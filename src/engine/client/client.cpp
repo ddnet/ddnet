@@ -3523,12 +3523,11 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 	SetState(IClient::STATE_DEMOPLAYBACK);
 
 	m_DemoPlayer.Play();
-	//m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "demo_recorder", "demo eof");
 	GameClient()->OnEnterGame();
 
 	return 0;
 }
-
+#if defined(CONF_VIDEORECORDER)
 const char *CClient::DemoPlayer_Render(const char *pFilename, int StorageType, const char *pVideoName)
 {
 	int Crc;
@@ -3582,13 +3581,7 @@ const char *CClient::DemoPlayer_Render(const char *pFilename, int StorageType, c
 
 	return 0;
 }
-/*
-{
-	DemoPlayer_Play(pFilename, StorageType);
-	//m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "demo_recorder", pVideoName);
-	this->CClient::StartVideo(NULL, this, pVideoName);
-}
-*/
+#endif
 
 void CClient::Con_Play(IConsole::IResult *pResult, void *pUserData)
 {
