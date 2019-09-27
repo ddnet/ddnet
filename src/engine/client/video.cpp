@@ -62,7 +62,7 @@ void CVideo::start()
 	char aDate[20];
 	str_timestamp(aDate, sizeof(aDate));
 	char aBuf[256];
-	if (strlen(m_Name) == 0)
+	if (strlen(m_Name) != 0)
 		str_format(aBuf, sizeof(aBuf), "videos/%s", m_Name);
 	else
 		str_format(aBuf, sizeof(aBuf), "videos/%s.mp4", aDate);
