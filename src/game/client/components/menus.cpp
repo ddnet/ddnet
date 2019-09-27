@@ -1120,6 +1120,12 @@ int CMenus::Render()
 			pExtraText = "";
 			ExtraAlign = -1;
 		}
+		else if(m_Popup == POPUP_REPLACE_VIDEO)
+		{
+			pTitle = Localize("Replace video");
+			pExtraText = Localize("Destination file exists, Do you want to replace it?");
+			ExtraAlign = -1;
+		}
 		else if(m_Popup == POPUP_REMOVE_FRIEND)
 		{
 			pTitle = Localize("Remove friend");
@@ -1567,9 +1573,21 @@ int CMenus::Render()
 						str_format(aBufNew, sizeof(aBufNew), "%s.mp4", m_aCurrentDemoFile);
 					else
 						str_format(aBufNew, sizeof(aBufNew), "%s", m_aCurrentDemoFile);
-					const char *pError = Client()->DemoPlayer_Render(aBufOld, m_lDemos[m_DemolistSelectedIndex].m_StorageType, aBufNew);
-					if(pError)
-						PopupMessage(Localize("Error"), str_comp(pError, "error loading demo") ? pError : Localize("Error loading demo"), Localize("Ok"));
+					char aWholePath[1024];
+					// store new video filename to origin buffer
+					str_copy(m_aCurrentDemoFile, aBufNew, sizeof(m_aCurrentDemoFile));
+					if(Storage()->FindFile(m_aCurrentDemoFile, "videos", IStorage::TYPE_ALL, aWholePath, sizeof(aWholePath)))
+					{
+						PopupMessage(Localize("Error"), Localize("Destination file already exist"), Localize("Ok"));
+						m_Popup = POPUP_REPLACE_VIDEO;
+					}
+					else
+					{
+						const char *pError = Client()->DemoPlayer_Render(aBufOld, m_lDemos[m_DemolistSelectedIndex].m_StorageType, m_aCurrentDemoFile);
+						//Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "demo_render_path", aWholePath);
+						if(pError)
+							PopupMessage(Localize("Error"), str_comp(pError, "error loading demo") ? pError : Localize("Error loading demo"), Localize("Ok"));
+					}
 				}
 			}
 
@@ -1587,6 +1605,38 @@ int CMenus::Render()
 			UI()->DoLabel(&Label, Localize("Video name:"), 18.0f, -1);
 			static float Offset = 0.0f;
 			DoEditBox(&Offset, &TextBox, m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile), 12.0f, &Offset);
+		}
+		else if(m_Popup == POPUP_REPLACE_VIDEO)
+		{
+			CUIRect Yes, No;
+			Box.HSplitBottom(20.f, &Box, &Part);
+#if defined(__ANDROID__)
+			Box.HSplitBottom(60.f, &Box, &Part);
+#else
+			Box.HSplitBottom(24.f, &Box, &Part);
+#endif
+			Part.VMargin(80.0f, &Part);
+
+			Part.VSplitMid(&No, &Yes);
+
+			Yes.VMargin(20.0f, &Yes);
+			No.VMargin(20.0f, &No);
+
+			static int s_ButtonAbort = 0;
+			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || m_EscapePressed)
+				m_Popup = POPUP_RENDER_DEMO;
+
+			static int s_ButtonTryAgain = 0;
+			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
+			{
+				m_Popup = POPUP_NONE;
+				// render video
+				char aBuf[512];
+				str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_lDemos[m_DemolistSelectedIndex].m_aFilename);
+				const char *pError = Client()->DemoPlayer_Render(aBuf, m_lDemos[m_DemolistSelectedIndex].m_StorageType, m_aCurrentDemoFile);
+				if(pError)
+					PopupMessage(Localize("Error"), str_comp(pError, "error loading demo") ? pError : Localize("Error loading demo"), Localize("Ok"));
+			}
 		}
 		else if(m_Popup == POPUP_REMOVE_FRIEND)
 		{
