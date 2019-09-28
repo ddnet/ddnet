@@ -732,7 +732,7 @@ public:
 		m_SpeedupAngle = 0;
 		m_LargeLayerWasWarned = false;
 		m_PreventUnusedTilesWasWarned = false;
-		m_AllowPlaceUnusedTiles = 0;
+		m_AllowPlaceUnusedTiles = 1;
 		m_BrushDrawDestructive = true;
 
 		m_Mentions = 0;
