@@ -1542,7 +1542,7 @@ int CMenus::Render()
 #if defined(CONF_VIDEORECORDER)
 		else if(m_Popup == POPUP_RENDER_DEMO)
 		{
-			CUIRect Label, TextBox, Ok, Abort;
+			CUIRect Label, TextBox, Ok, Abort, IncSpeed, DecSpeed, Button;
 
 			Box.HSplitBottom(20.f, &Box, &Part);
 #if defined(__ANDROID__)
@@ -1586,15 +1586,69 @@ int CMenus::Render()
 					}
 					else
 					{
-						const char *pError = Client()->DemoPlayer_Render(aBufOld, m_lDemos[m_DemolistSelectedIndex].m_StorageType, m_aCurrentDemoFile);
+						const char *pError = Client()->DemoPlayer_Render(aBufOld, m_lDemos[m_DemolistSelectedIndex].m_StorageType, m_aCurrentDemoFile, m_Speed);
+						m_Speed = 4;
 						//Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "demo_render_path", aWholePath);
 						if(pError)
 							PopupMessage(Localize("Error"), str_comp(pError, "error loading demo") ? pError : Localize("Error loading demo"), Localize("Ok"));
 					}
 				}
 			}
-
 			Box.HSplitBottom(60.f, &Box, &Part);
+			Box.HSplitBottom(20.f, &Box, &Part);
+			Part.VSplitLeft(60.0f, 0, &Part);
+			Part.VSplitLeft(60.0f, 0, &Label);
+			Part.VSplitMid(&IncSpeed, &DecSpeed);
+
+			IncSpeed.VMargin(20.0f, &IncSpeed);
+			DecSpeed.VMargin(20.0f, &DecSpeed);
+
+			Part.VSplitLeft(20.0f, &Button, &Part);
+			bool IncDemoSpeed = false, DecDemoSpeed = false;
+			// slowdown
+			Part.VSplitLeft(5.0f, 0, &Part);
+			Part.VSplitLeft(Button.h, &Button, &Part);
+			static int s_SlowDownButton = 0;
+			if(DoButton_Sprite(&s_SlowDownButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_SLOWER, 0, &Button, CUI::CORNER_ALL))
+				DecDemoSpeed = true;
+
+			// fastforward
+			Part.VSplitLeft(5.0f, 0, &Part);
+			Part.VSplitLeft(Button.h, &Button, &Part);
+			static int s_FastForwardButton = 0;
+			if(DoButton_Sprite(&s_FastForwardButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_FASTER, 0, &Button, CUI::CORNER_ALL))
+				IncDemoSpeed = true;
+
+			// speed meter
+			Part.VSplitLeft(15.0f, 0, &Part);
+			char aBuffer[64];
+			str_format(aBuffer, sizeof(aBuffer), "Speed: ×%g", g_aSpeeds[m_Speed]);
+			//str_format(aBuffer, sizeof(aBuffer), "Speed: ×%g", Speed);
+			UI()->DoLabel(&Part, aBuffer, Button.h*0.7f, -1);
+
+			if(IncDemoSpeed)
+				m_Speed = clamp(m_Speed + 1, 0, (int)(sizeof(g_aSpeeds)/sizeof(g_aSpeeds[0])-1));
+			else if(DecDemoSpeed)
+				m_Speed = clamp(m_Speed - 1, 0, (int)(sizeof(g_aSpeeds)/sizeof(g_aSpeeds[0])-1));
+
+			/*
+			static int s_ButtonInc = 0;
+			if(DoButton_Menu(&s_ButtonInc, Localize("IncSpeed"), 0, &IncSpeed))
+				m_Popup = POPUP_NONE;
+
+			static int s_ButtonDec = 0;
+			if(DoButton_Menu(&s_ButtonDec, Localize("DecSpeed"), 0, &DecSpeed))
+				m_Popup = POPUP_NONE;
+			*/
+			//Abort.VMargin(20.0f, &Abort);
+			//SpeedBox.VSplitLeft(40.0f, 0, &SpeedBox);
+			//SpeedBox.VSplitRight(80.0f, &SpeedBox, 0);
+			//UI()->DoLabel(&Label, Localize("Video speed:"), 18.0f, -1);
+			//static float Offset2 = 0.0f;
+			//char Speed[10] = "1";
+			//DoEditBox(&Offset2, &SpeedBox, Speed, sizeof(Speed), 12.0f, &Offset2);
+
+			Box.HSplitBottom(20.f, &Box, &Part);
 #if defined(__ANDROID__)
 			Box.HSplitBottom(60.f, &Box, &Part);
 #else
@@ -1636,7 +1690,8 @@ int CMenus::Render()
 				// render video
 				char aBuf[512];
 				str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_lDemos[m_DemolistSelectedIndex].m_aFilename);
-				const char *pError = Client()->DemoPlayer_Render(aBuf, m_lDemos[m_DemolistSelectedIndex].m_StorageType, m_aCurrentDemoFile);
+				const char *pError = Client()->DemoPlayer_Render(aBuf, m_lDemos[m_DemolistSelectedIndex].m_StorageType, m_aCurrentDemoFile, m_Speed);
+				m_Speed = 4;
 				if(pError)
 					PopupMessage(Localize("Error"), str_comp(pError, "error loading demo") ? pError : Localize("Error loading demo"), Localize("Ok"));
 			}
