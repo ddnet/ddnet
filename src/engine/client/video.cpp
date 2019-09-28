@@ -189,12 +189,17 @@ void CVideo::nextVideoFrame_thread()
 		// 	CAutoreleasePool AutoreleasePool;
 		// #endif
 
-		m_VideoStream.frame->pts = m_VideoStream.enc->frame_number;
-		dbg_msg("video_recorder", "vframe: %d", m_VideoStream.enc->frame_number);
+		if(m_VideoStream.enc->frame_number >= 2)
+		{
+			m_VideoStream.frame->pts = m_VideoStream.enc->frame_number;
+			dbg_msg("video_recorder", "vframe: %d", m_VideoStream.enc->frame_number);
 
-		read_rgb_from_gl();
-		fill_video_frame();
-		write_frame(&m_VideoStream);
+			read_rgb_from_gl();
+			fill_video_frame();
+			write_frame(&m_VideoStream);
+		}
+		else
+			m_VideoStream.enc->frame_number += 1;
 
 		m_ProcessingVideoFrame = false;
 		m_NextFrame = false;
