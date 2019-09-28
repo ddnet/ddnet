@@ -35,9 +35,9 @@ testrunner\[1\]_include.cmake
 
 # Ignore all the generated executables without extensions (for non-Windows
 # systems).
-DDNet
-DDNet-Server
-DDNet-Server-Launcher
+chillerbot-ux
+chillerbot-ux-Server
+chillerbot-ux-Server-Launcher
 config_retrieve
 config_store
 crapnet
