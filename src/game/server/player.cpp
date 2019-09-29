@@ -195,7 +195,7 @@ void CPlayer::Tick()
 	if(!GameServer()->m_World.m_Paused)
 	{
 		int EarliestRespawnTick = m_PreviousDieTick+Server()->TickSpeed()*3;
-		int RespawnTick = maximum(m_DieTick, EarliestRespawnTick);
+		int RespawnTick = maximum(m_DieTick, EarliestRespawnTick)+2;
 		if(!m_pCharacter && RespawnTick <= Server()->Tick())
 			m_Spawning = true;
 
