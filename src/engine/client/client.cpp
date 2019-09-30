@@ -2807,7 +2807,8 @@ void CClient::Run()
 #if defined(CONF_VIDEORECORDER)
 	IVideo::SetLocalStartTime(m_LocalStartTime);
 #endif
-	m_SnapshotParts = 0;
+	m_SnapshotParts[0] = 0;
+	m_SnapshotParts[1] = 0;
 
 	if(m_GenerateTimeoutSeed)
 	{

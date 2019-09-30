@@ -854,12 +854,11 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	ButtonBar.VSplitLeft(10.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(110.0f, &RenameRect, &ButtonBar);
 	ButtonBar.VSplitLeft(10.0f, 0, &ButtonBar);
-	ButtonBar.VSplitLeft(110.0f, &LabelRect, &ButtonBar);
-	ButtonBar.VSplitLeft(120.0f, &RenameRect, &ButtonBar);
 #if defined(CONF_VIDEORECORDER)
-	ButtonBar.VSplitLeft(10.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(110.0f, &RenderRect, &ButtonBar);
+	ButtonBar.VSplitLeft(10.0f, 0, &ButtonBar);
 #endif
+	ButtonBar.VSplitLeft(110.0f, &LabelRect, &ButtonBar);
 	MainView.HSplitBottom(140.0f, &ListBox, &MainView);
 
 	// render demo info
