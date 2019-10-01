@@ -330,6 +330,7 @@ void CVideo::read_rgb_from_gl()
 	m_pPixels = (uint8_t *)realloc(m_pPixels, nvals * sizeof(GLubyte));
 	m_pRGB = (uint8_t *)realloc(m_pRGB, nvals * sizeof(uint8_t));
 	/* Get RGBA to align to 32 bits instead of just 24 for RGB. May be faster for FFmpeg. */
+	glReadBuffer(GL_FRONT);
 	glReadPixels(0, 0, m_Width, m_Height, GL_RGB, GL_UNSIGNED_BYTE, m_pPixels);
 	for (i = 0; i < m_Height; i++)
 	{
