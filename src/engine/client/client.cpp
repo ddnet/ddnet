@@ -3321,7 +3321,7 @@ void CClient::Con_StartVideo(IConsole::IResult *pResult, void *pUserData)
 
 	if (!IVideo::Current())
 	{
-		new CVideo((CGraphics_Threaded*)pSelf->m_pGraphics, pSelf->Storage(), pSelf->m_pConsole, pSelf->Graphics()->ScreenWidth(), pSelf->Graphics()->ScreenHeight(), NULL);
+		new CVideo((CGraphics_Threaded*)pSelf->m_pGraphics, pSelf->Storage(), pSelf->m_pConsole, pSelf->Graphics()->ScreenWidth(), pSelf->Graphics()->ScreenHeight(), "");
 		IVideo::Current()->start();
 	}
 	else
