@@ -280,7 +280,11 @@ void CPlayers::RenderPlayer(
 
 	// draw gun
 	{
+#if defined(CONF_VIDEORECORDER)
+		if(ClientID >= 0 && ((GameClient()->m_GameInfo.m_AllowHookColl && g_Config.m_ClShowHookCollAlways) || (Player.m_PlayerFlags&PLAYERFLAG_AIM && ((!Local && ((!IVideo::Current()&&g_Config.m_ClShowHookCollOther)||(IVideo::Current()&&g_Config.m_ClVideoShowHookCollOther))) || (Local && g_Config.m_ClShowHookCollOwn)))))
+#else
 		if(ClientID >= 0 && ((GameClient()->m_GameInfo.m_AllowHookColl && g_Config.m_ClShowHookCollAlways) || (Player.m_PlayerFlags&PLAYERFLAG_AIM && ((!Local && g_Config.m_ClShowHookCollOther) || (Local && g_Config.m_ClShowHookCollOwn)))))
+#endif
 		{
 			vec2 ExDirection = Direction;
 
@@ -521,7 +525,11 @@ void CPlayers::RenderPlayer(
 
 	Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
 	Graphics()->QuadsSetRotation(0);
+#if defined(CONF_VIDEORECORDER)
+	if(((!IVideo::Current()&&g_Config.m_ClShowDirection)||(IVideo::Current()&&g_Config.m_ClVideoShowDirection)) && ClientID >= 0 && (!Local || DemoPlayer()->IsPlaying()))
+#else
 	if(g_Config.m_ClShowDirection && ClientID >= 0 && (!Local || DemoPlayer()->IsPlaying()))
+#endif
 	{
 		if(Player.m_Direction == -1)
 		{

@@ -163,7 +163,11 @@ MACRO_CONFIG_INT(SvSendVotesPerTick, sv_send_votes_per_tick, 5, 1, 15, CFGFLAG_S
 MACRO_CONFIG_INT(SvRescue, sv_rescue, 0, 0, 1, CFGFLAG_SERVER, "Allow /rescue command so players can teleport themselves out of freeze")
 MACRO_CONFIG_INT(SvRescueDelay, sv_rescue_delay, 5, 0, 1000, CFGFLAG_SERVER, "Number of seconds between two rescues")
 
-MACRO_CONFIG_INT(ClVideoShowhud, cl_video_showhud, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show ingame HUD when rendering video")
+#if defined(CONF_VIDEORECORDER)
+MACRO_CONFIG_INT(ClVideoShowhud, cl_video_showhud, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show ingame HUD when rendering video")
+MACRO_CONFIG_INT(ClVideoShowHookCollOther, cl_video_showhookcollother, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show other players' hook collision lines when rendering video")
+MACRO_CONFIG_INT(ClVideoShowDirection, cl_video_showdirection, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show other players' key presses when rendering video")
+#endif
 
 // debug
 #ifdef CONF_DEBUG // this one can crash the server if not used correctly

@@ -17,3 +17,6 @@ For ddnet origin client, please visit https://github.com/ddnet/ddnet
 - And then you can use command `start_video` and `stop_video` to start and stop conversion from demo to mp4.
 - `cl_video_recorder_fps` to change video fps.
 - or you can use `Record` button in demo menu, it will render the whole demo (you can stop recording by disconnect).
+- `cl_video_showhud`is for whether show ingame HUD when rendering video, default is 0.
+- `cl_video_showhookcollother`is for whether show other players' hook collision lines when rendering video, default is 0.
+- `cl_video_showdirection`is for whether show other players' key presses when rendering video, default is 0.
