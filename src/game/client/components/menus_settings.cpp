@@ -2085,6 +2085,22 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 		Button.VSplitLeft(50.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Size"), 14.0f, -1);
+		g_Config.m_ClTextEntitiesSize = (int)(DoScrollbarH(&g_Config.m_ClTextEntitiesSize, &Button, g_Config.m_ClTextEntitiesSize/100.0f)*100.0f);
+
+		if(DoButton_CheckBox(&g_Config.m_ClTextEntities, Localize("Show text entities"), g_Config.m_ClTextEntities, &LeftLeft))
+		{
+			g_Config.m_ClTextEntities ^= 1;
+		}
+	}
+
+	{
+		CUIRect Button, Label;
+		Left.HSplitTop(20.0f, &Button, &Left);
+		Button.VSplitMid(&LeftLeft, &Button);
+
+		Button.VSplitLeft(50.0f, &Label, &Button);
+		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Alpha"), 14.0f, -1);
 		g_Config.m_ClShowOthersAlpha = (int)(DoScrollbarH(&g_Config.m_ClShowOthersAlpha, &Button, g_Config.m_ClShowOthersAlpha /100.0f)*100.0f);
 
@@ -2172,7 +2188,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 	CUIRect aRects[2];
 	Left.HSplitTop(5.0f, &Button, &Left);
-	Right.HSplitTop(5.0f, &Button, &Right);
+	Right.HSplitTop(25.0f, &Button, &Right);
 	aRects[0] = Left;
 	aRects[1] = Right;
 	aRects[0].VSplitRight(10.0f, &aRects[0], 0);
