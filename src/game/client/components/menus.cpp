@@ -1631,6 +1631,10 @@ int CMenus::Render()
 			else if(DecDemoSpeed)
 				m_Speed = clamp(m_Speed - 1, 0, (int)(sizeof(g_aSpeeds)/sizeof(g_aSpeeds[0])-1));
 
+			Part.VSplitLeft(100.0f, 0, &Part);
+			Part.VSplitLeft(Button.h, &Button, &Part);
+			if(DoButton_CheckBox(&g_Config.m_ClVideoShowhud, Localize("Show ingame HUD"), g_Config.m_ClVideoShowhud, &Button))
+				g_Config.m_ClVideoShowhud ^= 1;
 			/*
 			static int s_ButtonInc = 0;
 			if(DoButton_Menu(&s_ButtonInc, Localize("IncSpeed"), 0, &IncSpeed))

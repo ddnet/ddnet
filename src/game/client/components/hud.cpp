@@ -770,7 +770,11 @@ void CHud::OnRender()
 	m_Height = 300.0f;
 	Graphics()->MapScreen(0.0f, 0.0f, m_Width, m_Height);
 
+#if defined(CONF_VIDEORECORDER)
+	if((IVideo::Current()&&g_Config.m_ClVideoShowhud)||(!IVideo::Current()&&g_Config.m_ClShowhud))
+#else
 	if(g_Config.m_ClShowhud)
+#endif
 	{
 		if(m_pClient->m_Snap.m_pLocalCharacter && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER))
 		{
