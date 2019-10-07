@@ -1187,9 +1187,17 @@ int CClient::PlayerScoreNameComp(const void *a, const void *b)
 		return -1;
 	if(!p0->m_Player && p1->m_Player)
 		return 1;
-	if(p0->m_Score > p1->m_Score)
+
+	int Score0 = p0->m_Score;
+	int Score1 = p1->m_Score;
+	if(Score0 == -9999)
+		Score0 = INT_MIN;
+	if(Score1 == -9999)
+		Score1 = INT_MIN;
+
+	if(Score0 > Score1)
 		return -1;
-	if(p0->m_Score < p1->m_Score)
+	if(Score0 < Score1)
 		return 1;
 	return str_comp_nocase(p0->m_aName, p1->m_aName);
 }
