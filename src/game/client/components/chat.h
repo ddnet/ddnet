@@ -5,7 +5,6 @@
 #include <engine/shared/ringbuffer.h>
 #include <game/client/component.h>
 #include <game/client/lineinput.h>
-#include <engine/shared/demo.h>
 
 class CChat : public CComponent
 {
