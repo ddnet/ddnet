@@ -731,29 +731,10 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	// check if we already have the map
 	// TODO: improve map checking (maps folder, check crc)
 	unsigned Crc = (m_Info.m_Header.m_aMapCrc[0]<<24) | (m_Info.m_Header.m_aMapCrc[1]<<16) | (m_Info.m_Header.m_aMapCrc[2]<<8) | (m_Info.m_Header.m_aMapCrc[3]);
-	char aMapFilename[128];
-	str_format(aMapFilename, sizeof(aMapFilename), "downloadedmaps/%s_%08x.map", m_Info.m_Header.m_aMapName, Crc);
-	IOHANDLE MapFile = pStorage->OpenFile(aMapFilename, IOFLAG_READ, IStorage::TYPE_ALL);
 
-	if(MapFile)
-	{
-		io_skip(m_File, MapSize);
-		io_close(MapFile);
-	}
-	else if(MapSize > 0)
-	{
-		// get map data
-		unsigned char *pMapData = (unsigned char *)malloc(MapSize);
-		io_read(m_File, pMapData, MapSize);
-
-		// save map
-		MapFile = pStorage->OpenFile(aMapFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
-		io_write(MapFile, pMapData, MapSize);
-		io_close(MapFile);
-
-		// free data
-		free(pMapData);
-	}
+	// save byte offset of map for later use
+	m_MapOffset = io_tell(m_File);
+	io_skip(m_File, MapSize);
 
 	// store map information
 	m_MapInfo.m_Crc = Crc;
@@ -784,6 +765,36 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 
 	// ready for playback
 	return 0;
+}
+
+SHA256_DIGEST CDemoPlayer::ExtractMap(class IStorage *pStorage)
+{
+	if(!m_MapInfo.m_Size)
+		return {};
+
+	long CurSeek = io_tell(m_File);
+
+	// get map data
+	io_seek(m_File, m_MapOffset, IOSEEK_START);
+	unsigned char *pMapData = (unsigned char *)malloc(m_MapInfo.m_Size);
+	io_read(m_File, pMapData, m_MapInfo.m_Size);
+	io_seek(m_File, CurSeek, IOSEEK_START);
+
+	// calculate sha, should probably add to demo header
+	SHA256_DIGEST Sha = sha256(pMapData, m_MapInfo.m_Size);
+	char aSha[SHA256_MAXSTRSIZE], aMapFilename[128];
+	sha256_str(Sha, aSha, sizeof(aSha));
+	str_format(aMapFilename, sizeof(aMapFilename), "downloadedmaps/%s_%08x_%s.map", m_Info.m_Header.m_aMapName, m_MapInfo.m_Crc, aSha);
+
+	// save map
+	IOHANDLE MapFile = pStorage->OpenFile(aMapFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	io_write(MapFile, pMapData, m_MapInfo.m_Size);
+	io_close(MapFile);
+
+	// free data
+	free(pMapData);
+
+	return Sha;
 }
 
 int CDemoPlayer::NextFrame()

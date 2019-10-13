@@ -105,6 +105,7 @@ private:
 
 	class IConsole *m_pConsole;
 	IOHANDLE m_File;
+	long m_MapOffset;
 	char m_aFilename[256];
 	CKeyFrame *m_pKeyFrames;
 	CMapInfo m_MapInfo;
@@ -128,6 +129,7 @@ public:
 	void SetListener(IListener *pListener);
 
 	int Load(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, int StorageType);
+	SHA256_DIGEST ExtractMap(class IStorage *pStorage);
 	int Play();
 	void Pause();
 	void Unpause();
