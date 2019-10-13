@@ -969,7 +969,11 @@ void CChat::OnRender()
 		TextRender()->TextEx(&Cursor, m_Input.GetString(Editing)+m_Input.GetCursorOffset(Editing), -1);
 	}
 
+#if defined(CONF_VIDEORECORDER)
+	if(!((g_Config.m_ClShowChat && !IVideo::Current()) || (g_Config.m_ClVideoShowChat && IVideo::Current())))
+#else
 	if(!g_Config.m_ClShowChat)
+#endif
 		return;
 
 	y -= 8.0f;

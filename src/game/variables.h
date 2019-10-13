@@ -165,6 +165,7 @@ MACRO_CONFIG_INT(SvRescueDelay, sv_rescue_delay, 5, 0, 1000, CFGFLAG_SERVER, "Nu
 
 #if defined(CONF_VIDEORECORDER)
 MACRO_CONFIG_INT(ClVideoShowhud, cl_video_showhud, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show ingame HUD when rendering video")
+MACRO_CONFIG_INT(ClVideoShowChat, cl_video_showchat, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show chat when rendering video")
 MACRO_CONFIG_INT(ClVideoShowHookCollOther, cl_video_showhookcollother, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show other players' hook collision lines when rendering video")
 MACRO_CONFIG_INT(ClVideoShowDirection, cl_video_showdirection, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show other players' key presses when rendering video")
 #endif
