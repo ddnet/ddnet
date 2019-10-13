@@ -748,7 +748,7 @@ void CChat::OnPrepareLines()
 	m_PrevScoreBoardShowed = m_pClient->m_pScoreboard->Active();
 	m_PrevShowChat = m_Show;
 
-	int64 Now = time_get();
+	int64 Now = time();
 	float LineWidth = m_pClient->m_pScoreboard->Active() ? 90.0f : 200.0f;
 	float HeightLimit = m_pClient->m_pScoreboard->Active() ? 230.0f : m_Show ? 50.0f : 200.0f;
 	float Begin = x;
