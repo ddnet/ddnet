@@ -104,8 +104,6 @@ void CMapLayers::EnvelopeEval(float TimeOffset, int Env, float *pChannels, void 
 						pThis->m_CurrentLocalTick / (float)pThis->Client()->GameTickSpeed(),
 						pThis->Client()->IntraGameTick());
 			}
-			if(!(pItem->m_Version < 2 || pItem->m_Synchronized))
-				s_Time += pThis->Client()->LocalTime()-s_LastLocalTime;
 		}
 		pThis->RenderTools()->RenderEvalEnvelope(pPoints+pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time+TimeOffset, pChannels);
 	}
