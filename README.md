@@ -13,7 +13,7 @@ For ddnet origin client, please visit https://github.com/ddnet/ddnet
 
 [![Repository status](https://repology.org/badge/vertical-allrepos/ddnet.svg?header=)](https://repology.org/metapackage/ddnet/versions)
 =======
-- Want to add this function supported, open CMakeLists.txt, and change `option(FFMPEG "Enable video support via ffmpeg" OFF)` 'OFF' to 'ON'.
+- Want to add this function supported, open CMakeLists.txt, and change `option(FFMPEG "Enable video support via ffmpeg" OFF)` 'OFF' to 'ON', or use `-DFFMPEG=ON` when cmake.
 - And then you can use command `start_video` and `stop_video` to start and stop conversion from demo to mp4.
 - `cl_video_recorder_fps` to change video fps.
 - or you can use `Record` button in demo menu, it will render the whole demo (you can stop recording by disconnect).
