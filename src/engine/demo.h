@@ -3,6 +3,7 @@
 #ifndef ENGINE_DEMO_H
 #define ENGINE_DEMO_H
 
+#include <base/hash.h>
 #include "kernel.h"
 
 enum
@@ -31,6 +32,14 @@ struct CTimelineMarkers
 {
 	char m_aNumTimelineMarkers[4];
 	char m_aTimelineMarkers[MAX_TIMELINE_MARKERS][4];
+};
+
+struct CMapInfo
+{
+	char m_aName[128];
+	SHA256_DIGEST m_Sha256;
+	int m_Crc;
+	int m_Size;
 };
 
 class IDemoPlayer : public IInterface
@@ -69,7 +78,7 @@ public:
 	virtual bool IsPlaying() const = 0;
 	virtual const CInfo *BaseInfo() const = 0;
 	virtual void GetDemoName(char *pBuffer, int BufferSize) const = 0;
-	virtual bool GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers) const = 0;
+	virtual bool GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo) const = 0;
 	virtual int GetDemoType() const = 0;
 };
 

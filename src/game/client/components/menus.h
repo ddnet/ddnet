@@ -174,6 +174,7 @@ class CMenus : public CComponent
 		bool m_Valid;
 		CDemoHeader m_Info;
 		CTimelineMarkers m_TimelineMarkers;
+		CMapInfo m_MapInfo;
 
 		int NumMarkers() const
 		{

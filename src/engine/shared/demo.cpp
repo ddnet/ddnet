@@ -15,8 +15,9 @@
 #include "snapshot.h"
 
 static const unsigned char gs_aHeaderMarker[7] = {'T', 'W', 'D', 'E', 'M', 'O', 0};
-static const unsigned char gs_ActVersion = 5;
+static const unsigned char gs_ActVersion = 6;
 static const unsigned char gs_OldVersion = 3;
+static const unsigned char gs_SHAVersion = 6;
 static const unsigned char gs_VersionTickCompression = 5; // demo files with this version or higher will use `CHUNKTICKFLAG_TICK_COMPRESSED`
 static const int gs_LengthOffset = 152;
 static const int gs_NumMarkersOffset = 176;
@@ -120,6 +121,7 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	str_timestamp(Header.m_aTimestamp, sizeof(Header.m_aTimestamp));
 	io_write(DemoFile, &Header, sizeof(Header));
 	io_write(DemoFile, &TimelineMarkers, sizeof(TimelineMarkers)); // fill this on stop
+	io_write(DemoFile, &Sha256, sizeof(SHA256_DIGEST));
 
 	if(m_NoMapData)
 	{
@@ -717,6 +719,10 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	else if(m_Info.m_Header.m_Version > gs_OldVersion)
 		io_read(m_File, &m_Info.m_TimelineMarkers, sizeof(m_Info.m_TimelineMarkers));
 
+	SHA256_DIGEST Sha = {};
+	if(m_Info.m_Header.m_Version >= gs_SHAVersion)
+		io_read(m_File, &Sha, sizeof(SHA256_DIGEST)); // need a safe read
+
 	// get demo type
 	if(!str_comp(m_Info.m_Header.m_aType, "client"))
 		m_DemoType = DEMOTYPE_CLIENT;
@@ -738,9 +744,9 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 
 	// store map information
 	m_MapInfo.m_Crc = Crc;
+	m_MapInfo.m_Sha256 = Sha;
 	m_MapInfo.m_Size = MapSize;
 	str_copy(m_MapInfo.m_aName, m_Info.m_Header.m_aMapName, sizeof(m_MapInfo.m_aName));
-
 
 	if(m_Info.m_Header.m_Version > gs_OldVersion)
 	{
@@ -767,10 +773,10 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	return 0;
 }
 
-SHA256_DIGEST CDemoPlayer::ExtractMap(class IStorage *pStorage)
+void CDemoPlayer::ExtractMap(class IStorage *pStorage)
 {
 	if(!m_MapInfo.m_Size)
-		return {};
+		return;
 
 	long CurSeek = io_tell(m_File);
 
@@ -780,8 +786,17 @@ SHA256_DIGEST CDemoPlayer::ExtractMap(class IStorage *pStorage)
 	io_read(m_File, pMapData, m_MapInfo.m_Size);
 	io_seek(m_File, CurSeek, IOSEEK_START);
 
-	// calculate sha, should probably add to demo header
-	SHA256_DIGEST Sha = sha256(pMapData, m_MapInfo.m_Size);
+	// handle sha256
+	SHA256_DIGEST Sha = {};
+	if(m_Info.m_Header.m_Version >= gs_SHAVersion)
+		Sha = m_MapInfo.m_Sha256;
+	else
+	{
+		Sha = sha256(pMapData, m_MapInfo.m_Size);
+		m_MapInfo.m_Sha256 = Sha;
+	}
+
+	// construct name
 	char aSha[SHA256_MAXSTRSIZE], aMapFilename[128];
 	sha256_str(Sha, aSha, sizeof(aSha));
 	str_format(aMapFilename, sizeof(aMapFilename), "downloadedmaps/%s_%08x_%s.map", m_Info.m_Header.m_aMapName, m_MapInfo.m_Crc, aSha);
@@ -793,8 +808,6 @@ SHA256_DIGEST CDemoPlayer::ExtractMap(class IStorage *pStorage)
 
 	// free data
 	free(pMapData);
-
-	return Sha;
 }
 
 int CDemoPlayer::NextFrame()
@@ -964,9 +977,9 @@ void CDemoPlayer::GetDemoName(char *pBuffer, int BufferSize) const
 	str_copy(pBuffer, pExtractedName, Length);
 }
 
-bool CDemoPlayer::GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers) const
+bool CDemoPlayer::GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo) const
 {
-	if(!pDemoHeader || !pTimelineMarkers)
+	if(!pDemoHeader || !pTimelineMarkers || !pMapInfo)
 		return false;
 
 	mem_zero(pDemoHeader, sizeof(CDemoHeader));
@@ -978,6 +991,17 @@ bool CDemoPlayer::GetDemoInfo(class IStorage *pStorage, const char *pFilename, i
 
 	io_read(File, pDemoHeader, sizeof(CDemoHeader));
 	io_read(File, pTimelineMarkers, sizeof(CTimelineMarkers));
+
+	str_copy(pMapInfo->m_aName, pDemoHeader->m_aMapName, sizeof(pMapInfo->m_aName));
+	pMapInfo->m_Crc = (pDemoHeader->m_aMapCrc[0]<<24) | (pDemoHeader->m_aMapCrc[1]<<16) | (pDemoHeader->m_aMapCrc[2]<<8) | (pDemoHeader->m_aMapCrc[3]);
+
+	if(pDemoHeader->m_Version >= gs_SHAVersion)
+		io_read(File, &pMapInfo->m_Sha256, SHA256_DIGEST_LENGTH);
+	else
+		pMapInfo->m_Sha256 = {};
+
+	pMapInfo->m_Size = (pDemoHeader->m_aMapSize[0]<<24) | (pDemoHeader->m_aMapSize[1]<<16) | (pDemoHeader->m_aMapSize[2]<<8) | (pDemoHeader->m_aMapSize[3]);
+
 	io_close(File);
 	return !(mem_comp(pDemoHeader->m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) || pDemoHeader->m_Version < gs_OldVersion);
 }
@@ -1014,7 +1038,7 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 	if (m_pDemoPlayer->Load(m_pStorage, m_pConsole, pDemo, IStorage::TYPE_ALL) == -1)
 		return;
 
-	const CDemoPlayer::CMapInfo *pMapInfo = m_pDemoPlayer->GetMapInfo();
+	const CMapInfo *pMapInfo = m_pDemoPlayer->GetMapInfo();
 	SHA256_DIGEST Fake;
 	for(unsigned i = 0; i < sizeof(Fake.data); i++)
 	{
