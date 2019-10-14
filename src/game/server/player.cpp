@@ -27,6 +27,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 
 CPlayer::~CPlayer()
 {
+	delete m_pLastTarget;
 	delete m_pCharacter;
 	m_pCharacter = 0;
 }
@@ -55,7 +56,7 @@ void CPlayer::Reset()
 	// DDRace
 
 	m_LastCommandPos = 0;
-	m_LastPlaytime = time_get();
+	m_LastPlaytime = 0;
 	m_Sent1stAfkWarning = 0;
 	m_Sent2ndAfkWarning = 0;
 	m_ChatScore = 0;
@@ -63,11 +64,12 @@ void CPlayer::Reset()
 	m_EyeEmote = true;
 	m_TimerType = (g_Config.m_SvDefaultTimerType == CPlayer::TIMERTYPE_GAMETIMER || g_Config.m_SvDefaultTimerType == CPlayer::TIMERTYPE_GAMETIMER_AND_BROADCAST) ? CPlayer::TIMERTYPE_BROADCAST : g_Config.m_SvDefaultTimerType;
 	m_DefEmote = EMOTE_NORMAL;
-	m_Afk = false;
+	m_Afk = true;
 	m_LastWhisperTo = -1;
 	m_LastSetSpectatorMode = 0;
 	m_TimeoutCode[0] = '\0';
-
+	delete m_pLastTarget;
+	m_pLastTarget = nullptr;
 	m_TuneZone = 0;
 	m_TuneZoneOld = m_TuneZone;
 	m_Halloween = false;
@@ -655,10 +657,17 @@ void CPlayer::AfkVoteTimer(CNetObj_PlayerInput *NewTarget)
 	if(g_Config.m_SvMaxAfkVoteTime == 0)
 		return;
 
-	if(mem_comp(NewTarget, &m_LastTarget, sizeof(CNetObj_PlayerInput)) != 0)
+	if(!m_pLastTarget)
+	{
+		m_pLastTarget = new CNetObj_PlayerInput(*NewTarget);
+		m_LastPlaytime = 0;
+		m_Afk = true;
+		return;
+	}
+	else if(mem_comp(NewTarget, m_pLastTarget, sizeof(CNetObj_PlayerInput)) != 0)
 	{
 		m_LastPlaytime = time_get();
-		mem_copy(&m_LastTarget, NewTarget, sizeof(CNetObj_PlayerInput));
+		mem_copy(m_pLastTarget, NewTarget, sizeof(CNetObj_PlayerInput));
 	}
 	else if(m_LastPlaytime < time_get()-time_freq()*g_Config.m_SvMaxAfkVoteTime)
 	{
