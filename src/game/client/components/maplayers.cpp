@@ -92,12 +92,24 @@ void CMapLayers::EnvelopeEval(float TimeOffset, int Env, float *pChannels, void 
 				pThis->m_LastLocalTick = pThis->m_CurrentLocalTick;
 				pThis->m_CurrentLocalTick = pInfo->m_CurrentTick;
 			}
-
-			s_Time = mix(pThis->m_LastLocalTick / (float)pThis->Client()->GameTickSpeed(),
+			if(pItem->m_Version < 2 || pItem->m_Synchronized)
+			{
+				s_Time = mix((pThis->Client()->PrevGameTick()-pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick) / (float)pThis->Client()->GameTickSpeed(),
+							(pThis->Client()->GameTick()-pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick) / (float)pThis->Client()->GameTickSpeed(),
+							pThis->Client()->IntraGameTick());
+			}
+			else
+			{
+				s_Time = mix(pThis->m_LastLocalTick / (float)pThis->Client()->GameTickSpeed(),
 						pThis->m_CurrentLocalTick / (float)pThis->Client()->GameTickSpeed(),
 						pThis->Client()->IntraGameTick());
+			}
+			if(!(pItem->m_Version < 2 || pItem->m_Synchronized))
+				s_Time += pThis->Client()->LocalTime()-s_LastLocalTime;
 		}
+		pThis->RenderTools()->RenderEvalEnvelope(pPoints+pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time+TimeOffset, pChannels);
 	}
+	else
 	{
 		if(pThis->m_pClient->m_Snap.m_pGameInfoObj) // && !(pThis->m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED))
 		{
