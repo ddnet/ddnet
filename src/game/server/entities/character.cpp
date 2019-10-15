@@ -1678,7 +1678,7 @@ void CCharacter::HandleTiles(int Index)
 	}
 
 	// stopper
-	if((m_Core.m_Vel.x > 0 || m_Core.m_Vel.y > 0) && (m_MoveRestrictions&CANTMOVE_DOWN))
+	if(m_Core.m_Vel.y > 0 && (m_MoveRestrictions&CANTMOVE_DOWN))
 	{
 		m_Core.m_Jumped = 0;
 		m_Core.m_JumpedTotal = 0;
