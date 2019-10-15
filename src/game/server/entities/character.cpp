@@ -341,7 +341,11 @@ void CCharacter::FireWeapon()
 	bool FullAuto = false;
 	if(m_Core.m_ActiveWeapon == WEAPON_GRENADE || m_Core.m_ActiveWeapon == WEAPON_SHOTGUN || m_Core.m_ActiveWeapon == WEAPON_RIFLE)
 		FullAuto = true;
-	if (m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN)
+	if(m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN)
+		FullAuto = true;
+	// allow firing directly after coming out of freeze or being unfrozen
+	// by something
+	if(m_FrozenLastTick)
 		FullAuto = true;
 
 	// don't fire non auto weapons when player is deep and sv_deepfly is disabled
@@ -368,8 +372,8 @@ void CCharacter::FireWeapon()
 		// Timer stuff to avoid shrieking orchestra caused by unfreeze-plasma
 		if(m_PainSoundTimer<=0)
 		{
-				m_PainSoundTimer = 1 * Server()->TickSpeed();
-				GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_LONG, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+			m_PainSoundTimer = 1 * Server()->TickSpeed();
+			GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_LONG, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 		}
 		return;
 	}
@@ -728,7 +732,7 @@ void CCharacter::Tick()
 		m_pPlayer->m_ForceBalanced = false;
 	}*/
 
-	if (m_Paused)
+	if(m_Paused)
 		return;
 
 	DDRaceTick();
@@ -2094,13 +2098,15 @@ void CCharacter::DDRacePostCoreTick()
 
 	if (m_pPlayer->m_DefEmoteReset >= 0 && m_pPlayer->m_DefEmoteReset <= Server()->Tick())
 	{
-	m_pPlayer->m_DefEmoteReset = -1;
+		m_pPlayer->m_DefEmoteReset = -1;
 		m_EmoteType = m_pPlayer->m_DefEmote = EMOTE_NORMAL;
 		m_EmoteStop = -1;
 	}
 
 	if (m_EndlessHook || (m_Super && g_Config.m_SvEndlessSuperHook))
 		m_Core.m_HookTick = 0;
+
+	m_FrozenLastTick = false;
 
 	if (m_DeepFreeze && !m_Super)
 		Freeze();
@@ -2161,10 +2167,12 @@ bool CCharacter::Freeze(int Seconds)
 	if (m_FreezeTick < Server()->Tick() - Server()->TickSpeed() || Seconds == -1)
 	{
 		for(int i = 0; i < NUM_WEAPONS; i++)
+		{
 			if(m_aWeapons[i].m_Got)
-			 {
-				 m_aWeapons[i].m_Ammo = 0;
-			 }
+			{
+				m_aWeapons[i].m_Ammo = 0;
+			}
+		}
 		m_Armor = 0;
 		m_FreezeTime = Seconds == -1 ? Seconds : Seconds * Server()->TickSpeed();
 		m_FreezeTick = Server()->Tick();
@@ -2192,7 +2200,7 @@ bool CCharacter::UnFreeze()
 			m_Core.m_ActiveWeapon = WEAPON_GUN;
 		m_FreezeTime = 0;
 		m_FreezeTick = 0;
-		if (m_Core.m_ActiveWeapon==WEAPON_HAMMER) m_ReloadTimer = 0;
+		m_FrozenLastTick = true;
 		return true;
 	}
 	return false;
