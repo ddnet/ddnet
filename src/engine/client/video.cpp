@@ -42,7 +42,7 @@ CVideo::CVideo(CGraphics_Threaded* pGraphics, IStorage* pStorage, IConsole *pCon
 
 
 	// TODO:
-	m_HasAudio = false;
+	m_HasAudio = g_Config.m_ClVideoSndEnable;
 
 	m_SndBufferSize =  g_Config.m_SndBufferSize;
 

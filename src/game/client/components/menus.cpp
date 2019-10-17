@@ -1639,6 +1639,10 @@ int CMenus::Render()
 			Part.VSplitLeft(Button.h, &Button, &Part);
 			if(DoButton_CheckBox(&g_Config.m_ClVideoShowChat, Localize("Show chat"), g_Config.m_ClVideoShowChat, &Button))
 				g_Config.m_ClVideoShowChat ^= 1;
+			Part.VSplitLeft(150.0f, 0, &Part);
+			Part.VSplitLeft(Button.h, &Button, &Part);
+			if(DoButton_CheckBox(&g_Config.m_ClVideoSndEnable, Localize("Use sounds"), g_Config.m_ClVideoSndEnable, &Button))
+				g_Config.m_ClVideoSndEnable ^= 1;
 			/*
 			static int s_ButtonInc = 0;
 			if(DoButton_Menu(&s_ButtonInc, Localize("IncSpeed"), 0, &IncSpeed))
