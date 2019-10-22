@@ -491,13 +491,16 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elas
 
 	if(Distance > 0.00001f)
 	{
-		//vec2 old_pos = pos;
 		float Fraction = 1.0f/(float)(Max+1);
 		for(int i = 0; i <= Max; i++)
 		{
-			//float amount = i/(float)max;
-			//if(max == 0)
-				//amount = 0;
+			// Early break as optimization to stop checking for collisions for
+			// large distances after the obstacles we have already hit reduced
+			// our speed to exactly 0.
+			if(Vel == vec2(0, 0))
+			{
+				break;
+			}
 
 			vec2 NewPos = Pos + Vel*Fraction; // TODO: this row is not nice
 
