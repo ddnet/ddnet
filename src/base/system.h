@@ -31,6 +31,38 @@
 extern "C" {
 #endif
 
+#ifndef MACRO_ALLOC_HEAP
+#define MACRO_ALLOC_HEAP() \
+	public: \
+	void *operator new(size_t Size) \
+	{ \
+		void *p = mem_alloc(Size, 1); \
+		/*dbg_msg("", "++ %p %d", p, size);*/ \
+		mem_zero(p, Size); \
+		return p; \
+	} \
+	void operator delete(void *pPtr) \
+	{ \
+		/*dbg_msg("", "-- %p", p);*/ \
+		mem_free(pPtr); \
+	} \
+	private:
+#endif
+
+#ifndef MACRO_ALLOC_HEAP_NO_INIT
+#define MACRO_ALLOC_HEAP_NO_INIT() \
+	public: \
+	void *operator new(size_t Size) \
+	{ \
+		return mem_alloc(Size, 1); \
+	} \
+	void operator delete(void *pPtr) \
+	{ \
+		mem_free(pPtr); \
+	} \
+	private:
+#endif
+
 /* Group: Debug */
 /*
 	Function: dbg_assert
@@ -102,6 +134,43 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 GNUC_ATTRIBUTE((format(printf, 2, 3)));
 
 /* Group: Memory */
+
+/*
+	Function: mem_alloc
+		Allocates memory.
+
+	Parameters:
+		size - Size of the needed block.
+		alignment - Alignment for the block.
+
+	Returns:
+		Returns a pointer to the newly allocated block. Returns a
+		null pointer if the memory couldn't be allocated.
+
+	Remarks:
+		- Passing 0 to size will allocated the smallest amount possible
+		and return a unique pointer.
+
+	See Also:
+		<mem_free>
+*/
+void* mem_alloc_debug(const char* filename, int line, unsigned size, unsigned alignment);
+#define mem_alloc(s,a) mem_alloc_debug(__FILE__, __LINE__, (s), (a))
+#define mem_allocb(t,n) (t*)mem_alloc_debug(__FILE__, __LINE__, (sizeof(t)*n), 0)
+
+/*
+	Function: mem_free
+		Frees a block allocated through <mem_alloc>.
+
+	Remarks:
+		- In the debug version of the library the function will assert if
+		a non-valid block is passed, like a null pointer or a block that
+		isn't allocated.
+
+	See Also:
+		<mem_alloc>
+*/
+void mem_free(void* block);
 
 /*
 	Function: mem_copy
@@ -516,6 +585,12 @@ void thread_yield();
 		thread - Thread to detach
 */
 void thread_detach(void *thread);
+
+/*
+	Function: thread_get_current
+		Returns the handle of the thread from which this function is called
+*/
+void* thread_get_current();
 
 /*
 	Function: thread_init_and_detach
@@ -1366,6 +1441,7 @@ const char *str_find_nocase(const char *haystack, const char *needle);
 */
 const char *str_find(const char *haystack, const char *needle);
 
+const char* str_find_rev(const char* haystack, const char* needle);
 /*
 	Function: str_rchr
 		Finds the last occurance of a character
@@ -1985,6 +2061,23 @@ void secure_random_fill(void *bytes, unsigned length);
 		Returns random int (replacement for rand()).
 */
 int secure_rand();
+
+/*
+	Function: str_copy
+		Copies a string to another.
+
+	Parameters:
+		dst - Pointer to a buffer that shall recive the string.
+		src - String to be copied.
+		dst_size - Size of the buffer dst.
+
+	Remarks:
+		- The strings are treated as zero-termineted strings.
+		- Garantees that dst string will contain zero-termination.
+*/
+void str_copy(char* dst, const char* src, int dst_size);
+#define str_copyb(BUF, SRC) str_copy(BUF, SRC, sizeof(BUF))
+
 
 #ifdef __cplusplus
 }

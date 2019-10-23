@@ -430,6 +430,8 @@ public:
 	class CMapSounds *m_pMapSounds;
 	class CPlayers *m_pPlayers;
 
+	class CGameTextureManager* m_pGameTextureManager;
+
 	// DDRace
 
 	int m_LocalIDs[2];

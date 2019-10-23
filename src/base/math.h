@@ -78,6 +78,8 @@ template <typename T> inline T minimum(T a, T b) { return a<b?a:b; }
 template <typename T> inline T minimum(T a, T b, T c) { return minimum(minimum(a, b), c); }
 template <typename T> inline T maximum(T a, T b) { return a>b?a:b; }
 template <typename T> inline T maximum(T a, T b, T c) { return maximum(maximum(a, b), c); }
+template <typename T> inline T min(T a, T b) { return a < b ? a : b; }
+template <typename T> inline T max(T a, T b) { return a > b ? a : b; }
 template <typename T> inline T absolute(T a) { return a<T(0)?-a:a; }
 
 template <typename T> inline T in_range(T a, T lower, T upper) { return lower <= a && a <= upper; }

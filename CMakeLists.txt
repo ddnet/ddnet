@@ -783,6 +783,8 @@ if(CLIENT)
     backend_sdl.h
     client.cpp
     client.h
+	debug.cpp
+	debug.h
     demoedit.cpp
     demoedit.h
     friends.cpp
@@ -836,6 +838,8 @@ if(CLIENT)
     components/emoticon.h
     components/flow.cpp
     components/flow.h
+	components/gametexture.cpp
+	components/gametexture.h
     components/ghost.cpp
     components/ghost.h
     components/hud.cpp

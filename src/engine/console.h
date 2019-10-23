@@ -100,6 +100,11 @@ public:
 	virtual void SetPrintOutputLevel(int Index, int OutputLevel) = 0;
 	virtual char *Format(char *pBuf, int Size, const char *pFrom, const char *pStr) = 0;
 	virtual void Print(int Level, const char *pFrom, const char *pStr, bool Highlighted = false) = 0;
+	virtual void Printf(int Level, const char* pFrom, const char* fmt, ...)
+#if defined(DO_NOT_COMPILE_THIS_CODE) && (defined(__GNUC__) || defined(__clang__)) // dunno why this gives weird errors all over the place if compiled
+		__attribute__((format(printf, 3, 4))) /* Warn if you specify wrong arguments in printf format string */
+#endif
+		= 0;
 	virtual void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser) = 0;
 
 	virtual void SetAccessLevel(int AccessLevel) = 0;

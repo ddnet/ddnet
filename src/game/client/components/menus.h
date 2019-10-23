@@ -26,6 +26,37 @@ public:
 	virtual bool OnInput(IInput::CEvent Event);
 };
 
+class CMenusTooltip : public CComponent
+{
+	char m_aTooltip[2048];
+
+public:
+	CMenusTooltip() { m_aTooltip[0] = 0; }
+	void SetTooltip(const char* pTooltip) { str_copy(m_aTooltip, pTooltip, sizeof(m_aTooltip)); }
+
+	virtual void OnRender();
+};
+
+
+struct CButtonContainer
+{
+	CButtonContainer() { m_FadeStartTime = 0.0f; }
+	float m_FadeStartTime;
+	virtual const void* GetID() const { return &m_FadeStartTime; }
+};
+
+struct CPointerContainer : public CButtonContainer
+{
+	/**
+	 * WARNING: do not feed volatile addresses into this pointer container!!
+	 * It will cause the most annoying bugs and rape your ass harder than you'd like!
+	 */
+	CPointerContainer(const void* pID) : CButtonContainer(), m_pID(pID) { }
+	const void* GetID() const { return m_pID; }
+private:
+	const void* m_pID;
+};
+
 class CMenus : public CComponent
 {
 	static ColorRGBA ms_GuiColor;
@@ -133,6 +164,7 @@ class CMenus : public CComponent
 	bool m_NeedRestartSound;
 	bool m_NeedRestartUpdate;
 	bool m_NeedRestartDDNet;
+	bool m_NeedRestartTexture;
 	bool m_NeedSendinfo;
 	bool m_NeedSendDummyinfo;
 	int m_SettingPlayerPage;
@@ -305,6 +337,13 @@ class CMenus : public CComponent
 	void RenderSettingsSound(CUIRect MainView);
 	void RenderSettings(CUIRect MainView);
 
+	// found in menus_texture.cpp
+	void RenderSettingsTexture(CUIRect MainView);
+	void RenderSettingsGameskin(CUIRect MainView);
+	void RenderSettingsParticles(CUIRect MainView);
+	void RenderSettingsEmoticons(CUIRect MainView);
+	void RenderSettingsCursor(CUIRect MainView);
+
 	void SetActive(bool Active);
 public:
 	void RenderBackground();
@@ -344,7 +383,8 @@ public:
 		PAGE_SETTINGS,
 		PAGE_SYSTEM,
 		PAGE_NETWORK,
-		PAGE_GHOST
+		PAGE_GHOST,
+		PAGE_TEXTURES
 	};
 
 	// DDRace

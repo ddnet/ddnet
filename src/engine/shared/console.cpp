@@ -1,6 +1,9 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <new>
+#include <cstdarg>
+#include <cstdio>
+
 
 #include <base/math.h>
 #include <base/vmath.h>
@@ -310,7 +313,7 @@ char *CConsole::Format(char *pBuf, int Size, const char *pFrom, const char *pStr
 	str_timestamp_format(aTimeBuf, sizeof(aTimeBuf), FORMAT_TIME);
 
 	str_format(pBuf, Size, "[%s][%s]: %s", aTimeBuf, pFrom, pStr);
-	return pBuf;
+	return pBuf;	
 }
 
 void CConsole::Print(int Level, const char *pFrom, const char *pStr, bool Highlighted)
@@ -323,6 +326,34 @@ void CConsole::Print(int Level, const char *pFrom, const char *pStr, bool Highli
 		if(Level <= m_aPrintCB[i].m_OutputLevel && m_aPrintCB[i].m_pfnPrintCallback)
 		{
 			m_aPrintCB[i].m_pfnPrintCallback(aBuf, m_aPrintCB[i].m_pPrintCallbackUserdata, Highlighted);
+		}
+	}
+}
+
+void CConsole::Printf(int Level, const char* pFrom, const char* format, ...)
+{
+	char buffer[1024];
+#if defined(CONF_FAMILY_WINDOWS)
+	va_list ap;
+	va_start(ap, format);
+	_vsnprintf(buffer, sizeof(buffer), format, ap);
+	va_end(ap);
+#else
+	va_list ap;
+	va_start(ap, format);
+	vsnprintf(buffer, sizeof(buffer), format, ap);
+	va_end(ap);
+#endif
+	buffer[sizeof(buffer) - 1] = 0; // null termination
+
+	dbg_msg(pFrom, "%s", buffer);
+	for (int i = 0; i < m_NumPrintCB; ++i)
+	{
+		if (Level <= m_aPrintCB[i].m_OutputLevel && m_aPrintCB[i].m_pfnPrintCallback)
+		{
+			char aBuf[1024];
+			str_format(aBuf, sizeof(aBuf), "[%s]: %s", pFrom, buffer);
+			m_aPrintCB[i].m_pfnPrintCallback(aBuf, m_aPrintCB[i].m_pPrintCallbackUserdata, false);
 		}
 	}
 }

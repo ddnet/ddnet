@@ -208,6 +208,7 @@ public:
 	virtual void SetPrintOutputLevel(int Index, int OutputLevel);
 	virtual char *Format(char *pBuf, int Size, const char *pFrom, const char *pStr);
 	virtual void Print(int Level, const char *pFrom, const char *pStr, bool Highlighted = false);
+	virtual void Printf(int Level, const char* pFrom, const char* fmt, ...);
 	virtual void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser);
 
 	void SetAccessLevel(int AccessLevel) { m_AccessLevel = clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_USER)); }

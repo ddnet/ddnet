@@ -104,6 +104,13 @@ MACRO_CONFIG_INT(UiCloseWindowAfterChangingSetting, ui_close_window_after_changi
 
 MACRO_CONFIG_INT(GfxNoclip, gfx_noclip, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Disable clipping")
 
+MACRO_CONFIG_INT(TexLazyLoading, tex_lazy_loading, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Don't load gametextures until needed (WARNING: disabling this takes up a HUGE amount of ram!!)")
+MACRO_CONFIG_STR(TexGame, tex_game, 128, "!default", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Gameskin texture")
+MACRO_CONFIG_STR(TexParticles, tex_particles, 128, "!default", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Particle texture")
+MACRO_CONFIG_STR(TexEmoticons, tex_emoticon, 128, "!default", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Emoticons texture")
+MACRO_CONFIG_STR(TexCursor, tex_cursor, 128, "!default", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Cursor texture")
+//MACRO_CONFIG_STR(TexEntities, tex_entities, 128, "!default", CFGFLAG_CLIENT | CFGFLAG_SAVE, "X-Ray entities")
+
 // dummy
 MACRO_CONFIG_STR(ClDummyName, dummy_name, 16, "brainless tee", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Name of the Dummy")
 MACRO_CONFIG_STR(ClDummyClan, dummy_clan, 12, "", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Clan of the Dummy")

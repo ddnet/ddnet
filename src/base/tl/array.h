@@ -95,6 +95,14 @@ public:
 	}
 
 	/*
+		Function: empty
+	*/
+	bool empty() const
+	{
+		return num_elements == 0;
+	}
+
+	/*
 		Function: remove_index_fast
 
 		Remarks:
