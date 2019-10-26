@@ -86,6 +86,7 @@ static int s_WVBufferPosition = 0;
 static int s_WVBufferSize = 0;
 
 const int DefaultDistance = 1500;
+int m_LastBreak = 0;
 
 // TODO: there should be a faster way todo this
 static short Int2Short(int i)
@@ -239,6 +240,11 @@ static void Mix(short *pFinalOut, unsigned Frames)
 				pInR += Step;
 				v->m_Tick++;
 			}
+#if defined(CONF_VIDEORECORDER)
+			if(IVideo::Current())
+				if(m_LastBreak > IVideo::Current()->GetBreak())
+					v->m_Tick -= End;
+#endif
 
 			// free voice if not used any more
 			if(v->m_Tick == v->m_pSample->m_NumFrames)
@@ -280,7 +286,13 @@ static void Mix(short *pFinalOut, unsigned Frames)
 
 #if defined(CONF_VIDEORECORDER)
 	if (IVideo::Current())
-		IVideo::Current()->nextAudioFrame(pFinalOut);
+	{
+		if(m_LastBreak <= IVideo::Current()->GetBreak()+0.005)
+		{
+			IVideo::Current()->nextAudioFrame(pFinalOut);
+			m_LastBreak += 1;
+		}
+	}
 #endif
 
 }

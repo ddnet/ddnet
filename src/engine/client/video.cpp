@@ -147,6 +147,7 @@ void CVideo::start()
 	m_Recording = true;
 	m_Started = true;
 	ms_Time = time_get();
+	m_Break = 0;
 }
 
 void CVideo::stop()
@@ -166,7 +167,10 @@ void CVideo::stop()
 	close_stream(&m_VideoStream);
 
 	if (m_HasAudio)
+	{
 		close_stream(&m_AudioStream);
+		fclose(m_dbgfile);
+	}
 
 	if (!(m_pFormat->flags & AVFMT_NOFILE))
 		avio_closep(&m_pFormatContext->pb);
@@ -236,7 +240,7 @@ void CVideo::nextAudioFrame(short* pData)
 	{
 		m_ProcessingAudioFrame = true;
 		m_AudioStream.frame->pts = m_AudioStream.enc->frame_number;
-		// dbg_msg("video_recorder", "aframe: %d", m_AudioStream.enc->frame_number);
+		dbg_msg("video_recorder", "aframe: %d", m_AudioStream.enc->frame_number);
 
 		// memcpy(m_AudioStream.tmp_frame->data[0], pData, sizeof(int16_t) * m_SndBufferSize * 2);
 		//
@@ -258,6 +262,7 @@ void CVideo::nextAudioFrame(short* pData)
 		// );
 
 		// dbg_msg("video_recorder", "dst_nb_samples: %d", dst_nb_samples);
+		fwrite(pData, sizeof(short), 1024, m_dbgfile);
 
 		av_samples_fill_arrays(
 			(uint8_t**)m_AudioStream.tmp_frame->data,
@@ -265,7 +270,7 @@ void CVideo::nextAudioFrame(short* pData)
 			(const uint8_t*)pData,
 			2, // channels
 			m_AudioStream.tmp_frame->nb_samples,
-			AV_SAMPLE_FMT_S16P,
+			AV_SAMPLE_FMT_S16,
 			0 // align
 		);
 
@@ -457,6 +462,7 @@ void CVideo::open_audio()
 	c = m_AudioStream.enc;
 
 	/* open it */
+	m_dbgfile = fopen("/tmp/pcm_dbg", "wb");
 	av_dict_copy(&opt, m_pOptDict, 0);
 	ret = avcodec_open2(c, m_AudioCodec, &opt);
 	av_dict_free(&opt);
@@ -475,7 +481,7 @@ void CVideo::open_audio()
 
 	m_AudioStream.frame	 = alloc_audio_frame(c->sample_fmt, c->channel_layout, c->sample_rate, nb_samples);
 
-	m_AudioStream.tmp_frame = alloc_audio_frame(AV_SAMPLE_FMT_S16P, AV_CH_LAYOUT_STEREO, g_Config.m_SndRate, m_SndBufferSize);
+	m_AudioStream.tmp_frame = alloc_audio_frame(AV_SAMPLE_FMT_S16, AV_CH_LAYOUT_STEREO, g_Config.m_SndRate, m_SndBufferSize);
 
 	/* copy the stream parameters to the muxer */
 	ret = avcodec_parameters_from_context(m_AudioStream.st->codecpar, c);
@@ -494,7 +500,7 @@ void CVideo::open_audio()
 		/* set options */
 		av_opt_set_int	   (m_AudioStream.swr_ctx, "in_channel_count",   2,	   0);
 		av_opt_set_int	   (m_AudioStream.swr_ctx, "in_sample_rate",	 g_Config.m_SndRate,	0);
-		av_opt_set_sample_fmt(m_AudioStream.swr_ctx, "in_sample_fmt",	  AV_SAMPLE_FMT_S16P, 0);
+		av_opt_set_sample_fmt(m_AudioStream.swr_ctx, "in_sample_fmt",	  AV_SAMPLE_FMT_S16, 0);
 		av_opt_set_int	   (m_AudioStream.swr_ctx, "out_channel_count",  c->channels,	   0);
 		av_opt_set_int	   (m_AudioStream.swr_ctx, "out_sample_rate",	c->sample_rate,	0);
 		av_opt_set_sample_fmt(m_AudioStream.swr_ctx, "out_sample_fmt",	 c->sample_fmt,	 0);
@@ -576,7 +582,7 @@ void CVideo::add_stream(OutputStream *ost, AVFormatContext *oc, AVCodec **codec,
 			c->bit_rate = 400000;
 			/* Resolution must be a multiple of two. */
 			c->width = m_Width;
-			c->height = m_Height;
+			c->height = m_Height%2==0?m_Height:m_Height-1;
 			/* timebase: This is the fundamental unit of time (in seconds) in terms
 			 * of which frame timestamps are represented. For fixed-fps content,
 			 * timebase should be 1/framerate and timestamp increments should be

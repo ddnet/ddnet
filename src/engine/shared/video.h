@@ -25,12 +25,16 @@ public:
 	static void SetLocalStartTime(int64 LocalStartTime) { ms_LocalStartTime = LocalStartTime; }
 	static void SetFPS(int fps) { ms_TickTime = time_freq() / fps; }
 
+	void SetBreak(double Speed) { m_Break += 4.0/Speed; } // I think this 4 is related to `Len/2/2` in `Mix` function of /expand/teeworlds/demo/video_3/src/engine/client/sound.cpp
+	double GetBreak() { return m_Break; }
+
 protected:
 	static IVideo* ms_pCurrentVideo;
 	static int64 ms_Time;
 	static int64 ms_LocalStartTime;
 	static float ms_LocalTime;
 	static int64 ms_TickTime;
+	double m_Break;
 };
 
 

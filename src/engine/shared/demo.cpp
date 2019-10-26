@@ -935,6 +935,10 @@ int CDemoPlayer::Update(bool RealTime)
 				break;
 
 			// do one more tick
+#if defined(CONF_VIDEORECORDER)
+			if(IVideo::Current())
+				IVideo::Current()->SetBreak((double)m_Info.m_Info.m_Speed);
+#endif
 			DoTick();
 
 			if(m_Info.m_Info.m_Paused)

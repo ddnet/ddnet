@@ -31,6 +31,7 @@ extern "C"
 #include <base/system.h>
 
 #include <engine/shared/video.h>
+#include <engine/shared/demo.h>
 
 
 // a wrapper around a single output AVStream
@@ -92,6 +93,7 @@ private:
 	int m_Width;
 	int m_Height;
 	char m_Name[256];
+	FILE *m_dbgfile;
 
 	int m_FPS;
 
