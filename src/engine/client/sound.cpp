@@ -301,6 +301,10 @@ static void SdlCallback(void *pUnused, Uint8 *pStream, int Len)
 {
 	(void)pUnused;
 	Mix((short *)pStream, Len/2/2);
+#if defined(CONF_VIDEORECORDER)
+	if (IVideo::Current())
+		memset(pStream, 0, Len);
+#endif
 }
 
 
