@@ -94,6 +94,8 @@ private:
 	int m_Height;
 	char m_Name[256];
 	FILE *m_dbgfile;
+	int m_aseq;
+	short m_aBuffer[2048];
 
 	int m_FPS;
 

@@ -238,6 +238,11 @@ void CVideo::nextAudioFrame(short* pData)
 {
 	if (m_Recording && m_HasAudio)
 	{
+		m_aseq += 1;
+		for(int i=0; i < 1024; i++)
+			m_aBuffer[i+(m_aseq%2)*1024] = pData[i];
+		if(m_aseq % 2)
+		{
 		m_ProcessingAudioFrame = true;
 		m_AudioStream.frame->pts = m_AudioStream.enc->frame_number;
 		dbg_msg("video_recorder", "aframe: %d", m_AudioStream.enc->frame_number);
@@ -262,14 +267,14 @@ void CVideo::nextAudioFrame(short* pData)
 		// );
 
 		// dbg_msg("video_recorder", "dst_nb_samples: %d", dst_nb_samples);
-		fwrite(pData, sizeof(short), 1024, m_dbgfile);
+		//fwrite(pData, sizeof(short), 1024, m_dbgfile);
 
 		av_samples_fill_arrays(
 			(uint8_t**)m_AudioStream.tmp_frame->data,
 			0, // pointer to linesize (int*)
-			(const uint8_t*)pData,
+			(const uint8_t*)m_aBuffer,
 			2, // channels
-			m_AudioStream.tmp_frame->nb_samples,
+			m_AudioStream.tmp_frame->nb_samples * 2,
 			AV_SAMPLE_FMT_S16,
 			0 // align
 		);
@@ -283,9 +288,9 @@ void CVideo::nextAudioFrame(short* pData)
 		ret = swr_convert(
 			m_AudioStream.swr_ctx,
 			m_AudioStream.frame->data,
-			m_AudioStream.frame->nb_samples,
+			m_AudioStream.frame->nb_samples * 2,
 			(const uint8_t **)m_AudioStream.tmp_frame->data,
-			m_AudioStream.tmp_frame->nb_samples
+			m_AudioStream.tmp_frame->nb_samples * 2
 		);
 
 		if (ret < 0)
@@ -303,6 +308,7 @@ void CVideo::nextAudioFrame(short* pData)
 		write_frame(&m_AudioStream);
 
 		m_ProcessingAudioFrame = false;
+		}
 	}
 }
 
@@ -510,6 +516,8 @@ void CVideo::open_audio()
 			dbg_msg("video_recorder", "Failed to initialize the resampling context");
 			exit(1);
 		}
+
+	m_aseq = 0;
 }
 
 
