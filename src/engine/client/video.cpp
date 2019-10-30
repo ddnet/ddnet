@@ -647,7 +647,7 @@ void CVideo::write_frame(OutputStream* pStream)
 		if (!ret_recv)
 		{
 			/* rescale output packet timestamp values from codec to stream timebase */
-			av_packet_rescale_ts(&Packet, pStream->enc->time_base, pStream->st->time_base);
+			av_packet_rescale_ts(&Packet, pStream->st->codec->time_base, pStream->st->time_base);
 			Packet.stream_index = pStream->st->index;
 
 			if (int ret = av_interleaved_write_frame(m_pFormatContext, &Packet))
