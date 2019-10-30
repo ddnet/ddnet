@@ -239,10 +239,9 @@ void CVideo::nextAudioFrame(short* pData)
 	if (m_Recording && m_HasAudio)
 	{
 		m_aseq += 1;
-		for(int i=0; i < 1024; i++)
-			m_aBuffer[i+(m_aseq%2)*1024] = pData[i];
-		if(m_aseq % 2)
-		{
+		mem_copy(m_aBuffer+(m_aseq%2)*1024, pData, sizeof(short)*1024);
+		if(!(m_aseq % 2) || m_aseq < 4) // jump first two audio frames
+			return;
 		m_ProcessingAudioFrame = true;
 		m_AudioStream.frame->pts = m_AudioStream.enc->frame_number;
 		dbg_msg("video_recorder", "aframe: %d", m_AudioStream.enc->frame_number);
@@ -308,7 +307,6 @@ void CVideo::nextAudioFrame(short* pData)
 		write_frame(&m_AudioStream);
 
 		m_ProcessingAudioFrame = false;
-		}
 	}
 }
 
