@@ -192,8 +192,8 @@ void CVideo::nextVideoFrame_thread()
 		// #ifdef CONF_PLATFORM_MACOSX
 		// 	CAutoreleasePool AutoreleasePool;
 		// #endif
-
-		if(m_VideoStream.enc->frame_number >= 2)
+		m_vseq += 1;
+		if(m_vseq >= 2)
 		{
 			m_VideoStream.frame->pts = m_VideoStream.enc->frame_number;
 			dbg_msg("video_recorder", "vframe: %d", m_VideoStream.enc->frame_number);
@@ -202,8 +202,6 @@ void CVideo::nextVideoFrame_thread()
 			fill_video_frame();
 			write_frame(&m_VideoStream);
 		}
-		else
-			m_VideoStream.enc->frame_number += 1;
 
 		m_ProcessingVideoFrame = false;
 		m_NextFrame = false;
@@ -243,7 +241,7 @@ void CVideo::nextAudioFrame(short* pData)
 		if(!(m_aseq % 2) || m_aseq < 4) // jump first two audio frames
 			return;
 		m_ProcessingAudioFrame = true;
-		m_AudioStream.frame->pts = m_AudioStream.enc->frame_number;
+		//m_AudioStream.frame->pts = m_AudioStream.enc->frame_number;
 		dbg_msg("video_recorder", "aframe: %d", m_AudioStream.enc->frame_number);
 
 		// memcpy(m_AudioStream.tmp_frame->data[0], pData, sizeof(int16_t) * m_SndBufferSize * 2);
@@ -253,20 +251,20 @@ void CVideo::nextAudioFrame(short* pData)
 		// 	dbg_msg("video_recorder", "test: %d %d", ((int16_t*)pData)[i*2], ((int16_t*)pData)[i*2 + 1]);
 		// }
 
-		// int dst_nb_samples;
+		int dst_nb_samples;
 
-		// dst_nb_samples = av_rescale_rnd(
-		// 	swr_get_delay(
-		// 		m_AudioStream.swr_ctx,
-		// 		m_AudioStream.enc->sample_rate
-		// 	) + m_AudioStream.tmp_frame->nb_samples,
-		//
-		// 	m_AudioStream.enc->sample_rate,
-		// 	m_AudioStream.enc->sample_rate, AV_ROUND_UP
-		// );
+		dst_nb_samples = av_rescale_rnd(
+			swr_get_delay(
+				m_AudioStream.swr_ctx,
+				m_AudioStream.enc->sample_rate
+			) + m_AudioStream.tmp_frame->nb_samples * 2,
+		
+			m_AudioStream.enc->sample_rate,
+			m_AudioStream.enc->sample_rate, AV_ROUND_UP
+		);
 
 		// dbg_msg("video_recorder", "dst_nb_samples: %d", dst_nb_samples);
-		//fwrite(pData, sizeof(short), 1024, m_dbgfile);
+		// fwrite(m_aBuffer, sizeof(short), 2048, m_dbgfile);
 
 		av_samples_fill_arrays(
 			(uint8_t**)m_AudioStream.tmp_frame->data,
@@ -300,8 +298,8 @@ void CVideo::nextAudioFrame(short* pData)
 
 		// frame = ost->frame;
 		//
-		// m_AudioStream.frame->pts = av_rescale_q(m_AudioStream.samples_count, (AVRational){1, m_AudioStream.enc->sample_rate}, m_AudioStream.enc->time_base);
-		// m_AudioStream.samples_count += dst_nb_samples;
+		m_AudioStream.frame->pts = av_rescale_q(m_AudioStream.samples_count, (AVRational){1, m_AudioStream.enc->sample_rate}, m_AudioStream.enc->time_base);
+		m_AudioStream.samples_count += dst_nb_samples;
 
 		// dbg_msg("video_recorder", "prewrite----");
 		write_frame(&m_AudioStream);
@@ -453,6 +451,7 @@ void CVideo::open_video()
 		dbg_msg("video_recorder", "Could not copy the stream parameters");
 		exit(1);
 	}
+	m_vseq = 0;
 }
 
 
@@ -647,7 +646,7 @@ void CVideo::write_frame(OutputStream* pStream)
 		if (!ret_recv)
 		{
 			/* rescale output packet timestamp values from codec to stream timebase */
-			av_packet_rescale_ts(&Packet, pStream->st->codec->time_base, pStream->st->time_base);
+			av_packet_rescale_ts(&Packet, pStream->enc->time_base, pStream->st->time_base);
 			Packet.stream_index = pStream->st->index;
 
 			if (int ret = av_interleaved_write_frame(m_pFormatContext, &Packet))
@@ -685,8 +684,8 @@ void CVideo::finish_frames(OutputStream* pStream)
 		if (!ret_recv)
 		{
 			/* rescale output packet timestamp values from codec to stream timebase */
-			if(pStream->st->codec->codec_type == AVMEDIA_TYPE_VIDEO)
-				av_packet_rescale_ts(&Packet, pStream->st->codec->time_base, pStream->st->time_base);
+			//if(pStream->st->codec->codec_type == AVMEDIA_TYPE_AUDIO)
+			av_packet_rescale_ts(&Packet, pStream->enc->time_base, pStream->st->time_base);
 			Packet.stream_index = pStream->st->index;
 
 			if (int ret = av_interleaved_write_frame(m_pFormatContext, &Packet))

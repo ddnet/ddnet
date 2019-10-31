@@ -95,6 +95,7 @@ private:
 	char m_Name[256];
 	FILE *m_dbgfile;
 	int m_aseq;
+	int m_vseq;
 	short m_aBuffer[2048];
 
 	int m_FPS;
