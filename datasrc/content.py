@@ -270,7 +270,7 @@ set_demobuttons = SpriteSet("demobuttons", image_demobuttons, 5, 1)
 set_fileicons = SpriteSet("fileicons", image_fileicons, 8, 1)
 set_guibuttons = SpriteSet("guibuttons", image_guibuttons, 12, 4)
 set_guiicons = SpriteSet("guiicons", image_guiicons, 8, 2)
-set_demobuttons2 = SpriteSet("demobuttons2", image_demobuttons2, 3, 1)
+set_demobuttons2 = SpriteSet("demobuttons2", image_demobuttons2, 4, 1)
 set_audio_source = SpriteSet("audio_source", image_audio_source, 1, 1)
 
 container.spritesets.Add(set_particles)
@@ -408,6 +408,8 @@ container.sprites.Add(Sprite("demobutton_faster", set_demobuttons, 4,0,1,1))
 
 container.sprites.Add(Sprite("demobutton_slice_begin", set_demobuttons2, 0,0,1,1))
 container.sprites.Add(Sprite("demobutton_slice_end", set_demobuttons2, 1,0,1,1))
+container.sprites.Add(Sprite("demobutton_shortcuts_enabled", set_demobuttons2, 2,0,1,1))
+container.sprites.Add(Sprite("demobutton_shortcuts_disabled", set_demobuttons2, 3,0,1,1))
 
 container.sprites.Add(Sprite("file_demo1", set_fileicons, 0,0,1,1))
 container.sprites.Add(Sprite("file_demo2", set_fileicons, 1,0,1,1))

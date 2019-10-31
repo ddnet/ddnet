@@ -229,7 +229,7 @@ static int GetMoveRestrictions(int Direction, int Tile, int Flags)
 	return Result&GetMoveRestrictionsMask(Direction);
 }
 
-int CCollision::GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance)
+int CCollision::GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance, int OverrideCenterTileIndex)
 {
 	static const vec2 DIRECTIONS[NUM_MR_DIRS] =
 	{
@@ -245,6 +245,10 @@ int CCollision::GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void 
 	{
 		vec2 ModPos = Pos + DIRECTIONS[d] * Distance;
 		int ModMapIndex = GetPureMapIndex(ModPos);
+		if(d == MR_DIR_HERE && OverrideCenterTileIndex >= 0)
+		{
+			ModMapIndex = OverrideCenterTileIndex;
+		}
 		for(int Front = 0; Front < 2; Front++)
 		{
 			int Tile;
@@ -487,13 +491,16 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elas
 
 	if(Distance > 0.00001f)
 	{
-		//vec2 old_pos = pos;
 		float Fraction = 1.0f/(float)(Max+1);
 		for(int i = 0; i <= Max; i++)
 		{
-			//float amount = i/(float)max;
-			//if(max == 0)
-				//amount = 0;
+			// Early break as optimization to stop checking for collisions for
+			// large distances after the obstacles we have already hit reduced
+			// our speed to exactly 0.
+			if(Vel == vec2(0, 0))
+			{
+				break;
+			}
 
 			vec2 NewPos = Pos + Vel*Fraction; // TODO: this row is not nice
 

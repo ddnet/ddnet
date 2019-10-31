@@ -101,8 +101,8 @@ void CMapLayers::EnvelopeEval(float TimeOffset, int Env, float *pChannels, void 
 			else
 			{
 				s_Time = mix(pThis->m_LastLocalTick / (float)pThis->Client()->GameTickSpeed(),
-							pThis->m_CurrentLocalTick / (float)pThis->Client()->GameTickSpeed(),
-							pThis->Client()->IntraGameTick());
+				    pThis->m_CurrentLocalTick / (float)pThis->Client()->GameTickSpeed(),
+						pThis->Client()->IntraGameTick());
 			}
 		}
 		pThis->RenderTools()->RenderEvalEnvelope(pPoints+pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time+TimeOffset, pChannels);

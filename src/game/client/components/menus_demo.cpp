@@ -164,7 +164,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	}
 
 	// handle keyboard shortcuts independent of active menu
-	if(m_pClient->m_pGameConsole->IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE)
+	if(m_pClient->m_pGameConsole->IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE && g_Config.m_ClDemoKeyboardShortcuts)
 	{
 		// increase/decrease speed
 		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) || Input()->KeyPress(KEY_UP))
@@ -465,6 +465,16 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	{
 		Client()->Disconnect();
 		DemolistOnUpdate(false);
+	}
+
+	// toggle keyboard shortcuts button
+	ButtonBar.VSplitRight(Margins*3, &ButtonBar, 0);
+	ButtonBar.VSplitRight(ButtonbarHeight, &ButtonBar, &Button);
+	static int s_KeyboardShortcutsButton = 0;
+	int Sprite = g_Config.m_ClDemoKeyboardShortcuts ? SPRITE_DEMOBUTTON_SHORTCUTS_ENABLED : SPRITE_DEMOBUTTON_SHORTCUTS_DISABLED;
+	if(DoButton_Sprite(&s_KeyboardShortcutsButton, IMAGE_DEMOBUTTONS2, Sprite, 0, &Button, CUI::CORNER_ALL))
+	{
+		g_Config.m_ClDemoKeyboardShortcuts ^= 1;
 	}
 
 	// demo name
