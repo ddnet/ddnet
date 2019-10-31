@@ -287,7 +287,7 @@ static void Mix(short *pFinalOut, unsigned Frames)
 #if defined(CONF_VIDEORECORDER)
 	if (IVideo::Current())
 	{
-		if(m_LastBreak <= IVideo::Current()->GetBreak()+0.005)
+		if(m_LastBreak <= IVideo::Current()->GetBreak())
 		{
 			IVideo::Current()->nextAudioFrame(pFinalOut);
 			m_LastBreak += 1;
