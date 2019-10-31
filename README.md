@@ -21,3 +21,4 @@ For ddnet origin client, please visit https://github.com/ddnet/ddnet
 - `cl_video_showchat`is for whether show chat when rendering video, default is 1.
 - `cl_video_showhookcollother`is for whether show other players' hook collision lines when rendering video, default is 0.
 - `cl_video_showdirection`is for whether show other players' key presses when rendering video, default is 0.
+- `cl_video_sound_enable` is for whether use sound when rendering video, default is 1.
