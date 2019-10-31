@@ -147,6 +147,7 @@ void CVideo::start()
 	m_Recording = true;
 	m_Started = true;
 	ms_Time = time_get();
+	m_vframe = 0;
 	m_Break = 0;
 }
 
@@ -224,6 +225,7 @@ void CVideo::nextVideoFrame()
 		ms_LocalTime = (ms_Time-ms_LocalStartTime)/(float)time_freq();
 		m_ProcessingVideoFrame = true;
 		m_NextFrame = true;
+		m_vframe += 1;
 
 		// m_pGraphics->KickCommandBuffer();
 		//thread_sleep(500);
@@ -236,6 +238,9 @@ void CVideo::nextAudioFrame(short* pData)
 {
 	if (m_Recording && m_HasAudio)
 	{
+		//dbg_msg("video recorder", "video_frame: %lf", (double)(m_vframe/m_FPS));
+		if((double)(m_vframe/m_FPS) < m_AudioStream.enc->frame_number*m_AudioStream.enc->frame_size/m_AudioStream.enc->sample_rate)
+			return;
 		m_aseq += 1;
 		mem_copy(m_aBuffer+(m_aseq%2)*1024, pData, sizeof(short)*1024);
 		if(!(m_aseq % 2) || m_aseq < 4) // jump first two audio frames

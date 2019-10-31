@@ -97,6 +97,7 @@ private:
 	int m_aseq;
 	int m_vseq;
 	short m_aBuffer[2048];
+	int m_vframe;
 
 	int m_FPS;
 
