@@ -333,22 +333,19 @@ int CServerBrowser::SortHash() const
 
 void SetFilteredPlayers(const CServerInfo &Item)
 {
-	Item.m_NumFilteredPlayers = 0;
-
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	if (g_Config.m_BrFilterSpectators)
+		Item.m_NumFilteredPlayers = Item.m_NumPlayers;
+	else
+		Item.m_NumFilteredPlayers = Item.m_NumClients;
+	if (g_Config.m_BrFilterConnectingPlayers)
 	{
-		const CServerInfo::CClient &Client = Item.m_aClients[i];
+		for (int i = 0; i < MAX_CLIENTS; i++)
+		{
+			const CServerInfo::CClient &Client = Item.m_aClients[i];
 
-		if(Client.m_aName[0] == '\0')
-			continue;
-
-		if(g_Config.m_BrFilterSpectators && !Client.m_Player)
-			continue;
-
-		if(g_Config.m_BrFilterConnectingPlayers && str_comp(Client.m_aName, "(connecting)") == 0 && Client.m_aClan[0] == '\0' && Client.m_Country == -1 && Client.m_Score == 0)
-			continue;
-
-		Item.m_NumFilteredPlayers++;
+			if (str_comp(Client.m_aName, "(connecting)") == 0 && Client.m_aClan[0] == '\0' && Client.m_Country == -1 && Client.m_Score == 0)
+				Item.m_NumFilteredPlayers--;
+		}
 	}
 }
 
