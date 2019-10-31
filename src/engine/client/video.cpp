@@ -168,10 +168,8 @@ void CVideo::stop()
 	close_stream(&m_VideoStream);
 
 	if (m_HasAudio)
-	{
 		close_stream(&m_AudioStream);
-		fclose(m_dbgfile);
-	}
+		//fclose(m_dbgfile);
 
 	if (!(m_pFormat->flags & AVFMT_NOFILE))
 		avio_closep(&m_pFormatContext->pb);
@@ -239,8 +237,8 @@ void CVideo::nextAudioFrame(short* pData)
 	if (m_Recording && m_HasAudio)
 	{
 		//dbg_msg("video recorder", "video_frame: %lf", (double)(m_vframe/m_FPS));
-		if((double)(m_vframe/m_FPS) < m_AudioStream.enc->frame_number*m_AudioStream.enc->frame_size/m_AudioStream.enc->sample_rate)
-			return;
+		//if((double)(m_vframe/m_FPS) < m_AudioStream.enc->frame_number*m_AudioStream.enc->frame_size/m_AudioStream.enc->sample_rate)
+			//return;
 		m_aseq += 1;
 		mem_copy(m_aBuffer+(m_aseq%2)*1024, pData, sizeof(short)*1024);
 		if(!(m_aseq % 2) || m_aseq < 4) // jump first two audio frames
@@ -470,7 +468,7 @@ void CVideo::open_audio()
 	c = m_AudioStream.enc;
 
 	/* open it */
-	m_dbgfile = fopen("/tmp/pcm_dbg", "wb");
+	//m_dbgfile = fopen("/tmp/pcm_dbg", "wb");
 	av_dict_copy(&opt, m_pOptDict, 0);
 	ret = avcodec_open2(c, m_AudioCodec, &opt);
 	av_dict_free(&opt);

@@ -16,6 +16,7 @@ public:
 	virtual void nextVideoFrame_thread() = 0;
 
 	virtual void nextAudioFrame(short* pData) = 0;
+	virtual bool GetSync() = 0;
 
 
 	static IVideo* Current() { return ms_pCurrentVideo; }

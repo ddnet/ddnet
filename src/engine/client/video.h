@@ -69,6 +69,8 @@ public:
 
 	static void Init() { av_log_set_level(AV_LOG_DEBUG); avcodec_register_all(); av_register_all(); }
 
+	bool GetSync() { return (double)(m_vframe/m_FPS) < m_AudioStream.enc->frame_number*m_AudioStream.enc->frame_size/m_AudioStream.enc->sample_rate; }
+
 private:
 	void fill_video_frame();
 	void read_rgb_from_gl();
@@ -93,7 +95,7 @@ private:
 	int m_Width;
 	int m_Height;
 	char m_Name[256];
-	FILE *m_dbgfile;
+	//FILE *m_dbgfile;
 	int m_aseq;
 	int m_vseq;
 	short m_aBuffer[2048];

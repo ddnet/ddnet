@@ -289,7 +289,8 @@ static void Mix(short *pFinalOut, unsigned Frames)
 	{
 		if(m_LastBreak <= IVideo::Current()->GetBreak())
 		{
-			IVideo::Current()->nextAudioFrame(pFinalOut);
+			if(!IVideo::Current()->GetSync())
+				IVideo::Current()->nextAudioFrame(pFinalOut);
 			m_LastBreak += 1;
 		}
 	}
