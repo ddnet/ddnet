@@ -69,7 +69,7 @@ public:
 
 	static void Init() { av_log_set_level(AV_LOG_DEBUG); avcodec_register_all(); av_register_all(); }
 
-	bool GetSync() { return (double)(m_vframe/m_FPS) < m_AudioStream.enc->frame_number*m_AudioStream.enc->frame_size/m_AudioStream.enc->sample_rate; }
+	bool GetSync() { if(m_Recording) return (double)(m_vframe/m_FPS) < m_AudioStream.enc->frame_number*m_AudioStream.enc->frame_size/m_AudioStream.enc->sample_rate; }
 
 private:
 	void fill_video_frame();
