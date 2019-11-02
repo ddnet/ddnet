@@ -240,11 +240,6 @@ static void Mix(short *pFinalOut, unsigned Frames)
 				pInR += Step;
 				v->m_Tick++;
 			}
-#if defined(CONF_VIDEORECORDER)
-			if(IVideo::Current())
-				if(m_LastBreak > IVideo::Current()->GetBreak())
-					v->m_Tick -= End;
-#endif
 
 			// free voice if not used any more
 			if(v->m_Tick == v->m_pSample->m_NumFrames)
@@ -284,27 +279,16 @@ static void Mix(short *pFinalOut, unsigned Frames)
 	swap_endian(pFinalOut, sizeof(short), Frames * 2);
 #endif
 
-#if defined(CONF_VIDEORECORDER)
-	if (IVideo::Current())
-	{
-		if(m_LastBreak <= IVideo::Current()->GetBreak())
-		{
-			if(!IVideo::Current()->GetSync())
-				IVideo::Current()->nextAudioFrame(pFinalOut);
-			m_LastBreak += 1;
-		}
-	}
-#endif
-
 }
 
 static void SdlCallback(void *pUnused, Uint8 *pStream, int Len)
 {
 	(void)pUnused;
-	Mix((short *)pStream, Len/2/2);
 #if defined(CONF_VIDEORECORDER)
-	if (IVideo::Current())
-		memset(pStream, 0, Len);
+	if (!(IVideo::Current() && g_Config.m_ClVideoSndEnable))
+		Mix((short *)pStream, Len/2/2);
+#else
+	Mix((short *)pStream, Len/2/2);
 #endif
 }
 
@@ -373,6 +357,10 @@ int CSound::Update()
 		m_SoundVolume = WantedVolume;
 		lock_unlock(m_SoundLock);
 	}
+#if defined(CONF_VIDEORECORDER)
+	if(IVideo::Current() && g_Config.m_ClVideoSndEnable)
+		IVideo::Current()->nextAudioFrame(Mix);
+#endif
 
 	return 0;
 }

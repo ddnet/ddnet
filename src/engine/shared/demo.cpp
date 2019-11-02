@@ -548,10 +548,7 @@ void CDemoPlayer::DoTick()
 				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", "end of file");
 			#if defined(CONF_VIDEORECORDER)
 				if (IVideo::Current())
-				{
-					IVideo::Current()->stop();
-					delete IVideo::Current();
-				}
+					Stop();
 			#endif
 			if(m_Info.m_PreviousTick == -1)
 			{
@@ -975,10 +972,7 @@ int CDemoPlayer::Stop()
 {
 #if defined(CONF_VIDEORECORDER)
 		if (IVideo::Current())
-		{
 			IVideo::Current()->stop();
-			delete IVideo::Current();
-		}
 #endif
 
 	if(!m_File)

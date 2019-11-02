@@ -182,12 +182,16 @@ void CVideo::stop()
 
 	if (m_pPixels)
 		free(m_pPixels);
+
+	if (ms_pCurrentVideo)
+		delete ms_pCurrentVideo;
 }
 
 void CVideo::nextVideoFrame_thread()
 {
 	if (m_NextFrame)
 	{
+		m_ProcessingVideoFrame = true;
 		// #ifdef CONF_PLATFORM_MACOSX
 		// 	CAutoreleasePool AutoreleasePool;
 		// #endif
@@ -221,7 +225,6 @@ void CVideo::nextVideoFrame()
 
 		ms_Time += ms_TickTime;
 		ms_LocalTime = (ms_Time-ms_LocalStartTime)/(float)time_freq();
-		m_ProcessingVideoFrame = true;
 		m_NextFrame = true;
 		m_vframe += 1;
 
@@ -232,18 +235,26 @@ void CVideo::nextVideoFrame()
 	}
 }
 
-void CVideo::nextAudioFrame(short* pData)
+void CVideo::nextAudioFrame_timeline()
 {
-	if (m_Recording && m_HasAudio)
+	if (m_Recording && m_HasAudio && !m_ProcessingAudioFrame)
 	{
+		if ((double)(m_vframe/m_FPS) >= m_AudioStream.enc->frame_number*m_AudioStream.enc->frame_size/m_AudioStream.enc->sample_rate)
+		{
+			m_NextaFrame = true;
+		}
+	}
+}
+
+void CVideo::nextAudioFrame(void (*Mix)(short *pFinalOut, unsigned Frames))
+{
+	if (m_NextaFrame)
+	{
+		m_ProcessingAudioFrame = true;
 		//dbg_msg("video recorder", "video_frame: %lf", (double)(m_vframe/m_FPS));
 		//if((double)(m_vframe/m_FPS) < m_AudioStream.enc->frame_number*m_AudioStream.enc->frame_size/m_AudioStream.enc->sample_rate)
 			//return;
-		m_aseq += 1;
-		mem_copy(m_aBuffer+(m_aseq%2)*1024, pData, sizeof(short)*1024);
-		if(!(m_aseq % 2) || m_aseq < 4) // jump first two audio frames
-			return;
-		m_ProcessingAudioFrame = true;
+		Mix(m_aBuffer, ALEN);
 		//m_AudioStream.frame->pts = m_AudioStream.enc->frame_number;
 		dbg_msg("video_recorder", "aframe: %d", m_AudioStream.enc->frame_number);
 
@@ -308,6 +319,7 @@ void CVideo::nextAudioFrame(short* pData)
 		write_frame(&m_AudioStream);
 
 		m_ProcessingAudioFrame = false;
+		m_NextaFrame = false;
 	}
 }
 

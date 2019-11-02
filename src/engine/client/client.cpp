@@ -2522,6 +2522,7 @@ void CClient::Update()
 		if (IVideo::Current()->frameRendered())
 		{
 			IVideo::Current()->nextVideoFrame();
+			IVideo::Current()->nextAudioFrame_timeline();
 		}
 	}
 	else if(m_ButtonRender)
@@ -3356,10 +3357,7 @@ void CClient::StartVideo(IConsole::IResult *pResult, void *pUserData, const char
 void CClient::Con_StopVideo(IConsole::IResult *pResult, void *pUserData)
 {
 	if (IVideo::Current())
-	{
 		IVideo::Current()->stop();
-		delete IVideo::Current();
-	}
 }
 
 #endif
