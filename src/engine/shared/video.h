@@ -17,7 +17,6 @@ public:
 
 	virtual void nextAudioFrame(void (*Mix)(short *pFinalOut, unsigned Frames)) = 0;
 	virtual void nextAudioFrame_timeline() = 0;
-	virtual bool GetSync() = 0;
 
 
 	static IVideo* Current() { return ms_pCurrentVideo; }
@@ -26,9 +25,6 @@ public:
 	static float LocalTime() { return ms_LocalTime; }
 	static void SetLocalStartTime(int64 LocalStartTime) { ms_LocalStartTime = LocalStartTime; }
 	static void SetFPS(int fps) { ms_TickTime = time_freq() / fps; }
-
-	void SetBreak(double Speed) { m_Break += 4.0/Speed; } // I think this 4 is related to `Len/2/2` in `Mix` function of /expand/teeworlds/demo/video_3/src/engine/client/sound.cpp
-	double GetBreak() { return m_Break; }
 
 protected:
 	static IVideo* ms_pCurrentVideo;
