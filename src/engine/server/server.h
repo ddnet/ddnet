@@ -291,6 +291,26 @@ public:
 
 	void ProcessClientPacket(CNetChunk *pPacket);
 
+	class CCache {
+	public:
+		struct SCacheChunk {
+			int m_DataSize;
+			void *m_pData;
+
+			SCacheChunk *m_pNext;
+		};
+
+	private:
+		SCacheChunk *m_pRoot, *m_pTail;
+
+	public:
+		void AddChunk(const void *pData, int Size);
+		SCacheChunk *GetFirst() { return m_pRoot; };
+		void Clear();
+	};
+	CCache m_ServerInfoCache[3 * 2];
+
+	void CacheServerInfo(CCache *pCache, int Type, bool SendClients);
 	void SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool SendClients);
 	void SendServerInfoConnless(const NETADDR *pAddr, int Token, int Type);
 	void UpdateServerInfo();
