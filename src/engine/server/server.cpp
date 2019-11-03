@@ -1265,6 +1265,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 				m_aClients[ClientID].m_State = CClient::STATE_INGAME;
 				GameServer()->OnClientEnter(ClientID);
+				ExpireServerInfo();
 			}
 		}
 		else if(Msg == NETMSG_INPUT)
@@ -1546,6 +1547,8 @@ void CServer::CCache::Clear()
 
 void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 {
+	pCache->Clear();
+
 	// One chance to improve the protocol!
 	CPacker p;
 	char aBuf[128];
@@ -1786,17 +1789,30 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool Sen
 	}
 }
 
-void CServer::UpdateServerInfo()
+void CServer::ExpireServerInfo()
 {
-	for(int i = 0; i < MAX_CLIENTS; ++i)
-	{
-		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
-		{
-			SendServerInfo(m_NetServer.ClientAddr(i), -1, SERVERINFO_INGAME, false);
-		}
-	}
+	m_ServerInfoNeedsUpdate = true;
 }
 
+void CServer::UpdateServerInfo(bool Resend)
+{
+	for(int i = 0; i < 3; i++)
+		for(int j = 0; j < 2; j++)
+			CacheServerInfo(&m_ServerInfoCache[i * 2 + j], i, j);
+
+	if(Resend)
+	{
+		for(int i = 0; i < MAX_CLIENTS; ++i)
+		{
+			if(m_aClients[i].m_State != CClient::STATE_EMPTY)
+			{
+				SendServerInfo(m_NetServer.ClientAddr(i), -1, SERVERINFO_INGAME, false);
+			}
+		}
+	}
+
+	m_ServerInfoNeedsUpdate = false;
+}
 
 void CServer::PumpNetwork()
 {
@@ -2001,6 +2017,7 @@ int CServer::Run()
 		m_Lastheartbeat = 0;
 		m_GameStartTime = time_get();
 
+		UpdateServerInfo();
 		while(m_RunServer)
 		{
 			if(NonActive)
@@ -2041,7 +2058,7 @@ int CServer::Run()
 					{
 						break;
 					}
-					UpdateServerInfo();
+					UpdateServerInfo(true);
 				}
 				else
 				{
@@ -2145,14 +2162,8 @@ int CServer::Run()
 			// master server stuff
 			m_Register.RegisterUpdate(m_NetServer.NetType());
 
-			for(int i = 0; i < 3; i++)
-			{
-				for(int j = 0; j < 2; j++)
-				{
-					m_ServerInfoCache[i * 2 + j].Clear();
-					CacheServerInfo(&m_ServerInfoCache[i * 2 + j], i, j);
-				}
-			}
+			if(m_ServerInfoNeedsUpdate)
+				UpdateServerInfo();
 
 			if(!NonActive)
 				PumpNetwork();
@@ -2792,7 +2803,7 @@ void CServer::ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserD
 {
 	pfnCallback(pResult, pCallbackUserData);
 	if(pResult->NumArguments())
-		((CServer *)pUserData)->UpdateServerInfo();
+		((CServer *)pUserData)->UpdateServerInfo(true);
 }
 
 void CServer::ConchainMaxclientsperipUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)

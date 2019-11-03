@@ -309,11 +309,13 @@ public:
 		void Clear();
 	};
 	CCache m_ServerInfoCache[3 * 2];
+	bool m_ServerInfoNeedsUpdate;
 
+	void ExpireServerInfo();
 	void CacheServerInfo(CCache *pCache, int Type, bool SendClients);
 	void SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool SendClients);
 	void SendServerInfoConnless(const NETADDR *pAddr, int Token, int Type);
-	void UpdateServerInfo();
+	void UpdateServerInfo(bool Resend = false);
 
 	void PumpNetwork();
 
