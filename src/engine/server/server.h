@@ -301,7 +301,7 @@ public:
 			CCacheChunk(const CCacheChunk &) = delete;
 
 			int m_DataSize;
-			unsigned char *m_aData[NET_MAX_PAYLOAD];
+			unsigned char m_aData[NET_MAX_PAYLOAD];
 		};
 
 		std::list<CCacheChunk> m_lCache;
