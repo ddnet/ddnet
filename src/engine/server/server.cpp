@@ -1516,14 +1516,8 @@ CServer::CCache::~CCache()
 
 CServer::CCache::CCacheChunk::CCacheChunk(const void *pData, int Size)
 {
-	m_pData = malloc(Size); // This can fail, but no way to indicate that barring an exception
-	mem_copy(m_pData, pData, Size);
+	mem_copy(m_aData, pData, Size);
 	m_DataSize = Size;
-}
-
-CServer::CCache::CCacheChunk::~CCacheChunk()
-{
-	free(m_pData);
 }
 
 void CServer::CCache::AddChunk(const void *pData, int Size)
@@ -1747,7 +1741,7 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool Sen
 	}
 
 	ADD_INT(p, Token);
-	p.AddRaw(FirstChunk.m_pData, FirstChunk.m_DataSize);
+	p.AddRaw(FirstChunk.m_aData, FirstChunk.m_DataSize);
 
 	CNetChunk Packet;
 	Packet.m_ClientID = -1;
@@ -1771,10 +1765,10 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool Sen
 		}
 		else if(Type == SERVERINFO_64_LEGACY)
 		{
-			p.AddRaw(FirstChunk.m_pData, FirstChunk.m_DataSize);
+			p.AddRaw(FirstChunk.m_aData, FirstChunk.m_DataSize);
 		}
 
-		p.AddRaw(Chunk.m_pData, Chunk.m_DataSize);
+		p.AddRaw(Chunk.m_aData, Chunk.m_DataSize);
 		Packet.m_pData = p.Data();
 		Packet.m_DataSize = p.Size();
 		m_NetServer.Send(&Packet);

@@ -299,10 +299,9 @@ public:
 		public:
 			CCacheChunk(const void *pData, int Size);
 			CCacheChunk(const CCacheChunk &) = delete;
-			~CCacheChunk();
 
 			int m_DataSize;
-			void *m_pData;
+			unsigned char *m_aData[NET_MAX_PAYLOAD];
 		};
 
 		std::list<CCacheChunk> m_lCache;
