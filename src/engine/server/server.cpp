@@ -472,6 +472,7 @@ int CServer::Init()
 		m_aClients[i].m_TrafficSince = 0;
 		m_aClients[i].m_ShowIps = false;
 		m_aClients[i].m_AuthKey = -1;
+		m_aClients[i].m_Latency = 0;
 	}
 
 	m_CurrentGameTick = 0;
