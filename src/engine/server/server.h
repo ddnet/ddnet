@@ -304,6 +304,9 @@ public:
 		SCacheChunk *m_pRoot, *m_pTail;
 
 	public:
+		CCache();
+		~CCache();
+
 		void AddChunk(const void *pData, int Size);
 		SCacheChunk *GetFirst() { return m_pRoot; };
 		void Clear();

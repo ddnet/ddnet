@@ -285,6 +285,7 @@ CServer::CServer()
 
 	m_ServerInfoFirstRequest = 0;
 	m_ServerInfoNumRequests = 0;
+	m_ServerInfoNeedsUpdate = false;
 
 #ifdef CONF_FAMILY_UNIX
 	m_ConnLoggingSocketCreated = false;
@@ -1503,6 +1504,16 @@ void CServer::SendServerInfoConnless(const NETADDR *pAddr, int Token, int Type)
 	SendServerInfo(pAddr, Token, Type, SendClients);
 }
 
+CServer::CCache::CCache()
+{
+	m_pRoot = m_pTail = 0;
+}
+
+CServer::CCache::~CCache()
+{
+	Clear();
+}
+
 void CServer::CCache::AddChunk(const void *pData, int Size)
 {
 	SCacheChunk *pNew = new SCacheChunk;
@@ -1518,6 +1529,7 @@ void CServer::CCache::AddChunk(const void *pData, int Size)
 	mem_copy(pNew->m_pData, pData, Size);
 	pNew->m_DataSize = Size;
 
+	pNew->m_pNext = 0;
 	if(!m_pRoot)
 		m_pRoot = m_pTail = pNew;
 	else
@@ -1532,8 +1544,8 @@ void CServer::CCache::Clear()
 	if(!m_pRoot)
 		return;
 
-	SCacheChunk *pChunk = m_pRoot, *pTmp = 0;
-	while(pChunk)
+	SCacheChunk *pTmp = 0;
+	for(SCacheChunk *pChunk = m_pRoot; pChunk;)
 	{
 		pTmp = pChunk;
 		pChunk = pChunk->m_pNext;
@@ -2219,10 +2231,6 @@ int CServer::Run()
 		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
 			m_NetServer.Drop(i, pDisconnectReason);
 	}
-
-	for(int i = 0; i < 3; i++)
-		for(int j = 0; j < 2; j++)
-			m_ServerInfoCache[i * 2 + j].Clear();
 
 	m_Econ.Shutdown();
 
