@@ -23,6 +23,8 @@
 
 #include <base/tl/array.h>
 
+#include <list>
+
 #include "authmanager.h"
 #include "name_ban.h"
 
@@ -293,22 +295,22 @@ public:
 
 	class CCache {
 	public:
-		struct SCacheChunk {
+		class CCacheChunk {
+		public:
+			CCacheChunk(const void *pData, int Size);
+			CCacheChunk(const CCacheChunk &) = delete;
+			~CCacheChunk();
+
 			int m_DataSize;
 			void *m_pData;
-
-			SCacheChunk *m_pNext;
 		};
 
-	private:
-		SCacheChunk *m_pRoot, *m_pTail;
+		std::list<CCacheChunk> m_lCache;
 
-	public:
 		CCache();
 		~CCache();
 
 		void AddChunk(const void *pData, int Size);
-		SCacheChunk *GetFirst() { return m_pRoot; };
 		void Clear();
 	};
 	CCache m_ServerInfoCache[3 * 2];

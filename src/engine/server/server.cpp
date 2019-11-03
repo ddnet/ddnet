@@ -1506,7 +1506,7 @@ void CServer::SendServerInfoConnless(const NETADDR *pAddr, int Token, int Type)
 
 CServer::CCache::CCache()
 {
-	m_pRoot = m_pTail = 0;
+	m_lCache.clear();
 }
 
 CServer::CCache::~CCache()
@@ -1514,47 +1514,26 @@ CServer::CCache::~CCache()
 	Clear();
 }
 
+CServer::CCache::CCacheChunk::CCacheChunk(const void *pData, int Size)
+{
+	m_pData = malloc(Size); // This can fail, but no way to indicate that barring an exception
+	mem_copy(m_pData, pData, Size);
+	m_DataSize = Size;
+}
+
+CServer::CCache::CCacheChunk::~CCacheChunk()
+{
+	free(m_pData);
+}
+
 void CServer::CCache::AddChunk(const void *pData, int Size)
 {
-	SCacheChunk *pNew = new SCacheChunk;
-	if(!pNew)
-		return;
-
-	pNew->m_pData = malloc(Size);
-	if(!pNew->m_pData) {
-		delete pNew;
-		return;
-	}
-
-	mem_copy(pNew->m_pData, pData, Size);
-	pNew->m_DataSize = Size;
-
-	pNew->m_pNext = 0;
-	if(!m_pRoot)
-		m_pRoot = m_pTail = pNew;
-	else
-	{
-		m_pTail->m_pNext = pNew;
-		m_pTail = pNew;
-	}
+	m_lCache.emplace_back(pData, Size);
 }
 
 void CServer::CCache::Clear()
 {
-	if(!m_pRoot)
-		return;
-
-	SCacheChunk *pTmp = 0;
-	for(SCacheChunk *pChunk = m_pRoot; pChunk;)
-	{
-		pTmp = pChunk;
-		pChunk = pChunk->m_pNext;
-		free(pTmp->m_pData);
-		delete pTmp;
-	}
-
-	m_pRoot = 0;
-	m_pTail = 0;
+	m_lCache.clear();
 }
 
 void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
@@ -1642,14 +1621,14 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 	int PrefixSize = p.Size();
 
 	CPacker pp;
-	int ChunksSaved = 0;
-	int PlayersSaved = 0;
+	int ChunksStored = 0;
+	int PlayersStored = 0;
 
 	#define SAVE(size) \
 		do \
 		{ \
 			pCache->AddChunk(pp.Data(), size); \
-			ChunksSaved++; \
+			ChunksStored++; \
 		} while(0)
 
 	#define RESET() \
@@ -1662,7 +1641,7 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 	RESET();
 
 	if(Type == SERVERINFO_64_LEGACY)
-		pp.AddInt(PlayersSaved); // offset
+		pp.AddInt(PlayersStored); // offset
 
 	if(!SendClients)
 	{
@@ -1703,7 +1682,7 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 				// Otherwise we're SERVERINFO_64_LEGACY.
 				SAVE(pp.Size());
 				RESET();
-				pp.AddInt(PlayersSaved); // offset
+				pp.AddInt(PlayersStored); // offset
 				Remaining = 24;
 			}
 			if(Remaining > 0)
@@ -1730,12 +1709,12 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 					i--;
 					SAVE(PreviousSize);
 					RESET();
-					ADD_INT(pp, ChunksSaved);
+					ADD_INT(pp, ChunksStored);
 					pp.AddString("", 0); // extra info, reserved
 					continue;
 				}
 			}
-			PlayersSaved++;
+			PlayersStored++;
 		}
 	}
 
@@ -1752,7 +1731,8 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool Sen
 	char aBuf[128];
 	p.Reset();
 
-	CCache::SCacheChunk *pFirstChunk = m_ServerInfoCache[Type * 2 + SendClients].GetFirst();
+	CCache *pCache = &m_ServerInfoCache[Type * 2 + SendClients];
+	CCache::CCacheChunk &FirstChunk = pCache->m_lCache.front();
 
 	#define ADD_RAW(p, x) (p).AddRaw(x, sizeof(x))
 	#define ADD_INT(p, x) do { str_format(aBuf, sizeof(aBuf), "%d", x); (p).AddString(aBuf, 0); } while(0)
@@ -1761,13 +1741,13 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool Sen
 	{
 	case SERVERINFO_EXTENDED: ADD_RAW(p, SERVERBROWSE_INFO_EXTENDED); break;
 	case SERVERINFO_64_LEGACY: ADD_RAW(p, SERVERBROWSE_INFO_64_LEGACY); break;
-	case SERVERINFO_VANILLA: ADD_RAW(p, SERVERBROWSE_INFO); break;
+	case SERVERINFO_VANILLA:
 	case SERVERINFO_INGAME: ADD_RAW(p, SERVERBROWSE_INFO); break;
 	default: dbg_assert(false, "unknown serverinfo type");
 	}
 
 	ADD_INT(p, Token);
-	p.AddRaw(pFirstChunk->m_pData, pFirstChunk->m_DataSize);
+	p.AddRaw(FirstChunk.m_pData, FirstChunk.m_DataSize);
 
 	CNetChunk Packet;
 	Packet.m_ClientID = -1;
@@ -1781,7 +1761,7 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool Sen
 	if(Type == SERVERINFO_INGAME || Type == SERVERINFO_VANILLA)
 		return;
 
-	for(CCache::SCacheChunk *pChunk = pFirstChunk->m_pNext; pChunk; pChunk = pChunk->m_pNext)
+	for(const auto &Chunk : pCache->m_lCache)
 	{
 		p.Reset();
 		if(Type == SERVERINFO_EXTENDED)
@@ -1791,10 +1771,10 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool Sen
 		}
 		else if(Type == SERVERINFO_64_LEGACY)
 		{
-			p.AddRaw(pFirstChunk->m_pData, pFirstChunk->m_DataSize);
+			p.AddRaw(FirstChunk.m_pData, FirstChunk.m_DataSize);
 		}
 
-		p.AddRaw(pChunk->m_pData, pChunk->m_DataSize);
+		p.AddRaw(Chunk.m_pData, Chunk.m_DataSize);
 		Packet.m_pData = p.Data();
 		Packet.m_DataSize = p.Size();
 		m_NetServer.Send(&Packet);
