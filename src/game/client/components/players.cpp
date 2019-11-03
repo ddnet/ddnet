@@ -561,7 +561,10 @@ void CPlayers::RenderPlayer(
 		Graphics()->QuadsSetRotation(0);
 	}
 
-	if(g_Config.m_ClAfkEmote && m_pClient->m_aClients[ClientID].m_Afk && !(Player.m_PlayerFlags&PLAYERFLAG_CHATTING) && !(m_pClient->Client()->DummyConnected() && ClientID == m_pClient->m_LocalIDs[!g_Config.m_ClDummy]))
+	if(ClientID < 0)
+		return;
+
+	if(g_Config.m_ClAfkEmote && m_pClient->m_aClients[ClientID].m_Afk && !(Player.m_PlayerFlags&PLAYERFLAG_CHATTING) && !(Client()->DummyConnected() && ClientID == m_pClient->m_LocalIDs[!g_Config.m_ClDummy]))
 	{
 		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_EMOTICONS].m_Id);
 		int QuadOffset = QuadOffsetToEmoticon + (SPRITE_ZZZ - SPRITE_OOP);
@@ -571,9 +574,6 @@ void CPlayers::RenderPlayer(
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		Graphics()->QuadsSetRotation(0);
 	}
-
-	if(ClientID < 0)
-		return;
 
 	if(g_Config.m_ClShowEmotes && m_pClient->m_aClients[ClientID].m_EmoticonStart != -1 && m_pClient->m_aClients[ClientID].m_EmoticonStart + 2 * Client()->GameTickSpeed() > Client()->GameTick())
 	{
