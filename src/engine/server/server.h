@@ -23,6 +23,8 @@
 
 #include <base/tl/array.h>
 
+#include <list>
+
 #include "authmanager.h"
 #include "name_ban.h"
 
@@ -291,9 +293,33 @@ public:
 
 	void ProcessClientPacket(CNetChunk *pPacket);
 
+	class CCache {
+	public:
+		class CCacheChunk {
+		public:
+			CCacheChunk(const void *pData, int Size);
+			CCacheChunk(const CCacheChunk &) = delete;
+
+			int m_DataSize;
+			unsigned char m_aData[NET_MAX_PAYLOAD];
+		};
+
+		std::list<CCacheChunk> m_lCache;
+
+		CCache();
+		~CCache();
+
+		void AddChunk(const void *pData, int Size);
+		void Clear();
+	};
+	CCache m_ServerInfoCache[3 * 2];
+	bool m_ServerInfoNeedsUpdate;
+
+	void ExpireServerInfo();
+	void CacheServerInfo(CCache *pCache, int Type, bool SendClients);
 	void SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool SendClients);
 	void SendServerInfoConnless(const NETADDR *pAddr, int Token, int Type);
-	void UpdateServerInfo();
+	void UpdateServerInfo(bool Resend = false);
 
 	void PumpNetwork();
 
