@@ -1124,7 +1124,7 @@ int CMenus::Render()
 		else if(m_Popup == POPUP_REPLACE_VIDEO)
 		{
 			pTitle = Localize("Replace video");
-			pExtraText = Localize("Destination file exists, Do you want to replace it?");
+			pExtraText = Localize("File already exists, do you want to overwrite it?");
 			ExtraAlign = -1;
 		}
 	#endif

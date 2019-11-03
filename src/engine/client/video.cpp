@@ -148,7 +148,6 @@ void CVideo::start()
 	m_Started = true;
 	ms_Time = time_get();
 	m_vframe = 0;
-	m_Break = 0;
 }
 
 void CVideo::stop()
@@ -189,7 +188,7 @@ void CVideo::stop()
 
 void CVideo::nextVideoFrame_thread()
 {
-	if (m_NextFrame)
+	if (m_NextFrame && m_Recording)
 	{
 		m_ProcessingVideoFrame = true;
 		// #ifdef CONF_PLATFORM_MACOSX
@@ -237,7 +236,7 @@ void CVideo::nextVideoFrame()
 
 void CVideo::nextAudioFrame_timeline()
 {
-	if (m_Recording && m_HasAudio && !m_ProcessingAudioFrame)
+	if (m_Recording && m_HasAudio && !m_NextaFrame)
 	{
 		if ((double)(m_vframe/m_FPS) >= m_AudioStream.enc->frame_number*m_AudioStream.enc->frame_size/m_AudioStream.enc->sample_rate)
 		{
@@ -248,7 +247,7 @@ void CVideo::nextAudioFrame_timeline()
 
 void CVideo::nextAudioFrame(void (*Mix)(short *pFinalOut, unsigned Frames))
 {
-	if (m_NextaFrame)
+	if (m_NextaFrame && m_Recording)
 	{
 		m_ProcessingAudioFrame = true;
 		//dbg_msg("video recorder", "video_frame: %lf", (double)(m_vframe/m_FPS));
@@ -528,8 +527,6 @@ void CVideo::open_audio()
 			dbg_msg("video_recorder", "Failed to initialize the resampling context");
 			exit(1);
 		}
-
-	m_aseq = 0;
 }
 
 

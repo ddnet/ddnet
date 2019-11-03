@@ -32,7 +32,6 @@ protected:
 	static int64 ms_LocalStartTime;
 	static float ms_LocalTime;
 	static int64 ms_TickTime;
-	double m_Break;
 };
 
 

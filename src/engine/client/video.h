@@ -96,7 +96,6 @@ private:
 	int m_Height;
 	char m_Name[256];
 	//FILE *m_dbgfile;
-	int m_aseq;
 	int m_vseq;
 	short m_aBuffer[ALEN];
 	int m_vframe;
