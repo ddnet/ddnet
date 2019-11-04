@@ -1505,6 +1505,16 @@ void CServer::SendServerInfoConnless(const NETADDR *pAddr, int Token, int Type)
 	SendServerInfo(pAddr, Token, Type, SendClients);
 }
 
+static inline int GetCacheIndex(int Type, bool SendClient)
+{
+	if(Type == SERVERINFO_INGAME)
+		Type = SERVERINFO_VANILLA;
+	else if(Type == SERVERINFO_EXTENDED_MORE)
+		Type = SERVERINFO_EXTENDED;
+
+	return Type * 2 + SendClient;
+}
+
 CServer::CCache::CCache()
 {
 	m_lCache.clear();
@@ -1726,7 +1736,7 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool Sen
 	char aBuf[128];
 	p.Reset();
 
-	CCache *pCache = &m_ServerInfoCache[Type * 2 + SendClients];
+	CCache *pCache = &m_ServerInfoCache[GetCacheIndex(Type, SendClients)];
 	CCache::CCacheChunk &FirstChunk = pCache->m_lCache.front();
 
 	#define ADD_RAW(p, x) (p).AddRaw(x, sizeof(x))
