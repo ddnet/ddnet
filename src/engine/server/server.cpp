@@ -405,6 +405,10 @@ void CServer::SetClientScore(int ClientID, int Score)
 {
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State < CClient::STATE_READY)
 		return;
+
+	if(m_aClients[ClientID].m_Score != Score)
+		ExpireServerInfo();
+
 	m_aClients[ClientID].m_Score = Score;
 }
 
@@ -1267,7 +1271,6 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 				m_aClients[ClientID].m_State = CClient::STATE_INGAME;
 				GameServer()->OnClientEnter(ClientID);
-				ExpireServerInfo();
 			}
 		}
 		else if(Msg == NETMSG_INPUT)
