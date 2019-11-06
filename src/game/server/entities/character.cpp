@@ -1455,6 +1455,10 @@ void CCharacter::HandleTiles(int Index)
 					m_Core.m_ActiveWeapon = WEAPON_GUN;
 			}
 		}
+		if(g_Config.m_SvResetTeleCheckpoint)
+		{
+			m_TeleCheckpoint = 0;
+		}
 		if(g_Config.m_SvTeam == 2 && (Team() == TEAM_FLOCK || Teams()->Count(Team()) <= 1))
 		{
 			if(m_LastStartWarning < Server()->Tick() - 3 * Server()->TickSpeed())
