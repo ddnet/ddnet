@@ -310,6 +310,9 @@ public:
 		bool m_Paused;
 		bool m_Spec;
 
+		CNetObj_Character m_Snapped;
+		CNetObj_Character m_Evolved;
+
 		void UpdateRenderInfo();
 		void Reset();
 

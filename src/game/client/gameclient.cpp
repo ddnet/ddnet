@@ -1214,10 +1214,26 @@ void CGameClient::OnNewSnapshot()
 					m_Snap.m_aCharacters[Item.m_ID].m_Active = true;
 					m_Snap.m_aCharacters[Item.m_ID].m_Prev = *((const CNetObj_Character *)pOld);
 
+					// reuse the result from the previous evolve if the snapped character didn't change since the previous snapshot
+					if(m_aClients[Item.m_ID].m_Evolved.m_Tick == Client()->PrevGameTick())
+					{
+						if(mem_comp(&m_Snap.m_aCharacters[Item.m_ID].m_Prev, &m_aClients[Item.m_ID].m_Snapped, sizeof(CNetObj_Character)) == 0)
+							m_Snap.m_aCharacters[Item.m_ID].m_Prev = m_aClients[Item.m_ID].m_Evolved;
+						if(mem_comp(&m_Snap.m_aCharacters[Item.m_ID].m_Cur, &m_aClients[Item.m_ID].m_Snapped, sizeof(CNetObj_Character)) == 0)
+							m_Snap.m_aCharacters[Item.m_ID].m_Cur = m_aClients[Item.m_ID].m_Evolved;
+					}
+
 					if(m_Snap.m_aCharacters[Item.m_ID].m_Prev.m_Tick)
 						Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Prev, Client()->PrevGameTick());
 					if(m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_Tick)
 						Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Cur, Client()->GameTick());
+
+					m_aClients[Item.m_ID].m_Snapped = *((const CNetObj_Character *)pData);
+					m_aClients[Item.m_ID].m_Evolved = m_Snap.m_aCharacters[Item.m_ID].m_Cur;
+				}
+				else
+				{
+					m_aClients[Item.m_ID].m_Evolved.m_Tick = -1;
 				}
 			}
 			else if(Item.m_Type == NETOBJTYPE_DDNETCHARACTER)
@@ -1797,6 +1813,8 @@ void CGameClient::CClientData::Reset()
 	m_HasTelegunLaser = false;
 	m_FreezeEnd = 0;
 	m_DeepFrozen = false;
+
+	m_Evolved.m_Tick = -1;
 
 	UpdateRenderInfo();
 }
