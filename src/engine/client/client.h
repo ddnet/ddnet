@@ -82,7 +82,15 @@ class CClient : public IClient, public CDemoPlayer::IListener
 		PREDICTION_MARGIN=1000/50/2, // magic network prediction value
 	};
 
-	class CNetClient m_NetClient[3];
+	enum
+	{
+		CLIENT_MAIN,
+		CLIENT_DUMMY,
+		CLIENT_CONTACT,
+		NUM_CLIENTS,
+	};
+
+	class CNetClient m_NetClient[NUM_CLIENTS];
 	class CDemoPlayer m_DemoPlayer;
 	class CDemoRecorder m_DemoRecorder[RECORDER_MAX];
 	class CDemoEditor m_DemoEditor;

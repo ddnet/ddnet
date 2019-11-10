@@ -689,12 +689,12 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
 
 	ServerInfoRequest();
-	if(net_host_lookup(m_aServerAddressStr, &m_ServerAddress, m_NetClient[0].NetType()) != 0)
+	if(net_host_lookup(m_aServerAddressStr, &m_ServerAddress, m_NetClient[CLIENT_MAIN].NetType()) != 0)
 	{
 		char aBufMsg[256];
 		str_format(aBufMsg, sizeof(aBufMsg), "could not find the address of %s, connecting to localhost", aBuf);
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBufMsg);
-		net_host_lookup("localhost", &m_ServerAddress, m_NetClient[0].NetType());
+		net_host_lookup("localhost", &m_ServerAddress, m_NetClient[CLIENT_MAIN].NetType());
 	}
 
 	if(m_SendPassword)
@@ -714,7 +714,7 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	m_pConsole->DeregisterTempAll();
 	if(m_ServerAddress.port == 0)
 		m_ServerAddress.port = Port;
-	m_NetClient[0].Connect(&m_ServerAddress);
+	m_NetClient[CLIENT_MAIN].Connect(&m_ServerAddress);
 	SetState(IClient::STATE_CONNECTING);
 
 	for(int i = 0; i < RECORDER_MAX; i++)
@@ -744,7 +744,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 	m_ServerSentCapabilities = false;
 	m_UseTempRconCommands = 0;
 	m_pConsole->DeregisterTempAll();
-	m_NetClient[0].Disconnect(pReason);
+	m_NetClient[CLIENT_MAIN].Disconnect(pReason);
 	SetState(IClient::STATE_OFFLINE);
 	m_pMap->Unload();
 
@@ -801,7 +801,7 @@ void CClient::DummyConnect()
 	if(m_LastDummyConnectTime > 0 && m_LastDummyConnectTime + GameTickSpeed() * 5 > GameTick())
 		return;
 
-	if(m_NetClient[0].State() != NET_CONNSTATE_ONLINE && m_NetClient[0].State() != NET_CONNSTATE_PENDING)
+	if(m_NetClient[CLIENT_MAIN].State() != NET_CONNSTATE_ONLINE && m_NetClient[CLIENT_MAIN].State() != NET_CONNSTATE_PENDING)
 		return;
 
 	if(m_DummyConnected)
@@ -817,7 +817,7 @@ void CClient::DummyConnect()
 	g_Config.m_ClDummyHammer = 0;
 
 	//connecting to the server
-	m_NetClient[1].Connect(&m_ServerAddress);
+	m_NetClient[CLIENT_DUMMY].Connect(&m_ServerAddress);
 }
 
 void CClient::DummyDisconnect(const char *pReason)
@@ -825,7 +825,7 @@ void CClient::DummyDisconnect(const char *pReason)
 	if(!m_DummyConnected)
 		return;
 
-	m_NetClient[1].Disconnect(pReason);
+	m_NetClient[CLIENT_DUMMY].Disconnect(pReason);
 	g_Config.m_ClDummy = 0;
 	m_RconAuthed[1] = 0;
 	m_DummyConnected = false;
@@ -1056,7 +1056,7 @@ void CClient::Quit()
 
 const char *CClient::ErrorString()
 {
-	return m_NetClient[0].ErrorString();
+	return m_NetClient[CLIENT_MAIN].ErrorString();
 }
 
 void CClient::Render()
@@ -2378,7 +2378,7 @@ void CClient::LoadDDNetInfo()
 
 void CClient::PumpNetwork()
 {
-	for(int i=0; i<3; i++)
+	for(int i=0; i<NUM_CLIENTS; i++)
 	{
 		m_NetClient[i].Update();
 	}
@@ -2386,17 +2386,17 @@ void CClient::PumpNetwork()
 	if(State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		// check for errors
-		if(State() != IClient::STATE_OFFLINE && State() != IClient::STATE_QUITING && m_NetClient[0].State() == NETSTATE_OFFLINE)
+		if(State() != IClient::STATE_OFFLINE && State() != IClient::STATE_QUITING && m_NetClient[CLIENT_MAIN].State() == NETSTATE_OFFLINE)
 		{
 			SetState(IClient::STATE_OFFLINE);
 			Disconnect();
 			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "offline error='%s'", m_NetClient[0].ErrorString());
+			str_format(aBuf, sizeof(aBuf), "offline error='%s'", m_NetClient[CLIENT_MAIN].ErrorString());
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
 		}
 
 		//
-		if(State() == IClient::STATE_CONNECTING && m_NetClient[0].State() == NETSTATE_ONLINE)
+		if(State() == IClient::STATE_CONNECTING && m_NetClient[CLIENT_MAIN].State() == NETSTATE_ONLINE)
 		{
 			// we switched to online
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", "connected, sending info");
@@ -2407,7 +2407,7 @@ void CClient::PumpNetwork()
 
 	// process packets
 	CNetChunk Packet;
-	for(int i=0; i < 3; i++)
+	for(int i=0; i < NUM_CLIENTS; i++)
 	{
 		while(m_NetClient[i].Recv(&Packet))
 		{
@@ -2768,7 +2768,7 @@ void CClient::InitInterfaces()
 
 	m_DemoEditor.Init(m_pGameClient->NetVersion(), &m_SnapshotDelta, m_pConsole, m_pStorage);
 
-	m_ServerBrowser.SetBaseInfo(&m_NetClient[2], m_pGameClient->NetVersion());
+	m_ServerBrowser.SetBaseInfo(&m_NetClient[CLIENT_CONTACT], m_pGameClient->NetVersion());
 
 	HttpInit(m_pStorage);
 
@@ -2843,7 +2843,7 @@ void CClient::Run()
 			mem_zero(&BindAddr, sizeof(BindAddr));
 			BindAddr.type = NETTYPE_ALL;
 		}
-		for(int i = 0; i < 3; i++)
+		for(int i = 0; i < NUM_CLIENTS; i++)
 		{
 			do
 			{
@@ -2860,7 +2860,7 @@ void CClient::Run()
 	Input()->Init();
 
 	// start refreshing addresses while we load
-	MasterServer()->RefreshAddresses(m_NetClient[0].NetType());
+	MasterServer()->RefreshAddresses(m_NetClient[CLIENT_MAIN].NetType());
 
 	// init the editor
 	m_pEditor->Init();
@@ -2938,7 +2938,7 @@ void CClient::Run()
 		}
 
 		// progress on dummy connect if security token handshake skipped/passed
-		if(m_DummySendConnInfo && !m_NetClient[1].SecurityTokenUnknown())
+		if(m_DummySendConnInfo && !m_NetClient[CLIENT_DUMMY].SecurityTokenUnknown())
 		{
 			m_DummySendConnInfo = false;
 
@@ -2949,7 +2949,7 @@ void CClient::Run()
 			SendMsgExY(&MsgInfo, MSGFLAG_VITAL|MSGFLAG_FLUSH, true, 1);
 
 			// update netclient
-			m_NetClient[1].Update();
+			m_NetClient[CLIENT_DUMMY].Update();
 
 			// send ready
 			CMsgPacker MsgReady(NETMSG_READY);
@@ -3105,7 +3105,7 @@ void CClient::Run()
 		{
 			SleepTimeInMicroSeconds = ((int64)1000000 / (int64)g_Config.m_ClRefreshRate) - (Now - LastTime);
 			if(SleepTimeInMicroSeconds > (int64)0)
-				net_socket_read_wait(m_NetClient[0].m_Socket, SleepTimeInMicroSeconds);
+				net_socket_read_wait(m_NetClient[CLIENT_MAIN].m_Socket, SleepTimeInMicroSeconds);
 			Slept = true;
 		}
 		if(Slept)
@@ -3411,7 +3411,7 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 	int Crc;
 	const char *pError;
 	Disconnect();
-	m_NetClient[0].ResetErrorString();
+	m_NetClient[CLIENT_MAIN].ResetErrorString();
 
 	// try to start playback
 	m_DemoPlayer.SetListener(this);
