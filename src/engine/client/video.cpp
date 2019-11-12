@@ -345,7 +345,8 @@ void CVideo::fill_video_frame()
 
 void CVideo::read_rgb_from_gl()
 {
-	size_t i, j, k, cur_gl, cur_rgb, nvals;
+	int i, j, k;
+	size_t cur_gl, cur_rgb, nvals;
 	const size_t format_nchannels = 3;
 	nvals = format_nchannels * m_Width * m_Height;
 	m_pPixels = (uint8_t *)realloc(m_pPixels, nvals * sizeof(GLubyte));
@@ -359,7 +360,7 @@ void CVideo::read_rgb_from_gl()
 		{
 			cur_gl  = format_nchannels * (m_Width * (m_Height - i - 1) + j);
 			cur_rgb = format_nchannels * (m_Width * i + j);
-			for (k = 0; k < format_nchannels; k++)
+			for (k = 0; k < (int)format_nchannels; k++)
 				m_pRGB[cur_rgb + k] = m_pPixels[cur_gl + k];
 		}
 	}
@@ -643,7 +644,7 @@ void CVideo::add_stream(OutputStream *ost, AVFormatContext *oc, AVCodec **codec,
 void CVideo::write_frame(OutputStream* pStream)
 {
 
-	int ret_send, ret_recv = 0;
+	int ret_recv = 0;
 
 	AVPacket Packet = { 0 };
 
@@ -651,7 +652,7 @@ void CVideo::write_frame(OutputStream* pStream)
 	Packet.data = 0;
 	Packet.size = 0;
 
-	ret_send = avcodec_send_frame(pStream->enc, pStream->frame);
+	avcodec_send_frame(pStream->enc, pStream->frame);
 	do
 	{
 		ret_recv = avcodec_receive_packet(pStream->enc, &Packet);
@@ -681,7 +682,7 @@ void CVideo::write_frame(OutputStream* pStream)
 void CVideo::finish_frames(OutputStream* pStream)
 {
 	dbg_msg("video_recorder", "------------");
-	int ret_send, ret_recv = 0;
+	int ret_recv = 0;
 
 	AVPacket Packet = { 0 };
 
@@ -689,7 +690,7 @@ void CVideo::finish_frames(OutputStream* pStream)
 	Packet.data = 0;
 	Packet.size = 0;
 
-	ret_send = avcodec_send_frame(pStream->enc, 0);
+	avcodec_send_frame(pStream->enc, 0);
 	do
 	{
 		ret_recv = avcodec_receive_packet(pStream->enc, &Packet);

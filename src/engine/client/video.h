@@ -69,7 +69,7 @@ public:
 
 	static IVideo* Current() { return IVideo::ms_pCurrentVideo; }
 
-	static void Init() { av_log_set_level(AV_LOG_DEBUG); avcodec_register_all(); av_register_all(); }
+	static void Init() { av_log_set_level(AV_LOG_DEBUG); }
 
 private:
 	void fill_video_frame();
