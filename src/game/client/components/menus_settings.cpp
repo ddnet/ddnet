@@ -1364,8 +1364,6 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 
 void CMenus::RenderSettings(CUIRect MainView)
 {
-	static int s_SettingsPage = 0;
-
 	// render background
 	CUIRect Temp, TabBar, RestartWarning;
 	MainView.VSplitRight(120.0f, &MainView, &TabBar);
@@ -1397,29 +1395,29 @@ void CMenus::RenderSettings(CUIRect MainView)
 	{
 		TabBar.HSplitTop(10, &Button, &TabBar);
 		TabBar.HSplitTop(26, &Button, &TabBar);
-		if(DoButton_MenuTab(aTabs[i], aTabs[i], s_SettingsPage == i, &Button, CUI::CORNER_R))
-			s_SettingsPage = i;
+		if(DoButton_MenuTab(aTabs[i], aTabs[i], g_Config.m_UiSettingsPage == i, &Button, CUI::CORNER_R))
+			g_Config.m_UiSettingsPage = i;
 	}
 
 	MainView.Margin(10.0f, &MainView);
 
-	if(s_SettingsPage == 0)
+	if(g_Config.m_UiSettingsPage == SETTINGS_LANGUAGE)
 		RenderLanguageSelection(MainView);
-	else if(s_SettingsPage == 1)
+	else if(g_Config.m_UiSettingsPage == SETTINGS_GENERAL)
 		RenderSettingsGeneral(MainView);
-	else if(s_SettingsPage == 2)
+	else if(g_Config.m_UiSettingsPage == SETTINGS_PLAYER)
 		RenderSettingsPlayer(MainView);
-	else if(s_SettingsPage == 3)
+	else if(g_Config.m_UiSettingsPage == SETTINGS_TEE)
 		RenderSettingsTee(MainView);
-	else if(s_SettingsPage == 4)
+	else if(g_Config.m_UiSettingsPage == SETTINGS_HUD)
 		RenderSettingsHUD(MainView);
-	else if(s_SettingsPage == 5)
+	else if(g_Config.m_UiSettingsPage == SETTINGS_CONTROLS)
 		RenderSettingsControls(MainView);
-	else if(s_SettingsPage == 6)
+	else if(g_Config.m_UiSettingsPage == SETTINGS_GRAPHICS)
 		RenderSettingsGraphics(MainView);
-	else if(s_SettingsPage == 7)
+	else if(g_Config.m_UiSettingsPage == SETTINGS_SOUND)
 		RenderSettingsSound(MainView);
-	else if(s_SettingsPage == 8)
+	else if(g_Config.m_UiSettingsPage == SETTINGS_DDNET)
 		RenderSettingsDDNet(MainView);
 
 	if(m_NeedRestartUpdate)
