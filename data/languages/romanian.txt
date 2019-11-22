@@ -597,7 +597,7 @@ Max Screenshots
 Length:
 == Durată:
 
-Rifle
+Laser
 == Carabină
 
 Netversion:

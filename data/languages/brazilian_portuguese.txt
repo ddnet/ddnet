@@ -599,8 +599,8 @@ Show quads
 Map sound volume
 == Volume do som de mapas
 
-Rifle
-== Rifle
+Laser
+== Laser
 
 Join game
 == Entrar no jogo

@@ -651,7 +651,7 @@ Dummy settings
 Length:
 == 长度：
 
-Rifle
+Laser
 == 激光枪
 
 Netversion:

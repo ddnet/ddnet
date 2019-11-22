@@ -615,7 +615,7 @@ Your skin
 Reset to defaults
 == Йĕркелӳ тасат
 
-Rifle
+Laser
 == Бластер
 
 Display Modes

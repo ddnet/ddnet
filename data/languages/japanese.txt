@@ -615,7 +615,7 @@ Your skin
 Reset to defaults
 == 初期設定に戻す
 
-Rifle
+Laser
 == ライフル
 
 Display Modes

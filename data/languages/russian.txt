@@ -674,7 +674,7 @@ Max Screenshots
 Length:
 == Длина
 
-Rifle
+Laser
 == Бластер
 
 Netversion:

@@ -191,7 +191,7 @@ void CProjectile::Tick()
 					IsSwitchTeleGun = IsBlueSwitchTeleGun = false;
 				if(delay == 2 && m_Type != WEAPON_GRENADE)
 					IsSwitchTeleGun = IsBlueSwitchTeleGun = false;
-				if(delay == 3 && m_Type != WEAPON_RIFLE)
+				if(delay == 3 && m_Type != WEAPON_LASER)
 					IsSwitchTeleGun = IsBlueSwitchTeleGun = false;
 			}
 

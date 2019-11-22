@@ -620,7 +620,7 @@ Hue
 Reset to defaults
 == 초기화
 
-Rifle
+Laser
 == 레이저
 
 Display Modes

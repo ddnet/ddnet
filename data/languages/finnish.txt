@@ -583,7 +583,7 @@ Max Screenshots
 Length:
 == Pituus:
 
-Rifle
+Laser
 == Kivääri
 
 Netversion:

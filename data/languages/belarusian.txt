@@ -582,7 +582,7 @@ Max Screenshots
 Length:
 == Даўжыня
 
-Rifle
+Laser
 == Бласцер
 
 Netversion:
