@@ -247,7 +247,7 @@ public:
 	bool m_EndlessJump;
 	bool m_NoHammerHit;
 	bool m_NoGrenadeHit;
-	bool m_NoRifleHit;
+	bool m_NoLaserHit;
 	bool m_NoShotgunHit;
 	bool m_NoHookHit;
 	bool m_Super;

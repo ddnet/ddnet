@@ -585,7 +585,7 @@ Max Screenshots
 Length:
 == Délka:
 
-Rifle
+Laser
 == Laser
 
 Netversion:

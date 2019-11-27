@@ -447,7 +447,7 @@ Reset filter
 Reset to defaults
 == Жарыяланбаска түшүрүү
 
-Rifle
+Laser
 == Бластер
 
 Round

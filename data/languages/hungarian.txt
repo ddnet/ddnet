@@ -563,7 +563,7 @@ Max Screenshots
 Length:
 == Hossza:
 
-Rifle
+Laser
 == Lézer
 
 Netversion:

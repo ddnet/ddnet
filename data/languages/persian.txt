@@ -777,7 +777,7 @@ Length:
 == : ﻝﻮﻃ
 
 
-Rifle
+Laser
 == ﺭﺰﯿﻟ
 
 

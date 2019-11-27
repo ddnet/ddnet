@@ -160,10 +160,10 @@ void CGameContext::ConGrenade(IConsole::IResult *pResult, void *pUserData)
 	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_GRENADE, false);
 }
 
-void CGameContext::ConRifle(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConLaser(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
-	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_RIFLE, false);
+	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_LASER, false);
 }
 
 void CGameContext::ConJetpack(IConsole::IResult *pResult, void *pUserData)
@@ -192,10 +192,10 @@ void CGameContext::ConUnGrenade(IConsole::IResult *pResult, void *pUserData)
 	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_GRENADE, true);
 }
 
-void CGameContext::ConUnRifle(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConUnLaser(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
-	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_RIFLE, true);
+	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_LASER, true);
 }
 
 void CGameContext::ConUnJetpack(IConsole::IResult *pResult, void *pUserData)
@@ -243,7 +243,7 @@ void CGameContext::ModifyWeapons(IConsole::IResult *pResult, void *pUserData,
 	{
 		pChr->GiveWeapon(WEAPON_SHOTGUN, Remove);
 		pChr->GiveWeapon(WEAPON_GRENADE, Remove);
-		pChr->GiveWeapon(WEAPON_RIFLE, Remove);
+		pChr->GiveWeapon(WEAPON_LASER, Remove);
 	}
 	else
 	{

@@ -300,9 +300,9 @@ const char *CEditor::Explain(int Tile, int Layer)
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
 			return "NINJA: Makes you invisible in the darkest nights.";
 		break;
-	case ENTITY_OFFSET + ENTITY_WEAPON_RIFLE:
+	case ENTITY_OFFSET + ENTITY_WEAPON_LASER:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
-			return "RIFLE: Unfreezes hit tee. Bounces off the walls. Also known as laser.";
+			return "LASER: Unfreezes hit tee. Bounces off the walls. Also known as laser.";
 		break;
 	case ENTITY_OFFSET + ENTITY_LASER_FAST_CCW:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)

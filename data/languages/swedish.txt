@@ -583,7 +583,7 @@ Max Screenshots
 Length:
 == Längd
 
-Rifle
+Laser
 == Gevär
 
 Netversion:

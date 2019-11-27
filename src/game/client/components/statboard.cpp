@@ -480,7 +480,7 @@ void CStatboard::FormatStats()
 	}
 
 	char aPlayerStats[1024 * VANILLA_MAX_CLIENTS];
-	str_format(aPlayerStats, sizeof(aPlayerStats), "Local-player,Team,Name,Clan,Score,Frags,Deaths,Suicides,F/D-ratio,Net,FPM,Spree,Best,Hammer-F/D,Gun-F/D,Shotgun-F/D,Grenade-F/D,Rifle-F/D,Ninja-F/D,GameWithFlags,Flag-grabs,Flag-captures\n");
+	str_format(aPlayerStats, sizeof(aPlayerStats), "Local-player,Team,Name,Clan,Score,Frags,Deaths,Suicides,F/D-ratio,Net,FPM,Spree,Best,Hammer-F/D,Gun-F/D,Shotgun-F/D,Grenade-F/D,Laser-F/D,Ninja-F/D,GameWithFlags,Flag-grabs,Flag-captures\n");
 	for (int i = 0; i < NumPlayers; i++)
 	{
 		const CNetObj_PlayerInfo *pInfo = apPlayers[i];

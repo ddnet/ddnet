@@ -110,7 +110,7 @@ void CCharacterCore::Reset()
 	m_EndlessJump = false;
 	m_NoHammerHit = false;
 	m_NoGrenadeHit = false;
-	m_NoRifleHit = false;
+	m_NoLaserHit = false;
 	m_NoShotgunHit = false;
 	m_NoHookHit = false;
 	m_Super = false;
@@ -562,7 +562,7 @@ void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 	m_NoCollision = pObjDDNet->m_Flags & CHARACTERFLAG_NO_COLLISION;
 	m_NoHammerHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_HAMMER_HIT;
 	m_NoGrenadeHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_GRENADE_HIT;
-	m_NoRifleHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_RIFLE_HIT;
+	m_NoLaserHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_LASER_HIT;
 	m_NoShotgunHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_SHOTGUN_HIT;
 	m_NoHookHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_HOOK;
 	m_Super = pObjDDNet->m_Flags & CHARACTERFLAG_SUPER;

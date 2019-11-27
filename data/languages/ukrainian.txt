@@ -411,7 +411,7 @@ Internet
 News
 == Новини
 
-Rifle
+Laser
 == Лазер
 
 Join game

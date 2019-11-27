@@ -582,7 +582,7 @@ Max Screenshots
 Length:
 == Uzunluk:
 
-Rifle
+Laser
 == Lazer
 
 Netversion:
