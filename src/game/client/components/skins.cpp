@@ -172,8 +172,6 @@ void CSkins::OnInit()
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load skins. folder='skins/'");
 		CSkin DummySkin;
 		DummySkin.m_IsVanilla = true;
-		DummySkin.m_OrgTexture = -1;
-		DummySkin.m_ColorTexture = -1;
 		str_copy(DummySkin.m_aName, "dummy", sizeof(DummySkin.m_aName));
 		DummySkin.m_BloodColor = ColorRGBA(1.0f, 1.0f, 1.0f);
 		m_aSkins.add(DummySkin);

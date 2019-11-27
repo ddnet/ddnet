@@ -615,7 +615,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			if(g_Config.m_Debug)
 			{
 				ColorRGBA BloodColor = *UseCustomColor ? color_cast<ColorRGBA>(ColorHSLA(*ColorBody)) : s->m_BloodColor;
-				Graphics()->TextureSet(-1);
+				Graphics()->TextureClear();
 				Graphics()->QuadsBegin();
 				Graphics()->SetColor(BloodColor.r, BloodColor.g, BloodColor.b, 1.0f);
 				IGraphics::CQuadItem QuadItem(Item.m_Rect.x, Item.m_Rect.y, 12.0f, 12.0f);
@@ -1906,7 +1906,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		vec2 Out, Border;
 
 		Graphics()->BlendNormal();
-		Graphics()->TextureSet(-1);
+		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
 
 		// do outline

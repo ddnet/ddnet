@@ -225,7 +225,7 @@ void CSpectator::OnRender()
 	Graphics()->MapScreen(0, 0, Width, Height);
 
 	Graphics()->BlendNormal();
-	Graphics()->TextureSet(-1);
+	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.3f);
 	RenderTools()->DrawRoundRect(Width/2.0f-ObjWidth, Height/2.0f-300.0f, ObjWidth*2, 600.0f, 20.0f);
@@ -239,7 +239,7 @@ void CSpectator::OnRender()
 	if((Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_DemoSpecID == SPEC_FREEVIEW) ||
 		 m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
 	{
-		Graphics()->TextureSet(-1);
+		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.25f);
 		RenderTools()->DrawRoundRect(Width/2.0f-(ObjWidth - 20.0f), Height/2.0f-280.0f, 270.0f, 60.0f, 20.0f);
@@ -248,7 +248,7 @@ void CSpectator::OnRender()
 
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_DemoSpecID == SPEC_FOLLOW)
 	{
-		Graphics()->TextureSet(-1);
+		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.25f);
 		RenderTools()->DrawRoundRect(Width/2.0f-(ObjWidth - 310.0f), Height/2.0f-280.0f, 270.0f, 60.0f, 20.0f);
@@ -325,7 +325,7 @@ void CSpectator::OnRender()
 
 		if (DDTeam != TEAM_FLOCK)
 		{
-			Graphics()->TextureSet(-1);
+			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
 			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(DDTeam / 64.0f, 1.0f, 0.5f, 0.5f));
 			Graphics()->SetColor(rgb);
@@ -347,7 +347,7 @@ void CSpectator::OnRender()
 		if((Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_DemoSpecID == m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID)
 			|| (Client()->State() != IClient::STATE_DEMOPLAYBACK && m_pClient ->m_Snap.m_SpecInfo.m_SpectatorID == m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID))
 		{
-			Graphics()->TextureSet(-1);
+			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.25f);
 			RenderTools()->DrawRoundRect(Width/2.0f+x-10.0f, Height/2.0f+y+BoxMove, 270.0f, LineHeight, RoundRadius);

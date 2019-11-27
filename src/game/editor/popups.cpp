@@ -1215,7 +1215,7 @@ int CEditor::PopupSelectImage(CEditor *pEditor, CUIRect View)
 		float Max = (float)(maximum(pEditor->m_Map.m_lImages[ShowImage]->m_Width, pEditor->m_Map.m_lImages[ShowImage]->m_Height));
 		ImageView.w *= pEditor->m_Map.m_lImages[ShowImage]->m_Width/Max;
 		ImageView.h *= pEditor->m_Map.m_lImages[ShowImage]->m_Height/Max;
-		pEditor->Graphics()->TextureSet(pEditor->m_Map.m_lImages[ShowImage]->m_TexID);
+		pEditor->Graphics()->TextureSet(pEditor->m_Map.m_lImages[ShowImage]->m_Texture);
 		pEditor->Graphics()->BlendNormal();
 		pEditor->Graphics()->WrapClamp();
 		pEditor->Graphics()->QuadsBegin();
@@ -1581,7 +1581,7 @@ int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View)
 	View.VSplitRight(20.0f, &SVPicker, &HuePicker);
 	HuePicker.VSplitLeft(4.0f, 0x0, &HuePicker);
 
-	pEditor->Graphics()->TextureSet(-1);
+	pEditor->Graphics()->TextureClear();
 	pEditor->Graphics()->QuadsBegin();
 
 	// base: white - hue
@@ -1695,8 +1695,8 @@ int CEditor::PopupEntities(CEditor *pEditor, CUIRect View)
 				char aBuf[512];
 				str_format(aBuf, sizeof(aBuf), "editor/entities/%s.png", Name);
 
-				pEditor->Graphics()->UnloadTexture(ms_EntitiesTexture);
-				ms_EntitiesTexture = pEditor->Graphics()->LoadTexture(aBuf, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+				pEditor->Graphics()->UnloadTexture(pEditor->m_EntitiesTexture);
+				pEditor->m_EntitiesTexture = pEditor->Graphics()->LoadTexture(aBuf, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 			}
 		}
 	}

@@ -225,7 +225,7 @@ void CHud::RenderScoreHud()
 						Graphics()->SetColor(0.0f, 0.0f, 1.0f, 0.25f);
 					m_aScoreInfo[t].m_RoundRectQuadContainerIndex = RenderTools()->CreateRoundRectQuadContainer(Whole - ScoreWidthMax - ImageSize - 2 * Split, StartY + t * 20, ScoreWidthMax + ImageSize + 2 * Split, 18.0f, 5.0f, CUI::CORNER_L);
 				}
-				Graphics()->TextureSet(-1);
+				Graphics()->TextureClear();
 				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 				if(m_aScoreInfo[t].m_RoundRectQuadContainerIndex != -1)
 					Graphics()->RenderQuadContainer(m_aScoreInfo[t].m_RoundRectQuadContainerIndex, -1);
@@ -399,7 +399,7 @@ void CHud::RenderScoreHud()
 						Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.25f);
 					m_aScoreInfo[t].m_RoundRectQuadContainerIndex = RenderTools()->CreateRoundRectQuadContainer(Whole - ScoreWidthMax - ImageSize - 2 * Split - PosSize, StartY + t * 20, ScoreWidthMax + ImageSize + 2 * Split + PosSize, 18.0f, 5.0f, CUI::CORNER_L);
 				}
-				Graphics()->TextureSet(-1);
+				Graphics()->TextureClear();
 				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 				if(m_aScoreInfo[t].m_RoundRectQuadContainerIndex != -1)
 					Graphics()->RenderQuadContainer(m_aScoreInfo[t].m_RoundRectQuadContainerIndex, -1);
@@ -603,7 +603,7 @@ void CHud::RenderVoting()
 	if((!g_Config.m_ClShowVotesAfterVoting && !m_pClient->m_pScoreboard->Active() && m_pClient->m_pVoting->TakenChoice()) || !m_pClient->m_pVoting->IsVoting() || Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		return;
 
-	Graphics()->TextureSet(-1);
+	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0,0,0,0.40f);
 
@@ -729,7 +729,7 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 void CHud::RenderSpectatorHud()
 {
 	// draw the box
-	Graphics()->TextureSet(-1);
+	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f);
 	RenderTools()->DrawRoundRectExt(m_Width-180.0f, m_Height-15.0f, 180.0f, 15.0f, 5.0f, CUI::CORNER_TL);
@@ -749,7 +749,7 @@ void CHud::RenderLocalTime(float x)
 
 	//draw the box
 	Graphics()->BlendNormal();
-	Graphics()->TextureSet(-1);
+	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f);
 	RenderTools()->DrawRoundRectExt(x-30.0f, 0.0f, 25.0f, 12.5f, 3.75f, CUI::CORNER_B);

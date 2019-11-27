@@ -14,8 +14,8 @@ public:
 	struct CSkin
 	{
 		bool m_IsVanilla;
-		int m_OrgTexture;
-		int m_ColorTexture;
+		IGraphics::CTextureHandle m_OrgTexture;
+		IGraphics::CTextureHandle m_ColorTexture;
 		char m_aName[24];
 		ColorRGBA m_BloodColor;
 

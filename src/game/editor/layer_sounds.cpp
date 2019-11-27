@@ -19,7 +19,7 @@ CLayerSounds::~CLayerSounds()
 void CLayerSounds::Render(bool Tileset)
 {
 	// TODO: nice texture
-	Graphics()->TextureSet(-1);
+	Graphics()->TextureClear();
 	Graphics()->BlendNormal();
 	Graphics()->QuadsBegin();
 
@@ -139,7 +139,7 @@ void CLayerSounds::BrushSelecting(CUIRect Rect)
 		IGraphics::CLineItem(Rect.x+Rect.w, Rect.y, Rect.x+Rect.w, Rect.y+Rect.h),
 		IGraphics::CLineItem(Rect.x+Rect.w, Rect.y+Rect.h, Rect.x, Rect.y+Rect.h),
 		IGraphics::CLineItem(Rect.x, Rect.y+Rect.h, Rect.x, Rect.y)};
-	Graphics()->TextureSet(-1);
+	Graphics()->TextureClear();
 	Graphics()->LinesBegin();
 	Graphics()->LinesDraw(Array, 4);
 	Graphics()->LinesEnd();
