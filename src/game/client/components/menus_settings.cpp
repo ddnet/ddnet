@@ -721,11 +721,17 @@ static CKeyInfo gs_aKeys[] =
 	{ "Show HUD", "toggle cl_showhud 0 1", 0, 0 },
 };
 
-/*	This is for scripts/update_localization.py to work, don't remove!
-	Localize("Move left");Localize("Move right");Localize("Jump");Localize("Fire");Localize("Hook");Localize("Hammer");
-	Localize("Pistol");Localize("Shotgun");Localize("Grenade");Localize("Laser");Localize("Next weapon");Localize("Prev. weapon");
-	Localize("Vote yes");Localize("Vote no");Localize("Chat");Localize("Team chat");Localize("Show chat");Localize("Emoticon");
-	Localize("Spectator mode");Localize("Spectate next");Localize("Spectate previous");Localize("Console");Localize("Remote console");Localize("Screenshot");Localize("Scoreboard");Localize("Respawn");
+/*	This is for scripts/languages to work, don't remove!
+	Localize("Move left");Localize("Move right");Localize("Jump");Localize("Fire");Localize("Hook");
+	Localize("Hook collisions");Localize("Pause");Localize("Kill");Localize("Zoom in");Localize("Zoom out");
+	Localize("Default zoom");Localize("Show others");Localize("Show all");Localize("Toggle dyncam");
+	Localize("Toggle dummy");Localize("Toggle ghost");Localize("Dummy copy");Localize("Hammerfly dummy");
+	Localize("Hammer");Localize("Pistol");Localize("Shotgun");Localize("Grenade");Localize("Laser");
+	Localize("Next weapon");Localize("Prev. weapon");Localize("Vote yes");Localize("Vote no");
+	Localize("Chat");Localize("Team chat");Localize("Converse");Localize("Show chat");Localize("Emoticon");
+	Localize("Spectator mode");Localize("Spectate next");Localize("Spectate previous");Localize("Console");
+	Localize("Remote console");Localize("Screenshot");Localize("Scoreboard");Localize("Statboard");
+	Localize("Lock team");Localize("Show entities");Localize("Show HUD");
 */
 
 const int g_KeyCount = sizeof(gs_aKeys) / sizeof(CKeyInfo);
