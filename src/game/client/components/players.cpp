@@ -292,7 +292,7 @@ void CPlayers::RenderPlayer(
 			vec2 FinishPos = InitPos + ExDirection * (m_pClient->m_Tuning[g_Config.m_ClDummy].m_HookLength-42.0f);
 
 			Graphics()->LinesBegin();
-			Graphics()->SetColor(1.00f, 0.0f, 0.0f, Alpha);
+			vec3 HookCollColor(1.0f, 0.0f, 0.0f);
 
 			float PhysSize = 28.0f;
 
@@ -318,12 +318,18 @@ void CPlayers::RenderPlayer(
 				if(!DoBreak && Hit)
 				{
 					if(Hit != TILE_NOHOOK)
-						Graphics()->SetColor(130.0f/255.0f, 232.0f/255.0f, 160.0f/255.0f, Alpha);
+					{
+						HookCollColor.r = 130.0f/255.0f;
+						HookCollColor.g = 232.0f/255.0f;
+						HookCollColor.b = 160.0f/255.0f;
+					}
 				}
 
 				if(m_pClient->IntersectCharacter(OldPos, FinishPos, FinishPos, ClientID) != -1)
 				{
-					Graphics()->SetColor(1.0f, 1.0f, 0.0f, Alpha);
+					HookCollColor.r = 1.0f;
+					HookCollColor.g = 1.0f;
+					HookCollColor.b = 0.0f;
 					break;
 				}
 
@@ -340,6 +346,14 @@ void CPlayers::RenderPlayer(
 				ExDirection.y = round_to_int(ExDirection.y*256.0f) / 256.0f;
 			} while (!DoBreak);
 
+			if(g_Config.m_ClShowHookCollAlways && (Player.m_PlayerFlags&PLAYERFLAG_AIM))
+			{
+				// invert the hook coll colors when using cl_show_hook_coll_always and +showhookcoll is pressed
+				HookCollColor.r = 1.0f-HookCollColor.r;
+				HookCollColor.g = 1.0f-HookCollColor.g;
+				HookCollColor.b = 1.0f-HookCollColor.b;
+			}
+			Graphics()->SetColor(HookCollColor.r, HookCollColor.g, HookCollColor.b, Alpha);
 			IGraphics::CLineItem LineItem(InitPos.x, InitPos.y, FinishPos.x, FinishPos.y);
 			Graphics()->LinesDraw(&LineItem, 1);
 			Graphics()->LinesEnd();
