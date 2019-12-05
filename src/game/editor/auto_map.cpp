@@ -330,6 +330,7 @@ void CAutoMapper::Load(const char* pTileName)
 				}
 				if(pIndexRule->m_SkipEmpty && pIndexRule->m_SkipFull)
 				{
+					pIndexRule->m_SkipEmpty = false;
 					pIndexRule->m_SkipFull = false;
 				}
 			}
