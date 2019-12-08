@@ -2227,8 +2227,8 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 			UI()->DoLabelScaled(&Label, paLabels[s], 15.0f, -1);
 		}
 	}
-	g_Config.m_ClBackgroundColor = Bg.Pack(false);
-	g_Config.m_ClBackgroundEntitiesColor = BgE.Pack(false);
+	g_Config.m_ClBackgroundColor = Bg.Pack();
+	g_Config.m_ClBackgroundEntitiesColor = BgE.Pack();
 
 	{
 		static float s_Map = 0.0f;
