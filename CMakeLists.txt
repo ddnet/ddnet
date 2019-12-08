@@ -1144,6 +1144,7 @@ set_glob(TOOLS GLOB src/tools
   dilate.cpp
   dummy_map.cpp
   fake_server.cpp
+  map_convert_07.cpp
   map_diff.cpp
   map_extract.cpp
   map_replace_image.cpp
@@ -1162,7 +1163,7 @@ foreach(ABS_T ${TOOLS})
     string(REGEX REPLACE "\\.cpp$" "" TOOL "${T}")
     set(TOOL_DEPS ${DEPS})
     set(TOOL_LIBS ${LIBS})
-    if(TOOL MATCHES "^(tileset_.*|dilate|map_extract|map_replace_image)$")
+    if(TOOL MATCHES "^(tileset_.*|dilate|map_convert_07|map_extract|map_replace_image)$")
       list(APPEND TOOL_DEPS ${PNGLITE_DEP})
       list(APPEND TOOL_LIBS ${PNGLITE_LIBRARIES})
       list(APPEND TOOL_INCLUDE_DIRS ${PNGLITE_INCLUDE_DIRS})
