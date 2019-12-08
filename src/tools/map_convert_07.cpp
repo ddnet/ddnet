@@ -11,7 +11,6 @@
 #include <pnglite.h>
 /*
 	Usage: map_convert_07 <source map filepath> <dest map filepath>
-	Notes: map filepath must be relative to user default teeworlds folder
 */
 
 CDataFileReader g_DataReader;
@@ -104,7 +103,6 @@ int main(int argc, const char **argv)
 	{
 		dbg_msg("map_convert_07", "Invalid arguments");
 		dbg_msg("map_convert_07", "Usage: map_convert_07 <source map filepath> <dest map filepath>");
-		dbg_msg("map_convert_07", "Notes: map filepath must be relative to user default teeworlds folder");
 		return -1;
 	}
 
@@ -123,13 +121,13 @@ int main(int argc, const char **argv)
 	void *pItem = 0;
 	void *pData = 0;
 
-	if(!g_DataReader.Open(pStorage, pSourceFileName, IStorage::TYPE_ALL))
+	if(!g_DataReader.Open(pStorage, pSourceFileName, IStorage::TYPE_ABSOLUTE))
 	{
 		dbg_msg("map_convert_07", "failed to open source map. filename='%s'", pSourceFileName);
 		return -1;
 	}
 
-	if(!g_DataWriter.Open(pStorage, pDestFileName))
+	if(!g_DataWriter.Open(pStorage, pDestFileName, IStorage::TYPE_ABSOLUTE))
 	{
 		dbg_msg("map_convert_07", "failed to open destination map. filename='%s'", pDestFileName);
 		return -1;
