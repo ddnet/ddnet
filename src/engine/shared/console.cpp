@@ -46,7 +46,7 @@ ColorHSLA CConsole::CResult::GetColor(unsigned Index, bool Light)
 	const char *pStr = m_apArgs[Index];
 	if(str_isallnum(pStr) || ((pStr[0] == '-' || pStr[0] == '+') && str_isallnum(pStr+1))) // Teeworlds Color (Packed HSL)
 	{
-		hsl = ColorHSLA(str_toint(pStr), true);
+		hsl = ColorHSLA(str_toulong_base(pStr, 10), true);
 	}
 	else if(*pStr == '$') // Hex RGB
 	{
