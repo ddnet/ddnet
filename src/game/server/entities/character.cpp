@@ -9,7 +9,6 @@
 #include "laser.h"
 #include "projectile.h"
 
-#include <stdio.h>
 #include <string.h>
 #include <game/server/gamemodes/DDRace.h>
 #include <game/server/score.h>
