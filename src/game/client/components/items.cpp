@@ -15,7 +15,6 @@
 #include <game/client/components/effects.h>
 
 #include "items.h"
-#include <stdio.h>
 
 void CItems::OnReset()
 {

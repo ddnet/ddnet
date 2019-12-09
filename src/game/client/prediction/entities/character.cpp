@@ -8,7 +8,6 @@
 #include "projectile.h"
 #include "laser.h"
 
-#include <stdio.h>
 #include <string.h>
 
 // Character, "physical" player's part

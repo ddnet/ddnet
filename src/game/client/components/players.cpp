@@ -26,7 +26,6 @@
 #include <engine/textrender.h>
 
 #include "players.h"
-#include <stdio.h>
 
 void CPlayers::RenderHand(CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float AngleOffset, vec2 PostRotOffset, float Alpha)
 {
