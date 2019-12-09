@@ -295,7 +295,7 @@ void CGameWorld::Tick()
 CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, CCharacter *pNotThis, int CollideWith, class CCharacter *pThisOnly)
 {
 	// Find other players
-	float ClosestLen = HUGE_VALF;
+	float ClosestLen = distance(Pos0, Pos1) * 100.0f;
 	CCharacter *pClosest = 0;
 
 	CCharacter *p = (CCharacter *)FindFirst(ENTTYPE_CHARACTER);

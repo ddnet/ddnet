@@ -77,9 +77,6 @@ typedef vector2_base<int> ivec2;
 template<typename T>
 inline vector2_base<T> closest_point_on_line(vector2_base<T> line_point0, vector2_base<T> line_point1, vector2_base<T> target_point)
 {
-	if(line_point1 == line_point0)
-		return line_point0;
-
 	vector2_base<T> c = target_point - line_point0;
 	vector2_base<T> v = (line_point1 - line_point0);
 	v = normalize(v);
