@@ -732,6 +732,7 @@ public:
 	virtual bool HasUnsavedData() { return m_Map.m_Modified; }
 	virtual void UpdateMentions() { m_Mentions++; }
 	virtual void ResetMentions() { m_Mentions = 0; }
+	virtual void ToggleEntities() { m_ToggleEntitites = true; };
 
 	int64 m_LastUndoUpdateTime;
 	bool m_UndoRunning;
@@ -813,6 +814,7 @@ public:
 	bool m_BrushDrawDestructive;
 
 	int m_Mentions;
+	bool m_ToggleEntitites;
 
 	enum
 	{
@@ -1032,6 +1034,7 @@ public:
 
 	// DDRace
 
+	void SetEntitiesVisible(bool Visible);
 	IGraphics::CTextureHandle m_FrontTexture;
 	IGraphics::CTextureHandle m_TeleTexture;
 	IGraphics::CTextureHandle m_SpeedupTexture;

@@ -165,6 +165,37 @@ bool CBinds::OnInput(IInput::CEvent e)
 	return ret;
 }
 
+bool CBinds::IsEntities(IInput::CEvent e)
+{
+	// don't handle invalid events
+	if(e.m_Key <= 0 || e.m_Key >= KEY_LAST)
+		return false;
+
+	int Mask = GetModifierMask(Input());
+	int KeyModifierMask = GetModifierMaskOfKey(e.m_Key);
+	Mask &= ~KeyModifierMask;
+	if(!Mask)
+		Mask = 1 << MODIFIER_NONE;
+
+	bool ret = false;
+	for(int Mod = 1; Mod < MODIFIER_COUNT; Mod++)
+	{
+		if(m_aapKeyBindings[Mod][e.m_Key] && Mask & (1 << Mod))	// always trigger +xxx binds despite any modifier
+		{
+			if(e.m_Flags&IInput::FLAG_PRESS)
+				if(str_find_nocase(m_aapKeyBindings[Mod][e.m_Key], "cl_overlay_entitie"))
+					return true;
+			ret = true;
+		}
+	}
+
+	if(m_aapKeyBindings[0][e.m_Key] && (!ret || m_aapKeyBindings[0][e.m_Key][0] == '+'))
+		if(e.m_Flags&IInput::FLAG_PRESS)
+			if(str_find_nocase(m_aapKeyBindings[0][e.m_Key], "cl_overlay_entitie"))
+				return true;
+	return false;
+}
+
 void CBinds::UnbindAll()
 {
 	for(int i = 0; i < MODIFIER_COUNT; i++)

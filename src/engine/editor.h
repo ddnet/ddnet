@@ -17,6 +17,7 @@ public:
 	virtual int Save(const char *pFilename) = 0;
 	virtual void UpdateMentions() = 0;
 	virtual void ResetMentions() = 0;
+	virtual void ToggleEntities() = 0;
 };
 
 extern IEditor *CreateEditor();

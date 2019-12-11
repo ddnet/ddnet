@@ -373,6 +373,7 @@ public:
 	virtual void OnConnected();
 	virtual void OnRender();
 	virtual void OnUpdate();
+	virtual void OnEditor();
 	virtual void OnDummyDisconnect();
 	virtual void OnRelease();
 	virtual void OnInit();

@@ -386,6 +386,20 @@ void CGameClient::OnUpdate()
 	}
 }
 
+void CGameClient::OnEditor()
+{
+	// handle key presses
+	for(int i = 0; i < Input()->NumEvents(); i++)
+	{
+		IInput::CEvent e = Input()->GetEvent(i);
+		if(!Input()->IsEventValid(&e))
+			continue;
+
+		if(m_pBinds->IsEntities(e))
+			Editor()->ToggleEntities();
+	}
+}
+
 void CGameClient::OnDummySwap()
 {
 	if(g_Config.m_ClDummyResetOnSwitch)

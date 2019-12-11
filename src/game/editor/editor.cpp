@@ -6126,6 +6126,49 @@ void CEditor::CreateUndoStepThread(void *pUser)
 
 void CEditor::UpdateAndRender()
 {
+	if(m_ToggleEntitites)
+	{
+		int Found = 0;
+		int Visible = 0;
+		if(m_Map.m_pGameLayer)
+		{
+			Found++;
+			if(m_Map.m_pGameLayer->m_Visible)
+				Visible++;
+		}
+		if(m_Map.m_pFrontLayer)
+		{
+			Found++;
+			if(m_Map.m_pFrontLayer->m_Visible)
+				Visible++;
+		}
+		if(m_Map.m_pSwitchLayer)
+		{
+			Found++;
+			if(m_Map.m_pSwitchLayer->m_Visible)
+				Visible++;
+		}
+		if(m_Map.m_pTuneLayer)
+		{
+			Found++;
+			if(m_Map.m_pTuneLayer->m_Visible)
+				Visible++;
+		}
+		if(m_Map.m_pSpeedupLayer)
+		{
+			Found++;
+			if(m_Map.m_pSpeedupLayer->m_Visible)
+				Visible++;
+		}
+		if(m_Map.m_pTeleLayer)
+		{
+			Found++;
+			if(m_Map.m_pTeleLayer->m_Visible)
+				Visible++;
+		}
+		SetEntitiesVisible(Visible < ((Found+1)/2));
+		m_ToggleEntitites = false;
+	}
 	static float s_MouseX = 0.0f;
 	static float s_MouseY = 0.0f;
 
@@ -6219,9 +6262,25 @@ void CEditor::UpdateAndRender()
 	Input()->Clear();
 }
 
-IEditor *CreateEditor() { return new CEditor; }
-
 // DDRace
+
+void CEditor::SetEntitiesVisible(bool Visible)
+{
+	if(m_Map.m_pGameLayer)
+		m_Map.m_pGameLayer->m_Visible = Visible;
+	if(m_Map.m_pFrontLayer)
+		m_Map.m_pFrontLayer->m_Visible = Visible;
+	if(m_Map.m_pSwitchLayer)
+		m_Map.m_pSwitchLayer->m_Visible = Visible;
+	if(m_Map.m_pTuneLayer)
+		m_Map.m_pTuneLayer->m_Visible = Visible;
+	if(m_Map.m_pSpeedupLayer)
+		m_Map.m_pSpeedupLayer->m_Visible = Visible;
+	if(m_Map.m_pTeleLayer)
+		m_Map.m_pTeleLayer->m_Visible = Visible;
+}
+
+IEditor *CreateEditor() { return new CEditor; }
 
 void CEditorMap::MakeTeleLayer(CLayer *pLayer)
 {

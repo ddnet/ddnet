@@ -2728,6 +2728,8 @@ void CClient::Update()
 	// update gameclient
 	if(!m_EditorActive)
 		GameClient()->OnUpdate();
+	else
+		GameClient()->OnEditor();
 
 	if(m_ReconnectTime > 0 && time_get() > m_ReconnectTime)
 	{

@@ -55,6 +55,7 @@ public:
 	// DDRace
 
 	void SetDDRaceBinds(bool FreeOnly);
+	virtual bool IsEntities(IInput::CEvent Event);
 
 private:
 	char *m_aapKeyBindings[MODIFIER_COUNT][KEY_LAST];

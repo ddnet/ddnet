@@ -45,6 +45,7 @@ public:
 	virtual void OnMessage(int Msg, void *pRawMsg) {}
 	virtual bool OnMouseMove(float x, float y) { return false; }
 	virtual bool OnInput(IInput::CEvent e) { return false; }
+	virtual bool IsEntitites(IInput::CEvent e) { return false; }
 };
 
 #endif
