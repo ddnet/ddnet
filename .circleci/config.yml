@@ -42,7 +42,9 @@ jobs:
             libopus-dev \
             libpnglite-dev \
             libopusfile-dev \
-            libwavpack-dev
+            libwavpack-dev \
+            libwebsockets-dev \
+            libmysqlcppconn-dev
           apt-get install -y cmake xz-utils
 
       # Compile
@@ -59,6 +61,21 @@ jobs:
           mkdir noautoupdate
           cd noautoupdate
           env CFLAGS="-Wdeclaration-after-statement -Werror" CXXFLAGS="-Werror" cmake -DAUTOUPDATE=OFF -DDOWNLOAD_GTEST=ON ..
+          make everything
+      - run: |
+          mkdir websockets
+          cd websockets
+          env CFLAGS="-Wdeclaration-after-statement -Werror" CXXFLAGS="-Werror" cmake -DWEBSOCKETS=ON -DDOWNLOAD_GTEST=ON ..
+          make everything
+      - run: |
+          mkdir mysql
+          cd mysql
+          env CFLAGS="-Wdeclaration-after-statement -Werror" CXXFLAGS="-Werror" cmake -DDMYSQL=ON -DDOWNLOAD_GTEST=ON ..
+          make everything
+      - run: |
+          mkdir bundled
+          cd bundled
+          env CFLAGS="-Wdeclaration-after-statement -Werror" CXXFLAGS="-Werror" cmake -DPREFER_BUNDLED_LIBS=ON -DDOWNLOAD_GTEST=ON ..
           make everything
 
       - store_artifacts:
