@@ -7,8 +7,6 @@
 
 #include <stdlib.h> // qsort
 #include <stdarg.h>
-#include <string.h>
-#include <climits>
 #include <tuple>
 
 #include <base/hash_ctxt.h>

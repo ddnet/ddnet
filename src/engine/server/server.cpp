@@ -31,7 +31,6 @@
 #include <mastersrv/mastersrv.h>
 
 // DDRace
-#include <string.h>
 #include <vector>
 #include <engine/shared/linereader.h>
 #include <game/extrainfo.h>

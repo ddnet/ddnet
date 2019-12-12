@@ -6,7 +6,6 @@
 #include <engine/shared/config.h>
 #include <sstream>
 #include <fstream>
-#include <string.h>
 #include "../gamemodes/DDRace.h"
 #include "file_score.h"
 #include <engine/shared/console.h>
