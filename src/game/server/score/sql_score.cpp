@@ -113,7 +113,7 @@ void CSqlScore::ExecSqlFunc(void *pUser)
 		// handle failures
 		// eg write inserts to a file and print a nice error message
 		if (!Success)
-			pData->m_pFuncPtr(0, pData->m_pSqlData, true);
+			pData->m_pFuncPtr(connector.SqlServer(), pData->m_pSqlData, true);
 	} catch (...) {
 		dbg_msg("sql", "Unexpected exception caught");
 	}
