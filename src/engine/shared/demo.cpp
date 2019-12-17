@@ -17,7 +17,7 @@
 static const unsigned char gs_aHeaderMarker[7] = {'T', 'W', 'D', 'E', 'M', 'O', 0};
 static const unsigned char gs_ActVersion = 6;
 static const unsigned char gs_OldVersion = 3;
-static const unsigned char gs_SHAVersion = 6;
+static const unsigned char gs_Sha256Version = 6;
 static const unsigned char gs_VersionTickCompression = 5; // demo files with this version or higher will use `CHUNKTICKFLAG_TICK_COMPRESSED`
 static const int gs_LengthOffset = 152;
 static const int gs_NumMarkersOffset = 176;
@@ -121,6 +121,9 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	str_timestamp(Header.m_aTimestamp, sizeof(Header.m_aTimestamp));
 	io_write(DemoFile, &Header, sizeof(Header));
 	io_write(DemoFile, &TimelineMarkers, sizeof(TimelineMarkers)); // fill this on stop
+
+	//Write Sha256
+	io_write(DemoFile, SHA256_EXTENSION.m_aData, sizeof(SHA256_EXTENSION.m_aData));
 	io_write(DemoFile, &Sha256, sizeof(SHA256_DIGEST));
 
 	if(m_NoMapData)
@@ -719,9 +722,23 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	else if(m_Info.m_Header.m_Version > gs_OldVersion)
 		io_read(m_File, &m_Info.m_TimelineMarkers, sizeof(m_Info.m_TimelineMarkers));
 
-	SHA256_DIGEST Sha = {};
-	if(m_Info.m_Header.m_Version >= gs_SHAVersion)
-		io_read(m_File, &Sha, sizeof(SHA256_DIGEST)); // need a safe read
+	SHA256_DIGEST Sha256 = SHA256_ZEROED;
+	if(m_Info.m_Header.m_Version >= gs_Sha256Version)
+	{
+		CUuid ExtensionUuid = {};
+		io_read(m_File, &ExtensionUuid.m_aData, sizeof(ExtensionUuid.m_aData));
+
+		if(ExtensionUuid == SHA256_EXTENSION)
+		{
+			io_read(m_File, &Sha256, sizeof(SHA256_DIGEST)); // need a safe read
+		}
+		else
+		{
+			// This hopes whatever happened during the version increment didn't add something here
+			dbg_msg("demo", "demo version incremented, but not by ddnet");
+			io_seek(m_File, -(int)sizeof(ExtensionUuid.m_aData), IOSEEK_CUR);
+		}
+	}
 
 	// get demo type
 	if(!str_comp(m_Info.m_Header.m_aType, "client"))
@@ -744,7 +761,7 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 
 	// store map information
 	m_MapInfo.m_Crc = Crc;
-	m_MapInfo.m_Sha256 = Sha;
+	m_MapInfo.m_Sha256 = Sha256;
 	m_MapInfo.m_Size = MapSize;
 	str_copy(m_MapInfo.m_aName, m_Info.m_Header.m_aMapName, sizeof(m_MapInfo.m_aName));
 
@@ -787,18 +804,18 @@ void CDemoPlayer::ExtractMap(class IStorage *pStorage)
 	io_seek(m_File, CurSeek, IOSEEK_START);
 
 	// handle sha256
-	SHA256_DIGEST Sha = {};
-	if(m_Info.m_Header.m_Version >= gs_SHAVersion)
-		Sha = m_MapInfo.m_Sha256;
+	SHA256_DIGEST Sha256 = SHA256_ZEROED;
+	if(m_Info.m_Header.m_Version >= gs_Sha256Version)
+		Sha256 = m_MapInfo.m_Sha256;
 	else
 	{
-		Sha = sha256(pMapData, m_MapInfo.m_Size);
-		m_MapInfo.m_Sha256 = Sha;
+		Sha256 = sha256(pMapData, m_MapInfo.m_Size);
+		m_MapInfo.m_Sha256 = Sha256;
 	}
 
 	// construct name
 	char aSha[SHA256_MAXSTRSIZE], aMapFilename[128];
-	sha256_str(Sha, aSha, sizeof(aSha));
+	sha256_str(Sha256, aSha, sizeof(aSha));
 	str_format(aMapFilename, sizeof(aMapFilename), "downloadedmaps/%s_%08x_%s.map", m_Info.m_Header.m_aMapName, m_MapInfo.m_Crc, aSha);
 
 	// save map
@@ -995,10 +1012,10 @@ bool CDemoPlayer::GetDemoInfo(class IStorage *pStorage, const char *pFilename, i
 	str_copy(pMapInfo->m_aName, pDemoHeader->m_aMapName, sizeof(pMapInfo->m_aName));
 	pMapInfo->m_Crc = (pDemoHeader->m_aMapCrc[0]<<24) | (pDemoHeader->m_aMapCrc[1]<<16) | (pDemoHeader->m_aMapCrc[2]<<8) | (pDemoHeader->m_aMapCrc[3]);
 
-	if(pDemoHeader->m_Version >= gs_SHAVersion)
+	if(pDemoHeader->m_Version >= gs_Sha256Version)
 		io_read(File, &pMapInfo->m_Sha256, SHA256_DIGEST_LENGTH);
 	else
-		pMapInfo->m_Sha256 = {};
+		pMapInfo->m_Sha256 = SHA256_ZEROED;
 
 	pMapInfo->m_Size = (pDemoHeader->m_aMapSize[0]<<24) | (pDemoHeader->m_aMapSize[1]<<16) | (pDemoHeader->m_aMapSize[2]<<8) | (pDemoHeader->m_aMapSize[3]);
 

@@ -935,13 +935,18 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		UI()->DoLabelScaled(&Right, aBuf, 14.0f, -1);
 		Labels.HSplitTop(5.0f, 0, &Labels);
 		Labels.HSplitTop(20.0f, &Left, &Labels);
-		Left.VSplitLeft(150.0f, &Left, &Right);
-		UI()->DoLabelScaled(&Left, Localize("SHA256:"), 14.0f, -1);
-		char aSha[SHA256_MAXSTRSIZE];
-		sha256_str(m_lDemos[m_DemolistSelectedIndex].m_MapInfo.m_Sha256, aSha, sizeof(aSha)/2);
-		UI()->DoLabelScaled(&Right, aSha, 14.0f, -1);
-		Labels.HSplitTop(5.0f, 0, &Labels);
-		Labels.HSplitTop(20.0f, &Left, &Labels);
+
+		if(m_lDemos[m_DemolistSelectedIndex].m_MapInfo.m_Sha256 != SHA256_ZEROED)
+		{
+			Left.VSplitLeft(150.0f, &Left, &Right);
+			UI()->DoLabelScaled(&Left, Localize("SHA256:"), 14.0f, -1);
+			char aSha[SHA256_MAXSTRSIZE];
+			sha256_str(m_lDemos[m_DemolistSelectedIndex].m_MapInfo.m_Sha256, aSha, sizeof(aSha)/2);
+			UI()->DoLabelScaled(&Right, aSha, 14.0f, -1);
+			Labels.HSplitTop(5.0f, 0, &Labels);
+			Labels.HSplitTop(20.0f, &Left, &Labels);
+		}
+
 		Left.VSplitLeft(150.0f, &Left, &Right);
 		UI()->DoLabelScaled(&Left, Localize("Netversion:"), 14.0f, -1);
 		UI()->DoLabelScaled(&Right, m_lDemos[m_DemolistSelectedIndex].m_Info.m_aNetversion, 14.0f, -1);
