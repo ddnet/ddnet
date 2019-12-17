@@ -1601,7 +1601,11 @@ foreach(target ${TARGETS})
     target_compile_options(${target} PRIVATE ${OUR_FLAGS})
   endif()
   if(DEFINE_FORTIFY_SOURCE)
-    target_compile_definitions(${target} PRIVATE $<$<NOT:$<CONFIG:Debug>>:_FORTIFY_SOURCE=2>) # Detect some buffer overflows.
+    if(MINGW)
+      target_compile_definitions(${target} PRIVATE $<$<NOT:$<CONFIG:Debug>>:_FORTIFY_SOURCE=0>) # Currently broken in MinGW, see https://sourceforge.net/p/mingw-w64/discussion/723798/thread/b9d24f041f/
+    else()
+      target_compile_definitions(${target} PRIVATE $<$<NOT:$<CONFIG:Debug>>:_FORTIFY_SOURCE=2>) # Detect some buffer overflows.
+    endif()
   endif()
 endforeach()
 
