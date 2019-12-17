@@ -4,6 +4,7 @@
 #include <base/tl/string.h>
 
 #include <base/math.h>
+#include <base/hash.h>
 
 #include <engine/demo.h>
 #include <engine/keys.h>
@@ -805,7 +806,7 @@ bool CMenus::FetchHeader(CDemoItem &Item)
 	{
 		char aBuffer[512];
 		str_format(aBuffer, sizeof(aBuffer), "%s/%s", m_aCurrentDemoFolder, Item.m_aFilename);
-		Item.m_Valid = DemoPlayer()->GetDemoInfo(Storage(), aBuffer, Item.m_StorageType, &Item.m_Info, &Item.m_TimelineMarkers);
+		Item.m_Valid = DemoPlayer()->GetDemoInfo(Storage(), aBuffer, Item.m_StorageType, &Item.m_Info, &Item.m_TimelineMarkers, &Item.m_MapInfo);
 		Item.m_InfosLoaded = true;
 	}
 	return Item.m_Valid;
@@ -930,12 +931,22 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 		Left.VSplitLeft(150.0f, &Left, &Right);
 		UI()->DoLabelScaled(&Left, Localize("Crc:"), 14.0f, -1);
-		unsigned Crc = (m_lDemos[m_DemolistSelectedIndex].m_Info.m_aMapCrc[0]<<24) | (m_lDemos[m_DemolistSelectedIndex].m_Info.m_aMapCrc[1]<<16) |
-					(m_lDemos[m_DemolistSelectedIndex].m_Info.m_aMapCrc[2]<<8) | (m_lDemos[m_DemolistSelectedIndex].m_Info.m_aMapCrc[3]);
-		str_format(aBuf, sizeof(aBuf), "%08x", Crc);
+		str_format(aBuf, sizeof(aBuf), "%08x", m_lDemos[m_DemolistSelectedIndex].m_MapInfo.m_Crc);
 		UI()->DoLabelScaled(&Right, aBuf, 14.0f, -1);
 		Labels.HSplitTop(5.0f, 0, &Labels);
 		Labels.HSplitTop(20.0f, &Left, &Labels);
+
+		if(m_lDemos[m_DemolistSelectedIndex].m_MapInfo.m_Sha256 != SHA256_ZEROED)
+		{
+			Left.VSplitLeft(150.0f, &Left, &Right);
+			UI()->DoLabelScaled(&Left, Localize("SHA256:"), 14.0f, -1);
+			char aSha[SHA256_MAXSTRSIZE];
+			sha256_str(m_lDemos[m_DemolistSelectedIndex].m_MapInfo.m_Sha256, aSha, sizeof(aSha)/2);
+			UI()->DoLabelScaled(&Right, aSha, 14.0f, -1);
+			Labels.HSplitTop(5.0f, 0, &Labels);
+			Labels.HSplitTop(20.0f, &Left, &Labels);
+		}
+
 		Left.VSplitLeft(150.0f, &Left, &Right);
 		UI()->DoLabelScaled(&Left, Localize("Netversion:"), 14.0f, -1);
 		UI()->DoLabelScaled(&Right, m_lDemos[m_DemolistSelectedIndex].m_Info.m_aNetversion, 14.0f, -1);

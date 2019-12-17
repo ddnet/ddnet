@@ -78,14 +78,6 @@ public:
 		float m_TickTime;
 	};
 
-	struct CMapInfo
-	{
-		char m_aName[128];
-		SHA256_DIGEST m_Sha256;
-		int m_Crc;
-		int m_Size;
-	};
-
 private:
 	IListener *m_pListener;
 
@@ -105,6 +97,7 @@ private:
 
 	class IConsole *m_pConsole;
 	IOHANDLE m_File;
+	long m_MapOffset;
 	char m_aFilename[256];
 	CKeyFrame *m_pKeyFrames;
 	CMapInfo m_MapInfo;
@@ -128,6 +121,7 @@ public:
 	void SetListener(IListener *pListener);
 
 	int Load(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, int StorageType);
+	void ExtractMap(class IStorage *pStorage);
 	int Play();
 	void Pause();
 	void Unpause();
@@ -139,7 +133,7 @@ public:
 	int SetPos(int WantedTick);
 	const CInfo *BaseInfo() const { return &m_Info.m_Info; }
 	void GetDemoName(char *pBuffer, int BufferSize) const;
-	bool GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers) const;
+	bool GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo) const;
 	const char *GetDemoFileName() { return m_aFilename; };
 	int GetDemoType() const;
 

@@ -15,8 +15,9 @@
 #include "snapshot.h"
 
 static const unsigned char gs_aHeaderMarker[7] = {'T', 'W', 'D', 'E', 'M', 'O', 0};
-static const unsigned char gs_ActVersion = 5;
+static const unsigned char gs_ActVersion = 6;
 static const unsigned char gs_OldVersion = 3;
+static const unsigned char gs_Sha256Version = 6;
 static const unsigned char gs_VersionTickCompression = 5; // demo files with this version or higher will use `CHUNKTICKFLAG_TICK_COMPRESSED`
 static const int gs_LengthOffset = 152;
 static const int gs_NumMarkersOffset = 176;
@@ -121,6 +122,10 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	str_timestamp(Header.m_aTimestamp, sizeof(Header.m_aTimestamp));
 	io_write(DemoFile, &Header, sizeof(Header));
 	io_write(DemoFile, &TimelineMarkers, sizeof(TimelineMarkers)); // fill this on stop
+
+	//Write Sha256
+	io_write(DemoFile, SHA256_EXTENSION.m_aData, sizeof(SHA256_EXTENSION.m_aData));
+	io_write(DemoFile, &Sha256, sizeof(SHA256_DIGEST));
 
 	if(m_NoMapData)
 	{
@@ -718,6 +723,24 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	else if(m_Info.m_Header.m_Version > gs_OldVersion)
 		io_read(m_File, &m_Info.m_TimelineMarkers, sizeof(m_Info.m_TimelineMarkers));
 
+	SHA256_DIGEST Sha256 = SHA256_ZEROED;
+	if(m_Info.m_Header.m_Version >= gs_Sha256Version)
+	{
+		CUuid ExtensionUuid = {};
+		io_read(m_File, &ExtensionUuid.m_aData, sizeof(ExtensionUuid.m_aData));
+
+		if(ExtensionUuid == SHA256_EXTENSION)
+		{
+			io_read(m_File, &Sha256, sizeof(SHA256_DIGEST)); // need a safe read
+		}
+		else
+		{
+			// This hopes whatever happened during the version increment didn't add something here
+			dbg_msg("demo", "demo version incremented, but not by ddnet");
+			io_seek(m_File, -(int)sizeof(ExtensionUuid.m_aData), IOSEEK_CUR);
+		}
+	}
+
 	// get demo type
 	if(!str_comp(m_Info.m_Header.m_aType, "client"))
 		m_DemoType = DEMOTYPE_CLIENT;
@@ -732,35 +755,16 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	// check if we already have the map
 	// TODO: improve map checking (maps folder, check crc)
 	unsigned Crc = (m_Info.m_Header.m_aMapCrc[0]<<24) | (m_Info.m_Header.m_aMapCrc[1]<<16) | (m_Info.m_Header.m_aMapCrc[2]<<8) | (m_Info.m_Header.m_aMapCrc[3]);
-	char aMapFilename[128];
-	str_format(aMapFilename, sizeof(aMapFilename), "downloadedmaps/%s_%08x.map", m_Info.m_Header.m_aMapName, Crc);
-	IOHANDLE MapFile = pStorage->OpenFile(aMapFilename, IOFLAG_READ, IStorage::TYPE_ALL);
 
-	if(MapFile)
-	{
-		io_skip(m_File, MapSize);
-		io_close(MapFile);
-	}
-	else if(MapSize > 0)
-	{
-		// get map data
-		unsigned char *pMapData = (unsigned char *)malloc(MapSize);
-		io_read(m_File, pMapData, MapSize);
-
-		// save map
-		MapFile = pStorage->OpenFile(aMapFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
-		io_write(MapFile, pMapData, MapSize);
-		io_close(MapFile);
-
-		// free data
-		free(pMapData);
-	}
+	// save byte offset of map for later use
+	m_MapOffset = io_tell(m_File);
+	io_skip(m_File, MapSize);
 
 	// store map information
 	m_MapInfo.m_Crc = Crc;
+	m_MapInfo.m_Sha256 = Sha256;
 	m_MapInfo.m_Size = MapSize;
 	str_copy(m_MapInfo.m_aName, m_Info.m_Header.m_aMapName, sizeof(m_MapInfo.m_aName));
-
 
 	if(m_Info.m_Header.m_Version > gs_OldVersion)
 	{
@@ -785,6 +789,43 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 
 	// ready for playback
 	return 0;
+}
+
+void CDemoPlayer::ExtractMap(class IStorage *pStorage)
+{
+	if(!m_MapInfo.m_Size)
+		return;
+
+	long CurSeek = io_tell(m_File);
+
+	// get map data
+	io_seek(m_File, m_MapOffset, IOSEEK_START);
+	unsigned char *pMapData = (unsigned char *)malloc(m_MapInfo.m_Size);
+	io_read(m_File, pMapData, m_MapInfo.m_Size);
+	io_seek(m_File, CurSeek, IOSEEK_START);
+
+	// handle sha256
+	SHA256_DIGEST Sha256 = SHA256_ZEROED;
+	if(m_Info.m_Header.m_Version >= gs_Sha256Version)
+		Sha256 = m_MapInfo.m_Sha256;
+	else
+	{
+		Sha256 = sha256(pMapData, m_MapInfo.m_Size);
+		m_MapInfo.m_Sha256 = Sha256;
+	}
+
+	// construct name
+	char aSha[SHA256_MAXSTRSIZE], aMapFilename[128];
+	sha256_str(Sha256, aSha, sizeof(aSha));
+	str_format(aMapFilename, sizeof(aMapFilename), "downloadedmaps/%s_%08x_%s.map", m_Info.m_Header.m_aMapName, m_MapInfo.m_Crc, aSha);
+
+	// save map
+	IOHANDLE MapFile = pStorage->OpenFile(aMapFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	io_write(MapFile, pMapData, m_MapInfo.m_Size);
+	io_close(MapFile);
+
+	// free data
+	free(pMapData);
 }
 
 int CDemoPlayer::NextFrame()
@@ -954,9 +995,9 @@ void CDemoPlayer::GetDemoName(char *pBuffer, int BufferSize) const
 	str_copy(pBuffer, pExtractedName, Length);
 }
 
-bool CDemoPlayer::GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers) const
+bool CDemoPlayer::GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo) const
 {
-	if(!pDemoHeader || !pTimelineMarkers)
+	if(!pDemoHeader || !pTimelineMarkers || !pMapInfo)
 		return false;
 
 	mem_zero(pDemoHeader, sizeof(CDemoHeader));
@@ -968,6 +1009,17 @@ bool CDemoPlayer::GetDemoInfo(class IStorage *pStorage, const char *pFilename, i
 
 	io_read(File, pDemoHeader, sizeof(CDemoHeader));
 	io_read(File, pTimelineMarkers, sizeof(CTimelineMarkers));
+
+	str_copy(pMapInfo->m_aName, pDemoHeader->m_aMapName, sizeof(pMapInfo->m_aName));
+	pMapInfo->m_Crc = (pDemoHeader->m_aMapCrc[0]<<24) | (pDemoHeader->m_aMapCrc[1]<<16) | (pDemoHeader->m_aMapCrc[2]<<8) | (pDemoHeader->m_aMapCrc[3]);
+
+	if(pDemoHeader->m_Version >= gs_Sha256Version)
+		io_read(File, &pMapInfo->m_Sha256, SHA256_DIGEST_LENGTH);
+	else
+		pMapInfo->m_Sha256 = SHA256_ZEROED;
+
+	pMapInfo->m_Size = (pDemoHeader->m_aMapSize[0]<<24) | (pDemoHeader->m_aMapSize[1]<<16) | (pDemoHeader->m_aMapSize[2]<<8) | (pDemoHeader->m_aMapSize[3]);
+
 	io_close(File);
 	return !(mem_comp(pDemoHeader->m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) || pDemoHeader->m_Version < gs_OldVersion);
 }
@@ -1004,7 +1056,7 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 	if (m_pDemoPlayer->Load(m_pStorage, m_pConsole, pDemo, IStorage::TYPE_ALL) == -1)
 		return;
 
-	const CDemoPlayer::CMapInfo *pMapInfo = m_pDemoPlayer->GetMapInfo();
+	const CMapInfo *pMapInfo = m_pDemoPlayer->GetMapInfo();
 	SHA256_DIGEST Fake;
 	for(unsigned i = 0; i < sizeof(Fake.data); i++)
 	{
