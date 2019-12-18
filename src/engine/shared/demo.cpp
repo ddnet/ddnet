@@ -791,10 +791,10 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	return 0;
 }
 
-void CDemoPlayer::ExtractMap(class IStorage *pStorage)
+bool CDemoPlayer::ExtractMap(class IStorage *pStorage)
 {
 	if(!m_MapInfo.m_Size)
-		return;
+		return false;
 
 	long CurSeek = io_tell(m_File);
 
@@ -821,11 +821,16 @@ void CDemoPlayer::ExtractMap(class IStorage *pStorage)
 
 	// save map
 	IOHANDLE MapFile = pStorage->OpenFile(aMapFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	if(!MapFile)
+		return false;
+
 	io_write(MapFile, pMapData, m_MapInfo.m_Size);
 	io_close(MapFile);
 
 	// free data
 	free(pMapData);
+
+	return true;
 }
 
 int CDemoPlayer::NextFrame()
