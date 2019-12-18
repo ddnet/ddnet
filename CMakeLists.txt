@@ -37,6 +37,8 @@ else()
 endif()
 
 set(ORIGINAL_CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
+set(ORIGINAL_CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS})
+set(ORIGINAL_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
 set(ORIGINAL_CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES})
 set(ORIGINAL_CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
 set(OWN_CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
@@ -186,7 +188,27 @@ if(NOT MSVC)
 endif()
 
 if(NOT MSVC)
-  check_c_compiler_flag("-O2;-Wp,-Werror;-D_FORTIFY_SOURCE=2" DEFINE_FORTIFY_SOURCE) # Some distributions define _FORTIFY_SOURCE by themselves.
+  string(CONCAT SOURCE
+    "#include <string.h>\n"
+    "\n"
+    "void mem_copy(void *d, const void *s, unsigned l)\n"
+    "{\n"
+    "\tmemcpy(d, s, l);\n"
+    "}\n"
+    "\n"
+    "int main()\n"
+    "{\n"
+    "\treturn 0;\n"
+    "}\n"
+  )
+  set(CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} -D_FORTIFY_SOURCE=2)
+  set(CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS} -O2 -Wp,-Werror)
+  # Some distributions define _FORTIFY_SOURCE by themselves.
+  # MinGW on Windows can fail linking with _FORTIFY_SOURCE enabled.
+  # https://sourceforge.net/p/mingw-w64/mailman/message/36764708/
+  check_c_source_compiles("${SOURCE}" DEFINE_FORTIFY_SOURCE)
+  set(CMAKE_REQUIRED_DEFINITIONS ${ORIGINAL_CMAKE_REQUIRED_DEFINITIONS})
+  set(CMAKE_REQUIRED_FLAGS ${ORIGINAL_CMAKE_REQUIRED_FLAGS})
 endif()
 
 ########################################################################
