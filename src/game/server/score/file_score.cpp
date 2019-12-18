@@ -6,7 +6,6 @@
 #include <engine/shared/config.h>
 #include <sstream>
 #include <fstream>
-#include <string.h>
 #include "../gamemodes/DDRace.h"
 #include "file_score.h"
 #include <engine/shared/console.h>
@@ -167,7 +166,7 @@ CFileScore::CPlayerScore *CFileScore::SearchName(const char *pName,
 				Found++;
 				pPlayer = &r.front();
 			}
-			if (!strcmp(r.front().m_aName, pName))
+			if (!str_comp(r.front().m_aName, pName))
 				return &r.front();
 		}
 		Pos++;
