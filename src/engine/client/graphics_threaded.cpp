@@ -1647,7 +1647,8 @@ void CGraphics_Threaded::RenderQuadContainerAsSpriteMultiple(int ContainerIndex,
 	}
 }
 
-void* CGraphics_Threaded::AllocCommandBufferData(unsigned AllocSize) {
+void* CGraphics_Threaded::AllocCommandBufferData(unsigned AllocSize)
+{
 	void* pData = m_pCommandBuffer->AllocData(AllocSize);
 	if(pData == 0x0)
 	{

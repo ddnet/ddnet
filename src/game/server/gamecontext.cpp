@@ -3490,7 +3490,8 @@ void CGameContext::List(int ClientID, const char *pFilter)
 	SendChatTarget(ClientID, aBuf);
 }
 
-int CGameContext::GetClientVersion(int ClientID) {
+int CGameContext::GetClientVersion(int ClientID)
+{
 	return m_apPlayers[ClientID]
 		? m_apPlayers[ClientID]->m_ClientVersion
 		: 0;
