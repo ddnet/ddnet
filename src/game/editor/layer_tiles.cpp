@@ -960,7 +960,8 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	return 0;
 }
 
-void CLayerTiles::FlagModified(int x, int y, int w, int h) {
+void CLayerTiles::FlagModified(int x, int y, int w, int h)
+{
 	m_pEditor->m_Map.m_Modified = true;
 	if (m_Seed != 0 && m_AutoMapperConfig != -1 && m_AutoAutoMap) {
 		m_pEditor->m_Map.m_lImages[m_Image]->m_AutoMapper.ProceedLocalized(this, m_AutoMapperConfig, m_Seed, x, y, w, h);
