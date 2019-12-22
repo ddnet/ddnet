@@ -1018,10 +1018,24 @@ bool CDemoPlayer::GetDemoInfo(class IStorage *pStorage, const char *pFilename, i
 	str_copy(pMapInfo->m_aName, pDemoHeader->m_aMapName, sizeof(pMapInfo->m_aName));
 	pMapInfo->m_Crc = (pDemoHeader->m_aMapCrc[0]<<24) | (pDemoHeader->m_aMapCrc[1]<<16) | (pDemoHeader->m_aMapCrc[2]<<8) | (pDemoHeader->m_aMapCrc[3]);
 
+	SHA256_DIGEST Sha256 = SHA256_ZEROED;
 	if(pDemoHeader->m_Version >= gs_Sha256Version)
-		io_read(File, &pMapInfo->m_Sha256, SHA256_DIGEST_LENGTH);
-	else
-		pMapInfo->m_Sha256 = SHA256_ZEROED;
+	{
+		CUuid ExtensionUuid = {};
+		io_read(File, &ExtensionUuid.m_aData, sizeof(ExtensionUuid.m_aData));
+
+		if(ExtensionUuid == SHA256_EXTENSION)
+		{
+			io_read(File, &Sha256, sizeof(SHA256_DIGEST)); // need a safe read
+		}
+		else
+		{
+			// This hopes whatever happened during the version increment didn't add something here
+			dbg_msg("demo", "demo version incremented, but not by ddnet");
+			io_seek(File, -(int)sizeof(ExtensionUuid.m_aData), IOSEEK_CUR);
+		}
+	}
+	pMapInfo->m_Sha256 = Sha256;
 
 	pMapInfo->m_Size = (pDemoHeader->m_aMapSize[0]<<24) | (pDemoHeader->m_aMapSize[1]<<16) | (pDemoHeader->m_aMapSize[2]<<8) | (pDemoHeader->m_aMapSize[3]);
 
@@ -1062,17 +1076,20 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 		return;
 
 	const CMapInfo *pMapInfo = m_pDemoPlayer->GetMapInfo();
-	SHA256_DIGEST Fake;
-	for(unsigned i = 0; i < sizeof(Fake.data); i++)
+	const CDemoPlayer::CPlaybackInfo *pInfo = m_pDemoPlayer->Info();
+
+	SHA256_DIGEST Sha256 = pMapInfo->m_Sha256;
+	if(pInfo->m_Header.m_Version < gs_Sha256Version)
 	{
-		Fake.data[i] = 0xff;
+		if(m_pDemoPlayer->ExtractMap(m_pStorage))
+			Sha256 = pMapInfo->m_Sha256;
 	}
-	if (m_pDemoRecorder->Start(m_pStorage, m_pConsole, pDst, m_pNetVersion, pMapInfo->m_aName, Fake, pMapInfo->m_Crc, "client", pMapInfo->m_Size, NULL, NULL, pfnFilter, pUser) == -1)
+
+	if (m_pDemoRecorder->Start(m_pStorage, m_pConsole, pDst, m_pNetVersion, pMapInfo->m_aName, Sha256, pMapInfo->m_Crc, "client", pMapInfo->m_Size, NULL, NULL, pfnFilter, pUser) == -1)
 		return;
 
 
 	m_pDemoPlayer->Play();
-	const CDemoPlayer::CPlaybackInfo *pInfo = m_pDemoPlayer->Info();
 
 	while (m_pDemoPlayer->IsPlaying() && !m_Stop) {
 		m_pDemoPlayer->Update(false);
