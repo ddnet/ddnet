@@ -3420,10 +3420,12 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 	// load map
 	Crc = m_DemoPlayer.GetMapInfo()->m_Crc;
 	SHA256_DIGEST Sha = m_DemoPlayer.GetMapInfo()->m_Sha256;
-	pError = LoadMapSearch(m_DemoPlayer.Info()->m_Header.m_aMapName, &Sha, Crc);
+	pError = LoadMapSearch(m_DemoPlayer.Info()->m_Header.m_aMapName, Sha != SHA256_ZEROED ? &Sha : nullptr, Crc);
 	if(pError)
 	{
-		m_DemoPlayer.ExtractMap(Storage());
+		if(!m_DemoPlayer.ExtractMap(Storage()))
+			return pError;
+
 		Sha = m_DemoPlayer.GetMapInfo()->m_Sha256;
 		pError = LoadMapSearch(m_DemoPlayer.Info()->m_Header.m_aMapName, &Sha, Crc);
 		if(pError)
