@@ -154,7 +154,7 @@ int main(int argc, const char **argv)
 	{
 		pData = g_DataReader.GetData(Index);
 		Size = g_DataReader.GetDataSize(Index);
-		g_DataWriter.AddData(pData ? Size : 0, pData);
+		g_DataWriter.AddData(Size, pData);
 	}
 
 	for(int Index = 0; Index < g_Index; Index++)
