@@ -588,7 +588,8 @@ bool CCollision::IsThrough(int x, int y, int xoff, int yoff, vec2 pos0, vec2 pos
 bool CCollision::IsHookBlocker(int x, int y, vec2 pos0, vec2 pos1)
 {
 	int pos = GetPureMapIndex(x, y);
-	if(m_pTiles[pos].m_Index == TILE_THROUGH_ALL || (m_pFront && m_pFront[pos].m_Index == TILE_THROUGH_ALL))
+	if(m_pTiles[pos].m_Index == TILE_THROUGH_ALL ||
+		(m_pFront && (m_pFront[pos].m_Index == TILE_THROUGH_ALL || m_pFront[pos].m_Index == TILE_THROUGH_CUT)))
 		return true;
 	if(m_pTiles[pos].m_Index == TILE_THROUGH_DIR && (
 		(m_pTiles[pos].m_Flags == ROTATION_0   && pos0.y < pos1.y) ||
