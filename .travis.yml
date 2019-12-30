@@ -16,8 +16,6 @@ script:
 - if [ "$TRAVIS_OS_NAME" != "osx" ]; then CMAKE_EXTRA_ARGS="-DGTEST_LIBRARY=../gtest_build/libgtest.a -DGTEST_MAIN_LIBRARY=../gtest_build/libgtest_main.a"; mkdir gtest_build; cmake -E chdir gtest_build cmake /usr/src/gtest; cmake --build gtest_build; fi
 - mkdir build; cd build
 - cmake -Werror=dev -DCMAKE_INSTALL_PREFIX=/usr $CMAKE_EXTRA_ARGS ..
-- cat CMakeFiles/CMakeError.log
-- cat CMakeFiles/CMakeOutput.log
 - make everything
 - make run_tests
 - if [ "$TRAVIS_OS_NAME" != "osx" ]; then make DESTDIR=install install; test -x install/bin/DDNet; test -x install/bin/DDNet-Server; test -d install/bin/data; test -d install/usr/lib; fi
