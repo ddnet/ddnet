@@ -2,7 +2,7 @@
 <component type="desktop-application">
     <id>ddnet.desktop</id>
     <metadata_license>CC0-1.0</metadata_license>
-    <project_license>CC-BY-SA and ASL 2.0</project_license>
+    <project_license>CC-BY-SA-3.0 and Apache-2.0</project_license>
     <name>DDNet</name>
     <summary>
         DDraceNetwork, a cooperative racing mod of Teeworlds
