@@ -30,6 +30,7 @@
     </keywords>
     <url type="homepage">https://ddnet.tw/</url>
     <url type="bugtracker">https://github.com/ddnet/ddnet/issues</url>
+    <url type="donation">https://www.paypal.me/ddnet</url>
     <provides>
         <binary>DDNet</binary>
     </provides>
