@@ -247,7 +247,7 @@ void CVideo::nextAudioFrame_timeline()
 
 void CVideo::nextAudioFrame(void (*Mix)(short *pFinalOut, unsigned Frames))
 {
-	if (m_NextaFrame && m_Recording)
+	if (m_NextaFrame && m_Recording && m_HasAudio)
 	{
 		m_ProcessingAudioFrame = true;
 		//dbg_msg("video recorder", "video_frame: %lf", (double)(m_vframe/m_FPS));
