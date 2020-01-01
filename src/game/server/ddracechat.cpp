@@ -35,7 +35,9 @@ void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
 		"Piepow, QingGo, RafaelFF, sctt, jao, daverck, fokkonaut,");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
-		"Bojidar, FallenKN, ardadem, archimede67, sirius1242 & others.");
+		"Bojidar, FallenKN, ardadem, archimede67, sirius1242, Aerll");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
+		"& others.");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
 		"Based on DDRace by the DDRace developers,");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",

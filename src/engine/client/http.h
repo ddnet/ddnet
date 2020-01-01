@@ -20,8 +20,8 @@ enum
 class CRequest : public IJob
 {
 	// Abort the request with an error if `BeforeInit()` or `AfterInit()`
-	// returns something nonzero. Also abort the request if `OnData()`
-	// returns something other than `DataSize`.
+	// returns false. Also abort the request if `OnData()` returns
+	// something other than `DataSize`.
 	virtual bool BeforeInit() { return true; }
 	virtual bool AfterInit(void *pCurl) { return true; }
 	virtual size_t OnData(char *pData, size_t DataSize) = 0;

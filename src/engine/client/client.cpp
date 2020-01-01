@@ -7,8 +7,6 @@
 
 #include <stdlib.h> // qsort
 #include <stdarg.h>
-#include <string.h>
-#include <climits>
 #include <tuple>
 
 #include <base/hash_ctxt.h>
@@ -118,12 +116,12 @@ void CGraph::Add(float v, float r, float g, float b)
 	m_aColors[m_Index][2] = b;
 }
 
-void CGraph::Render(IGraphics *pGraphics, int Font, float x, float y, float w, float h, const char *pDescription)
+void CGraph::Render(IGraphics *pGraphics, IGraphics::CTextureHandle FontTexture, float x, float y, float w, float h, const char *pDescription)
 {
 	//m_pGraphics->BlendNormal();
 
 
-	pGraphics->TextureSet(-1);
+	pGraphics->TextureClear();
 
 	pGraphics->QuadsBegin();
 	pGraphics->SetColor(0, 0, 0, 0.75f);
@@ -160,7 +158,7 @@ void CGraph::Render(IGraphics *pGraphics, int Font, float x, float y, float w, f
 	}
 	pGraphics->LinesEnd();
 
-	pGraphics->TextureSet(Font);
+	pGraphics->TextureSet(FontTexture);
 	pGraphics->QuadsBegin();
 	pGraphics->QuadsText(x+2, y+h-16, 16, pDescription);
 
@@ -693,12 +691,12 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
 
 	ServerInfoRequest();
-	if(net_host_lookup(m_aServerAddressStr, &m_ServerAddress, m_NetClient[0].NetType()) != 0)
+	if(net_host_lookup(m_aServerAddressStr, &m_ServerAddress, m_NetClient[CLIENT_MAIN].NetType()) != 0)
 	{
 		char aBufMsg[256];
 		str_format(aBufMsg, sizeof(aBufMsg), "could not find the address of %s, connecting to localhost", aBuf);
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBufMsg);
-		net_host_lookup("localhost", &m_ServerAddress, m_NetClient[0].NetType());
+		net_host_lookup("localhost", &m_ServerAddress, m_NetClient[CLIENT_MAIN].NetType());
 	}
 
 	if(m_SendPassword)
@@ -718,7 +716,7 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	m_pConsole->DeregisterTempAll();
 	if(m_ServerAddress.port == 0)
 		m_ServerAddress.port = Port;
-	m_NetClient[0].Connect(&m_ServerAddress);
+	m_NetClient[CLIENT_MAIN].Connect(&m_ServerAddress);
 	SetState(IClient::STATE_CONNECTING);
 
 	for(int i = 0; i < RECORDER_MAX; i++)
@@ -748,7 +746,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 	m_ServerSentCapabilities = false;
 	m_UseTempRconCommands = 0;
 	m_pConsole->DeregisterTempAll();
-	m_NetClient[0].Disconnect(pReason);
+	m_NetClient[CLIENT_MAIN].Disconnect(pReason);
 	SetState(IClient::STATE_OFFLINE);
 	m_pMap->Unload();
 
@@ -806,7 +804,7 @@ void CClient::DummyConnect()
 	if(m_LastDummyConnectTime > 0 && m_LastDummyConnectTime + GameTickSpeed() * 5 > GameTick())
 		return;
 
-	if(m_NetClient[0].State() != NET_CONNSTATE_ONLINE && m_NetClient[0].State() != NET_CONNSTATE_PENDING)
+	if(m_NetClient[CLIENT_MAIN].State() != NET_CONNSTATE_ONLINE && m_NetClient[CLIENT_MAIN].State() != NET_CONNSTATE_PENDING)
 		return;
 
 	if(m_DummyConnected)
@@ -822,7 +820,7 @@ void CClient::DummyConnect()
 	g_Config.m_ClDummyHammer = 0;
 
 	//connecting to the server
-	m_NetClient[1].Connect(&m_ServerAddress);
+	m_NetClient[CLIENT_DUMMY].Connect(&m_ServerAddress);
 }
 
 void CClient::DummyDisconnect(const char *pReason)
@@ -830,7 +828,7 @@ void CClient::DummyDisconnect(const char *pReason)
 	if(!m_DummyConnected)
 		return;
 
-	m_NetClient[1].Disconnect(pReason);
+	m_NetClient[CLIENT_DUMMY].Disconnect(pReason);
 	g_Config.m_ClDummy = 0;
 	m_RconAuthed[1] = 0;
 	m_DummyConnected = false;
@@ -1061,7 +1059,7 @@ void CClient::Quit()
 
 const char *CClient::ErrorString()
 {
-	return m_NetClient[0].ErrorString();
+	return m_NetClient[CLIENT_MAIN].ErrorString();
 }
 
 void CClient::Render()
@@ -2389,7 +2387,7 @@ void CClient::LoadDDNetInfo()
 
 void CClient::PumpNetwork()
 {
-	for(int i=0; i<3; i++)
+	for(int i=0; i<NUM_CLIENTS; i++)
 	{
 		m_NetClient[i].Update();
 	}
@@ -2397,17 +2395,17 @@ void CClient::PumpNetwork()
 	if(State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		// check for errors
-		if(State() != IClient::STATE_OFFLINE && State() != IClient::STATE_QUITING && m_NetClient[0].State() == NETSTATE_OFFLINE)
+		if(State() != IClient::STATE_OFFLINE && State() != IClient::STATE_QUITING && m_NetClient[CLIENT_MAIN].State() == NETSTATE_OFFLINE)
 		{
 			SetState(IClient::STATE_OFFLINE);
 			Disconnect();
 			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "offline error='%s'", m_NetClient[0].ErrorString());
+			str_format(aBuf, sizeof(aBuf), "offline error='%s'", m_NetClient[CLIENT_MAIN].ErrorString());
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
 		}
 
 		//
-		if(State() == IClient::STATE_CONNECTING && m_NetClient[0].State() == NETSTATE_ONLINE)
+		if(State() == IClient::STATE_CONNECTING && m_NetClient[CLIENT_MAIN].State() == NETSTATE_ONLINE)
 		{
 			// we switched to online
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", "connected, sending info");
@@ -2418,7 +2416,7 @@ void CClient::PumpNetwork()
 
 	// process packets
 	CNetChunk Packet;
-	for(int i=0; i < 3; i++)
+	for(int i=0; i < NUM_CLIENTS; i++)
 	{
 		while(m_NetClient[i].Recv(&Packet))
 		{
@@ -2795,7 +2793,7 @@ void CClient::InitInterfaces()
 
 	m_DemoEditor.Init(m_pGameClient->NetVersion(), &m_SnapshotDelta, m_pConsole, m_pStorage);
 
-	m_ServerBrowser.SetBaseInfo(&m_NetClient[2], m_pGameClient->NetVersion());
+	m_ServerBrowser.SetBaseInfo(&m_NetClient[CLIENT_CONTACT], m_pGameClient->NetVersion());
 
 	HttpInit(m_pStorage);
 
@@ -2880,7 +2878,7 @@ void CClient::Run()
 			mem_zero(&BindAddr, sizeof(BindAddr));
 			BindAddr.type = NETTYPE_ALL;
 		}
-		for(int i = 0; i < 3; i++)
+		for(int i = 0; i < NUM_CLIENTS; i++)
 		{
 			do
 			{
@@ -2897,7 +2895,7 @@ void CClient::Run()
 	Input()->Init();
 
 	// start refreshing addresses while we load
-	MasterServer()->RefreshAddresses(m_NetClient[0].NetType());
+	MasterServer()->RefreshAddresses(m_NetClient[CLIENT_MAIN].NetType());
 
 	// init the editor
 	m_pEditor->Init();
@@ -2975,7 +2973,7 @@ void CClient::Run()
 		}
 
 		// progress on dummy connect if security token handshake skipped/passed
-		if(m_DummySendConnInfo && !m_NetClient[1].SecurityTokenUnknown())
+		if(m_DummySendConnInfo && !m_NetClient[CLIENT_DUMMY].SecurityTokenUnknown())
 		{
 			m_DummySendConnInfo = false;
 
@@ -2986,7 +2984,7 @@ void CClient::Run()
 			SendMsgExY(&MsgInfo, MSGFLAG_VITAL|MSGFLAG_FLUSH, true, 1);
 
 			// update netclient
-			m_NetClient[1].Update();
+			m_NetClient[CLIENT_DUMMY].Update();
 
 			// send ready
 			CMsgPacker MsgReady(NETMSG_READY);
@@ -3142,7 +3140,7 @@ void CClient::Run()
 		{
 			SleepTimeInMicroSeconds = ((int64)1000000 / (int64)g_Config.m_ClRefreshRate) - (Now - LastTime);
 			if(SleepTimeInMicroSeconds > (int64)0)
-				net_socket_read_wait(m_NetClient[0].m_Socket, SleepTimeInMicroSeconds);
+				net_socket_read_wait(m_NetClient[CLIENT_MAIN].m_Socket, SleepTimeInMicroSeconds);
 			Slept = true;
 		}
 		if(Slept)
@@ -3443,7 +3441,7 @@ void CClient::SaveReplay(const int Length)
 		GameClient()->Echo(Localize("Replay feature is disabled!"));
 		return;
 	}
-	
+
 	if(!DemoRecorder(RECORDER_REPLAYS)->IsRecording())
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Error: demorecorder isn't recording. Try to rejoin to fix that.");
 	else if(DemoRecorder(RECORDER_REPLAYS)->Length() < 1)
@@ -3474,7 +3472,7 @@ void CClient::SaveReplay(const int Length)
 		// And we restart the recorder
 		DemoRecorder_StartReplayRecorder();
 	}
-	
+
 }
 
 void CClient::DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser)
@@ -3491,7 +3489,7 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 	int Crc;
 	const char *pError;
 	Disconnect();
-	m_NetClient[0].ResetErrorString();
+	m_NetClient[CLIENT_MAIN].ResetErrorString();
 
 	// try to start playback
 	m_DemoPlayer.SetListener(this);
@@ -3500,15 +3498,21 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 		return "error loading demo";
 
 	// load map
-	Crc = (m_DemoPlayer.Info()->m_Header.m_aMapCrc[0]<<24)|
-		(m_DemoPlayer.Info()->m_Header.m_aMapCrc[1]<<16)|
-		(m_DemoPlayer.Info()->m_Header.m_aMapCrc[2]<<8)|
-		(m_DemoPlayer.Info()->m_Header.m_aMapCrc[3]);
-	pError = LoadMapSearch(m_DemoPlayer.Info()->m_Header.m_aMapName, 0, Crc);
+	Crc = m_DemoPlayer.GetMapInfo()->m_Crc;
+	SHA256_DIGEST Sha = m_DemoPlayer.GetMapInfo()->m_Sha256;
+	pError = LoadMapSearch(m_DemoPlayer.Info()->m_Header.m_aMapName, Sha != SHA256_ZEROED ? &Sha : nullptr, Crc);
 	if(pError)
 	{
-		DisconnectWithReason(pError);
-		return pError;
+		if(!m_DemoPlayer.ExtractMap(Storage()))
+			return pError;
+
+		Sha = m_DemoPlayer.GetMapInfo()->m_Sha256;
+		pError = LoadMapSearch(m_DemoPlayer.Info()->m_Header.m_aMapName, &Sha, Crc);
+		if(pError)
+		{
+			DisconnectWithReason(pError);
+			return pError;
+		}
 	}
 
 	GameClient()->OnConnected();

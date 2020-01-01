@@ -8,7 +8,7 @@ class CMapImages : public CComponent
 {
 	friend class CBackground;
 
-	int m_aTextures[64];
+	IGraphics::CTextureHandle m_aTextures[64];
 	int m_Count;
 
 	const char *m_pEntitiesGameType;
@@ -16,7 +16,7 @@ public:
 	CMapImages();
 	CMapImages(int ImageSize);
 
-	int Get(int Index) const { return m_aTextures[Index]; }
+	IGraphics::CTextureHandle Get(int Index) const { return m_aTextures[Index]; }
 	int Num() const { return m_Count; }
 
 	virtual void OnMapLoad();
@@ -24,26 +24,27 @@ public:
 	void LoadBackground(class IMap *pMap);
 
 	// DDRace
-	int GetEntities();
+	IGraphics::CTextureHandle GetEntities();
 	
-	int GetOverlayBottom();
-	int GetOverlayTop();
-	int GetOverlayCenter();
+	IGraphics::CTextureHandle GetOverlayBottom();
+	IGraphics::CTextureHandle GetOverlayTop();
+	IGraphics::CTextureHandle GetOverlayCenter();
 
 	void SetTextureScale(int Size);
 	int GetTextureScale();
 
 private:
 
-	int m_EntitiesTextures;
-	int m_OverlayBottomTexture;
-	int m_OverlayTopTexture;
-	int m_OverlayCenterTexture;
+	bool m_EntitiesIsLoaded;
+	IGraphics::CTextureHandle m_EntitiesTextures;
+	IGraphics::CTextureHandle m_OverlayBottomTexture;
+	IGraphics::CTextureHandle m_OverlayTopTexture;
+	IGraphics::CTextureHandle m_OverlayCenterTexture;
 	int m_TextureScale;
 	
 	void InitOverlayTextures();
-	int UploadEntityLayerText(int TextureSize, int YOffset);
-	void UpdateEntityLayerText(int TextureID, int TextureSize, int YOffset, int NumbersPower, int MaxNumber = -1);
+	IGraphics::CTextureHandle UploadEntityLayerText(int TextureSize, int YOffset);
+	void UpdateEntityLayerText(IGraphics::CTextureHandle Texture, int TextureSize, int YOffset, int NumbersPower, int MaxNumber = -1);
 };
 
 #endif

@@ -281,7 +281,6 @@ public:
 	: m_AutoMapper(pEditor)
 	{
 		m_pEditor = pEditor;
-		m_TexID = -1;
 		m_aName[0] = 0;
 		m_External = 0;
 		m_Width = 0;
@@ -294,7 +293,7 @@ public:
 
 	void AnalyseTileFlags();
 
-	int m_TexID;
+	IGraphics::CTextureHandle m_Texture;
 	int m_External;
 	char m_aName[128];
 	unsigned char m_aTileFlags[256];
@@ -454,7 +453,7 @@ public:
 	}
 
 	void Clean();
-	void CreateDefault(int EntitiesTexture);
+	void CreateDefault(IGraphics::CTextureHandle EntitiesTexture);
 
 	// io
 	int Save(class IStorage *pStorage, const char *pFilename);
@@ -547,7 +546,7 @@ public:
 
 	void FlagModified(int x, int y, int w, int h);
 
-	int m_TexID;
+	IGraphics::CTextureHandle m_Texture;
 	int m_Game;
 	int m_Image;
 	int m_Width;
@@ -709,20 +708,10 @@ public:
 		m_CommandBox = 0.0f;
 		m_aSettingsCommand[0] = 0;
 
-		ms_CheckerTexture = 0;
-		ms_BackgroundTexture = 0;
-		ms_CursorTexture = 0;
-		ms_EntitiesTexture = 0;
-
 		ms_pUiGotContext = 0;
 
 		// DDRace
 
-		ms_FrontTexture = 0;
-		ms_TeleTexture = 0;
-		ms_SpeedupTexture = 0;
-		ms_SwitchTexture = 0;
-		ms_TuneTexture = 0;
 		m_TeleNumber = 1;
 		m_SwitchNum = 1;
 		m_TuningNum = 1;
@@ -754,7 +743,8 @@ public:
 		int m_FileNum;
 		int m_ButtonId;
 		char m_aName[128];
-		int m_PreviewImage;
+		IGraphics::CTextureHandle m_PreviewImage;
+		bool m_PreviewImageIsLoaded;
 	};
 	array<CUndo> m_lUndoSteps;
 	bool m_Undo;
@@ -848,7 +838,8 @@ public:
 	int m_FilesSelectedIndex;
 	char m_FileDialogNewFolderName[64];
 	char m_FileDialogErrString[64];
-	int m_FilePreviewImage;
+	IGraphics::CTextureHandle m_FilePreviewImage;
+	bool m_PreviewImageIsLoaded;
 	CImageInfo m_FilePreviewImageInfo;
 
 
@@ -913,10 +904,10 @@ public:
 	int m_SelectedSound;
 	int m_SelectedSource;
 
-	static int ms_CheckerTexture;
-	static int ms_BackgroundTexture;
-	static int ms_CursorTexture;
-	static int ms_EntitiesTexture;
+	IGraphics::CTextureHandle m_CheckerTexture;
+	IGraphics::CTextureHandle m_BackgroundTexture;
+	IGraphics::CTextureHandle m_CursorTexture;
+	IGraphics::CTextureHandle m_EntitiesTexture;
 
 	CLayerGroup m_Brush;
 	CLayerTiles m_TilesetPicker;
@@ -951,7 +942,7 @@ public:
 
 	int DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden=false, int Corners=CUI::CORNER_ALL);
 
-	void RenderBackground(CUIRect View, int Texture, float Size, float Brightness);
+	void RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, float Size, float Brightness);
 
 	void RenderGrid(CLayerGroup *pGroup);
 
@@ -997,7 +988,7 @@ public:
 
 	float ButtonColorMul(const void *pID);
 
-	void DoQuadEnvelopes(const array<CQuad> &m_lQuads, int TexID = -1);
+	void DoQuadEnvelopes(const array<CQuad> &m_lQuads, IGraphics::CTextureHandle Texture = IGraphics::CTextureHandle());
 	void DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int pIndex);
 	void DoQuadPoint(CQuad *pQuad, int QuadIndex, int v);
 
@@ -1041,11 +1032,11 @@ public:
 
 	// DDRace
 
-	static int ms_FrontTexture;
-	static int ms_TeleTexture;
-	static int ms_SpeedupTexture;
-	static int ms_SwitchTexture;
-	static int ms_TuneTexture;
+	IGraphics::CTextureHandle m_FrontTexture;
+	IGraphics::CTextureHandle m_TeleTexture;
+	IGraphics::CTextureHandle m_SpeedupTexture;
+	IGraphics::CTextureHandle m_SwitchTexture;
+	IGraphics::CTextureHandle m_TuneTexture;
 	static int PopupTele(CEditor *pEditor, CUIRect View);
 	static int PopupSpeedup(CEditor *pEditor, CUIRect View);
 	static int PopupSwitch(CEditor *pEditor, CUIRect View);

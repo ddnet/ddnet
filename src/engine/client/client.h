@@ -30,7 +30,7 @@ public:
 	void ScaleMin();
 
 	void Add(float v, float r, float g, float b);
-	void Render(IGraphics *pGraphics, int Font, float x, float y, float w, float h, const char *pDescription);
+	void Render(IGraphics *pGraphics, IGraphics::CTextureHandle FontTexture, float x, float y, float w, float h, const char *pDescription);
 };
 
 
@@ -82,7 +82,15 @@ class CClient : public IClient, public CDemoPlayer::IListener
 		PREDICTION_MARGIN=1000/50/2, // magic network prediction value
 	};
 
-	class CNetClient m_NetClient[3];
+	enum
+	{
+		CLIENT_MAIN,
+		CLIENT_DUMMY,
+		CLIENT_CONTACT,
+		NUM_CLIENTS,
+	};
+
+	class CNetClient m_NetClient[NUM_CLIENTS];
 	class CDemoPlayer m_DemoPlayer;
 	class CDemoRecorder m_DemoRecorder[RECORDER_MAX];
 	class CDemoEditor m_DemoEditor;
@@ -98,7 +106,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	unsigned m_SnapshotParts[2];
 	int64 m_LocalStartTime;
 
-	int m_DebugFont;
+	IGraphics::CTextureHandle m_DebugFont;
 	int m_DebugSoundIndex = 0;
 
 	int64 m_LastRenderTime;
@@ -260,7 +268,7 @@ public:
 
 	virtual bool SoundInitFailed() { return m_SoundInitFailed; }
 
-	virtual int GetDebugFont() { return m_DebugFont; }
+	virtual IGraphics::CTextureHandle GetDebugFont() { return m_DebugFont; }
 
 	void DirectInput(int *pInput, int Size);
 	void SendInput();

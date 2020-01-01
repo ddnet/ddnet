@@ -236,10 +236,10 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 		Type = POWERUP_WEAPON;
 		SubType = WEAPON_GRENADE;
 	}
-	else if(Index == ENTITY_WEAPON_RIFLE)
+	else if(Index == ENTITY_WEAPON_LASER)
 	{
 		Type = POWERUP_WEAPON;
-		SubType = WEAPON_RIFLE;
+		SubType = WEAPON_LASER;
 	}
 	else if(Index == ENTITY_POWERUP_NINJA)
 	{

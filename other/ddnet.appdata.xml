@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+    <id>ddnet.desktop</id>
+    <metadata_license>CC0-1.0</metadata_license>
+    <project_license>CC-BY-SA-3.0 and Apache-2.0</project_license>
+    <name>DDNet</name>
+    <summary>
+        DDraceNetwork, a cooperative racing mod of Teeworlds
+    </summary>
+    <description>
+        <p>
+            DDraceNetwork is an actively maintained version of DDRace,
+            a Teeworlds modification with a unique cooperative gameplay.
+            Help each other play through custom maps with up to 64 players,
+            compete against the best in international tournaments, design your
+            own maps, or run your own server.
+        </p>
+    </description>
+    <screenshots>
+        <screenshot type="default">
+            <image>https://ddnet.tw/screenshots/1.png</image>
+        </screenshot>
+        <screenshot>
+            <image>https://ddnet.tw/screenshots/2.png</image>
+        </screenshot>
+        <screenshot>
+            <image>https://ddnet.tw/screenshots/3.png</image>
+        </screenshot>
+    </screenshots>
+    <keywords>
+        <keyword>multiplayer</keyword>
+        <keyword>teeworlds</keyword>
+        <keyword>game</keyword>
+    </keywords>
+    <url type="homepage">https://ddnet.tw/</url>
+    <url type="bugtracker">https://github.com/ddnet/ddnet/issues</url>
+    <url type="donation">https://www.paypal.me/ddnet</url>
+    <provides>
+        <binary>DDNet</binary>
+    </provides>
+</component>

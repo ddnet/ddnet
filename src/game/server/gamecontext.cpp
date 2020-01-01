@@ -1078,6 +1078,8 @@ void CGameContext::OnClientEnter(int ClientID)
 	// send active vote
 	if(m_VoteCloseTime)
 		SendVoteSet(ClientID);
+
+	Server()->ExpireServerInfo();
 }
 
 void CGameContext::OnClientConnected(int ClientID)
@@ -1126,6 +1128,8 @@ void CGameContext::OnClientConnected(int ClientID)
 	CNetMsg_Sv_Motd Msg;
 	Msg.m_pMessage = g_Config.m_SvMotd;
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
+
+	Server()->ExpireServerInfo();
 }
 
 void CGameContext::OnClientDrop(int ClientID, const char *pReason)
@@ -1151,6 +1155,8 @@ void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 		if(m_apPlayers[i] && m_apPlayers[i]->m_LastWhisperTo == ClientID)
 			m_apPlayers[i]->m_LastWhisperTo = -1;
 	}
+
+	Server()->ExpireServerInfo();
 }
 
 void CGameContext::OnClientEngineJoin(int ClientID)
@@ -1837,6 +1843,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			pPlayer->m_TeeInfos.m_UseCustomColor = pMsg->m_UseCustomColor;
 			pPlayer->m_TeeInfos.m_ColorBody = pMsg->m_ColorBody;
 			pPlayer->m_TeeInfos.m_ColorFeet = pMsg->m_ColorFeet;
+
+			Server()->ExpireServerInfo();
 		}
 		else if (MsgID == NETMSGTYPE_CL_EMOTICON && !m_World.m_Paused)
 		{
@@ -1955,6 +1963,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			CNetMsg_Sv_ReadyToEnter m;
 			Server()->SendPackMsg(&m, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID);
 		}
+
+		Server()->ExpireServerInfo();
 	}
 }
 
@@ -3480,7 +3490,8 @@ void CGameContext::List(int ClientID, const char *pFilter)
 	SendChatTarget(ClientID, aBuf);
 }
 
-int CGameContext::GetClientVersion(int ClientID) {
+int CGameContext::GetClientVersion(int ClientID)
+{
 	return m_apPlayers[ClientID]
 		? m_apPlayers[ClientID]->m_ClientVersion
 		: 0;

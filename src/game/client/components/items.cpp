@@ -15,7 +15,6 @@
 #include <game/client/components/effects.h>
 
 #include "items.h"
-#include <stdio.h>
 
 void CItems::OnReset()
 {
@@ -231,7 +230,7 @@ void CItems::RenderLaser(const struct CNetObj_Laser *pCurrent, bool IsPredicted)
 
 	vec2 Out, Border;
 
-	Graphics()->TextureSet(-1);
+	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 
 	// do outline

@@ -192,7 +192,7 @@ void CStatboard::RenderGlobalStats()
 	Graphics()->MapScreen(0, 0, StatboardWidth, StatboardHeight);
 
 	Graphics()->BlendNormal();
-	Graphics()->TextureSet(-1);
+	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0,0,0,0.5f);
 	RenderTools()->DrawRoundRect(x-10.f, y-10.f, StatboardContentWidth, StatboardContentHeight, 17.0f);
@@ -272,7 +272,7 @@ void CStatboard::RenderGlobalStats()
 				|| (m_pClient->m_Snap.m_SpecInfo.m_Active && pInfo->m_ClientID == m_pClient->m_Snap.m_SpecInfo.m_SpectatorID))
 		{
 			// background so it's easy to find the local player
-			Graphics()->TextureSet(-1);
+			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(1,1,1,0.25f);
 			RenderTools()->DrawRoundRect(x, y, StatboardContentWidth-20, LineHeight*0.95f, 17.0f);
@@ -480,7 +480,7 @@ void CStatboard::FormatStats()
 	}
 
 	char aPlayerStats[1024 * VANILLA_MAX_CLIENTS];
-	str_format(aPlayerStats, sizeof(aPlayerStats), "Local-player,Team,Name,Clan,Score,Frags,Deaths,Suicides,F/D-ratio,Net,FPM,Spree,Best,Hammer-F/D,Gun-F/D,Shotgun-F/D,Grenade-F/D,Rifle-F/D,Ninja-F/D,GameWithFlags,Flag-grabs,Flag-captures\n");
+	str_format(aPlayerStats, sizeof(aPlayerStats), "Local-player,Team,Name,Clan,Score,Frags,Deaths,Suicides,F/D-ratio,Net,FPM,Spree,Best,Hammer-F/D,Gun-F/D,Shotgun-F/D,Grenade-F/D,Laser-F/D,Ninja-F/D,GameWithFlags,Flag-grabs,Flag-captures\n");
 	for (int i = 0; i < NumPlayers; i++)
 	{
 		const CNetObj_PlayerInfo *pInfo = apPlayers[i];

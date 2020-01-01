@@ -174,6 +174,7 @@ class CMenus : public CComponent
 		bool m_Valid;
 		CDemoHeader m_Info;
 		CTimelineMarkers m_TimelineMarkers;
+		CMapInfo m_MapInfo;
 
 		int NumMarkers() const
 		{
@@ -307,6 +308,8 @@ class CMenus : public CComponent
 	void RenderSettings(CUIRect MainView);
 
 	void SetActive(bool Active);
+
+	IGraphics::CTextureHandle m_TextureBlob;
 public:
 	void RenderBackground();
 
@@ -345,7 +348,17 @@ public:
 		PAGE_SETTINGS,
 		PAGE_SYSTEM,
 		PAGE_NETWORK,
-		PAGE_GHOST
+		PAGE_GHOST,
+
+		SETTINGS_LANGUAGE=0,
+		SETTINGS_GENERAL,
+		SETTINGS_PLAYER,
+		SETTINGS_TEE,
+		SETTINGS_HUD,
+		SETTINGS_CONTROLS,
+		SETTINGS_GRAPHICS,
+		SETTINGS_SOUND,
+		SETTINGS_DDNET,
 	};
 
 	// DDRace

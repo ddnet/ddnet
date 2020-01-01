@@ -1646,9 +1646,10 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *buffer, int maxsize, MMSGS
 	if(bytes <= 0 && sock.web_ipv4sock >= 0)
 	{
 		socklen_t fromlen = sizeof(struct sockaddr);
-		bytes = websocket_recv(sock.web_ipv4sock, buffer, maxsize, (struct sockaddr_in *)&sockaddrbuf, fromlen);
+		struct sockaddr_in *sockaddrbuf_in = (struct sockaddr_in *)&sockaddrbuf;
+		bytes = websocket_recv(sock.web_ipv4sock, buffer, maxsize, sockaddrbuf_in, fromlen);
 		*data = buffer;
-		((struct sockaddr_in *)&sockaddrbuf)->sin_family = AF_WEBSOCKET_INET;
+		sockaddrbuf_in->sin_family = AF_WEBSOCKET_INET;
 	}
 #endif
 

@@ -810,7 +810,7 @@ void CChat::OnPrepareLines()
 		if(g_Config.m_ClMessageFriend)
 		{
 			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendColor));
-			TextRender()->TextColor(rgb.SetAlpha(m_aLines[r].m_Friend ? 1.f : 0.f)); //Less ugly hack to align messages
+			TextRender()->TextColor(rgb.WithAlpha(m_aLines[r].m_Friend ? 1.f : 0.f)); //Less ugly hack to align messages
 			m_aLines[r].m_TextContainerIndex = TextRender()->CreateTextContainer(&Cursor, "♥ ");
 		}
 

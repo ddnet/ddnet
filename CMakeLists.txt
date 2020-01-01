@@ -42,10 +42,10 @@ set(ORIGINAL_CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
 set(OWN_CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 set(CMAKE_MODULE_PATH ${OWN_CMAKE_MODULE_PATH})
 
-if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-  set(TARGET_BITS "64")
-elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+if(CMAKE_SIZEOF_VOID_P EQUAL 4)
   set(TARGET_BITS "32")
+else()
+  set(TARGET_BITS "64")
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
@@ -1155,6 +1155,7 @@ set_glob(TOOLS GLOB src/tools
   dilate.cpp
   dummy_map.cpp
   fake_server.cpp
+  map_convert_07.cpp
   map_diff.cpp
   map_extract.cpp
   map_replace_image.cpp
@@ -1173,7 +1174,7 @@ foreach(ABS_T ${TOOLS})
     string(REGEX REPLACE "\\.cpp$" "" TOOL "${T}")
     set(TOOL_DEPS ${DEPS})
     set(TOOL_LIBS ${LIBS})
-    if(TOOL MATCHES "^(tileset_.*|dilate|map_extract|map_replace_image)$")
+    if(TOOL MATCHES "^(tileset_.*|dilate|map_convert_07|map_extract|map_replace_image)$")
       list(APPEND TOOL_DEPS ${PNGLITE_DEP})
       list(APPEND TOOL_LIBS ${PNGLITE_LIBRARIES})
       list(APPEND TOOL_INCLUDE_DIRS ${PNGLITE_INCLUDE_DIRS})
@@ -1424,13 +1425,15 @@ if(TARGET_OS STREQUAL "windows")
 endif()
 
 if(NOT DEV)
-  install(DIRECTORY data DESTINATION share/ddnet COMPONENT data)
-  install(TARGETS ${TARGET_CLIENT} DESTINATION bin COMPONENT client)
-  install(TARGETS ${TARGET_SERVER} DESTINATION bin COMPONENT server)
-  install(TARGETS ${TARGETS_TOOLS} DESTINATION lib/ddnet COMPONENT tools)
-  install(FILES other/ddnet.desktop DESTINATION share/applications COMPONENT client)
+  include(GNUInstallDirs)
+  install(DIRECTORY data DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/ddnet COMPONENT data)
+  install(TARGETS ${TARGET_CLIENT} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT client)
+  install(TARGETS ${TARGET_SERVER} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT server)
+  install(TARGETS ${TARGETS_TOOLS} DESTINATION ${CMAKE_INSTALL_LIBDIR}/ddnet COMPONENT tools)
+  install(FILES other/ddnet.desktop DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications COMPONENT client)
+  install(FILES other/ddnet.appdata.xml DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/metainfo COMPONENT client)
   foreach(SIZE 16 32 48 128 256 512)
-    install(FILES other/icons/DDNet_${SIZE}x${SIZE}x32.png DESTINATION share/icons/hicolor/${SIZE}x${SIZE}/apps RENAME ddnet.png COMPONENT client)
+    install(FILES other/icons/DDNet_${SIZE}x${SIZE}x32.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/${SIZE}x${SIZE}/apps RENAME ddnet.png COMPONENT client)
   endforeach()
 endif()
 
@@ -1610,7 +1613,11 @@ foreach(target ${TARGETS})
     target_compile_options(${target} PRIVATE ${OUR_FLAGS})
   endif()
   if(DEFINE_FORTIFY_SOURCE)
-    target_compile_definitions(${target} PRIVATE $<$<NOT:$<CONFIG:Debug>>:_FORTIFY_SOURCE=2>) # Detect some buffer overflows.
+    if(MINGW)
+      target_compile_definitions(${target} PRIVATE $<$<NOT:$<CONFIG:Debug>>:_FORTIFY_SOURCE=0>) # Currently broken in MinGW, see https://sourceforge.net/p/mingw-w64/discussion/723798/thread/b9d24f041f/
+    else()
+      target_compile_definitions(${target} PRIVATE $<$<NOT:$<CONFIG:Debug>>:_FORTIFY_SOURCE=2>) # Detect some buffer overflows.
+    endif()
   endif()
 endforeach()
 

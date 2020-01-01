@@ -5,6 +5,7 @@
 #include "kernel.h"
 
 #include "message.h"
+#include "graphics.h"
 #include <engine/friends.h>
 #include <engine/shared/config.h>
 
@@ -180,7 +181,7 @@ public:
 
 	virtual bool SoundInitFailed() = 0;
 
-	virtual int GetDebugFont() = 0;
+	virtual IGraphics::CTextureHandle GetDebugFont() = 0; // TODO: remove this function
 
 	//DDRace
 
