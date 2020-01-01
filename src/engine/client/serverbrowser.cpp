@@ -7,6 +7,7 @@
 #include <base/system.h>
 
 #include <engine/shared/config.h>
+#include <engine/shared/json.h>
 #include <engine/shared/memheap.h>
 #include <engine/shared/network.h>
 #include <engine/shared/protocol.h>
