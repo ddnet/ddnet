@@ -270,7 +270,7 @@ void CVideo::nextAudioFrame(void (*Mix)(short *pFinalOut, unsigned Frames))
 			swr_get_delay(
 				m_AudioStream.swr_ctx,
 				m_AudioStream.enc->sample_rate
-			) + m_AudioStream.tmp_frame->nb_samples * 2,
+			) + m_AudioStream.tmp_frame->nb_samples,
 		
 			m_AudioStream.enc->sample_rate,
 			m_AudioStream.enc->sample_rate, AV_ROUND_UP
@@ -284,7 +284,7 @@ void CVideo::nextAudioFrame(void (*Mix)(short *pFinalOut, unsigned Frames))
 			0, // pointer to linesize (int*)
 			(const uint8_t*)m_aBuffer,
 			2, // channels
-			m_AudioStream.tmp_frame->nb_samples * 2,
+			m_AudioStream.tmp_frame->nb_samples,
 			AV_SAMPLE_FMT_S16,
 			0 // align
 		);
@@ -298,9 +298,9 @@ void CVideo::nextAudioFrame(void (*Mix)(short *pFinalOut, unsigned Frames))
 		ret = swr_convert(
 			m_AudioStream.swr_ctx,
 			m_AudioStream.frame->data,
-			m_AudioStream.frame->nb_samples * 2,
+			m_AudioStream.frame->nb_samples,
 			(const uint8_t **)m_AudioStream.tmp_frame->data,
-			m_AudioStream.tmp_frame->nb_samples * 2
+			m_AudioStream.tmp_frame->nb_samples
 		);
 
 		if (ret < 0)
