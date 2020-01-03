@@ -97,7 +97,7 @@ private:
 	char m_Name[256];
 	//FILE *m_dbgfile;
 	int m_vseq;
-	short m_aBuffer[ALEN];
+	short m_aBuffer[ALEN*2];
 	int m_vframe;
 
 	int m_FPS;
