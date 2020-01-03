@@ -39,7 +39,7 @@ CVideo::CVideo(CGraphics_Threaded* pGraphics, IStorage* pStorage, IConsole *pCon
 	m_ProcessingAudioFrame = false;
 
 	m_NextFrame = false;
-
+	m_NextaFrame = false;
 
 	// TODO:
 	m_HasAudio = g_Config.m_ClVideoSndEnable;
