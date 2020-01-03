@@ -10,6 +10,8 @@
 
 #define STREAM_PIX_FMT AV_PIX_FMT_YUV420P /* default pix_fmt */
 
+const size_t format_nchannels = 3;
+
 CVideo::CVideo(CGraphics_Threaded* pGraphics, IStorage* pStorage, IConsole *pConsole, int width, int height, const char *name) :
 	m_pGraphics(pGraphics),
 	m_pStorage(pStorage),
@@ -89,6 +91,9 @@ void CVideo::start()
 
 	m_pFormat = m_pFormatContext->oformat;
 
+	size_t nvals = format_nchannels * m_Width * m_Height;
+	m_pPixels = (uint8_t *)malloc(nvals * sizeof(GLubyte));
+	m_pRGB = (uint8_t *)malloc(nvals * sizeof(uint8_t));
 
 
 	/* Add the audio and video streams using the default format codecs
@@ -134,6 +139,15 @@ void CVideo::start()
 		}
 	}
 
+	if (!m_VideoStream.sws_ctx)
+	{
+		m_VideoStream.sws_ctx = sws_getCachedContext(
+			m_VideoStream.sws_ctx,
+			m_VideoStream.enc->width, m_VideoStream.enc->height, AV_PIX_FMT_RGB24,
+			m_VideoStream.enc->width, m_VideoStream.enc->height, AV_PIX_FMT_YUV420P,
+			0, 0, 0, 0
+		);
+	}
 
 	/* Write the stream header, if any. */
 	int ret = avformat_write_header(m_pFormatContext, &m_pOptDict);
@@ -330,15 +344,6 @@ void CVideo::fill_audio_frame()
 void CVideo::fill_video_frame()
 {
 	const int in_linesize[1] = { 3 * m_VideoStream.enc->width };
-	if (!m_VideoStream.sws_ctx)
-	{
-		m_VideoStream.sws_ctx = sws_getCachedContext(
-			m_VideoStream.sws_ctx,
-			m_VideoStream.enc->width, m_VideoStream.enc->height, AV_PIX_FMT_RGB24,
-			m_VideoStream.enc->width, m_VideoStream.enc->height, AV_PIX_FMT_YUV420P,
-			0, 0, 0, 0
-		);
-	}
 	sws_scale(m_VideoStream.sws_ctx, (const uint8_t * const *)&m_pRGB, in_linesize, 0,
 			m_VideoStream.enc->height, m_VideoStream.frame->data, m_VideoStream.frame->linesize);
 }
@@ -346,11 +351,7 @@ void CVideo::fill_video_frame()
 void CVideo::read_rgb_from_gl()
 {
 	int i, j, k;
-	size_t cur_gl, cur_rgb, nvals;
-	const size_t format_nchannels = 3;
-	nvals = format_nchannels * m_Width * m_Height;
-	m_pPixels = (uint8_t *)realloc(m_pPixels, nvals * sizeof(GLubyte));
-	m_pRGB = (uint8_t *)realloc(m_pRGB, nvals * sizeof(uint8_t));
+	size_t cur_gl, cur_rgb;
 	/* Get RGBA to align to 32 bits instead of just 24 for RGB. May be faster for FFmpeg. */
 	glReadBuffer(GL_FRONT);
 	glReadPixels(0, 0, m_Width, m_Height, GL_RGB, GL_UNSIGNED_BYTE, m_pPixels);
