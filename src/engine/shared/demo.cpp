@@ -35,7 +35,7 @@ CDemoRecorder::CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool NoMapDat
 }
 
 // Record
-int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetVersion, const char *pMap, SHA256_DIGEST Sha256, unsigned Crc, const char *pType, unsigned int MapSize, unsigned char *pMapData, IOHANDLE MapFile, DEMOFUNC_FILTER pfnFilter, void *pUser)
+int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetVersion, const char *pMap, SHA256_DIGEST *pSha256, unsigned Crc, const char *pType, unsigned int MapSize, unsigned char *pMapData, IOHANDLE MapFile, DEMOFUNC_FILTER pfnFilter, void *pUser)
 {
 	m_pfnFilter = pfnFilter;
 	m_pUser = pUser;
@@ -68,13 +68,26 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	if(MapFile)
 		io_seek(MapFile, 0, IOSEEK_START);
 
+	char aSha256[SHA256_MAXSTRSIZE];
+	if(pSha256)
+		sha256_str(*pSha256, aSha256, sizeof(aSha256));
+
 	if(!pMapData && !MapFile)
 	{
 		// open mapfile
 		char aMapFilename[128];
 		// try the downloaded maps
-		str_format(aMapFilename, sizeof(aMapFilename), "downloadedmaps/%s_%08x.map", pMap, Crc);
-		MapFile = pStorage->OpenFile(aMapFilename, IOFLAG_READ, IStorage::TYPE_ALL);
+		if(pSha256)
+		{
+			str_format(aMapFilename, sizeof(aMapFilename), "downloadedmaps/%s_%08x_%s.map", pMap, Crc, aSha256);
+			MapFile = pStorage->OpenFile(aMapFilename, IOFLAG_READ, IStorage::TYPE_ALL);
+		}
+		if(!MapFile)
+		{
+			// try the downloaded maps without sha
+			str_format(aMapFilename, sizeof(aMapFilename), "downloadedmaps/%s_%08x.map", pMap, Crc);
+			MapFile = pStorage->OpenFile(aMapFilename, IOFLAG_READ, IStorage::TYPE_ALL);
+		}
 		if(!MapFile)
 		{
 			// try the normal maps folder
@@ -125,7 +138,7 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 
 	//Write Sha256
 	io_write(DemoFile, SHA256_EXTENSION.m_aData, sizeof(SHA256_EXTENSION.m_aData));
-	io_write(DemoFile, &Sha256, sizeof(SHA256_DIGEST));
+	io_write(DemoFile, pSha256, sizeof(SHA256_DIGEST));
 
 	if(m_NoMapData)
 	{
@@ -1085,7 +1098,7 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 			Sha256 = pMapInfo->m_Sha256;
 	}
 
-	if (m_pDemoRecorder->Start(m_pStorage, m_pConsole, pDst, m_pNetVersion, pMapInfo->m_aName, Sha256, pMapInfo->m_Crc, "client", pMapInfo->m_Size, NULL, NULL, pfnFilter, pUser) == -1)
+	if (m_pDemoRecorder->Start(m_pStorage, m_pConsole, pDst, m_pNetVersion, pMapInfo->m_aName, &Sha256, pMapInfo->m_Crc, "client", pMapInfo->m_Size, NULL, NULL, pfnFilter, pUser) == -1)
 		return;
 
 
