@@ -354,7 +354,11 @@ void CVideo::read_rgb_from_gl()
 	size_t cur_gl, cur_rgb;
 	/* Get RGBA to align to 32 bits instead of just 24 for RGB. May be faster for FFmpeg. */
 	glReadBuffer(GL_FRONT);
+	GLint Alignment;
+	glGetIntegerv(GL_PACK_ALIGNMENT, &Alignment);
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	glReadPixels(0, 0, m_Width, m_Height, GL_RGB, GL_UNSIGNED_BYTE, m_pPixels);
+	glPixelStorei(GL_PACK_ALIGNMENT, Alignment);
 	for (i = 0; i < m_Height; i++)
 	{
 		for (j = 0; j < m_Width; j++)
