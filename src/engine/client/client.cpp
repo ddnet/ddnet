@@ -3541,66 +3541,17 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 
 	return 0;
 }
+
 #if defined(CONF_VIDEORECORDER)
 const char *CClient::DemoPlayer_Render(const char *pFilename, int StorageType, const char *pVideoName, int SpeedIndex)
 {
-	int Crc;
-	const char *pError;
-	Disconnect();
-	m_NetClient[0].ResetErrorString();
-
-	// try to start playback
-	m_DemoPlayer.SetListener(this);
-
-	if(m_DemoPlayer.Load(Storage(), m_pConsole, pFilename, StorageType))
-		return "error loading demo";
-
-	// load map
-	Crc = m_DemoPlayer.GetMapInfo()->m_Crc;
-	SHA256_DIGEST Sha = m_DemoPlayer.GetMapInfo()->m_Sha256;
-	pError = LoadMapSearch(m_DemoPlayer.Info()->m_Header.m_aMapName, Sha != SHA256_ZEROED ? &Sha : nullptr, Crc);
-	if(pError)
-	{
-		if(!m_DemoPlayer.ExtractMap(Storage()))
-			return pError;
-
-		Sha = m_DemoPlayer.GetMapInfo()->m_Sha256;
-		pError = LoadMapSearch(m_DemoPlayer.Info()->m_Header.m_aMapName, &Sha, Crc);
-		if(pError)
-		{
-			DisconnectWithReason(pError);
-			return pError;
-		}
-	}
-
-	GameClient()->OnConnected();
-
-	// setup buffers
-	mem_zero(m_aDemorecSnapshotData, sizeof(m_aDemorecSnapshotData));
-
-	m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] = &m_aDemorecSnapshotHolders[SNAP_CURRENT];
-	m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV] = &m_aDemorecSnapshotHolders[SNAP_PREV];
-
-	m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_pSnap = (CSnapshot *)m_aDemorecSnapshotData[SNAP_CURRENT][0];
-	m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_pAltSnap = (CSnapshot *)m_aDemorecSnapshotData[SNAP_CURRENT][1];
-	m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_SnapSize = 0;
-	m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_Tick = -1;
-
-	m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_pSnap = (CSnapshot *)m_aDemorecSnapshotData[SNAP_PREV][0];
-	m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_pAltSnap = (CSnapshot *)m_aDemorecSnapshotData[SNAP_PREV][1];
-	m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_SnapSize = 0;
-	m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick = -1;
-
-	// enter demo playback state
-	SetState(IClient::STATE_DEMOPLAYBACK);
+	DemoPlayer_Play(pFilename, StorageType);
 	m_ButtonRender = true;
 
 	this->CClient::StartVideo(NULL, this, pVideoName);
 	m_DemoPlayer.Play();
 	m_DemoPlayer.SetSpeed(g_aSpeeds[SpeedIndex]);
 	//m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "demo_recorder", "demo eof");
-	GameClient()->OnEnterGame();
-
 	return 0;
 }
 #endif
