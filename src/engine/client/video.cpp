@@ -504,7 +504,7 @@ void CVideo::open_audio()
 
 	m_AudioStream.frame	 = alloc_audio_frame(c->sample_fmt, c->channel_layout, c->sample_rate, nb_samples);
 
-	m_AudioStream.tmp_frame = alloc_audio_frame(AV_SAMPLE_FMT_S16, AV_CH_LAYOUT_STEREO, g_Config.m_SndRate, m_SndBufferSize);
+	m_AudioStream.tmp_frame = alloc_audio_frame(AV_SAMPLE_FMT_S16, AV_CH_LAYOUT_STEREO, g_Config.m_SndRate, m_SndBufferSize * 2);
 
 	/* copy the stream parameters to the muxer */
 	ret = avcodec_parameters_from_context(m_AudioStream.st->codecpar, c);
