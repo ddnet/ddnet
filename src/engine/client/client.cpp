@@ -3556,15 +3556,21 @@ const char *CClient::DemoPlayer_Render(const char *pFilename, int StorageType, c
 		return "error loading demo";
 
 	// load map
-	Crc = (m_DemoPlayer.Info()->m_Header.m_aMapCrc[0]<<24)|
-		(m_DemoPlayer.Info()->m_Header.m_aMapCrc[1]<<16)|
-		(m_DemoPlayer.Info()->m_Header.m_aMapCrc[2]<<8)|
-		(m_DemoPlayer.Info()->m_Header.m_aMapCrc[3]);
-	pError = LoadMapSearch(m_DemoPlayer.Info()->m_Header.m_aMapName, 0, Crc);
+	Crc = m_DemoPlayer.GetMapInfo()->m_Crc;
+	SHA256_DIGEST Sha = m_DemoPlayer.GetMapInfo()->m_Sha256;
+	pError = LoadMapSearch(m_DemoPlayer.Info()->m_Header.m_aMapName, Sha != SHA256_ZEROED ? &Sha : nullptr, Crc);
 	if(pError)
 	{
-		DisconnectWithReason(pError);
-		return pError;
+		if(!m_DemoPlayer.ExtractMap(Storage()))
+			return pError;
+
+		Sha = m_DemoPlayer.GetMapInfo()->m_Sha256;
+		pError = LoadMapSearch(m_DemoPlayer.Info()->m_Header.m_aMapName, &Sha, Crc);
+		if(pError)
+		{
+			DisconnectWithReason(pError);
+			return pError;
+		}
 	}
 
 	GameClient()->OnConnected();
