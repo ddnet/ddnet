@@ -3545,7 +3545,10 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 #if defined(CONF_VIDEORECORDER)
 const char *CClient::DemoPlayer_Render(const char *pFilename, int StorageType, const char *pVideoName, int SpeedIndex)
 {
-	DemoPlayer_Play(pFilename, StorageType);
+	const char *pError;
+	pError = DemoPlayer_Play(pFilename, StorageType);
+	if(pError)
+		return pError;
 	m_ButtonRender = true;
 
 	this->CClient::StartVideo(NULL, this, pVideoName);
