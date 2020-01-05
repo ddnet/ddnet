@@ -211,7 +211,7 @@ void CVideo::nextVideoFrame_thread()
 		m_vseq += 1;
 		if(m_vseq >= 2)
 		{
-			m_VideoStream.frame->pts = m_VideoStream.enc->frame_number;
+			m_VideoStream.frame->pts = (int64_t)m_VideoStream.enc->frame_number;
 			dbg_msg("video_recorder", "vframe: %d", m_VideoStream.enc->frame_number);
 
 			read_rgb_from_gl();
@@ -630,8 +630,11 @@ void CVideo::add_stream(OutputStream *ost, AVFormatContext *oc, AVCodec **codec,
 			}
 			if (codec_id == AV_CODEC_ID_H264)
 			{
-				av_opt_set(c->priv_data, "preset", "slow", 0);
-				av_opt_set(c->priv_data, "crf", "22", 0);
+				const char *presets[10] = {"ultrafast", "superfast", "veryfast", "faster", "fast", "medium", "slow", "slower", "veryslow", "placebo"};
+				//av_opt_set(c->priv_data, "preset", "slow", 0);
+				//av_opt_set_int(c->priv_data, "crf", 22, 0);
+				av_opt_set(c->priv_data, "preset", presets[g_Config.m_ClVideoX264Preset], 0);
+				av_opt_set_int(c->priv_data, "crf", g_Config.m_ClVideoX264Crf, 0);
 			}
 		break;
 
