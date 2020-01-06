@@ -202,24 +202,24 @@ void CVideo::stop()
 
 void CVideo::nextVideoFrame_thread()
 {
-	if (m_NextFrame && m_Recording)
+	if (m_NextFrame && m_Recording && !m_ProcessingAudioFrame)
 	{
-		m_ProcessingVideoFrame = true;
 		// #ifdef CONF_PLATFORM_MACOSX
 		// 	CAutoreleasePool AutoreleasePool;
 		// #endif
 		m_vseq += 1;
 		if(m_vseq >= 2)
 		{
+			m_ProcessingVideoFrame = true;
 			m_VideoStream.frame->pts = (int64_t)m_VideoStream.enc->frame_number;
 			dbg_msg("video_recorder", "vframe: %d", m_VideoStream.enc->frame_number);
 
 			read_rgb_from_gl();
 			fill_video_frame();
 			write_frame(&m_VideoStream);
+			m_ProcessingVideoFrame = false;
 		}
 
-		m_ProcessingVideoFrame = false;
 		m_NextFrame = false;
 		// sync_barrier();
 		// m_Semaphore.signal();
@@ -252,7 +252,8 @@ void CVideo::nextAudioFrame_timeline()
 {
 	if (m_Recording && m_HasAudio && !m_NextaFrame)
 	{
-		if ((double)(m_vframe/m_FPS) >= m_AudioStream.enc->frame_number*m_AudioStream.enc->frame_size/m_AudioStream.enc->sample_rate)
+		//if (m_vframe * m_AudioStream.enc->sample_rate / m_FPS >= m_AudioStream.enc->frame_number*m_AudioStream.enc->frame_size)
+		if (m_VideoStream.enc->frame_number * (double)m_AudioStream.enc->sample_rate / m_FPS >= (double)m_AudioStream.enc->frame_number*m_AudioStream.enc->frame_size)
 		{
 			m_NextaFrame = true;
 		}
@@ -261,7 +262,7 @@ void CVideo::nextAudioFrame_timeline()
 
 void CVideo::nextAudioFrame(void (*Mix)(short *pFinalOut, unsigned Frames))
 {
-	if (m_NextaFrame && m_Recording && m_HasAudio)
+	if (m_NextaFrame && m_Recording && m_HasAudio && !m_ProcessingVideoFrame)
 	{
 		m_ProcessingAudioFrame = true;
 		//dbg_msg("video recorder", "video_frame: %lf", (double)(m_vframe/m_FPS));

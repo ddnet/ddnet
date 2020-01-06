@@ -2520,8 +2520,8 @@ void CClient::Update()
 		if (IVideo::Current()->frameRendered())
 		{
 			IVideo::Current()->nextVideoFrame();
-			IVideo::Current()->nextAudioFrame_timeline();
 		}
+		IVideo::Current()->nextAudioFrame_timeline();
 	}
 	else if(m_ButtonRender)
 		Disconnect();
