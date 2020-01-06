@@ -63,6 +63,19 @@ void CGameContext::ConInfo(IConsole::IResult *pResult, void *pUserData)
 			"Or visit DDNet.tw");
 }
 
+void CGameContext::ConList(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int ClientID = pResult->m_ClientID;
+	if(!CheckClientID(ClientID)) return;
+
+	char zerochar = 0;
+	if(pResult->NumArguments() > 0)
+		pSelf->List(ClientID, pResult->GetString(0));
+	else
+		pSelf->List(ClientID, &zerochar);
+}
+
 void CGameContext::ConHelp(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
