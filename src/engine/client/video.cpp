@@ -202,8 +202,10 @@ void CVideo::stop()
 
 void CVideo::nextVideoFrame_thread()
 {
-	if (m_NextFrame && m_Recording && !m_ProcessingAudioFrame)
+	if (m_NextFrame && m_Recording)
 	{
+		while(m_ProcessingAudioFrame)
+			continue;
 		// #ifdef CONF_PLATFORM_MACOSX
 		// 	CAutoreleasePool AutoreleasePool;
 		// #endif
@@ -262,8 +264,10 @@ void CVideo::nextAudioFrame_timeline()
 
 void CVideo::nextAudioFrame(void (*Mix)(short *pFinalOut, unsigned Frames))
 {
-	if (m_NextaFrame && m_Recording && m_HasAudio && !m_ProcessingVideoFrame)
+	if (m_NextaFrame && m_Recording && m_HasAudio)
 	{
+		while(m_ProcessingVideoFrame)
+			continue;
 		m_ProcessingAudioFrame = true;
 		//dbg_msg("video recorder", "video_frame: %lf", (double)(m_vframe/m_FPS));
 		//if((double)(m_vframe/m_FPS) < m_AudioStream.enc->frame_number*m_AudioStream.enc->frame_size/m_AudioStream.enc->sample_rate)
