@@ -66,6 +66,7 @@ public:
 
 	virtual void nextAudioFrame(void (*Mix)(short *pFinalOut, unsigned Frames));
 	virtual void nextAudioFrame_timeline();
+	virtual bool aframeRendered() { return !m_NextaFrame; }
 
 	static IVideo* Current() { return IVideo::ms_pCurrentVideo; }
 

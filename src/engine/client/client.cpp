@@ -2518,10 +2518,9 @@ void CClient::Update()
 	if (m_DemoPlayer.IsPlaying() && IVideo::Current())
 	{
 		if (IVideo::Current()->frameRendered())
-		{
 			IVideo::Current()->nextVideoFrame();
-		}
-		IVideo::Current()->nextAudioFrame_timeline();
+		if (IVideo::Current()->aframeRendered())
+			IVideo::Current()->nextAudioFrame_timeline();
 	}
 	else if(m_ButtonRender)
 		Disconnect();

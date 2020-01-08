@@ -11,6 +11,7 @@
 #define STREAM_PIX_FMT AV_PIX_FMT_YUV420P /* default pix_fmt */
 
 const size_t format_nchannels = 3;
+static LOCK m_WriteLock = 0;
 
 CVideo::CVideo(CGraphics_Threaded* pGraphics, IStorage* pStorage, IConsole *pConsole, int width, int height, const char *name) :
 	m_pGraphics(pGraphics),
@@ -52,11 +53,13 @@ CVideo::CVideo(CGraphics_Threaded* pGraphics, IStorage* pStorage, IConsole *pCon
 
 	ms_TickTime = time_freq() / m_FPS;
 	ms_pCurrentVideo = this;
+	m_WriteLock = lock_create();
 }
 
 CVideo::~CVideo()
 {
 	ms_pCurrentVideo = 0;
+	lock_destroy(m_WriteLock);
 }
 
 void CVideo::start()
@@ -204,8 +207,6 @@ void CVideo::nextVideoFrame_thread()
 {
 	if (m_NextFrame && m_Recording)
 	{
-		while(m_ProcessingAudioFrame)
-			continue;
 		// #ifdef CONF_PLATFORM_MACOSX
 		// 	CAutoreleasePool AutoreleasePool;
 		// #endif
@@ -252,7 +253,7 @@ void CVideo::nextVideoFrame()
 
 void CVideo::nextAudioFrame_timeline()
 {
-	if (m_Recording && m_HasAudio && !m_NextaFrame)
+	if (m_Recording && m_HasAudio)
 	{
 		//if (m_vframe * m_AudioStream.enc->sample_rate / m_FPS >= m_AudioStream.enc->frame_number*m_AudioStream.enc->frame_size)
 		if (m_VideoStream.enc->frame_number * (double)m_AudioStream.enc->sample_rate / m_FPS >= (double)m_AudioStream.enc->frame_number*m_AudioStream.enc->frame_size)
@@ -266,8 +267,6 @@ void CVideo::nextAudioFrame(void (*Mix)(short *pFinalOut, unsigned Frames))
 {
 	if (m_NextaFrame && m_Recording && m_HasAudio)
 	{
-		while(m_ProcessingVideoFrame)
-			continue;
 		m_ProcessingAudioFrame = true;
 		//dbg_msg("video recorder", "video_frame: %lf", (double)(m_vframe/m_FPS));
 		//if((double)(m_vframe/m_FPS) < m_AudioStream.enc->frame_number*m_AudioStream.enc->frame_size/m_AudioStream.enc->sample_rate)
@@ -675,12 +674,14 @@ void CVideo::write_frame(OutputStream* pStream)
 			av_packet_rescale_ts(&Packet, pStream->enc->time_base, pStream->st->time_base);
 			Packet.stream_index = pStream->st->index;
 
+			lock_wait(m_WriteLock);
 			if (int ret = av_interleaved_write_frame(m_pFormatContext, &Packet))
 			{
 				char aBuf[AV_ERROR_MAX_STRING_SIZE];
 				av_strerror(ret, aBuf, sizeof(aBuf));
 				dbg_msg("video_recorder", "Error while writing video frame: %s", aBuf);
 			}
+			lock_unlock(m_WriteLock);
 		}
 		else
 			break;

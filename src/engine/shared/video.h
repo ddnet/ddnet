@@ -16,6 +16,7 @@ public:
 	virtual void nextVideoFrame_thread() = 0;
 
 	virtual void nextAudioFrame(void (*Mix)(short *pFinalOut, unsigned Frames)) = 0;
+	virtual bool aframeRendered() = 0;
 	virtual void nextAudioFrame_timeline() = 0;
 
 

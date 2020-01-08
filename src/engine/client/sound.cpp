@@ -287,6 +287,8 @@ static void SdlCallback(void *pUnused, Uint8 *pStream, int Len)
 #if defined(CONF_VIDEORECORDER)
 	if (!(IVideo::Current() && g_Config.m_ClVideoSndEnable))
 		Mix((short *)pStream, Len/2/2);
+	else
+		IVideo::Current()->nextAudioFrame(Mix);
 #else
 	Mix((short *)pStream, Len/2/2);
 #endif
@@ -357,11 +359,10 @@ int CSound::Update()
 		m_SoundVolume = WantedVolume;
 		lock_unlock(m_SoundLock);
 	}
-#if defined(CONF_VIDEORECORDER)
-	if(IVideo::Current() && g_Config.m_ClVideoSndEnable)
-		IVideo::Current()->nextAudioFrame(Mix);
-#endif
-
+//#if defined(CONF_VIDEORECORDER)
+//	if(IVideo::Current() && g_Config.m_ClVideoSndEnable)
+//		IVideo::Current()->nextAudioFrame(Mix);
+//#endif
 	return 0;
 }
 
