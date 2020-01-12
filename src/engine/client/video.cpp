@@ -329,7 +329,7 @@ void CVideo::nextAudioFrame(void (*Mix)(short *pFinalOut, unsigned Frames))
 
 		// frame = ost->frame;
 		//
-		m_AudioStream.frame->pts = av_rescale_q(m_AudioStream.samples_count, (AVRational){1, m_AudioStream.enc->sample_rate}, m_AudioStream.enc->time_base);
+		m_AudioStream.frame->pts = av_rescale_q(m_AudioStream.samples_count, AVRational{1, m_AudioStream.enc->sample_rate}, m_AudioStream.enc->time_base);
 		m_AudioStream.samples_count += dst_nb_samples;
 
 		// dbg_msg("video_recorder", "prewrite----");
@@ -655,7 +655,7 @@ void CVideo::add_stream(OutputStream *ost, AVFormatContext *oc, AVCodec **codec,
 
 void CVideo::write_frame(OutputStream* pStream)
 {
-
+	lock_wait(m_WriteLock);
 	int ret_recv = 0;
 
 	AVPacket Packet = { 0 };
@@ -674,14 +674,12 @@ void CVideo::write_frame(OutputStream* pStream)
 			av_packet_rescale_ts(&Packet, pStream->enc->time_base, pStream->st->time_base);
 			Packet.stream_index = pStream->st->index;
 
-			lock_wait(m_WriteLock);
 			if (int ret = av_interleaved_write_frame(m_pFormatContext, &Packet))
 			{
 				char aBuf[AV_ERROR_MAX_STRING_SIZE];
 				av_strerror(ret, aBuf, sizeof(aBuf));
 				dbg_msg("video_recorder", "Error while writing video frame: %s", aBuf);
 			}
-			lock_unlock(m_WriteLock);
 		}
 		else
 			break;
@@ -691,6 +689,7 @@ void CVideo::write_frame(OutputStream* pStream)
 	{
 		dbg_msg("video_recorder", "Error encoding frame, error: %d", ret_recv);
 	}
+	lock_unlock(m_WriteLock);
 }
 
 void CVideo::finish_frames(OutputStream* pStream)
