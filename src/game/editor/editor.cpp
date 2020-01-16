@@ -5321,9 +5321,9 @@ void CEditor::RenderServerSettingsEditor(CUIRect View)
 		{
 			ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
 			Button.VSplitRight(5.0f, &Button, 0);
-			static int s_AddButton = 0;
-			if(DoButton_Editor(&s_AddButton, "Del", 0, &Button, 0, "Delete a command from the command list.")
-				|| Input()->KeyPress(KEY_DELETE))
+			static int s_DelButton = 0;
+			if(DoButton_Editor(&s_DelButton, "Del", 0, &Button, 0, "Delete a command from the command list.")
+				|| (Input()->KeyPress(KEY_DELETE) && UI()->LastActiveItem() != &m_CommandBox))
 				if(s_CommandSelectedIndex > -1 && s_CommandSelectedIndex < m_Map.m_lSettings.size())
 					m_Map.m_lSettings.remove_index(s_CommandSelectedIndex);
 		}
