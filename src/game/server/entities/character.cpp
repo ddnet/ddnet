@@ -1152,6 +1152,9 @@ void CCharacter::Snap(int SnappingClient)
 	pCharacter->m_PlayerFlags = GetPlayer()->m_PlayerFlags;
 
 	CNetObj_DDNetCharacter *pDDNetCharacter = static_cast<CNetObj_DDNetCharacter *>(Server()->SnapNewItem(NETOBJTYPE_DDNETCHARACTER, id, sizeof(CNetObj_DDNetCharacter)));
+	if(!pDDNetCharacter)
+		return;
+
 	pDDNetCharacter->m_Flags = 0;
 	if(m_Solo)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_SOLO;
