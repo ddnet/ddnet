@@ -508,10 +508,10 @@ void CLayerTiles::BrushFlipX()
 			m_pTiles[y*m_Width+m_Width-1-x] = Tmp;
 		}
 
-	if(m_Tele || m_Switch || m_Speedup || m_Tune)
+	if(m_Tele || m_Speedup || m_Tune)
 		return;
 
-	bool Rotate = !(m_Game || m_Front) || m_pEditor->m_AllowPlaceUnusedTiles;
+	bool Rotate = !(m_Game || m_Front || m_Switch) || m_pEditor->m_AllowPlaceUnusedTiles;
 	for(int y = 0; y < m_Height; y++)
 		for(int x = 0; x < m_Width; x++)
 			if(!Rotate && !IsRotatableTile(m_pTiles[y*m_Width+x].m_Index))
@@ -530,10 +530,10 @@ void CLayerTiles::BrushFlipY()
 			m_pTiles[(m_Height-1-y)*m_Width+x] = Tmp;
 		}
 
-	if(m_Tele || m_Switch || m_Speedup || m_Tune)
+	if(m_Tele || m_Speedup || m_Tune)
 		return;
 
-	bool Rotate = !(m_Game || m_Front) || m_pEditor->m_AllowPlaceUnusedTiles;
+	bool Rotate = !(m_Game || m_Front || m_Switch) || m_pEditor->m_AllowPlaceUnusedTiles;
 	for(int y = 0; y < m_Height; y++)
 		for(int x = 0; x < m_Width; x++)
 			if(!Rotate && !IsRotatableTile(m_pTiles[y*m_Width+x].m_Index))
@@ -1731,6 +1731,7 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 				m_pSwitchTile[fy*m_Width+fx].m_Type = l->m_pTiles[y*l->m_Width+x].m_Index;
 				m_pSwitchTile[fy*m_Width+fx].m_Flags = l->m_pTiles[y*l->m_Width+x].m_Flags;
 				m_pTiles[fy*m_Width+fx].m_Index = l->m_pTiles[y*l->m_Width+x].m_Index;
+				m_pTiles[fy*m_Width+fx].m_Flags = l->m_pTiles[y*l->m_Width+x].m_Flags;
 			}
 			else
 			{
@@ -1800,6 +1801,12 @@ void CLayerSwitch::BrushRotate(float Amount)
 			{
 				*pDst1 = pTempData1[y*m_Width+x];
 				*pDst2 = pTempData2[y*m_Width+x];
+				if(IsRotatableTile(pDst2->m_Index))
+				{
+					if(pDst2->m_Flags&TILEFLAG_ROTATE)
+						pDst2->m_Flags ^= (TILEFLAG_HFLIP|TILEFLAG_VFLIP);
+					pDst2->m_Flags ^= TILEFLAG_ROTATE;
+				}
 			}
 
 		int Temp = m_Width;
