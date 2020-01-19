@@ -11,7 +11,7 @@ endif()
 if(NOT ZLIB_FOUND)
   set(ZLIB_BUNDLED ON)
   set(ZLIB_SRC_DIR src/engine/external/zlib)
-  set_glob(ZLIB_SRC GLOB ${ZLIB_SRC_DIR}
+  set_src(ZLIB_SRC GLOB ${ZLIB_SRC_DIR}
     adler32.c
     compress.c
     crc32.c
