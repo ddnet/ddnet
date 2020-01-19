@@ -193,8 +193,12 @@ endif()
 # COMMON FUNCTIONS
 ########################################################################
 
-function(set_glob VAR GLOBBING DIRECTORY) # ...
-  file(${GLOBBING} GLOB_RESULT "${DIRECTORY}/*.c" "${DIRECTORY}/*.cpp" "${DIRECTORY}/*.h")
+function(set_glob VAR GLOBBING EXTS DIRECTORY) # ...
+  set(GLOBS)
+  foreach(ext ${EXTS})
+    list(APPEND GLOBS "${DIRECTORY}/*.${ext}")
+  endforeach()
+  file(${GLOBBING} GLOB_RESULT ${GLOBS})
   list(SORT GLOB_RESULT)
   set(FILES)
   foreach(file ${ARGN})
@@ -230,6 +234,11 @@ function(set_glob VAR GLOBBING DIRECTORY) # ...
   endif()
 
   set(${VAR} ${FILES} PARENT_SCOPE)
+endfunction()
+
+function(set_src VAR GLOBBING DIRECTORY) # ...
+  set_glob(${VAR} ${GLOBBING} "c;cpp;h" ${DIRECTORY} ${ARGN})
+  set(${VAR} ${${VAR}} PARENT_SCOPE)
 endfunction()
 
 ########################################################################
@@ -517,11 +526,10 @@ endif()
 # DEPENDENCY COMPILATION
 ########################################################################
 
-# Static dependencies
-set_glob(DEP_JSON_SRC GLOB src/engine/external/json-parser json.c json.h)
+set_src(DEP_JSON_SRC GLOB src/engine/external/json-parser json.c json.h)
 add_library(json EXCLUDE_FROM_ALL OBJECT ${DEP_JSON_SRC})
 
-set_glob(DEP_MD5_SRC GLOB src/engine/external/md5 md5.c md5.h)
+set_src(DEP_MD5_SRC GLOB src/engine/external/md5 md5.c md5.h)
 add_library(md5 EXCLUDE_FROM_ALL OBJECT ${DEP_MD5_SRC})
 
 list(APPEND TARGETS_DEP json md5)
@@ -596,7 +604,7 @@ generate_source("src/game/generated/server_data.h" "server_content_header")
 ########################################################################
 
 # Sources
-set_glob(BASE GLOB_RECURSE src/base
+set_src(BASE GLOB_RECURSE src/base
   color.h
   detect.h
   hash.c
@@ -622,7 +630,7 @@ set_glob(BASE GLOB_RECURSE src/base
   unicode/tolower_data.h
   vmath.h
 )
-set_glob(ENGINE_INTERFACE GLOB src/engine
+set_src(ENGINE_INTERFACE GLOB src/engine
   client.h
   config.h
   console.h
@@ -646,7 +654,7 @@ set_glob(ENGINE_INTERFACE GLOB src/engine
   updater.h
   uuid.h
 )
-set_glob(ENGINE_SHARED GLOB src/engine/shared
+set_src(ENGINE_SHARED GLOB src/engine/shared
   compression.cpp
   compression.h
   config.cpp
@@ -711,7 +719,7 @@ set_glob(ENGINE_SHARED GLOB src/engine/shared
   websockets.cpp
   websockets.h
 )
-set_glob(GAME_SHARED GLOB src/game
+set_src(GAME_SHARED GLOB src/game
   collision.cpp
   collision.h
   ddracecommands.h
@@ -783,7 +791,7 @@ list(APPEND TARGETS_OWN engine-shared game-shared)
 
 if(CLIENT)
   # Sources
-  set_glob(ENGINE_CLIENT GLOB src/engine/client
+  set_src(ENGINE_CLIENT GLOB src/engine/client
     backend_sdl.cpp
     backend_sdl.h
     client.cpp
@@ -811,7 +819,7 @@ if(CLIENT)
     updater.cpp
     updater.h
   )
-  set_glob(GAME_CLIENT GLOB_RECURSE src/game/client
+  set_src(GAME_CLIENT GLOB_RECURSE src/game/client
     animstate.cpp
     animstate.h
     component.h
@@ -907,7 +915,7 @@ if(CLIENT)
     ui.cpp
     ui.h
   )
-  set_glob(GAME_EDITOR GLOB src/game/editor
+  set_src(GAME_EDITOR GLOB src/game/editor
     auto_map.cpp
     auto_map.h
     editor.cpp
@@ -1012,7 +1020,7 @@ endif()
 ########################################################################
 
 # Sources
-set_glob(ENGINE_SERVER GLOB src/engine/server
+set_src(ENGINE_SERVER GLOB src/engine/server
   authmanager.cpp
   authmanager.h
   name_ban.cpp
@@ -1028,7 +1036,7 @@ set_glob(ENGINE_SERVER GLOB src/engine/server
   sql_string_helpers.cpp
   sql_string_helpers.h
 )
-set_glob(GAME_SERVER GLOB_RECURSE src/game/server
+set_src(GAME_SERVER GLOB_RECURSE src/game/server
   ddracechat.cpp
   ddracechat.h
   ddracecommands.cpp
@@ -1125,8 +1133,8 @@ endif()
 # VARIOUS TARGETS
 ########################################################################
 
-set_glob(MASTERSRV_SRC GLOB src/mastersrv mastersrv.cpp mastersrv.h)
-set_glob(TWPING_SRC GLOB src/twping twping.cpp)
+set_src(MASTERSRV_SRC GLOB src/mastersrv mastersrv.cpp mastersrv.h)
+set_src(TWPING_SRC GLOB src/twping twping.cpp)
 
 set(TARGET_MASTERSRV mastersrv)
 set(TARGET_TWPING twping)
@@ -1141,7 +1149,7 @@ list(APPEND TARGETS_OWN ${TARGET_MASTERSRV} ${TARGET_TWPING})
 list(APPEND TARGETS_LINK ${TARGET_MASTERSRV} ${TARGET_TWPING})
 
 set(TARGETS_TOOLS)
-set_glob(TOOLS GLOB src/tools
+set_src(TOOLS GLOB src/tools
   config_common.h
   config_retrieve.cpp
   config_store.cpp
@@ -1203,7 +1211,7 @@ add_custom_target(everything DEPENDS ${TARGETS_OWN})
 ########################################################################
 
 if(GTEST_FOUND OR DOWNLOAD_GTEST)
-  set_glob(TESTS GLOB src/test
+  set_src(TESTS GLOB src/test
     aio.cpp
     color.cpp
     datafile.cpp
