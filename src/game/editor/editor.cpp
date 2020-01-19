@@ -3408,6 +3408,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 						if (m_lSelectedLayers[j] == i)
 						{
 							Checked = 1;
+							break;
 						}
 					}
 				}
