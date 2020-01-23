@@ -1536,7 +1536,7 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 					m_Map.m_UndoModified++;
 
 					static int s_SourcePopupID = 0;
-					UiInvokePopupMenu(&s_SourcePopupID, 0, UI()->MouseX(), UI()->MouseY(), 180, 200, PopupSource);
+					UiInvokePopupMenu(&s_SourcePopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 200, PopupSource);
 					m_LockMouse = false;
 				}
 				s_Operation = OP_NONE;
@@ -1741,7 +1741,7 @@ void CEditor::DoQuad(CQuad *q, int Index)
 					m_SelectedQuadIndex = FindSelectedQuadIndex(Index);
 
 					static int s_QuadPopupID = 0;
-					UiInvokePopupMenu(&s_QuadPopupID, 0, UI()->MouseX(), UI()->MouseY(), 160, 180, PopupQuad);
+					UiInvokePopupMenu(&s_QuadPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 180, PopupQuad);
 					m_LockMouse = false;
 				}
 				s_Operation = OP_NONE;
@@ -3252,15 +3252,20 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			CUIRect Inc, Dec;
 			char aBuf[64];
 			float FontSize = 10.0f;
+			int CurValue = pProps[i].m_Value;
 
 			Shifter.VSplitRight(10.0f, &Shifter, &Inc);
 			Shifter.VSplitLeft(10.0f, &Dec, &Shifter);
 
-			if(pProps[i].m_Value <= 0)
+			if(CurValue <= 0)
 				str_copy(aBuf, "None", sizeof(aBuf));
 			else
 			{
-				str_format(aBuf, sizeof(aBuf), "%s", m_Map.m_lEnvelopes[pProps[i].m_Value - 1]->m_aName);
+				if(m_Map.m_lEnvelopes[CurValue - 1]->m_aName[0])
+					str_format(aBuf, sizeof(aBuf), "%d: %s", CurValue, m_Map.m_lEnvelopes[CurValue - 1]->m_aName);
+				else
+					str_format(aBuf, sizeof(aBuf), "%d", CurValue);
+
 				while(TextRender()->TextWidth(0, FontSize, aBuf, -1) > Shifter.w)
 				{
 					if(FontSize > 6.0f)
@@ -3479,7 +3484,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 					}
 					static int s_LayerPopupID = 0;
 					if(Result == 2)
-						UiInvokePopupMenu(&s_LayerPopupID, 0, UI()->MouseX(), UI()->MouseY(), 180, 300, PopupLayer);
+						UiInvokePopupMenu(&s_LayerPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 300, PopupLayer);
 				}
 
 				LayerCur += 14.0f;
