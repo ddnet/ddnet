@@ -3247,6 +3247,53 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 				Change = i;
 			}
 		}
+		else if(pProps[i].m_Type == PROPTYPE_ENVELOPE)
+		{
+			CUIRect Inc, Dec;
+			char aBuf[64];
+			float FontSize = 10.0f;
+			int CurValue = pProps[i].m_Value;
+
+			Shifter.VSplitRight(10.0f, &Shifter, &Inc);
+			Shifter.VSplitLeft(10.0f, &Dec, &Shifter);
+
+			if(CurValue <= 0)
+				str_copy(aBuf, "None", sizeof(aBuf));
+			else
+			{
+				if(m_Map.m_lEnvelopes[CurValue - 1]->m_aName[0])
+					str_format(aBuf, sizeof(aBuf), "%d: %s", CurValue, m_Map.m_lEnvelopes[CurValue - 1]->m_aName);
+				else
+					str_format(aBuf, sizeof(aBuf), "%d", CurValue);
+
+				while(TextRender()->TextWidth(0, FontSize, aBuf, -1) > Shifter.w)
+				{
+					if(FontSize > 6.0f)
+					{
+						FontSize--;
+					}
+					else
+					{
+						aBuf[str_length(aBuf) - 4] = '\0';
+						str_append(aBuf, "...", sizeof(aBuf));
+					}
+				}
+			}
+
+			RenderTools()->DrawUIRect(&Shifter, Color, 0, 5.0f);
+			UI()->DoLabel(&Shifter, aBuf, FontSize, 0, -1);
+
+			if(DoButton_ButtonDec((char *) &pIDs[i] +1, 0, 0, &Dec, 0, "Previous Envelope"))
+			{
+				*pNewVal = pProps[i].m_Value-1;
+				Change = i;
+			}
+			if(DoButton_ButtonInc(((char *)&pIDs[i])+2, 0, 0, &Inc, 0, "Next Envelope"))
+			{
+				*pNewVal = pProps[i].m_Value+1;
+				Change = i;
+			}
+		}
 	}
 
 	return Change;
