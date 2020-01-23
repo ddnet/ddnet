@@ -976,6 +976,7 @@ void CLayerTiles::ModifyImageIndex(INDEX_MODIFY_FUNC Func)
 
 void CLayerTiles::ModifyEnvelopeIndex(INDEX_MODIFY_FUNC Func)
 {
+	Func(&m_ColorEnv);
 }
 
 CLayerTele::CLayerTele(int w, int h)
