@@ -1536,7 +1536,7 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 					m_Map.m_UndoModified++;
 
 					static int s_SourcePopupID = 0;
-					UiInvokePopupMenu(&s_SourcePopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 200, PopupSource);
+					UiInvokePopupMenu(&s_SourcePopupID, 0, UI()->MouseX(), UI()->MouseY(), 180, 200, PopupSource);
 					m_LockMouse = false;
 				}
 				s_Operation = OP_NONE;
@@ -1741,7 +1741,7 @@ void CEditor::DoQuad(CQuad *q, int Index)
 					m_SelectedQuadIndex = FindSelectedQuadIndex(Index);
 
 					static int s_QuadPopupID = 0;
-					UiInvokePopupMenu(&s_QuadPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 180, PopupQuad);
+					UiInvokePopupMenu(&s_QuadPopupID, 0, UI()->MouseX(), UI()->MouseY(), 160, 180, PopupQuad);
 					m_LockMouse = false;
 				}
 				s_Operation = OP_NONE;
@@ -3247,6 +3247,33 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 				Change = i;
 			}
 		}
+		else if(pProps[i].m_Type == PROPTYPE_ENVELOPE)
+		{
+			CUIRect Inc, Dec;
+			char aBuf[64];
+			int Cur = pProps[i].m_Value;
+
+			Shifter.VSplitRight(10.0f, &Shifter, &Inc);
+			Shifter.VSplitLeft(10.0f, &Dec, &Shifter);
+
+			//TODO: Truncate this properly
+			int FieldLength = Shifter.w / 7.5f;
+			str_format(aBuf, sizeof(aBuf),"%.*s", FieldLength, Cur > 0 ? m_Map.m_lEnvelopes[Cur - 1]->m_aName : "None");
+
+			RenderTools()->DrawUIRect(&Shifter, Color, 0, 5.0f);
+			UI()->DoLabel(&Shifter, aBuf, 10, 0, -1);
+
+			if(DoButton_ButtonDec((char *) &pIDs[i] +1, 0, 0, &Dec, 0, "Previous Envelope"))
+			{
+				*pNewVal = pProps[i].m_Value-1;
+				Change = i;
+			}
+			if(DoButton_ButtonInc(((char *)&pIDs[i])+2, 0, 0, &Inc, 0, "Next Envelope"))
+			{
+				*pNewVal = pProps[i].m_Value+1;
+				Change = i;
+			}
+		}
 	}
 
 	return Change;
@@ -3437,7 +3464,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 					}
 					static int s_LayerPopupID = 0;
 					if(Result == 2)
-						UiInvokePopupMenu(&s_LayerPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 300, PopupLayer);
+						UiInvokePopupMenu(&s_LayerPopupID, 0, UI()->MouseX(), UI()->MouseY(), 180, 300, PopupLayer);
 				}
 
 				LayerCur += 14.0f;

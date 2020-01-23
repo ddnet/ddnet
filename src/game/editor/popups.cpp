@@ -570,9 +570,9 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View)
 	CProperty aProps[] = {
 		{"Pos X", pCurrentQuad->m_aPoints[4].x/1000, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Pos Y", pCurrentQuad->m_aPoints[4].y/1000, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Pos. Env", pCurrentQuad->m_PosEnv+1, PROPTYPE_INT_STEP, 0, pEditor->m_Map.m_lEnvelopes.size()+1},
+		{"Pos. Env", pCurrentQuad->m_PosEnv+1, PROPTYPE_ENVELOPE, 0, 0},
 		{"Pos. TO", pCurrentQuad->m_PosEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Color Env", pCurrentQuad->m_ColorEnv+1, PROPTYPE_INT_STEP, 0, pEditor->m_Map.m_lEnvelopes.size()+1},
+		{"Color Env", pCurrentQuad->m_ColorEnv+1, PROPTYPE_ENVELOPE, 0, 0},
 		{"Color TO", pCurrentQuad->m_ColorEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 
 		{0},
@@ -712,9 +712,9 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View)
 		{"Pan", pSource->m_Pan, PROPTYPE_BOOL, 0, 1},
 		{"Delay", pSource->m_TimeDelay, PROPTYPE_INT_SCROLL, 0, 1000000},
 		{"Falloff", pSource->m_Falloff, PROPTYPE_INT_SCROLL, 0, 255},
-		{"Pos. Env", pSource->m_PosEnv+1, PROPTYPE_INT_STEP, 0, pEditor->m_Map.m_lEnvelopes.size()+1},
+		{"Pos. Env", pSource->m_PosEnv+1, PROPTYPE_ENVELOPE, 0, 0},
 		{"Pos. TO", pSource->m_PosEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Sound Env", pSource->m_SoundEnv+1, PROPTYPE_INT_STEP, 0, pEditor->m_Map.m_lEnvelopes.size()+1},
+		{"Sound Env", pSource->m_SoundEnv+1, PROPTYPE_ENVELOPE, 0, 0},
 		{"Sound. TO", pSource->m_PosEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 
 		{0},
