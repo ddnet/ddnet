@@ -3251,17 +3251,32 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 		{
 			CUIRect Inc, Dec;
 			char aBuf[64];
-			int Cur = pProps[i].m_Value;
+			float FontSize = 10.0f;
 
 			Shifter.VSplitRight(10.0f, &Shifter, &Inc);
 			Shifter.VSplitLeft(10.0f, &Dec, &Shifter);
 
-			//TODO: Truncate this properly
-			int FieldLength = Shifter.w / 7.5f;
-			str_format(aBuf, sizeof(aBuf),"%.*s", FieldLength, Cur > 0 ? m_Map.m_lEnvelopes[Cur - 1]->m_aName : "None");
+			if(pProps[i].m_Value <= 0)
+				str_copy(aBuf, "None", sizeof(aBuf));
+			else
+			{
+				str_format(aBuf, sizeof(aBuf), "%s", m_Map.m_lEnvelopes[pProps[i].m_Value - 1]->m_aName);
+				while(TextRender()->TextWidth(0, FontSize, aBuf, -1) > Shifter.w)
+				{
+					if(FontSize > 6.0f)
+					{
+						FontSize--;
+					}
+					else
+					{
+						aBuf[str_length(aBuf) - 4] = '\0';
+						str_append(aBuf, "...", sizeof(aBuf));
+					}
+				}
+			}
 
 			RenderTools()->DrawUIRect(&Shifter, Color, 0, 5.0f);
-			UI()->DoLabel(&Shifter, aBuf, 10, 0, -1);
+			UI()->DoLabel(&Shifter, aBuf, FontSize, 0, -1);
 
 			if(DoButton_ButtonDec((char *) &pIDs[i] +1, 0, 0, &Dec, 0, "Previous Envelope"))
 			{
