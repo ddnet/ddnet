@@ -548,7 +548,7 @@ int *CClient::GetDirectInput(int Tick)
 // ------ state handling -----
 void CClient::SetState(int s)
 {
-	if(m_State >= IClient::STATE_QUITING)
+	if(m_State == IClient::STATE_QUITING || m_State == IClient::STATE_RESTARTING)
 		return;
 
 	int Old = m_State;
@@ -3051,7 +3051,7 @@ void CClient::Run()
 		AutoCSV_Cleanup();
 
 		// check conditions
-		if(State() >= IClient::STATE_QUITING)
+		if(State() == IClient::STATE_QUITING || State() == IClient::STATE_RESTARTING)
 			break;
 
 #if defined(CONF_FAMILY_UNIX)
