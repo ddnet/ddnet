@@ -160,12 +160,12 @@ public:
 	virtual void SnapSetStaticsize(int ItemType, int Size) = 0;
 
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags) = 0;
-	virtual int SendMsgExY(CMsgPacker *pMsg, int Flags, bool System=true, int NetClient=1) = 0;
+	virtual int SendMsgY(CMsgPacker *pMsg, int Flags, int NetClient=1) = 0;
 
 	template<class T>
 	int SendPackMsg(T *pMsg, int Flags)
 	{
-		CMsgPacker Packer(pMsg->MsgID());
+		CMsgPacker Packer(pMsg->MsgID(), false);
 		if(pMsg->Pack(&Packer))
 			return -1;
 		return SendMsg(&Packer, Flags);

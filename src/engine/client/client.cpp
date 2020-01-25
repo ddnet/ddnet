@@ -363,31 +363,15 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 // ----- send functions -----
 int CClient::SendMsg(CMsgPacker *pMsg, int Flags)
 {
-	return SendMsgEx(pMsg, Flags, false);
-}
-
-int CClient::SendMsgEx(CMsgPacker *pMsg, int Flags, bool System)
-{
 	CNetChunk Packet;
 
 	if(State() == IClient::STATE_OFFLINE)
 		return 0;
 
 	mem_zero(&Packet, sizeof(CNetChunk));
-
 	Packet.m_ClientID = 0;
 	Packet.m_pData = pMsg->Data();
 	Packet.m_DataSize = pMsg->Size();
-
-	// HACK: modify the message id in the packet and store the system flag
-	if(*((unsigned char*)Packet.m_pData) == 1 && System && Packet.m_DataSize == 1)
-	{
-		dbg_break();
-	}
-
-	*((unsigned char*)Packet.m_pData) <<= 1;
-	if(System)
-		*((unsigned char*)Packet.m_pData) |= 1;
 
 	if(Flags&MSGFLAG_VITAL)
 		Packet.m_Flags |= NETSENDFLAG_VITAL;
@@ -411,23 +395,23 @@ int CClient::SendMsgEx(CMsgPacker *pMsg, int Flags, bool System)
 
 void CClient::SendInfo()
 {
-	CMsgPacker Msg(NETMSG_INFO);
+	CMsgPacker Msg(NETMSG_INFO, true);
 	Msg.AddString(GameClient()->NetVersion(), 128);
 	Msg.AddString(m_Password, 128);
-	SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH);
+	SendMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH);
 }
 
 
 void CClient::SendEnterGame()
 {
-	CMsgPacker Msg(NETMSG_ENTERGAME);
-	SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH);
+	CMsgPacker Msg(NETMSG_ENTERGAME, true);
+	SendMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH);
 }
 
 void CClient::SendReady()
 {
-	CMsgPacker Msg(NETMSG_READY);
-	SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH);
+	CMsgPacker Msg(NETMSG_READY, true);
+	SendMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH);
 }
 
 void CClient::SendMapRequest()
@@ -435,9 +419,9 @@ void CClient::SendMapRequest()
 	if(m_MapdownloadFile)
 		io_close(m_MapdownloadFile);
 	m_MapdownloadFile = Storage()->OpenFile(m_aMapdownloadFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
-	CMsgPacker Msg(NETMSG_REQUEST_MAP_DATA);
+	CMsgPacker Msg(NETMSG_REQUEST_MAP_DATA, true);
 	Msg.AddInt(m_MapdownloadChunk);
-	SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH);
+	SendMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH);
 }
 
 void CClient::RconAuth(const char *pName, const char *pPassword)
@@ -448,18 +432,18 @@ void CClient::RconAuth(const char *pName, const char *pPassword)
 	if(pPassword != m_RconPassword)
 		str_copy(m_RconPassword, pPassword, sizeof(m_RconPassword));
 
-	CMsgPacker Msg(NETMSG_RCON_AUTH);
+	CMsgPacker Msg(NETMSG_RCON_AUTH, true);
 	Msg.AddString(pName, 32);
 	Msg.AddString(pPassword, 32);
 	Msg.AddInt(1);
-	SendMsgEx(&Msg, MSGFLAG_VITAL);
+	SendMsg(&Msg, MSGFLAG_VITAL);
 }
 
 void CClient::Rcon(const char *pCmd)
 {
-	CMsgPacker Msg(NETMSG_RCON_CMD);
+	CMsgPacker Msg(NETMSG_RCON_CMD, true);
 	Msg.AddString(pCmd, 256);
-	SendMsgEx(&Msg, MSGFLAG_VITAL);
+	SendMsg(&Msg, MSGFLAG_VITAL);
 }
 
 bool CClient::ConnectionProblems()
@@ -469,16 +453,15 @@ bool CClient::ConnectionProblems()
 
 void CClient::DirectInput(int *pInput, int Size)
 {
-	int i;
-	CMsgPacker Msg(NETMSG_INPUT);
+	CMsgPacker Msg(NETMSG_INPUT, true);
 	Msg.AddInt(m_AckGameTick[g_Config.m_ClDummy]);
 	Msg.AddInt(m_PredTick[g_Config.m_ClDummy]);
 	Msg.AddInt(Size);
 
-	for(i = 0; i < Size/4; i++)
+	for(int i = 0; i < Size/4; i++)
 		Msg.AddInt(pInput[i]);
 
-	SendMsgEx(&Msg, 0);
+	SendMsg(&Msg, 0);
 }
 
 void CClient::SendInput()
@@ -508,7 +491,7 @@ void CClient::SendInput()
 		if(Size)
 		{
 			// pack input
-			CMsgPacker Msg(NETMSG_INPUT);
+			CMsgPacker Msg(NETMSG_INPUT, true);
 			Msg.AddInt(m_AckGameTick[i]);
 			Msg.AddInt(m_PredTick[i]);
 			Msg.AddInt(Size);
@@ -524,7 +507,7 @@ void CClient::SendInput()
 			m_CurrentInput[i]++;
 			m_CurrentInput[i] %= 200;
 
-			SendMsgExY(&Msg, MSGFLAG_FLUSH, true, i);
+			SendMsgY(&Msg, MSGFLAG_FLUSH, i);
 			// ugly workaround for dummy. we need to send input with dummy to prevent
 			// prediction time resets. but if we do it too often, then it's
 			// impossible to use grenade with frozen dummy that gets hammered...
@@ -838,7 +821,7 @@ int CClient::GetCurrentRaceTime()
 	return (GameTick() - GameClient()->GetLastRaceTick()) / 50;
 }
 
-int CClient::SendMsgExY(CMsgPacker *pMsg, int Flags, bool System, int NetClient)
+int CClient::SendMsgY(CMsgPacker *pMsg, int Flags, int NetClient)
 {
 	CNetChunk Packet;
 
@@ -847,16 +830,6 @@ int CClient::SendMsgExY(CMsgPacker *pMsg, int Flags, bool System, int NetClient)
 	Packet.m_ClientID = 0;
 	Packet.m_pData = pMsg->Data();
 	Packet.m_DataSize = pMsg->Size();
-
-	// HACK: modify the message id in the packet and store the system flag
-	if(*((unsigned char*)Packet.m_pData) == 1 && System && Packet.m_DataSize == 1)
-	{
-		dbg_break();
-	}
-
-	*((unsigned char*)Packet.m_pData) <<= 1;
-	if(System)
-		*((unsigned char*)Packet.m_pData) |= 1;
 
 	if(Flags&MSGFLAG_VITAL)
 		Packet.m_Flags |= NETSENDFLAG_VITAL;
@@ -1541,7 +1514,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 {
 	CUnpacker Unpacker;
 	Unpacker.Reset(pPacket->m_pData, pPacket->m_DataSize);
-	CMsgPacker Packer(NETMSG_EX);
+	CMsgPacker Packer(NETMSG_EX, true);
 
 	// unpack msgid and system flag
 	int Msg;
@@ -1555,7 +1528,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 	}
 	else if(Result == UNPACKMESSAGE_ANSWER)
 	{
-		SendMsgEx(&Packer, MSGFLAG_VITAL, true);
+		SendMsg(&Packer, MSGFLAG_VITAL);
 	}
 
 	if(Sys)
@@ -1709,9 +1682,9 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 				// request new chunk
 				m_MapdownloadChunk++;
 
-				CMsgPacker Msg(NETMSG_REQUEST_MAP_DATA);
+				CMsgPacker Msg(NETMSG_REQUEST_MAP_DATA, true);
 				Msg.AddInt(m_MapdownloadChunk);
-				SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH);
+				SendMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH);
 
 				if(g_Config.m_Debug)
 				{
@@ -1727,8 +1700,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 		}
 		else if(Msg == NETMSG_PING)
 		{
-			CMsgPacker Msg(NETMSG_PING_REPLY);
-			SendMsgEx(&Msg, 0);
+			CMsgPacker Msg(NETMSG_PING_REPLY, true);
+			SendMsg(&Msg, 0);
 		}
 		else if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_ADD)
 		{
@@ -1992,9 +1965,9 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 							char aBuf[256];
 							str_format(aBuf, sizeof(aBuf), "/timeout %s", m_aTimeoutCodes[g_Config.m_ClDummy]);
 							Msg.m_pMessage = aBuf;
-							CMsgPacker Packer(Msg.MsgID());
+							CMsgPacker Packer(Msg.MsgID(), true);
 							Msg.Pack(&Packer);
-							SendMsgExY(&Packer, MSGFLAG_VITAL, false, g_Config.m_ClDummy);
+							SendMsgY(&Packer, MSGFLAG_VITAL, g_Config.m_ClDummy);
 						}
 					}
 
@@ -2027,7 +2000,7 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 {
 	CUnpacker Unpacker;
 	Unpacker.Reset(pPacket->m_pData, pPacket->m_DataSize);
-	CMsgPacker Packer(NETMSG_EX);
+	CMsgPacker Packer(NETMSG_EX, true);
 
 	// unpack msgid and system flag
 	int Msg;
@@ -2041,7 +2014,7 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 	}
 	else if(Result == UNPACKMESSAGE_ANSWER)
 	{
-		SendMsgEx(&Packer, MSGFLAG_VITAL, true);
+		SendMsg(&Packer, MSGFLAG_VITAL);
 	}
 
 	if(Sys)
@@ -2942,24 +2915,24 @@ void CClient::Run()
 			m_DummySendConnInfo = false;
 
 			// send client info
-			CMsgPacker MsgInfo(NETMSG_INFO);
+			CMsgPacker MsgInfo(NETMSG_INFO, true);
 			MsgInfo.AddString(GameClient()->NetVersion(), 128);
 			MsgInfo.AddString(m_Password, 128);
-			SendMsgExY(&MsgInfo, MSGFLAG_VITAL|MSGFLAG_FLUSH, true, 1);
+			SendMsgY(&MsgInfo, MSGFLAG_VITAL|MSGFLAG_FLUSH, 1);
 
 			// update netclient
 			m_NetClient[CLIENT_DUMMY].Update();
 
 			// send ready
-			CMsgPacker MsgReady(NETMSG_READY);
-			SendMsgExY(&MsgReady, MSGFLAG_VITAL|MSGFLAG_FLUSH, true, 1);
+			CMsgPacker MsgReady(NETMSG_READY, true);
+			SendMsgY(&MsgReady, MSGFLAG_VITAL|MSGFLAG_FLUSH, 1);
 
 			// startinfo
 			GameClient()->SendDummyInfo(true);
 
 			// send enter game an finish the connection
-			CMsgPacker MsgEnter(NETMSG_ENTERGAME);
-			SendMsgExY(&MsgEnter, MSGFLAG_VITAL|MSGFLAG_FLUSH, true, 1);
+			CMsgPacker MsgEnter(NETMSG_ENTERGAME, true);
+			SendMsgY(&MsgEnter, MSGFLAG_VITAL|MSGFLAG_FLUSH, 1);
 		}
 
 		// update input
@@ -3204,8 +3177,8 @@ void CClient::Con_Ping(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
 
-	CMsgPacker Msg(NETMSG_PING);
-	pSelf->SendMsgEx(&Msg, 0);
+	CMsgPacker Msg(NETMSG_PING, true);
+	pSelf->SendMsg(&Msg, 0);
 	pSelf->m_PingStartTime = time_get();
 }
 

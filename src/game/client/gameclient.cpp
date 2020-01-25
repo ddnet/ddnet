@@ -1471,17 +1471,17 @@ void CGameClient::OnNewSnapshot()
 
 	if(!m_DDRaceMsgSent[0] && m_Snap.m_pLocalInfo)
 	{
-		CMsgPacker Msg(NETMSGTYPE_CL_ISDDNET);
+		CMsgPacker Msg(NETMSGTYPE_CL_ISDDNET, false);
 		Msg.AddInt(CLIENT_VERSIONNR);
-		Client()->SendMsgExY(&Msg, MSGFLAG_VITAL,false, 0);
+		Client()->SendMsgY(&Msg, MSGFLAG_VITAL, 0);
 		m_DDRaceMsgSent[0] = true;
 	}
 
 	if(!m_DDRaceMsgSent[1] && m_Snap.m_pLocalInfo && Client()->DummyConnected())
 	{
-		CMsgPacker Msg(NETMSGTYPE_CL_ISDDNET);
+		CMsgPacker Msg(NETMSGTYPE_CL_ISDDNET, false);
 		Msg.AddInt(CLIENT_VERSIONNR);
-		Client()->SendMsgExY(&Msg, MSGFLAG_VITAL,false, 1);
+		Client()->SendMsgY(&Msg, MSGFLAG_VITAL, 1);
 		m_DDRaceMsgSent[1] = true;
 	}
 
@@ -1841,9 +1841,9 @@ void CGameClient::SendInfo(bool Start)
 		Msg.m_UseCustomColor = g_Config.m_ClPlayerUseCustomColor;
 		Msg.m_ColorBody = g_Config.m_ClPlayerColorBody;
 		Msg.m_ColorFeet = g_Config.m_ClPlayerColorFeet;
-		CMsgPacker Packer(Msg.MsgID());
+		CMsgPacker Packer(Msg.MsgID(), false);
 		Msg.Pack(&Packer);
-		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL, false, 0);
+		Client()->SendMsgY(&Packer, MSGFLAG_VITAL, 0);
 		m_CheckInfo[0] = -1;
 	}
 	else
@@ -1856,9 +1856,9 @@ void CGameClient::SendInfo(bool Start)
 		Msg.m_UseCustomColor = g_Config.m_ClPlayerUseCustomColor;
 		Msg.m_ColorBody = g_Config.m_ClPlayerColorBody;
 		Msg.m_ColorFeet = g_Config.m_ClPlayerColorFeet;
-		CMsgPacker Packer(Msg.MsgID());
+		CMsgPacker Packer(Msg.MsgID(), false);
 		Msg.Pack(&Packer);
-		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL, false, 0);
+		Client()->SendMsgY(&Packer, MSGFLAG_VITAL, 0);
 		m_CheckInfo[0] = Client()->GameTickSpeed();
 	}
 }
@@ -1875,9 +1875,9 @@ void CGameClient::SendDummyInfo(bool Start)
 		Msg.m_UseCustomColor = g_Config.m_ClDummyUseCustomColor;
 		Msg.m_ColorBody = g_Config.m_ClDummyColorBody;
 		Msg.m_ColorFeet = g_Config.m_ClDummyColorFeet;
-		CMsgPacker Packer(Msg.MsgID());
+		CMsgPacker Packer(Msg.MsgID(), false);
 		Msg.Pack(&Packer);
-		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL, false, 1);
+		Client()->SendMsgY(&Packer, MSGFLAG_VITAL, 1);
 		m_CheckInfo[1] = -1;
 	}
 	else
@@ -1890,9 +1890,9 @@ void CGameClient::SendDummyInfo(bool Start)
 		Msg.m_UseCustomColor = g_Config.m_ClDummyUseCustomColor;
 		Msg.m_ColorBody = g_Config.m_ClDummyColorBody;
 		Msg.m_ColorFeet = g_Config.m_ClDummyColorFeet;
-		CMsgPacker Packer(Msg.MsgID());
+		CMsgPacker Packer(Msg.MsgID(), false);
 		Msg.Pack(&Packer);
-		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL,false, 1);
+		Client()->SendMsgY(&Packer, MSGFLAG_VITAL, 1);
 		m_CheckInfo[1] = Client()->GameTickSpeed();
 	}
 }
@@ -1904,8 +1904,8 @@ void CGameClient::SendKill(int ClientID)
 
 	if(g_Config.m_ClDummyCopyMoves)
 	{
-		CMsgPacker Msg(NETMSGTYPE_CL_KILL);
-		Client()->SendMsgExY(&Msg, MSGFLAG_VITAL, false, !g_Config.m_ClDummy);
+		CMsgPacker Msg(NETMSGTYPE_CL_KILL, false);
+		Client()->SendMsgY(&Msg, MSGFLAG_VITAL, !g_Config.m_ClDummy);
 	}
 }
 
