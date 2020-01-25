@@ -219,7 +219,9 @@ void CVideo::nextVideoFrame_thread()
 
 			read_rgb_from_gl();
 			fill_video_frame();
+			lock_wait(m_WriteLock);
 			write_frame(&m_VideoStream);
+			lock_unlock(m_WriteLock);
 			m_ProcessingVideoFrame = false;
 		}
 
@@ -284,6 +286,16 @@ void CVideo::nextAudioFrame(void (*Mix)(short *pFinalOut, unsigned Frames))
 
 		int dst_nb_samples;
 
+		av_samples_fill_arrays(
+			(uint8_t**)m_AudioStream.tmp_frame->data,
+			0, // pointer to linesize (int*)
+			(const uint8_t*)m_aBuffer,
+			2, // channels
+			m_AudioStream.tmp_frame->nb_samples,
+			AV_SAMPLE_FMT_S16,
+			0 // align
+		);
+
 		dst_nb_samples = av_rescale_rnd(
 			swr_get_delay(
 				m_AudioStream.swr_ctx,
@@ -296,16 +308,6 @@ void CVideo::nextAudioFrame(void (*Mix)(short *pFinalOut, unsigned Frames))
 
 		// dbg_msg("video_recorder", "dst_nb_samples: %d", dst_nb_samples);
 		// fwrite(m_aBuffer, sizeof(short), 2048, m_dbgfile);
-
-		av_samples_fill_arrays(
-			(uint8_t**)m_AudioStream.tmp_frame->data,
-			0, // pointer to linesize (int*)
-			(const uint8_t*)m_aBuffer,
-			2, // channels
-			m_AudioStream.tmp_frame->nb_samples,
-			AV_SAMPLE_FMT_S16,
-			0 // align
-		);
 
 
 		int ret = av_frame_make_writable(m_AudioStream.frame);
@@ -333,7 +335,9 @@ void CVideo::nextAudioFrame(void (*Mix)(short *pFinalOut, unsigned Frames))
 		m_AudioStream.samples_count += dst_nb_samples;
 
 		// dbg_msg("video_recorder", "prewrite----");
+		lock_wait(m_WriteLock);
 		write_frame(&m_AudioStream);
+		lock_unlock(m_WriteLock);
 
 		m_ProcessingAudioFrame = false;
 		m_NextaFrame = false;
@@ -655,7 +659,7 @@ void CVideo::add_stream(OutputStream *ost, AVFormatContext *oc, AVCodec **codec,
 
 void CVideo::write_frame(OutputStream* pStream)
 {
-	lock_wait(m_WriteLock);
+	//lock_wait(m_WriteLock);
 	int ret_recv = 0;
 
 	AVPacket Packet = { 0 };
@@ -689,7 +693,7 @@ void CVideo::write_frame(OutputStream* pStream)
 	{
 		dbg_msg("video_recorder", "Error encoding frame, error: %d", ret_recv);
 	}
-	lock_unlock(m_WriteLock);
+	//lock_unlock(m_WriteLock);
 }
 
 void CVideo::finish_frames(OutputStream* pStream)
