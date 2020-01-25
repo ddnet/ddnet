@@ -281,7 +281,7 @@ int CInput::Update()
 					switch (Event.window.event)
 					{
 						case SDL_WINDOWEVENT_RESIZED:
-#if defined(SDL_VIDEO_DRIVER_X11)
+#if defined(SDL_VIDEO_DRIVER_X11) && !defined(CONF_VIDEORECORDER)
 							Graphics()->Resize(Event.window.data1, Event.window.data2);
 #endif
 							break;

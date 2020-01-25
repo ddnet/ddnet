@@ -1116,6 +1116,20 @@ int CMenus::Render()
 			pExtraText = "";
 			ExtraAlign = -1;
 		}
+	#if defined(CONF_VIDEORECORDER)
+		else if(m_Popup == POPUP_RENDER_DEMO)
+		{
+			pTitle = Localize("Render demo");
+			pExtraText = "";
+			ExtraAlign = -1;
+		}
+		else if(m_Popup == POPUP_REPLACE_VIDEO)
+		{
+			pTitle = Localize("Replace video");
+			pExtraText = Localize("File already exists, do you want to overwrite it?");
+			ExtraAlign = -1;
+		}
+	#endif
 		else if(m_Popup == POPUP_REMOVE_FRIEND)
 		{
 			pTitle = Localize("Remove friend");
@@ -1527,6 +1541,176 @@ int CMenus::Render()
 			static float Offset = 0.0f;
 			DoEditBox(&Offset, &TextBox, m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile), 12.0f, &Offset);
 		}
+#if defined(CONF_VIDEORECORDER)
+		else if(m_Popup == POPUP_RENDER_DEMO)
+		{
+			CUIRect Label, TextBox, Ok, Abort, IncSpeed, DecSpeed, Button;
+
+			Box.HSplitBottom(20.f, &Box, &Part);
+#if defined(__ANDROID__)
+			Box.HSplitBottom(60.f, &Box, &Part);
+#else
+			Box.HSplitBottom(24.f, &Box, &Part);
+#endif
+			Part.VMargin(80.0f, &Part);
+
+			Part.VSplitMid(&Abort, &Ok);
+
+			Ok.VMargin(20.0f, &Ok);
+			Abort.VMargin(20.0f, &Abort);
+
+			static int s_ButtonAbort = 0;
+			if(DoButton_Menu(&s_ButtonAbort, Localize("Abort"), 0, &Abort) || m_EscapePressed)
+				m_Popup = POPUP_NONE;
+
+			static int s_ButtonOk = 0;
+			if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &Ok) || m_EnterPressed)
+			{
+				m_Popup = POPUP_NONE;
+				// name video
+				if(m_DemolistSelectedIndex >= 0 && !m_DemolistSelectedIsDir)
+				{
+					char aBufOld[512];
+					str_format(aBufOld, sizeof(aBufOld), "%s/%s", m_aCurrentDemoFolder, m_lDemos[m_DemolistSelectedIndex].m_aFilename);
+					int Length = str_length(m_aCurrentDemoFile);
+					char aBufNew[512];
+					if(Length <= 3 || m_aCurrentDemoFile[Length-4] != '.' || str_comp_nocase(m_aCurrentDemoFile+Length-3, "mp4"))
+						str_format(aBufNew, sizeof(aBufNew), "%s.mp4", m_aCurrentDemoFile);
+					else
+						str_format(aBufNew, sizeof(aBufNew), "%s", m_aCurrentDemoFile);
+					char aWholePath[1024];
+					// store new video filename to origin buffer
+					str_copy(m_aCurrentDemoFile, aBufNew, sizeof(m_aCurrentDemoFile));
+					if(Storage()->FindFile(m_aCurrentDemoFile, "videos", IStorage::TYPE_ALL, aWholePath, sizeof(aWholePath)))
+					{
+						PopupMessage(Localize("Error"), Localize("Destination file already exist"), Localize("Ok"));
+						m_Popup = POPUP_REPLACE_VIDEO;
+					}
+					else
+					{
+						const char *pError = Client()->DemoPlayer_Render(aBufOld, m_lDemos[m_DemolistSelectedIndex].m_StorageType, m_aCurrentDemoFile, m_Speed);
+						m_Speed = 4;
+						//Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "demo_render_path", aWholePath);
+						if(pError)
+							PopupMessage(Localize("Error"), str_comp(pError, "error loading demo") ? pError : Localize("Error loading demo"), Localize("Ok"));
+					}
+				}
+			}
+			Box.HSplitBottom(60.f, &Box, &Part);
+			Box.HSplitBottom(20.f, &Box, &Part);
+			Part.VSplitLeft(60.0f, 0, &Part);
+			Part.VSplitLeft(60.0f, 0, &Label);
+			Part.VSplitMid(&IncSpeed, &DecSpeed);
+
+			IncSpeed.VMargin(20.0f, &IncSpeed);
+			DecSpeed.VMargin(20.0f, &DecSpeed);
+
+			Part.VSplitLeft(20.0f, &Button, &Part);
+			bool IncDemoSpeed = false, DecDemoSpeed = false;
+			// slowdown
+			Part.VSplitLeft(5.0f, 0, &Part);
+			Part.VSplitLeft(Button.h, &Button, &Part);
+			static int s_SlowDownButton = 0;
+			if(DoButton_Sprite(&s_SlowDownButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_SLOWER, 0, &Button, CUI::CORNER_ALL))
+				DecDemoSpeed = true;
+
+			// fastforward
+			Part.VSplitLeft(5.0f, 0, &Part);
+			Part.VSplitLeft(Button.h, &Button, &Part);
+			static int s_FastForwardButton = 0;
+			if(DoButton_Sprite(&s_FastForwardButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_FASTER, 0, &Button, CUI::CORNER_ALL))
+				IncDemoSpeed = true;
+
+			// speed meter
+			Part.VSplitLeft(15.0f, 0, &Part);
+			char aBuffer[64];
+			str_format(aBuffer, sizeof(aBuffer), "Speed: ×%g", g_aSpeeds[m_Speed]);
+			//str_format(aBuffer, sizeof(aBuffer), "Speed: ×%g", Speed);
+			UI()->DoLabel(&Part, aBuffer, Button.h*0.7f, -1);
+
+			if(IncDemoSpeed)
+				m_Speed = clamp(m_Speed + 1, 0, (int)(sizeof(g_aSpeeds)/sizeof(g_aSpeeds[0])-1));
+			else if(DecDemoSpeed)
+				m_Speed = clamp(m_Speed - 1, 0, (int)(sizeof(g_aSpeeds)/sizeof(g_aSpeeds[0])-1));
+
+			Part.VSplitLeft(100.0f, 0, &Part);
+			Part.VSplitLeft(Button.h, &Button, &Part);
+			if(DoButton_CheckBox(&g_Config.m_ClVideoShowhud, Localize("Show ingame HUD"), g_Config.m_ClVideoShowhud, &Button))
+				g_Config.m_ClVideoShowhud ^= 1;
+			Part.VSplitLeft(150.0f, 0, &Part);
+			Part.VSplitLeft(Button.h, &Button, &Part);
+			if(DoButton_CheckBox(&g_Config.m_ClVideoShowChat, Localize("Show chat"), g_Config.m_ClVideoShowChat, &Button))
+				g_Config.m_ClVideoShowChat ^= 1;
+			Part.VSplitLeft(150.0f, 0, &Part);
+			Part.VSplitLeft(Button.h, &Button, &Part);
+			if(DoButton_CheckBox(&g_Config.m_ClVideoSndEnable, Localize("Use sounds"), g_Config.m_ClVideoSndEnable, &Button))
+				g_Config.m_ClVideoSndEnable ^= 1;
+			/*
+			static int s_ButtonInc = 0;
+			if(DoButton_Menu(&s_ButtonInc, Localize("IncSpeed"), 0, &IncSpeed))
+				m_Popup = POPUP_NONE;
+
+			static int s_ButtonDec = 0;
+			if(DoButton_Menu(&s_ButtonDec, Localize("DecSpeed"), 0, &DecSpeed))
+				m_Popup = POPUP_NONE;
+			*/
+			//Abort.VMargin(20.0f, &Abort);
+			//SpeedBox.VSplitLeft(40.0f, 0, &SpeedBox);
+			//SpeedBox.VSplitRight(80.0f, &SpeedBox, 0);
+			//UI()->DoLabel(&Label, Localize("Video speed:"), 18.0f, -1);
+			//static float Offset2 = 0.0f;
+			//char Speed[10] = "1";
+			//DoEditBox(&Offset2, &SpeedBox, Speed, sizeof(Speed), 12.0f, &Offset2);
+
+			Box.HSplitBottom(20.f, &Box, &Part);
+#if defined(__ANDROID__)
+			Box.HSplitBottom(60.f, &Box, &Part);
+#else
+			Box.HSplitBottom(24.f, &Box, &Part);
+#endif
+
+			Part.VSplitLeft(60.0f, 0, &Label);
+			Label.VSplitLeft(120.0f, 0, &TextBox);
+			TextBox.VSplitLeft(20.0f, 0, &TextBox);
+			TextBox.VSplitRight(60.0f, &TextBox, 0);
+			UI()->DoLabel(&Label, Localize("Video name:"), 18.0f, -1);
+			static float Offset = 0.0f;
+			DoEditBox(&Offset, &TextBox, m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile), 12.0f, &Offset);
+		}
+		else if(m_Popup == POPUP_REPLACE_VIDEO)
+		{
+			CUIRect Yes, No;
+			Box.HSplitBottom(20.f, &Box, &Part);
+#if defined(__ANDROID__)
+			Box.HSplitBottom(60.f, &Box, &Part);
+#else
+			Box.HSplitBottom(24.f, &Box, &Part);
+#endif
+			Part.VMargin(80.0f, &Part);
+
+			Part.VSplitMid(&No, &Yes);
+
+			Yes.VMargin(20.0f, &Yes);
+			No.VMargin(20.0f, &No);
+
+			static int s_ButtonAbort = 0;
+			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || m_EscapePressed)
+				m_Popup = POPUP_RENDER_DEMO;
+
+			static int s_ButtonTryAgain = 0;
+			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
+			{
+				m_Popup = POPUP_NONE;
+				// render video
+				char aBuf[512];
+				str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_lDemos[m_DemolistSelectedIndex].m_aFilename);
+				const char *pError = Client()->DemoPlayer_Render(aBuf, m_lDemos[m_DemolistSelectedIndex].m_StorageType, m_aCurrentDemoFile, m_Speed);
+				m_Speed = 4;
+				if(pError)
+					PopupMessage(Localize("Error"), str_comp(pError, "error loading demo") ? pError : Localize("Error loading demo"), Localize("Ok"));
+			}
+		}
+#endif
 		else if(m_Popup == POPUP_REMOVE_FRIEND)
 		{
 			CUIRect Yes, No;
@@ -1862,7 +2046,7 @@ void CMenus::RenderBackground()
 	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 		float Size = 15.0f;
-		float OffsetTime = fmod(Client()->LocalTime()*0.15f, 2.0f);
+		float OffsetTime = fmod(LocalTime()*0.15f, 2.0f);
 		for(int y = -2; y < (int)(sw/Size); y++)
 			for(int x = -2; x < (int)(sh/Size); x++)
 			{

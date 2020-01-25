@@ -14,6 +14,9 @@
 
 extern "C"
 {
+#if defined(CONF_VIDEORECORDER)
+	#include <engine/shared/video.h>
+#endif
 	#include <opusfile.h>
 	#include <wavpack.h>
 }
@@ -83,6 +86,7 @@ static int s_WVBufferPosition = 0;
 static int s_WVBufferSize = 0;
 
 const int DefaultDistance = 1500;
+int m_LastBreak = 0;
 
 // TODO: there should be a faster way todo this
 static short Int2Short(int i)
@@ -266,18 +270,28 @@ static void Mix(short *pFinalOut, unsigned Frames)
 
 			pFinalOut[j] = Int2Short(vl);
 			pFinalOut[j+1] = Int2Short(vr);
+
+			// dbg_msg("sound", "the real shit: %d %d", pFinalOut[j], pFinalOut[j+1]);
 		}
 	}
 
 #if defined(CONF_ARCH_ENDIAN_BIG)
 	swap_endian(pFinalOut, sizeof(short), Frames * 2);
 #endif
+
 }
 
 static void SdlCallback(void *pUnused, Uint8 *pStream, int Len)
 {
 	(void)pUnused;
+#if defined(CONF_VIDEORECORDER)
+	if (!(IVideo::Current() && g_Config.m_ClVideoSndEnable))
+		Mix((short *)pStream, Len/2/2);
+	else
+		IVideo::Current()->nextAudioFrame(Mix);
+#else
 	Mix((short *)pStream, Len/2/2);
+#endif
 }
 
 
@@ -345,7 +359,10 @@ int CSound::Update()
 		m_SoundVolume = WantedVolume;
 		lock_unlock(m_SoundLock);
 	}
-
+//#if defined(CONF_VIDEORECORDER)
+//	if(IVideo::Current() && g_Config.m_ClVideoSndEnable)
+//		IVideo::Current()->nextAudioFrame(Mix);
+//#endif
 	return 0;
 }
 

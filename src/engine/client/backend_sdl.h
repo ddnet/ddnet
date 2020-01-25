@@ -5,8 +5,6 @@
 
 #include "graphics_threaded.h"
 
-
-
 # if defined(CONF_PLATFORM_MACOSX)
 	#include <objc/objc-runtime.h>
 

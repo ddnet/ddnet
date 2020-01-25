@@ -849,7 +849,11 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
 	MainView.Margin(10.0f, &MainView);
 
+#if defined(CONF_VIDEORECORDER)
+	CUIRect ButtonBar, RefreshRect, FetchRect, PlayRect, DeleteRect, RenameRect, RenderRect, LabelRect, ListBox;
+#else
 	CUIRect ButtonBar, RefreshRect, FetchRect, PlayRect, DeleteRect, RenameRect, LabelRect, ListBox;
+#endif
 	MainView.HSplitBottom(ms_ButtonHeight+5.0f, &MainView, &ButtonBar);
 	ButtonBar.HSplitTop(5.0f, 0, &ButtonBar);
 	ButtonBar.VSplitRight(110.0f, &ButtonBar, &PlayRect);
@@ -861,6 +865,10 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	ButtonBar.VSplitLeft(10.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(110.0f, &RenameRect, &ButtonBar);
 	ButtonBar.VSplitLeft(10.0f, 0, &ButtonBar);
+#if defined(CONF_VIDEORECORDER)
+	ButtonBar.VSplitLeft(110.0f, &RenderRect, &ButtonBar);
+	ButtonBar.VSplitLeft(10.0f, 0, &ButtonBar);
+#endif
 	ButtonBar.VSplitLeft(110.0f, &LabelRect, &ButtonBar);
 	MainView.HSplitBottom(140.0f, &ListBox, &MainView);
 
@@ -1299,6 +1307,20 @@ void CMenus::RenderDemoList(CUIRect MainView)
 				return;
 			}
 		}
+
+#if defined(CONF_VIDEORECORDER)
+		static int s_RenderButton = 0;
+		if(DoButton_Menu(&s_RenderButton, Localize("Render"), 0, &RenderRect))
+		{
+			if(m_DemolistSelectedIndex >= 0)
+			{
+				UI()->SetActiveItem(0);
+				m_Popup = POPUP_RENDER_DEMO;
+				str_copy(m_aCurrentDemoFile, m_lDemos[m_DemolistSelectedIndex].m_aFilename, sizeof(m_aCurrentDemoFile));
+				return;
+			}
+		}
+#endif
 	}
 
 	UI()->DoLabelScaled(&LabelRect, aFooterLabel, 14.0f, -1);

@@ -28,7 +28,12 @@
 #endif
 
 #include <engine/shared/config.h>
+
 #include <base/tl/threading.h>
+
+#if defined(CONF_VIDEORECORDER)
+	#include "video.h"
+#endif
 
 #include "graphics_threaded.h"
 #include "backend_sdl.h"
@@ -58,10 +63,15 @@ void CGraphicsBackend_Threaded::ThreadFunc(void *pUser)
 				CAutoreleasePool AutoreleasePool;
 			#endif
 			pThis->m_pProcessor->RunBuffer(pThis->m_pBuffer);
+
 			sync_barrier();
 			pThis->m_pBuffer = 0x0;
 			pThis->m_BufferDone.signal();
 		}
+		#if defined(CONF_VIDEORECORDER)
+			if (IVideo::Current())
+				IVideo::Current()->nextVideoFrame_thread();
+		#endif
 	}
 }
 

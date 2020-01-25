@@ -368,3 +368,8 @@ MACRO_CONFIG_INT(GfxEnableTextureUnitOptimization, gfx_enable_texture_unit_optim
 MACRO_CONFIG_INT(GfxEnableTextureUnitOptimization, gfx_enable_texture_unit_optimization, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Use multiple texture units, instead of only one.")
 #endif
 MACRO_CONFIG_INT(GfxUsePreinitBuffer, gfx_use_preinitialized_buffer, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Use only one buffer for data, that is uploaded to the GPU(might help when using an iGPUs).")
+
+#if defined(CONF_VIDEORECORDER)
+MACRO_CONFIG_INT(ClVideoRecorderFPS, cl_video_recorder_fps, 60, 1, 1000, CFGFLAG_SAVE|CFGFLAG_CLIENT, "At which FPS the videorecorder should record demos.")
+#endif
+

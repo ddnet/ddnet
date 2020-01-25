@@ -228,6 +228,7 @@ class CMenus : public CComponent
 	int m_DemolistSelectedIndex;
 	bool m_DemolistSelectedIsDir;
 	int m_DemolistStorageType;
+	int m_Speed = 4;
 
 	void DemolistOnUpdate(bool Reset);
 	//void DemolistPopulate();
@@ -410,6 +411,8 @@ public:
 		POPUP_COUNTRY,
 		POPUP_DELETE_DEMO,
 		POPUP_RENAME_DEMO,
+		POPUP_RENDER_DEMO,
+		POPUP_REPLACE_VIDEO,
 		POPUP_REMOVE_FRIEND,
 		POPUP_SOUNDERROR,
 		POPUP_PASSWORD,

@@ -68,6 +68,10 @@
 #include "updater.h"
 #include "client.h"
 
+#if defined(CONF_VIDEORECORDER)
+	#include "video.h"
+#endif
+
 #include <zlib.h>
 
 #include "SDL.h"
@@ -756,6 +760,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 
 void CClient::Disconnect()
 {
+	m_ButtonRender = false;
 	if(m_DummyConnected)
 		DummyDisconnect(0);
 	if(m_State != IClient::STATE_OFFLINE)
@@ -1944,6 +1949,9 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 						m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV] = m_SnapshotStorage[g_Config.m_ClDummy].m_pFirst;
 						m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] = m_SnapshotStorage[g_Config.m_ClDummy].m_pLast;
 						m_LocalStartTime = time_get();
+#if defined(CONF_VIDEORECORDER)
+						IVideo::SetLocalStartTime(m_LocalStartTime);
+#endif
 						SetState(IClient::STATE_ONLINE);
 						DemoRecorder_HandleAutoStart();
 					}
@@ -2194,6 +2202,9 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 						m_aSnapshots[!g_Config.m_ClDummy][SNAP_PREV] = m_SnapshotStorage[!g_Config.m_ClDummy].m_pFirst;
 						m_aSnapshots[!g_Config.m_ClDummy][SNAP_CURRENT] = m_SnapshotStorage[!g_Config.m_ClDummy].m_pLast;
 						m_LocalStartTime = time_get();
+#if defined(CONF_VIDEORECORDER)
+						IVideo::SetLocalStartTime(m_LocalStartTime);
+#endif
 						SetState(IClient::STATE_ONLINE);
 					}
 
@@ -2478,7 +2489,22 @@ void CClient::Update()
 {
 	if(State() == IClient::STATE_DEMOPLAYBACK)
 	{
+
+#if defined(CONF_VIDEORECORDER)
+	if (m_DemoPlayer.IsPlaying() && IVideo::Current())
+	{
+		if (IVideo::Current()->frameRendered())
+			IVideo::Current()->nextVideoFrame();
+		if (IVideo::Current()->aframeRendered())
+			IVideo::Current()->nextAudioFrame_timeline();
+	}
+	else if(m_ButtonRender)
+		Disconnect();
+#endif
+
+
 		m_DemoPlayer.Update();
+
 		if(m_DemoPlayer.IsPlaying())
 		{
 			// update timers
@@ -2760,6 +2786,11 @@ void CClient::InitInterfaces()
 void CClient::Run()
 {
 	m_LocalStartTime = time_get();
+#if defined(CONF_VIDEORECORDER)
+	IVideo::SetLocalStartTime(m_LocalStartTime);
+#endif
+	m_SnapshotParts[0] = 0;
+	m_SnapshotParts[1] = 0;
 
 	if(m_GenerateTimeoutSeed)
 	{
@@ -2803,6 +2834,11 @@ void CClient::Run()
 
 	// init sound, allowed to fail
 	m_SoundInitFailed = Sound()->Init() != 0;
+
+#if defined(CONF_VIDEORECORDER)
+	// init video recorder aka ffmpeg
+	CVideo::Init();
+#endif
 
 	// open socket
 	{
@@ -3256,6 +3292,49 @@ void CClient::Con_Screenshot(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Graphics()->TakeScreenshot(0);
 }
 
+#if defined(CONF_VIDEORECORDER)
+
+void CClient::Con_StartVideo(IConsole::IResult *pResult, void *pUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+
+	if (pSelf->State() != IClient::STATE_DEMOPLAYBACK)
+		pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "videorecorder", "Can not start videorecorder outside of demoplayer.");
+
+	if (!IVideo::Current())
+	{
+		new CVideo((CGraphics_Threaded*)pSelf->m_pGraphics, pSelf->Storage(), pSelf->m_pConsole, pSelf->Graphics()->ScreenWidth(), pSelf->Graphics()->ScreenHeight(), "");
+		IVideo::Current()->start();
+	}
+	else
+		pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "videorecorder", "Videorecorder already running.");
+}
+
+void CClient::StartVideo(IConsole::IResult *pResult, void *pUserData, const char *pVideoName)
+{
+	CClient *pSelf = (CClient *)pUserData;
+
+	if (pSelf->State() != IClient::STATE_DEMOPLAYBACK)
+		pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "videorecorder", "Can not start videorecorder outside of demoplayer.");
+
+	pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "demo_render", pVideoName);
+	if (!IVideo::Current())
+	{
+		new CVideo((CGraphics_Threaded*)pSelf->m_pGraphics, pSelf->Storage(), pSelf->m_pConsole, pSelf->Graphics()->ScreenWidth(), pSelf->Graphics()->ScreenHeight(), pVideoName);
+		IVideo::Current()->start();
+	}
+	else
+		pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "videorecorder", "Videorecorder already running.");
+}
+
+void CClient::Con_StopVideo(IConsole::IResult *pResult, void *pUserData)
+{
+	if (IVideo::Current())
+		IVideo::Current()->stop();
+}
+
+#endif
+
 void CClient::Con_Rcon(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
@@ -3437,6 +3516,23 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 
 	return 0;
 }
+
+#if defined(CONF_VIDEORECORDER)
+const char *CClient::DemoPlayer_Render(const char *pFilename, int StorageType, const char *pVideoName, int SpeedIndex)
+{
+	const char *pError;
+	pError = DemoPlayer_Play(pFilename, StorageType);
+	if(pError)
+		return pError;
+	m_ButtonRender = true;
+
+	this->CClient::StartVideo(NULL, this, pVideoName);
+	m_DemoPlayer.Play();
+	m_DemoPlayer.SetSpeed(g_aSpeeds[SpeedIndex]);
+	//m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "demo_recorder", "demo eof");
+	return 0;
+}
+#endif
 
 void CClient::Con_Play(IConsole::IResult *pResult, void *pUserData)
 {
@@ -3740,6 +3836,12 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("disconnect", "", CFGFLAG_CLIENT, Con_Disconnect, this, "Disconnect from the server");
 	m_pConsole->Register("ping", "", CFGFLAG_CLIENT, Con_Ping, this, "Ping the current server");
 	m_pConsole->Register("screenshot", "", CFGFLAG_CLIENT, Con_Screenshot, this, "Take a screenshot");
+
+#if defined(CONF_VIDEORECORDER)
+	m_pConsole->Register("start_video", "", CFGFLAG_CLIENT, Con_StartVideo, this, "Start recording a video");
+	m_pConsole->Register("stop_video", "", CFGFLAG_CLIENT, Con_StopVideo, this, "Stop recording a video");
+#endif
+
 	m_pConsole->Register("rcon", "r[rcon-command]", CFGFLAG_CLIENT, Con_Rcon, this, "Send specified command to rcon");
 	m_pConsole->Register("rcon_auth", "s[password]", CFGFLAG_CLIENT, Con_RconAuth, this, "Authenticate to rcon");
 	m_pConsole->Register("rcon_login", "s[username] r[password]", CFGFLAG_CLIENT, Con_RconLogin, this, "Authenticate to rcon with a username");

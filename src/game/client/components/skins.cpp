@@ -4,6 +4,7 @@
 
 #include <base/system.h>
 #include <base/math.h>
+#include <ctime>
 
 #include <engine/graphics.h>
 #include <engine/storage.h>
@@ -156,7 +157,7 @@ void CSkins::OnInit()
 	{
 		time_t rawtime;
 		struct tm* timeinfo;
-		time(&rawtime);
+		std::time(&rawtime);
 		timeinfo = localtime(&rawtime);
 		if(timeinfo->tm_mon == 11 && timeinfo->tm_mday >= 24 && timeinfo->tm_mday <= 26)
 		{ // Christmas

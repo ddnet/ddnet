@@ -69,6 +69,9 @@ Whether to enable the autoupdater. Packagers may want to disable this for their 
 * **-DCLIENT=[ON|OFF]** <br>
 Whether to enable client compilation. If set to OFF, DDNet will not depend on Curl, Freetype, Ogg, Opus, Opusfile, and SDL2. Default value is ON.
 
+* **-DVIDEORECORDER=[ON|OFF]** <br>
+Whether to add video recording support using FFmpeg to the client. You can use command `start_video` and `stop_video` to start and stop conversion from demo to mp4. This feature is currently experimental and not enabled by default.
+
 * **-DDOWNLOAD_GTEST=[ON|OFF]** <br>
 Whether to download and compile GTest. Useful if GTest is not installed and, for Linux users, there is no suitable package providing it. Default value is OFF.
 
