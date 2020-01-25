@@ -1428,6 +1428,8 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 		}
 	}
 
+	str_clean_whitespaces(Info.m_aName);
+
 	if(!Up.Error() || IgnoreError)
 	{
 		qsort(Info.m_aClients, Info.m_NumReceivedClients, sizeof(*Info.m_aClients), PlayerScoreNameComp);
