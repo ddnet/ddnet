@@ -548,7 +548,7 @@ int *CClient::GetDirectInput(int Tick)
 // ------ state handling -----
 void CClient::SetState(int s)
 {
-	if(m_State == IClient::STATE_QUITING)
+	if(m_State >= IClient::STATE_QUITING)
 		return;
 
 	int Old = m_State;
@@ -1016,9 +1016,7 @@ void CClient::DebugRender()
 
 void CClient::Restart()
 {
-	char aBuf[512];
-	shell_execute(Storage()->GetBinaryPath(PLAT_CLIENT_EXEC, aBuf, sizeof aBuf));
-	Quit();
+	SetState(IClient::STATE_RESTARTING);
 }
 
 void CClient::Quit()
@@ -2360,7 +2358,7 @@ void CClient::PumpNetwork()
 	if(State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		// check for errors
-		if(State() != IClient::STATE_OFFLINE && State() != IClient::STATE_QUITING && m_NetClient[CLIENT_MAIN].State() == NETSTATE_OFFLINE)
+		if(State() != IClient::STATE_OFFLINE && State() < IClient::STATE_QUITING && m_NetClient[CLIENT_MAIN].State() == NETSTATE_OFFLINE)
 		{
 			SetState(IClient::STATE_OFFLINE);
 			Disconnect();
@@ -3053,7 +3051,7 @@ void CClient::Run()
 		AutoCSV_Cleanup();
 
 		// check conditions
-		if(State() == IClient::STATE_QUITING)
+		if(State() >= IClient::STATE_QUITING)
 			break;
 
 #if defined(CONF_FAMILY_UNIX)
@@ -3962,10 +3960,18 @@ int main(int argc, const char **argv) // ignore_convention
 	// write down the config and quit
 	pConfig->Save();
 
-	delete pKernel;
+	bool Restarting = pClient->State() == CClient::STATE_RESTARTING;
+
 	pClient->~CClient();
 	free(pClient);
 
+	if(Restarting)
+	{
+		char aBuf[512];
+		shell_execute(pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aBuf, sizeof aBuf));
+	}
+
+	delete pKernel;
 	return 0;
 }
 
