@@ -614,14 +614,14 @@ void CGameClient::ChillerBotTick()
 		return;
 	if(!g_Config.m_ClFinishRename)
 		return;
-	vec2 PrevPos = m_PredictedPrevChar.m_Pos;
+	// vec2 PrevPos = m_PredictedPrevChar.m_Pos;
 	vec2 Pos = m_PredictedChar.m_Pos;
 	if(CRaceHelper::IsNearFinish(this, Pos))
 	{
 		if(Client()->State() == IClient::STATE_ONLINE && !m_pMenus->IsActive() && g_Config.m_ClEditor == 0)
 		{
 			Graphics()->BlendNormal();
-			Graphics()->TextureSet(-1);
+			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(0,0,0,0.5f);
 			RenderTools()->DrawRoundRect(10.0f, 30.0f, 150.0f, 50.0f, 10.0f);
@@ -1880,9 +1880,9 @@ void CGameClient::SendFinishName()
 	Msg.m_UseCustomColor = g_Config.m_ClPlayerUseCustomColor;
 	Msg.m_ColorBody = g_Config.m_ClPlayerColorBody;
 	Msg.m_ColorFeet = g_Config.m_ClPlayerColorFeet;
-	CMsgPacker Packer(Msg.MsgID());
+	CMsgPacker Packer(Msg.MsgID(), false);
 	Msg.Pack(&Packer);
-	Client()->SendMsgExY(&Packer, MSGFLAG_VITAL, false, 0);
+	Client()->SendMsgY(&Packer, MSGFLAG_VITAL, 0);
 	m_CheckInfo[0] = Client()->GameTickSpeed();
 }
 

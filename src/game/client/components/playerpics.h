@@ -13,7 +13,7 @@ public:
 	struct CPlayerPic
 	{
 		char m_aPlayerName[32];
-		int m_Texture;
+		IGraphics::CTextureHandle m_Texture;
 
 		bool operator<(const CPlayerPic &Other) { return str_comp(m_aPlayerName, Other.m_aPlayerName) < 0; }
 	};

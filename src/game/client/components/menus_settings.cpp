@@ -1426,7 +1426,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 		RenderSettingsSound(MainView);
 	else if(g_Config.m_UiSettingsPage == SETTINGS_DDNET)
 		RenderSettingsDDNet(MainView);
-	else if(s_SettingsPage == 9)
+	else if(g_Config.m_UiSettingsPage == SETTINGS_CHILLERBOT)
 		RenderSettingsChillerbot(MainView);
 
 	if(m_NeedRestartUpdate)

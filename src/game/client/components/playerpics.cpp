@@ -75,7 +75,6 @@ void CPlayerPics::OnInit()
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "playerpics", "failed to load directory 'playerpics/'.");
 		CPlayerPic DummyEntry;
-		DummyEntry.m_Texture = -1;
 		mem_zero(DummyEntry.m_aPlayerName, sizeof(DummyEntry.m_aPlayerName));
 		m_aPlayerPics.add(DummyEntry);
 	}
