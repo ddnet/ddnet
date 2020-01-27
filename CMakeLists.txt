@@ -42,10 +42,10 @@ set(ORIGINAL_CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
 set(OWN_CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 set(CMAKE_MODULE_PATH ${OWN_CMAKE_MODULE_PATH})
 
-if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-  set(TARGET_BITS "64")
-elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+if(CMAKE_SIZEOF_VOID_P EQUAL 4)
   set(TARGET_BITS "32")
+else()
+  set(TARGET_BITS "64")
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
@@ -79,6 +79,7 @@ endif()
 option(WEBSOCKETS "Enable websockets support" OFF)
 option(MYSQL "Enable mysql support" OFF)
 option(AUTOUPDATE "Enable the autoupdater" ${AUTOUPDATE_DEFAULT})
+option(VIDEORECORDER "Enable video recording support via FFmpeg" OFF)
 option(CLIENT "Compile client" ON)
 option(DOWNLOAD_GTEST "Download and compile GTest" ${AUTO_DEPENDENCIES_DEFAULT})
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
@@ -193,8 +194,12 @@ endif()
 # COMMON FUNCTIONS
 ########################################################################
 
-function(set_glob VAR GLOBBING DIRECTORY) # ...
-  file(${GLOBBING} GLOB_RESULT "${DIRECTORY}/*.c" "${DIRECTORY}/*.cpp" "${DIRECTORY}/*.h")
+function(set_glob VAR GLOBBING EXTS DIRECTORY) # ...
+  set(GLOBS)
+  foreach(ext ${EXTS})
+    list(APPEND GLOBS "${DIRECTORY}/*.${ext}")
+  endforeach()
+  file(${GLOBBING} GLOB_RESULT ${GLOBS})
   list(SORT GLOB_RESULT)
   set(FILES)
   foreach(file ${ARGN})
@@ -230,6 +235,11 @@ function(set_glob VAR GLOBBING DIRECTORY) # ...
   endif()
 
   set(${VAR} ${FILES} PARENT_SCOPE)
+endfunction()
+
+function(set_src VAR GLOBBING DIRECTORY) # ...
+  set_glob(${VAR} ${GLOBBING} "c;cpp;h" ${DIRECTORY} ${ARGN})
+  set(${VAR} ${${VAR}} PARENT_SCOPE)
 endfunction()
 
 ########################################################################
@@ -313,6 +323,9 @@ find_package(Opusfile)
 find_package(Pnglite)
 find_package(PythonInterp)
 find_package(SDL2)
+if(VIDEORECORDER)
+  find_package(FFmpeg)
+endif()
 find_package(Threads)
 find_package(Wavpack)
 if(WEBSOCKETS)
@@ -334,6 +347,11 @@ if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   endif()
 
   find_program(HDIUTIL hdiutil)
+  if(HDIUTIL)
+    set(HDIUTIL_FOUND ON)
+  else()
+    set(HDIUTIL_FOUND OFF)
+  endif()
 endif()
 
 message(STATUS "******** chillerbot-ux ********")
@@ -377,6 +395,9 @@ show_dependency_status("Opusfile" OPUSFILE)
 show_dependency_status("Pnglite" PNGLITE)
 show_dependency_status("PythonInterp" PYTHONINTERP)
 show_dependency_status("SDL2" SDL2)
+if(VIDEORECORDER)
+  show_dependency_status("FFmpeg" FFMPEG)
+endif()
 show_dependency_status("Wavpack" WAVPACK)
 show_dependency_status("Zlib" ZLIB)
 if(WEBSOCKETS)
@@ -512,11 +533,10 @@ endif()
 # DEPENDENCY COMPILATION
 ########################################################################
 
-# Static dependencies
-set_glob(DEP_JSON_SRC GLOB src/engine/external/json-parser json.c json.h)
+set_src(DEP_JSON_SRC GLOB src/engine/external/json-parser json.c json.h)
 add_library(json EXCLUDE_FROM_ALL OBJECT ${DEP_JSON_SRC})
 
-set_glob(DEP_MD5_SRC GLOB src/engine/external/md5 md5.c md5.h)
+set_src(DEP_MD5_SRC GLOB src/engine/external/md5 md5.c md5.h)
 add_library(md5 EXCLUDE_FROM_ALL OBJECT ${DEP_MD5_SRC})
 
 list(APPEND TARGETS_DEP json md5)
@@ -536,6 +556,7 @@ set(COPY_FILES
   ${FREETYPE_COPY_FILES}
   ${OPUSFILE_COPY_FILES}
   ${SDL2_COPY_FILES}
+  ${FFMPEG_COPY_FILES}
 )
 file(COPY ${COPY_FILES} DESTINATION .)
 
@@ -591,7 +612,7 @@ generate_source("src/game/generated/server_data.h" "server_content_header")
 ########################################################################
 
 # Sources
-set_glob(BASE GLOB_RECURSE src/base
+set_src(BASE GLOB_RECURSE src/base
   color.h
   detect.h
   hash.c
@@ -617,7 +638,7 @@ set_glob(BASE GLOB_RECURSE src/base
   unicode/tolower_data.h
   vmath.h
 )
-set_glob(ENGINE_INTERFACE GLOB src/engine
+set_src(ENGINE_INTERFACE GLOB src/engine
   client.h
   config.h
   console.h
@@ -641,7 +662,7 @@ set_glob(ENGINE_INTERFACE GLOB src/engine
   updater.h
   uuid.h
 )
-set_glob(ENGINE_SHARED GLOB src/engine/shared
+set_src(ENGINE_SHARED GLOB src/engine/shared
   compression.cpp
   compression.h
   config.cpp
@@ -703,10 +724,12 @@ set_glob(ENGINE_SHARED GLOB src/engine/shared
   teehistorian_ex_chunks.h
   uuid_manager.cpp
   uuid_manager.h
+  video.cpp
+  video.h
   websockets.cpp
   websockets.h
 )
-set_glob(GAME_SHARED GLOB src/game
+set_src(GAME_SHARED GLOB src/game
   collision.cpp
   collision.h
   ddracecommands.h
@@ -778,7 +801,7 @@ list(APPEND TARGETS_OWN engine-shared game-shared)
 
 if(CLIENT)
   # Sources
-  set_glob(ENGINE_CLIENT GLOB src/engine/client
+  set_src(ENGINE_CLIENT GLOB src/engine/client
     backend_sdl.cpp
     backend_sdl.h
     client.cpp
@@ -805,8 +828,10 @@ if(CLIENT)
     text.cpp
     updater.cpp
     updater.h
+    video.cpp
+    video.h
   )
-  set_glob(GAME_CLIENT GLOB_RECURSE src/game/client
+  set_src(GAME_CLIENT GLOB_RECURSE src/game/client
     animstate.cpp
     animstate.h
     component.h
@@ -904,7 +929,7 @@ if(CLIENT)
     ui.cpp
     ui.h
   )
-  set_glob(GAME_EDITOR GLOB src/game/editor
+  set_src(GAME_EDITOR GLOB src/game/editor
     auto_map.cpp
     auto_map.h
     editor.cpp
@@ -934,6 +959,7 @@ if(CLIENT)
     ${PNGLITE_LIBRARIES}
     ${SDL2_LIBRARIES}
     ${WAVPACK_LIBRARIES}
+    ${FFMPEG_LIBRARIES}
 
     # Order of these three is important.
     ${OPUSFILE_LIBRARIES}
@@ -981,6 +1007,7 @@ if(CLIENT)
     ${PNGLITE_INCLUDE_DIRS}
     ${SDL2_INCLUDE_DIRS}
     ${WAVPACK_INCLUDE_DIRS}
+    ${FFMPEG_INCLUDE_DIRS}
   )
 
   set(PARAMS "${WAVPACK_INCLUDE_DIRS};${WAVPACK_INCLUDE_DIRS}")
@@ -1009,7 +1036,7 @@ endif()
 ########################################################################
 
 # Sources
-set_glob(ENGINE_SERVER GLOB src/engine/server
+set_src(ENGINE_SERVER GLOB src/engine/server
   authmanager.cpp
   authmanager.h
   name_ban.cpp
@@ -1025,7 +1052,7 @@ set_glob(ENGINE_SERVER GLOB src/engine/server
   sql_string_helpers.cpp
   sql_string_helpers.h
 )
-set_glob(GAME_SERVER GLOB_RECURSE src/game/server
+set_src(GAME_SERVER GLOB_RECURSE src/game/server
   ddracechat.cpp
   ddracechat.h
   ddracecommands.cpp
@@ -1122,8 +1149,8 @@ endif()
 # VARIOUS TARGETS
 ########################################################################
 
-set_glob(MASTERSRV_SRC GLOB src/mastersrv mastersrv.cpp mastersrv.h)
-set_glob(TWPING_SRC GLOB src/twping twping.cpp)
+set_src(MASTERSRV_SRC GLOB src/mastersrv mastersrv.cpp mastersrv.h)
+set_src(TWPING_SRC GLOB src/twping twping.cpp)
 
 set(TARGET_MASTERSRV mastersrv)
 set(TARGET_TWPING twping)
@@ -1138,7 +1165,7 @@ list(APPEND TARGETS_OWN ${TARGET_MASTERSRV} ${TARGET_TWPING})
 list(APPEND TARGETS_LINK ${TARGET_MASTERSRV} ${TARGET_TWPING})
 
 set(TARGETS_TOOLS)
-set_glob(TOOLS GLOB src/tools
+set_src(TOOLS GLOB src/tools
   config_common.h
   config_retrieve.cpp
   config_store.cpp
@@ -1146,6 +1173,7 @@ set_glob(TOOLS GLOB src/tools
   dilate.cpp
   dummy_map.cpp
   fake_server.cpp
+  map_convert_07.cpp
   map_diff.cpp
   map_extract.cpp
   map_replace_image.cpp
@@ -1164,7 +1192,7 @@ foreach(ABS_T ${TOOLS})
     string(REGEX REPLACE "\\.cpp$" "" TOOL "${T}")
     set(TOOL_DEPS ${DEPS})
     set(TOOL_LIBS ${LIBS})
-    if(TOOL MATCHES "^(tileset_.*|dilate|map_extract|map_replace_image)$")
+    if(TOOL MATCHES "^(tileset_.*|dilate|map_convert_07|map_extract|map_replace_image)$")
       list(APPEND TOOL_DEPS ${PNGLITE_DEP})
       list(APPEND TOOL_LIBS ${PNGLITE_LIBRARIES})
       list(APPEND TOOL_INCLUDE_DIRS ${PNGLITE_INCLUDE_DIRS})
@@ -1199,7 +1227,7 @@ add_custom_target(everything DEPENDS ${TARGETS_OWN})
 ########################################################################
 
 if(GTEST_FOUND OR DOWNLOAD_GTEST)
-  set_glob(TESTS GLOB src/test
+  set_src(TESTS GLOB src/test
     aio.cpp
     color.cpp
     datafile.cpp
@@ -1415,13 +1443,15 @@ if(TARGET_OS STREQUAL "windows")
 endif()
 
 if(NOT DEV)
-  install(DIRECTORY data DESTINATION share/chillerbot-ux COMPONENT data)
-  install(TARGETS ${TARGET_CLIENT} DESTINATION bin COMPONENT client)
-  install(TARGETS ${TARGET_SERVER} DESTINATION bin COMPONENT server)
-  install(TARGETS ${TARGETS_TOOLS} DESTINATION lib/chillerbot-ux COMPONENT tools)
-  install(FILES other/chillerbot-ux.desktop DESTINATION share/applications COMPONENT client)
+  include(GNUInstallDirs)
+  install(DIRECTORY data DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/chillerbot-ux COMPONENT data)
+  install(TARGETS ${TARGET_CLIENT} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT client)
+  install(TARGETS ${TARGET_SERVER} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT server)
+  install(TARGETS ${TARGETS_TOOLS} DESTINATION ${CMAKE_INSTALL_LIBDIR}/chillerbot-ux COMPONENT tools)
+  install(FILES other/chillerbot-ux.desktop DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications COMPONENT client)
+  install(FILES other/chillerbot-ux.appdata.xml DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/metainfo COMPONENT client)
   foreach(SIZE 16 32 48 128 256 512)
-    install(FILES other/icons/chillerbot-ux_${SIZE}x${SIZE}x32.png DESTINATION share/icons/hicolor/${SIZE}x${SIZE}/apps RENAME chillerbot-ux.png COMPONENT client)
+    install(FILES other/icons/chillerbot-ux_${SIZE}x${SIZE}x32.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/${SIZE}x${SIZE}/apps RENAME chillerbot-ux.png COMPONENT client)
   endforeach()
 endif()
 
@@ -1601,7 +1631,11 @@ foreach(target ${TARGETS})
     target_compile_options(${target} PRIVATE ${OUR_FLAGS})
   endif()
   if(DEFINE_FORTIFY_SOURCE)
-    target_compile_definitions(${target} PRIVATE $<$<NOT:$<CONFIG:Debug>>:_FORTIFY_SOURCE=2>) # Detect some buffer overflows.
+    if(MINGW)
+      target_compile_definitions(${target} PRIVATE $<$<NOT:$<CONFIG:Debug>>:_FORTIFY_SOURCE=0>) # Currently broken in MinGW, see https://sourceforge.net/p/mingw-w64/discussion/723798/thread/b9d24f041f/
+    else()
+      target_compile_definitions(${target} PRIVATE $<$<NOT:$<CONFIG:Debug>>:_FORTIFY_SOURCE=2>) # Detect some buffer overflows.
+    endif()
   endif()
 endforeach()
 
@@ -1651,6 +1685,9 @@ foreach(target ${TARGETS_OWN})
   if(WEBSOCKETS)
     target_compile_definitions(${target} PRIVATE CONF_WEBSOCKETS)
     target_include_directories(${target} PRIVATE ${WEBSOCKETS_INCLUDE_DIRS})
+  endif()
+  if(VIDEORECORDER)
+    target_compile_definitions(${target} PRIVATE CONF_VIDEORECORDER)
   endif()
   if(MYSQL)
     target_compile_definitions(${target} PRIVATE CONF_SQL)

@@ -1,7 +1,6 @@
 #include "test.h"
 #include <gtest/gtest.h>
 
-#include <iostream>
 #include <base/system.h>
 #include <base/color.h>
 

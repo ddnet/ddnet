@@ -80,7 +80,7 @@ void CMapLayers::EnvelopeEval(float TimeOffset, int Env, float *pChannels, void 
 	CMapItemEnvelope *pItem = (CMapItemEnvelope *)pThis->m_pLayers->Map()->GetItem(Start+Env, 0, 0);
 
 	static float s_Time = 0.0f;
-	static float s_LastLocalTime = pThis->Client()->LocalTime();
+	static float s_LastLocalTime = pThis->LocalTime();
 	if(pThis->Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		const IDemoPlayer::CInfo *pInfo = pThis->DemoPlayer()->BaseInfo();
@@ -92,12 +92,19 @@ void CMapLayers::EnvelopeEval(float TimeOffset, int Env, float *pChannels, void 
 				pThis->m_LastLocalTick = pThis->m_CurrentLocalTick;
 				pThis->m_CurrentLocalTick = pInfo->m_CurrentTick;
 			}
-
-			s_Time = mix(pThis->m_LastLocalTick / (float)pThis->Client()->GameTickSpeed(),
-						pThis->m_CurrentLocalTick / (float)pThis->Client()->GameTickSpeed(),
+			if(pItem->m_Version < 2 || pItem->m_Synchronized)
+			{
+				s_Time = mix((pThis->Client()->PrevGameTick()-pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick) / (float)pThis->Client()->GameTickSpeed(),
+							(pThis->Client()->GameTick()-pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick) / (float)pThis->Client()->GameTickSpeed(),
+							pThis->Client()->IntraGameTick());
+			}
+			else
+			{
+				s_Time = mix(pThis->m_LastLocalTick / (float)pThis->Client()->GameTickSpeed(),
+				    pThis->m_CurrentLocalTick / (float)pThis->Client()->GameTickSpeed(),
 						pThis->Client()->IntraGameTick());
+			}
 		}
-
 		pThis->RenderTools()->RenderEvalEnvelope(pPoints+pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time+TimeOffset, pChannels);
 	}
 	else
@@ -111,10 +118,10 @@ void CMapLayers::EnvelopeEval(float TimeOffset, int Env, float *pChannels, void 
 							pThis->Client()->IntraGameTick());
 			}
 			else
-				s_Time += pThis->Client()->LocalTime()-s_LastLocalTime;
+				s_Time += pThis->LocalTime()-s_LastLocalTime;
 		}
 		pThis->RenderTools()->RenderEvalEnvelope(pPoints+pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time+TimeOffset, pChannels);
-		s_LastLocalTime = pThis->Client()->LocalTime();
+		s_LastLocalTime = pThis->LocalTime();
 	}
 }
 
@@ -1714,7 +1721,7 @@ void CMapLayers::OnRender()
 					if(pTMap->m_Image == -1)
 					{
 						if(!IsGameLayer)
-							Graphics()->TextureSet(-1);
+							Graphics()->TextureClear();
 						else
 							Graphics()->TextureSet(m_pImages->GetEntities());
 					}
@@ -1775,7 +1782,7 @@ void CMapLayers::OnRender()
 				{
 					CMapItemLayerQuads *pQLayer = (CMapItemLayerQuads *)pLayer;
 					if(pQLayer->m_Image == -1)
-						Graphics()->TextureSet(-1);
+						Graphics()->TextureClear();
 					else
 						Graphics()->TextureSet(m_pImages->Get(pQLayer->m_Image));
 

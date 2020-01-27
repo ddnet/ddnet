@@ -9,16 +9,16 @@
 class CMsgPacker : public CPacker
 {
 public:
-	CMsgPacker(int Type)
+	CMsgPacker(int Type, bool System=false)
 	{
 		Reset();
 		if(Type < OFFSET_UUID)
 		{
-			AddInt(Type);
+			AddInt((Type<<1)|(System?1:0));
 		}
 		else
 		{
-			AddInt(0); // NETMSG_EX, NETMSGTYPE_EX
+			AddInt((0<<1)|(System?1:0)); // NETMSG_EX, NETMSGTYPE_EX
 			g_UuidManager.PackUuid(Type, this);
 		}
 	}

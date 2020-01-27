@@ -174,6 +174,7 @@ class CMenus : public CComponent
 		bool m_Valid;
 		CDemoHeader m_Info;
 		CTimelineMarkers m_TimelineMarkers;
+		CMapInfo m_MapInfo;
 
 		int NumMarkers() const
 		{
@@ -227,6 +228,7 @@ class CMenus : public CComponent
 	int m_DemolistSelectedIndex;
 	bool m_DemolistSelectedIsDir;
 	int m_DemolistStorageType;
+	int m_Speed = 4;
 
 	void DemolistOnUpdate(bool Reset);
 	//void DemolistPopulate();
@@ -306,6 +308,8 @@ class CMenus : public CComponent
 	void RenderSettings(CUIRect MainView);
 
 	void SetActive(bool Active);
+
+	IGraphics::CTextureHandle m_TextureBlob;
 public:
 	void RenderBackground();
 
@@ -344,7 +348,17 @@ public:
 		PAGE_SETTINGS,
 		PAGE_SYSTEM,
 		PAGE_NETWORK,
-		PAGE_GHOST
+		PAGE_GHOST,
+
+		SETTINGS_LANGUAGE=0,
+		SETTINGS_GENERAL,
+		SETTINGS_PLAYER,
+		SETTINGS_TEE,
+		SETTINGS_HUD,
+		SETTINGS_CONTROLS,
+		SETTINGS_GRAPHICS,
+		SETTINGS_SOUND,
+		SETTINGS_DDNET,
 	};
 
 	// DDRace
@@ -397,6 +411,8 @@ public:
 		POPUP_COUNTRY,
 		POPUP_DELETE_DEMO,
 		POPUP_RENAME_DEMO,
+		POPUP_RENDER_DEMO,
+		POPUP_REPLACE_VIDEO,
 		POPUP_REMOVE_FRIEND,
 		POPUP_SOUNDERROR,
 		POPUP_PASSWORD,

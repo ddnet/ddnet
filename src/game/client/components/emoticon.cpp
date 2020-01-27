@@ -107,7 +107,7 @@ void CEmoticon::OnRender()
 
 	Graphics()->BlendNormal();
 
-	Graphics()->TextureSet(-1);
+	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0,0,0,0.3f);
 	DrawCircle(Screen.w/2, Screen.h/2, 190.0f, 64);
@@ -137,7 +137,7 @@ void CEmoticon::OnRender()
 
 	if(GameClient()->m_GameInfo.m_AllowEyeWheel && g_Config.m_ClEyeWheel)
 	{
-		Graphics()->TextureSet(-1);
+		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(1.0,1.0,1.0,0.3f);
 		DrawCircle(Screen.w/2, Screen.h/2, 100.0f, 64);
@@ -163,7 +163,7 @@ void CEmoticon::OnRender()
 			pTeeInfo->m_Size = 64.0f;
 		}
 
-		Graphics()->TextureSet(-1);
+		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(0,0,0,0.3f);
 		DrawCircle(Screen.w/2, Screen.h/2, 30.0f, 64);
@@ -188,9 +188,9 @@ void CEmoticon::Emote(int Emoticon)
 
 	if(g_Config.m_ClDummyCopyMoves)
 	{
-		CMsgPacker Msg(NETMSGTYPE_CL_EMOTICON);
+		CMsgPacker Msg(NETMSGTYPE_CL_EMOTICON, false);
 		Msg.AddInt(Emoticon);
-		Client()->SendMsgExY(&Msg, MSGFLAG_VITAL, false, !g_Config.m_ClDummy);
+		Client()->SendMsgY(&Msg, MSGFLAG_VITAL, !g_Config.m_ClDummy);
 	}
 }
 

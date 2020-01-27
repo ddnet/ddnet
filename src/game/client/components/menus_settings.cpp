@@ -615,7 +615,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			if(g_Config.m_Debug)
 			{
 				ColorRGBA BloodColor = *UseCustomColor ? color_cast<ColorRGBA>(ColorHSLA(*ColorBody)) : s->m_BloodColor;
-				Graphics()->TextureSet(-1);
+				Graphics()->TextureClear();
 				Graphics()->QuadsBegin();
 				Graphics()->SetColor(BloodColor.r, BloodColor.g, BloodColor.b, 1.0f);
 				IGraphics::CQuadItem QuadItem(Item.m_Rect.x, Item.m_Rect.y, 12.0f, 12.0f);
@@ -695,7 +695,7 @@ static CKeyInfo gs_aKeys[] =
 	{ "Pistol", "+weapon2", 0, 0 },
 	{ "Shotgun", "+weapon3", 0, 0 },
 	{ "Grenade", "+weapon4", 0, 0 },
-	{ "Rifle", "+weapon5", 0, 0 },
+	{ "Laser", "+weapon5", 0, 0 },
 	{ "Next weapon", "+nextweapon", 0, 0 },
 	{ "Prev. weapon", "+prevweapon", 0, 0 },
 
@@ -721,11 +721,17 @@ static CKeyInfo gs_aKeys[] =
 	{ "Show HUD", "toggle cl_showhud 0 1", 0, 0 },
 };
 
-/*	This is for scripts/update_localization.py to work, don't remove!
-	Localize("Move left");Localize("Move right");Localize("Jump");Localize("Fire");Localize("Hook");Localize("Hammer");
-	Localize("Pistol");Localize("Shotgun");Localize("Grenade");Localize("Rifle");Localize("Next weapon");Localize("Prev. weapon");
-	Localize("Vote yes");Localize("Vote no");Localize("Chat");Localize("Team chat");Localize("Show chat");Localize("Emoticon");
-	Localize("Spectator mode");Localize("Spectate next");Localize("Spectate previous");Localize("Console");Localize("Remote console");Localize("Screenshot");Localize("Scoreboard");Localize("Respawn");
+/*	This is for scripts/languages to work, don't remove!
+	Localize("Move left");Localize("Move right");Localize("Jump");Localize("Fire");Localize("Hook");
+	Localize("Hook collisions");Localize("Pause");Localize("Kill");Localize("Zoom in");Localize("Zoom out");
+	Localize("Default zoom");Localize("Show others");Localize("Show all");Localize("Toggle dyncam");
+	Localize("Toggle dummy");Localize("Toggle ghost");Localize("Dummy copy");Localize("Hammerfly dummy");
+	Localize("Hammer");Localize("Pistol");Localize("Shotgun");Localize("Grenade");Localize("Laser");
+	Localize("Next weapon");Localize("Prev. weapon");Localize("Vote yes");Localize("Vote no");
+	Localize("Chat");Localize("Team chat");Localize("Converse");Localize("Show chat");Localize("Emoticon");
+	Localize("Spectator mode");Localize("Spectate next");Localize("Spectate previous");Localize("Console");
+	Localize("Remote console");Localize("Screenshot");Localize("Scoreboard");Localize("Statboard");
+	Localize("Lock team");Localize("Show entities");Localize("Show HUD");
 */
 
 const int g_KeyCount = sizeof(gs_aKeys) / sizeof(CKeyInfo);
@@ -1364,8 +1370,6 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 
 void CMenus::RenderSettings(CUIRect MainView)
 {
-	static int s_SettingsPage = 0;
-
 	// render background
 	CUIRect Temp, TabBar, RestartWarning;
 	MainView.VSplitRight(120.0f, &MainView, &TabBar);
@@ -1398,29 +1402,29 @@ void CMenus::RenderSettings(CUIRect MainView)
 	{
 		TabBar.HSplitTop(10, &Button, &TabBar);
 		TabBar.HSplitTop(26, &Button, &TabBar);
-		if(DoButton_MenuTab(aTabs[i], aTabs[i], s_SettingsPage == i, &Button, CUI::CORNER_R))
-			s_SettingsPage = i;
+		if(DoButton_MenuTab(aTabs[i], aTabs[i], g_Config.m_UiSettingsPage == i, &Button, CUI::CORNER_R))
+			g_Config.m_UiSettingsPage = i;
 	}
 
 	MainView.Margin(10.0f, &MainView);
 
-	if(s_SettingsPage == 0)
+	if(g_Config.m_UiSettingsPage == SETTINGS_LANGUAGE)
 		RenderLanguageSelection(MainView);
-	else if(s_SettingsPage == 1)
+	else if(g_Config.m_UiSettingsPage == SETTINGS_GENERAL)
 		RenderSettingsGeneral(MainView);
-	else if(s_SettingsPage == 2)
+	else if(g_Config.m_UiSettingsPage == SETTINGS_PLAYER)
 		RenderSettingsPlayer(MainView);
-	else if(s_SettingsPage == 3)
+	else if(g_Config.m_UiSettingsPage == SETTINGS_TEE)
 		RenderSettingsTee(MainView);
-	else if(s_SettingsPage == 4)
+	else if(g_Config.m_UiSettingsPage == SETTINGS_HUD)
 		RenderSettingsHUD(MainView);
-	else if(s_SettingsPage == 5)
+	else if(g_Config.m_UiSettingsPage == SETTINGS_CONTROLS)
 		RenderSettingsControls(MainView);
-	else if(s_SettingsPage == 6)
+	else if(g_Config.m_UiSettingsPage == SETTINGS_GRAPHICS)
 		RenderSettingsGraphics(MainView);
-	else if(s_SettingsPage == 7)
+	else if(g_Config.m_UiSettingsPage == SETTINGS_SOUND)
 		RenderSettingsSound(MainView);
-	else if(s_SettingsPage == 8)
+	else if(g_Config.m_UiSettingsPage == SETTINGS_DDNET)
 		RenderSettingsDDNet(MainView);
 	else if(s_SettingsPage == 9)
 		RenderSettingsChillerbot(MainView);
@@ -1911,7 +1915,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		vec2 Out, Border;
 
 		Graphics()->BlendNormal();
-		Graphics()->TextureSet(-1);
+		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
 
 		// do outline
@@ -1963,7 +1967,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
 		Graphics()->QuadsBegin();
 
-		RenderTools()->SelectSprite(SPRITE_WEAPON_RIFLE_BODY);
+		RenderTools()->SelectSprite(SPRITE_WEAPON_LASER_BODY);
 		RenderTools()->DrawSprite(Weapon.x, Weapon.y + Weapon.h / 2.0f, 60.0f);
 
 		Graphics()->QuadsEnd();
@@ -2088,6 +2092,22 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 		Button.VSplitLeft(50.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Size"), 14.0f, -1);
+		g_Config.m_ClTextEntitiesSize = (int)(DoScrollbarH(&g_Config.m_ClTextEntitiesSize, &Button, g_Config.m_ClTextEntitiesSize/100.0f)*100.0f);
+
+		if(DoButton_CheckBox(&g_Config.m_ClTextEntities, Localize("Show text entities"), g_Config.m_ClTextEntities, &LeftLeft))
+		{
+			g_Config.m_ClTextEntities ^= 1;
+		}
+	}
+
+	{
+		CUIRect Button, Label;
+		Left.HSplitTop(20.0f, &Button, &Left);
+		Button.VSplitMid(&LeftLeft, &Button);
+
+		Button.VSplitLeft(50.0f, &Label, &Button);
+		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Alpha"), 14.0f, -1);
 		g_Config.m_ClShowOthersAlpha = (int)(DoScrollbarH(&g_Config.m_ClShowOthersAlpha, &Button, g_Config.m_ClShowOthersAlpha /100.0f)*100.0f);
 
@@ -2175,7 +2195,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 	CUIRect aRects[2];
 	Left.HSplitTop(5.0f, &Button, &Left);
-	Right.HSplitTop(5.0f, &Button, &Right);
+	Right.HSplitTop(25.0f, &Button, &Right);
 	aRects[0] = Left;
 	aRects[1] = Right;
 	aRects[0].VSplitRight(10.0f, &aRects[0], 0);

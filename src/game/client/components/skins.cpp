@@ -4,6 +4,7 @@
 
 #include <base/system.h>
 #include <base/math.h>
+#include <ctime>
 
 #include <engine/graphics.h>
 #include <engine/storage.h>
@@ -158,7 +159,7 @@ void CSkins::OnInit()
 	{
 		time_t rawtime;
 		struct tm* timeinfo;
-		time(&rawtime);
+		std::time(&rawtime);
 		timeinfo = localtime(&rawtime);
 		if(timeinfo->tm_mon == 11 && timeinfo->tm_mday >= 24 && timeinfo->tm_mday <= 26)
 		{ // Christmas
@@ -175,8 +176,6 @@ void CSkins::OnInit()
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load skins. folder='skins/'");
 		CSkin DummySkin;
 		DummySkin.m_IsVanilla = true;
-		DummySkin.m_OrgTexture = -1;
-		DummySkin.m_ColorTexture = -1;
 		str_copy(DummySkin.m_aName, "dummy", sizeof(DummySkin.m_aName));
 		DummySkin.m_BloodColor = ColorRGBA(1.0f, 1.0f, 1.0f);
 		m_aSkins.add(DummySkin);

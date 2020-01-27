@@ -1053,7 +1053,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 		if(pItem->m_Own)
 			rgb = color_cast<ColorRGBA>(ColorHSLA(0.33f, 1.0f, 0.75f));
 
-		TextRender()->TextColor(rgb.SetAlpha(pItem->HasFile() ? 1.0f : 0.5f));
+		TextRender()->TextColor(rgb.WithAlpha(pItem->HasFile() ? 1.0f : 0.5f));
 
 		for(int c = 0; c < NumCols; c++)
 		{

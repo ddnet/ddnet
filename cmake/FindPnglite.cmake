@@ -29,7 +29,7 @@ endif()
 
 if(NOT PNGLITE_FOUND)
   set(PNGLITE_SRC_DIR src/engine/external/pnglite)
-  set_glob(PNGLITE_SRC GLOB ${PNGLITE_SRC_DIR} pnglite.c pnglite.h)
+  set_src(PNGLITE_SRC GLOB ${PNGLITE_SRC_DIR} pnglite.c pnglite.h)
   add_library(pnglite EXCLUDE_FROM_ALL OBJECT ${PNGLITE_SRC})
   list(APPEND TARGETS_DEP pnglite)
 

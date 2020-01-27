@@ -5,6 +5,7 @@
 #include "kernel.h"
 
 #include "message.h"
+#include "graphics.h"
 #include <engine/friends.h>
 #include <engine/shared/config.h>
 
@@ -70,6 +71,7 @@ public:
 		STATE_ONLINE,
 		STATE_DEMOPLAYBACK,
 		STATE_QUITING,
+		STATE_RESTARTING,
 	};
 
 	//
@@ -102,6 +104,9 @@ public:
 	virtual void Restart() = 0;
 	virtual void Quit() = 0;
 	virtual const char *DemoPlayer_Play(const char *pFilename, int StorageType) = 0;
+	#if defined(CONF_VIDEORECORDER)
+	virtual const char *DemoPlayer_Render(const char *pFilename, int StorageType, const char *pVideoName, int SpeedIndex) = 0;
+	#endif
 	virtual void DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int Recorder) = 0;
 	virtual void DemoRecorder_HandleAutoStart() = 0;
 	virtual void DemoRecorder_Stop(int Recorder, bool RemoveFile = false) = 0;
@@ -159,12 +164,12 @@ public:
 	virtual void SnapSetStaticsize(int ItemType, int Size) = 0;
 
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags) = 0;
-	virtual int SendMsgExY(CMsgPacker *pMsg, int Flags, bool System=true, int NetClient=1) = 0;
+	virtual int SendMsgY(CMsgPacker *pMsg, int Flags, int NetClient=1) = 0;
 
 	template<class T>
 	int SendPackMsg(T *pMsg, int Flags)
 	{
-		CMsgPacker Packer(pMsg->MsgID());
+		CMsgPacker Packer(pMsg->MsgID(), false);
 		if(pMsg->Pack(&Packer))
 			return -1;
 		return SendMsg(&Packer, Flags);
@@ -177,7 +182,7 @@ public:
 
 	virtual bool SoundInitFailed() = 0;
 
-	virtual int GetDebugFont() = 0;
+	virtual IGraphics::CTextureHandle GetDebugFont() = 0; // TODO: remove this function
 
 	//DDRace
 

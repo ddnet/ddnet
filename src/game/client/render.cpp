@@ -286,7 +286,7 @@ void CRenderTools::DrawRoundRect(float x, float y, float w, float h, float r)
 
 void CRenderTools::DrawUIRect(const CUIRect *r, ColorRGBA Color, int Corners, float Rounding)
 {
-	Graphics()->TextureSet(-1);
+	Graphics()->TextureClear();
 
 	// TODO: FIX US
 	Graphics()->QuadsBegin();

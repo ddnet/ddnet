@@ -100,7 +100,7 @@ public:
 	template<class T>
 	int SendPackMsgOne(T *pMsg, int Flags, int ClientID)
 	{
-		CMsgPacker Packer(pMsg->MsgID());
+		CMsgPacker Packer(pMsg->MsgID(), false);
 		if(pMsg->Pack(&Packer))
 			return -1;
 		return SendMsg(&Packer, Flags, ClientID);
@@ -188,6 +188,7 @@ public:
 	virtual void SetTimeoutProtected(int ClientID) = 0;
 
 	virtual void SetErrorShutdown(const char *pReason) = 0;
+	virtual void ExpireServerInfo() = 0;
 
 	virtual char *GetMapName() = 0;
 };

@@ -5,8 +5,6 @@
 
 #include "graphics_threaded.h"
 
-
-
 # if defined(CONF_PLATFORM_MACOSX)
 	#include <objc/objc-runtime.h>
 
@@ -21,13 +19,13 @@
 			Class NSAutoreleasePoolClass = (Class) objc_getClass("NSAutoreleasePool");
 			m_Pool = class_createInstance(NSAutoreleasePoolClass, 0);
 			SEL selector = sel_registerName("init");
-			objc_msgSend(m_Pool, selector);
+			((id (*)(id, SEL))objc_msgSend)(m_Pool, selector);
 		}
 
 		~CAutoreleasePool()
 		{
 			SEL selector = sel_registerName("drain");
-			objc_msgSend(m_Pool, selector);
+			((id (*)(id, SEL))objc_msgSend)(m_Pool, selector);
 		}
 	};
 #endif

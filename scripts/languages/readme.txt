@@ -35,3 +35,7 @@ $ mv newspanish.txt ../spanish.txt
 Often people know better phrases for translations where the english phrase was just
 copied. To find these you can use find_unchanged.py
 $ ./find_unchanged.py ../spanish.txt
+
+To update all languages:
+
+$ for i in data/languages/*.txt; do scripts/languages/copy_fix.py $i $i.tmp --delete-unused --append-missing && mv $i.tmp $i; done

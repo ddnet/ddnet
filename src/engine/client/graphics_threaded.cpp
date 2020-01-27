@@ -229,7 +229,6 @@ CGraphics_Threaded::CGraphics_Threaded()
 
 	m_Rotation = 0;
 	m_Drawing = 0;
-	m_InvalidTexture = 0;
 
 	m_TextureMemoryUsage = 0;
 
@@ -341,7 +340,7 @@ void CGraphics_Threaded::LinesDraw(const CLineItem *pArray, int Num)
 	AddVertices(2*Num);
 }
 
-int CGraphics_Threaded::UnloadTexture(int Index)
+int CGraphics_Threaded::UnloadTexture(CTextureHandle Index)
 {
 	if(Index == m_InvalidTexture)
 		return 0;
@@ -377,7 +376,7 @@ static int ImageFormatToPixelSize(int Format)
 }
 
 
-int CGraphics_Threaded::LoadTextureRawSub(int TextureID, int x, int y, int Width, int Height, int Format, const void *pData)
+int CGraphics_Threaded::LoadTextureRawSub(CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData)
 {
 	CCommandBuffer::SCommand_Texture_Update Cmd;
 	Cmd.m_Slot = TextureID;
@@ -405,7 +404,7 @@ int CGraphics_Threaded::LoadTextureRawSub(int TextureID, int x, int y, int Width
 	return 0;
 }
 
-int CGraphics_Threaded::LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags)
+IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags)
 {
 	// don't waste memory on texture if we are stress testing
 #ifdef CONF_DEBUG
@@ -449,18 +448,18 @@ int CGraphics_Threaded::LoadTextureRaw(int Width, int Height, int Format, const 
 		m_pCommandBuffer->AddCommand(Cmd);
 	}
 
-	return Tex;
+	return CreateTextureHandle(Tex);
 }
 
 // simple uncompressed RGBA loaders
-int CGraphics_Threaded::LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags)
+IGraphics::CTextureHandle CGraphics_Threaded::LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags)
 {
 	int l = str_length(pFilename);
 	int ID;
 	CImageInfo Img;
 
 	if(l < 3)
-		return -1;
+		return CTextureHandle();
 	if(LoadPNG(&Img, pFilename, StorageType))
 	{
 		if(StoreFormat == CImageInfo::FORMAT_AUTO)
@@ -470,7 +469,7 @@ int CGraphics_Threaded::LoadTexture(const char *pFilename, int StorageType, int 
 		free(Img.m_pData);
 		if(ID != m_InvalidTexture && g_Config.m_Debug)
 			dbg_msg("graphics/texture", "loaded %s", pFilename);
-		return ID;
+		return CreateTextureHandle(ID);
 	}
 
 	return m_InvalidTexture;
@@ -570,7 +569,7 @@ void CGraphics_Threaded::ScreenshotDirect()
 	}
 }
 
-void CGraphics_Threaded::TextureSet(int TextureID)
+void CGraphics_Threaded::TextureSet(CTextureHandle TextureID)
 {
 	dbg_assert(m_Drawing == 0, "called Graphics()->TextureSet within begin");
 	m_State.m_Texture = TextureID;
@@ -1648,7 +1647,8 @@ void CGraphics_Threaded::RenderQuadContainerAsSpriteMultiple(int ContainerIndex,
 	}
 }
 
-void* CGraphics_Threaded::AllocCommandBufferData(unsigned AllocSize) {
+void* CGraphics_Threaded::AllocCommandBufferData(unsigned AllocSize)
+{
 	void* pData = m_pCommandBuffer->AllocData(AllocSize);
 	if(pData == 0x0)
 	{
@@ -2049,7 +2049,9 @@ int CGraphics_Threaded::IssueInit()
 	if(g_Config.m_GfxBorderless) Flags |= IGraphicsBackend::INITFLAG_BORDERLESS;
 	if(g_Config.m_GfxFullscreen) Flags |= IGraphicsBackend::INITFLAG_FULLSCREEN;
 	if(g_Config.m_GfxVsync) Flags |= IGraphicsBackend::INITFLAG_VSYNC;
+#ifndef CONF_VIDEORECORDER
 	if(g_Config.m_GfxResizable) Flags |= IGraphicsBackend::INITFLAG_RESIZABLE;
+#endif
 
 	int r = m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, g_Config.m_GfxFsaaSamples, Flags, &m_DesktopScreenWidth, &m_DesktopScreenHeight, &m_ScreenWidth, &m_ScreenHeight, m_pStorage);
 	m_UseOpenGL3_3 = m_pBackend->IsOpenGL3_3();

@@ -110,7 +110,7 @@ void CCharacterCore::Reset()
 	m_EndlessJump = false;
 	m_NoHammerHit = false;
 	m_NoGrenadeHit = false;
-	m_NoRifleHit = false;
+	m_NoLaserHit = false;
 	m_NoShotgunHit = false;
 	m_NoHookHit = false;
 	m_Super = false;
@@ -494,15 +494,7 @@ void CCharacterCore::Move()
 				if((!(pCharCore->m_Super || m_Super) && (m_Solo || pCharCore->m_Solo || !pCharCore->m_Collision || pCharCore->m_NoCollision || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, p)))))
 					continue;
 				float D = distance(Pos, pCharCore->m_Pos);
-				if(D < 28.0f && D > 0.0f)
-				{
-					if(a > 0.0f)
-						m_Pos = LastPos;
-					else if(distance(NewPos, pCharCore->m_Pos) > D)
-						m_Pos = NewPos;
-					return;
-				}
-				else if(D <= 0.001f && D >= -0.001f)
+				if(D < 28.0f && D >= 0.0f)
 				{
 					if(a > 0.0f)
 						m_Pos = LastPos;
@@ -562,7 +554,7 @@ void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 	m_NoCollision = pObjDDNet->m_Flags & CHARACTERFLAG_NO_COLLISION;
 	m_NoHammerHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_HAMMER_HIT;
 	m_NoGrenadeHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_GRENADE_HIT;
-	m_NoRifleHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_RIFLE_HIT;
+	m_NoLaserHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_LASER_HIT;
 	m_NoShotgunHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_SHOTGUN_HIT;
 	m_NoHookHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_HOOK;
 	m_Super = pObjDDNet->m_Flags & CHARACTERFLAG_SUPER;

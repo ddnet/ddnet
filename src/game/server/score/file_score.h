@@ -6,6 +6,7 @@
 
 #include <base/tl/sorted_array.h>
 
+#include <string>
 #include "../score.h"
 
 class CFileScore: public IScore

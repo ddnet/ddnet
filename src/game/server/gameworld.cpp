@@ -304,6 +304,9 @@ CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, v
 		if(p == pNotThis)
 			continue;
 
+		if(pThisOnly && p != pThisOnly)
+			continue;
+
 		if(CollideWith != -1 && !p->CanCollide(CollideWith))
 			continue;
 

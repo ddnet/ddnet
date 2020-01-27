@@ -193,6 +193,7 @@ public:
 	int m_TeamBeforeSuper;
 	int m_FreezeTime;
 	int m_FreezeTick;
+	bool m_FrozenLastTick;
 	bool m_DeepFreeze;
 	bool m_EndlessHook;
 	bool m_FreezeHammer;
@@ -202,7 +203,7 @@ public:
 		DISABLE_HIT_HAMMER=1,
 		DISABLE_HIT_SHOTGUN=2,
 		DISABLE_HIT_GRENADE=4,
-		DISABLE_HIT_RIFLE=8
+		DISABLE_HIT_LASER=8
 	};
 	int m_Hit;
 	int m_TuneZone;

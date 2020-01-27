@@ -35,7 +35,9 @@ void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
 		"Piepow, QingGo, RafaelFF, sctt, jao, daverck, fokkonaut,");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
-		"Bojidar, FallenKN, ardadem, archimede67, sirius1242 & others.");
+		"Bojidar, FallenKN, ardadem, archimede67, sirius1242, Aerll");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
+		"& others.");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
 		"Based on DDRace by the DDRace developers,");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
@@ -59,6 +61,19 @@ void CGameContext::ConInfo(IConsole::IResult *pResult, void *pUserData)
 			"For more info: /cmdlist");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info",
 			"Or visit DDNet.tw");
+}
+
+void CGameContext::ConList(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int ClientID = pResult->m_ClientID;
+	if(!CheckClientID(ClientID)) return;
+
+	char zerochar = 0;
+	if(pResult->NumArguments() > 0)
+		pSelf->List(ClientID, pResult->GetString(0));
+	else
+		pSelf->List(ClientID, &zerochar);
 }
 
 void CGameContext::ConHelp(IConsole::IResult *pResult, void *pUserData)
