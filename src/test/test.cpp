@@ -11,9 +11,14 @@ CTestInfo::CTestInfo()
 {
 	const ::testing::TestInfo *pTestInfo =
 		::testing::UnitTest::GetInstance()->current_test_info();
-	char aBuf[IO_MAX_PATH_LENGTH];
-	str_format(aBuf, sizeof(aBuf), "%s.%s", pTestInfo->test_case_name(), pTestInfo->name());
-	IStorage::FormatTmpPath(m_aFilename, sizeof(m_aFilename), aBuf);
+	str_format(m_aFilenamePrefix, sizeof(m_aFilenamePrefix), "%s.%s-%d",
+		pTestInfo->test_case_name(), pTestInfo->name(), pid());
+	Filename(m_aFilename, sizeof(m_aFilename), ".tmp");
+}
+
+void CTestInfo::Filename(char *pBuffer, size_t BufferLength, const char *pSuffix)
+{
+	str_format(pBuffer, BufferLength, "%s%s", m_aFilenamePrefix, pSuffix);
 }
 
 IStorage *CTestInfo::CreateTestStorage()
