@@ -12,27 +12,27 @@ jobs:
         - os: ubuntu-latest
           cmake-args: -G "Unix Makefiles"
           build-args: --parallel
-          package-file: DDNet-*-linux_x86_64.tar.xz
+          package-file: chillerbot-ux-*-linux_x86_64.tar.xz
           env:
             CFLAGS: -Wdeclaration-after-statement -Werror
             CXXFLAGS: -Werror
         - os: ubuntu-16.04
           cmake-path: /usr/bin/
           cmake-args: -G "Unix Makefiles"
-          package-file: DDNet-*-linux_x86_64.tar.xz
+          package-file: chillerbot-ux-*-linux_x86_64.tar.xz
           env:
             CFLAGS: -Wdeclaration-after-statement -Werror
             CXXFLAGS: -Werror
         - os: macOS-latest
           cmake-args: -G "Unix Makefiles"
           build-args: --parallel
-          package-file: DDNet-*-osx.dmg
+          package-file: chillerbot-ux-*-osx.dmg
           env:
             CFLAGS: -Wdeclaration-after-statement -Werror
             CXXFLAGS: -Werror
         - os: windows-latest
           cmake-args: -G "Visual Studio 16 2019" -A x64
-          package-file: DDNet-*-win64.zip
+          package-file: chillerbot-ux-*-win64.zip
           env:
             CFLAGS: /WX
             CXXFLAGS: /WX
@@ -96,5 +96,5 @@ jobs:
     - name: Upload Artifacts
       uses: actions/upload-artifact@v1
       with:
-        name: ddnet-${{ matrix.os }}
+        name: chillerbot-ux-${{ matrix.os }}
         path: release/artifacts
