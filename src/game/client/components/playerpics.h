@@ -33,7 +33,6 @@ private:
 		CODE_RANGE=CODE_UB-CODE_LB+1,
 	};
 	sorted_array<CPlayerPic> m_aPlayerPics;
-	int m_CodeIndexLUT[CODE_RANGE];
 
 	static int LoadImageByName(const char *pImgName, int IsDir, int DirType, void *pUser);
 	void LoadPlayerpicsIndexfile();
