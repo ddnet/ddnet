@@ -38,6 +38,8 @@ testrunner\[1\]_include.cmake
 chillerbot-ux
 chillerbot-ux-Server
 chillerbot-ux-Server-Launcher
+DDNet-Server
+DDNet-Server-Launcher
 config_retrieve
 config_store
 crapnet
