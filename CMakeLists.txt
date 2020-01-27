@@ -106,7 +106,7 @@ set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
   src/game/version.h
 )
 
-set(SERVER_EXECUTABLE chillerbot-ux-Server CACHE STRING "Name of the built server executable")
+set(SERVER_EXECUTABLE DDNet-Server CACHE STRING "Name of the built server executable")
 set(CLIENT_EXECUTABLE chillerbot-ux CACHE STRING "Name of the build client executable")
 
 ########################################################################
@@ -1109,7 +1109,7 @@ set(GAME_GENERATED_SERVER
 )
 set(SERVER_SRC ${ENGINE_SERVER} ${GAME_SERVER} ${GAME_GENERATED_SERVER})
 if(TARGET_OS STREQUAL "windows")
-  set(SERVER_ICON "other/icons/chillerbot-ux-Server.rc")
+  set(SERVER_ICON "other/icons/DDNet-Server.rc")
 else()
   set(SERVER_ICON)
 endif()
