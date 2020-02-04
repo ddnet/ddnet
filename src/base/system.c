@@ -2459,7 +2459,21 @@ char *str_skip_to_whitespace(char *str)
 	return str;
 }
 
+const char *str_skip_to_whitespace_const(const char *str)
+{
+	while(*str && (*str != ' ' && *str != '\t' && *str != '\n'))
+		str++;
+	return str;
+}
+
 char *str_skip_whitespaces(char *str)
+{
+	while(*str && (*str == ' ' || *str == '\t' || *str == '\n' || *str == '\r'))
+		str++;
+	return str;
+}
+
+const char *str_skip_whitespaces_const(const char *str)
 {
 	while(*str && (*str == ' ' || *str == '\t' || *str == '\n' || *str == '\r'))
 		str++;

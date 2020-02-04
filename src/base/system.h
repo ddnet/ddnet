@@ -1138,6 +1138,12 @@ void str_clean_whitespaces(char *str);
 char *str_skip_to_whitespace(char *str);
 
 /*
+	Function: str_skip_to_whitespace_const
+		See str_skip_to_whitespace.
+*/
+const char *str_skip_to_whitespace_const(const char *str);
+
+/*
 	Function: str_skip_whitespaces
 		Skips leading whitespace characters(' ', '\t', '\n', '\r').
 
@@ -1152,6 +1158,12 @@ char *str_skip_to_whitespace(char *str);
 		- The strings are treated as zero-terminated strings.
 */
 char *str_skip_whitespaces(char *str);
+
+/*
+	Function: str_skip_whitespaces_const
+		See str_skip_whitespaces.
+*/
+const char *str_skip_whitespaces_const(const char *str);
 
 /*
 	Function: str_comp_nocase
