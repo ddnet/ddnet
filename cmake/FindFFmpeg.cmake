@@ -124,14 +124,14 @@ set(FFMPEG_INCLUDE_DIRS
 is_bundled(IS_BUNDLED "${AVCODEC_LIBRARY}")
 if(IS_BUNDLED AND TARGET_OS STREQUAL "windows")
   set(FFMPEG_COPY_FILES
-    "${EXTRA_FFMPEG_LIBDIR}/avcodec-57.dll"
-    "${EXTRA_FFMPEG_LIBDIR}/avdevice-57.dll"
-    "${EXTRA_FFMPEG_LIBDIR}/avfilter-6.dll"
-    "${EXTRA_FFMPEG_LIBDIR}/avformat-57.dll"
-    "${EXTRA_FFMPEG_LIBDIR}/avutil-55.dll"
-    "${EXTRA_FFMPEG_LIBDIR}/postproc-54.dll"
-    "${EXTRA_FFMPEG_LIBDIR}/swresample-2.dll"
-    "${EXTRA_FFMPEG_LIBDIR}/swscale-4.dll"
+    "${EXTRA_FFMPEG_LIBDIR}/avcodec-58.dll"
+    "${EXTRA_FFMPEG_LIBDIR}/avdevice-58.dll"
+    "${EXTRA_FFMPEG_LIBDIR}/avfilter-7.dll"
+    "${EXTRA_FFMPEG_LIBDIR}/avformat-58.dll"
+    "${EXTRA_FFMPEG_LIBDIR}/avutil-56.dll"
+    "${EXTRA_FFMPEG_LIBDIR}/postproc-55.dll"
+    "${EXTRA_FFMPEG_LIBDIR}/swresample-3.dll"
+    "${EXTRA_FFMPEG_LIBDIR}/swscale-5.dll"
   )
 else()
   set(FFMPEG_COPY_FILES)
