@@ -620,12 +620,12 @@ void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
 		if(pCode[3] == ' ')
 		{
 			str_copy(aCountry, pCode, 4);
-			pCode = str_skip_whitespaces(pCode + 4);
+			pCode = str_skip_whitespaces_const(pCode + 4);
 		}
 		else if(str_length(pCode) > 4 && pCode[4] == ' ')
 		{
 			str_copy(aCountry, pCode, 5);
-			pCode = str_skip_whitespaces(pCode + 5);
+			pCode = str_skip_whitespaces_const(pCode + 5);
 		}
 		else
 		{
