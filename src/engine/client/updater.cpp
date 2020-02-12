@@ -203,7 +203,7 @@ bool CUpdater::ReplaceClient()
 		if(system(aBuf))
 		{
 			dbg_msg("updater", "ERROR: failed to set client executable bit");
-			Success &= false;
+			Success = false;
 		}
 	#endif
 	return Success;
@@ -226,7 +226,7 @@ bool CUpdater::ReplaceServer()
 		if (system(aBuf))
 		{
 			dbg_msg("updater", "ERROR: failed to set server executable bit");
-			Success &= false;
+			Success = false;
 		}
 	#endif
 	return Success;
