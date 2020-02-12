@@ -38,4 +38,4 @@ $ ./find_unchanged.py ../spanish.txt
 
 To update all languages:
 
-$ for i in data/languages/*.txt; do scripts/languages/copy_fix.py $i $i.tmp --delete-unused --append-missing && mv $i.tmp $i; done
+$ for i in data/languages/*.txt; do scripts/languages/copy_fix.py $i $i.$$.tmp --delete-unused --append-missing && mv $i.$$.tmp $i; done

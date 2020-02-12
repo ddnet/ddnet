@@ -166,6 +166,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_MapDetailsCrc;
 	SHA256_DIGEST m_MapDetailsSha256;
 
+	char m_aDDNetInfoTmp[64];
 	std::shared_ptr<CGetFile> m_pDDNetInfoTask;
 
 	// time

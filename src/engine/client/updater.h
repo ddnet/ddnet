@@ -48,6 +48,8 @@ class CUpdater : public IUpdater
 	char m_aStatus[256];
 	int m_Percent;
 	char m_aLastFile[256];
+	char m_aClientExecTmp[64];
+	char m_aServerExecTmp[64];
 
 	bool m_ClientUpdate;
 	bool m_ServerUpdate;
