@@ -3,6 +3,7 @@
 #include <engine/shared/config.h>
 #include <game/server/teams.h>
 #include <game/server/gamemodes/DDRace.h>
+#include <game/server/save.h>
 #include <game/version.h>
 #if defined(CONF_SQL)
 #include <game/server/score/sql_score.h>
@@ -704,4 +705,45 @@ void CGameContext::ConVoteNo(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
 	pSelf->ForceVote(pResult->m_ClientID, false);
+}
+
+void CGameContext::ConDrySave(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+
+	if(!pPlayer || pSelf->Server()->GetAuthedState(pResult->m_ClientID) != AUTHED_ADMIN)
+		return;
+
+
+	CSaveTeam SavedTeam(pSelf->m_pController);
+	int Num = SavedTeam.save(pPlayer->GetTeam());
+	switch (Num)
+	{
+		case 1:
+			pSelf->SendChatTarget(pResult->m_ClientID, "You have to be in a team (from 1-63)");
+			break;
+		case 2:
+			pSelf->SendChatTarget(pResult->m_ClientID, "Could not find your Team");
+			break;
+		case 3:
+			pSelf->SendChatTarget(pResult->m_ClientID, "Unable to find all Characters");
+			break;
+		case 4:
+			pSelf->SendChatTarget(pResult->m_ClientID, "Your team is not started yet");
+			break;
+	}
+	if(!Num)
+	{
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "%s-%lld-%s.save", pSelf->Server()->GetMapName(), time_get(), pSelf->Server()->GetAuthName(pResult->m_ClientID));
+		IOHANDLE File = pSelf->Storage()->OpenFile(aBuf, IOFLAG_WRITE, IStorage::TYPE_ALL);
+		if(!File)
+			return;
+
+		int Len = str_length(SavedTeam.GetString());
+		io_write(File, SavedTeam.GetString(), Len);
+		io_close(File);
+	}
 }
