@@ -1409,21 +1409,9 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 		{
 			CSaveTeam SavedTeam(pData->GameServer()->m_pController);
 			Num = SavedTeam.save(Team);
-			switch (Num)
-			{
-				case 1:
-					pData->GameServer()->SendChatTarget(pData->m_ClientID, "You have to be in a team (from 1-63)");
-					break;
-				case 2:
-					pData->GameServer()->SendChatTarget(pData->m_ClientID, "Could not find your Team");
-					break;
-				case 3:
-					pData->GameServer()->SendChatTarget(pData->m_ClientID, "Unable to find all Characters");
-					break;
-				case 4:
-					pData->GameServer()->SendChatTarget(pData->m_ClientID, "Your team is not started yet");
-					break;
-			}
+			if(CSaveTeam::HandleSaveError(Num, pData->m_ClientID, pData->GameServer()))
+				return true;
+
 			if(!Num)
 			{
 				str_copy(TeamString, SavedTeam.GetString(), sizeof(TeamString));

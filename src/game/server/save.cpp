@@ -279,6 +279,29 @@ int CSaveTeam::save(int Team)
 		return 1;
 }
 
+bool CSaveTeam::HandleSaveError(int Result, int ClientID, CGameContext *pGameContext)
+{
+	switch(Result)
+	{
+		case 1:
+			pGameContext->SendChatTarget(ClientID, "You have to be in a team (from 1-63)");
+			break;
+		case 2:
+			pGameContext->SendChatTarget(ClientID, "Could not find your Team");
+			break;
+		case 3:
+			pGameContext->SendChatTarget(ClientID, "Unable to find all Characters");
+			break;
+		case 4:
+			pGameContext->SendChatTarget(ClientID, "Your team is not started yet");
+			break;
+		default:
+			return false;
+	}
+
+	return true;
+}
+
 int CSaveTeam::load(int Team)
 {
 	if(Team <= 0 || Team >= MAX_CLIENTS)

@@ -718,23 +718,11 @@ void CGameContext::ConDrySave(IConsole::IResult *pResult, void *pUserData)
 
 
 	CSaveTeam SavedTeam(pSelf->m_pController);
-	int Num = SavedTeam.save(pPlayer->GetTeam());
-	switch (Num)
-	{
-		case 1:
-			pSelf->SendChatTarget(pResult->m_ClientID, "You have to be in a team (from 1-63)");
-			break;
-		case 2:
-			pSelf->SendChatTarget(pResult->m_ClientID, "Could not find your Team");
-			break;
-		case 3:
-			pSelf->SendChatTarget(pResult->m_ClientID, "Unable to find all Characters");
-			break;
-		case 4:
-			pSelf->SendChatTarget(pResult->m_ClientID, "Your team is not started yet");
-			break;
-	}
-	if(!Num)
+	int Result = SavedTeam.save(pPlayer->GetTeam());
+	if(CSaveTeam::HandleSaveError(Result, pResult->m_ClientID, pSelf))
+		return;
+
+	if(!Result)
 	{
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "%s-%lld-%s.save", pSelf->Server()->GetMapName(), time_get(), pSelf->Server()->GetAuthName(pResult->m_ClientID));
