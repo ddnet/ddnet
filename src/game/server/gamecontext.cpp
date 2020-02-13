@@ -2874,7 +2874,7 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 	char aConfig[128];
 	char aTemp[128];
 	str_format(aConfig, sizeof(aConfig), "maps/%s.cfg", g_Config.m_SvMap);
-	str_format(aTemp, sizeof(aTemp), "%s.temp.%d", pNewMapName, pid());
+	str_format(aTemp, sizeof(aTemp), "%s.%d.tmp", pNewMapName, pid());
 
 	IOHANDLE File = Storage()->OpenFile(aConfig, IOFLAG_READ, IStorage::TYPE_ALL);
 	if(!File)

@@ -329,6 +329,7 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	m_MapDetailsSha256 = SHA256_ZEROED;
 	m_MapDetailsCrc = 0;
 
+	str_format(m_aDDNetInfoTmp, sizeof(m_aDDNetInfoTmp), DDNET_INFO ".%d.tmp", pid());
 	m_pDDNetInfoTask = NULL;
 	m_aNews[0] = '\0';
 
@@ -1492,11 +1493,21 @@ static void FormatMapDownloadFilename(const char *pName, SHA256_DIGEST *pSha256,
 		sha256_str(*pSha256, aSha256 + 1, sizeof(aSha256) - 1);
 	}
 
-	str_format(pBuffer, BufferSize, "%s_%08x%s.map%s",
-		pName,
-		Crc,
-		aSha256,
-		Temp ? ".tmp" : "");
+	if(Temp)
+	{
+		str_format(pBuffer, BufferSize, "%s_%08x%s.map.%d.tmp",
+			pName,
+			Crc,
+			aSha256,
+			pid());
+	}
+	else
+	{
+		str_format(pBuffer, BufferSize, "%s_%08x%s.map",
+			pName,
+			Crc,
+			aSha256);
+	}
 }
 
 static CServerCapabilities GetServerCapabilities(int Version, int Flags)
@@ -2295,7 +2306,7 @@ void CClient::ResetDDNetInfo()
 void CClient::FinishDDNetInfo()
 {
 	ResetDDNetInfo();
-	m_pStorage->RenameFile(DDNET_INFO_TMP, DDNET_INFO, IStorage::TYPE_SAVE);
+	m_pStorage->RenameFile(m_aDDNetInfoTmp, DDNET_INFO, IStorage::TYPE_SAVE);
 	LoadDDNetInfo();
 }
 
@@ -4134,7 +4145,7 @@ void CClient::RequestDDNetInfo()
 		str_append(aUrl, aEscaped, sizeof(aUrl));
 	}
 
-	m_pDDNetInfoTask = std::make_shared<CGetFile>(Storage(), aUrl, DDNET_INFO_TMP, IStorage::TYPE_SAVE, true);
+	m_pDDNetInfoTask = std::make_shared<CGetFile>(Storage(), aUrl, m_aDDNetInfoTmp, IStorage::TYPE_SAVE, true);
 	Engine()->AddJob(m_pDDNetInfoTask);
 }
 
