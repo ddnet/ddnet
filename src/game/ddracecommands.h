@@ -52,6 +52,7 @@ CONSOLE_COMMAND("unmute", "v[id]", CFGFLAG_SERVER, ConUnmute, this, "")
 CONSOLE_COMMAND("mutes", "", CFGFLAG_SERVER, ConMutes, this, "")
 CONSOLE_COMMAND("moderate", "", CFGFLAG_SERVER, ConModerate, this, "Enables/disables active moderator mode for the player")
 CONSOLE_COMMAND("vote_no", "", CFGFLAG_SERVER, ConVoteNo, this, "Same as \"vote no\"")
+CONSOLE_COMMAND("save_dry", "", CFGFLAG_SERVER, ConDrySave, this, "Dump the current savestring")
 
 CONSOLE_COMMAND("freezehammer", "v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConFreezeHammer, this, "Gives a player Freeze Hammer")
 CONSOLE_COMMAND("unfreezehammer", "v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConUnFreezeHammer, this, "Removes Freeze Hammer from a player")
