@@ -23,7 +23,6 @@ class CDemoRecorder : public IDemoRecorder
 	int m_NumTimelineMarkers;
 	int m_aTimelineMarkers[MAX_TIMELINE_MARKERS];
 	bool m_NoMapData;
-	unsigned int m_MapSize;
 	unsigned char *m_pMapData;
 
 	DEMOFUNC_FILTER m_pfnFilter;

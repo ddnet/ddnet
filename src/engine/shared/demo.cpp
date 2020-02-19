@@ -46,7 +46,6 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	m_pfnFilter = pfnFilter;
 	m_pUser = pUser;
 
-	m_MapSize = MapSize;
 	m_pMapData = pMapData;
 	m_pConsole = pConsole;
 
@@ -121,6 +120,9 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 
 		CloseMapFile = true;
 	}
+
+	if(MapFile)
+		MapSize = io_length(MapFile);
 
 	// write header
 	mem_zero(&Header, sizeof(Header));
