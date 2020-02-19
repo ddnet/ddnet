@@ -781,12 +781,12 @@ bool CClient::DummyConnected()
 
 bool CClient::DummyConnecting()
 {
-	return !m_DummyConnected && m_LastDummyConnectTime > 0 && m_LastDummyConnectTime + GameTickSpeed() * 5 > GameTick();
+	return !m_DummyConnected && m_LastDummyConnectTime > 0 && m_LastDummyConnectTime + GameTickSpeed() * 5 > GameTick(g_Config.m_ClDummy);
 }
 
 void CClient::DummyConnect()
 {
-	if(m_LastDummyConnectTime > 0 && m_LastDummyConnectTime + GameTickSpeed() * 5 > GameTick())
+	if(m_LastDummyConnectTime > 0 && m_LastDummyConnectTime + GameTickSpeed() * 5 > GameTick(g_Config.m_ClDummy))
 		return;
 
 	if(m_NetClient[CLIENT_MAIN].State() != NET_CONNSTATE_ONLINE && m_NetClient[CLIENT_MAIN].State() != NET_CONNSTATE_PENDING)
@@ -795,7 +795,7 @@ void CClient::DummyConnect()
 	if(m_DummyConnected)
 		return;
 
-	m_LastDummyConnectTime = GameTick();
+	m_LastDummyConnectTime = GameTick(g_Config.m_ClDummy);
 
 	m_RconAuthed[1] = 0;
 
@@ -824,7 +824,7 @@ int CClient::GetCurrentRaceTime()
 {
 	if(GameClient()->GetLastRaceTick() < 0)
 		return 0;
-	return (GameTick() - GameClient()->GetLastRaceTick()) / 50;
+	return (GameTick(g_Config.m_ClDummy) - GameClient()->GetLastRaceTick()) / 50;
 }
 
 int CClient::SendMsgY(CMsgPacker *pMsg, int Flags, int NetClient)
@@ -3443,7 +3443,7 @@ void CClient::SaveReplay(const int Length)
 		char *pSrc = (&m_DemoRecorder[RECORDER_REPLAYS])->GetCurrentFilename();
 
 		// Slice the demo to get only the last cl_replay_length seconds
-		const int EndTick = GameTick();
+		const int EndTick = GameTick(g_Config.m_ClDummy);
 		const int StartTick = EndTick - Length * GameTickSpeed();
 
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Saving replay...");

@@ -103,9 +103,9 @@ void CMapSounds::OnRender()
 		static float s_Time = 0.0f;
 		if(m_pClient->m_Snap.m_pGameInfoObj) // && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED))
 		{
-			s_Time = mix((Client()->PrevGameTick()-m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick) / (float)Client()->GameTickSpeed(),
-								(Client()->GameTick()-m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick) / (float)Client()->GameTickSpeed(),
-								Client()->IntraGameTick());
+			s_Time = mix((Client()->PrevGameTick(g_Config.m_ClDummy)-m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick) / (float)Client()->GameTickSpeed(),
+								(Client()->GameTick(g_Config.m_ClDummy)-m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick) / (float)Client()->GameTickSpeed(),
+								Client()->IntraGameTick(g_Config.m_ClDummy));
 		}
 		float Offset = s_Time-pSource->m_pSource->m_TimeDelay;
 		if(Offset >= 0.0f && g_Config.m_SndEnable && (g_Config.m_GfxHighDetail || !pSource->m_HighDetail))

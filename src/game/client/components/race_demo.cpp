@@ -64,8 +64,8 @@ void CRaceDemo::OnNewSnapshot()
 	int RaceTick = -m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer;
 
 	// start the demo
-	bool ForceStart = ServerControl && s_LastRaceTick != RaceTick && Client()->GameTick() - RaceTick < Client()->GameTickSpeed();
-	bool AllowRestart = (m_AllowRestart || ForceStart) && m_RaceStartTick + 10 * Client()->GameTickSpeed() < Client()->GameTick();
+	bool ForceStart = ServerControl && s_LastRaceTick != RaceTick && Client()->GameTick(g_Config.m_ClDummy) - RaceTick < Client()->GameTickSpeed();
+	bool AllowRestart = (m_AllowRestart || ForceStart) && m_RaceStartTick + 10 * Client()->GameTickSpeed() < Client()->GameTick(g_Config.m_ClDummy);
 	if(m_RaceState == RACE_IDLE || m_RaceState == RACE_PREPARE || (m_RaceState == RACE_STARTED && AllowRestart))
 	{
 		vec2 PrevPos = vec2(m_pClient->m_Snap.m_pLocalPrevCharacter->m_X, m_pClient->m_Snap.m_pLocalPrevCharacter->m_Y);
@@ -80,7 +80,7 @@ void CRaceDemo::OnNewSnapshot()
 				GetPath(m_aTmpFilename, sizeof(m_aTmpFilename));
 				Client()->RaceRecord_Start(m_aTmpFilename);
 			}
-			m_RaceStartTick = Client()->GameTick();
+			m_RaceStartTick = Client()->GameTick(g_Config.m_ClDummy);
 			m_RaceState = RACE_STARTED;
 		}
 	}
@@ -90,19 +90,19 @@ void CRaceDemo::OnNewSnapshot()
 	{
 		GetPath(m_aTmpFilename, sizeof(m_aTmpFilename));
 		Client()->RaceRecord_Start(m_aTmpFilename);
-		m_RaceStartTick = Client()->GameTick();
+		m_RaceStartTick = Client()->GameTick(g_Config.m_ClDummy);
 		m_RaceState = RACE_PREPARE;
 	}
 
 	// stop recording if the player did not pass the start line after 20 seconds
-	if(m_RaceState == RACE_PREPARE && Client()->GameTick() - m_RaceStartTick >= Client()->GameTickSpeed() * 20)
+	if(m_RaceState == RACE_PREPARE && Client()->GameTick(g_Config.m_ClDummy) - m_RaceStartTick >= Client()->GameTickSpeed() * 20)
 	{
 		StopRecord();
 		m_RaceState = RACE_IDLE;
 	}
 
 	// stop the demo
-	if(m_RaceState == RACE_FINISHED && m_RecordStopTick <= Client()->GameTick())
+	if(m_RaceState == RACE_FINISHED && m_RecordStopTick <= Client()->GameTick(g_Config.m_ClDummy))
 		StopRecord(m_Time);
 
 	s_LastRaceTick = RaceFlag ? RaceTick : -1;
@@ -132,7 +132,7 @@ void CRaceDemo::OnMessage(int MsgType, void *pRawMsg)
 			if(Time > 0 && str_comp(aName, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_aName) == 0)
 			{
 				m_RaceState = RACE_FINISHED;
-				m_RecordStopTick = Client()->GameTick() + Client()->GameTickSpeed();
+				m_RecordStopTick = Client()->GameTick(g_Config.m_ClDummy) + Client()->GameTickSpeed();
 				m_Time = Time;
 			}
 		}

@@ -97,7 +97,7 @@ void CPlayers::RenderHook(
 
 	float IntraTick = Intra;
 	if(ClientID >= 0)
-		IntraTick = (m_pClient->m_aClients[ClientID].m_IsPredicted) ? Client()->PredIntraGameTick() : Client()->IntraGameTick();
+		IntraTick = (m_pClient->m_aClients[ClientID].m_IsPredicted) ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
 
 	bool OtherTeam = m_pClient->IsOtherTeam(ClientID);
 
@@ -183,24 +183,24 @@ void CPlayers::RenderPlayer(
 
 	float IntraTick = Intra;
 	if(ClientID >= 0)
-		IntraTick = m_pClient->m_aClients[ClientID].m_IsPredicted ? Client()->PredIntraGameTick() : Client()->IntraGameTick();
+		IntraTick = m_pClient->m_aClients[ClientID].m_IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
 
-	static float s_LastGameTickTime = Client()->GameTickTime();
-	static float s_LastPredIntraTick = Client()->PredIntraGameTick();
+	static float s_LastGameTickTime = Client()->GameTickTime(g_Config.m_ClDummy);
+	static float s_LastPredIntraTick = Client()->PredIntraGameTick(g_Config.m_ClDummy);
 	if(m_pClient->m_Snap.m_pGameInfoObj && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED))
 	{
-		s_LastGameTickTime = Client()->GameTickTime();
-		s_LastPredIntraTick = Client()->PredIntraGameTick();
+		s_LastGameTickTime = Client()->GameTickTime(g_Config.m_ClDummy);
+		s_LastPredIntraTick = Client()->PredIntraGameTick(g_Config.m_ClDummy);
 	}
 
 	bool PredictLocalWeapons = false;
-	float AttackTime = (Client()->PrevGameTick() - Player.m_AttackTick) / (float)SERVER_TICK_SPEED + Client()->GameTickTime();
-	float LastAttackTime = (Client()->PrevGameTick() - Player.m_AttackTick) / (float)SERVER_TICK_SPEED + s_LastGameTickTime;
+	float AttackTime = (Client()->PrevGameTick(g_Config.m_ClDummy) - Player.m_AttackTick) / (float)SERVER_TICK_SPEED + Client()->GameTickTime(g_Config.m_ClDummy);
+	float LastAttackTime = (Client()->PrevGameTick(g_Config.m_ClDummy) - Player.m_AttackTick) / (float)SERVER_TICK_SPEED + s_LastGameTickTime;
 	if(m_pClient->m_aClients[ClientID].m_IsPredictedLocal && m_pClient->AntiPingGunfire())
 	{
 		PredictLocalWeapons = true;
-		AttackTime = (Client()->PredIntraGameTick() + (Client()->PredGameTick() - 1 - Player.m_AttackTick)) / (float)SERVER_TICK_SPEED;
-		LastAttackTime = (s_LastPredIntraTick + (Client()->PredGameTick() - 1 - Player.m_AttackTick)) / (float)SERVER_TICK_SPEED;
+		AttackTime = (Client()->PredIntraGameTick(g_Config.m_ClDummy) + (Client()->PredGameTick(g_Config.m_ClDummy) - 1 - Player.m_AttackTick)) / (float)SERVER_TICK_SPEED;
+		LastAttackTime = (s_LastPredIntraTick + (Client()->PredGameTick(g_Config.m_ClDummy) - 1 - Player.m_AttackTick)) / (float)SERVER_TICK_SPEED;
 	}
 	float AttackTicksPassed = AttackTime*SERVER_TICK_SPEED;
 
@@ -215,7 +215,7 @@ void CPlayers::RenderPlayer(
 		float AngleIntraTick = IntraTick;
 		// using unpredicted angle when rendering other players in-game
 		if(ClientID >= 0)
-			AngleIntraTick = Client()->IntraGameTick();
+			AngleIntraTick = Client()->IntraGameTick(g_Config.m_ClDummy);
 		// If the player moves their weapon through top, then change
 		// the end angle by 2*Pi, so that the mix function will use the
 		// short path and not the long one.
@@ -522,7 +522,7 @@ void CPlayers::RenderPlayer(
 			GhostPosition = mix(
 					vec2(m_pClient->m_Snap.m_aCharacters[ClientID].m_Prev.m_X, m_pClient->m_Snap.m_aCharacters[ClientID].m_Prev.m_Y),
 					vec2(m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur.m_X, m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur.m_Y),
-					Client()->IntraGameTick());
+					Client()->IntraGameTick(g_Config.m_ClDummy));
 
 		CTeeRenderInfo Ghost = RenderInfo;
 		RenderTools()->RenderTee(&State, &Ghost, Player.m_Emote, Direction, GhostPosition, 0.5f); // render ghost
@@ -590,12 +590,12 @@ void CPlayers::RenderPlayer(
 		Graphics()->QuadsSetRotation(0);
 	}
 
-	if(g_Config.m_ClShowEmotes && m_pClient->m_aClients[ClientID].m_EmoticonStart != -1 && m_pClient->m_aClients[ClientID].m_EmoticonStart <= Client()->GameTick() && m_pClient->m_aClients[ClientID].m_EmoticonStart + 2 * Client()->GameTickSpeed() > Client()->GameTick())
+	if(g_Config.m_ClShowEmotes && m_pClient->m_aClients[ClientID].m_EmoticonStart != -1 && m_pClient->m_aClients[ClientID].m_EmoticonStart <= Client()->GameTick(g_Config.m_ClDummy) && m_pClient->m_aClients[ClientID].m_EmoticonStart + 2 * Client()->GameTickSpeed() > Client()->GameTick(g_Config.m_ClDummy))
 	{
 		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_EMOTICONS].m_Id);
 
-		int SinceStart = Client()->GameTick() - m_pClient->m_aClients[ClientID].m_EmoticonStart;
-		int FromEnd = m_pClient->m_aClients[ClientID].m_EmoticonStart + 2 * Client()->GameTickSpeed() - Client()->GameTick();
+		int SinceStart = Client()->GameTick(g_Config.m_ClDummy) - m_pClient->m_aClients[ClientID].m_EmoticonStart;
+		int FromEnd = m_pClient->m_aClients[ClientID].m_EmoticonStart + 2 * Client()->GameTickSpeed() - Client()->GameTick(g_Config.m_ClDummy);
 
 		float a = 1;
 
