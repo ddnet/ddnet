@@ -493,6 +493,9 @@ void CGameClient::OnConnected()
 	for(int i = 0; i < MAX_CLIENTS; i++)
 		m_aLastWorldCharacters[i].m_Alive = false;
 	LoadMapSettings();
+
+	if(Client()->State() != IClient::STATE_DEMOPLAYBACK && g_Config.m_ClAutoDemoOnConnect)
+		Client()->DemoRecorder_HandleAutoStart();
 }
 
 void CGameClient::OnReset()
@@ -874,7 +877,7 @@ void CGameClient::OnGameOver()
 
 void CGameClient::OnStartGame()
 {
-	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	if(Client()->State() != IClient::STATE_DEMOPLAYBACK && !g_Config.m_ClAutoDemoOnConnect)
 		Client()->DemoRecorder_HandleAutoStart();
 	m_pStatboard->OnReset();
 }
