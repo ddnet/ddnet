@@ -1984,7 +1984,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 							char aBuf[256];
 							str_format(aBuf, sizeof(aBuf), "/timeout %s", m_aTimeoutCodes[g_Config.m_ClDummy]);
 							Msg.m_pMessage = aBuf;
-							CMsgPacker Packer(Msg.MsgID(), true);
+							CMsgPacker Packer(Msg.MsgID(), false);
 							Msg.Pack(&Packer);
 							SendMsgY(&Packer, MSGFLAG_VITAL, g_Config.m_ClDummy);
 						}
