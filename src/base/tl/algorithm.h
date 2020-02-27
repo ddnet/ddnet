@@ -4,6 +4,7 @@
 #define BASE_TL_ALGORITHM_H
 
 #include "base/tl/range.h"
+#include <functional>
 
 
 /*
