@@ -167,6 +167,12 @@ void CVideo::start()
 	m_vframe = 0;
 }
 
+void CVideo::pause()
+{
+	if(ms_pCurrentVideo)
+		m_Recording ^= true;
+}
+
 void CVideo::stop()
 {
 	m_Recording = false;
