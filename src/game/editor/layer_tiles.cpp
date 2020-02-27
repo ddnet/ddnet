@@ -963,21 +963,41 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 
 int CLayerTiles::RenderCommonProperties(CEditor *pEditor, CUIRect *pToolbox, array<CLayerTiles *> &pLayers)
 {
+	{
+		CUIRect Warning;
+		pToolbox->HSplitTop(13.0f, &Warning, pToolbox);
+		Warning.HMargin(0.5f, &Warning);
+
+		pEditor->TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f));
+		pEditor->UI()->DoLabel(&Warning, "Editing multiple layers", 9.0f, -1, Warning.w);
+		pEditor->TextRender()->TextColor(ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
+		pToolbox->HSplitTop(2.0f, 0, pToolbox);
+	}
+
 	enum
 	{
 		PROP_WIDTH=0,
 		PROP_HEIGHT,
 		PROP_SHIFT,
+		PROP_COLOR,
 		NUM_PROPS,
 	};
 
-	int m_Width = 1;
-	int m_Height = 1;
+	int Width = 1;
+	int Height = 1;
+	for_each(pLayers.all(), [&Width, &Height](CLayerTiles *pLayer){
+		if(pLayer->m_Width > Width)
+			Width = pLayer->m_Width;
+		if(pLayer->m_Height > Height)
+			Height = pLayer->m_Height;
+	});
 
+	int Color = 0;
 	CProperty aProps[] = {
-		{"Width", m_Width, PROPTYPE_INT_SCROLL, 1, 100000},
-		{"Height", m_Height, PROPTYPE_INT_SCROLL, 1, 100000},
+		{"Width", Width, PROPTYPE_INT_SCROLL, 1, 100000},
+		{"Height", Height, PROPTYPE_INT_SCROLL, 1, 100000},
 		{"Shift", 0, PROPTYPE_SHIFT, 0, 0},
+		{"Color", Color, PROPTYPE_COLOR, 0, 0},
 		{0},
 	};
 
@@ -1014,6 +1034,15 @@ int CLayerTiles::RenderCommonProperties(CEditor *pEditor, CUIRect *pToolbox, arr
 	{
 		for_each(pLayers.all(), [NewVal](CLayerTiles *pLayer){
 			pLayer->Shift(NewVal);
+		});
+	}
+	else if(Prop == PROP_COLOR)
+	{
+		for_each(pLayers.all(), [NewVal](CLayerTiles *pLayer){
+			pLayer->m_Color.r = (NewVal>>24)&0xff;
+			pLayer->m_Color.g = (NewVal>>16)&0xff;
+			pLayer->m_Color.b = (NewVal>>8)&0xff;
+			pLayer->m_Color.a = NewVal&0xff;
 		});
 	}
 
