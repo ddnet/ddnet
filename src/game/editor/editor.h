@@ -537,6 +537,8 @@ public:
 	virtual void ShowInfo();
 	virtual int RenderProperties(CUIRect *pToolbox);
 
+	static int RenderCommonProperties(CEditor *pEditor, CUIRect *pToolbox, array<CLayerTiles *> &pLayers);
+
 	virtual void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc);
 	virtual void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc);
 

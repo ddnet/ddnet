@@ -134,4 +134,17 @@ bool sort_verify(R range)
 	return true;
 }
 
+template<class R>
+void for_each(R range, std::function<void(typename R::type)> fcn)
+{
+	concept_empty::check(range);
+	concept_forwarditeration::check(range);
+
+	for(; !range.empty(); range.pop_front())
+	{
+		typename R::type *cur = &range.front();
+		fcn(*cur);
+	}
+}
+
 #endif // TL_FILE_ALGORITHMS_HPP

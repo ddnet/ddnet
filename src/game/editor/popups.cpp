@@ -364,6 +364,25 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View)
 	View.HSplitBottom(12.0f, &View, &Button);
 	static int s_DeleteButton = 0;
 
+	if(pEditor->m_lSelectedLayers.size() > 1)
+	{
+		array<CLayerTiles *> apLayers;
+		bool AllTile = true;
+		for(int i = 0; AllTile && i < pEditor->m_lSelectedLayers.size(); i++)
+		{
+			if(pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_lLayers[i]->m_Type == LAYERTYPE_TILES)
+				apLayers.add((CLayerTiles *)pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_lLayers[i]);
+			else
+				AllTile = false;
+		}
+
+		// Don't allow editing if all selected layers are tile layers
+		if(!AllTile)
+			return 1;
+
+		return CLayerTiles::RenderCommonProperties(pEditor, &View, apLayers);
+	}
+
 	// don't allow deletion of game layer
 	if(pEditor->m_Map.m_pGameLayer != pEditor->GetSelectedLayer(0) &&
 		pEditor->DoButton_Editor(&s_DeleteButton, "Delete layer", 0, &Button, 0, "Deletes the layer"))

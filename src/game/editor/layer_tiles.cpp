@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/math.h>
+#include <base/tl/algorithm.h>
 
 #include <engine/client.h>
 #include <engine/graphics.h>
@@ -955,6 +956,72 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	}
 	if(Prop != -1) {
 		FlagModified(0, 0, m_Width, m_Height);
+	}
+
+	return 0;
+}
+
+int CLayerTiles::RenderCommonProperties(CEditor *pEditor, CUIRect *pToolbox, array<CLayerTiles *> &pLayers)
+{
+	enum
+	{
+		PROP_WIDTH=0,
+		PROP_HEIGHT,
+		PROP_SHIFT,
+		NUM_PROPS,
+	};
+
+	int m_Width = 1;
+	int m_Height = 1;
+
+	CProperty aProps[] = {
+		{"Width", m_Width, PROPTYPE_INT_SCROLL, 1, 100000},
+		{"Height", m_Height, PROPTYPE_INT_SCROLL, 1, 100000},
+		{"Shift", 0, PROPTYPE_SHIFT, 0, 0},
+		{0},
+	};
+
+	static int s_aIds[NUM_PROPS] = {0};
+	int NewVal = 0;
+	int Prop = pEditor->DoProperties(pToolbox, aProps, s_aIds, &NewVal);
+
+	if(Prop == PROP_WIDTH && NewVal > 1)
+	{
+		if(NewVal > 1000 && !pEditor->m_LargeLayerWasWarned)
+		{
+			pEditor->m_PopupEventType = pEditor->POPEVENT_LARGELAYER;
+			pEditor->m_PopupEventActivated = true;
+			pEditor->m_LargeLayerWasWarned = true;
+		}
+		for_each(pLayers.all(), [NewVal](CLayerTiles *pLayer){
+			pLayer->Resize(NewVal, pLayer->m_Height);
+		});
+	}
+	else if(Prop == PROP_HEIGHT && NewVal > 1)
+	{
+		if(NewVal > 1000 && !pEditor->m_LargeLayerWasWarned)
+		{
+			pEditor->m_PopupEventType = pEditor->POPEVENT_LARGELAYER;
+			pEditor->m_PopupEventActivated = true;
+			pEditor->m_LargeLayerWasWarned = true;
+		}
+
+		for_each(pLayers.all(), [NewVal](CLayerTiles *pLayer){
+			pLayer->Resize(pLayer->m_Width, NewVal);
+		});
+	}
+	else if(Prop == PROP_SHIFT)
+	{
+		for_each(pLayers.all(), [NewVal](CLayerTiles *pLayer){
+			pLayer->Shift(NewVal);
+		});
+	}
+
+	if(Prop != -1)
+	{
+		for_each(pLayers.all(), [](CLayerTiles *pLayer){
+			pLayer->FlagModified(0, 0, pLayer->m_Width, pLayer->m_Height);
+		});
 	}
 
 	return 0;
