@@ -961,8 +961,40 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	return 0;
 }
 
-int CLayerTiles::RenderCommonProperties(CEditor *pEditor, CUIRect *pToolbox, array<CLayerTiles *> &pLayers)
+int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, array<CLayerTiles *> &pLayers)
 {
+	if(State.Modified)
+	{
+		CUIRect Commit;
+		pToolbox->HSplitBottom(20.0f, pToolbox, &Commit);
+		static int s_CommitButton = 0;
+		if(pEditor->DoButton_Editor(&s_CommitButton, "Commit", 0, &Commit, 0, "Applies the changes"))
+		{
+			dbg_msg("editor", "applying changes");
+			for_each(pLayers.all(), [&State](CLayerTiles *pLayer){
+				pLayer->Resize(State.Width, State.Height);
+
+				pLayer->m_Color.r = (State.Color>>24)&0xff;
+				pLayer->m_Color.g = (State.Color>>16)&0xff;
+				pLayer->m_Color.b = (State.Color>>8)&0xff;
+				pLayer->m_Color.a = State.Color&0xff;
+
+				pLayer->FlagModified(0, 0, pLayer->m_Width, pLayer->m_Height);
+			});
+			State.Modified = false;
+		}
+
+	}
+	else
+	{
+		for_each(pLayers.all(), [&State](CLayerTiles *pLayer){
+			if(pLayer->m_Width > State.Width)
+				State.Width = pLayer->m_Width;
+			if(pLayer->m_Height > State.Height)
+				State.Height = pLayer->m_Height;
+		});
+	}
+
 	{
 		CUIRect Warning;
 		pToolbox->HSplitTop(13.0f, &Warning, pToolbox);
@@ -984,22 +1016,12 @@ int CLayerTiles::RenderCommonProperties(CEditor *pEditor, CUIRect *pToolbox, arr
 		NUM_PROPS,
 	};
 
-	int Width = 1;
-	int Height = 1;
-	for_each(pLayers.all(), [&Width, &Height](CLayerTiles *pLayer){
-		if(pLayer->m_Width > Width)
-			Width = pLayer->m_Width;
-		if(pLayer->m_Height > Height)
-			Height = pLayer->m_Height;
-	});
-
-	int Color = 0;
 	CProperty aProps[] = {
-		{"Width", Width, PROPTYPE_INT_SCROLL, 1, 100000},
-		{"Height", Height, PROPTYPE_INT_SCROLL, 1, 100000},
+		{"Width", State.Width, PROPTYPE_INT_SCROLL, 1, 100000},
+		{"Height", State.Height, PROPTYPE_INT_SCROLL, 1, 100000},
 		{"Shift", 0, PROPTYPE_SHIFT, 0, 0},
 		{"Shift by", pEditor->m_ShiftBy, PROPTYPE_INT_SCROLL, 1, 100000},
-		{"Color", Color, PROPTYPE_COLOR, 0, 0},
+		{"Color", State.Color, PROPTYPE_COLOR, 0, 0},
 		{0},
 	};
 
@@ -1015,9 +1037,7 @@ int CLayerTiles::RenderCommonProperties(CEditor *pEditor, CUIRect *pToolbox, arr
 			pEditor->m_PopupEventActivated = true;
 			pEditor->m_LargeLayerWasWarned = true;
 		}
-		for_each(pLayers.all(), [NewVal](CLayerTiles *pLayer){
-			pLayer->Resize(NewVal, pLayer->m_Height);
-		});
+		State.Width = NewVal;
 	}
 	else if(Prop == PROP_HEIGHT && NewVal > 1)
 	{
@@ -1027,10 +1047,7 @@ int CLayerTiles::RenderCommonProperties(CEditor *pEditor, CUIRect *pToolbox, arr
 			pEditor->m_PopupEventActivated = true;
 			pEditor->m_LargeLayerWasWarned = true;
 		}
-
-		for_each(pLayers.all(), [NewVal](CLayerTiles *pLayer){
-			pLayer->Resize(pLayer->m_Width, NewVal);
-		});
+		State.Height = NewVal;
 	}
 	else if(Prop == PROP_SHIFT)
 	{
@@ -1042,19 +1059,12 @@ int CLayerTiles::RenderCommonProperties(CEditor *pEditor, CUIRect *pToolbox, arr
 		pEditor->m_ShiftBy = NewVal;
 	else if(Prop == PROP_COLOR)
 	{
-		for_each(pLayers.all(), [NewVal](CLayerTiles *pLayer){
-			pLayer->m_Color.r = (NewVal>>24)&0xff;
-			pLayer->m_Color.g = (NewVal>>16)&0xff;
-			pLayer->m_Color.b = (NewVal>>8)&0xff;
-			pLayer->m_Color.a = NewVal&0xff;
-		});
+		State.Color = NewVal;
 	}
 
-	if(Prop != -1)
+	if(Prop != -1 && Prop != PROP_SHIFT)
 	{
-		for_each(pLayers.all(), [](CLayerTiles *pLayer){
-			pLayer->FlagModified(0, 0, pLayer->m_Width, pLayer->m_Height);
-		});
+		State.Modified = true;
 	}
 
 	return 0;
