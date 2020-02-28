@@ -979,6 +979,7 @@ int CLayerTiles::RenderCommonProperties(CEditor *pEditor, CUIRect *pToolbox, arr
 		PROP_WIDTH=0,
 		PROP_HEIGHT,
 		PROP_SHIFT,
+		PROP_SHIFT_BY,
 		PROP_COLOR,
 		NUM_PROPS,
 	};
@@ -997,6 +998,7 @@ int CLayerTiles::RenderCommonProperties(CEditor *pEditor, CUIRect *pToolbox, arr
 		{"Width", Width, PROPTYPE_INT_SCROLL, 1, 100000},
 		{"Height", Height, PROPTYPE_INT_SCROLL, 1, 100000},
 		{"Shift", 0, PROPTYPE_SHIFT, 0, 0},
+		{"Shift by", pEditor->m_ShiftBy, PROPTYPE_INT_SCROLL, 1, 100000},
 		{"Color", Color, PROPTYPE_COLOR, 0, 0},
 		{0},
 	};
@@ -1036,6 +1038,8 @@ int CLayerTiles::RenderCommonProperties(CEditor *pEditor, CUIRect *pToolbox, arr
 			pLayer->Shift(NewVal);
 		});
 	}
+	else if(Prop == PROP_SHIFT_BY)
+		pEditor->m_ShiftBy = NewVal;
 	else if(Prop == PROP_COLOR)
 	{
 		for_each(pLayers.all(), [NewVal](CLayerTiles *pLayer){
