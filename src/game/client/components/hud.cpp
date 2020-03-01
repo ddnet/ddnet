@@ -75,7 +75,8 @@ void CHud::OnReset()
 	m_FinishTime = false;
 	m_DDRaceTimeReceived = false;
 	m_ServerRecord = -1.0f;
-	m_PlayerRecord = -1.0f;
+	m_PlayerRecord[0] = -1.0f;
+	m_PlayerRecord[1] = -1.0f;
 
 	ResetHudContainers();
 }
@@ -872,7 +873,7 @@ void CHud::OnMessage(int MsgType, void *pRawMsg)
 		else if(GameClient()->m_GameInfo.m_RaceRecordMessage)
 		{
 			m_ServerRecord = (float)pMsg->m_ServerTimeBest/100;
-			m_PlayerRecord = (float)pMsg->m_PlayerTimeBest/100;
+			m_PlayerRecord[g_Config.m_ClDummy] = (float)pMsg->m_PlayerTimeBest/100;
 		}
 	}
 }
@@ -930,18 +931,19 @@ void CHud::RenderRecord()
 	if(m_ServerRecord > 0 )
 	{
 		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "Server best:");
+		str_format(aBuf, sizeof(aBuf), Localize("Server best:"));
 		TextRender()->Text(0, 5, 40, 6, aBuf, -1);
 		str_format(aBuf, sizeof(aBuf), "%02d:%05.2f", (int)m_ServerRecord/60, m_ServerRecord-((int)m_ServerRecord/60*60));
 		TextRender()->Text(0, 53, 40, 6, aBuf, -1);
 	}
 
-	if(m_PlayerRecord > 0 )
+	const float PlayerRecord = m_PlayerRecord[g_Config.m_ClDummy];
+	if(PlayerRecord > 0 )
 	{
 		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "Personal best:");
+		str_format(aBuf, sizeof(aBuf), Localize("Personal best:"));
 		TextRender()->Text(0, 5, 47, 6, aBuf, -1);
-		str_format(aBuf, sizeof(aBuf), "%02d:%05.2f", (int)m_PlayerRecord/60, m_PlayerRecord-((int)m_PlayerRecord/60*60));
+		str_format(aBuf, sizeof(aBuf), "%02d:%05.2f", (int)PlayerRecord/60, PlayerRecord-((int)PlayerRecord/60*60));
 		TextRender()->Text(0, 53, 47, 6, aBuf, -1);
 	}
 }
