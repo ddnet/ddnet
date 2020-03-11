@@ -11,6 +11,7 @@
 #include <game/mapbugs.h>
 #include <game/voting.h>
 
+#include "antibot.h"
 #include "eventhandler.h"
 #include "gamecontroller.h"
 #include "gameworld.h"
@@ -58,6 +59,7 @@ class IEngine;
 class IStorage;
 class CRandomMapResult;
 class CMapVoteResult;
+struct CAntibotData;
 
 class CGameContext : public IGameServer
 {
@@ -76,6 +78,7 @@ class CGameContext : public IGameServer
 	ASYNCIO *m_pTeeHistorianFile;
 	CUuid m_GameUuid;
 	CMapBugs m_MapBugs;
+	CAntibot m_Antibot;
 
 	std::shared_ptr<CRandomMapResult> m_pRandomMapResult;
 	std::shared_ptr<CMapVoteResult> m_pMapVoteResult;
@@ -112,6 +115,7 @@ class CGameContext : public IGameServer
 	static void ConVote(IConsole::IResult *pResult, void *pUserData);
 	static void ConVoteNo(IConsole::IResult *pResult, void *pUserData);
 	static void ConDrySave(IConsole::IResult *pResult, void *pUserData);
+	static void ConDumpAntibot(IConsole::IResult *pResult, void *pUserData);
 	static void ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	CGameContext(int Resetting);
@@ -126,6 +130,7 @@ public:
 	CCollision *Collision() { return &m_Collision; }
 	CTuningParams *Tuning() { return &m_Tuning; }
 	CTuningParams *TuningList() { return &m_aTuningList[0]; }
+	CAntibot *Antibot() { return &m_Antibot; }
 
 	CGameContext();
 	~CGameContext();
@@ -141,6 +146,7 @@ public:
 	// helper functions
 	class CCharacter *GetPlayerChar(int ClientID);
 	bool EmulateBug(int Bug);
+	void FillAntibot(CAntibotData *pData);
 
 	// voting
 	void StartVote(const char *pDesc, const char *pCommand, const char *pReason);

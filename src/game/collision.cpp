@@ -4,6 +4,8 @@
 #include <base/math.h>
 #include <base/vmath.h>
 
+#include <antibot/antibot_data.h>
+
 #include <math.h>
 #include <engine/map.h>
 #include <engine/kernel.h>
@@ -148,6 +150,21 @@ void CCollision::Init(class CLayers *pLayers)
 				m_pSwitchers[i].m_EndTick[j] = 0;
 				m_pSwitchers[i].m_Type[j] = 0;
 			}
+		}
+	}
+}
+
+void CCollision::FillAntibot(CAntibotMapData *pMapData)
+{
+	pMapData->m_Width = m_Width;
+	pMapData->m_Height = m_Height;
+	pMapData->m_pTiles = (unsigned char *)malloc(m_Width * m_Height);
+	for(int i = 0; i < m_Width * m_Height; i++)
+	{
+		pMapData->m_pTiles[i] = 0;
+		if(m_pTiles[i].m_Index >= TILE_SOLID && m_pTiles[i].m_Index <= TILE_NOLASER)
+		{
+			pMapData->m_pTiles[i] = m_pTiles[i].m_Index;
 		}
 	}
 }

@@ -731,3 +731,9 @@ void CGameContext::ConDrySave(IConsole::IResult *pResult, void *pUserData)
 	io_write(File, SavedTeam.GetString(), Len);
 	io_close(File);
 }
+
+void CGameContext::ConDumpAntibot(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->Antibot()->Dump();
+}
