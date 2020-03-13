@@ -9,7 +9,9 @@
 
 #include <game/gamecore.h>
 
+class CAntibot;
 class CGameTeams;
+struct CAntibotCharacterData;
 
 enum
 {
@@ -125,6 +127,7 @@ private:
 	int m_LastNoAmmoSound;
 
 	// these are non-heldback inputs
+	CNetObj_PlayerInput m_LatestPrevPrevInput;
 	CNetObj_PlayerInput m_LatestPrevInput;
 	CNetObj_PlayerInput m_LatestInput;
 
@@ -170,6 +173,7 @@ private:
 	void HandleBroadcast();
 	void HandleTuneLayer();
 	void SendZoneMsgs();
+	CAntibot *Antibot();
 
 	bool m_SetSavePos;
 	vec2 m_PrevSavePos;
@@ -177,6 +181,7 @@ private:
 
 public:
 	CGameTeams* Teams();
+	void FillAntibot(CAntibotCharacterData *pData);
 	void Pause(bool Pause);
 	bool Freeze(int Time);
 	bool Freeze();
@@ -232,6 +237,9 @@ public:
 	bool m_TeleGunTeleport;
 	bool m_IsBlueTeleGunTeleport;
 	int m_StrongWeakID;
+
+	int m_SpawnTick;
+	int m_WeaponChangeTick;
 
 	// Setters/Getters because i don't want to modify vanilla vars access modifiers
 	int GetLastWeapon() { return m_LastWeapon; };

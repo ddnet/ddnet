@@ -80,6 +80,7 @@ option(WEBSOCKETS "Enable websockets support" OFF)
 option(MYSQL "Enable mysql support" OFF)
 option(AUTOUPDATE "Enable the autoupdater" ${AUTOUPDATE_DEFAULT})
 option(VIDEORECORDER "Enable video recording support via FFmpeg" OFF)
+option(ANTIBOT "Enable support for a dynamic anticheat library" OFF)
 option(CLIENT "Compile client" ON)
 option(DOWNLOAD_GTEST "Download and compile GTest" ${AUTO_DEPENDENCIES_DEFAULT})
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
@@ -1034,6 +1035,12 @@ endif()
 ########################################################################
 
 # Sources
+set_src(ANTIBOT_SRC GLOB src/antibot
+  antibot_data.h
+  antibot_interface.h
+  antibot_null.cpp
+)
+
 set_src(ENGINE_SERVER GLOB src/engine/server
   authmanager.cpp
   authmanager.h
@@ -1051,6 +1058,8 @@ set_src(ENGINE_SERVER GLOB src/engine/server
   sql_string_helpers.h
 )
 set_src(GAME_SERVER GLOB_RECURSE src/game/server
+  antibot.cpp
+  antibot.h
   ddracechat.cpp
   ddracechat.h
   ddracecommands.cpp
@@ -1112,10 +1121,18 @@ else()
   set(SERVER_ICON)
 endif()
 
+# Antibot
+if(ANTIBOT)
+  set(TARGET_ANTIBOT antibot)
+  add_library(${TARGET_ANTIBOT} SHARED ${ANTIBOT_SRC})
+  list(APPEND TARGETS_OWN ${TARGET_ANTIBOT})
+endif()
+
 # Libraries
 set(LIBS_SERVER
   ${LIBS}
   ${MYSQL_LIBRARIES}
+  ${TARGET_ANTIBOT}
   # Add pthreads (on non-Windows) at the end, so that other libraries can depend
   # on it.
   ${CMAKE_THREAD_LIBS_INIT}
@@ -1686,6 +1703,9 @@ foreach(target ${TARGETS_OWN})
   endif()
   if(VIDEORECORDER)
     target_compile_definitions(${target} PRIVATE CONF_VIDEORECORDER)
+  endif()
+  if(ANTIBOT)
+    target_compile_definitions(${target} PRIVATE CONF_ANTIBOT)
   endif()
   if(MYSQL)
     target_compile_definitions(${target} PRIVATE CONF_SQL)
