@@ -1340,6 +1340,26 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_ADMIN);
 					m_RconClientID = IServer::RCON_CID_SERV;
 					m_RconAuthLevel = AUTHED_ADMIN;
+
+					if(g_Config.m_SvDiscordModLogPort != -1 && (str_startswith(pCmd, "ban") || str_startswith(pCmd, "kick") || str_startswith(pCmd, "muteid")))
+					{
+						NETADDR BindAddr = {NETTYPE_IPV4, {0}, 0};
+						NETSOCKET Socket = net_udp_create(BindAddr);
+
+						NETADDR DestAddr = {NETTYPE_IPV4, {127,0,0,1}, (unsigned short)g_Config.m_SvDiscordModLogPort};
+
+						char aServerName[16];
+#if defined(CONF_SQL)
+						str_format(aServerName, sizeof(aServerName), "%s:%d", g_Config.m_SvSqlServerName, g_Config.m_SvPort);
+#else
+						str_format(aServerName, sizeof(aServerName), "%d", g_Config.m_SvPort);
+#endif
+
+						char aMsg[256];
+						str_format(aMsg, sizeof(aMsg), "%s\t%s\t%s\t%s", aServerName, ClientName(ClientID), m_AuthManager.KeyIdent(m_aClients[ClientID].m_AuthKey), pCmd);
+
+						net_udp_send(Socket, &DestAddr, aMsg, strlen(aMsg));
+					}
 				}
 			}
 		}
