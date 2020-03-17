@@ -157,7 +157,7 @@ void CCharacter::HandleJetpack()
 		return;
 
 	// check for ammo
-	if(!m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo)
+	if(!m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo || m_FreezeTime)
 	{
 		return;
 	}
