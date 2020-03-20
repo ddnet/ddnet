@@ -597,7 +597,7 @@ void CCommandProcessorFragment_OpenGL3_3::SetState(const CCommandBuffer::SState 
 			m_aTextures[State.m_Texture].m_LastWrapMode = State.m_WrapMode;
 		}
 	}
-	else 
+	else
 	{
 		if(pProgram->m_LocIsTextured != -1)
 		{
@@ -1109,7 +1109,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 		}
 	}
 	m_aTextures[pCommand->m_Slot].m_Width = Width;
-	m_aTextures[pCommand->m_Slot].m_Height = Height; 
+	m_aTextures[pCommand->m_Slot].m_Height = Height;
 	m_aTextures[pCommand->m_Slot].m_RescaleCount = RescaleCount;
 
 	int Oglformat = TexFormatToOpenGLFormat(pCommand->m_Format);
@@ -1727,7 +1727,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadLayer(const CCommandBuff
 	{
 		pProgram = m_pQuadProgramTextured;
 	}
-	else 
+	else
 		pProgram = m_pQuadProgram;
 
 	UseProgram(pProgram);
@@ -2182,6 +2182,15 @@ void CCommandProcessor_SDL_OpenGL::RunBuffer(CCommandBuffer *pBuffer)
 
 int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, IStorage *pStorage)
 {
+	// print sdl version
+	{
+		SDL_version Compiled;
+		SDL_version Linked;
+
+		SDL_VERSION(&Compiled);
+		SDL_GetVersion(&Linked);
+		dbg_msg("sdl", "SDL version %d.%d.%d (linked = %d.%d.%d)", Compiled.major, Compiled.minor, Compiled.patch, Linked.major, Linked.minor, Linked.patch);
+	}
 	if(!SDL_WasInit(SDL_INIT_VIDEO))
 	{
 		if(SDL_InitSubSystem(SDL_INIT_VIDEO) < 0)
@@ -2255,7 +2264,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 						dbg_msg("gfx", "Using OpenGL version %d.%d.", vMaj, vMin);
 					}
 				}
-				else 
+				else
 				{
 					dbg_msg("gfx", "Couldn't create OpenGL 3.3 context.");
 					SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, s_SDLGLContextMajorVersion);
@@ -2419,7 +2428,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		CmdBuffer.AddCommand(CmdOpenGL);
 		RunBuffer(&CmdBuffer);
 		WaitForIdle();
-	} 
+	}
 	else
 	{
 		CCommandProcessorFragment_OpenGL::SCommand_Init CmdOpenGL;
