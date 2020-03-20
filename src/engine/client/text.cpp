@@ -592,6 +592,14 @@ public:
 	{
 		m_pGraphics = Kernel()->RequestInterface<IGraphics>();
 		FT_Init_FreeType(&m_FTLibrary);
+		// print freetype version
+		{
+			int LMajor, LMinor, LPatch;
+			FT_Library_Version(m_FTLibrary, &LMajor, &LMinor, &LPatch);
+			dbg_msg("freetype", "freetype version %d.%d.%d (linked=%d.%d.%d)", FREETYPE_MAJOR, FREETYPE_MINOR, FREETYPE_PATCH,
+				LMajor, LMinor, LPatch);
+		}
+
 		m_FirstFreeTextContainerIndex = -1;
 
 		m_DefaultTextContainerInfo.m_Stride = sizeof(STextCharQuadVertex);
@@ -1731,11 +1739,11 @@ public:
 				}
 
 				pBitmap = &pFont->m_FtFace->glyph->bitmap; // ignore_convention
-				
+
 				int SlotW = pBitmap->width;
 				int SlotH = pBitmap->rows;
 				int SlotSize = SlotW*SlotH;
-				
+
 				// prepare glyph data
 				mem_zero(ms_aGlyphData, SlotSize);
 
@@ -1747,15 +1755,15 @@ public:
 								ms_aGlyphData[(py)*SlotW + px] = pBitmap->buffer[py*pBitmap->width + px]; // ignore_convention
 							}
 					}
-				
+
 				Graphics()->LoadTextureRawSub(Texture, x + WidthLastChars, y, SlotW, SlotH, CImageInfo::FORMAT_ALPHA, ms_aGlyphData);
 				WidthLastChars += (SlotW + 1);
-				
+
 			}
 			pCurrent = pTmp;
 		}
 	}
-	
+
 	virtual int AdjustFontSize(const char *pText, int TextLength, int MaxSize = -1)
 	{
 		int WidthOfText = CalculateTextWidth(pText, TextLength, 0, 100);
@@ -1803,7 +1811,7 @@ public:
 
 		return WidthOfText;
 	}
-	
+
 	virtual void OnWindowResize()
 	{
 		bool FoundTextContainer = false;
