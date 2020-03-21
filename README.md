@@ -43,7 +43,7 @@ You can install the required libraries on your system, `touch CMakeLists.txt` an
 
 Or on Arch Linux like this:
 
-    sudo pacman -S --needed cmake curl freetype2 git glew opusfile sdl2 wavpack python
+    sudo pacman -S --needed base-devel cmake curl freetype2 git glew opusfile python sdl2 wavpack
 
 There is an [AUR package for pnglite](https://aur.archlinux.org/packages/pnglite/). For instructions on installing it, see [AUR packages installation instructions on ArchWiki](https://wiki.archlinux.org/index.php/Arch_User_Repository#Installing_packages).
 
