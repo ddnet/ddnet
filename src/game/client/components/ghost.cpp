@@ -175,7 +175,7 @@ void CGhost::CheckStart()
 	int RaceTick = -m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer;
 	int RenderTick = m_NewRenderTick;
 
-	if(m_LastRaceTick != RaceTick && Client()->GameTick() - RaceTick < Client()->GameTickSpeed())
+	if(m_LastRaceTick != RaceTick && Client()->GameTick(g_Config.m_ClDummy) - RaceTick < Client()->GameTickSpeed())
 	{
 		if(m_Rendering && m_RenderingStartedByServer) // race restarted: stop rendering
 			StopRender();
@@ -208,7 +208,7 @@ void CGhost::CheckStartLocal(bool Predicted)
 		{
 			if(m_Rendering && !m_RenderingStartedByServer) // race restarted: stop rendering
 				StopRender();
-			RenderTick = Client()->PredGameTick();
+			RenderTick = Client()->PredGameTick(g_Config.m_ClDummy);
 		}
 
 		TryRenderStart(RenderTick, false);
@@ -303,7 +303,7 @@ void CGhost::OnRender()
 	if(!m_Rendering || !g_Config.m_ClRaceShowGhost)
 		return;
 
-	int PlaybackTick = Client()->PredGameTick() - m_StartRenderTick;
+	int PlaybackTick = Client()->PredGameTick(g_Config.m_ClDummy) - m_StartRenderTick;
 
 	for(int i = 0; i < MAX_ACTIVE_GHOSTS; i++)
 	{
@@ -335,9 +335,9 @@ void CGhost::OnRender()
 		int TickDiff = Player.m_Tick - Prev.m_Tick;
 		float IntraTick = 0.f;
 		if(TickDiff > 0)
-			IntraTick = (GhostTick - Prev.m_Tick - 1 + Client()->PredIntraGameTick()) / TickDiff;
+			IntraTick = (GhostTick - Prev.m_Tick - 1 + Client()->PredIntraGameTick(g_Config.m_ClDummy)) / TickDiff;
 
-		Player.m_AttackTick += Client()->GameTick() - GhostTick;
+		Player.m_AttackTick += Client()->GameTick(g_Config.m_ClDummy) - GhostTick;
 
 		m_pClient->m_pPlayers->RenderHook(&Prev, &Player, &pGhost->m_RenderInfo , -2, IntraTick);
 		m_pClient->m_pPlayers->RenderPlayer(&Prev, &Player, &pGhost->m_RenderInfo, -2, IntraTick);
@@ -562,7 +562,7 @@ void CGhost::SaveGhost(CMenus::CGhostItem *pItem)
 void CGhost::ConGPlay(IConsole::IResult *pResult, void *pUserData)
 {
 	CGhost *pGhost = (CGhost *)pUserData;
-	pGhost->StartRender(pGhost->Client()->PredGameTick());
+	pGhost->StartRender(pGhost->Client()->PredGameTick(g_Config.m_ClDummy));
 }
 
 void CGhost::OnConsoleInit()
@@ -584,7 +584,7 @@ void CGhost::OnMessage(int MsgType, void *pRawMsg)
 			if(m_Recording)
 				StopRecord();
 			StopRender();
-			m_LastDeathTick = Client()->GameTick();
+			m_LastDeathTick = Client()->GameTick(g_Config.m_ClDummy);
 		}
 	}
 	else if(MsgType == NETMSGTYPE_SV_CHAT)

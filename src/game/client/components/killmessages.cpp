@@ -83,7 +83,7 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 
 		Kill.m_Weapon = pMsg->m_Weapon;
 		Kill.m_ModeSpecial = pMsg->m_ModeSpecial;
-		Kill.m_Tick = Client()->GameTick();
+		Kill.m_Tick = Client()->GameTick(g_Config.m_ClDummy);
 
 		Kill.m_FlagCarrierBlue = m_pClient->m_Snap.m_pGameDataObj ? m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue : -1;
 
@@ -153,7 +153,7 @@ void CKillMessages::OnRender()
 	for(int i = 1; i <= MAX_KILLMSGS; i++)
 	{
 		int r = (m_KillmsgCurrent+i)%MAX_KILLMSGS;
-		if(Client()->GameTick() > m_aKillmsgs[r].m_Tick+50*10)
+		if(Client()->GameTick(g_Config.m_ClDummy) > m_aKillmsgs[r].m_Tick+50*10)
 			continue;
 
 		float x = StartX;

@@ -7,6 +7,7 @@
 #include <base/vmath.h>
 #include <engine/client.h>
 #include <engine/console.h>
+#include <engine/shared/config.h>
 #include <game/layers.h>
 #include <game/localization.h>
 #include <game/gamecore.h>

@@ -18,14 +18,14 @@ static struct
 {
 	CUIRect m_Rect;
 	void *m_pId;
-	int (*m_pfnFunc)(CEditor *pEditor, CUIRect Rect);
+	int (*m_pfnFunc)(CEditor *pEditor, CUIRect Rect, void *pContext);
 	int m_IsMenu;
-	void *m_pExtra;
+	void *m_pContext;
 } s_UiPopups[8];
 
 static int g_UiNumPopups = 0;
 
-void CEditor::UiInvokePopupMenu(void *pID, int Flags, float x, float y, float Width, float Height, int (*pfnFunc)(CEditor *pEditor, CUIRect Rect), void *pExtra)
+void CEditor::UiInvokePopupMenu(void *pID, int Flags, float x, float y, float Width, float Height, int (*pfnFunc)(CEditor *pEditor, CUIRect Rect, void *pContext), void *pContext)
 {
 	if(g_UiNumPopups > 7)
 		return;
@@ -41,7 +41,7 @@ void CEditor::UiInvokePopupMenu(void *pID, int Flags, float x, float y, float Wi
 	s_UiPopups[g_UiNumPopups].m_Rect.w = Width;
 	s_UiPopups[g_UiNumPopups].m_Rect.h = Height;
 	s_UiPopups[g_UiNumPopups].m_pfnFunc = pfnFunc;
-	s_UiPopups[g_UiNumPopups].m_pExtra = pExtra;
+	s_UiPopups[g_UiNumPopups].m_pContext = pContext;
 	g_UiNumPopups++;
 }
 
@@ -80,7 +80,7 @@ void CEditor::UiDoPopupMenu()
 		RenderTools()->DrawUIRect(&r, ColorRGBA(0,0,0,0.75f), Corners, 3.0f);
 		r.Margin(4.0f, &r);
 
-		if(s_UiPopups[i].m_pfnFunc(this, r))
+		if(s_UiPopups[i].m_pfnFunc(this, r, s_UiPopups[i].m_pContext))
 		{
 			m_LockMouse = false;
 			UI()->SetActiveItem(0);
@@ -99,7 +99,7 @@ void CEditor::UiDoPopupMenu()
 }
 
 
-int CEditor::PopupGroup(CEditor *pEditor, CUIRect View)
+int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	// remove group button
 	CUIRect Button;
@@ -357,12 +357,19 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View)
 	return 0;
 }
 
-int CEditor::PopupLayer(CEditor *pEditor, CUIRect View)
+int CEditor::PopupLayer(CEditor *pEditor, CUIRect View, void *pContext)
 {
+	CLayerPopupContext *pPopup = (CLayerPopupContext *)pContext;
+
 	// remove layer button
 	CUIRect Button;
 	View.HSplitBottom(12.0f, &View, &Button);
 	static int s_DeleteButton = 0;
+
+	if(pPopup->m_aLayers.size() > 1)
+	{
+		return CLayerTiles::RenderCommonProperties(pPopup->m_CommonPropState, pEditor, &View, pPopup->m_aLayers);
+	}
 
 	// don't allow deletion of game layer
 	if(pEditor->m_Map.m_pGameLayer != pEditor->GetSelectedLayer(0) &&
@@ -452,7 +459,7 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View)
 	return pCurrentLayer->RenderProperties(&View);
 }
 
-int CEditor::PopupQuad(CEditor *pEditor, CUIRect View)
+int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	array<CQuad *> lQuads = pEditor->GetSelectedQuads();
 	CQuad *pCurrentQuad = lQuads[pEditor->m_SelectedQuadIndex];
@@ -634,7 +641,7 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View)
 	return 0;
 }
 
-int CEditor::PopupSource(CEditor *pEditor, CUIRect View)
+int CEditor::PopupSource(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	CSoundSource *pSource = pEditor->GetSelectedSource();
 
@@ -828,7 +835,7 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View)
 	return 0;
 }
 
-int CEditor::PopupPoint(CEditor *pEditor, CUIRect View)
+int CEditor::PopupPoint(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	array<CQuad *> lQuads = pEditor->GetSelectedQuads();
 	CQuad *pCurrentQuad = lQuads[pEditor->m_SelectedQuadIndex];
@@ -918,7 +925,7 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View)
 	return 0;
 }
 
-int CEditor::PopupNewFolder(CEditor *pEditor, CUIRect View)
+int CEditor::PopupNewFolder(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	CUIRect Label, ButtonBar;
 
@@ -987,7 +994,7 @@ int CEditor::PopupNewFolder(CEditor *pEditor, CUIRect View)
 	return 0;
 }
 
-int CEditor::PopupMapInfo(CEditor *pEditor, CUIRect View)
+int CEditor::PopupMapInfo(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	CUIRect Label, ButtonBar, Button;
 
@@ -1055,7 +1062,7 @@ int CEditor::PopupMapInfo(CEditor *pEditor, CUIRect View)
 	return 0;
 }
 
-int CEditor::PopupEvent(CEditor *pEditor, CUIRect View)
+int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	CUIRect Label, ButtonBar;
 
@@ -1137,7 +1144,7 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View)
 static int g_SelectImageSelected = -100;
 static int g_SelectImageCurrent = -100;
 
-int CEditor::PopupSelectImage(CEditor *pEditor, CUIRect View)
+int CEditor::PopupSelectImage(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	CUIRect ButtonBar, ImageView;
 	View.VSplitLeft(80.0f, &ButtonBar, &View);
@@ -1249,7 +1256,7 @@ int CEditor::PopupSelectImageResult()
 static int g_SelectSoundSelected = -100;
 static int g_SelectSoundCurrent = -100;
 
-int CEditor::PopupSelectSound(CEditor *pEditor, CUIRect View)
+int CEditor::PopupSelectSound(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	CUIRect ButtonBar, SoundView;
 	View.VSplitLeft(80.0f, &ButtonBar, &View);
@@ -1340,7 +1347,7 @@ int CEditor::PopupSelectSoundResult()
 
 static int s_GametileOpSelected = -1;
 
-int CEditor::PopupSelectGametileOp(CEditor *pEditor, CUIRect View)
+int CEditor::PopupSelectGametileOp(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	static const char *s_pButtonNames[] = { "Air", "Hookable", "Death", "Unhookable", "Hookthrough", "Freeze", "Unfreeze", "Deep Freeze", "Deep Unfreeze", "Blue Check-Tele", "Red Check-Tele" };
 	static unsigned s_NumButtons = sizeof(s_pButtonNames) / sizeof(char*);
@@ -1377,7 +1384,7 @@ int CEditor::PopupSelectGameTileOpResult()
 static int s_AutoMapConfigSelected = -100;
 static int s_AutoMapConfigCurrent = -100;
 
-int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View)
+int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	CLayerTiles *pLayer = static_cast<CLayerTiles*>(pEditor->GetSelectedLayer(0));
 	CUIRect Button;
@@ -1416,7 +1423,7 @@ int CEditor::PopupSelectConfigAutoMapResult()
 
 // DDRace
 
-int CEditor::PopupTele(CEditor *pEditor, CUIRect View)
+int CEditor::PopupTele(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	CUIRect Button;
 	View.HSplitBottom(12.0f, &View, &Button);
@@ -1464,7 +1471,7 @@ int CEditor::PopupTele(CEditor *pEditor, CUIRect View)
 	return 0;
 }
 
-int CEditor::PopupSpeedup(CEditor *pEditor, CUIRect View)
+int CEditor::PopupSpeedup(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	CUIRect Button;
 	View.HSplitBottom(12.0f, &View, &Button);
@@ -1498,7 +1505,7 @@ int CEditor::PopupSpeedup(CEditor *pEditor, CUIRect View)
 	return 0;
 }
 
-int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View)
+int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	CUIRect Button;
 	View.HSplitBottom(12.0f, &View, &Button);
@@ -1549,7 +1556,7 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View)
 	return 0;
 }
 
-int CEditor::PopupTune(CEditor *pEditor, CUIRect View)
+int CEditor::PopupTune(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	CUIRect Button;
 	View.HSplitBottom(12.0f, &View, &Button);
@@ -1575,7 +1582,7 @@ int CEditor::PopupTune(CEditor *pEditor, CUIRect View)
 	return 0;
 }
 
-int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View)
+int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	CUIRect SVPicker, HuePicker;
 	View.VSplitRight(20.0f, &SVPicker, &HuePicker);
@@ -1677,7 +1684,7 @@ int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View)
 	return 0;
 }
 
-int CEditor::PopupEntities(CEditor *pEditor, CUIRect View)
+int CEditor::PopupEntities(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	for(int i = 0; i < (int)pEditor->m_SelectEntitiesFiles.size(); i++)
 	{

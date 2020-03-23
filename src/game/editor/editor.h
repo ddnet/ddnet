@@ -537,6 +537,14 @@ public:
 	virtual void ShowInfo();
 	virtual int RenderProperties(CUIRect *pToolbox);
 
+	struct SCommonPropState {
+		bool Modified = false;
+		int Width = -1;
+		int Height = -1;
+		int Color = 0;
+	};
+	static int RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, array<CLayerTiles *> &pLayers);
+
 	virtual void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc);
 	virtual void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc);
 
@@ -946,28 +954,34 @@ public:
 
 	void RenderGrid(CLayerGroup *pGroup);
 
-	void UiInvokePopupMenu(void *pID, int Flags, float X, float Y, float W, float H, int (*pfnFunc)(CEditor *pEditor, CUIRect Rect), void *pExtra=0);
+	void UiInvokePopupMenu(void *pID, int Flags, float X, float Y, float W, float H, int (*pfnFunc)(CEditor *pEditor, CUIRect Rect, void *pContext), void *pExtra=0);
 	void UiDoPopupMenu();
 
 	int UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree=false, bool IsHex=false, int corners=CUI::CORNER_ALL, ColorRGBA* Color=0);
 
-	static int PopupGroup(CEditor *pEditor, CUIRect View);
-	static int PopupLayer(CEditor *pEditor, CUIRect View);
-	static int PopupQuad(CEditor *pEditor, CUIRect View);
-	static int PopupPoint(CEditor *pEditor, CUIRect View);
-	static int PopupNewFolder(CEditor *pEditor, CUIRect View);
-	static int PopupMapInfo(CEditor *pEditor, CUIRect View);
-	static int PopupEvent(CEditor *pEditor, CUIRect View);
-	static int PopupSelectImage(CEditor *pEditor, CUIRect View);
-	static int PopupSelectSound(CEditor *pEditor, CUIRect View);
-	static int PopupSelectGametileOp(CEditor *pEditor, CUIRect View);
-	static int PopupImage(CEditor *pEditor, CUIRect View);
-	static int PopupMenuFile(CEditor *pEditor, CUIRect View);
-	static int PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View);
-	static int PopupSound(CEditor *pEditor, CUIRect View);
-	static int PopupSource(CEditor *pEditor, CUIRect View);
-	static int PopupColorPicker(CEditor *pEditor, CUIRect View);
-	static int PopupEntities(CEditor *pEditor, CUIRect View);
+	static int PopupGroup(CEditor *pEditor, CUIRect View, void *pContext);
+
+	struct CLayerPopupContext
+	{
+		array<CLayerTiles *> m_aLayers;
+		CLayerTiles::SCommonPropState m_CommonPropState;
+	};
+	static int PopupLayer(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupQuad(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupPoint(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupNewFolder(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupMapInfo(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupEvent(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupSelectImage(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupSelectSound(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupSelectGametileOp(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupImage(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupMenuFile(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupSound(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupSource(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupColorPicker(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupEntities(CEditor *pEditor, CUIRect View, void *pContext);
 
 	static void CallbackOpenMap(const char *pFileName, int StorageType, void *pUser);
 	static void CallbackAppendMap(const char *pFileName, int StorageType, void *pUser);
@@ -1037,10 +1051,10 @@ public:
 	IGraphics::CTextureHandle m_SpeedupTexture;
 	IGraphics::CTextureHandle m_SwitchTexture;
 	IGraphics::CTextureHandle m_TuneTexture;
-	static int PopupTele(CEditor *pEditor, CUIRect View);
-	static int PopupSpeedup(CEditor *pEditor, CUIRect View);
-	static int PopupSwitch(CEditor *pEditor, CUIRect View);
-	static int PopupTune(CEditor *pEditor, CUIRect View);
+	static int PopupTele(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupSpeedup(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupTune(CEditor *pEditor, CUIRect View, void *pContext);
 	unsigned char m_TeleNumber;
 
 	unsigned char m_TuningNum;

@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/math.h>
+#include <base/tl/algorithm.h>
 
 #include <engine/client.h>
 #include <engine/graphics.h>
@@ -955,6 +956,115 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	}
 	if(Prop != -1) {
 		FlagModified(0, 0, m_Width, m_Height);
+	}
+
+	return 0;
+}
+
+int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, array<CLayerTiles *> &pLayers)
+{
+	if(State.Modified)
+	{
+		CUIRect Commit;
+		pToolbox->HSplitBottom(20.0f, pToolbox, &Commit);
+		static int s_CommitButton = 0;
+		if(pEditor->DoButton_Editor(&s_CommitButton, "Commit", 0, &Commit, 0, "Applies the changes"))
+		{
+			dbg_msg("editor", "applying changes");
+			for_each(pLayers.all(), [&State](CLayerTiles *pLayer){
+				pLayer->Resize(State.Width, State.Height);
+
+				pLayer->m_Color.r = (State.Color>>24)&0xff;
+				pLayer->m_Color.g = (State.Color>>16)&0xff;
+				pLayer->m_Color.b = (State.Color>>8)&0xff;
+				pLayer->m_Color.a = State.Color&0xff;
+
+				pLayer->FlagModified(0, 0, pLayer->m_Width, pLayer->m_Height);
+			});
+			State.Modified = false;
+		}
+
+	}
+	else
+	{
+		for_each(pLayers.all(), [&State](CLayerTiles *pLayer){
+			if(pLayer->m_Width > State.Width)
+				State.Width = pLayer->m_Width;
+			if(pLayer->m_Height > State.Height)
+				State.Height = pLayer->m_Height;
+		});
+	}
+
+	{
+		CUIRect Warning;
+		pToolbox->HSplitTop(13.0f, &Warning, pToolbox);
+		Warning.HMargin(0.5f, &Warning);
+
+		pEditor->TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f));
+		pEditor->UI()->DoLabel(&Warning, "Editing multiple layers", 9.0f, -1, Warning.w);
+		pEditor->TextRender()->TextColor(ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
+		pToolbox->HSplitTop(2.0f, 0, pToolbox);
+	}
+
+	enum
+	{
+		PROP_WIDTH=0,
+		PROP_HEIGHT,
+		PROP_SHIFT,
+		PROP_SHIFT_BY,
+		PROP_COLOR,
+		NUM_PROPS,
+	};
+
+	CProperty aProps[] = {
+		{"Width", State.Width, PROPTYPE_INT_SCROLL, 1, 100000},
+		{"Height", State.Height, PROPTYPE_INT_SCROLL, 1, 100000},
+		{"Shift", 0, PROPTYPE_SHIFT, 0, 0},
+		{"Shift by", pEditor->m_ShiftBy, PROPTYPE_INT_SCROLL, 1, 100000},
+		{"Color", State.Color, PROPTYPE_COLOR, 0, 0},
+		{0},
+	};
+
+	static int s_aIds[NUM_PROPS] = {0};
+	int NewVal = 0;
+	int Prop = pEditor->DoProperties(pToolbox, aProps, s_aIds, &NewVal);
+
+	if(Prop == PROP_WIDTH && NewVal > 1)
+	{
+		if(NewVal > 1000 && !pEditor->m_LargeLayerWasWarned)
+		{
+			pEditor->m_PopupEventType = pEditor->POPEVENT_LARGELAYER;
+			pEditor->m_PopupEventActivated = true;
+			pEditor->m_LargeLayerWasWarned = true;
+		}
+		State.Width = NewVal;
+	}
+	else if(Prop == PROP_HEIGHT && NewVal > 1)
+	{
+		if(NewVal > 1000 && !pEditor->m_LargeLayerWasWarned)
+		{
+			pEditor->m_PopupEventType = pEditor->POPEVENT_LARGELAYER;
+			pEditor->m_PopupEventActivated = true;
+			pEditor->m_LargeLayerWasWarned = true;
+		}
+		State.Height = NewVal;
+	}
+	else if(Prop == PROP_SHIFT)
+	{
+		for_each(pLayers.all(), [NewVal](CLayerTiles *pLayer){
+			pLayer->Shift(NewVal);
+		});
+	}
+	else if(Prop == PROP_SHIFT_BY)
+		pEditor->m_ShiftBy = NewVal;
+	else if(Prop == PROP_COLOR)
+	{
+		State.Color = NewVal;
+	}
+
+	if(Prop != -1 && Prop != PROP_SHIFT)
+	{
+		State.Modified = true;
 	}
 
 	return 0;

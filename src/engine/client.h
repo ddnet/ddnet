@@ -7,7 +7,6 @@
 #include "message.h"
 #include "graphics.h"
 #include <engine/friends.h>
-#include <engine/shared/config.h>
 
 enum
 {
@@ -78,12 +77,12 @@ public:
 	inline int State() const { return m_State; }
 
 	// tick time access
-	inline int PrevGameTick() const { return m_PrevGameTick[g_Config.m_ClDummy]; }
-	inline int GameTick() const { return m_CurGameTick[g_Config.m_ClDummy]; }
-	inline int PredGameTick() const { return m_PredTick[g_Config.m_ClDummy]; }
-	inline float IntraGameTick() const { return m_GameIntraTick[g_Config.m_ClDummy]; }
-	inline float PredIntraGameTick() const { return m_PredIntraTick[g_Config.m_ClDummy]; }
-	inline float GameTickTime() const { return m_GameTickTime[g_Config.m_ClDummy]; }
+	inline int PrevGameTick(int Dummy) const { return m_PrevGameTick[Dummy]; }
+	inline int GameTick(int Dummy) const { return m_CurGameTick[Dummy]; }
+	inline int PredGameTick(int Dummy) const { return m_PredTick[Dummy]; }
+	inline float IntraGameTick(int Dummy) const { return m_GameIntraTick[Dummy]; }
+	inline float PredIntraGameTick(int Dummy) const { return m_PredIntraTick[Dummy]; }
+	inline float GameTickTime(int Dummy) const { return m_GameTickTime[Dummy]; }
 	inline int GameTickSpeed() const { return m_GameTickSpeed; }
 
 	// other time access

@@ -25,9 +25,6 @@ CAntibot::CAntibot()
 }
 CAntibot::~CAntibot()
 {
-	AntibotDestroy();
-	free(g_Data.m_Map.m_pTiles);
-	g_Data.m_Map.m_pTiles = 0;
 }
 void CAntibot::Init(CGameContext *pGameContext)
 {
@@ -39,6 +36,12 @@ void CAntibot::Init(CGameContext *pGameContext)
 	g_Data.m_pUser = m_pGameContext;
 	AntibotInit(&g_Data);
 	Update();
+}
+void CAntibot::Shutdown()
+{
+	AntibotDestroy();
+	free(g_Data.m_Map.m_pTiles);
+	g_Data.m_Map.m_pTiles = 0;
 }
 void CAntibot::Dump() { AntibotDump(); }
 void CAntibot::Update()
@@ -71,6 +74,9 @@ void CAntibot::Init(CGameContext *pGameContext)
 void CAntibot::Dump()
 {
 	m_pGameContext->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "antibot", "antibot support not compiled in");
+}
+void CAntibot::Shutdown()
+{
 }
 void CAntibot::Update()
 {

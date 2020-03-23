@@ -33,7 +33,7 @@ void CNamePlates::RenderNameplate(
 	if(ClientID >= 0 && ClientID < MAX_CLIENTS)
 		Position = m_pClient->m_aClients[ClientID].m_RenderPos;
 	else
-		Position = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pPlayerChar->m_X, pPlayerChar->m_Y), Client()->IntraGameTick());
+		Position = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pPlayerChar->m_X, pPlayerChar->m_Y), Client()->IntraGameTick(g_Config.m_ClDummy));
 
 	bool OtherTeam = m_pClient->IsOtherTeam(ClientID);
 

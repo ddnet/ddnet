@@ -47,15 +47,15 @@ void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 	if(m_pClient->m_Snap.m_pLocalInfo)
 		LocalPlayerInGame = m_pClient->m_aClients[m_pClient->m_Snap.m_pLocalInfo->m_ClientID].m_Team != -1;
 
-	static float s_LastGameTickTime = Client()->GameTickTime();
+	static float s_LastGameTickTime = Client()->GameTickTime(g_Config.m_ClDummy);
 	if(m_pClient->m_Snap.m_pGameInfoObj && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED))
-		s_LastGameTickTime = Client()->GameTickTime();
+		s_LastGameTickTime = Client()->GameTickTime(g_Config.m_ClDummy);
 
 	float Ct;
 	if(m_pClient->Predict() && m_pClient->AntiPingGrenade() && LocalPlayerInGame && !(Client()->State() == IClient::STATE_DEMOPLAYBACK))
-		Ct = ((float)(Client()->PredGameTick() - 1 - pCurrent->m_StartTick) + Client()->PredIntraGameTick())/(float)SERVER_TICK_SPEED;
+		Ct = ((float)(Client()->PredGameTick(g_Config.m_ClDummy) - 1 - pCurrent->m_StartTick) + Client()->PredIntraGameTick(g_Config.m_ClDummy))/(float)SERVER_TICK_SPEED;
 	else
-		Ct = (Client()->PrevGameTick() - pCurrent->m_StartTick)/(float)SERVER_TICK_SPEED + s_LastGameTickTime;
+		Ct = (Client()->PrevGameTick(g_Config.m_ClDummy) - pCurrent->m_StartTick)/(float)SERVER_TICK_SPEED + s_LastGameTickTime;
 	if(Ct < 0)
 		return; // projectile haven't been shot yet
 
@@ -82,7 +82,7 @@ void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 	int QuadOffset = 2 + 4 + NUM_WEAPONS + clamp(pCurrent->m_Type, 0, NUM_WEAPONS - 1);
 
 	vec2 Vel = Pos-PrevPos;
-	//vec2 pos = mix(vec2(prev->x, prev->y), vec2(current->x, current->y), Client()->IntraGameTick());
+	//vec2 pos = mix(vec2(prev->x, prev->y), vec2(current->x, current->y), Client()->IntraGameTick(g_Config.m_ClDummy));
 
 	// add particle for this projectile
 	if(pCurrent->m_Type == WEAPON_GRENADE)
@@ -128,7 +128,7 @@ void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCu
 
 	int QuadOffset = 2;
 
-	float IntraTick = IsPredicted ? Client()->PredIntraGameTick() : Client()->IntraGameTick();
+	float IntraTick = IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
 	vec2 Pos = mix(vec2(pPrev->m_X, pPrev->m_Y), vec2(pCurrent->m_X, pCurrent->m_Y), IntraTick);
 	float Angle = 0.0f;
 	if(pCurrent->m_Type == POWERUP_WEAPON)
@@ -191,7 +191,7 @@ void CItems::RenderFlag(const CNetObj_Flag *pPrev, const CNetObj_Flag *pCurrent,
 
 	Graphics()->QuadsSetRotation(Angle);
 
-	vec2 Pos = mix(vec2(pPrev->m_X, pPrev->m_Y), vec2(pCurrent->m_X, pCurrent->m_Y), Client()->IntraGameTick());
+	vec2 Pos = mix(vec2(pPrev->m_X, pPrev->m_Y), vec2(pCurrent->m_X, pCurrent->m_Y), Client()->IntraGameTick(g_Config.m_ClDummy));
 
 	if(pCurGameData)
 	{
@@ -220,9 +220,9 @@ void CItems::RenderLaser(const struct CNetObj_Laser *pCurrent, bool IsPredicted)
 
 	float Ticks;
 	if(IsPredicted)
-		Ticks = (float)(Client()->PredGameTick() - pCurrent->m_StartTick) + Client()->PredIntraGameTick();
+		Ticks = (float)(Client()->PredGameTick(g_Config.m_ClDummy) - pCurrent->m_StartTick) + Client()->PredIntraGameTick(g_Config.m_ClDummy);
 	else
-		Ticks = (float)(Client()->GameTick() - pCurrent->m_StartTick) + Client()->IntraGameTick();
+		Ticks = (float)(Client()->GameTick(g_Config.m_ClDummy) - pCurrent->m_StartTick) + Client()->IntraGameTick(g_Config.m_ClDummy);
 	float Ms = (Ticks/50.0f) * 1000.0f;
 	float a = Ms / m_pClient->m_Tuning[g_Config.m_ClDummy].m_LaserBounceDelay;
 	a = clamp(a, 0.0f, 1.0f);
@@ -263,10 +263,10 @@ void CItems::RenderLaser(const struct CNetObj_Laser *pCurrent, bool IsPredicted)
 
 	// render head
 	{
-		int QuadOffset = 2 + 4 + NUM_WEAPONS * 2 + (Client()->GameTick() % 3);
+		int QuadOffset = 2 + 4 + NUM_WEAPONS * 2 + (Client()->GameTick(g_Config.m_ClDummy) % 3);
 
 		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_PARTICLES].m_Id);
-		Graphics()->QuadsSetRotation(Client()->GameTick());
+		Graphics()->QuadsSetRotation(Client()->GameTick(g_Config.m_ClDummy));
 		Graphics()->SetColor(OuterColor.r, OuterColor.g, OuterColor.b, 1.0f);
 		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, QuadOffset, Pos.x, Pos.y);
 		Graphics()->SetColor(InnerColor.r, InnerColor.g, InnerColor.b, 1.0f);
@@ -331,7 +331,7 @@ void CItems::OnRender()
 					{
 						ReconstructSmokeTrail((const CNetObj_Projectile *)pData, Item.m_ID, pProj->m_DestroyTick, pProj->m_LifeSpan);
 					}
-					pProj->m_LastRenderTick = Client()->GameTick();
+					pProj->m_LastRenderTick = Client()->GameTick(g_Config.m_ClDummy);
 					continue;
 				}
 			}
@@ -378,7 +378,7 @@ void CItems::OnRender()
 	// render extra projectiles
 	for(int i = 0; i < m_NumExtraProjectiles; i++)
 	{
-		if(m_aExtraProjectiles[i].m_StartTick < Client()->GameTick())
+		if(m_aExtraProjectiles[i].m_StartTick < Client()->GameTick(g_Config.m_ClDummy))
 		{
 			m_aExtraProjectiles[i] = m_aExtraProjectiles[m_NumExtraProjectiles-1];
 			m_NumExtraProjectiles--;
@@ -450,7 +450,7 @@ void CItems::ReconstructSmokeTrail(const CNetObj_Projectile *pCurrent, int ItemI
 		LocalPlayerInGame = m_pClient->m_aClients[m_pClient->m_Snap.m_pLocalInfo->m_ClientID].m_Team != -1;
 	if(!m_pClient->AntiPingGunfire() || !LocalPlayerInGame)
 		return;
-	if(Client()->PredGameTick() == pCurrent->m_StartTick)
+	if(Client()->PredGameTick(g_Config.m_ClDummy) == pCurrent->m_StartTick)
 		return;
 
 	// get positions
@@ -472,11 +472,11 @@ void CItems::ReconstructSmokeTrail(const CNetObj_Projectile *pCurrent, int ItemI
 		Speed = m_pClient->m_Tuning[g_Config.m_ClDummy].m_GunSpeed;
 	}
 
-	float Pt = ((float)(Client()->PredGameTick() - pCurrent->m_StartTick) + Client()->PredIntraGameTick())/(float)SERVER_TICK_SPEED;
+	float Pt = ((float)(Client()->PredGameTick(g_Config.m_ClDummy) - pCurrent->m_StartTick) + Client()->PredIntraGameTick(g_Config.m_ClDummy))/(float)SERVER_TICK_SPEED;
 	if(Pt < 0)
 		return; // projectile haven't been shot yet
 
-	float Gt = (Client()->PrevGameTick() - pCurrent->m_StartTick)/(float)SERVER_TICK_SPEED + Client()->GameTickTime();
+	float Gt = (Client()->PrevGameTick(g_Config.m_ClDummy) - pCurrent->m_StartTick)/(float)SERVER_TICK_SPEED + Client()->GameTickTime(g_Config.m_ClDummy);
 
 	vec2 StartPos;
 	vec2 StartVel;
@@ -494,7 +494,7 @@ void CItems::ReconstructSmokeTrail(const CNetObj_Projectile *pCurrent, int ItemI
 
 	float T = Pt;
 	if(DestroyTick >= 0)
-		T = minimum(Pt, ((float)(DestroyTick - 1 - pCurrent->m_StartTick) + Client()->PredIntraGameTick())/(float)SERVER_TICK_SPEED);
+		T = minimum(Pt, ((float)(DestroyTick - 1 - pCurrent->m_StartTick) + Client()->PredIntraGameTick(g_Config.m_ClDummy))/(float)SERVER_TICK_SPEED);
 	T = minimum(T, LifeSpan/(float)SERVER_TICK_SPEED);
 
 	float MinTrailSpan = 0.4f * ((pCurrent->m_Type == WEAPON_GRENADE) ? 0.5f : 0.25f);

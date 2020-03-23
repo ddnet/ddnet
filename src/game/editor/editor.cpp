@@ -1309,7 +1309,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		{
 			TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
 			{
-				int (*pPopupFunc)(CEditor *peditor, CUIRect View) = NULL;
+				int (*pPopupFunc)(CEditor *peditor, CUIRect View, void *pContext) = NULL;
 				const char *aButtonName = "Modifier";
 				float Height = 0.0f;
 				int Checked = -1;
@@ -3472,19 +3472,39 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 				if(int Result = DoButton_Ex(m_Map.m_lGroups[g]->m_lLayers[i], aBuf, Checked, &Button,
 					BUTTON_CONTEXT, "Select layer. Shift click to select multiple.", CUI::CORNER_R, FontSize))
 				{
-					if ((Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && m_SelectedGroup == g)
+					if(Result == 1 && (Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && m_SelectedGroup == g)
 					{
 						if(!m_lSelectedLayers.remove(i))
 							m_lSelectedLayers.add(i);
 					}
-					else
+					else if(!(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)))
 					{
 						m_SelectedGroup = g;
 						SelectLayer(i);
 					}
-					static int s_LayerPopupID = 0;
+					static CLayerPopupContext s_LayerPopupContext = {};
 					if(Result == 2)
-						UiInvokePopupMenu(&s_LayerPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 300, PopupLayer);
+					{
+						if(m_lSelectedLayers.size() > 1)
+						{
+							bool AllTile = true;
+							for(int i = 0; AllTile && i < m_lSelectedLayers.size(); i++)
+							{
+								if(m_Map.m_lGroups[m_SelectedGroup]->m_lLayers[i]->m_Type == LAYERTYPE_TILES)
+									s_LayerPopupContext.m_aLayers.add((CLayerTiles *)m_Map.m_lGroups[m_SelectedGroup]->m_lLayers[i]);
+								else
+									AllTile = false;
+							}
+
+							// Don't allow editing if all selected layers are tile layers
+							if(!AllTile)
+								s_LayerPopupContext.m_aLayers.clear();
+						}
+						else
+							s_LayerPopupContext.m_aLayers.clear();
+
+						UiInvokePopupMenu(&s_LayerPopupContext, 0, UI()->MouseX(), UI()->MouseY(), 120, 300, PopupLayer, &s_LayerPopupContext);
+					}
 				}
 
 				LayerCur += 14.0f;
@@ -3694,7 +3714,7 @@ static void ModifyIndexDeleted(int *pIndex)
 		*pIndex = *pIndex - 1;
 }
 
-int CEditor::PopupImage(CEditor *pEditor, CUIRect View)
+int CEditor::PopupImage(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	static int s_ReplaceButton = 0;
 	static int s_RemoveButton = 0;
@@ -3744,7 +3764,7 @@ int CEditor::PopupImage(CEditor *pEditor, CUIRect View)
 	return 0;
 }
 
-int CEditor::PopupSound(CEditor *pEditor, CUIRect View)
+int CEditor::PopupSound(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	static int s_ReplaceButton = 0;
 	static int s_RemoveButton = 0;
@@ -5440,7 +5460,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View)
 	UI()->ClipDisable();
 }
 
-int CEditor::PopupMenuFile(CEditor *pEditor, CUIRect View)
+int CEditor::PopupMenuFile(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	static int s_NewMapButton = 0;
 	static int s_SaveButton = 0;
