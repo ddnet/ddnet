@@ -11,6 +11,7 @@ public:
 	CAntibot();
 	~CAntibot();
 	void Init(CGameContext *pGameContext);
+	void Shutdown();
 	void Dump();
 
 	void OnPlayerInit(int ClientID);
