@@ -45,7 +45,7 @@ bool HttpInit(IStorage *pStorage)
 	// print curl version
 	{
 		curl_version_info_data *pVersion = curl_version_info(CURLVERSION_NOW);
-		dbg_msg("http", "libcurl version " LIBCURL_VERSION" (linked=%s)", pVersion->version);
+		dbg_msg("http", "libcurl version %s (compiled = " LIBCURL_VERSION ")", pVersion->version);
 	}
 
 	pStorage->GetBinaryPath("data/ca-ddnet.pem", CA_FILE_PATH, sizeof(CA_FILE_PATH));

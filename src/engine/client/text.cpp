@@ -596,8 +596,8 @@ public:
 		{
 			int LMajor, LMinor, LPatch;
 			FT_Library_Version(m_FTLibrary, &LMajor, &LMinor, &LPatch);
-			dbg_msg("freetype", "freetype version %d.%d.%d (linked=%d.%d.%d)", FREETYPE_MAJOR, FREETYPE_MINOR, FREETYPE_PATCH,
-				LMajor, LMinor, LPatch);
+			dbg_msg("freetype", "freetype version %d.%d.%d (compiled = %d.%d.%d)", LMajor, LMinor, LPatch,
+				FREETYPE_MAJOR, FREETYPE_MINOR, FREETYPE_PATCH);
 		}
 
 		m_FirstFreeTextContainerIndex = -1;
