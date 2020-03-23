@@ -2189,8 +2189,10 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 
 		SDL_VERSION(&Compiled);
 		SDL_GetVersion(&Linked);
-		dbg_msg("sdl", "SDL version %d.%d.%d (linked = %d.%d.%d)", Compiled.major, Compiled.minor, Compiled.patch, Linked.major, Linked.minor, Linked.patch);
+		dbg_msg("sdl", "SDL version %d.%d.%d (compiled = %d.%d.%d)", Linked.major, Linked.minor, Linked.patch,
+			Compiled.major, Compiled.minor, Compiled.patch);
 	}
+
 	if(!SDL_WasInit(SDL_INIT_VIDEO))
 	{
 		if(SDL_InitSubSystem(SDL_INIT_VIDEO) < 0)
