@@ -25,9 +25,15 @@ CAntibot::CAntibot()
 }
 CAntibot::~CAntibot()
 {
-	AntibotDestroy();
-	free(g_Data.m_Map.m_pTiles);
-	g_Data.m_Map.m_pTiles = 0;
+	// Check if `Init` was called. There is no easy way to prevent two
+	// destructors running without an `Init` call in between.
+	if(m_pGameContext)
+	{
+		AntibotDestroy();
+		free(g_Data.m_Map.m_pTiles);
+		g_Data.m_Map.m_pTiles = 0;
+		m_pGameContext = 0;
+	}
 }
 void CAntibot::Init(CGameContext *pGameContext)
 {
