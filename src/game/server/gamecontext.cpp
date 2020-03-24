@@ -3044,8 +3044,6 @@ void CGameContext::OnShutdown(bool FullShutdown)
 	if (FullShutdown)
 		Score()->OnShutdown();
 
-	m_Antibot.Shutdown();
-
 	if(m_TeeHistorianActive)
 	{
 		m_TeeHistorian.Finish();
