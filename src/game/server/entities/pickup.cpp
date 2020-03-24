@@ -68,12 +68,9 @@ void CPickup::Tick()
 					{
 						if(pChr->GetWeaponGot(i))
 						{
-							if(i != WEAPON_NINJA)
-							{
-								pChr->SetWeaponGot(i, false);
-								pChr->SetWeaponAmmo(i, 0);
-								Sound = true;
-							}
+							pChr->SetWeaponGot(i, false);
+							pChr->SetWeaponAmmo(i, 0);
+							Sound = true;
 						}
 					}
 					pChr->SetNinjaActivationDir(vec2(0,0));
