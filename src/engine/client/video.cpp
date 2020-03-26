@@ -167,10 +167,10 @@ void CVideo::start()
 	m_vframe = 0;
 }
 
-void CVideo::pause()
+void CVideo::pause(bool p)
 {
 	if(ms_pCurrentVideo)
-		m_Recording ^= true;
+		m_Recording = !p;
 }
 
 void CVideo::stop()

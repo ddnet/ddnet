@@ -681,7 +681,7 @@ void CDemoPlayer::Pause()
 	m_Info.m_Info.m_Paused = 1;
 #if defined(CONF_VIDEORECORDER)
 	if(IVideo::Current() && g_Config.m_ClVideoPauseWithDemo)
-		IVideo::Current()->pause();
+		IVideo::Current()->pause(true);
 #endif
 }
 
@@ -695,7 +695,7 @@ void CDemoPlayer::Unpause()
 	}
 #if defined(CONF_VIDEORECORDER)
 	if(IVideo::Current() && g_Config.m_ClVideoPauseWithDemo)
-		IVideo::Current()->pause();
+		IVideo::Current()->pause(false);
 #endif
 }
 

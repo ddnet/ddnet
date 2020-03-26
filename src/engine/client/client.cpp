@@ -3314,6 +3314,9 @@ void CClient::Con_StartVideo(IConsole::IResult *pResult, void *pUserData)
 	{
 		new CVideo((CGraphics_Threaded*)pSelf->m_pGraphics, pSelf->Storage(), pSelf->m_pConsole, pSelf->Graphics()->ScreenWidth(), pSelf->Graphics()->ScreenHeight(), "");
 		IVideo::Current()->start();
+		bool paused = pSelf->m_DemoPlayer.Info()->m_Info.m_Paused;
+		if(paused)
+			IVideo::Current()->pause(true);
 	}
 	else
 		pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "videorecorder", "Videorecorder already running.");
