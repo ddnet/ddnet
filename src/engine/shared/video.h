@@ -10,7 +10,7 @@ public:
 
 	virtual void start() = 0;
 	virtual void stop() = 0;
-	virtual void pause() = 0;
+	virtual void pause(bool p) = 0;
 
 	virtual void nextVideoFrame() = 0;
 	virtual bool frameRendered() = 0;
