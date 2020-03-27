@@ -460,7 +460,6 @@ elseif(TARGET_OS STREQUAL "mac")
   set(PLATFORM_CLIENT
     src/osx/notification.h
     src/osx/notification.mm
-    src/osxlaunch/client.h
     src/osxlaunch/client.m
   )
   set(PLATFORM_CLIENT_LIBS ${COCOA} ${OPENGL})
