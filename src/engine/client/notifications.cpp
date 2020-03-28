@@ -8,9 +8,8 @@
 
 void Notifications::init()
 {
-	const char *pName = "DDNet Client";
 #if defined(CONF_LIBNOTIFY)
-	notify_init(pName);
+	notify_init("DDNet Client");
 #endif
 }
 
