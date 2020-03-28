@@ -3777,6 +3777,12 @@ void CClient::LoadFont()
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load font. filename='%s'", pFontFile);
 }
 
+void CClient::Notify(const char *pTitle, const char *pMessage)
+{
+	NotificationsNotify(pTitle, pMessage);
+	Graphics()->NotifyWindow();
+}
+
 void CClient::ConchainWindowVSync(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
@@ -3931,8 +3937,6 @@ int main(int argc, const char **argv) // ignore_convention
 	bool Silent = false;
 	bool RandInitFailed = false;
 
-	Notifications::init();
-
 	for(int i = 1; i < argc; i++) // ignore_convention
 	{
 		if(str_comp("-s", argv[i]) == 0 || str_comp("--silent", argv[i]) == 0) // ignore_convention
@@ -3949,6 +3953,8 @@ int main(int argc, const char **argv) // ignore_convention
 	{
 		RandInitFailed = true;
 	}
+
+	NotificationsInit();
 
 	CClient *pClient = CreateClient();
 	IKernel *pKernel = IKernel::Create();
@@ -4074,8 +4080,6 @@ int main(int argc, const char **argv) // ignore_convention
 	dbg_msg("client", "starting...");
 	pClient->Run();
 
-	Notifications::uninit();
-
 	// write down the config and quit
 	pConfig->Save();
 
@@ -4083,6 +4087,8 @@ int main(int argc, const char **argv) // ignore_convention
 
 	pClient->~CClient();
 	free(pClient);
+
+	NotificationsUninit();
 
 	if(Restarting)
 	{

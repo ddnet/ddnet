@@ -1,29 +1,35 @@
-#include <base/detect.h>
-
-#if defined(CONF_LIBNOTIFY)
-	#include <libnotify/notify.h>
-#endif
-
 #include "notifications.h"
 
-void Notifications::init()
+#include <base/detect.h>
+
+#if defined(CONF_PLATFORM_MACOSX)
+// Code is in src/osx/notification.mm.
+#elif defined(CONF_FAMILY_UNIX)
+#include <libnotify/notify.h>
+void NotificationsInit()
 {
-#if defined(CONF_LIBNOTIFY)
 	notify_init("DDNet Client");
-#endif
 }
-
-void Notifications::uninit()
+void NotificationsUninit()
 {
-#if defined(CONF_LIBNOTIFY)
 	notify_uninit();
-#endif
 }
-
-void Notifications::Notify(const char *pTitle, const char *pMsg)
+void NotificationsNotify(const char *pTitle, const char *pMessage)
 {
-#if defined(CONF_LIBNOTIFY)
-	NotifyNotification *pNotif = notify_notification_new(pTitle, pMsg, NULL);
+	NotifyNotification *pNotif = notify_notification_new(pTitle, pMessage, NULL);
 	notify_notification_show(pNotif, NULL);
-#endif
+	g_object_unref(G_OBJECT(pNotif));
 }
+#else
+void NotificationsInit()
+{
+}
+void NotificationsUninit()
+{
+}
+void NotificationsNotify(const char *pTitle, const char *pMessage)
+{
+	(void)pTitle;
+	(void)pMessage;
+}
+#endif
