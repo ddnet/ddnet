@@ -9,7 +9,6 @@
 #include <engine/textrender.h>
 #include <engine/keys.h>
 #include <engine/shared/config.h>
-#include <engine/client/notifications.h>
 
 #include <game/generated/protocol.h>
 #include <game/generated/client_data.h>
@@ -19,10 +18,6 @@
 #include <game/client/components/scoreboard.h>
 #include <game/client/components/sounds.h>
 #include <game/localization.h>
-
-#ifdef CONF_PLATFORM_MACOSX
-#include <osx/notification.h>
-#endif
 
 #include "chat.h"
 
@@ -706,14 +701,8 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		if(Now-m_aLastSoundPlayed[CHAT_HIGHLIGHT] >= time_freq()*3/10)
 		{
 			char aBuf[1024];
-			const char *pTitle = "DDNet-Chat";
 			str_format(aBuf, sizeof(aBuf), "%s%s", m_aLines[m_CurrentLine].m_aName, m_aLines[m_CurrentLine].m_aText);
-			Notifications::Notify(pTitle, aBuf);
-#ifdef CONF_PLATFORM_MACOSX
-			CNotification::Notify(pTitle, aBuf);
-#else
-			Graphics()->NotifyWindow();
-#endif
+			Client()->Notify("DDNet Chat", aBuf);
 			if(g_Config.m_SndHighlight)
 			{
 				m_pClient->m_pSounds->Play(CSounds::CHN_GUI, SOUND_CHAT_HIGHLIGHT, 0);

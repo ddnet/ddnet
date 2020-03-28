@@ -428,6 +428,7 @@ public:
 	void ToggleWindowBordered();
 	void ToggleWindowVSync();
 	void LoadFont();
+	void Notify(const char *pTitle, const char *pMessage);
 
 	// DDRace
 
