@@ -86,6 +86,8 @@ option(DOWNLOAD_GTEST "Download and compile GTest" ${AUTO_DEPENDENCIES_DEFAULT})
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
 option(DEV "Don't generate stuff necessary for packaging" OFF)
 
+option(LIBNOTIFY "Enable libnotify support (only linux)" OFF)
+
 set(OpenGL_GL_PREFERENCE LEGACY)
 
 # Set the default build type to Release
@@ -452,6 +454,7 @@ if(TARGET_OS STREQUAL "windows")
   set(PLATFORM_CLIENT)
   set(PLATFORM_CLIENT_LIBS opengl32 glu32 winmm)
   set(PLATFORM_LIBS ws2_32) # Windows sockets
+  set(PLATFORM_CLIENT_COMPILE_DEFINITIONS)
 elseif(TARGET_OS STREQUAL "mac")
   find_library(CARBON Carbon)
   find_library(COCOA Cocoa)
@@ -464,12 +467,30 @@ elseif(TARGET_OS STREQUAL "mac")
   )
   set(PLATFORM_CLIENT_LIBS ${COCOA} ${OPENGL})
   set(PLATFORM_LIBS ${CARBON} ${SECURITY})
+  set(PLATFORM_CLIENT_COMPILE_DEFINITIONS)
 else()
-  set(PLATFORM_CLIENT)
   find_package(OpenGL)
   find_package(X11)
-  set(PLATFORM_CLIENT_LIBS ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY} ${X11_X11_LIB})
-  set(PLATFORM_CLIENT_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR} ${X11_X11_INCLUDE_PATH})
+  if(LIBNOTIFY) # optional libnotify support
+    find_package(GLib)
+    find_package(GdkPixbuf)
+    find_package(LibNotify)
+    set(LIBNOTIF_GLIB_GDKPIXBUF_LIB ${GLIB_LIBRARIES} ${GDK_PIXBUF_LIBRARIES} ${LIBNOTIFY_LIBRARIES})
+    set(LIBNOTIF_GLIB_GDKPIXBUF_INCLUDE_DIR ${GLIB_INCLUDE_DIRS} ${GDK_PIXBUF_INCLUDE_DIRS} ${LIBNOTIFY_INCLUDE_DIRS})
+    set(PLATFORM_CLIENT_COMPILE_DEFINITIONS CONF_LIBNOTIFY)
+  else()
+    set(LIBNOTIF_GLIB_GDKPIXBUF_LIB)
+    set(LIBNOTIF_GLIB_GDKPIXBUF_INCLUDE_DIR)
+    set(PLATFORM_CLIENT_COMPILE_DEFINITIONS)
+  endif()
+  set(PLATFORM_CLIENT_LIBS ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY} ${X11_X11_LIB} ${LIBNOTIF_GLIB_GDKPIXBUF_LIB})
+  set(PLATFORM_CLIENT_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR} ${X11_X11_INCLUDE_PATH} ${LIBNOTIF_GLIB_GDKPIXBUF_INCLUDE_DIR})
+  set(PLATFORM_CLIENT
+    src/engine/client/client.h
+    src/engine/client/client.cpp
+    src/engine/client/notifications.h
+    src/engine/client/notifications.cpp
+  )
   if(TARGET_OS STREQUAL "linux")
     set(PLATFORM_LIBS rt) # clock_gettime for glibc < 2.17
   else()
@@ -817,6 +838,8 @@ if(CLIENT)
     input.cpp
     input.h
     keynames.h
+    notifications.cpp
+    notifications.h
     opengl_sl.cpp
     opengl_sl.h
     opengl_sl_program.cpp
@@ -1006,6 +1029,12 @@ if(CLIENT)
     ${SDL2_INCLUDE_DIRS}
     ${WAVPACK_INCLUDE_DIRS}
     ${FFMPEG_INCLUDE_DIRS}
+
+    ${PLATFORM_CLIENT_INCLUDE_DIRS}
+  )
+
+  target_compile_definitions(${TARGET_CLIENT} PRIVATE
+    ${PLATFORM_CLIENT_COMPILE_DEFINITIONS}
   )
 
   set(PARAMS "${WAVPACK_INCLUDE_DIRS};${WAVPACK_INCLUDE_DIRS}")

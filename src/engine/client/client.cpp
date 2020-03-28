@@ -34,6 +34,7 @@
 #include <engine/textrender.h>
 
 #include <engine/client/http.h>
+#include <engine/client/notifications.h>
 #include <engine/shared/config.h>
 #include <engine/shared/compression.h>
 #include <engine/shared/datafile.h>
@@ -3930,6 +3931,8 @@ int main(int argc, const char **argv) // ignore_convention
 	bool Silent = false;
 	bool RandInitFailed = false;
 
+	Notifications::init();
+
 	for(int i = 1; i < argc; i++) // ignore_convention
 	{
 		if(str_comp("-s", argv[i]) == 0 || str_comp("--silent", argv[i]) == 0) // ignore_convention
@@ -4070,6 +4073,8 @@ int main(int argc, const char **argv) // ignore_convention
 	// run the client
 	dbg_msg("client", "starting...");
 	pClient->Run();
+
+	Notifications::uninit();
 
 	// write down the config and quit
 	pConfig->Save();

@@ -1,0 +1,20 @@
+if(NOT WIN32)
+	find_package(PkgConfig REQUIRED QUIET)
+	pkg_check_modules(PC_GDK_PIXBUF REQUIRED QUIET gdk-pixbuf-2.0)
+endif()
+
+find_path(GDK_PIXBUF_INCLUDEDIR gdk-pixbuf/gdk-pixbuf.h
+	PATH_SUFFIXES gtk-2.0 gdk-pixbuf-2.0
+	HINTS ${PC_GDK_PIXBUF_INCLUDE_DIRS} ${PC_GDK_PIXBUF_INCLUDEDIR})
+
+find_library(GDK_PIXBUF_LIBRARY
+	NAMES gdk_pixbuf-2.0
+	HINTS ${PC_GDK_PIXBUF_LIBRARY_DIRS} ${PC_GDK_PIXBUF_LIBDIR})
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(GdkPixbuf DEFAULT_MSG GDK_PIXBUF_INCLUDEDIR GDK_PIXBUF_LIBRARY)
+
+mark_as_advanced(GDK_PIXBUF_INCLUDEDIR GDK_PIXBUF_LIBRARY)
+
+set(GDK_PIXBUF_INCLUDE_DIRS ${GDK_PIXBUF_INCLUDEDIR})
+set(GDK_PIXBUF_LIBRARIES ${GDK_PIXBUF_LIBRARY})
