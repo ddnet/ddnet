@@ -106,7 +106,8 @@ enum
 };
 
 typedef int (*NETFUNC_DELCLIENT)(int ClientID, const char *pReason, void *pUser);
-typedef int (*NETFUNC_NEWCLIENT)(int ClientID, void *pUser);
+typedef int (*NETFUNC_NEWCLIENT_CON)(int ClientID, void *pUser);
+typedef int (*NETFUNC_NEWCLIENT)(int ClientID, void *pUser, bool Sixup);
 typedef int (*NETFUNC_NEWCLIENT_NOAUTH)(int ClientID, void *pUser);
 typedef int (*NETFUNC_CLIENTREJOIN)(int ClientID, void *pUser);
 
@@ -130,8 +131,8 @@ public:
 	int m_Size;
 	int m_Sequence;
 
-	unsigned char *Pack(unsigned char *pData);
-	unsigned char *Unpack(unsigned char *pData);
+	unsigned char *Pack(unsigned char *pData, int split = 4);
+	unsigned char *Unpack(unsigned char *pData, int split = 4);
 };
 
 class CNetChunkResend
@@ -170,7 +171,6 @@ private:
 	unsigned short m_PeerAck;
 	unsigned m_State;
 
-	int m_Token;
 	SECURITY_TOKEN m_SecurityToken;
 	int m_RemoteClosed;
 	bool m_BlockCloseMsg;
@@ -237,9 +237,12 @@ public:
 	void SetTimedOut(const NETADDR *pAddr, int Sequence, int Ack, SECURITY_TOKEN SecurityToken, TStaticRingBuffer<CNetChunkResend, NET_CONN_BUFFERSIZE> *pResendBuffer);
 
 	// anti spoof
-	void DirectInit(NETADDR &Addr, SECURITY_TOKEN SecurityToken);
+	void DirectInit(NETADDR &Addr, SECURITY_TOKEN SecurityToken, SECURITY_TOKEN Token, bool Sixup);
 	void SetUnknownSeq() { m_UnknownSeq = true; }
 	void SetSequence(int Sequence) { m_Sequence = Sequence; }
+
+	bool m_Sixup;
+	SECURITY_TOKEN m_Token;
 };
 
 class CConsoleNetConnection
@@ -333,13 +336,14 @@ class CNetServer
 	CNetRecvUnpacker m_RecvUnpacker;
 
 	void OnTokenCtrlMsg(NETADDR &Addr, int ControlMsg, const CNetPacketConstruct &Packet);
+	void OnSixupCtrlMsg(NETADDR &Addr, int ControlMsg, const CNetPacketConstruct &Packet, SECURITY_TOKEN Token);
 	void OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet);
 	void OnConnCtrlMsg(NETADDR &Addr, int ClientID, int ControlMsg, const CNetPacketConstruct &Packet);
 	bool ClientExists(const NETADDR &Addr) { return GetClientSlot(Addr) != -1; };
 	int GetClientSlot(const NETADDR &Addr);
 	void SendControl(NETADDR &Addr, int ControlMsg, const void *pExtra, int ExtraSize, SECURITY_TOKEN SecurityToken);
 
-	int TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, bool VanillaAuth=false);
+	int TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, bool VanillaAuth=false, bool Sixup=false, SECURITY_TOKEN Token=0);
 	int NumClientsWithAddr(NETADDR Addr);
 	bool Connlimit(NETADDR Addr);
 	void SendMsgs(NETADDR &Addr, const CMsgPacker *Msgs[], int num);
@@ -393,14 +397,14 @@ class CNetConsole
 	class CNetBan *m_pNetBan;
 	CSlot m_aSlots[NET_MAX_CONSOLE_CLIENTS];
 
-	NETFUNC_NEWCLIENT m_pfnNewClient;
+	NETFUNC_NEWCLIENT_CON m_pfnNewClient;
 	NETFUNC_DELCLIENT m_pfnDelClient;
 	void *m_UserPtr;
 
 	CNetRecvUnpacker m_RecvUnpacker;
 
 public:
-	void SetCallbacks(NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_DELCLIENT pfnDelClient, void *pUser);
+	void SetCallbacks(NETFUNC_NEWCLIENT_CON pfnNewClient, NETFUNC_DELCLIENT pfnDelClient, void *pUser);
 
 	//
 	bool Open(NETADDR BindAddr, class CNetBan *pNetBan, int Flags);
@@ -472,11 +476,11 @@ public:
 	static int Compress(const void *pData, int DataSize, void *pOutput, int OutputSize);
 	static int Decompress(const void *pData, int DataSize, void *pOutput, int OutputSize);
 
-	static void SendControlMsg(NETSOCKET Socket, NETADDR *pAddr, int Ack, int ControlMsg, const void *pExtra, int ExtraSize, SECURITY_TOKEN SecurityToken);
+	static void SendControlMsg(NETSOCKET Socket, NETADDR *pAddr, int Ack, int ControlMsg, const void *pExtra, int ExtraSize, SECURITY_TOKEN SecurityToken, bool Sixup = false);
 	static void SendPacketConnless(NETSOCKET Socket, NETADDR *pAddr, const void *pData, int DataSize, bool Extended, unsigned char aExtra[4]);
-	static void SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct *pPacket, SECURITY_TOKEN SecurityToken);
+	static void SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct *pPacket, SECURITY_TOKEN SecurityToken, bool Sixup = false);
 
-	static int UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket);
+	static int UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, SECURITY_TOKEN *SecurityToken = 0, bool Sixup = false);
 
 	// The backroom is ack-NET_MAX_SEQUENCE/2. Used for knowing if we acked a packet or not
 	static int IsSeqInBackroom(int Seq, int Ack);

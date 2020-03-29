@@ -114,6 +114,8 @@ public:
 
 	bool Translate(int& Target, int Client)
 	{
+		if(IsSixup(Client))
+			return true;
 		CClientInfo Info;
 		GetClientInfo(Client, &Info);
 		if (Info.m_DDNetVersion >= VERSION_DDNET_OLD)
@@ -134,6 +136,8 @@ public:
 
 	bool ReverseTranslate(int& Target, int Client)
 	{
+		if(IsSixup(Client))
+			return true;
 		CClientInfo Info;
 		GetClientInfo(Client, &Info);
 		if (Info.m_DDNetVersion >= VERSION_DDNET_OLD)
@@ -199,6 +203,8 @@ public:
 	virtual void SendMsgRaw(int ClientID, const void *pData, int Size, int Flags) = 0;
 
 	virtual char *GetMapName() = 0;
+
+	virtual bool IsSixup(int ClientID) = 0;
 };
 
 class IGameServer : public IInterface

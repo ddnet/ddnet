@@ -10,6 +10,7 @@
 #include "network.h"
 #include <engine/message.h>
 #include <engine/shared/protocol.h>
+#include <game/generated/protocol.h>
 
 const int DummyMapCrc = 0x6c760ac4;
 unsigned char g_aDummyMapData[] = {
@@ -41,6 +42,83 @@ unsigned char g_aDummyMapData[] = {
 	0xc2, 0x00, 0x00, 0x38, 0x00, 0x05
 };
 
+static unsigned char MsgTypeFromSixup(unsigned char Byte)
+{
+	unsigned char Six = Byte>>1;
+	unsigned char Msg;
+	if (Byte&1)
+	{
+		if(Six == 1)
+			Msg = NETMSG_INFO;
+		else if(Six >= 18 && Six <= 28)
+			Msg = NETMSG_READY + Six - 18;
+		else
+		{
+			dbg_msg("net", "DROP recv sys %d", Six);
+			return 0;
+		}
+		//dbg_msg("net", "recv sys %d <- %d", Msg, Six);
+	}
+	else
+	{
+		if(Six >= 24 && Six <= 27)
+			Msg = NETMSGTYPE_CL_SAY + Six - 24;
+		else if(Six == 28)
+			Msg = NETMSGTYPE_CL_KILL;
+		else if(Six >= 30 && Six <= 32)
+			Msg = NETMSGTYPE_CL_EMOTICON + Six - 30;
+		else
+		{
+			dbg_msg("net", "DROP recv msg %d", Six);
+			return 0;
+		}
+		//dbg_msg("net", "recv msg %d <- %d", Msg, Six);
+	}
+	return (Msg<<1) | (Byte&1);
+}
+
+static unsigned char MsgTypeToSixup(unsigned char Byte)
+{
+	unsigned char Msg = Byte>>1;
+	unsigned char Six;
+	if (Byte&1)
+	{
+		if(Msg >= NETMSG_MAP_CHANGE && Msg <= NETMSG_MAP_DATA)
+			Six = Msg;
+		else if(Msg >= NETMSG_CON_READY && Msg <= NETMSG_INPUTTIMING)
+			Six = Msg + 1;
+		else if(Msg >= NETMSG_AUTH_CHALLANGE && Msg <= NETMSG_AUTH_RESULT)
+			Six = Msg + 4;
+		else if(Msg >= NETMSG_PING && Msg <= NETMSG_ERROR)
+			Six = Msg + 4;
+		else if(Msg > 24)
+			Six = Msg - 24;
+		else
+		{
+			dbg_msg("net", "DROP send sys %d", Msg);
+			return 0;
+		}
+		//dbg_msg("net", "send sys %d -> %d", Msg, Six);
+	}
+	else
+	{
+		if(Msg >= NETMSGTYPE_SV_MOTD && Msg <= NETMSGTYPE_SV_CHAT)
+			Six = Msg;
+		else if(Msg == NETMSGTYPE_SV_KILLMSG)
+			Six = Msg + 1;
+		else if(Msg >= NETMSGTYPE_SV_TUNEPARAMS && Msg <= NETMSGTYPE_SV_VOTESTATUS)
+			Six = Msg;
+		else if(Msg > 24)
+			Six = Msg - 24;
+		else
+		{
+			dbg_msg("net", "DROP send msg %d", Msg);
+			return 0;
+		}
+		//dbg_msg("net", "send msg %d -> %d", Msg, Six);
+	}
+	return (Six<<1) | (Byte&1);
+}
 
 static SECURITY_TOKEN ToSecurityToken(const unsigned char *pData)
 {
@@ -214,12 +292,12 @@ bool CNetServer::Connlimit(NETADDR Addr)
 	return false;
 }
 
-int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, bool VanillaAuth)
+int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, bool VanillaAuth, bool Sixup, SECURITY_TOKEN Token)
 {
 	if (Connlimit(Addr))
 	{
 		const char Msg[] = "Too many connections in a short time";
-		CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, Msg, sizeof(Msg), SecurityToken);
+		CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, Msg, sizeof(Msg), SecurityToken, Sixup);
 		return -1; // failed to add client
 	}
 
@@ -228,7 +306,7 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, boo
 	{
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "Only %d players with the same IP are allowed", m_MaxClientsPerIP);
-		CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, aBuf, str_length(aBuf) + 1, SecurityToken);
+		CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, aBuf, str_length(aBuf) + 1, SecurityToken, Sixup);
 		return -1; // failed to add client
 	}
 
@@ -245,13 +323,13 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, boo
 	if (Slot == -1)
 	{
 		const char FullMsg[] = "This server is full";
-		CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, FullMsg, sizeof(FullMsg), SecurityToken);
+		CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, FullMsg, sizeof(FullMsg), SecurityToken, Sixup);
 
 		return -1; // failed to add client
 	}
 
 	// init connection slot
-	m_aSlots[Slot].m_Connection.DirectInit(Addr, SecurityToken);
+	m_aSlots[Slot].m_Connection.DirectInit(Addr, SecurityToken, Token, Sixup);
 
 	if (VanillaAuth)
 	{
@@ -273,7 +351,7 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, boo
 	if (VanillaAuth)
 		m_pfnNewClientNoAuth(Slot, m_UserPtr);
 	else
-		m_pfnNewClient(Slot, m_UserPtr);
+		m_pfnNewClient(Slot, m_UserPtr, Sixup);
 
 	return Slot; // done
 }
@@ -546,6 +624,30 @@ void CNetServer::OnTokenCtrlMsg(NETADDR &Addr, int ControlMsg, const CNetPacketC
 	}
 }
 
+void CNetServer::OnSixupCtrlMsg(NETADDR &Addr, int ControlMsg, const CNetPacketConstruct &Packet, SECURITY_TOKEN Token)
+{
+	if(ClientExists(Addr))
+		return; // silently ignore
+
+	SECURITY_TOKEN ResponseToken;
+	mem_copy(&ResponseToken, Packet.m_aChunkData+1, 4);
+
+	SECURITY_TOKEN MyToken = GetToken(Addr);
+	unsigned char aToken[4];
+	mem_copy(aToken, &MyToken, 4);
+
+	if(ControlMsg == 5)
+	{
+		CNetBase::SendControlMsg(m_Socket, &Addr, 0, 5, aToken, sizeof(aToken), ResponseToken, true);
+	}
+	else if(ControlMsg == NET_CTRLMSG_CONNECT)
+	{
+		CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CONNECTACCEPT, aToken, sizeof(aToken), ResponseToken, true);
+		if(Token == MyToken)
+			TryAcceptClient(Addr, ResponseToken, false, true, Token);
+	}
+}
+
 int CNetServer::GetClientSlot(const NETADDR &Addr)
 {
 	int Slot = -1;
@@ -598,7 +700,11 @@ int CNetServer::Recv(CNetChunk *pChunk)
 
 		// check for a chunk
 		if(m_RecvUnpacker.FetchChunk(pChunk))
+		{
+			if(m_aSlots[pChunk->m_ClientID].m_Connection.m_Sixup)
+				*(unsigned char*)pChunk->m_pData = MsgTypeFromSixup(*(unsigned char*)pChunk->m_pData);
 			return 1;
+		}
 
 		// TODO: empty the recvinfo
 		unsigned char *pData;
@@ -643,6 +749,16 @@ int CNetServer::Recv(CNetChunk *pChunk)
 				// normal packet, find matching slot
 				int Slot = GetClientSlot(Addr);
 
+				bool Sixup = false;
+				SECURITY_TOKEN Token;
+				if((Slot == -1 && m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_UNUSED)
+					|| (Slot != -1 && m_aSlots[Slot].m_Connection.m_Sixup))
+				{
+					Sixup = true;
+					if(CNetBase::UnpackPacket(m_RecvUnpacker.m_aBuffer, Bytes, &m_RecvUnpacker.m_Data, &Token, Sixup))
+						continue;
+				}
+
 				if (Slot != -1)
 				{
 					// found
@@ -651,7 +767,7 @@ int CNetServer::Recv(CNetChunk *pChunk)
 					if(m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONTROL)
 						OnConnCtrlMsg(Addr, Slot, m_RecvUnpacker.m_Data.m_aChunkData[0], m_RecvUnpacker.m_Data);
 
-					if(m_aSlots[Slot].m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr))
+					if(m_aSlots[Slot].m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr, Token))
 					{
 						if(m_RecvUnpacker.m_Data.m_DataSize)
 							m_RecvUnpacker.Start(&Addr, &m_aSlots[Slot].m_Connection, Slot);
@@ -661,7 +777,10 @@ int CNetServer::Recv(CNetChunk *pChunk)
 				{
 					// not found, client that wants to connect
 
-					if(IsDDNetControlMsg(&m_RecvUnpacker.m_Data))
+					if(Sixup)
+						// got 0.7 control msg
+						OnSixupCtrlMsg(Addr, m_RecvUnpacker.m_Data.m_aChunkData[0], m_RecvUnpacker.m_Data, Token);
+					else if(IsDDNetControlMsg(&m_RecvUnpacker.m_Data))
 						// got ddnet control msg
 						OnTokenCtrlMsg(Addr, m_RecvUnpacker.m_Data.m_aChunkData[0], m_RecvUnpacker.m_Data);
 					else
@@ -693,6 +812,13 @@ int CNetServer::Send(CNetChunk *pChunk)
 		int Flags = 0;
 		dbg_assert(pChunk->m_ClientID >= 0, "errornous client id");
 		dbg_assert(pChunk->m_ClientID < MaxClients(), "errornous client id");
+
+		if(m_aSlots[pChunk->m_ClientID].m_Connection.m_Sixup)
+		{
+			unsigned int MsgType = MsgTypeToSixup(*(unsigned char*)pChunk->m_pData);
+			if (MsgType == 0) return 0;
+			*(unsigned char*)pChunk->m_pData = MsgType;
+		}
 
 		if(pChunk->m_Flags&NETSENDFLAG_VITAL)
 			Flags = NET_CHUNKFLAG_VITAL;

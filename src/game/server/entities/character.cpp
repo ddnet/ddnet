@@ -1241,6 +1241,18 @@ void CCharacter::Snap(int SnappingClient)
 	pDDNetCharacter->m_Jumps = m_Core.m_Jumps;
 	pDDNetCharacter->m_TeleCheckpoint = m_TeleCheckpoint;
 	pDDNetCharacter->m_StrongWeakID = m_StrongWeakID;
+
+	if(Server()->IsSixup(SnappingClient))
+	{
+		int Offset = sizeof(CNetObj_CharacterCore) / 4;
+		((int*)pCharacter)[Offset+0] = pCharacter->m_Health;
+		((int*)pCharacter)[Offset+1] = pCharacter->m_Armor;
+		((int*)pCharacter)[Offset+2] = pCharacter->m_AmmoCount;
+		((int*)pCharacter)[Offset+3] = pCharacter->m_Weapon;
+		((int*)pCharacter)[Offset+4] = pCharacter->m_Emote;
+		((int*)pCharacter)[Offset+5] = pCharacter->m_AttackTick;
+		((int*)pCharacter)[Offset+6] = 0; // m_TriggeredEvents
+	}
 }
 
 int CCharacter::NetworkClipped(int SnappingClient)

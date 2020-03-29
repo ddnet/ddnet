@@ -259,6 +259,7 @@ void CServer::CClient::Reset()
 	m_DDNetVersion = VERSION_NONE;
 	m_GotDDNetVersionPacket = false;
 	m_DDNetVersionSettled = false;
+	m_Sixup = false;
 }
 
 CServer::CServer()
@@ -758,7 +759,7 @@ void CServer::DoSnapshot()
 			int DeltaTick = -1;
 			int DeltaSize;
 
-			m_SnapshotBuilder.Init();
+			m_SnapshotBuilder.Init(m_aClients[i].m_Sixup);
 
 			GameServer()->OnSnap(i);
 
@@ -895,7 +896,7 @@ int CServer::NewClientNoAuthCallback(int ClientID, void *pUser)
 	return 0;
 }
 
-int CServer::NewClientCallback(int ClientID, void *pUser)
+int CServer::NewClientCallback(int ClientID, void *pUser, bool Sixup)
 {
 	CServer *pThis = (CServer *)pUser;
 	pThis->m_aClients[ClientID].m_State = CClient::STATE_PREAUTH;
@@ -916,6 +917,8 @@ int CServer::NewClientCallback(int ClientID, void *pUser)
 
 	pThis->GameServer()->OnClientEngineJoin(ClientID);
 	pThis->Antibot()->OnEngineClientJoin(ClientID);
+
+	pThis->m_aClients[ClientID].m_Sixup = Sixup;
 
 #if defined(CONF_FAMILY_UNIX)
 	pThis->SendConnLoggingCommand(OPEN_SESSION, pThis->m_NetServer.ClientAddr(ClientID));
@@ -1042,7 +1045,13 @@ void CServer::SendMap(int ClientID)
 		Msg.AddString(GetMapName(), 0);
 		Msg.AddInt(m_CurrentMapCrc);
 		Msg.AddInt(m_CurrentMapSize);
-		SendMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID);
+		if(m_aClients[ClientID].m_Sixup)
+		{
+			Msg.AddInt(1);
+			Msg.AddInt(1024-128);
+			Msg.AddRaw(m_CurrentMapSha256.data, sizeof(m_CurrentMapSha256.data));
+		}
+		SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID, true);
 	}
 
 	m_aClients[ClientID].m_NextMapChunk = 0;
@@ -1064,11 +1073,14 @@ void CServer::SendMapData(int ClientID, int Chunk)
 		Last = 1;
 	}
 
-	CMsgPacker Msg(NETMSG_MAP_DATA, true);
-	Msg.AddInt(Last);
-	Msg.AddInt(m_CurrentMapCrc);
-	Msg.AddInt(Chunk);
-	Msg.AddInt(ChunkSize);
+	CMsgPacker Msg(NETMSG_MAP_DATA);
+	if(!m_aClients[ClientID].m_Sixup)
+	{
+		Msg.AddInt(Last);
+		Msg.AddInt(m_CurrentMapCrc);
+		Msg.AddInt(Chunk);
+		Msg.AddInt(ChunkSize);
+	}
 	Msg.AddRaw(&m_pCurrentMapData[Offset], ChunkSize);
 	SendMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID);
 
@@ -1248,7 +1260,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				{
 					return;
 				}
-				if(str_comp(pVersion, GameServer()->NetVersion()) != 0)
+				if(str_comp(pVersion, GameServer()->NetVersion()) != 0 && str_comp(pVersion, "0.7 802f1be60a05665f") != 0)
 				{
 					// wrong version
 					char aReason[256];
@@ -1286,6 +1298,13 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		{
 			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) == 0 || m_aClients[ClientID].m_State < CClient::STATE_CONNECTING)
 				return;
+
+			if(m_aClients[ClientID].m_Sixup)
+			{
+				SendMapData(ClientID, m_aClients[ClientID].m_NextMapChunk);
+				m_aClients[ClientID].m_NextMapChunk++;
+				return;
+			}
 
 			int Chunk = Unpacker.GetInt();
 			if(Chunk != m_aClients[ClientID].m_NextMapChunk || !g_Config.m_SvFastDownload)

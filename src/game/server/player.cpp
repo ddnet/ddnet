@@ -317,24 +317,38 @@ void CPlayer::Snap(int SnappingClient)
 	pClientInfo->m_ColorBody = m_TeeInfos.m_ColorBody;
 	pClientInfo->m_ColorFeet = m_TeeInfos.m_ColorFeet;
 
-	CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, id, sizeof(CNetObj_PlayerInfo)));
+	int Size = Server()->IsSixup(SnappingClient) ? 3*4 : sizeof(CNetObj_PlayerInfo);
+	CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, id, Size));
 	if(!pPlayerInfo)
 		return;
 
 	int ClientVersion = GetClientVersion();
-	pPlayerInfo->m_Latency = SnappingClient == -1 ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aActLatency[m_ClientID];
-	pPlayerInfo->m_Local = (int)(m_ClientID == SnappingClient && (m_Paused != PAUSE_PAUSED || ClientVersion >= VERSION_DDNET_OLD));
-	pPlayerInfo->m_ClientID = id;
-	pPlayerInfo->m_Team = (ClientVersion < VERSION_DDNET_OLD || m_Paused != PAUSE_PAUSED || m_ClientID != SnappingClient) && m_Paused < PAUSE_SPEC ? m_Team : TEAM_SPECTATORS;
-
-	if(m_ClientID == SnappingClient && m_Paused == PAUSE_PAUSED && ClientVersion < VERSION_DDNET_OLD)
-		pPlayerInfo->m_Team = TEAM_SPECTATORS;
+	int Latency = SnappingClient == -1 ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aActLatency[m_ClientID];
+	int Score = abs(m_Score) * -1;
 
 	// send 0 if times of others are not shown
 	if(SnappingClient != m_ClientID && g_Config.m_SvHideScore)
-		pPlayerInfo->m_Score = -9999;
+		Score = -9999;
 	else
-		pPlayerInfo->m_Score = abs(m_Score) * -1;
+		Score = abs(m_Score) * -1;
+
+	if(!Server()->IsSixup(SnappingClient))
+	{
+		pPlayerInfo->m_Latency = Latency;
+		pPlayerInfo->m_Score = Score;
+		pPlayerInfo->m_Local = (int)(m_ClientID == SnappingClient && (m_Paused != PAUSE_PAUSED || ClientVersion >= VERSION_DDNET_OLD));
+		pPlayerInfo->m_ClientID = id;
+		pPlayerInfo->m_Team = (ClientVersion < VERSION_DDNET_OLD || m_Paused != PAUSE_PAUSED || m_ClientID != SnappingClient) && m_Paused < PAUSE_SPEC ? m_Team : TEAM_SPECTATORS;
+
+		if(m_ClientID == SnappingClient && m_Paused == PAUSE_PAUSED && ClientVersion < VERSION_DDNET_OLD)
+			pPlayerInfo->m_Team = TEAM_SPECTATORS;
+	}
+	else
+	{
+		((int*)pPlayerInfo)[0] = 0; // m_PlayerFlags
+		((int*)pPlayerInfo)[1] = Score;
+		((int*)pPlayerInfo)[2] = Latency;
+	}
 
 	if(m_ClientID == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused))
 	{
