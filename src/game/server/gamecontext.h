@@ -388,7 +388,7 @@ private:
 	CMute m_aVoteMutes[MAX_VOTE_MUTES];
 	int m_NumVoteMutes;
 	bool TryMute(const NETADDR *pAddr, int Secs, const char *pReason);
-	void Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName, const char *pReason = "No reason given");
+	void Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName, const char *pReason = "");
 	bool TryVoteMute(const NETADDR *pAddr, int Secs);
 	bool VoteMute(const NETADDR *pAddr, int Secs, const char *pDisplayName, int AuthedID);
 	bool VoteUnmute(const NETADDR *pAddr, const char *pDisplayName, int AuthedID);
