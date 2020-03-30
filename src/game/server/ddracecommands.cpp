@@ -447,8 +447,10 @@ void CGameContext::Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName
 		return;
 
 	char aBuf[128];
-	str_format(aBuf, sizeof aBuf, "'%s' has been muted for %d seconds (Reason: %s).",
-			pDisplayName, Secs, pReason); 
+	if (pReason[0])
+		str_format(aBuf, sizeof aBuf, "'%s' has been muted for %d seconds (%s)", pDisplayName, Secs, pReason);
+	else
+		str_format(aBuf, sizeof aBuf, "'%s' has been muted for %d seconds", pDisplayName, Secs, pReason);
 	SendChat(-1, CHAT_ALL, aBuf);
 }
 
@@ -552,7 +554,7 @@ void CGameContext::ConMuteID(IConsole::IResult *pResult, void *pUserData)
 	NETADDR Addr;
 	pSelf->Server()->GetClientAddr(Victim, &Addr);
 
-	const char *pReason = pResult->NumArguments()>2 ? pResult->GetString(2) : "No reason given";
+	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "";
 
 	pSelf->Mute(&Addr, clamp(pResult->GetInteger(1), 1, 86400),
 			pSelf->Server()->ClientName(Victim), pReason);
@@ -568,7 +570,7 @@ void CGameContext::ConMuteIP(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes",
 				"Invalid network address to mute");
 	}
-	const char *pReason = pResult->NumArguments()>2 ? pResult->GetString(2) : "No reason given";
+	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "";
 	pSelf->Mute(&Addr, clamp(pResult->GetInteger(1), 1, 86400), NULL, pReason);
 }
 
