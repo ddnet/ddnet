@@ -409,7 +409,7 @@ bool CGameContext::VoteUnmute(const NETADDR *pAddr, const char *pDisplayName, in
 	return false;
 }
 
-bool CGameContext::TryMute(const NETADDR *pAddr, int Secs)
+bool CGameContext::TryMute(const NETADDR *pAddr, int Secs, const char *pReason)
 {
 	// find a matching mute for this ip, update expiration time if found
 	for(int i = 0; i < m_NumMutes; i++)
@@ -418,6 +418,7 @@ bool CGameContext::TryMute(const NETADDR *pAddr, int Secs)
 		{
 			m_aMutes[i].m_Expire = Server()->Tick()
 							+ Secs * Server()->TickSpeed();
+			str_copy(m_aMutes[i].m_aReason, pReason, sizeof(m_aMutes[i].m_aReason));
 			return true;
 		}
 	}
@@ -428,6 +429,7 @@ bool CGameContext::TryMute(const NETADDR *pAddr, int Secs)
 		m_aMutes[m_NumMutes].m_Addr = *pAddr;
 		m_aMutes[m_NumMutes].m_Expire = Server()->Tick()
 						+ Secs * Server()->TickSpeed();
+		str_copy(m_aMutes[m_NumMutes].m_aReason, pReason, sizeof(m_aMutes[m_NumMutes].m_aReason));	
 		m_NumMutes++;
 		return true;
 	}
@@ -436,17 +438,19 @@ bool CGameContext::TryMute(const NETADDR *pAddr, int Secs)
 	return false;
 }
 
-void CGameContext::Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName)
+void CGameContext::Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName, const char *pReason)
 {
-	if (!TryMute(pAddr, Secs))
+	if (!TryMute(pAddr, Secs, pReason))
 		return;
 
 	if(!pDisplayName)
 		return;
 
 	char aBuf[128];
-	str_format(aBuf, sizeof aBuf, "'%s' has been muted for %d seconds.",
-			pDisplayName, Secs);
+	if (pReason[0])
+		str_format(aBuf, sizeof aBuf, "'%s' has been muted for %d seconds (%s)", pDisplayName, Secs, pReason);
+	else
+		str_format(aBuf, sizeof aBuf, "'%s' has been muted for %d seconds", pDisplayName, Secs);
 	SendChat(-1, CHAT_ALL, aBuf);
 }
 
@@ -532,7 +536,7 @@ void CGameContext::ConMute(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
 			"mutes",
-			"Use either 'muteid <client_id> <seconds>' or 'muteip <ip> <seconds>'");
+			"Use either 'muteid <client_id> <seconds> <reason>' or 'muteip <ip> <seconds> <reason>'");
 }
 
 // mute through client id
@@ -550,8 +554,10 @@ void CGameContext::ConMuteID(IConsole::IResult *pResult, void *pUserData)
 	NETADDR Addr;
 	pSelf->Server()->GetClientAddr(Victim, &Addr);
 
+	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "";
+
 	pSelf->Mute(&Addr, clamp(pResult->GetInteger(1), 1, 86400),
-			pSelf->Server()->ClientName(Victim));
+			pSelf->Server()->ClientName(Victim), pReason);
 }
 
 // mute through ip, arguments reversed to workaround parsing
@@ -564,7 +570,8 @@ void CGameContext::ConMuteIP(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes",
 				"Invalid network address to mute");
 	}
-	pSelf->Mute(&Addr, clamp(pResult->GetInteger(1), 1, 86400), NULL);
+	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "";
+	pSelf->Mute(&Addr, clamp(pResult->GetInteger(1), 1, 86400), NULL, pReason);
 }
 
 // unmute by mute list index
@@ -607,8 +614,8 @@ void CGameContext::ConMutes(IConsole::IResult *pResult, void *pUserData)
 	for (int i = 0; i < pSelf->m_NumMutes; i++)
 	{
 		net_addr_str(&pSelf->m_aMutes[i].m_Addr, aIpBuf, sizeof(aIpBuf), false);
-		str_format(aBuf, sizeof aBuf, "%d: \"%s\", %d seconds left", i, aIpBuf,
-				(pSelf->m_aMutes[i].m_Expire - pSelf->Server()->Tick()) / pSelf->Server()->TickSpeed());
+		str_format(aBuf, sizeof aBuf, "%d: \"%s\", %d seconds left (%s)", i, aIpBuf,
+				(pSelf->m_aMutes[i].m_Expire - pSelf->Server()->Tick()) / pSelf->Server()->TickSpeed(), pSelf->m_aMutes[i].m_aReason);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes", aBuf);
 	}
 }
