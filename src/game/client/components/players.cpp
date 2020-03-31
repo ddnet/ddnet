@@ -515,7 +515,7 @@ void CPlayers::RenderPlayer(
 	}
 
 	// render the "shadow" tee
-	if(Local && (g_Config.m_Debug || g_Config.m_ClUnpredictedShadow))
+	if(Local && ((g_Config.m_Debug && g_Config.m_ClUnpredictedShadow >= 0) || g_Config.m_ClUnpredictedShadow == 1))
 	{
 		vec2 GhostPosition = Position;
 		if(ClientID >= 0)
