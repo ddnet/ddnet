@@ -15,6 +15,7 @@
 #include <game/client/render.h>
 
 #include "spectator.h"
+#include "camera.h"
 
 
 void CSpectator::ConKeySpectator(IConsole::IResult *pResult, void *pUserData)
@@ -142,39 +143,33 @@ void CSpectator::ConSpectateClosest(IConsole::IResult *pResult, void *pUserData)
 	int NewSpectatorID = -1;
 
 	int IndexOfTeeBeingSpectated = -1;
-	for (int i = 0; i < MAX_CLIENTS; i++)
+	vec2 CurPosition(pSelf->m_pClient->m_pCamera->m_Center);
+	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
 	{
-		if(pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i] && pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID == pSelf->m_pClient->m_Snap.m_SpecInfo.m_SpectatorID)
+		for (int i = 0; i < MAX_CLIENTS; i++)
 		{
-			IndexOfTeeBeingSpectated = i;
-			break;
+			if(pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i] && pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID == pSelf->m_pClient->m_Snap.m_SpecInfo.m_SpectatorID)
+			{
+				IndexOfTeeBeingSpectated = i;
+				const CNetObj_Character &CurCharacter = pSelf->m_pClient->m_Snap.m_aCharacters[pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID].m_Cur;
+				CurPosition.x = CurCharacter.m_X;
+				CurPosition.y = CurCharacter.m_Y;
+				break;
+			}
 		}
 	}
-
-	if(IndexOfTeeBeingSpectated == -1 || pSelf->m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
+	int ClosestDistance = INT_MAX;
+	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		//TODO: for now just behave like spectate_next when we're SPEC_FREEVIEW, but it would be better if we specate the tee closest to our mouse cursor
-		ConSpectateNext(pResult, pUserData);
-		return;
-	}
-	else
-	{
-		const CNetObj_Character &CurCharacter = pSelf->m_pClient->m_Snap.m_aCharacters[pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[IndexOfTeeBeingSpectated]->m_ClientID].m_Cur;
-		vec2 CurPosition(CurCharacter.m_X, CurCharacter.m_Y);
-		int ClosestDistance = INT_MAX;
-		for(int i = 0; i < MAX_CLIENTS; i++)
+		if(i == IndexOfTeeBeingSpectated || !pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i] || pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_Team == TEAM_SPECTATORS)
+			continue;
+		int ClientID = pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID;
+		const CNetObj_Character &MaybeClosestCharacter = pSelf->m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur;
+		int Distance = distance(CurPosition, vec2(MaybeClosestCharacter.m_X, MaybeClosestCharacter.m_Y));
+		if(NewSpectatorID == -1 || Distance < ClosestDistance)
 		{
-			if(i == IndexOfTeeBeingSpectated || !pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i] || pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_Team == TEAM_SPECTATORS)
-				continue;
-
-			int ClientID = pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID;
-			const CNetObj_Character &MaybeClosestCharacter = pSelf->m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur;
-			int Distance = distance(CurPosition, vec2(MaybeClosestCharacter.m_X, MaybeClosestCharacter.m_Y));
-			if(NewSpectatorID == -1 || Distance < ClosestDistance)
-			{
-				NewSpectatorID = ClientID;
-				ClosestDistance = Distance;
-			}
+			NewSpectatorID = ClientID;
+			ClosestDistance = Distance;
 		}
 	}
 	if(NewSpectatorID > -1)
