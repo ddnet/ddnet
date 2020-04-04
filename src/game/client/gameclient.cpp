@@ -1019,7 +1019,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	Info.m_RaceRecordMessage = DDNet || (Race && !DDRace);
 	Info.m_AllowEyeWheel = DDRace || BlockWorlds || Plus;
 	Info.m_AllowHookColl = DDRace;
-	Info.m_AllowZoom = Race || BlockWorlds;
+	Info.m_AllowZoom = true;
 	Info.m_BugDDRaceGhost = DDRace;
 	Info.m_BugDDRaceInput = DDRace;
 	Info.m_BugFNGLaserRange = FNG;
