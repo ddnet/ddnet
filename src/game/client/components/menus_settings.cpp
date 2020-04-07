@@ -932,6 +932,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	static int s_GfxOpenGLVersion = g_Config.m_GfxOpenGL3;
 	static int s_GfxEnableTextureUnitOptimization = g_Config.m_GfxEnableTextureUnitOptimization;
 	static int s_GfxUsePreinitBuffer = g_Config.m_GfxUsePreinitBuffer;
+	static int s_GfxHighdpi = g_Config.m_GfxHighdpi;
 
 	CUIRect ModeList;
 	MainView.VSplitLeft(300.0f, &MainView, &ModeList);
@@ -1077,6 +1078,14 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		}
 	}
 
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_GfxHighdpi, Localize("Use high DPI"), g_Config.m_GfxHighdpi, &Button))
+	{
+		CheckSettings = true;
+		g_Config.m_GfxHighdpi ^= 1;
+	}
+
+
 	// check if the new settings require a restart
 	if(CheckSettings)
 	{
@@ -1089,7 +1098,8 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			s_GfxTextureCompression == g_Config.m_GfxTextureCompression &&
 			s_GfxOpenGLVersion == g_Config.m_GfxOpenGL3 &&
 			s_GfxUsePreinitBuffer == g_Config.m_GfxUsePreinitBuffer &&
-			s_GfxEnableTextureUnitOptimization == g_Config.m_GfxEnableTextureUnitOptimization)
+			s_GfxEnableTextureUnitOptimization == g_Config.m_GfxEnableTextureUnitOptimization &&
+			s_GfxHighdpi == g_Config.m_GfxHighdpi)
 			m_NeedRestartGraphics = false;
 		else
 			m_NeedRestartGraphics = true;
