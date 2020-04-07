@@ -3030,7 +3030,9 @@ void CClient::Run()
 			Update();
 			int64 Now = time_get();
 
-			if((g_Config.m_GfxBackgroundRender || m_pGraphics->WindowOpen())
+			bool IsRenderActive = (g_Config.m_GfxBackgroundRender || m_pGraphics->WindowOpen());
+
+			if(IsRenderActive
 				&& (!g_Config.m_GfxAsyncRenderOld || m_pGraphics->IsIdle())
 				&& (!g_Config.m_GfxRefreshRate || (time_freq() / (int64)g_Config.m_GfxRefreshRate) <= Now - LastRenderTime))
 			{
@@ -3083,6 +3085,11 @@ void CClient::Run()
 				}
 
 				Input()->NextFrame();
+			}
+			else if(!IsRenderActive)
+			{
+				// if the client does not render, it should reset its render time to a time where it would render the first frame, when it wakes up again
+				LastRenderTime = Now - (time_freq() / (int64)g_Config.m_GfxRefreshRate);
 			}
 
 			if(Input()->VideoRestartNeeded())
