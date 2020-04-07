@@ -565,7 +565,7 @@ public:
 		INITFLAG_VSYNC = 1<<1,
 		INITFLAG_RESIZABLE = 1<<2,
 		INITFLAG_BORDERLESS = 1<<3,
-		INITFLAG_HIGHDPI = 1 <<4,
+		INITFLAG_HIGHDPI = 1<<4,
 	};
 
 	virtual ~IGraphicsBackend() {}
