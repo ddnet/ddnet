@@ -657,6 +657,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	m_pTextProgram = new CGLSLTextProgram;
 	m_pSpriteProgram = new CGLSLSpriteProgram;
 	m_pSpriteProgramMultiple = new CGLSLSpriteMultipleProgram;
+	m_LastProgramID = 0;
 
 	{
 		CGLSL PrimitiveVertexShader;
