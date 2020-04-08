@@ -452,7 +452,6 @@ if(TARGET_OS STREQUAL "windows")
   set(PLATFORM_CLIENT)
   set(PLATFORM_CLIENT_LIBS opengl32 glu32 winmm)
   set(PLATFORM_LIBS ws2_32) # Windows sockets
-  set(PLATFORM_CLIENT_COMPILE_DEFINITIONS)
 elseif(TARGET_OS STREQUAL "mac")
   find_library(CARBON Carbon)
   find_library(COCOA Cocoa)
@@ -464,7 +463,6 @@ elseif(TARGET_OS STREQUAL "mac")
   )
   set(PLATFORM_CLIENT_LIBS ${COCOA} ${OPENGL})
   set(PLATFORM_LIBS ${CARBON} ${SECURITY})
-  set(PLATFORM_CLIENT_COMPILE_DEFINITIONS)
 else()
   find_package(Notify)
   find_package(OpenGL)
@@ -1012,10 +1010,6 @@ if(CLIENT)
     ${FFMPEG_INCLUDE_DIRS}
 
     ${PLATFORM_CLIENT_INCLUDE_DIRS}
-  )
-
-  target_compile_definitions(${TARGET_CLIENT} PRIVATE
-    ${PLATFORM_CLIENT_COMPILE_DEFINITIONS}
   )
 
   set(PARAMS "${WAVPACK_INCLUDE_DIRS};${WAVPACK_INCLUDE_DIRS}")
