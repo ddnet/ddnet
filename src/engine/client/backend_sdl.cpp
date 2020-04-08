@@ -15,12 +15,7 @@
 #include <cmath>
 #include "SDL.h"
 #include "SDL_syswm.h"
-#if defined(CONF_PLATFORM_MACOSX)
-#include "OpenGL/glu.h"
-#else
 #include "SDL_opengl.h"
-#include "GL/glu.h"
-#endif
 
 #if defined(SDL_VIDEO_DRIVER_X11)
 	#include <X11/Xutil.h>
@@ -353,7 +348,8 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 	{
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-		gluBuild2DMipmaps(GL_TEXTURE_2D, StoreOglformat, Width, Height, Oglformat, GL_UNSIGNED_BYTE, pTexData);
+		glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+		glTexImage2D(GL_TEXTURE_2D, 0, StoreOglformat, Width, Height, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
 	}
 
 	// calculate memory usage
