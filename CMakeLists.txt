@@ -1537,7 +1537,7 @@ if(CLIENT AND (DMGTOOLS_FOUND OR HDIUTIL))
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/ddnet-libs/sdl/mac/lib64/SDL2.framework ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/SDL2.framework
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/freetype/mac/lib64/libfreetype.6.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
     COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change @rpath/SDL2.framework/Versions/A/SDL2 @executable_path/../Frameworks/SDL2.framework/SDL2 ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
-    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change @rpath/hidapi.framework/Versions/A/hidapi @executable_path/../Frameworks/SDL2.framework/SDL2/Versions/A/Frameworks/hidapi.framework/Versions/A/hidapi ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
+    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change @rpath/hidapi.framework/Versions/A/hidapi @executable_path/../Frameworks/SDL2.framework/Versions/A/Frameworks/hidapi.framework/Versions/A/hidapi ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/SDL2.framework/SDL2
     COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libfreetype.6.dylib @executable_path/../Frameworks/libfreetype.6.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
 
     # SERVER
