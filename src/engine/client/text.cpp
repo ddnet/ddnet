@@ -784,7 +784,9 @@ public:
 
 	virtual void TextEx(CTextCursor *pCursor, const char *pText, int Length)
 	{
-		if(!pText || !*pText)
+		dbg_assert(pText != NULL, "null text pointer");
+
+		if(!*pText)
 			return;
 
 		CFont *pFont = pCursor->m_pFont;
