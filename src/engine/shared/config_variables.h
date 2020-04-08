@@ -91,11 +91,12 @@ MACRO_CONFIG_INT(GfxScreenWidth, gfx_screen_width, 0, 0, 0, CFGFLAG_SAVE|CFGFLAG
 MACRO_CONFIG_INT(GfxScreenHeight, gfx_screen_height, 0, 0, 0, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Screen resolution height")
 MACRO_CONFIG_INT(GfxBorderless, gfx_borderless, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Borderless window (not to be used with fullscreen)")
 MACRO_CONFIG_INT(GfxFullscreen, gfx_fullscreen, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Fullscreen")
+MACRO_CONFIG_INT(GfxHighdpi, gfx_highdpi, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enable high-dpi")
 MACRO_CONFIG_INT(GfxAlphabits, gfx_alphabits, 0, 0, 0, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Alpha bits for framebuffer (fullscreen only)")
 MACRO_CONFIG_INT(GfxColorDepth, gfx_color_depth, 24, 16, 24, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Colors bits for framebuffer (fullscreen only)")
 //MACRO_CONFIG_INT(GfxClear, gfx_clear, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Clear screen before rendering")
 MACRO_CONFIG_INT(GfxVsync, gfx_vsync, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Vertical sync (may cause delay)")
-MACRO_CONFIG_INT(GfxResizable, gfx_resizable, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enables window resizing")
+MACRO_CONFIG_INT(GfxResizable, gfx_resizable, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enables window resizing")
 MACRO_CONFIG_INT(GfxDisplayAllModes, gfx_display_all_modes, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "")
 MACRO_CONFIG_INT(GfxTextureCompression, gfx_texture_compression, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Use texture compression")
 MACRO_CONFIG_INT(GfxHighDetail, gfx_high_detail, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "High detail")
@@ -331,7 +332,7 @@ MACRO_CONFIG_INT(SvConnlimitTime, sv_connlimit_time, 20, 0, 1000, CFGFLAG_SERVER
 MACRO_CONFIG_STR(SvConnLoggingServer, sv_conn_logging_server, 128, "", CFGFLAG_SERVER, "Unix socket server for IP address logging")
 #endif
 
-MACRO_CONFIG_INT(ClUnpredictedShadow, cl_unpredicted_shadow, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show unpredicted shadow tee to estimate your delay")
+MACRO_CONFIG_INT(ClUnpredictedShadow, cl_unpredicted_shadow, 0, -1, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show unpredicted shadow tee (0 = off, 1 = on, -1 = don't even show in debug mode)")
 MACRO_CONFIG_INT(ClPredictDDRace, cl_predict_ddrace, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Predict DDRace tiles and tunezones")
 MACRO_CONFIG_INT(ClPredictFreeze, cl_predict_freeze, 1, 0, 2, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Predict freeze tiles (0 = off, 1 = on, 2 = partial (allow a small amount of movement in freeze)")
 MACRO_CONFIG_INT(ClShowNinja, cl_show_ninja, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show ninja skin")
@@ -373,4 +374,3 @@ MACRO_CONFIG_INT(GfxUsePreinitBuffer, gfx_use_preinitialized_buffer, 0, 0, 1, CF
 #if defined(CONF_VIDEORECORDER)
 MACRO_CONFIG_INT(ClVideoRecorderFPS, cl_video_recorder_fps, 60, 1, 1000, CFGFLAG_SAVE|CFGFLAG_CLIENT, "At which FPS the videorecorder should record demos.")
 #endif
-
