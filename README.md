@@ -1,4 +1,4 @@
-[![DDraceNetwork](https://ddnet.tw/ddnet-small.png)](https://ddnet.tw) ![](https://github.com/ddnet/ddnet/workflows/Build/badge.svg)
+[![DDraceNetwork](https://ddnet.tw/ddnet-small.png)](https://ddnet.tw) [![Build status](https://github.com/ddnet/ddnet/workflows/Build/badge.svg)](https://github.com/ddnet/ddnet/actions?query=branch%3Amaster+event%3Apush)
 
 Our own flavor of DDRace, a Teeworlds mod. See the [website](https://ddnet.tw) for more information.
 
