@@ -578,6 +578,7 @@ int CSound::DecodeWV(int SampleID, const void *pData, unsigned DataSize)
 			*pDst++ = (short)*pSrc++;
 
 		free(pBuffer);
+		WavpackCloseFile(pContext);
 
 		pSample->m_NumFrames = NumSamples;
 		pSample->m_LoopStart = -1;
