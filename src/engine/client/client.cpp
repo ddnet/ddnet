@@ -3089,7 +3089,7 @@ void CClient::Run()
 			else if(!IsRenderActive)
 			{
 				// if the client does not render, it should reset its render time to a time where it would render the first frame, when it wakes up again
-				LastRenderTime = Now - (time_freq() / (int64)g_Config.m_GfxRefreshRate);
+				LastRenderTime = g_Config.m_GfxRefreshRate ? (Now - (time_freq() / (int64)g_Config.m_GfxRefreshRate)) : Now;
 			}
 
 			if(Input()->VideoRestartNeeded())
