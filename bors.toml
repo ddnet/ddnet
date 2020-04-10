@@ -1,6 +1,5 @@
 status = [
   "build-cmake (ubuntu-latest)",
   "build-cmake (ubuntu-16.04)",
-  "build-cmake (macOS-latest)",
   "build-cmake (windows-latest)",
 ]
