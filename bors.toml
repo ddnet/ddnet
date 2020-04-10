@@ -4,4 +4,3 @@ status = [
   "build-cmake (macOS-latest)",
   "build-cmake (windows-latest)",
 ]
-timeout_sec = 10800 # macOS on Travis CI has long waiting times
