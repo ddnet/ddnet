@@ -784,6 +784,11 @@ public:
 
 	virtual void TextEx(CTextCursor *pCursor, const char *pText, int Length)
 	{
+		dbg_assert(pText != NULL, "null text pointer");
+
+		if(!*pText)
+			return;
+
 		CFont *pFont = pCursor->m_pFont;
 		CFontSizeData *pSizeData = NULL;
 
@@ -916,6 +921,8 @@ public:
 			while(pCurrent < pBatchEnd)
 			{
 				int Character = NextCharacter;
+				if(!Character)
+					break;
 				pCurrent = pTmp;
 				NextCharacter = str_utf8_decode(&pTmp);
 
