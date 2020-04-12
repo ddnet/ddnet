@@ -3247,7 +3247,7 @@ void shell_execute(const char *file)
 #endif
 }
 
-int os_is_winxp_or_lower(unsigned int major, unsigned int minor)
+int os_is_winxp_or_lower()
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	static const DWORD WINXP_MAJOR = 5;
