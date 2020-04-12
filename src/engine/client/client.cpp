@@ -801,7 +801,10 @@ void CClient::DisconnectWithReason(const char *pReason)
 	if(m_pMapdownloadTask)
 		m_pMapdownloadTask->Abort();
 	if(m_MapdownloadFile)
+	{
 		io_close(m_MapdownloadFile);
+		Storage()->RemoveFile(m_aMapdownloadFilename, IStorage::TYPE_SAVE);
+	}
 	m_MapdownloadFile = 0;
 	m_MapdownloadSha256Present = false;
 	m_MapdownloadSha256 = SHA256_ZEROED;
