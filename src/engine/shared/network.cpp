@@ -157,7 +157,7 @@ void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct 
 	if(FinalSize >= 0)
 	{
 		FinalSize += NET_PACKETHEADERSIZE;
-		aBuffer[0] = ((pPacket->m_Flags<<4)&0xf0)|((pPacket->m_Ack>>8)&0xf);
+		aBuffer[0] = ((pPacket->m_Flags<<2)&0xfc)|((pPacket->m_Ack>>8)&0x3);
 		aBuffer[1] = pPacket->m_Ack&0xff;
 		aBuffer[2] = pPacket->m_NumChunks;
 		net_udp_send(Socket, pAddr, aBuffer, FinalSize);
@@ -195,8 +195,8 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 	}
 
 	// read the packet
-	pPacket->m_Flags = pBuffer[0]>>4;
-	pPacket->m_Ack = ((pBuffer[0]&0xf)<<8) | pBuffer[1];
+	pPacket->m_Flags = pBuffer[0]>>2;
+	pPacket->m_Ack = ((pBuffer[0]&0x3)<<8) | pBuffer[1];
 	pPacket->m_NumChunks = pBuffer[2];
 	pPacket->m_DataSize = Size - NET_PACKETHEADERSIZE;
 
