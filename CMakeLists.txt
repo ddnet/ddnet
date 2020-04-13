@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 
+set(CMAKE_OSX_DEPLOYMENT_TARGET 10.9 CACHE INTERNAL "")
+if(CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS 10.9)
+  message(WARNING "Building for macOS <= 10.9 is not supported")
+endif()
+
 file(STRINGS src/game/version.h VERSION_LINE
   LIMIT_COUNT 1
   REGEX "^#define GAME_RELEASE_VERSION "
@@ -168,7 +173,6 @@ if(NOT MSVC)
 
   if(TARGET_OS STREQUAL "mac")
     add_c_compiler_flag_if_supported(OUR_FLAGS -stdlib=libc++)
-    add_c_compiler_flag_if_supported(OUR_FLAGS -mmacosx-version-min=10.7)
   endif()
 
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wall)
@@ -361,7 +365,11 @@ if(TARGET_OS AND TARGET_OS STREQUAL "mac")
 endif()
 
 message(STATUS "******** DDNet ********")
-message(STATUS "Target OS: ${TARGET_OS} ${TARGET_BITS}bit")
+if(NOT TARGET_OS STREQUAL "mac")
+  message(STATUS "Target OS: ${TARGET_OS} ${TARGET_BITS}bit")
+else()
+  message(STATUS "Target OS: ${TARGET_OS} ${TARGET_BITS}bit (SDK: ${CMAKE_OSX_SYSROOT})")
+endif()
 message(STATUS "Compiler: ${CMAKE_CXX_COMPILER}")
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
@@ -1542,8 +1550,7 @@ if(CLIENT AND (DMGTOOLS_FOUND OR HDIUTIL))
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${TARGET_CLIENT}> ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/ddnet-libs/sdl/mac/lib64/SDL2.framework ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/SDL2.framework
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/freetype/mac/lib64/libfreetype.6.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change @rpath/SDL2.framework/Versions/A/SDL2 @executable_path/../Frameworks/SDL2.framework/SDL2 ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
-    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change @rpath/hidapi.framework/Versions/A/hidapi @executable_path/../Frameworks/SDL2.framework/Versions/A/Frameworks/hidapi.framework/Versions/A/hidapi ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/SDL2.framework/SDL2
+    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath @loader_path/../Frameworks ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
     COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libfreetype.6.dylib @executable_path/../Frameworks/libfreetype.6.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
 
     # SERVER
@@ -1680,11 +1687,6 @@ foreach(target ${TARGETS_LINK})
   endif()
   if(TARGET_OS STREQUAL "mac")
     target_link_libraries(${target} -stdlib=libc++)
-    target_link_libraries(${target} -mmacosx-version-min=10.7)
-    # Fixes: Undefined symbols for architecture x86_64:
-    #   "___isOSVersionAtLeast", referenced from:
-    #       _singleipconnect in libcurl.a(libcurl_la-connect.o)
-    target_link_libraries(${target} -Wl,-undefined -Wl,dynamic_lookup)
   endif()
   if((MINGW OR TARGET_OS STREQUAL "linux") AND PREFER_BUNDLED_LIBS)
     # Statically link the standard libraries with on MinGW/Linux so we don't
