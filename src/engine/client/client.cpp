@@ -3786,6 +3786,9 @@ void CClient::LoadFont()
 
 void CClient::Notify(const char *pTitle, const char *pMessage)
 {
+	if(!g_Config.m_ClShowNotifications)
+		return;
+
 	NotificationsNotify(pTitle, pMessage);
 	Graphics()->NotifyWindow();
 }
