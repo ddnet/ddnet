@@ -457,7 +457,10 @@ void CClient::SendReady()
 void CClient::SendMapRequest()
 {
 	if(m_MapdownloadFile)
+	{
 		io_close(m_MapdownloadFile);
+		Storage()->RemoveFile(m_aMapdownloadFilename, IStorage::TYPE_SAVE);
+	}
 	m_MapdownloadFile = Storage()->OpenFile(m_aMapdownloadFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	CMsgPacker Msg(NETMSG_REQUEST_MAP_DATA, true);
 	Msg.AddInt(m_MapdownloadChunk);
