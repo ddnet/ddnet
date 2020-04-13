@@ -646,16 +646,77 @@ int CServer::DistinctClientCount()
 	return ClientCount;
 }
 
+static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup)
+{
+	int MsgId = pMsg->m_MsgID;
+	Packer.Reset();
+	if(MsgId < OFFSET_UUID)
+	{
+		if(Sixup)
+		{
+			if(pMsg->m_System)
+			{
+				if(MsgId >= NETMSG_MAP_CHANGE && MsgId <= NETMSG_MAP_DATA)
+					;
+				else if(MsgId >= NETMSG_CON_READY && MsgId <= NETMSG_INPUTTIMING)
+					MsgId += 1;
+				else if(MsgId >= NETMSG_AUTH_CHALLANGE && MsgId <= NETMSG_AUTH_RESULT)
+					MsgId += 4;
+				else if(MsgId >= NETMSG_PING && MsgId <= NETMSG_ERROR)
+					MsgId += 4;
+				else if(MsgId > 24)
+					MsgId -= 24;
+				else
+				{
+					dbg_msg("net", "DROP send sys %d", MsgId);
+					return true;
+				}
+			}
+			else
+			{
+				if(MsgId >= NETMSGTYPE_SV_MOTD && MsgId <= NETMSGTYPE_SV_CHAT)
+					;
+				else if(MsgId == NETMSGTYPE_SV_KILLMSG)
+					MsgId += 1;
+				else if(MsgId >= NETMSGTYPE_SV_TUNEPARAMS && MsgId <= NETMSGTYPE_SV_VOTESTATUS)
+					;
+				else if(MsgId > 24)
+					MsgId -= 24;
+				else
+				{
+					dbg_msg("net", "DROP send game %d", MsgId);
+					return true;
+				}
+			}
+		}
+
+		Packer.AddInt((MsgId<<1)|(pMsg->m_System?1:0));
+	}
+	else if(!Sixup)
+	{
+		Packer.AddInt((0<<1)|(pMsg->m_System?1:0)); // NETMSG_EX, NETMSGTYPE_EX
+		g_UuidManager.PackUuid(MsgId, &Packer);
+	}
+	Packer.AddRaw(pMsg->Data(), pMsg->Size());
+
+	return false;
+}
+
 int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
 {
 	CNetChunk Packet;
 	if(!pMsg)
 		return -1;
 
+	// repack message (inefficient)
+	CPacker Pack;
+	if(RepackMsg(pMsg, Pack, m_aClients[ClientID].m_Sixup))
+		return 0;
+
 	mem_zero(&Packet, sizeof(CNetChunk));
 	Packet.m_ClientID = ClientID;
-	Packet.m_pData = pMsg->Data();
-	Packet.m_DataSize = pMsg->Size();
+	Packet.m_pData = Pack.Data();
+	Packet.m_DataSize = Pack.Size();
 
 	if(Flags&MSGFLAG_VITAL)
 		Packet.m_Flags |= NETSENDFLAG_VITAL;
@@ -666,8 +727,8 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
 	if(!(Flags&MSGFLAG_NORECORD))
 	{
 		if(ClientID > -1)
-			m_aDemoRecorder[ClientID].RecordMessage(pMsg->Data(), pMsg->Size());
-		m_aDemoRecorder[MAX_CLIENTS].RecordMessage(pMsg->Data(), pMsg->Size());
+			m_aDemoRecorder[ClientID].RecordMessage(Pack.Data(), Pack.Size());
+		m_aDemoRecorder[MAX_CLIENTS].RecordMessage(Pack.Data(), Pack.Size());
 	}
 
 	if(!(Flags&MSGFLAG_NOSEND))

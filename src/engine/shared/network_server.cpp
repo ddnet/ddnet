@@ -77,49 +77,6 @@ static unsigned char MsgTypeFromSixup(unsigned char Byte)
 	return (Msg<<1) | (Byte&1);
 }
 
-static unsigned char MsgTypeToSixup(unsigned char Byte)
-{
-	unsigned char Msg = Byte>>1;
-	unsigned char Six;
-	if (Byte&1)
-	{
-		if(Msg >= NETMSG_MAP_CHANGE && Msg <= NETMSG_MAP_DATA)
-			Six = Msg;
-		else if(Msg >= NETMSG_CON_READY && Msg <= NETMSG_INPUTTIMING)
-			Six = Msg + 1;
-		else if(Msg >= NETMSG_AUTH_CHALLANGE && Msg <= NETMSG_AUTH_RESULT)
-			Six = Msg + 4;
-		else if(Msg >= NETMSG_PING && Msg <= NETMSG_ERROR)
-			Six = Msg + 4;
-		else if(Msg > 24)
-			Six = Msg - 24;
-		else
-		{
-			dbg_msg("net", "DROP send sys %d", Msg);
-			return 0;
-		}
-		//dbg_msg("net", "send sys %d -> %d", Msg, Six);
-	}
-	else
-	{
-		if(Msg >= NETMSGTYPE_SV_MOTD && Msg <= NETMSGTYPE_SV_CHAT)
-			Six = Msg;
-		else if(Msg == NETMSGTYPE_SV_KILLMSG)
-			Six = Msg + 1;
-		else if(Msg >= NETMSGTYPE_SV_TUNEPARAMS && Msg <= NETMSGTYPE_SV_VOTESTATUS)
-			Six = Msg;
-		else if(Msg > 24)
-			Six = Msg - 24;
-		else
-		{
-			dbg_msg("net", "DROP send msg %d", Msg);
-			return 0;
-		}
-		//dbg_msg("net", "send msg %d -> %d", Msg, Six);
-	}
-	return (Six<<1) | (Byte&1);
-}
-
 static SECURITY_TOKEN ToSecurityToken(const unsigned char *pData)
 {
 	return (int)pData[0] | (pData[1] << 8) | (pData[2] << 16) | (pData[3] << 24);
@@ -812,13 +769,6 @@ int CNetServer::Send(CNetChunk *pChunk)
 		int Flags = 0;
 		dbg_assert(pChunk->m_ClientID >= 0, "errornous client id");
 		dbg_assert(pChunk->m_ClientID < MaxClients(), "errornous client id");
-
-		if(m_aSlots[pChunk->m_ClientID].m_Connection.m_Sixup)
-		{
-			unsigned int MsgType = MsgTypeToSixup(*(unsigned char*)pChunk->m_pData);
-			if (MsgType == 0) return 0;
-			*(unsigned char*)pChunk->m_pData = MsgType;
-		}
 
 		if(pChunk->m_Flags&NETSENDFLAG_VITAL)
 			Flags = NET_CHUNKFLAG_VITAL;

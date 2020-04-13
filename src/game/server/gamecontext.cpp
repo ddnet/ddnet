@@ -1111,6 +1111,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	Server()->ExpireServerInfo();
 
 		// update client infos (others before local)
+		dbg_msg("debug", "sending info");
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
 		if(i == ClientID || !m_apPlayers[i] || !Server()->ClientIngame(i))
