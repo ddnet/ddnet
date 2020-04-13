@@ -42,41 +42,6 @@ unsigned char g_aDummyMapData[] = {
 	0xc2, 0x00, 0x00, 0x38, 0x00, 0x05
 };
 
-static unsigned char MsgTypeFromSixup(unsigned char Byte)
-{
-	unsigned char Six = Byte>>1;
-	unsigned char Msg;
-	if (Byte&1)
-	{
-		if(Six == 1)
-			Msg = NETMSG_INFO;
-		else if(Six >= 18 && Six <= 28)
-			Msg = NETMSG_READY + Six - 18;
-		else
-		{
-			dbg_msg("net", "DROP recv sys %d", Six);
-			return 0;
-		}
-		//dbg_msg("net", "recv sys %d <- %d", Msg, Six);
-	}
-	else
-	{
-		if(Six >= 24 && Six <= 27)
-			Msg = NETMSGTYPE_CL_SAY + Six - 24;
-		else if(Six == 28)
-			Msg = NETMSGTYPE_CL_KILL;
-		else if(Six >= 30 && Six <= 32)
-			Msg = NETMSGTYPE_CL_EMOTICON + Six - 30;
-		else
-		{
-			dbg_msg("net", "DROP recv msg %d", Six);
-			return 0;
-		}
-		//dbg_msg("net", "recv msg %d <- %d", Msg, Six);
-	}
-	return (Msg<<1) | (Byte&1);
-}
-
 static SECURITY_TOKEN ToSecurityToken(const unsigned char *pData)
 {
 	return (int)pData[0] | (pData[1] << 8) | (pData[2] << 16) | (pData[3] << 24);
@@ -657,11 +622,7 @@ int CNetServer::Recv(CNetChunk *pChunk)
 
 		// check for a chunk
 		if(m_RecvUnpacker.FetchChunk(pChunk))
-		{
-			if(m_aSlots[pChunk->m_ClientID].m_Connection.m_Sixup)
-				*(unsigned char*)pChunk->m_pData = MsgTypeFromSixup(*(unsigned char*)pChunk->m_pData);
 			return 1;
-		}
 
 		// TODO: empty the recvinfo
 		unsigned char *pData;

@@ -1241,6 +1241,38 @@ void CServer::UpdateClientRconCommands()
 	}
 }
 
+static inline int MsgFromSixup(int Msg, bool System)
+{
+	if(System)
+	{
+		if(Msg == NETMSG_INFO)
+			;
+		else if(Msg >= 18 && Msg <= 28)
+			Msg = NETMSG_READY + Msg - 18;
+		else
+		{
+			dbg_msg("net", "DROP recv sys %d", Msg);
+			return -1;
+		}
+	}
+	else
+	{
+		if(Msg >= 24 && Msg <= 27)
+			Msg = NETMSGTYPE_CL_SAY + Msg - 24;
+		else if(Msg == 28)
+			Msg = NETMSGTYPE_CL_KILL;
+		else if(Msg >= 30 && Msg <= 32)
+			Msg = NETMSGTYPE_CL_EMOTICON + Msg - 30;
+		else
+		{
+			dbg_msg("net", "DROP recv msg %d", Msg);
+			return -1;
+		}
+	}
+
+	return Msg;
+}
+
 void CServer::ProcessClientPacket(CNetChunk *pPacket)
 {
 	int ClientID = pPacket->m_ClientID;
@@ -1262,6 +1294,11 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 	int Result = UnpackMessageID(&Msg, &Sys, &Uuid, &Unpacker, &Packer);
 	if(Result == UNPACKMESSAGE_ERROR)
+	{
+		return;
+	}
+
+	if(m_aClients[ClientID].m_Sixup && (Msg = MsgFromSixup(Msg, Sys)) < 0)
 	{
 		return;
 	}
