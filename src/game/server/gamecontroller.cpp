@@ -569,8 +569,6 @@ void IGameController::Snap(int SnappingClient)
 		pGameData[1] = 0; // m_GameStateFlags
 		pGameData[2] = 0; // m_GameStateEndTick
 	}
-
-	SnapFlags(SnappingClient);
 }
 
 int IGameController::GetAutoTeam(int NotThisID)

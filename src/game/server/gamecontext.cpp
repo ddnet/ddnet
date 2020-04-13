@@ -1110,48 +1110,45 @@ void CGameContext::OnClientEnter(int ClientID)
 
 	Server()->ExpireServerInfo();
 
-	// update client infos (others before local)
-	CMsgPacker NewClientInfoMsg(18 + 24);
-	NewClientInfoMsg.AddInt(ClientID);
-	NewClientInfoMsg.AddInt(0); // m_Local
-	NewClientInfoMsg.AddInt(m_apPlayers[ClientID]->GetTeam());
-	NewClientInfoMsg.AddString(Server()->ClientName(ClientID), -1);
-	NewClientInfoMsg.AddString(Server()->ClientClan(ClientID), -1);
-	NewClientInfoMsg.AddInt(Server()->ClientCountry(ClientID));
-	for(int p = 0; p < 6; p++)
-	{
-		NewClientInfoMsg.AddString("", -1); // m_apSkinPartNames
-		NewClientInfoMsg.AddInt(0); // m_aUseCustomColors
-		NewClientInfoMsg.AddInt(0); // m_aSkinPartColors
-	}
-	NewClientInfoMsg.AddInt(0); // m_Silent
-
+		// update client infos (others before local)
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
 		if(i == ClientID || !m_apPlayers[i] || !Server()->ClientIngame(i))
 			continue;
 
-		// new info for others
-		if(Server()->ClientIngame(i) && Server()->IsSixup(i))
+		if(Server()->IsSixup(i))
+		{
+			// new info for others
+			CMsgPacker NewClientInfoMsg(18 + 24); // NETMSGTYPE_SV_CLIENTINFO
+			NewClientInfoMsg.AddInt(ClientID);
+			NewClientInfoMsg.AddInt(0); // m_Local
+			NewClientInfoMsg.AddInt(m_apPlayers[ClientID]->GetTeam());
+			NewClientInfoMsg.AddString(Server()->ClientName(ClientID), -1);
+			NewClientInfoMsg.AddString(Server()->ClientClan(ClientID), -1);
+			NewClientInfoMsg.AddInt(Server()->ClientCountry(ClientID));
+			for(int p = 0; p < 6; p++) NewClientInfoMsg.AddString("", -1);
+			for(int p = 0; p < 6; p++) NewClientInfoMsg.AddInt(0);
+			for(int p = 0; p < 6; p++) NewClientInfoMsg.AddInt(0);
+			NewClientInfoMsg.AddInt(0); // m_Silent
+
 			Server()->SendMsg(&NewClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
+		}
 
 		if(Server()->IsSixup(ClientID))
 		{
 			// existing infos for new player
-			CMsgPacker ClientInfoMsg(18 + 24);
+			CMsgPacker ClientInfoMsg(18 + 24); // NETMSGTYPE_SV_CLIENTINFO
 			ClientInfoMsg.AddInt(i);
 			ClientInfoMsg.AddInt(0); // m_Local
 			ClientInfoMsg.AddInt(m_apPlayers[i]->GetTeam());
 			ClientInfoMsg.AddString(Server()->ClientName(i), -1);
 			ClientInfoMsg.AddString(Server()->ClientClan(i), -1);
 			ClientInfoMsg.AddInt(Server()->ClientCountry(i));
-			for(int p = 0; p < 6; p++)
-			{
-				ClientInfoMsg.AddString("", -1); // m_apSkinPartNames
-				ClientInfoMsg.AddInt(0); // m_aUseCustomColors
-				ClientInfoMsg.AddInt(0); // m_aSkinPartColors
-			}
+			for(int p = 0; p < 6; p++) ClientInfoMsg.AddString("", -1);
+			for(int p = 0; p < 6; p++) ClientInfoMsg.AddInt(0);
+			for(int p = 0; p < 6; p++) ClientInfoMsg.AddInt(0);
 			ClientInfoMsg.AddInt(0); // m_Silent
+
 			Server()->SendMsg(&ClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
 		}
 	}
@@ -1159,20 +1156,19 @@ void CGameContext::OnClientEnter(int ClientID)
 	// local info
 	if(Server()->IsSixup(ClientID))
 	{
-		CMsgPacker SelfClientInfoMsg(18 + 24);
+		dbg_msg("debug", "sending local client");
+		CMsgPacker SelfClientInfoMsg(18 + 24); // NETMSGTYPE_SV_CLIENTINFO
 		SelfClientInfoMsg.AddInt(ClientID);
 		SelfClientInfoMsg.AddInt(1); // m_Local
 		SelfClientInfoMsg.AddInt(m_apPlayers[ClientID]->GetTeam());
 		SelfClientInfoMsg.AddString(Server()->ClientName(ClientID), -1);
 		SelfClientInfoMsg.AddString(Server()->ClientClan(ClientID), -1);
 		SelfClientInfoMsg.AddInt(Server()->ClientCountry(ClientID));
-		for(int p = 0; p < 6; p++)
-		{
-			SelfClientInfoMsg.AddString("", -1); // m_apSkinPartNames
-			SelfClientInfoMsg.AddInt(0); // m_aUseCustomColors
-			SelfClientInfoMsg.AddInt(0); // m_aSkinPartColors
-		}
+		for(int p = 0; p < 6; p++) SelfClientInfoMsg.AddString("", -1);
+		for(int p = 0; p < 6; p++) SelfClientInfoMsg.AddInt(0);
+		for(int p = 0; p < 6; p++) SelfClientInfoMsg.AddInt(0);
 		SelfClientInfoMsg.AddInt(0); // m_Silent
+
 		Server()->SendMsg(&SelfClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
 	}
 }
