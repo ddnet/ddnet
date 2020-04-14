@@ -78,6 +78,9 @@ Whether to download and compile GTest. Useful if GTest is not installed and, for
 * **-DDEV=[ON|OFF]** <br>
 Whether to optimize for development, speeding up the compilation process a little. If enabled, don't generate stuff necessary for packaging. Setting to ON will set CMAKE\_BUILD\_TYPE to Debug by default. Default value is OFF.
 
+* **-DUPNP=[ON|OFF]** <br>
+Whether to enable UPnP support for the server.
+
 * **-GNinja** <br>
 Use the Ninja build system instead of Make. This automatically parallizes the build and is generally faster. Compile with `ninja` instead of `make`. Install Ninja with `sudo apt install ninja-build` on Debian, `sudo pacman -S --needed ninja` on Arch Linux.
 

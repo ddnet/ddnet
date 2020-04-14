@@ -84,6 +84,7 @@ option(WEBSOCKETS "Enable websockets support" OFF)
 option(MYSQL "Enable mysql support" OFF)
 option(AUTOUPDATE "Enable the autoupdater" ${AUTOUPDATE_DEFAULT})
 option(VIDEORECORDER "Enable video recording support via FFmpeg" OFF)
+option(UPNP "Enable UPnP support" OFF)
 option(ANTIBOT "Enable support for a dynamic anticheat library" OFF)
 option(CLIENT "Compile client" ON)
 option(DOWNLOAD_GTEST "Download and compile GTest" ${AUTO_DEPENDENCIES_DEFAULT})
@@ -326,6 +327,9 @@ endif()
 find_package(Ogg)
 find_package(Opus)
 find_package(Opusfile)
+if(UPNP)
+  find_package(Miniupnpc)
+endif()
 find_package(Pnglite)
 find_package(PythonInterp)
 find_package(SDL2)
@@ -398,6 +402,9 @@ show_dependency_status("Ogg" OGG)
 show_dependency_status("OpenSSL Crypto" CRYPTO)
 show_dependency_status("Opus" OPUS)
 show_dependency_status("Opusfile" OPUSFILE)
+if(UPNP)
+  show_dependency_status("Miniupnpc" MINIUPNPC)
+endif()
 show_dependency_status("Pnglite" PNGLITE)
 show_dependency_status("PythonInterp" PYTHONINTERP)
 show_dependency_status("SDL2" SDL2)
@@ -423,6 +430,10 @@ endif()
 
 if(WEBSOCKETS AND NOT(WEBSOCKETS_FOUND))
   message(SEND_ERROR "You must install libwebsockets to compile the DDNet server with websocket support")
+endif()
+
+if(UPNP AND NOT(MINIUPNPC_FOUND))
+  message(SEND_ERROR "You must install miniupnpc to compile the DDNet server with UPnP support")
 endif()
 
 if(CLIENT AND NOT(FREETYPE_FOUND))
@@ -1142,6 +1153,7 @@ set(LIBS_SERVER
   ${LIBS}
   ${MYSQL_LIBRARIES}
   ${TARGET_ANTIBOT}
+  ${MINIUPNPC_LIBRARIES}
   # Add pthreads (on non-Windows) at the end, so that other libraries can depend
   # on it.
   ${CMAKE_THREAD_LIBS_INIT}
@@ -1726,6 +1738,10 @@ foreach(target ${TARGETS_OWN})
   if(WEBSOCKETS)
     target_compile_definitions(${target} PRIVATE CONF_WEBSOCKETS)
     target_include_directories(${target} PRIVATE ${WEBSOCKETS_INCLUDE_DIRS})
+  endif()
+  if(UPNP)
+    target_compile_definitions(${target} PRIVATE CONF_UPNP)
+	target_include_directories(${target} PRIVATE ${MINIUPNPC_INCLUDE_DIRS})
   endif()
   if(VIDEORECORDER)
     target_compile_definitions(${target} PRIVATE CONF_VIDEORECORDER)
