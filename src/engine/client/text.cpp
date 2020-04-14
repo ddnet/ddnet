@@ -921,8 +921,6 @@ public:
 			while(pCurrent < pBatchEnd)
 			{
 				int Character = NextCharacter;
-				if(!Character)
-					break;
 				pCurrent = pTmp;
 				NextCharacter = str_utf8_decode(&pTmp);
 
