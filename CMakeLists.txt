@@ -463,18 +463,18 @@ elseif(TARGET_OS STREQUAL "mac")
   find_library(OPENGL OpenGL)
   find_library(SECURITY Security)
   set(PLATFORM_CLIENT
-    src/osx/notification.h
-    src/osx/notification.mm
+    src/osx/notifications.m
     src/osxlaunch/client.m
   )
   set(PLATFORM_CLIENT_LIBS ${COCOA} ${OPENGL})
   set(PLATFORM_LIBS ${CARBON} ${SECURITY})
 else()
-  set(PLATFORM_CLIENT)
+  find_package(Notify)
   find_package(OpenGL)
   find_package(X11)
-  set(PLATFORM_CLIENT_LIBS ${OPENGL_gl_LIBRARY} ${X11_X11_LIB})
-  set(PLATFORM_CLIENT_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR} ${X11_X11_INCLUDE_PATH})
+  set(PLATFORM_CLIENT_LIBS ${OPENGL_gl_LIBRARY} ${X11_X11_LIB} ${NOTIFY_LIBRARIES})
+  set(PLATFORM_CLIENT_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR} ${X11_X11_INCLUDE_PATH} ${NOTIFY_INCLUDE_DIRS})
+  set(PLATFORM_CLIENT)
   if(TARGET_OS STREQUAL "linux")
     set(PLATFORM_LIBS rt) # clock_gettime for glibc < 2.17
   else()
@@ -822,6 +822,8 @@ if(CLIENT)
     input.cpp
     input.h
     keynames.h
+    notifications.cpp
+    notifications.h
     opengl_sl.cpp
     opengl_sl.h
     opengl_sl_program.cpp
@@ -1011,6 +1013,8 @@ if(CLIENT)
     ${SDL2_INCLUDE_DIRS}
     ${WAVPACK_INCLUDE_DIRS}
     ${FFMPEG_INCLUDE_DIRS}
+
+    ${PLATFORM_CLIENT_INCLUDE_DIRS}
   )
 
   set(PARAMS "${WAVPACK_INCLUDE_DIRS};${WAVPACK_INCLUDE_DIRS}")

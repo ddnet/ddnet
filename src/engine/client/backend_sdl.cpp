@@ -2573,9 +2573,6 @@ void CGraphicsBackend_SDL_OpenGL::SetWindowGrab(bool Grab)
 
 void CGraphicsBackend_SDL_OpenGL::NotifyWindow()
 {
-	if(!g_Config.m_ClShowNotifications)
-		return;
-
 	// get window handle
 	SDL_SysWMinfo info;
 	SDL_VERSION(&info.version);

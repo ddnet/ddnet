@@ -34,6 +34,7 @@
 #include <engine/textrender.h>
 
 #include <engine/client/http.h>
+#include <engine/client/notifications.h>
 #include <engine/shared/config.h>
 #include <engine/shared/compression.h>
 #include <engine/shared/datafile.h>
@@ -3783,6 +3784,15 @@ void CClient::LoadFont()
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load font. filename='%s'", pFontFile);
 }
 
+void CClient::Notify(const char *pTitle, const char *pMessage)
+{
+	if(!g_Config.m_ClShowNotifications)
+		return;
+
+	NotificationsNotify(pTitle, pMessage);
+	Graphics()->NotifyWindow();
+}
+
 void CClient::ConchainWindowVSync(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
@@ -3954,6 +3964,8 @@ int main(int argc, const char **argv) // ignore_convention
 		RandInitFailed = true;
 	}
 
+	NotificationsInit();
+
 	CClient *pClient = CreateClient();
 	IKernel *pKernel = IKernel::Create();
 	pKernel->RegisterInterface(pClient, false);
@@ -4085,6 +4097,8 @@ int main(int argc, const char **argv) // ignore_convention
 
 	pClient->~CClient();
 	free(pClient);
+
+	NotificationsUninit();
 
 	if(Restarting)
 	{

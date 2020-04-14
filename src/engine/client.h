@@ -121,6 +121,7 @@ public:
 	virtual void ToggleWindowBordered() = 0;
 	virtual void ToggleWindowVSync() = 0;
 	virtual void LoadFont() = 0;
+	virtual void Notify(const char *pTitle, const char *pMessage) = 0;
 
 	// networking
 	virtual void EnterGame() = 0;
