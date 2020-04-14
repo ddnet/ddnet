@@ -313,9 +313,10 @@ CClient::CClient() :
 
 	// map download
 	m_aMapdownloadFilename[0] = 0;
+	m_aMapdownloadFilenameTemp[0] = 0;
 	m_aMapdownloadName[0] = 0;
 	m_pMapdownloadTask = NULL;
-	m_MapdownloadFile = 0;
+	m_MapdownloadFileTemp = 0;
 	m_MapdownloadChunk = 0;
 	m_MapdownloadSha256Present = false;
 	m_MapdownloadSha256 = SHA256_ZEROED;
@@ -456,12 +457,12 @@ void CClient::SendReady()
 
 void CClient::SendMapRequest()
 {
-	if(m_MapdownloadFile)
+	if(m_MapdownloadFileTemp)
 	{
-		io_close(m_MapdownloadFile);
-		Storage()->RemoveFile(m_aMapdownloadFilename, IStorage::TYPE_SAVE);
+		io_close(m_MapdownloadFileTemp);
+		Storage()->RemoveFile(m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE);
 	}
-	m_MapdownloadFile = Storage()->OpenFile(m_aMapdownloadFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	m_MapdownloadFileTemp = Storage()->OpenFile(m_aMapdownloadFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	CMsgPacker Msg(NETMSG_REQUEST_MAP_DATA, true);
 	Msg.AddInt(m_MapdownloadChunk);
 	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH);
@@ -803,12 +804,12 @@ void CClient::DisconnectWithReason(const char *pReason)
 	m_MapdownloadChunk = 0;
 	if(m_pMapdownloadTask)
 		m_pMapdownloadTask->Abort();
-	if(m_MapdownloadFile)
+	if(m_MapdownloadFileTemp)
 	{
-		io_close(m_MapdownloadFile);
-		Storage()->RemoveFile(m_aMapdownloadFilename, IStorage::TYPE_SAVE);
+		io_close(m_MapdownloadFileTemp);
+		Storage()->RemoveFile(m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE);
 	}
-	m_MapdownloadFile = 0;
+	m_MapdownloadFileTemp = 0;
 	m_MapdownloadSha256Present = false;
 	m_MapdownloadSha256 = SHA256_ZEROED;
 	m_MapdownloadCrc = 0;
@@ -1670,10 +1671,11 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 					char aTempFilename[256];
 					FormatMapDownloadFilename(pMap, pMapSha256, MapCrc, true, aTempFilename, sizeof(aTempFilename));
 
-					str_format(m_aMapdownloadFilename, sizeof(m_aMapdownloadFilename), "downloadedmaps/%s", aTempFilename);
+					str_format(m_aMapdownloadFilename, sizeof(m_aMapdownloadFilename), "downloadedmaps/%s", aFilename);
+					str_format(m_aMapdownloadFilenameTemp, sizeof(m_aMapdownloadFilename), "downloadedmaps/%s", aTempFilename);
 
 					char aBuf[256];
-					str_format(aBuf, sizeof(aBuf), "starting to download map to '%s'", m_aMapdownloadFilename);
+					str_format(aBuf, sizeof(aBuf), "starting to download map to '%s'", m_aMapdownloadFilenameTemp);
 					m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", aBuf);
 
 					m_MapdownloadChunk = 0;
@@ -1695,7 +1697,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 						bool UseConfigUrl = str_comp(g_Config.m_ClMapDownloadUrl, "https://maps2.ddnet.tw") != 0 || m_aMapDownloadUrl[0] == '\0';
 						str_format(aUrl, sizeof(aUrl), "%s/%s", UseConfigUrl ? g_Config.m_ClMapDownloadUrl : m_aMapDownloadUrl, aEscaped);
 
-						m_pMapdownloadTask = std::make_shared<CGetFile>(Storage(), aUrl, m_aMapdownloadFilename, IStorage::TYPE_SAVE, CTimeout{g_Config.m_ClMapDownloadConnectTimeoutMs, g_Config.m_ClMapDownloadLowSpeedLimit, g_Config.m_ClMapDownloadLowSpeedTime});
+						m_pMapdownloadTask = std::make_shared<CGetFile>(Storage(), aUrl, m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE, CTimeout{g_Config.m_ClMapDownloadConnectTimeoutMs, g_Config.m_ClMapDownloadLowSpeedLimit, g_Config.m_ClMapDownloadLowSpeedTime});
 						Engine()->AddJob(m_pMapdownloadTask);
 					}
 					else
@@ -1712,19 +1714,19 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 			const unsigned char *pData = Unpacker.GetRaw(Size);
 
 			// check for errors
-			if(Unpacker.Error() || Size <= 0 || MapCRC != m_MapdownloadCrc || Chunk != m_MapdownloadChunk || !m_MapdownloadFile)
+			if(Unpacker.Error() || Size <= 0 || MapCRC != m_MapdownloadCrc || Chunk != m_MapdownloadChunk || !m_MapdownloadFileTemp)
 				return;
 
-			io_write(m_MapdownloadFile, pData, Size);
+			io_write(m_MapdownloadFileTemp, pData, Size);
 
 			m_MapdownloadAmount += Size;
 
 			if(Last)
 			{
-				if(m_MapdownloadFile)
+				if(m_MapdownloadFileTemp)
 				{
-					io_close(m_MapdownloadFile);
-					m_MapdownloadFile = 0;
+					io_close(m_MapdownloadFileTemp);
+					m_MapdownloadFileTemp = 0;
 				}
 				FinishMapDownload();
 			}
@@ -2335,7 +2337,7 @@ void CClient::ResetMapDownload()
 		m_pMapdownloadTask->Abort();
 		m_pMapdownloadTask = NULL;
 	}
-	m_MapdownloadFile = 0;
+	m_MapdownloadFileTemp = 0;
 	m_MapdownloadAmount = 0;
 }
 
@@ -2348,18 +2350,11 @@ void CClient::FinishMapDownload()
 	m_MapdownloadTotalsize = -1;
 	SHA256_DIGEST *pSha256 = m_MapdownloadSha256Present ? &m_MapdownloadSha256 : 0;
 
-	char aTmp[MAX_PATH_LENGTH];
-	char aMapFileTemp[MAX_PATH_LENGTH];
-	char aMapFile[MAX_PATH_LENGTH];
-	FormatMapDownloadFilename(m_aMapdownloadName, pSha256, m_MapdownloadCrc, true, aTmp, sizeof(aTmp));
-	str_format(aMapFileTemp, sizeof(aMapFileTemp), "downloadedmaps/%s", aTmp);
-	FormatMapDownloadFilename(m_aMapdownloadName, pSha256, m_MapdownloadCrc, false, aTmp, sizeof(aTmp));
-	str_format(aMapFile, sizeof(aMapFileTemp), "downloadedmaps/%s", aTmp);
-
-	Storage()->RenameFile(aMapFileTemp, aMapFile, IStorage::TYPE_SAVE);
+	Storage()->RemoveFile(m_aMapdownloadFilename, IStorage::TYPE_SAVE);
+	Storage()->RenameFile(m_aMapdownloadFilenameTemp, m_aMapdownloadFilename, IStorage::TYPE_SAVE);
 
 	// load map
-	pError = LoadMap(m_aMapdownloadName, aMapFile, pSha256, m_MapdownloadCrc);
+	pError = LoadMap(m_aMapdownloadName, m_aMapdownloadFilename, pSha256, m_MapdownloadCrc);
 	if(!pError)
 	{
 		ResetMapDownload();
@@ -2374,10 +2369,11 @@ void CClient::FinishMapDownload()
 	}
 	else
 	{
-		if(m_MapdownloadFile)
+		if(m_MapdownloadFileTemp)
 		{
-			io_close(m_MapdownloadFile);
-			m_MapdownloadFile = 0;
+			io_close(m_MapdownloadFileTemp);
+			m_MapdownloadFileTemp = 0;
+			Storage()->RemoveFile(m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE);
 		}
 		ResetMapDownload();
 		DisconnectWithReason(pError);
