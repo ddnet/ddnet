@@ -80,6 +80,7 @@ Whether to optimize for development, speeding up the compilation process a littl
 
 * **-DUPNP=[ON|OFF]** <br>
 Whether to enable UPnP support for the server.
+You need to install `libminiupnpc-dev`.
 
 * **-GNinja** <br>
 Use the Ninja build system instead of Make. This automatically parallizes the build and is generally faster. Compile with `ninja` instead of `make`. Install Ninja with `sudo apt install ninja-build` on Debian, `sudo pacman -S --needed ninja` on Arch Linux.
