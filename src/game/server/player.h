@@ -96,6 +96,11 @@ public:
 		int m_UseCustomColor;
 		int m_ColorBody;
 		int m_ColorFeet;
+
+		// 0.7
+		char m_apSkinPartNames[6][24];
+		bool m_aUseCustomColors[6];
+		int m_aSkinPartColors[6];
 	} m_TeeInfos;
 
 	int m_DieTick;

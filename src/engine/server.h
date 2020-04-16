@@ -9,6 +9,7 @@
 #include "kernel.h"
 #include "message.h"
 #include <game/generated/protocol.h>
+#include <game/generated/protocol7.h>
 #include <engine/shared/protocol.h>
 
 struct CAntibotRoundData;

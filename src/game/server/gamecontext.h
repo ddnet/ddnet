@@ -68,6 +68,7 @@ class CGameContext : public IGameServer
 	IAntibot *m_pAntibot;
 	CLayers m_Layers;
 	CCollision m_Collision;
+	protocol7::CNetObjHandler m_NetObjHandler7;
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_Tuning;
 	CTuningParams m_aTuningList[NUM_TUNEZONES];
@@ -225,6 +226,7 @@ public:
 	virtual void OnSnap(int ClientID);
 	virtual void OnPostSnap();
 
+	void *SecureUnpackMsg(int *MsgID, CUnpacker *pUnpacker, bool Sixup);
 	virtual void OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID);
 
 	virtual void OnClientConnected(int ClientID);

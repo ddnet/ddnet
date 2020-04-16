@@ -664,8 +664,8 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 					MsgId += 4;
 				else if(MsgId >= NETMSG_PING && MsgId <= NETMSG_ERROR)
 					MsgId += 4;
-				else if(MsgId > 24)
-					MsgId -= 24;
+				else if(MsgId < 0)
+					MsgId *= -1;
 				else
 				{
 					dbg_msg("net", "DROP send sys %d", MsgId);
@@ -680,8 +680,8 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 					MsgId += 1;
 				else if(MsgId >= NETMSGTYPE_SV_TUNEPARAMS && MsgId <= NETMSGTYPE_SV_VOTESTATUS)
 					;
-				else if(MsgId > 24)
-					MsgId -= 24;
+				else if(MsgId < 0)
+					MsgId *= -1;
 				else
 				{
 					dbg_msg("net", "DROP send game %d", MsgId);
@@ -862,6 +862,8 @@ void CServer::DoSnapshot()
 			}
 
 			// create delta
+			m_SnapshotDelta.SetStaticsize(protocol7::NETEVENTTYPE_SOUNDWORLD, m_aClients[i].m_Sixup);
+			m_SnapshotDelta.SetStaticsize(protocol7::NETEVENTTYPE_DAMAGE, m_aClients[i].m_Sixup);
 			DeltaSize = m_SnapshotDelta.CreateDelta(pDeltashot, pData, aDeltaData);
 
 			if(DeltaSize)
@@ -1255,7 +1257,7 @@ static inline int MsgFromSixup(int Msg, bool System)
 			return -1;
 		}
 	}
-	else
+	/*else
 	{
 		if(Msg >= 24 && Msg <= 27)
 			Msg = NETMSGTYPE_CL_SAY + Msg - 24;
@@ -1268,7 +1270,7 @@ static inline int MsgFromSixup(int Msg, bool System)
 			dbg_msg("net", "DROP recv msg %d", Msg);
 			return -1;
 		}
-	}
+	}*/
 
 	return Msg;
 }

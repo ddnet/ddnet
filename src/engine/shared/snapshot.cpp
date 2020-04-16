@@ -13,6 +13,8 @@ static int ObjTypeToSixup(int Type)
 		Six = Type;
 	else if(Type >= NETOBJTYPE_CHARACTERCORE && Type <= NETOBJTYPE_PLAYERINFO)
 		Six = Type + 1;
+	else if(Type == NETOBJTYPE_SPECTATORINFO)
+		Six = Type;
 	else if(Type >= NETEVENTTYPE_COMMON && Type <= NETEVENTTYPE_DEATH)
 		Six = Type + 3;
 	else if(Type == NETEVENTTYPE_SOUNDWORLD)

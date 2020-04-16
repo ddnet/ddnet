@@ -335,7 +335,7 @@ if(UPNP)
   find_package(Miniupnpc)
 endif()
 find_package(Pnglite)
-find_package(PythonInterp)
+find_package(Python3)
 find_package(SDL2)
 if(VIDEORECORDER)
   find_package(FFMPEG)
@@ -415,7 +415,7 @@ if(UPNP)
   show_dependency_status("Miniupnpc" MINIUPNPC)
 endif()
 show_dependency_status("Pnglite" PNGLITE)
-show_dependency_status("PythonInterp" PYTHONINTERP)
+show_dependency_status("PythonInterp" Python3_Interpreter)
 show_dependency_status("SDL2" SDL2)
 if(VIDEORECORDER)
   show_dependency_status("FFmpeg" FFMPEG)
@@ -429,7 +429,7 @@ endif()
 if(CLIENT AND NOT(CURL_FOUND))
   message(SEND_ERROR "You must install Curl to compile DDNet")
 endif()
-if(NOT(PYTHONINTERP_FOUND))
+if(NOT(Python3_Interpreter_FOUND))
   message(SEND_ERROR "You must install Python to compile DDNet")
 endif()
 
@@ -591,13 +591,43 @@ file(COPY ${COPY_FILES} DESTINATION .)
 
 function(generate_source output_file script_parameter)
   add_custom_command(OUTPUT ${output_file}
-    COMMAND ${PYTHON_EXECUTABLE} datasrc/compile.py ${script_parameter}
+    COMMAND ${Python3_EXECUTABLE} datasrc/compile.py ${script_parameter}
       > "${PROJECT_BINARY_DIR}/${output_file}"
     DEPENDS
       datasrc/compile.py
       datasrc/content.py
       datasrc/datatypes.py
       datasrc/network.py
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  )
+endfunction()
+
+function(generate_source7 output_file script_parameter)
+  add_custom_command(OUTPUT ${output_file}
+    COMMAND ${Python3_EXECUTABLE} datasrc/seven/compile.py ${script_parameter}
+      > "${PROJECT_BINARY_DIR}/${output_file}"
+    DEPENDS
+      datasrc/seven/compile.py
+      datasrc/seven/content.py
+      datasrc/seven/datatypes.py
+      datasrc/seven/network.py
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  )
+endfunction()
+
+function(generate_maps output_file)
+  add_custom_command(OUTPUT ${output_file}
+    COMMAND ${Python3_EXECUTABLE} datasrc/crosscompile.py
+      > "${PROJECT_BINARY_DIR}/${output_file}"
+    DEPENDS
+      datasrc/compile.py
+      datasrc/content.py
+      datasrc/datatypes.py
+      datasrc/network.py
+      datasrc/seven/compile.py
+      datasrc/seven/content.py
+      datasrc/seven/datatypes.py
+      datasrc/seven/network.py
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   )
 endfunction()
@@ -616,7 +646,7 @@ if(NOT PROJECT_GIT_DIR_ERROR)
   )
 endif()
 add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/src/game/generated/git_revision.cpp
-  COMMAND ${PYTHON_EXECUTABLE}
+  COMMAND ${Python3_EXECUTABLE}
     scripts/git_revision.py
     > ${PROJECT_BINARY_DIR}/src/game/generated/git_revision.cpp
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
@@ -631,6 +661,10 @@ generate_source("src/game/generated/protocol.h" "network_header")
 generate_source("src/game/generated/server_data.cpp" "server_content_source")
 generate_source("src/game/generated/server_data.h" "server_content_header")
 
+generate_source7("src/game/generated/protocol7.cpp" "network_source")
+generate_source7("src/game/generated/protocol7.h" "network_header")
+
+generate_maps("src/game/generated/protocolglue.h")
 
 ########################################################################
 # SHARED
@@ -787,6 +821,9 @@ set_src(GAME_SHARED GLOB src/game
 # A bit hacky, but these are needed to register all the UUIDs, even for stuff
 # that doesn't link game.
 set(ENGINE_UUID_SHARED
+  src/game/generated/protocolglue.h
+  src/game/generated/protocol7.cpp
+  src/game/generated/protocol7.h
   src/game/generated/protocol.cpp
   src/game/generated/protocol.h
   src/game/mapitems_ex.cpp
@@ -802,6 +839,8 @@ list(REMOVE_ITEM GAME_SHARED ${ENGINE_UUID_SHARED})
 set(GAME_GENERATED_SHARED
   src/game/generated/git_revision.cpp
   src/game/generated/protocol.h
+  src/game/generated/protocol7.h
+  src/game/generated/protocolglue.h
 )
 
 set(DEPS ${DEP_JSON} ${DEP_MD5} ${ZLIB_DEP})
@@ -1586,7 +1625,7 @@ if(CLIENT AND (DMGTOOLS_FOUND OR HDIUTIL))
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${TARGET_SERVER}> $<TARGET_FILE:${TARGET_SERVER_LAUNCHER}> ${DMG_TMPDIR}/${TARGET_SERVER}.app/Contents/MacOS/
 
     # DMG
-    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/dmg.py create ${DMG_PARAMS} ${CPACK_PACKAGE_FILE_NAME}.dmg ${CPACK_PACKAGE_FILE_NAME} ${DMG_TMPDIR}
+    COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/dmg.py create ${DMG_PARAMS} ${CPACK_PACKAGE_FILE_NAME}.dmg ${CPACK_PACKAGE_FILE_NAME} ${DMG_TMPDIR}
 
     DEPENDS
       ${TARGET_CLIENT}

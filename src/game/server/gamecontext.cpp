@@ -18,6 +18,9 @@
 #include <game/collision.h>
 #include <game/gamecore.h>
 
+#include <game/generated/protocol7.h>
+#include <game/generated/protocolglue.h>
+
 #include "gamemodes/DDRace.h"
 #include "score.h"
 #include "score/file_score.h"
@@ -1110,8 +1113,7 @@ void CGameContext::OnClientEnter(int ClientID)
 
 	Server()->ExpireServerInfo();
 
-		// update client infos (others before local)
-		dbg_msg("debug", "sending info");
+	// update client infos (others before local)
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
 		if(i == ClientID || !m_apPlayers[i] || !Server()->ClientIngame(i))
@@ -1120,7 +1122,7 @@ void CGameContext::OnClientEnter(int ClientID)
 		if(Server()->IsSixup(i))
 		{
 			// new info for others
-			CMsgPacker NewClientInfoMsg(18 + 24); // NETMSGTYPE_SV_CLIENTINFO
+			CMsgPacker NewClientInfoMsg(-protocol7::NETMSGTYPE_SV_CLIENTINFO); // NETMSGTYPE_SV_CLIENTINFO
 			NewClientInfoMsg.AddInt(ClientID);
 			NewClientInfoMsg.AddInt(0); // m_Local
 			NewClientInfoMsg.AddInt(m_apPlayers[ClientID]->GetTeam());
@@ -1138,7 +1140,7 @@ void CGameContext::OnClientEnter(int ClientID)
 		if(Server()->IsSixup(ClientID))
 		{
 			// existing infos for new player
-			CMsgPacker ClientInfoMsg(18 + 24); // NETMSGTYPE_SV_CLIENTINFO
+			CMsgPacker ClientInfoMsg(-protocol7::NETMSGTYPE_SV_CLIENTINFO); // NETMSGTYPE_SV_CLIENTINFO
 			ClientInfoMsg.AddInt(i);
 			ClientInfoMsg.AddInt(0); // m_Local
 			ClientInfoMsg.AddInt(m_apPlayers[i]->GetTeam());
@@ -1157,8 +1159,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	// local info
 	if(Server()->IsSixup(ClientID))
 	{
-		dbg_msg("debug", "sending local client");
-		CMsgPacker SelfClientInfoMsg(18 + 24); // NETMSGTYPE_SV_CLIENTINFO
+		CMsgPacker SelfClientInfoMsg(-protocol7::NETMSGTYPE_SV_CLIENTINFO); // NETMSGTYPE_SV_CLIENTINFO
 		SelfClientInfoMsg.AddInt(ClientID);
 		SelfClientInfoMsg.AddInt(1); // m_Local
 		SelfClientInfoMsg.AddInt(m_apPlayers[ClientID]->GetTeam());
@@ -1313,25 +1314,45 @@ void CGameContext::OnClientDDNetVersionKnown(int ClientID)
 	}
 }
 
+void *CGameContext::SecureUnpackMsg(int *MsgID, CUnpacker *pUnpacker, bool Sixup)
+{
+	if(Sixup)
+	{
+		using namespace protocol7;
+
+		void *pRawMsg = m_NetObjHandler7.SecureUnpackMsg(*MsgID, pUnpacker);
+		if(!pRawMsg)
+			return 0;
+
+		static char aRawMsg[1024];
+		if(*MsgID == NETMSGTYPE_CL_SAY)
+		{
+			CNetMsg_Cl_Say *pMsg7 = (CNetMsg_Cl_Say *)pRawMsg;
+			::CNetMsg_Cl_Say *pMsg = aRawMsg;
+
+
+			pMsg->m_Team = pMsg7->m_Mode == CHAT_TEAM;
+			pMsg->m_pMessage = pMsg7->m_pMessage;
+		}
+
+		return pRawMsg;
+	}
+else
+		return m_NetObjHandler.SecureUnpackMsg(*MsgID, pUnpacker);
+}
+
 void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 {
-	void *pRawMsg = 0;
-	CPlayer *pPlayer = m_apPlayers[ClientID];
-
-	if(MsgID != NETMSGTYPE_CL_STARTINFO)
+	if(m_TeeHistorianActive)
 	{
-		pRawMsg = m_NetObjHandler.SecureUnpackMsg(MsgID, pUnpacker);
-		if(!pRawMsg)
-			return;
-
-		if(m_TeeHistorianActive)
+		if(m_NetObjHandler.TeeHistorianRecordMsg(MsgID))
 		{
-			if(m_NetObjHandler.TeeHistorianRecordMsg(MsgID))
-			{
-				m_TeeHistorian.RecordPlayerMessage(ClientID, pUnpacker->CompleteData(), pUnpacker->CompleteSize());
-			}
+			m_TeeHistorian.RecordPlayerMessage(ClientID, pUnpacker->CompleteData(), pUnpacker->CompleteSize());
 		}
 	}
+
+	void *pRawMsg = SecureUnpackMsg(&MsgID, pUnpacker, Server()->IsSixup(ClientID));
+	CPlayer *pPlayer = m_apPlayers[ClientID];
 
 	if(Server()->ClientIngame(ClientID))
 	{
@@ -1949,36 +1970,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		if(pPlayer->m_IsReady)
 			return;
 
-		CNetMsg_Cl_StartInfo Msg;
-		const char *apSkinPartNames[6];
-		int aUseCustomColors[6];
-		int aSkinPartColors[6];
-
-		Msg.m_pName = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
-		Msg.m_pClan = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
-		Msg.m_Country = pUnpacker->GetInt();
-		if(Server()->IsSixup(ClientID))
-		{
-			for(int p = 0; p < 6; p++) apSkinPartNames[p] = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
-			for(int p = 0; p < 6; p++) aUseCustomColors[p] = pUnpacker->GetInt();
-			for(int p = 0; p < 6; p++) aSkinPartColors[p] = pUnpacker->GetInt();
-			Msg.m_pSkin = "default";
-			Msg.m_UseCustomColor = 0;
-			Msg.m_ColorBody = 0;
-			Msg.m_ColorFeet = 0;
-		}
-		else
-		{
-			Msg.m_pSkin = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
-			Msg.m_UseCustomColor = pUnpacker->GetInt();
-			Msg.m_ColorBody = pUnpacker->GetInt();
-			Msg.m_ColorFeet = pUnpacker->GetInt();
-		}
-
-		if(pUnpacker->Error())
-			return;
-
-		CNetMsg_Cl_StartInfo *pMsg = &Msg;
+		CNetMsg_Cl_StartInfo *pMsg = (CNetMsg_Cl_StartInfo *)pRawMsg;
 
 		if(!str_utf8_check(pMsg->m_pName)
 			|| !str_utf8_check(pMsg->m_pClan)
