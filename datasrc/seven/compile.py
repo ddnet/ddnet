@@ -1,7 +1,7 @@
 import sys
-from datatypes import *
-import content
-import network
+from .datatypes import *
+from . import content
+from . import network
 
 def create_enum_table(names, num):
 	lines = []

@@ -1,4 +1,4 @@
-from datatypes import *
+from .datatypes import *
 
 class Sound(Struct):
 	def __init__(self, filename=""):

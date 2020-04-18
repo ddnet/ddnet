@@ -604,7 +604,7 @@ endfunction()
 
 function(generate_source7 output_file script_parameter)
   add_custom_command(OUTPUT ${output_file}
-    COMMAND ${Python3_EXECUTABLE} datasrc/seven/compile.py ${script_parameter}
+    COMMAND ${Python3_EXECUTABLE} -m datasrc.seven.compile ${script_parameter}
       > "${PROJECT_BINARY_DIR}/${output_file}"
     DEPENDS
       datasrc/seven/compile.py
