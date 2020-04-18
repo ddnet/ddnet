@@ -2140,7 +2140,7 @@ void CGameClient::UpdatePrediction()
 			if(CNetObj_PlayerInput *pInput = (CNetObj_PlayerInput*) Client()->GetInput(Client()->GameTick(g_Config.m_ClDummy)))
 				pLocalChar->SetInput(pInput);
 		if(pDummyChar)
-			if(CNetObj_PlayerInput *pInput = (CNetObj_PlayerInput*) Client()->GetInput(Client()->GameTick(), 1))
+			if(CNetObj_PlayerInput *pInput = (CNetObj_PlayerInput*) Client()->GetInput(Client()->GameTick(g_Config.m_ClDummy), 1))
 				pDummyChar->SetInput(pInput);
 	}
 
