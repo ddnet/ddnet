@@ -397,6 +397,7 @@ void CGameClient::OnDummySwap()
 	int tmp = m_DummyInput.m_Fire;
 	m_DummyInput = m_pControls->m_InputData[!g_Config.m_ClDummy];
 	m_pControls->m_InputData[g_Config.m_ClDummy].m_Fire = tmp;
+	m_IsDummySwapping = 1;
 }
 
 int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
@@ -490,6 +491,7 @@ void CGameClient::OnConnected()
 
 	m_GameWorld.Clear();
 	m_GameWorld.m_WorldConfig.m_InfiniteAmmo = true;
+	m_PredictedDummyID = -1;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 		m_aLastWorldCharacters[i].m_Alive = false;
 	LoadMapSettings();
@@ -673,6 +675,7 @@ void CGameClient::OnDummyDisconnect()
 	m_DDRaceMsgSent[1] = false;
 	m_ShowOthers[1] = -1;
 	m_LastNewPredictedTick[1] = -1;
+	m_PredictedDummyID = -1;
 }
 
 int CGameClient::GetLastRaceTick()
@@ -1516,6 +1519,12 @@ void CGameClient::OnNewSnapshot()
 				m_pEffects->AirJump(Pos);
 			}
 
+	static int PrevLocalID = -1;
+	if(m_Snap.m_LocalClientID != PrevLocalID)
+		m_PredictedDummyID = PrevLocalID;
+	PrevLocalID = m_Snap.m_LocalClientID;
+	m_IsDummySwapping = 0;
+
 	// update prediction data
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		UpdatePrediction();
@@ -1552,6 +1561,7 @@ void CGameClient::OnPredict()
 		aBeforeRender[i] = GetSmoothPos(i);
 
 	// init
+	bool Dummy = g_Config.m_ClDummy ^ m_IsDummySwapping;
 	m_PredictedWorld.CopyWorld(&m_GameWorld);
 
 	// don't predict inactive players
@@ -1563,6 +1573,9 @@ void CGameClient::OnPredict()
 	CCharacter *pLocalChar = m_PredictedWorld.GetCharacterByID(m_Snap.m_LocalClientID);
 	if(!pLocalChar)
 		return;
+	CCharacter *pDummyChar = 0;
+	if(PredictDummy())
+		pDummyChar = m_PredictedWorld.GetCharacterByID(m_PredictedDummyID);
 
 	// predict
 	for(int Tick = Client()->GameTick(g_Config.m_ClDummy) + 1; Tick <= Client()->PredGameTick(g_Config.m_ClDummy); Tick++)
@@ -1582,12 +1595,17 @@ void CGameClient::OnPredict()
 			pLocalChar->m_CanMoveInFreeze = true;
 
 		// apply inputs and tick
-		CNetObj_PlayerInput *pInputData = (CNetObj_PlayerInput*) Client()->GetDirectInput(Tick);
+		CNetObj_PlayerInput *pInputData = (CNetObj_PlayerInput*) Client()->GetDirectInput(Tick, m_IsDummySwapping);
+		CNetObj_PlayerInput *pDummyInputData = !pDummyChar ? 0 : (CNetObj_PlayerInput*) Client()->GetDirectInput(Tick, m_IsDummySwapping^1);
 		if(pInputData)
 			pLocalChar->OnDirectInput(pInputData);
+		if(pDummyInputData)
+			pDummyChar->OnDirectInput(pDummyInputData);
 		m_PredictedWorld.m_GameTick = Tick;
 		if(pInputData)
 			pLocalChar->OnPredictedInput(pInputData);
+		if(pDummyInputData)
+			pDummyChar->OnPredictedInput(pDummyInputData);
 		m_PredictedWorld.Tick();
 
 		// fetch the current characters
@@ -1607,9 +1625,9 @@ void CGameClient::OnPredict()
 			}
 
 		// check if we want to trigger effects
-		if(Tick > m_LastNewPredictedTick[g_Config.m_ClDummy])
+		if(Tick > m_LastNewPredictedTick[Dummy])
 		{
-			m_LastNewPredictedTick[g_Config.m_ClDummy] = Tick;
+			m_LastNewPredictedTick[Dummy] = Tick;
 			m_NewPredictedTick = true;
 			vec2 Pos = pLocalChar->Core()->m_Pos;
 			int Events = pLocalChar->Core()->m_TriggeredEvents;
@@ -2052,6 +2070,9 @@ void CGameClient::UpdatePrediction()
 			}
 
 	CCharacter *pLocalChar = m_GameWorld.GetCharacterByID(m_Snap.m_LocalClientID);
+	CCharacter *pDummyChar = 0;
+	if(PredictDummy())
+		pDummyChar = m_GameWorld.GetCharacterByID(m_PredictedDummyID);
 
 	// update strong and weak hook
 	if(pLocalChar && AntiPingPlayers())
@@ -2089,11 +2110,18 @@ void CGameClient::UpdatePrediction()
 		for(int Tick = m_GameWorld.GameTick() + 1; Tick <= Client()->GameTick(g_Config.m_ClDummy); Tick++)
 		{
 			CNetObj_PlayerInput *pInput = (CNetObj_PlayerInput*) Client()->GetDirectInput(Tick);
+			CNetObj_PlayerInput *pDummyInput = 0;
+			if(pDummyChar)
+				pDummyInput = (CNetObj_PlayerInput*) Client()->GetDirectInput(Tick, 1);
 			if(pInput)
 				pLocalChar->OnDirectInput(pInput);
+			if(pDummyInput)
+				pDummyChar->OnDirectInput(pDummyInput);
 			m_GameWorld.m_GameTick = Tick;
 			if(pInput)
 				pLocalChar->OnPredictedInput(pInput);
+			if(pDummyInput)
+				pDummyChar->OnPredictedInput(pDummyInput);
 			m_GameWorld.Tick();
 
 			for(int i = 0; i < MAX_CLIENTS; i++)
@@ -2111,6 +2139,9 @@ void CGameClient::UpdatePrediction()
 		if(pLocalChar)
 			if(CNetObj_PlayerInput *pInput = (CNetObj_PlayerInput*) Client()->GetInput(Client()->GameTick(g_Config.m_ClDummy)))
 				pLocalChar->SetInput(pInput);
+		if(pDummyChar)
+			if(CNetObj_PlayerInput *pInput = (CNetObj_PlayerInput*) Client()->GetInput(Client()->GameTick(), 1))
+				pDummyChar->SetInput(pInput);
 	}
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -2128,7 +2159,7 @@ void CGameClient::UpdatePrediction()
 	for(int i = 0; i < MAX_CLIENTS; i++)
 		if(m_Snap.m_aCharacters[i].m_Active)
 		{
-			bool IsLocal = (i == m_Snap.m_LocalClientID);
+			bool IsLocal = (i == m_Snap.m_LocalClientID || (PredictDummy() && i == m_PredictedDummyID));
 			int GameTeam = (m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_TEAMS) ? m_aClients[i].m_Team : i;
 			m_GameWorld.NetCharAdd(i, &m_Snap.m_aCharacters[i].m_Cur,
 					m_Snap.m_aCharacters[i].m_HasExtendedData ? &m_Snap.m_aCharacters[i].m_ExtendedData : 0,
