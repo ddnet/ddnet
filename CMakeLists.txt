@@ -1076,6 +1076,8 @@ set_src(ENGINE_SERVER GLOB src/engine/server
   sql_server.h
   sql_string_helpers.cpp
   sql_string_helpers.h
+  upnp.cpp
+  upnp.h
 )
 set_src(GAME_SERVER GLOB_RECURSE src/game/server
   antibot.cpp
@@ -1741,7 +1743,7 @@ foreach(target ${TARGETS_OWN})
   endif()
   if(UPNP)
     target_compile_definitions(${target} PRIVATE CONF_UPNP)
-	target_include_directories(${target} PRIVATE ${MINIUPNPC_INCLUDE_DIRS})
+    target_include_directories(${target} PRIVATE ${MINIUPNPC_INCLUDE_DIRS})
   endif()
   if(VIDEORECORDER)
     target_compile_definitions(${target} PRIVATE CONF_VIDEORECORDER)

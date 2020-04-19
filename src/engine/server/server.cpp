@@ -34,16 +34,9 @@
 #include <vector>
 #include <engine/shared/linereader.h>
 #include <game/extrainfo.h>
-#include <game/version.h>
 
 #include "register.h"
 #include "server.h"
-
-#if defined(CONF_UPNP)
-	#include <miniupnpc/miniupnpc.h>
-	#include <miniupnpc/upnpcommands.h>
-	#include <miniupnpc/upnperrors.h>
-#endif
 
 #if defined(CONF_FAMILY_WINDOWS)
 	#define WIN32_LEAN_AND_MEAN
@@ -1970,42 +1963,7 @@ int CServer::Run()
 	}
 
 #if defined(CONF_UPNP)
-	if(g_Config.m_SvUseUPnP)
-	{
-		struct UPNPUrls upnp_urls;
-		struct IGDdatas upnp_data;
-		char aLanAddr[64];
-		char aPort[6];
-		int error = 0;
-		struct UPNPDev *upnp_dev = upnpDiscover(2000, NULL, NULL, 0, 0, 2, &error);
-		int status = UPNP_GetValidIGD(upnp_dev, &upnp_urls, &upnp_data, aLanAddr, sizeof(aLanAddr));
-		dbg_msg("upnp", "status=%d, lan_addr=%s", status, aLanAddr);
-
-		if(status == 1)
-		{
-			dbg_msg("upnp", "found valid IGD: %s", upnp_urls.controlURL);
-			str_format(aPort, sizeof(aPort), "%d", BindAddr.port);
-			error = UPNP_AddPortMapping(upnp_urls.controlURL, upnp_data.first.servicetype, 
-					aPort, aPort, aLanAddr,
-					"DDNet Server " GAME_RELEASE_VERSION,
-					"UDP", NULL, "0");
-
-			if(error)
-			{
-				dbg_msg("upnp", "failed to map port");
-				dbg_msg("upnp", "error: %s", strupnperror(error));
-			}
-			else
-				dbg_msg("upnp", "successfully mapped port");
-		}
-		else
-		{
-				dbg_msg("upnp", "no valid IGD found");
-				dbg_msg("upnp", "disabled");
-		}
-		FreeUPNPUrls(&upnp_urls);
-		freeUPNPDevlist(upnp_dev);
-	}
+	m_UPnP.Open(BindAddr);
 #endif
 
 	if(!m_NetServer.Open(BindAddr, &m_ServerBan, g_Config.m_SvMaxClients, g_Config.m_SvMaxClientsPerIP, 0))
@@ -2274,6 +2232,10 @@ int CServer::Run()
 		if (m_apSqlWriteServers[i])
 			delete m_apSqlWriteServers[i];
 	}
+#endif
+
+#if defined (CONF_UPNP)
+	m_UPnP.Shutdown();
 #endif
 
 	return ErrorShutdown();

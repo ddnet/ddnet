@@ -222,7 +222,7 @@ MACRO_CONFIG_INT(SvSqlQueriesDelay, sv_sql_queries_delay, 1, 0, 20, CFGFLAG_SERV
 #endif
 
 #if defined(CONF_UPNP)
-MACRO_CONFIG_INT(SvUseUPnP, sv_use_upnp, 1, 0, 1, CFGFLAG_SERVER, "Enables UPnP support.")
+MACRO_CONFIG_INT(SvUseUPnP, sv_use_upnp, 0, 0, 1, CFGFLAG_SERVER, "Enables UPnP support.")
 #endif
 
 MACRO_CONFIG_INT(SvDDRaceRules, sv_ddrace_rules, 1, 0, 1, CFGFLAG_SERVER, "Whether the default mod rules are displayed or not")
