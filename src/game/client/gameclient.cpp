@@ -1597,9 +1597,13 @@ void CGameClient::OnPredict()
 		// apply inputs and tick
 		CNetObj_PlayerInput *pInputData = (CNetObj_PlayerInput*) Client()->GetDirectInput(Tick, m_IsDummySwapping);
 		CNetObj_PlayerInput *pDummyInputData = !pDummyChar ? 0 : (CNetObj_PlayerInput*) Client()->GetDirectInput(Tick, m_IsDummySwapping^1);
+		bool DummyFirst = pInputData && pDummyInputData && pDummyChar->GetCID() < pLocalChar->GetCID();
+
+		if(DummyFirst)
+			pDummyChar->OnDirectInput(pDummyInputData);
 		if(pInputData)
 			pLocalChar->OnDirectInput(pInputData);
-		if(pDummyInputData)
+		if(pDummyInputData && !DummyFirst)
 			pDummyChar->OnDirectInput(pDummyInputData);
 		m_PredictedWorld.m_GameTick = Tick;
 		if(pInputData)
