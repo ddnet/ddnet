@@ -362,6 +362,7 @@ public:
 
 	void PumpNetwork(bool PacketWaiting);
 
+	virtual void ChangeMap(const char *pMap);
 	const char *GetMapName() const;
 	int LoadMap(const char *pMapName);
 
