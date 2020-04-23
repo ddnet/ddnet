@@ -307,7 +307,7 @@ CServer::CServer() :
 		m_aCurrentMapSize[i] = 0;
 	}
 
-	m_MapReload = 0;
+	m_MapReload = false;
 	m_ReloadedWhenEmpty = false;
 
 	m_RconClientID = IServer::RCON_CID_SERV;
@@ -2487,7 +2487,6 @@ int CServer::Run()
 		bool NonActive = false;
 		bool PacketWaiting = false;
 
-		m_Lastheartbeat = 0;
 		m_GameStartTime = time_get();
 
 		UpdateServerInfo();
@@ -2502,9 +2501,9 @@ int CServer::Run()
 			int NewTicks = 0;
 
 			// load new map TODO: don't poll this
-			if(str_comp(Config()->m_SvMap, m_aCurrentMap) != 0 || m_MapReload)
+			if(m_MapReload)
 			{
-				m_MapReload = 0;
+				m_MapReload = false;
 
 				// load map
 				if(LoadMap(Config()->m_SvMap))
@@ -3188,7 +3187,7 @@ void CServer::ConStopRecord(IConsole::IResult *pResult, void *pUser)
 
 void CServer::ConMapReload(IConsole::IResult *pResult, void *pUser)
 {
-	((CServer *)pUser)->m_MapReload = 1;
+	((CServer *)pUser)->m_MapReload = true;
 }
 
 void CServer::ConLogout(IConsole::IResult *pResult, void *pUser)
@@ -3446,6 +3445,16 @@ void CServer::ConchainRconHelperPasswordChange(IConsole::IResult *pResult, void 
 	pfnCallback(pResult, pCallbackUserData);
 }
 
+void CServer::ConchainMapUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments() >= 1)
+	{
+		CServer *pThis = static_cast<CServer *>(pUserData);
+		pThis->m_MapReload = str_comp(pThis->Config()->m_SvMap, pThis->m_aCurrentMap) != 0;
+	}
+}
+
 #if defined(CONF_FAMILY_UNIX)
 void CServer::ConchainConnLoggingServerChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
@@ -3518,6 +3527,7 @@ void CServer::RegisterCommands()
 	Console()->Chain("sv_rcon_password", ConchainRconPasswordChange, this);
 	Console()->Chain("sv_rcon_mod_password", ConchainRconModPasswordChange, this);
 	Console()->Chain("sv_rcon_helper_password", ConchainRconHelperPasswordChange, this);
+	Console()->Chain("sv_map", ConchainMapUpdate, this);
 
 #if defined(CONF_FAMILY_UNIX)
 	Console()->Chain("sv_conn_logging_server", ConchainConnLoggingServerChange, this);
