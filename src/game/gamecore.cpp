@@ -592,13 +592,3 @@ bool CCharacterCore::IsSwitchActiveCb(int Number, void *pUser)
 			return pThis->Collision()->m_pSwitchers[Number].m_Status[pThis->m_pTeams->Team(pThis->m_Id)];
 	return false;
 }
-
-vec2 CCharacterCore::LimitVel(vec2 Vel)
-{
-	return ClampVel(m_MoveRestrictions, Vel);
-}
-
-void CCharacterCore::ApplyForce(vec2 Force)
-{
-	m_Vel = LimitVel(m_Vel + Force);
-}

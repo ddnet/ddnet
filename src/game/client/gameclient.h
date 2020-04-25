@@ -20,46 +20,6 @@
 #include <game/client/prediction/entities/laser.h>
 #include <game/client/prediction/entities/pickup.h>
 
-class CGameClient;
-
-class CWeaponData
-{
-public:
-	int m_Tick;
-	vec2 m_Pos;
-	vec2 m_Direction;
-	vec2 StartPos() { return m_Pos + m_Direction * 28.0f * 0.75f; }
-};
-
-class CLocalProjectile
-{
-public:
-	int m_Active;
-	CGameClient *m_pGameClient;
-	CWorldCore *m_pWorld;
-	CCollision *m_pCollision;
-
-	vec2 m_Direction;
-	vec2 m_Pos;
-	int m_StartTick;
-	int m_Type;
-
-	int m_Owner;
-	int m_Weapon;
-	bool m_Explosive;
-	int m_Bouncing;
-	bool m_Freeze;
-	bool m_ExtraInfo;
-
-	vec2 GetPos(float Time);
-	void CreateExplosion(vec2 Pos, int LocalClientID);
-	void Tick(int CurrentTick, int GameTickSpeed, int LocalClientID);
-	void Init(CGameClient *pGameClient, CWorldCore *pWorld, CCollision *pCollision, const CNetObj_Projectile *pProj);
-	void Init(CGameClient *pGameClient, CWorldCore *pWorld, CCollision *pCollision, vec2 Vel, vec2 Pos, int StartTick, int Type, int Owner, int Weapon, bool Explosive, int Bouncing, bool Freeze, bool ExtraInfo);
-	bool GameLayerClipped(vec2 CheckPos);
-	void Deactivate() { m_Active = 0; }
-};
-
 class CGameInfo
 {
 public:
