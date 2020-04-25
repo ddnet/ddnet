@@ -53,7 +53,7 @@ void CPickup::Tick()
 
 				case POWERUP_WEAPON:
 					if(m_Subtype >= 0 && m_Subtype < NUM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || (pChr->GetWeaponAmmo(m_Subtype) != -1 && !pChr->m_FreezeTime)))
-						pChr->GiveWeapon(m_Subtype, -1);
+						pChr->GiveWeapon(m_Subtype);
 					break;
 
 				case POWERUP_NINJA:

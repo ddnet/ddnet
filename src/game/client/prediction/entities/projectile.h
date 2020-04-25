@@ -24,7 +24,6 @@ public:
 		bool Explosive,
 		float Force,
 		int SoundImpact,
-		int Weapon,
 		int Layer = 0,
 		int Number = 0
 	);
@@ -50,7 +49,6 @@ private:
 	int m_Owner;
 	int m_Type;
 	int m_SoundImpact;
-	int m_Weapon;
 	float m_Force;
 	int m_StartTick;
 	bool m_Explosive;

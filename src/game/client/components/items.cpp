@@ -285,7 +285,7 @@ void CItems::OnRender()
 		for(auto *pProj = (CProjectile*) GameClient()->m_PredictedWorld.FindFirst(CGameWorld::ENTTYPE_PROJECTILE); pProj; pProj = (CProjectile*) pProj->NextEntity())
 		{
 			CNetObj_Projectile Data;
-			if(pProj->m_Weapon != WEAPON_SHOTGUN || pProj->m_Explosive || pProj->m_Freeze)
+			if(pProj->m_Type != WEAPON_SHOTGUN || pProj->m_Explosive || pProj->m_Freeze)
 				pProj->FillExtraInfo(&Data);
 			else
 				pProj->FillInfo(&Data);
@@ -324,8 +324,8 @@ void CItems::OnRender()
 				if(auto *pProj = (CProjectile*) GameClient()->m_GameWorld.FindMatch(Item.m_ID, Item.m_Type, pData))
 				{
 					if(pProj->m_LastRenderTick <= 0
-					&& (pProj->m_Weapon != WEAPON_SHOTGUN || (!pProj->m_Freeze && !pProj->m_Explosive)) // skip ddrace shotgun bullets
-					&& (pProj->m_Weapon == WEAPON_SHOTGUN || fabs(length(pProj->m_Direction) - 1.f) < 0.02) // workaround to skip grenades on ball mod
+					&& (pProj->m_Type != WEAPON_SHOTGUN || (!pProj->m_Freeze && !pProj->m_Explosive)) // skip ddrace shotgun bullets
+					&& (pProj->m_Type == WEAPON_SHOTGUN || fabs(length(pProj->m_Direction) - 1.f) < 0.02) // workaround to skip grenades on ball mod
 					&& (pProj->GetOwner() < 0 || !GameClient()->m_aClients[pProj->GetOwner()].m_IsPredictedLocal) // skip locally predicted projectiles
 					&& !Client()->SnapFindItem(IClient::SNAP_PREV, Item.m_Type, Item.m_ID))
 					{

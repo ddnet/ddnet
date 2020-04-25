@@ -25,6 +25,7 @@ void CCharacter::SetWeapon(int W)
 
 void CCharacter::SetSolo(bool Solo)
 {
+	m_Core.m_Solo = Solo;
 	TeamsCore()->SetSolo(GetCID(), Solo);
 }
 
@@ -83,7 +84,7 @@ void CCharacter::HandleJetpack()
 				float Strength = GetTuning(m_TuneZone)->m_JetpackStrength;
 				if(!m_TuneZone)
 					Strength = m_LastJetpackStrength;
-				TakeDamage(Direction * -1.0f * (Strength / 100.0f / 6.11f), g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage, GetCID(), m_Core.m_ActiveWeapon);
+				TakeDamage(Direction * -1.0f * (Strength / 100.0f / 6.11f), 0, GetCID(), m_Core.m_ActiveWeapon);
 			}
 		}
 	}
@@ -190,7 +191,7 @@ void CCharacter::HandleNinja()
 void CCharacter::DoWeaponSwitch()
 {
 	// make sure we can switch
-	if(m_ReloadTimer != 0 || m_QueuedWeapon == -1 || m_aWeapons[WEAPON_NINJA].m_Got)
+	if(m_ReloadTimer != 0 || m_QueuedWeapon == -1 || m_aWeapons[WEAPON_NINJA].m_Got || !m_aWeapons[m_QueuedWeapon].m_Got)
 		return;
 
 	// switch Weapon
@@ -264,7 +265,9 @@ void CCharacter::FireWeapon()
 	bool FullAuto = false;
 	if(m_Core.m_ActiveWeapon == WEAPON_GRENADE || m_Core.m_ActiveWeapon == WEAPON_SHOTGUN || m_Core.m_ActiveWeapon == WEAPON_LASER)
 		FullAuto = true;
-	if (m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN)
+	if(m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN)
+		FullAuto = true;
+	if(m_FrozenLastTick)
 		FullAuto = true;
 
 	// don't fire hammer when player is deep and sv_deepfly is disabled
@@ -322,7 +325,7 @@ void CCharacter::FireWeapon()
 				float Strength = GetTuning(m_TuneZone)->m_HammerStrength;
 
 				vec2 Temp = pTarget->m_Core.m_Vel + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
-				Temp = pTarget->Core()->LimitVel(Temp);
+				Temp = ClampVel(pTarget->m_MoveRestrictions, Temp);
 				Temp -= pTarget->m_Core.m_Vel;
 
 				vec2 Force = vec2(0.f, -1.0f) + Temp;
@@ -373,8 +376,7 @@ void CCharacter::FireWeapon()
 						0,//Freeze
 						0,//Explosive
 						0,//Force
-						-1,//SoundImpact
-						WEAPON_GUN//Weapon
+						-1//SoundImpact
 						);
 			}
 		} break;
@@ -402,8 +404,7 @@ void CCharacter::FireWeapon()
 						0,//Freeze
 						0,//Explosive
 						0,//Force
-						-1,//SoundImpact
-						WEAPON_SHOTGUN//Weapon
+						-1//SoundImpact
 						);
 				}
 			}
@@ -430,8 +431,7 @@ void CCharacter::FireWeapon()
 					0,//Freeze
 					true,//Explosive
 					0,//Force
-					SOUND_GRENADE_EXPLODE,//SoundImpact
-					WEAPON_GRENADE//Weapon
+					SOUND_GRENADE_EXPLODE//SoundImpact
 					);//SoundImpact
 		} break;
 
@@ -484,18 +484,6 @@ void CCharacter::HandleWeapons()
 	return;
 }
 
-bool CCharacter::GiveWeapon(int Weapon, int Ammo)
-{
-	if(m_aWeapons[Weapon].m_Ammo < g_pData->m_Weapons.m_aId[Weapon].m_Maxammo || !m_aWeapons[Weapon].m_Got)
-	{
-		m_aWeapons[Weapon].m_Got = true;
-		if(!m_FreezeTime)
-			m_aWeapons[Weapon].m_Ammo = minimum(g_pData->m_Weapons.m_aId[Weapon].m_Maxammo, Ammo);
-		return true;
-	}
-	return false;
-}
-
 void CCharacter::GiveNinja()
 {
 	m_Ninja.m_ActivationTick = GameWorld()->GameTick();
@@ -510,13 +498,14 @@ void CCharacter::GiveNinja()
 void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 {
 	// copy new input
-	mem_copy(&m_SavedInput, pNewInput, sizeof(m_SavedInput));
 	mem_copy(&m_Input, pNewInput, sizeof(m_Input));
 	//m_NumInputs++;
 
 	// it is not allowed to aim in the center
 	if(m_Input.m_TargetX == 0 && m_Input.m_TargetY == 0)
 		m_Input.m_TargetY = -1;
+
+	mem_copy(&m_SavedInput, &m_Input, sizeof(m_SavedInput));
 }
 
 void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
@@ -567,7 +556,8 @@ void CCharacter::TickDefered()
 
 bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 {
-	m_Core.ApplyForce(Force);
+	vec2 Temp = m_Core.m_Vel + Force;
+	m_Core.m_Vel = ClampVel(m_MoveRestrictions, Temp);
 	return true;
 }
 
@@ -646,7 +636,7 @@ void CCharacter::HandleSkippableTiles(int Index)
 			}
 			else
 				TempVel += Direction * Force;
-			m_Core.m_Vel = m_Core.LimitVel(TempVel);
+			m_Core.m_Vel = ClampVel(m_MoveRestrictions, TempVel);
 		}
 	}
 }
@@ -666,12 +656,12 @@ void CCharacter::HandleTiles(int Index)
 	m_MoveRestrictions = Collision()->GetMoveRestrictions(IsSwitchActiveCb, this, m_Pos);
 
 	// stopper
-	m_Core.m_Vel = ClampVel(m_MoveRestrictions, m_Core.m_Vel);
-	if(m_MoveRestrictions&CANTMOVE_DOWN)
+	if(m_Core.m_Vel.y > 0 && (m_MoveRestrictions&CANTMOVE_DOWN))
 	{
 		m_Core.m_Jumped = 0;
 		m_Core.m_JumpedTotal = 0;
 	}
+	m_Core.m_Vel = ClampVel(m_MoveRestrictions, m_Core.m_Vel);
 
 	if(!GameWorld()->m_WorldConfig.m_PredictTiles)
 		return;
@@ -706,10 +696,12 @@ void CCharacter::HandleTiles(int Index)
 	if(((m_TileIndex == TILE_EHOOK_START) || (m_TileFIndex == TILE_EHOOK_START)) && !m_EndlessHook)
 	{
 		m_EndlessHook = true;
+		m_Core.m_EndlessHook = true;
 	}
 	else if(((m_TileIndex == TILE_EHOOK_END) || (m_TileFIndex == TILE_EHOOK_END)) && m_EndlessHook)
 	{
 		m_EndlessHook = false;
+		m_Core.m_EndlessHook = false;
 	}
 
 	// collide with others
@@ -736,10 +728,12 @@ void CCharacter::HandleTiles(int Index)
 	if(((m_TileIndex == TILE_SUPER_START) || (m_TileFIndex == TILE_SUPER_START)) && !m_SuperJump)
 	{
 		m_SuperJump = true;
+		m_Core.m_EndlessJump = true;
 	}
 	else if(((m_TileIndex == TILE_SUPER_END) || (m_TileFIndex == TILE_SUPER_END)) && m_SuperJump)
 	{
 		m_SuperJump = false;
+		m_Core.m_EndlessJump = false;
 	}
 
 	// walljump
@@ -757,10 +751,12 @@ void CCharacter::HandleTiles(int Index)
 	if(((m_TileIndex == TILE_JETPACK_START) || (m_TileFIndex == TILE_JETPACK_START)) && !m_Jetpack)
 	{
 		m_Jetpack = true;
+		m_Core.m_Jetpack = true;
 	}
 	else if(((m_TileIndex == TILE_JETPACK_END) || (m_TileFIndex == TILE_JETPACK_END)) && m_Jetpack)
 	{
 		m_Jetpack = false;
+		m_Core.m_Jetpack = false;
 	}
 
 	// solo part
@@ -872,6 +868,8 @@ void CCharacter::DDRacePostCoreTick()
 	if (m_EndlessHook)
 		m_Core.m_HookTick = 0;
 
+	m_FrozenLastTick = false;
+
 	if (m_DeepFreeze && !m_Super)
 		Freeze();
 
@@ -934,20 +932,43 @@ bool CCharacter::UnFreeze()
 			m_Core.m_ActiveWeapon = WEAPON_GUN;
 		m_FreezeTime = 0;
 		m_FreezeTick = 0;
-		if (m_Core.m_ActiveWeapon==WEAPON_HAMMER) m_ReloadTimer = 0;
+		m_FrozenLastTick = true;
 		return true;
 	}
 	return false;
+}
+
+void CCharacter::GiveWeapon(int Weapon, bool Remove)
+{
+	if(Weapon == WEAPON_NINJA)
+	{
+		if(Remove)
+			RemoveNinja();
+		else
+			GiveNinja();
+		return;
+	}
+
+	if(Remove)
+	{
+		if(GetActiveWeapon() == Weapon)
+			SetActiveWeapon(WEAPON_GUN);
+	}
+	else
+	{
+		if(!m_FreezeTime)
+			m_aWeapons[Weapon].m_Ammo = -1;
+	}
+
+	m_aWeapons[Weapon].m_Got = !Remove;
 }
 
 void CCharacter::GiveAllWeapons()
 {
 	for(int i=WEAPON_GUN;i<NUM_WEAPONS-1;i++)
 	{
-		m_aWeapons[i].m_Got = true;
-		if(!m_FreezeTime) m_aWeapons[i].m_Ammo = -1;
+		GiveWeapon(i);
 	}
-	return;
 }
 
 CTeamsCore* CCharacter::TeamsCore()
@@ -1001,6 +1022,7 @@ void CCharacter::ResetPrediction()
 	m_FreezeTime = 0;
 	m_FreezeTick = 0;
 	m_DeepFreeze = 0;
+	m_FrozenLastTick = false;
 	m_Super = false;
 	for(int w = 0; w < NUM_WEAPONS; w++)
 	{
