@@ -736,13 +736,14 @@ void CChat::OnPrepareLines()
 	float FontSize = 6.0f;
 
 	bool ForceRecreate = m_pClient->m_pScoreboard->Active() != m_PrevScoreBoardShowed;
-	ForceRecreate |= m_Show != m_PrevShowChat;
+	bool ShowLargeArea = m_Show || g_Config.m_ClShowChat == 2;
+	ForceRecreate |= ShowLargeArea != m_PrevShowChat;
 	m_PrevScoreBoardShowed = m_pClient->m_pScoreboard->Active();
-	m_PrevShowChat = m_Show;
+	m_PrevShowChat = ShowLargeArea;
 
 	int64 Now = time();
 	float LineWidth = m_pClient->m_pScoreboard->Active() ? 90.0f : 200.0f;
-	float HeightLimit = m_pClient->m_pScoreboard->Active() ? 230.0f : m_Show ? 50.0f : 200.0f;
+	float HeightLimit = m_pClient->m_pScoreboard->Active() ? 230.0f : m_PrevShowChat ? 50.0f : 200.0f;
 	float Begin = x;
 	CTextCursor Cursor;
 	int OffsetType = m_pClient->m_pScoreboard->Active() ? 1 : 0;
@@ -750,7 +751,7 @@ void CChat::OnPrepareLines()
 	{
 
 		int r = ((m_CurrentLine - i) + MAX_LINES) % MAX_LINES;
-		if(Now > m_aLines[r].m_Time + 16 * time_freq() && !m_Show)
+		if(Now > m_aLines[r].m_Time + 16 * time_freq() && !m_PrevShowChat)
 			break;
 
 		if(m_aLines[r].m_TextContainerIndex != -1 && !ForceRecreate)
@@ -973,12 +974,12 @@ void CChat::OnRender()
 	OnPrepareLines();
 
 	int64 Now = time();
-	float HeightLimit = m_pClient->m_pScoreboard->Active() ? 230.0f : m_Show ? 50.0f : 200.0f;
+	float HeightLimit = m_pClient->m_pScoreboard->Active() ? 230.0f : m_PrevShowChat ? 50.0f : 200.0f;
 	int OffsetType = m_pClient->m_pScoreboard->Active() ? 1 : 0;
 	for(int i = 0; i < MAX_LINES; i++)
 	{
 		int r = ((m_CurrentLine-i)+MAX_LINES)%MAX_LINES;
-		if(Now > m_aLines[r].m_Time+16*time_freq() && !m_Show)
+		if(Now > m_aLines[r].m_Time+16*time_freq() && !m_PrevShowChat)
 			break;
 
 		y -= m_aLines[r].m_YOffset[OffsetType];
@@ -987,7 +988,7 @@ void CChat::OnRender()
 		if(y < HeightLimit)
 			break;
 
-		float Blend = Now > m_aLines[r].m_Time + 14 * time_freq() && !m_Show ? 1.0f - (Now - m_aLines[r].m_Time - 14 * time_freq()) / (2.0f*time_freq()) : 1.0f;
+		float Blend = Now > m_aLines[r].m_Time + 14 * time_freq() && !m_PrevShowChat ? 1.0f - (Now - m_aLines[r].m_Time - 14 * time_freq()) / (2.0f*time_freq()) : 1.0f;
 
 		if(m_aLines[r].m_TextContainerIndex != -1)
 		{
