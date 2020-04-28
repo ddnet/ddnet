@@ -1054,6 +1054,21 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 			GiveNinja();
 		else if(!Ninja && m_Core.m_ActiveWeapon == WEAPON_NINJA)
 			RemoveNinja();
+
+		m_DeepFreeze = false;
+		if(GameWorld()->m_WorldConfig.m_PredictFreeze && pExtended->m_FreezeEnd != 0)
+		{
+			if(pExtended->m_FreezeEnd > 0)
+			{
+				if(m_FreezeTime == 0)
+					Freeze();
+				m_FreezeTime = pExtended->m_FreezeEnd - GameWorld()->GameTick();
+			}
+			else if(pExtended->m_FreezeEnd == -1)
+				m_DeepFreeze = true;
+		}
+		else
+			UnFreeze();
 	}
 	else
 	{
@@ -1117,15 +1132,15 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 
 		if(m_Core.m_HookTick != 0)
 			m_EndlessHook = false;
-	}
 
-	// detect unfreeze (in case the player was frozen in the tile prediction and not correclty unfrozen)
-	if(pChar->m_Emote != EMOTE_PAIN && pChar->m_Emote != EMOTE_NORMAL)
-		m_DeepFreeze = false;
-	if(pChar->m_Weapon != WEAPON_NINJA || pChar->m_AttackTick > m_FreezeTick || absolute(pChar->m_VelX) == 256*10 || !GameWorld()->m_WorldConfig.m_PredictFreeze)
-	{
-		m_DeepFreeze = false;
-		UnFreeze();
+		// detect unfreeze (in case the player was frozen in the tile prediction and not correctly unfrozen)
+		if(pChar->m_Emote != EMOTE_PAIN && pChar->m_Emote != EMOTE_NORMAL)
+			m_DeepFreeze = false;
+		if(pChar->m_Weapon != WEAPON_NINJA || pChar->m_AttackTick > m_FreezeTick || absolute(pChar->m_VelX) == 256*10 || !GameWorld()->m_WorldConfig.m_PredictFreeze)
+		{
+			m_DeepFreeze = false;
+			UnFreeze();
+		}
 	}
 
 	vec2 PosBefore = m_Pos;

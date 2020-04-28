@@ -454,6 +454,7 @@ public:
 	bool AntiPingWeapons() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingWeapons && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK; }
 	bool AntiPingGunfire() { return AntiPingGrenade() && AntiPingWeapons() && g_Config.m_ClAntiPingGunfire; }
 	bool Predict() { return g_Config.m_ClPredict && !(m_Snap.m_pGameInfoObj && m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER) && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK && m_Snap.m_pLocalCharacter; }
+	bool PredictDummy() { return g_Config.m_ClPredictDummy && Client()->DummyConnected() && m_Snap.m_LocalClientID >= 0 && m_PredictedDummyID >= 0; }
 
 	CGameWorld m_GameWorld;
 	CGameWorld m_PredictedWorld;
@@ -471,6 +472,8 @@ private:
 	void DetectStrongHook();
 	vec2 GetSmoothPos(int ClientID);
 
+	int m_PredictedDummyID;
+	int m_IsDummySwapping;
 	CCharOrder m_CharOrder;
 	class CCharacter m_aLastWorldCharacters[MAX_CLIENTS];
 
