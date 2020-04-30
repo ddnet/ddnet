@@ -375,6 +375,7 @@ void CCharacter::FireWeapon()
 
 	if (m_FreezeTime)
 	{
+		// Timer stuff to avoid shrieking orchestra caused by unfreeze-plasma
 		if(m_PainSoundTimer<=0)
 		{
 			m_PainSoundTimer = 1 * Server()->TickSpeed();
@@ -389,7 +390,6 @@ void CCharacter::FireWeapon()
 		/*// 125ms is a magical limit of how fast a human can click
 		m_ReloadTimer = 125 * Server()->TickSpeed() / 1000;
 		GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO);*/
-		// Timer stuff to avoid shrieking orchestra caused by unfreeze-plasma
 		return;
 	}
 
