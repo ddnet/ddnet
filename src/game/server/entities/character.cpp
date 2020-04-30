@@ -157,7 +157,7 @@ void CCharacter::HandleJetpack()
 		return;
 
 	// check for ammo
-	if(!m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo)
+	if(!m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo || m_FreezeTime)
 	{
 		return;
 	}
@@ -373,18 +373,23 @@ void CCharacter::FireWeapon()
 	if(!WillFire)
 		return;
 
-	// check for ammo
-	if(!m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo)
+	if (m_FreezeTime)
 	{
-		/*// 125ms is a magical limit of how fast a human can click
-		m_ReloadTimer = 125 * Server()->TickSpeed() / 1000;
-		GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO);*/
 		// Timer stuff to avoid shrieking orchestra caused by unfreeze-plasma
 		if(m_PainSoundTimer<=0)
 		{
 			m_PainSoundTimer = 1 * Server()->TickSpeed();
 			GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_LONG, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 		}
+		return;
+	}
+
+	// check for ammo
+	if(!m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo)
+	{
+		/*// 125ms is a magical limit of how fast a human can click
+		m_ReloadTimer = 125 * Server()->TickSpeed() / 1000;
+		GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO);*/
 		return;
 	}
 
@@ -663,8 +668,7 @@ void CCharacter::GiveNinja()
 {
 	m_Ninja.m_ActivationTick = Server()->Tick();
 	m_aWeapons[WEAPON_NINJA].m_Got = true;
-	if (!m_FreezeTime)
-		m_aWeapons[WEAPON_NINJA].m_Ammo = -1;
+	m_aWeapons[WEAPON_NINJA].m_Ammo = -1;
 	if (m_Core.m_ActiveWeapon != WEAPON_NINJA)
 		m_LastWeapon = m_Core.m_ActiveWeapon;
 	m_Core.m_ActiveWeapon = WEAPON_NINJA;
@@ -2224,13 +2228,6 @@ bool CCharacter::Freeze(int Seconds)
 		 return false;
 	if (m_FreezeTick < Server()->Tick() - Server()->TickSpeed() || Seconds == -1)
 	{
-		for(int i = 0; i < NUM_WEAPONS; i++)
-		{
-			if(m_aWeapons[i].m_Got)
-			{
-				m_aWeapons[i].m_Ammo = 0;
-			}
-		}
 		m_Armor = 0;
 		m_FreezeTime = Seconds == -1 ? Seconds : Seconds * Server()->TickSpeed();
 		m_FreezeTick = Server()->Tick();
@@ -2249,11 +2246,6 @@ bool CCharacter::UnFreeze()
 	if (m_FreezeTime > 0)
 	{
 		m_Armor=10;
-		for(int i=0;i<NUM_WEAPONS;i++)
-			if(m_aWeapons[i].m_Got)
-			 {
-				 m_aWeapons[i].m_Ammo = -1;
-			 }
 		if(!m_aWeapons[m_Core.m_ActiveWeapon].m_Got)
 			m_Core.m_ActiveWeapon = WEAPON_GUN;
 		m_FreezeTime = 0;
@@ -2282,8 +2274,7 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove)
 	}
 	else
 	{
-		if (!m_FreezeTime)
-			m_aWeapons[Weapon].m_Ammo = -1;
+		m_aWeapons[Weapon].m_Ammo = -1;
 	}
 
 	m_aWeapons[Weapon].m_Got = !Remove;
