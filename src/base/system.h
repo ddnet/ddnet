@@ -27,10 +27,6 @@
 #include <netinet/in.h>
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* Group: Debug */
 /*
 	Function: dbg_assert
@@ -2007,9 +2003,5 @@ void secure_random_fill(void *bytes, unsigned length);
 		Returns random int (replacement for rand()).
 */
 int secure_rand(void);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

@@ -629,14 +629,14 @@ generate_source("src/game/generated/server_data.h" "server_content_header")
 set_src(BASE GLOB_RECURSE src/base
   color.h
   detect.h
-  hash.c
+  hash.cpp
   hash.h
-  hash_bundled.c
+  hash_bundled.cpp
   hash_ctxt.h
-  hash_libtomcrypt.c
-  hash_openssl.c
+  hash_libtomcrypt.cpp
+  hash_openssl.cpp
   math.h
-  system.c
+  system.cpp
   system.h
   tl/algorithm.h
   tl/allocator.h
@@ -646,9 +646,9 @@ set_src(BASE GLOB_RECURSE src/base
   tl/sorted_array.h
   tl/string.h
   tl/threading.h
-  unicode/confusables.c
+  unicode/confusables.cpp
   unicode/confusables_data.h
-  unicode/tolower.c
+  unicode/tolower.cpp
   unicode/tolower_data.h
   vmath.h
 )

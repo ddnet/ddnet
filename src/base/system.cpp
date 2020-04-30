@@ -64,10 +64,6 @@
 	#include <sys/filio.h>
 #endif
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
 #ifdef FUZZING
 static unsigned char gs_NetData[1024];
 static int gs_NetPosition = 0;
@@ -431,7 +427,7 @@ static void aio_handle_free_and_unlock(ASYNCIO *aio)
 
 static void aio_thread(void *user)
 {
-	ASYNCIO *aio = user;
+	auto aio = static_cast<ASYNCIO*>(user);
 
 	lock_wait(aio->lock);
 	while(1)
@@ -491,7 +487,7 @@ static void aio_thread(void *user)
 
 ASYNCIO *aio_new(IOHANDLE io)
 {
-	ASYNCIO *aio = malloc(sizeof(*aio));
+	ASYNCIO *aio = static_cast<ASYNCIO*>(malloc(sizeof(*aio)));
 	if(!aio)
 	{
 		return 0;
@@ -501,7 +497,7 @@ ASYNCIO *aio_new(IOHANDLE io)
 	sphore_init(&aio->sphore);
 	aio->thread = 0;
 
-	aio->buffer = malloc(ASYNC_BUFSIZE);
+	aio->buffer = static_cast<unsigned char*>(malloc(ASYNC_BUFSIZE));
 	if(!aio->buffer)
 	{
 		sphore_destroy(&aio->sphore);
@@ -585,7 +581,7 @@ void aio_write_unlocked(ASYNCIO *aio, const void *buffer, unsigned size)
 		unsigned int new_written = buffer_len(aio) + size + 1;
 		unsigned int next_size = next_buffer_size(aio->buffer_size, new_written);
 		unsigned int next_len = 0;
-		unsigned char *next_buffer = malloc(next_size);
+		auto next_buffer = static_cast<unsigned char*>(malloc(next_size));
 
 		struct BUFFERS buffers;
 		buffer_ptrs(aio, &buffers);
@@ -690,7 +686,7 @@ static unsigned long __stdcall thread_run(void *user)
 #error not implemented
 #endif
 {
-	struct THREAD_RUN *data = user;
+	auto data = static_cast<struct THREAD_RUN*>(user);
 	void (*threadfunc)(void *) = data->threadfunc;
 	void *u = data->u;
 	free(data);
@@ -700,7 +696,7 @@ static unsigned long __stdcall thread_run(void *user)
 
 void *thread_init(void (*threadfunc)(void *), void *u, const char *name)
 {
-	struct THREAD_RUN *data = malloc(sizeof(*data));
+	struct THREAD_RUN *data = static_cast<struct THREAD_RUN*>(malloc(sizeof(*data)));
 	data->threadfunc = threadfunc;
 	data->u = u;
 #if defined(CONF_FAMILY_UNIX)
@@ -2768,7 +2764,7 @@ static int byteval(const char *byte, unsigned char *dst)
 
 int str_hex_decode(void *dst, int dst_size, const char *src)
 {
-	unsigned char *cdst = dst;
+	auto cdst = static_cast<unsigned char*>(dst);
 	int slen = str_length(src);
 	int len = slen / 2;
 	int i;
@@ -3369,7 +3365,3 @@ int secure_rand(void)
 	secure_random_fill(&i, sizeof(i));
 	return (int)(i%RAND_MAX);
 }
-
-#if defined(__cplusplus)
-}
-#endif
