@@ -110,21 +110,16 @@ void dbg_break_imp()
 
 void dbg_msg(const char *sys, const char *fmt, ...)
 {
-	va_list args;
-	char *msg;
-	int len;
-
-	char str[1024*4];
-	int i;
-
 	char timestr[80];
 	str_timestamp_format(timestr, sizeof(timestr), FORMAT_SPACE);
 
+	char str[1024*4];
 	str_format(str, sizeof(str), "[%s][%s]: ", timestr, sys);
 
-	len = strlen(str);
-	msg = (char *)str + len;
+	int len = strlen(str);
+	char *msg = (char *)str + len;
 
+	va_list args;
 	va_start(args, fmt);
 #if defined(CONF_FAMILY_WINDOWS)
 	_vsnprintf(msg, sizeof(str)-len, fmt, args);
@@ -133,7 +128,7 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 #endif
 	va_end(args);
 
-	for(i = 0; i < num_loggers; i++)
+	for(int i = 0; i < num_loggers; i++)
 		loggers[i].logger(str, loggers[i].user);
 }
 
@@ -203,8 +198,7 @@ static void logger_file_finish(void *user)
 
 static void dbg_logger_finish()
 {
-	int i;
-	for(i = 0; i < num_loggers; i++)
+	for(int i = 0; i < num_loggers; i++)
 	{
 		if(loggers[i].finish)
 		{
