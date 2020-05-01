@@ -156,11 +156,10 @@ void CGameWorld::RemoveEntity(CEntity *pEnt)
 			m_Core.m_apCharacters[ID] = 0;
 		}
 	}
-	pEnt->m_pParent = 0;
 
-	if(m_IsValidCopy && m_pParent && m_pParent->m_pChild == this)
-		if(pEnt->m_pParent)
-			pEnt->m_pParent->m_DestroyTick = GameTick();
+	if(m_IsValidCopy && m_pParent && m_pParent->m_pChild == this && pEnt->m_pParent)
+		pEnt->m_pParent->m_DestroyTick = GameTick();
+	pEnt->m_pParent = 0;
 }
 
 void CGameWorld::RemoveEntities()

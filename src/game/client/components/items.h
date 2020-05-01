@@ -27,7 +27,7 @@ public:
 
 	void AddExtraProjectile(CNetObj_Projectile *pProj);
 
-	void ReconstructSmokeTrail(const CNetObj_Projectile *pCurrent, int ItemID, int DestroyTick, int LifeSpan);
+	void ReconstructSmokeTrail(const CNetObj_Projectile *pCurrent, int ItemID, int DestroyTick);
 };
 
 #endif

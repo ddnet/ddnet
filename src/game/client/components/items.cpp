@@ -329,7 +329,7 @@ void CItems::OnRender()
 					&& (pProj->GetOwner() < 0 || !GameClient()->m_aClients[pProj->GetOwner()].m_IsPredictedLocal) // skip locally predicted projectiles
 					&& !Client()->SnapFindItem(IClient::SNAP_PREV, Item.m_Type, Item.m_ID))
 					{
-						ReconstructSmokeTrail((const CNetObj_Projectile *)pData, Item.m_ID, pProj->m_DestroyTick, pProj->m_LifeSpan);
+						ReconstructSmokeTrail((const CNetObj_Projectile *)pData, Item.m_ID, pProj->m_DestroyTick);
 					}
 					pProj->m_LastRenderTick = Client()->GameTick(g_Config.m_ClDummy);
 					continue;
@@ -442,7 +442,7 @@ void CItems::AddExtraProjectile(CNetObj_Projectile *pProj)
 	}
 }
 
-void CItems::ReconstructSmokeTrail(const CNetObj_Projectile *pCurrent, int ItemID, int DestroyTick, int LifeSpan)
+void CItems::ReconstructSmokeTrail(const CNetObj_Projectile *pCurrent, int ItemID, int DestroyTick)
 {
 	bool LocalPlayerInGame = false;
 
@@ -495,7 +495,6 @@ void CItems::ReconstructSmokeTrail(const CNetObj_Projectile *pCurrent, int ItemI
 	float T = Pt;
 	if(DestroyTick >= 0)
 		T = minimum(Pt, ((float)(DestroyTick - 1 - pCurrent->m_StartTick) + Client()->PredIntraGameTick(g_Config.m_ClDummy))/(float)SERVER_TICK_SPEED);
-	T = minimum(T, LifeSpan/(float)SERVER_TICK_SPEED);
 
 	float MinTrailSpan = 0.4f * ((pCurrent->m_Type == WEAPON_GRENADE) ? 0.5f : 0.25f);
 	float Step = maximum(Client()->FrameTimeAvg(), (pCurrent->m_Type == WEAPON_GRENADE) ? 0.02f : 0.01f);
