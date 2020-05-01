@@ -106,7 +106,8 @@ void CSaveTee::load(CCharacter *pChr, int Team)
 	for(int i = 0; i< NUM_WEAPONS; i++)
 	{
 		pChr->m_aWeapons[i].m_AmmoRegenStart = m_aWeapons[i].m_AmmoRegenStart;
-		pChr->m_aWeapons[i].m_Ammo = m_aWeapons[i].m_Ammo;
+		// m_Ammo not used anymore for tracking freeze following https://github.com/ddnet/ddnet/pull/2086
+		pChr->m_aWeapons[i].m_Ammo = -1;
 		pChr->m_aWeapons[i].m_Ammocost = m_aWeapons[i].m_Ammocost;
 		pChr->m_aWeapons[i].m_Got = m_aWeapons[i].m_Got;
 	}
