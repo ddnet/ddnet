@@ -413,7 +413,7 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 	{
 		if(m_DummyFire != 0)
 		{
-			m_DummyInput.m_Fire = m_HammerInput.m_Fire;
+			m_DummyInput.m_Fire = (m_HammerInput.m_Fire+1) & ~1;
 			m_DummyFire = 0;
 		}
 
@@ -434,7 +434,7 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 		}
 		m_DummyFire++;
 
-		m_HammerInput.m_Fire += 2;
+		m_HammerInput.m_Fire = (m_HammerInput.m_Fire+1) | 1;
 		m_HammerInput.m_WantedWeapon = WEAPON_HAMMER + 1;
 		if(!g_Config.m_ClDummyRestoreWeapon)
 		{
