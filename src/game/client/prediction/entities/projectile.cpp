@@ -168,7 +168,7 @@ CProjectile::CProjectile(CGameWorld *pGameWorld, int ID, CNetObj_Projectile *pPr
 		m_Bouncing = m_Freeze = 0;
 		m_Explosive = (pProj->m_Type == WEAPON_GRENADE) && (fabs(1.0f - length(m_Direction)) < 0.015f);
 	}
-	m_Type = m_Type = pProj->m_Type;
+	m_Type = pProj->m_Type;
 	m_StartTick = pProj->m_StartTick;
 	m_TuneZone = GameWorld()->m_WorldConfig.m_PredictTiles ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
 

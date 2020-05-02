@@ -34,12 +34,9 @@ void CPickup::Tick()
 					{
 						if(pChr->GetWeaponGot(i))
 						{
-							if(!(pChr->m_FreezeTime && i == WEAPON_NINJA))
-							{
-								pChr->SetWeaponGot(i, false);
-								pChr->SetWeaponAmmo(i, 0);
-								sound = true;
-							}
+							pChr->SetWeaponGot(i, false);
+							pChr->SetWeaponAmmo(i, 0);
+							sound = true;
 						}
 					}
 					pChr->SetNinjaActivationDir(vec2(0,0));
@@ -47,12 +44,12 @@ void CPickup::Tick()
 					pChr->SetNinjaCurrentMoveTime(0);
 					if (sound)
 						pChr->SetLastWeapon(WEAPON_GUN);
-					if(!pChr->m_FreezeTime && pChr->GetActiveWeapon() >= WEAPON_SHOTGUN)
+					if(pChr->GetActiveWeapon() >= WEAPON_SHOTGUN)
 						pChr->SetActiveWeapon(WEAPON_HAMMER);
 					break;
 
 				case POWERUP_WEAPON:
-					if(m_Subtype >= 0 && m_Subtype < NUM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || (pChr->GetWeaponAmmo(m_Subtype) != -1 && !pChr->m_FreezeTime)))
+					if(m_Subtype >= 0 && m_Subtype < NUM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) != -1))
 						pChr->GiveWeapon(m_Subtype);
 					break;
 
