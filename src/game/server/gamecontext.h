@@ -243,6 +243,7 @@ public:
 
 	virtual void OnClientEngineJoin(int ClientID);
 	virtual void OnClientEngineDrop(int ClientID, const char *pReason);
+	virtual void OnClientEngineMessage(int ClientID, const void *pData, int Size, int Flags);
 
 	virtual bool IsClientReady(int ClientID);
 	virtual bool IsClientPlayer(int ClientID);

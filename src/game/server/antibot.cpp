@@ -18,6 +18,20 @@ static void Report(int ClientID, const char *pMessage, void *pUser)
 	str_format(aBuf, sizeof(aBuf), "%d: %s", ClientID, pMessage);
 	Log(aBuf, pUser);
 }
+static void Send(int ClientID, const void *pData, int Size, int Flags, void *pUser)
+{
+	CGameContext *pGameContext = (CGameContext *)pUser;
+	int RealFlags = MSGFLAG_VITAL;
+	if(Flags&ANTIBOT_MSGFLAG_NONVITAL)
+	{
+		RealFlags &= ~MSGFLAG_VITAL;
+	}
+	if(Flags&ANTIBOT_MSGFLAG_FLUSH)
+	{
+		RealFlags |= MSGFLAG_FLUSH;
+	}
+	pGameContext->Server()->SendMsgRaw(ClientID, pData, Size, RealFlags);
+}
 
 CAntibot::CAntibot()
 	: m_pGameContext(0)
@@ -42,6 +56,7 @@ void CAntibot::Init(CGameContext *pGameContext)
 	g_Data.m_Map.m_pTiles = 0;
 	g_Data.m_pfnLog = Log;
 	g_Data.m_pfnReport = Report;
+	g_Data.m_pfnSend = Send;
 	g_Data.m_pUser = m_pGameContext;
 	AntibotInit(&g_Data);
 	Update();
@@ -62,6 +77,18 @@ void CAntibot::OnHammerHit(int ClientID) { Update(); AntibotOnHammerHit(ClientID
 void CAntibot::OnDirectInput(int ClientID) { Update(); AntibotOnDirectInput(ClientID); }
 void CAntibot::OnTick(int ClientID) { Update(); AntibotOnTick(ClientID); }
 void CAntibot::OnHookAttach(int ClientID, bool Player) { Update(); AntibotOnHookAttach(ClientID, Player); }
+
+void CAntibot::OnEngineClientJoin(int ClientID) { AntibotOnEngineClientJoin(ClientID); }
+void CAntibot::OnEngineClientDrop(int ClientID, const char *pReason) { AntibotOnEngineClientDrop(ClientID, pReason); }
+void CAntibot::OnEngineClientMessage(int ClientID, const void *pData, int Size, int Flags)
+{
+	int AntibotFlags = 0;
+	if((Flags&MSGFLAG_VITAL) == 0)
+	{
+		AntibotFlags |= ANTIBOT_MSGFLAG_NONVITAL;
+	}
+	AntibotOnEngineClientMessage(ClientID, pData, Size, Flags);
+}
 #else
 CAntibot::CAntibot() :
 	m_pGameContext(0)
@@ -91,4 +118,8 @@ void CAntibot::OnHammerHit(int ClientID) { }
 void CAntibot::OnDirectInput(int ClientID) { }
 void CAntibot::OnTick(int ClientID) { }
 void CAntibot::OnHookAttach(int ClientID, bool Player) { }
+
+void CAntibot::OnEngineClientJoin(int ClientID) { }
+void CAntibot::OnEngineClientDrop(int ClientID, const char *pReason) { }
+void CAntibot::OnEngineClientMessage(int ClientID, const void *pData, int Size, int Flags) { }
 #endif

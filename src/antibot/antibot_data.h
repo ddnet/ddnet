@@ -5,6 +5,9 @@
 
 enum
 {
+	ANTIBOT_MSGFLAG_NONVITAL=1,
+	ANTIBOT_MSGFLAG_FLUSH=2,
+
 	ANTIBOT_MAX_CLIENTS=64,
 };
 
@@ -53,6 +56,7 @@ struct CAntibotData
 	CAntibotMapData m_Map;
 	void (*m_pfnLog)(const char *pMessage, void *pUser);
 	void (*m_pfnReport)(int ClientID, const char *pMessage, void *pUser);
+	void (*m_pfnSend)(int ClientID, const void *pData, int DataSize, int Flags, void *pUser);
 	void *m_pUser;
 };
 

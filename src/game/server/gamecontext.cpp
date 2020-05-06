@@ -1208,6 +1208,7 @@ void CGameContext::OnClientEngineJoin(int ClientID)
 	{
 		m_TeeHistorian.RecordPlayerJoin(ClientID);
 	}
+	m_Antibot.OnEngineClientJoin(ClientID);
 }
 
 void CGameContext::OnClientEngineDrop(int ClientID, const char *pReason)
@@ -1216,6 +1217,12 @@ void CGameContext::OnClientEngineDrop(int ClientID, const char *pReason)
 	{
 		m_TeeHistorian.RecordPlayerDrop(ClientID, pReason);
 	}
+	m_Antibot.OnEngineClientDrop(ClientID, pReason);
+}
+
+void CGameContext::OnClientEngineMessage(int ClientID, const void *pData, int Size, int Flags)
+{
+	m_Antibot.OnEngineClientMessage(ClientID, pData, Size, Flags);
 }
 
 void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)

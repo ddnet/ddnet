@@ -22,6 +22,10 @@ public:
 	void OnDirectInput(int ClientID);
 	void OnTick(int ClientID);
 	void OnHookAttach(int ClientID, bool Player);
+
+	void OnEngineClientJoin(int ClientID);
+	void OnEngineClientDrop(int ClientID, const char *pReason);
+	void OnEngineClientMessage(int ClientID, const void *pData, int Size, int Flags);
 };
 
 #endif // GAME_SERVER_ANTIBOT_H

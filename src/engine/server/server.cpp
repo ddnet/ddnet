@@ -663,6 +663,25 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
 	return 0;
 }
 
+void CServer::SendMsgRaw(int ClientID, const void *pData, int Size, int Flags)
+{
+	CNetChunk Packet;
+	mem_zero(&Packet, sizeof(CNetChunk));
+	Packet.m_ClientID = ClientID;
+	Packet.m_pData = pData;
+	Packet.m_DataSize = Size;
+	Packet.m_Flags = 0;
+	if(Flags&MSGFLAG_VITAL)
+	{
+		Packet.m_Flags |= NETSENDFLAG_VITAL;
+	}
+	if(Flags&MSGFLAG_FLUSH)
+	{
+		Packet.m_Flags |= NETSENDFLAG_FLUSH;
+	}
+	m_NetServer.Send(&Packet);
+}
+
 void CServer::DoSnapshot()
 {
 	GameServer()->OnPreSnap();
@@ -1127,6 +1146,13 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 	CUnpacker Unpacker;
 	Unpacker.Reset(pPacket->m_pData, pPacket->m_DataSize);
 	CMsgPacker Packer(NETMSG_EX, true);
+
+	int GameFlags = 0;
+	if(pPacket->m_Flags&NET_CHUNKFLAG_VITAL)
+	{
+		GameFlags |= MSGFLAG_VITAL;
+	}
+	GameServer()->OnClientEngineMessage(ClientID, pPacket->m_pData, pPacket->m_DataSize, GameFlags);
 
 	// unpack msgid and system flag
 	int Msg;

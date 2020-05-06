@@ -412,6 +412,8 @@ public:
 	bool SetTimedOut(int ClientID, int OrigID);
 	void SetTimeoutProtected(int ClientID) { m_NetServer.SetTimeoutProtected(ClientID); };
 
+	void SendMsgRaw(int ClientID, const void *pData, int Size, int Flags);
+
 	bool ErrorShutdown() const { return m_aErrorShutdownReason[0] != 0; }
 	void SetErrorShutdown(const char *pReason);
 

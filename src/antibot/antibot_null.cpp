@@ -1,5 +1,7 @@
 #include "antibot_data.h"
 
+#include <base/system.h>
+
 static CAntibotData *g_pAntibot;
 
 extern "C"
@@ -31,5 +33,8 @@ void AntibotOnHammerHit(int ClientID) { (void)ClientID; }
 void AntibotOnDirectInput(int ClientID) { (void)ClientID; }
 void AntibotOnTick(int ClientID) { (void)ClientID; }
 void AntibotOnHookAttach(int ClientID, bool Player) { (void)ClientID; (void)Player; }
+void AntibotOnEngineClientJoin(int ClientID) { (void)ClientID; }
+void AntibotOnEngineClientDrop(int ClientID, const char *pReason) { (void)ClientID; (void)pReason; }
+void AntibotOnEngineClientMessage(int ClientID, const void *pData, int Size, int Flags) { (void)ClientID; (void)pData; (void)Size; (void)Flags; }
 
 }
