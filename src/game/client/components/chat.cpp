@@ -581,6 +581,11 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 
 	bool Highlighted = false;
 	char *p = const_cast<char*>(pLine);
+
+	// Only empty string left
+	if(*p == 0)
+		return;
+
 	while(*p)
 	{
 		Highlighted = false;
