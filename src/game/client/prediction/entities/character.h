@@ -55,7 +55,7 @@ public:
 
 	bool TakeDamage(vec2 Force, int Dmg, int From, int Weapon);
 
-	bool GiveWeapon(int Weapon, int Ammo);
+	void GiveWeapon(int Weapon, bool Remove = false);
 	void GiveNinja();
 	void RemoveNinja();
 
@@ -77,6 +77,7 @@ public:
 	bool m_NinjaJetpack;
 	int m_FreezeTime;
 	int m_FreezeTick;
+	bool m_FrozenLastTick;
 	bool m_DeepFreeze;
 	bool m_EndlessHook;
 	enum

@@ -257,11 +257,6 @@ public:
 	int m_FreezeEnd;
 	bool m_DeepFrozen;
 
-	// Caps the given velocity according to the current set of stoppers
-	// that the character is affected by.
-	vec2 LimitVel(vec2 Vel);
-	void ApplyForce(vec2 Force);
-
 private:
 
 	CTeamsCore *m_pTeams;
