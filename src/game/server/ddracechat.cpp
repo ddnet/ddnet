@@ -1173,6 +1173,82 @@ void CGameContext::ConShowAll(IConsole::IResult *pResult, void *pUserData)
 		pSelf->SendChatTarget(pResult->m_ClientID, "You will no longer see all tees on this server");
 }
 
+void CGameContext::ConShowToTeleporter(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	if (pResult->NumArguments())
+	{
+		unsigned int TeleTo = pResult->GetInteger(0);
+		if (((CGameControllerDDRace*)pSelf->m_pController)->m_TeleOuts[TeleTo-1].size())
+		{
+			int Num = ((CGameControllerDDRace*)pSelf->m_pController)->m_TeleOuts[TeleTo-1].size();
+			vec2 TelePos = ((CGameControllerDDRace*)pSelf->m_pController)->m_TeleOuts[TeleTo-1][(!Num)?Num:rand() % Num];
+			if(!pPlayer->IsPaused())
+				pPlayer->Pause(CPlayer::PAUSE_PAUSED, true);
+			// need to force position for several ticks to prevent the client from
+			// moving around in gameclient.cpp:UpdatePositions at lines 565-584
+			pPlayer->m_ForceViewPos = pSelf->Server()->Tick()+5;
+			pPlayer->m_ViewPos = TelePos;
+		}
+		else
+		{
+			char msg[64];
+			str_format(msg, sizeof(msg), "No output found for tele %d", TeleTo);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "showtotelechat", msg);
+		}
+	}
+	else
+		pSelf->Console()->Print(
+				IConsole::OUTPUT_LEVEL_STANDARD,
+				"showtotelechat",
+				"Invalid argument... Usage /showtotele i[tele number]");
+}
+
+void CGameContext::ConShowToCheckTeleporter(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	if (pResult->NumArguments())
+	{
+		unsigned int TeleTo = pResult->GetInteger(0);
+		if (((CGameControllerDDRace*)pSelf->m_pController)->m_TeleCheckOuts[TeleTo-1].size())
+		{
+			int Num = ((CGameControllerDDRace*)pSelf->m_pController)->m_TeleCheckOuts[TeleTo-1].size();
+			vec2 TelePos = ((CGameControllerDDRace*)pSelf->m_pController)->m_TeleCheckOuts[TeleTo-1][(!Num)?Num:rand() % Num];
+			if(!pPlayer->IsPaused())
+				pPlayer->Pause(CPlayer::PAUSE_PAUSED, true);
+			// need to force position for several ticks to prevent the client from
+			// moving around in gameclient.cpp:UpdatePositions at lines 565-584
+			pPlayer->m_ForceViewPos = pSelf->Server()->Tick()+5;
+			pPlayer->m_ViewPos = TelePos;
+		}
+		else
+		{
+			char msg[64];
+			str_format(msg, sizeof(msg), "No output found for telecp %d", TeleTo);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "showtotelecpchat", msg);
+		}
+	}
+	else
+		pSelf->Console()->Print(
+				IConsole::OUTPUT_LEVEL_STANDARD,
+				"showtotelecpchat",
+				"Invalid argument... Usage /showtotelecp i[telecp number]");
+}
+
 void CGameContext::ConSpecTeam(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;

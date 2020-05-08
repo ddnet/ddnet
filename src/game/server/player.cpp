@@ -72,6 +72,7 @@ void CPlayer::Reset()
 	m_TimeoutCode[0] = '\0';
 	delete m_pLastTarget;
 	m_pLastTarget = nullptr;
+	m_ForceViewPos = 0;
 	m_TuneZone = 0;
 	m_TuneZoneOld = m_TuneZone;
 	m_Halloween = false;
@@ -208,7 +209,7 @@ void CPlayer::Tick()
 			if(m_pCharacter->IsAlive())
 			{
 				ProcessPause();
-				if(!m_Paused)
+				if(!m_Paused && Server()->Tick() > m_ForceViewPos)
 					m_ViewPos = m_pCharacter->m_Pos;
 			}
 			else if(!m_pCharacter->IsPaused())
@@ -252,7 +253,7 @@ void CPlayer::PostTick()
 	}
 
 	// update view pos for spectators
-	if((m_Team == TEAM_SPECTATORS || m_Paused) && m_SpectatorID != SPEC_FREEVIEW && GameServer()->m_apPlayers[m_SpectatorID] && GameServer()->m_apPlayers[m_SpectatorID]->GetCharacter())
+	if((m_Team == TEAM_SPECTATORS || m_Paused) && m_SpectatorID != SPEC_FREEVIEW && GameServer()->m_apPlayers[m_SpectatorID] && GameServer()->m_apPlayers[m_SpectatorID]->GetCharacter() && Server()->Tick() > m_ForceViewPos)
 		m_ViewPos = GameServer()->m_apPlayers[m_SpectatorID]->GetCharacter()->m_Pos;
 }
 
@@ -316,7 +317,12 @@ void CPlayer::Snap(int SnappingClient)
 		if(!pSpectatorInfo)
 			return;
 
-		pSpectatorInfo->m_SpectatorID = m_SpectatorID;
+		if(Server()->Tick() <= m_ForceViewPos)
+			// SPEC_FREEVIEW will make the client ignore the position, so use own player's ID
+			pSpectatorInfo->m_SpectatorID = m_ClientID;
+		else
+			pSpectatorInfo->m_SpectatorID = m_SpectatorID;
+
 		pSpectatorInfo->m_X = m_ViewPos.x;
 		pSpectatorInfo->m_Y = m_ViewPos.y;
 	}
@@ -435,7 +441,7 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 		return; // we must return if kicked, as player struct is already deleted
 	AfkVoteTimer(NewInput);
 
-	if(((!m_pCharacter && m_Team == TEAM_SPECTATORS) || m_Paused) && m_SpectatorID == SPEC_FREEVIEW)
+	if(((!m_pCharacter && m_Team == TEAM_SPECTATORS) || m_Paused) && m_SpectatorID == SPEC_FREEVIEW && Server()->Tick() > m_ForceViewPos)
 		m_ViewPos = vec2(NewInput->m_TargetX, NewInput->m_TargetY);
 
 	if(NewInput->m_PlayerFlags&PLAYERFLAG_CHATTING)

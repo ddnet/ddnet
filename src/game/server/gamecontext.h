@@ -346,6 +346,8 @@ private:
 	static void ConEyeEmote(IConsole::IResult *pResult, void *pUserData);
 	static void ConShowOthers(IConsole::IResult *pResult, void *pUserData);
 	static void ConShowAll(IConsole::IResult *pResult, void *pUserData);
+	static void ConShowToTeleporter(IConsole::IResult *pResult, void *pUserData);
+	static void ConShowToCheckTeleporter(IConsole::IResult *pResult, void *pUserData);
 	static void ConSpecTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConNinjaJetpack(IConsole::IResult *pResult, void *pUserData);
 	static void ConSayTime(IConsole::IResult *pResult, void *pUserData);
