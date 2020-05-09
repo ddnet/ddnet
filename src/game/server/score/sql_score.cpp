@@ -1468,8 +1468,8 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 
 				// be sure to keep all calls to pData->GameServer() after inserting the save, otherwise it might be lost due to CGameContextError.
 
-				char aBuf2[256];
-				str_format(aBuf2, sizeof(aBuf2), "Team successfully saved. Use '/load %s' to continue", pData->m_Code.Str());
+				char aBuf2[512];
+				str_format(aBuf2, sizeof(aBuf2), "Team successfully saved by %s. Use '/load %s' to continue", pData->Server()->ClientName(pData->m_ClientID), pData->m_Code.Str());
 				pData->GameServer()->SendChatTeam(Team, aBuf2);
 				((CGameControllerDDRace*)(pData->GameServer()->m_pController))->m_Teams.KillSavedTeam(Team);
 			}
@@ -1556,7 +1556,6 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 				pData->GameServer()->SendChatTarget(pData->m_ClientID, "Unable to load savegame: data corrupted");
 			else
 			{
-
 				bool Found = false;
 				for (int i = 0; i < SavedTeam.GetMembersCount(); i++)
 				{
@@ -1604,8 +1603,9 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 					}
 					else
 					{
-						pData->GameServer()->SendChatTeam(Team, "Loading successfully done");
 						char aBuf[512];
+						str_format(aBuf, sizeof(aBuf), "Loading successfully done by %s", pData->Server()->ClientName(pData->m_ClientID));
+						pData->GameServer()->SendChatTeam(Team, aBuf);
 						str_format(aBuf, sizeof(aBuf), "DELETE from %s_saves where Code='%s' and Map='%s';", pSqlServer->GetPrefix(), pData->m_Code.ClrStr(), pData->m_Map.ClrStr());
 						pSqlServer->executeSql(aBuf);
 					}
