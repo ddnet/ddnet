@@ -2108,7 +2108,7 @@ void CCharacter::SendZoneMsgs()
 	}
 }
 
-CAntibot *CCharacter::Antibot()
+IAntibot *CCharacter::Antibot()
 {
 	return GameServer()->Antibot();
 }
