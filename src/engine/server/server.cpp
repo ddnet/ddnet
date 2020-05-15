@@ -2183,6 +2183,8 @@ int CServer::Run()
 			if(m_ServerInfoNeedsUpdate)
 				UpdateServerInfo();
 
+			Antibot()->OnEngineTick();
+
 			if(!NonActive)
 				PumpNetwork();
 

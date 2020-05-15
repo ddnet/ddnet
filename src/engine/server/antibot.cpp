@@ -48,8 +48,12 @@ void CAntibot::Init()
 	m_pServer = Kernel()->RequestInterface<IServer>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	dbg_assert(m_pServer && m_pConsole, "antibot requires server and console");
+	dbg_assert(AntibotAbiVersion() == ANTIBOT_ABI_VERSION, "antibot abi version mismatch");
 
 	mem_zero(&m_Data, sizeof(m_Data));
+	CAntibotVersion Version = ANTIBOT_VERSION;
+	m_Data.m_Version = Version;
+
 	m_Data.m_Now = time_get();
 	m_Data.m_Freq = time_freq();
 	m_Data.m_pfnLog = Log;
@@ -95,10 +99,11 @@ void CAntibot::OnCharacterTick(int ClientID) { Update(); AntibotOnCharacterTick(
 void CAntibot::OnHookAttach(int ClientID, bool Player) { Update(); AntibotOnHookAttach(ClientID, Player); }
 
 void CAntibot::OnEngineTick() { Update(); AntibotOnEngineTick(); }
-void CAntibot::OnEngineClientJoin(int ClientID) { AntibotOnEngineClientJoin(ClientID); }
-void CAntibot::OnEngineClientDrop(int ClientID, const char *pReason) { AntibotOnEngineClientDrop(ClientID, pReason); }
+void CAntibot::OnEngineClientJoin(int ClientID) { Update(); AntibotOnEngineClientJoin(ClientID); }
+void CAntibot::OnEngineClientDrop(int ClientID, const char *pReason) { Update(); AntibotOnEngineClientDrop(ClientID, pReason); }
 void CAntibot::OnEngineClientMessage(int ClientID, const void *pData, int Size, int Flags)
 {
+	Update();
 	int AntibotFlags = 0;
 	if((Flags&MSGFLAG_VITAL) == 0)
 	{
