@@ -1054,7 +1054,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		// ctrl+o or ctrl+l to open
 		if((Input()->KeyPress(KEY_O) || Input()->KeyPress(KEY_L)) && ctrlPressed)
 		{
-			if(altPressed)
+			if(shiftPressed)
 			{
 				if(HasUnsavedData())
 				{
