@@ -31,6 +31,7 @@
 #include "auto_map.h"
 #include "editor.h"
 
+
 static const char *VANILLA_IMAGES[] = {
 	"bg_cloud1",
 	"bg_cloud2",
@@ -1333,9 +1334,8 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		// do tele/tune/switch/speedup button
 		{
 			int (*pPopupFunc)(CEditor *peditor, CUIRect View, void *pContext) = NULL;
-			const char *aButtonName = "Modifier";
+			const char *aButtonName = 0;
 			float Height = 0.0f;
-			int Checked = -1;
 			CLayerTiles *pS = (CLayerTiles *)GetSelectedLayerType(0, LAYERTYPE_TILES);
 			if(pS)
 			{
@@ -1344,43 +1344,45 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 					aButtonName = "Switch";
 					pPopupFunc = PopupSwitch;
 					Height = 36;
-					Checked = 0;
 				}
 				else if(pS == m_Map.m_pSpeedupLayer)
 				{
 					aButtonName = "Speedup";
 					pPopupFunc = PopupSpeedup;
 					Height = 53;
-					Checked = 0;
 				}
 				else if(pS == m_Map.m_pTuneLayer)
 				{
 					aButtonName = "Tune";
 					pPopupFunc = PopupTune;
 					Height = 23;
-					Checked = 0;
 				}
 				else if(pS == m_Map.m_pTeleLayer)
 				{
 					aButtonName = "Tele";
 					pPopupFunc = PopupTele;
 					Height = 23;
-					Checked = 0;
 				}
 
-				if(Checked == 0)
+				if(aButtonName != 0)
 				{
+					static char aBuf[64];
+					str_format(aBuf, sizeof(aBuf), "[ctrl+a] %s", aButtonName);
+
 					TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
 					static int s_ModifierButton = 0;
-					if(DoButton_Ex(&s_ModifierButton, aButtonName, Checked, &Button, 0, aButtonName, CUI::CORNER_ALL))
+					if(DoButton_Ex(&s_ModifierButton, aButtonName, 0, &Button, 0, aBuf, CUI::CORNER_ALL)
+						|| (ctrlPressed && Input()->KeyPress(KEY_A)))
 					{
 						static int s_ModifierPopupID = 0;
-						UiInvokePopupMenu(&s_ModifierPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, Height, pPopupFunc);
+						if(!UiPopupExists(&s_ModifierPopupID))
+						{
+							UiInvokePopupMenu(&s_ModifierPopupID, 0, Button.x, Button.y + Button.h, 120, Height, pPopupFunc);
+						}
 					}
 					TB_Bottom.VSplitLeft(5.0f, 0, &TB_Bottom);
 				}
 			}
-
 		}
 	}
 
