@@ -1435,48 +1435,61 @@ int CEditor::PopupSelectConfigAutoMapResult()
 
 int CEditor::PopupTele(CEditor *pEditor, CUIRect View, void *pContext)
 {
+	static int previousTeleNumber = -1;
+
 	CUIRect Button;
+	CUIRect FindEmptySlot;
+
 	View.HSplitBottom(12.0f, &View, &Button);
+	Button.VSplitRight(15.f, &Button, &FindEmptySlot);
+	Button.VSplitRight(2.f, &Button, 0);
+
+	static int emptySlotPid = 0;
+	if (pEditor->DoButton_Editor(&emptySlotPid, "F", 0, &FindEmptySlot, 0, "Find empty slot"))
+	{
+		int number = -1;
+		for(int i = 1; i <= 255; i++)
+		{
+			if(!pEditor->m_Map.m_pTeleLayer->ContainsElementWithId(i))
+			{
+				number = i;
+				break;
+			}
+		}
+
+		if(number != -1)
+		{
+			pEditor->m_TeleNumber = number;
+		}
+	}
 
 	enum
 	{
 		PROP_TELE=0,
 		NUM_PROPS,
 	};
-
 	CProperty aProps[] = {
-		{"Number", pEditor->m_TeleNumber, PROPTYPE_INT_STEP, 0, 255},
+		{"Number", pEditor->m_TeleNumber, PROPTYPE_INT_STEP, 1, 255},
 		{0},
 	};
 
 	static int s_aIds[NUM_PROPS] = {0};
-	int NewVal = 0;
-	static ColorRGBA s_color = ColorRGBA(1,1,1,0.5f);
+	static ColorRGBA s_color = ColorRGBA(0.5f, 1, 0.5f, 0.5f);
 
-	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal, s_color);
-
+	static int NewVal = 0;
+	int Prop = pEditor->DoProperties(&Button, aProps, s_aIds, &NewVal, s_color);
 	if(Prop == PROP_TELE)
 	{
-		NewVal = (NewVal + 256) % 256;
-
-		CLayerTele *gl = pEditor->m_Map.m_pTeleLayer;
-		for(int y = 0; y < gl->m_Height; ++y)
-		{
-			for(int x = 0; x < gl->m_Width; ++x)
-			{
-				if(gl->m_pTeleTile[y*gl->m_Width+x].m_Number == NewVal)
-				{
-					s_color = ColorRGBA(1,0.5f,0.5f,0.5f);
-					goto done;
-				}
-			}
-		}
-
-		s_color = ColorRGBA(0.5f,1,0.5f,0.5f);
-
-		done:
-		pEditor->m_TeleNumber = NewVal;
+		pEditor->m_TeleNumber = (NewVal + 256) % 256;
 	}
+
+	if(previousTeleNumber == 1 || previousTeleNumber != pEditor->m_TeleNumber)
+	{
+		s_color = pEditor->m_Map.m_pTeleLayer->ContainsElementWithId(pEditor->m_TeleNumber)
+			? ColorRGBA(1, 0.5f, 0.5f, 0.5f)
+			: ColorRGBA(0.5f, 1, 0.5f, 0.5f);
+	}
+	previousTeleNumber = pEditor->m_TeleNumber;
 
 	return 0;
 }

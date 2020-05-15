@@ -3322,6 +3322,9 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 		}
 	}
 
+	if(Change != -1)
+		*pNewVal = clamp(*pNewVal, pProps[Change].m_Min, pProps->m_Max);
+
 	return Change;
 }
 
