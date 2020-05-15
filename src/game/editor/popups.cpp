@@ -98,6 +98,16 @@ void CEditor::UiDoPopupMenu()
 	}
 }
 
+bool CEditor::UiPopupExists(void *pid)
+{
+	for(int i = 0; i < g_UiNumPopups; i++)
+	{
+		if(s_UiPopups[i].m_pId == pid)
+			return true;
+	}
+
+	return false;
+}
 
 int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 {
