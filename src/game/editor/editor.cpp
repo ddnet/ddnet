@@ -1044,19 +1044,39 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	TB_Top.HSplitBottom(2.5f, &TB_Top, 0);
 	TB_Bottom.HSplitTop(2.5f, 0, &TB_Bottom);
 
-	// ctrl+o to open
-	if(Input()->KeyPress(KEY_O) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)) && m_Dialog == DIALOG_NONE)
+	// ctrl+o or ctrl+l to open
+	if ((Input()->KeyPress(KEY_O) || Input()->KeyPress(KEY_L)) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)) && m_Dialog == DIALOG_NONE)
 	{
-		if(HasUnsavedData())
+		if (Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT))
 		{
-			if(!m_PopupEventWasActivated)
+			if (HasUnsavedData())
 			{
-				m_PopupEventType = POPEVENT_LOAD;
-				m_PopupEventActivated = true;
+				if (!m_PopupEventWasActivated)
+				{
+					m_PopupEventType = POPEVENT_LOADCURRENT;
+					m_PopupEventActivated = true;
+				}
+			}
+			else
+			{
+				LoadCurrentMap();
 			}
 		}
 		else
-			InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Load map", "Load", "maps", "", CallbackOpenMap, this);
+		{
+			if (HasUnsavedData())
+			{
+				if (!m_PopupEventWasActivated)
+				{
+					m_PopupEventType = POPEVENT_LOAD;
+					m_PopupEventActivated = true;
+				}
+			}
+			else
+			{
+				InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Load map", "Load", "maps", "", CallbackOpenMap, this);
+			}
+		}
 	}
 
 	// ctrl+s to save
@@ -1081,12 +1101,6 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	// ctrl+shift+alt+s to save as
 	if(Input()->KeyPress(KEY_S) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)) && (Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && (Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT)) && m_Dialog == DIALOG_NONE)
 		InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveCopyMap, this);
-
-	// ctrl+l to load
-	if(Input()->KeyPress(KEY_L) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)) && m_Dialog == DIALOG_NONE)
-	{
-		InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Load map", "Load", "maps", "", CallbackOpenMap, this);
-	}
 
 	// detail button
 	TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
@@ -5508,7 +5522,7 @@ int CEditor::PopupMenuFile(CEditor *pEditor, CUIRect View, void *pContext)
 
 	View.HSplitTop(2.0f, &Slot, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
-	if(pEditor->DoButton_MenuItem(&s_OpenCurrentMapButton, "Load Current Map", 0, &Slot, 0, "Opens the current in game map for editing"))
+	if(pEditor->DoButton_MenuItem(&s_OpenCurrentMapButton, "Load Current Map", 0, &Slot, 0, "Opens the current in game map for editing (ctrl+alt+l)"))
 	{
 		if(pEditor->HasUnsavedData())
 		{
