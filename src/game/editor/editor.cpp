@@ -1146,7 +1146,8 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	// grid button
 	TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 	static int s_GridButton = 0;
-	if(DoButton_Editor(&s_GridButton, "Grid", m_GridActive, &Button, 0, "[ctrl+g] Toggle Grid"))
+	if(DoButton_Editor(&s_GridButton, "Grid", m_GridActive, &Button, 0, "[ctrl+g] Toggle Grid") ||
+		(Input()->KeyPress(KEY_G) && ctrlPressed))
 	{
 		m_GridActive = !m_GridActive;
 	}
