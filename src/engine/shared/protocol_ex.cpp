@@ -60,12 +60,12 @@ int UnpackMessageID(int *pID, bool *pSys, struct CUuid *pUuid, CUnpacker *pUnpac
 				}
 				if(ID2 == UUID_UNKNOWN)
 				{
-					new (pPacker) CMsgPacker(NETMSG_IDONTKNOW);
+					new (pPacker) CMsgPacker(NETMSG_IDONTKNOW, true);
 					pPacker->AddRaw(&Uuid2, sizeof(Uuid2));
 				}
 				else
 				{
-					new (pPacker) CMsgPacker(NETMSG_ITIS);
+					new (pPacker) CMsgPacker(NETMSG_ITIS, true);
 					pPacker->AddRaw(&Uuid2, sizeof(Uuid2));
 					pPacker->AddString(g_UuidManager.GetName(ID2), 0);
 				}
