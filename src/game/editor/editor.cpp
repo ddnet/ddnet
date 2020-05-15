@@ -1036,6 +1036,10 @@ static int EntitiesListdirCallback(const char *pName, int IsDir, int StorageType
 
 void CEditor::DoToolbar(CUIRect ToolBar)
 {
+	bool ctrlPressed = Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL);
+	bool shiftPressed = Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT);
+	bool altPressed = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
+
 	CUIRect TB_Top, TB_Bottom;
 	CUIRect Button;
 
@@ -1044,69 +1048,72 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	TB_Top.HSplitBottom(2.5f, &TB_Top, 0);
 	TB_Bottom.HSplitTop(2.5f, 0, &TB_Bottom);
 
-	// ctrl+o or ctrl+l to open
-	if ((Input()->KeyPress(KEY_O) || Input()->KeyPress(KEY_L)) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)) && m_Dialog == DIALOG_NONE)
+	if(m_Dialog == DIALOG_NONE)
 	{
-		if (Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT))
+		// ctrl+o or ctrl+l to open
+		if((Input()->KeyPress(KEY_O) || Input()->KeyPress(KEY_L)) && ctrlPressed)
 		{
-			if (HasUnsavedData())
+			if(altPressed)
 			{
-				if (!m_PopupEventWasActivated)
+				if(HasUnsavedData())
 				{
-					m_PopupEventType = POPEVENT_LOADCURRENT;
-					m_PopupEventActivated = true;
+					if(!m_PopupEventWasActivated)
+					{
+						m_PopupEventType = POPEVENT_LOADCURRENT;
+						m_PopupEventActivated = true;
+					}
+				}
+				else
+				{
+					LoadCurrentMap();
 				}
 			}
 			else
 			{
-				LoadCurrentMap();
-			}
-		}
-		else
-		{
-			if (HasUnsavedData())
-			{
-				if (!m_PopupEventWasActivated)
+				if(HasUnsavedData())
 				{
-					m_PopupEventType = POPEVENT_LOAD;
-					m_PopupEventActivated = true;
+					if(!m_PopupEventWasActivated)
+					{
+						m_PopupEventType = POPEVENT_LOAD;
+						m_PopupEventActivated = true;
+					}
+				}
+				else
+				{
+					InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Load map", "Load", "maps", "", CallbackOpenMap, this);
 				}
 			}
-			else
-			{
-				InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Load map", "Load", "maps", "", CallbackOpenMap, this);
-			}
 		}
-	}
 
-	// ctrl+s to save
-	if(Input()->KeyPress(KEY_S) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)) && m_Dialog == DIALOG_NONE)
-	{
-		if(m_aFileName[0] && m_ValidSaveFilename)
+		// ctrl+s to save
+		if(Input()->KeyPress(KEY_S) && ctrlPressed)
 		{
-			if(!m_PopupEventWasActivated)
+			if(m_aFileName[0] && m_ValidSaveFilename)
 			{
-				str_copy(m_aFileSaveName, m_aFileName, sizeof(m_aFileSaveName));
-				CallbackSaveMap(m_aFileSaveName, IStorage::TYPE_SAVE, this);
+				if(!m_PopupEventWasActivated)
+				{
+					str_copy(m_aFileSaveName, m_aFileName, sizeof(m_aFileSaveName));
+					CallbackSaveMap(m_aFileSaveName, IStorage::TYPE_SAVE, this);
+				}
 			}
+			else
+				InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveMap, this);
 		}
-		else
+
+		// ctrl+shift+s to save as
+		if(Input()->KeyPress(KEY_S) && ctrlPressed && shiftPressed)
 			InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveMap, this);
+
+		// ctrl+shift+alt+s to save as
+		if(Input()->KeyPress(KEY_S) && ctrlPressed && shiftPressed && altPressed)
+			InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveCopyMap, this);
 	}
-
-	// ctrl+shift+s to save as
-	if(Input()->KeyPress(KEY_S) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)) && (Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && m_Dialog == DIALOG_NONE)
-		InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveMap, this);
-
-	// ctrl+shift+alt+s to save as
-	if(Input()->KeyPress(KEY_S) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)) && (Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && (Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT)) && m_Dialog == DIALOG_NONE)
-		InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveCopyMap, this);
 
 	// detail button
 	TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 	static int s_HqButton = 0;
 	if(DoButton_Editor(&s_HqButton, "HD", m_ShowDetail, &Button, 0, "[ctrl+h] Toggle High Detail") ||
-		(Input()->KeyPress(KEY_H) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))))
+		(Input()->KeyPress(KEY_H) && ctrlPressed))
 	{
 		m_ShowDetail = !m_ShowDetail;
 	}
@@ -1117,7 +1124,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 	static int s_AnimateButton = 0;
 	if(DoButton_Editor(&s_AnimateButton, "Anim", m_Animate, &Button, 0, "[ctrl+m] Toggle animation") ||
-		(Input()->KeyPress(KEY_M) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))))
+		(Input()->KeyPress(KEY_M) && ctrlPressed))
 	{
 		m_AnimateStart = time_get();
 		m_Animate = !m_Animate;
@@ -1129,7 +1136,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 	static int s_ProofButton = 0;
 	if(DoButton_Editor(&s_ProofButton, "Proof", m_ProofBorders, &Button, 0, "[ctrl+p] Toggles proof borders. These borders represent what a player maximum can see.") ||
-		(Input()->KeyPress(KEY_P) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))))
+		(Input()->KeyPress(KEY_P) && ctrlPressed))
 	{
 		m_ProofBorders = !m_ProofBorders;
 	}
@@ -1139,7 +1146,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	// grid button
 	TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 	static int s_GridButton = 0;
-	if(DoButton_Editor(&s_GridButton, "Grid", m_GridActive, &Button, 0, "Toggle Grid"))
+	if(DoButton_Editor(&s_GridButton, "Grid", m_GridActive, &Button, 0, "[ctrl+g] Toggle Grid"))
 	{
 		m_GridActive = !m_GridActive;
 	}
@@ -1150,7 +1157,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 	static int s_TileInfoButton = 0;
 	if(DoButton_Editor(&s_TileInfoButton, "Info", m_ShowTileInfo, &Button, 0, "[ctrl+i] Show tile information") ||
-		(Input()->KeyPress(KEY_I) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))))
+		(Input()->KeyPress(KEY_I) && ctrlPressed))
 	{
 		m_ShowTileInfo = !m_ShowTileInfo;
 		m_ShowEnvelopePreview = 0;
@@ -1162,7 +1169,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 	static int s_AllowPlaceUnusedTilesButton = 0;
 	if(DoButton_Editor(&s_AllowPlaceUnusedTilesButton, "Unused", m_AllowPlaceUnusedTiles, &Button, 0, "[ctrl+u] Allow placing unused tiles") ||
-		(Input()->KeyPress(KEY_U) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))))
+		(Input()->KeyPress(KEY_U) && ctrlPressed))
 	{
 		m_AllowPlaceUnusedTiles = !m_AllowPlaceUnusedTiles;
 	}
@@ -1186,7 +1193,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 
 		static int s_EntitiesPopupID = 0;
 		UiInvokePopupMenu(&s_EntitiesPopupID, 0, Button.x, Button.y+18.0f,
-		                  250,  m_SelectEntitiesFiles.size()*14 + 10, PopupEntities);
+			250, m_SelectEntitiesFiles.size()*14 + 10, PopupEntities);
 	}
 
 	TB_Top.VSplitLeft(5.0f, 0, &TB_Top);
@@ -1237,7 +1244,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 
 	// brush manipulation
 	{
-		int Enabled = m_Brush.IsEmpty()?-1:0;
+		int Enabled = m_Brush.IsEmpty() ? -1 : 0;
 
 		// flip buttons
 		TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
@@ -1270,7 +1277,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 				s_RotationAmount = maximum(90, (s_RotationAmount/90)*90);
 				break;
 			}
-		s_RotationAmount = UiDoValueSelector(&s_RotationAmount, &Button, "", s_RotationAmount, TileLayer?90:1, 359, TileLayer?90:1, TileLayer?10.0f:2.0f, "Rotation of the brush in degrees. Use left mouse button to drag and change the value. Hold shift to be more precise.", true);
+		s_RotationAmount = UiDoValueSelector(&s_RotationAmount, &Button, "", s_RotationAmount, TileLayer ? 90 : 1, 359, TileLayer ? 90 : 1, TileLayer ? 10.0f : 2.0f, "Rotation of the brush in degrees. Use left mouse button to drag and change the value. Hold shift to be more precise.", true);
 
 		TB_Top.VSplitLeft(5.0f, &Button, &TB_Top);
 		TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
@@ -1293,7 +1300,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	// refocus button
 	TB_Bottom.VSplitLeft(45.0f, &Button, &TB_Bottom);
 	static int s_RefocusButton = 0;
-	if(DoButton_Editor(&s_RefocusButton, "Refocus", m_WorldOffsetX&&m_WorldOffsetY?0:-1, &Button, 0, "[HOME] Restore map focus") || (m_EditBoxActive == 0 && Input()->KeyPress(KEY_HOME)))
+	if(DoButton_Editor(&s_RefocusButton, "Refocus", m_WorldOffsetX&&m_WorldOffsetY ? 0 : -1, &Button, 0, "[HOME] Restore map focus") || (m_EditBoxActive == 0 && Input()->KeyPress(KEY_HOME)))
 	{
 		m_WorldOffsetX = 0;
 		m_WorldOffsetY = 0;
@@ -1311,7 +1318,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		if(pT && (pT->m_Tele || pT->m_Speedup || pT->m_Switch || pT->m_Front || pT->m_Tune))
 			pT = 0;
 
-		if(DoButton_Editor(&s_BorderBut, "Border", pT?0:-1, &Button, 0, "Adds border tiles"))
+		if(DoButton_Editor(&s_BorderBut, "Border", pT ? 0 : -1, &Button, 0, "Adds border tiles"))
 		{
 			if(pT)
 				DoMapBorder();
@@ -1422,7 +1429,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 
 		static int s_AddItemButton = 0;
 		if(DoButton_Editor(&s_AddItemButton, pButtonText, Checked, &Button, 0, pButtonToolTip) ||
-				(Input()->KeyPress(KEY_Q) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))))
+			(Input()->KeyPress(KEY_Q) && ctrlPressed))
 		{
 			if(pLayer)
 			{
@@ -1432,7 +1439,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 				pGroup->Mapping(Mapping);
 				int x = Mapping[0] + (Mapping[2]-Mapping[0]) / 2;
 				int y = Mapping[1] + (Mapping[3]-Mapping[1]) / 2;
-				if(Input()->KeyPress(KEY_Q) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)))
+				if(Input()->KeyPress(KEY_Q) && ctrlPressed)
 				{
 					x += UI()->MouseWorldX() - (m_WorldOffsetX*pGroup->m_ParallaxX/100) - pGroup->m_OffsetX;
 					y += UI()->MouseWorldY() - (m_WorldOffsetY*pGroup->m_ParallaxY/100) - pGroup->m_OffsetY;
@@ -1467,7 +1474,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	TB_Bottom.VSplitLeft(65.0f, &Button, &TB_Bottom);
 	static int s_BrushDrawModeButton = 0;
 	if(DoButton_Editor(&s_BrushDrawModeButton, "Destructive", m_BrushDrawDestructive, &Button, 0, "[ctrl+d] Toggle brush draw mode") ||
-			(Input()->KeyPress(KEY_D) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))))
+		(Input()->KeyPress(KEY_D) && ctrlPressed))
 		m_BrushDrawDestructive = !m_BrushDrawDestructive;
 }
 
