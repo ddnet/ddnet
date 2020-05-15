@@ -1299,19 +1299,19 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	}
 
 	// refocus button
-	TB_Bottom.VSplitLeft(45.0f, &Button, &TB_Bottom);
-	static int s_RefocusButton = 0;
-	if(DoButton_Editor(&s_RefocusButton, "Refocus", m_WorldOffsetX&&m_WorldOffsetY ? 0 : -1, &Button, 0, "[HOME] Restore map focus") || (m_EditBoxActive == 0 && Input()->KeyPress(KEY_HOME)))
 	{
-		m_WorldOffsetX = 0;
-		m_WorldOffsetY = 0;
+		TB_Bottom.VSplitLeft(45.0f, &Button, &TB_Bottom);
+		static int s_RefocusButton = 0;
+		if(DoButton_Editor(&s_RefocusButton, "Refocus", m_WorldOffsetX&&m_WorldOffsetY ? 0 : -1, &Button, 0, "[HOME] Restore map focus") || (m_EditBoxActive == 0 && Input()->KeyPress(KEY_HOME)))
+		{
+			m_WorldOffsetX = 0;
+			m_WorldOffsetY = 0;
+		}
+		TB_Bottom.VSplitLeft(5.0f, 0, &TB_Bottom);
 	}
-
-	TB_Bottom.VSplitLeft(5.0f, 0, &TB_Bottom);
 
 	// tile manipulation
 	{
-		TB_Bottom.VSplitLeft(45.0f, &Button, &TB_Bottom);
 		static int s_BorderBut = 0;
 		CLayerTiles *pT = (CLayerTiles *)GetSelectedLayerType(0, LAYERTYPE_TILES);
 
@@ -1319,164 +1319,166 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		if(pT && (pT->m_Tele || pT->m_Speedup || pT->m_Switch || pT->m_Front || pT->m_Tune))
 			pT = 0;
 
-		if(DoButton_Editor(&s_BorderBut, "Border", pT ? 0 : -1, &Button, 0, "Adds border tiles"))
+		if(pT)
 		{
-			if(pT)
+			TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
+			if(DoButton_Ex(&s_BorderBut, "Border", 0, &Button, 0, "Adds border tiles", CUI::CORNER_ALL))
+			{
 				DoMapBorder();
+			}
+			TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
 		}
 
-		TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
 
 		// do tele/tune/switch/speedup button
 		{
-			TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
+			int (*pPopupFunc)(CEditor *peditor, CUIRect View, void *pContext) = NULL;
+			const char *aButtonName = "Modifier";
+			float Height = 0.0f;
+			int Checked = -1;
+			CLayerTiles *pS = (CLayerTiles *)GetSelectedLayerType(0, LAYERTYPE_TILES);
+			if(pS)
 			{
-				int (*pPopupFunc)(CEditor *peditor, CUIRect View, void *pContext) = NULL;
-				const char *aButtonName = "Modifier";
-				float Height = 0.0f;
-				int Checked = -1;
-				CLayerTiles *pS = (CLayerTiles *)GetSelectedLayerType(0, LAYERTYPE_TILES);
-				if(pS)
+				if(pS == m_Map.m_pSwitchLayer)
 				{
-					if(pS == m_Map.m_pSwitchLayer)
-					{
-						aButtonName = "Switch";
-						pPopupFunc = PopupSwitch;
-						Height = 36;
-						Checked = 0;
-					}
-					else if(pS == m_Map.m_pSpeedupLayer)
-					{
-						aButtonName = "Speedup";
-						pPopupFunc = PopupSpeedup;
-						Height = 53;
-						Checked = 0;
-					}
-					else if(pS == m_Map.m_pTuneLayer)
-					{
-						aButtonName = "Tune";
-						pPopupFunc = PopupTune;
-						Height = 23;
-						Checked = 0;
-					}
-					else if(pS == m_Map.m_pTeleLayer)
-					{
-						aButtonName = "Tele";
-						pPopupFunc = PopupTele;
-						Height = 23;
-						Checked = 0;
-					}
+					aButtonName = "Switch";
+					pPopupFunc = PopupSwitch;
+					Height = 36;
+					Checked = 0;
 				}
-				static int s_ModifierButton = 0;
-				if(DoButton_Ex(&s_ModifierButton, aButtonName, Checked, &Button, 0, aButtonName, CUI::CORNER_ALL))
+				else if(pS == m_Map.m_pSpeedupLayer)
 				{
-					static int s_ModifierPopupID = 0;
-					UiInvokePopupMenu(&s_ModifierPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, Height, pPopupFunc);
+					aButtonName = "Speedup";
+					pPopupFunc = PopupSpeedup;
+					Height = 53;
+					Checked = 0;
+				}
+				else if(pS == m_Map.m_pTuneLayer)
+				{
+					aButtonName = "Tune";
+					pPopupFunc = PopupTune;
+					Height = 23;
+					Checked = 0;
+				}
+				else if(pS == m_Map.m_pTeleLayer)
+				{
+					aButtonName = "Tele";
+					pPopupFunc = PopupTele;
+					Height = 23;
+					Checked = 0;
+				}
+
+				if(Checked == 0)
+				{
+					TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
+					static int s_ModifierButton = 0;
+					if(DoButton_Ex(&s_ModifierButton, aButtonName, Checked, &Button, 0, aButtonName, CUI::CORNER_ALL))
+					{
+						static int s_ModifierPopupID = 0;
+						UiInvokePopupMenu(&s_ModifierPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, Height, pPopupFunc);
+					}
+					TB_Bottom.VSplitLeft(5.0f, 0, &TB_Bottom);
 				}
 			}
+
 		}
 	}
 
-	TB_Bottom.VSplitLeft(5.0f, 0, &TB_Bottom);
 
 	// grid zoom
-	TB_Bottom.VSplitLeft(30.0f, &Button, &TB_Bottom);
-	static int s_GridIncreaseButton = 0;
-	if(DoButton_Ex(&s_GridIncreaseButton, "G-", 0, &Button, 0, "Decrease grid", CUI::CORNER_L))
+	if(m_GridActive)
 	{
-		if(m_GridFactor > 1)
-			m_GridFactor--;
+		TB_Bottom.VSplitLeft(30.0f, &Button, &TB_Bottom);
+		static int s_GridIncreaseButton = 0;
+		if(DoButton_Ex(&s_GridIncreaseButton, "G-", 0, &Button, 0, "Decrease grid", CUI::CORNER_L))
+		{
+			if(m_GridFactor > 1)
+				m_GridFactor--;
+		}
+
+		TB_Bottom.VSplitLeft(30.0f, &Button, &TB_Bottom);
+		static int s_GridNormalButton = 0;
+		if(DoButton_Ex(&s_GridNormalButton, "1", 0, &Button, 0, "Normal grid", 0))
+			m_GridFactor = 1;
+
+		TB_Bottom.VSplitLeft(30.0f, &Button, &TB_Bottom);
+
+		static int s_GridDecreaseButton = 0;
+		if(DoButton_Ex(&s_GridDecreaseButton, "G+", 0, &Button, 0, "Increase grid", CUI::CORNER_R))
+		{
+			if(m_GridFactor < 15)
+				m_GridFactor++;
+		}
+		TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
 	}
 
-	TB_Bottom.VSplitLeft(30.0f, &Button, &TB_Bottom);
-	static int s_GridNormalButton = 0;
-	if(DoButton_Ex(&s_GridNormalButton, "1", 0, &Button, 0, "Normal grid", 0))
-		m_GridFactor = 1;
-
-	TB_Bottom.VSplitLeft(30.0f, &Button, &TB_Bottom);
-
-	static int s_GridDecreaseButton = 0;
-	if(DoButton_Ex(&s_GridDecreaseButton, "G+", 0, &Button, 0, "Increase grid", CUI::CORNER_R))
-	{
-		if(m_GridFactor < 15)
-			m_GridFactor++;
-	}
-
-	TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
 
 	// do add quad/sound button
-	TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
+	CLayer *pLayer = GetSelectedLayer(0);
+	if(pLayer && (pLayer->m_Type == LAYERTYPE_QUADS || pLayer->m_Type == LAYERTYPE_SOUNDS))
 	{
-		const char *pButtonText = "Add Item";
-		const char *pButtonToolTip = "[ctrl+q] Add a new item";
-		int Checked = -1;
+		TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
 
-		CLayer *pLayer = GetSelectedLayer(0);
-		if(pLayer)
+		bool invoked = false;
+		static int s_AddItemButton = 0;
+
+		if(pLayer->m_Type == LAYERTYPE_QUADS)
 		{
+			invoked = DoButton_Editor(&s_AddItemButton, "Add Quad", 0, &Button, 0, "[ctrl+q] Add a new quad") ||
+				(Input()->KeyPress(KEY_Q) && ctrlPressed);
+		}
+		else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
+		{
+			invoked = DoButton_Editor(&s_AddItemButton, "Add Sound", 0, &Button, 0, "[ctrl+q] Add a new sound source") ||
+				(Input()->KeyPress(KEY_Q) && ctrlPressed);
+		}
+
+		if(invoked)
+		{
+			CLayerGroup *pGroup = GetSelectedGroup();
+
+			float Mapping[4];
+			pGroup->Mapping(Mapping);
+			int x = Mapping[0] + (Mapping[2]-Mapping[0]) / 2;
+			int y = Mapping[1] + (Mapping[3]-Mapping[1]) / 2;
+			if(Input()->KeyPress(KEY_Q) && ctrlPressed)
+			{
+				x += UI()->MouseWorldX() - (m_WorldOffsetX*pGroup->m_ParallaxX/100) - pGroup->m_OffsetX;
+				y += UI()->MouseWorldY() - (m_WorldOffsetY*pGroup->m_ParallaxY/100) - pGroup->m_OffsetY;
+			}
+
 			if(pLayer->m_Type == LAYERTYPE_QUADS)
 			{
-				pButtonText = "Add Quad";
-				pButtonToolTip = "[ctrl+q] Add a new quad";
-				Checked = 0;
+				CLayerQuads *pQuadLayer = (CLayerQuads *)pLayer;
+
+				int Width = 64;
+				int Height = 64;
+				if(pQuadLayer->m_Image >= 0)
+				{
+					Width = m_Map.m_lImages[pQuadLayer->m_Image]->m_Width;
+					Height = m_Map.m_lImages[pQuadLayer->m_Image]->m_Height;
+				}
+
+				pQuadLayer->NewQuad(x, y, Width, Height);
 			}
 			else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
 			{
-				pButtonText = "Add Sound";
-				pButtonToolTip = "[ctrl+q] Add a new sound source";
-				Checked = 0;
+				CLayerSounds *pSoundLayer = (CLayerSounds *)pLayer;
+				pSoundLayer->NewSource(x, y);
 			}
 		}
-
-		static int s_AddItemButton = 0;
-		if(DoButton_Editor(&s_AddItemButton, pButtonText, Checked, &Button, 0, pButtonToolTip) ||
-			(Input()->KeyPress(KEY_Q) && ctrlPressed))
-		{
-			if(pLayer)
-			{
-				CLayerGroup *pGroup = GetSelectedGroup();
-
-				float Mapping[4];
-				pGroup->Mapping(Mapping);
-				int x = Mapping[0] + (Mapping[2]-Mapping[0]) / 2;
-				int y = Mapping[1] + (Mapping[3]-Mapping[1]) / 2;
-				if(Input()->KeyPress(KEY_Q) && ctrlPressed)
-				{
-					x += UI()->MouseWorldX() - (m_WorldOffsetX*pGroup->m_ParallaxX/100) - pGroup->m_OffsetX;
-					y += UI()->MouseWorldY() - (m_WorldOffsetY*pGroup->m_ParallaxY/100) - pGroup->m_OffsetY;
-				}
-
-				if(pLayer->m_Type == LAYERTYPE_QUADS)
-				{
-					CLayerQuads *pQuadLayer = (CLayerQuads *)pLayer;
-
-					int Width = 64;
-					int Height = 64;
-					if(pQuadLayer->m_Image >= 0)
-					{
-						Width = m_Map.m_lImages[pQuadLayer->m_Image]->m_Width;
-						Height = m_Map.m_lImages[pQuadLayer->m_Image]->m_Height;
-					}
-
-					pQuadLayer->NewQuad(x, y, Width, Height);
-				}
-				else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
-				{
-					CLayerSounds *pSoundLayer = (CLayerSounds *)pLayer;
-					pSoundLayer->NewSource(x, y);
-				}
-			}
-		}
+		TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
 	}
 
-	TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
 
 	// Brush draw mode button
-	TB_Bottom.VSplitLeft(65.0f, &Button, &TB_Bottom);
-	static int s_BrushDrawModeButton = 0;
-	if(DoButton_Editor(&s_BrushDrawModeButton, "Destructive", m_BrushDrawDestructive, &Button, 0, "[ctrl+d] Toggle brush draw mode") ||
-		(Input()->KeyPress(KEY_D) && ctrlPressed))
-		m_BrushDrawDestructive = !m_BrushDrawDestructive;
+	{
+		TB_Bottom.VSplitLeft(65.0f, &Button, &TB_Bottom);
+		static int s_BrushDrawModeButton = 0;
+		if(DoButton_Editor(&s_BrushDrawModeButton, "Destructive", m_BrushDrawDestructive, &Button, 0, "[ctrl+d] Toggle brush draw mode") ||
+			(Input()->KeyPress(KEY_D) && ctrlPressed))
+			m_BrushDrawDestructive = !m_BrushDrawDestructive;
+	}
 }
 
 static void Rotate(const CPoint *pCenter, CPoint *pPoint, float Rotation)
