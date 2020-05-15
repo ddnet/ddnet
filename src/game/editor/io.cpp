@@ -567,12 +567,6 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 	return 1;
 }
 
-void CEditor::LoadCurrentMap()
-{
-	Load(m_pClient->GetCurrentMapPath(), IStorage::TYPE_ALL);
-	m_ValidSaveFilename = true;
-}
-
 int CEditor::Load(const char *pFileName, int StorageType)
 {
 	Reset();

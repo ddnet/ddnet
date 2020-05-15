@@ -21,6 +21,8 @@
 #include <engine/storage.h>
 #include <engine/textrender.h>
 
+#include <game/client/gameclient.h>
+#include <game/client/components/camera.h>
 #include <game/gamecore.h>
 #include <game/localization.h>
 #include <game/client/lineinput.h>
@@ -208,7 +210,7 @@ void CLayerGroup::Render()
 
 void CLayerGroup::AddLayer(CLayer *l)
 {
-	m_pMap->m_Modified = true;
+ 	m_pMap->m_Modified = true;
 	m_lLayers.add(l);
 }
 
@@ -6325,6 +6327,18 @@ void CEditor::UpdateAndRender()
 	Input()->Clear();
 }
 
+void CEditor::LoadCurrentMap()
+{
+	Load(m_pClient->GetCurrentMapPath(), IStorage::TYPE_ALL);
+	m_ValidSaveFilename = true;
+
+	CGameClient* gameClient = (CGameClient*)Kernel()->RequestInterface<IGameClient>();
+	vec2 center = gameClient->m_pCamera->m_Center;
+
+	m_WorldOffsetX = center.x;
+	m_WorldOffsetY = center.y;
+}
+
 IEditor *CreateEditor() { return new CEditor; }
 
 // DDRace
@@ -6363,3 +6377,4 @@ void CEditorMap::MakeTuneLayer(CLayer *pLayer)
 	m_pTuneLayer->m_pEditor = m_pEditor;
 	m_pTuneLayer->m_Texture = m_pEditor->m_TuneTexture;
 }
+
