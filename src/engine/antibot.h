@@ -18,7 +18,7 @@ public:
 	virtual void OnHammerFire(int ClientID) = 0;
 	virtual void OnHammerHit(int ClientID) = 0;
 	virtual void OnDirectInput(int ClientID) = 0;
-	virtual void OnTick(int ClientID) = 0;
+	virtual void OnCharacterTick(int ClientID) = 0;
 	virtual void OnHookAttach(int ClientID, bool Player) = 0;
 
 	// Commands
@@ -34,6 +34,7 @@ public:
 	virtual void Init() = 0;
 
 	// Hooks
+	virtual void OnEngineTick() = 0;
 	virtual void OnEngineClientJoin(int ClientID) = 0;
 	virtual void OnEngineClientDrop(int ClientID, const char *pReason) = 0;
 	virtual void OnEngineClientMessage(int ClientID, const void *pData, int Size, int Flags) = 0;

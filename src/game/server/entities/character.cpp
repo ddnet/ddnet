@@ -758,7 +758,7 @@ void CCharacter::Tick()
 
 	DDRaceTick();
 
-	Antibot()->OnTick(m_pPlayer->GetCID());
+	Antibot()->OnCharacterTick(m_pPlayer->GetCID());
 
 	m_Core.m_Input = m_Input;
 	m_Core.Tick(true);

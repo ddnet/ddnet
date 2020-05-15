@@ -14,7 +14,7 @@ class CAntibot : public IEngineAntibot
 	class IConsole *Console() const { return m_pConsole; }
 	class IGameServer *GameServer() const { return m_pGameServer; }
 
-	CAntibotCallbackData m_CallbackData;
+	CAntibotData m_Data;
 	CAntibotRoundData m_RoundData;
 
 	void Update();
@@ -28,6 +28,7 @@ public:
 	// Engine
 	virtual void Init();
 
+	virtual void OnEngineTick();
 	virtual void OnEngineClientJoin(int ClientID);
 	virtual void OnEngineClientDrop(int ClientID, const char *pReason);
 	virtual void OnEngineClientMessage(int ClientID, const void *pData, int Size, int Flags);
@@ -43,7 +44,7 @@ public:
 	virtual void OnHammerFire(int ClientID);
 	virtual void OnHammerHit(int ClientID);
 	virtual void OnDirectInput(int ClientID);
-	virtual void OnTick(int ClientID);
+	virtual void OnCharacterTick(int ClientID);
 	virtual void OnHookAttach(int ClientID, bool Player);
 
 	virtual void Dump();
