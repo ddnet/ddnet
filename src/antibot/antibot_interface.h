@@ -5,7 +5,10 @@
 extern "C"
 {
 
-void AntibotInit(CAntibotData *pData);
+int AntibotAbiVersion();
+void AntibotInit(CAntibotData *pCallbackData);
+void AntibotRoundStart(CAntibotRoundData *pRoundData);
+void AntibotRoundEnd(void);
 void AntibotUpdateData(void);
 void AntibotDestroy(void);
 void AntibotDump(void);
@@ -16,8 +19,12 @@ void AntibotOnHammerFireReloading(int ClientID);
 void AntibotOnHammerFire(int ClientID);
 void AntibotOnHammerHit(int ClientID);
 void AntibotOnDirectInput(int ClientID);
-void AntibotOnTick(int ClientID);
+void AntibotOnCharacterTick(int ClientID);
 void AntibotOnHookAttach(int ClientID, bool Player);
+void AntibotOnEngineTick(void);
+void AntibotOnEngineClientJoin(int ClientID);
+void AntibotOnEngineClientDrop(int ClientID, const char *pReason);
+void AntibotOnEngineClientMessage(int ClientID, const void *pData, int Size, int Flags);
 
 }
 

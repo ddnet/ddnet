@@ -11,6 +11,8 @@
 #include <game/generated/protocol.h>
 #include <engine/shared/protocol.h>
 
+struct CAntibotRoundData;
+
 class IServer : public IInterface
 {
 	MACRO_INTERFACE("server", 0)
@@ -190,6 +192,8 @@ public:
 	virtual void SetErrorShutdown(const char *pReason) = 0;
 	virtual void ExpireServerInfo() = 0;
 
+	virtual void SendMsgRaw(int ClientID, const void *pData, int Size, int Flags) = 0;
+
 	virtual char *GetMapName() = 0;
 };
 
@@ -236,6 +240,8 @@ public:
 
 	virtual void OnClientEngineJoin(int ClientID) = 0;
 	virtual void OnClientEngineDrop(int ClientID, const char *pReason) = 0;
+
+	virtual void FillAntibot(CAntibotRoundData *pData) = 0;
 };
 
 extern IGameServer *CreateGameServer();

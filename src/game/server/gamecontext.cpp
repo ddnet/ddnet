@@ -131,7 +131,7 @@ bool CGameContext::EmulateBug(int Bug)
 	return m_MapBugs.Contains(Bug);
 }
 
-void CGameContext::FillAntibot(CAntibotData *pData)
+void CGameContext::FillAntibot(CAntibotRoundData *pData)
 {
 	if(!pData->m_Map.m_pTiles)
 	{
@@ -2617,7 +2617,8 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	m_pEngine = Kernel()->RequestInterface<IEngine>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
-	m_Antibot.Init(this);
+	m_pAntibot = Kernel()->RequestInterface<IAntibot>();
+	m_pAntibot->RoundStart(this);
 	m_World.SetGameServer(this);
 	m_Events.SetGameServer(this);
 
@@ -3043,6 +3044,8 @@ void CGameContext::OnShutdown(bool FullShutdown)
 {
 	if (FullShutdown)
 		Score()->OnShutdown();
+
+	Antibot()->RoundEnd();
 
 	if(m_TeeHistorianActive)
 	{

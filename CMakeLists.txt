@@ -653,6 +653,7 @@ set_src(BASE GLOB_RECURSE src/base
   vmath.h
 )
 set_src(ENGINE_INTERFACE GLOB src/engine
+  antibot.h
   client.h
   config.h
   console.h
@@ -1064,6 +1065,8 @@ set_src(ANTIBOT_SRC GLOB src/antibot
 )
 
 set_src(ENGINE_SERVER GLOB src/engine/server
+  antibot.cpp
+  antibot.h
   authmanager.cpp
   authmanager.h
   name_ban.cpp
@@ -1080,8 +1083,6 @@ set_src(ENGINE_SERVER GLOB src/engine/server
   sql_string_helpers.h
 )
 set_src(GAME_SERVER GLOB_RECURSE src/game/server
-  antibot.cpp
-  antibot.h
   ddracechat.cpp
   ddracechat.h
   ddracecommands.cpp

@@ -1294,6 +1294,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 	else
 		return 0;
 
+	m_Modified = false;
 	return 1;
 }
 
