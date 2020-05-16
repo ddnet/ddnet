@@ -1389,6 +1389,7 @@ void CSqlScore::SaveTeam(int Team, const char* Code, int ClientID, const char* S
 	Tmp->m_ClientID = ClientID;
 	Tmp->m_Code = Code;
 	str_copy(Tmp->m_Server, Server, sizeof(Tmp->m_Server));
+	str_copy(Tmp->m_ClientName, Server()->ClientName(Tmp->m_ClientID), sizeof(Tmp->m_ClientName));
 
 	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(SaveTeamThread, Tmp, false), "save team");
 }
@@ -1469,7 +1470,7 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 				// be sure to keep all calls to pData->GameServer() after inserting the save, otherwise it might be lost due to CGameContextError.
 
 				char aBuf2[512];
-				str_format(aBuf2, sizeof(aBuf2), "Team successfully saved by %s. Use '/load %s' to continue", pData->Server()->ClientName(pData->m_ClientID), pData->m_Code.Str());
+				str_format(aBuf2, sizeof(aBuf2), "Team successfully saved by %s. Use '/load %s' to continue", pData->m_ClientName, pData->m_Code.Str());
 				pData->GameServer()->SendChatTeam(Team, aBuf2);
 				((CGameControllerDDRace*)(pData->GameServer()->m_pController))->m_Teams.KillSavedTeam(Team);
 			}
@@ -1507,6 +1508,7 @@ void CSqlScore::LoadTeam(const char* Code, int ClientID)
 	CSqlTeamLoad *Tmp = new CSqlTeamLoad();
 	Tmp->m_Code = Code;
 	Tmp->m_ClientID = ClientID;
+	str_copy(Tmp->m_ClientName, Server()->ClientName(Tmp->m_ClientID), sizeof(Tmp->m_ClientName));
 
 	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(LoadTeamThread, Tmp), "load team");
 }
@@ -1604,7 +1606,7 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 					else
 					{
 						char aBuf[512];
-						str_format(aBuf, sizeof(aBuf), "Loading successfully done by %s", pData->Server()->ClientName(pData->m_ClientID));
+						str_format(aBuf, sizeof(aBuf), "Loading successfully done by %s", pData->m_ClientName);
 						pData->GameServer()->SendChatTeam(Team, aBuf);
 						str_format(aBuf, sizeof(aBuf), "DELETE from %s_saves where Code='%s' and Map='%s';", pSqlServer->GetPrefix(), pData->m_Code.ClrStr(), pData->m_Map.ClrStr());
 						pSqlServer->executeSql(aBuf);
