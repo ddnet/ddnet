@@ -16,6 +16,7 @@ class CAntibot : public IEngineAntibot
 
 	CAntibotData m_Data;
 	CAntibotRoundData m_RoundData;
+	bool m_Initialized;
 
 	void Update();
 	static void Send(int ClientID, const void *pData, int Size, int Flags, void *pUser);
