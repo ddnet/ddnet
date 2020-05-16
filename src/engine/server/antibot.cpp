@@ -7,7 +7,7 @@
 
 #ifdef CONF_ANTIBOT
 CAntibot::CAntibot()
-	: m_pGameServer(0)
+	: m_pServer(0), m_pConsole(0), m_pGameServer(0), m_Initialized(false)
 {
 }
 CAntibot::~CAntibot()
@@ -15,7 +15,8 @@ CAntibot::~CAntibot()
 	if(m_pGameServer && m_RoundData.m_Map.m_pTiles)
 		free(m_RoundData.m_Map.m_pTiles);
 
-	AntibotDestroy();
+	if(m_Initialized)
+		AntibotDestroy();
 }
 void CAntibot::Send(int ClientID, const void *pData, int Size, int Flags, void *pUser)
 {
@@ -61,6 +62,8 @@ void CAntibot::Init()
 	m_Data.m_pfnSend = Send;
 	m_Data.m_pUser = this;
 	AntibotInit(&m_Data);
+
+	m_Initialized = true;
 }
 void CAntibot::RoundStart(IGameServer *pGameServer)
 {
@@ -112,8 +115,8 @@ void CAntibot::OnEngineClientMessage(int ClientID, const void *pData, int Size, 
 	AntibotOnEngineClientMessage(ClientID, pData, Size, Flags);
 }
 #else
-CAntibot::CAntibot() :
-	m_pGameServer(0)
+CAntibot::CAntibot()
+	: m_pServer(0), m_pConsole(0), m_pGameServer(0), m_Initialized(false)
 {
 }
 CAntibot::~CAntibot()
