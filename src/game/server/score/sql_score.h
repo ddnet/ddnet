@@ -132,6 +132,7 @@ struct CSqlTeamSave : CSqlData
 
 	int m_Team;
 	int m_ClientID;
+	char m_ClientName[MAX_NAME_LENGTH]
 	sqlstr::CSqlString<128> m_Code;
 	char m_Server[5];
 };
@@ -140,6 +141,7 @@ struct CSqlTeamLoad : CSqlData
 {
 	sqlstr::CSqlString<128> m_Code;
 	int m_ClientID;
+	char m_ClientName[MAX_NAME_LENGTH]
 };
 
 struct CSqlRandomMap : CSqlScoreData
