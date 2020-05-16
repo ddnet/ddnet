@@ -5,6 +5,7 @@
 extern "C"
 {
 
+int AntibotAbiVersion();
 void AntibotInit(CAntibotData *pCallbackData);
 void AntibotRoundStart(CAntibotRoundData *pRoundData);
 void AntibotRoundEnd(void);

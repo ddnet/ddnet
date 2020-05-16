@@ -6,6 +6,8 @@
 
 enum
 {
+	ANTIBOT_ABI_VERSION=2,
+
 	ANTIBOT_MSGFLAG_NONVITAL=1,
 	ANTIBOT_MSGFLAG_FLUSH=2,
 
@@ -50,8 +52,32 @@ struct CAntibotCharacterData
 	int m_WeaponChangeTick;
 };
 
+struct CAntibotVersion
+{
+	int m_AbiVersion;
+	int m_Size;
+
+	int m_SizeData;
+	int m_SizeCharacterData;
+	int m_SizeInputData;
+	int m_SizeMapData;
+	int m_SizeRoundData;
+};
+
+#define ANTIBOT_VERSION { \
+	ANTIBOT_ABI_VERSION, \
+	sizeof(CAntibotVersion), \
+	sizeof(CAntibotData), \
+	sizeof(CAntibotCharacterData), \
+	sizeof(CAntibotInputData), \
+	sizeof(CAntibotMapData), \
+	sizeof(CAntibotRoundData), \
+}
+
 struct CAntibotData
 {
+	CAntibotVersion m_Version;
+
 	int64 m_Now;
 	int64 m_Freq;
 	void (*m_pfnLog)(const char *pMessage, void *pUser);
