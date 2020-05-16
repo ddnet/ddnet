@@ -663,6 +663,25 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
 	return 0;
 }
 
+void CServer::SendMsgRaw(int ClientID, const void *pData, int Size, int Flags)
+{
+	CNetChunk Packet;
+	mem_zero(&Packet, sizeof(CNetChunk));
+	Packet.m_ClientID = ClientID;
+	Packet.m_pData = pData;
+	Packet.m_DataSize = Size;
+	Packet.m_Flags = 0;
+	if(Flags&MSGFLAG_VITAL)
+	{
+		Packet.m_Flags |= NETSENDFLAG_VITAL;
+	}
+	if(Flags&MSGFLAG_FLUSH)
+	{
+		Packet.m_Flags |= NETSENDFLAG_FLUSH;
+	}
+	m_NetServer.Send(&Packet);
+}
+
 void CServer::DoSnapshot()
 {
 	GameServer()->OnPreSnap();
@@ -869,7 +888,9 @@ int CServer::NewClientCallback(int ClientID, void *pUser)
 	pThis->m_aClients[ClientID].m_ShowIps = false;
 	memset(&pThis->m_aClients[ClientID].m_Addr, 0, sizeof(NETADDR));
 	pThis->m_aClients[ClientID].Reset();
+
 	pThis->GameServer()->OnClientEngineJoin(ClientID);
+	pThis->Antibot()->OnEngineClientJoin(ClientID);
 
 #if defined(CONF_FAMILY_UNIX)
 	pThis->SendConnLoggingCommand(OPEN_SESSION, pThis->m_NetServer.ClientAddr(ClientID));
@@ -951,6 +972,7 @@ int CServer::DelClientCallback(int ClientID, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientID].m_Snapshots.PurgeAll();
 
 	pThis->GameServer()->OnClientEngineDrop(ClientID, pReason);
+	pThis->Antibot()->OnEngineClientDrop(ClientID, pReason);
 #if defined(CONF_FAMILY_UNIX)
 	pThis->SendConnLoggingCommand(CLOSE_SESSION, pThis->m_NetServer.ClientAddr(ClientID));
 #endif
@@ -1127,6 +1149,13 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 	CUnpacker Unpacker;
 	Unpacker.Reset(pPacket->m_pData, pPacket->m_DataSize);
 	CMsgPacker Packer(NETMSG_EX, true);
+
+	int GameFlags = 0;
+	if(pPacket->m_Flags&NET_CHUNKFLAG_VITAL)
+	{
+		GameFlags |= MSGFLAG_VITAL;
+	}
+	Antibot()->OnEngineClientMessage(ClientID, pPacket->m_pData, pPacket->m_DataSize, GameFlags);
 
 	// unpack msgid and system flag
 	int Msg;
@@ -1980,6 +2009,7 @@ int CServer::Run()
 	str_format(aBuf, sizeof(aBuf), "server name is '%s'", g_Config.m_SvName);
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 
+	Antibot()->Init();
 	GameServer()->OnInit();
 	if(ErrorShutdown())
 	{
@@ -2965,6 +2995,7 @@ void CServer::RegisterCommands()
 	m_pGameServer = Kernel()->RequestInterface<IGameServer>();
 	m_pMap = Kernel()->RequestInterface<IEngineMap>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
+	m_pAntibot = Kernel()->RequestInterface<IEngineAntibot>();
 
 	// register console commands
 	Console()->Register("kick", "i[id] ?r[reason]", CFGFLAG_SERVER, ConKick, this, "Kick player with specified id for any reason");
@@ -3076,6 +3107,7 @@ int main(int argc, const char **argv) // ignore_convention
 	IEngineMasterServer *pEngineMasterServer = CreateEngineMasterServer();
 	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_SERVER, argc, argv); // ignore_convention
 	IConfig *pConfig = CreateConfig();
+	IEngineAntibot *pEngineAntibot = CreateEngineAntibot();
 
 	pServer->InitRegister(&pServer->m_NetServer, pEngineMasterServer, pConsole);
 
@@ -3092,6 +3124,8 @@ int main(int argc, const char **argv) // ignore_convention
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConfig);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngineMasterServer); // register as both
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IMasterServer*>(pEngineMasterServer), false);
+		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngineAntibot);
+		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IAntibot*>(pEngineAntibot), false);
 
 		if(RegisterFail)
 		{

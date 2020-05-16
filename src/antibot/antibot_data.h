@@ -1,10 +1,14 @@
 #ifndef ANTIBOT_ANTIBOT_DATA_H
 #define ANTIBOT_ANTIBOT_DATA_H
 
+#include <base/system.h>
 #include <base/vmath.h>
 
 enum
 {
+	ANTIBOT_MSGFLAG_NONVITAL=1,
+	ANTIBOT_MSGFLAG_FLUSH=2,
+
 	ANTIBOT_MAX_CLIENTS=64,
 };
 
@@ -48,12 +52,18 @@ struct CAntibotCharacterData
 
 struct CAntibotData
 {
+	int64 m_Now;
+	int64 m_Freq;
+	void (*m_pfnLog)(const char *pMessage, void *pUser);
+	void (*m_pfnReport)(int ClientID, const char *pMessage, void *pUser);
+	void (*m_pfnSend)(int ClientID, const void *pData, int DataSize, int Flags, void *pUser);
+	void *m_pUser;
+};
+struct CAntibotRoundData
+{
 	int m_Tick;
 	CAntibotCharacterData m_aCharacters[ANTIBOT_MAX_CLIENTS];
 	CAntibotMapData m_Map;
-	void (*m_pfnLog)(const char *pMessage, void *pUser);
-	void (*m_pfnReport)(int ClientID, const char *pMessage, void *pUser);
-	void *m_pUser;
 };
 
 #endif // ANTIBOT_ANTIBOT_DATA_H
