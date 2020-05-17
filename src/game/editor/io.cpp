@@ -439,7 +439,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 				df.AddItem(MAPITEMTYPE_LAYER, LayerCount, sizeof(Item), &Item);
 
 				CMapItemAutoMapperConfig ItemAutomapper;
-                ItemAutomapper.m_Version = CMapItemAutoMapperConfig::CURRENT_VERSION;
+				ItemAutomapper.m_Version = CMapItemAutoMapperConfig::CURRENT_VERSION;
 				ItemAutomapper.m_GroupId = GroupCount;
 				ItemAutomapper.m_LayerId = GItem.m_NumLayers;
 				ItemAutomapper.m_AutomapperConfig = pLayer->m_AutoMapperConfig;
