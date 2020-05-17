@@ -1142,6 +1142,7 @@ public:
 	virtual void BrushFlipY();
 	virtual void BrushRotate(float Amount);
 	virtual void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect);
+	virtual bool ContainsElementWithId(int Id);
 };
 
 class CLayerTune : public CLayerTiles
