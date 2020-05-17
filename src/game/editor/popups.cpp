@@ -1762,6 +1762,7 @@ int CEditor::PopupEntities(CEditor *pEditor, CUIRect View, void *pContext)
 
 				pEditor->Graphics()->UnloadTexture(pEditor->m_EntitiesTexture);
 				pEditor->m_EntitiesTexture = pEditor->Graphics()->LoadTexture(aBuf, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+				g_UiNumPopups--;
 			}
 		}
 	}
