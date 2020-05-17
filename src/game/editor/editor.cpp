@@ -209,7 +209,7 @@ void CLayerGroup::Render()
 
 void CLayerGroup::AddLayer(CLayer *l)
 {
- 	m_pMap->m_Modified = true;
+	m_pMap->m_Modified = true;
 	m_lLayers.add(l);
 }
 
@@ -6339,4 +6339,3 @@ void CEditorMap::MakeTuneLayer(CLayer *pLayer)
 	m_pTuneLayer->m_pEditor = m_pEditor;
 	m_pTuneLayer->m_Texture = m_pEditor->m_TuneTexture;
 }
-
