@@ -1048,438 +1048,444 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 
 	TB_Top.HSplitBottom(2.5f, &TB_Top, 0);
 	TB_Bottom.HSplitTop(2.5f, 0, &TB_Bottom);
-
-	if(m_Dialog == DIALOG_NONE)
+	
+	// top line buttons
 	{
-		// ctrl+o or ctrl+l to open
-		if((Input()->KeyPress(KEY_O) || Input()->KeyPress(KEY_L)) && ctrlPressed)
+		if(m_Dialog == DIALOG_NONE)
 		{
-			if(shiftPressed)
+			// ctrl+o or ctrl+l to open
+			if((Input()->KeyPress(KEY_O) || Input()->KeyPress(KEY_L)) && ctrlPressed)
 			{
-				if(HasUnsavedData())
+				if(shiftPressed)
 				{
-					if(!m_PopupEventWasActivated)
+					if(HasUnsavedData())
 					{
-						m_PopupEventType = POPEVENT_LOADCURRENT;
-						m_PopupEventActivated = true;
+						if(!m_PopupEventWasActivated)
+						{
+							m_PopupEventType = POPEVENT_LOADCURRENT;
+							m_PopupEventActivated = true;
+						}
+					}
+					else
+					{
+						LoadCurrentMap();
 					}
 				}
 				else
 				{
-					LoadCurrentMap();
-				}
-			}
-			else
-			{
-				if(HasUnsavedData())
-				{
-					if(!m_PopupEventWasActivated)
+					if(HasUnsavedData())
 					{
-						m_PopupEventType = POPEVENT_LOAD;
-						m_PopupEventActivated = true;
+						if(!m_PopupEventWasActivated)
+						{
+							m_PopupEventType = POPEVENT_LOAD;
+							m_PopupEventActivated = true;
+						}
+					}
+					else
+					{
+						InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Load map", "Load", "maps", "", CallbackOpenMap, this);
 					}
 				}
-				else
-				{
-					InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Load map", "Load", "maps", "", CallbackOpenMap, this);
-				}
 			}
-		}
 
-		// ctrl+s to save
-		if(Input()->KeyPress(KEY_S) && ctrlPressed)
-		{
-			if(m_aFileName[0] && m_ValidSaveFilename)
+			// ctrl+s to save
+			if(Input()->KeyPress(KEY_S) && ctrlPressed)
 			{
-				if(!m_PopupEventWasActivated)
+				if(m_aFileName[0] && m_ValidSaveFilename)
 				{
-					str_copy(m_aFileSaveName, m_aFileName, sizeof(m_aFileSaveName));
-					CallbackSaveMap(m_aFileSaveName, IStorage::TYPE_SAVE, this);
+					if(!m_PopupEventWasActivated)
+					{
+						str_copy(m_aFileSaveName, m_aFileName, sizeof(m_aFileSaveName));
+						CallbackSaveMap(m_aFileSaveName, IStorage::TYPE_SAVE, this);
+					}
 				}
+				else
+					InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveMap, this);
 			}
-			else
+
+			// ctrl+shift+s to save as
+			if(Input()->KeyPress(KEY_S) && ctrlPressed && shiftPressed)
 				InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveMap, this);
+
+			// ctrl+shift+alt+s to save as
+			if(Input()->KeyPress(KEY_S) && ctrlPressed && shiftPressed && altPressed)
+				InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveCopyMap, this);
 		}
 
-		// ctrl+shift+s to save as
-		if(Input()->KeyPress(KEY_S) && ctrlPressed && shiftPressed)
-			InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveMap, this);
-
-		// ctrl+shift+alt+s to save as
-		if(Input()->KeyPress(KEY_S) && ctrlPressed && shiftPressed && altPressed)
-			InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveCopyMap, this);
-	}
-
-	// detail button
-	TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
-	static int s_HqButton = 0;
-	if(DoButton_Editor(&s_HqButton, "HD", m_ShowDetail, &Button, 0, "[ctrl+h] Toggle High Detail") ||
-		(Input()->KeyPress(KEY_H) && ctrlPressed))
-	{
-		m_ShowDetail = !m_ShowDetail;
-	}
-
-	TB_Top.VSplitLeft(5.0f, 0, &TB_Top);
-
-	// animation button
-	TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
-	static int s_AnimateButton = 0;
-	if(DoButton_Editor(&s_AnimateButton, "Anim", m_Animate, &Button, 0, "[ctrl+m] Toggle animation") ||
-		(Input()->KeyPress(KEY_M) && ctrlPressed))
-	{
-		m_AnimateStart = time_get();
-		m_Animate = !m_Animate;
-	}
-
-	TB_Top.VSplitLeft(5.0f, 0, &TB_Top);
-
-	// proof button
-	TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
-	static int s_ProofButton = 0;
-	if(DoButton_Editor(&s_ProofButton, "Proof", m_ProofBorders, &Button, 0, "[ctrl+p] Toggles proof borders. These borders represent what a player maximum can see.") ||
-		(Input()->KeyPress(KEY_P) && ctrlPressed))
-	{
-		m_ProofBorders = !m_ProofBorders;
-	}
-
-	TB_Top.VSplitLeft(5.0f, 0, &TB_Top);
-
-	// grid button
-	TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
-	static int s_GridButton = 0;
-	if(DoButton_Editor(&s_GridButton, "Grid", m_GridActive, &Button, 0, "[ctrl+g] Toggle Grid") ||
-		(Input()->KeyPress(KEY_G) && ctrlPressed))
-	{
-		m_GridActive = !m_GridActive;
-	}
-
-	TB_Top.VSplitLeft(5.0f, 0, &TB_Top);
-
-	// tile info button
-	TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
-	static int s_TileInfoButton = 0;
-	if(DoButton_Editor(&s_TileInfoButton, "Info", m_ShowTileInfo, &Button, 0, "[ctrl+i] Show tile information") ||
-		(Input()->KeyPress(KEY_I) && ctrlPressed))
-	{
-		m_ShowTileInfo = !m_ShowTileInfo;
-		m_ShowEnvelopePreview = 0;
-	}
-
-	TB_Top.VSplitLeft(5.0f, 0, &TB_Top);
-
-	// allow place unused tiles button
-	TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
-	static int s_AllowPlaceUnusedTilesButton = 0;
-	if(DoButton_Editor(&s_AllowPlaceUnusedTilesButton, "Unused", m_AllowPlaceUnusedTiles, &Button, 0, "[ctrl+u] Allow placing unused tiles") ||
-		(Input()->KeyPress(KEY_U) && ctrlPressed))
-	{
-		m_AllowPlaceUnusedTiles = !m_AllowPlaceUnusedTiles;
-	}
-
-	TB_Top.VSplitLeft(5.0f, 0, &TB_Top);
-
-	TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
-	static int s_ColorBrushButton = 0;
-	if(DoButton_Editor(&s_ColorBrushButton, "Color", m_BrushColorEnabled, &Button, 0, "Toggle brush coloring"))
-	{
-		m_BrushColorEnabled = !m_BrushColorEnabled;
-	}
-
-	TB_Top.VSplitLeft(5.0f, 0, &TB_Top);
-
-	TB_Top.VSplitLeft(45.0f, &Button, &TB_Top);
-	if(DoButton_Editor(&Button, "Entities", 0, &Button, 0, "Choose game layer entities image for different gametypes")) {
-		m_SelectEntitiesFiles.clear();
-		Storage()->ListDirectory(IStorage::TYPE_ALL, "editor/entities", EntitiesListdirCallback, this);
-		std::sort(m_SelectEntitiesFiles.begin(), m_SelectEntitiesFiles.end());
-
-		static int s_EntitiesPopupID = 0;
-		UiInvokePopupMenu(&s_EntitiesPopupID, 0, Button.x, Button.y+18.0f,
-			250, m_SelectEntitiesFiles.size()*14 + 10, PopupEntities);
-	}
-
-	TB_Top.VSplitLeft(5.0f, 0, &TB_Top);
-
-	// zoom group
-	TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
-	static int s_ZoomOutButton = 0;
-	if(DoButton_Ex(&s_ZoomOutButton, "ZO", 0, &Button, 0, "[NumPad-] Zoom out", CUI::CORNER_L))
-		m_ZoomLevel += 50;
-
-	TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
-	static int s_ZoomNormalButton = 0;
-	if(DoButton_Ex(&s_ZoomNormalButton, "1:1", 0, &Button, 0, "[NumPad*] Zoom to normal and remove editor offset", 0))
-	{
-		m_EditorOffsetX = 0;
-		m_EditorOffsetY = 0;
-		m_ZoomLevel = 100;
-	}
-
-	TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
-	static int s_ZoomInButton = 0;
-	if(DoButton_Ex(&s_ZoomInButton, "ZI", 0, &Button, 0, "[NumPad+] Zoom in", CUI::CORNER_R))
-		m_ZoomLevel -= 50;
-
-	TB_Top.VSplitLeft(5.0f, 0, &TB_Top);
-
-	// animation speed
-	TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
-	static int s_AnimFasterButton = 0;
-	if(DoButton_Ex(&s_AnimFasterButton, "A+", 0, &Button, 0, "Increase animation speed", CUI::CORNER_L))
-		m_AnimateSpeed += 0.5f;
-
-	TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
-	static int s_AnimNormalButton = 0;
-	if(DoButton_Ex(&s_AnimNormalButton, "1", 0, &Button, 0, "Normal animation speed", 0))
-		m_AnimateSpeed = 1.0f;
-
-	TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
-	static int s_AnimSlowerButton = 0;
-	if(DoButton_Ex(&s_AnimSlowerButton, "A-", 0, &Button, 0, "Decrease animation speed", CUI::CORNER_R))
-	{
-		if(m_AnimateSpeed > 0.5f)
-			m_AnimateSpeed -= 0.5f;
-	}
-
-	TB_Top.VSplitLeft(5.0f, &Button, &TB_Top);
-
-
-	// brush manipulation
-	{
-		int Enabled = m_Brush.IsEmpty() ? -1 : 0;
-
-		// flip buttons
-		TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
-		static int s_FlipXButton = 0;
-		if(DoButton_Ex(&s_FlipXButton, "X/X", Enabled, &Button, 0, "[N] Flip brush horizontal", CUI::CORNER_L) || (Input()->KeyPress(KEY_N) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
+		// detail button
+		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
+		static int s_HqButton = 0;
+		if(DoButton_Editor(&s_HqButton, "HD", m_ShowDetail, &Button, 0, "[ctrl+h] Toggle High Detail") ||
+			(Input()->KeyPress(KEY_H) && ctrlPressed))
 		{
-			for(int i = 0; i < m_Brush.m_lLayers.size(); i++)
-				m_Brush.m_lLayers[i]->BrushFlipX();
+			m_ShowDetail = !m_ShowDetail;
 		}
 
-		TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
-		static int s_FlipyButton = 0;
-		if(DoButton_Ex(&s_FlipyButton, "Y/Y", Enabled, &Button, 0, "[M] Flip brush vertical", CUI::CORNER_R) || (Input()->KeyPress(KEY_M) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
+		TB_Top.VSplitLeft(5.0f, 0, &TB_Top);
+
+		// animation button
+		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
+		static int s_AnimateButton = 0;
+		if(DoButton_Editor(&s_AnimateButton, "Anim", m_Animate, &Button, 0, "[ctrl+m] Toggle animation") ||
+			(Input()->KeyPress(KEY_M) && ctrlPressed))
 		{
-			for(int i = 0; i < m_Brush.m_lLayers.size(); i++)
-				m_Brush.m_lLayers[i]->BrushFlipY();
+			m_AnimateStart = time_get();
+			m_Animate = !m_Animate;
 		}
 
-		// rotate buttons
-		TB_Top.VSplitLeft(5.0f, &Button, &TB_Top);
+		TB_Top.VSplitLeft(5.0f, 0, &TB_Top);
+
+		// proof button
+		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
+		static int s_ProofButton = 0;
+		if(DoButton_Editor(&s_ProofButton, "Proof", m_ProofBorders, &Button, 0, "[ctrl+p] Toggles proof borders. These borders represent what a player maximum can see.") ||
+			(Input()->KeyPress(KEY_P) && ctrlPressed))
+		{
+			m_ProofBorders = !m_ProofBorders;
+		}
+
+		TB_Top.VSplitLeft(5.0f, 0, &TB_Top);
+
+		// grid button
+		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
+		static int s_GridButton = 0;
+		if(DoButton_Editor(&s_GridButton, "Grid", m_GridActive, &Button, 0, "[ctrl+g] Toggle Grid") ||
+			(Input()->KeyPress(KEY_G) && ctrlPressed))
+		{
+			m_GridActive = !m_GridActive;
+		}
+
+		TB_Top.VSplitLeft(5.0f, 0, &TB_Top);
+
+		// tile info button
+		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
+		static int s_TileInfoButton = 0;
+		if(DoButton_Editor(&s_TileInfoButton, "Info", m_ShowTileInfo, &Button, 0, "[ctrl+i] Show tile information") ||
+			(Input()->KeyPress(KEY_I) && ctrlPressed))
+		{
+			m_ShowTileInfo = !m_ShowTileInfo;
+			m_ShowEnvelopePreview = 0;
+		}
+
+		TB_Top.VSplitLeft(5.0f, 0, &TB_Top);
+
+		// allow place unused tiles button
+		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
+		static int s_AllowPlaceUnusedTilesButton = 0;
+		if(DoButton_Editor(&s_AllowPlaceUnusedTilesButton, "Unused", m_AllowPlaceUnusedTiles, &Button, 0, "[ctrl+u] Allow placing unused tiles") ||
+			(Input()->KeyPress(KEY_U) && ctrlPressed))
+		{
+			m_AllowPlaceUnusedTiles = !m_AllowPlaceUnusedTiles;
+		}
+
+		TB_Top.VSplitLeft(5.0f, 0, &TB_Top);
+
+		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
+		static int s_ColorBrushButton = 0;
+		if(DoButton_Editor(&s_ColorBrushButton, "Color", m_BrushColorEnabled, &Button, 0, "Toggle brush coloring"))
+		{
+			m_BrushColorEnabled = !m_BrushColorEnabled;
+		}
+
+		TB_Top.VSplitLeft(5.0f, 0, &TB_Top);
+
+		TB_Top.VSplitLeft(45.0f, &Button, &TB_Top);
+		if(DoButton_Editor(&Button, "Entities", 0, &Button, 0, "Choose game layer entities image for different gametypes")) {
+			m_SelectEntitiesFiles.clear();
+			Storage()->ListDirectory(IStorage::TYPE_ALL, "editor/entities", EntitiesListdirCallback, this);
+			std::sort(m_SelectEntitiesFiles.begin(), m_SelectEntitiesFiles.end());
+
+			static int s_EntitiesPopupID = 0;
+			UiInvokePopupMenu(&s_EntitiesPopupID, 0, Button.x, Button.y+18.0f,
+				250, m_SelectEntitiesFiles.size()*14 + 10, PopupEntities);
+		}
+
+		TB_Top.VSplitLeft(5.0f, 0, &TB_Top);
+
+		// zoom group
+		TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
+		static int s_ZoomOutButton = 0;
+		if(DoButton_Ex(&s_ZoomOutButton, "ZO", 0, &Button, 0, "[NumPad-] Zoom out", CUI::CORNER_L))
+			m_ZoomLevel += 50;
 
 		TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
-		static int s_RotationAmount = 90;
-		bool TileLayer = false;
-		// check for tile layers in brush selection
-		for(int i = 0; i < m_Brush.m_lLayers.size(); i++)
-			if(m_Brush.m_lLayers[i]->m_Type == LAYERTYPE_TILES)
+		static int s_ZoomNormalButton = 0;
+		if(DoButton_Ex(&s_ZoomNormalButton, "1:1", 0, &Button, 0, "[NumPad*] Zoom to normal and remove editor offset", 0))
+		{
+			m_EditorOffsetX = 0;
+			m_EditorOffsetY = 0;
+			m_ZoomLevel = 100;
+		}
+
+		TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
+		static int s_ZoomInButton = 0;
+		if(DoButton_Ex(&s_ZoomInButton, "ZI", 0, &Button, 0, "[NumPad+] Zoom in", CUI::CORNER_R))
+			m_ZoomLevel -= 50;
+
+		TB_Top.VSplitLeft(5.0f, 0, &TB_Top);
+
+		// brush manipulation
+		{
+			int Enabled = m_Brush.IsEmpty() ? -1 : 0;
+
+			// flip buttons
+			TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
+			static int s_FlipXButton = 0;
+			if(DoButton_Ex(&s_FlipXButton, "X/X", Enabled, &Button, 0, "[N] Flip brush horizontal", CUI::CORNER_L) || (Input()->KeyPress(KEY_N) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
 			{
-				TileLayer = true;
-				s_RotationAmount = maximum(90, (s_RotationAmount/90)*90);
-				break;
+				for(int i = 0; i < m_Brush.m_lLayers.size(); i++)
+					m_Brush.m_lLayers[i]->BrushFlipX();
 			}
-		s_RotationAmount = UiDoValueSelector(&s_RotationAmount, &Button, "", s_RotationAmount, TileLayer ? 90 : 1, 359, TileLayer ? 90 : 1, TileLayer ? 10.0f : 2.0f, "Rotation of the brush in degrees. Use left mouse button to drag and change the value. Hold shift to be more precise.", true);
 
-		TB_Top.VSplitLeft(5.0f, &Button, &TB_Top);
-		TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
-		static int s_CcwButton = 0;
-		if(DoButton_Ex(&s_CcwButton, "CCW", Enabled, &Button, 0, "[R] Rotates the brush counter clockwise", CUI::CORNER_L) || (Input()->KeyPress(KEY_R) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
-		{
+			TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
+			static int s_FlipyButton = 0;
+			if(DoButton_Ex(&s_FlipyButton, "Y/Y", Enabled, &Button, 0, "[M] Flip brush vertical", CUI::CORNER_R) || (Input()->KeyPress(KEY_M) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
+			{
+				for(int i = 0; i < m_Brush.m_lLayers.size(); i++)
+					m_Brush.m_lLayers[i]->BrushFlipY();
+			}
+
+			// rotate buttons
+			TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
+			static int s_RotationAmount = 90;
+			bool TileLayer = false;
+			// check for tile layers in brush selection
 			for(int i = 0; i < m_Brush.m_lLayers.size(); i++)
-				m_Brush.m_lLayers[i]->BrushRotate(-s_RotationAmount/360.0f*pi*2);
+				if(m_Brush.m_lLayers[i]->m_Type == LAYERTYPE_TILES)
+				{
+					TileLayer = true;
+					s_RotationAmount = maximum(90, (s_RotationAmount/90)*90);
+					break;
+				}
+			s_RotationAmount = UiDoValueSelector(&s_RotationAmount, &Button, "", s_RotationAmount, TileLayer ? 90 : 1, 359, TileLayer ? 90 : 1, TileLayer ? 10.0f : 2.0f, "Rotation of the brush in degrees. Use left mouse button to drag and change the value. Hold shift to be more precise.", true);
+
+			TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
+			static int s_CcwButton = 0;
+			if(DoButton_Ex(&s_CcwButton, "CCW", Enabled, &Button, 0, "[R] Rotates the brush counter clockwise", CUI::CORNER_L) || (Input()->KeyPress(KEY_R) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
+			{
+				for(int i = 0; i < m_Brush.m_lLayers.size(); i++)
+					m_Brush.m_lLayers[i]->BrushRotate(-s_RotationAmount/360.0f*pi*2);
+			}
+
+			TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
+			static int s_CwButton = 0;
+			if(DoButton_Ex(&s_CwButton, "CW", Enabled, &Button, 0, "[T] Rotates the brush clockwise", CUI::CORNER_R) || (Input()->KeyPress(KEY_T) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
+			{
+				for(int i = 0; i < m_Brush.m_lLayers.size(); i++)
+					m_Brush.m_lLayers[i]->BrushRotate(s_RotationAmount/360.0f*pi*2);
+			}
+
+			TB_Top.VSplitLeft(5.0f, &Button, &TB_Top);
 		}
 
-		TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
-		static int s_CwButton = 0;
-		if(DoButton_Ex(&s_CwButton, "CW", Enabled, &Button, 0, "[T] Rotates the brush clockwise", CUI::CORNER_R) || (Input()->KeyPress(KEY_T) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
+		// animation speed
+		if(m_Animate)
 		{
-			for(int i = 0; i < m_Brush.m_lLayers.size(); i++)
-				m_Brush.m_lLayers[i]->BrushRotate(s_RotationAmount/360.0f*pi*2);
+			TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
+			static int s_AnimFasterButton = 0;
+			if(DoButton_Ex(&s_AnimFasterButton, "A+", 0, &Button, 0, "Increase animation speed", CUI::CORNER_L))
+				m_AnimateSpeed += 0.5f;
+
+			TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
+			static int s_AnimNormalButton = 0;
+			if(DoButton_Ex(&s_AnimNormalButton, "1", 0, &Button, 0, "Normal animation speed", 0))
+				m_AnimateSpeed = 1.0f;
+
+			TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
+			static int s_AnimSlowerButton = 0;
+			if(DoButton_Ex(&s_AnimSlowerButton, "A-", 0, &Button, 0, "Decrease animation speed", CUI::CORNER_R))
+			{
+				if(m_AnimateSpeed > 0.5f)
+					m_AnimateSpeed -= 0.5f;
+			}
+
+			TB_Top.VSplitLeft(5.0f, &Button, &TB_Top);
+		}
+
+		// grid zoom
+		if(m_GridActive)
+		{
+			TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
+			static int s_GridIncreaseButton = 0;
+			if(DoButton_Ex(&s_GridIncreaseButton, "G-", 0, &Button, 0, "Decrease grid", CUI::CORNER_L))
+			{
+				if(m_GridFactor > 1)
+					m_GridFactor--;
+			}
+
+			TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
+			static int s_GridNormalButton = 0;
+			if(DoButton_Ex(&s_GridNormalButton, "1", 0, &Button, 0, "Normal grid", 0))
+				m_GridFactor = 1;
+
+			TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
+
+			static int s_GridDecreaseButton = 0;
+			if(DoButton_Ex(&s_GridDecreaseButton, "G+", 0, &Button, 0, "Increase grid", CUI::CORNER_R))
+			{
+				if(m_GridFactor < 15)
+					m_GridFactor++;
+			}
+			TB_Top.VSplitLeft(5.0f, &Button, &TB_Top);
 		}
 	}
 
-	// refocus button
+	// Bottom line buttons
 	{
-		TB_Bottom.VSplitLeft(45.0f, &Button, &TB_Bottom);
-		static int s_RefocusButton = 0;
-		if(DoButton_Editor(&s_RefocusButton, "Refocus", m_WorldOffsetX&&m_WorldOffsetY ? 0 : -1, &Button, 0, "[HOME] Restore map focus") || (m_EditBoxActive == 0 && Input()->KeyPress(KEY_HOME)))
+		// refocus button
 		{
-			m_WorldOffsetX = 0;
-			m_WorldOffsetY = 0;
+			TB_Bottom.VSplitLeft(45.0f, &Button, &TB_Bottom);
+			static int s_RefocusButton = 0;
+			if(DoButton_Editor(&s_RefocusButton, "Refocus", m_WorldOffsetX&&m_WorldOffsetY ? 0 : -1, &Button, 0, "[HOME] Restore map focus") || (m_EditBoxActive == 0 && Input()->KeyPress(KEY_HOME)))
+			{
+				m_WorldOffsetX = 0;
+				m_WorldOffsetY = 0;
+			}
+			TB_Bottom.VSplitLeft(5.0f, 0, &TB_Bottom);
 		}
-		TB_Bottom.VSplitLeft(5.0f, 0, &TB_Bottom);
-	}
 
-	// tile manipulation
-	{
-		static int s_BorderBut = 0;
-		CLayerTiles *pT = (CLayerTiles *)GetSelectedLayerType(0, LAYERTYPE_TILES);
+		// tile manipulation
+		{
+			static int s_BorderBut = 0;
+			CLayerTiles *pT = (CLayerTiles *)GetSelectedLayerType(0, LAYERTYPE_TILES);
 
-		// no border for tele layer, speedup, front and switch
-		if(pT && (pT->m_Tele || pT->m_Speedup || pT->m_Switch || pT->m_Front || pT->m_Tune))
-			pT = 0;
+			// no border for tele layer, speedup, front and switch
+			if(pT && (pT->m_Tele || pT->m_Speedup || pT->m_Switch || pT->m_Front || pT->m_Tune))
+				pT = 0;
 
-		if(pT)
+			if(pT)
+			{
+				TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
+				if(DoButton_Ex(&s_BorderBut, "Border", 0, &Button, 0, "Adds border tiles", CUI::CORNER_ALL))
+				{
+					DoMapBorder();
+				}
+				TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
+			}
+
+
+			// do tele/tune/switch/speedup button
+			{
+				int (*pPopupFunc)(CEditor *peditor, CUIRect View, void *pContext) = NULL;
+				const char *aButtonName = 0;
+				float Height = 0.0f;
+				CLayerTiles *pS = (CLayerTiles *)GetSelectedLayerType(0, LAYERTYPE_TILES);
+				if(pS)
+				{
+					if(pS == m_Map.m_pSwitchLayer)
+					{
+						aButtonName = "Switch";
+						pPopupFunc = PopupSwitch;
+						Height = 36;
+					}
+					else if(pS == m_Map.m_pSpeedupLayer)
+					{
+						aButtonName = "Speedup";
+						pPopupFunc = PopupSpeedup;
+						Height = 53;
+					}
+					else if(pS == m_Map.m_pTuneLayer)
+					{
+						aButtonName = "Tune";
+						pPopupFunc = PopupTune;
+						Height = 23;
+					}
+					else if(pS == m_Map.m_pTeleLayer)
+					{
+						aButtonName = "Tele";
+						pPopupFunc = PopupTele;
+						Height = 23;
+					}
+
+					if(aButtonName != 0)
+					{
+						static char aBuf[64];
+						str_format(aBuf, sizeof(aBuf), "[ctrl+a] %s", aButtonName);
+
+						TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
+						static int s_ModifierButton = 0;
+						if(DoButton_Ex(&s_ModifierButton, aButtonName, 0, &Button, 0, aBuf, CUI::CORNER_ALL)
+							|| (ctrlPressed && Input()->KeyPress(KEY_A)))
+						{
+							static int s_ModifierPopupID = 0;
+							if(!UiPopupExists(&s_ModifierPopupID))
+							{
+								UiInvokePopupMenu(&s_ModifierPopupID, 0, Button.x, Button.y + Button.h, 120, Height, pPopupFunc);
+							}
+						}
+						TB_Bottom.VSplitLeft(5.0f, 0, &TB_Bottom);
+					}
+				}
+			}
+		}
+
+		// do add quad/sound button
+		CLayer *pLayer = GetSelectedLayer(0);
+		if(pLayer && (pLayer->m_Type == LAYERTYPE_QUADS || pLayer->m_Type == LAYERTYPE_SOUNDS))
 		{
 			TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
-			if(DoButton_Ex(&s_BorderBut, "Border", 0, &Button, 0, "Adds border tiles", CUI::CORNER_ALL))
+
+			bool invoked = false;
+			static int s_AddItemButton = 0;
+
+			if(pLayer->m_Type == LAYERTYPE_QUADS)
 			{
-				DoMapBorder();
+				invoked = DoButton_Editor(&s_AddItemButton, "Add Quad", 0, &Button, 0, "[ctrl+q] Add a new quad") ||
+					(Input()->KeyPress(KEY_Q) && ctrlPressed);
+			}
+			else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
+			{
+				invoked = DoButton_Editor(&s_AddItemButton, "Add Sound", 0, &Button, 0, "[ctrl+q] Add a new sound source") ||
+					(Input()->KeyPress(KEY_Q) && ctrlPressed);
+			}
+
+			if(invoked)
+			{
+				CLayerGroup *pGroup = GetSelectedGroup();
+
+				float Mapping[4];
+				pGroup->Mapping(Mapping);
+				int x = Mapping[0] + (Mapping[2]-Mapping[0]) / 2;
+				int y = Mapping[1] + (Mapping[3]-Mapping[1]) / 2;
+				if(Input()->KeyPress(KEY_Q) && ctrlPressed)
+				{
+					x += UI()->MouseWorldX() - (m_WorldOffsetX*pGroup->m_ParallaxX/100) - pGroup->m_OffsetX;
+					y += UI()->MouseWorldY() - (m_WorldOffsetY*pGroup->m_ParallaxY/100) - pGroup->m_OffsetY;
+				}
+
+				if(pLayer->m_Type == LAYERTYPE_QUADS)
+				{
+					CLayerQuads *pQuadLayer = (CLayerQuads *)pLayer;
+
+					int Width = 64;
+					int Height = 64;
+					if(pQuadLayer->m_Image >= 0)
+					{
+						Width = m_Map.m_lImages[pQuadLayer->m_Image]->m_Width;
+						Height = m_Map.m_lImages[pQuadLayer->m_Image]->m_Height;
+					}
+
+					pQuadLayer->NewQuad(x, y, Width, Height);
+				}
+				else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
+				{
+					CLayerSounds *pSoundLayer = (CLayerSounds *)pLayer;
+					pSoundLayer->NewSource(x, y);
+				}
 			}
 			TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
 		}
 
 
-		// do tele/tune/switch/speedup button
+		// Brush draw mode button
 		{
-			int (*pPopupFunc)(CEditor *peditor, CUIRect View, void *pContext) = NULL;
-			const char *aButtonName = 0;
-			float Height = 0.0f;
-			CLayerTiles *pS = (CLayerTiles *)GetSelectedLayerType(0, LAYERTYPE_TILES);
-			if(pS)
-			{
-				if(pS == m_Map.m_pSwitchLayer)
-				{
-					aButtonName = "Switch";
-					pPopupFunc = PopupSwitch;
-					Height = 36;
-				}
-				else if(pS == m_Map.m_pSpeedupLayer)
-				{
-					aButtonName = "Speedup";
-					pPopupFunc = PopupSpeedup;
-					Height = 53;
-				}
-				else if(pS == m_Map.m_pTuneLayer)
-				{
-					aButtonName = "Tune";
-					pPopupFunc = PopupTune;
-					Height = 23;
-				}
-				else if(pS == m_Map.m_pTeleLayer)
-				{
-					aButtonName = "Tele";
-					pPopupFunc = PopupTele;
-					Height = 23;
-				}
-
-				if(aButtonName != 0)
-				{
-					static char aBuf[64];
-					str_format(aBuf, sizeof(aBuf), "[ctrl+a] %s", aButtonName);
-
-					TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
-					static int s_ModifierButton = 0;
-					if(DoButton_Ex(&s_ModifierButton, aButtonName, 0, &Button, 0, aBuf, CUI::CORNER_ALL)
-						|| (ctrlPressed && Input()->KeyPress(KEY_A)))
-					{
-						static int s_ModifierPopupID = 0;
-						if(!UiPopupExists(&s_ModifierPopupID))
-						{
-							UiInvokePopupMenu(&s_ModifierPopupID, 0, Button.x, Button.y + Button.h, 120, Height, pPopupFunc);
-						}
-					}
-					TB_Bottom.VSplitLeft(5.0f, 0, &TB_Bottom);
-				}
-			}
+			TB_Bottom.VSplitLeft(65.0f, &Button, &TB_Bottom);
+			static int s_BrushDrawModeButton = 0;
+			if(DoButton_Editor(&s_BrushDrawModeButton, "Destructive", m_BrushDrawDestructive, &Button, 0, "[ctrl+d] Toggle brush draw mode") ||
+				(Input()->KeyPress(KEY_D) && ctrlPressed))
+				m_BrushDrawDestructive = !m_BrushDrawDestructive;
+			TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
 		}
-	}
-
-
-	// grid zoom
-	if(m_GridActive)
-	{
-		TB_Bottom.VSplitLeft(30.0f, &Button, &TB_Bottom);
-		static int s_GridIncreaseButton = 0;
-		if(DoButton_Ex(&s_GridIncreaseButton, "G-", 0, &Button, 0, "Decrease grid", CUI::CORNER_L))
-		{
-			if(m_GridFactor > 1)
-				m_GridFactor--;
-		}
-
-		TB_Bottom.VSplitLeft(30.0f, &Button, &TB_Bottom);
-		static int s_GridNormalButton = 0;
-		if(DoButton_Ex(&s_GridNormalButton, "1", 0, &Button, 0, "Normal grid", 0))
-			m_GridFactor = 1;
-
-		TB_Bottom.VSplitLeft(30.0f, &Button, &TB_Bottom);
-
-		static int s_GridDecreaseButton = 0;
-		if(DoButton_Ex(&s_GridDecreaseButton, "G+", 0, &Button, 0, "Increase grid", CUI::CORNER_R))
-		{
-			if(m_GridFactor < 15)
-				m_GridFactor++;
-		}
-		TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
-	}
-
-
-	// do add quad/sound button
-	CLayer *pLayer = GetSelectedLayer(0);
-	if(pLayer && (pLayer->m_Type == LAYERTYPE_QUADS || pLayer->m_Type == LAYERTYPE_SOUNDS))
-	{
-		TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
-
-		bool invoked = false;
-		static int s_AddItemButton = 0;
-
-		if(pLayer->m_Type == LAYERTYPE_QUADS)
-		{
-			invoked = DoButton_Editor(&s_AddItemButton, "Add Quad", 0, &Button, 0, "[ctrl+q] Add a new quad") ||
-				(Input()->KeyPress(KEY_Q) && ctrlPressed);
-		}
-		else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
-		{
-			invoked = DoButton_Editor(&s_AddItemButton, "Add Sound", 0, &Button, 0, "[ctrl+q] Add a new sound source") ||
-				(Input()->KeyPress(KEY_Q) && ctrlPressed);
-		}
-
-		if(invoked)
-		{
-			CLayerGroup *pGroup = GetSelectedGroup();
-
-			float Mapping[4];
-			pGroup->Mapping(Mapping);
-			int x = Mapping[0] + (Mapping[2]-Mapping[0]) / 2;
-			int y = Mapping[1] + (Mapping[3]-Mapping[1]) / 2;
-			if(Input()->KeyPress(KEY_Q) && ctrlPressed)
-			{
-				x += UI()->MouseWorldX() - (m_WorldOffsetX*pGroup->m_ParallaxX/100) - pGroup->m_OffsetX;
-				y += UI()->MouseWorldY() - (m_WorldOffsetY*pGroup->m_ParallaxY/100) - pGroup->m_OffsetY;
-			}
-
-			if(pLayer->m_Type == LAYERTYPE_QUADS)
-			{
-				CLayerQuads *pQuadLayer = (CLayerQuads *)pLayer;
-
-				int Width = 64;
-				int Height = 64;
-				if(pQuadLayer->m_Image >= 0)
-				{
-					Width = m_Map.m_lImages[pQuadLayer->m_Image]->m_Width;
-					Height = m_Map.m_lImages[pQuadLayer->m_Image]->m_Height;
-				}
-
-				pQuadLayer->NewQuad(x, y, Width, Height);
-			}
-			else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
-			{
-				CLayerSounds *pSoundLayer = (CLayerSounds *)pLayer;
-				pSoundLayer->NewSource(x, y);
-			}
-		}
-		TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
-	}
-
-
-	// Brush draw mode button
-	{
-		TB_Bottom.VSplitLeft(65.0f, &Button, &TB_Bottom);
-		static int s_BrushDrawModeButton = 0;
-		if(DoButton_Editor(&s_BrushDrawModeButton, "Destructive", m_BrushDrawDestructive, &Button, 0, "[ctrl+d] Toggle brush draw mode") ||
-			(Input()->KeyPress(KEY_D) && ctrlPressed))
-			m_BrushDrawDestructive = !m_BrushDrawDestructive;
 	}
 }
 
