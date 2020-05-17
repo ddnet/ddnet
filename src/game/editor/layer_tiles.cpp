@@ -2020,6 +2020,22 @@ void CLayerSwitch::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 	FlagModified(sx, sy, w, h);
 }
 
+bool CLayerSwitch::ContainsElementWithId(int Id)
+{
+	for(int y = 0; y < m_Height; ++y)
+	{
+		for(int x = 0; x < m_Width; ++x)
+		{
+			if(m_pSwitchTile[y*m_Width+x].m_Number == Id)
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
 //------------------------------------------------------
 
 CLayerTune::CLayerTune(int w, int h)
