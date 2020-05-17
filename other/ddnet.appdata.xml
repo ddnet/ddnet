@@ -32,6 +32,10 @@
         <keyword>teeworlds</keyword>
         <keyword>game</keyword>
     </keywords>
+    <releases>
+        <release date="2020-05-01" version="13.1"/>
+        <release date="2020-04-10" version="13.0.2"/>
+    </releases>
     <url type="homepage">https://ddnet.tw/</url>
     <url type="bugtracker">https://github.com/ddnet/ddnet/issues</url>
     <url type="donation">https://www.paypal.me/ddnet</url>
