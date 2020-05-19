@@ -6332,11 +6332,11 @@ void CEditor::LoadCurrentMap()
 	Load(m_pClient->GetCurrentMapPath(), IStorage::TYPE_ALL);
 	m_ValidSaveFilename = true;
 
-	CGameClient* gameClient = (CGameClient*)Kernel()->RequestInterface<IGameClient>();
-	vec2 center = gameClient->m_pCamera->m_Center;
+	CGameClient* GameClient = (CGameClient*)Kernel()->RequestInterface<IGameClient>();
+	vec2 Center = GameClient->m_pCamera->m_Center;
 
-	m_WorldOffsetX = center.x;
-	m_WorldOffsetY = center.y;
+	m_WorldOffsetX = Center.x;
+	m_WorldOffsetY = Center.y;
 }
 
 IEditor *CreateEditor() { return new CEditor; }
