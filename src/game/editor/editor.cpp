@@ -1037,9 +1037,9 @@ static int EntitiesListdirCallback(const char *pName, int IsDir, int StorageType
 
 void CEditor::DoToolbar(CUIRect ToolBar)
 {
-	bool ctrlPressed = Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL);
-	bool shiftPressed = Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT);
-	bool altPressed = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
+	bool CtrlPressed = Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL);
+	bool ShiftPressed = Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT);
+	bool AltPressed = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
 
 	CUIRect TB_Top, TB_Bottom;
 	CUIRect Button;
@@ -1054,9 +1054,9 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		if(m_Dialog == DIALOG_NONE)
 		{
 			// ctrl+o or ctrl+l to open
-			if((Input()->KeyPress(KEY_O) || Input()->KeyPress(KEY_L)) && ctrlPressed)
+			if((Input()->KeyPress(KEY_O) || Input()->KeyPress(KEY_L)) && CtrlPressed)
 			{
-				if(shiftPressed)
+				if(ShiftPressed)
 				{
 					if(HasUnsavedData())
 					{
@@ -1089,7 +1089,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			}
 
 			// ctrl+s to save
-			if(Input()->KeyPress(KEY_S) && ctrlPressed)
+			if(Input()->KeyPress(KEY_S) && CtrlPressed)
 			{
 				if(m_aFileName[0] && m_ValidSaveFilename)
 				{
@@ -1104,11 +1104,11 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			}
 
 			// ctrl+shift+s to save as
-			if(Input()->KeyPress(KEY_S) && ctrlPressed && shiftPressed)
+			if(Input()->KeyPress(KEY_S) && CtrlPressed && ShiftPressed)
 				InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveMap, this);
 
 			// ctrl+shift+alt+s to save as
-			if(Input()->KeyPress(KEY_S) && ctrlPressed && shiftPressed && altPressed)
+			if(Input()->KeyPress(KEY_S) && CtrlPressed && ShiftPressed && AltPressed)
 				InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveCopyMap, this);
 		}
 
@@ -1116,7 +1116,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 		static int s_HqButton = 0;
 		if(DoButton_Editor(&s_HqButton, "HD", m_ShowDetail, &Button, 0, "[ctrl+h] Toggle High Detail") ||
-			(Input()->KeyPress(KEY_H) && ctrlPressed))
+			(Input()->KeyPress(KEY_H) && CtrlPressed))
 		{
 			m_ShowDetail = !m_ShowDetail;
 		}
@@ -1127,7 +1127,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 		static int s_AnimateButton = 0;
 		if(DoButton_Editor(&s_AnimateButton, "Anim", m_Animate, &Button, 0, "[ctrl+m] Toggle animation") ||
-			(Input()->KeyPress(KEY_M) && ctrlPressed))
+			(Input()->KeyPress(KEY_M) && CtrlPressed))
 		{
 			m_AnimateStart = time_get();
 			m_Animate = !m_Animate;
@@ -1139,7 +1139,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 		static int s_ProofButton = 0;
 		if(DoButton_Editor(&s_ProofButton, "Proof", m_ProofBorders, &Button, 0, "[ctrl+p] Toggles proof borders. These borders represent what a player maximum can see.") ||
-			(Input()->KeyPress(KEY_P) && ctrlPressed))
+			(Input()->KeyPress(KEY_P) && CtrlPressed))
 		{
 			m_ProofBorders = !m_ProofBorders;
 		}
@@ -1150,7 +1150,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 		static int s_GridButton = 0;
 		if(DoButton_Editor(&s_GridButton, "Grid", m_GridActive, &Button, 0, "[ctrl+g] Toggle Grid") ||
-			(Input()->KeyPress(KEY_G) && ctrlPressed))
+			(Input()->KeyPress(KEY_G) && CtrlPressed))
 		{
 			m_GridActive = !m_GridActive;
 		}
@@ -1161,7 +1161,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 		static int s_TileInfoButton = 0;
 		if(DoButton_Editor(&s_TileInfoButton, "Info", m_ShowTileInfo, &Button, 0, "[ctrl+i] Show tile information") ||
-			(Input()->KeyPress(KEY_I) && ctrlPressed))
+			(Input()->KeyPress(KEY_I) && CtrlPressed))
 		{
 			m_ShowTileInfo = !m_ShowTileInfo;
 			m_ShowEnvelopePreview = 0;
@@ -1173,7 +1173,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 		static int s_AllowPlaceUnusedTilesButton = 0;
 		if(DoButton_Editor(&s_AllowPlaceUnusedTilesButton, "Unused", m_AllowPlaceUnusedTiles, &Button, 0, "[ctrl+u] Allow placing unused tiles") ||
-			(Input()->KeyPress(KEY_U) && ctrlPressed))
+			(Input()->KeyPress(KEY_U) && CtrlPressed))
 		{
 			m_AllowPlaceUnusedTiles = !m_AllowPlaceUnusedTiles;
 		}
@@ -1405,7 +1405,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 						TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
 						static int s_ModifierButton = 0;
 						if(DoButton_Ex(&s_ModifierButton, aButtonName, 0, &Button, 0, aBuf, CUI::CORNER_ALL)
-							|| (ctrlPressed && Input()->KeyPress(KEY_A)))
+							|| (CtrlPressed && Input()->KeyPress(KEY_A)))
 						{
 							static int s_ModifierPopupID = 0;
 							if(!UiPopupExists(&s_ModifierPopupID))
@@ -1425,21 +1425,21 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		{
 			TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
 
-			bool invoked = false;
+			bool Invoked = false;
 			static int s_AddItemButton = 0;
 
 			if(pLayer->m_Type == LAYERTYPE_QUADS)
 			{
-				invoked = DoButton_Editor(&s_AddItemButton, "Add Quad", 0, &Button, 0, "[ctrl+q] Add a new quad") ||
-					(Input()->KeyPress(KEY_Q) && ctrlPressed);
+				Invoked = DoButton_Editor(&s_AddItemButton, "Add Quad", 0, &Button, 0, "[ctrl+q] Add a new quad") ||
+					(Input()->KeyPress(KEY_Q) && CtrlPressed);
 			}
 			else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
 			{
-				invoked = DoButton_Editor(&s_AddItemButton, "Add Sound", 0, &Button, 0, "[ctrl+q] Add a new sound source") ||
-					(Input()->KeyPress(KEY_Q) && ctrlPressed);
+				Invoked = DoButton_Editor(&s_AddItemButton, "Add Sound", 0, &Button, 0, "[ctrl+q] Add a new sound source") ||
+					(Input()->KeyPress(KEY_Q) && CtrlPressed);
 			}
 
-			if(invoked)
+			if(Invoked)
 			{
 				CLayerGroup *pGroup = GetSelectedGroup();
 
@@ -1447,7 +1447,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 				pGroup->Mapping(Mapping);
 				int x = Mapping[0] + (Mapping[2]-Mapping[0]) / 2;
 				int y = Mapping[1] + (Mapping[3]-Mapping[1]) / 2;
-				if(Input()->KeyPress(KEY_Q) && ctrlPressed)
+				if(Input()->KeyPress(KEY_Q) && CtrlPressed)
 				{
 					x += UI()->MouseWorldX() - (m_WorldOffsetX*pGroup->m_ParallaxX/100) - pGroup->m_OffsetX;
 					y += UI()->MouseWorldY() - (m_WorldOffsetY*pGroup->m_ParallaxY/100) - pGroup->m_OffsetY;
@@ -1482,7 +1482,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			TB_Bottom.VSplitLeft(65.0f, &Button, &TB_Bottom);
 			static int s_BrushDrawModeButton = 0;
 			if(DoButton_Editor(&s_BrushDrawModeButton, "Destructive", m_BrushDrawDestructive, &Button, 0, "[ctrl+d] Toggle brush draw mode") ||
-				(Input()->KeyPress(KEY_D) && ctrlPressed))
+				(Input()->KeyPress(KEY_D) && CtrlPressed))
 				m_BrushDrawDestructive = !m_BrushDrawDestructive;
 			TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
 		}

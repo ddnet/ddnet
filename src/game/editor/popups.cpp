@@ -1435,7 +1435,7 @@ int CEditor::PopupSelectConfigAutoMapResult()
 
 int CEditor::PopupTele(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	static int previousNumber = -1;
+	static int PreviousNumber = -1;
 
 	CUIRect NumberPicker;
 	CUIRect FindEmptySlot;
@@ -1445,8 +1445,8 @@ int CEditor::PopupTele(CEditor *pEditor, CUIRect View, void *pContext)
 
 	// find empty number button
 	{ 
-		static int emptySlotPid = 0;
-		if(pEditor->DoButton_Editor(&emptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot")
+		static int s_EmptySlotPid = 0;
+		if(pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot")
 			|| pEditor->Input()->KeyPress(KEY_F))
 		{
 			int number = -1;
@@ -1468,7 +1468,7 @@ int CEditor::PopupTele(CEditor *pEditor, CUIRect View, void *pContext)
 
 	// number picker
 	{
-		static ColorRGBA s_color = ColorRGBA(0.5f, 1, 0.5f, 0.5f);
+		static ColorRGBA s_Color = ColorRGBA(0.5f, 1, 0.5f, 0.5f);
 
 		enum
 		{
@@ -1483,21 +1483,21 @@ int CEditor::PopupTele(CEditor *pEditor, CUIRect View, void *pContext)
 		static int s_aIds[NUM_PROPS] = {0};
 
 		static int NewVal = 0;
-		int Prop = pEditor->DoProperties(&NumberPicker, aProps, s_aIds, &NewVal, s_color);
+		int Prop = pEditor->DoProperties(&NumberPicker, aProps, s_aIds, &NewVal, s_Color);
 		if(Prop == PROP_TELE)
 		{
 			pEditor->m_TeleNumber = (NewVal + 256) % 256;
 		}
 
-		if(previousNumber == 1 || previousNumber != pEditor->m_TeleNumber)
+		if(PreviousNumber == 1 || PreviousNumber != pEditor->m_TeleNumber)
 		{
-			s_color = pEditor->m_Map.m_pTeleLayer->ContainsElementWithId(pEditor->m_TeleNumber)
+			s_Color = pEditor->m_Map.m_pTeleLayer->ContainsElementWithId(pEditor->m_TeleNumber)
 				? ColorRGBA(1, 0.5f, 0.5f, 0.5f)
 				: ColorRGBA(0.5f, 1, 0.5f, 0.5f);
 		}
 	}
 
-	previousNumber = pEditor->m_TeleNumber;
+	PreviousNumber = pEditor->m_TeleNumber;
 
 	return 0;
 }
@@ -1538,7 +1538,7 @@ int CEditor::PopupSpeedup(CEditor *pEditor, CUIRect View, void *pContext)
 
 int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	static int previousNumber = -1;
+	static int PreviousNumber = -1;
 
 	CUIRect NumberPicker;
 	CUIRect FindEmptySlot;
@@ -1551,8 +1551,8 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext)
 
 	// find empty number button
 	{
-		static int emptySlotPid = 0;
-		if(pEditor->DoButton_Editor(&emptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot")
+		static int s_EmptySlotPid = 0;
+		if(pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot")
 			|| pEditor->Input()->KeyPress(KEY_F))
 		{
 			int number = -1;
@@ -1574,7 +1574,7 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext)
 
 	// number picker
 	{
-		static ColorRGBA s_color = ColorRGBA(1, 1, 1, 0.5f);
+		static ColorRGBA s_Color = ColorRGBA(1, 1, 1, 0.5f);
 
 		enum
 		{
@@ -1591,7 +1591,7 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext)
 
 		static int s_aIds[NUM_PROPS] = {0};
 		int NewVal = 0;
-		int Prop = pEditor->DoProperties(&NumberPicker, aProps, s_aIds, &NewVal, s_color);
+		int Prop = pEditor->DoProperties(&NumberPicker, aProps, s_aIds, &NewVal, s_Color);
 
 		if(Prop == PROP_SwitchNumber)
 		{
@@ -1602,15 +1602,15 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext)
 			pEditor->m_SwitchDelay = (NewVal + 256) % 256;
 		}
 
-		if(previousNumber == 1 || previousNumber != pEditor->m_SwitchNum)
+		if(PreviousNumber == 1 || PreviousNumber != pEditor->m_SwitchNum)
 		{
-			s_color = pEditor->m_Map.m_pSwitchLayer->ContainsElementWithId(pEditor->m_SwitchNum)
+			s_Color = pEditor->m_Map.m_pSwitchLayer->ContainsElementWithId(pEditor->m_SwitchNum)
 				? ColorRGBA(1, 0.5f, 0.5f, 0.5f)
 				: ColorRGBA(0.5f, 1, 0.5f, 0.5f);
 		}
 	}
 
-	previousNumber = pEditor->m_SwitchNum;
+	PreviousNumber = pEditor->m_SwitchNum;
 	return 0;
 }
 
