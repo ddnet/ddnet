@@ -48,6 +48,7 @@ public:
 	bool m_EntitiesRace;
 	bool m_EntitiesFNG;
 	bool m_EntitiesVanilla;
+	bool m_EntitiesBW;
 
 	bool m_Race;
 

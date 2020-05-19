@@ -1036,6 +1036,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	Info.m_EntitiesRace = Race;
 	Info.m_EntitiesFNG = FNG;
 	Info.m_EntitiesVanilla = Vanilla;
+	Info.m_EntitiesBW = BlockWorlds;
 	Info.m_Race = Race;
 	Info.m_DontMaskEntities = !DDNet;
 
@@ -1065,6 +1066,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 		Info.m_EntitiesRace = Flags&GAMEINFOFLAG_ENTITIES_RACE;
 		Info.m_EntitiesFNG = Flags&GAMEINFOFLAG_ENTITIES_FNG;
 		Info.m_EntitiesVanilla = Flags&GAMEINFOFLAG_ENTITIES_VANILLA;
+		Info.m_EntitiesBW = Flags&GAMEINFOFLAG_ENTITIES_BW;
 	}
 	if(Version >= 3)
 	{

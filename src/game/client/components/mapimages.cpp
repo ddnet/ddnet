@@ -108,6 +108,8 @@ IGraphics::CTextureHandle CMapImages::GetEntities()
 		pEntities = "fng";
 	else if(GameClient()->m_GameInfo.m_EntitiesVanilla)
 		pEntities = "vanilla";
+	else if(GameClient()->m_GameInfo.m_EntitiesBW)
+		pEntities = "blockworlds";
 
 	if(!m_EntitiesIsLoaded || m_pEntitiesGameType != pEntities)
 	{
