@@ -1066,12 +1066,16 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 		Info.m_EntitiesRace = Flags&GAMEINFOFLAG_ENTITIES_RACE;
 		Info.m_EntitiesFNG = Flags&GAMEINFOFLAG_ENTITIES_FNG;
 		Info.m_EntitiesVanilla = Flags&GAMEINFOFLAG_ENTITIES_VANILLA;
-		Info.m_EntitiesBW = Flags&GAMEINFOFLAG_ENTITIES_BW;
 	}
 	if(Version >= 3)
 	{
 		Info.m_Race = Flags&GAMEINFOFLAG_RACE;
 		Info.m_DontMaskEntities = Flags&GAMEINFOFLAG_DONT_MASK_ENTITIES;
+	}
+
+	if (Version >= 4)
+	{
+		Info.m_EntitiesBW = Flags&GAMEINFOFLAG_ENTITIES_BW;
 	}
 	return Info;
 }
