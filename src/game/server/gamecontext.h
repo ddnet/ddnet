@@ -101,8 +101,6 @@ class CGameContext : public IGameServer
 	static void ConChangeMap(IConsole::IResult *pResult, void *pUserData);
 	static void ConRandomMap(IConsole::IResult *pResult, void *pUserData);
 	static void ConRandomUnfinishedMap(IConsole::IResult *pResult, void *pUserData);
-	static void ConSaveTeam(IConsole::IResult *pResult, void *pUserData);
-	static void ConLoadTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConRestart(IConsole::IResult *pResult, void *pUserData);
 	static void ConBroadcast(IConsole::IResult *pResult, void *pUserData);
 	static void ConSay(IConsole::IResult *pResult, void *pUserData);
