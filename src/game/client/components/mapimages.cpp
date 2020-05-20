@@ -104,6 +104,8 @@ IGraphics::CTextureHandle CMapImages::GetEntities()
 		pEntities = "ddrace";
 	else if(GameClient()->m_GameInfo.m_EntitiesRace)
 		pEntities = "race";
+	else if (GameClient()->m_GameInfo.m_EntitiesBW)
+		pEntities = "blockworlds";
 	else if(GameClient()->m_GameInfo.m_EntitiesFNG)
 		pEntities = "fng";
 	else if(GameClient()->m_GameInfo.m_EntitiesVanilla)
