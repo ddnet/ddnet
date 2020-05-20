@@ -85,7 +85,7 @@ private:
 	int m_HookTick;
 	int m_HookState;
 
-	char aGameUuid[16];
+	char m_aGameUuid[UUID_MAXSTRSIZE];
 };
 
 class CSaveTeam
