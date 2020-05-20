@@ -6332,8 +6332,8 @@ void CEditor::LoadCurrentMap()
 	Load(m_pClient->GetCurrentMapPath(), IStorage::TYPE_ALL);
 	m_ValidSaveFilename = true;
 
-	CGameClient* GameClient = (CGameClient*)Kernel()->RequestInterface<IGameClient>();
-	vec2 Center = GameClient->m_pCamera->m_Center;
+	CGameClient *pGameClient = (CGameClient*)Kernel()->RequestInterface<IGameClient>();
+	vec2 Center = pGameClient->m_pCamera->m_Center;
 
 	m_WorldOffsetX = Center.x;
 	m_WorldOffsetY = Center.y;
