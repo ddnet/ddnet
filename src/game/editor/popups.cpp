@@ -1435,7 +1435,7 @@ int CEditor::PopupSelectConfigAutoMapResult()
 
 int CEditor::PopupTele(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	static int PreviousNumber = -1;
+	static int s_PreviousNumber = -1;
 
 	CUIRect NumberPicker;
 	CUIRect FindEmptySlot;
@@ -1489,7 +1489,7 @@ int CEditor::PopupTele(CEditor *pEditor, CUIRect View, void *pContext)
 			pEditor->m_TeleNumber = (NewVal + 256) % 256;
 		}
 
-		if(PreviousNumber == 1 || PreviousNumber != pEditor->m_TeleNumber)
+		if(s_PreviousNumber == 1 || s_PreviousNumber != pEditor->m_TeleNumber)
 		{
 			s_Color = pEditor->m_Map.m_pTeleLayer->ContainsElementWithId(pEditor->m_TeleNumber)
 				? ColorRGBA(1, 0.5f, 0.5f, 0.5f)
@@ -1497,7 +1497,7 @@ int CEditor::PopupTele(CEditor *pEditor, CUIRect View, void *pContext)
 		}
 	}
 
-	PreviousNumber = pEditor->m_TeleNumber;
+	s_PreviousNumber = pEditor->m_TeleNumber;
 
 	return 0;
 }
@@ -1538,7 +1538,7 @@ int CEditor::PopupSpeedup(CEditor *pEditor, CUIRect View, void *pContext)
 
 int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	static int PreviousNumber = -1;
+	static int s_PreviousNumber = -1;
 
 	CUIRect NumberPicker;
 	CUIRect FindEmptySlot;
@@ -1602,7 +1602,7 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext)
 			pEditor->m_SwitchDelay = (NewVal + 256) % 256;
 		}
 
-		if(PreviousNumber == 1 || PreviousNumber != pEditor->m_SwitchNum)
+		if(s_PreviousNumber == 1 || s_PreviousNumber != pEditor->m_SwitchNum)
 		{
 			s_Color = pEditor->m_Map.m_pSwitchLayer->ContainsElementWithId(pEditor->m_SwitchNum)
 				? ColorRGBA(1, 0.5f, 0.5f, 0.5f)
@@ -1610,7 +1610,7 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext)
 		}
 	}
 
-	PreviousNumber = pEditor->m_SwitchNum;
+	s_PreviousNumber = pEditor->m_SwitchNum;
 	return 0;
 }
 
