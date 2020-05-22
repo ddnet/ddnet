@@ -1310,7 +1310,7 @@ void CGameContext::ConSetTimerType(IConsole::IResult *pResult, void *pUserData)
 
 		if(str_comp_nocase(pResult->GetString(0), "gametimer") == 0)
 		{
-			if(pPlayer->m_ClientVersion >= VERSION_DDNET_GAMETICK)
+			if(pPlayer->GetClientVersion() >= VERSION_DDNET_GAMETICK)
 				pPlayer->m_TimerType = CPlayer::TIMERTYPE_GAMETIMER;
 			else
 				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "timer", "gametimer is not supported by your client.");
@@ -1319,7 +1319,7 @@ void CGameContext::ConSetTimerType(IConsole::IResult *pResult, void *pUserData)
 			pPlayer->m_TimerType = CPlayer::TIMERTYPE_BROADCAST;
 		else if(str_comp_nocase(pResult->GetString(0), "both") == 0)
 		{
-			if(pPlayer->m_ClientVersion >= VERSION_DDNET_GAMETICK)
+			if(pPlayer->GetClientVersion() >= VERSION_DDNET_GAMETICK)
 				pPlayer->m_TimerType = CPlayer::TIMERTYPE_GAMETIMER_AND_BROADCAST;
 			else
 			{
@@ -1331,7 +1331,7 @@ void CGameContext::ConSetTimerType(IConsole::IResult *pResult, void *pUserData)
 			pPlayer->m_TimerType = CPlayer::TIMERTYPE_NONE;
 		else if(str_comp_nocase(pResult->GetString(0), "cycle") == 0)
 		{
-			if(pPlayer->m_ClientVersion >= VERSION_DDNET_GAMETICK)
+			if(pPlayer->GetClientVersion() >= VERSION_DDNET_GAMETICK)
 			{
 				if(pPlayer->m_TimerType < CPlayer::TIMERTYPE_NONE)
 					pPlayer->m_TimerType++;

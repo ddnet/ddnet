@@ -112,6 +112,8 @@ void CGameClient::CStack::Add(class CComponent *pComponent) { m_paComponents[m_N
 
 const char *CGameClient::Version() { return GAME_VERSION; }
 const char *CGameClient::NetVersion() { return GAME_NETVERSION; }
+int CGameClient::DDNetVersion() { return CLIENT_VERSIONNR; }
+const char *CGameClient::DDNetVersionStr() { return m_aDDNetVersionStr; }
 const char *CGameClient::GetItemName(int Type) { return m_NetObjHandler.GetObjName(Type); }
 
 void CGameClient::OnConsoleInit()
@@ -286,6 +288,15 @@ void CGameClient::OnInit()
 	m_RenderTools.m_pUI = UI();
 
 	int64 Start = time_get();
+
+	if(GIT_SHORTREV_HASH)
+	{
+		str_format(m_aDDNetVersionStr, sizeof(m_aDDNetVersionStr), "%s %s (%s)", GAME_NAME, GAME_RELEASE_VERSION, GIT_SHORTREV_HASH);
+	}
+	else
+	{
+		str_format(m_aDDNetVersionStr, sizeof(m_aDDNetVersionStr), "%s %s", GAME_NAME, GAME_RELEASE_VERSION);
+	}
 
 	// set the language
 	g_Localization.Load(g_Config.m_ClLanguagefile, Storage(), Console());

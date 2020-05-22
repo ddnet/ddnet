@@ -28,7 +28,10 @@ public:
 	{
 		const char *m_pName;
 		int m_Latency;
-		int m_ClientVersion;
+		bool m_GotDDNetVersion;
+		int m_DDNetVersion;
+		const char *m_pDDNetVersionStr;
+		const CUuid *m_pConnectionID;
 	};
 
 	int Tick() const { return m_CurrentGameTick; }
@@ -43,6 +46,7 @@ public:
 	virtual bool ClientIngame(int ClientID) = 0;
 	virtual bool ClientAuthed(int ClientID) = 0;
 	virtual int GetClientInfo(int ClientID, CClientInfo *pInfo) = 0;
+	virtual void SetClientDDNetVersion(int ClientID, int DDNetVersion) = 0;
 	virtual void GetClientAddr(int ClientID, char *pAddrStr, int Size) = 0;
 	virtual void RestrictRconOutput(int ClientID) = 0;
 
@@ -112,7 +116,7 @@ public:
 	{
 		CClientInfo Info;
 		GetClientInfo(Client, &Info);
-		if (Info.m_ClientVersion >= VERSION_DDNET_OLD)
+		if (Info.m_DDNetVersion >= VERSION_DDNET_OLD)
 			return true;
 		int *pMap = GetIdMap(Client);
 		bool Found = false;
@@ -132,7 +136,7 @@ public:
 	{
 		CClientInfo Info;
 		GetClientInfo(Client, &Info);
-		if (Info.m_ClientVersion >= VERSION_DDNET_OLD)
+		if (Info.m_DDNetVersion >= VERSION_DDNET_OLD)
 			return true;
 		Target = clamp(Target, 0, VANILLA_MAX_CLIENTS-1);
 		int *pMap = GetIdMap(Client);
@@ -234,8 +238,6 @@ public:
 	// DDRace
 
 	virtual void OnSetAuthed(int ClientID, int Level) = 0;
-	virtual int GetClientVersion(int ClientID) = 0;
-	virtual void SetClientVersion(int ClientID, int Version) = 0;
 	virtual bool PlayerExists(int ClientID) = 0;
 
 	virtual void OnClientEngineJoin(int ClientID) = 0;

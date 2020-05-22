@@ -517,7 +517,7 @@ void CGameContext::SendVoteSet(int ClientID)
 
 void CGameContext::SendVoteStatus(int ClientID, int Total, int Yes, int No)
 {
-	if (Total > VANILLA_MAX_CLIENTS && m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_ClientVersion <= VERSION_DDRACE)
+	if (Total > VANILLA_MAX_CLIENTS && m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetClientVersion() <= VERSION_DDRACE)
 	{
 		Yes = float(Yes) * VANILLA_MAX_CLIENTS / float(Total);
 		No = float(No) * VANILLA_MAX_CLIENTS / float(Total);
@@ -592,15 +592,19 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 	else
 		pParams = (int *)&(m_aTuningList[Zone]);
 
-	unsigned int last = sizeof(m_Tuning)/sizeof(int);
-	if (m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_ClientVersion < VERSION_DDNET_EXTRATUNES)
-		last = 33;
-	else if (m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_ClientVersion < VERSION_DDNET_HOOKDURATION_TUNE)
-		last = 37;
-	else if (m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_ClientVersion < VERSION_DDNET_FIREDELAY_TUNE)
-		last = 38;
+	unsigned int Last = sizeof(m_Tuning)/sizeof(int);
+	if(m_apPlayers[ClientID])
+	{
+		int ClientVersion = m_apPlayers[ClientID]->GetClientVersion();
+		if(ClientVersion < VERSION_DDNET_EXTRATUNES)
+			Last = 33;
+		else if(ClientVersion < VERSION_DDNET_HOOKDURATION_TUNE)
+			Last = 37;
+		else if(ClientVersion < VERSION_DDNET_FIREDELAY_TUNE)
+			Last = 38;
+	}
 
-	for(unsigned i = 0; i < last; i++)
+	for(unsigned i = 0; i < Last; i++)
 	{
 		if (m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetCharacter())
 		{
@@ -1095,6 +1099,13 @@ void CGameContext::OnClientEnter(int ClientID)
 
 	if(!Server()->ClientPrevIngame(ClientID))
 	{
+		IServer::CClientInfo Info;
+		Server()->GetClientInfo(ClientID, &Info);
+		if(Info.m_GotDDNetVersion)
+		{
+			OnClientDDNetVersionKnown(ClientID);
+		}
+
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientID), m_pController->GetTeamName(m_apPlayers[ClientID]->GetTeam()));
 		SendChat(-1, CGameContext::CHAT_ALL, aBuf);
@@ -1215,6 +1226,79 @@ void CGameContext::OnClientEngineDrop(int ClientID, const char *pReason)
 	if(m_TeeHistorianActive)
 	{
 		m_TeeHistorian.RecordPlayerDrop(ClientID, pReason);
+	}
+}
+
+void CGameContext::OnClientDDNetVersionKnown(int ClientID)
+{
+	IServer::CClientInfo Info;
+	Server()->GetClientInfo(ClientID, &Info);
+	int ClientVersion = Info.m_DDNetVersion;
+	dbg_msg("ddnet", "cid=%d version=%d", ClientID, ClientVersion);
+
+	if(m_TeeHistorianActive)
+	{
+		if(Info.m_pConnectionID && Info.m_pDDNetVersionStr)
+		{
+			m_TeeHistorian.RecordDDNetVersion(ClientID, *Info.m_pConnectionID, ClientVersion, Info.m_pDDNetVersionStr);
+		}
+		else
+		{
+			m_TeeHistorian.RecordDDNetVersionOld(ClientID, ClientVersion);
+		}
+	}
+
+	CPlayer *pPlayer = m_apPlayers[ClientID];
+	if(ClientVersion >= VERSION_DDNET_GAMETICK)
+		pPlayer->m_TimerType = g_Config.m_SvDefaultTimerType;
+
+	//first update his teams state
+	((CGameControllerDDRace *)m_pController)->m_Teams.SendTeamsState(ClientID);
+
+	//second give him records
+	SendRecord(ClientID);
+
+	//third give him others current time for table score
+	if(g_Config.m_SvHideScore)
+	{
+		return;
+	}
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(m_apPlayers[i] && Score()->PlayerData(i)->m_CurrentTime > 0)
+		{
+			CNetMsg_Sv_PlayerTime Msg;
+			Msg.m_Time = Score()->PlayerData(i)->m_CurrentTime * 100;
+			Msg.m_ClientID = i;
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
+			//also send its time to others
+
+		}
+	}
+	//also send its time to others
+	if(Score()->PlayerData(ClientID)->m_CurrentTime > 0)
+	{
+		//TODO: make function for this fucking steps
+		CNetMsg_Sv_PlayerTime Msg;
+		Msg.m_Time = Score()->PlayerData(ClientID)->m_CurrentTime * 100;
+		Msg.m_ClientID = ClientID;
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
+	}
+
+	//and give him correct tunings
+	if (ClientVersion >= VERSION_DDNET_EXTRATUNES)
+		SendTuningParams(ClientID, pPlayer->m_TuneZone);
+
+	//tell old clients to update
+	if (ClientVersion < VERSION_DDNET_UPDATER_FIXED && g_Config.m_SvClientSuggestionOld[0] != '\0')
+		SendBroadcast(g_Config.m_SvClientSuggestionOld, ClientID);
+	//tell known bot clients that they're botting and we know it
+	if (((ClientVersion >= 15 && ClientVersion < 100) || ClientVersion == 502) && g_Config.m_SvClientSuggestionBot[0] != '\0')
+		SendBroadcast(g_Config.m_SvClientSuggestionBot, ClientID);
+	//autoban known bot versions
+	if(g_Config.m_SvBannedVersions[0] != '\0' && IsVersionBanned(ClientVersion))
+	{
+		Server()->Kick(ClientID, "unsupported client");
 	}
 }
 
@@ -1752,66 +1836,19 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		}
 		else if (MsgID == NETMSGTYPE_CL_ISDDNET)
 		{
-			int Version = pUnpacker->GetInt();
-
-			if (pUnpacker->Error())
+			IServer::CClientInfo Info;
+			Server()->GetClientInfo(ClientID, &Info);
+			if(Info.m_GotDDNetVersion)
 			{
-				if (pPlayer->m_ClientVersion < VERSION_DDRACE)
-					pPlayer->m_ClientVersion = VERSION_DDRACE;
+				return;
 			}
-			else if(pPlayer->m_ClientVersion < Version)
-				pPlayer->m_ClientVersion = Version;
-
-			if(pPlayer->m_ClientVersion >= VERSION_DDNET_GAMETICK)
-				pPlayer->m_TimerType = g_Config.m_SvDefaultTimerType;
-
-			dbg_msg("ddnet", "%d using Custom Client %d", ClientID, pPlayer->m_ClientVersion);
-
-			//first update his teams state
-			((CGameControllerDDRace*)m_pController)->m_Teams.SendTeamsState(ClientID);
-
-			//second give him records
-			SendRecord(ClientID);
-
-			//third give him others current time for table score
-			if(g_Config.m_SvHideScore) return;
-			for(int i = 0; i < MAX_CLIENTS; i++)
+			int DDNetVersion = pUnpacker->GetInt();
+			if(pUnpacker->Error() || DDNetVersion < 0)
 			{
-				if(m_apPlayers[i] && Score()->PlayerData(i)->m_CurrentTime > 0)
-				{
-					CNetMsg_Sv_PlayerTime Msg;
-					Msg.m_Time = Score()->PlayerData(i)->m_CurrentTime * 100;
-					Msg.m_ClientID = i;
-					Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
-					//also send its time to others
-
-				}
+				DDNetVersion = VERSION_DDRACE;
 			}
-			//also send its time to others
-			if(Score()->PlayerData(ClientID)->m_CurrentTime > 0)
-			{
-				//TODO: make function for this fucking steps
-				CNetMsg_Sv_PlayerTime Msg;
-				Msg.m_Time = Score()->PlayerData(ClientID)->m_CurrentTime * 100;
-				Msg.m_ClientID = ClientID;
-				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
-			}
-
-			//and give him correct tunings
-			if (Version >= VERSION_DDNET_EXTRATUNES)
-				SendTuningParams(ClientID, pPlayer->m_TuneZone);
-
-			//tell old clients to update
-			if (Version < VERSION_DDNET_UPDATER_FIXED && g_Config.m_SvClientSuggestionOld[0] != '\0')
-				SendBroadcast(g_Config.m_SvClientSuggestionOld, ClientID);
-			//tell known bot clients that they're botting and we know it
-			if (((Version >= 15 && Version < 100) || Version == 502) && g_Config.m_SvClientSuggestionBot[0] != '\0')
-				SendBroadcast(g_Config.m_SvClientSuggestionBot, ClientID);
-			//autoban known bot versions
-			if(g_Config.m_SvBannedVersions[0] != '\0' && IsVersionBanned(Version))
-			{
-				Server()->Kick(ClientID, "unsupported client");
-			}
+			Server()->SetClientDDNetVersion(ClientID, DDNetVersion);
+			OnClientDDNetVersionKnown(ClientID);
 		}
 		else if (MsgID == NETMSGTYPE_CL_SHOWOTHERS)
 		{
@@ -3430,18 +3467,18 @@ void CGameContext::Whisper(int ClientID, char *pStr)
 
 void CGameContext::WhisperID(int ClientID, int VictimID, char *pMessage)
 {
-	if (!CheckClientID2(ClientID))
+	if(!CheckClientID2(ClientID))
 		return;
 
-	if (!CheckClientID2(VictimID))
+	if(!CheckClientID2(VictimID))
 		return;
 
-	if (m_apPlayers[ClientID])
+	if(m_apPlayers[ClientID])
 		m_apPlayers[ClientID]->m_LastWhisperTo = VictimID;
 
 	char aBuf[256];
 
-	if (m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_ClientVersion >= VERSION_DDNET_WHISPER)
+	if(GetClientVersion(ClientID) >= VERSION_DDNET_WHISPER)
 	{
 		CNetMsg_Sv_Chat Msg;
 		Msg.m_Team = CHAT_WHISPER_SEND;
@@ -3458,7 +3495,7 @@ void CGameContext::WhisperID(int ClientID, int VictimID, char *pMessage)
 		SendChatTarget(ClientID, aBuf);
 	}
 
-	if (m_apPlayers[VictimID] && m_apPlayers[VictimID]->m_ClientVersion >= VERSION_DDNET_WHISPER)
+	if(GetClientVersion(VictimID) >= VERSION_DDNET_WHISPER)
 	{
 		CNetMsg_Sv_Chat Msg2;
 		Msg2.m_Team = CHAT_WHISPER_RECV;
@@ -3544,18 +3581,9 @@ void CGameContext::List(int ClientID, const char *pFilter)
 
 int CGameContext::GetClientVersion(int ClientID)
 {
-	return m_apPlayers[ClientID]
-		? m_apPlayers[ClientID]->m_ClientVersion
-		: 0;
-}
-
-void CGameContext::SetClientVersion(int ClientID, int Version)
-{
-	if(!m_apPlayers[ClientID])
-	{
-		return;
-	}
-	m_apPlayers[ClientID]->m_ClientVersion = Version;
+	IServer::CClientInfo Info = {0};
+	Server()->GetClientInfo(ClientID, &Info);
+	return Info.m_DDNetVersion;
 }
 
 bool CGameContext::PlayerModerating()
