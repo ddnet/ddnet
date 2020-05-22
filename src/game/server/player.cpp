@@ -136,6 +136,7 @@ void CPlayer::Reset()
 
 	m_NotEligibleForFinish = false;
 	m_EligibleForFinishCheck = 0;
+	m_VotedForPractice = false;
 }
 
 void CPlayer::Tick()

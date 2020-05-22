@@ -13,6 +13,7 @@ class CGameTeams
 	bool m_TeamLocked[MAX_CLIENTS];
 	bool m_IsSaving[MAX_CLIENTS];
 	uint64_t m_Invited[MAX_CLIENTS];
+	bool m_Practice[MAX_CLIENTS];
 
 	class CGameContext * m_pGameContext;
 
@@ -121,6 +122,22 @@ public:
 	bool GetSaving(int TeamID)
 	{
 		return m_IsSaving[TeamID];
+	}
+
+	void EnablePractice(int Team)
+	{
+		if(Team <= TEAM_FLOCK || Team >= TEAM_SUPER)
+			return;
+
+		m_Practice[Team] = true;
+	}
+
+	bool IsPractice(int Team)
+	{
+		if(Team <= TEAM_FLOCK || Team >= TEAM_SUPER)
+			return false;
+
+		return m_Practice[Team];
 	}
 };
 
