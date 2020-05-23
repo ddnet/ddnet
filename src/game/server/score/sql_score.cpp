@@ -410,18 +410,18 @@ bool CSqlScore::MapInfoThread(CSqlServer* pSqlServer, const CSqlData *pGameData,
 			int ago = pSqlServer->GetResults()->getInt("Ago");
 			float ownTime = (float)pSqlServer->GetResults()->getDouble("OwnTime");
 
-			char pAgoString[40] = "\0";
-			char pReleasedString[60] = "\0";
+			char aAgoString[40] = "\0";
+			char aReleasedString[60] = "\0";
 			if(stamp != 0)
 			{
-				sqlstr::AgoTimeToString(ago, pAgoString);
-				str_format(pReleasedString, sizeof(pReleasedString), ", released %s ago", pAgoString);
+				sqlstr::AgoTimeToString(ago, aAgoString);
+				str_format(aReleasedString, sizeof(aReleasedString), ", released %s ago", aAgoString);
 			}
 
-			char pAverageString[60] = "\0";
+			char aAverageString[60] = "\0";
 			if(average > 0)
 			{
-				str_format(pAverageString, sizeof(pAverageString), " in %d:%02d average", average / 60, average % 60);
+				str_format(aAverageString, sizeof(aAverageString), " in %d:%02d average", average / 60, average % 60);
 			}
 
 			char aStars[20];
@@ -436,13 +436,13 @@ bool CSqlScore::MapInfoThread(CSqlServer* pSqlServer, const CSqlData *pGameData,
 				default: aStars[0] = '\0';
 			}
 
-			char pOwnFinishesString[40] = "\0";
+			char aOwnFinishesString[40] = "\0";
 			if(ownTime > 0)
 			{
-				str_format(pOwnFinishesString, sizeof(pOwnFinishesString), ", your time: %02d:%05.2f", (int)(ownTime/60), ownTime-((int)ownTime/60*60));
+				str_format(aOwnFinishesString, sizeof(aOwnFinishesString), ", your time: %02d:%05.2f", (int)(ownTime/60), ownTime-((int)ownTime/60*60));
 			}
 
-			str_format(aBuf, sizeof(aBuf), "\"%s\" by %s on %s, %s, %d %s%s, %d %s by %d %s%s%s", aMap, aMapper, aServer, aStars, points, points == 1 ? "point" : "points", pReleasedString, finishes, finishes == 1 ? "finish" : "finishes", finishers, finishers == 1 ? "tee" : "tees", pAverageString, pOwnFinishesString);
+			str_format(aBuf, sizeof(aBuf), "\"%s\" by %s on %s, %s, %d %s%s, %d %s by %d %s%s%s", aMap, aMapper, aServer, aStars, points, points == 1 ? "point" : "points", aReleasedString, finishes, finishes == 1 ? "finish" : "finishes", finishers, finishers == 1 ? "tee" : "tees", aAverageString, aOwnFinishesString);
 		}
 
 		pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
@@ -596,8 +596,8 @@ bool CSqlScore::SaveTeamScoreThread(CSqlServer* pSqlServer, const CSqlData *pGam
 		IOHANDLE File = io_open(g_Config.m_SvSqlFailureFile, IOFLAG_APPEND);
 		if(File)
 		{
-			const char pUUID[] = "SET @id = UUID();";
-			io_write(File, pUUID, sizeof(pUUID) - 1);
+			const char aUUID[] = "SET @id = UUID();";
+			io_write(File, aUUID, sizeof(aUUID) - 1);
 			io_write_newline(File);
 
 			char aBuf[2300];
@@ -1099,26 +1099,26 @@ bool CSqlScore::ShowTimesThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 
 		while(pSqlServer->GetResults()->next())
 		{
-			char pAgoString[40] = "\0";
+			char aAgoString[40] = "\0";
 			pSince = pSqlServer->GetResults()->getInt("Ago");
 			pStamp = pSqlServer->GetResults()->getInt("Stamp");
 			pTime = (float)pSqlServer->GetResults()->getDouble("Time");
 
-			sqlstr::AgoTimeToString(pSince,pAgoString);
+			sqlstr::AgoTimeToString(pSince,aAgoString);
 
 			if(pData->m_Search) // last 5 times of a player
 			{
 				if(pStamp == 0) // stamp is 00:00:00 cause it's an old entry from old times where there where no stamps yet
 					str_format(aBuf, sizeof(aBuf), "%02d:%05.02f, don't know how long ago", (int)(pTime/60), pTime-((int)pTime/60*60));
 				else
-					str_format(aBuf, sizeof(aBuf), "%s ago, %02d:%05.02f", pAgoString, (int)(pTime/60), pTime-((int)pTime/60*60));
+					str_format(aBuf, sizeof(aBuf), "%s ago, %02d:%05.02f", aAgoString, (int)(pTime/60), pTime-((int)pTime/60*60));
 			}
 			else // last 5 times of the server
 			{
 				if(pStamp == 0) // stamp is 00:00:00 cause it's an old entry from old times where there where no stamps yet
 					str_format(aBuf, sizeof(aBuf), "%s, %02d:%05.02f, don't know when", pSqlServer->GetResults()->getString("Name").c_str(), (int)(pTime/60), pTime-((int)pTime/60*60));
 				else
-					str_format(aBuf, sizeof(aBuf), "%s, %s ago, %02d:%05.02f", pSqlServer->GetResults()->getString("Name").c_str(), pAgoString, (int)(pTime/60), pTime-((int)pTime/60*60));
+					str_format(aBuf, sizeof(aBuf), "%s, %s ago, %02d:%05.02f", pSqlServer->GetResults()->getString("Name").c_str(), aAgoString, (int)(pTime/60), pTime-((int)pTime/60*60));
 			}
 			pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
 		}
