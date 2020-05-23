@@ -358,6 +358,13 @@ void CFileScore::LoadTeam(const char* Code, int ClientID)
 	GameServer()->SendChatTarget(ClientID, aBuf);
 }
 
+void CFileScore::GetSaves(int ClientID)
+{
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "Save-function not supported in file based servers");
+	GameServer()->SendChatTarget(ClientID, aBuf);
+}
+
 void CFileScore::OnShutdown()
 {
 	;

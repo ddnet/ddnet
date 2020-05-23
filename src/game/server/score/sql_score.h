@@ -144,6 +144,12 @@ struct CSqlTeamLoad : CSqlData
 	char m_ClientName[MAX_NAME_LENGTH];
 };
 
+struct CSqlGetSavesData: CSqlData
+{
+	int m_ClientID;
+	sqlstr::CSqlString<MAX_NAME_LENGTH> m_Name;
+};
+
 struct CSqlRandomMap : CSqlScoreData
 {
 	std::shared_ptr<CRandomMapResult> m_pResult;
@@ -183,6 +189,7 @@ class CSqlScore: public IScore
 	static bool RandomUnfinishedMapThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
 	static bool SaveTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
 	static bool LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
+	static bool GetSavesThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
 
 public:
 
@@ -211,6 +218,7 @@ public:
 	virtual void RandomUnfinishedMap(std::shared_ptr<CRandomMapResult> *ppResult, int ClientID, int stars);
 	virtual void SaveTeam(int Team, const char* Code, int ClientID, const char* Server);
 	virtual void LoadTeam(const char* Code, int ClientID);
+	virtual void GetSaves(int ClientID);
 
 	virtual void OnShutdown();
 };
