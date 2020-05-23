@@ -1302,27 +1302,27 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			{
 				if (str_comp_nocase_num(pMsg->m_pMessage+1, "w ", 2) == 0)
 				{
-					char pWhisperMsg[256];
-					str_copy(pWhisperMsg, pMsg->m_pMessage + 3, 256);
-					Whisper(pPlayer->GetCID(), pWhisperMsg);
+					char aWhisperMsg[256];
+					str_copy(aWhisperMsg, pMsg->m_pMessage + 3, 256);
+					Whisper(pPlayer->GetCID(), aWhisperMsg);
 				}
 				else if (str_comp_nocase_num(pMsg->m_pMessage+1, "whisper ", 8) == 0)
 				{
-					char pWhisperMsg[256];
-					str_copy(pWhisperMsg, pMsg->m_pMessage + 9, 256);
-					Whisper(pPlayer->GetCID(), pWhisperMsg);
+					char aWhisperMsg[256];
+					str_copy(aWhisperMsg, pMsg->m_pMessage + 9, 256);
+					Whisper(pPlayer->GetCID(), aWhisperMsg);
 				}
 				else if (str_comp_nocase_num(pMsg->m_pMessage+1, "c ", 2) == 0)
 				{
-					char pWhisperMsg[256];
-					str_copy(pWhisperMsg, pMsg->m_pMessage + 3, 256);
-					Converse(pPlayer->GetCID(), pWhisperMsg);
+					char aWhisperMsg[256];
+					str_copy(aWhisperMsg, pMsg->m_pMessage + 3, 256);
+					Converse(pPlayer->GetCID(), aWhisperMsg);
 				}
 				else if (str_comp_nocase_num(pMsg->m_pMessage+1, "converse ", 9) == 0)
 				{
-					char pWhisperMsg[256];
-					str_copy(pWhisperMsg, pMsg->m_pMessage + 10, 256);
-					Converse(pPlayer->GetCID(), pWhisperMsg);
+					char aWhisperMsg[256];
+					str_copy(aWhisperMsg, pMsg->m_pMessage + 10, 256);
+					Converse(pPlayer->GetCID(), aWhisperMsg);
 				}
 				else
 				{
