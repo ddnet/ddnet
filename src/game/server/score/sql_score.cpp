@@ -1635,4 +1635,60 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 	return false;
 }
 
+void CSqlScore::GetSaves(int ClientID)
+{
+	CSqlGetSavesData *Tmp = new CSqlGetSavesData();
+	Tmp->m_ClientID = ClientID;
+	Tmp->m_Name = Server()->ClientName(ClientID);
+
+	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(GetSavesThread, Tmp, false), "get saves");
+}
+
+bool CSqlScore::GetSavesThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
+{
+	const CSqlGetSavesData *pData = dynamic_cast<const CSqlGetSavesData *>(pGameData);
+
+	if (HandleFailure)
+		return true;
+
+	try
+	{
+		char aBuf[512];
+
+		str_format(aBuf, sizeof(aBuf), "SELECT count(*) as NumSaves, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(max(Timestamp)) as Ago FROM %s_saves WHERE Map='%s' AND Savegame regexp '\\n%s\\t';", pSqlServer->GetPrefix(), pData->m_Map.ClrStr(), pData->m_Name.ClrStr());
+		pSqlServer->executeSqlQuery(aBuf);
+		if(pSqlServer->GetResults()->next())
+		{
+			int NumSaves = pSqlServer->GetResults()->getInt("NumSaves");
+
+			int Ago = pSqlServer->GetResults()->getInt("Ago");
+			char aAgoString[40] = "\0";
+			char aLastSavedString[60] = "\0";
+			if(Ago)
+			{
+				sqlstr::AgoTimeToString(Ago, aAgoString);
+				str_format(aLastSavedString, sizeof(aLastSavedString), ", last saved %s ago", aAgoString);
+			}
+
+			str_format(aBuf, sizeof(aBuf), "%s has %d save%s on %s%s", pData->m_Name.Str(), NumSaves, NumSaves == 1 ? "" : "s", pData->m_Map.Str(), aLastSavedString);
+			pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
+		}
+
+		dbg_msg("sql", "Showing saves done");
+		return true;
+	}
+	catch (sql::SQLException &e)
+	{
+		dbg_msg("sql", "MySQL Error: %s", e.what());
+		dbg_msg("sql", "ERROR: Could not get saves");
+		pData->GameServer()->SendChatTarget(pData->m_ClientID, "MySQL Error: Could not get saves");
+	}
+	catch (CGameContextError &e)
+	{
+		dbg_msg("sql", "WARNING: Aborted getting saves due to reload/change of map.");
+		return true;
+	}
+	return false;
+}
+
 #endif

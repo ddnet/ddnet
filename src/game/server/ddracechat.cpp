@@ -676,10 +676,10 @@ void CGameContext::ConLoad(IConsole::IResult *pResult, void *pUserData)
 			return;
 #endif
 
-	if (pResult->NumArguments() > 0)
+	if(pResult->NumArguments() > 0)
 		pSelf->Score()->LoadTeam(pResult->GetString(0), pResult->m_ClientID);
 	else
-		return;
+		pSelf->Score()->GetSaves(pResult->m_ClientID);
 
 #if defined(CONF_SQL)
 	if(g_Config.m_SvUseSQL)
