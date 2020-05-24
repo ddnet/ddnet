@@ -785,13 +785,7 @@ void CGameContext::ConLockTeam(IConsole::IResult *pResult, void *pUserData)
 	char aBuf[512];
 	if(Lock)
 	{
-		((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.SetTeamLock(Team, false);
-
-		str_format(aBuf, sizeof(aBuf), "'%s' unlocked your team.", pSelf->Server()->ClientName(pResult->m_ClientID));
-
-		for (int i = 0; i < MAX_CLIENTS; i++)
-			if (((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.m_Core.Team(i) == Team)
-				pSelf->SendChatTarget(i, aBuf);
+		pSelf->UnlockTeam(pResult->m_ClientID, Team);
 	}
 	else if(!g_Config.m_SvTeamLock)
 	{
@@ -810,6 +804,35 @@ void CGameContext::ConLockTeam(IConsole::IResult *pResult, void *pUserData)
 			if (((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.m_Core.Team(i) == Team)
 				pSelf->SendChatTarget(i, aBuf);
 	}
+}
+
+void CGameContext::ConUnlockTeam(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+		return;
+
+	int Team = ((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.m_Core.Team(pResult->m_ClientID);
+
+	if(Team <= TEAM_FLOCK || Team >= TEAM_SUPER)
+		return;
+
+	if(pSelf->ProcessSpamProtection(pResult->m_ClientID))
+		return;
+
+	pSelf->UnlockTeam(pResult->m_ClientID, Team);
+}
+
+void CGameContext::UnlockTeam(int ClientID, int Team)
+{
+	((CGameControllerDDRace*) m_pController)->m_Teams.SetTeamLock(Team, false);
+
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "'%s' unlocked your team.", Server()->ClientName(ClientID));
+
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		if (((CGameControllerDDRace*) m_pController)->m_Teams.m_Core.Team(i) == Team)
+			SendChatTarget(i, aBuf);
 }
 
 void CGameContext::ConInviteTeam(IConsole::IResult *pResult, void *pUserData)

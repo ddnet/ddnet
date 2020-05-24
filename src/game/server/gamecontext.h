@@ -334,6 +334,7 @@ private:
 	static void ConBroadTime(IConsole::IResult *pResult, void *pUserData);
 	static void ConJoinTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConLockTeam(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnlockTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConInviteTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConMe(IConsole::IResult *pResult, void *pUserData);
 	static void ConWhisper(IConsole::IResult *pResult, void *pUserData);
@@ -393,6 +394,7 @@ private:
 	void WhisperID(int ClientID, int VictimID, char *pMessage);
 	void Converse(int ClientID, char *pStr);
 	bool IsVersionBanned(int Version);
+	void UnlockTeam(int ClientID, int Team);
 
 public:
 	CLayers *Layers() { return &m_Layers; }
