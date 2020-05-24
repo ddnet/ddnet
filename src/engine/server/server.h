@@ -29,6 +29,10 @@
 #include "authmanager.h"
 #include "name_ban.h"
 
+#if defined (CONF_UPNP)
+	#include "upnp.h"
+#endif
+
 #if defined (CONF_SQL)
 	#include "sql_connector.h"
 	#include "sql_server.h"
@@ -93,6 +97,10 @@ class CServer : public IServer
 	class IConsole *m_pConsole;
 	class IStorage *m_pStorage;
 	class IEngineAntibot *m_pAntibot;
+
+#if defined(CONF_UPNP)
+	CUPnP m_UPnP;
+#endif
 
 #if defined(CONF_SQL)
 	lock m_GlobalSqlLock;
