@@ -2625,7 +2625,9 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	m_GameUuid = RandomUuid();
 	Console()->SetTeeHistorianCommandCallback(CommandCallback, this);
 
-	m_Prng.Seed(1);
+	unsigned int Seed;
+	secure_random_fill(&Seed, sizeof(Seed));
+	m_Prng.Seed(Seed);
 	m_World.m_Core.m_pPrng = &m_Prng;
 
 	DeleteTempfile();
