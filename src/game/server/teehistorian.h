@@ -23,6 +23,7 @@ public:
 		CUuid m_GameUuid;
 		const char *m_pServerVersion;
 		time_t m_StartTime;
+		const char *m_pPrngDescription;
 
 		const char *m_pServerName;
 		int m_ServerPort;

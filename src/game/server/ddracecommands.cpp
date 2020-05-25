@@ -258,14 +258,15 @@ void CGameContext::ConToTeleporter(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
 	unsigned int TeleTo = pResult->GetInteger(0);
+	CGameControllerDDRace *pGameControllerDDRace = (CGameControllerDDRace *)pSelf->m_pController;
 
-	if (((CGameControllerDDRace*)pSelf->m_pController)->m_TeleOuts[TeleTo-1].size())
+	if(pGameControllerDDRace->m_TeleOuts[TeleTo-1].size())
 	{
-		int Num = ((CGameControllerDDRace*)pSelf->m_pController)->m_TeleOuts[TeleTo-1].size();
-		vec2 TelePos = ((CGameControllerDDRace*)pSelf->m_pController)->m_TeleOuts[TeleTo-1][(!Num)?Num:rand() % Num];
-		CCharacter* pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
-		if (pChr)
+		CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+		if(pChr)
 		{
+			int TeleOut = pSelf->m_World.m_Core.RandomOr0(pGameControllerDDRace->m_TeleOuts[TeleTo-1].size());
+			vec2 TelePos = pGameControllerDDRace->m_TeleOuts[TeleTo-1][TeleOut];
 			pChr->Core()->m_Pos = TelePos;
 			pChr->m_Pos = TelePos;
 			pChr->m_PrevPos = TelePos;
@@ -278,14 +279,15 @@ void CGameContext::ConToCheckTeleporter(IConsole::IResult *pResult, void *pUserD
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
 	unsigned int TeleTo = pResult->GetInteger(0);
+	CGameControllerDDRace *pGameControllerDDRace = (CGameControllerDDRace *)pSelf->m_pController;
 
-	if (((CGameControllerDDRace*)pSelf->m_pController)->m_TeleCheckOuts[TeleTo-1].size())
+	if(pGameControllerDDRace->m_TeleCheckOuts[TeleTo-1].size())
 	{
-		int Num = ((CGameControllerDDRace*)pSelf->m_pController)->m_TeleCheckOuts[TeleTo-1].size();
-		vec2 TelePos = ((CGameControllerDDRace*)pSelf->m_pController)->m_TeleCheckOuts[TeleTo-1][(!Num)?Num:rand() % Num];
-		CCharacter* pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
-		if (pChr)
+		CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+		if(pChr)
 		{
+			int TeleOut = pSelf->m_World.m_Core.RandomOr0(pGameControllerDDRace->m_TeleCheckOuts[TeleTo-1].size());
+			vec2 TelePos = pGameControllerDDRace->m_TeleCheckOuts[TeleTo-1][TeleOut];
 			pChr->Core()->m_Pos = TelePos;
 			pChr->m_Pos = TelePos;
 			pChr->m_PrevPos = TelePos;

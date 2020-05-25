@@ -14,6 +14,7 @@
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
 
+#include "prng.h"
 #include "teamscore.h"
 #include "mapitems.h"
 
@@ -180,10 +181,21 @@ public:
 	CWorldCore()
 	{
 		mem_zero(m_apCharacters, sizeof(m_apCharacters));
+		m_pPrng = 0;
+	}
+
+	int RandomOr0(int BelowThis)
+	{
+		if(BelowThis <= 1 || !m_pPrng)
+		{
+			return 0;
+		}
+		return m_pPrng->RandomInt() % BelowThis;
 	}
 
 	CTuningParams m_Tuning[2];
 	class CCharacterCore *m_apCharacters[MAX_CLIENTS];
+	CPrng *m_pPrng;
 };
 
 class CCharacterCore

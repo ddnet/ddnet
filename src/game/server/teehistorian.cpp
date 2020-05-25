@@ -80,12 +80,13 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 	char aGameTypeBuffer[128];
 	char aMapNameBuffer[128];
 	char aMapSha256Buffer[256];
+	char aPrngDescription[128];
 
 	char aJson[2048];
 
 	#define E(buf, str) EscapeJson(buf, sizeof(buf), str)
 
-	str_format(aJson, sizeof(aJson), "{\"comment\":\"%s\",\"version\":\"%s\",\"game_uuid\":\"%s\",\"server_version\":\"%s\",\"start_time\":\"%s\",\"server_name\":\"%s\",\"server_port\":\"%d\",\"game_type\":\"%s\",\"map_name\":\"%s\",\"map_size\":\"%d\",\"map_sha256\":\"%s\",\"map_crc\":\"%08x\",\"config\":{",
+	str_format(aJson, sizeof(aJson), "{\"comment\":\"%s\",\"version\":\"%s\",\"game_uuid\":\"%s\",\"server_version\":\"%s\",\"start_time\":\"%s\",\"server_name\":\"%s\",\"server_port\":\"%d\",\"game_type\":\"%s\",\"map_name\":\"%s\",\"map_size\":\"%d\",\"map_sha256\":\"%s\",\"map_crc\":\"%08x\",\"prng_description\":\"%s\",\"config\":{",
 		E(aCommentBuffer, TEEHISTORIAN_NAME),
 		TEEHISTORIAN_VERSION,
 		aGameUuid,
@@ -97,7 +98,8 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 		E(aMapNameBuffer, pGameInfo->m_pMapName),
 		pGameInfo->m_MapSize,
 		E(aMapSha256Buffer, aMapSha256),
-		pGameInfo->m_MapCrc);
+		pGameInfo->m_MapCrc,
+		E(aPrngDescription, pGameInfo->m_pPrngDescription));
 	Write(aJson, str_length(aJson));
 
 	char aBuffer1[1024];
