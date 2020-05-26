@@ -1,10 +1,11 @@
 #include "prng.h"
 
-#include <base/system.h>
+// From https://en.wikipedia.org/w/index.php?title=Permuted_congruential_generator&oldid=901497400#Example_code.
+//
+// > The generator recommended for most users is PCG-XSH-RR with 64-bit state
+// > and 32-bit output.
 
-// From https://www.mscs.dal.ca/~selinger/random/, 2020-05-25.
-
-#define NAME "glibc-rand-emu"
+#define NAME "pcg-xsh-rr"
 
 CPrng::CPrng() :
 	m_Seeded(false)
@@ -21,47 +22,30 @@ const char *CPrng::Description() const
 	return m_aDescription;
 }
 
-// Handles indices from -32 to +infty correctly.
-#define INDEX(i) (((i) + 32) % 32)
-#define r(i) (m_aState[INDEX(i)])
-void CPrng::Seed(unsigned int Seed)
+static unsigned int RotateRight32(unsigned int x, int Shift)
 {
-	// The PRNG behaves badly when seeded with 0.
-	if(Seed == 0)
-	{
-		Seed = 1;
-	}
-
-	m_Seeded = true;
-	str_format(m_aDescription, sizeof(m_aDescription), "%s:%08x", NAME, Seed);
-
-	int s = Seed;
-
-	r(0) = s;
-	r(1) = (16807 * (int64)(int)r(0)) % 2147483647;
-	for(int i = 1; i <= 30; i++)
-	{
-		r(i) = (16807 * (int64)r(i - 1)) % 2147483647;
-	}
-	r(31) = r(0);
-	r(32) = r(1);
-	r(33) = r(2);
-
-	m_Index = INDEX(34);
-	for(int i = 34; i <= 343; i++)
-	{
-		RandomInt();
-	}
+	return (x >> Shift) | (x << (-Shift & 31));
 }
 
-int CPrng::RandomInt()
+void CPrng::Seed(uint64 aSeed[2])
+{
+	m_Seeded = true;
+	str_format(m_aDescription, sizeof(m_aDescription), "%s:%016llx:%016llx", NAME, aSeed[0], aSeed[1]);
+
+	m_Increment = (aSeed[1] << 1) | 1;
+	m_State = aSeed[0] + m_Increment;
+	RandomBits();
+}
+
+unsigned int CPrng::RandomBits()
 {
 	dbg_assert(m_Seeded, "prng needs to be seeded before it can generate random numbers");
-	int i = m_Index;
 
-	r(i) = r(i - 3) + r(i - 31); // modulo 4294967296 is implicit.
+	uint64 x = m_State;
+	unsigned int Count = x >> 59;
 
-	int Result = r(i) >> 1;
-	m_Index = INDEX(i + 1);
-	return Result;
+	static const uint64 MULTIPLIER = 6364136223846793005u;
+	m_State = x * MULTIPLIER + m_Increment;
+	x ^= x >> 18;
+	return RotateRight32(x >> 27, Count);
 }

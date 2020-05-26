@@ -3,42 +3,73 @@
 
 #include <game/prng.h>
 
-// From https://www.mscs.dal.ca/~selinger/random/, 2020-05-25
-static const int NUM_RANDOM_INTEGERS = 60;
-static const int GLIBC_SEED_1_RANDOM_INTEGERS[NUM_RANDOM_INTEGERS] = {
-	1804289383, 846930886, 1681692777, 1714636915, 1957747793,
-	424238335, 719885386, 1649760492, 596516649, 1189641421,
-	1025202362, 1350490027, 783368690, 1102520059, 2044897763,
-	1967513926, 1365180540, 1540383426, 304089172, 1303455736,
-	35005211, 521595368, 294702567, 1726956429, 336465782,
-	861021530, 278722862, 233665123, 2145174067, 468703135,
-	1101513929, 1801979802, 1315634022, 635723058, 1369133069,
-	1125898167, 1059961393, 2089018456, 628175011, 1656478042,
-	1131176229, 1653377373, 859484421, 1914544919, 608413784,
-	756898537, 1734575198, 1973594324, 149798315, 2038664370,
-	1129566413, 184803526, 412776091, 1424268980, 1911759956,
-	749241873, 137806862, 42999170, 982906996, 135497281,
+// https://www.pcg-random.org/using-pcg-c-basic.html, retrieved 2020-05-25
+// suggests to use `pcg-32-global.demo.c`:
+//
+// ```
+// unix% ./pcg32-demo
+// pcg32_random_r:
+//       -  result:      32-bit unsigned int (uint32_t)
+//       -  period:      2^64   (* 2^63 streams)
+//       -  state type:  pcg32_random_t (16 bytes)
+//       -  output func: XSH-RR
+//
+// Round 1:
+//   32bit: 0xa15c02b7 0x7b47f409 0xba1d3330 0x83d2f293 0xbfa4784b 0xcbed606e
+//   Coins: HHTTTHTHHHTHTTTHHHHHTTTHHHTHTHTHTTHTTTHHHHHHTTTTHHTTTTTHTTTTTTTHT
+//   Rolls: 3 4 1 1 2 2 3 2 4 3 2 4 3 3 5 2 3 1 3 1 5 1 4 1 5 6 4 6 6 2 6 3 3
+//   Cards: Qd Ks 6d 3s 3d 4c 3h Td Kc 5c Jh Kd Jd As 4s 4h Ad Th Ac Jc 7s Qs
+//          2s 7h Kh 2d 6c Ah 4d Qh 9h 6s 5s 2c 9c Ts 8d 9s 3c 8c Js 5d 2h 6h
+//          7d 8s 9d 5h 8h Qc 7c Tc
+// ⋮
+// ⋮
+// Round 5:
+//   32bit: 0xfcef7cd6 0x1b488b5a 0xd0daf7ea 0x1d9a70f7 0x241a37cf 0x9a3857b7
+//   Coins: HHHHTHHTTHTTHHHTTTHHTHTHTTTTHTTHTHTTTHHHTHTHTTHTTHTHHTHTHHHTHTHTT
+//   Rolls: 5 4 1 2 6 1 3 1 5 6 3 6 2 1 4 4 5 2 1 5 6 5 6 4 4 4 5 2 6 4 3 5 6
+//   Cards: 4d 9s Qc 9h As Qs 7s 4c Kd 6h 6s 2c 8c 5d 7h 5h Jc 3s 7c Jh Js Ks
+//          Tc Jd Kc Th 3h Ts Qh Ad Td 3c Ah 2d 3d 5c Ac 8s 5s 9c 2h 6c 6d Kh
+//          Qd 8d 7d 2s 8h 4h 9d 4s
+// ```
+//
+// Numbers can also be seen at
+// https://github.com/imneme/pcg-c/blob/83252d9c23df9c82ecb42210afed61a7b42402d7/test-high/expected/check-pcg32.out.
+//
+// It's also the output of `pcg32-global-demo.c` from
+// https://github.com/imneme/pcg-c-basic/tree/bc39cd76ac3d541e618606bcc6e1e5ba5e5e6aa3.
+//
+// Only the first 6 numbers are taken from the generator directly, after this,
+// something more complicated is done.
+
+static const unsigned int PCG32_GLOBAL_DEMO[] = {
+	0xa15c02b7, 0x7b47f409, 0xba1d3330, 0x83d2f293, 0xbfa4784b, 0xcbed606e,
 };
 
-TEST(Prng, EqualsGlibc)
+TEST(Prng, EqualsPcg32GlobalDemo)
 {
-	const int *EXPECTED = GLIBC_SEED_1_RANDOM_INTEGERS;
+	uint64 aSeed[2] = {42, 54};
 
 	CPrng Prng;
-	Prng.Seed(1);
-	for(int i = 0; i < NUM_RANDOM_INTEGERS; i++)
+	Prng.Seed(aSeed);
+	for(unsigned i = 0; i < sizeof(PCG32_GLOBAL_DEMO) / sizeof(PCG32_GLOBAL_DEMO[0]); i++)
 	{
-		EXPECT_EQ(Prng.RandomInt(), EXPECTED[i]);
+		EXPECT_EQ(Prng.RandomBits(), PCG32_GLOBAL_DEMO[i]);
 	}
 }
 
 TEST(Prng, Description)
 {
 	CPrng Prng;
-	EXPECT_STREQ(Prng.Description(), "glibc-rand-emu:unseeded");
+	EXPECT_STREQ(Prng.Description(), "pcg-xsh-rr:unseeded");
 
-	Prng.Seed(0x01234567);
-	EXPECT_STREQ(Prng.Description(), "glibc-rand-emu:01234567");
-	Prng.Seed(0xfedbca98);
-	EXPECT_STREQ(Prng.Description(), "glibc-rand-emu:fedbca98");
+	uint64 aSeed0[2] = {0xfedbca9876543210, 0x0123456789abcdef};
+	uint64 aSeed1[2] = {0x0123456789abcdef, 0xfedcba9876543210};
+	uint64 aSeed2[2] = {0x0000000000000000, 0x0000000000000000};
+
+	Prng.Seed(aSeed0);
+	EXPECT_STREQ(Prng.Description(), "pcg-xsh-rr:fedbca9876543210:0123456789abcdef");
+	Prng.Seed(aSeed1);
+	EXPECT_STREQ(Prng.Description(), "pcg-xsh-rr:0123456789abcdef:fedcba9876543210");
+	Prng.Seed(aSeed2);
+	EXPECT_STREQ(Prng.Description(), "pcg-xsh-rr:0000000000000000:0000000000000000");
 }

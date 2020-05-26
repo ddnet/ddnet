@@ -190,7 +190,7 @@ public:
 		{
 			return 0;
 		}
-		return m_pPrng->RandomInt() % BelowThis;
+		return m_pPrng->RandomBits() % BelowThis;
 	}
 
 	CTuningParams m_Tuning[2];
