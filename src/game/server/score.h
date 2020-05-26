@@ -2,9 +2,9 @@
 #define GAME_SERVER_SCORE_H
 
 #include <memory>
+#include <atomic>
 
-#include "entities/character.h"
-#include "gamecontext.h"
+#include "save.h"
 
 enum
 {
@@ -40,26 +40,15 @@ public:
 	float m_aBestCpTime[NUM_CHECKPOINTS];
 };
 
-// Watch this: TODO(2019-05-20): Temporary fix for the random maps race
-// condition. See you in ten years.
-class CRandomMapResult
+struct CRandomMapResult
 {
-public:
-	bool m_Done;
 	char m_aMap[64];
-
-	CRandomMapResult() : m_Done(false) {}
 };
 
-class CMapVoteResult
+struct CMapVoteResult
 {
-public:
-	bool m_Done;
 	char m_aMap[64];
 	char m_aServer[32];
-	int m_ClientID;
-
-	CMapVoteResult() : m_Done(false) {}
 };
 
 class IScore
@@ -79,16 +68,16 @@ public:
 
 	virtual void SaveTeamScore(int *pClientIDs, unsigned int Size, float Time, const char *pTimestamp) = 0;
 
-	virtual void ShowTop5(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut=1) = 0;
+	virtual void ShowTop5(void *pResult, int ClientID, void *pUserData, int Debut=1) = 0;
 	virtual void ShowRank(int ClientID, const char *pName, bool Search=false) = 0;
 
-	virtual void ShowTeamTop5(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut=1) = 0;
+	virtual void ShowTeamTop5(void *pResult, int ClientID, void *pUserData, int Debut=1) = 0;
 	virtual void ShowTeamRank(int ClientID, const char *pName, bool Search=false) = 0;
 
-	virtual void ShowTopPoints(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut=1) = 0;
+	virtual void ShowTopPoints(void *pResult, int ClientID, void *pUserData, int Debut=1) = 0;
 	virtual void ShowPoints(int ClientID, const char *pName, bool Search=false) = 0;
 
-	virtual void RandomMap(std::shared_ptr<CRandomMapResult> *ppResult, int ClientID, int Stars) = 0;
+	virtual void RandomMap(int ClientID, int Stars) = 0;
 	virtual void RandomUnfinishedMap(std::shared_ptr<CRandomMapResult> *ppResult, int ClientID, int Stars) = 0;
 
 	virtual void SaveTeam(int Team, const char *pCode, int ClientID, const char *pServer) = 0;

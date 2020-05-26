@@ -922,6 +922,7 @@ void CGameContext::OnTick()
 		}
 	}
 
+	/*
 	if(m_pRandomMapResult && m_pRandomMapResult->m_Done)
 	{
 		str_copy(g_Config.m_SvMap, m_pRandomMapResult->m_aMap, sizeof(g_Config.m_SvMap));
@@ -944,6 +945,7 @@ void CGameContext::OnTick()
 
 		m_pMapVoteResult = NULL;
 	}
+	*/
 
 #ifdef CONF_DEBUG
 	if(g_Config.m_DbgDummies)
@@ -2243,7 +2245,7 @@ void CGameContext::ConRandomMap(IConsole::IResult *pResult, void *pUserData)
 
 	int Stars = pResult->NumArguments() ? pResult->GetInteger(0) : -1;
 
-	pSelf->m_pScore->RandomMap(&pSelf->m_pRandomMapResult, pSelf->m_VoteCreator, Stars);
+	pSelf->m_pScore->RandomMap(pSelf->m_VoteCreator, Stars);
 }
 
 void CGameContext::ConRandomUnfinishedMap(IConsole::IResult *pResult, void *pUserData)

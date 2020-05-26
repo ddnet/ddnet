@@ -1,82 +1,62 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 /* Based on Race mod stuff and tweaked by GreYFoX@GTi and others to fit our DDRace needs. */
 /* CSqlScore Class by Sushi Tee*/
-#ifndef GAME_SERVER_SCORE_SQL_SCORE_H
-#define GAME_SERVER_SCORE_SQL_SCORE_H
+#ifndef GAME_SERVER_SCORE_SQL_H
+#define GAME_SERVER_SCORE_SQL_H
 
 #include <exception>
 
 #include <base/system.h>
-#include <engine/console.h>
 #include <engine/server/sql_connector.h>
 #include <engine/server/sql_string_helpers.h>
+#include <engine/shared/uuid_manager.h>
 
-#include "../score.h"
+#include <game/server/score.h>
 
-
-class CGameContextError : public std::runtime_error
+// result only valid if m_Done is set to true
+class CSqlResult
 {
 public:
-	CGameContextError(const char* pMsg) : std::runtime_error(pMsg) {}
+	std::atomic_bool m_Done;
+	// specify where chat messages should be returned
+	enum
+	{
+		DIRECT,
+		TEAM,
+		ALL,
+	} m_MessageTarget;
+	int m_TeamMessageTo; // store team id, if player changes team after /save
+	char m_Message[512];
+	// TODO: replace this with a type-safe std::variant (C++17)
+	enum
+	{
+		NONE,
+		LOAD,
+		RANDOM_MAP,
+		MAP_VOTE,
+		MESSAGES, // relevant for TOP5
+	} m_Tag;
+
+	union
+	{
+		//CSaveTeam m_LoadTeam;
+		CRandomMapResult m_RandomMap;
+		CMapVoteResult m_MapVote;
+		char m_Messages[512][8]; // Space for extra messages
+	} m_Variant;
+
+	CSqlResult();
+	~CSqlResult();
 };
 
-
-// generic implementation to provide gameserver and server
+// holding relevant data for one thread, and function pointer for return values
 struct CSqlData
 {
-	CSqlData() : m_Map(ms_pMap), m_GameUuid(ms_pGameUuid)
-	{
-		m_Instance = ms_Instance;
-	}
-
-	virtual ~CSqlData() {}
-
-	bool isGameContextVaild() const
-	{
-		return m_Instance == ms_Instance && ms_GameContextAvailable;
-	}
-
-	CGameContext* GameServer() const { return isGameContextVaild() ? ms_pGameServer : throw CGameContextError("[CSqlData]: GameServer() unavailable."); }
-	IServer* Server() const { return isGameContextVaild() ? ms_pServer : throw CGameContextError("[CSqlData]: Server() unavailable."); }
-	CPlayerData* PlayerData(int ID) const { return isGameContextVaild() ? &ms_pPlayerData[ID] : throw CGameContextError("[CSqlData]: PlayerData() unavailable."); }
-
-	sqlstr::CSqlString<128> m_Map;
-	sqlstr::CSqlString<UUID_MAXSTRSIZE> m_GameUuid;
-
-	// counter to keep track to which instance of GameServer this object belongs to.
-	int m_Instance;
-
-	static CGameContext *ms_pGameServer;
-	static IServer *ms_pServer;
-	static CPlayerData *ms_pPlayerData;
-	static const char *ms_pMap;
-	static const char *ms_pGameUuid;
-
-	static bool ms_GameContextAvailable;
-	// contains the instancecount of the current GameServer
-	static int ms_Instance;
-};
-
-struct CSqlExecData
-{
-	CSqlExecData(bool (*pFuncPtr) (CSqlServer*, const CSqlData *, bool), CSqlData *pSqlData, bool ReadOnly = true) :
-		m_pFuncPtr(pFuncPtr),
-		m_pSqlData(pSqlData),
-		m_ReadOnly(ReadOnly)
-	{
-		++ms_InstanceCount;
-	}
-	~CSqlExecData()
-	{
-		--ms_InstanceCount;
-	}
-
-	bool (*m_pFuncPtr) (CSqlServer*, const CSqlData *, bool);
-	CSqlData *m_pSqlData;
-	bool m_ReadOnly;
-
-	// keeps track of score-threads
-	volatile static int ms_InstanceCount;
+	CSqlData(std::shared_ptr<CSqlResult> pSqlResult) :
+		m_pSqlResult(pSqlResult)
+	{ }
+	std::shared_ptr<CSqlResult> m_pSqlResult;
+	virtual ~CSqlData() = default;
 };
 
 struct CSqlPlayerData : CSqlData
@@ -130,10 +110,11 @@ struct CSqlTeamSave : CSqlData
 {
 	virtual ~CSqlTeamSave();
 
-	int m_Team;
-	int m_ClientID;
 	char m_ClientName[MAX_NAME_LENGTH];
+	CUuid m_SaveUuid;
+
 	sqlstr::CSqlString<128> m_Code;
+	sqlstr::CSqlString<65536> m_SaveState;
 	char m_Server[5];
 };
 
@@ -146,31 +127,54 @@ struct CSqlTeamLoad : CSqlData
 
 struct CSqlGetSavesData: CSqlData
 {
-	int m_ClientID;
 	sqlstr::CSqlString<MAX_NAME_LENGTH> m_Name;
 };
 
-struct CSqlRandomMap : CSqlScoreData
+struct CSqlRandomMap : CSqlData
 {
-	std::shared_ptr<CRandomMapResult> m_pResult;
+	using CSqlData::CSqlData;
+	int m_Stars;
+	char m_aCurrentMap[64];
+	char m_aServerType[64];
 };
+
+// controls one thread
+struct CSqlExecData
+{
+	CSqlExecData(
+			bool (*pFuncPtr) (CSqlServer*, const CSqlData *, bool),
+			CSqlData *pSqlResult,
+			bool ReadOnly = true
+	) :
+		m_pFuncPtr(pFuncPtr),
+		m_pSqlData(pSqlResult),
+		m_ReadOnly(ReadOnly)
+	{
+		++ms_InstanceCount;
+	}
+	~CSqlExecData()
+	{
+		--ms_InstanceCount;
+	}
+
+	bool (*m_pFuncPtr) (CSqlServer*, const CSqlData *, bool);
+	CSqlData *m_pSqlData;
+	bool m_ReadOnly;
+
+	// keeps track of score-threads
+	static std::atomic_int ms_InstanceCount;
+};
+
+class IServer;
+class CGameContext;
 
 class CSqlScore: public IScore
 {
-	CGameContext *GameServer() { return m_pGameServer; }
-	IServer *Server() { return m_pServer; }
-
-	CGameContext *m_pGameServer;
-	IServer *m_pServer;
+	static LOCK ms_FailureFileLock;
 
 	static void ExecSqlFunc(void *pUser);
 
 	static bool Init(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure);
-
-	char m_aMap[64];
-	char m_aGameUuid[UUID_MAXSTRSIZE];
-
-	static LOCK ms_FailureFileLock;
 
 	static bool CheckBirthdayThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
 	static bool MapInfoThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
@@ -191,10 +195,20 @@ class CSqlScore: public IScore
 	static bool LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
 	static bool GetSavesThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
 
+	CGameContext *GameServer() { return m_pGameServer; }
+	IServer *Server() { return m_pServer; }
+
+	CGameContext *m_pGameServer;
+	IServer *m_pServer;
+
+
+	char m_aMap[64];
+	char m_aGameUuid[UUID_MAXSTRSIZE];
+
 public:
 
 	CSqlScore(CGameContext *pGameServer);
-	~CSqlScore();
+	~CSqlScore() {}
 
 	virtual void CheckBirthday(int ClientID);
 	virtual void LoadScore(int ClientID);
@@ -207,14 +221,14 @@ public:
 	virtual void ShowTeamRank(int ClientID, const char* pName, bool Search = false);
 	virtual void ShowTimes(int ClientID, const char* pName, int Debut = 1);
 	virtual void ShowTimes(int ClientID, int Debut = 1);
-	virtual void ShowTop5(IConsole::IResult *pResult, int ClientID,
+	virtual void ShowTop5(void *pResult, int ClientID,
 			void *pUserData, int Debut = 1);
-	virtual void ShowTeamTop5(IConsole::IResult *pResult, int ClientID,
+	virtual void ShowTeamTop5(void *pResult, int ClientID,
 			void *pUserData, int Debut = 1);
 	virtual void ShowPoints(int ClientID, const char* pName, bool Search = false);
-	virtual void ShowTopPoints(IConsole::IResult *pResult, int ClientID,
+	virtual void ShowTopPoints(void *pResult, int ClientID,
 			void *pUserData, int Debut = 1);
-	virtual void RandomMap(std::shared_ptr<CRandomMapResult> *ppResult, int ClientID, int stars);
+	virtual void RandomMap(int ClientID, int Stars);
 	virtual void RandomUnfinishedMap(std::shared_ptr<CRandomMapResult> *ppResult, int ClientID, int stars);
 	virtual void SaveTeam(int Team, const char* Code, int ClientID, const char* Server);
 	virtual void LoadTeam(const char* Code, int ClientID);
@@ -223,4 +237,4 @@ public:
 	virtual void OnShutdown();
 };
 
-#endif // GAME_SERVER_SCORE_SQL_SCORE_H
+#endif // GAME_SERVER_SCORE_SQL_H

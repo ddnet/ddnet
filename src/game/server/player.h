@@ -5,7 +5,13 @@
 
 // this include should perhaps be removed
 #include "entities/character.h"
+#include "score.h"
 #include "gamecontext.h"
+#include <memory>
+
+#if defined(CONF_SQL)
+class CSqlResult;
+#endif
 
 // player object
 class CPlayer
@@ -194,7 +200,9 @@ public:
 	bool m_Halloween;
 	bool m_FirstPacket;
 #if defined(CONF_SQL)
+	void ProcessSqlResult();
 	int64 m_LastSQLQuery;
+	std::shared_ptr<CSqlResult> m_SqlQueryResult;
 #endif
 	bool m_NotEligibleForFinish;
 	int64 m_EligibleForFinishCheck;

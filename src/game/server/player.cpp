@@ -12,6 +12,10 @@
 #include "gamemodes/DDRace.h"
 #include <time.h>
 
+#if defined(CONF_SQL)
+#include "score/sql_score.h"
+#endif
+
 MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
 
 IServer *CPlayer::Server() const { return m_pGameServer->Server(); }
@@ -119,6 +123,7 @@ void CPlayer::Reset()
 	m_Last_Team = 0;
 #if defined(CONF_SQL)
 	m_LastSQLQuery = 0;
+	m_SqlQueryResult = nullptr;
 #endif
 
 	int64 Now = Server()->Tick();
@@ -782,3 +787,39 @@ void CPlayer::SpectatePlayerName(const char *pName)
 		}
 	}
 }
+
+#if defined(CONF_SQL)
+void CPlayer::ProcessSqlResult()
+{
+	if(m_SqlQueryResult == nullptr || !m_SqlQueryResult->m_Done)
+		return;
+	if(m_SqlQueryResult->m_Message[0] != 0)
+	{
+		switch(m_SqlQueryResult->m_MessageTarget)
+		{
+		case CSqlResult::DIRECT:
+			GameServer()->SendChatTarget(m_ClientID, m_SqlQueryResult->m_Message);
+			break;
+		case CSqlResult::TEAM:
+			if(m_SqlQueryResult->m_TeamMessageTo == -1)
+				break;
+			GameServer()->SendChatTeam(m_SqlQueryResult->m_TeamMessageTo, m_SqlQueryResult->m_Message);
+			break;
+		case CSqlResult::ALL:
+			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, m_SqlQueryResult->m_Message);
+			break;
+		}
+	}
+	switch(m_SqlQueryResult->m_Tag)
+	{
+	case CSqlResult::NONE:
+		break;
+	case CSqlResult::LOAD:
+		break;
+	case CSqlResult::RANDOM_MAP:
+		break;
+	case CSqlResult::MAP_VOTE:
+		break;
+	}
+}
+#endif
