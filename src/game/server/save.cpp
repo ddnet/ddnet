@@ -16,7 +16,7 @@ CSaveTee::~CSaveTee()
 
 void CSaveTee::save(CCharacter *pChr)
 {
-	str_copy(m_name, pChr->m_pPlayer->Server()->ClientName(pChr->m_pPlayer->GetCID()), sizeof(m_name));
+	str_copy(m_aName, pChr->m_pPlayer->Server()->ClientName(pChr->m_pPlayer->GetCID()), sizeof(m_aName));
 
 	m_Alive = pChr->m_Alive;
 	m_Paused = abs(pChr->m_pPlayer->IsPaused());
@@ -65,7 +65,7 @@ void CSaveTee::save(CCharacter *pChr)
 	m_CpLastBroadcast = pChr->m_CpLastBroadcast;
 
 	for(int i = 0; i < 25; i++)
-		m_CpCurrent[i] = pChr->m_CpCurrent[i];
+		m_aCpCurrent[i] = pChr->m_CpCurrent[i];
 
 	m_NotEligibleForFinish = pChr->m_pPlayer->m_NotEligibleForFinish;
 
@@ -144,7 +144,7 @@ void CSaveTee::load(CCharacter *pChr, int Team)
 	pChr->m_CpLastBroadcast = m_CpLastBroadcast;
 
 	for(int i = 0; i < 25; i++)
-		pChr->m_CpCurrent[i] = m_CpCurrent[i];
+		pChr->m_CpCurrent[i] = m_aCpCurrent[i];
 
 	pChr->m_pPlayer->m_NotEligibleForFinish = pChr->m_pPlayer->m_NotEligibleForFinish || m_NotEligibleForFinish;
 
@@ -182,7 +182,7 @@ void CSaveTee::load(CCharacter *pChr, int Team)
 
 char* CSaveTee::GetString()
 {
-	str_format(m_String, sizeof(m_String),
+	str_format(m_aString, sizeof(m_aString),
 			"%s\t%d\t%d\t%d\t%d\t%d\t"
 			// weapons
 			"%d\t%d\t%d\t%d\t"
@@ -211,7 +211,7 @@ char* CSaveTee::GetString()
 			"%d\t"
 			"%d\t%d\t%d\t"
 			"%s",
-			m_name, m_Alive, m_Paused, m_NeededFaketuning, m_TeeFinished, m_IsSolo,
+			m_aName, m_Alive, m_Paused, m_NeededFaketuning, m_TeeFinished, m_IsSolo,
 			// weapons
 			m_aWeapons[0].m_AmmoRegenStart, m_aWeapons[0].m_Ammo, m_aWeapons[0].m_Ammocost, m_aWeapons[0].m_Got,
 			m_aWeapons[1].m_AmmoRegenStart, m_aWeapons[1].m_Ammo, m_aWeapons[1].m_Ammocost, m_aWeapons[1].m_Got,
@@ -231,16 +231,16 @@ char* CSaveTee::GetString()
 			(int)m_HookTeleBase.x, (int)m_HookTeleBase.y, m_HookTick, m_HookState,
 			// time checkpoints
 			m_CpTime, m_CpActive, m_CpLastBroadcast,
-			m_CpCurrent[0], m_CpCurrent[1], m_CpCurrent[2], m_CpCurrent[3], m_CpCurrent[4],
-			m_CpCurrent[5], m_CpCurrent[6], m_CpCurrent[7], m_CpCurrent[8], m_CpCurrent[9],
-			m_CpCurrent[10], m_CpCurrent[11], m_CpCurrent[12], m_CpCurrent[13], m_CpCurrent[14],
-			m_CpCurrent[15], m_CpCurrent[16], m_CpCurrent[17], m_CpCurrent[18], m_CpCurrent[19],
-			m_CpCurrent[20], m_CpCurrent[21], m_CpCurrent[22], m_CpCurrent[23], m_CpCurrent[24],
+			m_aCpCurrent[0], m_aCpCurrent[1], m_aCpCurrent[2], m_aCpCurrent[3], m_aCpCurrent[4],
+			m_aCpCurrent[5], m_aCpCurrent[6], m_aCpCurrent[7], m_aCpCurrent[8], m_aCpCurrent[9],
+			m_aCpCurrent[10], m_aCpCurrent[11], m_aCpCurrent[12], m_aCpCurrent[13], m_aCpCurrent[14],
+			m_aCpCurrent[15], m_aCpCurrent[16], m_aCpCurrent[17], m_aCpCurrent[18], m_aCpCurrent[19],
+			m_aCpCurrent[20], m_aCpCurrent[21], m_aCpCurrent[22], m_aCpCurrent[23], m_aCpCurrent[24],
 			m_NotEligibleForFinish,
 			m_HasTelegunGun, m_HasTelegunLaser, m_HasTelegunGrenade,
 			m_aGameUuid
 	);
-	return m_String;
+	return m_aString;
 }
 
 int CSaveTee::LoadString(char* String)
@@ -260,7 +260,7 @@ int CSaveTee::LoadString(char* String)
 			"%d\t%d\t%d\t%d\t%d\t%d\t%d\t" // m_SuperJump
 			"%d\t%d\t%d\t%d\t%d\t%d\t%d\t" // m_DDRaceState
 			"%f\t%f\t%f\t%f\t" // m_Pos.x
-			"%d\t%d\t" // m_TeleCheckpoint,
+			"%d\t%d\t" // m_TeleCheckpoint
 			"%f\t%f\t%f\t%f\t" // m_CorePos.x
 			"%d\t%d\t%d\t%d\t" // m_ActiveWeapon
 			"%f\t%f\t%f\t%f\t" // m_HookPos.x
@@ -275,7 +275,7 @@ int CSaveTee::LoadString(char* String)
 			"%d\t"
 			"%d\t%d\t%d\t"
 			"%*s", // discard the game uuid
-			m_name, &m_Alive, &m_Paused, &m_NeededFaketuning, &m_TeeFinished, &m_IsSolo,
+			m_aName, &m_Alive, &m_Paused, &m_NeededFaketuning, &m_TeeFinished, &m_IsSolo,
 			// weapons
 			&m_aWeapons[0].m_AmmoRegenStart, &m_aWeapons[0].m_Ammo, &m_aWeapons[0].m_Ammocost, &m_aWeapons[0].m_Got,
 			&m_aWeapons[1].m_AmmoRegenStart, &m_aWeapons[1].m_Ammo, &m_aWeapons[1].m_Ammocost, &m_aWeapons[1].m_Got,
@@ -295,11 +295,11 @@ int CSaveTee::LoadString(char* String)
 			&m_HookTeleBase.x, &m_HookTeleBase.y, &m_HookTick, &m_HookState,
 			// time checkpoints
 			&m_CpTime, &m_CpActive, &m_CpLastBroadcast,
-			&m_CpCurrent[0], &m_CpCurrent[1], &m_CpCurrent[2], &m_CpCurrent[3], &m_CpCurrent[4],
-			&m_CpCurrent[5], &m_CpCurrent[6], &m_CpCurrent[7], &m_CpCurrent[8], &m_CpCurrent[9],
-			&m_CpCurrent[10], &m_CpCurrent[11], &m_CpCurrent[12], &m_CpCurrent[13], &m_CpCurrent[14],
-			&m_CpCurrent[15], &m_CpCurrent[16], &m_CpCurrent[17], &m_CpCurrent[18], &m_CpCurrent[19],
-			&m_CpCurrent[20], &m_CpCurrent[21], &m_CpCurrent[22], &m_CpCurrent[23], &m_CpCurrent[24],
+			&m_aCpCurrent[0], &m_aCpCurrent[1], &m_aCpCurrent[2], &m_aCpCurrent[3], &m_aCpCurrent[4],
+			&m_aCpCurrent[5], &m_aCpCurrent[6], &m_aCpCurrent[7], &m_aCpCurrent[8], &m_aCpCurrent[9],
+			&m_aCpCurrent[10], &m_aCpCurrent[11], &m_aCpCurrent[12], &m_aCpCurrent[13], &m_aCpCurrent[14],
+			&m_aCpCurrent[15], &m_aCpCurrent[16], &m_aCpCurrent[17], &m_aCpCurrent[18], &m_aCpCurrent[19],
+			&m_aCpCurrent[20], &m_aCpCurrent[21], &m_aCpCurrent[22], &m_aCpCurrent[23], &m_aCpCurrent[24],
 			&m_NotEligibleForFinish,
 			&m_HasTelegunGun, &m_HasTelegunLaser, &m_HasTelegunGrenade
 	);
@@ -307,12 +307,12 @@ int CSaveTee::LoadString(char* String)
 	{
 	case 96:
 		m_NotEligibleForFinish = false;
-		// fallthrough
+		// fall through
 	case 97:
 		m_HasTelegunGrenade = 0;
 		m_HasTelegunLaser = 0;
 		m_HasTelegunGun = 0;
-		// fallthrough
+		// fall through
 	case 100:
 		return 0;
 	default:
@@ -325,16 +325,16 @@ int CSaveTee::LoadString(char* String)
 CSaveTeam::CSaveTeam(IGameController* Controller)
 {
 	m_pController = Controller;
-	m_Switchers = 0;
-	SavedTees = 0;
+	m_pSwitchers = 0;
+	m_pSavedTees = 0;
 }
 
 CSaveTeam::~CSaveTeam()
 {
-	if(m_Switchers)
-		delete[] m_Switchers;
-	if(SavedTees)
-		delete[] SavedTees;
+	if(m_pSwitchers)
+		delete[] m_pSwitchers;
+	if(m_pSavedTees)
+		delete[] m_pSavedTees;
 }
 
 int CSaveTeam::save(int Team)
@@ -359,14 +359,14 @@ int CSaveTeam::save(int Team)
 		m_NumSwitchers = m_pController->GameServer()->Collision()->m_NumSwitchers;
 		m_TeamLocked = Teams->TeamLocked(Team);
 
-		SavedTees = new CSaveTee[m_MembersCount];
+		m_pSavedTees = new CSaveTee[m_MembersCount];
 		int j = 0;
 		for (int i = 0; i < MAX_CLIENTS; i++)
 		{
 			if(Teams->m_Core.Team(i) == Team)
 			{
 				if(m_pController->GameServer()->m_apPlayers[i] && m_pController->GameServer()->m_apPlayers[i]->GetCharacter())
-					SavedTees[j].save(m_pController->GameServer()->m_apPlayers[i]->GetCharacter());
+					m_pSavedTees[j].save(m_pController->GameServer()->m_apPlayers[i]->GetCharacter());
 				else
 					return 3;
 				j++;
@@ -375,16 +375,16 @@ int CSaveTeam::save(int Team)
 
 		if(m_pController->GameServer()->Collision()->m_NumSwitchers)
 		{
-			m_Switchers = new SSimpleSwitchers[m_pController->GameServer()->Collision()->m_NumSwitchers+1];
+			m_pSwitchers = new SSimpleSwitchers[m_pController->GameServer()->Collision()->m_NumSwitchers+1];
 
 			for(int i=1; i < m_pController->GameServer()->Collision()->m_NumSwitchers+1; i++)
 			{
-				m_Switchers[i].m_Status = m_pController->GameServer()->Collision()->m_pSwitchers[i].m_Status[Team];
+				m_pSwitchers[i].m_Status = m_pController->GameServer()->Collision()->m_pSwitchers[i].m_Status[Team];
 				if(m_pController->GameServer()->Collision()->m_pSwitchers[i].m_EndTick[Team])
-					m_Switchers[i].m_EndTime = m_pController->Server()->Tick() - m_pController->GameServer()->Collision()->m_pSwitchers[i].m_EndTick[Team];
+					m_pSwitchers[i].m_EndTime = m_pController->Server()->Tick() - m_pController->GameServer()->Collision()->m_pSwitchers[i].m_EndTick[Team];
 				else
-					m_Switchers[i].m_EndTime = 0;
-				m_Switchers[i].m_Type = m_pController->GameServer()->Collision()->m_pSwitchers[i].m_Type[Team];
+					m_pSwitchers[i].m_EndTime = 0;
+				m_pSwitchers[i].m_Type = m_pController->GameServer()->Collision()->m_pSwitchers[i].m_Type[Team];
 			}
 		}
 		return 0;
@@ -430,7 +430,7 @@ int CSaveTeam::load(int Team)
 
 	for (int i = 0; i < m_MembersCount; i++)
 	{
-		int ID = MatchPlayer(SavedTees[i].GetName());
+		int ID = MatchPlayer(m_pSavedTees[i].GetName());
 		if(ID == -1) // first check if team can be loaded / do not load half teams
 		{
 			return i+10; // +10 to leave space for other return-values
@@ -450,20 +450,20 @@ int CSaveTeam::load(int Team)
 
 	for (int i = 0; i < m_MembersCount; i++)
 	{
-		pChr = MatchCharacter(SavedTees[i].GetName(), i);
+		pChr = MatchCharacter(m_pSavedTees[i].GetName(), i);
 		if(pChr)
 		{
-			SavedTees[i].load(pChr, Team);
+			m_pSavedTees[i].load(pChr, Team);
 		}
 	}
 
 	if(m_pController->GameServer()->Collision()->m_NumSwitchers)
 		for(int i=1; i < m_pController->GameServer()->Collision()->m_NumSwitchers+1; i++)
 		{
-			m_pController->GameServer()->Collision()->m_pSwitchers[i].m_Status[Team] = m_Switchers[i].m_Status;
-			if(m_Switchers[i].m_EndTime)
-				m_pController->GameServer()->Collision()->m_pSwitchers[i].m_EndTick[Team] = m_pController->Server()->Tick() - m_Switchers[i].m_EndTime;
-			m_pController->GameServer()->Collision()->m_pSwitchers[i].m_Type[Team] = m_Switchers[i].m_Type;
+			m_pController->GameServer()->Collision()->m_pSwitchers[i].m_Status[Team] = m_pSwitchers[i].m_Status;
+			if(m_pSwitchers[i].m_EndTime)
+				m_pController->GameServer()->Collision()->m_pSwitchers[i].m_EndTick[Team] = m_pController->Server()->Tick() - m_pSwitchers[i].m_EndTime;
+			m_pController->GameServer()->Collision()->m_pSwitchers[i].m_Type[Team] = m_pSwitchers[i].m_Type;
 		}
 	return 0;
 }
@@ -488,7 +488,7 @@ CCharacter* CSaveTeam::MatchCharacter(char name[16], int SaveID)
 		if(m_pController->GameServer()->m_apPlayers[ID]->GetCharacter())
 			return m_pController->GameServer()->m_apPlayers[ID]->GetCharacter();
 		else
-			return m_pController->GameServer()->m_apPlayers[ID]->ForceSpawn(SavedTees[SaveID].GetPos());
+			return m_pController->GameServer()->m_apPlayers[ID]->ForceSpawn(m_pSavedTees[SaveID].GetPos());
 	}
 
 	return 0;
@@ -496,27 +496,27 @@ CCharacter* CSaveTeam::MatchCharacter(char name[16], int SaveID)
 
 char* CSaveTeam::GetString()
 {
-	str_format(m_String, sizeof(m_String), "%d\t%d\t%d\t%d", m_TeamState, m_MembersCount, m_NumSwitchers, m_TeamLocked);
+	str_format(m_aString, sizeof(m_aString), "%d\t%d\t%d\t%d", m_TeamState, m_MembersCount, m_NumSwitchers, m_TeamLocked);
 
 	for (int i = 0; i<m_MembersCount; i++)
 	{
 		char aBuf[1024];
-		str_format(aBuf, sizeof(aBuf), "\n%s", SavedTees[i].GetString());
-		str_append(m_String, aBuf, sizeof(m_String));
+		str_format(aBuf, sizeof(aBuf), "\n%s", m_pSavedTees[i].GetString());
+		str_append(m_aString, aBuf, sizeof(m_aString));
 	}
 
 	if(m_NumSwitchers)
 		for(int i=1; i < m_NumSwitchers+1; i++)
 		{
 			char aBuf[64];
-			if (m_Switchers)
+			if (m_pSwitchers)
 			{
-				str_format(aBuf, sizeof(aBuf), "\n%d\t%d\t%d", m_Switchers[i].m_Status, m_Switchers[i].m_EndTime, m_Switchers[i].m_Type);
-				str_append(m_String, aBuf, sizeof(m_String));
+				str_format(aBuf, sizeof(aBuf), "\n%d\t%d\t%d", m_pSwitchers[i].m_Status, m_pSwitchers[i].m_EndTime, m_pSwitchers[i].m_Type);
+				str_append(m_aString, aBuf, sizeof(m_aString));
 			}
 		}
 
-	return m_String;
+	return m_aString;
 }
 
 int CSaveTeam::LoadString(const char* String)
@@ -530,14 +530,14 @@ int CSaveTeam::LoadString(const char* String)
 	unsigned int LastPos = 0;
 	unsigned int StrSize;
 
-	str_copy(m_String, String, sizeof(m_String));
+	str_copy(m_aString, String, sizeof(m_aString));
 
-	while (m_String[Pos] != '\n' && Pos < sizeof(m_String) && m_String[Pos]) // find next \n or \0
+	while (m_aString[Pos] != '\n' && Pos < sizeof(m_aString) && m_aString[Pos]) // find next \n or \0
 		Pos++;
 
-	CopyPos = m_String + LastPos;
+	CopyPos = m_aString + LastPos;
 	StrSize = Pos - LastPos + 1;
-	if(m_String[Pos] == '\n')
+	if(m_aString[Pos] == '\n')
 	{
 		Pos++; // skip \n
 		LastPos = Pos;
@@ -565,23 +565,23 @@ int CSaveTeam::LoadString(const char* String)
 		return 1;
 	}
 
-	if(SavedTees)
+	if(m_pSavedTees)
 	{
-		delete [] SavedTees;
-		SavedTees = 0;
+		delete [] m_pSavedTees;
+		m_pSavedTees = 0;
 	}
 
 	if(m_MembersCount)
-		SavedTees = new CSaveTee[m_MembersCount];
+		m_pSavedTees = new CSaveTee[m_MembersCount];
 
 	for (int n = 0; n < m_MembersCount; n++)
 	{
-		while (m_String[Pos] != '\n' && Pos < sizeof(m_String) && m_String[Pos]) // find next \n or \0
+		while (m_aString[Pos] != '\n' && Pos < sizeof(m_aString) && m_aString[Pos]) // find next \n or \0
 			Pos++;
 
-		CopyPos = m_String + LastPos;
+		CopyPos = m_aString + LastPos;
 		StrSize = Pos - LastPos + 1;
-		if(m_String[Pos] == '\n')
+		if(m_aString[Pos] == '\n')
 		{
 			Pos++; // skip \n
 			LastPos = Pos;
@@ -596,7 +596,7 @@ int CSaveTeam::LoadString(const char* String)
 		if(StrSize < sizeof(SaveTee))
 		{
 			str_copy(SaveTee, CopyPos, StrSize);
-			int Num = SavedTees[n].LoadString(SaveTee);
+			int Num = m_pSavedTees[n].LoadString(SaveTee);
 			if(Num)
 			{
 				dbg_msg("load", "failed to load tee");
@@ -611,23 +611,23 @@ int CSaveTeam::LoadString(const char* String)
 		}
 	}
 
-	if(m_Switchers)
+	if(m_pSwitchers)
 	{
-		delete [] m_Switchers;
-		m_Switchers = 0;
+		delete [] m_pSwitchers;
+		m_pSwitchers = 0;
 	}
 
 	if(m_NumSwitchers)
-		m_Switchers = new SSimpleSwitchers[m_NumSwitchers+1];
+		m_pSwitchers = new SSimpleSwitchers[m_NumSwitchers+1];
 
 	for (int n = 1; n < m_NumSwitchers+1; n++)
 		{
-			while (m_String[Pos] != '\n' && Pos < sizeof(m_String) && m_String[Pos]) // find next \n or \0
+			while (m_aString[Pos] != '\n' && Pos < sizeof(m_aString) && m_aString[Pos]) // find next \n or \0
 				Pos++;
 
-			CopyPos = m_String + LastPos;
+			CopyPos = m_aString + LastPos;
 			StrSize = Pos - LastPos + 1;
-			if(m_String[Pos] == '\n')
+			if(m_aString[Pos] == '\n')
 			{
 				Pos++; // skip \n
 				LastPos = Pos;
@@ -642,7 +642,7 @@ int CSaveTeam::LoadString(const char* String)
 			if(StrSize < sizeof(Switcher))
 			{
 				str_copy(Switcher, CopyPos, StrSize);
-				int Num = sscanf(Switcher, "%d\t%d\t%d", &(m_Switchers[n].m_Status), &(m_Switchers[n].m_EndTime), &(m_Switchers[n].m_Type));
+				int Num = sscanf(Switcher, "%d\t%d\t%d", &(m_pSwitchers[n].m_Status), &(m_pSwitchers[n].m_EndTime), &(m_pSwitchers[n].m_Type));
 				if(Num != 3)
 				{
 					dbg_msg("load", "failed to load switcher");

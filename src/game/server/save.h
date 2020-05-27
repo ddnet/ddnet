@@ -14,12 +14,12 @@ public:
 	char* GetString();
 	int LoadString(char* String);
 	vec2 GetPos() { return m_Pos; }
-	char* GetName() { return m_name; }
+	char* GetName() { return m_aName; }
 
 private:
 
-	char m_String [2048];
-	char m_name [16];
+	char m_aString [2048];
+	char m_aName [16];
 
 	int m_Alive;
 	int m_Paused;
@@ -64,7 +64,7 @@ private:
 	int m_CpTime;
 	int m_CpActive;
 	int m_CpLastBroadcast;
-	float m_CpCurrent[25];
+	float m_aCpCurrent[25];
 
 	int m_NotEligibleForFinish;
 
@@ -98,7 +98,7 @@ public:
 	int LoadString(const char* String);
 	int save(int Team);
 	int load(int Team);
-	CSaveTee* SavedTees;
+	CSaveTee* m_pSavedTees;
 
 	static bool HandleSaveError(int Result, int ClientID, CGameContext *pGameContext);
 private:
@@ -107,7 +107,7 @@ private:
 
 	IGameController* m_pController;
 
-	char m_String[65536];
+	char m_aString[65536];
 
 	struct SSimpleSwitchers
 	{
@@ -115,7 +115,7 @@ private:
 		int m_EndTime;
 		int m_Type;
 	};
-	SSimpleSwitchers* m_Switchers;
+	SSimpleSwitchers* m_pSwitchers;
 
 	int m_TeamState;
 	int m_MembersCount;
