@@ -768,4 +768,6 @@ void CGameTeams::KillSavedTeam(int Team)
 	// unlock team when last player leaves
 	SetTeamLock(Team, false);
 	ResetInvited(Team);
+
+	m_Practice[Team] = false;
 }
