@@ -2356,7 +2356,7 @@ void CCharacter::DDRaceInit()
 
 void CCharacter::Rescue()
 {
-	if (m_SetSavePos && !m_Super && IsGrounded() && m_Pos == m_PrevPos) {
+	if (m_SetSavePos && !m_Super) {
 		if (m_LastRescue + g_Config.m_SvRescueDelay * Server()->TickSpeed() > Server()->Tick())
 		{
 			char aBuf[256];
@@ -2365,8 +2365,7 @@ void CCharacter::Rescue()
 			return;
 		}
 
-		int index = GameServer()->Collision()->GetPureMapIndex(m_Pos);
-		if (m_DeepFreeze || GameServer()->Collision()->GetTileIndex(index) == TILE_FREEZE || GameServer()->Collision()->GetFTileIndex(index) == TILE_FREEZE) {
+		if (m_DeepFreeze || m_FreezeTime) {
 			m_LastRescue = Server()->Tick();
 			m_Core.m_Pos = m_PrevSavePos;
 			m_Pos = m_PrevSavePos;
