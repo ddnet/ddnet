@@ -2356,7 +2356,7 @@ void CCharacter::DDRaceInit()
 
 void CCharacter::Rescue()
 {
-	if (m_SetSavePos && !m_Super && !m_DeepFreeze && IsGrounded() && m_Pos == m_PrevPos) {
+	if (m_SetSavePos && !m_Super && IsGrounded() && m_Pos == m_PrevPos) {
 		if (m_LastRescue + g_Config.m_SvRescueDelay * Server()->TickSpeed() > Server()->Tick())
 		{
 			char aBuf[256];
@@ -2366,7 +2366,7 @@ void CCharacter::Rescue()
 		}
 
 		int index = GameServer()->Collision()->GetPureMapIndex(m_Pos);
-		if (GameServer()->Collision()->GetTileIndex(index) == TILE_FREEZE || GameServer()->Collision()->GetFTileIndex(index) == TILE_FREEZE) {
+		if (m_DeepFreeze || GameServer()->Collision()->GetTileIndex(index) == TILE_FREEZE || GameServer()->Collision()->GetFTileIndex(index) == TILE_FREEZE) {
 			m_LastRescue = Server()->Tick();
 			m_Core.m_Pos = m_PrevSavePos;
 			m_Pos = m_PrevSavePos;
@@ -2377,6 +2377,7 @@ void CCharacter::Rescue()
 			m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
 			GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
 			m_Core.m_HookPos = m_Core.m_Pos;
+			m_DeepFreeze = false;
 			UnFreeze();
 		}
 	}
