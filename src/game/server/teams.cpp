@@ -624,19 +624,6 @@ void CGameTeams::OnFinish(CPlayer* Player, float Time, const char *pTimestamp)
 	{
 		pData->m_CurrentTime = Time;
 		NeedToSendNewRecord = true;
-		for (int i = 0; i < MAX_CLIENTS; i++)
-		{
-			if (GetPlayer(i) && GetPlayer(i)->GetClientVersion() >= VERSION_DDRACE)
-			{
-				if (!g_Config.m_SvHideScore || i == Player->GetCID())
-				{
-					CNetMsg_Sv_PlayerTime Msg;
-					Msg.m_Time = Time * 100.0f;
-					Msg.m_ClientID = Player->GetCID();
-					Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
-				}
-			}
-		}
 	}
 
 	if (NeedToSendNewRecord && Player->GetClientVersion() >= VERSION_DDRACE)

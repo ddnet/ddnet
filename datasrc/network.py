@@ -408,10 +408,7 @@ Messages = [
 		NetIntAny("m_PlayerTimeBest"),
 	]),
 
-	NetMessage("Sv_PlayerTime", [
-		NetIntAny("m_Time"),
-		NetIntRange("m_ClientID", 0, 'MAX_CLIENTS-1'),
-	]),
+	NetMessage("Unused", []),
 
 	NetMessage("Sv_TeamsState", []),
 
