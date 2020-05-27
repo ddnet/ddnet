@@ -190,6 +190,9 @@ public:
 		{
 			return 0;
 		}
+		// This makes the random number slightly biased if `BelowThis`
+		// is not a power of two, but we have decided that this is not
+		// significant for DDNet and favored the simple implementation.
 		return m_pPrng->RandomBits() % BelowThis;
 	}
 
