@@ -401,6 +401,12 @@ int CClient::SendMsg(CMsgPacker *pMsg, int Flags)
 
 void CClient::SendInfo()
 {
+	CMsgPacker MsgVer(NETMSG_CLIENTVER, true);
+	MsgVer.AddRaw(&m_ConnectionID, sizeof(m_ConnectionID));
+	MsgVer.AddInt(GameClient()->DDNetVersion());
+	MsgVer.AddString(GameClient()->DDNetVersionStr(), 0);
+	SendMsg(&MsgVer, MSGFLAG_VITAL);
+
 	CMsgPacker Msg(NETMSG_INFO, true);
 	Msg.AddString(GameClient()->NetVersion(), 128);
 	Msg.AddString(m_Password, 128);
@@ -673,6 +679,7 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 
 	Disconnect();
 
+	m_ConnectionID = RandomUuid();
 	str_copy(m_aServerAddressStr, pAddress, sizeof(m_aServerAddressStr));
 
 	str_format(aBuf, sizeof(aBuf), "connecting to '%s'", m_aServerAddressStr);
@@ -2965,6 +2972,12 @@ void CClient::Run()
 			m_DummySendConnInfo = false;
 
 			// send client info
+			CMsgPacker MsgVer(NETMSG_CLIENTVER, true);
+			MsgVer.AddRaw(&m_ConnectionID, sizeof(m_ConnectionID));
+			MsgVer.AddInt(GameClient()->DDNetVersion());
+			MsgVer.AddString(GameClient()->DDNetVersionStr(), 0);
+			SendMsg(&MsgVer, MSGFLAG_VITAL);
+
 			CMsgPacker MsgInfo(NETMSG_INFO, true);
 			MsgInfo.AddString(GameClient()->NetVersion(), 128);
 			MsgInfo.AddString(m_Password, 128);

@@ -424,7 +424,7 @@ void CGameTeams::SendTeamsState(int ClientID)
 	if (g_Config.m_SvTeam == 3)
 		return;
 
-	if (!m_pGameContext->m_apPlayers[ClientID] || m_pGameContext->m_apPlayers[ClientID]->m_ClientVersion <= VERSION_DDRACE)
+	if (!m_pGameContext->m_apPlayers[ClientID] || m_pGameContext->m_apPlayers[ClientID]->GetClientVersion() <= VERSION_DDRACE)
 		return;
 
 	CMsgPacker Msg(NETMSGTYPE_SV_TEAMSSTATE);
@@ -626,7 +626,7 @@ void CGameTeams::OnFinish(CPlayer* Player, float Time, const char *pTimestamp)
 		NeedToSendNewRecord = true;
 		for (int i = 0; i < MAX_CLIENTS; i++)
 		{
-			if (GetPlayer(i) && GetPlayer(i)->m_ClientVersion >= VERSION_DDRACE)
+			if (GetPlayer(i) && GetPlayer(i)->GetClientVersion() >= VERSION_DDRACE)
 			{
 				if (!g_Config.m_SvHideScore || i == Player->GetCID())
 				{
@@ -639,19 +639,19 @@ void CGameTeams::OnFinish(CPlayer* Player, float Time, const char *pTimestamp)
 		}
 	}
 
-	if (NeedToSendNewRecord && Player->m_ClientVersion >= VERSION_DDRACE)
+	if (NeedToSendNewRecord && Player->GetClientVersion() >= VERSION_DDRACE)
 	{
 		for (int i = 0; i < MAX_CLIENTS; i++)
 		{
 			if (GameServer()->m_apPlayers[i]
-					&& GameServer()->m_apPlayers[i]->m_ClientVersion >= VERSION_DDRACE)
+					&& GameServer()->m_apPlayers[i]->GetClientVersion() >= VERSION_DDRACE)
 			{
 				GameServer()->SendRecord(i);
 			}
 		}
 	}
 
-	if (Player->m_ClientVersion >= VERSION_DDRACE)
+	if (Player->GetClientVersion() >= VERSION_DDRACE)
 	{
 		CNetMsg_Sv_DDRaceTime Msg;
 		Msg.m_Time = (int)(Time * 100.0f);

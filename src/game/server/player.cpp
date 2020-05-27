@@ -103,7 +103,6 @@ void CPlayer::Reset()
 
 	GameServer()->Score()->PlayerData(m_ClientID)->Reset();
 
-	m_ClientVersion = VERSION_VANILLA;
 	m_ShowOthers = g_Config.m_SvShowOthersDefault;
 	m_ShowAll = g_Config.m_SvShowAllDefault;
 	m_SpecTeam = 0;
@@ -297,12 +296,13 @@ void CPlayer::Snap(int SnappingClient)
 	if(!pPlayerInfo)
 		return;
 
+	int ClientVersion = GetClientVersion();
 	pPlayerInfo->m_Latency = SnappingClient == -1 ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aActLatency[m_ClientID];
-	pPlayerInfo->m_Local = (int)(m_ClientID == SnappingClient && (m_Paused != PAUSE_PAUSED || m_ClientVersion >= VERSION_DDNET_OLD));
+	pPlayerInfo->m_Local = (int)(m_ClientID == SnappingClient && (m_Paused != PAUSE_PAUSED || ClientVersion >= VERSION_DDNET_OLD));
 	pPlayerInfo->m_ClientID = id;
-	pPlayerInfo->m_Team = (m_ClientVersion < VERSION_DDNET_OLD || m_Paused != PAUSE_PAUSED || m_ClientID != SnappingClient) && m_Paused < PAUSE_SPEC ? m_Team : TEAM_SPECTATORS;
+	pPlayerInfo->m_Team = (ClientVersion < VERSION_DDNET_OLD || m_Paused != PAUSE_PAUSED || m_ClientID != SnappingClient) && m_Paused < PAUSE_SPEC ? m_Team : TEAM_SPECTATORS;
 
-	if(m_ClientID == SnappingClient && m_Paused == PAUSE_PAUSED && m_ClientVersion < VERSION_DDNET_OLD)
+	if(m_ClientID == SnappingClient && m_Paused == PAUSE_PAUSED && ClientVersion < VERSION_DDNET_OLD)
 		pPlayerInfo->m_Team = TEAM_SPECTATORS;
 
 	// send 0 if times of others are not shown
@@ -338,10 +338,7 @@ void CPlayer::Snap(int SnappingClient)
 
 void CPlayer::FakeSnap()
 {
-	// This is problematic when it's sent before we know whether it's a non-64-player-client
-	// Then we can't spectate players at the start
-
-	if(m_ClientVersion >= VERSION_DDNET_OLD)
+	if(GetClientVersion() >= VERSION_DDNET_OLD)
 		return;
 
 	int FakeID = VANILLA_MAX_CLIENTS - 1;
@@ -422,7 +419,7 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)
 	// Magic number when we can hope that client has successfully identified itself
 	if(m_NumInputs == 20)
 	{
-		if(g_Config.m_SvClientSuggestion[0] != '\0' && m_ClientVersion <= VERSION_DDNET_OLD)
+		if(g_Config.m_SvClientSuggestion[0] != '\0' && GetClientVersion() <= VERSION_DDNET_OLD)
 			GameServer()->SendBroadcast(g_Config.m_SvClientSuggestion, m_ClientID);
 	}
 }
@@ -480,6 +477,11 @@ void CPlayer::OnPredictedEarlyInput(CNetObj_PlayerInput *NewInput)
 
 	if(m_pCharacter && !m_Paused)
 		m_pCharacter->OnDirectInput(NewInput);
+}
+
+int CPlayer::GetClientVersion() const
+{
+	return m_pGameServer->GetClientVersion(m_ClientID);
 }
 
 CCharacter *CPlayer::GetCharacter()

@@ -251,6 +251,7 @@ public:
 	virtual const char *NetVersion();
 
 	// DDRace
+	void OnClientDDNetVersionKnown(int ClientID);
 	virtual void FillAntibot(CAntibotRoundData *pData);
 	int ProcessSpamProtection(int ClientID);
 	int GetDDRaceTeam(int ClientID);
@@ -258,7 +259,6 @@ public:
 	int64 m_NonEmptySince;
 	int64 m_LastMapVote;
 	int GetClientVersion(int ClientID);
-	void SetClientVersion(int ClientID, int Version);
 	bool PlayerExists(int ClientID) { return m_apPlayers[ClientID]; };
 	// Returns true if someone is actively moderating.
 	bool PlayerModerating();

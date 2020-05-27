@@ -103,6 +103,8 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	char m_aServerAddressStr[256];
 
+	CUuid m_ConnectionID;
+
 	unsigned m_SnapshotParts[2];
 	int64 m_LocalStartTime;
 

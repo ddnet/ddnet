@@ -64,6 +64,9 @@ public:
 
 	void EndTick();
 
+	void RecordDDNetVersionOld(int ClientID, int DDNetVersion);
+	void RecordDDNetVersion(int ClientID, CUuid ConnectionID, int DDNetVersion, const char *pDDNetVersionStr);
+
 	void RecordAuthInitial(int ClientID, int Level, const char *pAuthName);
 	void RecordAuthLogin(int ClientID, int Level, const char *pAuthName);
 	void RecordAuthLogout(int ClientID);

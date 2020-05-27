@@ -490,6 +490,40 @@ void CTeeHistorian::EndTick()
 	m_State = STATE_BEFORE_TICK;
 }
 
+void CTeeHistorian::RecordDDNetVersionOld(int ClientID, int DDNetVersion)
+{
+	CPacker Buffer;
+	Buffer.Reset();
+	Buffer.AddInt(ClientID);
+	Buffer.AddInt(DDNetVersion);
+
+	if(m_Debug)
+	{
+		dbg_msg("teehistorian", "ddnetver_old cid=%d ddnet_version=%d", ClientID, DDNetVersion);
+	}
+
+	WriteExtra(UUID_TEEHISTORIAN_DDNETVER_OLD, Buffer.Data(), Buffer.Size());
+}
+
+void CTeeHistorian::RecordDDNetVersion(int ClientID, CUuid ConnectionID, int DDNetVersion, const char *pDDNetVersionStr)
+{
+	CPacker Buffer;
+	Buffer.Reset();
+	Buffer.AddInt(ClientID);
+	Buffer.AddRaw(&ConnectionID, sizeof(ConnectionID));
+	Buffer.AddInt(DDNetVersion);
+	Buffer.AddString(pDDNetVersionStr, 0);
+
+	if(m_Debug)
+	{
+		char aConnnectionID[UUID_MAXSTRSIZE];
+		FormatUuid(ConnectionID, aConnnectionID, sizeof(aConnnectionID));
+		dbg_msg("teehistorian", "ddnetver cid=%d connection_id=%s ddnet_version=%d ddnet_version_str=%s", ClientID, aConnnectionID, DDNetVersion, pDDNetVersionStr);
+	}
+
+	WriteExtra(UUID_TEEHISTORIAN_DDNETVER, Buffer.Data(), Buffer.Size());
+}
+
 void CTeeHistorian::RecordAuthInitial(int ClientID, int Level, const char *pAuthName)
 {
 	CPacker Buffer;
