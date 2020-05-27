@@ -127,7 +127,7 @@ void CPlayer::Reset()
 	// non-empty, allow them to vote immediately. This allows players to
 	// vote after map changes or when they join an empty server.
 	//
-	// Otherwise, block voting in the begnning after joining.
+	// Otherwise, block voting in the beginning after joining.
 	if(Now > GameServer()->m_NonEmptySince + 10 * TickSpeed)
 		m_FirstVoteTick = Now + g_Config.m_SvJoinVoteDelay * TickSpeed;
 	else
@@ -233,7 +233,7 @@ void CPlayer::Tick()
 	int CurrentIndex = GameServer()->Collision()->GetMapIndex(m_ViewPos);
 	m_TuneZone = GameServer()->Collision()->IsTune(CurrentIndex);
 
-	if (m_TuneZone != m_TuneZoneOld) // don't send tunigs all the time
+	if (m_TuneZone != m_TuneZoneOld) // don't send tunings all the time
 	{
 		GameServer()->SendTuningParams(m_ClientID, m_TuneZone);
 	}
@@ -258,11 +258,11 @@ void CPlayer::PostTick()
 
 void CPlayer::PostPostTick()
 {
-	#ifdef CONF_DEBUG
-		if(!g_Config.m_DbgDummies || m_ClientID < MAX_CLIENTS-g_Config.m_DbgDummies)
-	#endif
-		if(!Server()->ClientIngame(m_ClientID))
-			return;
+#ifdef CONF_DEBUG
+	if(!g_Config.m_DbgDummies || m_ClientID < MAX_CLIENTS-g_Config.m_DbgDummies)
+#endif
+	if(!Server()->ClientIngame(m_ClientID))
+		return;
 
 	if(!GameServer()->m_World.m_Paused && !m_pCharacter && m_Spawning && m_WeakHookSpawn)
 		TryRespawn();
