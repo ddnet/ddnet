@@ -250,6 +250,10 @@ bool CGameTeams::SetCharacterTeam(int ClientID, int Team)
 	if (m_Practice[m_Core.Team(ClientID)])
 		return false;
 
+	//you can not join a team which is currently in the process of saving,
+	//because the save-process can fail and then the team is reset into the game
+	if(Team != TEAM_SUPER && m_IsSaving[Team])
+		return false;
 	SetForceCharacterTeam(ClientID, Team);
 
 	//GameServer()->CreatePlayerSpawn(Character(id)->m_Core.m_Pos, TeamMask());
