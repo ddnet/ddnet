@@ -775,6 +775,8 @@ set_src(GAME_SHARED GLOB src/game
   mapitems_ex.cpp
   mapitems_ex.h
   mapitems_ex_types.h
+  prng.cpp
+  prng.h
   teamscore.cpp
   teamscore.h
   tuning.h
@@ -1300,6 +1302,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     json.cpp
     mapbugs.cpp
     name_ban.cpp
+    prng.cpp
     str.cpp
     strip_path_and_extension.cpp
     teehistorian.cpp

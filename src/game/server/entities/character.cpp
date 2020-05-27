@@ -1927,8 +1927,8 @@ void CCharacter::HandleTiles(int Index)
 	{
 		if (m_Super)
 			return;
-		int Num = Controller->m_TeleOuts[z-1].size();
-		m_Core.m_Pos = Controller->m_TeleOuts[z-1][(!Num)?Num:rand() % Num];
+		int TeleOut = m_Core.m_pWorld->RandomOr0(Controller->m_TeleOuts[z-1].size());
+		m_Core.m_Pos = Controller->m_TeleOuts[z-1][TeleOut];
 		if(!g_Config.m_SvTeleportHoldHook)
 		{
 			m_Core.m_HookedPlayer = -1;
@@ -1948,8 +1948,8 @@ void CCharacter::HandleTiles(int Index)
 	{
 		if (m_Super)
 			return;
-		int Num = Controller->m_TeleOuts[evilz-1].size();
-		m_Core.m_Pos = Controller->m_TeleOuts[evilz-1][(!Num)?Num:rand() % Num];
+		int TeleOut = m_Core.m_pWorld->RandomOr0(Controller->m_TeleOuts[evilz-1].size());
+		m_Core.m_Pos = Controller->m_TeleOuts[evilz-1][TeleOut];
 		if (!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons)
 		{
 			m_Core.m_Vel = vec2(0,0);
@@ -1979,8 +1979,8 @@ void CCharacter::HandleTiles(int Index)
 		{
 			if(Controller->m_TeleCheckOuts[k].size())
 			{
-				int Num = Controller->m_TeleCheckOuts[k].size();
-				m_Core.m_Pos = Controller->m_TeleCheckOuts[k][(!Num)?Num:rand() % Num];
+				int TeleOut = m_Core.m_pWorld->RandomOr0(Controller->m_TeleCheckOuts[k].size());
+				m_Core.m_Pos = Controller->m_TeleCheckOuts[k][TeleOut];
 				m_Core.m_Vel = vec2(0,0);
 
 				if(!g_Config.m_SvTeleportHoldHook)
@@ -2022,8 +2022,8 @@ void CCharacter::HandleTiles(int Index)
 		{
 			if(Controller->m_TeleCheckOuts[k].size())
 			{
-				int Num = Controller->m_TeleCheckOuts[k].size();
-				m_Core.m_Pos = Controller->m_TeleCheckOuts[k][(!Num)?Num:rand() % Num];
+				int TeleOut = m_Core.m_pWorld->RandomOr0(Controller->m_TeleCheckOuts[k].size());
+				m_Core.m_Pos = Controller->m_TeleCheckOuts[k][TeleOut];
 
 				if(!g_Config.m_SvTeleportHoldHook)
 				{

@@ -2625,6 +2625,11 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	m_GameUuid = RandomUuid();
 	Console()->SetTeeHistorianCommandCallback(CommandCallback, this);
 
+	uint64 aSeed[2];
+	secure_random_fill(aSeed, sizeof(aSeed));
+	m_Prng.Seed(aSeed);
+	m_World.m_Core.m_pPrng = &m_Prng;
+
 	DeleteTempfile();
 
 	//if(!data) // only load once
@@ -2739,6 +2744,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		GameInfo.m_GameUuid = m_GameUuid;
 		GameInfo.m_pServerVersion = aVersion;
 		GameInfo.m_StartTime = time(0);
+		GameInfo.m_pPrngDescription = m_Prng.Description();
 
 		GameInfo.m_pServerName = g_Config.m_SvName;
 		GameInfo.m_ServerPort = g_Config.m_SvPort;

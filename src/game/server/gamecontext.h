@@ -79,6 +79,7 @@ class CGameContext : public IGameServer
 	ASYNCIO *m_pTeeHistorianFile;
 	CUuid m_GameUuid;
 	CMapBugs m_MapBugs;
+	CPrng m_Prng;
 
 	std::shared_ptr<CRandomMapResult> m_pRandomMapResult;
 	std::shared_ptr<CMapVoteResult> m_pMapVoteResult;
