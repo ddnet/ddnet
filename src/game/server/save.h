@@ -100,6 +100,7 @@ public:
 	int load(int Team);
 	CSaveTee* m_pSavedTees;
 
+	// returns true if an error occured
 	static bool HandleSaveError(int Result, int ClientID, CGameContext *pGameContext);
 private:
 	int MatchPlayer(char name[16]);
