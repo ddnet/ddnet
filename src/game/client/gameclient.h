@@ -280,10 +280,6 @@ public:
 		void UpdateRenderInfo();
 		void Reset();
 
-		// DDRace
-
-		int m_Score;
-
 		// rendered characters
 		CNetObj_Character m_RenderCur;
 		CNetObj_Character m_RenderPrev;

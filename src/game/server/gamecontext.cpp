@@ -1252,50 +1252,23 @@ void CGameContext::OnClientDDNetVersionKnown(int ClientID)
 	if(ClientVersion >= VERSION_DDNET_GAMETICK)
 		pPlayer->m_TimerType = g_Config.m_SvDefaultTimerType;
 
-	//first update his teams state
+	// First update the teams state.
 	((CGameControllerDDRace *)m_pController)->m_Teams.SendTeamsState(ClientID);
 
-	//second give him records
+	// Then send records.
 	SendRecord(ClientID);
 
-	//third give him others current time for table score
-	if(g_Config.m_SvHideScore)
-	{
-		return;
-	}
-	for(int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if(m_apPlayers[i] && Score()->PlayerData(i)->m_CurrentTime > 0)
-		{
-			CNetMsg_Sv_PlayerTime Msg;
-			Msg.m_Time = Score()->PlayerData(i)->m_CurrentTime * 100;
-			Msg.m_ClientID = i;
-			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
-			//also send its time to others
-
-		}
-	}
-	//also send its time to others
-	if(Score()->PlayerData(ClientID)->m_CurrentTime > 0)
-	{
-		//TODO: make function for this fucking steps
-		CNetMsg_Sv_PlayerTime Msg;
-		Msg.m_Time = Score()->PlayerData(ClientID)->m_CurrentTime * 100;
-		Msg.m_ClientID = ClientID;
-		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
-	}
-
-	//and give him correct tunings
-	if (ClientVersion >= VERSION_DDNET_EXTRATUNES)
+	// And report correct tunings.
+	if(ClientVersion >= VERSION_DDNET_EXTRATUNES)
 		SendTuningParams(ClientID, pPlayer->m_TuneZone);
 
-	//tell old clients to update
-	if (ClientVersion < VERSION_DDNET_UPDATER_FIXED && g_Config.m_SvClientSuggestionOld[0] != '\0')
+	// Tell old clients to update.
+	if(ClientVersion < VERSION_DDNET_UPDATER_FIXED && g_Config.m_SvClientSuggestionOld[0] != '\0')
 		SendBroadcast(g_Config.m_SvClientSuggestionOld, ClientID);
-	//tell known bot clients that they're botting and we know it
-	if (((ClientVersion >= 15 && ClientVersion < 100) || ClientVersion == 502) && g_Config.m_SvClientSuggestionBot[0] != '\0')
+	// Tell known bot clients that they're botting and we know it.
+	if(((ClientVersion >= 15 && ClientVersion < 100) || ClientVersion == 502) && g_Config.m_SvClientSuggestionBot[0] != '\0')
 		SendBroadcast(g_Config.m_SvClientSuggestionBot, ClientID);
-	//autoban known bot versions
+	// Autoban known bot versions.
 	if(g_Config.m_SvBannedVersions[0] != '\0' && IsVersionBanned(ClientVersion))
 	{
 		Server()->Kick(ClientID, "unsupported client");

@@ -841,11 +841,6 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)
 		m_pGhost->m_AllowRestart = true;
 		m_pRaceDemo->m_AllowRestart = true;
 	}
-	else if(MsgId == NETMSGTYPE_SV_PLAYERTIME)
-	{
-		CNetMsg_Sv_PlayerTime *pMsg = (CNetMsg_Sv_PlayerTime *)pRawMsg;
-		m_aClients[pMsg->m_ClientID].m_Score = pMsg->m_Time;
-	}
 	else if(MsgId == NETMSGTYPE_SV_KILLMSG)
 	{
 		CNetMsg_Sv_KillMsg *pMsg = (CNetMsg_Sv_KillMsg *)pRawMsg;
