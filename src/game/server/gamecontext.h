@@ -326,6 +326,7 @@ private:
 	static void ConDND(IConsole::IResult *pResult, void *pUserData);
 	static void ConMapInfo(IConsole::IResult *pResult, void *pUserData);
 	static void ConTimeout(IConsole::IResult *pResult, void *pUserData);
+	static void ConPractice(IConsole::IResult *pResult, void *pUserData);
 	static void ConSave(IConsole::IResult *pResult, void *pUserData);
 	static void ConLoad(IConsole::IResult *pResult, void *pUserData);
 	static void ConMap(IConsole::IResult *pResult, void *pUserData);

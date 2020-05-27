@@ -121,6 +121,7 @@ private:
 	int m_MembersCount;
 	int m_NumSwitchers;
 	int m_TeamLocked;
+	int m_Practice;
 };
 
 #endif // GAME_SERVER_SAVE_H

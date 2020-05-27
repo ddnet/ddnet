@@ -198,6 +198,7 @@ public:
 #endif
 	bool m_NotEligibleForFinish;
 	int64 m_EligibleForFinishCheck;
+	bool m_VotedForPractice;
 };
 
 #endif

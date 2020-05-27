@@ -589,6 +589,82 @@ void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
 	str_copy(pPlayer->m_TimeoutCode, pResult->GetString(0), sizeof(pPlayer->m_TimeoutCode));
 }
 
+void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if(!pPlayer)
+		return;
+
+	if(pSelf->ProcessSpamProtection(pResult->m_ClientID))
+		return;
+
+	CGameTeams &Teams = ((CGameControllerDDRace*) pSelf->m_pController)->m_Teams;
+
+	int Team = Teams.m_Core.Team(pResult->m_ClientID);
+
+	if(Team <= TEAM_FLOCK || Team >= TEAM_SUPER)
+	{
+		pSelf->Console()->Print(
+				IConsole::OUTPUT_LEVEL_STANDARD,
+				"print",
+				"Join a team to enable practice mode, which means you can use /r, but can't earn a rank.");
+		return;
+	}
+
+	if(Teams.IsPractice(Team))
+	{
+		pSelf->Console()->Print(
+				IConsole::OUTPUT_LEVEL_STANDARD,
+				"print",
+				"Team is already in practice mode");
+		return;
+	}
+
+	bool VotedForPractice = pResult->NumArguments() == 0 || pResult->GetInteger(0);
+
+	if(VotedForPractice == pPlayer->m_VotedForPractice)
+		return;
+
+	pPlayer->m_VotedForPractice = VotedForPractice;
+
+	int NumCurrentVotes = 0;
+	int TeamSize = 0;
+
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(Teams.m_Core.Team(i) == Team)
+		{
+			CPlayer *pPlayer2 = pSelf->m_apPlayers[i];
+			if(pPlayer2 && pPlayer2->m_VotedForPractice)
+				NumCurrentVotes++;
+			TeamSize++;
+		}
+	}
+
+	int NumRequiredVotes = TeamSize / 2 + 1;
+
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "'%s' voted to %s /practice mode for your team, which means you can use /r, but you can't earn a rank. (%d/%d required votes)", pSelf->Server()->ClientName(pResult->m_ClientID), VotedForPractice ? "enable" : "disable", NumCurrentVotes, NumRequiredVotes);
+
+	for(int i = 0; i < MAX_CLIENTS; i++)
+		if(Teams.m_Core.Team(i) == Team)
+			pSelf->SendChatTarget(i, aBuf);
+
+	if(NumCurrentVotes >= NumRequiredVotes)
+	{
+		Teams.EnablePractice(Team);
+
+		for(int i = 0; i < MAX_CLIENTS; i++)
+			if(Teams.m_Core.Team(i) == Team)
+				pSelf->SendChatTarget(i, "Practice mode enabled for your team, happy practicing!");
+	}
+
+}
+
 void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
@@ -944,6 +1020,8 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 		}
 		else
 		{
+			int Team = pResult->GetInteger(0);
+
 			if (pPlayer->m_Last_Team
 					+ pSelf->Server()->TickSpeed()
 					* g_Config.m_SvTeamChangeDelay
@@ -952,28 +1030,30 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",
 						"You can\'t change teams that fast!");
 			}
-			else if(pResult->GetInteger(0) > 0 && pResult->GetInteger(0) < MAX_CLIENTS && pController->m_Teams.TeamLocked(pResult->GetInteger(0)) && !pController->m_Teams.IsInvited(pResult->GetInteger(0), pResult->m_ClientID))
+			else if(Team > 0 && Team < MAX_CLIENTS && pController->m_Teams.TeamLocked(Team) && !pController->m_Teams.IsInvited(Team, pResult->m_ClientID))
 			{
 				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",
 						g_Config.m_SvInvite ?
 						"This team is locked using /lock. Only members of the team can unlock it using /lock." :
 						"This team is locked using /lock. Only members of the team can invite you or unlock it using /lock.");
 			}
-			else if(pResult->GetInteger(0) > 0 && pResult->GetInteger(0) < MAX_CLIENTS && pController->m_Teams.Count(pResult->GetInteger(0)) >= g_Config.m_SvTeamMaxSize)
+			else if(Team > 0 && Team < MAX_CLIENTS && pController->m_Teams.Count(Team) >= g_Config.m_SvTeamMaxSize)
 			{
 				char aBuf[512];
 				str_format(aBuf, sizeof(aBuf), "This team already has the maximum allowed size of %d players", g_Config.m_SvTeamMaxSize);
 				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join", aBuf);
 			}
-			else if (((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.SetCharacterTeam(
-					pPlayer->GetCID(), pResult->GetInteger(0)))
+			else if(pController->m_Teams.SetCharacterTeam(pPlayer->GetCID(), Team))
 			{
 				char aBuf[512];
 				str_format(aBuf, sizeof(aBuf), "%s joined team %d",
 						pSelf->Server()->ClientName(pPlayer->GetCID()),
-						pResult->GetInteger(0));
+						Team);
 				pSelf->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 				pPlayer->m_Last_Team = pSelf->Server()->Tick();
+
+				if(pController->m_Teams.IsPractice(Team))
+					pSelf->SendChatTarget(pPlayer->GetCID(), "Practice mode enabled for your team, happy practicing!");
 			}
 			else
 			{
@@ -1400,8 +1480,10 @@ void CGameContext::ConRescue(IConsole::IResult *pResult, void *pUserData)
 	if (!pChr)
 		return;
 
-	if (!g_Config.m_SvRescue) {
-		pSelf->SendChatTarget(pPlayer->GetCID(), "Rescue is not enabled on this server");
+	CGameTeams &Teams = ((CGameControllerDDRace*) pSelf->m_pController)->m_Teams;
+	int Team = Teams.m_Core.Team(pResult->m_ClientID);
+	if (!g_Config.m_SvRescue && !Teams.IsPractice(Team)) {
+		pSelf->SendChatTarget(pPlayer->GetCID(), "Rescue is not enabled on this server and you're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
 		return;
 	}
 

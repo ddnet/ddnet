@@ -21,6 +21,7 @@ void CGameTeams::Reset()
 		m_TeamLocked[i] = false;
 		m_IsSaving[i] = false;
 		m_Invited[i] = 0;
+		m_Practice[i] = false;
 	}
 }
 
@@ -184,7 +185,35 @@ void CGameTeams::CheckTeamFinished(int Team)
 			float Time = (float)(Server()->Tick() - GetStartTime(TeamPlayers[0]))
 					/ ((float)Server()->TickSpeed());
 			if (Time < 0.000001f)
+			{
 				return;
+			}
+
+			if(m_Practice[Team])
+			{
+				ChangeTeamState(Team, TEAMSTATE_FINISHED);
+
+				char aBuf[256];
+				str_format(aBuf, sizeof(aBuf),
+					"Your team would've finished in: %d minute(s) %5.2f second(s). Since you had practice mode enabled your rank doesn't count.",
+					(int)Time / 60, Time - ((int)Time / 60 * 60));
+
+				for(int i = 0; i < MAX_CLIENTS; i++)
+				{
+					if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
+					{
+						GameServer()->SendChatTarget(i, aBuf);
+					}
+				}
+
+				for(unsigned int i = 0; i < PlayersCount; ++i)
+				{
+					SetDDRaceState(TeamPlayers[i], DDRACE_FINISHED);
+				}
+
+				return;
+			}
+
 			char aTimestamp[TIMESTAMP_STR_LENGTH];
 			str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_SPACE); // 2019-04-02 19:41:58
 
@@ -257,9 +286,14 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 	}
 
 	if (OldTeam != Team)
-		for (int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
-			if (GetPlayer(LoopClientID))
+	{
+		for(int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
+			if(GetPlayer(LoopClientID))
 				SendTeamsState(LoopClientID);
+
+		if(GetPlayer(ClientID))
+			GetPlayer(ClientID)->m_VotedForPractice = false;
+	}
 }
 
 void CGameTeams::ForceLeaveTeam(int ClientID)
@@ -284,6 +318,7 @@ void CGameTeams::ForceLeaveTeam(int ClientID)
 			// unlock team when last player leaves
 			SetTeamLock(m_Core.Team(ClientID), false);
 			ResetInvited(m_Core.Team(ClientID));
+			m_Practice[m_Core.Team(ClientID)] = false;
 		}
 	}
 
