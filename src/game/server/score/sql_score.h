@@ -13,6 +13,7 @@ class CSqlServer;
 
 class CSqlPlayerResult {
 public:
+	CSqlPlayerResult();
 	std::atomic_bool m_Done;
 	bool m_Failed;
 
@@ -21,7 +22,7 @@ public:
 		DIRECT,
 		ALL,
 	} m_MessageTarget;
-	char m_Message[512][7];
+	char m_aaMessages[7][512];
 };
 
 // result only valid if m_Done is set to true
@@ -46,7 +47,6 @@ public:
 		LOAD,
 		RANDOM_MAP,
 		MAP_VOTE,
-		MESSAGES, // relevant for TOP5
 	} m_Tag;
 
 	union
@@ -54,7 +54,6 @@ public:
 		//CSaveTeam m_LoadTeam;
 		CRandomMapResult m_RandomMap;
 		CMapVoteResult m_MapVote;
-		char m_Messages[512][8]; // Space for extra messages
 	} m_Variant;
 
 	CSqlResult();
@@ -66,9 +65,9 @@ template < typename TResult >
 struct CSqlData
 {
 	CSqlData(std::shared_ptr<TResult> pSqlResult) :
-		m_pSqlResult(pSqlResult)
+		m_pResult(pSqlResult)
 	{ }
-	std::shared_ptr<TResult> m_pSqlResult;
+	std::shared_ptr<TResult> m_pResult;
 	virtual ~CSqlData() = default;
 };
 
@@ -79,8 +78,9 @@ struct CSqlPlayerData : CSqlData<CSqlResult>
 };
 
 // used for mapinfo
-struct CSqlMapData : CSqlData<CSqlResult>
+struct CSqlMapData : CSqlData<CSqlPlayerResult>
 {
+	using CSqlData<CSqlPlayerResult>::CSqlData;
 	int m_ClientID;
 
 	sqlstr::CSqlString<128> m_RequestedMap;

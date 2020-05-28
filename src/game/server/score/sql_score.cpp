@@ -7,6 +7,7 @@
 #include <fstream>
 #include <cstring>
 
+#include <base/system.h>
 #include <engine/server/sql_connector.h>
 #include <engine/shared/config.h>
 #include <engine/shared/console.h>
@@ -17,6 +18,15 @@
 #include "../save.h"
 
 std::atomic_int CSqlScore::ms_InstanceCount(0);
+
+CSqlPlayerResult::CSqlPlayerResult() :
+	m_Done(0),
+	m_Failed(0),
+	m_MessageTarget(DIRECT)
+{
+	for(int i = 0; i < (int)(sizeof(m_aaMessages)/sizeof(m_aaMessages[0])); i++)
+		m_aaMessages[i][0] = 0;
+}
 
 CSqlResult::CSqlResult() :
 	m_Done(false),
@@ -31,7 +41,6 @@ CSqlResult::~CSqlResult() {
 	switch(m_Tag)
 	{
 	case NONE:
-	case MESSAGES:
 		break;
 	case LOAD:
 		//m_Variant.m_LoadTeam.~CSaveTeam();
@@ -390,8 +399,11 @@ bool CSqlScore::MapVoteThread(CSqlServer* pSqlServer, const CSqlData<CSqlResult>
 
 void CSqlScore::MapInfo(int ClientID, const char* MapName)
 {
-	/*
-	CSqlMapData *Tmp = new CSqlMapData();
+	auto pResult = NewSqlPlayerResult(ClientID);
+	if(pResult == nullptr)
+		return;
+	CSqlMapData *Tmp = new CSqlMapData(pResult);
+
 	Tmp->m_ClientID = ClientID;
 	Tmp->m_RequestedMap = MapName;
 	Tmp->m_Name = Server()->ClientName(ClientID);
@@ -399,13 +411,13 @@ void CSqlScore::MapInfo(int ClientID, const char* MapName)
 	sqlstr::ClearString(Tmp->m_aFuzzyMap, sizeof(Tmp->m_aFuzzyMap));
 	sqlstr::FuzzyString(Tmp->m_aFuzzyMap, sizeof(Tmp->m_aFuzzyMap));
 
-	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(MapInfoThread, Tmp), "map info");
-	*/
+	thread_init_and_detach(CSqlExecData<CSqlPlayerResult>::ExecSqlFunc,
+			new CSqlExecData<CSqlPlayerResult>(MapInfoThread, Tmp),
+			"map info");
 }
 
 bool CSqlScore::MapInfoThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure)
 {
-	/*
 	const CSqlMapData *pData = dynamic_cast<const CSqlMapData *>(pGameData);
 
 	if (HandleFailure)
@@ -414,17 +426,43 @@ bool CSqlScore::MapInfoThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerR
 	try
 	{
 		char aBuf[1024];
-		str_format(aBuf, sizeof(aBuf), "SELECT l.Map, l.Server, Mapper, Points, Stars, (select count(Name) from %s_race where Map = l.Map) as Finishes, (select count(distinct Name) from %s_race where Map = l.Map) as Finishers, (select round(avg(Time)) from %s_race where Map = l.Map) as Average, UNIX_TIMESTAMP(l.Timestamp) as Stamp, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(l.Timestamp) as Ago, (select min(Time) from %s_race where Map = l.Map and Name = '%s') as OwnTime FROM (SELECT * FROM %s_maps WHERE Map LIKE '%s' COLLATE utf8mb4_general_ci ORDER BY CASE WHEN Map = '%s' THEN 0 ELSE 1 END, CASE WHEN Map LIKE '%s%%' THEN 0 ELSE 1 END, LENGTH(Map), Map LIMIT 1) as l;", pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pData->m_Name.ClrStr(), pSqlServer->GetPrefix(), pData->m_aFuzzyMap, pData->m_RequestedMap.ClrStr(), pData->m_RequestedMap.ClrStr());
+		str_format(aBuf, sizeof(aBuf),
+				"SELECT l.Map, l.Server, Mapper, Points, Stars, "
+					"(select count(Name) from %s_race where Map = l.Map) as Finishes, "
+					"(select count(distinct Name) from %s_race where Map = l.Map) as Finishers, "
+					"(select round(avg(Time)) from %s_race where Map = l.Map) as Average, "
+					"UNIX_TIMESTAMP(l.Timestamp) as Stamp, "
+					"UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(l.Timestamp) as Ago, "
+					"(select min(Time) from %s_race where Map = l.Map and Name = '%s') as OwnTime "
+				"FROM ("
+					"SELECT * FROM %s_maps "
+					"WHERE Map LIKE '%s' COLLATE utf8mb4_general_ci "
+					"ORDER BY "
+						"CASE WHEN Map = '%s' THEN 0 ELSE 1 END, "
+						"CASE WHEN Map LIKE '%s%%' THEN 0 ELSE 1 END, "
+						"LENGTH(Map), "
+						"Map "
+					"LIMIT 1"
+				") as l;",
+				pSqlServer->GetPrefix(), pSqlServer->GetPrefix(),
+				pSqlServer->GetPrefix(), pSqlServer->GetPrefix(),
+				pData->m_Name.ClrStr(),
+				pSqlServer->GetPrefix(),
+				pData->m_aFuzzyMap,
+				pData->m_RequestedMap.ClrStr(),
+				pData->m_RequestedMap.ClrStr()
+		);
 		pSqlServer->executeSqlQuery(aBuf);
 
 		if(pSqlServer->GetResults()->rowsCount() != 1)
 		{
-			str_format(aBuf, sizeof(aBuf), "No map like \"%s\" found.", pData->m_RequestedMap.Str());
+			str_format(pData->m_pResult->m_aaMessages[0], sizeof(pData->m_pResult->m_aaMessages[0]),
+					"No map like \"%s\" found.", pData->m_RequestedMap.Str());
 		}
 		else
 		{
 			pSqlServer->GetResults()->next();
-			int points = pSqlServer->GetResults()->getInt("Points");
+			int Points = pSqlServer->GetResults()->getInt("Points");
 			int Stars = pSqlServer->GetResults()->getInt("Stars");
 			int finishes = pSqlServer->GetResults()->getInt("Finishes");
 			int finishers = pSqlServer->GetResults()->getInt("Finishers");
@@ -468,27 +506,31 @@ bool CSqlScore::MapInfoThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerR
 			char aOwnFinishesString[40] = "\0";
 			if(ownTime > 0)
 			{
-				str_format(aOwnFinishesString, sizeof(aOwnFinishesString), ", your time: %02d:%05.2f", (int)(ownTime/60), ownTime-((int)ownTime/60*60));
+				str_format(aOwnFinishesString, sizeof(aOwnFinishesString),
+						", your time: %02d:%05.2f", (int)(ownTime/60), ownTime-((int)ownTime/60*60)
+				);
 			}
 
-			str_format(aBuf, sizeof(aBuf), "\"%s\" by %s on %s, %s, %d %s%s, %d %s by %d %s%s%s", aMap, aMapper, aServer, aStars, points, points == 1 ? "point" : "points", aReleasedString, finishes, finishes == 1 ? "finish" : "finishes", finishers, finishers == 1 ? "tee" : "tees", aAverageString, aOwnFinishesString);
+			str_format(pData->m_pResult->m_aaMessages[0], sizeof(pData->m_pResult->m_aaMessages[0]),
+					"\"%s\" by %s on %s, %s, %d %s%s, %d %s by %d %s%s%s",
+					aMap, aMapper, aServer, aStars,
+					Points, Points == 1 ? "point" : "points",
+					aReleasedString,
+					finishes, finishes == 1 ? "finish" : "finishes",
+					finishers, finishers == 1 ? "tee" : "tees",
+					aAverageString, aOwnFinishesString
+			);
 		}
-
-		pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
+		pData->m_pResult->m_Done = true;
 		return true;
 	}
 	catch (sql::SQLException &e)
 	{
 		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not get Mapinfo");
+		pData->m_pResult->m_Failed = true;
+		pData->m_pResult->m_Done = true;
 	}
-	catch (CGameContextError &e)
-	{
-		dbg_msg("sql", "WARNING: Aborted mapinfo-thread due to reload/change of map.");
-		return true;
-	}
-	return false;
-	*/
 	return false;
 }
 
@@ -1378,22 +1420,22 @@ bool CSqlScore::RandomMapThread(CSqlServer* pSqlServer, const CSqlData<CSqlResul
 		}
 		pSqlServer->executeSqlQuery(aBuf);
 
-		pData->m_pSqlResult->m_Tag = CSqlResult::RANDOM_MAP;
+		pData->m_pResult->m_Tag = CSqlResult::RANDOM_MAP;
 		if(pSqlServer->GetResults()->rowsCount() != 1)
 		{
-			pData->m_pSqlResult->m_MessageTarget = CSqlResult::DIRECT;
-			strncpy(pData->m_pSqlResult->m_Message, "No maps found on this server!", sizeof(pData->m_pSqlResult->m_Message));
-			pData->m_pSqlResult->m_Variant.m_RandomMap.m_aMap[0] = 0;
+			pData->m_pResult->m_MessageTarget = CSqlResult::DIRECT;
+			strncpy(pData->m_pResult->m_Message, "No maps found on this server!", sizeof(pData->m_pResult->m_Message));
+			pData->m_pResult->m_Variant.m_RandomMap.m_aMap[0] = 0;
 		}
 		else
 		{
 			pSqlServer->GetResults()->next();
 			std::string Map = pSqlServer->GetResults()->getString("Map");
-			str_copy(pData->m_pSqlResult->m_Variant.m_RandomMap.m_aMap, Map.c_str(), sizeof(pData->m_pSqlResult->m_Variant.m_RandomMap.m_aMap));
+			str_copy(pData->m_pResult->m_Variant.m_RandomMap.m_aMap, Map.c_str(), sizeof(pData->m_pResult->m_Variant.m_RandomMap.m_aMap));
 		}
 
 		dbg_msg("sql", "voting random map done");
-		pData->m_pSqlResult->m_Done = true;
+		pData->m_pResult->m_Done = true;
 		return true;
 	}
 	catch (sql::SQLException &e)
@@ -1764,8 +1806,8 @@ bool CSqlScore::GetSavesThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayer
 				str_format(aLastSavedString, sizeof(aLastSavedString), ", last saved %s ago", aAgoString);
 			}
 
-			str_format(pData->m_pSqlResult->m_Message,
-					sizeof(pData->m_pSqlResult->m_Message),
+			str_format(pData->m_pResult->m_Message,
+					sizeof(pData->m_pResult->m_Message),
 					"%s has %d save%s on %s%s", pData->m_Name.Str(), NumSaves, NumSaves == 1 ? "" : "s", pData->m_Map.Str(), aLastSavedString);
 		}
 
