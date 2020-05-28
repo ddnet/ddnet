@@ -2372,27 +2372,25 @@ void CCharacter::Rescue()
 			return;
 		}
 
-		if (m_DeepFreeze || m_FreezeTime) {
-			m_LastRescue = Server()->Tick();
-			m_Core.m_Pos = m_PrevSavePos;
-			m_Pos = m_PrevSavePos;
-			m_PrevPos = m_PrevSavePos;
-			m_Core.m_Vel = vec2(0, 0);
-			m_Core.m_HookedPlayer = -1;
-			m_Core.m_HookState = HOOK_RETRACTED;
-			m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
-			GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
-			m_Core.m_HookPos = m_Core.m_Pos;
-			m_DeepFreeze = false;
-			UnFreeze();
+		m_LastRescue = Server()->Tick();
+		m_Core.m_Pos = m_PrevSavePos;
+		m_Pos = m_PrevSavePos;
+		m_PrevPos = m_PrevSavePos;
+		m_Core.m_Vel = vec2(0, 0);
+		m_Core.m_HookedPlayer = -1;
+		m_Core.m_HookState = HOOK_RETRACTED;
+		m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
+		GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
+		m_Core.m_HookPos = m_Core.m_Pos;
+		m_DeepFreeze = false;
+		UnFreeze();
 
-			for(int i = 0; i< NUM_WEAPONS; i++)
-			{
-				m_aWeapons[i].m_AmmoRegenStart = m_aPrevSaveWeapons[i].m_AmmoRegenStart;
-				m_aWeapons[i].m_Ammo = m_aPrevSaveWeapons[i].m_Ammo;
-				m_aWeapons[i].m_Ammocost = m_aPrevSaveWeapons[i].m_Ammocost;
-				m_aWeapons[i].m_Got = m_aPrevSaveWeapons[i].m_Got;
-			}
+		for(int i = 0; i< NUM_WEAPONS; i++)
+		{
+			m_aWeapons[i].m_AmmoRegenStart = m_aPrevSaveWeapons[i].m_AmmoRegenStart;
+			m_aWeapons[i].m_Ammo = m_aPrevSaveWeapons[i].m_Ammo;
+			m_aWeapons[i].m_Ammocost = m_aPrevSaveWeapons[i].m_Ammocost;
+			m_aWeapons[i].m_Got = m_aPrevSaveWeapons[i].m_Got;
 		}
 	}
 }
