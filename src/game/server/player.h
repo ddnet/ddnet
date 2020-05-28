@@ -10,7 +10,7 @@
 #include <memory>
 
 #if defined(CONF_SQL)
-class CSqlResult;
+class CSqlPlayerResult;
 #endif
 
 // player object
@@ -202,7 +202,7 @@ public:
 #if defined(CONF_SQL)
 	void ProcessSqlResult();
 	int64 m_LastSQLQuery;
-	std::shared_ptr<CSqlResult> m_SqlQueryResult;
+	std::shared_ptr<CSqlPlayerResult> m_SqlQueryResult;
 #endif
 	bool m_NotEligibleForFinish;
 	int64 m_EligibleForFinishCheck;
