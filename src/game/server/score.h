@@ -69,13 +69,13 @@ public:
 	virtual void SaveTeamScore(int *pClientIDs, unsigned int Size, float Time, const char *pTimestamp) = 0;
 
 	virtual void ShowTop5(void *pResult, int ClientID, void *pUserData, int Debut=1) = 0;
-	virtual void ShowRank(int ClientID, const char *pName, bool Search=false) = 0;
+	virtual void ShowRank(int ClientID, const char *pName) = 0;
 
 	virtual void ShowTeamTop5(void *pResult, int ClientID, void *pUserData, int Debut=1) = 0;
-	virtual void ShowTeamRank(int ClientID, const char *pName, bool Search=false) = 0;
+	virtual void ShowTeamRank(int ClientID, const char *pName) = 0;
 
 	virtual void ShowTopPoints(void *pResult, int ClientID, void *pUserData, int Debut=1) = 0;
-	virtual void ShowPoints(int ClientID, const char *pName, bool Search=false) = 0;
+	virtual void ShowPoints(int ClientID, const char *pName) = 0;
 
 	virtual void RandomMap(int ClientID, int Stars) = 0;
 	virtual void RandomUnfinishedMap(int ClientID, int Stars) = 0;

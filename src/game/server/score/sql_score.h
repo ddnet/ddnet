@@ -143,24 +143,12 @@ struct CSqlExecData
 			bool (*pFuncPtr) (CSqlServer*, const CSqlData *, bool),
 			CSqlData *pSqlResult,
 			bool ReadOnly = true
-	) :
-		m_pFuncPtr(pFuncPtr),
-		m_pSqlData(pSqlResult),
-		m_ReadOnly(ReadOnly)
-	{
-		++ms_InstanceCount;
-	}
-	~CSqlExecData()
-	{
-		--ms_InstanceCount;
-	}
+	);
+	~CSqlExecData();
 
 	bool (*m_pFuncPtr) (CSqlServer*, const CSqlData *, bool);
 	CSqlData *m_pSqlData;
 	bool m_ReadOnly;
-
-	// keeps track of score-threads
-	static std::atomic_int ms_InstanceCount;
 };
 
 class IServer;
@@ -207,26 +195,28 @@ class CSqlScore: public IScore
 	std::shared_ptr<CSqlResult> NewSqlResult(int ClientID);
 
 public:
+	// keeps track of score-threads
+	static std::atomic_int ms_InstanceCount;
 
 	CSqlScore(CGameContext *pGameServer);
 	~CSqlScore() {}
 
 	// Requested by game context
-	virtual void CheckBirthday(int ClientID);
-	virtual void LoadScore(int ClientID);
 	virtual void RandomMap(int ClientID, int Stars);
 	virtual void RandomUnfinishedMap(int ClientID, int Stars);
 	virtual void MapVote(int ClientID, const char* MapName);
+	virtual void CheckBirthday(int ClientID);
+	virtual void LoadScore(int ClientID);
 
 	// Requested by players (fails if another request by this player is active)
 	virtual void MapInfo(int ClientID, const char* MapName);
-	virtual void ShowRank(int ClientID, const char* pName, bool Search = false);
-	virtual void ShowTeamRank(int ClientID, const char* pName, bool Search = false);
+	virtual void ShowRank(int ClientID, const char* pName);
+	virtual void ShowTeamRank(int ClientID, const char* pName);
 	virtual void ShowTimes(int ClientID, const char* pName, int Debut = 1);
 	virtual void ShowTimes(int ClientID, int Debut = 1);
 	virtual void ShowTop5(void *pResult, int ClientID, void *pUserData, int Debut = 1);
 	virtual void ShowTeamTop5(void *pResult, int ClientID, void *pUserData, int Debut = 1);
-	virtual void ShowPoints(int ClientID, const char* pName, bool Search = false);
+	virtual void ShowPoints(int ClientID, const char* pName);
 	virtual void ShowTopPoints(void *pResult, int ClientID,	void *pUserData, int Debut = 1);
 	virtual void GetSaves(int ClientID);
 

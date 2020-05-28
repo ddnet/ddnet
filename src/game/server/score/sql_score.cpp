@@ -16,7 +16,7 @@
 #include "../gamemodes/DDRace.h"
 #include "../save.h"
 
-std::atomic_int CSqlExecData::ms_InstanceCount(0);
+std::atomic_int CSqlScore::ms_InstanceCount(0);
 
 CSqlResult::CSqlResult() :
 	m_Done(false),
@@ -26,6 +26,7 @@ CSqlResult::CSqlResult() :
 {
 	m_Message[0] = 0;
 }
+
 CSqlResult::~CSqlResult() {
 	switch(m_Tag)
 	{
@@ -42,6 +43,23 @@ CSqlResult::~CSqlResult() {
 		m_Variant.m_MapVote.~CMapVoteResult();
 		break;
 	}
+}
+
+CSqlExecData::CSqlExecData(
+		bool (*pFuncPtr) (CSqlServer*, const CSqlData *, bool),
+		CSqlData *pSqlResult,
+		bool ReadOnly
+) :
+	m_pFuncPtr(pFuncPtr),
+	m_pSqlData(pSqlResult),
+	m_ReadOnly(ReadOnly)
+{
+	++CSqlScore::ms_InstanceCount;
+}
+
+CSqlExecData::~CSqlExecData()
+{
+	--CSqlScore::ms_InstanceCount;
 }
 
 std::shared_ptr<CSqlResult> CSqlScore::NewSqlResult(int ClientID)
@@ -67,7 +85,7 @@ CSqlScore::CSqlScore(CGameContext *pGameServer) :
 void CSqlScore::OnShutdown()
 {
 	int i = 0;
-	while (CSqlExecData::ms_InstanceCount != 0)
+	while (CSqlScore::ms_InstanceCount != 0)
 	{
 		if (i > 600)  {
 			dbg_msg("sql", "Waited 60 seconds for score-threads to complete, quitting anyway");
@@ -76,7 +94,7 @@ void CSqlScore::OnShutdown()
 
 		// print a log about every two seconds
 		if (i % 20 == 0)
-			dbg_msg("sql", "Waiting for score-threads to complete (%d left)", CSqlExecData::ms_InstanceCount.load());
+			dbg_msg("sql", "Waiting for score-threads to complete (%d left)", CSqlScore::ms_InstanceCount.load());
 		++i;
 		thread_sleep(100000);
 	}
@@ -739,13 +757,12 @@ bool CSqlScore::SaveTeamScoreThread(CSqlServer* pSqlServer, const CSqlData *pGam
 	return false;
 }
 
-void CSqlScore::ShowRank(int ClientID, const char* pName, bool Search)
+void CSqlScore::ShowRank(int ClientID, const char* pName)
 {
 	/*
 	CSqlScoreData *Tmp = new CSqlScoreData();
 	Tmp->m_ClientID = ClientID;
 	Tmp->m_Name = pName;
-	Tmp->m_Search = Search;
 	str_copy(Tmp->m_aRequestingPlayer, Server()->ClientName(ClientID), sizeof(Tmp->m_aRequestingPlayer));
 
 	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(ShowRankThread, Tmp), "show rank");
@@ -813,13 +830,12 @@ bool CSqlScore::ShowRankThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 	return false;
 }
 
-void CSqlScore::ShowTeamRank(int ClientID, const char* pName, bool Search)
+void CSqlScore::ShowTeamRank(int ClientID, const char* pName)
 {
 	/*
 	CSqlScoreData *Tmp = new CSqlScoreData();
 	Tmp->m_ClientID = ClientID;
 	Tmp->m_Name = pName;
-	Tmp->m_Search = Search;
 	str_copy(Tmp->m_aRequestingPlayer, Server()->ClientName(ClientID), sizeof(Tmp->m_aRequestingPlayer));
 
 	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(ShowTeamRankThread, Tmp), "show team rank");
@@ -1186,13 +1202,12 @@ bool CSqlScore::ShowTimesThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 	return false;
 }
 
-void CSqlScore::ShowPoints(int ClientID, const char* pName, bool Search)
+void CSqlScore::ShowPoints(int ClientID, const char* pName)
 {
 	/*
 	CSqlScoreData *Tmp = new CSqlScoreData();
 	Tmp->m_ClientID = ClientID;
 	Tmp->m_Name = pName;
-	Tmp->m_Search = Search;
 	str_copy(Tmp->m_aRequestingPlayer, Server()->ClientName(ClientID), sizeof(Tmp->m_aRequestingPlayer));
 
 	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(ShowPointsThread, Tmp), "show points");

@@ -790,8 +790,7 @@ void CGameContext::ConTeamRank(IConsole::IResult *pResult, void *pUserData)
 
 	if (pResult->NumArguments() > 0)
 		if (!g_Config.m_SvHideScore)
-			pSelf->Score()->ShowTeamRank(pResult->m_ClientID, pResult->GetString(0),
-					true);
+			pSelf->Score()->ShowTeamRank(pResult->m_ClientID, pResult->GetString(0));
 		else
 			pSelf->Console()->Print(
 					IConsole::OUTPUT_LEVEL_STANDARD,
@@ -825,8 +824,7 @@ void CGameContext::ConRank(IConsole::IResult *pResult, void *pUserData)
 
 	if (pResult->NumArguments() > 0)
 		if (!g_Config.m_SvHideScore)
-			pSelf->Score()->ShowRank(pResult->m_ClientID, pResult->GetString(0),
-					true);
+			pSelf->Score()->ShowRank(pResult->m_ClientID, pResult->GetString(0));
 		else
 			pSelf->Console()->Print(
 					IConsole::OUTPUT_LEVEL_STANDARD,
@@ -1548,8 +1546,7 @@ void CGameContext::ConPoints(IConsole::IResult *pResult, void *pUserData)
 
 	if (pResult->NumArguments() > 0)
 		if (!g_Config.m_SvHideScore)
-			pSelf->Score()->ShowPoints(pResult->m_ClientID, pResult->GetString(0),
-					true);
+			pSelf->Score()->ShowPoints(pResult->m_ClientID, pResult->GetString(0));
 		else
 			pSelf->Console()->Print(
 					IConsole::OUTPUT_LEVEL_STANDARD,

@@ -21,10 +21,8 @@ class CFileScore: public IScore
 		float m_Score;
 		float m_aCpTime[NUM_CHECKPOINTS];
 
-		CPlayerScore()
-		{
-		}
-		;
+		CPlayerScore() {}
+
 		CPlayerScore(const char *pName, float Score,
 				float aCpTime[NUM_CHECKPOINTS]);
 
@@ -49,7 +47,6 @@ class CFileScore: public IScore
 	{
 		return SearchName(Server()->ClientName(ID), pPosition, 0);
 	}
-	;
 
 	CPlayerScore *SearchName(const char *pName, int *pPosition, bool MatchCase);
 	void UpdatePlayer(int ID, float Score, float aCpTime[NUM_CHECKPOINTS]);
@@ -73,14 +70,14 @@ public:
 
 	virtual void ShowTop5(void *pResult, int ClientID,
 			void *pUserData, int Debut = 1);
-	virtual void ShowRank(int ClientID, const char* pName, bool Search = false);
+	virtual void ShowRank(int ClientID, const char* pName);
 
 	virtual void ShowTeamTop5(void *pResult, int ClientID,
 			void *pUserData, int Debut = 1);
-	virtual void ShowTeamRank(int ClientID, const char* pName, bool Search = false);
+	virtual void ShowTeamRank(int ClientID, const char* pName);
 
 	virtual void ShowTopPoints(void *pResult, int ClientID, void *pUserData, int Debut);
-	virtual void ShowPoints(int ClientID, const char* pName, bool Search);
+	virtual void ShowPoints(int ClientID, const char* pName);
 	virtual void RandomMap(int ClientID, int Stars);
 	virtual void RandomUnfinishedMap(int ClientID, int Stars);
 	virtual void SaveTeam(int Team, const char* Code, int ClientID, const char* Server);

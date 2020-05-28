@@ -262,16 +262,13 @@ void CFileScore::ShowTop5(void *pResult, int ClientID,
 	pSelf->SendChatTarget(ClientID, "------------------------------");
 }
 
-void CFileScore::ShowRank(int ClientID, const char* pName, bool Search)
+void CFileScore::ShowRank(int ClientID, const char* pName)
 {
 	CPlayerScore *pScore;
 	int Pos = -2;
 	char aBuf[512];
 
-	if (!Search)
-		pScore = SearchScore(ClientID, &Pos);
-	else
-		pScore = SearchName(pName, &Pos, 1);
+	pScore = SearchName(pName, &Pos, 1);
 
 	if (pScore && Pos > -1)
 	{
@@ -285,17 +282,16 @@ void CFileScore::ShowRank(int ClientID, const char* pName, bool Search)
 					"%d. %s Time: %d minute(s) %5.2f second(s), requested by (%s)", Pos,
 					pScore->m_aName, (int)Time / 60,
 					Time - ((int)Time / 60 * 60), Server()->ClientName(ClientID));
-		if (!Search)
-			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, ClientID);
-		else
+		if (g_Config.m_SvHideScore)
 			GameServer()->SendChatTarget(ClientID, aBuf);
+		else
+			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, ClientID);
 		return;
 	}
 	else if (Pos == -1)
 		str_format(aBuf, sizeof(aBuf), "Several players were found.");
 	else
-		str_format(aBuf, sizeof(aBuf), "%s is not ranked",
-				Search ? pName : Server()->ClientName(ClientID));
+		str_format(aBuf, sizeof(aBuf), "%s is not ranked", pName);
 
 	GameServer()->SendChatTarget(ClientID, aBuf);
 }
@@ -307,7 +303,7 @@ void CFileScore::ShowTeamTop5(void *pResult, int ClientID, void *pUserData, int 
 	GameServer()->SendChatTarget(ClientID, aBuf);
 }
 
-void CFileScore::ShowTeamRank(int ClientID, const char* pName, bool Search)
+void CFileScore::ShowTeamRank(int ClientID, const char* pName)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "Team ranks not supported in file based servers");
@@ -321,7 +317,7 @@ void CFileScore::ShowTopPoints(void *pResult, int ClientID, void *pUserData, int
 	GameServer()->SendChatTarget(ClientID, aBuf);
 }
 
-void CFileScore::ShowPoints(int ClientID, const char* pName, bool Search)
+void CFileScore::ShowPoints(int ClientID, const char* pName)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "Points not supported in file based servers");
