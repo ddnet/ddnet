@@ -44,6 +44,15 @@ CSqlResult::~CSqlResult() {
 	}
 }
 
+std::shared_ptr<CSqlResult> CSqlScore::NewSqlResult(int ClientID)
+{
+	CPlayer *pCurPlayer = GameServer()->m_apPlayers[ClientID];
+	if(pCurPlayer->m_SqlQueryResult != nullptr)
+		return nullptr;
+	pCurPlayer->m_SqlQueryResult = std::make_shared<CSqlResult>();
+	return pCurPlayer->m_SqlQueryResult;
+}
+
 LOCK CSqlScore::ms_FailureFileLock = lock_create();
 
 CSqlScore::CSqlScore(CGameContext *pGameServer) :
@@ -1301,7 +1310,10 @@ bool CSqlScore::ShowTopPointsThread(CSqlServer* pSqlServer, const CSqlData *pGam
 
 void CSqlScore::RandomMap(int ClientID, int Stars)
 {
-	CSqlRandomMap *Tmp = new CSqlRandomMap(nullptr);
+	std::shared_ptr<CSqlResult> pResult = NewSqlResult(ClientID);
+	if(pResult == nullptr)
+		return;
+	CSqlRandomMap *Tmp = new CSqlRandomMap(pResult);
 	Tmp->m_Stars = Stars;
 
 	// TODO: Set Client result Tmp->m_ClientID = ClientID;

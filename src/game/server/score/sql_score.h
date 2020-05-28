@@ -203,6 +203,9 @@ class CSqlScore: public IScore
 	char m_aMap[64];
 	char m_aGameUuid[UUID_MAXSTRSIZE];
 
+	// returns new SqlResult bound to the player, if no current Thread is active for this player
+	std::shared_ptr<CSqlResult> NewSqlResult(int ClientID);
+
 public:
 
 	CSqlScore(CGameContext *pGameServer);
