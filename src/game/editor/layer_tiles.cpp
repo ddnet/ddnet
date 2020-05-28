@@ -870,7 +870,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		{"Height", m_Height, PROPTYPE_INT_SCROLL, 1, 100000},
 		{"Shift", 0, PROPTYPE_SHIFT, 0, 0},
 		{"Shift by", m_pEditor->m_ShiftBy, PROPTYPE_INT_SCROLL, 1, 100000},
-		{"Image", m_Image, PROPTYPE_IMAGE, 0, 0},
+		{"Image", m_Image, PROPTYPE_IMAGE, 0, m_pEditor->m_Map.m_lImages.size()},
 		{"Color", Color, PROPTYPE_COLOR, 0, 0},
 		{"Color Env", m_ColorEnv+1, PROPTYPE_ENVELOPE, 0, 0},
 		{"Color TO", m_ColorEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
@@ -921,14 +921,13 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		m_pEditor->m_ShiftBy = NewVal;
 	else if(Prop == PROP_IMAGE)
 	{
+		m_Image = NewVal;
 		if (NewVal == -1)
 		{
 			m_Texture = IGraphics::CTextureHandle();
-			m_Image = -1;
 		}
 		else
 		{
-			m_Image = NewVal%m_pEditor->m_Map.m_lImages.size();
 			m_AutoMapperConfig = -1;
 		}
 	}
