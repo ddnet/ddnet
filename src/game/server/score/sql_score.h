@@ -214,10 +214,10 @@ public:
 	virtual void ShowTeamRank(int ClientID, const char* pName);
 	virtual void ShowTimes(int ClientID, const char* pName, int Debut = 1);
 	virtual void ShowTimes(int ClientID, int Debut = 1);
-	virtual void ShowTop5(void *pResult, int ClientID, void *pUserData, int Debut = 1);
-	virtual void ShowTeamTop5(void *pResult, int ClientID, void *pUserData, int Debut = 1);
+	virtual void ShowTop5(int ClientID, void *pUserData, int Debut = 1);
+	virtual void ShowTeamTop5(int ClientID, void *pUserData, int Debut = 1);
 	virtual void ShowPoints(int ClientID, const char* pName);
-	virtual void ShowTopPoints(void *pResult, int ClientID,	void *pUserData, int Debut = 1);
+	virtual void ShowTopPoints(int ClientID, void *pUserData, int Debut = 1);
 	virtual void GetSaves(int ClientID);
 
 	// requested by teams

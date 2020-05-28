@@ -921,7 +921,7 @@ bool CSqlScore::ShowTeamRankThread(CSqlServer* pSqlServer, const CSqlData *pGame
 	return false;
 }
 
-void CSqlScore::ShowTop5(void *pResult, int ClientID, void *pUserData, int Debut)
+void CSqlScore::ShowTop5(int ClientID, void *pUserData, int Debut)
 {
 	/*
 	CSqlScoreData *Tmp = new CSqlScoreData();
@@ -986,7 +986,7 @@ bool CSqlScore::ShowTop5Thread(CSqlServer* pSqlServer, const CSqlData *pGameData
 	return false;
 }
 
-void CSqlScore::ShowTeamTop5(void *pResult, int ClientID, void *pUserData, int Debut)
+void CSqlScore::ShowTeamTop5(int ClientID, void *pUserData, int Debut)
 {
 	/*
 	CSqlScoreData *Tmp = new CSqlScoreData();
@@ -1263,7 +1263,7 @@ bool CSqlScore::ShowPointsThread(CSqlServer* pSqlServer, const CSqlData *pGameDa
 	return false;
 }
 
-void CSqlScore::ShowTopPoints(void *pResult, int ClientID, void *pUserData, int Debut)
+void CSqlScore::ShowTopPoints(int ClientID, void *pUserData, int Debut)
 {
 	/*
 	CSqlScoreData *Tmp = new CSqlScoreData();
