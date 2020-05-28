@@ -47,7 +47,7 @@ CSqlResult::~CSqlResult() {
 std::shared_ptr<CSqlResult> CSqlScore::NewSqlResult(int ClientID)
 {
 	CPlayer *pCurPlayer = GameServer()->m_apPlayers[ClientID];
-	if(pCurPlayer->m_SqlQueryResult != nullptr)
+	if(pCurPlayer->m_SqlQueryResult != nullptr) // TODO: send player a message: "too many requests"
 		return nullptr;
 	pCurPlayer->m_SqlQueryResult = std::make_shared<CSqlResult>();
 	return pCurPlayer->m_SqlQueryResult;
@@ -272,7 +272,7 @@ bool CSqlScore::LoadScoreThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 	return false;
 }
 
-void CSqlScore::MapVote(std::shared_ptr<CMapVoteResult> *ppResult, int ClientID, const char* MapName)
+void CSqlScore::MapVote(int ClientID, const char* MapName)
 {
 	/*
 	*ppResult = std::make_shared<CMapVoteResult>();
@@ -1310,7 +1310,7 @@ bool CSqlScore::ShowTopPointsThread(CSqlServer* pSqlServer, const CSqlData *pGam
 
 void CSqlScore::RandomMap(int ClientID, int Stars)
 {
-	std::shared_ptr<CSqlResult> pResult = NewSqlResult(ClientID);
+	auto pResult = NewSqlResult(ClientID);
 	if(pResult == nullptr)
 		return;
 	CSqlRandomMap *Tmp = new CSqlRandomMap(pResult);
@@ -1384,7 +1384,7 @@ bool CSqlScore::RandomMapThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 	return false;
 }
 
-void CSqlScore::RandomUnfinishedMap(std::shared_ptr<CRandomMapResult> *ppResult, int ClientID, int Stars)
+void CSqlScore::RandomUnfinishedMap(int ClientID, int Stars)
 {
 	/*
 	*ppResult = std::make_shared<CRandomMapResult>();

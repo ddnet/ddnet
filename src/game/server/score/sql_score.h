@@ -211,13 +211,15 @@ public:
 	CSqlScore(CGameContext *pGameServer);
 	~CSqlScore() {}
 
+	// Requested by game context
 	virtual void CheckBirthday(int ClientID);
 	virtual void LoadScore(int ClientID);
+	virtual void RandomMap(int ClientID, int Stars);
+	virtual void RandomUnfinishedMap(int ClientID, int Stars);
+
+	// Requested by players (fails if another request by this player is active)
 	virtual void MapInfo(int ClientID, const char* MapName);
-	virtual void MapVote(std::shared_ptr<CMapVoteResult> *ppResult, int ClientID, const char* MapName);
-	virtual void SaveScore(int ClientID, float Time, const char *pTimestamp,
-			float CpTime[NUM_CHECKPOINTS], bool NotEligible);
-	virtual void SaveTeamScore(int* aClientIDs, unsigned int Size, float Time, const char *pTimestamp);
+	virtual void MapVote(int ClientID, const char* MapName);
 	virtual void ShowRank(int ClientID, const char* pName, bool Search = false);
 	virtual void ShowTeamRank(int ClientID, const char* pName, bool Search = false);
 	virtual void ShowTimes(int ClientID, const char* pName, int Debut = 1);
@@ -229,11 +231,14 @@ public:
 	virtual void ShowPoints(int ClientID, const char* pName, bool Search = false);
 	virtual void ShowTopPoints(void *pResult, int ClientID,
 			void *pUserData, int Debut = 1);
-	virtual void RandomMap(int ClientID, int Stars);
-	virtual void RandomUnfinishedMap(std::shared_ptr<CRandomMapResult> *ppResult, int ClientID, int stars);
 	virtual void SaveTeam(int Team, const char* Code, int ClientID, const char* Server);
 	virtual void LoadTeam(const char* Code, int ClientID);
 	virtual void GetSaves(int ClientID);
+
+	// Game relevant not allowed to fail
+	virtual void SaveScore(int ClientID, float Time, const char *pTimestamp,
+			float CpTime[NUM_CHECKPOINTS], bool NotEligible);
+	virtual void SaveTeamScore(int* aClientIDs, unsigned int Size, float Time, const char *pTimestamp);
 
 	virtual void OnShutdown();
 };

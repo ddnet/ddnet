@@ -57,9 +57,6 @@ void CGameContext::Construct(int Resetting)
 	m_ChatResponseTargetID = -1;
 	m_aDeleteTempfile[0] = 0;
 	m_TeeHistorianActive = false;
-
-	m_pRandomMapResult = nullptr;
-	m_pMapVoteResult = nullptr;
 }
 
 CGameContext::CGameContext(int Resetting)
@@ -2254,7 +2251,7 @@ void CGameContext::ConRandomUnfinishedMap(IConsole::IResult *pResult, void *pUse
 
 	int Stars = pResult->NumArguments() ? pResult->GetInteger(0) : -1;
 
-	pSelf->m_pScore->RandomUnfinishedMap(&pSelf->m_pRandomMapResult, pSelf->m_VoteCreator, Stars);
+	pSelf->m_pScore->RandomUnfinishedMap(pSelf->m_VoteCreator, Stars);
 }
 
 void CGameContext::ConRestart(IConsole::IResult *pResult, void *pUserData)

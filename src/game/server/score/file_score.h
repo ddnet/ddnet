@@ -66,7 +66,7 @@ public:
 	virtual void CheckBirthday(int ClientID);
 	virtual void LoadScore(int ClientID);
 	virtual void MapInfo(int ClientID, const char* MapName);
-	virtual void MapVote(std::shared_ptr<CMapVoteResult> *ppResult, int ClientID, const char* MapName);
+	virtual void MapVote(int ClientID, const char* MapName);
 	virtual void SaveScore(int ClientID, float Time, const char *pTimestamp,
 			float CpTime[NUM_CHECKPOINTS], bool NotEligible);
 	virtual void SaveTeamScore(int* ClientIDs, unsigned int Size, float Time, const char *pTimestamp);
@@ -82,7 +82,7 @@ public:
 	virtual void ShowTopPoints(void *pResult, int ClientID, void *pUserData, int Debut);
 	virtual void ShowPoints(int ClientID, const char* pName, bool Search);
 	virtual void RandomMap(int ClientID, int stars);
-	virtual void RandomUnfinishedMap(std::shared_ptr<CRandomMapResult> *ppResult, int ClientID, int stars);
+	virtual void RandomUnfinishedMap(int ClientID, int stars);
 	virtual void SaveTeam(int Team, const char* Code, int ClientID, const char* Server);
 	virtual void LoadTeam(const char* Code, int ClientID);
 	virtual void GetSaves(int ClientID);

@@ -61,7 +61,7 @@ public:
 	CPlayerData *PlayerData(int ID) { return &m_aPlayerData[ID]; }
 
 	virtual void MapInfo(int ClientID, const char *pMapName) = 0;
-	virtual void MapVote(std::shared_ptr<CMapVoteResult> *ppResult, int ClientID, const char *pMapName) = 0;
+	virtual void MapVote(int ClientID, const char *pMapName) = 0;
 	virtual void CheckBirthday(int ClientID) = 0;
 	virtual void LoadScore(int ClientID) = 0;
 	virtual void SaveScore(int ClientID, float Time, const char *pTimestamp, float aCpTime[NUM_CHECKPOINTS], bool NotEligible) = 0;
@@ -78,7 +78,7 @@ public:
 	virtual void ShowPoints(int ClientID, const char *pName, bool Search=false) = 0;
 
 	virtual void RandomMap(int ClientID, int Stars) = 0;
-	virtual void RandomUnfinishedMap(std::shared_ptr<CRandomMapResult> *ppResult, int ClientID, int Stars) = 0;
+	virtual void RandomUnfinishedMap(int ClientID, int Stars) = 0;
 
 	virtual void SaveTeam(int Team, const char *pCode, int ClientID, const char *pServer) = 0;
 	virtual void LoadTeam(const char *pCode, int ClientID) = 0;
