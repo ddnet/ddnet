@@ -696,9 +696,13 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 			char aBuf[512];
 			str_format(aBuf, sizeof(aBuf), "Everyone in your locked team was killed because '%s' %s.", Server()->ClientName(ClientID), Weapon == WEAPON_SELF ? "killed" : "died");
 
+			m_Practice[Team] = false;
+
 			for(int i = 0; i < MAX_CLIENTS; i++)
 				if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
 				{
+					GameServer()->m_apPlayers[i]->m_VotedForPractice = false;
+
 					if(i != ClientID)
 					{
 						GameServer()->m_apPlayers[i]->KillCharacter(WEAPON_SELF);

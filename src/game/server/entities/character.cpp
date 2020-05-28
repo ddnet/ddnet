@@ -2146,6 +2146,13 @@ void CCharacter::DDRaceTick()
 		int ftile = GameServer()->Collision()->GetFTileIndex(index);
 		if(IsGrounded() && tile != TILE_FREEZE && tile != TILE_DFREEZE && ftile != TILE_FREEZE && ftile != TILE_DFREEZE) {
 			m_PrevSavePos = m_Pos;
+			for(int i = 0; i< NUM_WEAPONS; i++)
+			{
+				m_aPrevSaveWeapons[i].m_AmmoRegenStart = m_aWeapons[i].m_AmmoRegenStart;
+				m_aPrevSaveWeapons[i].m_Ammo = m_aWeapons[i].m_Ammo;
+				m_aPrevSaveWeapons[i].m_Ammocost = m_aWeapons[i].m_Ammocost;
+				m_aPrevSaveWeapons[i].m_Got = m_aWeapons[i].m_Got;
+			}
 			m_SetSavePos = true;
 		}
 	}
@@ -2356,7 +2363,7 @@ void CCharacter::DDRaceInit()
 
 void CCharacter::Rescue()
 {
-	if (m_SetSavePos && !m_Super && !m_DeepFreeze && IsGrounded() && m_Pos == m_PrevPos) {
+	if (m_SetSavePos && !m_Super) {
 		if (m_LastRescue + g_Config.m_SvRescueDelay * Server()->TickSpeed() > Server()->Tick())
 		{
 			char aBuf[256];
@@ -2365,19 +2372,25 @@ void CCharacter::Rescue()
 			return;
 		}
 
-		int index = GameServer()->Collision()->GetPureMapIndex(m_Pos);
-		if (GameServer()->Collision()->GetTileIndex(index) == TILE_FREEZE || GameServer()->Collision()->GetFTileIndex(index) == TILE_FREEZE) {
-			m_LastRescue = Server()->Tick();
-			m_Core.m_Pos = m_PrevSavePos;
-			m_Pos = m_PrevSavePos;
-			m_PrevPos = m_PrevSavePos;
-			m_Core.m_Vel = vec2(0, 0);
-			m_Core.m_HookedPlayer = -1;
-			m_Core.m_HookState = HOOK_RETRACTED;
-			m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
-			GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
-			m_Core.m_HookPos = m_Core.m_Pos;
-			UnFreeze();
+		m_LastRescue = Server()->Tick();
+		m_Core.m_Pos = m_PrevSavePos;
+		m_Pos = m_PrevSavePos;
+		m_PrevPos = m_PrevSavePos;
+		m_Core.m_Vel = vec2(0, 0);
+		m_Core.m_HookedPlayer = -1;
+		m_Core.m_HookState = HOOK_RETRACTED;
+		m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
+		GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
+		m_Core.m_HookPos = m_Core.m_Pos;
+		m_DeepFreeze = false;
+		UnFreeze();
+
+		for(int i = 0; i< NUM_WEAPONS; i++)
+		{
+			m_aWeapons[i].m_AmmoRegenStart = m_aPrevSaveWeapons[i].m_AmmoRegenStart;
+			m_aWeapons[i].m_Ammo = m_aPrevSaveWeapons[i].m_Ammo;
+			m_aWeapons[i].m_Ammocost = m_aPrevSaveWeapons[i].m_Ammocost;
+			m_aWeapons[i].m_Got = m_aPrevSaveWeapons[i].m_Got;
 		}
 	}
 }

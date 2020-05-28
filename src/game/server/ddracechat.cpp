@@ -602,6 +602,15 @@ void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
 	if(pSelf->ProcessSpamProtection(pResult->m_ClientID))
 		return;
 
+	if(!g_Config.m_SvPractice)
+	{
+		pSelf->Console()->Print(
+				IConsole::OUTPUT_LEVEL_STANDARD,
+				"print",
+				"Practice mode is disabled");
+		return;
+	}
+
 	CGameTeams &Teams = ((CGameControllerDDRace*) pSelf->m_pController)->m_Teams;
 
 	int Team = Teams.m_Core.Team(pResult->m_ClientID);
