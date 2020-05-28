@@ -69,14 +69,14 @@ public:
 	virtual void SaveTeamScore(int* ClientIDs, unsigned int Size, float Time, const char *pTimestamp);
 
 	virtual void ShowTop5(int ClientID,
-			void *pUserData, int Debut = 1);
+			void *pUserData, int Offset = 1);
 	virtual void ShowRank(int ClientID, const char* pName);
 
 	virtual void ShowTeamTop5(int ClientID,
-			void *pUserData, int Debut = 1);
+			void *pUserData, int Offset = 1);
 	virtual void ShowTeamRank(int ClientID, const char* pName);
 
-	virtual void ShowTopPoints(int ClientID, void *pUserData, int Debut);
+	virtual void ShowTopPoints(int ClientID, void *pUserData, int Offset);
 	virtual void ShowPoints(int ClientID, const char* pName);
 	virtual void RandomMap(int ClientID, int Stars);
 	virtual void RandomUnfinishedMap(int ClientID, int Stars);

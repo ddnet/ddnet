@@ -921,11 +921,11 @@ bool CSqlScore::ShowTeamRankThread(CSqlServer* pSqlServer, const CSqlData *pGame
 	return false;
 }
 
-void CSqlScore::ShowTop5(int ClientID, void *pUserData, int Debut)
+void CSqlScore::ShowTop5(int ClientID, void *pUserData, int Offset)
 {
 	/*
 	CSqlScoreData *Tmp = new CSqlScoreData();
-	Tmp->m_Num = Debut;
+	Tmp->m_Num = Offset;
 	Tmp->m_ClientID = ClientID;
 
 	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(ShowTop5Thread, Tmp), "show top5");
@@ -986,11 +986,11 @@ bool CSqlScore::ShowTop5Thread(CSqlServer* pSqlServer, const CSqlData *pGameData
 	return false;
 }
 
-void CSqlScore::ShowTeamTop5(int ClientID, void *pUserData, int Debut)
+void CSqlScore::ShowTeamTop5(int ClientID, void *pUserData, int Offset)
 {
 	/*
 	CSqlScoreData *Tmp = new CSqlScoreData();
-	Tmp->m_Num = Debut;
+	Tmp->m_Num = Offset;
 	Tmp->m_ClientID = ClientID;
 
 	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(ShowTeamTop5Thread, Tmp), "show team top5");
@@ -1097,11 +1097,11 @@ bool CSqlScore::ShowTeamTop5Thread(CSqlServer* pSqlServer, const CSqlData *pGame
 	return false;
 }
 
-void CSqlScore::ShowTimes(int ClientID, int Debut)
+void CSqlScore::ShowTimes(int ClientID, int Offset)
 {
 	/*
 	CSqlScoreData *Tmp = new CSqlScoreData();
-	Tmp->m_Num = Debut;
+	Tmp->m_Num = Offset;
 	Tmp->m_ClientID = ClientID;
 	Tmp->m_Search = false;
 
@@ -1109,11 +1109,11 @@ void CSqlScore::ShowTimes(int ClientID, int Debut)
 	*/
 }
 
-void CSqlScore::ShowTimes(int ClientID, const char* pName, int Debut)
+void CSqlScore::ShowTimes(int ClientID, const char* pName, int Offset)
 {
 	/*
 	CSqlScoreData *Tmp = new CSqlScoreData();
-	Tmp->m_Num = Debut;
+	Tmp->m_Num = Offset;
 	Tmp->m_ClientID = ClientID;
 	Tmp->m_Name = pName;
 	Tmp->m_Search = true;
@@ -1263,11 +1263,11 @@ bool CSqlScore::ShowPointsThread(CSqlServer* pSqlServer, const CSqlData *pGameDa
 	return false;
 }
 
-void CSqlScore::ShowTopPoints(int ClientID, void *pUserData, int Debut)
+void CSqlScore::ShowTopPoints(int ClientID, void *pUserData, int Offset)
 {
 	/*
 	CSqlScoreData *Tmp = new CSqlScoreData();
-	Tmp->m_Num = Debut;
+	Tmp->m_Num = Offset;
 	Tmp->m_ClientID = ClientID;
 
 	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(ShowTopPointsThread, Tmp), "show top points");

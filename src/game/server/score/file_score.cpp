@@ -242,19 +242,19 @@ void CFileScore::SaveScore(int ClientID, float Time, const char *pTimestamp,
 }
 
 void CFileScore::ShowTop5(int ClientID,
-		void *pUserData, int Debut)
+		void *pUserData, int Offset)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
 	char aBuf[512];
-	Debut = maximum(1, Debut < 0 ? m_Top.size() + Debut - 3 : Debut);
+	Offset = maximum(1, Offset < 0 ? m_Top.size() + Offset - 3 : Offset);
 	pSelf->SendChatTarget(ClientID, "----------- Top 5 -----------");
 	for (int i = 0; i < 5; i++)
 	{
-		if (i + Debut > m_Top.size())
+		if (i + Offset > m_Top.size())
 			break;
-		CPlayerScore *r = &m_Top[i + Debut - 1];
+		CPlayerScore *r = &m_Top[i + Offset - 1];
 		str_format(aBuf, sizeof(aBuf),
-				"%d. %s Time: %d minute(s) %5.2f second(s)", i + Debut,
+				"%d. %s Time: %d minute(s) %5.2f second(s)", i + Offset,
 				r->m_aName, (int)r->m_Score / 60,
 				r->m_Score - ((int)r->m_Score / 60 * 60));
 		pSelf->SendChatTarget(ClientID, aBuf);
@@ -296,7 +296,7 @@ void CFileScore::ShowRank(int ClientID, const char* pName)
 	GameServer()->SendChatTarget(ClientID, aBuf);
 }
 
-void CFileScore::ShowTeamTop5(int ClientID, void *pUserData, int Debut)
+void CFileScore::ShowTeamTop5(int ClientID, void *pUserData, int Offset)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "Team ranks not supported in file based servers");
@@ -310,7 +310,7 @@ void CFileScore::ShowTeamRank(int ClientID, const char* pName)
 	GameServer()->SendChatTarget(ClientID, aBuf);
 }
 
-void CFileScore::ShowTopPoints(int ClientID, void *pUserData, int Debut)
+void CFileScore::ShowTopPoints(int ClientID, void *pUserData, int Offset)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "Team ranks not supported in file based servers");
