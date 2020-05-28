@@ -404,7 +404,7 @@ bool CSqlScore::MapInfoThread(CSqlServer* pSqlServer, const CSqlData *pGameData,
 		{
 			pSqlServer->GetResults()->next();
 			int points = pSqlServer->GetResults()->getInt("Points");
-			int stars = pSqlServer->GetResults()->getInt("Stars");
+			int Stars = pSqlServer->GetResults()->getInt("Stars");
 			int finishes = pSqlServer->GetResults()->getInt("Finishes");
 			int finishers = pSqlServer->GetResults()->getInt("Finishers");
 			int average = pSqlServer->GetResults()->getInt("Average");
@@ -433,7 +433,7 @@ bool CSqlScore::MapInfoThread(CSqlServer* pSqlServer, const CSqlData *pGameData,
 			}
 
 			char aStars[20];
-			switch(stars)
+			switch(Stars)
 			{
 				case 0: strcpy(aStars, "✰✰✰✰✰"); break;
 				case 1: strcpy(aStars, "★✰✰✰✰"); break;
