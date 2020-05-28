@@ -1,9 +1,10 @@
+#include "save.h"
+
 #include <new>
 #include <cstdio>
 
-#include "save.h"
 #include "teams.h"
-#include "./gamemodes/DDRace.h"
+#include "gamemodes/DDRace.h"
 #include <engine/shared/config.h>
 
 CSaveTee::CSaveTee()

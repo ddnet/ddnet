@@ -1,8 +1,9 @@
 #ifndef GAME_SERVER_SAVE_H
 #define GAME_SERVER_SAVE_H
 
-#include "./entities/character.h"
-#include <game/server/gamecontroller.h>
+#include "entities/character.h"
+class IGameController;
+class CGameContext;
 
 class CSaveTee
 {

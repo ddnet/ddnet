@@ -4,14 +4,12 @@
 #ifndef GAME_SERVER_SCORE_SQL_H
 #define GAME_SERVER_SCORE_SQL_H
 
-#include <exception>
-
-#include <base/system.h>
-#include <engine/server/sql_connector.h>
 #include <engine/server/sql_string_helpers.h>
 #include <engine/shared/uuid_manager.h>
 
-#include <game/server/score.h>
+#include "../score.h"
+
+class CSqlServer;
 
 // result only valid if m_Done is set to true
 class CSqlResult

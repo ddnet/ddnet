@@ -7,6 +7,7 @@
 #include <fstream>
 #include <cstring>
 
+#include <engine/server/sql_connector.h>
 #include <engine/shared/config.h>
 #include <engine/shared/console.h>
 #include <engine/storage.h>
