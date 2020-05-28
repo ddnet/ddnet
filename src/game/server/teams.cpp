@@ -246,6 +246,9 @@ bool CGameTeams::SetCharacterTeam(int ClientID, int Team)
 	//if you begin race
 	if (Character(ClientID)->m_DDRaceState != DDRACE_NONE && Team != TEAM_SUPER)
 		return false;
+	//No cheating through noob filter with practice and then leaving team
+	if (m_Practice[m_Core.Team(ClientID)])
+		return false;
 
 	SetForceCharacterTeam(ClientID, Team);
 
