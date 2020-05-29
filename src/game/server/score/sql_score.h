@@ -230,7 +230,7 @@ class CSqlScore: public IScore
 			const char* pThreadName,
 			int ClientID,
 			const char* pName,
-			int OffSet
+			int Offset
 	);
 
 public:

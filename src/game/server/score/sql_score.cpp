@@ -998,25 +998,22 @@ bool CSqlScore::ShowTeamRankThread(CSqlServer* pSqlServer, const CSqlData<CSqlPl
 
 void CSqlScore::ShowTop5(int ClientID, int Offset)
 {
-	/*
-	CSqlScoreData *Tmp = new CSqlScoreData();
-	Tmp->m_Num = Offset;
-	Tmp->m_ClientID = ClientID;
-
-	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(ShowTop5Thread, Tmp), "show top5");
-	*/
+	ExecPlayerThread(ShowTop5Thread, "show top5", ClientID, "", Offset);
 }
 
 bool CSqlScore::ShowTop5Thread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure)
 {
-	/*
-	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
+	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 
 	if (HandleFailure)
+	{
+		pData->m_pResult->m_Failed = true;
+		pData->m_pResult->m_Done = true;
 		return true;
+	}
 
-	int LimitStart = maximum(abs(pData->m_Num)-1, 0);
-	const char *pOrder = pData->m_Num >= 0 ? "ASC" : "DESC";
+	int LimitStart = maximum(abs(pData->m_Offset)-1, 0);
+	const char *pOrder = pData->m_Offset >= 0 ? "ASC" : "DESC";
 
 	try
 	{
@@ -1025,24 +1022,49 @@ bool CSqlScore::ShowTop5Thread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayer
 		pSqlServer->executeSql("SET @prev := NULL;");
 		pSqlServer->executeSql("SET @rank := 1;");
 		pSqlServer->executeSql("SET @pos := 0;");
-		str_format(aBuf, sizeof(aBuf), "SELECT Name, Time, Rank FROM (SELECT Name, (@pos := @pos+1) pos, (@rank := IF(@prev = Time,@rank, @pos)) Rank, (@prev := Time) Time FROM (SELECT Name, min(Time) as Time FROM %s_race WHERE Map = '%s' GROUP BY Name ORDER BY `Time` ASC) as a) as b ORDER BY Rank %s LIMIT %d, 5;", pSqlServer->GetPrefix(), pData->m_Map.ClrStr(), pOrder, LimitStart);
+		str_format(aBuf, sizeof(aBuf),
+				"SELECT Name, Time, Rank "
+				"FROM ("
+					"SELECT "
+						"Name, "
+						"(@pos := @pos+1) pos, "
+						"(@rank := IF(@prev = Time,@rank, @pos)) Rank, "
+						"(@prev := Time) Time "
+					"FROM ("
+						"SELECT Name, min(Time) as Time "
+						"FROM %s_race "
+						"WHERE Map = '%s' "
+						"GROUP BY Name "
+						"ORDER BY `Time` ASC"
+					") as a"
+				") as b "
+				"ORDER BY Rank %s "
+				"LIMIT %d, 5;",
+				pSqlServer->GetPrefix(),
+				pData->m_Map.ClrStr(),
+				pOrder,
+				LimitStart
+		);
 		pSqlServer->executeSqlQuery(aBuf);
 
 		// show top5
-		pData->GameServer()->SendChatTarget(pData->m_ClientID, "----------- Top 5 -----------");
+		strcpy(pData->m_pResult->m_aaMessages[0], "----------- Top 5 -----------");
 
-		int Rank = 0;
-		float Time = 0;
+		int Line = 1;
 		while(pSqlServer->GetResults()->next())
 		{
-			Time = (float)pSqlServer->GetResults()->getDouble("Time");
-			Rank = (float)pSqlServer->GetResults()->getInt("Rank");
-			str_format(aBuf, sizeof(aBuf), "%d. %s Time: %02d:%05.2f", Rank, pSqlServer->GetResults()->getString("Name").c_str(), (int)(Time/60), Time-((int)Time/60*60));
-			pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
-			//Rank++;
+			float Time = (float)pSqlServer->GetResults()->getDouble("Time");
+			int Rank = pSqlServer->GetResults()->getInt("Rank");
+			str_format(pData->m_pResult->m_aaMessages[Line], sizeof(pData->m_pResult->m_aaMessages[0]),
+					"%d. %s Time: %02d:%05.2f",
+					Rank, pSqlServer->GetResults()->getString("Name").c_str(),
+					(int)(Time/60), Time-((int)Time/60*60)
+			);
+			Line++;
 		}
-		pData->GameServer()->SendChatTarget(pData->m_ClientID, "-------------------------------");
+		strcpy(pData->m_pResult->m_aaMessages[Line], "-------------------------------");
 
+		pData->m_pResult->m_Done = true;
 		dbg_msg("sql", "Showing top5 done");
 		return true;
 	}
@@ -1051,13 +1073,7 @@ bool CSqlScore::ShowTop5Thread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayer
 		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not show top5");
 	}
-	catch (CGameContextError &e)
-	{
-		dbg_msg("sql", "WARNING: Aborted showing top5 due to reload/change of map.");
-		return true;
-	}
-	return false;
-	*/
+
 	return false;
 }
 
