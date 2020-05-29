@@ -829,24 +829,15 @@ bool CSqlScore::ShowRankThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayer
 		// check sort method
 		char aBuf[600];
 
-		pSqlServer->executeSql("SET @prev := NULL;");
-		pSqlServer->executeSql("SET @rank := 1;");
-		pSqlServer->executeSql("SET @pos := 0;");
 		str_format(aBuf, sizeof(aBuf),
 				"SELECT Rank, Name, Time "
 				"FROM ("
-					"SELECT "
-						"Name, (@pos := @pos+1) pos, "
-						"(@rank := IF(@prev = Time,@rank, @pos)) rank, "
-						"(@prev := Time) Time "
-					"FROM ("
-						"SELECT Name, min(Time) as Time "
-						"FROM %s_race "
-						"WHERE Map = '%s' "
-						"GROUP BY Name "
-						"ORDER BY `Time` ASC"
-					") as a"
-				") as b "
+					"SELECT RANK() OVER w AS Rank, Name, MIN(Time) AS Time "
+					"FROM %s_race "
+					"WHERE Map = '%s' "
+					"GROUP BY Name "
+					"WINDOW w AS (ORDER BY Time)"
+				") as a "
 				"WHERE Name = '%s';",
 				pSqlServer->GetPrefix(),
 				pData->m_Map.ClrStr(),
@@ -881,7 +872,6 @@ bool CSqlScore::ShowRankThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayer
 			}
 		}
 
-		dbg_msg("sql", "Showing rank done");
 		pData->m_pResult->m_Done = true;
 		return true;
 	}
