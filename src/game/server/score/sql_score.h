@@ -84,16 +84,19 @@ struct CSqlMapData : CSqlData<CSqlPlayerResult>
 	int m_ClientID;
 
 	sqlstr::CSqlString<128> m_RequestedMap;
-	char m_aFuzzyMap[128];
 	sqlstr::CSqlString<MAX_NAME_LENGTH> m_Name;
 };
 
 struct CSqlPlayerRequest : CSqlData<CSqlPlayerResult>
 {
 	using CSqlData<CSqlPlayerResult>::CSqlData;
-	sqlstr::CSqlString<MAX_NAME_LENGTH> m_Player;
-	sqlstr::CSqlString<MAX_NAME_LENGTH> m_Map;
+	// object being requested, either map (128 bytes) or player (16 bytes)
+	sqlstr::CSqlString<128> m_Name;
+	// current map
+	sqlstr::CSqlString<128> m_Map;
 	sqlstr::CSqlString<MAX_NAME_LENGTH> m_RequestingPlayer;
+	// relevant for /top5 kind of requests
+	int m_Offset;
 };
 
 // used for mapvote
@@ -221,6 +224,14 @@ class CSqlScore: public IScore
 
 	// returns new SqlResult bound to the player, if no current Thread is active for this player
 	std::shared_ptr<CSqlPlayerResult> NewSqlPlayerResult(int ClientID);
+	// Creates for player database requests
+	void ExecPlayerThread(
+			bool (*pFuncPtr) (CSqlServer*, const CSqlData<CSqlPlayerResult> *, bool),
+			const char* pThreadName,
+			int ClientID,
+			const char* pName,
+			int OffSet
+	);
 
 public:
 	// keeps track of score-threads

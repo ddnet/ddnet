@@ -82,6 +82,27 @@ std::shared_ptr<CSqlPlayerResult> CSqlScore::NewSqlPlayerResult(int ClientID)
 	return pCurPlayer->m_SqlQueryResult;
 }
 
+void CSqlScore::ExecPlayerThread(
+		bool (*pFuncPtr) (CSqlServer*, const CSqlData<CSqlPlayerResult> *, bool),
+		const char* pThreadName,
+		int ClientID,
+		const char* pName,
+		int Offset
+) {
+	auto pResult = NewSqlPlayerResult(ClientID);
+	if(pResult == nullptr)
+		return;
+	CSqlPlayerRequest *Tmp = new CSqlPlayerRequest(pResult);
+	Tmp->m_Name = pName;
+	Tmp->m_Map = g_Config.m_SvMap;
+	Tmp->m_RequestingPlayer = Server()->ClientName(ClientID);
+	Tmp->m_Offset = Offset;
+
+	thread_init_and_detach(CSqlExecData<CSqlPlayerResult>::ExecSqlFunc,
+			new CSqlExecData<CSqlPlayerResult>(pFuncPtr, Tmp),
+			pThreadName);
+}
+
 LOCK CSqlScore::ms_FailureFileLock = lock_create();
 
 CSqlScore::CSqlScore(CGameContext *pGameServer) :
@@ -399,32 +420,23 @@ bool CSqlScore::MapVoteThread(CSqlServer* pSqlServer, const CSqlData<CSqlResult>
 
 void CSqlScore::MapInfo(int ClientID, const char* MapName)
 {
-	auto pResult = NewSqlPlayerResult(ClientID);
-	if(pResult == nullptr)
-		return;
-	CSqlMapData *Tmp = new CSqlMapData(pResult);
-
-	Tmp->m_ClientID = ClientID;
-	Tmp->m_RequestedMap = MapName;
-	Tmp->m_Name = Server()->ClientName(ClientID);
-	str_copy(Tmp->m_aFuzzyMap, MapName, sizeof(Tmp->m_aFuzzyMap));
-	sqlstr::ClearString(Tmp->m_aFuzzyMap, sizeof(Tmp->m_aFuzzyMap));
-	sqlstr::FuzzyString(Tmp->m_aFuzzyMap, sizeof(Tmp->m_aFuzzyMap));
-
-	thread_init_and_detach(CSqlExecData<CSqlPlayerResult>::ExecSqlFunc,
-			new CSqlExecData<CSqlPlayerResult>(MapInfoThread, Tmp),
-			"map info");
+	ExecPlayerThread(MapInfoThread, "map info", ClientID, MapName, 0);
 }
 
 bool CSqlScore::MapInfoThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure)
 {
-	const CSqlMapData *pData = dynamic_cast<const CSqlMapData *>(pGameData);
+	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 
 	if (HandleFailure)
 		return true;
 
 	try
 	{
+		char aFuzzyMap[128];
+		str_copy(aFuzzyMap, pData->m_Name.Str(), sizeof(aFuzzyMap));
+		sqlstr::ClearString(aFuzzyMap, sizeof(aFuzzyMap));
+		sqlstr::FuzzyString(aFuzzyMap, sizeof(aFuzzyMap));
+
 		char aBuf[1024];
 		str_format(aBuf, sizeof(aBuf),
 				"SELECT l.Map, l.Server, Mapper, Points, Stars, "
@@ -446,18 +458,18 @@ bool CSqlScore::MapInfoThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerR
 				") as l;",
 				pSqlServer->GetPrefix(), pSqlServer->GetPrefix(),
 				pSqlServer->GetPrefix(), pSqlServer->GetPrefix(),
-				pData->m_Name.ClrStr(),
+				pData->m_RequestingPlayer.ClrStr(),
 				pSqlServer->GetPrefix(),
-				pData->m_aFuzzyMap,
-				pData->m_RequestedMap.ClrStr(),
-				pData->m_RequestedMap.ClrStr()
+				aFuzzyMap,
+				pData->m_Name.ClrStr(),
+				pData->m_Name.ClrStr()
 		);
 		pSqlServer->executeSqlQuery(aBuf);
 
 		if(pSqlServer->GetResults()->rowsCount() != 1)
 		{
 			str_format(pData->m_pResult->m_aaMessages[0], sizeof(pData->m_pResult->m_aaMessages[0]),
-					"No map like \"%s\" found.", pData->m_RequestedMap.Str());
+					"No map like \"%s\" found.", pData->m_Name.Str());
 		}
 		else
 		{
@@ -804,17 +816,7 @@ bool CSqlScore::SaveTeamScoreThread(CSqlServer* pSqlServer, const CSqlData<CSqlP
 
 void CSqlScore::ShowRank(int ClientID, const char* pName)
 {
-	auto pResult = NewSqlPlayerResult(ClientID);
-	if(pResult == nullptr)
-		return;
-	CSqlPlayerRequest *Tmp = new CSqlPlayerRequest(pResult);
-	Tmp->m_Player = pName;
-	Tmp->m_Map = g_Config.m_SvMap;
-	Tmp->m_RequestingPlayer = Server()->ClientName(ClientID);
-
-	thread_init_and_detach(CSqlExecData<CSqlPlayerResult>::ExecSqlFunc,
-			new CSqlExecData<CSqlPlayerResult>(ShowRankThread, Tmp),
-			"show rank");
+	ExecPlayerThread(ShowRankThread, "show rank", ClientID, pName, 0);
 }
 
 bool CSqlScore::ShowRankThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure)
@@ -843,7 +845,7 @@ bool CSqlScore::ShowRankThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayer
 				"WHERE Name = '%s';",
 				pSqlServer->GetPrefix(),
 				pData->m_Map.ClrStr(),
-				pData->m_Player.ClrStr()
+				pData->m_Name.ClrStr()
 		);
 
 		pSqlServer->executeSqlQuery(aBuf);
@@ -851,7 +853,7 @@ bool CSqlScore::ShowRankThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayer
 		if(pSqlServer->GetResults()->rowsCount() != 1)
 		{
 			str_format(pData->m_pResult->m_aaMessages[0], sizeof(pData->m_pResult->m_aaMessages[0]),
-					"%s is not ranked", pData->m_Player.Str());
+					"%s is not ranked", pData->m_Name.Str());
 		}
 		else
 		{
@@ -888,17 +890,7 @@ bool CSqlScore::ShowRankThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayer
 
 void CSqlScore::ShowTeamRank(int ClientID, const char* pName)
 {
-	auto pResult = NewSqlPlayerResult(ClientID);
-	if(pResult == nullptr)
-		return;
-	CSqlPlayerRequest *Tmp = new CSqlPlayerRequest(pResult);
-	Tmp->m_Player = pName;
-	Tmp->m_Map = g_Config.m_SvMap;
-	Tmp->m_RequestingPlayer = Server()->ClientName(ClientID);
-
-	thread_init_and_detach(CSqlExecData<CSqlPlayerResult>::ExecSqlFunc,
-			new CSqlExecData<CSqlPlayerResult>(ShowTeamRankThread, Tmp),
-			"show team rank");
+	ExecPlayerThread(ShowTeamRankThread, "show team rank", ClientID, pName, 0);
 }
 
 bool CSqlScore::ShowTeamRankThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure)
@@ -948,7 +940,7 @@ bool CSqlScore::ShowTeamRankThread(CSqlServer* pSqlServer, const CSqlData<CSqlPl
 				pData->m_Map.ClrStr(),
 				pSqlServer->GetPrefix(),
 				pData->m_Map.ClrStr(),
-				pData->m_Player.ClrStr(),
+				pData->m_Name.ClrStr(),
 				pSqlServer->GetPrefix()
 		);
 
@@ -959,7 +951,7 @@ bool CSqlScore::ShowTeamRankThread(CSqlServer* pSqlServer, const CSqlData<CSqlPl
 		if(Rows < 1)
 		{
 			str_format(pData->m_pResult->m_aaMessages[0], sizeof(pData->m_pResult->m_aaMessages[0]),
-					"%s has no team ranks", pData->m_Player.Str());
+					"%s has no team ranks", pData->m_Name.Str());
 		}
 		else
 		{
