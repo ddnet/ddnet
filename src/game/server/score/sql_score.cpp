@@ -1019,25 +1019,15 @@ bool CSqlScore::ShowTop5Thread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayer
 	{
 		// check sort method
 		char aBuf[512];
-		pSqlServer->executeSql("SET @prev := NULL;");
-		pSqlServer->executeSql("SET @rank := 1;");
-		pSqlServer->executeSql("SET @pos := 0;");
 		str_format(aBuf, sizeof(aBuf),
 				"SELECT Name, Time, Rank "
 				"FROM ("
-					"SELECT "
-						"Name, "
-						"(@pos := @pos+1) pos, "
-						"(@rank := IF(@prev = Time,@rank, @pos)) Rank, "
-						"(@prev := Time) Time "
-					"FROM ("
-						"SELECT Name, min(Time) as Time "
-						"FROM %s_race "
-						"WHERE Map = '%s' "
-						"GROUP BY Name "
-						"ORDER BY `Time` ASC"
-					") as a"
-				") as b "
+					"SELECT RANK() OVER w AS Rank, Name, MIN(Time) AS Time "
+					"FROM %s_race "
+					"WHERE Map = '%s' "
+					"GROUP BY Name "
+					"WINDOW w AS (ORDER BY Time)"
+				") as a "
 				"ORDER BY Rank %s "
 				"LIMIT %d, 5;",
 				pSqlServer->GetPrefix(),
