@@ -386,10 +386,9 @@ void CGameContext::ConTeamTop5(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	if (pResult->NumArguments() > 0)
-		pSelf->Score()->ShowTeamTop5(pResult->m_ClientID, pUserData,
-				pResult->GetInteger(0));
+		pSelf->Score()->ShowTeamTop5(pResult->m_ClientID, pResult->GetInteger(0));
 	else
-		pSelf->Score()->ShowTeamTop5(pResult->m_ClientID, pUserData);
+		pSelf->Score()->ShowTeamTop5(pResult->m_ClientID);
 
 #if defined(CONF_SQL)
 	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
@@ -417,10 +416,9 @@ void CGameContext::ConTop5(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	if (pResult->NumArguments() > 0)
-		pSelf->Score()->ShowTop5(pResult->m_ClientID, pUserData,
-				pResult->GetInteger(0));
+		pSelf->Score()->ShowTop5(pResult->m_ClientID, pResult->GetInteger(0));
 	else
-		pSelf->Score()->ShowTop5(pResult->m_ClientID, pUserData);
+		pSelf->Score()->ShowTop5(pResult->m_ClientID);
 
 #if defined(CONF_SQL)
 	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
@@ -1580,10 +1578,9 @@ void CGameContext::ConTopPoints(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	if (pResult->NumArguments() > 0)
-		pSelf->Score()->ShowTopPoints(pResult->m_ClientID, pUserData,
-				pResult->GetInteger(0));
+		pSelf->Score()->ShowTopPoints(pResult->m_ClientID, pResult->GetInteger(0));
 	else
-		pSelf->Score()->ShowTopPoints(pResult->m_ClientID, pUserData);
+		pSelf->Score()->ShowTopPoints(pResult->m_ClientID);
 
 	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
 		pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery = pSelf->Server()->Tick();

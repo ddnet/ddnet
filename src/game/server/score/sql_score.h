@@ -195,8 +195,8 @@ class CSqlScore: public IScore
 
 	static bool MapInfoThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure = false);
 	static bool ShowRankThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure = false);
-	static bool ShowTop5Thread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure = false);
 	static bool ShowTeamRankThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure = false);
+	static bool ShowTop5Thread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure = false);
 	static bool ShowTeamTop5Thread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure = false);
 	static bool ShowTimesThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure = false);
 	static bool ShowPointsThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure = false);
@@ -240,12 +240,12 @@ public:
 	virtual void MapInfo(int ClientID, const char* MapName);
 	virtual void ShowRank(int ClientID, const char* pName);
 	virtual void ShowTeamRank(int ClientID, const char* pName);
+	virtual void ShowPoints(int ClientID, const char* pName);
 	virtual void ShowTimes(int ClientID, const char* pName, int Offset = 1);
 	virtual void ShowTimes(int ClientID, int Offset = 1);
-	virtual void ShowTop5(int ClientID, void *pUserData, int Offset = 1);
-	virtual void ShowTeamTop5(int ClientID, void *pUserData, int Offset = 1);
-	virtual void ShowPoints(int ClientID, const char* pName);
-	virtual void ShowTopPoints(int ClientID, void *pUserData, int Offset = 1);
+	virtual void ShowTop5(int ClientID, int Offset = 1);
+	virtual void ShowTeamTop5(int ClientID, int Offset = 1);
+	virtual void ShowTopPoints(int ClientID, int Offset = 1);
 	virtual void GetSaves(int ClientID);
 
 	// requested by teams
