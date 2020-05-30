@@ -1300,25 +1300,19 @@ bool CSqlScore::ShowPointsThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlay
 
 void CSqlScore::ShowTopPoints(int ClientID, int Offset)
 {
-	/*
-	CSqlScoreData *Tmp = new CSqlScoreData();
-	Tmp->m_Num = Offset;
-	Tmp->m_ClientID = ClientID;
-
-	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(ShowTopPointsThread, Tmp), "show top points");
-	*/
+	ExecPlayerThread(ShowTopPointsThread, "show top points", ClientID, "", Offset);
 }
 
 bool CSqlScore::ShowTopPointsThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure)
 {
-	/*
-	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
+	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
+	auto paMessages = pData->m_pResult->m_aaMessages;
 
 	if (HandleFailure)
 		return true;
 
-	int LimitStart = maximum(abs(pData->m_Num)-1, 0);
-	const char *pOrder = pData->m_Num >= 0 ? "ASC" : "DESC";
+	int LimitStart = maximum(abs(pData->m_Offset)-1, 0);
+	const char *pOrder = pData->m_Offset >= 0 ? "ASC" : "DESC";
 
 	try
 	{
@@ -1326,20 +1320,43 @@ bool CSqlScore::ShowTopPointsThread(CSqlServer* pSqlServer, const CSqlData<CSqlP
 		pSqlServer->executeSql("SET @prev := NULL;");
 		pSqlServer->executeSql("SET @rank := 1;");
 		pSqlServer->executeSql("SET @pos := 0;");
-		str_format(aBuf, sizeof(aBuf), "SELECT Rank, Points, Name FROM (SELECT Name, (@pos := @pos+1) pos, (@rank := IF(@prev = Points,@rank, @pos)) Rank, (@prev := Points) Points FROM (SELECT Name, Points FROM %s_points GROUP BY Name ORDER BY Points DESC) as a) as b ORDER BY Rank %s LIMIT %d, 5;", pSqlServer->GetPrefix(), pOrder, LimitStart);
+		str_format(aBuf, sizeof(aBuf),
+				"SELECT Rank, Points, Name "
+				"FROM ("
+					"SELECT Name, "
+						"(@pos := @pos+1) pos, "
+						"(@rank := IF(@prev = Points,@rank, @pos)) Rank, "
+						"(@prev := Points) Points "
+					"FROM ("
+						"SELECT Name, Points "
+						"FROM %s_points "
+						"GROUP BY Name "
+						"ORDER BY Points DESC"
+					") as a"
+				") as b "
+				"ORDER BY Rank %s "
+				"LIMIT %d, 5;",
+				pSqlServer->GetPrefix(), pOrder, LimitStart
+		);
 
 		pSqlServer->executeSqlQuery(aBuf);
 
 		// show top points
-		pData->GameServer()->SendChatTarget(pData->m_ClientID, "-------- Top Points --------");
+		strcpy(paMessages[0], "-------- Top Points --------");
 
+		int Line = 1;
 		while(pSqlServer->GetResults()->next())
 		{
-			str_format(aBuf, sizeof(aBuf), "%d. %s Points: %d", pSqlServer->GetResults()->getInt("Rank"), pSqlServer->GetResults()->getString("Name").c_str(), pSqlServer->GetResults()->getInt("Points"));
-			pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
+			int Rank = pSqlServer->GetResults()->getInt("Rank");
+			auto Name = pSqlServer->GetResults()->getString("Name");
+			int Points = pSqlServer->GetResults()->getInt("Points");
+			str_format(paMessages[Line], sizeof(paMessages[0]),
+					"%d. %s Points: %d", Rank, Name.c_str(), Points);
+			Line++;
 		}
-		pData->GameServer()->SendChatTarget(pData->m_ClientID, "-------------------------------");
+		strcpy(paMessages[Line], "-------------------------------");
 
+		pData->m_pResult->m_Done = true;
 		dbg_msg("sql", "Showing toppoints done");
 		return true;
 	}
@@ -1348,13 +1365,6 @@ bool CSqlScore::ShowTopPointsThread(CSqlServer* pSqlServer, const CSqlData<CSqlP
 		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not show toppoints");
 	}
-	catch (CGameContextError &e)
-	{
-		dbg_msg("sql", "WARNING: Aborted toppoints-thread due to reload/change of map.");
-		return true;
-	}
-
-	*/
 	return false;
 }
 
