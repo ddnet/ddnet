@@ -1243,20 +1243,13 @@ bool CSqlScore::ShowTimesThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlaye
 
 void CSqlScore::ShowPoints(int ClientID, const char* pName)
 {
-	/*
-	CSqlScoreData *Tmp = new CSqlScoreData();
-	Tmp->m_ClientID = ClientID;
-	Tmp->m_Name = pName;
-	str_copy(Tmp->m_aRequestingPlayer, Server()->ClientName(ClientID), sizeof(Tmp->m_aRequestingPlayer));
-
-	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(ShowPointsThread, Tmp), "show points");
-	*/
+	ExecPlayerThread(ShowPointsThread, "show points", ClientID, pName, 0);
 }
 
 bool CSqlScore::ShowPointsThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure)
 {
-	/*
-	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
+	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
+	auto paMessages = pData->m_pResult->m_aaMessages;
 
 	if (HandleFailure)
 		return true;
@@ -1268,23 +1261,43 @@ bool CSqlScore::ShowPointsThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlay
 		pSqlServer->executeSql("SET @pos := 0;");
 
 		char aBuf[512];
-		str_format(aBuf, sizeof(aBuf), "SELECT Rank, Points, Name FROM (SELECT Name, (@pos := @pos+1) pos, (@rank := IF(@prev = Points, @rank, @pos)) Rank, (@prev := Points) Points FROM (SELECT Name, Points FROM %s_points GROUP BY Name ORDER BY Points DESC) as a) as b where Name = '%s';", pSqlServer->GetPrefix(), pData->m_Name.ClrStr());
+		str_format(aBuf, sizeof(aBuf),
+				"SELECT Rank, Points, Name "
+				"FROM ("
+					"SELECT Name, "
+						"(@pos := @pos+1) pos, "
+						"(@rank := IF(@prev = Points, @rank, @pos)) Rank, "
+						"(@prev := Points) Points "
+					"FROM ("
+						"SELECT Name, Points "
+						"FROM %s_points "
+						"GROUP BY Name "
+						"ORDER BY Points DESC"
+					") as a"
+				") as b "
+				"WHERE Name = '%s';",
+				pSqlServer->GetPrefix(), pData->m_Name.ClrStr()
+		);
 		pSqlServer->executeSqlQuery(aBuf);
 
 		if(pSqlServer->GetResults()->rowsCount() != 1)
 		{
-			str_format(aBuf, sizeof(aBuf), "%s has not collected any points so far", pData->m_Name.Str());
-			pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
+			str_format(paMessages[0], sizeof(paMessages[0]),
+					"%s has not collected any points so far", pData->m_Name.Str());
 		}
 		else
 		{
 			pSqlServer->GetResults()->next();
-			int count = pSqlServer->GetResults()->getInt("Points");
-			int rank = pSqlServer->GetResults()->getInt("Rank");
-			str_format(aBuf, sizeof(aBuf), "%d. %s Points: %d, requested by %s", rank, pSqlServer->GetResults()->getString("Name").c_str(), count, pData->m_aRequestingPlayer);
-			pData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
+			int Count = pSqlServer->GetResults()->getInt("Points");
+			int Rank = pSqlServer->GetResults()->getInt("Rank");
+			auto Name = pSqlServer->GetResults()->getString("Name");
+			pData->m_pResult->m_MessageTarget = CSqlPlayerResult::ALL;
+			str_format(paMessages[0], sizeof(paMessages[0]),
+					"%d. %s Points: %d, requested by %s",
+					Rank, Name.c_str(), Count, pData->m_RequestingPlayer.Str());
 		}
 
+		pData->m_pResult->m_Done = true;
 		dbg_msg("sql", "Showing points done");
 		return true;
 	}
@@ -1293,12 +1306,6 @@ bool CSqlScore::ShowPointsThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlay
 		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not show points");
 	}
-	catch (CGameContextError &e)
-	{
-		dbg_msg("sql", "WARNING: Aborted showing points due to reload/change of map.");
-		return true;
-	}
-	*/
 	return false;
 }
 
