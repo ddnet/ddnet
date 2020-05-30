@@ -147,11 +147,6 @@ struct CSqlTeamLoad : CSqlData<CSqlResult>
 	char m_ClientName[MAX_NAME_LENGTH];
 };
 
-struct CSqlGetSavesData: CSqlData<CSqlResult>
-{
-	sqlstr::CSqlString<MAX_NAME_LENGTH> m_Name;
-};
-
 struct CSqlRandomMap : CSqlData<CSqlResult>
 {
 	using CSqlData::CSqlData;

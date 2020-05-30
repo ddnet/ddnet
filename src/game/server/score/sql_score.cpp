@@ -1760,19 +1760,13 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData<CSqlResult
 
 void CSqlScore::GetSaves(int ClientID)
 {
-	/*
-	CSqlGetSavesData *Tmp = new CSqlGetSavesData();
-	Tmp->m_ClientID = ClientID;
-	Tmp->m_Name = Server()->ClientName(ClientID);
-
-	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(GetSavesThread, Tmp, false), "get saves");
-	*/
+	ExecPlayerThread(GetSavesThread, "get saves", ClientID, "", 0);
 }
 
 bool CSqlScore::GetSavesThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure)
 {
-	/*
-	const CSqlGetSavesData *pData = dynamic_cast<const CSqlGetSavesData *>(pGameData);
+	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
+	auto paMessages = pData->m_pResult->m_aaMessages;
 
 	if (HandleFailure)
 		return true;
@@ -1781,7 +1775,15 @@ bool CSqlScore::GetSavesThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayer
 	{
 		char aBuf[512];
 
-		str_format(aBuf, sizeof(aBuf), "SELECT count(*) as NumSaves, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(max(Timestamp)) as Ago FROM %s_saves WHERE Map='%s' AND Savegame regexp '\\n%s\\t';", pSqlServer->GetPrefix(), pData->m_Map.ClrStr(), pData->m_Name.ClrStr());
+		str_format(aBuf, sizeof(aBuf),
+				"SELECT COUNT(*) as NumSaves, "
+					"UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(max(Timestamp)) as Ago "
+				"FROM %s_saves "
+				"WHERE Map='%s' AND Savegame regexp '\\n%s\\t';",
+				pSqlServer->GetPrefix(),
+				pData->m_Map.ClrStr(),
+				pData->m_RequestingPlayer.ClrStr()
+		);
 		pSqlServer->executeSqlQuery(aBuf);
 		if(pSqlServer->GetResults()->next())
 		{
@@ -1796,11 +1798,14 @@ bool CSqlScore::GetSavesThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayer
 				str_format(aLastSavedString, sizeof(aLastSavedString), ", last saved %s ago", aAgoString);
 			}
 
-			str_format(pData->m_pResult->m_Message,
-					sizeof(pData->m_pResult->m_Message),
-					"%s has %d save%s on %s%s", pData->m_Name.Str(), NumSaves, NumSaves == 1 ? "" : "s", pData->m_Map.Str(), aLastSavedString);
+			str_format(paMessages[0], sizeof(paMessages[0]),
+					"%s has %d save%s on %s%s",
+					pData->m_RequestingPlayer.Str(),
+					NumSaves, NumSaves == 1 ? "" : "s",
+					pData->m_Map.Str(), aLastSavedString);
 		}
 
+		pData->m_pResult->m_Done = true;
 		dbg_msg("sql", "Showing saves done");
 		return true;
 	}
@@ -1808,10 +1813,7 @@ bool CSqlScore::GetSavesThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayer
 	{
 		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not get saves");
-		pData->GameServer()->SendChatTarget(pData->m_ClientID, "MySQL Error: Could not get saves");
 	}
-	return false;
-	*/
 	return false;
 }
 
