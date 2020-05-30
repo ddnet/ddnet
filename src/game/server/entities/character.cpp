@@ -908,6 +908,12 @@ bool CCharacter::IncreaseArmor(int Amount)
 
 void CCharacter::Die(int Killer, int Weapon)
 {
+	//maybe rescue instead of kill
+	if ((g_Config.m_SvRescue || Teams()->IsPractice(Team())) && ShouldRescue()) {
+		ForceRescue(); //bypass rescue rate limit
+		return; //rescued, don't kill
+	}
+
 	if(Server()->IsRecording(m_pPlayer->GetCID()))
 		Server()->StopRecord(m_pPlayer->GetCID());
 
@@ -2144,7 +2150,7 @@ void CCharacter::DDRaceTick()
 		int index = GameServer()->Collision()->GetPureMapIndex(m_Pos);
 		int tile = GameServer()->Collision()->GetTileIndex(index);
 		int ftile = GameServer()->Collision()->GetFTileIndex(index);
-		if(IsGrounded() && tile != TILE_FREEZE && tile != TILE_DFREEZE && ftile != TILE_FREEZE && ftile != TILE_DFREEZE) {
+		if(IsGrounded() && tile != TILE_FREEZE && tile != TILE_DFREEZE && ftile != TILE_FREEZE && ftile != TILE_DFREEZE && !GameServer()->Collision()->IsSpeedup(index)) {
 			m_PrevSavePos = m_Pos;
 			for(int i = 0; i< NUM_WEAPONS; i++)
 			{
@@ -2363,7 +2369,7 @@ void CCharacter::DDRaceInit()
 
 void CCharacter::Rescue()
 {
-	if (m_SetSavePos && !m_Super) {
+	if (ShouldRescue()) {
 		if (m_LastRescue + g_Config.m_SvRescueDelay * Server()->TickSpeed() > Server()->Tick())
 		{
 			char aBuf[256];
@@ -2371,26 +2377,35 @@ void CCharacter::Rescue()
 			GameServer()->SendChatTarget(GetPlayer()->GetCID(), aBuf);
 			return;
 		}
+		ForceRescue();
+	}
+}
 
-		m_LastRescue = Server()->Tick();
-		m_Core.m_Pos = m_PrevSavePos;
-		m_Pos = m_PrevSavePos;
-		m_PrevPos = m_PrevSavePos;
-		m_Core.m_Vel = vec2(0, 0);
-		m_Core.m_HookedPlayer = -1;
-		m_Core.m_HookState = HOOK_RETRACTED;
-		m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
-		GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
-		m_Core.m_HookPos = m_Core.m_Pos;
-		m_DeepFreeze = false;
-		UnFreeze();
+bool CCharacter::ShouldRescue()
+{
+	return m_SetSavePos && !m_Super;
+}
 
-		for(int i = 0; i< NUM_WEAPONS; i++)
-		{
-			m_aWeapons[i].m_AmmoRegenStart = m_aPrevSaveWeapons[i].m_AmmoRegenStart;
-			m_aWeapons[i].m_Ammo = m_aPrevSaveWeapons[i].m_Ammo;
-			m_aWeapons[i].m_Ammocost = m_aPrevSaveWeapons[i].m_Ammocost;
-			m_aWeapons[i].m_Got = m_aPrevSaveWeapons[i].m_Got;
-		}
+void CCharacter::ForceRescue()
+{
+	m_LastRescue = Server()->Tick();
+	m_Core.m_Pos = m_PrevSavePos;
+	m_Pos = m_PrevSavePos;
+	m_PrevPos = m_PrevSavePos;
+	m_Core.m_Vel = vec2(0, 0);
+	m_Core.m_HookedPlayer = -1;
+	m_Core.m_HookState = HOOK_RETRACTED;
+	m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
+	GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
+	m_Core.m_HookPos = m_Core.m_Pos;
+	m_DeepFreeze = false;
+	UnFreeze();
+
+	for(int i = 0; i< NUM_WEAPONS; i++)
+	{
+		m_aWeapons[i].m_AmmoRegenStart = m_aPrevSaveWeapons[i].m_AmmoRegenStart;
+		m_aWeapons[i].m_Ammo = m_aPrevSaveWeapons[i].m_Ammo;
+		m_aWeapons[i].m_Ammocost = m_aPrevSaveWeapons[i].m_Ammocost;
+		m_aWeapons[i].m_Got = m_aPrevSaveWeapons[i].m_Got;
 	}
 }

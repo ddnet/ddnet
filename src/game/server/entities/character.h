@@ -177,6 +177,8 @@ private:
 	void HandleTuneLayer();
 	void SendZoneMsgs();
 	IAntibot *Antibot();
+	bool ShouldRescue();
+	void ForceRescue();
 
 	bool m_SetSavePos;
 	vec2 m_PrevSavePos;
