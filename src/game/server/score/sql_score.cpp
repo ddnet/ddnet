@@ -909,39 +909,30 @@ bool CSqlScore::ShowTeamRankThread(CSqlServer* pSqlServer, const CSqlData<CSqlPl
 		char aNames[2300];
 		aNames[0] = '\0';
 
-		pSqlServer->executeSql("SET @prev := NULL;");
-		pSqlServer->executeSql("SET @rank := 1;");
-		pSqlServer->executeSql("SET @pos := 0;");
 		str_format(aBuf, sizeof(aBuf),
-				"SELECT Rank, Name, Time "
-				"FROM ("
-					"SELECT Rank, l2.ID "
-					"FROM (("
-						"SELECT "
-							"ID, "
-							"(@pos := @pos+1) pos, "
-							"(@rank := IF(@prev = Time,@rank,@pos)) rank, "
-							"(@prev := Time) Time "
-						"FROM ("
-							"SELECT ID, Time "
-							"FROM %s_teamrace "
-							"WHERE Map = '%s' "
-							"GROUP BY ID "
-							"ORDER BY Time"
-						") as ll) "
-					"as l2) "
-					"LEFT JOIN %s_teamrace as r2 ON l2.ID = r2.ID "
-					"WHERE Map = '%s' AND Name = '%s' "
-					"ORDER BY Rank LIMIT 1"
+				"SELECT Time, Rank, Name "
+				"FROM (" // teamrank score board
+					"SELECT RANK() OVER w AS Rank, Id "
+					"FROM %s_teamrace "
+					"WHERE Map = '%s' "
+					"GROUP BY Id "
+					"WINDOW w AS (ORDER BY Time)"
 				") as l "
-				"LEFT JOIN %s_teamrace as r ON l.ID = r.ID "
+				"INNER JOIN %s_teamrace as r ON l.ID = r.ID "
+				"WHERE l.ID = (" // find id for top teamrank of player
+					"SELECT Id "
+					"FROM %s_teamrace "
+					"WHERE Map = '%s' AND Name = '%s' "
+					"ORDER BY Time "
+					"LIMIT 1"
+				") "
 				"ORDER BY Name;",
 				pSqlServer->GetPrefix(),
 				pData->m_Map.ClrStr(),
 				pSqlServer->GetPrefix(),
+				pSqlServer->GetPrefix(),
 				pData->m_Map.ClrStr(),
-				pData->m_Name.ClrStr(),
-				pSqlServer->GetPrefix()
+				pData->m_Name.ClrStr()
 		);
 
 		pSqlServer->executeSqlQuery(aBuf);
