@@ -995,7 +995,6 @@ void CSqlScore::ShowTop5(int ClientID, int Offset)
 bool CSqlScore::ShowTop5Thread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
-
 	if (HandleFailure)
 	{
 		pData->m_pResult->m_Failed = true;
@@ -1060,98 +1059,79 @@ bool CSqlScore::ShowTop5Thread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayer
 
 void CSqlScore::ShowTeamTop5(int ClientID, int Offset)
 {
-	/*
-	CSqlScoreData *Tmp = new CSqlScoreData();
-	Tmp->m_Num = Offset;
-	Tmp->m_ClientID = ClientID;
-
-	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(ShowTeamTop5Thread, Tmp), "show team top5");
-	*/
+	ExecPlayerThread(ShowTeamTop5Thread, "show team top5", ClientID, "", Offset);
 }
 
 bool CSqlScore::ShowTeamTop5Thread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure)
 {
-	/*
-	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
-
+	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
+	auto paMessages = pData->m_pResult->m_aaMessages;
 	if (HandleFailure)
+	{
+		pData->m_pResult->m_Failed = true;
+		pData->m_pResult->m_Done = true;
 		return true;
+	}
 
-	int LimitStart = maximum(abs(pData->m_Num)-1, 0);
-	const char *pOrder = pData->m_Num >= 0 ? "ASC" : "DESC";
+	int LimitStart = maximum(abs(pData->m_Offset)-1, 0);
+	const char *pOrder = pData->m_Offset >= 0 ? "ASC" : "DESC";
 
 	try
 	{
 		// check sort method
-		char aBuf[2400];
+		char aBuf[512];
 
-		pSqlServer->executeSql("SET @prev := NULL;");
-		pSqlServer->executeSql("SET @previd := NULL;");
-		pSqlServer->executeSql("SET @rank := 1;");
 		pSqlServer->executeSql("SET @pos := 0;");
-		str_format(aBuf, sizeof(aBuf), "SELECT ID, Name, Time, Rank FROM (SELECT r.ID, Name, Rank, l.Time FROM ((SELECT ID, Rank, Time FROM (SELECT ID, (@pos := IF(@previd = ID,@pos,@pos+1)) pos, (@previd := ID), (@rank := IF(@prev = Time,@rank,@pos)) Rank, (@prev := Time) Time FROM (SELECT ID, MIN(Time) as Time FROM %s_teamrace WHERE Map = '%s' GROUP BY ID ORDER BY `Time` ASC) as all_top_times) as a ORDER BY Rank %s LIMIT %d, 5) as l) LEFT JOIN %s_teamrace as r ON l.ID = r.ID ORDER BY Time ASC, r.ID, Name ASC) as a;", pSqlServer->GetPrefix(), pData->m_Map.ClrStr(), pOrder, LimitStart, pSqlServer->GetPrefix());
+		str_format(aBuf, sizeof(aBuf),
+				"SELECT Name, Time, Rank, TeamSize "
+				"FROM (" // limit to 5
+					"SELECT Rank, ID, TeamSize "
+					"FROM (" // teamrank score board
+						"SELECT RANK() OVER w AS Rank, ID, COUNT(*) AS Teamsize "
+						"FROM %s_teamrace "
+						"WHERE Map = '%s' "
+						"GROUP BY Id "
+						"WINDOW w AS (ORDER BY Time)"
+					") as l1 "
+					"ORDER BY Rank %s "
+					"LIMIT %d, 5"
+				") as l2 "
+				"INNER JOIN %s_teamrace as r ON l2.ID = r.ID "
+				"ORDER BY Rank %s, r.ID, Name ASC;",
+				pSqlServer->GetPrefix(), pData->m_Map.ClrStr(), pOrder, LimitStart, pSqlServer->GetPrefix(), pOrder
+		);
 		pSqlServer->executeSqlQuery(aBuf);
 
 		// show teamtop5
-		pData->GameServer()->SendChatTarget(pData->m_ClientID, "------- Team Top 5 -------");
-
-		int Rows = pSqlServer->GetResults()->rowsCount();
-
-		if (Rows >= 1)
+		pSqlServer->GetResults()->first();
+		strcpy(paMessages[0], "------- Team Top 5 -------");
+		int Line;
+		for(Line = 1; Line < 6; Line++) // print
 		{
-			char aID[17];
-			char aID2[17];
-			char aNames[2300];
-			int Rank = 0;
-			float Time = 0;
-			int aCuts[320]; // 64 * 5
-			int CutPos = 0;
+			if(pSqlServer->GetResults()->isAfterLast())
+				break;
+			int TeamSize = pSqlServer->GetResults()->getInt("TeamSize");
+			float Time = (float)pSqlServer->GetResults()->getDouble("Time");
+			int Rank = pSqlServer->GetResults()->getInt("Rank");
+			printf("%d", TeamSize);
 
-			aNames[0] = '\0';
-			aCuts[0] = -1;
-
-			pSqlServer->GetResults()->first();
-			strcpy(aID, pSqlServer->GetResults()->getString("ID").c_str());
-			for(int Row = 0; Row < Rows; Row++)
+			char aNames[2300] = { 0 };
+			for(int i = 0; i < TeamSize; i++)
 			{
-				strcpy(aID2, pSqlServer->GetResults()->getString("ID").c_str());
-				if (str_comp(aID, aID2) != 0)
-				{
-					strcpy(aID, aID2);
-					aCuts[CutPos++] = Row - 1;
-				}
-				pSqlServer->GetResults()->next();
-			}
-			aCuts[CutPos] = Rows - 1;
-
-			CutPos = 0;
-			pSqlServer->GetResults()->first();
-			for(int Row = 0; Row < Rows; Row++)
-			{
-				str_append(aNames, pSqlServer->GetResults()->getString("Name").c_str(), sizeof(aNames));
-
-				if (Row < aCuts[CutPos] - 1)
+				auto Name = pSqlServer->GetResults()->getString("Name");
+				str_append(aNames, Name.c_str(), sizeof(aNames));
+				if (i < TeamSize - 2)
 					str_append(aNames, ", ", sizeof(aNames));
-				else if (Row < aCuts[CutPos])
+				else if (i == TeamSize - 2)
 					str_append(aNames, " & ", sizeof(aNames));
-
-				Time = (float)pSqlServer->GetResults()->getDouble("Time");
-				Rank = (float)pSqlServer->GetResults()->getInt("Rank");
-
-				if (Row == aCuts[CutPos])
-				{
-					str_format(aBuf, sizeof(aBuf), "%d. %s Team Time: %02d:%05.2f", Rank, aNames, (int)(Time/60), Time-((int)Time/60*60));
-					pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
-					CutPos++;
-					aNames[0] = '\0';
-				}
-
 				pSqlServer->GetResults()->next();
 			}
+			str_format(paMessages[Line], sizeof(paMessages[0]), "%d. %s Team Time: %02d:%05.2f",
+					Rank, aNames, (int)(Time/60), Time-((int)Time/60*60));
 		}
+		strcpy(paMessages[Line], "-------------------------------");
 
-		pData->GameServer()->SendChatTarget(pData->m_ClientID, "-------------------------------");
-
+		pData->m_pResult->m_Done = true;
 		dbg_msg("sql", "Showing teamtop5 done");
 		return true;
 	}
@@ -1160,12 +1140,6 @@ bool CSqlScore::ShowTeamTop5Thread(CSqlServer* pSqlServer, const CSqlData<CSqlPl
 		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not show teamtop5");
 	}
-	catch (CGameContextError &e)
-	{
-		dbg_msg("sql", "WARNING: Aborted showing teamtop5 due to reload/change of map.");
-		return true;
-	}
-	*/
 	return false;
 }
 
