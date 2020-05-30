@@ -1134,91 +1134,102 @@ bool CSqlScore::ShowTeamTop5Thread(CSqlServer* pSqlServer, const CSqlData<CSqlPl
 
 void CSqlScore::ShowTimes(int ClientID, int Offset)
 {
-	/*
-	CSqlScoreData *Tmp = new CSqlScoreData();
-	Tmp->m_Num = Offset;
-	Tmp->m_ClientID = ClientID;
-	Tmp->m_Search = false;
-
-	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(ShowTimesThread, Tmp), "show times");
-	*/
+	ExecPlayerThread(ShowTimesThread, "show times", ClientID, "", Offset);
 }
 
 void CSqlScore::ShowTimes(int ClientID, const char* pName, int Offset)
 {
-	/*
-	CSqlScoreData *Tmp = new CSqlScoreData();
-	Tmp->m_Num = Offset;
-	Tmp->m_ClientID = ClientID;
-	Tmp->m_Name = pName;
-	Tmp->m_Search = true;
-
-	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(ShowTimesThread, Tmp), "show name's times");
-	*/
+	ExecPlayerThread(ShowTimesThread, "show times", ClientID, pName, Offset);
 }
 
 bool CSqlScore::ShowTimesThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure)
 {
-	/*
-	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
+	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
+	auto paMessages = pData->m_pResult->m_aaMessages;
 
 	if (HandleFailure)
 		return true;
 
-	int LimitStart = maximum(abs(pData->m_Num)-1, 0);
-	const char *pOrder = pData->m_Num >= 0 ? "DESC" : "ASC";
+	int LimitStart = maximum(abs(pData->m_Offset)-1, 0);
+	const char *pOrder = pData->m_Offset >= 0 ? "DESC" : "ASC";
 
 	try
 	{
 		char aBuf[512];
 
-		if(pData->m_Search) // last 5 times of a player
-			str_format(aBuf, sizeof(aBuf), "SELECT Time, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) as Ago, UNIX_TIMESTAMP(Timestamp) as Stamp FROM %s_race WHERE Map = '%s' AND Name = '%s' ORDER BY Timestamp %s LIMIT %d, 5;", pSqlServer->GetPrefix(), pData->m_Map.ClrStr(), pData->m_Name.ClrStr(), pOrder, LimitStart);
-		else// last 5 times of server
-			str_format(aBuf, sizeof(aBuf), "SELECT Name, Time, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) as Ago, UNIX_TIMESTAMP(Timestamp) as Stamp FROM %s_race WHERE Map = '%s' ORDER BY Timestamp %s LIMIT %d, 5;", pSqlServer->GetPrefix(), pData->m_Map.ClrStr(), pOrder, LimitStart);
-
+		if(pData->m_Name.Str()[0] != '\0') // last 5 times of a player
+		{
+			str_format(aBuf, sizeof(aBuf),
+					"SELECT Time, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) as Ago, UNIX_TIMESTAMP(Timestamp) as Stamp "
+					"FROM %s_race "
+					"WHERE Map = '%s' AND Name = '%s' "
+					"ORDER BY Timestamp %s "
+					"LIMIT %d, 5;",
+					pSqlServer->GetPrefix(), pData->m_Map.ClrStr(), pData->m_Name.ClrStr(), pOrder, LimitStart
+			);
+		}
+		else // last 5 times of server
+		{
+			str_format(aBuf, sizeof(aBuf),
+					"SELECT Name, Time, "
+						"UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) as Ago, "
+						"UNIX_TIMESTAMP(Timestamp) as Stamp "
+					"FROM %s_race "
+					"WHERE Map = '%s' "
+					"ORDER BY Timestamp %s "
+					"LIMIT %d, 5;",
+					pSqlServer->GetPrefix(), pData->m_Map.ClrStr(), pOrder, LimitStart
+			);
+		}
 		pSqlServer->executeSqlQuery(aBuf);
 
 		// show top5
 		if(pSqlServer->GetResults()->rowsCount() == 0)
 		{
-			pData->GameServer()->SendChatTarget(pData->m_ClientID, "There are no times in the specified range");
+			strcpy(paMessages[0], "There are no times in the specified range");
+			pData->m_pResult->m_Done = true;
 			return true;
 		}
 
-		pData->GameServer()->SendChatTarget(pData->m_ClientID, "------------- Last Times -------------");
-
-		float pTime = 0;
-		int pSince = 0;
-		int pStamp = 0;
-
+		strcpy(paMessages[0], "------------- Last Times -------------");
+		int Line = 1;
 		while(pSqlServer->GetResults()->next())
 		{
 			char aAgoString[40] = "\0";
-			pSince = pSqlServer->GetResults()->getInt("Ago");
-			pStamp = pSqlServer->GetResults()->getInt("Stamp");
-			pTime = (float)pSqlServer->GetResults()->getDouble("Time");
+			int pSince = pSqlServer->GetResults()->getInt("Ago");
+			int pStamp = pSqlServer->GetResults()->getInt("Stamp");
+			float pTime = (float)pSqlServer->GetResults()->getDouble("Time");
 
-			sqlstr::AgoTimeToString(pSince,aAgoString);
+			sqlstr::AgoTimeToString(pSince, aAgoString);
 
-			if(pData->m_Search) // last 5 times of a player
+			if(pData->m_Name.Str()[0] != '\0') // last 5 times of a player
 			{
 				if(pStamp == 0) // stamp is 00:00:00 cause it's an old entry from old times where there where no stamps yet
-					str_format(aBuf, sizeof(aBuf), "%02d:%05.02f, don't know how long ago", (int)(pTime/60), pTime-((int)pTime/60*60));
+					str_format(paMessages[Line], sizeof(paMessages[0]),
+							"%02d:%05.02f, don't know how long ago",
+							(int)(pTime/60), pTime-((int)pTime/60*60));
 				else
-					str_format(aBuf, sizeof(aBuf), "%s ago, %02d:%05.02f", aAgoString, (int)(pTime/60), pTime-((int)pTime/60*60));
+					str_format(paMessages[Line], sizeof(paMessages[0]),
+							"%s ago, %02d:%05.02f",
+							aAgoString, (int)(pTime/60), pTime-((int)pTime/60*60));
 			}
 			else // last 5 times of the server
 			{
+				auto Name = pSqlServer->GetResults()->getString("Name");
 				if(pStamp == 0) // stamp is 00:00:00 cause it's an old entry from old times where there where no stamps yet
-					str_format(aBuf, sizeof(aBuf), "%s, %02d:%05.02f, don't know when", pSqlServer->GetResults()->getString("Name").c_str(), (int)(pTime/60), pTime-((int)pTime/60*60));
+					str_format(paMessages[Line], sizeof(paMessages[0]),
+							"%s, %02d:%05.02f, don't know when",
+							Name.c_str(), (int)(pTime/60), pTime-((int)pTime/60*60));
 				else
-					str_format(aBuf, sizeof(aBuf), "%s, %s ago, %02d:%05.02f", pSqlServer->GetResults()->getString("Name").c_str(), aAgoString, (int)(pTime/60), pTime-((int)pTime/60*60));
+					str_format(paMessages[Line], sizeof(paMessages[0]),
+							"%s, %s ago, %02d:%05.02f",
+							Name.c_str(), aAgoString, (int)(pTime/60), pTime-((int)pTime/60*60));
 			}
-			pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
+			Line++;
 		}
-		pData->GameServer()->SendChatTarget(pData->m_ClientID, "----------------------------------------------------");
+		strcpy(paMessages[Line], "----------------------------------------------------");
 
+		pData->m_pResult->m_Done = true;
 		dbg_msg("sql", "Showing times done");
 		return true;
 	}
@@ -1226,14 +1237,7 @@ bool CSqlScore::ShowTimesThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlaye
 	{
 		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not show times");
-		return false;
 	}
-	catch (CGameContextError &e)
-	{
-		dbg_msg("sql", "WARNING: Aborted showing times due to reload/change of map.");
-		return true;
-	}
-	*/
 	return false;
 }
 
@@ -1414,7 +1418,7 @@ bool CSqlScore::RandomMapThread(CSqlServer* pSqlServer, const CSqlData<CSqlResul
 		if(pSqlServer->GetResults()->rowsCount() != 1)
 		{
 			pData->m_pResult->m_MessageTarget = CSqlResult::DIRECT;
-			strncpy(pData->m_pResult->m_Message, "No maps found on this server!", sizeof(pData->m_pResult->m_Message));
+			str_copy(pData->m_pResult->m_Message, "No maps found on this server!", sizeof(pData->m_pResult->m_Message));
 			pData->m_pResult->m_Variant.m_RandomMap.m_aMap[0] = 0;
 		}
 		else
