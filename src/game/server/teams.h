@@ -65,13 +65,14 @@ public:
 
 	int Count(int Team) const;
 
-	//need to be very careful using this method
-	void SetForceCharacterTeam(int id, int Team);
-	void ForceLeaveTeam(int id);
+	//need to be very careful using this method. SERIOUSLY...
+	void SetForceCharacterTeam(int ClientID, int Team);
+	void SetForceCharacterNewTeam(int ClientID, int Team);
+	void ForceLeaveTeam(int ClientID);
 
 	void Reset();
 
-	void SendTeamsState(int Cid);
+	void SendTeamsState(int ClientID);
 	void SetTeamLock(int Team, bool Lock);
 	void ResetInvited(int Team);
 	void SetClientInvited(int Team, int ClientID, bool Invited);
