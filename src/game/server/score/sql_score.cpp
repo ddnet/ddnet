@@ -1317,23 +1317,13 @@ bool CSqlScore::ShowTopPointsThread(CSqlServer* pSqlServer, const CSqlData<CSqlP
 	try
 	{
 		char aBuf[512];
-		pSqlServer->executeSql("SET @prev := NULL;");
-		pSqlServer->executeSql("SET @rank := 1;");
-		pSqlServer->executeSql("SET @pos := 0;");
 		str_format(aBuf, sizeof(aBuf),
 				"SELECT Rank, Points, Name "
 				"FROM ("
-					"SELECT Name, "
-						"(@pos := @pos+1) pos, "
-						"(@rank := IF(@prev = Points,@rank, @pos)) Rank, "
-						"(@prev := Points) Points "
-					"FROM ("
-						"SELECT Name, Points "
-						"FROM %s_points "
-						"GROUP BY Name "
-						"ORDER BY Points DESC"
-					") as a"
-				") as b "
+					"SELECT RANK() OVER w AS Rank, Points, Name "
+					"FROM %s_points "
+					"WINDOW w as (ORDER BY Points DESC)"
+				") as a "
 				"ORDER BY Rank %s "
 				"LIMIT %d, 5;",
 				pSqlServer->GetPrefix(), pOrder, LimitStart
