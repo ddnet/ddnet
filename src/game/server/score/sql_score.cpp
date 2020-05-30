@@ -1256,25 +1256,14 @@ bool CSqlScore::ShowPointsThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlay
 
 	try
 	{
-		pSqlServer->executeSql("SET @prev := NULL;");
-		pSqlServer->executeSql("SET @rank := 1;");
-		pSqlServer->executeSql("SET @pos := 0;");
-
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf),
 				"SELECT Rank, Points, Name "
 				"FROM ("
-					"SELECT Name, "
-						"(@pos := @pos+1) pos, "
-						"(@rank := IF(@prev = Points, @rank, @pos)) Rank, "
-						"(@prev := Points) Points "
-					"FROM ("
-						"SELECT Name, Points "
-						"FROM %s_points "
-						"GROUP BY Name "
-						"ORDER BY Points DESC"
-					") as a"
-				") as b "
+					"SELECT RANK() OVER w AS Rank, Points, Name "
+					"FROM %s_points "
+					"WINDOW w as (ORDER BY Points DESC)"
+				") as a "
 				"WHERE Name = '%s';",
 				pSqlServer->GetPrefix(), pData->m_Name.ClrStr()
 		);
