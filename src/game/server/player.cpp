@@ -794,20 +794,24 @@ void CPlayer::SpectatePlayerName(const char *pName)
 #if defined(CONF_SQL)
 void CPlayer::ProcessSqlResult()
 {
-	if(m_SqlQueryResult == nullptr || !m_SqlQueryResult->m_Done)
+	if(m_SqlQueryResult == nullptr || m_SqlQueryResult.use_count() != 1)
 		return;
-	for(int i = 0; i < (int)(sizeof(m_SqlQueryResult->m_aaMessages)/sizeof(m_SqlQueryResult->m_aaMessages[0])); i++)
+
+	if(m_SqlQueryResult->m_Done) // sql was query successful
 	{
-		if(m_SqlQueryResult->m_aaMessages[i][0] == 0)
-			break;
-		switch(m_SqlQueryResult->m_MessageTarget)
+		for(int i = 0; i < (int)(sizeof(m_SqlQueryResult->m_aaMessages)/sizeof(m_SqlQueryResult->m_aaMessages[0])); i++)
 		{
-		case CSqlPlayerResult::DIRECT:
-			GameServer()->SendChatTarget(m_ClientID, m_SqlQueryResult->m_aaMessages[i]);
-			break;
-		case CSqlPlayerResult::ALL:
-			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, m_SqlQueryResult->m_aaMessages[i]);
-			break;
+			if(m_SqlQueryResult->m_aaMessages[i][0] == 0)
+				break;
+			switch(m_SqlQueryResult->m_MessageTarget)
+			{
+			case CSqlPlayerResult::DIRECT:
+				GameServer()->SendChatTarget(m_ClientID, m_SqlQueryResult->m_aaMessages[i]);
+				break;
+			case CSqlPlayerResult::ALL:
+				GameServer()->SendChat(-1, CGameContext::CHAT_ALL, m_SqlQueryResult->m_aaMessages[i]);
+				break;
+			}
 		}
 	}
 	m_SqlQueryResult = nullptr;

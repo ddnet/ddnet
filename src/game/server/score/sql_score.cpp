@@ -21,7 +21,6 @@ std::atomic_int CSqlScore::ms_InstanceCount(0);
 
 CSqlPlayerResult::CSqlPlayerResult() :
 	m_Done(0),
-	m_Failed(0),
 	m_MessageTarget(DIRECT)
 {
 	for(int i = 0; i < (int)(sizeof(m_aaMessages)/sizeof(m_aaMessages[0])); i++)
@@ -540,8 +539,6 @@ bool CSqlScore::MapInfoThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerR
 	{
 		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not get Mapinfo");
-		pData->m_pResult->m_Failed = true;
-		pData->m_pResult->m_Done = true;
 	}
 	return false;
 }
@@ -996,11 +993,7 @@ bool CSqlScore::ShowTop5Thread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayer
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	if (HandleFailure)
-	{
-		pData->m_pResult->m_Failed = true;
-		pData->m_pResult->m_Done = true;
 		return true;
-	}
 
 	int LimitStart = maximum(abs(pData->m_Offset)-1, 0);
 	const char *pOrder = pData->m_Offset >= 0 ? "ASC" : "DESC";
@@ -1067,11 +1060,7 @@ bool CSqlScore::ShowTeamTop5Thread(CSqlServer* pSqlServer, const CSqlData<CSqlPl
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	auto paMessages = pData->m_pResult->m_aaMessages;
 	if (HandleFailure)
-	{
-		pData->m_pResult->m_Failed = true;
-		pData->m_pResult->m_Done = true;
 		return true;
-	}
 
 	int LimitStart = maximum(abs(pData->m_Offset)-1, 0);
 	const char *pOrder = pData->m_Offset >= 0 ? "ASC" : "DESC";

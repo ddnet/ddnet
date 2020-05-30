@@ -15,7 +15,6 @@ class CSqlPlayerResult {
 public:
 	CSqlPlayerResult();
 	std::atomic_bool m_Done;
-	bool m_Failed;
 
 	enum
 	{
@@ -30,7 +29,6 @@ class CSqlResult
 {
 public:
 	std::atomic_bool m_Done;
-	bool m_Failed;
 	// specify where chat messages should be returned
 	enum
 	{
