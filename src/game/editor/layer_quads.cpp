@@ -240,7 +240,7 @@ int CLayerQuads::RenderProperties(CUIRect *pToolBox)
 	};
 
 	CProperty aProps[] = {
-		{"Image", m_Image, PROPTYPE_IMAGE, -1, m_pEditor->m_Map.m_lImages.size()},
+		{"Image", m_Image, PROPTYPE_IMAGE, -1, 0},
 		{0},
 	};
 
@@ -252,7 +252,10 @@ int CLayerQuads::RenderProperties(CUIRect *pToolBox)
 
 	if(Prop == PROP_IMAGE)
 	{
-		m_Image = NewVal;
+		if(NewVal >= 0)
+			m_Image = NewVal%m_pEditor->m_Map.m_lImages.size();
+		else
+			m_Image = -1;
 	}
 
 	return 0;

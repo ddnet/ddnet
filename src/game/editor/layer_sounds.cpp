@@ -199,7 +199,7 @@ int CLayerSounds::RenderProperties(CUIRect *pToolBox)
 	};
 
 	CProperty aProps[] = {
-		{"Sound", m_Sound, PROPTYPE_SOUND, -1, m_pEditor->m_Map.m_lSounds.size()},
+		{"Sound", m_Sound, PROPTYPE_SOUND, -1, 0},
 		{0},
 	};
 
@@ -211,7 +211,10 @@ int CLayerSounds::RenderProperties(CUIRect *pToolBox)
 
 	if(Prop == PROP_SOUND)
 	{
-		m_Sound = NewVal;
+		if(NewVal >= 0)
+			m_Sound = NewVal%m_pEditor->m_Map.m_lSounds.size();
+		else
+			m_Sound = -1;
 	}
 
 	return 0;
