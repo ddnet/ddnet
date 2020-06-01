@@ -113,6 +113,7 @@ private:
 	} m_aWeapons[NUM_WEAPONS];
 
 	struct WeaponStat m_aPrevSaveWeapons[NUM_WEAPONS];
+	int m_PrevSaveActiveWeapon;
 
 	int m_LastWeapon;
 	int m_QueuedWeapon;
