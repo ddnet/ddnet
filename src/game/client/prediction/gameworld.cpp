@@ -300,13 +300,14 @@ void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage,
 		return;
 
 	// deal damage
-	CCharacter *apEnts[MAX_CLIENTS] = {0};
+	CEntity *apEnts[MAX_CLIENTS];
 	float Radius = 135.0f;
 	float InnerRadius = 48.0f;
 	int Num = FindEntities(Pos, Radius, (CEntity**)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 	for(int i = 0; i < Num; i++)
 	{
-		vec2 Diff = apEnts[i]->m_Pos - Pos;
+		CCharacter *pChar = (CCharacter*) apEnts[i];
+		vec2 Diff = pChar->m_Pos - Pos;
 		vec2 ForceDir(0,1);
 		float l = length(Diff);
 		if(l)
@@ -320,13 +321,13 @@ void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage,
 
 		float Dmg = Strength * l;
 		if((int)Dmg)
-			if((GetCharacterByID(Owner) ? !(GetCharacterByID(Owner)->m_Hit&CCharacter::DISABLE_HIT_GRENADE) : g_Config.m_SvHit || NoDamage) || Owner == apEnts[i]->GetCID())
+			if((GetCharacterByID(Owner) ? !(GetCharacterByID(Owner)->m_Hit&CCharacter::DISABLE_HIT_GRENADE) : g_Config.m_SvHit || NoDamage) || Owner == pChar->GetCID())
 			{
-				if(Owner != -1 && apEnts[i]->IsAlive() && !apEnts[i]->CanCollide(Owner))
+				if(Owner != -1 && pChar->IsAlive() && !pChar->CanCollide(Owner))
 					continue;
-				if(Owner == -1 && ActivatedTeam != -1 && apEnts[i]->IsAlive() && apEnts[i]->Team() != ActivatedTeam)
+				if(Owner == -1 && ActivatedTeam != -1 && pChar->IsAlive() && pChar->Team() != ActivatedTeam)
 					continue;
-				apEnts[i]->TakeDamage(ForceDir*Dmg*2, (int)Dmg, Owner, Weapon);
+				pChar->TakeDamage(ForceDir*Dmg*2, (int)Dmg, Owner, Weapon);
 				if(GetCharacterByID(Owner) ? GetCharacterByID(Owner)->m_Hit&CCharacter::DISABLE_HIT_GRENADE : !g_Config.m_SvHit || NoDamage)
 					break;
 			}
