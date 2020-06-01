@@ -5,6 +5,7 @@
 
 #include <engine/antibot.h>
 #include <game/server/entity.h>
+#include <game/server/save.h>
 #include <game/generated/server_data.h>
 #include <game/generated/protocol.h>
 
@@ -12,6 +13,7 @@
 
 class CAntibot;
 class CGameTeams;
+class CSaveTee;
 struct CAntibotCharacterData;
 
 enum
@@ -112,9 +114,6 @@ private:
 
 	} m_aWeapons[NUM_WEAPONS];
 
-	struct WeaponStat m_aPrevSaveWeapons[NUM_WEAPONS];
-	int m_PrevSaveActiveWeapon;
-
 	int m_LastWeapon;
 	int m_QueuedWeapon;
 
@@ -180,7 +179,7 @@ private:
 	IAntibot *Antibot();
 
 	bool m_SetSavePos;
-	vec2 m_PrevSavePos;
+	CSaveTee m_RescueTee;
 	bool m_Solo;
 
 public:

@@ -5,6 +5,7 @@
 #define GAME_SERVER_SCORE_SQL_H
 
 #include <string>
+#include <vector>
 
 #include <engine/map.h>
 #include <engine/server/sql_string_helpers.h>
