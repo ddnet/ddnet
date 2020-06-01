@@ -2153,6 +2153,7 @@ void CCharacter::DDRaceTick()
 				m_aPrevSaveWeapons[i].m_Ammocost = m_aWeapons[i].m_Ammocost;
 				m_aPrevSaveWeapons[i].m_Got = m_aWeapons[i].m_Got;
 			}
+			m_PrevSaveActiveWeapon = m_Core.m_ActiveWeapon;
 			m_SetSavePos = true;
 		}
 	}
@@ -2392,5 +2393,6 @@ void CCharacter::Rescue()
 			m_aWeapons[i].m_Ammocost = m_aPrevSaveWeapons[i].m_Ammocost;
 			m_aWeapons[i].m_Got = m_aPrevSaveWeapons[i].m_Got;
 		}
+		m_Core.m_ActiveWeapon = m_PrevSaveActiveWeapon;
 	}
 }
