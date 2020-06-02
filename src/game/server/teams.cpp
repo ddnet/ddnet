@@ -269,6 +269,21 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 			m_MembersCount[m_Core.Team(ClientID)]--;
 	}
 
+	SetForceCharacterNewTeam(ClientID, Team);
+
+	if (OldTeam != Team)
+	{
+		for(int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
+			if(GetPlayer(LoopClientID))
+				SendTeamsState(LoopClientID);
+
+		if(GetPlayer(ClientID))
+			GetPlayer(ClientID)->m_VotedForPractice = false;
+	}
+}
+
+void CGameTeams::SetForceCharacterNewTeam(int ClientID, int Team)
+{
 	m_Core.Team(ClientID, Team);
 
 	if (m_Core.Team(ClientID) != TEAM_SUPER)
@@ -286,16 +301,6 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 				GameServer()->Collision()->m_pSwitchers[i].m_Type[Team] = TILE_SWITCHOPEN;
 			}
 		}
-	}
-
-	if (OldTeam != Team)
-	{
-		for(int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
-			if(GetPlayer(LoopClientID))
-				SendTeamsState(LoopClientID);
-
-		if(GetPlayer(ClientID))
-			GetPlayer(ClientID)->m_VotedForPractice = false;
 	}
 }
 
@@ -670,7 +675,10 @@ void CGameTeams::OnCharacterSpawn(int ClientID)
 	m_Core.SetSolo(ClientID, false);
 
 	if (m_Core.Team(ClientID) >= TEAM_SUPER || !m_TeamLocked[m_Core.Team(ClientID)])
-		SetForceCharacterTeam(ClientID, 0);
+		// Important to only set a new team here, don't remove from an existing
+		// team since a newly joined player does by definition not have an old team
+		// to remove from. Doing so would destroy the count in m_MembersCount.
+		SetForceCharacterNewTeam(ClientID, 0);
 }
 
 void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
