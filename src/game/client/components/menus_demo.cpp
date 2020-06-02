@@ -342,7 +342,6 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 					if(Amount > 0.0f && Amount < 1.0f && absolute(PrevAmount-Amount) >= 0.0001f)
 					{
 						//PrevAmount = Amount;
-						m_pClient->OnReset();
 						m_pClient->m_SuppressEvents = true;
 						DemoPlayer()->SeekPercent(Amount);
 						m_pClient->m_SuppressEvents = false;
@@ -355,7 +354,6 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 					if(Amount > 0.0f && Amount < 1.0f && absolute(PrevAmount-Amount) >= 0.001f)
 					{
 						PrevAmount = Amount;
-						m_pClient->OnReset();
 						m_pClient->m_SuppressEvents = true;
 						DemoPlayer()->SeekPercent(Amount);
 						m_pClient->m_SuppressEvents = false;
@@ -377,7 +375,6 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 	if(CurrentTick == TotalTicks)
 	{
-		m_pClient->OnReset();
 		DemoPlayer()->Pause();
 		DemoPlayer()->SeekPercent(0.0f);
 	}
@@ -409,7 +406,6 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	static int s_ResetButton = 0;
 	if(DoButton_Sprite(&s_ResetButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_STOP, false, &Button, CUI::CORNER_ALL))
 	{
-		m_pClient->OnReset();
 		DemoPlayer()->Pause();
 		DemoPlayer()->SeekPercent(0.0f);
 	}
