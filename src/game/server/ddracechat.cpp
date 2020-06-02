@@ -693,8 +693,6 @@ void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
 		if(pPlayer->m_LastSQLQuery + g_Config.m_SvSqlQueriesDelay * pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
 			return;
 
-	int Team = ((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.m_Core.Team(pResult->m_ClientID);
-
 	const char* pCode = pResult->GetString(0);
 	char aCountry[5];
 	if(str_length(pCode) > 3 && pCode[0] >= 'A' && pCode[0] <= 'Z' && pCode[1] >= 'A'
@@ -722,7 +720,7 @@ void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
 
 	if(str_in_list(g_Config.m_SvSqlValidServerNames, ",", aCountry))
 	{
-		pSelf->Score()->SaveTeam(Team, pCode, pResult->m_ClientID, aCountry);
+		pSelf->Score()->SaveTeam(pResult->m_ClientID, pCode, aCountry);
 
 		if(g_Config.m_SvUseSQL)
 			pPlayer->m_LastSQLQuery = pSelf->Server()->Tick();

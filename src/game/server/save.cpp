@@ -52,7 +52,9 @@ void CSaveTee::save(CCharacter *pChr)
 	m_TuneZoneOld = pChr->m_TuneZoneOld;
 
 	if(pChr->m_StartTime)
-		m_Time = pChr->Server()->Tick() - pChr->m_StartTime + 60 * pChr->Server()->TickSpeed();
+		m_Time = pChr->Server()->Tick() - pChr->m_StartTime;
+	else
+		m_Time = 0;
 
 	m_Pos = pChr->m_Pos;
 	m_PrevPos = pChr->m_PrevPos;
@@ -183,6 +185,9 @@ void CSaveTee::load(CCharacter *pChr, int Team)
 
 char* CSaveTee::GetString()
 {
+	// Add time penalty of 60 seconds (only to the database)
+	int Time = m_Time + 60 * SERVER_TICK_SPEED;
+
 	str_format(m_aString, sizeof(m_aString),
 			"%s\t%d\t%d\t%d\t%d\t%d\t"
 			// weapons
@@ -223,7 +228,7 @@ char* CSaveTee::GetString()
 			m_LastWeapon, m_QueuedWeapon,
 			// tee states
 			m_SuperJump, m_Jetpack, m_NinjaJetpack, m_FreezeTime, m_FreezeTick, m_DeepFreeze, m_EndlessHook,
-			m_DDRaceState, m_Hit, m_Collision, m_TuneZone, m_TuneZoneOld, m_Hook, m_Time,
+			m_DDRaceState, m_Hit, m_Collision, m_TuneZone, m_TuneZoneOld, m_Hook, Time,
 			(int)m_Pos.x, (int)m_Pos.y, (int)m_PrevPos.x, (int)m_PrevPos.y,
 			m_TeleCheckpoint, m_LastPenalty,
 			(int)m_CorePos.x, (int)m_CorePos.y, m_Vel.x, m_Vel.y,
@@ -420,6 +425,38 @@ bool CSaveTeam::HandleSaveError(int Result, int ClientID, CGameContext *pGameCon
 	return true;
 }
 
+void CSaveTeam::HandleLoadError(int Result, int ClientID, const CSaveTeam &SavedTeam, CGameContext *pGameContext)
+{
+	if(Result == 1)
+	{
+		pGameContext->SendChatTarget(ClientID, "You have to be in a team (from 1-63)");
+	}
+	else if(Result == 2)
+	{
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "Too many players in this team, should be %d", SavedTeam.GetMembersCount());
+		pGameContext->SendChatTarget(ClientID, aBuf);
+	}
+	else if(Result >= 10 && Result < 100)
+	{
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "Unable to find player: '%s'", SavedTeam.m_pSavedTees[Result-10].GetName());
+		pGameContext->SendChatTarget(ClientID, aBuf);
+	}
+	else if(Result >= 100 && Result < 200)
+	{
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "%s is racing right now, Team can't be loaded if a Tee is racing already", SavedTeam.m_pSavedTees[Result-100].GetName());
+		pGameContext->SendChatTarget(ClientID, aBuf);
+	}
+	else if(Result >= 200)
+	{
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "Everyone has to be in a team, %s is in team 0 or the wrong team", SavedTeam.m_pSavedTees[Result-200].GetName());
+		pGameContext->SendChatTarget(ClientID, aBuf);
+	}
+}
+
 int CSaveTeam::load(int Team)
 {
 	if(Team <= 0 || Team >= MAX_CLIENTS)
@@ -474,7 +511,7 @@ int CSaveTeam::load(int Team)
 	return 0;
 }
 
-int CSaveTeam::MatchPlayer(char name[16])
+int CSaveTeam::MatchPlayer(const char name[16])
 {
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -486,7 +523,7 @@ int CSaveTeam::MatchPlayer(char name[16])
 	return -1;
 }
 
-CCharacter* CSaveTeam::MatchCharacter(char name[16], int SaveID)
+CCharacter* CSaveTeam::MatchCharacter(const char name[16], int SaveID)
 {
 	int ID = MatchPlayer(name);
 	if(ID >= 0 && m_pController->GameServer()->m_apPlayers[ID])

@@ -5,7 +5,6 @@
 #define GAME_SERVER_SCORE_SQL_H
 
 #include <engine/server/sql_string_helpers.h>
-#include <engine/shared/uuid_manager.h>
 
 #include "../score.h"
 
@@ -20,8 +19,38 @@ public:
 	{
 		DIRECT,
 		ALL,
-	} m_MessageTarget;
+		MAP_VOTE, // 3 Messages: Reason, Server, Map
+	} m_MessageKind;
 	char m_aaMessages[7][512];
+};
+
+class CSqlSaveResult {
+public:
+	CSqlSaveResult(int PlayerID, IGameController* Controller) :
+		m_Status(SAVE_SUCCESS),
+		m_SavedTeam(CSaveTeam(Controller)),
+		m_RequestingPlayer(PlayerID)
+	{
+		m_aMessage[0] = '\0';
+		m_aBroadcast[0] = '\0';
+	}
+	enum
+	{
+		SAVE_SUCCESS,
+		// load team in the following two cases
+		SAVE_FAILED,
+		LOAD_SUCCESS,
+		LOAD_FAILED,
+	} m_Status;
+	char m_aMessage[512];
+	char m_aBroadcast[512];
+	CSaveTeam m_SavedTeam;
+	int m_RequestingPlayer;
+};
+
+class CSqlMapResult {
+	CSqlMapResult();
+	std::atomic_bool m_Done;
 };
 
 // result only valid if m_Done is set to true
@@ -128,15 +157,16 @@ struct CSqlTeamScoreData : CSqlData<CSqlResult>
 	sqlstr::CSqlString<MAX_NAME_LENGTH> m_aNames[MAX_CLIENTS];
 };
 
-struct CSqlTeamSave : CSqlData<CSqlResult>
+struct CSqlTeamSave : CSqlData<CSqlSaveResult>
 {
-	virtual ~CSqlTeamSave();
+	using CSqlData<CSqlSaveResult>::CSqlData;
+	virtual ~CSqlTeamSave() {};
 
 	char m_ClientName[MAX_NAME_LENGTH];
-	CUuid m_SaveUuid;
 
+	sqlstr::CSqlString<128> m_Map;
 	sqlstr::CSqlString<128> m_Code;
-	sqlstr::CSqlString<65536> m_SaveState;
+	char m_Uuid[UUID_MAXSTRSIZE];
 	char m_Server[5];
 };
 
@@ -185,7 +215,7 @@ class CSqlScore: public IScore
 
 	static bool RandomMapThread(CSqlServer* pSqlServer, const CSqlData<CSqlResult> *pGameData, bool HandleFailure = false);
 	static bool RandomUnfinishedMapThread(CSqlServer* pSqlServer, const CSqlData<CSqlResult> *pGameData, bool HandleFailure = false);
-	static bool MapVoteThread(CSqlServer* pSqlServer, const CSqlData<CSqlResult> *pGameData, bool HandleFailure = false);
+	static bool MapVoteThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure = false);
 	static bool CheckBirthdayThread(CSqlServer* pSqlServer, const CSqlData<CSqlResult> *pGameData, bool HandleFailure = false);
 	static bool LoadScoreThread(CSqlServer* pSqlServer, const CSqlData<CSqlResult> *pGameData, bool HandleFailure = false);
 
@@ -199,7 +229,7 @@ class CSqlScore: public IScore
 	static bool ShowTopPointsThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure = false);
 	static bool GetSavesThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure = false);
 
-	static bool SaveTeamThread(CSqlServer* pSqlServer, const CSqlData<CSqlResult> *pGameData, bool HandleFailure = false);
+	static bool SaveTeamThread(CSqlServer* pSqlServer, const CSqlData<CSqlSaveResult> *pGameData, bool HandleFailure = false);
 	static bool LoadTeamThread(CSqlServer* pSqlServer, const CSqlData<CSqlResult> *pGameData, bool HandleFailure = false);
 
 	static bool SaveScoreThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure = false);
@@ -253,7 +283,7 @@ public:
 	virtual void GetSaves(int ClientID);
 
 	// requested by teams
-	virtual void SaveTeam(int Team, const char* Code, int ClientID, const char* Server);
+	virtual void SaveTeam(int ClientID, const char* Code, const char* Server);
 	virtual void LoadTeam(const char* Code, int ClientID);
 
 	// Game relevant not allowed to fail

@@ -14,8 +14,8 @@ public:
 	void load(CCharacter* pchr, int Team);
 	char* GetString();
 	int LoadString(char* String);
-	vec2 GetPos() { return m_Pos; }
-	char* GetName() { return m_aName; }
+	vec2 GetPos() const { return m_Pos; }
+	const char* GetName() const { return m_aName; }
 
 private:
 
@@ -95,7 +95,7 @@ public:
 	CSaveTeam(IGameController* Controller);
 	~CSaveTeam();
 	char* GetString();
-	int GetMembersCount() { return m_MembersCount; }
+	int GetMembersCount() const { return m_MembersCount; }
 	int LoadString(const char* String);
 	int save(int Team);
 	int load(int Team);
@@ -103,9 +103,10 @@ public:
 
 	// returns true if an error occured
 	static bool HandleSaveError(int Result, int ClientID, CGameContext *pGameContext);
+	static void HandleLoadError(int Result, int ClientID, const CSaveTeam &SavedTeam, CGameContext *pGameContext);
 private:
-	int MatchPlayer(char name[16]);
-	CCharacter* MatchCharacter(char name[16], int SaveID);
+	int MatchPlayer(const char name[16]);
+	CCharacter* MatchCharacter(const char name[16], int SaveID);
 
 	IGameController* m_pController;
 

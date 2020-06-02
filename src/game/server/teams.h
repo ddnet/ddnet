@@ -5,15 +5,21 @@
 #include <game/teamscore.h>
 #include <game/server/gamecontext.h>
 
+#if defined(CONF_SQL)
+class CSqlSaveResult;
+#endif
+
 class CGameTeams
 {
 	int m_TeamState[MAX_CLIENTS];
 	int m_MembersCount[MAX_CLIENTS];
 	bool m_TeeFinished[MAX_CLIENTS];
 	bool m_TeamLocked[MAX_CLIENTS];
-	bool m_IsSaving[MAX_CLIENTS];
 	uint64_t m_Invited[MAX_CLIENTS];
 	bool m_Practice[MAX_CLIENTS];
+#if defined(CONF_SQL)
+	std::shared_ptr<CSqlSaveResult> m_pSaveTeamResult[MAX_CLIENTS];
+#endif
 
 	class CGameContext * m_pGameContext;
 
@@ -85,7 +91,11 @@ public:
 	void SetDDRaceState(CPlayer* Player, int DDRaceState);
 	void SetStartTime(CPlayer* Player, int StartTime);
 	void SetCpActive(CPlayer* Player, int CpActive);
-	void KillSavedTeam(int Team);
+#if defined(CONF_SQL)
+	void KillSavedTeam(int ClientID, int Team);
+	void ResetSavedTeam(int ClientID, int Team);
+	void ProcessSaveTeam();
+#endif
 
 	bool TeeFinished(int ClientID)
 	{
@@ -114,15 +124,20 @@ public:
 	{
 		m_TeeFinished[ClientID] = finished;
 	}
-
-	void SetSaving(int TeamID, bool Value)
+#if defined(CONF_SQL)
+	void SetSaving(int TeamID, std::shared_ptr<CSqlSaveResult> SaveResult)
 	{
-		m_IsSaving[TeamID] = Value;
+		m_pSaveTeamResult[TeamID] = SaveResult;
 	}
+#endif
 
 	bool GetSaving(int TeamID)
 	{
-		return m_IsSaving[TeamID];
+#if defined(CONF_SQL)
+		return m_pSaveTeamResult[TeamID] != nullptr;
+#else
+		return false;
+#endif
 	}
 
 	void EnablePractice(int Team)

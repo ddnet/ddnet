@@ -47,7 +47,6 @@ public:
 	void OnPredictedEarlyInput(CNetObj_PlayerInput *NewInput);
 	void OnDisconnect(const char *pReason);
 
-	void ThreadKillCharacter(int Weapon = WEAPON_GAME);
 	void KillCharacter(int Weapon = WEAPON_GAME);
 	CCharacter *GetCharacter();
 
@@ -174,7 +173,6 @@ public:
 	bool m_SpecTeam;
 	bool m_NinjaJetpack;
 	bool m_Afk;
-	int m_KillMe;
 	bool m_HasFinishScore;
 
 	int m_ChatScore;

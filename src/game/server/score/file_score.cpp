@@ -336,7 +336,7 @@ void CFileScore::RandomUnfinishedMap(int ClientID, int Stars)
 	GameServer()->SendChatTarget(ClientID, aBuf);
 }
 
-void CFileScore::SaveTeam(int Team, const char* Code, int ClientID, const char* Server)
+void CFileScore::SaveTeam(int ClientID, const char* Code, const char* Server)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "Save-function not supported in file based servers");

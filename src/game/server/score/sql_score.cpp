@@ -21,7 +21,7 @@ std::atomic_int CSqlScore::ms_InstanceCount(0);
 
 CSqlPlayerResult::CSqlPlayerResult() :
 	m_Done(0),
-	m_MessageTarget(DIRECT)
+	m_MessageKind(DIRECT)
 {
 	for(int i = 0; i < (int)(sizeof(m_aaMessages)/sizeof(m_aaMessages[0])); i++)
 		m_aaMessages[i][0] = 0;
@@ -324,82 +324,58 @@ bool CSqlScore::LoadScoreThread(CSqlServer* pSqlServer, const CSqlData<CSqlResul
 
 void CSqlScore::MapVote(int ClientID, const char* MapName)
 {
-	/*
-	*ppResult = std::make_shared<CMapVoteResult>();
-
-	CSqlMapVoteData *Tmp = new CSqlMapVoteData();
-	Tmp->m_ClientID = ClientID;
-	Tmp->m_RequestedMap = MapName;
-	Tmp->m_pResult = *ppResult;
-	str_copy(Tmp->m_aFuzzyMap, MapName, sizeof(Tmp->m_aFuzzyMap));
-	sqlstr::ClearString(Tmp->m_aFuzzyMap, sizeof(Tmp->m_aFuzzyMap));
-	sqlstr::FuzzyString(Tmp->m_aFuzzyMap, sizeof(Tmp->m_aFuzzyMap));
-
-	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(MapVoteThread, Tmp), "map vote");
-	*/
+	ExecPlayerThread(MapVoteThread, "map vote", ClientID, MapName, 0);
 }
 
-bool CSqlScore::MapVoteThread(CSqlServer* pSqlServer, const CSqlData<CSqlResult> *pGameData, bool HandleFailure)
+bool CSqlScore::MapVoteThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure)
 {
-	/*
-	const CSqlMapVoteData *pData = dynamic_cast<const CSqlMapVoteData *>(pGameData);
+	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
+	auto paMessages = pData->m_pResult->m_aaMessages;
 
 	if (HandleFailure)
 		return true;
 
 	try
 	{
+		char aFuzzyMap[128];
+		str_copy(aFuzzyMap, pData->m_Name.Str(), sizeof(aFuzzyMap));
+		sqlstr::ClearString(aFuzzyMap, sizeof(aFuzzyMap));
+		sqlstr::FuzzyString(aFuzzyMap, sizeof(aFuzzyMap));
+
 		char aBuf[768];
-		str_format(aBuf, sizeof(aBuf), "SELECT Map, Server FROM %s_maps WHERE Map LIKE '%s' COLLATE utf8mb4_general_ci ORDER BY CASE WHEN Map = '%s' THEN 0 ELSE 1 END, CASE WHEN Map LIKE '%s%%' THEN 0 ELSE 1 END, LENGTH(Map), Map LIMIT 1;", pSqlServer->GetPrefix(), pData->m_aFuzzyMap, pData->m_RequestedMap.ClrStr(), pData->m_RequestedMap.ClrStr());
+		str_format(aBuf, sizeof(aBuf),
+				"SELECT Map, Server "
+				"FROM %s_maps "
+				"WHERE Map LIKE '%s' COLLATE utf8mb4_general_ci "
+				"ORDER BY "
+					"CASE WHEN Map = '%s' THEN 0 ELSE 1 END, "
+					"CASE WHEN Map LIKE '%s%%' THEN 0 ELSE 1 END, "
+					"LENGTH(Map), Map "
+				"LIMIT 1;",
+				pSqlServer->GetPrefix(), aFuzzyMap,
+				pData->m_Name.ClrStr(), pData->m_Name.ClrStr()
+		);
 		pSqlServer->executeSqlQuery(aBuf);
-
-		CPlayer *pPlayer = pData->GameServer()->m_apPlayers[pData->m_ClientID];
-
-		int64 Now = pData->Server()->Tick();
-		int Timeleft = 0;
-
-		if(!pPlayer)
-			goto end;
-
-		Timeleft = pPlayer->m_LastVoteCall + pData->Server()->TickSpeed()*g_Config.m_SvVoteDelay - Now;
-
 		if(pSqlServer->GetResults()->rowsCount() != 1)
 		{
-			str_format(aBuf, sizeof(aBuf), "No map like \"%s\" found. Try adding a '%%' at the start if you don't know the first character. Example: /map %%castle for \"Out of Castle\"", pData->m_RequestedMap.Str());
-			pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
-		}
-		else if(Now < pPlayer->m_FirstVoteTick)
-		{
-			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "You must wait %d seconds before making your first vote", (int)((pPlayer->m_FirstVoteTick - Now) / pData->Server()->TickSpeed()) + 1);
-			pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
-		}
-		else if(pPlayer->m_LastVoteCall && Timeleft > 0)
-		{
-			char aChatmsg[512] = {0};
-			str_format(aChatmsg, sizeof(aChatmsg), "You must wait %d seconds before making another vote", (Timeleft/pData->Server()->TickSpeed())+1);
-			pData->GameServer()->SendChatTarget(pData->m_ClientID, aChatmsg);
-		}
-		else if(time_get() < pData->GameServer()->m_LastMapVote + (time_freq() * g_Config.m_SvVoteMapTimeDelay))
-		{
-			char chatmsg[512] = {0};
-			str_format(chatmsg, sizeof(chatmsg), "There's a %d second delay between map-votes, please wait %d seconds.", g_Config.m_SvVoteMapTimeDelay, (int)(((pData->GameServer()->m_LastMapVote+(g_Config.m_SvVoteMapTimeDelay * time_freq()))/time_freq())-(time_get()/time_freq())));
-			pData->GameServer()->SendChatTarget(pData->m_ClientID, chatmsg);
+			str_format(paMessages[0], sizeof(paMessages[0]),
+					"No map like \"%s\" found. "
+					"Try adding a '%%' at the start if you don't know the first character. "
+					"Example: /map %%castle for \"Out of Castle\"",
+					pData->m_Name.Str());
 		}
 		else
 		{
-			pSqlServer->GetResults()->next();
-			str_copy(pData->m_pResult->m_aMap, pSqlServer->GetResults()->getString("Map").c_str(), sizeof(pData->m_pResult->m_aMap));
-			str_copy(pData->m_pResult->m_aServer, pSqlServer->GetResults()->getString("Server").c_str(), sizeof(pData->m_pResult->m_aServer));
+			auto Server = pSqlServer->GetResults()->getString("Server");
+			auto Map = pSqlServer->GetResults()->getString("Map");
+			strcpy(paMessages[0], "/map"); // reason
+			str_copy(paMessages[1], Server.c_str(), sizeof(paMessages[0]));
+			str_copy(paMessages[2], Map.c_str(), sizeof(paMessages[0]));
 
-			for(char *p = pData->m_pResult->m_aServer; *p; p++)
+			for(char *p = paMessages[1]; *p; p++) // lower case server
 				*p = tolower(*p);
-
-			pData->m_pResult->m_ClientID = pData->m_ClientID;
-
-			pData->m_pResult->m_Done = true;
 		}
-		end:
+		pData->m_pResult->m_Done = true;
 		return true;
 	}
 	catch (sql::SQLException &e)
@@ -407,13 +383,6 @@ bool CSqlScore::MapVoteThread(CSqlServer* pSqlServer, const CSqlData<CSqlResult>
 		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not start Mapvote");
 	}
-	catch (CGameContextError &e)
-	{
-		dbg_msg("sql", "WARNING: Aborted mapvote due to reload/change of map.");
-		return true;
-	}
-	return false;
-	*/
 	return false;
 }
 
@@ -865,7 +834,7 @@ bool CSqlScore::ShowRankThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayer
 			}
 			else
 			{
-				pData->m_pResult->m_MessageTarget = CSqlPlayerResult::ALL;
+				pData->m_pResult->m_MessageKind = CSqlPlayerResult::ALL;
 				str_format(pData->m_pResult->m_aaMessages[0], sizeof(pData->m_pResult->m_aaMessages[0]),
 						"%d. %s Time: %02d:%05.2f, requested by %s",
 						Rank, pSqlServer->GetResults()->getString("Name").c_str(),
@@ -965,7 +934,7 @@ bool CSqlScore::ShowTeamRankThread(CSqlServer* pSqlServer, const CSqlData<CSqlPl
 			}
 			else
 			{
-				pData->m_pResult->m_MessageTarget = CSqlPlayerResult::ALL;
+				pData->m_pResult->m_MessageKind = CSqlPlayerResult::ALL;
 				str_format(pData->m_pResult->m_aaMessages[0], sizeof(pData->m_pResult->m_aaMessages[0]),
 						"%d. %s Team time: %02d:%05.02f, requested by %s",
 						Rank, aNames, (int)(Time/60), Time-((int)Time/60*60), pData->m_RequestingPlayer.Str());
@@ -1102,7 +1071,6 @@ bool CSqlScore::ShowTeamTop5Thread(CSqlServer* pSqlServer, const CSqlData<CSqlPl
 			int TeamSize = pSqlServer->GetResults()->getInt("TeamSize");
 			float Time = (float)pSqlServer->GetResults()->getDouble("Time");
 			int Rank = pSqlServer->GetResults()->getInt("Rank");
-			printf("%d", TeamSize);
 
 			char aNames[2300] = { 0 };
 			for(int i = 0; i < TeamSize; i++)
@@ -1280,7 +1248,7 @@ bool CSqlScore::ShowPointsThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlay
 			int Count = pSqlServer->GetResults()->getInt("Points");
 			int Rank = pSqlServer->GetResults()->getInt("Rank");
 			auto Name = pSqlServer->GetResults()->getString("Name");
-			pData->m_pResult->m_MessageTarget = CSqlPlayerResult::ALL;
+			pData->m_pResult->m_MessageKind = CSqlPlayerResult::ALL;
 			str_format(paMessages[0], sizeof(paMessages[0]),
 					"%d. %s Points: %d, requested by %s",
 					Rank, Name.c_str(), Count, pData->m_RequestingPlayer.Str());
@@ -1499,126 +1467,128 @@ bool CSqlScore::RandomUnfinishedMapThread(CSqlServer* pSqlServer, const CSqlData
 	return false;
 }
 
-void CSqlScore::SaveTeam(int Team, const char* Code, int ClientID, const char* Server)
+void CSqlScore::SaveTeam(int ClientID, const char* Code, const char* Server)
 {
-	/*
-	if(((CGameControllerDDRace*)(GameServer()->m_pController))->m_Teams.GetSaving(Team))
+	auto pController = ((CGameControllerDDRace*)(GameServer()->m_pController));
+	int Team = pController->m_Teams.m_Core.Team(ClientID);
+	if(pController->m_Teams.GetSaving(Team))
 		return;
 
-	CSaveTeam SavedTeam(GameServer()->m_pController);
-	int Result = SavedTeam.save(Team);
+	auto SaveResult = std::make_shared<CSqlSaveResult>(ClientID, pController);
+	int Result = SaveResult->m_SavedTeam.save(Team);
 	if(CSaveTeam::HandleSaveError(Result, ClientID, GameServer()))
 		return;
-	// disable joining team while saving
-	((CGameControllerDDRace*)(GameServer()->m_pController))->m_Teams.SetSaving(Team, true);
+	pController->m_Teams.SetSaving(Team, SaveResult);
 
-	CSqlTeamSave *Tmp = new CSqlTeamSave();
-	Tmp->m_Team = Team;
-	Tmp->m_ClientID = ClientID;
-	// copy both save code and save state into the thread struct
+	CSqlTeamSave *Tmp = new CSqlTeamSave(SaveResult);
 	Tmp->m_Code = Code;
-	Tmp->m_SaveState = SavedTeam.GetString();
+	Tmp->m_Map = g_Config.m_SvMap;
+	FormatUuid(RandomUuid(), Tmp->m_Uuid, UUID_MAXSTRSIZE);
 	str_copy(Tmp->m_Server, Server, sizeof(Tmp->m_Server));
-	str_copy(Tmp->m_ClientName, this->Server()->ClientName(Tmp->m_ClientID), sizeof(Tmp->m_ClientName));
+	str_copy(Tmp->m_ClientName, this->Server()->ClientName(ClientID), sizeof(Tmp->m_ClientName));
 
-	// TODO: log event in Teehistorian
-	// TODO: find a way to send all players in the team the save code
-	((CGameControllerDDRace*)(GameServer()->m_pController))->m_Teams.KillSavedTeam(Team);
-	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(SaveTeamThread, Tmp, false), "save team");
-	*/
+	// TODO: log event in teehistorian
+	pController->m_Teams.KillSavedTeam(ClientID, Team);
+	char aBuf[512];
+	// TODO: better message, maybe hint that one should wait until the next message to leave
+	str_format(aBuf, sizeof(aBuf), "Saving team initiated by '%s'", this->Server()->ClientName(ClientID));
+	GameServer()->SendChatTeam(Team, aBuf);
+	thread_init_and_detach(
+			CSqlExecData<CSqlSaveResult>::ExecSqlFunc,
+			new CSqlExecData<CSqlSaveResult>(SaveTeamThread, Tmp, false),
+			"save team");
 }
 
-bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData<CSqlResult> *pGameData, bool HandleFailure)
+bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData<CSqlSaveResult> *pGameData, bool HandleFailure)
 {
-	/*
 	const CSqlTeamSave *pData = dynamic_cast<const CSqlTeamSave *>(pGameData);
 
-	try
+	sqlstr::CSqlString<10> SaveState = pData->m_pResult->m_SavedTeam.GetString();
+	if(HandleFailure)
 	{
-		if (HandleFailure)
+		if (!g_Config.m_SvSqlFailureFile[0])
+			return true;
+
+		lock_wait(ms_FailureFileLock);
+		IOHANDLE File = io_open(g_Config.m_SvSqlFailureFile, IOFLAG_APPEND);
+		if(File)
 		{
-			if (!g_Config.m_SvSqlFailureFile[0])
-				return true;
+			dbg_msg("sql", "ERROR: Could not save Teamsave, writing insert to a file now...");
 
-			lock_wait(ms_FailureFileLock);
-			IOHANDLE File = io_open(g_Config.m_SvSqlFailureFile, IOFLAG_APPEND);
-			if(File)
-			{
-				dbg_msg("sql", "ERROR: Could not save Teamsave, writing insert to a file now...");
-
-				char aBuf[65536];
-				str_format(aBuf, sizeof(aBuf),
-						"INSERT IGNORE INTO %%s_saves(Savegame, Map, Code, Timestamp, Server, DDNet7) "
-						"VALUES ('%s', '%s', '%s', CURRENT_TIMESTAMP(), '%s', false);",
-						pData->m_SaveState, pData->m_Map.ClrStr(), pData->m_Code.ClrStr(), pData->m_Server
-				);
-				io_write(File, aBuf, str_length(aBuf));
-				io_write_newline(File);
-				io_close(File);
-				lock_unlock(ms_FailureFileLock);
-
-				pData->GameServer()->SendBroadcast("Database connection failed, teamsave written to a file instead. Admins will add it manually in a few days.", -1);
-
-				return true;
-			}
+			char aBuf[65536];
+			str_format(aBuf, sizeof(aBuf),
+					"INSERT IGNORE INTO %%s_saves(Savegame, Map, Code, Timestamp, Server, SaveID, DDNet7) "
+					"VALUES ('%s', '%s', '%s', CURRENT_TIMESTAMP(), '%s', '%s', false)",
+					SaveState.ClrStr(), pData->m_Map.ClrStr(),
+					pData->m_Code.ClrStr(), pData->m_Server, pData->m_Uuid
+			);
+			io_write(File, aBuf, str_length(aBuf));
+			io_write_newline(File);
+			io_close(File);
 			lock_unlock(ms_FailureFileLock);
-			dbg_msg("sql", "ERROR: Could not save Teamsave, NOT even to a file");
-			return false;
-		}
 
+			pData->m_pResult->m_Status = CSqlSaveResult::SAVE_SUCCESS;
+			strcpy(pData->m_pResult->m_aBroadcast,
+					"Database connection failed, teamsave written to a file instead. Admins will add it manually in a few days.");
+
+			return true;
+		}
+		lock_unlock(ms_FailureFileLock);
+		dbg_msg("sql", "ERROR: Could not save Teamsave, NOT even to a file");
+		return false;
+	}
+	else
+	{
 		try
 		{
 			char aBuf[512];
 			str_format(aBuf, sizeof(aBuf), "lock tables %s_saves write;", pSqlServer->GetPrefix());
 			pSqlServer->executeSql(aBuf);
-			str_format(aBuf, sizeof(aBuf), "select Savegame from %s_saves where Code = '%s' and Map = '%s';",  pSqlServer->GetPrefix(), pData->m_Code.ClrStr(), pData->m_Map.ClrStr());
+			str_format(aBuf, sizeof(aBuf),
+					"SELECT Savegame "
+					"FROM %s_saves "
+					"WHERE Code = '%s' AND Map = '%s';",
+					pSqlServer->GetPrefix(), pData->m_Code.ClrStr(), pData->m_Map.ClrStr());
 			pSqlServer->executeSqlQuery(aBuf);
 
 			if (pSqlServer->GetResults()->rowsCount() == 0)
 			{
 				char aBuf[65536];
 				str_format(aBuf, sizeof(aBuf),
-						"INSERT IGNORE INTO %s_saves(Savegame, Map, Code, Timestamp, Server, DDNet7) VALUES ('%s', '%s', '%s', CURRENT_TIMESTAMP(), '%s', false)",
-						pSqlServer->GetPrefix(), pData->m_SaveState.ClrStr(), pData->m_Map.ClrStr(), pData->m_Code.ClrStr(), pData->m_Server
+						"INSERT IGNORE INTO %s_saves(Savegame, Map, Code, Timestamp, Server, SaveID, DDNet7) "
+						"VALUES ('%s', '%s', '%s', CURRENT_TIMESTAMP(), '%s', '%s', false)",
+						pSqlServer->GetPrefix(), SaveState.ClrStr(), pData->m_Map.ClrStr(),
+						pData->m_Code.ClrStr(), pData->m_Server, pData->m_Uuid
 				);
 				dbg_msg("sql", "%s", aBuf);
 				pSqlServer->executeSql(aBuf);
 
-				// be sure to keep all calls to pData->GameServer() after inserting the save, otherwise it might be lost due to CGameContextError.
-
-				char aBuf2[512];
-				str_format(aBuf2, sizeof(aBuf2), "Team successfully saved by %s. Use '/load %s' to continue", pData->m_ClientName, pData->m_Code.Str());
-				pData->GameServer()->SendChatTeam(Team, aBuf2);
+				str_format(pData->m_pResult->m_aMessage, sizeof(pData->m_pResult->m_aMessage),
+						"Team successfully saved by %s. Use '/load %s' to continue",
+						pData->m_ClientName, pData->m_Code.Str());
+				pData->m_pResult->m_Status = CSqlSaveResult::SAVE_SUCCESS;
 			}
 			else
 			{
 				dbg_msg("sql", "ERROR: This save-code already exists");
-				pData->GameServer()->SendChatTarget(pData->m_ClientID, "This save-code already exists");
+				pData->m_pResult->m_Status = CSqlSaveResult::SAVE_FAILED;
+				strcpy(pData->m_pResult->m_aMessage, "This save-code already exists");
 			}
-
 		}
 		catch (sql::SQLException &e)
 		{
+			pData->m_pResult->m_Status = CSqlSaveResult::SAVE_FAILED;
 			dbg_msg("sql", "MySQL Error: %s", e.what());
 			dbg_msg("sql", "ERROR: Could not save the team");
-			pData->GameServer()->SendChatTarget(pData->m_ClientID, "MySQL Error: Could not save the team");
+
+			strcpy(pData->m_pResult->m_aMessage, "MySQL Error: Could not save the team");
 			pSqlServer->executeSql("unlock tables;");
 			return false;
 		}
-		catch (CGameContextError &e)
-		{
-			dbg_msg("sql", "WARNING: Could not send chatmessage during saving team due to reload/change of map.");
-		}
-	}
-	catch (CGameContextError &e)
-	{
-		dbg_msg("sql", "WARNING: Aborted saving team due to reload/change of map.");
 	}
 
 	pSqlServer->executeSql("unlock tables;");
 	return true;
-	*/
-	return false;
 }
 
 void CSqlScore::LoadTeam(const char* Code, int ClientID)

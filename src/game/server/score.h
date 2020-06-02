@@ -80,7 +80,7 @@ public:
 	virtual void RandomMap(int ClientID, int Stars) = 0;
 	virtual void RandomUnfinishedMap(int ClientID, int Stars) = 0;
 
-	virtual void SaveTeam(int Team, const char *pCode, int ClientID, const char *pServer) = 0;
+	virtual void SaveTeam(int ClientID, const char *pCode, const char *pServer) = 0;
 	virtual void LoadTeam(const char *pCode, int ClientID) = 0;
 	virtual void GetSaves(int ClientID) = 0;
 

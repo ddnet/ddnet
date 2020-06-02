@@ -25,6 +25,9 @@ CGameControllerDDRace::~CGameControllerDDRace()
 void CGameControllerDDRace::Tick()
 {
 	IGameController::Tick();
+#if defined(CONF_SQL)
+	m_Teams.ProcessSaveTeam();
+#endif
 }
 
 void CGameControllerDDRace::InitTeleporter()

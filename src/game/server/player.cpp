@@ -45,7 +45,6 @@ void CPlayer::Reset()
 	m_JoinTick = Server()->Tick();
 	delete m_pCharacter;
 	m_pCharacter = 0;
-	m_KillMe = 0;
 	m_SpectatorID = SPEC_FREEVIEW;
 	m_LastActionTick = Server()->Tick();
 	m_TeamChangeTick = Server()->Tick();
@@ -153,13 +152,6 @@ void CPlayer::Tick()
 #endif
 	if(!Server()->ClientIngame(m_ClientID))
 		return;
-
-	if(m_KillMe != 0)
-	{
-		KillCharacter(m_KillMe);
-		m_KillMe = 0;
-		return;
-	}
 
 	if (m_ChatScore > 0)
 		m_ChatScore--;
@@ -499,11 +491,6 @@ CCharacter *CPlayer::GetCharacter()
 	return 0;
 }
 
-void CPlayer::ThreadKillCharacter(int Weapon)
-{
-	m_KillMe = Weapon;
-}
-
 void CPlayer::KillCharacter(int Weapon)
 {
 	if(m_pCharacter)
@@ -797,21 +784,30 @@ void CPlayer::ProcessSqlResult()
 	if(m_SqlQueryResult == nullptr || m_SqlQueryResult.use_count() != 1)
 		return;
 
-	if(m_SqlQueryResult->m_Done) // sql was query successful
+	if(m_SqlQueryResult->m_Done) // SQL request was successful
 	{
-		for(int i = 0; i < (int)(sizeof(m_SqlQueryResult->m_aaMessages)/sizeof(m_SqlQueryResult->m_aaMessages[0])); i++)
+		int NumMessages = (int)(sizeof(m_SqlQueryResult->m_aaMessages)/sizeof(m_SqlQueryResult->m_aaMessages[0]));
+		switch(m_SqlQueryResult->m_MessageKind)
 		{
-			if(m_SqlQueryResult->m_aaMessages[i][0] == 0)
-				break;
-			switch(m_SqlQueryResult->m_MessageTarget)
+		case CSqlPlayerResult::DIRECT:
+			for(int i = 0; i < NumMessages; i++)
 			{
-			case CSqlPlayerResult::DIRECT:
+				if(m_SqlQueryResult->m_aaMessages[i][0] == 0)
+					break;
 				GameServer()->SendChatTarget(m_ClientID, m_SqlQueryResult->m_aaMessages[i]);
-				break;
-			case CSqlPlayerResult::ALL:
-				GameServer()->SendChat(-1, CGameContext::CHAT_ALL, m_SqlQueryResult->m_aaMessages[i]);
-				break;
 			}
+			break;
+		case CSqlPlayerResult::ALL:
+			for(int i = 0; i < NumMessages; i++)
+			{
+				if(m_SqlQueryResult->m_aaMessages[i][0] == 0)
+					break;
+				GameServer()->SendChat(-1, CGameContext::CHAT_ALL, m_SqlQueryResult->m_aaMessages[i]);
+			}
+			break;
+		case CSqlPlayerResult::MAP_VOTE:
+			// TODO: start vote
+			break;
 		}
 	}
 	m_SqlQueryResult = nullptr;
