@@ -702,15 +702,12 @@ void CGameTeams::ProcessSaveTeam()
 			break;
 		}
 		case CSqlSaveResult::SAVE_FAILED:
-		{
-			int Result = m_pSaveTeamResult[Team]->m_SavedTeam.load(Team);
-			if(Result != 0)
-				CSaveTeam::HandleLoadError(Result, m_pSaveTeamResult[Team]->m_RequestingPlayer, m_pSaveTeamResult[Team]->m_SavedTeam, m_pGameContext);
-			break;
-		}
 		case CSqlSaveResult::LOAD_SUCCESS:
+			m_pSaveTeamResult[Team]->m_SavedTeam.load(Team);
+			break;
 		case CSqlSaveResult::LOAD_FAILED:
-			break; // TODO
+			// just printing the error message to the team above is enough
+			break;
 		}
 		m_pSaveTeamResult[Team] = nullptr;
 	}

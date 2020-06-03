@@ -1503,7 +1503,7 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData<CSqlSaveRe
 {
 	const CSqlTeamSave *pData = dynamic_cast<const CSqlTeamSave *>(pGameData);
 
-	sqlstr::CSqlString<10> SaveState = pData->m_pResult->m_SavedTeam.GetString();
+	sqlstr::CSqlString<65536> SaveState = pData->m_pResult->m_SavedTeam.GetString();
 	if(HandleFailure)
 	{
 		if (!g_Config.m_SvSqlFailureFile[0])
@@ -1593,139 +1593,128 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData<CSqlSaveRe
 
 void CSqlScore::LoadTeam(const char* Code, int ClientID)
 {
-	/*
-	CSqlTeamLoad *Tmp = new CSqlTeamLoad();
+	auto pController = ((CGameControllerDDRace*)(GameServer()->m_pController));
+	int Team = pController->m_Teams.m_Core.Team(ClientID);
+	if(pController->m_Teams.GetSaving(Team))
+		return;
+	if(Team <= 0 || Team >= MAX_CLIENTS)
+	{
+		GameServer()->SendChatTarget(ClientID, "You have to be in a team (from 1-63)");
+		return;
+	}
+	if(pController->m_Teams.GetTeamState(Team) != CGameTeams::TEAMSTATE_OPEN)
+	{
+		GameServer()->SendChatTarget(ClientID, "Team can't be loaded while racing");
+		return;
+	}
+	auto SaveResult = std::make_shared<CSqlSaveResult>(ClientID, pController);
+	pController->m_Teams.SetSaving(Team, SaveResult);
+	CSqlTeamLoad *Tmp = new CSqlTeamLoad(SaveResult);
 	Tmp->m_Code = Code;
+	Tmp->m_Map = g_Config.m_SvMap;
 	Tmp->m_ClientID = ClientID;
-	str_copy(Tmp->m_ClientName, Server()->ClientName(Tmp->m_ClientID), sizeof(Tmp->m_ClientName));
-
-	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(LoadTeamThread, Tmp), "load team");
-	*/
+	Tmp->m_RequestingPlayer = Server()->ClientName(ClientID);
+	Tmp->m_NumPlayer = 0;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(pController->m_Teams.m_Core.Team(i) == Team)
+		{
+			// put all names at the beginning of the array
+			str_copy(Tmp->m_aClientNames[Tmp->m_NumPlayer], Server()->ClientName(i), sizeof(Tmp->m_aClientNames[0]));
+			Tmp->m_aClientID[Tmp->m_NumPlayer] = i;
+			Tmp->m_NumPlayer++;
+		}
+	}
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "Loading team initiated by '%s'", this->Server()->ClientName(ClientID));
+	GameServer()->SendChatTeam(Team, aBuf);
+	thread_init_and_detach(
+			CSqlExecData<CSqlSaveResult>::ExecSqlFunc,
+			new CSqlExecData<CSqlSaveResult>(LoadTeamThread, Tmp, false),
+			"load team");
 }
 
-bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData<CSqlResult> *pGameData, bool HandleFailure)
+bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData<CSqlSaveResult> *pGameData, bool HandleFailure)
 {
-	/*
 	const CSqlTeamLoad *pData = dynamic_cast<const CSqlTeamLoad *>(pGameData);
+	pData->m_pResult->m_Status = CSqlSaveResult::LOAD_FAILED;
 
 	if (HandleFailure)
 		return true;
 
 	try
 	{
-		char aBuf[768];
+		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "lock tables %s_saves write;", pSqlServer->GetPrefix());
 		pSqlServer->executeSql(aBuf);
-		str_format(aBuf, sizeof(aBuf), "select Savegame, Server, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) as Ago from %s_saves where Code = '%s' and Map = '%s' and DDNet7 = false;", pSqlServer->GetPrefix(), pData->m_Code.ClrStr(), pData->m_Map.ClrStr());
+		str_format(aBuf, sizeof(aBuf),
+				"SELECT Savegame, Server, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) AS Ago "
+				"FROM %s_saves "
+				"where Code = '%s' AND Map = '%s' AND DDNet7 = false AND Savegame LIKE '%%\\n%s\\t%%';",
+				pSqlServer->GetPrefix(), pData->m_Code.ClrStr(), pData->m_Map.ClrStr(), pData->m_RequestingPlayer.ClrStr());
 		pSqlServer->executeSqlQuery(aBuf);
 
-		if (pSqlServer->GetResults()->rowsCount() > 0)
+		if(pSqlServer->GetResults()->rowsCount() == 0)
 		{
-			pSqlServer->GetResults()->first();
-			char ServerName[5];
-			str_copy(ServerName, pSqlServer->GetResults()->getString("Server").c_str(), sizeof(ServerName));
-			if(str_comp(ServerName, g_Config.m_SvSqlServerName))
-			{
-				str_format(aBuf, sizeof(aBuf), "You have to be on the '%s' server to load this savegame", ServerName);
-				pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
-				goto end;
-			}
-
-			pSqlServer->GetResults()->getInt("Ago");
-			int since = pSqlServer->GetResults()->getInt("Ago");
-
-			if(since < g_Config.m_SvSaveGamesDelay)
-			{
-				str_format(aBuf, sizeof(aBuf), "You have to wait %d seconds until you can load this savegame", g_Config.m_SvSaveGamesDelay - since);
-				pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
-				goto end;
-			}
-
-			CSaveTeam SavedTeam(pData->GameServer()->m_pController);
-
-			int Num = SavedTeam.LoadString(pSqlServer->GetResults()->getString("Savegame").c_str());
-
-			if(Num)
-				pData->GameServer()->SendChatTarget(pData->m_ClientID, "Unable to load savegame: data corrupted");
-			else
-			{
-				bool Found = false;
-				for (int i = 0; i < SavedTeam.GetMembersCount(); i++)
-				{
-					if(str_comp(SavedTeam.m_pSavedTees[i].GetName(), pData->Server()->ClientName(pData->m_ClientID)) == 0)
-					{
-						Found = true;
-						break;
-					}
-				}
-				if(!Found)
-					pData->GameServer()->SendChatTarget(pData->m_ClientID, "You don't belong to this team");
-				else
-				{
-					int Team = ((CGameControllerDDRace*)(pData->GameServer()->m_pController))->m_Teams.m_Core.Team(pData->m_ClientID);
-
-					Num = SavedTeam.load(Team);
-
-					if(Num == 1)
-					{
-						pData->GameServer()->SendChatTarget(pData->m_ClientID, "You have to be in a team (from 1-63)");
-					}
-					else if(Num == 2)
-					{
-						char aBuf[256];
-						str_format(aBuf, sizeof(aBuf), "Too many players in this team, should be %d", SavedTeam.GetMembersCount());
-						pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
-					}
-					else if(Num >= 10 && Num < 100)
-					{
-						char aBuf[256];
-						str_format(aBuf, sizeof(aBuf), "Unable to find player: '%s'", SavedTeam.m_pSavedTees[Num-10].GetName());
-						pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
-					}
-					else if(Num >= 100 && Num < 200)
-					{
-						char aBuf[256];
-						str_format(aBuf, sizeof(aBuf), "%s is racing right now, Team can't be loaded if a Tee is racing already", SavedTeam.m_pSavedTees[Num-100].GetName());
-						pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
-					}
-					else if(Num >= 200)
-					{
-						char aBuf[256];
-						str_format(aBuf, sizeof(aBuf), "Everyone has to be in a team, %s is in team 0 or the wrong team", SavedTeam.m_pSavedTees[Num-200].GetName());
-						pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
-					}
-					else
-					{
-						char aBuf[512];
-						str_format(aBuf, sizeof(aBuf), "Loading successfully done by %s", pData->m_ClientName);
-						pData->GameServer()->SendChatTeam(Team, aBuf);
-						str_format(aBuf, sizeof(aBuf), "DELETE from %s_saves where Code='%s' and Map='%s';", pSqlServer->GetPrefix(), pData->m_Code.ClrStr(), pData->m_Map.ClrStr());
-						pSqlServer->executeSql(aBuf);
-					}
-				}
-			}
+			strcpy(pData->m_pResult->m_aMessage, "No such savegame for this map");
+			goto end;
 		}
-		else
-			pData->GameServer()->SendChatTarget(pData->m_ClientID, "No such savegame for this map");
+		pSqlServer->GetResults()->first();
+		auto ServerName = pSqlServer->GetResults()->getString("Server");
+		if(str_comp(ServerName.c_str(), g_Config.m_SvSqlServerName) != 0)
+		{
+			str_format(pData->m_pResult->m_aMessage, sizeof(pData->m_pResult->m_aMessage),
+					"You have to be on the '%s' server to load this savegame", ServerName.c_str());
+			goto end;
+		}
 
-		end:
-		pSqlServer->executeSql("unlock tables;");
-		return true;
+		int Since = pSqlServer->GetResults()->getInt("Ago");
+		if(Since < g_Config.m_SvSaveGamesDelay)
+		{
+			str_format(pData->m_pResult->m_aMessage, sizeof(pData->m_pResult->m_aMessage),
+					"You have to wait %d seconds until you can load this savegame",
+					g_Config.m_SvSaveGamesDelay - Since);
+			goto end;
+		}
+		auto SaveString = pSqlServer->GetResults()->getString("Savegame");
+		int Num = pData->m_pResult->m_SavedTeam.LoadString(SaveString.c_str());
+
+		if(Num != 0)
+		{
+			strcpy(pData->m_pResult->m_aMessage, "Unable to load savegame: data corrupted");
+			goto end;
+		}
+
+		bool CanLoad = pData->m_pResult->m_SavedTeam.MatchPlayers(
+				pData->m_aClientNames, pData->m_aClientID, pData->m_NumPlayer,
+				pData->m_pResult->m_aMessage, sizeof(pData->m_pResult->m_aMessage));
+
+		if(!CanLoad)
+			goto end;
+
+		str_format(aBuf, sizeof(aBuf),
+				"DELETE FROM  %s_saves "
+				"WHERE Code='%s' AND Map='%s';",
+				pSqlServer->GetPrefix(), pData->m_Code.ClrStr(), pData->m_Map.ClrStr());
+		pSqlServer->executeSql(aBuf);
+
+		pData->m_pResult->m_Status = CSqlSaveResult::LOAD_SUCCESS;
+		strcpy(pData->m_pResult->m_aMessage, "Loading successfully done");
+
 	}
 	catch (sql::SQLException &e)
 	{
 		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not load the team");
-		pData->GameServer()->SendChatTarget(pData->m_ClientID, "MySQL Error: Could not load the team");
+		strcpy(pData->m_pResult->m_aMessage, "MySQL Error: Could not load the team");
+		pSqlServer->executeSql("unlock tables;");
+
+		return false;
 	}
-	catch (CGameContextError &e)
-	{
-		dbg_msg("sql", "WARNING: Aborted loading team due to reload/change of map.");
-		return true;
-	}
-	return false;
-	*/
-	return false;
+
+end:
+	pSqlServer->executeSql("unlock tables;");
+	return true;
 }
 
 void CSqlScore::GetSaves(int ClientID)
@@ -1749,7 +1738,7 @@ bool CSqlScore::GetSavesThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayer
 				"SELECT COUNT(*) as NumSaves, "
 					"UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(max(Timestamp)) as Ago "
 				"FROM %s_saves "
-				"WHERE Map='%s' AND Savegame regexp '\\n%s\\t';",
+				"WHERE Map='%s' AND Savegame LIKE '%%\\n%s\\t%%';",
 				pSqlServer->GetPrefix(),
 				pData->m_Map.ClrStr(),
 				pData->m_RequestingPlayer.ClrStr()

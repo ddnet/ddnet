@@ -13,11 +13,14 @@ public:
 	void save(CCharacter* pchr);
 	void load(CCharacter* pchr, int Team);
 	char* GetString();
-	int LoadString(char* String);
+	int LoadString(const char* String);
 	vec2 GetPos() const { return m_Pos; }
 	const char* GetName() const { return m_aName; }
+	int GetClientID() const { return m_ClientID; }
+	void SetClientID(int ClientID) { m_ClientID = ClientID; };
 
 private:
+	int m_ClientID;
 
 	char m_aString [2048];
 	char m_aName [16];
@@ -96,17 +99,18 @@ public:
 	~CSaveTeam();
 	char* GetString();
 	int GetMembersCount() const { return m_MembersCount; }
+	// MatchPlayers has to be called afterwards
 	int LoadString(const char* String);
+	// returns true if a team can load, otherwise writes a nice error Message in pMessage
+	bool MatchPlayers(const char (*paNames)[MAX_NAME_LENGTH], const int *pClientID, int NumPlayer, char *pMessage, int MessageLen);
 	int save(int Team);
-	int load(int Team);
+	void load(int Team);
 	CSaveTee* m_pSavedTees;
 
 	// returns true if an error occured
 	static bool HandleSaveError(int Result, int ClientID, CGameContext *pGameContext);
-	static void HandleLoadError(int Result, int ClientID, const CSaveTeam &SavedTeam, CGameContext *pGameContext);
 private:
-	int MatchPlayer(const char name[16]);
-	CCharacter* MatchCharacter(const char name[16], int SaveID);
+	CCharacter* MatchCharacter(int ClientID, int SaveID);
 
 	IGameController* m_pController;
 

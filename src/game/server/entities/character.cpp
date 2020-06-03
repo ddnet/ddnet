@@ -1505,7 +1505,11 @@ void CCharacter::HandleTiles(int Index)
 	{
 		if(Teams()->GetSaving(Team()))
 		{
-			GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Your team is currently getting saved"); // TODO: better message
+			if(m_LastStartWarning < Server()->Tick() - 3 * Server()->TickSpeed())
+			{
+				GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't start while loading/saving of team is in progress");
+				m_LastStartWarning = Server()->Tick();
+			}
 			Die(GetPlayer()->GetCID(), WEAPON_WORLD);
 			return;
 		}
