@@ -413,8 +413,6 @@ void CGameClient::OnDummySwap()
 
 int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 {
-	m_LocalIDs[g_Config.m_ClDummy] = m_Snap.m_LocalClientID;
-
 	if(!Dummy)
 	{
 		return m_pControls->SnapInput(pData);
@@ -1367,6 +1365,8 @@ void CGameClient::OnNewSnapshot()
 	// setup local pointers
 	if(m_Snap.m_LocalClientID >= 0)
 	{
+		m_LocalIDs[g_Config.m_ClDummy] = m_Snap.m_LocalClientID;
+		
 		CSnapState::CCharacterInfo *c = &m_Snap.m_aCharacters[m_Snap.m_LocalClientID];
 		if(c->m_Active)
 		{
