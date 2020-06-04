@@ -1077,8 +1077,7 @@ void CGameContext::OnClientEnter(int ClientID)
 
 	// Can't set score here as LoadScore() is threaded, run it in
 	// LoadScoreThreaded() instead
-	Score()->LoadScore(ClientID);
-	Score()->CheckBirthday(ClientID);
+	Score()->LoadPlayerData(ClientID);
 
 	{
 		int Empty = -1;
@@ -1878,18 +1877,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				// reload scores
 
 				Score()->PlayerData(ClientID)->Reset();
-				Score()->LoadScore(ClientID);
-				Score()->PlayerData(ClientID)->m_CurrentTime = Score()->PlayerData(ClientID)->m_BestTime;
-
-				// -9999 stands for no time and isn't displayed in scoreboard, so
-				// shift the time by a second if the player actually took 9999
-				// seconds to finish the map.
-				if(!Score()->PlayerData(ClientID)->m_BestTime)
-					m_apPlayers[ClientID]->m_Score = -9999;
-				else if((int)Score()->PlayerData(ClientID)->m_BestTime == -9999)
-					m_apPlayers[ClientID]->m_Score = -10000;
-				else
-					m_apPlayers[ClientID]->m_Score = Score()->PlayerData(ClientID)->m_BestTime;
+				m_apPlayers[ClientID]->m_Score = -9999;
+				Score()->LoadPlayerData(ClientID);
 			}
 			Server()->SetClientClan(ClientID, pMsg->m_pClan);
 			Server()->SetClientCountry(ClientID, pMsg->m_Country);

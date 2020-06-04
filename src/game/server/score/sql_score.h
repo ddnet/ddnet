@@ -12,16 +12,28 @@ class CSqlServer;
 
 class CSqlPlayerResult {
 public:
-	CSqlPlayerResult();
 	std::atomic_bool m_Done;
+	CSqlPlayerResult();
 
-	enum
+	enum Variant
 	{
 		DIRECT,
 		ALL,
 		MAP_VOTE, // 3 Messages: Reason, Server, Map
+		PLAYER_INFO,
 	} m_MessageKind;
 	char m_aaMessages[7][512];
+	union {
+		struct {
+			float m_Time;
+			float m_CpTime[NUM_CHECKPOINTS];
+			int m_Score;
+			int m_HasFinishScore;
+			int m_Birthday; // 0 indicates no birthday
+		} m_Info;
+	} m_Data; // PLAYER_INFO
+
+	void SetVariant(Variant v);
 };
 
 class CSqlSaveResult {
@@ -96,12 +108,6 @@ struct CSqlData
 	{ }
 	std::shared_ptr<TResult> m_pResult;
 	virtual ~CSqlData() = default;
-};
-
-struct CSqlPlayerData : CSqlData<CSqlResult>
-{
-	int m_ClientID;
-	sqlstr::CSqlString<MAX_NAME_LENGTH> m_Name;
 };
 
 // used for mapinfo
@@ -222,9 +228,8 @@ class CSqlScore: public IScore
 	static bool RandomMapThread(CSqlServer* pSqlServer, const CSqlData<CSqlResult> *pGameData, bool HandleFailure = false);
 	static bool RandomUnfinishedMapThread(CSqlServer* pSqlServer, const CSqlData<CSqlResult> *pGameData, bool HandleFailure = false);
 	static bool MapVoteThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure = false);
-	static bool CheckBirthdayThread(CSqlServer* pSqlServer, const CSqlData<CSqlResult> *pGameData, bool HandleFailure = false);
-	static bool LoadScoreThread(CSqlServer* pSqlServer, const CSqlData<CSqlResult> *pGameData, bool HandleFailure = false);
 
+	static bool LoadPlayerDataThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure = false);
 	static bool MapInfoThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure = false);
 	static bool ShowRankThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure = false);
 	static bool ShowTeamRankThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure = false);
@@ -272,9 +277,8 @@ public:
 	virtual void RandomMap(int ClientID, int Stars);
 	virtual void RandomUnfinishedMap(int ClientID, int Stars);
 	virtual void MapVote(int ClientID, const char* MapName);
-	virtual void CheckBirthday(int ClientID);
-	virtual void LoadScore(int ClientID);
 
+	virtual void LoadPlayerData(int ClientID);
 	// Requested by players (fails if another request by this player is active)
 	virtual void MapInfo(int ClientID, const char* MapName);
 	virtual void ShowRank(int ClientID, const char* pName);

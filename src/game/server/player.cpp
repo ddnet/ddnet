@@ -808,6 +808,29 @@ void CPlayer::ProcessSqlResult()
 		case CSqlPlayerResult::MAP_VOTE:
 			// TODO: start vote
 			break;
+		case CSqlPlayerResult::PLAYER_INFO:
+			GameServer()->Score()->PlayerData(m_ClientID)->Set(
+					m_SqlQueryResult->m_Data.m_Info.m_Time,
+					m_SqlQueryResult->m_Data.m_Info.m_CpTime
+			);
+			printf("%d", m_SqlQueryResult->m_Data.m_Info.m_Score);
+			m_Score = m_SqlQueryResult->m_Data.m_Info.m_Score;
+			m_HasFinishScore = m_SqlQueryResult->m_Data.m_Info.m_HasFinishScore;
+			Server()->ExpireServerInfo();
+			int Birthday = m_SqlQueryResult->m_Data.m_Info.m_Birthday;
+			if(Birthday != 0)
+			{
+				char aBuf[512];
+				str_format(aBuf, sizeof(aBuf),
+						"Happy DDNet birthday to %s for finishing their first map %d year%s ago!",
+						Server()->ClientName(m_ClientID), Birthday, Birthday > 1 ? "s" : "");
+				GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, m_ClientID);
+				str_format(aBuf, sizeof(aBuf),
+						"Happy DDNet birthday, %s!\nYou have finished your first map exactly %d year%s ago!",
+						Server()->ClientName(m_ClientID), Birthday, Birthday > 1 ? "s" : "");
+				GameServer()->SendBroadcast(aBuf, m_ClientID);
+			}
+			break;
 		}
 	}
 	m_SqlQueryResult = nullptr;

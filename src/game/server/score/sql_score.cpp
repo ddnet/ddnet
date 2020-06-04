@@ -20,11 +20,31 @@
 std::atomic_int CSqlScore::ms_InstanceCount(0);
 
 CSqlPlayerResult::CSqlPlayerResult() :
-	m_Done(0),
-	m_MessageKind(DIRECT)
+	m_Done(0)
 {
-	for(int i = 0; i < (int)(sizeof(m_aaMessages)/sizeof(m_aaMessages[0])); i++)
-		m_aaMessages[i][0] = 0;
+	SetVariant(Variant::DIRECT);
+}
+
+void CSqlPlayerResult::SetVariant(Variant v)
+{
+	m_MessageKind = v;
+	switch(v)
+	{
+	case DIRECT:
+	case ALL:
+		for(int i = 0; i < (int)(sizeof(m_aaMessages)/sizeof(m_aaMessages[0])); i++)
+			m_aaMessages[i][0] = 0;
+		break;
+	case MAP_VOTE:
+		break;
+	case PLAYER_INFO:
+		m_Data.m_Info.m_Score = -9999;
+		m_Data.m_Info.m_Birthday = 0;
+		m_Data.m_Info.m_HasFinishScore = false;
+		m_Data.m_Info.m_Time = 0;
+		for(int i = 0; i < NUM_CHECKPOINTS; i++)
+			m_Data.m_Info.m_CpTime[i] = 0;
+	}
 }
 
 CSqlResult::CSqlResult() :
@@ -205,72 +225,16 @@ bool CSqlScore::Init(CSqlServer* pSqlServer, const CSqlData<CSqlResult> *pGameDa
 	return false;
 }
 
-void CSqlScore::CheckBirthday(int ClientID)
+void CSqlScore::LoadPlayerData(int ClientID)
 {
-	/*
-	CSqlPlayerRequest *Tmp = new CSqlPlayerRequest();
-	Tmp->m_ClientID = ClientID;
-	Tmp->m_Name = Server()->ClientName(ClientID);
-	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(CheckBirthdayThread, Tmp), "birthday check");
-	*/
-}
-
-bool CSqlScore::CheckBirthdayThread(CSqlServer* pSqlServer, const CSqlData<CSqlResult> *pGameData, bool HandleFailure)
-{
-	/* TODO
-	const CSqlPlayerData *pData = dynamic_cast<const CSqlPlayerData *>(pGameData);
-
-	if (HandleFailure)
-		return true;
-
-	try
-	{
-
-		char aBuf[512];
-
-		str_format(aBuf, sizeof(aBuf), "select year(Current) - year(Stamp) as YearsAgo from (select CURRENT_TIMESTAMP as Current, min(Timestamp) as Stamp from %s_race WHERE Name='%s') as l where dayofmonth(Current) = dayofmonth(Stamp) and month(Current) = month(Stamp) and year(Current) > year(Stamp);", pSqlServer->GetPrefix(), pData->m_Name.ClrStr());
-		pSqlServer->executeSqlQuery(aBuf);
-
-		if(pSqlServer->GetResults()->next())
-		{
-			int yearsAgo = pSqlServer->GetResults()->getInt("YearsAgo");
-			str_format(aBuf, sizeof(aBuf), "Happy DDNet birthday to %s for finishing their first map %d year%s ago!", pData->m_Name.Str(), yearsAgo, yearsAgo > 1 ? "s" : "");
-			pData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
-
-			str_format(aBuf, sizeof(aBuf), "Happy DDNet birthday, %s!\nYou have finished your first map exactly %d year%s ago!", pData->m_Name.Str(), yearsAgo, yearsAgo > 1 ? "s" : "");
-
-			pData->GameServer()->SendBroadcast(aBuf, pData->m_ClientID);
-		}
-
-		dbg_msg("sql", "checking birthday done");
-		return true;
-	}
-	catch (sql::SQLException &e)
-	{
-		dbg_msg("sql", "MySQL ERROR: %s", e.what());
-		dbg_msg("sql", "ERROR: could not check birthday");
-	}
-	return false;
-	*/
-	return false;
-}
-
-void CSqlScore::LoadScore(int ClientID)
-{
-	/*
-	CSqlPlayerData *Tmp = new CSqlPlayerData();
-	Tmp->m_ClientID = ClientID;
-	Tmp->m_Name = Server()->ClientName(ClientID);
-
-	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(LoadScoreThread, Tmp), "load score");
-	*/
+	ExecPlayerThread(LoadPlayerDataThread, "load player data", ClientID, "", 0);
 }
 
 // update stuff
-bool CSqlScore::LoadScoreThread(CSqlServer* pSqlServer, const CSqlData<CSqlResult> *pGameData, bool HandleFailure)
+bool CSqlScore::LoadPlayerDataThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure)
 {
-	/*
-	const CSqlPlayerData *pData = dynamic_cast<const CSqlPlayerData *>(pGameData);
+	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
+	pData->m_pResult->SetVariant(CSqlPlayerResult::PLAYER_INFO);
 
 	if (HandleFailure)
 		return true;
@@ -278,20 +242,27 @@ bool CSqlScore::LoadScoreThread(CSqlServer* pSqlServer, const CSqlData<CSqlResul
 	try
 	{
 		char aBuf[512];
-
-		str_format(aBuf, sizeof(aBuf), "SELECT * FROM %s_race WHERE Map='%s' AND Name='%s' ORDER BY time ASC LIMIT 1;", pSqlServer->GetPrefix(), pData->m_Map.ClrStr(), pData->m_Name.ClrStr());
+		// get best race time
+		str_format(aBuf, sizeof(aBuf),
+				"SELECT * "
+				"FROM %s_race "
+				"WHERE Map='%s' AND Name='%s' "
+				"ORDER BY Time ASC "
+				"LIMIT 1;",
+				pSqlServer->GetPrefix(), pData->m_Map.ClrStr(), pData->m_RequestingPlayer.ClrStr());
 		pSqlServer->executeSqlQuery(aBuf);
 		if(pSqlServer->GetResults()->next())
 		{
 			// get the best time
 			float Time = (float)pSqlServer->GetResults()->getDouble("Time");
-			pData->PlayerData(pData->m_ClientID)->m_BestTime = Time;
-			pData->PlayerData(pData->m_ClientID)->m_CurrentTime = Time;
-			if(pData->GameServer()->m_apPlayers[pData->m_ClientID])
-			{
-				pData->GameServer()->m_apPlayers[pData->m_ClientID]->m_Score = -Time;
-				pData->GameServer()->m_apPlayers[pData->m_ClientID]->m_HasFinishScore = true;
-			}
+			pData->m_pResult->m_Data.m_Info.m_Time = Time;
+			pData->m_pResult->m_Data.m_Info.m_Score = -Time;
+			pData->m_pResult->m_Data.m_Info.m_HasFinishScore = true;
+			// -9999 stands for no time and isn't displayed in scoreboard, so
+			// shift the time by a second if the player actually took 9999
+			// seconds to finish the map.
+			if(pData->m_pResult->m_Data.m_Info.m_Score == -9999)
+				pData->m_pResult->m_Data.m_Info.m_Score = -10000;
 
 			char aColumn[8];
 			if(g_Config.m_SvCheckpointSave)
@@ -299,12 +270,31 @@ bool CSqlScore::LoadScoreThread(CSqlServer* pSqlServer, const CSqlData<CSqlResul
 				for(int i = 0; i < NUM_CHECKPOINTS; i++)
 				{
 					str_format(aColumn, sizeof(aColumn), "cp%d", i+1);
-					pData->PlayerData(pData->m_ClientID)->m_aBestCpTime[i] = (float)pSqlServer->GetResults()->getDouble(aColumn);
+					pData->m_pResult->m_Data.m_Info.m_CpTime[i] = (float)pSqlServer->GetResults()->getDouble(aColumn);
 				}
 			}
 		}
 
-		dbg_msg("sql", "Getting best time done");
+		// birthday check
+		str_format(aBuf, sizeof(aBuf),
+				"SELECT YEAR(Current) - YEAR(Stamp) AS YearsAgo "
+				"FROM ("
+					"SELECT CURRENT_TIMESTAMP AS Current, MIN(Timestamp) AS Stamp "
+					"FROM %s_race "
+					"WHERE Name='%s'"
+				") AS l "
+				"WHERE DAYOFMONTH(Current) = DAYOFMONTH(Stamp) AND MONTH(Current) = MONTH(Stamp) "
+					"AND YEAR(Current) > YEAR(Stamp);",
+				pSqlServer->GetPrefix(), pData->m_RequestingPlayer.ClrStr());
+		pSqlServer->executeSqlQuery(aBuf);
+
+		if(pSqlServer->GetResults()->next())
+		{
+			int YearsAgo = pSqlServer->GetResults()->getInt("YearsAgo");
+			pData->m_pResult->m_Data.m_Info.m_Birthday = YearsAgo;
+		}
+		pData->m_pResult->m_Done = true;
+		dbg_msg("sql", "Finished loading player data");
 		return true;
 	}
 	catch (sql::SQLException &e)
@@ -312,13 +302,6 @@ bool CSqlScore::LoadScoreThread(CSqlServer* pSqlServer, const CSqlData<CSqlResul
 		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not update account");
 	}
-	catch (CGameContextError &e)
-	{
-		dbg_msg("sql", "WARNING: Aborted loading score due to reload/change of map.");
-		return true;
-	}
-	return false;
-	*/
 	return false;
 }
 

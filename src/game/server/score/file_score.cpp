@@ -205,12 +205,7 @@ void CFileScore::UpdatePlayer(int ID, float Score,
 	Save();
 }
 
-void CFileScore::CheckBirthday(int ClientID)
-{
-	// TODO: implement
-}
-
-void CFileScore::LoadScore(int ClientID)
+void CFileScore::LoadPlayerData(int ClientID)
 {
 	CPlayerScore *pPlayer = SearchScore(ClientID, 0);
 	if (pPlayer)

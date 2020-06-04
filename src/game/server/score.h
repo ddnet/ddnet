@@ -19,6 +19,7 @@ public:
 	{
 		Reset();
 	}
+	~CPlayerData() {}
 
 	void Reset()
 	{
@@ -31,6 +32,7 @@ public:
 	void Set(float Time, float CpTime[NUM_CHECKPOINTS])
 	{
 		m_BestTime = Time;
+		m_CurrentTime = Time;
 		for(int i = 0; i < NUM_CHECKPOINTS; i++)
 			m_aBestCpTime[i] = CpTime[i];
 	}
@@ -62,8 +64,7 @@ public:
 
 	virtual void MapInfo(int ClientID, const char *pMapName) = 0;
 	virtual void MapVote(int ClientID, const char *pMapName) = 0;
-	virtual void CheckBirthday(int ClientID) = 0;
-	virtual void LoadScore(int ClientID) = 0;
+	virtual void LoadPlayerData(int ClientID) = 0;
 	virtual void SaveScore(int ClientID, float Time, const char *pTimestamp, float aCpTime[NUM_CHECKPOINTS], bool NotEligible) = 0;
 
 	virtual void SaveTeamScore(int *pClientIDs, unsigned int Size, float Time, const char *pTimestamp) = 0;

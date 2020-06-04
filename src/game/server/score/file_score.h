@@ -60,8 +60,7 @@ public:
 	CFileScore(CGameContext *pGameServer);
 	~CFileScore();
 
-	virtual void CheckBirthday(int ClientID);
-	virtual void LoadScore(int ClientID);
+	virtual void LoadPlayerData(int ClientID);
 	virtual void MapInfo(int ClientID, const char* MapName);
 	virtual void MapVote(int ClientID, const char* MapName);
 	virtual void SaveScore(int ClientID, float Time, const char *pTimestamp,
