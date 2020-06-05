@@ -337,9 +337,7 @@ void CGameTeams::ForceLeaveTeam(int ClientID)
 			SetTeamLock(m_Core.Team(ClientID), false);
 			ResetInvited(m_Core.Team(ClientID));
 			m_Practice[m_Core.Team(ClientID)] = false;
-#if defined(CONF_SQL)
-			m_pSaveTeamResult[m_Core.Team(ClientID)] = nullptr;
-#endif
+			// do not reset SaveTeamResult, because it should be logged into teehistorian even if the team leaves
 		}
 	}
 
@@ -694,19 +692,31 @@ void CGameTeams::ProcessSaveTeam()
 			GameServer()->SendBroadcast(m_pSaveTeamResult[Team]->m_aBroadcast, -1);
 		if(m_pSaveTeamResult[Team]->m_aMessage[0] != '\0')
 			GameServer()->SendChatTeam(Team, m_pSaveTeamResult[Team]->m_aMessage);
+		// TODO: log load/save success/fail in teehistorian
 		switch(m_pSaveTeamResult[Team]->m_Status)
 		{
 		case CSqlSaveResult::SAVE_SUCCESS:
 		{
 			ResetSavedTeam(m_pSaveTeamResult[Team]->m_RequestingPlayer, Team);
+			char aSaveID[UUID_MAXSTRSIZE];
+			FormatUuid(m_pSaveTeamResult[Team]->m_SaveID, aSaveID, UUID_MAXSTRSIZE);
+			dbg_msg("save", "Save successful: %s", aSaveID);
 			break;
 		}
 		case CSqlSaveResult::SAVE_FAILED:
-		case CSqlSaveResult::LOAD_SUCCESS:
-			m_pSaveTeamResult[Team]->m_SavedTeam.load(Team);
+			if(m_MembersCount[Team] > 0)
+				m_pSaveTeamResult[Team]->m_SavedTeam.load(Team);
 			break;
+		case CSqlSaveResult::LOAD_SUCCESS:
+		{
+			if(m_MembersCount[Team] > 0)
+				m_pSaveTeamResult[Team]->m_SavedTeam.load(Team);
+			char aSaveID[UUID_MAXSTRSIZE];
+			FormatUuid(m_pSaveTeamResult[Team]->m_SaveID, aSaveID, UUID_MAXSTRSIZE);
+			dbg_msg("save", "Load successful: %s", aSaveID);
+			break;
+		}
 		case CSqlSaveResult::LOAD_FAILED:
-			// just printing the error message to the team above is enough
 			break;
 		}
 		m_pSaveTeamResult[Team] = nullptr;

@@ -58,6 +58,7 @@ public:
 	char m_aBroadcast[512];
 	CSaveTeam m_SavedTeam;
 	int m_RequestingPlayer;
+	CUuid m_SaveID;
 };
 
 class CSqlMapResult {
@@ -172,7 +173,6 @@ struct CSqlTeamSave : CSqlData<CSqlSaveResult>
 
 	sqlstr::CSqlString<128> m_Map;
 	sqlstr::CSqlString<128> m_Code;
-	char m_Uuid[UUID_MAXSTRSIZE];
 	char m_Server[5];
 };
 
@@ -181,7 +181,7 @@ struct CSqlTeamLoad : CSqlData<CSqlSaveResult>
 	using CSqlData<CSqlSaveResult>::CSqlData;
 	sqlstr::CSqlString<128> m_Code;
 	sqlstr::CSqlString<128> m_Map;
-	sqlstr::CSqlString<128> m_RequestingPlayer;
+	sqlstr::CSqlString<MAX_NAME_LENGTH> m_RequestingPlayer;
 	int m_ClientID;
 	// struct holding all player names in the team or an empty string
 	char m_aClientNames[MAX_CLIENTS][MAX_NAME_LENGTH];

@@ -1466,11 +1466,10 @@ void CSqlScore::SaveTeam(int ClientID, const char* Code, const char* Server)
 	CSqlTeamSave *Tmp = new CSqlTeamSave(SaveResult);
 	Tmp->m_Code = Code;
 	Tmp->m_Map = g_Config.m_SvMap;
-	FormatUuid(RandomUuid(), Tmp->m_Uuid, UUID_MAXSTRSIZE);
+	Tmp->m_pResult->m_SaveID = RandomUuid();
 	str_copy(Tmp->m_Server, Server, sizeof(Tmp->m_Server));
 	str_copy(Tmp->m_ClientName, this->Server()->ClientName(ClientID), sizeof(Tmp->m_ClientName));
 
-	// TODO: log event in teehistorian
 	pController->m_Teams.KillSavedTeam(ClientID, Team);
 	char aBuf[512];
 	// TODO: better message, maybe hint that one should wait until the next message to leave
@@ -1485,6 +1484,9 @@ void CSqlScore::SaveTeam(int ClientID, const char* Code, const char* Server)
 bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData<CSqlSaveResult> *pGameData, bool HandleFailure)
 {
 	const CSqlTeamSave *pData = dynamic_cast<const CSqlTeamSave *>(pGameData);
+
+	char aSaveID[UUID_MAXSTRSIZE];
+	FormatUuid(pData->m_pResult->m_SaveID, aSaveID, UUID_MAXSTRSIZE);
 
 	sqlstr::CSqlString<65536> SaveState = pData->m_pResult->m_SavedTeam.GetString();
 	if(HandleFailure)
@@ -1503,7 +1505,7 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData<CSqlSaveRe
 					"INSERT IGNORE INTO %%s_saves(Savegame, Map, Code, Timestamp, Server, SaveID, DDNet7) "
 					"VALUES ('%s', '%s', '%s', CURRENT_TIMESTAMP(), '%s', '%s', false)",
 					SaveState.ClrStr(), pData->m_Map.ClrStr(),
-					pData->m_Code.ClrStr(), pData->m_Server, pData->m_Uuid
+					pData->m_Code.ClrStr(), pData->m_Server, aSaveID
 			);
 			io_write(File, aBuf, str_length(aBuf));
 			io_write_newline(File);
@@ -1537,11 +1539,12 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData<CSqlSaveRe
 			if (pSqlServer->GetResults()->rowsCount() == 0)
 			{
 				char aBuf[65536];
+
 				str_format(aBuf, sizeof(aBuf),
 						"INSERT IGNORE INTO %s_saves(Savegame, Map, Code, Timestamp, Server, SaveID, DDNet7) "
 						"VALUES ('%s', '%s', '%s', CURRENT_TIMESTAMP(), '%s', '%s', false)",
 						pSqlServer->GetPrefix(), SaveState.ClrStr(), pData->m_Map.ClrStr(),
-						pData->m_Code.ClrStr(), pData->m_Server, pData->m_Uuid
+						pData->m_Code.ClrStr(), pData->m_Server, aSaveID
 				);
 				dbg_msg("sql", "%s", aBuf);
 				pSqlServer->executeSql(aBuf);
@@ -1631,7 +1634,10 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData<CSqlSaveRe
 		str_format(aBuf, sizeof(aBuf), "lock tables %s_saves write;", pSqlServer->GetPrefix());
 		pSqlServer->executeSql(aBuf);
 		str_format(aBuf, sizeof(aBuf),
-				"SELECT Savegame, Server, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) AS Ago "
+				"SELECT "
+					"Savegame, Server, "
+					"UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) AS Ago, "
+					"(UNHEX(REPLACE(SaveID, '-',''))) AS SaveID "
 				"FROM %s_saves "
 				"where Code = '%s' AND Map = '%s' AND DDNet7 = false AND Savegame LIKE '%%\\n%s\\t%%';",
 				pSqlServer->GetPrefix(), pData->m_Code.ClrStr(), pData->m_Map.ClrStr(), pData->m_RequestingPlayer.ClrStr());
@@ -1659,6 +1665,21 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData<CSqlSaveRe
 					g_Config.m_SvSaveGamesDelay - Since);
 			goto end;
 		}
+		if(pSqlServer->GetResults()->isNull("SaveID"))
+		{
+			memset(pData->m_pResult->m_SaveID.m_aData, 0, sizeof(pData->m_pResult->m_SaveID.m_aData));
+		}
+		else
+		{
+			auto SaveID = pSqlServer->GetResults()->getBlob("SaveID");
+			SaveID->read((char *) pData->m_pResult->m_SaveID.m_aData, 16);
+			if(SaveID->gcount() != 16)
+			{
+				strcpy(pData->m_pResult->m_aMessage, "Unable to load savegame: SaveID corrupted");
+				goto end;
+			}
+		}
+
 		auto SaveString = pSqlServer->GetResults()->getString("Savegame");
 		int Num = pData->m_pResult->m_SavedTeam.LoadString(SaveString.c_str());
 
