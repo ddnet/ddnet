@@ -17,7 +17,7 @@ public:
 
 	bool Connect();
 	void Disconnect();
-	void CreateTables();
+	bool CreateTables();
 
 	void executeSql(const char *pCommand);
 	void executeSqlQuery(const char *pQuery);

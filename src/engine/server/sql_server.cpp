@@ -167,11 +167,12 @@ void CSqlServer::Disconnect()
 	m_SqlLock.release();
 }
 
-void CSqlServer::CreateTables()
+bool CSqlServer::CreateTables()
 {
 	if (!Connect())
-		return;
+		return false;
 
+	bool Success = false;
 	try
 	{
 		char aBuf[1024];
@@ -193,6 +194,7 @@ void CSqlServer::CreateTables()
 		executeSql(aBuf);
 
 		dbg_msg("sql", "Tables were created successfully");
+		Success = true;
 	}
 	catch (sql::SQLException &e)
 	{
@@ -200,6 +202,7 @@ void CSqlServer::CreateTables()
 	}
 
 	Disconnect();
+	return Success;
 }
 
 void CSqlServer::executeSql(const char *pCommand)

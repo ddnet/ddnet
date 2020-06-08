@@ -2828,12 +2828,18 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 		{
 			apSqlServers[i] = new CSqlServer(pResult->GetString(1), pResult->GetString(2), pResult->GetString(3), pResult->GetString(4), pResult->GetString(5), pResult->GetInteger(6), &pSelf->m_GlobalSqlLock, ReadOnly, SetUpDb);
 
-			if(SetUpDb)
-				thread_init(CreateTablesThread, apSqlServers[i], "CreateTables");
-
 			char aBuf[512];
-			str_format(aBuf, sizeof(aBuf), "Added new Sql%sServer: %d: DB: '%s' Prefix: '%s' User: '%s' IP: <{'%s'}> Port: %d", ReadOnly ? "Read" : "Write", i, apSqlServers[i]->GetDatabase(), apSqlServers[i]->GetPrefix(), apSqlServers[i]->GetUser(), apSqlServers[i]->GetIP(), apSqlServers[i]->GetPort());
+			str_format(aBuf, sizeof(aBuf),
+					"Added new Sql%sServer: %d: DB: '%s' Prefix: '%s' User: '%s' IP: <{'%s'}> Port: %d",
+					ReadOnly ? "Read" : "Write", i, apSqlServers[i]->GetDatabase(),
+					apSqlServers[i]->GetPrefix(), apSqlServers[i]->GetUser(),
+					apSqlServers[i]->GetIP(), apSqlServers[i]->GetPort());
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+			if(SetUpDb)
+			{
+				if(!apSqlServers[i]->CreateTables())
+					pSelf->SetErrorShutdown("database create tables failed");
+			}
 			return;
 		}
 	}
@@ -2864,11 +2870,6 @@ void CServer::ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData)
 			str_format(aBuf, sizeof(aBuf), "SQL-%s %d: DB: '%s' Prefix: '%s' User: '%s' Pass: '%s' IP: <{'%s'}> Port: %d", ReadOnly ? "Read" : "Write", i, apSqlServers[i]->GetDatabase(), apSqlServers[i]->GetPrefix(), apSqlServers[i]->GetUser(), apSqlServers[i]->GetPass(), apSqlServers[i]->GetIP(), apSqlServers[i]->GetPort());
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 		}
-}
-
-void CServer::CreateTablesThread(void *pData)
-{
-	((CSqlServer *)pData)->CreateTables();
 }
 
 #endif
