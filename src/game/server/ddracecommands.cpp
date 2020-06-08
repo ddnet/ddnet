@@ -297,11 +297,9 @@ void CGameContext::ConToCheckTeleporter(IConsole::IResult *pResult, void *pUserD
 	}
 }
 
-void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
+void TeleImpl(void *pUserData, int Tele, int TeleTo)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
-	int Tele = pResult->NumArguments() == 2 ? pResult->GetInteger(0) : pResult->m_ClientID;
-	int TeleTo = pResult->NumArguments() ? pResult->GetInteger(pResult->NumArguments() - 1) : pResult->m_ClientID;
 
 	CCharacter *pChr = pSelf->GetPlayerChar(Tele);
 	if(pChr && pSelf->GetPlayerChar(TeleTo))
@@ -311,6 +309,19 @@ void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
 		pChr->m_PrevPos = pSelf->m_apPlayers[TeleTo]->m_ViewPos;
 		pChr->m_DDRaceState = DDRACE_CHEAT;
 	}
+}
+
+void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
+{
+	int Tele = pResult->NumArguments() == 2 ? pResult->GetInteger(0) : pResult->m_ClientID;
+	int TeleTo = pResult->NumArguments() ? pResult->GetInteger(pResult->NumArguments() - 1) : pResult->m_ClientID;
+	TeleImpl(pUserData, Tele, TeleTo);
+}
+
+void CGameContext::ConTeleport2(IConsole::IResult *pResult, void *pUserData)
+{
+	int TeleTo = pResult->NumArguments() ? pResult->GetInteger(0) : pResult->m_ClientID;
+	TeleImpl(pUserData, pResult->m_ClientID, TeleTo);
 }
 
 void CGameContext::ConKill(IConsole::IResult *pResult, void *pUserData)
@@ -431,7 +442,7 @@ bool CGameContext::TryMute(const NETADDR *pAddr, int Secs, const char *pReason)
 		m_aMutes[m_NumMutes].m_Addr = *pAddr;
 		m_aMutes[m_NumMutes].m_Expire = Server()->Tick()
 						+ Secs * Server()->TickSpeed();
-		str_copy(m_aMutes[m_NumMutes].m_aReason, pReason, sizeof(m_aMutes[m_NumMutes].m_aReason));	
+		str_copy(m_aMutes[m_NumMutes].m_aReason, pReason, sizeof(m_aMutes[m_NumMutes].m_aReason));
 		m_NumMutes++;
 		return true;
 	}
