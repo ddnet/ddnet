@@ -47,32 +47,6 @@ void CSqlPlayerResult::SetVariant(Variant v)
 	}
 }
 
-CSqlResult::CSqlResult() :
-	m_Done(false),
-	m_MessageTarget(DIRECT),
-	m_TeamMessageTo(-1),
-	m_Tag(NONE)
-{
-	m_Message[0] = 0;
-}
-
-CSqlResult::~CSqlResult() {
-	switch(m_Tag)
-	{
-	case NONE:
-		break;
-	case LOAD:
-		//m_Variant.m_LoadTeam.~CSaveTeam();
-		break;
-	case RANDOM_MAP:
-		m_Variant.m_RandomMap.~CRandomMapResult();
-		break;
-	case MAP_VOTE:
-		m_Variant.m_MapVote.~CMapVoteResult();
-		break;
-	}
-}
-
 template < typename TResult >
 CSqlExecData<TResult>::CSqlExecData(
 		bool (*pFuncPtr) (CSqlServer*, const CSqlData<TResult> *, bool),
@@ -123,15 +97,6 @@ void CSqlScore::ExecPlayerThread(
 }
 
 LOCK CSqlScore::ms_FailureFileLock = lock_create();
-
-CSqlScore::CSqlScore(CGameContext *pGameServer) :
-		m_pGameServer(pGameServer),
-		m_pServer(pGameServer->Server())
-{
-	CSqlConnector::ResetReachable();
-
-	//thread_init_and_detach(ExecSqlFunc, new CSqlExecData<CSqlPlayerResult>(Init, new CSqlData<CSqlPlayerResult>(nullptr)), "SqlScore constructor");
-}
 
 void CSqlScore::OnShutdown()
 {
@@ -189,10 +154,25 @@ void CSqlExecData<TResult>::ExecSqlFunc(void *pUser)
 	delete pData;
 }
 
-bool CSqlScore::Init(CSqlServer* pSqlServer, const CSqlData<CSqlResult> *pGameData, bool HandleFailure)
+CSqlScore::CSqlScore(CGameContext *pGameServer) :
+		m_pGameServer(pGameServer),
+		m_pServer(pGameServer->Server())
 {
-	/*
-	const CSqlData<CSqlPlayerResult>* pData = pGameData;
+	CSqlConnector::ResetReachable();
+
+	auto InitResult = std::make_shared<CSqlInitResult>();
+	CSqlInitData *Tmp = new CSqlInitData(InitResult);
+	((CGameControllerDDRace*)(pGameServer->m_pController))->m_pInitResult = InitResult;
+	Tmp->m_Map = g_Config.m_SvMap;
+
+	thread_init_and_detach(CSqlExecData<CSqlInitResult>::ExecSqlFunc,
+			new CSqlExecData<CSqlInitResult>(Init, Tmp),
+			"SqlScore constructor");
+}
+
+bool CSqlScore::Init(CSqlServer* pSqlServer, const CSqlData<CSqlInitResult> *pGameData, bool HandleFailure)
+{
+	const CSqlInitData *pData = dynamic_cast<const CSqlInitData *>(pGameData);
 
 	if (HandleFailure)
 	{
@@ -202,26 +182,24 @@ bool CSqlScore::Init(CSqlServer* pSqlServer, const CSqlData<CSqlResult> *pGameDa
 
 	try
 	{
-		char aBuf[1024];
+		char aBuf[512];
 		// get the best time
-		str_format(aBuf, sizeof(aBuf), "SELECT Time FROM %s_race WHERE Map='%s' ORDER BY `Time` ASC LIMIT 0, 1;", pSqlServer->GetPrefix(), pData->m_Map.ClrStr());
+		str_format(aBuf, sizeof(aBuf),
+				"SELECT Time FROM %s_race WHERE Map='%s' ORDER BY `Time` ASC LIMIT 1;",
+				pSqlServer->GetPrefix(), pData->m_Map.ClrStr());
 		pSqlServer->executeSqlQuery(aBuf);
 
 		if(pSqlServer->GetResults()->next())
-		{
-			((CGameControllerDDRace*)pData->GameServer()->m_pController)->m_CurrentRecord = (float)pSqlServer->GetResults()->getDouble("Time");
+			pData->m_pResult->m_CurrentRecord = (float)pSqlServer->GetResults()->getDouble("Time");
 
-			dbg_msg("sql", "Getting best time on server done");
-		}
+		pData->m_pResult->m_Done = true;
+		dbg_msg("sql", "Getting best time on server done");
 		return true;
 	}
 	catch (sql::SQLException &e)
 	{
 		dbg_msg("sql", "MySQL Error: %s", e.what());
-		dbg_msg("sql", "ERROR: Tables were NOT created");
 	}
-	*/
-
 	return false;
 }
 
@@ -497,11 +475,10 @@ bool CSqlScore::MapInfoThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerR
 
 void CSqlScore::SaveScore(int ClientID, float Time, const char *pTimestamp, float CpTime[NUM_CHECKPOINTS], bool NotEligible)
 {
-	/*
 	CConsole* pCon = (CConsole*)GameServer()->Console();
 	if(pCon->m_Cheated)
 		return;
-	CSqlScoreData *Tmp = new CSqlScoreData();
+	CSqlScoreData *Tmp = new CSqlScoreData(nullptr);
 	Tmp->m_ClientID = ClientID;
 	Tmp->m_Name = Server()->ClientName(ClientID);
 	Tmp->m_Time = Time;
@@ -510,8 +487,9 @@ void CSqlScore::SaveScore(int ClientID, float Time, const char *pTimestamp, floa
 	for(int i = 0; i < NUM_CHECKPOINTS; i++)
 		Tmp->m_aCpCurrent[i] = CpTime[i];
 
-	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(SaveScoreThread, Tmp, false), "save score");
-	*/
+	thread_init_and_detach(CSqlExecData<CSqlPlayerResult>::ExecSqlFunc,
+			new CSqlExecData<CSqlPlayerResult>(SaveScoreThread, Tmp),
+			"save score");
 }
 
 bool CSqlScore::SaveScoreThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure)
@@ -595,7 +573,6 @@ bool CSqlScore::SaveScoreThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlaye
 		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not update time");
 	}
-	return false;
 	*/
 	return false;
 }
@@ -1326,8 +1303,9 @@ void CSqlScore::RandomMap(int ClientID, int Stars)
 	*/
 }
 
-bool CSqlScore::RandomMapThread(CSqlServer* pSqlServer, const CSqlData<CSqlResult> *pGameData, bool HandleFailure)
+bool CSqlScore::RandomMapThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure)
 {
+	/*
 	const CSqlRandomMap *pData = dynamic_cast<const CSqlRandomMap *>(pGameData);
 
 	if (HandleFailure)
@@ -1384,6 +1362,7 @@ bool CSqlScore::RandomMapThread(CSqlServer* pSqlServer, const CSqlData<CSqlResul
 		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not vote random map");
 	}
+	*/
 	return false;
 }
 
@@ -1402,7 +1381,7 @@ void CSqlScore::RandomUnfinishedMap(int ClientID, int Stars)
 	*/
 }
 
-bool CSqlScore::RandomUnfinishedMapThread(CSqlServer* pSqlServer, const CSqlData<CSqlResult> *pGameData, bool HandleFailure)
+bool CSqlScore::RandomUnfinishedMapThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure)
 {
 	/*
 	const CSqlRandomMap *pData = dynamic_cast<const CSqlRandomMap *>(pGameData);

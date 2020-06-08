@@ -10,8 +10,8 @@
 
 class CSqlServer;
 
-class CSqlPlayerResult {
-public:
+struct CSqlPlayerResult
+{
 	std::atomic_bool m_Done;
 	CSqlPlayerResult();
 
@@ -36,8 +36,7 @@ public:
 	void SetVariant(Variant v);
 };
 
-class CSqlSaveResult {
-public:
+struct CSqlSaveResult {
 	CSqlSaveResult(int PlayerID, IGameController* Controller) :
 		m_Status(SAVE_SUCCESS),
 		m_SavedTeam(CSaveTeam(Controller)),
@@ -61,43 +60,14 @@ public:
 	CUuid m_SaveID;
 };
 
-class CSqlMapResult {
-	CSqlMapResult();
-	std::atomic_bool m_Done;
-};
-
-// result only valid if m_Done is set to true
-class CSqlResult
+struct CSqlInitResult
 {
-public:
+	CSqlInitResult() :
+		m_Done(false),
+		m_CurrentRecord(0)
+	{ }
 	std::atomic_bool m_Done;
-	// specify where chat messages should be returned
-	enum
-	{
-		DIRECT,
-		TEAM,
-		ALL,
-	} m_MessageTarget;
-	int m_TeamMessageTo; // store team id, if player changes team after /save
-	char m_Message[512];
-	// TODO: replace this with a type-safe std::variant (C++17)
-	enum
-	{
-		NONE,
-		LOAD,
-		RANDOM_MAP,
-		MAP_VOTE,
-	} m_Tag;
-
-	union
-	{
-		//CSaveTeam m_LoadTeam;
-		CRandomMapResult m_RandomMap;
-		CMapVoteResult m_MapVote;
-	} m_Variant;
-
-	CSqlResult();
-	~CSqlResult();
+	float m_CurrentRecord;
 };
 
 // holding relevant data for one thread, and function pointer for return values
@@ -111,14 +81,11 @@ struct CSqlData
 	virtual ~CSqlData() = default;
 };
 
-// used for mapinfo
-struct CSqlMapData : CSqlData<CSqlPlayerResult>
+struct CSqlInitData : CSqlData<CSqlInitResult>
 {
-	using CSqlData<CSqlPlayerResult>::CSqlData;
-	int m_ClientID;
-
-	sqlstr::CSqlString<128> m_RequestedMap;
-	sqlstr::CSqlString<MAX_NAME_LENGTH> m_Name;
+	using CSqlData<CSqlInitResult>::CSqlData;
+	// current map
+	sqlstr::CSqlString<128> m_Map;
 };
 
 struct CSqlPlayerRequest : CSqlData<CSqlPlayerResult>
@@ -133,18 +100,13 @@ struct CSqlPlayerRequest : CSqlData<CSqlPlayerResult>
 	int m_Offset;
 };
 
-// used for mapvote
-struct CSqlMapVoteData : CSqlMapData
+struct CSqlScoreData : CSqlData<CSqlPlayerResult>
 {
-	std::shared_ptr<CMapVoteResult> m_pResult;
-};
-
-struct CSqlScoreData : CSqlData<CSqlResult>
-{
-	int m_ClientID;
+	using CSqlData<CSqlPlayerResult>::CSqlData;
 
 	sqlstr::CSqlString<MAX_NAME_LENGTH> m_Name;
 
+	int m_ClientID;
 	bool m_NotEligible;
 	float m_Time;
 	char m_aTimestamp[TIMESTAMP_STR_LENGTH];
@@ -154,7 +116,7 @@ struct CSqlScoreData : CSqlData<CSqlResult>
 	char m_aRequestingPlayer[MAX_NAME_LENGTH];
 };
 
-struct CSqlTeamScoreData : CSqlData<CSqlResult>
+struct CSqlTeamScoreData : CSqlData<CSqlPlayerResult>
 {
 	bool m_NotEligible;
 	float m_Time;
@@ -189,7 +151,7 @@ struct CSqlTeamLoad : CSqlData<CSqlSaveResult>
 	int m_NumPlayer;
 };
 
-struct CSqlRandomMap : CSqlData<CSqlResult>
+struct CSqlRandomMap : CSqlData<CSqlPlayerResult>
 {
 	using CSqlData::CSqlData;
 	int m_Stars;
@@ -223,10 +185,10 @@ class CSqlScore: public IScore
 	static LOCK ms_FailureFileLock;
 
 
-	static bool Init(CSqlServer* pSqlServer, const CSqlData<CSqlResult> *pGameData, bool HandleFailure);
+	static bool Init(CSqlServer* pSqlServer, const CSqlData<CSqlInitResult> *pGameData, bool HandleFailure);
 
-	static bool RandomMapThread(CSqlServer* pSqlServer, const CSqlData<CSqlResult> *pGameData, bool HandleFailure = false);
-	static bool RandomUnfinishedMapThread(CSqlServer* pSqlServer, const CSqlData<CSqlResult> *pGameData, bool HandleFailure = false);
+	static bool RandomMapThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure = false);
+	static bool RandomUnfinishedMapThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure = false);
 	static bool MapVoteThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure = false);
 
 	static bool LoadPlayerDataThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure = false);
@@ -295,7 +257,7 @@ public:
 	virtual void SaveTeam(int ClientID, const char* Code, const char* Server);
 	virtual void LoadTeam(const char* Code, int ClientID);
 
-	// Game relevant not allowed to fail
+	// Game relevant not allowed to fail due to an ongoing SQL request.
 	virtual void SaveScore(int ClientID, float Time, const char *pTimestamp,
 			float CpTime[NUM_CHECKPOINTS], bool NotEligible);
 	virtual void SaveTeamScore(int* aClientIDs, unsigned int Size, float Time, const char *pTimestamp);
