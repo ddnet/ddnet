@@ -19,11 +19,13 @@ struct CSqlPlayerResult
 	{
 		DIRECT,
 		ALL,
+		BROADCAST,
 		MAP_VOTE, // 3 Messages: Reason, Server, Map
 		PLAYER_INFO,
 	} m_MessageKind;
 	char m_aaMessages[7][512];
 	union {
+		char m_Broadcast[1024];
 		struct {
 			float m_Time;
 			float m_CpTime[NUM_CHECKPOINTS];
@@ -104,10 +106,11 @@ struct CSqlScoreData : CSqlData<CSqlPlayerResult>
 {
 	using CSqlData<CSqlPlayerResult>::CSqlData;
 
+	sqlstr::CSqlString<MAX_NAME_LENGTH> m_Map;
+	char m_GameUuid[UUID_MAXSTRSIZE];
 	sqlstr::CSqlString<MAX_NAME_LENGTH> m_Name;
 
 	int m_ClientID;
-	bool m_NotEligible;
 	float m_Time;
 	char m_aTimestamp[TIMESTAMP_STR_LENGTH];
 	float m_aCpCurrent[NUM_CHECKPOINTS];

@@ -20,7 +20,7 @@
 std::atomic_int CSqlScore::ms_InstanceCount(0);
 
 CSqlPlayerResult::CSqlPlayerResult() :
-	m_Done(0)
+	m_Done(false)
 {
 	SetVariant(Variant::DIRECT);
 }
@@ -34,6 +34,9 @@ void CSqlPlayerResult::SetVariant(Variant v)
 	case ALL:
 		for(int i = 0; i < (int)(sizeof(m_aaMessages)/sizeof(m_aaMessages[0])); i++)
 			m_aaMessages[i][0] = 0;
+		break;
+	case BROADCAST:
+		m_Data.m_Broadcast[0] = 0;
 		break;
 	case MAP_VOTE:
 		break;
@@ -476,14 +479,20 @@ bool CSqlScore::MapInfoThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerR
 void CSqlScore::SaveScore(int ClientID, float Time, const char *pTimestamp, float CpTime[NUM_CHECKPOINTS], bool NotEligible)
 {
 	CConsole* pCon = (CConsole*)GameServer()->Console();
-	if(pCon->m_Cheated)
+	if(pCon->m_Cheated || NotEligible)
 		return;
-	CSqlScoreData *Tmp = new CSqlScoreData(nullptr);
+
+	CPlayer *pCurPlayer = GameServer()->m_apPlayers[ClientID];
+	if(pCurPlayer->m_SqlFinishResult != nullptr)
+		dbg_msg("sql", "WARNING: previous save score result didn't complete, overwriting it now");
+	pCurPlayer->m_SqlFinishResult = std::make_shared<CSqlPlayerResult>();
+	CSqlScoreData *Tmp = new CSqlScoreData(pCurPlayer->m_SqlFinishResult);
+	Tmp->m_Map = g_Config.m_SvMap;
+	FormatUuid(GameServer()->GameUuid(), Tmp->m_GameUuid, sizeof(Tmp->m_GameUuid));
 	Tmp->m_ClientID = ClientID;
 	Tmp->m_Name = Server()->ClientName(ClientID);
 	Tmp->m_Time = Time;
 	str_copy(Tmp->m_aTimestamp, pTimestamp, sizeof(Tmp->m_aTimestamp));
-	Tmp->m_NotEligible = NotEligible;
 	for(int i = 0; i < NUM_CHECKPOINTS; i++)
 		Tmp->m_aCpCurrent[i] = CpTime[i];
 
@@ -494,48 +503,70 @@ void CSqlScore::SaveScore(int ClientID, float Time, const char *pTimestamp, floa
 
 bool CSqlScore::SaveScoreThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure)
 {
-	/*
 	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
+	auto paMessages = pData->m_pResult->m_aaMessages;
 
-	if (HandleFailure)
+	if(HandleFailure)
 	{
-		if (!g_Config.m_SvSqlFailureFile[0])
+		if(!g_Config.m_SvSqlFailureFile[0])
 			return true;
 
 		lock_wait(ms_FailureFileLock);
 		IOHANDLE File = io_open(g_Config.m_SvSqlFailureFile, IOFLAG_APPEND);
-		if(File)
+		if(File == 0)
 		{
-			dbg_msg("sql", "ERROR: Could not save Score, writing insert to a file now...");
-
-			char aBuf[768];
-				str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %%s_race(Map, Name, Timestamp, Time, Server, cp1, cp2, cp3, cp4, cp5, cp6, cp7, cp8, cp9, cp10, cp11, cp12, cp13, cp14, cp15, cp16, cp17, cp18, cp19, cp20, cp21, cp22, cp23, cp24, cp25, GameID, DDNet7) VALUES ('%s', '%s', '%s', '%.2f', '%s', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%s', false);", pData->m_Map.ClrStr(), pData->m_Name.ClrStr(), pData->m_aTimestamp, pData->m_Time, g_Config.m_SvSqlServerName, pData->m_aCpCurrent[0], pData->m_aCpCurrent[1], pData->m_aCpCurrent[2], pData->m_aCpCurrent[3], pData->m_aCpCurrent[4], pData->m_aCpCurrent[5], pData->m_aCpCurrent[6], pData->m_aCpCurrent[7], pData->m_aCpCurrent[8], pData->m_aCpCurrent[9], pData->m_aCpCurrent[10], pData->m_aCpCurrent[11], pData->m_aCpCurrent[12], pData->m_aCpCurrent[13], pData->m_aCpCurrent[14], pData->m_aCpCurrent[15], pData->m_aCpCurrent[16], pData->m_aCpCurrent[17], pData->m_aCpCurrent[18], pData->m_aCpCurrent[19], pData->m_aCpCurrent[20], pData->m_aCpCurrent[21], pData->m_aCpCurrent[22], pData->m_aCpCurrent[23], pData->m_aCpCurrent[24], pData->m_GameUuid.ClrStr());
-				io_write(File, aBuf, str_length(aBuf));
-				io_write_newline(File);
-				io_close(File);
-				lock_unlock(ms_FailureFileLock);
-
-				pData->GameServer()->SendBroadcast("Database connection failed, score written to a file instead. Admins will add it manually in a few days.", -1);
-
-			return true;
+			lock_unlock(ms_FailureFileLock);
+			dbg_msg("sql", "ERROR: Could not save Score, NOT even to a file");
+			return false;
 		}
-		lock_unlock(ms_FailureFileLock);
-		dbg_msg("sql", "ERROR: Could not save Score, NOT even to a file");
-		return false;
-	}
+		dbg_msg("sql", "ERROR: Could not save Score, writing insert to a file now...");
 
-	if(pData->m_NotEligible)
-	{
-		return false;
+		char aBuf[1024];
+		str_format(aBuf, sizeof(aBuf),
+				"INSERT IGNORE INTO %%s_race(Map, Name, Timestamp, Time, Server, "
+					"cp1, cp2, cp3, cp4, cp5, cp6, cp7, cp8, cp9, cp10, cp11, cp12, cp13, "
+					"cp14, cp15, cp16, cp17, cp18, cp19, cp20, cp21, cp22, cp23, cp24, cp25, "
+					"GameID, DDNet7) "
+				"VALUES ('%s', '%s', '%s', '%.2f', '%s',"
+					"'%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', "
+					"'%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', "
+					"'%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', "
+					"'%.2f', '%s', false);",
+				pData->m_Map.ClrStr(), pData->m_Name.ClrStr(),
+				pData->m_aTimestamp, pData->m_Time, g_Config.m_SvSqlServerName,
+				pData->m_aCpCurrent[0], pData->m_aCpCurrent[1], pData->m_aCpCurrent[2],
+				pData->m_aCpCurrent[3], pData->m_aCpCurrent[4], pData->m_aCpCurrent[5],
+				pData->m_aCpCurrent[6], pData->m_aCpCurrent[7], pData->m_aCpCurrent[8],
+				pData->m_aCpCurrent[9], pData->m_aCpCurrent[10], pData->m_aCpCurrent[11],
+				pData->m_aCpCurrent[12], pData->m_aCpCurrent[13], pData->m_aCpCurrent[14],
+				pData->m_aCpCurrent[15], pData->m_aCpCurrent[16], pData->m_aCpCurrent[17],
+				pData->m_aCpCurrent[18], pData->m_aCpCurrent[19], pData->m_aCpCurrent[20],
+				pData->m_aCpCurrent[21], pData->m_aCpCurrent[22], pData->m_aCpCurrent[23],
+				pData->m_aCpCurrent[24],
+				pData->m_GameUuid);
+		io_write(File, aBuf, str_length(aBuf));
+		io_write_newline(File);
+		io_close(File);
+		lock_unlock(ms_FailureFileLock);
+
+		pData->m_pResult->SetVariant(CSqlPlayerResult::BROADCAST);
+		strcpy(pData->m_pResult->m_Data.m_Broadcast,
+				"Database connection failed, score written to a file instead. Admins will add it manually in a few days.");
+		pData->m_pResult->m_Done = true;
+		return true;
 	}
 
 	try
 	{
-		char aBuf[768];
+		char aBuf[1024];
 
-		str_format(aBuf, sizeof(aBuf), "SELECT * FROM %s_race WHERE Map='%s' AND Name='%s' ORDER BY time ASC LIMIT 1;", pSqlServer->GetPrefix(), pData->m_Map.ClrStr(), pData->m_Name.ClrStr());
+		str_format(aBuf, sizeof(aBuf),
+				"SELECT COUNT(*) AS NumFinished FROM %s_race WHERE Map='%s' AND Name='%s' ORDER BY time ASC LIMIT 1;",
+				pSqlServer->GetPrefix(), pData->m_Map.ClrStr(), pData->m_Name.ClrStr());
 		pSqlServer->executeSqlQuery(aBuf);
-		if(!pSqlServer->GetResults()->next())
+		pSqlServer->GetResults()->first();
+		int NumFinished = pSqlServer->GetResults()->getInt("NumFinished");
+		if(NumFinished == 0)
 		{
 			str_format(aBuf, sizeof(aBuf), "SELECT Points FROM %s_maps WHERE Map ='%s'", pSqlServer->GetPrefix(), pData->m_Map.ClrStr());
 			pSqlServer->executeSqlQuery(aBuf);
@@ -543,37 +574,57 @@ bool CSqlScore::SaveScoreThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlaye
 			if(pSqlServer->GetResults()->rowsCount() == 1)
 			{
 				pSqlServer->GetResults()->next();
-				int points = pSqlServer->GetResults()->getInt("Points");
-				if (points == 1)
-					str_format(aBuf, sizeof(aBuf), "You earned %d point for finishing this map!", points);
+				int Points = pSqlServer->GetResults()->getInt("Points");
+				if(Points == 1)
+					str_format(paMessages[0], sizeof(paMessages[0]), "You earned %d point for finishing this map!", Points);
 				else
-					str_format(aBuf, sizeof(aBuf), "You earned %d points for finishing this map!", points);
+					str_format(paMessages[0], sizeof(paMessages[0]), "You earned %d points for finishing this map!", Points);
 
-				try
-				{
-					pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
-				}
-				catch (CGameContextError &e) {} // just do nothing, it is not much of a problem if the player is not informed about points during mapchange
-
-				str_format(aBuf, sizeof(aBuf), "INSERT INTO %s_points(Name, Points) VALUES ('%s', '%d') ON duplicate key UPDATE Name=VALUES(Name), Points=Points+VALUES(Points);", pSqlServer->GetPrefix(), pData->m_Name.ClrStr(), points);
+				str_format(aBuf, sizeof(aBuf),
+						"INSERT INTO %s_points(Name, Points) "
+						"VALUES ('%s', '%d') "
+						"ON duplicate key "
+							"UPDATE Name=VALUES(Name), Points=Points+VALUES(Points);",
+						pSqlServer->GetPrefix(), pData->m_Name.ClrStr(), Points);
 				pSqlServer->executeSql(aBuf);
 			}
 		}
 
-		// if no entry found... create a new one
-		str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %s_race(Map, Name, Timestamp, Time, Server, cp1, cp2, cp3, cp4, cp5, cp6, cp7, cp8, cp9, cp10, cp11, cp12, cp13, cp14, cp15, cp16, cp17, cp18, cp19, cp20, cp21, cp22, cp23, cp24, cp25, GameID, DDNet7) VALUES ('%s', '%s', '%s', '%.2f', '%s', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%s', false);", pSqlServer->GetPrefix(), pData->m_Map.ClrStr(), pData->m_Name.ClrStr(), pData->m_aTimestamp, pData->m_Time, g_Config.m_SvSqlServerName, pData->m_aCpCurrent[0], pData->m_aCpCurrent[1], pData->m_aCpCurrent[2], pData->m_aCpCurrent[3], pData->m_aCpCurrent[4], pData->m_aCpCurrent[5], pData->m_aCpCurrent[6], pData->m_aCpCurrent[7], pData->m_aCpCurrent[8], pData->m_aCpCurrent[9], pData->m_aCpCurrent[10], pData->m_aCpCurrent[11], pData->m_aCpCurrent[12], pData->m_aCpCurrent[13], pData->m_aCpCurrent[14], pData->m_aCpCurrent[15], pData->m_aCpCurrent[16], pData->m_aCpCurrent[17], pData->m_aCpCurrent[18], pData->m_aCpCurrent[19], pData->m_aCpCurrent[20], pData->m_aCpCurrent[21], pData->m_aCpCurrent[22], pData->m_aCpCurrent[23], pData->m_aCpCurrent[24], pData->m_GameUuid.ClrStr());
+		// save score
+		str_format(aBuf, sizeof(aBuf),
+				"INSERT IGNORE INTO %s_race("
+					"Map, Name, Timestamp, Time, Server, "
+					"cp1, cp2, cp3, cp4, cp5, cp6, cp7, cp8, cp9, cp10, cp11, cp12, cp13, "
+					"cp14, cp15, cp16, cp17, cp18, cp19, cp20, cp21, cp22, cp23, cp24, cp25, "
+					"GameID, DDNet7) "
+				"VALUES ('%s', '%s', '%s', '%.2f', '%s', "
+					"'%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', "
+					"'%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', "
+					"'%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', "
+					"'%s', false);",
+				pSqlServer->GetPrefix(), pData->m_Map.ClrStr(), pData->m_Name.ClrStr(),
+				pData->m_aTimestamp, pData->m_Time, g_Config.m_SvSqlServerName,
+				pData->m_aCpCurrent[0], pData->m_aCpCurrent[1], pData->m_aCpCurrent[2],
+				pData->m_aCpCurrent[3], pData->m_aCpCurrent[4], pData->m_aCpCurrent[5],
+				pData->m_aCpCurrent[6], pData->m_aCpCurrent[7], pData->m_aCpCurrent[8],
+				pData->m_aCpCurrent[9], pData->m_aCpCurrent[10], pData->m_aCpCurrent[11],
+				pData->m_aCpCurrent[12], pData->m_aCpCurrent[13], pData->m_aCpCurrent[14],
+				pData->m_aCpCurrent[15], pData->m_aCpCurrent[16], pData->m_aCpCurrent[17],
+				pData->m_aCpCurrent[18], pData->m_aCpCurrent[19], pData->m_aCpCurrent[20],
+				pData->m_aCpCurrent[21], pData->m_aCpCurrent[22], pData->m_aCpCurrent[23],
+				pData->m_aCpCurrent[24], pData->m_GameUuid);
 		dbg_msg("sql", "%s", aBuf);
 		pSqlServer->executeSql(aBuf);
 
-		dbg_msg("sql", "Updating time done");
+		pData->m_pResult->m_Done = true;
+		dbg_msg("sql", "Saving score done");
 		return true;
 	}
 	catch (sql::SQLException &e)
 	{
 		dbg_msg("sql", "MySQL Error: %s", e.what());
-		dbg_msg("sql", "ERROR: Could not update time");
+		dbg_msg("sql", "ERROR: Could not insert time");
 	}
-	*/
 	return false;
 }
 

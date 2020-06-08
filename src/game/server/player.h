@@ -198,9 +198,10 @@ public:
 	bool m_Halloween;
 	bool m_FirstPacket;
 #if defined(CONF_SQL)
-	void ProcessSqlResult();
+	void ProcessSqlResult(CSqlPlayerResult &Result);
 	int64 m_LastSQLQuery;
 	std::shared_ptr<CSqlPlayerResult> m_SqlQueryResult;
+	std::shared_ptr<CSqlPlayerResult> m_SqlFinishResult;
 #endif
 	bool m_NotEligibleForFinish;
 	int64 m_EligibleForFinishCheck;
