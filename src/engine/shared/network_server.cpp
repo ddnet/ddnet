@@ -673,7 +673,7 @@ int CNetServer::Recv(CNetChunk *pChunk)
 					|| (Slot != -1 && m_aSlots[Slot].m_Connection.m_Sixup))
 				{
 					Sixup = true;
-					if(CNetBase::UnpackPacket(m_RecvUnpacker.m_aBuffer, Bytes, &m_RecvUnpacker.m_Data, &Token, Sixup))
+					if(CNetBase::UnpackPacket(pData, Bytes, &m_RecvUnpacker.m_Data, &Token, Sixup))
 						continue;
 				}
 
