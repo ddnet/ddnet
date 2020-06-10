@@ -49,10 +49,38 @@ void CEventHandler::Snap(int SnappingClient)
 			CNetEvent_Common *ev = (CNetEvent_Common *)&m_aData[m_aOffsets[i]];
 			if(SnappingClient == -1 || distance(GameServer()->m_apPlayers[SnappingClient]->m_ViewPos, vec2(ev->m_X, ev->m_Y)) < 1500.0f)
 			{
-				void *d = GameServer()->Server()->SnapNewItem(m_aTypes[i], i, m_aSizes[i]);
+				int Type = m_aTypes[i];
+				int Size = m_aSizes[i];
+				const char *Data = &m_aData[m_aOffsets[i]];
+				if(GameServer()->Server()->IsSixup(SnappingClient))
+					EventToSixup(&Type, &Size, &Data);
+
+				void *d = GameServer()->Server()->SnapNewItem(Type, i, Size);
 				if(d)
-					mem_copy(d, &m_aData[m_aOffsets[i]], m_aSizes[i]);
+					mem_copy(d, Data, Size);
 			}
 		}
+	}
+}
+
+void CEventHandler::EventToSixup(int *Type, int *Size, const char **pData)
+{
+	static char s_aEventStore[128];
+	if(*Type == NETEVENTTYPE_DAMAGEIND)
+	{
+		const CNetEvent_DamageInd *pEvent = (const CNetEvent_DamageInd *)(*pData);
+		protocol7::CNetEvent_Damage *pEvent7 = (protocol7::CNetEvent_Damage *)s_aEventStore;
+		*Type = protocol7::NETEVENTTYPE_DAMAGE + 24;
+		*Size = sizeof(*pEvent7);
+
+		pEvent7->m_X = pEvent->m_X;
+		pEvent7->m_Y = pEvent->m_Y;
+
+		// This will need some work, perhaps an event wrapper for damageind,
+		// a scan of the event array to merge multiple damageinds
+		// or a separate array of "damage ind" events that's added in while snapping
+		pEvent7->m_HealthAmount = 1;
+
+		*pData = s_aEventStore;
 	}
 }
