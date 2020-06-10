@@ -30,6 +30,7 @@ public:
 	const char* GetPass() { return m_aPass; }
 	const char* GetIP() { return m_aIp; }
 	int GetPort() { return m_Port; }
+	sql::Connection *Connection() const { return m_pConnection; }
 
 	static int ms_NumReadServer;
 	static int ms_NumWriteServer;

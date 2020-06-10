@@ -5,6 +5,7 @@
 #define GAME_SERVER_SCORE_SQL_H
 
 #include <engine/server/sql_string_helpers.h>
+#include <game/prng.h>
 
 #include "../score.h"
 
@@ -40,7 +41,7 @@ struct CSqlPlayerResult
 
 struct CSqlSaveResult {
 	CSqlSaveResult(int PlayerID, IGameController* Controller) :
-		m_Status(SAVE_SUCCESS),
+		m_Status(SAVE_FAILED),
 		m_SavedTeam(CSaveTeam(Controller)),
 		m_RequestingPlayer(PlayerID)
 	{
@@ -137,8 +138,9 @@ struct CSqlTeamSave : CSqlData<CSqlSaveResult>
 
 	char m_ClientName[MAX_NAME_LENGTH];
 
-	sqlstr::CSqlString<128> m_Map;
-	sqlstr::CSqlString<128> m_Code;
+	char m_Map[128];
+	char m_Code[128];
+	char m_aGeneratedCode[128];
 	char m_Server[5];
 };
 
@@ -188,7 +190,6 @@ class CSqlScore: public IScore
 {
 	static LOCK ms_FailureFileLock;
 
-
 	static bool Init(CSqlServer* pSqlServer, const CSqlData<CSqlInitResult> *pGameData, bool HandleFailure);
 
 	static bool RandomMapThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure = false);
@@ -217,6 +218,10 @@ class CSqlScore: public IScore
 
 	CGameContext *m_pGameServer;
 	IServer *m_pServer;
+
+	std::vector<std::string> m_aWordlist;
+	CPrng m_Prng;
+	void GeneratePassphrase(char *pBuf, int BufSize);
 
 	char m_aMap[64];
 	char m_aGameUuid[UUID_MAXSTRSIZE];

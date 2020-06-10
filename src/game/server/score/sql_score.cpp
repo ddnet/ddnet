@@ -6,11 +6,14 @@
 
 #include <fstream>
 #include <cstring>
+#include <random>
+#include <cppconn/prepared_statement.h>
 
 #include <base/system.h>
 #include <engine/server/sql_connector.h>
 #include <engine/shared/config.h>
 #include <engine/shared/console.h>
+#include <engine/shared/linereader.h>
 #include <engine/storage.h>
 #include <algorithm>
 
@@ -100,6 +103,18 @@ void CSqlScore::ExecPlayerThread(
 			pThreadName);
 }
 
+void CSqlScore::GeneratePassphrase(char *pBuf, int BufSize)
+{
+	for(int i = 0; i < 3; i++)
+	{
+		if(i != 0)
+			str_append(pBuf, " ", BufSize);
+		// TODO: decide if the slight bias towards lower numbers is ok
+		int Rand = m_Prng.RandomBits() % m_aWordlist.size();
+		str_append(pBuf, m_aWordlist[Rand].c_str(), BufSize);
+	}
+}
+
 LOCK CSqlScore::ms_FailureFileLock = lock_create();
 
 void CSqlScore::OnShutdown()
@@ -169,6 +184,33 @@ CSqlScore::CSqlScore(CGameContext *pGameServer) :
 	((CGameControllerDDRace*)(pGameServer->m_pController))->m_pInitResult = InitResult;
 	Tmp->m_Map = g_Config.m_SvMap;
 
+	IOHANDLE File = GameServer()->Storage()->OpenFile("wordlist.txt", IOFLAG_READ, IStorage::TYPE_ALL);
+	if(!File)
+	{
+		dbg_msg("sql", "failed to open wordlist");
+		Server()->SetErrorShutdown("sql open wordlist error");
+		return;
+	}
+
+	uint64 aSeed[2];
+	secure_random_fill(aSeed, sizeof(aSeed));
+	m_Prng.Seed(aSeed);
+	CLineReader LineReader;
+	LineReader.Init(File);
+	char *pLine;
+	while((pLine = LineReader.Get()))
+	{
+		char Word[32] = {0};
+		sscanf(pLine, "%*s %31s", Word);
+		Word[31] = 0;
+		m_aWordlist.push_back(Word);
+	}
+	if(m_aWordlist.size() < 1000)
+	{
+		dbg_msg("sql", "too few words in wordlist");
+		Server()->SetErrorShutdown("sql too few words in wordlist");
+		return;
+	}
 	thread_init_and_detach(CSqlExecData<CSqlInitResult>::ExecSqlFunc,
 			new CSqlExecData<CSqlInitResult>(Init, Tmp),
 			"SqlScore constructor");
@@ -1463,11 +1505,13 @@ void CSqlScore::SaveTeam(int ClientID, const char* Code, const char* Server)
 	pController->m_Teams.SetSaving(Team, SaveResult);
 
 	CSqlTeamSave *Tmp = new CSqlTeamSave(SaveResult);
-	Tmp->m_Code = Code;
-	Tmp->m_Map = g_Config.m_SvMap;
+	str_copy(Tmp->m_Code, Code, sizeof(Tmp->m_Code));
+	str_copy(Tmp->m_Map, g_Config.m_SvMap, sizeof(Tmp->m_Map));
 	Tmp->m_pResult->m_SaveID = RandomUuid();
 	str_copy(Tmp->m_Server, Server, sizeof(Tmp->m_Server));
 	str_copy(Tmp->m_ClientName, this->Server()->ClientName(ClientID), sizeof(Tmp->m_ClientName));
+	Tmp->m_aGeneratedCode[0] = '\0';
+	GeneratePassphrase(Tmp->m_aGeneratedCode, sizeof(Tmp->m_aGeneratedCode));
 
 	pController->m_Teams.KillSavedTeam(ClientID, Team);
 	char aBuf[512];
@@ -1487,7 +1531,7 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData<CSqlSaveRe
 	char aSaveID[UUID_MAXSTRSIZE];
 	FormatUuid(pData->m_pResult->m_SaveID, aSaveID, UUID_MAXSTRSIZE);
 
-	sqlstr::CSqlString<65536> SaveState = pData->m_pResult->m_SavedTeam.GetString();
+	char *pSaveState = pData->m_pResult->m_SavedTeam.GetString();
 	if(HandleFailure)
 	{
 		if (!g_Config.m_SvSqlFailureFile[0])
@@ -1498,13 +1542,16 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData<CSqlSaveRe
 		if(File)
 		{
 			dbg_msg("sql", "ERROR: Could not save Teamsave, writing insert to a file now...");
+			sqlstr::CSqlString<65536> SaveState = pSaveState;
+			sqlstr::CSqlString<128> Code = pData->m_aGeneratedCode;
+			sqlstr::CSqlString<128> Map = pData->m_Map;
 
 			char aBuf[65536];
 			str_format(aBuf, sizeof(aBuf),
 					"INSERT IGNORE INTO %%s_saves(Savegame, Map, Code, Timestamp, Server, SaveID, DDNet7) "
 					"VALUES ('%s', '%s', '%s', CURRENT_TIMESTAMP(), '%s', '%s', false)",
-					SaveState.ClrStr(), pData->m_Map.ClrStr(),
-					pData->m_Code.ClrStr(), pData->m_Server, aSaveID
+					SaveState.ClrStr(), Map.ClrStr(),
+					Code.ClrStr(), pData->m_Server, aSaveID
 			);
 			io_write(File, aBuf, str_length(aBuf));
 			io_write_newline(File);
@@ -1514,62 +1561,97 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData<CSqlSaveRe
 			pData->m_pResult->m_Status = CSqlSaveResult::SAVE_SUCCESS;
 			strcpy(pData->m_pResult->m_aBroadcast,
 					"Database connection failed, teamsave written to a file instead. Admins will add it manually in a few days.");
-
+			str_format(pData->m_pResult->m_aMessage, sizeof(pData->m_pResult->m_aMessage),
+					"Team successfully saved by %s. Use '/load %s' to continue",
+					pData->m_ClientName, Code.Str());
 			return true;
 		}
 		lock_unlock(ms_FailureFileLock);
 		dbg_msg("sql", "ERROR: Could not save Teamsave, NOT even to a file");
 		return false;
 	}
-	else
+
+	try
 	{
-		try
+		char aBuf[65536];
+		str_format(aBuf, sizeof(aBuf), "lock tables %s_saves write;", pSqlServer->GetPrefix());
+		pSqlServer->executeSql(aBuf);
+
+		char Code[128] = {0};
+		str_format(aBuf, sizeof(aBuf), "SELECT Savegame FROM %s_saves WHERE Code = ? AND Map = ?", pSqlServer->GetPrefix());
+		std::unique_ptr<sql::PreparedStatement> pPrepStmt;
+		std::unique_ptr<sql::ResultSet> pResult;
+		pPrepStmt.reset(pSqlServer->Connection()->prepareStatement(aBuf));
+		bool UseCode = false;
+		if(pData->m_Code[0] != '\0')
 		{
-			char aBuf[512];
-			str_format(aBuf, sizeof(aBuf), "lock tables %s_saves write;", pSqlServer->GetPrefix());
-			pSqlServer->executeSql(aBuf);
-			str_format(aBuf, sizeof(aBuf),
-					"SELECT Savegame "
-					"FROM %s_saves "
-					"WHERE Code = '%s' AND Map = '%s';",
-					pSqlServer->GetPrefix(), pData->m_Code.ClrStr(), pData->m_Map.ClrStr());
-			pSqlServer->executeSqlQuery(aBuf);
-
-			if (pSqlServer->GetResults()->rowsCount() == 0)
+			pPrepStmt->setString(1, pData->m_Code);
+			pPrepStmt->setString(2, pData->m_Map);
+			pResult.reset(pPrepStmt->executeQuery());
+			if(pResult->rowsCount() == 0)
 			{
-				char aBuf[65536];
+				UseCode = true;
+				str_copy(Code, pData->m_Code, sizeof(Code));
+			}
+		}
+		if(!UseCode)
+		{
+			// use random generated passphrase if save code exists or no save code given
+			pPrepStmt->setString(1, pData->m_aGeneratedCode);
+			pPrepStmt->setString(2, pData->m_Map);
+			pResult.reset(pPrepStmt->executeQuery());
+			if(pResult->rowsCount() == 0)
+			{
+				UseCode = true;
+				str_copy(Code, pData->m_aGeneratedCode, sizeof(Code));
+			}
+		}
 
-				str_format(aBuf, sizeof(aBuf),
-						"INSERT IGNORE INTO %s_saves(Savegame, Map, Code, Timestamp, Server, SaveID, DDNet7) "
-						"VALUES ('%s', '%s', '%s', CURRENT_TIMESTAMP(), '%s', '%s', false)",
-						pSqlServer->GetPrefix(), SaveState.ClrStr(), pData->m_Map.ClrStr(),
-						pData->m_Code.ClrStr(), pData->m_Server, aSaveID
-				);
-				dbg_msg("sql", "%s", aBuf);
-				pSqlServer->executeSql(aBuf);
+		if(UseCode)
+		{
+			str_format(aBuf, sizeof(aBuf),
+					"INSERT IGNORE INTO %s_saves(Savegame, Map, Code, Timestamp, Server, SaveID, DDNet7) "
+					"VALUES (?, ?, ?, CURRENT_TIMESTAMP(), ?, ?, false)",
+					pSqlServer->GetPrefix());
+			pPrepStmt.reset(pSqlServer->Connection()->prepareStatement(aBuf));
+			pPrepStmt->setString(1, pSaveState);
+			pPrepStmt->setString(2, pData->m_Map);
+			pPrepStmt->setString(3, Code);
+			pPrepStmt->setString(4, pData->m_Server);
+			pPrepStmt->setString(5, aSaveID);
+			dbg_msg("sql", "%s", aBuf);
+			pPrepStmt->execute();
 
+			if(str_comp(pData->m_Server, g_Config.m_SvSqlServerName) == 0)
+			{
 				str_format(pData->m_pResult->m_aMessage, sizeof(pData->m_pResult->m_aMessage),
 						"Team successfully saved by %s. Use '/load %s' to continue",
-						pData->m_ClientName, pData->m_Code.Str());
-				pData->m_pResult->m_Status = CSqlSaveResult::SAVE_SUCCESS;
+						pData->m_ClientName, Code);
 			}
 			else
 			{
-				dbg_msg("sql", "ERROR: This save-code already exists");
-				pData->m_pResult->m_Status = CSqlSaveResult::SAVE_FAILED;
-				strcpy(pData->m_pResult->m_aMessage, "This save-code already exists");
+				str_format(pData->m_pResult->m_aMessage, sizeof(pData->m_pResult->m_aMessage),
+						"Team successfully saved by %s. Use '/load %s' on %s to continue",
+						pData->m_ClientName, Code, pData->m_Server);
 			}
+			pData->m_pResult->m_Status = CSqlSaveResult::SAVE_SUCCESS;
 		}
-		catch (sql::SQLException &e)
+		else
 		{
+			dbg_msg("sql", "ERROR: This save-code already exists");
 			pData->m_pResult->m_Status = CSqlSaveResult::SAVE_FAILED;
-			dbg_msg("sql", "MySQL Error: %s", e.what());
-			dbg_msg("sql", "ERROR: Could not save the team");
-
-			strcpy(pData->m_pResult->m_aMessage, "MySQL Error: Could not save the team");
-			pSqlServer->executeSql("unlock tables;");
-			return false;
+			strcpy(pData->m_pResult->m_aMessage, "This save-code already exists");
 		}
+	}
+	catch (sql::SQLException &e)
+	{
+		pData->m_pResult->m_Status = CSqlSaveResult::SAVE_FAILED;
+		dbg_msg("sql", "MySQL Error: %s", e.what());
+		dbg_msg("sql", "ERROR: Could not save the team");
+
+		strcpy(pData->m_pResult->m_aMessage, "MySQL Error: Could not save the team");
+		pSqlServer->executeSql("unlock tables;");
+		return false;
 	}
 
 	pSqlServer->executeSql("unlock tables;");

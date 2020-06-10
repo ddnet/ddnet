@@ -693,17 +693,20 @@ void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
 		if(pPlayer->m_LastSQLQuery + g_Config.m_SvSqlQueriesDelay * pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
 			return;
 
-	const char* pCode = pResult->GetString(0);
+	const char* pCode = "";
+	if(pResult->NumArguments() > 0)
+		pCode = pResult->GetString(0);
+
 	char aCountry[5];
-	if(str_length(pCode) > 3 && pCode[0] >= 'A' && pCode[0] <= 'Z' && pCode[1] >= 'A'
+	if(str_length(pCode) >= 3 && pCode[0] >= 'A' && pCode[0] <= 'Z' && pCode[1] >= 'A'
 		&& pCode[1] <= 'Z' && pCode[2] >= 'A' && pCode[2] <= 'Z')
 	{
-		if(pCode[3] == ' ')
+		if(str_length(pCode) == 3 || pCode[3] == ' ')
 		{
 			str_copy(aCountry, pCode, 4);
 			pCode = str_skip_whitespaces_const(pCode + 4);
 		}
-		else if(str_length(pCode) > 4 && pCode[4] == ' ')
+		else if(str_length(pCode) == 4 || (str_length(pCode) > 4 && pCode[4] == ' '))
 		{
 			str_copy(aCountry, pCode, 5);
 			pCode = str_skip_whitespaces_const(pCode + 5);
