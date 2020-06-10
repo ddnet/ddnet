@@ -708,45 +708,59 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
 	if(!pMsg)
 		return -1;
 
-	// repack message (inefficient)
-	CPacker Pack;
-	if(RepackMsg(pMsg, Pack, m_aClients[ClientID].m_Sixup))
-		return 0;
-
 	mem_zero(&Packet, sizeof(CNetChunk));
-	Packet.m_ClientID = ClientID;
-	Packet.m_pData = Pack.Data();
-	Packet.m_DataSize = Pack.Size();
-
 	if(Flags&MSGFLAG_VITAL)
 		Packet.m_Flags |= NETSENDFLAG_VITAL;
 	if(Flags&MSGFLAG_FLUSH)
 		Packet.m_Flags |= NETSENDFLAG_FLUSH;
 
-	// write message to demo recorder
-	if(!(Flags&MSGFLAG_NORECORD))
+	if(ClientID < 0)
 	{
-		if(ClientID > -1)
-			m_aDemoRecorder[ClientID].RecordMessage(Pack.Data(), Pack.Size());
-		m_aDemoRecorder[MAX_CLIENTS].RecordMessage(Pack.Data(), Pack.Size());
-	}
+		CPacker Pack6, Pack7;
+		if(RepackMsg(pMsg, Pack6, false))
+			return -1;
+		if(RepackMsg(pMsg, Pack7, true))
+			return -1;
 
-	if(!(Flags&MSGFLAG_NOSEND))
-	{
-		if(ClientID == -1)
+		// write message to demo recorder
+		if(!(Flags&MSGFLAG_NORECORD))
+			m_aDemoRecorder[MAX_CLIENTS].RecordMessage(Pack6.Data(), Pack6.Size());
+
+		if(!(Flags&MSGFLAG_NOSEND))
 		{
-			// broadcast
-			int i;
-			for(i = 0; i < MAX_CLIENTS; i++)
+			for(int i = 0; i < MAX_CLIENTS; i++)
+			{
 				if(m_aClients[i].m_State == CClient::STATE_INGAME)
 				{
+					CPacker *Pack = m_aClients[i].m_Sixup ? &Pack7 : &Pack6;
+					Packet.m_pData = Pack->Data();
+					Packet.m_DataSize = Pack->Size();
 					Packet.m_ClientID = i;
 					m_NetServer.Send(&Packet);
 				}
+			}
 		}
-		else
+	}
+	else
+	{
+		CPacker Pack;
+		if(RepackMsg(pMsg, Pack, m_aClients[ClientID].m_Sixup))
+			return -1;
+
+		Packet.m_ClientID = ClientID;
+		Packet.m_pData = Pack.Data();
+		Packet.m_DataSize = Pack.Size();
+
+		if(!(Flags&MSGFLAG_NORECORD))
+		{
+			m_aDemoRecorder[ClientID].RecordMessage(Pack.Data(), Pack.Size());
+			m_aDemoRecorder[MAX_CLIENTS].RecordMessage(Pack.Data(), Pack.Size());
+		}
+
+		if(!(Flags&MSGFLAG_NOSEND))
 			m_NetServer.Send(&Packet);
 	}
+
 	return 0;
 }
 

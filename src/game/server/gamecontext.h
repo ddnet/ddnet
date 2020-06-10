@@ -226,7 +226,7 @@ public:
 	virtual void OnSnap(int ClientID);
 	virtual void OnPostSnap();
 
-	void *SecureUnpackMsg(int *MsgID, CUnpacker *pUnpacker, bool Sixup);
+	void *PreProcessMsg(int *MsgID, CUnpacker *pUnpacker, int ClientID);
 	virtual void OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID);
 
 	virtual void OnClientConnected(int ClientID);
