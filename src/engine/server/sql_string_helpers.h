@@ -40,6 +40,11 @@ public:
 		return *this;
 	}
 
+	bool operator < (const CSqlString& other) const
+	{
+		return strcmp(m_aString, other.m_aString) < 0;
+	}
+
 private:
 	char m_aString[size];
 	char m_aClearString[size * 2 - 1];

@@ -119,13 +119,14 @@ struct CSqlScoreData : CSqlData<CSqlPlayerResult>
 	char m_aRequestingPlayer[MAX_NAME_LENGTH];
 };
 
-struct CSqlTeamScoreData : CSqlData<CSqlPlayerResult>
+struct CSqlTeamScoreData : CSqlData<void>
 {
-	bool m_NotEligible;
+	using CSqlData<void>::CSqlData;
+	char m_GameUuid[UUID_MAXSTRSIZE];
+	sqlstr::CSqlString<MAX_NAME_LENGTH> m_Map;
 	float m_Time;
 	char m_aTimestamp[TIMESTAMP_STR_LENGTH];
 	unsigned int m_Size;
-	int m_aClientIDs[MAX_CLIENTS];
 	sqlstr::CSqlString<MAX_NAME_LENGTH> m_aNames[MAX_CLIENTS];
 };
 
@@ -209,7 +210,7 @@ class CSqlScore: public IScore
 	static bool LoadTeamThread(CSqlServer* pSqlServer, const CSqlData<CSqlSaveResult> *pGameData, bool HandleFailure = false);
 
 	static bool SaveScoreThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure = false);
-	static bool SaveTeamScoreThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure = false);
+	static bool SaveTeamScoreThread(CSqlServer* pSqlServer, const CSqlData<void> *pGameData, bool HandleFailure = false);
 
 	CGameContext *GameServer() { return m_pGameServer; }
 	IServer *Server() { return m_pServer; }

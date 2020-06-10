@@ -12,6 +12,7 @@
 #include <engine/shared/config.h>
 #include <engine/shared/console.h>
 #include <engine/storage.h>
+#include <algorithm>
 
 #include "../entities/character.h"
 #include "../gamemodes/DDRace.h"
@@ -630,34 +631,35 @@ bool CSqlScore::SaveScoreThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlaye
 
 void CSqlScore::SaveTeamScore(int* aClientIDs, unsigned int Size, float Time, const char *pTimestamp)
 {
-	/*
 	CConsole* pCon = (CConsole*)GameServer()->Console();
 	if(pCon->m_Cheated)
 		return;
-	CSqlTeamScoreData *Tmp = new CSqlTeamScoreData();
-	Tmp->m_NotEligible = false;
 	for(unsigned int i = 0; i < Size; i++)
 	{
-		Tmp->m_aClientIDs[i] = aClientIDs[i];
-		Tmp->m_aNames[i] = Server()->ClientName(aClientIDs[i]);
-		Tmp->m_NotEligible = Tmp->m_NotEligible || GameServer()->m_apPlayers[aClientIDs[i]]->m_NotEligibleForFinish;
+		if(GameServer()->m_apPlayers[aClientIDs[i]]->m_NotEligibleForFinish)
+			return;
 	}
+	CSqlTeamScoreData *Tmp = new CSqlTeamScoreData(nullptr);
+	for(unsigned int i = 0; i < Size; i++)
+		Tmp->m_aNames[i] = Server()->ClientName(aClientIDs[i]);
 	Tmp->m_Size = Size;
 	Tmp->m_Time = Time;
 	str_copy(Tmp->m_aTimestamp, pTimestamp, sizeof(Tmp->m_aTimestamp));
+	FormatUuid(GameServer()->GameUuid(), Tmp->m_GameUuid, sizeof(Tmp->m_GameUuid));
+	Tmp->m_Map = g_Config.m_SvMap;
 
-	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(SaveTeamScoreThread, Tmp, false), "save team score");
-	*/
+	thread_init_and_detach(CSqlExecData<void>::ExecSqlFunc,
+			new CSqlExecData<void>(SaveTeamScoreThread, Tmp),
+			"save team score");
 }
 
-bool CSqlScore::SaveTeamScoreThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure)
+bool CSqlScore::SaveTeamScoreThread(CSqlServer* pSqlServer, const CSqlData<void> *pGameData, bool HandleFailure)
 {
-	/*
 	const CSqlTeamScoreData *pData = dynamic_cast<const CSqlTeamScoreData *>(pGameData);
 
-	if (HandleFailure)
+	if(HandleFailure)
 	{
-		if (!g_Config.m_SvSqlFailureFile[0])
+		if(!g_Config.m_SvSqlFailureFile[0])
 			return true;
 
 		dbg_msg("sql", "ERROR: Could not save TeamScore, writing insert to a file now...");
@@ -673,7 +675,7 @@ bool CSqlScore::SaveTeamScoreThread(CSqlServer* pSqlServer, const CSqlData<CSqlP
 			char aBuf[2300];
 			for(unsigned int i = 0; i < pData->m_Size; i++)
 			{
-				str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %%s_teamrace(Map, Name, Timestamp, Time, ID, GameID, DDNet7) VALUES ('%s', '%s', '%s', '%.2f', @id, '%s', false);", pData->m_Map.ClrStr(), pData->m_aNames[i].ClrStr(), pData->m_aTimestamp, pData->m_Time, pData->m_GameUuid.ClrStr());
+				str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %%s_teamrace(Map, Name, Timestamp, Time, ID, GameID, DDNet7) VALUES ('%s', '%s', '%s', '%.2f', @id, '%s', false);", pData->m_Map.ClrStr(), pData->m_aNames[i].ClrStr(), pData->m_aTimestamp, pData->m_Time, pData->m_GameUuid);
 				io_write(File, aBuf, str_length(aBuf));
 				io_write_newline(File);
 			}
@@ -685,84 +687,50 @@ bool CSqlScore::SaveTeamScoreThread(CSqlServer* pSqlServer, const CSqlData<CSqlP
 		return false;
 	}
 
-	if(pData->m_NotEligible)
-	{
-		return false;
-	}
-
 	try
 	{
 		char aBuf[2300];
-		char aUpdateID[17];
-		aUpdateID[0] = 0;
 
-		str_format(aBuf, sizeof(aBuf), "SELECT Name, l.ID, Time FROM ((SELECT ID FROM %s_teamrace WHERE Map = '%s' AND Name = '%s' and DDNet7 = false) as l) LEFT JOIN %s_teamrace as r ON l.ID = r.ID ORDER BY ID;", pSqlServer->GetPrefix(), pData->m_Map.ClrStr(), pData->m_aNames[0].ClrStr(), pSqlServer->GetPrefix());
+		// get the names sorted in a tab separated string
+		const sqlstr::CSqlString<MAX_NAME_LENGTH> *apNames[MAX_CLIENTS];
+		for(unsigned int i = 0; i < pData->m_Size; i++)
+			apNames[i] = &pData->m_aNames[i];
+		std::sort(apNames, apNames+pData->m_Size);
+		char aSortedNames[2048] = {0};
+		for(unsigned int i = 0; i < pData->m_Size; i++)
+		{
+			if(i != 0)
+				str_append(aSortedNames, "\t", sizeof(aSortedNames));
+			str_append(aSortedNames, apNames[i]->ClrStr(), sizeof(aSortedNames));
+		}
+		str_format(aBuf, sizeof(aBuf),
+				"SELECT l.ID, Time "
+				"FROM ((" // preselect teams with first name in team
+						"SELECT ID "
+						"FROM %s_teamrace "
+						"WHERE Map = '%s' AND Name = '%s' AND DDNet7 = false"
+					") as l"
+				") INNER JOIN %s_teamrace AS r ON l.ID = r.ID "
+				"GROUP BY ID "
+				"HAVING GROUP_CONCAT(Name ORDER BY Name SEPARATOR '\t') = '%s'",
+				pSqlServer->GetPrefix(), pData->m_Map.ClrStr(), pData->m_aNames[0].ClrStr(),
+				pSqlServer->GetPrefix(), aSortedNames);
 		pSqlServer->executeSqlQuery(aBuf);
 
 		if (pSqlServer->GetResults()->rowsCount() > 0)
 		{
-			char aID[17];
-			char aID2[17];
-			char aName[64];
-			unsigned int Count = 0;
-			bool ValidNames = true;
-
 			pSqlServer->GetResults()->first();
 			float Time = (float)pSqlServer->GetResults()->getDouble("Time");
-			strcpy(aID, pSqlServer->GetResults()->getString("ID").c_str());
-
-			do
+			auto ID = pSqlServer->GetResults()->getString("ID");
+			dbg_msg("sql", "found team rank from same team (old time: %f, new time: %f)", Time, pData->m_Time);
+			if(pData->m_Time < Time)
 			{
-				strcpy(aID2, pSqlServer->GetResults()->getString("ID").c_str());
-				strcpy(aName, pSqlServer->GetResults()->getString("Name").c_str());
-				sqlstr::ClearString(aName);
-				if (str_comp(aID, aID2) != 0)
-				{
-					if (ValidNames && Count == pData->m_Size)
-					{
-						if (pData->m_Time < Time)
-							strcpy(aUpdateID, aID);
-						else
-							goto end;
-						break;
-					}
-
-					Time = (float)pSqlServer->GetResults()->getDouble("Time");
-					ValidNames = true;
-					Count = 0;
-					strcpy(aID, aID2);
-				}
-
-				if (!ValidNames)
-					continue;
-
-				ValidNames = false;
-
-				for(unsigned int i = 0; i < pData->m_Size; i++)
-				{
-					if (str_comp(aName, pData->m_aNames[i].ClrStr()) == 0)
-					{
-						ValidNames = true;
-						Count++;
-						break;
-					}
-				}
-			} while (pSqlServer->GetResults()->next());
-
-			if (ValidNames && Count == pData->m_Size)
-			{
-				if (pData->m_Time < Time)
-					strcpy(aUpdateID, aID);
-				else
-					goto end;
+				str_format(aBuf, sizeof(aBuf),
+						"UPDATE %s_teamrace SET Time='%.2f', Timestamp='%s', DDNet7=false WHERE ID = '%s';",
+						pSqlServer->GetPrefix(), pData->m_Time, pData->m_aTimestamp, ID.c_str());
+				dbg_msg("sql", "%s", aBuf);
+				pSqlServer->executeSql(aBuf);
 			}
-		}
-
-		if (aUpdateID[0])
-		{
-			str_format(aBuf, sizeof(aBuf), "UPDATE %s_teamrace SET Time='%.2f', Timestamp='%s', DDNet7=false WHERE ID = '%s';", pSqlServer->GetPrefix(), pData->m_Time, pData->m_aTimestamp, aUpdateID);
-			dbg_msg("sql", "%s", aBuf);
-			pSqlServer->executeSql(aBuf);
 		}
 		else
 		{
@@ -770,14 +738,17 @@ bool CSqlScore::SaveTeamScoreThread(CSqlServer* pSqlServer, const CSqlData<CSqlP
 
 			for(unsigned int i = 0; i < pData->m_Size; i++)
 			{
-			// if no entry found... create a new one
-				str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %s_teamrace(Map, Name, Timestamp, Time, ID, GameID, DDNet7) VALUES ('%s', '%s', '%s', '%.2f', @id, '%s', false);", pSqlServer->GetPrefix(), pData->m_Map.ClrStr(), pData->m_aNames[i].ClrStr(), pData->m_aTimestamp, pData->m_Time, pData->m_GameUuid.ClrStr());
+				// if no entry found... create a new one
+				str_format(aBuf, sizeof(aBuf),
+						"INSERT IGNORE INTO %s_teamrace(Map, Name, Timestamp, Time, ID, GameID, DDNet7) "
+						"VALUES ('%s', '%s', '%s', '%.2f', @id, '%s', false);",
+						pSqlServer->GetPrefix(), pData->m_Map.ClrStr(), pData->m_aNames[i].ClrStr(),
+						pData->m_aTimestamp, pData->m_Time, pData->m_GameUuid);
 				dbg_msg("sql", "%s", aBuf);
 				pSqlServer->executeSql(aBuf);
 			}
 		}
 
-		end:
 		dbg_msg("sql", "Updating team time done");
 		return true;
 	}
@@ -786,8 +757,6 @@ bool CSqlScore::SaveTeamScoreThread(CSqlServer* pSqlServer, const CSqlData<CSqlP
 		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not update time");
 	}
-	return false;
-	*/
 	return false;
 }
 
