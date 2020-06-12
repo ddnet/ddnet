@@ -191,14 +191,17 @@ public:
 		CHAT_RED=0,
 		CHAT_BLUE=1,
 		CHAT_WHISPER_SEND=2,
-		CHAT_WHISPER_RECV=3
+		CHAT_WHISPER_RECV=3,
+
+		CHAT_SIX=1<<0,
+		CHAT_SIXUP=1<<1,
 	};
 
 	// network
 	void CallVote(int ClientID, const char *aDesc, const char *aCmd, const char *pReason, const char *aChatmsg);
 	void SendChatTarget(int To, const char *pText);
 	void SendChatTeam(int Team, const char *pText);
-	void SendChat(int ClientID, int Team, const char *pText, int SpamProtectionClientID = -1);
+	void SendChat(int ClientID, int Team, const char *pText, int SpamProtectionClientID = -1, int Flags = CHAT_SIX | CHAT_SIXUP);
 	void SendEmoticon(int ClientID, int Emoticon);
 	void SendWeaponPickup(int ClientID, int Weapon);
 	void SendBroadcast(const char *pText, int ClientID, bool IsImportant = true);

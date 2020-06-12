@@ -350,7 +350,7 @@ void CGameContext::SendChatTeam(int Team, const char *pText)
 			SendChatTarget(i, pText);
 }
 
-void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, int SpamProtectionClientID)
+void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, int SpamProtectionClientID, int Flags)
 {
 	if(SpamProtectionClientID >= 0 && SpamProtectionClientID < MAX_CLIENTS)
 		if(ProcessSpamProtection(SpamProtectionClientID))
@@ -384,10 +384,8 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, in
 		// send to the clients
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
-			if(m_apPlayers[i] != 0) {
-				if(!m_apPlayers[i]->m_DND)
+			if(m_apPlayers[i] != 0 && !m_apPlayers[i]->m_DND && Server()->IsSixup(i) == (Flags & CHAT_SIXUP))
 					Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
-			}
 		}
 	}
 	else
@@ -1086,11 +1084,8 @@ void CGameContext::OnClientEnter(int ClientID)
 		}
 
 		char aBuf[512];
-		if(!Server()->IsSixup(ClientID))
-		{
-			str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientID), m_pController->GetTeamName(m_apPlayers[ClientID]->GetTeam()));
-			SendChat(-1, CGameContext::CHAT_ALL, aBuf);
-		}
+		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientID), m_pController->GetTeamName(m_apPlayers[ClientID]->GetTeam()));
+		SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1, CHAT_SIX);
 
 		SendChatTarget(ClientID, "DDraceNetwork Mod. Version: " GAME_VERSION);
 		SendChatTarget(ClientID, "please visit DDNet.tw or say /info for more info");
