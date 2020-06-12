@@ -1338,6 +1338,12 @@ void *CGameContext::PreProcessMsg(int *MsgID, CUnpacker *pUnpacker, int ClientID
 			// Should probably use a placement new to start the lifetime of the object to avoid future weirdness
 			::CNetMsg_Cl_Say *pMsg = (::CNetMsg_Cl_Say *)s_aRawMsg;
 
+			if(pMsg7->m_Target >= 0)
+			{
+				// Should we maybe recraft the message so that it can go through the usual path?
+				WhisperID(ClientID, pMsg7->m_Target, pMsg7->m_pMessage);
+				return 0;
+			}
 
 			pMsg->m_Team = pMsg7->m_Mode == protocol7::CHAT_TEAM;
 			pMsg->m_pMessage = pMsg7->m_pMessage;
@@ -3478,7 +3484,7 @@ void CGameContext::Whisper(int ClientID, char *pStr)
 	WhisperID(ClientID, Victim, pMessage);
 }
 
-void CGameContext::WhisperID(int ClientID, int VictimID, char *pMessage)
+void CGameContext::WhisperID(int ClientID, int VictimID, const char *pMessage)
 {
 	if(!CheckClientID2(ClientID))
 		return;
@@ -3491,7 +3497,17 @@ void CGameContext::WhisperID(int ClientID, int VictimID, char *pMessage)
 
 	char aBuf[256];
 
-	if(GetClientVersion(ClientID) >= VERSION_DDNET_WHISPER)
+	if(Server()->IsSixup(ClientID))
+	{
+		protocol7::CNetMsg_Sv_Chat Msg;
+		Msg.m_ClientID = ClientID;
+		Msg.m_Mode = protocol7::CHAT_WHISPER;
+		Msg.m_pMessage = pMessage;
+		Msg.m_TargetID = VictimID;
+
+		Server()->SendPackMsgOne(&Msg, MSGFLAG_VITAL, ClientID);
+	}
+	else if(GetClientVersion(ClientID) >= VERSION_DDNET_WHISPER)
 	{
 		CNetMsg_Sv_Chat Msg;
 		Msg.m_Team = CHAT_WHISPER_SEND;
@@ -3508,7 +3524,17 @@ void CGameContext::WhisperID(int ClientID, int VictimID, char *pMessage)
 		SendChatTarget(ClientID, aBuf);
 	}
 
-	if(GetClientVersion(VictimID) >= VERSION_DDNET_WHISPER)
+	if(Server()->IsSixup(VictimID))
+	{
+		protocol7::CNetMsg_Sv_Chat Msg;
+		Msg.m_ClientID = ClientID;
+		Msg.m_Mode = protocol7::CHAT_WHISPER;
+		Msg.m_pMessage = pMessage;
+		Msg.m_TargetID = VictimID;
+
+		Server()->SendPackMsgOne(&Msg, MSGFLAG_VITAL, VictimID);
+	}
+	else if(GetClientVersion(VictimID) >= VERSION_DDNET_WHISPER)
 	{
 		CNetMsg_Sv_Chat Msg2;
 		Msg2.m_Team = CHAT_WHISPER_RECV;
