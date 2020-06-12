@@ -1377,6 +1377,18 @@ void *CGameContext::PreProcessMsg(int *MsgID, CUnpacker *pUnpacker, int ClientID
 
 			return 0;
 		}
+		else if(*MsgID == protocol7::NETMSGTYPE_CL_SETSPECTATORMODE)
+		{
+			protocol7::CNetMsg_Cl_SetSpectatorMode *pMsg7 = (protocol7::CNetMsg_Cl_SetSpectatorMode *)pRawMsg;
+			::CNetMsg_Cl_SetSpectatorMode *pMsg = (::CNetMsg_Cl_SetSpectatorMode *)s_aRawMsg;
+
+			if(pMsg7->m_SpecMode == protocol7::SPEC_FREEVIEW)
+				pMsg->m_SpectatorID = SPEC_FREEVIEW;
+			else if(pMsg7->m_SpecMode == protocol7::SPEC_PLAYER)
+				pMsg->m_SpectatorID = pMsg7->m_SpectatorID;
+			else
+				pMsg->m_SpectatorID = SPEC_FREEVIEW; // Probably not needed
+		}
 
 		*MsgID = Msg_SevenToSix(*MsgID);
 
@@ -3503,7 +3515,7 @@ void CGameContext::WhisperID(int ClientID, int VictimID, const char *pMessage)
 		Msg.m_pMessage = pMessage;
 		Msg.m_TargetID = VictimID;
 
-		Server()->SendPackMsgOne(&Msg, MSGFLAG_VITAL, ClientID);
+		Server()->SendPackMsgOne(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
 	}
 	else if(GetClientVersion(ClientID) >= VERSION_DDNET_WHISPER)
 	{
@@ -3530,7 +3542,7 @@ void CGameContext::WhisperID(int ClientID, int VictimID, const char *pMessage)
 		Msg.m_pMessage = pMessage;
 		Msg.m_TargetID = VictimID;
 
-		Server()->SendPackMsgOne(&Msg, MSGFLAG_VITAL, VictimID);
+		Server()->SendPackMsgOne(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, VictimID);
 	}
 	else if(GetClientVersion(VictimID) >= VERSION_DDNET_WHISPER)
 	{
