@@ -88,12 +88,23 @@ public:
 
 	int SendPackMsgTranslate(CNetMsg_Sv_Chat *pMsg, int Flags, int ClientID)
 	{
-		if (pMsg->m_ClientID >= 0 && !Translate(pMsg->m_ClientID, ClientID))
+		if(pMsg->m_ClientID >= 0 && !Translate(pMsg->m_ClientID, ClientID))
 		{
 			str_format(msgbuf, sizeof(msgbuf), "%s: %s", ClientName(pMsg->m_ClientID), pMsg->m_pMessage);
 			pMsg->m_pMessage = msgbuf;
 			pMsg->m_ClientID = VANILLA_MAX_CLIENTS - 1;
 		}
+
+		if(pMsg->m_ClientID >= 0 && IsSixup(ClientID))
+		{
+			protocol7::CNetMsg_Sv_Chat Msg7;
+			Msg7.m_ClientID = pMsg->m_ClientID;
+			Msg7.m_pMessage = pMsg->m_pMessage;
+			Msg7.m_Mode = pMsg->m_Team > 0 ? protocol7::CHAT_TEAM : protocol7::CHAT_ALL;
+			Msg7.m_TargetID = -1;
+			return SendPackMsgOne(&Msg7, Flags, ClientID);
+		}
+
 		return SendPackMsgOne(pMsg, Flags, ClientID);
 	}
 
