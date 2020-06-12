@@ -95,7 +95,7 @@ public:
 			pMsg->m_ClientID = VANILLA_MAX_CLIENTS - 1;
 		}
 
-		if(pMsg->m_ClientID >= 0 && IsSixup(ClientID))
+		if(IsSixup(ClientID))
 		{
 			protocol7::CNetMsg_Sv_Chat Msg7;
 			Msg7.m_ClientID = pMsg->m_ClientID;
