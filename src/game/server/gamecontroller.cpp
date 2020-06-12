@@ -561,13 +561,13 @@ void IGameController::Snap(int SnappingClient)
 
 	if(Server()->IsSixup(SnappingClient))
 	{
-		int *pGameData = (int*)Server()->SnapNewItem(6 + 24, 0, 3*4); // NETOBJTYPE_GAMEDATA
+		protocol7::CNetObj_GameData *pGameData = static_cast<protocol7::CNetObj_GameData *>(Server()->SnapNewItem(-protocol7::NETOBJTYPE_GAMEDATA, 0, sizeof(protocol7::CNetObj_GameData)));
 		if(!pGameData)
 			return;
 
-		pGameData[0] = m_RoundStartTick;
-		pGameData[1] = 0; // m_GameStateFlags
-		pGameData[2] = 0; // m_GameStateEndTick
+		pGameData->m_GameStartTick = m_RoundStartTick;
+		pGameData->m_GameStateFlags = 0;
+		pGameData->m_GameStateEndTick = 0;
 	}
 }
 

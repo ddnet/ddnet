@@ -70,7 +70,7 @@ void CEventHandler::EventToSixup(int *Type, int *Size, const char **pData)
 	{
 		const CNetEvent_DamageInd *pEvent = (const CNetEvent_DamageInd *)(*pData);
 		protocol7::CNetEvent_Damage *pEvent7 = (protocol7::CNetEvent_Damage *)s_aEventStore;
-		*Type = protocol7::NETEVENTTYPE_DAMAGE + 24;
+		*Type = -protocol7::NETEVENTTYPE_DAMAGE;
 		*Size = sizeof(*pEvent7);
 
 		pEvent7->m_X = pEvent->m_X;

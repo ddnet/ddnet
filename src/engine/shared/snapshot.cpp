@@ -5,30 +5,7 @@
 #include "uuid_manager.h"
 
 #include <game/generated/protocol.h>
-
-static int ObjTypeToSixup(int Type)
-{
-	int Six;
-	if(Type >= NETOBJTYPE_PLAYERINPUT && Type <= NETOBJTYPE_FLAG)
-		Six = Type;
-	else if(Type >= NETOBJTYPE_CHARACTERCORE && Type <= NETOBJTYPE_PLAYERINFO)
-		Six = Type + 1;
-	else if(Type == NETOBJTYPE_SPECTATORINFO)
-		Six = Type;
-	else if(Type >= NETEVENTTYPE_COMMON && Type <= NETEVENTTYPE_DEATH)
-		Six = Type + 3;
-	else if(Type == NETEVENTTYPE_SOUNDWORLD)
-		Six = Type + 2;
-	else if(Type > 24)
-		Six = Type - 24;
-	else
-	{
-		//dbg_msg("net", "DROP obj %d", Type);
-		return -1;
-	}
-	//dbg_msg("net", "pack obj %d -> %d", Type, Six);
-	return Six;
-}
+#include <game/generated/protocolglue.h>
 
 // CSnapshot
 
@@ -651,7 +628,11 @@ void *CSnapshotBuilder::NewItem(int Type, int ID, int Size)
 
 	if(m_Sixup)
 	{
-		Type = ObjTypeToSixup(Type);
+		if(Type >= 0)
+			Type = Obj_SixToSeven(Type);
+		else
+			Type *= -1;
+
 		if(Type < 0) return pObj;
 	}
 

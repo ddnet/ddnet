@@ -302,10 +302,10 @@ void CPlayer::Snap(int SnappingClient)
 		return;
 
 	int id = m_ClientID;
-	if (SnappingClient > -1 && !Server()->Translate(id, SnappingClient)) return;
+	if(SnappingClient > -1 && !Server()->Translate(id, SnappingClient))
+		return;
 
 	CNetObj_ClientInfo *pClientInfo = static_cast<CNetObj_ClientInfo *>(Server()->SnapNewItem(NETOBJTYPE_CLIENTINFO, id, sizeof(CNetObj_ClientInfo)));
-
 	if(!pClientInfo)
 		return;
 
@@ -316,11 +316,6 @@ void CPlayer::Snap(int SnappingClient)
 	pClientInfo->m_UseCustomColor = m_TeeInfos.m_UseCustomColor;
 	pClientInfo->m_ColorBody = m_TeeInfos.m_ColorBody;
 	pClientInfo->m_ColorFeet = m_TeeInfos.m_ColorFeet;
-
-	int Size = Server()->IsSixup(SnappingClient) ? 3*4 : sizeof(CNetObj_PlayerInfo);
-	CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, id, Size));
-	if(!pPlayerInfo)
-		return;
 
 	int ClientVersion = GetClientVersion();
 	int Latency = SnappingClient == -1 ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aActLatency[m_ClientID];
@@ -334,6 +329,10 @@ void CPlayer::Snap(int SnappingClient)
 
 	if(!Server()->IsSixup(SnappingClient))
 	{
+		CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, id, sizeof(CNetObj_PlayerInfo)));
+		if(!pPlayerInfo)
+			return;
+
 		pPlayerInfo->m_Latency = Latency;
 		pPlayerInfo->m_Score = Score;
 		pPlayerInfo->m_Local = (int)(m_ClientID == SnappingClient && (m_Paused != PAUSE_PAUSED || ClientVersion >= VERSION_DDNET_OLD));
@@ -345,9 +344,13 @@ void CPlayer::Snap(int SnappingClient)
 	}
 	else
 	{
-		((int*)pPlayerInfo)[0] = 0; // m_PlayerFlags
-		((int*)pPlayerInfo)[1] = Score;
-		((int*)pPlayerInfo)[2] = Latency;
+		protocol7::CNetObj_PlayerInfo *pPlayerInfo = static_cast<protocol7::CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, id, sizeof(protocol7::CNetObj_PlayerInfo)));
+		if(!pPlayerInfo)
+			return;
+
+		pPlayerInfo->m_PlayerFlags = 0; //TODO: Check if this needs translation
+		pPlayerInfo->m_Score = Score;
+		pPlayerInfo->m_Latency = Latency;
 	}
 
 	if(m_ClientID == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused))
