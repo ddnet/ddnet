@@ -1171,8 +1171,7 @@ void CCharacter::SnapCharacter(int SnappingClient)
 		if(!pCharacter)
 			return;
 
-		//TODO: Avoid this
-		pCore->Write(reinterpret_cast<CNetObj_CharacterCore *>(pCharacter));
+		pCore->Write(reinterpret_cast<CNetObj_CharacterCore *>(static_cast<protocol7::CNetObj_CharacterCore *>(pCharacter)));
 
 		pCharacter->m_Tick = Tick;
 		pCharacter->m_Emote = Emote;

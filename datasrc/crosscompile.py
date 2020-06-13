@@ -37,7 +37,7 @@ def output_map(name, map):
     print("static const int gs_{}[{}] = {{".format(name, len(map)))
     print(*map, sep=',')
     print("};")
-    print("inline int {0}(int a) {{ return gs_{0}[a]; }}".format(name))
+    print("inline int {0}(int a) {{ if(a < 0 || a >= {1}) return -1; return gs_{0}[a]; }}".format(name, len(map)))
 
 def main():
     msgs = get_msgs()

@@ -116,7 +116,7 @@ void CTeeInfo::FromSixup()
 	}
 
 	// find closest match
-	int best_skin;
+	int best_skin = 0;
 	int best_matches = -1;
 	for(int s = 0; s < 16; s++)
 	{
