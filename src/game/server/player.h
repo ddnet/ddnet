@@ -11,6 +11,7 @@
 
 #if defined(CONF_SQL)
 class CSqlPlayerResult;
+class CSqlRandomMapResult;
 #endif
 
 // player object
@@ -202,6 +203,7 @@ public:
 	int64 m_LastSQLQuery;
 	std::shared_ptr<CSqlPlayerResult> m_SqlQueryResult;
 	std::shared_ptr<CSqlPlayerResult> m_SqlFinishResult;
+	std::shared_ptr<CSqlRandomMapResult> m_SqlRandomMapResult;
 #endif
 	bool m_NotEligibleForFinish;
 	int64 m_EligibleForFinishCheck;

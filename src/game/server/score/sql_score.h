@@ -22,7 +22,7 @@ struct CSqlPlayerResult
 		DIRECT,
 		ALL,
 		BROADCAST,
-		MAP_VOTE, // 3 Messages: Reason, Server, Map
+		MAP_VOTE,
 		PLAYER_INFO,
 	} m_MessageKind;
 	char m_aaMessages[7][512];
@@ -44,6 +44,19 @@ struct CSqlPlayerResult
 	} m_Data; // PLAYER_INFO
 
 	void SetVariant(Variant v);
+};
+
+struct CSqlRandomMapResult
+{
+	std::atomic_bool m_Done;
+	CSqlRandomMapResult() :
+		m_Done(false)
+	{
+		m_Map[0] = '\0';
+		m_aMessage[0] = '\0';
+	}
+	char m_Map[128];
+	char m_aMessage[512];
 };
 
 struct CSqlSaveResult {
@@ -108,6 +121,15 @@ struct CSqlPlayerRequest : CSqlData<CSqlPlayerResult>
 	sqlstr::CSqlString<MAX_NAME_LENGTH> m_RequestingPlayer;
 	// relevant for /top5 kind of requests
 	int m_Offset;
+};
+
+struct CSqlRandomMapRequest : CSqlData<CSqlRandomMapResult>
+{
+	using CSqlData<CSqlRandomMapResult>::CSqlData;
+	sqlstr::CSqlString<32> m_ServerType;
+	sqlstr::CSqlString<32> m_CurrentMap;
+	sqlstr::CSqlString<MAX_NAME_LENGTH> m_RequestingPlayer;
+	int m_Stars;
 };
 
 struct CSqlScoreData : CSqlData<CSqlPlayerResult>
@@ -199,8 +221,8 @@ class CSqlScore: public IScore
 
 	static bool Init(CSqlServer* pSqlServer, const CSqlData<CSqlInitResult> *pGameData, bool HandleFailure);
 
-	static bool RandomMapThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure = false);
-	static bool RandomUnfinishedMapThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure = false);
+	static bool RandomMapThread(CSqlServer* pSqlServer, const CSqlData<CSqlRandomMapResult> *pGameData, bool HandleFailure = false);
+	static bool RandomUnfinishedMapThread(CSqlServer* pSqlServer, const CSqlData<CSqlRandomMapResult> *pGameData, bool HandleFailure = false);
 	static bool MapVoteThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure = false);
 
 	static bool LoadPlayerDataThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure = false);
@@ -229,9 +251,6 @@ class CSqlScore: public IScore
 	std::vector<std::string> m_aWordlist;
 	CPrng m_Prng;
 	void GeneratePassphrase(char *pBuf, int BufSize);
-
-	char m_aMap[64];
-	char m_aGameUuid[UUID_MAXSTRSIZE];
 
 	// returns new SqlResult bound to the player, if no current Thread is active for this player
 	std::shared_ptr<CSqlPlayerResult> NewSqlPlayerResult(int ClientID);

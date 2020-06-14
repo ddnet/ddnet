@@ -1356,25 +1356,25 @@ bool CSqlScore::ShowTopPointsThread(CSqlServer* pSqlServer, const CSqlData<CSqlP
 
 void CSqlScore::RandomMap(int ClientID, int Stars)
 {
-	/*
-	auto pResult = NewSqlResult(ClientID);
-	if(pResult == nullptr)
-		return;
-	CSqlRandomMap *Tmp = new CSqlRandomMap(pResult);
+	CPlayer *pCurPlayer = GameServer()->m_apPlayers[ClientID];
+	auto pResult = std::make_shared<CSqlRandomMapResult>();
+	pCurPlayer->m_SqlRandomMapResult = pResult;
+
+	auto *Tmp = new CSqlRandomMapRequest(pResult);
 	Tmp->m_Stars = Stars;
+	Tmp->m_CurrentMap = g_Config.m_SvMap;
+	Tmp->m_ServerType = g_Config.m_SvServerType;
+	Tmp->m_RequestingPlayer = GameServer()->Server()->ClientName(ClientID);
 
-	// TODO: Set Client result Tmp->m_ClientID = ClientID;
-	str_copy(Tmp->m_aCurrentMap, m_aMap, sizeof(Tmp->m_aCurrentMap));
-	str_copy(Tmp->m_aServerType, g_Config.m_SvServerType, sizeof(Tmp->m_aServerType));
-
-	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(RandomMapThread, Tmp), "random map");
-	*/
+	thread_init_and_detach(
+			CSqlExecData<CSqlRandomMapResult>::ExecSqlFunc,
+			new CSqlExecData<CSqlRandomMapResult>(RandomMapThread, Tmp),
+			"random map");
 }
 
-bool CSqlScore::RandomMapThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure)
+bool CSqlScore::RandomMapThread(CSqlServer* pSqlServer, const CSqlData<CSqlRandomMapResult> *pGameData, bool HandleFailure)
 {
-	/*
-	const CSqlRandomMap *pData = dynamic_cast<const CSqlRandomMap *>(pGameData);
+	const CSqlRandomMapRequest *pData = dynamic_cast<const CSqlRandomMapRequest *>(pGameData);
 
 	if (HandleFailure)
 		return true;
@@ -1389,8 +1389,8 @@ bool CSqlScore::RandomMapThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlaye
 					"WHERE Server = \"%s\" AND Map != \"%s\" AND Stars = \"%d\" "
 					"ORDER BY RAND() LIMIT 1;",
 					pSqlServer->GetPrefix(),
-					pData->m_aServerType,
-					pData->m_aCurrentMap,
+					pData->m_ServerType.ClrStr(),
+					pData->m_CurrentMap.ClrStr(),
 					pData->m_Stars
 			);
 		}
@@ -1401,24 +1401,21 @@ bool CSqlScore::RandomMapThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlaye
 					"WHERE Server = \"%s\" AND Map != \"%s\" "
 					"ORDER BY RAND() LIMIT 1;",
 					pSqlServer->GetPrefix(),
-					pData->m_aServerType,
-					pData->m_aCurrentMap
+					pData->m_ServerType.ClrStr(),
+					pData->m_CurrentMap.ClrStr()
 			);
 		}
 		pSqlServer->executeSqlQuery(aBuf);
 
-		pData->m_pResult->m_Tag = CSqlResult::RANDOM_MAP;
 		if(pSqlServer->GetResults()->rowsCount() != 1)
 		{
-			pData->m_pResult->m_MessageTarget = CSqlResult::DIRECT;
-			str_copy(pData->m_pResult->m_Message, "No maps found on this server!", sizeof(pData->m_pResult->m_Message));
-			pData->m_pResult->m_Variant.m_RandomMap.m_aMap[0] = 0;
+			str_copy(pData->m_pResult->m_aMessage, "No maps found on this server!", sizeof(pData->m_pResult->m_aMessage));
 		}
 		else
 		{
 			pSqlServer->GetResults()->next();
-			std::string Map = pSqlServer->GetResults()->getString("Map");
-			str_copy(pData->m_pResult->m_Variant.m_RandomMap.m_aMap, Map.c_str(), sizeof(pData->m_pResult->m_Variant.m_RandomMap.m_aMap));
+			auto Map = pSqlServer->GetResults()->getString("Map");
+			str_copy(pData->m_pResult->m_Map, Map.c_str(), sizeof(pData->m_pResult->m_Map));
 		}
 
 		dbg_msg("sql", "voting random map done");
@@ -1430,14 +1427,13 @@ bool CSqlScore::RandomMapThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlaye
 		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not vote random map");
 	}
-	*/
 	return false;
 }
 
 void CSqlScore::RandomUnfinishedMap(int ClientID, int Stars)
 {
 	/*
-	*ppResult = std::make_shared<CRandomMapResult>();
+	*ppResult = std::make_shared<CSqlMapResult>();
 
 	CSqlRandomMap *Tmp = new CSqlRandomMap();
 	Tmp->m_Num = Stars;
@@ -1449,7 +1445,7 @@ void CSqlScore::RandomUnfinishedMap(int ClientID, int Stars)
 	*/
 }
 
-bool CSqlScore::RandomUnfinishedMapThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure)
+bool CSqlScore::RandomUnfinishedMapThread(CSqlServer* pSqlServer, const CSqlData<CSqlRandomMapResult> *pGameData, bool HandleFailure)
 {
 	/*
 	const CSqlRandomMap *pData = dynamic_cast<const CSqlRandomMap *>(pGameData);

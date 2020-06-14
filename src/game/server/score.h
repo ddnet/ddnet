@@ -42,17 +42,6 @@ public:
 	float m_aBestCpTime[NUM_CHECKPOINTS];
 };
 
-struct CRandomMapResult
-{
-	char m_aMap[64];
-};
-
-struct CMapVoteResult
-{
-	char m_aMap[64];
-	char m_aServer[32];
-};
-
 class IScore
 {
 	CPlayerData m_aPlayerData[MAX_CLIENTS];

@@ -159,6 +159,17 @@ void CPlayer::Tick()
 		ProcessSqlResult(*m_SqlFinishResult);
 		m_SqlFinishResult = nullptr;
 	}
+	if(m_SqlRandomMapResult!= nullptr && m_SqlRandomMapResult.use_count() == 1)
+	{
+		if(m_SqlRandomMapResult->m_Done)
+		{
+			if(m_SqlRandomMapResult->m_aMessage[0] != '\0')
+				GameServer()->SendChatTarget(m_ClientID, m_SqlRandomMapResult->m_aMessage);
+			if(m_SqlRandomMapResult->m_Map[0] != '\0')
+				str_copy(g_Config.m_SvMap, m_SqlRandomMapResult->m_Map, sizeof(g_Config.m_SvMap));
+		}
+		m_SqlRandomMapResult = nullptr;
+	}
 #endif
 
 	if(!Server()->ClientIngame(m_ClientID))
