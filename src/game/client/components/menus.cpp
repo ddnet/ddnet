@@ -912,7 +912,7 @@ void CMenus::RenderNews(CUIRect MainView)
 		else
 		{
 			MainView.HSplitTop(20.0f, &Label, &MainView);
-			UI()->DoLabelScaled(&Label, aLine, 15.f, -1, MainView.w-30.0f);
+			UI()->DoLabelScaled(&Label, aLine, 15.f, -1, -1);
 		}
 	}
 }
