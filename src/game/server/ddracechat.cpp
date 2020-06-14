@@ -518,6 +518,9 @@ void CGameContext::ConMap(IConsole::IResult *pResult, void *pUserData)
 	if (!pPlayer)
 		return;
 
+	if(pSelf->RateLimitPlayerVote(pResult->m_ClientID) || pSelf->RateLimitPlayerMapVote(pResult->m_ClientID))
+		return;
+
 #if defined(CONF_SQL)
 	if(g_Config.m_SvUseSQL)
 		if(pPlayer->m_LastSQLQuery + g_Config.m_SvSqlQueriesDelay * pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())

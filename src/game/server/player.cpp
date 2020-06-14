@@ -818,7 +818,20 @@ void CPlayer::ProcessSqlResult(CSqlPlayerResult &Result)
 				GameServer()->SendBroadcast(Result.m_Data.m_Broadcast, -1);
 			break;
 		case CSqlPlayerResult::MAP_VOTE:
-			// TODO: start vote
+			GameServer()->m_VoteKick = false;
+			GameServer()->m_VoteSpec = false;
+			GameServer()->m_LastMapVote = time_get();
+
+			char aCmd[256];
+			str_format(aCmd, sizeof(aCmd),
+					"sv_reset_file types/%s/flexreset.cfg; change_map \"%s\"",
+					Result.m_Data.m_MapVote.m_Server, Result.m_Data.m_MapVote.m_Map);
+
+			char aChatmsg[512];
+			str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s' (%s)",
+					Server()->ClientName(m_ClientID), Result.m_Data.m_MapVote.m_Map, "/map");
+
+			GameServer()->CallVote(m_ClientID, Result.m_Data.m_MapVote.m_Map, aCmd, "/map", aChatmsg);
 			break;
 		case CSqlPlayerResult::PLAYER_INFO:
 			GameServer()->Score()->PlayerData(m_ClientID)->Set(

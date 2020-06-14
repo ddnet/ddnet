@@ -920,12 +920,6 @@ void CGameContext::OnTick()
 	}
 
 	/*
-	if(m_pRandomMapResult && m_pRandomMapResult->m_Done)
-	{
-		str_copy(g_Config.m_SvMap, m_pRandomMapResult->m_aMap, sizeof(g_Config.m_SvMap));
-		m_pRandomMapResult = NULL;
-	}
-
 	if(m_pMapVoteResult && m_pMapVoteResult->m_Done)
 	{
 		m_VoteKick = false;
@@ -939,8 +933,6 @@ void CGameContext::OnTick()
 		str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s' (%s)", Server()->ClientName(m_pMapVoteResult->m_ClientID), m_pMapVoteResult->m_aMap, "/map");
 
 		CallVote(m_pMapVoteResult->m_ClientID, m_pMapVoteResult->m_aMap, aCmd, "/map", aChatmsg);
-
-		m_pMapVoteResult = NULL;
 	}
 	*/
 
@@ -1424,68 +1416,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		}
 		else if(MsgID == NETMSGTYPE_CL_CALLVOTE)
 		{
-			int64 Now = Server()->Tick();
-			int64 TickSpeed = Server()->TickSpeed();
-
-			if(g_Config.m_SvRconVote && !Server()->GetAuthedState(ClientID))
-			{
-				SendChatTarget(ClientID, "You can only vote after logging in.");
+			if(RateLimitPlayerVote(ClientID))
 				return;
-			}
-
-			if (g_Config.m_SvDnsblVote && !m_pServer->DnsblWhite(ClientID) && Server()->DistinctClientCount() > 1)
-			{
-				// blacklisted by dnsbl
-				SendChatTarget(ClientID, "You are not allowed to vote due to DNSBL.");
-				return;
-			}
-
-			if(g_Config.m_SvSpamprotection && pPlayer->m_LastVoteTry && pPlayer->m_LastVoteTry + TickSpeed * 3 > Now)
-				return;
-
-			pPlayer->m_LastVoteTry = Now;
-			if(g_Config.m_SvSpectatorVotes == 0 && pPlayer->GetTeam() == TEAM_SPECTATORS)
-			{
-				SendChatTarget(ClientID, "Spectators aren't allowed to start a vote.");
-				return;
-			}
-
-			if(m_VoteCloseTime)
-			{
-				SendChatTarget(ClientID, "Wait for current vote to end before calling a new one.");
-				return;
-			}
-
-			if(Now < pPlayer->m_FirstVoteTick)
-			{
-				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf), "You must wait %d seconds before making your first vote.", (int)((pPlayer->m_FirstVoteTick - Now) / TickSpeed) + 1);
-				SendChatTarget(ClientID, aBuf);
-				return;
-			}
-
-			int TimeLeft = pPlayer->m_LastVoteCall + TickSpeed * g_Config.m_SvVoteDelay - Now;
-			if(pPlayer->m_LastVoteCall && TimeLeft > 0)
-			{
-				char aChatmsg[64];
-				str_format(aChatmsg, sizeof(aChatmsg), "You must wait %d seconds before making another vote.", (int)(TimeLeft / TickSpeed) + 1);
-				SendChatTarget(ClientID, aChatmsg);
-				return;
-			}
-
-			NETADDR Addr;
-			Server()->GetClientAddr(ClientID, &Addr);
-			int VoteMuted = 0;
-			for(int i = 0; i < m_NumVoteMutes && !VoteMuted; i++)
-				if(!net_addr_comp_noport(&Addr, &m_aVoteMutes[i].m_Addr))
-					VoteMuted = (m_aVoteMutes[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
-			if(VoteMuted > 0)
-			{
-				char aChatmsg[64];
-				str_format(aChatmsg, sizeof(aChatmsg), "You are not permitted to vote for the next %d seconds.", VoteMuted);
-				SendChatTarget(ClientID, aChatmsg);
-				return;
-			}
 
 			char aChatmsg[512] = {0};
 			char aDesc[VOTE_DESC_LENGTH] = {0};
@@ -1516,11 +1448,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 							SendChatTarget(ClientID, "Invalid option");
 							return;
 						}
-						if(!Authed && (str_startswith(pOption->m_aCommand, "sv_map ") || str_startswith(pOption->m_aCommand, "change_map ") || str_startswith(pOption->m_aCommand, "random_map") || str_startswith(pOption->m_aCommand, "random_unfinished_map")) && time_get() < m_LastMapVote + (time_freq() * g_Config.m_SvVoteMapTimeDelay))
+						if((str_startswith(pOption->m_aCommand, "sv_map ")
+								|| str_startswith(pOption->m_aCommand, "change_map ")
+								|| str_startswith(pOption->m_aCommand, "random_map")
+								|| str_startswith(pOption->m_aCommand, "random_unfinished_map"))
+								&& RateLimitPlayerMapVote(ClientID))
 						{
-							str_format(aChatmsg, sizeof(aChatmsg), "There's a %d second delay between map-votes, please wait %d seconds.", g_Config.m_SvVoteMapTimeDelay, (int)(((m_LastMapVote+(g_Config.m_SvVoteMapTimeDelay * time_freq()))/time_freq())-(time_get()/time_freq())));
-							SendChatTarget(ClientID, aChatmsg);
-
 							return;
 						}
 
@@ -3580,4 +3513,85 @@ void CGameContext::ForceVote(int EnforcerID, bool Success)
 	SendChatTarget(-1, aBuf);
 	str_format(aBuf, sizeof(aBuf), "forcing vote %s", pOption);
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+}
+
+bool CGameContext::RateLimitPlayerVote(int ClientID)
+{
+	int64 Now = Server()->Tick();
+	int64 TickSpeed = Server()->TickSpeed();
+	CPlayer *pPlayer = m_apPlayers[ClientID];
+
+	if(g_Config.m_SvRconVote && !Server()->GetAuthedState(ClientID))
+	{
+		SendChatTarget(ClientID, "You can only vote after logging in.");
+		return true;
+	}
+
+	if (g_Config.m_SvDnsblVote && !m_pServer->DnsblWhite(ClientID) && Server()->DistinctClientCount() > 1)
+	{
+		// blacklisted by dnsbl
+		SendChatTarget(ClientID, "You are not allowed to vote due to DNSBL.");
+		return true;
+	}
+
+	if(g_Config.m_SvSpamprotection && pPlayer->m_LastVoteTry && pPlayer->m_LastVoteTry + TickSpeed * 3 > Now)
+		return true;
+
+	pPlayer->m_LastVoteTry = Now;
+	if(g_Config.m_SvSpectatorVotes == 0 && pPlayer->GetTeam() == TEAM_SPECTATORS)
+	{
+		SendChatTarget(ClientID, "Spectators aren't allowed to start a vote.");
+		return true;
+	}
+
+	if(m_VoteCloseTime)
+	{
+		SendChatTarget(ClientID, "Wait for current vote to end before calling a new one.");
+		return true;
+	}
+
+	if(Now < pPlayer->m_FirstVoteTick)
+	{
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "You must wait %d seconds before making your first vote.", (int)((pPlayer->m_FirstVoteTick - Now) / TickSpeed) + 1);
+		SendChatTarget(ClientID, aBuf);
+		return true;
+	}
+
+	int TimeLeft = pPlayer->m_LastVoteCall + TickSpeed * g_Config.m_SvVoteDelay - Now;
+	if(pPlayer->m_LastVoteCall && TimeLeft > 0)
+	{
+		char aChatmsg[64];
+		str_format(aChatmsg, sizeof(aChatmsg), "You must wait %d seconds before making another vote.", (int)(TimeLeft / TickSpeed) + 1);
+		SendChatTarget(ClientID, aChatmsg);
+		return true;
+	}
+
+	NETADDR Addr;
+	Server()->GetClientAddr(ClientID, &Addr);
+	int VoteMuted = 0;
+	for(int i = 0; i < m_NumVoteMutes && !VoteMuted; i++)
+		if(!net_addr_comp_noport(&Addr, &m_aVoteMutes[i].m_Addr))
+			VoteMuted = (m_aVoteMutes[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
+	if(VoteMuted > 0)
+	{
+		char aChatmsg[64];
+		str_format(aChatmsg, sizeof(aChatmsg), "You are not permitted to vote for the next %d seconds.", VoteMuted);
+		SendChatTarget(ClientID, aChatmsg);
+		return true;
+	}
+	return false;
+}
+
+bool CGameContext::RateLimitPlayerMapVote(int ClientID)
+{
+	if(!Server()->GetAuthedState(ClientID) && time_get() < m_LastMapVote + (time_freq() * g_Config.m_SvVoteMapTimeDelay))
+	{
+		char aChatmsg[512] = {0};
+		str_format(aChatmsg, sizeof(aChatmsg), "There's a %d second delay between map-votes, please wait %d seconds.",
+				g_Config.m_SvVoteMapTimeDelay, (int)((m_LastMapVote + g_Config.m_SvVoteMapTimeDelay * time_freq() - time_get())/time_freq()));
+		SendChatTarget(ClientID, aChatmsg);
+		return true;
+	}
+	return false;
 }

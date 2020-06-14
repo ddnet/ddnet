@@ -6,6 +6,7 @@
 
 #include <engine/server/sql_string_helpers.h>
 #include <game/prng.h>
+#include <game/voting.h>
 
 #include "../score.h"
 
@@ -34,6 +35,12 @@ struct CSqlPlayerResult
 			int m_HasFinishScore;
 			int m_Birthday; // 0 indicates no birthday
 		} m_Info;
+		struct
+		{
+			char m_Reason[VOTE_REASON_LENGTH];
+			char m_Server[32+1];
+			char m_Map[128+1];
+		} m_MapVote;
 	} m_Data; // PLAYER_INFO
 
 	void SetVariant(Variant v);

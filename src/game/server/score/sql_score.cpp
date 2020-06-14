@@ -43,6 +43,9 @@ void CSqlPlayerResult::SetVariant(Variant v)
 		m_Data.m_Broadcast[0] = 0;
 		break;
 	case MAP_VOTE:
+		m_Data.m_MapVote.m_Map[0] = '\0';
+		m_Data.m_MapVote.m_Reason[0] = '\0';
+		m_Data.m_MapVote.m_Server[0] = '\0';
 		break;
 	case PLAYER_INFO:
 		m_Data.m_Info.m_Score = -9999;
@@ -373,13 +376,16 @@ bool CSqlScore::MapVoteThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerR
 		}
 		else
 		{
+			pSqlServer->GetResults()->first();
 			auto Server = pSqlServer->GetResults()->getString("Server");
 			auto Map = pSqlServer->GetResults()->getString("Map");
-			strcpy(paMessages[0], "/map"); // reason
-			str_copy(paMessages[1], Server.c_str(), sizeof(paMessages[0]));
-			str_copy(paMessages[2], Map.c_str(), sizeof(paMessages[0]));
+			pData->m_pResult->SetVariant(CSqlPlayerResult::MAP_VOTE);
+			auto MapVote = &pData->m_pResult->m_Data.m_MapVote;
+			strcpy(MapVote->m_Reason, "/map");
+			str_copy(MapVote->m_Server, Server.c_str(), sizeof(MapVote->m_Server));
+			str_copy(MapVote->m_Map, Map.c_str(), sizeof(MapVote->m_Map));
 
-			for(char *p = paMessages[1]; *p; p++) // lower case server
+			for(char *p = MapVote->m_Server; *p; p++) // lower case server
 				*p = tolower(*p);
 		}
 		pData->m_pResult->m_Done = true;

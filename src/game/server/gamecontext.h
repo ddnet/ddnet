@@ -259,6 +259,10 @@ public:
 	bool PlayerModerating();
 	void ForceVote(int EnforcerID, bool Success);
 
+	// Checks if player can vote and notify them about the reason
+	bool RateLimitPlayerVote(int ClientID);
+	bool RateLimitPlayerMapVote(int ClientID);
+
 private:
 
 	bool m_VoteWillPass;
