@@ -306,7 +306,7 @@ void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
 
 	if(Tele != pResult->m_ClientID && AuthLevel < g_Config.m_SvTeleOthersAuthLevel)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tele", "you aren't allowed to tele others");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tele", "You aren't allowed to tele others");
 		return;
 	}
 
