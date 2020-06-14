@@ -40,6 +40,10 @@ def output_map(name, map):
     print("inline int {0}(int a) {{ if(a < 0 || a >= {1}) return -1; return gs_{0}[a]; }}".format(name, len(map)))
 
 def main():
+    guard = "GAME_GENERATED_PROTOCOLGLUE"
+    print("#ifndef " + guard)
+    print("#define " + guard)
+
     msgs = get_msgs()
     msgs7 = get_msgs_7()
 
@@ -50,6 +54,8 @@ def main():
     objs7 = get_objs_7()
     output_map("Obj_SixToSeven", generate_map(objs, objs7))
     output_map("Obj_SevenToSix", generate_map(objs7, objs))
+
+    print("#endif //" + guard)
 
 if __name__ == "__main__":
     main()

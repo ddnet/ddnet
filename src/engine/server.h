@@ -10,6 +10,7 @@
 #include "message.h"
 #include <game/generated/protocol.h>
 #include <game/generated/protocol7.h>
+#include <game/generated/protocolglue.h>
 #include <engine/shared/protocol.h>
 
 struct CAntibotRoundData;
@@ -118,7 +119,8 @@ public:
 	template<class T>
 	int SendPackMsgOne(T *pMsg, int Flags, int ClientID)
 	{
-		CMsgPacker Packer(pMsg->MsgID(), false);
+		CMsgPacker Packer(pMsg->MsgID(), false, protocol7::is_sixup<T>::value);
+
 		if(pMsg->Pack(&Packer))
 			return -1;
 		return SendMsg(&Packer, Flags, ClientID);

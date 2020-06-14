@@ -11,7 +11,8 @@ class CMsgPacker : public CPacker
 public:
 	int m_MsgID;
 	bool m_System;
-	CMsgPacker(int Type, bool System=false) : m_MsgID(Type), m_System(System)
+	bool m_NoTranslate;
+	CMsgPacker(int Type, bool System = false, bool NoTranslate = false) : m_MsgID(Type), m_System(System), m_NoTranslate(NoTranslate)
 	{
 		Reset();
 	}

@@ -115,6 +115,21 @@ if gen_network_header:
 	for l in create_enum_table(["NETMSG_INVALID"]+[o.enum_name for o in network.Messages], "NUM_NETMSGTYPES"): print(l)
 	print("")
 
+	print("""
+template<class...>
+using void_t = void;
+
+template<typename T, typename = void>
+struct is_sixup {
+	constexpr static bool value = false;
+};
+
+template<typename T>
+struct is_sixup<T, void_t<typename T::is_sixup>> {
+	constexpr static bool value = true;
+};
+""")
+
 	for item in network.Objects + network.Messages:
 		for line in item.emit_declaration():
 			print(line)

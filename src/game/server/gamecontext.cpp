@@ -1127,56 +1127,68 @@ void CGameContext::OnClientEnter(int ClientID)
 		if(Server()->IsSixup(i))
 		{
 			// new info for others
-			CMsgPacker NewClientInfoMsg(-protocol7::NETMSGTYPE_SV_CLIENTINFO); // NETMSGTYPE_SV_CLIENTINFO
-			NewClientInfoMsg.AddInt(ClientID);
-			NewClientInfoMsg.AddInt(0); // m_Local
-			NewClientInfoMsg.AddInt(pNewPlayer->GetTeam());
-			NewClientInfoMsg.AddString(Server()->ClientName(ClientID), -1);
-			NewClientInfoMsg.AddString(Server()->ClientClan(ClientID), -1);
-			NewClientInfoMsg.AddInt(Server()->ClientCountry(ClientID));
-			for(int p = 0; p < 6; p++) NewClientInfoMsg.AddString(pNewPlayer->m_TeeInfos.m_apSkinPartNames[p], -1);
-			for(int p = 0; p < 6; p++) NewClientInfoMsg.AddInt(pNewPlayer->m_TeeInfos.m_aUseCustomColors[p]);
-			for(int p = 0; p < 6; p++) NewClientInfoMsg.AddInt(pNewPlayer->m_TeeInfos.m_aSkinPartColors[p]);
-			NewClientInfoMsg.AddInt(0); // m_Silent
+			protocol7::CNetMsg_Sv_ClientInfo NewClientInfoMsg;
+			NewClientInfoMsg.m_ClientID = ClientID;
+			NewClientInfoMsg.m_Local = 0;
+			NewClientInfoMsg.m_Team = pNewPlayer->GetTeam();
+			NewClientInfoMsg.m_pName = Server()->ClientName(ClientID);
+			NewClientInfoMsg.m_pClan = Server()->ClientClan(ClientID);
+			NewClientInfoMsg.m_Country = Server()->ClientCountry(ClientID);
+			NewClientInfoMsg.m_Silent = false;
 
-			Server()->SendMsg(&NewClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
+			for(int p = 0; p < 6; p++)
+			{
+				NewClientInfoMsg.m_apSkinPartNames[p] = pNewPlayer->m_TeeInfos.m_apSkinPartNames[p];
+				NewClientInfoMsg.m_aUseCustomColors[p] = pNewPlayer->m_TeeInfos.m_aUseCustomColors[p];
+				NewClientInfoMsg.m_aSkinPartColors[p] = pNewPlayer->m_TeeInfos.m_aSkinPartColors[p];
+			}
+
+			Server()->SendPackMsgOne(&NewClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
 		}
 
 		if(Server()->IsSixup(ClientID))
 		{
 			// existing infos for new player
-			CMsgPacker ClientInfoMsg(-protocol7::NETMSGTYPE_SV_CLIENTINFO); // NETMSGTYPE_SV_CLIENTINFO
-			ClientInfoMsg.AddInt(i);
-			ClientInfoMsg.AddInt(0); // m_Local
-			ClientInfoMsg.AddInt(pPlayer->GetTeam());
-			ClientInfoMsg.AddString(Server()->ClientName(i), -1);
-			ClientInfoMsg.AddString(Server()->ClientClan(i), -1);
-			ClientInfoMsg.AddInt(Server()->ClientCountry(i));
-			for(int p = 0; p < 6; p++) ClientInfoMsg.AddString(pPlayer->m_TeeInfos.m_apSkinPartNames[p], -1);
-			for(int p = 0; p < 6; p++) ClientInfoMsg.AddInt(pPlayer->m_TeeInfos.m_aUseCustomColors[p]);
-			for(int p = 0; p < 6; p++) ClientInfoMsg.AddInt(pPlayer->m_TeeInfos.m_aSkinPartColors[p]);
-			ClientInfoMsg.AddInt(0); // m_Silent
+			protocol7::CNetMsg_Sv_ClientInfo ClientInfoMsg;
+			ClientInfoMsg.m_ClientID = i;
+			ClientInfoMsg.m_Local = 0;
+			ClientInfoMsg.m_Team = pPlayer->GetTeam();
+			ClientInfoMsg.m_pName = Server()->ClientName(i);
+			ClientInfoMsg.m_pClan = Server()->ClientClan(i);
+			ClientInfoMsg.m_Country = Server()->ClientCountry(i);
+			ClientInfoMsg.m_Silent = 0;
 
-			Server()->SendMsg(&ClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
+			for(int p = 0; p < 6; p++)
+			{
+				ClientInfoMsg.m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_apSkinPartNames[p];
+				ClientInfoMsg.m_aUseCustomColors[p] = pPlayer->m_TeeInfos.m_aUseCustomColors[p];
+				ClientInfoMsg.m_aSkinPartColors[p] = pPlayer->m_TeeInfos.m_aSkinPartColors[p];
+			}
+
+			Server()->SendPackMsgOne(&ClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
 		}
 	}
 
 	// local info
 	if(Server()->IsSixup(ClientID))
 	{
-		CMsgPacker SelfClientInfoMsg(-protocol7::NETMSGTYPE_SV_CLIENTINFO); // NETMSGTYPE_SV_CLIENTINFO
-		SelfClientInfoMsg.AddInt(ClientID);
-		SelfClientInfoMsg.AddInt(1); // m_Local
-		SelfClientInfoMsg.AddInt(pNewPlayer->GetTeam());
-		SelfClientInfoMsg.AddString(Server()->ClientName(ClientID), -1);
-		SelfClientInfoMsg.AddString(Server()->ClientClan(ClientID), -1);
-		SelfClientInfoMsg.AddInt(Server()->ClientCountry(ClientID));
-			for(int p = 0; p < 6; p++) SelfClientInfoMsg.AddString(pNewPlayer->m_TeeInfos.m_apSkinPartNames[p], -1);
-			for(int p = 0; p < 6; p++) SelfClientInfoMsg.AddInt(pNewPlayer->m_TeeInfos.m_aUseCustomColors[p]);
-			for(int p = 0; p < 6; p++) SelfClientInfoMsg.AddInt(pNewPlayer->m_TeeInfos.m_aSkinPartColors[p]);
-		SelfClientInfoMsg.AddInt(0); // m_Silent
+		protocol7::CNetMsg_Sv_ClientInfo SelfClientInfoMsg;
+		SelfClientInfoMsg.m_ClientID = ClientID;
+		SelfClientInfoMsg.m_Local = 1;
+		SelfClientInfoMsg.m_Team = pNewPlayer->GetTeam();
+		SelfClientInfoMsg.m_pName = Server()->ClientName(ClientID);
+		SelfClientInfoMsg.m_pClan = Server()->ClientClan(ClientID);
+		SelfClientInfoMsg.m_Country = Server()->ClientCountry(ClientID);
+		SelfClientInfoMsg.m_Silent = 0;
 
-		Server()->SendMsg(&SelfClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
+		for(int p = 0; p < 6; p++)
+		{
+			SelfClientInfoMsg.m_apSkinPartNames[p] = pNewPlayer->m_TeeInfos.m_apSkinPartNames[p];
+			SelfClientInfoMsg.m_aUseCustomColors[p] = pNewPlayer->m_TeeInfos.m_aUseCustomColors[p];
+			SelfClientInfoMsg.m_aSkinPartColors[p] = pNewPlayer->m_TeeInfos.m_aSkinPartColors[p];
+		}
+
+		Server()->SendPackMsgOne(&SelfClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
 	}
 }
 
@@ -1374,6 +1386,19 @@ void *CGameContext::PreProcessMsg(int *MsgID, CUnpacker *pUnpacker, int ClientID
 			CTeeInfo Info(pMsg->m_apSkinPartNames, pMsg->m_aUseCustomColors, pMsg->m_aSkinPartColors);
 			Info.FromSixup();
 			pPlayer->m_TeeInfos = Info;
+
+			protocol7::CNetMsg_Sv_SkinChange Msg;
+			Msg.m_ClientID = ClientID;
+			for(int p = 0; p < 6; p++)
+			{
+				Msg.m_apSkinPartNames[p] = pMsg->m_apSkinPartNames[p];
+				Msg.m_aSkinPartColors[p] = pMsg->m_aSkinPartColors[p];
+				Msg.m_aUseCustomColors[p] = pMsg->m_aUseCustomColors[p];
+			}
+
+			for(int i = 0; i < MAX_CLIENTS; i++)
+				if(Server()->IsSixup(i))
+					Server()->SendPackMsgOne(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
 
 			return 0;
 		}
@@ -1944,6 +1969,25 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			pPlayer->m_TeeInfos.m_ColorBody = pMsg->m_ColorBody;
 			pPlayer->m_TeeInfos.m_ColorFeet = pMsg->m_ColorFeet;
 			pPlayer->m_TeeInfos.ToSixup();
+
+			protocol7::CNetMsg_Sv_SkinChange SkinChangeMsg;
+			SkinChangeMsg.m_ClientID = ClientID;
+			for(int p = 0; p < 6; p++)
+			{
+				SkinChangeMsg.m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_apSkinPartNames[p];
+				SkinChangeMsg.m_aSkinPartColors[p] = pPlayer->m_TeeInfos.m_aSkinPartColors[p];
+				SkinChangeMsg.m_aUseCustomColors[p] = pPlayer->m_TeeInfos.m_aUseCustomColors[p];
+			}
+
+			//TODO: Common pattern send-to-sixup could be abstracted out
+			for(int i = 0; i < MAX_CLIENTS; i++)
+			{
+				if(Server()->IsSixup(i))
+				{
+					dbg_msg("debug", "sending to %d", i);
+					Server()->SendPackMsgOne(&SkinChangeMsg, MSGFLAG_VITAL, i);
+				}
+			}
 
 			Server()->ExpireServerInfo();
 		}

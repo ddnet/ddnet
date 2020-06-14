@@ -652,7 +652,7 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 	Packer.Reset();
 	if(MsgId < OFFSET_UUID)
 	{
-		if(Sixup)
+		if(Sixup && !pMsg->m_NoTranslate)
 		{
 			if(pMsg->m_System)
 			{
@@ -674,19 +674,11 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 			}
 			else
 			{
-				if(MsgId >= NETMSGTYPE_SV_MOTD && MsgId <= NETMSGTYPE_SV_CHAT)
-					;
-				else if(MsgId == NETMSGTYPE_SV_KILLMSG)
-					MsgId += 1;
-				else if(MsgId >= NETMSGTYPE_SV_TUNEPARAMS && MsgId <= NETMSGTYPE_SV_VOTESTATUS)
-					;
-				else if(MsgId < 0)
-					MsgId *= -1;
-				else
-				{
-					dbg_msg("net", "DROP send game %d", MsgId);
+				if(MsgId >= 0)
+					MsgId = Msg_SixToSeven(MsgId);
+
+				if(MsgId < 0)
 					return true;
-				}
 			}
 		}
 

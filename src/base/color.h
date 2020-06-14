@@ -136,6 +136,20 @@ public:
 		else
 			return color4_base::Pack(Alpha);
 	}
+
+	unsigned Pack7()
+	{
+		if(m_Lit)
+		{
+			float Darkest = 61.0f/255.0f;
+			ColorHSLA Dark = *this;
+			Dark.l = (l - Darkest)/(1 - Darkest);
+			Dark.m_Lit = false;
+			return Dark.Pack7();
+		}
+		else
+			return color4_base::Pack(false);
+	}
 };
 
 class ColorHSVA : public color4_base<ColorHSVA>

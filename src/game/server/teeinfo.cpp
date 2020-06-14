@@ -1,4 +1,5 @@
 #include <base/system.h>
+#include <base/color.h>
 
 #include "teeinfo.h"
 
@@ -73,16 +74,19 @@ void CTeeInfo::ToSixup()
 
 	if(m_UseCustomColor)
 	{
+		int ColorBody = ColorHSLA(m_ColorBody).Lighten().Pack7();
+		dbg_msg("color", "o=%d n=%d", m_ColorBody, ColorBody);
+		int ColorFeet = ColorHSLA(m_ColorFeet).Lighten().Pack7();
 		m_aUseCustomColors[0] = true;
 		m_aUseCustomColors[1] = true;
 		m_aUseCustomColors[2] = true;
 		m_aUseCustomColors[3] = true;
 		m_aUseCustomColors[4] = true;
-		m_aSkinPartColors[0] = m_ColorBody;
+		m_aSkinPartColors[0] = ColorBody;
 		m_aSkinPartColors[1] = 0x22FFFFFF;
-		m_aSkinPartColors[2] = m_ColorBody;
-		m_aSkinPartColors[3] = m_ColorBody;
-		m_aSkinPartColors[4] = m_ColorFeet;
+		m_aSkinPartColors[2] = ColorBody;
+		m_aSkinPartColors[3] = ColorBody;
+		m_aSkinPartColors[4] = ColorFeet;
 	}
 }
 

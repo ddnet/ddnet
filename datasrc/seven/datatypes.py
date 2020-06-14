@@ -268,6 +268,7 @@ class NetMessage(NetObject):
 		return lines
 	def emit_declaration(self):
 		extra = []
+		extra += ["\tusing is_sixup = char;"]
 		extra += ["\tint MsgID() const { return %s; }" % self.enum_name]
 		extra += ["\t"]
 		extra += ["\tbool Pack(CMsgPacker *pPacker)"]
