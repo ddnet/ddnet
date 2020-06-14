@@ -186,14 +186,6 @@ struct CSqlTeamLoad : CSqlData<CSqlSaveResult>
 	int m_NumPlayer;
 };
 
-struct CSqlRandomMap : CSqlData<CSqlPlayerResult>
-{
-	using CSqlData::CSqlData;
-	int m_Stars;
-	char m_aCurrentMap[64];
-	char m_aServerType[64];
-};
-
 // controls one thread
 template < typename TResult >
 struct CSqlExecData

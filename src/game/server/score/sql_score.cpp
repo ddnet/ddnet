@@ -1432,23 +1432,25 @@ bool CSqlScore::RandomMapThread(CSqlServer* pSqlServer, const CSqlData<CSqlRando
 
 void CSqlScore::RandomUnfinishedMap(int ClientID, int Stars)
 {
-	/*
-	*ppResult = std::make_shared<CSqlMapResult>();
+	CPlayer *pCurPlayer = GameServer()->m_apPlayers[ClientID];
+	auto pResult = std::make_shared<CSqlRandomMapResult>();
+	pCurPlayer->m_SqlRandomMapResult = pResult;
 
-	CSqlRandomMap *Tmp = new CSqlRandomMap();
-	Tmp->m_Num = Stars;
-	Tmp->m_ClientID = ClientID;
-	Tmp->m_Name = GameServer()->Server()->ClientName(ClientID);
-	Tmp->m_pResult = *ppResult;
+	auto *Tmp = new CSqlRandomMapRequest(pResult);
+	Tmp->m_Stars = Stars;
+	Tmp->m_CurrentMap = g_Config.m_SvMap;
+	Tmp->m_ServerType = g_Config.m_SvServerType;
+	Tmp->m_RequestingPlayer = GameServer()->Server()->ClientName(ClientID);
 
-	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(RandomUnfinishedMapThread, Tmp), "random unfinished map");
-	*/
+	thread_init_and_detach(
+			CSqlExecData<CSqlRandomMapResult>::ExecSqlFunc,
+			new CSqlExecData<CSqlRandomMapResult>(RandomUnfinishedMapThread, Tmp),
+			"random unfinished map");
 }
 
 bool CSqlScore::RandomUnfinishedMapThread(CSqlServer* pSqlServer, const CSqlData<CSqlRandomMapResult> *pGameData, bool HandleFailure)
 {
-	/*
-	const CSqlRandomMap *pData = dynamic_cast<const CSqlRandomMap *>(pGameData);
+	const CSqlRandomMapRequest *pData = dynamic_cast<const CSqlRandomMapRequest *>(pGameData);
 
 	if (HandleFailure)
 		return true;
@@ -1456,25 +1458,48 @@ bool CSqlScore::RandomUnfinishedMapThread(CSqlServer* pSqlServer, const CSqlData
 	try
 	{
 		char aBuf[512];
-		if(pData->m_Num >= 0)
-			str_format(aBuf, sizeof(aBuf), "select * from %s_maps where Server = \"%s\" and Map != \"%s\" and Stars = \"%d\" and not exists (select * from %s_race where Name = \"%s\" and %s_race.Map = %s_maps.Map) order by RAND() limit 1;", pSqlServer->GetPrefix(), g_Config.m_SvServerType, g_Config.m_SvMap, pData->m_Num, pSqlServer->GetPrefix(), pData->m_Name.ClrStr(), pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
+		if(pData->m_Stars >= 0)
+		{
+			str_format(aBuf, sizeof(aBuf),
+					"SELECT Map "
+					"FROM %s_maps "
+					"WHERE Server = \"%s\" AND Map != \"%s\" AND Stars = \"%d\" AND Map NOT IN ("
+						"SELECT Map "
+						"FROM %s_race "
+						"WHERE Name = \"%s\""
+					") ORDER BY RAND() "
+					"LIMIT 1;",
+					pSqlServer->GetPrefix(), pData->m_ServerType.ClrStr(), pData->m_CurrentMap.ClrStr(),
+					pData->m_Stars, pSqlServer->GetPrefix(), pData->m_RequestingPlayer.ClrStr());
+		}
 		else
-			str_format(aBuf, sizeof(aBuf), "select * from %s_maps where Server = \"%s\" and Map != \"%s\" and not exists (select * from %s_race where Name = \"%s\" and %s_race.Map = %s_maps.Map) order by RAND() limit 1;", pSqlServer->GetPrefix(), g_Config.m_SvServerType, g_Config.m_SvMap, pSqlServer->GetPrefix(), pData->m_Name.ClrStr(), pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
+		{
+			str_format(aBuf, sizeof(aBuf),
+					"SELECT Map "
+					"FROM %s_maps AS maps "
+					"WHERE Server = \"%s\" AND Map != \"%s\" AND Map NOT IN ("
+						"SELECT Map "
+						"FROM %s_race as race "
+						"WHERE Name = \"%s\""
+					") ORDER BY RAND() "
+					"LIMIT 1;",
+					pSqlServer->GetPrefix(), pData->m_ServerType.ClrStr(), pData->m_CurrentMap.ClrStr(),
+					pSqlServer->GetPrefix(), pData->m_RequestingPlayer.ClrStr());
+		}
 		pSqlServer->executeSqlQuery(aBuf);
 
 		if(pSqlServer->GetResults()->rowsCount() != 1)
 		{
-			pData->GameServer()->SendChatTarget(pData->m_ClientID, "You have no more unfinished maps on this server!");
-			pData->GameServer()->m_LastMapVote = 0;
+			str_copy(pData->m_pResult->m_aMessage, "You have no more unfinished maps on this server!", sizeof(pData->m_pResult->m_aMessage));
 		}
 		else
 		{
 			pSqlServer->GetResults()->next();
-			std::string Map = pSqlServer->GetResults()->getString("Map");
-			str_copy(pData->m_pResult->m_aMap, Map.c_str(), sizeof(pData->m_pResult->m_aMap));
-			pData->m_pResult->m_Done = true;
+			auto Map = pSqlServer->GetResults()->getString("Map");
+			str_copy(pData->m_pResult->m_Map, Map.c_str(), sizeof(pData->m_pResult->m_Map));
 		}
 
+		pData->m_pResult->m_Done = true;
 		dbg_msg("sql", "voting random unfinished map done");
 		return true;
 	}
@@ -1483,13 +1508,6 @@ bool CSqlScore::RandomUnfinishedMapThread(CSqlServer* pSqlServer, const CSqlData
 		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not vote random unfinished map");
 	}
-	catch (CGameContextError &e)
-	{
-		dbg_msg("sql", "WARNING: Aborted unfinished-map-thread due to reload/change of map.");
-		return true;
-	}
-	return false;
-	*/
 	return false;
 }
 

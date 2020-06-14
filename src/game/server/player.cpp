@@ -167,6 +167,8 @@ void CPlayer::Tick()
 				GameServer()->SendChatTarget(m_ClientID, m_SqlRandomMapResult->m_aMessage);
 			if(m_SqlRandomMapResult->m_Map[0] != '\0')
 				str_copy(g_Config.m_SvMap, m_SqlRandomMapResult->m_Map, sizeof(g_Config.m_SvMap));
+			else
+				GameServer()->m_LastMapVote = 0;
 		}
 		m_SqlRandomMapResult = nullptr;
 	}
