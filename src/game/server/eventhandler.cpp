@@ -83,4 +83,18 @@ void CEventHandler::EventToSixup(int *Type, int *Size, const char **pData)
 
 		*pData = s_aEventStore;
 	}
+	else if(*Type == NETEVENTTYPE_SOUNDGLOBAL) // No more global sounds for the server
+	{
+		const CNetEvent_SoundGlobal *pEvent = (const CNetEvent_SoundGlobal *)(*pData);
+		protocol7::CNetEvent_SoundWorld *pEvent7 = (protocol7::CNetEvent_SoundWorld *)s_aEventStore;
+
+		*Type = -protocol7::NETEVENTTYPE_SOUNDWORLD;
+		*Size = sizeof(*pEvent7);
+
+		pEvent7->m_SoundID = pEvent->m_SoundID;
+		pEvent7->m_X = pEvent->m_X;
+		pEvent7->m_Y = pEvent->m_Y;
+
+		*pData = s_aEventStore;
+	}
 }

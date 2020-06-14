@@ -14,7 +14,7 @@ def get_objs():
     from datatypes import NetObject
     import network
 
-    return ["NETOBJ_INVALID"] + [m.enum_name for m in network.Objects]
+    return ["NETOBJ_INVALID"] + [m.enum_name for m in network.Objects if m.ex is None]
 
 def get_objs_7():
     from seven.datatypes import NetObject
