@@ -38,6 +38,7 @@ bool IsValidFrontTile(int Index)
 		|| (Index >= TILE_TELE_GRENADE_ENABLE && Index <= TILE_TELE_GRENADE_DISABLE)
 		|| (Index >= TILE_TELE_LASER_ENABLE && Index <= TILE_TELE_LASER_DISABLE)
 		|| (Index >= TILE_NPC_START && Index <= TILE_NPH_START)
+		|| (Index >= TILE_ENTITIES_OFF_1 && Index <= TILE_ENTITIES_OFF_2)
 		||  IsValidEntity(Index)
 	);
 }
