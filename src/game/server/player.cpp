@@ -610,18 +610,12 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 
 	//GameServer()->m_pController->OnPlayerInfoChange(GameServer()->m_apPlayers[m_ClientID]);
 
-	for(int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if(Server()->ClientIngame(i) && Server()->IsSixup(i))
-		{
-			protocol7::CNetMsg_Sv_Team Msg;
-			Msg.m_ClientID = m_ClientID;
-			Msg.m_Team = m_Team;
-			Msg.m_Silent = !DoChatMsg;
-			Msg.m_CooldownTick = m_LastSetTeam + Server()->TickSpeed() * g_Config.m_SvTeamChangeDelay;
-			Server()->SendPackMsgOne(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
-		}
-	}
+	protocol7::CNetMsg_Sv_Team Msg;
+	Msg.m_ClientID = m_ClientID;
+	Msg.m_Team = m_Team;
+	Msg.m_Silent = !DoChatMsg;
+	Msg.m_CooldownTick = m_LastSetTeam + Server()->TickSpeed() * g_Config.m_SvTeamChangeDelay;
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, -1);
 
 	if(Team == TEAM_SPECTATORS)
 	{

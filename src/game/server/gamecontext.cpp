@@ -1116,6 +1116,24 @@ void CGameContext::OnClientEnter(int ClientID)
 	Server()->ExpireServerInfo();
 
 	CPlayer *pNewPlayer = m_apPlayers[ClientID];
+
+	// new info for others
+	protocol7::CNetMsg_Sv_ClientInfo NewClientInfoMsg;
+	NewClientInfoMsg.m_ClientID = ClientID;
+	NewClientInfoMsg.m_Local = 0;
+	NewClientInfoMsg.m_Team = pNewPlayer->GetTeam();
+	NewClientInfoMsg.m_pName = Server()->ClientName(ClientID);
+	NewClientInfoMsg.m_pClan = Server()->ClientClan(ClientID);
+	NewClientInfoMsg.m_Country = Server()->ClientCountry(ClientID);
+	NewClientInfoMsg.m_Silent = false;
+
+	for(int p = 0; p < 6; p++)
+	{
+		NewClientInfoMsg.m_apSkinPartNames[p] = pNewPlayer->m_TeeInfos.m_apSkinPartNames[p];
+		NewClientInfoMsg.m_aUseCustomColors[p] = pNewPlayer->m_TeeInfos.m_aUseCustomColors[p];
+		NewClientInfoMsg.m_aSkinPartColors[p] = pNewPlayer->m_TeeInfos.m_aSkinPartColors[p];
+	}
+
 	// update client infos (others before local)
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
@@ -1125,26 +1143,7 @@ void CGameContext::OnClientEnter(int ClientID)
 		CPlayer *pPlayer = m_apPlayers[i];
 
 		if(Server()->IsSixup(i))
-		{
-			// new info for others
-			protocol7::CNetMsg_Sv_ClientInfo NewClientInfoMsg;
-			NewClientInfoMsg.m_ClientID = ClientID;
-			NewClientInfoMsg.m_Local = 0;
-			NewClientInfoMsg.m_Team = pNewPlayer->GetTeam();
-			NewClientInfoMsg.m_pName = Server()->ClientName(ClientID);
-			NewClientInfoMsg.m_pClan = Server()->ClientClan(ClientID);
-			NewClientInfoMsg.m_Country = Server()->ClientCountry(ClientID);
-			NewClientInfoMsg.m_Silent = false;
-
-			for(int p = 0; p < 6; p++)
-			{
-				NewClientInfoMsg.m_apSkinPartNames[p] = pNewPlayer->m_TeeInfos.m_apSkinPartNames[p];
-				NewClientInfoMsg.m_aUseCustomColors[p] = pNewPlayer->m_TeeInfos.m_aUseCustomColors[p];
-				NewClientInfoMsg.m_aSkinPartColors[p] = pNewPlayer->m_TeeInfos.m_aSkinPartColors[p];
-			}
-
-			Server()->SendPackMsgOne(&NewClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
-		}
+			Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
 
 		if(Server()->IsSixup(ClientID))
 		{
@@ -1165,30 +1164,15 @@ void CGameContext::OnClientEnter(int ClientID)
 				ClientInfoMsg.m_aSkinPartColors[p] = pPlayer->m_TeeInfos.m_aSkinPartColors[p];
 			}
 
-			Server()->SendPackMsgOne(&ClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
+			Server()->SendPackMsg(&ClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
 		}
 	}
 
 	// local info
 	if(Server()->IsSixup(ClientID))
 	{
-		protocol7::CNetMsg_Sv_ClientInfo SelfClientInfoMsg;
-		SelfClientInfoMsg.m_ClientID = ClientID;
-		SelfClientInfoMsg.m_Local = 1;
-		SelfClientInfoMsg.m_Team = pNewPlayer->GetTeam();
-		SelfClientInfoMsg.m_pName = Server()->ClientName(ClientID);
-		SelfClientInfoMsg.m_pClan = Server()->ClientClan(ClientID);
-		SelfClientInfoMsg.m_Country = Server()->ClientCountry(ClientID);
-		SelfClientInfoMsg.m_Silent = 0;
-
-		for(int p = 0; p < 6; p++)
-		{
-			SelfClientInfoMsg.m_apSkinPartNames[p] = pNewPlayer->m_TeeInfos.m_apSkinPartNames[p];
-			SelfClientInfoMsg.m_aUseCustomColors[p] = pNewPlayer->m_TeeInfos.m_aUseCustomColors[p];
-			SelfClientInfoMsg.m_aSkinPartColors[p] = pNewPlayer->m_TeeInfos.m_aSkinPartColors[p];
-		}
-
-		Server()->SendPackMsgOne(&SelfClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
+		NewClientInfoMsg.m_Local = 1;
+		Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
 	}
 }
 
@@ -1396,9 +1380,7 @@ void *CGameContext::PreProcessMsg(int *MsgID, CUnpacker *pUnpacker, int ClientID
 				Msg.m_aUseCustomColors[p] = pMsg->m_aUseCustomColors[p];
 			}
 
-			for(int i = 0; i < MAX_CLIENTS; i++)
-				if(Server()->IsSixup(i))
-					Server()->SendPackMsgOne(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, -1);
 
 			return 0;
 		}
@@ -1979,16 +1961,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				SkinChangeMsg.m_aUseCustomColors[p] = pPlayer->m_TeeInfos.m_aUseCustomColors[p];
 			}
 
-			//TODO: Common pattern send-to-sixup could be abstracted out
-			for(int i = 0; i < MAX_CLIENTS; i++)
-			{
-				if(Server()->IsSixup(i))
-				{
-					dbg_msg("debug", "sending to %d", i);
-					Server()->SendPackMsgOne(&SkinChangeMsg, MSGFLAG_VITAL, i);
-				}
-			}
-
+			Server()->SendPackMsg(&SkinChangeMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, -1);
 			Server()->ExpireServerInfo();
 		}
 		else if (MsgID == NETMSGTYPE_CL_EMOTICON && !m_World.m_Paused)
@@ -3559,7 +3532,7 @@ void CGameContext::WhisperID(int ClientID, int VictimID, const char *pMessage)
 		Msg.m_pMessage = pMessage;
 		Msg.m_TargetID = VictimID;
 
-		Server()->SendPackMsgOne(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
 	}
 	else if(GetClientVersion(ClientID) >= VERSION_DDNET_WHISPER)
 	{
@@ -3586,7 +3559,7 @@ void CGameContext::WhisperID(int ClientID, int VictimID, const char *pMessage)
 		Msg.m_pMessage = pMessage;
 		Msg.m_TargetID = VictimID;
 
-		Server()->SendPackMsgOne(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, VictimID);
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, VictimID);
 	}
 	else if(GetClientVersion(VictimID) >= VERSION_DDNET_WHISPER)
 	{

@@ -3,6 +3,8 @@
 #ifndef ENGINE_SERVER_H
 #define ENGINE_SERVER_H
 
+#include <type_traits>
+
 #include <base/hash.h>
 #include <base/math.h>
 
@@ -54,10 +56,10 @@ public:
 
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags, int ClientID) = 0;
 
-	template<class T>
-	int SendPackMsg(T *pMsg, int Flags, int ClientID)
+	template<class T, typename std::enable_if<!protocol7::is_sixup<T>::value, int>::type = 0>
+	inline int SendPackMsg(T *pMsg, int Flags, int ClientID)
 	{
-		int result = 0;
+		int Result = 0;
 		T tmp;
 		if (ClientID == -1)
 		{
@@ -65,13 +67,29 @@ public:
 				if(ClientIngame(i))
 				{
 					mem_copy(&tmp, pMsg, sizeof(T));
-					result = SendPackMsgTranslate(&tmp, Flags, i);
+					Result = SendPackMsgTranslate(&tmp, Flags, i);
 				}
 		} else {
 			mem_copy(&tmp, pMsg, sizeof(T));
-			result = SendPackMsgTranslate(&tmp, Flags, ClientID);
+			Result = SendPackMsgTranslate(&tmp, Flags, ClientID);
 		}
-		return result;
+		return Result;
+	}
+
+	template<class T, typename std::enable_if<protocol7::is_sixup<T>::value, int>::type = 1>
+	inline int SendPackMsg(T *pMsg, int Flags, int ClientID)
+	{
+		int Result = 0;
+		if(ClientID == -1)
+		{
+			for(int i = 0; i < MAX_CLIENTS; i++)
+				if(ClientIngame(i) && IsSixup(i))
+					Result = SendPackMsgOne(pMsg, Flags, i);
+		}
+		else if(IsSixup(ClientID))
+			Result = SendPackMsgOne(pMsg, Flags, ClientID);
+
+		return Result;
 	}
 
 	template<class T>
@@ -119,6 +137,7 @@ public:
 	template<class T>
 	int SendPackMsgOne(T *pMsg, int Flags, int ClientID)
 	{
+		dbg_assert(ClientID != -1, "SendPackMsgOne called with -1");
 		CMsgPacker Packer(pMsg->MsgID(), false, protocol7::is_sixup<T>::value);
 
 		if(pMsg->Pack(&Packer))
