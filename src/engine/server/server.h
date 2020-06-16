@@ -239,6 +239,7 @@ public:
 
 	CDemoRecorder m_aDemoRecorder[MAX_CLIENTS+1];
 	CRegister m_Register;
+	CRegister m_RegSixup;
 	CAuthManager m_AuthManager;
 
 	int m_RconRestrict;
@@ -332,11 +333,15 @@ public:
 		void Clear();
 	};
 	CCache m_ServerInfoCache[3 * 2];
+	CCache m_SixupServerInfoCache[2];
 	bool m_ServerInfoNeedsUpdate;
 
 	void ExpireServerInfo();
 	void CacheServerInfo(CCache *pCache, int Type, bool SendClients);
+	void CacheServerInfoSixup(CCache *pCache, bool SendClients);
 	void SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool SendClients);
+	void GetServerInfoSixup(CPacker *pPacker, int Token, bool SendClients);
+	bool RateLimitServerInfoConnless();
 	void SendServerInfoConnless(const NETADDR *pAddr, int Token, int Type);
 	void UpdateServerInfo(bool Resend = false);
 

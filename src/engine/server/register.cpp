@@ -10,8 +10,12 @@
 
 #include "register.h"
 
-CRegister::CRegister()
+CRegister::CRegister(bool Sixup)
 {
+	m_Sixup = Sixup;
+	m_pName = Sixup ? "regsixup" : "register";
+	m_LastTokenRequest = 0;
+
 	m_pNetServer = 0;
 	m_pMasterServer = 0;
 	m_pConsole = 0;
@@ -25,13 +29,28 @@ CRegister::CRegister()
 	m_RegisterRegisteredServer = -1;
 }
 
+void CRegister::FeedToken(NETADDR Addr, SECURITY_TOKEN ResponseToken)
+{
+	Addr.port = 0;
+	for(int i = 0; i < IMasterServer::MAX_MASTERSERVERS; i++)
+	{
+		NETADDR Addr2 = m_aMasterserverInfo[i].m_Addr;
+		Addr2.port = 0;
+		if(net_addr_comp(&Addr, &Addr2) == 0)
+		{
+			m_aMasterserverInfo[i].m_Token = ResponseToken;
+			break;
+		}
+	}
+}
+
 void CRegister::RegisterNewState(int State)
 {
 	m_RegisterState = State;
 	m_RegisterStateStart = time_get();
 }
 
-void CRegister::RegisterSendFwcheckresponse(NETADDR *pAddr)
+void CRegister::RegisterSendFwcheckresponse(NETADDR *pAddr, SECURITY_TOKEN ResponseToken)
 {
 	CNetChunk Packet;
 	Packet.m_ClientID = -1;
@@ -39,10 +58,13 @@ void CRegister::RegisterSendFwcheckresponse(NETADDR *pAddr)
 	Packet.m_Flags = NETSENDFLAG_CONNLESS;
 	Packet.m_DataSize = sizeof(SERVERBROWSE_FWRESPONSE);
 	Packet.m_pData = SERVERBROWSE_FWRESPONSE;
-	m_pNetServer->Send(&Packet);
+	if(m_Sixup)
+		m_pNetServer->SendConnlessSixup(&Packet, ResponseToken);
+	else
+		m_pNetServer->Send(&Packet);
 }
 
-void CRegister::RegisterSendHeartbeat(NETADDR Addr)
+void CRegister::RegisterSendHeartbeat(NETADDR Addr, SECURITY_TOKEN ResponseToken)
 {
 	static unsigned char aData[sizeof(SERVERBROWSE_HEARTBEAT) + 2];
 	unsigned short Port = g_Config.m_SvPort;
@@ -61,10 +83,13 @@ void CRegister::RegisterSendHeartbeat(NETADDR Addr)
 		Port = g_Config.m_SvExternalPort;
 	aData[sizeof(SERVERBROWSE_HEARTBEAT)] = Port >> 8;
 	aData[sizeof(SERVERBROWSE_HEARTBEAT)+1] = Port&0xff;
-	m_pNetServer->Send(&Packet);
+	if(m_Sixup)
+		m_pNetServer->SendConnlessSixup(&Packet, ResponseToken);
+	else
+		m_pNetServer->Send(&Packet);
 }
 
-void CRegister::RegisterSendCountRequest(NETADDR Addr)
+void CRegister::RegisterSendCountRequest(NETADDR Addr, SECURITY_TOKEN ResponseToken)
 {
 	CNetChunk Packet;
 	Packet.m_ClientID = -1;
@@ -72,7 +97,10 @@ void CRegister::RegisterSendCountRequest(NETADDR Addr)
 	Packet.m_Flags = NETSENDFLAG_CONNLESS;
 	Packet.m_DataSize = sizeof(SERVERBROWSE_GETCOUNT);
 	Packet.m_pData = SERVERBROWSE_GETCOUNT;
-	m_pNetServer->Send(&Packet);
+	if(m_Sixup)
+		m_pNetServer->SendConnlessSixup(&Packet, ResponseToken);
+	else
+		m_pNetServer->Send(&Packet);
 }
 
 void CRegister::RegisterGotCount(CNetChunk *pChunk)
@@ -107,13 +135,19 @@ void CRegister::RegisterUpdate(int Nettype)
 
 	m_pMasterServer->Update();
 
+	if(m_Sixup && (m_RegisterState == REGISTERSTATE_HEARTBEAT || m_RegisterState == REGISTERSTATE_REGISTERED) && Now > m_LastTokenRequest+Freq*5)
+	{
+		m_pNetServer->SendTokenSixup(m_aMasterserverInfo[m_RegisterRegisteredServer].m_Addr, NET_SECURITY_TOKEN_UNKNOWN);
+		m_LastTokenRequest = Now;
+	}
+
 	if(m_RegisterState == REGISTERSTATE_START)
 	{
 		m_RegisterCount = 0;
 		m_RegisterFirst = 1;
 		RegisterNewState(REGISTERSTATE_UPDATE_ADDRS);
 		m_pMasterServer->RefreshAddresses(Nettype);
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "register", "refreshing ip addresses");
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, m_pName, "refreshing ip addresses");
 	}
 	else if(m_RegisterState == REGISTERSTATE_UPDATE_ADDRS)
 	{
@@ -133,12 +167,16 @@ void CRegister::RegisterUpdate(int Nettype)
 
 				NETADDR Addr = m_pMasterServer->GetAddr(i);
 				m_aMasterserverInfo[i].m_Addr = Addr;
+				if(m_Sixup)
+					m_aMasterserverInfo[i].m_Addr.port = 8283;
 				m_aMasterserverInfo[i].m_Valid = 1;
 				m_aMasterserverInfo[i].m_Count = -1;
 				m_aMasterserverInfo[i].m_LastSend = 0;
+				m_aMasterserverInfo[i].m_Token = NET_SECURITY_TOKEN_UNKNOWN;
 			}
 
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "register", "fetching server counts");
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, m_pName, "fetching server counts");
+			m_LastTokenRequest = Now;
 			RegisterNewState(REGISTERSTATE_QUERY_COUNT);
 		}
 	}
@@ -156,13 +194,16 @@ void CRegister::RegisterUpdate(int Nettype)
 				if(m_aMasterserverInfo[i].m_LastSend+Freq < Now)
 				{
 					m_aMasterserverInfo[i].m_LastSend = Now;
-					RegisterSendCountRequest(m_aMasterserverInfo[i].m_Addr);
+					if(m_Sixup && m_aMasterserverInfo[i].m_Token == NET_SECURITY_TOKEN_UNKNOWN)
+						m_pNetServer->SendTokenSixup(m_aMasterserverInfo[i].m_Addr, NET_SECURITY_TOKEN_UNKNOWN);
+					else
+						RegisterSendCountRequest(m_aMasterserverInfo[i].m_Addr, m_aMasterserverInfo[i].m_Token);
 				}
 			}
 		}
 
 		// check if we are done or timed out
-		if(Left == 0 || Now > m_RegisterStateStart+Freq*3)
+		if(Left == 0 || Now > m_RegisterStateStart+Freq*5)
 		{
 			// choose server
 			int Best = -1;
@@ -180,14 +221,14 @@ void CRegister::RegisterUpdate(int Nettype)
 			m_RegisterRegisteredServer = Best;
 			if(m_RegisterRegisteredServer == -1)
 			{
-				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "register", "WARNING: No master servers. Retrying in 60 seconds");
+				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, m_pName, "WARNING: No master servers. Retrying in 60 seconds");
 				RegisterNewState(REGISTERSTATE_ERROR);
 			}
 			else
 			{
 				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf), "chose '%s' as master, sending heartbeats", m_pMasterServer->GetName(m_RegisterRegisteredServer));
-				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "register", aBuf);
+				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, m_pName, aBuf);
 				m_aMasterserverInfo[m_RegisterRegisteredServer].m_LastSend = 0;
 				RegisterNewState(REGISTERSTATE_HEARTBEAT);
 			}
@@ -199,19 +240,19 @@ void CRegister::RegisterUpdate(int Nettype)
 		if(Now > m_aMasterserverInfo[m_RegisterRegisteredServer].m_LastSend+Freq*15)
 		{
 			m_aMasterserverInfo[m_RegisterRegisteredServer].m_LastSend = Now;
-			RegisterSendHeartbeat(m_aMasterserverInfo[m_RegisterRegisteredServer].m_Addr);
+			RegisterSendHeartbeat(m_aMasterserverInfo[m_RegisterRegisteredServer].m_Addr, m_aMasterserverInfo[m_RegisterRegisteredServer].m_Token);
 		}
 
 		if(Now > m_RegisterStateStart+Freq*60)
 		{
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "register", "WARNING: Master server is not responding, switching master");
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, m_pName, "WARNING: Master server is not responding, switching master");
 			RegisterNewState(REGISTERSTATE_START);
 		}
 	}
 	else if(m_RegisterState == REGISTERSTATE_REGISTERED)
 	{
 		if(m_RegisterFirst)
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "register", "server registered");
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, m_pName, "server registered");
 
 		m_RegisterFirst = 0;
 
@@ -235,7 +276,7 @@ void CRegister::RegisterUpdate(int Nettype)
 	}
 }
 
-int CRegister::RegisterProcessPacket(CNetChunk *pPacket)
+int CRegister::RegisterProcessPacket(CNetChunk *pPacket, SECURITY_TOKEN ResponseToken)
 {
 	// check for masterserver address
 	bool Valid = false;
@@ -253,24 +294,26 @@ int CRegister::RegisterProcessPacket(CNetChunk *pPacket)
 	if(pPacket->m_DataSize == sizeof(SERVERBROWSE_FWCHECK) &&
 		mem_comp(pPacket->m_pData, SERVERBROWSE_FWCHECK, sizeof(SERVERBROWSE_FWCHECK)) == 0)
 	{
-		RegisterSendFwcheckresponse(&pPacket->m_Address);
+		RegisterSendFwcheckresponse(&pPacket->m_Address, ResponseToken);
 		return 1;
 	}
 	else if(pPacket->m_DataSize == sizeof(SERVERBROWSE_FWOK) &&
 		mem_comp(pPacket->m_pData, SERVERBROWSE_FWOK, sizeof(SERVERBROWSE_FWOK)) == 0)
 	{
 		if(m_RegisterFirst)
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "register", "no firewall/nat problems detected");
-		RegisterNewState(REGISTERSTATE_REGISTERED);
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, m_pName, "no firewall/nat problems detected");
+
+		if(m_RegisterState == REGISTERSTATE_HEARTBEAT || m_RegisterState == REGISTERSTATE_REGISTERED)
+			RegisterNewState(REGISTERSTATE_REGISTERED);
 		return 1;
 	}
 	else if(pPacket->m_DataSize == sizeof(SERVERBROWSE_FWERROR) &&
 		mem_comp(pPacket->m_pData, SERVERBROWSE_FWERROR, sizeof(SERVERBROWSE_FWERROR)) == 0)
 	{
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "register", "ERROR: the master server reports that clients can not connect to this server.");
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, m_pName, "ERROR: the master server reports that clients can not connect to this server.");
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "ERROR: configure your firewall/nat to let through udp on port %d.", g_Config.m_SvPort);
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "register", aBuf);
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, m_pName, aBuf);
 		//RegisterNewState(REGISTERSTATE_ERROR);
 		return 1;
 	}
