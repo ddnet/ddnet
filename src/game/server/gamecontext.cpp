@@ -1274,6 +1274,12 @@ void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 			m_apPlayers[i]->m_LastWhisperTo = -1;
 	}
 
+	protocol7::CNetMsg_Sv_ClientDrop Msg;
+	Msg.m_ClientID = ClientID;
+	Msg.m_pReason = pReason;
+	Msg.m_Silent = false;
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, -1);
+
 	Server()->ExpireServerInfo();
 }
 
