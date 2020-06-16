@@ -144,6 +144,28 @@ void CPlayer::Reset()
 	m_VotedForPractice = false;
 }
 
+static int PlayerFlags_SevenToSix(int Flags)
+{
+	int Six = 0;
+	if(Flags&protocol7::PLAYERFLAG_CHATTING)
+		Six |= PLAYERFLAG_CHATTING;
+	if(Flags&protocol7::PLAYERFLAG_SCOREBOARD)
+		Six |= PLAYERFLAG_SCOREBOARD;
+
+	return Six;
+}
+
+static int PlayerFlags_SixToSeven(int Flags)
+{
+	int Seven = 0;
+	if(Flags&PLAYERFLAG_CHATTING)
+		Seven |= protocol7::PLAYERFLAG_CHATTING;
+	if(Flags&PLAYERFLAG_SCOREBOARD)
+		Seven |= protocol7::PLAYERFLAG_SCOREBOARD;
+
+	return Seven;
+}
+
 void CPlayer::Tick()
 {
 #ifdef CONF_DEBUG
@@ -348,7 +370,9 @@ void CPlayer::Snap(int SnappingClient)
 		if(!pPlayerInfo)
 			return;
 
-		pPlayerInfo->m_PlayerFlags = 0; //TODO: Check if this needs translation
+		pPlayerInfo->m_PlayerFlags = PlayerFlags_SixToSeven(m_PlayerFlags);
+		if(Server()->ClientAuthed(m_ClientID))
+			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_ADMIN;
 		pPlayerInfo->m_Score = Score;
 		pPlayerInfo->m_Latency = Latency;
 	}
@@ -485,6 +509,9 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)
 
 void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 {
+	if(Server()->IsSixup(m_ClientID))
+		NewInput->m_PlayerFlags = PlayerFlags_SevenToSix(NewInput->m_PlayerFlags);
+
 	if(NewInput->m_PlayerFlags)
 		Server()->SetClientFlags(m_ClientID, NewInput->m_PlayerFlags);
 
