@@ -660,12 +660,14 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 					;
 				else if(MsgId >= NETMSG_CON_READY && MsgId <= NETMSG_INPUTTIMING)
 					MsgId += 1;
+				else if(MsgId == NETMSG_RCON_LINE)
+					MsgId = 13;
 				else if(MsgId >= NETMSG_AUTH_CHALLANGE && MsgId <= NETMSG_AUTH_RESULT)
 					MsgId += 4;
 				else if(MsgId >= NETMSG_PING && MsgId <= NETMSG_ERROR)
 					MsgId += 4;
-				else if(MsgId < 0)
-					MsgId *= -1;
+				else if(MsgId >= NETMSG_RCON_CMD_ADD && MsgId <= NETMSG_RCON_CMD_REM)
+					MsgId -= 11;
 				else
 				{
 					dbg_msg("net", "DROP send sys %d", MsgId);
@@ -1255,28 +1257,13 @@ static inline int MsgFromSixup(int Msg, bool System)
 	{
 		if(Msg == NETMSG_INFO)
 			;
+		else if(Msg >= 14 && Msg <= 15)
+			Msg += 11;
 		else if(Msg >= 18 && Msg <= 28)
 			Msg = NETMSG_READY + Msg - 18;
 		else
-		{
-			dbg_msg("net", "DROP recv sys %d", Msg);
 			return -1;
-		}
 	}
-	/*else
-	{
-		if(Msg >= 24 && Msg <= 27)
-			Msg = NETMSGTYPE_CL_SAY + Msg - 24;
-		else if(Msg == 28)
-			Msg = NETMSGTYPE_CL_KILL;
-		else if(Msg >= 30 && Msg <= 32)
-			Msg = NETMSGTYPE_CL_EMOTICON + Msg - 30;
-		else
-		{
-			dbg_msg("net", "DROP recv msg %d", Msg);
-			return -1;
-		}
-	}*/
 
 	return Msg;
 }
@@ -1551,7 +1538,9 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		}
 		else if(Msg == NETMSG_RCON_AUTH)
 		{
-			const char *pName = Unpacker.GetString(CUnpacker::SANITIZE_CC); // login name, now used
+			const char *pName = "";
+			if(!IsSixup(ClientID))
+				pName = Unpacker.GetString(CUnpacker::SANITIZE_CC); // login name, now used
 			const char *pPw = Unpacker.GetString(CUnpacker::SANITIZE_CC);
 			if(!str_utf8_check(pPw) || !str_utf8_check(pName))
 			{
@@ -1583,14 +1572,22 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				{
 					if(m_aClients[ClientID].m_Authed != AuthLevel)
 					{
-						CMsgPacker Msg(NETMSG_RCON_AUTH_STATUS, true);
-						Msg.AddInt(1);	//authed
-						Msg.AddInt(1);	//cmdlist
-						SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
+						if(!IsSixup(ClientID))
+						{
+							CMsgPacker Msg(NETMSG_RCON_AUTH_STATUS, true);
+							Msg.AddInt(1);	//authed
+							Msg.AddInt(1);	//cmdlist
+							SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
+						}
+						else
+						{
+							CMsgPacker Msg(11, true, true); //NETMSG_RCON_AUTH_ON
+							SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
+						}
 
 						m_aClients[ClientID].m_Authed = AuthLevel; // Keeping m_Authed around is unwise...
 						m_aClients[ClientID].m_AuthKey = KeySlot;
-						int SendRconCmds = Unpacker.GetInt();
+						int SendRconCmds = IsSixup(ClientID) ? true : Unpacker.GetInt();
 						if(Unpacker.Error() == 0 && SendRconCmds)
 							// AUTHED_ADMIN - AuthLevel gets the proper IConsole::ACCESS_LEVEL_<x>
 							m_aClients[ClientID].m_pRconCmdToSend = Console()->FirstCommandInfo(AUTHED_ADMIN - AuthLevel, CFGFLAG_SERVER);
@@ -3188,10 +3185,18 @@ void CServer::ConchainConsoleOutputLevelUpdate(IConsole::IResult *pResult, void 
 
 void CServer::LogoutClient(int ClientID, const char *pReason)
 {
-	CMsgPacker Msg(NETMSG_RCON_AUTH_STATUS, true);
-	Msg.AddInt(0);	//authed
-	Msg.AddInt(0);	//cmdlist
-	SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
+	if(!IsSixup(ClientID))
+	{
+		CMsgPacker Msg(NETMSG_RCON_AUTH_STATUS, true);
+		Msg.AddInt(0);	//authed
+		Msg.AddInt(0);	//cmdlist
+		SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
+	}
+	else
+	{
+		CMsgPacker Msg(12, true, true); //NETMSG_RCON_AUTH_OFF
+		SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
+	}
 
 	m_aClients[ClientID].m_AuthTries = 0;
 	m_aClients[ClientID].m_pRconCmdToSend = 0;
