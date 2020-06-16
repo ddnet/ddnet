@@ -1223,6 +1223,19 @@ void CGameContext::OnClientConnected(int ClientID)
 	Msg.m_pMessage = g_Config.m_SvMotd;
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
 
+	//send sixup settings
+	if(Server()->IsSixup(ClientID))
+	{
+		protocol7::CNetMsg_Sv_ServerSettings Msg;
+		Msg.m_KickVote = g_Config.m_SvVoteKick;
+		Msg.m_KickMin = g_Config.m_SvVoteKickMin;
+		Msg.m_SpecVote = g_Config.m_SvVoteSpectate;
+		Msg.m_TeamLock = 0;
+		Msg.m_TeamBalance = 0;
+		Msg.m_PlayerSlots = g_Config.m_SvMaxClients - g_Config.m_SvSpectatorSlots;
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
+	}
+
 	Server()->ExpireServerInfo();
 }
 
@@ -1395,6 +1408,13 @@ void *CGameContext::PreProcessMsg(int *MsgID, CUnpacker *pUnpacker, int ClientID
 				pMsg->m_SpectatorID = pMsg7->m_SpectatorID;
 			else
 				pMsg->m_SpectatorID = SPEC_FREEVIEW; // Probably not needed
+		}
+		else if(*MsgID == protocol7::NETMSGTYPE_CL_SETTEAM)
+		{
+			protocol7::CNetMsg_Cl_SetTeam *pMsg7 = (protocol7::CNetMsg_Cl_SetTeam *)pRawMsg;
+			::CNetMsg_Cl_SetTeam *pMsg = (::CNetMsg_Cl_SetTeam *)s_aRawMsg;
+
+			pMsg->m_Team = pMsg7->m_Team;
 		}
 
 		*MsgID = Msg_SevenToSix(*MsgID);

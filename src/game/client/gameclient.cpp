@@ -1366,7 +1366,7 @@ void CGameClient::OnNewSnapshot()
 	if(m_Snap.m_LocalClientID >= 0)
 	{
 		m_LocalIDs[g_Config.m_ClDummy] = m_Snap.m_LocalClientID;
-		
+
 		CSnapState::CCharacterInfo *c = &m_Snap.m_aCharacters[m_Snap.m_LocalClientID];
 		if(c->m_Active)
 		{

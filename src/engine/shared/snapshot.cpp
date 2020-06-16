@@ -562,6 +562,7 @@ int *CSnapshotBuilder::GetItemData(int Key)
 
 int CSnapshotBuilder::Finish(void *SpnapData)
 {
+	//dbg_msg("snap", "---------------------------");
 	// flattern and make the snapshot
 	CSnapshot *pSnap = (CSnapshot *)SpnapData;
 	int OffsetSize = sizeof(int)*m_NumItems;
@@ -628,13 +629,17 @@ void *CSnapshotBuilder::NewItem(int Type, int ID, int Size)
 
 	if(m_Sixup)
 	{
+		//dbg_msg("snap", "intype=%d", Type);
 		if(Type >= 0)
 			Type = Obj_SixToSeven(Type);
 		else
 			Type *= -1;
+		//dbg_msg("snap", "outtype=%d", Type);
 
 		if(Type < 0) return pObj;
 	}
+
+	//dbg_msg("snap", "adding type='%d' id='%d' size='%d'", Type, ID, Size);
 
 	mem_zero(pObj, sizeof(CSnapshotItem) + Size);
 	pObj->m_TypeAndID = (Type<<16)|ID;
