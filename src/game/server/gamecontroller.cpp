@@ -567,7 +567,22 @@ void IGameController::Snap(int SnappingClient)
 
 		pGameData->m_GameStartTick = m_RoundStartTick;
 		pGameData->m_GameStateFlags = 0;
+		if(m_GameOverTick != -1)
+			pGameData->m_GameStateFlags |= protocol7::GAMESTATEFLAG_GAMEOVER;
+		if(m_SuddenDeath)
+			pGameData->m_GameStateFlags |= protocol7::GAMESTATEFLAG_SUDDENDEATH;
+		if(GameServer()->m_World.m_Paused)
+			pGameData->m_GameStateFlags |= protocol7::GAMESTATEFLAG_PAUSED;
+
 		pGameData->m_GameStateEndTick = 0;
+
+		protocol7::CNetObj_GameDataRace *pRaceData = static_cast<protocol7::CNetObj_GameDataRace *>(Server()->SnapNewItem(-protocol7::NETOBJTYPE_GAMEDATARACE, 0, sizeof(protocol7::CNetObj_GameDataRace)));
+		if(!pRaceData)
+			return;
+
+		pRaceData->m_BestTime = round_to_int(m_CurrentRecord * 1000);
+		pRaceData->m_Precision = 3;
+		pRaceData->m_RaceFlags = protocol7::RACEFLAG_HIDE_KILLMSG | protocol7::RACEFLAG_KEEP_WANTED_WEAPON;
 	}
 }
 
