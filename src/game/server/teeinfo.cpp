@@ -75,7 +75,6 @@ void CTeeInfo::ToSixup()
 	if(m_UseCustomColor)
 	{
 		int ColorBody = ColorHSLA(m_ColorBody).Lighten().Pack7();
-		dbg_msg("color", "o=%d n=%d", m_ColorBody, ColorBody);
 		int ColorFeet = ColorHSLA(m_ColorFeet).Lighten().Pack7();
 		m_aUseCustomColors[0] = true;
 		m_aUseCustomColors[1] = true;

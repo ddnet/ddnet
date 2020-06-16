@@ -629,17 +629,13 @@ void *CSnapshotBuilder::NewItem(int Type, int ID, int Size)
 
 	if(m_Sixup)
 	{
-		//dbg_msg("snap", "intype=%d", Type);
 		if(Type >= 0)
 			Type = Obj_SixToSeven(Type);
 		else
 			Type *= -1;
-		//dbg_msg("snap", "outtype=%d", Type);
 
 		if(Type < 0) return pObj;
 	}
-
-	//dbg_msg("snap", "adding type='%d' id='%d' size='%d'", Type, ID, Size);
 
 	mem_zero(pObj, sizeof(CSnapshotItem) + Size);
 	pObj->m_TypeAndID = (Type<<16)|ID;
