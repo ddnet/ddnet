@@ -1068,6 +1068,16 @@ void CGameContext::OnClientEnter(int ClientID)
 		Msg.m_ScoreLimit = 0;
 		Msg.m_TimeLimit = 0;
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
+
+		for(const IConsole::CCommandInfo *pCmd = Console()->FirstCommandInfo(IConsole::ACCESS_LEVEL_USER, CFGFLAG_CHAT);
+			pCmd; pCmd = pCmd->NextCommandInfo(IConsole::ACCESS_LEVEL_USER, CFGFLAG_CHAT))
+		{
+			protocol7::CNetMsg_Sv_CommandInfo Msg;
+			Msg.m_Name = pCmd->m_pName;
+			Msg.m_ArgsFormat = pCmd->m_pParams;
+			Msg.m_HelpText = pCmd->m_pHelp;
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
+		}
 	}
 
 	{
@@ -1432,6 +1442,19 @@ void *CGameContext::PreProcessMsg(int *MsgID, CUnpacker *pUnpacker, int ClientID
 			::CNetMsg_Cl_SetTeam *pMsg = (::CNetMsg_Cl_SetTeam *)s_aRawMsg;
 
 			pMsg->m_Team = pMsg7->m_Team;
+		}
+		else if(*MsgID == protocol7::NETMSGTYPE_CL_COMMAND)
+		{
+			protocol7::CNetMsg_Cl_Command *pMsg7 = (protocol7::CNetMsg_Cl_Command *)pRawMsg;
+			::CNetMsg_Cl_Say *pMsg = (::CNetMsg_Cl_Say *)s_aRawMsg;
+
+			str_format(s_aRawMsg + sizeof(*pMsg), sizeof(s_aRawMsg) - sizeof(*pMsg), "/%s %s", pMsg7->m_Name, pMsg7->m_Arguments);
+			pMsg->m_pMessage = s_aRawMsg + sizeof(*pMsg);
+			dbg_msg("debug", "line='%s'", s_aRawMsg + sizeof(*pMsg));
+			pMsg->m_Team = 0;
+
+			*MsgID = NETMSGTYPE_CL_SAY;
+			return s_aRawMsg;
 		}
 
 		*MsgID = Msg_SevenToSix(*MsgID);
