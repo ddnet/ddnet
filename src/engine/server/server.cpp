@@ -259,7 +259,6 @@ void CServer::CClient::Reset()
 	m_DDNetVersion = VERSION_NONE;
 	m_GotDDNetVersionPacket = false;
 	m_DDNetVersionSettled = false;
-	m_Sixup = false;
 }
 
 CServer::CServer(): m_Register(false), m_RegSixup(true)
@@ -1069,6 +1068,7 @@ int CServer::DelClientCallback(int ClientID, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientID].m_ShowIps = false;
 	pThis->m_aPrevStates[ClientID] = CClient::STATE_EMPTY;
 	pThis->m_aClients[ClientID].m_Snapshots.PurgeAll();
+	pThis->m_aClients[ClientID].m_Sixup = false;
 
 	pThis->GameServer()->OnClientEngineDrop(ClientID, pReason);
 	pThis->Antibot()->OnEngineClientDrop(ClientID, pReason);
@@ -1144,7 +1144,7 @@ void CServer::SendMapData(int ClientID, int Chunk)
 		Last = 1;
 	}
 
-	CMsgPacker Msg(NETMSG_MAP_DATA);
+	CMsgPacker Msg(NETMSG_MAP_DATA, true);
 	if(!m_aClients[ClientID].m_Sixup)
 	{
 		Msg.AddInt(Last);
