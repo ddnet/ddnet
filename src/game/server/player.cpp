@@ -853,6 +853,11 @@ void CPlayer::ProcessSqlResult(CSqlPlayerResult &Result)
 			);
 			m_Score = Result.m_Data.m_Info.m_Score;
 			m_HasFinishScore = Result.m_Data.m_Info.m_HasFinishScore;
+			// -9999 stands for no time and isn't displayed in scoreboard, so
+			// shift the time by a second if the player actually took 9999
+			// seconds to finish the map.
+			if(m_HasFinishScore && m_Score == -9999)
+				m_Score = -10000;
 			Server()->ExpireServerInfo();
 			int Birthday = Result.m_Data.m_Info.m_Birthday;
 			if(Birthday != 0)

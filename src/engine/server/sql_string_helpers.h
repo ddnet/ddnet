@@ -32,7 +32,7 @@ public:
 	const char* Str() const { return m_aString; }
 	const char* ClrStr() const { return m_aClearString; }
 
-	CSqlString& operator = (const char *pStr)
+	CSqlString& operator=(const char *pStr)
 	{
 		str_copy(m_aString, pStr, size);
 		str_copy(m_aClearString, pStr, size);
@@ -40,7 +40,7 @@ public:
 		return *this;
 	}
 
-	bool operator < (const CSqlString& other) const
+	bool operator<(const CSqlString& other) const
 	{
 		return strcmp(m_aString, other.m_aString) < 0;
 	}

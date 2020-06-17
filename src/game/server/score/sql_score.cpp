@@ -285,11 +285,6 @@ bool CSqlScore::LoadPlayerDataThread(CSqlServer* pSqlServer, const CSqlData<CSql
 			pData->m_pResult->m_Data.m_Info.m_Time = Time;
 			pData->m_pResult->m_Data.m_Info.m_Score = -Time;
 			pData->m_pResult->m_Data.m_Info.m_HasFinishScore = true;
-			// -9999 stands for no time and isn't displayed in scoreboard, so
-			// shift the time by a second if the player actually took 9999
-			// seconds to finish the map.
-			if(pData->m_pResult->m_Data.m_Info.m_Score == -9999)
-				pData->m_pResult->m_Data.m_Info.m_Score = -10000;
 
 			char aColumn[8];
 			if(g_Config.m_SvCheckpointSave)
@@ -1067,7 +1062,6 @@ bool CSqlScore::ShowTeamTop5Thread(CSqlServer* pSqlServer, const CSqlData<CSqlPl
 		// check sort method
 		char aBuf[512];
 
-		pSqlServer->executeSql("SET @pos := 0;");
 		str_format(aBuf, sizeof(aBuf),
 				"SELECT Name, Time, Rank, TeamSize "
 				"FROM (" // limit to 5
