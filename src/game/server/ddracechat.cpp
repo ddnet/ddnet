@@ -386,10 +386,9 @@ void CGameContext::ConTeamTop5(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	if (pResult->NumArguments() > 0)
-		pSelf->Score()->ShowTeamTop5(pResult, pResult->m_ClientID, pUserData,
-				pResult->GetInteger(0));
+		pSelf->Score()->ShowTeamTop5(pResult->m_ClientID, pResult->GetInteger(0));
 	else
-		pSelf->Score()->ShowTeamTop5(pResult, pResult->m_ClientID, pUserData);
+		pSelf->Score()->ShowTeamTop5(pResult->m_ClientID);
 
 #if defined(CONF_SQL)
 	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
@@ -417,10 +416,9 @@ void CGameContext::ConTop5(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	if (pResult->NumArguments() > 0)
-		pSelf->Score()->ShowTop5(pResult, pResult->m_ClientID, pUserData,
-				pResult->GetInteger(0));
+		pSelf->Score()->ShowTop5(pResult->m_ClientID, pResult->GetInteger(0));
 	else
-		pSelf->Score()->ShowTop5(pResult, pResult->m_ClientID, pUserData);
+		pSelf->Score()->ShowTop5(pResult->m_ClientID);
 
 #if defined(CONF_SQL)
 	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
@@ -520,13 +518,16 @@ void CGameContext::ConMap(IConsole::IResult *pResult, void *pUserData)
 	if (!pPlayer)
 		return;
 
+	if(pSelf->RateLimitPlayerVote(pResult->m_ClientID) || pSelf->RateLimitPlayerMapVote(pResult->m_ClientID))
+		return;
+
 #if defined(CONF_SQL)
 	if(g_Config.m_SvUseSQL)
 		if(pPlayer->m_LastSQLQuery + g_Config.m_SvSqlQueriesDelay * pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
 			return;
 #endif
 
-	pSelf->Score()->MapVote(&pSelf->m_pMapVoteResult, pResult->m_ClientID, pResult->GetString(0));
+	pSelf->Score()->MapVote(pResult->m_ClientID, pResult->GetString(0));
 
 #if defined(CONF_SQL)
 	if(g_Config.m_SvUseSQL)
@@ -695,19 +696,20 @@ void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
 		if(pPlayer->m_LastSQLQuery + g_Config.m_SvSqlQueriesDelay * pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
 			return;
 
-	int Team = ((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.m_Core.Team(pResult->m_ClientID);
+	const char* pCode = "";
+	if(pResult->NumArguments() > 0)
+		pCode = pResult->GetString(0);
 
-	const char* pCode = pResult->GetString(0);
 	char aCountry[5];
-	if(str_length(pCode) > 3 && pCode[0] >= 'A' && pCode[0] <= 'Z' && pCode[1] >= 'A'
+	if(str_length(pCode) >= 3 && pCode[0] >= 'A' && pCode[0] <= 'Z' && pCode[1] >= 'A'
 		&& pCode[1] <= 'Z' && pCode[2] >= 'A' && pCode[2] <= 'Z')
 	{
-		if(pCode[3] == ' ')
+		if(str_length(pCode) == 3 || pCode[3] == ' ')
 		{
 			str_copy(aCountry, pCode, 4);
 			pCode = str_skip_whitespaces_const(pCode + 4);
 		}
-		else if(str_length(pCode) > 4 && pCode[4] == ' ')
+		else if(str_length(pCode) == 4 || (str_length(pCode) > 4 && pCode[4] == ' '))
 		{
 			str_copy(aCountry, pCode, 5);
 			pCode = str_skip_whitespaces_const(pCode + 5);
@@ -724,7 +726,7 @@ void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
 
 	if(str_in_list(g_Config.m_SvSqlValidServerNames, ",", aCountry))
 	{
-		pSelf->Score()->SaveTeam(Team, pCode, pResult->m_ClientID, aCountry);
+		pSelf->Score()->SaveTeam(pResult->m_ClientID, pCode, aCountry);
 
 		if(g_Config.m_SvUseSQL)
 			pPlayer->m_LastSQLQuery = pSelf->Server()->Tick();
@@ -790,8 +792,7 @@ void CGameContext::ConTeamRank(IConsole::IResult *pResult, void *pUserData)
 
 	if (pResult->NumArguments() > 0)
 		if (!g_Config.m_SvHideScore)
-			pSelf->Score()->ShowTeamRank(pResult->m_ClientID, pResult->GetString(0),
-					true);
+			pSelf->Score()->ShowTeamRank(pResult->m_ClientID, pResult->GetString(0));
 		else
 			pSelf->Console()->Print(
 					IConsole::OUTPUT_LEVEL_STANDARD,
@@ -825,8 +826,7 @@ void CGameContext::ConRank(IConsole::IResult *pResult, void *pUserData)
 
 	if (pResult->NumArguments() > 0)
 		if (!g_Config.m_SvHideScore)
-			pSelf->Score()->ShowRank(pResult->m_ClientID, pResult->GetString(0),
-					true);
+			pSelf->Score()->ShowRank(pResult->m_ClientID, pResult->GetString(0));
 		else
 			pSelf->Console()->Print(
 					IConsole::OUTPUT_LEVEL_STANDARD,
@@ -1548,8 +1548,7 @@ void CGameContext::ConPoints(IConsole::IResult *pResult, void *pUserData)
 
 	if (pResult->NumArguments() > 0)
 		if (!g_Config.m_SvHideScore)
-			pSelf->Score()->ShowPoints(pResult->m_ClientID, pResult->GetString(0),
-					true);
+			pSelf->Score()->ShowPoints(pResult->m_ClientID, pResult->GetString(0));
 		else
 			pSelf->Console()->Print(
 					IConsole::OUTPUT_LEVEL_STANDARD,
@@ -1583,10 +1582,9 @@ void CGameContext::ConTopPoints(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	if (pResult->NumArguments() > 0)
-		pSelf->Score()->ShowTopPoints(pResult, pResult->m_ClientID, pUserData,
-				pResult->GetInteger(0));
+		pSelf->Score()->ShowTopPoints(pResult->m_ClientID, pResult->GetInteger(0));
 	else
-		pSelf->Score()->ShowTopPoints(pResult, pResult->m_ClientID, pUserData);
+		pSelf->Score()->ShowTopPoints(pResult->m_ClientID);
 
 	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
 		pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery = pSelf->Server()->Tick();

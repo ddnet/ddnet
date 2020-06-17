@@ -1,8 +1,9 @@
 #ifndef GAME_SERVER_SAVE_H
 #define GAME_SERVER_SAVE_H
 
-#include "./entities/character.h"
-#include <game/server/gamecontroller.h>
+#include "entities/character.h"
+class IGameController;
+class CGameContext;
 
 class CSaveTee
 {
@@ -12,11 +13,14 @@ public:
 	void save(CCharacter* pchr);
 	void load(CCharacter* pchr, int Team);
 	char* GetString();
-	int LoadString(char* String);
-	vec2 GetPos() { return m_Pos; }
-	char* GetName() { return m_aName; }
+	int LoadString(const char* String);
+	vec2 GetPos() const { return m_Pos; }
+	const char* GetName() const { return m_aName; }
+	int GetClientID() const { return m_ClientID; }
+	void SetClientID(int ClientID) { m_ClientID = ClientID; };
 
 private:
+	int m_ClientID;
 
 	char m_aString [2048];
 	char m_aName [16];
@@ -94,16 +98,19 @@ public:
 	CSaveTeam(IGameController* Controller);
 	~CSaveTeam();
 	char* GetString();
-	int GetMembersCount() { return m_MembersCount; }
+	int GetMembersCount() const { return m_MembersCount; }
+	// MatchPlayers has to be called afterwards
 	int LoadString(const char* String);
+	// returns true if a team can load, otherwise writes a nice error Message in pMessage
+	bool MatchPlayers(const char (*paNames)[MAX_NAME_LENGTH], const int *pClientID, int NumPlayer, char *pMessage, int MessageLen);
 	int save(int Team);
-	int load(int Team);
+	void load(int Team);
 	CSaveTee* m_pSavedTees;
 
+	// returns true if an error occured
 	static bool HandleSaveError(int Result, int ClientID, CGameContext *pGameContext);
 private:
-	int MatchPlayer(char name[16]);
-	CCharacter* MatchCharacter(char name[16], int SaveID);
+	CCharacter* MatchCharacter(int ClientID, int SaveID);
 
 	IGameController* m_pController;
 

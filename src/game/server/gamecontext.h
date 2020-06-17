@@ -57,8 +57,6 @@ enum
 class IConsole;
 class IEngine;
 class IStorage;
-class CRandomMapResult;
-class CMapVoteResult;
 struct CAntibotData;
 
 class CGameContext : public IGameServer
@@ -80,9 +78,6 @@ class CGameContext : public IGameServer
 	CUuid m_GameUuid;
 	CMapBugs m_MapBugs;
 	CPrng m_Prng;
-
-	std::shared_ptr<CRandomMapResult> m_pRandomMapResult;
-	std::shared_ptr<CMapVoteResult> m_pMapVoteResult;
 
 	static void CommandCallback(int ClientID, int FlagMask, const char *pCmd, IConsole::IResult *pResult, void *pUser);
 	static void TeeHistorianWrite(const void *pData, int DataSize, void *pUser);
@@ -263,6 +258,10 @@ public:
 	// Returns true if someone is actively moderating.
 	bool PlayerModerating();
 	void ForceVote(int EnforcerID, bool Success);
+
+	// Checks if player can vote and notify them about the reason
+	bool RateLimitPlayerVote(int ClientID);
+	bool RateLimitPlayerMapVote(int ClientID);
 
 private:
 

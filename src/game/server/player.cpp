@@ -12,6 +12,10 @@
 #include "gamemodes/DDRace.h"
 #include <time.h>
 
+#if defined(CONF_SQL)
+#include "score/sql_score.h"
+#endif
+
 MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
 
 IServer *CPlayer::Server() const { return m_pGameServer->Server(); }
@@ -41,7 +45,6 @@ void CPlayer::Reset()
 	m_JoinTick = Server()->Tick();
 	delete m_pCharacter;
 	m_pCharacter = 0;
-	m_KillMe = 0;
 	m_SpectatorID = SPEC_FREEVIEW;
 	m_LastActionTick = Server()->Tick();
 	m_TeamChangeTick = Server()->Tick();
@@ -119,6 +122,8 @@ void CPlayer::Reset()
 	m_Last_Team = 0;
 #if defined(CONF_SQL)
 	m_LastSQLQuery = 0;
+	m_SqlQueryResult = nullptr;
+	m_SqlFinishResult = nullptr;
 #endif
 
 	int64 Now = Server()->Tick();
@@ -127,7 +132,7 @@ void CPlayer::Reset()
 	// non-empty, allow them to vote immediately. This allows players to
 	// vote after map changes or when they join an empty server.
 	//
-	// Otherwise, block voting in the begnning after joining.
+	// Otherwise, block voting in the beginning after joining.
 	if(Now > GameServer()->m_NonEmptySince + 10 * TickSpeed)
 		m_FirstVoteTick = Now + g_Config.m_SvJoinVoteDelay * TickSpeed;
 	else
@@ -143,15 +148,34 @@ void CPlayer::Tick()
 #ifdef CONF_DEBUG
 	if(!g_Config.m_DbgDummies || m_ClientID < MAX_CLIENTS-g_Config.m_DbgDummies)
 #endif
+#if defined(CONF_SQL)
+	if(m_SqlQueryResult != nullptr && m_SqlQueryResult.use_count() == 1)
+	{
+		ProcessSqlResult(*m_SqlQueryResult);
+		m_SqlQueryResult = nullptr;
+	}
+	if(m_SqlFinishResult != nullptr && m_SqlFinishResult.use_count() == 1)
+	{
+		ProcessSqlResult(*m_SqlFinishResult);
+		m_SqlFinishResult = nullptr;
+	}
+	if(m_SqlRandomMapResult!= nullptr && m_SqlRandomMapResult.use_count() == 1)
+	{
+		if(m_SqlRandomMapResult->m_Done)
+		{
+			if(m_SqlRandomMapResult->m_aMessage[0] != '\0')
+				GameServer()->SendChatTarget(m_ClientID, m_SqlRandomMapResult->m_aMessage);
+			if(m_SqlRandomMapResult->m_Map[0] != '\0')
+				str_copy(g_Config.m_SvMap, m_SqlRandomMapResult->m_Map, sizeof(g_Config.m_SvMap));
+			else
+				GameServer()->m_LastMapVote = 0;
+		}
+		m_SqlRandomMapResult = nullptr;
+	}
+#endif
+
 	if(!Server()->ClientIngame(m_ClientID))
 		return;
-
-	if(m_KillMe != 0)
-	{
-		KillCharacter(m_KillMe);
-		m_KillMe = 0;
-		return;
-	}
 
 	if (m_ChatScore > 0)
 		m_ChatScore--;
@@ -233,7 +257,7 @@ void CPlayer::Tick()
 	int CurrentIndex = GameServer()->Collision()->GetMapIndex(m_ViewPos);
 	m_TuneZone = GameServer()->Collision()->IsTune(CurrentIndex);
 
-	if (m_TuneZone != m_TuneZoneOld) // don't send tunigs all the time
+	if (m_TuneZone != m_TuneZoneOld) // don't send tunings all the time
 	{
 		GameServer()->SendTuningParams(m_ClientID, m_TuneZone);
 	}
@@ -258,11 +282,11 @@ void CPlayer::PostTick()
 
 void CPlayer::PostPostTick()
 {
-	#ifdef CONF_DEBUG
-		if(!g_Config.m_DbgDummies || m_ClientID < MAX_CLIENTS-g_Config.m_DbgDummies)
-	#endif
-		if(!Server()->ClientIngame(m_ClientID))
-			return;
+#ifdef CONF_DEBUG
+	if(!g_Config.m_DbgDummies || m_ClientID < MAX_CLIENTS-g_Config.m_DbgDummies)
+#endif
+	if(!Server()->ClientIngame(m_ClientID))
+		return;
 
 	if(!GameServer()->m_World.m_Paused && !m_pCharacter && m_Spawning && m_WeakHookSpawn)
 		TryRespawn();
@@ -489,11 +513,6 @@ CCharacter *CPlayer::GetCharacter()
 	if(m_pCharacter && m_pCharacter->IsAlive())
 		return m_pCharacter;
 	return 0;
-}
-
-void CPlayer::ThreadKillCharacter(int Weapon)
-{
-	m_KillMe = Weapon;
 }
 
 void CPlayer::KillCharacter(int Weapon)
@@ -782,3 +801,79 @@ void CPlayer::SpectatePlayerName(const char *pName)
 		}
 	}
 }
+
+#if defined(CONF_SQL)
+void CPlayer::ProcessSqlResult(CSqlPlayerResult &Result)
+{
+	if(Result.m_Done) // SQL request was successful
+	{
+		int NumMessages = (int)(sizeof(Result.m_aaMessages)/sizeof(Result.m_aaMessages[0]));
+		switch(Result.m_MessageKind)
+		{
+		case CSqlPlayerResult::DIRECT:
+			for(int i = 0; i < NumMessages; i++)
+			{
+				if(Result.m_aaMessages[i][0] == 0)
+					break;
+				GameServer()->SendChatTarget(m_ClientID, Result.m_aaMessages[i]);
+			}
+			break;
+		case CSqlPlayerResult::ALL:
+			for(int i = 0; i < NumMessages; i++)
+			{
+				if(Result.m_aaMessages[i][0] == 0)
+					break;
+				GameServer()->SendChat(-1, CGameContext::CHAT_ALL, Result.m_aaMessages[i]);
+			}
+			break;
+		case CSqlPlayerResult::BROADCAST:
+			if(Result.m_Data.m_Broadcast[0] != 0)
+				GameServer()->SendBroadcast(Result.m_Data.m_Broadcast, -1);
+			break;
+		case CSqlPlayerResult::MAP_VOTE:
+			GameServer()->m_VoteKick = false;
+			GameServer()->m_VoteSpec = false;
+			GameServer()->m_LastMapVote = time_get();
+
+			char aCmd[256];
+			str_format(aCmd, sizeof(aCmd),
+					"sv_reset_file types/%s/flexreset.cfg; change_map \"%s\"",
+					Result.m_Data.m_MapVote.m_Server, Result.m_Data.m_MapVote.m_Map);
+
+			char aChatmsg[512];
+			str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s' (%s)",
+					Server()->ClientName(m_ClientID), Result.m_Data.m_MapVote.m_Map, "/map");
+
+			GameServer()->CallVote(m_ClientID, Result.m_Data.m_MapVote.m_Map, aCmd, "/map", aChatmsg);
+			break;
+		case CSqlPlayerResult::PLAYER_INFO:
+			GameServer()->Score()->PlayerData(m_ClientID)->Set(
+					Result.m_Data.m_Info.m_Time,
+					Result.m_Data.m_Info.m_CpTime
+			);
+			m_Score = Result.m_Data.m_Info.m_Score;
+			m_HasFinishScore = Result.m_Data.m_Info.m_HasFinishScore;
+			// -9999 stands for no time and isn't displayed in scoreboard, so
+			// shift the time by a second if the player actually took 9999
+			// seconds to finish the map.
+			if(m_HasFinishScore && m_Score == -9999)
+				m_Score = -10000;
+			Server()->ExpireServerInfo();
+			int Birthday = Result.m_Data.m_Info.m_Birthday;
+			if(Birthday != 0)
+			{
+				char aBuf[512];
+				str_format(aBuf, sizeof(aBuf),
+						"Happy DDNet birthday to %s for finishing their first map %d year%s ago!",
+						Server()->ClientName(m_ClientID), Birthday, Birthday > 1 ? "s" : "");
+				GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, m_ClientID);
+				str_format(aBuf, sizeof(aBuf),
+						"Happy DDNet birthday, %s!\nYou have finished your first map exactly %d year%s ago!",
+						Server()->ClientName(m_ClientID), Birthday, Birthday > 1 ? "s" : "");
+				GameServer()->SendBroadcast(aBuf, m_ClientID);
+			}
+			break;
+		}
+	}
+}
+#endif

@@ -167,11 +167,12 @@ void CSqlServer::Disconnect()
 	m_SqlLock.release();
 }
 
-void CSqlServer::CreateTables()
+bool CSqlServer::CreateTables()
 {
 	if (!Connect())
-		return;
+		return false;
 
+	bool Success = false;
 	try
 	{
 		char aBuf[1024];
@@ -186,13 +187,14 @@ void CSqlServer::CreateTables()
 		str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_maps (Map VARCHAR(128) BINARY NOT NULL, Server VARCHAR(32) BINARY NOT NULL, Mapper VARCHAR(128) BINARY NOT NULL, Points INT DEFAULT 0, Stars INT DEFAULT 0, Timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, UNIQUE KEY Map (Map)) CHARACTER SET utf8mb4;", m_aPrefix);
 		executeSql(aBuf);
 
-		str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_saves (Savegame TEXT CHARACTER SET utf8mb4 BINARY NOT NULL, Map VARCHAR(128) BINARY NOT NULL, Code VARCHAR(128) BINARY NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, Server CHAR(4), DDNet7 BOOL DEFAULT FALSE, UNIQUE KEY (Map, Code)) CHARACTER SET utf8mb4;", m_aPrefix);
+		str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_saves (Savegame TEXT CHARACTER SET utf8mb4 BINARY NOT NULL, Map VARCHAR(128) BINARY NOT NULL, Code VARCHAR(128) BINARY NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, Server CHAR(4), DDNet7 BOOL DEFAULT FALSE, SaveID VARCHAR(36), UNIQUE KEY (Map, Code)) CHARACTER SET utf8mb4;", m_aPrefix);
 		executeSql(aBuf);
 
 		str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_points (Name VARCHAR(%d) BINARY NOT NULL, Points INT DEFAULT 0, UNIQUE KEY Name (Name)) CHARACTER SET utf8mb4;", m_aPrefix, MAX_NAME_LENGTH);
 		executeSql(aBuf);
 
 		dbg_msg("sql", "Tables were created successfully");
+		Success = true;
 	}
 	catch (sql::SQLException &e)
 	{
@@ -200,6 +202,7 @@ void CSqlServer::CreateTables()
 	}
 
 	Disconnect();
+	return Success;
 }
 
 void CSqlServer::executeSql(const char *pCommand)

@@ -58,7 +58,7 @@ void CFileScore::MapInfo(int ClientID, const char* MapName)
 	// TODO: implement
 }
 
-void CFileScore::MapVote(std::shared_ptr<CMapVoteResult> *ppResult, int ClientID, const char* MapName)
+void CFileScore::MapVote(int ClientID, const char* MapName)
 {
 	// TODO: implement
 }
@@ -205,12 +205,7 @@ void CFileScore::UpdatePlayer(int ID, float Score,
 	Save();
 }
 
-void CFileScore::CheckBirthday(int ClientID)
-{
-	// TODO: implement
-}
-
-void CFileScore::LoadScore(int ClientID)
+void CFileScore::LoadPlayerData(int ClientID)
 {
 	CPlayerScore *pPlayer = SearchScore(ClientID, 0);
 	if (pPlayer)
@@ -241,37 +236,32 @@ void CFileScore::SaveScore(int ClientID, float Time, const char *pTimestamp,
 		UpdatePlayer(ClientID, Time, CpTime);
 }
 
-void CFileScore::ShowTop5(IConsole::IResult *pResult, int ClientID,
-		void *pUserData, int Debut)
+void CFileScore::ShowTop5(int ClientID, int Offset)
 {
-	CGameContext *pSelf = (CGameContext *) pUserData;
 	char aBuf[512];
-	Debut = maximum(1, Debut < 0 ? m_Top.size() + Debut - 3 : Debut);
-	pSelf->SendChatTarget(ClientID, "----------- Top 5 -----------");
+	Offset = maximum(1, Offset < 0 ? m_Top.size() + Offset - 3 : Offset);
+	GameServer()->SendChatTarget(ClientID, "----------- Top 5 -----------");
 	for (int i = 0; i < 5; i++)
 	{
-		if (i + Debut > m_Top.size())
+		if (i + Offset > m_Top.size())
 			break;
-		CPlayerScore *r = &m_Top[i + Debut - 1];
+		CPlayerScore *r = &m_Top[i + Offset - 1];
 		str_format(aBuf, sizeof(aBuf),
-				"%d. %s Time: %d minute(s) %5.2f second(s)", i + Debut,
+				"%d. %s Time: %d minute(s) %5.2f second(s)", i + Offset,
 				r->m_aName, (int)r->m_Score / 60,
 				r->m_Score - ((int)r->m_Score / 60 * 60));
-		pSelf->SendChatTarget(ClientID, aBuf);
+		GameServer()->SendChatTarget(ClientID, aBuf);
 	}
-	pSelf->SendChatTarget(ClientID, "------------------------------");
+	GameServer()->SendChatTarget(ClientID, "------------------------------");
 }
 
-void CFileScore::ShowRank(int ClientID, const char* pName, bool Search)
+void CFileScore::ShowRank(int ClientID, const char* pName)
 {
 	CPlayerScore *pScore;
 	int Pos = -2;
 	char aBuf[512];
 
-	if (!Search)
-		pScore = SearchScore(ClientID, &Pos);
-	else
-		pScore = SearchName(pName, &Pos, 1);
+	pScore = SearchName(pName, &Pos, 1);
 
 	if (pScore && Pos > -1)
 	{
@@ -285,66 +275,63 @@ void CFileScore::ShowRank(int ClientID, const char* pName, bool Search)
 					"%d. %s Time: %d minute(s) %5.2f second(s), requested by (%s)", Pos,
 					pScore->m_aName, (int)Time / 60,
 					Time - ((int)Time / 60 * 60), Server()->ClientName(ClientID));
-		if (!Search)
-			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, ClientID);
-		else
+		if (g_Config.m_SvHideScore)
 			GameServer()->SendChatTarget(ClientID, aBuf);
+		else
+			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, ClientID);
 		return;
 	}
 	else if (Pos == -1)
 		str_format(aBuf, sizeof(aBuf), "Several players were found.");
 	else
-		str_format(aBuf, sizeof(aBuf), "%s is not ranked",
-				Search ? pName : Server()->ClientName(ClientID));
+		str_format(aBuf, sizeof(aBuf), "%s is not ranked", pName);
 
 	GameServer()->SendChatTarget(ClientID, aBuf);
 }
 
-void CFileScore::ShowTeamTop5(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut)
+void CFileScore::ShowTeamTop5(int ClientID, int Offset)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "Team ranks not supported in file based servers");
 	GameServer()->SendChatTarget(ClientID, aBuf);
 }
 
-void CFileScore::ShowTeamRank(int ClientID, const char* pName, bool Search)
+void CFileScore::ShowTeamRank(int ClientID, const char* pName)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "Team ranks not supported in file based servers");
 	GameServer()->SendChatTarget(ClientID, aBuf);
 }
 
-void CFileScore::ShowTopPoints(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut)
+void CFileScore::ShowTopPoints(int ClientID, int Offset)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "Team ranks not supported in file based servers");
 	GameServer()->SendChatTarget(ClientID, aBuf);
 }
 
-void CFileScore::ShowPoints(int ClientID, const char* pName, bool Search)
+void CFileScore::ShowPoints(int ClientID, const char* pName)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "Points not supported in file based servers");
 	GameServer()->SendChatTarget(ClientID, aBuf);
 }
 
-void CFileScore::RandomMap(std::shared_ptr<CRandomMapResult> *ppResult, int ClientID, int stars)
+void CFileScore::RandomMap(int ClientID, int Stars)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "Random map not supported in file based servers");
 	GameServer()->SendChatTarget(ClientID, aBuf);
-	*ppResult = NULL;
 }
 
-void CFileScore::RandomUnfinishedMap(std::shared_ptr<CRandomMapResult> *ppResult, int ClientID, int stars)
+void CFileScore::RandomUnfinishedMap(int ClientID, int Stars)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "Random unfinished map not supported in file based servers");
 	GameServer()->SendChatTarget(ClientID, aBuf);
-	*ppResult = NULL;
 }
 
-void CFileScore::SaveTeam(int Team, const char* Code, int ClientID, const char* Server)
+void CFileScore::SaveTeam(int ClientID, const char* Code, const char* Server)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "Save-function not supported in file based servers");

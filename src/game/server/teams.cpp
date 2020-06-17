@@ -2,6 +2,9 @@
 #include "teams.h"
 #include "score.h"
 #include <engine/shared/config.h>
+#if defined(CONF_SQL)
+#include "score/sql_score.h"
+#endif
 
 CGameTeams::CGameTeams(CGameContext *pGameContext) :
 		m_pGameContext(pGameContext)
@@ -19,9 +22,11 @@ void CGameTeams::Reset()
 		m_MembersCount[i] = 0;
 		m_LastChat[i] = 0;
 		m_TeamLocked[i] = false;
-		m_IsSaving[i] = false;
 		m_Invited[i] = 0;
 		m_Practice[i] = false;
+#if defined(CONF_SQL)
+		m_pSaveTeamResult[i] = nullptr;
+#endif
 	}
 }
 
@@ -250,6 +255,11 @@ bool CGameTeams::SetCharacterTeam(int ClientID, int Team)
 	if (m_Practice[m_Core.Team(ClientID)])
 		return false;
 
+	//you can not join a team which is currently in the process of saving,
+	//because the save-process can fail and then the team is reset into the game
+	if((Team != TEAM_SUPER && GetSaving(Team))
+			|| (m_Core.Team(ClientID) != TEAM_SUPER && GetSaving(m_Core.Team(ClientID))))
+		return false;
 	SetForceCharacterTeam(ClientID, Team);
 
 	//GameServer()->CreatePlayerSpawn(Character(id)->m_Core.m_Pos, TeamMask());
@@ -327,6 +337,7 @@ void CGameTeams::ForceLeaveTeam(int ClientID)
 			SetTeamLock(m_Core.Team(ClientID), false);
 			ResetInvited(m_Core.Team(ClientID));
 			m_Practice[m_Core.Team(ClientID)] = false;
+			// do not reset SaveTeamResult, because it should be logged into teehistorian even if the team leaves
 		}
 	}
 
@@ -670,9 +681,55 @@ void CGameTeams::OnFinish(CPlayer* Player, float Time, const char *pTimestamp)
 	}
 }
 
+#if defined(CONF_SQL)
+void CGameTeams::ProcessSaveTeam()
+{
+	for(int Team = 0; Team < MAX_CLIENTS; Team++)
+	{
+		if(m_pSaveTeamResult[Team] == nullptr || m_pSaveTeamResult[Team].use_count() != 1)
+			continue;
+		if(m_pSaveTeamResult[Team]->m_aBroadcast[0] != '\0')
+			GameServer()->SendBroadcast(m_pSaveTeamResult[Team]->m_aBroadcast, -1);
+		if(m_pSaveTeamResult[Team]->m_aMessage[0] != '\0')
+			GameServer()->SendChatTeam(Team, m_pSaveTeamResult[Team]->m_aMessage);
+		// TODO: log load/save success/fail in teehistorian
+		switch(m_pSaveTeamResult[Team]->m_Status)
+		{
+		case CSqlSaveResult::SAVE_SUCCESS:
+		{
+			ResetSavedTeam(m_pSaveTeamResult[Team]->m_RequestingPlayer, Team);
+			char aSaveID[UUID_MAXSTRSIZE];
+			FormatUuid(m_pSaveTeamResult[Team]->m_SaveID, aSaveID, UUID_MAXSTRSIZE);
+			dbg_msg("save", "Save successful: %s", aSaveID);
+			break;
+		}
+		case CSqlSaveResult::SAVE_FAILED:
+			if(m_MembersCount[Team] > 0)
+				m_pSaveTeamResult[Team]->m_SavedTeam.load(Team);
+			break;
+		case CSqlSaveResult::LOAD_SUCCESS:
+		{
+			if(m_MembersCount[Team] > 0)
+				m_pSaveTeamResult[Team]->m_SavedTeam.load(Team);
+			char aSaveID[UUID_MAXSTRSIZE];
+			FormatUuid(m_pSaveTeamResult[Team]->m_SaveID, aSaveID, UUID_MAXSTRSIZE);
+			dbg_msg("save", "Load successful: %s", aSaveID);
+			break;
+		}
+		case CSqlSaveResult::LOAD_FAILED:
+			break;
+		}
+		m_pSaveTeamResult[Team] = nullptr;
+	}
+}
+#endif
+
 void CGameTeams::OnCharacterSpawn(int ClientID)
 {
 	m_Core.SetSolo(ClientID, false);
+
+	if(GetSaving(m_Core.Team(ClientID)))
+		return;
 
 	if (m_Core.Team(ClientID) >= TEAM_SUPER || !m_TeamLocked[m_Core.Team(ClientID)])
 		// Important to only set a new team here, don't remove from an existing
@@ -686,6 +743,8 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 	m_Core.SetSolo(ClientID, false);
 
 	int Team = m_Core.Team(ClientID);
+	if(GetSaving(Team))
+		return;
 	bool Locked = TeamLocked(Team) && Weapon != WEAPON_GAME;
 
 	if(!Locked)
@@ -746,30 +805,27 @@ void CGameTeams::SetClientInvited(int Team, int ClientID, bool Invited)
 	}
 }
 
-void CGameTeams::KillSavedTeam(int Team)
+#if defined(CONF_SQL)
+void CGameTeams::KillSavedTeam(int ClientID, int Team)
 {
-	// Set so that no finish is accidentally given to some of the players
-	ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
+		{
+			GameServer()->m_apPlayers[i]->m_VotedForPractice = false;
+			GameServer()->m_apPlayers[i]->KillCharacter(WEAPON_SELF);
+		}
+	}
+}
 
+void CGameTeams::ResetSavedTeam(int ClientID, int Team)
+{
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
 		{
-			// Set so that no finish is accidentally given to some of the players
-			GameServer()->m_apPlayers[i]->GetCharacter()->m_DDRaceState = DDRACE_NONE;
-			m_TeeFinished[i] = false;
+			SetForceCharacterTeam(i, 0);
 		}
 	}
-
-	for (int i = 0; i < MAX_CLIENTS; i++)
-		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
-			GameServer()->m_apPlayers[i]->ThreadKillCharacter(-2);
-
-	ChangeTeamState(Team, CGameTeams::TEAMSTATE_EMPTY);
-
-	// unlock team when last player leaves
-	SetTeamLock(Team, false);
-	ResetInvited(Team);
-
-	m_Practice[Team] = false;
 }
+#endif
