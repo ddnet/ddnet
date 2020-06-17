@@ -65,7 +65,7 @@ int main(int argc, char **argv) // ignore_convention
 				continue;
 
 			int64 endTime = time_get();
-			printf("%g ms\n", (double)(endTime - startTime) / 1000);
+			printf("%g ms\n", (double)(endTime - startTime) / time_freq() * 1000);
 		}
 	}
 }
