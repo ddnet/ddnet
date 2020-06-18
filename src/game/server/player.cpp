@@ -124,6 +124,7 @@ void CPlayer::Reset()
 	m_LastSQLQuery = 0;
 	m_SqlQueryResult = nullptr;
 	m_SqlFinishResult = nullptr;
+	m_SqlRandomMapResult = nullptr;
 #endif
 
 	int64 Now = Server()->Tick();
@@ -159,7 +160,7 @@ void CPlayer::Tick()
 		ProcessSqlResult(*m_SqlFinishResult);
 		m_SqlFinishResult = nullptr;
 	}
-	if(m_SqlRandomMapResult!= nullptr && m_SqlRandomMapResult.use_count() == 1)
+	if(m_SqlRandomMapResult != nullptr && m_SqlRandomMapResult.use_count() == 1)
 	{
 		if(m_SqlRandomMapResult->m_Done)
 		{
