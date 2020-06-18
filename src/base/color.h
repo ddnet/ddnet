@@ -105,7 +105,9 @@ public:
 	using color4_base::color4_base;
 	ColorHSLA() {};
 
-	ColorHSLA UnclampLighting(float Darkest)
+	constexpr static const float DARKEST_LGT = 0.5f;
+
+	ColorHSLA UnclampLighting(float Darkest = DARKEST_LGT)
 	{
 		ColorHSLA col = *this;
 		col.l = Darkest + col.l * (1.0f - Darkest);
@@ -123,20 +125,6 @@ public:
 		col.l = (l - Darkest)/(1 - Darkest);
 		col.l = clamp(col.l, 0.0f, 1.0f);
 		return col.Pack(Alpha);
-	}
-
-	unsigned Pack7()
-	{
-		if(m_Lit)
-		{
-			float Darkest = 61.0f/255.0f;
-			ColorHSLA Dark = *this;
-			Dark.l = (l - Darkest)/(1 - Darkest);
-			Dark.m_Lit = false;
-			return Dark.Pack7();
-		}
-		else
-			return color4_base::Pack(false);
 	}
 };
 

@@ -48,7 +48,7 @@ ColorHSLA CConsole::CResult::GetColor(unsigned Index, bool Light)
 	{
 		hsl = ColorHSLA(str_toulong_base(pStr, 10), true);
 		if(Light)
-			hsl = hsl.UnclampLighting(0.5f);
+			hsl = hsl.UnclampLighting();
 	}
 	else if(*pStr == '$') // Hex RGB
 	{
@@ -780,7 +780,7 @@ static void ColVariableCommand(IConsole::IResult *pResult, void *pUserData)
 
 		ColorHSLA hsl(*(pData->m_pVariable), true);
 		if(pData->m_Light)
-			hsl = hsl.UnclampLighting(0.5f);
+			hsl = hsl.UnclampLighting();
 		str_format(aBuf, sizeof(aBuf), "H: %d°, S: %d%%, L: %d%%", round_truncate(hsl.h * 360), round_truncate(hsl.s * 100), round_truncate(hsl.l * 100));
 		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 
