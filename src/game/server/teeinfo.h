@@ -4,15 +4,15 @@
 class CTeeInfo
 {
 public:
-    char m_SkinName[64];
-    int m_UseCustomColor;
-    int m_ColorBody;
-    int m_ColorFeet;
+    char m_SkinName[64] = "";
+    int m_UseCustomColor = 0;
+    int m_ColorBody = 0;
+    int m_ColorFeet = 0;
 
     // 0.7
-    char m_apSkinPartNames[6][24];
-    bool m_aUseCustomColors[6];
-    int m_aSkinPartColors[6];
+    char m_apSkinPartNames[6][24] = {"", "", "", "", "", ""};
+    bool m_aUseCustomColors[6] = {false, false, false, false, false, false};
+    int m_aSkinPartColors[6] = {0, 0, 0, 0, 0, 0};
 
     CTeeInfo() = default;
 
