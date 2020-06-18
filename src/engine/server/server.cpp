@@ -2063,7 +2063,7 @@ int CServer::Run()
 	GameServer()->OnInit();
 	if(ErrorShutdown())
 	{
-		return 1;
+		m_RunServer = false;
 	}
 	str_format(aBuf, sizeof(aBuf), "version %s", GameServer()->NetVersion());
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
@@ -2281,6 +2281,7 @@ int CServer::Run()
 	const char *pDisconnectReason = "Server shutdown";
 	if(ErrorShutdown())
 	{
+		dbg_msg("server", "shutdown from game server (%s)", m_aErrorShutdownReason);
 		pDisconnectReason = m_aErrorShutdownReason;
 	}
 	// disconnect all clients on shutdown
