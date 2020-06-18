@@ -612,17 +612,14 @@ bool CSqlScore::SaveScoreThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlaye
 		int NumFinished = pSqlServer->GetResults()->getInt("NumFinished");
 		if(NumFinished == 0)
 		{
-			str_format(aBuf, sizeof(aBuf), "SELECT Points FROM %s_maps WHERE Map ='%s'", pSqlServer->GetPrefix(), pData->m_Map.ClrStr());
+			str_format(aBuf, sizeof(aBuf), "SELECT Points FROM %s_maps WHERE Map='%s'", pSqlServer->GetPrefix(), pData->m_Map.ClrStr());
 			pSqlServer->executeSqlQuery(aBuf);
 
 			if(pSqlServer->GetResults()->rowsCount() == 1)
 			{
 				pSqlServer->GetResults()->next();
 				int Points = pSqlServer->GetResults()->getInt("Points");
-				if(Points == 1)
-					str_format(paMessages[0], sizeof(paMessages[0]), "You earned %d point for finishing this map!", Points);
-				else
-					str_format(paMessages[0], sizeof(paMessages[0]), "You earned %d points for finishing this map!", Points);
+				str_format(paMessages[0], sizeof(paMessages[0]), "You earned %d point%s for finishing this map!", Points, Points == 1 ? "" : "s");
 
 				str_format(aBuf, sizeof(aBuf),
 						"INSERT INTO %s_points(Name, Points) "
