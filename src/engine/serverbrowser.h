@@ -3,6 +3,7 @@
 #ifndef ENGINE_SERVERBROWSER_H
 #define ENGINE_SERVERBROWSER_H
 
+#include <engine/map.h>
 #include <engine/shared/protocol.h>
 
 #include "kernel.h"
@@ -53,7 +54,7 @@ public:
 	int m_HasRank;
 	char m_aGameType[16];
 	char m_aName[64];
-	char m_aMap[32];
+	char m_aMap[MAX_MAP_LENGTH];
 	int m_MapCrc;
 	int m_MapSize;
 	char m_aVersion[32];

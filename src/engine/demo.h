@@ -4,6 +4,7 @@
 #define ENGINE_DEMO_H
 
 #include <base/hash.h>
+#include <engine/map.h>
 #include <engine/shared/uuid_manager.h>
 #include "kernel.h"
 
@@ -29,7 +30,7 @@ struct CDemoHeader
 	unsigned char m_aMarker[7];
 	unsigned char m_Version;
 	char m_aNetversion[64];
-	char m_aMapName[64];
+	char m_aMapName[MAX_MAP_LENGTH];
 	unsigned char m_aMapSize[4];
 	unsigned char m_aMapCrc[4];
 	char m_aType[8];
@@ -45,7 +46,7 @@ struct CTimelineMarkers
 
 struct CMapInfo
 {
-	char m_aName[128];
+	char m_aName[MAX_MAP_LENGTH];
 	SHA256_DIGEST m_Sha256;
 	int m_Crc;
 	int m_Size;

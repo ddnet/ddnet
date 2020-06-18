@@ -4,6 +4,9 @@
 #ifndef GAME_SERVER_SCORE_SQL_H
 #define GAME_SERVER_SCORE_SQL_H
 
+#include <string>
+
+#include <engine/map.h>
 #include <engine/server/sql_string_helpers.h>
 #include <game/prng.h>
 #include <game/voting.h>
@@ -39,7 +42,7 @@ struct CSqlPlayerResult
 		{
 			char m_Reason[VOTE_REASON_LENGTH];
 			char m_Server[32+1];
-			char m_Map[128+1];
+			char m_Map[MAX_MAP_LENGTH+1];
 		} m_MapVote;
 	} m_Data; // PLAYER_INFO
 
@@ -55,7 +58,7 @@ struct CSqlRandomMapResult
 		m_Map[0] = '\0';
 		m_aMessage[0] = '\0';
 	}
-	char m_Map[128];
+	char m_Map[MAX_MAP_LENGTH];
 	char m_aMessage[512];
 };
 
@@ -108,16 +111,16 @@ struct CSqlInitData : CSqlData<CSqlInitResult>
 {
 	using CSqlData<CSqlInitResult>::CSqlData;
 	// current map
-	sqlstr::CSqlString<128> m_Map;
+	sqlstr::CSqlString<MAX_MAP_LENGTH> m_Map;
 };
 
 struct CSqlPlayerRequest : CSqlData<CSqlPlayerResult>
 {
 	using CSqlData<CSqlPlayerResult>::CSqlData;
 	// object being requested, either map (128 bytes) or player (16 bytes)
-	sqlstr::CSqlString<128> m_Name;
+	sqlstr::CSqlString<MAX_MAP_LENGTH> m_Name;
 	// current map
-	sqlstr::CSqlString<128> m_Map;
+	sqlstr::CSqlString<MAX_MAP_LENGTH> m_Map;
 	sqlstr::CSqlString<MAX_NAME_LENGTH> m_RequestingPlayer;
 	// relevant for /top5 kind of requests
 	int m_Offset;
@@ -127,7 +130,7 @@ struct CSqlRandomMapRequest : CSqlData<CSqlRandomMapResult>
 {
 	using CSqlData<CSqlRandomMapResult>::CSqlData;
 	sqlstr::CSqlString<32> m_ServerType;
-	sqlstr::CSqlString<32> m_CurrentMap;
+	sqlstr::CSqlString<MAX_MAP_LENGTH> m_CurrentMap;
 	sqlstr::CSqlString<MAX_NAME_LENGTH> m_RequestingPlayer;
 	int m_Stars;
 };
@@ -136,7 +139,7 @@ struct CSqlScoreData : CSqlData<CSqlPlayerResult>
 {
 	using CSqlData<CSqlPlayerResult>::CSqlData;
 
-	sqlstr::CSqlString<MAX_NAME_LENGTH> m_Map;
+	sqlstr::CSqlString<MAX_MAP_LENGTH> m_Map;
 	char m_GameUuid[UUID_MAXSTRSIZE];
 	sqlstr::CSqlString<MAX_NAME_LENGTH> m_Name;
 
@@ -167,7 +170,7 @@ struct CSqlTeamSave : CSqlData<CSqlSaveResult>
 
 	char m_ClientName[MAX_NAME_LENGTH];
 
-	char m_Map[128];
+	char m_Map[MAX_MAP_LENGTH];
 	char m_Code[128];
 	char m_aGeneratedCode[128];
 	char m_Server[5];
@@ -177,7 +180,7 @@ struct CSqlTeamLoad : CSqlData<CSqlSaveResult>
 {
 	using CSqlData<CSqlSaveResult>::CSqlData;
 	sqlstr::CSqlString<128> m_Code;
-	sqlstr::CSqlString<128> m_Map;
+	sqlstr::CSqlString<MAX_MAP_LENGTH> m_Map;
 	sqlstr::CSqlString<MAX_NAME_LENGTH> m_RequestingPlayer;
 	int m_ClientID;
 	// struct holding all player names in the team or an empty string
