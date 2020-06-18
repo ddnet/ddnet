@@ -10,6 +10,7 @@
 class CSkins : public CComponent
 {
 public:
+	constexpr static const float DARKEST_LGT = 0.5f;
 	// do this better and nicer
 	struct CSkin
 	{
