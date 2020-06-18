@@ -1010,6 +1010,8 @@ void CCharacter::ResetPrediction()
 	m_Jetpack = false;
 	m_NinjaJetpack = false;
 	m_Core.m_Jumps = 2;
+	m_Core.m_Hook = true;
+	m_Core.m_Collision = true;
 	m_NumInputs = 0;
 	m_FreezeTime = 0;
 	m_FreezeTick = 0;
