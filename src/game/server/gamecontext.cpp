@@ -1293,11 +1293,11 @@ void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 	Server()->ExpireServerInfo();
 }
 
-void CGameContext::OnClientEngineJoin(int ClientID)
+void CGameContext::OnClientEngineJoin(int ClientID, bool Sixup)
 {
 	if(m_TeeHistorianActive)
 	{
-		m_TeeHistorian.RecordPlayerJoin(ClientID);
+		m_TeeHistorian.RecordPlayerJoin(ClientID, !Sixup ? CTeeHistorian::PROTOCOL_6 : CTeeHistorian::PROTOCOL_7);
 	}
 }
 
