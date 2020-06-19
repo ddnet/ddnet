@@ -231,11 +231,17 @@ public:
 	int64 m_Lastheartbeat;
 	//static NETADDR4 master_server;
 
+	enum
+	{
+		SIX=0,
+		SIXUP,
+	};
+
 	char m_aCurrentMap[MAX_PATH_LENGTH];
-	SHA256_DIGEST m_CurrentMapSha256;
-	unsigned m_CurrentMapCrc;
-	unsigned char *m_pCurrentMapData;
-	unsigned int m_CurrentMapSize;
+	SHA256_DIGEST m_aCurrentMapSha256[2];
+	unsigned m_aCurrentMapCrc[2];
+	unsigned char *m_apCurrentMapData[2];
+	unsigned int m_aCurrentMapSize[2];
 
 	CDemoRecorder m_aDemoRecorder[MAX_CLIENTS+1];
 	CRegister m_Register;
