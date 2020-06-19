@@ -169,7 +169,7 @@ void CEffects::PlayerDeath(vec2 Pos, int ClientID)
 	if(ClientID >= 0)
 	{
 		if(m_pClient->m_aClients[ClientID].m_UseCustomColor)
-			BloodColor = color_cast<ColorRGBA>(ColorHSLA(m_pClient->m_aClients[ClientID].m_ColorBody).Lighten());
+			BloodColor = color_cast<ColorRGBA>(ColorHSLA(m_pClient->m_aClients[ClientID].m_ColorBody).UnclampLighting(0.5f));
 		else
 		{
 			const CSkins::CSkin *s = m_pClient->m_pSkins->Get(m_pClient->m_aClients[ClientID].m_SkinID);

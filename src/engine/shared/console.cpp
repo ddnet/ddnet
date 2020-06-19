@@ -39,7 +39,7 @@ float CConsole::CResult::GetFloat(unsigned Index)
 
 ColorHSLA CConsole::CResult::GetColor(unsigned Index, bool Light)
 {
-	ColorHSLA hsl = ColorHSLA(0, 0, 0).Lighten();
+	ColorHSLA hsl = ColorHSLA(0, 0, 0);
 	if(Index >= m_NumArgs)
 		return hsl;
 
@@ -47,6 +47,8 @@ ColorHSLA CConsole::CResult::GetColor(unsigned Index, bool Light)
 	if(str_isallnum(pStr) || ((pStr[0] == '-' || pStr[0] == '+') && str_isallnum(pStr+1))) // Teeworlds Color (Packed HSL)
 	{
 		hsl = ColorHSLA(str_toulong_base(pStr, 10), true);
+		if(Light)
+			hsl = hsl.UnclampLighting();
 	}
 	else if(*pStr == '$') // Hex RGB
 	{
@@ -92,7 +94,7 @@ ColorHSLA CConsole::CResult::GetColor(unsigned Index, bool Light)
 	else if(!str_comp_nocase(pStr, "black"))
 		hsl = ColorHSLA(0, 0, 0);
 
-	return Light ? hsl.Lighten() : hsl;
+	return hsl;
 }
 
 const IConsole::CCommandInfo *CConsole::CCommand::NextCommandInfo(int AccessLevel, int FlagMask) const
@@ -763,7 +765,8 @@ static void ColVariableCommand(IConsole::IResult *pResult, void *pUserData)
 
 	if(pResult->NumArguments())
 	{
-		int Val = pResult->GetColor(0, pData->m_Light).Pack(pData->m_Alpha);
+		ColorHSLA Col = pResult->GetColor(0, pData->m_Light);
+		int Val = Col.Pack(pData->m_Light ? 0.5f : 0.0f, pData->m_Alpha);
 
 		*(pData->m_pVariable) = Val;
 		if(pResult->m_ClientID != IConsole::CLIENT_ID_GAME)
@@ -776,6 +779,8 @@ static void ColVariableCommand(IConsole::IResult *pResult, void *pUserData)
 		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 
 		ColorHSLA hsl(*(pData->m_pVariable), true);
+		if(pData->m_Light)
+			hsl = hsl.UnclampLighting();
 		str_format(aBuf, sizeof(aBuf), "H: %d°, S: %d%%, L: %d%%", round_truncate(hsl.h * 360), round_truncate(hsl.s * 100), round_truncate(hsl.l * 100));
 		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 
@@ -872,11 +877,11 @@ void CConsole::ConToggle(IConsole::IResult *pResult, void *pUser)
 		{
 			CColVariableData *pData = static_cast<CColVariableData *>(pUserData);
 			bool Light = pData->m_Light;
+			float Darkest = Light ? 0.5f : 0.0f;
 			bool Alpha = pData->m_Alpha;
 			unsigned Cur = *pData->m_pVariable;
-			ColorHSLA Val = Cur == pResult->GetColor(1, Light).Pack(Alpha) ? pResult->GetColor(2, Light) : pResult->GetColor(1, Light);
-			if(Light)
-				Val = Val.Lighten();
+			ColorHSLA Val = Cur == pResult->GetColor(1, Light).Pack(Darkest, Alpha) ? pResult->GetColor(2, Light) : pResult->GetColor(1, Light);
+			Cur = Val.Pack(Darkest, Alpha);
 
 			str_format(aBuf, sizeof(aBuf), "%s %u", pResult->GetString(0), Val.Pack(Alpha));
 			pConsole->ExecuteLine(aBuf);

@@ -414,8 +414,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(*UseCustomColor)
 	{
 		OwnSkinInfo.m_Texture = pOwnSkin->m_ColorTexture;
-		OwnSkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(*ColorBody).Lighten());
-		OwnSkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(*ColorFeet).Lighten());
+		OwnSkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(*ColorBody).UnclampLighting());
+		OwnSkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(*ColorFeet).UnclampLighting());
 	}
 	else
 	{
