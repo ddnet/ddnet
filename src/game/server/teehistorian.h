@@ -39,6 +39,12 @@ public:
 		CUuidManager *m_pUuids;
 	};
 
+	enum
+	{
+		PROTOCOL_6=1,
+		PROTOCOL_7,
+	};
+
 	CTeeHistorian();
 
 	void Reset(const CGameInfo *pGameInfo, WRITE_CALLBACK pfnWriteCallback, void *pUser);
@@ -56,7 +62,7 @@ public:
 	void BeginInputs();
 	void RecordPlayerInput(int ClientID, const CNetObj_PlayerInput *pInput);
 	void RecordPlayerMessage(int ClientID, const void *pMsg, int MsgSize);
-	void RecordPlayerJoin(int ClientID);
+	void RecordPlayerJoin(int ClientID, int Protocol);
 	void RecordPlayerDrop(int ClientID, const char *pReason);
 	void RecordConsoleCommand(int ClientID, int FlagMask, const char *pCmd, IConsole::IResult *pResult);
 	void RecordTestExtra();

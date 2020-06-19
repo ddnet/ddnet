@@ -239,7 +239,7 @@ public:
 	virtual void OnClientPredictedInput(int ClientID, void *pInput);
 	virtual void OnClientPredictedEarlyInput(int ClientID, void *pInput);
 
-	virtual void OnClientEngineJoin(int ClientID);
+	virtual void OnClientEngineJoin(int ClientID, bool Sixup);
 	virtual void OnClientEngineDrop(int ClientID, const char *pReason);
 
 	virtual bool IsClientReady(int ClientID);

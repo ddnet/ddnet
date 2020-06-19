@@ -399,3 +399,38 @@ TEST_F(TeeHistorian, Auth)
 	Finish();
 	Expect(EXPECTED, sizeof(EXPECTED));
 }
+
+TEST_F(TeeHistorian, JoinLeave)
+{
+
+	const unsigned char EXPECTED[] = {
+		// EX uuid=1899a382-71e3-36da-937d-c9de6bb95b1d data_len=1
+		0x4a,
+		0x18, 0x99, 0xa3, 0x82, 0x71, 0xe3, 0x36, 0xda,
+		0x93, 0x7d, 0xc9, 0xde, 0x6b, 0xb9, 0x5b, 0x1d,
+		0x01,
+		// (JOINVER6) cid=6
+		0x06,
+		// JOIN cid=7
+		0x47, 0x06,
+		// EX uuid=59239b05-0540-318d-bea4-9aa1e80e7d2b data_len=1
+		0x4a,
+		0x59, 0x23, 0x9b, 0x05, 0x05, 0x40, 0x31, 0x8d,
+		0xbe, 0xa4, 0x9a, 0xa1, 0xe8, 0x0e, 0x7d, 0x2b,
+		0x01,
+		// (JOINVER7) cid=7
+		0x07,
+		// JOIN cid=7
+		0x47, 0x07,
+		// LEAVE cid=6 reason="too many pancakes"
+		0x48, 0x06, 't',  'o',  'o', ' ',  'm',  'a',
+		'n',  'y',  ' ',  'p',  'a', 'n',  'c',  'a',
+		'k',  'e',  's',  0x00,
+		0x40, // FINISH
+	};
+	m_TH.RecordPlayerJoin(6, CTeeHistorian::PROTOCOL_6);
+	m_TH.RecordPlayerJoin(7, CTeeHistorian::PROTOCOL_7);
+	m_TH.RecordPlayerDrop(6, "too many pancakes");
+	Finish();
+	Expect(EXPECTED, sizeof(EXPECTED));
+}
