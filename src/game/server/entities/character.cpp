@@ -756,6 +756,13 @@ void CCharacter::Tick()
 	if(m_Paused)
 		return;
 
+	// set emote
+	if(m_EmoteStop < Server()->Tick())
+	{
+		m_EmoteType = m_pPlayer->m_DefEmote;
+		m_EmoteStop = -1;
+	}
+
 	DDRaceTick();
 
 	Antibot()->OnCharacterTick(m_pPlayer->GetCID());
@@ -1043,6 +1050,141 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 	return true;
 }
 
+//TODO: Move the emote stuff to a function
+void CCharacter::SnapCharacter(int SnappingClient)
+{
+	int OwnID = m_pPlayer->GetCID();
+
+	CCharacterCore *pCore;
+	int Tick, Emote = m_EmoteType, Weapon = m_Core.m_ActiveWeapon, AmmoCount = 0,
+		Health = 0, Armor = 0;
+	if(!m_ReckoningTick || GameServer()->m_World.m_Paused)
+	{
+		Tick = 0;
+		pCore = &m_Core;
+	}
+	else
+	{
+		Tick = m_ReckoningTick;
+		pCore = &m_SendCore;
+	}
+
+	// change eyes and use ninja graphic if player is frozen
+	if(m_DeepFreeze || m_FreezeTime > 0 || m_FreezeTime == -1)
+	{
+		if(Emote == EMOTE_NORMAL)
+			Emote = m_DeepFreeze ? EMOTE_PAIN : EMOTE_BLINK;
+
+		Weapon = WEAPON_NINJA;
+	}
+
+	// This could probably happen when m_Jetpack changes instead
+	// jetpack and ninjajetpack prediction
+	if(m_pPlayer->GetCID() == SnappingClient)
+	{
+		if(m_Jetpack && Weapon != WEAPON_NINJA)
+		{
+			if(!(m_NeededFaketuning & FAKETUNE_JETPACK))
+			{
+				m_NeededFaketuning |= FAKETUNE_JETPACK;
+				GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
+			}
+		}
+		else
+		{
+			if(m_NeededFaketuning & FAKETUNE_JETPACK)
+			{
+				m_NeededFaketuning &= ~FAKETUNE_JETPACK;
+				GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
+			}
+		}
+	}
+
+	// change eyes, use ninja graphic and set ammo count if player has ninjajetpack
+	if(m_pPlayer->m_NinjaJetpack && m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN && !m_DeepFreeze && !(m_FreezeTime > 0 || m_FreezeTime == -1))
+	{
+		if(Emote == EMOTE_NORMAL)
+			Emote = EMOTE_HAPPY;
+		Weapon = WEAPON_NINJA;
+		AmmoCount = 10;
+	}
+
+	if(m_pPlayer->GetCID() == SnappingClient || SnappingClient == -1 ||
+		(!g_Config.m_SvStrictSpectateMode && m_pPlayer->GetCID() == GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID))
+	{
+		Health = m_Health;
+		Armor = m_Armor;
+		if(m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo > 0)
+			AmmoCount = (!m_FreezeTime)?m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo:0;
+	}
+
+	if(GetPlayer()->m_Afk || GetPlayer()->IsPaused())
+	{
+		if(m_FreezeTime > 0 || m_FreezeTime == -1 || m_DeepFreeze)
+			Emote = EMOTE_NORMAL;
+		else
+			Emote = EMOTE_BLINK;
+	}
+
+	if(Emote == EMOTE_NORMAL)
+	{
+		if(250 - ((Server()->Tick() - m_LastAction)%(250)) < 5)
+			Emote = EMOTE_BLINK;
+	}
+
+	if(m_pPlayer->m_Halloween)
+	{
+		if(1200 - ((Server()->Tick() - m_LastAction)%(1200)) < 5)
+		{
+			GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_GHOST);
+		}
+	}
+
+	if(!Server()->IsSixup(SnappingClient))
+	{
+		CNetObj_Character *pCharacter = static_cast<CNetObj_Character *>(Server()->SnapNewItem(NETOBJTYPE_CHARACTER, OwnID, sizeof(CNetObj_Character)));
+		if(!pCharacter)
+			return;
+
+		pCore->Write(pCharacter);
+
+		pCharacter->m_Tick = Tick;
+		pCharacter->m_Emote = Emote;
+
+		if(pCharacter->m_HookedPlayer != -1)
+		{
+			if(!Server()->Translate(pCharacter->m_HookedPlayer, SnappingClient))
+				pCharacter->m_HookedPlayer = -1;
+		}
+
+		pCharacter->m_AttackTick = m_AttackTick;
+		pCharacter->m_Direction = m_Input.m_Direction;
+		pCharacter->m_Weapon = Weapon;
+		pCharacter->m_AmmoCount = AmmoCount;
+		pCharacter->m_Health = Health;
+		pCharacter->m_Armor = Armor;
+		pCharacter->m_PlayerFlags = GetPlayer()->m_PlayerFlags;
+	}
+	else
+	{
+		protocol7::CNetObj_Character *pCharacter = static_cast<protocol7::CNetObj_Character *>(Server()->SnapNewItem(NETOBJTYPE_CHARACTER, OwnID, sizeof(protocol7::CNetObj_Character)));
+		if(!pCharacter)
+			return;
+
+		pCore->Write(reinterpret_cast<CNetObj_CharacterCore *>(static_cast<protocol7::CNetObj_CharacterCore *>(pCharacter)));
+
+		pCharacter->m_Tick = Tick;
+		pCharacter->m_Emote = Emote;
+		pCharacter->m_AttackTick = m_AttackTick;
+		pCharacter->m_Direction = m_Input.m_Direction;
+		pCharacter->m_Weapon = Weapon;
+		pCharacter->m_AmmoCount = AmmoCount;
+		pCharacter->m_Health = Health;
+		pCharacter->m_Armor = Armor;
+		pCharacter->m_TriggeredEvents = 0;
+	}
+}
+
 void CCharacter::Snap(int SnappingClient)
 {
 	int id = m_pPlayer->GetCID();
@@ -1074,122 +1216,7 @@ void CCharacter::Snap(int SnappingClient)
 	if (m_Paused)
 		return;
 
-	CNetObj_Character *pCharacter = static_cast<CNetObj_Character *>(Server()->SnapNewItem(NETOBJTYPE_CHARACTER, id, sizeof(CNetObj_Character)));
-	if(!pCharacter)
-		return;
-
-	// write down the m_Core
-	if(!m_ReckoningTick || GameServer()->m_World.m_Paused)
-	{
-		// no dead reckoning when paused because the client doesn't know
-		// how far to perform the reckoning
-		pCharacter->m_Tick = 0;
-		m_Core.Write(pCharacter);
-	}
-	else
-	{
-		pCharacter->m_Tick = m_ReckoningTick;
-		m_SendCore.Write(pCharacter);
-	}
-
-	// set emote
-	if (m_EmoteStop < Server()->Tick())
-	{
-		m_EmoteType = m_pPlayer->m_DefEmote;
-		m_EmoteStop = -1;
-	}
-	pCharacter->m_Emote = m_EmoteType;
-
-	if (pCharacter->m_HookedPlayer != -1)
-	{
-		if (!Server()->Translate(pCharacter->m_HookedPlayer, SnappingClient))
-			pCharacter->m_HookedPlayer = -1;
-	}
-
-	pCharacter->m_AttackTick = m_AttackTick;
-	pCharacter->m_Direction = m_Input.m_Direction;
-	pCharacter->m_Weapon = m_Core.m_ActiveWeapon;
-	pCharacter->m_AmmoCount = 0;
-	pCharacter->m_Health = 0;
-	pCharacter->m_Armor = 0;
-
-	// change eyes and use ninja graphic if player is freeze
-	if (m_DeepFreeze)
-	{
-		if (pCharacter->m_Emote == EMOTE_NORMAL)
-			pCharacter->m_Emote = EMOTE_PAIN;
-		pCharacter->m_Weapon = WEAPON_NINJA;
-	}
-	else if (m_FreezeTime > 0 || m_FreezeTime == -1)
-	{
-		if (pCharacter->m_Emote == EMOTE_NORMAL)
-			pCharacter->m_Emote = EMOTE_BLINK;
-		pCharacter->m_Weapon = WEAPON_NINJA;
-	}
-
-	// jetpack and ninjajetpack prediction
-	if (m_pPlayer->GetCID() == SnappingClient)
-	{
-		if (m_Jetpack && pCharacter->m_Weapon != WEAPON_NINJA)
-		{
-			if (!(m_NeededFaketuning & FAKETUNE_JETPACK))
-			{
-				m_NeededFaketuning |= FAKETUNE_JETPACK;
-				GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
-			}
-		}
-		else
-		{
-			if (m_NeededFaketuning & FAKETUNE_JETPACK)
-			{
-				m_NeededFaketuning &= ~FAKETUNE_JETPACK;
-				GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
-			}
-		}
-	}
-
-	// change eyes, use ninja graphic and set ammo count if player has ninjajetpack
-	if (m_pPlayer->m_NinjaJetpack && m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN && !m_DeepFreeze && !(m_FreezeTime > 0 || m_FreezeTime == -1))
-	{
-		if (pCharacter->m_Emote == EMOTE_NORMAL)
-			pCharacter->m_Emote = EMOTE_HAPPY;
-		pCharacter->m_Weapon = WEAPON_NINJA;
-		pCharacter->m_AmmoCount = 10;
-	}
-
-	if(m_pPlayer->GetCID() == SnappingClient || SnappingClient == -1 ||
-		(!g_Config.m_SvStrictSpectateMode && m_pPlayer->GetCID() == GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID))
-	{
-		pCharacter->m_Health = m_Health;
-		pCharacter->m_Armor = m_Armor;
-		if(m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo > 0)
-			//pCharacter->m_AmmoCount = m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo;
-			pCharacter->m_AmmoCount = (!m_FreezeTime)?m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo:0;
-	}
-
-	if(GetPlayer()->m_Afk || GetPlayer()->IsPaused())
-	{
-		if(m_FreezeTime > 0 || m_FreezeTime == -1 || m_DeepFreeze)
-			pCharacter->m_Emote = EMOTE_NORMAL;
-		else
-			pCharacter->m_Emote = EMOTE_BLINK;
-	}
-
-	if(pCharacter->m_Emote == EMOTE_NORMAL)
-	{
-		if(250 - ((Server()->Tick() - m_LastAction)%(250)) < 5)
-			pCharacter->m_Emote = EMOTE_BLINK;
-	}
-
-	if(m_pPlayer->m_Halloween)
-	{
-		if(1200 - ((Server()->Tick() - m_LastAction)%(1200)) < 5)
-		{
-			GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_GHOST);
-		}
-	}
-
-	pCharacter->m_PlayerFlags = GetPlayer()->m_PlayerFlags;
+	SnapCharacter(SnappingClient);
 
 	CNetObj_DDNetCharacter *pDDNetCharacter = static_cast<CNetObj_DDNetCharacter *>(Server()->SnapNewItem(NETOBJTYPE_DDNETCHARACTER, id, sizeof(CNetObj_DDNetCharacter)));
 	if(!pDDNetCharacter)

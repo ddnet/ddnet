@@ -367,6 +367,23 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 }
 
 // ----- send functions -----
+static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer)
+{
+	Packer.Reset();
+	if(pMsg->m_MsgID < OFFSET_UUID)
+	{
+		Packer.AddInt((pMsg->m_MsgID<<1)|(pMsg->m_System?1:0));
+	}
+	else
+	{
+		Packer.AddInt((0<<1)|(pMsg->m_System?1:0)); // NETMSG_EX, NETMSGTYPE_EX
+		g_UuidManager.PackUuid(pMsg->m_MsgID, &Packer);
+	}
+	Packer.AddRaw(pMsg->Data(), pMsg->Size());
+
+	return false;
+}
+
 int CClient::SendMsg(CMsgPacker *pMsg, int Flags)
 {
 	CNetChunk Packet;
@@ -374,10 +391,15 @@ int CClient::SendMsg(CMsgPacker *pMsg, int Flags)
 	if(State() == IClient::STATE_OFFLINE)
 		return 0;
 
+	// repack message (inefficient)
+	CPacker Pack;
+	if(RepackMsg(pMsg, Pack))
+		return 0;
+
 	mem_zero(&Packet, sizeof(CNetChunk));
 	Packet.m_ClientID = 0;
-	Packet.m_pData = pMsg->Data();
-	Packet.m_DataSize = pMsg->Size();
+	Packet.m_pData = Pack.Data();
+	Packet.m_DataSize = Pack.Size();
 
 	if(Flags&MSGFLAG_VITAL)
 		Packet.m_Flags |= NETSENDFLAG_VITAL;
@@ -841,11 +863,15 @@ int CClient::SendMsgY(CMsgPacker *pMsg, int Flags, int NetClient)
 {
 	CNetChunk Packet;
 
-	mem_zero(&Packet, sizeof(CNetChunk));
+	// repack message (inefficient)
+	CPacker Pack;
+	if(RepackMsg(pMsg, Pack))
+		return 0;
 
+	mem_zero(&Packet, sizeof(CNetChunk));
 	Packet.m_ClientID = 0;
-	Packet.m_pData = pMsg->Data();
-	Packet.m_DataSize = pMsg->Size();
+	Packet.m_pData = Pack.Data();
+	Packet.m_DataSize = Pack.Size();
 
 	if(Flags&MSGFLAG_VITAL)
 		Packet.m_Flags |= NETSENDFLAG_VITAL;

@@ -139,10 +139,12 @@ class CSnapshotBuilder
 	void AddExtendedItemType(int Index);
 	int GetExtendedItemTypeIndex(int TypeID);
 
+	bool m_Sixup;
+
 public:
 	CSnapshotBuilder();
 
-	void Init();
+	void Init(bool Sixup = false);
 
 	void *NewItem(int Type, int ID, int Size);
 

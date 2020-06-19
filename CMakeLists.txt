@@ -335,7 +335,7 @@ if(UPNP)
   find_package(Miniupnpc)
 endif()
 find_package(Pnglite)
-find_package(PythonInterp)
+find_package(PythonInterp 3)
 find_package(SDL2)
 if(VIDEORECORDER)
   find_package(FFMPEG)
@@ -602,6 +602,36 @@ function(generate_source output_file script_parameter)
   )
 endfunction()
 
+function(generate_source7 output_file script_parameter)
+  add_custom_command(OUTPUT ${output_file}
+    COMMAND ${PYTHON_EXECUTABLE} -m datasrc.seven.compile ${script_parameter}
+      > "${PROJECT_BINARY_DIR}/${output_file}"
+    DEPENDS
+      datasrc/seven/compile.py
+      datasrc/seven/content.py
+      datasrc/seven/datatypes.py
+      datasrc/seven/network.py
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  )
+endfunction()
+
+function(generate_maps output_file)
+  add_custom_command(OUTPUT ${output_file}
+    COMMAND ${PYTHON_EXECUTABLE} datasrc/crosscompile.py
+      > "${PROJECT_BINARY_DIR}/${output_file}"
+    DEPENDS
+      datasrc/compile.py
+      datasrc/content.py
+      datasrc/datatypes.py
+      datasrc/network.py
+      datasrc/seven/compile.py
+      datasrc/seven/content.py
+      datasrc/seven/datatypes.py
+      datasrc/seven/network.py
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  )
+endfunction()
+
 file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/src/game/generated/")
 execute_process(COMMAND git rev-parse --git-dir
   ERROR_QUIET
@@ -631,6 +661,10 @@ generate_source("src/game/generated/protocol.h" "network_header")
 generate_source("src/game/generated/server_data.cpp" "server_content_source")
 generate_source("src/game/generated/server_data.h" "server_content_header")
 
+generate_source7("src/game/generated/protocol7.cpp" "network_source")
+generate_source7("src/game/generated/protocol7.h" "network_header")
+
+generate_maps("src/game/generated/protocolglue.h")
 
 ########################################################################
 # SHARED
@@ -787,6 +821,9 @@ set_src(GAME_SHARED GLOB src/game
 # A bit hacky, but these are needed to register all the UUIDs, even for stuff
 # that doesn't link game.
 set(ENGINE_UUID_SHARED
+  src/game/generated/protocolglue.h
+  src/game/generated/protocol7.cpp
+  src/game/generated/protocol7.h
   src/game/generated/protocol.cpp
   src/game/generated/protocol.h
   src/game/mapitems_ex.cpp
@@ -802,6 +839,8 @@ list(REMOVE_ITEM GAME_SHARED ${ENGINE_UUID_SHARED})
 set(GAME_GENERATED_SHARED
   src/game/generated/git_revision.cpp
   src/game/generated/protocol.h
+  src/game/generated/protocol7.h
+  src/game/generated/protocolglue.h
 )
 
 set(DEPS ${DEP_JSON} ${DEP_MD5} ${ZLIB_DEP})
@@ -1147,6 +1186,8 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   teams.h
   teehistorian.cpp
   teehistorian.h
+  teeinfo.cpp
+  teeinfo.h
 )
 set(GAME_GENERATED_SERVER
   "src/game/generated/server_data.cpp"

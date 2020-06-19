@@ -6,6 +6,7 @@
 // this include should perhaps be removed
 #include "entities/character.h"
 #include "score.h"
+#include "teeinfo.h"
 #include "gamecontext.h"
 #include <memory>
 
@@ -89,14 +90,7 @@ public:
 
 	int m_SendVoteIndex;
 
-	// TODO: clean this up
-	struct
-	{
-		char m_SkinName[64];
-		int m_UseCustomColor;
-		int m_ColorBody;
-		int m_ColorFeet;
-	} m_TeeInfos;
+	CTeeInfo m_TeeInfos;
 
 	int m_DieTick;
 	int m_PreviousDieTick;

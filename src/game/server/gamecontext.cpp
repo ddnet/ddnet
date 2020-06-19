@@ -13,10 +13,14 @@
 #include <engine/shared/datafile.h>
 #include <engine/shared/linereader.h>
 #include <engine/storage.h>
+#include "teeinfo.h"
 #include "gamecontext.h"
 #include <game/version.h>
 #include <game/collision.h>
 #include <game/gamecore.h>
+
+#include <game/generated/protocol7.h>
+#include <game/generated/protocolglue.h>
 
 #include "gamemodes/DDRace.h"
 #include "score.h"
@@ -346,7 +350,7 @@ void CGameContext::SendChatTeam(int Team, const char *pText)
 			SendChatTarget(i, pText);
 }
 
-void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, int SpamProtectionClientID)
+void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, int SpamProtectionClientID, int Flags)
 {
 	if(SpamProtectionClientID >= 0 && SpamProtectionClientID < MAX_CLIENTS)
 		if(ProcessSpamProtection(SpamProtectionClientID))
@@ -380,10 +384,11 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, in
 		// send to the clients
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
-			if(m_apPlayers[i] != 0) {
-				if(!m_apPlayers[i]->m_DND)
-					Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
-			}
+			bool Send = (Server()->IsSixup(i) && (Flags & CHAT_SIXUP)) ||
+				(!Server()->IsSixup(i) && (Flags & CHAT_SIX));
+
+			if(m_apPlayers[i] != 0 && !m_apPlayers[i]->m_DND && Send)
+				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
 		}
 	}
 	else
@@ -1054,6 +1059,27 @@ void CGameContext::OnClientEnter(int ClientID)
 	// LoadScoreThreaded() instead
 	Score()->LoadPlayerData(ClientID);
 
+	if(Server()->IsSixup(ClientID))
+	{
+		protocol7::CNetMsg_Sv_GameInfo Msg;
+		Msg.m_GameFlags = protocol7::GAMEFLAG_RACE;
+		Msg.m_MatchCurrent = 1;
+		Msg.m_MatchNum = 0;
+		Msg.m_ScoreLimit = 0;
+		Msg.m_TimeLimit = 0;
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
+
+		for(const IConsole::CCommandInfo *pCmd = Console()->FirstCommandInfo(IConsole::ACCESS_LEVEL_USER, CFGFLAG_CHAT);
+			pCmd; pCmd = pCmd->NextCommandInfo(IConsole::ACCESS_LEVEL_USER, CFGFLAG_CHAT))
+		{
+			protocol7::CNetMsg_Sv_CommandInfo Msg;
+			Msg.m_Name = pCmd->m_pName;
+			Msg.m_ArgsFormat = pCmd->m_pParams;
+			Msg.m_HelpText = pCmd->m_pHelp;
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
+		}
+	}
+
 	{
 		int Empty = -1;
 		for(int i = 0; i < MAX_CLIENTS; i++)
@@ -1083,7 +1109,7 @@ void CGameContext::OnClientEnter(int ClientID)
 
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientID), m_pController->GetTeamName(m_apPlayers[ClientID]->GetTeam()));
-		SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+		SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1, CHAT_SIX);
 
 		SendChatTarget(ClientID, "DDraceNetwork Mod. Version: " GAME_VERSION);
 		SendChatTarget(ClientID, "please visit DDNet.tw or say /info for more info");
@@ -1109,6 +1135,66 @@ void CGameContext::OnClientEnter(int ClientID)
 		SendVoteSet(ClientID);
 
 	Server()->ExpireServerInfo();
+
+	CPlayer *pNewPlayer = m_apPlayers[ClientID];
+
+	// new info for others
+	protocol7::CNetMsg_Sv_ClientInfo NewClientInfoMsg;
+	NewClientInfoMsg.m_ClientID = ClientID;
+	NewClientInfoMsg.m_Local = 0;
+	NewClientInfoMsg.m_Team = pNewPlayer->GetTeam();
+	NewClientInfoMsg.m_pName = Server()->ClientName(ClientID);
+	NewClientInfoMsg.m_pClan = Server()->ClientClan(ClientID);
+	NewClientInfoMsg.m_Country = Server()->ClientCountry(ClientID);
+	NewClientInfoMsg.m_Silent = false;
+
+	for(int p = 0; p < 6; p++)
+	{
+		NewClientInfoMsg.m_apSkinPartNames[p] = pNewPlayer->m_TeeInfos.m_apSkinPartNames[p];
+		NewClientInfoMsg.m_aUseCustomColors[p] = pNewPlayer->m_TeeInfos.m_aUseCustomColors[p];
+		NewClientInfoMsg.m_aSkinPartColors[p] = pNewPlayer->m_TeeInfos.m_aSkinPartColors[p];
+	}
+
+	// update client infos (others before local)
+	for(int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		if(i == ClientID || !m_apPlayers[i] || !Server()->ClientIngame(i))
+			continue;
+
+		CPlayer *pPlayer = m_apPlayers[i];
+
+		if(Server()->IsSixup(i))
+			Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
+
+		if(Server()->IsSixup(ClientID))
+		{
+			// existing infos for new player
+			protocol7::CNetMsg_Sv_ClientInfo ClientInfoMsg;
+			ClientInfoMsg.m_ClientID = i;
+			ClientInfoMsg.m_Local = 0;
+			ClientInfoMsg.m_Team = pPlayer->GetTeam();
+			ClientInfoMsg.m_pName = Server()->ClientName(i);
+			ClientInfoMsg.m_pClan = Server()->ClientClan(i);
+			ClientInfoMsg.m_Country = Server()->ClientCountry(i);
+			ClientInfoMsg.m_Silent = 0;
+
+			for(int p = 0; p < 6; p++)
+			{
+				ClientInfoMsg.m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_apSkinPartNames[p];
+				ClientInfoMsg.m_aUseCustomColors[p] = pPlayer->m_TeeInfos.m_aUseCustomColors[p];
+				ClientInfoMsg.m_aSkinPartColors[p] = pPlayer->m_TeeInfos.m_aSkinPartColors[p];
+			}
+
+			Server()->SendPackMsg(&ClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
+		}
+	}
+
+	// local info
+	if(Server()->IsSixup(ClientID))
+	{
+		NewClientInfoMsg.m_Local = 1;
+		Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
+	}
 }
 
 void CGameContext::OnClientConnected(int ClientID)
@@ -1158,6 +1244,19 @@ void CGameContext::OnClientConnected(int ClientID)
 	Msg.m_pMessage = g_Config.m_SvMotd;
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
 
+	//send sixup settings
+	if(Server()->IsSixup(ClientID))
+	{
+		protocol7::CNetMsg_Sv_ServerSettings Msg;
+		Msg.m_KickVote = g_Config.m_SvVoteKick;
+		Msg.m_KickMin = g_Config.m_SvVoteKickMin;
+		Msg.m_SpecVote = g_Config.m_SvVoteSpectate;
+		Msg.m_TeamLock = 0;
+		Msg.m_TeamBalance = 0;
+		Msg.m_PlayerSlots = g_Config.m_SvMaxClients - g_Config.m_SvSpectatorSlots;
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
+	}
+
 	Server()->ExpireServerInfo();
 }
 
@@ -1184,6 +1283,12 @@ void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 		if(m_apPlayers[i] && m_apPlayers[i]->m_LastWhisperTo == ClientID)
 			m_apPlayers[i]->m_LastWhisperTo = -1;
 	}
+
+	protocol7::CNetMsg_Sv_ClientDrop Msg;
+	Msg.m_ClientID = ClientID;
+	Msg.m_pReason = pReason;
+	Msg.m_Silent = false;
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, -1);
 
 	Server()->ExpireServerInfo();
 }
@@ -1250,11 +1355,120 @@ void CGameContext::OnClientDDNetVersionKnown(int ClientID)
 	}
 }
 
+void *CGameContext::PreProcessMsg(int *MsgID, CUnpacker *pUnpacker, int ClientID)
+{
+	if(Server()->IsSixup(ClientID))
+	{
+		void *pRawMsg = m_NetObjHandler7.SecureUnpackMsg(*MsgID, pUnpacker);
+		if(!pRawMsg)
+			return 0;
+
+		CPlayer *pPlayer = m_apPlayers[ClientID];
+		static char s_aRawMsg[1024];
+
+		if(*MsgID == protocol7::NETMSGTYPE_CL_SAY)
+		{
+			protocol7::CNetMsg_Cl_Say *pMsg7 = (protocol7::CNetMsg_Cl_Say *)pRawMsg;
+			// Should probably use a placement new to start the lifetime of the object to avoid future weirdness
+			::CNetMsg_Cl_Say *pMsg = (::CNetMsg_Cl_Say *)s_aRawMsg;
+
+			if(pMsg7->m_Target >= 0)
+			{
+				// Should we maybe recraft the message so that it can go through the usual path?
+				WhisperID(ClientID, pMsg7->m_Target, pMsg7->m_pMessage);
+				return 0;
+			}
+
+			pMsg->m_Team = pMsg7->m_Mode == protocol7::CHAT_TEAM;
+			pMsg->m_pMessage = pMsg7->m_pMessage;
+		}
+		else if(*MsgID == protocol7::NETMSGTYPE_CL_STARTINFO)
+		{
+			protocol7::CNetMsg_Cl_StartInfo *pMsg7 = (protocol7::CNetMsg_Cl_StartInfo *)pRawMsg;
+			::CNetMsg_Cl_StartInfo *pMsg = (::CNetMsg_Cl_StartInfo *)s_aRawMsg;
+
+			pMsg->m_pName = pMsg7->m_pName;
+			pMsg->m_pClan = pMsg7->m_pClan;
+			pMsg->m_Country = pMsg7->m_Country;
+
+			CTeeInfo Info(pMsg7->m_apSkinPartNames, pMsg7->m_aUseCustomColors, pMsg7->m_aSkinPartColors);
+			Info.FromSixup();
+			pPlayer->m_TeeInfos = Info;
+
+			str_copy(s_aRawMsg + sizeof(*pMsg), Info.m_SkinName, sizeof(s_aRawMsg) - sizeof(*pMsg));
+
+			pMsg->m_pSkin = s_aRawMsg + sizeof(*pMsg);
+			pMsg->m_UseCustomColor = pPlayer->m_TeeInfos.m_UseCustomColor;
+			pMsg->m_ColorBody = pPlayer->m_TeeInfos.m_ColorBody;
+			pMsg->m_ColorFeet = pPlayer->m_TeeInfos.m_ColorFeet;
+		}
+		else if(*MsgID == protocol7::NETMSGTYPE_CL_SKINCHANGE)
+		{
+			protocol7::CNetMsg_Cl_SkinChange *pMsg = (protocol7::CNetMsg_Cl_SkinChange *)pRawMsg;
+			if(g_Config.m_SvSpamprotection && pPlayer->m_LastChangeInfo &&
+				pPlayer->m_LastChangeInfo + Server()->TickSpeed() * g_Config.m_SvInfoChangeDelay > Server()->Tick())
+			return 0;
+
+			CTeeInfo Info(pMsg->m_apSkinPartNames, pMsg->m_aUseCustomColors, pMsg->m_aSkinPartColors);
+			Info.FromSixup();
+			pPlayer->m_TeeInfos = Info;
+
+			protocol7::CNetMsg_Sv_SkinChange Msg;
+			Msg.m_ClientID = ClientID;
+			for(int p = 0; p < 6; p++)
+			{
+				Msg.m_apSkinPartNames[p] = pMsg->m_apSkinPartNames[p];
+				Msg.m_aSkinPartColors[p] = pMsg->m_aSkinPartColors[p];
+				Msg.m_aUseCustomColors[p] = pMsg->m_aUseCustomColors[p];
+			}
+
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, -1);
+
+			return 0;
+		}
+		else if(*MsgID == protocol7::NETMSGTYPE_CL_SETSPECTATORMODE)
+		{
+			protocol7::CNetMsg_Cl_SetSpectatorMode *pMsg7 = (protocol7::CNetMsg_Cl_SetSpectatorMode *)pRawMsg;
+			::CNetMsg_Cl_SetSpectatorMode *pMsg = (::CNetMsg_Cl_SetSpectatorMode *)s_aRawMsg;
+
+			if(pMsg7->m_SpecMode == protocol7::SPEC_FREEVIEW)
+				pMsg->m_SpectatorID = SPEC_FREEVIEW;
+			else if(pMsg7->m_SpecMode == protocol7::SPEC_PLAYER)
+				pMsg->m_SpectatorID = pMsg7->m_SpectatorID;
+			else
+				pMsg->m_SpectatorID = SPEC_FREEVIEW; // Probably not needed
+		}
+		else if(*MsgID == protocol7::NETMSGTYPE_CL_SETTEAM)
+		{
+			protocol7::CNetMsg_Cl_SetTeam *pMsg7 = (protocol7::CNetMsg_Cl_SetTeam *)pRawMsg;
+			::CNetMsg_Cl_SetTeam *pMsg = (::CNetMsg_Cl_SetTeam *)s_aRawMsg;
+
+			pMsg->m_Team = pMsg7->m_Team;
+		}
+		else if(*MsgID == protocol7::NETMSGTYPE_CL_COMMAND)
+		{
+			protocol7::CNetMsg_Cl_Command *pMsg7 = (protocol7::CNetMsg_Cl_Command *)pRawMsg;
+			::CNetMsg_Cl_Say *pMsg = (::CNetMsg_Cl_Say *)s_aRawMsg;
+
+			str_format(s_aRawMsg + sizeof(*pMsg), sizeof(s_aRawMsg) - sizeof(*pMsg), "/%s %s", pMsg7->m_Name, pMsg7->m_Arguments);
+			pMsg->m_pMessage = s_aRawMsg + sizeof(*pMsg);
+			dbg_msg("debug", "line='%s'", s_aRawMsg + sizeof(*pMsg));
+			pMsg->m_Team = 0;
+
+			*MsgID = NETMSGTYPE_CL_SAY;
+			return s_aRawMsg;
+		}
+
+		*MsgID = Msg_SevenToSix(*MsgID);
+
+		return s_aRawMsg;
+	}
+	else
+		return m_NetObjHandler.SecureUnpackMsg(*MsgID, pUnpacker);
+}
+
 void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 {
-	void *pRawMsg = m_NetObjHandler.SecureUnpackMsg(MsgID, pUnpacker);
-	CPlayer *pPlayer = m_apPlayers[ClientID];
-
 	if(m_TeeHistorianActive)
 	{
 		if(m_NetObjHandler.TeeHistorianRecordMsg(MsgID))
@@ -1263,13 +1477,9 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		}
 	}
 
-	if(!pRawMsg)
-	{
-		//char aBuf[256];
-		//str_format(aBuf, sizeof(aBuf), "dropped weird message '%s' (%d), failed on '%s'", m_NetObjHandler.GetMsgName(MsgID), MsgID, m_NetObjHandler.FailedMsgOn());
-		//Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "server", aBuf);
-		return;
-	}
+	void *pRawMsg = PreProcessMsg(&MsgID, pUnpacker, ClientID);
+
+	CPlayer *pPlayer = m_apPlayers[ClientID];
 
 	if(Server()->ClientIngame(ClientID))
 	{
@@ -1802,7 +2012,19 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			pPlayer->m_TeeInfos.m_UseCustomColor = pMsg->m_UseCustomColor;
 			pPlayer->m_TeeInfos.m_ColorBody = pMsg->m_ColorBody;
 			pPlayer->m_TeeInfos.m_ColorFeet = pMsg->m_ColorFeet;
+			if(!Server()->IsSixup(ClientID))
+				pPlayer->m_TeeInfos.ToSixup();
 
+			protocol7::CNetMsg_Sv_SkinChange SkinChangeMsg;
+			SkinChangeMsg.m_ClientID = ClientID;
+			for(int p = 0; p < 6; p++)
+			{
+				SkinChangeMsg.m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_apSkinPartNames[p];
+				SkinChangeMsg.m_aSkinPartColors[p] = pPlayer->m_TeeInfos.m_aSkinPartColors[p];
+				SkinChangeMsg.m_aUseCustomColors[p] = pPlayer->m_TeeInfos.m_aUseCustomColors[p];
+			}
+
+			Server()->SendPackMsg(&SkinChangeMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, -1);
 			Server()->ExpireServerInfo();
 		}
 		else if (MsgID == NETMSGTYPE_CL_EMOTICON && !m_World.m_Paused)
@@ -1888,6 +2110,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			return;
 
 		CNetMsg_Cl_StartInfo *pMsg = (CNetMsg_Cl_StartInfo *)pRawMsg;
+
 		if(!str_utf8_check(pMsg->m_pName)
 			|| !str_utf8_check(pMsg->m_pClan)
 			|| !str_utf8_check(pMsg->m_pSkin))
@@ -1904,6 +2127,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		pPlayer->m_TeeInfos.m_UseCustomColor = pMsg->m_UseCustomColor;
 		pPlayer->m_TeeInfos.m_ColorBody = pMsg->m_ColorBody;
 		pPlayer->m_TeeInfos.m_ColorFeet = pMsg->m_ColorFeet;
+		if(!Server()->IsSixup(ClientID))
+			pPlayer->m_TeeInfos.ToSixup();
 
 		// send clear vote options
 		CNetMsg_Sv_VoteClearOptions ClearMsg;
@@ -3350,7 +3575,7 @@ void CGameContext::Whisper(int ClientID, char *pStr)
 	WhisperID(ClientID, Victim, pMessage);
 }
 
-void CGameContext::WhisperID(int ClientID, int VictimID, char *pMessage)
+void CGameContext::WhisperID(int ClientID, int VictimID, const char *pMessage)
 {
 	if(!CheckClientID2(ClientID))
 		return;
@@ -3363,7 +3588,17 @@ void CGameContext::WhisperID(int ClientID, int VictimID, char *pMessage)
 
 	char aBuf[256];
 
-	if(GetClientVersion(ClientID) >= VERSION_DDNET_WHISPER)
+	if(Server()->IsSixup(ClientID))
+	{
+		protocol7::CNetMsg_Sv_Chat Msg;
+		Msg.m_ClientID = ClientID;
+		Msg.m_Mode = protocol7::CHAT_WHISPER;
+		Msg.m_pMessage = pMessage;
+		Msg.m_TargetID = VictimID;
+
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
+	}
+	else if(GetClientVersion(ClientID) >= VERSION_DDNET_WHISPER)
 	{
 		CNetMsg_Sv_Chat Msg;
 		Msg.m_Team = CHAT_WHISPER_SEND;
@@ -3380,7 +3615,17 @@ void CGameContext::WhisperID(int ClientID, int VictimID, char *pMessage)
 		SendChatTarget(ClientID, aBuf);
 	}
 
-	if(GetClientVersion(VictimID) >= VERSION_DDNET_WHISPER)
+	if(Server()->IsSixup(VictimID))
+	{
+		protocol7::CNetMsg_Sv_Chat Msg;
+		Msg.m_ClientID = ClientID;
+		Msg.m_Mode = protocol7::CHAT_WHISPER;
+		Msg.m_pMessage = pMessage;
+		Msg.m_TargetID = VictimID;
+
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, VictimID);
+	}
+	else if(GetClientVersion(VictimID) >= VERSION_DDNET_WHISPER)
 	{
 		CNetMsg_Sv_Chat Msg2;
 		Msg2.m_Team = CHAT_WHISPER_RECV;

@@ -166,6 +166,7 @@ private:
 
 	// DDRace
 
+	void SnapCharacter(int SnappingClient);
 	static bool IsSwitchActiveCb(int Number, void *pUser);
 	void HandleTiles(int Index);
 	float m_Time;

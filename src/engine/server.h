@@ -3,12 +3,16 @@
 #ifndef ENGINE_SERVER_H
 #define ENGINE_SERVER_H
 
+#include <type_traits>
+
 #include <base/hash.h>
 #include <base/math.h>
 
 #include "kernel.h"
 #include "message.h"
 #include <game/generated/protocol.h>
+#include <game/generated/protocol7.h>
+#include <game/generated/protocolglue.h>
 #include <engine/shared/protocol.h>
 
 struct CAntibotRoundData;
@@ -52,10 +56,10 @@ public:
 
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags, int ClientID) = 0;
 
-	template<class T>
-	int SendPackMsg(T *pMsg, int Flags, int ClientID)
+	template<class T, typename std::enable_if<!protocol7::is_sixup<T>::value, int>::type = 0>
+	inline int SendPackMsg(T *pMsg, int Flags, int ClientID)
 	{
-		int result = 0;
+		int Result = 0;
 		T tmp;
 		if (ClientID == -1)
 		{
@@ -63,13 +67,29 @@ public:
 				if(ClientIngame(i))
 				{
 					mem_copy(&tmp, pMsg, sizeof(T));
-					result = SendPackMsgTranslate(&tmp, Flags, i);
+					Result = SendPackMsgTranslate(&tmp, Flags, i);
 				}
 		} else {
 			mem_copy(&tmp, pMsg, sizeof(T));
-			result = SendPackMsgTranslate(&tmp, Flags, ClientID);
+			Result = SendPackMsgTranslate(&tmp, Flags, ClientID);
 		}
-		return result;
+		return Result;
+	}
+
+	template<class T, typename std::enable_if<protocol7::is_sixup<T>::value, int>::type = 1>
+	inline int SendPackMsg(T *pMsg, int Flags, int ClientID)
+	{
+		int Result = 0;
+		if(ClientID == -1)
+		{
+			for(int i = 0; i < MAX_CLIENTS; i++)
+				if(ClientIngame(i) && IsSixup(i))
+					Result = SendPackMsgOne(pMsg, Flags, i);
+		}
+		else if(IsSixup(ClientID))
+			Result = SendPackMsgOne(pMsg, Flags, ClientID);
+
+		return Result;
 	}
 
 	template<class T>
@@ -87,12 +107,23 @@ public:
 
 	int SendPackMsgTranslate(CNetMsg_Sv_Chat *pMsg, int Flags, int ClientID)
 	{
-		if (pMsg->m_ClientID >= 0 && !Translate(pMsg->m_ClientID, ClientID))
+		if(pMsg->m_ClientID >= 0 && !Translate(pMsg->m_ClientID, ClientID))
 		{
 			str_format(msgbuf, sizeof(msgbuf), "%s: %s", ClientName(pMsg->m_ClientID), pMsg->m_pMessage);
 			pMsg->m_pMessage = msgbuf;
 			pMsg->m_ClientID = VANILLA_MAX_CLIENTS - 1;
 		}
+
+		if(IsSixup(ClientID))
+		{
+			protocol7::CNetMsg_Sv_Chat Msg7;
+			Msg7.m_ClientID = pMsg->m_ClientID;
+			Msg7.m_pMessage = pMsg->m_pMessage;
+			Msg7.m_Mode = pMsg->m_Team > 0 ? protocol7::CHAT_TEAM : protocol7::CHAT_ALL;
+			Msg7.m_TargetID = -1;
+			return SendPackMsgOne(&Msg7, Flags, ClientID);
+		}
+
 		return SendPackMsgOne(pMsg, Flags, ClientID);
 	}
 
@@ -106,7 +137,9 @@ public:
 	template<class T>
 	int SendPackMsgOne(T *pMsg, int Flags, int ClientID)
 	{
-		CMsgPacker Packer(pMsg->MsgID(), false);
+		dbg_assert(ClientID != -1, "SendPackMsgOne called with -1");
+		CMsgPacker Packer(pMsg->MsgID(), false, protocol7::is_sixup<T>::value);
+
 		if(pMsg->Pack(&Packer))
 			return -1;
 		return SendMsg(&Packer, Flags, ClientID);
@@ -114,6 +147,8 @@ public:
 
 	bool Translate(int& Target, int Client)
 	{
+		if(IsSixup(Client))
+			return true;
 		CClientInfo Info;
 		GetClientInfo(Client, &Info);
 		if (Info.m_DDNetVersion >= VERSION_DDNET_OLD)
@@ -134,6 +169,8 @@ public:
 
 	bool ReverseTranslate(int& Target, int Client)
 	{
+		if(IsSixup(Client))
+			return true;
 		CClientInfo Info;
 		GetClientInfo(Client, &Info);
 		if (Info.m_DDNetVersion >= VERSION_DDNET_OLD)
@@ -199,6 +236,8 @@ public:
 	virtual void SendMsgRaw(int ClientID, const void *pData, int Size, int Flags) = 0;
 
 	virtual char *GetMapName() = 0;
+
+	virtual bool IsSixup(int ClientID) = 0;
 };
 
 class IGameServer : public IInterface
