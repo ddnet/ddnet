@@ -1181,15 +1181,18 @@ int CMenus::Render()
 		else if(m_Popup == POPUP_FIRST_LAUNCH)
 		{
 			pTitle = Localize("Welcome to DDNet");
-			pExtraText = Localize("As this is the first time you launch the game, please enter your nick name below. It's recommended that you check the settings to adjust them to your liking before joining a server.");
+			pExtraText = Localize("DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.\n\nThe maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.\n\nThe mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.\n\nHook (right mouse) can be used to swing through the map and to hook other tees to you.\n\nMost importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.\n\nIt's recommended that you check the settings to adjust them to your liking before joining a server.\n\nPlease enter your nick name below.");
 			pButtonText = Localize("Ok");
 			ExtraAlign = -1;
 		}
 
 		CUIRect Box, Part;
 		Box = Screen;
-		Box.VMargin(150.0f/UI()->Scale(), &Box);
-		Box.HMargin(150.0f/UI()->Scale(), &Box);
+		if(m_Popup != POPUP_FIRST_LAUNCH)
+		{
+			Box.VMargin(150.0f/UI()->Scale(), &Box);
+			Box.HMargin(150.0f/UI()->Scale(), &Box);
+		}
 
 		// render the box
 		RenderTools()->DrawUIRect(&Box, ColorRGBA(0,0,0,0.5f), CUI::CORNER_ALL, 15.0f);
@@ -1205,14 +1208,16 @@ int CMenus::Render()
 		Box.HSplitTop(24.f/UI()->Scale(), &Part, &Box);
 		Part.VMargin(20.f/UI()->Scale(), &Part);
 
+		float FontSize = m_Popup == POPUP_FIRST_LAUNCH ? 16.0f : 20.f;
+
 		if(ExtraAlign == -1)
-			UI()->DoLabelScaled(&Part, pExtraText, 20.f, -1, (int)Part.w);
+			UI()->DoLabelScaled(&Part, pExtraText, FontSize, -1, (int)Part.w);
 		else
 		{
-			if(TextRender()->TextWidth(0, 20.f, pExtraText, -1) > Part.w)
-				UI()->DoLabelScaled(&Part, pExtraText, 20.f, -1, (int)Part.w);
+			if(TextRender()->TextWidth(0, FontSize, pExtraText, -1) > Part.w)
+				UI()->DoLabelScaled(&Part, pExtraText, FontSize, -1, (int)Part.w);
 			else
-				UI()->DoLabelScaled(&Part, pExtraText, 20.f, 0, -1);
+				UI()->DoLabelScaled(&Part, pExtraText, FontSize, 0, -1);
 		}
 
 		if(m_Popup == POPUP_QUIT)
@@ -1770,17 +1775,18 @@ int CMenus::Render()
 			Box.HSplitBottom(20.f, &Box, &Part);
 			Box.HSplitBottom(24.f, &Box, &Part);
 
-			Part.VSplitLeft(60.0f, 0, &Part);
+			Part.VSplitLeft(30.0f, 0, &Part);
 			if(DoButton_CheckBox(&g_Config.m_BrIndicateFinished, Localize("Show DDNet map finishes in server browser\n(transmits your player name to info.ddnet.tw)"), g_Config.m_BrIndicateFinished, &Part))
 				g_Config.m_BrIndicateFinished ^= 1;
 
+			Box.HSplitBottom(20.f, &Box, &Part);
 			Box.HSplitBottom(24.f, &Box, &Part);
 
 			Part.VSplitLeft(60.0f, 0, &Label);
 			Label.VSplitLeft(100.0f, 0, &TextBox);
 			TextBox.VSplitLeft(20.0f, 0, &TextBox);
 			TextBox.VSplitRight(60.0f, &TextBox, 0);
-			UI()->DoLabel(&Label, Localize("Nickname"), 18.0f, -1);
+			UI()->DoLabel(&Label, Localize("Nickname"), 16.0f, -1);
 			static float Offset = 0.0f;
 			DoEditBox(&g_Config.m_PlayerName, &TextBox, g_Config.m_PlayerName, sizeof(g_Config.m_PlayerName), 12.0f, &Offset);
 		}
