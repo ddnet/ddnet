@@ -216,6 +216,13 @@ bool CNetServer::Connlimit(NETADDR Addr)
 
 int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, bool VanillaAuth, bool Sixup, SECURITY_TOKEN Token)
 {
+	if(Sixup && !g_Config.m_SvSixup)
+	{
+		const char Msg[] = "0.7 connections are not accepted at this time";
+		CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, Msg, sizeof(Msg), SecurityToken, Sixup);
+		return -1; // failed to add client?
+	}
+
 	if (Connlimit(Addr))
 	{
 		const char Msg[] = "Too many connections in a short time";
