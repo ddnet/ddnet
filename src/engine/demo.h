@@ -30,7 +30,7 @@ struct CDemoHeader
 	unsigned char m_aMarker[7];
 	unsigned char m_Version;
 	char m_aNetversion[64];
-	char m_aMapName[MAX_MAP_LENGTH];
+	char m_aMapName[64];
 	unsigned char m_aMapSize[4];
 	unsigned char m_aMapCrc[4];
 	char m_aType[8];
