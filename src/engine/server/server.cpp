@@ -2115,7 +2115,8 @@ void CServer::PumpNetwork()
 				continue;
 			}
 
-			if(ResponseToken != NET_SECURITY_TOKEN_UNKNOWN && m_RegSixup.RegisterProcessPacket(&Packet, ResponseToken))
+			if(ResponseToken != NET_SECURITY_TOKEN_UNKNOWN && g_Config.m_SvSixup &&
+				m_RegSixup.RegisterProcessPacket(&Packet, ResponseToken))
 				continue;
 			if(ResponseToken == NET_SECURITY_TOKEN_UNKNOWN && m_Register.RegisterProcessPacket(&Packet))
 				continue;
@@ -2139,7 +2140,7 @@ void CServer::PumpNetwork()
 				{
 					Type = SERVERINFO_64_LEGACY;
 				}
-				if(Type == SERVERINFO_VANILLA && ResponseToken != NET_SECURITY_TOKEN_UNKNOWN)
+				if(Type == SERVERINFO_VANILLA && ResponseToken != NET_SECURITY_TOKEN_UNKNOWN && g_Config.m_SvSixup)
 				{
 					CUnpacker Unpacker;
 					Unpacker.Reset((unsigned char*)Packet.m_pData+sizeof(SERVERBROWSE_GETINFO), Packet.m_DataSize-sizeof(SERVERBROWSE_GETINFO));
@@ -2480,7 +2481,8 @@ int CServer::Run()
 
 			// master server stuff
 			m_Register.RegisterUpdate(m_NetServer.NetType());
-			m_RegSixup.RegisterUpdate(m_NetServer.NetType());
+			if(g_Config.m_SvSixup)
+				m_RegSixup.RegisterUpdate(m_NetServer.NetType());
 
 			if(m_ServerInfoNeedsUpdate)
 				UpdateServerInfo();
