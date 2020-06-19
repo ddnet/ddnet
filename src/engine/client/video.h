@@ -60,6 +60,7 @@ public:
 	virtual void start();
 	virtual void stop();
 	virtual void pause(bool p);
+	virtual bool isRecording() { return m_Recording; }
 
 	virtual void nextVideoFrame();
 	virtual void nextVideoFrame_thread();
