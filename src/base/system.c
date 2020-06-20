@@ -3247,6 +3247,21 @@ void shell_execute(const char *file)
 #endif
 }
 
+int open_link(const char *link)
+{
+	char aBuf[512];
+#if defined(CONF_FAMILY_WINDOWS)
+	str_format(aBuf, sizeof(aBuf), "start %s", link);
+	return (uintptr_t)ShellExecuteA(NULL, "open", link, NULL, NULL, SW_SHOWDEFAULT) > 32;
+#elif defined(CONF_PLATFORM_LINUX)
+	str_format(aBuf, sizeof(aBuf), "xdg-open %s", link);
+	return system(aBuf) == 0;
+#elif defined(CONF_FAMILY_UNIX)
+	str_format(aBuf, sizeof(aBuf), "open %s", link);
+	return system(aBuf) == 0;
+#endif
+}
+
 int os_is_winxp_or_lower(void)
 {
 #if defined(CONF_FAMILY_WINDOWS)
