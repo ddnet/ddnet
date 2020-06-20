@@ -574,16 +574,27 @@ void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
 
 	const char* pTimeout = pResult->NumArguments() > 0 ? pResult->GetString(0) : pPlayer->m_TimeoutCode;
 
-	for(int i = 0; i < pSelf->Server()->MaxClients(); i++)
+	if(!pSelf->Server()->IsSixup(pResult->m_ClientID))
 	{
-		if (i == pResult->m_ClientID) continue;
-		if (!pSelf->m_apPlayers[i]) continue;
-		if (str_comp(pSelf->m_apPlayers[i]->m_TimeoutCode, pTimeout)) continue;
-		if (pSelf->Server()->SetTimedOut(i, pResult->m_ClientID)) {
-			if (pSelf->m_apPlayers[i]->GetCharacter())
-				pSelf->SendTuningParams(i, pSelf->m_apPlayers[i]->GetCharacter()->m_TuneZone);
-			return;
+		for(int i = 0; i < pSelf->Server()->MaxClients(); i++)
+		{
+			if (i == pResult->m_ClientID) continue;
+			if (!pSelf->m_apPlayers[i]) continue;
+			if (str_comp(pSelf->m_apPlayers[i]->m_TimeoutCode, pTimeout)) continue;
+			if (pSelf->Server()->SetTimedOut(i, pResult->m_ClientID))
+			{
+				if (pSelf->m_apPlayers[i]->GetCharacter())
+					pSelf->SendTuningParams(i, pSelf->m_apPlayers[i]->GetCharacter()->m_TuneZone);
+				/*if(pSelf->Server()->IsSixup(i))
+					pSelf->SendClientInfo(i, i);*/
+				return;
+			}
 		}
+	}
+	else
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "print",
+			"Your timeout code has been set. 0.7 clients can not reclaim their tees on timeout; however, a 0.6 client can claim your tee ");
 	}
 
 	pSelf->Server()->SetTimeoutProtected(pResult->m_ClientID);

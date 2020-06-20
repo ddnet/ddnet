@@ -472,7 +472,7 @@ int CNetConnection::Update()
 	return 0;
 }
 
-void CNetConnection::SetTimedOut(const NETADDR *pAddr, int Sequence, int Ack, SECURITY_TOKEN SecurityToken, TStaticRingBuffer<CNetChunkResend, NET_CONN_BUFFERSIZE> *pResendBuffer)
+void CNetConnection::SetTimedOut(const NETADDR *pAddr, int Sequence, int Ack, SECURITY_TOKEN SecurityToken, TStaticRingBuffer<CNetChunkResend, NET_CONN_BUFFERSIZE> *pResendBuffer, bool Sixup)
 {
 	int64 Now = time_get();
 
@@ -487,6 +487,7 @@ void CNetConnection::SetTimedOut(const NETADDR *pAddr, int Sequence, int Ack, SE
 	m_LastRecvTime = Now;
 	m_LastUpdateTime = Now;
 	m_SecurityToken = SecurityToken;
+	m_Sixup = Sixup;
 
 	// copy resend buffer
 	m_Buffer.Init();
