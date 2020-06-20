@@ -20,6 +20,10 @@ struct CSqlPlayerResult
 	std::atomic_bool m_Done;
 	CSqlPlayerResult();
 
+	enum {
+		MAX_MESSAGES = 7,
+	};
+
 	enum Variant
 	{
 		DIRECT,
@@ -28,8 +32,8 @@ struct CSqlPlayerResult
 		MAP_VOTE,
 		PLAYER_INFO,
 	} m_MessageKind;
-	char m_aaMessages[7][512];
 	union {
+		char m_aaMessages[MAX_MESSAGES][512];
 		char m_Broadcast[1024];
 		struct {
 			float m_Time;
@@ -62,7 +66,8 @@ struct CSqlRandomMapResult
 	char m_aMessage[512];
 };
 
-struct CSqlSaveResult {
+struct CSqlSaveResult
+{
 	CSqlSaveResult(int PlayerID, IGameController* Controller) :
 		m_Status(SAVE_FAILED),
 		m_SavedTeam(CSaveTeam(Controller)),

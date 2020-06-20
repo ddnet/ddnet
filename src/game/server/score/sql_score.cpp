@@ -36,8 +36,8 @@ void CSqlPlayerResult::SetVariant(Variant v)
 	{
 	case DIRECT:
 	case ALL:
-		for(int i = 0; i < (int)(sizeof(m_aaMessages)/sizeof(m_aaMessages[0])); i++)
-			m_aaMessages[i][0] = 0;
+		for(int i = 0; i < MAX_MESSAGES; i++)
+			m_Data.m_aaMessages[i][0] = 0;
 		break;
 	case BROADCAST:
 		m_Data.m_Broadcast[0] = 0;
@@ -335,7 +335,7 @@ void CSqlScore::MapVote(int ClientID, const char* MapName)
 bool CSqlScore::MapVoteThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
-	auto paMessages = pData->m_pResult->m_aaMessages;
+	auto paMessages = pData->m_pResult->m_Data.m_aaMessages;
 
 	if (HandleFailure)
 		return true;
@@ -444,7 +444,7 @@ bool CSqlScore::MapInfoThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerR
 
 		if(pSqlServer->GetResults()->rowsCount() != 1)
 		{
-			str_format(pData->m_pResult->m_aaMessages[0], sizeof(pData->m_pResult->m_aaMessages[0]),
+			str_format(pData->m_pResult->m_Data.m_aaMessages[0], sizeof(pData->m_pResult->m_Data.m_aaMessages[0]),
 					"No map like \"%s\" found.", pData->m_Name.Str());
 		}
 		else
@@ -499,7 +499,7 @@ bool CSqlScore::MapInfoThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerR
 				);
 			}
 
-			str_format(pData->m_pResult->m_aaMessages[0], sizeof(pData->m_pResult->m_aaMessages[0]),
+			str_format(pData->m_pResult->m_Data.m_aaMessages[0], sizeof(pData->m_pResult->m_Data.m_aaMessages[0]),
 					"\"%s\" by %s on %s, %s, %d %s%s, %d %s by %d %s%s%s",
 					aMap, aMapper, aServer, aStars,
 					Points, Points == 1 ? "point" : "points",
@@ -548,7 +548,7 @@ void CSqlScore::SaveScore(int ClientID, float Time, const char *pTimestamp, floa
 bool CSqlScore::SaveScoreThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure)
 {
 	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
-	auto paMessages = pData->m_pResult->m_aaMessages;
+	auto paMessages = pData->m_pResult->m_Data.m_aaMessages;
 
 	if(HandleFailure)
 	{
@@ -838,7 +838,7 @@ bool CSqlScore::ShowRankThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayer
 
 		if(pSqlServer->GetResults()->rowsCount() != 1)
 		{
-			str_format(pData->m_pResult->m_aaMessages[0], sizeof(pData->m_pResult->m_aaMessages[0]),
+			str_format(pData->m_pResult->m_Data.m_aaMessages[0], sizeof(pData->m_pResult->m_Data.m_aaMessages[0]),
 					"%s is not ranked", pData->m_Name.Str());
 		}
 		else
@@ -849,13 +849,13 @@ bool CSqlScore::ShowRankThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayer
 			int Rank = pSqlServer->GetResults()->getInt("Rank");
 			if(g_Config.m_SvHideScore)
 			{
-				str_format(pData->m_pResult->m_aaMessages[0], sizeof(pData->m_pResult->m_aaMessages[0]),
+				str_format(pData->m_pResult->m_Data.m_aaMessages[0], sizeof(pData->m_pResult->m_Data.m_aaMessages[0]),
 						"Your time: %02d:%05.2f", (int)(Time/60), Time-((int)Time/60*60));
 			}
 			else
 			{
 				pData->m_pResult->m_MessageKind = CSqlPlayerResult::ALL;
-				str_format(pData->m_pResult->m_aaMessages[0], sizeof(pData->m_pResult->m_aaMessages[0]),
+				str_format(pData->m_pResult->m_Data.m_aaMessages[0], sizeof(pData->m_pResult->m_Data.m_aaMessages[0]),
 						"%d. %s Time: %02d:%05.2f, requested by %s",
 						Rank, pSqlServer->GetResults()->getString("Name").c_str(),
 						(int)(Time/60), Time-((int)Time/60*60), pData->m_RequestingPlayer.Str());
@@ -927,7 +927,7 @@ bool CSqlScore::ShowTeamRankThread(CSqlServer* pSqlServer, const CSqlData<CSqlPl
 
 		if(Rows < 1)
 		{
-			str_format(pData->m_pResult->m_aaMessages[0], sizeof(pData->m_pResult->m_aaMessages[0]),
+			str_format(pData->m_pResult->m_Data.m_aaMessages[0], sizeof(pData->m_pResult->m_Data.m_aaMessages[0]),
 					"%s has no team ranks", pData->m_Name.Str());
 		}
 		else
@@ -949,13 +949,13 @@ bool CSqlScore::ShowTeamRankThread(CSqlServer* pSqlServer, const CSqlData<CSqlPl
 
 			if(g_Config.m_SvHideScore)
 			{
-				str_format(pData->m_pResult->m_aaMessages[0], sizeof(pData->m_pResult->m_aaMessages[0]),
+				str_format(pData->m_pResult->m_Data.m_aaMessages[0], sizeof(pData->m_pResult->m_Data.m_aaMessages[0]),
 						"Your team time: %02d:%05.02f", (int)(Time/60), Time-((int)Time/60*60));
 			}
 			else
 			{
 				pData->m_pResult->m_MessageKind = CSqlPlayerResult::ALL;
-				str_format(pData->m_pResult->m_aaMessages[0], sizeof(pData->m_pResult->m_aaMessages[0]),
+				str_format(pData->m_pResult->m_Data.m_aaMessages[0], sizeof(pData->m_pResult->m_Data.m_aaMessages[0]),
 						"%d. %s Team time: %02d:%05.02f, requested by %s",
 						Rank, aNames, (int)(Time/60), Time-((int)Time/60*60), pData->m_RequestingPlayer.Str());
 			}
@@ -1010,21 +1010,21 @@ bool CSqlScore::ShowTop5Thread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayer
 		pSqlServer->executeSqlQuery(aBuf);
 
 		// show top5
-		strcpy(pData->m_pResult->m_aaMessages[0], "----------- Top 5 -----------");
+		strcpy(pData->m_pResult->m_Data.m_aaMessages[0], "----------- Top 5 -----------");
 
 		int Line = 1;
 		while(pSqlServer->GetResults()->next())
 		{
 			float Time = (float)pSqlServer->GetResults()->getDouble("Time");
 			int Rank = pSqlServer->GetResults()->getInt("Rank");
-			str_format(pData->m_pResult->m_aaMessages[Line], sizeof(pData->m_pResult->m_aaMessages[0]),
+			str_format(pData->m_pResult->m_Data.m_aaMessages[Line], sizeof(pData->m_pResult->m_Data.m_aaMessages[Line]),
 					"%d. %s Time: %02d:%05.2f",
 					Rank, pSqlServer->GetResults()->getString("Name").c_str(),
 					(int)(Time/60), Time-((int)Time/60*60)
 			);
 			Line++;
 		}
-		strcpy(pData->m_pResult->m_aaMessages[Line], "-------------------------------");
+		strcpy(pData->m_pResult->m_Data.m_aaMessages[Line], "-------------------------------");
 
 		pData->m_pResult->m_Done = true;
 		dbg_msg("sql", "Showing top5 done");
@@ -1047,7 +1047,7 @@ void CSqlScore::ShowTeamTop5(int ClientID, int Offset)
 bool CSqlScore::ShowTeamTop5Thread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
-	auto paMessages = pData->m_pResult->m_aaMessages;
+	auto paMessages = pData->m_pResult->m_Data.m_aaMessages;
 	if (HandleFailure)
 		return true;
 
@@ -1102,7 +1102,7 @@ bool CSqlScore::ShowTeamTop5Thread(CSqlServer* pSqlServer, const CSqlData<CSqlPl
 					str_append(aNames, " & ", sizeof(aNames));
 				pSqlServer->GetResults()->next();
 			}
-			str_format(paMessages[Line], sizeof(paMessages[0]), "%d. %s Team Time: %02d:%05.2f",
+			str_format(paMessages[Line], sizeof(paMessages[Line]), "%d. %s Team Time: %02d:%05.2f",
 					Rank, aNames, (int)(Time/60), Time-((int)Time/60*60));
 		}
 		strcpy(paMessages[Line], "-------------------------------");
@@ -1132,7 +1132,7 @@ void CSqlScore::ShowTimes(int ClientID, const char* pName, int Offset)
 bool CSqlScore::ShowTimesThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
-	auto paMessages = pData->m_pResult->m_aaMessages;
+	auto paMessages = pData->m_pResult->m_Data.m_aaMessages;
 
 	if (HandleFailure)
 		return true;
@@ -1192,11 +1192,11 @@ bool CSqlScore::ShowTimesThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlaye
 			if(pData->m_Name.Str()[0] != '\0') // last 5 times of a player
 			{
 				if(pStamp == 0) // stamp is 00:00:00 cause it's an old entry from old times where there where no stamps yet
-					str_format(paMessages[Line], sizeof(paMessages[0]),
+					str_format(paMessages[Line], sizeof(paMessages[Line]),
 							"%02d:%05.02f, don't know how long ago",
 							(int)(pTime/60), pTime-((int)pTime/60*60));
 				else
-					str_format(paMessages[Line], sizeof(paMessages[0]),
+					str_format(paMessages[Line], sizeof(paMessages[Line]),
 							"%s ago, %02d:%05.02f",
 							aAgoString, (int)(pTime/60), pTime-((int)pTime/60*60));
 			}
@@ -1204,11 +1204,11 @@ bool CSqlScore::ShowTimesThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlaye
 			{
 				auto Name = pSqlServer->GetResults()->getString("Name");
 				if(pStamp == 0) // stamp is 00:00:00 cause it's an old entry from old times where there where no stamps yet
-					str_format(paMessages[Line], sizeof(paMessages[0]),
+					str_format(paMessages[Line], sizeof(paMessages[Line]),
 							"%s, %02d:%05.02f, don't know when",
 							Name.c_str(), (int)(pTime/60), pTime-((int)pTime/60*60));
 				else
-					str_format(paMessages[Line], sizeof(paMessages[0]),
+					str_format(paMessages[Line], sizeof(paMessages[Line]),
 							"%s, %s ago, %02d:%05.02f",
 							Name.c_str(), aAgoString, (int)(pTime/60), pTime-((int)pTime/60*60));
 			}
@@ -1236,7 +1236,7 @@ void CSqlScore::ShowPoints(int ClientID, const char* pName)
 bool CSqlScore::ShowPointsThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
-	auto paMessages = pData->m_pResult->m_aaMessages;
+	auto paMessages = pData->m_pResult->m_Data.m_aaMessages;
 
 	if (HandleFailure)
 		return true;
@@ -1293,7 +1293,7 @@ void CSqlScore::ShowTopPoints(int ClientID, int Offset)
 bool CSqlScore::ShowTopPointsThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
-	auto paMessages = pData->m_pResult->m_aaMessages;
+	auto paMessages = pData->m_pResult->m_Data.m_aaMessages;
 
 	if (HandleFailure)
 		return true;
@@ -1327,7 +1327,7 @@ bool CSqlScore::ShowTopPointsThread(CSqlServer* pSqlServer, const CSqlData<CSqlP
 			int Rank = pSqlServer->GetResults()->getInt("Rank");
 			auto Name = pSqlServer->GetResults()->getString("Name");
 			int Points = pSqlServer->GetResults()->getInt("Points");
-			str_format(paMessages[Line], sizeof(paMessages[0]),
+			str_format(paMessages[Line], sizeof(paMessages[Line]),
 					"%d. %s Points: %d", Rank, Name.c_str(), Points);
 			Line++;
 		}
@@ -1694,7 +1694,7 @@ void CSqlScore::LoadTeam(const char* Code, int ClientID)
 		if(pController->m_Teams.m_Core.Team(i) == Team)
 		{
 			// put all names at the beginning of the array
-			str_copy(Tmp->m_aClientNames[Tmp->m_NumPlayer], Server()->ClientName(i), sizeof(Tmp->m_aClientNames[0]));
+			str_copy(Tmp->m_aClientNames[Tmp->m_NumPlayer], Server()->ClientName(i), sizeof(Tmp->m_aClientNames[Tmp->m_NumPlayer]));
 			Tmp->m_aClientID[Tmp->m_NumPlayer] = i;
 			Tmp->m_NumPlayer++;
 		}
@@ -1814,7 +1814,7 @@ void CSqlScore::GetSaves(int ClientID)
 bool CSqlScore::GetSavesThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayerResult> *pGameData, bool HandleFailure)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
-	auto paMessages = pData->m_pResult->m_aaMessages;
+	auto paMessages = pData->m_pResult->m_Data.m_aaMessages;
 
 	if (HandleFailure)
 		return true;
