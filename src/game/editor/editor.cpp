@@ -1040,8 +1040,6 @@ static int EntitiesListdirCallback(const char *pName, int IsDir, int StorageType
 void CEditor::DoToolbar(CUIRect ToolBar)
 {
 	bool CtrlPressed = Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL);
-	bool ShiftPressed = Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT);
-	bool AltPressed = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
 
 	CUIRect TB_Top, TB_Bottom;
 	CUIRect Button;
@@ -1053,67 +1051,6 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	
 	// top line buttons
 	{
-		if(m_Dialog == DIALOG_NONE)
-		{
-			// ctrl+o or ctrl+l to open
-			if((Input()->KeyPress(KEY_O) || Input()->KeyPress(KEY_L)) && CtrlPressed)
-			{
-				if(ShiftPressed)
-				{
-					if(HasUnsavedData())
-					{
-						if(!m_PopupEventWasActivated)
-						{
-							m_PopupEventType = POPEVENT_LOADCURRENT;
-							m_PopupEventActivated = true;
-						}
-					}
-					else
-					{
-						LoadCurrentMap();
-					}
-				}
-				else
-				{
-					if(HasUnsavedData())
-					{
-						if(!m_PopupEventWasActivated)
-						{
-							m_PopupEventType = POPEVENT_LOAD;
-							m_PopupEventActivated = true;
-						}
-					}
-					else
-					{
-						InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Load map", "Load", "maps", "", CallbackOpenMap, this);
-					}
-				}
-			}
-
-			// ctrl+s to save
-			if(Input()->KeyPress(KEY_S) && CtrlPressed)
-			{
-				if(m_aFileName[0] && m_ValidSaveFilename)
-				{
-					if(!m_PopupEventWasActivated)
-					{
-						str_copy(m_aFileSaveName, m_aFileName, sizeof(m_aFileSaveName));
-						CallbackSaveMap(m_aFileSaveName, IStorage::TYPE_SAVE, this);
-					}
-				}
-				else
-					InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveMap, this);
-			}
-
-			// ctrl+shift+s to save as
-			if(Input()->KeyPress(KEY_S) && CtrlPressed && ShiftPressed)
-				InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveMap, this);
-
-			// ctrl+shift+alt+s to save as
-			if(Input()->KeyPress(KEY_S) && CtrlPressed && ShiftPressed && AltPressed)
-				InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveCopyMap, this);
-		}
-
 		// detail button
 		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 		static int s_HqButton = 0;
@@ -5835,6 +5772,70 @@ void CEditor::Render()
 	// do the toolbar
 	if(m_Mode == MODE_LAYERS)
 		DoToolbar(ToolBar);
+
+	if(m_Dialog == DIALOG_NONE)
+	{
+		bool CtrlPressed = Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL);
+		bool ShiftPressed = Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT);
+		bool AltPressed = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
+		// ctrl+o or ctrl+l to open
+		if((Input()->KeyPress(KEY_O) || Input()->KeyPress(KEY_L)) && CtrlPressed)
+		{
+			if(ShiftPressed)
+			{
+				if(HasUnsavedData())
+				{
+					if(!m_PopupEventWasActivated)
+					{
+						m_PopupEventType = POPEVENT_LOADCURRENT;
+						m_PopupEventActivated = true;
+					}
+				}
+				else
+				{
+					LoadCurrentMap();
+				}
+			}
+			else
+			{
+				if(HasUnsavedData())
+				{
+					if(!m_PopupEventWasActivated)
+					{
+						m_PopupEventType = POPEVENT_LOAD;
+						m_PopupEventActivated = true;
+					}
+				}
+				else
+				{
+					InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Load map", "Load", "maps", "", CallbackOpenMap, this);
+				}
+			}
+		}
+
+		// ctrl+s to save
+		if(Input()->KeyPress(KEY_S) && CtrlPressed)
+		{
+			if(m_aFileName[0] && m_ValidSaveFilename)
+			{
+				if(!m_PopupEventWasActivated)
+				{
+					str_copy(m_aFileSaveName, m_aFileName, sizeof(m_aFileSaveName));
+					CallbackSaveMap(m_aFileSaveName, IStorage::TYPE_SAVE, this);
+				}
+			}
+			else
+				InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveMap, this);
+		}
+
+		// ctrl+shift+s to save as
+		if(Input()->KeyPress(KEY_S) && CtrlPressed && ShiftPressed)
+			InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveMap, this);
+
+		// ctrl+shift+alt+s to save as
+		if(Input()->KeyPress(KEY_S) && CtrlPressed && ShiftPressed && AltPressed)
+			InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveCopyMap, this);
+	}
 
 	if(m_GuiActive)
 	{
