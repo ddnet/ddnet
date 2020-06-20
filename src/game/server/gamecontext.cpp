@@ -1454,6 +1454,25 @@ void *CGameContext::PreProcessMsg(int *MsgID, CUnpacker *pUnpacker, int ClientID
 			*MsgID = NETMSGTYPE_CL_SAY;
 			return s_aRawMsg;
 		}
+		else if(*MsgID == protocol7::NETMSGTYPE_CL_CALLVOTE)
+		{
+			protocol7::CNetMsg_Cl_CallVote *pMsg7 = (protocol7::CNetMsg_Cl_CallVote *)pRawMsg;
+			::CNetMsg_Cl_CallVote *pMsg = (::CNetMsg_Cl_CallVote *)s_aRawMsg;
+
+			int Authed = Server()->GetAuthedState(ClientID);
+			if(pMsg7->m_Force)
+			{
+				str_format(s_aRawMsg, sizeof(s_aRawMsg), "force_vote \"%s\" \"%s\" \"%s\"", pMsg7->m_Type, pMsg7->m_Value, pMsg7->m_Reason);
+				Console()->SetAccessLevel(Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_HELPER);
+				Console()->ExecuteLine(s_aRawMsg, ClientID, false);
+				Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_ADMIN);
+				return 0;
+			}
+
+			pMsg->m_Value = pMsg7->m_Value;
+			pMsg->m_Reason = pMsg7->m_Reason;
+			pMsg->m_Type = pMsg7->m_Type;
+		}
 
 		*MsgID = Msg_SevenToSix(*MsgID);
 
