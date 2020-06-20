@@ -749,11 +749,7 @@ void CGameContext::OnTick()
 				int64 Now = Server()->Tick();
 				for(int i = 0; i < MAX_CLIENTS; i++)
 				{
-					//if(!m_apPlayers[i] || m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS || aVoteChecked[i])	// don't count in votes by spectators
-					if(!m_apPlayers[i] ||
-							(g_Config.m_SvSpectatorVotes == 0 &&
-									m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS) ||
-									aVoteChecked[i])	// don't count in votes by spectators if the admin doesn't want it
+					if(!m_apPlayers[i] || aVoteChecked[i])
 						continue;
 
 					if((m_VoteKick || m_VoteSpec) && (m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS ||
@@ -3766,12 +3762,6 @@ bool CGameContext::RateLimitPlayerVote(int ClientID)
 		return true;
 
 	pPlayer->m_LastVoteTry = Now;
-	if(g_Config.m_SvSpectatorVotes == 0 && pPlayer->GetTeam() == TEAM_SPECTATORS)
-	{
-		SendChatTarget(ClientID, "Spectators aren't allowed to start a vote.");
-		return true;
-	}
-
 	if(m_VoteCloseTime)
 	{
 		SendChatTarget(ClientID, "Wait for current vote to end before calling a new one.");
