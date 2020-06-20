@@ -23,6 +23,8 @@ void *g_pNewData[64];
 int g_Index = 0;
 int g_NextDataItemID = -1;
 
+int g_aImageIDs[64];
+
 int LoadPNG(CImageInfo *pImg, const char *pFilename)
 {
 	unsigned char *pBuffer;
@@ -58,6 +60,53 @@ int LoadPNG(CImageInfo *pImg, const char *pFilename)
 	return 1;
 }
 
+inline void IntsToStr(const int *pInts, int Num, char *pStr)
+{
+	while(Num)
+	{
+		pStr[0] = (((*pInts)>>24)&0xff)-128;
+		pStr[1] = (((*pInts)>>16)&0xff)-128;
+		pStr[2] = (((*pInts)>>8)&0xff)-128;
+		pStr[3] = ((*pInts)&0xff)-128;
+		pStr += 4;
+		pInts++;
+		Num--;
+	}
+
+	// null terminate
+	pStr[-1] = 0;
+}
+
+bool CheckImageDimensions(void *pItem, int Type, const char *pFilename)
+{
+	if(Type != MAPITEMTYPE_LAYER)
+		return true;
+
+	CMapItemLayer *pImgLayer = (CMapItemLayer *)pItem;
+	if(pImgLayer->m_Type != LAYERTYPE_TILES)
+		return true;
+
+	CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pImgLayer;
+	if(pTMap->m_Image == -1)
+		return true;
+
+	int TypeImg = 0;
+	int ID = 0;
+	void *pItem2 = g_DataReader.GetItem(g_aImageIDs[pTMap->m_Image], &TypeImg, &ID);
+	if(TypeImg != MAPITEMTYPE_IMAGE)
+		return true;
+
+	CMapItemImage *pImgItem = (CMapItemImage *)pItem2;
+	if(pImgItem->m_Width % 16 == 0)
+		return true;
+
+	char aTileLayerName[12];
+	IntsToStr(pTMap->m_aName, sizeof(pTMap->m_aName)/sizeof(int), aTileLayerName);
+	char *pName = (char *)g_DataReader.GetData(pImgItem->m_ImageName);
+	dbg_msg("map_convert_07", "%s: Tile layer \"%s\" uses image \"%s\" with width %d, which is not divisible by 16. This is not supported in Teeworlds 0.7. Please scale the image and replace it manually.", pFilename, aTileLayerName, pName, pImgItem->m_Width);
+	return false;
+}
+
 void *ReplaceImageItem(void *pItem, int Type, CMapItemImage *pNewImgItem)
 {
 	if(Type != MAPITEMTYPE_IMAGE)
@@ -80,7 +129,7 @@ void *ReplaceImageItem(void *pItem, int Type, CMapItemImage *pNewImgItem)
 
 	*pNewImgItem = *pImgItem;
 
-	pNewImgItem->m_Width  = ImgInfo.m_Width;
+	pNewImgItem->m_Width = ImgInfo.m_Width;
 	pNewImgItem->m_Height = ImgInfo.m_Height;
 	pNewImgItem->m_External = false;
 	int PixelSize = ImgInfo.m_Format == CImageInfo::FORMAT_RGB ? 3 : 4;
@@ -137,12 +186,25 @@ int main(int argc, const char **argv)
 
 	g_NextDataItemID = g_DataReader.NumData();
 
+	int i = 0;
+	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)
+	{
+		pItem = g_DataReader.GetItem(Index, &Type, &ID);
+		if(Type == MAPITEMTYPE_IMAGE)
+			g_aImageIDs[i++] = Index;
+	}
+
+	bool Success = true;
+
 	// add all items
 	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)
 	{
 		CMapItemImage NewImageItem;
 		pItem = g_DataReader.GetItem(Index, &Type, &ID);
 		Size = g_DataReader.GetItemSize(Index);
+
+		Success &= CheckImageDimensions(pItem, Type, pSourceFileName);
+
 		pItem = ReplaceImageItem(pItem, Type, &NewImageItem);
 		if(!pItem)
 			return -1;
@@ -166,5 +228,5 @@ int main(int argc, const char **argv)
 
 	g_DataReader.Close();
 	g_DataWriter.Finish();
-	return 0;
+	return Success ? 0 : -1;
 }
