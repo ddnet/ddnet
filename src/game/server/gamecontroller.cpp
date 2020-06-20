@@ -581,7 +581,7 @@ void IGameController::Snap(int SnappingClient)
 			return;
 
 		pRaceData->m_BestTime = round_to_int(m_CurrentRecord * 1000);
-		pRaceData->m_Precision = 3;
+		pRaceData->m_Precision = 0;
 		pRaceData->m_RaceFlags = protocol7::RACEFLAG_HIDE_KILLMSG | protocol7::RACEFLAG_KEEP_WANTED_WEAPON;
 	}
 }
