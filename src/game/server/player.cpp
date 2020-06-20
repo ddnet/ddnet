@@ -874,23 +874,22 @@ void CPlayer::ProcessSqlResult(CSqlPlayerResult &Result)
 {
 	if(Result.m_Done) // SQL request was successful
 	{
-		int NumMessages = (int)(sizeof(Result.m_aaMessages)/sizeof(Result.m_aaMessages[0]));
 		switch(Result.m_MessageKind)
 		{
 		case CSqlPlayerResult::DIRECT:
-			for(int i = 0; i < NumMessages; i++)
+			for(int i = 0; i < CSqlPlayerResult::MAX_MESSAGES; i++)
 			{
-				if(Result.m_aaMessages[i][0] == 0)
+				if(Result.m_Data.m_aaMessages[i][0] == 0)
 					break;
-				GameServer()->SendChatTarget(m_ClientID, Result.m_aaMessages[i]);
+				GameServer()->SendChatTarget(m_ClientID, Result.m_Data.m_aaMessages[i]);
 			}
 			break;
 		case CSqlPlayerResult::ALL:
-			for(int i = 0; i < NumMessages; i++)
+			for(int i = 0; i < CSqlPlayerResult::MAX_MESSAGES; i++)
 			{
-				if(Result.m_aaMessages[i][0] == 0)
+				if(Result.m_Data.m_aaMessages[i][0] == 0)
 					break;
-				GameServer()->SendChat(-1, CGameContext::CHAT_ALL, Result.m_aaMessages[i]);
+				GameServer()->SendChat(-1, CGameContext::CHAT_ALL, Result.m_Data.m_aaMessages[i]);
 			}
 			break;
 		case CSqlPlayerResult::BROADCAST:
