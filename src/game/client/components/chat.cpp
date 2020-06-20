@@ -543,6 +543,63 @@ bool CChat::LineShouldHighlight(const char *pLine, const char *pName)
 	return false;
 }
 
+#define SAVES_FILE "ddnet-saves.txt"
+const char *SAVES_HEADER = "Time,Player,Map,Code";
+
+void CChat::StoreSave(const char *pText)
+{
+	const char *pStart = str_find(pText, "Team successfully saved by ");
+	const char *pMid = str_find(pText, ". Use '/load ");
+	const char *pEnd = str_find(pText, "' to continue");
+
+	if(!pStart || !pMid || !pEnd || pMid < pStart || pEnd < pMid)
+		return;
+
+	char aName[16];
+	str_copy(aName, pStart + 27, minimum(static_cast<size_t>(pMid - pStart - 26), sizeof(aName)));
+
+	char aSaveCode[64];
+	str_copy(aSaveCode, pMid + 13, minimum(static_cast<size_t>(pEnd - pMid - 12), sizeof(aSaveCode)));
+
+	char aTimestamp[20];
+	str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_SPACE);
+
+	// TODO: Find a simple way to get the names of team members. This doesn't
+	// work since team is killed first, then save message gets sent:
+	/*
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		const CNetObj_PlayerInfo *pInfo = GameClient()->m_Snap.m_paInfoByDDTeam[i];
+		if(!pInfo)
+			continue;
+		pInfo->m_Team // All 0
+	}
+	*/
+
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "%s,%s,%s,%s", aTimestamp, aName, Client()->GetCurrentMap(), aSaveCode);
+
+	IOHANDLE File = Storage()->OpenFile(SAVES_FILE, IOFLAG_READ, IStorage::TYPE_SAVE);
+	bool FileExists = File;
+	if(File)
+		io_close(File);
+
+	File = Storage()->OpenFile(SAVES_FILE, IOFLAG_APPEND, IStorage::TYPE_SAVE);
+
+	if(!File)
+		return;
+
+	if(!FileExists)
+	{
+		io_write(File, SAVES_HEADER, str_length(SAVES_HEADER));
+		io_write_newline(File);
+	}
+
+	io_write(File, aBuf, str_length(aBuf));
+	io_write_newline(File);
+	io_close(File);
+}
+
 void CChat::AddLine(int ClientID, int Team, const char *pLine)
 {
 	if(*pLine == 0 ||
@@ -640,6 +697,9 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		{
 			str_copy(m_aLines[m_CurrentLine].m_aName, "*** ", sizeof(m_aLines[m_CurrentLine].m_aName));
 			str_format(m_aLines[m_CurrentLine].m_aText, sizeof(m_aLines[m_CurrentLine].m_aText), "%s", pLine);
+
+			if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
+				StoreSave(m_aLines[m_CurrentLine].m_aText);
 		}
 		else
 		{
