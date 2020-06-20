@@ -127,6 +127,8 @@ public:
 	CTuningParams *Tuning() { return &m_Tuning; }
 	CTuningParams *TuningList() { return &m_aTuningList[0]; }
 	IAntibot *Antibot() { return m_pAntibot; }
+	CTeeHistorian *TeeHistorian() { return &m_TeeHistorian; }
+	bool TeeHistorianActive() const { return m_TeeHistorianActive; }
 
 	CGameContext();
 	~CGameContext();

@@ -490,6 +490,70 @@ void CTeeHistorian::RecordTestExtra()
 	WriteExtra(UUID_TEEHISTORIAN_TEST, "", 0);
 }
 
+void CTeeHistorian::RecordTeamSaveSuccess(int Team, CUuid SaveID, const char *pTeamSave)
+{
+	CPacker Buffer;
+	Buffer.Reset();
+	Buffer.AddInt(Team);
+	Buffer.AddRaw(&SaveID, sizeof(SaveID));
+	Buffer.AddString(pTeamSave, 0);
+
+	if(m_Debug)
+	{
+		char aSaveID[UUID_MAXSTRSIZE];
+		FormatUuid(SaveID, aSaveID, sizeof(aSaveID));
+		dbg_msg("teehistorian", "save_load team=%d save_id=%s team_save='%s'", Team, aSaveID, pTeamSave);
+	}
+
+	WriteExtra(UUID_TEEHISTORIAN_SAVE_SUCCESS, Buffer.Data(), Buffer.Size());
+}
+
+void CTeeHistorian::RecordTeamSaveFailure(int Team)
+{
+	CPacker Buffer;
+	Buffer.Reset();
+	Buffer.AddInt(Team);
+
+	if(m_Debug)
+	{
+		dbg_msg("teehistorian", "save_load team=%d", Team);
+	}
+
+	WriteExtra(UUID_TEEHISTORIAN_SAVE_FAILURE, Buffer.Data(), Buffer.Size());
+}
+
+void CTeeHistorian::RecordTeamLoadSuccess(int Team, CUuid SaveID, const char *pTeamSave)
+{
+	CPacker Buffer;
+	Buffer.Reset();
+	Buffer.AddInt(Team);
+	Buffer.AddRaw(&SaveID, sizeof(SaveID));
+	Buffer.AddString(pTeamSave, 0);
+
+	if(m_Debug)
+	{
+		char aSaveID[UUID_MAXSTRSIZE];
+		FormatUuid(SaveID, aSaveID, sizeof(aSaveID));
+		dbg_msg("teehistorian", "save_load team=%d save_id=%s team_save='%s'", Team, aSaveID, pTeamSave);
+	}
+
+	WriteExtra(UUID_TEEHISTORIAN_LOAD_SUCCESS, Buffer.Data(), Buffer.Size());
+}
+
+void CTeeHistorian::RecordTeamLoadFailure(int Team)
+{
+	CPacker Buffer;
+	Buffer.Reset();
+	Buffer.AddInt(Team);
+
+	if(m_Debug)
+	{
+		dbg_msg("teehistorian", "save_load team=%d", Team);
+	}
+
+	WriteExtra(UUID_TEEHISTORIAN_LOAD_FAILURE, Buffer.Data(), Buffer.Size());
+}
+
 void CTeeHistorian::EndInputs()
 {
 	dbg_assert(m_State == STATE_INPUTS, "invalid teehistorian state");
