@@ -198,7 +198,7 @@ void CCharacter::HandleNinja()
 		GameServer()->CreateDamageInd(m_Pos, 0, NinjaTime / Server()->TickSpeed(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 	}
 
-	m_Armor = 10 - (NinjaTime / 15);
+	m_Armor = clamp(10 - (NinjaTime / 15), 0, 10);
 
 	// force ninja Weapon
 	SetWeapon(WEAPON_NINJA);
@@ -1179,6 +1179,12 @@ void CCharacter::SnapCharacter(int SnappingClient)
 		pCharacter->m_Direction = m_Input.m_Direction;
 		pCharacter->m_Weapon = Weapon;
 		pCharacter->m_AmmoCount = AmmoCount;
+
+		if (m_FreezeTime > 0 || m_FreezeTime == -1 || m_DeepFreeze)
+			pCharacter->m_AmmoCount = m_FreezeTick + g_Config.m_SvFreezeDelay * Server()->TickSpeed();
+		else if(Weapon == WEAPON_NINJA)
+			pCharacter->m_AmmoCount = m_Ninja.m_ActivationTick + g_pData->m_Weapons.m_Ninja.m_Duration * Server()->TickSpeed() / 1000;
+
 		pCharacter->m_Health = Health;
 		pCharacter->m_Armor = Armor;
 		pCharacter->m_TriggeredEvents = 0;
