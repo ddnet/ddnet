@@ -1525,10 +1525,6 @@ void CSqlScore::SaveTeam(int ClientID, const char* Code, const char* Server)
 	GeneratePassphrase(Tmp->m_aGeneratedCode, sizeof(Tmp->m_aGeneratedCode));
 
 	pController->m_Teams.KillSavedTeam(ClientID, Team);
-	char aBuf[512];
-	// TODO: better message, maybe hint that one should wait until the next message to leave
-	str_format(aBuf, sizeof(aBuf), "Saving team initiated by '%s'", this->Server()->ClientName(ClientID));
-	GameServer()->SendChatTeam(Team, aBuf);
 	thread_init_and_detach(
 			CSqlExecData<CSqlSaveResult>::ExecSqlFunc,
 			new CSqlExecData<CSqlSaveResult>(SaveTeamThread, Tmp, false),
@@ -1703,9 +1699,6 @@ void CSqlScore::LoadTeam(const char* Code, int ClientID)
 			Tmp->m_NumPlayer++;
 		}
 	}
-	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "Loading team initiated by '%s'", this->Server()->ClientName(ClientID));
-	GameServer()->SendChatTeam(Team, aBuf);
 	thread_init_and_detach(
 			CSqlExecData<CSqlSaveResult>::ExecSqlFunc,
 			new CSqlExecData<CSqlSaveResult>(LoadTeamThread, Tmp, false),
