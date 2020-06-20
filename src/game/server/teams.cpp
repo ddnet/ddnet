@@ -690,7 +690,7 @@ void CGameTeams::ProcessSaveTeam()
 			continue;
 		if(m_pSaveTeamResult[Team]->m_aBroadcast[0] != '\0')
 			GameServer()->SendBroadcast(m_pSaveTeamResult[Team]->m_aBroadcast, -1);
-		if(m_pSaveTeamResult[Team]->m_aMessage[0] != '\0')
+		if(m_pSaveTeamResult[Team]->m_aMessage[0] != '\0' && m_pSaveTeamResult[Team]->m_Status != CSqlSaveResult::LOAD_FAILED)
 			GameServer()->SendChatTeam(Team, m_pSaveTeamResult[Team]->m_aMessage);
 		// TODO: log load/save success/fail in teehistorian
 		switch(m_pSaveTeamResult[Team]->m_Status)
@@ -717,6 +717,8 @@ void CGameTeams::ProcessSaveTeam()
 			break;
 		}
 		case CSqlSaveResult::LOAD_FAILED:
+			if(m_pSaveTeamResult[Team]->m_aMessage[0] != '\0')
+				GameServer()->SendChatTarget(m_pSaveTeamResult[Team]->m_RequestingPlayer, m_pSaveTeamResult[Team]->m_aMessage);
 			break;
 		}
 		m_pSaveTeamResult[Team] = nullptr;
