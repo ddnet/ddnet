@@ -1987,7 +1987,7 @@ void CServer::CacheServerInfoSixup(CCache *pCache, bool SendClients)
 				Packer.AddString(ClientName(i), MAX_NAME_LENGTH); // client name
 				Packer.AddString(ClientClan(i), MAX_CLAN_LENGTH); // client clan
 				Packer.AddInt(m_aClients[i].m_Country); // client country
-				Packer.AddInt(m_aClients[i].m_Score); // client score
+				Packer.AddInt(m_aClients[i].m_Score == -9999 ? -1 : -m_aClients[i].m_Score); // client score
 				Packer.AddInt(GameServer()->IsClientPlayer(i)?0:1); // flag spectator=1, bot=2 (player=0)
 			}
 		}
