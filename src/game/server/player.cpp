@@ -346,8 +346,6 @@ void CPlayer::Snap(int SnappingClient)
 	// send 0 if times of others are not shown
 	if(SnappingClient != m_ClientID && g_Config.m_SvHideScore)
 		Score = -9999;
-	else
-		Score = abs(m_Score) * -1;
 
 	if(!Server()->IsSixup(SnappingClient))
 	{
@@ -373,7 +371,7 @@ void CPlayer::Snap(int SnappingClient)
 		pPlayerInfo->m_PlayerFlags = PlayerFlags_SixToSeven(m_PlayerFlags);
 		if(Server()->ClientAuthed(m_ClientID))
 			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_ADMIN;
-		pPlayerInfo->m_Score = Score;
+		pPlayerInfo->m_Score = Score == -9999 ? -1 : -Score;
 		pPlayerInfo->m_Latency = Latency;
 	}
 
