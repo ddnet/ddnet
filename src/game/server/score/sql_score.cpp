@@ -1017,7 +1017,7 @@ bool CSqlScore::ShowTop5Thread(CSqlServer* pSqlServer, const CSqlData<CSqlPlayer
 		{
 			float Time = (float)pSqlServer->GetResults()->getDouble("Time");
 			int Rank = pSqlServer->GetResults()->getInt("Rank");
-			str_format(pData->m_pResult->m_Data.m_aaMessages[Line], sizeof(pData->m_pResult->m_Data.m_aaMessages[0]),
+			str_format(pData->m_pResult->m_Data.m_aaMessages[Line], sizeof(pData->m_pResult->m_Data.m_aaMessages[Line]),
 					"%d. %s Time: %02d:%05.2f",
 					Rank, pSqlServer->GetResults()->getString("Name").c_str(),
 					(int)(Time/60), Time-((int)Time/60*60)
@@ -1102,7 +1102,7 @@ bool CSqlScore::ShowTeamTop5Thread(CSqlServer* pSqlServer, const CSqlData<CSqlPl
 					str_append(aNames, " & ", sizeof(aNames));
 				pSqlServer->GetResults()->next();
 			}
-			str_format(paMessages[Line], sizeof(paMessages[0]), "%d. %s Team Time: %02d:%05.2f",
+			str_format(paMessages[Line], sizeof(paMessages[Line]), "%d. %s Team Time: %02d:%05.2f",
 					Rank, aNames, (int)(Time/60), Time-((int)Time/60*60));
 		}
 		strcpy(paMessages[Line], "-------------------------------");
@@ -1192,11 +1192,11 @@ bool CSqlScore::ShowTimesThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlaye
 			if(pData->m_Name.Str()[0] != '\0') // last 5 times of a player
 			{
 				if(pStamp == 0) // stamp is 00:00:00 cause it's an old entry from old times where there where no stamps yet
-					str_format(paMessages[Line], sizeof(paMessages[0]),
+					str_format(paMessages[Line], sizeof(paMessages[Line]),
 							"%02d:%05.02f, don't know how long ago",
 							(int)(pTime/60), pTime-((int)pTime/60*60));
 				else
-					str_format(paMessages[Line], sizeof(paMessages[0]),
+					str_format(paMessages[Line], sizeof(paMessages[Line]),
 							"%s ago, %02d:%05.02f",
 							aAgoString, (int)(pTime/60), pTime-((int)pTime/60*60));
 			}
@@ -1204,11 +1204,11 @@ bool CSqlScore::ShowTimesThread(CSqlServer* pSqlServer, const CSqlData<CSqlPlaye
 			{
 				auto Name = pSqlServer->GetResults()->getString("Name");
 				if(pStamp == 0) // stamp is 00:00:00 cause it's an old entry from old times where there where no stamps yet
-					str_format(paMessages[Line], sizeof(paMessages[0]),
+					str_format(paMessages[Line], sizeof(paMessages[Line]),
 							"%s, %02d:%05.02f, don't know when",
 							Name.c_str(), (int)(pTime/60), pTime-((int)pTime/60*60));
 				else
-					str_format(paMessages[Line], sizeof(paMessages[0]),
+					str_format(paMessages[Line], sizeof(paMessages[Line]),
 							"%s, %s ago, %02d:%05.02f",
 							Name.c_str(), aAgoString, (int)(pTime/60), pTime-((int)pTime/60*60));
 			}
@@ -1327,7 +1327,7 @@ bool CSqlScore::ShowTopPointsThread(CSqlServer* pSqlServer, const CSqlData<CSqlP
 			int Rank = pSqlServer->GetResults()->getInt("Rank");
 			auto Name = pSqlServer->GetResults()->getString("Name");
 			int Points = pSqlServer->GetResults()->getInt("Points");
-			str_format(paMessages[Line], sizeof(paMessages[0]),
+			str_format(paMessages[Line], sizeof(paMessages[Line]),
 					"%d. %s Points: %d", Rank, Name.c_str(), Points);
 			Line++;
 		}
@@ -1698,7 +1698,7 @@ void CSqlScore::LoadTeam(const char* Code, int ClientID)
 		if(pController->m_Teams.m_Core.Team(i) == Team)
 		{
 			// put all names at the beginning of the array
-			str_copy(Tmp->m_aClientNames[Tmp->m_NumPlayer], Server()->ClientName(i), sizeof(Tmp->m_aClientNames[0]));
+			str_copy(Tmp->m_aClientNames[Tmp->m_NumPlayer], Server()->ClientName(i), sizeof(Tmp->m_aClientNames[Tmp->m_NumPlayer]));
 			Tmp->m_aClientID[Tmp->m_NumPlayer] = i;
 			Tmp->m_NumPlayer++;
 		}

@@ -66,7 +66,8 @@ struct CSqlRandomMapResult
 	char m_aMessage[512];
 };
 
-struct CSqlSaveResult {
+struct CSqlSaveResult
+{
 	CSqlSaveResult(int PlayerID, IGameController* Controller) :
 		m_Status(SAVE_FAILED),
 		m_SavedTeam(CSaveTeam(Controller)),
