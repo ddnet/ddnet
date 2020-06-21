@@ -58,6 +58,7 @@ class IConsole;
 class IEngine;
 class IStorage;
 struct CAntibotData;
+struct CSqlRandomMapResult;
 
 class CGameContext : public IGameServer
 {
@@ -267,6 +268,8 @@ public:
 	// Checks if player can vote and notify them about the reason
 	bool RateLimitPlayerVote(int ClientID);
 	bool RateLimitPlayerMapVote(int ClientID);
+
+	std::shared_ptr<CSqlRandomMapResult> m_SqlRandomMapResult;
 
 private:
 

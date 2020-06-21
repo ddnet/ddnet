@@ -1347,9 +1347,8 @@ bool CSqlScore::ShowTopPointsThread(CSqlServer* pSqlServer, const CSqlData<CSqlP
 
 void CSqlScore::RandomMap(int ClientID, int Stars)
 {
-	CPlayer *pCurPlayer = GameServer()->m_apPlayers[ClientID];
-	auto pResult = std::make_shared<CSqlRandomMapResult>();
-	pCurPlayer->m_SqlRandomMapResult = pResult;
+	auto pResult = std::make_shared<CSqlRandomMapResult>(ClientID);
+	GameServer()->m_SqlRandomMapResult = pResult;
 
 	auto *Tmp = new CSqlRandomMapRequest(pResult);
 	Tmp->m_Stars = Stars;
@@ -1423,9 +1422,8 @@ bool CSqlScore::RandomMapThread(CSqlServer* pSqlServer, const CSqlData<CSqlRando
 
 void CSqlScore::RandomUnfinishedMap(int ClientID, int Stars)
 {
-	CPlayer *pCurPlayer = GameServer()->m_apPlayers[ClientID];
-	auto pResult = std::make_shared<CSqlRandomMapResult>();
-	pCurPlayer->m_SqlRandomMapResult = pResult;
+	auto pResult = std::make_shared<CSqlRandomMapResult>(ClientID);
+	GameServer()->m_SqlRandomMapResult = pResult;
 
 	auto *Tmp = new CSqlRandomMapRequest(pResult);
 	Tmp->m_Stars = Stars;
