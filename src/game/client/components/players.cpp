@@ -177,7 +177,7 @@ void CPlayers::RenderPlayer(
 
 	bool Local = m_pClient->m_Snap.m_LocalClientID == ClientID;
 	bool OtherTeam = m_pClient->IsOtherTeam(ClientID);
-	float Alpha = OtherTeam ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f;
+	float Alpha = (OtherTeam || !Active) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f;
 
 	// set size
 	RenderInfo.m_Size = 64.0f;
@@ -561,7 +561,7 @@ void CPlayers::RenderPlayer(
 		Graphics()->QuadsSetRotation(0);
 	}
 
-	if(OtherTeam || ClientID < 0)
+	if(OtherTeam || !Active || ClientID < 0)
 		RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position, g_Config.m_ClShowOthersAlpha / 100.0f);
 	else
 		RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position);
@@ -679,14 +679,9 @@ void CPlayers::OnRender()
 					int Skin = m_pClient->m_pSkins->Find("x_spec");
 					if(Skin != -1)
 					{
-						if(IsTeamplay)
-							m_aRenderInfo[i].m_Texture = m_pClient->m_pSkins->Get(Skin)->m_ColorTexture;
-						else
-						{
-							m_aRenderInfo[i].m_Texture = m_pClient->m_pSkins->Get(Skin)->m_OrgTexture;
-							m_aRenderInfo[i].m_ColorBody = ColorRGBA(1,1,1);
-							m_aRenderInfo[i].m_ColorFeet = ColorRGBA(1,1,1);
-						}
+						m_aRenderInfo[i].m_Texture = m_pClient->m_pSkins->Get(Skin)->m_OrgTexture;
+						m_aRenderInfo[i].m_ColorBody = ColorRGBA(1,1,1);
+						m_aRenderInfo[i].m_ColorFeet = ColorRGBA(1,1,1);
 					}
 				}
 
