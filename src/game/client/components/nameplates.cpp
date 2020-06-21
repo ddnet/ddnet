@@ -159,7 +159,7 @@ void CNamePlates::OnRender()
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		// only render active characters
-		if(!m_pClient->m_Snap.m_aCharacters[i].m_Active)
+		if(!m_pClient->m_Snap.m_aCharacters[i].m_Active && !g_Config.m_ClShowSpecTee)
 			continue;
 
 		const void *pInfo = Client()->SnapFindItem(IClient::SNAP_CURRENT, NETOBJTYPE_PLAYERINFO, i);
