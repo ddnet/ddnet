@@ -654,10 +654,10 @@ void CPlayers::OnRender()
 		m_aRenderInfo[i] = m_pClient->m_aClients[i].m_RenderInfo;
 
 		int FreezeEnd = m_pClient->m_Snap.m_aCharacters[i].m_ExtendedData.m_FreezeEnd;
-		bool IsFrozen = FreezeEnd == -1 || FreezeEnd > m_pClient->Client()->PredGameTick(0);
+		bool IsFrozen = FreezeEnd == -1 || FreezeEnd > m_pClient->Client()->PredGameTick(g_Config.m_ClDummy);
 
-		if(!g_Config.m_ClShowWeaponFreeze && IsFrozen)
-			m_pClient->m_Snap.m_aCharacters[i].m_Cur.m_Weapon = WEAPON_NINJA;
+		//if(!g_Config.m_ClShowWeaponFreeze && IsFrozen)
+		//	m_pClient->m_Snap.m_aCharacters[i].m_Cur.m_Weapon = WEAPON_NINJA;
 
 		if(m_pClient->m_Snap.m_aCharacters[i].m_Cur.m_Weapon == WEAPON_NINJA 
 			|| (IsFrozen && g_Config.m_ClShowNinja))

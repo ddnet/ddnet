@@ -1283,6 +1283,12 @@ void CGameClient::OnNewSnapshot()
 				m_aClients[Item.m_ID].m_HasTelegunLaser = pCharacterData->m_Flags & CHARACTERFLAG_TELEGUN_LASER;
 
 				m_aClients[Item.m_ID].m_Predicted.ReadDDNet(pCharacterData);
+
+				int FreezeEnd = m_Snap.m_aCharacters[Item.m_ID].m_ExtendedData.m_FreezeEnd;
+				bool IsFrozen = FreezeEnd == -1 || FreezeEnd > Client()->PredGameTick(g_Config.m_ClDummy);
+
+				if(!g_Config.m_ClShowWeaponFreeze && IsFrozen)
+					m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_Weapon = WEAPON_NINJA;
 			}
 			else if(Item.m_Type == NETOBJTYPE_SPECTATORINFO)
 			{
