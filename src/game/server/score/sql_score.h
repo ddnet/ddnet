@@ -161,7 +161,7 @@ struct CSqlTeamScoreData : CSqlData<void>
 {
 	using CSqlData<void>::CSqlData;
 	char m_GameUuid[UUID_MAXSTRSIZE];
-	sqlstr::CSqlString<MAX_NAME_LENGTH> m_Map;
+	sqlstr::CSqlString<MAX_MAP_LENGTH> m_Map;
 	float m_Time;
 	char m_aTimestamp[TIMESTAMP_STR_LENGTH];
 	unsigned int m_Size;
