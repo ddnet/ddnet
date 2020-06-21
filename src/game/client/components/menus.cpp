@@ -674,14 +674,14 @@ int CMenus::RenderMenubar(CUIRect r)
 	if(Client()->State() == IClient::STATE_OFFLINE)
 	{
 		// offline menus
-		Box.VSplitLeft(90.0f, &Button, &Box);
+		Box.VSplitLeft(60.0f, &Button, &Box);
 		static int s_NewsButton=0;
 		if(DoButton_MenuTab(&s_NewsButton, Localize("News"), m_ActivePage==PAGE_NEWS, &Button, CUI::CORNER_TL))
 		{
 			NewPage = PAGE_NEWS;
 			m_DoubleClickIndex = -1;
 		}
-		Box.VSplitLeft(100.0f, &Button, &Box);
+		Box.VSplitLeft(60.0f, &Button, &Box);
 		static int s_LearnButton=0;
 		if(DoButton_MenuTab(&s_LearnButton, Localize("Learn"), false, &Button, CUI::CORNER_TR))
 		{
@@ -692,7 +692,7 @@ int CMenus::RenderMenubar(CUIRect r)
 			m_DoubleClickIndex = -1;
 		}
 
-		Box.VSplitLeft(10.0f, 0, &Box);
+		Box.VSplitLeft(5.0f, 0, &Box);
 
 		Box.VSplitLeft(100.0f, &Button, &Box);
 		static int s_InternetButton=0;
@@ -750,8 +750,8 @@ int CMenus::RenderMenubar(CUIRect r)
 			m_DoubleClickIndex = -1;
 		}
 
-		Box.VSplitLeft(10.0f, 0, &Box);
-		Box.VSplitLeft(100.0f, &Button, &Box);
+		Box.VSplitLeft(5.0f, 0, &Box);
+		Box.VSplitLeft(80.0f, &Button, &Box);
 		static int s_DemosButton=0;
 		if(DoButton_MenuTab(&s_DemosButton, Localize("Demos"), m_ActivePage==PAGE_DEMOS, &Button, CUI::CORNER_T))
 		{
