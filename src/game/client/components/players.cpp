@@ -459,6 +459,25 @@ void CPlayers::RenderPlayer(
 				p.y -= 8;
 			Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, p.x, p.y);
 		}
+	
+		if(g_Config.m_ClNinjaParticles)
+		{
+			int FreezeEnd = m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedData.m_FreezeEnd;
+			vec2 EffectPos = Position;
+			EffectPos.y += g_pData->m_Weapons.m_aId[WEAPON_NINJA].m_Offsety;
+			if(Player.m_Weapon != WEAPON_NINJA && (FreezeEnd == -1 || FreezeEnd > m_pClient->Client()->PredGameTick(0)))
+			{
+				if(Direction.x < 0)
+				{
+					m_pClient->m_pEffects->PowerupShine(EffectPos+vec2(32,0), vec2(32,12));
+				}
+				else
+				{
+					m_pClient->m_pEffects->PowerupShine(EffectPos-vec2(32,0), vec2(32,12));
+				}
+			}
+		}
+		
 
 		if(Player.m_Weapon == WEAPON_GUN || Player.m_Weapon == WEAPON_SHOTGUN)
 		{
@@ -633,7 +652,15 @@ void CPlayers::OnRender()
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
 		m_aRenderInfo[i] = m_pClient->m_aClients[i].m_RenderInfo;
-		if(m_pClient->m_Snap.m_aCharacters[i].m_Cur.m_Weapon == WEAPON_NINJA && g_Config.m_ClShowNinja)
+
+		int FreezeEnd = m_pClient->m_Snap.m_aCharacters[i].m_ExtendedData.m_FreezeEnd;
+		bool IsFrozen = FreezeEnd == -1 || FreezeEnd > m_pClient->Client()->PredGameTick(0);
+
+		if(!g_Config.m_ClShowWeaponFreeze && IsFrozen)
+			m_pClient->m_Snap.m_aCharacters[i].m_Cur.m_Weapon = WEAPON_NINJA;
+
+		if(m_pClient->m_Snap.m_aCharacters[i].m_Cur.m_Weapon == WEAPON_NINJA 
+			|| (IsFrozen && g_Config.m_ClShowNinja))
 		{
 			// change the skin for the player to the ninja
 			int Skin = m_pClient->m_pSkins->Find("x_ninja");

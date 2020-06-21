@@ -82,6 +82,8 @@ MACRO_CONFIG_INT(ClAutoStatboardScreenshot, cl_auto_statboard_screenshot, 0, 0, 
 MACRO_CONFIG_INT(ClAutoStatboardScreenshotMax, cl_auto_statboard_screenshot_max, 10, 0, 1000, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Maximum number of automatically created statboard screenshots (0 = no limit)")
 
 MACRO_CONFIG_INT(ClDefaultZoom, cl_default_zoom, 10, 0, 20, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Default zoom level (10 default, min 0, max 20)")
+MACRO_CONFIG_INT(ClNinjaParticles, cl_ninja_particles, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Whether to show ninja particles on forzen tees.")
+MACRO_CONFIG_INT(ClShowWeaponFreeze, cl_show_weapon_freeze, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Whether to show what weapon a tee has when frozen.")
 
 MACRO_CONFIG_INT(ClPlayerUseCustomColor, player_use_custom_color, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Toggles usage of custom colors")
 MACRO_CONFIG_COL(ClPlayerColorBody, player_color_body, 65408, CFGFLAG_CLIENT|CFGFLAG_SAVE|CFGFLAG_COLLIGHT, "Player body color")

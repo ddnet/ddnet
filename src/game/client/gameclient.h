@@ -426,6 +426,7 @@ public:
 
 private:
 	bool m_DDRaceMsgSent[2];
+	bool m_CapabilitiesSent;
 	int m_ShowOthers[2];
 
 	void UpdatePrediction();

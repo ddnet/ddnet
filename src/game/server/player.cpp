@@ -26,6 +26,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 	m_ClientID = ClientID;
 	m_Team = GameServer()->m_pController->ClampTeam(Team);
 	m_NumInputs = 0;
+	m_Capabilities.m_UseDDnetCharFreeze = false;
 	Reset();
 	GameServer()->Antibot()->OnPlayerInit(m_ClientID);
 }

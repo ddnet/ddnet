@@ -1503,6 +1503,16 @@ void CGameClient::OnNewSnapshot()
 		m_DDRaceMsgSent[1] = true;
 	}
 
+	if(!m_CapabilitiesSent)
+	{
+		CMsgPacker Msg(NETMSGTYPE_CL_CAPABILITIES, false);
+		Msg.AddInt(CLIENT_CAPABILITIES_CURVERSION);
+		int Flags = 0
+			| CAPABILITIESFLAG_USE_DDNET_CHAR_FREEZE;
+		Msg.AddInt(Flags);
+		Client()->SendMsg(&Msg, MSGFLAG_VITAL);
+	}
+
 	if(m_ShowOthers[g_Config.m_ClDummy] == -1 || (m_ShowOthers[g_Config.m_ClDummy] != -1 && m_ShowOthers[g_Config.m_ClDummy] != g_Config.m_ClShowOthers))
 	{
 		// no need to send, default settings

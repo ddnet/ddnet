@@ -1075,7 +1075,8 @@ void CCharacter::SnapCharacter(int SnappingClient)
 		if(Emote == EMOTE_NORMAL)
 			Emote = m_DeepFreeze ? EMOTE_PAIN : EMOTE_BLINK;
 
-		Weapon = WEAPON_NINJA;
+		if(!GetPlayer()->m_Capabilities.m_UseDDnetCharFreeze)
+			Weapon = WEAPON_NINJA;
 	}
 
 	// This could probably happen when m_Jetpack changes instead

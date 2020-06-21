@@ -202,6 +202,11 @@ public:
 	bool m_NotEligibleForFinish;
 	int64 m_EligibleForFinishCheck;
 	bool m_VotedForPractice;
+
+	struct CCapabilities
+	{
+		bool m_UseDDnetCharFreeze;
+	} m_Capabilities;
 };
 
 #endif

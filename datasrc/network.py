@@ -26,6 +26,10 @@ Emoticons = ["OOP", "EXCLAMATION", "HEARTS", "DROP", "DOTDOT", "MUSIC", "SORRY",
 Powerups = ["HEALTH", "ARMOR", "WEAPON", "NINJA"]
 Authed = ["NO", "HELPER", "MOD", "ADMIN"]
 
+ClientCapabilitiesFlags = [
+	"USE_DDNET_CHAR_FREEZE",
+]
+
 RawHeader = '''
 
 #include <engine/message.h>
@@ -54,6 +58,11 @@ enum
 {
 	GAMEINFO_CURVERSION=4,
 };
+
+enum
+{
+	CLIENT_CAPABILITIES_CURVERSION=1,
+};
 '''
 
 RawSource = '''
@@ -75,6 +84,7 @@ Flags = [
 	Flags("CHARACTERFLAG", CharacterFlags),
 	Flags("GAMEINFOFLAG", GameInfoFlags),
 	Flags("EXPLAYERFLAG", ExPlayerFlags),
+	Flags("CAPABILITIESFLAG", ClientCapabilitiesFlags),
 ]
 
 Objects = [
@@ -419,5 +429,10 @@ Messages = [
 
 	NetMessageEx("Sv_MyOwnMessage", "my-own-message@heinrich5991.de", [
 		NetIntAny("m_Test"),
+	]),
+
+	NetMessageEx("Cl_Capabilities", "client-capabilities@net-message.ddnet.tw", [
+		NetIntAny("m_Version"),
+		NetIntAny("m_Flags"),
 	]),
 ]
