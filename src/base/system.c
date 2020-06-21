@@ -3254,10 +3254,10 @@ int open_link(const char *link)
 	str_format(aBuf, sizeof(aBuf), "start %s", link);
 	return (uintptr_t)ShellExecuteA(NULL, "open", link, NULL, NULL, SW_SHOWDEFAULT) > 32;
 #elif defined(CONF_PLATFORM_LINUX)
-	str_format(aBuf, sizeof(aBuf), "xdg-open %s", link);
+	str_format(aBuf, sizeof(aBuf), "xdg-open %s &", link);
 	return system(aBuf) == 0;
 #elif defined(CONF_FAMILY_UNIX)
-	str_format(aBuf, sizeof(aBuf), "open %s", link);
+	str_format(aBuf, sizeof(aBuf), "open %s &", link);
 	return system(aBuf) == 0;
 #endif
 }
