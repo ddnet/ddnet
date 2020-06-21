@@ -1057,19 +1057,35 @@ void CGameContext::OnClientEnter(int ClientID)
 
 	if(Server()->IsSixup(ClientID))
 	{
-		protocol7::CNetMsg_Sv_GameInfo Msg;
-		Msg.m_GameFlags = protocol7::GAMEFLAG_RACE;
-		Msg.m_MatchCurrent = 1;
-		Msg.m_MatchNum = 0;
-		Msg.m_ScoreLimit = 0;
-		Msg.m_TimeLimit = 0;
-		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
+		{
+			protocol7::CNetMsg_Sv_GameInfo Msg;
+			Msg.m_GameFlags = protocol7::GAMEFLAG_RACE;
+			Msg.m_MatchCurrent = 1;
+			Msg.m_MatchNum = 0;
+			Msg.m_ScoreLimit = 0;
+			Msg.m_TimeLimit = 0;
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
+		}
+
+		// /team is essential
+		{
+			protocol7::CNetMsg_Sv_CommandInfoRemove Msg;
+			Msg.m_Name = "team";
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
+		}
 
 		for(const IConsole::CCommandInfo *pCmd = Console()->FirstCommandInfo(IConsole::ACCESS_LEVEL_USER, CFGFLAG_CHAT);
 			pCmd; pCmd = pCmd->NextCommandInfo(IConsole::ACCESS_LEVEL_USER, CFGFLAG_CHAT))
 		{
+			if(!str_comp(pCmd->m_pName, "w") || !str_comp(pCmd->m_pName, "whisper"))
+				continue;
+
+			const char *pName = pCmd->m_pName;
+			if(!str_comp(pCmd->m_pName, "r"))
+				pName = "rescue";
+
 			protocol7::CNetMsg_Sv_CommandInfo Msg;
-			Msg.m_Name = pCmd->m_pName;
+			Msg.m_Name = pName;
 			Msg.m_ArgsFormat = pCmd->m_pParams;
 			Msg.m_HelpText = pCmd->m_pHelp;
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
