@@ -656,10 +656,7 @@ void CPlayers::OnRender()
 		int FreezeEnd = m_pClient->m_Snap.m_aCharacters[i].m_ExtendedData.m_FreezeEnd;
 		bool IsFrozen = FreezeEnd == -1 || FreezeEnd > m_pClient->Client()->PredGameTick(g_Config.m_ClDummy);
 
-		//if(!g_Config.m_ClShowWeaponFreeze && IsFrozen)
-		//	m_pClient->m_Snap.m_aCharacters[i].m_Cur.m_Weapon = WEAPON_NINJA;
-
-		if(m_pClient->m_Snap.m_aCharacters[i].m_Cur.m_Weapon == WEAPON_NINJA 
+		if((m_pClient->m_Snap.m_aCharacters[i].m_Cur.m_Weapon == WEAPON_NINJA && g_Config.m_ClShowNinja)
 			|| (IsFrozen && g_Config.m_ClShowNinja))
 		{
 			// change the skin for the player to the ninja
