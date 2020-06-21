@@ -114,8 +114,16 @@ void CNamePlates::RenderNameplate(
 		}
 		else
 		{
-			TOutlineColor.Set(0.0f, 0.0f, 0.0f, 0.5f*a);
-			TColor.Set(rgb.r, rgb.g, rgb.b, a);
+			if(!m_pClient->m_Snap.m_aCharacters[ClientID].m_Active)
+			{
+				TOutlineColor.Set(0.0f, 0.0f, 0.0f, 0.2f * g_Config.m_ClShowOthersAlpha / 100.0f);
+				TColor.Set(rgb.r, rgb.g, rgb.b, g_Config.m_ClShowOthersAlpha / 100.0f);
+			}
+			else
+			{
+				TOutlineColor.Set(0.0f, 0.0f, 0.0f, 0.5f*a);
+				TColor.Set(rgb.r, rgb.g, rgb.b, a);
+			}
 		}
 		if(g_Config.m_ClNameplatesTeamcolors && m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_TEAMS)
 		{
