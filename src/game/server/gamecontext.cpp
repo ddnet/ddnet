@@ -1510,6 +1510,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 	void *pRawMsg = PreProcessMsg(&MsgID, pUnpacker, ClientID);
 
+	if(!pRawMsg)
+	{
+		dbg_msg("net", "failed to preprocess msg %d from client %d", MsgID, ClientID);
+		return;
+	}
+
 	CPlayer *pPlayer = m_apPlayers[ClientID];
 
 	if(Server()->ClientIngame(ClientID))
