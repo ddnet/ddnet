@@ -34,6 +34,7 @@ public:
 	int GetTeam() const { return m_Team; };
 	int GetCID() const { return m_ClientID; };
 	int GetClientVersion() const;
+	bool SetTimerType(int NewType);
 
 	void Tick();
 	void PostTick();
@@ -144,9 +145,11 @@ public:
 
 	enum
 	{
+		TIMERTYPE_DEFAULT=-1,
 		TIMERTYPE_GAMETIMER=0,
 		TIMERTYPE_BROADCAST,
 		TIMERTYPE_GAMETIMER_AND_BROADCAST,
+		TIMERTYPE_SIXUP,
 		TIMERTYPE_NONE,
 	};
 

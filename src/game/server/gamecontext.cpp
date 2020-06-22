@@ -333,8 +333,12 @@ void CGameContext::CallVote(int ClientID, const char *pDesc, const char *pCmd, c
 	pPlayer->m_LastVoteCall = Now;
 }
 
-void CGameContext::SendChatTarget(int To, const char *pText)
+void CGameContext::SendChatTarget(int To, const char *pText, int Flags)
 {
+	if(!((Server()->IsSixup(To) && (Flags & CHAT_SIXUP)) ||
+				(!Server()->IsSixup(To) && (Flags & CHAT_SIX))))
+		return;
+
 	CNetMsg_Sv_Chat Msg;
 	Msg.m_Team = 0;
 	Msg.m_ClientID = -1;
