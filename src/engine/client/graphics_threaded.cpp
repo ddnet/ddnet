@@ -2189,7 +2189,7 @@ bool CGraphics_Threaded::SetWindowScreen(int Index)
 void CGraphics_Threaded::Resize(int w, int h)
 {
 #if defined(CONF_VIDEORECORDER)
-	if (IVideo::Current() && IVideo::Current()->isRecording())
+	if (IVideo::Current() && IVideo::Current()->IsRecording())
 		return;
 #endif
 
