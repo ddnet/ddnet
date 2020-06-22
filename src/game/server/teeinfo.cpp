@@ -31,20 +31,20 @@ static StdSkin g_StdSkins[] = {
 
 CTeeInfo::CTeeInfo(const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet)
 {
-    str_copy(m_SkinName, pSkinName, sizeof(m_SkinName));
-    m_UseCustomColor = UseCustomColor;
-    m_ColorBody = ColorBody;
-    m_ColorFeet = ColorFeet;
+	str_copy(m_SkinName, pSkinName, sizeof(m_SkinName));
+	m_UseCustomColor = UseCustomColor;
+	m_ColorBody = ColorBody;
+	m_ColorFeet = ColorFeet;
 }
 
 CTeeInfo::CTeeInfo(const char *pSkinPartNames[6], int *pUseCustomColors, int *pSkinPartColors)
 {
-    for(int i = 0; i < 6; i++)
-    {
-        str_copy(m_apSkinPartNames[i], pSkinPartNames[i], sizeof(m_apSkinPartNames[i]));
-        m_aUseCustomColors[i] = pUseCustomColors[i];
-        m_aSkinPartColors[i] = pSkinPartColors[i];
-    }
+	for(int i = 0; i < 6; i++)
+	{
+		str_copy(m_apSkinPartNames[i], pSkinPartNames[i], sizeof(m_apSkinPartNames[i]));
+		m_aUseCustomColors[i] = pUseCustomColors[i];
+		m_aSkinPartColors[i] = pSkinPartColors[i];
+	}
 }
 
 void CTeeInfo::ToSixup()
