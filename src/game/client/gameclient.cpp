@@ -1509,16 +1509,6 @@ void CGameClient::OnNewSnapshot()
 		m_DDRaceMsgSent[1] = true;
 	}
 
-	if(!m_CapabilitiesSent)
-	{
-		CMsgPacker Msg(NETMSGTYPE_CL_CAPABILITIES, false);
-		Msg.AddInt(CLIENT_CAPABILITIES_CURVERSION);
-		int Flags = 0
-			| CAPABILITIESFLAG_USE_DDNET_CHAR_FREEZE;
-		Msg.AddInt(Flags);
-		Client()->SendMsg(&Msg, MSGFLAG_VITAL);
-	}
-
 	if(m_ShowOthers[g_Config.m_ClDummy] == -1 || (m_ShowOthers[g_Config.m_ClDummy] != -1 && m_ShowOthers[g_Config.m_ClDummy] != g_Config.m_ClShowOthers))
 	{
 		// no need to send, default settings
@@ -1886,6 +1876,7 @@ void CGameClient::SendInfo(bool Start)
 {
 	if(Start)
 	{
+		SendClientCapabilities(false);
 		CNetMsg_Cl_StartInfo Msg;
 		Msg.m_pName = g_Config.m_PlayerName;
 		Msg.m_pClan = g_Config.m_PlayerClan;
@@ -1920,6 +1911,7 @@ void CGameClient::SendDummyInfo(bool Start)
 {
 	if(Start)
 	{
+		SendClientCapabilities(true);
 		CNetMsg_Cl_StartInfo Msg;
 		Msg.m_pName = g_Config.m_ClDummyName;
 		Msg.m_pClan = g_Config.m_ClDummyClan;
@@ -1948,6 +1940,17 @@ void CGameClient::SendDummyInfo(bool Start)
 		Client()->SendMsgY(&Packer, MSGFLAG_VITAL, 1);
 		m_CheckInfo[1] = Client()->GameTickSpeed();
 	}
+}
+
+void CGameClient::SendClientCapabilities(bool Dummy)
+{
+	CNetMsg_Cl_Capabilities Msg;
+	Msg.m_Version = CLIENT_CAPABILITIES_CURVERSION;
+	Msg.m_Flags = 0
+		| CAPABILITIESFLAG_USE_DDNET_CHAR_FREEZE;
+	
+	CMsgPacker Packer(Msg.MsgID(), false);
+	Client()->SendMsgY(&Packer, MSGFLAG_VITAL, Dummy);
 }
 
 void CGameClient::SendKill(int ClientID)

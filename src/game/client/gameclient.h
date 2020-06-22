@@ -366,6 +366,7 @@ public:
 	void SendSwitchTeam(int Team);
 	void SendInfo(bool Start);
 	virtual void SendDummyInfo(bool Start);
+	void SendClientCapabilities(bool Dummy);
 	void SendKill(int ClientID);
 
 	// pointers to all systems
@@ -426,7 +427,6 @@ public:
 
 private:
 	bool m_DDRaceMsgSent[2];
-	bool m_CapabilitiesSent;
 	int m_ShowOthers[2];
 
 	void UpdatePrediction();
