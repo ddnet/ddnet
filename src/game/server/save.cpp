@@ -649,7 +649,7 @@ bool CSaveTeam::MatchPlayers(const char (*paNames)[MAX_NAME_LENGTH], const int *
 		int Found = false;
 		for(int j = 0; j < m_MembersCount; j++)
 		{
-			if(strcmp(paNames[i], m_pSavedTees[j].GetName()) == 0)
+			if(str_comp(paNames[i], m_pSavedTees[j].GetName()) == 0)
 			{
 				Found = true;
 			}
@@ -666,7 +666,7 @@ bool CSaveTeam::MatchPlayers(const char (*paNames)[MAX_NAME_LENGTH], const int *
 		int Found = false;
 		for(int j = 0; j < NumPlayer; j++)
 		{
-			if(strcmp(m_pSavedTees[i].GetName(), paNames[j]) == 0)
+			if(str_comp(m_pSavedTees[i].GetName(), paNames[j]) == 0)
 			{
 				m_pSavedTees[i].SetClientID(pClientID[j]);
 				Found = true;
