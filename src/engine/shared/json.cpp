@@ -9,7 +9,7 @@ const struct _json_value *json_object_get (const json_value * object, const char
       return &json_value_none;
 
    for (i = 0; i < object->u.object.length; ++ i)
-      if (!strcmp (object->u.object.values [i].name, index))
+      if (!str_comp(object->u.object.values [i].name, index))
          return object->u.object.values [i].value;
 
    return &json_value_none;

@@ -42,7 +42,7 @@ public:
 
 	bool operator<(const CSqlString& other) const
 	{
-		return strcmp(m_aString, other.m_aString) < 0;
+		return str_comp(m_aString, other.m_aString) < 0;
 	}
 
 private:
