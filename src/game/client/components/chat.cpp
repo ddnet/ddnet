@@ -9,6 +9,7 @@
 #include <engine/textrender.h>
 #include <engine/keys.h>
 #include <engine/shared/config.h>
+#include <engine/shared/csv.h>
 
 #include <game/generated/protocol.h>
 #include <game/generated/client_data.h>
@@ -544,7 +545,12 @@ bool CChat::LineShouldHighlight(const char *pLine, const char *pName)
 }
 
 #define SAVES_FILE "ddnet-saves.txt"
-const char *SAVES_HEADER = "Time,Player,Map,Code";
+const char *SAVES_HEADER[] = {
+	"Time",
+	"Player",
+	"Map",
+	"Code",
+};
 
 void CChat::StoreSave(const char *pText)
 {
@@ -576,27 +582,22 @@ void CChat::StoreSave(const char *pText)
 	}
 	*/
 
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "%s,%s,%s,%s", aTimestamp, aName, Client()->GetCurrentMap(), aSaveCode);
-
-	IOHANDLE File = Storage()->OpenFile(SAVES_FILE, IOFLAG_READ, IStorage::TYPE_SAVE);
-	bool FileExists = File;
-	if(File)
-		io_close(File);
-
-	File = Storage()->OpenFile(SAVES_FILE, IOFLAG_APPEND, IStorage::TYPE_SAVE);
-
+	IOHANDLE File = Storage()->OpenFile(SAVES_FILE, IOFLAG_APPEND, IStorage::TYPE_SAVE);
 	if(!File)
 		return;
 
-	if(!FileExists)
-	{
-		io_write(File, SAVES_HEADER, str_length(SAVES_HEADER));
-		io_write_newline(File);
-	}
+	const char *apColumns[4] = {
+		aTimestamp,
+		aName,
+		Client()->GetCurrentMap(),
+		aSaveCode,
+	};
 
-	io_write(File, aBuf, str_length(aBuf));
-	io_write_newline(File);
+	if(io_tell(File) == 0)
+	{
+		CsvWrite(File, 4, SAVES_HEADER);
+	}
+	CsvWrite(File, 4, apColumns);
 	io_close(File);
 }
 
