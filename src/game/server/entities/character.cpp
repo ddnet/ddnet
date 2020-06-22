@@ -1051,10 +1051,8 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 }
 
 //TODO: Move the emote stuff to a function
-void CCharacter::SnapCharacter(int SnappingClient)
+void CCharacter::SnapCharacter(int SnappingClient, int ID)
 {
-	int OwnID = m_pPlayer->GetCID();
-
 	CCharacterCore *pCore;
 	int Tick, Emote = m_EmoteType, Weapon = m_Core.m_ActiveWeapon, AmmoCount = 0,
 		Health = 0, Armor = 0;
@@ -1142,7 +1140,7 @@ void CCharacter::SnapCharacter(int SnappingClient)
 
 	if(!Server()->IsSixup(SnappingClient))
 	{
-		CNetObj_Character *pCharacter = static_cast<CNetObj_Character *>(Server()->SnapNewItem(NETOBJTYPE_CHARACTER, OwnID, sizeof(CNetObj_Character)));
+		CNetObj_Character *pCharacter = static_cast<CNetObj_Character *>(Server()->SnapNewItem(NETOBJTYPE_CHARACTER, ID, sizeof(CNetObj_Character)));
 		if(!pCharacter)
 			return;
 
@@ -1167,7 +1165,7 @@ void CCharacter::SnapCharacter(int SnappingClient)
 	}
 	else
 	{
-		protocol7::CNetObj_Character *pCharacter = static_cast<protocol7::CNetObj_Character *>(Server()->SnapNewItem(NETOBJTYPE_CHARACTER, OwnID, sizeof(protocol7::CNetObj_Character)));
+		protocol7::CNetObj_Character *pCharacter = static_cast<protocol7::CNetObj_Character *>(Server()->SnapNewItem(NETOBJTYPE_CHARACTER, ID, sizeof(protocol7::CNetObj_Character)));
 		if(!pCharacter)
 			return;
 
@@ -1222,7 +1220,7 @@ void CCharacter::Snap(int SnappingClient)
 	if (m_Paused)
 		return;
 
-	SnapCharacter(SnappingClient);
+	SnapCharacter(SnappingClient, id);
 
 	CNetObj_DDNetCharacter *pDDNetCharacter = static_cast<CNetObj_DDNetCharacter *>(Server()->SnapNewItem(NETOBJTYPE_DDNETCHARACTER, id, sizeof(CNetObj_DDNetCharacter)));
 	if(!pDDNetCharacter)
