@@ -679,9 +679,7 @@ void CPlayers::OnRender()
 					int Skin = m_pClient->m_pSkins->Find("x_spec");
 					if(Skin != -1)
 					{
-						m_aRenderInfo[i].m_Texture = m_pClient->m_pSkins->Get(Skin)->m_OrgTexture;
-						m_aRenderInfo[i].m_ColorBody = ColorRGBA(1,1,1);
-						m_aRenderInfo[i].m_ColorFeet = ColorRGBA(1,1,1);
+						m_aRenderInfo[i].m_Texture = m_pClient->m_pSkins->Get(Skin)->m_ColorTexture;
 					}
 				}
 
