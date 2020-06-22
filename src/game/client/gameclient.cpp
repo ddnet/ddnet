@@ -1950,6 +1950,7 @@ void CGameClient::SendClientCapabilities(bool Dummy)
 		| CAPABILITIESFLAG_USE_DDNET_CHAR_FREEZE;
 	
 	CMsgPacker Packer(Msg.MsgID(), false);
+	Msg.Pack(&Packer);
 	Client()->SendMsgY(&Packer, MSGFLAG_VITAL, Dummy);
 }
 
