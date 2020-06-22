@@ -192,6 +192,7 @@ public:
 	int m_DefEmoteReset;
 	bool m_Halloween;
 	bool m_FirstPacket;
+	bool m_ReceivedCapabilities;
 #if defined(CONF_SQL)
 	void ProcessSqlResult(CSqlPlayerResult &Result);
 	int64 m_LastSQLQuery;

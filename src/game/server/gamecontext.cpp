@@ -1964,18 +1964,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			Server()->SetClientDDNetVersion(ClientID, DDNetVersion);
 			OnClientDDNetVersionKnown(ClientID);
 		}
-		else if (MsgID == NETMSGTYPE_CL_CAPABILITIES)
-		{
-			CNetMsg_Cl_Capabilities *pMsg = (CNetMsg_Cl_Capabilities *)pRawMsg;
-
-			int Flags = 0;
-			if(pMsg->m_Version >= 1)
-			{
-				Flags = pMsg->m_Flags;
-			}
-
-			pPlayer->m_Capabilities.m_UseDDnetCharFreeze = Flags&CAPABILITIESFLAG_USE_DDNET_CHAR_FREEZE;
-		}
 		else if (MsgID == NETMSGTYPE_CL_SHOWOTHERS)
 		{
 			if(g_Config.m_SvShowOthers && !g_Config.m_SvShowOthersDefault)
@@ -2176,6 +2164,22 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		}
 
 		Server()->ExpireServerInfo();
+	}
+	else if (MsgID == NETMSGTYPE_CL_CAPABILITIES)
+	{
+		if(pPlayer->m_IsReady || pPlayer->m_ReceivedCapabilities)
+			return;
+
+		CNetMsg_Cl_Capabilities *pMsg = (CNetMsg_Cl_Capabilities *)pRawMsg;
+
+		int Flags = 0;
+		if(pMsg->m_Version >= 1)
+		{
+			Flags = pMsg->m_Flags;
+		}
+
+		pPlayer->m_Capabilities.m_UseDDnetCharFreeze = Flags&CAPABILITIESFLAG_USE_DDNET_CHAR_FREEZE;
+		pPlayer->m_ReceivedCapabilities = true;
 	}
 }
 
