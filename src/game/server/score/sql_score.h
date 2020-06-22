@@ -56,12 +56,14 @@ struct CSqlPlayerResult
 struct CSqlRandomMapResult
 {
 	std::atomic_bool m_Done;
-	CSqlRandomMapResult() :
-		m_Done(false)
+	CSqlRandomMapResult(int ClientID) :
+		m_Done(false),
+		m_ClientID(ClientID)
 	{
 		m_Map[0] = '\0';
 		m_aMessage[0] = '\0';
 	}
+	int m_ClientID;
 	char m_Map[MAX_MAP_LENGTH];
 	char m_aMessage[512];
 };

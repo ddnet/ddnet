@@ -51,6 +51,8 @@ void CGameContext::Construct(int Resetting)
 	m_LastMapVote = 0;
 	//m_LockTeams = 0;
 
+	m_SqlRandomMapResult = nullptr;
+
 	if(Resetting==NO_RESET)
 	{
 		m_pVoteOptionHeap = new CHeap();
@@ -919,6 +921,22 @@ void CGameContext::OnTick()
 			}
 		}
 	}
+
+#if defined(CONF_SQL)
+	if(m_SqlRandomMapResult != nullptr && m_SqlRandomMapResult.use_count() == 1)
+	{
+		if(m_SqlRandomMapResult->m_Done)
+		{
+			if(PlayerExists(m_SqlRandomMapResult->m_ClientID) && m_SqlRandomMapResult->m_aMessage[0] != '\0')
+				SendChatTarget(m_SqlRandomMapResult->m_ClientID, m_SqlRandomMapResult->m_aMessage);
+			if(m_SqlRandomMapResult->m_Map[0] != '\0')
+				str_copy(g_Config.m_SvMap, m_SqlRandomMapResult->m_Map, sizeof(g_Config.m_SvMap));
+			else
+				m_LastMapVote = 0;
+		}
+		m_SqlRandomMapResult = nullptr;
+	}
+#endif
 
 #ifdef CONF_DEBUG
 	if(g_Config.m_DbgDummies)

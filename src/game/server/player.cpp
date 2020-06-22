@@ -124,7 +124,6 @@ void CPlayer::Reset()
 	m_LastSQLQuery = 0;
 	m_SqlQueryResult = nullptr;
 	m_SqlFinishResult = nullptr;
-	m_SqlRandomMapResult = nullptr;
 #endif
 
 	int64 Now = Server()->Tick();
@@ -181,19 +180,6 @@ void CPlayer::Tick()
 	{
 		ProcessSqlResult(*m_SqlFinishResult);
 		m_SqlFinishResult = nullptr;
-	}
-	if(m_SqlRandomMapResult != nullptr && m_SqlRandomMapResult.use_count() == 1)
-	{
-		if(m_SqlRandomMapResult->m_Done)
-		{
-			if(m_SqlRandomMapResult->m_aMessage[0] != '\0')
-				GameServer()->SendChatTarget(m_ClientID, m_SqlRandomMapResult->m_aMessage);
-			if(m_SqlRandomMapResult->m_Map[0] != '\0')
-				str_copy(g_Config.m_SvMap, m_SqlRandomMapResult->m_Map, sizeof(g_Config.m_SvMap));
-			else
-				GameServer()->m_LastMapVote = 0;
-		}
-		m_SqlRandomMapResult = nullptr;
 	}
 #endif
 
