@@ -164,7 +164,7 @@ void CPlayers::RenderPlayer(
 	const CNetObj_Character *pPlayerChar,
 	const CTeeRenderInfo *pRenderInfo,
 	int ClientID,
-	bool Active,
+	bool Spec,
 	float Intra
 	)
 {
@@ -177,7 +177,7 @@ void CPlayers::RenderPlayer(
 
 	bool Local = m_pClient->m_Snap.m_LocalClientID == ClientID;
 	bool OtherTeam = m_pClient->IsOtherTeam(ClientID);
-	float Alpha = (OtherTeam || !Active) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f;
+	float Alpha = (OtherTeam || Spec) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f;
 
 	// set size
 	RenderInfo.m_Size = 64.0f;
@@ -279,7 +279,7 @@ void CPlayers::RenderPlayer(
 	}
 
 	// draw gun
-	if(Active)
+	if(!Spec)
 	{
 #if defined(CONF_VIDEORECORDER)
 		if(ClientID >= 0 && ((GameClient()->m_GameInfo.m_AllowHookColl && g_Config.m_ClShowHookCollAlways) || (Player.m_PlayerFlags&PLAYERFLAG_AIM && ((!Local && ((!IVideo::Current()&&g_Config.m_ClShowHookCollOther)||(IVideo::Current()&&g_Config.m_ClVideoShowHookCollOther))) || (Local && g_Config.m_ClShowHookCollOwn)))))
@@ -561,7 +561,7 @@ void CPlayers::RenderPlayer(
 		Graphics()->QuadsSetRotation(0);
 	}
 
-	if(OtherTeam || !Active || ClientID < 0)
+	if(OtherTeam || Spec || ClientID < 0)
 		RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position, g_Config.m_ClShowOthersAlpha / 100.0f);
 	else
 		RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position);
@@ -659,7 +659,7 @@ void CPlayers::OnRender()
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
 			// only render active characters
-			if(!m_pClient->m_Snap.m_aCharacters[i].m_Active && !g_Config.m_ClShowSpecTee)
+			if(!m_pClient->m_Snap.m_aCharacters[i].m_Active && (!m_pClient->m_aClients[i].m_Spec || !g_Config.m_ClShowSpecTee))
 				continue;
 
 			const void *pPrevInfo = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_PLAYERINFO, i);
@@ -674,7 +674,8 @@ void CPlayers::OnRender()
 				CNetObj_Character PrevChar = m_pClient->m_aClients[i].m_RenderPrev;
 				CNetObj_Character CurChar = m_pClient->m_aClients[i].m_RenderCur;
 
-				if(!m_pClient->m_Snap.m_aCharacters[i].m_Active)
+
+				if(m_pClient->m_aClients[i].m_Spec)
 				{
 					int Skin = m_pClient->m_pSkins->Find("x_spec");
 					if(Skin != -1)
@@ -699,7 +700,7 @@ void CPlayers::OnRender()
 							&CurChar,
 							&m_aRenderInfo[i],
 							i,
-							m_pClient->m_Snap.m_aCharacters[i].m_Active
+							m_pClient->m_aClients[i].m_Spec
 						);
 				}
 			}

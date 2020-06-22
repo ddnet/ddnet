@@ -114,7 +114,7 @@ void CNamePlates::RenderNameplate(
 		}
 		else
 		{
-			if(!m_pClient->m_Snap.m_aCharacters[ClientID].m_Active)
+			if(m_pClient->m_aClients[ClientID].m_Spec)
 			{
 				TOutlineColor.Set(0.0f, 0.0f, 0.0f, 0.2f * g_Config.m_ClShowOthersAlpha / 100.0f);
 				TColor.Set(rgb.r, rgb.g, rgb.b, g_Config.m_ClShowOthersAlpha / 100.0f);
@@ -167,7 +167,7 @@ void CNamePlates::OnRender()
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		// only render active characters
-		if(!m_pClient->m_Snap.m_aCharacters[i].m_Active && !g_Config.m_ClShowSpecTee)
+		if(!m_pClient->m_Snap.m_aCharacters[i].m_Active && (!m_pClient->m_aClients[i].m_Spec || !g_Config.m_ClShowSpecTee))
 			continue;
 
 		const void *pInfo = Client()->SnapFindItem(IClient::SNAP_CURRENT, NETOBJTYPE_PLAYERINFO, i);
