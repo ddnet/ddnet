@@ -1446,7 +1446,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				net_addr_str(m_NetServer.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), true);
 
 				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "player has entered the game. ClientID=%d addr=<{%s}>", ClientID, aAddrStr);
+				str_format(aBuf, sizeof(aBuf), "player has entered the game. ClientID=%d addr=<{%s}> sixup=%d", ClientID, aAddrStr, IsSixup(ClientID));
 				Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 				m_aClients[ClientID].m_State = CClient::STATE_INGAME;
 				if(IsSixup(ClientID))
