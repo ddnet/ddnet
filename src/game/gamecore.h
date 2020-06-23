@@ -113,8 +113,15 @@ inline void IntsToStr(const int *pInts, int Num, char *pStr)
 		Num--;
 	}
 
+#if defined(__GNUC__) && __GNUC__ >= 7
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstringop-overflow" // false positive
+#endif
 	// null terminate
 	pStr[-1] = 0;
+#if defined(__GNUC__) && __GNUC__ >= 7
+#pragma GCC diagnostic pop
+#endif
 }
 
 
