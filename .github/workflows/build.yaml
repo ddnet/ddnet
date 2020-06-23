@@ -9,6 +9,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest, ubuntu-16.04]
+        docker: [false]
         include:
         - os: ubuntu-latest
           cmake-args: -G "Unix Makefiles"
@@ -23,6 +24,17 @@ jobs:
           cmake-args: -G "Unix Makefiles"
           package-file: DDNet-*-linux_x86_64.tar.xz
           fancy: false
+          env:
+            CFLAGS: -Wdeclaration-after-statement -Werror
+            CXXFLAGS: -Werror
+        - os: ubuntu-16.04
+          cmake-path: /usr/bin/
+          cmake-args: -G "Unix Makefiles"
+          package-file: DDNet-*-linux_x86_64.tar.xz
+          docker: true
+          fancy: false
+          container:
+            image: debian:jessie
           env:
             CFLAGS: -Wdeclaration-after-statement -Werror
             CXXFLAGS: -Werror
