@@ -268,8 +268,6 @@ bool CGameTeams::SetCharacterTeam(int ClientID, int Team)
 
 void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 {
-	int OldTeam = m_Core.Team(ClientID);
-
 	if (Team != m_Core.Team(ClientID))
 		ForceLeaveTeam(ClientID);
 	else
@@ -280,6 +278,13 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 	}
 
 	SetForceCharacterNewTeam(ClientID, Team);
+}
+
+void CGameTeams::SetForceCharacterNewTeam(int ClientID, int Team)
+{
+	int OldTeam = m_Core.Team(ClientID);
+
+	m_Core.Team(ClientID, Team);
 
 	if (OldTeam != Team)
 	{
@@ -290,11 +295,6 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 		if(GetPlayer(ClientID))
 			GetPlayer(ClientID)->m_VotedForPractice = false;
 	}
-}
-
-void CGameTeams::SetForceCharacterNewTeam(int ClientID, int Team)
-{
-	m_Core.Team(ClientID, Team);
 
 	if (m_Core.Team(ClientID) != TEAM_SUPER)
 		m_MembersCount[m_Core.Team(ClientID)]++;
@@ -741,15 +741,19 @@ void CGameTeams::ProcessSaveTeam()
 void CGameTeams::OnCharacterSpawn(int ClientID)
 {
 	m_Core.SetSolo(ClientID, false);
+	int Team = m_Core.Team(ClientID);
 
-	if(GetSaving(m_Core.Team(ClientID)))
+	if(GetSaving(Team))
 		return;
 
-	if (m_Core.Team(ClientID) >= TEAM_SUPER || !m_TeamLocked[m_Core.Team(ClientID)])
+	if (m_Core.Team(ClientID) >= TEAM_SUPER || !m_TeamLocked[Team])
+	{
 		// Important to only set a new team here, don't remove from an existing
 		// team since a newly joined player does by definition not have an old team
 		// to remove from. Doing so would destroy the count in m_MembersCount.
 		SetForceCharacterNewTeam(ClientID, 0);
+		CheckTeamFinished(Team);
+	}
 }
 
 void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
