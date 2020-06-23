@@ -5,13 +5,12 @@ on: [push, pull_request]
 jobs:
   build-cmake:
     runs-on: ${{ matrix.os }}
-    container:
-      image: ${{ matrix.docker }}
+    container: ${{ matrix.docker }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest, ubuntu-16.04]
-        docker: [null]
+        docker: [{}]
         include:
         - os: ubuntu-latest
           cmake-args: -G "Unix Makefiles"
@@ -33,7 +32,8 @@ jobs:
           cmake-path: /usr/bin/
           cmake-args: -G "Unix Makefiles"
           package-file: DDNet-*-linux_x86_64.tar.xz
-          docker: debian:jessie
+          docker:
+            image: debian:jessie
           fancy: false
           env:
             CFLAGS: -Wdeclaration-after-statement -Werror
