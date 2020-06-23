@@ -21,6 +21,10 @@
 
 #include <math.h> // cosf, sinf, log2f
 
+#if defined(CONF_VIDEORECORDER)
+	#include "video.h"
+#endif
+
 #include "graphics_threaded.h"
 
 static CVideoMode g_aFakeModes[] = {
@@ -2050,9 +2054,7 @@ int CGraphics_Threaded::IssueInit()
 	if(g_Config.m_GfxFullscreen) Flags |= IGraphicsBackend::INITFLAG_FULLSCREEN;
 	if(g_Config.m_GfxVsync) Flags |= IGraphicsBackend::INITFLAG_VSYNC;
 	if(g_Config.m_GfxHighdpi) Flags |= IGraphicsBackend::INITFLAG_HIGHDPI;
-#ifndef CONF_VIDEORECORDER
 	if(g_Config.m_GfxResizable) Flags |= IGraphicsBackend::INITFLAG_RESIZABLE;
-#endif
 
 	int r = m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, g_Config.m_GfxFsaaSamples, Flags, &m_DesktopScreenWidth, &m_DesktopScreenHeight, &m_ScreenWidth, &m_ScreenHeight, m_pStorage);
 	m_UseOpenGL3_3 = m_pBackend->IsOpenGL3_3();
@@ -2186,6 +2188,11 @@ bool CGraphics_Threaded::SetWindowScreen(int Index)
 
 void CGraphics_Threaded::Resize(int w, int h)
 {
+#if defined(CONF_VIDEORECORDER)
+	if (IVideo::Current() && IVideo::Current()->IsRecording())
+		return;
+#endif
+
 	if(m_ScreenWidth == w && m_ScreenHeight == h)
 		return;
 

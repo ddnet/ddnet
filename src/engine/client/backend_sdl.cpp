@@ -65,7 +65,7 @@ void CGraphicsBackend_Threaded::ThreadFunc(void *pUser)
 		}
 		#if defined(CONF_VIDEORECORDER)
 			if (IVideo::Current())
-				IVideo::Current()->nextVideoFrame_thread();
+				IVideo::Current()->NextVideoFrameThread();
 		#endif
 	}
 }

@@ -37,18 +37,18 @@ extern "C"
 
 // a wrapper around a single output AVStream
 typedef struct OutputStream {
-	AVStream *st;
-	AVCodecContext *enc;
+	AVStream *pSt;
+	AVCodecContext *pEnc;
 
 	/* pts of the next frame that will be generated */
-	int64_t next_pts;
-	int samples_count;
+	int64_t NextPts;
+	int SamplesCount;
 
-	AVFrame *frame;
-	AVFrame *tmp_frame;
+	AVFrame *pFrame;
+	AVFrame *pTmpFrame;
 
-	struct SwsContext *sws_ctx;
-	struct SwrContext *swr_ctx;
+	struct SwsContext *pSwsCtx;
+	struct SwrContext *pSwrCtx;
 } OutputStream;
 
 class CVideo : public IVideo
@@ -57,38 +57,39 @@ public:
 	CVideo(class CGraphics_Threaded* pGraphics, class IStorage* pStorage, class IConsole *pConsole, int width, int height, const char *name);
 	~CVideo();
 
-	virtual void start();
-	virtual void stop();
-	virtual void pause(bool p);
+	virtual void Start();
+	virtual void Stop();
+	virtual void Pause(bool Pause);
+	virtual bool IsRecording() { return m_Recording; }
 
-	virtual void nextVideoFrame();
-	virtual void nextVideoFrame_thread();
-	virtual bool frameRendered() { return !m_NextFrame; }
+	virtual void NextVideoFrame();
+	virtual void NextVideoFrameThread();
+	virtual bool FrameRendered() { return !m_NextFrame; }
 
-	virtual void nextAudioFrame(void (*Mix)(short *pFinalOut, unsigned Frames));
-	virtual void nextAudioFrame_timeline();
-	virtual bool aframeRendered() { return !m_NextaFrame; }
+	virtual void NextAudioFrame(void (*Mix)(short *pFinalOut, unsigned Frames));
+	virtual void NextAudioFrameTimeline();
+	virtual bool AudioFrameRendered() { return !m_NextAudioFrame; }
 
 	static IVideo* Current() { return IVideo::ms_pCurrentVideo; }
 
 	static void Init() { av_log_set_level(AV_LOG_DEBUG); }
 
 private:
-	void fill_video_frame();
-	void read_rgb_from_gl();
+	void FillVideoFrame();
+	void ReadRGBFromGL();
 
-	void fill_audio_frame();
+	void FillAudioFrame();
 
-	void open_video();
-	void open_audio();
-	AVFrame *alloc_picture(enum AVPixelFormat pix_fmt, int width, int height);
-	AVFrame* alloc_audio_frame(enum AVSampleFormat sample_fmt, uint64_t channel_layout, int sample_rate, int nb_samples);
+	void OpenVideo();
+	void OpenAudio();
+	AVFrame *AllocPicture(enum AVPixelFormat PixFmt, int Width, int Height);
+	AVFrame* AllocAudioFrame(enum AVSampleFormat SampleFmt, uint64_t ChannelLayout, int SampleRate, int NbSamples);
 
-	void write_frame(OutputStream* pStream);
-	void finish_frames(OutputStream* pStream);
-	void close_stream(OutputStream *ost);
+	void WriteFrame(OutputStream* pStream);
+	void FinishFrames(OutputStream* pStream);
+	void CloseStream(OutputStream *pStream);
 
-	void add_stream(OutputStream *ost, AVFormatContext *oc, AVCodec **codec, enum AVCodecID codec_id);
+	void AddStream(OutputStream *pStream, AVFormatContext *pOC, AVCodec **ppCodec, enum AVCodecID CodecId);
 
 	class CGraphics_Threaded* m_pGraphics;
 	class IStorage* m_pStorage;
@@ -98,9 +99,9 @@ private:
 	int m_Height;
 	char m_Name[256];
 	//FILE *m_dbgfile;
-	int m_vseq;
+	int m_Vseq;
 	short m_aBuffer[ALEN*2];
-	int m_vframe;
+	int m_Vframe;
 
 	int m_FPS;
 
@@ -111,7 +112,7 @@ private:
 	bool m_ProcessingAudioFrame;
 
 	bool m_NextFrame;
-	bool m_NextaFrame;
+	bool m_NextAudioFrame;
 
 	bool m_HasAudio;
 

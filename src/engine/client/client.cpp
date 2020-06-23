@@ -2547,10 +2547,10 @@ void CClient::Update()
 #if defined(CONF_VIDEORECORDER)
 	if (m_DemoPlayer.IsPlaying() && IVideo::Current())
 	{
-		if (IVideo::Current()->frameRendered())
-			IVideo::Current()->nextVideoFrame();
-		if (IVideo::Current()->aframeRendered())
-			IVideo::Current()->nextAudioFrame_timeline();
+		if (IVideo::Current()->FrameRendered())
+			IVideo::Current()->NextVideoFrame();
+		if (IVideo::Current()->AudioFrameRendered())
+			IVideo::Current()->NextAudioFrameTimeline();
 	}
 	else if(m_ButtonRender)
 		Disconnect();
@@ -3371,10 +3371,10 @@ void CClient::Con_StartVideo(IConsole::IResult *pResult, void *pUserData)
 	if (!IVideo::Current())
 	{
 		new CVideo((CGraphics_Threaded*)pSelf->m_pGraphics, pSelf->Storage(), pSelf->m_pConsole, pSelf->Graphics()->ScreenWidth(), pSelf->Graphics()->ScreenHeight(), "");
-		IVideo::Current()->start();
+		IVideo::Current()->Start();
 		bool paused = pSelf->m_DemoPlayer.Info()->m_Info.m_Paused;
 		if(paused)
-			IVideo::Current()->pause(true);
+			IVideo::Current()->Pause(true);
 	}
 	else
 		pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "videorecorder", "Videorecorder already running.");
@@ -3391,7 +3391,7 @@ void CClient::StartVideo(IConsole::IResult *pResult, void *pUserData, const char
 	if (!IVideo::Current())
 	{
 		new CVideo((CGraphics_Threaded*)pSelf->m_pGraphics, pSelf->Storage(), pSelf->m_pConsole, pSelf->Graphics()->ScreenWidth(), pSelf->Graphics()->ScreenHeight(), pVideoName);
-		IVideo::Current()->start();
+		IVideo::Current()->Start();
 	}
 	else
 		pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "videorecorder", "Videorecorder already running.");
@@ -3400,7 +3400,7 @@ void CClient::StartVideo(IConsole::IResult *pResult, void *pUserData, const char
 void CClient::Con_StopVideo(IConsole::IResult *pResult, void *pUserData)
 {
 	if (IVideo::Current())
-		IVideo::Current()->stop();
+		IVideo::Current()->Stop();
 }
 
 #endif
