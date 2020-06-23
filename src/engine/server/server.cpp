@@ -1956,7 +1956,7 @@ void CServer::CacheServerInfoSixup(CCache *pCache, bool SendClients)
 	}
 
 	char aVersion[32];
-	str_format(aVersion, sizeof(aVersion), "0.7, %s", GameServer()->Version());
+	str_format(aVersion, sizeof(aVersion), "0.7↔%s", GameServer()->Version());
 	Packer.AddString(aVersion, 32);
 	Packer.AddString(g_Config.m_SvName, 64);
 	Packer.AddString(g_Config.m_SvHostname, 128);
