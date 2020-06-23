@@ -731,6 +731,8 @@ set_src(ENGINE_SHARED GLOB src/engine/shared
   config_variables.h
   console.cpp
   console.h
+  csv.cpp
+  csv.h
   datafile.cpp
   datafile.h
   demo.cpp
@@ -1336,6 +1338,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
   set_src(TESTS GLOB src/test
     aio.cpp
     color.cpp
+    csv.cpp
     datafile.cpp
     fs.cpp
     git_revision.cpp
