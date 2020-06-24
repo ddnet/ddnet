@@ -182,6 +182,10 @@ void CSaveTee::load(CCharacter *pChr, int Team)
 	}
 
 	pChr->SetSolo(m_IsSolo);
+
+	// Always create a rescue tee at the exact location we loaded from so that
+	// the old one gets overwritten.
+	pChr->SetRescue();
 }
 
 char* CSaveTee::GetString()
