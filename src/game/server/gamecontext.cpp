@@ -340,7 +340,9 @@ void CGameContext::SendChatTarget(int To, const char *pText, int Flags)
 	Msg.m_ClientID = -1;
 	Msg.m_pMessage = pText;
 
-	const int MsgFlags = g_Config.m_SvDemoChat ? MSGFLAG_VITAL : MSGFLAG_VITAL|MSGFLAG_NORECORD;
+	if(g_Config.m_SvDemoChat)
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NOSEND, -1);
+
 	if(To == -1)
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
@@ -349,7 +351,7 @@ void CGameContext::SendChatTarget(int To, const char *pText, int Flags)
 				(!Server()->IsSixup(i) && (Flags & CHAT_SIX))))
 				continue;
 
-			Server()->SendPackMsg(&Msg, MsgFlags, i);
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
 		}
 	}
 	else
@@ -358,7 +360,7 @@ void CGameContext::SendChatTarget(int To, const char *pText, int Flags)
 			(!Server()->IsSixup(To) && (Flags & CHAT_SIX))))
 			return;
 
-		Server()->SendPackMsg(&Msg, MsgFlags, To);
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, To);
 	}
 }
 
