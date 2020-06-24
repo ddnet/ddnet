@@ -234,6 +234,13 @@ void CPlayers::RenderPlayer(
 		Position = m_pClient->m_aClients[ClientID].m_RenderPos;
 	else
 		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
+	
+	if(Spec)
+	{
+		Position.x = m_pClient->m_aClients[ClientID].m_SpecChar.m_X;
+		Position.y = m_pClient->m_aClients[ClientID].m_SpecChar.m_Y;
+	}
+
 	vec2 Vel = mix(vec2(Prev.m_VelX/256.0f, Prev.m_VelY/256.0f), vec2(Player.m_VelX/256.0f, Player.m_VelY/256.0f), IntraTick);
 
 	m_pClient->m_pFlow->Add(Position, Vel*100.0f, 10.0f);

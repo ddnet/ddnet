@@ -411,6 +411,13 @@ void CPlayer::Snap(int SnappingClient)
 		protocol7::CNetObj_PlayerInfoRace *pRaceInfo = static_cast<protocol7::CNetObj_PlayerInfoRace *>(Server()->SnapNewItem(-protocol7::NETOBJTYPE_PLAYERINFORACE, id, sizeof(protocol7::CNetObj_PlayerInfoRace)));
 		pRaceInfo->m_RaceStartTick = m_pCharacter->m_StartTime;
 	}
+
+	if(m_Paused == PAUSE_SPEC && m_pCharacter && m_pCharacter->Core())
+	{
+		CNetObj_SpecChar *pSpecChar = static_cast<CNetObj_SpecChar *>(Server()->SnapNewItem(NETOBJTYPE_SPECCHAR, id, sizeof(CNetObj_SpecChar)));
+		pSpecChar->m_X = m_pCharacter->Core()->m_Pos.x;
+		pSpecChar->m_Y = m_pCharacter->Core()->m_Pos.y;
+	}
 }
 
 void CPlayer::FakeSnap()

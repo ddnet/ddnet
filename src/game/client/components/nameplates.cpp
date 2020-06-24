@@ -35,6 +35,12 @@ void CNamePlates::RenderNameplate(
 	else
 		Position = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pPlayerChar->m_X, pPlayerChar->m_Y), Client()->IntraGameTick(g_Config.m_ClDummy));
 
+	if(m_pClient->m_aClients[ClientID].m_Spec)
+	{
+		Position.x = m_pClient->m_aClients[ClientID].m_SpecChar.m_X;
+		Position.y = m_pClient->m_aClients[ClientID].m_SpecChar.m_Y;
+	}
+
 	bool OtherTeam = m_pClient->IsOtherTeam(ClientID);
 
 	float FontSize = 18.0f + 20.0f * g_Config.m_ClNameplatesSize / 100.0f;
