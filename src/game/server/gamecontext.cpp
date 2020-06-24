@@ -335,18 +335,31 @@ void CGameContext::CallVote(int ClientID, const char *pDesc, const char *pCmd, c
 
 void CGameContext::SendChatTarget(int To, const char *pText, int Flags)
 {
-	if(!((Server()->IsSixup(To) && (Flags & CHAT_SIXUP)) ||
-				(!Server()->IsSixup(To) && (Flags & CHAT_SIX))))
-		return;
-
 	CNetMsg_Sv_Chat Msg;
 	Msg.m_Team = 0;
 	Msg.m_ClientID = -1;
 	Msg.m_pMessage = pText;
-	if(g_Config.m_SvDemoChat)
-		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, To);
+
+	const int MsgFlags = g_Config.m_SvDemoChat ? MSGFLAG_VITAL : MSGFLAG_VITAL|MSGFLAG_NORECORD;
+	if(To == -1)
+	{
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(!((Server()->IsSixup(i) && (Flags & CHAT_SIXUP)) ||
+				(!Server()->IsSixup(i) && (Flags & CHAT_SIX))))
+				continue;
+
+			Server()->SendPackMsg(&Msg, MsgFlags, i);
+		}
+	}
 	else
-		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, To);
+	{
+		if(!((Server()->IsSixup(To) && (Flags & CHAT_SIXUP)) ||
+			(!Server()->IsSixup(To) && (Flags & CHAT_SIX))))
+			return;
+
+		Server()->SendPackMsg(&Msg, MsgFlags, To);
+	}
 }
 
 void CGameContext::SendChatTeam(int Team, const char *pText)
