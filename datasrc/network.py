@@ -269,6 +269,11 @@ Objects = [
 	NetObjectEx("MyOwnEvent", "my-own-event@heinrich5991.de", [
 		NetIntAny("m_Test"),
 	]),
+
+	NetObjectEx("SpecChar", "spec-char@netobj.ddnet.tw", [
+		NetIntAny("m_X"),
+		NetIntAny("m_Y"),
+	]),
 ]
 
 Messages = [

@@ -1284,6 +1284,13 @@ void CGameClient::OnNewSnapshot()
 
 				m_aClients[Item.m_ID].m_Predicted.ReadDDNet(pCharacterData);
 			}
+			else if(Item.m_Type == NETOBJTYPE_SPECCHAR)
+			{
+				const CNetObj_SpecChar *pSpecCharData = (const CNetObj_SpecChar *)pData;
+				
+				m_aClients[Item.m_ID].m_SpecChar.m_X = pSpecCharData->m_X;
+				m_aClients[Item.m_ID].m_SpecChar.m_Y = pSpecCharData->m_Y;
+			}
 			else if(Item.m_Type == NETOBJTYPE_SPECTATORINFO)
 			{
 				m_Snap.m_pSpectatorInfo = (const CNetObj_SpectatorInfo *)pData;
@@ -1852,6 +1859,9 @@ void CGameClient::CClientData::Reset()
 	m_DeepFrozen = false;
 
 	m_Evolved.m_Tick = -1;
+
+	m_SpecChar.m_X = 0;
+	m_SpecChar.m_Y = 0;
 
 	UpdateRenderInfo();
 }

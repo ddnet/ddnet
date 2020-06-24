@@ -290,6 +290,12 @@ public:
 		int64 m_SmoothLen[2];
 		vec2 m_PredPos[200];
 		int m_PredTick[200];
+
+		struct SpecChar
+		{
+			int m_X;
+			int m_Y;
+		} m_SpecChar;
 	};
 
 	CClientData m_aClients[MAX_CLIENTS];
