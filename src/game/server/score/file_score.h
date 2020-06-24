@@ -75,6 +75,8 @@ public:
 
 	virtual void ShowTopPoints(int ClientID, int Offset);
 	virtual void ShowPoints(int ClientID, const char* pName);
+	virtual void ShowTimes(int ClientID, const char *pName, int Offset = 1);
+	virtual void ShowTimes(int ClientID, int Offset = 1);
 	virtual void RandomMap(int ClientID, int Stars);
 	virtual void RandomUnfinishedMap(int ClientID, int Stars);
 	virtual void SaveTeam(int ClientID, const char* Code, const char* Server);

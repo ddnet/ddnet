@@ -2,9 +2,6 @@
 #include "teams.h"
 #include "score.h"
 #include <engine/shared/config.h>
-#if defined(CONF_SQL)
-#include "score/sql_score.h"
-#endif
 
 CGameTeams::CGameTeams(CGameContext *pGameContext) :
 		m_pGameContext(pGameContext)
@@ -23,9 +20,7 @@ void CGameTeams::Reset()
 		m_TeamLocked[i] = false;
 		m_Invited[i] = 0;
 		m_Practice[i] = false;
-#if defined(CONF_SQL)
 		m_pSaveTeamResult[i] = nullptr;
-#endif
 	}
 }
 
@@ -511,12 +506,6 @@ float *CGameTeams::GetCpCurrent(CPlayer* Player)
 
 void CGameTeams::OnTeamFinish(CPlayer** Players, unsigned int Size, float Time, const char *pTimestamp)
 {
-	bool CallSaveScore = false;
-
-#if defined(CONF_SQL)
-	CallSaveScore = g_Config.m_SvUseSQL;
-#endif
-
 	int PlayerCIDs[MAX_CLIENTS];
 
 	for(unsigned int i = 0; i < Size; i++)
@@ -533,7 +522,7 @@ void CGameTeams::OnTeamFinish(CPlayer** Players, unsigned int Size, float Time, 
 		}
 	}
 
-	if (CallSaveScore && Size >= 2)
+	if (Size >= 2)
 		GameServer()->Score()->SaveTeamScore(PlayerCIDs, Size, Time, pTimestamp);
 }
 
@@ -600,10 +589,7 @@ void CGameTeams::OnFinish(CPlayer* Player, float Time, const char *pTimestamp)
 		Server()->SaveDemo(ClientID, Time);
 	}
 
-	bool CallSaveScore = false;
-#if defined(CONF_SQL)
-	CallSaveScore = g_Config.m_SvUseSQL && g_Config.m_SvSaveWorseScores;
-#endif
+	bool CallSaveScore = g_Config.m_SvSaveWorseScores;
 
 	if (!pData->m_BestTime || Time < pData->m_BestTime)
 	{
@@ -685,7 +671,6 @@ void CGameTeams::OnFinish(CPlayer* Player, float Time, const char *pTimestamp)
 	}
 }
 
-#if defined(CONF_SQL)
 void CGameTeams::ProcessSaveTeam()
 {
 	for(int Team = 0; Team < MAX_CLIENTS; Team++)
@@ -694,12 +679,12 @@ void CGameTeams::ProcessSaveTeam()
 			continue;
 		if(m_pSaveTeamResult[Team]->m_aBroadcast[0] != '\0')
 			GameServer()->SendBroadcast(m_pSaveTeamResult[Team]->m_aBroadcast, -1);
-		if(m_pSaveTeamResult[Team]->m_aMessage[0] != '\0' && m_pSaveTeamResult[Team]->m_Status != CSqlSaveResult::LOAD_FAILED)
+		if(m_pSaveTeamResult[Team]->m_aMessage[0] != '\0' && m_pSaveTeamResult[Team]->m_Status != CScoreSaveResult::LOAD_FAILED)
 			GameServer()->SendChatTeam(Team, m_pSaveTeamResult[Team]->m_aMessage);
 		// TODO: log load/save success/fail in teehistorian
 		switch(m_pSaveTeamResult[Team]->m_Status)
 		{
-		case CSqlSaveResult::SAVE_SUCCESS:
+		case CScoreSaveResult::SAVE_SUCCESS:
 		{
 			ResetSavedTeam(m_pSaveTeamResult[Team]->m_RequestingPlayer, Team);
 			char aSaveID[UUID_MAXSTRSIZE];
@@ -707,11 +692,11 @@ void CGameTeams::ProcessSaveTeam()
 			dbg_msg("save", "Save successful: %s", aSaveID);
 			break;
 		}
-		case CSqlSaveResult::SAVE_FAILED:
+		case CScoreSaveResult::SAVE_FAILED:
 			if(Count(Team) > 0)
 				m_pSaveTeamResult[Team]->m_SavedTeam.load(Team);
 			break;
-		case CSqlSaveResult::LOAD_SUCCESS:
+		case CScoreSaveResult::LOAD_SUCCESS:
 		{
 			if(Count(Team) > 0)
 				m_pSaveTeamResult[Team]->m_SavedTeam.load(Team);
@@ -720,7 +705,7 @@ void CGameTeams::ProcessSaveTeam()
 			dbg_msg("save", "Load successful: %s", aSaveID);
 			break;
 		}
-		case CSqlSaveResult::LOAD_FAILED:
+		case CScoreSaveResult::LOAD_FAILED:
 			if(m_pSaveTeamResult[Team]->m_aMessage[0] != '\0')
 				GameServer()->SendChatTarget(m_pSaveTeamResult[Team]->m_RequestingPlayer, m_pSaveTeamResult[Team]->m_aMessage);
 			break;
@@ -728,7 +713,6 @@ void CGameTeams::ProcessSaveTeam()
 		m_pSaveTeamResult[Team] = nullptr;
 	}
 }
-#endif
 
 void CGameTeams::OnCharacterSpawn(int ClientID)
 {
@@ -812,7 +796,6 @@ void CGameTeams::SetClientInvited(int Team, int ClientID, bool Invited)
 	}
 }
 
-#if defined(CONF_SQL)
 void CGameTeams::KillSavedTeam(int ClientID, int Team)
 {
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -835,4 +818,3 @@ void CGameTeams::ResetSavedTeam(int ClientID, int Team)
 		}
 	}
 }
-#endif

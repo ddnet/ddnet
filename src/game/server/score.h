@@ -4,12 +4,102 @@
 #include <memory>
 #include <atomic>
 
+#include <game/voting.h>
+#include <engine/map.h>
 #include "save.h"
 
 enum
 {
 	NUM_CHECKPOINTS = 25,
 	TIMESTAMP_STR_LENGTH = 20, // 2019-04-02 19:38:36
+};
+
+struct CScorePlayerResult
+{
+	std::atomic_bool m_Done;
+	CScorePlayerResult();
+
+	enum {
+		MAX_MESSAGES = 7,
+	};
+
+	enum Variant
+	{
+		DIRECT,
+		ALL,
+		BROADCAST,
+		MAP_VOTE,
+		PLAYER_INFO,
+	} m_MessageKind;
+	union {
+		char m_aaMessages[MAX_MESSAGES][512];
+		char m_Broadcast[1024];
+		struct {
+			float m_Time;
+			float m_CpTime[NUM_CHECKPOINTS];
+			int m_Score;
+			int m_HasFinishScore;
+			int m_Birthday; // 0 indicates no birthday
+		} m_Info;
+		struct
+		{
+			char m_Reason[VOTE_REASON_LENGTH];
+			char m_Server[32+1];
+			char m_Map[MAX_MAP_LENGTH+1];
+		} m_MapVote;
+	} m_Data; // PLAYER_INFO
+
+	void SetVariant(Variant v);
+};
+
+struct CScoreRandomMapResult
+{
+	std::atomic_bool m_Done;
+	CScoreRandomMapResult(int ClientID) :
+		m_Done(false),
+		m_ClientID(ClientID)
+	{
+		m_Map[0] = '\0';
+		m_aMessage[0] = '\0';
+	}
+	int m_ClientID;
+	char m_Map[MAX_MAP_LENGTH];
+	char m_aMessage[512];
+};
+
+struct CScoreSaveResult
+{
+	CScoreSaveResult(int PlayerID, IGameController* Controller) :
+		m_Status(SAVE_FAILED),
+		m_SavedTeam(CSaveTeam(Controller)),
+		m_RequestingPlayer(PlayerID)
+	{
+		m_aMessage[0] = '\0';
+		m_aBroadcast[0] = '\0';
+	}
+	enum
+	{
+		SAVE_SUCCESS,
+		// load team in the following two cases
+		SAVE_FAILED,
+		LOAD_SUCCESS,
+		LOAD_FAILED,
+	} m_Status;
+	char m_aMessage[512];
+	char m_aBroadcast[512];
+	CSaveTeam m_SavedTeam;
+	int m_RequestingPlayer;
+	CUuid m_SaveID;
+};
+
+struct CScoreInitResult
+{
+	CScoreInitResult() :
+		m_Done(false),
+		m_CurrentRecord(0)
+	{ }
+	std::atomic_bool m_Done;
+	float m_CurrentRecord;
 };
 
 class CPlayerData
@@ -66,6 +156,9 @@ public:
 
 	virtual void ShowTopPoints(int ClientID, int Offset=1) = 0;
 	virtual void ShowPoints(int ClientID, const char *pName) = 0;
+
+	virtual void ShowTimes(int ClientID, const char *pName, int Offset = 1) = 0;
+	virtual void ShowTimes(int ClientID, int Offset = 1) = 0;
 
 	virtual void RandomMap(int ClientID, int Stars) = 0;
 	virtual void RandomUnfinishedMap(int ClientID, int Stars) = 0;
