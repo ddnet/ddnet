@@ -566,6 +566,9 @@ void CPlayers::RenderPlayer(
 	else
 		RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position);
 
+	if(Spec)
+		return;
+
 	int QuadOffsetToEmoticon = NUM_WEAPONS * 2 + 2 + 2;
 	if(Player.m_PlayerFlags&PLAYERFLAG_CHATTING)
 	{
