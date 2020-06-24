@@ -1956,7 +1956,7 @@ void CServer::CacheServerInfoSixup(CCache *pCache, bool SendClients)
 	}
 
 	char aVersion[32];
-	str_format(aVersion, sizeof(aVersion), "0.7, %s", GameServer()->Version());
+	str_format(aVersion, sizeof(aVersion), "0.7↔%s", GameServer()->Version());
 	Packer.AddString(aVersion, 32);
 	Packer.AddString(g_Config.m_SvName, 64);
 	Packer.AddString(g_Config.m_SvHostname, 128);
@@ -1972,7 +1972,7 @@ void CServer::CacheServerInfoSixup(CCache *pCache, bool SendClients)
 	Packer.AddInt(Flags);
 
 	int MaxClients = m_NetServer.MaxClients();
-	Packer.AddInt(0);	// server skill level //TODO: Implement this with IGameServer::GetSkillLevel()
+	Packer.AddInt(g_Config.m_SvSkillLevel); // server skill level
 	Packer.AddInt(PlayerCount); // num players
 	Packer.AddInt(maximum(MaxClients - maximum(g_Config.m_SvSpectatorSlots, g_Config.m_SvReservedSlots), PlayerCount)); // max players
 	Packer.AddInt(ClientCount); // num clients
