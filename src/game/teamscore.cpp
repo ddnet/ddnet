@@ -6,12 +6,12 @@ CTeamsCore::CTeamsCore()
 	Reset();
 }
 
-bool CTeamsCore::SameTeam(int ClientID1, int ClientID2)
+bool CTeamsCore::SameTeam(int ClientID1, int ClientID2) const
 {
 	return m_Team[ClientID1] == m_Team[ClientID2];
 }
 
-int CTeamsCore::Team(int ClientID)
+int CTeamsCore::Team(int ClientID) const
 {
 	return m_Team[ClientID];
 }
@@ -21,7 +21,7 @@ void CTeamsCore::Team(int ClientID, int Team)
 	m_Team[ClientID] = Team;
 }
 
-bool CTeamsCore::CanKeepHook(int ClientID1, int ClientID2)
+bool CTeamsCore::CanKeepHook(int ClientID1, int ClientID2) const
 {
 	if (m_Team[ClientID1] == (m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER) || m_Team[ClientID2] == (m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER)
 			|| ClientID1 == ClientID2)
@@ -29,7 +29,7 @@ bool CTeamsCore::CanKeepHook(int ClientID1, int ClientID2)
 	return m_Team[ClientID1] == m_Team[ClientID2];
 }
 
-bool CTeamsCore::CanCollide(int ClientID1, int ClientID2)
+bool CTeamsCore::CanCollide(int ClientID1, int ClientID2) const
 {
 	if (m_Team[ClientID1] == (m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER) || m_Team[ClientID2] == (m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER)
 			|| ClientID1 == ClientID2)

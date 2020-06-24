@@ -12,7 +12,6 @@ class CSqlSaveResult;
 class CGameTeams
 {
 	int m_TeamState[MAX_CLIENTS];
-	int m_MembersCount[MAX_CLIENTS];
 	bool m_TeeFinished[MAX_CLIENTS];
 	bool m_TeamLocked[MAX_CLIENTS];
 	uint64_t m_Invited[MAX_CLIENTS];

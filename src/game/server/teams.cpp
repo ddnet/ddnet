@@ -19,7 +19,6 @@ void CGameTeams::Reset()
 	{
 		m_TeamState[i] = TEAMSTATE_EMPTY;
 		m_TeeFinished[i] = false;
-		m_MembersCount[i] = 0;
 		m_LastChat[i] = 0;
 		m_TeamLocked[i] = false;
 		m_Invited[i] = 0;
@@ -271,17 +270,8 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 	if (Team != m_Core.Team(ClientID))
 		ForceLeaveTeam(ClientID);
 	else
-	{
 		m_TeeFinished[ClientID] = false;
-		if (Count(m_Core.Team(ClientID)) > 0)
-			m_MembersCount[m_Core.Team(ClientID)]--;
-	}
 
-	SetForceCharacterNewTeam(ClientID, Team);
-}
-
-void CGameTeams::SetForceCharacterNewTeam(int ClientID, int Team)
-{
 	int OldTeam = m_Core.Team(ClientID);
 
 	m_Core.Team(ClientID, Team);
@@ -296,8 +286,6 @@ void CGameTeams::SetForceCharacterNewTeam(int ClientID, int Team)
 			GetPlayer(ClientID)->m_VotedForPractice = false;
 	}
 
-	if (m_Core.Team(ClientID) != TEAM_SUPER)
-		m_MembersCount[m_Core.Team(ClientID)]++;
 	if (Team != TEAM_SUPER && (m_TeamState[Team] == TEAMSTATE_EMPTY || m_TeamLocked[Team]))
 	{
 		if (!m_TeamLocked[Team])
@@ -340,16 +328,20 @@ void CGameTeams::ForceLeaveTeam(int ClientID)
 			// do not reset SaveTeamResult, because it should be logged into teehistorian even if the team leaves
 		}
 	}
-
-	if (Count(m_Core.Team(ClientID)) > 0)
-		m_MembersCount[m_Core.Team(ClientID)]--;
 }
 
 int CGameTeams::Count(int Team) const
 {
 	if (Team == TEAM_SUPER)
 		return -1;
-	return m_MembersCount[Team];
+
+	int Count = 0;
+
+	for (int i = 0; i < MAX_CLIENTS; ++i)
+		if (m_Core.Team(i) == Team)
+			Count++;
+
+	return Count;
 }
 
 void CGameTeams::ChangeTeamState(int Team, int State)
@@ -716,12 +708,12 @@ void CGameTeams::ProcessSaveTeam()
 			break;
 		}
 		case CSqlSaveResult::SAVE_FAILED:
-			if(m_MembersCount[Team] > 0)
+			if(Count(Team) > 0)
 				m_pSaveTeamResult[Team]->m_SavedTeam.load(Team);
 			break;
 		case CSqlSaveResult::LOAD_SUCCESS:
 		{
-			if(m_MembersCount[Team] > 0)
+			if(Count(Team) > 0)
 				m_pSaveTeamResult[Team]->m_SavedTeam.load(Team);
 			char aSaveID[UUID_MAXSTRSIZE];
 			FormatUuid(m_pSaveTeamResult[Team]->m_SaveID, aSaveID, UUID_MAXSTRSIZE);
@@ -748,10 +740,7 @@ void CGameTeams::OnCharacterSpawn(int ClientID)
 
 	if (m_Core.Team(ClientID) >= TEAM_SUPER || !m_TeamLocked[Team])
 	{
-		// Important to only set a new team here, don't remove from an existing
-		// team since a newly joined player does by definition not have an old team
-		// to remove from. Doing so would destroy the count in m_MembersCount.
-		SetForceCharacterNewTeam(ClientID, 0);
+		SetForceCharacterTeam(ClientID, 0);
 		CheckTeamFinished(Team);
 	}
 }
@@ -794,7 +783,7 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 						if (Weapon == WEAPON_SELF)
 							GameServer()->m_apPlayers[i]->Respawn(true); // spawn the rest of team with weak hook on the killer
 					}
-					if(m_MembersCount[Team] > 1)
+					if(Count(Team) > 1)
 						GameServer()->SendChatTarget(i, aBuf);
 				}
 		}
