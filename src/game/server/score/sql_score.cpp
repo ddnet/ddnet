@@ -1080,31 +1080,39 @@ bool CSqlScore::ShowTeamTop5Thread(CSqlServer* pSqlServer, const CSqlData<CSqlPl
 		pSqlServer->executeSqlQuery(aBuf);
 
 		// show teamtop5
-		pSqlServer->GetResults()->first();
-		strcpy(paMessages[0], "------- Team Top 5 -------");
-		int Line;
-		for(Line = 1; Line < 6; Line++) // print
-		{
-			if(pSqlServer->GetResults()->isAfterLast())
-				break;
-			int TeamSize = pSqlServer->GetResults()->getInt("TeamSize");
-			float Time = (float)pSqlServer->GetResults()->getDouble("Time");
-			int Rank = pSqlServer->GetResults()->getInt("Rank");
+		int Line = 0;
+		strcpy(paMessages[Line++], "------- Team Top 5 -------");
 
-			char aNames[2300] = { 0 };
-			for(int i = 0; i < TeamSize; i++)
+		int Rows = pSqlServer->GetResults()->rowsCount();
+
+		if(Rows > 0)
+		{
+			pSqlServer->GetResults()->first();
+
+			for(Line = 1; Line < 6; Line++) // print
 			{
-				auto Name = pSqlServer->GetResults()->getString("Name");
-				str_append(aNames, Name.c_str(), sizeof(aNames));
-				if (i < TeamSize - 2)
-					str_append(aNames, ", ", sizeof(aNames));
-				else if (i == TeamSize - 2)
-					str_append(aNames, " & ", sizeof(aNames));
-				pSqlServer->GetResults()->next();
+				if(pSqlServer->GetResults()->isAfterLast())
+					break;
+				int TeamSize = pSqlServer->GetResults()->getInt("TeamSize");
+				float Time = (float)pSqlServer->GetResults()->getDouble("Time");
+				int Rank = pSqlServer->GetResults()->getInt("Rank");
+
+				char aNames[2300] = { 0 };
+				for(int i = 0; i < TeamSize; i++)
+				{
+					auto Name = pSqlServer->GetResults()->getString("Name");
+					str_append(aNames, Name.c_str(), sizeof(aNames));
+					if (i < TeamSize - 2)
+						str_append(aNames, ", ", sizeof(aNames));
+					else if (i == TeamSize - 2)
+						str_append(aNames, " & ", sizeof(aNames));
+					pSqlServer->GetResults()->next();
+				}
+				str_format(paMessages[Line], sizeof(paMessages[Line]), "%d. %s Team Time: %02d:%05.2f",
+						Rank, aNames, (int)(Time/60), Time-((int)Time/60*60));
 			}
-			str_format(paMessages[Line], sizeof(paMessages[Line]), "%d. %s Team Time: %02d:%05.2f",
-					Rank, aNames, (int)(Time/60), Time-((int)Time/60*60));
 		}
+
 		strcpy(paMessages[Line], "-------------------------------");
 
 		pData->m_pResult->m_Done = true;
