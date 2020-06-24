@@ -2154,6 +2154,12 @@ IAntibot *CCharacter::Antibot()
 	return GameServer()->Antibot();
 }
 
+void CCharacter::SetRescue()
+{
+	m_RescueTee.save(this);
+	m_SetSavePos = true;
+}
+
 void CCharacter::DDRaceTick()
 {
 	mem_copy(&m_Input, &m_SavedInput, sizeof(m_Input));
@@ -2186,14 +2192,12 @@ void CCharacter::DDRaceTick()
 		int tile = GameServer()->Collision()->GetTileIndex(index);
 		int ftile = GameServer()->Collision()->GetFTileIndex(index);
 		if(IsGrounded() && tile != TILE_FREEZE && tile != TILE_DFREEZE && ftile != TILE_FREEZE && ftile != TILE_DFREEZE && !m_DeepFreeze) {
-			m_RescueTee.save(this);
-			m_SetSavePos = true;
+			SetRescue();
 		}
 	}
 
 	m_Core.m_Id = GetPlayer()->GetCID();
 }
-
 
 void CCharacter::DDRacePostCoreTick()
 {
