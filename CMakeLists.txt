@@ -1294,6 +1294,7 @@ set(EXPECTED_DATA
   skins/wartee.png
   skins/whis.png
   skins/x_ninja.png
+  skins/x_spec.png
   wordlist.txt
 )
 

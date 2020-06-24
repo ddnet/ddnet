@@ -15,6 +15,7 @@ class CPlayers : public CComponent
 		const CNetObj_Character *pPlayerChar,
 		const CTeeRenderInfo *pRenderInfo,
 		int ClientID,
+		bool Spec,
 		float Intra = 0.f
 	);
 	void RenderHook(
