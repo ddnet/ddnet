@@ -27,7 +27,7 @@ public:
 
 static const char *GetUpdaterUrl(char *pBuf, int BufSize, const char *pFile)
 {
-	str_format(pBuf, BufSize, "https://update4.ddnet.tw/%s", pFile);
+	str_format(pBuf, BufSize, "https://update5.ddnet.tw/%s", pFile);
 	return pBuf;
 }
 
@@ -244,12 +244,14 @@ void CUpdater::ParseUpdate()
 	if(!File)
 		return;
 
-	char aBuf[4096*4];
-	mem_zero(aBuf, sizeof (aBuf));
-	io_read(File, aBuf, sizeof(aBuf));
+	long int Length = io_length(File);
+	char *pBuf = (char *)malloc(Length);
+	mem_zero(pBuf, Length);
+	io_read(File, pBuf, Length);
 	io_close(File);
 
-	json_value *pVersions = json_parse(aBuf, sizeof(aBuf));
+	json_value *pVersions = json_parse(pBuf, Length);
+	free(pBuf);
 
 	if(pVersions && pVersions->type == json_array)
 	{
