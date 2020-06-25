@@ -270,7 +270,7 @@ Objects = [
 		NetIntAny("m_Test"),
 	]),
 
-	NetObjectEx("SpecChar", "spec-char@netobj.ddnet.tw", [
+	NetObjectEx("SpecChar", "spec-char-2@netobj.ddnet.tw", [
 		NetIntAny("m_X"),
 		NetIntAny("m_Y"),
 		NetIntAny("m_HookState"),
