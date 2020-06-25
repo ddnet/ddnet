@@ -1595,6 +1595,7 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData<CScoreSave
 		std::unique_ptr<sql::ResultSet> pResult;
 		pPrepStmt.reset(pSqlServer->Connection()->prepareStatement(aBuf));
 		bool UseCode = false;
+		bool SpecifiedSaveCodeExists = false;
 		if(pData->m_Code[0] != '\0')
 		{
 			pPrepStmt->setString(1, pData->m_Code);
@@ -1604,6 +1605,10 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData<CScoreSave
 			{
 				UseCode = true;
 				str_copy(Code, pData->m_Code, sizeof(Code));
+			}
+			else
+			{
+				SpecifiedSaveCodeExists = true;
 			}
 		}
 		if(!UseCode)
@@ -1636,15 +1641,33 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData<CScoreSave
 
 			if(str_comp(pData->m_Server, g_Config.m_SvSqlServerName) == 0)
 			{
-				str_format(pData->m_pResult->m_aMessage, sizeof(pData->m_pResult->m_aMessage),
-						"Team successfully saved by %s. Use '/load %s' to continue",
-						pData->m_ClientName, Code);
+				if(SpecifiedSaveCodeExists)
+				{
+					str_format(pData->m_pResult->m_aMessage, sizeof(pData->m_pResult->m_aMessage),
+							"Team successfully saved by %s. The specified save code already exists, using generated save code instead. Use '/load %s' to continue",
+							pData->m_ClientName, Code);
+				}
+				else
+				{
+					str_format(pData->m_pResult->m_aMessage, sizeof(pData->m_pResult->m_aMessage),
+							"Team successfully saved by %s. Use '/load %s' to continue",
+							pData->m_ClientName, Code);
+				}
 			}
 			else
 			{
-				str_format(pData->m_pResult->m_aMessage, sizeof(pData->m_pResult->m_aMessage),
-						"Team successfully saved by %s. Use '/load %s' on %s to continue",
-						pData->m_ClientName, Code, pData->m_Server);
+				if(SpecifiedSaveCodeExists)
+				{
+					str_format(pData->m_pResult->m_aMessage, sizeof(pData->m_pResult->m_aMessage),
+							"Team successfully saved by %s. The specified save code already exists, using generated save code instead. Use '/load %s' on %s to continue",
+							pData->m_ClientName, Code, pData->m_Server);
+				}
+				else
+				{
+					str_format(pData->m_pResult->m_aMessage, sizeof(pData->m_pResult->m_aMessage),
+							"Team successfully saved by %s. Use '/load %s' on %s to continue",
+							pData->m_ClientName, Code, pData->m_Server);
+				}
 			}
 			pData->m_pResult->m_Status = CScoreSaveResult::SAVE_SUCCESS;
 		}
