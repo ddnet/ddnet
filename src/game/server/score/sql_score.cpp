@@ -1573,9 +1573,18 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData<CScoreSave
 			pData->m_pResult->m_Status = CScoreSaveResult::SAVE_SUCCESS;
 			strcpy(pData->m_pResult->m_aBroadcast,
 					"Database connection failed, teamsave written to a file instead. Admins will add it manually in a few days.");
-			str_format(pData->m_pResult->m_aMessage, sizeof(pData->m_pResult->m_aMessage),
-					"Team successfully saved by %s. Use '/load %s' to continue",
-					pData->m_ClientName, Code.Str());
+			if(str_comp(pData->m_Server, g_Config.m_SvSqlServerName) == 0)
+			{
+				str_format(pData->m_pResult->m_aMessage, sizeof(pData->m_pResult->m_aMessage),
+						"Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue",
+						pData->m_ClientName, Code.ClrStr());
+			}
+			else
+			{
+				str_format(pData->m_pResult->m_aMessage, sizeof(pData->m_pResult->m_aMessage),
+						"Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue",
+						pData->m_ClientName, Code.ClrStr(), pData->m_Server);
+			}
 			return true;
 		}
 		lock_unlock(ms_FailureFileLock);
@@ -1606,7 +1615,7 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData<CScoreSave
 				str_copy(Code, pData->m_Code, sizeof(Code));
 			}
 		}
-		if(!UseCode)
+		else
 		{
 			// use random generated passphrase if save code exists or no save code given
 			pPrepStmt->setString(1, pData->m_aGeneratedCode);
