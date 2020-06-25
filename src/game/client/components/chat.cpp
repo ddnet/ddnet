@@ -556,16 +556,18 @@ void CChat::StoreSave(const char *pText)
 {
 	const char *pStart = str_find(pText, "Team successfully saved by ");
 	const char *pMid = str_find(pText, ". Use '/load ");
-	const char *pEnd = str_find(pText, "' to continue");
+	const char *pOn = str_find(pText, "' on ");
+	const char *pEnd = str_find(pText, pOn ? " to continue" : "' to continue");
 
-	if(!pStart || !pMid || !pEnd || pMid < pStart || pEnd < pMid)
+	if(!pStart || !pMid || !pEnd || pMid < pStart || pEnd < pMid || (pOn && (pOn < pMid || pEnd < pOn)))
 		return;
 
 	char aName[16];
 	str_copy(aName, pStart + 27, minimum(static_cast<size_t>(pMid - pStart - 26), sizeof(aName)));
 
 	char aSaveCode[64];
-	str_copy(aSaveCode, pMid + 13, minimum(static_cast<size_t>(pEnd - pMid - 12), sizeof(aSaveCode)));
+
+	str_copy(aSaveCode, pMid + 13, minimum(static_cast<size_t>((pOn ? pOn : pEnd) - pMid - 12), sizeof(aSaveCode)));
 
 	char aTimestamp[20];
 	str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_SPACE);
