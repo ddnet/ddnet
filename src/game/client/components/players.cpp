@@ -703,7 +703,7 @@ void CPlayers::OnRender()
 				CNetObj_Character CurChar = m_pClient->m_aClients[i].m_RenderCur;
 
 
-				if(m_pClient->m_aClients[i].m_Spec)
+				if(m_pClient->m_aClients[i].m_Spec && !m_pClient->m_Snap.m_aCharacters[i].m_Active)
 				{
 					int Skin = m_pClient->m_pSkins->Find("x_spec");
 					if(Skin != -1)
@@ -719,7 +719,7 @@ void CPlayers::OnRender()
 							&CurChar,
 							&m_aRenderInfo[i],
 							i,
-							m_pClient->m_aClients[i].m_Spec
+							m_pClient->m_aClients[i].m_Spec && !m_pClient->m_Snap.m_aCharacters[i].m_Active
 						);
 				}
 				else
@@ -729,7 +729,7 @@ void CPlayers::OnRender()
 							&CurChar,
 							&m_aRenderInfo[i],
 							i,
-							m_pClient->m_aClients[i].m_Spec
+							m_pClient->m_aClients[i].m_Spec && !m_pClient->m_Snap.m_aCharacters[i].m_Active
 						);
 				}
 			}
