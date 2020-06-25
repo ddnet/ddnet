@@ -317,6 +317,20 @@ void CFileScore::ShowPoints(int ClientID, const char* pName)
 	GameServer()->SendChatTarget(ClientID, aBuf);
 }
 
+void CFileScore::ShowTimes(int ClientID, const char *pName, int Offset)
+{
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "Show times not supported in file based servers");
+	GameServer()->SendChatTarget(ClientID, aBuf);
+}
+
+void CFileScore::ShowTimes(int ClientID, int Offset)
+{
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "Show times not supported in file based servers");
+	GameServer()->SendChatTarget(ClientID, aBuf);
+}
+
 void CFileScore::RandomMap(int ClientID, int Stars)
 {
 	char aBuf[512];

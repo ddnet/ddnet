@@ -12,10 +12,6 @@
 #include "gamemodes/DDRace.h"
 #include <time.h>
 
-#if defined(CONF_SQL)
-#include "score/sql_score.h"
-#endif
-
 MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
 
 IServer *CPlayer::Server() const { return m_pGameServer->Server(); }
@@ -124,11 +120,9 @@ void CPlayer::Reset()
 
 	// Variable initialized:
 	m_Last_Team = 0;
-#if defined(CONF_SQL)
 	m_LastSQLQuery = 0;
-	m_SqlQueryResult = nullptr;
-	m_SqlFinishResult = nullptr;
-#endif
+	m_ScoreQueryResult = nullptr;
+	m_ScoreFinishResult = nullptr;
 
 	int64 Now = Server()->Tick();
 	int64 TickSpeed = Server()->TickSpeed();
@@ -174,18 +168,16 @@ void CPlayer::Tick()
 #ifdef CONF_DEBUG
 	if(!g_Config.m_DbgDummies || m_ClientID < MAX_CLIENTS-g_Config.m_DbgDummies)
 #endif
-#if defined(CONF_SQL)
-	if(m_SqlQueryResult != nullptr && m_SqlQueryResult.use_count() == 1)
+	if(m_ScoreQueryResult != nullptr && m_ScoreQueryResult.use_count() == 1)
 	{
-		ProcessSqlResult(*m_SqlQueryResult);
-		m_SqlQueryResult = nullptr;
+		ProcessScoreResult(*m_ScoreQueryResult);
+		m_ScoreQueryResult = nullptr;
 	}
-	if(m_SqlFinishResult != nullptr && m_SqlFinishResult.use_count() == 1)
+	if(m_ScoreFinishResult != nullptr && m_ScoreFinishResult.use_count() == 1)
 	{
-		ProcessSqlResult(*m_SqlFinishResult);
-		m_SqlFinishResult = nullptr;
+		ProcessScoreResult(*m_ScoreFinishResult);
+		m_ScoreFinishResult = nullptr;
 	}
-#endif
 
 	if(!Server()->ClientIngame(m_ClientID))
 		return;
@@ -924,34 +916,33 @@ void CPlayer::SpectatePlayerName(const char *pName)
 	}
 }
 
-#if defined(CONF_SQL)
-void CPlayer::ProcessSqlResult(CSqlPlayerResult &Result)
+void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 {
 	if(Result.m_Done) // SQL request was successful
 	{
 		switch(Result.m_MessageKind)
 		{
-		case CSqlPlayerResult::DIRECT:
-			for(int i = 0; i < CSqlPlayerResult::MAX_MESSAGES; i++)
+		case CScorePlayerResult::DIRECT:
+			for(int i = 0; i < CScorePlayerResult::MAX_MESSAGES; i++)
 			{
 				if(Result.m_Data.m_aaMessages[i][0] == 0)
 					break;
 				GameServer()->SendChatTarget(m_ClientID, Result.m_Data.m_aaMessages[i]);
 			}
 			break;
-		case CSqlPlayerResult::ALL:
-			for(int i = 0; i < CSqlPlayerResult::MAX_MESSAGES; i++)
+		case CScorePlayerResult::ALL:
+			for(int i = 0; i < CScorePlayerResult::MAX_MESSAGES; i++)
 			{
 				if(Result.m_Data.m_aaMessages[i][0] == 0)
 					break;
 				GameServer()->SendChat(-1, CGameContext::CHAT_ALL, Result.m_Data.m_aaMessages[i]);
 			}
 			break;
-		case CSqlPlayerResult::BROADCAST:
+		case CScorePlayerResult::BROADCAST:
 			if(Result.m_Data.m_Broadcast[0] != 0)
 				GameServer()->SendBroadcast(Result.m_Data.m_Broadcast, -1);
 			break;
-		case CSqlPlayerResult::MAP_VOTE:
+		case CScorePlayerResult::MAP_VOTE:
 			GameServer()->m_VoteKick = false;
 			GameServer()->m_VoteSpec = false;
 			GameServer()->m_LastMapVote = time_get();
@@ -967,7 +958,7 @@ void CPlayer::ProcessSqlResult(CSqlPlayerResult &Result)
 
 			GameServer()->CallVote(m_ClientID, Result.m_Data.m_MapVote.m_Map, aCmd, "/map", aChatmsg);
 			break;
-		case CSqlPlayerResult::PLAYER_INFO:
+		case CScorePlayerResult::PLAYER_INFO:
 			GameServer()->Score()->PlayerData(m_ClientID)->Set(
 					Result.m_Data.m_Info.m_Time,
 					Result.m_Data.m_Info.m_CpTime
@@ -997,4 +988,3 @@ void CPlayer::ProcessSqlResult(CSqlPlayerResult &Result)
 		}
 	}
 }
-#endif

@@ -8,7 +8,7 @@
 #include <vector>
 #include <map>
 
-struct CSqlInitResult;
+struct CScoreInitResult;
 class CGameControllerDDRace: public IGameController
 {
 public:
@@ -24,6 +24,6 @@ public:
 	void InitTeleporter();
 	virtual void Tick();
 
-	std::shared_ptr<CSqlInitResult> m_pInitResult;
+	std::shared_ptr<CScoreInitResult> m_pInitResult;
 };
 #endif // GAME_SERVER_GAMEMODES_DDRACE_H

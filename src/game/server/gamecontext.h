@@ -58,7 +58,7 @@ class IConsole;
 class IEngine;
 class IStorage;
 struct CAntibotData;
-struct CSqlRandomMapResult;
+struct CScoreRandomMapResult;
 
 class CGameContext : public IGameServer
 {
@@ -269,7 +269,7 @@ public:
 	bool RateLimitPlayerVote(int ClientID);
 	bool RateLimitPlayerMapVote(int ClientID);
 
-	std::shared_ptr<CSqlRandomMapResult> m_SqlRandomMapResult;
+	std::shared_ptr<CScoreRandomMapResult> m_SqlRandomMapResult;
 
 private:
 

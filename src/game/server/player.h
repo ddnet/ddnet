@@ -10,10 +10,6 @@
 #include "gamecontext.h"
 #include <memory>
 
-#if defined(CONF_SQL)
-class CSqlPlayerResult;
-#endif
-
 // player object
 class CPlayer
 {
@@ -194,12 +190,10 @@ public:
 	int m_DefEmoteReset;
 	bool m_Halloween;
 	bool m_FirstPacket;
-#if defined(CONF_SQL)
-	void ProcessSqlResult(CSqlPlayerResult &Result);
 	int64 m_LastSQLQuery;
-	std::shared_ptr<CSqlPlayerResult> m_SqlQueryResult;
-	std::shared_ptr<CSqlPlayerResult> m_SqlFinishResult;
-#endif
+	void ProcessScoreResult(CScorePlayerResult &Result);
+	std::shared_ptr<CScorePlayerResult> m_ScoreQueryResult;
+	std::shared_ptr<CScorePlayerResult> m_ScoreFinishResult;
 	bool m_NotEligibleForFinish;
 	int64 m_EligibleForFinishCheck;
 	bool m_VotedForPractice;

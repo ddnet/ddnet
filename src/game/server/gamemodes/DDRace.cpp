@@ -9,10 +9,6 @@
 #include "DDRace.h"
 #include "gamemode.h"
 
-#if defined(CONF_SQL)
-#include <game/server/score/sql_score.h>
-#endif
-
 CGameControllerDDRace::CGameControllerDDRace(class CGameContext *pGameServer) :
 		IGameController(pGameServer), m_Teams(pGameServer), m_pInitResult(nullptr)
 {
@@ -29,7 +25,6 @@ CGameControllerDDRace::~CGameControllerDDRace()
 void CGameControllerDDRace::Tick()
 {
 	IGameController::Tick();
-#if defined(CONF_SQL)
 	m_Teams.ProcessSaveTeam();
 
 	if(m_pInitResult != nullptr && m_pInitResult.use_count() == 1)
@@ -40,7 +35,6 @@ void CGameControllerDDRace::Tick()
 		}
 		m_pInitResult = nullptr;
 	}
-#endif
 }
 
 void CGameControllerDDRace::InitTeleporter()

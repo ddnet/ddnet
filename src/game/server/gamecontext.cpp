@@ -941,7 +941,6 @@ void CGameContext::OnTick()
 		}
 	}
 
-#if defined(CONF_SQL)
 	if(m_SqlRandomMapResult != nullptr && m_SqlRandomMapResult.use_count() == 1)
 	{
 		if(m_SqlRandomMapResult->m_Done)
@@ -955,7 +954,6 @@ void CGameContext::OnTick()
 		}
 		m_SqlRandomMapResult = nullptr;
 	}
-#endif
 
 #ifdef CONF_DEBUG
 	if(g_Config.m_DbgDummies)
