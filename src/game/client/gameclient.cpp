@@ -1135,6 +1135,11 @@ void CGameClient::OnNewSnapshot()
 
 	bool FoundGameInfoEx = false;
 
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		m_aClients[i].m_SpecCharPresent = false;
+	}
+
 	// go trough all the items in the snapshot and gather the info we want
 	{
 		m_Snap.m_aTeamSize[TEAM_RED] = m_Snap.m_aTeamSize[TEAM_BLUE] = 0;
@@ -1287,13 +1292,10 @@ void CGameClient::OnNewSnapshot()
 			else if(Item.m_Type == NETOBJTYPE_SPECCHAR)
 			{
 				const CNetObj_SpecChar *pSpecCharData = (const CNetObj_SpecChar *)pData;
-				
-				m_aClients[Item.m_ID].m_SpecChar.m_X = pSpecCharData->m_X;
-				m_aClients[Item.m_ID].m_SpecChar.m_Y = pSpecCharData->m_Y;
-				m_aClients[Item.m_ID].m_SpecChar.m_HookState = pSpecCharData->m_HookState;
-				m_aClients[Item.m_ID].m_SpecChar.m_HookedPlayer = pSpecCharData->m_HookedPlayer;
-				m_aClients[Item.m_ID].m_SpecChar.m_HookX = pSpecCharData->m_HookX;
-				m_aClients[Item.m_ID].m_SpecChar.m_HookY = pSpecCharData->m_HookY;
+
+				m_aClients[Item.m_ID].m_SpecCharPresent = true;
+				m_aClients[Item.m_ID].m_SpecChar.x = pSpecCharData->m_X;
+				m_aClients[Item.m_ID].m_SpecChar.y = pSpecCharData->m_Y;
 			}
 			else if(Item.m_Type == NETOBJTYPE_SPECTATORINFO)
 			{
@@ -1864,8 +1866,8 @@ void CGameClient::CClientData::Reset()
 
 	m_Evolved.m_Tick = -1;
 
-	m_SpecChar.m_X = 0;
-	m_SpecChar.m_Y = 0;
+	m_SpecChar = vec2(0, 0);
+	m_SpecCharPresent = false;
 
 	UpdateRenderInfo();
 }
