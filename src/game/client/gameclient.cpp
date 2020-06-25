@@ -1290,6 +1290,10 @@ void CGameClient::OnNewSnapshot()
 				
 				m_aClients[Item.m_ID].m_SpecChar.m_X = pSpecCharData->m_X;
 				m_aClients[Item.m_ID].m_SpecChar.m_Y = pSpecCharData->m_Y;
+				m_aClients[Item.m_ID].m_SpecChar.m_HookState = pSpecCharData->m_HookState;
+				m_aClients[Item.m_ID].m_SpecChar.m_HookedPlayer = pSpecCharData->m_HookedPlayer;
+				m_aClients[Item.m_ID].m_SpecChar.m_HookX = pSpecCharData->m_HookX;
+				m_aClients[Item.m_ID].m_SpecChar.m_HookY = pSpecCharData->m_HookY;
 			}
 			else if(Item.m_Type == NETOBJTYPE_SPECTATORINFO)
 			{
