@@ -412,15 +412,11 @@ void CPlayer::Snap(int SnappingClient)
 		pRaceInfo->m_RaceStartTick = m_pCharacter->m_StartTime;
 	}
 
-	if(m_Paused == PAUSE_SPEC && m_pCharacter && m_pCharacter->Core())
+	if(m_pCharacter && m_pCharacter->IsPaused())
 	{
 		CNetObj_SpecChar *pSpecChar = static_cast<CNetObj_SpecChar *>(Server()->SnapNewItem(NETOBJTYPE_SPECCHAR, id, sizeof(CNetObj_SpecChar)));
 		pSpecChar->m_X = m_pCharacter->Core()->m_Pos.x;
 		pSpecChar->m_Y = m_pCharacter->Core()->m_Pos.y;
-		pSpecChar->m_HookState = m_pCharacter->Core()->m_HookState;
-		pSpecChar->m_HookedPlayer = m_pCharacter->Core()->m_HookedPlayer;
-		pSpecChar->m_HookX = m_pCharacter->Core()->m_HookPos.x;
-		pSpecChar->m_HookY = m_pCharacter->Core()->m_HookPos.y;
 	}
 }
 
