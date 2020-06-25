@@ -295,6 +295,10 @@ public:
 		{
 			int m_X;
 			int m_Y;
+			int m_HookState;
+			int m_HookedPlayer;
+			int m_HookX;
+			int m_HookY;
 		} m_SpecChar;
 	};
 
