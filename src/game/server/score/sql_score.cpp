@@ -1606,7 +1606,7 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData<CScoreSave
 				str_copy(Code, pData->m_Code, sizeof(Code));
 			}
 		}
-		if(!UseCode)
+		else
 		{
 			// use random generated passphrase if save code exists or no save code given
 			pPrepStmt->setString(1, pData->m_aGeneratedCode);
