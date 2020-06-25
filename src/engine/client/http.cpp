@@ -146,7 +146,7 @@ int CRequest::RunImpl(CURL *pHandle)
 		|| str_comp_nocase_num("https://maps.ddnet.tw/", m_aUrl, 22) == 0
 		|| str_comp_nocase_num("http://info.ddnet.tw/", m_aUrl, 21) == 0
 		|| str_comp_nocase_num("https://info.ddnet.tw/", m_aUrl, 22) == 0
-		|| str_comp_nocase_num("https://update4.ddnet.tw/", m_aUrl, 25) == 0)
+		|| str_comp_nocase_num("https://update5.ddnet.tw/", m_aUrl, 25) == 0)
 	{
 		curl_easy_setopt(pHandle, CURLOPT_CAINFO, CA_FILE_PATH);
 	}
