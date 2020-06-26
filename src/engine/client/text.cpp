@@ -1714,10 +1714,7 @@ public:
 	virtual void UploadEntityLayerText(IGraphics::CTextureHandle Texture, const char *pText, int Length, float x, float y, int FontSize)
 	{
 		if (FontSize < 1)
-		{
-			dbg_msg("pFont", "texture with id '%d' will not be updated. Reason - font is too small", (int)Texture);
 			return;
-		}
 
 		const char *pCurrent = (char *)pText;
 		const char *pEnd = pCurrent + Length;
