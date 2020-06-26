@@ -1859,6 +1859,7 @@ void CGameClient::CClientData::Reset()
 	m_EmoticonStart = -1;
 	m_Active = false;
 	m_ChatIgnore = false;
+	m_EmoticonIgnore = false;
 	m_Friend = false;
 	m_Foe = false;
 	m_AuthLevel = AUTHED_NO;

@@ -183,6 +183,15 @@ void CMenus::RenderPlayers(CUIRect MainView)
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
 
+	ButtonBar.HMargin(1.0f, &ButtonBar);
+	ButtonBar.VSplitLeft(Width, &Button, &ButtonBar);
+	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GUIICONS].m_Id);
+	Graphics()->QuadsBegin();
+	RenderTools()->SelectSprite(SPRITE_GUIICON_EMOTICON_MUTE);
+	QuadItem = IGraphics::CQuadItem(Button.x, Button.y, Button.w, Button.h);
+	Graphics()->QuadsDrawTL(&QuadItem, 1);
+	Graphics()->QuadsEnd();
+
 	ButtonBar.VSplitLeft(20.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(Width, &Button, &ButtonBar);
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GUIICONS].m_Id);
@@ -214,7 +223,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 	UiDoListboxStart(&s_VoteList, &List, 24.0f, "", "", TotalPlayers, 1, -1, s_ScrollValue);
 
 	// options
-	static int s_aPlayerIDs[MAX_CLIENTS][2] = {{0}};
+	static int s_aPlayerIDs[MAX_CLIENTS][3] = {{0}};
 
 	for(int i = 0, Count = 0; i < MAX_CLIENTS; ++i)
 	{
@@ -261,7 +270,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		m_pClient->m_pCountryFlags->Render(m_pClient->m_aClients[Index].m_Country, &Color,
 			Button2.x, Button2.y + Button2.h/2.0f - 0.75*Button2.h/2.0f, 1.5f*Button2.h, 0.75f*Button2.h);
 
-		// ignore button
+		// ignore chat button
 		Item.m_Rect.HMargin(2.0f, &Item.m_Rect);
 		Item.m_Rect.VSplitLeft(Width, &Button, &Item.m_Rect);
 		Button.VSplitLeft((Width-Button.h)/4.0f, 0, &Button);
@@ -272,12 +281,23 @@ void CMenus::RenderPlayers(CUIRect MainView)
 			if(DoButton_Toggle(&s_aPlayerIDs[Index][0], m_pClient->m_aClients[Index].m_ChatIgnore, &Button, true))
 				m_pClient->m_aClients[Index].m_ChatIgnore ^= 1;
 
+		// ignore emoticon button
+		Item.m_Rect.VSplitLeft(20.0f, &Button, &Item.m_Rect);
+		Item.m_Rect.VSplitLeft(Width, &Button, &Item.m_Rect);
+		Button.VSplitLeft((Width-Button.h)/4.0f, 0, &Button);
+		Button.VSplitLeft(Button.h, &Button, 0);
+		if(g_Config.m_ClShowChatFriends && !m_pClient->m_aClients[Index].m_Friend)
+			DoButton_Toggle(&s_aPlayerIDs[Index][1], 1, &Button, false);
+		else
+			if(DoButton_Toggle(&s_aPlayerIDs[Index][1], m_pClient->m_aClients[Index].m_EmoticonIgnore, &Button, true))
+				m_pClient->m_aClients[Index].m_EmoticonIgnore ^= 1;
+
 		// friend button
 		Item.m_Rect.VSplitLeft(20.0f, &Button, &Item.m_Rect);
 		Item.m_Rect.VSplitLeft(Width, &Button, &Item.m_Rect);
 		Button.VSplitLeft((Width-Button.h)/4.0f, 0, &Button);
 		Button.VSplitLeft(Button.h, &Button, 0);
-		if(DoButton_Toggle(&s_aPlayerIDs[Index][1], m_pClient->m_aClients[Index].m_Friend, &Button, true))
+		if(DoButton_Toggle(&s_aPlayerIDs[Index][2], m_pClient->m_aClients[Index].m_Friend, &Button, true))
 		{
 			if(m_pClient->m_aClients[Index].m_Friend)
 				m_pClient->Friends()->RemoveFriend(m_pClient->m_aClients[Index].m_aName, m_pClient->m_aClients[Index].m_aClan);
