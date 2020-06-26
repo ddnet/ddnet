@@ -1193,3 +1193,6 @@ Vote description:
 
 Skin prefix
 == 
+
+Connect Dummy
+== 

@@ -1194,7 +1194,10 @@ Team message
 == Lag meddelande
 
 File already exists, do you want to overwrite it?
-== Fil finns redan, vill du skriv över den?
+== Filen finns redan, vill du skriv över den?
 
 Hook collisions
 == Hook kollisioner
+
+Connect Dummy
+== Anslut Dummy

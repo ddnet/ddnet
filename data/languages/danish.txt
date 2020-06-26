@@ -1196,3 +1196,6 @@ Replay feature is disabled!
 
 Show only chat messages from friends
 == 
+
+Connect Dummy
+== 

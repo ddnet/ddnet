@@ -1202,3 +1202,6 @@ Enable replays
 
 DDNet %s is out!
 == 
+
+Connect Dummy
+== 

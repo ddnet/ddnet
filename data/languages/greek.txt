@@ -1193,3 +1193,6 @@ Pause
 
 Automatically take statboard screenshot
 == 
+
+Connect Dummy
+== 

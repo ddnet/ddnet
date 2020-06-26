@@ -1196,3 +1196,6 @@ IncSpeed
 
 Enable game sounds
 == 
+
+Connect Dummy
+== 
