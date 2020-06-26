@@ -683,9 +683,6 @@ UI mouse s.
 Select a name
 == Välj ett namn
 
-\xEE\x85\x8B
-== \xEE\x85\x8B
-
 Enable long pain sound (used when shooting in freeze)
 == Aktivera ett långt ont ljud (använt vid sjutning i freeze)
 
@@ -810,13 +807,13 @@ Hook (right mouse) can be used to swing through the map and to hook other tees t
 == Hook (höger klick) kan användas till att svinga sig igenom banan och att dra andra tees till dig.
 
 Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-= Mest viktiga är kommunikation: Det finns ingen tutorial så du kommer att behöva chatta (t knappen) med andra spelare för att lära dig grunderna och tricks till spelet.
+== Mest viktiga är kommunikation: Det finns ingen tutorial så du kommer att behöva chatta (t knappen) med andra spelare för att lära dig grunderna och tricks till spelet.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
-= Det är rekomenderad att du kollar igenom inställningarna och ändra dom så de passar dig innan du ansluter dig till en server.
+== Det är rekomenderad att du kollar igenom inställningarna och ändra dom så de passar dig innan du ansluter dig till en server.
 
 Please enter your nick name below.
-= Skriv ditt smeknamn nedanför.
+== Skriv ditt smeknamn nedanför.
 
 Render
 == Rendera
@@ -890,17 +887,11 @@ Update failed! Check log...
 Check now
 == Kolla nu
 
-DecSpeed
-== DecHastighet
-
 second
 == sekund
 
 Reset wanted weapon on death
 == Återställ önskade vapen vid död
-
-SHA256:
-== SHA256
 
 Search
 == Sök
@@ -1034,9 +1025,6 @@ Net
 seconds
 == sekunder
 
-IncSpeed
-== IncHastighet
-
 Spectator
 == Åskådare
 
@@ -1138,9 +1126,6 @@ Show client IDs in Scoreboard
 
 Game paused
 == Spel pausad
-
-Video speed:
-== Video hastighet:
 
 Automatically take statboard screenshot
 == Automatiskt ta skärmdumpar av poänglistan
