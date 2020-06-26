@@ -738,7 +738,7 @@ Map sound volume
 == Bana ljud Volym
 
 Reconnect in %d sec
-== \n\nÅterkopplar om %d sekunder
+== Återkopplar om %d sekunder
 
 Successfully saved the replay!
 == Lyckades med att spara repris

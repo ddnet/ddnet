@@ -875,7 +875,7 @@ Countries
 == 國家
 
 Reconnect in %d sec
-== \n\n在 %d 秒內重新連接
+== 在 %d 秒內重新連接
 
 Grabs
 == 鏈鉤

@@ -881,7 +881,7 @@ Countries
 == 国家
 
 Reconnect in %d sec
-== \n\n在 %d 秒后重新连接
+== 在 %d 秒后重新连接
 
 Grabs
 == 得旗数
