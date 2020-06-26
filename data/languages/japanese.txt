@@ -1193,3 +1193,6 @@ Connecting dummy
 
 Old mouse mode
 == 
+
+Connect Dummy
+== 

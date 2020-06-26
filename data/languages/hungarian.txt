@@ -1195,3 +1195,6 @@ Are you sure that you want to disconnect your dummy?
 
 \xEE\x85\x8B
 == 
+
+Connect Dummy
+== 

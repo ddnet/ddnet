@@ -1195,3 +1195,6 @@ No updates available
 
 Manual %3d:%02d  
 == 
+
+Connect Dummy
+== 

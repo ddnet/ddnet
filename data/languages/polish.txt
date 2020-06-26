@@ -1198,3 +1198,6 @@ Replay %3d:%02d
 
 Friend
 == 
+
+Connect Dummy
+== 

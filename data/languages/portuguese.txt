@@ -1193,3 +1193,6 @@ DDraceNetwork is a cooperative online game where the goal is for you and your gr
 
 Render demo
 == 
+
+Connect Dummy
+== 

@@ -1202,3 +1202,6 @@ Check now
 
 Show votes window after voting
 == 
+
+Connect Dummy
+== 
