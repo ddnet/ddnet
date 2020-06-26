@@ -281,11 +281,13 @@ void CPlayers::RenderPlayer(
 
 	// draw gun
 	{
+		bool AlwaysRenderHookColl = GameClient()->m_GameInfo.m_AllowHookColl && (Local ? g_Config.m_ClShowHookCollOwn : g_Config.m_ClShowHookCollOther) == 2;
+		bool RenderHookCollPlayer = ClientID >= 0 && Player.m_PlayerFlags & PLAYERFLAG_AIM && (Local ? g_Config.m_ClShowHookCollOwn : g_Config.m_ClShowHookCollOther) > 0;
+		bool RenderHookCollVideo = true;
 #if defined(CONF_VIDEORECORDER)
-		if(ClientID >= 0 && ((GameClient()->m_GameInfo.m_AllowHookColl && g_Config.m_ClShowHookCollAlways) || (Player.m_PlayerFlags&PLAYERFLAG_AIM && ((!Local && ((!IVideo::Current()&&g_Config.m_ClShowHookCollOther)||(IVideo::Current()&&g_Config.m_ClVideoShowHookCollOther))) || (Local && g_Config.m_ClShowHookCollOwn)))))
-#else
-		if(ClientID >= 0 && ((GameClient()->m_GameInfo.m_AllowHookColl && g_Config.m_ClShowHookCollAlways) || (Player.m_PlayerFlags&PLAYERFLAG_AIM && ((!Local && g_Config.m_ClShowHookCollOther) || (Local && g_Config.m_ClShowHookCollOwn)))))
+		RenderHookCollVideo = !IVideo::Current() || g_Config.m_ClVideoShowHookCollOther || Local;
 #endif
+		if((AlwaysRenderHookColl || RenderHookCollPlayer) && RenderHookCollVideo)
 		{
 			vec2 ExDirection = Direction;
 
@@ -347,7 +349,7 @@ void CPlayers::RenderPlayer(
 				ExDirection.y = round_to_int(ExDirection.y*256.0f) / 256.0f;
 			} while (!DoBreak);
 
-			if(g_Config.m_ClShowHookCollAlways && (Player.m_PlayerFlags&PLAYERFLAG_AIM))
+			if(AlwaysRenderHookColl && RenderHookCollPlayer)
 			{
 				// invert the hook coll colors when using cl_show_hook_coll_always and +showhookcoll is pressed
 				HookCollColor = color_invert(HookCollColor);

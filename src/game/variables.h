@@ -171,7 +171,7 @@ MACRO_CONFIG_INT(ClVideoPauseWithDemo, cl_video_pausewithdemo, 1, 0, 1, CFGFLAG_
 MACRO_CONFIG_INT(ClVideoShowhud, cl_video_showhud, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show ingame HUD when rendering video")
 MACRO_CONFIG_INT(ClVideoShowChat, cl_video_showchat, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show chat when rendering video")
 MACRO_CONFIG_INT(ClVideoSndEnable, cl_video_sound_enable, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Use sound when rendering video")
-MACRO_CONFIG_INT(ClVideoShowHookCollOther, cl_video_showhookcollother, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show other players' hook collision lines when rendering video")
+MACRO_CONFIG_INT(ClVideoShowHookCollOther, cl_video_show_hook_coll_other, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show other players' hook collision lines when rendering video")
 MACRO_CONFIG_INT(ClVideoShowDirection, cl_video_showdirection, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show other players' key presses when rendering video")
 MACRO_CONFIG_INT(ClVideoX264Crf, cl_video_crf, 18, 0, 51, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Set crf when encode video with libx264")
 MACRO_CONFIG_INT(ClVideoX264Preset, cl_video_preset, 5, 0, 9, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Set preset when encode video with libx264, default is 5 (medium), 0 is ultrafast, 9 is placebo(the slowest, not recommend)")
