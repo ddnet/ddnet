@@ -674,6 +674,7 @@ bool CSaveTeam::MatchPlayers(const char (*paNames)[MAX_NAME_LENGTH], const int *
 			{
 				m_pSavedTees[i].SetClientID(pClientID[j]);
 				Found = true;
+				break;
 			}
 		}
 		if(!Found)
