@@ -1033,7 +1033,7 @@ Replace video
 Personal best:
 == 
 
-\n\nReconnect in %d sec
+Reconnect in %d sec
 == 
 
 \xEE\x85\x8B

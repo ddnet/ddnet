@@ -609,8 +609,8 @@ FSAA samples
 Inner color
 == Cor interna
 
-\n\nReconnect in %d sec
-== \n\nReconnetar em %d segundos
+Reconnect in %d sec
+== Reconnetar em %d segundos
 
 Save ghost
 == Salvar fantasma
@@ -1032,8 +1032,11 @@ Vanilla skins only
 Date
 == Data
 
-Show DDNet map finishes in server browser\n(transmits your player name to info.ddnet.tw)
-== Mostrar finalizações de mapas do DDNet no navegador do servidor\n(transmite seu nome de jogador para info.ddnet.tw)
+Show DDNet map finishes in server browser
+== Mostrar finalizações de mapas do DDNet no navegador do servidor
+
+transmits your player name to info.ddnet.tw
+== transmite seu nome de jogador para info.ddnet.tw
 
 Reload
 == Recarregar
@@ -1198,3 +1201,4 @@ IncSpeed
 
 Connect Dummy
 == 
+

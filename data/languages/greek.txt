@@ -675,7 +675,7 @@ Vanilla skins only
 Default zoom
 == 
 
-\n\nReconnect in %d sec
+Reconnect in %d sec
 == 
 
 Use OpenGL 3.3 (experimental)

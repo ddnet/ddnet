@@ -754,7 +754,7 @@ second
 Show other players' hook collision lines
 == 
 
-\n\nReconnect in %d sec
+Reconnect in %d sec
 == 
 
 Gameplay

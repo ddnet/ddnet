@@ -1188,7 +1188,7 @@ Replay %3d:%02d
 Connecting dummy
 == 
 
-\n\nReconnect in %d sec
+Reconnect in %d sec
 == 
 
 Old mouse mode

@@ -732,7 +732,7 @@ DDNet %s is available:
 Select a name
 == 
 
-\n\nReconnect in %d sec
+Reconnect in %d sec
 == 
 
 Show others

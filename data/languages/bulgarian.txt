@@ -1035,7 +1035,7 @@ Toggle ghost
 Welcome to DDNet
 == 
 
-\n\nReconnect in %d sec
+Reconnect in %d sec
 == 
 
 DDNet %s is available:

@@ -846,7 +846,7 @@ Grabs
 Toggle dyncam
 == 
 
-\n\nReconnect in %d sec
+Reconnect in %d sec
 == 
 
 Countries

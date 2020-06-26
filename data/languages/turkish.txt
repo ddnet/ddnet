@@ -689,7 +689,7 @@ Automatically take statboard screenshot
 Update now
 == 
 
-\n\nReconnect in %d sec
+Reconnect in %d sec
 == 
 
 DecSpeed

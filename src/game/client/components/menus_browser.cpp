@@ -507,7 +507,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 	// render quick exclude
 	{
-		const char *pLabel = Localize("\xEE\x85\x8B"); // U+0e14b
+		const char *pLabel = "\xEE\x85\x8B"; // U+0e14b
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 		UI()->DoLabelScaled(&QuickExclude, pLabel, 16.0f, -1);

@@ -1050,7 +1050,7 @@ Messages
 Length
 == 
 
-\n\nReconnect in %d sec
+Reconnect in %d sec
 == 
 
 Date

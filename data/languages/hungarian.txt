@@ -647,8 +647,8 @@ Show only chat messages from friends
 Countries
 == Országok
 
-\n\nReconnect in %d sec
-== \\nÚjracsatlakozás %d másodperc múlva
+Reconnect in %d sec
+== Újracsatlakozás %d másodperc múlva
 
 Grabs
 == Megfog
@@ -1023,8 +1023,11 @@ Vanilla skins only
 Date
 == Idő
 
-Show DDNet map finishes in server browser\n(transmits your player name to info.ddnet.tw)
-== Mutassa a DDNet befejezett pályákat a keresőben\n(Keress rá a játékosnevedre az info.ddnet.tw oldalon)
+Show DDNet map finishes in server browser
+== Mutassa a DDNet befejezett pályákat a keresőben
+
+transmits your player name to info.ddnet.tw
+== Keress rá a játékosnevedre az info.ddnet.tw oldalon
 
 Reload
 == újratöltés

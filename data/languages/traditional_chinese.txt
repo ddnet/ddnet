@@ -874,7 +874,7 @@ AntiPing
 Countries
 == 國家
 
-\n\nReconnect in %d sec
+Reconnect in %d sec
 == \n\n在 %d 秒內重新連接
 
 Grabs
@@ -1013,8 +1013,11 @@ Save
 Date
 == 日期
 
-Show DDNet map finishes in server browser\n(transmits your player name to info.ddnet.tw)
-== 在伺服器瀏覽器中顯示已完成的 DDNet 地圖\n(將會發送您的玩家名稱到 info.ddnet.tw)
+Show DDNet map finishes in server browser
+== 在伺服器瀏覽器中顯示已完成的 DDNet 地圖
+
+transmits your player name to info.ddnet.tw
+== 將會發送您的玩家名稱到 info.ddnet.tw
 
 Reload
 == 刷新

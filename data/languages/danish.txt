@@ -1098,7 +1098,7 @@ Show quads
 %.2f MiB
 == 
 
-\n\nReconnect in %d sec
+Reconnect in %d sec
 == 
 
 DDNet %s is available:

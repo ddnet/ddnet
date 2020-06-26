@@ -876,7 +876,7 @@ Please use a different name
 Use high DPI
 == 
 
-\n\nReconnect in %d sec
+Reconnect in %d sec
 == 
 
 Welcome to DDNet

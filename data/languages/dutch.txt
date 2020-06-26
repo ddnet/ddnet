@@ -819,7 +819,7 @@ DDNet %s is available:
 Default length: %d
 == 
 
-\n\nReconnect in %d sec
+Reconnect in %d sec
 == 
 
 Spree

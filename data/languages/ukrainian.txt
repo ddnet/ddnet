@@ -765,7 +765,7 @@ Destination file already exist
 Unable to rename the demo
 == 
 
-\n\nReconnect in %d sec
+Reconnect in %d sec
 == 
 
 Vote command:

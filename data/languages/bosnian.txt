@@ -1157,7 +1157,7 @@ Replay feature is disabled!
 Friend message
 == 
 
-\n\nReconnect in %d sec
+Reconnect in %d sec
 == 
 
 Converse

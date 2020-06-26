@@ -1089,7 +1089,7 @@ Refresh Rate
 Converse
 == 
 
-\n\nReconnect in %d sec
+Reconnect in %d sec
 == 
 
 Zoom in

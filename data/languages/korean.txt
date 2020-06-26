@@ -1088,7 +1088,7 @@ No updates available
 Video speed:
 == 
 
-\n\nReconnect in %d sec
+Reconnect in %d sec
 == 
 
 Reload

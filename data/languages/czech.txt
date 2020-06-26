@@ -1062,7 +1062,7 @@ seconds
 Render
 == 
 
-\n\nReconnect in %d sec
+Reconnect in %d sec
 == 
 
 Save

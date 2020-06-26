@@ -990,7 +990,7 @@ Inner color
 \xEE\x85\x8B
 == 
 
-\n\nReconnect in %d sec
+Reconnect in %d sec
 == 
 
 Default zoom

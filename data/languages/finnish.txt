@@ -802,7 +802,7 @@ Spectator
 Date
 == 
 
-\n\nReconnect in %d sec
+Reconnect in %d sec
 == 
 
 Please use a different name

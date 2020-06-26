@@ -674,7 +674,7 @@ Map sound volume
 Countries
 == Països
 
-\n\nReconnect in %d sec
+Reconnect in %d sec
 == Reconnectar-se en %d segons
 
 Grabs
@@ -1013,8 +1013,11 @@ Vanilla skins only
 Date
 == Data
 
-Show DDNet map finishes in server browser\n(transmits your player name to info.ddnet.tw)
-== Mostrar finalitzacions de mapes en el buscador de servidors\n(retransmet el teu nom de jugar a info.ddnet.tw)
+Show DDNet map finishes in server browser
+== Mostrar finalitzacions de mapes en el buscador de servidors
+
+transmits your player name to info.ddnet.tw
+== retransmet el teu nom de jugar a info.ddnet.tw
 
 Reload
 == Recarga
@@ -1185,3 +1188,4 @@ Update failed! Check log...
 
 Connect Dummy
 == 
+

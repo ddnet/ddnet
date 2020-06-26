@@ -942,7 +942,7 @@ Render
 %d new mentions
 == 
 
-\n\nReconnect in %d sec
+Reconnect in %d sec
 == 
 
 Threaded sound loading

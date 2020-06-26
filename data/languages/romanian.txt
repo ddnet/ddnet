@@ -855,7 +855,7 @@ DDraceNetwork is a cooperative online game where the goal is for you and your gr
 Update failed! Check log...
 == 
 
-\n\nReconnect in %d sec
+Reconnect in %d sec
 == 
 
 Updating...

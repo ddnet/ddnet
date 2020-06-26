@@ -899,7 +899,7 @@ Wait before try for
 Follow
 == 
 
-\n\nReconnect in %d sec
+Reconnect in %d sec
 == 
 
 Converse

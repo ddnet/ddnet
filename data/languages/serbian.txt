@@ -1037,7 +1037,7 @@ Show kill messages
 Use DDRace Scoreboard
 == 
 
-\n\nReconnect in %d sec
+Reconnect in %d sec
 == 
 
 Automatically take statboard screenshot
