@@ -197,7 +197,7 @@ void CPlayers::RenderPlayer(
 	bool PredictLocalWeapons = false;
 	float AttackTime = (Client()->PrevGameTick(g_Config.m_ClDummy) - Player.m_AttackTick) / (float)SERVER_TICK_SPEED + Client()->GameTickTime(g_Config.m_ClDummy);
 	float LastAttackTime = (Client()->PrevGameTick(g_Config.m_ClDummy) - Player.m_AttackTick) / (float)SERVER_TICK_SPEED + s_LastGameTickTime;
-	if(ClientID >= 0 && m_pClient->m_aClients[ClientID].m_IsPredictedLocal && m_pClient->AntiPingGunfire())
+	if(m_pClient->m_aClients[ClientID].m_IsPredictedLocal && m_pClient->AntiPingGunfire())
 	{
 		PredictLocalWeapons = true;
 		AttackTime = (Client()->PredIntraGameTick(g_Config.m_ClDummy) + (Client()->PredGameTick(g_Config.m_ClDummy) - 1 - Player.m_AttackTick)) / (float)SERVER_TICK_SPEED;
@@ -230,7 +230,7 @@ void CPlayers::RenderPlayer(
 
 	vec2 Direction = GetDirection((int)(Angle*256.0f));
 	vec2 Position;
-	if(ClientID >= 0)
+	if(in_range(ClientID, MAX_CLIENTS-1))
 		Position = m_pClient->m_aClients[ClientID].m_RenderPos;
 	else
 		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
