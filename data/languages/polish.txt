@@ -6,6 +6,7 @@
 #	Tsin			2011-04-06 23:15:58
 #	Shymwo			2011-07-15 01:27:45
 #	Shymwo			2011-07-21 18:54:53
+#	TortiLeq		2020-06-26 13:14:09 (with Ertee :D)
 ##### /authors #####
 
 ##### translated strings #####
@@ -260,7 +261,7 @@ Move left
 == W lewo
 
 Move player to spectators
-== Przesuń gracza do obserwatorów
+== Przenieś gracza do obserwatorów
 
 Move right
 == W prawo
@@ -857,347 +858,347 @@ Indicate map finish
 DecSpeed
 == 
 
+Connect Dummy
+== Przyślij kukłę
+
 Disconnect Dummy
-== 
+== Odeślij kukłę
 
 Remove chat
-== 
+== Usuń chat
 
 Manual %3d:%02d  
-== 
+==  
 
 Activate
-== 
+== Aktywuj
 
 Render demo
-== 
+== Renderuj demo
 
 AntiPing limit
-== 
+== Limit AntyPing
 
 Automatically take statboard screenshot
-== 
+== Automatyczny zrzut ekranu tabeli wyników
 
 Show DDNet map finishes in server browser\n(transmits your player name to info.ddnet.tw)
-== 
+== Pokaż ukończone mapy DDNet w wyszukiwarce serwerów\n(przenosi twój nick do info.ddnet.tw)
 
 Enable replays
-== 
+== Włącz powtórki
 
 Automatically create statboard csv
-== 
+== Automatycznie stwórz plik csv z tabelą wyników
 
 Destination file already exist
-== 
+== Plik docelowy już istnieje
 
 Skin prefix
 == 
 
 Use OpenGL 3.3 (experimental)
-== 
+== Użyj OpenGL 3.3 (eksperymentalne)
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.\n\nThe maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.\n\nThe mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.\n\nHook (right mouse) can be used to swing through the map and to hook other tees to you.\n\nMost importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.\n\nIt's recommended that you check the settings to adjust them to your liking before joining a server.\n\nPlease enter your nick name below.
-== 
+== DDraceNetwork jest kooperatywną grą online, gdzie twoim i innych graczy zadaniem jest dotrzeć do mety na mapie. Jako nowy gracz powinieneś zacząć od serwerów Novice, które hostują najłatwiejsze mapy. Weź pod uwagę ping aby wybrać serwer najbliżej siebie.\n\nMapy zawierają freeze, który tymczasowo uniemożliwia poruszanie się tee. Powienieneś współpracować z innymi aby ukończyć wszystkie części mapy.\n\nRolka myszki zmienia narzędzie (broń). Młotek (lewy przycisk myszki) może być użyty do uderzania innych tee i odmrozić ich, gdy byli we freezie.\n\nHak (prawy przycisk myszki) może być użyty do wspinania się po mapie i do łąpania innych tee (przyciągania ich do siebie).\n\nNajważniejszym przyciskiem jest t. Dzięki niemu możesz rozmawiać z innymi aby nauczyć się podstaw i trików gry.\n\nPrzed dołączeniem do serwera zalecane jest sprawdzenie ustawień w celu dostosowania ich do własnych upodobań.\n\nProszę wpisać swój nick poniżej.
 
 Reload
-== 
+== Przeładuj
 
 Multiple texture units (disable for MacOS)
-== 
+== Jednostki z wieloma teksturami (wyłącz dla MacOS)
 
 Replay feature is disabled!
-== 
+== Funkcja odtwarzania jest wyłączona!
 
 Fat skins (DDFat)
-== 
+== Masne skiny (DDFat)
 
 Grabs
-== 
+== Przechwyceń
 
 \xEE\x85\x8B
-== 
+== \xEE\x85\x8B
 
 second
-== 
+== sekund
 
 Kill
-== 
+== Restart
 
 Messages
-== 
+== Wiadomości
 
 Toggle dyncam
-== 
+== Przełącz na dynamiczną kamerę
 
 Follow
-== 
+== Śledź
 
 Deactivate
-== 
+== Dezaktywuj
 
 Pause
-== 
+== Zapauzuj
 
 1 new mention
-== 
+== 1 raz wspomniano o tobie
 
 Hi o/
-== 
+== Cześć o/
 
 Welcome to DDNet
-== 
+== Witaj w DDNet
 
 New random timeout code
-== 
+== Nowy losowy kod timeout
 
 Wait before try for
-== 
+== Poczekaj zanim spróbujesz
 
 Enable long pain sound (used when shooting in freeze)
-== 
+== Włącz długi jęk (używany gdy krzyczyć we freezie)
 
 DDNet
-== 
+== DDNet
 
 seconds
-== 
+== sekundy
 
 Show HUD
-== 
+== Pokaż HUD
 
 Frags
-== 
+== Fragi
 
 Net
-== 
+== Przechwycenia
 
 IncSpeed
 == 
 
 Render
-== 
+== Renderuj
 
 Suicides
-== 
+== Samobójstwa
 
 Show clan above name plates
-== 
+== Pokazuj klan nad nazwyą gracza
 
 Loading DDNet Client
-== 
+== Ładowanie klitenta DDNet
 
 SHA256:
-== 
+== SHA256
 
 Please use a different name
-== 
+== Użyj innej nazwy
 
 HUD
-== 
+== HUD
 
 Update failed! Check log...
-== 
+== Niepowodzenie aktualizacji! Sprawdź logi...
 
 Friend message
-== 
+== Wiadomość od znajowego
 
 %.2f MiB
-== 
+== %.2f MiB
 
 Spree
-== 
+== Spree
 
 Clan plates size
-== 
+== Wielkość nazw klanów
 
 Vanilla skins only
-== 
+== Tylko skiny Vanilla
 
 Best
-== 
+== Najwięcej
 
 Markers
-== 
+== Znaczniki
 
 File already exists, do you want to overwrite it?
-== 
+== Plik już istnieje, chcesz go nadpisać?
 
 Show entities
-== 
+== Pokaż entities
 
 Size
-== 
+== Rozmiar
 
 UI mouse s.
-== 
+== Czułość myszy w UI
 
 Fetch Info
-== 
+== Pobierz szczegóły
 
 Hammerfly dummy
-== 
+== Hammerfly z kukłą
 
 Ratio
-== 
+== Stosunek
 
 Browser
-== 
+== Wyszukiwarka
 
 Time
-== 
+== Czas
 
 Learn
-== 
+== Poznaj
 
 Toggle ghost
-== 
+== Przełącz duszka
 
 Replace video
-== 
+== Zamień wideo
 
 Old mouse mode
-== 
+== Tryb starej myszki
 
 Lock team
-== 
+== Zablokuj drużynę
 
 Filter connecting players
-== 
+== Filtruj dołączających graczy
 
 Save
-== 
+== Zapisz
 
 Zoom out
-== 
+== Oddal kamerę
 
 Connecting dummy
-== 
+== Przyślij kukłę
 
 Show all
-== 
+== Pokaż wszystkich
 
 Race %3d:%02d  
-== 
+== Wyścig %3d:%02d  
 
 Use high DPI
-== 
+== Użyj dużego DPI
 
 %.2f KiB
-== 
+== %.2f KiB
 
 Zoom in
-== 
+== Przybliż kamerę
 
 Hook collisions
-== 
+== Kolizje haka
 
 Deaths
-== 
+== Śmierci
 
 Downloading %s:
-== 
+== Pobieranie %s:
 
 Show tiles layers from BG map
-== 
+== Pokaż warstwy płytek razem z tłem mapy
 
 DDNet %s is out! Download it at DDNet.tw!
-== 
+== DDNet %s już jest! Pobierz je na DDNet.tw!
 
 Show console window
-== 
+== Pokaż okno konsoli
 
 Max CSVs
-== 
+== Maksymalne CSV
 
 Unfinished map
-== 
+== Nieukończone mapy
 
 Markers:
-== 
+== Znaczniki
 
 Video speed:
-== 
+== Szybkość odtwarzania
 
 %d new mentions
-== 
+== %d razy wspomniano o tobie
 
 Default length: %d
-== 
+== Domyślna długość: %d
 
 Refresh Rate
-== 
+== Częstotliwość próbkowania
 
 Video name:
-== 
+== Nazwa wideo
 
 Restart
-== 
+== Restart
 
 Toggle dummy
-== 
+== Przełącz na kukłę
 
 Server best:
-== 
+== Najlepszy wynik serwera
 
 FPM
-== 
+== FPM
 
 Are you sure that you want to disconnect?
-== 
+== Czy jesteś pewien, że chcesz opuścić serwer?
 
 Borderless window
-== 
+== Okno bez ramek
 
 Successfully saved the replay!
-== 
+== Pomyślnie zapisano powtórkę!
 
 Length
-== 
+== Długość
 
 Auto %3d:%02d  
-== 
+== Auto %3d:%02d  
 
 Are you sure that you want to disconnect your dummy?
-== 
+== Czy jesteś pewien, że chcesz odesłać kukłę?
 
 DDNet %s is out!
-== 
+== DDNet %s już jest!
 
 Converse
-== 
+== Chat prywatny
 
 Dummy copy
-== 
+== Kukła kopiuję ruchy
 
 \n\nReconnect in %d sec
-== 
+== \n\nPonowna próba połączenia za %d sek
 
 9+ new mentions
-== 
+== 9+ razy wspomniano o tobie
 
 Preinit VBO (iGPUs only)
-== 
+== Zainicjuj VBO (tylko iGPU)
 
 Statboard
-== 
+== Tabela wyników
 
 may cause delay
-== 
+== może spowodować opóźnienie
 
 Date
-== 
+== Data
 
 Personal best:
-== 
+== Najlepszy wynik gracza:
 
 Show text entities
-== 
+== Pokaż entities tekstu
 
 Replay %3d:%02d  
-== 
+== Powtórka %3d:%02d  
 
 Friend
-== 
-
-Connect Dummy
-== 
+== Znajomy
