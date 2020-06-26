@@ -66,6 +66,10 @@ public:
 	void RecordPlayerDrop(int ClientID, const char *pReason);
 	void RecordConsoleCommand(int ClientID, int FlagMask, const char *pCmd, IConsole::IResult *pResult);
 	void RecordTestExtra();
+	void RecordTeamSaveSuccess(int Team, CUuid SaveID, const char *pTeamSave);
+	void RecordTeamSaveFailure(int Team);
+	void RecordTeamLoadSuccess(int Team, CUuid SaveID, const char *pTeamSave);
+	void RecordTeamLoadFailure(int Team);
 	void EndInputs();
 
 	void EndTick();
