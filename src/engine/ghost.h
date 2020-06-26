@@ -12,7 +12,7 @@ public:
 	unsigned char m_aMarker[8];
 	unsigned char m_Version;
 	char m_aOwner[MAX_NAME_LENGTH];
-	char m_aMap[MAX_MAP_LENGTH];
+	char m_aMap[64];
 	unsigned char m_aCrc[4];
 	unsigned char m_aNumTicks[4];
 	unsigned char m_aTime[4];
