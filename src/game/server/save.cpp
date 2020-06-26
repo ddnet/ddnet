@@ -602,40 +602,40 @@ int CSaveTeam::LoadString(const char* String)
 		m_pSwitchers = new SSimpleSwitchers[m_NumSwitchers+1];
 
 	for (int n = 1; n < m_NumSwitchers+1; n++)
+	{
+		while (m_aString[Pos] != '\n' && Pos < sizeof(m_aString) && m_aString[Pos]) // find next \n or \0
+			Pos++;
+
+		CopyPos = m_aString + LastPos;
+		StrSize = Pos - LastPos + 1;
+		if(m_aString[Pos] == '\n')
 		{
-			while (m_aString[Pos] != '\n' && Pos < sizeof(m_aString) && m_aString[Pos]) // find next \n or \0
-				Pos++;
+			Pos++; // skip \n
+			LastPos = Pos;
+		}
 
-			CopyPos = m_aString + LastPos;
-			StrSize = Pos - LastPos + 1;
-			if(m_aString[Pos] == '\n')
-			{
-				Pos++; // skip \n
-				LastPos = Pos;
-			}
+		if(StrSize <= 0)
+		{
+			dbg_msg("load", "savegame: wrong format (couldn't load switcher)");
+			return 1;
+		}
 
-			if(StrSize <= 0)
+		if(StrSize < sizeof(Switcher))
+		{
+			str_copy(Switcher, CopyPos, StrSize);
+			int Num = sscanf(Switcher, "%d\t%d\t%d", &(m_pSwitchers[n].m_Status), &(m_pSwitchers[n].m_EndTime), &(m_pSwitchers[n].m_Type));
+			if(Num != 3)
 			{
-				dbg_msg("load", "savegame: wrong format (couldn't load switcher)");
-				return 1;
-			}
-
-			if(StrSize < sizeof(Switcher))
-			{
-				str_copy(Switcher, CopyPos, StrSize);
-				int Num = sscanf(Switcher, "%d\t%d\t%d", &(m_pSwitchers[n].m_Status), &(m_pSwitchers[n].m_EndTime), &(m_pSwitchers[n].m_Type));
-				if(Num != 3)
-				{
-					dbg_msg("load", "failed to load switcher");
-					dbg_msg("load", "loaded %d vars", Num-1);
-				}
-			}
-			else
-			{
-				dbg_msg("load", "savegame: wrong format (couldn't load switcher, too big)");
-				return 1;
+				dbg_msg("load", "failed to load switcher");
+				dbg_msg("load", "loaded %d vars", Num-1);
 			}
 		}
+		else
+		{
+			dbg_msg("load", "savegame: wrong format (couldn't load switcher, too big)");
+			return 1;
+		}
+	}
 
 	return 0;
 }
