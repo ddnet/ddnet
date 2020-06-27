@@ -170,7 +170,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 
 	// headline
 	Options.HSplitTop(34.0f, &ButtonBar, &Options);
-	ButtonBar.VSplitRight(220.0f, &Player, &ButtonBar);
+	ButtonBar.VSplitRight(231.0f, &Player, &ButtonBar);
 	UI()->DoLabelScaled(&Player, Localize("Player"), 24.0f, -1);
 
 	ButtonBar.HMargin(1.0f, &ButtonBar);
