@@ -1415,12 +1415,12 @@ ColorHSLA CMenus::RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool
 		Button.VSplitLeft(10.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
-		str_format(aBuf, sizeof(aBuf), "%s: %03d", aLabels[i], (int)(*paComponent[i] * 100));
+		str_format(aBuf, sizeof(aBuf), "%s: %03d", aLabels[i], (int)(*paComponent[i] * 255));
 		UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
 		*paComponent[i] = DoScrollbarH(&((char *)pColor)[i], &Button, *paComponent[i]);
 	}
 
-	*pColor = Color.Pack(false, Alpha);
+	*pColor = Color.Pack(Alpha);
 	return Color;
 }
 
