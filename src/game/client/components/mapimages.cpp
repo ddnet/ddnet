@@ -191,11 +191,6 @@ void CMapImages::UpdateEntityLayerText(IGraphics::CTextureHandle Texture, int Te
 	int CurrentNumberSuitableFontSize = TextRender()->AdjustFontSize(aBuf, DigitsCount, TextureSize);
 	int UniversalSuitableFontSize = CurrentNumberSuitableFontSize*0.9; // should be smoothed enough to fit any digits combination
 
-	if (UniversalSuitableFontSize < 1)
-	{
-		dbg_msg("pFont", "texture with id '%d' will not be loaded. Reason - font is too small", (int)Texture);
-	}
-
 	int ApproximateTextWidth = TextRender()->CalculateTextWidth(aBuf, DigitsCount, 0, UniversalSuitableFontSize);
 	int XOffSet = (64-ApproximateTextWidth)/2;
 	YOffset += ((TextureSize - UniversalSuitableFontSize)/2);
