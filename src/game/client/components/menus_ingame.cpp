@@ -183,7 +183,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
 
-	ButtonBar.HMargin(1.0f, &ButtonBar);
+	ButtonBar.VSplitLeft(20.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(Width, &Button, &ButtonBar);
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GUIICONS].m_Id);
 	Graphics()->QuadsBegin();
