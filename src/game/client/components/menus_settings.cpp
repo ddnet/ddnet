@@ -512,50 +512,26 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		aRects[0].VSplitRight(10.0f, &aRects[0], 0);
 		aRects[1].VSplitLeft(10.0f, 0, &aRects[1]);
 
-		unsigned *paColors[2];
-		paColors[0] = ColorBody;
-		paColors[1] = ColorFeet;
-
-		const char *paParts[] = {
-			Localize("Body"),
-			Localize("Feet")};
-		const char *paLabels[] = {
-			Localize("Hue"),
-			Localize("Sat."),
-			Localize("Lht.")};
-		static int s_aColorSlider[2][3] = {{0}};
+		unsigned *paColors[2] = {ColorBody, ColorFeet};
+		const char *paParts[] = {Localize("Body"), Localize("Feet")};
 
 		for(int i = 0; i < 2; i++)
 		{
 			aRects[i].HSplitTop(20.0f, &Label, &aRects[i]);
 			UI()->DoLabelScaled(&Label, paParts[i], 14.0f, -1);
-			aRects[i].VSplitLeft(20.0f, 0, &aRects[i]);
+			aRects[i].VSplitLeft(10.0f, 0, &aRects[i]);
 			aRects[i].HSplitTop(2.5f, 0, &aRects[i]);
 
-			int PrevColor = *paColors[i];
-			int Color = 0;
-			for(int s = 0; s < 3; s++)
-			{
-				aRects[i].HSplitTop(20.0f, &Label, &aRects[i]);
-				Label.VSplitLeft(100.0f, &Label, &Button);
-				Button.HMargin(2.0f, &Button);
+			unsigned PrevColor = *paColors[i];
+			RenderHSLScrollbars(&aRects[i], paColors[i]);
 
-				float k = ((PrevColor>>((2-s)*8))&0xff) / 255.0f;
-				k = DoScrollbarH(&s_aColorSlider[i][s], &Button, k);
-				Color <<= 8;
-				Color += clamp((int)(k*255), 0, 255);
-				UI()->DoLabelScaled(&Label, paLabels[s], 14.0f, -1);
-			}
-
-			if(PrevColor != Color)
+			if(PrevColor != *paColors[i])
 			{
 				if(m_Dummy)
 					m_NeedSendDummyinfo = true;
 				else
 					m_NeedSendinfo = true;
 			}
-
-			*paColors[i] = Color;
 		}
 	}
 
@@ -1122,28 +1098,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	MainView.HSplitTop(20.0f, &Text, &MainView);
 	//text.VSplitLeft(15.0f, 0, &text);
 	UI()->DoLabelScaled(&Text, Localize("UI Color"), 14.0f, -1);
-
-	ColorHSLA UIColor = ColorHSLA(g_Config.m_UiColor, true);
-	const char *paLabels[] = {
-		Localize("Hue"),
-		Localize("Sat."),
-		Localize("Lht."),
-		Localize("Alpha")};
-	float *pColorSlider[4] = {&UIColor.h, &UIColor.s, &UIColor.l, &UIColor.a};
-	for(int s = 0; s < 4; s++)
-	{
-		CUIRect Text;
-		MainView.HSplitTop(19.0f, &Button, &MainView);
-		Button.VMargin(15.0f, &Button);
-		Button.VSplitLeft(100.0f, &Text, &Button);
-		//Button.VSplitRight(5.0f, &Button, 0);
-		Button.HSplitTop(4.0f, 0, &Button);
-
-		float *k = pColorSlider[s];
-		*k = DoScrollbarH(k, &Button, *k);
-		UI()->DoLabelScaled(&Text, paLabels[s], 15.0f, -1);
-	}
-	g_Config.m_UiColor = UIColor.Pack();
+	RenderHSLScrollbars(&MainView, &g_Config.m_UiColor, true);
 }
 
 void CMenus::RenderSettingsSound(CUIRect MainView)
@@ -1446,6 +1401,27 @@ void CMenus::RenderSettings(CUIRect MainView)
 		UI()->DoLabelScaled(&RestartWarning, Localize("You must restart the game for all settings to take effect."), 14.0f, -1);
 }
 
+ColorHSLA CMenus::RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alpha)
+{
+	ColorHSLA Color(*pColor, Alpha);
+	CUIRect Button, Label;
+	float *paComponent[] = {&Color.h, &Color.s, &Color.l, &Color.a};
+	const char *aLabels[] = {Localize("Hue"), Localize("Sat."), Localize("Lht."), Localize("Alpha")};
+
+	for(int i = 0; i < 3 + Alpha; i++)
+	{
+		pRect->HSplitTop(20.0f, &Button, pRect);
+		Button.VSplitLeft(10.0f, 0, &Button);
+		Button.VSplitLeft(100.0f, &Label, &Button);
+		Button.HMargin(2.0f, &Button);
+		UI()->DoLabelScaled(&Label, aLabels[i], 14.0f, -1);
+		*paComponent[i] = DoScrollbarH(&((char *)pColor)[i], &Button, *paComponent[i]);
+	}
+
+	*pColor = Color.Pack(false, Alpha);
+	return Color;
+}
+
 void CMenus::RenderSettingsHUD(CUIRect MainView)
 {
 	static int pIDP1 = 0, pIDP2 = 0;
@@ -1548,31 +1524,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 				}
 			}
 
-			static ColorHSLA SMColor;
-			SMColor = g_Config.m_ClMessageSystemColor;
-
-			Left.HSplitTop(20.0f, &Button, &Left);
-			Button.VSplitLeft(15.0f, 0, &Button);
-			Button.VSplitLeft(100.0f, &Label, &Button);
-			Button.HMargin(2.0f, &Button);
-			UI()->DoLabelScaled(&Label, Localize("Hue"), 14.0f, -1);
-			SMColor.h = DoScrollbarH(&SMColor.h, &Button, SMColor.h);
-
-			Left.HSplitTop(20.0f, &Button, &Left);
-			Button.VSplitLeft(15.0f, 0, &Button);
-			Button.VSplitLeft(100.0f, &Label, &Button);
-			Button.HMargin(2.0f, &Button);
-			UI()->DoLabelScaled(&Label, Localize("Sat."), 14.0f, -1);
-			SMColor.s = DoScrollbarH(&SMColor.s, &Button, SMColor.s);
-
-			Left.HSplitTop(20.0f, &Button, &Left);
-			Button.VSplitLeft(15.0f, 0, &Button);
-			Button.VSplitLeft(100.0f, &Label, &Button);
-			Button.HMargin(2.0f, &Button);
-			UI()->DoLabelScaled(&Label, Localize("Lht."), 14.0f, -1);
-			SMColor.l = DoScrollbarH(&SMColor.l, &Button, SMColor.l);
-
-			g_Config.m_ClMessageSystemColor = SMColor.Pack(false);
+			ColorHSLA SMColor = RenderHSLScrollbars(&Left, &g_Config.m_ClMessageSystemColor);
 
 			Left.HSplitTop(10.0f, &Label, &Left);
 
@@ -1606,31 +1558,8 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 				}
 			}
 
-			static ColorHSLA HMColor;
-			HMColor = g_Config.m_ClMessageHighlightColor;
+			ColorHSLA HMColor = RenderHSLScrollbars(&Right, &g_Config.m_ClMessageHighlightColor);
 
-			Right.HSplitTop(20.0f, &Button, &Right);
-			Button.VSplitLeft(15.0f, 0, &Button);
-			Button.VSplitLeft(100.0f, &Label, &Button);
-			Button.HMargin(2.0f, &Button);
-			UI()->DoLabelScaled(&Label, Localize("Hue"), 14.0f, -1);
-			HMColor.h = DoScrollbarH(&HMColor.h, &Button, HMColor.h);
-
-			Right.HSplitTop(20.0f, &Button, &Right);
-			Button.VSplitLeft(15.0f, 0, &Button);
-			Button.VSplitLeft(100.0f, &Label, &Button);
-			Button.HMargin(2.0f, &Button);
-			UI()->DoLabelScaled(&Label, Localize("Sat."), 14.0f, -1);
-			HMColor.s = DoScrollbarH(&HMColor.s, &Button, HMColor.s);
-
-			Right.HSplitTop(20.0f, &Button, &Right);
-			Button.VSplitLeft(15.0f, 0, &Button);
-			Button.VSplitLeft(100.0f, &Label, &Button);
-			Button.HMargin(2.0f, &Button);
-			UI()->DoLabelScaled(&Label, Localize("Lht."), 14.0f, -1);
-			HMColor.l = DoScrollbarH(&HMColor.l, &Button, HMColor.l);
-
-			g_Config.m_ClMessageHighlightColor = HMColor.Pack(false);
 			Right.HSplitTop(10.0f, &Label, &Right);
 
 			TextRender()->TextColor(0.75f, 0.5f, 0.75f, 1.0f);
@@ -1667,31 +1596,8 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 				}
 			}
 
-			static ColorHSLA TMColor;
-			TMColor = g_Config.m_ClMessageTeamColor;
+			ColorHSLA TMColor = RenderHSLScrollbars(&Left, &g_Config.m_ClMessageTeamColor);
 
-			Left.HSplitTop(20.0f, &Button, &Left);
-			Button.VSplitLeft(15.0f, 0, &Button);
-			Button.VSplitLeft(100.0f, &Label, &Button);
-			Button.HMargin(2.0f, &Button);
-			UI()->DoLabelScaled(&Label, Localize("Hue"), 14.0f, -1);
-			TMColor.h = DoScrollbarH(&TMColor.h, &Button, TMColor.h);
-
-			Left.HSplitTop(20.0f, &Button, &Left);
-			Button.VSplitLeft(15.0f, 0, &Button);
-			Button.VSplitLeft(100.0f, &Label, &Button);
-			Button.HMargin(2.0f, &Button);
-			UI()->DoLabelScaled(&Label, Localize("Sat."), 14.0f, -1);
-			TMColor.s = DoScrollbarH(&TMColor.s, &Button, TMColor.s);
-
-			Left.HSplitTop(20.0f, &Button, &Left);
-			Button.VSplitLeft(15.0f, 0, &Button);
-			Button.VSplitLeft(100.0f, &Label, &Button);
-			Button.HMargin(2.0f, &Button);
-			UI()->DoLabelScaled(&Label, Localize("Lht."), 14.0f, -1);
-			TMColor.l = DoScrollbarH(&TMColor.l, &Button, TMColor.l);
-
-			g_Config.m_ClMessageTeamColor = TMColor.Pack(false);
 			Left.HSplitTop(10.0f, &Label, &Left);
 
 			ColorRGBA rgbn = CalculateNameColor(TMColor);
@@ -1727,31 +1633,8 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 				g_Config.m_ClMessageFriend ^= 1;
 			}
 
-			static ColorHSLA FMColor;
-			FMColor = g_Config.m_ClMessageFriendColor;
+			ColorHSLA FMColor = RenderHSLScrollbars(&Right, &g_Config.m_ClMessageFriendColor);
 
-			Right.HSplitTop(20.0f, &Button, &Right);
-			Button.VSplitLeft(15.0f, 0, &Button);
-			Button.VSplitLeft(100.0f, &Label, &Button);
-			Button.HMargin(2.0f, &Button);
-			UI()->DoLabelScaled(&Label, Localize("Hue"), 14.0f, -1);
-			FMColor.h = DoScrollbarH(&FMColor.h, &Button, FMColor.h);
-
-			Right.HSplitTop(20.0f, &Button, &Right);
-			Button.VSplitLeft(15.0f, 0, &Button);
-			Button.VSplitLeft(100.0f, &Label, &Button);
-			Button.HMargin(2.0f, &Button);
-			UI()->DoLabelScaled(&Label, Localize("Sat."), 14.0f, -1);
-			FMColor.s = DoScrollbarH(&FMColor.s, &Button, FMColor.s);
-
-			Right.HSplitTop(20.0f, &Button, &Right);
-			Button.VSplitLeft(15.0f, 0, &Button);
-			Button.VSplitLeft(100.0f, &Label, &Button);
-			Button.HMargin(2.0f, &Button);
-			UI()->DoLabelScaled(&Label, Localize("Lht."), 14.0f, -1);
-			FMColor.l = DoScrollbarH(&FMColor.l, &Button, FMColor.l);
-
-			g_Config.m_ClMessageFriendColor = FMColor.Pack(false);
 			Right.HSplitTop(10.0f, &Label, &Right);
 
 			ColorRGBA rgbf = color_cast<ColorRGBA>(FMColor);
@@ -1765,7 +1648,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			Label.VSplitLeft(tw, &Label, &Button);
 			UI()->DoLabelScaled(&Label, Localize("Friend"), 12.0f, -1);
 
-			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageColor));
+			ColorRGBA rgb = color_cast<ColorRGBA>(FMColor);
 			TextRender()->TextColor(rgb);
 			str_format(aBuf, sizeof(aBuf), ": %s", Localize("Hi o/"));
 			UI()->DoLabelScaled(&Button, aBuf, 12.0f, -1);
@@ -1787,31 +1670,8 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 				}
 			}
 
-			static ColorHSLA MColor;
-			MColor = g_Config.m_ClMessageColor;
+			ColorHSLA MColor = RenderHSLScrollbars(&Left, &g_Config.m_ClMessageColor);
 
-			Left.HSplitTop(20.0f, &Button, &Left);
-			Button.VSplitLeft(15.0f, 0, &Button);
-			Button.VSplitLeft(100.0f, &Label, &Button);
-			Button.HMargin(2.0f, &Button);
-			UI()->DoLabelScaled(&Label, Localize("Hue"), 14.0f, -1);
-			MColor.h = DoScrollbarH(&MColor.h, &Button, MColor.h);
-
-			Left.HSplitTop(20.0f, &Button, &Left);
-			Button.VSplitLeft(15.0f, 0, &Button);
-			Button.VSplitLeft(100.0f, &Label, &Button);
-			Button.HMargin(2.0f, &Button);
-			UI()->DoLabelScaled(&Label, Localize("Sat."), 14.0f, -1);
-			MColor.s = DoScrollbarH(&MColor.s, &Button, MColor.s);
-
-			Left.HSplitTop(20.0f, &Button, &Left);
-			Button.VSplitLeft(15.0f, 0, &Button);
-			Button.VSplitLeft(100.0f, &Label, &Button);
-			Button.HMargin(2.0f, &Button);
-			UI()->DoLabelScaled(&Label, Localize("Lht."), 14.0f, -1);
-			MColor.l = DoScrollbarH(&MColor.l, &Button, MColor.l);
-
-			g_Config.m_ClMessageColor = MColor.Pack(false);
 			Left.HSplitTop(10.0f, &Label, &Left);
 
 			TextRender()->TextColor(0.8f, 0.8f, 0.8f, 1.0f);
@@ -1849,30 +1709,8 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			}
 		}
 
-		ColorHSLA LIColor(g_Config.m_ClLaserInnerColor);
+		ColorHSLA LIColor = RenderHSLScrollbars(&Laser, &g_Config.m_ClLaserInnerColor);
 
-		Laser.HSplitTop(20.0f, &Button, &Laser);
-		Button.VSplitLeft(20.0f, 0, &Button);
-		Button.VSplitLeft(100.0f, &Label, &Button);
-		Button.HMargin(2.0f, &Button);
-		UI()->DoLabelScaled(&Label, Localize("Hue"), 12.0f, -1);
-		LIColor.h = DoScrollbarH(&LIColor.h, &Button, LIColor.h);
-
-		Laser.HSplitTop(20.0f, &Button, &Laser);
-		Button.VSplitLeft(20.0f, 0, &Button);
-		Button.VSplitLeft(100.0f, &Label, &Button);
-		Button.HMargin(2.0f, &Button);
-		UI()->DoLabelScaled(&Label, Localize("Sat."), 12.0f, -1);
-		LIColor.s = DoScrollbarH(&LIColor.s, &Button, LIColor.s);
-
-		Laser.HSplitTop(20.0f, &Button, &Laser);
-		Button.VSplitLeft(20.0f, 0, &Button);
-		Button.VSplitLeft(100.0f, &Label, &Button);
-		Button.HMargin(2.0f, &Button);
-		UI()->DoLabelScaled(&Label, Localize("Lht."), 12.0f, -1);
-		LIColor.l = DoScrollbarH(&LIColor.l, &Button, LIColor.l);
-
-		g_Config.m_ClLaserInnerColor = LIColor.Pack(false);
 		Laser.HSplitTop(10.0f, 0, &Laser);
 
 		Laser.HSplitTop(20.0f, &Label, &Laser);
@@ -1888,31 +1726,8 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			}
 		}
 
-		ColorRGBA LOColor(g_Config.m_ClLaserOutlineColor);
+		ColorHSLA LOColor = RenderHSLScrollbars(&Laser, &g_Config.m_ClLaserOutlineColor);
 
-		Laser.HSplitTop(20.0f, &Button, &Laser);
-		Button.VSplitLeft(15.0f, 0, &Button);
-		Button.VSplitLeft(100.0f, &Label, &Button);
-		Button.HMargin(2.0f, &Button);
-		UI()->DoLabelScaled(&Label, Localize("Hue"), 12.0f, -1);
-		LOColor.h = DoScrollbarH(&LOColor.h, &Button, LOColor.h);
-
-		Laser.HSplitTop(20.0f, &Button, &Laser);
-		Button.VSplitLeft(15.0f, 0, &Button);
-		Button.VSplitLeft(100.0f, &Label, &Button);
-		Button.HMargin(2.0f, &Button);
-		UI()->DoLabelScaled(&Label, Localize("Sat."), 12.0f, -1);
-		LOColor.s = DoScrollbarH(&LOColor.s, &Button, LOColor.s);
-
-		Laser.HSplitTop(20.0f, &Button, &Laser);
-		Button.VSplitLeft(15.0f, 0, &Button);
-		Button.VSplitLeft(100.0f, &Label, &Button);
-		Button.HMargin(2.0f, &Button);
-		UI()->DoLabelScaled(&Label, Localize("Lht."), 12.0f, -1);
-		LOColor.l = DoScrollbarH(&LOColor.l, &Button, LOColor.l);
-
-		g_Config.m_ClLaserOutlineColor = LOColor.Pack(false);
-		//Laser.HSplitTop(8.0f, &Weapon, &Laser);
 		Weapon.VSplitLeft(30.0f, 0, &Weapon);
 
 		ColorRGBA RGB;
@@ -1926,7 +1741,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		Graphics()->QuadsBegin();
 
 		// do outline
-		RGB = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClLaserOutlineColor));
+		RGB = color_cast<ColorRGBA>(LOColor);
 		ColorRGBA OuterColor(RGB.r, RGB.g, RGB.b, 1.0f);
 		Graphics()->SetColor(RGB.r, RGB.g, RGB.b, 1.0f); // outline
 		Out = vec2(0.0f, -1.0f) * (3.15f);
@@ -1939,7 +1754,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		Graphics()->QuadsDrawFreeform(&Freeform, 1);
 
 		// do inner
-		RGB = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClLaserInnerColor));
+		RGB = color_cast<ColorRGBA>(LIColor);
 		ColorRGBA InnerColor(RGB.r, RGB.g, RGB.b, 1.0f);
 		Out = vec2(0.0f, -1.0f) * (2.25f);
 		Graphics()->SetColor(InnerColor.r, InnerColor.g, InnerColor.b, 1.0f); // center
@@ -2208,37 +2023,18 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	aRects[0].VSplitRight(10.0f, &aRects[0], 0);
 	aRects[1].VSplitLeft(10.0f, 0, &aRects[1]);
 
-	ColorHSLA Bg = ColorHSLA(g_Config.m_ClBackgroundColor), BgE = ColorHSLA(g_Config.m_ClBackgroundEntitiesColor);
-	float *pColorSlider[2][3] = {{&Bg.h, &Bg.s, &Bg.l}, {&BgE.h, &BgE.s, &BgE.l}};
-
-	const char *paParts[] = {
-		Localize("Background (regular)"),
-		Localize("Background (entities)")};
-	const char *paLabels[] = {
-		Localize("Hue"),
-		Localize("Sat."),
-		Localize("Lht.")};
+	unsigned *paColors[2] = {&g_Config.m_ClBackgroundColor, &g_Config.m_ClBackgroundEntitiesColor};
+	const char *paParts[2] = {Localize("Background (regular)"), Localize("Background (entities)")};
 
 	for(int i = 0; i < 2; i++)
 	{
 		aRects[i].HSplitTop(20.0f, &Label, &aRects[i]);
 		UI()->DoLabelScaled(&Label, paParts[i], 14.0f, -1);
-		aRects[i].VSplitLeft(20.0f, 0, &aRects[i]);
+		aRects[i].VSplitLeft(10.0f, 0, &aRects[i]);
 		aRects[i].HSplitTop(2.5f, 0, &aRects[i]);
 
-		for(int s = 0; s < 3; s++)
-		{
-			aRects[i].HSplitTop(20.0f, &Label, &aRects[i]);
-			Label.VSplitLeft(100.0f, &Label, &Button);
-			Button.HMargin(2.0f, &Button);
-
-			float *k = pColorSlider[i][s];
-			*k = DoScrollbarH(k, &Button, *k);
-			UI()->DoLabelScaled(&Label, paLabels[s], 15.0f, -1);
-		}
+		RenderHSLScrollbars(&aRects[i], paColors[i]);
 	}
-	g_Config.m_ClBackgroundColor = Bg.Pack();
-	g_Config.m_ClBackgroundEntitiesColor = BgE.Pack();
 
 	{
 		static float s_Map = 0.0f;
