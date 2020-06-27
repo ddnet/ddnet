@@ -881,9 +881,8 @@ void CConsole::ConToggle(IConsole::IResult *pResult, void *pUser)
 			bool Alpha = pData->m_Alpha;
 			unsigned Cur = *pData->m_pVariable;
 			ColorHSLA Val = Cur == pResult->GetColor(1, Light).Pack(Darkest, Alpha) ? pResult->GetColor(2, Light) : pResult->GetColor(1, Light);
-			Cur = Val.Pack(Darkest, Alpha);
 
-			str_format(aBuf, sizeof(aBuf), "%s %u", pResult->GetString(0), Val.Pack(Alpha));
+			str_format(aBuf, sizeof(aBuf), "%s %u", pResult->GetString(0), Val.Pack(Darkest, Alpha));
 			pConsole->ExecuteLine(aBuf);
 			aBuf[0] = 0;
 		}
