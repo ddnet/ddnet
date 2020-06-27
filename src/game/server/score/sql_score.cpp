@@ -747,8 +747,8 @@ bool CSqlScore::SaveTeamScoreThread(CSqlServer* pSqlServer, const CSqlData<void>
 			if(pData->m_Time < Time)
 			{
 				str_format(aBuf, sizeof(aBuf),
-						"UPDATE %s_teamrace SET Time='%.2f', Timestamp='%s', DDNet7=false WHERE ID = '%s';",
-						pSqlServer->GetPrefix(), pData->m_Time, pData->m_aTimestamp, ID.c_str());
+						"UPDATE %s_teamrace SET Time='%.2f', Timestamp='%s', DDNet7=false, GameID='%s' WHERE ID = '%s';",
+						pSqlServer->GetPrefix(), pData->m_Time, pData->m_aTimestamp, pData->m_GameUuid, ID.c_str());
 				dbg_msg("sql", "%s", aBuf);
 				pSqlServer->executeSql(aBuf);
 			}
