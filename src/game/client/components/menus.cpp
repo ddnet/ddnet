@@ -1070,7 +1070,7 @@ int CMenus::Render()
 		// make sure that other windows doesn't do anything funnay!
 		//UI()->SetHotItem(0);
 		//UI()->SetActiveItem(0);
-		char aBuf[128];
+		char aBuf[1536];
 		const char *pTitle = "";
 		const char *pExtraText = "";
 		const char *pButtonText = "";
@@ -1101,7 +1101,7 @@ int CMenus::Render()
 			pButtonText = Localize("Ok");
 			if(Client()->m_ReconnectTime > 0)
 			{
-				str_format(aBuf, sizeof(aBuf), Localize("\n\nReconnect in %d sec"), (int)((Client()->m_ReconnectTime - time_get()) / time_freq()));
+				str_format(aBuf, sizeof(aBuf), Localize("Reconnect in %d sec"), (int)((Client()->m_ReconnectTime - time_get()) / time_freq()));
 				pTitle = Client()->ErrorString();
 				pExtraText = aBuf;
 				pButtonText = Localize("Abort");
@@ -1181,7 +1181,15 @@ int CMenus::Render()
 		else if(m_Popup == POPUP_FIRST_LAUNCH)
 		{
 			pTitle = Localize("Welcome to DDNet");
-			pExtraText = Localize("DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.\n\nThe maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.\n\nThe mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.\n\nHook (right mouse) can be used to swing through the map and to hook other tees to you.\n\nMost importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.\n\nIt's recommended that you check the settings to adjust them to your liking before joining a server.\n\nPlease enter your nick name below.");
+			str_format(aBuf, sizeof(aBuf), "%s\n\n%s\n\n%s\n\n%s\n\n%s\n\n%s\n\n%s",
+				Localize("DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you."),
+				Localize("The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts."),
+				Localize("The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen."),
+				Localize("Hook (right mouse) can be used to swing through the map and to hook other tees to you."),
+				Localize("Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game."),
+				Localize("It's recommended that you check the settings to adjust them to your liking before joining a server."),
+				Localize("Please enter your nick name below."));
+			pExtraText = aBuf;
 			pButtonText = Localize("Ok");
 			ExtraAlign = -1;
 		}
@@ -1661,22 +1669,6 @@ int CMenus::Render()
 			Part.VSplitLeft(Button.h, &Button, &Part);
 			if(DoButton_CheckBox(&g_Config.m_ClVideoSndEnable, Localize("Use sounds"), g_Config.m_ClVideoSndEnable, &Button))
 				g_Config.m_ClVideoSndEnable ^= 1;
-			/*
-			static int s_ButtonInc = 0;
-			if(DoButton_Menu(&s_ButtonInc, Localize("IncSpeed"), 0, &IncSpeed))
-				m_Popup = POPUP_NONE;
-
-			static int s_ButtonDec = 0;
-			if(DoButton_Menu(&s_ButtonDec, Localize("DecSpeed"), 0, &DecSpeed))
-				m_Popup = POPUP_NONE;
-			*/
-			//Abort.VMargin(20.0f, &Abort);
-			//SpeedBox.VSplitLeft(40.0f, 0, &SpeedBox);
-			//SpeedBox.VSplitRight(80.0f, &SpeedBox, 0);
-			//UI()->DoLabel(&Label, Localize("Video speed:"), 18.0f, -1);
-			//static float Offset2 = 0.0f;
-			//char Speed[10] = "1";
-			//DoEditBox(&Offset2, &SpeedBox, Speed, sizeof(Speed), 12.0f, &Offset2);
 
 			Box.HSplitBottom(20.f, &Box, &Part);
 #if defined(__ANDROID__)
@@ -1776,7 +1768,12 @@ int CMenus::Render()
 			Box.HSplitBottom(24.f, &Box, &Part);
 
 			Part.VSplitLeft(30.0f, 0, &Part);
-			if(DoButton_CheckBox(&g_Config.m_BrIndicateFinished, Localize("Show DDNet map finishes in server browser\n(transmits your player name to info.ddnet.tw)"), g_Config.m_BrIndicateFinished, &Part))
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "%s\n(%s)",
+				Localize("Show DDNet map finishes in server browser"),
+				Localize("transmits your player name to info.ddnet.tw"));
+
+			if(DoButton_CheckBox(&g_Config.m_BrIndicateFinished, aBuf, g_Config.m_BrIndicateFinished, &Part))
 				g_Config.m_BrIndicateFinished ^= 1;
 
 			Box.HSplitBottom(20.f, &Box, &Part);

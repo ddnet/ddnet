@@ -120,7 +120,7 @@ void CMenus::RenderGame(CUIRect MainView)
 
 	static int s_DemoButton = 0;
 	bool Recording = DemoRecorder(RECORDER_MANUAL)->IsRecording();
-	if(DoButton_Menu(&s_DemoButton, Localize(Recording ? "Stop record" : "Record demo"), 0, &Button))	// Localize("Stop record");Localize("Record demo");
+	if(DoButton_Menu(&s_DemoButton, Recording ? Localize("Stop record") : Localize("Record demo"), 0, &Button))
 	{
 		if(!Recording)
 			Client()->DemoRecorder_Start(Client()->GetCurrentMap(), true, RECORDER_MANUAL);
