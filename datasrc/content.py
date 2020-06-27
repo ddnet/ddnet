@@ -422,8 +422,8 @@ container.sprites.Add(Sprite("guibutton_on", set_guibuttons, 4,0,4,4))
 container.sprites.Add(Sprite("guibutton_hover", set_guibuttons, 8,0,4,4))
 
 container.sprites.Add(Sprite("guiicon_mute", set_guiicons, 0,0,4,2))
-container.sprites.Add(Sprite("guiicon_friend", set_guiicons, 4,0,4,2))
-container.sprites.Add(Sprite("guiicon_emoticon_mute", set_guiicons, 8,0,4,2))
+container.sprites.Add(Sprite("guiicon_emoticon_mute", set_guiicons, 4,0,4,2))
+container.sprites.Add(Sprite("guiicon_friend", set_guiicons, 8,0,4,2))
 
 container.sprites.Add(Sprite("audio_source", set_audio_source, 0,0,1,1))
 
