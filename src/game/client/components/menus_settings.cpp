@@ -1405,6 +1405,7 @@ ColorHSLA CMenus::RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool
 {
 	ColorHSLA Color(*pColor, Alpha);
 	CUIRect Button, Label;
+	char aBuf[32];
 	float *paComponent[] = {&Color.h, &Color.s, &Color.l, &Color.a};
 	const char *aLabels[] = {Localize("Hue"), Localize("Sat."), Localize("Lht."), Localize("Alpha")};
 
@@ -1414,7 +1415,8 @@ ColorHSLA CMenus::RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool
 		Button.VSplitLeft(10.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
-		UI()->DoLabelScaled(&Label, aLabels[i], 14.0f, -1);
+		str_format(aBuf, sizeof(aBuf), "%s: %03d", aLabels[i], (int)(*paComponent[i] * 100));
+		UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
 		*paComponent[i] = DoScrollbarH(&((char *)pColor)[i], &Button, *paComponent[i]);
 	}
 
