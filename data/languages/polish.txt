@@ -1,4 +1,4 @@
-﻿##### authors #####
+##### authors #####
 #originally created by:
 #	Łukasz D
 #modified by:

@@ -1,4 +1,4 @@
-﻿##### authors #####
+##### authors #####
 # Created By : OneShadow
 ##### translated strings #####
 
