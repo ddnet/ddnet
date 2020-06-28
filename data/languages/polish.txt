@@ -1159,32 +1159,26 @@ Replay %3d:%02d
 Friend
 == Znajomy
 
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
+Skin prefix
+== Motyw skinów
+
+Reconnect in %d sec
 == 
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == 
 
-transmits your player name to info.ddnet.tw
-== 
-
 The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== 
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== 
-
-Show DDNet map finishes in server browser
 == 
 
 The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
 == 
 
-Reconnect in %d sec
+Hook (right mouse) can be used to swing through the map and to hook other tees to you.
 == 
 
-Skin prefix
-== Motyw skinów
+Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
+== 
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == 
@@ -1192,5 +1186,14 @@ It's recommended that you check the settings to adjust them to your liking befor
 Please enter your nick name below.
 == 
 
+Show DDNet map finishes in server browser
+== 
+
+transmits your player name to info.ddnet.tw
+== 
+
 Indicate map finish
+== 
+
+Show others (own team only)
 == 

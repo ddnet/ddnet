@@ -648,548 +648,551 @@ Name plates size
 Type:
 == Typ:
 
-Check now
-== 
-
-Replay %3d:%02d  
-== 
-
-Show kill messages
-== 
-
-Automatically take statboard screenshot
-== 
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== 
-
-Unfinished map
-== 
-
-Fat skins (DDFat)
-== 
-
-Activate
-== 
-
-Show quads
-== 
-
-Enable replays
-== 
-
-Render demo
-== 
-
-Disconnect Dummy
-== 
-
-Show health + ammo
-== 
-
-Show only chat messages from friends
-== 
-
-Show votes window after voting
-== 
-
-It's recommended that you check the settings to adjust them to your liking before joining a server.
-== 
-
-Refresh Rate
-== 
-
-%.2f MiB
-== 
-
-Render
-== 
-
-Threaded sound loading
-== 
-
-Automatically create statboard csv
-== 
-
-Indicate map finish
-== 
-
-DDNet Client updated!
-== 
-
-Net
-== 
-
-Use OpenGL 3.3 (experimental)
-== 
-
-Default length: %d
-== 
-
-Grabs
-== 
-
-Markers
-== 
-
-Deactivate
-== 
-
-Inner color
-== 
-
-Browser
-== 
-
-Time
-== 
-
-Restart
-== 
-
-Zoom in
-== 
-
-Update failed! Check log...
-== 
-
-Select a name
-== 
-
-Clan plates size
-== 
-
-Outline color
-== 
-
-Best
-== 
-
-Reconnect in %d sec
-== 
-
-Filter connecting players
-== 
-
-Frags
-== 
-
-1 new mention
-== 
-
-Video name:
-== 
-
-Show ghost
-== 
-
-New random timeout code
-== 
-
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== 
-
-AntiPing
-== 
-
-second
-== 
-
-Enable highlighted chat sound
-== 
-
-FPM
-== 
-
-Look out!
-== 
-
-Overlay entities
-== 
-
-Hook collisions
-== 
-
-Learn
-== 
-
-Date
-== 
-
-DDNet Client needs to be restarted to complete update!
-== 
-
-Converse
-== 
-
-Show entities
-== 
-
-Show clan above name plates
-== 
-
-System message
-== 
-
-%.2f KiB
-== 
-
-Default zoom
-== 
-
-Spree
-== 
-
-Please use a different name
-== 
-
-Toggle ghost
-== 
-
-Auto %3d:%02d  
-== 
-
-Hello and welcome
-== 
-
-Please enter your nick name below.
-== 
-
-Length
-== 
-
-Gameplay
-== 
-
-Try fast HTTP map download first
-== 
-
-Map sound volume
-== 
-
-Ratio
-== 
-
-Reset
-== 
-
-Demo
-== 
-
-Wait before try for
-== 
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== 
-
-Fetch Info
-== 
-
-Statboard
+Successfully saved the replay!
 == 
 
 Replay feature is disabled!
 == 
 
-Save
-== 
-
-DDNet %s is out! Download it at DDNet.tw!
-== 
-
-Background (entities)
-== 
-
-Kill
-== 
-
-Size
-== 
-
-Show other players' key presses
-== 
-
-Are you sure that you want to disconnect your dummy?
-== 
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== 
-
-Are you sure that you want to disconnect?
-== 
-
-Friend
-== 
-
-Hammerfly dummy
-== 
-
-Background (regular)
-== 
-
-Normal message
-== 
-
-Screen
-== 
-
-UI mouse s.
-== 
-
-Connecting dummy
-== 
-
-Countries
-== 
-
-Save the best demo of each race
-== 
-
-Zoom out
-== 
-
-Destination file already exist
-== 
-
-Show tiles layers from BG map
-== 
-
-File already exists, do you want to overwrite it?
-== 
-
-seconds
-== 
-
-Toggle dummy
-== 
-
-Deaths
-== 
-
-Ghost
-== 
-
-Switch weapon when out of ammo
-== 
-
-%d new mentions
-== 
-
-Team message
-== 
-
-Follow
-== 
-
-Highlighted message
-== 
-
-DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== 
-
-Hi o/
-== 
-
-Exclude
-== 
-
-Show console window
-== 
-
-Enable game sounds
-== 
-
-Show text entities
-== 
-
-Enable gun sound
-== 
-
-9+ new mentions
-== 
-
-Loading DDNet Client
-== 
-
-Suicides
-== 
-
-may cause delay
-== 
-
-AntiPing: predict other players
+Game paused
 == 
 
 Server best:
 == 
 
-Search
-== 
-
-transmits your player name to info.ddnet.tw
-== 
-
-No updates available
-== 
-
-Borderless window
-== 
-
-AntiPing: predict weapons
-== 
-
-Show score
-== 
-
-Show all
-== 
-
-HUD
-== 
-
-Enable long pain sound (used when shooting in freeze)
-== 
-
-Pause
-== 
-
-Save ghost
-== 
-
-AntiPing: predict grenade paths
-== 
-
-Successfully saved the replay!
-== 
-
 Personal best:
 == 
 
-Dummy copy
+Learn
 == 
 
-Show DDNet map finishes in server browser
+Browser
 == 
 
-Preinit VBO (iGPUs only)
+Ghost
+== 
+
+Loading DDNet Client
+== 
+
+Reconnect in %d sec
+== 
+
+Render demo
 == 
 
 Replace video
 == 
 
-Multiple texture units (disable for MacOS)
+File already exists, do you want to overwrite it?
 == 
 
-Connect Dummy
+Are you sure that you want to disconnect?
 == 
 
-Remove chat
+Disconnect Dummy
 == 
 
-Use high DPI
-== 
-
-Messages
-== 
-
-Game paused
-== 
-
-Downloading %s:
-== 
-
-Max CSVs
-== 
-
-Show names in chat in team colors
-== 
-
-Reset wanted weapon on death
-== 
-
-Markers:
-== 
-
-DDNet %s is available:
-== 
-
-Spectator
-== 
-
-DDNet %s is out!
-== 
-
-Manual %3d:%02d  
-== 
-
-Enable team chat sound
-== 
-
-Show client IDs in Scoreboard
-== 
-
-Show others
-== 
-
-Reload
-== 
-
-Use DDRace Scoreboard
-== 
-
-We will win
-== 
-
-Lock team
-== 
-
-Update now
-== 
-
-Race %3d:%02d  
-== 
-
-Show other players' hook collision lines
-== 
-
-Updating...
-== 
-
-Dummy settings
-== 
-
-Toggle dyncam
-== 
-
-Types
-== 
-
-AntiPing limit
-== 
-
-Enable regular chat sound
-== 
-
-Friend message
+Are you sure that you want to disconnect your dummy?
 == 
 
 Welcome to DDNet
 == 
 
-Old mouse mode
+DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == 
 
-Show HUD
+The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
 == 
 
-DDNet
+The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
+== 
+
+Hook (right mouse) can be used to swing through the map and to hook other tees to you.
+== 
+
+Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
+== 
+
+It's recommended that you check the settings to adjust them to your liking before joining a server.
+== 
+
+Please enter your nick name below.
+== 
+
+Destination file already exist
+== 
+
+Video name:
+== 
+
+Show DDNet map finishes in server browser
+== 
+
+transmits your player name to info.ddnet.tw
+== 
+
+Search
+== 
+
+Exclude
+== 
+
+Filter connecting players
+== 
+
+Indicate map finish
+== 
+
+Unfinished map
+== 
+
+Countries
+== 
+
+Types
+== 
+
+DDNet %s is out!
+== 
+
+Downloading %s:
+== 
+
+Update failed! Check log...
+== 
+
+DDNet Client updated!
+== 
+
+Update now
+== 
+
+Restart
+== 
+
+DDNet %s is out! Download it at DDNet.tw!
+== 
+
+Select a name
+== 
+
+Please use a different name
+== 
+
+Remove chat
+== 
+
+Markers:
+== 
+
+%.2f MiB
+== 
+
+%.2f KiB
+== 
+
+Demo
+== 
+
+Markers
+== 
+
+Length
+== 
+
+Date
+== 
+
+Fetch Info
+== 
+
+Render
+== 
+
+Connecting dummy
+== 
+
+Connect Dummy
+== 
+
+Reload
+== 
+
+Deactivate
+== 
+
+Activate
+== 
+
+Save
+== 
+
+Switch weapon when out of ammo
+== 
+
+Reset wanted weapon on death
+== 
+
+Show only chat messages from friends
+== 
+
+Show clan above name plates
+== 
+
+Clan plates size
+== 
+
+Refresh Rate
+== 
+
+Show console window
+== 
+
+Automatically take statboard screenshot
+== 
+
+Automatically create statboard csv
+== 
+
+Max CSVs
+== 
+
+Dummy settings
 == 
 
 Vanilla skins only
 == 
 
-Enable server message sound
+Fat skins (DDFat)
 == 
 
 Skin prefix
+== 
+
+Hook collisions
+== 
+
+Pause
+== 
+
+Kill
+== 
+
+Zoom in
+== 
+
+Zoom out
+== 
+
+Default zoom
+== 
+
+Show others
+== 
+
+Show all
+== 
+
+Toggle dyncam
+== 
+
+Toggle dummy
+== 
+
+Toggle ghost
+== 
+
+Dummy copy
+== 
+
+Hammerfly dummy
+== 
+
+Converse
+== 
+
+Statboard
+== 
+
+Lock team
+== 
+
+Show entities
+== 
+
+Show HUD
+== 
+
+UI mouse s.
+== 
+
+Borderless window
+== 
+
+may cause delay
+== 
+
+Screen
+== 
+
+Use OpenGL 3.3 (experimental)
+== 
+
+Preinit VBO (iGPUs only)
+== 
+
+Multiple texture units (disable for MacOS)
+== 
+
+Use high DPI
+== 
+
+Enable game sounds
+== 
+
+Enable gun sound
+== 
+
+Enable long pain sound (used when shooting in freeze)
+== 
+
+Enable server message sound
+== 
+
+Enable regular chat sound
+== 
+
+Enable team chat sound
+== 
+
+Enable highlighted chat sound
+== 
+
+Threaded sound loading
+== 
+
+Map sound volume
+== 
+
+HUD
+== 
+
+DDNet
+== 
+
+DDNet Client needs to be restarted to complete update!
+== 
+
+Use DDRace Scoreboard
+== 
+
+Show client IDs in Scoreboard
+== 
+
+Show score
+== 
+
+Show health + ammo
+== 
+
+Show names in chat in team colors
+== 
+
+Show kill messages
+== 
+
+Show votes window after voting
+== 
+
+Messages
+== 
+
+System message
+== 
+
+Reset
+== 
+
+Highlighted message
+== 
+
+Spectator
+== 
+
+Look out!
+== 
+
+Team message
+== 
+
+We will win
+== 
+
+Friend message
+== 
+
+Friend
+== 
+
+Hi o/
+== 
+
+Normal message
+== 
+
+Hello and welcome
+== 
+
+Inner color
+== 
+
+Outline color
+== 
+
+Wait before try for
+== 
+
+second
+== 
+
+seconds
+== 
+
+Save the best demo of each race
+== 
+
+Default length: %d
+== 
+
+Enable replays
+== 
+
+Show ghost
+== 
+
+Save ghost
+== 
+
+Gameplay
+== 
+
+Overlay entities
+== 
+
+Size
+== 
+
+Show text entities
+== 
+
+Show others (own team only)
+== 
+
+Show quads
+== 
+
+AntiPing limit
+== 
+
+AntiPing
+== 
+
+AntiPing: predict other players
+== 
+
+AntiPing: predict weapons
+== 
+
+AntiPing: predict grenade paths
+== 
+
+Show other players' hook collision lines
+== 
+
+Show other players' key presses
+== 
+
+Old mouse mode
+== 
+
+Background (regular)
+== 
+
+Background (entities)
+== 
+
+Show tiles layers from BG map
+== 
+
+Try fast HTTP map download first
+== 
+
+DDNet %s is available:
+== 
+
+Updating...
+== 
+
+No updates available
+== 
+
+Check now
+== 
+
+New random timeout code
+== 
+
+Time
+== 
+
+Manual %3d:%02d  
+== 
+
+Race %3d:%02d  
+== 
+
+Auto %3d:%02d  
+== 
+
+Replay %3d:%02d  
+== 
+
+Follow
+== 
+
+Frags
+== 
+
+Deaths
+== 
+
+Suicides
+== 
+
+Ratio
+== 
+
+Net
+== 
+
+FPM
+== 
+
+Spree
+== 
+
+Best
+== 
+
+Grabs
+== 
+
+1 new mention
+== 
+
+%d new mentions
+== 
+
+9+ new mentions
 == 

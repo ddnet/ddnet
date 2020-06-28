@@ -1032,76 +1032,31 @@ transmits your player name to info.ddnet.tw
 Reload
 == újratöltés
 
-Size
-== 
-
-Fetch Info
-== 
-
-Render
-== 
-
-Statboard
-== 
-
-Length
-== 
-
-Skin prefix
-== 
-
-Zoom in
-== 
-
-Toggle dummy
-== 
-
-Hook collisions
-== 
-
-Show text entities
-== 
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== 
-
 Successfully saved the replay!
-== 
-
-Hammerfly dummy
-== 
-
-Replace video
-== 
-
-Zoom out
-== 
-
-DDNet %s is out!
-== 
-
-Connect Dummy
-== 
-
-Kill
-== 
-
-Enable replays
-== 
-
-Markers
 == 
 
 Replay feature is disabled!
 == 
 
-Toggle ghost
-== 
-
-Time
-== 
-
 Server best:
+== 
+
+Personal best:
+== 
+
+Learn
+== 
+
+Render demo
+== 
+
+Replace video
+== 
+
+Disconnect Dummy
+== 
+
+Are you sure that you want to disconnect your dummy?
 == 
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
@@ -1110,16 +1065,34 @@ DDraceNetwork is a cooperative online game where the goal is for you and your gr
 The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
 == 
 
-It's recommended that you check the settings to adjust them to your liking before joining a server.
+The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
 == 
 
-Lock team
-== 
-
-Use high DPI
+Hook (right mouse) can be used to swing through the map and to hook other tees to you.
 == 
 
 Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
+== 
+
+It's recommended that you check the settings to adjust them to your liking before joining a server.
+== 
+
+Please enter your nick name below.
+== 
+
+Destination file already exist
+== 
+
+Video name:
+== 
+
+Filter connecting players
+== 
+
+DDNet %s is out!
+== 
+
+Downloading %s:
 == 
 
 Update failed! Check log...
@@ -1128,71 +1101,101 @@ Update failed! Check log...
 Markers:
 == 
 
-Toggle dyncam
+Markers
 == 
 
-Dummy copy
+Length
 == 
 
-Default length: %d
+Fetch Info
 == 
 
-Are you sure that you want to disconnect your dummy?
+Render
 == 
 
-Show all
+Connect Dummy
 == 
 
-Personal best:
+Skin prefix
 == 
 
-Disconnect Dummy
-== 
-
-Show entities
-== 
-
-Converse
-== 
-
-Video name:
-== 
-
-Destination file already exist
+Hook collisions
 == 
 
 Pause
 == 
 
-9+ new mentions
+Kill
 == 
 
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
+Zoom in
 == 
 
-Replay %3d:%02d  
+Zoom out
 == 
 
-Please enter your nick name below.
+Show all
 == 
 
-1 new mention
+Toggle dyncam
 == 
 
-Render demo
+Toggle dummy
 == 
 
-Learn
+Toggle ghost
 == 
 
-Downloading %s:
+Dummy copy
+== 
+
+Hammerfly dummy
+== 
+
+Converse
+== 
+
+Statboard
+== 
+
+Lock team
+== 
+
+Show entities
 == 
 
 Show HUD
 == 
 
-Filter connecting players
+Use high DPI
+== 
+
+Default length: %d
+== 
+
+Enable replays
+== 
+
+Size
+== 
+
+Show text entities
+== 
+
+Show others (own team only)
+== 
+
+Time
+== 
+
+Replay %3d:%02d  
+== 
+
+1 new mention
 == 
 
 %d new mentions
+== 
+
+9+ new mentions
 == 
