@@ -417,6 +417,7 @@ Messages = [
 
 	NetMessage("Sv_TeamsState", []),
 
+	# deprecated, use showothers@netobj.ddnet.tw instead
 	NetMessage("Cl_ShowOthers", [
 		NetBool("m_Show"),
 	]),
@@ -429,5 +430,9 @@ Messages = [
 	NetMessageEx("Cl_ShowDistance", "show-distance@netmsg.ddnet.tw", [
 		NetIntAny("m_X"),
 		NetIntAny("m_Y"),
+	]),
+
+	NetMessageEx("Cl_ShowOthers2", "showothers2@netmsg.ddnet.tw", [
+		NetIntRange("m_Show", 0, 2),
 	]),
 ]
