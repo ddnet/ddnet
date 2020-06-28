@@ -2037,6 +2037,14 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				pPlayer->m_ShowOthers = (bool)pMsg->m_Show;
 			}
 		}
+		else if (MsgID == NETMSGTYPE_CL_SHOWOTHERS2)
+		{
+			if(g_Config.m_SvShowOthers && !g_Config.m_SvShowOthersDefault)
+			{
+				CNetMsg_Cl_ShowOthers2 *pMsg = (CNetMsg_Cl_ShowOthers2 *)pRawMsg;
+				pPlayer->m_ShowOthers = pMsg->m_Show;
+			}
+		}
 		else if (MsgID == NETMSGTYPE_CL_SHOWDISTANCE)
 		{
 			CNetMsg_Cl_ShowDistance *pMsg = (CNetMsg_Cl_ShowDistance *)pRawMsg;
