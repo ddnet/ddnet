@@ -1198,3 +1198,6 @@ Video name:
 
 Connect Dummy
 == 
+
+Show others (own team only)
+== 

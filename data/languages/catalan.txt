@@ -1019,76 +1019,64 @@ transmits your player name to info.ddnet.tw
 Reload
 == Recarga
 
-Toggle dyncam
+Successfully saved the replay!
 == 
 
-Statboard
-== 
-
-Kill
-== 
-
-Please enter your nick name below.
-== 
-
-Default length: %d
-== 
-
-Personal best:
-== 
-
-Zoom in
-== 
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== 
-
-Dummy copy
-== 
-
-Render
-== 
-
-Replace video
-== 
-
-1 new mention
-== 
-
-Show text entities
-== 
-
-Hammerfly dummy
-== 
-
-%d new mentions
-== 
-
-Markers
-== 
-
-Markers:
+Replay feature is disabled!
 == 
 
 Server best:
 == 
 
+Personal best:
+== 
+
+Learn
+== 
+
+Render demo
+== 
+
+Replace video
+== 
+
 Disconnect Dummy
 == 
 
-Lock team
+Are you sure that you want to disconnect your dummy?
+== 
+
+DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == 
 
 The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
 == 
 
-Time
+The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
 == 
 
-9+ new mentions
+Hook (right mouse) can be used to swing through the map and to hook other tees to you.
+== 
+
+Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
 == 
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
+== 
+
+Please enter your nick name below.
+== 
+
+Destination file already exist
+== 
+
+Video name:
+== 
+
+Filter connecting players
+== 
+
+DDNet %s is out!
 == 
 
 Downloading %s:
@@ -1097,89 +1085,104 @@ Downloading %s:
 Update failed! Check log...
 == 
 
-DDNet %s is out!
+Markers:
 == 
 
-Fetch Info
-== 
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== 
-
-Connect Dummy
-== 
-
-Successfully saved the replay!
-== 
-
-Replay feature is disabled!
-== 
-
-Render demo
-== 
-
-Show entities
-== 
-
-Zoom out
-== 
-
-Enable replays
-== 
-
-Toggle ghost
-== 
-
-Toggle dummy
-== 
-
-DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== 
-
-Skin prefix
-== 
-
-Show all
-== 
-
-Converse
-== 
-
-Pause
-== 
-
-Show HUD
-== 
-
-Filter connecting players
-== 
-
-Use high DPI
-== 
-
-Hook collisions
-== 
-
-Are you sure that you want to disconnect your dummy?
+Markers
 == 
 
 Length
 == 
 
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
+Fetch Info
+== 
+
+Render
+== 
+
+Connect Dummy
+== 
+
+Skin prefix
+== 
+
+Hook collisions
+== 
+
+Pause
+== 
+
+Kill
+== 
+
+Zoom in
+== 
+
+Zoom out
+== 
+
+Show all
+== 
+
+Toggle dyncam
+== 
+
+Toggle dummy
+== 
+
+Toggle ghost
+== 
+
+Dummy copy
+== 
+
+Hammerfly dummy
+== 
+
+Converse
+== 
+
+Statboard
+== 
+
+Lock team
+== 
+
+Show entities
+== 
+
+Show HUD
+== 
+
+Use high DPI
+== 
+
+Default length: %d
+== 
+
+Enable replays
+== 
+
+Size
+== 
+
+Show text entities
+== 
+
+Show others (own team only)
+== 
+
+Time
 == 
 
 Replay %3d:%02d  
 == 
 
-Video name:
+1 new mention
 == 
 
-Destination file already exist
+%d new mentions
 == 
 
-Learn
-== 
-
-Size
+9+ new mentions
 == 

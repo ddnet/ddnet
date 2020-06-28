@@ -1205,3 +1205,6 @@ Video name:
 
 Toggle dyncam
 == Dyncam wechseln
+
+Show others (own team only)
+== 

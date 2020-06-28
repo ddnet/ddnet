@@ -1192,3 +1192,6 @@ Hook collisions
 
 Connect Dummy
 == Anslut Dummy
+
+Show others (own team only)
+== 
