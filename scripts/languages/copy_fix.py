@@ -45,8 +45,11 @@ content = [line for line in content if line != None]
 if append_missing:
     missing = [index for index in range(len(local)) if index not in supported]
     if missing:
-        for miss in missing:
-            content.append("\n"+local[miss]+"\n== \n")
+        if content[-1] != "\n":
+            content.append("\n")
+        for i, miss in enumerate(missing):
+            content.append(local[miss]+"\n== \n\n")
+        content[-1] = content[-1][:-1]
 
 open(outfile, "w").write("".join(content))
 print("Successfully created '"+outfile+"'.")
