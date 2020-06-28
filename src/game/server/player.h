@@ -163,6 +163,7 @@ public:
 	int64 m_Last_Team;
 	bool m_ShowOthers;
 	bool m_ShowAll;
+	vec2 m_ShowDistance;
 	bool m_SpecTeam;
 	bool m_NinjaJetpack;
 	bool m_Afk;

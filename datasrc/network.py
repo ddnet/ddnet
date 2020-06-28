@@ -425,4 +425,9 @@ Messages = [
 	NetMessageEx("Sv_MyOwnMessage", "my-own-message@heinrich5991.de", [
 		NetIntAny("m_Test"),
 	]),
+
+	NetMessageEx("Cl_ShowDistance", "show-distance@netmsg.ddnet.tw", [
+		NetIntAny("m_X"),
+		NetIntAny("m_Y"),
+	]),
 ]

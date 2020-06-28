@@ -1552,6 +1552,20 @@ void CGameClient::OnNewSnapshot()
 		m_ShowOthers[g_Config.m_ClDummy] = g_Config.m_ClShowOthers;
 	}
 
+	static float LastZoom = .0;
+	static float LastScreenAspect = .0;
+	if(m_pCamera->m_Zoom != LastZoom || Graphics()->ScreenAspect() != LastScreenAspect)
+	{
+		LastZoom = m_pCamera->m_Zoom;
+		LastScreenAspect = Graphics()->ScreenAspect();
+		CNetMsg_Cl_ShowDistance Msg;
+		float x, y;
+		RenderTools()->CalcScreenParams(Graphics()->ScreenAspect(), m_pCamera->m_Zoom, &x, &y);
+		Msg.m_X = x;
+		Msg.m_Y = y;
+		Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+	}
+
 	m_pGhost->OnNewSnapshot();
 	m_pRaceDemo->OnNewSnapshot();
 
