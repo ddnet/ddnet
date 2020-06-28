@@ -884,7 +884,7 @@ void CSound::SetChannel(int ChannelID, float Vol, float Pan)
 	m_aChannels[ChannelID].m_Pan = (int)(Pan*255.0f); // TODO: this is only on and off right now
 }
 
-ISound::CVoiceHandle CSound::Play(int ChannelID, int SampleID, int Flags, float x, float y)
+ISound::CVoiceHandle CSound::Play(int ChannelID, int SampleID, int Flags, float x, float y, float Volume)
 {
 	int VoiceID = -1;
 	int Age = -1;
@@ -913,7 +913,7 @@ ISound::CVoiceHandle CSound::Play(int ChannelID, int SampleID, int Flags, float 
 			m_aVoices[VoiceID].m_Tick = m_aSamples[SampleID].m_PausedAt;
 		else
 			m_aVoices[VoiceID].m_Tick = 0;
-		m_aVoices[VoiceID].m_Vol = 255;
+		m_aVoices[VoiceID].m_Vol = clamp(Volume, 0.0f, 1.0f) * 255.0f;
 		m_aVoices[VoiceID].m_Flags = Flags;
 		m_aVoices[VoiceID].m_X = (int)x;
 		m_aVoices[VoiceID].m_Y = (int)y;
@@ -927,14 +927,14 @@ ISound::CVoiceHandle CSound::Play(int ChannelID, int SampleID, int Flags, float 
 	return CreateVoiceHandle(VoiceID, Age);
 }
 
-ISound::CVoiceHandle CSound::PlayAt(int ChannelID, int SampleID, int Flags, float x, float y)
+ISound::CVoiceHandle CSound::PlayAt(int ChannelID, int SampleID, int Flags, float x, float y, float Volume)
 {
-	return Play(ChannelID, SampleID, Flags|ISound::FLAG_POS, x, y);
+	return Play(ChannelID, SampleID, Flags|ISound::FLAG_POS, x, y, Volume);
 }
 
-ISound::CVoiceHandle CSound::Play(int ChannelID, int SampleID, int Flags)
+ISound::CVoiceHandle CSound::Play(int ChannelID, int SampleID, int Flags, float Volume)
 {
-	return Play(ChannelID, SampleID, Flags, 0, 0);
+	return Play(ChannelID, SampleID, Flags, 0, 0, Volume);
 }
 
 void CSound::Stop(int SampleID)
