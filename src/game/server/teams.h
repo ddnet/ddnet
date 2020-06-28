@@ -123,6 +123,9 @@ public:
 
 	bool GetSaving(int TeamID)
 	{
+		if(TeamID <= TEAM_FLOCK || TeamID >= TEAM_SUPER)
+			return false;
+
 		return m_pSaveTeamResult[TeamID] != nullptr;
 	}
 
