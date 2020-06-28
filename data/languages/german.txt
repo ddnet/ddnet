@@ -739,7 +739,7 @@ Spectator
 == Zuschauer
 
 Show others
-== Andere Teams zeigen
+== Andere zeigen
 
 Restart
 == Neustart
@@ -1057,7 +1057,7 @@ Length
 == Länge
 
 Show text entities
-== Entities Text anzeigen
+== Entities-Text anzeigen
 
 Hook collisions
 == Hakenkollisionen
@@ -1207,4 +1207,4 @@ Toggle dyncam
 == Dyncam wechseln
 
 Show others (own team only)
-== 
+== Andere Spieler zeigen (nur eigenes Team)
