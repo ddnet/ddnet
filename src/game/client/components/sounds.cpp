@@ -195,7 +195,7 @@ void CSounds::PlayAt(int Chn, int SetId, float Vol, vec2 Pos)
 	if(Chn == CHN_MUSIC)
 		Flags = ISound::FLAG_LOOP;
 
-	Sound()->PlayAt(Chn, SampleId, Flags, Pos.x, Pos.y);
+	Sound()->PlayAt(Chn, SampleId, Flags, Pos.x, Pos.y, Vol);
 }
 
 void CSounds::Stop(int SetId)

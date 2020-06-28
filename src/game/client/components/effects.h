@@ -17,11 +17,11 @@ public:
 	void SmokeTrail(vec2 Pos, vec2 Vel, float Alpha = 1.f, float TimePassed = 0.f);
 	void SkidTrail(vec2 Pos, vec2 Vel);
 	void Explosion(vec2 Pos);
-	void HammerHit(vec2 Pos);
-	void AirJump(vec2 Pos);
+	void HammerHit(vec2 Pos, float Volume = 1.0f);
+	void AirJump(vec2 Pos, float Volume = 1.0f);
 	void DamageIndicator(vec2 Pos, vec2 Dir);
 	void ResetDamageIndicator();
-	void PlayerSpawn(vec2 Pos);
+	void PlayerSpawn(vec2 Pos, float Volume = 1.0f);
 	void PlayerDeath(vec2 Pos, int ClientID);
 	void PowerupShine(vec2 Pos, vec2 Size);
 

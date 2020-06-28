@@ -27,7 +27,7 @@ CEffects::CEffects()
 	m_Add100hz = false;
 }
 
-void CEffects::AirJump(vec2 Pos)
+void CEffects::AirJump(vec2 Pos, float Volume)
 {
 	CParticle p;
 	p.SetDefault();
@@ -48,7 +48,7 @@ void CEffects::AirJump(vec2 Pos)
 	m_pClient->m_pParticles->Add(CParticles::GROUP_GENERAL, &p);
 
 	if(g_Config.m_SndGame)
-		m_pClient->m_pSounds->PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_AIRJUMP, 1.0f, Pos);
+		m_pClient->m_pSounds->PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_AIRJUMP, Volume, Pos);
 }
 
 void CEffects::DamageIndicator(vec2 Pos, vec2 Dir)
@@ -138,7 +138,7 @@ void CEffects::BulletTrail(vec2 Pos, float Alpha, float TimePassed)
 	m_pClient->m_pParticles->Add(CParticles::GROUP_PROJECTILE_TRAIL, &p, TimePassed);
 }
 
-void CEffects::PlayerSpawn(vec2 Pos)
+void CEffects::PlayerSpawn(vec2 Pos, float Volume)
 {
 	for(int i = 0; i < 32; i++)
 	{
@@ -242,7 +242,7 @@ void CEffects::Explosion(vec2 Pos)
 }
 
 
-void CEffects::HammerHit(vec2 Pos)
+void CEffects::HammerHit(vec2 Pos, float Volume)
 {
 	// add the explosion
 	CParticle p;

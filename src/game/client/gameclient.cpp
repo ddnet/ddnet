@@ -1563,7 +1563,7 @@ void CGameClient::OnNewSnapshot()
 				vec2 Pos = mix(vec2(m_Snap.m_aCharacters[i].m_Prev.m_X, m_Snap.m_aCharacters[i].m_Prev.m_Y),
 						vec2(m_Snap.m_aCharacters[i].m_Cur.m_X, m_Snap.m_aCharacters[i].m_Cur.m_Y),
 						Client()->IntraGameTick(g_Config.m_ClDummy));
-				m_pEffects->AirJump(Pos);
+				m_pEffects->AirJump(Pos, IsOtherTeam(i) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f);
 			}
 
 	static int PrevLocalID = -1;
