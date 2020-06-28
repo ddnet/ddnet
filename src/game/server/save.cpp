@@ -373,17 +373,18 @@ int CSaveTeam::save(int Team)
 
 		m_pSavedTees = new CSaveTee[m_MembersCount];
 		int j = 0;
-		for (int i = 0; i < MAX_CLIENTS; i++)
+		CCharacter *p = (CCharacter *)m_pController->GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_CHARACTER);
+		for(; p; p = (CCharacter *)p->TypeNext())
 		{
-			if(Teams->m_Core.Team(i) == Team)
-			{
-				if(m_pController->GameServer()->m_apPlayers[i] && m_pController->GameServer()->m_apPlayers[i]->GetCharacter())
-					m_pSavedTees[j].save(m_pController->GameServer()->m_apPlayers[i]->GetCharacter());
-				else
-					return 3;
-				j++;
-			}
+			if(m_MembersCount == j)
+				return 3;
+			if(Teams->m_Core.Team(p->GetPlayer()->GetCID()) != Team)
+				continue;
+			m_pSavedTees[j].save(p);
+			j++;
 		}
+		if(m_MembersCount != j)
+			return 3;
 
 		if(m_pController->GameServer()->Collision()->m_NumSwitchers)
 		{
@@ -439,7 +440,7 @@ void CSaveTeam::load(int Team)
 	if(m_Practice)
 		pTeams->EnablePractice(Team);
 
-	for (int i = 0; i < m_MembersCount; i++)
+	for (int i = m_MembersCount; i-- > 0;)
 	{
 		int ClientID = m_pSavedTees[i].GetClientID();
 		if(m_pController->GameServer()->m_apPlayers[ClientID] && pTeams->m_Core.Team(ClientID) == Team)
@@ -463,10 +464,8 @@ void CSaveTeam::load(int Team)
 
 CCharacter* CSaveTeam::MatchCharacter(int ClientID, int SaveID)
 {
-	if(m_pController->GameServer()->m_apPlayers[ClientID]->GetCharacter())
-		return m_pController->GameServer()->m_apPlayers[ClientID]->GetCharacter();
-	else
-		return m_pController->GameServer()->m_apPlayers[ClientID]->ForceSpawn(m_pSavedTees[SaveID].GetPos());
+	m_pController->GameServer()->m_apPlayers[ClientID]->KillCharacter(WEAPON_GAME);
+	return m_pController->GameServer()->m_apPlayers[ClientID]->ForceSpawn(m_pSavedTees[SaveID].GetPos());
 }
 
 char* CSaveTeam::GetString()
