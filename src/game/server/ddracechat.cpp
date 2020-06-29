@@ -570,7 +570,7 @@ void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
 
 	int Team = Teams.m_Core.Team(pResult->m_ClientID);
 
-	if(Team < TEAM_FLOCK || (Team == TEAM_FLOCK && g_Config.m_SvTeam == 3) || Team >= TEAM_SUPER)
+	if(Team < TEAM_FLOCK || (Team == TEAM_FLOCK && g_Config.m_SvTeam != 3) || Team >= TEAM_SUPER)
 	{
 		pSelf->Console()->Print(
 				IConsole::OUTPUT_LEVEL_STANDARD,
