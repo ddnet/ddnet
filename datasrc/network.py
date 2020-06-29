@@ -417,8 +417,8 @@ Messages = [
 
 	NetMessage("Sv_TeamsState", []),
 
-	# deprecated, use showothers@netobj.ddnet.tw instead
-	NetMessage("Cl_ShowOthers", [
+	# deprecated, use showothers@netmsg.ddnet.tw instead
+	NetMessage("Cl_ShowOthersLegacy", [
 		NetBool("m_Show"),
 	]),
 # Can't add any NetMessages here!
@@ -432,7 +432,7 @@ Messages = [
 		NetIntAny("m_Y"),
 	]),
 
-	NetMessageEx("Cl_ShowOthers2", "showothers2@netmsg.ddnet.tw", [
+	NetMessageEx("Cl_ShowOthers", "showothers@netmsg.ddnet.tw", [
 		NetIntRange("m_Show", 0, 2),
 	]),
 ]

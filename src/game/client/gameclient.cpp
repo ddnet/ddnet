@@ -1541,7 +1541,7 @@ void CGameClient::OnNewSnapshot()
 	if(m_ShowOthers[g_Config.m_ClDummy] == -1 || (m_ShowOthers[g_Config.m_ClDummy] != -1 && m_ShowOthers[g_Config.m_ClDummy] != g_Config.m_ClShowOthers))
 	{
 		{
-			CNetMsg_Cl_ShowOthers2 Msg;
+			CNetMsg_Cl_ShowOthers Msg;
 			Msg.m_Show = g_Config.m_ClShowOthers;
 			Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
 		}
