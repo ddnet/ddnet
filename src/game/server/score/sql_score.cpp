@@ -1561,7 +1561,7 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData<CScoreSave
 			char aBuf[65536];
 			str_format(aBuf, sizeof(aBuf),
 					"INSERT IGNORE INTO %%s_saves(Savegame, Map, Code, Timestamp, Server, SaveID, DDNet7) "
-					"VALUES ('%s', '%s', '%s', CURRENT_TIMESTAMP(), '%s', '%s', false)",
+					"VALUES ('%s', '%s', '%s', CURRENT_TIMESTAMP(), '%s', '%s', false);",
 					SaveState.ClrStr(), Map.ClrStr(),
 					Code.ClrStr(), pData->m_Server, aSaveID
 			);
