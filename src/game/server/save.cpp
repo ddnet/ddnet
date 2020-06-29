@@ -93,6 +93,13 @@ void CSaveTee::save(CCharacter *pChr)
 	m_HookTick = pChr->m_Core.m_HookTick;
 
 	m_HookState = pChr->m_Core.m_HookState;
+	m_HookedPlayer = pChr->m_Core.m_HookedPlayer;
+	m_NewHook = pChr->m_Core.m_NewHook != 0;
+
+	m_InputDirection = pChr->m_SavedInput.m_Direction;
+	m_InputJump = pChr->m_SavedInput.m_Jump;
+	m_InputFire = pChr->m_SavedInput.m_Fire;
+	m_InputHook = pChr->m_SavedInput.m_Hook;
 
 	FormatUuid(pChr->GameServer()->GameUuid(), m_aGameUuid, sizeof(m_aGameUuid));
 }
@@ -171,15 +178,14 @@ void CSaveTee::load(CCharacter *pChr, int Team)
 
 	pChr->m_Core.m_HookTick = m_HookTick;
 
-	if(m_HookState == HOOK_GRABBED)
-	{
-		pChr->m_Core.m_HookState = HOOK_FLYING;
-		pChr->m_Core.m_HookedPlayer = -1;
-	}
-	else
-	{
-		pChr->m_Core.m_HookState = m_HookState;
-	}
+	pChr->m_Core.m_HookState = m_HookState;
+	pChr->m_Core.m_HookedPlayer = m_HookedPlayer;
+	pChr->m_Core.m_NewHook = m_NewHook;
+	pChr->m_SavedInput.m_Direction = m_InputDirection;
+	pChr->m_SavedInput.m_Jump = m_InputJump;
+	pChr->m_SavedInput.m_Fire = m_InputFire;
+	pChr->m_SavedInput.m_Hook = m_InputHook;
+
 
 	pChr->SetSolo(m_IsSolo);
 
@@ -188,10 +194,23 @@ void CSaveTee::load(CCharacter *pChr, int Team)
 	pChr->SetRescue();
 }
 
-char* CSaveTee::GetString()
+char* CSaveTee::GetString(const CSaveTeam *pTeam)
 {
 	// Add time penalty of 60 seconds (only to the database)
 	int Time = m_Time + 60 * SERVER_TICK_SPEED;
+
+	int HookedPlayer = -1;
+	if(m_HookedPlayer != -1)
+	{
+		for(int n = 0; n < pTeam->GetMembersCount(); n++)
+		{
+			if(m_HookedPlayer == pTeam->m_pSavedTees[n].GetClientID())
+			{
+				HookedPlayer = n;
+				break;
+			}
+		}
+	}
 
 	str_format(m_aString, sizeof(m_aString),
 			"%s\t%d\t%d\t%d\t%d\t%d\t"
@@ -221,7 +240,9 @@ char* CSaveTee::GetString()
 			"%f\t%f\t%f\t%f\t%f\t"
 			"%d\t"
 			"%d\t%d\t%d\t"
-			"%s",
+			"%s\t"
+			"%d\t%d\t"
+			"%d\t%d\t%d\t%d",
 			m_aName, m_Alive, m_Paused, m_NeededFaketuning, m_TeeFinished, m_IsSolo,
 			// weapons
 			m_aWeapons[0].m_AmmoRegenStart, m_aWeapons[0].m_Ammo, m_aWeapons[0].m_Ammocost, m_aWeapons[0].m_Got,
@@ -249,7 +270,9 @@ char* CSaveTee::GetString()
 			m_aCpCurrent[20], m_aCpCurrent[21], m_aCpCurrent[22], m_aCpCurrent[23], m_aCpCurrent[24],
 			m_NotEligibleForFinish,
 			m_HasTelegunGun, m_HasTelegunLaser, m_HasTelegunGrenade,
-			m_aGameUuid
+			m_aGameUuid,
+			HookedPlayer, m_NewHook,
+			m_InputDirection, m_InputJump, m_InputFire, m_InputHook
 	);
 	return m_aString;
 }
@@ -285,7 +308,9 @@ int CSaveTee::LoadString(const char* String)
 			"%f\t%f\t%f\t%f\t%f\t"
 			"%d\t"
 			"%d\t%d\t%d\t"
-			"%*s", // discard the game uuid
+			"%*s\t" // discard the game uuid
+			"%d\t%d"
+			"%d\t%d\t%d\t%d",
 			m_aName, &m_Alive, &m_Paused, &m_NeededFaketuning, &m_TeeFinished, &m_IsSolo,
 			// weapons
 			&m_aWeapons[0].m_AmmoRegenStart, &m_aWeapons[0].m_Ammo, &m_aWeapons[0].m_Ammocost, &m_aWeapons[0].m_Got,
@@ -312,7 +337,9 @@ int CSaveTee::LoadString(const char* String)
 			&m_aCpCurrent[15], &m_aCpCurrent[16], &m_aCpCurrent[17], &m_aCpCurrent[18], &m_aCpCurrent[19],
 			&m_aCpCurrent[20], &m_aCpCurrent[21], &m_aCpCurrent[22], &m_aCpCurrent[23], &m_aCpCurrent[24],
 			&m_NotEligibleForFinish,
-			&m_HasTelegunGun, &m_HasTelegunLaser, &m_HasTelegunGrenade
+			&m_HasTelegunGun, &m_HasTelegunLaser, &m_HasTelegunGrenade,
+			&m_HookedPlayer, &m_NewHook,
+			&m_InputDirection, &m_InputJump, &m_InputFire, &m_InputHook
 	);
 	switch(Num) // Don't forget to update this when you save / load more / less.
 	{
@@ -325,12 +352,29 @@ int CSaveTee::LoadString(const char* String)
 		m_HasTelegunGun = 0;
 		// fall through
 	case 100:
+		m_HookedPlayer = -1;
+		m_NewHook = false;
+		if(m_HookState == HOOK_GRABBED)
+			m_HookState = HOOK_FLYING;
+		m_InputDirection = 0;
+		m_InputJump = 0;
+		m_InputFire = 0;
+		m_InputHook = 0;
+		// fall through
+	case 106:
 		return 0;
 	default:
 		dbg_msg("load", "failed to load tee-string");
 		dbg_msg("load", "loaded %d vars", Num);
 		return Num + 1; // never 0 here
 	}
+}
+
+void CSaveTee::LoadHookedPlayer(const CSaveTeam *pTeam)
+{
+	if(m_HookedPlayer == -1)
+		return;
+	m_HookedPlayer = pTeam->m_pSavedTees[m_HookedPlayer].GetClientID();
 }
 
 CSaveTeam::CSaveTeam(IGameController* Controller)
@@ -475,7 +519,7 @@ char* CSaveTeam::GetString()
 	for(int i = 0; i < m_MembersCount; i++)
 	{
 		char aBuf[1024];
-		str_format(aBuf, sizeof(aBuf), "\n%s", m_pSavedTees[i].GetString());
+		str_format(aBuf, sizeof(aBuf), "\n%s", m_pSavedTees[i].GetString(this));
 		str_append(m_aString, aBuf, sizeof(m_aString));
 	}
 
@@ -682,5 +726,8 @@ bool CSaveTeam::MatchPlayers(const char (*paNames)[MAX_NAME_LENGTH], const int *
 			return false;
 		}
 	}
+	// match hook to correct ClientID
+	for (int n = 0; n < m_MembersCount; n++)
+		m_pSavedTees[n].LoadHookedPlayer(this);
 	return true;
 }
