@@ -30,7 +30,9 @@ static unsigned int RotateRight32(unsigned int x, int Shift)
 void CPrng::Seed(uint64 aSeed[2])
 {
 	m_Seeded = true;
-	str_format(m_aDescription, sizeof(m_aDescription), "%s:%016llx:%016llx", NAME, aSeed[0], aSeed[1]);
+	str_format(m_aDescription, sizeof(m_aDescription), "%s:%08x%08x:%08x%08x", NAME,
+		(unsigned)(aSeed[0] >> 32), (unsigned)aSeed[0],
+		(unsigned)(aSeed[1] >> 32), (unsigned)aSeed[1]);
 
 	m_Increment = (aSeed[1] << 1) | 1;
 	m_State = aSeed[0] + m_Increment;
