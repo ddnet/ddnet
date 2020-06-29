@@ -8,6 +8,7 @@
 class IGameController;
 class CGameContext;
 class CCharacter;
+class CSaveTeam;
 
 class CSaveTee
 {
@@ -16,8 +17,9 @@ public:
 	~CSaveTee();
 	void save(CCharacter* pchr);
 	void load(CCharacter* pchr, int Team);
-	char* GetString();
+	char* GetString(const CSaveTeam *pTeam);
 	int LoadString(const char* String);
+	void LoadHookedPlayer(const CSaveTeam *pTeam);
 	vec2 GetPos() const { return m_Pos; }
 	const char* GetName() const { return m_aName; }
 	int GetClientID() const { return m_ClientID; }
@@ -43,7 +45,6 @@ private:
 		int m_Ammo;
 		int m_Ammocost;
 		int m_Got;
-
 	} m_aWeapons[NUM_WEAPONS];
 
 	int m_LastWeapon;
@@ -92,6 +93,14 @@ private:
 	vec2 m_HookTeleBase;
 	int m_HookTick;
 	int m_HookState;
+	int m_HookedPlayer;
+	int m_NewHook;
+
+	// player input
+	int m_InputDirection;
+	int m_InputJump;
+	int m_InputFire;
+	int m_InputHook;
 
 	char m_aGameUuid[UUID_MAXSTRSIZE];
 };
