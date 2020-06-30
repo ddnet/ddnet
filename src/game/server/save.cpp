@@ -101,6 +101,8 @@ void CSaveTee::save(CCharacter *pChr)
 	m_InputFire = pChr->m_SavedInput.m_Fire;
 	m_InputHook = pChr->m_SavedInput.m_Hook;
 
+	m_ReloadTimer  = pChr->m_ReloadTimer;
+
 	FormatUuid(pChr->GameServer()->GameUuid(), m_aGameUuid, sizeof(m_aGameUuid));
 }
 
@@ -194,6 +196,7 @@ void CSaveTee::load(CCharacter *pChr, int Team)
 	pChr->m_SavedInput.m_Fire = m_InputFire;
 	pChr->m_SavedInput.m_Hook = m_InputHook;
 
+	pChr->m_ReloadTimer = m_ReloadTimer;
 
 	pChr->SetSolo(m_IsSolo);
 
@@ -250,7 +253,8 @@ char* CSaveTee::GetString(const CSaveTeam *pTeam)
 			"%d\t%d\t%d\t"
 			"%s\t"
 			"%d\t%d\t"
-			"%d\t%d\t%d\t%d",
+			"%d\t%d\t%d\t%d\t"
+			"%d",
 			m_aName, m_Alive, m_Paused, m_NeededFaketuning, m_TeeFinished, m_IsSolo,
 			// weapons
 			m_aWeapons[0].m_AmmoRegenStart, m_aWeapons[0].m_Ammo, m_aWeapons[0].m_Ammocost, m_aWeapons[0].m_Got,
@@ -280,7 +284,8 @@ char* CSaveTee::GetString(const CSaveTeam *pTeam)
 			m_HasTelegunGun, m_HasTelegunLaser, m_HasTelegunGrenade,
 			m_aGameUuid,
 			HookedPlayer, m_NewHook,
-			m_InputDirection, m_InputJump, m_InputFire, m_InputHook
+			m_InputDirection, m_InputJump, m_InputFire, m_InputHook,
+			m_ReloadTimer
 	);
 	return m_aString;
 }
@@ -318,7 +323,8 @@ int CSaveTee::LoadString(const char* String)
 			"%d\t%d\t%d\t"
 			"%*s\t" // discard the game uuid
 			"%d\t%d"
-			"%d\t%d\t%d\t%d",
+			"%d\t%d\t%d\t%d\t"
+			"%d",
 			m_aName, &m_Alive, &m_Paused, &m_NeededFaketuning, &m_TeeFinished, &m_IsSolo,
 			// weapons
 			&m_aWeapons[0].m_AmmoRegenStart, &m_aWeapons[0].m_Ammo, &m_aWeapons[0].m_Ammocost, &m_aWeapons[0].m_Got,
@@ -347,7 +353,8 @@ int CSaveTee::LoadString(const char* String)
 			&m_NotEligibleForFinish,
 			&m_HasTelegunGun, &m_HasTelegunLaser, &m_HasTelegunGrenade,
 			&m_HookedPlayer, &m_NewHook,
-			&m_InputDirection, &m_InputJump, &m_InputFire, &m_InputHook
+			&m_InputDirection, &m_InputJump, &m_InputFire, &m_InputHook,
+			&m_ReloadTimer
 	);
 	switch(Num) // Don't forget to update this when you save / load more / less.
 	{
@@ -368,8 +375,9 @@ int CSaveTee::LoadString(const char* String)
 		m_InputJump = 0;
 		m_InputFire = 0;
 		m_InputHook = 0;
+		m_ReloadTimer = 0;
 		// fall through
-	case 106:
+	case 107:
 		return 0;
 	default:
 		dbg_msg("load", "failed to load tee-string");
