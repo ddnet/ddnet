@@ -179,7 +179,15 @@ void CSaveTee::load(CCharacter *pChr, int Team)
 	pChr->m_Core.m_HookTick = m_HookTick;
 
 	pChr->m_Core.m_HookState = m_HookState;
-	pChr->m_Core.m_HookedPlayer = m_HookedPlayer;
+	if(m_HookedPlayer != -1 && pChr->Teams()->m_Core.Team(m_HookedPlayer) != Team)
+	{
+		pChr->m_Core.m_HookedPlayer = -1;
+		pChr->m_Core.m_HookState = HOOK_FLYING;
+	}
+	else
+	{
+		pChr->m_Core.m_HookedPlayer = m_HookedPlayer;
+	}
 	pChr->m_Core.m_NewHook = m_NewHook;
 	pChr->m_SavedInput.m_Direction = m_InputDirection;
 	pChr->m_SavedInput.m_Jump = m_InputJump;
