@@ -4233,6 +4233,8 @@ void CClient::GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float Mix
 	int64 PredTime = m_PredictedTime.Get(time_get());
 	int64 SmoothTime = clamp(GameTime + (int64)(MixAmount * (PredTime - GameTime)), GameTime, PredTime);
 
-	*pSmoothTick = (int)(SmoothTime*50/time_freq())+1;
-	*pSmoothIntraTick = (SmoothTime - (*pSmoothTick-1)*time_freq()/50) / (float)(time_freq()/50);
+	if(pSmoothTick)
+		*pSmoothTick = (int)(SmoothTime*50/time_freq())+1;
+	if(pSmoothIntraTick)
+		*pSmoothIntraTick = (SmoothTime - (*pSmoothTick-1)*time_freq()/50) / (float)(time_freq()/50);
 }
