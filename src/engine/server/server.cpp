@@ -2308,7 +2308,7 @@ int CServer::Run()
 	m_PrintCBIndex = Console()->RegisterPrintCallback(g_Config.m_ConsoleOutputLevel, SendRconLineAuthed, this);
 
 	// load map
-	if(!LoadMap(g_Config.m_SvMap))
+	if (!LoadMap(g_Config.m_SvMap))
 	{
 		dbg_msg("server", "failed to load map. mapname='%s'", g_Config.m_SvMap);
 		return -1;
@@ -2318,27 +2318,52 @@ int CServer::Run()
 	NETADDR BindAddr;
 	int NetType = g_Config.m_SvIpv4Only ? NETTYPE_IPV4 : NETTYPE_ALL;
 
-	if(g_Config.m_Bindaddr[0] && net_host_lookup(g_Config.m_Bindaddr, &BindAddr, NetType) == 0)
+	if (g_Config.m_Bindaddr[0] && net_host_lookup(g_Config.m_Bindaddr, &BindAddr, NetType) == 0)
 	{
 		// sweet!
 		BindAddr.type = NetType;
-		BindAddr.port = g_Config.m_SvPort;
+		BindAddr.port = g_Config.m_SvPort == 0 ? 8303 : g_Config.m_SvPort;
 	}
 	else
 	{
 		mem_zero(&BindAddr, sizeof(BindAddr));
 		BindAddr.type = NetType;
-		BindAddr.port = g_Config.m_SvPort;
+		BindAddr.port = g_Config.m_SvPort == 0 ? 8303 : g_Config.m_SvPort;
 	}
 
 #if defined(CONF_UPNP)
 	m_UPnP.Open(BindAddr);
 #endif
 
-	while(!m_NetServer.Open(BindAddr, &m_ServerBan, g_Config.m_SvMaxClients, g_Config.m_SvMaxClientsPerIP, 0))
+	if(!g_Config.m_SvFindFreePort && (g_Config.m_SvPort != 0))
 	{
-		dbg_msg("server", "couldn't open socket. port %d might already be in use", BindAddr.port);
-		BindAddr.port++;
+		if (!m_NetServer.Open(BindAddr, &m_ServerBan, g_Config.m_SvMaxClients, g_Config.m_SvMaxClientsPerIP, 0))
+		{
+			dbg_msg("server", "couldn't open socket. port %d might already be in use", g_Config.m_SvPort);
+			return -1;
+		}
+	}
+	else
+	{
+		while (!m_NetServer.Open(BindAddr, &m_ServerBan, g_Config.m_SvMaxClients, g_Config.m_SvMaxClientsPerIP, 0))
+		{
+			if (((int)(BindAddr.port - 8303)) < 7) //ugly af 
+			{
+				dbg_msg("server", "couldn't open socket. port %d might already be in use. checking for next port.", BindAddr.port);
+				BindAddr.port++;
+			}
+			else if (g_Config.m_SvFindFreePortM)
+			{
+				dbg_msg("server", "couldn't open socket. port %d might already be in use", BindAddr.port);
+				return -1;
+			}
+			else
+			{
+				//Do one more cycle to be sure all ports used
+				g_Config.m_SvFindFreePortM = 1;
+				BindAddr.port = 8303;
+			}
+		}
 	}
 
 	m_NetServer.SetCallbacks(NewClientCallback, NewClientNoAuthCallback, ClientRejoinCallback, DelClientCallback, this);
