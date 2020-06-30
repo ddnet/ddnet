@@ -283,7 +283,7 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 			GetPlayer(ClientID)->m_VotedForPractice = false;
 	}
 
-	if (Team != TEAM_SUPER && (m_TeamState[Team] == TEAMSTATE_EMPTY || m_TeamLocked[Team]))
+	if (Team != TEAM_SUPER && (m_TeamState[Team] == TEAMSTATE_EMPTY || m_TeamLocked[Team] || g_Config.m_SvTeam == 3))
 	{
 		if (!m_TeamLocked[Team])
 			ChangeTeamState(Team, TEAMSTATE_OPEN);
@@ -762,7 +762,7 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 
 	if(g_Config.m_SvTeam == 3)
 	{
-		m_TeamState[Team] = CGameTeams::TEAMSTATE_OPEN;
+		SetForceCharacterTeam(ClientID, Team);
 		m_Practice[Team] = false;
 	}
 	else if(Locked)
