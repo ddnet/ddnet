@@ -102,6 +102,8 @@ private:
 	int m_InputFire;
 	int m_InputHook;
 
+	int m_ReloadTimer;
+
 	char m_aGameUuid[UUID_MAXSTRSIZE];
 };
 
