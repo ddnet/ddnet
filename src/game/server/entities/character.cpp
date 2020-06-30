@@ -1908,7 +1908,7 @@ void CCharacter::HandleTiles(int Index)
 
 		m_StartTime -= (min * 60 + sec) * Server()->TickSpeed();
 
-		if (Team != TEAM_FLOCK && Team != TEAM_SUPER)
+		if ((g_Config.m_SvTeam == 3 || Team != TEAM_FLOCK) && Team != TEAM_SUPER)
 		{
 			for (int i = 0; i < MAX_CLIENTS; i++)
 			{
@@ -1934,7 +1934,7 @@ void CCharacter::HandleTiles(int Index)
 		if (m_StartTime > Server()->Tick())
 			m_StartTime = Server()->Tick();
 
-		if (Team != TEAM_FLOCK && Team != TEAM_SUPER)
+		if ((g_Config.m_SvTeam == 3 || Team != TEAM_FLOCK) && Team != TEAM_SUPER)
 		{
 			for (int i = 0; i < MAX_CLIENTS; i++)
 			{
@@ -2185,7 +2185,10 @@ void CCharacter::DDRaceTick()
 	HandleTuneLayer(); // need this before coretick
 
 	// look for save position for rescue feature
-	if(g_Config.m_SvRescue || (Team() > TEAM_FLOCK && Team() < TEAM_SUPER)) {
+	if(g_Config.m_SvRescue
+			|| ((g_Config.m_SvTeam == 3 || Team() > TEAM_FLOCK)
+					&& Team() >= TEAM_FLOCK
+					&& Team() < TEAM_SUPER)) {
 		int index = GameServer()->Collision()->GetPureMapIndex(m_Pos);
 		int tile = GameServer()->Collision()->GetTileIndex(index);
 		int ftile = GameServer()->Collision()->GetFTileIndex(index);
