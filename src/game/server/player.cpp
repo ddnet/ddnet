@@ -492,7 +492,8 @@ void CPlayer::OnDisconnect(const char *pReason)
 	}
 
 	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
-	Controller->m_Teams.SetForceCharacterTeam(m_ClientID, 0);
+	if(g_Config.m_SvTeam != 3)
+		Controller->m_Teams.SetForceCharacterTeam(m_ClientID, TEAM_FLOCK);
 }
 
 void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)
@@ -631,7 +632,8 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 	if(Team == TEAM_SPECTATORS)
 	{
 		CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
-		Controller->m_Teams.SetForceCharacterTeam(m_ClientID, 0);
+		if(g_Config.m_SvTeam != 3)
+			Controller->m_Teams.SetForceCharacterTeam(m_ClientID, TEAM_FLOCK);
 	}
 
 	KillCharacter();
@@ -716,8 +718,6 @@ void CPlayer::TryRespawn()
 	if(!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos))
 		return;
 
-	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
-
 	m_WeakHookSpawn = false;
 	m_Spawning = false;
 	m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World);
@@ -725,18 +725,7 @@ void CPlayer::TryRespawn()
 	GameServer()->CreatePlayerSpawn(SpawnPos, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
 
 	if(g_Config.m_SvTeam == 3)
-	{
-		int NewTeam = 1;
-		for(; NewTeam < TEAM_SUPER; NewTeam++)
-			if(Controller->m_Teams.Count(NewTeam) == 0)
-				break;
-
-		if(NewTeam == TEAM_SUPER)
-			NewTeam = 0;
-
-		Controller->m_Teams.SetForceCharacterTeam(GetCID(), NewTeam);
 		m_pCharacter->SetSolo(true);
-	}
 }
 
 bool CPlayer::AfkTimer(int NewTargetX, int NewTargetY)
