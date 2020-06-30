@@ -177,7 +177,9 @@ void CNamePlates::OnRender()
 
 		if(m_pClient->m_aClients[i].m_SpecCharPresent)
 		{
-			RenderNameplatePos(m_pClient->m_aClients[i].m_SpecChar, pInfo, 0.4f);
+			bool OtherTeam = m_pClient->IsOtherTeam(i);
+			float Alpha = 0.4f * (OtherTeam ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f);
+			RenderNameplatePos(m_pClient->m_aClients[i].m_SpecChar, pInfo, Alpha);
 		}
 
 		// only render active characters
