@@ -1191,9 +1191,9 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 
 void CCharacter::Snap(int SnappingClient)
 {
-	int id = m_pPlayer->GetCID();
+	int ID = m_pPlayer->GetCID();
 
-	if(SnappingClient > -1 && !Server()->Translate(id, SnappingClient))
+	if(SnappingClient > -1 && !Server()->Translate(ID, SnappingClient))
 		return;
 
 	if(NetworkClipped(SnappingClient))
@@ -1201,28 +1201,26 @@ void CCharacter::Snap(int SnappingClient)
 
 	if(SnappingClient > -1)
 	{
-		CCharacter* SnapChar = GameServer()->GetPlayerChar(SnappingClient);
-		CPlayer* SnapPlayer = GameServer()->m_apPlayers[SnappingClient];
+		CCharacter *pSnapChar = GameServer()->GetPlayerChar(SnappingClient);
+		CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
 
-		if((SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->IsPaused()) && SnapPlayer->m_SpectatorID != -1
-			&& !CanCollide(SnapPlayer->m_SpectatorID) && !SnapPlayer->m_ShowOthers)
-			return;
-
-		if( SnapPlayer->GetTeam() != TEAM_SPECTATORS && !SnapPlayer->IsPaused() && SnapChar && !SnapChar->m_Super
-			&& !CanCollide(SnappingClient) && !SnapPlayer->m_ShowOthers)
-			return;
-
-		if((SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->IsPaused()) && SnapPlayer->m_SpectatorID == -1
-			&& !CanCollide(SnappingClient) && SnapPlayer->m_SpecTeam)
+		if(pSnapPlayer->GetTeam() == TEAM_SPECTATORS || pSnapPlayer->IsPaused())
+		{
+			if(pSnapPlayer->m_SpectatorID != -1 && !CanCollide(pSnapPlayer->m_SpectatorID) && !pSnapPlayer->m_ShowOthers)
+				return;
+			else if(pSnapPlayer->m_SpectatorID == -1 && !CanCollide(SnappingClient) && pSnapPlayer->m_SpecTeam)
+				return;
+		}
+		else if(pSnapChar && !pSnapChar->m_Super && !CanCollide(SnappingClient) && !pSnapPlayer->m_ShowOthers)
 			return;
 	}
 
 	if (m_Paused)
 		return;
 
-	SnapCharacter(SnappingClient, id);
+	SnapCharacter(SnappingClient, ID);
 
-	CNetObj_DDNetCharacter *pDDNetCharacter = static_cast<CNetObj_DDNetCharacter *>(Server()->SnapNewItem(NETOBJTYPE_DDNETCHARACTER, id, sizeof(CNetObj_DDNetCharacter)));
+	CNetObj_DDNetCharacter *pDDNetCharacter = static_cast<CNetObj_DDNetCharacter *>(Server()->SnapNewItem(NETOBJTYPE_DDNETCHARACTER, ID, sizeof(CNetObj_DDNetCharacter)));
 	if(!pDDNetCharacter)
 		return;
 
