@@ -1573,18 +1573,9 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData<CScoreSave
 			pData->m_pResult->m_Status = CScoreSaveResult::SAVE_SUCCESS;
 			strcpy(pData->m_pResult->m_aBroadcast,
 					"Database connection failed, teamsave written to a file instead. Admins will add it manually in a few days.");
-			if(str_comp(pData->m_Server, g_Config.m_SvSqlServerName) == 0)
-			{
-				str_format(pData->m_pResult->m_aMessage, sizeof(pData->m_pResult->m_aMessage),
-						"Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue",
-						pData->m_ClientName, Code.ClrStr());
-			}
-			else
-			{
-				str_format(pData->m_pResult->m_aMessage, sizeof(pData->m_pResult->m_aMessage),
-						"Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue",
-						pData->m_ClientName, Code.ClrStr(), pData->m_Server);
-			}
+			str_format(pData->m_pResult->m_aMessage, sizeof(pData->m_pResult->m_aMessage),
+					"Team successfully saved by %s. Use '/load %s' to continue",
+					pData->m_ClientName, Code.Str());
 			return true;
 		}
 		lock_unlock(ms_FailureFileLock);
