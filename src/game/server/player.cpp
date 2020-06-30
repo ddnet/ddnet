@@ -108,6 +108,7 @@ void CPlayer::Reset()
 
 	m_ShowOthers = g_Config.m_SvShowOthersDefault;
 	m_ShowAll = g_Config.m_SvShowAllDefault;
+	m_ShowDistance = vec2(2000, 1500);
 	m_SpecTeam = 0;
 	m_NinjaJetpack = false;
 

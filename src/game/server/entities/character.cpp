@@ -1285,13 +1285,13 @@ int CCharacter::NetworkClipped(int SnappingClient, vec2 CheckPos)
 		return 0;
 
 	float dx = GameServer()->m_apPlayers[SnappingClient]->m_ViewPos.x-CheckPos.x;
+	if(absolute(dx) > GameServer()->m_apPlayers[SnappingClient]->m_ShowDistance.y)
+		return 1;
+
 	float dy = GameServer()->m_apPlayers[SnappingClient]->m_ViewPos.y-CheckPos.y;
-
-	if(absolute(dx) > 1000.0f || absolute(dy) > 800.0f)
+	if(absolute(dy) > GameServer()->m_apPlayers[SnappingClient]->m_ShowDistance.y)
 		return 1;
 
-	if(distance(GameServer()->m_apPlayers[SnappingClient]->m_ViewPos, CheckPos) > 4000.0f)
-		return 1;
 	return 0;
 }
 
