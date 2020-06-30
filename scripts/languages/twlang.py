@@ -1,6 +1,6 @@
 import os
 import re
-
+from collections import OrderedDict
 
 class LanguageDecodeError(Exception):
     def __init__(self, message, filename, line):
@@ -47,12 +47,14 @@ def check_file(path):
 
 
 def check_folder(path):
-    englishlist = set()
-    for path, _, files in os.walk(path):
-        for f in files:
+    englishlist = OrderedDict()
+    for path, dirs, files in os.walk(path):
+        dirs.sort()
+        for f in sorted(files):
             if not any(f.endswith(x) for x in ".cpp .c .h".split()):
                 continue
-            englishlist.update(check_file(os.path.join(path, f)))
+            for sentence in check_file(os.path.join(path, f)):
+                englishlist[sentence] = None
     return englishlist
 
 

@@ -1540,8 +1540,6 @@ void CGameClient::OnNewSnapshot()
 
 	if(m_ShowOthers[g_Config.m_ClDummy] == -1 || (m_ShowOthers[g_Config.m_ClDummy] != -1 && m_ShowOthers[g_Config.m_ClDummy] != g_Config.m_ClShowOthers))
 	{
-		// no need to send, default settings
-		//if(!(m_ShowOthers == -1 && g_Config.m_ClShowOthers))
 		{
 			CNetMsg_Cl_ShowOthers Msg;
 			Msg.m_Show = g_Config.m_ClShowOthers;

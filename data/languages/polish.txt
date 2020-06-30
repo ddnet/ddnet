@@ -1159,38 +1159,41 @@ Replay %3d:%02d
 Friend
 == Znajomy
 
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== 
-
-DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== 
-
-transmits your player name to info.ddnet.tw
-== 
-
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== 
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== 
-
-Show DDNet map finishes in server browser
-== 
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== 
-
-Reconnect in %d sec
-== 
-
 Skin prefix
 == Motyw skinów
 
+Reconnect in %d sec
+== Ponowna próba połączenia za %d sek
+
+DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
+== DDraceNetwork jest kooperatywną grą online, gdzie twoim i innych graczy zadaniem jest dotrzeć do mety na mapie. Jako nowy gracz powinieneś zacząć od serwerów Novice, które hostują najłatwiejsze mapy. Weź pod uwagę ping aby wybrać serwer najbliżej siebie.
+
+The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
+== Mapy zawierają freeze, który tymczasowo uniemożliwia poruszanie się tee. Powienieneś współpracować z innymi aby ukończyć wszystkie części mapy.
+
+The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
+== Rolka myszki zmienia narzędzie (broń). Młotek (lewy przycisk myszki) może być użyty do uderzania innych tee i odmrozić ich, gdy byli we freezie.
+
+Hook (right mouse) can be used to swing through the map and to hook other tees to you.
+== Hak (prawy przycisk myszki) może być użyty do wspinania się po mapie i do łąpania innych tee (przyciągania ich do siebie).
+
+Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
+== Najważniejszym przyciskiem jest t. Dzięki niemu możesz rozmawiać z innymi aby nauczyć się podstaw i trików gry.
+
 It's recommended that you check the settings to adjust them to your liking before joining a server.
-== 
+== Przed dołączeniem do serwera zalecane jest sprawdzenie ustawień w celu dostosowania ich do własnych upodobań.
 
 Please enter your nick name below.
-== 
+== Proszę wpisać swój nick poniżej.
+
+Show DDNet map finishes in server browser
+== Pokaż ukończone mapy DDNet w wyszukiwarce serwerów
+
+transmits your player name to info.ddnet.tw
+== przenosi twój nick do info.ddnet.tw
 
 Indicate map finish
+== 
+
+Show others (own team only)
 == 

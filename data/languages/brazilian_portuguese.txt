@@ -1152,25 +1152,49 @@ Zoom in
 Zoom out
 == Zoom out
 
-Video name:
+Server best:
 == 
 
-Replace video
+Personal best:
 == 
 
 Learn
 == 
 
-It's recommended that you check the settings to adjust them to your liking before joining a server.
+Render demo
 == 
 
-Render
+Replace video
+== 
+
+DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
+== 
+
+The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
+== 
+
+The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
 == 
 
 Hook (right mouse) can be used to swing through the map and to hook other tees to you.
 == 
 
+Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
+== 
+
+It's recommended that you check the settings to adjust them to your liking before joining a server.
+== 
+
+Please enter your nick name below.
+== 
+
 Destination file already exist
+== 
+
+Video name:
+== 
+
+Render
 == 
 
 Connect Dummy
@@ -1179,26 +1203,5 @@ Connect Dummy
 Use high DPI
 == 
 
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== 
-
-Render demo
-== 
-
-DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== 
-
-Please enter your nick name below.
-== 
-
-Personal best:
-== 
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== 
-
-Server best:
-== 
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
+Show others (own team only)
 == 

@@ -2029,12 +2029,20 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			Server()->SetClientDDNetVersion(ClientID, DDNetVersion);
 			OnClientDDNetVersionKnown(ClientID);
 		}
+		else if (MsgID == NETMSGTYPE_CL_SHOWOTHERSLEGACY)
+		{
+			if(g_Config.m_SvShowOthers && !g_Config.m_SvShowOthersDefault)
+			{
+				CNetMsg_Cl_ShowOthersLegacy *pMsg = (CNetMsg_Cl_ShowOthersLegacy *)pRawMsg;
+				pPlayer->m_ShowOthers = pMsg->m_Show;
+			}
+		}
 		else if (MsgID == NETMSGTYPE_CL_SHOWOTHERS)
 		{
 			if(g_Config.m_SvShowOthers && !g_Config.m_SvShowOthersDefault)
 			{
 				CNetMsg_Cl_ShowOthers *pMsg = (CNetMsg_Cl_ShowOthers *)pRawMsg;
-				pPlayer->m_ShowOthers = (bool)pMsg->m_Show;
+				pPlayer->m_ShowOthers = pMsg->m_Show;
 			}
 		}
 		else if (MsgID == NETMSGTYPE_CL_SHOWDISTANCE)
