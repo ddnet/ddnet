@@ -1,4 +1,4 @@
-##### authors #####
+﻿##### authors #####
 #originally created by:
 #	Feca
 #modified by:
@@ -8,7 +8,7 @@
 ##### translated strings #####
 
 %ds left
-==  %ds van hátra
+== %ds van hátra
 
 %i minute left
 == %i perc van hátra
@@ -32,10 +32,10 @@ Abort
 == Mégse
 
 Add
-== Hozzáad
+== Hozzáadás
 
 Add Friend
-== Hozzáad barátot
+== Barát hozzáadása
 
 Address
 == Cím
@@ -104,7 +104,7 @@ Controls
 == Irányítások
 
 Count players only
-== Csak számontartott játékosok
+== Számontartott játékosok
 
 Country
 == Ország
@@ -128,7 +128,7 @@ Demos
 == Demók
 
 Disconnect
-== Szerver elhagyása
+== Kilépés
 
 Disconnected
 == Lekapcsolódott
@@ -248,7 +248,7 @@ Maximum ping:
 == Maximum Ping:
 
 Mouse sens.
-== Egér érzékenysége
+== Egér érzékenység
 
 Move left
 == Balra lépés
@@ -317,7 +317,7 @@ Player options
 == Játékos beállításai
 
 Players
-== Játékosok
+== Játékos
 
 Please balance teams!
 == Kérlek egyenlítsd ki a csapatokat!
@@ -437,7 +437,7 @@ Standard map
 == Általános pálya
 
 Stop record
-== Felvétel megállítása
+== Demó megállítása
 
 Sudden Death
 == Gyors halál
@@ -524,7 +524,7 @@ New name:
 == Új Név:
 
 Sat.
-== Sat.
+== telítettség
 
 
 
@@ -600,7 +600,7 @@ Round
 == Menet
 
 Lht.
-== Lht.
+== Fényerősség
 
 UI Color
 == UI Szín
@@ -630,7 +630,7 @@ Type:
 == Típus:
 
 Dummy settings
-== Dummy beállítások
+== Másolat beállításai
 
 AntiPing
 == Antiping
@@ -690,7 +690,7 @@ Spectate next
 == Utáni nézése
 
 Show names in chat in team colors
-== Csapat színben jelennek meg a játékosok a chatben
+== Csapatszínben jelennek meg a játékosok a chatben
 
 Select a name
 == Válassz nevet
@@ -753,7 +753,7 @@ Follow
 == Követni
 
 Reset
-== Újraindítás
+== Alap
 
 Enable gun sound
 == Fegyverhang lejátszása
@@ -766,7 +766,6 @@ Team message
 
 Manual %3d:%02d  
 == Manuális %3d:%02  
-
 
 Automatically create statboard csv
 == Magától készítsen csv pontszámtáblát
@@ -829,7 +828,7 @@ Updating...
 == Fejlesztés...
 
 Overlay entities
-== Entitás megjelenése
+== Entitás jelenése
 
 Messages
 == Üzenetek
@@ -910,7 +909,7 @@ Search
 == Keresés
 
 Connecting dummy
-== Dummy csatlakoztatás
+== Másolat válasza...
 
 Clan plates size
 == Klán felirat mérete
@@ -1012,7 +1011,7 @@ File already exists, do you want to overwrite it?
 == A fájl már létezik, szeretné felülírni?
 
 Indicate map finish
-== Mutasson befejezett pályákat
+== Befejezett pályák
 
 Save
 == Mentés
@@ -1032,170 +1031,176 @@ transmits your player name to info.ddnet.tw
 Reload
 == újratöltés
 
-Successfully saved the replay!
-== 
-
-Replay feature is disabled!
-== 
-
-Server best:
-== 
-
-Personal best:
-== 
-
-Learn
-== 
-
-Render demo
-== 
-
-Replace video
-== 
-
-Disconnect Dummy
-== 
-
-Are you sure that you want to disconnect your dummy?
-== 
-
-DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== 
-
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== 
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== 
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== 
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== 
-
-It's recommended that you check the settings to adjust them to your liking before joining a server.
-== 
-
-Please enter your nick name below.
-== 
-
-Destination file already exist
-== 
-
-Video name:
-== 
-
-Filter connecting players
-== 
-
-DDNet %s is out!
-== 
+Hammerfly dummy
+== Másolat kalapács
 
 Downloading %s:
-== 
+== Letöltés %s:
 
-Update failed! Check log...
-== 
+Time
+== Idő
 
-Markers:
-== 
+Kill
+== Halál
 
-Markers
-== 
+Personal best:
+== Egyéni record:
 
-Length
-== 
+DecSpeed
+== Visszatekerés
 
-Fetch Info
-== 
+Show entities
+== Entitások mutatása
 
-Render
-== 
+Replay %3d:%02d  
+== Visszajátszás %3d:%02d  
+
+Video name:
+== Videó neve:
 
 Connect Dummy
-== 
+== Másolat belépése
+
+Disconnect Dummy
+== Másolat kilépése
+
+Filter connecting players
+== "Connecting" szűrés
+
+Pause
+== Nézetváltás
+
+Toggle dummy
+== Másolat irányítása
+
+Fetch Info
+== Minden infó
+
+Dummy copy
+== Másolat tükrözése
+
+Video speed:
+== Videó sebesség:
+
+Enable replays
+== Visszajátszások
+
+Render demo
+== Demó renderelése
+
+Zoom in
+== Nagyítás
+
+Show text entities
+== Textúrázott entitások
+
+Render
+== Render
+
+Show all
+== Mutasson mindent
+
+Learn
+== Wiki
+
+Successfully saved the replay!
+== Sikeresen elmentette a visszajátszást!
+
+Zoom out
+== Kicsinyítés
+
+DDNet %s is out!
+== DDNet %s elérhető!
+
+Statboard
+== Státusztábla
+
+Converse
+== Fordítás
+
+Use high DPI
+== Magas DPI használata
+
+Update failed! Check log...
+== Fejlesztés sikertelen! Tekintsen a naplóba...
+
+Toggle dyncam
+== Dinamikus kamera
+
+%d new mentions
+== %d új értesítés
+
+Default length: %d
+== Átlagos hossz: %d
+
+Show HUD
+== HUD mutatása
+
+Size
+== Méret
+
+Destination file already exist
+== A kiválasztott helynél ez létezik
+
+Server best:
+== Legjobb szerver:
+
+IncSpeed
+== Előretekerés
+
+Markers:
+== Jelölések
+
+1 new mention
+== 1 új értesítés
+
+DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
+== A DDraceNetwork együttműködésen alapuló online játékként tekinthető, ahol a cél az, hogy te és egy csapat Tee elérje a célvonalat. Ha újonc vagy, a kezdő szervereket ajánljuk, ahol a legegyszerűbb versenyeket tároljuk. A lehető legkisebb ping választása alapján válasszon egy szervert.
+
+The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
+== A pályákon fagyasztó részeket találtok, melyek ideiglenesen blokkolják a játékos mozgását. Együtt kell dolgoznod a pályarészek átjutásán.
+
+The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
+== A görgő megváltoztatja a fegyvereket. A kalapács (bal egérgomb) segítségével más Tee-ket megüthetsz és ütésekkel kiolvadhatnak a fagyásból.
+
+Hook (right mouse) can be used to swing through the map and to hook other tees to you.
+== A horoggal (jobb egérgomb) megkapaszkodhatsz néhány platformon és más Tee-ket is megragadhatsz vele.
+
+Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
+== A legfontosabb kulcsa a sikerhez: Nincs oktatóprogram, így mindenki magától tanulja meg más játékosok által. (T gombbal tudsz Chattelni)
+
+It's recommended that you check the settings to adjust them to your liking before joining a server.
+== Ajánlott, hogy ellenőrizze a beállításokat, hogy a kedvéhez igazítsa őket, mielőtt csatlakozna egy szerverhet. (Tipp: szűrők)
+
+Please enter your nick name below.
+== Írja be lent a becenevét.
+
+9+ new mentions
+== 9+ új értesítés
+
+Replay feature is disabled!
+== Visszajátszás mód kikapcsolva van!
+
+Lock team
+== Csapat lezárása
 
 Skin prefix
 == 
 
 Hook collisions
-== 
-
-Pause
-== 
-
-Kill
-== 
-
-Zoom in
-== 
-
-Zoom out
-== 
-
-Show all
-== 
-
-Toggle dyncam
-== 
-
-Toggle dummy
-== 
+== Horog pontossága
 
 Toggle ghost
-== 
+== Szellem mutatása
 
-Dummy copy
-== 
+Markers
+== Jelölések
 
-Hammerfly dummy
-== 
+Replace video
+== Videó lecserélése
 
-Converse
-== 
+Length
+== Hossz
 
-Statboard
-== 
-
-Lock team
-== 
-
-Show entities
-== 
-
-Show HUD
-== 
-
-Use high DPI
-== 
-
-Default length: %d
-== 
-
-Enable replays
-== 
-
-Size
-== 
-
-Show text entities
-== 
-
-Show others (own team only)
-== 
-
-Time
-== 
-
-Replay %3d:%02d  
-== 
-
-1 new mention
-== 
-
-%d new mentions
-== 
-
-9+ new mentions
-== 
+Are you sure that you want to disconnect your dummy?
+== Biztos, hogy kiakarod léptetni a másolatodat?
