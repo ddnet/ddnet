@@ -2,7 +2,6 @@
 #ifndef GAME_SERVER_TEAMS_H
 #define GAME_SERVER_TEAMS_H
 
-#include <engine/shared/config.h>
 #include <game/teamscore.h>
 #include <game/server/gamecontext.h>
 
@@ -124,9 +123,7 @@ public:
 
 	bool GetSaving(int TeamID)
 	{
-		if(TeamID < TEAM_FLOCK || TeamID >= TEAM_SUPER)
-			return false;
-		if(g_Config.m_SvTeam != 3 && TeamID == TEAM_FLOCK)
+		if(TeamID <= TEAM_FLOCK || TeamID >= TEAM_SUPER)
 			return false;
 
 		return m_pSaveTeamResult[TeamID] != nullptr;
@@ -134,9 +131,7 @@ public:
 
 	void EnablePractice(int Team)
 	{
-		if(Team < TEAM_FLOCK || Team >= TEAM_SUPER)
-			return;
-		if(g_Config.m_SvTeam != 3 && Team == TEAM_FLOCK)
+		if(Team <= TEAM_FLOCK || Team >= TEAM_SUPER)
 			return;
 
 		m_Practice[Team] = true;
@@ -144,9 +139,7 @@ public:
 
 	bool IsPractice(int Team)
 	{
-		if(Team < TEAM_FLOCK || Team >= TEAM_SUPER)
-			return false;
-		if(g_Config.m_SvTeam != 3 && Team == TEAM_FLOCK)
+		if(Team <= TEAM_FLOCK || Team >= TEAM_SUPER)
 			return false;
 
 		return m_Practice[Team];

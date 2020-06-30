@@ -2,7 +2,6 @@
 #ifndef GAME_TEAMSCORE_H
 #define GAME_TEAMSCORE_H
 
-#include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
 
 enum
