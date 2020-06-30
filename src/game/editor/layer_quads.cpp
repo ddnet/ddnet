@@ -230,8 +230,6 @@ void CLayerQuads::GetSize(float *w, float *h)
 	}
 }
 
-extern int gs_SelectedPoints;
-
 int CLayerQuads::RenderProperties(CUIRect *pToolBox)
 {
 	// layer props

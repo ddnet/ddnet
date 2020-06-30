@@ -29,6 +29,10 @@
 #include "authmanager.h"
 #include "name_ban.h"
 
+#if defined (CONF_UPNP)
+	#include "upnp.h"
+#endif
+
 #if defined (CONF_SQL)
 	#include "sql_connector.h"
 	#include "sql_server.h"
@@ -94,6 +98,10 @@ class CServer : public IServer
 	class IStorage *m_pStorage;
 	class IEngineAntibot *m_pAntibot;
 
+#if defined(CONF_UPNP)
+	CUPnP m_UPnP;
+#endif
+
 #if defined(CONF_SQL)
 	lock m_GlobalSqlLock;
 
@@ -125,6 +133,7 @@ public:
 		enum
 		{
 			STATE_EMPTY = 0,
+			STATE_PREAUTH,
 			STATE_AUTH,
 			STATE_CONNECTING,
 			STATE_READY,
@@ -182,10 +191,17 @@ public:
 		// DDRace
 
 		NETADDR m_Addr;
+		bool m_GotDDNetVersionPacket;
+		bool m_DDNetVersionSettled;
+		int m_DDNetVersion;
+		char m_aDDNetVersionStr[64];
+		CUuid m_ConnectionID;
 
 		// DNSBL
 		int m_DnsblState;
 		std::shared_ptr<CHostLookup> m_pDnsblLookup;
+
+		bool m_Sixup;
 	};
 
 	CClient m_aClients[MAX_CLIENTS];
@@ -215,14 +231,21 @@ public:
 	int64 m_Lastheartbeat;
 	//static NETADDR4 master_server;
 
+	enum
+	{
+		SIX=0,
+		SIXUP,
+	};
+
 	char m_aCurrentMap[MAX_PATH_LENGTH];
-	SHA256_DIGEST m_CurrentMapSha256;
-	unsigned m_CurrentMapCrc;
-	unsigned char *m_pCurrentMapData;
-	unsigned int m_CurrentMapSize;
+	SHA256_DIGEST m_aCurrentMapSha256[2];
+	unsigned m_aCurrentMapCrc[2];
+	unsigned char *m_apCurrentMapData[2];
+	unsigned int m_aCurrentMapSize[2];
 
 	CDemoRecorder m_aDemoRecorder[MAX_CLIENTS+1];
 	CRegister m_Register;
+	CRegister m_RegSixup;
 	CAuthManager m_AuthManager;
 
 	int m_RconRestrict;
@@ -261,6 +284,7 @@ public:
 	const char *GetAuthName(int ClientID);
 	void GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_DIGEST *pMapSha256, int *pMapCrc);
 	int GetClientInfo(int ClientID, CClientInfo *pInfo);
+	void SetClientDDNetVersion(int ClientID, int DDNetVersion);
 	void GetClientAddr(int ClientID, char *pAddrStr, int Size);
 	const char *ClientName(int ClientID);
 	const char *ClientClan(int ClientID);
@@ -275,7 +299,7 @@ public:
 
 	void DoSnapshot();
 
-	static int NewClientCallback(int ClientID, void *pUser);
+	static int NewClientCallback(int ClientID, void *pUser, bool Sixup);
 	static int NewClientNoAuthCallback(int ClientID, void *pUser);
 	static int DelClientCallback(int ClientID, const char *pReason, void *pUser);
 
@@ -315,11 +339,15 @@ public:
 		void Clear();
 	};
 	CCache m_ServerInfoCache[3 * 2];
+	CCache m_SixupServerInfoCache[2];
 	bool m_ServerInfoNeedsUpdate;
 
 	void ExpireServerInfo();
 	void CacheServerInfo(CCache *pCache, int Type, bool SendClients);
+	void CacheServerInfoSixup(CCache *pCache, bool SendClients);
 	void SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool SendClients);
+	void GetServerInfoSixup(CPacker *pPacker, int Token, bool SendClients);
+	bool RateLimitServerInfoConnless();
 	void SendServerInfoConnless(const NETADDR *pAddr, int Token, int Type);
 	void UpdateServerInfo(bool Resend = false);
 
@@ -362,8 +390,6 @@ public:
 	// console commands for sqlmasters
 	static void ConAddSqlServer(IConsole::IResult *pResult, void *pUserData);
 	static void ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData);
-
-	static void CreateTablesThread(void *pData);
 #endif
 
 	static void ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -419,6 +445,8 @@ public:
 
 	bool ErrorShutdown() const { return m_aErrorShutdownReason[0] != 0; }
 	void SetErrorShutdown(const char *pReason);
+
+	bool IsSixup(int ClientID) const { return m_aClients[ClientID].m_Sixup; }
 
 #ifdef CONF_FAMILY_UNIX
 	enum CONN_LOGGING_CMD

@@ -162,14 +162,23 @@ void CPickup::Snap(int SnappingClient)
 					&& (!Tick))
 		return;
 
-	CNetObj_Pickup *pP = static_cast<CNetObj_Pickup *>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, m_ID, sizeof(CNetObj_Pickup)));
+	int Size = Server()->IsSixup(SnappingClient) ? 3*4 : sizeof(CNetObj_Pickup);
+	CNetObj_Pickup *pP = static_cast<CNetObj_Pickup *>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, m_ID, Size));
 	if(!pP)
 		return;
 
 	pP->m_X = (int)m_Pos.x;
 	pP->m_Y = (int)m_Pos.y;
 	pP->m_Type = m_Type;
-	pP->m_Subtype = m_Subtype;
+	if(Server()->IsSixup(SnappingClient))
+	{
+		if(m_Type == POWERUP_WEAPON)
+			pP->m_Type = m_Subtype == WEAPON_SHOTGUN ? 3 : m_Subtype == WEAPON_GRENADE ? 2 : 4;
+		else if(m_Type == POWERUP_NINJA)
+			pP->m_Type = 5;
+	}
+	else
+		pP->m_Subtype = m_Subtype;
 }
 
 void CPickup::Move()

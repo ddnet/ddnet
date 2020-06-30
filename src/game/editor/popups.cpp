@@ -98,6 +98,16 @@ void CEditor::UiDoPopupMenu()
 	}
 }
 
+bool CEditor::UiPopupExists(void *pid)
+{
+	for(int i = 0; i < g_UiNumPopups; i++)
+	{
+		if(s_UiPopups[i].m_pId == pid)
+			return true;
+	}
+
+	return false;
+}
 
 int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 {
@@ -1081,6 +1091,8 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 		pEditor->UI()->DoLabel(&Label, "Large layer", 20.0f, 0);
 	else if(pEditor->m_PopupEventType == POPEVENT_PREVENTUNUSEDTILES)
 		pEditor->UI()->DoLabel(&Label, "Unused tiles disabled", 20.0f, 0);
+	else if(pEditor->m_PopupEventType == POPEVENT_IMAGEDIV16)
+		pEditor->UI()->DoLabel(&Label, "Image width", 20.0f, 0);
 
 	View.HSplitBottom(10.0f, &View, 0);
 	View.HSplitBottom(20.0f, &View, &ButtonBar);
@@ -1102,6 +1114,8 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 		pEditor->UI()->DoLabel(&Label, "You are trying to set the height or width of a layer to more than 1000 tiles. This is actually possible, but only rarely necessary. It may cause the editor to work slower, larger file size as well as higher memory usage for client and server.", 10.0f, -1, Label.w-10.0f);
 	else if(pEditor->m_PopupEventType == POPEVENT_PREVENTUNUSEDTILES)
 		pEditor->UI()->DoLabel(&Label, "Unused tiles can't be placed by default because they could get a use later and then destroy your map.\nActivate the 'Unused' switch to be able to place every tile.", 10.0f, -1, Label.w-10.0f);
+	else if(pEditor->m_PopupEventType == POPEVENT_IMAGEDIV16)
+		pEditor->UI()->DoLabel(&Label, "The width of this image is not divisible by 16. This is required for images used in tile layers for Teeworlds 0.7 compatibility.", 10.0f, -1, Label.w-10.0f);
 
 	// button bar
 	ButtonBar.VSplitLeft(30.0f, 0, &ButtonBar);
@@ -1127,7 +1141,7 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 	}
 	ButtonBar.VSplitRight(30.0f, &ButtonBar, 0);
 	ButtonBar.VSplitRight(110.0f, &ButtonBar, &Label);
-	if(pEditor->m_PopupEventType != POPEVENT_LARGELAYER && pEditor->m_PopupEventType != POPEVENT_PREVENTUNUSEDTILES)
+	if(pEditor->m_PopupEventType != POPEVENT_LARGELAYER && pEditor->m_PopupEventType != POPEVENT_PREVENTUNUSEDTILES && pEditor->m_PopupEventType != POPEVENT_IMAGEDIV16)
 	{
 		static int s_AbortButton = 0;
 		if(pEditor->DoButton_Editor(&s_AbortButton, "Abort", 0, &Label, 0, 0))
@@ -1425,48 +1439,69 @@ int CEditor::PopupSelectConfigAutoMapResult()
 
 int CEditor::PopupTele(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	CUIRect Button;
-	View.HSplitBottom(12.0f, &View, &Button);
+	static int s_PreviousNumber = -1;
 
-	enum
-	{
-		PROP_TELE=0,
-		NUM_PROPS,
-	};
+	CUIRect NumberPicker;
+	CUIRect FindEmptySlot;
 
-	CProperty aProps[] = {
-		{"Number", pEditor->m_TeleNumber, PROPTYPE_INT_STEP, 0, 255},
-		{0},
-	};
+	View.VSplitRight(15.f, &NumberPicker, &FindEmptySlot);
+	NumberPicker.VSplitRight(2.f, &NumberPicker, 0);
 
-	static int s_aIds[NUM_PROPS] = {0};
-	int NewVal = 0;
-	static ColorRGBA s_color = ColorRGBA(1,1,1,0.5f);
-
-	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal, s_color);
-
-	if(Prop == PROP_TELE)
-	{
-		NewVal = (NewVal + 256) % 256;
-
-		CLayerTele *gl = pEditor->m_Map.m_pTeleLayer;
-		for(int y = 0; y < gl->m_Height; ++y)
+	// find empty number button
+	{ 
+		static int s_EmptySlotPid = 0;
+		if(pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot")
+			|| pEditor->Input()->KeyPress(KEY_F))
 		{
-			for(int x = 0; x < gl->m_Width; ++x)
+			int number = -1;
+			for(int i = 1; i <= 255; i++)
 			{
-				if(gl->m_pTeleTile[y*gl->m_Width+x].m_Number == NewVal)
+				if(!pEditor->m_Map.m_pTeleLayer->ContainsElementWithId(i))
 				{
-					s_color = ColorRGBA(1,0.5f,0.5f,0.5f);
-					goto done;
+					number = i;
+					break;
 				}
 			}
+
+			if(number != -1)
+			{
+				pEditor->m_TeleNumber = number;
+			}
+		}
+	}
+
+	// number picker
+	{
+		static ColorRGBA s_Color = ColorRGBA(0.5f, 1, 0.5f, 0.5f);
+
+		enum
+		{
+			PROP_TELE = 0,
+			NUM_PROPS,
+		};
+		CProperty aProps[] = {
+			{"Number", pEditor->m_TeleNumber, PROPTYPE_INT_STEP, 1, 255},
+			{0},
+		};
+		
+		static int s_aIds[NUM_PROPS] = {0};
+
+		static int NewVal = 0;
+		int Prop = pEditor->DoProperties(&NumberPicker, aProps, s_aIds, &NewVal, s_Color);
+		if(Prop == PROP_TELE)
+		{
+			pEditor->m_TeleNumber = (NewVal + 256) % 256;
 		}
 
-		s_color = ColorRGBA(0.5f,1,0.5f,0.5f);
-
-		done:
-		pEditor->m_TeleNumber = NewVal;
+		if(s_PreviousNumber == 1 || s_PreviousNumber != pEditor->m_TeleNumber)
+		{
+			s_Color = pEditor->m_Map.m_pTeleLayer->ContainsElementWithId(pEditor->m_TeleNumber)
+				? ColorRGBA(1, 0.5f, 0.5f, 0.5f)
+				: ColorRGBA(0.5f, 1, 0.5f, 0.5f);
+		}
 	}
+
+	s_PreviousNumber = pEditor->m_TeleNumber;
 
 	return 0;
 }
@@ -1507,52 +1542,79 @@ int CEditor::PopupSpeedup(CEditor *pEditor, CUIRect View, void *pContext)
 
 int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	CUIRect Button;
-	View.HSplitBottom(12.0f, &View, &Button);
+	static int s_PreviousNumber = -1;
 
-	enum
+	CUIRect NumberPicker;
+	CUIRect FindEmptySlot;
+
+	CUIRect DelayPicker;
+
+	View.HSplitMid(&NumberPicker, &DelayPicker);
+	NumberPicker.VSplitRight(15.f, &NumberPicker, &FindEmptySlot);
+	NumberPicker.VSplitRight(2.f, &NumberPicker, 0);
+
+	// find empty number button
 	{
-		PROP_SwitchDelay=0,
-		PROP_SwitchNumber,
-		NUM_PROPS,
-	};
-
-	CProperty aProps[] = {
-		{"Delay", pEditor->m_SwitchDelay, PROPTYPE_INT_STEP, 0, 255},
-		{"Number", pEditor->m_SwitchNum, PROPTYPE_INT_STEP, 0, 255},
-		{0},
-	};
-
-	static int s_aIds[NUM_PROPS] = {0};
-	int NewVal = 0;
-	static ColorRGBA s_color = ColorRGBA(1,1,1,0.5f);
-	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal, s_color);
-
-	if(Prop == PROP_SwitchNumber)
-	{
-		NewVal = (NewVal + 256) % 256;
-
-		CLayerSwitch *gl = pEditor->m_Map.m_pSwitchLayer;
-		for(int y = 0; y < gl->m_Height; ++y)
+		static int s_EmptySlotPid = 0;
+		if(pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot")
+			|| pEditor->Input()->KeyPress(KEY_F))
 		{
-			for(int x = 0; x < gl->m_Width; ++x)
+			int number = -1;
+			for(int i = 1; i <= 255; i++)
 			{
-				if(gl->m_pSwitchTile[y*gl->m_Width+x].m_Number == NewVal)
+				if(!pEditor->m_Map.m_pSwitchLayer->ContainsElementWithId(i))
 				{
-					s_color = ColorRGBA(1,0.5f,0.5f,0.5f);
-					goto done;
+					number = i;
+					break;
 				}
 			}
+
+			if(number != -1)
+			{
+				pEditor->m_SwitchNum = number;
+			}
+		}
+	}
+
+	// number picker
+	{
+		static ColorRGBA s_Color = ColorRGBA(1, 1, 1, 0.5f);
+
+		enum
+		{
+			PROP_SwitchNumber = 0,
+			PROP_SwitchDelay,
+			NUM_PROPS,
+		};
+
+		CProperty aProps[] = {
+			{"Number", pEditor->m_SwitchNum, PROPTYPE_INT_STEP, 1, 255},
+			{"Delay", pEditor->m_SwitchDelay, PROPTYPE_INT_STEP, 0, 255},
+			{0},
+		}; 
+
+		static int s_aIds[NUM_PROPS] = {0};
+		int NewVal = 0;
+		int Prop = pEditor->DoProperties(&NumberPicker, aProps, s_aIds, &NewVal, s_Color);
+
+		if(Prop == PROP_SwitchNumber)
+		{
+			pEditor->m_SwitchNum = (NewVal + 256) % 256;
+		}
+		else if(Prop == PROP_SwitchDelay)
+		{
+			pEditor->m_SwitchDelay = (NewVal + 256) % 256;
 		}
 
-		s_color = ColorRGBA(0.5f,1,0.5f,0.5f);
-
-		done:
-		pEditor->m_SwitchNum = NewVal;
+		if(s_PreviousNumber == 1 || s_PreviousNumber != pEditor->m_SwitchNum)
+		{
+			s_Color = pEditor->m_Map.m_pSwitchLayer->ContainsElementWithId(pEditor->m_SwitchNum)
+				? ColorRGBA(1, 0.5f, 0.5f, 0.5f)
+				: ColorRGBA(0.5f, 1, 0.5f, 0.5f);
+		}
 	}
-	if(Prop == PROP_SwitchDelay)
-		pEditor->m_SwitchDelay = (NewVal + 256) % 256;
 
+	s_PreviousNumber = pEditor->m_SwitchNum;
 	return 0;
 }
 
@@ -1704,6 +1766,7 @@ int CEditor::PopupEntities(CEditor *pEditor, CUIRect View, void *pContext)
 
 				pEditor->Graphics()->UnloadTexture(pEditor->m_EntitiesTexture);
 				pEditor->m_EntitiesTexture = pEditor->Graphics()->LoadTexture(aBuf, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+				g_UiNumPopups--;
 			}
 		}
 	}

@@ -1656,6 +1656,21 @@ int net_would_block(void);
 
 int net_socket_read_wait(NETSOCKET sock, int time);
 
+/*
+	Function: open_link
+		Opens a link in the browser.
+	
+	Parameters:
+		link - The link to open in a browser.
+	
+	Returns:
+		Returns 1 on success, 0 on failure.
+	
+	Remarks:
+		This may not be called with untrusted input or it'll result in arbitrary code execution.
+*/
+int open_link(const char *link);
+
 void swap_endian(void *data, unsigned elem_size, unsigned num);
 
 

@@ -102,39 +102,29 @@ public:
 class ColorHSLA : public color4_base<ColorHSLA>
 {
 public:
-	bool m_Lit = false;
-
 	using color4_base::color4_base;
 	ColorHSLA() {};
 
-	ColorHSLA Lighten()
+	constexpr static const float DARKEST_LGT = 0.5f;
+
+	ColorHSLA UnclampLighting(float Darkest = DARKEST_LGT)
 	{
-		if(m_Lit)
-			return *this;
-
 		ColorHSLA col = *this;
-		col.l = 0.5f + l * 0.5f;
-		col.m_Lit = true;
-		return col;
-	};
-
-	ColorHSLA Darken()
-	{
-		if(!m_Lit)
-			return *this;
-
-		ColorHSLA col = *this;
-		col.l = (l - 0.5f) * 2;
-		col.m_Lit = false;
+		col.l = Darkest + col.l * (1.0f - Darkest);
 		return col;
 	}
 
 	unsigned Pack(bool Alpha = true)
 	{
-		if(m_Lit)
-			return Darken().color4_base::Pack(Alpha);
-		else
-			return color4_base::Pack(Alpha);
+		return color4_base::Pack(Alpha);
+	}
+
+	unsigned Pack(float Darkest, bool Alpha = false)
+	{
+		ColorHSLA col = *this;
+		col.l = (l - Darkest)/(1 - Darkest);
+		col.l = clamp(col.l, 0.0f, 1.0f);
+		return col.Pack(Alpha);
 	}
 };
 

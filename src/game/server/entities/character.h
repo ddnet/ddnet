@@ -5,6 +5,7 @@
 
 #include <engine/antibot.h>
 #include <game/server/entity.h>
+#include <game/server/save.h>
 #include <game/generated/server_data.h>
 #include <game/generated/protocol.h>
 
@@ -12,6 +13,7 @@
 
 class CAntibot;
 class CGameTeams;
+class CSaveTee;
 struct CAntibotCharacterData;
 
 enum
@@ -163,12 +165,14 @@ private:
 
 	// DDRace
 
+	void SnapCharacter(int SnappingClient, int ID);
 	static bool IsSwitchActiveCb(int Number, void *pUser);
 	void HandleTiles(int Index);
 	float m_Time;
 	int m_LastBroadcast;
 	void DDRaceInit();
 	void HandleSkippableTiles(int Index);
+	void SetRescue();
 	void DDRaceTick();
 	void DDRacePostCoreTick();
 	void HandleBroadcast();
@@ -177,7 +181,7 @@ private:
 	IAntibot *Antibot();
 
 	bool m_SetSavePos;
-	vec2 m_PrevSavePos;
+	CSaveTee m_RescueTee;
 	bool m_Solo;
 
 public:

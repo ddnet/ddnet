@@ -674,14 +674,25 @@ int CMenus::RenderMenubar(CUIRect r)
 	if(Client()->State() == IClient::STATE_OFFLINE)
 	{
 		// offline menus
-		Box.VSplitLeft(90.0f, &Button, &Box);
+		Box.VSplitLeft(60.0f, &Button, &Box);
 		static int s_NewsButton=0;
-		if(DoButton_MenuTab(&s_NewsButton, Localize("News"), m_ActivePage==PAGE_NEWS, &Button, CUI::CORNER_T))
+		if(DoButton_MenuTab(&s_NewsButton, Localize("News"), m_ActivePage==PAGE_NEWS, &Button, CUI::CORNER_TL))
 		{
 			NewPage = PAGE_NEWS;
 			m_DoubleClickIndex = -1;
 		}
-		Box.VSplitLeft(10.0f, 0, &Box);
+		Box.VSplitLeft(60.0f, &Button, &Box);
+		static int s_LearnButton=0;
+		if(DoButton_MenuTab(&s_LearnButton, Localize("Learn"), false, &Button, CUI::CORNER_TR))
+		{
+			if(!open_link("https://wiki.ddnet.tw/"))
+			{
+				dbg_msg("menus", "couldn't open link");
+			}
+			m_DoubleClickIndex = -1;
+		}
+
+		Box.VSplitLeft(5.0f, 0, &Box);
 
 		Box.VSplitLeft(100.0f, &Button, &Box);
 		static int s_InternetButton=0;
@@ -739,8 +750,8 @@ int CMenus::RenderMenubar(CUIRect r)
 			m_DoubleClickIndex = -1;
 		}
 
-		Box.VSplitLeft(10.0f, 0, &Box);
-		Box.VSplitLeft(100.0f, &Button, &Box);
+		Box.VSplitLeft(5.0f, 0, &Box);
+		Box.VSplitLeft(80.0f, &Button, &Box);
 		static int s_DemosButton=0;
 		if(DoButton_MenuTab(&s_DemosButton, Localize("Demos"), m_ActivePage==PAGE_DEMOS, &Button, CUI::CORNER_T))
 		{
@@ -912,7 +923,7 @@ void CMenus::RenderNews(CUIRect MainView)
 		else
 		{
 			MainView.HSplitTop(20.0f, &Label, &MainView);
-			UI()->DoLabelScaled(&Label, aLine, 15.f, -1, MainView.w-30.0f);
+			UI()->DoLabelScaled(&Label, aLine, 15.f, -1, -1);
 		}
 	}
 }
@@ -1059,7 +1070,7 @@ int CMenus::Render()
 		// make sure that other windows doesn't do anything funnay!
 		//UI()->SetHotItem(0);
 		//UI()->SetActiveItem(0);
-		char aBuf[128];
+		char aBuf[1536];
 		const char *pTitle = "";
 		const char *pExtraText = "";
 		const char *pButtonText = "";
@@ -1090,7 +1101,7 @@ int CMenus::Render()
 			pButtonText = Localize("Ok");
 			if(Client()->m_ReconnectTime > 0)
 			{
-				str_format(aBuf, sizeof(aBuf), Localize("\n\nReconnect in %d sec"), (int)((Client()->m_ReconnectTime - time_get()) / time_freq()));
+				str_format(aBuf, sizeof(aBuf), Localize("Reconnect in %d sec"), (int)((Client()->m_ReconnectTime - time_get()) / time_freq()));
 				pTitle = Client()->ErrorString();
 				pExtraText = aBuf;
 				pButtonText = Localize("Abort");
@@ -1170,15 +1181,26 @@ int CMenus::Render()
 		else if(m_Popup == POPUP_FIRST_LAUNCH)
 		{
 			pTitle = Localize("Welcome to DDNet");
-			pExtraText = Localize("As this is the first time you launch the game, please enter your nick name below. It's recommended that you check the settings to adjust them to your liking before joining a server.");
+			str_format(aBuf, sizeof(aBuf), "%s\n\n%s\n\n%s\n\n%s\n\n%s\n\n%s\n\n%s",
+				Localize("DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you."),
+				Localize("The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts."),
+				Localize("The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen."),
+				Localize("Hook (right mouse) can be used to swing through the map and to hook other tees to you."),
+				Localize("Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game."),
+				Localize("It's recommended that you check the settings to adjust them to your liking before joining a server."),
+				Localize("Please enter your nick name below."));
+			pExtraText = aBuf;
 			pButtonText = Localize("Ok");
 			ExtraAlign = -1;
 		}
 
 		CUIRect Box, Part;
 		Box = Screen;
-		Box.VMargin(150.0f/UI()->Scale(), &Box);
-		Box.HMargin(150.0f/UI()->Scale(), &Box);
+		if(m_Popup != POPUP_FIRST_LAUNCH)
+		{
+			Box.VMargin(150.0f/UI()->Scale(), &Box);
+			Box.HMargin(150.0f/UI()->Scale(), &Box);
+		}
 
 		// render the box
 		RenderTools()->DrawUIRect(&Box, ColorRGBA(0,0,0,0.5f), CUI::CORNER_ALL, 15.0f);
@@ -1194,14 +1216,16 @@ int CMenus::Render()
 		Box.HSplitTop(24.f/UI()->Scale(), &Part, &Box);
 		Part.VMargin(20.f/UI()->Scale(), &Part);
 
+		float FontSize = m_Popup == POPUP_FIRST_LAUNCH ? 16.0f : 20.f;
+
 		if(ExtraAlign == -1)
-			UI()->DoLabelScaled(&Part, pExtraText, 20.f, -1, (int)Part.w);
+			UI()->DoLabelScaled(&Part, pExtraText, FontSize, -1, (int)Part.w);
 		else
 		{
-			if(TextRender()->TextWidth(0, 20.f, pExtraText, -1) > Part.w)
-				UI()->DoLabelScaled(&Part, pExtraText, 20.f, -1, (int)Part.w);
+			if(TextRender()->TextWidth(0, FontSize, pExtraText, -1) > Part.w)
+				UI()->DoLabelScaled(&Part, pExtraText, FontSize, -1, (int)Part.w);
 			else
-				UI()->DoLabelScaled(&Part, pExtraText, 20.f, 0, -1);
+				UI()->DoLabelScaled(&Part, pExtraText, FontSize, 0, -1);
 		}
 
 		if(m_Popup == POPUP_QUIT)
@@ -1645,22 +1669,6 @@ int CMenus::Render()
 			Part.VSplitLeft(Button.h, &Button, &Part);
 			if(DoButton_CheckBox(&g_Config.m_ClVideoSndEnable, Localize("Use sounds"), g_Config.m_ClVideoSndEnable, &Button))
 				g_Config.m_ClVideoSndEnable ^= 1;
-			/*
-			static int s_ButtonInc = 0;
-			if(DoButton_Menu(&s_ButtonInc, Localize("IncSpeed"), 0, &IncSpeed))
-				m_Popup = POPUP_NONE;
-
-			static int s_ButtonDec = 0;
-			if(DoButton_Menu(&s_ButtonDec, Localize("DecSpeed"), 0, &DecSpeed))
-				m_Popup = POPUP_NONE;
-			*/
-			//Abort.VMargin(20.0f, &Abort);
-			//SpeedBox.VSplitLeft(40.0f, 0, &SpeedBox);
-			//SpeedBox.VSplitRight(80.0f, &SpeedBox, 0);
-			//UI()->DoLabel(&Label, Localize("Video speed:"), 18.0f, -1);
-			//static float Offset2 = 0.0f;
-			//char Speed[10] = "1";
-			//DoEditBox(&Offset2, &SpeedBox, Speed, sizeof(Speed), 12.0f, &Offset2);
 
 			Box.HSplitBottom(20.f, &Box, &Part);
 #if defined(__ANDROID__)
@@ -1759,17 +1767,23 @@ int CMenus::Render()
 			Box.HSplitBottom(20.f, &Box, &Part);
 			Box.HSplitBottom(24.f, &Box, &Part);
 
-			Part.VSplitLeft(60.0f, 0, &Part);
-			if(DoButton_CheckBox(&g_Config.m_BrIndicateFinished, Localize("Show DDNet map finishes in server browser\n(transmits your player name to info.ddnet.tw)"), g_Config.m_BrIndicateFinished, &Part))
+			Part.VSplitLeft(30.0f, 0, &Part);
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "%s\n(%s)",
+				Localize("Show DDNet map finishes in server browser"),
+				Localize("transmits your player name to info.ddnet.tw"));
+
+			if(DoButton_CheckBox(&g_Config.m_BrIndicateFinished, aBuf, g_Config.m_BrIndicateFinished, &Part))
 				g_Config.m_BrIndicateFinished ^= 1;
 
+			Box.HSplitBottom(20.f, &Box, &Part);
 			Box.HSplitBottom(24.f, &Box, &Part);
 
 			Part.VSplitLeft(60.0f, 0, &Label);
 			Label.VSplitLeft(100.0f, 0, &TextBox);
 			TextBox.VSplitLeft(20.0f, 0, &TextBox);
 			TextBox.VSplitRight(60.0f, &TextBox, 0);
-			UI()->DoLabel(&Label, Localize("Nickname"), 18.0f, -1);
+			UI()->DoLabel(&Label, Localize("Nickname"), 16.0f, -1);
 			static float Offset = 0.0f;
 			DoEditBox(&g_Config.m_PlayerName, &TextBox, g_Config.m_PlayerName, sizeof(g_Config.m_PlayerName), 12.0f, &Offset);
 		}

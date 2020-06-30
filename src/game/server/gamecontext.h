@@ -57,9 +57,8 @@ enum
 class IConsole;
 class IEngine;
 class IStorage;
-class CRandomMapResult;
-class CMapVoteResult;
 struct CAntibotData;
+struct CScoreRandomMapResult;
 
 class CGameContext : public IGameServer
 {
@@ -70,6 +69,7 @@ class CGameContext : public IGameServer
 	IAntibot *m_pAntibot;
 	CLayers m_Layers;
 	CCollision m_Collision;
+	protocol7::CNetObjHandler m_NetObjHandler7;
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_Tuning;
 	CTuningParams m_aTuningList[NUM_TUNEZONES];
@@ -79,9 +79,7 @@ class CGameContext : public IGameServer
 	ASYNCIO *m_pTeeHistorianFile;
 	CUuid m_GameUuid;
 	CMapBugs m_MapBugs;
-
-	std::shared_ptr<CRandomMapResult> m_pRandomMapResult;
-	std::shared_ptr<CMapVoteResult> m_pMapVoteResult;
+	CPrng m_Prng;
 
 	static void CommandCallback(int ClientID, int FlagMask, const char *pCmd, IConsole::IResult *pResult, void *pUser);
 	static void TeeHistorianWrite(const void *pData, int DataSize, void *pUser);
@@ -101,8 +99,6 @@ class CGameContext : public IGameServer
 	static void ConChangeMap(IConsole::IResult *pResult, void *pUserData);
 	static void ConRandomMap(IConsole::IResult *pResult, void *pUserData);
 	static void ConRandomUnfinishedMap(IConsole::IResult *pResult, void *pUserData);
-	static void ConSaveTeam(IConsole::IResult *pResult, void *pUserData);
-	static void ConLoadTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConRestart(IConsole::IResult *pResult, void *pUserData);
 	static void ConBroadcast(IConsole::IResult *pResult, void *pUserData);
 	static void ConSay(IConsole::IResult *pResult, void *pUserData);
@@ -131,6 +127,8 @@ public:
 	CTuningParams *Tuning() { return &m_Tuning; }
 	CTuningParams *TuningList() { return &m_aTuningList[0]; }
 	IAntibot *Antibot() { return m_pAntibot; }
+	CTeeHistorian *TeeHistorian() { return &m_TeeHistorian; }
+	bool TeeHistorianActive() const { return m_TeeHistorianActive; }
 
 	CGameContext();
 	~CGameContext();
@@ -196,14 +194,17 @@ public:
 		CHAT_RED=0,
 		CHAT_BLUE=1,
 		CHAT_WHISPER_SEND=2,
-		CHAT_WHISPER_RECV=3
+		CHAT_WHISPER_RECV=3,
+
+		CHAT_SIX=1<<0,
+		CHAT_SIXUP=1<<1,
 	};
 
 	// network
 	void CallVote(int ClientID, const char *aDesc, const char *aCmd, const char *pReason, const char *aChatmsg);
-	void SendChatTarget(int To, const char *pText);
+	void SendChatTarget(int To, const char *pText, int Flags = CHAT_SIX | CHAT_SIXUP);
 	void SendChatTeam(int Team, const char *pText);
-	void SendChat(int ClientID, int Team, const char *pText, int SpamProtectionClientID = -1);
+	void SendChat(int ClientID, int Team, const char *pText, int SpamProtectionClientID = -1, int Flags = CHAT_SIX | CHAT_SIXUP);
 	void SendEmoticon(int ClientID, int Emoticon);
 	void SendWeaponPickup(int ClientID, int Weapon);
 	void SendBroadcast(const char *pText, int ClientID, bool IsImportant = true);
@@ -231,6 +232,7 @@ public:
 	virtual void OnSnap(int ClientID);
 	virtual void OnPostSnap();
 
+	void *PreProcessMsg(int *MsgID, CUnpacker *pUnpacker, int ClientID);
 	virtual void OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID);
 
 	virtual void OnClientConnected(int ClientID);
@@ -240,7 +242,7 @@ public:
 	virtual void OnClientPredictedInput(int ClientID, void *pInput);
 	virtual void OnClientPredictedEarlyInput(int ClientID, void *pInput);
 
-	virtual void OnClientEngineJoin(int ClientID);
+	virtual void OnClientEngineJoin(int ClientID, bool Sixup);
 	virtual void OnClientEngineDrop(int ClientID, const char *pReason);
 
 	virtual bool IsClientReady(int ClientID);
@@ -252,6 +254,7 @@ public:
 	virtual const char *NetVersion();
 
 	// DDRace
+	void OnClientDDNetVersionKnown(int ClientID);
 	virtual void FillAntibot(CAntibotRoundData *pData);
 	int ProcessSpamProtection(int ClientID);
 	int GetDDRaceTeam(int ClientID);
@@ -259,11 +262,16 @@ public:
 	int64 m_NonEmptySince;
 	int64 m_LastMapVote;
 	int GetClientVersion(int ClientID);
-	void SetClientVersion(int ClientID, int Version);
 	bool PlayerExists(int ClientID) { return m_apPlayers[ClientID]; };
 	// Returns true if someone is actively moderating.
 	bool PlayerModerating();
 	void ForceVote(int EnforcerID, bool Success);
+
+	// Checks if player can vote and notify them about the reason
+	bool RateLimitPlayerVote(int ClientID);
+	bool RateLimitPlayerMapVote(int ClientID);
+
+	std::shared_ptr<CScoreRandomMapResult> m_SqlRandomMapResult;
 
 private:
 
@@ -328,6 +336,7 @@ private:
 	static void ConDND(IConsole::IResult *pResult, void *pUserData);
 	static void ConMapInfo(IConsole::IResult *pResult, void *pUserData);
 	static void ConTimeout(IConsole::IResult *pResult, void *pUserData);
+	static void ConPractice(IConsole::IResult *pResult, void *pUserData);
 	static void ConSave(IConsole::IResult *pResult, void *pUserData);
 	static void ConLoad(IConsole::IResult *pResult, void *pUserData);
 	static void ConMap(IConsole::IResult *pResult, void *pUserData);
@@ -336,6 +345,7 @@ private:
 	static void ConBroadTime(IConsole::IResult *pResult, void *pUserData);
 	static void ConJoinTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConLockTeam(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnlockTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConInviteTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConMe(IConsole::IResult *pResult, void *pUserData);
 	static void ConWhisper(IConsole::IResult *pResult, void *pUserData);
@@ -392,9 +402,10 @@ private:
 	bool VoteMute(const NETADDR *pAddr, int Secs, const char *pDisplayName, int AuthedID);
 	bool VoteUnmute(const NETADDR *pAddr, const char *pDisplayName, int AuthedID);
 	void Whisper(int ClientID, char *pStr);
-	void WhisperID(int ClientID, int VictimID, char *pMessage);
+	void WhisperID(int ClientID, int VictimID, const char *pMessage);
 	void Converse(int ClientID, char *pStr);
 	bool IsVersionBanned(int Version);
+	void UnlockTeam(int ClientID, int Team);
 
 public:
 	CLayers *Layers() { return &m_Layers; }

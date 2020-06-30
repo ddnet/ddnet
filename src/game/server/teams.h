@@ -2,17 +2,18 @@
 #ifndef GAME_SERVER_TEAMS_H
 #define GAME_SERVER_TEAMS_H
 
+#include <engine/shared/config.h>
 #include <game/teamscore.h>
 #include <game/server/gamecontext.h>
 
 class CGameTeams
 {
 	int m_TeamState[MAX_CLIENTS];
-	int m_MembersCount[MAX_CLIENTS];
 	bool m_TeeFinished[MAX_CLIENTS];
 	bool m_TeamLocked[MAX_CLIENTS];
-	bool m_IsSaving[MAX_CLIENTS];
 	uint64_t m_Invited[MAX_CLIENTS];
+	bool m_Practice[MAX_CLIENTS];
+	std::shared_ptr<CScoreSaveResult> m_pSaveTeamResult[MAX_CLIENTS];
 
 	class CGameContext * m_pGameContext;
 
@@ -64,13 +65,14 @@ public:
 
 	int Count(int Team) const;
 
-	//need to be very careful using this method
-	void SetForceCharacterTeam(int id, int Team);
-	void ForceLeaveTeam(int id);
+	//need to be very careful using this method. SERIOUSLY...
+	void SetForceCharacterTeam(int ClientID, int Team);
+	void SetForceCharacterNewTeam(int ClientID, int Team);
+	void ForceLeaveTeam(int ClientID);
 
 	void Reset();
 
-	void SendTeamsState(int Cid);
+	void SendTeamsState(int ClientID);
 	void SetTeamLock(int Team, bool Lock);
 	void ResetInvited(int Team);
 	void SetClientInvited(int Team, int ClientID, bool Invited);
@@ -83,7 +85,9 @@ public:
 	void SetDDRaceState(CPlayer* Player, int DDRaceState);
 	void SetStartTime(CPlayer* Player, int StartTime);
 	void SetCpActive(CPlayer* Player, int CpActive);
-	void KillSavedTeam(int Team);
+	void KillSavedTeam(int ClientID, int Team);
+	void ResetSavedTeam(int ClientID, int Team);
+	void ProcessSaveTeam();
 
 	bool TeeFinished(int ClientID)
 	{
@@ -113,14 +117,39 @@ public:
 		m_TeeFinished[ClientID] = finished;
 	}
 
-	void SetSaving(int TeamID, bool Value)
+	void SetSaving(int TeamID, std::shared_ptr<CScoreSaveResult> SaveResult)
 	{
-		m_IsSaving[TeamID] = Value;
+		m_pSaveTeamResult[TeamID] = SaveResult;
 	}
 
 	bool GetSaving(int TeamID)
 	{
-		return m_IsSaving[TeamID];
+		if(TeamID < TEAM_FLOCK || TeamID >= TEAM_SUPER)
+			return false;
+		if(g_Config.m_SvTeam != 3 && TeamID == TEAM_FLOCK)
+			return false;
+
+		return m_pSaveTeamResult[TeamID] != nullptr;
+	}
+
+	void EnablePractice(int Team)
+	{
+		if(Team < TEAM_FLOCK || Team >= TEAM_SUPER)
+			return;
+		if(g_Config.m_SvTeam != 3 && Team == TEAM_FLOCK)
+			return;
+
+		m_Practice[Team] = true;
+	}
+
+	bool IsPractice(int Team)
+	{
+		if(Team < TEAM_FLOCK || Team >= TEAM_SUPER)
+			return false;
+		if(g_Config.m_SvTeam != 3 && Team == TEAM_FLOCK)
+			return false;
+
+		return m_Practice[Team];
 	}
 };
 

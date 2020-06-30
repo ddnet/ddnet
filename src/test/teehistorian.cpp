@@ -57,6 +57,7 @@ protected:
 		m_GameInfo.m_GameUuid = CalculateUuid("test@ddnet.tw");
 		m_GameInfo.m_pServerVersion = "DDNet test";
 		m_GameInfo.m_StartTime = time(0);
+		m_GameInfo.m_pPrngDescription = "test-prng:02468ace";
 
 		m_GameInfo.m_pServerName = "server name";
 		m_GameInfo.m_ServerPort = 8303;
@@ -91,7 +92,7 @@ protected:
 	{
 		static CUuid TEEHISTORIAN_UUID = CalculateUuid("teehistorian@ddnet.tw");
 		static const char PREFIX1[] = "{\"comment\":\"teehistorian@ddnet.tw\",\"version\":\"2\",\"game_uuid\":\"a1eb7182-796e-3b3e-941d-38ca71b2a4a8\",\"server_version\":\"DDNet test\",\"start_time\":\"";
-		static const char PREFIX2[] = "\",\"server_name\":\"server name\",\"server_port\":\"8303\",\"game_type\":\"game type\",\"map_name\":\"Kobra 3 Solo\",\"map_size\":\"903514\",\"map_sha256\":\"0123456789012345678901234567890123456789012345678901234567890123\",\"map_crc\":\"eceaf25c\",\"config\":{},\"tuning\":{},\"uuids\":[";
+		static const char PREFIX2[] = "\",\"server_name\":\"server name\",\"server_port\":\"8303\",\"game_type\":\"game type\",\"map_name\":\"Kobra 3 Solo\",\"map_size\":\"903514\",\"map_sha256\":\"0123456789012345678901234567890123456789012345678901234567890123\",\"map_crc\":\"eceaf25c\",\"prng_description\":\"test-prng:02468ace\",\"config\":{},\"tuning\":{},\"uuids\":[";
 		static const char PREFIX3[] = "]}";
 
 		char aTimeBuf[64];
@@ -319,6 +320,43 @@ TEST_F(TeeHistorian, ExtraMessage)
 	Expect(EXPECTED, sizeof(EXPECTED));
 }
 
+TEST_F(TeeHistorian, DDNetVersion)
+{
+	const unsigned char EXPECTED[] = {
+		// EX uuid=60daba5c-52c4-3aeb-b8ba-b2953fb55a17 data_len=50
+		0x4a,
+		0x13, 0x97, 0xb6, 0x3e, 0xee, 0x4e, 0x39, 0x19,
+		0xb8, 0x6a, 0xb0, 0x58, 0x88, 0x7f, 0xca, 0xf5,
+		0x32,
+		// (DDNETVER) cid=0 connection_id=fb13a576-d35f-4893-b815-eedc6d98015b
+		// ddnet_version=13010 ddnet_version_str=DDNet 13.1 (3623f5e4cd184556)
+		0x00,
+		0xfb, 0x13, 0xa5, 0x76, 0xd3, 0x5f, 0x48, 0x93,
+		0xb8, 0x15, 0xee, 0xdc, 0x6d, 0x98, 0x01, 0x5b,
+		0x92, 0xcb, 0x01, 'D',  'D',  'N',  'e',  't',
+		' ',  '1',  '3',  '.',  '1',  ' ',  '(',  '3',
+		'6',  '2',  '3',  'f',  '5',  'e',  '4',  'c',
+		'd',  '1',  '8',  '4',  '5',  '5',  '6',  ')',
+		0x00,
+		// EX uuid=1397b63e-ee4e-3919-b86a-b058887fcaf5 data_len=4
+		0x4a,
+		0x41, 0xb4, 0x95, 0x41, 0xf2, 0x6f, 0x32, 0x5d,
+		0x87, 0x15, 0x9b, 0xaf, 0x4b, 0x54, 0x4e, 0xf9,
+		0x04,
+		// (DDNETVER_OLD) cid=1 ddnet_version=13010
+		0x01, 0x92, 0xcb, 0x01,
+		0x40, // FINISH
+	};
+	CUuid ConnectionID = {
+		0xfb, 0x13, 0xa5, 0x76, 0xd3, 0x5f, 0x48, 0x93,
+		0xb8, 0x15, 0xee, 0xdc, 0x6d, 0x98, 0x01, 0x5b,
+	};
+	m_TH.RecordDDNetVersion(0, ConnectionID, 13010, "DDNet 13.1 (3623f5e4cd184556)");
+	m_TH.RecordDDNetVersionOld(1, 13010);
+	Finish();
+	Expect(EXPECTED, sizeof(EXPECTED));
+}
+
 TEST_F(TeeHistorian, Auth)
 {
 	const unsigned char EXPECTED[] = {
@@ -361,3 +399,133 @@ TEST_F(TeeHistorian, Auth)
 	Finish();
 	Expect(EXPECTED, sizeof(EXPECTED));
 }
+
+TEST_F(TeeHistorian, JoinLeave)
+{
+
+	const unsigned char EXPECTED[] = {
+		// EX uuid=1899a382-71e3-36da-937d-c9de6bb95b1d data_len=1
+		0x4a,
+		0x18, 0x99, 0xa3, 0x82, 0x71, 0xe3, 0x36, 0xda,
+		0x93, 0x7d, 0xc9, 0xde, 0x6b, 0xb9, 0x5b, 0x1d,
+		0x01,
+		// (JOINVER6) cid=6
+		0x06,
+		// JOIN cid=7
+		0x47, 0x06,
+		// EX uuid=59239b05-0540-318d-bea4-9aa1e80e7d2b data_len=1
+		0x4a,
+		0x59, 0x23, 0x9b, 0x05, 0x05, 0x40, 0x31, 0x8d,
+		0xbe, 0xa4, 0x9a, 0xa1, 0xe8, 0x0e, 0x7d, 0x2b,
+		0x01,
+		// (JOINVER7) cid=7
+		0x07,
+		// JOIN cid=7
+		0x47, 0x07,
+		// LEAVE cid=6 reason="too many pancakes"
+		0x48, 0x06, 't',  'o',  'o', ' ',  'm',  'a',
+		'n',  'y',  ' ',  'p',  'a', 'n',  'c',  'a',
+		'k',  'e',  's',  0x00,
+		0x40, // FINISH
+	};
+	m_TH.RecordPlayerJoin(6, CTeeHistorian::PROTOCOL_6);
+	m_TH.RecordPlayerJoin(7, CTeeHistorian::PROTOCOL_7);
+	m_TH.RecordPlayerDrop(6, "too many pancakes");
+	Finish();
+	Expect(EXPECTED, sizeof(EXPECTED));
+}
+
+TEST_F(TeeHistorian, SaveSuccess)
+{
+	const unsigned char EXPECTED[] = {
+		// EX uuid=4560c756-da29-3036-81d4-90a50f0182cd datalen=42
+		0x4a,
+		0x45, 0x60, 0xc7, 0x56, 0xda, 0x29, 0x30, 0x36,
+		0x81, 0xd4, 0x90, 0xa5, 0x0f, 0x01, 0x82, 0xcd,
+		0x1a,
+		// team=21
+		0x15,
+		// save_id
+		0xfb, 0x13, 0xa5, 0x76, 0xd3, 0x5f, 0x48, 0x93,
+		0xb8, 0x15, 0xee, 0xdc, 0x6d, 0x98, 0x01, 0x5b,
+		// team_save
+		'2', '\t', 'H', '.', '\n', 'l', 'l', '0', 0x00,
+		// FINISH
+		0x40
+	};
+
+	CUuid SaveID = {
+		0xfb, 0x13, 0xa5, 0x76, 0xd3, 0x5f, 0x48, 0x93,
+		0xb8, 0x15, 0xee, 0xdc, 0x6d, 0x98, 0x01, 0x5b,
+	};
+	const char *pTeamSave = "2\tH.\nll0";
+	m_TH.RecordTeamSaveSuccess(21, SaveID, pTeamSave);
+	Finish();
+	Expect(EXPECTED, sizeof(EXPECTED));
+}
+
+TEST_F(TeeHistorian, SaveFailed)
+{
+	const unsigned char EXPECTED[] = {
+		// EX uuid=b29901d5-1244-3bd0-bbde-23d04b1f7ba9 datalen=42
+		0x4a,
+		0xb2, 0x99, 0x01, 0xd5, 0x12, 0x44, 0x3b, 0xd0,
+		0xbb, 0xde, 0x23, 0xd0, 0x4b, 0x1f, 0x7b, 0xa9,
+		0x01,
+		// team=12
+		0x0c,
+		0x40
+	};
+
+	m_TH.RecordTeamSaveFailure(12);
+	Finish();
+	Expect(EXPECTED, sizeof(EXPECTED));
+}
+
+TEST_F(TeeHistorian, LoadSuccess)
+{
+	const unsigned char EXPECTED[] = {
+		// EX uuid=e05408d3-a313-33df-9eb3-ddb990ab954a datalen=42
+		0x4a,
+		0xe0, 0x54, 0x08, 0xd3, 0xa3, 0x13, 0x33, 0xdf,
+		0x9e, 0xb3, 0xdd, 0xb9, 0x90, 0xab, 0x95, 0x4a,
+		0x1a,
+		// team=21
+		0x15,
+		// save_id
+		0xfb, 0x13, 0xa5, 0x76, 0xd3, 0x5f, 0x48, 0x93,
+		0xb8, 0x15, 0xee, 0xdc, 0x6d, 0x98, 0x01, 0x5b,
+		// team_save
+		'2', '\t', 'H', '.', '\n', 'l', 'l', '0', 0x00,
+		// FINISH
+		0x40
+	};
+
+	CUuid SaveID = {
+		0xfb, 0x13, 0xa5, 0x76, 0xd3, 0x5f, 0x48, 0x93,
+		0xb8, 0x15, 0xee, 0xdc, 0x6d, 0x98, 0x01, 0x5b,
+	};
+	const char *pTeamSave = "2\tH.\nll0";
+	m_TH.RecordTeamLoadSuccess(21, SaveID, pTeamSave);
+	Finish();
+	Expect(EXPECTED, sizeof(EXPECTED));
+}
+
+TEST_F(TeeHistorian, LoadFailed)
+{
+	const unsigned char EXPECTED[] = {
+		// EX uuid=ef8905a2-c695-3591-a1cd-53d2015992dd datalen=42
+		0x4a,
+		0xef, 0x89, 0x05, 0xa2, 0xc6, 0x95, 0x35, 0x91,
+		0xa1, 0xcd, 0x53, 0xd2, 0x01, 0x59, 0x92, 0xdd,
+		0x01,
+		// team=12
+		0x0c,
+		0x40
+	};
+
+	m_TH.RecordTeamLoadFailure(12);
+	Finish();
+	Expect(EXPECTED, sizeof(EXPECTED));
+}
+

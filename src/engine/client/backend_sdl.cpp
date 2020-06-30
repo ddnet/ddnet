@@ -65,7 +65,7 @@ void CGraphicsBackend_Threaded::ThreadFunc(void *pUser)
 		}
 		#if defined(CONF_VIDEORECORDER)
 			if (IVideo::Current())
-				IVideo::Current()->nextVideoFrame_thread();
+				IVideo::Current()->NextVideoFrameThread();
 		#endif
 	}
 }
@@ -1489,7 +1489,9 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_CreateBufferContainer(const CComma
 	{
 		for(int i = m_BufferContainers.size(); i < Index + 1; ++i)
 		{
-			m_BufferContainers.push_back(SBufferContainer());
+			SBufferContainer Container;
+			Container.m_ContainerInfo.m_Stride = 0;
+			m_BufferContainers.push_back(Container);
 		}
 	}
 

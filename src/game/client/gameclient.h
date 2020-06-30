@@ -48,6 +48,7 @@ public:
 	bool m_EntitiesRace;
 	bool m_EntitiesFNG;
 	bool m_EntitiesVanilla;
+	bool m_EntitiesBW;
 
 	bool m_Race;
 
@@ -106,6 +107,8 @@ class CGameClient : public IGameClient
 	int m_LastFlagCarrierBlue;
 
 	int m_CheckInfo[2];
+
+	char m_aDDNetVersionStr[64];
 
 	static void ConTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConKill(IConsole::IResult *pResult, void *pUserData);
@@ -263,6 +266,7 @@ public:
 		float m_Angle;
 		bool m_Active;
 		bool m_ChatIgnore;
+		bool m_EmoticonIgnore;
 		bool m_Friend;
 		bool m_Foe;
 
@@ -277,10 +281,6 @@ public:
 		void UpdateRenderInfo();
 		void Reset();
 
-		// DDRace
-
-		int m_Score;
-
 		// rendered characters
 		CNetObj_Character m_RenderCur;
 		CNetObj_Character m_RenderPrev;
@@ -291,6 +291,8 @@ public:
 		int64 m_SmoothLen[2];
 		vec2 m_PredPos[200];
 		int m_PredTick[200];
+		bool m_SpecCharPresent;
+		vec2 m_SpecChar;
 	};
 
 	CClientData m_aClients[MAX_CLIENTS];
@@ -359,6 +361,8 @@ public:
 	virtual const char *GetItemName(int Type);
 	virtual const char *Version();
 	virtual const char *NetVersion();
+	virtual int DDNetVersion();
+	virtual const char *DDNetVersionStr();
 
 	// actions
 	// TODO: move these

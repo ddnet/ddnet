@@ -72,6 +72,7 @@ void CAutoMapper::Load(const char* pTileName)
 				// new configuration, get the name
 				pLine++;
 				CConfiguration NewConf;
+				NewConf.m_aName[0] = '\0';
 				NewConf.m_StartX = 0;
 				NewConf.m_StartY = 0;
 				NewConf.m_EndX = 0;

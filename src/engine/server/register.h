@@ -23,11 +23,16 @@ class CRegister
 		int m_Count;
 		int m_Valid;
 		int64 m_LastSend;
+		SECURITY_TOKEN m_Token;
 	};
 
 	class CNetServer *m_pNetServer;
 	class IEngineMasterServer *m_pMasterServer;
 	class IConsole *m_pConsole;
+
+	bool m_Sixup;
+	const char *m_pName;
+	int64 m_LastTokenRequest;
 
 	int m_RegisterState;
 	int64 m_RegisterStateStart;
@@ -38,16 +43,17 @@ class CRegister
 	int m_RegisterRegisteredServer;
 
 	void RegisterNewState(int State);
-	void RegisterSendFwcheckresponse(NETADDR *pAddr);
-	void RegisterSendHeartbeat(NETADDR Addr);
-	void RegisterSendCountRequest(NETADDR Addr);
+	void RegisterSendFwcheckresponse(NETADDR *pAddr, SECURITY_TOKEN ResponseToken);
+	void RegisterSendHeartbeat(NETADDR Addr, SECURITY_TOKEN ResponseToken);
+	void RegisterSendCountRequest(NETADDR Addr, SECURITY_TOKEN ResponseToken);
 	void RegisterGotCount(struct CNetChunk *pChunk);
 
 public:
-	CRegister();
+	CRegister(bool Sixup);
 	void Init(class CNetServer *pNetServer, class IEngineMasterServer *pMasterServer, class IConsole *pConsole);
 	void RegisterUpdate(int Nettype);
-	int RegisterProcessPacket(struct CNetChunk *pPacket);
+	int RegisterProcessPacket(struct CNetChunk *pPacket, SECURITY_TOKEN ResponseToken = 0);
+	void FeedToken(NETADDR Addr, SECURITY_TOKEN ResponseToken);
 };
 
 #endif

@@ -35,6 +35,13 @@ void CNamePlates::RenderNameplate(
 	else
 		Position = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pPlayerChar->m_X, pPlayerChar->m_Y), Client()->IntraGameTick(g_Config.m_ClDummy));
 
+	RenderNameplatePos(Position, pPlayerInfo, 1.0f);
+}
+
+void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pPlayerInfo, float Alpha)
+{
+	int ClientID = pPlayerInfo->m_ClientID;
+
 	bool OtherTeam = m_pClient->IsOtherTeam(ClientID);
 
 	float FontSize = 18.0f + 20.0f * g_Config.m_ClNameplatesSize / 100.0f;
@@ -125,6 +132,9 @@ void CNamePlates::RenderNameplate(
 				TColor.Set(0.7f, 0.7f, 1.0f, a);
 		}
 
+		TOutlineColor.m_A *= Alpha;
+		TColor.m_A *= Alpha;
+
 		if(m_aNamePlates[ClientID].m_NameTextContainerIndex != -1)
 			TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_NameTextContainerIndex, &TColor, &TOutlineColor, Position.x - tw / 2.0f, Position.y - FontSize - 38.0f);
 
@@ -134,12 +144,13 @@ void CNamePlates::RenderNameplate(
 				TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex, &TColor, &TOutlineColor, Position.x - m_aNamePlates[ClientID].m_ClanNameTextWidth / 2.0f, Position.y - FontSize - FontSizeClan - 38.0f);
 		}
 
-		if(g_Config.m_Debug) // render client id when in debug as well
+		if(g_Config.m_Debug || g_Config.m_ClNameplatesIDs) // render client id when in debug as well
 		{
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf),"%d", pPlayerInfo->m_ClientID);
 			float Offset = g_Config.m_ClNameplatesClan ? (FontSize * 2 + FontSizeClan) : (FontSize * 2);
 			float tw_id = TextRender()->TextWidth(0, FontSize, aBuf, -1);
+			TextRender()->TextColor(rgb);
 			TextRender()->Text(0, Position.x-tw_id/2.0f, Position.y-Offset-38.0f, 28.0f, aBuf, -1);
 		}
 
@@ -157,18 +168,25 @@ void CNamePlates::OnRender()
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		// only render active characters
-		if(!m_pClient->m_Snap.m_aCharacters[i].m_Active)
+		const void *pInfoRaw = Client()->SnapFindItem(IClient::SNAP_CURRENT, NETOBJTYPE_PLAYERINFO, i);
+		const CNetObj_PlayerInfo *pInfo = (CNetObj_PlayerInfo *)pInfoRaw;
+		if(!pInfo)
+		{
 			continue;
+		}
 
-		const void *pInfo = Client()->SnapFindItem(IClient::SNAP_CURRENT, NETOBJTYPE_PLAYERINFO, i);
+		if(m_pClient->m_aClients[i].m_SpecCharPresent)
+		{
+			RenderNameplatePos(m_pClient->m_aClients[i].m_SpecChar, pInfo, 0.4f);
+		}
 
-		if(pInfo)
+		// only render active characters
+		if(m_pClient->m_Snap.m_aCharacters[i].m_Active)
 		{
 			RenderNameplate(
 				&m_pClient->m_Snap.m_aCharacters[i].m_Prev,
 				&m_pClient->m_Snap.m_aCharacters[i].m_Cur,
-				(const CNetObj_PlayerInfo *)pInfo);
+				pInfo);
 		}
 	}
 }

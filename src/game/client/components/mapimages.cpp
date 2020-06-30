@@ -104,6 +104,8 @@ IGraphics::CTextureHandle CMapImages::GetEntities()
 		pEntities = "ddrace";
 	else if(GameClient()->m_GameInfo.m_EntitiesRace)
 		pEntities = "race";
+	else if (GameClient()->m_GameInfo.m_EntitiesBW)
+		pEntities = "blockworlds";
 	else if(GameClient()->m_GameInfo.m_EntitiesFNG)
 		pEntities = "fng";
 	else if(GameClient()->m_GameInfo.m_EntitiesVanilla)
@@ -188,11 +190,6 @@ void CMapImages::UpdateEntityLayerText(IGraphics::CTextureHandle Texture, int Te
 	
 	int CurrentNumberSuitableFontSize = TextRender()->AdjustFontSize(aBuf, DigitsCount, TextureSize);
 	int UniversalSuitableFontSize = CurrentNumberSuitableFontSize*0.9; // should be smoothed enough to fit any digits combination
-
-	if (UniversalSuitableFontSize < 1)
-	{
-		dbg_msg("pFont", "texture with id '%d' will not be loaded. Reason - font is too small", (int)Texture);
-	}
 
 	int ApproximateTextWidth = TextRender()->CalculateTextWidth(aBuf, DigitsCount, 0, UniversalSuitableFontSize);
 	int XOffSet = (64-ApproximateTextWidth)/2;

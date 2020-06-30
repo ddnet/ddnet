@@ -66,9 +66,6 @@ Are you sure that you want to quit?
 Are you sure that you want to remove the player from your friends list?
 == Tem certeza que deseja remover o jogador de sua lista de amigos?
 
-As this is the first time you launch the game, please enter your nick name below. It's recommended that you check the settings to adjust them to your liking before joining a server.
-== Como esta é a primeira vez que você abre o jogo, por favor, coloque seu apelido abaixo. É recomendado que você verifique as configurações e então ajuste-as para suas preferências antes de entrar em um servidor.
-
 Automatically record demos
 == Gravar demos automaticamente
 
@@ -612,8 +609,8 @@ FSAA samples
 Inner color
 == Cor interna
 
-\n\nReconnect in %d sec
-== \n\nReconnetar em %d segundos
+Reconnect in %d sec
+== Reconnetar em %d segundos
 
 Save ghost
 == Salvar fantasma
@@ -987,9 +984,6 @@ Friend
 Friend message
 == Mensagem de amigo
 
-\xEE\x85\x8B
-== \xEE\x85\x8B
-
 Fat skins (DDFat)
 == Skins Fat (DDFat)
 
@@ -1035,8 +1029,11 @@ Vanilla skins only
 Date
 == Data
 
-Show DDNet map finishes in server browser\n(transmits your player name to info.ddnet.tw)
-== Mostrar finalizações de mapas do DDNet no navegador do servidor\n(transmite seu nome de jogador para info.ddnet.tw)
+Show DDNet map finishes in server browser
+== Mostrar finalizações de mapas do DDNet no navegador do servidor
+
+transmits your player name to info.ddnet.tw
+== transmite seu nome de jogador para info.ddnet.tw
 
 Reload
 == Recarregar
@@ -1154,3 +1151,54 @@ Zoom in
 
 Zoom out
 == Zoom out
+
+Video name:
+== 
+
+Replace video
+== 
+
+Learn
+== 
+
+It's recommended that you check the settings to adjust them to your liking before joining a server.
+== 
+
+Render
+== 
+
+Hook (right mouse) can be used to swing through the map and to hook other tees to you.
+== 
+
+Destination file already exist
+== 
+
+Connect Dummy
+== 
+
+Use high DPI
+== 
+
+The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
+== 
+
+Render demo
+== 
+
+DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
+== 
+
+Please enter your nick name below.
+== 
+
+Personal best:
+== 
+
+The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
+== 
+
+Server best:
+== 
+
+Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
+== 

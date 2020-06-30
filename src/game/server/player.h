@@ -5,7 +5,10 @@
 
 // this include should perhaps be removed
 #include "entities/character.h"
+#include "score.h"
+#include "teeinfo.h"
 #include "gamecontext.h"
+#include <memory>
 
 // player object
 class CPlayer
@@ -26,6 +29,8 @@ public:
 	void SetTeam(int Team, bool DoChatMsg=true);
 	int GetTeam() const { return m_Team; };
 	int GetCID() const { return m_ClientID; };
+	int GetClientVersion() const;
+	bool SetTimerType(int NewType);
 
 	void Tick();
 	void PostTick();
@@ -40,7 +45,6 @@ public:
 	void OnPredictedEarlyInput(CNetObj_PlayerInput *NewInput);
 	void OnDisconnect(const char *pReason);
 
-	void ThreadKillCharacter(int Weapon = WEAPON_GAME);
 	void KillCharacter(int Weapon = WEAPON_GAME);
 	CCharacter *GetCharacter();
 
@@ -82,14 +86,7 @@ public:
 
 	int m_SendVoteIndex;
 
-	// TODO: clean this up
-	struct
-	{
-		char m_SkinName[64];
-		int m_UseCustomColor;
-		int m_ColorBody;
-		int m_ColorFeet;
-	} m_TeeInfos;
+	CTeeInfo m_TeeInfos;
 
 	int m_DieTick;
 	int m_PreviousDieTick;
@@ -144,9 +141,11 @@ public:
 
 	enum
 	{
+		TIMERTYPE_DEFAULT=-1,
 		TIMERTYPE_GAMETIMER=0,
 		TIMERTYPE_BROADCAST,
 		TIMERTYPE_GAMETIMER_AND_BROADCAST,
+		TIMERTYPE_SIXUP,
 		TIMERTYPE_NONE,
 	};
 
@@ -162,13 +161,12 @@ public:
 	bool IsPlaying();
 	int64 m_Last_KickVote;
 	int64 m_Last_Team;
-	int m_ClientVersion;
 	bool m_ShowOthers;
 	bool m_ShowAll;
+	vec2 m_ShowDistance;
 	bool m_SpecTeam;
 	bool m_NinjaJetpack;
 	bool m_Afk;
-	int m_KillMe;
 	bool m_HasFinishScore;
 
 	int m_ChatScore;
@@ -193,11 +191,13 @@ public:
 	int m_DefEmoteReset;
 	bool m_Halloween;
 	bool m_FirstPacket;
-#if defined(CONF_SQL)
 	int64 m_LastSQLQuery;
-#endif
+	void ProcessScoreResult(CScorePlayerResult &Result);
+	std::shared_ptr<CScorePlayerResult> m_ScoreQueryResult;
+	std::shared_ptr<CScorePlayerResult> m_ScoreFinishResult;
 	bool m_NotEligibleForFinish;
 	int64 m_EligibleForFinishCheck;
+	bool m_VotedForPractice;
 };
 
 #endif

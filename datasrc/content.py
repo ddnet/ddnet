@@ -269,7 +269,7 @@ set_speedup_arrow = SpriteSet("speedup_arrow", image_speedup_arrow, 1, 1)
 set_demobuttons = SpriteSet("demobuttons", image_demobuttons, 5, 1)
 set_fileicons = SpriteSet("fileicons", image_fileicons, 8, 1)
 set_guibuttons = SpriteSet("guibuttons", image_guibuttons, 12, 4)
-set_guiicons = SpriteSet("guiicons", image_guiicons, 8, 2)
+set_guiicons = SpriteSet("guiicons", image_guiicons, 12, 2)
 set_demobuttons2 = SpriteSet("demobuttons2", image_demobuttons2, 4, 1)
 set_audio_source = SpriteSet("audio_source", image_audio_source, 1, 1)
 
@@ -422,7 +422,8 @@ container.sprites.Add(Sprite("guibutton_on", set_guibuttons, 4,0,4,4))
 container.sprites.Add(Sprite("guibutton_hover", set_guibuttons, 8,0,4,4))
 
 container.sprites.Add(Sprite("guiicon_mute", set_guiicons, 0,0,4,2))
-container.sprites.Add(Sprite("guiicon_friend", set_guiicons, 4,0,4,2))
+container.sprites.Add(Sprite("guiicon_emoticon_mute", set_guiicons, 4,0,4,2))
+container.sprites.Add(Sprite("guiicon_friend", set_guiicons, 8,0,4,2))
 
 container.sprites.Add(Sprite("audio_source", set_audio_source, 0,0,1,1))
 

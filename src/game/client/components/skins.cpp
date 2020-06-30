@@ -15,7 +15,7 @@
 static const char *VANILLA_SKINS[] = {"bluekitty", "bluestripe", "brownbear",
 	"cammo", "cammostripes", "coala", "default", "limekitty",
 	"pinky", "redbopp", "redstripe", "saddo", "toptri",
-	"twinbop", "twintri", "warpaint", "x_ninja"};
+	"twinbop", "twintri", "warpaint", "x_ninja", "x_spec"};
 
 static bool IsVanillaSkin(const char *pName)
 {
