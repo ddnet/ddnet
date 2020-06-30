@@ -21,7 +21,11 @@ class CCamera : public CComponent
 public:
 	vec2 m_Center;
 	bool m_ZoomSet;
+	float m_StartZoom;
 	float m_Zoom;
+	float m_TargetZoom;
+	float m_ZoomAnimStartTick;
+	float m_ZoomAnimEndTick;
 
 	CCamera();
 	virtual void OnRender();
@@ -30,6 +34,8 @@ public:
 
 	virtual void OnConsoleInit();
 	virtual void OnReset();
+
+	void StartSmoothZoom(float ZoomStep);
 
 private:
 	static void ConZoomPlus(IConsole::IResult *pResult, void *pUserData);

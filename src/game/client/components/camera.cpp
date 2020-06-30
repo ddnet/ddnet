@@ -20,14 +20,32 @@ CCamera::CCamera()
 	m_CamType = CAMTYPE_UNDEFINED;
 	m_ZoomSet = false;
 	m_Zoom = 1.0f;
+	m_StartZoom = m_Zoom;
+	m_TargetZoom = m_Zoom;
+	m_ZoomAnimStartTick = 0;
+	m_ZoomAnimEndTick = 0;
 }
 
 void CCamera::OnRender()
 {
+	if(Client()->GameTick(g_Config.m_ClDummy) < m_ZoomAnimEndTick && m_ZoomAnimStartTick < m_ZoomAnimEndTick)
+	{
+		int SmoothTick;
+		Client()->GetSmoothTick(&SmoothTick, NULL, 0);
+		m_Zoom = mix(m_StartZoom, m_TargetZoom, (SmoothTick - m_ZoomAnimStartTick) / (m_ZoomAnimEndTick - m_ZoomAnimStartTick));
+		if(m_TargetZoom < m_StartZoom)
+			m_Zoom = clamp(m_Zoom, m_TargetZoom, m_StartZoom);
+		else
+			m_Zoom = clamp(m_Zoom, m_StartZoom, m_TargetZoom);
+	}
+
 	if(!(m_pClient->m_Snap.m_SpecInfo.m_Active || GameClient()->m_GameInfo.m_AllowZoom || Client()->State() == IClient::STATE_DEMOPLAYBACK))
 	{
 		m_ZoomSet = false;
 		m_Zoom = 1.0f;
+		m_StartZoom = m_Zoom;
+		m_TargetZoom = m_Zoom;
+		m_ZoomAnimEndTick = 0;
 	}
 	else if(!m_ZoomSet && g_Config.m_ClDefaultZoom != 10)
 	{
@@ -102,26 +120,45 @@ void CCamera::OnReset()
 		m_Zoom = pow(ZoomStep, g_Config.m_ClDefaultZoom - 10);
 	}
 
+	m_StartZoom = m_Zoom;
+	m_TargetZoom = m_Zoom;
+	m_ZoomAnimEndTick = 0;
 }
 
 void CCamera::ConZoomPlus(IConsole::IResult *pResult, void *pUserData)
 {
 	CCamera *pSelf = (CCamera *)pUserData;
 	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || pSelf->GameClient()->m_GameInfo.m_AllowZoom || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
-		((CCamera *)pUserData)->m_Zoom *= ZoomStep;
+	{
+		if(g_Config.m_ClSmoothZoom)
+			pSelf->StartSmoothZoom(ZoomStep);
+		else
+			pSelf->m_Zoom *= ZoomStep;
+	}
 }
 void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData)
 {
 	CCamera *pSelf = (CCamera *)pUserData;
 	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || pSelf->GameClient()->m_GameInfo.m_AllowZoom || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
-		if(((CCamera *)pUserData)->m_Zoom < 500.0f/ZoomStep)
+		if(pSelf->m_Zoom < 500.0f/ZoomStep)
 		{
-			((CCamera *)pUserData)->m_Zoom *= 1/ZoomStep;
+			if(g_Config.m_ClSmoothZoom)
+				pSelf->StartSmoothZoom(1/ZoomStep);
+			else
+				pSelf->m_Zoom *= 1/ZoomStep;
 		}
 	}
 }
 void CCamera::ConZoomReset(IConsole::IResult *pResult, void *pUserData)
 {
 	((CCamera *)pUserData)->OnReset();
+}
+
+void CCamera::StartSmoothZoom(float ZoomStep)
+{
+	m_StartZoom = m_Zoom;
+	m_TargetZoom = m_StartZoom * ZoomStep;
+	m_ZoomAnimStartTick = Client()->GameTick(g_Config.m_ClDummy);
+	m_ZoomAnimEndTick = m_ZoomAnimStartTick + g_Config.m_ClSmoothZoomLength / 1000.f * Client()->GameTickSpeed();
 }
