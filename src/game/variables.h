@@ -82,8 +82,8 @@ MACRO_CONFIG_INT(ClAutoStatboardScreenshot, cl_auto_statboard_screenshot, 0, 0, 
 MACRO_CONFIG_INT(ClAutoStatboardScreenshotMax, cl_auto_statboard_screenshot_max, 10, 0, 1000, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Maximum number of automatically created statboard screenshots (0 = no limit)")
 
 MACRO_CONFIG_INT(ClDefaultZoom, cl_default_zoom, 10, 0, 20, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Default zoom level (10 default, min 0, max 20)")
-MACRO_CONFIG_INT(ClSmoothZoom, cl_smooth_zoom, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Whether to enable smooth zoom.")
-MACRO_CONFIG_INT(ClSmoothZoomLength, cl_smooth_zoom_length, 400, 1, 5000, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Zoom smooth animation length in miliseconds.")
+MACRO_CONFIG_INT(ClSmoothZoom, cl_smooth_zoom, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Whether to enable smooth zoom.")
+MACRO_CONFIG_INT(ClSmoothZoomLength, cl_smooth_zoom_length, 800, 1, 5000, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Zoom smooth animation length in miliseconds.")
 
 MACRO_CONFIG_INT(ClPlayerUseCustomColor, player_use_custom_color, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Toggles usage of custom colors")
 MACRO_CONFIG_COL(ClPlayerColorBody, player_color_body, 65408, CFGFLAG_CLIENT|CFGFLAG_SAVE|CFGFLAG_COLLIGHT, "Player body color")

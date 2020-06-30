@@ -36,6 +36,9 @@ public:
 	virtual void OnReset();
 
 	void StartSmoothZoom(float ZoomStep);
+	// Returns the zoom progress [0, 1]
+	float ZoomProgress();
+	bool IsZooming();
 
 private:
 	static void ConZoomPlus(IConsole::IResult *pResult, void *pUserData);

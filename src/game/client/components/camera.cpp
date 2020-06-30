@@ -28,11 +28,14 @@ CCamera::CCamera()
 
 void CCamera::OnRender()
 {
-	if(Client()->GameTick(g_Config.m_ClDummy) < m_ZoomAnimEndTick && m_ZoomAnimStartTick < m_ZoomAnimEndTick)
+	if(IsZooming())
 	{
-		int SmoothTick;
-		Client()->GetSmoothTick(&SmoothTick, NULL, 0);
-		m_Zoom = mix(m_StartZoom, m_TargetZoom, (SmoothTick - m_ZoomAnimStartTick) / (m_ZoomAnimEndTick - m_ZoomAnimStartTick));
+
+		// The logistic function with default values give values near maximums and minimums on [-6, 6].
+		float ScaledProgress = ZoomProgress() * 12 - 6;
+		float Amount = 1.f / (1.f + exp(-ScaledProgress));
+		m_Zoom = mix(m_StartZoom, m_TargetZoom, Amount);
+
 		if(m_TargetZoom < m_StartZoom)
 			m_Zoom = clamp(m_Zoom, m_TargetZoom, m_StartZoom);
 		else
@@ -155,10 +158,30 @@ void CCamera::ConZoomReset(IConsole::IResult *pResult, void *pUserData)
 	((CCamera *)pUserData)->OnReset();
 }
 
+float CCamera::ZoomProgress()
+{
+	int SmoothTick;
+	Client()->GetSmoothTick(&SmoothTick, NULL, 0);
+	return (SmoothTick - m_ZoomAnimStartTick) / (m_ZoomAnimEndTick - m_ZoomAnimStartTick);
+}
+
+bool CCamera::IsZooming()
+{
+	return Client()->GameTick(g_Config.m_ClDummy) < m_ZoomAnimEndTick && m_ZoomAnimStartTick < m_ZoomAnimEndTick;
+}
+
 void CCamera::StartSmoothZoom(float ZoomStep)
 {
-	m_StartZoom = m_Zoom;
-	m_TargetZoom = m_StartZoom * ZoomStep;
-	m_ZoomAnimStartTick = Client()->GameTick(g_Config.m_ClDummy);
-	m_ZoomAnimEndTick = m_ZoomAnimStartTick + g_Config.m_ClSmoothZoomLength / 1000.f * Client()->GameTickSpeed();
+	// Check if we are in the middle of a smooth zoom already.
+	if(IsZooming())
+	{
+		// TODO: Implement
+	}
+	else
+	{
+		m_StartZoom = m_Zoom;
+		m_TargetZoom = m_StartZoom * ZoomStep;
+		m_ZoomAnimStartTick = Client()->GameTick(g_Config.m_ClDummy);
+		m_ZoomAnimEndTick = m_ZoomAnimStartTick + g_Config.m_ClSmoothZoomLength / 1000.f * Client()->GameTickSpeed();
+	}
 }
