@@ -1527,6 +1527,8 @@ set_src(ENGINE_SHARED GLOB src/engine/shared
   websockets.h
 )
 set_src(GAME_SHARED GLOB src/game
+  bezier.cpp
+  bezier.h
   collision.cpp
   collision.h
   ddracecommands.h

@@ -6,49 +6,83 @@
 #include <engine/shared/config.h>
 
 #include <base/math.h>
-#include <game/collision.h>
-#include <game/client/gameclient.h>
 #include <game/client/component.h>
+#include <game/client/gameclient.h>
+#include <game/collision.h>
 
 #include "camera.h"
 #include "controls.h"
 
 #include <engine/serverbrowser.h>
 
+const float ZoomStep = 0.866025f;
+const float ZoomTime = 0.25f;
+
 CCamera::CCamera()
 {
 	m_CamType = CAMTYPE_UNDEFINED;
 	m_ZoomSet = false;
 	m_Zoom = 1.0f;
-	m_StartZoom = m_Zoom;
-	m_TargetZoom = m_Zoom;
-	m_ZoomAnimStartTick = 0;
-	m_ZoomAnimEndTick = 0;
+	m_Zooming = false;
+}
+
+float CCamera::ZoomProgress(float CurrentTime) const
+{
+	return (CurrentTime - m_ZoomSmoothingStart) / (m_ZoomSmoothingEnd - m_ZoomSmoothingStart);
+}
+
+void CCamera::ScaleZoom(float Factor)
+{
+	float CurrentTarget = m_Zooming ? m_ZoomSmoothingTarget : m_Zoom;
+	ChangeZoom(CurrentTarget * Factor);
+}
+
+void CCamera::ChangeZoom(float Target)
+{
+	if(Target >= 500.0f/ZoomStep)
+	{
+		return;
+	}
+
+	float Now = Client()->LocalTime();
+	float Current = m_Zoom;
+	float Derivative = 0.0f;
+	if(m_Zooming)
+	{
+		float Progress = ZoomProgress(Now);
+		Current = m_ZoomSmoothing.Evaluate(Progress);
+		Derivative = m_ZoomSmoothing.Derivative(Progress);
+	}
+
+	m_ZoomSmoothingTarget = Target;
+	m_ZoomSmoothing = CCubicBezier::With(Current, Derivative, 0, m_ZoomSmoothingTarget);
+	m_ZoomSmoothingStart = Now;
+	m_ZoomSmoothingEnd = Now + ZoomTime;
+
+	m_Zooming = true;
 }
 
 void CCamera::OnRender()
 {
-	if(IsZooming())
+	if(m_Zooming)
 	{
-
-		// The logistic function with default values give values near maximums and minimums on [-6, 6].
-		float ScaledProgress = ZoomProgress() * 12 - 6;
-		float Amount = 1.f / (1.f + exp(-ScaledProgress));
-		m_Zoom = mix(m_StartZoom, m_TargetZoom, Amount);
-
-		if(m_TargetZoom < m_StartZoom)
-			m_Zoom = clamp(m_Zoom, m_TargetZoom, m_StartZoom);
+		float Time = Client()->LocalTime();
+		if(Time >= m_ZoomSmoothingEnd)
+		{
+			m_Zoom = m_ZoomSmoothingTarget;
+			m_Zooming = false;
+		}
 		else
-			m_Zoom = clamp(m_Zoom, m_StartZoom, m_TargetZoom);
+		{
+			m_Zoom = m_ZoomSmoothing.Evaluate(ZoomProgress(Time));
+		}
 	}
 
 	if(!(m_pClient->m_Snap.m_SpecInfo.m_Active || GameClient()->m_GameInfo.m_AllowZoom || Client()->State() == IClient::STATE_DEMOPLAYBACK))
 	{
 		m_ZoomSet = false;
 		m_Zoom = 1.0f;
-		m_StartZoom = m_Zoom;
-		m_TargetZoom = m_Zoom;
-		m_ZoomAnimEndTick = 0;
+		m_Zooming = false;
 	}
 	else if(!m_ZoomSet && g_Config.m_ClDefaultZoom != 10)
 	{
@@ -108,24 +142,10 @@ void CCamera::OnConsoleInit()
 	Console()->Register("zoom", "", CFGFLAG_CLIENT, ConZoomReset, this, "Zoom reset");
 }
 
-const float ZoomStep = 0.866025f;
-
 void CCamera::OnReset()
 {
-	m_Zoom = 1.0f;
-
-	if(g_Config.m_ClDefaultZoom < 10)
-	{
-		m_Zoom = pow(1/ZoomStep, 10 - g_Config.m_ClDefaultZoom);
-	}
-	else if(g_Config.m_ClDefaultZoom > 10)
-	{
-		m_Zoom = pow(ZoomStep, g_Config.m_ClDefaultZoom - 10);
-	}
-
-	m_StartZoom = m_Zoom;
-	m_TargetZoom = m_Zoom;
-	m_ZoomAnimEndTick = 0;
+	m_Zoom = pow(ZoomStep, g_Config.m_ClDefaultZoom - 10);
+	m_Zooming = false;
 }
 
 void CCamera::ConZoomPlus(IConsole::IResult *pResult, void *pUserData)
@@ -133,10 +153,7 @@ void CCamera::ConZoomPlus(IConsole::IResult *pResult, void *pUserData)
 	CCamera *pSelf = (CCamera *)pUserData;
 	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || pSelf->GameClient()->m_GameInfo.m_AllowZoom || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
-		if(g_Config.m_ClSmoothZoom)
-			pSelf->StartSmoothZoom(ZoomStep);
-		else
-			pSelf->m_Zoom *= ZoomStep;
+		pSelf->ScaleZoom(ZoomStep);
 	}
 }
 void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData)
@@ -144,44 +161,10 @@ void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData)
 	CCamera *pSelf = (CCamera *)pUserData;
 	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || pSelf->GameClient()->m_GameInfo.m_AllowZoom || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
-		if(pSelf->m_Zoom < 500.0f/ZoomStep)
-		{
-			if(g_Config.m_ClSmoothZoom)
-				pSelf->StartSmoothZoom(1/ZoomStep);
-			else
-				pSelf->m_Zoom *= 1/ZoomStep;
-		}
+		pSelf->ScaleZoom(1 / ZoomStep);
 	}
 }
 void CCamera::ConZoomReset(IConsole::IResult *pResult, void *pUserData)
 {
-	((CCamera *)pUserData)->OnReset();
-}
-
-float CCamera::ZoomProgress()
-{
-	int SmoothTick;
-	Client()->GetSmoothTick(&SmoothTick, NULL, 0);
-	return (SmoothTick - m_ZoomAnimStartTick) / (m_ZoomAnimEndTick - m_ZoomAnimStartTick);
-}
-
-bool CCamera::IsZooming()
-{
-	return Client()->GameTick(g_Config.m_ClDummy) < m_ZoomAnimEndTick && m_ZoomAnimStartTick < m_ZoomAnimEndTick;
-}
-
-void CCamera::StartSmoothZoom(float ZoomStep)
-{
-	// Check if we are in the middle of a smooth zoom already.
-	if(IsZooming())
-	{
-		// TODO: Implement
-	}
-	else
-	{
-		m_StartZoom = m_Zoom;
-		m_TargetZoom = m_StartZoom * ZoomStep;
-		m_ZoomAnimStartTick = Client()->GameTick(g_Config.m_ClDummy);
-		m_ZoomAnimEndTick = m_ZoomAnimStartTick + g_Config.m_ClSmoothZoomLength / 1000.f * Client()->GameTickSpeed();
-	}
+	((CCamera *)pUserData)->ChangeZoom(1.0f);
 }
