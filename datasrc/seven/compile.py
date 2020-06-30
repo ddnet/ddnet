@@ -116,8 +116,8 @@ if gen_network_header:
 	print("")
 
 	print("""
-template<class...>
-using void_t = void;
+template<typename... Ts> struct make_void { typedef void type;};
+template<typename... Ts> using void_t = typename make_void<Ts...>::type;
 
 template<typename T, typename = void>
 struct is_sixup {
