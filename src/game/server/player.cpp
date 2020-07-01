@@ -941,8 +941,7 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 				GameServer()->SendBroadcast(Result.m_Data.m_Broadcast, -1);
 			break;
 		case CScorePlayerResult::MAP_VOTE:
-			GameServer()->m_VoteKick = false;
-			GameServer()->m_VoteSpec = false;
+			GameServer()->m_VoteType = CGameContext::VOTE_TYPE_OPTION;
 			GameServer()->m_LastMapVote = time_get();
 
 			char aCmd[256];
