@@ -991,7 +991,7 @@ int CServer::NewClientCallback(int ClientID, void *pUser, bool Sixup)
 	pThis->m_aClients[ClientID].Reset();
 
 	pThis->GameServer()->OnClientEngineJoin(ClientID, Sixup);
-	pThis->Antibot()->OnEngineClientJoin(ClientID);
+	pThis->Antibot()->OnEngineClientJoin(ClientID, Sixup);
 
 	pThis->m_aClients[ClientID].m_Sixup = Sixup;
 
