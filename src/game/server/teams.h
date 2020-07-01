@@ -71,6 +71,7 @@ public:
 	void ForceLeaveTeam(int ClientID);
 
 	void Reset();
+	void ResetSwitchers(int Team);
 
 	void SendTeamsState(int ClientID);
 	void SetTeamLock(int Team, bool Lock);
