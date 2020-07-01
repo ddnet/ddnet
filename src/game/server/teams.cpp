@@ -25,6 +25,18 @@ void CGameTeams::Reset()
 	}
 }
 
+void CGameTeams::ResetSwitchers(int Team)
+{
+	if (GameServer()->Collision()->m_NumSwitchers > 0) {
+		for (int i = 0; i < GameServer()->Collision()->m_NumSwitchers+1; ++i)
+		{
+			GameServer()->Collision()->m_pSwitchers[i].m_Status[Team] = GameServer()->Collision()->m_pSwitchers[i].m_Initial;
+			GameServer()->Collision()->m_pSwitchers[i].m_EndTick[Team] = 0;
+			GameServer()->Collision()->m_pSwitchers[i].m_Type[Team] = TILE_SWITCHOPEN;
+		}
+	}
+}
+
 void CGameTeams::OnCharacterStart(int ClientID)
 {
 	int Tick = Server()->Tick();
@@ -283,19 +295,12 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 			GetPlayer(ClientID)->m_VotedForPractice = false;
 	}
 
-	if (Team != TEAM_SUPER && (m_TeamState[Team] == TEAMSTATE_EMPTY || m_TeamLocked[Team] || g_Config.m_SvTeam == 3))
+	if (Team != TEAM_SUPER && (m_TeamState[Team] == TEAMSTATE_EMPTY || m_TeamLocked[Team]))
 	{
 		if (!m_TeamLocked[Team])
 			ChangeTeamState(Team, TEAMSTATE_OPEN);
 
-		if (GameServer()->Collision()->m_NumSwitchers > 0) {
-			for (int i = 0; i < GameServer()->Collision()->m_NumSwitchers+1; ++i)
-			{
-				GameServer()->Collision()->m_pSwitchers[i].m_Status[Team] = GameServer()->Collision()->m_pSwitchers[i].m_Initial;
-				GameServer()->Collision()->m_pSwitchers[i].m_EndTick[Team] = 0;
-				GameServer()->Collision()->m_pSwitchers[i].m_Type[Team] = TILE_SWITCHOPEN;
-			}
-		}
+		ResetSwitchers(Team);
 	}
 }
 
@@ -762,7 +767,8 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 
 	if(g_Config.m_SvTeam == 3)
 	{
-		SetForceCharacterTeam(ClientID, Team);
+		ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
+		ResetSwitchers(Team);
 		m_Practice[Team] = false;
 	}
 	else if(Locked)
@@ -840,6 +846,7 @@ void CGameTeams::ResetSavedTeam(int ClientID, int Team)
 	if(g_Config.m_SvTeam == 3)
 	{
 		ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
+		ResetSwitchers(Team);
 	}
 	else
 	{
