@@ -30,7 +30,7 @@ public:
 	virtual void Init();
 
 	virtual void OnEngineTick();
-	virtual void OnEngineClientJoin(int ClientID);
+	virtual void OnEngineClientJoin(int ClientID, bool Sixup);
 	virtual void OnEngineClientDrop(int ClientID, const char *pReason);
 	virtual void OnEngineClientMessage(int ClientID, const void *pData, int Size, int Flags);
 
