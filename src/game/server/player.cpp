@@ -411,8 +411,8 @@ void CPlayer::Snap(int SnappingClient)
 	{
 		CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
 		ShowSpec = ShowSpec && (
-			GameServer()->GetDDRaceTeam(id) == GameServer()->GetDDRaceTeam(SnappingClient) 
-			|| pSnapPlayer->m_ShowOthers 
+			GameServer()->GetDDRaceTeam(id) == GameServer()->GetDDRaceTeam(SnappingClient)
+			|| pSnapPlayer->m_ShowOthers
 			|| (pSnapPlayer->GetTeam() == TEAM_SPECTATORS || pSnapPlayer->IsPaused())
 			);
 	}
@@ -933,7 +933,7 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 			{
 				if(Result.m_Data.m_aaMessages[i][0] == 0)
 					break;
-				GameServer()->SendChat(-1, CGameContext::CHAT_ALL, Result.m_Data.m_aaMessages[i]);
+				GameServer()->SendChat(-1, CGameContext::CHAT_ALL, Result.m_Data.m_aaMessages[i], m_ClientID);
 			}
 			break;
 		case CScorePlayerResult::BROADCAST:
