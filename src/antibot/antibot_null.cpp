@@ -32,7 +32,7 @@ void AntibotOnDirectInput(int ClientID) { (void)ClientID; }
 void AntibotOnCharacterTick(int ClientID) { (void)ClientID; }
 void AntibotOnHookAttach(int ClientID, bool Player) { (void)ClientID; (void)Player; }
 void AntibotOnEngineTick(void) { }
-void AntibotOnEngineClientJoin(int ClientID) { (void)ClientID; }
+void AntibotOnEngineClientJoin(int ClientID, bool Sixup) { (void)ClientID; (void)Sixup; }
 void AntibotOnEngineClientDrop(int ClientID, const char *pReason) { (void)ClientID; (void)pReason; }
 void AntibotOnEngineClientMessage(int ClientID, const void *pData, int Size, int Flags) { (void)ClientID; (void)pData; (void)Size; (void)Flags; }
 
