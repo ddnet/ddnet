@@ -1687,7 +1687,7 @@ void CSqlScore::LoadTeam(const char* Code, int ClientID)
 	int Team = pController->m_Teams.m_Core.Team(ClientID);
 	if(pController->m_Teams.GetSaving(Team))
 		return;
-	if(Team <= 0 || Team >= MAX_CLIENTS)
+	if(Team < TEAM_FLOCK || Team >= MAX_CLIENTS || (g_Config.m_SvTeam != 3 && Team == TEAM_FLOCK))
 	{
 		GameServer()->SendChatTarget(ClientID, "You have to be in a team (from 1-63)");
 		return;

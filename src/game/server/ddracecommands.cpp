@@ -658,6 +658,13 @@ void CGameContext::ConSetDDRTeam(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	CGameControllerDDRace *pController = (CGameControllerDDRace *)pSelf->m_pController;
 
+	if(g_Config.m_SvTeam == 0 || g_Config.m_SvTeam == 3)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",
+				"Teams are disabled");
+		return;
+	}
+
 	int Target = pResult->GetVictim();
 	int Team = pResult->GetInteger(1);
 
