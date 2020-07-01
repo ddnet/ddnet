@@ -1194,4 +1194,4 @@ Connect Dummy
 == Anslut Dummy
 
 Show others (own team only)
-== 
+== Visa andra (eget lag endast)
