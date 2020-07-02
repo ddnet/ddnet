@@ -2419,6 +2419,12 @@ void CCharacter::Rescue()
 		m_Core.m_HookState = HOOK_IDLE;
 		m_StartTime = StartTime;
 		m_SavedInput.m_Direction = 0;
+		m_SavedInput.m_Jump = 0;
+		// simulate releasing the fire button
+		if((m_SavedInput.m_Fire&1) != 0)
+			m_SavedInput.m_Fire++;
+		m_SavedInput.m_Fire &= INPUT_STATE_MASK;
+		m_SavedInput.m_Hook = 0;
 		m_pPlayer->Pause(CPlayer::PAUSE_NONE, true);
 	}
 }
