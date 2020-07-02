@@ -436,10 +436,10 @@ int CSaveTeam::save(int Team)
 		CCharacter *p = (CCharacter *)m_pController->GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_CHARACTER);
 		for(; p; p = (CCharacter *)p->TypeNext())
 		{
-			if(m_MembersCount == j)
-				return 3;
 			if(Teams->m_Core.Team(p->GetPlayer()->GetCID()) != Team)
 				continue;
+			if(m_MembersCount == j)
+				return 3;
 			m_pSavedTees[j].save(p);
 			j++;
 		}
