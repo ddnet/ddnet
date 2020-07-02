@@ -2402,8 +2402,9 @@ void CCharacter::DDRaceInit()
 
 void CCharacter::Rescue()
 {
-	if (m_SetSavePos && !m_Super) {
-		if (m_LastRescue + g_Config.m_SvRescueDelay * Server()->TickSpeed() > Server()->Tick())
+	if(m_SetSavePos && !m_Super)
+	{
+		if(m_LastRescue + g_Config.m_SvRescueDelay * Server()->TickSpeed() > Server()->Tick())
 		{
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "You have to wait %d seconds until you can rescue yourself", (int)((m_LastRescue + g_Config.m_SvRescueDelay * Server()->TickSpeed() - Server()->Tick()) / Server()->TickSpeed()));
@@ -2411,12 +2412,19 @@ void CCharacter::Rescue()
 			return;
 		}
 
-
 		float StartTime = m_StartTime;
 		m_RescueTee.load(this, Team());
 		// Don't load these from saved tee:
 		m_Core.m_Vel = vec2(0, 0);
 		m_Core.m_HookState = HOOK_IDLE;
 		m_StartTime = StartTime;
+		m_SavedInput.m_Direction = 0;
+		m_SavedInput.m_Jump = 0;
+		// simulate releasing the fire button
+		if((m_SavedInput.m_Fire&1) != 0)
+			m_SavedInput.m_Fire++;
+		m_SavedInput.m_Fire &= INPUT_STATE_MASK;
+		m_SavedInput.m_Hook = 0;
+		m_pPlayer->Pause(CPlayer::PAUSE_NONE, true);
 	}
 }
