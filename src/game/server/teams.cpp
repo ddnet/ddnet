@@ -147,8 +147,7 @@ void CGameTeams::OnCharacterStart(int ClientID)
 
 void CGameTeams::OnCharacterFinish(int ClientID)
 {
-	if (m_Core.Team(ClientID) == TEAM_FLOCK
-			|| g_Config.m_SvTeam == 3
+	if((m_Core.Team(ClientID) == TEAM_FLOCK && g_Config.m_SvTeam != 3)
 			|| m_Core.Team(ClientID) == TEAM_SUPER)
 	{
 		CPlayer* pPlayer = GetPlayer(ClientID);
