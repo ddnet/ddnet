@@ -770,6 +770,7 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 		ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
 		ResetSwitchers(Team);
 		m_Practice[Team] = false;
+		GameServer()->m_apPlayers[ClientID]->m_VotedForPractice = false;
 	}
 	else if(Locked)
 	{
