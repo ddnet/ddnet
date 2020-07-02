@@ -2079,6 +2079,7 @@ add_custom_target(everything DEPENDS ${TARGETS_OWN})
 if(GTEST_FOUND OR DOWNLOAD_GTEST)
   set_src(TESTS GLOB src/test
     aio.cpp
+    bezier.cpp
     color.cpp
     csv.cpp
     datafile.cpp
