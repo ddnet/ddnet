@@ -1,6 +1,5 @@
 #include <cmath>
 #include <cstring>
-#include <ctime>
 #include <base/system.h>
 
 #include "sql_string_helpers.h"
@@ -135,12 +134,4 @@ void sqlstr::AgoTimeToString(int AgoTime, char *pAgoString)
 			strcat(pAgoString, aBuf);
 		}
 	}
-}
-
-void sqlstr::GetTimeStamp(char *pDest, unsigned int Size)
-{
-	std::time_t Rawtime;
-	std::time(&Rawtime);
-
-	str_timestamp_ex(Rawtime, pDest, Size, FORMAT_SPACE);
 }

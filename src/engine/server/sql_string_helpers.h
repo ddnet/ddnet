@@ -13,9 +13,6 @@ void ClearString(char *pString, int size = 32);
 
 void AgoTimeToString(int agoTime, char *pAgoString);
 
-void GetTimeStamp(char *pDest, unsigned int Size);
-
-
 template<unsigned int size>
 class CSqlString
 {
