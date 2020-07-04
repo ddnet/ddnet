@@ -1840,6 +1840,8 @@ set_src(ENGINE_SERVER GLOB_RECURSE src/engine/server
   authmanager.cpp
   authmanager.h
   databases/connection.h
+  databases/connection_pool.cpp
+  databases/connection_pool.h
   databases/mysql.cpp
   databases/mysql.h
   name_ban.cpp

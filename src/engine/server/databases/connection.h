@@ -25,8 +25,9 @@ public:
 		SUCCESS,
 		ERROR,
 	};
-	// returns true if connection was established
+	// tries to allocate the connection from the pool established
 	virtual Status Connect() = 0;
+	// has to be called to return the connection back to the pool
 	virtual void Disconnect() = 0;
 
 	// get exclusive read/write access to the database
