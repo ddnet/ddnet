@@ -33,11 +33,6 @@
 	#include "upnp.h"
 #endif
 
-#if defined (CONF_SQL)
-	#include "sql_connector.h"
-	#include "sql_server.h"
-#endif
-
 class CSnapIDPool
 {
 	enum
@@ -102,24 +97,20 @@ class CServer : public IServer
 	CUPnP m_UPnP;
 #endif
 
-#if defined(CONF_SQL)
-	lock m_GlobalSqlLock;
-
-	CSqlServer *m_apSqlReadServers[MAX_SQLSERVERS];
-	CSqlServer *m_apSqlWriteServers[MAX_SQLSERVERS];
-#endif
-
 #if defined(CONF_FAMILY_UNIX)
 	UNIXSOCKETADDR m_ConnLoggingDestAddr;
 	bool m_ConnLoggingSocketCreated;
 	UNIXSOCKET m_ConnLoggingSocket;
 #endif
 
+	class CDbConnectionPool *m_pConnectionPool;
+
 public:
 	class IGameServer *GameServer() { return m_pGameServer; }
 	class IConsole *Console() { return m_pConsole; }
 	class IStorage *Storage() { return m_pStorage; }
 	class IEngineAntibot *Antibot() { return m_pAntibot; }
+	class CDbConnectionPool *DbPool() { return m_pConnectionPool; }
 
 	enum
 	{
@@ -395,11 +386,9 @@ public:
 	static void ConNameUnban(IConsole::IResult *pResult, void *pUser);
 	static void ConNameBans(IConsole::IResult *pResult, void *pUser);
 
-#if defined (CONF_SQL)
 	// console commands for sqlmasters
 	static void ConAddSqlServer(IConsole::IResult *pResult, void *pUserData);
 	static void ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData);
-#endif
 
 	static void ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainMaxclientsperipUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);

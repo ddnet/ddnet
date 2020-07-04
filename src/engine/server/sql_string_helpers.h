@@ -11,6 +11,9 @@ void FuzzyString(char *pString, int size);
 // anti SQL injection
 void ClearString(char *pString, int size = 32);
 
+// written number of added bytes
+int EscapeLike(char *pDst, const char *pSrc, int DstSize);
+
 void AgoTimeToString(int agoTime, char *pAgoString);
 
 template<unsigned int size>

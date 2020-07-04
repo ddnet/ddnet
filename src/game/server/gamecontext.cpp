@@ -24,10 +24,6 @@
 
 #include "gamemodes/DDRace.h"
 #include "score.h"
-#include "score/file_score.h"
-#if defined(CONF_SQL)
-#include "score/sql_score.h"
-#endif
 
 enum
 {
@@ -3116,17 +3112,11 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		}
 	}
 
-	// delete old score object
-	if(m_pScore)
-		delete m_pScore;
+	if(!m_pScore)
+	{
+		m_pScore = new CScore(this, ((CServer *)Server())->DbPool());
+	}
 
-	// create score object (add sql later)
-#if defined(CONF_SQL)
-	if(g_Config.m_SvUseSQL)
-		m_pScore = new CSqlScore(this);
-	else
-#endif
-		m_pScore = new CFileScore(this);
 	// setup core world
 	//for(int i = 0; i < MAX_CLIENTS; i++)
 	//	game.players[i].core.world = &game.world.core;
@@ -3376,11 +3366,8 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 	str_copy(m_aDeleteTempfile, aTemp, sizeof(m_aDeleteTempfile));
 }
 
-void CGameContext::OnShutdown(bool FullShutdown)
+void CGameContext::OnShutdown()
 {
-	if (FullShutdown)
-		Score()->OnShutdown();
-
 	Antibot()->RoundEnd();
 
 	if(m_TeeHistorianActive)

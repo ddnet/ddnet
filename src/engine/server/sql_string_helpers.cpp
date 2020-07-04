@@ -24,6 +24,23 @@ void sqlstr::FuzzyString(char *pString, int size)
 	delete [] newString;
 }
 
+int sqlstr::EscapeLike(char *pDst, const char *pSrc, int DstSize)
+{
+	int Pos = 0;
+	int DstPos = 0;
+	while(DstPos + 2 < DstSize)
+	{
+		if(pSrc[Pos] == '\0')
+			break;
+		if(pSrc[Pos] == '\\' || pSrc[Pos] == '%' || pSrc[Pos] == '_' || pSrc[Pos] == '[')
+			pDst[DstPos++] = '\\';
+		pDst[DstPos++] = pSrc[Pos++];
+
+	}
+	pDst[DstPos++] = '\0';
+	return DstPos;
+}
+
 // anti SQL injection
 void sqlstr::ClearString(char *pString, int size)
 {

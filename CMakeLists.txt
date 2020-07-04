@@ -1902,10 +1902,6 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   save.h
   score.cpp
   score.h
-  score/file_score.cpp
-  score/file_score.h
-  score/sql_score.cpp
-  score/sql_score.h
   teams.cpp
   teams.h
   teehistorian.cpp
