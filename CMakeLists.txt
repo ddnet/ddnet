@@ -1834,11 +1834,14 @@ set_src(ANTIBOT_SRC GLOB src/antibot
   antibot_null.cpp
 )
 
-set_src(ENGINE_SERVER GLOB src/engine/server
+set_src(ENGINE_SERVER GLOB_RECURSE src/engine/server
   antibot.cpp
   antibot.h
   authmanager.cpp
   authmanager.h
+  databases/connection.h
+  databases/mysql.cpp
+  databases/mysql.h
   name_ban.cpp
   name_ban.h
   register.cpp
