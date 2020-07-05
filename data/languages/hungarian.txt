@@ -1170,7 +1170,7 @@ Most importantly communication is key: There is no tutorial so you'll have to ch
 == A legfontosabb kulcsa a sikerhez: Nincs oktatóprogram, így mindenki magától tanulja meg más játékosok által. (T gombbal tudsz Chattelni)
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
-== Ajánlott, hogy ellenőrizze a beállításokat, hogy a kedvéhez igazítsa őket, mielőtt csatlakozna egy szerverhet. (Tipp: szűrők)
+== Ajánlott, hogy ellenőrizze a beállításokat, hogy a kedvéhez igazítsa őket, mielőtt csatlakozna egy szerverhez. (Tipp: szűrők)
 
 Please enter your nick name below.
 == Írja be lent a becenevét.
