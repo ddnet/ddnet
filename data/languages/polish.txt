@@ -953,7 +953,7 @@ Show clan above name plates
 == Pokazuj klan nad nazwyą gracza
 
 Loading DDNet Client
-== Ładowanie klitenta DDNet
+== Ładowanie klienta DDNet
 
 Please use a different name
 == Użyj innej nazwy
