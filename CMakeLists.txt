@@ -337,6 +337,7 @@ endif()
 find_package(Pnglite)
 find_package(PythonInterp 3)
 find_package(SDL2)
+find_package(SQLite3)
 if(VIDEORECORDER)
   find_package(FFMPEG)
 endif()
@@ -417,6 +418,7 @@ endif()
 show_dependency_status("Pnglite" PNGLITE)
 show_dependency_status("PythonInterp" PYTHONINTERP)
 show_dependency_status("SDL2" SDL2)
+show_dependency_status("SQLite3" SQLite3)
 if(VIDEORECORDER)
   show_dependency_status("FFmpeg" FFMPEG)
 endif()
@@ -431,6 +433,9 @@ if(CLIENT AND NOT(CURL_FOUND))
 endif()
 if(NOT(PYTHONINTERP_FOUND))
   message(SEND_ERROR "You must install Python to compile DDNet")
+endif()
+if(NOT(SQLite3_FOUND))
+  message(SEND_ERROR "You must install SQLite3 to compile the DDNet server")
 endif()
 
 if(MYSQL AND NOT(MYSQL_FOUND))
@@ -1844,6 +1849,8 @@ set_src(ENGINE_SERVER GLOB_RECURSE src/engine/server
   databases/connection_pool.h
   databases/mysql.cpp
   databases/mysql.h
+  databases/sqlite.cpp
+  databases/sqlite.h
   name_ban.cpp
   name_ban.h
   register.cpp
@@ -1931,6 +1938,7 @@ endif()
 set(LIBS_SERVER
   ${LIBS}
   ${MYSQL_LIBRARIES}
+  ${SQLite3_LIBRARIES}
   ${TARGET_ANTIBOT}
   ${MINIUPNPC_LIBRARIES}
   # Add pthreads (on non-Windows) at the end, so that other libraries can depend

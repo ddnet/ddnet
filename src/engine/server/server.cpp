@@ -45,6 +45,7 @@
 #endif
 
 #include <engine/server/databases/mysql.h>
+#include <engine/server/databases/sqlite.h>
 #include <engine/server/databases/connection_pool.h>
 
 
@@ -2301,6 +2302,23 @@ int CServer::Run()
 		return -1;
 	}
 
+	if(g_Config.m_SvSqliteFile[0] != '\0')
+	{
+		auto pSqlServers = std::unique_ptr<CSqliteConnection>(new CSqliteConnection(
+				g_Config.m_SvSqliteFile, true));
+
+		if(g_Config.m_SvUseSQL)
+		{
+			DbPool()->RegisterDatabase(std::move(pSqlServers), CDbConnectionPool::WRITE_BACKUP);
+		}
+		else
+		{
+			auto pCopy = std::unique_ptr<CSqliteConnection>(pSqlServers->Copy());
+			DbPool()->RegisterDatabase(std::move(pSqlServers), CDbConnectionPool::READ);
+			DbPool()->RegisterDatabase(std::move(pCopy), CDbConnectionPool::WRITE);
+		}
+	}
+
 	// start server
 	NETADDR BindAddr;
 	int NetType = g_Config.m_SvIpv4Only ? NETTYPE_IPV4 : NETTYPE_ALL;
@@ -3051,6 +3069,8 @@ void CServer::ConLogout(IConsole::IResult *pResult, void *pUser)
 
 void CServer::ConShowIps(IConsole::IResult *pResult, void *pUser)
 {
+	if(!g_Config.m_SvUseSQL)
+		return;
 	CServer *pServer = (CServer *)pUser;
 
 	if(pServer->m_RconClientID >= 0 && pServer->m_RconClientID < MAX_CLIENTS &&
@@ -3072,6 +3092,8 @@ void CServer::ConShowIps(IConsole::IResult *pResult, void *pUser)
 
 void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 {
+	if(!g_Config.m_SvUseSQL)
+		return;
 	CServer *pSelf = (CServer *)pUserData;
 
 	if (pResult->NumArguments() != 7 && pResult->NumArguments() != 8)

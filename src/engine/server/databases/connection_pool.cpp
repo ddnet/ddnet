@@ -3,6 +3,7 @@
 #if defined(CONF_SQL)
 #include <cppconn/exception.h>
 #endif
+#include <stdexcept>
 
 // helper struct to hold thread data
 struct CSqlExecData
@@ -176,6 +177,10 @@ bool CDbConnectionPool::ExecSqlFunc(IDbConnection *pConnection, CSqlExecData *pD
 		dbg_msg("sql", "MySQL Error: %s", e.what());
 	}
 #endif
+	catch (std::runtime_error &e)
+	{
+		dbg_msg("sql", "SQLite Error: %s", e.what());
+	}
 	catch (...)
 	{
 		dbg_msg("sql", "Unexpected exception caught");
