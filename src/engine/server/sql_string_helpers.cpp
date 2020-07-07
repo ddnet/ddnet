@@ -1,8 +1,8 @@
+#include "sql_string_helpers.h"
+
+#include <base/system.h>
 #include <cmath>
 #include <cstring>
-#include <base/system.h>
-
-#include "sql_string_helpers.h"
 
 void sqlstr::FuzzyString(char *pString, int size)
 {
@@ -39,41 +39,6 @@ int sqlstr::EscapeLike(char *pDst, const char *pSrc, int DstSize)
 	}
 	pDst[DstPos++] = '\0';
 	return DstPos;
-}
-
-// anti SQL injection
-void sqlstr::ClearString(char *pString, int size)
-{
-	char *newString = new char [size * 2 - 1];
-	int pos = 0;
-
-	for(int i = 0; i < size; i++)
-	{
-		if(pString[i] == '\\')
-		{
-			newString[pos++] = '\\';
-			newString[pos++] = '\\';
-		}
-		else if(pString[i] == '\'')
-		{
-			newString[pos++] = '\\';
-			newString[pos++] = '\'';
-		}
-		else if(pString[i] == '"')
-		{
-			newString[pos++] = '\\';
-			newString[pos++] = '"';
-		}
-		else
-		{
-			newString[pos++] = pString[i];
-		}
-	}
-
-	newString[pos] = '\0';
-
-	str_copy(pString, newString, size);
-	delete [] newString;
 }
 
 void sqlstr::AgoTimeToString(int AgoTime, char *pAgoString)
