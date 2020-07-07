@@ -35,7 +35,7 @@ CChat::CChat()
 	#include <game/server/ddracechat.h>
 	m_Commands.sort_range();
 
-	OnReset();
+	Reset();
 }
 
 void CChat::RegisterCommand(const char *pName, const char *pParams, int flags, const char *pHelp)
@@ -53,7 +53,7 @@ void CChat::OnWindowResize()
 	}
 }
 
-void CChat::OnReset()
+void CChat::Reset()
 {
 	for(int i = 0; i < MAX_LINES; i++)
 	{
@@ -80,6 +80,8 @@ void CChat::OnReset()
 	m_pHistoryEntry = 0x0;
 	m_PendingChatCounter = 0;
 	m_LastChatSend = 0;
+	m_CurrentLine = 0;
+	m_Mode = MODE_NONE;
 
 	for(int i = 0; i < CHAT_NUM; ++i)
 		m_aLastSoundPlayed[i] = 0;
@@ -94,13 +96,8 @@ void CChat::OnStateChange(int NewState, int OldState)
 {
 	if(OldState <= IClient::STATE_CONNECTING)
 	{
-		m_Mode = MODE_NONE;
+		Reset();
 		Input()->SetIMEState(false);
-		for(int i = 0; i < MAX_LINES; i++)
-		{
-			m_aLines[i].m_Time = 0;
-		}
-		m_CurrentLine = 0;
 	}
 }
 
