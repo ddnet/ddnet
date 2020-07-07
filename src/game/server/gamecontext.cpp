@@ -1577,6 +1577,13 @@ void *CGameContext::PreProcessMsg(int *MsgID, CUnpacker *pUnpacker, int ClientID
 
 			pMsg->m_Emoticon = pMsg7->m_Emoticon;
 		}
+		else if(*MsgID == protocol7::NETMSGTYPE_CL_VOTE)
+		{
+			protocol7::CNetMsg_Cl_Vote *pMsg7 = (protocol7::CNetMsg_Cl_Vote *)pRawMsg;
+			::CNetMsg_Cl_Vote *pMsg = (::CNetMsg_Cl_Vote *)s_aRawMsg;
+
+			pMsg->m_Vote = pMsg7->m_Vote;
+		}
 
 		*MsgID = Msg_SevenToSix(*MsgID);
 
