@@ -7,6 +7,7 @@
 #	GaBOr			2011-07-15 01:23:39
 #	HeroiAmarelo	2012-08-01 15:52:45
 #	Mortcheck		2012-11-03 22:58:43
+#	FeaRZ		2020-07-07 12:09:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -249,7 +250,7 @@ Language
 == Idioma
 
 MOTD
-== MOTD
+== Mensaje del día
 
 Map
 == Mapa
@@ -420,7 +421,7 @@ Show friends only
 == Solo mostrar amigos
 
 Show ingame HUD
-== Mostrar HUD durante el juego
+== Mostrar apariencia durante el juego
 
 Show name plates
 == Mostrar apodos
@@ -863,16 +864,16 @@ Dummy settings
 == Configuraciones del Dummy
 
 Vanilla skins only
-== Solo skins de vanilla
+== Solo skins de Vanilla
 
 Fat skins (DDFat)
-== Skins obesas (DDFat)
+== Skins Obesas (DDFat)
 
 Skin prefix
 == Prefijo de skin
 
 Hook collisions
-== Colision de Gancho
+== Colisión de Gancho
 
 Pause
 == Pausa
@@ -1187,7 +1188,7 @@ Best
 == Mejor
 
 Grabs
-== Agarra
+== Agarrar
 
 1 new mention
 == 1 nueva mención
