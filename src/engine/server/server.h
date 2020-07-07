@@ -221,7 +221,16 @@ public:
 
 	int64 m_GameStartTime;
 	//int m_CurrentGameTick;
+
+	enum
+	{
+		UNINITIALIZED=0,
+		RUNNING=1,
+		STOPPING=2
+	};
+
 	int m_RunServer;
+
 	int m_MapReload;
 	bool m_ReloadedWhenEmpty;
 	int m_RconClientID;
