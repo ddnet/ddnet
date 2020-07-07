@@ -554,7 +554,7 @@ New name:
 == Nuevo nombre:
 
 Sat.
-== Saturación.
+== Saturación
 
 Miscellaneous
 == Miscelánea
