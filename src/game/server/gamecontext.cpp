@@ -3894,11 +3894,18 @@ bool CGameContext::RateLimitPlayerVote(int ClientID)
 		return true;
 	}
 
-	if (g_Config.m_SvDnsblVote && !m_pServer->DnsblWhite(ClientID) && Server()->DistinctClientCount() > 1)
+	if(g_Config.m_SvDnsblVote && Server()->DistinctClientCount() > 1)
 	{
-		// blacklisted by dnsbl
-		SendChatTarget(ClientID, "You are not allowed to vote due to DNSBL.");
-		return true;
+		if(m_pServer->DnsblPending(ClientID))
+		{
+			SendChatTarget(ClientID, "You are not allowed to vote due to pending DNSBL request. Try again in ~30 seconds.");
+			return true;
+		}
+		else if(m_pServer->DnsblBlack(ClientID))
+		{
+			SendChatTarget(ClientID, "You are not allowed to vote due to DNSBL. Try connecting without a VPN.");
+			return true;
+		}
 	}
 
 	if(g_Config.m_SvSpamprotection && pPlayer->m_LastVoteTry && pPlayer->m_LastVoteTry + TickSpeed * 3 > Now)
