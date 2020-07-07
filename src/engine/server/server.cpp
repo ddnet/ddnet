@@ -273,7 +273,7 @@ CServer::CServer(): m_Register(false), m_RegSixup(true)
 	m_pGameServer = 0;
 
 	m_CurrentGameTick = 0;
-	m_RunServer = 1;
+	m_RunServer = UNINITIALIZED;
 
 	for(int i = 0; i < 2; i++)
 	{
@@ -2075,6 +2075,9 @@ void CServer::ExpireServerInfo()
 
 void CServer::UpdateServerInfo(bool Resend)
 {
+	if(m_RunServer == UNINITIALIZED)
+		return;
+
 	for(int i = 0; i < 3; i++)
 		for(int j = 0; j < 2; j++)
 			CacheServerInfo(&m_ServerInfoCache[i * 2 + j], i, j);
@@ -2292,6 +2295,9 @@ void CServer::InitRegister(CNetServer *pNetServer, IEngineMasterServer *pMasterS
 
 int CServer::Run()
 {
+	if(m_RunServer == UNINITIALIZED)
+		m_RunServer = RUNNING;
+
 	m_AuthManager.Init();
 
 	if(g_Config.m_Debug)
@@ -2376,7 +2382,7 @@ int CServer::Run()
 	GameServer()->OnInit();
 	if(ErrorShutdown())
 	{
-		m_RunServer = false;
+		m_RunServer = STOPPING;
 	}
 	str_format(aBuf, sizeof(aBuf), "version %s", GameServer()->NetVersion());
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
@@ -2399,7 +2405,7 @@ int CServer::Run()
 		m_GameStartTime = time_get();
 
 		UpdateServerInfo();
-		while(m_RunServer)
+		while(m_RunServer < STOPPING)
 		{
 			if(NonActive)
 				PumpNetwork();
@@ -2574,7 +2580,7 @@ int CServer::Run()
 				}
 
 				if(g_Config.m_SvShutdownWhenEmpty)
-					m_RunServer = false;
+					m_RunServer = STOPPING;
 				else
 					net_socket_read_wait(m_NetServer.Socket(), 1000000);
 			}
@@ -2985,7 +2991,7 @@ void CServer::ConNameBans(IConsole::IResult *pResult, void *pUser)
 
 void CServer::ConShutdown(IConsole::IResult *pResult, void *pUser)
 {
-	((CServer *)pUser)->m_RunServer = 0;
+	((CServer *)pUser)->m_RunServer = STOPPING;
 }
 
 void CServer::DemoRecorder_HandleAutoStart()
