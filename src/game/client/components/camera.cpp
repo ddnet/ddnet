@@ -166,5 +166,5 @@ void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData)
 }
 void CCamera::ConZoomReset(IConsole::IResult *pResult, void *pUserData)
 {
-	((CCamera *)pUserData)->ChangeZoom(1.0f);
+	((CCamera *)pUserData)->ChangeZoom(pow(ZoomStep, g_Config.m_ClDefaultZoom - 10));
 }
