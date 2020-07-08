@@ -7,7 +7,7 @@
 #	GaBOr			2011-07-15 01:23:39
 #	HeroiAmarelo	2012-08-01 15:52:45
 #	Mortcheck		2012-11-03 22:58:43
-#	FeaRZ		2020-07-07 12:09:00
+#	FeaRZ		2020-07-08 19:37:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -421,7 +421,7 @@ Show friends only
 == Solo mostrar amigos
 
 Show ingame HUD
-== Mostrar apariencia durante el juego
+== Mostrar interfaz durante el juego
 
 Show name plates
 == Mostrar apodos
@@ -681,7 +681,7 @@ Loading DDNet Client
 == Cargando Cliente DDNet
 
 Reconnect in %d sec
-== Vuelva a conectar en %d seg
+== Vuelva a conectar en %d segundos
 
 Render demo
 == Renderizar demo
@@ -711,10 +711,10 @@ The maps contain freeze, which temporarily make a tee unable to move. You have t
 == Los mapas contienen congelación, lo que hace que a un tee no pueda moverse temporalmente. Deben trabajar juntos para superar estas partes.
 
 The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== La rueda del ratón cambia las armas. El martillo (ratón izquierdo) se puede usar para golpear otros tees y despertarlos de la congelación.
+== La rueda del ratón cambia las armas. El martillo (ratón izquierdo) se puede usar para golpear a otros tees y despertarlos de la congelación.
 
 Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== El gancho (mouse derecho) se puede usar para desplazarse por el mapa y enganchar a  otros tees hacia ti.
+== El gancho (mouse derecho) se puede usar para desplazarse por el mapa y enganchar a otros tees hacia ti.
 
 Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
 == Lo más importante es que la comunicación es clave: no hay un tutorial, por lo que tendrás que chatear (tecla t) con otros jugadores para aprender los conceptos básicos y los trucos del juego.
@@ -759,7 +759,7 @@ Types
 == Tipos
 
 DDNet %s is out!
-== ¡DDNet %s ya salió!
+== ¡DDNet %s está disponible!
 
 Downloading %s:
 == Descargando %s:
@@ -777,7 +777,7 @@ Restart
 == Reiniciar
 
 DDNet %s is out! Download it at DDNet.tw!
-== ¡DDNet %s ya salió! ¡Descárgalo en DDNet.tw!
+== ¡DDNet %s está disponible! ¡Descárgalo en DDNet.tw!
 
 Select a name
 == Selecciona un nombre
@@ -819,7 +819,7 @@ Connecting dummy
 == Conectando dummy
 
 Connect Dummy
-== Conectar Dummy
+== Conectar dummy
 
 Reload
 == Recargar
@@ -837,10 +837,10 @@ Switch weapon when out of ammo
 == Cambiar arma cuando no tengas munición
 
 Reset wanted weapon on death
-== Restablecer arma deseada en la muerte
+== Restablecer arma deseada en muerte
 
 Show clan above name plates
-== Mostrar clan por encima del nombre del jugador
+== Mostrar clan por encima de los apodos
 
 Clan plates size
 == Tamaño de la fuente del clan
@@ -858,22 +858,22 @@ Automatically create statboard csv
 == Crear automáticamente el csv del Statboard
 
 Max CSVs
-== CSV máx
+== CSVs Máximo
 
 Dummy settings
 == Configuraciones del Dummy
 
 Vanilla skins only
-== Solo skins de Vanilla
+== Skins por defecto
 
 Fat skins (DDFat)
-== Skins Obesas (DDFat)
+== Skins obesas (DDFat)
 
 Skin prefix
 == Prefijo de skin
 
 Hook collisions
-== Colisión de Gancho
+== Gancho de Colisión
 
 Pause
 == Pausa
@@ -924,7 +924,7 @@ Show entities
 == Mostrar entidades
 
 Show HUD
-== Mostrar apariencia
+== Mostrar interfaz
 
 UI mouse s.
 == UI mouse s.
@@ -978,7 +978,7 @@ Map sound volume
 == Volumen de sonido del mapa
 
 HUD
-== Apariencia
+== Interfaz
 
 DDNet
 == DDNet
@@ -987,7 +987,7 @@ DDNet Client needs to be restarted to complete update!
 == ¡El Cliente DDNet debe reiniciarse para completar la actualización!
 
 Use DDRace Scoreboard
-== Utiliza el marcador DDRace
+== Utiliza la tabla de puntuación de DDRace
 
 Show client IDs in Scoreboard
 == Mostrar IDs de clientes en el marcador
@@ -1023,7 +1023,7 @@ Spectator
 == Espectador
 
 Look out!
-== ¡Ten cuidado!
+== ¡Atención!
 
 Team message
 == Mensaje del equipo
@@ -1110,7 +1110,7 @@ AntiPing: predict grenade paths
 == AntiPing: predice recorrido de granadas
 
 Show other players' hook collision lines
-== Mostrar las líneas de colisión de gancho de otros jugadores
+== Mostrar el gancho de colisión de otros jugadores
 
 Show other players' key presses
 == Mostrar las pulsaciones de teclas de otros jugadores
@@ -1131,7 +1131,7 @@ Try fast HTTP map download first
 == Prueba primero la descarga rápida del mapa HTTP
 
 DDNet %s is available:
-== DDNet %s está disponible:
+== DDNet %s está disponible
 
 Updating...
 == Actualizando...
