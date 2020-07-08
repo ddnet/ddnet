@@ -7,7 +7,6 @@
 #	Shymwo			2011-07-15 01:27:45
 #	Shymwo			2011-07-21 18:54:53
 #	TortiLeq		2020-06-26 13:14:09 (with Ertee :D)
-#	FeaRZ		        2020-07-07 11:15:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -849,7 +848,7 @@ Remove chat
 == Usuń chat
 
 Manual %3d:%02d  
-== Manual %3d:%02d
+==  
 
 Activate
 == Aktywuj
@@ -1194,7 +1193,7 @@ transmits your player name to info.ddnet.tw
 == przenosi twój nick do info.ddnet.tw
 
 Indicate map finish
-== Wskaż koniec mapy
+== 
 
 Show others (own team only)
-== Pokaż innym (tylko własny zespół)
+== 
