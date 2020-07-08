@@ -588,7 +588,7 @@ Max Screenshots
 == Nombre maximum de captures d'écran
 
 Length:
-== Longueur :
+== Durée :
 
 Laser
 == Laser
@@ -939,7 +939,7 @@ Remove chat
 == Desactiver le chat
 
 Markers:
-== Marqueurs
+== Marqueurs :
 
 Multiple texture units (disable for MacOS)
 == Unités de texture multiple (désactivé pour MacOS)
@@ -1047,7 +1047,7 @@ Save the best demo of each race
 == Sauvegarder la meilleure démo de chaque course
 
 SHA256:
-== 
+== SHA256 :
 
 may cause delay
 == Peut causer du délai
@@ -1068,7 +1068,7 @@ Unfinished map
 == Carte non terminée
 
 Default length: %d
-== Durée par défaut
+== Durée par défaut: %d
 
 Highlighted message
 == Message en surbrillance
