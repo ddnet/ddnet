@@ -534,10 +534,10 @@ void CVideo::OpenAudio()
 		/* set options */
 		av_opt_set_int(m_AudioStream.pSwrCtx, "in_channel_count", 2, 0);
 		av_opt_set_int(m_AudioStream.pSwrCtx, "in_sample_rate", g_Config.m_SndRate, 0);
-		av_opt_set_sample_fmt(m_AudioStream.pSwrCtx, "in_SampleFmt", AV_SAMPLE_FMT_S16, 0);
+		av_opt_set_sample_fmt(m_AudioStream.pSwrCtx, "in_sample_fmt", AV_SAMPLE_FMT_S16, 0);
 		av_opt_set_int(m_AudioStream.pSwrCtx, "out_channel_count", c->channels, 0);
 		av_opt_set_int(m_AudioStream.pSwrCtx, "out_sample_rate", c->sample_rate, 0);
-		av_opt_set_sample_fmt(m_AudioStream.pSwrCtx, "out_SampleFmt", c->sample_fmt, 0);
+		av_opt_set_sample_fmt(m_AudioStream.pSwrCtx, "out_sample_fmt", c->sample_fmt, 0);
 
 		/* initialize the resampling context */
 		if((Ret = swr_init(m_AudioStream.pSwrCtx)) < 0) {
