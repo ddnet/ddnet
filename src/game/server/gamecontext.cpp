@@ -3898,7 +3898,7 @@ bool CGameContext::RateLimitPlayerVote(int ClientID)
 	{
 		if(m_pServer->DnsblPending(ClientID))
 		{
-			SendChatTarget(ClientID, "You are not allowed to vote due to pending DNSBL request. Try again in ~30 seconds.");
+			SendChatTarget(ClientID, "You are not allowed to vote because we're currently checking for VPNs. Try again in ~30 seconds.");
 			return true;
 		}
 		else if(m_pServer->DnsblBlack(ClientID))
