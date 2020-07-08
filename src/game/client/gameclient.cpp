@@ -1552,21 +1552,28 @@ void CGameClient::OnNewSnapshot()
 
 	static float LastZoom = .0;
 	static float LastScreenAspect = .0;
+	static bool LastDummyConnected = false;
 	float ZoomToSend = m_pCamera->m_ZoomSmoothingTarget == .0 ? m_pCamera->m_Zoom // Initial
 		: m_pCamera->m_ZoomSmoothingTarget > m_pCamera->m_Zoom ? m_pCamera->m_ZoomSmoothingTarget // Zooming out
 		: m_pCamera->m_ZoomSmoothingTarget < m_pCamera->m_Zoom ? LastZoom // Zooming in
 		: m_pCamera->m_Zoom; // Not zooming
-	if(ZoomToSend != LastZoom || Graphics()->ScreenAspect() != LastScreenAspect)
+	if(ZoomToSend != LastZoom || Graphics()->ScreenAspect() != LastScreenAspect || (Client()->DummyConnected() && !LastDummyConnected))
 	{
-		LastZoom = ZoomToSend;
-		LastScreenAspect = Graphics()->ScreenAspect();
 		CNetMsg_Cl_ShowDistance Msg;
 		float x, y;
 		RenderTools()->CalcScreenParams(Graphics()->ScreenAspect(), ZoomToSend, &x, &y);
 		Msg.m_X = x;
 		Msg.m_Y = y;
-		Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+		CMsgPacker Packer(Msg.MsgID(), false);
+		Msg.Pack(&Packer);
+		if(ZoomToSend != LastZoom)
+			Client()->SendMsgY(&Packer, MSGFLAG_VITAL, 0);
+		if(Client()->DummyConnected())
+			Client()->SendMsgY(&Packer, MSGFLAG_VITAL, 1);
+		LastZoom = ZoomToSend;
+		LastScreenAspect = Graphics()->ScreenAspect();
 	}
+	LastDummyConnected = Client()->DummyConnected();
 
 	m_pGhost->OnNewSnapshot();
 	m_pRaceDemo->OnNewSnapshot();
