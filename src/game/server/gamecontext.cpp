@@ -3903,7 +3903,7 @@ bool CGameContext::RateLimitPlayerVote(int ClientID)
 		}
 		else if(m_pServer->DnsblBlack(ClientID))
 		{
-			SendChatTarget(ClientID, "You are not allowed to vote due to DNSBL. Try connecting without a VPN.");
+			SendChatTarget(ClientID, "You are not allowed to vote because you appear to be using a VPN. Try connecting without a VPN or contacting an admin if you think this is a mistake.");
 			return true;
 		}
 	}
