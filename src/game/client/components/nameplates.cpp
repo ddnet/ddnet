@@ -160,9 +160,8 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			if(Health > 0)
 			{
 				int Armor = m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur.m_Armor;
-				float HFontSize = 15;
-				float AFontSize = 18;
-				//char pHealth[11];
+				float HFontSize = 5.0f + 20.0f * g_Config.m_ClNameplatesHASize / 100.0f;
+				float AFontSize = 6.0f + 24.0f * g_Config.m_ClNameplatesHASize / 100.0f;
 				std::string pHealth;
 				std::string pArmor;
 				for(int i = 0; i < Health; i++)
