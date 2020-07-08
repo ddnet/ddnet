@@ -154,7 +154,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			TextRender()->Text(0, Position.x-tw_id/2.0f, Position.y-Offset-38.0f, 28.0f, aBuf, -1);
 		}
 
-		if(g_Config.m_ClNameplatesHA) // render client id when in debug as well
+		if(g_Config.m_ClNameplatesHA) // render health and armor in nameplate
 		{
 			int Health = m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur.m_Health;
 			if(Health > 0)
@@ -196,7 +196,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 				mem_copy(aBuf, pArmor.c_str(), sizeof(aBuf));
 				float tw_armor = TextRender()->TextWidth(0, AFontSize, aBuf, -1);
 				TextRender()->TextColor(ColorRGBA(1.0f, 1.0f, 0.0f));
-				TextRender()->Text(0, Position.x-tw_armor/2.0f, Position.y-Offset-AFontSize-2.0f, AFontSize, aBuf, -1);
+				TextRender()->Text(0, Position.x-tw_armor/2.0f, Position.y-Offset-AFontSize-3.0f, AFontSize, aBuf, -1);
 			}
 		}
 
