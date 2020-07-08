@@ -154,6 +154,52 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			TextRender()->Text(0, Position.x-tw_id/2.0f, Position.y-Offset-38.0f, 28.0f, aBuf, -1);
 		}
 
+		if(g_Config.m_ClNameplatesHA) // render client id when in debug as well
+		{
+			int Health = m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur.m_Health;
+			if(Health > 0)
+			{
+				int Armor = m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur.m_Armor;
+				float HFontSize = 15;
+				float AFontSize = 18;
+				//char pHealth[11];
+				std::string pHealth;
+				std::string pArmor;
+				for(int i = 0; i < Health; i++)
+					pHealth.append("♥");
+				for(int i = Health; i < 10; i++)
+					pHealth.append("♡");
+				pHealth.append("\0");
+				for(int i = 0; i < Armor; i++)
+					pArmor.append("⚫");
+				for(int i = Armor; i < 10; i++)
+					pArmor.append("⚪");
+				pArmor.append("\0");
+
+				char aBuf[128];
+				mem_copy(aBuf, pHealth.c_str(), sizeof(aBuf));
+				float Offset;
+
+				if(g_Config.m_ClNameplatesClan && (g_Config.m_Debug || g_Config.m_ClNameplatesIDs))
+					Offset = (FontSize * 3 + FontSizeClan);
+				else if (g_Config.m_ClNameplatesClan)
+					Offset = (FontSize * 2 + FontSizeClan);
+				else if (g_Config.m_Debug || g_Config.m_ClNameplatesIDs)
+					Offset = (FontSize * 3);
+				else
+					Offset = (FontSize * 2);
+
+				float tw_health = TextRender()->TextWidth(0, HFontSize, aBuf, -1);
+				TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f));
+				TextRender()->Text(0, Position.x-tw_health/2.0f, Position.y-Offset-HFontSize-AFontSize, HFontSize, aBuf, -1);
+
+				mem_copy(aBuf, pArmor.c_str(), sizeof(aBuf));
+				float tw_armor = TextRender()->TextWidth(0, AFontSize, aBuf, -1);
+				TextRender()->TextColor(ColorRGBA(1.0f, 1.0f, 0.0f));
+				TextRender()->Text(0, Position.x-tw_armor/2.0f, Position.y-Offset-AFontSize-2.0f, AFontSize, aBuf, -1);
+			}
+		}
+
 		TextRender()->TextColor(1,1,1,1);
 		TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.3f);
 

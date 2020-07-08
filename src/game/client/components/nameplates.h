@@ -3,6 +3,7 @@
 #ifndef GAME_CLIENT_COMPONENTS_NAMEPLATES_H
 #define GAME_CLIENT_COMPONENTS_NAMEPLATES_H
 #include <game/client/component.h>
+#include <string>
 struct SPlayerNamePlate
 {
 	SPlayerNamePlate()
