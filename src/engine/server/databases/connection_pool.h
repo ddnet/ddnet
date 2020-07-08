@@ -20,6 +20,9 @@ public:
 	~CDbConnectionPool();
 	CDbConnectionPool& operator=(const CDbConnectionPool&) = delete;
 
+	typedef bool (*FRead)(IDbConnection *, const ISqlData *);
+	typedef bool (*FWrite)(IDbConnection *, const ISqlData *, bool);
+
 	enum Mode
 	{
 		READ,
@@ -31,12 +34,12 @@ public:
 	void RegisterDatabase(std::unique_ptr<IDbConnection> pDatabase, Mode DatabaseMode);
 
 	void Execute(
-			bool (*pFuncPtr) (IDbConnection *, const ISqlData *),
+			FRead pFunc,
 			std::unique_ptr<const ISqlData> pSqlRequestData,
 			const char *pName);
 	// writes to WRITE_BACKUP server in case of failure
 	void ExecuteWrite(
-			bool (*pFuncPtr) (IDbConnection *, const ISqlData *, bool),
+			FWrite pFunc,
 			std::unique_ptr<const ISqlData> pSqlRequestData,
 			const char *pName);
 
@@ -45,8 +48,8 @@ public:
 private:
 	std::vector<std::unique_ptr<IDbConnection>> m_aapDbConnections[NUM_MODES];
 
-	static void SqlWorker(void *pUser);
-	void SqlWorker();
+	static void Worker(void *pUser);
+	void Worker();
 	bool ExecSqlFunc(IDbConnection *pConnection, struct CSqlExecData *pData, bool Failure);
 
 	semaphore m_NumElem;

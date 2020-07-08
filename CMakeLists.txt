@@ -435,7 +435,7 @@ if(NOT(PYTHONINTERP_FOUND))
   message(SEND_ERROR "You must install Python to compile DDNet")
 endif()
 if(NOT(SQLite3_FOUND))
-  message(SEND_ERROR "You must install SQLite3 to compile the DDNet server")
+  message(SEND_ERROR "You must install SQLite3 to compile DDNet")
 endif()
 
 if(MYSQL AND NOT(MYSQL_FOUND))

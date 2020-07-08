@@ -9,11 +9,11 @@
 struct CSqlExecData
 {
 	CSqlExecData(
-			bool (*pFuncPtr) (IDbConnection *, const ISqlData *),
+			CDbConnectionPool::FRead pFunc,
 			std::unique_ptr<const ISqlData> pThreadData,
 			const char *pName);
 	CSqlExecData(
-			bool (*pFuncPtr) (IDbConnection *, const ISqlData *, bool),
+			CDbConnectionPool::FWrite pFunc,
 			std::unique_ptr<const ISqlData> pThreadData,
 			const char *pName);
 	~CSqlExecData() {}
@@ -25,8 +25,8 @@ struct CSqlExecData
 	} m_Mode;
 	union
 	{
-		bool (*m_pWriteFunc) (IDbConnection*, const ISqlData *, bool);
-		bool (*m_pReadFunc) (IDbConnection*, const ISqlData *);
+		CDbConnectionPool::FRead m_pReadFunc;
+		CDbConnectionPool::FWrite m_pWriteFunc;
 	} m_Ptr;
 
 	std::unique_ptr<const ISqlData> m_pThreadData;
@@ -34,25 +34,25 @@ struct CSqlExecData
 };
 
 CSqlExecData::CSqlExecData(
-	bool (*pFuncPtr) (IDbConnection *, const ISqlData *),
+	CDbConnectionPool::FRead pFunc,
 	std::unique_ptr<const ISqlData> pThreadData,
 	const char *pName) :
 			m_Mode(READ_ACCESS),
 			m_pThreadData(std::move(pThreadData)),
 			m_pName(pName)
 {
-	m_Ptr.m_pReadFunc = pFuncPtr;
+	m_Ptr.m_pReadFunc = pFunc;
 }
 
 CSqlExecData::CSqlExecData(
-	bool (*pFuncPtr) (IDbConnection *, const ISqlData *, bool),
+	CDbConnectionPool::FWrite pFunc,
 	std::unique_ptr<const ISqlData> pThreadData,
 	const char *pName) :
 			m_Mode(WRITE_ACCESS),
 			m_pThreadData(std::move(pThreadData)),
 			m_pName(pName)
 {
-	m_Ptr.m_pWriteFunc = pFuncPtr;
+	m_Ptr.m_pWriteFunc = pFunc;
 }
 
 CDbConnectionPool::CDbConnectionPool() :
@@ -60,7 +60,7 @@ CDbConnectionPool::CDbConnectionPool() :
 	FirstElem(0),
 	LastElem(0)
 {
-	thread_init_and_detach(CDbConnectionPool::SqlWorker, this, "database worker thread");
+	thread_init_and_detach(CDbConnectionPool::Worker, this, "database worker thread");
 }
 
 CDbConnectionPool::~CDbConnectionPool()
@@ -75,21 +75,21 @@ void CDbConnectionPool::RegisterDatabase(std::unique_ptr<IDbConnection> pDatabas
 }
 
 void CDbConnectionPool::Execute(
-		bool (*pFuncPtr) (IDbConnection *, const ISqlData *),
+		FRead pFunc,
 		std::unique_ptr<const ISqlData> pThreadData,
 		const char *pName)
 {
-	m_aTasks[FirstElem++].reset(new CSqlExecData(pFuncPtr, std::move(pThreadData), pName));
+	m_aTasks[FirstElem++].reset(new CSqlExecData(pFunc, std::move(pThreadData), pName));
 	FirstElem %= sizeof(m_aTasks) / sizeof(m_aTasks[0]);
 	m_NumElem.signal();
 }
 
 void CDbConnectionPool::ExecuteWrite(
-		bool (*pFuncPtr) (IDbConnection *, const ISqlData *, bool),
+		FWrite pFunc,
 		std::unique_ptr<const ISqlData> pThreadData,
 		const char *pName)
 {
-	m_aTasks[FirstElem++].reset(new CSqlExecData(pFuncPtr, std::move(pThreadData), pName));
+	m_aTasks[FirstElem++].reset(new CSqlExecData(pFunc, std::move(pThreadData), pName));
 	FirstElem %= sizeof(m_aTasks) / sizeof(m_aTasks[0]);
 	m_NumElem.signal();
 }
@@ -98,13 +98,13 @@ void CDbConnectionPool::OnShutdown()
 {
 }
 
-void CDbConnectionPool::SqlWorker(void *pUser)
+void CDbConnectionPool::Worker(void *pUser)
 {
 	CDbConnectionPool *pThis = (CDbConnectionPool *)pUser;
-	pThis->SqlWorker();
+	pThis->Worker();
 }
 
-void CDbConnectionPool::SqlWorker()
+void CDbConnectionPool::Worker()
 {
 	while(1)
 	{
@@ -158,7 +158,8 @@ bool CDbConnectionPool::ExecSqlFunc(IDbConnection *pConnection, CSqlExecData *pD
 	if(pConnection->Connect() != IDbConnection::SUCCESS)
 		return false;
 	bool Success = false;
-	try {
+	try
+	{
 		switch(pData->m_Mode)
 		{
 		case CSqlExecData::READ_ACCESS:
