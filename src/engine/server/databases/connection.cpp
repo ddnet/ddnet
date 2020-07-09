@@ -6,8 +6,8 @@ void IDbConnection::FormatCreateRace(char *aBuf, unsigned int BufferSize)
 {
 	str_format(aBuf, BufferSize,
 			"CREATE TABLE IF NOT EXISTS %s_race ("
-				"Map VARCHAR(128) BINARY NOT NULL, "
-				"Name VARCHAR(%d) BINARY NOT NULL, "
+				"Map VARCHAR(128) COLLATE %s NOT NULL, "
+				"Name VARCHAR(%d) COLLATE %s NOT NULL, "
 				"Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, "
 				"Time FLOAT DEFAULT 0, "
 				"Server CHAR(4), "
@@ -21,66 +21,64 @@ void IDbConnection::FormatCreateRace(char *aBuf, unsigned int BufferSize)
 				"cp22 FLOAT DEFAULT 0, cp23 FLOAT DEFAULT 0, cp24 FLOAT DEFAULT 0, "
 				"cp25 FLOAT DEFAULT 0, "
 				"GameID VARCHAR(64), "
-				"DDNet7 BOOL DEFAULT FALSE, "
-				"KEY (Map, Name)"
-			") CHARACTER SET utf8mb4;",
-			GetPrefix(), MAX_NAME_LENGTH);
+				"DDNet7 BOOL DEFAULT FALSE"
+			");",
+			GetPrefix(), BinaryCollate(), MAX_NAME_LENGTH, BinaryCollate());
 }
 
-void IDbConnection::FormatCreateTeamrace(char *aBuf, unsigned int BufferSize)
+void IDbConnection::FormatCreateTeamrace(char *aBuf, unsigned int BufferSize, const char *pIdType)
 {
 	str_format(aBuf, BufferSize,
 			"CREATE TABLE IF NOT EXISTS %s_teamrace ("
-				"Map VARCHAR(128) BINARY NOT NULL, "
-				"Name VARCHAR(%d) BINARY NOT NULL, "
+				"Map VARCHAR(128) COLLATE %s NOT NULL, "
+				"Name VARCHAR(%d) COLLATE %s NOT NULL, "
 				"Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, "
 				"Time FLOAT DEFAULT 0, "
-				"ID VARBINARY(16) NOT NULL, "
+				"ID %s NOT NULL, " // VARBINARY(16) for MySQL and BLOB for SQLite
 				"GameID VARCHAR(64), "
-				"DDNet7 BOOL DEFAULT FALSE, "
-				"KEY Map (Map)"
-			") CHARACTER SET utf8mb4;",
-			GetPrefix(), MAX_NAME_LENGTH);
+				"DDNet7 BOOL DEFAULT FALSE"
+			");",
+			GetPrefix(), BinaryCollate(), MAX_NAME_LENGTH, BinaryCollate(), pIdType);
 }
 
 void IDbConnection::FormatCreateMaps(char *aBuf, unsigned int BufferSize)
 {
 	str_format(aBuf, BufferSize,
 			"CREATE TABLE IF NOT EXISTS %s_maps ("
-				"Map VARCHAR(128) BINARY NOT NULL, "
-				"Server VARCHAR(32) BINARY NOT NULL, "
-				"Mapper VARCHAR(128) BINARY NOT NULL, "
+				"Map VARCHAR(128) COLLATE %s NOT NULL, "
+				"Server VARCHAR(32) COLLATE %s NOT NULL, "
+				"Mapper VARCHAR(128) COLLATE %s NOT NULL, "
 				"Points INT DEFAULT 0, "
 				"Stars INT DEFAULT 0, "
 				"Timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
-				"UNIQUE KEY Map (Map)"
-			") CHARACTER SET utf8mb4;",
-			GetPrefix());
+				"PRIMARY KEY (Map)"
+			");",
+			GetPrefix(), BinaryCollate(), BinaryCollate(), BinaryCollate());
 }
 
 void IDbConnection::FormatCreateSaves(char *aBuf, unsigned int BufferSize)
 {
 	str_format(aBuf, BufferSize,
 			"CREATE TABLE IF NOT EXISTS %s_saves ("
-				"Savegame TEXT CHARACTER SET utf8mb4 BINARY NOT NULL, "
-				"Map VARCHAR(128) BINARY NOT NULL, "
-				"Code VARCHAR(128) BINARY NOT NULL, "
+				"Savegame TEXT COLLATE %s NOT NULL, "
+				"Map VARCHAR(128) COLLATE %s NOT NULL, "
+				"Code VARCHAR(128) COLLATE %s NOT NULL, "
 				"Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, "
 				"Server CHAR(4), "
 				"DDNet7 BOOL DEFAULT FALSE, "
 				"SaveID VARCHAR(36) DEFAULT NULL, "
-				"UNIQUE KEY (Map, Code)"
-			") CHARACTER SET utf8mb4;",
-			GetPrefix());
+				"PRIMARY KEY (Map, Code)"
+			");",
+			GetPrefix(), BinaryCollate(), BinaryCollate(), BinaryCollate());
 }
 
 void IDbConnection::FormatCreatePoints(char *aBuf, unsigned int BufferSize)
 {
 	str_format(aBuf, BufferSize,
 			"CREATE TABLE IF NOT EXISTS %s_points ("
-				"Name VARCHAR(%d) BINARY NOT NULL, "
+				"Name VARCHAR(%d) COLLATE %s NOT NULL, "
 				"Points INT DEFAULT 0, "
-				"UNIQUE KEY Name (Name)"
-			") CHARACTER SET utf8mb4;",
-			GetPrefix(), MAX_NAME_LENGTH);
+				"PRIMARY KEY (Name)"
+			");",
+			GetPrefix(), MAX_NAME_LENGTH, BinaryCollate());
 }

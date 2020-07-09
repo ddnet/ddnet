@@ -19,6 +19,7 @@ public:
 
 	// returns the database prefix
 	const char *GetPrefix() { return m_aPrefix; }
+	virtual const char *BinaryCollate() const = 0;
 
 	enum Status
 	{
@@ -59,7 +60,7 @@ private:
 
 protected:
 	void FormatCreateRace(char *aBuf, unsigned int BufferSize);
-	void FormatCreateTeamrace(char *aBuf, unsigned int BufferSize);
+	void FormatCreateTeamrace(char *aBuf, unsigned int BufferSize, const char *pIdType);
 	void FormatCreateMaps(char *aBuf, unsigned int BufferSize);
 	void FormatCreateSaves(char *aBuf, unsigned int BufferSize);
 	void FormatCreatePoints(char *aBuf, unsigned int BufferSize);

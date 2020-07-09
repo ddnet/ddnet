@@ -53,7 +53,7 @@ IDbConnection::Status CSqliteConnection::Connect()
 		FormatCreateRace(aBuf, sizeof(aBuf));
 		if(!Execute(aBuf))
 			return Status::ERROR;
-		FormatCreateTeamrace(aBuf, sizeof(aBuf));
+		FormatCreateTeamrace(aBuf, sizeof(aBuf), "BLOB");
 		if(!Execute(aBuf))
 			return Status::ERROR;
 		FormatCreateMaps(aBuf, sizeof(aBuf));

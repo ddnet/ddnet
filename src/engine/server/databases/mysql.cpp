@@ -119,7 +119,7 @@ IDbConnection::Status CMysqlConnection::Connect()
 			m_pConnection->setSchema(m_aDatabase);
 			FormatCreateRace(aBuf, sizeof(aBuf));
 			m_pStmt->execute(aBuf);
-			FormatCreateTeamrace(aBuf, sizeof(aBuf));
+			FormatCreateTeamrace(aBuf, sizeof(aBuf), "VARBINARY(16)");
 			m_pStmt->execute(aBuf);
 			FormatCreateMaps(aBuf, sizeof(aBuf));
 			m_pStmt->execute(aBuf);

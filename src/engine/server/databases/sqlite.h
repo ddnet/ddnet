@@ -15,6 +15,8 @@ public:
 
 	virtual CSqliteConnection *Copy();
 
+	virtual const char *BinaryCollate() const { return "BINARY"; }
+
 	virtual Status Connect();
 	virtual void Disconnect();
 
