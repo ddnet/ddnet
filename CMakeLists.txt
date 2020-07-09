@@ -1844,6 +1844,7 @@ set_src(ENGINE_SERVER GLOB_RECURSE src/engine/server
   antibot.h
   authmanager.cpp
   authmanager.h
+  databases/connection.cpp
   databases/connection.h
   databases/connection_pool.cpp
   databases/connection_pool.h

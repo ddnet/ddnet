@@ -1,7 +1,6 @@
 #include "sqlite.h"
 
 #include <base/math.h>
-#include <engine/shared/protocol.h>
 
 #include <stdexcept>
 #include <sqlite3.h>
@@ -51,19 +50,19 @@ IDbConnection::Status CSqliteConnection::Connect()
 	if(m_Setup)
 	{
 		char aBuf[1024];
-		str_format(aBuf, sizeof(aBuf), m_pCreateRace, GetPrefix(), MAX_NAME_LENGTH);
+		FormatCreateRace(aBuf, sizeof(aBuf));
 		if(!Execute(aBuf))
 			return Status::ERROR;
-		str_format(aBuf, sizeof(aBuf), m_pCreateTeamrace, GetPrefix(), MAX_NAME_LENGTH);
+		FormatCreateTeamrace(aBuf, sizeof(aBuf));
 		if(!Execute(aBuf))
 			return Status::ERROR;
-		str_format(aBuf, sizeof(aBuf), m_pCreateMaps, GetPrefix());
+		FormatCreateMaps(aBuf, sizeof(aBuf));
 		if(!Execute(aBuf))
 			return Status::ERROR;
-		str_format(aBuf, sizeof(aBuf), m_pCreateSaves, GetPrefix());
+		FormatCreateSaves(aBuf, sizeof(aBuf));
 		if(!Execute(aBuf))
 			return Status::ERROR;
-		str_format(aBuf, sizeof(aBuf), m_pCreatePoints, GetPrefix(), MAX_NAME_LENGTH);
+		FormatCreatePoints(aBuf, sizeof(aBuf));
 		if(!Execute(aBuf))
 			return Status::ERROR;
 		m_Setup = false;

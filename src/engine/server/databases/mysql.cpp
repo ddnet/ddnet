@@ -2,7 +2,6 @@
 
 #if defined(CONF_SQL)
 #include <cppconn/driver.h>
-#include <engine/shared/protocol.h>
 #endif
 
 lock CMysqlConnection::m_SqlDriverLock;
@@ -39,7 +38,7 @@ CMysqlConnection::~CMysqlConnection()
 
 CMysqlConnection *CMysqlConnection::Copy()
 {
-	return new CMysqlConnection(m_aDatabase, m_aPrefix, m_aUser, m_aPass, m_aIp, m_Port, m_Setup);
+	return new CMysqlConnection(m_aDatabase, GetPrefix(), m_aUser, m_aPass, m_aIp, m_Port, m_Setup);
 }
 
 IDbConnection::Status CMysqlConnection::Connect()
@@ -118,15 +117,15 @@ IDbConnection::Status CMysqlConnection::Connect()
 			m_pStmt->execute(aBuf);
 			// Connect to specific database
 			m_pConnection->setSchema(m_aDatabase);
-			str_format(aBuf, sizeof(aBuf), m_pCreateRace, GetPrefix(), MAX_NAME_LENGTH);
+			FormatCreateRace(aBuf, sizeof(aBuf));
 			m_pStmt->execute(aBuf);
-			str_format(aBuf, sizeof(aBuf), m_pCreateTeamrace, GetPrefix(), MAX_NAME_LENGTH);
+			FormatCreateTeamrace(aBuf, sizeof(aBuf));
 			m_pStmt->execute(aBuf);
-			str_format(aBuf, sizeof(aBuf), m_pCreateMaps, GetPrefix());
+			FormatCreateMaps(aBuf, sizeof(aBuf));
 			m_pStmt->execute(aBuf);
-			str_format(aBuf, sizeof(aBuf), m_pCreateSaves, GetPrefix());
+			FormatCreateSaves(aBuf, sizeof(aBuf));
 			m_pStmt->execute(aBuf);
-			str_format(aBuf, sizeof(aBuf), m_pCreatePoints, GetPrefix(), MAX_NAME_LENGTH);
+			FormatCreatePoints(aBuf, sizeof(aBuf));
 			m_pStmt->execute(aBuf);
 			m_Setup = false;
 		}
