@@ -8,6 +8,7 @@
 #	HeroiAmarelo	2012-08-01 15:52:45
 #	Mortcheck		2012-11-03 22:58:43
 #	FeaRZ		2020-07-07 12:09:00
+#	Ryozuki         2020-07-09 12:06:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -250,7 +251,7 @@ Language
 == Idioma
 
 MOTD
-== Mensaje del día
+== MOTD
 
 Map
 == Mapa
@@ -421,7 +422,7 @@ Show friends only
 == Solo mostrar amigos
 
 Show ingame HUD
-== Mostrar apariencia durante el juego
+== Mostrar HUD durante el juego
 
 Show name plates
 == Mostrar apodos
@@ -555,7 +556,7 @@ New name:
 == Nuevo nombre:
 
 Sat.
-== Saturación
+== Sat.
 
 Miscellaneous
 == Miscelánea
@@ -657,16 +658,16 @@ Type:
 == Tipo:
 
 Successfully saved the replay!
-== ¡Guardado con éxito la repetición!
+== ¡Repetición guardada con éxito!
 
 Replay feature is disabled!
 == ¡La función de repetición está desactivada!
 
 Server best:
-== Mejor marca del servidor:
+== Mejor del servidor:
 
 Personal best:
-== Mejor marca personal:
+== Mejor personal:
 
 Learn
 == Aprender
@@ -678,10 +679,10 @@ Ghost
 == Fantasma
 
 Loading DDNet Client
-== Cargando Cliente DDNet
+== Cargando el cliente DDNet
 
 Reconnect in %d sec
-== Vuelva a conectar en %d seg
+== Reconectando en %d seg
 
 Render demo
 == Renderizar demo
@@ -690,10 +691,10 @@ Replace video
 == Reemplazar video
 
 File already exists, do you want to overwrite it?
-== El archivo ya existe, ¿desea sobrescribirlo?
+== El archivo ya existe, ¿quieres sobrescribirlo?
 
 Are you sure that you want to disconnect?
-== ¿Estás seguro de que quieres desconectar?
+== ¿Estás seguro de que quieres desconectarte?
 
 Disconnect Dummy
 == Desconectar Dummy
@@ -705,22 +706,22 @@ Welcome to DDNet
 == Bienvenido a DDNet
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== DDraceNetwork es un juego cooperativo en línea donde el objetivo es que usted y su grupo de tees lleguen a la meta del mapa. Como recién llegado, debes comenzar en los servidores Novice, que alojan los mapas más fáciles. Considere el ping para elegir un servidor cercano a usted.
+== DDraceNetwork es un juego cooperativo en línea donde el objetivo es que tú y vuestro grupo de tees lleguen a la meta del mapa. Como recién llegado, deberías comenzar en los servidores Novice, que alojan los mapas más fáciles. Considera el ping para elegir un servidor cercano.
 
 The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Los mapas contienen congelación, lo que hace que a un tee no pueda moverse temporalmente. Deben trabajar juntos para superar estas partes.
+== Los mapas contienen freeze, lo que hace que a un tee no pueda moverse temporalmente. Tendrán que trabajar juntos para superar estas partes.
 
 The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== La rueda del ratón cambia las armas. El martillo (ratón izquierdo) se puede usar para golpear otros tees y despertarlos de la congelación.
+== La rueda del ratón cambia las armas. El martillo (ratón izquierdo) se puede usar para golpear otros tees y despertarlos del freeze.
 
 Hook (right mouse) can be used to swing through the map and to hook other tees to you.
 == El gancho (mouse derecho) se puede usar para desplazarse por el mapa y enganchar a  otros tees hacia ti.
 
 Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== Lo más importante es que la comunicación es clave: no hay un tutorial, por lo que tendrás que chatear (tecla t) con otros jugadores para aprender los conceptos básicos y los trucos del juego.
+== Lo más importante es que la comunicación es clave: no hay un tutorial, por lo que tendrás que chatear (tecla t) con otros jugadores para aprender los conceptos básicos y las técnicas del juego.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
-== Se recomienda que verifiques la configuración para ajustarla a su gusto antes de unirse a un servidor.
+== Se recomienda que verifiques la configuración para ajustarla a tu gusto antes de unirte a un servidor.
 
 Please enter your nick name below.
 == Por favor, introduzca su apodo a continuación.
@@ -732,7 +733,7 @@ Video name:
 == Nombre del video:
 
 Show DDNet map finishes in server browser
-== Mostrar las metas de los mapas DDNet en el navegador del servidor
+== Marcar los mapas DDNet acabados en el navegador de servidores
 
 transmits your player name to info.ddnet.tw
 == transmite tu nombre de jugador a info.ddnet.tw
@@ -744,10 +745,10 @@ Exclude
 == Excluir
 
 Filter connecting players
-== Conectando filtros de jugadores
+== Filtrar jugadores conectándose
 
 Indicate map finish
-== Indicar la finalización del mapa
+== Indicar mapa acabado
 
 Unfinished map
 == Mapa inacabado
@@ -759,7 +760,7 @@ Types
 == Tipos
 
 DDNet %s is out!
-== ¡DDNet %s ya salió!
+== ¡DDNet %s ya esta disponible!
 
 Downloading %s:
 == Descargando %s:
@@ -777,7 +778,7 @@ Restart
 == Reiniciar
 
 DDNet %s is out! Download it at DDNet.tw!
-== ¡DDNet %s ya salió! ¡Descárgalo en DDNet.tw!
+== ¡DDNet %s ya esta disponible! ¡Descárgalo en DDNet.tw!
 
 Select a name
 == Selecciona un nombre
@@ -834,13 +835,13 @@ Save
 == Guardar
 
 Switch weapon when out of ammo
-== Cambiar arma cuando no tengas munición
+== Cambiar de arma cuando se acabe la munición
 
 Reset wanted weapon on death
-== Restablecer arma deseada en la muerte
+== Restablecer el arma deseada al morir
 
 Show clan above name plates
-== Mostrar clan por encima del nombre del jugador
+== Mostrar el clan por encima de los nombres
 
 Clan plates size
 == Tamaño de la fuente del clan
@@ -861,10 +862,10 @@ Max CSVs
 == CSV máx
 
 Dummy settings
-== Configuraciones del Dummy
+== Configuración del Dummy
 
 Vanilla skins only
-== Solo skins de Vanilla
+== Solo skins Vanilla
 
 Fat skins (DDFat)
 == Skins Obesas (DDFat)
@@ -873,7 +874,7 @@ Skin prefix
 == Prefijo de skin
 
 Hook collisions
-== Colisión de Gancho
+== Colisiones del gancho
 
 Pause
 == Pausa
@@ -924,7 +925,7 @@ Show entities
 == Mostrar entidades
 
 Show HUD
-== Mostrar apariencia
+== Mostrar HUD
 
 UI mouse s.
 == UI mouse s.
@@ -957,13 +958,13 @@ Enable gun sound
 == Habilitar sonido de pistola
 
 Enable long pain sound (used when shooting in freeze)
-== Habilitar el sonido de dolor prolongado (se usa al disparar en congelación)
+== Habilitar el sonido de dolor prolongado (se usa al disparar al estar congelado)
 
 Enable server message sound
-== Habilitar el sonido del mensaje del servidor
+== Habilitar el sonido para mensajes del servidor
 
 Enable regular chat sound
-== Habilitar sonido de chat normal
+== Habilitar sonido del chat normal
 
 Enable team chat sound
 == Habilitar el sonido del chat del equipo
@@ -972,7 +973,7 @@ Enable highlighted chat sound
 == Habilitar sonido de chat resaltado
 
 Threaded sound loading
-== Carga de sonido roscado
+== Carga de sonido en un hilo
 
 Map sound volume
 == Volumen de sonido del mapa
@@ -1032,7 +1033,7 @@ We will win
 == Nosotros ganaremos
 
 Friend message
-== Mensaje de amigo
+== Mensaje de un amigo
 
 Friend
 == Amigo
@@ -1125,7 +1126,7 @@ Background (entities)
 == Fondo (entidades)
 
 Show tiles layers from BG map
-== Mostrar capas de mosaico del mapa BG
+== Mostrar capas de tiles del mapa BG
 
 Try fast HTTP map download first
 == Prueba primero la descarga rápida del mapa HTTP
@@ -1143,7 +1144,7 @@ Check now
 == Revisar ahora
 
 New random timeout code
-== Nuevo código de tiempo de espera aleatorio
+== Nuevo código de timeout aleatorio
 
 Time
 == Tiempo
@@ -1182,7 +1183,7 @@ FPM
 == Modo de página rápida
 
 Spree
-== Asesinato múltiple
+== Racha
 
 Best
 == Mejor
