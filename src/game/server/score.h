@@ -3,6 +3,8 @@
 
 #include <memory>
 #include <atomic>
+#include <string>
+#include <vector>
 
 #include <engine/map.h>
 #include <engine/server/databases/connection_pool.h>
