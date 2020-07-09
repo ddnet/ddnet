@@ -22,8 +22,8 @@
 #ifdef _MSC_VER
 typedef __int32 int32_t;
 typedef unsigned __int32 uint32_t;
-typedef __int64 int64_t;
-typedef unsigned __int64 uint64_t;
+typedef __int64 int64;
+typedef unsigned __int64 uint64;
 #else
 #include <stdint.h>
 #endif
@@ -178,12 +178,12 @@ public:
 	CVoteOptionServer *m_pVoteOptionLast;
 
 	// helper functions
-	void CreateDamageInd(vec2 Pos, float AngleMod, int Amount, int64_t Mask=-1);
-	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int64_t Mask);
-	void CreateHammerHit(vec2 Pos, int64_t Mask=-1);
-	void CreatePlayerSpawn(vec2 Pos, int64_t Mask=-1);
-	void CreateDeath(vec2 Pos, int Who, int64_t Mask=-1);
-	void CreateSound(vec2 Pos, int Sound, int64_t Mask=-1);
+	void CreateDamageInd(vec2 Pos, float AngleMod, int Amount, int64 Mask=-1);
+	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int64 Mask);
+	void CreateHammerHit(vec2 Pos, int64 Mask=-1);
+	void CreatePlayerSpawn(vec2 Pos, int64 Mask=-1);
+	void CreateDeath(vec2 Pos, int Who, int64 Mask=-1);
+	void CreateSound(vec2 Pos, int Sound, int64 Mask=-1);
 	void CreateSoundGlobal(int Sound, int Target=-1);
 
 
@@ -433,9 +433,9 @@ public:
 	int m_ChatPrintCBIndex;
 };
 
-inline int64_t CmaskAll() { return -1LL; }
-inline int64_t CmaskOne(int ClientID) { return 1LL<<ClientID; }
-inline int64_t CmaskUnset(int64_t Mask, int ClientID) { return Mask^CmaskOne(ClientID); }
-inline int64_t CmaskAllExceptOne(int ClientID) { return CmaskUnset(CmaskAll(), ClientID); }
-inline bool CmaskIsSet(int64_t Mask, int ClientID) { return (Mask&CmaskOne(ClientID)) != 0; }
+inline int64 CmaskAll() { return -1LL; }
+inline int64 CmaskOne(int ClientID) { return 1LL<<ClientID; }
+inline int64 CmaskUnset(int64 Mask, int ClientID) { return Mask^CmaskOne(ClientID); }
+inline int64 CmaskAllExceptOne(int ClientID) { return CmaskUnset(CmaskAll(), ClientID); }
+inline bool CmaskIsSet(int64 Mask, int ClientID) { return (Mask&CmaskOne(ClientID)) != 0; }
 #endif
