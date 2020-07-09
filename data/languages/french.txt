@@ -14,6 +14,7 @@
 #	Choupom			2011-04-03 23:00:57
 #	Ubu				2011-04-04 21:09:05
 #	Choupom			2011-07-02 19:23:49
+#	SunnyPistache & Pipou   2020-07-09 21:09:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -863,9 +864,6 @@ Dummy settings
 Are you sure that you want to disconnect?
 == Êtes-vous sûr de vouloir vous déconnecter?
 
-\xEE\x85\x8B
-== 
-
 Deactivate
 == Désactiver
 
@@ -1068,7 +1066,7 @@ Unfinished map
 == Carte non terminée
 
 Default length: %d
-== Durée par défaut: %d
+== Durée par défaut : %d
 
 Highlighted message
 == Message en surbrillance
@@ -1080,7 +1078,7 @@ New random timeout code
 == Nouveau code de time-out aléatoire
 
 FPM
-== 
+== FPM
 
 Enable replays
 == Activer les replays
