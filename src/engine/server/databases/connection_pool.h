@@ -52,6 +52,7 @@ private:
 	void Worker();
 	bool ExecSqlFunc(IDbConnection *pConnection, struct CSqlExecData *pData, bool Failure);
 
+	std::atomic_bool m_Shutdown;
 	semaphore m_NumElem;
 	int FirstElem;
 	int LastElem;

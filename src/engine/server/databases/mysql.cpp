@@ -34,6 +34,11 @@ CMysqlConnection::CMysqlConnection(
 
 CMysqlConnection::~CMysqlConnection()
 {
+#if defined(CONF_SQL)
+	m_pStmt.release();
+	m_pPreparedStmt.release();
+	m_pConnection.release();
+#endif
 }
 
 CMysqlConnection *CMysqlConnection::Copy()

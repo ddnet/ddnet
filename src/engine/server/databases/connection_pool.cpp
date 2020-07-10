@@ -96,6 +96,22 @@ void CDbConnectionPool::ExecuteWrite(
 
 void CDbConnectionPool::OnShutdown()
 {
+	m_Shutdown.store(true);
+	m_NumElem.signal();
+	int i = 0;
+	while(m_Shutdown.load())
+	{
+		if (i > 600)  {
+			dbg_msg("sql", "Waited 60 seconds for score-threads to complete, quitting anyway");
+			break;
+		}
+
+		// print a log about every two seconds
+		if (i % 20 == 0)
+			dbg_msg("sql", "Waiting for score-threads to complete (%ds)", i / 10);
+		++i;
+		thread_sleep(100000);
+	}
 }
 
 void CDbConnectionPool::Worker(void *pUser)
@@ -110,6 +126,12 @@ void CDbConnectionPool::Worker()
 	{
 		m_NumElem.wait();
 		auto pThreadData = std::move(m_aTasks[LastElem++]);
+		// work through all database jobs after OnShutdown is called before exiting the thread
+		if(pThreadData == nullptr)
+		{
+			m_Shutdown.store(false);
+			return;
+		}
 		LastElem %= sizeof(m_aTasks) / sizeof(m_aTasks[0]);
 		bool Success = false;
 		switch(pThreadData->m_Mode)
