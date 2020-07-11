@@ -1046,9 +1046,6 @@ Kill
 Personal best:
 == Egyéni record:
 
-DecSpeed
-== Visszatekerés
-
 Show entities
 == Entitások mutatása
 
@@ -1078,9 +1075,6 @@ Fetch Info
 
 Dummy copy
 == Másolat tükrözése
-
-Video speed:
-== Videó sebesség:
 
 Enable replays
 == Visszajátszások
@@ -1145,9 +1139,6 @@ Destination file already exist
 Server best:
 == Legjobb szerver:
 
-IncSpeed
-== Előretekerés
-
 Markers:
 == Jelölések
 
@@ -1184,9 +1175,6 @@ Replay feature is disabled!
 Lock team
 == Csapat lezárása
 
-Skin prefix
-== 
-
 Hook collisions
 == Horog pontossága
 
@@ -1204,3 +1192,9 @@ Length
 
 Are you sure that you want to disconnect your dummy?
 == Biztos, hogy kiakarod léptetni a másolatodat?
+
+Skin prefix
+== 
+
+Show others (own team only)
+== 
