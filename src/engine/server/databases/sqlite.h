@@ -45,6 +45,7 @@ private:
 	sqlite3 *m_pDb;
 	sqlite3_stmt *m_pStmt;
 	bool m_Done; // no more rows available for Step
+	bool m_Locked;
 	// returns true, if the query succeded
 	bool Execute(const char *pQuery);
 

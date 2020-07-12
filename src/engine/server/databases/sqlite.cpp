@@ -11,6 +11,7 @@ CSqliteConnection::CSqliteConnection(const char *pFilename, bool Setup) :
 	m_pDb(nullptr),
 	m_pStmt(nullptr),
 	m_Done(true),
+	m_Locked(false),
 	m_InUse(false)
 {
 	str_copy(m_aFilename, pFilename, sizeof(m_aFilename));
@@ -67,6 +68,7 @@ IDbConnection::Status CSqliteConnection::Connect()
 			return Status::ERROR;
 		m_Setup = false;
 	}
+	m_Locked = false;
 	return Status::SUCCESS;
 }
 
@@ -80,10 +82,18 @@ void CSqliteConnection::Disconnect()
 
 void CSqliteConnection::Lock(const char *pTable)
 {
+	// locks the whole database read/write
+	Execute("BEGIN EXCLUSIVE TRANSACTION;");
+	m_Locked = true;
 }
 
 void CSqliteConnection::Unlock()
 {
+	if(m_Locked)
+	{
+		Execute("COMMIT TRANSACTION;");
+		m_Locked = false;
+	}
 }
 
 void CSqliteConnection::PrepareStatement(const char *pStmt)
