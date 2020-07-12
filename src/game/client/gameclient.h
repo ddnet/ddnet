@@ -346,6 +346,7 @@ public:
 	virtual void OnConsoleInit();
 	virtual void OnStateChange(int NewState, int OldState);
 	virtual void OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy = 0);
+	virtual void InvalidateSnapshot();
 	virtual void OnNewSnapshot();
 	virtual void OnPredict();
 	virtual void OnActivateEditor();
