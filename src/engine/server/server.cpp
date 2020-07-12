@@ -2004,46 +2004,39 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool Sen
 	p.Reset();
 
 	CCache *pCache = &m_ServerInfoCache[GetCacheIndex(Type, SendClients)];
-	CCache::CCacheChunk &FirstChunk = pCache->m_lCache.front();
 
 	#define ADD_RAW(p, x) (p).AddRaw(x, sizeof(x))
 	#define ADD_INT(p, x) do { str_format(aBuf, sizeof(aBuf), "%d", x); (p).AddString(aBuf, 0); } while(0)
-
-	switch(Type)
-	{
-	case SERVERINFO_EXTENDED: ADD_RAW(p, SERVERBROWSE_INFO_EXTENDED); break;
-	case SERVERINFO_64_LEGACY: ADD_RAW(p, SERVERBROWSE_INFO_64_LEGACY); break;
-	case SERVERINFO_VANILLA:
-	case SERVERINFO_INGAME: ADD_RAW(p, SERVERBROWSE_INFO); break;
-	default: dbg_assert(false, "unknown serverinfo type");
-	}
-
-	ADD_INT(p, Token);
-	p.AddRaw(FirstChunk.m_aData, FirstChunk.m_DataSize);
 
 	CNetChunk Packet;
 	Packet.m_ClientID = -1;
 	Packet.m_Address = *pAddr;
 	Packet.m_Flags = NETSENDFLAG_CONNLESS;
-	Packet.m_pData = p.Data();
-	Packet.m_DataSize = p.Size();
-
-	m_NetServer.Send(&Packet);
-
-	if(Type == SERVERINFO_INGAME || Type == SERVERINFO_VANILLA)
-		return;
 
 	for(const auto &Chunk : pCache->m_lCache)
 	{
 		p.Reset();
 		if(Type == SERVERINFO_EXTENDED)
 		{
-			p.AddRaw(SERVERBROWSE_INFO_EXTENDED_MORE, sizeof(SERVERBROWSE_INFO_EXTENDED_MORE));
+			if(&Chunk == &pCache->m_lCache.front())
+				p.AddRaw(SERVERBROWSE_INFO_EXTENDED, sizeof(SERVERBROWSE_INFO_EXTENDED));
+			else
+				p.AddRaw(SERVERBROWSE_INFO_EXTENDED_MORE, sizeof(SERVERBROWSE_INFO_EXTENDED_MORE));
 			ADD_INT(p, Token);
 		}
 		else if(Type == SERVERINFO_64_LEGACY)
 		{
-			p.AddRaw(FirstChunk.m_aData, FirstChunk.m_DataSize);
+			ADD_RAW(p, SERVERBROWSE_INFO_64_LEGACY);
+			ADD_INT(p, Token);
+		}
+		else if (Type == SERVERINFO_VANILLA || Type == SERVERINFO_INGAME)
+		{
+			ADD_RAW(p, SERVERBROWSE_INFO);
+			ADD_INT(p, Token);
+		}
+		else
+		{
+			dbg_assert(false, "unknown serverinfo type");
 		}
 
 		p.AddRaw(Chunk.m_aData, Chunk.m_DataSize);

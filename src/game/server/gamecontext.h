@@ -153,6 +153,7 @@ public:
 	void AbortVoteKickOnDisconnect(int ClientID);
 
 	int m_VoteCreator;
+	int m_VoteType;
 	int64 m_VoteCloseTime;
 	bool m_VoteUpdate;
 	int m_VotePos;
@@ -172,6 +173,7 @@ public:
 		VOTE_ENFORCE_UNKNOWN=0,
 		VOTE_ENFORCE_NO,
 		VOTE_ENFORCE_YES,
+		VOTE_ENFORCE_ABORT,
 	};
 	CHeap *m_pVoteOptionHeap;
 	CVoteOptionServer *m_pVoteOptionFirst;
@@ -410,15 +412,24 @@ private:
 public:
 	CLayers *Layers() { return &m_Layers; }
 	class IScore *Score() { return m_pScore; }
-	bool m_VoteKick;
-	bool m_VoteSpec;
-	int m_VoteVictim;
+
 	enum
 	{
 		VOTE_ENFORCE_NO_ADMIN = VOTE_ENFORCE_YES + 1,
-		VOTE_ENFORCE_YES_ADMIN
+		VOTE_ENFORCE_YES_ADMIN,
+
+		VOTE_TYPE_UNKNOWN=0,
+		VOTE_TYPE_OPTION,
+		VOTE_TYPE_KICK,
+		VOTE_TYPE_SPECTATE,
 	};
+	int m_VoteVictim;
 	int m_VoteEnforcer;
+
+	inline bool IsOptionVote() const { return m_VoteType == VOTE_TYPE_OPTION; };
+	inline bool IsKickVote() const { return m_VoteType == VOTE_TYPE_KICK; };
+	inline bool IsSpecVote() const { return m_VoteType == VOTE_TYPE_SPECTATE; };
+
 	void SendRecord(int ClientID);
 	static void SendChatResponse(const char *pLine, void *pUser, bool Highlighted = false);
 	static void SendChatResponseAll(const char *pLine, void *pUser);
