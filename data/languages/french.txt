@@ -708,9 +708,6 @@ Zoom out
 Show other players' hook collision lines
 == Montrer la ligne de collision du grappin des autres joueurs
 
-Video speed:
-== Vitesse de vidéo
-
 Filter connecting players
 == Filtre les Tees se connectant
 
@@ -776,9 +773,6 @@ Skin prefix
 
 Use OpenGL 3.3 (experimental)
 == Utiliser OpenGL 3.3 (expérimental)
-
-DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.\n\nThe maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.\n\nThe mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.\n\nHook (right mouse) can be used to swing through the map and to hook other tees to you.\n\nMost importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.\n\nIt's recommended that you check the settings to adjust them to your liking before joining a server.\n\nPlease enter your nick name below.
-== DDRaceNetwork est un jeu coopératif en ligne dont l'objectif est, pour vous ainsi que votre groupe de tees, d'atteindre la ligne d'arrivée d'une map. En tant que nouveau joueur, il est préférable que vous commenciez sur les serveurs Novice, qui sont constitués des cartes les plus simples. Prenez en compte le ping afin de choisir un serveur proche de chez vous. \n\nLes maps contiennent du freeze (gèle), ce qui vous empêche temporairement de bouger. Vous devez travailler en équipe pour passer ces parties. \n\nLa molette de la souris permet de changer d'arme. Le marteau (clic gauche) peut être utilisé pour frapper les autres tees ce qui les unfreeze (dégivre). \n\nLe grappin (clic droit) peut être utilisé pour se balancer tout le long de la carte en attrappant les murs et peut aussi permettre d'attrapper les autres Tees. \n\nLa communication est la clé de la réussite: Il n'y a pas de tutoriel donc vous devrez parler avec d'autres joueurs (touche T) afin d'apprendre les bases du jeu ainsi que ses mécanismes complexes, avancés et variés. \n\nIl est recommandé d'ajuster les configurations à votre goût avant de rejoindre un serveur. \n\nVeuillez entrer votre pseudonyme ci-dessous.
 
 Date
 == Date
@@ -897,9 +891,6 @@ Wait before try for
 Follow
 == Suivre
 
-\n\nReconnect in %d sec
-== \n\nReconnecte dans %d sec
-
 Converse
 == Converser
 
@@ -975,9 +966,6 @@ Demo
 Map sound volume
 == Volume des sons de la map
 
-IncSpeed
-== Accélérer
-
 Time
 == Temps
 
@@ -1017,9 +1005,6 @@ Net
 Show HUD
 == Afficher l'interface
 
-Show DDNet map finishes in server browser\n(transmits your player name to info.ddnet.tw)
-== Afficher les cartes de DDNet terminées dans le navigateur\n(transmet votre pseudonyme à info.ddnet.tw)
-
 DDNet %s is available:
 == DDNet %s est disponible:
 
@@ -1043,9 +1028,6 @@ Try fast HTTP map download first
 
 Save the best demo of each race
 == Sauvegarder la meilleure démo de chaque course
-
-SHA256:
-== SHA256 :
 
 may cause delay
 == Peut causer du délai
@@ -1197,11 +1179,41 @@ Types
 Countries
 == Pays
 
-DecSpeed
-== Ralentir
-
 Gameplay
 == Jouabilité
 
 Connect Dummy
 == Connecter le dummy
+
+Reconnect in %d sec
+== Reconnecte dans %d sec
+
+DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
+== DDRaceNetwork est un jeu coopératif en ligne dont l'objectif est, pour vous ainsi que votre groupe de tees, d'atteindre la ligne d'arrivée d'une map. En tant que nouveau joueur, il est préférable que vous commenciez sur les serveurs Novice, qui sont constitués des cartes les plus simples. Prenez en compte le ping afin de choisir un serveur proche de chez vous.
+
+The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
+== Les maps contiennent du freeze (gèle), ce qui vous empêche temporairement de bouger. Vous devez travailler en équipe pour passer ces parties.
+
+The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
+== La molette de la souris permet de changer d'arme. Le marteau (clic gauche) peut être utilisé pour frapper les autres tees ce qui les unfreeze (dégivre).
+
+Hook (right mouse) can be used to swing through the map and to hook other tees to you.
+== Le grappin (clic droit) peut être utilisé pour se balancer tout le long de la carte en attrappant les murs et peut aussi permettre d'attrapper les autres Tees.
+
+Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
+== La communication est la clé de la réussite: Il n'y a pas de tutoriel donc vous devrez parler avec d'autres joueurs (touche T) afin d'apprendre les bases du jeu ainsi que ses mécanismes complexes, avancés et variés.
+
+It's recommended that you check the settings to adjust them to your liking before joining a server.
+== Il est recommandé d'ajuster les configurations à votre goût avant de rejoindre un serveur.
+
+Please enter your nick name below.
+== Veuillez entrer votre pseudonyme ci-dessous.
+
+Show DDNet map finishes in server browser
+== Afficher les cartes de DDNet terminées dans le navigateur
+
+transmits your player name to info.ddnet.tw
+== transmet votre pseudonyme à info.ddnet.tw
+
+Show others (own team only)
+== 
