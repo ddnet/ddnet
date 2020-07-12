@@ -868,6 +868,15 @@ int CPlayer::Pause(int State, bool Force)
 		// Update state
 		m_Paused = State;
 		m_LastPause = Server()->Tick();
+
+		// Sixup needs a teamchange
+		protocol7::CNetMsg_Sv_Team Msg;
+		Msg.m_ClientID = m_ClientID;
+		Msg.m_CooldownTick = Server()->Tick();
+		Msg.m_Silent = true;
+		Msg.m_Team = m_Paused ? protocol7::TEAM_SPECTATORS : m_Team;
+
+		GameServer()->Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, m_ClientID);
 	}
 
 	return m_Paused;
