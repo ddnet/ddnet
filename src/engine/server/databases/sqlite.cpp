@@ -193,3 +193,18 @@ void CSqliteConnection::ExceptionOnError(int Result)
 		throw std::runtime_error(sqlite3_errmsg(m_pDb));
 	}
 }
+
+void CSqliteConnection::AddPoints(const char *pPlayer, int Points)
+{
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf),
+			"INSERT INTO %s_points(Name, Points) "
+			"VALUES (?, ?) "
+			"ON CONFLICT(Name) UPDATE SET Points=Points+?;",
+			GetPrefix());
+	PrepareStatement(aBuf);
+	BindString(1, pPlayer);
+	BindInt(2, Points);
+	BindInt(3, Points);
+	Step();
+}

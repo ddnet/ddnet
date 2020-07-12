@@ -55,6 +55,9 @@ public:
 	// returns number of bytes read into the buffer
 	virtual int GetBlob(int Col, unsigned char *pBuffer, int BufferSize) const = 0;
 
+	// SQL statements, that can't be abstracted, has side effects to the result
+	virtual void AddPoints(const char *pPlayer, int Points) = 0;
+
 private:
 	char m_aPrefix[64];
 

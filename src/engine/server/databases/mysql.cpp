@@ -273,3 +273,18 @@ int CMysqlConnection::GetBlob(int Col, unsigned char *pBuffer, int BufferSize) c
 	return 0;
 #endif
 }
+
+void CMysqlConnection::AddPoints(const char *pPlayer, int Points)
+{
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf),
+			"INSERT INTO %s_points(Name, Points) "
+			"VALUES (?, ?) "
+			"ON DUPLICATE KEY UPDATE Points=Points+?;",
+			GetPrefix());
+	PrepareStatement(aBuf);
+	BindString(1, pPlayer);
+	BindInt(2, Points);
+	BindInt(3, Points);
+	Step();
+}

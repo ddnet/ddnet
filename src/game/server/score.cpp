@@ -453,26 +453,16 @@ bool CScore::SaveScoreThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		if(pSqlServer->Step())
 		{
 			int Points = pSqlServer->GetInt(1);
+			pSqlServer->AddPoints(pData->m_Name, Points);
 			str_format(paMessages[0], sizeof(paMessages[0]),
 					"You earned %d point%s for finishing this map!",
 					Points, Points == 1 ? "" : "s");
-
-			str_format(aBuf, sizeof(aBuf),
-					"INSERT INTO %s_points(Name, Points) "
-					"VALUES (?, ?) "
-					"ON duplicate key "
-						"UPDATE Name=VALUES(Name), Points=Points+VALUES(Points);",
-					pSqlServer->GetPrefix());
-			pSqlServer->PrepareStatement(aBuf);
-			pSqlServer->BindString(1, pData->m_Name);
-			pSqlServer->BindInt(1, Points);
-			pSqlServer->Step();
 		}
 	}
 
-	// save score
+	// save score. Can't fail, because no UNIQUE/PRIMARY KEY constrain is defined.
 	str_format(aBuf, sizeof(aBuf),
-			"INSERT IGNORE INTO %s_race("
+			"INSERT INTO %s_race("
 				"Map, Name, Timestamp, Time, Server, "
 				"cp1, cp2, cp3, cp4, cp5, cp6, cp7, cp8, cp9, cp10, cp11, cp12, cp13, "
 				"cp14, cp15, cp16, cp17, cp18, cp19, cp20, cp21, cp22, cp23, cp24, cp25, "
@@ -481,7 +471,7 @@ bool CScore::SaveScoreThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 				"%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, "
 				"%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, "
 				"%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, "
-				"'%s', false);",
+				"?, false);",
 			pSqlServer->GetPrefix(), pData->m_Time,
 			pData->m_aCpCurrent[0], pData->m_aCpCurrent[1], pData->m_aCpCurrent[2],
 			pData->m_aCpCurrent[3], pData->m_aCpCurrent[4], pData->m_aCpCurrent[5],
@@ -491,12 +481,13 @@ bool CScore::SaveScoreThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 			pData->m_aCpCurrent[15], pData->m_aCpCurrent[16], pData->m_aCpCurrent[17],
 			pData->m_aCpCurrent[18], pData->m_aCpCurrent[19], pData->m_aCpCurrent[20],
 			pData->m_aCpCurrent[21], pData->m_aCpCurrent[22], pData->m_aCpCurrent[23],
-			pData->m_aCpCurrent[24], pData->m_GameUuid);
+			pData->m_aCpCurrent[24]);
 	pSqlServer->PrepareStatement(aBuf);
 	pSqlServer->BindString(1, pData->m_Map);
 	pSqlServer->BindString(2, pData->m_Name);
 	pSqlServer->BindString(3, pData->m_aTimestamp);
 	pSqlServer->BindString(4, g_Config.m_SvSqlServerName);
+	pSqlServer->BindString(5, pData->m_GameUuid);
 	pSqlServer->Step();
 
 	pData->m_pResult->m_Done = true;

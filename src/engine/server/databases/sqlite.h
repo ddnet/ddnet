@@ -37,6 +37,8 @@ public:
 	// passing a negative buffer size is undefined behavior
 	virtual int GetBlob(int Col, unsigned char *pBuffer, int BufferSize) const;
 
+	virtual void AddPoints(const char *pPlayer, int Points);
+
 private:
 	// copy of config vars
 	char m_aFilename[512];

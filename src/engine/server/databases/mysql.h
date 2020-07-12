@@ -49,6 +49,8 @@ public:
 	virtual void GetString(int Col, char *pBuffer, int BufferSize) const;
 	virtual int GetBlob(int Col, unsigned char *pBuffer, int BufferSize) const;
 
+	virtual void AddPoints(const char *pPlayer, int Points);
+
 private:
 #if defined(CONF_SQL)
 	std::unique_ptr<sql::Connection> m_pConnection;
