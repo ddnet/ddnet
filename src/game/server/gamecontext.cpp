@@ -1423,6 +1423,9 @@ void *CGameContext::PreProcessMsg(int *MsgID, CUnpacker *pUnpacker, int ClientID
 
 			if(pMsg7->m_Target >= 0)
 			{
+				if(ProcessSpamProtection(ClientID))
+					return 0;
+
 				// Should we maybe recraft the message so that it can go through the usual path?
 				WhisperID(ClientID, pMsg7->m_Target, pMsg7->m_pMessage);
 				return 0;
