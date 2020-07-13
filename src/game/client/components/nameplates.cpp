@@ -162,21 +162,21 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 				int Armor = m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur.m_Armor;
 				float HFontSize = 5.0f + 20.0f * g_Config.m_ClNameplatesHASize / 100.0f;
 				float AFontSize = 6.0f + 24.0f * g_Config.m_ClNameplatesHASize / 100.0f;
-				char pHealth[40] = "\0";
-				char pArmor[40] = "\0";
+				char aHealth[40] = "\0";
+				char aArmor[40] = "\0";
 				for(int i = 0; i < Health; i++)
-					str_append(pHealth, "♥", sizeof(pHealth));
+					str_append(aHealth, "♥", sizeof(aHealth));
 				for(int i = Health; i < 10; i++)
-					str_append(pHealth, "♡", sizeof(pHealth));
-				str_append(pHealth, "\0", sizeof(pHealth));
+					str_append(aHealth, "♡", sizeof(aHealth));
+				str_append(aHealth, "\0", sizeof(aHealth));
 				for(int i = 0; i < Armor; i++)
-					str_append(pArmor, "⚫", sizeof(pArmor));
+					str_append(aArmor, "⚫", sizeof(aArmor));
 				for(int i = Armor; i < 10; i++)
-					str_append(pArmor, "⚪", sizeof(pArmor));
-				str_append(pArmor, "\0", sizeof(pHealth));
+					str_append(aArmor, "⚪", sizeof(aArmor));
+				str_append(aArmor, "\0", sizeof(aHealth));
 
 				char aBuf[128];
-				mem_copy(aBuf, pHealth, sizeof(aBuf));
+				mem_copy(aBuf, aHealth, sizeof(aBuf));
 				float Offset;
 
 				if(g_Config.m_ClNameplatesClan && (g_Config.m_Debug || g_Config.m_ClNameplatesIDs))
@@ -192,7 +192,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 				TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f));
 				TextRender()->Text(0, Position.x-PosHealth/2.0f, Position.y-Offset-HFontSize-AFontSize, HFontSize, aBuf, -1);
 
-				mem_copy(aBuf, pArmor, sizeof(aBuf));
+				mem_copy(aBuf, aArmor, sizeof(aBuf));
 				float PosArmor = TextRender()->TextWidth(0, AFontSize, aBuf, -1);
 				TextRender()->TextColor(ColorRGBA(1.0f, 1.0f, 0.0f));
 				TextRender()->Text(0, Position.x-PosArmor/2.0f, Position.y-Offset-AFontSize-3.0f, AFontSize, aBuf, -1);
