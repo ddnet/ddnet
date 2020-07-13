@@ -206,22 +206,25 @@ bool CScore::LoadPlayerDataThread(IDbConnection *pSqlServer, const ISqlData *pGa
 
 	// birthday check
 	str_format(aBuf, sizeof(aBuf),
-			"SELECT YEAR(Current) - YEAR(Stamp) AS YearsAgo "
-			"FROM ("
-				"SELECT CURRENT_TIMESTAMP AS Current, MIN(Timestamp) AS Stamp "
-				"FROM %s_race "
-				"WHERE Name=?"
-			") AS l "
-			"WHERE DAYOFMONTH(Current) = DAYOFMONTH(Stamp) AND MONTH(Current) = MONTH(Stamp) "
-				"AND YEAR(Current) > YEAR(Stamp);",
+			"SELECT CURRENT_TIMESTAMP AS Current, MIN(Timestamp) AS Stamp "
+			"FROM %s_race "
+			"WHERE Name = ?",
 			pSqlServer->GetPrefix());
 	pSqlServer->PrepareStatement(aBuf);
 	pSqlServer->BindString(1, pData->m_RequestingPlayer);
 
-	if(pSqlServer->Step())
+	if(pSqlServer->Step() && !pSqlServer->IsNull(2))
 	{
-		int YearsAgo = pSqlServer->GetInt(1);
-		pData->m_pResult->m_Data.m_Info.m_Birthday = YearsAgo;
+		char aCurrent[TIMESTAMP_STR_LENGTH];
+		pSqlServer->GetString(1, aCurrent, sizeof(aCurrent));
+		char aStamp[TIMESTAMP_STR_LENGTH];
+		pSqlServer->GetString(2, aStamp, sizeof(aStamp));
+		int CurrentYear, CurrentMonth, CurrentDay;
+		int StampYear, StampMonth, StampDay;
+		if(sscanf(aCurrent, "%d-%d-%d", &CurrentYear, &CurrentMonth, &CurrentDay) == 3
+				&& sscanf(aStamp, "%d-%d-%d", &StampYear, &StampMonth, &StampDay) == 3
+				&& CurrentMonth == StampMonth && CurrentDay == StampDay)
+			pData->m_pResult->m_Data.m_Info.m_Birthday = CurrentYear - StampYear;
 	}
 	pData->m_pResult->m_Done = true;
 	return true;
