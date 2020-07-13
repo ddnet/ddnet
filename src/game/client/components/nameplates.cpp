@@ -162,21 +162,21 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 				int Armor = m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur.m_Armor;
 				float HFontSize = 5.0f + 20.0f * g_Config.m_ClNameplatesHASize / 100.0f;
 				float AFontSize = 6.0f + 24.0f * g_Config.m_ClNameplatesHASize / 100.0f;
-				std::string pHealth;
-				std::string pArmor;
+				char pHealth[40] = "\0";
+				char pArmor[40] = "\0";
 				for(int i = 0; i < Health; i++)
-					pHealth.append("♥");
+					str_append(pHealth, "♥", sizeof(pHealth));
 				for(int i = Health; i < 10; i++)
-					pHealth.append("♡");
-				pHealth.append("\0");
+					str_append(pHealth, "♡", sizeof(pHealth));
+				str_append(pHealth, "\0", sizeof(pHealth));
 				for(int i = 0; i < Armor; i++)
-					pArmor.append("⚫");
+					str_append(pArmor, "⚫", sizeof(pArmor));
 				for(int i = Armor; i < 10; i++)
-					pArmor.append("⚪");
-				pArmor.append("\0");
+					str_append(pArmor, "⚪", sizeof(pArmor));
+				str_append(pArmor, "\0", sizeof(pHealth));
 
 				char aBuf[128];
-				mem_copy(aBuf, pHealth.c_str(), sizeof(aBuf));
+				mem_copy(aBuf, pHealth, sizeof(aBuf));
 				float Offset;
 
 				if(g_Config.m_ClNameplatesClan && (g_Config.m_Debug || g_Config.m_ClNameplatesIDs))
@@ -188,14 +188,14 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 				else
 					Offset = (FontSize * 2);
 
-				float tw_health = TextRender()->TextWidth(0, HFontSize, aBuf, -1);
+				float pos_Health = TextRender()->TextWidth(0, HFontSize, aBuf, -1);
 				TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f));
-				TextRender()->Text(0, Position.x-tw_health/2.0f, Position.y-Offset-HFontSize-AFontSize, HFontSize, aBuf, -1);
+				TextRender()->Text(0, Position.x-pos_Health/2.0f, Position.y-Offset-HFontSize-AFontSize, HFontSize, aBuf, -1);
 
-				mem_copy(aBuf, pArmor.c_str(), sizeof(aBuf));
-				float tw_armor = TextRender()->TextWidth(0, AFontSize, aBuf, -1);
+				mem_copy(aBuf, pArmor, sizeof(aBuf));
+				float pos_Armor = TextRender()->TextWidth(0, AFontSize, aBuf, -1);
 				TextRender()->TextColor(ColorRGBA(1.0f, 1.0f, 0.0f));
-				TextRender()->Text(0, Position.x-tw_armor/2.0f, Position.y-Offset-AFontSize-3.0f, AFontSize, aBuf, -1);
+				TextRender()->Text(0, Position.x-pos_Armor/2.0f, Position.y-Offset-AFontSize-3.0f, AFontSize, aBuf, -1);
 			}
 		}
 
