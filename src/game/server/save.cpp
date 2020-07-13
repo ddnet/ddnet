@@ -194,7 +194,7 @@ void CSaveTee::load(CCharacter *pChr, int Team)
 	pChr->m_SavedInput.m_Direction = m_InputDirection;
 	pChr->m_SavedInput.m_Jump = m_InputJump;
 	pChr->m_SavedInput.m_Fire = m_InputFire;
-	pChr->m_SavedInput.m_Hook = m_InputHook;
+	pChr->m_KeepHookAfterLoad = m_InputHook;
 
 	pChr->m_ReloadTimer = m_ReloadTimer;
 

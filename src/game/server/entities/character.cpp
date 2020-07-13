@@ -41,6 +41,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_LastRefillJumps = false;
 	m_LastPenalty = false;
 	m_LastBonus = false;
+	m_KeepHookAfterLoad = false;
 
 	m_TeleGunTeleport = false;
 	m_IsBlueTeleGunTeleport = false;
@@ -2161,6 +2162,13 @@ void CCharacter::SetRescue()
 void CCharacter::DDRaceTick()
 {
 	mem_copy(&m_Input, &m_SavedInput, sizeof(m_Input));
+	if(m_KeepHookAfterLoad)
+	{
+		if(m_Input.m_Hook != 0)
+			m_KeepHookAfterLoad = false;
+		else
+			m_Input.m_Hook = 1;
+	}
 	m_Armor=(m_FreezeTime >= 0)?10-(m_FreezeTime/15):0;
 	if(m_Input.m_Direction != 0 || m_Input.m_Jump != 0)
 		m_LastMove = Server()->Tick();
@@ -2424,7 +2432,7 @@ void CCharacter::Rescue()
 		if((m_SavedInput.m_Fire&1) != 0)
 			m_SavedInput.m_Fire++;
 		m_SavedInput.m_Fire &= INPUT_STATE_MASK;
-		m_SavedInput.m_Hook = 0;
+		m_KeepHookAfterLoad = false;
 		m_pPlayer->Pause(CPlayer::PAUSE_NONE, true);
 	}
 }

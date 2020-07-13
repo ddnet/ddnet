@@ -140,6 +140,7 @@ private:
 	CNetObj_PlayerInput m_SavedInput;
 	int m_NumInputs;
 	int m_Jumped;
+	bool m_KeepHookAfterLoad;
 
 	int m_DamageTakenTick;
 
