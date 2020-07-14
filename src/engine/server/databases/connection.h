@@ -41,7 +41,9 @@ public:
 
 	// PrepareStatement has to be called beforehand,
 	virtual void BindString(int Idx, const char *pString) = 0;
+	virtual void BindBlob(int Idx, unsigned char *pBlob, int Size) = 0;
 	virtual void BindInt(int Idx, int Value) = 0;
+	virtual void BindFloat(int Idx, float Value) = 0;
 
 	// executes the query and returns if a result row exists and selects it
 	// when called multiple times the next row is selected

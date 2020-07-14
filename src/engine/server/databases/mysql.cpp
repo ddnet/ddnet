@@ -4,6 +4,8 @@
 #include <cppconn/driver.h>
 #endif
 
+#include <string>
+
 lock CMysqlConnection::m_SqlDriverLock;
 
 CMysqlConnection::CMysqlConnection(
@@ -205,10 +207,28 @@ void CMysqlConnection::BindString(int Idx, const char *pString)
 #endif
 }
 
+void CMysqlConnection::BindBlob(int Idx, unsigned char *pBlob, int Size)
+{
+#if defined(CONF_SQL)
+	// copy blob into string
+	auto Blob = std::string(pBlob, pBlob+Size);
+	m_pPreparedStmt->setString(Idx, Blob);
+	m_NewQuery = true;
+#endif
+}
+
 void CMysqlConnection::BindInt(int Idx, int Value)
 {
 #if defined(CONF_SQL)
 	m_pPreparedStmt->setInt(Idx, Value);
+	m_NewQuery = true;
+#endif
+}
+
+void CMysqlConnection::BindFloat(int Idx, float Value)
+{
+#if defined(CONF_SQL)
+	m_pPreparedStmt->setDouble(Idx, (double)Value);
 	m_NewQuery = true;
 #endif
 }

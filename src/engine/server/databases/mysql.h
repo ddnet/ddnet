@@ -39,7 +39,9 @@ public:
 	virtual void PrepareStatement(const char *pStmt);
 
 	virtual void BindString(int Idx, const char *pString);
+	virtual void BindBlob(int Idx, unsigned char *pBlob, int Size);
 	virtual void BindInt(int Idx, int Value);
+	virtual void BindFloat(int Idx, float Value);
 
 	virtual bool Step();
 

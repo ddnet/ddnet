@@ -118,9 +118,23 @@ void CSqliteConnection::BindString(int Idx, const char *pString)
 	m_Done = false;
 }
 
+void CSqliteConnection::BindBlob(int Idx, unsigned char *pBlob, int Size)
+{
+	int Result = sqlite3_bind_blob(m_pStmt, Idx, pBlob, Size, NULL);
+	ExceptionOnError(Result);
+	m_Done = false;
+}
+
 void CSqliteConnection::BindInt(int Idx, int Value)
 {
 	int Result = sqlite3_bind_int(m_pStmt, Idx, Value);
+	ExceptionOnError(Result);
+	m_Done = false;
+}
+
+void CSqliteConnection::BindFloat(int Idx, float Value)
+{
+	int Result = sqlite3_bind_double(m_pStmt, Idx, (double)Value);
 	ExceptionOnError(Result);
 	m_Done = false;
 }
