@@ -523,42 +523,91 @@ bool CScore::SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGam
 {
 	const CSqlTeamScoreData *pData = dynamic_cast<const CSqlTeamScoreData *>(pGameData);
 
-	char aBuf[2300];
+	char aBuf[512];
 
 	// get the names sorted in a tab separated string
 	std::vector<std::string> aNames;
 	for(unsigned int i = 0; i < pData->m_Size; i++)
 		aNames.push_back(pData->m_aNames[i]);
 
+	char aTable[512];
+	str_format(aTable, sizeof(aTable),
+			"%s_teamrace WRITE, %s_teamrace AS r WRITE",
+			pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
+	pSqlServer->Lock(aTable);
 	std::sort(aNames.begin(), aNames.end());
-	char aSortedNames[2048] = {0};
-	for(unsigned int i = 0; i < pData->m_Size; i++)
-	{
-		if(i != 0)
-			str_append(aSortedNames, "\t", sizeof(aSortedNames));
-		str_append(aSortedNames, aNames[i].c_str(), sizeof(aSortedNames));
-	}
 	str_format(aBuf, sizeof(aBuf),
-			"SELECT l.ID, Time "
-			"FROM ((" // preselect teams with first name in team
+			"SELECT l.ID, Time, Name "
+			"FROM (" // preselect teams with first name in team
 					"SELECT ID "
 					"FROM %s_teamrace "
 					"WHERE Map = ? AND Name = ? AND DDNet7 = false"
-				") as l"
-			") INNER JOIN %s_teamrace AS r ON l.ID = r.ID "
-			"GROUP BY ID "
-			"HAVING GROUP_CONCAT(Name ORDER BY Name SEPARATOR '\t') = ?",
+			") as l INNER JOIN %s_teamrace AS r ON l.ID = r.ID "
+			"ORDER BY l.ID, Name ",
 			pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
 	pSqlServer->PrepareStatement(aBuf);
 	pSqlServer->BindString(1, pData->m_Map);
 	pSqlServer->BindString(2, pData->m_aNames[0]);
-	pSqlServer->BindString(3, aSortedNames);
 
-	if (pSqlServer->Step())
+	CUuid GameID;
+	bool SearchTeam = true;
+	bool FoundTeam = false;
+	float Time;
+	if(pSqlServer->Step())
 	{
-		char aGameID[UUID_MAXSTRSIZE];
-		pSqlServer->GetString(1, aGameID, sizeof(aGameID));
-		float Time = pSqlServer->GetFloat(2);
+		while(SearchTeam)
+		{
+			CUuid LastGameID;
+			pSqlServer->GetBlob(1, GameID.m_aData, sizeof(GameID.m_aData));
+			Time = pSqlServer->GetFloat(2);
+			char aName[MAX_NAME_LENGTH];
+			pSqlServer->GetString(3, aName, sizeof(aName));
+			if(str_comp(aName, aNames[0].c_str()) != 0)
+			{
+				dbg_msg("sql", "insert team rank logic error: "
+						"first team member from sql (%s) should be first name in array (%s), "
+						"because both are sorted by binary values", aName, aNames[0].c_str());
+				return false;
+			}
+			if(!pSqlServer->Step())
+			{
+				SearchTeam = false;
+				break;
+			}
+			pSqlServer->GetBlob(1, LastGameID.m_aData, sizeof(LastGameID.m_aData));
+			// check if all team members are equal
+			for(unsigned int i = 1; i < pData->m_Size; i++)
+			{
+				if(GameID != LastGameID)
+					break;
+				pSqlServer->GetString(3, aName, sizeof(aName));
+				if(str_comp(aName, aNames[i].c_str()) != 0)
+				{
+					dbg_msg("sql", "unequal '%s' != '%s'", aName, aNames[i].c_str());
+					break;
+				}
+				else if(i == pData->m_Size - 1)
+					FoundTeam = true;
+				if(!pSqlServer->Step())
+				{
+					SearchTeam = false;
+					break;
+				}
+				pSqlServer->GetBlob(1, LastGameID.m_aData, sizeof(LastGameID.m_aData));
+			}
+			// skip to next team
+			while(SearchTeam && GameID == LastGameID)
+			{
+				if(pSqlServer->Step())
+					pSqlServer->GetBlob(1, LastGameID.m_aData, sizeof(LastGameID.m_aData));
+				else
+					SearchTeam = false;
+				FoundTeam = false;
+			}
+		}
+	}
+	if(FoundTeam)
+	{
 		dbg_msg("sql", "found team rank from same team (old time: %f, new time: %f)", Time, pData->m_Time);
 		if(pData->m_Time < Time)
 		{
@@ -568,32 +617,30 @@ bool CScore::SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGam
 			pSqlServer->PrepareStatement(aBuf);
 			pSqlServer->BindString(1, pData->m_aTimestamp);
 			pSqlServer->BindString(2, pData->m_GameUuid);
-			pSqlServer->BindString(3, aGameID);
+			pSqlServer->BindBlob(3, GameID.m_aData, sizeof(GameID.m_aData));
 			pSqlServer->Step();
 		}
 	}
 	else
 	{
 		CUuid GameID = RandomUuid();
-		char aGameID[UUID_MAXSTRSIZE];
-		FormatUuid(GameID, aGameID, sizeof(aGameID));
-
 		for(unsigned int i = 0; i < pData->m_Size; i++)
 		{
 			// if no entry found... create a new one
 			str_format(aBuf, sizeof(aBuf),
-					"INSERT IGNORE INTO %s_teamrace(Map, Name, Timestamp, Time, ID, GameID, DDNet7) "
+					"INSERT INTO %s_teamrace(Map, Name, Timestamp, Time, ID, GameID, DDNet7) "
 					"VALUES (?, ?, ?, %.2f, ?, ?, false);",
 					pSqlServer->GetPrefix(), pData->m_Time);
 			pSqlServer->PrepareStatement(aBuf);
 			pSqlServer->BindString(1, pData->m_Map);
 			pSqlServer->BindString(2, pData->m_aNames[i]);
 			pSqlServer->BindString(3, pData->m_aTimestamp);
-			pSqlServer->BindString(4, aGameID);
+			pSqlServer->BindBlob(4, GameID.m_aData, sizeof(GameID.m_aData));
 			pSqlServer->BindString(5, pData->m_GameUuid);
 			pSqlServer->Step();
 		}
 	}
+	pSqlServer->Unlock();
 
 	return true;
 }
@@ -1242,7 +1289,7 @@ bool CScore::SaveTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 	char aBuf[65536];
 
 	char aTable[512];
-	str_format(aTable, sizeof(aTable), "%s_saves", pSqlServer->GetPrefix());
+	str_format(aTable, sizeof(aTable), "%s_saves WRITE", pSqlServer->GetPrefix());
 	pSqlServer->Lock(aTable);
 
 	char Code[128] = {0};
@@ -1378,7 +1425,7 @@ bool CScore::LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 	pData->m_pResult->m_Status = CScoreSaveResult::LOAD_FAILED;
 
 	char aTable[512];
-	str_format(aTable, sizeof(aTable), "%s_saves", pSqlServer->GetPrefix());
+	str_format(aTable, sizeof(aTable), "%s_saves WRITE", pSqlServer->GetPrefix());
 	pSqlServer->Lock(aTable);
 
 	{

@@ -174,7 +174,7 @@ void CMysqlConnection::Lock(const char *pTable)
 {
 #if defined(CONF_SQL)
 	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "lock tables %s write;", pTable);
+	str_format(aBuf, sizeof(aBuf), "LOCK TABLES %s;", pTable);
 	m_pStmt->execute(aBuf);
 	m_Locked = true;
 #endif
@@ -185,7 +185,7 @@ void CMysqlConnection::Unlock()
 #if defined(CONF_SQL)
 	if(m_Locked)
 	{
-		m_pStmt->execute("unlock tables;");
+		m_pStmt->execute("UNLOCK TABLES;");
 		m_Locked = false;
 	}
 #endif
