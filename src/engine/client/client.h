@@ -186,7 +186,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	int m_CurrentInput[2];
 	bool m_LastDummy;
-	bool m_LastDummy2;
 	bool m_DummySendConnInfo;
 
 	// graphs

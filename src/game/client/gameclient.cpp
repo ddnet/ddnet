@@ -511,10 +511,10 @@ void CGameClient::OnConnected()
 
 void CGameClient::OnReset()
 {
-	// clear out the invalid pointers
 	m_LastNewPredictedTick[0] = -1;
 	m_LastNewPredictedTick[1] = -1;
-	mem_zero(&g_GameClient.m_Snap, sizeof(g_GameClient.m_Snap));
+
+	InvalidateSnapshot();
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 		m_aClients[i].Reset();
@@ -1084,13 +1084,18 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	return Info;
 }
 
-void CGameClient::OnNewSnapshot()
+void CGameClient::InvalidateSnapshot()
 {
-	m_NewTick = true;
-
-	// clear out the invalid pointers
+	// clear all pointers
 	mem_zero(&g_GameClient.m_Snap, sizeof(g_GameClient.m_Snap));
 	m_Snap.m_LocalClientID = -1;
+}
+
+void CGameClient::OnNewSnapshot()
+{
+	InvalidateSnapshot();
+
+	m_NewTick = true;
 
 	// secure snapshot
 	{
