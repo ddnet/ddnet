@@ -78,9 +78,7 @@ IDbConnection::Status CMysqlConnection::Connect()
 			dbg_msg("sql", "Unknown Error cause by the MySQL/C++ Connector");
 		}
 
-		m_InUse.store(false);
-		dbg_msg("sql", "ERROR: SQL connection failed");
-		return Status::ERROR;
+		dbg_msg("sql", "ERROR: SQL connection failed, trying to reconnect");
 	}
 
 	try
@@ -158,6 +156,7 @@ IDbConnection::Status CMysqlConnection::Connect()
 	{
 		dbg_msg("sql", "Unknown Error cause by the MySQL/C++ Connector");
 	}
+	m_InUse.store(false);
 
 #endif
 	dbg_msg("sql", "ERROR: sql connection failed");
