@@ -391,7 +391,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	x = 5.0f;
 	y = 0.0f;
 
-	TextRender()->Text(0, ServerInfo.x+x, ServerInfo.y+y, 32, Localize("Server info"), 250);
+	TextRender()->Text(0, ServerInfo.x+x, ServerInfo.y+y, 32, Localize("Server info"), 250.0f);
 	y += 32.0f+5.0f;
 
 	mem_zero(aBuf, sizeof(aBuf));
@@ -410,7 +410,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 		Localize("Password"), CurrentServerInfo.m_Flags &1 ? Localize("Yes") : Localize("No")
 	);
 
-	TextRender()->Text(0, ServerInfo.x+x, ServerInfo.y+y, 20, aBuf, 250);
+	TextRender()->Text(0, ServerInfo.x+x, ServerInfo.y+y, 20, aBuf, 250.0f);
 
 	{
 		CUIRect Button;
@@ -435,7 +435,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	x = 5.0f;
 	y = 0.0f;
 
-	TextRender()->Text(0, GameInfo.x+x, GameInfo.y+y, 32, Localize("Game info"), 250);
+	TextRender()->Text(0, GameInfo.x+x, GameInfo.y+y, 32, Localize("Game info"), 250.0f);
 	y += 32.0f+5.0f;
 
 	if(m_pClient->m_Snap.m_pGameInfoObj)
@@ -457,7 +457,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 			Localize("Time limit"), m_pClient->m_Snap.m_pGameInfoObj->m_TimeLimit,
 			Localize("Players"), m_pClient->m_Snap.m_NumPlayers, CurrentServerInfo.m_MaxClients
 		);
-		TextRender()->Text(0, GameInfo.x+x, GameInfo.y+y, 20, aBuf, 250);
+		TextRender()->Text(0, GameInfo.x+x, GameInfo.y+y, 20, aBuf, 250.0f);
 	}
 
 	// motd
@@ -466,9 +466,9 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	Motd.Margin(5.0f, &Motd);
 	y = 0.0f;
 	x = 5.0f;
-	TextRender()->Text(0, Motd.x+x, Motd.y+y, 32, Localize("MOTD"), -1);
+	TextRender()->Text(0, Motd.x+x, Motd.y+y, 32, Localize("MOTD"), -1.0f);
 	y += 32.0f+5.0f;
-	TextRender()->Text(0, Motd.x+x, Motd.y+y, 16, m_pClient->m_pMotd->m_aServerMotd, (int)Motd.w);
+	TextRender()->Text(0, Motd.x+x, Motd.y+y, 16, m_pClient->m_pMotd->m_aServerMotd, Motd.w);
 }
 
 bool CMenus::RenderServerControlServer(CUIRect MainView)
@@ -617,7 +617,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 			TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 			UI()->DoLabelScaled(&QuickSearch, pSearchLabel, 14.0f, -1);
-			float wSearch = TextRender()->TextWidth(0, 14.0f, pSearchLabel, -1);
+			float wSearch = TextRender()->TextWidth(0, 14.0f, pSearchLabel, -1, -1.0f);
 			TextRender()->SetRenderFlags(0);
 			TextRender()->SetCurFont(NULL);
 			QuickSearch.VSplitLeft(wSearch, 0, &QuickSearch);
@@ -672,7 +672,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		Reason.HSplitTop(5.0f, 0, &Reason);
 		const char *pLabel = Localize("Reason:");
 		UI()->DoLabelScaled(&Reason, pLabel, 14.0f, -1);
-		float w = TextRender()->TextWidth(0, 14.0f, pLabel, -1);
+		float w = TextRender()->TextWidth(0, 14.0f, pLabel, -1, -1.0f);
 		Reason.VSplitLeft(w+10.0f, 0, &Reason);
 		static float s_Offset = 0.0f;
 		if(Input()->KeyPress(KEY_R) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)))

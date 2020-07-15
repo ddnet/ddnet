@@ -272,7 +272,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 
 			for(int i = 1; i <= Len; i++)
 			{
-				if(TextRender()->TextWidth(0, FontSize, pStr, i) - *Offset > MxRel)
+				if(TextRender()->TextWidth(0, FontSize, pStr, i, -1.0f) - *Offset > MxRel)
 				{
 					s_AtIndex = i - 1;
 					break;
@@ -388,11 +388,11 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	// check if the text has to be moved
 	if(UI()->LastActiveItem() == pID && !JustGotActive && (UpdateOffset || m_NumInputEvents))
 	{
-		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex);
+		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex, -1.0f);
 		if(w-*Offset > Textbox.w)
 		{
 			// move to the left
-			float wt = TextRender()->TextWidth(0, FontSize, pDisplayStr, -1);
+			float wt = TextRender()->TextWidth(0, FontSize, pDisplayStr, -1, -1.0f);
 			do
 			{
 				*Offset += minimum(wt-*Offset-Textbox.w, Textbox.w/3);
@@ -421,17 +421,17 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	{
 		if(str_length(aInputing))
 		{
-			float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex + Input()->GetEditingCursor());
+			float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex + Input()->GetEditingCursor(), -1.0f);
 			Textbox = *pRect;
 			Textbox.VSplitLeft(2.0f, 0, &Textbox);
-			Textbox.x += (w-*Offset-TextRender()->TextWidth(0, FontSize, "|", -1)/2);
+			Textbox.x += (w-*Offset-TextRender()->TextWidth(0, FontSize, "|", -1, -1.0f)/2);
 
 			UI()->DoLabel(&Textbox, "|", FontSize, -1);
 		}
-		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex);
+		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex, -1.0f);
 		Textbox = *pRect;
 		Textbox.VSplitLeft(2.0f, 0, &Textbox);
-		Textbox.x += (w-*Offset-TextRender()->TextWidth(0, FontSize, "|", -1)/2);
+		Textbox.x += (w-*Offset-TextRender()->TextWidth(0, FontSize, "|", -1, -1.0f)/2);
 
 		if((2*time_get()/time_freq()) % 2)	// make it blink
 			UI()->DoLabel(&Textbox, "|", FontSize, -1);
@@ -1208,7 +1208,7 @@ int CMenus::Render()
 		Box.HSplitTop(20.f/UI()->Scale(), &Part, &Box);
 		Box.HSplitTop(24.f/UI()->Scale(), &Part, &Box);
 		Part.VMargin(20.f/UI()->Scale(), &Part);
-		if(TextRender()->TextWidth(0, 24.f, pTitle, -1) > Part.w)
+		if(TextRender()->TextWidth(0, 24.f, pTitle, -1, -1.0f) > Part.w)
 			UI()->DoLabelScaled(&Part, pTitle, 24.f, -1, (int)Part.w);
 		else
 			UI()->DoLabelScaled(&Part, pTitle, 24.f, 0);
@@ -1222,7 +1222,7 @@ int CMenus::Render()
 			UI()->DoLabelScaled(&Part, pExtraText, FontSize, -1, (int)Part.w);
 		else
 		{
-			if(TextRender()->TextWidth(0, FontSize, pExtraText, -1) > Part.w)
+			if(TextRender()->TextWidth(0, FontSize, pExtraText, -1, -1.0f) > Part.w)
 				UI()->DoLabelScaled(&Part, pExtraText, FontSize, -1, (int)Part.w);
 			else
 				UI()->DoLabelScaled(&Part, pExtraText, FontSize, 0, -1);

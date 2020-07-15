@@ -620,7 +620,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 		UI()->DoLabelScaled(&QuickSearch, pSearchLabel, 14.0f, -1);
-		float wSearch = TextRender()->TextWidth(0, 14.0f, pSearchLabel, -1);
+		float wSearch = TextRender()->TextWidth(0, 14.0f, pSearchLabel, -1, -1.0f);
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetCurFont(NULL);
 		QuickSearch.VSplitLeft(wSearch, 0, &QuickSearch);
@@ -787,7 +787,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		RenderTools()->DrawUIRect(&MovementSettings, ColorRGBA(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 		MovementSettings.VMargin(10.0f, &MovementSettings);
 
-		TextRender()->Text(0, MovementSettings.x, MovementSettings.y + (14.0f + 5.0f + 10.0f - 14.0f*UI()->Scale()) / 2.f, 14.0f*UI()->Scale(), Localize("Movement"), -1);
+		TextRender()->Text(0, MovementSettings.x, MovementSettings.y + (14.0f + 5.0f + 10.0f - 14.0f*UI()->Scale()) / 2.f, 14.0f*UI()->Scale(), Localize("Movement"), -1.0f);
 
 		MovementSettings.HSplitTop(14.0f+5.0f+10.0f, 0, &MovementSettings);
 
@@ -828,7 +828,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		RenderTools()->DrawUIRect(&WeaponSettings, ColorRGBA(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 		WeaponSettings.VMargin(10.0f, &WeaponSettings);
 
-		TextRender()->Text(0, WeaponSettings.x, WeaponSettings.y + (14.0f + 5.0f + 10.0f - 14.0f*UI()->Scale()) / 2.f, 14.0f*UI()->Scale(), Localize("Weapon"), -1);
+		TextRender()->Text(0, WeaponSettings.x, WeaponSettings.y + (14.0f + 5.0f + 10.0f - 14.0f*UI()->Scale()) / 2.f, 14.0f*UI()->Scale(), Localize("Weapon"), -1.0f);
 
 		WeaponSettings.HSplitTop(14.0f+5.0f+10.0f, 0, &WeaponSettings);
 		UiDoGetButtons(18, 25, WeaponSettings, MainView);
@@ -854,7 +854,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		RenderTools()->DrawUIRect(&VotingSettings, ColorRGBA(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 		VotingSettings.VMargin(10.0f, &VotingSettings);
 
-		TextRender()->Text(0, VotingSettings.x, VotingSettings.y + (14.0f + 5.0f + 10.0f - 14.0f*UI()->Scale()) / 2.f, 14.0f*UI()->Scale(), Localize("Voting"), -1);
+		TextRender()->Text(0, VotingSettings.x, VotingSettings.y + (14.0f + 5.0f + 10.0f - 14.0f*UI()->Scale()) / 2.f, 14.0f*UI()->Scale(), Localize("Voting"), -1.0f);
 
 		VotingSettings.HSplitTop(14.0f+5.0f+10.0f, 0, &VotingSettings);
 		UiDoGetButtons(25, 27, VotingSettings, MainView);
@@ -867,7 +867,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		RenderTools()->DrawUIRect(&ChatSettings, ColorRGBA(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 		ChatSettings.VMargin(10.0f, &ChatSettings);
 
-		TextRender()->Text(0, ChatSettings.x, ChatSettings.y + (14.0f + 5.0f + 10.0f - 14.0f*UI()->Scale()) / 2.f, 14.0f*UI()->Scale(), Localize("Chat"), -1);
+		TextRender()->Text(0, ChatSettings.x, ChatSettings.y + (14.0f + 5.0f + 10.0f - 14.0f*UI()->Scale()) / 2.f, 14.0f*UI()->Scale(), Localize("Chat"), -1.0f);
 
 		ChatSettings.HSplitTop(14.0f+5.0f+10.0f, 0, &ChatSettings);
 		UiDoGetButtons(27, 31, ChatSettings, MainView);
@@ -880,7 +880,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		RenderTools()->DrawUIRect(&MiscSettings, ColorRGBA(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 		MiscSettings.VMargin(10.0f, &MiscSettings);
 
-		TextRender()->Text(0, MiscSettings.x, MiscSettings.y + (14.0f + 5.0f + 10.0f - 14.0f*UI()->Scale()) / 2.f, 14.0f*UI()->Scale(), Localize("Miscellaneous"), -1);
+		TextRender()->Text(0, MiscSettings.x, MiscSettings.y + (14.0f + 5.0f + 10.0f - 14.0f*UI()->Scale()) / 2.f, 14.0f*UI()->Scale(), Localize("Miscellaneous"), -1.0f);
 
 		MiscSettings.HSplitTop(14.0f+5.0f+10.0f, 0, &MiscSettings);
 		UiDoGetButtons(31, 43, MiscSettings, MainView);
@@ -1433,7 +1433,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	MainView.HSplitTop(150.0f, &HUD, &MainView);
 
 	HUD.HSplitTop(30.0f, &Label, &HUD);
-	float tw = TextRender()->TextWidth(0, 20.0f, Localize("HUD"), -1);
+	float tw = TextRender()->TextWidth(0, 20.0f, Localize("HUD"), -1, -1.0f);
 	Label.VSplitLeft(tw + 10.0f, &Label, &Page1Tab);
 	Page1Tab.VSplitLeft(60.0f, &Page1Tab, 0);
 	Page1Tab.VSplitLeft(30.0f, &Page1Tab, &Page2Tab);
@@ -1537,7 +1537,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			char name[16];
 			str_copy(name, g_Config.m_PlayerName, sizeof(name));
 			str_format(aBuf, sizeof(aBuf), "*** '%s' entered and joined the spectators", name);
-			while(TextRender()->TextWidth(0, 12.0f, aBuf, -1) > Label.w)
+			while(TextRender()->TextWidth(0, 12.0f, aBuf, -1, -1.0f) > Label.w)
 			{
 				name[str_length(name) - 1] = 0;
 				str_format(aBuf, sizeof(aBuf), "*** '%s' entered and joined the spectators", name);
@@ -1565,7 +1565,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			Right.HSplitTop(10.0f, &Label, &Right);
 
 			TextRender()->TextColor(0.75f, 0.5f, 0.75f, 1.0f);
-			float tw = TextRender()->TextWidth(0, 12.0f, Localize("Spectator"), -1);
+			float tw = TextRender()->TextWidth(0, 12.0f, Localize("Spectator"), -1, -1.0f);
 			Label.VSplitLeft(tw, &Label, &Button);
 			UI()->DoLabelScaled(&Label, Localize("Spectator"), 12.0f, -1);
 
@@ -1574,7 +1574,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			char name[16];
 			str_copy(name, g_Config.m_PlayerName, sizeof(name));
 			str_format(aBuf, sizeof(aBuf), ": %s: %s", name, Localize ("Look out!"));
-			while(TextRender()->TextWidth(0, 12.0f, aBuf, -1) > Button.w)
+			while(TextRender()->TextWidth(0, 12.0f, aBuf, -1, -1.0f) > Button.w)
 			{
 				name[str_length(name) - 1] = 0;
 				str_format(aBuf, sizeof(aBuf), ": %s: %s", name, Localize("Look out!"));
@@ -1604,7 +1604,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 			ColorRGBA rgbn = CalculateNameColor(TMColor);
 			TextRender()->TextColor(rgbn);
-			float tw = TextRender()->TextWidth(0, 12.0f, Localize("Player"), -1);
+			float tw = TextRender()->TextWidth(0, 12.0f, Localize("Player"), -1, -1.0f);
 			Label.VSplitLeft(tw, &Label, &Button);
 			UI()->DoLabelScaled(&Label, Localize("Player"), 12.0f, -1);
 
@@ -1620,7 +1620,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			char aBuf[64];
 			Right.HSplitTop(20.0f, &Label, &Right);
 			Label.VSplitRight(50.0f, &Label, &Button);
-			float twh = TextRender()->TextWidth(0, 16.0f, Localize("Friend message"), -1) ;
+			float twh = TextRender()->TextWidth(0, 16.0f, Localize("Friend message"), -1, -1.0f) ;
 			Label.VSplitLeft(twh + 5.0f, &Label, &Enable);
 			Enable.VSplitLeft(20.0f, &Enable, 0);
 			UI()->DoLabelScaled(&Label, Localize("Friend message"), 16.0f, -1);
@@ -1641,12 +1641,12 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 			ColorRGBA rgbf = color_cast<ColorRGBA>(FMColor);
 			TextRender()->TextColor(rgbf);
-			float hw = TextRender()->TextWidth(0, 12.0f, "♥ ", -1);
+			float hw = TextRender()->TextWidth(0, 12.0f, "♥ ", -1, -1.0f);
 			Label.VSplitLeft(hw, &Heart, &Label);
 			UI()->DoLabelScaled(&Heart, "♥ ", 12.0f, -1);
 
 			TextRender()->TextColor(0.8f, 0.8f, 0.8f, 1.0f);
-			float tw = TextRender()->TextWidth(0, 12.0f, Localize("Friend"), -1);
+			float tw = TextRender()->TextWidth(0, 12.0f, Localize("Friend"), -1, -1.0f);
 			Label.VSplitLeft(tw, &Label, &Button);
 			UI()->DoLabelScaled(&Label, Localize("Friend"), 12.0f, -1);
 
@@ -1677,7 +1677,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			Left.HSplitTop(10.0f, &Label, &Left);
 
 			TextRender()->TextColor(0.8f, 0.8f, 0.8f, 1.0f);
-			float tw = TextRender()->TextWidth(0, 12.0f, Localize("Player"), -1);
+			float tw = TextRender()->TextWidth(0, 12.0f, Localize("Player"), -1, -1.0f);
 			Label.VSplitLeft(tw, &Label, &Button);
 			UI()->DoLabelScaled(&Label, Localize("Player"), 12.0f, -1);
 
@@ -1695,7 +1695,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		//RenderTools()->DrawUIRect(&Laser, vec4(1.0f, 1.0f, 1.0f, 0.1f), CUI::CORNER_ALL, 5.0f);
 		//Laser.Margin(10.0f, &Laser);
 		Laser.HSplitTop(30.0f, &Label, &Laser);
-		Label.VSplitLeft(TextRender()->TextWidth(0, 20.0f, Localize("Laser"), -1) + 5.0f, &Label, &Weapon);
+		Label.VSplitLeft(TextRender()->TextWidth(0, 20.0f, Localize("Laser"), -1, -1.0f) + 5.0f, &Label, &Weapon);
 		UI()->DoLabelScaled(&Label, Localize("Laser"), 20.0f, -1);
 
 		Laser.HSplitTop(20.0f, &Label, &Laser);
@@ -2087,7 +2087,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		if(NeedUpdate && State <= IUpdater::CLEAN)
 		{
 			str_format(aBuf, sizeof(aBuf), Localize("DDNet %s is available:"), Client()->LatestVersion());
-			Label.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1) + 10.0f, &Label, &Button);
+			Label.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1, -1.0f) + 10.0f, &Label, &Button);
 			Button.VSplitLeft(100.0f, &Button, 0);
 			static int s_ButtonUpdate = 0;
 			if(DoButton_Menu(&s_ButtonUpdate, Localize("Update now"), 0, &Button))
@@ -2103,7 +2103,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		else
 		{
 			str_format(aBuf, sizeof(aBuf), Localize("No updates available"));
-			Label.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1) + 10.0f, &Label, &Button);
+			Label.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1, -1.0f) + 10.0f, &Label, &Button);
 			Button.VSplitLeft(100.0f, &Button, 0);
 			static int s_ButtonUpdate = 0;
 			if(DoButton_Menu(&s_ButtonUpdate, Localize("Check now"), 0, &Button))
