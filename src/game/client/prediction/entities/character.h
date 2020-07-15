@@ -104,7 +104,7 @@ public:
 	int GetLastWeapon() { return m_LastWeapon; };
 	void SetLastWeapon(int LastWeap) { m_LastWeapon = LastWeap; };
 	int GetActiveWeapon() { return m_Core.m_ActiveWeapon; };
-	void SetActiveWeapon(int ActiveWeap) { m_Core.m_ActiveWeapon = ActiveWeap; };
+	void SetActiveWeapon(int ActiveWeap);
 	CCharacterCore GetCore() { return m_Core; };
 	void SetCore(CCharacterCore Core) { m_Core = Core; };
 	CCharacterCore* Core() { return &m_Core; };
@@ -134,6 +134,7 @@ public:
 	bool Match(CCharacter *pChar);
 	void ResetPrediction();
 	CCharacter() { m_Alive = false; }
+	void SetTuneZone(int Zone);
 
 private:
 	// weapon info
@@ -187,6 +188,9 @@ private:
 	void HandleTuneLayer();
 
 	int m_StrongWeakID;
+
+	int m_LastWeaponSwitchTick;
+	int m_LastTuneZoneTick;
 };
 
 enum
