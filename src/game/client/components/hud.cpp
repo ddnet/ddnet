@@ -143,7 +143,7 @@ void CHud::RenderGameTimer()
 			float Alpha = Time <= 10 && (2*time()/time_freq()) % 2 ? 0.5f : 1.0f;
 			TextRender()->TextColor(1.0f, 0.25f, 0.25f, Alpha);
 		}
-		TextRender()->Text(0, Half-w/2, 2, FontSize, aBuf, -1);
+		TextRender()->Text(0, Half-w/2, 2, FontSize, aBuf, -1.0f);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 }
@@ -156,7 +156,7 @@ void CHud::RenderPauseNotification()
 		const char *pText = Localize("Game paused");
 		float FontSize = 20.0f;
 		float w = TextRender()->TextWidth(0, FontSize,pText, -1, -1.0f);
-		TextRender()->Text(0, 150.0f*Graphics()->ScreenAspect()+-w/2.0f, 50.0f, FontSize, pText, -1);
+		TextRender()->Text(0, 150.0f*Graphics()->ScreenAspect()+-w/2.0f, 50.0f, FontSize, pText, -1.0f);
 	}
 }
 
@@ -168,7 +168,7 @@ void CHud::RenderSuddenDeath()
 		const char *pText = Localize("Sudden Death");
 		float FontSize = 12.0f;
 		float w = TextRender()->TextWidth(0, FontSize, pText, -1, -1.0f);
-		TextRender()->Text(0, Half-w/2, 2, FontSize, pText, -1);
+		TextRender()->Text(0, Half-w/2, 2, FontSize, pText, -1.0f);
 	}
 }
 
@@ -500,7 +500,7 @@ void CHud::RenderWarmupTimer()
 		char Buf[256];
 		float FontSize = 20.0f;
 		float w = TextRender()->TextWidth(0, FontSize, Localize("Warmup"), -1, -1.0f);
-		TextRender()->Text(0, 150*Graphics()->ScreenAspect()+-w/2, 50, FontSize, Localize("Warmup"), -1);
+		TextRender()->Text(0, 150*Graphics()->ScreenAspect()+-w/2, 50, FontSize, Localize("Warmup"), -1.0f);
 
 		int Seconds = m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer/SERVER_TICK_SPEED;
 		if(Seconds < 5)
@@ -508,7 +508,7 @@ void CHud::RenderWarmupTimer()
 		else
 			str_format(Buf, sizeof(Buf), "%d", Seconds);
 		w = TextRender()->TextWidth(0, FontSize, Buf, -1, -1.0f);
-		TextRender()->Text(0, 150*Graphics()->ScreenAspect()+-w/2, 75, FontSize, Buf, -1);
+		TextRender()->Text(0, 150*Graphics()->ScreenAspect()+-w/2, 75, FontSize, Buf, -1.0f);
 	}
 }
 
@@ -540,7 +540,7 @@ void CHud::RenderTextInfo()
 		int DigitIndex = (int)log10((FrameTime ? FrameTime : 1));
 		if(DigitIndex > 4)
 			DigitIndex = 4;
-		//TextRender()->Text(0, m_Width-10-TextRender()->TextWidth(0,12,Buf,-1,-1.0f), 5, 12, Buf, -1);
+		//TextRender()->Text(0, m_Width-10-TextRender()->TextWidth(0,12,Buf,-1,-1.0f), 5, 12, Buf, -1.0f);
 
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, m_Width - 10 - s_TextWidth[DigitIndex], 5, 12, TEXTFLAG_RENDER);
@@ -564,7 +564,7 @@ void CHud::RenderTextInfo()
 	{
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "%d", Client()->GetPredictionTime());
-		TextRender()->Text(0, m_Width-10-TextRender()->TextWidth(0,12,aBuf,-1,-1.0f), g_Config.m_ClShowfps ? 20 : 5, 12, aBuf, -1);
+		TextRender()->Text(0, m_Width-10-TextRender()->TextWidth(0,12,aBuf,-1,-1.0f), g_Config.m_ClShowfps ? 20 : 5, 12, aBuf, -1.0f);
 	}
 }
 
@@ -574,7 +574,7 @@ void CHud::RenderConnectionWarning()
 	{
 		const char *pText = Localize("Connection Problems...");
 		float w = TextRender()->TextWidth(0, 24, pText, -1, -1.0f);
-		TextRender()->Text(0, 150*Graphics()->ScreenAspect()-w/2, 50, 24, pText, -1);
+		TextRender()->Text(0, 150*Graphics()->ScreenAspect()-w/2, 50, 24, pText, -1.0f);
 	}
 }
 
@@ -592,7 +592,7 @@ void CHud::RenderTeambalanceWarning()
 				TextRender()->TextColor(1,1,0.5f,1);
 			else
 				TextRender()->TextColor(0.7f,0.7f,0.2f,1.0f);
-			TextRender()->Text(0x0, 5, 50, 6, pText, -1);
+			TextRender()->Text(0x0, 5, 50, 6, pText, -1.0f);
 			TextRender()->TextColor(1,1,1,1);
 		}
 	}
@@ -740,7 +740,7 @@ void CHud::RenderSpectatorHud()
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Spectate"), m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW ?
 		m_pClient->m_aClients[m_pClient->m_Snap.m_SpecInfo.m_SpectatorID].m_aName : Localize("Free-View"));
-	TextRender()->Text(0, m_Width-174.0f, m_Height-15.0f + (15.f - 8.f) / 2.f, 8.0f, aBuf, -1);
+	TextRender()->Text(0, m_Width-174.0f, m_Height-15.0f + (15.f - 8.f) / 2.f, 8.0f, aBuf, -1.0f);
 }
 
 void CHud::RenderLocalTime(float x)
@@ -759,7 +759,7 @@ void CHud::RenderLocalTime(float x)
 	//draw the text
 	char aTimeStr[6];
 	str_timestamp_format(aTimeStr, sizeof(aTimeStr), "%H:%M");
-	TextRender()->Text(0, x-25.0f, (12.5f - 5.f) / 2.f, 5.0f, aTimeStr, -1);
+	TextRender()->Text(0, x-25.0f, (12.5f - 5.f) / 2.f, 5.0f, aTimeStr, -1.0f);
 }
 
 void CHud::OnRender()
@@ -894,7 +894,7 @@ void CHud::RenderDDRaceEffects()
 		if(m_FinishTime)
 		{
 			str_format(aBuf, sizeof(aBuf), "Finish time: %02d:%02d.%02d", m_DDRaceTime/6000, m_DDRaceTime/100-m_DDRaceTime/6000 * 60, m_DDRaceTime % 100);
-			TextRender()->Text(0, 150*Graphics()->ScreenAspect()-TextRender()->TextWidth(0, 12, aBuf, -1, -1.0f)/2, 20, 12, aBuf, -1);
+			TextRender()->Text(0, 150*Graphics()->ScreenAspect()-TextRender()->TextWidth(0, 12, aBuf, -1, -1.0f)/2, 20, 12, aBuf, -1.0f);
 		}
 		else if(m_CheckpointTick + Client()->GameTickSpeed()*6 > Client()->GameTick(g_Config.m_ClDummy))
 		{
@@ -914,7 +914,7 @@ void CHud::RenderDDRaceEffects()
 				TextRender()->TextColor(0.5f,1.0f,0.5f,a); // green
 			else if(!m_CheckpointDiff)
 				TextRender()->TextColor(1,1,1,a); // white
-			TextRender()->Text(0, 150*Graphics()->ScreenAspect()-TextRender()->TextWidth(0, 10, aBuf, -1, -1.0f)/2, 20, 10, aBuf, -1);
+			TextRender()->Text(0, 150*Graphics()->ScreenAspect()-TextRender()->TextWidth(0, 10, aBuf, -1, -1.0f)/2, 20, 10, aBuf, -1.0f);
 
 			TextRender()->TextColor(1,1,1,1);
 		}
@@ -922,7 +922,7 @@ void CHud::RenderDDRaceEffects()
 		/*else if(m_DDRaceTimeReceived)
 		{
 			str_format(aBuf, sizeof(aBuf), "%02d:%02d.%d", m_DDRaceTime/60, m_DDRaceTime%60, m_DDRaceTick/10);
-			TextRender()->Text(0, 150*Graphics()->ScreenAspect()-TextRender()->TextWidth(0, 12, "00:00.0", -1, -1.0f)/2, 20, 12, aBuf, -1); // use fixed value for text width so its not shaky
+			TextRender()->Text(0, 150*Graphics()->ScreenAspect()-TextRender()->TextWidth(0, 12, "00:00.0", -1, -1.0f)/2, 20, 12, aBuf, -1.0f); // use fixed value for text width so its not shaky
 		}*/
 }
 
@@ -932,9 +932,9 @@ void CHud::RenderRecord()
 	{
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), Localize("Server best:"));
-		TextRender()->Text(0, 5, 40, 6, aBuf, -1);
+		TextRender()->Text(0, 5, 40, 6, aBuf, -1.0f);
 		str_format(aBuf, sizeof(aBuf), "%02d:%05.2f", (int)m_ServerRecord/60, m_ServerRecord-((int)m_ServerRecord/60*60));
-		TextRender()->Text(0, 53, 40, 6, aBuf, -1);
+		TextRender()->Text(0, 53, 40, 6, aBuf, -1.0f);
 	}
 
 	const float PlayerRecord = m_PlayerRecord[g_Config.m_ClDummy];
@@ -942,8 +942,8 @@ void CHud::RenderRecord()
 	{
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), Localize("Personal best:"));
-		TextRender()->Text(0, 5, 47, 6, aBuf, -1);
+		TextRender()->Text(0, 5, 47, 6, aBuf, -1.0f);
 		str_format(aBuf, sizeof(aBuf), "%02d:%05.2f", (int)PlayerRecord/60, PlayerRecord-((int)PlayerRecord/60*60));
-		TextRender()->Text(0, 53, 47, 6, aBuf, -1);
+		TextRender()->Text(0, 53, 47, 6, aBuf, -1.0f);
 	}
 }

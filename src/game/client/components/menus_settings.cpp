@@ -787,7 +787,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		RenderTools()->DrawUIRect(&MovementSettings, ColorRGBA(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 		MovementSettings.VMargin(10.0f, &MovementSettings);
 
-		TextRender()->Text(0, MovementSettings.x, MovementSettings.y + (14.0f + 5.0f + 10.0f - 14.0f*UI()->Scale()) / 2.f, 14.0f*UI()->Scale(), Localize("Movement"), -1);
+		TextRender()->Text(0, MovementSettings.x, MovementSettings.y + (14.0f + 5.0f + 10.0f - 14.0f*UI()->Scale()) / 2.f, 14.0f*UI()->Scale(), Localize("Movement"), -1.0f);
 
 		MovementSettings.HSplitTop(14.0f+5.0f+10.0f, 0, &MovementSettings);
 
@@ -828,7 +828,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		RenderTools()->DrawUIRect(&WeaponSettings, ColorRGBA(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 		WeaponSettings.VMargin(10.0f, &WeaponSettings);
 
-		TextRender()->Text(0, WeaponSettings.x, WeaponSettings.y + (14.0f + 5.0f + 10.0f - 14.0f*UI()->Scale()) / 2.f, 14.0f*UI()->Scale(), Localize("Weapon"), -1);
+		TextRender()->Text(0, WeaponSettings.x, WeaponSettings.y + (14.0f + 5.0f + 10.0f - 14.0f*UI()->Scale()) / 2.f, 14.0f*UI()->Scale(), Localize("Weapon"), -1.0f);
 
 		WeaponSettings.HSplitTop(14.0f+5.0f+10.0f, 0, &WeaponSettings);
 		UiDoGetButtons(18, 25, WeaponSettings, MainView);
@@ -854,7 +854,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		RenderTools()->DrawUIRect(&VotingSettings, ColorRGBA(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 		VotingSettings.VMargin(10.0f, &VotingSettings);
 
-		TextRender()->Text(0, VotingSettings.x, VotingSettings.y + (14.0f + 5.0f + 10.0f - 14.0f*UI()->Scale()) / 2.f, 14.0f*UI()->Scale(), Localize("Voting"), -1);
+		TextRender()->Text(0, VotingSettings.x, VotingSettings.y + (14.0f + 5.0f + 10.0f - 14.0f*UI()->Scale()) / 2.f, 14.0f*UI()->Scale(), Localize("Voting"), -1.0f);
 
 		VotingSettings.HSplitTop(14.0f+5.0f+10.0f, 0, &VotingSettings);
 		UiDoGetButtons(25, 27, VotingSettings, MainView);
@@ -867,7 +867,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		RenderTools()->DrawUIRect(&ChatSettings, ColorRGBA(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 		ChatSettings.VMargin(10.0f, &ChatSettings);
 
-		TextRender()->Text(0, ChatSettings.x, ChatSettings.y + (14.0f + 5.0f + 10.0f - 14.0f*UI()->Scale()) / 2.f, 14.0f*UI()->Scale(), Localize("Chat"), -1);
+		TextRender()->Text(0, ChatSettings.x, ChatSettings.y + (14.0f + 5.0f + 10.0f - 14.0f*UI()->Scale()) / 2.f, 14.0f*UI()->Scale(), Localize("Chat"), -1.0f);
 
 		ChatSettings.HSplitTop(14.0f+5.0f+10.0f, 0, &ChatSettings);
 		UiDoGetButtons(27, 31, ChatSettings, MainView);
@@ -880,7 +880,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		RenderTools()->DrawUIRect(&MiscSettings, ColorRGBA(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 		MiscSettings.VMargin(10.0f, &MiscSettings);
 
-		TextRender()->Text(0, MiscSettings.x, MiscSettings.y + (14.0f + 5.0f + 10.0f - 14.0f*UI()->Scale()) / 2.f, 14.0f*UI()->Scale(), Localize("Miscellaneous"), -1);
+		TextRender()->Text(0, MiscSettings.x, MiscSettings.y + (14.0f + 5.0f + 10.0f - 14.0f*UI()->Scale()) / 2.f, 14.0f*UI()->Scale(), Localize("Miscellaneous"), -1.0f);
 
 		MiscSettings.HSplitTop(14.0f+5.0f+10.0f, 0, &MiscSettings);
 		UiDoGetButtons(31, 43, MiscSettings, MainView);

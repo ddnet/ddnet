@@ -151,7 +151,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			float Offset = g_Config.m_ClNameplatesClan ? (FontSize * 2 + FontSizeClan) : (FontSize * 2);
 			float tw_id = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f);
 			TextRender()->TextColor(rgb);
-			TextRender()->Text(0, Position.x-tw_id/2.0f, Position.y-Offset-38.0f, 28.0f, aBuf, -1);
+			TextRender()->Text(0, Position.x-tw_id/2.0f, Position.y-Offset-38.0f, 28.0f, aBuf, -1.0f);
 		}
 
 		TextRender()->TextColor(1,1,1,1);

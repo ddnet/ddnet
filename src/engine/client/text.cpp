@@ -737,11 +737,11 @@ public:
 		pCursor->m_CharCount = 0;
 	}
 
-	virtual void Text(void *pFontSetV, float x, float y, float Size, const char *pText, int MaxWidth)
+	virtual void Text(void *pFontSetV, float x, float y, float Size, const char *pText, float LineWidth)
 	{
 		CTextCursor Cursor;
 		SetCursor(&Cursor, x, y, Size, TEXTFLAG_RENDER);
-		Cursor.m_LineWidth = MaxWidth;
+		Cursor.m_LineWidth = LineWidth;
 		TextEx(&Cursor, pText, -1);
 	}
 
