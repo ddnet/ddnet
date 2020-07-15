@@ -51,6 +51,7 @@ public:
 
 	void OnPredictedInput(CNetObj_PlayerInput *pNewInput);
 	void OnDirectInput(CNetObj_PlayerInput *pNewInput);
+	void ResetInput();
 	void FireWeapon();
 
 	bool TakeDamage(vec2 Force, int Dmg, int From, int Weapon);
