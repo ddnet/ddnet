@@ -745,11 +745,12 @@ public:
 		TextEx(&Cursor, pText, -1);
 	}
 
-	virtual float TextWidth(void *pFontSetV, float Size, const char *pText, int Length, float *pAlignedHeight = NULL)
+	virtual float TextWidth(void *pFontSetV, float Size, const char *pText, int StrLength, float LineWidth, float *pAlignedHeight = NULL)
 	{
 		CTextCursor Cursor;
 		SetCursor(&Cursor, 0, 0, Size, 0);
-		TextEx(&Cursor, pText, Length);
+		Cursor.m_LineWidth = LineWidth;
+		TextEx(&Cursor, pText, StrLength);
 		if(pAlignedHeight != NULL)
 			*pAlignedHeight = Cursor.m_AlignedFontSize;
 		return Cursor.m_X;

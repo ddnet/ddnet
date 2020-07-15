@@ -404,7 +404,7 @@ void CGameConsole::PossibleCommandsRenderCallback(const char *pStr, void *pUser)
 
 	if(pInfo->m_EnumCount == pInfo->m_WantedCompletion)
 	{
-		float tw = pInfo->m_pSelf->TextRender()->TextWidth(pInfo->m_Cursor.m_pFont, pInfo->m_Cursor.m_FontSize, pStr, -1);
+		float tw = pInfo->m_pSelf->TextRender()->TextWidth(pInfo->m_Cursor.m_pFont, pInfo->m_Cursor.m_FontSize, pStr, -1, -1.0f);
 		pInfo->m_pSelf->Graphics()->TextureClear();
 		pInfo->m_pSelf->Graphics()->QuadsBegin();
 		pInfo->m_pSelf->Graphics()->SetColor(229.0f/255.0f,185.0f/255.0f,4.0f/255.0f,0.85f);
@@ -612,7 +612,7 @@ void CGameConsole::OnRender()
 		Cursor.m_LineWidth = Screen.w - 10.0f - x;
 
 		TextRender()->TextEx(&Cursor, aInputString, pConsole->m_Input.GetCursorOffset(Editing));
-		static float MarkerOffset = TextRender()->TextWidth(0, FontSize, "|", -1)/3;
+		static float MarkerOffset = TextRender()->TextWidth(0, FontSize, "|", -1, -1.0f)/3;
 		CTextCursor Marker = Cursor;
 		Marker.m_X -= MarkerOffset;
 		Marker.m_LineWidth = -1;
@@ -711,7 +711,7 @@ void CGameConsole::OnRender()
 
 		// render version
 		str_format(aBuf, sizeof(aBuf), "v%s", GAME_VERSION);
-		float Width = TextRender()->TextWidth(0, FontSize, aBuf, -1);
+		float Width = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f);
 		TextRender()->Text(0, Screen.w-Width-10.0f, FontSize / 2.f, FontSize, aBuf, -1);
 	}
 }

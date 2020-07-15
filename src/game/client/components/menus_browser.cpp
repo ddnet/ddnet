@@ -492,7 +492,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 		UI()->DoLabelScaled(&QuickSearch, pLabel, 16.0f, -1);
-		float w = TextRender()->TextWidth(0, 16.0f, pLabel, -1);
+		float w = TextRender()->TextWidth(0, 16.0f, pLabel, -1, -1.0f);
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetCurFont(NULL);
 		QuickSearch.VSplitLeft(w, 0, &QuickSearch);
@@ -511,7 +511,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 		UI()->DoLabelScaled(&QuickExclude, pLabel, 16.0f, -1);
-		float w = TextRender()->TextWidth(0, 16.0f, pLabel, -1);
+		float w = TextRender()->TextWidth(0, 16.0f, pLabel, -1, -1.0f);
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetCurFont(NULL);
 		QuickExclude.VSplitLeft(w, 0, &QuickExclude);
@@ -528,7 +528,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	// render status
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), Localize("%d of %d servers, %d players"), ServerBrowser()->NumSortedServers(), ServerBrowser()->NumServers(), NumPlayers);
-	Status3.VSplitRight(TextRender()->TextWidth(0, 14.0f, aBuf, -1), 0, &Status3);
+	Status3.VSplitRight(TextRender()->TextWidth(0, 14.0f, aBuf, -1, -1.0f), 0, &Status3);
 	UI()->DoLabelScaled(&Status3, aBuf, 14.0f, -1);
 }
 
@@ -1321,7 +1321,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		UI()->DoLabelScaled(&Button, aBuf, 14.0f, -1);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-		Button.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1) + 10.0f, &Button, &Part);
+		Button.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1, -1.0f) + 10.0f, &Button, &Part);
 
 		if(State == IUpdater::CLEAN && NeedUpdate)
 		{

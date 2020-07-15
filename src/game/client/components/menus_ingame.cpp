@@ -617,7 +617,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 			TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 			UI()->DoLabelScaled(&QuickSearch, pSearchLabel, 14.0f, -1);
-			float wSearch = TextRender()->TextWidth(0, 14.0f, pSearchLabel, -1);
+			float wSearch = TextRender()->TextWidth(0, 14.0f, pSearchLabel, -1, -1.0f);
 			TextRender()->SetRenderFlags(0);
 			TextRender()->SetCurFont(NULL);
 			QuickSearch.VSplitLeft(wSearch, 0, &QuickSearch);
@@ -672,7 +672,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		Reason.HSplitTop(5.0f, 0, &Reason);
 		const char *pLabel = Localize("Reason:");
 		UI()->DoLabelScaled(&Reason, pLabel, 14.0f, -1);
-		float w = TextRender()->TextWidth(0, 14.0f, pLabel, -1);
+		float w = TextRender()->TextWidth(0, 14.0f, pLabel, -1, -1.0f);
 		Reason.VSplitLeft(w+10.0f, 0, &Reason);
 		static float s_Offset = 0.0f;
 		if(Input()->KeyPress(KEY_R) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)))

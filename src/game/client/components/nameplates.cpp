@@ -73,7 +73,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 			MapscreenToGroup(m_pClient->m_pCamera->m_Center.x, m_pClient->m_pCamera->m_Center.y, Layers()->GameGroup());
 
-			m_aNamePlates[ClientID].m_NameTextWidth = TextRender()->TextWidth(0, FontSize, pName, -1);
+			m_aNamePlates[ClientID].m_NameTextWidth = TextRender()->TextWidth(0, FontSize, pName, -1, -1.0f);
 
 			m_aNamePlates[ClientID].m_NameTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, pName);
 			Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
@@ -99,7 +99,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 				Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 				MapscreenToGroup(m_pClient->m_pCamera->m_Center.x, m_pClient->m_pCamera->m_Center.y, Layers()->GameGroup());
 
-				m_aNamePlates[ClientID].m_ClanNameTextWidth = TextRender()->TextWidth(0, FontSizeClan, pClan, -1);
+				m_aNamePlates[ClientID].m_ClanNameTextWidth = TextRender()->TextWidth(0, FontSizeClan, pClan, -1, -1.0f);
 
 				m_aNamePlates[ClientID].m_ClanNameTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, pClan);
 				Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
@@ -149,7 +149,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf),"%d", pPlayerInfo->m_ClientID);
 			float Offset = g_Config.m_ClNameplatesClan ? (FontSize * 2 + FontSizeClan) : (FontSize * 2);
-			float tw_id = TextRender()->TextWidth(0, FontSize, aBuf, -1);
+			float tw_id = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f);
 			TextRender()->TextColor(rgb);
 			TextRender()->Text(0, Position.x-tw_id/2.0f, Position.y-Offset-38.0f, 28.0f, aBuf, -1);
 		}

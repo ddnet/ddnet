@@ -43,34 +43,34 @@ void CDebugHud::RenderNetCorrections()
 	x = Width-10.0f;
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "%.0f", Velspeed/32);
-	float w = TextRender()->TextWidth(0, Fontsize, aBuf, -1);
+	float w = TextRender()->TextWidth(0, Fontsize, aBuf, -1, -1.0f);
 	TextRender()->Text(0, x-w, y, Fontsize, aBuf, -1);
 	y += LineHeight;
 	str_format(aBuf, sizeof(aBuf), "%.0f", Velspeed/32*Ramp);
-	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1);
+	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1, -1.0f);
 	TextRender()->Text(0, x-w, y, Fontsize, aBuf, -1);
 	y += LineHeight;
 	str_format(aBuf, sizeof(aBuf), "%.2f", Ramp);
-	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1);
+	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1, -1.0f);
 	TextRender()->Text(0, x-w, y, Fontsize, aBuf, -1);
 	y += 2*LineHeight;
 	str_format(aBuf, sizeof(aBuf), "%.2f", static_cast<float>(m_pClient->m_Snap.m_pLocalCharacter->m_X)/32.0f);
-	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1);
+	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1, -1.0f);
 	TextRender()->Text(0, x-w, y, Fontsize, aBuf, -1);
 	y += LineHeight;
 	str_format(aBuf, sizeof(aBuf), "%.2f", static_cast<float>(m_pClient->m_Snap.m_pLocalCharacter->m_Y)/32.0f);
-	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1);
+	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1, -1.0f);
 	TextRender()->Text(0, x-w, y, Fontsize, aBuf, -1);
 	y += LineHeight;
 	str_format(aBuf, sizeof(aBuf), "%d", m_pClient->m_Snap.m_pLocalCharacter->m_Angle);
-	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1);
+	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1, -1.0f);
 	TextRender()->Text(0, x-w, y, Fontsize, aBuf, -1);
 	y += 2*LineHeight;
 	str_format(aBuf, sizeof(aBuf), "%d", m_pClient->NetobjNumCorrections());
-	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1);
+	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1, -1.0f);
 	TextRender()->Text(0, x-w, y, Fontsize, aBuf, -1);
 	y += LineHeight;
-	w = TextRender()->TextWidth(0, Fontsize, m_pClient->NetobjCorrectedOn(), -1);
+	w = TextRender()->TextWidth(0, Fontsize, m_pClient->NetobjCorrectedOn(), -1, -1.0f);
 	TextRender()->Text(0, x-w, y, Fontsize, m_pClient->NetobjCorrectedOn(), -1);
 }
 
@@ -103,12 +103,12 @@ void CDebugHud::RenderTuning()
 
 		str_format(aBuf, sizeof(aBuf), "%.2f", Standard);
 		x += 20.0f;
-		w = TextRender()->TextWidth(0, 5, aBuf, -1);
+		w = TextRender()->TextWidth(0, 5, aBuf, -1, -1.0f);
 		TextRender()->Text(0x0, x-w, y+Count*6, 5, aBuf, -1);
 
 		str_format(aBuf, sizeof(aBuf), "%.2f", Current);
 		x += 20.0f;
-		w = TextRender()->TextWidth(0, 5, aBuf, -1);
+		w = TextRender()->TextWidth(0, 5, aBuf, -1, -1.0f);
 		TextRender()->Text(0x0, x-w, y+Count*6, 5, aBuf, -1);
 
 		x += 5.0f;
