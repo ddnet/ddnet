@@ -17,10 +17,10 @@ void CCharacter::SetWeapon(int W)
 
 	m_LastWeapon = m_Core.m_ActiveWeapon;
 	m_QueuedWeapon = -1;
-	m_Core.m_ActiveWeapon = W;
+	SetActiveWeapon(W);
 
 	if(m_Core.m_ActiveWeapon < 0 || m_Core.m_ActiveWeapon >= NUM_WEAPONS)
-		m_Core.m_ActiveWeapon = 0;
+		SetActiveWeapon(0);
 }
 
 void CCharacter::SetSolo(bool Solo)
@@ -497,6 +497,10 @@ void CCharacter::GiveNinja()
 
 void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 {
+	// skip the input if chat is active
+	if(pNewInput->m_PlayerFlags&PLAYERFLAG_CHATTING)
+		return;
+
 	// copy new input
 	mem_copy(&m_Input, pNewInput, sizeof(m_Input));
 	//m_NumInputs++;
@@ -510,6 +514,15 @@ void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 
 void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 {
+	// skip the input if chat is active
+	if(pNewInput->m_PlayerFlags&PLAYERFLAG_CHATTING)
+	{
+		// reset input
+		ResetInput();
+
+		return;
+	}
+
 	m_NumInputs++;
 	mem_copy(&m_LatestPrevInput, &m_LatestInput, sizeof(m_LatestInput));
 	mem_copy(&m_LatestInput, pNewInput, sizeof(m_LatestInput));
@@ -525,6 +538,18 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 	}
 
 	mem_copy(&m_LatestPrevInput, &m_LatestInput, sizeof(m_LatestInput));
+}
+
+void CCharacter::ResetInput()
+{
+    m_Input.m_Direction = 0;
+    //m_Input.m_Hook = 0;
+    // simulate releasing the fire button
+    if((m_Input.m_Fire&1) != 0)
+        m_Input.m_Fire++;
+    m_Input.m_Fire &= INPUT_STATE_MASK;
+    m_Input.m_Jump = 0;
+    m_LatestPrevInput = m_LatestInput = m_Input;
 }
 
 void CCharacter::Tick()
@@ -833,7 +858,7 @@ void CCharacter::HandleTiles(int Index)
 void CCharacter::HandleTuneLayer()
 {
 	int CurrentIndex = Collision()->GetMapIndex(m_Pos);
-	m_TuneZone = GameWorld()->m_WorldConfig.m_PredictTiles ? Collision()->IsTune(CurrentIndex) : 0;
+	SetTuneZone(GameWorld()->m_WorldConfig.m_PredictTiles ? Collision()->IsTune(CurrentIndex) : 0);
 
 	m_Core.m_pWorld->m_Tuning[g_Config.m_ClDummy] = *GetTuning(m_TuneZone); // throw tunings (from specific zone if in a tunezone) into gamecore
 }
@@ -1028,6 +1053,8 @@ void CCharacter::ResetPrediction()
 		m_Core.m_HookedPlayer = -1;
 		m_Core.m_HookState = HOOK_IDLE;
 	}
+	m_LastWeaponSwitchTick = 0;
+	m_LastTuneZoneTick = 0;
 }
 
 void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal)
@@ -1174,13 +1201,14 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 	m_LastSnapWeapon = pChar->m_Weapon;
 	m_Alive = true;
 
-	m_TuneZone = GameWorld()->m_WorldConfig.m_PredictTiles ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
+	SetTuneZone(GameWorld()->m_WorldConfig.m_PredictTiles ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0);
 
 	// set the current weapon
 	if(pChar->m_Weapon != WEAPON_NINJA)
 	{
 		m_aWeapons[pChar->m_Weapon].m_Ammo = (GameWorld()->m_WorldConfig.m_InfiniteAmmo || GameWorld()->m_WorldConfig.m_IsDDRace || pChar->m_Weapon == WEAPON_HAMMER) ? -1 : pChar->m_AmmoCount;
-		SetActiveWeapon(pChar->m_Weapon);
+		if(pChar->m_Weapon != m_Core.m_ActiveWeapon)
+			SetActiveWeapon(pChar->m_Weapon);
 	}
 
 	// reset all input except direction and hook for non-local players (as in vanilla prediction)
@@ -1192,6 +1220,19 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		m_Input.m_Hook = m_SavedInput.m_Hook = (m_Core.m_HookState != HOOK_IDLE);
 		m_Input.m_TargetX = cosf(pChar->m_Angle/256.0f);
 		m_Input.m_TargetY = sinf(pChar->m_Angle/256.0f);
+	}
+
+	// in most cases the reload timer can be determined from the last attack tick
+	// (this is only needed for autofire weapons to prevent the predicted reload timer from desyncing)
+	if(IsLocal && m_Core.m_ActiveWeapon != WEAPON_HAMMER)
+	{
+		if(maximum(m_LastTuneZoneTick, m_LastWeaponSwitchTick) + GameWorld()->GameTickSpeed() < GameWorld()->GameTick())
+		{
+			float FireDelay;
+			GetTuning(m_TuneZone)->Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
+			const int FireDelayTicks = FireDelay * GameWorld()->GameTickSpeed() / 1000;
+			m_ReloadTimer = maximum(0, m_AttackTick + FireDelayTicks - GameWorld()->GameTick());
+		}
 	}
 }
 
@@ -1207,4 +1248,18 @@ bool CCharacter::Match(CCharacter *pChar)
 	if(distance(pChar->m_Core.m_Pos, m_Core.m_Pos) > 32.f)
 		return false;
 	return true;
+}
+
+void CCharacter::SetActiveWeapon(int ActiveWeap)
+{
+	m_Core.m_ActiveWeapon = ActiveWeap;
+	m_LastWeaponSwitchTick = GameWorld()->GameTick();
+}
+
+void CCharacter::SetTuneZone(int Zone)
+{
+	if(Zone == m_TuneZone)
+		return;
+	m_TuneZone = Zone;
+	m_LastTuneZoneTick = GameWorld()->GameTick();
 }
