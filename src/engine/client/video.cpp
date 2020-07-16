@@ -220,7 +220,7 @@ void CVideo::NextVideoFrameThread()
 		if(m_Vseq >= 2)
 		{
 			m_ProcessingVideoFrame = true;
-			m_VideoStream.pFrame->pts = (int64_t)m_VideoStream.pEnc->frame_number;
+			m_VideoStream.pFrame->pts = (int64)m_VideoStream.pEnc->frame_number;
 			dbg_msg("video_recorder", "vframe: %d", m_VideoStream.pEnc->frame_number);
 
 			ReadRGBFromGL();
@@ -407,7 +407,7 @@ AVFrame* CVideo::AllocPicture(enum AVPixelFormat PixFmt, int Width, int Height)
 }
 
 
-AVFrame* CVideo::AllocAudioFrame(enum AVSampleFormat SampleFmt, uint64_t ChannelLayout, int SampleRate, int NbSamples)
+AVFrame* CVideo::AllocAudioFrame(enum AVSampleFormat SampleFmt, uint64 ChannelLayout, int SampleRate, int NbSamples)
 {
 	AVFrame *Frame = av_frame_alloc();
 	int Ret;
@@ -534,10 +534,10 @@ void CVideo::OpenAudio()
 		/* set options */
 		av_opt_set_int(m_AudioStream.pSwrCtx, "in_channel_count", 2, 0);
 		av_opt_set_int(m_AudioStream.pSwrCtx, "in_sample_rate", g_Config.m_SndRate, 0);
-		av_opt_set_sample_fmt(m_AudioStream.pSwrCtx, "in_SampleFmt", AV_SAMPLE_FMT_S16, 0);
+		av_opt_set_sample_fmt(m_AudioStream.pSwrCtx, "in_sample_fmt", AV_SAMPLE_FMT_S16, 0);
 		av_opt_set_int(m_AudioStream.pSwrCtx, "out_channel_count", c->channels, 0);
 		av_opt_set_int(m_AudioStream.pSwrCtx, "out_sample_rate", c->sample_rate, 0);
-		av_opt_set_sample_fmt(m_AudioStream.pSwrCtx, "out_SampleFmt", c->sample_fmt, 0);
+		av_opt_set_sample_fmt(m_AudioStream.pSwrCtx, "out_sample_fmt", c->sample_fmt, 0);
 
 		/* initialize the resampling context */
 		if((Ret = swr_init(m_AudioStream.pSwrCtx)) < 0) {

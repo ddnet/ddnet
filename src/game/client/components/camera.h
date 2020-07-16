@@ -20,7 +20,6 @@ class CCamera : public CComponent
 	vec2 m_PrevCenter;
 
 	bool m_Zooming;
-	float m_ZoomSmoothingTarget;
 	CCubicBezier m_ZoomSmoothing;
 	float m_ZoomSmoothingStart;
 	float m_ZoomSmoothingEnd;
@@ -33,6 +32,7 @@ public:
 	vec2 m_Center;
 	bool m_ZoomSet;
 	float m_Zoom;
+	float m_ZoomSmoothingTarget;
 
 	CCamera();
 	virtual void OnRender();

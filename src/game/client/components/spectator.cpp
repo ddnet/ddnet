@@ -306,7 +306,7 @@ void CSpectator::OnRender()
 		Selected = true;
 	}
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, Selected?1.0f:0.5f);
-	TextRender()->Text(0, Width/2.0f-(ObjWidth-60.0f), Height/2.0f-280.f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Free-View"), -1);
+	TextRender()->Text(0, Width/2.0f-(ObjWidth-60.0f), Height/2.0f-280.f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Free-View"), -1.0f);
 
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
@@ -318,7 +318,7 @@ void CSpectator::OnRender()
 			Selected = true;
 		}
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, Selected?1.0f:0.5f);
-		TextRender()->Text(0, Width/2.0f-(ObjWidth-350.0f), Height/2.0f-280.0f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Follow"), -1);
+		TextRender()->Text(0, Width/2.0f-(ObjWidth-350.0f), Height/2.0f-280.0f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Follow"), -1.0f);
 	}
 
 	float x = -(ObjWidth - 30.0f), y = StartY;

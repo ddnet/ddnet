@@ -372,9 +372,9 @@ bool CGameTeams::TeamFinished(int Team)
 	return true;
 }
 
-int64_t CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
+int64 CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 {
-	int64_t Mask = 0;
+	int64 Mask = 0;
 
 	for (int i = 0; i < MAX_CLIENTS; ++i)
 	{

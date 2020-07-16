@@ -16,7 +16,6 @@
 #include <engine/serverbrowser.h>
 
 const float ZoomStep = 0.866025f;
-const float ZoomTime = 0.25f;
 
 CCamera::CCamera()
 {
@@ -39,7 +38,7 @@ void CCamera::ScaleZoom(float Factor)
 
 void CCamera::ChangeZoom(float Target)
 {
-	if(Target >= 500.0f/ZoomStep)
+	if(Target >= (Graphics()->IsBufferingEnabled()? 60 : 30))
 	{
 		return;
 	}
@@ -57,7 +56,7 @@ void CCamera::ChangeZoom(float Target)
 	m_ZoomSmoothingTarget = Target;
 	m_ZoomSmoothing = CCubicBezier::With(Current, Derivative, 0, m_ZoomSmoothingTarget);
 	m_ZoomSmoothingStart = Now;
-	m_ZoomSmoothingEnd = Now + ZoomTime;
+	m_ZoomSmoothingEnd = Now + (float)g_Config.m_ClSmoothZoomTime / 1000;
 
 	m_Zooming = true;
 }

@@ -930,9 +930,9 @@ int64 time_get_impl(void)
 #if defined(CONF_PLATFORM_MACOSX)
 		static int got_timebase = 0;
 		mach_timebase_info_data_t timebase;
-		uint64_t time;
-		uint64_t q;
-		uint64_t r;
+		uint64 time;
+		uint64 q;
+		uint64 r;
 		if(!got_timebase)
 		{
 			mach_timebase_info(&timebase);

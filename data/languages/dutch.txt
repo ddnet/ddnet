@@ -1181,12 +1181,6 @@ Suicides
 Ratio
 == Ratio
 
-Net
-== 
-
-FPM
-== 
-
 Spree
 == Reeks
 
@@ -1204,3 +1198,9 @@ Grabs
 
 9+ new mentions
 == 9+ nieuwe berichten
+
+Net
+== 
+
+FPM
+== 

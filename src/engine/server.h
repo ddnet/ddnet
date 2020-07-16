@@ -223,6 +223,8 @@ public:
 	virtual int* GetIdMap(int ClientID) = 0;
 
 	virtual bool DnsblWhite(int ClientID) = 0;
+	virtual bool DnsblPending(int ClientID) = 0;
+	virtual bool DnsblBlack(int ClientID) = 0;
 	virtual const char *GetAnnouncementLine(char const *FileName) = 0;
 	virtual bool ClientPrevIngame(int ClientID) = 0;
 	virtual const char *GetNetErrorString(int ClientID) = 0;

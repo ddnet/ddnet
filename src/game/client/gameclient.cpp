@@ -130,7 +130,7 @@ void CGameClient::OnConsoleInit()
 	m_pEditor = Kernel()->RequestInterface<IEditor>();
 	m_pFriends = Kernel()->RequestInterface<IFriends>();
 	m_pFoes = Client()->Foes();
-#if defined(CONF_FAMILY_WINDOWS) || defined(CONF_PLATFORM_LINUX)
+#if defined(CONF_AUTOUPDATE)
 	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
 #endif
 
@@ -511,10 +511,10 @@ void CGameClient::OnConnected()
 
 void CGameClient::OnReset()
 {
-	// clear out the invalid pointers
 	m_LastNewPredictedTick[0] = -1;
 	m_LastNewPredictedTick[1] = -1;
-	mem_zero(&g_GameClient.m_Snap, sizeof(g_GameClient.m_Snap));
+
+	InvalidateSnapshot();
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 		m_aClients[i].Reset();
@@ -1084,13 +1084,18 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	return Info;
 }
 
-void CGameClient::OnNewSnapshot()
+void CGameClient::InvalidateSnapshot()
 {
-	m_NewTick = true;
-
-	// clear out the invalid pointers
+	// clear all pointers
 	mem_zero(&g_GameClient.m_Snap, sizeof(g_GameClient.m_Snap));
 	m_Snap.m_LocalClientID = -1;
+}
+
+void CGameClient::OnNewSnapshot()
+{
+	InvalidateSnapshot();
+
+	m_NewTick = true;
 
 	// secure snapshot
 	{
@@ -1552,17 +1557,28 @@ void CGameClient::OnNewSnapshot()
 
 	static float LastZoom = .0;
 	static float LastScreenAspect = .0;
-	if(m_pCamera->m_Zoom != LastZoom || Graphics()->ScreenAspect() != LastScreenAspect)
+	static bool LastDummyConnected = false;
+	float ZoomToSend = m_pCamera->m_ZoomSmoothingTarget == .0 ? m_pCamera->m_Zoom // Initial
+		: m_pCamera->m_ZoomSmoothingTarget > m_pCamera->m_Zoom ? m_pCamera->m_ZoomSmoothingTarget // Zooming out
+		: m_pCamera->m_ZoomSmoothingTarget < m_pCamera->m_Zoom ? LastZoom // Zooming in
+		: m_pCamera->m_Zoom; // Not zooming
+	if(ZoomToSend != LastZoom || Graphics()->ScreenAspect() != LastScreenAspect || (Client()->DummyConnected() && !LastDummyConnected))
 	{
-		LastZoom = m_pCamera->m_Zoom;
-		LastScreenAspect = Graphics()->ScreenAspect();
 		CNetMsg_Cl_ShowDistance Msg;
 		float x, y;
-		RenderTools()->CalcScreenParams(Graphics()->ScreenAspect(), m_pCamera->m_Zoom, &x, &y);
+		RenderTools()->CalcScreenParams(Graphics()->ScreenAspect(), ZoomToSend, &x, &y);
 		Msg.m_X = x;
 		Msg.m_Y = y;
-		Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+		CMsgPacker Packer(Msg.MsgID(), false);
+		Msg.Pack(&Packer);
+		if(ZoomToSend != LastZoom)
+			Client()->SendMsgY(&Packer, MSGFLAG_VITAL, 0);
+		if(Client()->DummyConnected())
+			Client()->SendMsgY(&Packer, MSGFLAG_VITAL, 1);
+		LastZoom = ZoomToSend;
+		LastScreenAspect = Graphics()->ScreenAspect();
 	}
+	LastDummyConnected = Client()->DummyConnected();
 
 	m_pGhost->OnNewSnapshot();
 	m_pRaceDemo->OnNewSnapshot();

@@ -108,7 +108,7 @@ void CPlayer::Reset()
 
 	m_ShowOthers = g_Config.m_SvShowOthersDefault;
 	m_ShowAll = g_Config.m_SvShowAllDefault;
-	m_ShowDistance = vec2(2000, 1500);
+	m_ShowDistance = vec2(1000, 800);
 	m_SpecTeam = 0;
 	m_NinjaJetpack = false;
 
@@ -868,6 +868,15 @@ int CPlayer::Pause(int State, bool Force)
 		// Update state
 		m_Paused = State;
 		m_LastPause = Server()->Tick();
+
+		// Sixup needs a teamchange
+		protocol7::CNetMsg_Sv_Team Msg;
+		Msg.m_ClientID = m_ClientID;
+		Msg.m_CooldownTick = Server()->Tick();
+		Msg.m_Silent = true;
+		Msg.m_Team = m_Paused ? protocol7::TEAM_SPECTATORS : m_Team;
+
+		GameServer()->Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, m_ClientID);
 	}
 
 	return m_Paused;
@@ -941,8 +950,7 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 				GameServer()->SendBroadcast(Result.m_Data.m_Broadcast, -1);
 			break;
 		case CScorePlayerResult::MAP_VOTE:
-			GameServer()->m_VoteKick = false;
-			GameServer()->m_VoteSpec = false;
+			GameServer()->m_VoteType = CGameContext::VOTE_TYPE_OPTION;
 			GameServer()->m_LastMapVote = time_get();
 
 			char aCmd[256];
