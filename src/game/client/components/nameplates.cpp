@@ -186,11 +186,11 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 				else
 					Offset = (FontSize * 2);
 
-				float PosHealth = TextRender()->TextWidth(0, HFontSize, aHealth, -1);
+				float PosHealth = TextRender()->TextWidth(0, HFontSize, aHealth, -1, -1.0f);
 				TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f));
 				TextRender()->Text(0, Position.x-PosHealth/2.0f, Position.y-Offset-HFontSize-AFontSize, HFontSize, aHealth, -1);
 
-				float PosArmor = TextRender()->TextWidth(0, AFontSize, aArmor, -1);
+				float PosArmor = TextRender()->TextWidth(0, AFontSize, aArmor, -1, -1.0f);
 				TextRender()->TextColor(ColorRGBA(1.0f, 1.0f, 0.0f));
 				TextRender()->Text(0, Position.x-PosArmor/2.0f, Position.y-Offset-AFontSize-3.0f, AFontSize, aArmor, -1);
 			}
