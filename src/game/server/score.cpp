@@ -291,13 +291,13 @@ bool CScore::MapVoteThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 	str_format(aBuf, sizeof(aBuf),
 			"SELECT Map, Server "
 			"FROM %s_maps "
-			"WHERE Map LIKE convert(? using utf8mb4) COLLATE utf8mb4_general_ci "
+			"WHERE Map LIKE %s "
 			"ORDER BY "
 				"CASE WHEN Map = ? THEN 0 ELSE 1 END, "
 				"CASE WHEN Map LIKE ? THEN 0 ELSE 1 END, "
 				"LENGTH(Map), Map "
 			"LIMIT 1;",
-			pSqlServer->GetPrefix());
+			pSqlServer->GetPrefix(), pSqlServer->CollateNocase());
 	pSqlServer->PrepareStatement(aBuf);
 	pSqlServer->BindString(1, aFuzzyMap);
 	pSqlServer->BindString(2, pData->m_Name);
@@ -362,7 +362,7 @@ bool CScore::MapInfoThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 				"(SELECT MIN(Time) FROM %s_race WHERE Map = l.Map AND Name = ?) AS OwnTime "
 			"FROM ("
 				"SELECT * FROM %s_maps "
-				"WHERE Map LIKE convert(? using utf8mb4) COLLATE utf8mb4_general_ci "
+				"WHERE Map LIKE %s "
 				"ORDER BY "
 					"CASE WHEN Map = ? THEN 0 ELSE 1 END, "
 					"CASE WHEN Map LIKE ? THEN 0 ELSE 1 END, "
@@ -372,7 +372,8 @@ bool CScore::MapInfoThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 			") as l;",
 			pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->GetPrefix(),
 			aTimestamp, aCurrentTimestamp, aTimestamp,
-			pSqlServer->GetPrefix(), pSqlServer->GetPrefix()
+			pSqlServer->GetPrefix(), pSqlServer->GetPrefix(),
+			pSqlServer->CollateNocase()
 	);
 	pSqlServer->PrepareStatement(aBuf);
 	pSqlServer->BindString(1, pData->m_RequestingPlayer);

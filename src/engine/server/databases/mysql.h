@@ -31,6 +31,7 @@ public:
 	virtual const char *BinaryCollate() const { return "utf8mb4_bin"; }
 	virtual void ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize);
 	virtual const char *InsertTimestampAsUtc() const { return "?"; }
+	virtual const char *CollateNocase() const { return "CONVERT(? USING utf8mb4) COLLATE utf8mb4_general_ci"; }
 
 	virtual Status Connect();
 	virtual void Disconnect();

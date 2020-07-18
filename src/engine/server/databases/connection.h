@@ -26,6 +26,8 @@ public:
 	// explicitly convert before inserting timestamps, NOTE: CURRENT_TIMESTAMP in SQLite is UTC by
 	// default and doesn't have to be converted
 	virtual const char *InsertTimestampAsUtc() const = 0;
+	// can be used in the context of `LIKE Map`, adds `? COLLATE`
+	virtual const char *CollateNocase() const = 0;
 
 	enum Status
 	{
