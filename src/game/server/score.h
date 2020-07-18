@@ -248,6 +248,26 @@ struct CSqlTeamLoad : ISqlData
 	int m_NumPlayer;
 };
 
+struct CTeamrank {
+	CUuid m_TeamID;
+	char m_aaNames[MAX_CLIENTS][MAX_NAME_LENGTH];
+	unsigned int m_NumNames;
+	CTeamrank();
+
+	// Assumes that a database query equivalent to
+	//
+	//     SELECT TeamID, Name [, ...] -- the order is important
+	//     FROM record_teamrace
+	//     ORDER BY TeamID, Name
+	//
+	// was executed and that the result line of the first team member is already selected.
+	// Afterwards the team member of the next team is selected.
+	// Returns if another team can be extracted
+	bool NextSqlResult(IDbConnection *pSqlServer);
+
+	bool SamePlayers(const std::vector<std::string> *aSortedNames);
+};
+
 class CScore
 {
 	CPlayerData m_aPlayerData[MAX_CLIENTS];

@@ -51,6 +51,43 @@ void CScorePlayerResult::SetVariant(Variant v)
 	}
 }
 
+CTeamrank::CTeamrank() :
+	m_NumNames(0)
+{
+	for(int i = 0; i < MAX_CLIENTS; i++)
+		m_aaNames[i][0] = '\0';
+	mem_zero(&m_TeamID.m_aData, sizeof(m_TeamID));
+}
+
+bool CTeamrank::NextSqlResult(IDbConnection *pSqlServer)
+{
+	pSqlServer->GetBlob(1, m_TeamID.m_aData, sizeof(m_TeamID.m_aData));
+	pSqlServer->GetString(2, m_aaNames[0], sizeof(m_aaNames[0]));
+	m_NumNames = 1;
+	while(pSqlServer->Step())
+	{
+		CUuid TeamID;
+		pSqlServer->GetBlob(1, TeamID.m_aData, sizeof(TeamID.m_aData));
+		if(m_TeamID != TeamID)
+			return true;
+		pSqlServer->GetString(2, m_aaNames[m_NumNames], sizeof(m_aaNames[m_NumNames]));
+		m_NumNames++;
+	}
+	return false;
+}
+
+bool CTeamrank::SamePlayers(const std::vector<std::string> *aSortedNames)
+{
+	if(aSortedNames->size() != m_NumNames)
+		return false;
+	for(unsigned int i = 0; i < m_NumNames; i++)
+	{
+		if(str_comp(aSortedNames->at(i).c_str(), m_aaNames[i]) != 0)
+			return false;
+	}
+	return true;
+}
+
 std::shared_ptr<CScorePlayerResult> CScore::NewSqlPlayerResult(int ClientID)
 {
 	CPlayer *pCurPlayer = GameServer()->m_apPlayers[ClientID];
@@ -537,7 +574,7 @@ bool CScore::SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGam
 	pSqlServer->Lock(aTable);
 	std::sort(aNames.begin(), aNames.end());
 	str_format(aBuf, sizeof(aBuf),
-			"SELECT l.ID, Time, Name "
+			"SELECT l.ID, Name, Time "
 			"FROM (" // preselect teams with first name in team
 					"SELECT ID "
 					"FROM %s_teamrace "
@@ -550,59 +587,27 @@ bool CScore::SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGam
 	pSqlServer->BindString(2, pData->m_aNames[0]);
 
 	CUuid GameID;
-	bool SearchTeam = true;
 	bool FoundTeam = false;
 	float Time;
+	CTeamrank Teamrank;
 	if(pSqlServer->Step())
 	{
+		bool SearchTeam = true;
 		while(SearchTeam)
 		{
-			CUuid LastGameID;
-			pSqlServer->GetBlob(1, GameID.m_aData, sizeof(GameID.m_aData));
-			Time = pSqlServer->GetFloat(2);
-			char aName[MAX_NAME_LENGTH];
-			pSqlServer->GetString(3, aName, sizeof(aName));
-			if(str_comp(aName, aNames[0].c_str()) != 0)
+			Time = pSqlServer->GetFloat(3);
+			SearchTeam = Teamrank.NextSqlResult(pSqlServer);
+			if(str_comp(Teamrank.m_aaNames[0], aNames[0].c_str()) != 0)
 			{
 				dbg_msg("sql", "insert team rank logic error: "
 						"first team member from sql (%s) should be first name in array (%s), "
-						"because both are sorted by binary values", aName, aNames[0].c_str());
+						"because both are sorted by binary values", Teamrank.m_aaNames[0], aNames[0].c_str());
 				return false;
 			}
-			if(!pSqlServer->Step())
+			if(Teamrank.SamePlayers(&aNames))
 			{
-				SearchTeam = false;
+				FoundTeam = true;
 				break;
-			}
-			pSqlServer->GetBlob(1, LastGameID.m_aData, sizeof(LastGameID.m_aData));
-			// check if all team members are equal
-			for(unsigned int i = 1; i < pData->m_Size; i++)
-			{
-				if(GameID != LastGameID)
-					break;
-				pSqlServer->GetString(3, aName, sizeof(aName));
-				if(str_comp(aName, aNames[i].c_str()) != 0)
-				{
-					dbg_msg("sql", "unequal '%s' != '%s'", aName, aNames[i].c_str());
-					break;
-				}
-				else if(i == pData->m_Size - 1)
-					FoundTeam = true;
-				if(!pSqlServer->Step())
-				{
-					SearchTeam = false;
-					break;
-				}
-				pSqlServer->GetBlob(1, LastGameID.m_aData, sizeof(LastGameID.m_aData));
-			}
-			// skip to next team
-			while(SearchTeam && GameID == LastGameID)
-			{
-				if(pSqlServer->Step())
-					pSqlServer->GetBlob(1, LastGameID.m_aData, sizeof(LastGameID.m_aData));
-				else
-					SearchTeam = false;
-				FoundTeam = false;
 			}
 		}
 	}
