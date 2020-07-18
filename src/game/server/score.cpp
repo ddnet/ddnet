@@ -1450,8 +1450,7 @@ bool CScore::LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf),
-				"SELECT Savegame, Server, %s-%s AS Ago, "
-					"(UNHEX(REPLACE(SaveID, '-',''))) AS SaveID "
+				"SELECT Savegame, Server, %s-%s AS Ago, SaveID "
 				"FROM %s_saves "
 				"where Code = ? AND Map = ? AND DDNet7 = false AND Savegame LIKE ?;",
 				aCurrentTimestamp, aTimestamp,
@@ -1483,17 +1482,18 @@ bool CScore::LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 					g_Config.m_SvSaveGamesDelay - Since);
 			goto end;
 		}
-		if(pSqlServer->IsNull(4))
+
+		char aSaveID[UUID_MAXSTRSIZE];
+		memset(pData->m_pResult->m_SaveID.m_aData, 0, sizeof(pData->m_pResult->m_SaveID.m_aData));
+		if(!pSqlServer->IsNull(4))
 		{
-			memset(pData->m_pResult->m_SaveID.m_aData, 0, sizeof(pData->m_pResult->m_SaveID.m_aData));
-		}
-		else
-		{
-			if(pSqlServer->GetBlob(4, pData->m_pResult->m_SaveID.m_aData, sizeof(pData->m_pResult->m_SaveID.m_aData)) != 16)
+			pSqlServer->GetString(4, aSaveID, sizeof(aSaveID));
+			if(str_length(aSaveID) + 1 != UUID_MAXSTRSIZE)
 			{
 				strcpy(pData->m_pResult->m_aMessage, "Unable to load savegame: SaveID corrupted");
 				goto end;
 			}
+			ParseUuid(&pData->m_pResult->m_SaveID, aSaveID);
 		}
 
 		char aSaveString[65536];
