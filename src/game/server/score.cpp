@@ -723,7 +723,7 @@ bool CScore::ShowTeamRankThread(IDbConnection *pSqlServer, const ISqlData *pGame
 	char aBuf[2400];
 
 	str_format(aBuf, sizeof(aBuf),
-			"SELECT GROUP_CONCAT(Name ORDER BY Name SEPARATOR '\t') AS Names, COUNT(Name) AS NumNames, Time, Rank "
+			"SELECT l.ID, Name, Time, Rank "
 			"FROM (" // teamrank score board
 				"SELECT RANK() OVER w AS Rank, ID "
 				"FROM %s_teamrace "
@@ -737,8 +737,7 @@ bool CScore::ShowTeamRankThread(IDbConnection *pSqlServer, const ISqlData *pGame
 				"ORDER BY Time "
 				"LIMIT 1"
 			") AS l ON TeamRank.ID = l.ID "
-			"INNER JOIN %s_teamrace AS r ON l.ID = r.ID "
-			"GROUP BY l.ID",
+			"INNER JOIN %s_teamrace AS r ON l.ID = r.ID ",
 			pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
 	pSqlServer->PrepareStatement(aBuf);
 	pSqlServer->BindString(1, pData->m_Map);
@@ -747,28 +746,20 @@ bool CScore::ShowTeamRankThread(IDbConnection *pSqlServer, const ISqlData *pGame
 
 	if(pSqlServer->Step())
 	{
-		char aNames[512];
-		pSqlServer->GetString(1, aNames, sizeof(aNames));
-		int NumNames = pSqlServer->GetInt(2);
 		float Time = pSqlServer->GetFloat(3);
 		int Rank = pSqlServer->GetInt(4);
+		CTeamrank Teamrank;
+		Teamrank.NextSqlResult(pSqlServer);
 
 		char aFormattedNames[512] = "";
-		int StrPos = 0;
-		for(int Name = 0; Name < NumNames; Name++)
+		for(unsigned int Name = 0; Name < Teamrank.m_NumNames; Name++)
 		{
-			int NameStart = StrPos;
-			while(aNames[StrPos] != '\t' && aNames[StrPos] != '\0')
-				StrPos++;
-			aNames[StrPos] = '\0';
+			str_append(aFormattedNames, Teamrank.m_aaNames[Name], sizeof(aFormattedNames));
 
-			str_append(aFormattedNames, &aNames[NameStart], sizeof(aFormattedNames));
-
-			if (Name < NumNames - 2)
+			if (Name < Teamrank.m_NumNames - 2)
 				str_append(aFormattedNames, ", ", sizeof(aFormattedNames));
-			else if (Name < NumNames - 1)
+			else if (Name < Teamrank.m_NumNames - 1)
 				str_append(aFormattedNames, " & ", sizeof(aFormattedNames));
-			StrPos++;
 		}
 
 		if(g_Config.m_SvHideScore)
