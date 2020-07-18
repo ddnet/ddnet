@@ -889,7 +889,7 @@ bool CScore::ShowTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGame
 	{
 		for(Line = 1; Line < 6; Line++) // print
 		{
-			bool Break = false;
+			bool Last = false;
 			float Time = pSqlServer->GetFloat(2);
 			int Rank = pSqlServer->GetInt(3);
 			int TeamSize = pSqlServer->GetInt(4);
@@ -906,14 +906,17 @@ bool CScore::ShowTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGame
 					str_append(aNames, " & ", sizeof(aNames));
 				if(!pSqlServer->Step())
 				{
-					Break = true;
+					Last = true;
 					break;
 				}
 			}
 			str_format(paMessages[Line], sizeof(paMessages[Line]), "%d. %s Team Time: %02d:%05.2f",
 					Rank, aNames, (int)(Time/60), Time-((int)Time/60*60));
-			if(Break)
+			if(Last)
+			{
+				Line++;
 				break;
+			}
 		}
 	}
 
