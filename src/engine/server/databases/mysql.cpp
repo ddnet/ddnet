@@ -48,6 +48,11 @@ CMysqlConnection *CMysqlConnection::Copy()
 	return new CMysqlConnection(m_aDatabase, GetPrefix(), m_aUser, m_aPass, m_aIp, m_Port, m_Setup);
 }
 
+void CMysqlConnection::ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize)
+{
+	str_format(aBuf, BufferSize, "UNIX_TIMESTAMP(%s)", pTimestamp);
+}
+
 IDbConnection::Status CMysqlConnection::Connect()
 {
 #if defined(CONF_SQL)

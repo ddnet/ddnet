@@ -346,14 +346,19 @@ bool CScore::MapInfoThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 	str_copy(aMapPrefix, pData->m_Name, sizeof(aMapPrefix));
 	str_append(aMapPrefix, "%", sizeof(aMapPrefix));
 
+	char aCurrentTimestamp[512];
+	pSqlServer->ToUnixTimestamp("CURRENT_TIMESTAMP", aCurrentTimestamp, sizeof(aCurrentTimestamp));
+	char aTimestamp[512];
+	pSqlServer->ToUnixTimestamp("l.Timestamp", aTimestamp, sizeof(aTimestamp));
+
 	char aBuf[1024];
 	str_format(aBuf, sizeof(aBuf),
 			"SELECT l.Map, l.Server, Mapper, Points, Stars, "
 				"(SELECT COUNT(Name) FROM %s_race WHERE Map = l.Map) AS Finishes, "
 				"(SELECT COUNT(DISTINCT Name) FROM %s_race WHERE Map = l.Map) AS Finishers, "
 				"(SELECT ROUND(AVG(Time)) FROM %s_race WHERE Map = l.Map) AS Average, "
-				"UNIX_TIMESTAMP(l.Timestamp) AS Stamp, "
-				"UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(l.Timestamp) AS Ago, "
+				"%s AS Stamp, "
+				"%s-%s AS Ago, "
 				"(SELECT MIN(Time) FROM %s_race WHERE Map = l.Map AND Name = ?) AS OwnTime "
 			"FROM ("
 				"SELECT * FROM %s_maps "
@@ -365,9 +370,9 @@ bool CScore::MapInfoThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 					"Map "
 				"LIMIT 1"
 			") as l;",
-			pSqlServer->GetPrefix(), pSqlServer->GetPrefix(),
-			pSqlServer->GetPrefix(), pSqlServer->GetPrefix(),
-			pSqlServer->GetPrefix()
+			pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->GetPrefix(),
+			aTimestamp, aCurrentTimestamp, aTimestamp,
+			pSqlServer->GetPrefix(), pSqlServer->GetPrefix()
 	);
 	pSqlServer->PrepareStatement(aBuf);
 	pSqlServer->BindString(1, pData->m_RequestingPlayer);
@@ -507,12 +512,12 @@ bool CScore::SaveScoreThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 				"cp1, cp2, cp3, cp4, cp5, cp6, cp7, cp8, cp9, cp10, cp11, cp12, cp13, "
 				"cp14, cp15, cp16, cp17, cp18, cp19, cp20, cp21, cp22, cp23, cp24, cp25, "
 				"GameID, DDNet7) "
-			"VALUES (?, ?, ?, %.2f, ?, "
+			"VALUES (?, ?, %s, %.2f, ?, "
 				"%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, "
 				"%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, "
 				"%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, "
 				"?, false);",
-			pSqlServer->GetPrefix(), pData->m_Time,
+			pSqlServer->GetPrefix(), pSqlServer->InsertTimestampAsUtc(), pData->m_Time,
 			pData->m_aCpCurrent[0], pData->m_aCpCurrent[1], pData->m_aCpCurrent[2],
 			pData->m_aCpCurrent[3], pData->m_aCpCurrent[4], pData->m_aCpCurrent[5],
 			pData->m_aCpCurrent[6], pData->m_aCpCurrent[7], pData->m_aCpCurrent[8],
@@ -634,8 +639,8 @@ bool CScore::SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGam
 			// if no entry found... create a new one
 			str_format(aBuf, sizeof(aBuf),
 					"INSERT INTO %s_teamrace(Map, Name, Timestamp, Time, ID, GameID, DDNet7) "
-					"VALUES (?, ?, ?, %.2f, ?, ?, false);",
-					pSqlServer->GetPrefix(), pData->m_Time);
+					"VALUES (?, ?, %s, %.2f, ?, ?, false);",
+					pSqlServer->GetPrefix(), pSqlServer->InsertTimestampAsUtc(), pData->m_Time);
 			pSqlServer->PrepareStatement(aBuf);
 			pSqlServer->BindString(1, pData->m_Map);
 			pSqlServer->BindString(2, pData->m_aNames[i]);
@@ -943,16 +948,20 @@ bool CScore::ShowTimesThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 	int LimitStart = maximum(abs(pData->m_Offset)-1, 0);
 	const char *pOrder = pData->m_Offset >= 0 ? "DESC" : "ASC";
 
+	char aCurrentTimestamp[512];
+	pSqlServer->ToUnixTimestamp("CURRENT_TIMESTAMP", aCurrentTimestamp, sizeof(aCurrentTimestamp));
+	char aTimestamp[512];
+	pSqlServer->ToUnixTimestamp("Timestamp", aTimestamp, sizeof(aTimestamp));
 	char aBuf[512];
-
 	if(pData->m_Name[0] != '\0') // last 5 times of a player
 	{
 		str_format(aBuf, sizeof(aBuf),
-				"SELECT Time, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) as Ago, UNIX_TIMESTAMP(Timestamp) as Stamp "
+				"SELECT Time, (%s-%s) as Ago, %s as Stamp "
 				"FROM %s_race "
 				"WHERE Map = ? AND Name = ? "
 				"ORDER BY Timestamp %s "
 				"LIMIT ?, 5;",
+				aCurrentTimestamp, aTimestamp, aTimestamp,
 				pSqlServer->GetPrefix(), pOrder);
 		pSqlServer->PrepareStatement(aBuf);
 		pSqlServer->BindString(1, pData->m_Map);
@@ -962,14 +971,12 @@ bool CScore::ShowTimesThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 	else // last 5 times of server
 	{
 		str_format(aBuf, sizeof(aBuf),
-				"SELECT Time, "
-					"UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) as Ago, "
-					"UNIX_TIMESTAMP(Timestamp) as Stamp, "
-					"Name "
+				"SELECT Time, (%s-%s) as Ago, %s as Stamp, Name "
 				"FROM %s_race "
 				"WHERE Map = ? "
 				"ORDER BY Timestamp %s "
 				"LIMIT ?, 5;",
+				aCurrentTimestamp, aTimestamp, aTimestamp,
 				pSqlServer->GetPrefix(), pOrder);
 		pSqlServer->PrepareStatement(aBuf);
 		pSqlServer->BindString(1, pData->m_Map);
@@ -1321,8 +1328,8 @@ bool CScore::SaveTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 	if(UseCode)
 	{
 		str_format(aBuf, sizeof(aBuf),
-				"INSERT IGNORE INTO %s_saves(Savegame, Map, Code, Timestamp, Server, SaveID, DDNet7) "
-				"VALUES (?, ?, ?, CURRENT_TIMESTAMP(), ?, ?, false)",
+				"INSERT INTO %s_saves(Savegame, Map, Code, Timestamp, Server, SaveID, DDNet7) "
+				"VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, false)",
 				pSqlServer->GetPrefix());
 		pSqlServer->PrepareStatement(aBuf);
 		pSqlServer->BindString(1, pSaveState);
@@ -1435,14 +1442,18 @@ bool CScore::LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 				sizeof(aSaveLike) - str_length(aSaveLike));
 		str_append(aSaveLike, "\t%", sizeof(aSaveLike));
 
+		char aCurrentTimestamp[512];
+		pSqlServer->ToUnixTimestamp("CURRENT_TIMESTAMP", aCurrentTimestamp, sizeof(aCurrentTimestamp));
+		char aTimestamp[512];
+		pSqlServer->ToUnixTimestamp("Timestamp", aTimestamp, sizeof(aTimestamp));
+
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf),
-				"SELECT "
-					"Savegame, Server, "
-					"UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) AS Ago, "
+				"SELECT Savegame, Server, %s-%s AS Ago, "
 					"(UNHEX(REPLACE(SaveID, '-',''))) AS SaveID "
 				"FROM %s_saves "
 				"where Code = ? AND Map = ? AND DDNet7 = false AND Savegame LIKE ?;",
+				aCurrentTimestamp, aTimestamp,
 				pSqlServer->GetPrefix());
 		pSqlServer->PrepareStatement(aBuf);
 		pSqlServer->BindString(1, pData->m_Code);
@@ -1537,12 +1548,18 @@ bool CScore::GetSavesThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 			sizeof(aSaveLike) - str_length(aSaveLike));
 	str_append(aSaveLike, "\t%", sizeof(aSaveLike));
 
+
+	char aCurrentTimestamp[512];
+	pSqlServer->ToUnixTimestamp("CURRENT_TIMESTAMP", aCurrentTimestamp, sizeof(aCurrentTimestamp));
+	char aMaxTimestamp[512];
+	pSqlServer->ToUnixTimestamp("MAX(Timestamp)", aMaxTimestamp, sizeof(aMaxTimestamp));
+
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
-			"SELECT COUNT(*) AS NumSaves, "
-				"UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(MAX(Timestamp)) AS Ago "
+			"SELECT COUNT(*) AS NumSaves, %s-%s AS Ago "
 			"FROM %s_saves "
 			"WHERE Map = ? AND Savegame LIKE ?;",
+			aCurrentTimestamp, aMaxTimestamp,
 			pSqlServer->GetPrefix());
 	pSqlServer->PrepareStatement(aBuf);
 	pSqlServer->BindString(1, pData->m_Map);

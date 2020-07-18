@@ -16,6 +16,8 @@ public:
 	virtual CSqliteConnection *Copy();
 
 	virtual const char *BinaryCollate() const { return "BINARY"; }
+	virtual void ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize);
+	virtual const char *InsertTimestampAsUtc() const { return "DATETIME(?, 'utc')"; }
 
 	virtual Status Connect();
 	virtual void Disconnect();

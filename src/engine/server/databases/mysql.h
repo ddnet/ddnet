@@ -29,6 +29,8 @@ public:
 	virtual CMysqlConnection *Copy();
 
 	virtual const char *BinaryCollate() const { return "utf8mb4_bin"; }
+	virtual void ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize);
+	virtual const char *InsertTimestampAsUtc() const { return "?"; }
 
 	virtual Status Connect();
 	virtual void Disconnect();

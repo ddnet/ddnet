@@ -25,6 +25,11 @@ CSqliteConnection::~CSqliteConnection()
 	m_pDb = nullptr;
 }
 
+void CSqliteConnection::ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize)
+{
+	str_format(aBuf, BufferSize, "strftime('%%s', %s)", pTimestamp);
+}
+
 CSqliteConnection *CSqliteConnection::Copy()
 {
 	return new CSqliteConnection(m_aFilename, m_Setup);
