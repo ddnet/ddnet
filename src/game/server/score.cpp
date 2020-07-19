@@ -1423,10 +1423,10 @@ void CScore::LoadTeam(const char* Code, int ClientID)
 			Tmp->m_NumPlayer++;
 		}
 	}
-	m_pPool->Execute(LoadTeamThread, std::move(Tmp), "load team");
+	m_pPool->ExecuteWrite(LoadTeamThread, std::move(Tmp), "load team");
 }
 
-bool CScore::LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
+bool CScore::LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure)
 {
 	const CSqlTeamLoad *pData = dynamic_cast<const CSqlTeamLoad *>(pGameData);
 	pData->m_pResult->m_Status = CScoreSaveResult::LOAD_FAILED;

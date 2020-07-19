@@ -291,7 +291,7 @@ class CScore
 	static bool GetSavesThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
 
 	static bool SaveTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure);
-	static bool LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
+	static bool LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure);
 
 	static bool SaveScoreThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure);
 	static bool SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure);
