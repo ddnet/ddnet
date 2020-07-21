@@ -7,6 +7,7 @@
 #	Shymwo			2011-07-15 01:27:45
 #	Shymwo			2011-07-21 18:54:53
 #	TortiLeq		2020-06-26 13:14:09 (with Ertee :D)
+#   TortiLeq        2020-07-21 12:48:38
 ##### /authors #####
 
 ##### translated strings #####
@@ -578,7 +579,7 @@ Max demos
 == Maksymalnie dem
 
 News
-== Wiadomości
+== Nowości
 
 Join game
 == Dołącz
@@ -848,7 +849,7 @@ Remove chat
 == Usuń chat
 
 Manual %3d:%02d  
-==  
+== Instrukcja %3d:%02d
 
 Activate
 == Aktywuj
@@ -926,7 +927,7 @@ Wait before try for
 == Poczekaj zanim spróbujesz
 
 Enable long pain sound (used when shooting in freeze)
-== Włącz długi jęk (używany gdy krzyczyć we freezie)
+== Włącz długi jęk (używany gdy krzyczysz we freezie)
 
 DDNet
 == DDNet
@@ -1013,7 +1014,7 @@ Time
 == Czas
 
 Learn
-== Poznaj
+== Wiki
 
 Toggle ghost
 == Przełącz duszka
@@ -1193,7 +1194,7 @@ transmits your player name to info.ddnet.tw
 == przenosi twój nick do info.ddnet.tw
 
 Indicate map finish
-== 
+== Pokazuj ukończone mapy
 
 Show others (own team only)
-== 
+== Pokazuj innych (tylko drużynę)
