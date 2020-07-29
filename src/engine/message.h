@@ -9,18 +9,12 @@
 class CMsgPacker : public CPacker
 {
 public:
-	CMsgPacker(int Type, bool System=false)
+	int m_MsgID;
+	bool m_System;
+	bool m_NoTranslate;
+	CMsgPacker(int Type, bool System = false, bool NoTranslate = false) : m_MsgID(Type), m_System(System), m_NoTranslate(NoTranslate)
 	{
 		Reset();
-		if(Type < OFFSET_UUID)
-		{
-			AddInt((Type<<1)|(System?1:0));
-		}
-		else
-		{
-			AddInt((0<<1)|(System?1:0)); // NETMSG_EX, NETMSGTYPE_EX
-			g_UuidManager.PackUuid(Type, this);
-		}
 	}
 };
 

@@ -3,6 +3,7 @@
 #ifndef GAME_SERVER_GAMECONTEXT_H
 #define GAME_SERVER_GAMECONTEXT_H
 
+#include <engine/antibot.h>
 #include <engine/server.h>
 #include <engine/console.h>
 #include <engine/shared/memheap.h>
@@ -21,8 +22,8 @@
 #ifdef _MSC_VER
 typedef __int32 int32_t;
 typedef unsigned __int32 uint32_t;
-typedef __int64 int64_t;
-typedef unsigned __int64 uint64_t;
+typedef __int64 int64;
+typedef unsigned __int64 uint64;
 #else
 #include <stdint.h>
 #endif
@@ -56,8 +57,8 @@ enum
 class IConsole;
 class IEngine;
 class IStorage;
-class CRandomMapResult;
-class CMapVoteResult;
+struct CAntibotData;
+struct CScoreRandomMapResult;
 
 class CGameContext : public IGameServer
 {
@@ -65,8 +66,10 @@ class CGameContext : public IGameServer
 	IConsole *m_pConsole;
 	IEngine *m_pEngine;
 	IStorage *m_pStorage;
+	IAntibot *m_pAntibot;
 	CLayers m_Layers;
 	CCollision m_Collision;
+	protocol7::CNetObjHandler m_NetObjHandler7;
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_Tuning;
 	CTuningParams m_aTuningList[NUM_TUNEZONES];
@@ -76,9 +79,7 @@ class CGameContext : public IGameServer
 	ASYNCIO *m_pTeeHistorianFile;
 	CUuid m_GameUuid;
 	CMapBugs m_MapBugs;
-
-	std::shared_ptr<CRandomMapResult> m_pRandomMapResult;
-	std::shared_ptr<CMapVoteResult> m_pMapVoteResult;
+	CPrng m_Prng;
 
 	static void CommandCallback(int ClientID, int FlagMask, const char *pCmd, IConsole::IResult *pResult, void *pUser);
 	static void TeeHistorianWrite(const void *pData, int DataSize, void *pUser);
@@ -98,8 +99,6 @@ class CGameContext : public IGameServer
 	static void ConChangeMap(IConsole::IResult *pResult, void *pUserData);
 	static void ConRandomMap(IConsole::IResult *pResult, void *pUserData);
 	static void ConRandomUnfinishedMap(IConsole::IResult *pResult, void *pUserData);
-	static void ConSaveTeam(IConsole::IResult *pResult, void *pUserData);
-	static void ConLoadTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConRestart(IConsole::IResult *pResult, void *pUserData);
 	static void ConBroadcast(IConsole::IResult *pResult, void *pUserData);
 	static void ConSay(IConsole::IResult *pResult, void *pUserData);
@@ -111,6 +110,8 @@ class CGameContext : public IGameServer
 	static void ConClearVotes(IConsole::IResult *pResult, void *pUserData);
 	static void ConVote(IConsole::IResult *pResult, void *pUserData);
 	static void ConVoteNo(IConsole::IResult *pResult, void *pUserData);
+	static void ConDrySave(IConsole::IResult *pResult, void *pUserData);
+	static void ConDumpAntibot(IConsole::IResult *pResult, void *pUserData);
 	static void ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	CGameContext(int Resetting);
@@ -125,6 +126,9 @@ public:
 	CCollision *Collision() { return &m_Collision; }
 	CTuningParams *Tuning() { return &m_Tuning; }
 	CTuningParams *TuningList() { return &m_aTuningList[0]; }
+	IAntibot *Antibot() { return m_pAntibot; }
+	CTeeHistorian *TeeHistorian() { return &m_TeeHistorian; }
+	bool TeeHistorianActive() const { return m_TeeHistorianActive; }
 
 	CGameContext();
 	~CGameContext();
@@ -149,6 +153,7 @@ public:
 	void AbortVoteKickOnDisconnect(int ClientID);
 
 	int m_VoteCreator;
+	int m_VoteType;
 	int64 m_VoteCloseTime;
 	bool m_VoteUpdate;
 	int m_VotePos;
@@ -168,18 +173,19 @@ public:
 		VOTE_ENFORCE_UNKNOWN=0,
 		VOTE_ENFORCE_NO,
 		VOTE_ENFORCE_YES,
+		VOTE_ENFORCE_ABORT,
 	};
 	CHeap *m_pVoteOptionHeap;
 	CVoteOptionServer *m_pVoteOptionFirst;
 	CVoteOptionServer *m_pVoteOptionLast;
 
 	// helper functions
-	void CreateDamageInd(vec2 Pos, float AngleMod, int Amount, int64_t Mask=-1);
-	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int64_t Mask);
-	void CreateHammerHit(vec2 Pos, int64_t Mask=-1);
-	void CreatePlayerSpawn(vec2 Pos, int64_t Mask=-1);
-	void CreateDeath(vec2 Pos, int Who, int64_t Mask=-1);
-	void CreateSound(vec2 Pos, int Sound, int64_t Mask=-1);
+	void CreateDamageInd(vec2 Pos, float AngleMod, int Amount, int64 Mask=-1);
+	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int64 Mask);
+	void CreateHammerHit(vec2 Pos, int64 Mask=-1);
+	void CreatePlayerSpawn(vec2 Pos, int64 Mask=-1);
+	void CreateDeath(vec2 Pos, int Who, int64 Mask=-1);
+	void CreateSound(vec2 Pos, int Sound, int64 Mask=-1);
 	void CreateSoundGlobal(int Sound, int Target=-1);
 
 
@@ -190,14 +196,17 @@ public:
 		CHAT_RED=0,
 		CHAT_BLUE=1,
 		CHAT_WHISPER_SEND=2,
-		CHAT_WHISPER_RECV=3
+		CHAT_WHISPER_RECV=3,
+
+		CHAT_SIX=1<<0,
+		CHAT_SIXUP=1<<1,
 	};
 
 	// network
 	void CallVote(int ClientID, const char *aDesc, const char *aCmd, const char *pReason, const char *aChatmsg);
-	void SendChatTarget(int To, const char *pText);
+	void SendChatTarget(int To, const char *pText, int Flags = CHAT_SIX | CHAT_SIXUP);
 	void SendChatTeam(int Team, const char *pText);
-	void SendChat(int ClientID, int Team, const char *pText, int SpamProtectionClientID = -1);
+	void SendChat(int ClientID, int Team, const char *pText, int SpamProtectionClientID = -1, int Flags = CHAT_SIX | CHAT_SIXUP);
 	void SendEmoticon(int ClientID, int Emoticon);
 	void SendWeaponPickup(int ClientID, int Weapon);
 	void SendBroadcast(const char *pText, int ClientID, bool IsImportant = true);
@@ -225,6 +234,7 @@ public:
 	virtual void OnSnap(int ClientID);
 	virtual void OnPostSnap();
 
+	void *PreProcessMsg(int *MsgID, CUnpacker *pUnpacker, int ClientID);
 	virtual void OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID);
 
 	virtual void OnClientConnected(int ClientID);
@@ -234,7 +244,7 @@ public:
 	virtual void OnClientPredictedInput(int ClientID, void *pInput);
 	virtual void OnClientPredictedEarlyInput(int ClientID, void *pInput);
 
-	virtual void OnClientEngineJoin(int ClientID);
+	virtual void OnClientEngineJoin(int ClientID, bool Sixup);
 	virtual void OnClientEngineDrop(int ClientID, const char *pReason);
 
 	virtual bool IsClientReady(int ClientID);
@@ -246,18 +256,24 @@ public:
 	virtual const char *NetVersion();
 
 	// DDRace
-
+	void OnClientDDNetVersionKnown(int ClientID);
+	virtual void FillAntibot(CAntibotRoundData *pData);
 	int ProcessSpamProtection(int ClientID);
 	int GetDDRaceTeam(int ClientID);
 	// Describes the time when the first player joined the server.
 	int64 m_NonEmptySince;
 	int64 m_LastMapVote;
 	int GetClientVersion(int ClientID);
-	void SetClientVersion(int ClientID, int Version);
 	bool PlayerExists(int ClientID) { return m_apPlayers[ClientID]; };
 	// Returns true if someone is actively moderating.
 	bool PlayerModerating();
 	void ForceVote(int EnforcerID, bool Success);
+
+	// Checks if player can vote and notify them about the reason
+	bool RateLimitPlayerVote(int ClientID);
+	bool RateLimitPlayerMapVote(int ClientID);
+
+	std::shared_ptr<CScoreRandomMapResult> m_SqlRandomMapResult;
 
 private:
 
@@ -322,6 +338,7 @@ private:
 	static void ConDND(IConsole::IResult *pResult, void *pUserData);
 	static void ConMapInfo(IConsole::IResult *pResult, void *pUserData);
 	static void ConTimeout(IConsole::IResult *pResult, void *pUserData);
+	static void ConPractice(IConsole::IResult *pResult, void *pUserData);
 	static void ConSave(IConsole::IResult *pResult, void *pUserData);
 	static void ConLoad(IConsole::IResult *pResult, void *pUserData);
 	static void ConMap(IConsole::IResult *pResult, void *pUserData);
@@ -330,6 +347,7 @@ private:
 	static void ConBroadTime(IConsole::IResult *pResult, void *pUserData);
 	static void ConJoinTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConLockTeam(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnlockTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConInviteTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConMe(IConsole::IResult *pResult, void *pUserData);
 	static void ConWhisper(IConsole::IResult *pResult, void *pUserData);
@@ -373,34 +391,45 @@ private:
 	{
 		NETADDR m_Addr;
 		int m_Expire;
+		char m_aReason[128];
 	};
 
 	CMute m_aMutes[MAX_MUTES];
 	int m_NumMutes;
 	CMute m_aVoteMutes[MAX_VOTE_MUTES];
 	int m_NumVoteMutes;
-	bool TryMute(const NETADDR *pAddr, int Secs);
-	void Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName);
+	bool TryMute(const NETADDR *pAddr, int Secs, const char *pReason);
+	void Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName, const char *pReason = "");
 	bool TryVoteMute(const NETADDR *pAddr, int Secs);
 	bool VoteMute(const NETADDR *pAddr, int Secs, const char *pDisplayName, int AuthedID);
 	bool VoteUnmute(const NETADDR *pAddr, const char *pDisplayName, int AuthedID);
 	void Whisper(int ClientID, char *pStr);
-	void WhisperID(int ClientID, int VictimID, char *pMessage);
+	void WhisperID(int ClientID, int VictimID, const char *pMessage);
 	void Converse(int ClientID, char *pStr);
 	bool IsVersionBanned(int Version);
+	void UnlockTeam(int ClientID, int Team);
 
 public:
 	CLayers *Layers() { return &m_Layers; }
 	class IScore *Score() { return m_pScore; }
-	bool m_VoteKick;
-	bool m_VoteSpec;
-	int m_VoteVictim;
+
 	enum
 	{
 		VOTE_ENFORCE_NO_ADMIN = VOTE_ENFORCE_YES + 1,
-		VOTE_ENFORCE_YES_ADMIN
+		VOTE_ENFORCE_YES_ADMIN,
+
+		VOTE_TYPE_UNKNOWN=0,
+		VOTE_TYPE_OPTION,
+		VOTE_TYPE_KICK,
+		VOTE_TYPE_SPECTATE,
 	};
+	int m_VoteVictim;
 	int m_VoteEnforcer;
+
+	inline bool IsOptionVote() const { return m_VoteType == VOTE_TYPE_OPTION; };
+	inline bool IsKickVote() const { return m_VoteType == VOTE_TYPE_KICK; };
+	inline bool IsSpecVote() const { return m_VoteType == VOTE_TYPE_SPECTATE; };
+
 	void SendRecord(int ClientID);
 	static void SendChatResponse(const char *pLine, void *pUser, bool Highlighted = false);
 	static void SendChatResponseAll(const char *pLine, void *pUser);
@@ -415,9 +444,9 @@ public:
 	int m_ChatPrintCBIndex;
 };
 
-inline int64_t CmaskAll() { return -1LL; }
-inline int64_t CmaskOne(int ClientID) { return 1LL<<ClientID; }
-inline int64_t CmaskUnset(int64_t Mask, int ClientID) { return Mask^CmaskOne(ClientID); }
-inline int64_t CmaskAllExceptOne(int ClientID) { return CmaskUnset(CmaskAll(), ClientID); }
-inline bool CmaskIsSet(int64_t Mask, int ClientID) { return (Mask&CmaskOne(ClientID)) != 0; }
+inline int64 CmaskAll() { return -1LL; }
+inline int64 CmaskOne(int ClientID) { return 1LL<<ClientID; }
+inline int64 CmaskUnset(int64 Mask, int ClientID) { return Mask^CmaskOne(ClientID); }
+inline int64 CmaskAllExceptOne(int ClientID) { return CmaskUnset(CmaskAll(), ClientID); }
+inline bool CmaskIsSet(int64 Mask, int ClientID) { return (Mask&CmaskOne(ClientID)) != 0; }
 #endif

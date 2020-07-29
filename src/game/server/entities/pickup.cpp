@@ -68,12 +68,9 @@ void CPickup::Tick()
 					{
 						if(pChr->GetWeaponGot(i))
 						{
-							if(!(pChr->m_FreezeTime && i == WEAPON_NINJA))
-							{
-								pChr->SetWeaponGot(i, false);
-								pChr->SetWeaponAmmo(i, 0);
-								Sound = true;
-							}
+							pChr->SetWeaponGot(i, false);
+							pChr->SetWeaponAmmo(i, 0);
+							Sound = true;
 						}
 					}
 					pChr->SetNinjaActivationDir(vec2(0,0));
@@ -84,13 +81,13 @@ void CPickup::Tick()
 						pChr->SetLastWeapon(WEAPON_GUN);
 						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->Teams()->TeamMask(pChr->Team()));
 					}
-					if(!pChr->m_FreezeTime && pChr->GetActiveWeapon() >= WEAPON_SHOTGUN)
+					if(pChr->GetActiveWeapon() >= WEAPON_SHOTGUN)
 						pChr->SetActiveWeapon(WEAPON_HAMMER);
 					break;
 
 				case POWERUP_WEAPON:
 
-					if (m_Subtype >= 0 && m_Subtype < NUM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || (pChr->GetWeaponAmmo(m_Subtype) != -1 && !pChr->m_FreezeTime)))
+					if (m_Subtype >= 0 && m_Subtype < NUM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) != -1))
 					{
 						pChr->GiveWeapon(m_Subtype);
 
@@ -165,14 +162,23 @@ void CPickup::Snap(int SnappingClient)
 					&& (!Tick))
 		return;
 
-	CNetObj_Pickup *pP = static_cast<CNetObj_Pickup *>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, m_ID, sizeof(CNetObj_Pickup)));
+	int Size = Server()->IsSixup(SnappingClient) ? 3*4 : sizeof(CNetObj_Pickup);
+	CNetObj_Pickup *pP = static_cast<CNetObj_Pickup *>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, m_ID, Size));
 	if(!pP)
 		return;
 
 	pP->m_X = (int)m_Pos.x;
 	pP->m_Y = (int)m_Pos.y;
 	pP->m_Type = m_Type;
-	pP->m_Subtype = m_Subtype;
+	if(Server()->IsSixup(SnappingClient))
+	{
+		if(m_Type == POWERUP_WEAPON)
+			pP->m_Type = m_Subtype == WEAPON_SHOTGUN ? 3 : m_Subtype == WEAPON_GRENADE ? 2 : 4;
+		else if(m_Type == POWERUP_NINJA)
+			pP->m_Type = 5;
+	}
+	else
+		pP->m_Subtype = m_Subtype;
 }
 
 void CPickup::Move()

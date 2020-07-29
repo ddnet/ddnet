@@ -10,7 +10,7 @@ class CBackground : public CMapLayers
 {
 	IEngineMap *m_pMap;
 	bool m_Loaded;
-	char m_aMapName[128];
+	char m_aMapName[MAX_MAP_LENGTH];
 
 	//to avoid spam when in menu
 	int64 m_LastLoad;

@@ -3,6 +3,7 @@
 #ifndef GAME_CLIENT_COMPONENTS_CAMERA_H
 #define GAME_CLIENT_COMPONENTS_CAMERA_H
 #include <base/vmath.h>
+#include <game/bezier.h>
 #include <game/client/component.h>
 
 class CCamera : public CComponent
@@ -18,10 +19,20 @@ class CCamera : public CComponent
 	vec2 m_LastPos[2];
 	vec2 m_PrevCenter;
 
+	bool m_Zooming;
+	CCubicBezier m_ZoomSmoothing;
+	float m_ZoomSmoothingStart;
+	float m_ZoomSmoothingEnd;
+
+	void ScaleZoom(float Factor);
+	void ChangeZoom(float Target);
+	float ZoomProgress(float CurrentTime) const;
+
 public:
 	vec2 m_Center;
 	bool m_ZoomSet;
 	float m_Zoom;
+	float m_ZoomSmoothingTarget;
 
 	CCamera();
 	virtual void OnRender();

@@ -7,6 +7,7 @@
 #include <base/vmath.h>
 #include <engine/client.h>
 #include <engine/console.h>
+#include <engine/shared/config.h>
 #include <game/layers.h>
 #include <game/localization.h>
 #include <game/gamecore.h>
@@ -18,46 +19,6 @@
 #include <game/client/prediction/entities/character.h>
 #include <game/client/prediction/entities/laser.h>
 #include <game/client/prediction/entities/pickup.h>
-
-class CGameClient;
-
-class CWeaponData
-{
-public:
-	int m_Tick;
-	vec2 m_Pos;
-	vec2 m_Direction;
-	vec2 StartPos() { return m_Pos + m_Direction * 28.0f * 0.75f; }
-};
-
-class CLocalProjectile
-{
-public:
-	int m_Active;
-	CGameClient *m_pGameClient;
-	CWorldCore *m_pWorld;
-	CCollision *m_pCollision;
-
-	vec2 m_Direction;
-	vec2 m_Pos;
-	int m_StartTick;
-	int m_Type;
-
-	int m_Owner;
-	int m_Weapon;
-	bool m_Explosive;
-	int m_Bouncing;
-	bool m_Freeze;
-	bool m_ExtraInfo;
-
-	vec2 GetPos(float Time);
-	void CreateExplosion(vec2 Pos, int LocalClientID);
-	void Tick(int CurrentTick, int GameTickSpeed, int LocalClientID);
-	void Init(CGameClient *pGameClient, CWorldCore *pWorld, CCollision *pCollision, const CNetObj_Projectile *pProj);
-	void Init(CGameClient *pGameClient, CWorldCore *pWorld, CCollision *pCollision, vec2 Vel, vec2 Pos, int StartTick, int Type, int Owner, int Weapon, bool Explosive, int Bouncing, bool Freeze, bool ExtraInfo);
-	bool GameLayerClipped(vec2 CheckPos);
-	void Deactivate() { m_Active = 0; }
-};
 
 class CGameInfo
 {
@@ -87,6 +48,7 @@ public:
 	bool m_EntitiesRace;
 	bool m_EntitiesFNG;
 	bool m_EntitiesVanilla;
+	bool m_EntitiesBW;
 
 	bool m_Race;
 
@@ -127,7 +89,9 @@ class CGameClient : public IGameClient
 	class IEditor *m_pEditor;
 	class IFriends *m_pFriends;
 	class IFriends *m_pFoes;
+#if defined(CONF_AUTOUPDATE)
 	class IUpdater *m_pUpdater;
+#endif
 
 	CLayers m_Layers;
 	class CCollision m_Collision;
@@ -145,6 +109,8 @@ class CGameClient : public IGameClient
 	int m_LastFlagCarrierBlue;
 
 	int m_CheckInfo[2];
+
+	char m_aDDNetVersionStr[64];
 
 	static void ConTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConKill(IConsole::IResult *pResult, void *pUserData);
@@ -176,7 +142,9 @@ public:
 	class IEditor *Editor() { return m_pEditor; }
 	class IFriends *Friends() { return m_pFriends; }
 	class IFriends *Foes() { return m_pFoes; }
+#if defined(CONF_AUTOUPDATE)
 	class IUpdater *Updater() { return m_pUpdater; }
+#endif
 
 	int NetobjNumCorrections() { return m_NetObjHandler.NumObjCorrections(); }
 	const char *NetobjCorrectedOn() { return m_NetObjHandler.CorrectedObjOn(); }
@@ -302,6 +270,7 @@ public:
 		float m_Angle;
 		bool m_Active;
 		bool m_ChatIgnore;
+		bool m_EmoticonIgnore;
 		bool m_Friend;
 		bool m_Foe;
 
@@ -316,10 +285,6 @@ public:
 		void UpdateRenderInfo();
 		void Reset();
 
-		// DDRace
-
-		int m_Score;
-
 		// rendered characters
 		CNetObj_Character m_RenderCur;
 		CNetObj_Character m_RenderPrev;
@@ -330,6 +295,8 @@ public:
 		int64 m_SmoothLen[2];
 		vec2 m_PredPos[200];
 		int m_PredTick[200];
+		bool m_SpecCharPresent;
+		vec2 m_SpecChar;
 	};
 
 	CClientData m_aClients[MAX_CLIENTS];
@@ -379,6 +346,7 @@ public:
 	virtual void OnConsoleInit();
 	virtual void OnStateChange(int NewState, int OldState);
 	virtual void OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy = 0);
+	virtual void InvalidateSnapshot();
 	virtual void OnNewSnapshot();
 	virtual void OnPredict();
 	virtual void OnActivateEditor();
@@ -398,6 +366,8 @@ public:
 	virtual const char *GetItemName(int Type);
 	virtual const char *Version();
 	virtual const char *NetVersion();
+	virtual int DDNetVersion();
+	virtual const char *DDNetVersionStr();
 
 	// actions
 	// TODO: move these
@@ -457,6 +427,7 @@ public:
 	bool AntiPingWeapons() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingWeapons && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK; }
 	bool AntiPingGunfire() { return AntiPingGrenade() && AntiPingWeapons() && g_Config.m_ClAntiPingGunfire; }
 	bool Predict() { return g_Config.m_ClPredict && !(m_Snap.m_pGameInfoObj && m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER) && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK && m_Snap.m_pLocalCharacter; }
+	bool PredictDummy() { return g_Config.m_ClPredictDummy && Client()->DummyConnected() && m_Snap.m_LocalClientID >= 0 && m_PredictedDummyID >= 0; }
 
 	CGameWorld m_GameWorld;
 	CGameWorld m_PredictedWorld;
@@ -474,6 +445,8 @@ private:
 	void DetectStrongHook();
 	vec2 GetSmoothPos(int ClientID);
 
+	int m_PredictedDummyID;
+	int m_IsDummySwapping;
 	CCharOrder m_CharOrder;
 	class CCharacter m_aLastWorldCharacters[MAX_CLIENTS];
 

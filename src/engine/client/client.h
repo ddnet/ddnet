@@ -103,6 +103,8 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	char m_aServerAddressStr[256];
 
+	CUuid m_ConnectionID;
+
 	unsigned m_SnapshotParts[2];
 	int64 m_LocalStartTime;
 
@@ -166,6 +168,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_MapDetailsCrc;
 	SHA256_DIGEST m_MapDetailsSha256;
 
+	char m_aDDNetInfoTmp[64];
 	std::shared_ptr<CGetFile> m_pDDNetInfoTask;
 
 	// time
@@ -183,7 +186,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	int m_CurrentInput[2];
 	bool m_LastDummy;
-	bool m_LastDummy2;
 	bool m_DummySendConnInfo;
 
 	// graphs
@@ -273,8 +275,8 @@ public:
 	void SendInput();
 
 	// TODO: OPT: do this a lot smarter!
-	virtual int *GetInput(int Tick);
-	virtual int *GetDirectInput(int Tick);
+	virtual int *GetInput(int Tick, int IsDummy);
+	virtual int *GetDirectInput(int Tick, int IsDummy);
 
 	const char *LatestVersion();
 
@@ -427,6 +429,7 @@ public:
 	void ToggleWindowBordered();
 	void ToggleWindowVSync();
 	void LoadFont();
+	void Notify(const char *pTitle, const char *pMessage);
 
 	// DDRace
 

@@ -38,4 +38,8 @@ $ ./find_unchanged.py ../spanish.txt
 
 To update all languages:
 
-$ for i in data/languages/*.txt; do scripts/languages/copy_fix.py $i $i.tmp --delete-unused --append-missing && mv $i.tmp $i; done
+$ for i in data/languages/*.txt; do [ "${i:t}" != "license.txt" ] && [ "${i:t}" != "index.txt" ] && scripts/languages/copy_fix.py $i $i.$$.tmp --delete-unused --append-missing && mv $i.$$.tmp $i; done
+
+To get a statistic of how complete the translation is:
+
+$ for i in data/languages/*.txt; do COVERED=$(cat $i|grep "^== "|grep -v "^== $"|wc -l); TOTAL=$(cat $i|grep "^== "|wc -l); [ "${i:t}" != "license.txt" ] && [ "${i:t}" != "index.txt" ] && echo "$(($COVERED*100/$TOTAL))% ${i:r:t}"; done | sort -n -r

@@ -9,6 +9,7 @@
 #include <engine/textrender.h>
 #include <engine/keys.h>
 #include <engine/shared/config.h>
+#include <engine/shared/csv.h>
 
 #include <game/generated/protocol.h>
 #include <game/generated/client_data.h>
@@ -18,10 +19,6 @@
 #include <game/client/components/scoreboard.h>
 #include <game/client/components/sounds.h>
 #include <game/localization.h>
-
-#ifdef CONF_PLATFORM_MACOSX
-#include <osx/notification.h>
-#endif
 
 #include "chat.h"
 
@@ -38,7 +35,7 @@ CChat::CChat()
 	#include <game/server/ddracechat.h>
 	m_Commands.sort_range();
 
-	OnReset();
+	Reset();
 }
 
 void CChat::RegisterCommand(const char *pName, const char *pParams, int flags, const char *pHelp)
@@ -56,7 +53,7 @@ void CChat::OnWindowResize()
 	}
 }
 
-void CChat::OnReset()
+void CChat::Reset()
 {
 	for(int i = 0; i < MAX_LINES; i++)
 	{
@@ -83,6 +80,8 @@ void CChat::OnReset()
 	m_pHistoryEntry = 0x0;
 	m_PendingChatCounter = 0;
 	m_LastChatSend = 0;
+	m_CurrentLine = 0;
+	m_Mode = MODE_NONE;
 
 	for(int i = 0; i < CHAT_NUM; ++i)
 		m_aLastSoundPlayed[i] = 0;
@@ -97,13 +96,8 @@ void CChat::OnStateChange(int NewState, int OldState)
 {
 	if(OldState <= IClient::STATE_CONNECTING)
 	{
-		m_Mode = MODE_NONE;
+		Reset();
 		Input()->SetIMEState(false);
-		for(int i = 0; i < MAX_LINES; i++)
-		{
-			m_aLines[i].m_Time = 0;
-		}
-		m_CurrentLine = 0;
 	}
 }
 
@@ -547,6 +541,65 @@ bool CChat::LineShouldHighlight(const char *pLine, const char *pName)
 	return false;
 }
 
+#define SAVES_FILE "ddnet-saves.txt"
+const char *SAVES_HEADER[] = {
+	"Time",
+	"Player",
+	"Map",
+	"Code",
+};
+
+void CChat::StoreSave(const char *pText)
+{
+	const char *pStart = str_find(pText, "Team successfully saved by ");
+	const char *pMid = str_find(pText, ". Use '/load ");
+	const char *pOn = str_find(pText, "' on ");
+	const char *pEnd = str_find(pText, pOn ? " to continue" : "' to continue");
+
+	if(!pStart || !pMid || !pEnd || pMid < pStart || pEnd < pMid || (pOn && (pOn < pMid || pEnd < pOn)))
+		return;
+
+	char aName[16];
+	str_copy(aName, pStart + 27, minimum(static_cast<size_t>(pMid - pStart - 26), sizeof(aName)));
+
+	char aSaveCode[64];
+
+	str_copy(aSaveCode, pMid + 13, minimum(static_cast<size_t>((pOn ? pOn : pEnd) - pMid - 12), sizeof(aSaveCode)));
+
+	char aTimestamp[20];
+	str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_SPACE);
+
+	// TODO: Find a simple way to get the names of team members. This doesn't
+	// work since team is killed first, then save message gets sent:
+	/*
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		const CNetObj_PlayerInfo *pInfo = GameClient()->m_Snap.m_paInfoByDDTeam[i];
+		if(!pInfo)
+			continue;
+		pInfo->m_Team // All 0
+	}
+	*/
+
+	IOHANDLE File = Storage()->OpenFile(SAVES_FILE, IOFLAG_APPEND, IStorage::TYPE_SAVE);
+	if(!File)
+		return;
+
+	const char *apColumns[4] = {
+		aTimestamp,
+		aName,
+		Client()->GetCurrentMap(),
+		aSaveCode,
+	};
+
+	if(io_tell(File) == 0)
+	{
+		CsvWrite(File, 4, SAVES_HEADER);
+	}
+	CsvWrite(File, 4, apColumns);
+	io_close(File);
+}
+
 void CChat::AddLine(int ClientID, int Team, const char *pLine)
 {
 	if(*pLine == 0 ||
@@ -585,6 +638,11 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 
 	bool Highlighted = false;
 	char *p = const_cast<char*>(pLine);
+
+	// Only empty string left
+	if(*p == 0)
+		return;
+
 	while(*p)
 	{
 		Highlighted = false;
@@ -639,6 +697,9 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		{
 			str_copy(m_aLines[m_CurrentLine].m_aName, "*** ", sizeof(m_aLines[m_CurrentLine].m_aName));
 			str_format(m_aLines[m_CurrentLine].m_aText, sizeof(m_aLines[m_CurrentLine].m_aText), "%s", pLine);
+
+			if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
+				StoreSave(m_aLines[m_CurrentLine].m_aText);
 		}
 		else
 		{
@@ -704,13 +765,9 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 	{
 		if(Now-m_aLastSoundPlayed[CHAT_HIGHLIGHT] >= time_freq()*3/10)
 		{
-#ifdef CONF_PLATFORM_MACOSX
 			char aBuf[1024];
 			str_format(aBuf, sizeof(aBuf), "%s%s", m_aLines[m_CurrentLine].m_aName, m_aLines[m_CurrentLine].m_aText);
-			CNotification::Notify("DDNet-Chat", aBuf);
-#else
-			Graphics()->NotifyWindow();
-#endif
+			Client()->Notify("DDNet Chat", aBuf);
 			if(g_Config.m_SndHighlight)
 			{
 				m_pClient->m_pSounds->Play(CSounds::CHN_GUI, SOUND_CHAT_HIGHLIGHT, 0);
@@ -744,13 +801,14 @@ void CChat::OnPrepareLines()
 	float FontSize = 6.0f;
 
 	bool ForceRecreate = m_pClient->m_pScoreboard->Active() != m_PrevScoreBoardShowed;
-	ForceRecreate |= m_Show != m_PrevShowChat;
+	bool ShowLargeArea = m_Show || g_Config.m_ClShowChat == 2;
+	ForceRecreate |= ShowLargeArea != m_PrevShowChat;
 	m_PrevScoreBoardShowed = m_pClient->m_pScoreboard->Active();
-	m_PrevShowChat = m_Show;
+	m_PrevShowChat = ShowLargeArea;
 
 	int64 Now = time();
 	float LineWidth = m_pClient->m_pScoreboard->Active() ? 90.0f : 200.0f;
-	float HeightLimit = m_pClient->m_pScoreboard->Active() ? 230.0f : m_Show ? 50.0f : 200.0f;
+	float HeightLimit = m_pClient->m_pScoreboard->Active() ? 230.0f : m_PrevShowChat ? 50.0f : 200.0f;
 	float Begin = x;
 	CTextCursor Cursor;
 	int OffsetType = m_pClient->m_pScoreboard->Active() ? 1 : 0;
@@ -758,7 +816,7 @@ void CChat::OnPrepareLines()
 	{
 
 		int r = ((m_CurrentLine - i) + MAX_LINES) % MAX_LINES;
-		if(Now > m_aLines[r].m_Time + 16 * time_freq() && !m_Show)
+		if(Now > m_aLines[r].m_Time + 16 * time_freq() && !m_PrevShowChat)
 			break;
 
 		if(m_aLines[r].m_TextContainerIndex != -1 && !ForceRecreate)
@@ -962,7 +1020,7 @@ void CChat::OnRender()
 		}
 
 		TextRender()->TextEx(&Cursor, m_Input.GetString(Editing)+m_ChatStringOffset, m_Input.GetCursorOffset(Editing)-m_ChatStringOffset);
-		static float MarkerOffset = TextRender()->TextWidth(0, 8.0f, "|", -1)/3;
+		static float MarkerOffset = TextRender()->TextWidth(0, 8.0f, "|", -1, -1.0f)/3;
 		CTextCursor Marker = Cursor;
 		Marker.m_X -= MarkerOffset;
 		TextRender()->TextEx(&Marker, "|", -1);
@@ -981,12 +1039,12 @@ void CChat::OnRender()
 	OnPrepareLines();
 
 	int64 Now = time();
-	float HeightLimit = m_pClient->m_pScoreboard->Active() ? 230.0f : m_Show ? 50.0f : 200.0f;
+	float HeightLimit = m_pClient->m_pScoreboard->Active() ? 230.0f : m_PrevShowChat ? 50.0f : 200.0f;
 	int OffsetType = m_pClient->m_pScoreboard->Active() ? 1 : 0;
 	for(int i = 0; i < MAX_LINES; i++)
 	{
 		int r = ((m_CurrentLine-i)+MAX_LINES)%MAX_LINES;
-		if(Now > m_aLines[r].m_Time+16*time_freq() && !m_Show)
+		if(Now > m_aLines[r].m_Time+16*time_freq() && !m_PrevShowChat)
 			break;
 
 		y -= m_aLines[r].m_YOffset[OffsetType];
@@ -995,7 +1053,7 @@ void CChat::OnRender()
 		if(y < HeightLimit)
 			break;
 
-		float Blend = Now > m_aLines[r].m_Time + 14 * time_freq() && !m_Show ? 1.0f - (Now - m_aLines[r].m_Time - 14 * time_freq()) / (2.0f*time_freq()) : 1.0f;
+		float Blend = Now > m_aLines[r].m_Time + 14 * time_freq() && !m_PrevShowChat ? 1.0f - (Now - m_aLines[r].m_Time - 14 * time_freq()) / (2.0f*time_freq()) : 1.0f;
 
 		if(m_aLines[r].m_TextContainerIndex != -1)
 		{

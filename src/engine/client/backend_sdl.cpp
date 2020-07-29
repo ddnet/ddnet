@@ -15,12 +15,7 @@
 #include <cmath>
 #include "SDL.h"
 #include "SDL_syswm.h"
-#if defined(CONF_PLATFORM_MACOSX)
-#include "OpenGL/glu.h"
-#else
 #include "SDL_opengl.h"
-#include "GL/glu.h"
-#endif
 
 #if defined(SDL_VIDEO_DRIVER_X11)
 	#include <X11/Xutil.h>
@@ -70,7 +65,7 @@ void CGraphicsBackend_Threaded::ThreadFunc(void *pUser)
 		}
 		#if defined(CONF_VIDEORECORDER)
 			if (IVideo::Current())
-				IVideo::Current()->nextVideoFrame_thread();
+				IVideo::Current()->NextVideoFrameThread();
 		#endif
 	}
 }
@@ -353,7 +348,8 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 	{
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-		gluBuild2DMipmaps(GL_TEXTURE_2D, StoreOglformat, Width, Height, Oglformat, GL_UNSIGNED_BYTE, pTexData);
+		glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+		glTexImage2D(GL_TEXTURE_2D, 0, StoreOglformat, Width, Height, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
 	}
 
 	// calculate memory usage
@@ -597,7 +593,7 @@ void CCommandProcessorFragment_OpenGL3_3::SetState(const CCommandBuffer::SState 
 			m_aTextures[State.m_Texture].m_LastWrapMode = State.m_WrapMode;
 		}
 	}
-	else 
+	else
 	{
 		if(pProgram->m_LocIsTextured != -1)
 		{
@@ -661,6 +657,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	m_pTextProgram = new CGLSLTextProgram;
 	m_pSpriteProgram = new CGLSLSpriteProgram;
 	m_pSpriteProgramMultiple = new CGLSLSpriteMultipleProgram;
+	m_LastProgramID = 0;
 
 	{
 		CGLSL PrimitiveVertexShader;
@@ -1109,7 +1106,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 		}
 	}
 	m_aTextures[pCommand->m_Slot].m_Width = Width;
-	m_aTextures[pCommand->m_Slot].m_Height = Height; 
+	m_aTextures[pCommand->m_Slot].m_Height = Height;
 	m_aTextures[pCommand->m_Slot].m_RescaleCount = RescaleCount;
 
 	int Oglformat = TexFormatToOpenGLFormat(pCommand->m_Format);
@@ -1492,7 +1489,9 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_CreateBufferContainer(const CComma
 	{
 		for(int i = m_BufferContainers.size(); i < Index + 1; ++i)
 		{
-			m_BufferContainers.push_back(SBufferContainer());
+			SBufferContainer Container;
+			Container.m_ContainerInfo.m_Stride = 0;
+			m_BufferContainers.push_back(Container);
 		}
 	}
 
@@ -1727,7 +1726,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadLayer(const CCommandBuff
 	{
 		pProgram = m_pQuadProgramTextured;
 	}
-	else 
+	else
 		pProgram = m_pQuadProgram;
 
 	UseProgram(pProgram);
@@ -2182,6 +2181,17 @@ void CCommandProcessor_SDL_OpenGL::RunBuffer(CCommandBuffer *pBuffer)
 
 int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, IStorage *pStorage)
 {
+	// print sdl version
+	{
+		SDL_version Compiled;
+		SDL_version Linked;
+
+		SDL_VERSION(&Compiled);
+		SDL_GetVersion(&Linked);
+		dbg_msg("sdl", "SDL version %d.%d.%d (compiled = %d.%d.%d)", Linked.major, Linked.minor, Linked.patch,
+			Compiled.major, Compiled.minor, Compiled.patch);
+	}
+
 	if(!SDL_WasInit(SDL_INIT_VIDEO))
 	{
 		if(SDL_InitSubSystem(SDL_INIT_VIDEO) < 0)
@@ -2255,7 +2265,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 						dbg_msg("gfx", "Using OpenGL version %d.%d.", vMaj, vMin);
 					}
 				}
-				else 
+				else
 				{
 					dbg_msg("gfx", "Couldn't create OpenGL 3.3 context.");
 					SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, s_SDLGLContextMajorVersion);
@@ -2310,7 +2320,9 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	}
 
 	// set flags
-	int SdlFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN | SDL_WINDOW_ALLOW_HIGHDPI;
+	int SdlFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN;
+	if(Flags&IGraphicsBackend::INITFLAG_HIGHDPI)
+		SdlFlags |= SDL_WINDOW_ALLOW_HIGHDPI;
 #if defined(SDL_VIDEO_DRIVER_X11)
 	if(Flags&IGraphicsBackend::INITFLAG_RESIZABLE)
 		SdlFlags |= SDL_WINDOW_RESIZABLE;
@@ -2419,7 +2431,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		CmdBuffer.AddCommand(CmdOpenGL);
 		RunBuffer(&CmdBuffer);
 		WaitForIdle();
-	} 
+	}
 	else
 	{
 		CCommandProcessorFragment_OpenGL::SCommand_Init CmdOpenGL;
@@ -2563,9 +2575,6 @@ void CGraphicsBackend_SDL_OpenGL::SetWindowGrab(bool Grab)
 
 void CGraphicsBackend_SDL_OpenGL::NotifyWindow()
 {
-	if(!g_Config.m_ClShowNotifications)
-		return;
-
 	// get window handle
 	SDL_SysWMinfo info;
 	SDL_VERSION(&info.version);

@@ -3,13 +3,18 @@
 #ifndef GAME_SERVER_ENTITIES_CHARACTER_H
 #define GAME_SERVER_ENTITIES_CHARACTER_H
 
+#include <engine/antibot.h>
 #include <game/server/entity.h>
+#include <game/server/save.h>
 #include <game/generated/server_data.h>
 #include <game/generated/protocol.h>
 
 #include <game/gamecore.h>
 
+class CAntibot;
 class CGameTeams;
+class CSaveTee;
+struct CAntibotCharacterData;
 
 enum
 {
@@ -125,6 +130,7 @@ private:
 	int m_LastNoAmmoSound;
 
 	// these are non-heldback inputs
+	CNetObj_PlayerInput m_LatestPrevPrevInput;
 	CNetObj_PlayerInput m_LatestPrevInput;
 	CNetObj_PlayerInput m_LatestInput;
 
@@ -159,24 +165,28 @@ private:
 
 	// DDRace
 
+	void SnapCharacter(int SnappingClient, int ID);
 	static bool IsSwitchActiveCb(int Number, void *pUser);
 	void HandleTiles(int Index);
 	float m_Time;
 	int m_LastBroadcast;
 	void DDRaceInit();
 	void HandleSkippableTiles(int Index);
+	void SetRescue();
 	void DDRaceTick();
 	void DDRacePostCoreTick();
 	void HandleBroadcast();
 	void HandleTuneLayer();
 	void SendZoneMsgs();
+	IAntibot *Antibot();
 
 	bool m_SetSavePos;
-	vec2 m_PrevSavePos;
+	CSaveTee m_RescueTee;
 	bool m_Solo;
 
 public:
 	CGameTeams* Teams();
+	void FillAntibot(CAntibotCharacterData *pData);
 	void Pause(bool Pause);
 	bool Freeze(int Time);
 	bool Freeze();
@@ -232,6 +242,9 @@ public:
 	bool m_TeleGunTeleport;
 	bool m_IsBlueTeleGunTeleport;
 	int m_StrongWeakID;
+
+	int m_SpawnTick;
+	int m_WeaponChangeTick;
 
 	// Setters/Getters because i don't want to modify vanilla vars access modifiers
 	int GetLastWeapon() { return m_LastWeapon; };

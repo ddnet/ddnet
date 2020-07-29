@@ -7,7 +7,6 @@
 #include "message.h"
 #include "graphics.h"
 #include <engine/friends.h>
-#include <engine/shared/config.h>
 
 enum
 {
@@ -78,12 +77,12 @@ public:
 	inline int State() const { return m_State; }
 
 	// tick time access
-	inline int PrevGameTick() const { return m_PrevGameTick[g_Config.m_ClDummy]; }
-	inline int GameTick() const { return m_CurGameTick[g_Config.m_ClDummy]; }
-	inline int PredGameTick() const { return m_PredTick[g_Config.m_ClDummy]; }
-	inline float IntraGameTick() const { return m_GameIntraTick[g_Config.m_ClDummy]; }
-	inline float PredIntraGameTick() const { return m_PredIntraTick[g_Config.m_ClDummy]; }
-	inline float GameTickTime() const { return m_GameTickTime[g_Config.m_ClDummy]; }
+	inline int PrevGameTick(int Dummy) const { return m_PrevGameTick[Dummy]; }
+	inline int GameTick(int Dummy) const { return m_CurGameTick[Dummy]; }
+	inline int PredGameTick(int Dummy) const { return m_PredTick[Dummy]; }
+	inline float IntraGameTick(int Dummy) const { return m_GameIntraTick[Dummy]; }
+	inline float PredIntraGameTick(int Dummy) const { return m_PredIntraTick[Dummy]; }
+	inline float GameTickTime(int Dummy) const { return m_GameTickTime[Dummy]; }
 	inline int GameTickSpeed() const { return m_GameTickSpeed; }
 
 	// other time access
@@ -122,6 +121,7 @@ public:
 	virtual void ToggleWindowBordered() = 0;
 	virtual void ToggleWindowVSync() = 0;
 	virtual void LoadFont() = 0;
+	virtual void Notify(const char *pTitle, const char *pMessage) = 0;
 
 	// networking
 	virtual void EnterGame() = 0;
@@ -132,8 +132,8 @@ public:
 	virtual int MapDownloadTotalsize() = 0;
 
 	// input
-	virtual int *GetInput(int Tick) = 0;
-	virtual int *GetDirectInput(int Tick) = 0;
+	virtual int *GetInput(int Tick, int IsDummy = 0) = 0;
+	virtual int *GetDirectInput(int Tick, int IsDummy = 0) = 0;
 
 	// remote console
 	virtual void RconAuth(const char *pUsername, const char *pPassword) = 0;
@@ -221,6 +221,7 @@ public:
 	virtual void OnRconType(bool UsernameReq) = 0;
 	virtual void OnRconLine(const char *pLine) = 0;
 	virtual void OnInit() = 0;
+	virtual void InvalidateSnapshot() = 0;
 	virtual void OnNewSnapshot() = 0;
 	virtual void OnEnterGame() = 0;
 	virtual void OnShutdown() = 0;
@@ -240,6 +241,8 @@ public:
 	virtual const char *GetItemName(int Type) = 0;
 	virtual const char *Version() = 0;
 	virtual const char *NetVersion() = 0;
+	virtual int DDNetVersion() = 0;
+	virtual const char *DDNetVersionStr() = 0;
 
 	virtual void OnDummyDisconnect() = 0;
 	virtual void Echo(const char *pString) = 0;

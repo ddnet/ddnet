@@ -8,6 +8,7 @@
 
 #include <engine/demo.h>
 #include <engine/friends.h>
+#include <engine/shared/config.h>
 
 #include <game/voting.h>
 #include <game/client/component.h>
@@ -438,5 +439,6 @@ private:
 	void RenderSettingsDDNet(CUIRect MainView);
 	void RenderSettingsHUD(CUIRect MainView);
 	void RenderSettingsChillerbot(CUIRect MainView);
+	ColorHSLA RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alpha = false);
 };
 #endif

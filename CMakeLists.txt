@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 
+set(CMAKE_OSX_DEPLOYMENT_TARGET 10.9 CACHE INTERNAL "")
+if(CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS 10.9)
+  message(WARNING "Building for macOS <= 10.9 is not supported")
+endif()
+
 file(STRINGS src/game/version.h VERSION_LINE
   LIMIT_COUNT 1
   REGEX "^#define GAME_RELEASE_VERSION "
@@ -15,6 +20,10 @@ elseif(VERSION_LINE MATCHES "\"([0-9]+)\\.([0-9]+)\"")
   set(VERSION_PATCH "0")
 else()
   message(FATAL_ERROR "Couldn't parse version from src/game/version.h")
+endif()
+
+if(POLICY CMP0017)
+  cmake_policy(SET CMP0017 NEW)
 endif()
 
 if(POLICY CMP0048)
@@ -80,6 +89,8 @@ option(WEBSOCKETS "Enable websockets support" OFF)
 option(MYSQL "Enable mysql support" OFF)
 option(AUTOUPDATE "Enable the autoupdater" ${AUTOUPDATE_DEFAULT})
 option(VIDEORECORDER "Enable video recording support via FFmpeg" OFF)
+option(UPNP "Enable UPnP support" OFF)
+option(ANTIBOT "Enable support for a dynamic anticheat library" OFF)
 option(CLIENT "Compile client" ON)
 option(DOWNLOAD_GTEST "Download and compile GTest" ${AUTO_DEPENDENCIES_DEFAULT})
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
@@ -163,7 +174,6 @@ if(NOT MSVC)
 
   if(TARGET_OS STREQUAL "mac")
     add_c_compiler_flag_if_supported(OUR_FLAGS -stdlib=libc++)
-    add_c_compiler_flag_if_supported(OUR_FLAGS -mmacosx-version-min=10.7)
   endif()
 
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wall)
@@ -178,6 +188,7 @@ if(NOT MSVC)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-missing-field-initializers)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wformat=2) # Warn about format strings.
   add_c_compiler_flag_if_supported(OUR_FLAGS_DEP -Wno-implicit-function-declaration)
+  add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-nullability-completeness) # Mac OS build on github
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-cond)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-branches)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wlogical-op)
@@ -306,7 +317,7 @@ endif()
 find_package(ZLIB)
 find_package(Crypto)
 find_package(Curl)
-find_package(OwnFreetype)
+find_package(Freetype)
 if(DOWNLOAD_GTEST)
   find_package(Git)
 endif()
@@ -320,11 +331,14 @@ endif()
 find_package(Ogg)
 find_package(Opus)
 find_package(Opusfile)
+if(UPNP)
+  find_package(Miniupnpc)
+endif()
 find_package(Pnglite)
-find_package(PythonInterp)
+find_package(PythonInterp 3)
 find_package(SDL2)
 if(VIDEORECORDER)
-  find_package(FFmpeg)
+  find_package(FFMPEG)
 endif()
 find_package(Threads)
 find_package(Wavpack)
@@ -337,6 +351,7 @@ endif()
 
 
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
+  find_program(CMAKE_OTOOL otool)
   find_program(DMG dmg)
   find_program(HFSPLUS hfsplus)
   find_program(NEWFS_HFS newfs_hfs)
@@ -355,7 +370,11 @@ if(TARGET_OS AND TARGET_OS STREQUAL "mac")
 endif()
 
 message(STATUS "******** chillerbot-ux ********")
-message(STATUS "Target OS: ${TARGET_OS} ${TARGET_BITS}bit")
+if(NOT TARGET_OS STREQUAL "mac")
+  message(STATUS "Target OS: ${TARGET_OS} ${TARGET_BITS}bit")
+else()
+  message(STATUS "Target OS: ${TARGET_OS} ${TARGET_BITS}bit (SDK: ${CMAKE_OSX_SYSROOT})")
+endif()
 message(STATUS "Compiler: ${CMAKE_CXX_COMPILER}")
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
@@ -392,6 +411,9 @@ show_dependency_status("Ogg" OGG)
 show_dependency_status("OpenSSL Crypto" CRYPTO)
 show_dependency_status("Opus" OPUS)
 show_dependency_status("Opusfile" OPUSFILE)
+if(UPNP)
+  show_dependency_status("Miniupnpc" MINIUPNPC)
+endif()
 show_dependency_status("Pnglite" PNGLITE)
 show_dependency_status("PythonInterp" PYTHONINTERP)
 show_dependency_status("SDL2" SDL2)
@@ -417,6 +439,10 @@ endif()
 
 if(WEBSOCKETS AND NOT(WEBSOCKETS_FOUND))
   message(SEND_ERROR "You must install libwebsockets to compile the chillerbot-ux server with websocket support")
+endif()
+
+if(UPNP AND NOT(MINIUPNPC_FOUND))
+  message(SEND_ERROR "You must install miniupnpc to compile the DDNet server with UPnP support")
 endif()
 
 if(CLIENT AND NOT(FREETYPE_FOUND))
@@ -449,7 +475,7 @@ endif()
 
 if(TARGET_OS STREQUAL "windows")
   set(PLATFORM_CLIENT)
-  set(PLATFORM_CLIENT_LIBS opengl32 glu32 winmm)
+  set(PLATFORM_CLIENT_LIBS opengl32 winmm)
   set(PLATFORM_LIBS ws2_32) # Windows sockets
 elseif(TARGET_OS STREQUAL "mac")
   find_library(CARBON Carbon)
@@ -457,19 +483,18 @@ elseif(TARGET_OS STREQUAL "mac")
   find_library(OPENGL OpenGL)
   find_library(SECURITY Security)
   set(PLATFORM_CLIENT
-    src/osx/notification.h
-    src/osx/notification.mm
-    src/osxlaunch/client.h
+    src/osx/notifications.mm
     src/osxlaunch/client.m
   )
   set(PLATFORM_CLIENT_LIBS ${COCOA} ${OPENGL})
   set(PLATFORM_LIBS ${CARBON} ${SECURITY})
 else()
-  set(PLATFORM_CLIENT)
+  find_package(Notify)
   find_package(OpenGL)
   find_package(X11)
-  set(PLATFORM_CLIENT_LIBS ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY} ${X11_X11_LIB})
-  set(PLATFORM_CLIENT_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR} ${X11_X11_INCLUDE_PATH})
+  set(PLATFORM_CLIENT_LIBS ${OPENGL_gl_LIBRARY} ${X11_X11_LIB} ${NOTIFY_LIBRARIES})
+  set(PLATFORM_CLIENT_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR} ${X11_X11_INCLUDE_PATH} ${NOTIFY_INCLUDE_DIRS})
+  set(PLATFORM_CLIENT)
   if(TARGET_OS STREQUAL "linux")
     set(PLATFORM_LIBS rt) # clock_gettime for glibc < 2.17
   else()
@@ -547,10 +572,718 @@ if(NOT CRYPTO_FOUND)
 endif()
 
 ########################################################################
+# DATA
+########################################################################
+
+set(EXPECTED_DATA
+  arrow.png
+  audio/foley_body_impact-01.wv
+  audio/foley_body_impact-02.wv
+  audio/foley_body_impact-03.wv
+  audio/foley_body_splat-01.wv
+  audio/foley_body_splat-02.wv
+  audio/foley_body_splat-03.wv
+  audio/foley_body_splat-04.wv
+  audio/foley_dbljump-01.wv
+  audio/foley_dbljump-02.wv
+  audio/foley_dbljump-03.wv
+  audio/foley_foot_left-01.wv
+  audio/foley_foot_left-02.wv
+  audio/foley_foot_left-03.wv
+  audio/foley_foot_left-04.wv
+  audio/foley_foot_right-01.wv
+  audio/foley_foot_right-02.wv
+  audio/foley_foot_right-03.wv
+  audio/foley_foot_right-04.wv
+  audio/foley_land-01.wv
+  audio/foley_land-02.wv
+  audio/foley_land-03.wv
+  audio/foley_land-04.wv
+  audio/hook_attach-01.wv
+  audio/hook_attach-02.wv
+  audio/hook_attach-03.wv
+  audio/hook_loop-01.wv
+  audio/hook_loop-02.wv
+  audio/hook_noattach-01.wv
+  audio/hook_noattach-02.wv
+  audio/hook_noattach-03.wv
+  audio/music_menu.wv
+  audio/sfx_ctf_cap_pl.wv
+  audio/sfx_ctf_drop.wv
+  audio/sfx_ctf_grab_en.wv
+  audio/sfx_ctf_grab_pl.wv
+  audio/sfx_ctf_rtn.wv
+  audio/sfx_hit_strong-01.wv
+  audio/sfx_hit_strong-02.wv
+  audio/sfx_hit_weak-01.wv
+  audio/sfx_hit_weak-02.wv
+  audio/sfx_hit_weak-03.wv
+  audio/sfx_msg-client.wv
+  audio/sfx_msg-highlight.wv
+  audio/sfx_msg-server.wv
+  audio/sfx_pickup_arm-01.wv
+  audio/sfx_pickup_arm-02.wv
+  audio/sfx_pickup_arm-03.wv
+  audio/sfx_pickup_arm-04.wv
+  audio/sfx_pickup_gun.wv
+  audio/sfx_pickup_hrt-01.wv
+  audio/sfx_pickup_hrt-02.wv
+  audio/sfx_pickup_launcher.wv
+  audio/sfx_pickup_ninja.wv
+  audio/sfx_pickup_sg.wv
+  audio/sfx_skid-01.wv
+  audio/sfx_skid-02.wv
+  audio/sfx_skid-03.wv
+  audio/sfx_skid-04.wv
+  audio/sfx_spawn_wpn-01.wv
+  audio/sfx_spawn_wpn-02.wv
+  audio/sfx_spawn_wpn-03.wv
+  audio/vo_teefault_cry-01.wv
+  audio/vo_teefault_cry-02.wv
+  audio/vo_teefault_ninja-01.wv
+  audio/vo_teefault_ninja-02.wv
+  audio/vo_teefault_ninja-03.wv
+  audio/vo_teefault_ninja-04.wv
+  audio/vo_teefault_pain_long-01.wv
+  audio/vo_teefault_pain_long-02.wv
+  audio/vo_teefault_pain_short-01.wv
+  audio/vo_teefault_pain_short-02.wv
+  audio/vo_teefault_pain_short-03.wv
+  audio/vo_teefault_pain_short-04.wv
+  audio/vo_teefault_pain_short-05.wv
+  audio/vo_teefault_pain_short-06.wv
+  audio/vo_teefault_pain_short-07.wv
+  audio/vo_teefault_pain_short-08.wv
+  audio/vo_teefault_pain_short-09.wv
+  audio/vo_teefault_pain_short-10.wv
+  audio/vo_teefault_pain_short-11.wv
+  audio/vo_teefault_pain_short-12.wv
+  audio/vo_teefault_sledge-01.wv
+  audio/vo_teefault_sledge-02.wv
+  audio/vo_teefault_sledge-03.wv
+  audio/vo_teefault_spawn-01.wv
+  audio/vo_teefault_spawn-02.wv
+  audio/vo_teefault_spawn-03.wv
+  audio/vo_teefault_spawn-04.wv
+  audio/vo_teefault_spawn-05.wv
+  audio/vo_teefault_spawn-06.wv
+  audio/vo_teefault_spawn-07.wv
+  audio/wp_flump_explo-01.wv
+  audio/wp_flump_explo-02.wv
+  audio/wp_flump_explo-03.wv
+  audio/wp_flump_launch-01.wv
+  audio/wp_flump_launch-02.wv
+  audio/wp_flump_launch-03.wv
+  audio/wp_gun_fire-01.wv
+  audio/wp_gun_fire-02.wv
+  audio/wp_gun_fire-03.wv
+  audio/wp_hammer_hit-01.wv
+  audio/wp_hammer_hit-02.wv
+  audio/wp_hammer_hit-03.wv
+  audio/wp_hammer_swing-01.wv
+  audio/wp_hammer_swing-02.wv
+  audio/wp_hammer_swing-03.wv
+  audio/wp_laser_bnce-01.wv
+  audio/wp_laser_bnce-02.wv
+  audio/wp_laser_bnce-03.wv
+  audio/wp_laser_fire-01.wv
+  audio/wp_laser_fire-02.wv
+  audio/wp_laser_fire-03.wv
+  audio/wp_ninja_attack-01.wv
+  audio/wp_ninja_attack-02.wv
+  audio/wp_ninja_attack-03.wv
+  audio/wp_ninja_attack-04.wv
+  audio/wp_ninja_hit-01.wv
+  audio/wp_ninja_hit-02.wv
+  audio/wp_ninja_hit-03.wv
+  audio/wp_ninja_hit-04.wv
+  audio/wp_noammo-01.wv
+  audio/wp_noammo-02.wv
+  audio/wp_noammo-03.wv
+  audio/wp_noammo-04.wv
+  audio/wp_noammo-05.wv
+  audio/wp_shotty_fire-01.wv
+  audio/wp_shotty_fire-02.wv
+  audio/wp_shotty_fire-03.wv
+  audio/wp_switch-01.wv
+  audio/wp_switch-02.wv
+  audio/wp_switch-03.wv
+  blob.png
+  browse_icons.png
+  ca-ddnet.pem
+  console.png
+  console_bar.png
+  countryflags/AD.png
+  countryflags/AE.png
+  countryflags/AF.png
+  countryflags/AG.png
+  countryflags/AI.png
+  countryflags/AL.png
+  countryflags/AM.png
+  countryflags/AO.png
+  countryflags/AR.png
+  countryflags/AS.png
+  countryflags/AT.png
+  countryflags/AU.png
+  countryflags/AW.png
+  countryflags/AX.png
+  countryflags/AZ.png
+  countryflags/BA.png
+  countryflags/BB.png
+  countryflags/BD.png
+  countryflags/BE.png
+  countryflags/BF.png
+  countryflags/BG.png
+  countryflags/BH.png
+  countryflags/BI.png
+  countryflags/BJ.png
+  countryflags/BL.png
+  countryflags/BM.png
+  countryflags/BN.png
+  countryflags/BO.png
+  countryflags/BR.png
+  countryflags/BS.png
+  countryflags/BT.png
+  countryflags/BW.png
+  countryflags/BY.png
+  countryflags/BZ.png
+  countryflags/CA.png
+  countryflags/CC.png
+  countryflags/CD.png
+  countryflags/CF.png
+  countryflags/CG.png
+  countryflags/CH.png
+  countryflags/CI.png
+  countryflags/CK.png
+  countryflags/CL.png
+  countryflags/CM.png
+  countryflags/CN.png
+  countryflags/CO.png
+  countryflags/CR.png
+  countryflags/CU.png
+  countryflags/CV.png
+  countryflags/CW.png
+  countryflags/CX.png
+  countryflags/CY.png
+  countryflags/CZ.png
+  countryflags/DE.png
+  countryflags/DJ.png
+  countryflags/DK.png
+  countryflags/DM.png
+  countryflags/DO.png
+  countryflags/DZ.png
+  countryflags/EC.png
+  countryflags/EE.png
+  countryflags/EG.png
+  countryflags/EH.png
+  countryflags/ER.png
+  countryflags/ES.png
+  countryflags/ET.png
+  countryflags/FI.png
+  countryflags/FJ.png
+  countryflags/FK.png
+  countryflags/FM.png
+  countryflags/FO.png
+  countryflags/FR.png
+  countryflags/GA.png
+  countryflags/GB.png
+  countryflags/GD.png
+  countryflags/GE.png
+  countryflags/GF.png
+  countryflags/GG.png
+  countryflags/GH.png
+  countryflags/GI.png
+  countryflags/GL.png
+  countryflags/GM.png
+  countryflags/GN.png
+  countryflags/GP.png
+  countryflags/GQ.png
+  countryflags/GR.png
+  countryflags/GS.png
+  countryflags/GT.png
+  countryflags/GU.png
+  countryflags/GW.png
+  countryflags/GY.png
+  countryflags/HK.png
+  countryflags/HN.png
+  countryflags/HR.png
+  countryflags/HT.png
+  countryflags/HU.png
+  countryflags/ID.png
+  countryflags/IE.png
+  countryflags/IL.png
+  countryflags/IM.png
+  countryflags/IN.png
+  countryflags/IO.png
+  countryflags/IQ.png
+  countryflags/IR.png
+  countryflags/IS.png
+  countryflags/IT.png
+  countryflags/JE.png
+  countryflags/JM.png
+  countryflags/JO.png
+  countryflags/JP.png
+  countryflags/KE.png
+  countryflags/KG.png
+  countryflags/KH.png
+  countryflags/KI.png
+  countryflags/KM.png
+  countryflags/KN.png
+  countryflags/KP.png
+  countryflags/KR.png
+  countryflags/KW.png
+  countryflags/KY.png
+  countryflags/KZ.png
+  countryflags/LA.png
+  countryflags/LB.png
+  countryflags/LC.png
+  countryflags/LI.png
+  countryflags/LK.png
+  countryflags/LR.png
+  countryflags/LS.png
+  countryflags/LT.png
+  countryflags/LU.png
+  countryflags/LV.png
+  countryflags/LY.png
+  countryflags/MA.png
+  countryflags/MC.png
+  countryflags/MD.png
+  countryflags/ME.png
+  countryflags/MF.png
+  countryflags/MG.png
+  countryflags/MH.png
+  countryflags/MK.png
+  countryflags/ML.png
+  countryflags/MM.png
+  countryflags/MN.png
+  countryflags/MO.png
+  countryflags/MP.png
+  countryflags/MQ.png
+  countryflags/MR.png
+  countryflags/MS.png
+  countryflags/MT.png
+  countryflags/MU.png
+  countryflags/MV.png
+  countryflags/MW.png
+  countryflags/MX.png
+  countryflags/MY.png
+  countryflags/MZ.png
+  countryflags/NA.png
+  countryflags/NC.png
+  countryflags/NE.png
+  countryflags/NF.png
+  countryflags/NG.png
+  countryflags/NI.png
+  countryflags/NL.png
+  countryflags/NO.png
+  countryflags/NP.png
+  countryflags/NR.png
+  countryflags/NU.png
+  countryflags/NZ.png
+  countryflags/OM.png
+  countryflags/PA.png
+  countryflags/PE.png
+  countryflags/PF.png
+  countryflags/PG.png
+  countryflags/PH.png
+  countryflags/PK.png
+  countryflags/PL.png
+  countryflags/PM.png
+  countryflags/PN.png
+  countryflags/PR.png
+  countryflags/PS.png
+  countryflags/PT.png
+  countryflags/PW.png
+  countryflags/PY.png
+  countryflags/QA.png
+  countryflags/RE.png
+  countryflags/RO.png
+  countryflags/RS.png
+  countryflags/RU.png
+  countryflags/RW.png
+  countryflags/SA.png
+  countryflags/SB.png
+  countryflags/SC.png
+  countryflags/SD.png
+  countryflags/SE.png
+  countryflags/SG.png
+  countryflags/SH.png
+  countryflags/SI.png
+  countryflags/SK.png
+  countryflags/SL.png
+  countryflags/SM.png
+  countryflags/SN.png
+  countryflags/SO.png
+  countryflags/SR.png
+  countryflags/SS.png
+  countryflags/ST.png
+  countryflags/SV.png
+  countryflags/SX.png
+  countryflags/SY.png
+  countryflags/SZ.png
+  countryflags/TC.png
+  countryflags/TD.png
+  countryflags/TF.png
+  countryflags/TG.png
+  countryflags/TH.png
+  countryflags/TJ.png
+  countryflags/TK.png
+  countryflags/TL.png
+  countryflags/TM.png
+  countryflags/TN.png
+  countryflags/TO.png
+  countryflags/TR.png
+  countryflags/TT.png
+  countryflags/TV.png
+  countryflags/TW.png
+  countryflags/TZ.png
+  countryflags/UA.png
+  countryflags/UG.png
+  countryflags/US.png
+  countryflags/UY.png
+  countryflags/UZ.png
+  countryflags/VA.png
+  countryflags/VC.png
+  countryflags/VE.png
+  countryflags/VG.png
+  countryflags/VI.png
+  countryflags/VN.png
+  countryflags/VU.png
+  countryflags/WF.png
+  countryflags/WS.png
+  countryflags/XCA.png
+  countryflags/XEN.png
+  countryflags/XEU.png
+  countryflags/XNI.png
+  countryflags/XSC.png
+  countryflags/XWA.png
+  countryflags/YE.png
+  countryflags/ZA.png
+  countryflags/ZM.png
+  countryflags/ZW.png
+  countryflags/default.png
+  countryflags/index.txt
+  debug_font.png
+  demo_buttons.png
+  demo_buttons2.png
+  editor/audio_source.png
+  editor/background.png
+  editor/basic_freeze.rules
+  editor/checker.png
+  editor/cursor.png
+  editor/ddmax_freeze.rules
+  editor/ddnet_tiles.rules
+  editor/ddnet_walls.rules
+  editor/desert_main.rules
+  editor/entities/DDNet.png
+  editor/entities/FNG.png
+  editor/entities/Race.png
+  editor/entities/Vanilla.png
+  editor/entities/blockworlds.png
+  editor/entities_clear/blockworlds.png
+  editor/entities_clear/ddnet.png
+  editor/entities_clear/ddrace.png
+  editor/entities_clear/fng.png
+  editor/entities_clear/race.png
+  editor/entities_clear/vanilla.png
+  editor/fadeout.rules
+  editor/front.png
+  editor/generic_clear.rules
+  editor/generic_unhookable.rules
+  editor/generic_unhookable_0.7.rules
+  editor/grass_main.rules
+  editor/grass_main_0.7.rules
+  editor/jungle_main.rules
+  editor/jungle_midground.rules
+  editor/round_tiles.rules
+  editor/speed_arrow.png
+  editor/speedup.png
+  editor/switch.png
+  editor/tele.png
+  editor/tune.png
+  editor/water.rules
+  editor/winter_main.rules
+  emoticons.png
+  file_icons.png
+  fonts/DejaVuSansCJKName.ttf
+  fonts/DejavuWenQuanYiMicroHei.ttf
+  fonts/Icons.ttf
+  game.png
+  gui_buttons.png
+  gui_cursor.png
+  gui_icons.png
+  gui_logo.png
+  languages/belarusian.txt
+  languages/bosnian.txt
+  languages/brazilian_portuguese.txt
+  languages/bulgarian.txt
+  languages/catalan.txt
+  languages/chuvash.txt
+  languages/czech.txt
+  languages/danish.txt
+  languages/dutch.txt
+  languages/finnish.txt
+  languages/french.txt
+  languages/german.txt
+  languages/greek.txt
+  languages/hungarian.txt
+  languages/index.txt
+  languages/italian.txt
+  languages/japanese.txt
+  languages/korean.txt
+  languages/kyrgyz.txt
+  languages/license.txt
+  languages/norwegian.txt
+  languages/persian.txt
+  languages/polish.txt
+  languages/portuguese.txt
+  languages/romanian.txt
+  languages/russian.txt
+  languages/serbian.txt
+  languages/simplified_chinese.txt
+  languages/slovak.txt
+  languages/spanish.txt
+  languages/swedish.txt
+  languages/traditional_chinese.txt
+  languages/turkish.txt
+  languages/ukrainian.txt
+  mapres/basic_freeze.png
+  mapres/bg_cloud1.png
+  mapres/bg_cloud2.png
+  mapres/bg_cloud3.png
+  mapres/ddmax_freeze.png
+  mapres/ddnet_start.png
+  mapres/ddnet_tiles.png
+  mapres/ddnet_walls.png
+  mapres/desert_background.png
+  mapres/desert_doodads.png
+  mapres/desert_main.png
+  mapres/desert_mountains.png
+  mapres/desert_mountains2.png
+  mapres/desert_mountains_new_background.png
+  mapres/desert_mountains_new_foreground.png
+  mapres/desert_sun.png
+  mapres/entities.png
+  mapres/fadeout.png
+  mapres/font_teeworlds.png
+  mapres/font_teeworlds_alt.png
+  mapres/generic_clear.png
+  mapres/generic_deathtiles.png
+  mapres/generic_lamps.png
+  mapres/generic_unhookable.png
+  mapres/generic_unhookable_0.7.png
+  mapres/grass_doodads.png
+  mapres/grass_doodads_0.7.png
+  mapres/grass_main.png
+  mapres/grass_main_0.7.png
+  mapres/jungle_background.png
+  mapres/jungle_deathtiles.png
+  mapres/jungle_doodads.png
+  mapres/jungle_main.png
+  mapres/jungle_midground.png
+  mapres/jungle_unhookables.png
+  mapres/light.png
+  mapres/mixed_tiles.png
+  mapres/moon.png
+  mapres/mountains.png
+  mapres/round_tiles.png
+  mapres/snow.png
+  mapres/snow_mountain.png
+  mapres/stars.png
+  mapres/sun.png
+  mapres/water.png
+  mapres/winter_doodads.png
+  mapres/winter_main.png
+  mapres/winter_mountains.png
+  mapres/winter_mountains2.png
+  mapres/winter_mountains3.png
+  maps/Goo!.map
+  maps/Kobra\ 4.map
+  maps/ctf1.map
+  maps/ctf2.map
+  maps/ctf3.map
+  maps/ctf4.map
+  maps/ctf5.map
+  maps/ctf6.map
+  maps/ctf7.map
+  maps/dm1.map
+  maps/dm2.map
+  maps/dm6.map
+  maps/dm7.map
+  maps/dm8.map
+  maps/dm9.map
+  particles.png
+  shader/bordertile.frag
+  shader/bordertile.vert
+  shader/bordertileline.frag
+  shader/bordertileline.vert
+  shader/bordertilelinetex.frag
+  shader/bordertilelinetex.vert
+  shader/bordertiletex.frag
+  shader/bordertiletex.vert
+  shader/prim.frag
+  shader/prim.vert
+  shader/quad.frag
+  shader/quad.vert
+  shader/quadtex.frag
+  shader/quadtex.vert
+  shader/sprite.frag
+  shader/sprite.vert
+  shader/spritemulti.frag
+  shader/spritemulti.vert
+  shader/text.frag
+  shader/text.vert
+  shader/tile.frag
+  shader/tile.vert
+  shader/tiletex.frag
+  shader/tiletex.vert
+  skins/Ablush\ NeoN.png
+  skins/Aoe4leg.png
+  skins/Apish\ Coke.png
+  skins/BadAnqelMonster.png
+  skins/Black\ Phantom\ heinrich5991.png
+  skins/DuMoH.png
+  skins/Evil\ Puffi.png
+  skins/Flying\ Silex.png
+  skins/Hidden\ Assassin.png
+  skins/Irradiated\ Sunny.png
+  skins/Mobys\ Skull.png
+  skins/PaladiN.png
+  skins/Red\ Coke.png
+  skins/Straw\ Crytek.png
+  skins/Terrorist.png
+  skins/Volt.png
+  skins/antiantey.png
+  skins/aqua.png
+  skins/bauer.png
+  skins/beast.png
+  skins/blacktee.png
+  skins/bluekitty.png
+  skins/bluestripe.png
+  skins/bomb.png
+  skins/brownbear.png
+  skins/bunny.png
+  skins/caesar.png
+  skins/cammo.png
+  skins/cammostripes.png
+  skins/chera.png
+  skins/chinese_by_whis.png
+  skins/clefairy.png
+  skins/coala.png
+  skins/coala_bluekitty.png
+  skins/coala_bluestripe.png
+  skins/coala_cammo.png
+  skins/coala_cammostripes.png
+  skins/coala_default.png
+  skins/coala_limekitty.png
+  skins/coala_pinky.png
+  skins/coala_redbopp.png
+  skins/coala_redstripe.png
+  skins/coala_saddo.png
+  skins/coala_toptri.png
+  skins/coala_twinbop.png
+  skins/coala_twintri.png
+  skins/coala_warpaint.png
+  skins/coala_x_ninja.png
+  skins/default.png
+  skins/demonlimekitty.png
+  skins/dino.png
+  skins/dragon.png
+  skins/emo.png
+  skins/evil.png
+  skins/evilwolfe.png
+  skins/fuzzy_coala.png
+  skins/ghost.png
+  skins/ghostjtj.png
+  skins/giraffe.png
+  skins/greensward.png
+  skins/greyfox.png
+  skins/greyfox_2.png
+  skins/hammie-chew.png
+  skins/hammie-whis.png
+  skins/hedgehog.png
+  skins/jeet.png
+  skins/kintaro_2.png
+  skins/kitty_bluestripe.png
+  skins/kitty_brownbear.png
+  skins/kitty_cammo.png
+  skins/kitty_cammostripes.png
+  skins/kitty_coala.png
+  skins/kitty_default.png
+  skins/kitty_pinky.png
+  skins/kitty_redbopp.png
+  skins/kitty_redstripe.png
+  skins/kitty_saddo.png
+  skins/kitty_toptri.png
+  skins/kitty_twinbop.png
+  skins/kitty_twintri.png
+  skins/kitty_warpaint.png
+  skins/kitty_x_ninja.png
+  skins/lightbulb.png
+  skins/limekitty.png
+  skins/mermydon-coala.png
+  skins/mermydon.png
+  skins/mouse.png
+  skins/musmann.png
+  skins/nanami.png
+  skins/nanas.png
+  skins/napoleon.png
+  skins/nersif.png
+  skins/nosey.png
+  skins/oldman.png
+  skins/oldschool.png
+  skins/penguin.png
+  skins/pinky.png
+  skins/random.png
+  skins/redbopp.png
+  skins/redstripe.png
+  skins/roman.png
+  skins/saddo.png
+  skins/santa_bluekitty.png
+  skins/santa_bluestripe.png
+  skins/santa_brownbear.png
+  skins/santa_cammo.png
+  skins/santa_cammostripes.png
+  skins/santa_coala.png
+  skins/santa_default.png
+  skins/santa_limekitty.png
+  skins/santa_pinky.png
+  skins/santa_redbopp.png
+  skins/santa_redstripe.png
+  skins/santa_saddo.png
+  skins/santa_toptri.png
+  skins/santa_twinbop.png
+  skins/santa_twintri.png
+  skins/santa_warpaint.png
+  skins/savage.png
+  skins/tank.png
+  skins/teerasta.png
+  skins/toptri.png
+  skins/ts2_contest_skin.png
+  skins/twinbop.png
+  skins/twintri.png
+  skins/veteran.png
+  skins/voodoo_tee.png
+  skins/warpaint.png
+  skins/wartee.png
+  skins/whis.png
+  skins/x_ninja.png
+  skins/x_spec.png
+  wordlist.txt
+)
+
+set_glob(DATA GLOB_RECURSE "frag;json;map;pem;png;rules;ttf;txt;vert;wv" data ${EXPECTED_DATA})
+
+########################################################################
 # COPY DATA AND DLLS
 ########################################################################
 
-file(COPY data DESTINATION .)
+foreach(datafile ${DATA})
+  file(RELATIVE_PATH OUT ${PROJECT_SOURCE_DIR}/data ${datafile})
+  get_filename_component(DESTINATION data/${OUT} PATH)
+  file(MAKE_DIRECTORY ${DESTINATION})
+  file(COPY ${datafile} DESTINATION ${DESTINATION})
+endforeach()
 set(COPY_FILES
   ${CURL_COPY_FILES}
   ${FREETYPE_COPY_FILES}
@@ -577,9 +1310,40 @@ function(generate_source output_file script_parameter)
   )
 endfunction()
 
+function(generate_source7 output_file script_parameter)
+  add_custom_command(OUTPUT ${output_file}
+    COMMAND ${PYTHON_EXECUTABLE} -m datasrc.seven.compile ${script_parameter}
+      > "${PROJECT_BINARY_DIR}/${output_file}"
+    DEPENDS
+      datasrc/seven/compile.py
+      datasrc/seven/content.py
+      datasrc/seven/datatypes.py
+      datasrc/seven/network.py
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  )
+endfunction()
+
+function(generate_maps output_file)
+  add_custom_command(OUTPUT ${output_file}
+    COMMAND ${PYTHON_EXECUTABLE} datasrc/crosscompile.py
+      > "${PROJECT_BINARY_DIR}/${output_file}"
+    DEPENDS
+      datasrc/compile.py
+      datasrc/content.py
+      datasrc/datatypes.py
+      datasrc/network.py
+      datasrc/seven/compile.py
+      datasrc/seven/content.py
+      datasrc/seven/datatypes.py
+      datasrc/seven/network.py
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  )
+endfunction()
+
 file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/src/game/generated/")
 execute_process(COMMAND git rev-parse --git-dir
   ERROR_QUIET
+  WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
   OUTPUT_VARIABLE PROJECT_GIT_DIR
   OUTPUT_STRIP_TRAILING_WHITESPACE
   RESULT_VARIABLE PROJECT_GIT_DIR_ERROR
@@ -606,6 +1370,10 @@ generate_source("src/game/generated/protocol.h" "network_header")
 generate_source("src/game/generated/server_data.cpp" "server_content_source")
 generate_source("src/game/generated/server_data.h" "server_content_header")
 
+generate_source7("src/game/generated/protocol7.cpp" "network_source")
+generate_source7("src/game/generated/protocol7.h" "network_header")
+
+generate_maps("src/game/generated/protocolglue.h")
 
 ########################################################################
 # SHARED
@@ -639,6 +1407,7 @@ set_src(BASE GLOB_RECURSE src/base
   vmath.h
 )
 set_src(ENGINE_INTERFACE GLOB src/engine
+  antibot.h
   client.h
   config.h
   console.h
@@ -670,6 +1439,8 @@ set_src(ENGINE_SHARED GLOB src/engine/shared
   config_variables.h
   console.cpp
   console.h
+  csv.cpp
+  csv.h
   datafile.cpp
   datafile.h
   demo.cpp
@@ -730,6 +1501,8 @@ set_src(ENGINE_SHARED GLOB src/engine/shared
   websockets.h
 )
 set_src(GAME_SHARED GLOB src/game
+  bezier.cpp
+  bezier.h
   collision.cpp
   collision.h
   ddracecommands.h
@@ -749,6 +1522,8 @@ set_src(GAME_SHARED GLOB src/game
   mapitems_ex.cpp
   mapitems_ex.h
   mapitems_ex_types.h
+  prng.cpp
+  prng.h
   teamscore.cpp
   teamscore.h
   tuning.h
@@ -759,6 +1534,9 @@ set_src(GAME_SHARED GLOB src/game
 # A bit hacky, but these are needed to register all the UUIDs, even for stuff
 # that doesn't link game.
 set(ENGINE_UUID_SHARED
+  src/game/generated/protocolglue.h
+  src/game/generated/protocol7.cpp
+  src/game/generated/protocol7.h
   src/game/generated/protocol.cpp
   src/game/generated/protocol.h
   src/game/mapitems_ex.cpp
@@ -774,6 +1552,8 @@ list(REMOVE_ITEM GAME_SHARED ${ENGINE_UUID_SHARED})
 set(GAME_GENERATED_SHARED
   src/game/generated/git_revision.cpp
   src/game/generated/protocol.h
+  src/game/generated/protocol7.h
+  src/game/generated/protocolglue.h
 )
 
 set(DEPS ${DEP_JSON} ${DEP_MD5} ${ZLIB_DEP})
@@ -817,6 +1597,8 @@ if(CLIENT)
     input.cpp
     input.h
     keynames.h
+    notifications.cpp
+    notifications.h
     opengl_sl.cpp
     opengl_sl.h
     opengl_sl_program.cpp
@@ -1008,7 +1790,14 @@ if(CLIENT)
     ${SDL2_INCLUDE_DIRS}
     ${WAVPACK_INCLUDE_DIRS}
     ${FFMPEG_INCLUDE_DIRS}
+
+    ${PLATFORM_CLIENT_INCLUDE_DIRS}
   )
+
+  # Support shipped SDL2 shared lib for Steam release
+  if(TARGET_OS STREQUAL "linux")
+    set_property(TARGET ${TARGET_CLIENT} PROPERTY BUILD_RPATH "$ORIGIN")
+  endif()
 
   set(PARAMS "${WAVPACK_INCLUDE_DIRS};${WAVPACK_INCLUDE_DIRS}")
   if(NOT(WAVPACK_OPEN_FILE_INPUT_EX_PARAMS STREQUAL PARAMS))
@@ -1019,11 +1808,16 @@ if(CLIENT)
   set(CMAKE_REQUIRED_INCLUDES ${ORIGINAL_CMAKE_REQUIRED_INCLUDES} ${WAVPACK_INCLUDE_DIRS})
   set(CMAKE_REQUIRED_LIBRARIES ${ORIGINAL_CMAKE_REQUIRED_LIBRARIES} ${WAVPACK_LIBRARIES})
   check_symbol_exists(WavpackOpenFileInputEx wavpack.h WAVPACK_OPEN_FILE_INPUT_EX)
+  check_symbol_exists(WavpackCloseFile wavpack.h WAVPACK_CLOSE_FILE)
   set(CMAKE_REQUIRED_INCLUDES ${ORIGINAL_CMAKE_REQUIRED_INCLUDES})
   set(CMAKE_REQUIRED_LIBRARIES ${ORIGINAL_CMAKE_REQUIRED_LIBRARIES})
 
   if(WAVPACK_OPEN_FILE_INPUT_EX)
     target_compile_definitions(${TARGET_CLIENT} PRIVATE CONF_WAVPACK_OPEN_FILE_INPUT_EX)
+  endif()
+
+  if(WAVPACK_CLOSE_FILE)
+	  target_compile_definitions(${TARGET_CLIENT} PRIVATE CONF_WAVPACK_CLOSE_FILE)
   endif()
 
   list(APPEND TARGETS_OWN ${TARGET_CLIENT})
@@ -1036,7 +1830,15 @@ endif()
 ########################################################################
 
 # Sources
+set_src(ANTIBOT_SRC GLOB src/antibot
+  antibot_data.h
+  antibot_interface.h
+  antibot_null.cpp
+)
+
 set_src(ENGINE_SERVER GLOB src/engine/server
+  antibot.cpp
+  antibot.h
   authmanager.cpp
   authmanager.h
   name_ban.cpp
@@ -1051,6 +1853,8 @@ set_src(ENGINE_SERVER GLOB src/engine/server
   sql_server.h
   sql_string_helpers.cpp
   sql_string_helpers.h
+  upnp.cpp
+  upnp.h
 )
 set_src(GAME_SERVER GLOB_RECURSE src/game/server
   ddracechat.cpp
@@ -1093,6 +1897,7 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   player.h
   save.cpp
   save.h
+  score.cpp
   score.h
   score/file_score.cpp
   score/file_score.h
@@ -1102,6 +1907,8 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   teams.h
   teehistorian.cpp
   teehistorian.h
+  teeinfo.cpp
+  teeinfo.h
 )
 set(GAME_GENERATED_SERVER
   "src/game/generated/server_data.cpp"
@@ -1114,10 +1921,19 @@ else()
   set(SERVER_ICON)
 endif()
 
+# Antibot
+if(ANTIBOT)
+  set(TARGET_ANTIBOT ddnet-antibot)
+  add_library(${TARGET_ANTIBOT} SHARED ${ANTIBOT_SRC})
+  list(APPEND TARGETS_OWN ${TARGET_ANTIBOT})
+endif()
+
 # Libraries
 set(LIBS_SERVER
   ${LIBS}
   ${MYSQL_LIBRARIES}
+  ${TARGET_ANTIBOT}
+  ${MINIUPNPC_LIBRARIES}
   # Add pthreads (on non-Windows) at the end, so that other libraries can depend
   # on it.
   ${CMAKE_THREAD_LIBS_INIT}
@@ -1135,6 +1951,16 @@ add_executable(${TARGET_SERVER}
 target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER})
 list(APPEND TARGETS_OWN ${TARGET_SERVER})
 list(APPEND TARGETS_LINK ${TARGET_SERVER})
+
+if(ANTIBOT)
+  if(CMAKE_VERSION VERSION_GREATER 3.8 OR CMAKE_VERSION VERSION_EQUAL 3.8)
+    if(CMAKE_VERSION VERSION_LESS 3.14)
+      set_property(TARGET ${TARGET_SERVER} PROPERTY BUILD_RPATH "$ORIGIN")
+    endif()
+  else()
+    message(STATUS "Can't set BUILD_RPATH in CMake before 3.8, pass -Wl,-rpath,'$ORIGIN' manually if you wish to emulate this. Or just install a newer version of CMake...")
+  endif()
+endif()
 
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   set(SERVER_LAUNCHER_SRC src/osxlaunch/server.mm)
@@ -1229,7 +2055,9 @@ add_custom_target(everything DEPENDS ${TARGETS_OWN})
 if(GTEST_FOUND OR DOWNLOAD_GTEST)
   set_src(TESTS GLOB src/test
     aio.cpp
+    bezier.cpp
     color.cpp
+    csv.cpp
     datafile.cpp
     fs.cpp
     git_revision.cpp
@@ -1238,6 +2066,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     json.cpp
     mapbugs.cpp
     name_ban.cpp
+    prng.cpp
     str.cpp
     strip_path_and_extension.cpp
     teehistorian.cpp
@@ -1447,6 +2276,9 @@ if(NOT DEV)
   install(DIRECTORY data DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/chillerbot-ux COMPONENT data)
   install(TARGETS ${TARGET_CLIENT} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT client)
   install(TARGETS ${TARGET_SERVER} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT server)
+  if(ANTIBOT)
+    install(TARGETS ${TARGET_ANTIBOT} DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT server)
+  endif()
   install(TARGETS ${TARGETS_TOOLS} DESTINATION ${CMAKE_INSTALL_LIBDIR}/chillerbot-ux COMPONENT tools)
   install(FILES other/chillerbot-ux.desktop DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications COMPONENT client)
   install(FILES other/chillerbot-ux.appdata.xml DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/metainfo COMPONENT client)
@@ -1467,7 +2299,6 @@ else()
 endif()
 
 set(PACKAGE_TARGETS)
-
 if(CLIENT AND (DMGTOOLS_FOUND OR HDIUTIL))
   file(MAKE_DIRECTORY bundle/client/)
   file(MAKE_DIRECTORY bundle/server/)
@@ -1508,7 +2339,8 @@ if(CLIENT AND (DMGTOOLS_FOUND OR HDIUTIL))
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${TARGET_CLIENT}> ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/ddnet-libs/sdl/mac/lib64/SDL2.framework ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/SDL2.framework
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/freetype/mac/lib64/libfreetype.6.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change @rpath/SDL2.framework/Versions/A/SDL2 @executable_path/../Frameworks/SDL2.framework/SDL2 ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
+    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/darwin_strip_rpath.py ${CMAKE_OTOOL} ${CMAKE_INSTALL_NAME_TOOL} ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
+    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath @loader_path/../Frameworks ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
     COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libfreetype.6.dylib @executable_path/../Frameworks/libfreetype.6.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
 
     # SERVER
@@ -1645,11 +2477,6 @@ foreach(target ${TARGETS_LINK})
   endif()
   if(TARGET_OS STREQUAL "mac")
     target_link_libraries(${target} -stdlib=libc++)
-    target_link_libraries(${target} -mmacosx-version-min=10.7)
-    # Fixes: Undefined symbols for architecture x86_64:
-    #   "___isOSVersionAtLeast", referenced from:
-    #       _singleipconnect in libcurl.a(libcurl_la-connect.o)
-    target_link_libraries(${target} -Wl,-undefined -Wl,dynamic_lookup)
   endif()
   if((MINGW OR TARGET_OS STREQUAL "linux") AND PREFER_BUNDLED_LIBS)
     # Statically link the standard libraries with on MinGW/Linux so we don't
@@ -1663,6 +2490,9 @@ foreach(target ${TARGETS_OWN})
   if((CMAKE_VERSION VERSION_GREATER 3.1 OR CMAKE_VERSION VERSION_EQUAL 3.1) AND NOT TARGET_OS STREQUAL "mac")
     set_property(TARGET ${target} PROPERTY CXX_STANDARD 11)
     set_property(TARGET ${target} PROPERTY CXX_STANDARD_REQUIRED ON)
+  endif()
+  if(CMAKE_VERSION VERSION_GREATER 3.14 OR CMAKE_VERSION VERSION_EQUAL 3.14)
+    set_property(TARGET ${TARGET_SERVER} PROPERTY BUILD_RPATH_USE_ORIGIN TRUE)
   endif()
 
   if(MSVC)
@@ -1686,8 +2516,15 @@ foreach(target ${TARGETS_OWN})
     target_compile_definitions(${target} PRIVATE CONF_WEBSOCKETS)
     target_include_directories(${target} PRIVATE ${WEBSOCKETS_INCLUDE_DIRS})
   endif()
+  if(UPNP)
+    target_compile_definitions(${target} PRIVATE CONF_UPNP)
+    target_include_directories(${target} PRIVATE ${MINIUPNPC_INCLUDE_DIRS})
+  endif()
   if(VIDEORECORDER)
     target_compile_definitions(${target} PRIVATE CONF_VIDEORECORDER)
+  endif()
+  if(ANTIBOT)
+    target_compile_definitions(${target} PRIVATE CONF_ANTIBOT)
   endif()
   if(MYSQL)
     target_compile_definitions(${target} PRIVATE CONF_SQL)

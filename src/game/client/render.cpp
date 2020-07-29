@@ -420,8 +420,12 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 
 }
 
-static void CalcScreenParams(float Amount, float WMax, float HMax, float Aspect, float *w, float *h)
+void CRenderTools::CalcScreenParams(float Aspect, float Zoom, float *w, float *h)
 {
+	const float Amount = 1150 * 1000;
+	const float WMax = 1500;
+	const float HMax = 1050;
+
 	float f = sqrtf(Amount) / sqrtf(Aspect);
 	*w = f*Aspect;
 	*h = f;
@@ -438,17 +442,18 @@ static void CalcScreenParams(float Amount, float WMax, float HMax, float Aspect,
 		*h = HMax;
 		*w = *h*Aspect;
 	}
+
+	*w *= Zoom;
+	*h *= Zoom;
 }
 
 void CRenderTools::MapscreenToWorld(float CenterX, float CenterY, float ParallaxX, float ParallaxY,
 	float OffsetX, float OffsetY, float Aspect, float Zoom, float *pPoints)
 {
 	float Width, Height;
-	CalcScreenParams(1150*1000, 1500, 1050, Aspect, &Width, &Height);
+	CalcScreenParams(Aspect, Zoom, &Width, &Height);
 	CenterX *= ParallaxX/100.0f;
 	CenterY *= ParallaxY/100.0f;
-	Width *= Zoom;
-	Height *= Zoom;
 	pPoints[0] = OffsetX+CenterX-Width/2;
 	pPoints[1] = OffsetY+CenterY-Height/2;
 	pPoints[2] = pPoints[0]+Width;

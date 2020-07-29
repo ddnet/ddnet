@@ -110,6 +110,8 @@ public:
 	CHolder *m_pFirst;
 	CHolder *m_pLast;
 
+	CSnapshotStorage() { Init(); };
+	~CSnapshotStorage() { PurgeAll(); };
 	void Init();
 	void PurgeAll();
 	void PurgeUntil(int Tick);
@@ -137,10 +139,12 @@ class CSnapshotBuilder
 	void AddExtendedItemType(int Index);
 	int GetExtendedItemTypeIndex(int TypeID);
 
+	bool m_Sixup;
+
 public:
 	CSnapshotBuilder();
 
-	void Init();
+	void Init(bool Sixup = false);
 
 	void *NewItem(int Type, int ID, int Size);
 

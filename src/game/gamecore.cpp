@@ -313,8 +313,8 @@ void CCharacterCore::Tick(bool UseInput)
 				m_HookedPlayer = -1;
 
 				m_NewHook = true;
-				int Num = (*m_pTeleOuts)[teleNr-1].size();
-				m_HookPos = (*m_pTeleOuts)[teleNr-1][(Num==1)?0:rand() % Num]+TargetDirection*PhysSize*1.5f;
+				int RandomOut = m_pWorld->RandomOr0((*m_pTeleOuts)[teleNr-1].size());
+				m_HookPos = (*m_pTeleOuts)[teleNr-1][RandomOut]+TargetDirection*PhysSize*1.5f;
 				m_HookDir = TargetDirection;
 				m_HookTeleBase = m_HookPos;
 			}
@@ -591,14 +591,4 @@ bool CCharacterCore::IsSwitchActiveCb(int Number, void *pUser)
 		if(pThis->m_pTeams->Team(pThis->m_Id) != (pThis->m_pTeams->m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER))
 			return pThis->Collision()->m_pSwitchers[Number].m_Status[pThis->m_pTeams->Team(pThis->m_Id)];
 	return false;
-}
-
-vec2 CCharacterCore::LimitVel(vec2 Vel)
-{
-	return ClampVel(m_MoveRestrictions, Vel);
-}
-
-void CCharacterCore::ApplyForce(vec2 Force)
-{
-	m_Vel = LimitVel(m_Vel + Force);
 }

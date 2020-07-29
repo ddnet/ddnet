@@ -1,5 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+
+#include <limits.h>
+
 #include <engine/demo.h>
 #include <engine/graphics.h>
 #include <engine/textrender.h>
@@ -12,6 +15,7 @@
 #include <game/client/render.h>
 
 #include "spectator.h"
+#include "camera.h"
 
 
 void CSpectator::ConKeySpectator(IConsole::IResult *pResult, void *pUserData)
@@ -133,6 +137,45 @@ void CSpectator::ConSpectatePrevious(IConsole::IResult *pResult, void *pUserData
 		pSelf->Spectate(NewSpectatorID);
 }
 
+void CSpectator::ConSpectateClosest(IConsole::IResult *pResult, void *pUserData)
+{
+	CSpectator *pSelf = (CSpectator *)pUserData;
+	int NewSpectatorID = -1;
+
+	int IndexOfTeeBeingSpectated = -1;
+	vec2 CurPosition(pSelf->m_pClient->m_pCamera->m_Center);
+	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
+	{
+		for (int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i] && pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID == pSelf->m_pClient->m_Snap.m_SpecInfo.m_SpectatorID)
+			{
+				IndexOfTeeBeingSpectated = i;
+				const CNetObj_Character &CurCharacter = pSelf->m_pClient->m_Snap.m_aCharacters[pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID].m_Cur;
+				CurPosition.x = CurCharacter.m_X;
+				CurPosition.y = CurCharacter.m_Y;
+				break;
+			}
+		}
+	}
+	int ClosestDistance = INT_MAX;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(i == IndexOfTeeBeingSpectated || !pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i] || pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_Team == TEAM_SPECTATORS)
+			continue;
+		int ClientID = pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID;
+		const CNetObj_Character &MaybeClosestCharacter = pSelf->m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur;
+		int Distance = distance(CurPosition, vec2(MaybeClosestCharacter.m_X, MaybeClosestCharacter.m_Y));
+		if(NewSpectatorID == -1 || Distance < ClosestDistance)
+		{
+			NewSpectatorID = ClientID;
+			ClosestDistance = Distance;
+		}
+	}
+	if(NewSpectatorID > -1)
+		pSelf->Spectate(NewSpectatorID);
+}
+
 CSpectator::CSpectator()
 {
 	OnReset();
@@ -145,6 +188,7 @@ void CSpectator::OnConsoleInit()
 	Console()->Register("spectate", "i[spectator-id]", CFGFLAG_CLIENT, ConSpectate, this, "Switch spectator mode");
 	Console()->Register("spectate_next", "", CFGFLAG_CLIENT, ConSpectateNext, this, "Spectate the next player");
 	Console()->Register("spectate_previous", "", CFGFLAG_CLIENT, ConSpectatePrevious, this, "Spectate the previous player");
+	Console()->Register("spectate_closest", "", CFGFLAG_CLIENT, ConSpectateClosest, this, "Spectate the closest player");
 }
 
 bool CSpectator::OnMouseMove(float x, float y)
@@ -262,7 +306,7 @@ void CSpectator::OnRender()
 		Selected = true;
 	}
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, Selected?1.0f:0.5f);
-	TextRender()->Text(0, Width/2.0f-(ObjWidth-60.0f), Height/2.0f-280.f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Free-View"), -1);
+	TextRender()->Text(0, Width/2.0f-(ObjWidth-60.0f), Height/2.0f-280.f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Free-View"), -1.0f);
 
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
@@ -274,7 +318,7 @@ void CSpectator::OnRender()
 			Selected = true;
 		}
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, Selected?1.0f:0.5f);
-		TextRender()->Text(0, Width/2.0f-(ObjWidth-350.0f), Height/2.0f-280.0f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Follow"), -1);
+		TextRender()->Text(0, Width/2.0f-(ObjWidth-350.0f), Height/2.0f-280.0f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Follow"), -1.0f);
 	}
 
 	float x = -(ObjWidth - 30.0f), y = StartY;

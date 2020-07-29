@@ -91,6 +91,8 @@ class CChat : public CComponent
 	static void ConEcho(IConsole::IResult *pResult, void *pUserData);
 
 	bool LineShouldHighlight(const char *pLine, const char *pName);
+	void StoreSave(const char *pText);
+	void Reset();
 
 public:
 	CChat();
@@ -104,7 +106,6 @@ public:
 	void Echo(const char *pString);
 
 	virtual void OnWindowResize();
-	virtual void OnReset();
 	virtual void OnConsoleInit();
 	virtual void OnStateChange(int NewState, int OldState);
 	virtual void OnRender();

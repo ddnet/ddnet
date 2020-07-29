@@ -42,6 +42,12 @@ static void CurlUnlock(CURL *pHandle, curl_lock_data Data, void *pUser)
 
 bool HttpInit(IStorage *pStorage)
 {
+	// print curl version
+	{
+		curl_version_info_data *pVersion = curl_version_info(CURLVERSION_NOW);
+		dbg_msg("http", "libcurl version %s (compiled = " LIBCURL_VERSION ")", pVersion->version);
+	}
+
 	pStorage->GetBinaryPath("data/ca-ddnet.pem", CA_FILE_PATH, sizeof(CA_FILE_PATH));
 	if(curl_global_init(CURL_GLOBAL_DEFAULT))
 	{
@@ -140,7 +146,7 @@ int CRequest::RunImpl(CURL *pHandle)
 		|| str_comp_nocase_num("https://maps.ddnet.tw/", m_aUrl, 22) == 0
 		|| str_comp_nocase_num("http://info.ddnet.tw/", m_aUrl, 21) == 0
 		|| str_comp_nocase_num("https://info.ddnet.tw/", m_aUrl, 22) == 0
-		|| str_comp_nocase_num("https://update4.ddnet.tw/", m_aUrl, 25) == 0)
+		|| str_comp_nocase_num("https://update5.ddnet.tw/", m_aUrl, 25) == 0)
 	{
 		curl_easy_setopt(pHandle, CURLOPT_CAINFO, CA_FILE_PATH);
 	}

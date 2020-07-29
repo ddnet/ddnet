@@ -34,6 +34,7 @@
 #include <engine/textrender.h>
 
 #include <engine/client/http.h>
+#include <engine/client/notifications.h>
 #include <engine/shared/config.h>
 #include <engine/shared/compression.h>
 #include <engine/shared/datafile.h>
@@ -329,6 +330,7 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	m_MapDetailsSha256 = SHA256_ZEROED;
 	m_MapDetailsCrc = 0;
 
+	str_format(m_aDDNetInfoTmp, sizeof(m_aDDNetInfoTmp), DDNET_INFO ".%d.tmp", pid());
 	m_pDDNetInfoTask = NULL;
 	m_aNews[0] = '\0';
 
@@ -337,7 +339,6 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	m_CurrentInput[0] = 0;
 	m_CurrentInput[1] = 0;
 	m_LastDummy = 0;
-	m_LastDummy2 = 0;
 
 	mem_zero(&m_aInputs, sizeof(m_aInputs));
 
@@ -365,6 +366,23 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 }
 
 // ----- send functions -----
+static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer)
+{
+	Packer.Reset();
+	if(pMsg->m_MsgID < OFFSET_UUID)
+	{
+		Packer.AddInt((pMsg->m_MsgID<<1)|(pMsg->m_System?1:0));
+	}
+	else
+	{
+		Packer.AddInt((0<<1)|(pMsg->m_System?1:0)); // NETMSG_EX, NETMSGTYPE_EX
+		g_UuidManager.PackUuid(pMsg->m_MsgID, &Packer);
+	}
+	Packer.AddRaw(pMsg->Data(), pMsg->Size());
+
+	return false;
+}
+
 int CClient::SendMsg(CMsgPacker *pMsg, int Flags)
 {
 	CNetChunk Packet;
@@ -372,10 +390,15 @@ int CClient::SendMsg(CMsgPacker *pMsg, int Flags)
 	if(State() == IClient::STATE_OFFLINE)
 		return 0;
 
+	// repack message (inefficient)
+	CPacker Pack;
+	if(RepackMsg(pMsg, Pack))
+		return 0;
+
 	mem_zero(&Packet, sizeof(CNetChunk));
 	Packet.m_ClientID = 0;
-	Packet.m_pData = pMsg->Data();
-	Packet.m_DataSize = pMsg->Size();
+	Packet.m_pData = Pack.Data();
+	Packet.m_DataSize = Pack.Size();
 
 	if(Flags&MSGFLAG_VITAL)
 		Packet.m_Flags |= NETSENDFLAG_VITAL;
@@ -399,6 +422,12 @@ int CClient::SendMsg(CMsgPacker *pMsg, int Flags)
 
 void CClient::SendInfo()
 {
+	CMsgPacker MsgVer(NETMSG_CLIENTVER, true);
+	MsgVer.AddRaw(&m_ConnectionID, sizeof(m_ConnectionID));
+	MsgVer.AddInt(GameClient()->DDNetVersion());
+	MsgVer.AddString(GameClient()->DDNetVersionStr(), 0);
+	SendMsg(&MsgVer, MSGFLAG_VITAL);
+
 	CMsgPacker Msg(NETMSG_INFO, true);
 	Msg.AddString(GameClient()->NetVersion(), 128);
 	Msg.AddString(m_Password, 128);
@@ -475,12 +504,6 @@ void CClient::SendInput()
 	if(m_PredTick[g_Config.m_ClDummy] <= 0)
 		return;
 
-	if(m_LastDummy != (bool)g_Config.m_ClDummy)
-	{
-		m_LastDummy = g_Config.m_ClDummy;
-		GameClient()->OnDummySwap();
-	}
-
 	bool Force = false;
 	// fetch input
 	for(int Dummy = 0; Dummy < 2; Dummy++)
@@ -500,7 +523,7 @@ void CClient::SendInput()
 			Msg.AddInt(m_PredTick[i]);
 			Msg.AddInt(Size);
 
-			m_aInputs[i][m_CurrentInput[i]].m_Tick = m_PredTick[i];
+			m_aInputs[i][m_CurrentInput[i]].m_Tick = m_PredTick[g_Config.m_ClDummy];
 			m_aInputs[i][m_CurrentInput[i]].m_PredictedTime = m_PredictedTime.Get(Now);
 			m_aInputs[i][m_CurrentInput[i]].m_Time = Now;
 
@@ -527,12 +550,13 @@ const char *CClient::LatestVersion()
 }
 
 // TODO: OPT: do this a lot smarter!
-int *CClient::GetInput(int Tick)
+int *CClient::GetInput(int Tick, int IsDummy)
 {
 	int Best = -1;
+	const int d = IsDummy ^ g_Config.m_ClDummy;
 	for(int i = 0; i < 200; i++)
 	{
-		if(m_aInputs[g_Config.m_ClDummy][i].m_Tick <= Tick && (Best == -1 || m_aInputs[g_Config.m_ClDummy][Best].m_Tick < m_aInputs[g_Config.m_ClDummy][i].m_Tick))
+		if(m_aInputs[d][i].m_Tick <= Tick && (Best == -1 || m_aInputs[d][Best].m_Tick < m_aInputs[d][i].m_Tick))
 			Best = i;
 	}
 
@@ -541,11 +565,12 @@ int *CClient::GetInput(int Tick)
 	return 0;
 }
 
-int *CClient::GetDirectInput(int Tick)
+int *CClient::GetDirectInput(int Tick, int IsDummy)
 {
+	const int d = IsDummy ^ g_Config.m_ClDummy;
 	for(int i = 0; i < 200; i++)
-		if(m_aInputs[g_Config.m_ClDummy][i].m_Tick == Tick)
-			return (int *)m_aInputs[g_Config.m_ClDummy][i].m_aData;
+		if(m_aInputs[d][i].m_Tick == Tick)
+			return (int *)m_aInputs[d][i].m_aData;
 	return 0;
 }
 
@@ -669,6 +694,7 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 
 	Disconnect();
 
+	m_ConnectionID = RandomUuid();
 	str_copy(m_aServerAddressStr, pAddress, sizeof(m_aServerAddressStr));
 
 	str_format(aBuf, sizeof(aBuf), "connecting to '%s'", m_aServerAddressStr);
@@ -780,12 +806,12 @@ bool CClient::DummyConnected()
 
 bool CClient::DummyConnecting()
 {
-	return !m_DummyConnected && m_LastDummyConnectTime > 0 && m_LastDummyConnectTime + GameTickSpeed() * 5 > GameTick();
+	return !m_DummyConnected && m_LastDummyConnectTime > 0 && m_LastDummyConnectTime + GameTickSpeed() * 5 > GameTick(g_Config.m_ClDummy);
 }
 
 void CClient::DummyConnect()
 {
-	if(m_LastDummyConnectTime > 0 && m_LastDummyConnectTime + GameTickSpeed() * 5 > GameTick())
+	if(m_LastDummyConnectTime > 0 && m_LastDummyConnectTime + GameTickSpeed() * 5 > GameTick(g_Config.m_ClDummy))
 		return;
 
 	if(m_NetClient[CLIENT_MAIN].State() != NET_CONNSTATE_ONLINE && m_NetClient[CLIENT_MAIN].State() != NET_CONNSTATE_PENDING)
@@ -794,7 +820,7 @@ void CClient::DummyConnect()
 	if(m_DummyConnected)
 		return;
 
-	m_LastDummyConnectTime = GameTick();
+	m_LastDummyConnectTime = GameTick(g_Config.m_ClDummy);
 
 	m_RconAuthed[1] = 0;
 
@@ -815,6 +841,9 @@ void CClient::DummyDisconnect(const char *pReason)
 	m_NetClient[CLIENT_DUMMY].Disconnect(pReason);
 	g_Config.m_ClDummy = 0;
 	m_RconAuthed[1] = 0;
+	m_aSnapshots[1][SNAP_CURRENT] = 0;
+	m_aSnapshots[1][SNAP_PREV] = 0;
+	m_ReceivedSnapshots[1] = 0;
 	m_DummyConnected = false;
 	GameClient()->OnDummyDisconnect();
 }
@@ -823,18 +852,22 @@ int CClient::GetCurrentRaceTime()
 {
 	if(GameClient()->GetLastRaceTick() < 0)
 		return 0;
-	return (GameTick() - GameClient()->GetLastRaceTick()) / 50;
+	return (GameTick(g_Config.m_ClDummy) - GameClient()->GetLastRaceTick()) / 50;
 }
 
 int CClient::SendMsgY(CMsgPacker *pMsg, int Flags, int NetClient)
 {
 	CNetChunk Packet;
 
-	mem_zero(&Packet, sizeof(CNetChunk));
+	// repack message (inefficient)
+	CPacker Pack;
+	if(RepackMsg(pMsg, Pack))
+		return 0;
 
+	mem_zero(&Packet, sizeof(CNetChunk));
 	Packet.m_ClientID = 0;
-	Packet.m_pData = pMsg->Data();
-	Packet.m_DataSize = pMsg->Size();
+	Packet.m_pData = Pack.Data();
+	Packet.m_DataSize = Pack.Size();
 
 	if(Flags&MSGFLAG_VITAL)
 		Packet.m_Flags |= NETSENDFLAG_VITAL;
@@ -1492,11 +1525,21 @@ static void FormatMapDownloadFilename(const char *pName, SHA256_DIGEST *pSha256,
 		sha256_str(*pSha256, aSha256 + 1, sizeof(aSha256) - 1);
 	}
 
-	str_format(pBuffer, BufferSize, "%s_%08x%s.map%s",
-		pName,
-		Crc,
-		aSha256,
-		Temp ? ".tmp" : "");
+	if(Temp)
+	{
+		str_format(pBuffer, BufferSize, "%s_%08x%s.map.%d.tmp",
+			pName,
+			Crc,
+			aSha256,
+			pid());
+	}
+	else
+	{
+		str_format(pBuffer, BufferSize, "%s_%08x%s.map",
+			pName,
+			Crc,
+			aSha256);
+	}
 }
 
 static CServerCapabilities GetServerCapabilities(int Version, int Flags)
@@ -1973,7 +2016,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 							char aBuf[256];
 							str_format(aBuf, sizeof(aBuf), "/timeout %s", m_aTimeoutCodes[g_Config.m_ClDummy]);
 							Msg.m_pMessage = aBuf;
-							CMsgPacker Packer(Msg.MsgID(), true);
+							CMsgPacker Packer(Msg.MsgID(), false);
 							Msg.Pack(&Packer);
 							SendMsgY(&Packer, MSGFLAG_VITAL, g_Config.m_ClDummy);
 						}
@@ -2295,7 +2338,7 @@ void CClient::ResetDDNetInfo()
 void CClient::FinishDDNetInfo()
 {
 	ResetDDNetInfo();
-	m_pStorage->RenameFile(DDNET_INFO_TMP, DDNET_INFO, IStorage::TYPE_SAVE);
+	m_pStorage->RenameFile(m_aDDNetInfoTmp, DDNET_INFO, IStorage::TYPE_SAVE);
 	LoadDDNetInfo();
 }
 
@@ -2375,6 +2418,15 @@ void CClient::PumpNetwork()
 			Disconnect();
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "offline error='%s'", m_NetClient[CLIENT_MAIN].ErrorString());
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
+		}
+
+		if(State() != IClient::STATE_OFFLINE && State() < IClient::STATE_QUITING && m_DummyConnected
+			&& m_NetClient[CLIENT_DUMMY].State() == NETSTATE_OFFLINE)
+		{
+			DummyDisconnect(0);
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "offline dummy error='%s'", m_NetClient[CLIENT_DUMMY].ErrorString());
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
 		}
 
@@ -2491,10 +2543,10 @@ void CClient::Update()
 #if defined(CONF_VIDEORECORDER)
 	if (m_DemoPlayer.IsPlaying() && IVideo::Current())
 	{
-		if (IVideo::Current()->frameRendered())
-			IVideo::Current()->nextVideoFrame();
-		if (IVideo::Current()->aframeRendered())
-			IVideo::Current()->nextAudioFrame_timeline();
+		if (IVideo::Current()->FrameRendered())
+			IVideo::Current()->NextVideoFrame();
+		if (IVideo::Current()->AudioFrameRendered())
+			IVideo::Current()->NextAudioFrameTimeline();
 	}
 	else if(m_ButtonRender)
 		Disconnect();
@@ -2518,8 +2570,15 @@ void CClient::Update()
 			Disconnect();
 		}
 	}
-	else if(State() == IClient::STATE_ONLINE && m_ReceivedSnapshots[g_Config.m_ClDummy] >= 3)
+	else if(State() == IClient::STATE_ONLINE)
 	{
+		if(m_LastDummy != (bool)g_Config.m_ClDummy)
+		{
+			// Invalidate references to !m_ClDummy snapshots
+			GameClient()->InvalidateSnapshot();
+			GameClient()->OnDummySwap();
+		}
+
 		if(m_ReceivedSnapshots[!g_Config.m_ClDummy] >= 3)
 		{
 			// switch dummy snapshot
@@ -2549,92 +2608,100 @@ void CClient::Update()
 			}
 		}
 
-		// switch snapshot
-		int Repredict = 0;
-		int64 Freq = time_freq();
-		int64 Now = m_GameTime[g_Config.m_ClDummy].Get(time_get());
-		int64 PredNow = m_PredictedTime.Get(time_get());
-
-		while(1)
+		if(m_ReceivedSnapshots[g_Config.m_ClDummy] >= 3)
 		{
-			CSnapshotStorage::CHolder *pCur = m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT];
-			int64 TickStart = (pCur->m_Tick)*time_freq()/50;
+			// switch snapshot
+			int Repredict = 0;
+			int64 Freq = time_freq();
+			int64 Now = m_GameTime[g_Config.m_ClDummy].Get(time_get());
+			int64 PredNow = m_PredictedTime.Get(time_get());
 
-			if(TickStart < Now)
+			if(m_LastDummy != (bool)g_Config.m_ClDummy && m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] && m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV])
 			{
-				CSnapshotStorage::CHolder *pNext = m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_pNext;
-				if(pNext)
+				// Load snapshot for m_ClDummy
+				GameClient()->OnNewSnapshot();
+				Repredict = 1;
+			}
+
+			while(1)
+			{
+				CSnapshotStorage::CHolder *pCur = m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT];
+				int64 TickStart = (pCur->m_Tick)*time_freq()/50;
+
+				if(TickStart < Now)
 				{
-					m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV] = m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT];
-					m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] = pNext;
-
-					// set ticks
-					m_CurGameTick[g_Config.m_ClDummy] = m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_Tick;
-					m_PrevGameTick[g_Config.m_ClDummy] = m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick;
-
-					if(m_LastDummy2 == (bool)g_Config.m_ClDummy && m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] && m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV])
+					CSnapshotStorage::CHolder *pNext = m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_pNext;
+					if(pNext)
 					{
-						GameClient()->OnNewSnapshot();
-						Repredict = 1;
+						m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV] = m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT];
+						m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] = pNext;
+
+						// set ticks
+						m_CurGameTick[g_Config.m_ClDummy] = m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_Tick;
+						m_PrevGameTick[g_Config.m_ClDummy] = m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick;
+
+						if(m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] && m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV])
+						{
+							GameClient()->OnNewSnapshot();
+							Repredict = 1;
+						}
 					}
+					else
+						break;
 				}
 				else
 					break;
 			}
-			else
-				break;
-		}
 
-		if(m_LastDummy2 != (bool)g_Config.m_ClDummy)
-		{
-			m_LastDummy2 = g_Config.m_ClDummy;
-		}
 
-		if(m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] && m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV])
-		{
-			int64 CurtickStart = (m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_Tick)*time_freq()/50;
-			int64 PrevtickStart = (m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick)*time_freq()/50;
-			int PrevPredTick = (int)(PredNow*50/time_freq());
-			int NewPredTick = PrevPredTick+1;
-
-			m_GameIntraTick[g_Config.m_ClDummy] = (Now - PrevtickStart) / (float)(CurtickStart-PrevtickStart);
-			m_GameTickTime[g_Config.m_ClDummy] = (Now - PrevtickStart) / (float)Freq; //(float)SERVER_TICK_SPEED);
-
-			CurtickStart = NewPredTick*time_freq()/50;
-			PrevtickStart = PrevPredTick*time_freq()/50;
-			m_PredIntraTick[g_Config.m_ClDummy] = (PredNow - PrevtickStart) / (float)(CurtickStart-PrevtickStart);
-
-			if(NewPredTick < m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick-SERVER_TICK_SPEED || NewPredTick > m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick+SERVER_TICK_SPEED)
+			if(m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] && m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV])
 			{
-				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", "prediction time reset!");
-				m_PredictedTime.Init(m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_Tick*time_freq()/50);
+				int64 CurtickStart = (m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_Tick)*time_freq()/50;
+				int64 PrevtickStart = (m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick)*time_freq()/50;
+				int PrevPredTick = (int)(PredNow*50/time_freq());
+				int NewPredTick = PrevPredTick+1;
+
+				m_GameIntraTick[g_Config.m_ClDummy] = (Now - PrevtickStart) / (float)(CurtickStart-PrevtickStart);
+				m_GameTickTime[g_Config.m_ClDummy] = (Now - PrevtickStart) / (float)Freq; //(float)SERVER_TICK_SPEED);
+
+				CurtickStart = NewPredTick*time_freq()/50;
+				PrevtickStart = PrevPredTick*time_freq()/50;
+				m_PredIntraTick[g_Config.m_ClDummy] = (PredNow - PrevtickStart) / (float)(CurtickStart-PrevtickStart);
+
+				if(NewPredTick < m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick-SERVER_TICK_SPEED || NewPredTick > m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick+SERVER_TICK_SPEED)
+				{
+					m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", "prediction time reset!");
+					m_PredictedTime.Init(m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_Tick*time_freq()/50);
+				}
+
+				if(NewPredTick > m_PredTick[g_Config.m_ClDummy])
+				{
+					m_PredTick[g_Config.m_ClDummy] = NewPredTick;
+					Repredict = 1;
+
+					// send input
+					SendInput();
+				}
 			}
 
-			if(NewPredTick > m_PredTick[g_Config.m_ClDummy])
+			// only do sane predictions
+			if(Repredict)
 			{
-				m_PredTick[g_Config.m_ClDummy] = NewPredTick;
-				Repredict = 1;
+				if(m_PredTick[g_Config.m_ClDummy] > m_CurGameTick[g_Config.m_ClDummy] && m_PredTick[g_Config.m_ClDummy] < m_CurGameTick[g_Config.m_ClDummy]+50)
+					GameClient()->OnPredict();
+			}
 
-				// send input
-				SendInput();
+			// fetch server info if we don't have it
+			if(State() >= IClient::STATE_LOADING &&
+				m_CurrentServerInfoRequestTime >= 0 &&
+				time_get() > m_CurrentServerInfoRequestTime)
+			{
+				m_ServerBrowser.RequestCurrentServer(m_ServerAddress);
+				m_CurrentServerInfoRequestTime = time_get()+time_freq()*2;
 			}
 		}
 
-		// only do sane predictions
-		if(Repredict)
-		{
-			if(m_PredTick[g_Config.m_ClDummy] > m_CurGameTick[g_Config.m_ClDummy] && m_PredTick[g_Config.m_ClDummy] < m_CurGameTick[g_Config.m_ClDummy]+50)
-				GameClient()->OnPredict();
-		}
-
-		// fetch server info if we don't have it
-		if(State() >= IClient::STATE_LOADING &&
-			m_CurrentServerInfoRequestTime >= 0 &&
-			time_get() > m_CurrentServerInfoRequestTime)
-		{
-			m_ServerBrowser.RequestCurrentServer(m_ServerAddress);
-			m_CurrentServerInfoRequestTime = time_get()+time_freq()*2;
-		}
+		m_LastDummy = (bool)g_Config.m_ClDummy;
 	}
 
 	// STRESS TEST: join the server again
@@ -2951,6 +3018,12 @@ void CClient::Run()
 			m_DummySendConnInfo = false;
 
 			// send client info
+			CMsgPacker MsgVer(NETMSG_CLIENTVER, true);
+			MsgVer.AddRaw(&m_ConnectionID, sizeof(m_ConnectionID));
+			MsgVer.AddInt(GameClient()->DDNetVersion());
+			MsgVer.AddString(GameClient()->DDNetVersionStr(), 0);
+			SendMsg(&MsgVer, MSGFLAG_VITAL);
+
 			CMsgPacker MsgInfo(NETMSG_INFO, true);
 			MsgInfo.AddString(GameClient()->NetVersion(), 128);
 			MsgInfo.AddString(m_Password, 128);
@@ -3019,7 +3092,9 @@ void CClient::Run()
 			Update();
 			int64 Now = time_get();
 
-			if((g_Config.m_GfxBackgroundRender || m_pGraphics->WindowOpen())
+			bool IsRenderActive = (g_Config.m_GfxBackgroundRender || m_pGraphics->WindowOpen());
+
+			if(IsRenderActive
 				&& (!g_Config.m_GfxAsyncRenderOld || m_pGraphics->IsIdle())
 				&& (!g_Config.m_GfxRefreshRate || (time_freq() / (int64)g_Config.m_GfxRefreshRate) <= Now - LastRenderTime))
 			{
@@ -3072,6 +3147,11 @@ void CClient::Run()
 				}
 
 				Input()->NextFrame();
+			}
+			else if(!IsRenderActive)
+			{
+				// if the client does not render, it should reset its render time to a time where it would render the first frame, when it wakes up again
+				LastRenderTime = g_Config.m_GfxRefreshRate ? (Now - (time_freq() / (int64)g_Config.m_GfxRefreshRate)) : Now;
 			}
 
 			if(Input()->VideoRestartNeeded())
@@ -3302,7 +3382,10 @@ void CClient::Con_StartVideo(IConsole::IResult *pResult, void *pUserData)
 	if (!IVideo::Current())
 	{
 		new CVideo((CGraphics_Threaded*)pSelf->m_pGraphics, pSelf->Storage(), pSelf->m_pConsole, pSelf->Graphics()->ScreenWidth(), pSelf->Graphics()->ScreenHeight(), "");
-		IVideo::Current()->start();
+		IVideo::Current()->Start();
+		bool paused = pSelf->m_DemoPlayer.Info()->m_Info.m_Paused;
+		if(paused)
+			IVideo::Current()->Pause(true);
 	}
 	else
 		pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "videorecorder", "Videorecorder already running.");
@@ -3319,7 +3402,7 @@ void CClient::StartVideo(IConsole::IResult *pResult, void *pUserData, const char
 	if (!IVideo::Current())
 	{
 		new CVideo((CGraphics_Threaded*)pSelf->m_pGraphics, pSelf->Storage(), pSelf->m_pConsole, pSelf->Graphics()->ScreenWidth(), pSelf->Graphics()->ScreenHeight(), pVideoName);
-		IVideo::Current()->start();
+		IVideo::Current()->Start();
 	}
 	else
 		pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "videorecorder", "Videorecorder already running.");
@@ -3328,7 +3411,7 @@ void CClient::StartVideo(IConsole::IResult *pResult, void *pUserData, const char
 void CClient::Con_StopVideo(IConsole::IResult *pResult, void *pUserData)
 {
 	if (IVideo::Current())
-		IVideo::Current()->stop();
+		IVideo::Current()->Stop();
 }
 
 #endif
@@ -3432,7 +3515,7 @@ void CClient::SaveReplay(const int Length)
 		char *pSrc = (&m_DemoRecorder[RECORDER_REPLAYS])->GetCurrentFilename();
 
 		// Slice the demo to get only the last cl_replay_length seconds
-		const int EndTick = GameTick();
+		const int EndTick = GameTick(g_Config.m_ClDummy);
 		const int StartTick = EndTick - Length * GameTickSpeed();
 
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Saving replay...");
@@ -3762,6 +3845,15 @@ void CClient::LoadFont()
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load font. filename='%s'", pFontFile);
 }
 
+void CClient::Notify(const char *pTitle, const char *pMessage)
+{
+	if(m_pGraphics->WindowActive() || !g_Config.m_ClShowNotifications)
+		return;
+
+	NotificationsNotify(pTitle, pMessage);
+	Graphics()->NotifyWindow();
+}
+
 void CClient::ConchainWindowVSync(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
@@ -3908,13 +4000,11 @@ void CClient::HandleDemoPath(const char *pPath)
 */
 
 #if defined(CONF_PLATFORM_MACOSX)
-extern "C" int SDL_main(int argc, char **argv_) // ignore_convention
-{
-	const char **argv = const_cast<const char **>(argv_);
+extern "C" int TWMain(int argc, const char **argv) // ignore_convention
 #else
 int main(int argc, const char **argv) // ignore_convention
-{
 #endif
+{
 	bool Silent = false;
 	bool RandInitFailed = false;
 
@@ -3934,6 +4024,8 @@ int main(int argc, const char **argv) // ignore_convention
 	{
 		RandInitFailed = true;
 	}
+
+	NotificationsInit();
 
 	CClient *pClient = CreateClient();
 	IKernel *pKernel = IKernel::Create();
@@ -4067,6 +4159,8 @@ int main(int argc, const char **argv) // ignore_convention
 	pClient->~CClient();
 	free(pClient);
 
+	NotificationsUninit();
+
 	if(Restarting)
 	{
 		char aBuf[512];
@@ -4134,7 +4228,7 @@ void CClient::RequestDDNetInfo()
 		str_append(aUrl, aEscaped, sizeof(aUrl));
 	}
 
-	m_pDDNetInfoTask = std::make_shared<CGetFile>(Storage(), aUrl, DDNET_INFO_TMP, IStorage::TYPE_SAVE, true);
+	m_pDDNetInfoTask = std::make_shared<CGetFile>(Storage(), aUrl, m_aDDNetInfoTmp, IStorage::TYPE_SAVE, true);
 	Engine()->AddJob(m_pDDNetInfoTask);
 }
 

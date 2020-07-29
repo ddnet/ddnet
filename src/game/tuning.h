@@ -30,7 +30,7 @@ MACRO_TUNING_PARAM(GunLifetime, gun_lifetime, 2.0f, "Gun lifetime")
 MACRO_TUNING_PARAM(ShotgunCurvature, shotgun_curvature, 1.25f, "Shotgun curvature")
 MACRO_TUNING_PARAM(ShotgunSpeed, shotgun_speed, 2750.0f, "Shotgun speed")
 MACRO_TUNING_PARAM(ShotgunSpeeddiff, shotgun_speeddiff, 0.8f, "(UNUSED) Speed difference between shotgun bullets")
-MACRO_TUNING_PARAM(ShotgunLifetime, shotgun_lifetime, 0.20f, "Shotgun lifetime")
+MACRO_TUNING_PARAM(ShotgunLifetime, shotgun_lifetime, 0.20f, "(UNUSED) Shotgun lifetime")
 
 MACRO_TUNING_PARAM(GrenadeCurvature, grenade_curvature, 7.0f, "Grenade curvature")
 MACRO_TUNING_PARAM(GrenadeSpeed, grenade_speed, 1000.0f, "Grenade speed")
@@ -40,7 +40,7 @@ MACRO_TUNING_PARAM(LaserReach, laser_reach, 800.0f, "How long the laser can reac
 MACRO_TUNING_PARAM(LaserBounceDelay, laser_bounce_delay, 150, "When bouncing, stop the laser this long")
 MACRO_TUNING_PARAM(LaserBounceNum, laser_bounce_num, 1000, "How many times the laser can bounce")
 MACRO_TUNING_PARAM(LaserBounceCost, laser_bounce_cost, 0, "Remove this much from reach when laser is bouncing")
-MACRO_TUNING_PARAM(LaserDamage, laser_damage, 5, "Laser damage")
+MACRO_TUNING_PARAM(LaserDamage, laser_damage, 5, "(UNUSED) Laser damage")
 
 MACRO_TUNING_PARAM(PlayerCollision, player_collision, 1, "Enable player collisions")
 MACRO_TUNING_PARAM(PlayerHooking, player_hooking, 1, "Enable player vs player hooking")

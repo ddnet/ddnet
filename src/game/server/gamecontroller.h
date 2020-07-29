@@ -4,6 +4,7 @@
 #define GAME_SERVER_GAMECONTROLLER_H
 
 #include <base/vmath.h>
+#include <engine/map.h>
 
 class CDoor;
 #if !defined(_MSC_VER) || _MSC_VER >= 1600
@@ -11,8 +12,8 @@ class CDoor;
 #else
 typedef __int32 int32_t;
 typedef unsigned __int32 uint32_t;
-typedef __int64 int64_t;
-typedef unsigned __int64 uint64_t;
+typedef __int64 int64;
+typedef unsigned __int64 uint64;
 #endif
 
 /*
@@ -54,7 +55,7 @@ protected:
 
 	void ResetGame();
 
-	char m_aMapWish[128];
+	char m_aMapWish[MAX_MAP_LENGTH];
 
 
 	int m_RoundStartTick;

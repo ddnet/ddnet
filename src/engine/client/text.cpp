@@ -592,6 +592,14 @@ public:
 	{
 		m_pGraphics = Kernel()->RequestInterface<IGraphics>();
 		FT_Init_FreeType(&m_FTLibrary);
+		// print freetype version
+		{
+			int LMajor, LMinor, LPatch;
+			FT_Library_Version(m_FTLibrary, &LMajor, &LMinor, &LPatch);
+			dbg_msg("freetype", "freetype version %d.%d.%d (compiled = %d.%d.%d)", LMajor, LMinor, LPatch,
+				FREETYPE_MAJOR, FREETYPE_MINOR, FREETYPE_PATCH);
+		}
+
 		m_FirstFreeTextContainerIndex = -1;
 
 		m_DefaultTextContainerInfo.m_Stride = sizeof(STextCharQuadVertex);
@@ -729,19 +737,20 @@ public:
 		pCursor->m_CharCount = 0;
 	}
 
-	virtual void Text(void *pFontSetV, float x, float y, float Size, const char *pText, int MaxWidth)
+	virtual void Text(void *pFontSetV, float x, float y, float Size, const char *pText, float LineWidth)
 	{
 		CTextCursor Cursor;
 		SetCursor(&Cursor, x, y, Size, TEXTFLAG_RENDER);
-		Cursor.m_LineWidth = MaxWidth;
+		Cursor.m_LineWidth = LineWidth;
 		TextEx(&Cursor, pText, -1);
 	}
 
-	virtual float TextWidth(void *pFontSetV, float Size, const char *pText, int Length, float *pAlignedHeight = NULL)
+	virtual float TextWidth(void *pFontSetV, float Size, const char *pText, int StrLength, float LineWidth, float *pAlignedHeight = NULL)
 	{
 		CTextCursor Cursor;
 		SetCursor(&Cursor, 0, 0, Size, 0);
-		TextEx(&Cursor, pText, Length);
+		Cursor.m_LineWidth = LineWidth;
+		TextEx(&Cursor, pText, StrLength);
 		if(pAlignedHeight != NULL)
 			*pAlignedHeight = Cursor.m_AlignedFontSize;
 		return Cursor.m_X;
@@ -776,6 +785,11 @@ public:
 
 	virtual void TextEx(CTextCursor *pCursor, const char *pText, int Length)
 	{
+		dbg_assert(pText != NULL, "null text pointer");
+
+		if(!*pText)
+			return;
+
 		CFont *pFont = pCursor->m_pFont;
 		CFontSizeData *pSizeData = NULL;
 
@@ -1701,10 +1715,7 @@ public:
 	virtual void UploadEntityLayerText(IGraphics::CTextureHandle Texture, const char *pText, int Length, float x, float y, int FontSize)
 	{
 		if (FontSize < 1)
-		{
-			dbg_msg("pFont", "texture with id '%d' will not be updated. Reason - font is too small", (int)Texture);
 			return;
-		}
 
 		const char *pCurrent = (char *)pText;
 		const char *pEnd = pCurrent + Length;
@@ -1731,11 +1742,11 @@ public:
 				}
 
 				pBitmap = &pFont->m_FtFace->glyph->bitmap; // ignore_convention
-				
+
 				int SlotW = pBitmap->width;
 				int SlotH = pBitmap->rows;
 				int SlotSize = SlotW*SlotH;
-				
+
 				// prepare glyph data
 				mem_zero(ms_aGlyphData, SlotSize);
 
@@ -1747,15 +1758,15 @@ public:
 								ms_aGlyphData[(py)*SlotW + px] = pBitmap->buffer[py*pBitmap->width + px]; // ignore_convention
 							}
 					}
-				
+
 				Graphics()->LoadTextureRawSub(Texture, x + WidthLastChars, y, SlotW, SlotH, CImageInfo::FORMAT_ALPHA, ms_aGlyphData);
 				WidthLastChars += (SlotW + 1);
-				
+
 			}
 			pCurrent = pTmp;
 		}
 	}
-	
+
 	virtual int AdjustFontSize(const char *pText, int TextLength, int MaxSize = -1)
 	{
 		int WidthOfText = CalculateTextWidth(pText, TextLength, 0, 100);
@@ -1803,7 +1814,7 @@ public:
 
 		return WidthOfText;
 	}
-	
+
 	virtual void OnWindowResize()
 	{
 		bool FoundTextContainer = false;

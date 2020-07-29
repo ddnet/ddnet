@@ -46,7 +46,6 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	m_pfnFilter = pfnFilter;
 	m_pUser = pUser;
 
-	m_MapSize = MapSize;
 	m_pMapData = pMapData;
 	m_pConsole = pConsole;
 
@@ -121,6 +120,9 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 
 		CloseMapFile = true;
 	}
+
+	if(MapFile)
+		MapSize = io_length(MapFile);
 
 	// write header
 	mem_zero(&Header, sizeof(Header));
@@ -677,6 +679,10 @@ void CDemoPlayer::DoTick()
 void CDemoPlayer::Pause()
 {
 	m_Info.m_Info.m_Paused = 1;
+#if defined(CONF_VIDEORECORDER)
+	if(IVideo::Current() && g_Config.m_ClVideoPauseWithDemo)
+		IVideo::Current()->Pause(true);
+#endif
 }
 
 void CDemoPlayer::Unpause()
@@ -687,6 +693,10 @@ void CDemoPlayer::Unpause()
 		m_Info.start_time = time_get();*/
 		m_Info.m_Info.m_Paused = 0;
 	}
+#if defined(CONF_VIDEORECORDER)
+	if(IVideo::Current() && g_Config.m_ClVideoPauseWithDemo)
+		IVideo::Current()->Pause(false);
+#endif
 }
 
 int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, int StorageType)
@@ -874,9 +884,9 @@ int64 CDemoPlayer::time()
 		if (!s_Recording)
 		{
 			s_Recording = true;
-			m_Info.m_LastUpdate = IVideo::time();
+			m_Info.m_LastUpdate = IVideo::Time();
 		}
-		return IVideo::time();
+		return IVideo::Time();
 	}
 	else
 	{
@@ -1028,7 +1038,7 @@ int CDemoPlayer::Stop()
 {
 #if defined(CONF_VIDEORECORDER)
 		if (IVideo::Current())
-			IVideo::Current()->stop();
+			IVideo::Current()->Stop();
 #endif
 
 	if(!m_File)

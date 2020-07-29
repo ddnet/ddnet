@@ -1,8 +1,14 @@
 #ifndef GAME_SERVER_SAVE_H
 #define GAME_SERVER_SAVE_H
 
-#include "./entities/character.h"
+#include <engine/shared/protocol.h>
+#include <game/generated/protocol.h>
 #include <game/server/gamecontroller.h>
+
+class IGameController;
+class CGameContext;
+class CCharacter;
+class CSaveTeam;
 
 class CSaveTee
 {
@@ -11,15 +17,19 @@ public:
 	~CSaveTee();
 	void save(CCharacter* pchr);
 	void load(CCharacter* pchr, int Team);
-	char* GetString();
-	int LoadString(char* String);
-	vec2 GetPos() { return m_Pos; }
-	char* GetName() { return m_name; }
+	char* GetString(const CSaveTeam *pTeam);
+	int LoadString(const char* String);
+	void LoadHookedPlayer(const CSaveTeam *pTeam);
+	vec2 GetPos() const { return m_Pos; }
+	const char* GetName() const { return m_aName; }
+	int GetClientID() const { return m_ClientID; }
+	void SetClientID(int ClientID) { m_ClientID = ClientID; };
 
 private:
+	int m_ClientID;
 
-	char m_String [2048];
-	char m_name [16];
+	char m_aString [2048];
+	char m_aName [16];
 
 	int m_Alive;
 	int m_Paused;
@@ -35,7 +45,6 @@ private:
 		int m_Ammo;
 		int m_Ammocost;
 		int m_Got;
-
 	} m_aWeapons[NUM_WEAPONS];
 
 	int m_LastWeapon;
@@ -64,7 +73,7 @@ private:
 	int m_CpTime;
 	int m_CpActive;
 	int m_CpLastBroadcast;
-	float m_CpCurrent[25];
+	float m_aCpCurrent[25];
 
 	int m_NotEligibleForFinish;
 
@@ -84,8 +93,18 @@ private:
 	vec2 m_HookTeleBase;
 	int m_HookTick;
 	int m_HookState;
+	int m_HookedPlayer;
+	int m_NewHook;
 
-	char aGameUuid[16];
+	// player input
+	int m_InputDirection;
+	int m_InputJump;
+	int m_InputFire;
+	int m_InputHook;
+
+	int m_ReloadTimer;
+
+	char m_aGameUuid[UUID_MAXSTRSIZE];
 };
 
 class CSaveTeam
@@ -94,19 +113,23 @@ public:
 	CSaveTeam(IGameController* Controller);
 	~CSaveTeam();
 	char* GetString();
-	int GetMembersCount() { return m_MembersCount; }
+	int GetMembersCount() const { return m_MembersCount; }
+	// MatchPlayers has to be called afterwards
 	int LoadString(const char* String);
+	// returns true if a team can load, otherwise writes a nice error Message in pMessage
+	bool MatchPlayers(const char (*paNames)[MAX_NAME_LENGTH], const int *pClientID, int NumPlayer, char *pMessage, int MessageLen);
 	int save(int Team);
-	int load(int Team);
-	CSaveTee* SavedTees;
+	void load(int Team);
+	CSaveTee* m_pSavedTees;
 
+	// returns true if an error occured
+	static bool HandleSaveError(int Result, int ClientID, CGameContext *pGameContext);
 private:
-	int MatchPlayer(char name[16]);
-	CCharacter* MatchCharacter(char name[16], int SaveID);
+	CCharacter* MatchCharacter(int ClientID, int SaveID);
 
 	IGameController* m_pController;
 
-	char m_String[65536];
+	char m_aString[65536];
 
 	struct SSimpleSwitchers
 	{
@@ -114,12 +137,13 @@ private:
 		int m_EndTime;
 		int m_Type;
 	};
-	SSimpleSwitchers* m_Switchers;
+	SSimpleSwitchers* m_pSwitchers;
 
 	int m_TeamState;
 	int m_MembersCount;
 	int m_NumSwitchers;
 	int m_TeamLocked;
+	int m_Practice;
 };
 
 #endif // GAME_SERVER_SAVE_H

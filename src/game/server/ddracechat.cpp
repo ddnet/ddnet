@@ -6,9 +6,6 @@
 #include <game/server/teams.h>
 #include <game/server/gamemodes/DDRace.h>
 #include <game/version.h>
-#if defined(CONF_SQL)
-#include <game/server/score/sql_score.h>
-#endif
 
 bool CheckClientID(int ClientID);
 
@@ -35,9 +32,9 @@ void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
 		"Piepow, QingGo, RafaelFF, sctt, jao, daverck, fokkonaut,");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
-		"Bojidar, FallenKN, ardadem, archimede67, sirius1242, Aerll");
+		"Bojidar, FallenKN, ardadem, archimede67, sirius1242, Aerll,");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
-		"& others.");
+		"trafilaw, Zwelf, Patiga, Konsti, ElXreno, MikiGamer & others.");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
 		"Based on DDRace by the DDRace developers,");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
@@ -331,7 +328,7 @@ void ToggleSpecPauseVoted(IConsole::IResult *pResult, void *pUserData, int Pause
 	}
 
 	bool IsPlayerBeingVoted = pSelf->m_VoteCloseTime &&
-		(pSelf->m_VoteKick || pSelf->m_VoteSpec) &&
+		(pSelf->IsKickVote() || pSelf->IsSpecVote()) &&
 		pResult->m_ClientID != pSelf->m_VoteVictim;
 	if((!IsPlayerBeingVoted && -PauseState == PauseType) ||
 		(IsPlayerBeingVoted && PauseState && pPlayer->m_SpectatorID == pSelf->m_VoteVictim))
@@ -372,12 +369,6 @@ void CGameContext::ConTeamTop5(IConsole::IResult *pResult, void *pUserData)
 	if (!CheckClientID(pResult->m_ClientID))
 		return;
 
-#if defined(CONF_SQL)
-	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
-		if(pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery + g_Config.m_SvSqlQueriesDelay * pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
-			return;
-#endif
-
 	if (g_Config.m_SvHideScore)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "teamtop5",
@@ -386,15 +377,9 @@ void CGameContext::ConTeamTop5(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	if (pResult->NumArguments() > 0)
-		pSelf->Score()->ShowTeamTop5(pResult, pResult->m_ClientID, pUserData,
-				pResult->GetInteger(0));
+		pSelf->Score()->ShowTeamTop5(pResult->m_ClientID, pResult->GetInteger(0));
 	else
-		pSelf->Score()->ShowTeamTop5(pResult, pResult->m_ClientID, pUserData);
-
-#if defined(CONF_SQL)
-	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
-		pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery = pSelf->Server()->Tick();
-#endif
+		pSelf->Score()->ShowTeamTop5(pResult->m_ClientID);
 }
 
 void CGameContext::ConTop5(IConsole::IResult *pResult, void *pUserData)
@@ -402,12 +387,6 @@ void CGameContext::ConTop5(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *) pUserData;
 	if (!CheckClientID(pResult->m_ClientID))
 		return;
-
-#if defined(CONF_SQL)
-	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
-		if(pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery + g_Config.m_SvSqlQueriesDelay * pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
-			return;
-#endif
 
 	if (g_Config.m_SvHideScore)
 	{
@@ -417,63 +396,46 @@ void CGameContext::ConTop5(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	if (pResult->NumArguments() > 0)
-		pSelf->Score()->ShowTop5(pResult, pResult->m_ClientID, pUserData,
-				pResult->GetInteger(0));
+		pSelf->Score()->ShowTop5(pResult->m_ClientID, pResult->GetInteger(0));
 	else
-		pSelf->Score()->ShowTop5(pResult, pResult->m_ClientID, pUserData);
-
-#if defined(CONF_SQL)
-	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
-		pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery = pSelf->Server()->Tick();
-#endif
+		pSelf->Score()->ShowTop5(pResult->m_ClientID);
 }
 
 void CGameContext::ConTimes(IConsole::IResult *pResult, void *pUserData)
 {
-#if defined(CONF_SQL)
-	if(!CheckClientID(pResult->m_ClientID)) return;
 	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
 
-	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
-		if(pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery + g_Config.m_SvSqlQueriesDelay * pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
-			return;
-
-	if(g_Config.m_SvUseSQL)
+	if(pResult->NumArguments() == 0)
 	{
-		CSqlScore *pScore = (CSqlScore *)pSelf->Score();
-		CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
-		if(!pPlayer)
-			return;
-
-		if(pResult->NumArguments() == 0)
+		pSelf->Score()->ShowTimes(pResult->m_ClientID, 1);
+	}
+	else if(pResult->NumArguments() == 1)
+	{
+		if(pResult->GetInteger(0) != 0)
 		{
-			pScore->ShowTimes(pPlayer->GetCID(),1);
-		}
-		else if(pResult->NumArguments() < 3)
-		{
-			if (pResult->NumArguments() == 1)
-			{
-				if(pResult->GetInteger(0) != 0)
-					pScore->ShowTimes(pPlayer->GetCID(),pResult->GetInteger(0));
-				else
-					pScore->ShowTimes(pPlayer->GetCID(), (str_comp(pResult->GetString(0), "me") == 0) ? pSelf->Server()->ClientName(pResult->m_ClientID) : pResult->GetString(0),1);
-			}
-			else if (pResult->GetInteger(1) != 0)
-			{
-				pScore->ShowTimes(pPlayer->GetCID(), (str_comp(pResult->GetString(0), "me") == 0) ? pSelf->Server()->ClientName(pResult->m_ClientID) : pResult->GetString(0),pResult->GetInteger(1));
-			}
+			pSelf->Score()->ShowTimes(pResult->m_ClientID, pResult->GetInteger(0));
 		}
 		else
 		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "times", "/times needs 0, 1 or 2 parameter. 1. = name, 2. = start number");
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "times", "Example: /times, /times me, /times Hans, /times \"Papa Smurf\" 5");
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "times", "Bad: /times Papa Smurf 5 # Good: /times \"Papa Smurf\" 5 ");
+			const char *pRequestedName = (str_comp(pResult->GetString(0), "me") == 0) ?
+					pSelf->Server()->ClientName(pResult->m_ClientID) : pResult->GetString(0);
+			pSelf->Score()->ShowTimes(pResult->m_ClientID, pRequestedName, pResult->GetInteger(1));
 		}
-
-		if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
-			pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery = pSelf->Server()->Tick();
 	}
-#endif
+	else if(pResult->NumArguments() == 2 && pResult->GetInteger(1) != 0)
+	{
+		const char *pRequestedName = (str_comp(pResult->GetString(0), "me") == 0) ?
+				pSelf->Server()->ClientName(pResult->m_ClientID) : pResult->GetString(0);
+		pSelf->Score()->ShowTimes(pResult->m_ClientID, pRequestedName, pResult->GetInteger(1));
+	}
+	else
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "times", "/times needs 0, 1 or 2 parameter. 1. = name, 2. = start number");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "times", "Example: /times, /times me, /times Hans, /times \"Papa Smurf\" 5");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "times", "Bad: /times Papa Smurf 5 # Good: /times \"Papa Smurf\" 5 ");
+	}
 }
 
 void CGameContext::ConDND(IConsole::IResult *pResult, void *pUserData)
@@ -520,18 +482,10 @@ void CGameContext::ConMap(IConsole::IResult *pResult, void *pUserData)
 	if (!pPlayer)
 		return;
 
-#if defined(CONF_SQL)
-	if(g_Config.m_SvUseSQL)
-		if(pPlayer->m_LastSQLQuery + g_Config.m_SvSqlQueriesDelay * pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
-			return;
-#endif
+	if(pSelf->RateLimitPlayerVote(pResult->m_ClientID) || pSelf->RateLimitPlayerMapVote(pResult->m_ClientID))
+		return;
 
-	pSelf->Score()->MapVote(&pSelf->m_pMapVoteResult, pResult->m_ClientID, pResult->GetString(0));
-
-#if defined(CONF_SQL)
-	if(g_Config.m_SvUseSQL)
-		pPlayer->m_LastSQLQuery = pSelf->Server()->Tick();
-#endif
+	pSelf->Score()->MapVote(pResult->m_ClientID, pResult->GetString(0));
 }
 
 void CGameContext::ConMapInfo(IConsole::IResult *pResult, void *pUserData)
@@ -544,21 +498,11 @@ void CGameContext::ConMapInfo(IConsole::IResult *pResult, void *pUserData)
 	if (!pPlayer)
 		return;
 
-#if defined(CONF_SQL)
-	if(g_Config.m_SvUseSQL)
-		if(pPlayer->m_LastSQLQuery + g_Config.m_SvSqlQueriesDelay * pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
-			return;
-#endif
-
 	if (pResult->NumArguments() > 0)
 		pSelf->Score()->MapInfo(pResult->m_ClientID, pResult->GetString(0));
 	else
 		pSelf->Score()->MapInfo(pResult->m_ClientID, g_Config.m_SvMap);
 
-#if defined(CONF_SQL)
-	if(g_Config.m_SvUseSQL)
-		pPlayer->m_LastSQLQuery = pSelf->Server()->Tick();
-#endif
 }
 
 void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
@@ -573,20 +517,116 @@ void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
 
 	const char* pTimeout = pResult->NumArguments() > 0 ? pResult->GetString(0) : pPlayer->m_TimeoutCode;
 
-	for(int i = 0; i < pSelf->Server()->MaxClients(); i++)
+	if(!pSelf->Server()->IsSixup(pResult->m_ClientID))
 	{
-		if (i == pResult->m_ClientID) continue;
-		if (!pSelf->m_apPlayers[i]) continue;
-		if (str_comp(pSelf->m_apPlayers[i]->m_TimeoutCode, pTimeout)) continue;
-		if (pSelf->Server()->SetTimedOut(i, pResult->m_ClientID)) {
-			if (pSelf->m_apPlayers[i]->GetCharacter())
-				pSelf->SendTuningParams(i, pSelf->m_apPlayers[i]->GetCharacter()->m_TuneZone);
-			return;
+		for(int i = 0; i < pSelf->Server()->MaxClients(); i++)
+		{
+			if (i == pResult->m_ClientID) continue;
+			if (!pSelf->m_apPlayers[i]) continue;
+			if (str_comp(pSelf->m_apPlayers[i]->m_TimeoutCode, pTimeout)) continue;
+			if (pSelf->Server()->SetTimedOut(i, pResult->m_ClientID))
+			{
+				if (pSelf->m_apPlayers[i]->GetCharacter())
+					pSelf->SendTuningParams(i, pSelf->m_apPlayers[i]->GetCharacter()->m_TuneZone);
+				/*if(pSelf->Server()->IsSixup(i))
+					pSelf->SendClientInfo(i, i);*/
+				return;
+			}
 		}
+	}
+	else
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "print",
+			"Your timeout code has been set. 0.7 clients can not reclaim their tees on timeout; however, a 0.6 client can claim your tee ");
 	}
 
 	pSelf->Server()->SetTimeoutProtected(pResult->m_ClientID);
 	str_copy(pPlayer->m_TimeoutCode, pResult->GetString(0), sizeof(pPlayer->m_TimeoutCode));
+}
+
+void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if(!pPlayer)
+		return;
+
+	if(pSelf->ProcessSpamProtection(pResult->m_ClientID))
+		return;
+
+	if(!g_Config.m_SvPractice)
+	{
+		pSelf->Console()->Print(
+				IConsole::OUTPUT_LEVEL_STANDARD,
+				"print",
+				"Practice mode is disabled");
+		return;
+	}
+
+	CGameTeams &Teams = ((CGameControllerDDRace*) pSelf->m_pController)->m_Teams;
+
+	int Team = Teams.m_Core.Team(pResult->m_ClientID);
+
+	if(Team < TEAM_FLOCK || (Team == TEAM_FLOCK && g_Config.m_SvTeam != 3) || Team >= TEAM_SUPER)
+	{
+		pSelf->Console()->Print(
+				IConsole::OUTPUT_LEVEL_STANDARD,
+				"print",
+				"Join a team to enable practice mode, which means you can use /r, but can't earn a rank.");
+		return;
+	}
+
+	if(Teams.IsPractice(Team))
+	{
+		pSelf->Console()->Print(
+				IConsole::OUTPUT_LEVEL_STANDARD,
+				"print",
+				"Team is already in practice mode");
+		return;
+	}
+
+	bool VotedForPractice = pResult->NumArguments() == 0 || pResult->GetInteger(0);
+
+	if(VotedForPractice == pPlayer->m_VotedForPractice)
+		return;
+
+	pPlayer->m_VotedForPractice = VotedForPractice;
+
+	int NumCurrentVotes = 0;
+	int TeamSize = 0;
+
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(Teams.m_Core.Team(i) == Team)
+		{
+			CPlayer *pPlayer2 = pSelf->m_apPlayers[i];
+			if(pPlayer2 && pPlayer2->m_VotedForPractice)
+				NumCurrentVotes++;
+			TeamSize++;
+		}
+	}
+
+	int NumRequiredVotes = TeamSize / 2 + 1;
+
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "'%s' voted to %s /practice mode for your team, which means you can use /r, but you can't earn a rank. Type /practice to vote (%d/%d required votes)", pSelf->Server()->ClientName(pResult->m_ClientID), VotedForPractice ? "enable" : "disable", NumCurrentVotes, NumRequiredVotes);
+
+	for(int i = 0; i < MAX_CLIENTS; i++)
+		if(Teams.m_Core.Team(i) == Team)
+			pSelf->SendChatTarget(i, aBuf);
+
+	if(NumCurrentVotes >= NumRequiredVotes)
+	{
+		Teams.EnablePractice(Team);
+
+		for(int i = 0; i < MAX_CLIENTS; i++)
+			if(Teams.m_Core.Team(i) == Team)
+				pSelf->SendChatTarget(i, "Practice mode enabled for your team, happy practicing!");
+	}
+
 }
 
 void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
@@ -595,37 +635,29 @@ void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
 	if (!CheckClientID(pResult->m_ClientID))
 		return;
 
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
-	if (!pPlayer)
-		return;
-
-#if defined(CONF_SQL)
 	if(!g_Config.m_SvSaveGames)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "Save-function is disabled on this server");
 		return;
 	}
 
-	if(g_Config.m_SvUseSQL)
-		if(pPlayer->m_LastSQLQuery + g_Config.m_SvSqlQueriesDelay * pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
-			return;
+	const char* pCode = "";
+	if(pResult->NumArguments() > 0)
+		pCode = pResult->GetString(0);
 
-	int Team = ((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.m_Core.Team(pResult->m_ClientID);
-
-	const char* pCode = pResult->GetString(0);
 	char aCountry[5];
-	if(str_length(pCode) > 3 && pCode[0] >= 'A' && pCode[0] <= 'Z' && pCode[1] >= 'A'
+	if(str_length(pCode) >= 3 && pCode[0] >= 'A' && pCode[0] <= 'Z' && pCode[1] >= 'A'
 		&& pCode[1] <= 'Z' && pCode[2] >= 'A' && pCode[2] <= 'Z')
 	{
-		if(pCode[3] == ' ')
+		if(str_length(pCode) == 3 || pCode[3] == ' ')
 		{
 			str_copy(aCountry, pCode, 4);
-			pCode = pCode + 4;
+			pCode = str_skip_whitespaces_const(pCode + 4);
 		}
-		else if(str_length(pCode) > 4 && pCode[4] == ' ')
+		else if(str_length(pCode) == 4 || (str_length(pCode) > 4 && pCode[4] == ' '))
 		{
 			str_copy(aCountry, pCode, 5);
-			pCode = pCode + 5;
+			pCode = str_skip_whitespaces_const(pCode + 5);
 		}
 		else
 		{
@@ -639,10 +671,7 @@ void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
 
 	if(str_in_list(g_Config.m_SvSqlValidServerNames, ",", aCountry))
 	{
-		pSelf->Score()->SaveTeam(Team, pCode, pResult->m_ClientID, aCountry);
-
-		if(g_Config.m_SvUseSQL)
-			pPlayer->m_LastSQLQuery = pSelf->Server()->Tick();
+		pSelf->Score()->SaveTeam(pResult->m_ClientID, pCode, aCountry);
 	}
 	else
 	{
@@ -650,8 +679,6 @@ void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
 		str_format(aBuf, sizeof(aBuf), "Unknown server name '%s'.", aCountry);
 		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	}
-
-#endif
 }
 
 void CGameContext::ConLoad(IConsole::IResult *pResult, void *pUserData)
@@ -660,31 +687,16 @@ void CGameContext::ConLoad(IConsole::IResult *pResult, void *pUserData)
 	if (!CheckClientID(pResult->m_ClientID))
 		return;
 
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
-	if (!pPlayer)
-		return;
-
-#if defined(CONF_SQL)
 	if(!g_Config.m_SvSaveGames)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "Save-function is disabled on this server");
 		return;
 	}
 
-	if(g_Config.m_SvUseSQL)
-		if(pPlayer->m_LastSQLQuery + g_Config.m_SvSqlQueriesDelay * pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
-			return;
-#endif
-
-	if (pResult->NumArguments() > 0)
+	if(pResult->NumArguments() > 0)
 		pSelf->Score()->LoadTeam(pResult->GetString(0), pResult->m_ClientID);
 	else
-		return;
-
-#if defined(CONF_SQL)
-	if(g_Config.m_SvUseSQL)
-		pPlayer->m_LastSQLQuery = pSelf->Server()->Tick();
-#endif
+		pSelf->Score()->GetSaves(pResult->m_ClientID);
 }
 
 void CGameContext::ConTeamRank(IConsole::IResult *pResult, void *pUserData)
@@ -693,33 +705,19 @@ void CGameContext::ConTeamRank(IConsole::IResult *pResult, void *pUserData)
 	if (!CheckClientID(pResult->m_ClientID))
 		return;
 
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
-	if (!pPlayer)
-		return;
-
-#if defined(CONF_SQL)
-	if(g_Config.m_SvUseSQL)
-		if(pPlayer->m_LastSQLQuery + g_Config.m_SvSqlQueriesDelay * pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
-			return;
-#endif
-
 	if (pResult->NumArguments() > 0)
+	{
 		if (!g_Config.m_SvHideScore)
-			pSelf->Score()->ShowTeamRank(pResult->m_ClientID, pResult->GetString(0),
-					true);
+			pSelf->Score()->ShowTeamRank(pResult->m_ClientID, pResult->GetString(0));
 		else
 			pSelf->Console()->Print(
 					IConsole::OUTPUT_LEVEL_STANDARD,
 					"teamrank",
 					"Showing the team rank of other players is not allowed on this server.");
+	}
 	else
 		pSelf->Score()->ShowTeamRank(pResult->m_ClientID,
 				pSelf->Server()->ClientName(pResult->m_ClientID));
-
-#if defined(CONF_SQL)
-	if(g_Config.m_SvUseSQL)
-		pPlayer->m_LastSQLQuery = pSelf->Server()->Tick();
-#endif
 }
 
 void CGameContext::ConRank(IConsole::IResult *pResult, void *pUserData)
@@ -728,33 +726,19 @@ void CGameContext::ConRank(IConsole::IResult *pResult, void *pUserData)
 	if (!CheckClientID(pResult->m_ClientID))
 		return;
 
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
-	if (!pPlayer)
-		return;
-
-#if defined(CONF_SQL)
-	if(g_Config.m_SvUseSQL)
-		if(pPlayer->m_LastSQLQuery + g_Config.m_SvSqlQueriesDelay * pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
-			return;
-#endif
-
 	if (pResult->NumArguments() > 0)
+	{
 		if (!g_Config.m_SvHideScore)
-			pSelf->Score()->ShowRank(pResult->m_ClientID, pResult->GetString(0),
-					true);
+			pSelf->Score()->ShowRank(pResult->m_ClientID, pResult->GetString(0));
 		else
 			pSelf->Console()->Print(
 					IConsole::OUTPUT_LEVEL_STANDARD,
 					"rank",
 					"Showing the rank of other players is not allowed on this server.");
+	}
 	else
 		pSelf->Score()->ShowRank(pResult->m_ClientID,
 				pSelf->Server()->ClientName(pResult->m_ClientID));
-
-#if defined(CONF_SQL)
-	if(g_Config.m_SvUseSQL)
-		pPlayer->m_LastSQLQuery = pSelf->Server()->Tick();
-#endif
 }
 
 void CGameContext::ConLockTeam(IConsole::IResult *pResult, void *pUserData)
@@ -762,6 +746,13 @@ void CGameContext::ConLockTeam(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *) pUserData;
 	if (!CheckClientID(pResult->m_ClientID))
 		return;
+
+	if(g_Config.m_SvTeam == 0 || g_Config.m_SvTeam == 3)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "lock",
+				"Teams are disabled");
+		return;
+	}
 
 	int Team = ((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.m_Core.Team(pResult->m_ClientID);
 
@@ -785,13 +776,7 @@ void CGameContext::ConLockTeam(IConsole::IResult *pResult, void *pUserData)
 	char aBuf[512];
 	if(Lock)
 	{
-		((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.SetTeamLock(Team, false);
-
-		str_format(aBuf, sizeof(aBuf), "'%s' unlocked your team.", pSelf->Server()->ClientName(pResult->m_ClientID));
-
-		for (int i = 0; i < MAX_CLIENTS; i++)
-			if (((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.m_Core.Team(i) == Team)
-				pSelf->SendChatTarget(i, aBuf);
+		pSelf->UnlockTeam(pResult->m_ClientID, Team);
 	}
 	else if(!g_Config.m_SvTeamLock)
 	{
@@ -810,6 +795,42 @@ void CGameContext::ConLockTeam(IConsole::IResult *pResult, void *pUserData)
 			if (((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.m_Core.Team(i) == Team)
 				pSelf->SendChatTarget(i, aBuf);
 	}
+}
+
+void CGameContext::ConUnlockTeam(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+		return;
+
+	if(g_Config.m_SvTeam == 0 || g_Config.m_SvTeam == 3)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "unlock",
+				"Teams are disabled");
+		return;
+	}
+
+	int Team = ((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.m_Core.Team(pResult->m_ClientID);
+
+	if(Team <= TEAM_FLOCK || Team >= TEAM_SUPER)
+		return;
+
+	if(pSelf->ProcessSpamProtection(pResult->m_ClientID))
+		return;
+
+	pSelf->UnlockTeam(pResult->m_ClientID, Team);
+}
+
+void CGameContext::UnlockTeam(int ClientID, int Team)
+{
+	((CGameControllerDDRace*) m_pController)->m_Teams.SetTeamLock(Team, false);
+
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "'%s' unlocked your team.", Server()->ClientName(ClientID));
+
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		if (((CGameControllerDDRace*) m_pController)->m_Teams.m_Core.Team(i) == Team)
+			SendChatTarget(i, aBuf);
 }
 
 void CGameContext::ConInviteTeam(IConsole::IResult *pResult, void *pUserData)
@@ -889,7 +910,7 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 	if (!pPlayer)
 		return;
 
-	if (pSelf->m_VoteCloseTime && pSelf->m_VoteCreator == pResult->m_ClientID && (pSelf->m_VoteKick || pSelf->m_VoteSpec))
+	if (pSelf->m_VoteCloseTime && pSelf->m_VoteCreator == pResult->m_ClientID && (pSelf->IsKickVote() || pSelf->IsSpecVote()))
 	{
 		pSelf->Console()->Print(
 				IConsole::OUTPUT_LEVEL_STANDARD,
@@ -921,6 +942,8 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 		}
 		else
 		{
+			int Team = pResult->GetInteger(0);
+
 			if (pPlayer->m_Last_Team
 					+ pSelf->Server()->TickSpeed()
 					* g_Config.m_SvTeamChangeDelay
@@ -929,28 +952,30 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",
 						"You can\'t change teams that fast!");
 			}
-			else if(pResult->GetInteger(0) > 0 && pResult->GetInteger(0) < MAX_CLIENTS && pController->m_Teams.TeamLocked(pResult->GetInteger(0)) && !pController->m_Teams.IsInvited(pResult->GetInteger(0), pResult->m_ClientID))
+			else if(Team > 0 && Team < MAX_CLIENTS && pController->m_Teams.TeamLocked(Team) && !pController->m_Teams.IsInvited(Team, pResult->m_ClientID))
 			{
 				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",
 						g_Config.m_SvInvite ?
 						"This team is locked using /lock. Only members of the team can unlock it using /lock." :
 						"This team is locked using /lock. Only members of the team can invite you or unlock it using /lock.");
 			}
-			else if(pResult->GetInteger(0) > 0 && pResult->GetInteger(0) < MAX_CLIENTS && pController->m_Teams.Count(pResult->GetInteger(0)) >= g_Config.m_SvTeamMaxSize)
+			else if(Team > 0 && Team < MAX_CLIENTS && pController->m_Teams.Count(Team) >= g_Config.m_SvTeamMaxSize)
 			{
 				char aBuf[512];
 				str_format(aBuf, sizeof(aBuf), "This team already has the maximum allowed size of %d players", g_Config.m_SvTeamMaxSize);
 				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join", aBuf);
 			}
-			else if (((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.SetCharacterTeam(
-					pPlayer->GetCID(), pResult->GetInteger(0)))
+			else if(pController->m_Teams.SetCharacterTeam(pPlayer->GetCID(), Team))
 			{
 				char aBuf[512];
 				str_format(aBuf, sizeof(aBuf), "%s joined team %d",
 						pSelf->Server()->ClientName(pPlayer->GetCID()),
-						pResult->GetInteger(0));
+						Team);
 				pSelf->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 				pPlayer->m_Last_Team = pSelf->Server()->Tick();
+
+				if(pController->m_Teams.IsPractice(Team))
+					pSelf->SendChatTarget(pPlayer->GetCID(), "Practice mode enabled for your team, happy practicing!");
 			}
 			else
 			{
@@ -1289,7 +1314,7 @@ void CGameContext::ConTime(IConsole::IResult *pResult, void *pUserData)
 	pSelf->SendBroadcast(aBuftime, pResult->m_ClientID);
 }
 
-static const char s_aaMsg[3][128] = {"game/round timer.", "broadcast.", "both game/round timer and broadcast."};
+static const char s_aaMsg[4][128] = {"game/round timer.", "broadcast.", "both game/round timer and broadcast.", "racetime."};
 
 void CGameContext::ConSetTimerType(IConsole::IResult *pResult, void *pUserData)
 {
@@ -1307,49 +1332,27 @@ void CGameContext::ConSetTimerType(IConsole::IResult *pResult, void *pUserData)
 	if(pResult->NumArguments() > 0)
 	{
 		int OldType = pPlayer->m_TimerType;
+		bool Result = false;
 
-		if(str_comp_nocase(pResult->GetString(0), "gametimer") == 0)
-		{
-			if(pPlayer->m_ClientVersion >= VERSION_DDNET_GAMETICK)
-				pPlayer->m_TimerType = CPlayer::TIMERTYPE_GAMETIMER;
-			else
-				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "timer", "gametimer is not supported by your client.");
-		}
+		if(str_comp_nocase(pResult->GetString(0), "default") == 0)
+			Result = pPlayer->SetTimerType(CPlayer::TIMERTYPE_DEFAULT);
+		else if(str_comp_nocase(pResult->GetString(0), "gametimer") == 0)
+			Result = pPlayer->SetTimerType(CPlayer::TIMERTYPE_GAMETIMER);
 		else if(str_comp_nocase(pResult->GetString(0), "broadcast") == 0)
-			pPlayer->m_TimerType = CPlayer::TIMERTYPE_BROADCAST;
+			Result = pPlayer->SetTimerType(CPlayer::TIMERTYPE_BROADCAST);
 		else if(str_comp_nocase(pResult->GetString(0), "both") == 0)
-		{
-			if(pPlayer->m_ClientVersion >= VERSION_DDNET_GAMETICK)
-				pPlayer->m_TimerType = CPlayer::TIMERTYPE_GAMETIMER_AND_BROADCAST;
-			else
-			{
-				pPlayer->m_TimerType = CPlayer::TIMERTYPE_BROADCAST;
-				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "timer", "gametimer is not supported by your client.");
-			}
-		}
+			Result = pPlayer->SetTimerType(CPlayer::TIMERTYPE_GAMETIMER_AND_BROADCAST);
 		else if(str_comp_nocase(pResult->GetString(0), "none") == 0)
-			pPlayer->m_TimerType = CPlayer::TIMERTYPE_NONE;
-		else if(str_comp_nocase(pResult->GetString(0), "cycle") == 0)
-		{
-			if(pPlayer->m_ClientVersion >= VERSION_DDNET_GAMETICK)
-			{
-				if(pPlayer->m_TimerType < CPlayer::TIMERTYPE_NONE)
-					pPlayer->m_TimerType++;
-				else if(pPlayer->m_TimerType == CPlayer::TIMERTYPE_NONE)
-					pPlayer->m_TimerType = CPlayer::TIMERTYPE_GAMETIMER;
-			}
-			else
-			{
-				if(pPlayer->m_TimerType < CPlayer::TIMERTYPE_NONE)
-					pPlayer->m_TimerType = CPlayer::TIMERTYPE_NONE;
-				else if(pPlayer->m_TimerType == CPlayer::TIMERTYPE_NONE)
-					pPlayer->m_TimerType = CPlayer::TIMERTYPE_BROADCAST;
-			}
-		}
+			Result = pPlayer->SetTimerType(CPlayer::TIMERTYPE_NONE);
 		else
 		{
-			str_format(aBuf, sizeof(aBuf), "Unknown \"%s\" parameter. Accepted values: gametimer, broadcast, both, none, cycle", pResult->GetString(0));
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "timer", aBuf);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "timer", "Unknown parameter. Accepted values: default, gametimer, broadcast, both, none");
+			return;
+		}
+
+		if(!Result)
+		{
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "timer", "Selected timertype is not supported by your client");
 			return;
 		}
 
@@ -1357,7 +1360,7 @@ void CGameContext::ConSetTimerType(IConsole::IResult *pResult, void *pUserData)
 			pSelf->SendBroadcast("", pResult->m_ClientID);
 	}
 
-	if(pPlayer->m_TimerType <= CPlayer::TIMERTYPE_GAMETIMER_AND_BROADCAST && pPlayer->m_TimerType >= CPlayer::TIMERTYPE_GAMETIMER)
+	if(pPlayer->m_TimerType <= CPlayer::TIMERTYPE_SIXUP && pPlayer->m_TimerType >= CPlayer::TIMERTYPE_GAMETIMER)
 		str_format(aBuf, sizeof(aBuf), "Timer is displayed in %s", s_aaMsg[pPlayer->m_TimerType]);
 	else if(pPlayer->m_TimerType == CPlayer::TIMERTYPE_NONE)
 		str_format(aBuf, sizeof(aBuf), "Timer isn't displayed.");
@@ -1377,8 +1380,10 @@ void CGameContext::ConRescue(IConsole::IResult *pResult, void *pUserData)
 	if (!pChr)
 		return;
 
-	if (!g_Config.m_SvRescue) {
-		pSelf->SendChatTarget(pPlayer->GetCID(), "Rescue is not enabled on this server");
+	CGameTeams &Teams = ((CGameControllerDDRace*) pSelf->m_pController)->m_Teams;
+	int Team = Teams.m_Core.Team(pResult->m_ClientID);
+	if (!g_Config.m_SvRescue && !Teams.IsPractice(Team)) {
+		pSelf->SendChatTarget(pPlayer->GetCID(), "Rescue is not enabled on this server and you're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
 		return;
 	}
 
@@ -1412,47 +1417,30 @@ void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)
 
 void CGameContext::ConPoints(IConsole::IResult *pResult, void *pUserData)
 {
-#if defined(CONF_SQL)
 	CGameContext *pSelf = (CGameContext *) pUserData;
 	if (!CheckClientID(pResult->m_ClientID))
 		return;
 
-	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
-		if(pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery + g_Config.m_SvSqlQueriesDelay * pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
-			return;
-
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
-	if (!pPlayer)
-		return;
-
 	if (pResult->NumArguments() > 0)
+	{
 		if (!g_Config.m_SvHideScore)
-			pSelf->Score()->ShowPoints(pResult->m_ClientID, pResult->GetString(0),
-					true);
+			pSelf->Score()->ShowPoints(pResult->m_ClientID, pResult->GetString(0));
 		else
 			pSelf->Console()->Print(
 					IConsole::OUTPUT_LEVEL_STANDARD,
 					"points",
 					"Showing the global points of other players is not allowed on this server.");
+	}
 	else
 		pSelf->Score()->ShowPoints(pResult->m_ClientID,
 				pSelf->Server()->ClientName(pResult->m_ClientID));
-
-	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
-		pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery = pSelf->Server()->Tick();
-#endif
 }
 
 void CGameContext::ConTopPoints(IConsole::IResult *pResult, void *pUserData)
 {
-#if defined(CONF_SQL)
 	CGameContext *pSelf = (CGameContext *) pUserData;
 	if (!CheckClientID(pResult->m_ClientID))
 		return;
-
-	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
-		if(pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery + g_Config.m_SvSqlQueriesDelay * pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
-			return;
 
 	if (g_Config.m_SvHideScore)
 	{
@@ -1462,12 +1450,8 @@ void CGameContext::ConTopPoints(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	if (pResult->NumArguments() > 0)
-		pSelf->Score()->ShowTopPoints(pResult, pResult->m_ClientID, pUserData,
-				pResult->GetInteger(0));
+		pSelf->Score()->ShowTopPoints(pResult->m_ClientID, pResult->GetInteger(0));
 	else
-		pSelf->Score()->ShowTopPoints(pResult, pResult->m_ClientID, pUserData);
+		pSelf->Score()->ShowTopPoints(pResult->m_ClientID);
 
-	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
-		pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery = pSelf->Server()->Tick();
-#endif
 }
