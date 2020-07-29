@@ -1113,6 +1113,8 @@ set(EXPECTED_DATA
   maps/dm8.map
   maps/dm9.map
   particles.png
+  playerpics/ChillerDragon.png
+  playerpics/jao.png
   shader/bordertile.frag
   shader/bordertile.vert
   shader/bordertileline.frag
