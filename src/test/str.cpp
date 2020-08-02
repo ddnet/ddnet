@@ -188,14 +188,23 @@ TEST(Str, StrFormat)
 
 TEST(Str, StrCopyNum)
 {
-	const char *foo = "Foobar";
+	const char *foo = "Foobaré";
 	char aBuf[64];
-	str_truncate(aBuf, 3, foo, 1);
+	str_utf8_truncate(aBuf, 3, foo, 1);
 	EXPECT_STREQ(aBuf, "F");
-	str_truncate(aBuf, 3, foo, 2);
+	str_utf8_truncate(aBuf, 3, foo, 2);
 	EXPECT_STREQ(aBuf, "Fo");
-	str_truncate(aBuf, 3, foo, 3);
+	str_utf8_truncate(aBuf, 3, foo, 3);
 	EXPECT_STREQ(aBuf, "Fo");
-	str_truncate(aBuf, sizeof(aBuf), foo, 6);
+	str_utf8_truncate(aBuf, sizeof(aBuf), foo, 6);
 	EXPECT_STREQ(aBuf, "Foobar");
+	str_utf8_truncate(aBuf, sizeof(aBuf), foo, 7);
+	EXPECT_STREQ(aBuf, "Foobaré");
+
+	char aBuf2[8];
+	str_utf8_truncate(aBuf2, sizeof(aBuf2), foo, 7);
+	EXPECT_STREQ(aBuf2, "Foobar");
+	char aBuf3[9];
+	str_utf8_truncate(aBuf3, sizeof(aBuf3), foo, 7);
+	EXPECT_STREQ(aBuf3, "Foobaré");
 }

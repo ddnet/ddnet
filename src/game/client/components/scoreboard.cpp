@@ -201,16 +201,10 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			pTitle = Localize("Game over");
 		else
 		{
-			if(str_length(Client()->GetCurrentMap()) > 16)
-			{
-				str_truncate(aBuf, sizeof(aBuf), Client()->GetCurrentMap(), 16);
-				str_append(aBuf, "...", sizeof(aBuf));
-				pTitle = aBuf;
-			}
-			else
-			{
-				pTitle = Client()->GetCurrentMap();
-			}
+			str_utf8_truncate(aBuf, sizeof(aBuf), Client()->GetCurrentMap(), 16);
+			if(str_comp(aBuf, Client()->GetCurrentMap()))
+				str_append(aBuf, "…", sizeof(aBuf));
+			pTitle = aBuf;
 		}
 	}
 	TextRender()->Text(0, x + 20.0f, y + (50.f - TitleFontsize) / 2.f, TitleFontsize, pTitle, -1.0f);
