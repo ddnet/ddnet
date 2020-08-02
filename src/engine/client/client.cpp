@@ -3012,6 +3012,17 @@ void CClient::Run()
 			m_aCmdPlayDemo[0] = 0;
 		}
 
+		// handle pending map edits
+		if(m_aCmdEditMap[0])
+		{
+			int Result = m_pEditor->Load(m_aCmdEditMap, IStorage::TYPE_ABSOLUTE);
+			if(Result)
+				g_Config.m_ClEditor = true;
+			else
+				dbg_msg("demo_player", "editing passed map file '%s' failed", m_aCmdEditMap);
+			m_aCmdEditMap[0] = 0;
+		}
+
 		// progress on dummy connect if security token handshake skipped/passed
 		if(m_DummySendConnInfo && !m_NetClient[CLIENT_DUMMY].SecurityTokenUnknown())
 		{
@@ -3987,6 +3998,11 @@ void CClient::HandleDemoPath(const char *pPath)
 	str_copy(m_aCmdPlayDemo, pPath, sizeof(m_aCmdPlayDemo));
 }
 
+void CClient::HandleMapPath(const char *pPath)
+{
+	str_copy(m_aCmdEditMap, pPath, sizeof(m_aCmdEditMap));
+}
+
 /*
 	Server Time
 	Client Mirror Time
@@ -4137,6 +4153,8 @@ int main(int argc, const char **argv) // ignore_convention
 		pClient->HandleConnectLink(argv[1]);
 	else if(argc == 2 && str_endswith(argv[1], ".demo"))
 		pClient->HandleDemoPath(argv[1]);
+	else if(argc == 2 && str_endswith(argv[1], ".map"))
+		pClient->HandleMapPath(argv[1]);
 	else if(argc > 1) // ignore_convention
 		pConsole->ParseArguments(argc-1, &argv[1]); // ignore_convention
 
