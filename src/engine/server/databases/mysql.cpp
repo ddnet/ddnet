@@ -1,5 +1,6 @@
 #include "mysql.h"
 
+#include <engine/console.h>
 #if defined(CONF_SQL)
 #include <cppconn/driver.h>
 #endif
@@ -41,6 +42,15 @@ CMysqlConnection::~CMysqlConnection()
 	m_pPreparedStmt.release();
 	m_pConnection.release();
 #endif
+}
+
+void CMysqlConnection::Print(IConsole *pConsole, const char *Mode)
+{
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf),
+			"MySQL-%s: DB: '%s' Prefix: '%s' User: '%s' Pass: '%s' IP: <{'%s'}> Port: %d",
+			Mode, m_aDatabase, GetPrefix(), m_aUser, m_aPass, m_aIp, m_Port);
+	pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 }
 
 CMysqlConnection *CMysqlConnection::Copy()

@@ -1,5 +1,6 @@
 #include "connection_pool.h"
 
+#include <engine/console.h>
 #if defined(CONF_SQL)
 #include <cppconn/exception.h>
 #endif
@@ -65,6 +66,15 @@ CDbConnectionPool::CDbConnectionPool() :
 
 CDbConnectionPool::~CDbConnectionPool()
 {
+}
+
+void CDbConnectionPool::Print(IConsole *pConsole, Mode DatabaseMode)
+{
+	const char *ModeDesc[] = {"Read", "Write", "WriteBackup"};
+	for(unsigned int i = 0; i < m_aapDbConnections[DatabaseMode].size(); i++)
+	{
+		m_aapDbConnections[DatabaseMode][i]->Print(pConsole, ModeDesc[DatabaseMode]);
+	}
 }
 
 void CDbConnectionPool::RegisterDatabase(std::unique_ptr<IDbConnection> pDatabase, Mode DatabaseMode)

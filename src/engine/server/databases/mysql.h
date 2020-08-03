@@ -25,6 +25,7 @@ public:
 			int Port,
 			bool Setup);
 	virtual ~CMysqlConnection();
+	virtual void Print(IConsole *pConsole, const char *Mode);
 
 	virtual CMysqlConnection *Copy();
 

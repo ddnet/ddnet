@@ -1,6 +1,7 @@
 #include "sqlite.h"
 
 #include <base/math.h>
+#include <engine/console.h>
 
 #include <stdexcept>
 #include <sqlite3.h>
@@ -24,6 +25,17 @@ CSqliteConnection::~CSqliteConnection()
 	sqlite3_close(m_pDb);
 	m_pDb = nullptr;
 }
+
+
+void CSqliteConnection::Print(IConsole *pConsole, const char *Mode)
+{
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf),
+			"SQLite-%s: DB: '%s'",
+			Mode, m_aFilename);
+	pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+}
+
 
 void CSqliteConnection::ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize)
 {

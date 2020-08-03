@@ -13,6 +13,8 @@ struct ISqlData
 	virtual ~ISqlData() {};
 };
 
+class IConsole;
+
 class CDbConnectionPool
 {
 public:
@@ -30,6 +32,8 @@ public:
 		WRITE_BACKUP,
 		NUM_MODES,
 	};
+
+	void Print(IConsole *pConsole, Mode DatabaseMode);
 
 	void RegisterDatabase(std::unique_ptr<IDbConnection> pDatabase, Mode DatabaseMode);
 
