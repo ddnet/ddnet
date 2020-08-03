@@ -47,7 +47,7 @@ IDbConnection::Status CSqliteConnection::Connect()
 	if(Result != SQLITE_OK)
 	{
 		dbg_msg("sql", "Can't open sqlite database: '%s'", sqlite3_errmsg(m_pDb));
-		return Status::ERROR;
+		return Status::FAILURE;
 	}
 
 	// wait for database to unlock so we don't have to handle SQLITE_BUSY errors
@@ -58,19 +58,19 @@ IDbConnection::Status CSqliteConnection::Connect()
 		char aBuf[1024];
 		FormatCreateRace(aBuf, sizeof(aBuf));
 		if(!Execute(aBuf))
-			return Status::ERROR;
+			return Status::FAILURE;
 		FormatCreateTeamrace(aBuf, sizeof(aBuf), "BLOB");
 		if(!Execute(aBuf))
-			return Status::ERROR;
+			return Status::FAILURE;
 		FormatCreateMaps(aBuf, sizeof(aBuf));
 		if(!Execute(aBuf))
-			return Status::ERROR;
+			return Status::FAILURE;
 		FormatCreateSaves(aBuf, sizeof(aBuf));
 		if(!Execute(aBuf))
-			return Status::ERROR;
+			return Status::FAILURE;
 		FormatCreatePoints(aBuf, sizeof(aBuf));
 		if(!Execute(aBuf))
-			return Status::ERROR;
+			return Status::FAILURE;
 		m_Setup = false;
 	}
 	m_Locked = false;

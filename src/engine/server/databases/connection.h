@@ -33,7 +33,7 @@ public:
 	{
 		IN_USE,
 		SUCCESS,
-		ERROR,
+		FAILURE,
 	};
 	// tries to allocate the connection from the pool established
 	virtual Status Connect() = 0;
