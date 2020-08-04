@@ -314,7 +314,7 @@ void CGameContext::CreateSoundGlobal(int Sound, int Target)
 	}
 }
 
-void CGameContext::CallVote(int ClientID, const char *pDesc, const char *pCmd, const char *pReason, const char *pChatmsg)
+void CGameContext::CallVote(int ClientID, const char *pDesc, const char *pCmd, const char *pReason, const char *pChatmsg, const char *pSixupDesc)
 {
 	// check if a vote is already running
 	if(m_VoteCloseTime)
@@ -326,8 +326,11 @@ void CGameContext::CallVote(int ClientID, const char *pDesc, const char *pCmd, c
 	if(!pPlayer)
 		return;
 
-	SendChat(-1, CGameContext::CHAT_ALL, pChatmsg);
-	StartVote(pDesc, pCmd, pReason);
+	SendChat(-1, CGameContext::CHAT_ALL, pChatmsg, -1, CHAT_SIX);
+	if(!pSixupDesc)
+		pSixupDesc = pDesc;
+
+	StartVote(pDesc, pCmd, pReason, pSixupDesc);
 	pPlayer->m_Vote = 1;
 	pPlayer->m_VotePos = m_VotePos = 1;
 	m_VoteCreator = ClientID;
@@ -493,7 +496,7 @@ void CGameContext::SendBroadcast(const char *pText, int ClientID, bool IsImporta
 	m_apPlayers[ClientID]->m_LastBroadcastImportance = IsImportant;
 }
 
-void CGameContext::StartVote(const char *pDesc, const char *pCommand, const char *pReason)
+void CGameContext::StartVote(const char *pDesc, const char *pCommand, const char *pReason, const char *pSixupDesc)
 {
 	// reset votes
 	m_VoteEnforce = VOTE_ENFORCE_UNKNOWN;
@@ -510,6 +513,7 @@ void CGameContext::StartVote(const char *pDesc, const char *pCommand, const char
 	// start vote
 	m_VoteCloseTime = time_get() + time_freq() * g_Config.m_SvVoteTime;
 	str_copy(m_aVoteDescription, pDesc, sizeof(m_aVoteDescription));
+	str_copy(m_aSixupVoteDescription, pSixupDesc, sizeof(m_aSixupVoteDescription));
 	str_copy(m_aVoteCommand, pCommand, sizeof(m_aVoteCommand));
 	str_copy(m_aVoteReason, pReason, sizeof(m_aVoteReason));
 	SendVoteSet(-1);
@@ -532,7 +536,8 @@ void CGameContext::SendVoteSet(int ClientID)
 	if(m_VoteCloseTime)
 	{
 		Msg6.m_Timeout = Msg7.m_Timeout = (m_VoteCloseTime-time_get())/time_freq();
-		Msg6.m_pDescription = Msg7.m_pDescription = m_aVoteDescription;
+		Msg6.m_pDescription = m_aVoteDescription;
+		Msg7.m_pDescription = m_aSixupVoteDescription;
 		Msg6.m_pReason = Msg7.m_pReason = m_aVoteReason;
 
 		int &Type = (Msg7.m_Type = protocol7::VOTE_UNKNOWN);
@@ -1747,6 +1752,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			m_VoteType = VOTE_TYPE_UNKNOWN;
 			char aChatmsg[512] = {0};
 			char aDesc[VOTE_DESC_LENGTH] = {0};
+			char aSixupDesc[VOTE_DESC_LENGTH] = {0};
 			char aCmd[VOTE_CMD_LENGTH] = {0};
 			char aReason[VOTE_REASON_LENGTH] = "No reason given";
 			CNetMsg_Cl_CallVote *pMsg = (CNetMsg_Cl_CallVote *)pRawMsg;
@@ -1920,6 +1926,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				}
 
 				str_format(aChatmsg, sizeof(aChatmsg), "'%s' called for vote to kick '%s' (%s)", Server()->ClientName(ClientID), Server()->ClientName(KickID), aReason);
+				str_format(aSixupDesc, sizeof(aSixupDesc), "%2d: %s", KickID, Server()->ClientName(KickID));
 				if(!GetDDRaceTeam(ClientID))
 				{
 					if (!g_Config.m_SvVoteKickBantime)
@@ -1975,6 +1982,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					return;
 				}
 
+				str_format(aSixupDesc, sizeof(aSixupDesc), "%2d: %s", SpectateID, Server()->ClientName(SpectateID));
 				if(g_Config.m_SvPauseable && g_Config.m_SvVotePause)
 				{
 					str_format(aChatmsg, sizeof(aChatmsg), "'%s' called for vote to pause '%s' for %d seconds (%s)", Server()->ClientName(ClientID), Server()->ClientName(SpectateID), g_Config.m_SvVotePauseTime, aReason);
@@ -1992,7 +2000,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 
 			if(aCmd[0] && str_comp(aCmd, "info") != 0)
-				CallVote(ClientID, aDesc, aCmd, aReason, aChatmsg);
+				CallVote(ClientID, aDesc, aCmd, aReason, aChatmsg, aSixupDesc);
 		}
 		else if(MsgID == NETMSGTYPE_CL_VOTE)
 		{
