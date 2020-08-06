@@ -997,21 +997,20 @@ void str_append(char *dst, const char *src, int dst_size);
 void str_copy(char *dst, const char *src, int dst_size);
 
 /*
-	Function: str_truncate
-		Truncates a string to a given length.
+	Function: str_utf8_truncate
+		Truncates a utf8 encoded string to a given length.
 
 	Parameters:
 		dst - Pointer to a buffer that shall receive the string.
 		dst_size - Size of the buffer dst.
 		str - String to be truncated.
-		truncation_len - Maximum length of the returned string (not
-		counting the zero termination).
+		truncation_len - Maximum codepoints in the returned string.
 
 	Remarks:
-		- The strings are treated as zero-terminated strings.
+		- The strings are treated as utf8-encoded zero-terminated strings.
 		- Guarantees that dst string will contain zero-termination.
 */
-void str_truncate(char *dst, int dst_size, const char *src, int truncation_len);
+void str_utf8_truncate(char *dst, int dst_size, const char *src, int truncation_len);
 
 /*
 	Function: str_length
