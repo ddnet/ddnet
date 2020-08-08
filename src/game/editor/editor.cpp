@@ -4388,7 +4388,6 @@ void CEditor::RenderFileDialog()
 						if(m_FileList[NewIndex].m_IsVisible)
 							break;
 					}
-					dbg_msg("DEBUG", "NewIndex='%d'", NewIndex);
 				}
 				if(Input()->GetEvent(i).m_Key == KEY_UP)
 				{
@@ -4397,7 +4396,6 @@ void CEditor::RenderFileDialog()
 						if(m_FileList[NewIndex].m_IsVisible)
 							break;
 					}
-					dbg_msg("DEBUG", "NewIndex='%d'", NewIndex);
 				}
 			}
 			if(NewIndex > -1 && NewIndex < m_FileList.size())
