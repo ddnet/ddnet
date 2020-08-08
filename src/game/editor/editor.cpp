@@ -3490,6 +3490,71 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 		}
 	}
 
+	if(Input()->KeyPress(KEY_DOWN) && m_Dialog == DIALOG_NONE)
+	{
+		if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+		{
+			if(m_lSelectedLayers[m_lSelectedLayers.size() - 1] < m_Map.m_lGroups[m_SelectedGroup]->m_lLayers.size() - 1)
+				m_lSelectedLayers.add(m_lSelectedLayers[m_lSelectedLayers.size() - 1] + 1);
+		}
+		else
+		{
+			int CurrentLayer = 0;
+			for(int i = 0; i < m_lSelectedLayers.size(); i++)
+				CurrentLayer = maximum(m_lSelectedLayers[i], CurrentLayer);
+			SelectLayer(CurrentLayer);
+
+			if(m_lSelectedLayers[0] < m_Map.m_lGroups[m_SelectedGroup]->m_lLayers.size() - 1)
+			{
+				SelectLayer(m_lSelectedLayers[0] + 1);
+			}
+			else
+			{
+				for(int Group = m_SelectedGroup + 1; Group < m_Map.m_lGroups.size(); Group++)
+				{
+					if(m_Map.m_lGroups[Group]->m_lLayers.size() > 0)
+					{
+						m_SelectedGroup = Group;
+						SelectLayer(0);
+						break;
+					}
+				}
+			}
+		}
+	}
+	if(Input()->KeyPress(KEY_UP) && m_Dialog == DIALOG_NONE)
+	{
+		if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+		{
+			if(m_lSelectedLayers[m_lSelectedLayers.size() - 1] > 0)
+				m_lSelectedLayers.add(m_lSelectedLayers[m_lSelectedLayers.size() - 1] - 1);
+		}
+		else
+		{
+			int CurrentLayer = std::numeric_limits<int>::max();
+			for(int i = 0; i < m_lSelectedLayers.size(); i++)
+				CurrentLayer = minimum(m_lSelectedLayers[i], CurrentLayer);
+			SelectLayer(CurrentLayer);
+
+			if(m_lSelectedLayers[0] > 0)
+			{
+				SelectLayer(m_lSelectedLayers[0] - 1);
+			}
+			else
+			{
+				for(int Group = m_SelectedGroup - 1; Group >= 0; Group--)
+				{
+					if(m_Map.m_lGroups[Group]->m_lLayers.size() > 0)
+					{
+						m_SelectedGroup = Group;
+						SelectLayer(m_Map.m_lGroups[Group]->m_lLayers.size() - 1);
+						break;
+					}
+				}
+			}
+		}
+	}
+
 	if(LayerCur <= LayerStopAt)
 	{
 		LayersBox.HSplitTop(12.0f, &Slot, &LayersBox);
