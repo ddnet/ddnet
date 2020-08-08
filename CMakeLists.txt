@@ -1137,36 +1137,19 @@ set(EXPECTED_DATA
   shader/tile.vert
   shader/tiletex.frag
   shader/tiletex.vert
-  skins/Ablush\ NeoN.png
   skins/Aoe4leg.png
-  skins/Apish\ Coke.png
-  skins/BadAnqelMonster.png
-  skins/Black\ Phantom\ heinrich5991.png
-  skins/DuMoH.png
-  skins/Evil\ Puffi.png
-  skins/Flying\ Silex.png
-  skins/Hidden\ Assassin.png
-  skins/Irradiated\ Sunny.png
-  skins/Mobys\ Skull.png
   skins/PaladiN.png
-  skins/Red\ Coke.png
-  skins/Straw\ Crytek.png
   skins/Terrorist.png
-  skins/Volt.png
   skins/antiantey.png
-  skins/aqua.png
-  skins/bauer.png
   skins/beast.png
   skins/blacktee.png
   skins/bluekitty.png
   skins/bluestripe.png
-  skins/bomb.png
   skins/brownbear.png
   skins/bunny.png
   skins/caesar.png
   skins/cammo.png
   skins/cammostripes.png
-  skins/chera.png
   skins/chinese_by_whis.png
   skins/coala.png
   skins/coala_bluekitty.png
@@ -1191,7 +1174,6 @@ set(EXPECTED_DATA
   skins/emo.png
   skins/evil.png
   skins/evilwolfe.png
-  skins/fuzzy_coala.png
   skins/ghost.png
   skins/ghostjtj.png
   skins/giraffe.png
@@ -1258,7 +1240,6 @@ set(EXPECTED_DATA
   skins/tank.png
   skins/teerasta.png
   skins/toptri.png
-  skins/ts2_contest_skin.png
   skins/twinbop.png
   skins/twintri.png
   skins/veteran.png
