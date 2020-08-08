@@ -3443,18 +3443,21 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 				if(int Result = DoButton_Ex(m_Map.m_lGroups[g]->m_lLayers[i], aBuf, Checked, &Button,
 					BUTTON_CONTEXT, "Select layer. Shift click to select multiple.", CUI::CORNER_R, FontSize))
 				{
-					if(Result == 1 && (Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && m_SelectedGroup == g)
-					{
-						if(!m_lSelectedLayers.remove(i))
-							m_lSelectedLayers.add(i);
-					}
-					else if(!(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)))
-					{
-						m_SelectedGroup = g;
-						SelectLayer(i);
-					}
 					static CLayerPopupContext s_LayerPopupContext = {};
-					if(Result == 2)
+					if(Result == 1)
+					{
+						if((Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && m_SelectedGroup == g)
+						{
+							if(!m_lSelectedLayers.remove(i))
+								m_lSelectedLayers.add(i);
+						}
+						else if(!(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)))
+						{
+							m_SelectedGroup = g;
+							SelectLayer(i);
+						}
+					}
+					else if(Result == 2)
 					{
 						if(m_lSelectedLayers.size() > 1)
 						{
