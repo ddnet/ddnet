@@ -4029,6 +4029,53 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect View)
 		Graphics()->LinesEnd();
 	}
 
+	if(Input()->KeyPress(KEY_DOWN) && m_Dialog == DIALOG_NONE)
+	{
+		int OldImage = m_SelectedImage;
+		for(int i = m_SelectedImage + 1; i < m_Map.m_lImages.size(); i++)
+		{
+			if(m_Map.m_lImages[i]->m_External == m_Map.m_lImages[m_SelectedImage]->m_External)
+			{
+				m_SelectedImage = i;
+				break;
+			}
+		}
+		if(m_SelectedImage == OldImage && !m_Map.m_lImages[m_SelectedImage]->m_External)
+		{
+			for(int i = 0; i < m_Map.m_lImages.size(); i++)
+			{
+				if(m_Map.m_lImages[i]->m_External)
+				{
+					m_SelectedImage = i;
+					break;
+				}
+			}
+		}
+	}
+	if(Input()->KeyPress(KEY_UP) && m_Dialog == DIALOG_NONE)
+	{
+		int OldImage = m_SelectedImage;
+		for(int i = m_SelectedImage - 1; i >= 0; i--)
+		{
+			if(m_Map.m_lImages[i]->m_External == m_Map.m_lImages[m_SelectedImage]->m_External)
+			{
+				m_SelectedImage = i;
+				break;
+			}
+		}
+		if(m_SelectedImage == OldImage && m_Map.m_lImages[m_SelectedImage]->m_External)
+		{
+			for(int i = m_Map.m_lImages.size() - 1; i >= 0; i--)
+			{
+				if(!m_Map.m_lImages[i]->m_External)
+				{
+					m_SelectedImage = i;
+					break;
+				}
+			}
+		}
+	}
+
 	// render image
 	int i = m_SelectedImage;
 	if(i < m_Map.m_lImages.size())
@@ -4181,6 +4228,53 @@ void CEditor::RenderSounds(CUIRect ToolBox, CUIRect View)
 		Graphics()->LinesBegin();
 		Graphics()->LinesDraw(&LineItem, 1);
 		Graphics()->LinesEnd();
+	}
+
+	if(Input()->KeyPress(KEY_DOWN) && m_Dialog == DIALOG_NONE)
+	{
+		int OldSound = m_SelectedSound;
+		for(int i = m_SelectedSound + 1; i < m_Map.m_lSounds.size(); i++)
+		{
+			if(m_Map.m_lSounds[i]->m_External == m_Map.m_lSounds[m_SelectedSound]->m_External)
+			{
+				m_SelectedSound = i;
+				break;
+			}
+		}
+		if(m_SelectedSound == OldSound && !m_Map.m_lSounds[m_SelectedSound]->m_External)
+		{
+			for(int i = 0; i < m_Map.m_lSounds.size(); i++)
+			{
+				if(m_Map.m_lSounds[i]->m_External)
+				{
+					m_SelectedSound = i;
+					break;
+				}
+			}
+		}
+	}
+	if(Input()->KeyPress(KEY_UP) && m_Dialog == DIALOG_NONE)
+	{
+		int OldSound = m_SelectedSound;
+		for(int i = m_SelectedSound - 1; i >= 0; i--)
+		{
+			if(m_Map.m_lSounds[i]->m_External == m_Map.m_lSounds[m_SelectedSound]->m_External)
+			{
+				m_SelectedSound = i;
+				break;
+			}
+		}
+		if(m_SelectedSound == OldSound && m_Map.m_lSounds[m_SelectedSound]->m_External)
+		{
+			for(int i = m_Map.m_lSounds.size() - 1; i >= 0; i--)
+			{
+				if(!m_Map.m_lSounds[i]->m_External)
+				{
+					m_SelectedSound = i;
+					break;
+				}
+			}
+		}
 	}
 
 	CUIRect Slot;
