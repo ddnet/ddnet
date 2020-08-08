@@ -1168,7 +1168,6 @@ set(EXPECTED_DATA
   skins/cammostripes.png
   skins/chera.png
   skins/chinese_by_whis.png
-  skins/clefairy.png
   skins/coala.png
   skins/coala_bluekitty.png
   skins/coala_bluestripe.png
