@@ -30,7 +30,7 @@ CMysqlConnection::CMysqlConnection(
 	str_copy(m_aUser, pUser, sizeof(m_aUser));
 	str_copy(m_aPass, pPass, sizeof(m_aPass));
 	str_copy(m_aIp, pIp, sizeof(m_aIp));
-#if not defined(CONF_SQL)
+#ifndef CONF_SQL
 	dbg_msg("sql", "Adding MySQL server failed due to MySQL support not enabled during compile time");
 #endif
 }
