@@ -6,8 +6,8 @@
 #include <string>
 #include <vector>
 
-#include <engine/map.h>
 #include <engine/server/databases/connection_pool.h>
+#include <engine/map.h>
 #include <game/voting.h>
 #include <game/prng.h>
 

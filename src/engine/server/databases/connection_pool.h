@@ -1,12 +1,12 @@
 #ifndef ENGINE_SERVER_DATABASES_CONNECTION_POOL_H
 #define ENGINE_SERVER_DATABASES_CONNECTION_POOL_H
 
-#include "connection.h"
-
 #include <base/tl/threading.h>
 #include <atomic>
 #include <memory>
 #include <vector>
+
+class IDbConnection;
 
 struct ISqlData
 {

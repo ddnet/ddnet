@@ -1,8 +1,12 @@
 #include "mysql.h"
 
+#include <base/tl/threading.h>
 #include <engine/console.h>
 #if defined(CONF_SQL)
 #include <cppconn/driver.h>
+#include <cppconn/exception.h>
+#include <cppconn/prepared_statement.h>
+#include <cppconn/statement.h>
 #endif
 
 #include <string>

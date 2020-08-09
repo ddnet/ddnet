@@ -1,17 +1,17 @@
 #ifndef ENGINE_SERVER_DATABASES_MYSQL_H
 #define ENGINE_SERVER_DATABASES_MYSQL_H
 
-#include "connection.h"
-#include <base/tl/threading.h>
-
+#include <engine/server/databases/connection.h>
 #include <atomic>
 #include <memory>
 
-#if defined(CONF_SQL)
-#include <cppconn/exception.h>
-#include <cppconn/prepared_statement.h>
-#include <cppconn/statement.h>
-#endif
+class lock;
+namespace sql {
+class Connection;
+class PreparedStatement;
+class ResultSet;
+class Statement;
+} /* namespace sql */
 
 class CMysqlConnection : public IDbConnection
 {

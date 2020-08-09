@@ -1,4 +1,5 @@
 #include "connection_pool.h"
+#include "connection.h"
 
 #include <engine/console.h>
 #if defined(CONF_SQL)
