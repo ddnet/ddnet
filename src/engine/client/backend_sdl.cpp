@@ -43,6 +43,25 @@ extern "C"
 }
 #endif
 
+/*
+	sync_barrier - creates a full hardware fence
+*/
+#if defined(__GNUC__)
+	inline void sync_barrier()
+	{
+		__sync_synchronize();
+	}
+#elif defined(_MSC_VER)
+	#define WIN32_LEAN_AND_MEAN
+	#include <windows.h>
+	inline void sync_barrier()
+	{
+		MemoryBarrier();
+	}
+#else
+	#error missing atomic implementation for this compiler
+#endif
+
 // ------------ CGraphicsBackend_Threaded
 
 void CGraphicsBackend_Threaded::ThreadFunc(void *pUser)

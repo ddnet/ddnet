@@ -317,12 +317,18 @@ endif()
 find_package(ZLIB)
 find_package(Crypto)
 find_package(Curl)
+if(VIDEORECORDER)
+  find_package(FFMPEG)
+endif()
 find_package(Freetype)
 if(DOWNLOAD_GTEST)
   find_package(Git)
 endif()
 find_package(GLEW)
 find_package(GTest)
+if(UPNP)
+  find_package(Miniupnpc)
+endif()
 if(MYSQL)
   find_package(MySQL)
 else()
@@ -331,15 +337,10 @@ endif()
 find_package(Ogg)
 find_package(Opus)
 find_package(Opusfile)
-if(UPNP)
-  find_package(Miniupnpc)
-endif()
 find_package(Pnglite)
 find_package(PythonInterp 3)
 find_package(SDL2)
-if(VIDEORECORDER)
-  find_package(FFMPEG)
-endif()
+find_package(SQLite3)
 find_package(Threads)
 find_package(Wavpack)
 if(WEBSOCKETS)
@@ -395,6 +396,9 @@ show_dependency_status("Curl" CURL)
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   show_dependency_status("Dmg tools" DMGTOOLS)
 endif()
+if(VIDEORECORDER)
+  show_dependency_status("FFmpeg" FFMPEG)
+endif()
 show_dependency_status("Freetype" FREETYPE)
 if(DOWNLOAD_GTEST)
   show_dependency_status("Git" GIT)
@@ -404,6 +408,9 @@ show_dependency_status("GTest" GTEST)
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   show_dependency_status("Hdiutil" HDIUTIL)
 endif()
+if(UPNP)
+  show_dependency_status("Miniupnpc" MINIUPNPC)
+endif()
 if(MYSQL)
   show_dependency_status("MySQL" MYSQL)
 endif()
@@ -411,15 +418,10 @@ show_dependency_status("Ogg" OGG)
 show_dependency_status("OpenSSL Crypto" CRYPTO)
 show_dependency_status("Opus" OPUS)
 show_dependency_status("Opusfile" OPUSFILE)
-if(UPNP)
-  show_dependency_status("Miniupnpc" MINIUPNPC)
-endif()
 show_dependency_status("Pnglite" PNGLITE)
 show_dependency_status("PythonInterp" PYTHONINTERP)
 show_dependency_status("SDL2" SDL2)
-if(VIDEORECORDER)
-  show_dependency_status("FFmpeg" FFMPEG)
-endif()
+show_dependency_status("SQLite3" SQLite3)
 show_dependency_status("Wavpack" WAVPACK)
 show_dependency_status("Zlib" ZLIB)
 if(WEBSOCKETS)
@@ -431,6 +433,9 @@ if(CLIENT AND NOT(CURL_FOUND))
 endif()
 if(NOT(PYTHONINTERP_FOUND))
   message(SEND_ERROR "You must install Python to compile DDNet")
+endif()
+if(NOT(SQLite3_FOUND))
+  message(SEND_ERROR "You must install SQLite3 to compile DDNet")
 endif()
 
 if(MYSQL AND NOT(MYSQL_FOUND))
@@ -1814,21 +1819,25 @@ set_src(ANTIBOT_SRC GLOB src/antibot
   antibot_null.cpp
 )
 
-set_src(ENGINE_SERVER GLOB src/engine/server
+set_src(ENGINE_SERVER GLOB_RECURSE src/engine/server
   antibot.cpp
   antibot.h
   authmanager.cpp
   authmanager.h
+  databases/connection.cpp
+  databases/connection.h
+  databases/connection_pool.cpp
+  databases/connection_pool.h
+  databases/mysql.cpp
+  databases/mysql.h
+  databases/sqlite.cpp
+  databases/sqlite.h
   name_ban.cpp
   name_ban.h
   register.cpp
   register.h
   server.cpp
   server.h
-  sql_connector.cpp
-  sql_connector.h
-  sql_server.cpp
-  sql_server.h
   sql_string_helpers.cpp
   sql_string_helpers.h
   upnp.cpp
@@ -1877,10 +1886,6 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   save.h
   score.cpp
   score.h
-  score/file_score.cpp
-  score/file_score.h
-  score/sql_score.cpp
-  score/sql_score.h
   teams.cpp
   teams.h
   teehistorian.cpp
@@ -1910,6 +1915,7 @@ endif()
 set(LIBS_SERVER
   ${LIBS}
   ${MYSQL_LIBRARIES}
+  ${SQLite3_LIBRARIES}
   ${TARGET_ANTIBOT}
   ${MINIUPNPC_LIBRARIES}
   # Add pthreads (on non-Windows) at the end, so that other libraries can depend
@@ -2484,7 +2490,7 @@ foreach(target ${TARGETS_OWN})
   target_include_directories(${target} PRIVATE ${PROJECT_BINARY_DIR}/src)
   target_include_directories(${target} PRIVATE src)
   target_compile_definitions(${target} PRIVATE $<$<CONFIG:Debug>:CONF_DEBUG>)
-  target_include_directories(${target} PRIVATE ${ZLIB_INCLUDE_DIRS})
+  target_include_directories(${target} PRIVATE ${SQLite3_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS})
   target_compile_definitions(${target} PRIVATE GLEW_STATIC)
   if(CRYPTO_FOUND)
     target_compile_definitions(${target} PRIVATE CONF_OPENSSL)

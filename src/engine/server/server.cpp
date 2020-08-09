@@ -44,6 +44,10 @@
 	#include <windows.h>
 #endif
 
+#include <engine/server/databases/mysql.h>
+#include <engine/server/databases/sqlite.h>
+#include <engine/server/databases/connection_pool.h>
+
 
 CSnapIDPool::CSnapIDPool()
 {
@@ -297,16 +301,7 @@ CServer::CServer(): m_Register(false), m_RegSixup(true)
 	m_ConnLoggingSocketCreated = false;
 #endif
 
-#if defined (CONF_SQL)
-	for (int i = 0; i < MAX_SQLSERVERS; i++)
-	{
-		m_apSqlReadServers[i] = 0;
-		m_apSqlWriteServers[i] = 0;
-	}
-
-	CSqlConnector::SetReadServers(m_apSqlReadServers);
-	CSqlConnector::SetWriteServers(m_apSqlWriteServers);
-#endif
+	m_pConnectionPool = new CDbConnectionPool();
 
 	m_aErrorShutdownReason[0] = 0;
 
@@ -2307,6 +2302,23 @@ int CServer::Run()
 		return -1;
 	}
 
+	if(g_Config.m_SvSqliteFile[0] != '\0')
+	{
+		auto pSqlServers = std::unique_ptr<CSqliteConnection>(new CSqliteConnection(
+				g_Config.m_SvSqliteFile, true));
+
+		if(g_Config.m_SvUseSQL)
+		{
+			DbPool()->RegisterDatabase(std::move(pSqlServers), CDbConnectionPool::WRITE_BACKUP);
+		}
+		else
+		{
+			auto pCopy = std::unique_ptr<CSqliteConnection>(pSqlServers->Copy());
+			DbPool()->RegisterDatabase(std::move(pSqlServers), CDbConnectionPool::READ);
+			DbPool()->RegisterDatabase(std::move(pCopy), CDbConnectionPool::WRITE);
+		}
+	}
+
 	// start server
 	NETADDR BindAddr;
 	int NetType = g_Config.m_SvIpv4Only ? NETTYPE_IPV4 : NETTYPE_ALL;
@@ -2584,22 +2596,14 @@ int CServer::Run()
 	m_Fifo.Shutdown();
 #endif
 
-	GameServer()->OnShutdown(true);
+	GameServer()->OnShutdown();
 	m_pMap->Unload();
 
 	for(int i = 0; i < 2; i++)
 		free(m_apCurrentMapData[i]);
 
-#if defined (CONF_SQL)
-	for (int i = 0; i < MAX_SQLSERVERS; i++)
-	{
-		if (m_apSqlReadServers[i])
-			delete m_apSqlReadServers[i];
-
-		if (m_apSqlWriteServers[i])
-			delete m_apSqlWriteServers[i];
-	}
-#endif
+	DbPool()->OnShutdown();
+	delete m_pConnectionPool;
 
 #if defined (CONF_UPNP)
 	m_UPnP.Shutdown();
@@ -3065,6 +3069,8 @@ void CServer::ConLogout(IConsole::IResult *pResult, void *pUser)
 
 void CServer::ConShowIps(IConsole::IResult *pResult, void *pUser)
 {
+	if(!g_Config.m_SvUseSQL)
+		return;
 	CServer *pServer = (CServer *)pUser;
 
 	if(pServer->m_RconClientID >= 0 && pServer->m_RconClientID < MAX_CLIENTS &&
@@ -3084,10 +3090,10 @@ void CServer::ConShowIps(IConsole::IResult *pResult, void *pUser)
 	}
 }
 
-#if defined (CONF_SQL)
-
 void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 {
+	if(!g_Config.m_SvUseSQL)
+		return;
 	CServer *pSelf = (CServer *)pUserData;
 
 	if (pResult->NumArguments() != 7 && pResult->NumArguments() != 8)
@@ -3109,59 +3115,41 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 
 	bool SetUpDb = pResult->NumArguments() == 8 ? pResult->GetInteger(7) : true;
 
-	CSqlServer** apSqlServers = ReadOnly ? pSelf->m_apSqlReadServers : pSelf->m_apSqlWriteServers;
+	auto pSqlServers = std::unique_ptr<CMysqlConnection>(new CMysqlConnection(
+			pResult->GetString(1), pResult->GetString(2), pResult->GetString(3),
+			pResult->GetString(4), pResult->GetString(5), pResult->GetInteger(6),
+			SetUpDb));
 
-	for (int i = 0; i < MAX_SQLSERVERS; i++)
-	{
-		if (!apSqlServers[i])
-		{
-			apSqlServers[i] = new CSqlServer(pResult->GetString(1), pResult->GetString(2), pResult->GetString(3), pResult->GetString(4), pResult->GetString(5), pResult->GetInteger(6), &pSelf->m_GlobalSqlLock, ReadOnly, SetUpDb);
-
-			char aBuf[512];
-			str_format(aBuf, sizeof(aBuf),
-					"Added new Sql%sServer: %d: DB: '%s' Prefix: '%s' User: '%s' IP: <{'%s'}> Port: %d",
-					ReadOnly ? "Read" : "Write", i, apSqlServers[i]->GetDatabase(),
-					apSqlServers[i]->GetPrefix(), apSqlServers[i]->GetUser(),
-					apSqlServers[i]->GetIP(), apSqlServers[i]->GetPort());
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
-			if(SetUpDb)
-			{
-				if(!apSqlServers[i]->CreateTables())
-					pSelf->SetErrorShutdown("database create tables failed");
-			}
-			return;
-		}
-	}
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "failed to add new sqlserver: limit of sqlservers reached");
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf),
+			"Added new Sql%sServer: DB: '%s' Prefix: '%s' User: '%s' IP: <{'%s'}> Port: %d",
+			ReadOnly ? "Read" : "Write",
+			pResult->GetString(1), pResult->GetString(2), pResult->GetString(3),
+			pResult->GetString(5), pResult->GetInteger(6));
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+	pSelf->DbPool()->RegisterDatabase(std::move(pSqlServers), ReadOnly ? CDbConnectionPool::READ : CDbConnectionPool::WRITE);
 }
 
 void CServer::ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData)
 {
 	CServer *pSelf = (CServer *)pUserData;
 
-	bool ReadOnly;
-	if (str_comp_nocase(pResult->GetString(0), "w") == 0)
-		ReadOnly = false;
-	else if (str_comp_nocase(pResult->GetString(0), "r") == 0)
-		ReadOnly = true;
+	if(str_comp_nocase(pResult->GetString(0), "w") == 0)
+	{
+		pSelf->DbPool()->Print(pSelf->Console(), CDbConnectionPool::WRITE);
+		pSelf->DbPool()->Print(pSelf->Console(), CDbConnectionPool::WRITE_BACKUP);
+	}
+	else if(str_comp_nocase(pResult->GetString(0), "r") == 0)
+	{
+		pSelf->DbPool()->Print(pSelf->Console(), CDbConnectionPool::READ);
+	}
 	else
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "choose either 'r' for SqlReadServer or 'w' for SqlWriteServer");
 		return;
 	}
 
-	CSqlServer** apSqlServers = ReadOnly ? pSelf->m_apSqlReadServers : pSelf->m_apSqlWriteServers;
-
-	for (int i = 0; i < MAX_SQLSERVERS; i++)
-		if (apSqlServers[i])
-		{
-			char aBuf[512];
-			str_format(aBuf, sizeof(aBuf), "SQL-%s %d: DB: '%s' Prefix: '%s' User: '%s' Pass: '%s' IP: <{'%s'}> Port: %d", ReadOnly ? "Read" : "Write", i, apSqlServers[i]->GetDatabase(), apSqlServers[i]->GetPrefix(), apSqlServers[i]->GetUser(), apSqlServers[i]->GetPass(), apSqlServers[i]->GetIP(), apSqlServers[i]->GetPort());
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
-		}
 }
-
-#endif
 
 void CServer::ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
@@ -3363,10 +3351,8 @@ void CServer::RegisterCommands()
 
 	Console()->Register("reload", "", CFGFLAG_SERVER, ConMapReload, this, "Reload the map");
 
-#if defined(CONF_SQL)
 	Console()->Register("add_sqlserver", "s['r'|'w'] s[Database] s[Prefix] s[User] s[Password] s[IP] i[Port] ?i[SetUpDatabase ?]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAddSqlServer, this, "add a sqlserver");
 	Console()->Register("dump_sqlservers", "s['r'|'w']", CFGFLAG_SERVER, ConDumpSqlServers, this, "dumps all sqlservers readservers = r, writeservers = w");
-#endif
 
 	Console()->Register("auth_add", "s[ident] s[level] s[pw]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAuthAdd, this, "Add a rcon key");
 	Console()->Register("auth_add_p", "s[ident] s[level] s[hash] s[salt]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAuthAddHashed, this, "Add a prehashed rcon key");
