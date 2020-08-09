@@ -290,7 +290,7 @@ char* CSaveTee::GetString(const CSaveTeam *pTeam)
 	return m_aString;
 }
 
-int CSaveTee::LoadString(const char* String)
+int CSaveTee::FromString(const char* String)
 {
 	int Num;
 	Num = sscanf(String,
@@ -552,7 +552,7 @@ char* CSaveTeam::GetString()
 	return m_aString;
 }
 
-int CSaveTeam::LoadString(const char* String)
+int CSaveTeam::FromString(const char* String)
 {
 	char TeamStats[MAX_CLIENTS];
 	char Switcher[64];
@@ -636,7 +636,7 @@ int CSaveTeam::LoadString(const char* String)
 		if(StrSize < sizeof(SaveTee))
 		{
 			str_copy(SaveTee, CopyPos, StrSize);
-			int Num = m_pSavedTees[n].LoadString(SaveTee);
+			int Num = m_pSavedTees[n].FromString(SaveTee);
 			if(Num)
 			{
 				dbg_msg("load", "failed to load tee");

@@ -18,7 +18,7 @@ public:
 	void save(CCharacter* pchr);
 	void load(CCharacter* pchr, int Team);
 	char* GetString(const CSaveTeam *pTeam);
-	int LoadString(const char* String);
+	int FromString(const char* String);
 	void LoadHookedPlayer(const CSaveTeam *pTeam);
 	vec2 GetPos() const { return m_Pos; }
 	const char* GetName() const { return m_aName; }
@@ -115,7 +115,7 @@ public:
 	char* GetString();
 	int GetMembersCount() const { return m_MembersCount; }
 	// MatchPlayers has to be called afterwards
-	int LoadString(const char* String);
+	int FromString(const char* String);
 	// returns true if a team can load, otherwise writes a nice error Message in pMessage
 	bool MatchPlayers(const char (*paNames)[MAX_NAME_LENGTH], const int *pClientID, int NumPlayer, char *pMessage, int MessageLen);
 	int save(int Team);

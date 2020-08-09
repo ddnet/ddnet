@@ -1498,7 +1498,7 @@ bool CScore::LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 
 		char aSaveString[65536];
 		pSqlServer->GetString(1, aSaveString, sizeof(aSaveString));
-		int Num = pData->m_pResult->m_SavedTeam.LoadString(aSaveString);
+		int Num = pData->m_pResult->m_SavedTeam.FromString(aSaveString);
 
 		if(Num != 0)
 		{
