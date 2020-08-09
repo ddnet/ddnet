@@ -467,7 +467,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	SkinPrefix.HSplitTop(2.0f, 0, &SkinPrefix);
 	{
-		static const char *s_aSkinPrefixes[] = {"kitty", "coala", "santa"};
+		static const char *s_aSkinPrefixes[] = {"kitty", "santa"};
 		for(unsigned i = 0; i < sizeof(s_aSkinPrefixes) / sizeof(s_aSkinPrefixes[0]); i++)
 		{
 			const char *pPrefix = s_aSkinPrefixes[i];
