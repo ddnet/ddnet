@@ -1688,6 +1688,33 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 		}
+		{
+			char aBuf[64];
+			Right.HSplitTop(20.0f, &Label, &Right);
+			Label.VSplitRight(50.0f, &Label, &Button);
+			str_format(aBuf, sizeof(aBuf), "%s (echo)", Localize("Client message"));
+			UI()->DoLabelScaled(&Label, aBuf, 16.0f, -1);
+			{
+				static int s_DefaultButton = 0;
+				if(DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
+				{
+					ColorHSLA HSL = color_cast<ColorHSLA>(ColorRGBA(0.5f, 0.78f, 1.0f));
+					g_Config.m_ClMessageClientColor = HSL.Pack(false);
+				}
+			}
+
+			ColorHSLA CMColor = RenderHSLScrollbars(&Right, &g_Config.m_ClMessageClientColor);
+
+			Right.HSplitTop(10.0f, &Label, &Right);
+
+			ColorRGBA rgb = color_cast<ColorRGBA>(CMColor);
+			TextRender()->TextColor(rgb);
+
+
+			UI()->DoLabelScaled(&Label, "*** Dynamic camera activated", 12.0f, -1);
+			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+			Right.HSplitTop(20.0f, 0, &Right);
+		}
 	}
 	else if(Page == 2)
 	{
