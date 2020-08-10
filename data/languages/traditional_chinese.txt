@@ -6,7 +6,7 @@
 ##### translated strings #####
 
 %ds left
-== %ds 離開了
+== 還剩下 %d 秒
 
 %i minute left
 == 還剩下 %i 分鐘
