@@ -4032,6 +4032,7 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect View)
 	if(Input()->KeyPress(KEY_DOWN) && m_Dialog == DIALOG_NONE)
 	{
 		int OldImage = m_SelectedImage;
+		m_SelectedImage = clamp(m_SelectedImage, 0, m_Map.m_lImages.size() - 1);
 		for(int i = m_SelectedImage + 1; i < m_Map.m_lImages.size(); i++)
 		{
 			if(m_Map.m_lImages[i]->m_External == m_Map.m_lImages[m_SelectedImage]->m_External)
@@ -4055,6 +4056,7 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect View)
 	if(Input()->KeyPress(KEY_UP) && m_Dialog == DIALOG_NONE)
 	{
 		int OldImage = m_SelectedImage;
+		m_SelectedImage = clamp(m_SelectedImage, 0, m_Map.m_lImages.size() - 1);
 		for(int i = m_SelectedImage - 1; i >= 0; i--)
 		{
 			if(m_Map.m_lImages[i]->m_External == m_Map.m_lImages[m_SelectedImage]->m_External)
@@ -4233,6 +4235,7 @@ void CEditor::RenderSounds(CUIRect ToolBox, CUIRect View)
 	if(Input()->KeyPress(KEY_DOWN) && m_Dialog == DIALOG_NONE)
 	{
 		int OldSound = m_SelectedSound;
+		m_SelectedSound = clamp(m_SelectedSound, 0, m_Map.m_lSounds.size() - 1);
 		for(int i = m_SelectedSound + 1; i < m_Map.m_lSounds.size(); i++)
 		{
 			if(m_Map.m_lSounds[i]->m_External == m_Map.m_lSounds[m_SelectedSound]->m_External)
@@ -4256,6 +4259,7 @@ void CEditor::RenderSounds(CUIRect ToolBox, CUIRect View)
 	if(Input()->KeyPress(KEY_UP) && m_Dialog == DIALOG_NONE)
 	{
 		int OldSound = m_SelectedSound;
+		m_SelectedSound = clamp(m_SelectedSound, 0, m_Map.m_lSounds.size() - 1);
 		for(int i = m_SelectedSound - 1; i >= 0; i--)
 		{
 			if(m_Map.m_lSounds[i]->m_External == m_Map.m_lSounds[m_SelectedSound]->m_External)
