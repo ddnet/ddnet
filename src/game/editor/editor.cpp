@@ -3443,18 +3443,21 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 				if(int Result = DoButton_Ex(m_Map.m_lGroups[g]->m_lLayers[i], aBuf, Checked, &Button,
 					BUTTON_CONTEXT, "Select layer. Shift click to select multiple.", CUI::CORNER_R, FontSize))
 				{
-					if(Result == 1 && (Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && m_SelectedGroup == g)
-					{
-						if(!m_lSelectedLayers.remove(i))
-							m_lSelectedLayers.add(i);
-					}
-					else if(!(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)))
-					{
-						m_SelectedGroup = g;
-						SelectLayer(i);
-					}
 					static CLayerPopupContext s_LayerPopupContext = {};
-					if(Result == 2)
+					if(Result == 1)
+					{
+						if((Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && m_SelectedGroup == g)
+						{
+							if(!m_lSelectedLayers.remove(i))
+								m_lSelectedLayers.add(i);
+						}
+						else if(!(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)))
+						{
+							m_SelectedGroup = g;
+							SelectLayer(i);
+						}
+					}
+					else if(Result == 2)
 					{
 						if(m_lSelectedLayers.size() > 1)
 						{
@@ -3484,6 +3487,71 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 			if(LayerCur > LayerStartAt && LayerCur < LayerStopAt)
 				LayersBox.HSplitTop(5.0f, &Slot, &LayersBox);
 			LayerCur += 5.0f;
+		}
+	}
+
+	if(Input()->KeyPress(KEY_DOWN) && m_Dialog == DIALOG_NONE)
+	{
+		if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+		{
+			if(m_lSelectedLayers[m_lSelectedLayers.size() - 1] < m_Map.m_lGroups[m_SelectedGroup]->m_lLayers.size() - 1)
+				m_lSelectedLayers.add(m_lSelectedLayers[m_lSelectedLayers.size() - 1] + 1);
+		}
+		else
+		{
+			int CurrentLayer = 0;
+			for(int i = 0; i < m_lSelectedLayers.size(); i++)
+				CurrentLayer = maximum(m_lSelectedLayers[i], CurrentLayer);
+			SelectLayer(CurrentLayer);
+
+			if(m_lSelectedLayers[0] < m_Map.m_lGroups[m_SelectedGroup]->m_lLayers.size() - 1)
+			{
+				SelectLayer(m_lSelectedLayers[0] + 1);
+			}
+			else
+			{
+				for(int Group = m_SelectedGroup + 1; Group < m_Map.m_lGroups.size(); Group++)
+				{
+					if(m_Map.m_lGroups[Group]->m_lLayers.size() > 0)
+					{
+						m_SelectedGroup = Group;
+						SelectLayer(0);
+						break;
+					}
+				}
+			}
+		}
+	}
+	if(Input()->KeyPress(KEY_UP) && m_Dialog == DIALOG_NONE)
+	{
+		if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+		{
+			if(m_lSelectedLayers[m_lSelectedLayers.size() - 1] > 0)
+				m_lSelectedLayers.add(m_lSelectedLayers[m_lSelectedLayers.size() - 1] - 1);
+		}
+		else
+		{
+			int CurrentLayer = std::numeric_limits<int>::max();
+			for(int i = 0; i < m_lSelectedLayers.size(); i++)
+				CurrentLayer = minimum(m_lSelectedLayers[i], CurrentLayer);
+			SelectLayer(CurrentLayer);
+
+			if(m_lSelectedLayers[0] > 0)
+			{
+				SelectLayer(m_lSelectedLayers[0] - 1);
+			}
+			else
+			{
+				for(int Group = m_SelectedGroup - 1; Group >= 0; Group--)
+				{
+					if(m_Map.m_lGroups[Group]->m_lLayers.size() > 0)
+					{
+						m_SelectedGroup = Group;
+						SelectLayer(m_Map.m_lGroups[Group]->m_lLayers.size() - 1);
+						break;
+					}
+				}
+			}
 		}
 	}
 
@@ -3939,7 +4007,7 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect View)
 				FontSize--;
 
 			if(int Result = DoButton_Ex(&m_Map.m_lImages[i], aBuf, Selected, &Slot,
-				BUTTON_CONTEXT, "Select image", 0, FontSize))
+				BUTTON_CONTEXT, "Select image.", 0, FontSize))
 			{
 				m_SelectedImage = i;
 
@@ -3959,6 +4027,55 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect View)
 		Graphics()->LinesBegin();
 		Graphics()->LinesDraw(&LineItem, 1);
 		Graphics()->LinesEnd();
+	}
+
+	if(Input()->KeyPress(KEY_DOWN) && m_Dialog == DIALOG_NONE)
+	{
+		int OldImage = m_SelectedImage;
+		m_SelectedImage = clamp(m_SelectedImage, 0, m_Map.m_lImages.size() - 1);
+		for(int i = m_SelectedImage + 1; i < m_Map.m_lImages.size(); i++)
+		{
+			if(m_Map.m_lImages[i]->m_External == m_Map.m_lImages[m_SelectedImage]->m_External)
+			{
+				m_SelectedImage = i;
+				break;
+			}
+		}
+		if(m_SelectedImage == OldImage && !m_Map.m_lImages[m_SelectedImage]->m_External)
+		{
+			for(int i = 0; i < m_Map.m_lImages.size(); i++)
+			{
+				if(m_Map.m_lImages[i]->m_External)
+				{
+					m_SelectedImage = i;
+					break;
+				}
+			}
+		}
+	}
+	if(Input()->KeyPress(KEY_UP) && m_Dialog == DIALOG_NONE)
+	{
+		int OldImage = m_SelectedImage;
+		m_SelectedImage = clamp(m_SelectedImage, 0, m_Map.m_lImages.size() - 1);
+		for(int i = m_SelectedImage - 1; i >= 0; i--)
+		{
+			if(m_Map.m_lImages[i]->m_External == m_Map.m_lImages[m_SelectedImage]->m_External)
+			{
+				m_SelectedImage = i;
+				break;
+			}
+		}
+		if(m_SelectedImage == OldImage && m_Map.m_lImages[m_SelectedImage]->m_External)
+		{
+			for(int i = m_Map.m_lImages.size() - 1; i >= 0; i--)
+			{
+				if(!m_Map.m_lImages[i]->m_External)
+				{
+					m_SelectedImage = i;
+					break;
+				}
+			}
+		}
 	}
 
 	// render image
@@ -4093,7 +4210,7 @@ void CEditor::RenderSounds(CUIRect ToolBox, CUIRect View)
 				FontSize--;
 
 			if(int Result = DoButton_Ex(&m_Map.m_lSounds[i], aBuf, Selected, &Slot,
-				BUTTON_CONTEXT, "Select sound", 0, FontSize))
+				BUTTON_CONTEXT, "Select sound.", 0, FontSize))
 			{
 				m_SelectedSound = i;
 
@@ -4113,6 +4230,55 @@ void CEditor::RenderSounds(CUIRect ToolBox, CUIRect View)
 		Graphics()->LinesBegin();
 		Graphics()->LinesDraw(&LineItem, 1);
 		Graphics()->LinesEnd();
+	}
+
+	if(Input()->KeyPress(KEY_DOWN) && m_Dialog == DIALOG_NONE)
+	{
+		int OldSound = m_SelectedSound;
+		m_SelectedSound = clamp(m_SelectedSound, 0, m_Map.m_lSounds.size() - 1);
+		for(int i = m_SelectedSound + 1; i < m_Map.m_lSounds.size(); i++)
+		{
+			if(m_Map.m_lSounds[i]->m_External == m_Map.m_lSounds[m_SelectedSound]->m_External)
+			{
+				m_SelectedSound = i;
+				break;
+			}
+		}
+		if(m_SelectedSound == OldSound && !m_Map.m_lSounds[m_SelectedSound]->m_External)
+		{
+			for(int i = 0; i < m_Map.m_lSounds.size(); i++)
+			{
+				if(m_Map.m_lSounds[i]->m_External)
+				{
+					m_SelectedSound = i;
+					break;
+				}
+			}
+		}
+	}
+	if(Input()->KeyPress(KEY_UP) && m_Dialog == DIALOG_NONE)
+	{
+		int OldSound = m_SelectedSound;
+		m_SelectedSound = clamp(m_SelectedSound, 0, m_Map.m_lSounds.size() - 1);
+		for(int i = m_SelectedSound - 1; i >= 0; i--)
+		{
+			if(m_Map.m_lSounds[i]->m_External == m_Map.m_lSounds[m_SelectedSound]->m_External)
+			{
+				m_SelectedSound = i;
+				break;
+			}
+		}
+		if(m_SelectedSound == OldSound && m_Map.m_lSounds[m_SelectedSound]->m_External)
+		{
+			for(int i = m_Map.m_lSounds.size() - 1; i >= 0; i--)
+			{
+				if(!m_Map.m_lSounds[i]->m_External)
+				{
+					m_SelectedSound = i;
+					break;
+				}
+			}
+		}
 	}
 
 	CUIRect Slot;
@@ -4320,7 +4486,6 @@ void CEditor::RenderFileDialog()
 						if(m_FileList[NewIndex].m_IsVisible)
 							break;
 					}
-					dbg_msg("DEBUG", "NewIndex='%d'", NewIndex);
 				}
 				if(Input()->GetEvent(i).m_Key == KEY_UP)
 				{
@@ -4329,7 +4494,6 @@ void CEditor::RenderFileDialog()
 						if(m_FileList[NewIndex].m_IsVisible)
 							break;
 					}
-					dbg_msg("DEBUG", "NewIndex='%d'", NewIndex);
 				}
 			}
 			if(NewIndex > -1 && NewIndex < m_FileList.size())
@@ -4589,7 +4753,7 @@ void CEditor::RenderModebar(CUIRect View)
 			pButName = "Sounds";
 
 		int MouseButton = DoButton_Tab(&s_Button, pButName, 0, &Button, 0, "Switch between images, sounds and layers management.");
-		if(MouseButton == 2)
+		if(MouseButton == 2 || (Input()->KeyPress(KEY_LEFT) && m_Dialog == DIALOG_NONE))
 		{
 			if(m_Mode == MODE_LAYERS)
 				m_Mode = MODE_SOUNDS;
@@ -4598,7 +4762,7 @@ void CEditor::RenderModebar(CUIRect View)
 			else
 				m_Mode = MODE_IMAGES;
 		}
-		else if(MouseButton == 1)
+		else if(MouseButton == 1 || (Input()->KeyPress(KEY_RIGHT) && m_Dialog == DIALOG_NONE))
 		{
 			if(m_Mode == MODE_LAYERS)
 				m_Mode = MODE_IMAGES;
@@ -5448,7 +5612,7 @@ int CEditor::PopupMenuFile(CEditor *pEditor, CUIRect View, void *pContext)
 	CUIRect Slot;
 	View.HSplitTop(2.0f, &Slot, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
-	if(pEditor->DoButton_MenuItem(&s_NewMapButton, "New", 0, &Slot, 0, "Creates a new map"))
+	if(pEditor->DoButton_MenuItem(&s_NewMapButton, "New", 0, &Slot, 0, "Creates a new map (ctrl+n)"))
 	{
 		if(pEditor->HasUnsavedData())
 		{
@@ -5465,7 +5629,7 @@ int CEditor::PopupMenuFile(CEditor *pEditor, CUIRect View, void *pContext)
 
 	View.HSplitTop(10.0f, &Slot, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
-	if(pEditor->DoButton_MenuItem(&s_OpenButton, "Load", 0, &Slot, 0, "Opens a map for editing"))
+	if(pEditor->DoButton_MenuItem(&s_OpenButton, "Load", 0, &Slot, 0, "Opens a map for editing (ctrl+l)"))
 	{
 		if(pEditor->HasUnsavedData())
 		{
@@ -5495,7 +5659,7 @@ int CEditor::PopupMenuFile(CEditor *pEditor, CUIRect View, void *pContext)
 
 	View.HSplitTop(10.0f, &Slot, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
-	if(pEditor->DoButton_MenuItem(&s_AppendButton, "Append", 0, &Slot, 0, "Opens a map and adds everything from that map to the current one"))
+	if(pEditor->DoButton_MenuItem(&s_AppendButton, "Append", 0, &Slot, 0, "Opens a map and adds everything from that map to the current one (ctrl+a)"))
 	{
 		pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Append map", "Append", "maps", "", pEditor->CallbackAppendMap, pEditor);
 		return 1;
@@ -5778,6 +5942,28 @@ void CEditor::Render()
 		bool CtrlPressed = Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL);
 		bool ShiftPressed = Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT);
 		bool AltPressed = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
+		// ctrl+n to create new map
+		if(Input()->KeyPress(KEY_N) && CtrlPressed)
+		{
+				if(HasUnsavedData())
+				{
+					if(!m_PopupEventWasActivated)
+					{
+						m_PopupEventType = POPEVENT_NEW;
+						m_PopupEventActivated = true;
+					}
+				}
+				else
+				{
+					Reset();
+					m_aFileName[0] = 0;
+				}
+		}
+		// ctrl+a to append map
+		if(Input()->KeyPress(KEY_A) && CtrlPressed)
+		{
+			InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Append map", "Append", "maps", "", CallbackAppendMap, this);
+		}
 		// ctrl+o or ctrl+l to open
 		if((Input()->KeyPress(KEY_O) || Input()->KeyPress(KEY_L)) && CtrlPressed)
 		{
