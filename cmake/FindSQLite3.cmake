@@ -12,14 +12,14 @@ if(NOT SQLite3_FOUND)
 
   set_extra_dirs_lib(SQLite3 sqlite3)
   find_library(SQLite3_LIBRARY
-    NAMES sqlite3
+    NAMES sqlite3 sqlite3.0
     HINTS ${HINTS_SQLite3_LIBDIR} ${PC_SQLite3_LIBDIR} ${PC_SQLite3_LIBRARY_DIRS}
     PATHS ${PATHS_SQLite3_LIBDIR}
     ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
   )
   set_extra_dirs_include(SQLite3 sqlite3 "${SQLite3_LIBRARY}")
-  find_path(SQLite3_INCLUDEDIR sqlite3.h 
-    PATH_SUFFIXES sqlite3 
+  find_path(SQLite3_INCLUDEDIR sqlite3.h
+    PATH_SUFFIXES sqlite3
     HINTS ${HINTS_SQLite3_INCLUDEDIR} ${PC_SQLite3_INCLUDEDIR} ${PC_SQLite3_INCLUDE_DIRS}
     PATHS ${PATHS_SQLite3_INCLUDEDIR}
     ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
