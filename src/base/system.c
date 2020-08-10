@@ -2322,8 +2322,14 @@ void str_copy(char *dst, const char *src, int dst_size)
 void str_utf8_truncate(char *dst, int dst_size, const char *src, int truncation_len)
 {
 	int size = -1;
-	for(int cursor = 0, pos = 0; pos <= truncation_len && cursor < dst_size && size != cursor; cursor = str_utf8_forward(src, cursor), pos++)
+	int cursor = 0;
+	int pos = 0;
+	while(pos <= truncation_len && cursor < dst_size && size != cursor)
+	{
 		size = cursor;
+		cursor = str_utf8_forward(src, cursor);
+		pos++;
+	}
 	str_copy(dst, src, size+1);
 }
 
