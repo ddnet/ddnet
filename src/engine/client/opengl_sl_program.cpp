@@ -131,3 +131,21 @@ CGLSLProgram::~CGLSLProgram()
 {
 	DeleteProgram();
 }
+
+void CGLSLProgram::ValidateProgram(GLuint ProgramID)
+{
+	//in debug check validation
+#ifdef CONF_DEBUG
+	glValidateProgram(ProgramID);
+	int ValidateStatus;
+	glGetProgramiv(ProgramID, GL_VALIDATE_STATUS, &ValidateStatus);
+	if(ValidateStatus != GL_TRUE)
+	{
+		char aInfoLog[1024];
+		int iLogLength;
+		glGetProgramInfoLog(ProgramID, 1024, &iLogLength, aInfoLog);
+		dbg_msg("GLSL Program", "Error! Shader program wasn't validated and returned:");
+		dbg_msg("GLSL Program", "%s", aInfoLog);
+	}
+#endif
+}

@@ -37,6 +37,9 @@ public:
 protected:
 	GLuint m_ProgramID;
 	bool m_IsLinked;
+
+public:
+	static void ValidateProgram(GLuint ProgramID);
 };
 
 class CGLSLTWProgram : public CGLSLProgram {

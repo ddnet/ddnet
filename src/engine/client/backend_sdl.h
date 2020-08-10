@@ -369,4 +369,48 @@ public:
 	virtual bool IsOpenGL3_3() { return m_UseOpenGL3_3; }
 };
 
+#ifdef CONF_DEBUG
+
+#define OpenGLErrorToString(err) \
+	dbg_msg("gfx", "With error message: %s", glewGetErrorString(err))
+
+#define HandleOpenGLErrorDbg \
+	{ \
+		GLenum ErrorCode; \
+		if ((ErrorCode = glGetError()) != GL_NO_ERROR) \
+		{ \
+			dbg_msg("gfx", "Got error code: %u at %s: line %u", (unsigned int)ErrorCode, (const char*)__func__, (unsigned int)__LINE__); \
+			OpenGLErrorToString(ErrorCode); \
+			GLint ProgramIDCheck_ = 0; \
+			glGetIntegerv(GL_CURRENT_PROGRAM, &ProgramIDCheck_); \
+			if(ProgramIDCheck_ != 0) \
+			{ \
+				CGLSLProgram::ValidateProgram((GLuint)ProgramIDCheck_); \
+			} \
+		} \
+	}
+
+#else
+#define HandleOpenGLErrorDbg
+#endif
+
+#define CallGL(name) \
+	{\
+		gl ## name ; \
+		HandleOpenGLErrorDbg \
+	}
+
+#define CallGLReturn(name, returntype) \
+	{\
+		returntype r = gl ## name ; \
+		HandleOpenGLErrorDbg; \
+		return r; \
+	}
+
+#define CallGLGetReturn(name, returnvar) \
+	{\
+		returnvar = gl ## name ; \
+		HandleOpenGLErrorDbg; \
+	}
+
 #endif // ENGINE_CLIENT_BACKEND_SDL_H

@@ -533,11 +533,11 @@ void CCommandProcessorFragment_OpenGL3_3::SetState(const CCommandBuffer::SState 
 			break;
 		case CCommandBuffer::BLEND_ALPHA:
 			//glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			CallGL(BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 			break;
 		case CCommandBuffer::BLEND_ADDITIVE:
 			//glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+			CallGL(BlendFunc(GL_SRC_ALPHA, GL_ONE));
 			break;
 		default:
 			dbg_msg("render", "unknown blendmode %d\n", State.m_BlendMode);
@@ -549,14 +549,14 @@ void CCommandProcessorFragment_OpenGL3_3::SetState(const CCommandBuffer::SState 
 	// clip
 	if(State.m_ClipEnable)
 	{
-		glScissor(State.m_ClipX, State.m_ClipY, State.m_ClipW, State.m_ClipH);
-		glEnable(GL_SCISSOR_TEST);
+		CallGL(Scissor(State.m_ClipX, State.m_ClipY, State.m_ClipW, State.m_ClipH));
+		CallGL(Enable(GL_SCISSOR_TEST));
 		m_LastClipEnable = true;
 	}
 	else if(m_LastClipEnable)
 	{
 		// Don't disable it always
-		glDisable(GL_SCISSOR_TEST);
+		CallGL(Disable(GL_SCISSOR_TEST));
 		m_LastClipEnable = false;
 	}
 
@@ -569,15 +569,15 @@ void CCommandProcessorFragment_OpenGL3_3::SetState(const CCommandBuffer::SState 
 		{
 			if(!IsAndUpdateTextureSlotBound(Slot, State.m_Texture))
 			{
-				glActiveTexture(GL_TEXTURE0 + Slot);
-				glBindTexture(GL_TEXTURE_2D, m_aTextures[State.m_Texture].m_Tex);
-				glBindSampler(Slot, m_aTextures[State.m_Texture].m_Sampler);
+				CallGL(ActiveTexture(GL_TEXTURE0 + Slot));
+				CallGL(BindTexture(GL_TEXTURE_2D, m_aTextures[State.m_Texture].m_Tex));
+				CallGL(BindSampler(Slot, m_aTextures[State.m_Texture].m_Sampler));
 			}
 		} else
 		{
 			Slot = 0;
-			glBindTexture(GL_TEXTURE_2D, m_aTextures[State.m_Texture].m_Tex);
-			glBindSampler(Slot, m_aTextures[State.m_Texture].m_Sampler);
+			CallGL(BindTexture(GL_TEXTURE_2D, m_aTextures[State.m_Texture].m_Tex));
+			CallGL(BindSampler(Slot, m_aTextures[State.m_Texture].m_Sampler));
 		}
 		if(pProgram->m_LocIsTextured != -1)
 		{
@@ -599,12 +599,12 @@ void CCommandProcessorFragment_OpenGL3_3::SetState(const CCommandBuffer::SState 
 			switch (State.m_WrapMode)
 			{
 			case CCommandBuffer::WRAP_REPEAT:
-				glSamplerParameteri(m_aTextures[State.m_Texture].m_Sampler, GL_TEXTURE_WRAP_S, GL_REPEAT);
-				glSamplerParameteri(m_aTextures[State.m_Texture].m_Sampler, GL_TEXTURE_WRAP_T, GL_REPEAT);
+				CallGL(SamplerParameteri(m_aTextures[State.m_Texture].m_Sampler, GL_TEXTURE_WRAP_S, GL_REPEAT));
+				CallGL(SamplerParameteri(m_aTextures[State.m_Texture].m_Sampler, GL_TEXTURE_WRAP_T, GL_REPEAT));
 				break;
 			case CCommandBuffer::WRAP_CLAMP:
-				glSamplerParameteri(m_aTextures[State.m_Texture].m_Sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-				glSamplerParameteri(m_aTextures[State.m_Texture].m_Sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				CallGL(SamplerParameteri(m_aTextures[State.m_Texture].m_Sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+				CallGL(SamplerParameteri(m_aTextures[State.m_Texture].m_Sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
 				break;
 			default:
 				dbg_msg("render", "unknown wrapmode %d\n", State.m_WrapMode);
@@ -641,7 +641,7 @@ void CCommandProcessorFragment_OpenGL3_3::SetState(const CCommandBuffer::SState 
 		};
 
 		// transpose bcs of column-major order of opengl
-		glUniformMatrix4x2fv(pProgram->m_LocPos, 1, true, (float*)&m);
+		CallGL(UniformMatrix4x2fv(pProgram->m_LocPos, 1, true, (float*)&m));
 	}
 }
 
@@ -658,7 +658,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	m_UseMultipleTextureUnits = g_Config.m_GfxEnableTextureUnitOptimization;
 	if(!m_UseMultipleTextureUnits)
 	{
-		glActiveTexture(GL_TEXTURE0);
+		CallGL(ActiveTexture(GL_TEXTURE0));
 	}
 
 	m_pTextureMemoryUsage = pCommand->m_pTextureMemoryUsage;
@@ -943,43 +943,43 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 
 	m_LastStreamBuffer = 0;
 
-	glGenBuffers(MAX_STREAM_BUFFER_COUNT, m_PrimitiveDrawBufferID);
-	glGenVertexArrays(MAX_STREAM_BUFFER_COUNT, m_PrimitiveDrawVertexID);
+	CallGL(GenBuffers(MAX_STREAM_BUFFER_COUNT, m_PrimitiveDrawBufferID));
+	CallGL(GenVertexArrays(MAX_STREAM_BUFFER_COUNT, m_PrimitiveDrawVertexID));
 
 	m_UsePreinitializedVertexBuffer = g_Config.m_GfxUsePreinitBuffer;
 
 	for(int i = 0; i < MAX_STREAM_BUFFER_COUNT; ++i)
 	{
-		glBindBuffer(GL_ARRAY_BUFFER, m_PrimitiveDrawBufferID[i]);
-		glBindVertexArray(m_PrimitiveDrawVertexID[i]);
-		glEnableVertexAttribArray(0);
-		glEnableVertexAttribArray(1);
-		glEnableVertexAttribArray(2);
+		CallGL(BindBuffer(GL_ARRAY_BUFFER, m_PrimitiveDrawBufferID[i]));
+		CallGL(BindVertexArray(m_PrimitiveDrawVertexID[i]));
+		CallGL(EnableVertexAttribArray(0));
+		CallGL(EnableVertexAttribArray(1));
+		CallGL(EnableVertexAttribArray(2));
 
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(CCommandBuffer::SVertex), 0);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(CCommandBuffer::SVertex), (void*)(sizeof(float) * 2));
-		glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(CCommandBuffer::SVertex), (void*)(sizeof(float) * 4));
+		CallGL(VertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(CCommandBuffer::SVertex), 0));
+		CallGL(VertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(CCommandBuffer::SVertex), (void*)(sizeof(float) * 2)));
+		CallGL(VertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(CCommandBuffer::SVertex), (void*)(sizeof(float) * 4)));
 
 		if(m_UsePreinitializedVertexBuffer)
-			glBufferData(GL_ARRAY_BUFFER, sizeof(CCommandBuffer::SVertex) * CCommandBuffer::MAX_VERTICES, NULL, GL_STREAM_DRAW);
+			CallGL(BufferData(GL_ARRAY_BUFFER, sizeof(CCommandBuffer::SVertex) * CCommandBuffer::MAX_VERTICES, NULL, GL_STREAM_DRAW));
 
 		m_LastIndexBufferBound[i] = 0;
 	}
 
 	//query the image max size only once
-	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &m_MaxTexSize);
+	CallGL(GetIntegerv(GL_MAX_TEXTURE_SIZE, &m_MaxTexSize));
 
 	//query maximum of allowed textures
-	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &m_MaxTextureUnits);
+	CallGL(GetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &m_MaxTextureUnits));
 	m_TextureSlotBoundToUnit.resize(m_MaxTextureUnits);
 	for(int i = 0; i < m_MaxTextureUnits; ++i)
 	{
 		m_TextureSlotBoundToUnit[i].m_TextureSlot = -1;
 	}
 
-	glBindVertexArray(0);
-	glGenBuffers(1, &m_QuadDrawIndexBufferID);
-	glBindBuffer(GL_COPY_WRITE_BUFFER, m_QuadDrawIndexBufferID);
+	CallGL(BindVertexArray(0));
+	CallGL(GenBuffers(1, &m_QuadDrawIndexBufferID));
+	CallGL(BindBuffer(GL_COPY_WRITE_BUFFER, m_QuadDrawIndexBufferID));
 
 	unsigned int Indices[CCommandBuffer::MAX_VERTICES/4 * 6];
 	int Primq = 0;
@@ -993,7 +993,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 		Indices[i+5] = Primq + 3;
 		Primq+=4;
 	}
-	glBufferData(GL_COPY_WRITE_BUFFER, sizeof(unsigned int) * CCommandBuffer::MAX_VERTICES/4 * 6, Indices, GL_STATIC_DRAW);
+	CallGL(BufferData(GL_COPY_WRITE_BUFFER, sizeof(unsigned int) * CCommandBuffer::MAX_VERTICES/4 * 6, Indices, GL_STATIC_DRAW));
 
 	m_CurrentIndicesInBuffer = CCommandBuffer::MAX_VERTICES/4 * 6;
 
@@ -1002,7 +1002,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	m_ClearColor.r = m_ClearColor.g = m_ClearColor.b = -1.f;
 
 	// fix the alignment to allow even 1byte changes, e.g. for alpha components
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	CallGL(PixelStorei(GL_UNPACK_ALIGNMENT, 1));
 }
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_Shutdown(const SCommand_Shutdown *pCommand)
@@ -1017,10 +1017,10 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Shutdown(const SCommand_Shutdown *
 	delete m_pBorderTileLineProgram;
 	delete m_pBorderTileLineProgramTextured;
 
-	glBindVertexArray(0);
-	glDeleteBuffers(MAX_STREAM_BUFFER_COUNT, m_PrimitiveDrawBufferID);
-	glDeleteBuffers(1, &m_QuadDrawIndexBufferID);
-	glDeleteVertexArrays(MAX_STREAM_BUFFER_COUNT, m_PrimitiveDrawVertexID);
+	CallGL(BindVertexArray(0));
+	CallGL(DeleteBuffers(MAX_STREAM_BUFFER_COUNT, m_PrimitiveDrawBufferID));
+	CallGL(DeleteBuffers(1, &m_QuadDrawIndexBufferID));
+	CallGL(DeleteVertexArrays(MAX_STREAM_BUFFER_COUNT, m_PrimitiveDrawVertexID));
 
 	for(int i = 0; i < CCommandBuffer::MAX_TEXTURES; ++i)
 	{
@@ -1042,11 +1042,11 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Update(const CCommandBuffe
 		int Slot = pCommand->m_Slot % m_MaxTextureUnits;
 		//just tell, that we using this texture now
 		IsAndUpdateTextureSlotBound(Slot, pCommand->m_Slot);
-		glActiveTexture(GL_TEXTURE0 + Slot);
-		glBindSampler(Slot, m_aTextures[pCommand->m_Slot].m_Sampler);
+		CallGL(ActiveTexture(GL_TEXTURE0 + Slot));
+		CallGL(BindSampler(Slot, m_aTextures[pCommand->m_Slot].m_Sampler));
 	}
 
-	glBindTexture(GL_TEXTURE_2D, m_aTextures[pCommand->m_Slot].m_Tex);
+	CallGL(BindTexture(GL_TEXTURE_2D, m_aTextures[pCommand->m_Slot].m_Tex));
 
 	void* pTexData = pCommand->m_pData;
 	int Width = pCommand->m_Width;
@@ -1069,8 +1069,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Update(const CCommandBuffe
 		pTexData = pTmpData;
 	}
 
-	glTexSubImage2D(GL_TEXTURE_2D, 0, X, Y, Width, Height,
-		TexFormatToOpenGLFormat(pCommand->m_Format), GL_UNSIGNED_BYTE, pTexData);
+	CallGL(TexSubImage2D(GL_TEXTURE_2D, 0, X, Y, Width, Height,
+		TexFormatToOpenGLFormat(pCommand->m_Format), GL_UNSIGNED_BYTE, pTexData));
 	free(pTexData);
 }
 
@@ -1081,10 +1081,10 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Destroy(const CCommandBuff
 	{
 		Slot = pCommand->m_Slot % m_MaxTextureUnits;
 		IsAndUpdateTextureSlotBound(Slot, pCommand->m_Slot);
-		glActiveTexture(GL_TEXTURE0 + Slot);
+		CallGL(ActiveTexture(GL_TEXTURE0 + Slot));
 	}
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glBindSampler(Slot, 0);
+	CallGL(BindTexture(GL_TEXTURE_2D, 0));
+	CallGL(BindSampler(Slot, 0));
 	m_TextureSlotBoundToUnit[Slot].m_TextureSlot = -1;
 	DestroyTexture(pCommand->m_Slot);
 }
@@ -1148,42 +1148,42 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 		Slot = pCommand->m_Slot % m_MaxTextureUnits;
 		//just tell, that we using this texture now
 		IsAndUpdateTextureSlotBound(Slot, pCommand->m_Slot);
-		glActiveTexture(GL_TEXTURE0 + Slot);
+		CallGL(ActiveTexture(GL_TEXTURE0 + Slot));
 	}
-	glGenTextures(1, &m_aTextures[pCommand->m_Slot].m_Tex);
-	glBindTexture(GL_TEXTURE_2D, m_aTextures[pCommand->m_Slot].m_Tex);
+	CallGL(GenTextures(1, &m_aTextures[pCommand->m_Slot].m_Tex));
+	CallGL(BindTexture(GL_TEXTURE_2D, m_aTextures[pCommand->m_Slot].m_Tex));
 
-	glGenSamplers(1, &m_aTextures[pCommand->m_Slot].m_Sampler);
-	glBindSampler(Slot, m_aTextures[pCommand->m_Slot].m_Sampler);
+	CallGL(GenSamplers(1, &m_aTextures[pCommand->m_Slot].m_Sampler));
+	CallGL(BindSampler(Slot, m_aTextures[pCommand->m_Slot].m_Sampler));
 
 	if(Oglformat == GL_RED)
 	{
 		//Bind the texture 2D.
 		GLint swizzleMask[] = {GL_ONE, GL_ONE, GL_ONE, GL_RED};
-		glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
+		CallGL(TexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask));
 		StoreOglformat = GL_R8;
 	}
 
 	if(pCommand->m_Flags&CCommandBuffer::TEXFLAG_NOMIPMAPS)
 	{
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexImage2D(GL_TEXTURE_2D, 0, StoreOglformat, Width, Height, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
+		CallGL(TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+		CallGL(TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+		CallGL(SamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+		CallGL(SamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+		CallGL(TexImage2D(GL_TEXTURE_2D, 0, StoreOglformat, Width, Height, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData));
 	}
 	else
 	{
-		glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+		CallGL(SamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+		CallGL(SamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST));
 		//prevent mipmap display bugs, when zooming out far
 		if(Width >= 1024 && Height >= 1024)
 		{
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 5.f);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, 5);
+			CallGL(TexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 5.f));
+			CallGL(TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, 5));
 		}
-		glTexImage2D(GL_TEXTURE_2D, 0, StoreOglformat, Width, Height, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
-		glGenerateMipmap(GL_TEXTURE_2D);
+		CallGL(TexImage2D(GL_TEXTURE_2D, 0, StoreOglformat, Width, Height, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData));
+		CallGL(GenerateMipmap(GL_TEXTURE_2D));
 	}
 
 	// This is the initial value for the wrap modes
@@ -1206,10 +1206,10 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Clear(const CCommandBuffer::SComma
 {
 	if(pCommand->m_Color.r != m_ClearColor.r || pCommand->m_Color.g != m_ClearColor.g || pCommand->m_Color.b != m_ClearColor.b)
 	{
-		glClearColor(pCommand->m_Color.r, pCommand->m_Color.g, pCommand->m_Color.b, 0.0f);
+		CallGL(ClearColor(pCommand->m_Color.r, pCommand->m_Color.g, pCommand->m_Color.b, 0.0f));
 		m_ClearColor = pCommand->m_Color;
 	}
-	glClear(GL_COLOR_BUFFER_BIT);
+	CallGL(Clear(GL_COLOR_BUFFER_BIT));
 }
 
 void CCommandProcessorFragment_OpenGL3_3::UploadStreamBufferData(unsigned int PrimitiveType, const void* pVertices, unsigned int PrimitiveCount)
@@ -1227,18 +1227,22 @@ void CCommandProcessorFragment_OpenGL3_3::UploadStreamBufferData(unsigned int Pr
 		return;
 	};
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_PrimitiveDrawBufferID[m_LastStreamBuffer]);
+	CallGL(BindBuffer(GL_ARRAY_BUFFER, m_PrimitiveDrawBufferID[m_LastStreamBuffer]));
 
 	if(!m_UsePreinitializedVertexBuffer)
-		glBufferData(GL_ARRAY_BUFFER, sizeof(CCommandBuffer::SVertex) * Count, pVertices, GL_STREAM_DRAW);
+	{
+		CallGL(BufferData(GL_ARRAY_BUFFER, sizeof(CCommandBuffer::SVertex) * Count, pVertices, GL_STREAM_DRAW));
+	}
 	else
 	{
 		// This is better for some iGPUs. Probably due to not initializing a new buffer in the system memory again and again...(driver dependent)
-		void *pData = glMapBufferRange(GL_ARRAY_BUFFER, 0, sizeof(CCommandBuffer::SVertex) * Count, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+		void *pData;
+		
+		CallGLGetReturn(MapBufferRange(GL_ARRAY_BUFFER, 0, sizeof(CCommandBuffer::SVertex) * Count, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT), pData);
 
 		mem_copy(pData, pVertices, sizeof(CCommandBuffer::SVertex) * Count);
 
-		glUnmapBuffer(GL_ARRAY_BUFFER);
+		CallGL(UnmapBuffer(GL_ARRAY_BUFFER));
 	}
 }
 
@@ -1249,21 +1253,21 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Render(const CCommandBuffer::SComm
 
 	UploadStreamBufferData(pCommand->m_PrimType, pCommand->m_pVertices, pCommand->m_PrimCount);
 
-	glBindVertexArray(m_PrimitiveDrawVertexID[m_LastStreamBuffer]);
+	CallGL(BindVertexArray(m_PrimitiveDrawVertexID[m_LastStreamBuffer]));
 
 	switch(pCommand->m_PrimType)
 	{
 	// We don't support GL_QUADS due to core profile
 	case CCommandBuffer::PRIMTYPE_LINES:
-		glDrawArrays(GL_LINES, 0, pCommand->m_PrimCount*2);
+		CallGL(DrawArrays(GL_LINES, 0, pCommand->m_PrimCount*2));
 		break;
 	case CCommandBuffer::PRIMTYPE_QUADS:
 		if(m_LastIndexBufferBound[m_LastStreamBuffer] != m_QuadDrawIndexBufferID)
 		{
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID);
+			CallGL(BindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID));
 			m_LastIndexBufferBound[m_LastStreamBuffer] = m_QuadDrawIndexBufferID;
 		}
-		glDrawElements(GL_TRIANGLES, pCommand->m_PrimCount*6, GL_UNSIGNED_INT, 0);
+		CallGL(DrawElements(GL_TRIANGLES, pCommand->m_PrimCount*6, GL_UNSIGNED_INT, 0));
 		break;
 	default:
 		dbg_msg("render", "unknown primtype %d\n", pCommand->m_Cmd);
@@ -1276,7 +1280,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Screenshot(const CCommandBuffer::S
 {
 	// fetch image data
 	GLint aViewport[4] = {0,0,0,0};
-	glGetIntegerv(GL_VIEWPORT, aViewport);
+	CallGL(GetIntegerv(GL_VIEWPORT, aViewport));
 
 	int w = aViewport[2];
 	int h = aViewport[3];
@@ -1287,10 +1291,10 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Screenshot(const CCommandBuffer::S
 
 	// fetch the pixels
 	GLint Alignment;
-	glGetIntegerv(GL_PACK_ALIGNMENT, &Alignment);
-	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-	glReadPixels(0,0, w, h, GL_RGB, GL_UNSIGNED_BYTE, pPixelData);
-	glPixelStorei(GL_PACK_ALIGNMENT, Alignment);
+	CallGL(GetIntegerv(GL_PACK_ALIGNMENT, &Alignment));
+	CallGL(PixelStorei(GL_PACK_ALIGNMENT, 1));
+	CallGL(ReadPixels(0,0, w, h, GL_RGB, GL_UNSIGNED_BYTE, pPixelData));
+	CallGL(PixelStorei(GL_PACK_ALIGNMENT, Alignment));
 
 	// flip the pixel because opengl works from bottom left corner
 	for(int y = 0; y < h/2; y++)
@@ -1365,8 +1369,8 @@ bool CCommandProcessorFragment_OpenGL3_3::IsAndUpdateTextureSlotBound(int IDX, i
 
 void CCommandProcessorFragment_OpenGL3_3::DestroyTexture(int Slot)
 {
-	glDeleteTextures(1, &m_aTextures[Slot].m_Tex);
-	glDeleteSamplers(1, &m_aTextures[Slot].m_Sampler);
+	CallGL(DeleteTextures(1, &m_aTextures[Slot].m_Tex));
+	CallGL(DeleteSamplers(1, &m_aTextures[Slot].m_Sampler));
 	*m_pTextureMemoryUsage -= m_aTextures[Slot].m_MemSize;
 
 	m_aTextures[Slot].m_Tex = 0;
@@ -1377,7 +1381,7 @@ void CCommandProcessorFragment_OpenGL3_3::DestroyBufferContainer(int Index, bool
 {
 	SBufferContainer& BufferContainer = m_BufferContainers[Index];
 	if(BufferContainer.m_VertArrayID != 0)
-		glDeleteVertexArrays(1, &BufferContainer.m_VertArrayID);
+		CallGL(DeleteVertexArrays(1, &BufferContainer.m_VertArrayID));
 
 	// all buffer objects can deleted automatically, so the program doesn't need to deal with them (e.g. causing crashes because of driver bugs)
 	if(DeleteBOs)
@@ -1395,7 +1399,7 @@ void CCommandProcessorFragment_OpenGL3_3::DestroyBufferContainer(int Index, bool
 					}
 				}
 
-				glDeleteBuffers(1, &m_BufferObjectIndices[VertBufferID]);
+				CallGL(DeleteBuffers(1, &m_BufferObjectIndices[VertBufferID]));
 			}
 		}
 	}
@@ -1421,18 +1425,18 @@ void CCommandProcessorFragment_OpenGL3_3::AppendIndices(unsigned int NewIndicesC
 		Primq+=4;
 	}
 
-	glBindBuffer(GL_COPY_READ_BUFFER, m_QuadDrawIndexBufferID);
+	CallGL(BindBuffer(GL_COPY_READ_BUFFER, m_QuadDrawIndexBufferID));
 	GLuint NewIndexBufferID;
-	glGenBuffers(1, &NewIndexBufferID);
-	glBindBuffer(GL_COPY_WRITE_BUFFER, NewIndexBufferID);
+	CallGL(GenBuffers(1, &NewIndexBufferID));
+	CallGL(BindBuffer(GL_COPY_WRITE_BUFFER, NewIndexBufferID));
 	GLsizeiptr size = sizeof(unsigned int);
-	glBufferData(GL_COPY_WRITE_BUFFER, (GLsizeiptr)NewIndicesCount * size, NULL, GL_STATIC_DRAW);
-	glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, (GLsizeiptr)m_CurrentIndicesInBuffer * size);
-	glBufferSubData(GL_COPY_WRITE_BUFFER, (GLsizeiptr)m_CurrentIndicesInBuffer * size, (GLsizeiptr)AddCount * size, Indices);
-	glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
-	glBindBuffer(GL_COPY_READ_BUFFER, 0);
+	CallGL(BufferData(GL_COPY_WRITE_BUFFER, (GLsizeiptr)NewIndicesCount * size, NULL, GL_STATIC_DRAW));
+	CallGL(CopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, (GLsizeiptr)m_CurrentIndicesInBuffer * size));
+	CallGL(BufferSubData(GL_COPY_WRITE_BUFFER, (GLsizeiptr)m_CurrentIndicesInBuffer * size, (GLsizeiptr)AddCount * size, Indices));
+	CallGL(BindBuffer(GL_COPY_WRITE_BUFFER, 0));
+	CallGL(BindBuffer(GL_COPY_READ_BUFFER, 0));
 
-	glDeleteBuffers(1, &m_QuadDrawIndexBufferID);
+	CallGL(DeleteBuffers(1, &m_QuadDrawIndexBufferID));
 	m_QuadDrawIndexBufferID = NewIndexBufferID;
 
 	for(int i = 0; i < MAX_STREAM_BUFFER_COUNT; ++i)
@@ -1460,9 +1464,9 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_CreateBufferObject(const CCommandB
 
 	GLuint VertBufferID = 0;
 
-	glGenBuffers(1, &VertBufferID);
-	glBindBuffer(GL_COPY_WRITE_BUFFER, VertBufferID);
-	glBufferData(GL_COPY_WRITE_BUFFER, (GLsizeiptr)(pCommand->m_DataSize), pCommand->m_pUploadData, GL_STATIC_DRAW);
+	CallGL(GenBuffers(1, &VertBufferID));
+	CallGL(BindBuffer(GL_COPY_WRITE_BUFFER, VertBufferID));
+	CallGL(BufferData(GL_COPY_WRITE_BUFFER, (GLsizeiptr)(pCommand->m_DataSize), pCommand->m_pUploadData, GL_STATIC_DRAW));
 
 	m_BufferObjectIndices[Index] = VertBufferID;
 }
@@ -1471,16 +1475,16 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RecreateBufferObject(const CComman
 {
 	int Index = pCommand->m_BufferIndex;
 
-	glBindBuffer(GL_COPY_WRITE_BUFFER, m_BufferObjectIndices[Index]);
-	glBufferData(GL_COPY_WRITE_BUFFER, (GLsizeiptr)(pCommand->m_DataSize), pCommand->m_pUploadData, GL_STATIC_DRAW);
+	CallGL(BindBuffer(GL_COPY_WRITE_BUFFER, m_BufferObjectIndices[Index]));
+	CallGL(BufferData(GL_COPY_WRITE_BUFFER, (GLsizeiptr)(pCommand->m_DataSize), pCommand->m_pUploadData, GL_STATIC_DRAW));
 }
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_UpdateBufferObject(const CCommandBuffer::SCommand_UpdateBufferObject *pCommand)
 {
 	int Index = pCommand->m_BufferIndex;
 
-	glBindBuffer(GL_COPY_WRITE_BUFFER, m_BufferObjectIndices[Index]);
-	glBufferSubData(GL_COPY_WRITE_BUFFER, (GLintptr)(pCommand->m_pOffset), (GLsizeiptr)(pCommand->m_DataSize), pCommand->m_pUploadData);
+	CallGL(BindBuffer(GL_COPY_WRITE_BUFFER, m_BufferObjectIndices[Index]));
+	CallGL(BufferSubData(GL_COPY_WRITE_BUFFER, (GLintptr)(pCommand->m_pOffset), (GLsizeiptr)(pCommand->m_DataSize), pCommand->m_pUploadData));
 }
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_CopyBufferObject(const CCommandBuffer::SCommand_CopyBufferObject *pCommand)
@@ -1488,16 +1492,16 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_CopyBufferObject(const CCommandBuf
 	int WriteIndex = pCommand->m_WriteBufferIndex;
 	int ReadIndex = pCommand->m_ReadBufferIndex;
 
-	glBindBuffer(GL_COPY_WRITE_BUFFER, m_BufferObjectIndices[WriteIndex]);
-	glBindBuffer(GL_COPY_READ_BUFFER, m_BufferObjectIndices[ReadIndex]);
-	glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, (GLsizeiptr)(pCommand->m_pReadOffset), (GLsizeiptr)(pCommand->m_pWriteOffset), (GLsizeiptr)pCommand->m_CopySize);
+	CallGL(BindBuffer(GL_COPY_WRITE_BUFFER, m_BufferObjectIndices[WriteIndex]));
+	CallGL(BindBuffer(GL_COPY_READ_BUFFER, m_BufferObjectIndices[ReadIndex]));
+	CallGL(CopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, (GLsizeiptr)(pCommand->m_pReadOffset), (GLsizeiptr)(pCommand->m_pWriteOffset), (GLsizeiptr)pCommand->m_CopySize));
 }
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_DeleteBufferObject(const CCommandBuffer::SCommand_DeleteBufferObject *pCommand)
 {
 	int Index = pCommand->m_BufferIndex;
 
-	glDeleteBuffers(1, &m_BufferObjectIndices[Index]);
+	CallGL(DeleteBuffers(1, &m_BufferObjectIndices[Index]));
 }
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_CreateBufferContainer(const CCommandBuffer::SCommand_CreateBufferContainer *pCommand)
@@ -1515,23 +1519,27 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_CreateBufferContainer(const CComma
 	}
 
 	SBufferContainer& BufferContainer = m_BufferContainers[Index];
-	glGenVertexArrays(1, &BufferContainer.m_VertArrayID);
-	glBindVertexArray(BufferContainer.m_VertArrayID);
+	CallGL(GenVertexArrays(1, &BufferContainer.m_VertArrayID));
+	CallGL(BindVertexArray(BufferContainer.m_VertArrayID));
 
 	BufferContainer.m_LastIndexBufferBound = 0;
 
 	for(int i = 0; i < pCommand->m_AttrCount; ++i)
 	{
-		glEnableVertexAttribArray((GLuint)i);
+		CallGL(EnableVertexAttribArray((GLuint)i));
 
-		glBindBuffer(GL_ARRAY_BUFFER, m_BufferObjectIndices[pCommand->m_Attributes[i].m_VertBufferBindingIndex]);
+		CallGL(BindBuffer(GL_ARRAY_BUFFER, m_BufferObjectIndices[pCommand->m_Attributes[i].m_VertBufferBindingIndex]));
 
 		SBufferContainerInfo::SAttribute& Attr = pCommand->m_Attributes[i];
 
 		if(Attr.m_FuncType == 0)
-			glVertexAttribPointer((GLuint)i, Attr.m_DataTypeCount, Attr.m_Type, (GLboolean)Attr.m_Normalized, pCommand->m_Stride, Attr.m_pOffset);
+		{
+			CallGL(VertexAttribPointer((GLuint)i, Attr.m_DataTypeCount, Attr.m_Type, (GLboolean)Attr.m_Normalized, pCommand->m_Stride, Attr.m_pOffset));
+		}
 		else if(Attr.m_FuncType == 1)
-			glVertexAttribIPointer((GLuint)i, Attr.m_DataTypeCount, Attr.m_Type, pCommand->m_Stride, Attr.m_pOffset);
+		{
+			CallGL(VertexAttribIPointer((GLuint)i, Attr.m_DataTypeCount, Attr.m_Type, pCommand->m_Stride, Attr.m_pOffset));
+		}
 
 		BufferContainer.m_ContainerInfo.m_Attributes.push_back(Attr);
 	}
@@ -1543,24 +1551,28 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_UpdateBufferContainer(const CComma
 {
 	SBufferContainer& BufferContainer = m_BufferContainers[pCommand->m_BufferContainerIndex];
 
-	glBindVertexArray(BufferContainer.m_VertArrayID);
+	CallGL(BindVertexArray(BufferContainer.m_VertArrayID));
 
 	//disable all old attributes
 	for(size_t i = 0; i < BufferContainer.m_ContainerInfo.m_Attributes.size(); ++i) {
-		glDisableVertexAttribArray((GLuint)i);
+		CallGL(DisableVertexAttribArray((GLuint)i));
 	}
 	BufferContainer.m_ContainerInfo.m_Attributes.clear();
 
 	for(int i = 0; i < pCommand->m_AttrCount; ++i) {
-		glEnableVertexAttribArray((GLuint)i);
+		CallGL(EnableVertexAttribArray((GLuint)i));
 
-		glBindBuffer(GL_ARRAY_BUFFER, m_BufferObjectIndices[pCommand->m_Attributes[i].m_VertBufferBindingIndex]);
+		CallGL(BindBuffer(GL_ARRAY_BUFFER, m_BufferObjectIndices[pCommand->m_Attributes[i].m_VertBufferBindingIndex]));
 		SBufferContainerInfo::SAttribute& Attr = pCommand->m_Attributes[i];
 		if(Attr.m_FuncType == 0)
-			glVertexAttribPointer((GLuint)i, Attr.m_DataTypeCount, Attr.m_Type, Attr.m_Normalized, pCommand->m_Stride, Attr.m_pOffset);
+		{
+			CallGL(VertexAttribPointer((GLuint)i, Attr.m_DataTypeCount, Attr.m_Type, Attr.m_Normalized, pCommand->m_Stride, Attr.m_pOffset));
+		}
 		else if(Attr.m_FuncType == 1)
-			glVertexAttribIPointer((GLuint)i, Attr.m_DataTypeCount, Attr.m_Type, pCommand->m_Stride, Attr.m_pOffset);
-
+		{
+			CallGL(VertexAttribIPointer((GLuint)i, Attr.m_DataTypeCount, Attr.m_Type, pCommand->m_Stride, Attr.m_pOffset));
+		}
+	
 		BufferContainer.m_ContainerInfo.m_Attributes.push_back(Attr);
 	}
 
@@ -1616,13 +1628,13 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderBorderTile(const CCommandBuf
 	pProgram->SetUniformVec2(pProgram->m_LocDir, 1, (float*)&pCommand->m_Dir);
 	pProgram->SetUniform(pProgram->m_LocJumpIndex, (int)pCommand->m_JumpIndex);
 
-	glBindVertexArray(BufferContainer.m_VertArrayID);
+	CallGL(BindVertexArray(BufferContainer.m_VertArrayID));
 	if(BufferContainer.m_LastIndexBufferBound != m_QuadDrawIndexBufferID)
 	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID);
+		CallGL(BindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID));
 		BufferContainer.m_LastIndexBufferBound = m_QuadDrawIndexBufferID;
 	}
-	glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, pCommand->m_pIndicesOffset, pCommand->m_DrawNum);
+	CallGL(DrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, pCommand->m_pIndicesOffset, pCommand->m_DrawNum));
 }
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderBorderTileLine(const CCommandBuffer::SCommand_RenderBorderTileLine *pCommand)
@@ -1662,13 +1674,13 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderBorderTileLine(const CComman
 	pProgram->SetUniformVec2(pProgram->m_LocOffset, 1, (float*)&pCommand->m_Offset);
 	pProgram->SetUniformVec2(pProgram->m_LocDir, 1, (float*)&pCommand->m_Dir);
 
-	glBindVertexArray(BufferContainer.m_VertArrayID);
+	CallGL(BindVertexArray(BufferContainer.m_VertArrayID));
 	if(BufferContainer.m_LastIndexBufferBound != m_QuadDrawIndexBufferID)
 	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID);
+		CallGL(BindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID));
 		BufferContainer.m_LastIndexBufferBound = m_QuadDrawIndexBufferID;
 	}
-	glDrawElementsInstanced(GL_TRIANGLES, pCommand->m_IndexDrawNum, GL_UNSIGNED_INT, pCommand->m_pIndicesOffset, pCommand->m_DrawNum);
+	CallGL(DrawElementsInstanced(GL_TRIANGLES, pCommand->m_IndexDrawNum, GL_UNSIGNED_INT, pCommand->m_pIndicesOffset, pCommand->m_DrawNum));
 }
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderTileLayer(const CCommandBuffer::SCommand_RenderTileLayer *pCommand)
@@ -1712,15 +1724,15 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderTileLayer(const CCommandBuff
 	SetState(pCommand->m_State, pProgram);
 	pProgram->SetUniformVec4(pProgram->m_LocColor, 1, (float*)&pCommand->m_Color);
 
-	glBindVertexArray(BufferContainer.m_VertArrayID);
+	CallGL(BindVertexArray(BufferContainer.m_VertArrayID));
 	if(BufferContainer.m_LastIndexBufferBound != m_QuadDrawIndexBufferID)
 	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID);
+		CallGL(BindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID));
 		BufferContainer.m_LastIndexBufferBound = m_QuadDrawIndexBufferID;
 	}
 	for(int i = 0; i < pCommand->m_IndicesDrawNum; ++i)
 	{
-		glDrawElements(GL_TRIANGLES, pCommand->m_pDrawCount[i], GL_UNSIGNED_INT, pCommand->m_pIndicesOffsets[i]);
+		CallGL(DrawElements(GL_TRIANGLES, pCommand->m_pDrawCount[i], GL_UNSIGNED_INT, pCommand->m_pIndicesOffsets[i]));
 	}
 }
 
@@ -1751,10 +1763,10 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadLayer(const CCommandBuff
 	UseProgram(pProgram);
 	SetState(pCommand->m_State, pProgram);
 
-	glBindVertexArray(BufferContainer.m_VertArrayID);
+	CallGL(BindVertexArray(BufferContainer.m_VertArrayID));
 	if(BufferContainer.m_LastIndexBufferBound != m_QuadDrawIndexBufferID)
 	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID);
+		CallGL(BindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID));
 		BufferContainer.m_LastIndexBufferBound = m_QuadDrawIndexBufferID;
 	}
 
@@ -1785,7 +1797,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadLayer(const CCommandBuff
 			Rotation = pCommand->m_pQuadInfo[i].m_Rotation;
 			pProgram->SetUniform(pProgram->m_LocRotation, Rotation);
 		}
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)(i * 6 * sizeof(unsigned int)));
+		CallGL(DrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)(i * 6 * sizeof(unsigned int))));
 	}
 }
 
@@ -1810,27 +1822,27 @@ void CCommandProcessorFragment_OpenGL3_3::RenderText(const CCommandBuffer::SStat
 
 		if(!IsAndUpdateTextureSlotBound(SlotText, TextTextureIndex))
 		{
-			glActiveTexture(GL_TEXTURE0 + SlotText);
-			glBindTexture(GL_TEXTURE_2D, m_aTextures[TextTextureIndex].m_Tex);
-			glBindSampler(SlotText, m_aTextures[TextTextureIndex].m_Sampler);
+			CallGL(ActiveTexture(GL_TEXTURE0 + SlotText));
+			CallGL(BindTexture(GL_TEXTURE_2D, m_aTextures[TextTextureIndex].m_Tex));
+			CallGL(BindSampler(SlotText, m_aTextures[TextTextureIndex].m_Sampler));
 		}
 		if(!IsAndUpdateTextureSlotBound(SlotTextOutline, TextOutlineTextureIndex))
 		{
-			glActiveTexture(GL_TEXTURE0 + SlotTextOutline);
-			glBindTexture(GL_TEXTURE_2D, m_aTextures[TextOutlineTextureIndex].m_Tex);
-			glBindSampler(SlotTextOutline, m_aTextures[TextOutlineTextureIndex].m_Sampler);
+			CallGL(ActiveTexture(GL_TEXTURE0 + SlotTextOutline));
+			CallGL(BindTexture(GL_TEXTURE_2D, m_aTextures[TextOutlineTextureIndex].m_Tex));
+			CallGL(BindSampler(SlotTextOutline, m_aTextures[TextOutlineTextureIndex].m_Sampler));
 		}
 	}
 	else
 	{
 		SlotText = 0;
 		SlotTextOutline = 1;
-		glBindTexture(GL_TEXTURE_2D, m_aTextures[TextTextureIndex].m_Tex);
-		glBindSampler(SlotText, m_aTextures[TextTextureIndex].m_Sampler);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, m_aTextures[TextOutlineTextureIndex].m_Tex);
-		glBindSampler(SlotTextOutline, m_aTextures[TextOutlineTextureIndex].m_Sampler);
-		glActiveTexture(GL_TEXTURE0);
+		CallGL(BindTexture(GL_TEXTURE_2D, m_aTextures[TextTextureIndex].m_Tex));
+		CallGL(BindSampler(SlotText, m_aTextures[TextTextureIndex].m_Sampler));
+		CallGL(ActiveTexture(GL_TEXTURE1));
+		CallGL(BindTexture(GL_TEXTURE_2D, m_aTextures[TextOutlineTextureIndex].m_Tex));
+		CallGL(BindSampler(SlotTextOutline, m_aTextures[TextOutlineTextureIndex].m_Sampler));
+		CallGL(ActiveTexture(GL_TEXTURE0));
 	}
 
 	if(m_pTextProgram->m_LastTextSampler != SlotText)
@@ -1872,7 +1884,7 @@ void CCommandProcessorFragment_OpenGL3_3::RenderText(const CCommandBuffer::SStat
 	}
 
 
-	glDrawElements(GL_TRIANGLES, DrawNum, GL_UNSIGNED_INT, (void*)(0));
+	CallGL(DrawElements(GL_TRIANGLES, DrawNum, GL_UNSIGNED_INT, (void*)(0)));
 }
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderText(const CCommandBuffer::SCommand_RenderText *pCommand)
@@ -1886,10 +1898,10 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderText(const CCommandBuffer::S
 	if(BufferContainer.m_VertArrayID == 0)
 		return;
 
-	glBindVertexArray(BufferContainer.m_VertArrayID);
+	CallGL(BindVertexArray(BufferContainer.m_VertArrayID));
 	if(BufferContainer.m_LastIndexBufferBound != m_QuadDrawIndexBufferID)
 	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID);
+		CallGL(BindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID));
 		BufferContainer.m_LastIndexBufferBound = m_QuadDrawIndexBufferID;
 	}
 
@@ -1905,10 +1917,10 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderTextStream(const CCommandBuf
 
 	UploadStreamBufferData(CCommandBuffer::PRIMTYPE_QUADS, pCommand->m_pVertices, pCommand->m_QuadNum);
 
-	glBindVertexArray(m_PrimitiveDrawVertexID[m_LastStreamBuffer]);
+	CallGL(BindVertexArray(m_PrimitiveDrawVertexID[m_LastStreamBuffer]));
 	if(m_LastIndexBufferBound[m_LastStreamBuffer] != m_QuadDrawIndexBufferID)
 	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID);
+		CallGL(BindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID));
 		m_LastIndexBufferBound[m_LastStreamBuffer] = m_QuadDrawIndexBufferID;
 	}
 
@@ -1935,17 +1947,17 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadContainer(const CCommand
 	if(BufferContainer.m_VertArrayID == 0)
 		return;
 
-	glBindVertexArray(BufferContainer.m_VertArrayID);
+	CallGL(BindVertexArray(BufferContainer.m_VertArrayID));
 	if(BufferContainer.m_LastIndexBufferBound != m_QuadDrawIndexBufferID)
 	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID);
+		CallGL(BindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID));
 		BufferContainer.m_LastIndexBufferBound = m_QuadDrawIndexBufferID;
 	}
 
 	UseProgram(m_pPrimitiveProgram);
 	SetState(pCommand->m_State, m_pPrimitiveProgram);
 
-	glDrawElements(GL_TRIANGLES, pCommand->m_DrawNum, GL_UNSIGNED_INT, pCommand->m_pOffset);
+	CallGL(DrawElements(GL_TRIANGLES, pCommand->m_DrawNum, GL_UNSIGNED_INT, pCommand->m_pOffset));
 }
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadContainerAsSprite(const CCommandBuffer::SCommand_RenderQuadContainerAsSprite *pCommand)
@@ -1964,10 +1976,10 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadContainerAsSprite(const 
 	if(BufferContainer.m_VertArrayID == 0)
 		return;
 
-	glBindVertexArray(BufferContainer.m_VertArrayID);
+	CallGL(BindVertexArray(BufferContainer.m_VertArrayID));
 	if(BufferContainer.m_LastIndexBufferBound != m_QuadDrawIndexBufferID)
 	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID);
+		CallGL(BindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID));
 		BufferContainer.m_LastIndexBufferBound = m_QuadDrawIndexBufferID;
 	}
 
@@ -1996,7 +2008,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadContainerAsSprite(const 
 		m_pSpriteProgram->m_LastVertciesColor[3] = pCommand->m_VertexColor.a;
 	}
 
-	glDrawElements(GL_TRIANGLES, pCommand->m_DrawNum, GL_UNSIGNED_INT, pCommand->m_pOffset);
+	CallGL(DrawElements(GL_TRIANGLES, pCommand->m_DrawNum, GL_UNSIGNED_INT, pCommand->m_pOffset));
 }
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadContainerAsSpriteMultiple(const CCommandBuffer::SCommand_RenderQuadContainerAsSpriteMultiple *pCommand)
@@ -2015,10 +2027,10 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadContainerAsSpriteMultipl
 	if(BufferContainer.m_VertArrayID == 0)
 		return;
 
-	glBindVertexArray(BufferContainer.m_VertArrayID);
+	CallGL(BindVertexArray(BufferContainer.m_VertArrayID));
 	if(BufferContainer.m_LastIndexBufferBound != m_QuadDrawIndexBufferID)
 	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID);
+		CallGL(BindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID));
 		BufferContainer.m_LastIndexBufferBound = m_QuadDrawIndexBufferID;
 	}
 
@@ -2053,7 +2065,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadContainerAsSpriteMultipl
 
 		m_pSpriteProgramMultiple->SetUniformVec4(m_pSpriteProgramMultiple->m_LocRSP, UniformCount, (float*)(pCommand->m_pRenderInfo + RenderOffset));
 
-		glDrawElementsInstanced(GL_TRIANGLES, pCommand->m_DrawNum, GL_UNSIGNED_INT, pCommand->m_pOffset, UniformCount);
+		CallGL(DrawElementsInstanced(GL_TRIANGLES, pCommand->m_DrawNum, GL_UNSIGNED_INT, pCommand->m_pOffset, UniformCount));
 
 		RenderOffset += RSPCount;
 		DrawCount -= RSPCount;
