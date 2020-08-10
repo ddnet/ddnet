@@ -12,7 +12,7 @@
 ##### translated strings #####
 
 %ds left
-== 还剩 %ds 秒
+== 还剩 %d 秒
 
 %i minute left
 == 还剩 %i 分钟
