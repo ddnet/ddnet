@@ -1205,6 +1205,7 @@ set(EXPECTED_DATA
   skins/kitty_twintri.png
   skins/kitty_warpaint.png
   skins/kitty_x_ninja.png
+  skins/license.txt
   skins/lightbulb.png
   skins/limekitty.png
   skins/mermydon-coala.png
