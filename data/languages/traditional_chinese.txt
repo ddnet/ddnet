@@ -1157,6 +1157,9 @@ Show HUD
 Use high DPI
 == 
 
+Client message
+== 
+
 Default length: %d
 == 
 

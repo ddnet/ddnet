@@ -1208,3 +1208,6 @@ Toggle dyncam
 
 Show others (own team only)
 == Andere Spieler zeigen (nur eigenes Team)
+
+Client message
+== 

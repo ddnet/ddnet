@@ -1038,6 +1038,9 @@ Normal message
 Hello and welcome
 == 
 
+Client message
+== 
+
 Inner color
 == 
 

@@ -1186,3 +1186,6 @@ Replay %3d:%02d
 
 9+ new mentions
 == 9+ noves mencions
+
+Client message
+== 

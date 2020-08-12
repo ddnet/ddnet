@@ -1199,5 +1199,8 @@ Video name:
 Connect Dummy
 == 
 
+Client message
+== 
+
 Show others (own team only)
 == 

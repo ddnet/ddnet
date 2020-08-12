@@ -1196,5 +1196,8 @@ Are you sure that you want to disconnect your dummy?
 Skin prefix
 == 
 
+Client message
+== 
+
 Show others (own team only)
 == 
