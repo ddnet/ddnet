@@ -592,7 +592,6 @@ bool CScore::SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGam
 	pSqlServer->BindString(1, pData->m_Map);
 	pSqlServer->BindString(2, pData->m_aNames[0]);
 
-	CUuid GameID;
 	bool FoundTeam = false;
 	float Time;
 	CTeamrank Teamrank;
@@ -628,7 +627,7 @@ bool CScore::SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGam
 			pSqlServer->PrepareStatement(aBuf);
 			pSqlServer->BindString(1, pData->m_aTimestamp);
 			pSqlServer->BindString(2, pData->m_GameUuid);
-			pSqlServer->BindBlob(3, GameID.m_aData, sizeof(GameID.m_aData));
+			pSqlServer->BindBlob(3, Teamrank.m_TeamID.m_aData, sizeof(Teamrank.m_TeamID.m_aData));
 			pSqlServer->Step();
 		}
 	}
