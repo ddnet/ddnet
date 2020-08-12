@@ -521,6 +521,13 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elas
 
 			vec2 NewPos = Pos + Vel*Fraction; // TODO: this row is not nice
 
+			// Fraction can be very small and thus the calculation has no effect, no
+			// reason to continue calculating.
+			if(NewPos == Pos)
+			{
+				break;
+			}
+
 			if(TestBox(vec2(NewPos.x, NewPos.y), Size))
 			{
 				int Hits = 0;
