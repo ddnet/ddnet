@@ -91,8 +91,8 @@ def main():
 			.format(os.path.abspath(args.to), sql_file))
 	print("    mysql -u teeworlds -p'PW2' teeworlds < {}".format(sql_file))
 	print()
-	print("When the ranks are transfered successfully to mysql {} and {} can be removed".format(
-			os.path.abspath(args.f), os.path.abspath(args.to)))
+	print("When the ranks are transfered successfully to mysql, {} can be removed".format(
+			os.path.abspath(args.to)))
 	print()
 	print("Log of the transfer:")
 	print()
