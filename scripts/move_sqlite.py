@@ -17,8 +17,14 @@ import argparse
 from time import strftime
 import os
 
+def sqlite_table_exists(cursor, table):
+	cursor.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='{}'".format(table))
+	return cursor.fetchone()[0] != 0
+
 def sqlite_num_transfer(conn, table):
 	c = conn.cursor()
+	if not sqlite_table_exists(c, table):
+		return 0
 	c.execute('SELECT COUNT(*) FROM {}'.format(table))
 	num = c.fetchone()[0]
 	return num
@@ -36,9 +42,12 @@ def transfer(file_from, file_to):
 	conn_to.close()
 
 	cursor_from = conn_from.cursor()
-	cursor_from.execute('DELETE FROM record_race')
-	cursor_from.execute('DELETE FROM record_teamrace')
-	cursor_from.execute('DELETE FROM record_saves')
+	if sqlite_table_exists(cursor_from, 'record_race'):
+		cursor_from.execute('DELETE FROM record_race')
+	if sqlite_table_exists(cursor_from, 'record_teamrace'):
+		cursor_from.execute('DELETE FROM record_teamrace')
+	if sqlite_table_exists(cursor_from, 'record_saves'):
+		cursor_from.execute('DELETE FROM record_saves')
 	cursor_from.close()
 	conn_from.commit()
 	conn_from.close()
@@ -55,6 +64,10 @@ def main():
 			default=default_output,
 			help='Output file where ranks are saved adds current date by default')
 	args = parser.parse_args()
+
+	if not os.path.exists(args.f):
+		print("Warning: '{}' does not exist (yet). Is the path specified correctly?".format(args.f))
+		return
 
 	conn = sqlite3.connect(args.f)
 	num_ranks = sqlite_num_transfer(conn, 'record_race')
