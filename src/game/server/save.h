@@ -119,13 +119,13 @@ public:
 	// returns true if a team can load, otherwise writes a nice error Message in pMessage
 	bool MatchPlayers(const char (*paNames)[MAX_NAME_LENGTH], const int *pClientID, int NumPlayer, char *pMessage, int MessageLen);
 	int save(int Team);
-	void load(int Team);
+	void load(int Team, bool KeepCurrentWeakStrong);
 	CSaveTee* m_pSavedTees;
 
 	// returns true if an error occured
 	static bool HandleSaveError(int Result, int ClientID, CGameContext *pGameContext);
 private:
-	CCharacter* MatchCharacter(int ClientID, int SaveID);
+	CCharacter* MatchCharacter(int ClientID, int SaveID, bool KeepCurrentWeakStrong);
 
 	IGameController* m_pController;
 
