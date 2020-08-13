@@ -1203,5 +1203,8 @@ Connect Dummy
 Use high DPI
 == 
 
+Client message
+== 
+
 Show others (own team only)
 == 

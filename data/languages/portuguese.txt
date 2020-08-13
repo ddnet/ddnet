@@ -1114,6 +1114,9 @@ Threaded sound loading
 Friend message
 == 
 
+Client message
+== 
+
 Outline color
 == 
 
