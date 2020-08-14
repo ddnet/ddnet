@@ -7,6 +7,7 @@
 # 2018.10.7 Yangfl
 # 2019.12.16 Eki
 # 2020.6.25 Night_L
+# 2020.8.14 Night_L
 ##### /authors #####
 
 ##### translated strings #####
@@ -729,7 +730,7 @@ Show health + ammo
 == 显示生命与弹药
 
 Show names in chat in team colors
-== 在聊天中名稱顯示玩家顏色
+== 聊天中以队伍颜色显示名称
 
 Show kill messages
 == 显示 Kill 消息
@@ -738,31 +739,31 @@ Show votes window after voting
 == 在投票时显示投票窗口
 
 Messages
-== 信息
+== 消息
 
 System message
-== 系统信息
+== 系统消息
 
 Highlighted message
-== 高亮显示信息
+== 高亮显示消息
 
 Look out!
 == 小心!
 
 Team message
-== 团队信息
+== 团队消息
 
 We will win
-== 我们一定会赢
+== 我们赢定了
 
 Normal message
-== 普通信息
+== 普通消息
 
 Hello and welcome
 == 你好,欢迎
 
 Friend message
-== 好友信息
+== 好友消息
 
 Inner color
 == 内部颜色
@@ -852,7 +853,7 @@ Browser
 == 浏览
 
 Connecting dummy
-== 正在开启假人
+== 正在连接假人
 
 Spectator
 == 旁观者
@@ -881,7 +882,7 @@ Countries
 == 国家
 
 Reconnect in %d sec
-== 在 %d 秒后重新连接
+== %d 秒后重新连接
 
 Grabs
 == 得旗数
@@ -920,7 +921,7 @@ Automatically create statboard csv
 == 自动创建状态版的纯文本文件(CSV)
 
 Are you sure that you want to disconnect?
-== 你确定要断开连接吗？
+== 确定要断开连接吗？
 
 Types
 == 类型
@@ -1059,7 +1060,7 @@ Replay feature is disabled!
 == 回放功能已被禁用！
 
 Are you sure that you want to disconnect your dummy?
-== 你确定要断连你的假人吗？
+== 确定要断连假人吗？
 
 Hook collisions
 == 钩子预测线
@@ -1197,10 +1198,10 @@ Video name:
 == 视频名称
 
 Connect Dummy
-== 
+== 连接假人
 
 Client message
-== 
+== 客户端消息
 
 Show others (own team only)
-== 
+== 显示其他玩家(仅同队伍)
