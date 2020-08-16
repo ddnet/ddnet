@@ -2251,6 +2251,7 @@ set(CPACK_TARGETS
   config_retrieve
   config_store
   dilate
+  map_convert_07
   map_diff
   map_extract
 )
