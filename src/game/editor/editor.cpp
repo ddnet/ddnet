@@ -6279,6 +6279,10 @@ void CEditorMap::MakeGameGroup(CLayerGroup *pGroup)
 
 void CEditorMap::Clean()
 {
+	for(int i = 0; i < m_lGroups.size(); i++)
+	{
+		m_lGroups[i]->m_lLayers.delete_all();
+	}
 	m_lGroups.delete_all();
 	m_lEnvelopes.delete_all();
 	m_lImages.delete_all();
