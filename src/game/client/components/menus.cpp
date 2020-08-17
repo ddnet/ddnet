@@ -264,6 +264,23 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 			Input()->SetClipboardText(pStr);
 		}
 
+		/* TODO: Doesn't work, SetClipboardText doesn't retain the string quickly enough?
+		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_X))
+		{
+			Input()->SetClipboardText(pStr);
+			pStr[0] = '\0';
+			s_AtIndex = 0;
+			ReturnValue = true;
+		}
+		*/
+
+		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_U))
+		{
+			pStr[0] = '\0';
+			s_AtIndex = 0;
+			ReturnValue = true;
+		}
+
 		if(Inside && UI()->MouseButton(0))
 		{
 			s_DoScroll = true;

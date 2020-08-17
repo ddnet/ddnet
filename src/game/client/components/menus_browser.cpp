@@ -175,44 +175,44 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		else
 			g_Config.m_UiToolboxPage = (g_Config.m_UiToolboxPage + 3 + 1) % 3;
 	}
-	if(m_SelectedIndex > -1)
+	if(m_SelectedIndex < 0)
+		m_SelectedIndex = 0;
+
+	for(int i = 0; i < m_NumInputEvents; i++)
 	{
-		for(int i = 0; i < m_NumInputEvents; i++)
+		int NewIndex = -1;
+		if(m_aInputEvents[i].m_Flags&IInput::FLAG_PRESS)
 		{
-			int NewIndex = -1;
-			if(m_aInputEvents[i].m_Flags&IInput::FLAG_PRESS)
+			if(m_aInputEvents[i].m_Key == KEY_DOWN) NewIndex = minimum(m_SelectedIndex + 1, NumServers - 1);
+			else if(m_aInputEvents[i].m_Key == KEY_UP) NewIndex = maximum(m_SelectedIndex - 1, 0);
+			else if(m_aInputEvents[i].m_Key == KEY_PAGEUP) NewIndex = maximum(m_SelectedIndex - 25, 0);
+			else if(m_aInputEvents[i].m_Key == KEY_PAGEDOWN) NewIndex = minimum(m_SelectedIndex + 25, NumServers - 1);
+			else if(m_aInputEvents[i].m_Key == KEY_HOME) NewIndex = 0;
+			else if(m_aInputEvents[i].m_Key == KEY_END) NewIndex = NumServers - 1;
+		}
+		if(NewIndex > -1 && NewIndex < NumServers)
+		{
+			//scroll
+			float IndexY = View.y - s_ScrollValue*ScrollNum*s_aCols[0].m_Rect.h + NewIndex*s_aCols[0].m_Rect.h;
+			int Scroll = View.y > IndexY ? -1 : View.y+View.h < IndexY+s_aCols[0].m_Rect.h ? 1 : 0;
+			if(Scroll)
 			{
-				if(m_aInputEvents[i].m_Key == KEY_DOWN) NewIndex = m_SelectedIndex + 1;
-				else if(m_aInputEvents[i].m_Key == KEY_UP) NewIndex = m_SelectedIndex - 1;
-				else if(m_aInputEvents[i].m_Key == KEY_PAGEUP) NewIndex = maximum(m_SelectedIndex - 25, 0);
-				else if(m_aInputEvents[i].m_Key == KEY_PAGEDOWN) NewIndex = minimum(m_SelectedIndex + 25, NumServers - 1);
-				else if(m_aInputEvents[i].m_Key == KEY_HOME) NewIndex = 0;
-				else if(m_aInputEvents[i].m_Key == KEY_END) NewIndex = NumServers - 1;
-			}
-			if(NewIndex > -1 && NewIndex < NumServers)
-			{
-				//scroll
-				float IndexY = View.y - s_ScrollValue*ScrollNum*s_aCols[0].m_Rect.h + NewIndex*s_aCols[0].m_Rect.h;
-				int Scroll = View.y > IndexY ? -1 : View.y+View.h < IndexY+s_aCols[0].m_Rect.h ? 1 : 0;
-				if(Scroll)
+				if(Scroll < 0)
 				{
-					if(Scroll < 0)
-					{
-						int NumScrolls = (View.y-IndexY+s_aCols[0].m_Rect.h-1.0f)/s_aCols[0].m_Rect.h;
-						s_ScrollValue -= (1.0f/ScrollNum)*NumScrolls;
-					}
-					else
-					{
-						int NumScrolls = (IndexY+s_aCols[0].m_Rect.h-(View.y+View.h)+s_aCols[0].m_Rect.h-1.0f)/s_aCols[0].m_Rect.h;
-						s_ScrollValue += (1.0f/ScrollNum)*NumScrolls;
-					}
+					int NumScrolls = (View.y-IndexY+s_aCols[0].m_Rect.h-1.0f)/s_aCols[0].m_Rect.h;
+					s_ScrollValue -= (1.0f/ScrollNum)*NumScrolls;
 				}
-
-				m_SelectedIndex = NewIndex;
-
-				const CServerInfo *pItem = ServerBrowser()->SortedGet(m_SelectedIndex);
-				str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress, sizeof(g_Config.m_UiServerAddress));
+				else
+				{
+					int NumScrolls = (IndexY+s_aCols[0].m_Rect.h-(View.y+View.h)+s_aCols[0].m_Rect.h-1.0f)/s_aCols[0].m_Rect.h;
+					s_ScrollValue += (1.0f/ScrollNum)*NumScrolls;
+				}
 			}
+
+			m_SelectedIndex = NewIndex;
+
+			const CServerInfo *pItem = ServerBrowser()->SortedGet(m_SelectedIndex);
+			str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress, sizeof(g_Config.m_UiServerAddress));
 		}
 	}
 
