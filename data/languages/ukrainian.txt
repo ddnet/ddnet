@@ -101,10 +101,10 @@ Error loading demo
 == Помилка при завантаженні демо
 
 Favorite
-== Обраний
+== Улюблений
 
 Favorites
-== Обрані
+== Улюблені
 
 Feet
 == Ноги
@@ -371,7 +371,7 @@ Use sounds
 == Використовувати звуки
 
 V-Sync
-== Вертикальна синхронізація
+== V-Sync
 
 Version
 == Версія
@@ -389,7 +389,7 @@ Warmup
 == Розминка
 
 Weapon
-== зброя
+== Зброя
 
 Yes
 == Так
@@ -448,7 +448,7 @@ Lht.
 == Яскравість
 
 UI Color
-== колір інтерфейсу
+== Колір інтерфейсу
 
 Host address
 == Адреса сервера
@@ -466,736 +466,733 @@ Record demo
 == Запис демо
 
 Successfully saved the replay!
-== 
+== Повтор збережено
 
 Replay feature is disabled!
-== 
+== Функція повтору вимкнена
 
 -Page %d-
-== 
+== -Сторінка %d-
 
 Game paused
-== 
+== Гра призупинена
 
 Free-View
-== 
+== Вільний перегляд
 
 Server best:
-== 
+== Найкраще сервера
 
 Personal best:
-== 
+== Твоє найкраще
 
 Learn
-== 
+== Вчитися
 
 Browser
-== 
+== Браузер
 
 Ghost
-== 
+== Тінь
 
 Loading DDNet Client
-== 
+== Завантаження DDNet Client
 
 Reconnect in %d sec
-== 
+== Перепідключення через %d сек.
 
 Delete demo
-== 
+== Видалити демо
 
 Rename demo
-== 
+== Перейменувати демо
 
 Render demo
-== 
+== Почати рендер демо
 
 Replace video
-== 
+== Замінити відео
 
 File already exists, do you want to overwrite it?
-== 
+== Файл вже існує, ви хочете його перезаписати?
 
 Remove friend
-== 
+== Видалити друга
 
 Are you sure that you want to remove the player from your friends list?
-== 
+== Ви впевнені, що хочете видалити гравця зі свого списку друзів?
 
 Sound error
-== 
+== Звукова помилка
 
 The audio device couldn't be initialised.
-== 
+== Не вдалося ініціалізувати аудіопристрій.
 
 Are you sure that you want to disconnect?
-== 
+== Ви впевнені, що хочете відключитися?
 
 Disconnect Dummy
-== 
+== Відключити Dummy
 
 Are you sure that you want to disconnect your dummy?
-== 
+== Ви впевнені, що хочете відключити свого Dummy?
 
 Welcome to DDNet
-== 
+== Ласкаво просимо в DDNet
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== 
+== DDraceNetwork кооперативна онлайн гра, де Вашою головною метою і метою вашої команди є досягненням фінішу карти. Новачкам рекомендовано починати свій шлях на Novice серверах, на яких стоять легкі карти. Також враховуйте пінг щоб вибрати найближчий до вас сервер.
 
 The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== 
+== Карта містить фриз-тайли, які тимчасово позбавляють вас можливості рухатися. Ви повинні працювати спільно, щоб пройти такі рівні.
 
 The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== 
+== Колесо миші змінює зброю. Молот (ЛКМ) можна використовувати для удару інших і пробудження їх від замерзання.
 
 Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== 
+== Гак (ПКМ) можна використовувати для переміщення по карті та притягання до вас інших граців.
 
 Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== 
+== Найголовніше, що спілкування є ключовим: туторіалу немає, тому вам доведеться спілкуватися з іншими гравцями, щоб засвоїти основи та хитрощі гри.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == 
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
-== 
+== Рекомендується перевірити налаштування, щоб підлаштувати їх до душі перед тим, як приєднатися до сервера.
 
 Please enter your nick name below.
-== 
+== Будь ласка, введіть свій нікнейм нижче
 
 There's an unsaved map in the editor, you might want to save it before you quit the game.
-== 
+== У редакторі є незбережена карта. Ви можете зберегти її, перш ніж вийти з гри.
 
 Quit anyway?
-== 
+== Вийти?
 
 %i minute left
-== 
+== Залишилася %i хвилина
 
 %i minutes left
-== 
+== Залишилось %i хвилин
 
 %i second left
-== 
+== Залишилася %i секунда
 
 %i seconds left
-== 
+== Залишилось %i секунд
 
 Country
-== 
+== Країна
 
 Unable to delete the demo
-== 
+== Неможливо видалити демо
 
 Unable to rename the demo
-== 
+== Неможливо перейменувати демо
 
 New name:
-== 
+== Нове ім’я
 
 Destination file already exist
-== 
+== Файл призначення вже існує
 
 Show ingame HUD
-== 
+== Показувати HUD
 
 Video name:
-== 
+== Назва відео
 
 Show DDNet map finishes in server browser
-== 
+== Показувати статус завершення карти DDNet в браузері сервера
 
 transmits your player name to info.ddnet.tw
-== 
+== передає Ваш нікнейм на info.ddnet.tw
 
 Search
-== 
+== Поиск
 
 Exclude
-== 
+== Виключити
 
 Server filter
-== 
+== Фільтр серверів
 
 Count players only
-== 
+== Рахувати тільки гравців
 
 Show friends only
-== 
+== Тільки з друзями
 
 Strict gametype filter
-== 
+== Строгий фільтр р-мів
 
 Server address:
-== 
+== Адреса сервера
 
 Player country:
-== 
+== Країна гравця
 
 Filter connecting players
-== 
+== Лише підключені
 
 Indicate map finish
-== 
+== Показувати фініші карт
 
 Unfinished map
-== 
+== Нефінішована карта
 
 Countries
-== 
+== Країни
 
 Types
-== 
+== Тип
 
 Friends
-== 
+== Друзі
 
 Remove
-== 
+== Видалити
 
 Clan
-== 
+== Клан
 
 Add Friend
-== 
+== Додати друга
 
 DDNet %s is out!
-== 
+== Вийшов DDnet %s!
 
 Downloading %s:
-== 
+== Завантаження %s:
 
 Update failed! Check log...
-== 
+== Помилка оновлення! Перевірте логи...
 
 DDNet Client updated!
-== 
+== Клієнт DDNet оновлено!
 
 Update now
-== 
+== Оновити зараз
 
 Restart
-== 
+== Перезапустити
 
 DDNet %s is out! Download it at DDNet.tw!
-== 
+== Вийшов DDnet %s! Скачай його на DDnet.tw!
 
 Select a name
-== 
+== Оберіть ім'я
 
 Please use a different name
-== 
+== Будь ласка, використовуйте інше ім’я
 
 Remove chat
-== 
+== Видалити чат
 
 Demofile: %s
-== 
+== Демо: %s
 
 Parent Folder
-== 
+== Батьківський каталог
 
 Demo details
-== 
+== Деталі демо
 
 Created:
-== 
+== Створений:
 
 Type:
-== 
+== Тип:
 
 Length:
-== 
+== Довжина:
 
 Version:
-== 
+== Версія:
 
 Markers:
-== 
+== Маркери:
 
 Map:
-== 
+== Карта
 
 Size:
-== 
+== Розмір
 
 %.2f MiB
-== 
+== %.2f MiB
 
 %.2f KiB
-== 
+== %.2f KiB
 
 Crc:
-== 
+== Crc
 
 Netversion:
-== 
+== Версія:
 
 Demo
-== 
-
-Markers
-== 
+== Демо
 
 Length
-== 
+== Довжина
 
 Date
-== 
+== Дата
 
 Fetch Info
-== 
+== Отримати інформацію
 
 Rename
-== 
+== Перейменув.
 
 Render
-== 
+== Почати рендер
 
 Connecting dummy
-== 
+== Підключення Dummy
 
 Connect Dummy
-== 
+== Підключити Dummy
 
 Player options
-== 
+== Опції гравця
 
 Change settings
-== 
+== Змінити налаштування
 
 Kick player
-== 
+== Забанити гравця
 
 Move player to spectators
-== 
+== Перемістити гравця до глядачів
 
 Vote description:
-== 
+== Опис голосування
 
 Vote command:
-== 
+== Команда голосування
 
 Add
-== 
+== Додати
 
 Reload
-== 
+== Перезавантажити
 
 Deactivate
-== 
+== Вимкнути
 
 Activate
-== 
+== Увімкнути
 
 Save
-== 
+== Зберегти
 
 Switch weapon when out of ammo
-== 
+== Перемикати зброю без патронів
 
 Reset wanted weapon on death
-== 
+== Скидати вибір зброї при смерті
 
 Show only chat messages from friends
-== 
+== Показувати повідомлення тільки від друзів
 
 Name plates size
-== 
+== Розмір
 
 Use team colors for name plates
-== 
+== Розфарбовувати ім'я гравця кольором команди
 
 Show clan above name plates
-== 
+== Показувати клан
 
 Clan plates size
-== 
+== Розмір панелі клану
 
 Client
-== 
+== Клієнт
 
 Automatically record demos
-== 
+== Автоматично записувати демо
 
 Automatically take game over screenshot
-== 
+== Робити знімок результатів гри
 
 Max demos
-== 
+== Максимальна кількість демо
 
 Max Screenshots
-== 
+== Максимальна кількість скріншотів
 
 Refresh Rate
-== 
+== Частота оновлення
 
 Show console window
-== 
+== Показувати консоль
 
 Automatically take statboard screenshot
-== 
+== Автоматично робити скрін результатів
 
 Automatically create statboard csv
-== 
+== Автоматично створювати statboard csv
 
 Max CSVs
-== 
+== Максимум CSV
 
 Dummy settings
-== 
+== Налаштування dummy
 
 Vanilla skins only
-== 
+== Тільки базові скіни
 
 Fat skins (DDFat)
-== 
+== Товсті скіни (DDFat)
 
 Skin prefix
-== 
+== Префікс скіну
 
 Hook collisions
-== 
+== Колізії гака
 
 Pause
-== 
+== Пауза
 
 Kill
-== 
+== Самогубство
 
 Zoom in
-== 
+== Збільшити
 
 Zoom out
-== 
+== Зменшити
 
 Default zoom
-== 
+== Стандартний масштаб
 
 Show others
-== 
+== Показувати інших
 
 Show all
-== 
+== Показувати всіх
 
 Toggle dyncam
-== 
+== Переключити дин. камеру
 
 Toggle dummy
-== 
+== Переключити Дамм
 
 Toggle ghost
-== 
+== Переключити примару
 
 Dummy copy
-== 
+== Повторення рухів Дамі
 
 Hammerfly dummy
-== 
+== Політ з даммі
 
 Converse
-== 
+== Розмовляти
 
 Spectator mode
-== 
+== Спостерігач
 
 Spectate next
-== 
+== Спостерігати слід.
 
 Spectate previous
-== 
+== Спостерігати попер.
 
 Statboard
-== 
+== Статистика
 
 Lock team
-== 
+== Закрити команду
 
 Show entities
-== 
+== Показати сутності
 
 Show HUD
-== 
+== Показувати HUD
 
 UI mouse s.
-== 
+== Чутлив. миші в меню
 
 Borderless window
-== 
+== Безмежне вікно
 
 may cause delay
-== 
+== може спричинити затримку
 
 Screen
-== 
+== Екран
 
 Use OpenGL 3.3 (experimental)
-== 
+== OpenGL 3.3 (експериментально)
 
 Preinit VBO (iGPUs only)
-== 
+== Preinit VBO (iGPUs only)
 
 Multiple texture units (disable for MacOS)
-== 
+== Декілька текстурних одиниць (вимкнути для MacOS)
 
 Use high DPI
-== 
+== Використовувати високий DPI
 
 Play background music
-== 
+== Грати фонову музику
 
 Enable game sounds
-== 
+== Звуки гри
 
 Enable gun sound
-== 
+== Звуки зброї
 
 Enable long pain sound (used when shooting in freeze)
-== 
+== Включити звук тривалого болю (при стрільбі з фриза)
 
 Enable server message sound
-== 
+== Звуки повідомлення сервера
 
 Enable regular chat sound
-== 
+== Звичайні звуки чату
 
 Enable team chat sound
-== 
+== Звуки повідомлень в команді
 
 Enable highlighted chat sound
-== 
+== Звуки підсвічених повідомлень
 
 Threaded sound loading
-== 
+== Фонове завантаження музики
 
 Map sound volume
-== 
+== Гучність звуку на карті
 
 HUD
-== 
+== HUD
 
 DDNet
-== 
+== DDNet
 
 DDNet Client needs to be restarted to complete update!
-== 
+== Перезапустіть DDNet Client для завершення поновлення!
 
 Use DDRace Scoreboard
-== 
+== Використовувати DDRace табло
 
 Show client IDs in Scoreboard
-== 
+== Показувати ID клієнтів в табло
 
 Show score
-== 
+== Показувати лідерів
 
 Show health + ammo
-== 
+== Показувати здоров'я + патрони
 
 Show names in chat in team colors
-== 
+== Виділяти кольором повідомлення гравців в командному чаті
 
 Show kill messages
-== 
+== Показати повідомлення про вбивство
 
 Show votes window after voting
-== 
+== Не приховувати меню голосування після вашого вибору
 
 Messages
-== 
+== Повідомлення 
 
 System message
-== 
+== Системне повідомлення
 
 Reset
-== 
+== Скинути
 
 Highlighted message
-== 
+== Виділене повідомлення
 
 Spectator
-== 
+== Спостерігач
 
 Look out!
-== 
-
+== Стережися!
+	
 Team message
-== 
+== Повідомлення команди
 
 We will win
-== 
+== Ми переможемо
 
 Friend message
-== 
+== Повідомлення від друга
 
 Friend
-== 
+== Друг
 
 Hi o/
-== 
+== Привіт o/
 
 Normal message
-== 
+== Звичайне повідомлення
 
 Hello and welcome
-== 
+== Привіт і ласкаво просимо
 
 Client message
-== 
+== Повідомлення від клієнта
 
 Inner color
-== 
+== Внутрішній колір
 
 Outline color
-== 
+== колір контуру
 
 Wait before try for
-== 
+== Зачекайте перш ніж повторити
 
 second
-== 
+== секнуда
 
 seconds
-== 
+== секунд
 
 Save the best demo of each race
-== 
+== Зберігати краще демо кожної спроби
 
 Default length: %d
-== 
+== Стандартна довжина: %d
 
 Enable replays
-== 
+== Включити повтори
 
 Show ghost
-== 
+== Показати тінь
 
 Save ghost
-== 
+== Зберігати тінь
 
 Gameplay
-== 
+== Ігровий процес
 
 Overlay entities
-== 
+== Накласти сутності
 
 Size
-== 
+== Розмір
 
 Show text entities
-== 
+== Текстові сутності
 
 Show others (own team only)
-== 
+== Завжди показувати вашу команду
 
 Show quads
-== 
+== Показувати quads
 
 AntiPing limit
-== 
+== AntiPing ліміт
 
 AntiPing
-== 
+== AntiPing
 
 AntiPing: predict other players
-== 
+== AntiPing: прогнозувати інших гравців
 
 AntiPing: predict weapons
-== 
+== AntiPing: прогнозувати снаряди
 
 AntiPing: predict grenade paths
-== 
+== AntiPing: прогнозувати шляхи гранат
 
 Show other players' hook collision lines
-== 
+== Показувати лінії колізій гака інших гравців
 
 Show other players' key presses
-== 
+== Показувати натискання кнопок інших гравців
 
 Old mouse mode
-== 
+== Режим старої мишки
 
 Background (regular)
-== 
+== Фон (звичайний)
 
 Background (entities)
-== 
+== Задній фон
 
 Show tiles layers from BG map
-== 
+== Показувати шари з тайлами з фонової карти
 
 Try fast HTTP map download first
-== 
+== Намагатися закачати карту швидко по HTTP
 
 DDNet %s is available:
-== 
+== Доступний DDNet %s:
 
 Updating...
-== 
+== Оновлення ...
 
 No updates available
-== 
+== Немає доступних оновлень
 
 Check now
-== 
+== Перевірити зараз
 
 New random timeout code
-== 
+== Новий випадковий тайм-аут код
 
 Time
-== 
+== Час
 
 Manual %3d:%02d  
-== 
+== Ручна %3d:%02d  
 
 Race %3d:%02d  
-== 
+== Гонка %3d:%02d  
 
 Auto %3d:%02d  
-== 
+== Авто %3d:%02d  
 
 Replay %3d:%02d  
-== 
+== Повтор %3d:%02d  
 
 %s wins!
-== 
+== %s переміг!
 
 Follow
-== 
+== Стежити
 
 Frags
-== 
+== Фраги
 
 Deaths
-== 
+== Смерті
 
 Suicides
-== 
+== Самогуб.
 
 Ratio
-== 
+== Співвідношення
 
 Net
-== 
+== Мережа
 
 FPM
-== 
+== FPM
 
 Spree
-== 
+== Серія
 
 Best
-== 
+== Найкраще
 
 Grabs
-== 
+== Захоплень
 
 1 new mention
-== 
+== 1 нова згадка
 
 %d new mentions
-== 
+== %d нових згадок
 
 9+ new mentions
-== 
+== 9+ нових згадок
