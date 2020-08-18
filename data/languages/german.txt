@@ -1209,5 +1209,8 @@ Toggle dyncam
 Show others (own team only)
 == Andere Spieler zeigen (nur eigenes Team)
 
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
 Client message
 == 

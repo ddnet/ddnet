@@ -1215,6 +1215,9 @@ Show DDNet map finishes in server browser
 transmits your player name to info.ddnet.tw
 == transmet votre pseudonyme à info.ddnet.tw
 
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
 Client message
 == 
 

@@ -1193,6 +1193,9 @@ Length
 Are you sure that you want to disconnect your dummy?
 == Biztos, hogy kiakarod léptetni a másolatodat?
 
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
 Skin prefix
 == 
 

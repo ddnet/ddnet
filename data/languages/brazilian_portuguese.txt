@@ -1182,6 +1182,9 @@ Hook (right mouse) can be used to swing through the map and to hook other tees t
 Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
 == 
 
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == 
 

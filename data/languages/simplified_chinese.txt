@@ -1205,3 +1205,6 @@ Client message
 
 Show others (own team only)
 == 显示其他玩家(仅同队伍)
+
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
