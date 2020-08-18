@@ -148,21 +148,40 @@ int main(int argc, const char **argv)
 
 	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC, argc, argv);
 
-	if(argc != 3)
+	if(argc < 2 || argc > 3)
 	{
 		dbg_msg("map_convert_07", "Invalid arguments");
-		dbg_msg("map_convert_07", "Usage: map_convert_07 <source map filepath> <dest map filepath>");
+		dbg_msg("map_convert_07", "Usage: map_convert_07 <source map filepath> [<dest map filepath>]");
 		return -1;
 	}
 
-	if (!pStorage)
+	if(!pStorage)
 	{
 		dbg_msg("map_convert_07", "error loading storage");
 		return -1;
 	}
 
 	const char *pSourceFileName = argv[1];
-	const char *pDestFileName = argv[2];
+
+	const char *pDestFileName;
+	char aDestFileName[MAX_PATH_LENGTH];
+
+	if(argc == 3)
+	{
+		pDestFileName = argv[2];
+	}
+	else
+	{
+		char aBuf[MAX_PATH_LENGTH];
+		IStorage::StripPathAndExtension(pSourceFileName, aBuf, sizeof(aBuf));
+		str_format(aDestFileName, sizeof(aDestFileName), "data/maps7/%s.map", aBuf);
+		pDestFileName = aDestFileName;
+		if(fs_makedir("data/maps7") != 0)
+		{
+			dbg_msg("map_convert_07", "failed to create maps7 directory");
+			return -1;
+		}
+	}
 
 	int ID = 0;
 	int Type = 0;

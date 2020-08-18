@@ -1198,12 +1198,13 @@ int CMenus::Render()
 		else if(m_Popup == POPUP_FIRST_LAUNCH)
 		{
 			pTitle = Localize("Welcome to DDNet");
-			str_format(aBuf, sizeof(aBuf), "%s\n\n%s\n\n%s\n\n%s\n\n%s\n\n%s\n\n%s",
+			str_format(aBuf, sizeof(aBuf), "%s\n\n%s\n\n%s\n\n%s\n\n%s\n\n%s\n\n%s\n\n%s",
 				Localize("DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you."),
 				Localize("The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts."),
 				Localize("The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen."),
 				Localize("Hook (right mouse) can be used to swing through the map and to hook other tees to you."),
 				Localize("Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game."),
+				Localize("Use k key to kill (restart), q to pause and watch other players. See settings for other key binds."),
 				Localize("It's recommended that you check the settings to adjust them to your liking before joining a server."),
 				Localize("Please enter your nick name below."));
 			pExtraText = aBuf;
