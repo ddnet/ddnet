@@ -135,7 +135,7 @@ class CGLSLBorderTileLineProgram;
 class CGLSLTextProgram;
 class CGLSLSpriteProgram;
 class CGLSLSpriteMultipleProgram;
-// takes care of opengl 3.3 related rendering
+// takes care of opengl 3.3+ related rendering
 class CCommandProcessorFragment_OpenGL3_3
 {
 	bool m_UseMultipleTextureUnits;
@@ -346,7 +346,7 @@ class CGraphicsBackend_SDL_OpenGL : public CGraphicsBackend_Threaded
 	volatile int m_TextureMemoryUsage;
 	int m_NumScreens;
 	
-	bool m_UseOpenGL3_3;
+	bool m_UseNewOpenGL;
 public:
 	virtual int Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, class IStorage *pStorage);
 	virtual int Shutdown();
@@ -366,7 +366,7 @@ public:
 	virtual void SetWindowGrab(bool Grab);
 	virtual void NotifyWindow();
 	
-	virtual bool IsOpenGL3_3() { return m_UseOpenGL3_3; }
+	virtual bool IsNewOpenGL() { return m_UseNewOpenGL; }
 };
 
 #endif // ENGINE_CLIENT_BACKEND_SDL_H

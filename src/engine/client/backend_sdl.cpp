@@ -2241,8 +2241,29 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		s_InitDefaultParams = true;
 	}
 
+	//clamp the versions to existing versions(only for OpenGL major <= 3)
+	if(g_Config.m_GfxOpenGLMajor == 1)
+	{
+		g_Config.m_GfxOpenGLMinor = clamp(g_Config.m_GfxOpenGLMinor, 1, 5);
+		if(g_Config.m_GfxOpenGLMinor == 2)
+			g_Config.m_GfxOpenGLPatch = clamp(g_Config.m_GfxOpenGLPatch, 0, 1);
+		else
+			g_Config.m_GfxOpenGLPatch = 0;
+	}
+	else if(g_Config.m_GfxOpenGLMajor == 2)
+	{
+		g_Config.m_GfxOpenGLMinor = clamp(g_Config.m_GfxOpenGLMinor, 0, 1);
+		g_Config.m_GfxOpenGLPatch = 0;
+	}
+	else if(g_Config.m_GfxOpenGLMajor == 3)
+	{
+		g_Config.m_GfxOpenGLMinor = clamp(g_Config.m_GfxOpenGLMinor, 0, 3);
+		g_Config.m_GfxOpenGLPatch = 0;
+	}
+
 	// if OpenGL3 context was tried to be created, but failed, we have to restore the old context attributes
-	if(s_TriedOpenGL3Context && !g_Config.m_GfxOpenGL3)
+	bool IsNewOpenGL = (g_Config.m_GfxOpenGLMajor == 3 && g_Config.m_GfxOpenGLMinor == 3) || g_Config.m_GfxOpenGLMajor >= 4;
+	if(s_TriedOpenGL3Context && !IsNewOpenGL)
 	{
 		s_TriedOpenGL3Context = false;
 
@@ -2251,8 +2272,8 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, s_SDLGLContextMinorVersion);
 	}
 
-	m_UseOpenGL3_3 = false;
-	if(g_Config.m_GfxOpenGL3)
+	m_UseNewOpenGL = false;
+	if(IsNewOpenGL)
 	{
 		s_TriedOpenGL3Context = true;
 
@@ -2261,23 +2282,23 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 			pErr = SDL_GetError();
 			if(pErr[0] != '\0')
 			{
-				dbg_msg("gfx", "Using old OpenGL context, because an error occurred while trying to use OpenGL context 3.3: %s.", pErr);
+				dbg_msg("gfx", "Using old OpenGL context, because an error occurred while trying to use OpenGL context %zu.%zu: %s.", (size_t)g_Config.m_GfxOpenGLMajor, (size_t)g_Config.m_GfxOpenGLMinor, pErr);
 				SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, s_SDLGLContextProfileMask);
 			}
 			else
 			{
-				if(SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3) == 0 && SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3) == 0)
+				if(SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, g_Config.m_GfxOpenGLMajor) == 0 && SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, g_Config.m_GfxOpenGLMinor) == 0)
 				{
 					pErr = SDL_GetError();
 					if(pErr[0] != '\0')
 					{
-						dbg_msg("gfx", "Using old OpenGL context, because an error occurred while trying to use OpenGL context 3.3: %s.", pErr);
+						dbg_msg("gfx", "Using old OpenGL context, because an error occurred while trying to use OpenGL context %zu.%zu: %s.", (size_t)g_Config.m_GfxOpenGLMajor, (size_t)g_Config.m_GfxOpenGLMinor, pErr);
 						SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, s_SDLGLContextMajorVersion);
 						SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, s_SDLGLContextMinorVersion);
 					}
 					else
 					{
-						m_UseOpenGL3_3 = true;
+						m_UseNewOpenGL = true;
 						int vMaj, vMin;
 						SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &vMaj);
 						SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &vMin);
@@ -2286,7 +2307,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 				}
 				else
 				{
-					dbg_msg("gfx", "Couldn't create OpenGL 3.3 context.");
+					dbg_msg("gfx", "Couldn't create OpenGL %zu.%zu context.", (size_t)g_Config.m_GfxOpenGLMajor, (size_t)g_Config.m_GfxOpenGLMinor);
 					SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, s_SDLGLContextMajorVersion);
 					SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, s_SDLGLContextMinorVersion);
 				}
@@ -2299,6 +2320,12 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, s_SDLGLContextMajorVersion);
 			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, s_SDLGLContextMinorVersion);
 		}
+	}
+	//if non standard opengl, set it
+	else if(s_SDLGLContextMajorVersion != g_Config.m_GfxOpenGLMajor || s_SDLGLContextMinorVersion != g_Config.m_GfxOpenGLMinor) {
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, g_Config.m_GfxOpenGLMajor);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, g_Config.m_GfxOpenGLMinor);
+		dbg_msg("gfx", "Created OpenGL %zu.%zu context.", (size_t)g_Config.m_GfxOpenGLMajor, (size_t)g_Config.m_GfxOpenGLMinor);
 	}
 
 	// set screen
@@ -2416,7 +2443,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		return -1;
 	}
 
-	if(m_UseOpenGL3_3)
+	if(m_UseNewOpenGL)
 	{
 		//support graphic cards that are pretty old(and linux)
 		glewExperimental = GL_TRUE;
@@ -2430,12 +2457,12 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 
 	// start the command processor
 	m_pProcessor = new CCommandProcessor_SDL_OpenGL;
-	((CCommandProcessor_SDL_OpenGL*)m_pProcessor)->UseOpenGL3_3(m_UseOpenGL3_3);
+	((CCommandProcessor_SDL_OpenGL*)m_pProcessor)->UseOpenGL3_3(m_UseNewOpenGL);
 	StartProcessor(m_pProcessor);
 
 	// issue init commands for OpenGL and SDL
 	CCommandBuffer CmdBuffer(1024, 512);
-	if(m_UseOpenGL3_3)
+	if(m_UseNewOpenGL)
 	{
 		//run sdl first to have the context in the thread
 		CCommandProcessorFragment_SDL::SCommand_Init CmdSDL;
@@ -2504,7 +2531,7 @@ int CGraphicsBackend_SDL_OpenGL::Shutdown()
 {
 	// issue a shutdown command
 	CCommandBuffer CmdBuffer(1024, 512);
-	if(m_UseOpenGL3_3)
+	if(m_UseNewOpenGL)
 	{
 		CCommandProcessorFragment_OpenGL3_3::SCommand_Shutdown Cmd;
 		CmdBuffer.AddCommand(Cmd);

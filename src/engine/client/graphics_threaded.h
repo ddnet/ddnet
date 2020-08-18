@@ -592,7 +592,7 @@ public:
 	virtual bool IsIdle() const = 0;
 	virtual void WaitForIdle() = 0;
 
-	virtual bool IsOpenGL3_3() { return false; }
+	virtual bool IsNewOpenGL() { return false; }
 };
 
 class CGraphics_Threaded : public IEngineGraphics
@@ -610,7 +610,8 @@ class CGraphics_Threaded : public IEngineGraphics
 
 	CCommandBuffer::SState m_State;
 	IGraphicsBackend *m_pBackend;
-	bool m_UseOpenGL3_3;
+	bool m_OpenGLBufferingEnabled;
+	bool m_IsNewOpenGL;
 
 	CCommandBuffer *m_apCommandBuffers[NUM_CMDBUFFERS];
 	CCommandBuffer *m_pCommandBuffer;
@@ -827,7 +828,7 @@ public:
 	virtual bool IsIdle();
 	virtual void WaitForIdle();
 
-	virtual bool IsBufferingEnabled() { return m_UseOpenGL3_3; }
+	virtual bool IsBufferingEnabled() { return m_OpenGLBufferingEnabled; }
 };
 
 extern IGraphicsBackend *CreateGraphicsBackend();

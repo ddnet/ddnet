@@ -68,7 +68,7 @@ void CGraphics_Threaded::FlushVertices(bool KeepVertices)
 
 	if(m_Drawing == DRAWING_QUADS)
 	{
-		if(g_Config.m_GfxQuadAsTriangle && !m_UseOpenGL3_3)
+		if(g_Config.m_GfxQuadAsTriangle && !m_IsNewOpenGL)
 		{
 			Cmd.m_PrimType = CCommandBuffer::PRIMTYPE_TRIANGLES;
 			Cmd.m_PrimCount = NumVerts/3;
@@ -705,7 +705,7 @@ void CGraphics_Threaded::ChangeColorOfCurrentQuadVertices(float r, float g, floa
 
 void CGraphics_Threaded::ChangeColorOfQuadVertices(int QuadOffset, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
 {
-	if(g_Config.m_GfxQuadAsTriangle && !m_UseOpenGL3_3)
+	if(g_Config.m_GfxQuadAsTriangle && !m_IsNewOpenGL)
 	{
 		m_aVertices[QuadOffset * 6].m_Color.r = r;
 		m_aVertices[QuadOffset * 6].m_Color.g = g;
@@ -806,7 +806,7 @@ void CGraphics_Threaded::QuadsDrawTL(const CQuadItem *pArray, int Num)
 
 	dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->QuadsDrawTL without begin");
 
-	if(g_Config.m_GfxQuadAsTriangle && !m_UseOpenGL3_3)
+	if(g_Config.m_GfxQuadAsTriangle && !m_IsNewOpenGL)
 	{
 		for(int i = 0; i < Num; ++i)
 		{
@@ -894,7 +894,7 @@ void CGraphics_Threaded::QuadsDrawFreeform(const CFreeformItem *pArray, int Num)
 {
 	dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->QuadsDrawFreeform without begin");
 
-	if(g_Config.m_GfxQuadAsTriangle && !m_UseOpenGL3_3)
+	if(g_Config.m_GfxQuadAsTriangle && !m_IsNewOpenGL)
 	{
 		for(int i = 0; i < Num; ++i)
 		{
@@ -1228,7 +1228,7 @@ int CGraphics_Threaded::CreateQuadContainer()
 
 void CGraphics_Threaded::QuadContainerUpload(int ContainerIndex)
 {
-	if(m_UseOpenGL3_3)
+	if(m_IsNewOpenGL)
 	{
 		SQuadContainer& Container = m_QuadContainers[ContainerIndex];
 		if(Container.m_Quads.size() > 0)
@@ -1364,7 +1364,7 @@ void CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CFreeformItem
 void CGraphics_Threaded::QuadContainerReset(int ContainerIndex)
 {
 	SQuadContainer& Container = m_QuadContainers[ContainerIndex];
-	if(m_UseOpenGL3_3)
+	if(m_IsNewOpenGL)
 	{
 		if(Container.m_QuadBufferContainerIndex != -1)
 			DeleteBufferContainer(Container.m_QuadBufferContainerIndex, true);
@@ -1397,7 +1397,7 @@ void CGraphics_Threaded::RenderQuadContainer(int ContainerIndex, int QuadOffset,
 	if((int)Container.m_Quads.size() < QuadOffset + QuadDrawNum || QuadDrawNum == 0)
 		return;
 
-	if(m_UseOpenGL3_3)
+	if(m_IsNewOpenGL)
 	{
 		if(Container.m_QuadBufferContainerIndex == -1)
 			return;
@@ -1455,7 +1455,7 @@ void CGraphics_Threaded::RenderQuadContainerAsSprite(int ContainerIndex, int Qua
 	if((int)Container.m_Quads.size() < QuadOffset + 1)
 		return;
 
-	if(m_UseOpenGL3_3)
+	if(m_IsNewOpenGL)
 	{
 		if(Container.m_QuadBufferContainerIndex == -1)
 			return;
@@ -1581,7 +1581,7 @@ void CGraphics_Threaded::RenderQuadContainerAsSpriteMultiple(int ContainerIndex,
 	if(DrawCount == 0)
 		return;
 
-	if(m_UseOpenGL3_3)
+	if(m_IsNewOpenGL)
 	{
 		if(Container.m_QuadBufferContainerIndex == -1)
 			return;
@@ -2057,7 +2057,8 @@ int CGraphics_Threaded::IssueInit()
 	if(g_Config.m_GfxResizable) Flags |= IGraphicsBackend::INITFLAG_RESIZABLE;
 
 	int r = m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, g_Config.m_GfxFsaaSamples, Flags, &m_DesktopScreenWidth, &m_DesktopScreenHeight, &m_ScreenWidth, &m_ScreenHeight, m_pStorage);
-	m_UseOpenGL3_3 = m_pBackend->IsOpenGL3_3();
+	m_IsNewOpenGL = m_pBackend->IsNewOpenGL();
+	m_OpenGLBufferingEnabled = m_IsNewOpenGL;
 	return r;
 }
 
@@ -2081,9 +2082,12 @@ int CGraphics_Threaded::InitWindow()
 	}
 
 	// try using old opengl context
-	if(g_Config.m_GfxOpenGL3)
+	bool IsNewOpenGL = (g_Config.m_GfxOpenGLMajor == 3 && g_Config.m_GfxOpenGLMinor == 3) || g_Config.m_GfxOpenGLMajor >= 4;
+	if(IsNewOpenGL)
 	{
-		g_Config.m_GfxOpenGL3 = 0;
+		g_Config.m_GfxOpenGLMajor = 2;
+		g_Config.m_GfxOpenGLMinor = 1;
+		g_Config.m_GfxOpenGLPatch = 0;
 		if(IssueInit() == 0)
 		{
 			return 0;
