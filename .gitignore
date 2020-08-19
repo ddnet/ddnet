@@ -3,6 +3,8 @@
 data/
 !/data/
 
+docs/
+
 bundle/
 !/other/bundle/
 
