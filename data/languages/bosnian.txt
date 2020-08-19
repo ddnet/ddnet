@@ -46,10 +46,10 @@ All
 == Svi
 
 Are you sure that you want to delete the demo?
-== Jeste li sigurni da želite obrisati demo-snimak?
+== Da li ste sigurni da želite obrisati demo-snimak?
 
 Are you sure that you want to quit?
-== Jeste li sigurni da želite izići?
+== Da li ste sigurni da želite izaći?
 
 Are you sure that you want to remove the player from your friends list?
 == Da li ste sigurni da želite ukloniti igrača iz vaše liste prijatelja?
@@ -58,7 +58,7 @@ Automatically record demos
 == Automatski demo-snimci
 
 Automatically take game over screenshot
-== Automatski screenshot po završetku igre
+== Automatski screenshot nakon završetka igre
 
 Blue team
 == Plavi tim
@@ -94,7 +94,7 @@ Connect
 == Konektuj
 
 Connecting to
-== Konektujem na
+== Konektovanje na
 
 Connection Problems...
 == Problemi sa konekcijom...
@@ -139,7 +139,7 @@ Disconnected
 == Diskonektovan
 
 Downloading map
-== Preuzimam mapu
+== Preuzimanje mape
 
 Draw!
 == Neriješeno!
@@ -148,7 +148,7 @@ Dynamic Camera
 == Dinamička kamera
 
 Emoticon
-== Emoticon
+== Emotikoni
 
 Enter
 == Započni
@@ -175,7 +175,7 @@ Fire
 == Pucanje
 
 Folder
-== Direktorij
+== Folder
 
 Force vote
 == Obavezno glasanje
@@ -256,13 +256,13 @@ Mouse sens.
 == Osjetljivost miša
 
 Move left
-== Nalijevo
+== Lijevo
 
 Move player to spectators
 == Izbaci igrača u posmatrače
 
 Move right
-== Nadesno
+== Desno
 
 Movement
 == Kretanje
@@ -286,10 +286,10 @@ No password
 == Bez lozinke
 
 No servers found
-== Nije pronađen nijedan server
+== Nema pronađenih servera
 
 No servers match your filter criteria
-== Nijedan server ne odgovara zadatom kriteriju
+== Nema pronađenih servera sa odgovarajućim filterom
 
 Ok
 == OK
@@ -298,7 +298,7 @@ Open
 == Otvori
 
 Parent Folder
-== Prethodni direktorij
+== Prethodni folder
 
 Password
 == Lozinka
@@ -331,7 +331,7 @@ Players
 == Igrači
 
 Please balance teams!
-== Molim uravnotežite timove!
+== Molimo da balansirate timove!
 
 Prev. weapon
 == Prethodno oružje
@@ -412,7 +412,7 @@ Show chat
 == Prikaži chat
 
 Show friends only
-== Prikaži prijatelje
+== Prikaži samo prijatelje
 
 Show ingame HUD
 == Prikaži HUD
@@ -424,7 +424,7 @@ Show only supported
 == Prikaži samo podržane
 
 Skins
-== Izgled
+== Skinovi
 
 Sound
 == Zvuk
@@ -600,7 +600,7 @@ Record demo
 == Snimi demo
 
 Your skin
-== Vaš izgled
+== Vaš skin
 
 Size:
 == Veličina:
@@ -648,142 +648,142 @@ Type:
 == Tip:
 
 Successfully saved the replay!
-== 
+== Uspješno sačuvan replay-snimak!
 
 Replay feature is disabled!
-== 
+== Replay opcija je isključena!
 
 Game paused
-== 
+== Igra je pauzirana
 
 Server best:
-== 
+== Najbolje na serveru
 
 Personal best:
-== 
+== Najbolje osobno
 
 Learn
-== 
+== Učiti
 
 Browser
-== 
+== Pretraživač
 
 Ghost
-== 
+== Duh
 
 Loading DDNet Client
-== 
+== Učitavanje DDNet Klijenta
 
 Reconnect in %d sec
-== 
+== Rekonetovanje za %d sekundi
 
 Render demo
-== 
+== Renderuj demo
 
 Replace video
-== 
+== Zamijeni video
 
 File already exists, do you want to overwrite it?
-== 
+== Fajl već postoji, da li ga ipak želite sačuvati?
 
 Are you sure that you want to disconnect?
-== 
+== Da li ste sigurni da se želite diskonektovati?
 
 Disconnect Dummy
-== 
+== Diskonektuj Dummy-a
 
 Are you sure that you want to disconnect your dummy?
-== 
+== Da li ste sigurni da želite diskonektovati dummy-a?
 
 Welcome to DDNet
-== 
+== Dobrodošni na DDNet
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== 
+== DDraceNetwork je kooperativna online igra gdje je cilj da ti i tvoja grupa igrača dođete do finiša na mapi. Kao početnik trebalo bi da počneš igrati na Novice serverima, gdje se nalaze najlakše mape. U zavisnosti od ping-a izaberite server najbliži vama.
 
 The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== 
+== Mapa sadrži zaleđivanje, koje privremeno igrača napravi nepokretnim. Potrebno je surađivati sa ostalima da prođete te dijelove.
 
 The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== 
+== Kuglica na mišu mijenja oružja. Čekić (lijevi klik na mišu) može se koristiti da udariš ostale igrače i tako da ih odlediš.
 
 Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== 
+== Lanac (desni klik na mišu) može se koristiti da se ljuljaš kroz mapu i da povučeš ostale igrače prema sebi.
 
 Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== 
+== Najvažnija je komunikacija: Tutorijala nema, stoga je potrebno čatovati (t tipka) sa ostalim igračima i tako naučiti osnove i trikove igre.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 
+== Koristi k tipku da se ubiješ (restart), q da pauziraš i posmatraš ostale igrače. Pogledaj podešavanja za ostale bindove za tipke.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
-== 
+== Preporučeno je da provjeriš i podesiš postavke najbolje za tebe prije nego uđeš na server.
 
 Please enter your nick name below.
-== 
+== Molimo unesite vaš nadimak dole.
 
 Destination file already exist
-== 
+== Destinacija fajla već postoji
 
 Video name:
-== 
+== Ime videa
 
 Show DDNet map finishes in server browser
-== 
+== Prikaži završene DDNet mape u pretraživaču za servere
 
 transmits your player name to info.ddnet.tw
-== 
+== prenosi tvoje ime na info.ddnet.tw
 
 Search
-== 
+== Pretraži
 
 Exclude
-== 
+== Izostavi
 
 Filter connecting players
-== 
+== Filtriraj igrače koji se konektuju
 
 Indicate map finish
-== 
+== Indikator završene mape
 
 Unfinished map
-== 
+== Nezavršene mape
 
 Countries
-== 
+== Zemlje
 
 Types
-== 
+== Tipovi
 
 DDNet %s is out!
-== 
+== DDNet %s je izašao!
 
 Downloading %s:
-== 
+== Preuzimanje %s:
 
 Update failed! Check log...
-== 
+== Ažuriranje neuspješno! Provjeri log...
 
 DDNet Client updated!
-== 
+== DDNet Client ažuriran!
 
 Update now
-== 
+== Ažuriraj sad
 
 Restart
-== 
+== Restart
 
 Select a name
-== 
+== Izaberite ime
 
 Please use a different name
-== 
+== Molimo izaberite drugo ime
 
 Remove chat
-== 
+== Ukloni čat
 
 Markers:
-== 
+== Markeri
 
 %.2f MiB
 == 
@@ -792,187 +792,187 @@ Markers:
 == 
 
 Demo
-== 
+== Demo-snimak
 
 Markers
-== 
+== Markeri
 
 Length
-== 
+== Dužina
 
 Date
-== 
+== Datum
 
 Fetch Info
-== 
+== Dohvati info
 
 Render
-== 
+== Renderuj
 
 Connecting dummy
-== 
+== Konektovanje dummy-a
 
 Connect Dummy
-== 
+== Konektuj dummy-a
 
 Reload
-== 
+== Reload
 
 Deactivate
-== 
+== Deaktiviraj
 
 Activate
-== 
+== Aktiviraj
 
 Save
-== 
+== Sačuvati
 
 Switch weapon when out of ammo
-== 
+== Promijeni oružje kada nestane municije
 
 Reset wanted weapon on death
-== 
+== Resetuj željeno oružije prilikom smrti
 
 Show only chat messages from friends
-== 
+== Prikaži čat poruke samo od prijatelja
 
 Show clan above name plates
-== 
+== Prikaži klan iznad imena
 
 Clan plates size
-== 
+== Veličina klan podloge
 
 Refresh Rate
-== 
+== Brzina osvježavanja
 
 Show console window
-== 
+== Prikaži prozor konzole
 
 Automatically take statboard screenshot
-== 
+== Automatski slikaj tablicu bodova
 
 Automatically create statboard csv
-== 
+== Automatski kreiraj csv tablice bodova
 
 Max CSVs
 == 
 
 Dummy settings
-== 
+== Postavke Dummy-a
 
 Vanilla skins only
-== 
+== Samo skinovi iz Vanille
 
 Fat skins (DDFat)
-== 
+== Debeli skinovi (DDFat)
 
 Skin prefix
-== 
+== Prefiks Skina
 
 Hook collisions
-== 
+== Sudari lanca
 
 Pause
-== 
+== Pauza
 
 Kill
-== 
+== Smrt
 
 Zoom in
-== 
+== Uvećati
 
 Zoom out
-== 
+== Umanjiti
 
 Default zoom
-== 
+== Zadana veličina
 
 Show others
-== 
+== Prikaži ostale
 
 Show all
-== 
+== Prikaži sve
 
 Toggle dyncam
-== 
+== Promijeni din. kameru
 
 Toggle dummy
-== 
+== Promijeni dummy-a
 
 Toggle ghost
-== 
+== Promijeni duha
 
 Dummy copy
-== 
+== Dummy kopiranje
 
 Hammerfly dummy
-== 
+== Dummy čekić-letenje
 
 Converse
-== 
+== Konverzacija
 
 Statboard
-== 
+== Tablica bodova
 
 Lock team
-== 
+== Zaključaj tim
 
 Show entities
-== 
+== Prikaži entiti-e
 
 Show HUD
-== 
+== Prikaži HUD
 
 UI mouse s.
-== 
+== Osjet. miša u UI
 
 Borderless window
 == 
 
 may cause delay
-== 
+== može prouzrokovati kašnjenje
 
 Screen
-== 
+== Ekran
 
 Use OpenGL 3.3 (experimental)
-== 
+== Koristi OpenGL 3.3 (eksperimentalno)
 
 Preinit VBO (iGPUs only)
-== 
+== Inicijalizuj VBO (samo iGPU-ovi)
 
 Multiple texture units (disable for MacOS)
-== 
+== Više tekturnih jedinica (isljučeno za MacOS)
 
 Use high DPI
-== 
+== Koristi visoki DPI
 
 Enable game sounds
-== 
+== Omogući zvukove igre
 
 Enable gun sound
-== 
+== Omogući zvukove pištolja
 
 Enable long pain sound (used when shooting in freeze)
-== 
+== Omogući dugi bolni zvuk (koristi se kada se puca dok si zaleđen)
 
 Enable server message sound
-== 
+== Omogući zvuk poruke servera
 
 Enable regular chat sound
-== 
+== Omogući zvuk regularnog čata
 
 Enable team chat sound
-== 
+== Omogući zvuk timskog čata
 
 Enable highlighted chat sound
-== 
+== Omogući zvuk označavanja u čatu
 
 Threaded sound loading
-== 
+== Učitavanje tredovanog zvuka
 
 Map sound volume
-== 
+== Glasnoća zvuka mape
 
 HUD
 == 
@@ -981,118 +981,118 @@ DDNet
 == 
 
 DDNet Client needs to be restarted to complete update!
-== 
+== DDNet Klijent mora da se restartuje da bi završio ažuriranje!
 
 Use DDRace Scoreboard
-== 
+== Koristi DDRace tablicu bodova
 
 Show client IDs in Scoreboard
-== 
+== Prikaži ID-eve klijenta na tablici bodova
 
 Show score
-== 
+== Prikaži bodove
 
 Show health + ammo
-== 
+== Prikaži život + municiju
 
 Show names in chat in team colors
-== 
+== Prikaži imena timova u boji
 
 Show kill messages
-== 
+== Prikaži smrtne poruke
 
 Show votes window after voting
-== 
+== Prikaži prozor glasanja nakon glasanja
 
 Messages
-== 
+== Poruke
 
 System message
-== 
+== Poruka od sistema
 
 Reset
-== 
+== Reset
 
 Highlighted message
-== 
+== Označene poruke
 
 Spectator
-== 
+== Posmatrač
 
 Look out!
-== 
+== Pazi!
 
 Team message
-== 
+== Timske poruke
 
 We will win
-== 
+== Mi ćemo pobijediti
 
 Friend message
-== 
+== Poruka prijatelja
 
 Friend
-== 
+== Prijatelj
 
 Hi o/
-== 
+== Ćao o/
 
 Normal message
-== 
+== Normalna poruka
 
 Hello and welcome
-== 
+== Ćao i dobrodošao
 
 Client message
-== 
+== Poruka klijenta
 
 Inner color
-== 
+== Unutrašnja boja
 
 Outline color
-== 
+== Vanjska boja
 
 Wait before try for
-== 
+== Pričekaj prije nego pokušaš
 
 second
-== 
+== sekunda
 
 seconds
-== 
+== sekunde
 
 Save the best demo of each race
-== 
+== Sačuvaj najbolji demo-snimak svake trke
 
 Default length: %d
-== 
+== Zadana dužina: %d
 
 Enable replays
-== 
+== Omogući replay
 
 Show ghost
-== 
+== Prikaži duha
 
 Save ghost
-== 
+== Sačuvaj duha
 
 Gameplay
-== 
+== Igra
 
 Overlay entities
 == 
 
 Size
-== 
+== Veličina
 
 Show text entities
-== 
+== Prikaži tekst entiti-e
 
 Show others (own team only)
-== 
+== Prikaži ostale (samo vlastiti tim)
 
 Show quads
-== 
+== Prikaži quads
 
 AntiPing limit
 == 
@@ -1101,52 +1101,52 @@ AntiPing
 == 
 
 AntiPing: predict other players
-== 
+== AntiPing: preduhitri ostale igrače
 
 AntiPing: predict weapons
-== 
+== AntiPing: preduhitri oružja
 
 AntiPing: predict grenade paths
-== 
+== AntiPing: preduhitri putanje granate
 
 Show other players' hook collision lines
-== 
+== Prikaži linije sudaranja lanca od ostalih igrača
 
 Show other players' key presses
-== 
+== Prikaži tipke koje ostali igrači pritiskaju
 
 Old mouse mode
-== 
+== Stari način miša
 
 Background (regular)
-== 
+== Pozadina (regularno)
 
 Background (entities)
-== 
+== Pozadina (entities)
 
 Show tiles layers from BG map
-== 
+== Prikaži slojeve od pozadinske mape
 
 Try fast HTTP map download first
-== 
+== Pokušaj prvo brzo HTTP skidanje mape
 
 DDNet %s is available:
-== 
+== DDNet %s je dostupan:
 
 Updating...
-== 
+== Ažuriranje...
 
 No updates available
-== 
+== Nema dostupnih ažuriranja
 
 Check now
-== 
+== Provjeri sad
 
 New random timeout code
-== 
+== Novi nasumični timeout kod
 
 Time
-== 
+== Vrijeme
 
 Manual %3d:%02d  
 == 
@@ -1161,22 +1161,22 @@ Replay %3d:%02d
 == 
 
 Follow
-== 
+== Prati
 
 Frags
-== 
+== Fragovi
 
 Deaths
-== 
+== Smrti
 
 Suicides
-== 
+== Samoubistva
 
 Ratio
-== 
+== Omjer
 
 Net
-== 
+== Net
 
 FPM
 == 
@@ -1185,16 +1185,16 @@ Spree
 == 
 
 Best
-== 
+== Najbolji
 
 Grabs
 == 
 
 1 new mention
-== 
+== 1 novo označenje
 
 %d new mentions
-== 
+== %d novih označenja
 
 9+ new mentions
-== 
+== 9+ novih označenja
