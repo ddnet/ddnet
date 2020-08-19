@@ -5,6 +5,7 @@
 #	DNR			2011-07-15 00:36:32
 #	EliteTee	2011-11-30 01:55:30
 #	DNR			2011-11-30 01:57:52
+#	Kingston		2020-08-18 10:57:34
 ##### /authors #####
 
 ##### translated strings #####
@@ -46,16 +47,16 @@ All
 == Svi
 
 Are you sure that you want to delete the demo?
-== Da li sigurni da želite da obrišete demo-snimak?
+== Da li ste sigurni da želite obrisati demo-snimak?
 
 Are you sure that you want to quit?
-== Jeste li sigurni da želite da izađete?
+== Jeste li sigurni da želite izaći?
 
 Are you sure that you want to remove the player from your friends list?
-== Da li ste sigurni da želite da obrišete igrača iz liste prijatelja?
+== Da li ste sigurni da želite obrisati igrača iz liste prijatelja?
 
 Automatically record demos
-== Automatski snimi demo
+== Automatski snimaj demo-e
 
 Automatically take game over screenshot
 == Automatski snimi screenshot
@@ -76,7 +77,7 @@ Change settings
 == Izmeni podešavanja
 
 Chat
-== Chat
+== Čet
 
 Clan
 == Klan
@@ -148,7 +149,7 @@ Dynamic Camera
 == Dinamična kamera
 
 Emoticon
-== Emoticon
+== Emotikon
 
 Enter
 == Započni
@@ -205,7 +206,7 @@ Game types:
 == Tipovi igre:
 
 General
-== Opšte
+== Generalno
 
 Graphics
 == Grafika
@@ -253,16 +254,16 @@ Maximum ping:
 == Maksimalan ping:
 
 Mouse sens.
-== Osetljivost miša
+== Mouse sens.
 
 Move left
-== Nalevo
+== Levo
 
 Move player to spectators
 == Prebaci igrača u posmatrače
 
 Move right
-== Nadesno
+== Desno
 
 Movement
 == Kretanje
@@ -289,7 +290,7 @@ No servers found
 == Nije pronađen nijedan server
 
 No servers match your filter criteria
-== Nijedan server ne odgovara zadatom kriteriju
+== Nijedan server ne odgovara filter kriterijumu
 
 Ok
 == Ok
@@ -331,7 +332,7 @@ Players
 == Igrači
 
 Please balance teams!
-== Molim uravnotežite timove!
+== Molim balansirajte timove!
 
 Prev. weapon
 == Prethodno oružje
@@ -394,7 +395,7 @@ Server address:
 == Adresa servera:
 
 Server details
-== Podaci o serveru
+== Podaci servera
 
 Server filter
 == Filter servera
@@ -406,10 +407,10 @@ Server not full
 == Server nije pun
 
 Shotgun
-== Sačmarica
+== Pumparica
 
 Show chat
-== Prikaži chat
+== Prikaži čet
 
 Show friends only
 == Prikaži samo prijatelje
@@ -424,7 +425,7 @@ Show only supported
 == Prikaži samo podržane
 
 Skins
-== Izgled
+== Skinovi
 
 Sound
 == Zvuk
@@ -469,7 +470,7 @@ Team
 == Tim
 
 Team chat
-== Timski chat
+== Timski čet
 
 Texture Compression
 == Kompresija tekstura
@@ -538,15 +539,13 @@ Yes
 == Da
 
 You must restart the game for all settings to take effect.
-== Morate ponovo pokrenuti igru da bi sva podešavanja bila primenjena.
-
-##### needs translation #####
+== Morate ponovo pokrenuti igru da bi sva nova podešavanja bila primenjena.
 
 New name:
 == Novo ime:
 
 Sat.
-== Zasić.
+== Sat.
 
 Miscellaneous
 == Razno
@@ -558,7 +557,7 @@ Max demos
 == Maksimalan broj demo-a
 
 News
-== Novosti
+== Novo
 
 Join game
 == Uključi se u igru
@@ -600,7 +599,7 @@ Record demo
 == Snimi demo
 
 Your skin
-== Vaš izgled
+== Vaš skin
 
 Size:
 == Veličina:
@@ -648,13 +647,13 @@ Type:
 == Tip:
 
 Successfully saved the replay!
-== 
+== Uspesno sačuvan replay!
 
 Replay feature is disabled!
-== 
+== Replay opcija je isključena!
 
 Game paused
-== 
+== Igra pauzirana
 
 Server best:
 == 
@@ -663,7 +662,7 @@ Personal best:
 == 
 
 Learn
-== 
+== Nauči
 
 Browser
 == 
@@ -672,13 +671,13 @@ Ghost
 == 
 
 Loading DDNet Client
-== 
+== Učitavanje DDNet Klijenta
 
 Reconnect in %d sec
 == 
 
 Render demo
-== 
+== Renderuj demo
 
 Replace video
 == 
@@ -690,13 +689,13 @@ Are you sure that you want to disconnect?
 == 
 
 Disconnect Dummy
-== 
+== Diskonektuj Dummy
 
 Are you sure that you want to disconnect your dummy?
 == 
 
 Welcome to DDNet
-== 
+==
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == 
@@ -713,9 +712,6 @@ Hook (right mouse) can be used to swing through the map and to hook other tees t
 Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
 == 
 
-Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 
-
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == 
 
@@ -726,7 +722,7 @@ Destination file already exist
 == 
 
 Video name:
-== 
+== Video naziv:
 
 Show DDNet map finishes in server browser
 == 
@@ -1200,4 +1196,10 @@ Grabs
 == 
 
 9+ new mentions
+== 
+
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== Tipka K da se ubijes (restart), tipka q da pauziras i gledas druge igrače. 
+
+Client message
 == 
