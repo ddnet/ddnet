@@ -9,11 +9,7 @@
 template <typename T>
 constexpr inline T clamp(T val, T min, T max)
 {
-	if(val < min)
-		return min;
-	if(val > max)
-		return max;
-	return val;
+	return val < min ? min : (val > max ? max : val);
 }
 
 constexpr inline float sign(float f)
@@ -23,9 +19,7 @@ constexpr inline float sign(float f)
 
 constexpr inline int round_to_int(float f)
 {
-	if(f > 0)
-		return (int)(f+0.5f);
-	return (int)(f-0.5f);
+	return f > 0 ? (int)(f + 0.5f) : (int)(f - 0.5f);
 }
 
 constexpr inline int round_truncate(float f)
@@ -50,7 +44,7 @@ inline float frandom() { return rand()/(float)(RAND_MAX); }
 constexpr inline int f2fx(float v) { return (int)(v*(float)(1<<10)); }
 constexpr inline float fx2f(int v) { return v*(1.0f/(1<<10)); }
 
-constexpr inline int gcd(int a, int b)
+inline int gcd(int a, int b)
 {
 	while(b != 0)
 	{
