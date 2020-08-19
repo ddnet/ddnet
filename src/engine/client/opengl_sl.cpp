@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <string>
 
-bool CGLSL::LoadShader(IStorage *pStorage, const char *pFile, int Type)
+bool CGLSL::LoadShader(CGLSLCompiler* pCompiler, IStorage *pStorage, const char *pFile, int Type)
 {
 	if (m_IsLoaded)
 		return true;
@@ -14,6 +14,14 @@ bool CGLSL::LoadShader(IStorage *pStorage, const char *pFile, int Type)
 	std::vector<std::string> Lines;
 	if (f)
 	{
+		//add compiler specific values
+		Lines.push_back(std::string("#version ") + std::string(std::to_string(pCompiler->m_OpenGLVersionMajor)) + std::string(std::to_string(pCompiler->m_OpenGLVersionMinor)) + std::string(std::to_string(pCompiler->m_OpenGLVersionPatch)) + std::string(" core\r\n"));
+
+		for(CGLSLCompiler::SGLSLCompilerDefine& Define : pCompiler->m_Defines)
+		{
+			Lines.push_back(std::string("#define ") + Define.m_DefineName + std::string(" ") + Define.m_DefineValue + std::string("\r\n"));
+		}
+
 		CLineReader LineReader;
 		LineReader.Init(f);
 		char* ReadLine = NULL;
@@ -90,4 +98,26 @@ CGLSL::CGLSL()
 CGLSL::~CGLSL()
 {
 	DeleteShader();
+}
+
+CGLSLCompiler::CGLSLCompiler(int OpenGLVersionMajor, int OpenGLVersionMinor, int OpenGLVersionPatch)
+{
+	m_OpenGLVersionMajor = OpenGLVersionMajor;
+	m_OpenGLVersionMinor = OpenGLVersionMinor;
+	m_OpenGLVersionPatch = OpenGLVersionPatch;
+}
+
+void CGLSLCompiler::AddDefine(const std::string& DefineName, const std::string& DefineValue)
+{
+	m_Defines.emplace_back(SGLSLCompilerDefine(DefineName, DefineValue));
+}
+
+void CGLSLCompiler::AddDefine(const char* pDefineName, const char* pDefineValue)
+{
+	AddDefine(std::string(pDefineName), std::string(pDefineValue));
+}
+
+void CGLSLCompiler::ClearDefines()
+{
+	m_Defines.clear();
 }

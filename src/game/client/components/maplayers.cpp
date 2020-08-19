@@ -132,23 +132,13 @@ struct STmpTile
 	vec2 m_BottomRight;
 	vec2 m_BottomLeft;
 };
+
 struct STmpTileTexCoord
 {
-	STmpTileTexCoord()
-	{
-		m_TexCoordTopLeftRightOrBottom[0] = m_TexCoordTopLeftRightOrBottom[1] = 0;
-		m_TexCoordBottomLeftRightOrBottom[0] = 0; m_TexCoordBottomLeftRightOrBottom[1] = 1;
-		m_TexCoordTopRightRightOrBottom[0] = 1; m_TexCoordTopRightRightOrBottom[1] = 0;
-		m_TexCoordBottomRightRightOrBottom[0] = m_TexCoordBottomRightRightOrBottom[1] = 1;
-	}
-	unsigned char m_TexCoordTopLeft[2];
-	unsigned char m_TexCoordTopLeftRightOrBottom[2];
-	unsigned char m_TexCoordTopRight[2];
-	unsigned char m_TexCoordTopRightRightOrBottom[2];
-	unsigned char m_TexCoordBottomRight[2];
-	unsigned char m_TexCoordBottomRightRightOrBottom[2];
-	unsigned char m_TexCoordBottomLeft[2];
-	unsigned char m_TexCoordBottomLeftRightOrBottom[2];
+	vec3 m_TexCoordTopLeft;
+	vec3 m_TexCoordTopRight;
+	vec3 m_TexCoordBottomRight;
+	vec3 m_TexCoordBottomLeft;
 };
 
 void FillTmpTileSpeedup(STmpTile* pTmpTile, STmpTileTexCoord* pTmpTex, unsigned char Flags, unsigned char Index, int x, int y, int Scale, CMapItemGroup* pGroup, short AngleRotate)
@@ -157,39 +147,25 @@ void FillTmpTileSpeedup(STmpTile* pTmpTile, STmpTileTexCoord* pTmpTex, unsigned 
 	{
 		unsigned char x0 = 0;
 		unsigned char y0 = 0;
-		unsigned char x1 = 16;
-		unsigned char y1 = 0;
-		unsigned char x2 = 16;
-		unsigned char y2 = 16;
-		unsigned char x3 = 0;
-		unsigned char y3 = 16;
+		unsigned char x1 = x0 + 1;
+		unsigned char y1 = y0;
+		unsigned char x2 = x0 + 1;
+		unsigned char y2 = y0 + 1;
+		unsigned char x3 = x0;
+		unsigned char y3 = y0 + 1;
 
-		unsigned char bx0 = 0;
-		unsigned char by0 = 0;
-		unsigned char bx1 = 1;
-		unsigned char by1 = 0;
-		unsigned char bx2 = 1;
-		unsigned char by2 = 1;
-		unsigned char bx3 = 0;
-		unsigned char by3 = 1;
-
-		pTmpTex->m_TexCoordTopLeft[0] = x0;
-		pTmpTex->m_TexCoordTopLeft[1] = y0;
-		pTmpTex->m_TexCoordBottomLeft[0] = x3;
-		pTmpTex->m_TexCoordBottomLeft[1] = y3;
-		pTmpTex->m_TexCoordTopRight[0] = x1;
-		pTmpTex->m_TexCoordTopRight[1] = y1;
-		pTmpTex->m_TexCoordBottomRight[0] = x2;
-		pTmpTex->m_TexCoordBottomRight[1] = y2;
-
-		pTmpTex->m_TexCoordTopLeftRightOrBottom[0] = bx0;
-		pTmpTex->m_TexCoordTopLeftRightOrBottom[1] = by0;
-		pTmpTex->m_TexCoordBottomLeftRightOrBottom[0] = bx3;
-		pTmpTex->m_TexCoordBottomLeftRightOrBottom[1] = by3;
-		pTmpTex->m_TexCoordTopRightRightOrBottom[0] = bx1;
-		pTmpTex->m_TexCoordTopRightRightOrBottom[1] = by1;
-		pTmpTex->m_TexCoordBottomRightRightOrBottom[0] = bx2;
-		pTmpTex->m_TexCoordBottomRightRightOrBottom[1] = by2;
+		pTmpTex->m_TexCoordTopLeft.x = x0;
+		pTmpTex->m_TexCoordTopLeft.y = y0;
+		pTmpTex->m_TexCoordTopLeft.z = Index;
+		pTmpTex->m_TexCoordBottomLeft.x = x3;
+		pTmpTex->m_TexCoordBottomLeft.y = y3;
+		pTmpTex->m_TexCoordBottomLeft.z = Index;
+		pTmpTex->m_TexCoordTopRight.x = x1;
+		pTmpTex->m_TexCoordTopRight.y = y1;
+		pTmpTex->m_TexCoordTopRight.z = Index;
+		pTmpTex->m_TexCoordBottomRight.x = x2;
+		pTmpTex->m_TexCoordBottomRight.y = y2;
+		pTmpTex->m_TexCoordBottomRight.z = Index;
 	}
 
 	//same as in rotate from Graphics()
@@ -228,27 +204,14 @@ void FillTmpTile(STmpTile* pTmpTile, STmpTileTexCoord* pTmpTex, unsigned char Fl
 {
 	if(pTmpTex)
 	{
-		unsigned char tx = Index%16;
-		unsigned char ty = Index/16;
-		unsigned char x0 = tx;
-		unsigned char y0 = ty;
-		unsigned char x1 = tx+1;
-		unsigned char y1 = ty;
-		unsigned char x2 = tx+1;
-		unsigned char y2 = ty+1;
-		unsigned char x3 = tx;
-		unsigned char y3 = ty+1;
-
-		unsigned char bx0 = 0;
-		unsigned char by0 = 0;
-		unsigned char bx1 = 1;
-		unsigned char by1 = 0;
-		unsigned char bx2 = 1;
-		unsigned char by2 = 1;
-		unsigned char bx3 = 0;
-		unsigned char by3 = 1;
-
-
+		unsigned char x0 = 0;
+		unsigned char y0 = 0;
+		unsigned char x1 = x0 + 1;
+		unsigned char y1 = y0;
+		unsigned char x2 = x0 + 1;
+		unsigned char y2 = y0 + 1;
+		unsigned char x3 = x0;
+		unsigned char y3 = y0 + 1;
 
 		if(Flags&TILEFLAG_VFLIP)
 		{
@@ -256,11 +219,6 @@ void FillTmpTile(STmpTile* pTmpTile, STmpTileTexCoord* pTmpTex, unsigned char Fl
 			x1 = x3;
 			x2 = x3;
 			x3 = x0;
-
-			bx0 = bx2;
-			bx1 = bx3;
-			bx2 = bx3;
-			bx3 = bx0;
 		}
 
 		if(Flags&TILEFLAG_HFLIP)
@@ -269,11 +227,6 @@ void FillTmpTile(STmpTile* pTmpTile, STmpTileTexCoord* pTmpTex, unsigned char Fl
 			y2 = y1;
 			y3 = y1;
 			y1 = y0;
-
-			by0 = by3;
-			by2 = by1;
-			by3 = by1;
-			by1 = by0;
 		}
 
 		if(Flags&TILEFLAG_ROTATE)
@@ -288,36 +241,20 @@ void FillTmpTile(STmpTile* pTmpTile, STmpTileTexCoord* pTmpTex, unsigned char Fl
 			y3 = y2;
 			y2 = y1;
 			y1 = Tmp;
-
-			Tmp = bx0;
-			bx0 = bx3;
-			bx3 = bx2;
-			bx2 = bx1;
-			bx1 = Tmp;
-			Tmp = by0;
-			by0 = by3;
-			by3 = by2;
-			by2 = by1;
-			by1 = Tmp;
 		}
 
-		pTmpTex->m_TexCoordTopLeft[0] = x0;
-		pTmpTex->m_TexCoordTopLeft[1] = y0;
-		pTmpTex->m_TexCoordBottomLeft[0] = x3;
-		pTmpTex->m_TexCoordBottomLeft[1] = y3;
-		pTmpTex->m_TexCoordTopRight[0] = x1;
-		pTmpTex->m_TexCoordTopRight[1] = y1;
-		pTmpTex->m_TexCoordBottomRight[0] = x2;
-		pTmpTex->m_TexCoordBottomRight[1] = y2;
-
-		pTmpTex->m_TexCoordTopLeftRightOrBottom[0] = bx0;
-		pTmpTex->m_TexCoordTopLeftRightOrBottom[1] = by0;
-		pTmpTex->m_TexCoordBottomLeftRightOrBottom[0] = bx3;
-		pTmpTex->m_TexCoordBottomLeftRightOrBottom[1] = by3;
-		pTmpTex->m_TexCoordTopRightRightOrBottom[0] = bx1;
-		pTmpTex->m_TexCoordTopRightRightOrBottom[1] = by1;
-		pTmpTex->m_TexCoordBottomRightRightOrBottom[0] = bx2;
-		pTmpTex->m_TexCoordBottomRightRightOrBottom[1] = by2;
+		pTmpTex->m_TexCoordTopLeft.x = x0;
+		pTmpTex->m_TexCoordTopLeft.y = y0;
+		pTmpTex->m_TexCoordTopLeft.z = Index;
+		pTmpTex->m_TexCoordBottomLeft.x = x3;
+		pTmpTex->m_TexCoordBottomLeft.y = y3;
+		pTmpTex->m_TexCoordBottomLeft.z = Index;
+		pTmpTex->m_TexCoordTopRight.x = x1;
+		pTmpTex->m_TexCoordTopRight.y = y1;
+		pTmpTex->m_TexCoordTopRight.z = Index;
+		pTmpTex->m_TexCoordBottomRight.x = x2;
+		pTmpTex->m_TexCoordBottomRight.y = y2;
+		pTmpTex->m_TexCoordBottomRight.z = Index;
 	}
 
 	pTmpTile->m_TopLeft.x = x*Scale;
@@ -401,8 +338,8 @@ bool AddTile(std::vector<STmpTile>& TmpTiles, std::vector<STmpTileTexCoord>& Tmp
 struct STmpQuadVertexTextured
 {
 	float m_X, m_Y, m_CenterX, m_CenterY;
-	float m_U, m_V;
 	unsigned char m_R, m_G, m_B, m_A;
+	float m_U, m_V;
 };
 
 struct STmpQuadVertex
@@ -839,10 +776,10 @@ void CMapLayers::OnMapLoad()
 						size_t UploadDataSize = tmpTileTexCoords.size() * sizeof(STmpTileTexCoord) + tmpTiles.size() * sizeof(STmpTile);
 						char* pUploadData = new char[UploadDataSize];
 
-						mem_copy_special(pUploadData, pTmpTiles, sizeof(vec2), tmpTiles.size() * 4, (DoTextureCoords ? (sizeof(unsigned char) * 2 * 2) : 0));
+						mem_copy_special(pUploadData, pTmpTiles, sizeof(vec2), tmpTiles.size() * 4, (DoTextureCoords ? sizeof(vec3) : 0));
 						if(DoTextureCoords)
 						{
-							mem_copy_special(pUploadData + sizeof(vec2), pTmpTileTexCoords, sizeof(unsigned char) * 2 * 2, tmpTiles.size() * 4, (DoTextureCoords ? (sizeof(vec2)) : 0));
+							mem_copy_special(pUploadData + sizeof(vec2), pTmpTileTexCoords, sizeof(vec3), tmpTiles.size() * 4, (DoTextureCoords ? (sizeof(vec2)) : 0));
 						}
 
 						// first create the buffer object
@@ -851,7 +788,7 @@ void CMapLayers::OnMapLoad()
 
 						// then create the buffer container
 						SBufferContainerInfo ContainerInfo;
-						ContainerInfo.m_Stride = (DoTextureCoords ? (sizeof(float) * 2 + sizeof(unsigned char) * 2 * 2) : 0);
+						ContainerInfo.m_Stride = (DoTextureCoords ? (sizeof(float) * 2 + sizeof(vec3)) : 0);
 						ContainerInfo.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
 						SBufferContainerInfo::SAttribute* pAttr = &ContainerInfo.m_Attributes.back();
 						pAttr->m_DataTypeCount = 2;
@@ -864,20 +801,11 @@ void CMapLayers::OnMapLoad()
 						{
 							ContainerInfo.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
 							pAttr = &ContainerInfo.m_Attributes.back();
-							pAttr->m_DataTypeCount = 2;
-							pAttr->m_Type = GRAPHICS_TYPE_UNSIGNED_BYTE;
+							pAttr->m_DataTypeCount = 3;
+							pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
 							pAttr->m_Normalized = false;
 							pAttr->m_pOffset = (void*)(sizeof(vec2));
 							pAttr->m_FuncType = 0;
-							pAttr->m_VertBufferBindingIndex = BufferObjectIndex;
-
-							ContainerInfo.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
-							pAttr = &ContainerInfo.m_Attributes.back();
-							pAttr->m_DataTypeCount = 2;
-							pAttr->m_Type = GRAPHICS_TYPE_UNSIGNED_BYTE;
-							pAttr->m_Normalized = false;
-							pAttr->m_pOffset = (void*)(sizeof(vec2) + sizeof(unsigned char) * 2);
-							pAttr->m_FuncType = 1;
 							pAttr->m_VertBufferBindingIndex = BufferObjectIndex;
 						}
 
@@ -971,6 +899,14 @@ void CMapLayers::OnMapLoad()
 					pAttr->m_pOffset = 0;
 					pAttr->m_FuncType = 0;
 					pAttr->m_VertBufferBindingIndex = BufferObjectIndex;
+					ContainerInfo.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
+					pAttr = &ContainerInfo.m_Attributes.back();
+					pAttr->m_DataTypeCount = 4;
+					pAttr->m_Type = GRAPHICS_TYPE_UNSIGNED_BYTE;
+					pAttr->m_Normalized = true;
+					pAttr->m_pOffset = (void*)(sizeof(float) * 4);
+					pAttr->m_FuncType = 0;
+					pAttr->m_VertBufferBindingIndex = BufferObjectIndex;
 					if(Textured)
 					{
 						ContainerInfo.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
@@ -978,18 +914,10 @@ void CMapLayers::OnMapLoad()
 						pAttr->m_DataTypeCount = 2;
 						pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
 						pAttr->m_Normalized = false;
-						pAttr->m_pOffset = (void*)(sizeof(float) * 4);
+						pAttr->m_pOffset = (void*)(sizeof(float) * 4 + sizeof(unsigned char) * 4);
 						pAttr->m_FuncType = 0;
 						pAttr->m_VertBufferBindingIndex = BufferObjectIndex;
 					}
-					ContainerInfo.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
-					pAttr = &ContainerInfo.m_Attributes.back();
-					pAttr->m_DataTypeCount = 4;
-					pAttr->m_Type = GRAPHICS_TYPE_UNSIGNED_BYTE;
-					pAttr->m_Normalized = true;
-					pAttr->m_pOffset = (void*)(sizeof(float) * 4 + (Textured ? (sizeof(float) * 2) : 0));
-					pAttr->m_FuncType = 0;
-					pAttr->m_VertBufferBindingIndex = BufferObjectIndex;
 
 					pQLayerVisuals->m_BufferContainerIndex = Graphics()->CreateBufferContainer(&ContainerInfo);
 					// and finally inform the backend how many indices are required
@@ -1935,7 +1863,7 @@ void CMapLayers::OnRender()
 
 						// draw arrow -- clamp to the edge of the arrow image
 						Graphics()->WrapClamp();
-						Graphics()->TextureSet(g_pData->m_aImages[IMAGE_SPEEDUP_ARROW].m_Id);
+						Graphics()->TextureSet(m_pImages->GetSpeedupArrow());
 						RenderTileLayer(TileLayerCounter-3, &Color, pTMap, pGroup);
 						Graphics()->WrapNormal();
 						if(g_Config.m_ClTextEntities)

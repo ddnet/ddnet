@@ -19,6 +19,7 @@ CMapImages::CMapImages(int TextureSize)
 	m_Count = 0;
 	m_TextureScale = TextureSize;
 	m_EntitiesIsLoaded = false;
+	m_SpeedupArrowIsLoaded = false;
 }
 
 void CMapImages::OnInit()
@@ -35,11 +36,37 @@ void CMapImages::OnMapLoad()
 	{
 		Graphics()->UnloadTexture(m_aTextures[i]);
 		m_aTextures[i] = IGraphics::CTextureHandle();
+		m_aTextureUsedByLayer[i] = false;
 	}
 	m_Count = 0;
 
 	int Start;
 	pMap->GetType(MAPITEMTYPE_IMAGE, &Start, &m_Count);
+
+	CLayers *pLayers = m_pClient->Layers();
+	for(int g = 0; g < pLayers->NumGroups(); g++)
+	{
+		CMapItemGroup *pGroup = pLayers->GetGroup(g);
+		if(!pGroup)
+		{
+			continue;
+		}
+
+		for(int l = 0; l < pGroup->m_NumLayers; l++)
+		{
+			CMapItemLayer *pLayer = pLayers->GetLayer(pGroup->m_StartLayer+l);
+			if(pLayer->m_Type == LAYERTYPE_TILES)
+			{
+				CMapItemLayerTilemap *pTLayer = (CMapItemLayerTilemap *)pLayer;
+				if(pTLayer->m_Image != -1 && pTLayer->m_Image < (int)(sizeof(m_aTextures) / sizeof(m_aTextures[0])))
+				{
+					m_aTextureUsedByLayer[(size_t)pTLayer->m_Image] = true;
+				}
+			}
+		}
+	}
+
+	int TextureLoadFlag = Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 
 	// load new textures
 	for(int i = 0; i < m_Count; i++)
@@ -50,12 +77,12 @@ void CMapImages::OnMapLoad()
 			char Buf[256];
 			char *pName = (char *)pMap->GetData(pImg->m_ImageName);
 			str_format(Buf, sizeof(Buf), "mapres/%s.png", pName);
-			m_aTextures[i] = Graphics()->LoadTexture(Buf, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+			m_aTextures[i] = Graphics()->LoadTexture(Buf, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, m_aTextureUsedByLayer[i] ? TextureLoadFlag : 0);
 		}
 		else
 		{
 			void *pData = pMap->GetData(pImg->m_ImageData);
-			m_aTextures[i] = Graphics()->LoadTextureRaw(pImg->m_Width, pImg->m_Height, CImageInfo::FORMAT_RGBA, pData, CImageInfo::FORMAT_RGBA, 0);
+			m_aTextures[i] = Graphics()->LoadTextureRaw(pImg->m_Width, pImg->m_Height, CImageInfo::FORMAT_RGBA, pData, CImageInfo::FORMAT_RGBA, m_aTextureUsedByLayer[i] ? TextureLoadFlag : 0);
 			pMap->UnloadData(pImg->m_ImageData);
 		}
 	}
@@ -63,35 +90,7 @@ void CMapImages::OnMapLoad()
 
 void CMapImages::LoadBackground(class IMap *pMap)
 {
-	// unload all textures
-	for(int i = 0; i < m_Count; i++)
-	{
-		Graphics()->UnloadTexture(m_aTextures[i]);
-		m_aTextures[i] = IGraphics::CTextureHandle();
-	}
-	m_Count = 0;
-
-	int Start;
-	pMap->GetType(MAPITEMTYPE_IMAGE, &Start, &m_Count);
-
-	// load new textures
-	for(int i = 0; i < m_Count; i++)
-	{
-		CMapItemImage *pImg = (CMapItemImage *)pMap->GetItem(Start+i, 0, 0);
-		if(pImg->m_External)
-		{
-			char Buf[256];
-			char *pName = (char *)pMap->GetData(pImg->m_ImageName);
-			str_format(Buf, sizeof(Buf), "mapres/%s.png", pName);
-			m_aTextures[i] = Graphics()->LoadTexture(Buf, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
-		}
-		else
-		{
-			void *pData = pMap->GetData(pImg->m_ImageData);
-			m_aTextures[i] = Graphics()->LoadTextureRaw(pImg->m_Width, pImg->m_Height, CImageInfo::FORMAT_RGBA, pData, CImageInfo::FORMAT_RGBA, 0);
-			pMap->UnloadData(pImg->m_ImageData);
-		}
-	}
+	CMapImages::OnMapLoad();
 }
 
 IGraphics::CTextureHandle CMapImages::GetEntities()
@@ -118,11 +117,25 @@ IGraphics::CTextureHandle CMapImages::GetEntities()
 
 		if(m_EntitiesTextures >= 0)
 			Graphics()->UnloadTexture(m_EntitiesTextures);
-		m_EntitiesTextures = Graphics()->LoadTexture(aPath, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+		int TextureLoadFlag = Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+		m_EntitiesTextures = Graphics()->LoadTexture(aPath, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, TextureLoadFlag);
 		m_EntitiesIsLoaded = true;
 		m_pEntitiesGameType = pEntities;
 	}
 	return m_EntitiesTextures;
+}
+
+IGraphics::CTextureHandle CMapImages::GetSpeedupArrow()
+{
+	if(!m_SpeedupArrowIsLoaded)
+	{
+		int TextureLoadFlag = Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER : IGraphics::TEXLOAD_TO_3D_TEXTURE_SINGLE_LAYER;
+		m_SpeedupArrowTexture = Graphics()->LoadTexture(g_pData->m_aImages[IMAGE_SPEEDUP_ARROW].m_pFilename, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, TextureLoadFlag);
+
+		m_SpeedupArrowIsLoaded = true;
+	}
+
+	return m_SpeedupArrowTexture;
 }
 
 IGraphics::CTextureHandle CMapImages::GetOverlayBottom()
@@ -166,17 +179,19 @@ int CMapImages::GetTextureScale()
 IGraphics::CTextureHandle CMapImages::UploadEntityLayerText(int TextureSize, int YOffset)
 {	
 	void *pMem = calloc(1024 * 1024, 1);
-	IGraphics::CTextureHandle Texture = Graphics()->LoadTextureRaw(1024, 1024, CImageInfo::FORMAT_ALPHA, pMem, CImageInfo::FORMAT_ALPHA, IGraphics::TEXLOAD_NOMIPMAPS);
-	free(pMem);
 
-	UpdateEntityLayerText(Texture, TextureSize, YOffset, 0);
-	UpdateEntityLayerText(Texture, TextureSize, YOffset, 1);
-	UpdateEntityLayerText(Texture, TextureSize, YOffset, 2, 255);
+	UpdateEntityLayerText(pMem, 1024, 1024, TextureSize, YOffset, 0);
+	UpdateEntityLayerText(pMem, 1024, 1024, TextureSize, YOffset, 1);
+	UpdateEntityLayerText(pMem, 1024, 1024, TextureSize, YOffset, 2, 255);
+
+	int TextureLoadFlag = Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+	IGraphics::CTextureHandle Texture = Graphics()->LoadTextureRaw(1024, 1024, CImageInfo::FORMAT_ALPHA, pMem, CImageInfo::FORMAT_ALPHA, TextureLoadFlag);
+	free(pMem);
 
 	return Texture;
 }
 
-void CMapImages::UpdateEntityLayerText(IGraphics::CTextureHandle Texture, int TextureSize, int YOffset, int NumbersPower, int MaxNumber)
+void CMapImages::UpdateEntityLayerText(void* pTexBuffer, int TexWidth, int TexHeight, int TextureSize, int YOffset, int NumbersPower, int MaxNumber)
 {
 	char aBuf[4];
 	int DigitsCount = NumbersPower+1;
@@ -202,7 +217,7 @@ void CMapImages::UpdateEntityLayerText(IGraphics::CTextureHandle Texture, int Te
 		float x = (CurrentNumber%16)*64;
 		float y = (CurrentNumber/16)*64;
 
-		TextRender()->UploadEntityLayerText(Texture, aBuf, DigitsCount, x+XOffSet, y+YOffset, UniversalSuitableFontSize);
+		TextRender()->UploadEntityLayerText(pTexBuffer, TexWidth, TexHeight, aBuf, DigitsCount, x+XOffSet, y+YOffset, UniversalSuitableFontSize);
 	}
 }
 

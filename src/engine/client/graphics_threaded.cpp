@@ -437,6 +437,14 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Heig
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_COMPRESSED;
 	if(g_Config.m_GfxTextureQuality || Flags&TEXLOAD_NORESAMPLE)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_QUALITY;
+	if((Flags&IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE) != 0)
+		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE;
+	if((Flags&IGraphics::TEXLOAD_TO_3D_TEXTURE) != 0)
+		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_3D_TEXTURE;
+	if((Flags&IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER) != 0)
+		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER;
+	if((Flags&IGraphics::TEXLOAD_TO_3D_TEXTURE_SINGLE_LAYER) != 0)
+		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_3D_TEXTURE_SINGLE_LAYER;
 
 	// copy texture data
 	int MemSize = Width*Height*Cmd.m_PixelSize;
@@ -1000,15 +1008,6 @@ void CGraphics_Threaded::RenderTileLayer(int BufferContainerIndex, float *pColor
 	Cmd.m_IndicesDrawNum = NumIndicesOffet;
 	Cmd.m_BufferContainerIndex = BufferContainerIndex;
 	mem_copy(&Cmd.m_Color, pColor, sizeof(Cmd.m_Color));
-	float ScreenZoomRatio = ScreenWidth() / (m_State.m_ScreenBR.x - m_State.m_ScreenTL.x);
-	//the number of pixels we would skip in the fragment shader -- basically the LOD
-	float LODFactor = (64.f / (32.f * ScreenZoomRatio));
-	//log2 gives us the amount of halving the texture for mipmapping
-	int LOD = (int)log2f(LODFactor);
-	//5 because log2(1024/(2^5)) is 5 -- 2^5 = 32 which would mean 2 pixels per tile index
-	if(LOD > 5) LOD = 5;
-	if(LOD < 0) LOD = 0;
-	Cmd.m_LOD = LOD;
 
 	void *Data = m_pCommandBuffer->AllocData((sizeof(char*) + sizeof(unsigned int))*NumIndicesOffet);
 	if(Data == 0x0)
@@ -1065,16 +1064,6 @@ void CGraphics_Threaded::RenderBorderTiles(int BufferContainerIndex, float *pCol
 	Cmd.m_DrawNum = DrawNum;
 	Cmd.m_BufferContainerIndex = BufferContainerIndex;
 	mem_copy(&Cmd.m_Color, pColor, sizeof(Cmd.m_Color));
-	float ScreenZoomRatio = ScreenWidth() / (m_State.m_ScreenBR.x - m_State.m_ScreenTL.x);
-	//the number of pixels we would skip in the fragment shader -- basically the LOD
-	float LODFactor = (64.f / (32.f * ScreenZoomRatio));
-	//log2 gives us the amount of halving the texture for mipmapping
-	int LOD = (int)log2f(LODFactor);
-	if(LOD > 5)
-		LOD = 5;
-	if(LOD < 0)
-		LOD = 0;
-	Cmd.m_LOD = LOD;
 
 	Cmd.m_pIndicesOffset = pIndexBufferOffset;
 	Cmd.m_JumpIndex = JumpIndex;
@@ -1109,16 +1098,6 @@ void CGraphics_Threaded::RenderBorderTileLines(int BufferContainerIndex, float *
 	Cmd.m_DrawNum = RedrawNum;
 	Cmd.m_BufferContainerIndex = BufferContainerIndex;
 	mem_copy(&Cmd.m_Color, pColor, sizeof(Cmd.m_Color));
-	float ScreenZoomRatio = ScreenWidth() / (m_State.m_ScreenBR.x - m_State.m_ScreenTL.x);
-	//the number of pixels we would skip in the fragment shader -- basically the LOD
-	float LODFactor = (64.f / (32.f * ScreenZoomRatio));
-	//log2 gives us the amount of halving the texture for mipmapping
-	int LOD = (int)log2f(LODFactor);
-	if(LOD > 5)
-		LOD = 5;
-	if(LOD < 0)
-		LOD = 0;
-	Cmd.m_LOD = LOD;
 
 	Cmd.m_pIndicesOffset = pIndexBufferOffset;
 
@@ -2059,6 +2038,7 @@ int CGraphics_Threaded::IssueInit()
 	int r = m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, g_Config.m_GfxFsaaSamples, Flags, &m_DesktopScreenWidth, &m_DesktopScreenHeight, &m_ScreenWidth, &m_ScreenHeight, m_pStorage);
 	m_IsNewOpenGL = m_pBackend->IsNewOpenGL();
 	m_OpenGLBufferingEnabled = m_IsNewOpenGL;
+	m_OpenGLHasTextureArrays = m_IsNewOpenGL;
 	return r;
 }
 

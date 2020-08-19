@@ -111,6 +111,10 @@ public:
 		TEXLOAD_NORESAMPLE = 1<<0,
 		TEXLOAD_NOMIPMAPS = 1<<1,
 		TEXLOAD_NO_COMPRESSION = 1<<2,
+		TEXLOAD_TO_3D_TEXTURE = (1 << 3),
+		TEXLOAD_TO_2D_ARRAY_TEXTURE = (1 << 4),
+		TEXLOAD_TO_3D_TEXTURE_SINGLE_LAYER = (1 << 5),
+		TEXLOAD_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER = (1 << 6),
 	};
 
 
@@ -187,6 +191,7 @@ public:
 	virtual void IndicesNumRequiredNotify(unsigned int RequiredIndicesCount) = 0;
 
 	virtual bool IsBufferingEnabled() = 0;
+	virtual bool HasTextureArrays() = 0;
 
 	struct CLineItem
 	{

@@ -130,6 +130,10 @@ public:
 		TEXFLAG_NOMIPMAPS = 1,
 		TEXFLAG_COMPRESSED = 2,
 		TEXFLAG_QUALITY = 4,
+		TEXFLAG_TO_3D_TEXTURE = (1 << 3),
+		TEXFLAG_TO_2D_ARRAY_TEXTURE = (1 << 4),
+		TEXFLAG_TO_3D_TEXTURE_SINGLE_LAYER = (1 << 5),
+		TEXFLAG_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER = (1 << 6),
 	};
 
 	enum
@@ -313,7 +317,6 @@ public:
 
 		int m_IndicesDrawNum;
 		int m_BufferContainerIndex;
-		int m_LOD;
 	};
 
 	struct SCommand_RenderBorderTile : public SCommand
@@ -324,7 +327,6 @@ public:
 		char *m_pIndicesOffset; // you should use the command buffer data to allocate vertices for this command
 		unsigned int m_DrawNum;
 		int m_BufferContainerIndex;
-		int m_LOD;
 
 		float m_Offset[2];
 		float m_Dir[2];
@@ -340,7 +342,6 @@ public:
 		unsigned int m_IndexDrawNum;
 		unsigned int m_DrawNum;
 		int m_BufferContainerIndex;
-		int m_LOD;
 
 		float m_Offset[2];
 		float m_Dir[2];
@@ -611,6 +612,7 @@ class CGraphics_Threaded : public IEngineGraphics
 	CCommandBuffer::SState m_State;
 	IGraphicsBackend *m_pBackend;
 	bool m_OpenGLBufferingEnabled;
+	bool m_OpenGLHasTextureArrays;
 	bool m_IsNewOpenGL;
 
 	CCommandBuffer *m_apCommandBuffers[NUM_CMDBUFFERS];
@@ -829,6 +831,7 @@ public:
 	virtual void WaitForIdle();
 
 	virtual bool IsBufferingEnabled() { return m_OpenGLBufferingEnabled; }
+	virtual bool HasTextureArrays() { return m_OpenGLHasTextureArrays; }
 };
 
 extern IGraphicsBackend *CreateGraphicsBackend();

@@ -9,6 +9,7 @@ class CMapImages : public CComponent
 	friend class CBackground;
 
 	IGraphics::CTextureHandle m_aTextures[64];
+	bool m_aTextureUsedByLayer[64];
 	int m_Count;
 
 	const char *m_pEntitiesGameType;
@@ -25,6 +26,7 @@ public:
 
 	// DDRace
 	IGraphics::CTextureHandle GetEntities();
+	IGraphics::CTextureHandle GetSpeedupArrow();
 	
 	IGraphics::CTextureHandle GetOverlayBottom();
 	IGraphics::CTextureHandle GetOverlayTop();
@@ -34,9 +36,10 @@ public:
 	int GetTextureScale();
 
 private:
-
 	bool m_EntitiesIsLoaded;
+	bool m_SpeedupArrowIsLoaded;
 	IGraphics::CTextureHandle m_EntitiesTextures;
+	IGraphics::CTextureHandle m_SpeedupArrowTexture;
 	IGraphics::CTextureHandle m_OverlayBottomTexture;
 	IGraphics::CTextureHandle m_OverlayTopTexture;
 	IGraphics::CTextureHandle m_OverlayCenterTexture;
@@ -44,7 +47,7 @@ private:
 	
 	void InitOverlayTextures();
 	IGraphics::CTextureHandle UploadEntityLayerText(int TextureSize, int YOffset);
-	void UpdateEntityLayerText(IGraphics::CTextureHandle Texture, int TextureSize, int YOffset, int NumbersPower, int MaxNumber = -1);
+	void UpdateEntityLayerText(void* pTexBuffer, int TexWidth, int TexHeight, int TextureSize, int YOffset, int NumbersPower, int MaxNumber = -1);
 };
 
 #endif

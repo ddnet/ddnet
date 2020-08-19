@@ -1712,7 +1712,7 @@ public:
 		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 	}
 
-	virtual void UploadEntityLayerText(IGraphics::CTextureHandle Texture, const char *pText, int Length, float x, float y, int FontSize)
+	virtual void UploadEntityLayerText(void* pTexBuff, int TexWidth, int TexHeight, const char *pText, int Length, float x, float y, int FontSize)
 	{
 		if (FontSize < 1)
 			return;
@@ -1751,15 +1751,22 @@ public:
 				mem_zero(ms_aGlyphData, SlotSize);
 
 				if(pBitmap->pixel_mode == FT_PIXEL_MODE_GRAY) // ignore_convention
-					{
-						for(py = 0; py < (unsigned)SlotH; py++) // ignore_convention
-							for(px = 0; px < (unsigned)SlotW; px++)
-							{
-								ms_aGlyphData[(py)*SlotW + px] = pBitmap->buffer[py*pBitmap->width + px]; // ignore_convention
-							}
-					}
+				{
+					for(py = 0; py < (unsigned)SlotH; py++) // ignore_convention
+						for(px = 0; px < (unsigned)SlotW; px++)
+						{
+							ms_aGlyphData[(py)*SlotW + px] = pBitmap->buffer[py*pBitmap->width + px]; // ignore_convention
+						}
+				}
 
-				Graphics()->LoadTextureRawSub(Texture, x + WidthLastChars, y, SlotW, SlotH, CImageInfo::FORMAT_ALPHA, ms_aGlyphData);
+				uint8_t* pImageBuff = (uint8_t*)pTexBuff;
+				for(int OffY = 0; OffY < SlotH; ++OffY)
+				{
+					size_t ImageOffset = (y + OffY) * TexWidth + (x + WidthLastChars);
+					size_t GlyphOffset = (OffY) * SlotW;
+					mem_copy(pImageBuff + ImageOffset, ms_aGlyphData + GlyphOffset, sizeof(uint8_t) * SlotW);
+				}
+
 				WidthLastChars += (SlotW + 1);
 
 			}
