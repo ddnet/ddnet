@@ -83,6 +83,8 @@ public:
 	virtual int BanRange(const CNetRange *pRange, int Seconds, const char *pReason);
 
 	static void ConBanExt(class IConsole::IResult *pResult, void *pUser);
+	static void ConBanRegion(class IConsole::IResult *pResult, void *pUser);
+	static void ConBanRegionRange(class IConsole::IResult *pResult, void *pUser);
 };
 
 
