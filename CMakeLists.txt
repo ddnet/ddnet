@@ -1010,7 +1010,6 @@ set(EXPECTED_DATA
   editor/winter_main.rules
   emoticons.png
   file_icons.png
-  fonts/DejaVuSansCJKName.ttf
   fonts/DejavuWenQuanYiMicroHei.ttf
   fonts/Icons.ttf
   game.png
