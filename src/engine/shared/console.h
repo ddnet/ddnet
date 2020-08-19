@@ -121,6 +121,15 @@ class CConsole : public IConsole
 		virtual float GetFloat(unsigned Index);
 		virtual ColorHSLA GetColor(unsigned Index, bool Light);
 
+		virtual void RemoveArgument(unsigned Index)
+		{
+			dbg_assert(Index < m_NumArgs, "invalid argument index");
+			for(unsigned i = Index; i < m_NumArgs - 1; i++)
+				m_apArgs[i] = m_apArgs[i + 1];
+
+			m_apArgs[m_NumArgs--] = 0;
+		}
+
 		// DDRace
 
 		enum

@@ -48,6 +48,8 @@ public:
 		virtual const char *GetString(unsigned Index) = 0;
 		virtual ColorHSLA GetColor(unsigned Index, bool Light) = 0;
 
+		virtual void RemoveArgument(unsigned Index) = 0;
+
 		int NumArguments() const { return m_NumArgs; }
 		int m_ClientID;
 
