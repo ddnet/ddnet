@@ -49,7 +49,7 @@ Are you sure that you want to delete the demo?
 == Da li ste sigurni da želite obrisati demo-snimak?
 
 Are you sure that you want to quit?
-== Da li ste sigurni da želite izići?
+== Da li ste sigurni da želite izaći?
 
 Are you sure that you want to remove the player from your friends list?
 == Da li ste sigurni da želite ukloniti igrača iz vaše liste prijatelja?
