@@ -924,9 +924,6 @@ Threaded sound loading
 Race %3d:%02d  
 == Rennen %3d:%02d  
 
-DDNet %s is out! Download it at DDNet.tw!
-== DDNet %s ist da! Download bei DDNet.tw!
-
 Frags
 == Abschüsse
 

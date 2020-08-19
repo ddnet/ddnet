@@ -797,9 +797,6 @@ Race %3d:%02d
 Background (regular)
 == Háttér (pálya)
 
-DDNet %s is out! Download it at DDNet.tw!
-== DDnet %s kijött! Töltsd le a DDNet.tw oldalon!
-
 Reset wanted weapon on death
 == Újraéledéskor váltson az akart fegyverre
 

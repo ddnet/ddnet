@@ -783,9 +783,6 @@ Type:
 Background (regular)
 == Fundo de tela (regular)
 
-DDNet %s is out! Download it at DDNet.tw!
-== DDNet %s foi lançado! Baixe-o em DDNet.tw!
-
 Internet
 == Internet
 

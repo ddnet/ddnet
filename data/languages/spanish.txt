@@ -777,9 +777,6 @@ Update now
 Restart
 == Reiniciar
 
-DDNet %s is out! Download it at DDNet.tw!
-== ¡DDNet %s ya esta disponible! ¡Descárgalo en DDNet.tw!
-
 Select a name
 == Selecciona un nombre
 

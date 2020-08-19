@@ -1067,9 +1067,6 @@ Downloading %s:
 Show tiles layers from BG map
 == Pokaż warstwy płytek razem z tłem mapy
 
-DDNet %s is out! Download it at DDNet.tw!
-== DDNet %s już jest! Pobierz je na DDNet.tw!
-
 Show console window
 == Pokaż okno konsoli
 

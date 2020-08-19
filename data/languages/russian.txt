@@ -939,9 +939,6 @@ Update failed! Check log...
 Restart
 == Рестарт
 
-DDNet %s is out! Download it at DDNet.tw!
-== Вышел DDnet %s! Скачай его на DDnet.tw!
-
 Markers:
 == Маркеры:
 
@@ -1197,8 +1194,11 @@ Grabs
 9+ new mentions
 == 9+ новых упоминаний
 
+Client message
+== Сообщение от клиента
+
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == 
 
-Client message
-== Сообщение от клиента
+Markers
+== 

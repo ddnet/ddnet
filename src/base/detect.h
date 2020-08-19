@@ -16,12 +16,12 @@
 	#define CONF_FAMILY_WINDOWS 1
 	#define CONF_FAMILY_STRING "windows"
 	#define CONF_PLATFORM_WIN64 1
-	#define CONF_PLATFORM_STRING "win64"
+	#define PLATFORM_STRING "win64"
 #elif defined(WIN32) || defined(_WIN32) || defined(__CYGWIN32__) || defined(__MINGW32__)
 	#define CONF_FAMILY_WINDOWS 1
 	#define CONF_FAMILY_STRING "windows"
 	#define CONF_PLATFORM_WIN32 1
-	#define CONF_PLATFORM_STRING "win32"
+	#define PLATFORM_STRING "win32"
 #endif
 
 /* unix family */
@@ -29,49 +29,49 @@
 	#define CONF_FAMILY_UNIX 1
 	#define CONF_FAMILY_STRING "unix"
 	#define CONF_PLATFORM_FREEBSD 1
-	#define CONF_PLATFORM_STRING "freebsd"
+	#define PLATFORM_STRING "freebsd"
 #endif
 
 #if defined(__NetBSD__)
 	#define CONF_FAMILY_UNIX 1
 	#define CONF_FAMILY_STRING "unix"
 	#define CONF_PLATFORM_NETBSD 1
-	#define CONF_PLATFORM_STRING "netbsd"
+	#define PLATFORM_STRING "netbsd"
 #endif
 
 #if defined(__OpenBSD__)
 	#define CONF_FAMILY_UNIX 1
 	#define CONF_FAMILY_STRING "unix"
 	#define CONF_PLATFORM_OPENBSD 1
-	#define CONF_PLATFORM_STRING "openbsd"
+	#define PLATFORM_STRING "openbsd"
 #endif
 
 #if defined(__LINUX__) || defined(__linux__)
 	#define CONF_FAMILY_UNIX 1
 	#define CONF_FAMILY_STRING "unix"
 	#define CONF_PLATFORM_LINUX 1
-	#define CONF_PLATFORM_STRING "linux"
+	#define PLATFORM_STRING "linux"
 #endif
 
 #if defined(__GNU__) || defined(__gnu__)
 	#define CONF_FAMILY_UNIX 1
 	#define CONF_FAMILY_STRING "unix"
 	#define CONF_PLATFORM_HURD 1
-	#define CONF_PLATFORM_STRING "gnu"
+	#define PLATFORM_STRING "gnu"
 #endif
 
 #if defined(MACOSX) || defined(__APPLE__) || defined(__DARWIN__)
 	#define CONF_FAMILY_UNIX 1
 	#define CONF_FAMILY_STRING "unix"
 	#define CONF_PLATFORM_MACOSX 1
-	#define CONF_PLATFORM_STRING "macosx"
+	#define PLATFORM_STRING "macosx"
 #endif
 
 #if defined(__sun)
 	#define CONF_FAMILY_UNIX 1
 	#define CONF_FAMILY_STRING "unix"
 	#define CONF_PLATFORM_SOLARIS 1
-	#define CONF_PLATFORM_STRING "solaris"
+	#define PLATFORM_STRING "solaris"
 #endif
 
 /* beos family */
@@ -79,7 +79,7 @@
 	#define CONF_FAMILY_BEOS 1
 	#define CONF_FAMILY_STRING "beos"
 	#define CONF_PLATFORM_BEOS 1
-	#define CONF_PLATFORM_STRING "beos"
+	#define PLATFORM_STRING "beos"
 #endif
 
 
@@ -156,9 +156,15 @@
 #define CONF_FAMILY_STRING "unknown"
 #endif
 
-#ifndef CONF_PLATFORM_STRING
-#define CONF_PLATFORM_STRING "unknown"
+#ifndef PLATFORM_STRING
+#define PLATFORM_STRING "unknown"
 #endif
+
+#ifndef PLATFORM_SUFFIX
+#define PLATFORM_SUFFIX ""
+#endif
+
+#define CONF_PLATFORM_STRING PLATFORM_STRING PLATFORM_SUFFIX
 
 #ifndef CONF_ARCH_STRING
 #define CONF_ARCH_STRING "unknown"

@@ -768,9 +768,6 @@ Update now
 Restart
 == 
 
-DDNet %s is out! Download it at DDNet.tw!
-== 
-
 Select a name
 == 
 

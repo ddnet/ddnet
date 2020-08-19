@@ -1360,8 +1360,8 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		char aBuf[64];
 		if(str_comp(Client()->LatestVersion(), "0") != 0)
 		{
-			str_format(aBuf, sizeof(aBuf), Localize("DDNet %s is out! Download it at DDNet.tw!"), Client()->LatestVersion());
-			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
+			str_format(aBuf, sizeof(aBuf), Localize("DDNet %s is out!"), Client()->LatestVersion());
+			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 		}
 		else
 			str_format(aBuf, sizeof(aBuf), Localize("Current version: %s"), GAME_VERSION);

@@ -780,9 +780,6 @@ Update now
 Restart
 == Herstarten
 
-DDNet %s is out! Download it at DDNet.tw!
-== DDnet %s is beschikbaar! Download het op DDnet.tw!
-
 Select a name
 == Selecteer een naam
 

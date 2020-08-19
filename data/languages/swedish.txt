@@ -647,9 +647,6 @@ Name plates size
 Type:
 == Typ:
 
-DDNet %s is out! Download it at DDNet.tw!
-== DDNet %s har släppts! Ladda ner det från DDNet.tw!
-
 Show console window
 == Visa konsol fönster
 
