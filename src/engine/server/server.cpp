@@ -147,6 +147,7 @@ void CServerBan::InitServerBan(IConsole *pConsole, IStorage *pStorage, CServer *
 	// overwrites base command, todo: improve this
 	Console()->Register("ban", "s[ip|id] ?i[minutes] r[reason]", CFGFLAG_SERVER|CFGFLAG_STORE, ConBanExt, this, "Ban player with ip/client id for x minutes for any reason");
 	Console()->Register("ban_region", "s[region] s[ip|id] ?i[minutes] r[reason]", CFGFLAG_SERVER|CFGFLAG_STORE, ConBanRegion, this, "Ban player in a region");
+	Console()->Register("ban_region_range", "s[region] s[first ip] s[last ip] ?i[minutes] r[reason]", CFGFLAG_SERVER|CFGFLAG_STORE, ConBanRegionRange, this, "Ban range in a region");
 }
 
 template<class T>
@@ -249,11 +250,23 @@ void CServerBan::ConBanExt(IConsole::IResult *pResult, void *pUser)
 void CServerBan::ConBanRegion(IConsole::IResult *pResult, void *pUser)
 {
 	const char *pRegion = pResult->GetString(0);
-	if(str_comp_nocase(pRegion, g_Config.m_SvSqlServerName))
+	if(str_comp_nocase(pRegion, g_Config.m_SvRegionName))
 		return;
 
 	pResult->RemoveArgument(0);
 	ConBanExt(pResult, pUser);
+}
+
+void CServerBan::ConBanRegionRange(IConsole::IResult *pResult, void *pUser)
+{
+	CServerBan *pServerBan = static_cast<CServerBan *>(pUser);
+
+	const char *pRegion = pResult->GetString(0);
+	if(str_comp_nocase(pRegion, g_Config.m_SvRegionName))
+		return;
+
+	pResult->RemoveArgument(0);
+	ConBanRange(pResult, static_cast<CNetBan *>(pServerBan));
 }
 
 void CServer::CClient::Reset()
