@@ -922,9 +922,6 @@ Types
 Remove chat
 == 刪除聊天欄
 
-DDNet %s is out! Download it at DDNet.tw!
-== DDNet %s 已經更新了！趕緊去 DDNet.tw 下載吧！
-
 Frags
 == 擊殺
 

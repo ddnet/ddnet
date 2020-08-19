@@ -809,9 +809,6 @@ Race %3d:%02d
 Background (regular)
 == Fons (regular)
 
-DDNet %s is out! Download it at DDNet.tw!
-== DDNet %s ja està disponible! Descarrega'l a DDNet.tw!
-
 Reset wanted weapon on death
 == Reiniciar l'arma desitjada al morir
 

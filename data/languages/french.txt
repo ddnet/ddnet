@@ -1038,9 +1038,6 @@ Show others
 %.2f MiB
 == %.2f Mio
 
-DDNet %s is out! Download it at DDNet.tw!
-== DDNet %s est disponible! Téléchargez le sur DDNet.tw!
-
 Hi o/
 == Salut o/
 

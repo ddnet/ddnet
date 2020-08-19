@@ -790,9 +790,6 @@ Check now
 Background (regular)
 == Plano de fundo (regular)
 
-DDNet %s is out! Download it at DDNet.tw!
-== DDNet %s saiu! Saca-o em DDNet.tw!
-
 AntiPing: predict other players
 == Antiping: prever os outros jogadores
 

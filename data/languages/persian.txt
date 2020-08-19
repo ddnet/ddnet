@@ -781,8 +781,6 @@ Manual %3d:%02d
 == ىﺎﻤﻨﻫﺍﺭ %3d:%02d 
 Disconnect Dummy
 == ﯽﻣﺍﺩ ﻥﺩﺮﻛ ﻊﻄﻗ
-DDNet %s is out! Download it at DDNet.tw!
-== !ﺪﯿﻨﻛ ﺖﻓﺎﯾﺭﺩ DDnet.tw ﺯﺍ !ﺪﻣﺁ ﻥﻭﺮﯿﺑ DDNet %s
 AntiPing: predict weapons
 == ﺎﻫ ﻪﺤﻠﺳﺍ ﯽﻨﯿﺑ ﺶﯿﭘ :ﮓﻨﯿﭘ ﺪﺿ
 Personal best:

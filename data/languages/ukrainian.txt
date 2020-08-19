@@ -555,9 +555,6 @@ Hook (right mouse) can be used to swing through the map and to hook other tees t
 Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
 == Найголовніше, що спілкування є ключовим: туторіалу немає, тому вам доведеться спілкуватися з іншими гравцями, щоб засвоїти основи та хитрощі гри.
 
-Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 
-
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Рекомендується перевірити налаштування, щоб підлаштувати їх до душі перед тим, як приєднатися до сервера.
 
@@ -677,9 +674,6 @@ Update now
 
 Restart
 == Перезапустити
-
-DDNet %s is out! Download it at DDNet.tw!
-== Вийшов DDnet %s! Скачай його на DDnet.tw!
 
 Select a name
 == Оберіть ім'я
@@ -1016,7 +1010,7 @@ Spectator
 
 Look out!
 == Стережися!
-	
+
 Team message
 == Повідомлення команди
 
@@ -1196,3 +1190,9 @@ Grabs
 
 9+ new mentions
 == 9+ нових згадок
+
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
+Markers
+== 
