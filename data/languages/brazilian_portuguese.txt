@@ -1029,8 +1029,8 @@ Date
 Show DDNet map finishes in server browser
 == Mostrar finalizações de mapas do DDNet no navegador do servidor
 
-transmits your player name to info.ddnet.tw
-== transmite seu nome de jogador para info.ddnet.tw
+transmits your player name to info2.ddnet.tw
+== transmite seu nome de jogador para info2.ddnet.tw
 
 Reload
 == Recarregar

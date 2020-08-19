@@ -1789,7 +1789,7 @@ int CMenus::Render()
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf), "%s\n(%s)",
 				Localize("Show DDNet map finishes in server browser"),
-				Localize("transmits your player name to info.ddnet.tw"));
+				Localize("transmits your player name to info2.ddnet.tw"));
 
 			if(DoButton_CheckBox(&g_Config.m_BrIndicateFinished, aBuf, g_Config.m_BrIndicateFinished, &Part))
 				g_Config.m_BrIndicateFinished ^= 1;

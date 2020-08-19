@@ -11,7 +11,6 @@
 #include "curl/curl.h"
 #include "curl/easy.h"
 
-static char CA_FILE_PATH[512];
 // TODO: Non-global pls?
 static CURLSH *gs_Share;
 static LOCK gs_aLocks[CURL_LOCK_DATA_LAST+1];
@@ -48,7 +47,6 @@ bool HttpInit(IStorage *pStorage)
 		dbg_msg("http", "libcurl version %s (compiled = " LIBCURL_VERSION ")", pVersion->version);
 	}
 
-	pStorage->GetBinaryPath("data/ca-ddnet.pem", CA_FILE_PATH, sizeof(CA_FILE_PATH));
 	if(curl_global_init(CURL_GLOBAL_DEFAULT))
 	{
 		return true;
@@ -138,18 +136,6 @@ int CRequest::RunImpl(CURL *pHandle)
 	curl_easy_setopt(pHandle, CURLOPT_NOSIGNAL, 1L);
 	curl_easy_setopt(pHandle, CURLOPT_USERAGENT, GAME_NAME " " GAME_RELEASE_VERSION " (" CONF_PLATFORM_STRING "; " CONF_ARCH_STRING ")");
 
-	// We only trust our own custom-selected CAs for our own servers.
-	// Other servers can use any CA trusted by the system.
-	if(false
-		|| str_comp_nocase_num("maps.ddnet.tw/", m_aUrl, 14) == 0
-		|| str_comp_nocase_num("http://maps.ddnet.tw/", m_aUrl, 21) == 0
-		|| str_comp_nocase_num("https://maps.ddnet.tw/", m_aUrl, 22) == 0
-		|| str_comp_nocase_num("http://info.ddnet.tw/", m_aUrl, 21) == 0
-		|| str_comp_nocase_num("https://info.ddnet.tw/", m_aUrl, 22) == 0
-		|| str_comp_nocase_num("https://update5.ddnet.tw/", m_aUrl, 25) == 0)
-	{
-		curl_easy_setopt(pHandle, CURLOPT_CAINFO, CA_FILE_PATH);
-	}
 	curl_easy_setopt(pHandle, CURLOPT_WRITEDATA, this);
 	curl_easy_setopt(pHandle, CURLOPT_WRITEFUNCTION, WriteCallback);
 	curl_easy_setopt(pHandle, CURLOPT_NOPROGRESS, 0L);

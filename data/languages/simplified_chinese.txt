@@ -1017,8 +1017,8 @@ Date
 Show DDNet map finishes in server browser
 == 在服务器浏览器中显示已完成的 DDNet 地图
 
-transmits your player name to info.ddnet.tw
-== 将会发送您的玩家名称到 info.ddnet.tw
+transmits your player name to info2.ddnet.tw
+== 将会发送您的玩家名称到 info2.ddnet.tw
 
 Reload
 == 刷新
