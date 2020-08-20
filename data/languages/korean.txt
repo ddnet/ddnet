@@ -1195,3 +1195,291 @@ Grabs
 
 9+ new mentions
 == 
+
+Practice mode enabled for your team, happy practicing!
+== 
+
+Save functionality is disabled on this server
+== 
+
+Unknown server name
+== 
+
+Team locked by
+== 
+
+After the race started killing will kill everyone in your team
+== 
+
+Team unlocked by
+== 
+
+joined team
+== 
+
+You will now see all tees on this server, no matter the distance
+== 
+
+You will no longer see all tees on this server
+== 
+
+Rescue is not enabled on this server and you're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.
+== 
+
+Server kick/spec votes will now be actively moderated.
+== 
+
+Server kick/spec votes are no longer actively moderated.
+== 
+
+Active moderator mode enabled for you.
+== 
+
+Active moderator mode disabled for you.
+== 
+
+Vote aborted
+== 
+
+Vote passed
+== 
+
+Vote passed enforced by authorized player
+== 
+
+Vote failed enforced by authorized player
+== 
+
+Vote failed because of veto. Find an empty server instead
+== 
+
+Vote failed
+== 
+
+You can see other players. To disable this use DDNet client and type /showothers
+== 
+
+Invalid option
+== 
+
+Invalid option on this server
+== 
+
+Server does not allow voting to kick players
+== 
+
+Invalid client id to kick
+== 
+
+You can't kick yourself
+== 
+
+You can't kick authorized players
+== 
+
+called for vote to kick you
+== 
+
+You can kick only your team member
+== 
+
+Server does not allow voting to move players to spectators
+== 
+
+Invalid client id to move
+== 
+
+You can't move yourself
+== 
+
+You can only move your team member to specators
+== 
+
+Kill Protection enabled. If you really want to join the spectators, first type /kill
+== 
+
+Use /pause first then you can kill
+== 
+
+Invalid spectator id used
+== 
+
+You are running a vote please try again after the vote is done!
+== 
+
+Kill Protection enabled. If you really want to kill, type /kill
+== 
+
+authorized player forced server option
+== 
+
+Player moved to spectator
+== 
+
+Invalid whisper
+== 
+
+No player with name found
+== 
+
+You do not have an ongoing conversation. Whisper to someone to start one
+== 
+
+You can only vote after logging in.
+== 
+
+You are not allowed to vote because we're currently checking for VPNs. Try again in ~30 seconds.
+== 
+
+You are not allowed to vote because you appear to be using a VPN. Try connecting without a VPN or contacting an admin if you think this is a mistake.
+== 
+
+Wait for current vote to end before calling a new one.
+== 
+
+You must wait before making your first vote
+== 
+
+You must wait before making another vote
+== 
+
+You must wait before voting
+== 
+
+Active moderator mode disabled because you are afk.
+== 
+
+would have timed out, but can use timeout protection now
+== 
+
+has left the game
+== 
+
+joined the game
+== 
+
+joined the spectators
+== 
+
+Can't /spec that quickly.
+== 
+
+You have to be in a team (from 1-63)
+== 
+
+Could not find your Team
+== 
+
+Unable to find all Characters
+== 
+
+Your team has not started yet
+== 
+
+Team can't be loaded while racing
+== 
+
+joined team 0
+== 
+
+You can't start while loading/saving of team is in progress
+== 
+
+You have to be in a team with other tees to start
+== 
+
+Endless hook has been activated
+== 
+
+Endless hook has been deactivated
+== 
+
+You can't hit others
+== 
+
+You can hit others
+== 
+
+You can't collide with others
+== 
+
+You can collide with others
+== 
+
+You can't hook others
+== 
+
+You can hook others
+== 
+
+You have unlimited air jumps
+== 
+
+You don't have unlimited air jumps
+== 
+
+You have a jetpack gun
+== 
+
+You lost your jetpack gun
+== 
+
+Your team was unlocked by an unlock team tile
+== 
+
+You are now in a solo part
+== 
+
+You are now out of the solo part
+== 
+
+Teleport gun enabled
+== 
+
+Teleport gun disabled
+== 
+
+Teleport grenade enabled
+== 
+
+Teleport grenade disabled
+== 
+
+Teleport laser enabled
+== 
+
+Teleport laser disabled
+== 
+
+You can hammer hit others
+== 
+
+You can't hammer hit others
+== 
+
+You can shoot others with shotgun
+== 
+
+You can't shoot others with shotgun
+== 
+
+You can shoot others with grenade
+== 
+
+You can't shoot others with grenade
+== 
+
+You can shoot others with laser
+== 
+
+You can't shoot others with laser
+== 
+
+Number of jumps
+== 
+
+Please join a team before you start
+== 
+
+Wait time in seconds until you can rescue yourself
+== 
