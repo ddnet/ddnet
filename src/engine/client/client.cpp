@@ -3839,8 +3839,8 @@ void CClient::LoadFont()
 	static CFont *pDefaultFont = 0;
 	static CFont *pFallbackFont = 0;
 	char aFilename[512];
-	const char *pFontFile = "fonts/DejaVuSansCJKName.ttf";
-	const char *pFallbackFontFile = "fonts/WenQuanYiMicroHei.ttf";
+	const char *pFontFile = "fonts/DejaVuSans.ttf";
+	const char *pFallbackFontFile = "fonts/SourceHanSansSC-Regular.otf";
 	IOHANDLE File = Storage()->OpenFile(pFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
 	if(File)
 	{
