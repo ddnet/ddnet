@@ -1187,8 +1187,8 @@ Please enter your nick name below.
 Show DDNet map finishes in server browser
 == Pokaż ukończone mapy DDNet w wyszukiwarce serwerów
 
-transmits your player name to info.ddnet.tw
-== przenosi twój nick do info.ddnet.tw
+transmits your player name to info2.ddnet.tw
+== przenosi twój nick do info2.ddnet.tw
 
 Indicate map finish
 == Pokazuj ukończone mapy

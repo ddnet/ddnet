@@ -585,8 +585,8 @@ Are you sure that you want to disconnect your dummy?
 == ؟ﺪﯿﻨﻛ ﻊﻄﻗ ﺍﺭ ﺩﻮﺧ ﯽﻣﺍﺩ ﻁﺎﺒﺗﺭﺍ ﺪﯿﻫﺍﻮﺧ ﯽﻣ ﻪﻛ ﺪﯿﺘﺴﻫ ﻦﺌﻤﻄﻣ ﺎﯾﺁ
 Save ghost
 == ﺡﻭﺭ ﻩﺮﯿﺧﺫ
-transmits your player name to info.ddnet.tw
-== ﺪﯿﻨﻛ ﻞﻘﺘﻨﻣ info.ddnet.tw ﻪﺑ ﺍﺭ ﺩﻮﺧ ﻦﻜﯾﺯﺎﺑ ﻡﺎﻧ
+transmits your player name to info2.ddnet.tw
+== ﺪﯿﻨﻛ ﻞﻘﺘﻨﻣ info2.ddnet.tw ﻪﺑ ﺍﺭ ﺩﻮﺧ ﻦﻜﯾﺯﺎﺑ ﻡﺎﻧ
 Replay %3d:%02d  
 == d٢٠%:d٣% ﺶﺨﭘﺯﺎﺑ
 Unfinished map

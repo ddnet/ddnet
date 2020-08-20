@@ -1209,8 +1209,8 @@ Please enter your nick name below.
 Show DDNet map finishes in server browser
 == Afficher les cartes de DDNet terminées dans le navigateur
 
-transmits your player name to info.ddnet.tw
-== transmet votre pseudonyme à info.ddnet.tw
+transmits your player name to info2.ddnet.tw
+== transmet votre pseudonyme à info2.ddnet.tw
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == 

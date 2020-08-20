@@ -735,8 +735,8 @@ Video name:
 Show DDNet map finishes in server browser
 == Marcar los mapas DDNet acabados en el navegador de servidores
 
-transmits your player name to info.ddnet.tw
-== transmite tu nombre de jugador a info.ddnet.tw
+transmits your player name to info2.ddnet.tw
+== transmite tu nombre de jugador a info2.ddnet.tw
 
 Search
 == Buscar

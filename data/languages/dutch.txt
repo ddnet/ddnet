@@ -738,8 +738,8 @@ Video name:
 Show DDNet map finishes in server browser
 == Laat gefinishte maps zien in de verkenner
 
-transmits your player name to info.ddnet.tw
-== Verzend je speler naam naar info.ddnet.tw
+transmits your player name to info2.ddnet.tw
+== Verzend je speler naam naar info2.ddnet.tw
 
 Search
 == Zoek
