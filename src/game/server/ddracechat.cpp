@@ -626,7 +626,7 @@ void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
 
 		for(int i = 0; i < MAX_CLIENTS; i++)
 			if(Teams.m_Core.Team(i) == Team)
-				pSelf->SendChatTarget(i, "Practice mode enabled for your team, happy practicing!");
+				pSelf->SendChatTarget(i, Localize("Practice mode enabled for your team, happy practicing!"));
 	}
 
 }
@@ -639,7 +639,7 @@ void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
 
 	if(!g_Config.m_SvSaveGames)
 	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "Save-function is disabled on this server");
+		pSelf->SendChatTarget(pResult->m_ClientID, Localize("Save functionality is disabled on this server"));
 		return;
 	}
 
@@ -678,7 +678,7 @@ void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
 	else
 	{
 		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "Unknown server name '%s'.", aCountry);
+		str_format(aBuf, sizeof(aBuf), "%s '%s'", Localize("Unknown server name"), aCountry);
 		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	}
 }
@@ -691,7 +691,7 @@ void CGameContext::ConLoad(IConsole::IResult *pResult, void *pUserData)
 
 	if(!g_Config.m_SvSaveGames)
 	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "Save-function is disabled on this server");
+		pSelf->SendChatTarget(pResult->m_ClientID, Localize("Save functionality is disabled on this server"));
 		return;
 	}
 
@@ -791,7 +791,7 @@ void CGameContext::ConLockTeam(IConsole::IResult *pResult, void *pUserData)
 	{
 		((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.SetTeamLock(Team, true);
 
-		str_format(aBuf, sizeof(aBuf), "'%s' locked your team. After the race started killing will kill everyone in your team.", pSelf->Server()->ClientName(pResult->m_ClientID));
+		str_format(aBuf, sizeof(aBuf), "%s: %s. %s", Localize("Team locked by"), Localize("After the race started killing will kill everyone in your team"), pSelf->Server()->ClientName(pResult->m_ClientID));
 
 		for (int i = 0; i < MAX_CLIENTS; i++)
 			if (((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.m_Core.Team(i) == Team)
@@ -828,7 +828,7 @@ void CGameContext::UnlockTeam(int ClientID, int Team)
 	((CGameControllerDDRace*) m_pController)->m_Teams.SetTeamLock(Team, false);
 
 	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "'%s' unlocked your team.", Server()->ClientName(ClientID));
+	str_format(aBuf, sizeof(aBuf), "%s: %s",  Localize("Team unlocked by"), Server()->ClientName(ClientID));
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
 		if (((CGameControllerDDRace*) m_pController)->m_Teams.m_Core.Team(i) == Team)
@@ -970,14 +970,15 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 			else if(pController->m_Teams.SetCharacterTeam(pPlayer->GetCID(), Team))
 			{
 				char aBuf[512];
-				str_format(aBuf, sizeof(aBuf), "%s joined team %d",
+				str_format(aBuf, sizeof(aBuf), "%s %s %d",
 						pSelf->Server()->ClientName(pPlayer->GetCID()),
+						Localize("joined team"),
 						Team);
 				pSelf->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 				pPlayer->m_Last_Team = pSelf->Server()->Tick();
 
 				if(pController->m_Teams.IsPractice(Team))
-					pSelf->SendChatTarget(pPlayer->GetCID(), "Practice mode enabled for your team, happy practicing!");
+					pSelf->SendChatTarget(pPlayer->GetCID(), Localize("Practice mode enabled for your team, happy practicing!"));
 			}
 			else
 			{
@@ -1195,9 +1196,9 @@ void CGameContext::ConShowAll(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	if (pPlayer->m_ShowAll)
-		pSelf->SendChatTarget(pResult->m_ClientID, "You will now see all tees on this server, no matter the distance");
+		pSelf->SendChatTarget(pResult->m_ClientID, Localize("You will now see all tees on this server, no matter the distance"));
 	else
-		pSelf->SendChatTarget(pResult->m_ClientID, "You will no longer see all tees on this server");
+		pSelf->SendChatTarget(pResult->m_ClientID, Localize("You will no longer see all tees on this server"));
 }
 
 void CGameContext::ConSpecTeam(IConsole::IResult *pResult, void *pUserData)
@@ -1385,7 +1386,7 @@ void CGameContext::ConRescue(IConsole::IResult *pResult, void *pUserData)
 	CGameTeams &Teams = ((CGameControllerDDRace*) pSelf->m_pController)->m_Teams;
 	int Team = Teams.m_Core.Team(pResult->m_ClientID);
 	if (!g_Config.m_SvRescue && !Teams.IsPractice(Team)) {
-		pSelf->SendChatTarget(pPlayer->GetCID(), "Rescue is not enabled on this server and you're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
+		pSelf->SendChatTarget(pPlayer->GetCID(), Localize("Rescue is not enabled on this server and you're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled."));
 		return;
 	}
 
@@ -1408,12 +1409,6 @@ void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)
 	if(g_Config.m_SvKillProtection != 0 && CurrTime >= (60 * g_Config.m_SvKillProtection) && pChr->m_DDRaceState == DDRACE_STARTED)
 	{
 			pPlayer->KillCharacter(WEAPON_SELF);
-
-			//char aBuf[64];
-			//str_format(aBuf, sizeof(aBuf), "You killed yourself in: %s%d:%s%d",
-			//		((CurrTime / 60) > 9) ? "" : "0", CurrTime / 60,
-			//		((CurrTime % 60) > 9) ? "" : "0", CurrTime % 60);
-			//pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	}
 }
 

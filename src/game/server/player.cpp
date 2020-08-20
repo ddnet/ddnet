@@ -191,10 +191,10 @@ void CPlayer::Tick()
 	if (m_Moderating && m_Afk)
 	{
 		m_Moderating = false;
-		GameServer()->SendChatTarget(m_ClientID, "Active moderator mode disabled because you are afk.");
+		GameServer()->SendChatTarget(m_ClientID, Localize("Active moderator mode disabled because you are afk."));
 
 		if (!GameServer()->PlayerModerating())
-			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, "Server kick/spec votes are no longer actively moderated.");
+			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, Localize("Server kick/spec votes are no longer actively moderated."));
 	}
 
 	// do latency stuff
@@ -223,7 +223,7 @@ void CPlayer::Tick()
 		m_Afk = true;
 
 		char aBuf[512];
-		str_format(aBuf, sizeof(aBuf), "'%s' would have timed out, but can use timeout protection now", Server()->ClientName(m_ClientID));
+		str_format(aBuf, sizeof(aBuf), "'%s' %s", Localize("would have timed out, but can use timeout protection now"), Server()->ClientName(m_ClientID));
 		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 		Server()->ResetNetErrorString(m_ClientID);
 	}
@@ -476,9 +476,9 @@ void CPlayer::OnDisconnect(const char *pReason)
 	{
 		char aBuf[512];
 		if(pReason && *pReason)
-			str_format(aBuf, sizeof(aBuf), "'%s' has left the game (%s)", Server()->ClientName(m_ClientID), pReason);
+			str_format(aBuf, sizeof(aBuf), "'%s' %s (%s)", Server()->ClientName(m_ClientID), Localize("has left the game"), pReason);
 		else
-			str_format(aBuf, sizeof(aBuf), "'%s' has left the game", Server()->ClientName(m_ClientID));
+			str_format(aBuf, sizeof(aBuf), "'%s' %s", Server()->ClientName(m_ClientID), Localize("has left the game"));
 		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1, CGameContext::CHAT_SIX);
 
 		str_format(aBuf, sizeof(aBuf), "leave player='%d:%s'", m_ClientID, Server()->ClientName(m_ClientID));
@@ -490,7 +490,7 @@ void CPlayer::OnDisconnect(const char *pReason)
 		m_Moderating = false;
 
 		if (!GameServer()->PlayerModerating() && WasModerator)
-			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, "Server kick/spec votes are no longer actively moderated.");
+			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, Localize("Server kick/spec votes are no longer actively moderated."));
 	}
 
 	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
@@ -627,7 +627,7 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 	DoChatMsg = false;
 	if(DoChatMsg)
 	{
-		str_format(aBuf, sizeof(aBuf), "'%s' joined the %s", Server()->ClientName(m_ClientID), GameServer()->m_pController->GetTeamName(Team));
+		str_format(aBuf, sizeof(aBuf), "'%s' %s", Server()->ClientName(m_ClientID), Team == 0 ? Localize("joined the game") : Localize("joined the spectators"));
 		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 	}
 
@@ -851,7 +851,7 @@ int CPlayer::Pause(int State, bool Force)
 			{
 				if(!Force && m_LastPause && m_LastPause + g_Config.m_SvSpecFrequency * Server()->TickSpeed() > Server()->Tick())
 				{
-					GameServer()->SendChatTarget(m_ClientID, "Can't /spec that quickly.");
+					GameServer()->SendChatTarget(m_ClientID, Localize("Can't /spec that quickly."));
 					return m_Paused; // Do not update state. Do not collect $200
 				}
 				m_pCharacter->Pause(false);

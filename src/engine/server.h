@@ -15,6 +15,11 @@
 #include <game/generated/protocolglue.h>
 #include <engine/shared/protocol.h>
 
+// Only use Localize in server-side code to allow scripts/languages/copy_fix.py
+// to pick strings up for translation automatically. Actual localization
+// happens on client-side.
+#define Localize(str) str
+
 struct CAntibotRoundData;
 
 class IServer : public IInterface

@@ -1388,12 +1388,12 @@ void CScore::LoadTeam(const char* Code, int ClientID)
 		return;
 	if(Team < TEAM_FLOCK || Team >= MAX_CLIENTS || (g_Config.m_SvTeam != 3 && Team == TEAM_FLOCK))
 	{
-		GameServer()->SendChatTarget(ClientID, "You have to be in a team (from 1-63)");
+		GameServer()->SendChatTarget(ClientID, Localize("You have to be in a team (from 1-63)"));
 		return;
 	}
 	if(pController->m_Teams.GetTeamState(Team) != CGameTeams::TEAMSTATE_OPEN)
 	{
-		GameServer()->SendChatTarget(ClientID, "Team can't be loaded while racing");
+		GameServer()->SendChatTarget(ClientID, Localize("Team can't be loaded while racing"));
 		return;
 	}
 	auto SaveResult = std::make_shared<CScoreSaveResult>(ClientID, pController);

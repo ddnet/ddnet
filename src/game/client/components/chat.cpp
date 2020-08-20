@@ -696,7 +696,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		if(ClientID < 0) // server or client message
 		{
 			str_copy(m_aLines[m_CurrentLine].m_aName, "*** ", sizeof(m_aLines[m_CurrentLine].m_aName));
-			str_format(m_aLines[m_CurrentLine].m_aText, sizeof(m_aLines[m_CurrentLine].m_aText), "%s", pLine);
+			str_copy(m_aLines[m_CurrentLine].m_aText, ClientID == -1 ? Localize(pLine) : pLine, sizeof(m_aLines[m_CurrentLine].m_aText));
 
 			if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 				StoreSave(m_aLines[m_CurrentLine].m_aText);

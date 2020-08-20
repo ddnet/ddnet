@@ -473,16 +473,16 @@ bool CSaveTeam::HandleSaveError(int Result, int ClientID, CGameContext *pGameCon
 		case 0:
 			return false;
 		case 1:
-			pGameContext->SendChatTarget(ClientID, "You have to be in a team (from 1-63)");
+			pGameContext->SendChatTarget(ClientID, Localize("You have to be in a team (from 1-63)"));
 			break;
 		case 2:
-			pGameContext->SendChatTarget(ClientID, "Could not find your Team");
+			pGameContext->SendChatTarget(ClientID, Localize("Could not find your Team"));
 			break;
 		case 3:
-			pGameContext->SendChatTarget(ClientID, "Unable to find all Characters");
+			pGameContext->SendChatTarget(ClientID, Localize("Unable to find all Characters"));
 			break;
 		case 4:
-			pGameContext->SendChatTarget(ClientID, "Your team has not started yet");
+			pGameContext->SendChatTarget(ClientID, Localize("Your team has not started yet"));
 			break;
 		default: // this state should never be reached
 			pGameContext->SendChatTarget(ClientID, "Unknown error while saving");
