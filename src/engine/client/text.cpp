@@ -127,6 +127,7 @@ struct STextContainer
 	STextContainer() { Reset(); }
 
 	CFont* m_pFont;
+	CFont* m_pFallbackFont;
 	int m_FontSize;
 	STextString m_StringInfo;
 
@@ -151,6 +152,7 @@ struct STextContainer
 	void Reset()
 	{
 		m_pFont = NULL;
+		m_pFallbackFont = NULL;
 		m_FontSize = 0;
 
 		m_StringInfo.m_QuadBufferObjectIndex = m_StringInfo.m_QuadBufferContainerIndex = m_StringInfo.m_SelectionQuadContainerIndex = -1;
@@ -243,6 +245,7 @@ class CTextRender : public IEngineTextRender
 	ColorRGBA m_Color;
 	ColorRGBA m_OutlineColor;
 	CFont *m_pDefaultFont;
+	CFont *m_pFallbackFont;
 
 	FT_Library m_FTLibrary;
 
@@ -425,13 +428,15 @@ class CTextRender : public IEngineTextRender
 			return false;
 	}
 
-	void RenderGlyph(CFont *pFont, CFontSizeData *pSizeData, int Chr)
+	void RenderGlyph(CFont *pInitialFont, CFont *pFallbackFont, CFontSizeData *pSizeData, int Chr)
 	{
 		FT_Bitmap *pBitmap;
 
 		int x = 1;
 		int y = 1;
 		unsigned int px, py;
+
+		CFont *pFont = pInitialFont;
 
 		FT_Set_Pixel_Sizes(pFont->m_FtFace, 0, pSizeData->m_FontSize);
 
@@ -441,13 +446,25 @@ class CTextRender : public IEngineTextRender
 
 		if(GlyphIndex == 0)
 		{
-			const int ReplacementChr = 0x25a1; // White square to indicate missing glyph
-			GlyphIndex = FT_Get_Char_Index(pFont->m_FtFace, (FT_ULong)ReplacementChr);
+			if(pFallbackFont)
+			{
+				pFont = pFallbackFont;
+				FT_Set_Pixel_Sizes(pFont->m_FtFace, 0, pSizeData->m_FontSize);
+
+				if(pFont->m_FtFace->charmap)
+					GlyphIndex = FT_Get_Char_Index(pFont->m_FtFace, (FT_ULong)Chr);
+			}
 
 			if(GlyphIndex == 0)
 			{
-				dbg_msg("pFont", "font has no glyph for either %d or replacement char %d", Chr, ReplacementChr);
-				return;
+				const int ReplacementChr = 0x25a1; // White square to indicate missing glyph
+				GlyphIndex = FT_Get_Char_Index(pFont->m_FtFace, (FT_ULong)ReplacementChr);
+
+				if(GlyphIndex == 0)
+				{
+					dbg_msg("pFont", "font has no glyph for either %d or replacement char %d", Chr, ReplacementChr);
+					return;
+				}
 			}
 		}
 
@@ -477,20 +494,20 @@ class CTextRender : public IEngineTextRender
 		// upload the glyph
 		int X = 0;
 		int Y = 0;
-		while(!GetCharacterSpace(pFont, 0, (int)Width, (int)Height, X, Y))
+		while(!GetCharacterSpace(pInitialFont, 0, (int)Width, (int)Height, X, Y))
 		{
-			IncreaseFontTexture(pFont, 0);
+			IncreaseFontTexture(pInitialFont, 0);
 		}
-		UploadGlyph(pFont, 0, X, Y, (int)Width, (int)Height, ms_aGlyphData);
+		UploadGlyph(pInitialFont, 0, X, Y, (int)Width, (int)Height, ms_aGlyphData);
 
 		if(OutlineThickness == 1)
 		{
 			Grow(ms_aGlyphData, ms_aGlyphDataOutlined, Width, Height);
-			while(!GetCharacterSpace(pFont, 1, (int)Width, (int)Height, X, Y))
+			while(!GetCharacterSpace(pInitialFont, 1, (int)Width, (int)Height, X, Y))
 			{
-				IncreaseFontTexture(pFont, 1);
+				IncreaseFontTexture(pInitialFont, 1);
 			}
-			UploadGlyph(pFont, 1, X, Y, (int)Width, (int)Height, ms_aGlyphDataOutlined);
+			UploadGlyph(pInitialFont, 1, X, Y, (int)Width, (int)Height, ms_aGlyphDataOutlined);
 		}
 		else
 		{
@@ -499,11 +516,11 @@ class CTextRender : public IEngineTextRender
 				Grow(ms_aGlyphData, ms_aGlyphDataOutlined, Width, Height);
 				Grow(ms_aGlyphDataOutlined, ms_aGlyphData, Width, Height);
 			}
-			while(!GetCharacterSpace(pFont, 1, (int)Width, (int)Height, X, Y))
+			while(!GetCharacterSpace(pInitialFont, 1, (int)Width, (int)Height, X, Y))
 			{
-				IncreaseFontTexture(pFont, 1);
+				IncreaseFontTexture(pInitialFont, 1);
 			}
-			UploadGlyph(pFont, 1, X, Y, (int)Width, (int)Height, ms_aGlyphData);
+			UploadGlyph(pInitialFont, 1, X, Y, (int)Width, (int)Height, ms_aGlyphData);
 		}
 
 		// set char info
@@ -527,7 +544,7 @@ class CTextRender : public IEngineTextRender
 		}
 	}
 
-	SFontSizeChar *GetChar(CFont *pFont, CFontSizeData *pSizeData, int Chr)
+	SFontSizeChar *GetChar(CFont *pFont, CFont *pFallbackFont, CFontSizeData *pSizeData, int Chr)
 	{
 		std::map<int, SFontSizeChar>::iterator it = pSizeData->m_Chars.find(Chr);
 		if(it == pSizeData->m_Chars.end())
@@ -535,7 +552,7 @@ class CTextRender : public IEngineTextRender
 			// render and add character
 			SFontSizeChar& FontSizeChr = pSizeData->m_Chars[Chr];
 
-			RenderGlyph(pFont, pSizeData, Chr);
+			RenderGlyph(pFont, pFallbackFont, pSizeData, Chr);
 
 			return &FontSizeChr;
 		}
@@ -569,6 +586,7 @@ public:
 
 		m_pCurFont = 0;
 		m_pDefaultFont = 0;
+		m_pFallbackFont = 0;
 		m_FTLibrary = 0;
 
 		// GL_LUMINANCE can be good for debugging
@@ -708,10 +726,11 @@ public:
 		}
 	}
 
-	virtual void SetDefaultFont(CFont *pFont)
+	virtual void SetDefaultFont(CFont *pFont, CFont *pFallbackFont)
 	{
-		dbg_msg("textrender", "default pFont set %p", pFont);
+		dbg_msg("textrender", "default pFont set %p %p", pFont, pFallbackFont);
 		m_pDefaultFont = pFont;
+		m_pFallbackFont = pFallbackFont;
 		m_pCurFont = m_pDefaultFont;
 	}
 
@@ -791,6 +810,7 @@ public:
 			return;
 
 		CFont *pFont = pCursor->m_pFont;
+		CFont *pFallbackFont = pCursor->m_pFallbackFont;
 		CFontSizeData *pSizeData = NULL;
 
 		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
@@ -827,6 +847,9 @@ public:
 
 		if(!pFont)
 			return;
+
+		if(!pFallbackFont)
+			pFallbackFont = m_pFallbackFont;
 
 		pSizeData = pFont->GetFontSize(ActualSize);
 
@@ -943,7 +966,7 @@ public:
 					continue;
 				}
 
-				SFontSizeChar *pChr = GetChar(pFont, pSizeData, Character);
+				SFontSizeChar *pChr = GetChar(pFont, pFallbackFont, pSizeData, Character);
 				if(pChr)
 				{
 					bool ApplyBearingX = !(((m_RenderFlags&TEXT_RENDER_FLAG_NO_X_BEARING) != 0) || (CharacterCounter == 0 && (m_RenderFlags&TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING) != 0));
@@ -1038,6 +1061,7 @@ public:
 	virtual int CreateTextContainer(CTextCursor *pCursor, const char *pText)
 	{
 		CFont *pFont = pCursor->m_pFont;
+		CFont *pFallbackFont = pCursor->m_pFallbackFont;
 
 		// fetch pFont data
 		if(!pFont)
@@ -1046,9 +1070,13 @@ public:
 		if(!pFont)
 			return -1;
 
+		if(!pFallbackFont)
+			pFallbackFont = m_pFallbackFont;
+
 		int ContainerIndex = GetFreeTextContainerIndex();
 		STextContainer& TextContainer = GetTextContainer(ContainerIndex);
 		TextContainer.m_pFont = pFont;
+		TextContainer.m_pFallbackFont = pFallbackFont;
 
 		CFontSizeData *pSizeData = NULL;
 
@@ -1248,7 +1276,7 @@ public:
 					continue;
 				}
 
-				SFontSizeChar *pChr = GetChar(TextContainer.m_pFont, pSizeData, Character);
+				SFontSizeChar *pChr = GetChar(TextContainer.m_pFont, TextContainer.m_pFallbackFont, pSizeData, Character);
 				if(pChr)
 				{
 					bool ApplyBearingX = !(((RenderFlags&TEXT_RENDER_FLAG_NO_X_BEARING) != 0) || (CharacterCounter == 0 && (RenderFlags&TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING) != 0));
@@ -1468,6 +1496,7 @@ public:
 				FakeCursor.m_StartY = TextContainer.m_StartY;
 				FakeCursor.m_LineWidth = TextContainer.m_LineWidth;
 				FakeCursor.m_pFont = TextContainer.m_pFont;
+				FakeCursor.m_pFallbackFont = TextContainer.m_pFallbackFont;
 
 				int Wlen = minimum(WordLength((char *)pCurrent), (int)(pEnd - pCurrent));
 				CTextCursor Compare = FakeCursor;
@@ -1530,7 +1559,7 @@ public:
 					continue;
 				}
 
-				SFontSizeChar *pChr = GetChar(TextContainer.m_pFont, pSizeData, Character);
+				SFontSizeChar *pChr = GetChar(TextContainer.m_pFont, TextContainer.m_pFallbackFont, pSizeData, Character);
 				if(pChr)
 				{
 					bool ApplyBearingX = !(((RenderFlags&TEXT_RENDER_FLAG_NO_X_BEARING) != 0) || (CharacterCounter == 0 && (RenderFlags&TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING) != 0));
