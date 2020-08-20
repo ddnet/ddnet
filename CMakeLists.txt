@@ -26,6 +26,10 @@ if(POLICY CMP0017)
   cmake_policy(SET CMP0017 NEW)
 endif()
 
+if(POLICY CMP0042)
+  cmake_policy(SET CMP0042 NEW)
+endif()
+
 if(POLICY CMP0048)
   cmake_policy(SET CMP0048 NEW)
   if(VERSION_PATCH STREQUAL "0")
@@ -252,6 +256,23 @@ function(set_src VAR GLOBBING DIRECTORY) # ...
   set_glob(${VAR} ${GLOBBING} "c;cpp;h" ${DIRECTORY} ${ARGN})
   set(${VAR} ${${VAR}} PARENT_SCOPE)
 endfunction()
+
+function(set_own_rpath TARGET)
+  if(NOT TARGET_OS STREQUAL "windows" AND NOT TARGET_OS STREQUAL "mac")
+    if(CMAKE_VERSION VERSION_GREATER 3.14 OR CMAKE_VERSION VERSION_EQUAL 3.14)
+      set_property(TARGET ${TARGET} PROPERTY BUILD_RPATH_USE_ORIGIN TRUE)
+    elseif(CMAKE_VERSION VERSION_GREATER 3.8 OR CMAKE_VERSION VERSION_EQUAL 3.8)
+      set_property(TARGET ${TARGET} PROPERTY BUILD_RPATH "$ORIGIN")
+    endif()
+    set_property(TARGET ${TARGET} PROPERTY INSTALL_RPATH "$ORIGIN/../lib/ddnet")
+  endif()
+endfunction()
+
+if(NOT TARGET_OS STREQUAL "windows" AND NOT TARGET_OS STREQUAL "mac" AND CMAKE_VERSION VERSION_LESS 3.8)
+  if(CLIENT OR ANTIBOT)
+    message(STATUS "Can't set BUILD_RPATH in CMake before 3.8, pass -Wl,-rpath,'$ORIGIN' manually if you wish to emulate this. Or just install a newer version of CMake...")
+  endif()
+endif()
 
 ########################################################################
 # INITIALIZE TARGET LISTS
@@ -1367,6 +1388,7 @@ generate_maps("src/game/generated/protocolglue.h")
 set_src(BASE GLOB_RECURSE src/base
   color.h
   detect.h
+  dynamic.h
   hash.c
   hash.h
   hash_bundled.c
@@ -1410,6 +1432,7 @@ set_src(ENGINE_INTERFACE GLOB src/engine
   server.h
   serverbrowser.h
   sound.h
+  steam.h
   storage.h
   textrender.h
   updater.h
@@ -1565,6 +1588,15 @@ list(APPEND TARGETS_OWN engine-shared game-shared)
 
 if(CLIENT)
   # Sources
+  set_src(STEAMAPI_SRC GLOB_RECURSE src/steam
+    steam_api_flat.h
+    steam_api_stub.cpp
+  )
+
+  set(TARGET_STEAMAPI steam_api)
+  add_library(${TARGET_STEAMAPI} SHARED ${STEAMAPI_SRC})
+  list(APPEND TARGETS_OWN ${TARGET_STEAMAPI})
+
   set_src(ENGINE_CLIENT GLOB src/engine/client
     backend_sdl.cpp
     backend_sdl.h
@@ -1591,6 +1623,7 @@ if(CLIENT)
     serverbrowser.h
     sound.cpp
     sound.h
+    steam.cpp
     text.cpp
     updater.cpp
     updater.h
@@ -1730,6 +1763,8 @@ if(CLIENT)
     ${OPUS_LIBRARIES}
     ${OGG_LIBRARIES}
 
+    ${TARGET_STEAMAPI}
+
     ${PLATFORM_CLIENT_LIBS}
 
     # Add pthreads (on non-Windows) at the end, so that other libraries can depend
@@ -1776,10 +1811,7 @@ if(CLIENT)
     ${PLATFORM_CLIENT_INCLUDE_DIRS}
   )
 
-  # Support shipped SDL2 shared lib for Steam release
-  if(TARGET_OS STREQUAL "linux")
-    set_property(TARGET ${TARGET_CLIENT} PROPERTY BUILD_RPATH "$ORIGIN")
-  endif()
+  set_own_rpath(${TARGET_CLIENT})
 
   set(PARAMS "${WAVPACK_INCLUDE_DIRS};${WAVPACK_INCLUDE_DIRS}")
   if(NOT(WAVPACK_OPEN_FILE_INPUT_EX_PARAMS STREQUAL PARAMS))
@@ -1934,16 +1966,6 @@ add_executable(${TARGET_SERVER}
 target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER})
 list(APPEND TARGETS_OWN ${TARGET_SERVER})
 list(APPEND TARGETS_LINK ${TARGET_SERVER})
-
-if(ANTIBOT)
-  if(CMAKE_VERSION VERSION_GREATER 3.8 OR CMAKE_VERSION VERSION_EQUAL 3.8)
-    if(CMAKE_VERSION VERSION_LESS 3.14)
-      set_property(TARGET ${TARGET_SERVER} PROPERTY BUILD_RPATH "$ORIGIN")
-    endif()
-  else()
-    message(STATUS "Can't set BUILD_RPATH in CMake before 3.8, pass -Wl,-rpath,'$ORIGIN' manually if you wish to emulate this. Or just install a newer version of CMake...")
-  endif()
-endif()
 
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   set(SERVER_LAUNCHER_SRC src/osxlaunch/server.mm)
@@ -2237,6 +2259,7 @@ set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME ${PROJECT_NAME})
 set(CPACK_TARGETS
   ${TARGET_CLIENT}
   ${TARGET_SERVER}
+  ${TARGET_STEAMAPI}
   config_retrieve
   config_store
   dilate
@@ -2259,9 +2282,10 @@ if(NOT DEV)
   include(GNUInstallDirs)
   install(DIRECTORY data DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/ddnet COMPONENT data)
   install(TARGETS ${TARGET_CLIENT} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT client)
+  install(TARGETS ${TARGET_STEAMAPI} DESTINATION ${CMAKE_INSTALL_LIBDIR}/ddnet COMPONENT client)
   install(TARGETS ${TARGET_SERVER} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT server)
   if(ANTIBOT)
-    install(TARGETS ${TARGET_ANTIBOT} DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT server)
+    install(TARGETS ${TARGET_ANTIBOT} DESTINATION ${CMAKE_INSTALL_LIBDIR}/ddnet COMPONENT server)
   endif()
   install(TARGETS ${TARGETS_TOOLS} DESTINATION ${CMAKE_INSTALL_LIBDIR}/ddnet COMPONENT tools)
   install(FILES other/ddnet.desktop DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications COMPONENT client)
@@ -2434,6 +2458,10 @@ macro(source_group_tree dir)
 endmacro()
 source_group_tree(src)
 
+if(ANTIBOT)
+  set_own_rpath(${TARGET_SERVER})
+endif()
+
 set(TARGETS ${TARGETS_OWN} ${TARGETS_DEP})
 
 foreach(target ${TARGETS})
@@ -2475,9 +2503,6 @@ foreach(target ${TARGETS_OWN})
   if((CMAKE_VERSION VERSION_GREATER 3.1 OR CMAKE_VERSION VERSION_EQUAL 3.1) AND NOT TARGET_OS STREQUAL "mac")
     set_property(TARGET ${target} PROPERTY CXX_STANDARD 11)
     set_property(TARGET ${target} PROPERTY CXX_STANDARD_REQUIRED ON)
-  endif()
-  if(CMAKE_VERSION VERSION_GREATER 3.14 OR CMAKE_VERSION VERSION_EQUAL 3.14)
-    set_property(TARGET ${TARGET_SERVER} PROPERTY BUILD_RPATH_USE_ORIGIN TRUE)
   endif()
 
   if(MSVC)

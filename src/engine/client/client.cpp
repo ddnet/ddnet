@@ -30,6 +30,7 @@
 #include <engine/masterserver.h>
 #include <engine/serverbrowser.h>
 #include <engine/sound.h>
+#include <engine/steam.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
 
@@ -2829,6 +2830,7 @@ void CClient::InitInterfaces()
 #if defined(CONF_AUTOUPDATE)
 	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
 #endif
+	m_pSteam = Kernel()->RequestInterface<ISteam>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
 	m_DemoEditor.Init(m_pGameClient->NetVersion(), &m_SnapshotDelta, m_pConsole, m_pStorage);
@@ -4101,6 +4103,7 @@ int main(int argc, const char **argv) // ignore_convention
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateEditor(), false);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateGameClient(), false);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pStorage);
+		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateSteam());
 
 		if(RegisterFail)
 		{
