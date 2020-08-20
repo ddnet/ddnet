@@ -24,10 +24,10 @@ santa_saddo, santa_toptri, santa_twinbop, santa_twintri, santa_warpaint:
 Copyright forsaken
 CC-BY-SA license
 
-kitty_bluekitty, kitty_bluestripe, kitty_brownbear, kitty_cammo, kitty_coala,
-kitty_default, kitty_limekitty, kitty_pinky, kitty_redbopp, kitty_redstripe,
-kitty_saddo, kitty_toptri, kitty_twinbop, kitty_twintri, kitty_warpaint,
-kitty_x_ninja:
+bomb, kitty_bluekitty, kitty_bluestripe, kitty_brownbear, kitty_cammo,
+kitty_coala, kitty_default, kitty_limekitty, kitty_pinky, kitty_redbopp,
+kitty_redstripe, kitty_saddo, kitty_toptri, kitty_twinbop, kitty_twintri,
+kitty_warpaint, kitty_x_ninja:
 Copyright Ravie
 CC0 license
 
