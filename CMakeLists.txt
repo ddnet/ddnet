@@ -1145,6 +1145,7 @@ set(EXPECTED_DATA
   skins/blacktee.png
   skins/bluekitty.png
   skins/bluestripe.png
+  skins/bomb.png
   skins/brownbear.png
   skins/bunny.png
   skins/caesar.png

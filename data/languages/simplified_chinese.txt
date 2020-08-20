@@ -8,30 +8,32 @@
 # 2019.12.16 Eki
 # 2020.6.25 Night_L
 # 2020.8.14 Night_L
+# 2020.8.19 TsFreddie
+# 2020.8.20 Dan_cao
 ##### /authors #####
 
 ##### translated strings #####
 
 %ds left
-== 还剩 %d 秒
+== 还剩%d秒
 
 %i minute left
-== 还剩 %i 分钟
+== 还剩下%i分钟
 
 %i minutes left
-== 还剩 %i 分钟
+== 还剩下%i分钟
 
 %i second left
-== 还剩 %i 秒钟
+== 还剩下%i秒钟
 
 %i seconds left
-== 还剩 %i 秒钟
+== 还剩下%i秒钟
 
 %s wins!
-== %s 胜利！
+== %s胜利!
 
 -Page %d-
-== -第 %d 页-
+== -第%d页-
 
 Abort
 == 取消
@@ -49,7 +51,7 @@ All
 == 全部
 
 Are you sure that you want to delete the demo?
-== 你确定要删除这个录像吗？
+== 你确定要删除这个回放吗？
 
 Are you sure that you want to quit?
 == 你确定要退出吗？
@@ -58,7 +60,7 @@ Are you sure that you want to remove the player from your friends list?
 == 你确定要把这个玩家从好友列表中删除吗？
 
 Automatically record demos
-== 自动录制录像
+== 自动录制回放
 
 Automatically take game over screenshot
 == 自动截取游戏结束画面
@@ -76,13 +78,13 @@ Call vote
 == 发起投票
 
 Change settings
-== 改变设置
+== 变更设置
 
 Chat
 == 聊天
 
 Clan
-== 团队
+== 战队
 
 Client
 == 客户端
@@ -100,7 +102,7 @@ Connecting to
 == 正在连接到
 
 Connection Problems...
-== 连接出现问题...
+== 连接中断...
 
 Console
 == 控制台
@@ -109,7 +111,7 @@ Controls
 == 控制
 
 Count players only
-== 只统计玩家数
+== 屏蔽旁观位
 
 Country
 == 国家/地区
@@ -124,16 +126,16 @@ Delete
 == 删除
 
 Delete demo
-== 删除录像
+== 删除回放
 
 Demo details
-== 录像详细信息
+== 回放详细信息
 
 Demofile: %s
-== 录像：%s
+== 回放文件：%s
 
 Demos
-== 录像
+== 回放
 
 Disconnect
 == 断开连接
@@ -148,25 +150,25 @@ Draw!
 == 平局！
 
 Dynamic Camera
-== 动态镜头
+== 动态视野
 
 Emoticon
 == 表情
 
 Enter
-== 进入
+== 确定
 
 Error
 == 错误
 
 Error loading demo
-== 读取录像错误
+== 回放读取错误
 
 Favorite
 == 收藏
 
 Favorites
-== 收藏夹
+== 收藏
 
 Feet
 == 脚
@@ -205,10 +207,10 @@ Game paused
 == 游戏已暂停
 
 Game type
-== 游戏类型
+== 游戏模式
 
 Game types:
-== 游戏类型：
+== 游戏模式：
 
 General
 == 常规
@@ -217,7 +219,7 @@ Graphics
 == 图像
 
 Grenade
-== 榴弹
+== 榴弹枪
 
 Hammer
 == 锤子
@@ -226,13 +228,13 @@ Has people playing
 == 有人在玩
 
 High Detail
-== 高细节
+== 显示地图细节
 
 Hook
-== 钩子
+== 钩索
 
 Invalid Demo
-== 无效的录像
+== 回放文件无效或已损坏
 
 Join blue
 == 加入蓝队
@@ -250,10 +252,10 @@ Language
 == 语言
 
 DDNet Client needs to be restarted to complete update!
-== DDNet 客户端需要重新启动才能完成更新！
+== DDNet客户端需要重新启动才能完成更新！
 
 MOTD
-== 服务器通告
+== 公告
 
 Map
 == 地图
@@ -268,7 +270,7 @@ Move left
 == 向左移动
 
 Move player to spectators
-== 将玩家移至旁观
+== 将玩家移至旁观位
 
 Move right
 == 向右移动
@@ -277,31 +279,31 @@ Movement
 == 移动
 
 Mute when not active
-== 不活动时静音
+== 在后台时静音
 
 Enable game sounds
-== 开启游戏声音
+== 启用游戏声音
 
 Enable gun sound
-== 开启枪的声音
+== 启用枪声
 
 Enable server message sound
-== 开启服务器消息声音
+== 启用服务器通知声音
 
 Enable regular chat sound
-== 开启普通聊天的声音
+== 启用聊天提示音
 
 Enable team chat sound
-== 开启团队聊天声音
+== 启用队伍聊天提示音
 
 Enable highlighted chat sound
-== 开启高亮(被@)聊天声音
+== 启用被提及时的提示音
 
 Threaded sound loading
-== 开启线程声音
+== 启用多线程音频加载
 
 Name
-== 名字
+== 名称
 
 Next weapon
 == 下一个武器
@@ -313,13 +315,13 @@ No
 == 否
 
 No password
-== 无密码
+== 没有密码
 
 No servers found
 == 找不到任何服务器
 
 No servers match your filter criteria
-== 没有任何服务器匹配你的过滤器
+== 没有服务器满足设置的过滤条件
 
 Ok
 == 确定
@@ -352,10 +354,10 @@ Player
 == 玩家
 
 HUD
-== 详细
+== HUD
 
 Player country:
-== 玩家的国家/地区：
+== 玩家国家/地区：
 
 Player options
 == 玩家选项
@@ -364,7 +366,7 @@ Players
 == 玩家数
 
 Please balance teams!
-== 请平衡队伍人数！
+== 队伍人数不平衡！
 
 Prev. weapon
 == 上一个武器
@@ -388,7 +390,7 @@ Refresh
 == 刷新
 
 Refreshing master servers
-== 刷新主服务器中
+== 正在刷新主服务器
 
 Remote console
 == 远程控制台
@@ -403,7 +405,7 @@ Rename
 == 重命名
 
 Rename demo
-== 重命名录像
+== 重命名回放
 
 Reset filter
 == 重置过滤器
@@ -415,7 +417,7 @@ Score
 == 分数
 
 Score limit
-== 分数限制
+== 目标得分
 
 Scoreboard
 == 计分板
@@ -448,16 +450,16 @@ Show friends only
 == 只显示好友
 
 Show ingame HUD
-== 显示游戏内信息
+== 显示HUD
 
 Show name plates
-== 显示名字
+== 显示昵称
 
 Show only chat messages from friends
 == 只显示好友消息
 
 Show only supported
-== 只显示支持的
+== 只显示支持的分辨率
 
 Skins
 == 皮肤
@@ -466,16 +468,16 @@ Sound
 == 声音
 
 Sound error
-== 声音出现错误
+== 音频错误
 
 Spectate
 == 旁观
 
 Spectate next
-== 观看后一个
+== 旁观下一个
 
 Spectate previous
-== 观看前一个
+== 旁观上一个
 
 Spectator mode
 == 旁观者模式
@@ -484,19 +486,19 @@ Spectators
 == 旁观者
 
 Standard gametype
-== 标准游戏类型
+== 原生游戏模式
 
 Standard map
-== 标准地图
+== 原生地图
 
 Stop record
 == 停止录制
 
 Strict gametype filter
-== 严格过滤游戏类型
+== 严格过滤游戏模式
 
 Sudden Death
-== 一枪击杀
+== 决胜
 
 Switch weapon on pickup
 == 拾取武器时自动装备
@@ -511,43 +513,43 @@ Clan plates size
 == 战队名称大小
 
 Reset wanted weapon on death
-== 死亡时重置目标武器
+== 死亡后自动切换回默认武器
 
 Team
-== 团队
+== 队伍
 
 Team chat
-== 团队聊天
+== 队伍聊天
 
 Texture Compression
 == 纹理压缩
 
 The audio device couldn't be initialised.
-== 无法初始化音频设备。
+== 初始化音频设备失败。
 
 The server is running a non-standard tuning on a pure game type.
-== 此服务器运行着非标准参数的标准游戏类型。
+== 此服务器运行着经过调整的非标准游戏模式。
 
 There's an unsaved map in the editor, you might want to save it before you quit the game.
-== 编辑器中的地图尚未保存，或许你应该在退出游戏之前保存一下。
+== 编辑器中的地图尚未保存，建议您在退出游戏之前返回编辑器进行保存。
 
 Time limit
-== 时间限制
+== 规定时限
 
 Time limit: %d min
-== 时间限制：%d 分钟
+== 规定时限：%d 分钟
 
 Try again
 == 重试
 
 Type
-== 类型
+== 模式
 
 Unable to delete the demo
-== 无法删除这个录像
+== 无法删除这个回放
 
 Unable to rename the demo
-== 无法重命名这个录像
+== 无法重命名这个回放
 
 Use sounds
 == 开启声音
@@ -568,7 +570,7 @@ Vote description:
 == 投票描述：
 
 Vote no
-== 否决
+== 反对
 
 Vote yes
 == 赞成
@@ -586,13 +588,13 @@ Yes
 == 是
 
 You must restart the game for all settings to take effect.
-== 你必须重启游戏才能让所有设置生效。
+== 你需要重启游戏来使某些设置生效。
 
 Borderless window
 == 无边框窗口
 
 Demo
-== 录像
+== 回放
 
 Reset
 == 重置
@@ -601,7 +603,7 @@ Screen
 == 屏幕
 
 New name:
-== 新名字：
+== 新文件名：
 
 Sat.
 == 饱和度
@@ -610,10 +612,10 @@ Miscellaneous
 == 杂项
 
 Internet
-== 因特网
+== 互联网
 
 Max demos
-== 最大录像数
+== 最大回放数
 
 News
 == 新闻
@@ -625,22 +627,22 @@ FSAA samples
 == 全屏抗锯齿(FSAA)采样倍数
 
 %d of %d servers, %d players
-== %d / %d 个服务器，%d 个玩家
+== %d / %d 个服务器，%d 位玩家
 
 Sound volume
 == 音量
 
 Map sound volume
-== 地图音量
+== 地图音效音量
 
 Created:
-== 创建于：
+== 创建时间：
 
 Max Screenshots
 == 最大截图数
 
 Dummy settings
-== 假人设置
+== 分身设置
 
 Length:
 == 长度：
@@ -649,7 +651,7 @@ Laser
 == 激光枪
 
 Netversion:
-== 网络版本：
+== 通信版本：
 
 Map:
 == 地图：
@@ -661,7 +663,7 @@ Hue
 == 色调
 
 Record demo
-== 录制录像
+== 录制回放
 
 Your skin
 == 你的皮肤
@@ -691,7 +693,7 @@ Show console window
 == 显示控制台窗口
 
 Automatically take statboard screenshot
-== 自动对状态版截图
+== 自动对统计板截图
 
 UI Color
 == 界面颜色
@@ -700,7 +702,7 @@ Host address
 == 主机地址
 
 Crc:
-== Crc校验码:
+== Crc:
 
 Alpha
 == 透明度
@@ -712,7 +714,7 @@ LAN
 == 局域网
 
 Name plates size
-== 名字板尺寸
+== 昵称大小
 
 Type:
 == 类型：
@@ -721,7 +723,7 @@ Use DDRace Scoreboard
 == 使用 DDRace 计分板
 
 Show client IDs in Scoreboard
-== 在计分板上显示客户端 ID
+== 在计分板上显示客户端ID
 
 Show score
 == 显示比分
@@ -730,13 +732,13 @@ Show health + ammo
 == 显示生命与弹药
 
 Show names in chat in team colors
-== 聊天中以队伍颜色显示名称
+== 以队伍颜色显示玩家昵称
 
 Show kill messages
-== 显示 Kill 消息
+== 显示击杀消息
 
 Show votes window after voting
-== 在投票时显示投票窗口
+== 投票后不关闭投票窗口
 
 Messages
 == 消息
@@ -745,13 +747,13 @@ System message
 == 系统消息
 
 Highlighted message
-== 高亮显示消息
+== 被提及消息
 
 Look out!
 == 小心!
 
 Team message
-== 团队消息
+== 队伍消息
 
 We will win
 == 我们赢定了
@@ -772,16 +774,16 @@ Outline color
 == 外部颜色
 
 Save the best demo of each race
-== 保存每场竞赛的录像
+== 保存竞速模式最高记录的回放
 
 Ghost
-== 幽灵
+== 影子
 
 Show ghost
-== 显示幽灵
+== 显示影子
 
 Save ghost
-== 保存幽灵
+== 保存影子
 
 Gameplay
 == 游戏
@@ -790,7 +792,7 @@ Overlay entities
 == 显示实体层
 
 Show others
-== 显示其他
+== 显示其他玩家
 
 Show quads
 == 显示背景
@@ -811,7 +813,7 @@ AntiPing: predict grenade paths
 == AntiPing：预测榴弹路径
 
 Show other players' hook collision lines
-== 显示其他玩家的钩子线
+== 显示其他玩家的钩索辅助线
 
 Show other players' key presses
 == 显示其他玩家的按键
@@ -823,16 +825,16 @@ Background (entities)
 == 背景(实体)
 
 Show tiles layers from BG map
-== 在 BG 地图显示砖层
+== 在背景地图显示图块层
 
 Try fast HTTP map download first
-== 首先尝试下载较快的 HTTP 地图
+== 优先尝试用HTTP快速下载地图
 
 DDNet %s is available:
-== DDnet %s 可用：
+== DDnet %s 现已可用：
 
 Update now
-== 现在就更新
+== 现在更新
 
 Updating...
 == 更新中...
@@ -853,7 +855,7 @@ Browser
 == 浏览
 
 Connecting dummy
-== 正在连接假人
+== 正在连接分身
 
 Spectator
 == 旁观者
@@ -865,13 +867,13 @@ UI mouse s.
 == 主页面灵敏度
 
 Vanilla skins only
-== 只显示原版皮肤
+== 只显示原生皮肤
 
 Fat skins (DDFat)
-== 胖胖的皮肤(DDFat)
+== 胖胖的皮肤 (DDFat)
 
 Ratio
-== 击杀死亡比
+== K/D
 
 ##### Ratio的算法是击杀除以死亡次数 #####
 
@@ -894,16 +896,16 @@ second
 == 秒
 
 Select a name
-== 设置名字
+== 另存为
 
 Hi o/
 == 你好
 
 Deaths
-== 死亡
+== 死亡数
 
 Please use a different name
-== 请使用另一个名字
+== 请换一个不同的文件名
 
 Wait before try for
 == 请等待
@@ -915,22 +917,22 @@ Old mouse mode
 == 旧版鼠标模式
 
 Follow
-== 跟(Follow)
+== 跟随
 
 Automatically create statboard csv
-== 自动创建状态版的纯文本文件(CSV)
+== 自动将统计板导出为csv文件
 
 Are you sure that you want to disconnect?
 == 确定要断开连接吗？
 
 Types
-== 类型
+== 模式
 
 Remove chat
-== 删除聊天栏
+== 删除消息记录
 
 Frags
-== 击杀
+== 击杀数
 
 Enable long pain sound (used when shooting in freeze)
 == 启用长时间痛苦的声音(在冻结时使用)
@@ -945,7 +947,7 @@ New random timeout code
 == 新随机超时代码
 
 Suicides
-== 自杀
+== 自杀数
 
 Net
 == 净击杀
@@ -953,7 +955,7 @@ Net
 ##### Net的算法是杀人+1被杀-1 #####
 
 FPM
-== 每分钟击杀
+== 击杀/分
 
 ##### 得分速度就是效率FPM #####
 
@@ -961,7 +963,7 @@ Spree
 == 连杀
 
 Max CSVs
-== 最大的状态版纯文本(CSV)储存数量
+== 最大csv文件数
 
 seconds
 == 秒
@@ -991,13 +993,13 @@ Welcome to DDNet
 == 欢迎来到 DDNet
 
 Preinit VBO (iGPUs only)
-== Preinit VBO (仅限 iGPU)
+== 预初始化顶点缓冲对象 (仅限集成显卡)
 
 Activate
 == 启用
 
 Multiple texture units (disable for MacOS)
-== 多重纹理单元(MacOS 上被禁用)
+== 多重纹理单元 (MacOS不可用)
 
 Use OpenGL 3.3 (experimental)
 == 使用 OpenGL 3.3 (实验性)
@@ -1024,13 +1026,13 @@ Reload
 == 刷新
 
 Enable replays
-== 开启回放
+== 启用短时回放
 
 Time
 == 用时
 
 Show entities
-== 显示实体层
+== 实体层显示开关
 
 Race %3d:%02d  
 == 竞速赛 %3d:%02d  
@@ -1051,16 +1053,16 @@ Manual %3d:%02d
 == %d 条新提示
 
 Toggle dummy
-== 控制假人
+== 切换分身
 
 Replay feature is disabled!
-== 回放功能已被禁用！
+== 短时回放功能未启用！
 
 Are you sure that you want to disconnect your dummy?
-== 确定要断连假人吗？
+== 确定要断连分身吗？
 
 Hook collisions
-== 钩子预测线
+== 钩索辅助线
 
 DDNet %s is out!
 == DDNet %s 已经更新了！
@@ -1075,7 +1077,7 @@ Markers:
 == 书签
 
 Zoom in
-== 放大
+== 视野放大
 
 1 new mention
 == 1 条新提示
@@ -1093,10 +1095,10 @@ Converse
 == 继续会话
 
 Successfully saved the replay!
-== 成功保存回放！
+== 成功保存短时回放！
 
 Fetch Info
-== 获取录像信息
+== 回放详情
 
 Lock team
 == 锁定队伍
@@ -1105,7 +1107,7 @@ Size
 == 大小
 
 Dummy copy
-== 假人同步动作
+== 分身同步动作
 
 Auto %3d:%02d  
 == 自动 %3d:%02d  
@@ -1117,25 +1119,25 @@ Statboard
 == 统计板
 
 Disconnect Dummy
-== 中断假人的连接
+== 中断分身的连接
 
 Show HUD
-== 显示状态
+== 游戏HUD开关
 
 Hammerfly dummy
-== 假人Hammerfly开关
+== 分身Hammerfly开关
 
 Default length: %d
 == 默认长度: %d
 
 Toggle ghost
-== 幽灵开关
+== 影子记录开关
 
 Kill
 == 自杀
 
 Zoom out
-== 缩小
+== 视野缩小
 
 Show text entities
 == 显示文本实体
@@ -1156,10 +1158,10 @@ The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other te
 == 鼠标滚轮可以切换武器。锤子 (鼠标左键) 击中其他 tee 时，可以让他们从冰冻中苏醒。
 
 Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== 钩子 (鼠标右键) 可以悬挂通过地图关卡，或者将其他 tee 拉向你。
+== 钩索 (鼠标右键) 可以用来悠荡您的角色来通过地图关卡，也可以用来将其他 tee 拉向自己。
 
 Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== 沟通是最关键的：游戏内没有教程，你需要通过聊天 (t键) 向其他玩家学习基本技巧。
+== 游戏内没有教程，沟通则至关重要。你需要通过聊天 (t键) 向其他玩家学习基本技巧。
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == 推荐在进入服务器前，先将设置调整到符合你的习惯。
@@ -1183,7 +1185,7 @@ Personal best:
 == 个人最佳
 
 Render demo
-== 渲染录像
+== 渲染回放
 
 Destination file already exist
 == 目标文件已经存在
@@ -1195,13 +1197,13 @@ Video name:
 == 视频名称
 
 Connect Dummy
-== 连接假人
+== 连接分身
 
 Client message
 == 客户端消息
 
 Show others (own team only)
-== 显示其他玩家(仅同队伍)
+== 显示其他玩家 (仅同队伍)
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 
+== 使用 k键 自杀以重新开始，使用 q键 可以暂停以旁观他人或查看地图。 请在设置中查看其他按键。
