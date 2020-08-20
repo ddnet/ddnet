@@ -1213,289 +1213,289 @@ Client message
 == Client-Nachricht
 
 You are now in a solo part
-== 
+== Du bist jetzt in einem Solo-Part
 
 Practice mode enabled for your team, happy practicing!
-== 
+== Übungsmodus für dein Team aktiviert, frohes Üben!
 
 Save functionality is disabled on this server
-== 
+== Speicher-Funktion ist auf diesem Server deaktiviert
 
 Unknown server name
-== 
+== Unbekannter Servername
 
 Team locked by
-== 
+== Team gesperrt von
 
 After the race started killing will kill everyone in your team
-== 
+== Nachdem das Rennen angefangen hat sterben alle im Team wenn jemand stirbt
 
 Team unlocked by
-== 
+== Team entsperrt von
 
 joined team
-== 
+== ist dem Team beigetreten
 
 You will now see all tees on this server, no matter the distance
-== 
+== Du siehst jetzt alle Tees auf diesem Server, unabhängig vom Abstand
 
 You will no longer see all tees on this server
-== 
+== Du siehst nicht mehr alle Tees auf diesem Server
 
 Rescue is not enabled on this server and you're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.
-== 
+== Rettung ist auf diesem Server nicht aktiviert und du bist nicht in einem Team mit /practice aktiviert. Beachte dass du keine Ränge verdienen kannst wenn der Übungsmodus aktiviert ist.
 
 Server kick/spec votes will now be actively moderated.
-== 
+== Kick/Zuschauer-Abstimmungen werden jetzt aktiv moderiert.
 
 Server kick/spec votes are no longer actively moderated.
-== 
+== Kick/Zuschauer-Abstimmungen werden nicht mehr aktiv moderiert.
 
 Active moderator mode enabled for you.
-== 
+== Aktiver-Moderator-Modus für dich aktiviert.
 
 Active moderator mode disabled for you.
-== 
+== Aktiver-Moderator-Modus für dich deaktiviert.
 
 Vote aborted
-== 
+== Abstimmung abgebrochen
 
 Vote passed
-== 
+== Abstimmung erfolgreich
 
 Vote passed enforced by authorized player
-== 
+== Abstimmung erfolgreich erzwungen durch authorisierten Spieler
 
 Vote failed enforced by authorized player
-== 
+== Abstimmung fehlgeschlagen erzwungen durch authorisierten Spieler
 
 Vote failed because of veto. Find an empty server instead
-== 
+== Abstimmung fehlgeschlagen wegen Vego. Finde stattdessen einen leeren Server
 
 Vote failed
-== 
+== Abstimmung fehlgeschlagen
 
 You can see other players. To disable this use DDNet client and type /showothers
-== 
+== Du kannst andere Spieler sehen. Zum Abschalten benutze DDNet-Client und schreibe /showothers
 
 Invalid option
-== 
+== Ungültige Option
 
 Invalid option on this server
-== 
+== Ungültige Option auf diesem Server
 
 Server does not allow voting to kick players
-== 
+== Server erlaubt keine Abstimmungen um Spieler zu kicken
 
 Invalid client id to kick
-== 
+== Ungültige Client-ID zum Kicken
 
 You can't kick yourself
-== 
+== Du kannst dich nicht selbst kicken
 
 You can't kick authorized players
-== 
+== Du kannst authorisierte Spieler nicht kicken
 
 called for vote to kick you
-== 
+== hat eine Abstimmung gestartet um dich zu kicken
 
 You can kick only your team member
-== 
+== Du kannst nur deine Teammitglieder kicken
 
 Server does not allow voting to move players to spectators
-== 
+== Server erlaubt keine Abstimmungen um Spiler zu Beobachtern zu verschieben
 
 Invalid client id to move
-== 
+== Ungültige Client-ID zum verschieben
 
 You can't move yourself
-== 
+== Du kannst dich nicht selbst verschieben
 
 You can only move your team member to specators
-== 
+== Du kannst nur deine Teammitglieder zu Beobachtern verschieben
 
 Kill Protection enabled. If you really want to join the spectators, first type /kill
-== 
+== Kill-Schutz aktiviert. Wenn du wirklich den Beobachtern beitreten willst, schreibe zuerst /kill
 
 Use /pause first then you can kill
-== 
+== Benutze /pause zuerst, dann kannst du killen
 
 Invalid spectator id used
-== 
+== Ungültige Beobachter-ID benutzt
 
 You are running a vote please try again after the vote is done!
-== 
+== Du veranstaltest schon eine Abstimmung, versuche es nochmal nachdem die Abstimmung fertig ist!
 
 Kill Protection enabled. If you really want to kill, type /kill
-== 
+== Kill-Schutz aktiviert. Wenn du wirklich Killenw illst, schreibe /kill
 
 authorized player forced server option
-== 
+== authorisierter Spieler hat Server-Option erzwungen
 
 Player moved to spectator
-== 
+== Spieler zu Beobachtern verschoben
 
 Invalid whisper
-== 
+== Ungültiger Flüster
 
 No player with name found
-== 
+== Kein Spieler mit Namen gefunden
 
 You do not have an ongoing conversation. Whisper to someone to start one
-== 
+== Du hast keine laufende Konversation. Flüstere zu jemandem um eine zu starten.
 
 You can only vote after logging in.
-== 
+== Du kannst nur nach dem Einloggen abstimmen.
 
 You are not allowed to vote because we're currently checking for VPNs. Try again in ~30 seconds.
-== 
+== Du kannst nicht abstimmen da wir gerade nach VPNs prüfen. Versuch es in ~30 Sekunden nochmal.
 
 You are not allowed to vote because you appear to be using a VPN. Try connecting without a VPN or contacting an admin if you think this is a mistake.
-== 
+== Du darfst nicht abstimmen da du ein VPN zu nutzen scheinst. Versuch ohne VPN zu verbinden oder einen Admin zu kontaktieren falls du denkst das ist falsch.
 
 Wait for current vote to end before calling a new one.
-== 
+== Warte auf das Ende der aktuellen Abstimmung bevor du eine neue startest.
 
 You must wait before making your first vote
-== 
+== Du musst warten bevor du deine erste Abstimmung startest
 
 You must wait before making another vote
-== 
+== Du musst warten bevor du eine weitere Abstimmung startest
 
 You must wait before voting
-== 
+== Du musst warten bevor du abstimmst
 
 Active moderator mode disabled because you are afk.
-== 
+== Aktive Moderator-Rolle deaktiviert weil du AFK warst.
 
 would have timed out, but can use timeout protection now
-== 
+== hätte einen Timeout bekommen, aber kann jetzt Timeout-Schutz benutzen
 
 has left the game
-== 
+== hat das Spiel verlassen
 
 joined the game
-== 
+== ist dem Spiel beigetreten
 
 joined the spectators
-== 
+== ist den Beobachtern beigetreten
 
 Can't /spec that quickly.
-== 
+== Kann nicht soll schnell /spec
 
 You have to be in a team (from 1-63)
-== 
+== Du musst in einem Team sein (von 1-63)
 
 Could not find your Team
-== 
+== Konnte dein Team nicht finden
 
 Unable to find all Characters
-== 
+== Konnte nicht alle Charaktäre finden
 
 Your team has not started yet
-== 
+== Dein Team hat noch nicht gestartet
 
 Team can't be loaded while racing
-== 
+== Team kann nicht geladen werden währen dem Rennen
 
 joined team 0
-== 
+== ist Team 0 beigetreten
 
 You can't start while loading/saving of team is in progress
-== 
+== Du kannst nicht anfangen während dein Team geladen/gespeichert wird
 
 You have to be in a team with other tees to start
-== 
+== Du musst mit anderen Tees in einem Team sein um anzufangen
 
 Endless hook has been activated
-== 
+== Endloser Hook wurde aktiviert
 
 Endless hook has been deactivated
-== 
+== Endloser Hook wurde deaktiviert
 
 You can't hit others
-== 
+== Du kannst andere nicht schlagen
 
 You can hit others
-== 
+== Du kannst andere schlagen
 
 You can't collide with others
-== 
+== Du kannst mit anderen nicht kollidieren
 
 You can collide with others
-== 
+== Du kannst mit anderen kollidieren
 
 You can't hook others
-== 
+== Du kannst andere nicht hooken
 
 You can hook others
-== 
+== Du kannst andere hooken
 
 You have unlimited air jumps
-== 
+== Du hast unbegrenzte Luftsprünge
 
 You don't have unlimited air jumps
-== 
+== Du hast keine unbegrenzten Luftsprünge
 
 You have a jetpack gun
-== 
+== Du hast ein Jetpack-Gewehr bekommen
 
 You lost your jetpack gun
-== 
+== Du hast dein Jetpack-Gewehr verloren
 
 Your team was unlocked by an unlock team tile
-== 
+== Dein Team wurde durch ein Team-Entsperr-Feld entsperrt
 
 You are now out of the solo part
-== 
+== Du bist jetzt aus dem Solo-Part raus
 
 Teleport gun enabled
-== 
+== Teleportier-Gewehr aktiviert
 
 Teleport gun disabled
-== 
+== Teleportier-Gewehr deaktiviert
 
 Teleport grenade enabled
-== 
+== Teleportier-Granate aktiviert
 
 Teleport grenade disabled
-== 
+== Teleportier-Granate deaktiviert
 
 Teleport laser enabled
-== 
+== Teleportier-Laser aktiviert
 
 Teleport laser disabled
-== 
+== Teleportier-Laser deaktiviert
 
 You can hammer hit others
-== 
+== Du kannst andere mit dem Hammer schlagen
 
 You can't hammer hit others
-== 
+== Du kannst andere nicht mit dem Hammer schlagen
 
 You can shoot others with shotgun
-== 
+== Du kannst andere mit Schrotflinte abschießen
 
 You can't shoot others with shotgun
-== 
+== Du kannst andere mit Schrotflinte nicht abschließen
 
 You can shoot others with grenade
-== 
+== Du kannst andere mit Granate abschießen
 
 You can't shoot others with grenade
-== 
+== Du kannst andere mit Granate nicht abschießen
 
 You can shoot others with laser
-== 
+== Du kannst andere mit Laser abschießen
 
 You can't shoot others with laser
-== 
+== Du kannst andere mit Laser nicht abschießen
 
 Number of jumps
-== 
+== Anzahl Luftsprünge
 
 Please join a team before you start
-== 
+== Bitte tritt einem Team bei bevor du anfängst
 
 Wait time in seconds until you can rescue yourself
-== 
+== Warte diese Zeit in Sekunden bis du dich retten kannst
