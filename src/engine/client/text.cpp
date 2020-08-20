@@ -100,6 +100,15 @@ public:
 
 	char m_aFilename[512];
 	FT_Face m_FtFace;
+
+	struct SFontFallBack
+	{
+		char m_aFilename[512];
+		FT_Face m_FtFace;
+	};
+
+	std::vector<SFontFallBack> m_FtFallbackFonts;
+
 	CFontSizeData m_aFontSizes[NUM_FONT_SIZES];
 
 	IGraphics::CTextureHandle m_aTextures[2];
@@ -433,31 +442,49 @@ class CTextRender : public IEngineTextRender
 		int y = 1;
 		unsigned int px, py;
 
-		FT_Set_Pixel_Sizes(pFont->m_FtFace, 0, pSizeData->m_FontSize);
+		FT_Face FtFace = pFont->m_FtFace;
+
+		FT_Set_Pixel_Sizes(FtFace, 0, pSizeData->m_FontSize);
 
 		FT_UInt GlyphIndex = 0;
-		if(pFont->m_FtFace->charmap)
-			GlyphIndex = FT_Get_Char_Index(pFont->m_FtFace, (FT_ULong)Chr);
+		if(FtFace->charmap)
+			GlyphIndex = FT_Get_Char_Index(FtFace, (FT_ULong)Chr);
 
 		if(GlyphIndex == 0)
 		{
-			const int ReplacementChr = 0x25a1; // White square to indicate missing glyph
-			GlyphIndex = FT_Get_Char_Index(pFont->m_FtFace, (FT_ULong)ReplacementChr);
+			for(CFont::SFontFallBack& FallbackFont : pFont->m_FtFallbackFonts)
+			{
+				FtFace = FallbackFont.m_FtFace;
+				FT_Set_Pixel_Sizes(FtFace, 0, pSizeData->m_FontSize);
+
+				if(FtFace->charmap)
+					GlyphIndex = FT_Get_Char_Index(FtFace, (FT_ULong)Chr);
+
+				if(GlyphIndex != 0)
+					break;
+			}
 
 			if(GlyphIndex == 0)
 			{
-				dbg_msg("pFont", "font has no glyph for either %d or replacement char %d", Chr, ReplacementChr);
-				return;
+				const int ReplacementChr = 0x25a1; // White square to indicate missing glyph
+				FtFace = pFont->m_FtFace;
+				GlyphIndex = FT_Get_Char_Index(FtFace, (FT_ULong)ReplacementChr);
+
+				if(GlyphIndex == 0)
+				{
+					dbg_msg("pFont", "font has no glyph for either %d or replacement char %d", Chr, ReplacementChr);
+					return;
+				}
 			}
 		}
 
-		if(FT_Load_Glyph(pFont->m_FtFace, GlyphIndex, FT_LOAD_RENDER|FT_LOAD_NO_BITMAP))
+		if(FT_Load_Glyph(FtFace, GlyphIndex, FT_LOAD_RENDER|FT_LOAD_NO_BITMAP))
 		{
 			dbg_msg("pFont", "error loading glyph %d", Chr);
 			return;
 		}
 
-		pBitmap = &pFont->m_FtFace->glyph->bitmap; // ignore_convention
+		pBitmap = &FtFace->glyph->bitmap; // ignore_convention
 
 		// adjust spacing
 		int OutlineThickness = AdjustOutlineThicknessToFontSize(1, pSizeData->m_FontSize);
@@ -515,9 +542,9 @@ class CTextRender : public IEngineTextRender
 			pFontchr->m_ID = Chr;
 			pFontchr->m_Height = Height;
 			pFontchr->m_Width = Width;
-			pFontchr->m_OffsetX = (pFont->m_FtFace->glyph->metrics.horiBearingX >> 6); // ignore_convention
-			pFontchr->m_OffsetY = -((pFont->m_FtFace->glyph->metrics.height >> 6) - (pFont->m_FtFace->glyph->metrics.horiBearingY >> 6));
-			pFontchr->m_AdvanceX = (pFont->m_FtFace->glyph->advance.x>>6); // ignore_convention
+			pFontchr->m_OffsetX = (FtFace->glyph->metrics.horiBearingX >> 6); // ignore_convention
+			pFontchr->m_OffsetY = -((FtFace->glyph->metrics.height >> 6) - (FtFace->glyph->metrics.horiBearingY >> 6));
+			pFontchr->m_AdvanceX = (FtFace->glyph->advance.x>>6); // ignore_convention
 
 			pFontchr->m_aUVs[0] = X;
 			pFontchr->m_aUVs[1] = Y;
@@ -543,12 +570,6 @@ class CTextRender : public IEngineTextRender
 		{
 			return &it->second;
 		}
-	}
-
-	// must only be called from the rendering function as the pFont must be set to the correct size
-	void RenderSetup(CFont *pFont, int size)
-	{
-		FT_Set_Pixel_Sizes(pFont->m_FtFace, 0, size);
 	}
 
 	float Kerning(CFont *pFont, FT_UInt GlyphIndexLeft, FT_UInt GlyphIndexRight)
@@ -672,7 +693,23 @@ public:
 		m_Fonts.push_back(pFont);
 
 		return pFont;
-	};
+	}
+
+	virtual bool LoadFallbackFont(CFont* pFont, const char *pFilename)
+	{
+		CFont::SFontFallBack FallbackFont;
+		str_copy(FallbackFont.m_aFilename, pFilename, sizeof(FallbackFont.m_aFilename));
+
+		if(FT_New_Face(m_FTLibrary, pFilename, 0, &FallbackFont.m_FtFace) == 0)
+		{
+			dbg_msg("textrender", "loaded fallback font from '%s'", pFilename);
+			pFont->m_FtFallbackFonts.emplace_back(std::move(FallbackFont));
+
+			return true;
+		}
+
+		return false;
+	}
 
 	virtual CFont *GetFont(int FontIndex)
 	{
@@ -703,6 +740,12 @@ public:
 				m_Fonts.pop_back();
 
 				FT_Done_Face(pFont->m_FtFace);
+
+				for(CFont::SFontFallBack& FallbackFont : pFont->m_FtFallbackFonts)
+				{
+					FT_Done_Face(FallbackFont.m_FtFace);
+				}
+
 				delete pFont;
 			}
 		}

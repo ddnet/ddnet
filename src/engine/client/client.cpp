@@ -3837,8 +3837,10 @@ void CClient::ToggleWindowVSync()
 void CClient::LoadFont()
 {
 	static CFont *pDefaultFont = 0;
+	static bool LoadedFallbackFont = false;
 	char aFilename[512];
-	const char *pFontFile = "fonts/DejavuWenQuanYiMicroHei.ttf";
+	const char *pFontFile = "fonts/DejaVuSans.ttf";
+	const char *pFallbackFontFile = "fonts/SourceHanSansSC-Regular.otf";
 	IOHANDLE File = Storage()->OpenFile(pFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
 	if(File)
 	{
@@ -3847,10 +3849,22 @@ void CClient::LoadFont()
 		pDefaultFont = pTextRender->GetFont(aFilename);
 		if(pDefaultFont == NULL)
 			pDefaultFont = pTextRender->LoadFont(aFilename);
+
+		File = Storage()->OpenFile(pFallbackFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
+		if(File)
+		{
+			io_close(File);
+			IEngineTextRender *pTextRender = Kernel()->RequestInterface<IEngineTextRender>();
+			LoadedFallbackFont = pTextRender->LoadFallbackFont(pDefaultFont, aFilename);
+		}
+
 		Kernel()->RequestInterface<IEngineTextRender>()->SetDefaultFont(pDefaultFont);
 	}
 	if(!pDefaultFont)
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load font. filename='%s'", pFontFile);
+
+	if(!LoadedFallbackFont)
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load the fallback font. filename='%s'", pFallbackFontFile);
 }
 
 void CClient::Notify(const char *pTitle, const char *pMessage)
