@@ -6,6 +6,7 @@
 #	Learath2		2011-08-21 00:12:50
 #	Learath2		2011-09-07 15:59:20
 #	Learath2		2012-01-01 22:54:29
+#	ardadem			2020-08-20 00:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -71,7 +72,7 @@ Body
 == Gövde
 
 Call vote
-== Oylama başlat
+== Oylama
 
 Change settings
 == Ayarları değiştir
@@ -221,7 +222,7 @@ Has people playing
 == Insan bulunduran
 
 High Detail
-== High Detail
+== Yüksek Detay
 
 Hook
 == Kanca
@@ -251,7 +252,7 @@ Map
 == Harita
 
 Maximum ping:
-== Maximum ping
+== Maksimum ping
 
 Mouse sens.
 == Mouse duyarlılığı
@@ -272,7 +273,7 @@ Mute when not active
 == Aktif değilken sessizleştir
 
 Name
-== İsim
+== Takma ad
 
 Next weapon
 == Sonraki silah
@@ -326,7 +327,7 @@ Player options
 == Oyuncu ayarları
 
 Players
-== Oyuncular
+== Oyuncu
 
 Please balance teams!
 == Takımları dengeleyin!
@@ -371,10 +372,10 @@ Rename demo
 == Demonun adını değiştir
 
 Reset filter
-== Filitreleri varsayılanlara getir
+== Filtreleri sıfırla
 
 Sample rate
-== Sample rate
+== Örnekleme hızı
 
 Score
 == Skor
@@ -398,7 +399,7 @@ Server filter
 == Filtreler
 
 Server info
-== Sunucu bilgisi
+== Hakkında
 
 Server not full
 == Sunucu dolu değil
@@ -556,7 +557,7 @@ Max demos
 == Maksimum Demo Sayısı
 
 News
-== Haberler
+== Haber
 
 Join game
 == Oyuna katıl
@@ -648,55 +649,55 @@ Type:
 == Tür:
 
 Successfully saved the replay!
-== 
+== Başarıyla kaydedildi!
 
 Replay feature is disabled!
 == 
 
 Game paused
-== 
+== Oyun durduruldu
 
 Server best:
-== 
+== Server best:
 
 Personal best:
-== 
+== Personal best:
 
 Learn
-== 
+== Öğren
 
 Browser
-== 
+== Sunucular
 
 Ghost
-== 
+== Hayalet
 
 Loading DDNet Client
-== 
+== DDNet Client yükleniyor
 
 Reconnect in %d sec
-== 
+== %d saniye içinde yeniden bağlanılacak
 
 Render demo
-== 
+== Render demo
 
 Replace video
-== 
+== Replace video
 
 File already exists, do you want to overwrite it?
-== 
+== Dosya halihazırda mevcut, üzerine yazılsın mı?
 
 Are you sure that you want to disconnect?
-== 
+== Ayrılmak istediğinizden emin misiniz?
 
 Disconnect Dummy
-== 
+== Dummy Ayrıl
 
 Are you sure that you want to disconnect your dummy?
-== 
+== Dummy bağlantısını koparmak istediğinizden emin misiniz?
 
 Welcome to DDNet
-== 
+== DDNet e hoşgeldiniz
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == 
@@ -720,136 +721,136 @@ It's recommended that you check the settings to adjust them to your liking befor
 == 
 
 Please enter your nick name below.
-== 
+== Lütfen takma adı giriniz.
 
 Destination file already exist
-== 
+== Dosya hali hazırda mevcut
 
 Video name:
-== 
+== Video ismi:
 
 Show DDNet map finishes in server browser
-== 
+== Tamamlanan DDNet haritalarını sunucu listesinde göster
 
 transmits your player name to info2.ddnet.tw
-== 
+== oyuncu adını info2.ddnet.tw ile paylaşır
 
 Search
-== 
+== Ara
 
 Exclude
-== 
+== Hariç
 
 Player country:
-== 
+== Oyuncu ülkesi
 
 Filter connecting players
-== 
+== Bağlanan oyuncuları sayma
 
 Indicate map finish
-== 
+== Tamamlanmış haritaları göster
 
 Unfinished map
-== 
+== Tamamlanmamış harita
 
 Countries
-== 
+== Ülkeler
 
 Types
-== 
+== Türler
 
 DDNet %s is out!
-== 
+== DDNet %s yayınlandı!
 
 Downloading %s:
-== 
+== İndiriliyor %s:
 
 Update failed! Check log...
-== 
+== Güncelleme sırasında hata oluştu!
 
 DDNet Client updated!
-== 
+== DDNet Client güncellendi!
 
 Update now
-== 
+== Güncelle
 
 Restart
-== 
+== Yeniden başlat
 
 Select a name
-== 
+== Takma ad seç
 
 Please use a different name
-== 
+== Lütfen farklı takma ad kullanın
 
 Remove chat
-== 
+== Sohbeti kaldır
 
 Markers:
-== 
+== İşaretler:
 
 %.2f MiB
-== 
+== %.2f MiB
 
 %.2f KiB
-== 
+== %.2f KiB
 
 Demo
-== 
+== Demo
 
 Markers
-== 
+== İşaretler
 
 Length
-== 
+== Uzunluk
 
 Date
-== 
+== Tarih
 
 Fetch Info
 == 
 
 Render
-== 
+== Render
 
 Connecting dummy
-== 
+== Dummy bağlanıyor
 
 Connect Dummy
-== 
+== Dummy Katıl
 
 Reload
-== 
+== Yenile
 
 Deactivate
-== 
+== Devre dışı bırak
 
 Activate
-== 
+== Etkinleştir
 
 Save
-== 
+== Kaydet
 
 Switch weapon when out of ammo
-== 
+== Mermi kalmadığında silahı değiştir
 
 Reset wanted weapon on death
-== 
+== İstenilen silahı ölünce sıfırla
 
 Show only chat messages from friends
-== 
+== Sadece arkadaşlardan gelen mesajları göster
 
 Show clan above name plates
-== 
+== Takma adların üstünde clanı göster
 
 Clan plates size
 == 
 
 Refresh Rate
-== 
+== Yenileme Hızı
 
 Show console window
-== 
+== Konsol penceresini göster
 
 Automatically take statboard screenshot
 == 
@@ -861,13 +862,13 @@ Max CSVs
 == 
 
 Dummy settings
-== 
+== Dummy ayarları
 
 Vanilla skins only
-== 
+== Sadece vanilla skin
 
 Fat skins (DDFat)
-== 
+== Şişko skinler (DDFat)
 
 Skin prefix
 == 
@@ -876,25 +877,25 @@ Hook collisions
 == 
 
 Pause
-== 
+== Durdur
 
 Kill
-== 
+== İntihar et
 
 Zoom in
-== 
+== Yakınlaştır
 
 Zoom out
-== 
+== Uzaklaştır
 
 Default zoom
-== 
+== Varsayılan zoom
 
 Show others
-== 
+== Diğerlerini göster
 
 Show all
-== 
+== Herkesi göster
 
 Toggle dyncam
 == 
@@ -906,10 +907,10 @@ Toggle ghost
 == 
 
 Dummy copy
-== 
+== Dummy copy
 
 Hammerfly dummy
-== 
+== Hammerfly dummy
 
 Converse
 == 
@@ -918,28 +919,28 @@ Statboard
 == 
 
 Lock team
-== 
+== Takımı kilitle
 
 Show entities
 == 
 
 Show HUD
-== 
+== Arayüzü göster
 
 UI mouse s.
-== 
+== Arayüzde mouse duy.
 
 Borderless window
-== 
+== Kenarsız pencere
 
 may cause delay
-== 
+== gecikmelere sebep olabilir
 
 Screen
-== 
+== Ekran
 
 Use OpenGL 3.3 (experimental)
-== 
+== OpenGL 3.3 Kullan (deneysel)
 
 Preinit VBO (iGPUs only)
 == 
@@ -948,43 +949,43 @@ Multiple texture units (disable for MacOS)
 == 
 
 Use high DPI
-== 
+== Yüksek DPI kullan
 
 Enable game sounds
-== 
+== Oyun sesini etkinleştir
 
 Enable gun sound
-== 
+== Silah sesini etkinleştir
 
 Enable long pain sound (used when shooting in freeze)
 == 
 
 Enable server message sound
-== 
+== Sunucu mesaj sesini etkinleştir
 
 Enable regular chat sound
-== 
+== Genel mesaj sesini etkinleştir
 
 Enable team chat sound
-== 
+== Takım mesajı sesini etkinleştir
 
 Enable highlighted chat sound
-== 
+== Vurgulanmış mesaj sesini etkinleştir
 
 Threaded sound loading
 == 
 
 Map sound volume
-== 
+== Harita ses seviyesi
 
 HUD
-== 
+== Arayüz
 
 DDNet
-== 
+== DDNet
 
 DDNet Client needs to be restarted to complete update!
-== 
+== Güncellemenin tamamlanabilmesi için istemcinin yeniden başlatılması gerek!
 
 Use DDRace Scoreboard
 == 
@@ -993,7 +994,7 @@ Show client IDs in Scoreboard
 == 
 
 Show score
-== 
+== Skoru göster
 
 Show health + ammo
 == 
@@ -1002,91 +1003,91 @@ Show names in chat in team colors
 == 
 
 Show kill messages
-== 
+== Ölüm mesajlarını göster
 
 Show votes window after voting
-== 
+== Oyladıktan sonra oylama ekranını göstermeye devam et
 
 Messages
-== 
+== Mesajlar
 
 System message
-== 
+== Sistem mesajı
 
 Reset
-== 
+== Sıfırla
 
 Highlighted message
-== 
+== Vurgulanmış mesaj
 
 Spectator
-== 
+== İzleyici
 
 Look out!
-== 
+== Dikkat et!
 
 Team message
-== 
+== Takım mesajı
 
 We will win
-== 
+== Kazanacağız
 
 Friend message
-== 
+== Arkadaş mesajı
 
 Friend
-== 
+== Arkadaş
 
 Hi o/
-== 
+== Selam o/
 
 Normal message
-== 
+== Normal mesaj
 
 Hello and welcome
-== 
+== Selam ve hoşgeldin
 
 Client message
-== 
+== İstemci mesajı
 
 Inner color
-== 
+== İç renk
 
 Outline color
-== 
+== Dış renk
 
 Wait before try for
 == 
 
 second
-== 
+== saniye
 
 seconds
-== 
+== saniye
 
 Save the best demo of each race
-== 
+== Her yarış en iyi demoyu kaydet
 
 Default length: %d
-== 
+== Varsayılan uzunluk: %d
 
 Enable replays
 == 
 
 Show ghost
-== 
+== Hayaleti göster
 
 Save ghost
-== 
+== Hayaleti kaydet
 
 Gameplay
-== 
+== Oyun içi
 
 Overlay entities
 == 
 
 Size
-== 
+== Boyut
 
 Show text entities
 == 
@@ -1098,19 +1099,19 @@ Show quads
 == 
 
 AntiPing limit
-== 
+== AntiPing sınırı
 
 AntiPing
-== 
+== AntiPing
 
 AntiPing: predict other players
-== 
+== AntiPing: diğer oyuncuları tahmin et
 
 AntiPing: predict weapons
-== 
+== AntiPing: silahları tahmin et
 
 AntiPing: predict grenade paths
-== 
+== AntiPing: el bombası yolunu tahmin et
 
 Show other players' hook collision lines
 == 
@@ -1122,34 +1123,34 @@ Old mouse mode
 == 
 
 Background (regular)
-== 
+== Arkaplan (regular)
 
 Background (entities)
-== 
+== Arkaplan (entities)
 
 Show tiles layers from BG map
 == 
 
 Try fast HTTP map download first
-== 
+== Önce HTTP üzerinden haritayı hızlı indirmeyi dene
 
 DDNet %s is available:
-== 
+== DDNet %s yayınlandı:
 
 Updating...
-== 
+== Güncelleniyor...
 
 No updates available
-== 
+== Güncelleme mevcut değil
 
 Check now
-== 
+== Kontrol et
 
 New random timeout code
-== 
+== Yeni rastgele zaman aşımı kodu
 
 Time
-== 
+== Zaman
 
 Manual %3d:%02d  
 == 
@@ -1164,19 +1165,19 @@ Replay %3d:%02d
 == 
 
 Follow
-== 
+== Takip et
 
 Frags
 == 
 
 Deaths
-== 
+== Ölümler
 
 Suicides
-== 
+== İntiharlar
 
 Ratio
-== 
+== Oran
 
 Net
 == 
