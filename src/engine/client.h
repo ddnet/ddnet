@@ -176,6 +176,7 @@ public:
 	}
 
 	//
+	virtual const char *PlayerName() = 0;
 	virtual const char *ErrorString() = 0;
 	virtual const char *LatestVersion() = 0;
 	virtual bool ConnectionProblems() = 0;

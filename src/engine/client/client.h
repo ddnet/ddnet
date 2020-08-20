@@ -322,6 +322,7 @@ public:
 	virtual void Restart();
 	virtual void Quit();
 
+	virtual const char *PlayerName();
 	virtual const char *ErrorString();
 
 	const char *LoadMap(const char *pName, const char *pFilename, SHA256_DIGEST *pWantedSha256, unsigned WantedCrc);

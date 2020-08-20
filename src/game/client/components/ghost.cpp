@@ -375,7 +375,7 @@ void CGhost::StartRecord(int Tick)
 	m_CurGhost.m_StartTick = Tick;
 
 	const CGameClient::CClientData *pData = &m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID];
-	str_copy(m_CurGhost.m_aPlayer, g_Config.m_PlayerName, sizeof(m_CurGhost.m_aPlayer));
+	str_copy(m_CurGhost.m_aPlayer, Client()->PlayerName(), sizeof(m_CurGhost.m_aPlayer));
 	GetGhostSkin(&m_CurGhost.m_Skin, pData->m_aSkinName, pData->m_UseCustomColor, pData->m_ColorBody, pData->m_ColorFeet);
 	InitRenderInfos(&m_CurGhost);
 }

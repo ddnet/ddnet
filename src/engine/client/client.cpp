@@ -1063,6 +1063,19 @@ void CClient::Quit()
 	SetState(IClient::STATE_QUITING);
 }
 
+const char *CClient::PlayerName()
+{
+	if(g_Config.m_PlayerName[0])
+	{
+		return g_Config.m_PlayerName;
+	}
+	if(g_Config.m_SteamName[0])
+	{
+		return g_Config.m_SteamName;
+	}
+	return "nameless tee";
+}
+
 const char *CClient::ErrorString()
 {
 	return m_NetClient[CLIENT_MAIN].ErrorString();
@@ -2950,6 +2963,11 @@ void CClient::Run()
 	// load data
 	if(!LoadData())
 		return;
+
+	if(Steam()->GetPlayerName())
+	{
+		str_copy(g_Config.m_SteamName, Steam()->GetPlayerName(), sizeof(g_Config.m_SteamName));
+	}
 
 	GameClient()->OnInit();
 

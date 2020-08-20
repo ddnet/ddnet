@@ -4,15 +4,14 @@
 
 class CSteam : public ISteam
 {
-	char aPlayerName[16];
+	char m_aPlayerName[16];
 
 public:
 	CSteam()
 	{
 		ISteamFriends *pSteamFriends = SteamAPI_SteamFriends_v017();
-		str_copy(aPlayerName, SteamAPI_ISteamFriends_GetPersonaName(pSteamFriends), sizeof(aPlayerName));
+		str_copy(m_aPlayerName, SteamAPI_ISteamFriends_GetPersonaName(pSteamFriends), sizeof(m_aPlayerName));
 	}
-
 	~CSteam()
 	{
 		SteamAPI_Shutdown();
@@ -21,7 +20,7 @@ public:
 
 	const char *GetPlayerName()
 	{
-		return aPlayerName;
+		return m_aPlayerName;
 	}
 };
 
