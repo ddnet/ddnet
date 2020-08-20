@@ -860,6 +860,12 @@ Vote failed because of veto. Find an empty server instead
 Vote failed
 == 
 
+entered and joined the game
+== 
+
+entered and joined the spectators
+== 
+
 You can see other players. To disable this use DDNet client and type /showothers
 == 
 

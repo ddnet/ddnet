@@ -696,7 +696,34 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		if(ClientID < 0) // server or client message
 		{
 			str_copy(m_aLines[m_CurrentLine].m_aName, "*** ", sizeof(m_aLines[m_CurrentLine].m_aName));
-			str_copy(m_aLines[m_CurrentLine].m_aText, ClientID == -1 ? Localize(pLine) : pLine, sizeof(m_aLines[m_CurrentLine].m_aText));
+
+			const auto* pStrings = g_Localization.GetServerStrings();
+			char aBuf[512];
+			aBuf[0] = '\0';
+			int Pos = std::numeric_limits<int>::max();
+			for(int i = 0; i < pStrings->size(); ++i)
+			{
+				const char *pStr = str_find(pLine, (*pStrings)[i].m_Original);
+				if(pStr && pStr - pLine < Pos)
+				{
+					Pos = pStr - pLine;
+					if(pStr > pLine)
+						str_copy(aBuf, pLine, minimum((int)sizeof(aBuf), Pos + 1));
+					str_append(aBuf, (*pStrings)[i].m_Replacement, sizeof(aBuf));
+					str_append(aBuf, pStr + str_length((*pStrings)[i].m_Original), sizeof(aBuf));
+				}
+			}
+
+			str_copy(m_aLines[m_CurrentLine].m_aText, aBuf[0] ? aBuf : pLine, sizeof(m_aLines[m_CurrentLine].m_aText));
+
+			if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
+				StoreSave(m_aLines[m_CurrentLine].m_aText);
+		}
+		else if(ClientID == -2) // client message
+		{
+			str_copy(m_aLines[m_CurrentLine].m_aName, "*** ", sizeof(m_aLines[m_CurrentLine].m_aName));
+
+			str_copy(m_aLines[m_CurrentLine].m_aText, pLine, sizeof(m_aLines[m_CurrentLine].m_aText));
 
 			if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 				StoreSave(m_aLines[m_CurrentLine].m_aText);

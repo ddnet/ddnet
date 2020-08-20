@@ -1196,7 +1196,7 @@ void CGameContext::OnClientEnter(int ClientID)
 		}
 
 		char aBuf[512];
-		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientID), m_pController->GetTeamName(m_apPlayers[ClientID]->GetTeam()));
+		str_format(aBuf, sizeof(aBuf), "'%s' %s", m_apPlayers[ClientID]->GetTeam() == 0 ? Localize("entered and joined the game") : Localize("entered and joined the spectators"), Server()->ClientName(ClientID));
 		SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1, CHAT_SIX);
 
 		SendChatTarget(ClientID, "DDraceNetwork Mod. Version: " GAME_VERSION);

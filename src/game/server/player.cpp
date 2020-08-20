@@ -627,7 +627,7 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 	DoChatMsg = false;
 	if(DoChatMsg)
 	{
-		str_format(aBuf, sizeof(aBuf), "'%s' %s", Server()->ClientName(m_ClientID), Team == 0 ? Localize("joined the game") : Localize("joined the spectators"));
+		str_format(aBuf, sizeof(aBuf), "'%s' %s", Server()->ClientName(m_ClientID), Team == 0 ? Localize("moved to the the game") : Localize("moved to spectators"));
 		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 	}
 

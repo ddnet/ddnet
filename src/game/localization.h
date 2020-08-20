@@ -20,7 +20,15 @@ class CLocalizationDatabase
 		bool operator ==(const CString &Other) const { return m_Hash == Other.m_Hash; }
 	};
 
+	class CServerString
+	{
+	public:
+		string m_Original;
+		string m_Replacement;
+	};
+
 	sorted_array<CString> m_Strings;
+	array<CServerString> m_ServerStrings;
 	int m_VersionCounter;
 	int m_CurrentVersion;
 
@@ -33,6 +41,9 @@ public:
 
 	void AddString(const char *pOrgStr, const char *pNewStr);
 	const char *FindString(unsigned Hash);
+
+	void AddServerString(const char *pOrgStr, const char *pNewStr);
+	const array<CServerString> *GetServerStrings() { return &m_ServerStrings; };
 };
 
 extern CLocalizationDatabase g_Localization;

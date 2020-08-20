@@ -50,6 +50,7 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 	if(pFilename[0] == 0)
 	{
 		m_Strings.clear();
+		m_ServerStrings.clear();
 		m_CurrentVersion = 0;
 		return true;
 	}
@@ -62,6 +63,7 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 	str_format(aBuf, sizeof(aBuf), "loaded '%s'", pFilename);
 	pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", aBuf);
 	m_Strings.clear();
+	m_ServerStrings.clear();
 
 	char aOrigin[512];
 	CLineReader LineReader;
@@ -86,15 +88,17 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 			break;
 		}
 
-		if(pReplacement[0] != '=' || pReplacement[1] != '=' || pReplacement[2] != ' ')
+		if(((pReplacement[0] != '=' || pReplacement[1] != '=') && (pReplacement[0] != '~' || pReplacement[1] != '~')) || pReplacement[2] != ' ')
 		{
 			str_format(aBuf, sizeof(aBuf), "malform replacement line (%d) for '%s'", Line, aOrigin);
 			pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", aBuf);
 			continue;
 		}
 
-		pReplacement += 3;
-		AddString(aOrigin, pReplacement);
+		if(pReplacement[0] == '=')
+			AddString(aOrigin, pReplacement + 3);
+		else
+			AddServerString(aOrigin, pReplacement + 3);
 	}
 	io_close(IoHandle);
 
@@ -110,6 +114,14 @@ const char *CLocalizationDatabase::FindString(unsigned Hash)
 	if(r.empty())
 		return 0;
 	return r.front().m_Replacement;
+}
+
+void CLocalizationDatabase::AddServerString(const char *pOrgStr, const char *pNewStr)
+{
+	CServerString s;
+	s.m_Original = pOrgStr;
+	s.m_Replacement = *pNewStr ? pNewStr : pOrgStr;
+	m_ServerStrings.add(s);
 }
 
 CLocalizationDatabase g_Localization;
