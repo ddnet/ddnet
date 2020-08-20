@@ -3,6 +3,7 @@
 #	SiuFu
 #modified by:
 # 2020.8.19 TsFreddie
+# 2020.8.20 Dan_cao
 ##### /authors #####
 
 ##### translated strings #####
@@ -143,7 +144,7 @@ Draw!
 == 平局！
 
 Dynamic Camera
-== 動態鏡頭
+== 動態視距
 
 Emoticon
 == 表情
@@ -290,7 +291,7 @@ Enable team chat sound
 == 啟用隊伍聊天提示音
 
 Enable highlighted chat sound
-== 啟用被@時的高亮提示音
+== 啟用被提及時的提示音
 
 Threaded sound loading
 == 啟用多執行緒音訊載入
@@ -347,7 +348,7 @@ Player
 == 玩家
 
 HUD
-== 詳細
+== HUD
 
 Player country:
 == 玩家國家/地區：
@@ -443,7 +444,7 @@ Show friends only
 == 只顯示好友
 
 Show ingame HUD
-== 顯示遊戲介面
+== 顯示HUD
 
 Show name plates
 == 顯示暱稱
@@ -740,7 +741,7 @@ System message
 == 系統訊息
 
 Highlighted message
-== 高亮顯示訊息
+== 被提及訊息
 
 Look out!
 == 小心!
@@ -866,7 +867,7 @@ Fat skins (DDFat)
 == 胖胖的外觀 (DDFat)
 
 Ratio
-== F/D比率
+== F/D
 
 ##### Ratio的演算法是擊殺除以死亡次數 #####
 
@@ -898,7 +899,7 @@ Deaths
 == 死亡數
 
 Please use a different name
-== 請使用另一個檔名
+== 請換一個不同的檔名
 
 Wait before try for
 == 請等待
@@ -922,7 +923,7 @@ Types
 == 模式
 
 Remove chat
-== 刪除聊天記錄
+== 刪除訊息記錄
 
 Frags
 == 擊殺數
@@ -1046,10 +1047,10 @@ Manual %3d:%02d
 == %d 條新提示
 
 Toggle dummy
-== 控制分身
+== 切換分身
 
 Replay feature is disabled!
-== 短時回放功能已被禁用！
+== 短時回放功能未啟用！
 
 Are you sure that you want to disconnect your dummy?
 == 確定要斷連分身嗎？
@@ -1070,7 +1071,7 @@ Markers:
 == 標記
 
 Zoom in
-== 鏡頭放大
+== 視距放大
 
 1 new mention
 == 1 條新提示
@@ -1115,7 +1116,7 @@ Disconnect Dummy
 == 中斷分身的連線
 
 Show HUD
-== 遊戲介面開關
+== 遊戲HUD開關
 
 Hammerfly dummy
 == 分身Hammerfly開關
@@ -1130,7 +1131,7 @@ Kill
 == 自殺
 
 Zoom out
-== 鏡頭縮小
+== 視距縮小
 
 Show text entities
 == 顯示文字實體

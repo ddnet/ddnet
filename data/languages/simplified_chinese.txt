@@ -9,6 +9,7 @@
 # 2020.6.25 Night_L
 # 2020.8.14 Night_L
 # 2020.8.19 TsFreddie
+# 2020.8.20 Dan_cao
 ##### /authors #####
 
 ##### translated strings #####
@@ -149,7 +150,7 @@ Draw!
 == 平局！
 
 Dynamic Camera
-== 动态镜头
+== 动态视野
 
 Emoticon
 == 表情
@@ -296,7 +297,7 @@ Enable team chat sound
 == 启用队伍聊天提示音
 
 Enable highlighted chat sound
-== 启用被@时的高亮提示音
+== 启用被提及时的提示音
 
 Threaded sound loading
 == 启用多线程音频加载
@@ -353,7 +354,7 @@ Player
 == 玩家
 
 HUD
-== 详细
+== HUD
 
 Player country:
 == 玩家国家/地区：
@@ -449,7 +450,7 @@ Show friends only
 == 只显示好友
 
 Show ingame HUD
-== 显示游戏界面
+== 显示HUD
 
 Show name plates
 == 显示昵称
@@ -746,7 +747,7 @@ System message
 == 系统消息
 
 Highlighted message
-== 高亮显示消息
+== 被提及消息
 
 Look out!
 == 小心!
@@ -872,7 +873,7 @@ Fat skins (DDFat)
 == 胖胖的皮肤 (DDFat)
 
 Ratio
-== K/D比率
+== K/D
 
 ##### Ratio的算法是击杀除以死亡次数 #####
 
@@ -904,7 +905,7 @@ Deaths
 == 死亡数
 
 Please use a different name
-== 请使用另一个文件名
+== 请换一个不同的文件名
 
 Wait before try for
 == 请等待
@@ -928,7 +929,7 @@ Types
 == 模式
 
 Remove chat
-== 删除聊天记录
+== 删除消息记录
 
 Frags
 == 击杀数
@@ -1052,10 +1053,10 @@ Manual %3d:%02d
 == %d 条新提示
 
 Toggle dummy
-== 控制分身
+== 切换分身
 
 Replay feature is disabled!
-== 短时回放功能已被禁用！
+== 短时回放功能未启用！
 
 Are you sure that you want to disconnect your dummy?
 == 确定要断连分身吗？
@@ -1076,7 +1077,7 @@ Markers:
 == 书签
 
 Zoom in
-== 镜头放大
+== 视野放大
 
 1 new mention
 == 1 条新提示
@@ -1121,7 +1122,7 @@ Disconnect Dummy
 == 中断分身的连接
 
 Show HUD
-== 游戏界面开关
+== 游戏HUD开关
 
 Hammerfly dummy
 == 分身Hammerfly开关
@@ -1136,7 +1137,7 @@ Kill
 == 自杀
 
 Zoom out
-== 镜头缩小
+== 视野缩小
 
 Show text entities
 == 显示文本实体
