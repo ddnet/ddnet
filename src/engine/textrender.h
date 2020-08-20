@@ -47,7 +47,6 @@ public:
 	float m_X, m_Y;
 
 	CFont *m_pFont;
-	CFont *m_pFallbackFont;
 	float m_FontSize;
 	float m_AlignedFontSize;
 };
@@ -78,11 +77,12 @@ public:
 	virtual void SetCursor(CTextCursor *pCursor, float x, float y, float FontSize, int Flags) = 0;
 
 	virtual CFont *LoadFont(const char *pFilename) = 0;
+	virtual bool LoadFallbackFont(CFont* pFont, const char *pFilename) = 0;
 	virtual CFont *GetFont(int FontIndex) = 0;
 	virtual CFont *GetFont(const char *pFilename) = 0;
 	virtual void DestroyFont(CFont *pFont) = 0;
 
-	virtual void SetDefaultFont(CFont *pFont, CFont *pFallbackFont) = 0;
+	virtual void SetDefaultFont(CFont *pFont) = 0;
 	virtual void SetCurFont(CFont *pFont) = 0;
 
 	virtual void SetRenderFlags(unsigned int Flags) = 0;

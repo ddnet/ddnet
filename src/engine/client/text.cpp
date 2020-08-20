@@ -100,6 +100,15 @@ public:
 
 	char m_aFilename[512];
 	FT_Face m_FtFace;
+
+	struct SFontFallBack
+	{
+		char m_aFilename[512];
+		FT_Face m_FtFace;
+	};
+
+	std::vector<SFontFallBack> m_FtFallbackFonts;
+
 	CFontSizeData m_aFontSizes[NUM_FONT_SIZES];
 
 	IGraphics::CTextureHandle m_aTextures[2];
@@ -127,7 +136,6 @@ struct STextContainer
 	STextContainer() { Reset(); }
 
 	CFont* m_pFont;
-	CFont* m_pFallbackFont;
 	int m_FontSize;
 	STextString m_StringInfo;
 
@@ -152,7 +160,6 @@ struct STextContainer
 	void Reset()
 	{
 		m_pFont = NULL;
-		m_pFallbackFont = NULL;
 		m_FontSize = 0;
 
 		m_StringInfo.m_QuadBufferObjectIndex = m_StringInfo.m_QuadBufferContainerIndex = m_StringInfo.m_SelectionQuadContainerIndex = -1;
@@ -245,7 +252,6 @@ class CTextRender : public IEngineTextRender
 	ColorRGBA m_Color;
 	ColorRGBA m_OutlineColor;
 	CFont *m_pDefaultFont;
-	CFont *m_pFallbackFont;
 
 	FT_Library m_FTLibrary;
 
@@ -428,7 +434,7 @@ class CTextRender : public IEngineTextRender
 			return false;
 	}
 
-	void RenderGlyph(CFont *pInitialFont, CFont *pFallbackFont, CFontSizeData *pSizeData, int Chr)
+	void RenderGlyph(CFont *pFont, CFontSizeData *pSizeData, int Chr)
 	{
 		FT_Bitmap *pBitmap;
 
@@ -436,29 +442,33 @@ class CTextRender : public IEngineTextRender
 		int y = 1;
 		unsigned int px, py;
 
-		CFont *pFont = pInitialFont;
+		FT_Face FtFace = pFont->m_FtFace;
 
-		FT_Set_Pixel_Sizes(pFont->m_FtFace, 0, pSizeData->m_FontSize);
+		FT_Set_Pixel_Sizes(FtFace, 0, pSizeData->m_FontSize);
 
 		FT_UInt GlyphIndex = 0;
-		if(pFont->m_FtFace->charmap)
-			GlyphIndex = FT_Get_Char_Index(pFont->m_FtFace, (FT_ULong)Chr);
+		if(FtFace->charmap)
+			GlyphIndex = FT_Get_Char_Index(FtFace, (FT_ULong)Chr);
 
 		if(GlyphIndex == 0)
 		{
-			if(pFallbackFont)
+			for(CFont::SFontFallBack& FallbackFont : pFont->m_FtFallbackFonts)
 			{
-				pFont = pFallbackFont;
-				FT_Set_Pixel_Sizes(pFont->m_FtFace, 0, pSizeData->m_FontSize);
+				FtFace = FallbackFont.m_FtFace;
+				FT_Set_Pixel_Sizes(FtFace, 0, pSizeData->m_FontSize);
 
-				if(pFont->m_FtFace->charmap)
-					GlyphIndex = FT_Get_Char_Index(pFont->m_FtFace, (FT_ULong)Chr);
+				if(FtFace->charmap)
+					GlyphIndex = FT_Get_Char_Index(FtFace, (FT_ULong)Chr);
+
+				if(GlyphIndex != 0)
+					break;
 			}
 
 			if(GlyphIndex == 0)
 			{
 				const int ReplacementChr = 0x25a1; // White square to indicate missing glyph
-				GlyphIndex = FT_Get_Char_Index(pFont->m_FtFace, (FT_ULong)ReplacementChr);
+				FtFace = pFont->m_FtFace;
+				GlyphIndex = FT_Get_Char_Index(FtFace, (FT_ULong)ReplacementChr);
 
 				if(GlyphIndex == 0)
 				{
@@ -468,13 +478,13 @@ class CTextRender : public IEngineTextRender
 			}
 		}
 
-		if(FT_Load_Glyph(pFont->m_FtFace, GlyphIndex, FT_LOAD_RENDER|FT_LOAD_NO_BITMAP))
+		if(FT_Load_Glyph(FtFace, GlyphIndex, FT_LOAD_RENDER|FT_LOAD_NO_BITMAP))
 		{
 			dbg_msg("pFont", "error loading glyph %d", Chr);
 			return;
 		}
 
-		pBitmap = &pFont->m_FtFace->glyph->bitmap; // ignore_convention
+		pBitmap = &FtFace->glyph->bitmap; // ignore_convention
 
 		// adjust spacing
 		int OutlineThickness = AdjustOutlineThicknessToFontSize(1, pSizeData->m_FontSize);
@@ -494,20 +504,20 @@ class CTextRender : public IEngineTextRender
 		// upload the glyph
 		int X = 0;
 		int Y = 0;
-		while(!GetCharacterSpace(pInitialFont, 0, (int)Width, (int)Height, X, Y))
+		while(!GetCharacterSpace(pFont, 0, (int)Width, (int)Height, X, Y))
 		{
-			IncreaseFontTexture(pInitialFont, 0);
+			IncreaseFontTexture(pFont, 0);
 		}
-		UploadGlyph(pInitialFont, 0, X, Y, (int)Width, (int)Height, ms_aGlyphData);
+		UploadGlyph(pFont, 0, X, Y, (int)Width, (int)Height, ms_aGlyphData);
 
 		if(OutlineThickness == 1)
 		{
 			Grow(ms_aGlyphData, ms_aGlyphDataOutlined, Width, Height);
-			while(!GetCharacterSpace(pInitialFont, 1, (int)Width, (int)Height, X, Y))
+			while(!GetCharacterSpace(pFont, 1, (int)Width, (int)Height, X, Y))
 			{
-				IncreaseFontTexture(pInitialFont, 1);
+				IncreaseFontTexture(pFont, 1);
 			}
-			UploadGlyph(pInitialFont, 1, X, Y, (int)Width, (int)Height, ms_aGlyphDataOutlined);
+			UploadGlyph(pFont, 1, X, Y, (int)Width, (int)Height, ms_aGlyphDataOutlined);
 		}
 		else
 		{
@@ -516,11 +526,11 @@ class CTextRender : public IEngineTextRender
 				Grow(ms_aGlyphData, ms_aGlyphDataOutlined, Width, Height);
 				Grow(ms_aGlyphDataOutlined, ms_aGlyphData, Width, Height);
 			}
-			while(!GetCharacterSpace(pInitialFont, 1, (int)Width, (int)Height, X, Y))
+			while(!GetCharacterSpace(pFont, 1, (int)Width, (int)Height, X, Y))
 			{
-				IncreaseFontTexture(pInitialFont, 1);
+				IncreaseFontTexture(pFont, 1);
 			}
-			UploadGlyph(pInitialFont, 1, X, Y, (int)Width, (int)Height, ms_aGlyphData);
+			UploadGlyph(pFont, 1, X, Y, (int)Width, (int)Height, ms_aGlyphData);
 		}
 
 		// set char info
@@ -532,9 +542,9 @@ class CTextRender : public IEngineTextRender
 			pFontchr->m_ID = Chr;
 			pFontchr->m_Height = Height;
 			pFontchr->m_Width = Width;
-			pFontchr->m_OffsetX = (pFont->m_FtFace->glyph->metrics.horiBearingX >> 6); // ignore_convention
-			pFontchr->m_OffsetY = -((pFont->m_FtFace->glyph->metrics.height >> 6) - (pFont->m_FtFace->glyph->metrics.horiBearingY >> 6));
-			pFontchr->m_AdvanceX = (pFont->m_FtFace->glyph->advance.x>>6); // ignore_convention
+			pFontchr->m_OffsetX = (FtFace->glyph->metrics.horiBearingX >> 6); // ignore_convention
+			pFontchr->m_OffsetY = -((FtFace->glyph->metrics.height >> 6) - (FtFace->glyph->metrics.horiBearingY >> 6));
+			pFontchr->m_AdvanceX = (FtFace->glyph->advance.x>>6); // ignore_convention
 
 			pFontchr->m_aUVs[0] = X;
 			pFontchr->m_aUVs[1] = Y;
@@ -544,7 +554,7 @@ class CTextRender : public IEngineTextRender
 		}
 	}
 
-	SFontSizeChar *GetChar(CFont *pFont, CFont *pFallbackFont, CFontSizeData *pSizeData, int Chr)
+	SFontSizeChar *GetChar(CFont *pFont, CFontSizeData *pSizeData, int Chr)
 	{
 		std::map<int, SFontSizeChar>::iterator it = pSizeData->m_Chars.find(Chr);
 		if(it == pSizeData->m_Chars.end())
@@ -552,7 +562,7 @@ class CTextRender : public IEngineTextRender
 			// render and add character
 			SFontSizeChar& FontSizeChr = pSizeData->m_Chars[Chr];
 
-			RenderGlyph(pFont, pFallbackFont, pSizeData, Chr);
+			RenderGlyph(pFont, pSizeData, Chr);
 
 			return &FontSizeChr;
 		}
@@ -560,12 +570,6 @@ class CTextRender : public IEngineTextRender
 		{
 			return &it->second;
 		}
-	}
-
-	// must only be called from the rendering function as the pFont must be set to the correct size
-	void RenderSetup(CFont *pFont, int size)
-	{
-		FT_Set_Pixel_Sizes(pFont->m_FtFace, 0, size);
 	}
 
 	float Kerning(CFont *pFont, FT_UInt GlyphIndexLeft, FT_UInt GlyphIndexRight)
@@ -586,7 +590,6 @@ public:
 
 		m_pCurFont = 0;
 		m_pDefaultFont = 0;
-		m_pFallbackFont = 0;
 		m_FTLibrary = 0;
 
 		// GL_LUMINANCE can be good for debugging
@@ -690,7 +693,23 @@ public:
 		m_Fonts.push_back(pFont);
 
 		return pFont;
-	};
+	}
+
+	virtual bool LoadFallbackFont(CFont* pFont, const char *pFilename)
+	{
+		CFont::SFontFallBack FallbackFont;
+		str_copy(FallbackFont.m_aFilename, pFilename, sizeof(FallbackFont.m_aFilename));
+
+		if(FT_New_Face(m_FTLibrary, pFilename, 0, &FallbackFont.m_FtFace) == 0)
+		{
+			dbg_msg("textrender", "loaded fallback font from '%s'", pFilename);
+			pFont->m_FtFallbackFonts.emplace_back(std::move(FallbackFont));
+
+			return true;
+		}
+
+		return false;
+	}
 
 	virtual CFont *GetFont(int FontIndex)
 	{
@@ -721,16 +740,21 @@ public:
 				m_Fonts.pop_back();
 
 				FT_Done_Face(pFont->m_FtFace);
+
+				for(CFont::SFontFallBack& FallbackFont : pFont->m_FtFallbackFonts)
+				{
+					FT_Done_Face(FallbackFont.m_FtFace);
+				}
+
 				delete pFont;
 			}
 		}
 	}
 
-	virtual void SetDefaultFont(CFont *pFont, CFont *pFallbackFont)
+	virtual void SetDefaultFont(CFont *pFont)
 	{
-		dbg_msg("textrender", "default pFont set %p %p", pFont, pFallbackFont);
+		dbg_msg("textrender", "default pFont set %p", pFont);
 		m_pDefaultFont = pFont;
-		m_pFallbackFont = pFallbackFont;
 		m_pCurFont = m_pDefaultFont;
 	}
 
@@ -810,7 +834,6 @@ public:
 			return;
 
 		CFont *pFont = pCursor->m_pFont;
-		CFont *pFallbackFont = pCursor->m_pFallbackFont;
 		CFontSizeData *pSizeData = NULL;
 
 		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
@@ -847,9 +870,6 @@ public:
 
 		if(!pFont)
 			return;
-
-		if(!pFallbackFont)
-			pFallbackFont = m_pFallbackFont;
 
 		pSizeData = pFont->GetFontSize(ActualSize);
 
@@ -966,7 +986,7 @@ public:
 					continue;
 				}
 
-				SFontSizeChar *pChr = GetChar(pFont, pFallbackFont, pSizeData, Character);
+				SFontSizeChar *pChr = GetChar(pFont, pSizeData, Character);
 				if(pChr)
 				{
 					bool ApplyBearingX = !(((m_RenderFlags&TEXT_RENDER_FLAG_NO_X_BEARING) != 0) || (CharacterCounter == 0 && (m_RenderFlags&TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING) != 0));
@@ -1061,7 +1081,6 @@ public:
 	virtual int CreateTextContainer(CTextCursor *pCursor, const char *pText)
 	{
 		CFont *pFont = pCursor->m_pFont;
-		CFont *pFallbackFont = pCursor->m_pFallbackFont;
 
 		// fetch pFont data
 		if(!pFont)
@@ -1070,13 +1089,9 @@ public:
 		if(!pFont)
 			return -1;
 
-		if(!pFallbackFont)
-			pFallbackFont = m_pFallbackFont;
-
 		int ContainerIndex = GetFreeTextContainerIndex();
 		STextContainer& TextContainer = GetTextContainer(ContainerIndex);
 		TextContainer.m_pFont = pFont;
-		TextContainer.m_pFallbackFont = pFallbackFont;
 
 		CFontSizeData *pSizeData = NULL;
 
@@ -1276,7 +1291,7 @@ public:
 					continue;
 				}
 
-				SFontSizeChar *pChr = GetChar(TextContainer.m_pFont, TextContainer.m_pFallbackFont, pSizeData, Character);
+				SFontSizeChar *pChr = GetChar(TextContainer.m_pFont, pSizeData, Character);
 				if(pChr)
 				{
 					bool ApplyBearingX = !(((RenderFlags&TEXT_RENDER_FLAG_NO_X_BEARING) != 0) || (CharacterCounter == 0 && (RenderFlags&TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING) != 0));
@@ -1496,7 +1511,6 @@ public:
 				FakeCursor.m_StartY = TextContainer.m_StartY;
 				FakeCursor.m_LineWidth = TextContainer.m_LineWidth;
 				FakeCursor.m_pFont = TextContainer.m_pFont;
-				FakeCursor.m_pFallbackFont = TextContainer.m_pFallbackFont;
 
 				int Wlen = minimum(WordLength((char *)pCurrent), (int)(pEnd - pCurrent));
 				CTextCursor Compare = FakeCursor;
@@ -1559,7 +1573,7 @@ public:
 					continue;
 				}
 
-				SFontSizeChar *pChr = GetChar(TextContainer.m_pFont, TextContainer.m_pFallbackFont, pSizeData, Character);
+				SFontSizeChar *pChr = GetChar(TextContainer.m_pFont, pSizeData, Character);
 				if(pChr)
 				{
 					bool ApplyBearingX = !(((RenderFlags&TEXT_RENDER_FLAG_NO_X_BEARING) != 0) || (CharacterCounter == 0 && (RenderFlags&TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING) != 0));
