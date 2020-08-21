@@ -7,6 +7,7 @@
 #	Learath2		2011-09-07 15:59:20
 #	Learath2		2012-01-01 22:54:29
 #	ardadem			2020-08-20 00:00:00
+#	ardadem			2020-08-22 00:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -81,7 +82,7 @@ Chat
 == Sohbet
 
 Clan
-== Clan
+== Klan
 
 Client
 == İstemci
@@ -183,7 +184,7 @@ Force vote
 == Oylamayı zorla
 
 Free-View
-== Serbest Görüntü
+== Serbest Bakış
 
 Friends
 == Arkadaşlar
@@ -219,7 +220,7 @@ Hammer
 == Çekiç
 
 Has people playing
-== Insan bulunduran
+== Oyuncu bulunduran
 
 High Detail
 == Yüksek Detay
@@ -342,7 +343,7 @@ Quit
 == Çıkış
 
 Reason:
-== Neden :
+== Neden:
 
 Red team
 == Kırmızı takım
@@ -387,10 +388,10 @@ Scoreboard
 == Skor tahtası
 
 Screenshot
-== Ekran alıntısı
+== Ekran görüntüsü
 
 Server address:
-== Sunucu adresi :
+== Sunucu adresi:
 
 Server details
 == Sunucucu detayları
@@ -414,7 +415,7 @@ Show friends only
 == Sadece arkadaşları göster
 
 Show ingame HUD
-== Oyun içi HUD ı göster
+== Oyun içi arayüzünü göster
 
 Show name plates
 == Oyuncu isimlerini göster
@@ -423,7 +424,7 @@ Show only supported
 == Desteklenmeyen çözünürlükleri gizle
 
 Skins
-== Skins
+== Skinler
 
 Sound
 == Ses
@@ -462,7 +463,7 @@ Sudden Death
 == Ani ölüm
 
 Switch weapon on pickup
-== Silah alındığıda yeni silaha geç
+== Silah alındığıda yeni silahı kullan
 
 Team
 == Takım
@@ -486,7 +487,7 @@ Time limit
 == Süre limiti
 
 Time limit: %d min
-== Süre limiti: %d min
+== Süre limiti: %d dakika
 
 Try again
 == Tekrar dene
@@ -516,13 +517,13 @@ Vote command:
 == Komut:
 
 Vote description:
-== Açıklama :
+== Açıklama:
 
 Vote no
-== Olumsuz oy ver
+== Olumsuz
 
 Vote yes
-== Olumlu oy ver
+== Olumlu
 
 Voting
 == Oylama
@@ -538,8 +539,6 @@ Yes
 
 You must restart the game for all settings to take effect.
 == Bütün ayarların aktif olması için oyunu yeniden başlatmalısınız.
-
-##### needs translation #####
 
 New name:
 == Yeni isim :
@@ -569,13 +568,13 @@ FSAA samples
 == %d/%d sunucu, %d oyuncu
 
 Sound volume
-== Ses yüksekliği
+== Ses seviyesi
 
 Created:
-== Yaratıldı:
+== Oluşturuldu:
 
 Max Screenshots
-== Maksimum Ekran Alıntısı Sayısı
+== Maksimum Ekran Görüntüsü Sayısı
 
 Length:
 == Uzunluk:
@@ -616,7 +615,7 @@ Display Modes
 == Çözünürlük
 
 Version:
-== Versyon :
+== Versiyon :
 
 Round
 == Raund
@@ -652,16 +651,16 @@ Successfully saved the replay!
 == Başarıyla kaydedildi!
 
 Replay feature is disabled!
-== 
+== Yeniden oynatma özelliği devre dışı!
 
 Game paused
 == Oyun durduruldu
 
 Server best:
-== Server best:
+== Sunucu en iyi:
 
 Personal best:
-== Personal best:
+== Bireysel en iyi:
 
 Learn
 == Öğren
@@ -682,7 +681,7 @@ Render demo
 == Render demo
 
 Replace video
-== Replace video
+== Video üzerine yaz
 
 File already exists, do you want to overwrite it?
 == Dosya halihazırda mevcut, üzerine yazılsın mı?
@@ -700,28 +699,28 @@ Welcome to DDNet
 == DDNet e hoşgeldiniz
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== 
+== DDRaceNetwork bitiş çizgisine en kısa sürede ulaşmayı amaçlayan oyunculardan oluşan, çevrimiçi bir takım oyunudur. Çaylak olarak ilk önce kolay haritalardan yani Novice sunuculardan oynamaya başlamanı öneririz. Herhangi bir sunucu seçmeden önce sana yakın olan sunucuyu seçmek için ping'i dikkate al.
 
 The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== 
+== Haritalar, içindeyken haraket edemediğin freeze denilen yapılar içerir. Bu aşamaları geçmen için takım çalışması lazım.
 
 The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== 
+== Mouse tekeri silahını değiştirir. Çekiç (sol tık) kullanarak diğer oyunculara vurabilir, onları uyandırıp haraket etmelerini sağlayabilirsin.
 
 Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== 
+== Kanca (sağ tık) ile sallanma haraketi yaparak haritada aşamaları geçebilir, diğer oyunculara tutunmak için kullanabilirsin.
 
 Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== 
+== Herhangi bir öğretici mekanizma olmadığı için diğer oyuncularla yazışarak (t tuşu) yardım isteyebilir, oyunun genel mantığını ipuçlarıyla öğrenebilirsin.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 
+== İntihar etmek (yeniden başlamak) için k tuşu, oyunu durdurup diğer oyuncuları izlemek için q tuşunu kullanabilirsin. Diğer kontrollere ayarlardan bakabilirsin.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
-== 
+== Sunuculara bağlanmadan önce ayarları kontrol edip kendine göre düzenlemeni öneriyoruz.
 
 Please enter your nick name below.
-== Lütfen takma adı giriniz.
+== Lütfen takma adı girin.
 
 Destination file already exist
 == Dosya hali hazırda mevcut
@@ -808,7 +807,7 @@ Date
 == Tarih
 
 Fetch Info
-== 
+== Bilgileri göster
 
 Render
 == Render
@@ -835,16 +834,16 @@ Switch weapon when out of ammo
 == Mermi kalmadığında silahı değiştir
 
 Reset wanted weapon on death
-== İstenilen silahı ölünce sıfırla
+== Ölünce varsayılan silahı kullan
 
 Show only chat messages from friends
 == Sadece arkadaşlardan gelen mesajları göster
 
 Show clan above name plates
-== Takma adların üstünde clanı göster
+== Oyuncu isimlerinin üstünde klanı göster
 
 Clan plates size
-== 
+== Boyut
 
 Refresh Rate
 == Yenileme Hızı
@@ -853,28 +852,28 @@ Show console window
 == Konsol penceresini göster
 
 Automatically take statboard screenshot
-== 
+== Otomatik olarak stat tahtası ekran görüntüsü al
 
 Automatically create statboard csv
-== 
+== Otomatik olarak stat tahtası csv oluştur
 
 Max CSVs
-== 
+== Max CSVs
 
 Dummy settings
 == Dummy ayarları
 
 Vanilla skins only
-== Sadece vanilla skin
+== Sadece vanilla skinleri
 
 Fat skins (DDFat)
 == Şişko skinler (DDFat)
 
 Skin prefix
-== 
+== Skin sıfatı
 
 Hook collisions
-== 
+== Kanca çizgisi
 
 Pause
 == Durdur
@@ -898,13 +897,13 @@ Show all
 == Herkesi göster
 
 Toggle dyncam
-== 
+== Dinamik kamera
 
 Toggle dummy
-== 
+== Dummy kullan
 
 Toggle ghost
-== 
+== Hayaleti göster
 
 Dummy copy
 == Dummy copy
@@ -913,16 +912,16 @@ Hammerfly dummy
 == Hammerfly dummy
 
 Converse
-== 
+== Konuşma
 
 Statboard
-== 
+== Stat tahtası
 
 Lock team
 == Takımı kilitle
 
 Show entities
-== 
+== Yapıları göster
 
 Show HUD
 == Arayüzü göster
@@ -943,10 +942,10 @@ Use OpenGL 3.3 (experimental)
 == OpenGL 3.3 Kullan (deneysel)
 
 Preinit VBO (iGPUs only)
-== 
+== Preinit VBO (sadece iGPUs)
 
 Multiple texture units (disable for MacOS)
-== 
+== Çoklu doku birimleri (MacOS'da kullanılmaz)
 
 Use high DPI
 == Yüksek DPI kullan
@@ -958,7 +957,7 @@ Enable gun sound
 == Silah sesini etkinleştir
 
 Enable long pain sound (used when shooting in freeze)
-== 
+== Uzun ağlama sesini etkinleştir (freeze iken ateş edince kullanılır)
 
 Enable server message sound
 == Sunucu mesaj sesini etkinleştir
@@ -973,7 +972,7 @@ Enable highlighted chat sound
 == Vurgulanmış mesaj sesini etkinleştir
 
 Threaded sound loading
-== 
+== Threaded ses yükleme
 
 Map sound volume
 == Harita ses seviyesi
@@ -988,19 +987,19 @@ DDNet Client needs to be restarted to complete update!
 == Güncellemenin tamamlanabilmesi için istemcinin yeniden başlatılması gerek!
 
 Use DDRace Scoreboard
-== 
+== DDRace Skor Tahtası kulan
 
 Show client IDs in Scoreboard
-== 
+== Client ID'lerini skor tahtasında göster
 
 Show score
 == Skoru göster
 
 Show health + ammo
-== 
+== Can + mermi göster
 
 Show names in chat in team colors
-== 
+== Sohbetde isimleri takım rengiyle göster
 
 Show kill messages
 == Ölüm mesajlarını göster
@@ -1057,7 +1056,7 @@ Outline color
 == Dış renk
 
 Wait before try for
-== 
+== Denemeden önce şu kadar bekle:
 
 second
 == saniye
@@ -1066,13 +1065,13 @@ seconds
 == saniye
 
 Save the best demo of each race
-== Her yarış en iyi demoyu kaydet
+== Her yarış için en iyi demoyu kaydet
 
 Default length: %d
-== Varsayılan uzunluk: %d
+== Uzunluk: %d
 
 Enable replays
-== 
+== Tekrar oynatmaları etkinleştir
 
 Show ghost
 == Hayaleti göster
@@ -1084,19 +1083,19 @@ Gameplay
 == Oyun içi
 
 Overlay entities
-== 
+== Üst katman yapıları
 
 Size
 == Boyut
 
 Show text entities
-== 
+== Yazı yapılarını göster
 
 Show others (own team only)
-== 
+== Diğerlerini göster (sadece kendi takımın)
 
 Show quads
-== 
+== Dörtgen yapıları göster
 
 AntiPing limit
 == AntiPing sınırı
@@ -1114,22 +1113,22 @@ AntiPing: predict grenade paths
 == AntiPing: el bombası yolunu tahmin et
 
 Show other players' hook collision lines
-== 
+== Diğer oyuncuların kanca çizgisini göster
 
 Show other players' key presses
-== 
+== Diğer oyuncuların tuş basışlarını göster
 
 Old mouse mode
-== 
+== Eski mouse modu
 
 Background (regular)
-== Arkaplan (regular)
+== Arkaplan (normal)
 
 Background (entities)
-== Arkaplan (entities)
+== Arkaplan (yapı)
 
 Show tiles layers from BG map
-== 
+== Yapı katmanlarını göster
 
 Try fast HTTP map download first
 == Önce HTTP üzerinden haritayı hızlı indirmeyi dene
@@ -1150,25 +1149,25 @@ New random timeout code
 == Yeni rastgele zaman aşımı kodu
 
 Time
-== Zaman
+== Süre
 
 Manual %3d:%02d  
-== 
+== Manual %3d:%02d
 
 Race %3d:%02d  
-== 
+== Yarış %3d:%02d
 
 Auto %3d:%02d  
-== 
+== Otomatik %3d:%02d
 
 Replay %3d:%02d  
-== 
+== Yeniden oynatma %3d:%02d
 
 Follow
 == Takip et
 
 Frags
-== 
+== Frags
 
 Deaths
 == Ölümler
@@ -1180,25 +1179,25 @@ Ratio
 == Oran
 
 Net
-== 
+== Net
 
 FPM
-== 
+== FPM
 
 Spree
-== 
+== Spree
 
 Best
-== 
+== En iyi
 
 Grabs
-== 
+== Grabs
 
 1 new mention
-== 
+== 1 yeni bildirim
 
 %d new mentions
-== 
+== %d yeni bildirim
 
 9+ new mentions
-== 
+== 9+ yeni bildirim
