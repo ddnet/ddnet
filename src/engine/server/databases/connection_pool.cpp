@@ -168,7 +168,7 @@ void CDbConnectionPool::Worker()
 		{
 			for(int i = 0; i < (int)m_aapDbConnections[Mode::WRITE].size(); i++)
 			{
-				int CurServer = (WriteServer + i) % (int)m_aapDbConnections[Mode::READ].size();
+				int CurServer = (WriteServer + i) % (int)m_aapDbConnections[Mode::WRITE].size();
 				if(ExecSqlFunc(m_aapDbConnections[Mode::WRITE][i].get(), pThreadData.get(), false))
 				{
 					WriteServer = CurServer;
