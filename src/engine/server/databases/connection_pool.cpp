@@ -133,6 +133,9 @@ void CDbConnectionPool::Worker(void *pUser)
 
 void CDbConnectionPool::Worker()
 {
+	// remember last working server and try to connect to it first
+	int ReadServer = 0;
+	int WriteServer = 0;
 	while(1)
 	{
 		m_NumElem.wait();
@@ -151,9 +154,11 @@ void CDbConnectionPool::Worker()
 		{
 			for(int i = 0; i < (int)m_aapDbConnections[Mode::READ].size(); i++)
 			{
-				if(ExecSqlFunc(m_aapDbConnections[Mode::READ][i].get(), pThreadData.get(), false))
+				int CurServer = (ReadServer + i) % (int)m_aapDbConnections[Mode::READ].size();
+				if(ExecSqlFunc(m_aapDbConnections[Mode::READ][CurServer].get(), pThreadData.get(), false))
 				{
-					dbg_msg("sql", "%s done on read database %d", pThreadData->m_pName, i);
+					ReadServer = CurServer;
+					dbg_msg("sql", "%s done on read database %d", pThreadData->m_pName, CurServer);
 					Success = true;
 					break;
 				}
@@ -163,9 +168,11 @@ void CDbConnectionPool::Worker()
 		{
 			for(int i = 0; i < (int)m_aapDbConnections[Mode::WRITE].size(); i++)
 			{
+				int CurServer = (WriteServer + i) % (int)m_aapDbConnections[Mode::READ].size();
 				if(ExecSqlFunc(m_aapDbConnections[Mode::WRITE][i].get(), pThreadData.get(), false))
 				{
-					dbg_msg("sql", "%s done on write database %d", pThreadData->m_pName, i);
+					WriteServer = CurServer;
+					dbg_msg("sql", "%s done on write database %d", pThreadData->m_pName, CurServer);
 					Success = true;
 					break;
 				}
