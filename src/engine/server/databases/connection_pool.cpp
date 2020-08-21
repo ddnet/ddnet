@@ -153,6 +153,7 @@ void CDbConnectionPool::Worker()
 			{
 				if(ExecSqlFunc(m_aapDbConnections[Mode::READ][i].get(), pThreadData.get(), false))
 				{
+					dbg_msg("sql", "%s done on read database %d", pThreadData->m_pName, i);
 					Success = true;
 					break;
 				}
@@ -164,6 +165,7 @@ void CDbConnectionPool::Worker()
 			{
 				if(ExecSqlFunc(m_aapDbConnections[Mode::WRITE][i].get(), pThreadData.get(), false))
 				{
+					dbg_msg("sql", "%s done on write database %d", pThreadData->m_pName, i);
 					Success = true;
 					break;
 				}
@@ -174,6 +176,7 @@ void CDbConnectionPool::Worker()
 				{
 					if(ExecSqlFunc(m_aapDbConnections[Mode::WRITE_BACKUP][i].get(), pThreadData.get(), true))
 					{
+						dbg_msg("sql", "%s done on write backup database %d", pThreadData->m_pName, i);
 						Success = true;
 						break;
 					}
@@ -181,8 +184,8 @@ void CDbConnectionPool::Worker()
 			}
 		} break;
 		}
-		if(Success)
-			dbg_msg("sql", "%s done", pThreadData->m_pName);
+		if(!Success)
+			dbg_msg("sql", "%s failed on all databases", pThreadData->m_pName);
 	}
 }
 
@@ -208,18 +211,35 @@ bool CDbConnectionPool::ExecSqlFunc(IDbConnection *pConnection, CSqlExecData *pD
 #if defined(CONF_SQL)
 	catch (sql::SQLException &e)
 	{
-		dbg_msg("sql", "MySQL Error: %s", e.what());
+		dbg_msg("sql", "%s MySQL Error: %s", pData->m_pName, e.what());
 	}
 #endif
 	catch (std::runtime_error &e)
 	{
-		dbg_msg("sql", "SQLite Error: %s", e.what());
+		dbg_msg("sql", "%s SQLite Error: %s", pData->m_pName, e.what());
 	}
 	catch (...)
 	{
-		dbg_msg("sql", "Unexpected exception caught");
+		dbg_msg("sql", "%s Unexpected exception caught", pData->m_pName);
 	}
-	pConnection->Unlock();
+	try
+	{
+		pConnection->Unlock();
+	}
+#if defined(CONF_SQL)
+	catch (sql::SQLException &e)
+	{
+		dbg_msg("sql", "%s MySQL Error during unlock: %s", pData->m_pName, e.what());
+	}
+#endif
+	catch (std::runtime_error &e)
+	{
+		dbg_msg("sql", "%s SQLite Error during unlock: %s", pData->m_pName, e.what());
+	}
+	catch (...)
+	{
+		dbg_msg("sql", "%s Unexpected exception caught during unlock", pData->m_pName);
+	}
 	pConnection->Disconnect();
 	if(!Success)
 		dbg_msg("sql", "%s failed", pData->m_pName);
