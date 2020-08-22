@@ -366,8 +366,8 @@ MACRO_CONFIG_INT(ClDemoShowSpeed, cl_demo_show_speed, 0, 0, 1, CFGFLAG_SAVE|CFGF
 MACRO_CONFIG_INT(ClDemoKeyboardShortcuts, cl_demo_keyboard_shortcuts, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enable keyboard shortcuts in demo player")
 
 //opengl
-MACRO_CONFIG_INT(GfxOpenGLMajor, gfx_opengl_major, 2, 1, 10, CFGFLAG_SAVE|CFGFLAG_CLIENT, "OpenGL major version")
-MACRO_CONFIG_INT(GfxOpenGLMinor, gfx_opengl_minor, 1, 0, 10, CFGFLAG_SAVE|CFGFLAG_CLIENT, "OpenGL minor version")
+MACRO_CONFIG_INT(GfxOpenGLMajor, gfx_opengl_major, 3, 1, 10, CFGFLAG_SAVE|CFGFLAG_CLIENT, "OpenGL major version")
+MACRO_CONFIG_INT(GfxOpenGLMinor, gfx_opengl_minor, 0, 0, 10, CFGFLAG_SAVE|CFGFLAG_CLIENT, "OpenGL minor version")
 MACRO_CONFIG_INT(GfxOpenGLPatch, gfx_opengl_patch, 0, 0, 10, CFGFLAG_SAVE|CFGFLAG_CLIENT, "OpenGL patch version")
 #if !defined(CONF_PLATFORM_MACOSX)
 MACRO_CONFIG_INT(GfxEnableTextureUnitOptimization, gfx_enable_texture_unit_optimization, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Use multiple texture units, instead of only one.")
