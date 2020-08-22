@@ -178,20 +178,20 @@ int CMapImages::GetTextureScale()
 
 IGraphics::CTextureHandle CMapImages::UploadEntityLayerText(int TextureSize, int YOffset)
 {	
-	void *pMem = calloc(1024 * 1024, 1);
+	void *pMem = calloc(1024 * 1024 * 4, 1);
 
-	UpdateEntityLayerText(pMem, 1024, 1024, TextureSize, YOffset, 0);
-	UpdateEntityLayerText(pMem, 1024, 1024, TextureSize, YOffset, 1);
-	UpdateEntityLayerText(pMem, 1024, 1024, TextureSize, YOffset, 2, 255);
+	UpdateEntityLayerText(pMem, 4, 1024, 1024, TextureSize, YOffset, 0);
+	UpdateEntityLayerText(pMem, 4, 1024, 1024, TextureSize, YOffset, 1);
+	UpdateEntityLayerText(pMem, 4, 1024, 1024, TextureSize, YOffset, 2, 255);
 
 	int TextureLoadFlag = Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
-	IGraphics::CTextureHandle Texture = Graphics()->LoadTextureRaw(1024, 1024, CImageInfo::FORMAT_ALPHA, pMem, CImageInfo::FORMAT_ALPHA, TextureLoadFlag);
+	IGraphics::CTextureHandle Texture = Graphics()->LoadTextureRaw(1024, 1024, CImageInfo::FORMAT_RGBA, pMem, CImageInfo::FORMAT_RGBA, TextureLoadFlag);
 	free(pMem);
 
 	return Texture;
 }
 
-void CMapImages::UpdateEntityLayerText(void* pTexBuffer, int TexWidth, int TexHeight, int TextureSize, int YOffset, int NumbersPower, int MaxNumber)
+void CMapImages::UpdateEntityLayerText(void* pTexBuffer, int ImageColorChannelCount, int TexWidth, int TexHeight, int TextureSize, int YOffset, int NumbersPower, int MaxNumber)
 {
 	char aBuf[4];
 	int DigitsCount = NumbersPower+1;
@@ -217,7 +217,7 @@ void CMapImages::UpdateEntityLayerText(void* pTexBuffer, int TexWidth, int TexHe
 		float x = (CurrentNumber%16)*64;
 		float y = (CurrentNumber/16)*64;
 
-		TextRender()->UploadEntityLayerText(pTexBuffer, TexWidth, TexHeight, aBuf, DigitsCount, x+XOffSet, y+YOffset, UniversalSuitableFontSize);
+		TextRender()->UploadEntityLayerText(pTexBuffer, ImageColorChannelCount, TexWidth, TexHeight, aBuf, DigitsCount, x+XOffSet, y+YOffset, UniversalSuitableFontSize);
 	}
 }
 

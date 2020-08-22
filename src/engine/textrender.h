@@ -6,6 +6,7 @@
 
 #include <base/color.h>
 #include <engine/graphics.h>
+#include <stdint.h>
 
 enum
 {
@@ -99,7 +100,7 @@ public:
 	virtual void RenderTextContainer(int TextContainerIndex, STextRenderColor *pTextColor, STextRenderColor *pTextOutlineColor) = 0;
 	virtual void RenderTextContainer(int TextContainerIndex, STextRenderColor *pTextColor, STextRenderColor *pTextOutlineColor, float X, float Y) = 0;
 
-	virtual void UploadEntityLayerText(void* pTexBuff, int TexWidth, int TexHeight, const char *pText, int Length, float x, float y, int FontHeight) = 0;
+	virtual void UploadEntityLayerText(void* pTexBuff, int ImageColorChannelCount, int TexWidth, int TexHeight, const char *pText, int Length, float x, float y, int FontHeight) = 0;
 	virtual int AdjustFontSize(const char *pText, int TextLength, int MaxSize = -1) = 0;
 	virtual int CalculateTextWidth(const char *pText, int TextLength, int FontWidth, int FontHeight) = 0;
 

@@ -47,7 +47,7 @@ private:
 	
 	void InitOverlayTextures();
 	IGraphics::CTextureHandle UploadEntityLayerText(int TextureSize, int YOffset);
-	void UpdateEntityLayerText(void* pTexBuffer, int TexWidth, int TexHeight, int TextureSize, int YOffset, int NumbersPower, int MaxNumber = -1);
+	void UpdateEntityLayerText(void* pTexBuffer, int ImageColorChannelCount, int TexWidth, int TexHeight, int TextureSize, int YOffset, int NumbersPower, int MaxNumber = -1);
 };
 
 #endif

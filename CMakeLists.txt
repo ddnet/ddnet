@@ -1107,6 +1107,8 @@ set(EXPECTED_DATA
   maps7/Gold\ Mine.map
   maps7/readme.txt
   particles.png
+  shader/pipeline.frag
+  shader/pipeline.vert
   shader/prim.frag
   shader/prim.vert
   shader/quad.frag

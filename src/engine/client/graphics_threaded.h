@@ -66,7 +66,6 @@ public:
 		CMDGROUP_CORE = 0, // commands that everyone has to implement
 		CMDGROUP_PLATFORM_OPENGL = 10000, // commands specific to a platform
 		CMDGROUP_PLATFORM_SDL = 20000,
-		CMDGROUP_PLATFORM_OPENGL3_3 = 30000,
 
 		//
 		CMD_NOP = CMDGROUP_CORE,
@@ -86,7 +85,7 @@ public:
 		CMD_CLEAR,
 		CMD_RENDER,
 
-		//opengl 3.3 commands
+		//opengl 2.0+ commands (some are just emulated and only exist in opengl 3.3+)
 		CMD_CREATE_BUFFER_OBJECT, // create vbo
 		CMD_RECREATE_BUFFER_OBJECT, // recreate vbo
 		CMD_UPDATE_BUFFER_OBJECT, // update vbo
@@ -555,6 +554,19 @@ public:
 	}
 };
 
+enum EGraphicsBackendErrorCodes
+{
+	GRAPHICS_BACKEND_ERROR_CODE_UNKNOWN = -1,
+	GRAPHICS_BACKEND_ERROR_CODE_NONE = 0,
+	GRAPHICS_BACKEND_ERROR_CODE_OPENGL_CONTEXT_FAILED,
+	GRAPHICS_BACKEND_ERROR_CODE_OPENGL_VERSION_FAILED,
+	GRAPHICS_BACKEND_ERROR_CODE_SDL_INIT_FAILED,
+	GRAPHICS_BACKEND_ERROR_CODE_SDL_SCREEN_REQUEST_FAILED,
+	GRAPHICS_BACKEND_ERROR_CODE_SDL_SCREEN_INFO_REQUEST_FAILED,
+	GRAPHICS_BACKEND_ERROR_CODE_SDL_SCREEN_RESOLUTION_REQUEST_FAILED,
+	GRAPHICS_BACKEND_ERROR_CODE_SDL_WINDOW_CREATE_FAILED,
+};
+
 // interface for the graphics backend
 // all these functions are called on the main thread
 class IGraphicsBackend
@@ -594,6 +606,11 @@ public:
 	virtual void WaitForIdle() = 0;
 
 	virtual bool IsNewOpenGL() { return false; }
+	virtual bool HasTileBuffering() { return false; }
+	virtual bool HasQuadBuffering() { return false; }
+	virtual bool HasTextBuffering() { return false; }
+	virtual bool HasQuadContainerBuffering() { return false; }
+	virtual bool Has2DTextureArrays() { return false; }
 };
 
 class CGraphics_Threaded : public IEngineGraphics
@@ -611,7 +628,10 @@ class CGraphics_Threaded : public IEngineGraphics
 
 	CCommandBuffer::SState m_State;
 	IGraphicsBackend *m_pBackend;
-	bool m_OpenGLBufferingEnabled;
+	bool m_OpenGLTileBufferingEnabled;
+	bool m_OpenGLQuadBufferingEnabled;
+	bool m_OpenGLTextBufferingEnabled;
+	bool m_OpenGLQuadContainerBufferingEnabled;
 	bool m_OpenGLHasTextureArrays;
 	bool m_IsNewOpenGL;
 
@@ -830,7 +850,10 @@ public:
 	virtual bool IsIdle();
 	virtual void WaitForIdle();
 
-	virtual bool IsBufferingEnabled() { return m_OpenGLBufferingEnabled; }
+	virtual bool IsTileBufferingEnabled() { return m_OpenGLTileBufferingEnabled; }
+	virtual bool IsQuadBufferingEnabled() { return m_OpenGLQuadBufferingEnabled; }
+	virtual bool IsTextBufferingEnabled() { return m_OpenGLTextBufferingEnabled; }
+	virtual bool IsQuadContainerBufferingEnabled() { return m_OpenGLQuadContainerBufferingEnabled; }
 	virtual bool HasTextureArrays() { return m_OpenGLHasTextureArrays; }
 };
 

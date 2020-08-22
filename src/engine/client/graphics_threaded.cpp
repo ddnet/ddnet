@@ -1207,7 +1207,7 @@ int CGraphics_Threaded::CreateQuadContainer()
 
 void CGraphics_Threaded::QuadContainerUpload(int ContainerIndex)
 {
-	if(m_IsNewOpenGL)
+	if(IsQuadContainerBufferingEnabled())
 	{
 		SQuadContainer& Container = m_QuadContainers[ContainerIndex];
 		if(Container.m_Quads.size() > 0)
@@ -1343,7 +1343,7 @@ void CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CFreeformItem
 void CGraphics_Threaded::QuadContainerReset(int ContainerIndex)
 {
 	SQuadContainer& Container = m_QuadContainers[ContainerIndex];
-	if(m_IsNewOpenGL)
+	if(IsQuadContainerBufferingEnabled())
 	{
 		if(Container.m_QuadBufferContainerIndex != -1)
 			DeleteBufferContainer(Container.m_QuadBufferContainerIndex, true);
@@ -1376,7 +1376,7 @@ void CGraphics_Threaded::RenderQuadContainer(int ContainerIndex, int QuadOffset,
 	if((int)Container.m_Quads.size() < QuadOffset + QuadDrawNum || QuadDrawNum == 0)
 		return;
 
-	if(m_IsNewOpenGL)
+	if(IsQuadContainerBufferingEnabled())
 	{
 		if(Container.m_QuadBufferContainerIndex == -1)
 			return;
@@ -1434,7 +1434,7 @@ void CGraphics_Threaded::RenderQuadContainerAsSprite(int ContainerIndex, int Qua
 	if((int)Container.m_Quads.size() < QuadOffset + 1)
 		return;
 
-	if(m_IsNewOpenGL)
+	if(IsQuadContainerBufferingEnabled())
 	{
 		if(Container.m_QuadBufferContainerIndex == -1)
 			return;
@@ -1560,7 +1560,7 @@ void CGraphics_Threaded::RenderQuadContainerAsSpriteMultiple(int ContainerIndex,
 	if(DrawCount == 0)
 		return;
 
-	if(m_IsNewOpenGL)
+	if(IsQuadContainerBufferingEnabled())
 	{
 		if(Container.m_QuadBufferContainerIndex == -1)
 			return;
@@ -2037,14 +2037,18 @@ int CGraphics_Threaded::IssueInit()
 
 	int r = m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, g_Config.m_GfxFsaaSamples, Flags, &m_DesktopScreenWidth, &m_DesktopScreenHeight, &m_ScreenWidth, &m_ScreenHeight, m_pStorage);
 	m_IsNewOpenGL = m_pBackend->IsNewOpenGL();
-	m_OpenGLBufferingEnabled = m_IsNewOpenGL;
-	m_OpenGLHasTextureArrays = m_IsNewOpenGL;
+	m_OpenGLTileBufferingEnabled = m_IsNewOpenGL || m_pBackend->HasTileBuffering();
+	m_OpenGLQuadBufferingEnabled = m_IsNewOpenGL || m_pBackend->HasQuadBuffering();
+	m_OpenGLQuadContainerBufferingEnabled = m_IsNewOpenGL || m_pBackend->HasQuadContainerBuffering();
+	m_OpenGLTextBufferingEnabled = m_IsNewOpenGL || (m_OpenGLQuadContainerBufferingEnabled && m_pBackend->HasTextBuffering());
+	m_OpenGLHasTextureArrays = m_IsNewOpenGL || m_pBackend->Has2DTextureArrays();
 	return r;
 }
 
 int CGraphics_Threaded::InitWindow()
 {
-	if(IssueInit() == 0)
+	int ErrorCode = IssueInit();
+	if(ErrorCode == 0)
 		return 0;
 
 	// try disabling fsaa
@@ -2057,20 +2061,84 @@ int CGraphics_Threaded::InitWindow()
 		else
 			dbg_msg("gfx", "disabling FSAA and trying again");
 
-		if(IssueInit() == 0)
+		ErrorCode = IssueInit();
+		if(ErrorCode == 0)
 			return 0;
 	}
 
-	// try using old opengl context
-	bool IsNewOpenGL = (g_Config.m_GfxOpenGLMajor == 3 && g_Config.m_GfxOpenGLMinor == 3) || g_Config.m_GfxOpenGLMajor >= 4;
-	if(IsNewOpenGL)
+	size_t OpenGLInitTryCount = 0;
+	while(ErrorCode == EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_OPENGL_CONTEXT_FAILED || ErrorCode == EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_OPENGL_VERSION_FAILED)
 	{
-		g_Config.m_GfxOpenGLMajor = 2;
-		g_Config.m_GfxOpenGLMinor = 1;
-		g_Config.m_GfxOpenGLPatch = 0;
-		if(IssueInit() == 0)
+		if(ErrorCode == EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_OPENGL_CONTEXT_FAILED)
+		{
+			// try next smaller major/minor or patch version
+			if(g_Config.m_GfxOpenGLMajor >= 4)
+			{
+				g_Config.m_GfxOpenGLMajor = 3;
+				g_Config.m_GfxOpenGLMinor = 3;
+				g_Config.m_GfxOpenGLPatch = 0;
+			}
+			else if(g_Config.m_GfxOpenGLMajor == 3 && g_Config.m_GfxOpenGLMinor >= 1)
+			{
+				g_Config.m_GfxOpenGLMajor = 3;
+				g_Config.m_GfxOpenGLMinor = 0;
+				g_Config.m_GfxOpenGLPatch = 0;
+			}
+			else if(g_Config.m_GfxOpenGLMajor == 3 && g_Config.m_GfxOpenGLMinor == 0)
+			{
+				g_Config.m_GfxOpenGLMajor = 2;
+				g_Config.m_GfxOpenGLMinor = 1;
+				g_Config.m_GfxOpenGLPatch = 0;
+			}
+			else if(g_Config.m_GfxOpenGLMajor == 2 && g_Config.m_GfxOpenGLMinor >= 1)
+			{
+				g_Config.m_GfxOpenGLMajor = 2;
+				g_Config.m_GfxOpenGLMinor = 0;
+				g_Config.m_GfxOpenGLPatch = 0;
+			}
+			else if(g_Config.m_GfxOpenGLMajor == 2 && g_Config.m_GfxOpenGLMinor == 0)
+			{
+				g_Config.m_GfxOpenGLMajor = 1;
+				g_Config.m_GfxOpenGLMinor = 5;
+				g_Config.m_GfxOpenGLPatch = 0;
+			}
+			else if(g_Config.m_GfxOpenGLMajor == 1 && g_Config.m_GfxOpenGLMinor == 5)
+			{
+				g_Config.m_GfxOpenGLMajor = 1;
+				g_Config.m_GfxOpenGLMinor = 4;
+				g_Config.m_GfxOpenGLPatch = 0;
+			}
+			else if(g_Config.m_GfxOpenGLMajor == 1 && g_Config.m_GfxOpenGLMinor == 4)
+			{
+				g_Config.m_GfxOpenGLMajor = 1;
+				g_Config.m_GfxOpenGLMinor = 3;
+				g_Config.m_GfxOpenGLPatch = 0;
+			}
+			else if(g_Config.m_GfxOpenGLMajor == 1 && g_Config.m_GfxOpenGLMinor == 3)
+			{
+				g_Config.m_GfxOpenGLMajor = 1;
+				g_Config.m_GfxOpenGLMinor = 2;
+				g_Config.m_GfxOpenGLPatch = 1;
+			}
+			else if(g_Config.m_GfxOpenGLMajor == 1 && g_Config.m_GfxOpenGLMinor == 2)
+			{
+				g_Config.m_GfxOpenGLMajor = 1;
+				g_Config.m_GfxOpenGLMinor = 1;
+				g_Config.m_GfxOpenGLPatch = 0;
+			}
+		}
+
+		// new opengl version was set by backend, try again
+		ErrorCode = IssueInit();
+		if(ErrorCode == 0)
 		{
 			return 0;
+		}
+
+		if(++OpenGLInitTryCount >= 9)
+		{
+			// try something else
+			break;
 		}
 	}
 

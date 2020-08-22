@@ -16,7 +16,7 @@ out vec4 FragClr;
 void main()
 {
 #ifdef TW_TILE_TEXTURED
-	vec4 TexColor = texture(gTextureSampler, TexCoord);
+	vec4 TexColor = texture(gTextureSampler, TexCoord.xyz);
 	FragClr = TexColor * gVertColor;
 #else
 	FragClr = gVertColor;

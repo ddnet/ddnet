@@ -860,7 +860,7 @@ public:
 			// make sure there are no vertices
 			Graphics()->FlushVertices();
 
-			if(Graphics()->IsBufferingEnabled())
+			if(Graphics()->IsTextBufferingEnabled())
 			{
 				Graphics()->TextureClear();
 				Graphics()->TextQuadsBegin();
@@ -966,7 +966,7 @@ public:
 
 					if(pCursor->m_Flags&TEXTFLAG_RENDER && m_Color.a != 0.f)
 					{
-						if(Graphics()->IsBufferingEnabled())
+						if(Graphics()->IsTextBufferingEnabled())
 							Graphics()->QuadsSetSubset(pChr->m_aUVs[0], pChr->m_aUVs[3], pChr->m_aUVs[2], pChr->m_aUVs[1]);
 						else
 							Graphics()->QuadsSetSubset(pChr->m_aUVs[0] * UVScale, pChr->m_aUVs[3] * UVScale, pChr->m_aUVs[2] * UVScale, pChr->m_aUVs[1] * UVScale);
@@ -1011,7 +1011,7 @@ public:
 
 		if(pCursor->m_Flags&TEXTFLAG_RENDER)
 		{
-			if(Graphics()->IsBufferingEnabled())
+			if(Graphics()->IsTextBufferingEnabled())
 			{
 				float OutlineColor[4] = { m_OutlineColor.r, m_OutlineColor.g, m_OutlineColor.b, m_OutlineColor.a*m_Color.a };
 				Graphics()->TextQuadsEnd(pFont->m_CurTextureDimensions[0], pFont->m_aTextures[0], pFont->m_aTextures[1], OutlineColor);
@@ -1094,7 +1094,7 @@ public:
 		else
 		{
 			TextContainer.m_StringInfo.m_QuadNum = TextContainer.m_StringInfo.m_CharacterQuads.size();
-			if(Graphics()->IsBufferingEnabled())
+			if(Graphics()->IsTextBufferingEnabled())
 			{
 				size_t DataSize = TextContainer.m_StringInfo.m_CharacterQuads.size() * sizeof(STextCharQuad);
 				void *pUploadData = &TextContainer.m_StringInfo.m_CharacterQuads[0];
@@ -1349,7 +1349,7 @@ public:
 		{
 			TextContainer.m_StringInfo.m_QuadNum = TextContainer.m_StringInfo.m_CharacterQuads.size();
 			// setup the buffers
-			if(Graphics()->IsBufferingEnabled())
+			if(Graphics()->IsTextBufferingEnabled())
 			{
 				size_t DataSize = TextContainer.m_StringInfo.m_CharacterQuads.size() * sizeof(STextCharQuad);
 				void *pUploadData = &TextContainer.m_StringInfo.m_CharacterQuads[0];
@@ -1604,7 +1604,7 @@ public:
 	virtual void DeleteTextContainer(int TextContainerIndex)
 	{
 		STextContainer& TextContainer = GetTextContainer(TextContainerIndex);
-		if(Graphics()->IsBufferingEnabled())
+		if(Graphics()->IsTextBufferingEnabled())
 		{
 			if(TextContainer.m_StringInfo.m_QuadBufferContainerIndex != -1)
 				Graphics()->DeleteBufferContainer(TextContainer.m_StringInfo.m_QuadBufferContainerIndex, true);
@@ -1632,7 +1632,7 @@ public:
 				s_CursorRenderTime = time_get_microseconds();
 		}
 
-		if(Graphics()->IsBufferingEnabled())
+		if(Graphics()->IsTextBufferingEnabled())
 		{
 			Graphics()->TextureClear();
 			// render buffered text
@@ -1712,7 +1712,7 @@ public:
 		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 	}
 
-	virtual void UploadEntityLayerText(void* pTexBuff, int TexWidth, int TexHeight, const char *pText, int Length, float x, float y, int FontSize)
+	virtual void UploadEntityLayerText(void* pTexBuff, int ImageColorChannelCount, int TexWidth, int TexHeight, const char *pText, int Length, float x, float y, int FontSize)
 	{
 		if (FontSize < 1)
 			return;
@@ -1762,13 +1762,25 @@ public:
 				uint8_t* pImageBuff = (uint8_t*)pTexBuff;
 				for(int OffY = 0; OffY < SlotH; ++OffY)
 				{
-					size_t ImageOffset = (y + OffY) * TexWidth + (x + WidthLastChars);
-					size_t GlyphOffset = (OffY) * SlotW;
-					mem_copy(pImageBuff + ImageOffset, ms_aGlyphData + GlyphOffset, sizeof(uint8_t) * SlotW);
+					for(int OffX = 0; OffX < SlotW; ++OffX)
+					{
+						size_t ImageOffset = (y + OffY) * (TexWidth * ImageColorChannelCount) + ((x + OffX) + WidthLastChars) * ImageColorChannelCount;
+						size_t GlyphOffset = (OffY) * SlotW + OffX;
+						for(size_t i = 0; i < (size_t)ImageColorChannelCount; ++i)
+						{
+							if(i != (size_t)ImageColorChannelCount - 1)
+							{
+								*(pImageBuff + ImageOffset + i) = 255;
+							}
+							else
+							{
+								*(pImageBuff + ImageOffset + i) = *(ms_aGlyphData + GlyphOffset);
+							}
+						}
+					}
 				}
 
 				WidthLastChars += (SlotW + 1);
-
 			}
 			pCurrent = pTmp;
 		}
