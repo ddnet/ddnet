@@ -178,6 +178,19 @@ bool CCommandProcessorFragment_General::RunCommand(const CCommandBuffer::SComman
 
 // ------------ CCommandProcessorFragment_OpenGL
 
+static int HighestBit(int OfVar)
+{
+	if(!OfVar)
+		return 0;
+
+	int RetV = 1;
+
+	while(OfVar >>= 1)
+		RetV <<= 1;
+
+	return RetV;
+}
+
 int CCommandProcessorFragment_OpenGL::TexFormatToOpenGLFormat(int TexFormat)
 {
 	if(TexFormat == CCommandBuffer::TEXFORMAT_RGB) return GL_RGB;
@@ -203,9 +216,116 @@ unsigned char CCommandProcessorFragment_OpenGL::Sample(int w, int h, const unsig
 	return Value/(ScaleW*ScaleH);
 }
 
+static float CubicHermite(float A, float B, float C, float D, float t)
+{
+	float a = -A / 2.0f + (3.0f * B) / 2.0f - (3.0f * C) / 2.0f + D / 2.0f;
+	float b = A - (5.0f * B) / 2.0f + 2.0f * C - D / 2.0f;
+	float c = -A / 2.0f + C / 2.0f;
+	float d = B;
+
+	return (a * t * t * t) + (b * t * t) + (c * t) + d;
+}
+
+void GetPixelClamped(uint8_t* pSourceImage, int x, int y, uint32_t W, uint32_t H, size_t BPP, uint8_t aTmp[])
+{
+	x = clamp<int>(x, 0, (int)W - 1);
+	y = clamp<int>(y, 0, (int)H - 1);
+
+	for (size_t i = 0; i < BPP; i++)
+	{
+		aTmp[i] = pSourceImage[x * BPP + (W * BPP * y) + i];
+	}
+}
+
+void SampleBicubic(uint8_t* pSourceImage, float u, float v, uint32_t W, uint32_t H, size_t BPP, uint8_t aSample[])
+{
+	float X = (u * W) - 0.5f;
+	int xInt = (int)X;
+	float xFract = X - floorf(X);
+
+	float Y = (v * H) - 0.5f;
+	int yInt = (int)Y;
+	float yFract = Y - floorf(Y);
+
+	uint8_t PX00[4];
+	uint8_t PX10[4];
+	uint8_t PX20[4];
+	uint8_t PX30[4];
+
+	uint8_t PX01[4];
+	uint8_t PX11[4];
+	uint8_t PX21[4];
+	uint8_t PX31[4];
+
+	uint8_t PX02[4];
+	uint8_t PX12[4];
+	uint8_t PX22[4];
+	uint8_t PX32[4];
+
+	uint8_t PX03[4];
+	uint8_t PX13[4];
+	uint8_t PX23[4];
+	uint8_t PX33[4];
+
+	GetPixelClamped(pSourceImage, xInt - 1, yInt - 1, W, H, BPP, PX00);   
+	GetPixelClamped(pSourceImage, xInt + 0, yInt - 1, W, H, BPP, PX10);
+	GetPixelClamped(pSourceImage, xInt + 1, yInt - 1, W, H, BPP, PX20);
+	GetPixelClamped(pSourceImage, xInt + 2, yInt - 1, W, H, BPP, PX30);
+
+	GetPixelClamped(pSourceImage, xInt - 1, yInt + 0, W, H, BPP, PX01);
+	GetPixelClamped(pSourceImage, xInt + 0, yInt + 0, W, H, BPP, PX11);
+	GetPixelClamped(pSourceImage, xInt + 1, yInt + 0, W, H, BPP, PX21);
+	GetPixelClamped(pSourceImage, xInt + 2, yInt + 0, W, H, BPP, PX31);
+
+	GetPixelClamped(pSourceImage, xInt - 1, yInt + 1, W, H, BPP, PX02);
+	GetPixelClamped(pSourceImage, xInt + 0, yInt + 1, W, H, BPP, PX12);
+	GetPixelClamped(pSourceImage, xInt + 1, yInt + 1, W, H, BPP, PX22);
+	GetPixelClamped(pSourceImage, xInt + 2, yInt + 1, W, H, BPP, PX32);
+
+	GetPixelClamped(pSourceImage, xInt - 1, yInt + 2, W, H, BPP, PX03);
+	GetPixelClamped(pSourceImage, xInt + 0, yInt + 2, W, H, BPP, PX13);
+	GetPixelClamped(pSourceImage, xInt + 1, yInt + 2, W, H, BPP, PX23);
+	GetPixelClamped(pSourceImage, xInt + 2, yInt + 2, W, H, BPP, PX33);
+
+	for (size_t i = 0; i < BPP; i++)
+	{
+		float Clmn0 = CubicHermite(PX00[i], PX10[i], PX20[i], PX30[i], xFract);
+		float Clmn1 = CubicHermite(PX01[i], PX11[i], PX21[i], PX31[i], xFract);
+		float Clmn2 = CubicHermite(PX02[i], PX12[i], PX22[i], PX32[i], xFract);
+		float Clmn3 = CubicHermite(PX03[i], PX13[i], PX23[i], PX33[i], xFract);
+
+		float Valuef = CubicHermite(Clmn0, Clmn1, Clmn2, Clmn3, yFract);
+
+		Valuef = clamp<float>(Valuef, 0.0f, 255.0f);
+
+		aSample[i] = (uint8_t)Valuef;
+	}
+}
+
+static void ResizeImage(uint8_t *pSourceImage, uint32_t SW, uint32_t SH, uint8_t *pDestinationImage, uint32_t W, uint32_t H, size_t BPP)
+{
+	uint8_t aSample[4];
+	int y, x;
+
+	for(y = 0; y < (int)H; ++y)
+	{
+		float v = (float)y / (float)(H - 1);
+
+		for(x = 0; x < (int)W; ++x)
+		{
+			float u = (float)x / (float)(W - 1);
+			SampleBicubic(pSourceImage, u, v, SW, SH, BPP, aSample);
+
+			for (size_t i = 0; i < BPP; ++i)
+			{
+				pDestinationImage[x * BPP + ((W * BPP) * y) + i] = aSample[i];
+			}
+		}
+	}
+}
+
 void *CCommandProcessorFragment_OpenGL::Rescale(int Width, int Height, int NewWidth, int NewHeight, int Format, const unsigned char *pData)
 {
-
 	unsigned char *pTmpData;
 	int ScaleW = Width / NewWidth;
 	int ScaleH = Height / NewHeight;
@@ -222,6 +342,19 @@ void *CCommandProcessorFragment_OpenGL::Rescale(int Width, int Height, int NewWi
 				pTmpData[c*Bpp + i] = Sample(Width, Height, pData, x*ScaleW, y*ScaleH, i, ScaleW, ScaleH, Bpp);
 			}
 		}
+
+	return pTmpData;
+}
+
+void *CCommandProcessorFragment_OpenGL::Resize(int Width, int Height, int NewWidth, int NewHeight, int Format, const unsigned char *pData)
+{
+	unsigned char *pTmpData;
+
+	int Bpp = TexFormatToImageColorChannelCount(Format);
+
+	pTmpData = (unsigned char *)malloc(NewWidth * NewHeight * Bpp);
+
+	ResizeImage((uint8_t*)pData, Width, Height, (uint8_t*)pTmpData, NewWidth, NewHeight, Bpp);
 
 	return pTmpData;
 }
@@ -342,6 +475,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Init(const SCommand_Init *pCommand)
 
 	m_Has3DTextures = pCommand->m_pCapabilities->m_3DTextures;
 	m_HasMipMaps = pCommand->m_pCapabilities->m_MipMapping;
+	m_HasNPOTTextures = pCommand->m_pCapabilities->m_NPOTTextures;
 
 	m_LastBlendMode = CCommandBuffer::BLEND_ALPHA;
 	m_LastClipEnable = false;
@@ -356,6 +490,25 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Update(const CCommandBuffer::
 	int Height = pCommand->m_Height;
 	int X = pCommand->m_X;
 	int Y = pCommand->m_Y;
+
+	if(!m_HasNPOTTextures)
+	{
+		float ResizeW = m_aTextures[pCommand->m_Slot].m_ResizeWidth;
+		float ResizeH = m_aTextures[pCommand->m_Slot].m_ResizeHeight;
+		if(ResizeW > 0 && ResizeH > 0)
+		{
+			int ResizedW = (int)(Width * ResizeW);
+			int ResizedH = (int)(Height * ResizeH);
+
+			void *pTmpData = Resize(Width, Height, ResizedW, ResizedH, pCommand->m_Format, static_cast<const unsigned char *>(pCommand->m_pData));
+			free(pTexData);
+			pTexData = pTmpData;
+
+			Width = ResizedW;
+			Height = ResizedH;
+		}
+	}
+
 	if(m_aTextures[pCommand->m_Slot].m_RescaleCount > 0)
 	{
 		for(int i = 0; i < m_aTextures[pCommand->m_Slot].m_RescaleCount; ++i)
@@ -395,6 +548,27 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 		// fix the alignment to allow even 1byte changes, e.g. for alpha components
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &m_MaxTexSize);
+	}
+
+	m_aTextures[pCommand->m_Slot].m_ResizeWidth = -1.f;
+	m_aTextures[pCommand->m_Slot].m_ResizeHeight = -1.f;
+
+	if(!m_HasNPOTTextures)
+	{
+		int PowerOfTwoWidth = HighestBit(Width);
+		int PowerOfTwoHeight = HighestBit(Height);
+		if(Width != PowerOfTwoWidth || Height != PowerOfTwoHeight)
+		{
+			void *pTmpData = Resize(Width, Height, PowerOfTwoWidth, PowerOfTwoHeight, pCommand->m_Format, static_cast<const unsigned char *>(pCommand->m_pData));
+			free(pTexData);
+			pTexData = pTmpData;
+
+			m_aTextures[pCommand->m_Slot].m_ResizeWidth = (float)PowerOfTwoWidth / (float)Width;
+			m_aTextures[pCommand->m_Slot].m_ResizeHeight = (float)PowerOfTwoHeight / (float)Height;
+
+			Width = PowerOfTwoWidth;
+			Height = PowerOfTwoHeight;
+		}
 	}
 
 	int RescaleCount = 0;
@@ -2955,6 +3129,7 @@ void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 		PatchV = pCommand->m_RequestedPatch;
 
 		pCommand->m_pCapabilities->m_2DArrayTexturesAsExtension = false;
+		pCommand->m_pCapabilities->m_NPOTTextures = true;
 
 		if(MajorV >= 4 || (MajorV == 3 && MinorV == 3))
 		{
@@ -3029,6 +3204,21 @@ void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 			pCommand->m_pCapabilities->m_QuadBuffering = false;
 			pCommand->m_pCapabilities->m_TextBuffering = false;
 			pCommand->m_pCapabilities->m_QuadContainerBuffering = false;
+
+			if(GLEW_ARB_texture_non_power_of_two || pCommand->m_GlewMajor > 2)
+				pCommand->m_pCapabilities->m_NPOTTextures = true;
+			else
+			{
+				pCommand->m_pCapabilities->m_NPOTTextures = false;
+			}
+
+			if(!pCommand->m_pCapabilities->m_NPOTTextures || (!pCommand->m_pCapabilities->m_3DTextures && !pCommand->m_pCapabilities->m_2DArrayTextures))
+			{
+				*pCommand->m_pInitError = -2;
+				pCommand->m_pCapabilities->m_ContextMajor = 1;
+				pCommand->m_pCapabilities->m_ContextMinor = 5;
+				pCommand->m_pCapabilities->m_ContextPatch = 0;
+			}	
 		}
 		else if(MajorV < 2)
 		{
@@ -3041,6 +3231,7 @@ void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 			pCommand->m_pCapabilities->m_MipMapping = false;
 			pCommand->m_pCapabilities->m_3DTextures = false;
 			pCommand->m_pCapabilities->m_2DArrayTextures = false;
+			pCommand->m_pCapabilities->m_NPOTTextures = false;
 		}
 	}
 }
@@ -3175,6 +3366,48 @@ CCommandProcessor_SDL_OpenGL::CCommandProcessor_SDL_OpenGL(int OpenGLMajor, int 
 
 static void GetGlewVersion(int& GlewMajor, int& GlewMinor, int& GlewPatch)
 {
+	if(GLEW_VERSION_4_6)
+	{
+		GlewMajor = 4;
+		GlewMinor = 6;
+		GlewPatch = 0;
+		return;
+	}
+	if(GLEW_VERSION_4_5)
+	{
+		GlewMajor = 4;
+		GlewMinor = 5;
+		GlewPatch = 0;
+		return;
+	}
+	if(GLEW_VERSION_4_4)
+	{
+		GlewMajor = 4;
+		GlewMinor = 4;
+		GlewPatch = 0;
+		return;
+	}
+	if(GLEW_VERSION_4_3)
+	{
+		GlewMajor = 4;
+		GlewMinor = 3;
+		GlewPatch = 0;
+		return;
+	}
+	if(GLEW_VERSION_4_2)
+	{
+		GlewMajor = 4;
+		GlewMinor = 2;
+		GlewPatch = 0;
+		return;
+	}
+	if(GLEW_VERSION_4_1)
+	{
+		GlewMajor = 4;
+		GlewMinor = 1;
+		GlewPatch = 0;
+		return;
+	}
 	if(GLEW_VERSION_4_0)
 	{
 		GlewMajor = 4;
@@ -3644,6 +3877,9 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	CmdSDL.m_RequestedMajor = g_Config.m_GfxOpenGLMajor;
 	CmdSDL.m_RequestedMinor = g_Config.m_GfxOpenGLMinor;
 	CmdSDL.m_RequestedPatch = g_Config.m_GfxOpenGLPatch;
+	CmdSDL.m_GlewMajor = GlewMajor;
+	CmdSDL.m_GlewMinor = GlewMinor;
+	CmdSDL.m_GlewPatch = GlewPatch;
 	CmdSDL.m_pInitError = &InitError;
 	CmdBuffer.AddCommand(CmdSDL);
 	RunBuffer(&CmdBuffer);

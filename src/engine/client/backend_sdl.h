@@ -84,6 +84,7 @@ struct SBackendCapabilites
 	bool m_QuadContainerBuffering;
 
 	bool m_MipMapping;
+	bool m_NPOTTextures;
 	bool m_3DTextures;
 	bool m_2DArrayTextures;
 	bool m_2DArrayTexturesAsExtension;
@@ -121,6 +122,8 @@ protected:
 		int m_Width;
 		int m_Height;
 		int m_RescaleCount;
+		float m_ResizeWidth;
+		float m_ResizeHeight;
 	};
 	CTexture m_aTextures[CCommandBuffer::MAX_TEXTURES];
 	std::atomic<int> *m_pTextureMemoryUsage;
@@ -132,6 +135,7 @@ protected:
 	GLenum m_2DArrayTarget;
 	bool m_Has3DTextures;
 	bool m_HasMipMaps;
+	bool m_HasNPOTTextures;
 
 	bool m_HasShaders;
 	int m_LastBlendMode; //avoid all possible opengl state changes
@@ -164,6 +168,7 @@ protected:
 	static int TexFormatToImageColorChannelCount(int TexFormat);
 	static unsigned char Sample(int w, int h, const unsigned char *pData, int u, int v, int Offset, int ScaleW, int ScaleH, int Bpp);
 	static void *Rescale(int Width, int Height, int NewWidth, int NewHeight, int Format, const unsigned char *pData);
+	static void *Resize(int Width, int Height, int NewWidth, int NewHeight, int Format, const unsigned char *pData);
 
 	virtual void Cmd_Init(const SCommand_Init *pCommand);
 	virtual void Cmd_Shutdown(const SCommand_Shutdown *pCommand) {}
@@ -389,6 +394,10 @@ public:
 		int m_RequestedMajor;
 		int m_RequestedMinor;
 		int m_RequestedPatch;
+
+		int m_GlewMajor;
+		int m_GlewMinor;
+		int m_GlewPatch;
 	};
 
 	struct SCommand_Update_Viewport : public CCommandBuffer::SCommand
