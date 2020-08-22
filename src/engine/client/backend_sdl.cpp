@@ -226,7 +226,7 @@ static float CubicHermite(float A, float B, float C, float D, float t)
 	return (a * t * t * t) + (b * t * t) + (c * t) + d;
 }
 
-void GetPixelClamped(uint8_t* pSourceImage, int x, int y, uint32_t W, uint32_t H, size_t BPP, uint8_t aTmp[])
+static void GetPixelClamped(uint8_t* pSourceImage, int x, int y, uint32_t W, uint32_t H, size_t BPP, uint8_t aTmp[])
 {
 	x = clamp<int>(x, 0, (int)W - 1);
 	y = clamp<int>(y, 0, (int)H - 1);
@@ -237,7 +237,7 @@ void GetPixelClamped(uint8_t* pSourceImage, int x, int y, uint32_t W, uint32_t H
 	}
 }
 
-void SampleBicubic(uint8_t* pSourceImage, float u, float v, uint32_t W, uint32_t H, size_t BPP, uint8_t aSample[])
+static void SampleBicubic(uint8_t* pSourceImage, float u, float v, uint32_t W, uint32_t H, size_t BPP, uint8_t aSample[])
 {
 	float X = (u * W) - 0.5f;
 	int xInt = (int)X;
@@ -3165,6 +3165,14 @@ void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 				pCommand->m_pCapabilities->m_3DTextures = true;
 			}
 
+			if(!pCommand->m_pCapabilities->m_3DTextures && !pCommand->m_pCapabilities->m_2DArrayTextures)
+			{
+				*pCommand->m_pInitError = -2;
+				pCommand->m_pCapabilities->m_ContextMajor = 1;
+				pCommand->m_pCapabilities->m_ContextMinor = 5;
+				pCommand->m_pCapabilities->m_ContextPatch = 0;
+			}
+
 			pCommand->m_pCapabilities->m_TileBuffering = pCommand->m_pCapabilities->m_2DArrayTextures || pCommand->m_pCapabilities->m_3DTextures;
 			pCommand->m_pCapabilities->m_QuadBuffering = false;
 			pCommand->m_pCapabilities->m_TextBuffering = false;
@@ -3218,7 +3226,7 @@ void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 				pCommand->m_pCapabilities->m_ContextMajor = 1;
 				pCommand->m_pCapabilities->m_ContextMinor = 5;
 				pCommand->m_pCapabilities->m_ContextPatch = 0;
-			}	
+			}
 		}
 		else if(MajorV < 2)
 		{
