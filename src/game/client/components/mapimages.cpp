@@ -20,6 +20,8 @@ CMapImages::CMapImages(int TextureSize)
 	m_TextureScale = TextureSize;
 	m_EntitiesIsLoaded = false;
 	m_SpeedupArrowIsLoaded = false;
+
+	mem_zero(m_aTextureUsedByTileOrQuadLayerFlag, sizeof(m_aTextureUsedByTileOrQuadLayerFlag));
 }
 
 void CMapImages::OnInit()
@@ -36,7 +38,7 @@ void CMapImages::OnMapLoad()
 	{
 		Graphics()->UnloadTexture(m_aTextures[i]);
 		m_aTextures[i] = IGraphics::CTextureHandle();
-		m_aTextureUsedByLayer[i] = false;
+		m_aTextureUsedByTileOrQuadLayerFlag[i] = 0;
 	}
 	m_Count = 0;
 
@@ -60,7 +62,15 @@ void CMapImages::OnMapLoad()
 				CMapItemLayerTilemap *pTLayer = (CMapItemLayerTilemap *)pLayer;
 				if(pTLayer->m_Image != -1 && pTLayer->m_Image < (int)(sizeof(m_aTextures) / sizeof(m_aTextures[0])))
 				{
-					m_aTextureUsedByLayer[(size_t)pTLayer->m_Image] = true;
+					m_aTextureUsedByTileOrQuadLayerFlag[(size_t)pTLayer->m_Image] |= 1;
+				}
+			}
+			else if(pLayer->m_Type == LAYERTYPE_QUADS)
+			{
+				CMapItemLayerQuads *pQLayer = (CMapItemLayerQuads *)pLayer;
+				if(pQLayer->m_Image != -1 && pQLayer->m_Image < (int)(sizeof(m_aTextures) / sizeof(m_aTextures[0])))
+				{
+					m_aTextureUsedByTileOrQuadLayerFlag[(size_t)pQLayer->m_Image] |= 2;
 				}
 			}
 		}
@@ -71,18 +81,19 @@ void CMapImages::OnMapLoad()
 	// load new textures
 	for(int i = 0; i < m_Count; i++)
 	{
+		int LoadFlag = (((m_aTextureUsedByTileOrQuadLayerFlag[i] & 1) != 0) ? TextureLoadFlag : 0) | (((m_aTextureUsedByTileOrQuadLayerFlag[i] & 2) != 0) ? 0 : (Graphics()->IsTileBufferingEnabled() ? IGraphics::TEXLOAD_NO_2D_TEXTURE : 0));
 		CMapItemImage *pImg = (CMapItemImage *)pMap->GetItem(Start+i, 0, 0);
 		if(pImg->m_External)
 		{
 			char Buf[256];
 			char *pName = (char *)pMap->GetData(pImg->m_ImageName);
 			str_format(Buf, sizeof(Buf), "mapres/%s.png", pName);
-			m_aTextures[i] = Graphics()->LoadTexture(Buf, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, m_aTextureUsedByLayer[i] ? TextureLoadFlag : 0);
+			m_aTextures[i] = Graphics()->LoadTexture(Buf, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, LoadFlag);
 		}
 		else
 		{
 			void *pData = pMap->GetData(pImg->m_ImageData);
-			m_aTextures[i] = Graphics()->LoadTextureRaw(pImg->m_Width, pImg->m_Height, CImageInfo::FORMAT_RGBA, pData, CImageInfo::FORMAT_RGBA, m_aTextureUsedByLayer[i] ? TextureLoadFlag : 0);
+			m_aTextures[i] = Graphics()->LoadTextureRaw(pImg->m_Width, pImg->m_Height, CImageInfo::FORMAT_RGBA, pData, CImageInfo::FORMAT_RGBA, LoadFlag);
 			pMap->UnloadData(pImg->m_ImageData);
 		}
 	}
@@ -129,7 +140,7 @@ IGraphics::CTextureHandle CMapImages::GetSpeedupArrow()
 {
 	if(!m_SpeedupArrowIsLoaded)
 	{
-		int TextureLoadFlag = Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER : IGraphics::TEXLOAD_TO_3D_TEXTURE_SINGLE_LAYER;
+		int TextureLoadFlag = (Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER : IGraphics::TEXLOAD_TO_3D_TEXTURE_SINGLE_LAYER) | IGraphics::TEXLOAD_NO_2D_TEXTURE;
 		m_SpeedupArrowTexture = Graphics()->LoadTexture(g_pData->m_aImages[IMAGE_SPEEDUP_ARROW].m_pFilename, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, TextureLoadFlag);
 
 		m_SpeedupArrowIsLoaded = true;
@@ -184,7 +195,7 @@ IGraphics::CTextureHandle CMapImages::UploadEntityLayerText(int TextureSize, int
 	UpdateEntityLayerText(pMem, 4, 1024, 1024, TextureSize, YOffset, 1);
 	UpdateEntityLayerText(pMem, 4, 1024, 1024, TextureSize, YOffset, 2, 255);
 
-	int TextureLoadFlag = Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+	int TextureLoadFlag = (Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE) | IGraphics::TEXLOAD_NO_2D_TEXTURE;
 	IGraphics::CTextureHandle Texture = Graphics()->LoadTextureRaw(1024, 1024, CImageInfo::FORMAT_RGBA, pMem, CImageInfo::FORMAT_RGBA, TextureLoadFlag);
 	free(pMem);
 

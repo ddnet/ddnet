@@ -445,6 +445,8 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Heig
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER;
 	if((Flags&IGraphics::TEXLOAD_TO_3D_TEXTURE_SINGLE_LAYER) != 0)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_3D_TEXTURE_SINGLE_LAYER;
+	if((Flags&IGraphics::TEXLOAD_NO_2D_TEXTURE) != 0)
+		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_NO_2D_TEXTURE;
 
 	// copy texture data
 	int MemSize = Width*Height*Cmd.m_PixelSize;

@@ -616,21 +616,30 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 		}
 	}
 
-	glGenTextures(1, &m_aTextures[pCommand->m_Slot].m_Tex);
-	glBindTexture(GL_TEXTURE_2D, m_aTextures[pCommand->m_Slot].m_Tex);
+	if((pCommand->m_Flags&CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0)
+	{
+		glGenTextures(1, &m_aTextures[pCommand->m_Slot].m_Tex);
+		glBindTexture(GL_TEXTURE_2D, m_aTextures[pCommand->m_Slot].m_Tex);
+	}
 
 	if(pCommand->m_Flags&CCommandBuffer::TEXFLAG_NOMIPMAPS || !m_HasMipMaps)
 	{
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexImage2D(GL_TEXTURE_2D, 0, StoreOglformat, Width, Height, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
+		if((pCommand->m_Flags&CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0)
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexImage2D(GL_TEXTURE_2D, 0, StoreOglformat, Width, Height, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
+		}
 	}
 	else
 	{
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
-		glTexImage2D(GL_TEXTURE_2D, 0, StoreOglformat, Width, Height, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
+		if((pCommand->m_Flags&CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0)
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+			glTexImage2D(GL_TEXTURE_2D, 0, StoreOglformat, Width, Height, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
+		}
 
 		int Flag2DArrayTexture = (CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE | CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER);
 		int Flag3DTexture = (CCommandBuffer::TEXFLAG_TO_3D_TEXTURE | CCommandBuffer::TEXFLAG_TO_3D_TEXTURE_SINGLE_LAYER);
@@ -2157,11 +2166,15 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 		IsAndUpdateTextureSlotBound(Slot, pCommand->m_Slot);
 		glActiveTexture(GL_TEXTURE0 + Slot);
 	}
-	glGenTextures(1, &m_aTextures[pCommand->m_Slot].m_Tex);
-	glBindTexture(GL_TEXTURE_2D, m_aTextures[pCommand->m_Slot].m_Tex);
 
-	glGenSamplers(1, &m_aTextures[pCommand->m_Slot].m_Sampler);
-	glBindSampler(Slot, m_aTextures[pCommand->m_Slot].m_Sampler);
+	if((pCommand->m_Flags&CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0)
+	{
+		glGenTextures(1, &m_aTextures[pCommand->m_Slot].m_Tex);
+		glBindTexture(GL_TEXTURE_2D, m_aTextures[pCommand->m_Slot].m_Tex);
+
+		glGenSamplers(1, &m_aTextures[pCommand->m_Slot].m_Sampler);
+		glBindSampler(Slot, m_aTextures[pCommand->m_Slot].m_Sampler);
+	}
 
 	if(Oglformat == GL_RED)
 	{
@@ -2173,24 +2186,30 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 
 	if(pCommand->m_Flags&CCommandBuffer::TEXFLAG_NOMIPMAPS)
 	{
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexImage2D(GL_TEXTURE_2D, 0, StoreOglformat, Width, Height, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
+		if((pCommand->m_Flags&CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0)
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexImage2D(GL_TEXTURE_2D, 0, StoreOglformat, Width, Height, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
+		}
 	}
 	else
 	{
-		glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-		//prevent mipmap display bugs, when zooming out far
-		if(Width >= 1024 && Height >= 1024)
+		if((pCommand->m_Flags&CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0)
 		{
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 5.f);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, 5);
+			glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+			//prevent mipmap display bugs, when zooming out far
+			if(Width >= 1024 && Height >= 1024)
+			{
+				glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 5.f);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, 5);
+			}
+			glTexImage2D(GL_TEXTURE_2D, 0, StoreOglformat, Width, Height, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
+			glGenerateMipmap(GL_TEXTURE_2D);
 		}
-		glTexImage2D(GL_TEXTURE_2D, 0, StoreOglformat, Width, Height, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
-		glGenerateMipmap(GL_TEXTURE_2D);
 
 		if((pCommand->m_Flags&(CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE | CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER)) != 0)
 		{

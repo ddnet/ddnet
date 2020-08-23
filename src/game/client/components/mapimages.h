@@ -9,7 +9,7 @@ class CMapImages : public CComponent
 	friend class CBackground;
 
 	IGraphics::CTextureHandle m_aTextures[64];
-	bool m_aTextureUsedByLayer[64];
+	int m_aTextureUsedByTileOrQuadLayerFlag[64]; // 0: nothing, 1(as flag): tile layer, 2(as flag): quad layer
 	int m_Count;
 
 	const char *m_pEntitiesGameType;
