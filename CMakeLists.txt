@@ -1937,7 +1937,7 @@ endif()
 
 # Antibot
 if(ANTIBOT)
-  set(TARGET_ANTIBOT ddnet-antibot)
+  set(TARGET_ANTIBOT antibot)
   add_library(${TARGET_ANTIBOT} SHARED ${ANTIBOT_SRC})
   list(APPEND TARGETS_OWN ${TARGET_ANTIBOT})
 endif()
