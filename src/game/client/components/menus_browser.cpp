@@ -109,15 +109,26 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			s_aCols[i].m_Rect = Headers;
 	}
 
+	const bool PlayersOrPing = (g_Config.m_BrSort == IServerBrowser::SORT_NUMPLAYERS || g_Config.m_BrSort == IServerBrowser::SORT_PING);
+
 	// do headers
 	for(int i = 0; i < NumCols; i++)
 	{
-		if(DoButton_GridHeader(s_aCols[i].m_Caption, s_aCols[i].m_Caption, g_Config.m_BrSort == s_aCols[i].m_Sort, &s_aCols[i].m_Rect))
+		int Checked = g_Config.m_BrSort == s_aCols[i].m_Sort;
+		if(PlayersOrPing && g_Config.m_BrSortOrder == 2 && (s_aCols[i].m_Sort == IServerBrowser::SORT_NUMPLAYERS || s_aCols[i].m_Sort == IServerBrowser::SORT_PING))
+			Checked = 2;
+
+		if(DoButton_GridHeader(s_aCols[i].m_Caption, s_aCols[i].m_Caption, Checked, &s_aCols[i].m_Rect))
 		{
 			if(s_aCols[i].m_Sort != -1)
 			{
 				if(g_Config.m_BrSort == s_aCols[i].m_Sort)
-					g_Config.m_BrSortOrder ^= 1;
+				{
+					if(PlayersOrPing)
+						g_Config.m_BrSortOrder = (g_Config.m_BrSortOrder+1)%3;
+					else
+						g_Config.m_BrSortOrder = (g_Config.m_BrSortOrder+1)%2;
+				}
 				else
 					g_Config.m_BrSortOrder = 0;
 				g_Config.m_BrSort = s_aCols[i].m_Sort;

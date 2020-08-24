@@ -155,6 +155,19 @@ bool CServerBrowser::SortCompareNumClients(int Index1, int Index2) const
 	return a->m_Info.m_NumClients < b->m_Info.m_NumClients;
 }
 
+bool CServerBrowser::SortCompareNumPlayersAndPing(int Index1, int Index2) const
+{
+	CServerEntry *a = m_ppServerlist[Index1];
+	CServerEntry *b = m_ppServerlist[Index2];
+
+	if(a->m_Info.m_NumFilteredPlayers == b->m_Info.m_NumFilteredPlayers)
+		return a->m_Info.m_Latency > b->m_Info.m_Latency;
+	if(a->m_Info.m_NumFilteredPlayers == 0 || b->m_Info.m_NumFilteredPlayers == 0)
+		return a->m_Info.m_NumFilteredPlayers == 0;
+	else
+		return a->m_Info.m_NumFilteredPlayers - (a->m_Info.m_Latency/100)*MAX_CLIENTS < b->m_Info.m_NumFilteredPlayers - (b->m_Info.m_Latency/100)*MAX_CLIENTS;
+}
+
 void CServerBrowser::Filter()
 {
 	int i = 0, p = 0;
@@ -322,13 +335,13 @@ int CServerBrowser::SortHash() const
 	i |= g_Config.m_BrFilterFriends<<7;
 	i |= g_Config.m_BrFilterPw<<8;
 	i |= g_Config.m_BrSortOrder<<9;
-	i |= g_Config.m_BrFilterCompatversion<<10;
-	i |= g_Config.m_BrFilterPure<<11;
-	i |= g_Config.m_BrFilterPureMap<<12;
-	i |= g_Config.m_BrFilterGametypeStrict<<13;
-	i |= g_Config.m_BrFilterUnfinishedMap<<14;
-	i |= g_Config.m_BrFilterCountry<<15;
-	i |= g_Config.m_BrFilterConnectingPlayers<<16;
+	i |= g_Config.m_BrFilterCompatversion<<11;
+	i |= g_Config.m_BrFilterPure<<12;
+	i |= g_Config.m_BrFilterPureMap<<13;
+	i |= g_Config.m_BrFilterGametypeStrict<<14;
+	i |= g_Config.m_BrFilterUnfinishedMap<<15;
+	i |= g_Config.m_BrFilterCountry<<16;
+	i |= g_Config.m_BrFilterConnectingPlayers<<17;
 	return i;
 }
 
@@ -364,7 +377,9 @@ void CServerBrowser::Sort()
 	Filter();
 
 	// sort
-	if(g_Config.m_BrSort == IServerBrowser::SORT_NAME)
+	if(g_Config.m_BrSortOrder == 2 && (g_Config.m_BrSort == IServerBrowser::SORT_NUMPLAYERS ||g_Config.m_BrSort == IServerBrowser::SORT_PING))
+		std::stable_sort(m_pSortedServerlist, m_pSortedServerlist+m_NumSortedServers, SortWrap(this, &CServerBrowser::SortCompareNumPlayersAndPing));
+	else if(g_Config.m_BrSort == IServerBrowser::SORT_NAME)
 		std::stable_sort(m_pSortedServerlist, m_pSortedServerlist+m_NumSortedServers, SortWrap(this, &CServerBrowser::SortCompareName));
 	else if(g_Config.m_BrSort == IServerBrowser::SORT_PING)
 		std::stable_sort(m_pSortedServerlist, m_pSortedServerlist+m_NumSortedServers, SortWrap(this, &CServerBrowser::SortComparePing));
