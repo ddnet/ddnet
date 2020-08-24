@@ -1566,7 +1566,7 @@ void CGameClient::OnNewSnapshot()
 	{
 		CNetMsg_Cl_ShowDistance Msg;
 		float x, y;
-		RenderTools()->CalcScreenParams(Graphics()->ScreenAspect(), ZoomToSend, &x, &y);
+		RenderTools()->CalcScreenParams(Graphics()->ScreenAspect(), ZoomToSend * 1.25, &x, &y);
 		Msg.m_X = x;
 		Msg.m_Y = y;
 		CMsgPacker Packer(Msg.MsgID(), false);
