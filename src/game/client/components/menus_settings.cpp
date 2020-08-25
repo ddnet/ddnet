@@ -298,7 +298,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	if(m_Dummy)
 	{
 		pName = g_Config.m_ClDummyName;
-		pNameFallback = "";
+		pNameFallback = Client()->DummyName();
 		pClan = g_Config.m_ClDummyClan;
 		pCountry = &g_Config.m_ClDummyCountry;
 	}

@@ -1076,6 +1076,29 @@ const char *CClient::PlayerName()
 	return "nameless tee";
 }
 
+const char *CClient::DummyName()
+{
+	if(g_Config.m_ClDummyName[0])
+	{
+		return g_Config.m_ClDummyName;
+	}
+	const char *pBase = 0;
+	if(g_Config.m_PlayerName[0])
+	{
+		pBase = g_Config.m_PlayerName;
+	}
+	else if(g_Config.m_SteamName[0])
+	{
+		pBase = g_Config.m_SteamName;
+	}
+	if(pBase)
+	{
+		str_format(m_aDummyNameBuf, sizeof(m_aDummyNameBuf), "[D] %s", pBase);
+		return m_aDummyNameBuf;
+	}
+	return "brainless tee";
+}
+
 const char *CClient::ErrorString()
 {
 	return m_NetClient[CLIENT_MAIN].ErrorString();
