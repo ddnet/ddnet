@@ -145,14 +145,14 @@ bool CServerBrowser::SortCompareNumPlayers(int Index1, int Index2) const
 {
 	CServerEntry *a = m_ppServerlist[Index1];
 	CServerEntry *b = m_ppServerlist[Index2];
-	return a->m_Info.m_NumFilteredPlayers < b->m_Info.m_NumFilteredPlayers;
+	return a->m_Info.m_NumFilteredPlayers > b->m_Info.m_NumFilteredPlayers;
 }
 
 bool CServerBrowser::SortCompareNumClients(int Index1, int Index2) const
 {
 	CServerEntry *a = m_ppServerlist[Index1];
 	CServerEntry *b = m_ppServerlist[Index2];
-	return a->m_Info.m_NumClients < b->m_Info.m_NumClients;
+	return a->m_Info.m_NumClients > b->m_Info.m_NumClients;
 }
 
 bool CServerBrowser::SortCompareNumPlayersAndPing(int Index1, int Index2) const
