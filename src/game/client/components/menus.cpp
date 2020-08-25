@@ -174,7 +174,9 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 
 int CMenus::DoButton_GridHeader(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {
-	if(Checked)
+	if(Checked == 2)
+		RenderTools()->DrawUIRect(pRect, ColorRGBA(1,0.98f,0.5f,0.55f), CUI::CORNER_T, 5.0f);
+	else if(Checked)
 		RenderTools()->DrawUIRect(pRect, ColorRGBA(1,1,1,0.5f), CUI::CORNER_T, 5.0f);
 	CUIRect t;
 	pRect->VSplitLeft(5.0f, 0, &t);
