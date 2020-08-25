@@ -30,6 +30,7 @@
 #include <engine/masterserver.h>
 #include <engine/serverbrowser.h>
 #include <engine/sound.h>
+#include <engine/steam.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
 
@@ -1060,6 +1061,42 @@ void CClient::Restart()
 void CClient::Quit()
 {
 	SetState(IClient::STATE_QUITING);
+}
+
+const char *CClient::PlayerName()
+{
+	if(g_Config.m_PlayerName[0])
+	{
+		return g_Config.m_PlayerName;
+	}
+	if(g_Config.m_SteamName[0])
+	{
+		return g_Config.m_SteamName;
+	}
+	return "nameless tee";
+}
+
+const char *CClient::DummyName()
+{
+	if(g_Config.m_ClDummyName[0])
+	{
+		return g_Config.m_ClDummyName;
+	}
+	const char *pBase = 0;
+	if(g_Config.m_PlayerName[0])
+	{
+		pBase = g_Config.m_PlayerName;
+	}
+	else if(g_Config.m_SteamName[0])
+	{
+		pBase = g_Config.m_SteamName;
+	}
+	if(pBase)
+	{
+		str_format(m_aDummyNameBuf, sizeof(m_aDummyNameBuf), "[D] %s", pBase);
+		return m_aDummyNameBuf;
+	}
+	return "brainless tee";
 }
 
 const char *CClient::ErrorString()
@@ -2829,6 +2866,7 @@ void CClient::InitInterfaces()
 #if defined(CONF_AUTOUPDATE)
 	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
 #endif
+	m_pSteam = Kernel()->RequestInterface<ISteam>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
 	m_DemoEditor.Init(m_pGameClient->NetVersion(), &m_SnapshotDelta, m_pConsole, m_pStorage);
@@ -2948,6 +2986,11 @@ void CClient::Run()
 	// load data
 	if(!LoadData())
 		return;
+
+	if(Steam()->GetPlayerName())
+	{
+		str_copy(g_Config.m_SteamName, Steam()->GetPlayerName(), sizeof(g_Config.m_SteamName));
+	}
 
 	GameClient()->OnInit();
 
@@ -4101,6 +4144,7 @@ int main(int argc, const char **argv) // ignore_convention
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateEditor(), false);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateGameClient(), false);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pStorage);
+		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateSteam());
 
 		if(RegisterFail)
 		{

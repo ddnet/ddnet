@@ -864,7 +864,7 @@ void CMenus::GhostlistPopulate()
 
 	for(int i = 0; i < m_lGhosts.size(); i++)
 	{
-		if(str_comp(m_lGhosts[i].m_aPlayer, g_Config.m_PlayerName) == 0 && (!pOwnGhost || m_lGhosts[i] < *pOwnGhost))
+		if(str_comp(m_lGhosts[i].m_aPlayer, Client()->PlayerName()) == 0 && (!pOwnGhost || m_lGhosts[i] < *pOwnGhost))
 			pOwnGhost = &m_lGhosts[i];
 	}
 

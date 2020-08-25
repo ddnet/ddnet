@@ -290,27 +290,45 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	CUIRect Button, Label, Dummy;
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
-	char *Name = g_Config.m_PlayerName;
-	char *Clan = g_Config.m_PlayerClan;
-	int *Country = &g_Config.m_PlayerCountry;
+	char *pName = g_Config.m_PlayerName;
+	const char *pNameFallback = Client()->PlayerName();
+	char *pClan = g_Config.m_PlayerClan;
+	int *pCountry = &g_Config.m_PlayerCountry;
 
 	if(m_Dummy)
 	{
-		Name = g_Config.m_ClDummyName;
-		Clan = g_Config.m_ClDummyClan;
-		Country = &g_Config.m_ClDummyCountry;
+		pName = g_Config.m_ClDummyName;
+		pNameFallback = Client()->DummyName();
+		pClan = g_Config.m_ClDummyClan;
+		pCountry = &g_Config.m_ClDummyCountry;
 	}
 
 	// player name
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	Button.VSplitLeft(80.0f, &Label, &Button);
-	Button.VSplitLeft(200.0f, &Button, &Dummy);
 	Button.VSplitLeft(150.0f, &Button, 0);
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Name"));
 	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
 	static float s_OffsetName = 0.0f;
-	if(DoEditBox(Name, &Button, Name, sizeof(g_Config.m_PlayerName), 14.0f, &s_OffsetName))
+	if(DoEditBox(pName, &Button, pName, sizeof(g_Config.m_PlayerName), 14.0f, &s_OffsetName, false, CUI::CORNER_ALL, pNameFallback))
+	{
+		if(m_Dummy)
+			m_NeedSendDummyinfo = true;
+		else
+			m_NeedSendinfo = true;
+	}
+
+	// player clan
+	MainView.HSplitTop(5.0f, 0, &MainView);
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	Button.VSplitLeft(80.0f, &Label, &Button);
+	Button.VSplitLeft(200.0f, &Button, &Dummy);
+	Button.VSplitLeft(150.0f, &Button, 0);
+	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Clan"));
+	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
+	static float s_OffsetClan = 0.0f;
+	if(DoEditBox(pClan, &Button, pClan, sizeof(g_Config.m_PlayerClan), 14.0f, &s_OffsetClan))
 	{
 		if(m_Dummy)
 			m_NeedSendDummyinfo = true;
@@ -323,24 +341,8 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 		m_Dummy ^= 1;
 	}
 
-	// player clan
-	MainView.HSplitTop(5.0f, 0, &MainView);
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	Button.VSplitLeft(80.0f, &Label, &Button);
-	Button.VSplitLeft(150.0f, &Button, 0);
-	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Clan"));
-	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
-	static float s_OffsetClan = 0.0f;
-	if(DoEditBox(Clan, &Button, Clan, sizeof(g_Config.m_PlayerClan), 14.0f, &s_OffsetClan))
-	{
-		if(m_Dummy)
-			m_NeedSendDummyinfo = true;
-		else
-			m_NeedSendinfo = true;
-	}
-
 	static bool s_ListBoxUsed = false;
-	if(UI()->ActiveItem() == Clan || UI()->ActiveItem() == Name)
+	if(UI()->ActiveItem() == pClan || UI()->ActiveItem() == pName)
 		s_ListBoxUsed = false;
 
 	// country flag selector
@@ -352,7 +354,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	for(int i = 0; i < m_pClient->m_pCountryFlags->Num(); ++i)
 	{
 		const CCountryFlags::CCountryFlag *pEntry = m_pClient->m_pCountryFlags->GetByIndex(i);
-		if(pEntry->m_CountryCode == *Country)
+		if(pEntry->m_CountryCode == *pCountry)
 			OldSelected = i;
 
 		CListboxItem Item = UiDoListboxNextItem(&pEntry->m_CountryCode, OldSelected == i, s_ListBoxUsed);
@@ -378,7 +380,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 
 	if(OldSelected != NewSelected)
 	{
-		*Country = m_pClient->m_pCountryFlags->GetByIndex(NewSelected)->m_CountryCode;
+		*pCountry = m_pClient->m_pCountryFlags->GetByIndex(NewSelected)->m_CountryCode;
 		if(m_Dummy)
 			m_NeedSendDummyinfo = true;
 		else
@@ -1533,13 +1535,13 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			TextRender()->TextColor(rgb);
 
 
-			char name[16];
-			str_copy(name, g_Config.m_PlayerName, sizeof(name));
-			str_format(aBuf, sizeof(aBuf), "*** '%s' entered and joined the spectators", name);
+			char aName[16];
+			str_copy(aName, Client()->PlayerName(), sizeof(aName));
+			str_format(aBuf, sizeof(aBuf), "*** '%s' entered and joined the spectators", aName);
 			while(TextRender()->TextWidth(0, 12.0f, aBuf, -1, -1.0f) > Label.w)
 			{
-				name[str_length(name) - 1] = 0;
-				str_format(aBuf, sizeof(aBuf), "*** '%s' entered and joined the spectators", name);
+				aName[str_length(aName) - 1] = 0;
+				str_format(aBuf, sizeof(aBuf), "*** '%s' entered and joined the spectators", aName);
 			}
 			UI()->DoLabelScaled(&Label, aBuf, 12.0f, -1);
 			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -1570,13 +1572,13 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 			ColorRGBA rgb = color_cast<ColorRGBA>(HMColor);
 			TextRender()->TextColor(rgb);
-			char name[16];
-			str_copy(name, g_Config.m_PlayerName, sizeof(name));
-			str_format(aBuf, sizeof(aBuf), ": %s: %s", name, Localize ("Look out!"));
+			char aName[16];
+			str_copy(aName, Client()->PlayerName(), sizeof(aName));
+			str_format(aBuf, sizeof(aBuf), ": %s: %s", aName, Localize ("Look out!"));
 			while(TextRender()->TextWidth(0, 12.0f, aBuf, -1, -1.0f) > Button.w)
 			{
-				name[str_length(name) - 1] = 0;
-				str_format(aBuf, sizeof(aBuf), ": %s: %s", name, Localize("Look out!"));
+				aName[str_length(aName) - 1] = 0;
+				str_format(aBuf, sizeof(aBuf), ": %s: %s", aName, Localize("Look out!"));
 			}
 			UI()->DoLabelScaled(&Button, aBuf, 12.0f, -1);
 
