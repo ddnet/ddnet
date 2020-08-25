@@ -1,5 +1,3 @@
-#version 330
-
 layout (location = 0) in vec2 inVertex;
 layout (location = 1) in vec2 inVertexTexCoord;
 layout (location = 2) in vec4 inVertexColor;
