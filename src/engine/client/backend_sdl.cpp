@@ -402,7 +402,7 @@ void CCommandProcessorFragment_OpenGL::SetState(const CCommandBuffer::SState &St
 		glDisable(m_2DArrayTarget);
 	}
 
-	if(m_HasShaders)
+	if(m_HasShaders && IsNewApi())
 	{
 		glBindSampler(0, 0);
 	}
@@ -662,31 +662,39 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 			
 			glBindTexture(Target, m_aTextures[pCommand->m_Slot].m_Tex2DArray);
 
-			glGenSamplers(1, &m_aTextures[pCommand->m_Slot].m_Sampler2DArray);
-			glBindSampler(0, m_aTextures[pCommand->m_Slot].m_Sampler2DArray);
+			if(IsNewApi())
+			{
+				glGenSamplers(1, &m_aTextures[pCommand->m_Slot].m_Sampler2DArray);
+				glBindSampler(0, m_aTextures[pCommand->m_Slot].m_Sampler2DArray);
+			}
 
 			glTexParameteri(Target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			if(Is3DTexture)
 			{
 				glTexParameteri(Target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				if(IsNewApi())
+					glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			}
 			else
 			{
 				glTexParameteri(Target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
 				glTexParameteri(Target, GL_GENERATE_MIPMAP, GL_TRUE);
-				glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+				if(IsNewApi())
+					glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
 			}
 			
 			glTexParameteri(Target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(Target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glTexParameteri(Target, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
 
-			glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
+			if(IsNewApi())
+			{
+				glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
 
-			glBindSampler(0, 0);
+				glBindSampler(0, 0);
+			}
 
 			int ImageColorChannels = TexFormatToImageColorChannelCount(pCommand->m_Format);
 
@@ -938,12 +946,14 @@ void CCommandProcessorFragment_OpenGL2::SetState(const CCommandBuffer::SState &S
 				if(!Use2DArrayTextures)
 				{
 					glBindTexture(GL_TEXTURE_2D, m_aTextures[State.m_Texture].m_Tex);
-					glBindSampler(Slot, m_aTextures[State.m_Texture].m_Sampler);
+					if(IsNewApi())
+						glBindSampler(Slot, m_aTextures[State.m_Texture].m_Sampler);
 				}
 				else
 				{
 					glBindTexture(GL_TEXTURE_2D_ARRAY, m_aTextures[State.m_Texture].m_Tex2DArray);
-					glBindSampler(Slot, m_aTextures[State.m_Texture].m_Sampler2DArray);
+					if(IsNewApi())
+						glBindSampler(Slot, m_aTextures[State.m_Texture].m_Sampler2DArray);
 				}
 			}
 		}
@@ -955,7 +965,8 @@ void CCommandProcessorFragment_OpenGL2::SetState(const CCommandBuffer::SState &S
 				if(!IsNewApi())
 					glEnable(GL_TEXTURE_2D);
 				glBindTexture(GL_TEXTURE_2D, m_aTextures[State.m_Texture].m_Tex);
-				glBindSampler(Slot, m_aTextures[State.m_Texture].m_Sampler);
+				if(IsNewApi())
+					glBindSampler(Slot, m_aTextures[State.m_Texture].m_Sampler);
 			}
 			else
 			{
@@ -964,14 +975,16 @@ void CCommandProcessorFragment_OpenGL2::SetState(const CCommandBuffer::SState &S
 					if(!IsNewApi())
 						glEnable(GL_TEXTURE_3D);
 					glBindTexture(GL_TEXTURE_3D, m_aTextures[State.m_Texture].m_Tex2DArray);
-					glBindSampler(Slot, m_aTextures[State.m_Texture].m_Sampler2DArray);
+					if(IsNewApi())
+						glBindSampler(Slot, m_aTextures[State.m_Texture].m_Sampler2DArray);
 				}
 				else
 				{
 					if(!IsNewApi())
 						glEnable(m_2DArrayTarget);
 					glBindTexture(m_2DArrayTarget, m_aTextures[State.m_Texture].m_Tex2DArray);
-					glBindSampler(Slot, m_aTextures[State.m_Texture].m_Sampler2DArray);
+					if(IsNewApi())
+						glBindSampler(Slot, m_aTextures[State.m_Texture].m_Sampler2DArray);
 				}				
 			}
 		}
@@ -995,12 +1008,18 @@ void CCommandProcessorFragment_OpenGL2::SetState(const CCommandBuffer::SState &S
 			switch (State.m_WrapMode)
 			{
 			case CCommandBuffer::WRAP_REPEAT:
-				glSamplerParameteri(m_aTextures[State.m_Texture].m_Sampler, GL_TEXTURE_WRAP_S, GL_REPEAT);
-				glSamplerParameteri(m_aTextures[State.m_Texture].m_Sampler, GL_TEXTURE_WRAP_T, GL_REPEAT);
+				if(IsNewApi())
+				{
+					glSamplerParameteri(m_aTextures[State.m_Texture].m_Sampler, GL_TEXTURE_WRAP_S, GL_REPEAT);
+					glSamplerParameteri(m_aTextures[State.m_Texture].m_Sampler, GL_TEXTURE_WRAP_T, GL_REPEAT);
+				}
 				break;
 			case CCommandBuffer::WRAP_CLAMP:
-				glSamplerParameteri(m_aTextures[State.m_Texture].m_Sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-				glSamplerParameteri(m_aTextures[State.m_Texture].m_Sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				if(IsNewApi())
+				{
+					glSamplerParameteri(m_aTextures[State.m_Texture].m_Sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+					glSamplerParameteri(m_aTextures[State.m_Texture].m_Sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				}
 				break;
 			default:
 				dbg_msg("render", "unknown wrapmode %d\n", State.m_WrapMode);
