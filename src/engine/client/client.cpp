@@ -3027,7 +3027,6 @@ void CClient::Run()
 		RequestDDNetInfo();
 
 	bool LastD = false;
-	bool LastQ = false;
 	bool LastE = false;
 	bool LastG = false;
 
@@ -3107,13 +3106,6 @@ void CClient::Run()
 
 		// update sound
 		Sound()->Update();
-
-		// panic quit button
-		if(CtrlShiftKey(KEY_Q, LastQ))
-		{
-			Quit();
-			break;
-		}
 
 		if(CtrlShiftKey(KEY_D, LastD))
 			g_Config.m_Debug ^= 1;
