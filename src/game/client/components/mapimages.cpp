@@ -191,13 +191,13 @@ int CMapImages::GetTextureScale()
 	return m_TextureScale;
 }
 
-IGraphics::CTextureHandle CMapImages::UploadEntityLayerText(int TextureSize, int YOffset)
+IGraphics::CTextureHandle CMapImages::UploadEntityLayerText(int TextureSize, int MaxWidth, int YOffset)
 {	
 	void *pMem = calloc(1024 * 1024 * 4, 1);
 
-	UpdateEntityLayerText(pMem, 4, 1024, 1024, TextureSize, YOffset, 0);
-	UpdateEntityLayerText(pMem, 4, 1024, 1024, TextureSize, YOffset, 1);
-	UpdateEntityLayerText(pMem, 4, 1024, 1024, TextureSize, YOffset, 2, 255);
+	UpdateEntityLayerText(pMem, 4, 1024, 1024, TextureSize, MaxWidth, YOffset, 0);
+	UpdateEntityLayerText(pMem, 4, 1024, 1024, TextureSize, MaxWidth, YOffset, 1);
+	UpdateEntityLayerText(pMem, 4, 1024, 1024, TextureSize, MaxWidth, YOffset, 2, 255);
 
 	int TextureLoadFlag = (Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE) | IGraphics::TEXLOAD_NO_2D_TEXTURE;
 	IGraphics::CTextureHandle Texture = Graphics()->LoadTextureRaw(1024, 1024, CImageInfo::FORMAT_RGBA, pMem, CImageInfo::FORMAT_RGBA, TextureLoadFlag);
@@ -206,7 +206,7 @@ IGraphics::CTextureHandle CMapImages::UploadEntityLayerText(int TextureSize, int
 	return Texture;
 }
 
-void CMapImages::UpdateEntityLayerText(void* pTexBuffer, int ImageColorChannelCount, int TexWidth, int TexHeight, int TextureSize, int YOffset, int NumbersPower, int MaxNumber)
+void CMapImages::UpdateEntityLayerText(void* pTexBuffer, int ImageColorChannelCount, int TexWidth, int TexHeight, int TextureSize, int MaxWidth, int YOffset, int NumbersPower, int MaxNumber)
 {
 	char aBuf[4];
 	int DigitsCount = NumbersPower+1;
@@ -218,8 +218,8 @@ void CMapImages::UpdateEntityLayerText(void* pTexBuffer, int ImageColorChannelCo
 	
 	str_format(aBuf, 4, "%d", CurrentNumber);
 	
-	int CurrentNumberSuitableFontSize = TextRender()->AdjustFontSize(aBuf, DigitsCount, TextureSize);
-	int UniversalSuitableFontSize = CurrentNumberSuitableFontSize*0.9; // should be smoothed enough to fit any digits combination
+	int CurrentNumberSuitableFontSize = TextRender()->AdjustFontSize(aBuf, DigitsCount, TextureSize, MaxWidth);
+	int UniversalSuitableFontSize = CurrentNumberSuitableFontSize*0.95f; // should be smoothed enough to fit any digits combination
 
 	int ApproximateTextWidth = TextRender()->CalculateTextWidth(aBuf, DigitsCount, 0, UniversalSuitableFontSize);
 	int XOffSet = (64-ApproximateTextWidth)/2;
@@ -243,16 +243,16 @@ void CMapImages::InitOverlayTextures()
 	
 	if(m_OverlayBottomTexture == -1)
 	{
-		m_OverlayBottomTexture = UploadEntityLayerText(TextureSize/2, 32+TextureToVerticalCenterOffset/2);
+		m_OverlayBottomTexture = UploadEntityLayerText(TextureSize/2, 64, 32+TextureToVerticalCenterOffset/2);
 	}
 
 	if(m_OverlayTopTexture == -1)
 	{
-		m_OverlayTopTexture = UploadEntityLayerText(TextureSize/2, TextureToVerticalCenterOffset/2);
+		m_OverlayTopTexture = UploadEntityLayerText(TextureSize/2, 64, TextureToVerticalCenterOffset/2);
 	}
 
 	if(m_OverlayCenterTexture == -1)
 	{
-		m_OverlayCenterTexture = UploadEntityLayerText(TextureSize, TextureToVerticalCenterOffset);
+		m_OverlayCenterTexture = UploadEntityLayerText(TextureSize, 64, TextureToVerticalCenterOffset);
 	}
 }
