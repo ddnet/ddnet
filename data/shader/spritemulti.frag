@@ -1,3 +1,5 @@
+#version 330
+
 uniform sampler2D textureSampler;
 
 uniform vec4 VerticesColor;

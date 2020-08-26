@@ -907,7 +907,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	static int s_GfxFsaaSamples = g_Config.m_GfxFsaaSamples;
 	static int s_GfxTextureQuality = g_Config.m_GfxTextureQuality;
 	static int s_GfxTextureCompression = g_Config.m_GfxTextureCompression;
-	static int s_GfxOpenGLVersion = (g_Config.m_GfxOpenGLMajor == 3 && g_Config.m_GfxOpenGLMinor == 3) || g_Config.m_GfxOpenGLMajor >= 4;
+	static int s_GfxOpenGLVersion = g_Config.m_GfxOpenGL3;
 	static int s_GfxEnableTextureUnitOptimization = g_Config.m_GfxEnableTextureUnitOptimization;
 	static int s_GfxUsePreinitBuffer = g_Config.m_GfxUsePreinitBuffer;
 	static int s_GfxHighdpi = g_Config.m_GfxHighdpi;
@@ -1033,27 +1033,13 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		g_Config.m_GfxHighDetail ^= 1;
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	bool IsNewOpenGL = (g_Config.m_GfxOpenGLMajor == 3 && g_Config.m_GfxOpenGLMinor == 3) || g_Config.m_GfxOpenGLMajor >= 4;
-	if(DoButton_CheckBox(&g_Config.m_GfxOpenGLMajor, Localize("Use OpenGL 3.3 (experimental)"), IsNewOpenGL, &Button))
+	if(DoButton_CheckBox(&g_Config.m_GfxOpenGL3, Localize("Use OpenGL 3.3 (experimental)"), g_Config.m_GfxOpenGL3, &Button))
 	{
 		CheckSettings = true;
-		if(IsNewOpenGL)
-		{
-			g_Config.m_GfxOpenGLMajor = 2;
-			g_Config.m_GfxOpenGLMinor = 1;
-			g_Config.m_GfxOpenGLPatch = 0;
-			IsNewOpenGL = false;
-		}
-		else
-		{
-			g_Config.m_GfxOpenGLMajor = 3;
-			g_Config.m_GfxOpenGLMinor = 3;
-			g_Config.m_GfxOpenGLPatch = 0;
-			IsNewOpenGL = true;
-		}
+		g_Config.m_GfxOpenGL3 ^= 1;
 	}
 
-	if(IsNewOpenGL)
+	if(g_Config.m_GfxOpenGL3)
 	{
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		if(DoButton_CheckBox(&g_Config.m_GfxUsePreinitBuffer, Localize("Preinit VBO (iGPUs only)"), g_Config.m_GfxUsePreinitBuffer, &Button))
@@ -1088,7 +1074,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			s_GfxFsaaSamples == g_Config.m_GfxFsaaSamples &&
 			s_GfxTextureQuality == g_Config.m_GfxTextureQuality &&
 			s_GfxTextureCompression == g_Config.m_GfxTextureCompression &&
-			s_GfxOpenGLVersion == (int)IsNewOpenGL &&
+			s_GfxOpenGLVersion == g_Config.m_GfxOpenGL3 &&
 			s_GfxUsePreinitBuffer == g_Config.m_GfxUsePreinitBuffer &&
 			s_GfxEnableTextureUnitOptimization == g_Config.m_GfxEnableTextureUnitOptimization &&
 			s_GfxHighdpi == g_Config.m_GfxHighdpi)

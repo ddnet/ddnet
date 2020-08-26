@@ -1,3 +1,5 @@
+#version 330
+
 uniform int isTextured;
 uniform sampler2D textureSampler;
 

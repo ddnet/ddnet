@@ -1,13 +1,15 @@
 #version 330
 
 layout (location = 0) in vec4 inVertex;
-layout (location = 1) in vec4 inColor;
+layout (location = 1) in vec2 inVertexTexCoord;
+layout (location = 2) in vec4 inColor;
 
 uniform mat4x2 Pos;
 
 uniform vec2 Offset;
 uniform float Rotation;
 
+noperspective out vec2 texCoord;
 noperspective out vec4 quadColor;
 
 void main()
@@ -27,5 +29,6 @@ void main()
 	FinalPos.y = FinalPos.y / 1024.0 + Offset.y;
 
 	gl_Position = vec4(Pos * vec4(FinalPos, 0.0, 1.0), 0.0, 1.0);
+	texCoord = inVertexTexCoord;
 	quadColor = inColor;
 }

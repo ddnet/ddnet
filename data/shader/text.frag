@@ -1,3 +1,5 @@
+#version 330
+
 uniform sampler2D textSampler;
 uniform sampler2D textOutlineSampler;
 

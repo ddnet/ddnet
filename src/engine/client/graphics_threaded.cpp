@@ -68,7 +68,7 @@ void CGraphics_Threaded::FlushVertices(bool KeepVertices)
 
 	if(m_Drawing == DRAWING_QUADS)
 	{
-		if(g_Config.m_GfxQuadAsTriangle && !m_IsNewOpenGL)
+		if(g_Config.m_GfxQuadAsTriangle && !m_UseOpenGL3_3)
 		{
 			Cmd.m_PrimType = CCommandBuffer::PRIMTYPE_TRIANGLES;
 			Cmd.m_PrimCount = NumVerts/3;
@@ -437,16 +437,6 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Heig
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_COMPRESSED;
 	if(g_Config.m_GfxTextureQuality || Flags&TEXLOAD_NORESAMPLE)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_QUALITY;
-	if((Flags&IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE) != 0)
-		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE;
-	if((Flags&IGraphics::TEXLOAD_TO_3D_TEXTURE) != 0)
-		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_3D_TEXTURE;
-	if((Flags&IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER) != 0)
-		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER;
-	if((Flags&IGraphics::TEXLOAD_TO_3D_TEXTURE_SINGLE_LAYER) != 0)
-		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_3D_TEXTURE_SINGLE_LAYER;
-	if((Flags&IGraphics::TEXLOAD_NO_2D_TEXTURE) != 0)
-		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_NO_2D_TEXTURE;
 
 	// copy texture data
 	int MemSize = Width*Height*Cmd.m_PixelSize;
@@ -715,7 +705,7 @@ void CGraphics_Threaded::ChangeColorOfCurrentQuadVertices(float r, float g, floa
 
 void CGraphics_Threaded::ChangeColorOfQuadVertices(int QuadOffset, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
 {
-	if(g_Config.m_GfxQuadAsTriangle && !m_IsNewOpenGL)
+	if(g_Config.m_GfxQuadAsTriangle && !m_UseOpenGL3_3)
 	{
 		m_aVertices[QuadOffset * 6].m_Color.r = r;
 		m_aVertices[QuadOffset * 6].m_Color.g = g;
@@ -816,7 +806,7 @@ void CGraphics_Threaded::QuadsDrawTL(const CQuadItem *pArray, int Num)
 
 	dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->QuadsDrawTL without begin");
 
-	if(g_Config.m_GfxQuadAsTriangle && !m_IsNewOpenGL)
+	if(g_Config.m_GfxQuadAsTriangle && !m_UseOpenGL3_3)
 	{
 		for(int i = 0; i < Num; ++i)
 		{
@@ -904,7 +894,7 @@ void CGraphics_Threaded::QuadsDrawFreeform(const CFreeformItem *pArray, int Num)
 {
 	dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->QuadsDrawFreeform without begin");
 
-	if(g_Config.m_GfxQuadAsTriangle && !m_IsNewOpenGL)
+	if(g_Config.m_GfxQuadAsTriangle && !m_UseOpenGL3_3)
 	{
 		for(int i = 0; i < Num; ++i)
 		{
@@ -1010,6 +1000,15 @@ void CGraphics_Threaded::RenderTileLayer(int BufferContainerIndex, float *pColor
 	Cmd.m_IndicesDrawNum = NumIndicesOffet;
 	Cmd.m_BufferContainerIndex = BufferContainerIndex;
 	mem_copy(&Cmd.m_Color, pColor, sizeof(Cmd.m_Color));
+	float ScreenZoomRatio = ScreenWidth() / (m_State.m_ScreenBR.x - m_State.m_ScreenTL.x);
+	//the number of pixels we would skip in the fragment shader -- basically the LOD
+	float LODFactor = (64.f / (32.f * ScreenZoomRatio));
+	//log2 gives us the amount of halving the texture for mipmapping
+	int LOD = (int)log2f(LODFactor);
+	//5 because log2(1024/(2^5)) is 5 -- 2^5 = 32 which would mean 2 pixels per tile index
+	if(LOD > 5) LOD = 5;
+	if(LOD < 0) LOD = 0;
+	Cmd.m_LOD = LOD;
 
 	void *Data = m_pCommandBuffer->AllocData((sizeof(char*) + sizeof(unsigned int))*NumIndicesOffet);
 	if(Data == 0x0)
@@ -1066,6 +1065,16 @@ void CGraphics_Threaded::RenderBorderTiles(int BufferContainerIndex, float *pCol
 	Cmd.m_DrawNum = DrawNum;
 	Cmd.m_BufferContainerIndex = BufferContainerIndex;
 	mem_copy(&Cmd.m_Color, pColor, sizeof(Cmd.m_Color));
+	float ScreenZoomRatio = ScreenWidth() / (m_State.m_ScreenBR.x - m_State.m_ScreenTL.x);
+	//the number of pixels we would skip in the fragment shader -- basically the LOD
+	float LODFactor = (64.f / (32.f * ScreenZoomRatio));
+	//log2 gives us the amount of halving the texture for mipmapping
+	int LOD = (int)log2f(LODFactor);
+	if(LOD > 5)
+		LOD = 5;
+	if(LOD < 0)
+		LOD = 0;
+	Cmd.m_LOD = LOD;
 
 	Cmd.m_pIndicesOffset = pIndexBufferOffset;
 	Cmd.m_JumpIndex = JumpIndex;
@@ -1100,6 +1109,16 @@ void CGraphics_Threaded::RenderBorderTileLines(int BufferContainerIndex, float *
 	Cmd.m_DrawNum = RedrawNum;
 	Cmd.m_BufferContainerIndex = BufferContainerIndex;
 	mem_copy(&Cmd.m_Color, pColor, sizeof(Cmd.m_Color));
+	float ScreenZoomRatio = ScreenWidth() / (m_State.m_ScreenBR.x - m_State.m_ScreenTL.x);
+	//the number of pixels we would skip in the fragment shader -- basically the LOD
+	float LODFactor = (64.f / (32.f * ScreenZoomRatio));
+	//log2 gives us the amount of halving the texture for mipmapping
+	int LOD = (int)log2f(LODFactor);
+	if(LOD > 5)
+		LOD = 5;
+	if(LOD < 0)
+		LOD = 0;
+	Cmd.m_LOD = LOD;
 
 	Cmd.m_pIndicesOffset = pIndexBufferOffset;
 
@@ -1209,7 +1228,7 @@ int CGraphics_Threaded::CreateQuadContainer()
 
 void CGraphics_Threaded::QuadContainerUpload(int ContainerIndex)
 {
-	if(IsQuadContainerBufferingEnabled())
+	if(m_UseOpenGL3_3)
 	{
 		SQuadContainer& Container = m_QuadContainers[ContainerIndex];
 		if(Container.m_Quads.size() > 0)
@@ -1345,7 +1364,7 @@ void CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CFreeformItem
 void CGraphics_Threaded::QuadContainerReset(int ContainerIndex)
 {
 	SQuadContainer& Container = m_QuadContainers[ContainerIndex];
-	if(IsQuadContainerBufferingEnabled())
+	if(m_UseOpenGL3_3)
 	{
 		if(Container.m_QuadBufferContainerIndex != -1)
 			DeleteBufferContainer(Container.m_QuadBufferContainerIndex, true);
@@ -1378,7 +1397,7 @@ void CGraphics_Threaded::RenderQuadContainer(int ContainerIndex, int QuadOffset,
 	if((int)Container.m_Quads.size() < QuadOffset + QuadDrawNum || QuadDrawNum == 0)
 		return;
 
-	if(IsQuadContainerBufferingEnabled())
+	if(m_UseOpenGL3_3)
 	{
 		if(Container.m_QuadBufferContainerIndex == -1)
 			return;
@@ -1436,7 +1455,7 @@ void CGraphics_Threaded::RenderQuadContainerAsSprite(int ContainerIndex, int Qua
 	if((int)Container.m_Quads.size() < QuadOffset + 1)
 		return;
 
-	if(IsQuadContainerBufferingEnabled())
+	if(m_UseOpenGL3_3)
 	{
 		if(Container.m_QuadBufferContainerIndex == -1)
 			return;
@@ -1562,7 +1581,7 @@ void CGraphics_Threaded::RenderQuadContainerAsSpriteMultiple(int ContainerIndex,
 	if(DrawCount == 0)
 		return;
 
-	if(IsQuadContainerBufferingEnabled())
+	if(m_UseOpenGL3_3)
 	{
 		if(Container.m_QuadBufferContainerIndex == -1)
 			return;
@@ -2038,19 +2057,13 @@ int CGraphics_Threaded::IssueInit()
 	if(g_Config.m_GfxResizable) Flags |= IGraphicsBackend::INITFLAG_RESIZABLE;
 
 	int r = m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, g_Config.m_GfxFsaaSamples, Flags, &m_DesktopScreenWidth, &m_DesktopScreenHeight, &m_ScreenWidth, &m_ScreenHeight, m_pStorage);
-	m_IsNewOpenGL = m_pBackend->IsNewOpenGL();
-	m_OpenGLTileBufferingEnabled = m_IsNewOpenGL || m_pBackend->HasTileBuffering();
-	m_OpenGLQuadBufferingEnabled = m_IsNewOpenGL || m_pBackend->HasQuadBuffering();
-	m_OpenGLQuadContainerBufferingEnabled = m_IsNewOpenGL || m_pBackend->HasQuadContainerBuffering();
-	m_OpenGLTextBufferingEnabled = m_IsNewOpenGL || (m_OpenGLQuadContainerBufferingEnabled && m_pBackend->HasTextBuffering());
-	m_OpenGLHasTextureArrays = m_IsNewOpenGL || m_pBackend->Has2DTextureArrays();
+	m_UseOpenGL3_3 = m_pBackend->IsOpenGL3_3();
 	return r;
 }
 
 int CGraphics_Threaded::InitWindow()
 {
-	int ErrorCode = IssueInit();
-	if(ErrorCode == 0)
+	if(IssueInit() == 0)
 		return 0;
 
 	// try disabling fsaa
@@ -2063,84 +2076,17 @@ int CGraphics_Threaded::InitWindow()
 		else
 			dbg_msg("gfx", "disabling FSAA and trying again");
 
-		ErrorCode = IssueInit();
-		if(ErrorCode == 0)
+		if(IssueInit() == 0)
 			return 0;
 	}
 
-	size_t OpenGLInitTryCount = 0;
-	while(ErrorCode == EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_OPENGL_CONTEXT_FAILED || ErrorCode == EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_OPENGL_VERSION_FAILED)
+	// try using old opengl context
+	if(g_Config.m_GfxOpenGL3)
 	{
-		if(ErrorCode == EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_OPENGL_CONTEXT_FAILED)
-		{
-			// try next smaller major/minor or patch version
-			if(g_Config.m_GfxOpenGLMajor >= 4)
-			{
-				g_Config.m_GfxOpenGLMajor = 3;
-				g_Config.m_GfxOpenGLMinor = 3;
-				g_Config.m_GfxOpenGLPatch = 0;
-			}
-			else if(g_Config.m_GfxOpenGLMajor == 3 && g_Config.m_GfxOpenGLMinor >= 1)
-			{
-				g_Config.m_GfxOpenGLMajor = 3;
-				g_Config.m_GfxOpenGLMinor = 0;
-				g_Config.m_GfxOpenGLPatch = 0;
-			}
-			else if(g_Config.m_GfxOpenGLMajor == 3 && g_Config.m_GfxOpenGLMinor == 0)
-			{
-				g_Config.m_GfxOpenGLMajor = 2;
-				g_Config.m_GfxOpenGLMinor = 1;
-				g_Config.m_GfxOpenGLPatch = 0;
-			}
-			else if(g_Config.m_GfxOpenGLMajor == 2 && g_Config.m_GfxOpenGLMinor >= 1)
-			{
-				g_Config.m_GfxOpenGLMajor = 2;
-				g_Config.m_GfxOpenGLMinor = 0;
-				g_Config.m_GfxOpenGLPatch = 0;
-			}
-			else if(g_Config.m_GfxOpenGLMajor == 2 && g_Config.m_GfxOpenGLMinor == 0)
-			{
-				g_Config.m_GfxOpenGLMajor = 1;
-				g_Config.m_GfxOpenGLMinor = 5;
-				g_Config.m_GfxOpenGLPatch = 0;
-			}
-			else if(g_Config.m_GfxOpenGLMajor == 1 && g_Config.m_GfxOpenGLMinor == 5)
-			{
-				g_Config.m_GfxOpenGLMajor = 1;
-				g_Config.m_GfxOpenGLMinor = 4;
-				g_Config.m_GfxOpenGLPatch = 0;
-			}
-			else if(g_Config.m_GfxOpenGLMajor == 1 && g_Config.m_GfxOpenGLMinor == 4)
-			{
-				g_Config.m_GfxOpenGLMajor = 1;
-				g_Config.m_GfxOpenGLMinor = 3;
-				g_Config.m_GfxOpenGLPatch = 0;
-			}
-			else if(g_Config.m_GfxOpenGLMajor == 1 && g_Config.m_GfxOpenGLMinor == 3)
-			{
-				g_Config.m_GfxOpenGLMajor = 1;
-				g_Config.m_GfxOpenGLMinor = 2;
-				g_Config.m_GfxOpenGLPatch = 1;
-			}
-			else if(g_Config.m_GfxOpenGLMajor == 1 && g_Config.m_GfxOpenGLMinor == 2)
-			{
-				g_Config.m_GfxOpenGLMajor = 1;
-				g_Config.m_GfxOpenGLMinor = 1;
-				g_Config.m_GfxOpenGLPatch = 0;
-			}
-		}
-
-		// new opengl version was set by backend, try again
-		ErrorCode = IssueInit();
-		if(ErrorCode == 0)
+		g_Config.m_GfxOpenGL3 = 0;
+		if(IssueInit() == 0)
 		{
 			return 0;
-		}
-
-		if(++OpenGLInitTryCount >= 9)
-		{
-			// try something else
-			break;
 		}
 	}
 

@@ -66,6 +66,7 @@ public:
 		CMDGROUP_CORE = 0, // commands that everyone has to implement
 		CMDGROUP_PLATFORM_OPENGL = 10000, // commands specific to a platform
 		CMDGROUP_PLATFORM_SDL = 20000,
+		CMDGROUP_PLATFORM_OPENGL3_3 = 30000,
 
 		//
 		CMD_NOP = CMDGROUP_CORE,
@@ -85,7 +86,7 @@ public:
 		CMD_CLEAR,
 		CMD_RENDER,
 
-		//opengl 2.0+ commands (some are just emulated and only exist in opengl 3.3+)
+		//opengl 3.3 commands
 		CMD_CREATE_BUFFER_OBJECT, // create vbo
 		CMD_RECREATE_BUFFER_OBJECT, // recreate vbo
 		CMD_UPDATE_BUFFER_OBJECT, // update vbo
@@ -129,11 +130,6 @@ public:
 		TEXFLAG_NOMIPMAPS = 1,
 		TEXFLAG_COMPRESSED = 2,
 		TEXFLAG_QUALITY = 4,
-		TEXFLAG_TO_3D_TEXTURE = (1 << 3),
-		TEXFLAG_TO_2D_ARRAY_TEXTURE = (1 << 4),
-		TEXFLAG_TO_3D_TEXTURE_SINGLE_LAYER = (1 << 5),
-		TEXFLAG_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER = (1 << 6),
-		TEXFLAG_NO_2D_TEXTURE = (1 << 7),
 	};
 
 	enum
@@ -317,6 +313,7 @@ public:
 
 		int m_IndicesDrawNum;
 		int m_BufferContainerIndex;
+		int m_LOD;
 	};
 
 	struct SCommand_RenderBorderTile : public SCommand
@@ -327,6 +324,7 @@ public:
 		char *m_pIndicesOffset; // you should use the command buffer data to allocate vertices for this command
 		unsigned int m_DrawNum;
 		int m_BufferContainerIndex;
+		int m_LOD;
 
 		float m_Offset[2];
 		float m_Dir[2];
@@ -342,6 +340,7 @@ public:
 		unsigned int m_IndexDrawNum;
 		unsigned int m_DrawNum;
 		int m_BufferContainerIndex;
+		int m_LOD;
 
 		float m_Offset[2];
 		float m_Dir[2];
@@ -555,19 +554,6 @@ public:
 	}
 };
 
-enum EGraphicsBackendErrorCodes
-{
-	GRAPHICS_BACKEND_ERROR_CODE_UNKNOWN = -1,
-	GRAPHICS_BACKEND_ERROR_CODE_NONE = 0,
-	GRAPHICS_BACKEND_ERROR_CODE_OPENGL_CONTEXT_FAILED,
-	GRAPHICS_BACKEND_ERROR_CODE_OPENGL_VERSION_FAILED,
-	GRAPHICS_BACKEND_ERROR_CODE_SDL_INIT_FAILED,
-	GRAPHICS_BACKEND_ERROR_CODE_SDL_SCREEN_REQUEST_FAILED,
-	GRAPHICS_BACKEND_ERROR_CODE_SDL_SCREEN_INFO_REQUEST_FAILED,
-	GRAPHICS_BACKEND_ERROR_CODE_SDL_SCREEN_RESOLUTION_REQUEST_FAILED,
-	GRAPHICS_BACKEND_ERROR_CODE_SDL_WINDOW_CREATE_FAILED,
-};
-
 // interface for the graphics backend
 // all these functions are called on the main thread
 class IGraphicsBackend
@@ -606,12 +592,7 @@ public:
 	virtual bool IsIdle() const = 0;
 	virtual void WaitForIdle() = 0;
 
-	virtual bool IsNewOpenGL() { return false; }
-	virtual bool HasTileBuffering() { return false; }
-	virtual bool HasQuadBuffering() { return false; }
-	virtual bool HasTextBuffering() { return false; }
-	virtual bool HasQuadContainerBuffering() { return false; }
-	virtual bool Has2DTextureArrays() { return false; }
+	virtual bool IsOpenGL3_3() { return false; }
 };
 
 class CGraphics_Threaded : public IEngineGraphics
@@ -629,12 +610,7 @@ class CGraphics_Threaded : public IEngineGraphics
 
 	CCommandBuffer::SState m_State;
 	IGraphicsBackend *m_pBackend;
-	bool m_OpenGLTileBufferingEnabled;
-	bool m_OpenGLQuadBufferingEnabled;
-	bool m_OpenGLTextBufferingEnabled;
-	bool m_OpenGLQuadContainerBufferingEnabled;
-	bool m_OpenGLHasTextureArrays;
-	bool m_IsNewOpenGL;
+	bool m_UseOpenGL3_3;
 
 	CCommandBuffer *m_apCommandBuffers[NUM_CMDBUFFERS];
 	CCommandBuffer *m_pCommandBuffer;
@@ -851,11 +827,7 @@ public:
 	virtual bool IsIdle();
 	virtual void WaitForIdle();
 
-	virtual bool IsTileBufferingEnabled() { return m_OpenGLTileBufferingEnabled; }
-	virtual bool IsQuadBufferingEnabled() { return m_OpenGLQuadBufferingEnabled; }
-	virtual bool IsTextBufferingEnabled() { return m_OpenGLTextBufferingEnabled; }
-	virtual bool IsQuadContainerBufferingEnabled() { return m_OpenGLQuadContainerBufferingEnabled; }
-	virtual bool HasTextureArrays() { return m_OpenGLHasTextureArrays; }
+	virtual bool IsBufferingEnabled() { return m_UseOpenGL3_3; }
 };
 
 extern IGraphicsBackend *CreateGraphicsBackend();

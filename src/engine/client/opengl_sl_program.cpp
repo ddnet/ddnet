@@ -77,19 +77,14 @@ void CGLSLProgram::DetachAllShaders()
 	}
 }
 
-void CGLSLProgram::SetUniformVec4(int Loc, int Count, const float *pValues)
+void CGLSLProgram::SetUniformVec4(int Loc, int Count, const float* Value)
 {
-	glUniform4fv(Loc, Count, pValues);
+	glUniform4fv(Loc, Count, Value);
 }
 
-void CGLSLProgram::SetUniformVec2(int Loc, int Count, const float *pValues)
+void CGLSLProgram::SetUniformVec2(int Loc, int Count, const float* Value)
 {
-	glUniform2fv(Loc, Count, pValues);
-}
-
-void CGLSLProgram::SetUniform(int Loc, int Count, const float *pValues)
-{
-	glUniform1fv(Loc, Count, pValues);
+	glUniform2fv(Loc, Count, Value);
 }
 
 void CGLSLProgram::SetUniform(int Loc, const int Value)
