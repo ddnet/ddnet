@@ -20,9 +20,10 @@ public:
 	IGraphics::CTextureHandle Get(int Index) const { return m_aTextures[Index]; }
 	int Num() const { return m_Count; }
 
+	void OnMapLoadImpl(class CLayers *pLayers, class IMap *pMap);
 	virtual void OnMapLoad();
 	virtual void OnInit();
-	void LoadBackground(class IMap *pMap);
+	void LoadBackground(class CLayers *pLayers, class IMap *pMap);
 
 	// DDRace
 	IGraphics::CTextureHandle GetEntities();
