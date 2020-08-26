@@ -29,10 +29,8 @@ void CMapImages::OnInit()
 	InitOverlayTextures();
 }
 
-void CMapImages::OnMapLoad()
+void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 {
-	IMap *pMap = Kernel()->RequestInterface<IMap>();
-
 	// unload all textures
 	for(int i = 0; i < m_Count; i++)
 	{
@@ -45,7 +43,6 @@ void CMapImages::OnMapLoad()
 	int Start;
 	pMap->GetType(MAPITEMTYPE_IMAGE, &Start, &m_Count);
 
-	CLayers *pLayers = m_pClient->Layers();
 	for(int g = 0; g < pLayers->NumGroups(); g++)
 	{
 		CMapItemGroup *pGroup = pLayers->GetGroup(g);
@@ -99,9 +96,16 @@ void CMapImages::OnMapLoad()
 	}
 }
 
-void CMapImages::LoadBackground(class IMap *pMap)
+void CMapImages::OnMapLoad()
 {
-	CMapImages::OnMapLoad();
+	IMap *pMap = Kernel()->RequestInterface<IMap>();
+	CLayers *pLayers = m_pClient->Layers();
+	OnMapLoadImpl(pLayers, pMap);
+}
+
+void CMapImages::LoadBackground(class CLayers *pLayers, class IMap *pMap)
+{
+	OnMapLoadImpl(pLayers, pMap);
 }
 
 IGraphics::CTextureHandle CMapImages::GetEntities()
