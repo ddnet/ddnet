@@ -380,8 +380,9 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 					Button.VMargin(4.0f, &Button);
 					Button.VSplitLeft(Button.h, &Icon, &Button);
 					Icon.Margin(2.0f, &Icon);
-					if(pItem->m_HasRank == 1)
-						DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_RANK, &Icon);
+
+					if (g_Config.m_BrIndicateFinished && pItem->m_HasRank == 1)
+							DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_RANK, &Icon);
 				}
 
 				CTextCursor Cursor;
@@ -663,7 +664,12 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	{
 		ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
 		if(DoButton_CheckBox(&g_Config.m_BrIndicateFinished, Localize("Indicate map finish"), g_Config.m_BrIndicateFinished, &Button))
+		{
 			g_Config.m_BrIndicateFinished ^= 1;
+
+			if (g_Config.m_BrIndicateFinished)
+				ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
+		}
 
 		if(g_Config.m_BrIndicateFinished)
 		{
