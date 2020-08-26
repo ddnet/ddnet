@@ -1786,11 +1786,11 @@ public:
 		}
 	}
 
-	virtual int AdjustFontSize(const char *pText, int TextLength, int MaxSize = -1)
+	virtual int AdjustFontSize(const char *pText, int TextLength, int MaxSize, int MaxWidth)
 	{
 		int WidthOfText = CalculateTextWidth(pText, TextLength, 0, 100);
 
-		int FontSize = 100.f / ((float)WidthOfText / (float)MaxSize);
+		int FontSize = 100.f / ((float)WidthOfText / (float)MaxWidth);
 
 		if (MaxSize > 0 && FontSize > MaxSize)
 			FontSize = MaxSize;
