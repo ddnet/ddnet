@@ -17,6 +17,7 @@
 # Rafael Fontenelle   2018-07-04 07:38:13
 # Rafael Fontenelle   2019-04-06 16:49:12
 # Rafael Fontenelle   2019-12-18 02:47:58
+# Rafael Fontenelle   2020-08-27 12:38:07
 ##### /authors #####
 
 ##### translated strings #####
@@ -601,7 +602,7 @@ Inner color
 == Cor interna
 
 Reconnect in %d sec
-== Reconnetar em %d segundos
+== Reconectar em %d segundos
 
 Save ghost
 == Salvar fantasma
@@ -721,7 +722,7 @@ Follow
 == Seguir
 
 %.2f KiB
-== %.2f KB
+== %.2f KiB
 
 Enable gun sound
 == Habilitar som da arma
@@ -817,7 +818,7 @@ Sat.
 == Sat.
 
 %.2f MiB
-== %.2f MB
+== %.2f MiB
 
 Refresh Rate
 == Taxa de atualização
@@ -1072,7 +1073,7 @@ Length
 == 9+ novas menções
 
 Hammerfly dummy
-== Dummy de hammerfly
+== Hammerfly dummy
 
 Lock team
 == Travar time
@@ -1144,64 +1145,64 @@ The width or height of texture %s is not divisible by 16, which might cause visu
 == 
 
 Server best:
-== 
+== Melhor servidor:
 
 Personal best:
-== 
+== Melhor pessoal:
 
 Learn
-== 
+== Aprender
 
 Render demo
-== 
+== Renderizar demo
 
 Replace video
-== 
+== Substituir vídeo
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== 
+== DDraceNetwork é um jogo online cooperativo cujo objetivo é você e seu grupo de tees chegarem à linha de chegada do mapa. Como um novato, você deve começar nos servidores Novice, que hospedam os mapas mais fáceis. Considere o ping para escolher um servidor próximo a você.
 
 The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== 
+== Os mapas contêm congelamento, o que temporariamente torna um tee incapaz de se mover. Você tem que trabalhar junto para passar por essas partes.
 
 The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== 
+== A roda do mouse muda de arma. O martelo (botão esquerdo do mouse) pode ser usado para acertar outros tees e acordá-los do congelamento.
 
 Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== 
+== O gancho (botão direito do mouse) pode ser usado para balançar pelo mapa e agarrar outros tees em você.
 
 Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== 
+== Mais importante ainda, a comunicação é a chave: não há um tutorial, então você terá que conversar (tecla t) com outros jogadores para aprender o básico e os truques do jogo.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 
+== Use a tecla k para se matar (reiniciar), q para pausar e assistir outros jogadores. Veja as configurações para outras combinações de teclas.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
-== 
+== É recomendado que você verifique as configurações para ajustá-las ao seu gosto antes de entrar em um servidor.
 
 Please enter your nick name below.
-== 
+== Por favor, insira seu apelido abaixo.
 
 Country / Region
 == 
 
 Destination file already exist
-== 
+== O arquivo de destino já existe
 
 Video name:
-== 
+== Nome do vídeo
 
 Render
-== 
+== Renderizar
 
 Connect Dummy
-== 
+== Conectar dummy
 
 Use high DPI
-== 
+== Usar DPI alta
 
 Client message
-== 
+== Mensagem do cliente
 
 Show others (own team only)
-== 
+== Mostrar outras (próprio time apenas)
