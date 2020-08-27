@@ -1996,7 +1996,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 
 			if(aCmd[0] && str_comp(aCmd, "info") != 0)
-				CallVote(ClientID, aDesc, aCmd, aReason, aChatmsg, aSixupDesc);
+				CallVote(ClientID, aDesc, aCmd, aReason, aChatmsg, aSixupDesc[0] ? aSixupDesc : 0);
 		}
 		else if(MsgID == NETMSGTYPE_CL_VOTE)
 		{
