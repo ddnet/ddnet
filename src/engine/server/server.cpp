@@ -2232,7 +2232,7 @@ int CServer::LoadMap(const char *pMapName)
 		if(i < MAX_CLIENTS)
 		{
 			char aPath[256];
-			str_format(aPath, sizeof(aPath), "demos/%s_%d_%d_tmp.demo", m_aCurrentMap, g_Config.m_SvPort, i);
+			str_format(aPath, sizeof(aPath), "demos/%s_%d_%d_tmp.demo", m_aCurrentMap, m_NetServer.Address().port, i);
 			Storage()->RemoveFile(aPath, IStorage::TYPE_SAVE);
 		}
 	}
@@ -2351,16 +2351,17 @@ int CServer::Run()
 
 	BindAddr.type = NetType;
 
-	for(BindAddr.port = g_Config.m_SvPort != 0 ? g_Config.m_SvPort : 8303; !m_NetServer.Open(BindAddr, &m_ServerBan, g_Config.m_SvMaxClients, g_Config.m_SvMaxClientsPerIP, 0); BindAddr.port++)
+	int Port = g_Config.m_SvPort;
+	for(BindAddr.port = Port != 0 ? Port  : 8303; !m_NetServer.Open(BindAddr, &m_ServerBan, g_Config.m_SvMaxClients, g_Config.m_SvMaxClientsPerIP, 0); BindAddr.port++)
 	{
-		if(g_Config.m_SvPort != 0 || BindAddr.port >= 8310)
+		if(Port  != 0 || BindAddr.port >= 8310)
 		{
 			dbg_msg("server", "couldn't open socket. port %d might already be in use", BindAddr.port);
 			return -1;
 		}
 	}
 
-	if(g_Config.m_SvPort == 0)
+	if(Port  == 0)
 		dbg_msg("server", "using port %d", BindAddr.port);
 
 #if defined(CONF_UPNP)
@@ -3020,7 +3021,7 @@ void CServer::SaveDemo(int ClientID, float Time)
 		// rename the demo
 		char aOldFilename[256];
 		char aNewFilename[256];
-		str_format(aOldFilename, sizeof(aOldFilename), "demos/%s_%d_%d_tmp.demo", m_aCurrentMap, g_Config.m_SvPort, ClientID);
+		str_format(aOldFilename, sizeof(aOldFilename), "demos/%s_%d_%d_tmp.demo", m_aCurrentMap, m_NetServer.Address().port, ClientID);
 		str_format(aNewFilename, sizeof(aNewFilename), "demos/%s_%s_%5.2f.demo", m_aCurrentMap, m_aClients[ClientID].m_aName, Time);
 		Storage()->RenameFile(aOldFilename, aNewFilename, IStorage::TYPE_SAVE);
 	}
@@ -3031,7 +3032,7 @@ void CServer::StartRecord(int ClientID)
 	if(g_Config.m_SvPlayerDemoRecord)
 	{
 		char aFilename[128];
-		str_format(aFilename, sizeof(aFilename), "demos/%s_%d_%d_tmp.demo", m_aCurrentMap, g_Config.m_SvPort, ClientID);
+		str_format(aFilename, sizeof(aFilename), "demos/%s_%d_%d_tmp.demo", m_aCurrentMap, m_NetServer.Address().port, ClientID);
 		m_aDemoRecorder[ClientID].Start(Storage(), Console(), aFilename, GameServer()->NetVersion(), m_aCurrentMap, &m_aCurrentMapSha256[SIX], m_aCurrentMapCrc[SIX], "server", m_aCurrentMapSize[SIX], m_apCurrentMapData[SIX]);
 	}
 }
@@ -3043,7 +3044,7 @@ void CServer::StopRecord(int ClientID)
 		m_aDemoRecorder[ClientID].Stop();
 
 		char aFilename[128];
-		str_format(aFilename, sizeof(aFilename), "demos/%s_%d_%d_tmp.demo", m_aCurrentMap, g_Config.m_SvPort, ClientID);
+		str_format(aFilename, sizeof(aFilename), "demos/%s_%d_%d_tmp.demo", m_aCurrentMap, m_NetServer.Address().port, ClientID);
 		Storage()->RemoveFile(aFilename, IStorage::TYPE_SAVE);
 	}
 }

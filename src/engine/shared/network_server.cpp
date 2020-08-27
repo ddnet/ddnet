@@ -57,6 +57,7 @@ bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int Ma
 	if(!m_Socket.type)
 		return false;
 
+	m_Address = BindAddr;
 	m_pNetBan = pNetBan;
 
 	// clamp clients
