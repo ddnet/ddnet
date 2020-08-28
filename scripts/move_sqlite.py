@@ -87,6 +87,7 @@ def main():
 	print()
 	print(("    echo '.dump --preserve-rowids' | sqlite3 {} | " + # including rowids, this forces sqlite to name all columns in each INSERT statement
 			"grep -E '^INSERT INTO record_(race|teamrace|saves)' | " + # filter out inserts
+			"sed -e 's/INSERT INTO/INSERT IGNORE INTO/' | " + # ignore duplicate rows
 			"sed -e 's/rowid,//' -e 's/VALUES([0-9]*,/VALUES(/' > {}") # filter out rowids again
 			.format(os.path.abspath(args.to), sql_file))
 	print("    mysql -u teeworlds -p'PW2' teeworlds < {}".format(sql_file))
