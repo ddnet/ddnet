@@ -135,23 +135,39 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		TOutlineColor.m_A *= Alpha;
 		TColor.m_A *= Alpha;
 
+		float YOffSet = Position.y - 38;
+
 		if(m_aNamePlates[ClientID].m_NameTextContainerIndex != -1)
-			TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_NameTextContainerIndex, &TColor, &TOutlineColor, Position.x - tw / 2.0f, Position.y - FontSize - 38.0f);
+		{
+			YOffSet -= FontSize;
+			TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_NameTextContainerIndex, &TColor, &TOutlineColor, Position.x - tw / 2.0f, YOffSet);
+		}
 
 		if(g_Config.m_ClNameplatesClan)
 		{
+			YOffSet -= FontSizeClan;
 			if(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex != -1)
-				TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex, &TColor, &TOutlineColor, Position.x - m_aNamePlates[ClientID].m_ClanNameTextWidth / 2.0f, Position.y - FontSize - FontSizeClan - 38.0f);
+				TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex, &TColor, &TOutlineColor, Position.x - m_aNamePlates[ClientID].m_ClanNameTextWidth / 2.0f, YOffSet);
+		}
+
+		if (g_Config.m_ClNameplatesFriendMark && m_pClient->m_aClients[ClientID].m_Friend)
+		{
+			YOffSet -= FontSize;
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf),"[F]");
+			float XOffSet = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f)/2.0f;
+			TextRender()->TextColor(rgb);
+			TextRender()->Text(0, Position.x-XOffSet, YOffSet, FontSize, aBuf, -1.0f);
 		}
 
 		if(g_Config.m_Debug || g_Config.m_ClNameplatesIDs) // render client id when in debug as well
 		{
+			YOffSet -= FontSize;
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf),"%d", pPlayerInfo->m_ClientID);
-			float Offset = g_Config.m_ClNameplatesClan ? (FontSize * 2 + FontSizeClan) : (FontSize * 2);
-			float tw_id = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f);
+			float XOffSet = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f)/2.0f;
 			TextRender()->TextColor(rgb);
-			TextRender()->Text(0, Position.x-tw_id/2.0f, Position.y-Offset-38.0f, 28.0f, aBuf, -1.0f);
+			TextRender()->Text(0, Position.x-XOffSet, YOffSet, FontSize, aBuf, -1.0f);
 		}
 
 		if(g_Config.m_ClNameplatesHA) // render health and armor in nameplate
