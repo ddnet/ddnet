@@ -408,7 +408,7 @@ int CGraphics_Threaded::LoadTextureRawSub(CTextureHandle TextureID, int x, int y
 	return 0;
 }
 
-IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags)
+IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName)
 {
 	// don't waste memory on texture if we are stress testing
 #ifdef CONF_DEBUG
@@ -448,6 +448,27 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Heig
 	if((Flags&IGraphics::TEXLOAD_NO_2D_TEXTURE) != 0)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_NO_2D_TEXTURE;
 
+	if((Flags&IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE) != 0 || (Flags&IGraphics::TEXLOAD_TO_3D_TEXTURE) != 0)
+	{
+		if(Width == 0 || (Width % 16) != 0 || Height == 0 || (Height % 16) != 0)
+		{
+			SGraphicsWarning NewWarning;
+			char aText[128];
+			if(pTexName && *pTexName)
+			{
+				str_format(aText, sizeof(aText), ":\n\"%s\"\n", pTexName);
+			}
+			else
+			{
+				aText[0] = ' ';
+				aText[1] = 0;
+			}
+			str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg), "The width and height of texture%sare not divisible by 16, which might cause visual bugs.", aText);
+
+			m_Warnings.emplace_back(NewWarning);
+		}
+	}
+
 	// copy texture data
 	int MemSize = Width*Height*Cmd.m_PixelSize;
 	void *pTmpData = malloc(MemSize);
@@ -479,7 +500,7 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTexture(const char *pFilename,
 		if(StoreFormat == CImageInfo::FORMAT_AUTO)
 			StoreFormat = Img.m_Format;
 
-		ID = LoadTextureRaw(Img.m_Width, Img.m_Height, Img.m_Format, Img.m_pData, StoreFormat, Flags);
+		ID = LoadTextureRaw(Img.m_Width, Img.m_Height, Img.m_Format, Img.m_pData, StoreFormat, Flags, pFilename);
 		free(Img.m_pData);
 		if(ID != m_InvalidTexture && g_Config.m_Debug)
 			dbg_msg("graphics/texture", "loaded %s", pFilename);
@@ -2318,6 +2339,15 @@ void CGraphics_Threaded::TakeCustomScreenshot(const char *pFilename)
 
 void CGraphics_Threaded::Swap()
 {
+	if(!m_Warnings.empty())
+	{
+		SGraphicsWarning* pCurWarning = GetCurWarning();
+		if(pCurWarning->m_WasShown)
+		{
+			m_Warnings.erase(m_Warnings.begin());
+		}
+	}
+
 	// TODO: screenshot support
 	if(m_DoScreenshot)
 	{
@@ -2369,6 +2399,17 @@ bool CGraphics_Threaded::IsIdle()
 void CGraphics_Threaded::WaitForIdle()
 {
 	m_pBackend->WaitForIdle();
+}
+
+SGraphicsWarning *CGraphics_Threaded::GetCurWarning()
+{
+	if(m_Warnings.empty())
+		return NULL;
+	else
+	{
+		SGraphicsWarning* pCurWarning = &m_Warnings[0];
+		return pCurWarning;
+	}
 }
 
 int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen)

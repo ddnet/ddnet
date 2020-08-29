@@ -396,6 +396,13 @@ public:
 	void DeleteGhostItem(int Index);
 
 	void setPopup(int Popup) { m_Popup = Popup; }
+	int GetCurPopup() { return m_Popup; }
+	bool CanDisplayWarning();
+
+	void PopupWarning(const char *pTopic, const char *pBody, const char *pButton, int64 Duration);
+
+	int64 m_PopupWarningLastTime;
+	int64 m_PopupWarningDuration;
 
 	int m_DemoPlayerState;
 	char m_aDemoPlayerPopupHint[256];
@@ -420,6 +427,7 @@ public:
 		POPUP_QUIT,
 		POPUP_DISCONNECT,
 		POPUP_DISCONNECT_DUMMY,
+		POPUP_WARNING,
 
 		// demo player states
 		DEMOPLAYER_NONE=0,

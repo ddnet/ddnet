@@ -972,12 +972,33 @@ void CMenus::PopupMessage(const char *pTopic, const char *pBody, const char *pBu
 	str_copy(m_aMessageTopic, pTopic, sizeof(m_aMessageTopic));
 	str_copy(m_aMessageBody, pBody, sizeof(m_aMessageBody));
 	str_copy(m_aMessageButton, pButton, sizeof(m_aMessageButton));
-	m_Popup = POPUP_MESSAGE;
 }
 
+void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pButton, int64 Duration)
+{
+	// reset active item
+	UI()->SetActiveItem(0);
+
+	str_copy(m_aMessageTopic, pTopic, sizeof(m_aMessageTopic));
+	str_copy(m_aMessageBody, pBody, sizeof(m_aMessageBody));
+	str_copy(m_aMessageButton, pButton, sizeof(m_aMessageButton));
+	m_Popup = POPUP_WARNING;
+	SetActive(true);
+
+	m_PopupWarningDuration = Duration;
+	m_PopupWarningLastTime = time_get_microseconds();
+}
+
+bool CMenus::CanDisplayWarning()
+{
+	return m_Popup == POPUP_NONE && (Client()->State() == IClient::STATE_DEMOPLAYBACK || Client()->State() == IClient::STATE_ONLINE);
+}
 
 int CMenus::Render()
 {
+	if(Client()->State() == IClient::STATE_DEMOPLAYBACK && m_Popup == POPUP_NONE)
+		return 0;
+
 	CUIRect Screen = *UI()->Screen();
 	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
 
@@ -1006,7 +1027,7 @@ int CMenus::Render()
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_KOG);
 	}
 
-	if(Client()->State() == IClient::STATE_ONLINE)
+	if(Client()->State() >= IClient::STATE_ONLINE)
 	{
 		ms_ColorTabbarInactive = ms_ColorTabbarInactiveIngame;
 		ms_ColorTabbarActive = ms_ColorTabbarActiveIngame;
@@ -1093,6 +1114,7 @@ int CMenus::Render()
 		const char *pButtonText = "";
 		int ExtraAlign = 0;
 
+		ColorRGBA BgColor = ColorRGBA{0.0f, 0.0f, 0.0f, 0.5f};
 		if(m_Popup == POPUP_MESSAGE)
 		{
 			pTitle = m_aMessageTopic;
@@ -1211,6 +1233,14 @@ int CMenus::Render()
 			pButtonText = Localize("Ok");
 			ExtraAlign = -1;
 		}
+		else if(m_Popup == POPUP_WARNING)
+		{
+			BgColor = ColorRGBA{0.5f, 0.0f, 0.0f, 0.7f};
+			pTitle = m_aMessageTopic;
+			pExtraText = m_aMessageBody;
+			pButtonText = m_aMessageButton;
+			ExtraAlign = -1;
+		}
 
 		CUIRect Box, Part;
 		Box = Screen;
@@ -1221,7 +1251,7 @@ int CMenus::Render()
 		}
 
 		// render the box
-		RenderTools()->DrawUIRect(&Box, ColorRGBA(0,0,0,0.5f), CUI::CORNER_ALL, 15.0f);
+		RenderTools()->DrawUIRect(&Box, BgColor, CUI::CORNER_ALL, 15.0f);
 
 		Box.HSplitTop(20.f/UI()->Scale(), &Part, &Box);
 		Box.HSplitTop(24.f/UI()->Scale(), &Part, &Box);
@@ -1805,6 +1835,19 @@ int CMenus::Render()
 			static float Offset = 0.0f;
 			DoEditBox(&g_Config.m_PlayerName, &TextBox, g_Config.m_PlayerName, sizeof(g_Config.m_PlayerName), 12.0f, &Offset);
 		}
+		else if(m_Popup == POPUP_WARNING)
+		{
+			Box.HSplitBottom(20.f, &Box, &Part);
+			Box.HSplitBottom(24.f, &Box, &Part);
+			Part.VMargin(120.0f, &Part);
+
+			static int s_Button = 0;
+			if(DoButton_Menu(&s_Button, pButtonText, 0, &Part) || m_EscapePressed || m_EnterPressed || (time_get_microseconds() - m_PopupWarningLastTime >= m_PopupWarningDuration))
+			{
+				m_Popup = POPUP_NONE;
+				SetActive(false);
+			}
+		}
 		else
 		{
 			Box.HSplitBottom(20.f, &Box, &Part);
@@ -1952,8 +1995,11 @@ void CMenus::OnStateChange(int NewState, int OldState)
 		m_Popup = POPUP_CONNECTING;
 	else if(NewState == IClient::STATE_ONLINE || NewState == IClient::STATE_DEMOPLAYBACK)
 	{
-		m_Popup = POPUP_NONE;
-		SetActive(false);
+		if(m_Popup != POPUP_WARNING)
+		{
+			m_Popup = POPUP_NONE;
+			SetActive(false);
+		}
 	}
 }
 
@@ -2023,8 +2069,7 @@ void CMenus::OnRender()
 	UI()->Update(mx,my,mx*3.0f,my*3.0f,Buttons);
 
 	// render
-	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
-		Render();
+	Render();
 
 	// render cursor
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CURSOR].m_Id);

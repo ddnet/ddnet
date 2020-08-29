@@ -663,6 +663,8 @@ class CGraphics_Threaded : public IEngineGraphics
 	int m_FirstFreeTexture;
 	int m_TextureMemoryUsage;
 
+	std::vector<SGraphicsWarning> m_Warnings;
+
 	struct SVertexArrayInfo
 	{
 		SVertexArrayInfo() : m_FreeIndex(-1) {}
@@ -742,7 +744,7 @@ public:
 	virtual void LinesDraw(const CLineItem *pArray, int Num);
 
 	virtual int UnloadTexture(IGraphics::CTextureHandle Index);
-	virtual IGraphics::CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags);
+	virtual IGraphics::CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName = NULL);
 	virtual int LoadTextureRawSub(IGraphics::CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData);
 
 	// simple uncompressed RGBA loaders
@@ -850,6 +852,8 @@ public:
 	virtual void InsertSignal(semaphore *pSemaphore);
 	virtual bool IsIdle();
 	virtual void WaitForIdle();
+
+	virtual SGraphicsWarning *GetCurWarning();
 
 	virtual bool IsTileBufferingEnabled() { return m_OpenGLTileBufferingEnabled; }
 	virtual bool IsQuadBufferingEnabled() { return m_OpenGLQuadBufferingEnabled; }
