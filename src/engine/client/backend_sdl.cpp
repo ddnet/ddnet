@@ -1080,6 +1080,267 @@ void CCommandProcessorFragment_OpenGL2::SetState(const CCommandBuffer::SState &S
 	}
 }
 
+bool CCommandProcessorFragment_OpenGL2::IsTileMapAnalysisSucceeded()
+{
+	glClearColor(0, 0, 0, 1);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// create fake texture 64x64
+	uint8_t aFakeTexture[64*64*4];
+	// fill by colors stepping by 50 => (255 / 50 ~ 5) => 5 times 3(color channels) = 5 ^ 3 = 125 possibilities to check
+	size_t CheckCount = 5 * 5 * 5;
+	// always fill 4 pixels of the texture, so the sampling is accurate
+	int aCurColor[4] = { 25, 25, 25, 255 };
+	size_t SingleImageSize = 4 * 4 * 4;
+	for(size_t d = 0; d < CheckCount; ++d)
+	{
+		uint8_t *pCurFakeTexture = aFakeTexture + (ptrdiff_t)(SingleImageSize * d);
+
+		uint8_t aCurColorUint8[4 * 4 * 4];
+		for(size_t y = 0; y < 4; ++y)
+		{
+			for(size_t x = 0; x < 4; ++x)
+			{
+				for(size_t i = 0; i < 4; ++i)
+				{
+					aCurColorUint8[(y * 4 * 4) + (x * 4) + i] = (uint8_t)aCurColor[i];
+				}
+			}
+		}
+		mem_copy(pCurFakeTexture, aCurColorUint8, sizeof(aCurColorUint8));
+
+		aCurColor[2] += 50;
+		if(aCurColor[2] > 225)
+		{
+			aCurColor[2] -= 250;
+			aCurColor[1] += 50;
+		}
+		if(aCurColor[1] > 225)
+		{
+			aCurColor[1] -= 250;
+			aCurColor[0] += 50;
+		}
+		if(aCurColor[0] > 225)
+		{
+			break;
+		}
+	}
+
+	// upload the texture
+	GLuint FakeTexture;
+	glGenTextures(1, &FakeTexture);
+
+	GLenum Target = GL_TEXTURE_3D;
+	if(m_Has2DArrayTextures)
+	{
+		Target = m_2DArrayTarget;
+	}
+	
+	glBindTexture(Target, FakeTexture);
+	glTexParameteri(Target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	if(!m_Has2DArrayTextures)
+	{
+		glTexParameteri(Target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	}
+	else
+	{
+		glTexParameteri(Target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+		glTexParameteri(Target, GL_GENERATE_MIPMAP, GL_TRUE);
+	}
+	
+	glTexParameteri(Target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(Target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(Target, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
+	
+	glTexImage3D(Target, 0, GL_RGBA, 64 / 16, 64 / 16, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, aFakeTexture);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable(GL_SCISSOR_TEST);
+	
+	glDisable(GL_TEXTURE_2D);
+	if(m_Has3DTextures)
+		glDisable(GL_TEXTURE_3D);
+	if(m_Has2DArrayTextures)
+	{
+		glDisable(m_2DArrayTarget);
+	}
+	int Slot = 0;
+	if(!m_Has2DArrayTextures)
+	{
+		glEnable(GL_TEXTURE_3D);
+		glBindTexture(GL_TEXTURE_3D, FakeTexture);
+	}
+	else
+	{
+		glEnable(m_2DArrayTarget);
+		glBindTexture(m_2DArrayTarget, FakeTexture);
+	}
+	
+	if(m_HasShaders)
+	{
+		CGLSLPrimitiveProgram *pProgram = m_pPrimitive3DProgramTextured;
+		UseProgram(pProgram);
+
+		pProgram->SetUniform(pProgram->m_LocTextureSampler, Slot);
+
+		float m[2 * 4] = {
+			1, 0, 0, 0,
+			0, 1, 0, 0
+		};
+
+		// transpose bcs of column-major order of opengl
+		glUniformMatrix4x2fv(pProgram->m_LocPos, 1, true, (float*)&m);
+	}
+	else {
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(-1, 1, -1, 1, -10.0f, 10.f);
+	}
+	
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+	glVertexPointer(2, GL_FLOAT, sizeof(m_aStreamVertices[0]), m_aStreamVertices);
+	glColorPointer(4, GL_FLOAT, sizeof(m_aStreamVertices[0]), (uint8_t*)m_aStreamVertices + (ptrdiff_t)(sizeof(vec2)));
+	glTexCoordPointer(3, GL_FLOAT, sizeof(m_aStreamVertices[0]), (uint8_t*)m_aStreamVertices + (ptrdiff_t)(sizeof(vec2) + sizeof(vec4)));
+
+	size_t VertexCount = 0;
+	for(size_t i = 0; i < CheckCount; ++i)
+	{
+		float XPos = (float)(i % 16);
+		float YPos = (float)(i / 16);
+
+		GL_SVertexTex3D *pVertex = &m_aStreamVertices[VertexCount++];
+		GL_SVertexTex3D *pVertexBefore = pVertex;
+		pVertex->m_Pos.x = XPos / 16.f;
+		pVertex->m_Pos.y = YPos / 16.f;
+		pVertex->m_Color.r = 1;
+		pVertex->m_Color.g = 1;
+		pVertex->m_Color.b = 1;
+		pVertex->m_Color.a = 1;
+		pVertex->m_Tex.u = 0;
+		pVertex->m_Tex.v = 0;
+
+		pVertex = &m_aStreamVertices[VertexCount++];
+		pVertex->m_Pos.x = XPos / 16.f + 1.f / 16.f;
+		pVertex->m_Pos.y = YPos / 16.f;
+		pVertex->m_Color.r = 1;
+		pVertex->m_Color.g = 1;
+		pVertex->m_Color.b = 1;
+		pVertex->m_Color.a = 1;
+		pVertex->m_Tex.u = 1;
+		pVertex->m_Tex.v = 0;
+
+		pVertex = &m_aStreamVertices[VertexCount++];
+		pVertex->m_Pos.x = XPos / 16.f + 1.f / 16.f;
+		pVertex->m_Pos.y = YPos / 16.f + 1.f / 16.f;
+		pVertex->m_Color.r = 1;
+		pVertex->m_Color.g = 1;
+		pVertex->m_Color.b = 1;
+		pVertex->m_Color.a = 1;
+		pVertex->m_Tex.u = 1;
+		pVertex->m_Tex.v = 1;
+
+		pVertex = &m_aStreamVertices[VertexCount++];
+		pVertex->m_Pos.x = XPos / 16.f;
+		pVertex->m_Pos.y = YPos / 16.f + 1.f / 16.f;
+		pVertex->m_Color.r = 1;
+		pVertex->m_Color.g = 1;
+		pVertex->m_Color.b = 1;
+		pVertex->m_Color.a = 1;
+		pVertex->m_Tex.u = 0;
+		pVertex->m_Tex.v = 1;
+
+		for(size_t n = 0; n < 4; ++n)
+		{
+			pVertexBefore[n].m_Pos.x *= 2;
+			pVertexBefore[n].m_Pos.x -= 1;
+			pVertexBefore[n].m_Pos.y *= 2;
+			pVertexBefore[n].m_Pos.y -= 1;
+			if(m_Has2DArrayTextures)
+			{
+				pVertexBefore[n].m_Tex.w = i;
+			}
+			else {
+				pVertexBefore[n].m_Tex.w = (i + 0.5f) / 256.f;
+			}
+		}
+
+		if(VertexCount > sizeof(m_aStreamVertices) / sizeof(m_aStreamVertices[0]))
+		{
+			glDrawArrays(GL_QUADS, 0, VertexCount);
+			VertexCount = 0;
+		}
+	}
+
+	glDrawArrays(GL_QUADS, 0, VertexCount);
+
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+	if(m_HasShaders)
+	{
+		glUseProgram(0);
+	}
+
+	glFinish();
+
+	GLint aViewport[4] = {0,0,0,0};
+	glGetIntegerv(GL_VIEWPORT, aViewport);
+
+	int w = aViewport[2];
+	int h = aViewport[3];
+
+	// we allocate one more row to use when we are flipping the texture
+	size_t PixelDataSize = w*(h+1)*3;
+	if(PixelDataSize == 0)
+		return false;
+	uint8_t *pPixelData = (uint8_t *)malloc(PixelDataSize);
+
+	// fetch the pixels
+	GLint Alignment;
+	glGetIntegerv(GL_PACK_ALIGNMENT, &Alignment);
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	glReadPixels(0,0, w, h, GL_RGB, GL_UNSIGNED_BYTE, pPixelData);
+	glPixelStorei(GL_PACK_ALIGNMENT, Alignment);
+
+	// now analyse the image data
+	bool CheckFailed = false;
+	int WidthTile = w / 16;
+	int HeightTile = h / 16;
+	int StartX = WidthTile / 2;
+	int StartY = HeightTile / 2;
+	for(size_t d = 0; d < CheckCount; ++d)
+	{
+		int CurX = (int)d % 16;
+		int CurY = (int)d / 16;
+
+		int CheckX = StartX + CurX * WidthTile;
+		int CheckY = StartY + CurY * HeightTile;
+
+		ptrdiff_t OffsetPixelData = (CheckY * (w * 3)) + (CheckX * 3);
+		ptrdiff_t OffsetFakeTexture = SingleImageSize * d;
+		OffsetPixelData = clamp<ptrdiff_t>(OffsetPixelData, 0, (ptrdiff_t)PixelDataSize);
+		OffsetFakeTexture = clamp<ptrdiff_t>(OffsetFakeTexture, 0, (ptrdiff_t)sizeof(aFakeTexture));
+		uint8_t* pPixel = pPixelData + OffsetPixelData;
+		uint8_t* pPixelTex = aFakeTexture + OffsetFakeTexture;
+		for(size_t i = 0; i < 3; ++i)
+		{
+			if((pPixel[i] < pPixelTex[i] - 25) || (pPixel[i] > pPixelTex[i] + 25))
+			{
+				CheckFailed = true;
+				break;
+			}
+		}
+	}
+
+	free(pPixelData);
+	return !CheckFailed;
+}
+
 void CCommandProcessorFragment_OpenGL2::Cmd_Init(const SCommand_Init *pCommand)
 {
 	CCommandProcessorFragment_OpenGL::Cmd_Init(pCommand);
@@ -1193,6 +1454,15 @@ void CCommandProcessorFragment_OpenGL2::Cmd_Init(const SCommand_Init *pCommand)
 		}
 
 		glUseProgram(0);
+	}
+
+	if(!IsTileMapAnalysisSucceeded())
+	{
+		// downgrade to opengl 1.5
+		*pCommand->m_pInitError = -2;
+		pCommand->m_pCapabilities->m_ContextMajor = 1;
+		pCommand->m_pCapabilities->m_ContextMinor = 5;
+		pCommand->m_pCapabilities->m_ContextPatch = 0;
 	}
 }
 
@@ -3972,6 +4242,26 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	WaitForIdle();
 	CmdBuffer.Reset();
 
+	if(InitError == 0)
+	{
+		CCommandProcessorFragment_OpenGL::SCommand_Init CmdOpenGL;
+		CmdOpenGL.m_pTextureMemoryUsage = &m_TextureMemoryUsage;
+		CmdOpenGL.m_pStorage = pStorage;
+		CmdOpenGL.m_pCapabilities = &m_Capabilites;
+		CmdOpenGL.m_pInitError = &InitError;
+		CmdBuffer.AddCommand(CmdOpenGL);
+		RunBuffer(&CmdBuffer);
+		WaitForIdle();
+		CmdBuffer.Reset();
+
+		if(InitError == -2)
+		{
+			g_Config.m_GfxOpenGLMajor = 1;
+			g_Config.m_GfxOpenGLMinor = 5;
+			g_Config.m_GfxOpenGLPatch = 0;
+		}
+	}
+
 	if(InitError != 0)
 	{
 		CCommandProcessorFragment_SDL::SCommand_Shutdown Cmd;
@@ -3998,15 +4288,6 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 
 		return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_OPENGL_VERSION_FAILED;
 	}
-
-	CCommandProcessorFragment_OpenGL::SCommand_Init CmdOpenGL;
-	CmdOpenGL.m_pTextureMemoryUsage = &m_TextureMemoryUsage;
-	CmdOpenGL.m_pStorage = pStorage;
-	CmdOpenGL.m_pCapabilities = &m_Capabilites;
-	CmdBuffer.AddCommand(CmdOpenGL);
-	RunBuffer(&CmdBuffer);
-	WaitForIdle();
-	CmdBuffer.Reset();
 
 	if(SetWindowScreen(g_Config.m_GfxScreen))
 	{
