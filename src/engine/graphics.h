@@ -6,6 +6,7 @@
 #include "kernel.h"
 
 #include <base/color.h>
+#include <stddef.h>
 
 #include <vector>
 #define GRAPHICS_TYPE_UNSIGNED_BYTE 0x1401
@@ -116,6 +117,13 @@ struct GL_SVertexTex3D
 	GL_STexCoord3D m_Tex;
 };
 
+struct SGraphicsWarning
+{
+	SGraphicsWarning() : m_WasShown(false) {}
+	char m_aWarningMsg[128];
+	bool m_WasShown;
+};
+
 typedef void(*WINDOW_RESIZE_FUNC)(void *pUser);
 
 class IGraphics : public IInterface
@@ -186,7 +194,7 @@ public:
 	virtual int LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType) = 0;
 
 	virtual int UnloadTexture(CTextureHandle Index) = 0;
-	virtual CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags) = 0;
+	virtual CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName = NULL) = 0;
 	virtual int LoadTextureRawSub(CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData) = 0;
 	virtual CTextureHandle LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags) = 0;
 	virtual void TextureSet(CTextureHandle Texture) = 0;
@@ -309,6 +317,7 @@ public:
 	virtual void SetWindowGrab(bool Grab) = 0;
 	virtual void NotifyWindow() = 0;
 
+	virtual SGraphicsWarning *GetCurWarning() = 0;
 protected:
 	inline CTextureHandle CreateTextureHandle(int Index)
 	{

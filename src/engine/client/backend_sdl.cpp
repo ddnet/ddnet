@@ -706,11 +706,31 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 				p3DImageData = (uint8_t*)malloc(ImageColorChannels * Width * Height);
 			int Image3DWidth, Image3DHeight;
 
-			if(IsSingleLayer || (Width != 0 && Width % 16 == 0 && Height != 0 && Height % 16 == 0 && Texture2DTo3D(pTexData, Width, Height, ImageColorChannels, 16, 16, p3DImageData, Image3DWidth, Image3DHeight)))
+			int ConvertWidth = Width;
+			int ConvertHeight = Height;
+
+			if(!IsSingleLayer)
+			{
+				if(ConvertWidth == 0 || (ConvertWidth % 16) != 0 || ConvertHeight == 0 || (ConvertHeight % 16) != 0)
+				{
+					dbg_msg("gfx", "3D/2D array texture was resized");
+					int NewWidth = maximum<int>(HighestBit(ConvertWidth), 16);
+					int NewHeight = maximum<int>(HighestBit(ConvertHeight), 16);
+					uint8_t* pNewTexData = (uint8_t*)Resize(ConvertWidth, ConvertHeight, NewWidth, NewHeight, pCommand->m_Format, (const uint8_t*)pTexData);
+
+					ConvertWidth = NewWidth;
+					ConvertHeight = NewHeight;
+
+					free(pTexData);
+					pTexData = pNewTexData;
+				}
+			}
+
+			if(IsSingleLayer || (Texture2DTo3D(pTexData, ConvertWidth, ConvertHeight, ImageColorChannels, 16, 16, p3DImageData, Image3DWidth, Image3DHeight)))
 			{
 				if(IsSingleLayer)
 				{
-					glTexImage3D(Target, 0, StoreOglformat, Width, Height, 1, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
+					glTexImage3D(Target, 0, StoreOglformat, ConvertWidth, ConvertHeight, 1, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
 				}
 				else
 				{
@@ -2253,11 +2273,31 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 				p3DImageData = (uint8_t*)malloc(ImageColorChannels * Width * Height);
 			int Image3DWidth, Image3DHeight;
 
-			if(IsSingleLayer || (Width != 0 && Width % 16 == 0 && Height != 0 && Height % 16 == 0 && Texture2DTo3D(pTexData, Width, Height, ImageColorChannels, 16, 16, p3DImageData, Image3DWidth, Image3DHeight)))
+			int ConvertWidth = Width;
+			int ConvertHeight = Height;
+
+			if(!IsSingleLayer)
+			{
+				if(ConvertWidth == 0 || (ConvertWidth % 16) != 0 || ConvertHeight == 0 || (ConvertHeight % 16) != 0)
+				{
+					dbg_msg("gfx", "3D/2D array texture was resized");
+					int NewWidth = maximum<int>(HighestBit(ConvertWidth), 16);
+					int NewHeight = maximum<int>(HighestBit(ConvertHeight), 16);
+					uint8_t* pNewTexData = (uint8_t*)Resize(ConvertWidth, ConvertHeight, NewWidth, NewHeight, pCommand->m_Format, (const uint8_t*)pTexData);
+
+					ConvertWidth = NewWidth;
+					ConvertHeight = NewHeight;
+
+					free(pTexData);
+					pTexData = pNewTexData;
+				}
+			}
+
+			if(IsSingleLayer || (Texture2DTo3D(pTexData, ConvertWidth, ConvertHeight, ImageColorChannels, 16, 16, p3DImageData, Image3DWidth, Image3DHeight)))
 			{
 				if(IsSingleLayer)
 				{
-					glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, StoreOglformat, Width, Height, 1, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
+					glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, StoreOglformat, ConvertWidth, ConvertHeight, 1, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
 				}
 				else
 				{

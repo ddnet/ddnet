@@ -90,7 +90,10 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 		else
 		{
 			void *pData = pMap->GetData(pImg->m_ImageData);
-			m_aTextures[i] = Graphics()->LoadTextureRaw(pImg->m_Width, pImg->m_Height, CImageInfo::FORMAT_RGBA, pData, CImageInfo::FORMAT_RGBA, LoadFlag);
+			char *pName = (char *)pMap->GetData(pImg->m_ImageName);
+			char aTexName[128];
+			str_format(aTexName, sizeof(aTexName), "%s %s", "embedded:", pName);
+			m_aTextures[i] = Graphics()->LoadTextureRaw(pImg->m_Width, pImg->m_Height, CImageInfo::FORMAT_RGBA, pData, CImageInfo::FORMAT_RGBA, LoadFlag, aTexName);
 			pMap->UnloadData(pImg->m_ImageData);
 		}
 	}
