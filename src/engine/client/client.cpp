@@ -4288,7 +4288,7 @@ void CClient::RequestDDNetInfo()
 	if(g_Config.m_BrIndicateFinished)
 	{
 		char aEscaped[128];
-		EscapeUrl(aEscaped, sizeof(aEscaped), g_Config.m_PlayerName);
+		EscapeUrl(aEscaped, sizeof(aEscaped), PlayerName());
 		str_append(aUrl, "?name=", sizeof(aUrl));
 		str_append(aUrl, aEscaped, sizeof(aUrl));
 	}
