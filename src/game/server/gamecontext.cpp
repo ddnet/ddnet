@@ -3096,7 +3096,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		GameInfo.m_pPrngDescription = m_Prng.Description();
 
 		GameInfo.m_pServerName = g_Config.m_SvName;
-		GameInfo.m_ServerPort = g_Config.m_SvPort;
+		GameInfo.m_ServerPort = Server()->Port();
 		GameInfo.m_pGameType = m_pController->m_pGameType;
 
 		GameInfo.m_pConfig = &g_Config;

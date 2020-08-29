@@ -41,6 +41,7 @@ public:
 	int Tick() const { return m_CurrentGameTick; }
 	int TickSpeed() const { return m_TickSpeed; }
 
+	virtual int Port() const = 0;
 	virtual int MaxClients() const = 0;
 	virtual int ClientCount() = 0;
 	virtual int DistinctClientCount() = 0;
