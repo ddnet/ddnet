@@ -508,7 +508,7 @@ bool CScore::SaveScoreThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 
 	// save score. Can't fail, because no UNIQUE/PRIMARY KEY constrain is defined.
 	str_format(aBuf, sizeof(aBuf),
-			"INSERT INTO %s_race("
+			"INSERT IGNORE INTO %s_race("
 				"Map, Name, Timestamp, Time, Server, "
 				"cp1, cp2, cp3, cp4, cp5, cp6, cp7, cp8, cp9, cp10, cp11, cp12, cp13, "
 				"cp14, cp15, cp16, cp17, cp18, cp19, cp20, cp21, cp22, cp23, cp24, cp25, "
@@ -631,7 +631,7 @@ bool CScore::SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGam
 		{
 			// if no entry found... create a new one
 			str_format(aBuf, sizeof(aBuf),
-					"INSERT INTO %s_teamrace(Map, Name, Timestamp, Time, ID, GameID, DDNet7) "
+					"INSERT IGNORE INTO %s_teamrace(Map, Name, Timestamp, Time, ID, GameID, DDNet7) "
 					"VALUES (?, ?, %s, %.2f, ?, ?, false);",
 					pSqlServer->GetPrefix(), pSqlServer->InsertTimestampAsUtc(), pData->m_Time);
 			pSqlServer->PrepareStatement(aBuf);
@@ -1321,7 +1321,7 @@ bool CScore::SaveTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 	if(UseCode)
 	{
 		str_format(aBuf, sizeof(aBuf),
-				"INSERT INTO %s_saves(Savegame, Map, Code, Timestamp, Server, SaveID, DDNet7) "
+				"INSERT IGNORE INTO %s_saves(Savegame, Map, Code, Timestamp, Server, SaveID, DDNet7) "
 				"VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, false)",
 				pSqlServer->GetPrefix());
 		pSqlServer->PrepareStatement(aBuf);
