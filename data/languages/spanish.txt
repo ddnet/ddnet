@@ -112,9 +112,6 @@ Controls
 Count players only
 == Solo contar jugadores
 
-Country
-== País
-
 Current
 == Actual
 
@@ -1198,6 +1195,9 @@ Grabs
 == 9+ nuevas menciones
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
+Country / Region
 == 
 
 Client message

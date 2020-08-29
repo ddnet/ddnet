@@ -118,9 +118,6 @@ Controls
 Count players only
 == Seulement les joueurs
 
-Country
-== Pays
-
 Current
 == Actuellement
 
@@ -1213,6 +1210,9 @@ transmits your player name to info2.ddnet.tw
 == transmet votre pseudonyme à info2.ddnet.tw
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
+Country / Region
 == 
 
 Client message

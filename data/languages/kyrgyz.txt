@@ -105,9 +105,6 @@ Controls
 Count players only
 == Оюнчуларды гана саноо
 
-Country
-== Өлкө
-
 Crc:
 == Crc:
 
@@ -712,6 +709,9 @@ It's recommended that you check the settings to adjust them to your liking befor
 == 
 
 Please enter your nick name below.
+== 
+
+Country / Region
 == 
 
 Destination file already exist

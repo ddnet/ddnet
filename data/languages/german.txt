@@ -120,9 +120,6 @@ Controls
 Count players only
 == Nur Spieler zählen
 
-Country
-== Land
-
 Current
 == Aktuell
 
@@ -1211,3 +1208,6 @@ Use k key to kill (restart), q to pause and watch other players. See settings fo
 
 Client message
 == Client-Nachricht
+
+Country / Region
+== 

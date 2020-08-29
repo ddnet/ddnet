@@ -68,8 +68,6 @@ Controls
 == ﺎﻫ ﻝﺮﺘﻨﻛ
 Count players only
 == ﺎﻫ ﻦﻜﯾﺯﺎﺑ ﺩﺍﺪﻌﺗ
-Country
-== ﺭﻮﺸﻛ
 Current
 == ﯽﻠﻌﻓ
 Custom colors
@@ -789,6 +787,9 @@ Best
 == ﻦﯾﺮﺘﻬﺑ
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
+Country / Region
 == 
 
 may cause delay

@@ -112,9 +112,6 @@ Controls
 Count players only
 == Numără doar jucătorii
 
-Country
-== Țara
-
 Current
 == Curent
 
@@ -727,6 +724,9 @@ It's recommended that you check the settings to adjust them to your liking befor
 == 
 
 Please enter your nick name below.
+== 
+
+Country / Region
 == 
 
 Destination file already exist

@@ -108,9 +108,6 @@ Controls
 Count players only
 == Räkna endast spelare
 
-Country
-== Land
-
 Current
 == Nuvarande
 
@@ -1194,6 +1191,9 @@ Show others (own team only)
 == Visa andra (eget lag endast)
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
+Country / Region
 == 
 
 Client message
