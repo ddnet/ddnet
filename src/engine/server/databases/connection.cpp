@@ -22,6 +22,7 @@ void IDbConnection::FormatCreateRace(char *aBuf, unsigned int BufferSize)
 				"cp25 FLOAT DEFAULT 0, "
 				"GameID VARCHAR(64), "
 				"DDNet7 BOOL DEFAULT FALSE"
+				"PRIMARY KEY (Map, Name, Time, Timestamp, Server)"
 			");",
 			GetPrefix(), BinaryCollate(), MAX_NAME_LENGTH, BinaryCollate());
 }
@@ -37,6 +38,7 @@ void IDbConnection::FormatCreateTeamrace(char *aBuf, unsigned int BufferSize, co
 				"ID %s NOT NULL, " // VARBINARY(16) for MySQL and BLOB for SQLite
 				"GameID VARCHAR(64), "
 				"DDNet7 BOOL DEFAULT FALSE"
+				"PRIMARY KEY (ID, Name)"
 			");",
 			GetPrefix(), BinaryCollate(), MAX_NAME_LENGTH, BinaryCollate(), pIdType);
 }
