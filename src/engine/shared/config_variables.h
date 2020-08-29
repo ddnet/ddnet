@@ -378,6 +378,7 @@ MACRO_CONFIG_INT(ClDemoKeyboardShortcuts, cl_demo_keyboard_shortcuts, 1, 0, 1, C
 MACRO_CONFIG_INT(GfxOpenGLMajor, gfx_opengl_major, 3, 1, 10, CFGFLAG_SAVE|CFGFLAG_CLIENT, "OpenGL major version")
 MACRO_CONFIG_INT(GfxOpenGLMinor, gfx_opengl_minor, 0, 0, 10, CFGFLAG_SAVE|CFGFLAG_CLIENT, "OpenGL minor version")
 MACRO_CONFIG_INT(GfxOpenGLPatch, gfx_opengl_patch, 0, 0, 10, CFGFLAG_SAVE|CFGFLAG_CLIENT, "OpenGL patch version")
+MACRO_CONFIG_INT(GfxDid3DTextureAnalysis, gfx_did_3d_texture_analysis, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Analyzed, if sampling 3D/2D array textures was correct")
 #if !defined(CONF_PLATFORM_MACOSX)
 MACRO_CONFIG_INT(GfxEnableTextureUnitOptimization, gfx_enable_texture_unit_optimization, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Use multiple texture units, instead of only one.")
 #else

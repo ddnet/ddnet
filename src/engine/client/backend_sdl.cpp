@@ -1456,7 +1456,17 @@ void CCommandProcessorFragment_OpenGL2::Cmd_Init(const SCommand_Init *pCommand)
 		glUseProgram(0);
 	}
 
-	if(!IsTileMapAnalysisSucceeded())
+	bool AnalysisCorrect = true;
+	if(g_Config.m_GfxDid3DTextureAnalysis == 0)
+	{
+		AnalysisCorrect = IsTileMapAnalysisSucceeded();
+		if(AnalysisCorrect)
+		{
+			g_Config.m_GfxDid3DTextureAnalysis = 1;
+		}
+	}
+
+	if(!AnalysisCorrect)
 	{
 		// downgrade to opengl 1.5
 		*pCommand->m_pInitError = -2;
