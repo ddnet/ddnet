@@ -1206,4 +1206,4 @@ Use k key to kill (restart), q to pause and watch other players. See settings fo
 == 使用 k键 自杀以重新开始，使用 q键 可以暂停以旁观他人或查看地图。 请在设置中查看其他按键。
 
 Country / Region
-== 
+== 国家 / 地区
