@@ -618,6 +618,11 @@ bool CServer::ClientAuthed(int ClientID)
 	return ClientID >= 0 && ClientID < MAX_CLIENTS && m_aClients[ClientID].m_Authed;
 }
 
+int CServer::Port() const
+{
+	return m_NetServer.Address().port;
+}
+
 int CServer::MaxClients() const
 {
 	return m_NetServer.MaxClients();
