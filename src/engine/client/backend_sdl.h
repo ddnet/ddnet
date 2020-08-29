@@ -152,7 +152,8 @@ public:
 		SCommand_Init() : SCommand(CMD_INIT) {}
 		class IStorage *m_pStorage;
 		std::atomic<int> *m_pTextureMemoryUsage;
-		const SBackendCapabilites* m_pCapabilities;
+		SBackendCapabilites *m_pCapabilities;
+		int *m_pInitError;
 	};
 
 	struct SCommand_Shutdown : public CCommandBuffer::SCommand
@@ -228,6 +229,8 @@ class CCommandProcessorFragment_OpenGL2 : public CCommandProcessorFragment_OpenG
 	};
 
 	std::vector<SBufferObject> m_BufferObjectIndices;
+
+	bool IsTileMapAnalysisSucceeded();
 
 	void RenderBorderTileEmulation(SBufferContainer& BufferContainer, const CCommandBuffer::SState& State, const float* pColor, const char *pBuffOffset, unsigned int DrawNum, const float* pOffset, const float* pDir, int JumpIndex);
 	void RenderBorderTileLineEmulation(SBufferContainer& BufferContainer, const CCommandBuffer::SState& State, const float* pColor, const char *pBuffOffset, unsigned int IndexDrawNum, unsigned int DrawNum, const float* pOffset, const float* pDir);
@@ -387,9 +390,9 @@ public:
 		SCommand_Init() : SCommand(CMD_INIT) {}
 		SDL_Window *m_pWindow;
 		SDL_GLContext m_GLContext;
-		SBackendCapabilites* m_pCapabilities;
+		SBackendCapabilites *m_pCapabilities;
 
-		int* m_pInitError;
+		int *m_pInitError;
 
 		int m_RequestedMajor;
 		int m_RequestedMinor;
