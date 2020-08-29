@@ -111,9 +111,6 @@ Controls
 Count players only
 == Licz tylko graczy
 
-Country
-== Kraj
-
 Current
 == Aktualnie
 
@@ -1197,6 +1194,9 @@ Show others (own team only)
 == Pokazuj innych (tylko drużynę)
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
+Country / Region
 == 
 
 Client message

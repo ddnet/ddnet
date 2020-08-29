@@ -110,9 +110,6 @@ Controls
 Count players only
 == Conta solo giocatori
 
-Country
-== Paese
-
 Current
 == Attuale
 
@@ -724,6 +721,9 @@ It's recommended that you check the settings to adjust them to your liking befor
 == 
 
 Please enter your nick name below.
+== 
+
+Country / Region
 == 
 
 Destination file already exist

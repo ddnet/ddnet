@@ -108,9 +108,6 @@ Controls
 Count players only
 == Izbroj samo igrače
 
-Country
-== Država
-
 Current
 == Current
 
@@ -785,12 +782,6 @@ Remove chat
 Markers:
 == Markeri
 
-%.2f MiB
-== 
-
-%.2f KiB
-== 
-
 Demo
 == Demo-snimak
 
@@ -853,9 +844,6 @@ Automatically take statboard screenshot
 
 Automatically create statboard csv
 == Automatski kreiraj csv tablice bodova
-
-Max CSVs
-== 
 
 Dummy settings
 == Postavke Dummy-a
@@ -926,9 +914,6 @@ Show HUD
 UI mouse s.
 == Osjet. miša u UI
 
-Borderless window
-== 
-
 may cause delay
 == može prouzrokovati kašnjenje
 
@@ -973,12 +958,6 @@ Threaded sound loading
 
 Map sound volume
 == Glasnoća zvuka mape
-
-HUD
-== 
-
-DDNet
-== 
 
 DDNet Client needs to be restarted to complete update!
 == DDNet Klijent mora da se restartuje da bi završio ažuriranje!
@@ -1079,9 +1058,6 @@ Save ghost
 Gameplay
 == Igra
 
-Overlay entities
-== 
-
 Size
 == Veličina
 
@@ -1093,12 +1069,6 @@ Show others (own team only)
 
 Show quads
 == Prikaži quads
-
-AntiPing limit
-== 
-
-AntiPing
-== 
 
 AntiPing: predict other players
 == AntiPing: preduhitri ostale igrače
@@ -1148,18 +1118,6 @@ New random timeout code
 Time
 == Vrijeme
 
-Manual %3d:%02d  
-== 
-
-Race %3d:%02d  
-== 
-
-Auto %3d:%02d  
-== 
-
-Replay %3d:%02d  
-== 
-
 Follow
 == Prati
 
@@ -1178,17 +1136,8 @@ Ratio
 Net
 == Net
 
-FPM
-== 
-
-Spree
-== 
-
 Best
 == Najbolji
-
-Grabs
-== 
 
 1 new mention
 == 1 novo označenje
@@ -1198,3 +1147,54 @@ Grabs
 
 9+ new mentions
 == 9+ novih označenja
+
+Country / Region
+== 
+
+%.2f MiB
+== 
+
+%.2f KiB
+== 
+
+Max CSVs
+== 
+
+Borderless window
+== 
+
+HUD
+== 
+
+DDNet
+== 
+
+Overlay entities
+== 
+
+AntiPing limit
+== 
+
+AntiPing
+== 
+
+Manual %3d:%02d  
+== 
+
+Race %3d:%02d  
+== 
+
+Auto %3d:%02d  
+== 
+
+Replay %3d:%02d  
+== 
+
+FPM
+== 
+
+Spree
+== 
+
+Grabs
+== 

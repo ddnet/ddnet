@@ -113,9 +113,6 @@ Controls
 Count players only
 == 屏蔽旁观位
 
-Country
-== 国家/地区
-
 Current
 == 当前
 
@@ -1207,3 +1204,6 @@ Show others (own team only)
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == 使用 k键 自杀以重新开始，使用 q键 可以暂停以旁观他人或查看地图。 请在设置中查看其他按键。
+
+Country / Region
+== 国家 / 地区

@@ -111,9 +111,6 @@ Controls
 Count players only
 == Sadece oyuncuları say
 
-Country
-== Ülke
-
 Current
 == Şimdiki
 
@@ -1201,3 +1198,6 @@ Grabs
 
 9+ new mentions
 == 9+ yeni bildirim
+
+Country / Region
+== 

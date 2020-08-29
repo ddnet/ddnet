@@ -579,9 +579,6 @@ Quit anyway?
 %i seconds left
 == Залишилось %i секунд
 
-Country
-== Країна
-
 Unable to delete the demo
 == Неможливо видалити демо
 
@@ -1192,6 +1189,9 @@ Grabs
 == 9+ нових згадок
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
+Country / Region
 == 
 
 Markers

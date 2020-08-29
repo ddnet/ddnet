@@ -106,9 +106,6 @@ Controls
 Count players only
 == 実際のプレイヤー数を表示
 
-Country
-== 国
-
 Current
 == 現行
 
@@ -718,6 +715,9 @@ It's recommended that you check the settings to adjust them to your liking befor
 == 
 
 Please enter your nick name below.
+== 
+
+Country / Region
 == 
 
 Destination file already exist

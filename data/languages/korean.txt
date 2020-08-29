@@ -105,9 +105,6 @@ Controls
 Count players only
 == 플레이어만 세기
 
-Country
-== 국가
-
 Current
 == 현재
 
@@ -717,6 +714,9 @@ It's recommended that you check the settings to adjust them to your liking befor
 == 
 
 Please enter your nick name below.
+== 
+
+Country / Region
 == 
 
 Destination file already exist
