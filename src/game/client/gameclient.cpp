@@ -623,6 +623,21 @@ void CGameClient::OnRender()
 	// update the local character and spectate position
 	UpdatePositions();
 
+	// display gfx warnings
+	if(g_Config.m_GfxShowWarnings == 1)
+	{
+		SGraphicsWarning* pWarning = Graphics()->GetCurWarning();
+		if(pWarning != NULL)
+		{
+			if(m_pMenus->CanDisplayWarning())
+			{
+				m_pMenus->PopupWarning("Warning!", pWarning->m_aWarningMsg, "Ok", 10000000);
+
+				pWarning->m_WasShown = true;
+			}
+		}
+	}
+
 	// render all systems
 	for(int i = 0; i < m_All.m_Num; i++)
 		m_All.m_paComponents[i]->OnRender();

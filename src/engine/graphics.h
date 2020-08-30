@@ -6,6 +6,7 @@
 #include "kernel.h"
 
 #include <base/color.h>
+#include <stddef.h>
 
 #include <vector>
 #define GRAPHICS_TYPE_UNSIGNED_BYTE 0x1401
@@ -38,6 +39,22 @@ struct SQuadRenderInfo
 	float m_aColor[4];
 	float m_aOffsets[2];
 	float m_Rotation;
+};
+
+struct SGraphicTile
+{
+	vec2 m_TopLeft;
+	vec2 m_TopRight;
+	vec2 m_BottomRight;
+	vec2 m_BottomLeft;
+};
+
+struct SGraphicTileTexureCoords
+{
+	vec3 m_TexCoordTopLeft;
+	vec3 m_TexCoordTopRight;
+	vec3 m_TexCoordBottomRight;
+	vec3 m_TexCoordBottomLeft;
 };
 
 class CImageInfo
@@ -80,6 +97,7 @@ public:
 
 struct GL_SPoint { float x, y; };
 struct GL_STexCoord { float u, v; };
+struct GL_STexCoord3D { float u, v, w; };
 struct GL_SColorf { float r, g, b, a; };
 
 //use normalized color values
@@ -90,6 +108,20 @@ struct GL_SVertex
 	GL_SPoint m_Pos;
 	GL_STexCoord m_Tex;
 	GL_SColor m_Color;
+};
+
+struct GL_SVertexTex3D
+{
+	GL_SPoint m_Pos;
+	GL_SColorf m_Color;
+	GL_STexCoord3D m_Tex;
+};
+
+struct SGraphicsWarning
+{
+	SGraphicsWarning() : m_WasShown(false) {}
+	char m_aWarningMsg[128];
+	bool m_WasShown;
 };
 
 typedef void(*WINDOW_RESIZE_FUNC)(void *pUser);
@@ -111,6 +143,11 @@ public:
 		TEXLOAD_NORESAMPLE = 1<<0,
 		TEXLOAD_NOMIPMAPS = 1<<1,
 		TEXLOAD_NO_COMPRESSION = 1<<2,
+		TEXLOAD_TO_3D_TEXTURE = (1 << 3),
+		TEXLOAD_TO_2D_ARRAY_TEXTURE = (1 << 4),
+		TEXLOAD_TO_3D_TEXTURE_SINGLE_LAYER = (1 << 5),
+		TEXLOAD_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER = (1 << 6),
+		TEXLOAD_NO_2D_TEXTURE = (1 << 7),
 	};
 
 
@@ -157,7 +194,7 @@ public:
 	virtual int LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType) = 0;
 
 	virtual int UnloadTexture(CTextureHandle Index) = 0;
-	virtual CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags) = 0;
+	virtual CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName = NULL) = 0;
 	virtual int LoadTextureRawSub(CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData) = 0;
 	virtual CTextureHandle LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags) = 0;
 	virtual void TextureSet(CTextureHandle Texture) = 0;
@@ -186,7 +223,11 @@ public:
 	virtual void UpdateBufferContainer(int ContainerIndex, struct SBufferContainerInfo *pContainerInfo) = 0;
 	virtual void IndicesNumRequiredNotify(unsigned int RequiredIndicesCount) = 0;
 
-	virtual bool IsBufferingEnabled() = 0;
+	virtual bool IsTileBufferingEnabled() = 0;
+	virtual bool IsQuadBufferingEnabled() = 0;
+	virtual bool IsTextBufferingEnabled() = 0;
+	virtual bool IsQuadContainerBufferingEnabled() = 0;
+	virtual bool HasTextureArrays() = 0;
 
 	struct CLineItem
 	{
@@ -276,6 +317,7 @@ public:
 	virtual void SetWindowGrab(bool Grab) = 0;
 	virtual void NotifyWindow() = 0;
 
+	virtual SGraphicsWarning *GetCurWarning() = 0;
 protected:
 	inline CTextureHandle CreateTextureHandle(int Index)
 	{

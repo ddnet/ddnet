@@ -38,7 +38,7 @@ void CCamera::ScaleZoom(float Factor)
 
 void CCamera::ChangeZoom(float Target)
 {
-	if(Target >= (Graphics()->IsBufferingEnabled()? 60 : 30))
+	if(Target >= (Graphics()->IsTileBufferingEnabled()? 60 : 30))
 	{
 		return;
 	}
