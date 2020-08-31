@@ -3,6 +3,7 @@
 #	MertenNor
 #modified by:
 #	MertenNor		2011-07-02 08:46:16
+#	nuborn			2020-08-31 23:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -56,7 +57,7 @@ Automatically record demos
 == Spill inn demoer automatisk
 
 Automatically take game over screenshot
-== Ta skjermbilder når runden er over
+== Ta skjermbilde når runden er over
 
 Blue team
 == Blått lag
@@ -119,7 +120,7 @@ Delete demo
 == Slett demo
 
 Demo details
-== Demo detaljer
+== Demo-detaljer
 
 Demofile: %s
 == Demo fil: %s
@@ -173,10 +174,10 @@ Folder
 == Mappe
 
 Force vote
-== Tvungen valg
+== Tving valg
 
 Free-View
-== fri-visning
+== Fri-visning
 
 Friends
 == Venner
@@ -188,7 +189,7 @@ Game
 == Spill
 
 Game info
-== Spill info
+== Spill-info
 
 Game over
 == Spill avsluttet
@@ -197,7 +198,7 @@ Game type
 == Spilltype
 
 Game types:
-== Spilletyper:
+== Spilltyper:
 
 General
 == Generelt
@@ -218,7 +219,7 @@ High Detail
 == Ekstra detaljer
 
 Hook
-== Gripe tang
+== Gripekrok
 
 Invalid Demo
 == Ugyldig Demo
@@ -278,13 +279,13 @@ No
 == Nei
 
 No password
-== ikke passord
+== Ikke passord
 
 No servers found
 == Ingen servere funnet
 
 No servers match your filter criteria
-== Ingen servere tilsvarer dine filter kriterier
+== Ingen servere tilsvarer dine filterkriterier
 
 Ok
 == Ok
@@ -311,13 +312,13 @@ Play
 == Spill
 
 Play background music
-== Spill bakrunds musikk
+== Spill bakgrunnsmusikk
 
 Player
 == Spiller
 
 Player country:
-== spiller landet
+== Spillerland:
 
 Player options
 == Spillerinstillinger
@@ -350,28 +351,28 @@ Refresh
 == Oppdater
 
 Refreshing master servers
-== Opdaterer master servere
+== Opdaterer master-servere
 
 Remote console
-== Server konsoll
+== Server-konsoll
 
 Remove
-== Ta bort
+== Fjern
 
 Remove friend
-== Ta bort venn
+== Fjern venn
 
 Rename
 == Gi nytt navn
 
 Rename demo
-== Gi nytt navn på Demo
+== Gi nytt navn på demo
 
 Reset filter
-== Tilbakestill filteret
+== Tilbakestill filter
 
 Sample rate
-== Enkel frekvens
+== Samplingsrate
 
 Score
 == Poeng
@@ -386,7 +387,7 @@ Screenshot
 == Skjermbilde
 
 Server address:
-== Serveradresse
+== Serveradresse:
 
 Server details
 == Serverdetaljer
@@ -398,7 +399,7 @@ Server info
 == Serverinfo
 
 Server not full
-== Serveren er ikke full
+== Server ikke full
 
 Shotgun
 == Hagle
@@ -407,13 +408,13 @@ Show chat
 == Vis samtale
 
 Show friends only
-== Vis venner
+== Vis kun venner
 
 Show ingame HUD
 == Vis HUD i spillet
 
 Show name plates
-== Vis navnskilt
+== Vis navneskilt
 
 Show only supported
 == Vis kompatible
@@ -434,13 +435,13 @@ Spectate next
 == Se på neste
 
 Spectate previous
-== Se på forige
+== Se på forrige
 
 Spectator mode
-== Tilhenger modus
+== Tilskuermodus
 
 Spectators
-== Tilskuere:
+== Tilskuere
 
 Standard gametype
 == Standard spilletyper
@@ -452,7 +453,7 @@ Stop record
 == Stopp inspilling
 
 Strict gametype filter
-== spilltype-filter
+== Eksakt spilltype
 
 Sudden Death
 == Brå død
@@ -500,7 +501,7 @@ Use sounds
 == Lyd på
 
 Use team colors for name plates
-== Bruk lagfarger for navnskilt
+== Bruk lagfarger for navneskilt
 
 V-Sync
 == V-Sync
@@ -559,7 +560,7 @@ Join game
 == Bli med i spillet
 
 FSAA samples
-== FSAA prøver
+== FSAA-sampler
 
 %d of %d servers, %d players
 == %d av %d servere, %d spillere
@@ -574,7 +575,7 @@ Max Screenshots
 == Maks antall skjermbilder
 
 Length:
-== Lengde
+== Lengde:
 
 Laser
 == Laser
@@ -607,7 +608,7 @@ Quit anyway?
 == Avslutt uansett?
 
 Display Modes
-== Skjerm moduser
+== Skjermmodi
 
 Version:
 == Versjon:
@@ -616,7 +617,7 @@ Round
 == Runde
 
 Lht.
-== Lysstyrke
+== Lyshet
 
 UI Color
 == Menyfarge
@@ -637,565 +638,565 @@ LAN
 == LAN
 
 Name plates size
-== Størrelse på navnskilt
+== Navneskilt-størrelse
 
 Type:
 == Type:
 
 Successfully saved the replay!
-== 
+== Opptaket ble lagret!
 
 Replay feature is disabled!
-== 
+== Opptaksfunksjon er slått av!
 
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
 == 
 
 Game paused
-== 
+== Spill pauset
 
 Server best:
-== 
+== Serverens beste
 
 Personal best:
-== 
+== Personlig beste
 
 Learn
-== 
+== Lær
 
 Browser
-== 
+== Servere
 
 Ghost
-== 
+== Skygge
 
 Loading DDNet Client
-== 
+== Laster DDNet-klient
 
 Reconnect in %d sec
-== 
+== Koble til igjen om %d sek
 
 Render demo
-== 
+== Rendre demo
 
 Replace video
-== 
+== Erstatt video
 
 File already exists, do you want to overwrite it?
-== 
+== Filen finnes allerede, vil du overskrive den?
 
 Are you sure that you want to disconnect?
-== 
+== Er du sikker på at du vil koble fra?
 
 Disconnect Dummy
-== 
+== Koble fra dummy
 
 Are you sure that you want to disconnect your dummy?
-== 
+== Er du sikker på at du vil koble fra dummyen din?
 
 Welcome to DDNet
-== 
+== Velkommen til DDNet
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== 
+== DDraceNetwork er et kooperativt onlinespill der målet er at du og gruppen din skal nå banens målstrek. Som nybegynner anbefales det at du starter på Novice-serverne, som har de letteste banene. Se på serverens ping for å finne en som er nærme deg.
 
 The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== 
+== Banene inneholder freeze, som midlertidig gjør at en tee ikke kan bevege seg. Du må samarbeide med andre for å komme gjennom disse partiene.
 
 The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== 
+== Scrollehjulet bytter våpen. Hammer (venstre museknapp) kan brukes til å slå andre tees og vekke dem opp fra freeze.
 
 Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== 
+== Gripekrok (høyre museknapp) kan brukes til å svinge seg gjennom banen og til å dra andre spillere mot deg.
 
 Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== 
+== Viktigst av alt er kommunikasjon: Det fins ingen tutorial, så du er nødt til å snakke (t-knappen) med andre spillere for å lære det grunnleggende og triksene i spillet.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == 
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
-== 
+== Det anbefales å sjekke innstillingene og justere dem slik det passer deg før du går inn på en server.
 
 Please enter your nick name below.
-== 
+== Skriv inn ditt ønskede kallenavn under.
 
 Country / Region
 == 
 
 Destination file already exist
-== 
+== Destinasjonsfilen eksisterer allerede
 
 Video name:
-== 
+== Navn på video:
 
 Show DDNet map finishes in server browser
-== 
+== Vis fullførte DDNet-baner i serverlisten
 
 transmits your player name to info2.ddnet.tw
-== 
+== sender spillnavnet ditt til info2.ddnet.tw
 
 Search
-== 
+== Søk
 
 Exclude
-== 
+== Ekskluder
 
 Filter connecting players
-== 
+== Filtrer tilkoblende spillere
 
 Indicate map finish
-== 
+== Indiker fullført bane
 
 Unfinished map
-== 
+== Ikke fullført bane
 
 Countries
-== 
+== Land
 
 Types
-== 
+== Typer
 
 DDNet %s is out!
-== 
+== DDNet %s er ute!
 
 Downloading %s:
-== 
+== Laster ned %s:
 
 Update failed! Check log...
-== 
+== Oppdatering mislyktes! Sjekk logg...
 
 DDNet Client updated!
-== 
+== DDNet-klient oppdatert!
 
 Update now
-== 
+== Oppdater nå
 
 Restart
-== 
+== Restart
 
 Select a name
-== 
+== Velg et navn
 
 Please use a different name
-== 
+== Vennligst velg et annet navn
 
 Remove chat
-== 
+== Fjern chat
 
 Markers:
-== 
+== Markør
 
 %.2f MiB
-== 
+== %.2f MiB
 
 %.2f KiB
-== 
+== %.2f KiB
 
 Demo
-== 
+== Demo
 
 Markers
-== 
+== Markører
 
 Length
-== 
+== Lengde
 
 Date
-== 
+== Dato
 
 Fetch Info
-== 
+== Hent info
 
 Render
-== 
+== Rendre
 
 Connecting dummy
-== 
+== Kobler til dummy
 
 Connect Dummy
-== 
+== Koble til dummy
 
 Reload
-== 
+== Last på nytt
 
 Deactivate
-== 
+== Deaktiver
 
 Activate
-== 
+== Aktiver
 
 Save
-== 
+== Lagre
 
 Switch weapon when out of ammo
-== 
+== Bytt våpen ved tom ammo
 
 Reset wanted weapon on death
-== 
+== Tilbakestill våpen ved død
 
 Show only chat messages from friends
-== 
+== Vis kun meldinger fra venner
 
 Show clan above name plates
-== 
+== Vis klan over navneskilt
 
 Clan plates size
-== 
+== Klanskilt-størrelse
 
 Refresh Rate
-== 
+== Oppdateringsrate
 
 Show console window
-== 
+== Vis konsoll-vindu
 
 Automatically take statboard screenshot
-== 
+== Automatisk ta skjermbilde av spillerstatistikk
 
 Automatically create statboard csv
-== 
+== Automatisk generer csv fra spillerstatistikk
 
 Max CSVs
-== 
+== Max CSV-er
 
 Dummy settings
-== 
+== Dummy-innstillinger
 
 Vanilla skins only
-== 
+== Kun vanilla-skins
 
 Fat skins (DDFat)
-== 
+== Fete skins (DDFat)
 
 Skin prefix
-== 
+== Skin-prefix
 
 Hook collisions
-== 
+== Krok-siktelinje
 
 Pause
-== 
+== Pause
 
 Kill
-== 
+== Drep
 
 Zoom in
-== 
+== Zoom inn
 
 Zoom out
-== 
+== Zoom ut
 
 Default zoom
-== 
+== Standard zoom
 
 Show others
-== 
+== Vis andre
 
 Show all
-== 
+== Vis alle
 
 Toggle dyncam
-== 
+== Dyncam av/på
 
 Toggle dummy
-== 
+== Bytt dummy
 
 Toggle ghost
-== 
+== Skygge av/på
 
 Dummy copy
-== 
+== Dummy-kopi
 
 Hammerfly dummy
-== 
+== Dummy-hammerfly
 
 Converse
-== 
+== Samtale
 
 Statboard
-== 
+== Spillerstatistikk
 
 Lock team
-== 
+== Lås lag
 
 Show entities
-== 
+== Vis entities
 
 Show HUD
-== 
+== Vis HUD
 
 UI mouse s.
-== 
+== UI museh.
 
 Borderless window
-== 
+== Rammeløst vindu
 
 may cause delay
-== 
+== kan gi forsinkelse
 
 Screen
-== 
+== Skjerm
 
 Use OpenGL 3.3 (experimental)
-== 
+== Bruk OpenGL 3.3 (eksperimentell)
 
 Preinit VBO (iGPUs only)
-== 
+== Preinit. VBO (kun iGPU)
 
 Multiple texture units (disable for MacOS)
-== 
+== Multiple texture units (slå av for MacOS)
 
 Use high DPI
-== 
+== Bruk høy DPI
 
 Enable game sounds
-== 
+== Aktiver spillyd
 
 Enable gun sound
-== 
+== Aktiver pistollyd
 
 Enable long pain sound (used when shooting in freeze)
-== 
+== Aktiver smertelyd (ved bruk av våpen i freeze)
 
 Enable server message sound
-== 
+== Aktiver servermelding-lyd
 
 Enable regular chat sound
-== 
+== Lyd for vanlig samtale
 
 Enable team chat sound
-== 
+== Lyd for lagsamtale
 
 Enable highlighted chat sound
-== 
+== Lyd for uthevet samtale
 
 Threaded sound loading
-== 
+== Trådet lyd-innlasting
 
 Map sound volume
-== 
+== Lydvolum bane
 
 HUD
-== 
+== HUD
 
 DDNet
-== 
+== DDNet
 
 DDNet Client needs to be restarted to complete update!
-== 
+== DDNet-klienten må restartes for å fullføre oppdatering!
 
 Use DDRace Scoreboard
-== 
+== Bruk DDRace-poengliste
 
 Show client IDs in Scoreboard
-== 
+== Vis klient-ID i poengliste
 
 Show score
-== 
+== Vis poeng
 
 Show health + ammo
-== 
+== Vis liv + ammo
 
 Show names in chat in team colors
-== 
+== Vis lagfarger på navn i chat
 
 Show kill messages
-== 
+== Vis dødsmeldinger
 
 Show votes window after voting
-== 
+== Vis avstemming etter avgitt stemme
 
 Messages
-== 
+== Meldinger
 
 System message
-== 
+== Systemmelding
 
 Reset
-== 
+== Tilbakestill
 
 Highlighted message
-== 
+== Uthevet melding
 
 Spectator
-== 
+== Tilskuer
 
 Look out!
-== 
+== Se opp!
 
 Team message
-== 
+== Lagmelding
 
 We will win
-== 
+== Vi kommer til å vinne
 
 Friend message
-== 
+== Vennemelding
 
 Friend
-== 
+== Venn
 
 Hi o/
-== 
+== Hei o/
 
 Normal message
-== 
+== Vanlig melding
 
 Hello and welcome
-== 
+== Hei og velkommen
 
 Client message
 == 
 
 Inner color
-== 
+== Indre farge
 
 Outline color
-== 
+== Kantfarge
 
 Wait before try for
-== 
+== Vent før nytt forsøk i
 
 second
-== 
+== sekund
 
 seconds
-== 
+== sekunder
 
 Save the best demo of each race
-== 
+== Lagre beste demo for hvert løp
 
 Default length: %d
-== 
+== Standard lengde: %d
 
 Enable replays
-== 
+== Aktiver opptak
 
 Show ghost
-== 
+== Vis skygge
 
 Save ghost
-== 
+== Lagre skygge
 
 Gameplay
-== 
+== Spillet
 
 Overlay entities
-== 
+== Entities-overlegg
 
 Size
-== 
+== Størrelse
 
 Show text entities
-== 
+== Vis tekst-entities
 
 Show others (own team only)
-== 
+== Vis andre (bare eget lag)
 
 Show quads
-== 
+== Vis quads
 
 AntiPing limit
-== 
+== AntiPing-grense
 
 AntiPing
-== 
+== AntiPing
 
 AntiPing: predict other players
-== 
+== AntiPing: predikter andre spillere
 
 AntiPing: predict weapons
-== 
+== AntiPing: predikter våpen
 
 AntiPing: predict grenade paths
-== 
+== AntiPing: forutsi prosjektilbane
 
 Show other players' hook collision lines
-== 
+== Vis andre spilleres krok-siktelinje
 
 Show other players' key presses
-== 
+== Vis andre spilleres tastetrykk
 
 Old mouse mode
-== 
+== Gammel musemodus
 
 Background (regular)
-== 
+== Bakgrunn (vanlig)
 
 Background (entities)
-== 
+== Bakgrunn (entities)
 
 Show tiles layers from BG map
-== 
+== Vis tile-lag fra BG-bane
 
 Try fast HTTP map download first
-== 
+== Forsøk først rask HTTP-nedlasting av bane
 
 DDNet %s is available:
-== 
+== DDNet %s er tilgjengelig:
 
 Updating...
-== 
+== Oppdaterer...
 
 No updates available
-== 
+== Ingen oppdateringer tilgjengelig
 
 Check now
-== 
+== Sjekk nå
 
 New random timeout code
-== 
+== Ny tilfeldig timeout-kode
 
 Time
-== 
+== Tid
 
 Manual %3d:%02d  
-== 
+== Manuell %3d:%02d
 
 Race %3d:%02d  
-== 
+== Løp %3d:%02d
 
 Auto %3d:%02d  
-== 
+== Auto %3d:%02d
 
 Replay %3d:%02d  
-== 
+== Opptak %3d:%02d
 
 Follow
-== 
+== Følg
 
 Frags
-== 
+== Frags
 
 Deaths
-== 
+== Døde
 
 Suicides
-== 
+== Selvmord
 
 Ratio
-== 
+== Ratio
 
 Net
-== 
+== Forskj.
 
 FPM
-== 
+== FPM
 
 Spree
-== 
+== Spree
 
 Best
-== 
+== Beste
 
 Grabs
-== 
+== Grabbinger
 
 1 new mention
-== 
+== nevnt 1 gang
 
 %d new mentions
-== 
+== nevnt %d ganger
 
 9+ new mentions
-== 
+== nevnt 9+ ganger
