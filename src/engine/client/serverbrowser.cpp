@@ -705,16 +705,26 @@ void CServerBrowser::Refresh(int Type)
 		CountryFilterClean(NETWORK_DDNET);
 		TypeFilterClean(NETWORK_DDNET);
 
+		int MaxServers = 0;
 		for(int i = 0; i < m_aNetworks[NETWORK_DDNET].m_NumCountries; i++)
 		{
 			CNetworkCountry *pCntr = &m_aNetworks[NETWORK_DDNET].m_aCountries[i];
+			MaxServers = maximum(MaxServers, pCntr->m_NumServers);
+		}
 
-			// check for filter
-			if(DDNetFiltered(g_Config.m_BrFilterExcludeCountries, pCntr->m_aName))
-				continue;
-
-			for(int g = 0; g < pCntr->m_NumServers; g++)
+		for(int g = 0; g < MaxServers; g++)
+		{
+			for(int i = 0; i < m_aNetworks[NETWORK_DDNET].m_NumCountries; i++)
 			{
+				CNetworkCountry *pCntr = &m_aNetworks[NETWORK_DDNET].m_aCountries[i];
+
+				// check for filter
+				if(DDNetFiltered(g_Config.m_BrFilterExcludeCountries, pCntr->m_aName))
+					continue;
+
+				if(g >= pCntr->m_NumServers)
+					continue;
+
 				if(!DDNetFiltered(g_Config.m_BrFilterExcludeTypes, pCntr->m_aTypes[g]))
 					Set(pCntr->m_aServers[g], IServerBrowser::SET_DDNET_ADD, -1, 0);
 			}
@@ -726,16 +736,26 @@ void CServerBrowser::Refresh(int Type)
 		CountryFilterClean(NETWORK_KOG);
 		TypeFilterClean(NETWORK_KOG);
 
+		int MaxServers = 0;
 		for(int i = 0; i < m_aNetworks[NETWORK_KOG].m_NumCountries; i++)
 		{
 			CNetworkCountry *pCntr = &m_aNetworks[NETWORK_KOG].m_aCountries[i];
+			MaxServers = maximum(MaxServers, pCntr->m_NumServers);
+		}
 
-			// check for filter
-			if(DDNetFiltered(g_Config.m_BrFilterExcludeCountriesKoG, pCntr->m_aName))
-				continue;
-
-			for(int g = 0; g < pCntr->m_NumServers; g++)
+		for(int g = 0; g < MaxServers; g++)
+		{
+			for(int i = 0; i < m_aNetworks[NETWORK_KOG].m_NumCountries; i++)
 			{
+				CNetworkCountry *pCntr = &m_aNetworks[NETWORK_KOG].m_aCountries[i];
+
+				// check for filter
+				if(DDNetFiltered(g_Config.m_BrFilterExcludeCountriesKoG, pCntr->m_aName))
+					continue;
+
+				if(g >= pCntr->m_NumServers)
+					continue;
+
 				if(!DDNetFiltered(g_Config.m_BrFilterExcludeTypesKoG, pCntr->m_aTypes[g]))
 					Set(pCntr->m_aServers[g], IServerBrowser::SET_KOG_ADD, -1, 0);
 			}
