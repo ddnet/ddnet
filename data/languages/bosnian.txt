@@ -1148,6 +1148,9 @@ Best
 9+ new mentions
 == 9+ novih označenja
 
+The width or height of texture %s is not divisible by 16, which might cause visual bugs.
+== 
+
 Country / Region
 == 
 

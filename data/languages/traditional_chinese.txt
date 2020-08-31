@@ -1201,3 +1201,6 @@ Auto %3d:%02d
 
 Replay %3d:%02d  
 == 回放 %3d:%02d  
+
+The width or height of texture %s is not divisible by 16, which might cause visual bugs.
+== 
