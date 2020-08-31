@@ -710,7 +710,7 @@ void CGameConsole::OnRender()
 		TextRender()->Text(0, 10.0f, FontSize / 2.f, FontSize, aBuf, -1.0f);
 
 		// render version
-		str_format(aBuf, sizeof(aBuf), "v%s", GAME_VERSION);
+		str_copy(aBuf, "v" GAME_VERSION " on " CONF_PLATFORM_STRING " " CONF_ARCH_STRING, sizeof(aBuf));
 		float Width = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f);
 		TextRender()->Text(0, Screen.w-Width-10.0f, FontSize / 2.f, FontSize, aBuf, -1.0f);
 	}
