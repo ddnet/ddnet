@@ -932,7 +932,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 			m_Image = NewVal%m_pEditor->m_Map.m_lImages.size();
 			m_AutoMapperConfig = -1;
 
-			if(m_pEditor->m_Map.m_lImages[m_Image]->m_Width % 16 != 0)
+			if(m_pEditor->m_Map.m_lImages[m_Image]->m_Width % 16 != 0 || m_pEditor->m_Map.m_lImages[m_Image]->m_Height % 16 != 0)
 			{
 				m_pEditor->m_PopupEventType = m_pEditor->POPEVENT_IMAGEDIV16;
 				m_pEditor->m_PopupEventActivated = true;
