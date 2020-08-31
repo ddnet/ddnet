@@ -2102,6 +2102,8 @@ void CMenus::OnRender()
 
 void CMenus::RenderBackground()
 {
+	Graphics()->BlendNormal();
+	
 	float sw = 300*Graphics()->ScreenAspect();
 	float sh = 300;
 	Graphics()->MapScreen(0, 0, sw, sh);
@@ -2178,7 +2180,6 @@ void CMenus::RenderUpdating(const char *pCaption, int current, int total)
 	CUIRect Screen = *UI()->Screen();
 	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
 
-	Graphics()->BlendNormal();
 	RenderBackground();
 
 	float w = 700;
