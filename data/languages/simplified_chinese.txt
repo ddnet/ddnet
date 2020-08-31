@@ -1207,3 +1207,6 @@ Use k key to kill (restart), q to pause and watch other players. See settings fo
 
 Country / Region
 == 国家 / 地区
+
+The width or height of texture %s is not divisible by 16, which might cause visual bugs.
+== 

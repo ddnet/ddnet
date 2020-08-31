@@ -18,6 +18,7 @@
 #include <engine/storage.h>
 #include <engine/keys.h>
 #include <engine/console.h>
+#include <game/localization.h>
 
 #include <math.h> // cosf, sinf, log2f
 
@@ -454,16 +455,12 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Heig
 		{
 			SGraphicsWarning NewWarning;
 			char aText[128];
-			if(pTexName && *pTexName)
+			aText[0] = '\0';
+			if(pTexName)
 			{
-				str_format(aText, sizeof(aText), ":\n\"%s\"\n", pTexName);
+				str_format(aText, sizeof(aText), "\"%s\"", pTexName);
 			}
-			else
-			{
-				aText[0] = ' ';
-				aText[1] = 0;
-			}
-			str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg), "The width and height of texture%sare not divisible by 16, which might cause visual bugs.", aText);
+			str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg), Localize("The width or height of texture %s is not divisible by 16, which might cause visual bugs."), aText);
 
 			m_Warnings.emplace_back(NewWarning);
 		}

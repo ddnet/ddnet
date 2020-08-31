@@ -1190,6 +1190,9 @@ Connect Dummy
 Show others (own team only)
 == Visa andra (eget lag endast)
 
+The width or height of texture %s is not divisible by 16, which might cause visual bugs.
+== 
+
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == 
 

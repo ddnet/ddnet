@@ -1209,6 +1209,9 @@ Show DDNet map finishes in server browser
 transmits your player name to info2.ddnet.tw
 == transmet votre pseudonyme à info2.ddnet.tw
 
+The width or height of texture %s is not divisible by 16, which might cause visual bugs.
+== 
+
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == 
 
