@@ -97,6 +97,7 @@ option(UPNP "Enable UPnP support" OFF)
 option(ANTIBOT "Enable support for a dynamic anticheat library" OFF)
 option(CLIENT "Compile client" ON)
 option(DOWNLOAD_GTEST "Download and compile GTest" ${AUTO_DEPENDENCIES_DEFAULT})
+option(STEAM "Build the Steam release version" OFF)
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
 option(DEV "Don't generate stuff necessary for packaging" OFF)
 
@@ -269,7 +270,7 @@ function(set_own_rpath TARGET)
 endfunction()
 
 if(NOT TARGET_OS STREQUAL "windows" AND NOT TARGET_OS STREQUAL "mac" AND CMAKE_VERSION VERSION_LESS 3.8)
-  if(CLIENT OR ANTIBOT)
+  if((CLIENT AND STEAM) OR ANTIBOT)
     message(STATUS "Can't set BUILD_RPATH in CMake before 3.8, pass -Wl,-rpath,'$ORIGIN' manually if you wish to emulate this. Or just install a newer version of CMake...")
   endif()
 endif()
@@ -1596,8 +1597,13 @@ if(CLIENT)
     steam_api_stub.cpp
   )
 
+  if(STEAM OR TARGET_OS STREQUAL "windows" OR TARGET_OS STREQUAL "mac")
+    set(STEAMAPI_KIND SHARED)
+  else()
+    set(STEAMAPI_KIND STATIC)
+  endif()
   set(TARGET_STEAMAPI steam_api)
-  add_library(${TARGET_STEAMAPI} SHARED ${STEAMAPI_SRC})
+  add_library(${TARGET_STEAMAPI} ${STEAMAPI_KIND} ${STEAMAPI_SRC})
   list(APPEND TARGETS_OWN ${TARGET_STEAMAPI})
 
   set_src(ENGINE_CLIENT GLOB src/engine/client
@@ -1815,7 +1821,9 @@ if(CLIENT)
     ${PLATFORM_CLIENT_INCLUDE_DIRS}
   )
 
-  set_own_rpath(${TARGET_CLIENT})
+  if(STEAMAPI_KIND STREQUAL DYNAMIC)
+    set_own_rpath(${TARGET_CLIENT})
+  endif()
 
   set(PARAMS "${WAVPACK_INCLUDE_DIRS};${WAVPACK_INCLUDE_DIRS}")
   if(NOT(WAVPACK_OPEN_FILE_INPUT_EX_PARAMS STREQUAL PARAMS))
@@ -2263,7 +2271,6 @@ set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME ${PROJECT_NAME})
 set(CPACK_TARGETS
   ${TARGET_CLIENT}
   ${TARGET_SERVER}
-  ${TARGET_STEAMAPI}
   config_retrieve
   config_store
   dilate
@@ -2271,6 +2278,9 @@ set(CPACK_TARGETS
   map_diff
   map_extract
 )
+if(STEAMAPI_KIND STREQUAL DYNAMIC)
+  list(APPEND CPACK_TARGETS ${TARGET_STEAMAPI})
+endif()
 set(CPACK_DIRS data)
 set(CPACK_FILES
   license.txt
@@ -2286,7 +2296,9 @@ if(NOT DEV)
   include(GNUInstallDirs)
   install(DIRECTORY data DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/ddnet COMPONENT data)
   install(TARGETS ${TARGET_CLIENT} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT client)
-  install(TARGETS ${TARGET_STEAMAPI} DESTINATION ${CMAKE_INSTALL_LIBDIR}/ddnet COMPONENT client)
+  if(STEAMAPI_KIND STREQUAL DYNAMIC)
+    install(TARGETS ${TARGET_STEAMAPI} DESTINATION ${CMAKE_INSTALL_LIBDIR}/ddnet COMPONENT client)
+  endif()
   install(TARGETS ${TARGET_SERVER} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT server)
   if(ANTIBOT)
     install(TARGETS ${TARGET_ANTIBOT} DESTINATION ${CMAKE_INSTALL_LIBDIR}/ddnet COMPONENT server)
