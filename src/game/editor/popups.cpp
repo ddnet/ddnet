@@ -1092,7 +1092,7 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 	else if(pEditor->m_PopupEventType == POPEVENT_PREVENTUNUSEDTILES)
 		pEditor->UI()->DoLabel(&Label, "Unused tiles disabled", 20.0f, 0);
 	else if(pEditor->m_PopupEventType == POPEVENT_IMAGEDIV16)
-		pEditor->UI()->DoLabel(&Label, "Image width", 20.0f, 0);
+		pEditor->UI()->DoLabel(&Label, "Image width/height", 20.0f, 0);
 
 	View.HSplitBottom(10.0f, &View, 0);
 	View.HSplitBottom(20.0f, &View, &ButtonBar);
@@ -1115,7 +1115,7 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 	else if(pEditor->m_PopupEventType == POPEVENT_PREVENTUNUSEDTILES)
 		pEditor->UI()->DoLabel(&Label, "Unused tiles can't be placed by default because they could get a use later and then destroy your map.\nActivate the 'Unused' switch to be able to place every tile.", 10.0f, -1, Label.w-10.0f);
 	else if(pEditor->m_PopupEventType == POPEVENT_IMAGEDIV16)
-		pEditor->UI()->DoLabel(&Label, "The width of this image is not divisible by 16. This is required for images used in tile layers for Teeworlds 0.7 compatibility.", 10.0f, -1, Label.w-10.0f);
+		pEditor->UI()->DoLabel(&Label, "The width or height of this image is not divisible by 16. This is required for images used in tile layers for Teeworlds 0.7 compatibility.", 10.0f, -1, Label.w-10.0f);
 
 	// button bar
 	ButtonBar.VSplitLeft(30.0f, 0, &ButtonBar);

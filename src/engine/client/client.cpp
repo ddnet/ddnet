@@ -4167,10 +4167,6 @@ int main(int argc, const char **argv) // ignore_convention
 		io_close(File);
 		pConsole->ExecuteFile(CONFIG_FILE);
 	}
-	else // fallback
-	{
-		pConsole->ExecuteFile("settings.cfg");
-	}
 
 	// execute autoexec file
 	File = pStorage->OpenFile(AUTOEXEC_CLIENT_FILE, IOFLAG_READ, IStorage::TYPE_ALL);

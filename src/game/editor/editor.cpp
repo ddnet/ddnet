@@ -4351,7 +4351,7 @@ void CEditor::AddFileDialogEntry(int Index, CUIRect *pView)
 		m_PreviewImageIsLoaded = false;
 
 		if(Input()->MouseDoubleClick())
-			m_aFileDialogActivate = true;
+			m_FileDialogActivate = true;
 	}
 }
 
@@ -4422,6 +4422,8 @@ void CEditor::RenderFileDialog()
 		UI()->DoLabel(&FileBoxLabel, "Search:", 10.0f, -1, -1);
 		str_copy(m_aFileDialogPrevSearchText, m_aFileDialogSearchText, sizeof(m_aFileDialogPrevSearchText));
 		DoEditBox(&s_SearchBoxID, &FileBox, m_aFileDialogSearchText, sizeof(m_aFileDialogSearchText), 10.0f, &s_SearchBoxID,false,CUI::CORNER_L);
+		if(m_FileDialogOpening)
+			UI()->SetActiveItem(&s_SearchBoxID);
 
 		// clearSearchbox button
 		{
@@ -4438,6 +4440,8 @@ void CEditor::RenderFileDialog()
 		if(str_comp(m_aFileDialogPrevSearchText, m_aFileDialogSearchText))
 			m_FileDialogScrollValue = 0.0f;
 	}
+
+	m_FileDialogOpening = false;
 
 	int Num = (int)(View.h/17.0f)+1;
 	static int ScrollBar = 0;
@@ -4562,7 +4566,7 @@ void CEditor::RenderFileDialog()
 		if(Input()->GetEvent(i).m_Flags&IInput::FLAG_PRESS)
 		{
 			if(Input()->GetEvent(i).m_Key == KEY_RETURN || Input()->GetEvent(i).m_Key == KEY_KP_ENTER)
-				m_aFileDialogActivate = true;
+				m_FileDialogActivate = true;
 		}
 	}
 
@@ -4592,9 +4596,9 @@ void CEditor::RenderFileDialog()
 	CUIRect Button;
 	ButtonBar.VSplitRight(50.0f, &ButtonBar, &Button);
 	bool IsDir = m_FilesSelectedIndex >= 0 && m_FileList[m_FilesSelectedIndex].m_IsDir;
-	if(DoButton_Editor(&s_OkButton, IsDir ? "Open" : m_pFileDialogButtonText, 0, &Button, 0, 0) || m_aFileDialogActivate)
+	if(DoButton_Editor(&s_OkButton, IsDir ? "Open" : m_pFileDialogButtonText, 0, &Button, 0, 0) || m_FileDialogActivate)
 	{
-		m_aFileDialogActivate = false;
+		m_FileDialogActivate = false;
 		if(IsDir)	// folder
 		{
 			if(str_comp(m_FileList[m_FilesSelectedIndex].m_aFilename, "..") == 0)	// parent folder
@@ -4696,7 +4700,7 @@ void CEditor::FilelistPopulate(int StorageType)
 	Storage()->ListDirectory(StorageType, m_pFileDialogPath, EditorListdirCallback, this);
 	m_FilesSelectedIndex = m_FileList.size() ? 0 : -1;
 	m_PreviewImageIsLoaded = false;
-	m_aFileDialogActivate = false;
+	m_FileDialogActivate = false;
 
 	if(m_FilesSelectedIndex >= 0 && !m_FileList[m_FilesSelectedIndex].m_IsDir)
 		str_copy(m_aFileDialogFileName, m_FileList[m_FilesSelectedIndex].m_aFilename, sizeof(m_aFileDialogFileName));
@@ -4721,6 +4725,7 @@ void CEditor::InvokeFileDialog(int StorageType, int FileType, const char *pTitle
 	m_FileDialogFileType = FileType;
 	m_FileDialogScrollValue = 0.0f;
 	m_PreviewImageIsLoaded = false;
+	m_FileDialogOpening = true;
 
 	if(pDefaultName)
 		str_copy(m_aFileDialogFileName, pDefaultName, sizeof(m_aFileDialogFileName));
@@ -4729,6 +4734,7 @@ void CEditor::InvokeFileDialog(int StorageType, int FileType, const char *pTitle
 
 	FilelistPopulate(m_FileDialogStorageType);
 
+	m_FileDialogOpening = true;
 	m_Dialog = DIALOG_FILE;
 }
 

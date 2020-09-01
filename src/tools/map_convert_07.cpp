@@ -97,13 +97,14 @@ bool CheckImageDimensions(void *pItem, int Type, const char *pFilename)
 		return true;
 
 	CMapItemImage *pImgItem = (CMapItemImage *)pItem2;
-	if(pImgItem->m_Width % 16 == 0)
+
+	if(pImgItem->m_Width % 16 == 0 && pImgItem->m_Height % 16 == 0)
 		return true;
 
 	char aTileLayerName[12];
 	IntsToStr(pTMap->m_aName, sizeof(pTMap->m_aName)/sizeof(int), aTileLayerName);
 	char *pName = (char *)g_DataReader.GetData(pImgItem->m_ImageName);
-	dbg_msg("map_convert_07", "%s: Tile layer \"%s\" uses image \"%s\" with width %d, which is not divisible by 16. This is not supported in Teeworlds 0.7. Please scale the image and replace it manually.", pFilename, aTileLayerName, pName, pImgItem->m_Width);
+	dbg_msg("map_convert_07", "%s: Tile layer \"%s\" uses image \"%s\" with width %d, height %d, which is not divisible by 16. This is not supported in Teeworlds 0.7. Please scale the image and replace it manually.", pFilename, aTileLayerName, pName, pImgItem->m_Width, pImgItem->m_Height);
 	return false;
 }
 
@@ -176,9 +177,15 @@ int main(int argc, const char **argv)
 		IStorage::StripPathAndExtension(pSourceFileName, aBuf, sizeof(aBuf));
 		str_format(aDestFileName, sizeof(aDestFileName), "data/maps7/%s.map", aBuf);
 		pDestFileName = aDestFileName;
+		if(fs_makedir("data") != 0)
+		{
+			dbg_msg("map_convert_07", "failed to create data directory");
+			return -1;
+		}
+
 		if(fs_makedir("data/maps7") != 0)
 		{
-			dbg_msg("map_convert_07", "failed to create maps7 directory");
+			dbg_msg("map_convert_07", "failed to create data/maps7 directory");
 			return -1;
 		}
 	}
