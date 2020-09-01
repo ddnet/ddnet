@@ -672,6 +672,7 @@ public:
 		m_aFileDialogCurrentLink[0] = 0;
 		m_pFileDialogPath = m_aFileDialogCurrentFolder;
 		m_FileDialogActivate = false;
+		m_FileDialogOpening = false;
 		m_FileDialogScrollValue = 0.0f;
 		m_FilesSelectedIndex = -1;
 		m_FilesStartAt = 0;
@@ -850,6 +851,7 @@ public:
 	IGraphics::CTextureHandle m_FilePreviewImage;
 	bool m_PreviewImageIsLoaded;
 	CImageInfo m_FilePreviewImageInfo;
+	bool m_FileDialogOpening;
 
 
 	struct CFilelistItem

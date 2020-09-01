@@ -4422,6 +4422,8 @@ void CEditor::RenderFileDialog()
 		UI()->DoLabel(&FileBoxLabel, "Search:", 10.0f, -1, -1);
 		str_copy(m_aFileDialogPrevSearchText, m_aFileDialogSearchText, sizeof(m_aFileDialogPrevSearchText));
 		DoEditBox(&s_SearchBoxID, &FileBox, m_aFileDialogSearchText, sizeof(m_aFileDialogSearchText), 10.0f, &s_SearchBoxID,false,CUI::CORNER_L);
+		if(m_FileDialogOpening)
+			UI()->SetActiveItem(&s_SearchBoxID);
 
 		// clearSearchbox button
 		{
@@ -4438,6 +4440,8 @@ void CEditor::RenderFileDialog()
 		if(str_comp(m_aFileDialogPrevSearchText, m_aFileDialogSearchText))
 			m_FileDialogScrollValue = 0.0f;
 	}
+
+	m_FileDialogOpening = false;
 
 	int Num = (int)(View.h/17.0f)+1;
 	static int ScrollBar = 0;
@@ -4721,6 +4725,7 @@ void CEditor::InvokeFileDialog(int StorageType, int FileType, const char *pTitle
 	m_FileDialogFileType = FileType;
 	m_FileDialogScrollValue = 0.0f;
 	m_PreviewImageIsLoaded = false;
+	m_FileDialogOpening = true;
 
 	if(pDefaultName)
 		str_copy(m_aFileDialogFileName, pDefaultName, sizeof(m_aFileDialogFileName));
@@ -4729,6 +4734,7 @@ void CEditor::InvokeFileDialog(int StorageType, int FileType, const char *pTitle
 
 	FilelistPopulate(m_FileDialogStorageType);
 
+	m_FileDialogOpening = true;
 	m_Dialog = DIALOG_FILE;
 }
 
