@@ -671,7 +671,7 @@ public:
 		m_aFileDialogCurrentFolder[0] = 0;
 		m_aFileDialogCurrentLink[0] = 0;
 		m_pFileDialogPath = m_aFileDialogCurrentFolder;
-		m_aFileDialogActivate = false;
+		m_FileDialogActivate = false;
 		m_FileDialogScrollValue = 0.0f;
 		m_FilesSelectedIndex = -1;
 		m_FilesStartAt = 0;
@@ -841,7 +841,7 @@ public:
 	char m_aFileDialogSearchText[64];
 	char m_aFileDialogPrevSearchText[64];
 	char *m_pFileDialogPath;
-	bool m_aFileDialogActivate;
+	bool m_FileDialogActivate;
 	int m_FileDialogFileType;
 	float m_FileDialogScrollValue;
 	int m_FilesSelectedIndex;

@@ -4351,7 +4351,7 @@ void CEditor::AddFileDialogEntry(int Index, CUIRect *pView)
 		m_PreviewImageIsLoaded = false;
 
 		if(Input()->MouseDoubleClick())
-			m_aFileDialogActivate = true;
+			m_FileDialogActivate = true;
 	}
 }
 
@@ -4562,7 +4562,7 @@ void CEditor::RenderFileDialog()
 		if(Input()->GetEvent(i).m_Flags&IInput::FLAG_PRESS)
 		{
 			if(Input()->GetEvent(i).m_Key == KEY_RETURN || Input()->GetEvent(i).m_Key == KEY_KP_ENTER)
-				m_aFileDialogActivate = true;
+				m_FileDialogActivate = true;
 		}
 	}
 
@@ -4592,9 +4592,9 @@ void CEditor::RenderFileDialog()
 	CUIRect Button;
 	ButtonBar.VSplitRight(50.0f, &ButtonBar, &Button);
 	bool IsDir = m_FilesSelectedIndex >= 0 && m_FileList[m_FilesSelectedIndex].m_IsDir;
-	if(DoButton_Editor(&s_OkButton, IsDir ? "Open" : m_pFileDialogButtonText, 0, &Button, 0, 0) || m_aFileDialogActivate)
+	if(DoButton_Editor(&s_OkButton, IsDir ? "Open" : m_pFileDialogButtonText, 0, &Button, 0, 0) || m_FileDialogActivate)
 	{
-		m_aFileDialogActivate = false;
+		m_FileDialogActivate = false;
 		if(IsDir)	// folder
 		{
 			if(str_comp(m_FileList[m_FilesSelectedIndex].m_aFilename, "..") == 0)	// parent folder
@@ -4696,7 +4696,7 @@ void CEditor::FilelistPopulate(int StorageType)
 	Storage()->ListDirectory(StorageType, m_pFileDialogPath, EditorListdirCallback, this);
 	m_FilesSelectedIndex = m_FileList.size() ? 0 : -1;
 	m_PreviewImageIsLoaded = false;
-	m_aFileDialogActivate = false;
+	m_FileDialogActivate = false;
 
 	if(m_FilesSelectedIndex >= 0 && !m_FileList[m_FilesSelectedIndex].m_IsDir)
 		str_copy(m_aFileDialogFileName, m_FileList[m_FilesSelectedIndex].m_aFilename, sizeof(m_aFileDialogFileName));
