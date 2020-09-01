@@ -185,6 +185,10 @@ void CMapImages::SetTextureScale(int Scale)
 		Graphics()->UnloadTexture(m_OverlayTopTexture);
 		Graphics()->UnloadTexture(m_OverlayCenterTexture);
 
+		m_OverlayBottomTexture = IGraphics::CTextureHandle();
+		m_OverlayTopTexture = IGraphics::CTextureHandle();
+		m_OverlayCenterTexture = IGraphics::CTextureHandle();
+
 		InitOverlayTextures();
 	}
 }
