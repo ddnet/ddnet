@@ -600,6 +600,15 @@ void CClient::SetState(int s)
 			else if(g_Config.m_ClReconnectTimeout > 0 && (str_find_nocase(ErrorString(), "Timeout") || str_find_nocase(ErrorString(), "Too weak connection")))
 				m_ReconnectTime = time_get() + time_freq() * g_Config.m_ClReconnectTimeout;
 		}
+
+		if(s == IClient::STATE_ONLINE)
+		{
+			Steam()->SetGameInfo(m_ServerAddress, m_aCurrentMap);
+		}
+		else if(Old == IClient::STATE_ONLINE)
+		{
+			Steam()->ClearGameInfo();
+		}
 	}
 }
 
