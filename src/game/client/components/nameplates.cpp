@@ -135,31 +135,47 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		TOutlineColor.m_A *= Alpha;
 		TColor.m_A *= Alpha;
 
+		float YOffset = Position.y-38;
+
 		if(m_aNamePlates[ClientID].m_NameTextContainerIndex != -1)
-			TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_NameTextContainerIndex, &TColor, &TOutlineColor, Position.x - tw / 2.0f, Position.y - FontSize - 38.0f);
+		{
+			YOffset -= FontSize;
+			TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_NameTextContainerIndex, &TColor, &TOutlineColor, Position.x - tw / 2.0f, YOffset);
+		}
 
 		if(g_Config.m_ClNameplatesClan)
 		{
+			YOffset -= FontSizeClan;
 			if(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex != -1)
-				TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex, &TColor, &TOutlineColor, Position.x - m_aNamePlates[ClientID].m_ClanNameTextWidth / 2.0f, Position.y - FontSize - FontSizeClan - 38.0f);
+				TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex, &TColor, &TOutlineColor, Position.x - m_aNamePlates[ClientID].m_ClanNameTextWidth / 2.0f, YOffset);
+		}
+
+		if (g_Config.m_ClNameplatesFriendMark && m_pClient->m_aClients[ClientID].m_Friend)
+		{
+			YOffset -= FontSize;
+			char aFriendMark[]  = "♥";
+			TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f));
+			float XOffSet = TextRender()->TextWidth(0, FontSize, aFriendMark, -1, -1.0f)/2.0f;
+			TextRender()->Text(0, Position.x-XOffSet, YOffset, FontSize, aFriendMark, -1.0f);
 		}
 
 		if(g_Config.m_Debug || g_Config.m_ClNameplatesIDs) // render client id when in debug as well
 		{
+			YOffset -= FontSize;
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf),"%d", pPlayerInfo->m_ClientID);
-			float Offset = g_Config.m_ClNameplatesClan ? (FontSize * 2 + FontSizeClan) : (FontSize * 2);
-			float tw_id = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f);
+			float XOffset = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f)/2.0f;
 			TextRender()->TextColor(rgb);
-			TextRender()->Text(0, Position.x-tw_id/2.0f, Position.y-Offset-38.0f, 28.0f, aBuf, -1.0f);
+			TextRender()->Text(0, Position.x-XOffset, YOffset, FontSize, aBuf, -1.0f);
 		}
 
 		if(g_Config.m_ClNameplatesHA) // render health and armor in nameplate
 		{
 			int Health = m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur.m_Health;
-			if(Health > 0)
+			int Armor = m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur.m_Armor;
+			
+			if(Health > 0 || Armor > 0)
 			{
-				int Armor = m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur.m_Armor;
 				float HFontSize = 5.0f + 20.0f * g_Config.m_ClNameplatesHASize / 100.0f;
 				float AFontSize = 6.0f + 24.0f * g_Config.m_ClNameplatesHASize / 100.0f;
 				char aHealth[40] = "\0";
@@ -175,24 +191,16 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 					str_append(aArmor, "⚪", sizeof(aArmor));
 				str_append(aArmor, "\0", sizeof(aArmor));
 
-				float Offset;
 
-				if(g_Config.m_ClNameplatesClan && (g_Config.m_Debug || g_Config.m_ClNameplatesIDs))
-					Offset = (FontSize * 3 + FontSizeClan);
-				else if (g_Config.m_ClNameplatesClan)
-					Offset = (FontSize * 2 + FontSizeClan);
-				else if (g_Config.m_Debug || g_Config.m_ClNameplatesIDs)
-					Offset = (FontSize * 3);
-				else
-					Offset = (FontSize * 2);
-
+				YOffset -= HFontSize+AFontSize;
 				float PosHealth = TextRender()->TextWidth(0, HFontSize, aHealth, -1, -1.0f);
 				TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f));
-				TextRender()->Text(0, Position.x-PosHealth/2.0f, Position.y-Offset-HFontSize-AFontSize, HFontSize, aHealth, -1);
+				TextRender()->Text(0, Position.x-PosHealth/2.0f, YOffset, HFontSize, aHealth, -1);
 
+				YOffset -= -AFontSize+3.0f;
 				float PosArmor = TextRender()->TextWidth(0, AFontSize, aArmor, -1, -1.0f);
 				TextRender()->TextColor(ColorRGBA(1.0f, 1.0f, 0.0f));
-				TextRender()->Text(0, Position.x-PosArmor/2.0f, Position.y-Offset-AFontSize-3.0f, AFontSize, aArmor, -1);
+				TextRender()->Text(0, Position.x-PosArmor/2.0f, YOffset, AFontSize, aArmor, -1);
 			}
 		}
 
