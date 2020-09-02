@@ -917,10 +917,13 @@ CSoundSource *CEditor::GetSelectedSource()
 	return 0;
 }
 
-void CEditor::SelectLayer(int Index)
+void CEditor::SelectLayer(int LayerIndex, int GroupIndex)
 {
+	if (GroupIndex != -1)
+		m_SelectedGroup = GroupIndex;
+
 	m_lSelectedLayers.clear();
-	m_lSelectedLayers.add(Index);
+	m_lSelectedLayers.add(LayerIndex);
 }
 
 void CEditor::SelectQuad(int Index)
@@ -3350,8 +3353,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 				if(int Result = DoButton_Ex(&m_Map.m_lGroups[g], aBuf, g==m_SelectedGroup, &Slot,
 					BUTTON_CONTEXT, m_Map.m_lGroups[g]->m_Collapse ? "Select group. Shift click to select all layers. Double click to expand." : "Select group. Shift click to select all layers. Double click to collapse.", CUI::CORNER_R, FontSize))
 				{
-					m_SelectedGroup = g;
-					SelectLayer(0);
+					SelectLayer(0, g);
 					if ((Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && m_SelectedGroup == g)
 					{
 						for(int i = 1; i < m_Map.m_lGroups[g]->m_lLayers.size(); i++)
@@ -3453,12 +3455,30 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 						}
 						else if(!(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)))
 						{
-							m_SelectedGroup = g;
-							SelectLayer(i);
+							SelectLayer(i, g);
 						}
 					}
 					else if(Result == 2)
 					{
+						bool IsLayerSelected = false;
+
+						if (m_SelectedGroup == g)
+						{
+							for (int x = 0; x < m_lSelectedLayers.size(); x++)
+							{
+								if (m_lSelectedLayers[x] == i)
+								{
+									IsLayerSelected = true;
+									break;
+								}
+							}
+						}
+						
+						if (!IsLayerSelected)
+						{
+							SelectLayer(i, g);
+						}
+
 						if(m_lSelectedLayers.size() > 1)
 						{
 							bool AllTile = true;
@@ -3514,8 +3534,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 				{
 					if(m_Map.m_lGroups[Group]->m_lLayers.size() > 0)
 					{
-						m_SelectedGroup = Group;
-						SelectLayer(0);
+						SelectLayer(0, Group);
 						break;
 					}
 				}
@@ -3546,8 +3565,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 				{
 					if(m_Map.m_lGroups[Group]->m_lLayers.size() > 0)
 					{
-						m_SelectedGroup = Group;
-						SelectLayer(m_Map.m_lGroups[Group]->m_lLayers.size() - 1);
+						SelectLayer(m_Map.m_lGroups[Group]->m_lLayers.size() - 1, Group);
 						break;
 					}
 				}
@@ -6156,9 +6174,8 @@ void CEditor::Reset(bool CreateDefault)
 	if(CreateDefault)
 		m_Map.CreateDefault(m_EntitiesTexture);
 
-	SelectLayer(0);
+	SelectLayer(0, 0);
 	m_lSelectedQuads.clear();
-	m_SelectedGroup = 0;
 	m_SelectedPoints = 0;
 	m_SelectedEnvelope = 0;
 	m_SelectedImage = 0;

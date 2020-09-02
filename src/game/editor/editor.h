@@ -779,8 +779,7 @@ public:
 	CLayer *GetSelectedLayer(int Index);
 	CLayerGroup *GetSelectedGroup();
 	CSoundSource *GetSelectedSource();
-	void SelectLayer(int Index);
-
+	void SelectLayer(int LayerIndex, int GroupIndex = -1);
 	void SelectQuad(int Index);
 	void DeleteSelectedQuads();
 	bool IsQuadSelected(int Index);
