@@ -9,6 +9,9 @@ class ISteam : public IInterface
 public:
 	// Returns NULL if the name cannot be determined.
 	virtual const char *GetPlayerName() = 0;
+
+	virtual void ClearGameInfo() = 0;
+	virtual void SetGameInfo(NETADDR ServerAddr, const char *pMapName) = 0;
 };
 
 ISteam *CreateSteam();
