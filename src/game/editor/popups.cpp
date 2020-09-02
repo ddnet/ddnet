@@ -1021,32 +1021,32 @@ int CEditor::PopupMapInfo(CEditor *pEditor, CUIRect View, void *pContext)
 	// author box
 	View.HSplitTop(20.0f, &Label, &View);
 	pEditor->UI()->DoLabel(&Label, "Author:", 10.0f, -1);
-	Label.VSplitLeft(40.0f, 0, &Button);
-	Button.HSplitTop(12.0f, &Button, 0);
+	Label.VSplitLeft(45.0f, 0, &Button);
+	Button.HMargin(3, &Button);
 	static float s_AuthorBox = 0;
 	pEditor->DoEditBox(&s_AuthorBox, &Button, pEditor->m_Map.m_MapInfo.m_aAuthorTmp, sizeof(pEditor->m_Map.m_MapInfo.m_aAuthorTmp), 10.0f, &s_AuthorBox);
 
 	// version box
 	View.HSplitTop(20.0f, &Label, &View);
 	pEditor->UI()->DoLabel(&Label, "Version:", 10.0f, -1);
-	Label.VSplitLeft(40.0f, 0, &Button);
-	Button.HSplitTop(12.0f, &Button, 0);
+	Label.VSplitLeft(45.0f, 0, &Button);
+	Button.HMargin(3, &Button);
 	static float s_VersionBox = 0;
 	pEditor->DoEditBox(&s_VersionBox, &Button, pEditor->m_Map.m_MapInfo.m_aVersionTmp, sizeof(pEditor->m_Map.m_MapInfo.m_aVersionTmp), 10.0f, &s_VersionBox);
 
 	// credits box
 	View.HSplitTop(20.0f, &Label, &View);
 	pEditor->UI()->DoLabel(&Label, "Credits:", 10.0f, -1);
-	Label.VSplitLeft(40.0f, 0, &Button);
-	Button.HSplitTop(12.0f, &Button, 0);
+	Label.VSplitLeft(45.0f, 0, &Button);
+	Button.HMargin(3, &Button);
 	static float s_CreditsBox = 0;
 	pEditor->DoEditBox(&s_CreditsBox, &Button, pEditor->m_Map.m_MapInfo.m_aCreditsTmp, sizeof(pEditor->m_Map.m_MapInfo.m_aCreditsTmp), 10.0f, &s_CreditsBox);
 
 	// license box
 	View.HSplitTop(20.0f, &Label, &View);
 	pEditor->UI()->DoLabel(&Label, "License:", 10.0f, -1);
-	Label.VSplitLeft(40.0f, 0, &Button);
-	Button.HSplitTop(12.0f, &Button, 0);
+	Label.VSplitLeft(45.0f, 0, &Button);
+	Button.HMargin(3, &Button);
 	static float s_LicenseBox = 0;
 	pEditor->DoEditBox(&s_LicenseBox, &Button, pEditor->m_Map.m_MapInfo.m_aLicenseTmp, sizeof(pEditor->m_Map.m_MapInfo.m_aLicenseTmp), 10.0f, &s_LicenseBox);
 
