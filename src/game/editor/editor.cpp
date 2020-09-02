@@ -3353,7 +3353,9 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 				if(int Result = DoButton_Ex(&m_Map.m_lGroups[g], aBuf, g==m_SelectedGroup, &Slot,
 					BUTTON_CONTEXT, m_Map.m_lGroups[g]->m_Collapse ? "Select group. Shift click to select all layers. Double click to expand." : "Select group. Shift click to select all layers. Double click to collapse.", CUI::CORNER_R, FontSize))
 				{
-					SelectLayer(0, g);
+					if (g != m_SelectedGroup)
+						SelectLayer(0, g);
+	
 					if ((Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && m_SelectedGroup == g)
 					{
 						for(int i = 1; i < m_Map.m_lGroups[g]->m_lLayers.size(); i++)
