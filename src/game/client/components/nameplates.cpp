@@ -153,21 +153,10 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		if (g_Config.m_ClNameplatesFriendMark && m_pClient->m_aClients[ClientID].m_Friend)
 		{
 			YOffset -= FontSize;
-			char aBuf[128];
-			
-			if (g_Config.m_ClNameplatesFriendMark == 1)
-			{
-				str_format(aBuf, sizeof(aBuf),"♥");
-				TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f));
-			}
-			else if (g_Config.m_ClNameplatesFriendMark == 2)
-			{
-				str_format(aBuf, sizeof(aBuf),"[F]");
-				TextRender()->TextColor(rgb);
-			}			
-			
-			float XOffSet = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f)/2.0f;
-			TextRender()->Text(0, Position.x-XOffSet, YOffset, FontSize, aBuf, -1.0f);
+			char aFriendMark[]  = "♥";
+			TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f));
+			float XOffSet = TextRender()->TextWidth(0, FontSize, aFriendMark, -1, -1.0f)/2.0f;
+			TextRender()->Text(0, Position.x-XOffSet, YOffset, FontSize, aFriendMark, -1.0f);
 		}
 
 		if(g_Config.m_Debug || g_Config.m_ClNameplatesIDs) // render client id when in debug as well
