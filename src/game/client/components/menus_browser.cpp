@@ -614,8 +614,9 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 
 		UI()->DoLabelScaled(&Button, Localize("Maximum ping:"), FontSize, -1);
 
-		char aBuf[5];
-		str_format(aBuf, sizeof(aBuf), "%d", g_Config.m_BrFilterPing);
+		char aBuf[5] = "";
+		if (g_Config.m_BrFilterPing != 0)
+			str_format(aBuf, sizeof(aBuf), "%d", g_Config.m_BrFilterPing);
 		static float Offset = 0.0f;
 		DoEditBox(&g_Config.m_BrFilterPing, &EditBox, aBuf, sizeof(aBuf), FontSize, &Offset);
 		g_Config.m_BrFilterPing = clamp(str_toint(aBuf), 0, 999);
