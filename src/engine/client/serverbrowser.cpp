@@ -596,7 +596,25 @@ void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServer
 		}
 
 		pEntry = Find(Addr);
-		if(m_ServerlistType != IServerBrowser::TYPE_LAN)
+		
+		if(m_ServerlistType == IServerBrowser::TYPE_LAN)
+		{
+			NETADDR Broadcast;
+			mem_zero(&Broadcast, sizeof(Broadcast));
+			Broadcast.type = m_pNetClient->NetType()|NETTYPE_LINK_BROADCAST;
+			int Token = GenerateToken(Broadcast);
+			bool Drop = false;
+			Drop = Drop || BasicToken != GetBasicToken(Token);
+			Drop = Drop || (pInfo->m_Type == SERVERINFO_EXTENDED && ExtraToken != GetExtraToken(Token));
+			if(Drop)
+			{
+				return;
+			}
+
+			if(!pEntry)
+				pEntry = Add(Addr);
+		}
+		else
 		{
 			if(!pEntry)
 			{
@@ -611,34 +629,16 @@ void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServer
 				return;
 			}
 		}
-		if(!pEntry)
-			pEntry = Add(Addr);
-		if(pEntry)
+		
+		SetInfo(pEntry, *pInfo);
+		if (m_ServerlistType == IServerBrowser::TYPE_LAN)
+			pEntry->m_Info.m_Latency = minimum(static_cast<int>((time_get()-m_BroadcastTime)*1000/time_freq()), 999);
+		else if (pEntry->m_RequestTime > 0)
 		{
-			if(m_ServerlistType == IServerBrowser::TYPE_LAN)
-			{
-				NETADDR Broadcast;
-				mem_zero(&Broadcast, sizeof(Broadcast));
-				Broadcast.type = m_pNetClient->NetType()|NETTYPE_LINK_BROADCAST;
-				int Token = GenerateToken(Broadcast);
-				bool Drop = false;
-				Drop = Drop || BasicToken != GetBasicToken(Token);
-				Drop = Drop || (pInfo->m_Type == SERVERINFO_EXTENDED && ExtraToken != GetExtraToken(Token));
-				if(Drop)
-				{
-					return;
-				}
-			}
-			SetInfo(pEntry, *pInfo);
-			if (m_ServerlistType == IServerBrowser::TYPE_LAN)
-				pEntry->m_Info.m_Latency = minimum(static_cast<int>((time_get()-m_BroadcastTime)*1000/time_freq()), 999);
-			else if (pEntry->m_RequestTime > 0)
-			{
-				pEntry->m_Info.m_Latency = minimum(static_cast<int>((time_get()-pEntry->m_RequestTime)*1000/time_freq()), 999);
-				pEntry->m_RequestTime = -1; // Request has been answered
-			}
-			RemoveRequest(pEntry);
+			pEntry->m_Info.m_Latency = minimum(static_cast<int>((time_get()-pEntry->m_RequestTime)*1000/time_freq()), 999);
+			pEntry->m_RequestTime = -1; // Request has been answered
 		}
+		RemoveRequest(pEntry);
 	}
 
 	Sort();
@@ -658,6 +658,7 @@ void CServerBrowser::Refresh(int Type)
 	m_RequestNumber++;
 
 	m_ServerlistType = Type;
+	secure_random_fill(m_aTokenSeed, sizeof(m_aTokenSeed));
 
 	if(Type == IServerBrowser::TYPE_LAN)
 	{
