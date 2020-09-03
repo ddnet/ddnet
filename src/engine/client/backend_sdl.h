@@ -110,7 +110,7 @@ class CCommandProcessorFragment_OpenGL
 protected:
 	struct CTexture
 	{
-		CTexture() : m_Tex2DArray(0), m_Sampler2DArray(0) {}
+		CTexture() : m_Tex(0), m_Tex2DArray(0), m_Sampler(0), m_Sampler2DArray(0) {}
 		GLuint m_Tex;
 		GLuint m_Tex2DArray; //or 3D texture as fallback
 		GLuint m_Sampler;
@@ -164,6 +164,7 @@ public:
 protected:
 	void SetState(const CCommandBuffer::SState &State, bool Use2DArrayTexture = false);
 	virtual bool IsNewApi() { return false; }
+	void DestroyTexture(int Slot);
 
 	static int TexFormatToOpenGLFormat(int TexFormat);
 	static int TexFormatToImageColorChannelCount(int TexFormat);
@@ -313,7 +314,6 @@ class CCommandProcessorFragment_OpenGL3_3 : public CCommandProcessorFragment_Ope
 	GLuint m_QuadDrawIndexBufferID;
 	unsigned int m_CurrentIndicesInBuffer;
 
-	void DestroyTexture(int Slot);
 	void DestroyBufferContainer(int Index, bool DeleteBOs = true);
 	
 	void AppendIndices(unsigned int NewIndicesCount);

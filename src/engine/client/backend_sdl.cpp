@@ -530,11 +530,41 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Update(const CCommandBuffer::
 	free(pTexData);
 }
 
+void CCommandProcessorFragment_OpenGL::DestroyTexture(int Slot)
+{
+	m_pTextureMemoryUsage->store(m_pTextureMemoryUsage->load(std::memory_order_relaxed) - m_aTextures[Slot].m_MemSize, std::memory_order_relaxed);
+
+	if(m_aTextures[Slot].m_Tex != 0)
+	{
+		glDeleteTextures(1, &m_aTextures[Slot].m_Tex);
+	}
+
+	if(m_aTextures[Slot].m_Tex2DArray != 0)
+	{
+		glDeleteTextures(1, &m_aTextures[Slot].m_Tex2DArray);
+	}
+
+	if(IsNewApi())
+	{
+		if(m_aTextures[Slot].m_Sampler != 0)
+		{
+			glDeleteSamplers(1, &m_aTextures[Slot].m_Sampler);
+		}
+		if(m_aTextures[Slot].m_Sampler2DArray != 0)
+		{
+			glDeleteSamplers(1, &m_aTextures[Slot].m_Sampler2DArray);
+		}
+	}
+
+	m_aTextures[Slot].m_Tex = 0;
+	m_aTextures[Slot].m_Sampler = 0;
+	m_aTextures[Slot].m_Tex2DArray = 0;
+	m_aTextures[Slot].m_Sampler2DArray = 0;
+}
+
 void CCommandProcessorFragment_OpenGL::Cmd_Texture_Destroy(const CCommandBuffer::SCommand_Texture_Destroy *pCommand)
 {
-	glDeleteTextures(1, &m_aTextures[pCommand->m_Slot].m_Tex);
-	m_aTextures[pCommand->m_Slot].m_Tex = 0;
-	m_pTextureMemoryUsage->store(m_pTextureMemoryUsage->load(std::memory_order_relaxed) - m_aTextures[pCommand->m_Slot].m_MemSize, std::memory_order_relaxed);
+	DestroyTexture(pCommand->m_Slot);
 }
 
 void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::SCommand_Texture_Create *pCommand)
@@ -2717,28 +2747,6 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Screenshot(const CCommandBuffer::S
 	pCommand->m_pImage->m_Height = h;
 	pCommand->m_pImage->m_Format = CImageInfo::FORMAT_RGB;
 	pCommand->m_pImage->m_pData = pPixelData;
-}
-
-void CCommandProcessorFragment_OpenGL3_3::DestroyTexture(int Slot)
-{
-	glDeleteTextures(1, &m_aTextures[Slot].m_Tex);
-	glDeleteSamplers(1, &m_aTextures[Slot].m_Sampler);
-	m_pTextureMemoryUsage->store(m_pTextureMemoryUsage->load(std::memory_order_relaxed) - m_aTextures[Slot].m_MemSize, std::memory_order_relaxed);
-
-	if(m_aTextures[Slot].m_Tex2DArray != 0)
-	{
-		glDeleteTextures(1, &m_aTextures[Slot].m_Tex2DArray);
-	}
-
-	if(m_aTextures[Slot].m_Sampler2DArray != 0)
-	{
-		glDeleteSamplers(1, &m_aTextures[Slot].m_Sampler2DArray);
-	}
-
-	m_aTextures[Slot].m_Tex = 0;
-	m_aTextures[Slot].m_Sampler = 0;
-	m_aTextures[Slot].m_Tex2DArray = 0;
-	m_aTextures[Slot].m_Sampler2DArray = 0;
 }
 
 void CCommandProcessorFragment_OpenGL3_3::DestroyBufferContainer(int Index, bool DeleteBOs)
