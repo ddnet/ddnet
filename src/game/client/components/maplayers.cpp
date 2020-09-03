@@ -26,12 +26,58 @@ CMapLayers::CMapLayers(int t)
 	m_CurrentLocalTick = 0;
 	m_LastLocalTick = 0;
 	m_EnvelopeUpdate = false;
+	m_pMenuMap = 0;
+	m_pMenuLayers = 0;
+}
+
+void CMapLayers::LoadBackgroundMap()
+{
+	int HourOfTheDay = time_houroftheday();
+	char aBuf[128];
+	// check for the appropriate day/night map
+	str_format(aBuf, sizeof(aBuf), "themes/%s_%s.map", g_Config.m_ClMenuMap, (HourOfTheDay >= 6 && HourOfTheDay < 18) ? "day" : "night");
+	if(!m_pMenuMap->Load(aBuf, m_pClient->Storage()))
+	{
+		// fall back on generic map
+		str_format(aBuf, sizeof(aBuf), "themes/%s.map", g_Config.m_ClMenuMap);
+		if(!m_pMenuMap->Load(aBuf, m_pClient->Storage()))
+		{
+			// fall back on day/night alternative map
+			str_format(aBuf, sizeof(aBuf), "themes/%s_%s.map", g_Config.m_ClMenuMap, (HourOfTheDay >= 6 && HourOfTheDay < 18) ? "night" : "day");
+			if(!m_pMenuMap->Load(aBuf, m_pClient->Storage()))
+			{
+				str_format(aBuf, sizeof(aBuf), "map '%s' not found", g_Config.m_ClMenuMap);
+				Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", aBuf);
+				return;
+			}
+		}
+	}
+
+	str_format(aBuf, sizeof(aBuf), "loaded map '%s'", g_Config.m_ClMenuMap);
+	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", aBuf);
+
+	m_pMenuLayers->Init(Kernel(), m_pMenuMap);
+	m_pClient->m_pMapimages->OnMenuMapLoad(m_pMenuMap);
+	//LoadEnvPoints(m_pMenuLayers, m_lEnvPointsMenu);
 }
 
 void CMapLayers::OnInit()
 {
-	m_pLayers = Layers();
-	m_pImages = m_pClient->m_pMapimages;
+	if(m_Type == TYPE_BACKGROUND)
+	{
+		m_pMenuLayers = new CLayers;
+		m_pMenuMap = CreateEngineMap();
+		if(g_Config.m_ClShowMenuMap)
+		{
+			LoadBackgroundMap();
+		}
+	}
+	else
+	{
+		m_pLayers = Layers();
+	}
+
+	//m_pClient->m_pMapimages = m_pClient->m_pMapimages;
 }
 
 void CMapLayers::EnvelopeUpdate()
@@ -57,6 +103,9 @@ void CMapLayers::MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *p
 void CMapLayers::EnvelopeEval(float TimeOffset, int Env, float *pChannels, void *pUser)
 {
 	CMapLayers *pThis = (CMapLayers *)pUser;
+	CLayers *pLayers = pThis->m_Type == TYPE_BACKGROUND ? pThis->m_pMenuLayers : pThis->m_pLayers;
+	IMap *pMap = pThis->m_Type == TYPE_BACKGROUND ? pThis->m_pMenuMap : pLayers->Map();
+
 	pChannels[0] = 0;
 	pChannels[1] = 0;
 	pChannels[2] = 0;
@@ -66,18 +115,18 @@ void CMapLayers::EnvelopeEval(float TimeOffset, int Env, float *pChannels, void 
 
 	{
 		int Start, Num;
-		pThis->m_pLayers->Map()->GetType(MAPITEMTYPE_ENVPOINTS, &Start, &Num);
+		pMap->GetType(MAPITEMTYPE_ENVPOINTS, &Start, &Num);
 		if(Num)
-			pPoints = (CEnvPoint *)pThis->m_pLayers->Map()->GetItem(Start, 0, 0);
+			pPoints = (CEnvPoint *)pMap->GetItem(Start, 0, 0);
 	}
 
 	int Start, Num;
-	pThis->m_pLayers->Map()->GetType(MAPITEMTYPE_ENVELOPE, &Start, &Num);
+	pMap->GetType(MAPITEMTYPE_ENVELOPE, &Start, &Num);
 
 	if(Env >= Num)
 		return;
 
-	CMapItemEnvelope *pItem = (CMapItemEnvelope *)pThis->m_pLayers->Map()->GetItem(Start+Env, 0, 0);
+	CMapItemEnvelope *pItem = (CMapItemEnvelope *)pMap->GetItem(Start+Env, 0, 0);
 
 	static float s_Time = 0.0f;
 	static float s_LastLocalTime = pThis->LocalTime();
@@ -420,12 +469,15 @@ void CMapLayers::OnMapLoad()
 
 	bool As3DTextureCoords = !Graphics()->HasTextureArrays();
 
-	for(int g = 0; g < m_pLayers->NumGroups(); g++)
+	CLayers *pLayers = m_Type == TYPE_BACKGROUND ? m_pMenuLayers : m_pLayers;
+	IMap *pMap = m_Type == TYPE_BACKGROUND ? m_pMenuMap : pLayers->Map();
+
+	for(int g = 0; g < pLayers->NumGroups(); g++)
 	{
-		CMapItemGroup *pGroup = m_pLayers->GetGroup(g);
+		CMapItemGroup *pGroup = pLayers->GetGroup(g);
 		if(!pGroup)
 		{
-			dbg_msg("maplayers", "error group was null, group number = %d, total groups = %d", g, m_pLayers->NumGroups());
+			dbg_msg("maplayers", "error group was null, group number = %d, total groups = %d", g, pLayers->NumGroups());
 			dbg_msg("maplayers", "this is here to prevent a crash but the source of this is unknown, please report this for it to get fixed");
 			dbg_msg("maplayers", "we need mapname and crc and the map that caused this if possible, and anymore info you think is relevant");
 			continue;
@@ -433,7 +485,7 @@ void CMapLayers::OnMapLoad()
 
 		for(int l = 0; l < pGroup->m_NumLayers; l++)
 		{
-			CMapItemLayer *pLayer = m_pLayers->GetLayer(pGroup->m_StartLayer+l);
+			CMapItemLayer *pLayer = pLayers->GetLayer(pGroup->m_StartLayer+l);
 			bool IsFrontLayer = false;
 			bool IsSwitchLayer = false;
 			bool IsTeleLayer = false;
@@ -442,26 +494,26 @@ void CMapLayers::OnMapLoad()
 			bool IsGameLayer = false;
 			bool IsEntityLayer = false;
 
-			if(pLayer == (CMapItemLayer*)m_pLayers->GameLayer())
+			if(pLayer == (CMapItemLayer*)pLayers->GameLayer())
 			{
 				IsGameLayer = true;
 				IsEntityLayer = true;
 				PassedGameLayer = true;
 			}
 
-			if(pLayer == (CMapItemLayer*)m_pLayers->FrontLayer())
+			if(pLayer == (CMapItemLayer*)pLayers->FrontLayer())
 				IsEntityLayer = IsFrontLayer = true;
 
-			if(pLayer == (CMapItemLayer*)m_pLayers->SwitchLayer())
+			if(pLayer == (CMapItemLayer*)pLayers->SwitchLayer())
 				IsEntityLayer = IsSwitchLayer = true;
 
-			if(pLayer == (CMapItemLayer*)m_pLayers->TeleLayer())
+			if(pLayer == (CMapItemLayer*)pLayers->TeleLayer())
 				IsEntityLayer = IsTeleLayer = true;
 
-			if(pLayer == (CMapItemLayer*)m_pLayers->SpeedupLayer())
+			if(pLayer == (CMapItemLayer*)pLayers->SpeedupLayer())
 				IsEntityLayer = IsSpeedupLayer = true;
 
-			if(pLayer == (CMapItemLayer*)m_pLayers->TuneLayer())
+			if(pLayer == (CMapItemLayer*)pLayers->TuneLayer())
 				IsEntityLayer = IsTuneLayer = true;
 
 			if(m_Type <= TYPE_BACKGROUND_FORCE)
@@ -524,8 +576,8 @@ void CMapLayers::OnMapLoad()
 					DataIndex = pTMap->m_Data;
 					TileSize = sizeof(CTile);
 				}
-				unsigned int Size = m_pLayers->Map()->GetDataSize(DataIndex);
-				void* pTiles = m_pLayers->Map()->GetData(DataIndex);
+				unsigned int Size = pMap->GetDataSize(DataIndex);
+				void* pTiles = pMap->GetData(DataIndex);
 
 				if(Size >= pTMap->m_Width*pTMap->m_Height*TileSize)
 				{
@@ -863,7 +915,7 @@ void CMapLayers::OnMapLoad()
 				else
 					tmpQuads.resize(pQLayer->m_NumQuads);
 
-				CQuad *pQuads = (CQuad *)m_pLayers->Map()->GetDataSwapped(pQLayer->m_Data);
+				CQuad *pQuads = (CQuad *)pMap->GetDataSwapped(pQLayer->m_Data);
 				for(int i = 0; i < pQLayer->m_NumQuads; ++i)
 				{
 					CQuad *q = &pQuads[i];
@@ -1342,7 +1394,9 @@ void CMapLayers::RenderQuadLayer(int LayerIndex, CMapItemLayerQuads* pQuadLayer,
 	if(!Force && (!g_Config.m_ClShowQuads || g_Config.m_ClOverlayEntities == 100))
 		return;
 
-	CQuad *pQuads = (CQuad *)m_pLayers->Map()->GetDataSwapped(pQuadLayer->m_Data);
+	CLayers *pLayers = m_Type == TYPE_BACKGROUND ? m_pMenuLayers : m_pLayers;
+	IMap *pMap = m_Type == TYPE_BACKGROUND ? m_pMenuMap : pLayers->Map();
+	CQuad *pQuads = (CQuad *)pMap->GetDataSwapped(pQuadLayer->m_Data);
 
 	static std::vector<SQuadRenderInfo> s_QuadRenderInfo;
 
@@ -1382,35 +1436,37 @@ void CMapLayers::RenderQuadLayer(int LayerIndex, CMapItemLayerQuads* pQuadLayer,
 
 void CMapLayers::LayersOfGroupCount(CMapItemGroup* pGroup, int& TileLayerCount, int& QuadLayerCount, bool& PassedGameLayer)
 {
+	CLayers *pLayers = m_Type == TYPE_BACKGROUND ? m_pMenuLayers : m_pLayers;
+	IMap *pMap = m_Type == TYPE_BACKGROUND ? m_pMenuMap : pLayers->Map();
 	int TileLayerCounter = 0;
 	int QuadLayerCounter = 0;
 	for(int l = 0; l < pGroup->m_NumLayers; l++)
 	{
-		CMapItemLayer *pLayer = m_pLayers->GetLayer(pGroup->m_StartLayer+l);
+		CMapItemLayer *pLayer = pLayers->GetLayer(pGroup->m_StartLayer+l);
 		bool IsFrontLayer = false;
 		bool IsSwitchLayer = false;
 		bool IsTeleLayer = false;
 		bool IsSpeedupLayer = false;
 		bool IsTuneLayer = false;
 
-		if(pLayer == (CMapItemLayer*)m_pLayers->GameLayer())
+		if(pLayer == (CMapItemLayer*)pLayers->GameLayer())
 		{
 			PassedGameLayer = true;
 		}
 
-		if(pLayer == (CMapItemLayer*)m_pLayers->FrontLayer())
+		if(pLayer == (CMapItemLayer*)pLayers->FrontLayer())
 			IsFrontLayer = true;
 
-		if(pLayer == (CMapItemLayer*)m_pLayers->SwitchLayer())
+		if(pLayer == (CMapItemLayer*)pLayers->SwitchLayer())
 			IsSwitchLayer = true;
 
-		if(pLayer == (CMapItemLayer*)m_pLayers->TeleLayer())
+		if(pLayer == (CMapItemLayer*)pLayers->TeleLayer())
 			IsTeleLayer = true;
 
-		if(pLayer == (CMapItemLayer*)m_pLayers->SpeedupLayer())
+		if(pLayer == (CMapItemLayer*)pLayers->SpeedupLayer())
 			IsSpeedupLayer = true;
 
-		if(pLayer == (CMapItemLayer*)m_pLayers->TuneLayer())
+		if(pLayer == (CMapItemLayer*)pLayers->TuneLayer())
 			IsTuneLayer = true;
 
 
@@ -1468,7 +1524,7 @@ void CMapLayers::LayersOfGroupCount(CMapItemGroup* pGroup, int& TileLayerCount, 
 				TileLayerAndOverlayCount = 1;
 			}
 
-			unsigned int Size = m_pLayers->Map()->GetDataSize(DataIndex);
+			unsigned int Size = pMap->GetDataSize(DataIndex);
 			if(Size >= pTMap->m_Width*pTMap->m_Height*TileSize)
 			{
 				TileLayerCounter += TileLayerAndOverlayCount;
@@ -1486,8 +1542,11 @@ void CMapLayers::LayersOfGroupCount(CMapItemGroup* pGroup, int& TileLayerCount, 
 
 void CMapLayers::OnRender()
 {
-	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK && m_Type != TYPE_BACKGROUND)
 		return;
+
+	CLayers *pLayers = m_Type == TYPE_BACKGROUND ? m_pMenuLayers : m_pLayers;
+	IMap *pMap = m_Type == TYPE_BACKGROUND ? m_pMenuMap : pLayers->Map();
 
 	CUIRect Screen;
 	Graphics()->GetScreen(&Screen.x, &Screen.y, &Screen.w, &Screen.h);
@@ -1498,13 +1557,13 @@ void CMapLayers::OnRender()
 	int TileLayerCounter = 0;
 	int QuadLayerCounter = 0;
 
-	for(int g = 0; g < m_pLayers->NumGroups(); g++)
+	for(int g = 0; g < pLayers->NumGroups(); g++)
 	{
-		CMapItemGroup *pGroup = m_pLayers->GetGroup(g);
+		CMapItemGroup *pGroup = pLayers->GetGroup(g);
 
 		if(!pGroup)
 		{
-			dbg_msg("maplayers", "error group was null, group number = %d, total groups = %d", g, m_pLayers->NumGroups());
+			dbg_msg("maplayers", "error group was null, group number = %d, total groups = %d", g, pLayers->NumGroups());
 			dbg_msg("maplayers", "this is here to prevent a crash but the source of this is unknown, please report this for it to get fixed");
 			dbg_msg("maplayers", "we need mapname and crc and the map that caused this if possible, and anymore info you think is relevant");
 			continue;
@@ -1514,7 +1573,7 @@ void CMapLayers::OnRender()
 		{
 			// set clipping
 			float Points[4];
-			MapScreenToGroup(Center.x, Center.y, m_pLayers->GameGroup(), m_pClient->m_pCamera->m_Zoom);
+			MapScreenToGroup(Center.x, Center.y, pLayers->GameGroup(), m_pClient->m_pCamera->m_Zoom);
 			Graphics()->GetScreen(&Points[0], &Points[1], &Points[2], &Points[3]);
 			float x0 = (pGroup->m_ClipX - Points[0]) / (Points[2]-Points[0]);
 			float y0 = (pGroup->m_ClipY - Points[1]) / (Points[3]-Points[1]);
@@ -1540,7 +1599,7 @@ void CMapLayers::OnRender()
 
 		for(int l = 0; l < pGroup->m_NumLayers; l++)
 		{
-			CMapItemLayer *pLayer = m_pLayers->GetLayer(pGroup->m_StartLayer+l);
+			CMapItemLayer *pLayer = pLayers->GetLayer(pGroup->m_StartLayer+l);
 			bool Render = false;
 			bool IsGameLayer = false;
 			bool IsFrontLayer = false;
@@ -1550,25 +1609,25 @@ void CMapLayers::OnRender()
 			bool IsTuneLayer = false;
 			bool IsEntityLayer = false;
 
-			if(pLayer == (CMapItemLayer*)m_pLayers->GameLayer())
+			if(pLayer == (CMapItemLayer*)pLayers->GameLayer())
 			{
 				IsEntityLayer = IsGameLayer = true;
 				PassedGameLayer = true;
 			}
 
-			if(pLayer == (CMapItemLayer*)m_pLayers->FrontLayer())
+			if(pLayer == (CMapItemLayer*)pLayers->FrontLayer())
 				IsEntityLayer = IsFrontLayer = true;
 
-			if(pLayer == (CMapItemLayer*)m_pLayers->SwitchLayer())
+			if(pLayer == (CMapItemLayer*)pLayers->SwitchLayer())
 				IsEntityLayer = IsSwitchLayer = true;
 
-			if(pLayer == (CMapItemLayer*)m_pLayers->TeleLayer())
+			if(pLayer == (CMapItemLayer*)pLayers->TeleLayer())
 				IsEntityLayer = IsTeleLayer = true;
 
-			if(pLayer == (CMapItemLayer*)m_pLayers->SpeedupLayer())
+			if(pLayer == (CMapItemLayer*)pLayers->SpeedupLayer())
 				IsEntityLayer = IsSpeedupLayer = true;
 
-			if(pLayer == (CMapItemLayer*)m_pLayers->TuneLayer())
+			if(pLayer == (CMapItemLayer*)pLayers->TuneLayer())
 				IsEntityLayer = IsTuneLayer = true;
 
 			if(m_Type == -1)
@@ -1594,7 +1653,7 @@ void CMapLayers::OnRender()
 			if(Render && pLayer->m_Type == LAYERTYPE_TILES && Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyIsPressed(KEY_LSHIFT) && Input()->KeyPress(KEY_KP_0))
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
-				CTile *pTiles = (CTile *)m_pLayers->Map()->GetData(pTMap->m_Data);
+				CTile *pTiles = (CTile *)pMap->GetData(pTMap->m_Data);
 				CServerInfo CurrentServerInfo;
 				Client()->GetServerInfo(&CurrentServerInfo);
 				char aFilename[256];
@@ -1655,7 +1714,7 @@ void CMapLayers::OnRender()
 					TileLayerAndOverlayCount = 1;
 				}
 
-				unsigned int Size = m_pLayers->Map()->GetDataSize(DataIndex);
+				unsigned int Size = pMap->GetDataSize(DataIndex);
 				if(Size >= pTMap->m_Width*pTMap->m_Height*TileSize)
 				{
 					TileLayerCounter += TileLayerAndOverlayCount;
@@ -1680,13 +1739,13 @@ void CMapLayers::OnRender()
 						if(!IsGameLayer)
 							Graphics()->TextureClear();
 						else
-							Graphics()->TextureSet(m_pImages->GetEntities());
+							Graphics()->TextureSet(m_pClient->m_pMapimages->GetEntities());
 					}
 					else
-						Graphics()->TextureSet(m_pImages->Get(pTMap->m_Image));
+						Graphics()->TextureSet(m_pClient->m_pMapimages->Get(pTMap->m_Image));
 
-					CTile *pTiles = (CTile *)m_pLayers->Map()->GetData(pTMap->m_Data);
-					unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Data);
+					CTile *pTiles = (CTile *)pMap->GetData(pTMap->m_Data);
+					unsigned int Size = pMap->GetDataSize(pTMap->m_Data);
 
 					if(Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CTile))
 					{
@@ -1742,9 +1801,9 @@ void CMapLayers::OnRender()
 					if(pQLayer->m_Image == -1)
 						Graphics()->TextureClear();
 					else
-						Graphics()->TextureSet(m_pImages->Get(pQLayer->m_Image));
+						Graphics()->TextureSet(m_pClient->m_pMapimages->Get(pQLayer->m_Image));
 
-					CQuad *pQuads = (CQuad *)m_pLayers->Map()->GetDataSwapped(pQLayer->m_Data);
+					CQuad *pQuads = (CQuad *)pMap->GetDataSwapped(pQLayer->m_Data);
 					if(m_Type == TYPE_BACKGROUND_FORCE)
 					{
 						if(g_Config.m_ClShowQuads)
@@ -1780,10 +1839,10 @@ void CMapLayers::OnRender()
 			else if(Render && g_Config.m_ClOverlayEntities && IsFrontLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
-				Graphics()->TextureSet(m_pImages->GetEntities());
+				Graphics()->TextureSet(m_pClient->m_pMapimages->GetEntities());
 
-				CTile *pFrontTiles = (CTile *)m_pLayers->Map()->GetData(pTMap->m_Front);
-				unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Front);
+				CTile *pFrontTiles = (CTile *)pMap->GetData(pTMap->m_Front);
+				unsigned int Size = pMap->GetDataSize(pTMap->m_Front);
 
 				if(Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CTile))
 				{
@@ -1807,10 +1866,10 @@ void CMapLayers::OnRender()
 			else if(Render && g_Config.m_ClOverlayEntities && IsSwitchLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
-				Graphics()->TextureSet(m_pImages->GetEntities());
+				Graphics()->TextureSet(m_pClient->m_pMapimages->GetEntities());
 
-				CSwitchTile *pSwitchTiles = (CSwitchTile *)m_pLayers->Map()->GetData(pTMap->m_Switch);
-				unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Switch);
+				CSwitchTile *pSwitchTiles = (CSwitchTile *)pMap->GetData(pTMap->m_Switch);
+				unsigned int Size = pMap->GetDataSize(pTMap->m_Switch);
 
 				if(Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CSwitchTile))
 				{
@@ -1829,9 +1888,9 @@ void CMapLayers::OnRender()
 						RenderTileLayer(TileLayerCounter-3, &Color, pTMap, pGroup);
 						if(g_Config.m_ClTextEntities)
 						{
-							Graphics()->TextureSet(m_pImages->GetOverlayBottom());
+							Graphics()->TextureSet(m_pClient->m_pMapimages->GetOverlayBottom());
 							RenderTileLayer(TileLayerCounter-2, &Color, pTMap, pGroup);
-							Graphics()->TextureSet(m_pImages->GetOverlayTop());
+							Graphics()->TextureSet(m_pClient->m_pMapimages->GetOverlayTop());
 							RenderTileLayer(TileLayerCounter-1, &Color, pTMap, pGroup);
 						}
 					}
@@ -1840,10 +1899,10 @@ void CMapLayers::OnRender()
 			else if(Render && g_Config.m_ClOverlayEntities && IsTeleLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
-				Graphics()->TextureSet(m_pImages->GetEntities());
+				Graphics()->TextureSet(m_pClient->m_pMapimages->GetEntities());
 
-				CTeleTile *pTeleTiles = (CTeleTile *)m_pLayers->Map()->GetData(pTMap->m_Tele);
-				unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Tele);
+				CTeleTile *pTeleTiles = (CTeleTile *)pMap->GetData(pTMap->m_Tele);
+				unsigned int Size = pMap->GetDataSize(pTMap->m_Tele);
 
 				if(Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CTeleTile))
 				{
@@ -1862,7 +1921,7 @@ void CMapLayers::OnRender()
 						RenderTileLayer(TileLayerCounter-2, &Color, pTMap, pGroup);
 						if(g_Config.m_ClTextEntities)
 						{
-							Graphics()->TextureSet(m_pImages->GetOverlayCenter());
+							Graphics()->TextureSet(m_pClient->m_pMapimages->GetOverlayCenter());
 							RenderTileLayer(TileLayerCounter-1, &Color, pTMap, pGroup);
 						}
 					}
@@ -1871,10 +1930,10 @@ void CMapLayers::OnRender()
 			else if(Render && g_Config.m_ClOverlayEntities && IsSpeedupLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
-				Graphics()->TextureSet(m_pImages->GetEntities());
+				Graphics()->TextureSet(m_pClient->m_pMapimages->GetEntities());
 
-				CSpeedupTile *pSpeedupTiles = (CSpeedupTile *)m_pLayers->Map()->GetData(pTMap->m_Speedup);
-				unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Speedup);
+				CSpeedupTile *pSpeedupTiles = (CSpeedupTile *)pMap->GetData(pTMap->m_Speedup);
+				unsigned int Size = pMap->GetDataSize(pTMap->m_Speedup);
 
 				if(Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CSpeedupTile))
 				{
@@ -1893,14 +1952,14 @@ void CMapLayers::OnRender()
 
 						// draw arrow -- clamp to the edge of the arrow image
 						Graphics()->WrapClamp();
-						Graphics()->TextureSet(m_pImages->GetSpeedupArrow());
+						Graphics()->TextureSet(m_pClient->m_pMapimages->GetSpeedupArrow());
 						RenderTileLayer(TileLayerCounter-3, &Color, pTMap, pGroup);
 						Graphics()->WrapNormal();
 						if(g_Config.m_ClTextEntities)
 						{
-							Graphics()->TextureSet(m_pImages->GetOverlayBottom());
+							Graphics()->TextureSet(m_pClient->m_pMapimages->GetOverlayBottom());
 							RenderTileLayer(TileLayerCounter-2, &Color, pTMap, pGroup);
-							Graphics()->TextureSet(m_pImages->GetOverlayTop());
+							Graphics()->TextureSet(m_pClient->m_pMapimages->GetOverlayTop());
 							RenderTileLayer(TileLayerCounter-1, &Color, pTMap, pGroup);
 						}
 					}
@@ -1909,10 +1968,10 @@ void CMapLayers::OnRender()
 			else if(Render && g_Config.m_ClOverlayEntities && IsTuneLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
-				Graphics()->TextureSet(m_pImages->GetEntities());
+				Graphics()->TextureSet(m_pClient->m_pMapimages->GetEntities());
 
-				CTuneTile *pTuneTiles = (CTuneTile *)m_pLayers->Map()->GetData(pTMap->m_Tune);
-				unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Tune);
+				CTuneTile *pTuneTiles = (CTuneTile *)pMap->GetData(pTMap->m_Tune);
+				unsigned int Size = pMap->GetDataSize(pTMap->m_Tune);
 
 				if(Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CTuneTile))
 				{

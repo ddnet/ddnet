@@ -618,10 +618,41 @@ static void Evolve(CNetObj_Character *pCharacter, int Tick)
 	TempCore.Write(pCharacter);
 }
 
+void CGameClient::StartRendering()
+{
+	if(m_pMenus->IsBackgroundNeeded())
+		Graphics()->Clear(0.45f, 0.45f, 0.45f);
+	else
+		Graphics()->Clear(1.0f, 1.0f, 0.0f);
+
+	if(m_pMenus->IsBackgroundNeeded())
+	{
+		// render background color
+		float sw = 300 * Graphics()->ScreenAspect();
+		float sh = 300;
+		Graphics()->MapScreen(0, 0, sw, sh);
+		Graphics()->TextureClear();
+		Graphics()->QuadsBegin();
+		vec4 Bottom(0.45f, 0.45f, 0.45f, 1.0f);
+		vec4 Top(0.45f, 0.45f, 0.45f, 1.0f);
+		IGraphics::CColorVertex Array[4] = {
+			IGraphics::CColorVertex(0, Top.r, Top.g, Top.b, Top.a),
+			IGraphics::CColorVertex(1, Top.r, Top.g, Top.b, Top.a),
+			IGraphics::CColorVertex(2, Bottom.r, Bottom.g, Bottom.b, Bottom.a),
+			IGraphics::CColorVertex(3, Bottom.r, Bottom.g, Bottom.b, Bottom.a) };
+		Graphics()->SetColorVertex(Array, 4);
+		IGraphics::CQuadItem QuadItem(0, 0, sw, sh);
+		Graphics()->QuadsDrawTL(&QuadItem, 1);
+		Graphics()->QuadsEnd();
+	}
+}
+
 void CGameClient::OnRender()
 {
 	// update the local character and spectate position
 	UpdatePositions();
+
+	StartRendering();
 
 	// display gfx warnings
 	if(g_Config.m_GfxShowWarnings == 1)

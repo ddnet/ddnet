@@ -336,6 +336,8 @@ public:
 
 	void OnReset();
 
+	void StartRendering();
+
 	// hooks
 	virtual void OnConnected();
 	virtual void OnRender();

@@ -618,6 +618,15 @@ int64 time_freq(void);
 int time_timestamp(void);
 
 /*
+	Function: time_houroftheday
+		Retrives the hours since midnight (0..23)
+
+	Returns:
+		The current hour of the day
+*/
+int time_houroftheday();
+
+/*
 Function: time_get_microseconds
 Fetches a sample from a high resolution timer and converts it in microseconds.
 

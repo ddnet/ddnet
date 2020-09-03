@@ -6,22 +6,37 @@
 
 class CMapImages : public CComponent
 {
+	enum
+	{
+		MAX_TEXTURES=64,
+
+		MAP_TYPE_GAME=0,
+		MAP_TYPE_MENU,
+		NUM_MAP_TYPES
+	};
+	struct
+	{
+		IGraphics::CTextureHandle m_aTextures[MAX_TEXTURES];
+		int m_aTextureUsedByTileOrQuadLayerFlag[MAX_TEXTURES]; // 0: nothing, 1(as flag): tile layer, 2(as flag): quad layer
+		int m_Count;
+	} m_Info[NUM_MAP_TYPES];
+
 	friend class CBackground;
 
-	IGraphics::CTextureHandle m_aTextures[64];
-	int m_aTextureUsedByTileOrQuadLayerFlag[64]; // 0: nothing, 1(as flag): tile layer, 2(as flag): quad layer
-	int m_Count;
-
 	const char *m_pEntitiesGameType;
+
+	void LoadMapImages(class IMap *pMap, class CLayers *pLayers, int MapType);
+
 public:
 	CMapImages();
 	CMapImages(int ImageSize);
 
-	IGraphics::CTextureHandle Get(int Index) const { return m_aTextures[Index]; }
-	int Num() const { return m_Count; }
+	IGraphics::CTextureHandle Get(int Index) const;
+	int Num() const;
 
-	void OnMapLoadImpl(class CLayers *pLayers, class IMap *pMap);
+	void OnMapLoadImpl(class CLayers *pLayers, class IMap *pMap, int MapType);
 	virtual void OnMapLoad();
+	void OnMenuMapLoad(class IMap *pMap);
 	virtual void OnInit();
 	void LoadBackground(class CLayers *pLayers, class IMap *pMap);
 

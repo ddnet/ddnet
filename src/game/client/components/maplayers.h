@@ -20,6 +20,9 @@ class CMapLayers : public CComponent
 {
 	friend class CBackground;
 
+	CLayers *m_pMenuLayers;
+	IEngineMap *m_pMenuMap;
+
 	CLayers *m_pLayers;
 	class CMapImages *m_pImages;
 	int m_Type;
@@ -27,7 +30,12 @@ class CMapLayers : public CComponent
 	int m_LastLocalTick;
 	bool m_EnvelopeUpdate;
 
+	array<CEnvPoint> m_lEnvPoints;
+	array<CEnvPoint> m_lEnvPointsMenu;
+
 	void MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, float Zoom = 1.0f);
+	void LoadEnvPoints(const CLayers *pLayers, array<CEnvPoint>& lEnvPoints);
+	void LoadBackgroundMap();
 
 	struct STileLayerVisuals
 	{
@@ -138,6 +146,8 @@ public:
 	void EnvelopeUpdate();
 
 	static void EnvelopeEval(float TimeOffset, int Env, float *pChannels, void *pUser);
+
+	bool MenuMapLoaded() { return m_pMenuMap ? m_pMenuMap->IsLoaded() : false; }
 };
 
 #endif

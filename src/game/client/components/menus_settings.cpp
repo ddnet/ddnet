@@ -1219,6 +1219,91 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 	}
 }
 
+int CMenus::ThemeScan(const char *pName, int IsDir, int DirType, void *pUser)
+{
+	CMenus *pSelf = (CMenus *)pUser;
+	const char *pSuffix = str_endswith(pName, ".map");
+	if(IsDir || !pSuffix)
+		return 0;
+	char aFullName[128];
+	char aThemeName[128];
+	str_truncate(aFullName, sizeof(aFullName), pName, pSuffix - pName);
+
+	bool IsDay = false;
+	bool IsNight = false;
+	if((pSuffix = str_endswith(aFullName, "_day")))
+	{
+		str_truncate(aThemeName, sizeof(aThemeName), pName, pSuffix - aFullName);
+		IsDay = true;
+	}
+	else if((pSuffix = str_endswith(aFullName, "_night")))
+	{
+		str_truncate(aThemeName, sizeof(aThemeName), pName, pSuffix - aFullName);
+		IsNight = true;
+	}
+	else
+		str_copy(aThemeName, aFullName, sizeof(aThemeName));
+
+	if(str_comp(aThemeName, "none") == 0) // "none" is reserved, disallowed for maps
+		return 0;
+
+	// try to edit an existing theme
+	for(int i = 0; i < pSelf->m_lThemes.size(); i++)
+	{
+		if(str_comp(pSelf->m_lThemes[i].m_Name, aThemeName) == 0)
+		{
+			if(IsDay)
+				pSelf->m_lThemes[i].m_HasDay = true;
+			if(IsNight)
+				pSelf->m_lThemes[i].m_HasNight = true;
+			return 0;
+		}
+	}
+
+	// make new theme
+	CTheme Theme(aThemeName, IsDay, IsNight);
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "added theme %s from themes/%s", aThemeName, pName);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
+	pSelf->m_lThemes.add(Theme);
+	return 0;
+}
+
+int CMenus::ThemeIconScan(const char *pName, int IsDir, int DirType, void *pUser)
+{
+	CMenus *pSelf = (CMenus *)pUser;
+	const char *pSuffix = str_endswith(pName, ".png");
+	if(IsDir || !pSuffix)
+		return 0;
+
+	char aThemeName[128];
+	str_truncate(aThemeName, sizeof(aThemeName), pName, pSuffix - pName);
+
+	// save icon for an existing theme
+	for(sorted_array<CTheme>::range r = pSelf->m_lThemes.all(); !r.empty(); r.pop_front()) // bit slow but whatever
+	{
+		if(str_comp(r.front().m_Name, aThemeName) == 0 || (!r.front().m_Name[0] && str_comp(aThemeName, "none") == 0))
+		{
+			char aBuf[MAX_PATH_LENGTH];
+			str_format(aBuf, sizeof(aBuf), "themes/%s", pName);
+			CImageInfo Info;
+			if(!pSelf->Graphics()->LoadPNG(&Info, aBuf, DirType))
+			{
+				str_format(aBuf, sizeof(aBuf), "failed to load theme icon from %s", pName);
+				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
+				return 0;
+			}
+			str_format(aBuf, sizeof(aBuf), "loaded theme icon %s", pName);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
+
+			r.front().m_IconTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
+			return 0;
+		}
+	}
+	return 0; // no existing theme
+}
+
+
 class CLanguage
 {
 public:

@@ -119,6 +119,24 @@ class CMenus : public CComponent
 
 	const CMenuImage *FindMenuImage(const char* pName);
 
+	// themes
+	class CTheme
+	{
+	public:
+		CTheme() {}
+		CTheme(const char *n, bool HasDay, bool HasNight) : m_Name(n), m_HasDay(HasDay), m_HasNight(HasNight) {}
+
+		string m_Name;
+		bool m_HasDay;
+		bool m_HasNight;
+		IGraphics::CTextureHandle m_IconTexture;
+		bool operator<(const CTheme &Other) const { return m_Name < Other.m_Name; }
+	};
+	sorted_array<CTheme> m_lThemes;
+
+	static int ThemeScan(const char *pName, int IsDir, int DirType, void *pUser);
+	static int ThemeIconScan(const char *pName, int IsDir, int DirType, void *pUser);
+
 	// loading
 	int m_LoadCurrent;
 	int m_LoadTotal;
@@ -332,6 +350,7 @@ class CMenus : public CComponent
 	bool CheckHotKey(int Key) const;
 
 public:
+	bool IsBackgroundNeeded() const;
 	void RenderBackground();
 
 	void UseMouseButtons(bool Use) { m_UseMouseButtons = Use; }

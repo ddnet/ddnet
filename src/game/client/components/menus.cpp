@@ -26,6 +26,7 @@
 #include <game/generated/client_data.h>
 #include <game/client/components/binds.h>
 #include <game/client/components/console.h>
+#include <game/client/components/maplayers.h>
 #include <game/client/components/sounds.h>
 #include <game/client/gameclient.h>
 #include <game/client/lineinput.h>
@@ -917,6 +918,7 @@ void CMenus::RenderLoading()
 	CUIRect Screen = *UI()->Screen();
 	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
 
+	m_pClient->StartRendering();
 	RenderBackground();
 
 	float w = 700;
@@ -1075,7 +1077,8 @@ int CMenus::Render()
 	}
 	else
 	{
-		RenderBackground();
+		if(IsBackgroundNeeded())
+			RenderBackground();
 		ms_ColorTabbarInactive = ms_ColorTabbarInactiveOutgame;
 		ms_ColorTabbarActive = ms_ColorTabbarActiveOutgame;
 	}
@@ -2120,7 +2123,8 @@ void CMenus::OnRender()
 	UI()->Update(mx,my,mx*3.0f,my*3.0f,Buttons);
 
 	// render
-	Render();
+	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
+		Render();
 
 	// render cursor
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CURSOR].m_Id);
@@ -2147,6 +2151,11 @@ void CMenus::OnRender()
 	m_EnterPressed = false;
 	m_DeletePressed = false;
 	m_NumInputEvents = 0;
+}
+
+bool CMenus::IsBackgroundNeeded() const
+{ 
+	return (Client()->State() != IClient::STATE_ONLINE && !m_pClient->m_pMapLayersBackGround->MenuMapLoaded());
 }
 
 void CMenus::RenderBackground()

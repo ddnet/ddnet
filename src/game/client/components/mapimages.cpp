@@ -12,16 +12,20 @@
 
 CMapImages::CMapImages() : CMapImages(100)
 {
+	m_Info[MAP_TYPE_GAME].m_Count = 0;
+	m_Info[MAP_TYPE_MENU].m_Count = 0;
 }
 
 CMapImages::CMapImages(int TextureSize) 
 {
-	m_Count = 0;
+	m_Info[MAP_TYPE_GAME].m_Count = 0;
+	m_Info[MAP_TYPE_MENU].m_Count = 0;
 	m_TextureScale = TextureSize;
 	m_EntitiesIsLoaded = false;
 	m_SpeedupArrowIsLoaded = false;
 
-	mem_zero(m_aTextureUsedByTileOrQuadLayerFlag, sizeof(m_aTextureUsedByTileOrQuadLayerFlag));
+	mem_zero(m_Info[MAP_TYPE_GAME].m_aTextureUsedByTileOrQuadLayerFlag, sizeof(m_Info[MAP_TYPE_GAME].m_aTextureUsedByTileOrQuadLayerFlag));
+	mem_zero(m_Info[MAP_TYPE_MENU].m_aTextureUsedByTileOrQuadLayerFlag, sizeof(m_Info[MAP_TYPE_MENU].m_aTextureUsedByTileOrQuadLayerFlag));
 }
 
 void CMapImages::OnInit()
@@ -29,19 +33,22 @@ void CMapImages::OnInit()
 	InitOverlayTextures();
 }
 
-void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
+void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap, int MapType)
 {
+	if(MapType < 0 || MapType >= NUM_MAP_TYPES)
+		return;
+
 	// unload all textures
-	for(int i = 0; i < m_Count; i++)
+	for(int i = 0; i < m_Info[MapType].m_Count; i++)
 	{
-		Graphics()->UnloadTexture(m_aTextures[i]);
-		m_aTextures[i] = IGraphics::CTextureHandle();
-		m_aTextureUsedByTileOrQuadLayerFlag[i] = 0;
+		Graphics()->UnloadTexture(m_Info[MapType].m_aTextures[i]);
+		m_Info[MapType].m_aTextures[i] = IGraphics::CTextureHandle();
+		m_Info[MapType].m_aTextureUsedByTileOrQuadLayerFlag[i] = 0;
 	}
-	m_Count = 0;
+	m_Info[MapType].m_Count = 0;
 
 	int Start;
-	pMap->GetType(MAPITEMTYPE_IMAGE, &Start, &m_Count);
+	pMap->GetType(MAPITEMTYPE_IMAGE, &Start, &m_Info[MapType].m_Count);
 
 	for(int g = 0; g < pLayers->NumGroups(); g++)
 	{
@@ -57,17 +64,17 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
 				CMapItemLayerTilemap *pTLayer = (CMapItemLayerTilemap *)pLayer;
-				if(pTLayer->m_Image != -1 && pTLayer->m_Image < (int)(sizeof(m_aTextures) / sizeof(m_aTextures[0])))
+				if(pTLayer->m_Image != -1 && pTLayer->m_Image < (int)(sizeof(m_Info[MapType].m_aTextures) / sizeof(m_Info[MapType].m_aTextures[0])))
 				{
-					m_aTextureUsedByTileOrQuadLayerFlag[(size_t)pTLayer->m_Image] |= 1;
+					m_Info[MapType].m_aTextureUsedByTileOrQuadLayerFlag[(size_t)pTLayer->m_Image] |= 1;
 				}
 			}
 			else if(pLayer->m_Type == LAYERTYPE_QUADS)
 			{
 				CMapItemLayerQuads *pQLayer = (CMapItemLayerQuads *)pLayer;
-				if(pQLayer->m_Image != -1 && pQLayer->m_Image < (int)(sizeof(m_aTextures) / sizeof(m_aTextures[0])))
+				if(pQLayer->m_Image != -1 && pQLayer->m_Image < (int)(sizeof(m_Info[MapType].m_aTextures) / sizeof(m_Info[MapType].m_aTextures[0])))
 				{
-					m_aTextureUsedByTileOrQuadLayerFlag[(size_t)pQLayer->m_Image] |= 2;
+					m_Info[MapType].m_aTextureUsedByTileOrQuadLayerFlag[(size_t)pQLayer->m_Image] |= 2;
 				}
 			}
 		}
@@ -76,16 +83,16 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 	int TextureLoadFlag = Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 
 	// load new textures
-	for(int i = 0; i < m_Count; i++)
+	for(int i = 0; i < m_Info[MapType].m_Count; i++)
 	{
-		int LoadFlag = (((m_aTextureUsedByTileOrQuadLayerFlag[i] & 1) != 0) ? TextureLoadFlag : 0) | (((m_aTextureUsedByTileOrQuadLayerFlag[i] & 2) != 0) ? 0 : (Graphics()->IsTileBufferingEnabled() ? IGraphics::TEXLOAD_NO_2D_TEXTURE : 0));
+		int LoadFlag = (((m_Info[MapType].m_aTextureUsedByTileOrQuadLayerFlag[i] & 1) != 0) ? TextureLoadFlag : 0) | (((m_Info[MapType].m_aTextureUsedByTileOrQuadLayerFlag[i] & 2) != 0) ? 0 : (Graphics()->IsTileBufferingEnabled() ? IGraphics::TEXLOAD_NO_2D_TEXTURE : 0));
 		CMapItemImage *pImg = (CMapItemImage *)pMap->GetItem(Start+i, 0, 0);
 		if(pImg->m_External)
 		{
 			char Buf[256];
 			char *pName = (char *)pMap->GetData(pImg->m_ImageName);
 			str_format(Buf, sizeof(Buf), "mapres/%s.png", pName);
-			m_aTextures[i] = Graphics()->LoadTexture(Buf, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, LoadFlag);
+			m_Info[MapType].m_aTextures[i] = Graphics()->LoadTexture(Buf, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, LoadFlag);
 		}
 		else
 		{
@@ -93,7 +100,7 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 			char *pName = (char *)pMap->GetData(pImg->m_ImageName);
 			char aTexName[128];
 			str_format(aTexName, sizeof(aTexName), "%s %s", "embedded:", pName);
-			m_aTextures[i] = Graphics()->LoadTextureRaw(pImg->m_Width, pImg->m_Height, CImageInfo::FORMAT_RGBA, pData, CImageInfo::FORMAT_RGBA, LoadFlag, aTexName);
+			m_Info[MapType].m_aTextures[i] = Graphics()->LoadTextureRaw(pImg->m_Width, pImg->m_Height, CImageInfo::FORMAT_RGBA, pData, CImageInfo::FORMAT_RGBA, LoadFlag, aTexName);
 			pMap->UnloadData(pImg->m_ImageData);
 		}
 	}
@@ -103,13 +110,30 @@ void CMapImages::OnMapLoad()
 {
 	IMap *pMap = Kernel()->RequestInterface<IMap>();
 	CLayers *pLayers = m_pClient->Layers();
-	OnMapLoadImpl(pLayers, pMap);
+	OnMapLoadImpl(pLayers, pMap, MAP_TYPE_GAME);
 }
+
+void CMapImages::OnMenuMapLoad(IMap *pMap)
+{
+	CLayers MenuLayers;
+	MenuLayers.Init(Kernel(), pMap);
+	LoadMapImages(pMap, &MenuLayers, MAP_TYPE_MENU);
+}
+
 
 void CMapImages::LoadBackground(class CLayers *pLayers, class IMap *pMap)
 {
-	OnMapLoadImpl(pLayers, pMap);
+	OnMapLoadImpl(pLayers, pMap, MAP_TYPE_GAME);
 }
+
+void CMapImages::LoadMapImages(IMap *pMap, class CLayers *pLayers, int MapType)
+{
+	if(MapType < 0 || MapType >= NUM_MAP_TYPES)
+		return;
+
+	OnMapLoadImpl(pLayers, pMap, MapType);
+}
+
 
 IGraphics::CTextureHandle CMapImages::GetEntities()
 {
@@ -262,4 +286,18 @@ void CMapImages::InitOverlayTextures()
 	{
 		m_OverlayCenterTexture = UploadEntityLayerText(TextureSize, 64, TextureToVerticalCenterOffset);
 	}
+}
+
+IGraphics::CTextureHandle CMapImages::Get(int Index) const
+{
+	if(Client()->State() == IClient::STATE_ONLINE || Client()->State() == IClient::STATE_DEMOPLAYBACK)
+		return m_Info[MAP_TYPE_GAME].m_aTextures[clamp(Index, 0, m_Info[MAP_TYPE_GAME].m_Count)];
+	return m_Info[MAP_TYPE_MENU].m_aTextures[clamp(Index, 0, m_Info[MAP_TYPE_MENU].m_Count)];
+}
+
+int CMapImages::Num() const
+{
+	if(Client()->State() == IClient::STATE_ONLINE || Client()->State() == IClient::STATE_DEMOPLAYBACK)
+		return m_Info[MAP_TYPE_GAME].m_Count;
+	return m_Info[MAP_TYPE_MENU].m_Count;
 }

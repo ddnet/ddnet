@@ -10,6 +10,9 @@ class CCamera : public CComponent
 {
 	enum
 	{
+		POS_START = 0,
+		NUM_POS,
+
 		CAMTYPE_UNDEFINED=-1,
 		CAMTYPE_SPEC,
 		CAMTYPE_PLAYER,
@@ -18,6 +21,12 @@ class CCamera : public CComponent
 	int m_CamType;
 	vec2 m_LastPos[2];
 	vec2 m_PrevCenter;
+	vec2 m_MenuCenter;
+	vec2 m_RotationCenter;
+	vec2 m_Positions[NUM_POS];
+	int m_CurrentPosition;
+	vec2 m_AnimationStartPos;
+	float m_MoveTime;
 
 	bool m_Zooming;
 	CCubicBezier m_ZoomSmoothing;
@@ -36,6 +45,7 @@ public:
 
 	CCamera();
 	virtual void OnRender();
+	void ChangePosition(int PositionNumber);
 
 	// DDRace
 

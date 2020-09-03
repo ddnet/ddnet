@@ -23,6 +23,17 @@ CCamera::CCamera()
 	m_ZoomSet = false;
 	m_Zoom = 1.0f;
 	m_Zooming = false;
+
+	m_RotationCenter = vec2(0.0f, 0.0f);
+	m_AnimationStartPos = vec2(0.0f, 0.0f);
+	m_Center = vec2(0.0f, 0.0f);
+	m_PrevCenter = vec2(0.0f, 0.0f);
+	m_MenuCenter = vec2(0.0f, 0.0f);
+
+	m_Positions[POS_START] = vec2(500.0f, 500.0f);
+
+	m_CurrentPosition = -1;
+	m_MoveTime = 0.0f;
 }
 
 float CCamera::ZoomProgress(float CurrentTime) const
@@ -63,72 +74,102 @@ void CCamera::ChangeZoom(float Target)
 
 void CCamera::OnRender()
 {
-	if(m_Zooming)
+	if(Client()->State() == IClient::STATE_ONLINE || Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
-		float Time = Client()->LocalTime();
-		if(Time >= m_ZoomSmoothingEnd)
+		if(m_Zooming)
 		{
-			m_Zoom = m_ZoomSmoothingTarget;
+			float Time = Client()->LocalTime();
+			if(Time >= m_ZoomSmoothingEnd)
+			{
+				m_Zoom = m_ZoomSmoothingTarget;
+				m_Zooming = false;
+			}
+			else
+			{
+				m_Zoom = m_ZoomSmoothing.Evaluate(ZoomProgress(Time));
+			}
+		}
+
+		if(!(m_pClient->m_Snap.m_SpecInfo.m_Active || GameClient()->m_GameInfo.m_AllowZoom || Client()->State() == IClient::STATE_DEMOPLAYBACK))
+		{
+			m_ZoomSet = false;
+			m_Zoom = 1.0f;
 			m_Zooming = false;
+		}
+		else if(!m_ZoomSet && g_Config.m_ClDefaultZoom != 10)
+		{
+			m_ZoomSet = true;
+			OnReset();
+		}
+
+		// update camera center
+		if(m_pClient->m_Snap.m_SpecInfo.m_Active && !m_pClient->m_Snap.m_SpecInfo.m_UsePosition)
+		{
+			if(m_CamType != CAMTYPE_SPEC)
+			{
+				m_LastPos[g_Config.m_ClDummy] = m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy];
+				m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy] = m_PrevCenter;
+				m_pClient->m_pControls->ClampMousePos();
+				m_CamType = CAMTYPE_SPEC;
+			}
+			m_Center = m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy];
 		}
 		else
 		{
-			m_Zoom = m_ZoomSmoothing.Evaluate(ZoomProgress(Time));
-		}
-	}
+			if(m_CamType != CAMTYPE_PLAYER)
+			{
+				if((m_LastPos[g_Config.m_ClDummy].x < g_Config.m_ClMouseMinDistance) || (m_LastPos[g_Config.m_ClDummy].x < g_Config.m_ClDyncamMinDistance))
+					m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy].x = m_LastPos[g_Config.m_ClDummy].x + g_Config.m_ClMouseMinDistance + g_Config.m_ClDyncamMinDistance;
+				else
+					m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy] = m_LastPos[g_Config.m_ClDummy];
+				m_pClient->m_pControls->ClampMousePos();
+				m_CamType = CAMTYPE_PLAYER;
+			}
 
-	if(!(m_pClient->m_Snap.m_SpecInfo.m_Active || GameClient()->m_GameInfo.m_AllowZoom || Client()->State() == IClient::STATE_DEMOPLAYBACK))
-	{
-		m_ZoomSet = false;
-		m_Zoom = 1.0f;
-		m_Zooming = false;
-	}
-	else if(!m_ZoomSet && g_Config.m_ClDefaultZoom != 10)
-	{
-		m_ZoomSet = true;
-		OnReset();
-	}
+			vec2 CameraOffset(0, 0);
 
-	// update camera center
-	if(m_pClient->m_Snap.m_SpecInfo.m_Active && !m_pClient->m_Snap.m_SpecInfo.m_UsePosition)
-	{
-		if(m_CamType != CAMTYPE_SPEC)
-		{
-			m_LastPos[g_Config.m_ClDummy] = m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy];
-			m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy] = m_PrevCenter;
-			m_pClient->m_pControls->ClampMousePos();
-			m_CamType = CAMTYPE_SPEC;
+			float l = length(m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy]);
+			if(l > 0.0001f) // make sure that this isn't 0
+			{
+				float DeadZone = g_Config.m_ClDyncam ? g_Config.m_ClDyncamDeadzone : g_Config.m_ClMouseDeadzone;
+				float FollowFactor = (g_Config.m_ClDyncam ? g_Config.m_ClDyncamFollowFactor : g_Config.m_ClMouseFollowfactor) / 100.0f;
+				float OffsetAmount = maximum(l-DeadZone, 0.0f) * FollowFactor;
+
+				CameraOffset = normalize(m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy])*OffsetAmount;
+			}
+
+			if(m_pClient->m_Snap.m_SpecInfo.m_Active)
+				m_Center = m_pClient->m_Snap.m_SpecInfo.m_Position + CameraOffset;
+			else
+				m_Center = m_pClient->m_LocalCharacterPos + CameraOffset;
 		}
-		m_Center = m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy];
 	}
 	else
 	{
-		if(m_CamType != CAMTYPE_PLAYER)
+		m_Zoom = 0.7f;
+		static vec2 Dir = vec2(1.0f, 0.0f);
+
+		if(distance(m_Center, m_RotationCenter) <= (float)g_Config.m_ClRotationRadius+0.5f)
 		{
-			if((m_LastPos[g_Config.m_ClDummy].x < g_Config.m_ClMouseMinDistance) || (m_LastPos[g_Config.m_ClDummy].x < g_Config.m_ClDyncamMinDistance))
-				m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy].x = m_LastPos[g_Config.m_ClDummy].x + g_Config.m_ClMouseMinDistance + g_Config.m_ClDyncamMinDistance;
-			else
-				m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy] = m_LastPos[g_Config.m_ClDummy];
-			m_pClient->m_pControls->ClampMousePos();
-			m_CamType = CAMTYPE_PLAYER;
+			// do little rotation
+			float RotPerTick = 360.0f/(float)g_Config.m_ClRotationSpeed * Client()->RenderFrameTime();
+			Dir = rotate(Dir, RotPerTick);
+			m_Center = m_RotationCenter+Dir*(float)g_Config.m_ClRotationRadius;
 		}
-
-		vec2 CameraOffset(0, 0);
-
-		float l = length(m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy]);
-		if(l > 0.0001f) // make sure that this isn't 0
-		{
-			float DeadZone = g_Config.m_ClDyncam ? g_Config.m_ClDyncamDeadzone : g_Config.m_ClMouseDeadzone;
-			float FollowFactor = (g_Config.m_ClDyncam ? g_Config.m_ClDyncamFollowFactor : g_Config.m_ClMouseFollowfactor) / 100.0f;
-			float OffsetAmount = maximum(l-DeadZone, 0.0f) * FollowFactor;
-
-			CameraOffset = normalize(m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy])*OffsetAmount;
-		}
-
-		if(m_pClient->m_Snap.m_SpecInfo.m_Active)
-			m_Center = m_pClient->m_Snap.m_SpecInfo.m_Position + CameraOffset;
 		else
-			m_Center = m_pClient->m_LocalCharacterPos + CameraOffset;
+		{
+			// positions for the animation
+			Dir = normalize(m_AnimationStartPos - m_RotationCenter);
+			vec2 TargetPos = m_RotationCenter + Dir * (float)g_Config.m_ClRotationRadius;
+			float Distance = distance(m_AnimationStartPos, TargetPos);
+
+			// move time
+			m_MoveTime += Client()->RenderFrameTime()*g_Config.m_ClCameraSpeed / 10.0f;
+			float XVal = 1 - m_MoveTime;
+			XVal = pow(XVal, 7.0f);
+
+			m_Center = TargetPos + Dir * (XVal*Distance);
+		}
 	}
 
 	m_PrevCenter = m_Center;
