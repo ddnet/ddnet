@@ -1013,6 +1013,24 @@ void str_copy(char *dst, const char *src, int dst_size);
 void str_utf8_truncate(char *dst, int dst_size, const char *src, int truncation_len);
 
 /*
+	Function: str_truncate
+		Truncates a string to a given length.
+
+	Parameters:
+		dst - Pointer to a buffer that shall receive the string.
+		dst_size - Size of the buffer dst.
+		src - String to be truncated.
+		truncation_len - Maximum length of the returned string (not
+		counting the zero termination).
+
+	Remarks:
+		- The strings are treated as zero-terminated strings.
+		- Garantees that dst string will contain zero-termination.
+*/
+void str_truncate(char *dst, int dst_size, const char *src, int truncation_len);
+
+
+/*
 	Function: str_length
 		Returns the length of a zero terminated string.
 

@@ -714,6 +714,17 @@ void CGraphics_Threaded::SetColor(ColorRGBA rgb)
 	SetColor(rgb.r, rgb.g, rgb.b, rgb.a);
 }
 
+void CGraphics_Threaded::SetColor4(vec4 TopLeft, vec4 TopRight, vec4 BottomLeft, vec4 BottomRight)
+{
+	dbg_assert(m_Drawing != 0, "called Graphics()->SetColor without begin");
+	CColorVertex Array[4] = {
+		CColorVertex(0, TopLeft.r, TopLeft.g, TopLeft.b, TopLeft.a),
+		CColorVertex(1, TopRight.r, TopRight.g, TopRight.b, TopRight.a),
+		CColorVertex(2, BottomRight.r, BottomRight.g, BottomRight.b, BottomRight.a),
+		CColorVertex(3, BottomLeft.r, BottomLeft.g, BottomLeft.b, BottomLeft.a)};
+	SetColorVertex(Array, 4);
+}
+
 void CGraphics_Threaded::ChangeColorOfCurrentQuadVertices(float r, float g, float b, float a)
 {
 	clampf(r, 0.f, 1.f);

@@ -67,7 +67,6 @@
 
 #include "friends.h"
 #include "serverbrowser.h"
-#include "updater.h"
 #include "client.h"
 
 #if defined(CONF_VIDEORECORDER)

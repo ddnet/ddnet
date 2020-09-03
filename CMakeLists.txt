@@ -1140,6 +1140,11 @@ set(EXPECTED_DATA
   maps/license.txt
   maps7/Gold\ Mine.map
   maps7/readme.txt
+  menuimages/demos.png
+  menuimages/editor.png
+  menuimages/local_server.png
+  menuimages/play_game.png
+  menuimages/settings.png
   particles.png
   shader/pipeline.frag
   shader/pipeline.vert
@@ -1689,6 +1694,7 @@ if(CLIENT)
     components/menus_demo.cpp
     components/menus_ingame.cpp
     components/menus_settings.cpp
+    components/menus_start.cpp
     components/motd.cpp
     components/motd.h
     components/nameplates.cpp

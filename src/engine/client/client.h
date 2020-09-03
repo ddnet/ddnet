@@ -7,6 +7,7 @@
 
 #include <base/hash.h>
 #include <engine/client/http.h>
+#include <engine/client/updater.h>
 
 #define CONNECTLINK "ddnet:"
 

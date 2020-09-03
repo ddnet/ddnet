@@ -25,6 +25,7 @@
 
 #include <game/generated/client_data.h>
 #include <game/client/components/binds.h>
+#include <game/client/components/console.h>
 #include <game/client/components/sounds.h>
 #include <game/client/gameclient.h>
 #include <game/client/lineinput.h>
@@ -56,6 +57,7 @@ CMenus::CMenus()
 {
 	m_Popup = POPUP_NONE;
 	m_ActivePage = PAGE_INTERNET;
+	m_MenuPage = 0;
 	m_GamePage = PAGE_GAME;
 
 	m_NeedRestartGraphics = false;
@@ -63,6 +65,7 @@ CMenus::CMenus()
 	m_NeedSendinfo = false;
 	m_NeedSendDummyinfo = false;
 	m_MenuActive = true;
+	m_ShowStart = true;
 	m_UseMouseButtons = true;
 	m_MouseSlow = false;
 
@@ -142,14 +145,43 @@ int CMenus::DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, 
 	return Active ? UI()->DoButtonLogic(pID, "", Checked, pRect) : 0;
 }
 
-int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
+int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pImageName, int Corners, float r, float FontFactor, vec4 ColorHot, bool Dark)
 {
-	RenderTools()->DrawUIRect(pRect, ColorRGBA(1,1,1,0.5f * ButtonColorMul(pID)), CUI::CORNER_ALL, 5.0f);
-	CUIRect Temp;
-	pRect->HMargin(pRect->h>=20.0f?2.0f:1.0f, &Temp);
-	UI()->DoLabel(&Temp, pText, Temp.h*ms_FontmodHeight, 0);
+	CUIRect Text = *pRect;
+
+	vec4 Color;
+	if(Dark)
+		Color = UI()->HotItem() == pID ? ColorHot : vec4(0.0f, 0.0f, 0.0f, 0.25f);
+	else
+		Color = vec4(1,1,1,0.5f * ButtonColorMul(pID));
+	RenderTools()->DrawUIRect(pRect, Color, Corners, r);
+
+	if(pImageName)
+	{
+		CUIRect Image;
+		pRect->VSplitRight(pRect->h*4.0f, &Text, &Image); // always correct ratio for image
+
+		// render image
+		const CMenuImage *pImage = FindMenuImage(pImageName);
+		if(pImage)
+		{
+			Graphics()->TextureSet(UI()->HotItem() == pID ? pImage->m_OrgTexture : pImage->m_GreyTexture);
+			Graphics()->WrapClamp();
+			Graphics()->QuadsBegin();
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+			IGraphics::CQuadItem QuadItem(Image.x, Image.y, Image.w, Image.h);
+			Graphics()->QuadsDrawTL(&QuadItem, 1);
+			Graphics()->QuadsEnd();
+			Graphics()->WrapNormal();
+		}
+	}
+
+	Text.HMargin(pRect->h>=20.0f?2.0f:1.0f, &Text);
+	Text.HMargin((Text.h*FontFactor)/2.0f, &Text);
+	UI()->DoLabel(&Text, pText, Text.h*ms_FontmodHeight, 0);
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
 }
+
 
 void CMenus::DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {
@@ -684,7 +716,7 @@ int CMenus::RenderMenubar(CUIRect r)
 	CUIRect Box = r;
 	CUIRect Button;
 
-	m_ActivePage = g_Config.m_UiPage;
+	m_ActivePage = m_MenuPage;
 	int NewPage = -1;
 
 	if(Client()->State() != IClient::STATE_OFFLINE)
@@ -857,7 +889,7 @@ int CMenus::RenderMenubar(CUIRect r)
 	if(NewPage != -1)
 	{
 		if(Client()->State() == IClient::STATE_OFFLINE)
-			g_Config.m_UiPage = NewPage;
+			SetMenuPage(NewPage);
 		else
 			m_GamePage = NewPage;
 	}
@@ -951,6 +983,8 @@ void CMenus::OnInit()
 {
 	if(g_Config.m_ClShowWelcome)
 		m_Popup = POPUP_LANGUAGE;
+	if(g_Config.m_ClSkipStartMenu)
+		m_ShowStart = false;
 
 	Console()->Chain("add_favorite", ConchainServerbrowserUpdate, this);
 	Console()->Chain("remove_favorite", ConchainServerbrowserUpdate, this);
@@ -958,6 +992,10 @@ void CMenus::OnInit()
 	Console()->Chain("remove_friend", ConchainFriendlistUpdate, this);
 
 	m_TextureBlob = Graphics()->LoadTexture("blob.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+
+	// load menu images
+	m_lMenuImages.clear();
+	Storage()->ListDirectory(IStorage::TYPE_ALL, "menuimages", MenuImageScan, this);
 
 	// setup load amount
 	m_LoadCurrent = 0;
@@ -1009,6 +1047,7 @@ int CMenus::Render()
 	static int s_Frame = 0;
 	if(s_Frame == 0)
 	{
+		m_MenuPage = g_Config.m_UiPage;
 		s_Frame++;
 	}
 	else if(s_Frame == 1)
@@ -1057,53 +1096,63 @@ int CMenus::Render()
 
 	if(m_Popup == POPUP_NONE)
 	{
-		Screen.HSplitTop(24.0f, &TabBar, &MainView);
-
-		// render news
-		if(g_Config.m_UiPage < PAGE_NEWS || g_Config.m_UiPage > PAGE_SETTINGS || (Client()->State() == IClient::STATE_OFFLINE && g_Config.m_UiPage >= PAGE_GAME && g_Config.m_UiPage <= PAGE_CALLVOTE))
+		if(m_ShowStart && Client()->State() == IClient::STATE_OFFLINE)
+			RenderStartMenu(Screen);
+		else
 		{
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
-			g_Config.m_UiPage = PAGE_INTERNET;
-			m_DoubleClickIndex = -1;
-		}
+			Screen.HSplitTop(24.0f, &TabBar, &MainView);
 
-		// render current page
-		if(Client()->State() != IClient::STATE_OFFLINE)
-		{
-			if(m_GamePage == PAGE_GAME)
-				RenderGame(MainView);
-			else if(m_GamePage == PAGE_PLAYERS)
-				RenderPlayers(MainView);
-			else if(m_GamePage == PAGE_SERVER_INFO)
-				RenderServerInfo(MainView);
-			else if(m_GamePage == PAGE_NETWORK)
-				RenderInGameNetwork(MainView);
-			else if(m_GamePage == PAGE_GHOST)
-				RenderGhost(MainView);
-			else if(m_GamePage == PAGE_CALLVOTE)
-				RenderServerControl(MainView);
-			else if(m_GamePage == PAGE_SETTINGS)
+			if(Client()->State() == IClient::STATE_OFFLINE && m_EscapePressed)
+			{
+				m_ShowStart = true;
+			}
+
+			// render news
+			if(m_MenuPage < PAGE_NEWS || m_MenuPage > PAGE_SETTINGS || (Client()->State() == IClient::STATE_OFFLINE && m_MenuPage >= PAGE_GAME && m_MenuPage <= PAGE_CALLVOTE))
+			{
+				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+				SetMenuPage(PAGE_INTERNET);
+				m_DoubleClickIndex = -1;
+			}
+
+			// render current page
+			if(Client()->State() != IClient::STATE_OFFLINE)
+			{
+				if(m_GamePage == PAGE_GAME)
+					RenderGame(MainView);
+				else if(m_GamePage == PAGE_PLAYERS)
+					RenderPlayers(MainView);
+				else if(m_GamePage == PAGE_SERVER_INFO)
+					RenderServerInfo(MainView);
+				else if(m_GamePage == PAGE_NETWORK)
+					RenderInGameNetwork(MainView);
+				else if(m_GamePage == PAGE_GHOST)
+					RenderGhost(MainView);
+				else if(m_GamePage == PAGE_CALLVOTE)
+					RenderServerControl(MainView);
+				else if(m_GamePage == PAGE_SETTINGS)
+					RenderSettings(MainView);
+			}
+			else if(m_MenuPage == PAGE_NEWS)
+				RenderNews(MainView);
+			else if(m_MenuPage == PAGE_INTERNET)
+				RenderServerbrowser(MainView);
+			else if(m_MenuPage == PAGE_LAN)
+				RenderServerbrowser(MainView);
+			else if(m_MenuPage == PAGE_DEMOS)
+				RenderDemoList(MainView);
+			else if(m_MenuPage == PAGE_FAVORITES)
+				RenderServerbrowser(MainView);
+			else if(m_MenuPage == PAGE_DDNET)
+				RenderServerbrowser(MainView);
+			else if(m_MenuPage == PAGE_KOG)
+				RenderServerbrowser(MainView);
+			else if(m_MenuPage == PAGE_SETTINGS)
 				RenderSettings(MainView);
-		}
-		else if(g_Config.m_UiPage == PAGE_NEWS)
-			RenderNews(MainView);
-		else if(g_Config.m_UiPage == PAGE_INTERNET)
-			RenderServerbrowser(MainView);
-		else if(g_Config.m_UiPage == PAGE_LAN)
-			RenderServerbrowser(MainView);
-		else if(g_Config.m_UiPage == PAGE_DEMOS)
-			RenderDemoList(MainView);
-		else if(g_Config.m_UiPage == PAGE_FAVORITES)
-			RenderServerbrowser(MainView);
-		else if(g_Config.m_UiPage == PAGE_DDNET)
-			RenderServerbrowser(MainView);
-		else if(g_Config.m_UiPage == PAGE_KOG)
-			RenderServerbrowser(MainView);
-		else if(g_Config.m_UiPage == PAGE_SETTINGS)
-			RenderSettings(MainView);
 
-		// do tab bar
-		RenderMenubar(TabBar);
+			// do tab bar
+			RenderMenubar(TabBar);
+		}
 	}
 	else
 	{
@@ -2150,6 +2199,13 @@ void CMenus::RenderBackground()
 	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);}
 }
 
+bool CMenus::CheckHotKey(int Key) const
+{
+	return m_Popup == POPUP_NONE &&
+		!Input()->KeyIsPressed(KEY_LSHIFT) && !Input()->KeyIsPressed(KEY_RSHIFT) && !Input()->KeyIsPressed(KEY_LCTRL) && !Input()->KeyIsPressed(KEY_RCTRL) && !Input()->KeyIsPressed(KEY_LALT) && // no modifier
+		Input()->KeyIsPressed(Key) && m_pClient->m_pGameConsole->IsClosed();
+}
+
 int CMenus::DoButton_CheckBox_DontCare(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {
 	switch(Checked)
@@ -2213,4 +2269,104 @@ void CMenus::RenderUpdating(const char *pCaption, int current, int total)
 	}
 
 	Graphics()->Swap();
+}
+
+int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser)
+{
+	CMenus *pSelf = (CMenus *)pUser;
+	if(IsDir || !str_endswith(pName, ".png"))
+		return 0;
+
+	char aBuf[MAX_PATH_LENGTH];
+	str_format(aBuf, sizeof(aBuf), "menuimages/%s", pName);
+	CImageInfo Info;
+	if(!pSelf->Graphics()->LoadPNG(&Info, aBuf, DirType))
+	{
+		str_format(aBuf, sizeof(aBuf), "failed to load menu image from %s", pName);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
+		return 0;
+	}
+
+	CMenuImage MenuImage;
+	MenuImage.m_OrgTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
+
+	unsigned char *d = (unsigned char *)Info.m_pData;
+	//int Pitch = Info.m_Width*4;
+
+	// create colorless version
+	int Step = Info.m_Format == CImageInfo::FORMAT_RGBA ? 4 : 3;
+
+	// make the texture gray scale
+	for(int i = 0; i < Info.m_Width*Info.m_Height; i++)
+	{
+		int v = (d[i*Step]+d[i*Step+1]+d[i*Step+2])/3;
+		d[i*Step] = v;
+		d[i*Step+1] = v;
+		d[i*Step+2] = v;
+	}
+
+	/* same grey like sinks
+	int Freq[256] = {0};
+	int OrgWeight = 0;
+	int NewWeight = 192;
+
+	// find most common frequence
+	for(int y = 0; y < Info.m_Height; y++)
+		for(int x = 0; x < Info.m_Width; x++)
+		{
+			if(d[y*Pitch+x*4+3] > 128)
+				Freq[d[y*Pitch+x*4]]++;
+		}
+
+	for(int i = 1; i < 256; i++)
+	{
+		if(Freq[OrgWeight] < Freq[i])
+			OrgWeight = i;
+	}
+
+	// reorder
+	int InvOrgWeight = 255-OrgWeight;
+	int InvNewWeight = 255-NewWeight;
+	for(int y = 0; y < Info.m_Height; y++)
+		for(int x = 0; x < Info.m_Width; x++)
+		{
+			int v = d[y*Pitch+x*4];
+			if(v <= OrgWeight)
+				v = (int)(((v/(float)OrgWeight) * NewWeight));
+			else
+				v = (int)(((v-OrgWeight)/(float)InvOrgWeight)*InvNewWeight + NewWeight);
+			d[y*Pitch+x*4] = v;
+			d[y*Pitch+x*4+1] = v;
+			d[y*Pitch+x*4+2] = v;
+		}
+	*/
+
+	MenuImage.m_GreyTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
+	free(Info.m_pData);
+
+	// set menu image data
+	str_truncate(MenuImage.m_aName, sizeof(MenuImage.m_aName), pName, str_length(pName) - 4);
+	str_format(aBuf, sizeof(aBuf), "load menu image %s", MenuImage.m_aName);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
+	pSelf->m_lMenuImages.add(MenuImage);
+	pSelf->RenderLoading();
+
+	return 0;
+}
+
+const CMenus::CMenuImage *CMenus::FindMenuImage(const char *pName)
+{
+	for(int i = 0; i < m_lMenuImages.size(); i++)
+	{
+		if(str_comp(m_lMenuImages[i].m_aName, pName) == 0)
+			return &m_lMenuImages[i];
+	}
+	return 0;
+}
+
+void CMenus::SetMenuPage(int NewPage)
+{
+	m_MenuPage = NewPage;
+	if(NewPage >= PAGE_INTERNET && NewPage <= PAGE_KOG)
+		g_Config.m_UiPage = NewPage;
 }
