@@ -2083,6 +2083,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     json.cpp
     mapbugs.cpp
     name_ban.cpp
+    packer.cpp
     prng.cpp
     str.cpp
     strip_path_and_extension.cpp
