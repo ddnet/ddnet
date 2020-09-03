@@ -101,6 +101,7 @@ tags
 *.sdf
 *.sln
 *.so
+*.sqlite
 *.suo
 *.swp
 *.tar.gz
