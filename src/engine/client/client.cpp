@@ -2441,7 +2441,8 @@ void CClient::LoadDDNetInfo()
 	{
 		const char *pNewsString = json_string_get(pNews);
 
-		if(m_aNews[0] && str_comp(m_aNews, pNewsString))
+		// Only switch to news page if something new was added to the news
+		if(m_aNews[0] && str_find(m_aNews, pNewsString) == nullptr)
 			g_Config.m_UiPage = CMenus::PAGE_NEWS;
 
 		str_copy(m_aNews, pNewsString, sizeof(m_aNews));
