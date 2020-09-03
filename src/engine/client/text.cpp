@@ -675,10 +675,10 @@ public:
 
 		dbg_msg("textrender", "loaded pFont from '%s'", pFilename);
 
-		pFont->m_CurTextureDimensions[0] = 256;
+		pFont->m_CurTextureDimensions[0] = 1024;
 		pFont->m_TextureData[0] = new unsigned char[pFont->m_CurTextureDimensions[0] * pFont->m_CurTextureDimensions[0]];
 		mem_zero(pFont->m_TextureData[0], pFont->m_CurTextureDimensions[0] * pFont->m_CurTextureDimensions[0] * sizeof(unsigned char));
-		pFont->m_CurTextureDimensions[1] = 256;
+		pFont->m_CurTextureDimensions[1] = 1024;
 		pFont->m_TextureData[1] = new unsigned char[pFont->m_CurTextureDimensions[1] * pFont->m_CurTextureDimensions[1]];
 		mem_zero(pFont->m_TextureData[1], pFont->m_CurTextureDimensions[1] * pFont->m_CurTextureDimensions[1] * sizeof(unsigned char));
 
