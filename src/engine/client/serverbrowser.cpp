@@ -658,6 +658,7 @@ void CServerBrowser::Refresh(int Type)
 	m_RequestNumber++;
 
 	m_ServerlistType = Type;
+	secure_random_fill(m_aTokenSeed, sizeof(m_aTokenSeed));
 
 	if(Type == IServerBrowser::TYPE_LAN)
 	{
