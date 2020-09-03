@@ -2304,12 +2304,22 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 		CNetMsg_Cl_StartInfo *pMsg = (CNetMsg_Cl_StartInfo *)pRawMsg;
 
-		if(!str_utf8_check(pMsg->m_pName)
-			|| !str_utf8_check(pMsg->m_pClan)
-			|| !str_utf8_check(pMsg->m_pSkin))
+		if(!str_utf8_check(pMsg->m_pName))
 		{
+			Server()->Kick(ClientID, "name is not valid utf8");
 			return;
 		}
+		if(!str_utf8_check(pMsg->m_pClan))
+		{
+			Server()->Kick(ClientID, "clan is not valid utf8");
+			return;
+		}
+		if(!str_utf8_check(pMsg->m_pSkin))
+		{
+			Server()->Kick(ClientID, "skin is not valid utf8");
+			return;
+		}
+
 		pPlayer->m_LastChangeInfo = Server()->Tick();
 
 		// set start infos
