@@ -3732,6 +3732,7 @@ CCommandProcessor_SDL_OpenGL::CCommandProcessor_SDL_OpenGL(int OpenGLMajor, int 
 
 static void GetGlewVersion(int& GlewMajor, int& GlewMinor, int& GlewPatch)
 {
+#ifdef GLEW_VERSION_4_6
 	if(GLEW_VERSION_4_6)
 	{
 		GlewMajor = 4;
@@ -3739,6 +3740,7 @@ static void GetGlewVersion(int& GlewMajor, int& GlewMinor, int& GlewPatch)
 		GlewPatch = 0;
 		return;
 	}
+#endif
 	if(GLEW_VERSION_4_5)
 	{
 		GlewMajor = 4;
