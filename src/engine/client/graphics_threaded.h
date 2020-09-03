@@ -768,6 +768,7 @@ public:
 	virtual void SetColorVertex(const CColorVertex *pArray, int Num);
 	virtual void SetColor(float r, float g, float b, float a);
 	virtual void SetColor(ColorRGBA rgb);
+	virtual void SetColor4(vec4 TopLeft, vec4 TopRight, vec4 BottomLeft, vec4 BottomRight);
 
 	// go through all vertices and change their color (only works for quads)
 	virtual void ChangeColorOfCurrentQuadVertices(float r, float g, float b, float a);

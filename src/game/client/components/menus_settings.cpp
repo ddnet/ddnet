@@ -165,8 +165,15 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		Left.VSplitRight(5.0f, &Left, 0);
 		Right.VMargin(5.0f, &Right);
 
+		// skip main menu
+		Left.HSplitTop(5.0f, 0, &Left);
+		Left.HSplitTop(20.0f, &Button, &Left);
+		if(DoButton_CheckBox(&g_Config.m_ClSkipStartMenu, Localize("Skip the main menu"), g_Config.m_ClSkipStartMenu, &Button))
+			g_Config.m_ClSkipStartMenu^= 1;
+
 		// auto demo settings
 		{
+			Left.HSplitTop(5.0f, 0, &Left);
 			Left.HSplitTop(20.0f, &Button, &Left);
 			if(DoButton_CheckBox(&g_Config.m_ClAutoDemoRecord, Localize("Automatically record demos"), g_Config.m_ClAutoDemoRecord, &Button))
 				g_Config.m_ClAutoDemoRecord ^= 1;

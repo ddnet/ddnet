@@ -18,7 +18,9 @@
 
 #if defined(CONF_FAMILY_UNIX)
 	#include <sys/time.h>
+	#include <sys/wait.h>
 	#include <unistd.h>
+	#include <signal.h>
 
 	/* unix net includes */
 	#include <sys/socket.h>
@@ -2286,6 +2288,16 @@ void str_utf8_truncate(char *dst, int dst_size, const char *src, int truncation_
 	str_copy(dst, src, size+1);
 }
 
+void str_truncate(char *dst, int dst_size, const char *src, int truncation_len)
+{
+	int size = dst_size;
+	if(truncation_len < size)
+	{
+		size = truncation_len + 1;
+	}
+	str_copy(dst, src, size);
+}
+
 int str_length(const char *str)
 {
 	return (int)strlen(str);
@@ -3202,10 +3214,11 @@ int pid(void)
 #endif
 }
 
-void shell_execute(const char *file)
+int shell_execute(const char *file)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	ShellExecute(NULL, NULL, file, NULL, NULL, SW_SHOWDEFAULT);
+	// TODO: Get PID
 #elif defined(CONF_FAMILY_UNIX)
 	char *argv[2];
 	pid_t pid;
@@ -3214,6 +3227,18 @@ void shell_execute(const char *file)
 	pid = fork();
 	if(!pid)
 		execv(file, argv);
+	return pid;
+#endif
+}
+
+int kill_process(int pid)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	// TODO: Implement
+#elif defined(CONF_FAMILY_UNIX)
+	int status;
+	kill(pid, SIGTERM);
+	return waitpid(pid, &status, 0);
 #endif
 }
 

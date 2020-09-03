@@ -71,6 +71,7 @@ class CGameConsole : public CComponent
 
 	CInstance m_LocalConsole;
 	CInstance m_RemoteConsole;
+	CInstance m_ServerConsole;
 
 	CInstance *CurrentConsole();
 	float TimeNow();
@@ -88,10 +89,13 @@ class CGameConsole : public CComponent
 	static void ClientConsolePrintCallback(const char *pStr, void *pUserData, bool Highlighted);
 	static void ConToggleLocalConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConToggleRemoteConsole(IConsole::IResult *pResult, void *pUserData);
+	static void ConToggleServerConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConClearLocalConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConClearRemoteConsole(IConsole::IResult *pResult, void *pUserData);
+	static void ConClearServerConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConDumpLocalConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConDumpRemoteConsole(IConsole::IResult *pResult, void *pUserData);
+	static void ConDumpServerConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConConsolePageUp(IConsole::IResult *pResult, void *pUserData);
 	static void ConConsolePageDown(IConsole::IResult *pResult, void *pUserData);
 	static void ConchainConsoleOutputLevelUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -101,6 +105,7 @@ public:
 	{
 		CONSOLETYPE_LOCAL=0,
 		CONSOLETYPE_REMOTE,
+		CONSOLETYPE_SERVER,
 	};
 
 	CGameConsole();

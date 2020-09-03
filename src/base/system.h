@@ -1013,6 +1013,24 @@ void str_copy(char *dst, const char *src, int dst_size);
 void str_utf8_truncate(char *dst, int dst_size, const char *src, int truncation_len);
 
 /*
+	Function: str_truncate
+		Truncates a string to a given length.
+
+	Parameters:
+		dst - Pointer to a buffer that shall receive the string.
+		dst_size - Size of the buffer dst.
+		src - String to be truncated.
+		truncation_len - Maximum length of the returned string (not
+		counting the zero termination).
+
+	Remarks:
+		- The strings are treated as zero-terminated strings.
+		- Garantees that dst string will contain zero-termination.
+*/
+void str_truncate(char *dst, int dst_size, const char *src, int truncation_len);
+
+
+/*
 	Function: str_length
 		Returns the length of a zero terminated string.
 
@@ -1964,13 +1982,36 @@ const char *str_next_token(const char *str, const char *delim, char *buffer, int
 */
 int str_in_list(const char *list, const char *delim, const char *needle);
 
+/*
+	Function: pid
+		Returns the pid of the current process.
+	
+	Returns:
+		pid of the current process
+*/
 int pid(void);
 
 /*
 	Function: shell_execute
 		Executes a given file.
+
+	Returns:
+		pid of the new process
 */
-void shell_execute(const char *file);
+int shell_execute(const char *file);
+
+/*
+	Function: kill_process
+		Sends kill signal to a process.
+
+	Parameters:
+		pid - pid of the process
+
+	Returns:
+		0 - Success
+		1 - Error
+*/
+int kill_process(int pid);
 
 /*
 	Function: os_is_winxp_or_lower
@@ -1986,7 +2027,6 @@ int os_is_winxp_or_lower(void);
 	Function: generate_password
 		Generates a null-terminated password of length `2 *
 		random_length`.
-
 
 	Parameters:
 		buffer - Pointer to the start of the output buffer.

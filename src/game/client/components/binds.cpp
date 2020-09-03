@@ -213,6 +213,7 @@ void CBinds::SetDefaults()
 	UnbindAll();
 	Bind(KEY_F1, "toggle_local_console");
 	Bind(KEY_F2, "toggle_remote_console");
+	Bind(KEY_F7, "toggle_server_console");
 	Bind(KEY_TAB, "+scoreboard");
 	Bind(KEY_EQUALS, "+statboard");
 	Bind(KEY_F10, "screenshot");
