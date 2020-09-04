@@ -168,14 +168,14 @@ bool CChat::OnInput(IInput::CEvent Event)
 				if(Text[i] == '\n')
 				{
 					int max = minimum(i - Begin + 1, (int)sizeof(Line));
-					str_copy(Line, Text + Begin, max);
+					str_utf8_copy(Line, Text + Begin, max);
 					Begin = i+1;
 					SayChat(Line);
 					while(Text[i] == '\n') i++;
 				}
 			}
 			int max = minimum(i - Begin + 1, (int)sizeof(Line));
-			str_copy(Line, Text + Begin, max);
+			str_utf8_copy(Line, Text + Begin, max);
 			Begin = i+1;
 			m_Input.Add(Line);
 		}
