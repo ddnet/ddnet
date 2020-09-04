@@ -2336,9 +2336,9 @@ void CClient::FinishMapDownload()
 	m_MapdownloadTotalsize = -1;
 	SHA256_DIGEST *pSha256 = m_MapdownloadSha256Present ? &m_MapdownloadSha256 : 0;
 
-	char aTmp[256];
-	char aMapFileTemp[256];
-	char aMapFile[256];
+	char aTmp[MAX_PATH_LENGTH];
+	char aMapFileTemp[MAX_PATH_LENGTH];
+	char aMapFile[MAX_PATH_LENGTH];
 	FormatMapDownloadFilename(m_aMapdownloadName, pSha256, m_MapdownloadCrc, true, aTmp, sizeof(aTmp));
 	str_format(aMapFileTemp, sizeof(aMapFileTemp), "downloadedmaps/%s", aTmp);
 	FormatMapDownloadFilename(m_aMapdownloadName, pSha256, m_MapdownloadCrc, false, aTmp, sizeof(aTmp));
@@ -2788,11 +2788,13 @@ void CClient::Update()
 		else if(m_pMapdownloadTask->State() == HTTP_ERROR)
 		{
 			dbg_msg("webdl", "http failed, falling back to gameserver");
+			Storage()->RemoveFile(m_pMapdownloadTask->Dest(), IStorage::TYPE_SAVE);
 			ResetMapDownload();
 			SendMapRequest();
 		}
 		else if(m_pMapdownloadTask->State() == HTTP_ABORTED)
 		{
+			Storage()->RemoveFile(m_pMapdownloadTask->Dest(), IStorage::TYPE_SAVE);
 			m_pMapdownloadTask = NULL;
 		}
 	}
@@ -2804,10 +2806,12 @@ void CClient::Update()
 		else if(m_pDDNetInfoTask->State() == HTTP_ERROR)
 		{
 			dbg_msg("ddnet-info", "download failed");
+			Storage()->RemoveFile(m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
 			ResetDDNetInfo();
 		}
 		else if(m_pDDNetInfoTask->State() == HTTP_ABORTED)
 		{
+			Storage()->RemoveFile(m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
 			m_pDDNetInfoTask = NULL;
 		}
 	}
@@ -3562,7 +3566,7 @@ void CClient::SaveReplay(const int Length)
 	{
 		// First we stop the recorder to slice correctly the demo after
 		DemoRecorder_Stop(RECORDER_REPLAYS);
-		char aFilename[256];
+		char aFilename[MAX_PATH_LENGTH];
 
 		char aDate[64];
 		str_timestamp(aDate, sizeof(aDate));
