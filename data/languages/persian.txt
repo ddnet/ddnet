@@ -220,8 +220,6 @@ Please balance teams!
 == !ﺪﯿﻨﻛ ﻝﺩﺎﻌﺘﻣ ﺍﺭ ﺎﻫ ﻢﯿﺗ ﺎﻔﻄﻟ
 Prev. weapon
 == ﯽﻠﺒﻗ ﻪﺤﻠﺳﺍ
-Quality Textures
-== ﻦﺘﻣ ﺖﯿﻔﯿﮐ
 Quit
 == ﻥﺪﺷ ﺝﺭﺎﺧ
 Reason:
@@ -312,8 +310,6 @@ Team
 == ﻢﯿﺗ
 Team chat
 == ﻢﯿﺗ ﺖﭼ
-Texture Compression
-== Texture Compression
 The audio device couldn't be initialised.
 == .ﺪﺸﻧ ﻥﺪﺷ ﺐﺼﻧ ﻪﺑ ﻖﻓﻮﻣ ﺍﺪﺻ ﻩﺎﮕﺘﺳﺩ
 The server is running a non-standard tuning on a pure game type.

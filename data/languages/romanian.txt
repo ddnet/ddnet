@@ -340,9 +340,6 @@ Please balance teams!
 Prev. weapon
 == Arma precedentă
 
-Quality Textures
-== Texturi de înaltă calitate
-
 Quit
 == Ieșire
 
@@ -477,9 +474,6 @@ Team
 
 Team chat
 == Chat cu echipa
-
-Texture Compression
-== Compresie texturi
 
 The audio device couldn't be initialised.
 == Dispozitivul audio nu a putut fi inițializat.

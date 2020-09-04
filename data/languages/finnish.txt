@@ -332,9 +332,6 @@ Please balance teams!
 Prev. weapon
 == Edellinen ase
 
-Quality Textures
-== Hyvälaatuiset tekstuurit
-
 Quit
 == Lopeta
 
@@ -466,9 +463,6 @@ Team
 
 Team chat
 == Joukkuechatti
-
-Texture Compression
-== Tekstuuripakkaus
 
 The audio device couldn't be initialised.
 == Äänilaitteen alustaminen ei onnistunut.

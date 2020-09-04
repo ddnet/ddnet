@@ -348,9 +348,6 @@ Please balance teams!
 Prev. weapon
 == Vorherige Waffe
 
-Quality Textures
-== Hochauflösende Texturen
-
 Quit
 == Beenden
 
@@ -485,9 +482,6 @@ Team
 
 Team chat
 == Teamchat
-
-Texture Compression
-== Texturkompression
 
 The audio device couldn't be initialised.
 == Das Audiosystem konnte nicht gestartet werden.

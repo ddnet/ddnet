@@ -253,9 +253,6 @@ Please balance teams!
 Prev. weapon
 == Попер. зброя
 
-Quality Textures
-== Якісні текстури
-
 Quit
 == Вихід
 
@@ -348,9 +345,6 @@ Team
 
 Team chat
 == Командний чат
-
-Texture Compression
-== Стиснення текстур
 
 The server is running a non-standard tuning on a pure game type.
 == Сервер запущено з нестандартними налаштуваннями на стандартному типі гри.

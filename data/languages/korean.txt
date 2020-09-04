@@ -321,9 +321,6 @@ Please balance teams!
 Prev. weapon
 == 이전 무기
 
-Quality Textures
-== 텍스처 품질
-
 Quit
 == 종료
 
@@ -449,9 +446,6 @@ Team
 
 Team chat
 == 팀 채팅
-
-Texture Compression
-== 텍스처 압축
 
 The audio device couldn't be initialised.
 == 오디오 장치를 초기화할 수 없음

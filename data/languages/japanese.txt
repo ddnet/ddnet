@@ -331,9 +331,6 @@ Please balance teams!
 Prev. weapon
 == 前の武器
 
-Quality Textures
-== テクスチャの品質
-
 Quit
 == 終了
 
@@ -465,9 +462,6 @@ Team
 
 Team chat
 == チームチャット
-
-Texture Compression
-== テクスチャ圧縮
 
 The audio device couldn't be initialised.
 == オーディオデバイスの初期化に失敗しました。
