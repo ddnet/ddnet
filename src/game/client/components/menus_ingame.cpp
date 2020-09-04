@@ -32,7 +32,7 @@
 
 void CMenus::RenderGame(CUIRect MainView)
 {
-	CUIRect Button, ButtonBar;
+	CUIRect Button, ButtonBar, ButtonBar2;
 	MainView.HSplitTop(45.0f, &ButtonBar, &MainView);
 	RenderTools()->DrawUIRect(&ButtonBar, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
 
@@ -41,7 +41,11 @@ void CMenus::RenderGame(CUIRect MainView)
 	ButtonBar.HSplitTop(25.0f, &ButtonBar, 0);
 	ButtonBar.VMargin(10.0f, &ButtonBar);
 
+	ButtonBar.HSplitTop(30.0f, 0, &ButtonBar2);
+	ButtonBar2.HSplitTop(25.0f, &ButtonBar2, 0);
+
 	ButtonBar.VSplitRight(120.0f, &ButtonBar, &Button);
+
 	static int s_DisconnectButton = 0;
 	if(DoButton_Menu(&s_DisconnectButton, Localize("Disconnect"), 0, &Button))
 	{
@@ -55,12 +59,58 @@ void CMenus::RenderGame(CUIRect MainView)
 		}
 	}
 
+	ButtonBar.VSplitRight(5.0f, &ButtonBar, 0);
+	ButtonBar.VSplitRight(170.0f, &ButtonBar, &Button);
+
+	bool DummyConnecting = Client()->DummyConnecting();
+	static int s_DummyButton = 0;
+	if(DummyConnecting)
+	{
+		DoButton_Menu(&s_DummyButton, Localize("Connecting dummy"), 1, &Button);
+	}
+	else if(DoButton_Menu(&s_DummyButton, Client()->DummyConnected() ? Localize("Disconnect Dummy") : Localize("Connect Dummy"), 0, &Button))
+	{
+		if(!Client()->DummyConnected())
+		{
+			Client()->DummyConnect();
+		}
+		else
+		{
+			if(Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
+			{
+				m_Popup = POPUP_DISCONNECT_DUMMY;
+			}
+			else
+			{
+				Client()->DummyDisconnect(0);
+			}
+		}
+		SetActive(false);
+	}
+
+	ButtonBar.VSplitRight(5.0f, &ButtonBar, 0);
+	ButtonBar.VSplitRight(140.0f, &ButtonBar, &Button);
+
+	static int s_DemoButton = 0;
+	bool Recording = DemoRecorder(RECORDER_MANUAL)->IsRecording();
+	if(DoButton_Menu(&s_DemoButton, Recording ? Localize("Stop record") : Localize("Record demo"), 0, &Button))
+	{
+		if(!Recording)
+			Client()->DemoRecorder_Start(Client()->GetCurrentMap(), true, RECORDER_MANUAL);
+		else
+			Client()->DemoRecorder_Stop(RECORDER_MANUAL);
+	}
+
 	static int s_SpectateButton = 0;
 	static int s_JoinRedButton = 0;
 	static int s_JoinBlueButton = 0;
-	bool DummyConnecting = m_pClient->Client()->DummyConnecting();
 
-	if(m_pClient->m_Snap.m_pLocalInfo && m_pClient->m_Snap.m_pGameInfoObj)
+	CServerInfo CurrentServerInfo;
+	Client()->GetServerInfo(&CurrentServerInfo);
+	bool Paused = m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Paused;
+	bool Spec = m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Spec;
+
+	if(m_pClient->m_Snap.m_pLocalInfo && m_pClient->m_Snap.m_pGameInfoObj && !Paused && !Spec)
 	{
 		if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_SPECTATORS)
 		{
@@ -68,7 +118,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
 			if(!DummyConnecting && DoButton_Menu(&s_SpectateButton, Localize("Spectate"), 0, &Button))
 			{
-				if(g_Config.m_ClDummy == 0 || m_pClient->Client()->DummyConnected())
+				if(g_Config.m_ClDummy == 0 || Client()->DummyConnected())
 				{
 					m_pClient->SendSwitchTeam(TEAM_SPECTATORS);
 					SetActive(false);
@@ -115,42 +165,34 @@ void CMenus::RenderGame(CUIRect MainView)
 		}
 	}
 
-	ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
-	ButtonBar.VSplitLeft(150.0f, &Button, &ButtonBar);
-
-	static int s_DemoButton = 0;
-	bool Recording = DemoRecorder(RECORDER_MANUAL)->IsRecording();
-	if(DoButton_Menu(&s_DemoButton, Recording ? Localize("Stop record") : Localize("Record demo"), 0, &Button))
+	if(m_pClient->m_Snap.m_pLocalInfo && m_pClient->m_Snap.m_pGameInfoObj)
 	{
-		if(!Recording)
-			Client()->DemoRecorder_Start(Client()->GetCurrentMap(), true, RECORDER_MANUAL);
-		else
-			Client()->DemoRecorder_Stop(RECORDER_MANUAL);
-	}
-
-	ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
-	ButtonBar.VSplitLeft(170.0f, &Button, &ButtonBar);
-
-	static int s_DummyButton = 0;
-	if(DummyConnecting)
-	{
-		DoButton_Menu(&s_DummyButton, Localize("Connecting dummy"), 1, &Button);
-	}
-	else if(DoButton_Menu(&s_DummyButton, Client()->DummyConnected() ? Localize("Disconnect Dummy") : Localize("Connect Dummy"), 0, &Button))
-	{
-		if(!Client()->DummyConnected())
+		if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_SPECTATORS)
 		{
-			Client()->DummyConnect();
-		}
-		else
-		{
-			if(Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
+			ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
+			ButtonBar.VSplitLeft(65.0f, &Button, &ButtonBar);
+
+			static int s_KillButton = 0;
+			if(DoButton_Menu(&s_KillButton, Localize("Kill"), 0, &Button))
 			{
-				m_Popup = POPUP_DISCONNECT_DUMMY;
+				m_pClient->SendKill(-1);
+				SetActive(false);
 			}
-			else
+		}
+	}
+
+	if(IsRace(&CurrentServerInfo) && m_pClient->m_Snap.m_pLocalInfo && m_pClient->m_Snap.m_pGameInfoObj)
+	{
+		if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_SPECTATORS || Paused || Spec)
+		{
+			ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
+			ButtonBar.VSplitLeft((!Paused && !Spec) ? 65.0f : 120.0f, &Button, &ButtonBar);
+
+			static int s_PauseButton = 0;
+			if(DoButton_Menu(&s_PauseButton, (!Paused && !Spec) ? Localize("Pause") : Localize("Join game"), 0, &Button))
 			{
-				Client()->DummyDisconnect(0);
+				m_pClient->Console()->ExecuteLine("say /pause");
+				SetActive(false);
 			}
 		}
 	}
