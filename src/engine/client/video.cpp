@@ -221,7 +221,7 @@ void CVideo::NextVideoFrameThread()
 		{
 			m_ProcessingVideoFrame = true;
 			m_VideoStream.pFrame->pts = (int64)m_VideoStream.pEnc->frame_number;
-			dbg_msg("video_recorder", "vframe: %d", m_VideoStream.pEnc->frame_number);
+			//dbg_msg("video_recorder", "vframe: %d", m_VideoStream.pEnc->frame_number);
 
 			ReadRGBFromGL();
 			FillVideoFrame();
@@ -245,7 +245,7 @@ void CVideo::NextVideoFrame()
 		// 	CAutoreleasePool AutoreleasePool;
 		// #endif
 
-		dbg_msg("video_recorder", "called");
+		//dbg_msg("video_recorder", "called");
 
 		ms_Time += ms_TickTime;
 		ms_LocalTime = (ms_Time-ms_LocalStartTime)/(float)time_freq();
@@ -281,7 +281,7 @@ void CVideo::NextAudioFrame(void (*Mix)(short *pFinalOut, unsigned Frames))
 			//return;
 		Mix(m_aBuffer, ALEN);
 		//m_AudioStream.pFrame->pts = m_AudioStream.pEnc->frame_number;
-		dbg_msg("video_recorder", "aframe: %d", m_AudioStream.pEnc->frame_number);
+		//dbg_msg("video_recorder", "aframe: %d", m_AudioStream.pEnc->frame_number);
 
 		// memcpy(m_AudioStream.pTmpFrame->data[0], pData, sizeof(int16_t) * m_SndBufferSize * 2);
 		//
