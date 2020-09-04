@@ -312,6 +312,11 @@ int CMysqlConnection::GetBlob(int Col, unsigned char *pBuffer, int BufferSize) c
 #endif
 }
 
+const char *CMysqlConnection::GetInsertIgnore() const
+{
+	return "INSERT IGNORE";
+}
+
 void CMysqlConnection::AddPoints(const char *pPlayer, int Points)
 {
 	char aBuf[512];
