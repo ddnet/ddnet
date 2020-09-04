@@ -2030,6 +2030,14 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 		glActiveTexture(GL_TEXTURE0);
 	}
 
+	m_Has2DArrayTextures = true;
+	m_Has2DArrayTexturesAsExtension = false;
+	m_2DArrayTarget = GL_TEXTURE_2D_ARRAY;
+	m_Has3DTextures = false;
+	m_HasMipMaps = true;
+	m_HasNPOTTextures = true;
+	m_HasShaders = true;
+
 	m_pTextureMemoryUsage = pCommand->m_pTextureMemoryUsage;
 	m_pTextureMemoryUsage->store(0, std::memory_order_relaxed);
 	m_LastBlendMode = CCommandBuffer::BLEND_ALPHA;
