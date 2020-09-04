@@ -54,6 +54,7 @@ public:
 	virtual int GetInt(int Col) const;
 	virtual void GetString(int Col, char *pBuffer, int BufferSize) const;
 	virtual int GetBlob(int Col, unsigned char *pBuffer, int BufferSize) const;
+	virtual const char *GetInsertIgnore() const;
 
 	virtual void AddPoints(const char *pPlayer, int Points);
 

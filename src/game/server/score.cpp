@@ -508,7 +508,7 @@ bool CScore::SaveScoreThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 
 	// save score. Can't fail, because no UNIQUE/PRIMARY KEY constrain is defined.
 	str_format(aBuf, sizeof(aBuf),
-			"INSERT IGNORE INTO %s_race("
+			"%s INTO %s_race("
 				"Map, Name, Timestamp, Time, Server, "
 				"cp1, cp2, cp3, cp4, cp5, cp6, cp7, cp8, cp9, cp10, cp11, cp12, cp13, "
 				"cp14, cp15, cp16, cp17, cp18, cp19, cp20, cp21, cp22, cp23, cp24, cp25, "
@@ -518,7 +518,8 @@ bool CScore::SaveScoreThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 				"%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, "
 				"%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, "
 				"?, false);",
-			pSqlServer->GetPrefix(), pSqlServer->InsertTimestampAsUtc(), pData->m_Time,
+			pSqlServer->GetInsertIgnore(), pSqlServer->GetPrefix(),
+			pSqlServer->InsertTimestampAsUtc(), pData->m_Time,
 			pData->m_aCpCurrent[0], pData->m_aCpCurrent[1], pData->m_aCpCurrent[2],
 			pData->m_aCpCurrent[3], pData->m_aCpCurrent[4], pData->m_aCpCurrent[5],
 			pData->m_aCpCurrent[6], pData->m_aCpCurrent[7], pData->m_aCpCurrent[8],
@@ -631,9 +632,10 @@ bool CScore::SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGam
 		{
 			// if no entry found... create a new one
 			str_format(aBuf, sizeof(aBuf),
-					"INSERT IGNORE INTO %s_teamrace(Map, Name, Timestamp, Time, ID, GameID, DDNet7) "
+					"%s INTO %s_teamrace(Map, Name, Timestamp, Time, ID, GameID, DDNet7) "
 					"VALUES (?, ?, %s, %.2f, ?, ?, false);",
-					pSqlServer->GetPrefix(), pSqlServer->InsertTimestampAsUtc(), pData->m_Time);
+					pSqlServer->GetInsertIgnore(), pSqlServer->GetPrefix(),
+					pSqlServer->InsertTimestampAsUtc(), pData->m_Time);
 			pSqlServer->PrepareStatement(aBuf);
 			pSqlServer->BindString(1, pData->m_Map);
 			pSqlServer->BindString(2, pData->m_aNames[i]);
@@ -1321,9 +1323,9 @@ bool CScore::SaveTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 	if(UseCode)
 	{
 		str_format(aBuf, sizeof(aBuf),
-				"INSERT IGNORE INTO %s_saves(Savegame, Map, Code, Timestamp, Server, SaveID, DDNet7) "
+				"%s INTO %s_saves(Savegame, Map, Code, Timestamp, Server, SaveID, DDNet7) "
 				"VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, false)",
-				pSqlServer->GetPrefix());
+				pSqlServer->GetInsertIgnore(), pSqlServer->GetPrefix());
 		pSqlServer->PrepareStatement(aBuf);
 		pSqlServer->BindString(1, pSaveState);
 		pSqlServer->BindString(2, pData->m_Map);

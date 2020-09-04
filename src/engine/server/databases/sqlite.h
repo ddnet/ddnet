@@ -42,6 +42,7 @@ public:
 	virtual void GetString(int Col, char *pBuffer, int BufferSize) const;
 	// passing a negative buffer size is undefined behavior
 	virtual int GetBlob(int Col, unsigned char *pBuffer, int BufferSize) const;
+	virtual const char *GetInsertIgnore() const;
 
 	virtual void AddPoints(const char *pPlayer, int Points);
 
