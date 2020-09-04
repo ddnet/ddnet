@@ -20,19 +20,22 @@ public:
 		ColorRGBA m_BloodColor;
 
 		bool operator<(const CSkin &Other) { return str_comp(m_aName, Other.m_aName) < 0; }
+
+		bool operator<(const char *pOther) { return str_comp(m_aName, pOther) < 0; }
+		bool operator==(const char *pOther) { return !str_comp(m_aName, pOther); }
 	};
 
 	void OnInit();
 
 	int Num();
 	const CSkin *Get(int Index);
-	int Find(const char *pName) const;
+	int Find(const char *pName);
 
 private:
 	sorted_array<CSkin> m_aSkins;
 	char m_EventSkinPrefix[100];
 
-	int FindImpl(const char *pName) const;
+	int FindImpl(const char *pName);
 	static int SkinScan(const char *pName, int IsDir, int DirType, void *pUser);
 };
 #endif
