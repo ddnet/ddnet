@@ -12,7 +12,7 @@ bool CBinds::CBindsSpecial::OnInput(IInput::CEvent Event)
 		int Mask = m_pBinds->GetModifierMask(Input());
 
 		bool ret = false;
-		for(int Mod = 0; Mod < (1 << MODIFIER_COUNT); Mod++)
+		for(int Mod = 0; Mod < MODIFIER_COMBINATION_COUNT; Mod++)
 		{
 			if(Mask&(1 << Mod) && m_pBinds->m_aapKeyBindings[Mod][Event.m_Key])
 				m_pBinds->GetConsole()->ExecuteLineStroked(Event.m_Flags&IInput::FLAG_PRESS, m_pBinds->m_aapKeyBindings[Mod][Event.m_Key]);
@@ -33,7 +33,7 @@ CBinds::CBinds()
 CBinds::~CBinds()
 {
 	for(int i = 0; i < KEY_LAST; i++)
-		for(int j = 0; j < (1 << MODIFIER_COUNT); j++)
+		for(int j = 0; j < MODIFIER_COMBINATION_COUNT; j++)
 			if(m_aapKeyBindings[j][i])
 				free(m_aapKeyBindings[j][i]);
 }
@@ -66,15 +66,7 @@ void CBinds::Bind(int KeyID, const char *pStr, bool FreeOnly, int Modifier)
 		int Size = str_length(pStr) + 1;
 		m_aapKeyBindings[Modifier][KeyID] = (char *)malloc(Size);
 		str_copy(m_aapKeyBindings[Modifier][KeyID], pStr, Size);
-		char aModifier[256] = { 0 };
-		for (int i = 1; i < MODIFIER_COUNT; i++) {
-			if (Modifier & (1 << i)) {
-				const char *ModifierName = GetModifierName(i);
-				str_append(aModifier, ModifierName, sizeof(aModifier));
-				str_append(aModifier, "+", sizeof(aModifier));
-			}
-		}
-		str_format(aBuf, sizeof(aBuf), "bound %s%s (%d) = %s", aModifier, Input()->KeyName(KeyID), KeyID, m_aapKeyBindings[Modifier][KeyID]);
+		str_format(aBuf, sizeof(aBuf), "bound %s%s (%d) = %s", GetKeyBindModifiersName(Modifier), Input()->KeyName(KeyID), KeyID, m_aapKeyBindings[Modifier][KeyID]);
 	}
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
 }
@@ -139,7 +131,7 @@ bool CBinds::OnInput(IInput::CEvent e)
 		Mask = 1 << MODIFIER_NONE;
 
 	bool ret = false;
-	for(int Mod = 1; Mod < (1 << MODIFIER_COUNT); Mod++)
+	for(int Mod = 1; Mod < MODIFIER_COMBINATION_COUNT; Mod++)
 	{
 		if(m_aapKeyBindings[Mod][e.m_Key] && (Mask == Mod))
 		{
@@ -165,7 +157,7 @@ bool CBinds::OnInput(IInput::CEvent e)
 
 void CBinds::UnbindAll()
 {
-	for(int i = 0; i < (1 << MODIFIER_COUNT); i++)
+	for(int i = 0; i < MODIFIER_COMBINATION_COUNT; i++)
 	{
 		for(int j = 0; j < KEY_LAST; j++)
 		{
@@ -186,7 +178,7 @@ const char *CBinds::Get(int KeyID, int Modifier)
 void CBinds::GetKey(const char *pBindStr, char *aBuf, unsigned BufSize)
 {
 	aBuf[0] = 0;
-	for(int Mod = 0; Mod < (1 << MODIFIER_COUNT); Mod++)
+	for(int Mod = 0; Mod < MODIFIER_COMBINATION_COUNT; Mod++)
 	{
 		for(int KeyId = 0; KeyId < KEY_LAST; KeyId++)
 		{
@@ -194,7 +186,8 @@ void CBinds::GetKey(const char *pBindStr, char *aBuf, unsigned BufSize)
 			if(!pBind[0])
 				continue;
 
-			if(str_comp(pBind, pBindStr) == 0){
+			if(str_comp(pBind, pBindStr) == 0)
+			{
 				if(Mod)
 					str_format(aBuf, BufSize, "%s+%s", GetModifierName(Mod), Input()->KeyName(KeyId));
 				else
@@ -316,22 +309,14 @@ void CBinds::ConDumpBinds(IConsole::IResult *pResult, void *pUserData)
 	else if(pResult->NumArguments() == 0)
 	{
 		char aBuf[1024];
-		for(int i = 0; i < (1 << MODIFIER_COUNT); i++)
+		for(int i = 0; i < MODIFIER_COMBINATION_COUNT; i++)
 		{
 			for(int j = 0; j < KEY_LAST; j++)
 			{
 				if(!pBinds->m_aapKeyBindings[i][j])
 					continue;
 
-				char aModifier[256] = { 0 };
-				for (int k = 1; k < MODIFIER_COUNT; k++) {
-					if (i & (1 << k)) {
-						const char *ModifierName = GetModifierName(k);
-						str_append(aModifier, ModifierName, sizeof(aModifier));
-						str_append(aModifier, "+", sizeof(aModifier));
-					}
-				}
-				str_format(aBuf, sizeof(aBuf), "%s%s (%d) = %s", aModifier, pBinds->Input()->KeyName(j), j, pBinds->m_aapKeyBindings[i][j]);
+				str_format(aBuf, sizeof(aBuf), "%s%s (%d) = %s", GetKeyBindModifiersName(i), pBinds->Input()->KeyName(j), j, pBinds->m_aapKeyBindings[i][j]);
 				pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
 			}
 		}
@@ -385,7 +370,8 @@ int CBinds::GetKeyID(const char *pKeyName)
 int CBinds::GetBindSlot(const char *pBindString, int *Mod)
 {
 	*Mod = MODIFIER_NONE;
-	char aMod[32] = { 0 };
+	char aMod[32];
+	aMod[0] = '\0';
 	const char *pKey = str_next_token(pBindString, "+", aMod, sizeof(aMod));
 	while(aMod[0] && *(pKey))
 	{
@@ -422,6 +408,22 @@ const char *CBinds::GetModifierName(int Modifier)
 	}
 }
 
+const char *CBinds::GetKeyBindModifiersName(int Modifier)
+{
+	static char aModifier[256];
+	aModifier[0] = '\0';
+	for (int k = 1; k < MODIFIER_COUNT; k++)
+	{
+
+		if (Modifier & (1 << k))
+		{
+			str_append(aModifier, GetModifierName(k), sizeof(aModifier));
+			str_append(aModifier, "+", sizeof(aModifier));
+		}
+	}
+	return aModifier;
+}
+
 void CBinds::ConfigSaveCallback(IConfig *pConfig, void *pUserData)
 {
 	CBinds *pSelf = (CBinds *)pUserData;
@@ -429,22 +431,14 @@ void CBinds::ConfigSaveCallback(IConfig *pConfig, void *pUserData)
 	char aBuffer[256];
 	char *pEnd = aBuffer+sizeof(aBuffer);
 	pConfig->WriteLine("unbindall");
-	for(int i = 0; i < (1 << MODIFIER_COUNT); i++)
+	for(int i = 0; i < MODIFIER_COMBINATION_COUNT; i++)
 	{
 		for(int j = 0; j < KEY_LAST; j++)
 		{
 			if(!pSelf->m_aapKeyBindings[i][j])
 				continue;
 
-			char aModifier[256] = { 0 };
-			for (int k = 1; k < MODIFIER_COUNT; k++) {
-				if (i & (1 << k)) {
-					const char *ModifierName = GetModifierName(k);
-					str_append(aModifier, ModifierName, sizeof(aModifier));
-					str_append(aModifier, "+", sizeof(aModifier));
-				}
-			}
-			str_format(aBuffer, sizeof(aBuffer), "bind %s%s \"", aModifier, pSelf->Input()->KeyName(j));
+			str_format(aBuffer, sizeof(aBuffer), "bind %s%s \"", GetKeyBindModifiersName(i), pSelf->Input()->KeyName(j));
 			// process the string. we need to escape some characters
 			char *pDst = aBuffer + str_length(aBuffer);
 			str_escape(&pDst, pSelf->m_aapKeyBindings[i][j], pEnd);
