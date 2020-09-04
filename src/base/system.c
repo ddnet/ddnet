@@ -3182,51 +3182,6 @@ int str_utf8_check(const char *str)
 	return 1;
 }
 
-void str_utf8_copy(char *dst, const char *src, int dst_size)
-{
-	char *end = dst + (dst_size-2);
-	char *ptr = end;
-
-	strncpy(dst, src, dst_size);
-	dst[dst_size-1] = 0;
-
-	// check whether we need to remove a broken utf8 character
-	while(ptr > dst)
-	{
-		if((*ptr&0xC0) == 0x80)
-		{
-			ptr--;
-		}
-		else if((*ptr&0x80) == 0)
-		{
-			return;
-		}
-		else if((*ptr&0xE0) == 0xC0)
-		{
-			if(end-ptr != 1)
-				*ptr = 0;
-			return;
-		}
-		else if((*ptr&0xF0) == 0xE0)
-		{
-			if(end-ptr != 2)
-				*ptr = 0;
-			return;
-		}
-		else if((*ptr&0xF8) == 0xF0)
-		{
-			if(end-ptr != 3)
-				*ptr = 0;
-			return;
-		}
-		else
-		{
-			return;
-		}
-	}
-
-	*ptr = 0;
-}
 
 unsigned str_quickhash(const char *str)
 {
