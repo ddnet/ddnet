@@ -1142,7 +1142,7 @@ void CServer::SendMap(int ClientID)
 		Msg.AddInt(m_aCurrentMapSize[Sixup]);
 		if(Sixup)
 		{
-			Msg.AddInt(1);
+			Msg.AddInt(g_Config.m_SvMapWindow);
 			Msg.AddInt(1024-128);
 			Msg.AddRaw(m_aCurrentMapSha256[Sixup].data, sizeof(m_aCurrentMapSha256[Sixup].data));
 		}
@@ -1419,8 +1419,10 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 			if(m_aClients[ClientID].m_Sixup)
 			{
-				SendMapData(ClientID, m_aClients[ClientID].m_NextMapChunk);
-				m_aClients[ClientID].m_NextMapChunk++;
+				for(int i = 0; i < g_Config.m_SvMapWindow; i++)
+				{
+					SendMapData(ClientID, m_aClients[ClientID].m_NextMapChunk++);
+				}
 				return;
 			}
 
