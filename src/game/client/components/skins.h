@@ -5,6 +5,7 @@
 #include <base/vmath.h>
 #include <base/color.h>
 #include <base/tl/sorted_array.h>
+#include <engine/client/http.h>
 #include <game/client/component.h>
 
 class CSkins : public CComponent
@@ -25,6 +26,12 @@ public:
 		bool operator==(const char *pOther) { return !str_comp(m_aName, pOther); }
 	};
 
+	struct CDownloadSkin : public CSkin
+	{
+		std::shared_ptr<CGetFile> m_pTask;
+		char m_aPath[MAX_PATH_LENGTH];
+	};
+
 	void OnInit();
 
 	int Num();
@@ -33,8 +40,10 @@ public:
 
 private:
 	sorted_array<CSkin> m_aSkins;
+	sorted_array<CDownloadSkin> m_aDownloadSkins;
 	char m_EventSkinPrefix[100];
 
+	int LoadSkin(const char *pName, const char *pPath, int DirType);
 	int FindImpl(const char *pName);
 	static int SkinScan(const char *pName, int IsDir, int DirType, void *pUser);
 };

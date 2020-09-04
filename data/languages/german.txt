@@ -1225,6 +1225,9 @@ Editor
 Menu
 == Menü
 
+Download skins
+== Skins herunterladen
+
 Warning
 == Warnung
 

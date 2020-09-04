@@ -1200,6 +1200,9 @@ Speed
 Skip the main menu
 == 
 
+Download skins
+== 
+
 Skin prefix
 == 
 
