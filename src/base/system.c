@@ -3184,12 +3184,13 @@ int str_utf8_check(const char *str)
 
 void str_utf8_copy(char *dst, const char *src, int dst_size)
 {
-	strncpy(dst, src, dst_size);
-	dst[dst_size-1] = 0; /* assure null termination */
-
-	// check whether we need to remove a broken utf8 character
 	char *end = dst + (dst_size-2);
 	char *ptr = end;
+
+	strncpy(dst, src, dst_size);
+	dst[dst_size-1] = 0;
+
+	// check whether we need to remove a broken utf8 character
 	while(ptr > dst)
 	{
 		if((*ptr&0xC0) == 0x80)
