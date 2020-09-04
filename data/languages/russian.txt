@@ -337,9 +337,6 @@ Please balance teams!
 Prev. weapon
 == Пред. оружие
 
-Quality Textures
-== Качественные текстуры
-
 Quit
 == Выход
 
@@ -489,9 +486,6 @@ Team
 
 Team chat
 == Командный чат
-
-Texture Compression
-== Сжатие текстур
 
 The audio device couldn't be initialised.
 == Аудио устройство не может быть инициализировано

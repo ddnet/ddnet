@@ -336,9 +336,6 @@ Please balance teams!
 Prev. weapon
 == Poprzednia broń
 
-Quality Textures
-== Szczegółowe tekstury
-
 Quit
 == Wyjście
 
@@ -470,9 +467,6 @@ Team
 
 Team chat
 == Czat drużynowy
-
-Texture Compression
-== Kompresja tekstur
 
 The audio device couldn't be initialised.
 == Urządzenie dźwiękowe nie mogło zostać zainicjowane.

@@ -334,9 +334,6 @@ Please balance teams!
 Prev. weapon
 == Προηγούμενο όπλο
 
-Quality Textures
-== Ποιότητα Υφής
-
 Quit
 == Έξοδος
 
@@ -471,9 +468,6 @@ Team
 
 Team chat
 == Ομαδική συνομιλία
-
-Texture Compression
-== Συμπίεση Υφής
 
 The audio device couldn't be initialised.
 == Η συσκευή ήχου δεν μπορούσε να ενεργοποιηθεί.

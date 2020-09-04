@@ -331,9 +331,6 @@ Please balance teams!
 Prev. weapon
 == Predošlá zbraň
 
-Quality Textures
-== Kvalitné textúry
-
 Quit
 == Ukončiť
 
@@ -465,9 +462,6 @@ Team
 
 Team chat
 == Týmový chat
-
-Texture Compression
-== Kompresia textúr
 
 The audio device couldn't be initialised.
 == Zvukové zariadenie nemohlo byť inicializované.

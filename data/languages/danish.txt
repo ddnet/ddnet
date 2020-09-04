@@ -331,9 +331,6 @@ Please balance teams!
 Prev. weapon
 == Foregående våben
 
-Quality Textures
-== Kvalitetsteksturer
-
 Quit
 == Afslut
 
@@ -465,9 +462,6 @@ Team
 
 Team chat
 == Holdchat
-
-Texture Compression
-== Teksturkompression
 
 The audio device couldn't be initialised.
 == Lydenheden kunne ikke startes

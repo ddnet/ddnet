@@ -333,9 +333,6 @@ Please balance teams!
 Prev. weapon
 == Föregående vapen
 
-Quality Textures
-== Kvalitetstexturer
-
 Quit
 == Avsluta
 
@@ -467,9 +464,6 @@ Team
 
 Team chat
 == Lagchatt
-
-Texture Compression
-== Texturkompression
 
 The audio device couldn't be initialised.
 == Ljudet kunde inte startas

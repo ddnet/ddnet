@@ -331,9 +331,6 @@ Please balance teams!
 Prev. weapon
 == Малтанхи хĕç-пăшал
 
-Quality Textures
-== Лайăх текстурасем
-
 Quit
 == Туху
 
@@ -465,9 +462,6 @@ Team
 
 Team chat
 == Ушкăнри калаçу
-
-Texture Compression
-== Текстур хĕсӳ
 
 The audio device couldn't be initialised.
 == Аудио ярма пултараймасть

@@ -333,9 +333,6 @@ Please balance teams!
 Prev. weapon
 == Prethodno oružje
 
-Quality Textures
-== Visokokvalitetne teksture
-
 Quit
 == Izlaz
 
@@ -467,9 +464,6 @@ Team
 
 Team chat
 == Timski chat
-
-Texture Compression
-== Kompresija tekstura
 
 The audio device couldn't be initialised.
 == Audio-uređaj nije moguće pokrenuti.

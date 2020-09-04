@@ -393,9 +393,6 @@ Please balance teams!
 Prev. weapon
 == Мурун. курал
 
-Quality Textures
-== Сапаттуу текстуралар
-
 Quit
 == Чыгуу
 
@@ -551,9 +548,6 @@ Team
 
 Team chat
 == Команда маеги
-
-Texture Compression
-== Текстура кысылышы
 
 The audio device couldn't be initialised.
 == Аудио түзмөгүн инициализациялап алууга мүмкүн эмес.

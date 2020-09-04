@@ -368,9 +368,6 @@ Please balance teams!
 Prev. weapon
 == 上一个武器
 
-Quality Textures
-== 高品质纹理
-
 Quit
 == 退出
 
@@ -517,9 +514,6 @@ Team
 
 Team chat
 == 队伍聊天
-
-Texture Compression
-== 纹理压缩
 
 The audio device couldn't be initialised.
 == 初始化音频设备失败。

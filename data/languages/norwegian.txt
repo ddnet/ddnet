@@ -332,9 +332,6 @@ Please balance teams!
 Prev. weapon
 == Forrige våpen
 
-Quality Textures
-== Teksturkvalitet
-
 Quit
 == Avslutt
 
@@ -466,9 +463,6 @@ Team
 
 Team chat
 == Lagsamtale
-
-Texture Compression
-== Teksturkompressjon
 
 The audio device couldn't be initialised.
 == Lydenheten kunne ikke initialiseres.
@@ -649,9 +643,6 @@ Successfully saved the replay!
 Replay feature is disabled!
 == Opptaksfunksjon er slått av!
 
-The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== 
-
 Game paused
 == Spill pauset
 
@@ -712,17 +703,11 @@ Hook (right mouse) can be used to swing through the map and to hook other tees t
 Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
 == Viktigst av alt er kommunikasjon: Det fins ingen tutorial, så du er nødt til å snakke (t-knappen) med andre spillere for å lære det grunnleggende og triksene i spillet.
 
-Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 
-
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Det anbefales å sjekke innstillingene og justere dem slik det passer deg før du går inn på en server.
 
 Please enter your nick name below.
 == Skriv inn ditt ønskede kallenavn under.
-
-Country / Region
-== 
 
 Destination file already exist
 == Destinasjonsfilen eksisterer allerede
@@ -1045,9 +1030,6 @@ Normal message
 Hello and welcome
 == Hei og velkommen
 
-Client message
-== 
-
 Inner color
 == Indre farge
 
@@ -1200,3 +1182,15 @@ Grabs
 
 9+ new mentions
 == nevnt 9+ ganger
+
+The width or height of texture %s is not divisible by 16, which might cause visual bugs.
+== 
+
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
+Country / Region
+== 
+
+Client message
+== 

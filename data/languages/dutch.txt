@@ -343,9 +343,6 @@ Please balance teams!
 Prev. weapon
 == Vorig wapen
 
-Quality Textures
-== Structuurkwaliteit
-
 Quit
 == Afsluiten
 
@@ -477,9 +474,6 @@ Team
 
 Team chat
 == Team chat
-
-Texture Compression
-== Structuurscompressie
 
 The audio device couldn't be initialised.
 == Het geluid kon niet worden geladen.

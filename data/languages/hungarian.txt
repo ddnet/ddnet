@@ -322,9 +322,6 @@ Please balance teams!
 Prev. weapon
 == Előző fegyver
 
-Quality Textures
-== Minőségi kidolgozás
-
 Quit
 == Kilépés
 
@@ -447,9 +444,6 @@ Team
 
 Team chat
 == Csapat chat
-
-Texture Compression
-== Textúra tömörítés
 
 The audio device couldn't be initialised.
 == A hangeszköz nem kezdeményezhető.

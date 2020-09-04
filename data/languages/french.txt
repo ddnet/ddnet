@@ -343,9 +343,6 @@ Please balance teams!
 Prev. weapon
 == Arme précédente
 
-Quality Textures
-== Textures haute qualité
-
 Quit
 == Quitter
 
@@ -477,9 +474,6 @@ Team
 
 Team chat
 == Chat d'équipe
-
-Texture Compression
-== Compression des textures
 
 The audio device couldn't be initialised.
 == Le périphérique audio n'a pas pu être initialisé.

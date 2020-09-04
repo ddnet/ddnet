@@ -333,9 +333,6 @@ Please balance teams!
 Prev. weapon
 == Önceki silah
 
-Quality Textures
-== Kaliteli dolgular
-
 Quit
 == Çıkış
 
@@ -467,9 +464,6 @@ Team
 
 Team chat
 == Takım sohbeti
-
-Texture Compression
-== Dolgu sıkıştırması
 
 The audio device couldn't be initialised.
 == Ses donanımı başlatılamadı.
