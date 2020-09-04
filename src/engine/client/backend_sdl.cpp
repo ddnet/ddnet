@@ -530,11 +530,41 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Update(const CCommandBuffer::
 	free(pTexData);
 }
 
+void CCommandProcessorFragment_OpenGL::DestroyTexture(int Slot)
+{
+	m_pTextureMemoryUsage->store(m_pTextureMemoryUsage->load(std::memory_order_relaxed) - m_aTextures[Slot].m_MemSize, std::memory_order_relaxed);
+
+	if(m_aTextures[Slot].m_Tex != 0)
+	{
+		glDeleteTextures(1, &m_aTextures[Slot].m_Tex);
+	}
+
+	if(m_aTextures[Slot].m_Tex2DArray != 0)
+	{
+		glDeleteTextures(1, &m_aTextures[Slot].m_Tex2DArray);
+	}
+
+	if(IsNewApi())
+	{
+		if(m_aTextures[Slot].m_Sampler != 0)
+		{
+			glDeleteSamplers(1, &m_aTextures[Slot].m_Sampler);
+		}
+		if(m_aTextures[Slot].m_Sampler2DArray != 0)
+		{
+			glDeleteSamplers(1, &m_aTextures[Slot].m_Sampler2DArray);
+		}
+	}
+
+	m_aTextures[Slot].m_Tex = 0;
+	m_aTextures[Slot].m_Sampler = 0;
+	m_aTextures[Slot].m_Tex2DArray = 0;
+	m_aTextures[Slot].m_Sampler2DArray = 0;
+}
+
 void CCommandProcessorFragment_OpenGL::Cmd_Texture_Destroy(const CCommandBuffer::SCommand_Texture_Destroy *pCommand)
 {
-	glDeleteTextures(1, &m_aTextures[pCommand->m_Slot].m_Tex);
-	m_aTextures[pCommand->m_Slot].m_Tex = 0;
-	m_pTextureMemoryUsage->store(m_pTextureMemoryUsage->load(std::memory_order_relaxed) - m_aTextures[pCommand->m_Slot].m_MemSize, std::memory_order_relaxed);
+	DestroyTexture(pCommand->m_Slot);
 }
 
 void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::SCommand_Texture_Create *pCommand)
@@ -2341,15 +2371,34 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_Shutdown(const SCommand_Shutdown *pCommand)
 {
+	glUseProgram(0);
+
+	m_pPrimitiveProgram->DeleteProgram();
+	m_pBorderTileProgram->DeleteProgram();
+	m_pBorderTileProgramTextured->DeleteProgram();
+	m_pBorderTileLineProgram->DeleteProgram();
+	m_pBorderTileLineProgramTextured->DeleteProgram();
+	m_pQuadProgram->DeleteProgram();
+	m_pQuadProgramTextured->DeleteProgram();
+	m_pTileProgram->DeleteProgram();
+	m_pTileProgramTextured->DeleteProgram();
+	m_pTextProgram->DeleteProgram();
+	m_pSpriteProgram->DeleteProgram();
+	m_pSpriteProgramMultiple->DeleteProgram();
+
 	//clean up everything
 	delete m_pPrimitiveProgram;
-	//delete m_QuadProgram;
-	delete m_pTileProgram;
-	delete m_pTileProgramTextured;
 	delete m_pBorderTileProgram;
 	delete m_pBorderTileProgramTextured;
 	delete m_pBorderTileLineProgram;
 	delete m_pBorderTileLineProgramTextured;
+	delete m_pQuadProgram;
+	delete m_pQuadProgramTextured;
+	delete m_pTileProgram;
+	delete m_pTileProgramTextured;
+	delete m_pTextProgram;
+	delete m_pSpriteProgram;
+	delete m_pSpriteProgramMultiple;
 
 	glBindVertexArray(0);
 	glDeleteBuffers(MAX_STREAM_BUFFER_COUNT, m_PrimitiveDrawBufferID);
@@ -2717,28 +2766,6 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Screenshot(const CCommandBuffer::S
 	pCommand->m_pImage->m_Height = h;
 	pCommand->m_pImage->m_Format = CImageInfo::FORMAT_RGB;
 	pCommand->m_pImage->m_pData = pPixelData;
-}
-
-void CCommandProcessorFragment_OpenGL3_3::DestroyTexture(int Slot)
-{
-	glDeleteTextures(1, &m_aTextures[Slot].m_Tex);
-	glDeleteSamplers(1, &m_aTextures[Slot].m_Sampler);
-	m_pTextureMemoryUsage->store(m_pTextureMemoryUsage->load(std::memory_order_relaxed) - m_aTextures[Slot].m_MemSize, std::memory_order_relaxed);
-
-	if(m_aTextures[Slot].m_Tex2DArray != 0)
-	{
-		glDeleteTextures(1, &m_aTextures[Slot].m_Tex2DArray);
-	}
-
-	if(m_aTextures[Slot].m_Sampler2DArray != 0)
-	{
-		glDeleteSamplers(1, &m_aTextures[Slot].m_Sampler2DArray);
-	}
-
-	m_aTextures[Slot].m_Tex = 0;
-	m_aTextures[Slot].m_Sampler = 0;
-	m_aTextures[Slot].m_Tex2DArray = 0;
-	m_aTextures[Slot].m_Sampler2DArray = 0;
 }
 
 void CCommandProcessorFragment_OpenGL3_3::DestroyBufferContainer(int Index, bool DeleteBOs)
@@ -4268,6 +4295,12 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 
 		if(InitError == -2)
 		{
+			CCommandProcessorFragment_OpenGL::SCommand_Shutdown CmdGL;
+			CmdBuffer.AddCommand(CmdGL);
+			RunBuffer(&CmdBuffer);
+			WaitForIdle();
+			CmdBuffer.Reset();
+
 			g_Config.m_GfxOpenGLMajor = 1;
 			g_Config.m_GfxOpenGLMinor = 5;
 			g_Config.m_GfxOpenGLPatch = 0;
@@ -4340,6 +4373,12 @@ int CGraphicsBackend_SDL_OpenGL::Shutdown()
 {
 	// issue a shutdown command
 	CCommandBuffer CmdBuffer(1024, 512);
+	CCommandProcessorFragment_OpenGL::SCommand_Shutdown CmdGL;
+	CmdBuffer.AddCommand(CmdGL);
+	RunBuffer(&CmdBuffer);
+	WaitForIdle();
+	CmdBuffer.Reset();
+
 	CCommandProcessorFragment_SDL::SCommand_Shutdown Cmd;
 	CmdBuffer.AddCommand(Cmd);
 	RunBuffer(&CmdBuffer);
