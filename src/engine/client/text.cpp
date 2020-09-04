@@ -147,6 +147,7 @@ struct STextContainer
 
 	int m_Flags;
 	int m_LineCount;
+	int m_GlyphCount;
 	int m_CharCount;
 	int m_MaxLines;
 
@@ -167,7 +168,7 @@ struct STextContainer
 		m_StringInfo.m_CharacterQuads.clear();
 
 		m_AlignedStartX = m_AlignedStartY = m_X = m_Y = 0.f;
-		m_Flags = m_LineCount = m_CharCount = 0;
+		m_Flags = m_LineCount = m_CharCount = m_GlyphCount = 0;
 		m_MaxLines = -1;
 		m_StartX = m_StartY = 0.f;
 		m_LineWidth = -1.f;
@@ -237,15 +238,15 @@ class CTextRender : public IEngineTextRender
 
 	int WordLength(const char *pText)
 	{
-		int s = 1;
+		int Length = 0;
 		while(1)
 		{
-			if(*pText == 0)
-				return s-1;
-			if(*pText == '\n' || *pText == '\t' || *pText == ' ')
-				return s;
-			pText++;
-			s++;
+			const char *pCursor = (pText + Length);
+			if(*pCursor == 0)
+				return Length;
+			if(*pCursor == '\n' || *pCursor == '\t' || *pCursor == ' ')
+				return Length+1;
+			Length = str_utf8_forward(pText, Length);
 		}
 	}
 
@@ -777,6 +778,7 @@ public:
 		pCursor->m_LineCount = 1;
 		pCursor->m_LineWidth = -1;
 		pCursor->m_Flags = Flags;
+		pCursor->m_GlyphCount = 0;
 		pCursor->m_CharCount = 0;
 	}
 
@@ -938,6 +940,7 @@ public:
 				{
 					// word can't be fitted in one line, cut it
 					CTextCursor Cutter = *pCursor;
+					Cutter.m_GlyphCount = 0;
 					Cutter.m_CharCount = 0;
 					Cutter.m_X = DrawX;
 					Cutter.m_Y = DrawY;
@@ -945,10 +948,11 @@ public:
 					Cutter.m_Flags |= TEXTFLAG_STOP_AT_END;
 
 					TextEx(&Cutter, pCurrent, Wlen);
+					int WordGlyphs = Cutter.m_GlyphCount;
 					Wlen = Cutter.m_CharCount;
 					NewLine = 1;
 
-					if(Wlen <= 3) // if we can't place 3 chars of the word on this line, take the next
+					if(WordGlyphs <= 3) // if we can't place 3 chars of the word on this line, take the next
 						Wlen = 0;
 				}
 				else if(Compare.m_X-pCursor->m_StartX > pCursor->m_LineWidth)
@@ -964,6 +968,7 @@ public:
 			int NextCharacter = str_utf8_decode(&pTmp);
 			while(pCurrent < pBatchEnd)
 			{
+				pCursor->m_CharCount += pTmp-pCurrent;
 				int Character = NextCharacter;
 				pCurrent = pTmp;
 				NextCharacter = str_utf8_decode(&pTmp);
@@ -1032,7 +1037,7 @@ public:
 						DrawX += BearingX + CharKerning + CharWidth;
 					else
 						DrawX += Advance*Size + CharKerning;
-					pCursor->m_CharCount++;
+					pCursor->m_GlyphCount++;
 
 					++CharacterCounter;
 				}
@@ -1152,6 +1157,7 @@ public:
 			}
 
 			TextContainer.m_LineCount = pCursor->m_LineCount;
+			TextContainer.m_GlyphCount = pCursor->m_GlyphCount;
 			TextContainer.m_CharCount = pCursor->m_CharCount;
 			TextContainer.m_MaxLines = pCursor->m_MaxLines;
 			TextContainer.m_StartX = pCursor->m_StartX;
@@ -1243,6 +1249,7 @@ public:
 				{
 					// word can't be fitted in one line, cut it
 					CTextCursor Cutter = *pCursor;
+					Cutter.m_GlyphCount = 0;
 					Cutter.m_CharCount = 0;
 					Cutter.m_X = DrawX;
 					Cutter.m_Y = DrawY;
@@ -1250,10 +1257,11 @@ public:
 					Cutter.m_Flags |= TEXTFLAG_STOP_AT_END;
 
 					TextEx(&Cutter, pCurrent, Wlen);
+					int WordGlyphs = Cutter.m_GlyphCount;
 					Wlen = Cutter.m_CharCount;
 					NewLine = 1;
 
-					if(Wlen <= 3) // if we can't place 3 chars of the word on this line, take the next
+					if(WordGlyphs <= 3) // if we can't place 3 chars of the word on this line, take the next
 						Wlen = 0;
 				}
 				else if(Compare.m_X - pCursor->m_StartX > pCursor->m_LineWidth)
@@ -1269,6 +1277,7 @@ public:
 			int NextCharacter = str_utf8_decode(&pTmp);
 			while(pCurrent < pBatchEnd)
 			{
+				TextContainer.m_CharCount += pTmp-pCurrent;
 				int Character = NextCharacter;
 				pCurrent = pTmp;
 				NextCharacter = str_utf8_decode(&pTmp);
@@ -1369,7 +1378,7 @@ public:
 						DrawX += BearingX + CharKerning + CharWidth;
 					else
 						DrawX += Advance * Size + CharKerning;
-					pCursor->m_CharCount++;
+					pCursor->m_GlyphCount++;
 					++CharacterCounter;
 				}
 			}
@@ -1505,6 +1514,7 @@ public:
 				CTextCursor FakeCursor;
 				SetCursor(&FakeCursor, DrawX, DrawY, TextContainer.m_UnscaledFontSize, TextContainer.m_Flags);
 				FakeCursor.m_LineCount = TextContainer.m_LineCount;
+				FakeCursor.m_GlyphCount = TextContainer.m_GlyphCount;
 				FakeCursor.m_CharCount = TextContainer.m_CharCount;
 				FakeCursor.m_MaxLines = TextContainer.m_MaxLines;
 				FakeCursor.m_StartX = TextContainer.m_StartX;
@@ -1524,6 +1534,7 @@ public:
 				{
 					// word can't be fitted in one line, cut it
 					CTextCursor Cutter = FakeCursor;
+					Cutter.m_GlyphCount = 0;
 					Cutter.m_CharCount = 0;
 					Cutter.m_X = DrawX;
 					Cutter.m_Y = DrawY;
@@ -1531,10 +1542,11 @@ public:
 					Cutter.m_Flags |= TEXTFLAG_STOP_AT_END;
 
 					TextEx(&Cutter, pCurrent, Wlen);
+					int WordGlyphs = Cutter.m_GlyphCount;
 					Wlen = Cutter.m_CharCount;
 					NewLine = 1;
 
-					if(Wlen <= 3) // if we can't place 3 chars of the word on this line, take the next
+					if(WordGlyphs <= 3) // if we can't place 3 chars of the word on this line, take the next
 						Wlen = 0;
 				}
 				else if(Compare.m_X - TextContainer.m_StartX > TextContainer.m_LineWidth)
@@ -1551,6 +1563,7 @@ public:
 			int NextCharacter = str_utf8_decode(&pTmp);
 			while(pCurrent < pBatchEnd)
 			{
+				TextContainer.m_CharCount += pTmp-pCurrent;
 				int Character = NextCharacter;
 				pCurrent = pTmp;
 				NextCharacter = str_utf8_decode(&pTmp);
@@ -1611,7 +1624,7 @@ public:
 					else
 						DrawX += Advance * Size + CharKerning;
 
-					TextContainer.m_CharCount++;
+					TextContainer.m_GlyphCount++;
 					++CharacterCounter;
 				}
 				pCurrentLast = pCurrent;
