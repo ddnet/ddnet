@@ -425,8 +425,6 @@ Crc:
 == Crc:
 Alpha
 == Alpha
-Current version: %s
-== Versió actual: %s
 LAN
 == ﻦﻟ
 Name plates size
@@ -791,6 +789,9 @@ Use k key to kill (restart), q to pause and watch other players. See settings fo
 Country / Region
 == 
 
+Skip the main menu
+== 
+
 may cause delay
 == 
 
@@ -798,4 +799,19 @@ Client message
 == 
 
 Show others (own team only)
+== 
+
+Settings
+== 
+
+Run server
+== 
+
+Stop server
+== 
+
+https://wiki.ddnet.tw/
+== 
+
+Editor
 == 

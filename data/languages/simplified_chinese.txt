@@ -698,9 +698,6 @@ Crc:
 Alpha
 == 透明度
 
-Current version: %s
-== 当前版本：%s
-
 LAN
 == 局域网
 
@@ -1203,4 +1200,22 @@ Country / Region
 == 国家 / 地区
 
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
+== 
+
+Skip the main menu
+== 
+
+Settings
+== 
+
+Run server
+== 
+
+Stop server
+== 
+
+https://wiki.ddnet.tw/
+== 
+
+Editor
 == 

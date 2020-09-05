@@ -643,9 +643,6 @@ Crc:
 Alpha
 == Alpha
 
-Current version: %s
-== Versão atual: %s
-
 LAN
 == LAN
 
@@ -976,15 +973,6 @@ Indicate map finish
 Unfinished map
 == 
 
-DDNet %s is out!
-== 
-
-Downloading %s:
-== 
-
-Update failed! Check log...
-== 
-
 Markers:
 == 
 
@@ -1012,6 +1000,12 @@ Render
 Connect Dummy
 == 
 
+Kill
+== 
+
+Pause
+== 
+
 Reload
 == 
 
@@ -1027,6 +1021,9 @@ Save
 Reset wanted weapon on death
 == 
 
+Skip the main menu
+== 
+
 Vanilla skins only
 == 
 
@@ -1037,12 +1034,6 @@ Skin prefix
 == 
 
 Hook collisions
-== 
-
-Pause
-== 
-
-Kill
 == 
 
 Zoom in
@@ -1151,6 +1142,30 @@ Show tiles layers from BG map
 == 
 
 Try fast HTTP map download first
+== 
+
+Settings
+== 
+
+Run server
+== 
+
+Stop server
+== 
+
+https://wiki.ddnet.tw/
+== 
+
+Editor
+== 
+
+DDNet %s is out!
+== 
+
+Downloading %s:
+== 
+
+Update failed! Check log...
 == 
 
 Time

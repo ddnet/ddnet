@@ -608,9 +608,6 @@ Crc:
 Alpha
 == Alpha
 
-Current version: %s
-== Aktuális verzió: %s
-
 LAN
 == Helyi
 
@@ -1190,6 +1187,9 @@ Use k key to kill (restart), q to pause and watch other players. See settings fo
 Country / Region
 == 
 
+Skip the main menu
+== 
+
 Skin prefix
 == 
 
@@ -1197,4 +1197,19 @@ Client message
 == 
 
 Show others (own team only)
+== 
+
+Settings
+== 
+
+Run server
+== 
+
+Stop server
+== 
+
+https://wiki.ddnet.tw/
+== 
+
+Editor
 == 
