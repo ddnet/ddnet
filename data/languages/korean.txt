@@ -650,7 +650,7 @@ Server best:
 Personal best:
 == 
 
-Learn
+Back
 == 
 
 Browser
@@ -1134,6 +1134,9 @@ Run server
 == 
 
 Stop server
+== 
+
+Learn
 == 
 
 https://wiki.ddnet.tw/

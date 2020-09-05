@@ -1193,7 +1193,13 @@ Auto %3d:%02d
 Replay %3d:%02d  
 == 回放 %3d:%02d  
 
+https://wiki.ddnet.tw/
+== https://docs.qq.com/doc/DWGFrV0xPRmVWVkla
+
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
+== 
+
+Back
 == 
 
 Skip the main menu
@@ -1207,9 +1213,6 @@ Run server
 
 Stop server
 == 
-
-https://wiki.ddnet.tw/
-== https://docs.qq.com/doc/DWGFrV0xPRmVWVkla
 
 Editor
 == 

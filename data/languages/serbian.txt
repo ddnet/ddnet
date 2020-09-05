@@ -670,6 +670,9 @@ Server best:
 Personal best:
 == 
 
+Back
+== 
+
 Browser
 == 
 
