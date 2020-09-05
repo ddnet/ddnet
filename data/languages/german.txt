@@ -639,9 +639,6 @@ Crc:
 Alpha
 == Alpha
 
-Current version: %s
-== Aktuelle Version: %s
-
 LAN
 == LAN
 
@@ -1208,3 +1205,21 @@ Country / Region
 
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
 == Die Breite oder Höhe von Textur %s ist nicht durch 16 teilbar, was visuelle Bugs verursachen kann.
+
+Skip the main menu
+== 
+
+Settings
+== 
+
+Run server
+== 
+
+Stop server
+== 
+
+https://wiki.ddnet.tw/
+== 
+
+Editor
+== 

@@ -626,9 +626,6 @@ Crc:
 Alpha
 == Şeffaflık
 
-Current version: %s
-== Mevcut versiyon: %s
-
 LAN
 == LAN
 
@@ -1197,4 +1194,22 @@ The width or height of texture %s is not divisible by 16, which might cause visu
 == 
 
 Country / Region
+== 
+
+Skip the main menu
+== 
+
+Settings
+== 
+
+Run server
+== 
+
+Stop server
+== 
+
+https://wiki.ddnet.tw/
+== 
+
+Editor
 == 

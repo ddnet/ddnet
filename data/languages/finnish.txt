@@ -625,9 +625,6 @@ Crc:
 Alpha
 == Alfa
 
-Current version: %s
-== Nykyinen versio: %s
-
 LAN
 == LAN
 
@@ -751,24 +748,6 @@ Countries
 Types
 == 
 
-DDNet %s is out!
-== 
-
-Downloading %s:
-== 
-
-Update failed! Check log...
-== 
-
-DDNet Client updated!
-== 
-
-Update now
-== 
-
-Restart
-== 
-
 Select a name
 == 
 
@@ -811,6 +790,12 @@ Connecting dummy
 Connect Dummy
 == 
 
+Kill
+== 
+
+Pause
+== 
+
 Reload
 == 
 
@@ -836,6 +821,9 @@ Show clan above name plates
 == 
 
 Clan plates size
+== 
+
+Skip the main menu
 == 
 
 Refresh Rate
@@ -866,12 +854,6 @@ Skin prefix
 == 
 
 Hook collisions
-== 
-
-Pause
-== 
-
-Kill
 == 
 
 Zoom in
@@ -1129,7 +1111,13 @@ Try fast HTTP map download first
 DDNet %s is available:
 == 
 
+Update now
+== 
+
 Updating...
+== 
+
+DDNet Client updated!
 == 
 
 No updates available
@@ -1139,6 +1127,33 @@ Check now
 == 
 
 New random timeout code
+== 
+
+Settings
+== 
+
+Run server
+== 
+
+Stop server
+== 
+
+https://wiki.ddnet.tw/
+== 
+
+Editor
+== 
+
+DDNet %s is out!
+== 
+
+Downloading %s:
+== 
+
+Update failed! Check log...
+== 
+
+Restart
 == 
 
 Time

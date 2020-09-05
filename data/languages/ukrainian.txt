@@ -450,9 +450,6 @@ Host address
 Alpha
 == Прозор..
 
-Current version: %s
-== Поточна версія: %s
-
 LAN
 == LAN
 
@@ -1192,4 +1189,22 @@ Country / Region
 == 
 
 Markers
+== 
+
+Skip the main menu
+== 
+
+Settings
+== 
+
+Run server
+== 
+
+Stop server
+== 
+
+https://wiki.ddnet.tw/
+== 
+
+Editor
 == 

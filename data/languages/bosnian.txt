@@ -626,9 +626,6 @@ Crc:
 Alpha
 == Provid.
 
-Current version: %s
-== Trenutna verzija: %s
-
 LAN
 == LAN
 
@@ -1154,6 +1151,9 @@ Country / Region
 %.2f KiB
 == 
 
+Skip the main menu
+== 
+
 Max CSVs
 == 
 
@@ -1173,6 +1173,21 @@ AntiPing limit
 == 
 
 AntiPing
+== 
+
+Settings
+== 
+
+Run server
+== 
+
+Stop server
+== 
+
+https://wiki.ddnet.tw/
+== 
+
+Editor
 == 
 
 Manual %3d:%02d  

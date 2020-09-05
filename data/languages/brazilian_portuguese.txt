@@ -751,9 +751,6 @@ Ghost
 Remove chat
 == Remover chat
 
-Current version: %s
-== Versão atual: %s
-
 Threaded sound loading
 == Carregamento de som em fluxos
 
@@ -1141,9 +1138,6 @@ Zoom in
 Zoom out
 == Zoom out
 
-The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== 
-
 Server best:
 == Melhor servidor:
 
@@ -1183,9 +1177,6 @@ It's recommended that you check the settings to adjust them to your liking befor
 Please enter your nick name below.
 == Por favor, insira seu apelido abaixo.
 
-Country / Region
-== 
-
 Destination file already exist
 == O arquivo de destino já existe
 
@@ -1206,3 +1197,27 @@ Client message
 
 Show others (own team only)
 == Mostrar outras (próprio time apenas)
+
+The width or height of texture %s is not divisible by 16, which might cause visual bugs.
+== 
+
+Country / Region
+== 
+
+Skip the main menu
+== 
+
+Settings
+== 
+
+Run server
+== 
+
+Stop server
+== 
+
+https://wiki.ddnet.tw/
+== 
+
+Editor
+== 

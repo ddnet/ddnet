@@ -644,9 +644,6 @@ Crc:
 Alpha
 == Alfa
 
-Current version: %s
-== Aktualna wersja: %s
-
 LAN
 == LAN
 
@@ -1196,5 +1193,23 @@ Use k key to kill (restart), q to pause and watch other players. See settings fo
 Country / Region
 == 
 
+Skip the main menu
+== 
+
 Client message
+== 
+
+Settings
+== 
+
+Run server
+== 
+
+Stop server
+== 
+
+https://wiki.ddnet.tw/
+== 
+
+Editor
 == 
