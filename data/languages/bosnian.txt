@@ -1143,6 +1143,9 @@ Best
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
 == Širina ili visina teksture %s nije djeljiva sa 16, zbog toga mogu nastati vizuelne greške.
 
+Back
+== 
+
 Country / Region
 == Zemlja / Regija
 
