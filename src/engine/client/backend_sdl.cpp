@@ -414,6 +414,24 @@ void CCommandProcessorFragment_OpenGL::SetState(const CCommandBuffer::SState &St
 		{
 			glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, m_aTextures[State.m_Texture].m_Tex);
+
+			if(m_aTextures[State.m_Texture].m_LastWrapMode != State.m_WrapMode)
+			{
+				switch(State.m_WrapMode)
+				{
+				case CCommandBuffer::WRAP_REPEAT:
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+					break;
+				case CCommandBuffer::WRAP_CLAMP:
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+					break;
+				default:
+					dbg_msg("render", "unknown wrapmode %d\n", State.m_WrapMode);
+				};
+				m_aTextures[State.m_Texture].m_LastWrapMode = State.m_WrapMode;
+			}
 		}
 		else
 		{
@@ -434,20 +452,6 @@ void CCommandProcessorFragment_OpenGL::SetState(const CCommandBuffer::SState &St
 			
 		}
 	}
-
-	switch(State.m_WrapMode)
-	{
-	case CCommandBuffer::WRAP_REPEAT:
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		break;
-	case CCommandBuffer::WRAP_CLAMP:
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		break;
-	default:
-		dbg_msg("render", "unknown wrapmode %d\n", State.m_WrapMode);
-	};
 
 	// screen mapping
 	glMatrixMode(GL_PROJECTION);
@@ -560,6 +564,7 @@ void CCommandProcessorFragment_OpenGL::DestroyTexture(int Slot)
 	m_aTextures[Slot].m_Sampler = 0;
 	m_aTextures[Slot].m_Tex2DArray = 0;
 	m_aTextures[Slot].m_Sampler2DArray = 0;
+	m_aTextures[Slot].m_LastWrapMode = CCommandBuffer::WRAP_REPEAT;
 }
 
 void CCommandProcessorFragment_OpenGL::Cmd_Texture_Destroy(const CCommandBuffer::SCommand_Texture_Destroy *pCommand)
@@ -779,6 +784,9 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 				free(p3DImageData);
 		}
 	}
+
+	// This is the initial value for the wrap modes
+	m_aTextures[pCommand->m_Slot].m_LastWrapMode = CCommandBuffer::WRAP_REPEAT;
 
 	// calculate memory usage
 	m_aTextures[pCommand->m_Slot].m_MemSize = Width*Height*pCommand->m_PixelSize;
@@ -1110,30 +1118,165 @@ void CCommandProcessorFragment_OpenGL2::SetState(const CCommandBuffer::SState &S
 	}
 }
 
+bool CCommandProcessorFragment_OpenGL2::DoAnalyzeStep(size_t StepN, size_t CheckCount, size_t VerticesCount, uint8_t aFakeTexture[], size_t SingleImageSize) {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	int Slot = 0;
+	if(m_HasShaders)
+	{
+		CGLSLTWProgram *pProgram = m_pPrimitive3DProgramTextured;
+		if(StepN == 1)
+			pProgram = m_pTileProgramTextured;
+		UseProgram(pProgram);
+
+		pProgram->SetUniform(pProgram->m_LocTextureSampler, Slot);
+
+		if(StepN == 1)
+		{
+			float aColor[4] = { 1.f, 1.f, 1.f, 1.f };
+			pProgram->SetUniformVec4(((CGLSLTileProgram*)pProgram)->m_LocColor, 1, aColor);
+		}
+
+		float m[2 * 4] = {
+			1, 0, 0, 0,
+			0, 1, 0, 0
+		};
+
+		// transpose bcs of column-major order of opengl
+		glUniformMatrix4x2fv(pProgram->m_LocPos, 1, true, (float*)&m);
+	}
+	else
+	{
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(-1, 1, -1, 1, -10.0f, 10.f);
+	}
+	
+	GLuint BufferID = 0;
+	if(StepN == 1 && m_HasShaders)
+	{
+		glGenBuffers(1, &BufferID);
+		glBindBuffer(GL_ARRAY_BUFFER, BufferID);
+		glBufferData(GL_ARRAY_BUFFER, VerticesCount * sizeof((m_aStreamVertices[0])), m_aStreamVertices, GL_STATIC_DRAW);
+
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 2, GL_FLOAT, false, sizeof((m_aStreamVertices[0])), 0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, false, sizeof((m_aStreamVertices[0])), (GLvoid*)(sizeof(vec4) + sizeof(vec2)));
+	}
+	else
+	{
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glEnableClientState(GL_COLOR_ARRAY);
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+		glVertexPointer(2, GL_FLOAT, sizeof(m_aStreamVertices[0]), m_aStreamVertices);
+		glColorPointer(4, GL_FLOAT, sizeof(m_aStreamVertices[0]), (uint8_t*)m_aStreamVertices + (ptrdiff_t)(sizeof(vec2)));
+		glTexCoordPointer(3, GL_FLOAT, sizeof(m_aStreamVertices[0]), (uint8_t*)m_aStreamVertices + (ptrdiff_t)(sizeof(vec2) + sizeof(vec4)));
+	}
+
+	glDrawArrays(GL_QUADS, 0, VerticesCount);
+
+	if(StepN == 1 && m_HasShaders)
+	{
+		glDisableVertexAttribArray(0);
+		glDisableVertexAttribArray(1);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glDeleteBuffers(1, &BufferID);
+	}
+	else
+	{
+		glDisableClientState(GL_VERTEX_ARRAY);
+		glDisableClientState(GL_COLOR_ARRAY);
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	}
+
+	if(m_HasShaders)
+	{
+		glUseProgram(0);
+	}
+
+	glFinish();
+
+	GLint aViewport[4] = {0,0,0,0};
+	glGetIntegerv(GL_VIEWPORT, aViewport);
+
+	int w = aViewport[2];
+	int h = aViewport[3];
+
+	size_t PixelDataSize = w * h * 3;
+	if(PixelDataSize == 0)
+		return false;
+	uint8_t *pPixelData = (uint8_t *)malloc(PixelDataSize);
+
+	// fetch the pixels
+	GLint Alignment;
+	glGetIntegerv(GL_PACK_ALIGNMENT, &Alignment);
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, pPixelData);
+	glPixelStorei(GL_PACK_ALIGNMENT, Alignment);
+	
+	// now analyse the image data
+	bool CheckFailed = false;
+	int WidthTile = w / 16;
+	int HeightTile = h / 16;
+	int StartX = WidthTile / 2;
+	int StartY = HeightTile / 2;
+	for(size_t d = 0; d < CheckCount; ++d)
+	{
+		int CurX = (int)d % 16;
+		int CurY = (int)d / 16;
+
+		int CheckX = StartX + CurX * WidthTile;
+		int CheckY = StartY + CurY * HeightTile;
+
+		ptrdiff_t OffsetPixelData = (CheckY * (w * 3)) + (CheckX * 3);
+		ptrdiff_t OffsetFakeTexture = SingleImageSize * d;
+		OffsetPixelData = clamp<ptrdiff_t>(OffsetPixelData, 0, (ptrdiff_t)PixelDataSize);
+		OffsetFakeTexture = clamp<ptrdiff_t>(OffsetFakeTexture, 0, (ptrdiff_t)(SingleImageSize * CheckCount));
+		uint8_t* pPixel = pPixelData + OffsetPixelData;
+		uint8_t* pPixelTex = aFakeTexture + OffsetFakeTexture;
+		for(size_t i = 0; i < 3; ++i)
+		{
+			if((pPixel[i] < pPixelTex[i] - 25) || (pPixel[i] > pPixelTex[i] + 25))
+			{
+				CheckFailed = true;
+				break;
+			}
+		}
+	}
+
+	free(pPixelData);
+	return !CheckFailed;
+}
+
 bool CCommandProcessorFragment_OpenGL2::IsTileMapAnalysisSucceeded()
 {
 	glClearColor(0, 0, 0, 1);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// create fake texture 64x64
-	uint8_t aFakeTexture[64*64*4];
+	// create fake texture 1024x1024
+	const size_t ImageWidth = 1024;
+	const size_t ImageHeight = 1024;
+	uint8_t* pFakeTexture = (uint8_t*)malloc(sizeof(uint8_t) * ImageWidth * ImageHeight * 4);
 	// fill by colors stepping by 50 => (255 / 50 ~ 5) => 5 times 3(color channels) = 5 ^ 3 = 125 possibilities to check
 	size_t CheckCount = 5 * 5 * 5;
 	// always fill 4 pixels of the texture, so the sampling is accurate
 	int aCurColor[4] = { 25, 25, 25, 255 };
-	size_t SingleImageSize = 4 * 4 * 4;
+	const size_t SingleImageWidth = 64;
+	const size_t SingleImageHeight = 64;
+	size_t SingleImageSize = SingleImageWidth * SingleImageHeight * 4;
 	for(size_t d = 0; d < CheckCount; ++d)
 	{
-		uint8_t *pCurFakeTexture = aFakeTexture + (ptrdiff_t)(SingleImageSize * d);
+		uint8_t *pCurFakeTexture = pFakeTexture + (ptrdiff_t)(SingleImageSize * d);
 
-		uint8_t aCurColorUint8[4 * 4 * 4];
-		for(size_t y = 0; y < 4; ++y)
+		uint8_t aCurColorUint8[SingleImageWidth * SingleImageHeight * 4];
+		for(size_t y = 0; y < SingleImageHeight; ++y)
 		{
-			for(size_t x = 0; x < 4; ++x)
+			for(size_t x = 0; x < SingleImageWidth; ++x)
 			{
 				for(size_t i = 0; i < 4; ++i)
 				{
-					aCurColorUint8[(y * 4 * 4) + (x * 4) + i] = (uint8_t)aCurColor[i];
+					aCurColorUint8[(y * SingleImageWidth * 4) + (x * 4) + i] = (uint8_t)aCurColor[i];
 				}
 			}
 		}
@@ -1182,7 +1325,7 @@ bool CCommandProcessorFragment_OpenGL2::IsTileMapAnalysisSucceeded()
 	glTexParameteri(Target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(Target, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
 	
-	glTexImage3D(Target, 0, GL_RGBA, 64 / 16, 64 / 16, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, aFakeTexture);
+	glTexImage3D(Target, 0, GL_RGBA, ImageWidth / 16, ImageHeight / 16, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, pFakeTexture);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -1195,7 +1338,7 @@ bool CCommandProcessorFragment_OpenGL2::IsTileMapAnalysisSucceeded()
 	{
 		glDisable(m_2DArrayTarget);
 	}
-	int Slot = 0;
+
 	if(!m_Has2DArrayTextures)
 	{
 		glEnable(GL_TEXTURE_3D);
@@ -1206,35 +1349,8 @@ bool CCommandProcessorFragment_OpenGL2::IsTileMapAnalysisSucceeded()
 		glEnable(m_2DArrayTarget);
 		glBindTexture(m_2DArrayTarget, FakeTexture);
 	}
-	
-	if(m_HasShaders)
-	{
-		CGLSLPrimitiveProgram *pProgram = m_pPrimitive3DProgramTextured;
-		UseProgram(pProgram);
 
-		pProgram->SetUniform(pProgram->m_LocTextureSampler, Slot);
-
-		float m[2 * 4] = {
-			1, 0, 0, 0,
-			0, 1, 0, 0
-		};
-
-		// transpose bcs of column-major order of opengl
-		glUniformMatrix4x2fv(pProgram->m_LocPos, 1, true, (float*)&m);
-	}
-	else {
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glOrtho(-1, 1, -1, 1, -10.0f, 10.f);
-	}
-	
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
-	glVertexPointer(2, GL_FLOAT, sizeof(m_aStreamVertices[0]), m_aStreamVertices);
-	glColorPointer(4, GL_FLOAT, sizeof(m_aStreamVertices[0]), (uint8_t*)m_aStreamVertices + (ptrdiff_t)(sizeof(vec2)));
-	glTexCoordPointer(3, GL_FLOAT, sizeof(m_aStreamVertices[0]), (uint8_t*)m_aStreamVertices + (ptrdiff_t)(sizeof(vec2) + sizeof(vec4)));
+	static_assert(sizeof(m_aStreamVertices) / sizeof(m_aStreamVertices[0]) >= 256 * 4, "Keep the number of stream vertices >= 256 * 4.");
 
 	size_t VertexCount = 0;
 	for(size_t i = 0; i < CheckCount; ++i)
@@ -1293,210 +1409,177 @@ bool CCommandProcessorFragment_OpenGL2::IsTileMapAnalysisSucceeded()
 			{
 				pVertexBefore[n].m_Tex.w = i;
 			}
-			else {
+			else
+			{
 				pVertexBefore[n].m_Tex.w = (i + 0.5f) / 256.f;
 			}
 		}
-
-		if(VertexCount > sizeof(m_aStreamVertices) / sizeof(m_aStreamVertices[0]))
-		{
-			glDrawArrays(GL_QUADS, 0, VertexCount);
-			VertexCount = 0;
-		}
 	}
 
-	glDrawArrays(GL_QUADS, 0, VertexCount);
+	//everything build up, now do the analyze steps
+	bool NoError = DoAnalyzeStep(0, CheckCount, VertexCount, pFakeTexture, SingleImageSize);
+	if(NoError && m_HasShaders)
+		NoError &= DoAnalyzeStep(1, CheckCount, VertexCount, pFakeTexture, SingleImageSize);
+	
+	glDeleteTextures(1, &FakeTexture);
+	free(pFakeTexture);
 
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glDisableClientState(GL_COLOR_ARRAY);
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
-	if(m_HasShaders)
-	{
-		glUseProgram(0);
-	}
-
-	glFinish();
-
-	GLint aViewport[4] = {0,0,0,0};
-	glGetIntegerv(GL_VIEWPORT, aViewport);
-
-	int w = aViewport[2];
-	int h = aViewport[3];
-
-	// we allocate one more row to use when we are flipping the texture
-	size_t PixelDataSize = w*(h+1)*3;
-	if(PixelDataSize == 0)
-		return false;
-	uint8_t *pPixelData = (uint8_t *)malloc(PixelDataSize);
-
-	// fetch the pixels
-	GLint Alignment;
-	glGetIntegerv(GL_PACK_ALIGNMENT, &Alignment);
-	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-	glReadPixels(0,0, w, h, GL_RGB, GL_UNSIGNED_BYTE, pPixelData);
-	glPixelStorei(GL_PACK_ALIGNMENT, Alignment);
-
-	// now analyse the image data
-	bool CheckFailed = false;
-	int WidthTile = w / 16;
-	int HeightTile = h / 16;
-	int StartX = WidthTile / 2;
-	int StartY = HeightTile / 2;
-	for(size_t d = 0; d < CheckCount; ++d)
-	{
-		int CurX = (int)d % 16;
-		int CurY = (int)d / 16;
-
-		int CheckX = StartX + CurX * WidthTile;
-		int CheckY = StartY + CurY * HeightTile;
-
-		ptrdiff_t OffsetPixelData = (CheckY * (w * 3)) + (CheckX * 3);
-		ptrdiff_t OffsetFakeTexture = SingleImageSize * d;
-		OffsetPixelData = clamp<ptrdiff_t>(OffsetPixelData, 0, (ptrdiff_t)PixelDataSize);
-		OffsetFakeTexture = clamp<ptrdiff_t>(OffsetFakeTexture, 0, (ptrdiff_t)sizeof(aFakeTexture));
-		uint8_t* pPixel = pPixelData + OffsetPixelData;
-		uint8_t* pPixelTex = aFakeTexture + OffsetFakeTexture;
-		for(size_t i = 0; i < 3; ++i)
-		{
-			if((pPixel[i] < pPixelTex[i] - 25) || (pPixel[i] > pPixelTex[i] + 25))
-			{
-				CheckFailed = true;
-				break;
-			}
-		}
-	}
-
-	free(pPixelData);
-	return !CheckFailed;
+	return NoError;
 }
 
 void CCommandProcessorFragment_OpenGL2::Cmd_Init(const SCommand_Init *pCommand)
 {
 	CCommandProcessorFragment_OpenGL::Cmd_Init(pCommand);
+	
 	m_HasShaders = pCommand->m_pCapabilities->m_ShaderSupport;
 
+	bool HasAllFunc = true;
 	if(m_HasShaders)
 	{
-		m_pTileProgram = new CGLSLTileProgram;
-		m_pTileProgramTextured = new CGLSLTileProgram;
-		m_pPrimitive3DProgram = new CGLSLPrimitiveProgram;
-		m_pPrimitive3DProgramTextured = new CGLSLPrimitiveProgram;
-
-		CGLSLCompiler ShaderCompiler(g_Config.m_GfxOpenGLMajor, g_Config.m_GfxOpenGLMinor, g_Config.m_GfxOpenGLPatch);
-		ShaderCompiler.SetHasTextureArray(pCommand->m_pCapabilities->m_2DArrayTextures);
-
-		if(pCommand->m_pCapabilities->m_2DArrayTextures)
-			ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::GLSL_COMPILER_TEXTURE_REPLACE_TYPE_2D_ARRAY);
-		else
-			ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::GLSL_COMPILER_TEXTURE_REPLACE_TYPE_3D);
-		{
-			CGLSL PrimitiveVertexShader;
-			CGLSL PrimitiveFragmentShader;
-			PrimitiveVertexShader.LoadShader(&ShaderCompiler, pCommand->m_pStorage, "shader/pipeline.vert", GL_VERTEX_SHADER);
-			PrimitiveFragmentShader.LoadShader(&ShaderCompiler, pCommand->m_pStorage, "shader/pipeline.frag", GL_FRAGMENT_SHADER);
-
-			m_pPrimitive3DProgram->CreateProgram();
-			m_pPrimitive3DProgram->AddShader(&PrimitiveVertexShader);
-			m_pPrimitive3DProgram->AddShader(&PrimitiveFragmentShader);
-			m_pPrimitive3DProgram->LinkProgram();
-
-			UseProgram(m_pPrimitive3DProgram);
-
-			m_pPrimitive3DProgram->m_LocPos = m_pPrimitive3DProgram->GetUniformLoc("gPos");
-		}
-
-		if(pCommand->m_pCapabilities->m_2DArrayTextures)
-			ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::GLSL_COMPILER_TEXTURE_REPLACE_TYPE_2D_ARRAY);
-		else
-			ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::GLSL_COMPILER_TEXTURE_REPLACE_TYPE_3D);
-		{
-			CGLSL PrimitiveVertexShader;
-			CGLSL PrimitiveFragmentShader;
-			ShaderCompiler.AddDefine("TW_TEXTURED", "");
-			if(!pCommand->m_pCapabilities->m_2DArrayTextures)
-				ShaderCompiler.AddDefine("TW_3D_TEXTURED", "");
-			PrimitiveVertexShader.LoadShader(&ShaderCompiler, pCommand->m_pStorage, "shader/pipeline.vert", GL_VERTEX_SHADER);
-			PrimitiveFragmentShader.LoadShader(&ShaderCompiler, pCommand->m_pStorage, "shader/pipeline.frag", GL_FRAGMENT_SHADER);
-			ShaderCompiler.ClearDefines();
-
-			m_pPrimitive3DProgramTextured->CreateProgram();
-			m_pPrimitive3DProgramTextured->AddShader(&PrimitiveVertexShader);
-			m_pPrimitive3DProgramTextured->AddShader(&PrimitiveFragmentShader);
-			m_pPrimitive3DProgramTextured->LinkProgram();
-
-			UseProgram(m_pPrimitive3DProgramTextured);
-
-			m_pPrimitive3DProgramTextured->m_LocPos = m_pPrimitive3DProgramTextured->GetUniformLoc("gPos");
-			m_pPrimitive3DProgramTextured->m_LocTextureSampler = m_pPrimitive3DProgramTextured->GetUniformLoc("gTextureSampler");
-		}
-		if(pCommand->m_pCapabilities->m_2DArrayTextures)
-			ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::GLSL_COMPILER_TEXTURE_REPLACE_TYPE_2D_ARRAY);
-		else
-			ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::GLSL_COMPILER_TEXTURE_REPLACE_TYPE_3D);
-		{
-			CGLSL VertexShader;
-			CGLSL FragmentShader;
-			VertexShader.LoadShader(&ShaderCompiler, pCommand->m_pStorage, "shader/tile.vert", GL_VERTEX_SHADER);
-			FragmentShader.LoadShader(&ShaderCompiler, pCommand->m_pStorage, "shader/tile.frag", GL_FRAGMENT_SHADER);
-
-			m_pTileProgram->CreateProgram();
-			m_pTileProgram->AddShader(&VertexShader);
-			m_pTileProgram->AddShader(&FragmentShader);
-
-			glBindAttribLocation(m_pTileProgram->GetProgramID(), 0, "inVertex");
-
-			m_pTileProgram->LinkProgram();
-
-			UseProgram(m_pTileProgram);
-
-			m_pTileProgram->m_LocPos = m_pTileProgram->GetUniformLoc("gPos");
-			m_pTileProgram->m_LocColor = m_pTileProgram->GetUniformLoc("gVertColor");
-		}
-		if(pCommand->m_pCapabilities->m_2DArrayTextures)
-			ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::GLSL_COMPILER_TEXTURE_REPLACE_TYPE_2D_ARRAY);
-		else
-			ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::GLSL_COMPILER_TEXTURE_REPLACE_TYPE_3D);
-		{
-			CGLSL VertexShader;
-			CGLSL FragmentShader;
-			ShaderCompiler.AddDefine("TW_TILE_TEXTURED", "");
-			if(!pCommand->m_pCapabilities->m_2DArrayTextures)
-				ShaderCompiler.AddDefine("TW_TILE_3D_TEXTURED", "");
-			VertexShader.LoadShader(&ShaderCompiler, pCommand->m_pStorage, "shader/tile.vert", GL_VERTEX_SHADER);
-			FragmentShader.LoadShader(&ShaderCompiler, pCommand->m_pStorage, "shader/tile.frag", GL_FRAGMENT_SHADER);
-			ShaderCompiler.ClearDefines();
-
-			m_pTileProgramTextured->CreateProgram();
-			m_pTileProgramTextured->AddShader(&VertexShader);
-			m_pTileProgramTextured->AddShader(&FragmentShader);
-
-			glBindAttribLocation(m_pTileProgram->GetProgramID(), 0, "inVertex");
-			glBindAttribLocation(m_pTileProgram->GetProgramID(), 1, "inVertexTexCoord");
-
-			m_pTileProgramTextured->LinkProgram();
-
-			UseProgram(m_pTileProgramTextured);
-
-			m_pTileProgramTextured->m_LocPos = m_pTileProgramTextured->GetUniformLoc("gPos");
-			m_pTileProgramTextured->m_LocTextureSampler = m_pTileProgramTextured->GetUniformLoc("gTextureSampler");
-			m_pTileProgramTextured->m_LocColor = m_pTileProgramTextured->GetUniformLoc("gVertColor");
-		}
-
-		glUseProgram(0);
+		HasAllFunc &= (glUniformMatrix4x2fv != NULL) && (glGenBuffers != NULL);
+		HasAllFunc &= (glBindBuffer != NULL) && (glBufferData != NULL);
+		HasAllFunc &= (glEnableVertexAttribArray != NULL) && (glVertexAttribPointer != NULL);
+		HasAllFunc &= (glDisableVertexAttribArray != NULL) && (glDeleteBuffers != NULL);
+		HasAllFunc &= (glUseProgram != NULL) && (glTexImage3D != NULL);
+		HasAllFunc &= (glBindAttribLocation != NULL) && (glTexImage3D != NULL);
+		HasAllFunc &= (glBufferSubData != NULL) && (glGetUniformLocation != NULL);
+		HasAllFunc &= (glUniform1i != NULL) && (glUniform1f != NULL);
+		HasAllFunc &= (glUniform1ui != NULL) && (glUniform1i != NULL);
+		HasAllFunc &= (glUniform1fv != NULL) && (glUniform2fv != NULL);
+		HasAllFunc &= (glUniform4fv != NULL) && (glGetAttachedShaders != NULL);
+		HasAllFunc &= (glGetProgramInfoLog != NULL) && (glGetProgramiv != NULL);
+		HasAllFunc &= (glLinkProgram != NULL) && (glDetachShader != NULL);
+		HasAllFunc &= (glAttachShader != NULL) && (glDeleteProgram != NULL);
+		HasAllFunc &= (glCreateProgram != NULL) && (glShaderSource != NULL);
+		HasAllFunc &= (glCompileShader != NULL) && (glGetShaderiv != NULL);
+		HasAllFunc &= (glGetShaderInfoLog != NULL) && (glDeleteShader != NULL);
+		HasAllFunc &= (glCreateShader != NULL);
 	}
 
 	bool AnalysisCorrect = true;
-	if(g_Config.m_GfxDid3DTextureAnalysis == 0)
+	if(HasAllFunc)
 	{
-		AnalysisCorrect = IsTileMapAnalysisSucceeded();
-		if(AnalysisCorrect)
+		if(m_HasShaders)
 		{
-			g_Config.m_GfxDid3DTextureAnalysis = 1;
+			m_pTileProgram = new CGLSLTileProgram;
+			m_pTileProgramTextured = new CGLSLTileProgram;
+			m_pPrimitive3DProgram = new CGLSLPrimitiveProgram;
+			m_pPrimitive3DProgramTextured = new CGLSLPrimitiveProgram;
+
+			CGLSLCompiler ShaderCompiler(g_Config.m_GfxOpenGLMajor, g_Config.m_GfxOpenGLMinor, g_Config.m_GfxOpenGLPatch);
+			ShaderCompiler.SetHasTextureArray(pCommand->m_pCapabilities->m_2DArrayTextures);
+
+			if(pCommand->m_pCapabilities->m_2DArrayTextures)
+				ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::GLSL_COMPILER_TEXTURE_REPLACE_TYPE_2D_ARRAY);
+			else
+				ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::GLSL_COMPILER_TEXTURE_REPLACE_TYPE_3D);
+			{
+				CGLSL PrimitiveVertexShader;
+				CGLSL PrimitiveFragmentShader;
+				PrimitiveVertexShader.LoadShader(&ShaderCompiler, pCommand->m_pStorage, "shader/pipeline.vert", GL_VERTEX_SHADER);
+				PrimitiveFragmentShader.LoadShader(&ShaderCompiler, pCommand->m_pStorage, "shader/pipeline.frag", GL_FRAGMENT_SHADER);
+
+				m_pPrimitive3DProgram->CreateProgram();
+				m_pPrimitive3DProgram->AddShader(&PrimitiveVertexShader);
+				m_pPrimitive3DProgram->AddShader(&PrimitiveFragmentShader);
+				m_pPrimitive3DProgram->LinkProgram();
+
+				UseProgram(m_pPrimitive3DProgram);
+
+				m_pPrimitive3DProgram->m_LocPos = m_pPrimitive3DProgram->GetUniformLoc("gPos");
+			}
+
+			if(pCommand->m_pCapabilities->m_2DArrayTextures)
+				ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::GLSL_COMPILER_TEXTURE_REPLACE_TYPE_2D_ARRAY);
+			else
+				ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::GLSL_COMPILER_TEXTURE_REPLACE_TYPE_3D);
+			{
+				CGLSL PrimitiveVertexShader;
+				CGLSL PrimitiveFragmentShader;
+				ShaderCompiler.AddDefine("TW_TEXTURED", "");
+				if(!pCommand->m_pCapabilities->m_2DArrayTextures)
+					ShaderCompiler.AddDefine("TW_3D_TEXTURED", "");
+				PrimitiveVertexShader.LoadShader(&ShaderCompiler, pCommand->m_pStorage, "shader/pipeline.vert", GL_VERTEX_SHADER);
+				PrimitiveFragmentShader.LoadShader(&ShaderCompiler, pCommand->m_pStorage, "shader/pipeline.frag", GL_FRAGMENT_SHADER);
+				ShaderCompiler.ClearDefines();
+
+				m_pPrimitive3DProgramTextured->CreateProgram();
+				m_pPrimitive3DProgramTextured->AddShader(&PrimitiveVertexShader);
+				m_pPrimitive3DProgramTextured->AddShader(&PrimitiveFragmentShader);
+				m_pPrimitive3DProgramTextured->LinkProgram();
+
+				UseProgram(m_pPrimitive3DProgramTextured);
+
+				m_pPrimitive3DProgramTextured->m_LocPos = m_pPrimitive3DProgramTextured->GetUniformLoc("gPos");
+				m_pPrimitive3DProgramTextured->m_LocTextureSampler = m_pPrimitive3DProgramTextured->GetUniformLoc("gTextureSampler");
+			}
+			if(pCommand->m_pCapabilities->m_2DArrayTextures)
+				ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::GLSL_COMPILER_TEXTURE_REPLACE_TYPE_2D_ARRAY);
+			else
+				ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::GLSL_COMPILER_TEXTURE_REPLACE_TYPE_3D);
+			{
+				CGLSL VertexShader;
+				CGLSL FragmentShader;
+				VertexShader.LoadShader(&ShaderCompiler, pCommand->m_pStorage, "shader/tile.vert", GL_VERTEX_SHADER);
+				FragmentShader.LoadShader(&ShaderCompiler, pCommand->m_pStorage, "shader/tile.frag", GL_FRAGMENT_SHADER);
+
+				m_pTileProgram->CreateProgram();
+				m_pTileProgram->AddShader(&VertexShader);
+				m_pTileProgram->AddShader(&FragmentShader);
+
+				glBindAttribLocation(m_pTileProgram->GetProgramID(), 0, "inVertex");
+
+				m_pTileProgram->LinkProgram();
+
+				UseProgram(m_pTileProgram);
+
+				m_pTileProgram->m_LocPos = m_pTileProgram->GetUniformLoc("gPos");
+				m_pTileProgram->m_LocColor = m_pTileProgram->GetUniformLoc("gVertColor");
+			}
+			if(pCommand->m_pCapabilities->m_2DArrayTextures)
+				ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::GLSL_COMPILER_TEXTURE_REPLACE_TYPE_2D_ARRAY);
+			else
+				ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::GLSL_COMPILER_TEXTURE_REPLACE_TYPE_3D);
+			{
+				CGLSL VertexShader;
+				CGLSL FragmentShader;
+				ShaderCompiler.AddDefine("TW_TILE_TEXTURED", "");
+				if(!pCommand->m_pCapabilities->m_2DArrayTextures)
+					ShaderCompiler.AddDefine("TW_TILE_3D_TEXTURED", "");
+				VertexShader.LoadShader(&ShaderCompiler, pCommand->m_pStorage, "shader/tile.vert", GL_VERTEX_SHADER);
+				FragmentShader.LoadShader(&ShaderCompiler, pCommand->m_pStorage, "shader/tile.frag", GL_FRAGMENT_SHADER);
+				ShaderCompiler.ClearDefines();
+
+				m_pTileProgramTextured->CreateProgram();
+				m_pTileProgramTextured->AddShader(&VertexShader);
+				m_pTileProgramTextured->AddShader(&FragmentShader);
+
+				glBindAttribLocation(m_pTileProgram->GetProgramID(), 0, "inVertex");
+				glBindAttribLocation(m_pTileProgram->GetProgramID(), 1, "inVertexTexCoord");
+
+				m_pTileProgramTextured->LinkProgram();
+
+				UseProgram(m_pTileProgramTextured);
+
+				m_pTileProgramTextured->m_LocPos = m_pTileProgramTextured->GetUniformLoc("gPos");
+				m_pTileProgramTextured->m_LocTextureSampler = m_pTileProgramTextured->GetUniformLoc("gTextureSampler");
+				m_pTileProgramTextured->m_LocColor = m_pTileProgramTextured->GetUniformLoc("gVertColor");
+			}
+
+			glUseProgram(0);
+		}
+
+		if(g_Config.m_Gfx3DTextureAnalysisDone == 0)
+		{
+			AnalysisCorrect = IsTileMapAnalysisSucceeded();
+			if(AnalysisCorrect)
+			{
+				g_Config.m_Gfx3DTextureAnalysisDone = 1;
+			}
 		}
 	}
 
-	if(!AnalysisCorrect)
+	if(!AnalysisCorrect || !HasAllFunc)
 	{
 		// downgrade to opengl 1.5
 		*pCommand->m_pInitError = -2;
