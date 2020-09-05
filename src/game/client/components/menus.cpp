@@ -1348,6 +1348,7 @@ int CMenus::Render()
 			{
 				Client()->DummyDisconnect(0);
 				m_Popup = POPUP_NONE;
+				SetActive(false);
 			}
 		}
 		else if(m_Popup == POPUP_PASSWORD)
@@ -2103,7 +2104,7 @@ void CMenus::OnRender()
 void CMenus::RenderBackground()
 {
 	Graphics()->BlendNormal();
-	
+
 	float sw = 300*Graphics()->ScreenAspect();
 	float sh = 300;
 	Graphics()->MapScreen(0, 0, sw, sh);

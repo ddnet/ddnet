@@ -83,9 +83,9 @@ void CMenus::RenderGame(CUIRect MainView)
 			else
 			{
 				Client()->DummyDisconnect(0);
+				SetActive(false);
 			}
 		}
-		SetActive(false);
 	}
 
 	ButtonBar.VSplitRight(5.0f, &ButtonBar, 0);
