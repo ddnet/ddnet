@@ -727,91 +727,95 @@ int CMenus::RenderMenubar(CUIRect r)
 
 	if(Client()->State() == IClient::STATE_OFFLINE)
 	{
+		Box.VSplitLeft(100.0f, &Button, &Box);
+		static int s_StartButton=0;
+		if(DoButton_MenuTab(&s_StartButton, Localize("Back"), false, &Button, CUI::CORNER_T))
+		{
+			m_ShowStart = true;
+			m_DoubleClickIndex = -1;
+		}
+
+		Box.VSplitLeft(5.0f, 0, &Box);
+
 		// offline menus
-		Box.VSplitLeft(60.0f, &Button, &Box);
-		static int s_NewsButton=0;
-		if(DoButton_MenuTab(&s_NewsButton, Localize("News"), m_ActivePage==PAGE_NEWS, &Button, CUI::CORNER_TL))
+		if(m_ActivePage == PAGE_NEWS)
 		{
-			NewPage = PAGE_NEWS;
-			m_DoubleClickIndex = -1;
-		}
-		Box.VSplitLeft(60.0f, &Button, &Box);
-		static int s_LearnButton=0;
-		if(DoButton_MenuTab(&s_LearnButton, Localize("Learn"), false, &Button, CUI::CORNER_TR))
-		{
-			if(!open_link("https://wiki.ddnet.tw/"))
+			Box.VSplitLeft(100.0f, &Button, &Box);
+			static int s_NewsButton=0;
+			if(DoButton_MenuTab(&s_NewsButton, Localize("News"), m_ActivePage==PAGE_NEWS, &Button, CUI::CORNER_T))
 			{
-				dbg_msg("menus", "couldn't open link");
+				NewPage = PAGE_NEWS;
+				m_DoubleClickIndex = -1;
 			}
-			m_DoubleClickIndex = -1;
 		}
-
-		Box.VSplitLeft(5.0f, 0, &Box);
-
-		Box.VSplitLeft(100.0f, &Button, &Box);
-		static int s_InternetButton=0;
-		if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), m_ActivePage==PAGE_INTERNET, &Button, CUI::CORNER_TL))
+		else if(m_ActivePage == PAGE_DEMOS)
 		{
-			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_INTERNET)
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
-			NewPage = PAGE_INTERNET;
-			m_DoubleClickIndex = -1;
-		}
-
-		Box.VSplitLeft(60.0f, &Button, &Box);
-		static int s_LanButton=0;
-		if(DoButton_MenuTab(&s_LanButton, Localize("LAN"), m_ActivePage==PAGE_LAN, &Button, 0))
-		{
-			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_LAN)
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
-			NewPage = PAGE_LAN;
-			m_DoubleClickIndex = -1;
-		}
-
-		Box.VSplitLeft(100.0f, &Button, &Box);
-		static int s_FavoritesButton=0;
-		if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), m_ActivePage==PAGE_FAVORITES, &Button, 0))
-		{
-			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_FAVORITES)
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
-			NewPage = PAGE_FAVORITES;
-			m_DoubleClickIndex = -1;
-		}
-
-		Box.VSplitLeft(80.0f, &Button, &Box);
-		static int s_DDNetButton=0;
-		if(DoButton_MenuTab(&s_DDNetButton, "DDNet", m_ActivePage==PAGE_DDNET, &Button, 0))
-		{
-			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_DDNET)
+			Box.VSplitLeft(100.0f, &Button, &Box);
+			static int s_DemosButton=0;
+			if(DoButton_MenuTab(&s_DemosButton, Localize("Demos"), m_ActivePage==PAGE_DEMOS, &Button, CUI::CORNER_T))
 			{
-				Client()->RequestDDNetInfo();
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
+				DemolistPopulate();
+				NewPage = PAGE_DEMOS;
+				m_DoubleClickIndex = -1;
 			}
-			NewPage = PAGE_DDNET;
-			m_DoubleClickIndex = -1;
 		}
-
-		Box.VSplitLeft(60.0f, &Button, &Box);
-		static int s_KoGButton=0;
-		if(DoButton_MenuTab(&s_KoGButton, "KoG", m_ActivePage==PAGE_KOG, &Button, CUI::CORNER_TR))
+		else
 		{
-			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_KOG)
+			Box.VSplitLeft(100.0f, &Button, &Box);
+			static int s_InternetButton=0;
+			if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), m_ActivePage==PAGE_INTERNET, &Button, CUI::CORNER_TL))
 			{
-				Client()->RequestDDNetInfo();
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_KOG);
+				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_INTERNET)
+					ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+				NewPage = PAGE_INTERNET;
+				m_DoubleClickIndex = -1;
 			}
-			NewPage = PAGE_KOG;
-			m_DoubleClickIndex = -1;
-		}
 
-		Box.VSplitLeft(5.0f, 0, &Box);
-		Box.VSplitLeft(80.0f, &Button, &Box);
-		static int s_DemosButton=0;
-		if(DoButton_MenuTab(&s_DemosButton, Localize("Demos"), m_ActivePage==PAGE_DEMOS, &Button, CUI::CORNER_T))
-		{
-			DemolistPopulate();
-			NewPage = PAGE_DEMOS;
-			m_DoubleClickIndex = -1;
+			Box.VSplitLeft(100.0f, &Button, &Box);
+			static int s_LanButton=0;
+			if(DoButton_MenuTab(&s_LanButton, Localize("LAN"), m_ActivePage==PAGE_LAN, &Button, 0))
+			{
+				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_LAN)
+					ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
+				NewPage = PAGE_LAN;
+				m_DoubleClickIndex = -1;
+			}
+
+			Box.VSplitLeft(100.0f, &Button, &Box);
+			static int s_FavoritesButton=0;
+			if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), m_ActivePage==PAGE_FAVORITES, &Button, 0))
+			{
+				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_FAVORITES)
+					ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
+				NewPage = PAGE_FAVORITES;
+				m_DoubleClickIndex = -1;
+			}
+
+			Box.VSplitLeft(100.0f, &Button, &Box);
+			static int s_DDNetButton=0;
+			if(DoButton_MenuTab(&s_DDNetButton, "DDNet", m_ActivePage==PAGE_DDNET, &Button, 0))
+			{
+				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_DDNET)
+				{
+					Client()->RequestDDNetInfo();
+					ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
+				}
+				NewPage = PAGE_DDNET;
+				m_DoubleClickIndex = -1;
+			}
+
+			Box.VSplitLeft(100.0f, &Button, &Box);
+			static int s_KoGButton=0;
+			if(DoButton_MenuTab(&s_KoGButton, "KoG", m_ActivePage==PAGE_KOG, &Button, CUI::CORNER_TR))
+			{
+				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_KOG)
+				{
+					Client()->RequestDDNetInfo();
+					ServerBrowser()->Refresh(IServerBrowser::TYPE_KOG);
+				}
+				NewPage = PAGE_KOG;
+				m_DoubleClickIndex = -1;
+			}
 		}
 	}
 	else
@@ -841,7 +845,7 @@ int CMenus::RenderMenubar(CUIRect r)
 			static int s_GhostButton = 0;
 			if(GameClient()->m_GameInfo.m_Race)
 			{
-				Box.VSplitLeft(70.0f, &Button, &Box);
+				Box.VSplitLeft(90.0f, &Button, &Box);
 				if(DoButton_MenuTab(&s_GhostButton, Localize("Ghost"), m_ActivePage==PAGE_GHOST, &Button, 0))
 					NewPage = PAGE_GHOST;
 			}
