@@ -1991,27 +1991,33 @@ int str_in_list(const char *list, const char *delim, const char *needle);
 */
 int pid(void);
 
+#if defined(CONF_FAMILY_WINDOWS)
+typedef void *PROCESS;
+#else
+typedef pid_t PROCESS;
+#endif
+
 /*
 	Function: shell_execute
 		Executes a given file.
 
 	Returns:
-		pid of the new process
+		handle/pid of the new process
 */
-int shell_execute(const char *file);
+PROCESS shell_execute(const char *file);
 
 /*
 	Function: kill_process
 		Sends kill signal to a process.
 
 	Parameters:
-		pid - pid of the process
+		process - handle/pid of the process
 
 	Returns:
-		0 - Success
-		1 - Error
+		0 - Error
+		1 - Success
 */
-int kill_process(int pid);
+int kill_process(PROCESS process);
 
 /*
 	Function: os_is_winxp_or_lower

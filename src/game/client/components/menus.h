@@ -17,7 +17,7 @@
 
 struct CServerProcess
 {
-	pid_t Pid;
+	PROCESS Process;
 	bool Initialized;
 	CLineReader LineReader;
 };
