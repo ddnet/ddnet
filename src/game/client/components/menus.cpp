@@ -974,6 +974,7 @@ void CMenus::PopupMessage(const char *pTopic, const char *pBody, const char *pBu
 	str_copy(m_aMessageTopic, pTopic, sizeof(m_aMessageTopic));
 	str_copy(m_aMessageBody, pBody, sizeof(m_aMessageBody));
 	str_copy(m_aMessageButton, pButton, sizeof(m_aMessageButton));
+	m_Popup = POPUP_MESSAGE;
 }
 
 void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pButton, int64 Duration)
