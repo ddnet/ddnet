@@ -409,6 +409,7 @@ public:
 	CNetObj_PlayerInput m_DummyInput;
 	CNetObj_PlayerInput m_HammerInput;
 	int m_DummyFire;
+	bool m_ReceivedDDNetPlayer;
 
 	class CRaceDemo *m_pRaceDemo;
 	class CGhost *m_pGhost;

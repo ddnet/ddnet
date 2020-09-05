@@ -535,6 +535,8 @@ void CGameClient::OnReset()
 	m_DDRaceMsgSent[1] = false;
 	m_ShowOthers[0] = -1;
 	m_ShowOthers[1] = -1;
+
+	m_ReceivedDDNetPlayer = false;
 }
 
 
@@ -1248,6 +1250,7 @@ void CGameClient::OnNewSnapshot()
 			}
 			else if(Item.m_Type == NETOBJTYPE_DDNETPLAYER)
 			{
+				m_ReceivedDDNetPlayer = true;
 				const CNetObj_DDNetPlayer *pInfo = (const CNetObj_DDNetPlayer *)pData;
 				if(Item.m_ID < MAX_CLIENTS)
 				{
