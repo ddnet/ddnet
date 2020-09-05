@@ -105,8 +105,6 @@ void CMenus::RenderGame(CUIRect MainView)
 	static int s_JoinRedButton = 0;
 	static int s_JoinBlueButton = 0;
 
-	CServerInfo CurrentServerInfo;
-	Client()->GetServerInfo(&CurrentServerInfo);
 	bool Paused = m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Paused;
 	bool Spec = m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Spec;
 
@@ -181,7 +179,7 @@ void CMenus::RenderGame(CUIRect MainView)
 		}
 	}
 
-	if(IsRace(&CurrentServerInfo) && m_pClient->m_Snap.m_pLocalInfo && m_pClient->m_Snap.m_pGameInfoObj)
+	if(m_pClient->m_ReceivedDDNetPlayer && m_pClient->m_Snap.m_pLocalInfo && m_pClient->m_Snap.m_pGameInfoObj)
 	{
 		if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_SPECTATORS || Paused || Spec)
 		{
