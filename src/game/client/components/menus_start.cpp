@@ -49,7 +49,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	Menu.HSplitBottom(5.0f, &Menu, 0); // little space
 	Menu.HSplitBottom(40.0f, &Menu, &Button);
 	static int s_LocalServerButton = 0;
-	if(DoButton_Menu(&s_LocalServerButton, m_ServerProcess.Pid == -1 ? Localize("Run server") : Localize("Stop server"), 0, &Button, g_Config.m_ClShowStartMenuImages ? "local_server" : 0, CUI::CORNER_ALL, Rounding, 0.5f, vec4(0.0f, 0.0f, 0.0f, 0.5f), m_ServerProcess.Pid == -1 ? vec4(0.0f, 0.0f, 0.0f, 0.25f) : vec4(0.0f, 1.0f, 0.0f, 0.25f)) || CheckHotKey(KEY_R))
+	if(DoButton_Menu(&s_LocalServerButton, m_ServerProcess.Pid == -1 ? Localize("Run server") : Localize("Stop server"), 0, &Button, g_Config.m_ClShowStartMenuImages ? "local_server" : 0, CUI::CORNER_ALL, Rounding, 0.5f, vec4(0.0f, 0.0f, 0.0f, 0.5f), m_ServerProcess.Pid == -1 ? vec4(0.0f, 0.0f, 0.0f, 0.25f) : vec4(0.0f, 1.0f, 0.0f, 0.25f)) || (CheckHotKey(KEY_R) && Input()->KeyPress(KEY_R)))
 	{
 		if(m_ServerProcess.Pid == -1)
 		{
