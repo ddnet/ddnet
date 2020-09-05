@@ -53,6 +53,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	{
 		if(m_ServerProcess.Pid == -1)
 		{
+			Storage()->RemoveFile("autoexec_server.log", IStorage::TYPE_ALL);
 			m_ServerProcess.Pid = shell_execute(PLAT_SERVER_EXEC);
 		}
 		else

@@ -2070,7 +2070,7 @@ void CMenus::OnRender()
 		// TODO: Maybe call this less often, or probably even cleaner, use econ
 		if(!m_ServerProcess.Initialized)
 		{
-			IOHANDLE File = io_open("autoexec_server.log", IOFLAG_READ);
+			IOHANDLE File = Storage()->OpenFile("autoexec_server.log", IOFLAG_READ, IStorage::TYPE_ALL);
 			if(File)
 			{
 				m_ServerProcess.LineReader.Init(File);
