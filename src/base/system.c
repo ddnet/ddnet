@@ -3214,11 +3214,17 @@ int pid(void)
 #endif
 }
 
-int shell_execute(const char *file)
+PROCESS shell_execute(const char *file)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	ShellExecute(NULL, NULL, file, NULL, NULL, SW_SHOWDEFAULT);
-	// TODO: Get PID
+	SHELLEXECUTEINFOA info;
+	mem_zero(&info, sizeof(SHELLEXECUTEINFOA));
+	info.lpVerb = "open";
+	info.lpFile = file;
+	info.nShow = SW_SHOWDEFAULT;
+	info.fMask = SEE_MASK_NOCLOSEPROCESS;
+	ShellExecuteEx(&info);
+	return info.hProcess;
 #elif defined(CONF_FAMILY_UNIX)
 	char *argv[2];
 	pid_t pid;
@@ -3231,14 +3237,14 @@ int shell_execute(const char *file)
 #endif
 }
 
-int kill_process(int pid)
+int kill_process(PROCESS process)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	// TODO: Implement
+	return TerminateProcess(process, 0);
 #elif defined(CONF_FAMILY_UNIX)
 	int status;
-	kill(pid, SIGTERM);
-	return waitpid(pid, &status, 0);
+	kill(process, SIGTERM);
+	return !waitpid(process, &status, 0);
 #endif
 }
 

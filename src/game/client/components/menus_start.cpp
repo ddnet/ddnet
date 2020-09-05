@@ -49,17 +49,18 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	Menu.HSplitBottom(5.0f, &Menu, 0); // little space
 	Menu.HSplitBottom(40.0f, &Menu, &Button);
 	static int s_LocalServerButton = 0;
-	if(DoButton_Menu(&s_LocalServerButton, m_ServerProcess.Pid == -1 ? Localize("Run server") : Localize("Stop server"), 0, &Button, g_Config.m_ClShowStartMenuImages ? "local_server" : 0, CUI::CORNER_ALL, Rounding, 0.5f, vec4(0.0f, 0.0f, 0.0f, 0.5f), m_ServerProcess.Pid == -1 ? vec4(0.0f, 0.0f, 0.0f, 0.25f) : vec4(0.0f, 1.0f, 0.0f, 0.25f)) || (CheckHotKey(KEY_R) && Input()->KeyPress(KEY_R)))
+	if(DoButton_Menu(&s_LocalServerButton, m_ServerProcess.Process ? Localize("Stop server") : Localize("Run server"), 0, &Button, g_Config.m_ClShowStartMenuImages ? "local_server" : 0, CUI::CORNER_ALL, Rounding, 0.5f, vec4(0.0f, 0.0f, 0.0f, 0.5f), m_ServerProcess.Process ? vec4(0.0f, 1.0f, 0.0f, 0.25f) : vec4(0.0f, 0.0f, 0.0f, 0.25f)) || (CheckHotKey(KEY_R) && Input()->KeyPress(KEY_R)))
 	{
-		if(m_ServerProcess.Pid == -1)
+		if(m_ServerProcess.Process)
 		{
-			Storage()->RemoveFile("autoexec_server.log", IStorage::TYPE_ALL);
-			m_ServerProcess.Pid = shell_execute(PLAT_SERVER_EXEC);
+			kill_process(m_ServerProcess.Process);
+			m_ServerProcess.Process = 0;
 		}
 		else
 		{
-			kill_process(m_ServerProcess.Pid);
-			m_ServerProcess.Pid = -1;
+			Storage()->RemoveBinaryFile("autoexec_server.log");
+			char aBuf[MAX_PATH_LENGTH];
+			m_ServerProcess.Process = shell_execute(Storage()->GetBinaryPath(PLAT_SERVER_EXEC, aBuf, sizeof(aBuf)));
 		}
 	}
 

@@ -85,7 +85,7 @@ CMenus::CMenus()
 	m_DemoPlayerState = DEMOPLAYER_NONE;
 	m_Dummy = false;
 
-	m_ServerProcess.Pid = -1;
+	m_ServerProcess.Process = 0;
 	m_ServerProcess.Initialized = false;
 }
 
@@ -2069,12 +2069,13 @@ extern "C" void font_debug_render();
 
 void CMenus::OnRender()
 {
-	if(m_ServerProcess.Pid != -1)
+	if(m_ServerProcess.Process != 0)
 	{
 		// TODO: Maybe call this less often, or probably even cleaner, use econ
 		if(!m_ServerProcess.Initialized)
 		{
-			IOHANDLE File = Storage()->OpenFile("autoexec_server.log", IOFLAG_READ, IStorage::TYPE_ALL);
+			char aBuf[MAX_PATH_LENGTH];
+			IOHANDLE File = Storage()->OpenFile(Storage()->GetBinaryPath("autoexec_server.log", aBuf, sizeof(aBuf)), IOFLAG_READ, IStorage::TYPE_ALL);
 			if(File)
 			{
 				m_ServerProcess.LineReader.Init(File);
