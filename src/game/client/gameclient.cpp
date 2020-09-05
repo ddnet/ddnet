@@ -332,8 +332,7 @@ void CGameClient::OnInit()
 	m_ShowOthers[1] = -1;
 
 	// Set free binds to DDRace binds if it's active
-	if(!g_Config.m_ClDDRaceBindsSet && g_Config.m_ClDDRaceBinds)
-		gs_Binds.SetDDRaceBinds(true);
+	gs_Binds.SetDDRaceBinds(true);
 
 	if(g_Config.m_ClTimeoutCode[0] == '\0' || str_comp(g_Config.m_ClTimeoutCode, "hGuEYnfxicsXGwFq") == 0)
 	{

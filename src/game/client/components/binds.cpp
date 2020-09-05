@@ -252,9 +252,8 @@ void CBinds::SetDefaults()
 	Bind(KEY_P, "say /pause");
 
 	// DDRace
-
-	if(g_Config.m_ClDDRaceBinds)
-		SetDDRaceBinds(false);
+	g_Config.m_ClDDRaceBindsSet = 0;
+	SetDDRaceBinds(false);
 }
 
 void CBinds::OnConsoleInit()
@@ -447,34 +446,42 @@ void CBinds::ConfigSaveCallback(IConfig *pConfig, void *pUserData)
 
 void CBinds::SetDDRaceBinds(bool FreeOnly)
 {
-	Bind(KEY_KP_PLUS, "zoom+", FreeOnly);
-	Bind(KEY_KP_MINUS, "zoom-", FreeOnly);
-	Bind(KEY_KP_MULTIPLY, "zoom", FreeOnly);
-	Bind(KEY_PAUSE, "say /pause", FreeOnly);
-	Bind(KEY_UP, "+jump", FreeOnly);
-	Bind(KEY_LEFT, "+left", FreeOnly);
-	Bind(KEY_RIGHT, "+right", FreeOnly);
-	Bind(KEY_LEFTBRACKET, "+prevweapon", FreeOnly);
-	Bind(KEY_RIGHTBRACKET, "+nextweapon", FreeOnly);
-	Bind(KEY_C, "say /rank", FreeOnly);
-	Bind(KEY_V, "say /info", FreeOnly);
-	Bind(KEY_B, "say /top5", FreeOnly);
-	Bind(KEY_X, "emote 14", FreeOnly);
-	Bind(KEY_H, "emote 2", FreeOnly);
-	Bind(KEY_M, "emote 5", FreeOnly);
-	Bind(KEY_S, "+showhookcoll", FreeOnly);
-	Bind(KEY_X, "toggle cl_dummy 0 1", FreeOnly);
-	Bind(KEY_PAGEDOWN, "toggle cl_show_quads 0 1", FreeOnly);
-	Bind(KEY_PAGEUP, "toggle cl_overlay_entities 0 100", FreeOnly);
-	Bind(KEY_KP_0, "say /emote normal 999999", FreeOnly);
-	Bind(KEY_KP_1, "say /emote happy 999999", FreeOnly);
-	Bind(KEY_KP_2, "say /emote angry 999999", FreeOnly);
-	Bind(KEY_KP_3, "say /emote pain 999999", FreeOnly);
-	Bind(KEY_KP_4, "say /emote surprise 999999", FreeOnly);
-	Bind(KEY_KP_5, "say /emote blink 999999", FreeOnly);
-	Bind(KEY_MOUSE_3, "+spectate", FreeOnly);
-	Bind(KEY_MINUS, "spectate_previous", FreeOnly);
-	Bind(KEY_EQUALS, "spectate_next", FreeOnly);
+	if(g_Config.m_ClDDRaceBindsSet < 2)
+	{
+		Bind(KEY_F7, "toggle_server_console", FreeOnly);
+	}
 
-	g_Config.m_ClDDRaceBindsSet = 1;
+	if(g_Config.m_ClDDRaceBindsSet < 1)
+	{
+		Bind(KEY_KP_PLUS, "zoom+", FreeOnly);
+		Bind(KEY_KP_MINUS, "zoom-", FreeOnly);
+		Bind(KEY_KP_MULTIPLY, "zoom", FreeOnly);
+		Bind(KEY_PAUSE, "say /pause", FreeOnly);
+		Bind(KEY_UP, "+jump", FreeOnly);
+		Bind(KEY_LEFT, "+left", FreeOnly);
+		Bind(KEY_RIGHT, "+right", FreeOnly);
+		Bind(KEY_LEFTBRACKET, "+prevweapon", FreeOnly);
+		Bind(KEY_RIGHTBRACKET, "+nextweapon", FreeOnly);
+		Bind(KEY_C, "say /rank", FreeOnly);
+		Bind(KEY_V, "say /info", FreeOnly);
+		Bind(KEY_B, "say /top5", FreeOnly);
+		Bind(KEY_X, "emote 14", FreeOnly);
+		Bind(KEY_H, "emote 2", FreeOnly);
+		Bind(KEY_M, "emote 5", FreeOnly);
+		Bind(KEY_S, "+showhookcoll", FreeOnly);
+		Bind(KEY_X, "toggle cl_dummy 0 1", FreeOnly);
+		Bind(KEY_PAGEDOWN, "toggle cl_show_quads 0 1", FreeOnly);
+		Bind(KEY_PAGEUP, "toggle cl_overlay_entities 0 100", FreeOnly);
+		Bind(KEY_KP_0, "say /emote normal 999999", FreeOnly);
+		Bind(KEY_KP_1, "say /emote happy 999999", FreeOnly);
+		Bind(KEY_KP_2, "say /emote angry 999999", FreeOnly);
+		Bind(KEY_KP_3, "say /emote pain 999999", FreeOnly);
+		Bind(KEY_KP_4, "say /emote surprise 999999", FreeOnly);
+		Bind(KEY_KP_5, "say /emote blink 999999", FreeOnly);
+		Bind(KEY_MOUSE_3, "+spectate", FreeOnly);
+		Bind(KEY_MINUS, "spectate_previous", FreeOnly);
+		Bind(KEY_EQUALS, "spectate_next", FreeOnly);
+	}
+
+	g_Config.m_ClDDRaceBindsSet = 2;
 }
