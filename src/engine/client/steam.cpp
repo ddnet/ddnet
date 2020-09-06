@@ -72,6 +72,7 @@ public:
 		SteamAPI_ISteamFriends_SetRichPresence(m_pSteamFriends, "map", pMapName);
 		SteamAPI_ISteamFriends_SetRichPresence(m_pSteamFriends, "status", pMapName);
 		SteamAPI_ISteamFriends_SetRichPresence(m_pSteamFriends, "steam_display", "#Status");
+		SteamAPI_ISteamFriends_SetRichPresence(m_pSteamFriends, "steam_player_group", aServerAddr);
 	}
 };
 
