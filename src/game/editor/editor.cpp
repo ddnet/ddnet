@@ -2924,7 +2924,7 @@ void CEditor::DoMapEditor(CUIRect View)
 			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(0,0,1,0.3f);
-			RenderTools()->DrawCircle(m_WorldOffsetX, m_WorldOffsetY, 20.0f, 32);
+			RenderTools()->DrawCircle(m_WorldOffsetX, m_WorldOffsetY-3.0f, 20.0f, 32);
 			Graphics()->QuadsEnd();
 		}
 	}
