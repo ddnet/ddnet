@@ -427,6 +427,7 @@ public:
 
 	void ServerBrowserUpdate();
 
+	void HandleConnectAddress(const NETADDR *pAddr);
 	void HandleConnectLink(const char *pLink);
 	void HandleDemoPath(const char *pPath);
 	void HandleMapPath(const char *pPath);

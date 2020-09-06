@@ -4048,6 +4048,11 @@ static CClient *CreateClient()
 	return new(pClient) CClient;
 }
 
+void CClient::HandleConnectAddress(const NETADDR *pAddr)
+{
+	net_addr_str(pAddr, m_aCmdConnect, sizeof(m_aCmdConnect), true);
+}
+
 void CClient::HandleConnectLink(const char *pLink)
 {
 	str_copy(m_aCmdConnect, pLink + sizeof(CONNECTLINK) - 1, sizeof(m_aCmdConnect));
@@ -4118,6 +4123,7 @@ int main(int argc, const char **argv) // ignore_convention
 	IEngineTextRender *pEngineTextRender = CreateEngineTextRender();
 	IEngineMap *pEngineMap = CreateEngineMap();
 	IEngineMasterServer *pEngineMasterServer = CreateEngineMasterServer();
+	ISteam *pSteam = CreateSteam();
 
 	if(RandInitFailed)
 	{
@@ -4150,7 +4156,7 @@ int main(int argc, const char **argv) // ignore_convention
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateEditor(), false);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateGameClient(), false);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pStorage);
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateSteam());
+		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pSteam);
 
 		if(RegisterFail)
 		{
@@ -4214,6 +4220,11 @@ int main(int argc, const char **argv) // ignore_convention
 		pClient->HandleMapPath(argv[1]);
 	else if(argc > 1) // ignore_convention
 		pConsole->ParseArguments(argc-1, &argv[1]); // ignore_convention
+
+	if(pSteam->GetLaunchConnectAddress())
+	{
+		pClient->HandleConnectAddress(pSteam->GetLaunchConnectAddress());
+	}
 
 	pClient->Engine()->InitLogfile();
 
