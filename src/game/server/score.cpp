@@ -518,7 +518,7 @@ bool CScore::SaveScoreThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 				"%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, "
 				"%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, "
 				"?, false);",
-			pSqlServer->GetInsertIgnore(), pSqlServer->GetPrefix(),
+			pSqlServer->InsertIgnore(), pSqlServer->GetPrefix(),
 			pSqlServer->InsertTimestampAsUtc(), pData->m_Time,
 			pData->m_aCpCurrent[0], pData->m_aCpCurrent[1], pData->m_aCpCurrent[2],
 			pData->m_aCpCurrent[3], pData->m_aCpCurrent[4], pData->m_aCpCurrent[5],
@@ -629,7 +629,7 @@ bool CScore::SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGam
 			str_format(aBuf, sizeof(aBuf),
 					"%s INTO %s_teamrace(Map, Name, Timestamp, Time, ID, GameID, DDNet7) "
 					"VALUES (?, ?, %s, %.2f, ?, ?, false);",
-					pSqlServer->GetInsertIgnore(), pSqlServer->GetPrefix(),
+					pSqlServer->InsertIgnore(), pSqlServer->GetPrefix(),
 					pSqlServer->InsertTimestampAsUtc(), pData->m_Time);
 			pSqlServer->PrepareStatement(aBuf);
 			pSqlServer->BindString(1, pData->m_Map);
@@ -1317,7 +1317,7 @@ bool CScore::SaveTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 		str_format(aBuf, sizeof(aBuf),
 				"%s INTO %s_saves(Savegame, Map, Code, Timestamp, Server, SaveID, DDNet7) "
 				"VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, false)",
-				pSqlServer->GetInsertIgnore(), pSqlServer->GetPrefix());
+				pSqlServer->InsertIgnore(), pSqlServer->GetPrefix());
 		pSqlServer->PrepareStatement(aBuf);
 		pSqlServer->BindString(1, pSaveState);
 		pSqlServer->BindString(2, pData->m_Map);

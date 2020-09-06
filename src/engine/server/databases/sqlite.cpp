@@ -205,11 +205,6 @@ int CSqliteConnection::GetBlob(int Col, unsigned char *pBuffer, int BufferSize) 
 	return Size;
 }
 
-const char *CSqliteConnection::GetInsertIgnore() const
-{
-	return "INSERT OR IGNORE";
-}
-
 bool CSqliteConnection::Execute(const char *pQuery)
 {
 	char *pErrorMsg;
