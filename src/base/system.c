@@ -3182,6 +3182,10 @@ int str_utf8_check(const char *str)
 	return 1;
 }
 
+void str_utf8_copy(char *dst, const char *src, int dst_size)
+{
+	str_utf8_truncate(dst, dst_size, src, dst_size);
+}
 
 unsigned str_quickhash(const char *str)
 {

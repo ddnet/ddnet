@@ -249,12 +249,16 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 			{
 				int Offset = str_length(pStr);
 				int CharsLeft = StrSize - Offset - 1;
-				for(int i = 0; i < str_length(Text) && i < CharsLeft; i++)
+				char *pCur = pStr + Offset;
+				str_utf8_copy(pCur, Text, CharsLeft);
+				for(int i = 0; i < CharsLeft; i++)
 				{
-					if(Text[i] == '\n')
-						pStr[i + Offset] = ' ';
-					else
-						pStr[i + Offset] = Text[i];
+					if(pCur[i] == 0)
+						break;
+					else if(pCur[i] == '\r')
+						pCur[i] = ' ';
+					else if(pCur[i] == '\n')
+						pCur[i] = ' ';
 				}
 				s_AtIndex = str_length(pStr);
 				ReturnValue = true;
