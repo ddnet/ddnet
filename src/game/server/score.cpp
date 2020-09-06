@@ -535,6 +535,7 @@ bool CScore::SaveScoreThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 	pSqlServer->BindString(3, pData->m_aTimestamp);
 	pSqlServer->BindString(4, g_Config.m_SvSqlServerName);
 	pSqlServer->BindString(5, pData->m_GameUuid);
+	pSqlServer->Print();
 	pSqlServer->Step();
 
 	pData->m_pResult->m_Done = true;
@@ -617,6 +618,7 @@ bool CScore::SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGam
 			pSqlServer->BindString(1, pData->m_aTimestamp);
 			pSqlServer->BindString(2, pData->m_GameUuid);
 			pSqlServer->BindBlob(3, Teamrank.m_TeamID.m_aData, sizeof(Teamrank.m_TeamID.m_aData));
+			pSqlServer->Print();
 			pSqlServer->Step();
 		}
 	}
@@ -637,6 +639,7 @@ bool CScore::SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGam
 			pSqlServer->BindString(3, pData->m_aTimestamp);
 			pSqlServer->BindBlob(4, GameID.m_aData, sizeof(GameID.m_aData));
 			pSqlServer->BindString(5, pData->m_GameUuid);
+			pSqlServer->Print();
 			pSqlServer->Step();
 		}
 	}
@@ -1324,6 +1327,7 @@ bool CScore::SaveTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 		pSqlServer->BindString(3, Code);
 		pSqlServer->BindString(4, pData->m_Server);
 		pSqlServer->BindString(5, aSaveID);
+		pSqlServer->Print();
 		pSqlServer->Step();
 
 		if(!Failure)
@@ -1498,6 +1502,7 @@ bool CScore::LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 		pSqlServer->PrepareStatement(aBuf);
 		pSqlServer->BindString(1, pData->m_Code);
 		pSqlServer->BindString(2, pData->m_Map);
+		pSqlServer->Print();
 		pSqlServer->Step();
 
 		pData->m_pResult->m_Status = CScoreSaveResult::LOAD_SUCCESS;

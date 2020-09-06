@@ -26,7 +26,6 @@ CSqliteConnection::~CSqliteConnection()
 	m_pDb = nullptr;
 }
 
-
 void CSqliteConnection::Print(IConsole *pConsole, const char *Mode)
 {
 	char aBuf[512];
@@ -35,7 +34,6 @@ void CSqliteConnection::Print(IConsole *pConsole, const char *Mode)
 			Mode, m_aFilename);
 	pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 }
-
 
 void CSqliteConnection::ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize)
 {
@@ -154,6 +152,12 @@ void CSqliteConnection::BindFloat(int Idx, float Value)
 	int Result = sqlite3_bind_double(m_pStmt, Idx, (double)Value);
 	ExceptionOnError(Result);
 	m_Done = false;
+}
+
+void CSqliteConnection::Print()
+{
+	if(m_pStmt != nullptr)
+		dbg_msg("sql", "SQLite statement: %s", sqlite3_expanded_sql(m_pStmt));
 }
 
 bool CSqliteConnection::Step()

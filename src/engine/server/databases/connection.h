@@ -58,6 +58,8 @@ public:
 	virtual void BindInt(int Idx, int Value) = 0;
 	virtual void BindFloat(int Idx, float Value) = 0;
 
+	// Print expanded sql statement
+	virtual void Print() = 0;
 	// executes the query and returns if a result row exists and selects it
 	// when called multiple times the next row is selected
 	virtual bool Step() = 0;

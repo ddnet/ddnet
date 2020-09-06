@@ -48,6 +48,7 @@ public:
 	virtual void BindInt(int Idx, int Value);
 	virtual void BindFloat(int Idx, float Value);
 
+	virtual void Print() {}
 	virtual bool Step();
 
 	virtual bool IsNull(int Col) const;
