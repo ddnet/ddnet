@@ -17,6 +17,13 @@ enum
 	HTTP_ABORTED,
 };
 
+struct CTimeout
+{
+	long ConnectTimeoutMs;
+	long LowSpeedLimit;
+	long LowSpeedTime;
+};
+
 class CRequest : public IJob
 {
 	// Abort the request with an error if `BeforeInit()` or `AfterInit()`
@@ -31,7 +38,8 @@ class CRequest : public IJob
 	virtual void OnCompletion() { }
 
 	char m_aUrl[256];
-	bool m_CanTimeout;
+
+	CTimeout m_Timeout;
 
 	double m_Size;
 	double m_Current;
@@ -47,7 +55,7 @@ class CRequest : public IJob
 	int RunImpl(CURL *pHandle);
 
 public:
-	CRequest(const char *pUrl, bool CanTimeout);
+	CRequest(const char *pUrl, CTimeout Timeout);
 
 	double Current() const { return m_Current; }
 	double Size() const { return m_Size; }
@@ -65,7 +73,7 @@ class CGet : public CRequest
 	unsigned char *m_pBuffer;
 
 public:
-	CGet(const char *pUrl, bool CanTimeout);
+	CGet(const char *pUrl, CTimeout Timeout);
 	~CGet();
 
 	size_t ResultSize() const { if(!Result()) { return 0; } else { return m_BufferSize; } }
@@ -87,7 +95,7 @@ class CGetFile : public CRequest
 	IOHANDLE m_File;
 
 public:
-	CGetFile(IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType = -2, bool CanTimeout = true);
+	CGetFile(IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType = -2, CTimeout Timeout = CTimeout{4000, 500, 5});
 
 	const char *Dest() const { return m_aDest; }
 };
@@ -101,7 +109,7 @@ class CPostJson : public CRequest
 	char m_aJson[1024];
 
 public:
-	CPostJson(const char *pUrl, bool CanTimeout, const char *pJson);
+	CPostJson(const char *pUrl, CTimeout Timeout, const char *pJson);
 };
 
 bool HttpInit(IStorage *pStorage);
