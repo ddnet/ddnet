@@ -173,6 +173,7 @@ TEST(Str, InList)
 	EXPECT_FALSE(str_in_list("", ",", "xyz"));
 
 	EXPECT_TRUE(str_in_list("FOO,,BAR", ",", ""));
+	EXPECT_TRUE(str_in_list("abc,,def", ",", "def"));
 }
 
 TEST(Str, StrFormat)

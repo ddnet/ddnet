@@ -3223,8 +3223,11 @@ const char *str_next_token(const char *str, const char *delim, char *buffer, int
 {
 	int len = 0;
 	const char *tok = str_token_get(str, delim, &len);
-	if(len < 0)
+	if(len < 0 || tok == NULL)
+	{
+		buffer[0] = '\0';
 		return NULL;
+	}
 
 	len = buffer_size > len ? len : buffer_size - 1;
 	mem_copy(buffer, tok, len);
