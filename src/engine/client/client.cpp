@@ -2588,17 +2588,16 @@ void CClient::Update()
 	{
 
 #if defined(CONF_VIDEORECORDER)
-	if (m_DemoPlayer.IsPlaying() && IVideo::Current())
-	{
-		if (IVideo::Current()->FrameRendered())
-			IVideo::Current()->NextVideoFrame();
-		if (IVideo::Current()->AudioFrameRendered())
-			IVideo::Current()->NextAudioFrameTimeline();
-	}
-	else if(m_ButtonRender)
-		Disconnect();
+		if (m_DemoPlayer.IsPlaying() && IVideo::Current())
+		{
+			if (IVideo::Current()->FrameRendered())
+				IVideo::Current()->NextVideoFrame();
+			if (IVideo::Current()->AudioFrameRendered())
+				IVideo::Current()->NextAudioFrameTimeline();
+		}
+		else if(m_ButtonRender)
+			Disconnect();
 #endif
-
 
 		m_DemoPlayer.Update();
 
