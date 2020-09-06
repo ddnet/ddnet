@@ -652,7 +652,7 @@ Server best:
 Personal best:
 == 
 
-Back
+Menu
 == 
 
 Browser
@@ -1132,10 +1132,10 @@ New random timeout code
 Settings
 == 
 
-Run server
+Stop server
 == 
 
-Stop server
+Run server
 == 
 
 Learn

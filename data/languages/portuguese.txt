@@ -901,7 +901,7 @@ Server best:
 Personal best:
 == 
 
-Back
+Menu
 == 
 
 Reconnect in %d sec
@@ -1147,10 +1147,10 @@ Try fast HTTP map download first
 Settings
 == 
 
-Run server
+Stop server
 == 
 
-Stop server
+Run server
 == 
 
 Learn

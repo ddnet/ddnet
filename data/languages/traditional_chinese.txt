@@ -1199,7 +1199,7 @@ https://wiki.ddnet.tw/
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
 == 
 
-Back
+Menu
 == 
 
 Skip the main menu
@@ -1208,10 +1208,10 @@ Skip the main menu
 Settings
 == 
 
-Run server
+Stop server
 == 
 
-Stop server
+Run server
 == 
 
 Editor

@@ -729,7 +729,7 @@ int CMenus::RenderMenubar(CUIRect r)
 	{
 		Box.VSplitLeft(100.0f, &Button, &Box);
 		static int s_StartButton=0;
-		if(DoButton_MenuTab(&s_StartButton, Localize("Back"), false, &Button, CUI::CORNER_T))
+		if(DoButton_MenuTab(&s_StartButton, Localize("Menu"), false, &Button, CUI::CORNER_T))
 		{
 			m_ShowStart = true;
 			m_DoubleClickIndex = -1;
