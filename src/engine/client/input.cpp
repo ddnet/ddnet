@@ -24,14 +24,9 @@ void CInput::AddEvent(char *pText, int Key, int Flags)
 		m_aInputEvents[m_NumEvents].m_Key = Key;
 		m_aInputEvents[m_NumEvents].m_Flags = Flags;
 		if(!pText)
-		{
 			m_aInputEvents[m_NumEvents].m_aText[0] = 0;
-		}
 		else
-		{
-			int TextSize = sizeof(m_aInputEvents[m_NumEvents].m_aText);
-			str_utf8_truncate(m_aInputEvents[m_NumEvents].m_aText, TextSize, pText, TextSize);
-		}
+			str_utf8_copy(m_aInputEvents[m_NumEvents].m_aText, pText, sizeof(m_aInputEvents[m_NumEvents].m_aText));
 		m_aInputEvents[m_NumEvents].m_InputCount = m_InputCounter;
 		m_NumEvents++;
 	}
