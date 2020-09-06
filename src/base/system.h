@@ -1930,8 +1930,7 @@ int str_utf8_check(const char *str);
 	Remarks:
 		- The strings are treated as zero-terminated strings.
 		- Guarantees that dst string will contain zero-termination.
-		- Guarantees that dst always ends with a valid utf8 sequence.
-		- Does not guarantee the entire string is a valid utf8 string.
+		- Guarantees that dst always contains a valid utf8 string.
 */
 void str_utf8_copy(char *dst, const char *src, int dst_size);
 
