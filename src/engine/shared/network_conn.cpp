@@ -318,10 +318,8 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 			{
 				if(CtrlMsg == NET_CTRLMSG_CONNECT)
 				{
-#ifndef FUZZING
 					if(net_addr_comp_noport(&m_PeerAddr, pAddr) == 0 && time_get() - m_LastUpdateTime < time_freq() * 3)
 						return 0;
-#endif
 
 					// send response and init connection
 					Reset();
