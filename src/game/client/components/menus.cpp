@@ -2088,7 +2088,7 @@ void CMenus::OnRender()
 		{
 			const char *pLine = m_ServerProcess.LineReader.Get();
 			if(pLine)
-				GameClient()->m_pGameConsole->PrintLine(CGameConsole::CONSOLETYPE_SERVER, pLine);
+				GameClient()->m_pGameConsole->PrintLine(CGameConsole::CONSOLETYPE_ECON, pLine);
 		}
 	}
 
