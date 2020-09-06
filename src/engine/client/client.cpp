@@ -2844,6 +2844,15 @@ void CClient::Update()
 	if(!m_EditorActive)
 		GameClient()->OnUpdate();
 
+	Steam()->Update();
+	if(Steam()->GetConnectAddress())
+	{
+		char aAddress[NETADDR_MAXSTRSIZE];
+		net_addr_str(Steam()->GetConnectAddress(), aAddress, sizeof(aAddress), true);
+		Connect(aAddress);
+		Steam()->ClearConnectAddress();
+	}
+
 	if(m_ReconnectTime > 0 && time_get() > m_ReconnectTime)
 	{
 		Connect(m_aServerAddressStr);
@@ -4220,9 +4229,10 @@ int main(int argc, const char **argv) // ignore_convention
 	else if(argc > 1) // ignore_convention
 		pConsole->ParseArguments(argc-1, &argv[1]); // ignore_convention
 
-	if(pSteam->GetLaunchConnectAddress())
+	if(pSteam->GetConnectAddress())
 	{
-		pClient->HandleConnectAddress(pSteam->GetLaunchConnectAddress());
+		pClient->HandleConnectAddress(pSteam->GetConnectAddress());
+		pSteam->ClearConnectAddress();
 	}
 
 	pClient->Engine()->InitLogfile();

@@ -11,7 +11,11 @@ public:
 	virtual const char *GetPlayerName() = 0;
 
 	// Returns NULL if the no server needs to be joined.
-	virtual const NETADDR *GetLaunchConnectAddress() = 0;
+	// Can change while the game is running.
+	virtual const NETADDR *GetConnectAddress() = 0;
+	virtual void ClearConnectAddress() = 0;
+
+	virtual void Update() = 0;
 
 	virtual void ClearGameInfo() = 0;
 	virtual void SetGameInfo(NETADDR ServerAddr, const char *pMapName) = 0;
