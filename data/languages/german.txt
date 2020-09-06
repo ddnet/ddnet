@@ -1206,9 +1206,6 @@ Country / Region
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
 == Die Breite oder Höhe von Textur %s ist nicht durch 16 teilbar, was visuelle Bugs verursachen kann.
 
-Back
-== Zurück
-
 Skip the main menu
 == Hauptmenü überspringen
 
@@ -1223,6 +1220,9 @@ Stop server
 
 Editor
 == Editor
+
+Menu
+== Menü
 
 https://wiki.ddnet.tw/
 == 

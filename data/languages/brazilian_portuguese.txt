@@ -1201,7 +1201,7 @@ Show others (own team only)
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
 == 
 
-Back
+Menu
 == 
 
 Country / Region
@@ -1213,10 +1213,10 @@ Skip the main menu
 Settings
 == 
 
-Run server
+Stop server
 == 
 
-Stop server
+Run server
 == 
 
 https://wiki.ddnet.tw/

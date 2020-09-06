@@ -1188,7 +1188,7 @@ Grabs
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
 == 
 
-Back
+Menu
 == 
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
@@ -1206,10 +1206,10 @@ Client message
 Settings
 == 
 
-Run server
+Stop server
 == 
 
-Stop server
+Run server
 == 
 
 https://wiki.ddnet.tw/
