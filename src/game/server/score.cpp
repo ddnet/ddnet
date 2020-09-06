@@ -98,11 +98,11 @@ std::shared_ptr<CScorePlayerResult> CScore::NewSqlPlayerResult(int ClientID)
 }
 
 void CScore::ExecPlayerThread(
-		bool (*pFuncPtr) (IDbConnection *, const ISqlData *),
-		const char *pThreadName,
-		int ClientID,
-		const char *pName,
-		int Offset)
+	FSqlThread pFuncPtr,
+	const char *pThreadName,
+	int ClientID,
+	const char *pName,
+	int Offset)
 {
 	auto pResult = NewSqlPlayerResult(ClientID);
 	if(pResult == nullptr)
@@ -113,7 +113,7 @@ void CScore::ExecPlayerThread(
 	str_copy(Tmp->m_RequestingPlayer, Server()->ClientName(ClientID), sizeof(Tmp->m_RequestingPlayer));
 	Tmp->m_Offset = Offset;
 
-	m_pPool->Execute(pFuncPtr, std::move(Tmp), pThreadName);
+	m_pPool->ExecuteRead(pFuncPtr, std::move(Tmp), pThreadName);
 }
 
 bool CScore::RateLimitPlayer(int ClientID)
@@ -176,10 +176,10 @@ CScore::CScore(CGameContext *pGameServer, CDbConnectionPool *pPool) :
 		Server()->SetErrorShutdown("sql too few words in wordlist");
 		return;
 	}
-	m_pPool->Execute(Init, std::move(Tmp), "load best time");
+	m_pPool->ExecuteRead(Init, std::move(Tmp), "load best time");
 }
 
-bool CScore::Init(IDbConnection *pSqlServer, const ISqlData *pGameData)
+bool CScore::Init(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure)
 {
 	const CSqlInitData *pData = dynamic_cast<const CSqlInitData *>(pGameData);
 
@@ -204,7 +204,7 @@ void CScore::LoadPlayerData(int ClientID)
 }
 
 // update stuff
-bool CScore::LoadPlayerDataThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
+bool CScore::LoadPlayerDataThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	pData->m_pResult->SetVariant(CScorePlayerResult::PLAYER_INFO);
@@ -274,7 +274,7 @@ void CScore::MapVote(int ClientID, const char* MapName)
 	ExecPlayerThread(MapVoteThread, "map vote", ClientID, MapName, 0);
 }
 
-bool CScore::MapVoteThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
+bool CScore::MapVoteThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	auto paMessages = pData->m_pResult->m_Data.m_aaMessages;
@@ -334,7 +334,7 @@ void CScore::MapInfo(int ClientID, const char* MapName)
 	ExecPlayerThread(MapInfoThread, "map info", ClientID, MapName, 0);
 }
 
-bool CScore::MapInfoThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
+bool CScore::MapInfoThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 
@@ -471,7 +471,7 @@ void CScore::SaveScore(int ClientID, float Time, const char *pTimestamp, float C
 	for(int i = 0; i < NUM_CHECKPOINTS; i++)
 		Tmp->m_aCpCurrent[i] = CpTime[i];
 
-	m_pPool->ExecuteWrite(SaveScoreThread, std::move(Tmp), "save score");
+	m_pPool->ExecuteWriteFaultTolerant(SaveScoreThread, std::move(Tmp), "save score");
 }
 
 bool CScore::SaveScoreThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure)
@@ -561,7 +561,7 @@ void CScore::SaveTeamScore(int* aClientIDs, unsigned int Size, float Time, const
 	FormatUuid(GameServer()->GameUuid(), Tmp->m_GameUuid, sizeof(Tmp->m_GameUuid));
 	str_copy(Tmp->m_Map, g_Config.m_SvMap, sizeof(Tmp->m_Map));
 
-	m_pPool->ExecuteWrite(SaveTeamScoreThread, std::move(Tmp), "save team score");
+	m_pPool->ExecuteWriteFaultTolerant(SaveTeamScoreThread, std::move(Tmp), "save team score");
 }
 
 bool CScore::SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure)
@@ -653,7 +653,7 @@ void CScore::ShowRank(int ClientID, const char* pName)
 	ExecPlayerThread(ShowRankThread, "show rank", ClientID, pName, 0);
 }
 
-bool CScore::ShowRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
+bool CScore::ShowRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 
@@ -711,7 +711,7 @@ void CScore::ShowTeamRank(int ClientID, const char* pName)
 	ExecPlayerThread(ShowTeamRankThread, "show team rank", ClientID, pName, 0);
 }
 
-bool CScore::ShowTeamRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
+bool CScore::ShowTeamRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 
@@ -787,7 +787,7 @@ void CScore::ShowTop5(int ClientID, int Offset)
 	ExecPlayerThread(ShowTop5Thread, "show top5", ClientID, "", Offset);
 }
 
-bool CScore::ShowTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData)
+bool CScore::ShowTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 
@@ -842,7 +842,7 @@ void CScore::ShowTeamTop5(int ClientID, int Offset)
 	ExecPlayerThread(ShowTeamTop5Thread, "show team top5", ClientID, "", Offset);
 }
 
-bool CScore::ShowTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData)
+bool CScore::ShowTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	auto paMessages = pData->m_pResult->m_Data.m_aaMessages;
@@ -931,7 +931,7 @@ void CScore::ShowTimes(int ClientID, const char* pName, int Offset)
 	ExecPlayerThread(ShowTimesThread, "show times", ClientID, pName, Offset);
 }
 
-bool CScore::ShowTimesThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
+bool CScore::ShowTimesThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	auto paMessages = pData->m_pResult->m_Data.m_aaMessages;
@@ -1037,7 +1037,7 @@ void CScore::ShowPoints(int ClientID, const char* pName)
 	ExecPlayerThread(ShowPointsThread, "show points", ClientID, pName, 0);
 }
 
-bool CScore::ShowPointsThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
+bool CScore::ShowPointsThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	auto paMessages = pData->m_pResult->m_Data.m_aaMessages;
@@ -1082,7 +1082,7 @@ void CScore::ShowTopPoints(int ClientID, int Offset)
 	ExecPlayerThread(ShowTopPointsThread, "show top points", ClientID, "", Offset);
 }
 
-bool CScore::ShowTopPointsThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
+bool CScore::ShowTopPointsThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	auto paMessages = pData->m_pResult->m_Data.m_aaMessages;
@@ -1135,10 +1135,10 @@ void CScore::RandomMap(int ClientID, int Stars)
 	str_copy(Tmp->m_ServerType, g_Config.m_SvServerType, sizeof(Tmp->m_ServerType));
 	str_copy(Tmp->m_RequestingPlayer, GameServer()->Server()->ClientName(ClientID), sizeof(Tmp->m_RequestingPlayer));
 
-	m_pPool->Execute(RandomMapThread, std::move(Tmp), "random map");
+	m_pPool->ExecuteRead(RandomMapThread, std::move(Tmp), "random map");
 }
 
-bool CScore::RandomMapThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
+bool CScore::RandomMapThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure)
 {
 	const CSqlRandomMapRequest *pData = dynamic_cast<const CSqlRandomMapRequest *>(pGameData);
 
@@ -1189,10 +1189,10 @@ void CScore::RandomUnfinishedMap(int ClientID, int Stars)
 	str_copy(Tmp->m_ServerType, g_Config.m_SvServerType, sizeof(Tmp->m_ServerType));
 	str_copy(Tmp->m_RequestingPlayer, GameServer()->Server()->ClientName(ClientID), sizeof(Tmp->m_RequestingPlayer));
 
-	m_pPool->Execute(RandomUnfinishedMapThread, std::move(Tmp), "random unfinished map");
+	m_pPool->ExecuteRead(RandomUnfinishedMapThread, std::move(Tmp), "random unfinished map");
 }
 
-bool CScore::RandomUnfinishedMapThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
+bool CScore::RandomUnfinishedMapThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure)
 {
 	const CSqlRandomMapRequest *pData = dynamic_cast<const CSqlRandomMapRequest *>(pGameData);
 
@@ -1520,7 +1520,7 @@ void CScore::GetSaves(int ClientID)
 	ExecPlayerThread(GetSavesThread, "get saves", ClientID, "", 0);
 }
 
-bool CScore::GetSavesThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
+bool CScore::GetSavesThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	auto paMessages = pData->m_pResult->m_Data.m_aaMessages;

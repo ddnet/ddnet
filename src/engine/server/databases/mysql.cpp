@@ -48,13 +48,11 @@ CMysqlConnection::~CMysqlConnection()
 #endif
 }
 
-void CMysqlConnection::Print(IConsole *pConsole, const char *Mode)
+void CMysqlConnection::Format(char *pBuffer, int BufferSize)
 {
-	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf),
-			"MySQL-%s: DB: '%s' Prefix: '%s' User: '%s' IP: <{'%s'}> Port: %d",
-			Mode, m_aDatabase, GetPrefix(), m_aUser, m_aIp, m_Port);
-	pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+	str_format(pBuffer, BufferSize,
+		"MySQL: DB: '%s' Prefix: '%s' User: '%s' IP: <{'%s'}> Port: %d",
+		m_aDatabase, GetPrefix(), m_aUser, m_aIp, m_Port);
 }
 
 CMysqlConnection *CMysqlConnection::Copy()

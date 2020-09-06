@@ -12,7 +12,7 @@ class CSqliteConnection : public IDbConnection
 public:
 	CSqliteConnection(const char *pFilename, bool Setup);
 	virtual ~CSqliteConnection();
-	virtual void Print(IConsole *pConsole, const char *Mode);
+	virtual void Format(char *pBuffer, int BufferSize);
 
 	virtual CSqliteConnection *Copy();
 

@@ -106,6 +106,7 @@ class CServer : public IServer
 #endif
 
 	class CDbConnectionPool *m_pConnectionPool;
+	void RecvConnectionPoolMsgs();
 
 public:
 	class IGameServer *GameServer() { return m_pGameServer; }

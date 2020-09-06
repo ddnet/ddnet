@@ -269,6 +269,23 @@ void CServerBan::ConBanRegionRange(IConsole::IResult *pResult, void *pUser)
 	ConBanRange(pResult, static_cast<CNetBan *>(pServerBan));
 }
 
+void CServer::RecvConnectionPoolMsgs()
+{
+	CSqlResponse Msg;
+	while(m_pConnectionPool->GetResponse(&Msg))
+	{
+		switch(Msg.m_Type)
+		{
+		case CSqlResponse::NONE:
+			dbg_msg("server", "warning: received empty sql_pool response");
+			break;
+		case CSqlResponse::CONSOLE:
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", Msg.aMsg);
+			break;
+		}
+	}
+}
+
 void CServer::CClient::Reset()
 {
 	// reset input
@@ -2340,15 +2357,14 @@ int CServer::Run()
 		auto pSqlServers = std::unique_ptr<CSqliteConnection>(new CSqliteConnection(
 				g_Config.m_SvSqliteFile, true));
 
-		if(g_Config.m_SvUseSQL)
+		// always register the database as write-backup, as it is used when the server shuts down
+		auto pCopy = std::unique_ptr<CSqliteConnection>(pSqlServers->Copy());
+		DbPool()->RegisterDatabase(std::move(pCopy), CDbConnectionPool::WRITE_BACKUP);
+		if(!g_Config.m_SvUseSQL)
 		{
-			DbPool()->RegisterDatabase(std::move(pSqlServers), CDbConnectionPool::WRITE_BACKUP);
-		}
-		else
-		{
-			auto pCopy = std::unique_ptr<CSqliteConnection>(pSqlServers->Copy());
-			DbPool()->RegisterDatabase(std::move(pSqlServers), CDbConnectionPool::READ);
-			DbPool()->RegisterDatabase(std::move(pCopy), CDbConnectionPool::WRITE);
+			pCopy = std::unique_ptr<CSqliteConnection>(pSqlServers->Copy());
+			DbPool()->RegisterDatabase(std::move(pCopy), CDbConnectionPool::READ);
+			DbPool()->RegisterDatabase(std::move(pSqlServers), CDbConnectionPool::WRITE);
 		}
 	}
 
@@ -2512,6 +2528,8 @@ int CServer::Run()
 						m_NetServer.NetBan()->BanAddr(m_NetServer.ClientAddr(ClientID), 60*10, "VPN detected, try connecting without. Contact admin if mistaken");
 				}
 			}
+
+			RecvConnectionPoolMsgs();
 
 			while(t > TickStartTime(m_CurrentGameTick+1))
 			{

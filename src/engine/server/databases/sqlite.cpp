@@ -26,13 +26,9 @@ CSqliteConnection::~CSqliteConnection()
 	m_pDb = nullptr;
 }
 
-void CSqliteConnection::Print(IConsole *pConsole, const char *Mode)
+void CSqliteConnection::Format(char *pBuffer, int BufferSize)
 {
-	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf),
-			"SQLite-%s: DB: '%s'",
-			Mode, m_aFilename);
-	pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+	str_format(pBuffer, BufferSize, "SQLite: File: '%s'", m_aFilename);
 }
 
 void CSqliteConnection::ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize)

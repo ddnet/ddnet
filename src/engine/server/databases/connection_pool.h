@@ -1,19 +1,37 @@
 #ifndef ENGINE_SERVER_DATABASES_CONNECTION_POOL_H
 #define ENGINE_SERVER_DATABASES_CONNECTION_POOL_H
 
-#include <base/tl/threading.h>
-#include <atomic>
 #include <memory>
-#include <vector>
 
 class IDbConnection;
+class IConsole;
 
 struct ISqlData
 {
 	virtual ~ISqlData() {};
 };
 
-class IConsole;
+typedef bool (*FSqlThread)(IDbConnection *, const ISqlData *, bool);
+
+struct CSqlResponse
+{
+	enum Type
+	{
+		NONE,
+		CONSOLE,
+	} m_Type;
+	char aMsg[122];
+
+	CSqlResponse()
+		: CSqlResponse(NONE)
+	{
+	}
+	CSqlResponse(Type t)
+		: m_Type(t),
+		  aMsg{0}
+	{
+	}
+};
 
 class CDbConnectionPool
 {
@@ -21,9 +39,6 @@ public:
 	CDbConnectionPool();
 	~CDbConnectionPool();
 	CDbConnectionPool& operator=(const CDbConnectionPool&) = delete;
-
-	typedef bool (*FRead)(IDbConnection *, const ISqlData *);
-	typedef bool (*FWrite)(IDbConnection *, const ISqlData *, bool);
 
 	enum Mode
 	{
@@ -37,30 +52,29 @@ public:
 
 	void RegisterDatabase(std::unique_ptr<IDbConnection> pDatabase, Mode DatabaseMode);
 
-	void Execute(
-			FRead pFunc,
-			std::unique_ptr<const ISqlData> pSqlRequestData,
-			const char *pName);
+	void ExecuteRead(
+		FSqlThread pFunc,
+		std::unique_ptr<const ISqlData> pSqlRequestData,
+		const char *pName);
 	// writes to WRITE_BACKUP server in case of failure
 	void ExecuteWrite(
-			FWrite pFunc,
-			std::unique_ptr<const ISqlData> pSqlRequestData,
-			const char *pName);
+		FSqlThread pFunc,
+		std::unique_ptr<const ISqlData> pSqlRequestData,
+		const char *pName);
+	// retries writes to main WRITE server multiple times and WRITE_BACKUP server in case of failure
+	void ExecuteWriteFaultTolerant(
+		FSqlThread pFunc,
+		std::unique_ptr<const ISqlData> pSqlRequestData,
+		const char *pName);
+
+	// Tries to fetch response, returns true if successful
+	bool GetResponse(CSqlResponse *pResponse);
 
 	void OnShutdown();
 
 private:
-	std::vector<std::unique_ptr<IDbConnection>> m_aapDbConnections[NUM_MODES];
-
-	static void Worker(void *pUser);
-	void Worker();
-	bool ExecSqlFunc(IDbConnection *pConnection, struct CSqlExecData *pData, bool Failure);
-
-	std::atomic_bool m_Shutdown;
-	semaphore m_NumElem;
-	int FirstElem;
-	int LastElem;
-	std::unique_ptr<struct CSqlExecData> m_aTasks[512];
+	struct Impl;
+	std::unique_ptr<Impl> pImpl;
 };
 
 #endif // ENGINE_SERVER_DATABASES_CONNECTION_POOL_H
