@@ -1293,6 +1293,8 @@ void CMapLayers::RenderKillTileBorder(int LayerIndex, ColorRGBA* pColor, CMapIte
 		vec2 Offset;
 		int OffX0 = (BorderX0 < -201 ? -201 : BorderX0);
 		int OffX1 = (BorderX1 >= pTileLayer->m_Width + 201 ? pTileLayer->m_Width + 201 : BorderX1);
+		OffX0 = clamp(OffX0, -201, (int)pTileLayer->m_Width + 201);
+		OffX1 = clamp(OffX1, -201, (int)pTileLayer->m_Width + 201);
 		Offset.x = OffX0 * 32.f;
 		Offset.y = BorderY0 * 32.f;
 		vec2 Dir;
@@ -1321,6 +1323,8 @@ void CMapLayers::RenderKillTileBorder(int LayerIndex, ColorRGBA* pColor, CMapIte
 		vec2 Offset;
 		int OffX0 = (BorderX0 < -201 ? -201 : BorderX0);
 		int OffX1 = (BorderX1 >= pTileLayer->m_Width + 201 ? pTileLayer->m_Width + 201 : BorderX1);
+		OffX0 = clamp(OffX0, -201, (int)pTileLayer->m_Width + 201);
+		OffX1 = clamp(OffX1, -201, (int)pTileLayer->m_Width + 201);
 		Offset.x = OffX0 * 32.f;
 		Offset.y = (pTileLayer->m_Height + 201) * 32.f;
 		vec2 Dir;

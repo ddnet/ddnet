@@ -2588,17 +2588,16 @@ void CClient::Update()
 	{
 
 #if defined(CONF_VIDEORECORDER)
-	if (m_DemoPlayer.IsPlaying() && IVideo::Current())
-	{
-		if (IVideo::Current()->FrameRendered())
-			IVideo::Current()->NextVideoFrame();
-		if (IVideo::Current()->AudioFrameRendered())
-			IVideo::Current()->NextAudioFrameTimeline();
-	}
-	else if(m_ButtonRender)
-		Disconnect();
+		if (m_DemoPlayer.IsPlaying() && IVideo::Current())
+		{
+			if (IVideo::Current()->FrameRendered())
+				IVideo::Current()->NextVideoFrame();
+			if (IVideo::Current()->AudioFrameRendered())
+				IVideo::Current()->NextAudioFrameTimeline();
+		}
+		else if(m_ButtonRender)
+			Disconnect();
 #endif
-
 
 		m_DemoPlayer.Update();
 
@@ -2844,6 +2843,15 @@ void CClient::Update()
 	// update gameclient
 	if(!m_EditorActive)
 		GameClient()->OnUpdate();
+
+	Steam()->Update();
+	if(Steam()->GetConnectAddress())
+	{
+		char aAddress[NETADDR_MAXSTRSIZE];
+		net_addr_str(Steam()->GetConnectAddress(), aAddress, sizeof(aAddress), true);
+		Connect(aAddress);
+		Steam()->ClearConnectAddress();
+	}
 
 	if(m_ReconnectTime > 0 && time_get() > m_ReconnectTime)
 	{
@@ -4048,6 +4056,11 @@ static CClient *CreateClient()
 	return new(pClient) CClient;
 }
 
+void CClient::HandleConnectAddress(const NETADDR *pAddr)
+{
+	net_addr_str(pAddr, m_aCmdConnect, sizeof(m_aCmdConnect), true);
+}
+
 void CClient::HandleConnectLink(const char *pLink)
 {
 	str_copy(m_aCmdConnect, pLink + sizeof(CONNECTLINK) - 1, sizeof(m_aCmdConnect));
@@ -4118,6 +4131,7 @@ int main(int argc, const char **argv) // ignore_convention
 	IEngineTextRender *pEngineTextRender = CreateEngineTextRender();
 	IEngineMap *pEngineMap = CreateEngineMap();
 	IEngineMasterServer *pEngineMasterServer = CreateEngineMasterServer();
+	ISteam *pSteam = CreateSteam();
 
 	if(RandInitFailed)
 	{
@@ -4150,7 +4164,7 @@ int main(int argc, const char **argv) // ignore_convention
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateEditor(), false);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateGameClient(), false);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pStorage);
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateSteam());
+		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pSteam);
 
 		if(RegisterFail)
 		{
@@ -4214,6 +4228,12 @@ int main(int argc, const char **argv) // ignore_convention
 		pClient->HandleMapPath(argv[1]);
 	else if(argc > 1) // ignore_convention
 		pConsole->ParseArguments(argc-1, &argv[1]); // ignore_convention
+
+	if(pSteam->GetConnectAddress())
+	{
+		pClient->HandleConnectAddress(pSteam->GetConnectAddress());
+		pSteam->ClearConnectAddress();
+	}
 
 	pClient->Engine()->InitLogfile();
 
