@@ -35,9 +35,9 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	MainView.VSplitLeft(30.0f, 0, &ExtMenu);
 	ExtMenu.VSplitLeft(100.0f, &ExtMenu, 0);
 
-	ExtMenu.HSplitBottom(30.0f, &ExtMenu, &Button);
+	ExtMenu.HSplitBottom(20.0f, &ExtMenu, &Button);
 	static int s_DiscordButton;
-	if(DoButton_Menu(&s_DiscordButton, "Discord", 0, &Button, 0, CUI::CORNER_ALL, Rounding, 0.5f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
+	if(DoButton_Menu(&s_DiscordButton, "Discord", 0, &Button, 0, CUI::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
 	{
 		if(!open_link("https://ddnet.tw/discord"))
 		{
@@ -47,9 +47,9 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	}
 
 	ExtMenu.HSplitBottom(5.0f, &ExtMenu, 0); // little space
-	ExtMenu.HSplitBottom(30.0f, &ExtMenu, &Button);
+	ExtMenu.HSplitBottom(20.0f, &ExtMenu, &Button);
 	static int s_LearnButton;
-	if(DoButton_Menu(&s_LearnButton, Localize("Learn"), 0, &Button, 0, CUI::CORNER_ALL, Rounding, 0.5f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
+	if(DoButton_Menu(&s_LearnButton, Localize("Learn"), 0, &Button, 0, CUI::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
 	{
 		if(!open_link(Localize("https://wiki.ddnet.tw/")))
 		{
@@ -59,9 +59,9 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	}
 
 	ExtMenu.HSplitBottom(5.0f, &ExtMenu, 0); // little space
-	ExtMenu.HSplitBottom(30.0f, &ExtMenu, &Button);
+	ExtMenu.HSplitBottom(20.0f, &ExtMenu, &Button);
 	static int s_WebsiteButton;
-	if(DoButton_Menu(&s_WebsiteButton, Localize("Website"), 0, &Button, 0, CUI::CORNER_ALL, Rounding, 0.5f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
+	if(DoButton_Menu(&s_WebsiteButton, Localize("Website"), 0, &Button, 0, CUI::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
 	{
 		if(!open_link("https://ddnet.tw/"))
 		{
@@ -71,14 +71,14 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	}
 
 	ExtMenu.HSplitBottom(5.0f, &ExtMenu, 0); // little space
-	ExtMenu.HSplitBottom(30.0f, &ExtMenu, &Button);
+	ExtMenu.HSplitBottom(20.0f, &ExtMenu, &Button);
 	static int s_NewsButton;
-	if(DoButton_Menu(&s_NewsButton, Localize("News"), 0, &Button, 0, CUI::CORNER_ALL, Rounding, 0.5f, vec4(0.0f, 0.0f, 0.0f, 0.5f), g_Config.m_UiUnreadNews ? vec4(0.0f, 1.0f, 0.0f, 0.25f) : vec4(0.0f, 0.0f, 0.0f, 0.25f)) || CheckHotKey(KEY_N))
+	if(DoButton_Menu(&s_NewsButton, Localize("News"), 0, &Button, 0, CUI::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), g_Config.m_UiUnreadNews ? vec4(0.0f, 1.0f, 0.0f, 0.25f) : vec4(0.0f, 0.0f, 0.0f, 0.25f)) || CheckHotKey(KEY_N))
 		NewPage = PAGE_NEWS;
 
 	CUIRect Menu;
 	MainView.VMargin(VMargin, &Menu);
-	Menu.HSplitBottom(20.0f, &Menu, 0);
+	Menu.HSplitBottom(25.0f, &Menu, 0);
 
 	Menu.HSplitBottom(40.0f, &Menu, &Button);
 	static int s_QuitButton;
