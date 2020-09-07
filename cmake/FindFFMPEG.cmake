@@ -5,43 +5,55 @@ if(NOT CMAKE_CROSSCOMPILING)
   pkg_check_modules(PC_AVUTIL libavutil)
   pkg_check_modules(PC_SWSCALE libswscale)
   pkg_check_modules(PC_SWRESAMPLE libswresample)
+  if(TARGET_OS STREQUAL "linux")
+    pkg_check_modules(PC_X264 libx264)
+  endif()
 endif()
 
 set_extra_dirs_lib(FFMPEG ffmpeg)
 find_library(AVCODEC_LIBRARY
-  NAMES avcodec libavcodec
+  NAMES avcodec libavcodec avcodec.58
   HINTS ${HINTS_FFMPEG_LIBDIR} ${PC_AVCODEC_LIBRARY_DIRS}
   PATHS ${PATHS_AVCODEC_LIBDIR}
   ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
 
 find_library(AVFORMAT_LIBRARY
-  NAMES avformat libavformat
+  NAMES avformat libavformat avformat.58
   HINTS ${HINTS_FFMPEG_LIBDIR} ${PC_AVFORMAT_LIBRARY_DIRS}
   PATHS ${PATHS_AVFORMAT_LIBDIR}
   ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
 
 find_library(AVUTIL_LIBRARY
-  NAMES avutil libavutil
+  NAMES avutil libavutil avutil.56
   HINTS ${HINTS_FFMPEG_LIBDIR} ${PC_AVUTIL_LIBRARY_DIRS}
   PATHS ${PATHS_AVUTIL_LIBDIR}
   ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
 
 find_library(SWSCALE_LIBRARY
-  NAMES swscale libswscale
+  NAMES swscale libswscale swscale.5
   HINTS ${HINTS_FFMPEG_LIBDIR} ${PC_SWSCALE_LIBRARY_DIRS}
   PATHS ${PATHS_SWSCALE_LIBDIR}
   ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
 
 find_library(SWRESAMPLE_LIBRARY
-  NAMES swresample libswresample
+  NAMES swresample libswresample swresample.3
   HINTS ${HINTS_FFMPEG_LIBDIR} ${PC_SWRESAMPLE_LIBRARY_DIRS}
   PATHS ${PATHS_SWRESAMPLE_LIBDIR}
   ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
+
+if(TARGET_OS STREQUAL "linux")
+  find_library(X264_LIBRARY
+    NAMES x264 libx264
+    HINTS ${HINTS_FFMPEG_LIBDIR} ${PC_X264_LIBRARY_DIRS}
+    PATHS ${PATHS_X264_LIBDIR}
+    ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
+  )
+endif()
 
 set_extra_dirs_include(AVCODEC ffmpeg "${AVCODEC_LIBRARY}")
 find_path(AVCODEC_INCLUDEDIR libavcodec
@@ -78,6 +90,10 @@ find_path(SWRESAMPLE_INCLUDEDIR libswresample
   ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
 
+if(TARGET_OS STREQUAL "linux")
+  set_extra_dirs_include(X264 x264 "${X264_LIBRARY}")
+endif()
+
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(FFMPEG DEFAULT_MSG
   AVCODEC_LIBRARY
@@ -105,13 +121,21 @@ mark_as_advanced(
   SWRESAMPLE_INCLUDEDIR
 )
 
-set(FFMPEG_LIBRARIES 
+set(FFMPEG_LIBRARIES
   ${AVCODEC_LIBRARY}
   ${AVFORMAT_LIBRARY}
   ${AVUTIL_LIBRARY}
   ${SWSCALE_LIBRARY}
   ${SWRESAMPLE_LIBRARY}
 )
+
+if(TARGET_OS STREQUAL "linux")
+  list(APPEND FFMPEG_LIBRARIES ${X264_LIBRARY})
+endif()
+
+if(NOT TARGET_OS STREQUAL "windows")
+  list(APPEND FFMPEG_LIBRARIES ${CMAKE_DL_LIBS})
+endif()
 
 set(FFMPEG_INCLUDE_DIRS
   ${AVCODEC_INCLUDEDIR}
@@ -121,15 +145,12 @@ set(FFMPEG_INCLUDE_DIRS
   ${SWRESAMPLE_INCLUDEDIR}
 )
 
-is_bundled(IS_BUNDLED "${AVCODEC_LIBRARY}")
-if(IS_BUNDLED AND TARGET_OS STREQUAL "windows")
+is_bundled(FFMPEG_BUNDLED "${AVCODEC_LIBRARY}")
+if(FFMPEG_BUNDLED AND TARGET_OS STREQUAL "windows")
   set(FFMPEG_COPY_FILES
     "${EXTRA_FFMPEG_LIBDIR}/avcodec-58.dll"
-    "${EXTRA_FFMPEG_LIBDIR}/avdevice-58.dll"
-    "${EXTRA_FFMPEG_LIBDIR}/avfilter-7.dll"
     "${EXTRA_FFMPEG_LIBDIR}/avformat-58.dll"
     "${EXTRA_FFMPEG_LIBDIR}/avutil-56.dll"
-    "${EXTRA_FFMPEG_LIBDIR}/postproc-55.dll"
     "${EXTRA_FFMPEG_LIBDIR}/swresample-3.dll"
     "${EXTRA_FFMPEG_LIBDIR}/swscale-5.dll"
   )
