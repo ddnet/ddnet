@@ -355,7 +355,7 @@ void CGameConsole::CInstance::PrintLine(const char *pLine, bool Highlighted)
 }
 
 CGameConsole::CGameConsole()
-: m_LocalConsole(CONSOLETYPE_LOCAL), m_RemoteConsole(CONSOLETYPE_REMOTE), m_EconConsole(CONSOLETYPE_ECON)
+: m_LocalConsole(CONSOLETYPE_LOCAL), m_RemoteConsole(CONSOLETYPE_REMOTE)
 {
 	m_ConsoleType = CONSOLETYPE_LOCAL;
 	m_ConsoleState = CONSOLE_CLOSED;
@@ -373,8 +373,6 @@ CGameConsole::CInstance *CGameConsole::CurrentConsole()
 {
 	if(m_ConsoleType == CONSOLETYPE_REMOTE)
 		return &m_RemoteConsole;
-	if(m_ConsoleType == CONSOLETYPE_ECON)
-		return &m_EconConsole;
 	return &m_LocalConsole;
 }
 
@@ -505,8 +503,6 @@ void CGameConsole::OnRender()
 	Graphics()->SetColor(0.2f, 0.2f, 0.2f,0.9f);
 	if(m_ConsoleType == CONSOLETYPE_REMOTE)
 		Graphics()->SetColor(0.4f, 0.2f, 0.2f,0.9f);
-	else if(m_ConsoleType == CONSOLETYPE_ECON)
-		Graphics()->SetColor(0.2f, 0.2f, 0.4f,0.9f);
 	Graphics()->QuadsSetSubset(0,-ConsoleHeight*0.075f,Screen.w*0.075f*0.5f,0);
 	QuadItem = IGraphics::CQuadItem(0, 0, Screen.w, ConsoleHeight);
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
@@ -786,7 +782,7 @@ void CGameConsole::Toggle(int Type)
 
 void CGameConsole::Dump(int Type)
 {
-	CInstance *pConsole = Type == CONSOLETYPE_REMOTE ? &m_RemoteConsole : Type == CONSOLETYPE_ECON ? &m_EconConsole : &m_LocalConsole;
+	CInstance *pConsole = Type == CONSOLETYPE_REMOTE ? &m_RemoteConsole : &m_LocalConsole;
 	char aFilename[128];
 	char aDate[20];
 
@@ -814,11 +810,6 @@ void CGameConsole::ConToggleRemoteConsole(IConsole::IResult *pResult, void *pUse
 	((CGameConsole *)pUserData)->Toggle(CONSOLETYPE_REMOTE);
 }
 
-void CGameConsole::ConToggleEconConsole(IConsole::IResult *pResult, void *pUserData)
-{
-	((CGameConsole *)pUserData)->Toggle(CONSOLETYPE_ECON);
-}
-
 void CGameConsole::ConClearLocalConsole(IConsole::IResult *pResult, void *pUserData)
 {
 	((CGameConsole *)pUserData)->m_LocalConsole.ClearBacklog();
@@ -829,11 +820,6 @@ void CGameConsole::ConClearRemoteConsole(IConsole::IResult *pResult, void *pUser
 	((CGameConsole *)pUserData)->m_RemoteConsole.ClearBacklog();
 }
 
-void CGameConsole::ConClearEconConsole(IConsole::IResult *pResult, void *pUserData)
-{
-	((CGameConsole *)pUserData)->m_EconConsole.ClearBacklog();
-}
-
 void CGameConsole::ConDumpLocalConsole(IConsole::IResult *pResult, void *pUserData)
 {
 	((CGameConsole *)pUserData)->Dump(CONSOLETYPE_LOCAL);
@@ -842,11 +828,6 @@ void CGameConsole::ConDumpLocalConsole(IConsole::IResult *pResult, void *pUserDa
 void CGameConsole::ConDumpRemoteConsole(IConsole::IResult *pResult, void *pUserData)
 {
 	((CGameConsole *)pUserData)->Dump(CONSOLETYPE_REMOTE);
-}
-
-void CGameConsole::ConDumpEconConsole(IConsole::IResult *pResult, void *pUserData)
-{
-	((CGameConsole *)pUserData)->Dump(CONSOLETYPE_ECON);
 }
 
 void CGameConsole::ClientConsolePrintCallback(const char *pStr, void *pUserData, bool Highlighted)
@@ -893,8 +874,6 @@ void CGameConsole::PrintLine(int Type, const char *pLine)
 		m_LocalConsole.PrintLine(pLine);
 	else if(Type == CONSOLETYPE_REMOTE)
 		m_RemoteConsole.PrintLine(pLine);
-	else if(Type == CONSOLETYPE_ECON)
-		m_EconConsole.PrintLine(pLine);
 }
 
 void CGameConsole::OnConsoleInit()
@@ -902,7 +881,6 @@ void CGameConsole::OnConsoleInit()
 	// init console instances
 	m_LocalConsole.Init(this);
 	m_RemoteConsole.Init(this);
-	m_EconConsole.Init(this);
 
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 
@@ -911,13 +889,10 @@ void CGameConsole::OnConsoleInit()
 
 	Console()->Register("toggle_local_console", "", CFGFLAG_CLIENT, ConToggleLocalConsole, this, "Toggle local console");
 	Console()->Register("toggle_remote_console", "", CFGFLAG_CLIENT, ConToggleRemoteConsole, this, "Toggle remote console");
-	Console()->Register("toggle_econ_console", "", CFGFLAG_CLIENT, ConToggleEconConsole, this, "Toggle econ console");
 	Console()->Register("clear_local_console", "", CFGFLAG_CLIENT, ConClearLocalConsole, this, "Clear local console");
 	Console()->Register("clear_remote_console", "", CFGFLAG_CLIENT, ConClearRemoteConsole, this, "Clear remote console");
-	Console()->Register("clear_econ_console", "", CFGFLAG_CLIENT, ConClearEconConsole, this, "Clear econ console");
 	Console()->Register("dump_local_console", "", CFGFLAG_CLIENT, ConDumpLocalConsole, this, "Dump local console");
 	Console()->Register("dump_remote_console", "", CFGFLAG_CLIENT, ConDumpRemoteConsole, this, "Dump remote console");
-	Console()->Register("dump_econ_console", "", CFGFLAG_CLIENT, ConDumpEconConsole, this, "Dump econ console");
 
 	Console()->Register("console_page_up", "", CFGFLAG_CLIENT, ConConsolePageUp, this, "Previous page in console");
 	Console()->Register("console_page_down", "", CFGFLAG_CLIENT, ConConsolePageDown, this, "Next page in console");

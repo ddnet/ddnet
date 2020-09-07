@@ -445,9 +445,6 @@ void CBinds::ConfigSaveCallback(IConfig *pConfig, void *pUserData)
 
 void CBinds::SetDDRaceBinds(bool FreeOnly)
 {
-	if(g_Config.m_ClDDRaceBindsSet < 2)
-		Bind(KEY_F7, "toggle_econ_console", FreeOnly);
-
 	if(g_Config.m_ClDDRaceBindsSet < 1)
 	{
 		Bind(KEY_KP_PLUS, "zoom+", FreeOnly);
@@ -480,5 +477,5 @@ void CBinds::SetDDRaceBinds(bool FreeOnly)
 		Bind(KEY_EQUALS, "spectate_next", FreeOnly);
 	}
 
-	g_Config.m_ClDDRaceBindsSet = 2;
+	g_Config.m_ClDDRaceBindsSet = 1;
 }
