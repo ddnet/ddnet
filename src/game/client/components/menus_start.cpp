@@ -28,19 +28,64 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	const float Rounding = 10.0f;
 	const float VMargin = MainView.w/2-190.0f;
 
+	CUIRect Button;
+	int NewPage = -1;
+
+	CUIRect ExtMenu;
+	MainView.VSplitLeft(30.0f, 0, &ExtMenu);
+	ExtMenu.VSplitLeft(100.0f, &ExtMenu, 0);
+
+	ExtMenu.HSplitBottom(30.0f, &ExtMenu, &Button);
+	static int s_DiscordButton;
+	if(DoButton_Menu(&s_DiscordButton, "Discord", 0, &Button, 0, CUI::CORNER_ALL, Rounding, 0.5f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
+	{
+		if(!open_link("https://ddnet.tw/discord"))
+		{
+			dbg_msg("menus", "couldn't open link");
+		}
+		m_DoubleClickIndex = -1;
+	}
+
+	ExtMenu.HSplitBottom(5.0f, &ExtMenu, 0); // little space
+	ExtMenu.HSplitBottom(30.0f, &ExtMenu, &Button);
+	static int s_LearnButton;
+	if(DoButton_Menu(&s_LearnButton, Localize("Learn"), 0, &Button, 0, CUI::CORNER_ALL, Rounding, 0.5f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
+	{
+		if(!open_link(Localize("https://wiki.ddnet.tw/")))
+		{
+			dbg_msg("menus", "couldn't open link");
+		}
+		m_DoubleClickIndex = -1;
+	}
+
+	ExtMenu.HSplitBottom(5.0f, &ExtMenu, 0); // little space
+	ExtMenu.HSplitBottom(30.0f, &ExtMenu, &Button);
+	static int s_WebsiteButton;
+	if(DoButton_Menu(&s_WebsiteButton, Localize("Website"), 0, &Button, 0, CUI::CORNER_ALL, Rounding, 0.5f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
+	{
+		if(!open_link("https://ddnet.tw/"))
+		{
+			dbg_msg("menus", "couldn't open link");
+		}
+		m_DoubleClickIndex = -1;
+	}
+
+	ExtMenu.HSplitBottom(5.0f, &ExtMenu, 0); // little space
+	ExtMenu.HSplitBottom(30.0f, &ExtMenu, &Button);
+	static int s_NewsButton;
+	if(DoButton_Menu(&s_NewsButton, Localize("News"), 0, &Button, 0, CUI::CORNER_ALL, Rounding, 0.5f, vec4(0.0f, 0.0f, 0.0f, 0.5f), g_Config.m_UiUnreadNews ? vec4(0.0f, 1.0f, 0.0f, 0.25f) : vec4(0.0f, 0.0f, 0.0f, 0.25f)) || CheckHotKey(KEY_N))
+		NewPage = PAGE_NEWS;
+
 	CUIRect Menu;
 	MainView.VMargin(VMargin, &Menu);
 	Menu.HSplitBottom(20.0f, &Menu, 0);
-
-	CUIRect Button;
-	int NewPage = -1;
 
 	Menu.HSplitBottom(40.0f, &Menu, &Button);
 	static int s_QuitButton;
 	if(DoButton_Menu(&s_QuitButton, Localize("Quit"), 0, &Button, 0, CUI::CORNER_ALL, Rounding, 0.5f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)) || m_EscapePressed || CheckHotKey(KEY_Q))
 		m_Popup = POPUP_QUIT;
 
-	Menu.HSplitBottom(40.0f, &Menu, 0);
+	Menu.HSplitBottom(100.0f, &Menu, 0);
 	Menu.HSplitBottom(40.0f, &Menu, &Button);
 	static int s_SettingsButton;
 	if(DoButton_Menu(&s_SettingsButton, Localize("Settings"), 0, &Button, g_Config.m_ClShowStartMenuImages ? "settings" : 0, CUI::CORNER_ALL, Rounding, 0.5f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)) || CheckHotKey(KEY_S))
@@ -58,29 +103,10 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		}
 		else
 		{
-			Storage()->RemoveBinaryFile("autoexec_server.log");
 			char aBuf[MAX_PATH_LENGTH];
 			m_ServerProcess.Process = shell_execute(Storage()->GetBinaryPath(PLAT_SERVER_EXEC, aBuf, sizeof(aBuf)));
 		}
 	}
-
-	Menu.HSplitBottom(5.0f, &Menu, 0); // little space
-	Menu.HSplitBottom(40.0f, &Menu, &Button);
-	static int s_LearnButton;
-	if(DoButton_Menu(&s_LearnButton, Localize("Learn"), 0, &Button, g_Config.m_ClShowStartMenuImages ? "learn" : 0, CUI::CORNER_ALL, Rounding, 0.5f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)) || CheckHotKey(KEY_L))
-	{
-		if(!open_link(Localize("https://wiki.ddnet.tw/")))
-		{
-			dbg_msg("menus", "couldn't open link");
-		}
-		m_DoubleClickIndex = -1;
-	}
-
-	Menu.HSplitBottom(5.0f, &Menu, 0); // little space
-	Menu.HSplitBottom(40.0f, &Menu, &Button);
-	static int s_NewsButton;
-	if(DoButton_Menu(&s_NewsButton, Localize("News"), 0, &Button, g_Config.m_ClShowStartMenuImages ? "news" : 0, CUI::CORNER_ALL, Rounding, 0.5f, vec4(0.0f, 0.0f, 0.0f, 0.5f), g_Config.m_UiUnreadNews ? vec4(0.0f, 1.0f, 0.0f, 0.25f) : vec4(0.0f, 0.0f, 0.0f, 0.25f)) || CheckHotKey(KEY_N))
-		NewPage = PAGE_NEWS;
 
 	static bool EditorHotkeyWasPressed = true;
 	static float EditorHotKeyChecktime = 0;

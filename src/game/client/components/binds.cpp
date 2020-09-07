@@ -213,7 +213,6 @@ void CBinds::SetDefaults()
 	UnbindAll();
 	Bind(KEY_F1, "toggle_local_console");
 	Bind(KEY_F2, "toggle_remote_console");
-	Bind(KEY_F7, "toggle_server_console");
 	Bind(KEY_TAB, "+scoreboard");
 	Bind(KEY_EQUALS, "+statboard");
 	Bind(KEY_F10, "screenshot");
@@ -447,9 +446,7 @@ void CBinds::ConfigSaveCallback(IConfig *pConfig, void *pUserData)
 void CBinds::SetDDRaceBinds(bool FreeOnly)
 {
 	if(g_Config.m_ClDDRaceBindsSet < 2)
-	{
-		Bind(KEY_F7, "toggle_server_console", FreeOnly);
-	}
+		Bind(KEY_F7, "toggle_econ_console", FreeOnly);
 
 	if(g_Config.m_ClDDRaceBindsSet < 1)
 	{

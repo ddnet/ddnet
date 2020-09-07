@@ -2069,27 +2069,6 @@ extern "C" void font_debug_render();
 
 void CMenus::OnRender()
 {
-	if(m_ServerProcess.Process != 0)
-	{
-		// TODO: Maybe call this less often, or probably even cleaner, use econ
-		if(!m_ServerProcess.Initialized)
-		{
-			char aBuf[MAX_PATH_LENGTH];
-			IOHANDLE File = Storage()->OpenFile(Storage()->GetBinaryPath("autoexec_server.log", aBuf, sizeof(aBuf)), IOFLAG_READ, IStorage::TYPE_ALL);
-			if(File)
-			{
-				m_ServerProcess.LineReader.Init(File);
-				m_ServerProcess.Initialized = true;
-			}
-		}
-		if(m_ServerProcess.Initialized)
-		{
-			const char *pLine = m_ServerProcess.LineReader.Get();
-			if(pLine)
-				GameClient()->m_pGameConsole->PrintLine(CGameConsole::CONSOLETYPE_ECON, pLine);
-		}
-	}
-
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		SetActive(true);
 
