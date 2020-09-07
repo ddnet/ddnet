@@ -1041,16 +1041,15 @@ bool CScore::ShowPointsThread(IDbConnection *pSqlServer, const ISqlData *pGameDa
 
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
-			"SELECT Rank, Points, Name "
-			"FROM ("
-				"SELECT RANK() OVER w AS Rank, Points, Name "
-				"FROM %s_points "
-				"WINDOW w as (ORDER BY Points DESC)"
-			") as a "
-			"WHERE Name = ?;",
-			pSqlServer->GetPrefix());
+			"SELECT ("
+				"SELECT COUNT(Name) + 1 FROM %s_points WHERE Points > ("
+					"SELECT points FROM %s_points WHERE Name = ?"
+			")) as Rank, Points, Name "
+			"FROM %s_points WHERE Name = ?;",
+			pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
 	pSqlServer->PrepareStatement(aBuf);
 	pSqlServer->BindString(1, pData->m_Name);
+	pSqlServer->BindString(2, pData->m_Name);
 
 	if(pSqlServer->Step())
 	{
