@@ -1717,6 +1717,8 @@ if(CLIENT)
     components/statboard.h
     components/voting.cpp
     components/voting.h
+    econ_client.cpp
+    econ_client.h
     gameclient.cpp
     gameclient.h
     lineinput.cpp

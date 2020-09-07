@@ -77,6 +77,8 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 {
 	if(m_Type == CGameConsole::CONSOLETYPE_LOCAL)
 		m_pGameConsole->m_pConsole->ExecuteLine(pLine);
+	else if(m_Type == CGameConsole::CONSOLETYPE_ECON)
+		m_pGameConsole->m_pEconClient->Send(pLine);
 	else
 	{
 		if(m_pGameConsole->Client()->RconAuthed())
@@ -211,7 +213,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 		{
 			if(m_Input.GetString()[0] || (m_UsernameReq && !m_pGameConsole->Client()->RconAuthed() && !m_UserGot))
 			{
-				if(m_Type == CONSOLETYPE_LOCAL || m_pGameConsole->Client()->RconAuthed())
+				if(m_Type == CONSOLETYPE_LOCAL || (m_Type == CONSOLETYPE_REMOTE && m_pGameConsole->Client()->RconAuthed()) || (m_Type == CONSOLETYPE_ECON && m_pGameConsole->m_pEconClient->State() == CEconClient::STATE_AUTHED))
 				{
 					char *pEntry = m_History.Allocate(m_Input.GetLength()+1);
 					mem_copy(pEntry, m_Input.GetString(), m_Input.GetLength()+1);
@@ -252,7 +254,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 		}
 		else if(Event.m_Key == KEY_TAB)
 		{
-			if(m_Type == CGameConsole::CONSOLETYPE_LOCAL || m_pGameConsole->Client()->RconAuthed())
+			if(m_Type == CGameConsole::CONSOLETYPE_LOCAL || (m_Type == CONSOLETYPE_REMOTE && m_pGameConsole->Client()->RconAuthed()) || (m_Type == CONSOLETYPE_ECON && m_pGameConsole->m_pEconClient->State() == CEconClient::STATE_AUTHED))
 			{
 				if(m_ReverseTAB)
 					 m_CompletionChosen--;
@@ -578,6 +580,15 @@ void CGameConsole::OnRender()
 			else
 				pPrompt = "NOT CONNECTED> ";
 		}
+		else if(m_ConsoleType == CONSOLETYPE_ECON)
+		{
+			if(m_pEconClient->State() == CEconClient::STATE_OFFLINE)
+				pPrompt = "NOT CONNECTED> ";
+			else if(m_pEconClient->State() == CEconClient::STATE_CONNECTED)
+				pPrompt = "Enter Password> ";
+			else
+				pPrompt = "econ> ";
+		}
 		TextRender()->TextEx(&Cursor, pPrompt, -1);
 
 		x = Cursor.m_X;
@@ -598,7 +609,8 @@ void CGameConsole::OnRender()
 		//hide rcon password
 		char aInputString[512];
 		str_copy(aInputString, pConsole->m_Input.GetString(Editing), sizeof(aInputString));
-		if(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed() && (pConsole->m_UserGot || !pConsole->m_UsernameReq))
+		if((m_ConsoleType == CONSOLETYPE_REMOTE && Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed() && (pConsole->m_UserGot || !pConsole->m_UsernameReq)) ||
+			(m_ConsoleType == CONSOLETYPE_ECON && m_pEconClient->State() == CEconClient::STATE_CONNECTED))
 		{
 			for(int i = 0; i < pConsole->m_Input.GetLength(Editing); ++i)
 				aInputString[i] = '*';
@@ -895,6 +907,11 @@ void CGameConsole::PrintLine(int Type, const char *pLine)
 		m_RemoteConsole.PrintLine(pLine);
 	else if(Type == CONSOLETYPE_ECON)
 		m_EconConsole.PrintLine(pLine);
+}
+
+void CGameConsole::SetEconClient(CEconClient *pEconClient)
+{
+	m_pEconClient = pEconClient;
 }
 
 void CGameConsole::OnConsoleInit()

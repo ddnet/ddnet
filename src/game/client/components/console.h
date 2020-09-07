@@ -4,6 +4,7 @@
 #define GAME_CLIENT_COMPONENTS_CONSOLE_H
 #include <engine/shared/ringbuffer.h>
 #include <game/client/component.h>
+#include <game/client/econ_client.h>
 #include <game/client/lineinput.h>
 
 enum
@@ -68,6 +69,7 @@ class CGameConsole : public CComponent
 	};
 
 	class IConsole *m_pConsole;
+	CEconClient *m_pEconClient;
 
 	CInstance m_LocalConsole;
 	CInstance m_RemoteConsole;
@@ -112,6 +114,7 @@ public:
 
 	void PrintLine(int Type, const char *pLine);
 	void RequireUsername(bool UsernameReq);
+	void SetEconClient(CEconClient *pEconClient);
 
 	virtual void OnStateChange(int NewState, int OldState);
 	virtual void OnConsoleInit();

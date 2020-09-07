@@ -105,6 +105,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		{
 			char aBuf[MAX_PATH_LENGTH];
 			m_ServerProcess.Process = shell_execute(Storage()->GetBinaryPath(PLAT_SERVER_EXEC, aBuf, sizeof(aBuf)));
+			GameClient()->EconClientConnect("localhost:7303", "default");
 		}
 	}
 

@@ -365,6 +365,9 @@ void CGameClient::OnInit()
 	m_GameWorld.m_pTuningList = m_aTuningList;
 
 	m_pMapimages->SetTextureScale(g_Config.m_ClTextEntitiesSize);
+
+	m_EconClient.Init(m_pGameConsole);
+	m_pGameConsole->SetEconClient(&m_EconClient);
 }
 
 void CGameClient::OnUpdate()
@@ -394,6 +397,8 @@ void CGameClient::OnUpdate()
 				break;
 		}
 	}
+
+	m_EconClient.Update();
 }
 
 void CGameClient::OnDummySwap()
@@ -2466,6 +2471,11 @@ bool CGameClient::IsOtherTeam(int ClientID)
 		return true;
 
 	return m_Teams.Team(ClientID) != m_Teams.Team(m_Snap.m_LocalClientID);
+}
+
+void CGameClient::EconClientConnect(const char *pAddress, const char *pPassword)
+{
+	m_EconClient.Connect(pAddress, pPassword);
 }
 
 void CGameClient::LoadMapSettings()

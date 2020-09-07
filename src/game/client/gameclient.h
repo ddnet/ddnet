@@ -11,6 +11,7 @@
 #include <game/layers.h>
 #include <game/localization.h>
 #include <game/gamecore.h>
+#include "econ_client.h"
 #include "render.h"
 
 #include <game/teamscore.h>
@@ -432,6 +433,7 @@ public:
 
 	void Echo(const char *pString);
 	bool IsOtherTeam(int ClientID);
+	void EconClientConnect(const char *pAddress, const char *pPassword);
 
 private:
 	bool m_DDRaceMsgSent[2];
@@ -454,6 +456,8 @@ private:
 	void LoadMapSettings();
 	CTuningParams m_aTuningList[NUM_TUNEZONES];
 	CTuningParams *TuningList() { return m_aTuningList; }
+
+	CEconClient m_EconClient;
 };
 
 ColorRGBA CalculateNameColor(ColorHSLA TextColorHSL);
