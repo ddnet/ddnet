@@ -3219,6 +3219,7 @@ PROCESS shell_execute(const char *file)
 #if defined(CONF_FAMILY_WINDOWS)
 	SHELLEXECUTEINFOA info;
 	mem_zero(&info, sizeof(SHELLEXECUTEINFOA));
+	info.cbSize = sizeof(SHELLEXECUTEINFOA);
 	info.lpVerb = "open";
 	info.lpFile = file;
 	info.nShow = SW_SHOWDEFAULT;
