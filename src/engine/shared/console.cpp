@@ -482,7 +482,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bo
 					}
 					else
 					{
-						if(pCommand->m_Flags&CMDFLAG_TEST && !g_Config.m_SvTestingCommands)
+						if((pCommand->m_Flags&CMDFLAG_TEST) && ClientID != IConsole::CLIENT_ID_GAME && !g_Config.m_SvTestingCommands)
 						{
 							Print(OUTPUT_LEVEL_STANDARD, "console", "Forbidden. Test commands are disabled on the server");
 							return;
@@ -972,7 +972,7 @@ CConsole::CConsole(int FlagMask)
 	// TODO: this should disappear
 	#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Flags,Desc) \
 	{ \
-		static CIntVariableData Data = { this, &g_Config.m_##Name, Min, Max, Def, static_cast<bool>((Flags) & CFGFLAG_READONLY) }; \
+		static CIntVariableData Data = { this, &g_Config.m_##Name, Min, Max, Def, static_cast<bool>(Flags & CFGFLAG_READONLY) }; \
 		Register(#ScriptName, "?i", Flags, IntVariableCommand, &Data, Desc); \
 	}
 
