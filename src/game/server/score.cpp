@@ -582,7 +582,7 @@ bool CScore::SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGam
 					"FROM %s_teamrace "
 					"WHERE Map = ? AND Name = ? AND DDNet7 = false"
 			") as l INNER JOIN %s_teamrace AS r ON l.ID = r.ID "
-			"ORDER BY l.ID, Name;",
+			"ORDER BY l.ID, Name COLLATE utf8mb4_bin;",
 			pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
 	pSqlServer->PrepareStatement(aBuf);
 	pSqlServer->BindString(1, pData->m_Map);
