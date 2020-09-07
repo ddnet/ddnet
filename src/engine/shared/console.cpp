@@ -509,7 +509,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bo
 							pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
 						}
 
-						if (pCommand->m_Flags&CMDFLAG_TEST)
+						if (ClientID != CLIENT_ID_GAME && pCommand->m_Flags&CMDFLAG_TEST)
 							m_Cheated = true;
 					}
 				}
@@ -972,7 +972,7 @@ CConsole::CConsole(int FlagMask)
 	// TODO: this should disappear
 	#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Flags,Desc) \
 	{ \
-		static CIntVariableData Data = { this, &g_Config.m_##Name, Min, Max, Def, static_cast<bool>(Flags & CFGFLAG_READONLY) }; \
+		static CIntVariableData Data = { this, &g_Config.m_##Name, Min, Max, Def, static_cast<bool>((Flags) & CFGFLAG_READONLY) }; \
 		Register(#ScriptName, "?i", Flags, IntVariableCommand, &Data, Desc); \
 	}
 
