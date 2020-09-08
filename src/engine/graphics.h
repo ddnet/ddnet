@@ -193,6 +193,9 @@ public:
 
 	virtual int LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType) = 0;
 
+	// destination and source buffer require to have the same width and height
+	virtual void CopyTextureBufferSub(uint8_t* pDestBuffer, uint8_t* pSourceBuffer, size_t FullWidth, size_t FullHeight, size_t ColorChannelCount, size_t SubOffsetX, size_t SubOffsetY, size_t SubCopyWidth, size_t SubCopyHeight) = 0;
+
 	virtual int UnloadTexture(CTextureHandle Index) = 0;
 	virtual CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName = NULL) = 0;
 	virtual int LoadTextureRawSub(CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData) = 0;

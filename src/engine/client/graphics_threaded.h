@@ -751,6 +751,8 @@ public:
 	virtual IGraphics::CTextureHandle LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags);
 	virtual int LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType);
 
+	void CopyTextureBufferSub(uint8_t* pDestBuffer, uint8_t* pSourceBuffer, size_t FullWidth, size_t FullHeight, size_t ColorChannelCount, size_t SubOffsetX, size_t SubOffsetY, size_t SubCopyWidth, size_t SubCopyHeight) override;
+
 	void ScreenshotDirect();
 
 	virtual void TextureSet(CTextureHandle TextureID);

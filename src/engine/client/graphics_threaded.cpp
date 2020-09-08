@@ -555,6 +555,16 @@ int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int Sto
 	return 1;
 }
 
+void CGraphics_Threaded::CopyTextureBufferSub(uint8_t* pDestBuffer, uint8_t* pSourceBuffer, size_t FullWidth, size_t FullHeight, size_t ColorChannelCount, size_t SubOffsetX, size_t SubOffsetY, size_t SubCopyWidth, size_t SubCopyHeight)
+{
+	for(size_t Y = 0; Y < SubCopyHeight; ++Y)
+	{
+		size_t ImgOffset = ((SubOffsetY + Y) * FullWidth * ColorChannelCount) + (SubOffsetX * ColorChannelCount);
+		size_t CopySize = SubCopyWidth * ColorChannelCount;
+		mem_copy(&pDestBuffer[ImgOffset], &pSourceBuffer[ImgOffset], CopySize);
+	}
+}
+
 void CGraphics_Threaded::KickCommandBuffer()
 {
 	m_pBackend->RunBuffer(m_pCommandBuffer);

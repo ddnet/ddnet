@@ -111,3 +111,17 @@ bool IsRotatableTile(int Index)
 		||  Index - ENTITY_OFFSET == ENTITY_CRAZY_SHOTGUN
 	);
 }
+
+bool IsCreditsTile(int TileIndex)
+{
+	return 	(
+			(TILE_CREDITS_1 == TileIndex)
+		||	(TILE_CREDITS_2 == TileIndex)
+		||	(TILE_CREDITS_3 == TileIndex)
+		||	(TILE_CREDITS_4 == TileIndex)
+		||	(TILE_CREDITS_5 == TileIndex)
+		||	(TILE_CREDITS_6 == TileIndex)
+		||	(TILE_CREDITS_7 == TileIndex)
+		||	(TILE_CREDITS_8 == TileIndex)
+	);
+}

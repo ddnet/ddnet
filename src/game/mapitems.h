@@ -484,5 +484,6 @@ bool IsValidSwitchTile(int Index);
 bool IsValidTuneTile(int Index);
 bool IsValidEntity(int Index);
 bool IsRotatableTile(int Index);
+bool IsCreditsTile(int TileIndex);
 
 #endif
