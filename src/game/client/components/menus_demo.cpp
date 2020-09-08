@@ -946,7 +946,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			UI()->DoLabelScaled(&Left, "SHA256:", 14.0f, -1);
 			char aSha[SHA256_MAXSTRSIZE];
 			sha256_str(m_lDemos[m_DemolistSelectedIndex].m_MapInfo.m_Sha256, aSha, sizeof(aSha)/2);
-			UI()->DoLabelScaled(&Right, aSha, 14.0f, -1);
+			UI()->DoLabelScaled(&Right, aSha, Right.w > 235 ? 14.0f : 11.0f, -1);
 			Labels.HSplitTop(5.0f, 0, &Labels);
 			Labels.HSplitTop(20.0f, &Left, &Labels);
 		}
@@ -1319,5 +1319,9 @@ void CMenus::RenderDemoList(CUIRect MainView)
 #endif
 	}
 
-	UI()->DoLabelScaled(&LabelRect, aFooterLabel, 14.0f, -1);
+#if defined(CONF_VIDEORECORDER)
+	// Doesn't always fit, not so important to show
+	if(PlayRect.x > 725)
+#endif
+		UI()->DoLabelScaled(&LabelRect, aFooterLabel, 14.0f, -1);
 }
