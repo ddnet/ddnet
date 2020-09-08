@@ -652,15 +652,6 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *ResponseToken)
 		if(Bytes <= 0)
 			break;
 
-		// check if we just should drop the packet
-		char aBuf[128];
-		if(NetBan() && NetBan()->IsBanned(&Addr, aBuf, sizeof(aBuf)))
-		{
-			// banned, reply with a message
-			CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, aBuf, str_length(aBuf)+1, NET_SECURITY_TOKEN_UNSUPPORTED);
-			continue;
-		}
-
 		SECURITY_TOKEN Token;
 		bool Sixup = false;
 		*ResponseToken = NET_SECURITY_TOKEN_UNKNOWN;
@@ -703,6 +694,15 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *ResponseToken)
 				if (Slot != -1)
 				{
 					// found
+
+					// check if we just should drop the packet
+					char aBuf[128];
+					if(NetBan() && NetBan()->IsBanned(&Addr, aBuf, sizeof(aBuf)))
+					{
+						// banned, reply with a message
+						CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, aBuf, str_length(aBuf)+1, NET_SECURITY_TOKEN_UNSUPPORTED);
+						continue;
+					}
 
 					// control
 					if(m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONTROL)
