@@ -458,7 +458,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	// close button
 	ButtonBar.VSplitRight(ButtonbarHeight*3, &ButtonBar, &Button);
 	static int s_ExitButton = 0;
-	if(DoButton_DemoPlayer(&s_ExitButton, Localize("Close"), 0, &Button))
+	if(DoButton_DemoPlayer(&s_ExitButton, Localize("Close"), 0, &Button) || Input()->KeyPress(KEY_C))
 	{
 		Client()->Disconnect();
 		DemolistOnUpdate(false);
@@ -946,7 +946,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			UI()->DoLabelScaled(&Left, "SHA256:", 14.0f, -1);
 			char aSha[SHA256_MAXSTRSIZE];
 			sha256_str(m_lDemos[m_DemolistSelectedIndex].m_MapInfo.m_Sha256, aSha, sizeof(aSha)/2);
-			UI()->DoLabelScaled(&Right, aSha, 14.0f, -1);
+			UI()->DoLabelScaled(&Right, aSha, Right.w > 235 ? 14.0f : 11.0f, -1);
 			Labels.HSplitTop(5.0f, 0, &Labels);
 			Labels.HSplitTop(20.0f, &Left, &Labels);
 		}
@@ -1245,7 +1245,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	}
 
 	static int s_PlayButton = 0;
-	if(DoButton_Menu(&s_PlayButton, m_DemolistSelectedIsDir?Localize("Open"):Localize("Play"), 0, &PlayRect) || Activated)
+	if(DoButton_Menu(&s_PlayButton, m_DemolistSelectedIsDir?Localize("Open"):Localize("Play"), 0, &PlayRect) || Activated || Input()->KeyPress(KEY_P))
 	{
 		if(m_DemolistSelectedIndex >= 0)
 		{
@@ -1282,7 +1282,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	if(!m_DemolistSelectedIsDir)
 	{
 		static int s_DeleteButton = 0;
-		if(DoButton_Menu(&s_DeleteButton, Localize("Delete"), 0, &DeleteRect) || m_DeletePressed)
+		if(DoButton_Menu(&s_DeleteButton, Localize("Delete"), 0, &DeleteRect) || m_DeletePressed || Input()->KeyPress(KEY_D))
 		{
 			if(m_DemolistSelectedIndex >= 0)
 			{
@@ -1306,7 +1306,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 #if defined(CONF_VIDEORECORDER)
 		static int s_RenderButton = 0;
-		if(DoButton_Menu(&s_RenderButton, Localize("Render"), 0, &RenderRect))
+		if(DoButton_Menu(&s_RenderButton, Localize("Render"), 0, &RenderRect) || Input()->KeyPress(KEY_R))
 		{
 			if(m_DemolistSelectedIndex >= 0)
 			{
@@ -1319,5 +1319,9 @@ void CMenus::RenderDemoList(CUIRect MainView)
 #endif
 	}
 
-	UI()->DoLabelScaled(&LabelRect, aFooterLabel, 14.0f, -1);
+#if defined(CONF_VIDEORECORDER)
+	// Doesn't always fit, not so important to show
+	if(PlayRect.x > 725)
+#endif
+		UI()->DoLabelScaled(&LabelRect, aFooterLabel, 14.0f, -1);
 }

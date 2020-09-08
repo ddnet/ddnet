@@ -1676,7 +1676,18 @@ int CMenus::Render()
 					}
 				}
 			}
-			Box.HSplitBottom(60.f, &Box, &Part);
+			Box.HSplitBottom(40.f, &Box, &Part);
+			Box.HSplitBottom(20.f, &Box, &Part);
+
+			Part.VSplitLeft(113.0f, 0, &Part);
+			Part.VSplitLeft(Button.h, &Button, &Part);
+			if(DoButton_CheckBox(&g_Config.m_ClVideoShowChat, Localize("Show chat"), g_Config.m_ClVideoShowChat, &Button))
+				g_Config.m_ClVideoShowChat ^= 1;
+			Part.VSplitLeft(112.0f, 0, &Part);
+			Part.VSplitLeft(Button.h, &Button, &Part);
+			if(DoButton_CheckBox(&g_Config.m_ClVideoSndEnable, Localize("Use sounds"), g_Config.m_ClVideoSndEnable, &Button))
+				g_Config.m_ClVideoSndEnable ^= 1;
+
 			Box.HSplitBottom(20.f, &Box, &Part);
 			Part.VSplitLeft(60.0f, 0, &Part);
 			Part.VSplitLeft(60.0f, 0, &Label);
@@ -1702,29 +1713,20 @@ int CMenus::Render()
 				IncDemoSpeed = true;
 
 			// speed meter
-			Part.VSplitLeft(15.0f, 0, &Part);
+			Part.VSplitLeft(8.0f, 0, &Part);
 			char aBuffer[64];
-			str_format(aBuffer, sizeof(aBuffer), "Speed: ×%g", g_aSpeeds[m_Speed]);
-			//str_format(aBuffer, sizeof(aBuffer), "Speed: ×%g", Speed);
-			UI()->DoLabel(&Part, aBuffer, Button.h*0.7f, -1);
+			str_format(aBuffer, sizeof(aBuffer), "%s: ×%g", Localize("Speed"), g_aSpeeds[m_Speed]);
+			UI()->DoLabel(&Part, aBuffer, 12.8f, -1);
 
 			if(IncDemoSpeed)
 				m_Speed = clamp(m_Speed + 1, 0, (int)(sizeof(g_aSpeeds)/sizeof(g_aSpeeds[0])-1));
 			else if(DecDemoSpeed)
 				m_Speed = clamp(m_Speed - 1, 0, (int)(sizeof(g_aSpeeds)/sizeof(g_aSpeeds[0])-1));
 
-			Part.VSplitLeft(100.0f, 0, &Part);
+			Part.VSplitLeft(107.0f, 0, &Part);
 			Part.VSplitLeft(Button.h, &Button, &Part);
 			if(DoButton_CheckBox(&g_Config.m_ClVideoShowhud, Localize("Show ingame HUD"), g_Config.m_ClVideoShowhud, &Button))
 				g_Config.m_ClVideoShowhud ^= 1;
-			Part.VSplitLeft(150.0f, 0, &Part);
-			Part.VSplitLeft(Button.h, &Button, &Part);
-			if(DoButton_CheckBox(&g_Config.m_ClVideoShowChat, Localize("Show chat"), g_Config.m_ClVideoShowChat, &Button))
-				g_Config.m_ClVideoShowChat ^= 1;
-			Part.VSplitLeft(150.0f, 0, &Part);
-			Part.VSplitLeft(Button.h, &Button, &Part);
-			if(DoButton_CheckBox(&g_Config.m_ClVideoSndEnable, Localize("Use sounds"), g_Config.m_ClVideoSndEnable, &Button))
-				g_Config.m_ClVideoSndEnable ^= 1;
 
 			Box.HSplitBottom(20.f, &Box, &Part);
 #if defined(__ANDROID__)
