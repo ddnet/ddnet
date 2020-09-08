@@ -5,6 +5,7 @@
 #	***			2011-01-05 18:48:00
 #	***			2011-04-12 17:53:42
 #	***			2011-07-04 23:31:22
+#	MikiGamer		2020-09-08 13:13:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -654,7 +655,7 @@ Personal best:
 == Najbolje osobno
 
 Learn
-== Učiti
+== Wiki
 
 Browser
 == Pretraživač
@@ -687,7 +688,7 @@ Are you sure that you want to disconnect your dummy?
 == Da li ste sigurni da želite diskonektovati dummy-a?
 
 Welcome to DDNet
-== Dobrodošni na DDNet
+== Dobrodošli na DDNet
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDraceNetwork je kooperativna online igra gdje je cilj da ti i tvoja grupa igrača dođete do finiša na mapi. Kao početnik trebalo bi da počneš igrati na Novice serverima, gdje se nalaze najlakše mape. U zavisnosti od ping-a izaberite server najbliži vama.
@@ -717,7 +718,7 @@ Destination file already exist
 == Destinacija fajla već postoji
 
 Video name:
-== Ime videa
+== Ime videa:
 
 Show DDNet map finishes in server browser
 == Prikaži završene DDNet mape u pretraživaču za servere
@@ -747,7 +748,7 @@ Types
 == Tipovi
 
 DDNet %s is out!
-== DDNet %s je izašao!
+== DDNet %s je dostupan!
 
 Downloading %s:
 == Preuzimanje %s:
@@ -756,7 +757,7 @@ Update failed! Check log...
 == Ažuriranje neuspješno! Provjeri log...
 
 DDNet Client updated!
-== DDNet Client ažuriran!
+== DDNet Klijent ažuriran!
 
 Update now
 == Ažuriraj sad
@@ -1143,10 +1144,10 @@ Best
 == 9+ novih označenja
 
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== 
+== Širina ili visina teksture %s nije djeljiva sa 16, zbog toga mogu nastati vizuelne greške.
 
 Country / Region
-== 
+== Zemlja / Regija
 
 %.2f MiB
 == 
