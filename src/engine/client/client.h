@@ -343,6 +343,7 @@ public:
 
 	void RequestDDNetInfo();
 	void ResetDDNetInfo();
+	bool IsDDNetInfoChanged();
 	void FinishDDNetInfo();
 	void LoadDDNetInfo();
 

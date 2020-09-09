@@ -2381,11 +2381,60 @@ void CClient::ResetDDNetInfo()
 	}
 }
 
+bool CClient::IsDDNetInfoChanged()
+{
+	IOHANDLE OldFile = m_pStorage->OpenFile(DDNET_INFO, IOFLAG_READ, IStorage::TYPE_SAVE);
+
+	if(!OldFile)
+		return true;
+
+	IOHANDLE NewFile = m_pStorage->OpenFile(m_aDDNetInfoTmp, IOFLAG_READ, IStorage::TYPE_SAVE);
+
+	if(NewFile)
+	{
+		char aOldData[4096];
+		char aNewData[4096];
+		unsigned OldBytes;
+		unsigned NewBytes;
+
+		do
+		{
+			OldBytes = io_read(OldFile, aOldData, sizeof(aOldData));
+			NewBytes = io_read(NewFile, aNewData, sizeof(aNewData));
+
+			if(OldBytes != NewBytes || mem_comp(aOldData, aNewData, OldBytes) != 0)
+			{
+				io_close(NewFile);
+				io_close(OldFile);
+				return true;
+			}
+		}
+		while(OldBytes > 0);
+
+		io_close(NewFile);
+	}
+
+	io_close(OldFile);
+	return false;
+}
+
 void CClient::FinishDDNetInfo()
 {
 	ResetDDNetInfo();
-	m_pStorage->RenameFile(m_aDDNetInfoTmp, DDNET_INFO, IStorage::TYPE_SAVE);
-	LoadDDNetInfo();
+	if(IsDDNetInfoChanged())
+	{
+		m_pStorage->RenameFile(m_aDDNetInfoTmp, DDNET_INFO, IStorage::TYPE_SAVE);
+		LoadDDNetInfo();
+
+		if(g_Config.m_UiPage == CMenus::PAGE_DDNET)
+			m_ServerBrowser.Refresh(IServerBrowser::TYPE_DDNET);
+		else if(g_Config.m_UiPage == CMenus::PAGE_KOG)
+			m_ServerBrowser.Refresh(IServerBrowser::TYPE_KOG);
+	}
+	else
+	{
+		m_pStorage->RemoveFile(m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
+	}
 }
 
 typedef std::tuple<int, int, int> Version;
