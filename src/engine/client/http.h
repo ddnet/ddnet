@@ -112,6 +112,6 @@ public:
 	CPostJson(const char *pUrl, CTimeout Timeout, const char *pJson);
 };
 
-bool HttpInit(IStorage *pStorage);
+bool HttpInit();
 void EscapeUrl(char *pBuf, int Size, const char *pStr);
 #endif // ENGINE_CLIENT_HTTP_H

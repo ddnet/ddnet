@@ -2895,8 +2895,6 @@ void CClient::InitInterfaces()
 
 	m_ServerBrowser.SetBaseInfo(&m_NetClient[CLIENT_CONTACT], m_pGameClient->NetVersion());
 
-	HttpInit(m_pStorage);
-
 #if defined(CONF_AUTOUPDATE)
 	m_Updater.Init();
 #endif
@@ -4184,6 +4182,8 @@ int main(int argc, const char **argv) // ignore_convention
 	pClient->RegisterCommands();
 
 	pKernel->RequestInterface<IGameClient>()->OnConsoleInit();
+
+	HttpInit();
 
 	// init client's interfaces
 	pClient->InitInterfaces();

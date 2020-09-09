@@ -39,7 +39,7 @@ static void CurlUnlock(CURL *pHandle, curl_lock_data Data, void *pUser)
 	lock_unlock(gs_aLocks[GetLockIndex(Data)]);
 }
 
-bool HttpInit(IStorage *pStorage)
+bool HttpInit()
 {
 	// print curl version
 	{
