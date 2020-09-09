@@ -6,7 +6,7 @@
 #include <memory>
 
 #include <base/hash.h>
-#include <engine/client/http.h>
+#include <engine/shared/http.h>
 
 #define CONNECTLINK "ddnet:"
 

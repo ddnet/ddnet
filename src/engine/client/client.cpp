@@ -34,7 +34,6 @@
 #include <engine/storage.h>
 #include <engine/textrender.h>
 
-#include <engine/client/http.h>
 #include <engine/client/notifications.h>
 #include <engine/shared/compression.h>
 #include <engine/shared/config.h>
@@ -43,6 +42,7 @@
 #include <engine/shared/fifo.h>
 #include <engine/shared/filecollection.h>
 #include <engine/shared/ghost.h>
+#include <engine/shared/http.h>
 #include <engine/shared/json.h>
 #include <engine/shared/network.h>
 #include <engine/shared/packer.h>

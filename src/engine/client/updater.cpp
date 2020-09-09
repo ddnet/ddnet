@@ -2,8 +2,8 @@
 
 #include <base/system.h>
 #include <engine/client.h>
-#include <engine/client/http.h>
 #include <engine/engine.h>
+#include <engine/shared/http.h>
 #include <engine/shared/json.h>
 #include <engine/storage.h>
 #include <game/version.h>
