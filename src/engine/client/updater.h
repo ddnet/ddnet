@@ -2,7 +2,6 @@
 #define ENGINE_CLIENT_UPDATER_H
 
 #include <engine/updater.h>
-#include <engine/client/http.h>
 #include <map>
 #include <string>
 

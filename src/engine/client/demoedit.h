@@ -1,9 +1,10 @@
 #ifndef ENGINE_CLIENT_DEMOEDIT_H
 #define ENGINE_CLIENT_DEMOEDIT_H
 
-#include <engine/client/http.h>
-
 #define CONNECTLINK "ddnet:"
+
+#include <engine/shared/demo.h>
+#include <engine/shared/jobs.h>
 
 class CDemoEdit : public IJob
 {

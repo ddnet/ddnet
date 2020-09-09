@@ -1,10 +1,11 @@
 #include "updater.h"
+
 #include <base/system.h>
-#include <engine/engine.h>
-#include <engine/storage.h>
 #include <engine/client.h>
-#include <engine/external/json-parser/json.h>
+#include <engine/client/http.h>
+#include <engine/engine.h>
 #include <engine/shared/json.h>
+#include <engine/storage.h>
 #include <game/version.h>
 
 #include <stdlib.h> // system

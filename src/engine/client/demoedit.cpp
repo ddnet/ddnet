@@ -1,5 +1,6 @@
-#include <engine/shared/demo.h>
 #include "demoedit.h"
+
+#include <engine/storage.h>
 
 CDemoEdit::CDemoEdit(const char *pNetVersion, class CSnapshotDelta *pSnapshotDelta, IStorage *pStorage, const char *pDemo, const char *pDst, int StartTick, int EndTick) :
 	m_SnapshotDelta(*pSnapshotDelta),

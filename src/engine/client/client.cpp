@@ -36,10 +36,11 @@
 
 #include <engine/client/http.h>
 #include <engine/client/notifications.h>
-#include <engine/shared/config.h>
 #include <engine/shared/compression.h>
+#include <engine/shared/config.h>
 #include <engine/shared/datafile.h>
 #include <engine/shared/demo.h>
+#include <engine/shared/fifo.h>
 #include <engine/shared/filecollection.h>
 #include <engine/shared/ghost.h>
 #include <engine/shared/json.h>
@@ -49,7 +50,6 @@
 #include <engine/shared/protocol_ex.h>
 #include <engine/shared/ringbuffer.h>
 #include <engine/shared/snapshot.h>
-#include <engine/shared/fifo.h>
 #include <engine/shared/uuid_manager.h>
 
 #include <game/extrainfo.h>
