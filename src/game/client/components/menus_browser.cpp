@@ -691,9 +691,9 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	{
 		int Network = g_Config.m_UiPage == PAGE_DDNET ? IServerBrowser::NETWORK_DDNET : IServerBrowser::NETWORK_KOG;
 		// add more space
-		ServerFilter.HSplitTop(10.0f, 0, &ServerFilter);
+		ServerFilter.HSplitTop(5.0f, 0, &ServerFilter);
 		ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
-		ServerFilter.HSplitTop(95.0f, &ServerFilter, 0);
+		ServerFilter.HSplitTop(123.0f, &ServerFilter, 0);
 
 		RenderTools()->DrawUIRect(&ServerFilter, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
 
