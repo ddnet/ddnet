@@ -23,12 +23,12 @@
 #include <game/version.h>
 #include <game/generated/protocol.h>
 
-#include <game/generated/client_data.h>
 #include <game/client/components/binds.h>
 #include <game/client/components/console.h>
 #include <game/client/components/sounds.h>
 #include <game/client/gameclient.h>
 #include <game/client/lineinput.h>
+#include <game/generated/client_data.h>
 #include <game/localization.h>
 #include <mastersrv/mastersrv.h>
 
@@ -158,7 +158,7 @@ int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const
 	if(pImageName)
 	{
 		CUIRect Image;
-		pRect->VSplitRight(pRect->h*4.0f, &Text, &Image); // always correct ratio for image
+		pRect->VSplitRight(pRect->h * 4.0f, &Text, &Image); // always correct ratio for image
 
 		// render image
 		const CMenuImage *pImage = FindMenuImage(pImageName);
@@ -175,12 +175,11 @@ int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const
 		}
 	}
 
-	Text.HMargin(pRect->h>=20.0f?2.0f:1.0f, &Text);
-	Text.HMargin((Text.h*FontFactor)/2.0f, &Text);
-	UI()->DoLabel(&Text, pText, Text.h*ms_FontmodHeight, 0);
+	Text.HMargin(pRect->h >= 20.0f ? 2.0f : 1.0f, &Text);
+	Text.HMargin((Text.h * FontFactor) / 2.0f, &Text);
+	UI()->DoLabel(&Text, pText, Text.h * ms_FontmodHeight, 0);
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
 }
-
 
 void CMenus::DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {
@@ -728,7 +727,7 @@ int CMenus::RenderMenubar(CUIRect r)
 	if(Client()->State() == IClient::STATE_OFFLINE)
 	{
 		Box.VSplitLeft(100.0f, &Button, &Box);
-		static int s_StartButton=0;
+		static int s_StartButton = 0;
 		if(DoButton_MenuTab(&s_StartButton, Localize("Menu"), false, &Button, CUI::CORNER_T))
 		{
 			m_ShowStart = true;
@@ -741,8 +740,8 @@ int CMenus::RenderMenubar(CUIRect r)
 		if(m_ActivePage == PAGE_NEWS)
 		{
 			Box.VSplitLeft(100.0f, &Button, &Box);
-			static int s_NewsButton=0;
-			if(DoButton_MenuTab(&s_NewsButton, Localize("News"), m_ActivePage==PAGE_NEWS, &Button, CUI::CORNER_T))
+			static int s_NewsButton = 0;
+			if(DoButton_MenuTab(&s_NewsButton, Localize("News"), m_ActivePage == PAGE_NEWS, &Button, CUI::CORNER_T))
 			{
 				NewPage = PAGE_NEWS;
 				m_DoubleClickIndex = -1;
@@ -751,8 +750,8 @@ int CMenus::RenderMenubar(CUIRect r)
 		else if(m_ActivePage == PAGE_DEMOS)
 		{
 			Box.VSplitLeft(100.0f, &Button, &Box);
-			static int s_DemosButton=0;
-			if(DoButton_MenuTab(&s_DemosButton, Localize("Demos"), m_ActivePage==PAGE_DEMOS, &Button, CUI::CORNER_T))
+			static int s_DemosButton = 0;
+			if(DoButton_MenuTab(&s_DemosButton, Localize("Demos"), m_ActivePage == PAGE_DEMOS, &Button, CUI::CORNER_T))
 			{
 				DemolistPopulate();
 				NewPage = PAGE_DEMOS;
@@ -762,8 +761,8 @@ int CMenus::RenderMenubar(CUIRect r)
 		else
 		{
 			Box.VSplitLeft(100.0f, &Button, &Box);
-			static int s_InternetButton=0;
-			if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), m_ActivePage==PAGE_INTERNET, &Button, CUI::CORNER_TL))
+			static int s_InternetButton = 0;
+			if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), m_ActivePage == PAGE_INTERNET, &Button, CUI::CORNER_TL))
 			{
 				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_INTERNET)
 					ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
@@ -772,8 +771,8 @@ int CMenus::RenderMenubar(CUIRect r)
 			}
 
 			Box.VSplitLeft(100.0f, &Button, &Box);
-			static int s_LanButton=0;
-			if(DoButton_MenuTab(&s_LanButton, Localize("LAN"), m_ActivePage==PAGE_LAN, &Button, 0))
+			static int s_LanButton = 0;
+			if(DoButton_MenuTab(&s_LanButton, Localize("LAN"), m_ActivePage == PAGE_LAN, &Button, 0))
 			{
 				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_LAN)
 					ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
@@ -782,8 +781,8 @@ int CMenus::RenderMenubar(CUIRect r)
 			}
 
 			Box.VSplitLeft(100.0f, &Button, &Box);
-			static int s_FavoritesButton=0;
-			if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), m_ActivePage==PAGE_FAVORITES, &Button, 0))
+			static int s_FavoritesButton = 0;
+			if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), m_ActivePage == PAGE_FAVORITES, &Button, 0))
 			{
 				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_FAVORITES)
 					ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
@@ -792,8 +791,8 @@ int CMenus::RenderMenubar(CUIRect r)
 			}
 
 			Box.VSplitLeft(100.0f, &Button, &Box);
-			static int s_DDNetButton=0;
-			if(DoButton_MenuTab(&s_DDNetButton, "DDNet", m_ActivePage==PAGE_DDNET, &Button, 0))
+			static int s_DDNetButton = 0;
+			if(DoButton_MenuTab(&s_DDNetButton, "DDNet", m_ActivePage == PAGE_DDNET, &Button, 0))
 			{
 				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_DDNET)
 				{
@@ -805,8 +804,8 @@ int CMenus::RenderMenubar(CUIRect r)
 			}
 
 			Box.VSplitLeft(100.0f, &Button, &Box);
-			static int s_KoGButton=0;
-			if(DoButton_MenuTab(&s_KoGButton, "KoG", m_ActivePage==PAGE_KOG, &Button, CUI::CORNER_TR))
+			static int s_KoGButton = 0;
+			if(DoButton_MenuTab(&s_KoGButton, "KoG", m_ActivePage == PAGE_KOG, &Button, CUI::CORNER_TR))
 			{
 				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_KOG)
 				{
@@ -846,7 +845,7 @@ int CMenus::RenderMenubar(CUIRect r)
 			if(GameClient()->m_GameInfo.m_Race)
 			{
 				Box.VSplitLeft(90.0f, &Button, &Box);
-				if(DoButton_MenuTab(&s_GhostButton, Localize("Ghost"), m_ActivePage==PAGE_GHOST, &Button, 0))
+				if(DoButton_MenuTab(&s_GhostButton, Localize("Ghost"), m_ActivePage == PAGE_GHOST, &Button, 0))
 					NewPage = PAGE_GHOST;
 			}
 		}
@@ -2215,8 +2214,8 @@ void CMenus::RenderBackground()
 bool CMenus::CheckHotKey(int Key) const
 {
 	return m_Popup == POPUP_NONE &&
-		!Input()->KeyIsPressed(KEY_LSHIFT) && !Input()->KeyIsPressed(KEY_RSHIFT) && !Input()->KeyIsPressed(KEY_LCTRL) && !Input()->KeyIsPressed(KEY_RCTRL) && !Input()->KeyIsPressed(KEY_LALT) && // no modifier
-		Input()->KeyIsPressed(Key) && m_pClient->m_pGameConsole->IsClosed();
+	       !Input()->KeyIsPressed(KEY_LSHIFT) && !Input()->KeyIsPressed(KEY_RSHIFT) && !Input()->KeyIsPressed(KEY_LCTRL) && !Input()->KeyIsPressed(KEY_RCTRL) && !Input()->KeyIsPressed(KEY_LALT) && // no modifier
+	       Input()->KeyIsPressed(Key) && m_pClient->m_pGameConsole->IsClosed();
 }
 
 int CMenus::DoButton_CheckBox_DontCare(const void *pID, const char *pText, int Checked, const CUIRect *pRect)

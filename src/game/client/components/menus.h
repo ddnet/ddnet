@@ -49,7 +49,7 @@ class CMenus : public CComponent
 	int DoButton_DemoPlayer(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 	int DoButton_Sprite(const void *pID, int ImageID, int SpriteID, int Checked, const CUIRect *pRect, int Corners);
 	int DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, bool Active);
-	int DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pImageName=0, int Corners=CUI::CORNER_ALL, float r=5.0f, float FontFactor=0.0f, vec4 ColorHot=vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4 Color=vec4(1,1,1,0.5f));
+	int DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pImageName = 0, int Corners = CUI::CORNER_ALL, float r = 5.0f, float FontFactor = 0.0f, vec4 ColorHot = vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4 Color = vec4(1, 1, 1, 0.5f));
 	int DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners);
 
 	int DoButton_CheckBox_Common(const void *pID, const char *pText, const char *pBoxText, const CUIRect *pRect);
@@ -124,7 +124,7 @@ class CMenus : public CComponent
 
 	static int MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser);
 
-	const CMenuImage *FindMenuImage(const char* pName);
+	const CMenuImage *FindMenuImage(const char *pName);
 
 	// loading
 	int m_LoadCurrent;
@@ -462,7 +462,6 @@ public:
 	};
 
 private:
-
 	static int GhostlistFetchCallback(const char *pName, int IsDir, int StorageType, void *pUser);
 	void SetMenuPage(int NewPage);
 

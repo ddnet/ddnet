@@ -486,7 +486,7 @@ public:
 		GetPath(Type, pDir, pBuffer, BufferSize);
 	}
 
-	virtual const char* GetBinaryPath(const char *pFilename, char *pBuffer, unsigned BufferSize)
+	virtual const char *GetBinaryPath(const char *pFilename, char *pBuffer, unsigned BufferSize)
 	{
 		str_format(pBuffer, BufferSize, "%s%s%s", m_aBinarydir, !m_aBinarydir[0] ? "" : "/", pFilename);
 		return pBuffer;

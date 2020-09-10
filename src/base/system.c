@@ -17,33 +17,33 @@
 #endif
 
 #if defined(CONF_FAMILY_UNIX)
-	#include <sys/time.h>
-	#include <sys/wait.h>
-	#include <unistd.h>
-	#include <signal.h>
+#include <signal.h>
+#include <sys/time.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
-	/* unix net includes */
-	#include <sys/socket.h>
-	#include <sys/ioctl.h>
-	#include <errno.h>
-	#include <netdb.h>
-	#include <netinet/in.h>
-	#include <fcntl.h>
-	#include <pthread.h>
-	#include <arpa/inet.h>
+/* unix net includes */
+#include <arpa/inet.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <pthread.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
 
-	#include <dirent.h>
+#include <dirent.h>
 
-	#if defined(CONF_PLATFORM_MACOSX)
-		// some lock and pthread functions are already defined in headers
-		// included from Carbon.h
-		// this prevents having duplicate definitions of those
-		#define _lock_set_user_
-		#define _task_user_
+#if defined(CONF_PLATFORM_MACOSX)
+// some lock and pthread functions are already defined in headers
+// included from Carbon.h
+// this prevents having duplicate definitions of those
+#define _lock_set_user_
+#define _task_user_
 
-		#include <Carbon/Carbon.h>
-		#include <mach/mach_time.h>
-	#endif
+#include <Carbon/Carbon.h>
+#include <mach/mach_time.h>
+#endif
 
 #elif defined(CONF_FAMILY_WINDOWS)
 	#define WIN32_LEAN_AND_MEAN

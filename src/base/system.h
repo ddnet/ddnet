@@ -1029,7 +1029,6 @@ void str_utf8_truncate(char *dst, int dst_size, const char *src, int truncation_
 */
 void str_truncate(char *dst, int dst_size, const char *src, int truncation_len);
 
-
 /*
 	Function: str_length
 		Returns the length of a zero terminated string.

@@ -7,11 +7,11 @@
 #include <engine/client/updater.h>
 #include <engine/shared/config.h>
 
-#include <game/editor/editor.h>
-#include <game/version.h>
 #include <game/client/components/console.h>
 #include <game/client/render.h>
 #include <game/client/ui.h>
+#include <game/editor/editor.h>
+#include <game/version.h>
 
 #include "menus.h"
 
@@ -20,13 +20,13 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	// render logo
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_BANNER].m_Id);
 	Graphics()->QuadsBegin();
-	Graphics()->SetColor(1,1,1,1);
-	IGraphics::CQuadItem QuadItem(MainView.w/2-170, 60, 360, 103);
+	Graphics()->SetColor(1, 1, 1, 1);
+	IGraphics::CQuadItem QuadItem(MainView.w / 2 - 170, 60, 360, 103);
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
 
 	const float Rounding = 10.0f;
-	const float VMargin = MainView.w/2-190.0f;
+	const float VMargin = MainView.w / 2 - 190.0f;
 
 	CUIRect Button;
 	int NewPage = -1;

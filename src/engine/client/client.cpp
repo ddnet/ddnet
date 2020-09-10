@@ -65,9 +65,9 @@
 	#include <windows.h>
 #endif
 
+#include "client.h"
 #include "friends.h"
 #include "serverbrowser.h"
-#include "client.h"
 
 #if defined(CONF_VIDEORECORDER)
 	#include "video.h"
