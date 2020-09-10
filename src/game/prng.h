@@ -1,5 +1,5 @@
-#ifndef GAME_SERVER_PRNG_H
-#define GAME_SERVER_PRNG_H
+#ifndef GAME_PRNG_H
+#define GAME_PRNG_H
 
 #include <base/system.h>
 
@@ -29,4 +29,4 @@ private:
 	uint64 m_Increment;
 };
 
-#endif // GAME_SERVER_PRNG_H
+#endif // GAME_PRNG_H
