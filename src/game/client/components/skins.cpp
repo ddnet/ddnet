@@ -196,7 +196,7 @@ const CSkins::CSkin *CSkins::Get(int Index)
 	return &m_aSkins[Index % m_aSkins.size()];
 }
 
-int CSkins::Find(const char *pName) const
+int CSkins::Find(const char *pName)
 {
 	const char *pSkinPrefix = m_EventSkinPrefix[0] ? m_EventSkinPrefix : g_Config.m_ClSkinPrefix;
 	if(g_Config.m_ClVanillaSkinsOnly && !IsVanillaSkin(pName))
@@ -217,14 +217,11 @@ int CSkins::Find(const char *pName) const
 	return FindImpl(pName);
 }
 
-int CSkins::FindImpl(const char *pName) const
+int CSkins::FindImpl(const char *pName)
 {
-	for(int i = 0; i < m_aSkins.size(); i++)
-	{
-		if(str_comp(m_aSkins[i].m_aName, pName) == 0)
-		{
-			return i;
-		}
-	}
-	return -1;
+	auto r = ::find_binary(m_aSkins.all(), pName);
+	if(r.empty())
+		return -1;
+
+	return &r.front() - m_aSkins.base_ptr();
 }
