@@ -59,7 +59,7 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 				CMapItemLayerTilemap *pTLayer = (CMapItemLayerTilemap *)pLayer;
 				if(pTLayer->m_Image != -1 && pTLayer->m_Image < (int)(sizeof(m_aTextures) / sizeof(m_aTextures[0])))
 				{
-					m_aTextureUsedByTileOrQuadLayerFlag[(size_t)pTLayer->m_Image] |= 1;
+					m_aTextureUsedByTileOrQuadLayerFlag[pTLayer->m_Image] |= 1;
 				}
 			}
 			else if(pLayer->m_Type == LAYERTYPE_QUADS)
@@ -67,7 +67,7 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 				CMapItemLayerQuads *pQLayer = (CMapItemLayerQuads *)pLayer;
 				if(pQLayer->m_Image != -1 && pQLayer->m_Image < (int)(sizeof(m_aTextures) / sizeof(m_aTextures[0])))
 				{
-					m_aTextureUsedByTileOrQuadLayerFlag[(size_t)pQLayer->m_Image] |= 2;
+					m_aTextureUsedByTileOrQuadLayerFlag[pQLayer->m_Image] |= 2;
 				}
 			}
 		}
@@ -157,7 +157,7 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 		pEntities = "race";
 		EntitiesModType = MAP_IMAGE_MOD_TYPE_RACE;
 	}
-	else if (GameClient()->m_GameInfo.m_EntitiesBW)
+	else if(GameClient()->m_GameInfo.m_EntitiesBW)
 	{
 		pEntities = "blockworlds";
 		EntitiesModType = MAP_IMAGE_MOD_TYPE_BLOCKWORLDS;
@@ -176,7 +176,7 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 	if(!m_EntitiesIsLoaded[EntitiesModType])
 	{
 		m_EntitiesIsLoaded[EntitiesModType] = true;
-		
+
 		bool WasUnknwon = EntitiesModType == MAP_IMAGE_MOD_TYPE_UNKNOWN;
 
 		char aPath[64];
@@ -193,7 +193,7 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 		CImageInfo ImgInfo;
 		if(Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL) && ImgInfo.m_Width > 0 && ImgInfo.m_Height > 0)
 		{
-			size_t ColorChannelCount = 0;
+			int ColorChannelCount = 0;
 			if(ImgInfo.m_Format == CImageInfo::FORMAT_ALPHA)
 				ColorChannelCount = 1;
 			else if(ImgInfo.m_Format == CImageInfo::FORMAT_RGB)
@@ -201,48 +201,48 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 			else if(ImgInfo.m_Format == CImageInfo::FORMAT_RGBA)
 				ColorChannelCount = 4;
 
-			size_t BuildImageSize = ColorChannelCount * (size_t)ImgInfo.m_Width * (size_t)ImgInfo.m_Height;
+			int BuildImageSize = ColorChannelCount * ImgInfo.m_Width * ImgInfo.m_Height;
 
-			uint8_t* pTmpImgData = (uint8_t*)ImgInfo.m_pData;
-			uint8_t* pBuildImgData = (uint8_t*)malloc(BuildImageSize);
-			
+			uint8_t *pTmpImgData = (uint8_t *)ImgInfo.m_pData;
+			uint8_t *pBuildImgData = (uint8_t *)malloc(BuildImageSize);
+
 			// build game layer
-			for(size_t n = 0; n < MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT; ++n)
+			for(int n = 0; n < MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT; ++n)
 			{
 				bool BuildThisLayer = true;
-				if(n == (size_t)MAP_IMAGE_ENTITY_LAYER_TYPE_FRONT && !GameTypeHasFrontLayer)
+				if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_FRONT && !GameTypeHasFrontLayer)
 					BuildThisLayer = false;
-				else if(n == (size_t)MAP_IMAGE_ENTITY_LAYER_TYPE_SPEEDUP && !GameTypeHasSpeedupLayer)
+				else if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_SPEEDUP && !GameTypeHasSpeedupLayer)
 					BuildThisLayer = false;
-				else if(n == (size_t)MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH && !GameTypeHasSwitchLayer)
+				else if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH && !GameTypeHasSwitchLayer)
 					BuildThisLayer = false;
-				else if(n == (size_t)MAP_IMAGE_ENTITY_LAYER_TYPE_TELE && !GameTypeHasTeleLayer)
+				else if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_TELE && !GameTypeHasTeleLayer)
 					BuildThisLayer = false;
-				else if(n == (size_t)MAP_IMAGE_ENTITY_LAYER_TYPE_TUNE && !GameTypeHasTuneLayer)
+				else if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_TUNE && !GameTypeHasTuneLayer)
 					BuildThisLayer = false;
 
-				dbg_assert(m_EntitiesTextures[EntitiesModType][n] == -1, "This should not happen.");
+				dbg_assert(m_EntitiesTextures[EntitiesModType][n] == -1, "entities texture already loaded when it should not be");
 
 				if(BuildThisLayer)
 				{
 					// set everything transparent
 					mem_zero(pBuildImgData, BuildImageSize);
 
-					for(size_t i = 0; i < 256; ++i)
+					for(int i = 0; i < 256; ++i)
 					{
 						bool ValidTile = i != 0;
-						size_t TileIndex = i;
+						int TileIndex = i;
 						if(EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET || EntitiesModType == MAP_IMAGE_MOD_TYPE_DDRACE)
 						{
 							if(EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET || TileIndex != TILE_BOOST)
 							{
-								if(n == (size_t)MAP_IMAGE_ENTITY_LAYER_TYPE_GAME && !IsValidGameTile((int)TileIndex))
+								if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_GAME && !IsValidGameTile((int)TileIndex))
 									ValidTile = false;
-								else if(n == (size_t)MAP_IMAGE_ENTITY_LAYER_TYPE_FRONT && !IsValidFrontTile((int)TileIndex))
+								else if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_FRONT && !IsValidFrontTile((int)TileIndex))
 									ValidTile = false;
-								else if(n == (size_t)MAP_IMAGE_ENTITY_LAYER_TYPE_SPEEDUP && !IsValidSpeedupTile((int)TileIndex))
+								else if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_SPEEDUP && !IsValidSpeedupTile((int)TileIndex))
 									ValidTile = false;
-								else if(n == (size_t)MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH)
+								else if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH)
 								{
 									if(!IsValidSwitchTile((int)TileIndex))
 										ValidTile = false;
@@ -250,11 +250,11 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 									{
 										if(TileIndex == TILE_SWITCHTIMEDOPEN)
 											TileIndex = 8;
-									}								
+									}
 								}
-								else if(n == (size_t)MAP_IMAGE_ENTITY_LAYER_TYPE_TELE && !IsValidTeleTile((int)TileIndex))
+								else if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_TELE && !IsValidTeleTile((int)TileIndex))
 									ValidTile = false;
-								else if(n == (size_t)MAP_IMAGE_ENTITY_LAYER_TYPE_TUNE && !IsValidTuneTile((int)TileIndex))
+								else if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_TUNE && !IsValidTuneTile((int)TileIndex))
 									ValidTile = false;
 							}
 						}
@@ -275,14 +275,14 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 							ValidTile = false;
 						}*/
 
-						size_t X = TileIndex % 16;
-						size_t Y = TileIndex / 16;
+						int X = TileIndex % 16;
+						int Y = TileIndex / 16;
 
-						size_t CopyWidth = (size_t)ImgInfo.m_Width / 16;
-						size_t CopyHeight = (size_t)ImgInfo.m_Height / 16;
+						int CopyWidth = ImgInfo.m_Width / 16;
+						int CopyHeight = ImgInfo.m_Height / 16;
 						if(ValidTile)
 						{
-							Graphics()->CopyTextureBufferSub(pBuildImgData, pTmpImgData, (size_t)ImgInfo.m_Width, (size_t)ImgInfo.m_Height, ColorChannelCount, X * CopyWidth, Y * CopyHeight, CopyWidth, CopyHeight);
+							Graphics()->CopyTextureBufferSub(pBuildImgData, pTmpImgData, ImgInfo.m_Width, ImgInfo.m_Height, ColorChannelCount, X * CopyWidth, Y * CopyHeight, CopyWidth, CopyHeight);
 						}
 					}
 
@@ -298,14 +298,14 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 						m_TransparentTexture = Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, pBuildImgData, ImgInfo.m_Format, TextureLoadFlag, aPath);
 					}
 					m_EntitiesTextures[EntitiesModType][n] = m_TransparentTexture;
-				}				
+				}
 			}
 
 			free(pBuildImgData);
 		}
 	}
 
-	return m_EntitiesTextures[EntitiesModType][(size_t)EntityLayerType];
+	return m_EntitiesTextures[EntitiesModType][EntityLayerType];
 }
 
 IGraphics::CTextureHandle CMapImages::GetSpeedupArrow()

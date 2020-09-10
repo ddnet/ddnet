@@ -42,6 +42,7 @@ class CMapImages : public CComponent
 	bool HasSwitchLayer();
 	bool HasTeleLayer();
 	bool HasTuneLayer();
+
 public:
 	CMapImages();
 	CMapImages(int ImageSize);
@@ -57,7 +58,7 @@ public:
 	// DDRace
 	IGraphics::CTextureHandle GetEntities(EMapImageEntityLayerType EntityLayerType);
 	IGraphics::CTextureHandle GetSpeedupArrow();
-	
+
 	IGraphics::CTextureHandle GetOverlayBottom();
 	IGraphics::CTextureHandle GetOverlayTop();
 	IGraphics::CTextureHandle GetOverlayCenter();
@@ -75,7 +76,7 @@ private:
 	IGraphics::CTextureHandle m_OverlayCenterTexture;
 	IGraphics::CTextureHandle m_TransparentTexture;
 	int m_TextureScale;
-	
+
 	void InitOverlayTextures();
 	IGraphics::CTextureHandle UploadEntityLayerText(int TextureSize, int MaxWidth, int YOffset);
 	void UpdateEntityLayerText(void* pTexBuffer, int ImageColorChannelCount, int TexWidth, int TexHeight, int TextureSize, int MaxWidth, int YOffset, int NumbersPower, int MaxNumber = -1);

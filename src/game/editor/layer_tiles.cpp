@@ -1548,20 +1548,20 @@ void CLayerSpeedup::BrushDraw(CLayer *pBrush, float wx, float wy)
 				}
 				else
 				{
-					m_pSpeedupTile[fy*m_Width+fx].m_Force = 0;
-					m_pSpeedupTile[fy*m_Width+fx].m_MaxSpeed = 0;
-					m_pSpeedupTile[fy*m_Width+fx].m_Angle = 0;
-					m_pSpeedupTile[fy*m_Width+fx].m_Type = 0;
-					m_pTiles[fy*m_Width+fx].m_Index = 0;
+					m_pSpeedupTile[fy * m_Width + fx].m_Force = 0;
+					m_pSpeedupTile[fy * m_Width + fx].m_MaxSpeed = 0;
+					m_pSpeedupTile[fy * m_Width + fx].m_Angle = 0;
+					m_pSpeedupTile[fy * m_Width + fx].m_Type = 0;
+					m_pTiles[fy * m_Width + fx].m_Index = 0;
 				}
 			}
 			else
 			{
-				m_pSpeedupTile[fy*m_Width+fx].m_Force = 0;
-				m_pSpeedupTile[fy*m_Width+fx].m_MaxSpeed = 0;
-				m_pSpeedupTile[fy*m_Width+fx].m_Angle = 0;
-				m_pSpeedupTile[fy*m_Width+fx].m_Type = 0;
-				m_pTiles[fy*m_Width+fx].m_Index = 0;
+				m_pSpeedupTile[fy * m_Width + fx].m_Force = 0;
+				m_pSpeedupTile[fy * m_Width + fx].m_MaxSpeed = 0;
+				m_pSpeedupTile[fy * m_Width + fx].m_Angle = 0;
+				m_pSpeedupTile[fy * m_Width + fx].m_Type = 0;
+				m_pTiles[fy * m_Width + fx].m_Index = 0;
 			}
 		}
 	FlagModified(sx, sy, l->m_Width, l->m_Height);
