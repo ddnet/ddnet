@@ -20,6 +20,7 @@ public:
 	virtual void ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize);
 	virtual const char *InsertTimestampAsUtc() const { return "DATETIME(?, 'utc')"; }
 	virtual const char *CollateNocase() const { return "? COLLATE NOCASE"; }
+	virtual const char *InsertIgnore() const { return "INSERT OR IGNORE"; };
 
 	virtual Status Connect();
 	virtual void Disconnect();
@@ -34,6 +35,7 @@ public:
 	virtual void BindInt(int Idx, int Value);
 	virtual void BindFloat(int Idx, float Value);
 
+	virtual void Print();
 	virtual bool Step();
 
 	virtual bool IsNull(int Col) const;
@@ -42,7 +44,6 @@ public:
 	virtual void GetString(int Col, char *pBuffer, int BufferSize) const;
 	// passing a negative buffer size is undefined behavior
 	virtual int GetBlob(int Col, unsigned char *pBuffer, int BufferSize) const;
-	virtual const char *GetInsertIgnore() const;
 
 	virtual void AddPoints(const char *pPlayer, int Points);
 
