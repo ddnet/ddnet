@@ -1001,15 +1001,16 @@ void CMenus::OnInit()
 
 	m_TextureBlob = Graphics()->LoadTexture("blob.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 
+	// setup load amount
+	const int NumMenuImages = 5;
+	m_LoadCurrent = 0;
+	m_LoadTotal = g_pData->m_NumImages + NumMenuImages;
+	if(!g_Config.m_ClThreadsoundloading)
+		m_LoadTotal += g_pData->m_NumSounds;
+
 	// load menu images
 	m_lMenuImages.clear();
 	Storage()->ListDirectory(IStorage::TYPE_ALL, "menuimages", MenuImageScan, this);
-
-	// setup load amount
-	m_LoadCurrent = 0;
-	m_LoadTotal = g_pData->m_NumImages;
-	if(!g_Config.m_ClThreadsoundloading)
-		m_LoadTotal += g_pData->m_NumSounds;
 }
 
 void CMenus::PopupMessage(const char *pTopic, const char *pBody, const char *pButton)
@@ -2358,8 +2359,6 @@ int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser
 
 	// set menu image data
 	str_truncate(MenuImage.m_aName, sizeof(MenuImage.m_aName), pName, str_length(pName) - 4);
-	str_format(aBuf, sizeof(aBuf), "load menu image %s", MenuImage.m_aName);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
 	pSelf->m_lMenuImages.add(MenuImage);
 	pSelf->RenderLoading();
 
