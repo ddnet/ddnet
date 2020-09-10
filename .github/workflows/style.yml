@@ -23,4 +23,5 @@ jobs:
     - name: Check style
       run: |
         clang-format -version
-        python3 scripts/fix_style.py --dry-run --base "$(git merge-base origin/master $GITHUB_SHA)"
+        scripts/fix_style.py --dry-run --base "$(git merge-base origin/master $GITHUB_SHA)"
+        scripts/check_header_guards.py
