@@ -508,33 +508,34 @@ bool CScore::SaveScoreThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 
 	// save score. Can't fail, because no UNIQUE/PRIMARY KEY constrain is defined.
 	str_format(aBuf, sizeof(aBuf),
-			"%s INTO %s_race("
-				"Map, Name, Timestamp, Time, Server, "
-				"cp1, cp2, cp3, cp4, cp5, cp6, cp7, cp8, cp9, cp10, cp11, cp12, cp13, "
-				"cp14, cp15, cp16, cp17, cp18, cp19, cp20, cp21, cp22, cp23, cp24, cp25, "
-				"GameID, DDNet7) "
-			"VALUES (?, ?, %s, %.2f, ?, "
-				"%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, "
-				"%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, "
-				"%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, "
-				"?, false);",
-			pSqlServer->GetInsertIgnore(), pSqlServer->GetPrefix(),
-			pSqlServer->InsertTimestampAsUtc(), pData->m_Time,
-			pData->m_aCpCurrent[0], pData->m_aCpCurrent[1], pData->m_aCpCurrent[2],
-			pData->m_aCpCurrent[3], pData->m_aCpCurrent[4], pData->m_aCpCurrent[5],
-			pData->m_aCpCurrent[6], pData->m_aCpCurrent[7], pData->m_aCpCurrent[8],
-			pData->m_aCpCurrent[9], pData->m_aCpCurrent[10], pData->m_aCpCurrent[11],
-			pData->m_aCpCurrent[12], pData->m_aCpCurrent[13], pData->m_aCpCurrent[14],
-			pData->m_aCpCurrent[15], pData->m_aCpCurrent[16], pData->m_aCpCurrent[17],
-			pData->m_aCpCurrent[18], pData->m_aCpCurrent[19], pData->m_aCpCurrent[20],
-			pData->m_aCpCurrent[21], pData->m_aCpCurrent[22], pData->m_aCpCurrent[23],
-			pData->m_aCpCurrent[24]);
+		"%s INTO %s_race("
+		"	Map, Name, Timestamp, Time, Server, "
+		"	cp1, cp2, cp3, cp4, cp5, cp6, cp7, cp8, cp9, cp10, cp11, cp12, cp13, "
+		"	cp14, cp15, cp16, cp17, cp18, cp19, cp20, cp21, cp22, cp23, cp24, cp25, "
+		"	GameID, DDNet7) "
+		"VALUES (?, ?, %s, %.2f, ?, "
+		"	%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, "
+		"	%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, "
+		"	%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, "
+		"	?, false);",
+		pSqlServer->InsertIgnore(), pSqlServer->GetPrefix(),
+		pSqlServer->InsertTimestampAsUtc(), pData->m_Time,
+		pData->m_aCpCurrent[0], pData->m_aCpCurrent[1], pData->m_aCpCurrent[2],
+		pData->m_aCpCurrent[3], pData->m_aCpCurrent[4], pData->m_aCpCurrent[5],
+		pData->m_aCpCurrent[6], pData->m_aCpCurrent[7], pData->m_aCpCurrent[8],
+		pData->m_aCpCurrent[9], pData->m_aCpCurrent[10], pData->m_aCpCurrent[11],
+		pData->m_aCpCurrent[12], pData->m_aCpCurrent[13], pData->m_aCpCurrent[14],
+		pData->m_aCpCurrent[15], pData->m_aCpCurrent[16], pData->m_aCpCurrent[17],
+		pData->m_aCpCurrent[18], pData->m_aCpCurrent[19], pData->m_aCpCurrent[20],
+		pData->m_aCpCurrent[21], pData->m_aCpCurrent[22], pData->m_aCpCurrent[23],
+		pData->m_aCpCurrent[24]);
 	pSqlServer->PrepareStatement(aBuf);
 	pSqlServer->BindString(1, pData->m_Map);
 	pSqlServer->BindString(2, pData->m_Name);
 	pSqlServer->BindString(3, pData->m_aTimestamp);
 	pSqlServer->BindString(4, g_Config.m_SvSqlServerName);
 	pSqlServer->BindString(5, pData->m_GameUuid);
+	pSqlServer->Print();
 	pSqlServer->Step();
 
 	pData->m_pResult->m_Done = true;
@@ -617,6 +618,7 @@ bool CScore::SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGam
 			pSqlServer->BindString(1, pData->m_aTimestamp);
 			pSqlServer->BindString(2, pData->m_GameUuid);
 			pSqlServer->BindBlob(3, Teamrank.m_TeamID.m_aData, sizeof(Teamrank.m_TeamID.m_aData));
+			pSqlServer->Print();
 			pSqlServer->Step();
 		}
 	}
@@ -627,16 +629,17 @@ bool CScore::SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGam
 		{
 			// if no entry found... create a new one
 			str_format(aBuf, sizeof(aBuf),
-					"%s INTO %s_teamrace(Map, Name, Timestamp, Time, ID, GameID, DDNet7) "
-					"VALUES (?, ?, %s, %.2f, ?, ?, false);",
-					pSqlServer->GetInsertIgnore(), pSqlServer->GetPrefix(),
-					pSqlServer->InsertTimestampAsUtc(), pData->m_Time);
+				"%s INTO %s_teamrace(Map, Name, Timestamp, Time, ID, GameID, DDNet7) "
+				"VALUES (?, ?, %s, %.2f, ?, ?, false);",
+				pSqlServer->InsertIgnore(), pSqlServer->GetPrefix(),
+				pSqlServer->InsertTimestampAsUtc(), pData->m_Time);
 			pSqlServer->PrepareStatement(aBuf);
 			pSqlServer->BindString(1, pData->m_Map);
 			pSqlServer->BindString(2, pData->m_aNames[i]);
 			pSqlServer->BindString(3, pData->m_aTimestamp);
 			pSqlServer->BindBlob(4, GameID.m_aData, sizeof(GameID.m_aData));
 			pSqlServer->BindString(5, pData->m_GameUuid);
+			pSqlServer->Print();
 			pSqlServer->Step();
 		}
 	}
@@ -1315,15 +1318,16 @@ bool CScore::SaveTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 	if(UseCode)
 	{
 		str_format(aBuf, sizeof(aBuf),
-				"%s INTO %s_saves(Savegame, Map, Code, Timestamp, Server, SaveID, DDNet7) "
-				"VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, false)",
-				pSqlServer->GetInsertIgnore(), pSqlServer->GetPrefix());
+			"%s INTO %s_saves(Savegame, Map, Code, Timestamp, Server, SaveID, DDNet7) "
+			"VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, false)",
+			pSqlServer->InsertIgnore(), pSqlServer->GetPrefix());
 		pSqlServer->PrepareStatement(aBuf);
 		pSqlServer->BindString(1, pSaveState);
 		pSqlServer->BindString(2, pData->m_Map);
 		pSqlServer->BindString(3, Code);
 		pSqlServer->BindString(4, pData->m_Server);
 		pSqlServer->BindString(5, aSaveID);
+		pSqlServer->Print();
 		pSqlServer->Step();
 
 		if(!Failure)
@@ -1498,6 +1502,7 @@ bool CScore::LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 		pSqlServer->PrepareStatement(aBuf);
 		pSqlServer->BindString(1, pData->m_Code);
 		pSqlServer->BindString(2, pData->m_Map);
+		pSqlServer->Print();
 		pSqlServer->Step();
 
 		pData->m_pResult->m_Status = CScoreSaveResult::LOAD_SUCCESS;

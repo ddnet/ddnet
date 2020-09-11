@@ -33,6 +33,7 @@ public:
 	virtual void ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize);
 	virtual const char *InsertTimestampAsUtc() const { return "?"; }
 	virtual const char *CollateNocase() const { return "CONVERT(? USING utf8mb4) COLLATE utf8mb4_general_ci"; }
+	virtual const char *InsertIgnore() const { return "INSERT IGNORE"; };
 
 	virtual Status Connect();
 	virtual void Disconnect();
@@ -47,6 +48,7 @@ public:
 	virtual void BindInt(int Idx, int Value);
 	virtual void BindFloat(int Idx, float Value);
 
+	virtual void Print() {}
 	virtual bool Step();
 
 	virtual bool IsNull(int Col) const;
@@ -54,7 +56,6 @@ public:
 	virtual int GetInt(int Col) const;
 	virtual void GetString(int Col, char *pBuffer, int BufferSize) const;
 	virtual int GetBlob(int Col, unsigned char *pBuffer, int BufferSize) const;
-	virtual const char *GetInsertIgnore() const;
 
 	virtual void AddPoints(const char *pPlayer, int Points);
 

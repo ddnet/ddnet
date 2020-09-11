@@ -671,7 +671,8 @@ void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
 		str_copy(aCountry, g_Config.m_SvSqlServerName, sizeof(aCountry));
 	}
 
-	if(str_in_list(g_Config.m_SvSqlValidServerNames, ",", aCountry))
+	if(str_comp(aCountry, g_Config.m_SvSqlServerName) == 0 ||
+		str_in_list(g_Config.m_SvSqlValidServerNames, ",", aCountry))
 	{
 		pSelf->Score()->SaveTeam(pResult->m_ClientID, pCode, aCountry);
 	}

@@ -2032,10 +2032,6 @@ set_src(TOOLS GLOB src/tools
   map_replace_image.cpp
   map_resave.cpp
   packetgen.cpp
-  tileset_borderadd.cpp
-  tileset_borderfix.cpp
-  tileset_borderrem.cpp
-  tileset_borderset.cpp
   unicode_confusables.cpp
   uuid.cpp
 )

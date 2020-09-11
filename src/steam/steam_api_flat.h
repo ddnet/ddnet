@@ -1,5 +1,5 @@
-#ifndef STEAMAPI_STEAM_STEAM_API_FLAT_H
-#define STEAMAPI_STEAM_STEAM_API_FLAT_H
+#ifndef STEAM_STEAM_API_FLAT_H
+#define STEAM_STEAM_API_FLAT_H
 
 #include <base/dynamic.h>
 
@@ -60,4 +60,4 @@ STEAMAPI bool SteamAPI_ISteamFriends_SetRichPresence(ISteamFriends *pSelf, const
 
 }
 
-#endif // STEAMAPI_STEAM_API_FLAT_H
+#endif // STEAM_STEAM_API_FLAT_H

@@ -54,7 +54,14 @@ int DilateFile(const char *pFileName)
 	CPixel *pBuffer[3] = {0,0,0};
 
 	png_init(0, 0);
-	png_open_file(&Png, pFileName);
+	int Error = png_open_file(&Png, pFileName);
+	if(Error != PNG_NO_ERROR)
+	{
+		dbg_msg("dilate", "failed to open image file. filename='%s'", pFileName);
+		if(Error != PNG_FILE_ERROR)
+			png_close_file(&Png);
+		return 0;
+	}
 
 	if(Png.color_type != PNG_TRUECOLOR_ALPHA)
 	{
