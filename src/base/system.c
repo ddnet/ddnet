@@ -3232,8 +3232,15 @@ PROCESS shell_execute(const char *file)
 	argv[0] = (char*) file;
 	argv[1] = NULL;
 	pid = fork();
-	if(!pid)
+	if(pid == -1)
+	{
+		return 0;
+	}
+	if(pid == 0)
+	{
 		execv(file, argv);
+		exit(1);
+	}
 	return pid;
 #endif
 }
