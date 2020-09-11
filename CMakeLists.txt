@@ -1403,6 +1403,7 @@ set_src(BASE GLOB_RECURSE src/base
   tl/allocator.h
   tl/array.h
   tl/base.h
+  tl/mpsc.h
   tl/range.h
   tl/sorted_array.h
   tl/string.h
