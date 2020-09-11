@@ -643,6 +643,9 @@ Replay feature is disabled!
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
 == 
 
+Warning
+== 
+
 Game paused
 == 
 
@@ -716,6 +719,9 @@ Country / Region
 == 
 
 Destination file already exist
+== 
+
+Speed
 == 
 
 Video name:
@@ -1129,6 +1135,15 @@ Check now
 New random timeout code
 == 
 
+Learn
+== 
+
+https://wiki.ddnet.tw/
+== 
+
+Website
+== 
+
 Settings
 == 
 
@@ -1138,10 +1153,7 @@ Stop server
 Run server
 == 
 
-Learn
-== 
-
-https://wiki.ddnet.tw/
+Server executable not found, can't run server
 == 
 
 Editor

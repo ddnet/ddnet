@@ -1175,6 +1175,9 @@ Replay %3d:%02d
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
 == 
 
+Warning
+== 
+
 Menu
 == 
 
@@ -1184,10 +1187,19 @@ Use k key to kill (restart), q to pause and watch other players. See settings fo
 Country / Region
 == 
 
+Speed
+== 
+
 Skip the main menu
 == 
 
 Client message
+== 
+
+https://wiki.ddnet.tw/
+== 
+
+Website
 == 
 
 Settings
@@ -1199,7 +1211,7 @@ Stop server
 Run server
 == 
 
-https://wiki.ddnet.tw/
+Server executable not found, can't run server
 == 
 
 Editor

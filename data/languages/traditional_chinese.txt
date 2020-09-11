@@ -1199,10 +1199,19 @@ https://wiki.ddnet.tw/
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
 == 
 
+Warning
+== 
+
 Menu
 == 
 
+Speed
+== 
+
 Skip the main menu
+== 
+
+Website
 == 
 
 Settings
@@ -1212,6 +1221,9 @@ Stop server
 == 
 
 Run server
+== 
+
+Server executable not found, can't run server
 == 
 
 Editor

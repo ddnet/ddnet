@@ -1224,5 +1224,17 @@ Editor
 Menu
 == Menü
 
+Warning
+== 
+
+Speed
+== 
+
 https://wiki.ddnet.tw/
+== 
+
+Website
+== 
+
+Server executable not found, can't run server
 == 
