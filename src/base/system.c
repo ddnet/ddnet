@@ -866,11 +866,26 @@ void lock_unlock(LOCK lock)
 }
 
 #if defined(CONF_FAMILY_WINDOWS)
-void sphore_init(SEMAPHORE *sem) { *sem = CreateSemaphore(0, 0, 10000, 0); }
-void sphore_wait(SEMAPHORE *sem) { WaitForSingleObject((HANDLE)*sem, INFINITE); }
-int sphore_trywait(SEMAPHORE *sem) { return WaitForSingleObject((HANDLE)*sem, 0) == WAIT_OBJECT_0; }
-void sphore_signal(SEMAPHORE *sem) { ReleaseSemaphore((HANDLE)*sem, 1, NULL); }
-void sphore_destroy(SEMAPHORE *sem) { CloseHandle((HANDLE)*sem); }
+void sphore_init(SEMAPHORE *sem)
+{
+	*sem = CreateSemaphore(0, 0, 10000, 0);
+}
+void sphore_wait(SEMAPHORE *sem)
+{
+	WaitForSingleObject((HANDLE)*sem, INFINITE);
+}
+int sphore_trywait(SEMAPHORE *sem)
+{
+	return WaitForSingleObject((HANDLE)*sem, 0) == WAIT_OBJECT_0;
+}
+void sphore_signal(SEMAPHORE *sem)
+{
+	ReleaseSemaphore((HANDLE)*sem, 1, NULL);
+}
+void sphore_destroy(SEMAPHORE *sem)
+{
+	CloseHandle((HANDLE)*sem);
+}
 #elif defined(CONF_PLATFORM_MACOSX)
 void sphore_init(SEMAPHORE *sem)
 {
@@ -878,9 +893,18 @@ void sphore_init(SEMAPHORE *sem)
 	str_format(aBuf, sizeof(aBuf), "/%d-ddnet.tw-%p", pid(), (void *)sem);
 	*sem = sem_open(aBuf, O_CREAT | O_EXCL, S_IRWXU | S_IRWXG, 0);
 }
-void sphore_wait(SEMAPHORE *sem) { sem_wait(*sem); }
-int sphore_trywait(SEMAPHORE *sem) { return sem_trywait(*sem) == 0; }
-void sphore_signal(SEMAPHORE *sem) { sem_post(*sem); }
+void sphore_wait(SEMAPHORE *sem)
+{
+	sem_wait(*sem);
+}
+int sphore_trywait(SEMAPHORE *sem)
+{
+	return sem_trywait(*sem) == 0;
+}
+void sphore_signal(SEMAPHORE *sem)
+{
+	sem_post(*sem);
+}
 void sphore_destroy(SEMAPHORE *sem)
 {
 	char aBuf[64];
