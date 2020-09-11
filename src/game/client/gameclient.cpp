@@ -632,7 +632,7 @@ void CGameClient::OnRender()
 		{
 			if(m_pMenus->CanDisplayWarning())
 			{
-				m_pMenus->PopupWarning("Warning!", pWarning->m_aWarningMsg, "Ok", 10000000);
+				m_pMenus->PopupWarning(Localize("Warning"), pWarning->m_aWarningMsg, "Ok", 10000000);
 
 				pWarning->m_WasShown = true;
 			}

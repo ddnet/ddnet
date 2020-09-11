@@ -113,7 +113,17 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		else
 		{
 			char aBuf[MAX_PATH_LENGTH];
-			m_ServerProcess.Process = shell_execute(Storage()->GetBinaryPath(PLAT_SERVER_EXEC, aBuf, sizeof(aBuf)));
+			Storage()->GetBinaryPath(PLAT_SERVER_EXEC, aBuf, sizeof(aBuf));
+			IOHANDLE File = io_open(aBuf, IOFLAG_READ);
+			if(File)
+			{
+				io_close(File);
+				m_ServerProcess.Process = shell_execute(PLAT_SERVER_EXEC);
+			}
+			else
+			{
+				PopupWarning(Localize("Warning"), Localize("Server executable not found, can't run server"), Localize("Ok"), 10000000);
+			}
 		}
 	}
 
