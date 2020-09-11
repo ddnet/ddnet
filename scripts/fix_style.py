@@ -43,6 +43,8 @@ def warn(changed_lines):
 		result = subprocess.call(["clang-format", "-Werror", "--dry-run"] + ["--lines={}:{}".format(start, end) for start, end in changed_lines[filename]] + [filename]) or result
 	return result
 
+def get_common_base(base):
+	return subprocess.check_output(["git", "merge-base", "HEAD", base]).decode().strip()
 
 def main():
 	import argparse
