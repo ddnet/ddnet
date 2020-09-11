@@ -16,7 +16,7 @@ extern "C" {
 // not sure why would anyone need more than one but well...
 #define WS_CONTEXTS 4
 // ddnet client opens two connections for whatever reason
-#define WS_CLIENTS MAX_CLIENTS*2
+#define WS_CLIENTS (MAX_CLIENTS*2)
 
 typedef TStaticRingBuffer<unsigned char, WS_CLIENTS * 4 * 1024, CRingBufferBase::FLAG_RECYCLE> TRecvBuffer;
 typedef TStaticRingBuffer<unsigned char, 4 * 1024, CRingBufferBase::FLAG_RECYCLE> TSendBuffer;
@@ -135,7 +135,7 @@ static int websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
 	case LWS_CALLBACK_RECEIVE:
 		if(pss->port == -1)
 			return -1;
-		if(!receive_chunk(ctx_data, pss, in, len))
+		if(receive_chunk(ctx_data, pss, in, len))
 			return 1;
 		break;
 
@@ -209,7 +209,7 @@ int websocket_recv(int socket, unsigned char *data, size_t maxsize, struct socka
 	lws_context *context = contexts[socket].context;
 	if(context == NULL)
 		return -1;
-	int n = lws_service(context, 0);
+	int n = lws_service(context, -1);
 	if(n < 0)
 		return n;
 	context_data *ctx_data = (context_data *)lws_context_user(context);
