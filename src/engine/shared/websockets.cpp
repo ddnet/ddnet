@@ -1,13 +1,13 @@
 #if defined(CONF_WEBSOCKETS)
 
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
-#include <libwebsockets.h>
 #include "base/system.h"
 #include "protocol.h"
 #include "ringbuffer.h"
 #include <arpa/inet.h>
+#include <libwebsockets.h>
 
 extern "C" {
 
@@ -16,10 +16,14 @@ extern "C" {
 // not sure why would anyone need more than one but well...
 #define WS_CONTEXTS 4
 // ddnet client opens two connections for whatever reason
-#define WS_CLIENTS (MAX_CLIENTS*2)
+#define WS_CLIENTS (MAX_CLIENTS * 2)
 
-typedef TStaticRingBuffer<unsigned char, WS_CLIENTS * 4 * 1024, CRingBufferBase::FLAG_RECYCLE> TRecvBuffer;
-typedef TStaticRingBuffer<unsigned char, 4 * 1024, CRingBufferBase::FLAG_RECYCLE> TSendBuffer;
+typedef TStaticRingBuffer<unsigned char, WS_CLIENTS * 4 * 1024,
+	CRingBufferBase::FLAG_RECYCLE>
+	TRecvBuffer;
+typedef TStaticRingBuffer<unsigned char, 4 * 1024,
+	CRingBufferBase::FLAG_RECYCLE>
+	TSendBuffer;
 
 typedef struct
 {
@@ -45,9 +49,11 @@ struct context_data
 	int last_used_port;
 };
 
-static int receive_chunk(context_data *ctx_data, struct per_session_data *pss, void *in, size_t len)
+static int receive_chunk(context_data *ctx_data, struct per_session_data *pss,
+	void *in, size_t len)
 {
-	websocket_chunk *chunk = (websocket_chunk *)ctx_data->recv_buffer.Allocate(len + sizeof(websocket_chunk));
+	websocket_chunk *chunk = (websocket_chunk *)ctx_data->recv_buffer.Allocate(
+		len + sizeof(websocket_chunk));
 	if(chunk == 0)
 		return 1;
 	chunk->size = len;
@@ -57,7 +63,8 @@ static int receive_chunk(context_data *ctx_data, struct per_session_data *pss, v
 	return 0;
 }
 
-static int websocket_callback(struct lws *wsi, enum lws_callback_reasons reason, void *user, void *in, size_t len)
+static int websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
+	void *user, void *in, size_t len)
 {
 	struct per_session_data *pss = (struct per_session_data *)user;
 	lws_context *context = lws_get_context(wsi);
@@ -65,7 +72,6 @@ static int websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
 
 	switch(reason)
 	{
-
 	case LWS_CALLBACK_ESTABLISHED:
 	{
 		int port = -1;
@@ -96,15 +102,18 @@ static int websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
 		ctx_data->port_map[port] = pss;
 		char addr_str[NETADDR_MAXSTRSIZE];
 		inet_ntop(AF_INET, &pss->addr.sin_addr, addr_str, sizeof(addr_str));
-		dbg_msg("websockets", "connection established with %s:%d , assigned fake port %d", addr_str, orig_port, port);
+		dbg_msg("websockets",
+			"connection established with %s:%d , assigned fake port %d",
+			addr_str, orig_port, port);
 	}
 	break;
 
 	case LWS_CALLBACK_CLOSED:
 	{
 		dbg_msg("websockets", "connection with fake port %d closed", pss->port);
-		if (pss->port > -1) {
-			unsigned char close_packet[] = { 0x10, 0x0e, 0x00, 0x04 };
+		if(pss->port > -1)
+		{
+			unsigned char close_packet[] = {0x10, 0x0e, 0x00, 0x04};
 			receive_chunk(ctx_data, pss, &close_packet, sizeof(close_packet));
 			pss->wsi = 0;
 			ctx_data->port_map[pss->port] = NULL;
@@ -118,7 +127,9 @@ static int websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
 		if(chunk == NULL)
 			break;
 		int len = chunk->size - chunk->read;
-		int n = lws_write(wsi, &chunk->data[LWS_SEND_BUFFER_PRE_PADDING + chunk->read], chunk->size - chunk->read, LWS_WRITE_BINARY);
+		int n =
+			lws_write(wsi, &chunk->data[LWS_SEND_BUFFER_PRE_PADDING + chunk->read],
+				chunk->size - chunk->read, LWS_WRITE_BINARY);
 		if(n < 0)
 			return 1;
 		if(n < len)
@@ -146,14 +157,15 @@ static int websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
 	return 0;
 }
 
-static struct lws_protocols protocols[] = { {
-		                                               "binary", /* name */
-		                                               websocket_callback, /* callback */
-		                                               sizeof(struct per_session_data) /* per_session_data_size */
-		                                             },
-	                                                 {
-		                                               NULL, NULL, 0 /* End of list */
-		                                             } };
+static struct lws_protocols protocols[] = {
+	{
+		"binary", /* name */
+		websocket_callback, /* callback */
+		sizeof(struct per_session_data) /* per_session_data_size */
+	},
+	{
+		NULL, NULL, 0 /* End of list */
+	}};
 
 static context_data contexts[WS_CONTEXTS];
 
@@ -204,7 +216,8 @@ int websocket_destroy(int socket)
 	return 0;
 }
 
-int websocket_recv(int socket, unsigned char *data, size_t maxsize, struct sockaddr_in *sockaddrbuf, size_t fromLen)
+int websocket_recv(int socket, unsigned char *data, size_t maxsize,
+	struct sockaddr_in *sockaddrbuf, size_t fromLen)
 {
 	lws_context *context = contexts[socket].context;
 	if(context == NULL)
@@ -233,7 +246,8 @@ int websocket_recv(int socket, unsigned char *data, size_t maxsize, struct socka
 	}
 }
 
-int websocket_send(int socket, const unsigned char *data, size_t size, int port)
+int websocket_send(int socket, const unsigned char *data, size_t size,
+	int port)
 {
 	lws_context *context = contexts[socket].context;
 	if(context == NULL)
@@ -242,7 +256,9 @@ int websocket_send(int socket, const unsigned char *data, size_t size, int port)
 	struct per_session_data *pss = ctx_data->port_map[port];
 	if(pss == NULL)
 		return -1;
-	websocket_chunk *chunk = (websocket_chunk *)pss->send_buffer.Allocate(size + sizeof(websocket_chunk) + LWS_SEND_BUFFER_PRE_PADDING + LWS_SEND_BUFFER_POST_PADDING);
+	websocket_chunk *chunk = (websocket_chunk *)pss->send_buffer.Allocate(
+		size + sizeof(websocket_chunk) + LWS_SEND_BUFFER_PRE_PADDING +
+		LWS_SEND_BUFFER_POST_PADDING);
 	if(chunk == NULL)
 		return -1;
 	chunk->size = size;
