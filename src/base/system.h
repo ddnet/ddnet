@@ -557,6 +557,8 @@ void lock_unlock(LOCK lock);
 
 void sphore_init(SEMAPHORE *sem);
 void sphore_wait(SEMAPHORE *sem);
+// returns non-zero value if successfully decreasing the semaphore
+int sphore_trywait(SEMAPHORE *sem);
 void sphore_signal(SEMAPHORE *sem);
 void sphore_destroy(SEMAPHORE *sem);
 

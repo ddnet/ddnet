@@ -11,6 +11,7 @@ public:
 	~semaphore() { sphore_destroy(&sem); }
 	semaphore(const semaphore&) = delete;
 	void wait() { sphore_wait(&sem); }
+	bool trywait() { return sphore_trywait(&sem) != 0; }
 	void signal() { sphore_signal(&sem); }
 };
 
