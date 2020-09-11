@@ -770,6 +770,7 @@ public:
 	void SetColorVertex(const CColorVertex *pArray, int Num) override;
 	void SetColor(float r, float g, float b, float a) override;
 	void SetColor(ColorRGBA rgb) override;
+	void SetColor4(vec4 TopLeft, vec4 TopRight, vec4 BottomLeft, vec4 BottomRight) override;
 
 	// go through all vertices and change their color (only works for quads)
 	void ChangeColorOfCurrentQuadVertices(float r, float g, float b, float a) override;

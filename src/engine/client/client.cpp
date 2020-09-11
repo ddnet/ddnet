@@ -65,10 +65,9 @@
 	#include <windows.h>
 #endif
 
+#include "client.h"
 #include "friends.h"
 #include "serverbrowser.h"
-#include "updater.h"
-#include "client.h"
 
 #if defined(CONF_VIDEORECORDER)
 	#include "video.h"
@@ -2490,9 +2489,9 @@ void CClient::LoadDDNetInfo()
 	{
 		const char *pNewsString = json_string_get(pNews);
 
-		// Only switch to news page if something new was added to the news
+		// Only mark news button if something new was added to the news
 		if(m_aNews[0] && str_find(m_aNews, pNewsString) == nullptr)
-			g_Config.m_UiPage = CMenus::PAGE_NEWS;
+			g_Config.m_UiUnreadNews = true;
 
 		str_copy(m_aNews, pNewsString, sizeof(m_aNews));
 	}

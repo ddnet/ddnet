@@ -332,8 +332,7 @@ void CGameClient::OnInit()
 	m_ShowOthers[1] = -1;
 
 	// Set free binds to DDRace binds if it's active
-	if(!g_Config.m_ClDDRaceBindsSet && g_Config.m_ClDDRaceBinds)
-		gs_Binds.SetDDRaceBinds(true);
+	gs_Binds.SetDDRaceBinds(true);
 
 	if(g_Config.m_ClTimeoutCode[0] == '\0' || str_comp(g_Config.m_ClTimeoutCode, "hGuEYnfxicsXGwFq") == 0)
 	{
@@ -633,7 +632,7 @@ void CGameClient::OnRender()
 		{
 			if(m_pMenus->CanDisplayWarning())
 			{
-				m_pMenus->PopupWarning("Warning!", pWarning->m_aWarningMsg, "Ok", 10000000);
+				m_pMenus->PopupWarning(Localize("Warning"), pWarning->m_aWarningMsg, "Ok", 10000000);
 
 				pWarning->m_WasShown = true;
 			}

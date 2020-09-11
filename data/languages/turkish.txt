@@ -626,9 +626,6 @@ Crc:
 Alpha
 == Şeffaflık
 
-Current version: %s
-== Mevcut versiyon: %s
-
 LAN
 == LAN
 
@@ -1196,5 +1193,38 @@ Grabs
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
 == 
 
+Warning
+== 
+
+Menu
+== 
+
 Country / Region
+== 
+
+Speed
+== 
+
+Skip the main menu
+== 
+
+https://wiki.ddnet.tw/
+== 
+
+Website
+== 
+
+Settings
+== 
+
+Stop server
+== 
+
+Run server
+== 
+
+Server executable not found, can't run server
+== 
+
+Editor
 == 
