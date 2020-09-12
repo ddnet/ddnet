@@ -482,12 +482,21 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bo
 					}
 					else
 					{
-						if((pCommand->m_Flags&CMDFLAG_TEST) && ClientID != IConsole::CLIENT_ID_GAME && !g_Config.m_SvTestingCommands)
+						if (ClientID != IConsole::CLIENT_ID_GAME && pCommand->m_Flags&CFGFLAG_GAME)
 						{
-							Print(OUTPUT_LEVEL_STANDARD, "console", "Forbidden. Test commands are disabled on the server");
-							return;
+							if(g_Config.m_SvTestingCommands)
+							{
+								m_Cheated = true;
+							}
+							else
+							{
+								char aBuf[256];
+								str_format(aBuf, sizeof(aBuf), "Command '%s' is forbidden. Test commands were disabled on the server.", Result.m_pCommand);
+								Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+								return;
+							}
 						}
-
+						
 						if(m_pfnTeeHistorianCommandCallback && !(pCommand->m_Flags&CFGFLAG_NONTEEHISTORIC))
 						{
 							m_pfnTeeHistorianCommandCallback(ClientID, m_FlagMask, pCommand->m_pName, &Result, m_pTeeHistorianCommandUserdata);
@@ -508,9 +517,6 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bo
 						{
 							pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
 						}
-
-						if (ClientID != CLIENT_ID_GAME && pCommand->m_Flags&CMDFLAG_TEST)
-							m_Cheated = true;
 					}
 				}
 			}
@@ -739,8 +745,8 @@ static void IntVariableCommand(IConsole::IResult *pResult, void *pUserData)
 	CIntVariableData *pData = (CIntVariableData *)pUserData;
 
 	if(pResult->NumArguments())
-	{
-		if (pData->m_Readonly)
+	{		
+		if(pData->m_Readonly && pResult->m_ClientID >= 0)
 		{
 			pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "This is read only variable");
 			return;
