@@ -781,13 +781,6 @@ void CGameContext::ConLockTeam(IConsole::IResult *pResult, void *pUserData)
 	{
 		pSelf->UnlockTeam(pResult->m_ClientID, Team);
 	}
-	else if(!g_Config.m_SvTeamLock)
-	{
-		pSelf->Console()->Print(
-				IConsole::OUTPUT_LEVEL_STANDARD,
-				"print",
-				"Team locking is disabled on this server");
-	}
 	else
 	{
 		((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.SetTeamLock(Team, true);
