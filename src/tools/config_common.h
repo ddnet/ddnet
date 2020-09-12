@@ -37,7 +37,7 @@ static int ListdirCallback(const char *pItemName, int IsDir, int StorageType, vo
 	{
 		ListDirectoryContext Context = *((ListDirectoryContext *)pUser);
 		char aName[2048];
-		str_format(aName, sizeof(aName), "%s\\%s", Context.pPath, pItemName);
+		str_format(aName, sizeof(aName), "%s/%s", Context.pPath, pItemName);
 		ProcessItem(aName, Context.pStorage);
 	}
 
@@ -51,6 +51,7 @@ int main(int argc, const char **argv)
 	if(argc == 1)
 	{
 		dbg_msg("usage", "%s FILE1 [ FILE2... ]", argv[0]);
+		dbg_msg("usage", "%s DIRECTORY", argv[0]);
 		return -1;
 	}
 	else if(argc == 2 && fs_is_dir(argv[1]))
