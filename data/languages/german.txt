@@ -325,6 +325,10 @@ Pistol
 == Pistole
 
 Play
+== Spielen
+
+[Demo browser]
+Play
 == Abspielen
 
 Play background music
