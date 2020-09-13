@@ -3949,18 +3949,24 @@ void CClient::LoadFont()
 	IOHANDLE File = Storage()->OpenFile(pFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
 	if(File)
 	{
+		size_t Size = io_length(File);
+		unsigned char *pBuf = (unsigned char *)malloc(Size);
+		io_read(File, pBuf, Size);
 		io_close(File);
 		IEngineTextRender *pTextRender = Kernel()->RequestInterface<IEngineTextRender>();
 		pDefaultFont = pTextRender->GetFont(aFilename);
 		if(pDefaultFont == NULL)
-			pDefaultFont = pTextRender->LoadFont(aFilename);
+			pDefaultFont = pTextRender->LoadFont(aFilename, pBuf, Size);
 
 		File = Storage()->OpenFile(pFallbackFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
 		if(File)
 		{
+			size_t Size = io_length(File);
+			unsigned char *pBuf = (unsigned char *)malloc(Size);
+			io_read(File, pBuf, Size);
 			io_close(File);
 			IEngineTextRender *pTextRender = Kernel()->RequestInterface<IEngineTextRender>();
-			LoadedFallbackFont = pTextRender->LoadFallbackFont(pDefaultFont, aFilename);
+			LoadedFallbackFont = pTextRender->LoadFallbackFont(pDefaultFont, aFilename, pBuf, Size);
 		}
 
 		Kernel()->RequestInterface<IEngineTextRender>()->SetDefaultFont(pDefaultFont);

@@ -657,18 +657,21 @@ public:
 		IOHANDLE File = pStorage->OpenFile(pFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
 		if(File)
 		{
+			size_t Size = io_length(File);
+			unsigned char *pBuf = (unsigned char *)malloc(Size);
+			io_read(File, pBuf, Size);
 			io_close(File);
-			LoadFont(aFilename);
+			LoadFont(aFilename, pBuf, Size);
 		}
 	}
 
-	virtual CFont *LoadFont(const char *pFilename)
+	virtual CFont *LoadFont(const char *pFilename, const unsigned char *pBuf, size_t Size)
 	{
 		CFont *pFont = new CFont();
 
 		str_copy(pFont->m_aFilename, pFilename, sizeof(pFont->m_aFilename));
 
-		if(FT_New_Face(m_FTLibrary, pFont->m_aFilename, 0, &pFont->m_FtFace))
+		if(FT_New_Memory_Face(m_FTLibrary, pBuf, Size, 0, &pFont->m_FtFace))
 		{
 			delete pFont;
 			return NULL;
@@ -696,12 +699,12 @@ public:
 		return pFont;
 	}
 
-	virtual bool LoadFallbackFont(CFont* pFont, const char *pFilename)
+	virtual bool LoadFallbackFont(CFont *pFont, const char *pFilename, const unsigned char *pBuf, size_t Size)
 	{
 		CFont::SFontFallBack FallbackFont;
 		str_copy(FallbackFont.m_aFilename, pFilename, sizeof(FallbackFont.m_aFilename));
 
-		if(FT_New_Face(m_FTLibrary, pFilename, 0, &FallbackFont.m_FtFace) == 0)
+		if(FT_New_Memory_Face(m_FTLibrary, pBuf, Size, 0, &FallbackFont.m_FtFace) == 0)
 		{
 			dbg_msg("textrender", "loaded fallback font from '%s'", pFilename);
 			pFont->m_FtFallbackFonts.emplace_back(std::move(FallbackFont));

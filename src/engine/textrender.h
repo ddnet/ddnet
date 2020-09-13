@@ -78,8 +78,8 @@ class ITextRender : public IInterface
 public:
 	virtual void SetCursor(CTextCursor *pCursor, float x, float y, float FontSize, int Flags) = 0;
 
-	virtual CFont *LoadFont(const char *pFilename) = 0;
-	virtual bool LoadFallbackFont(CFont* pFont, const char *pFilename) = 0;
+	virtual CFont *LoadFont(const char *pFilename, const unsigned char *pBuf, size_t Size) = 0;
+	virtual bool LoadFallbackFont(CFont *pFont, const char *pFilename, const unsigned char *pBuf, size_t Size) = 0;
 	virtual CFont *GetFont(int FontIndex) = 0;
 	virtual CFont *GetFont(const char *pFilename) = 0;
 	virtual void DestroyFont(CFont *pFont) = 0;
