@@ -647,41 +647,7 @@ void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
 	if(pResult->NumArguments() > 0)
 		pCode = pResult->GetString(0);
 
-	char aCountry[5];
-	if(str_length(pCode) >= 3 && pCode[0] >= 'A' && pCode[0] <= 'Z' && pCode[1] >= 'A'
-		&& pCode[1] <= 'Z' && pCode[2] >= 'A' && pCode[2] <= 'Z')
-	{
-		if(str_length(pCode) == 3 || pCode[3] == ' ')
-		{
-			str_copy(aCountry, pCode, 4);
-			pCode = str_skip_whitespaces_const(pCode + 4);
-		}
-		else if(str_length(pCode) == 4 || (str_length(pCode) > 4 && pCode[4] == ' '))
-		{
-			str_copy(aCountry, pCode, 5);
-			pCode = str_skip_whitespaces_const(pCode + 5);
-		}
-		else
-		{
-			str_copy(aCountry, g_Config.m_SvSqlServerName, sizeof(aCountry));
-		}
-	}
-	else
-	{
-		str_copy(aCountry, g_Config.m_SvSqlServerName, sizeof(aCountry));
-	}
-
-	if(str_comp(aCountry, g_Config.m_SvSqlServerName) == 0 ||
-		str_in_list(g_Config.m_SvSqlValidServerNames, ",", aCountry))
-	{
-		pSelf->Score()->SaveTeam(pResult->m_ClientID, pCode, aCountry);
-	}
-	else
-	{
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "Unknown server name '%s'.", aCountry);
-		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-	}
+	pSelf->Score()->SaveTeam(pResult->m_ClientID, pCode, g_Config.m_SvSqlServerName);
 }
 
 void CGameContext::ConLoad(IConsole::IResult *pResult, void *pUserData)
