@@ -26,7 +26,6 @@ CSqliteConnection::~CSqliteConnection()
 	m_pDb = nullptr;
 }
 
-
 void CSqliteConnection::Print(IConsole *pConsole, const char *Mode)
 {
 	char aBuf[512];
@@ -35,7 +34,6 @@ void CSqliteConnection::Print(IConsole *pConsole, const char *Mode)
 			Mode, m_aFilename);
 	pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 }
-
 
 void CSqliteConnection::ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize)
 {
@@ -156,6 +154,17 @@ void CSqliteConnection::BindFloat(int Idx, float Value)
 	m_Done = false;
 }
 
+// TODO(2020-09-07): remove extern declaration, when all supported systems ship SQLite3 version 3.14 or above
+#if defined(__GNUC__)
+extern char *sqlite3_expanded_sql(sqlite3_stmt *pStmt) __attribute__((weak));
+#endif
+
+void CSqliteConnection::Print()
+{
+	if(m_pStmt != nullptr && sqlite3_expanded_sql != nullptr)
+		dbg_msg("sql", "SQLite statement: %s", sqlite3_expanded_sql(m_pStmt));
+}
+
 bool CSqliteConnection::Step()
 {
 	if(m_Done)
@@ -203,11 +212,6 @@ int CSqliteConnection::GetBlob(int Col, unsigned char *pBuffer, int BufferSize) 
 	Size = minimum(Size, BufferSize);
 	mem_copy(pBuffer, sqlite3_column_blob(m_pStmt, Col - 1), Size);
 	return Size;
-}
-
-const char *CSqliteConnection::GetInsertIgnore() const
-{
-	return "INSERT OR IGNORE";
 }
 
 bool CSqliteConnection::Execute(const char *pQuery)

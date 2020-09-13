@@ -31,6 +31,8 @@ public:
 	virtual const char *InsertTimestampAsUtc() const = 0;
 	// can be used in the context of `LIKE Map`, adds `? COLLATE`
 	virtual const char *CollateNocase() const = 0;
+	// syntax to insert a row into table or ignore if it already exists
+	virtual const char *InsertIgnore() const = 0;
 
 	enum Status
 	{
@@ -56,6 +58,8 @@ public:
 	virtual void BindInt(int Idx, int Value) = 0;
 	virtual void BindFloat(int Idx, float Value) = 0;
 
+	// Print expanded sql statement
+	virtual void Print() = 0;
 	// executes the query and returns if a result row exists and selects it
 	// when called multiple times the next row is selected
 	virtual bool Step() = 0;
@@ -67,8 +71,6 @@ public:
 	virtual void GetString(int Col, char *pBuffer, int BufferSize) const = 0;
 	// returns number of bytes read into the buffer
 	virtual int GetBlob(int Col, unsigned char *pBuffer, int BufferSize) const = 0;
-	// syntax to insert a row into table or ignore if it already exists
-	virtual const char *GetInsertIgnore() const = 0;
 
 	// SQL statements, that can't be abstracted, has side effects to the result
 	virtual void AddPoints(const char *pPlayer, int Points) = 0;

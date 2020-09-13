@@ -17,31 +17,33 @@
 #endif
 
 #if defined(CONF_FAMILY_UNIX)
-	#include <sys/time.h>
-	#include <unistd.h>
+#include <signal.h>
+#include <sys/time.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
-	/* unix net includes */
-	#include <sys/socket.h>
-	#include <sys/ioctl.h>
-	#include <errno.h>
-	#include <netdb.h>
-	#include <netinet/in.h>
-	#include <fcntl.h>
-	#include <pthread.h>
-	#include <arpa/inet.h>
+/* unix net includes */
+#include <arpa/inet.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <pthread.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
 
-	#include <dirent.h>
+#include <dirent.h>
 
-	#if defined(CONF_PLATFORM_MACOSX)
-		// some lock and pthread functions are already defined in headers
-		// included from Carbon.h
-		// this prevents having duplicate definitions of those
-		#define _lock_set_user_
-		#define _task_user_
+#if defined(CONF_PLATFORM_MACOSX)
+// some lock and pthread functions are already defined in headers
+// included from Carbon.h
+// this prevents having duplicate definitions of those
+#define _lock_set_user_
+#define _task_user_
 
-		#include <Carbon/Carbon.h>
-		#include <mach/mach_time.h>
-	#endif
+#include <Carbon/Carbon.h>
+#include <mach/mach_time.h>
+#endif
 
 #elif defined(CONF_FAMILY_WINDOWS)
 	#define WIN32_LEAN_AND_MEAN
@@ -2286,6 +2288,16 @@ void str_utf8_truncate(char *dst, int dst_size, const char *src, int truncation_
 	str_copy(dst, src, size+1);
 }
 
+void str_truncate(char *dst, int dst_size, const char *src, int truncation_len)
+{
+	int size = dst_size;
+	if(truncation_len < size)
+	{
+		size = truncation_len + 1;
+	}
+	str_copy(dst, src, size);
+}
+
 int str_length(const char *str)
 {
 	return (int)strlen(str);
@@ -3202,18 +3214,45 @@ int pid(void)
 #endif
 }
 
-void shell_execute(const char *file)
+PROCESS shell_execute(const char *file)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	ShellExecute(NULL, NULL, file, NULL, NULL, SW_SHOWDEFAULT);
+	SHELLEXECUTEINFOA info;
+	mem_zero(&info, sizeof(SHELLEXECUTEINFOA));
+	info.cbSize = sizeof(SHELLEXECUTEINFOA);
+	info.lpVerb = "open";
+	info.lpFile = file;
+	info.nShow = SW_SHOWDEFAULT;
+	info.fMask = SEE_MASK_NOCLOSEPROCESS;
+	ShellExecuteEx(&info);
+	return info.hProcess;
 #elif defined(CONF_FAMILY_UNIX)
 	char *argv[2];
 	pid_t pid;
 	argv[0] = (char*) file;
 	argv[1] = NULL;
 	pid = fork();
-	if(!pid)
+	if(pid == -1)
+	{
+		return 0;
+	}
+	if(pid == 0)
+	{
 		execv(file, argv);
+		exit(1);
+	}
+	return pid;
+#endif
+}
+
+int kill_process(PROCESS process)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	return TerminateProcess(process, 0);
+#elif defined(CONF_FAMILY_UNIX)
+	int status;
+	kill(process, SIGTERM);
+	return !waitpid(process, &status, 0);
 #endif
 }
 

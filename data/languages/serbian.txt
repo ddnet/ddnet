@@ -625,9 +625,6 @@ Crc:
 Alpha
 == Provid.
 
-Current version: %s
-== Trenutna verzija: %s
-
 LAN
 == LAN
 
@@ -667,10 +664,16 @@ Use k key to kill (restart), q to pause and watch other players. See settings fo
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
 == 
 
+Warning
+== 
+
 Server best:
 == 
 
 Personal best:
+== 
+
+Menu
 == 
 
 Browser
@@ -724,6 +727,9 @@ Country / Region
 Destination file already exist
 == 
 
+Speed
+== 
+
 Show DDNet map finishes in server browser
 == 
 
@@ -749,24 +755,6 @@ Countries
 == 
 
 Types
-== 
-
-DDNet %s is out!
-== 
-
-Downloading %s:
-== 
-
-Update failed! Check log...
-== 
-
-DDNet Client updated!
-== 
-
-Update now
-== 
-
-Restart
 == 
 
 Select a name
@@ -811,6 +799,12 @@ Connecting dummy
 Connect Dummy
 == 
 
+Kill
+== 
+
+Pause
+== 
+
 Reload
 == 
 
@@ -836,6 +830,9 @@ Show clan above name plates
 == 
 
 Clan plates size
+== 
+
+Skip the main menu
 == 
 
 Refresh Rate
@@ -866,12 +863,6 @@ Skin prefix
 == 
 
 Hook collisions
-== 
-
-Pause
-== 
-
-Kill
 == 
 
 Zoom in
@@ -1129,7 +1120,13 @@ Try fast HTTP map download first
 DDNet %s is available:
 == 
 
+Update now
+== 
+
 Updating...
+== 
+
+DDNet Client updated!
 == 
 
 No updates available
@@ -1139,6 +1136,39 @@ Check now
 == 
 
 New random timeout code
+== 
+
+https://wiki.ddnet.tw/
+== 
+
+Website
+== 
+
+Settings
+== 
+
+Stop server
+== 
+
+Run server
+== 
+
+Server executable not found, can't run server
+== 
+
+Editor
+== 
+
+DDNet %s is out!
+== 
+
+Downloading %s:
+== 
+
+Update failed! Check log...
+== 
+
+Restart
 == 
 
 Time

@@ -643,9 +643,6 @@ Crc:
 Alpha
 == Alpha
 
-Current version: %s
-== Versão atual: %s
-
 LAN
 == LAN
 
@@ -898,13 +895,16 @@ Replay feature is disabled!
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
 == 
 
+Warning
+== 
+
 Server best:
 == 
 
 Personal best:
 == 
 
-Learn
+Menu
 == 
 
 Reconnect in %d sec
@@ -958,6 +958,9 @@ Country / Region
 Destination file already exist
 == 
 
+Speed
+== 
+
 Video name:
 == 
 
@@ -974,15 +977,6 @@ Indicate map finish
 == 
 
 Unfinished map
-== 
-
-DDNet %s is out!
-== 
-
-Downloading %s:
-== 
-
-Update failed! Check log...
 == 
 
 Markers:
@@ -1012,6 +1006,12 @@ Render
 Connect Dummy
 == 
 
+Kill
+== 
+
+Pause
+== 
+
 Reload
 == 
 
@@ -1027,6 +1027,9 @@ Save
 Reset wanted weapon on death
 == 
 
+Skip the main menu
+== 
+
 Vanilla skins only
 == 
 
@@ -1037,12 +1040,6 @@ Skin prefix
 == 
 
 Hook collisions
-== 
-
-Pause
-== 
-
-Kill
 == 
 
 Zoom in
@@ -1151,6 +1148,39 @@ Show tiles layers from BG map
 == 
 
 Try fast HTTP map download first
+== 
+
+Learn
+== 
+
+https://wiki.ddnet.tw/
+== 
+
+Website
+== 
+
+Settings
+== 
+
+Stop server
+== 
+
+Run server
+== 
+
+Server executable not found, can't run server
+== 
+
+Editor
+== 
+
+DDNet %s is out!
+== 
+
+Downloading %s:
+== 
+
+Update failed! Check log...
 == 
 
 Time

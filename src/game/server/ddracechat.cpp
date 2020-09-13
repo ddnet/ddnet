@@ -671,7 +671,8 @@ void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
 		str_copy(aCountry, g_Config.m_SvSqlServerName, sizeof(aCountry));
 	}
 
-	if(str_in_list(g_Config.m_SvSqlValidServerNames, ",", aCountry))
+	if(str_comp(aCountry, g_Config.m_SvSqlServerName) == 0 ||
+		str_in_list(g_Config.m_SvSqlValidServerNames, ",", aCountry))
 	{
 		pSelf->Score()->SaveTeam(pResult->m_ClientID, pCode, aCountry);
 	}
@@ -779,13 +780,6 @@ void CGameContext::ConLockTeam(IConsole::IResult *pResult, void *pUserData)
 	if(Lock)
 	{
 		pSelf->UnlockTeam(pResult->m_ClientID, Team);
-	}
-	else if(!g_Config.m_SvTeamLock)
-	{
-		pSelf->Console()->Print(
-				IConsole::OUTPUT_LEVEL_STANDARD,
-				"print",
-				"Team locking is disabled on this server");
 	}
 	else
 	{

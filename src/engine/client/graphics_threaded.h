@@ -724,142 +724,144 @@ class CGraphics_Threaded : public IEngineGraphics
 public:
 	CGraphics_Threaded();
 
-	virtual void ClipEnable(int x, int y, int w, int h);
-	virtual void ClipDisable();
+	void ClipEnable(int x, int y, int w, int h) override;
+	void ClipDisable() override;
 
-	virtual void BlendNone();
-	virtual void BlendNormal();
-	virtual void BlendAdditive();
+	void BlendNone() override;
+	void BlendNormal() override;
+	void BlendAdditive() override;
 
-	virtual void WrapNormal();
-	virtual void WrapClamp();
+	void WrapNormal() override;
+	void WrapClamp() override;
 
-	virtual int MemoryUsage() const;
+	int MemoryUsage() const override;
 
-	virtual void MapScreen(float TopLeftX, float TopLeftY, float BottomRightX, float BottomRightY);
-	virtual void GetScreen(float *pTopLeftX, float *pTopLeftY, float *pBottomRightX, float *pBottomRightY);
+	void MapScreen(float TopLeftX, float TopLeftY, float BottomRightX, float BottomRightY) override;
+	void GetScreen(float *pTopLeftX, float *pTopLeftY, float *pBottomRightX, float *pBottomRightY) override;
 
-	virtual void LinesBegin();
-	virtual void LinesEnd();
-	virtual void LinesDraw(const CLineItem *pArray, int Num);
+	void LinesBegin() override;
+	void LinesEnd() override;
+	void LinesDraw(const CLineItem *pArray, int Num) override;
 
-	virtual int UnloadTexture(IGraphics::CTextureHandle Index);
-	virtual IGraphics::CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName = NULL);
-	virtual int LoadTextureRawSub(IGraphics::CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData);
+	int UnloadTexture(IGraphics::CTextureHandle Index) override;
+	IGraphics::CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName = NULL) override;
+	int LoadTextureRawSub(IGraphics::CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData) override;
 
 	// simple uncompressed RGBA loaders
-	virtual IGraphics::CTextureHandle LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags);
-	virtual int LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType);
+	IGraphics::CTextureHandle LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags) override;
+	int LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType) override;
+
+	void CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSourceBuffer, int FullWidth, int FullHeight, int ColorChannelCount, int SubOffsetX, int SubOffsetY, int SubCopyWidth, int SubCopyHeight) override;
 
 	void ScreenshotDirect();
 
-	virtual void TextureSet(CTextureHandle TextureID);
+	void TextureSet(CTextureHandle TextureID) override;
 
-	virtual void Clear(float r, float g, float b);
+	void Clear(float r, float g, float b) override;
 
-	virtual void QuadsBegin();
-	virtual void QuadsEnd();
-	virtual void TextQuadsBegin();
-	virtual void TextQuadsEnd(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float* pOutlineTextColor);
-	virtual void QuadsEndKeepVertices();
-	virtual void QuadsDrawCurrentVertices(bool KeepVertices = true);
-	virtual void QuadsSetRotation(float Angle);
+	void QuadsBegin() override;
+	void QuadsEnd() override;
+	void TextQuadsBegin() override;
+	void TextQuadsEnd(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor) override;
+	void QuadsEndKeepVertices() override;
+	void QuadsDrawCurrentVertices(bool KeepVertices = true) override;
+	void QuadsSetRotation(float Angle) override;
 
-	virtual void SetColorVertex(const CColorVertex *pArray, int Num);
-	virtual void SetColor(float r, float g, float b, float a);
-	virtual void SetColor(ColorRGBA rgb);
+	void SetColorVertex(const CColorVertex *pArray, int Num) override;
+	void SetColor(float r, float g, float b, float a) override;
+	void SetColor(ColorRGBA rgb) override;
+	void SetColor4(vec4 TopLeft, vec4 TopRight, vec4 BottomLeft, vec4 BottomRight) override;
 
 	// go through all vertices and change their color (only works for quads)
-	virtual void ChangeColorOfCurrentQuadVertices(float r, float g, float b, float a);
-	virtual void ChangeColorOfQuadVertices(int QuadOffset, unsigned char r, unsigned char g, unsigned char b, unsigned char a);
+	void ChangeColorOfCurrentQuadVertices(float r, float g, float b, float a) override;
+	void ChangeColorOfQuadVertices(int QuadOffset, unsigned char r, unsigned char g, unsigned char b, unsigned char a) override;
 
 	void SetColor(CCommandBuffer::SVertex *pVertex, int ColorIndex);
 
-	virtual void QuadsSetSubset(float TlU, float TlV, float BrU, float BrV);
-	virtual void QuadsSetSubsetFree(
+	void QuadsSetSubset(float TlU, float TlV, float BrU, float BrV) override;
+	void QuadsSetSubsetFree(
 		float x0, float y0, float x1, float y1,
-		float x2, float y2, float x3, float y3);
+		float x2, float y2, float x3, float y3) override;
 
-	virtual void QuadsDraw(CQuadItem *pArray, int Num);
-	virtual void QuadsDrawTL(const CQuadItem *pArray, int Num);
-	virtual void QuadsDrawFreeform(const CFreeformItem *pArray, int Num);
-	virtual void QuadsText(float x, float y, float Size, const char *pText);
+	void QuadsDraw(CQuadItem *pArray, int Num) override;
+	void QuadsDrawTL(const CQuadItem *pArray, int Num) override;
+	void QuadsDrawFreeform(const CFreeformItem *pArray, int Num) override;
+	void QuadsText(float x, float y, float Size, const char *pText) override;
 
-	virtual int CreateQuadContainer();
-	virtual void QuadContainerUpload(int ContainerIndex);
-	virtual void QuadContainerAddQuads(int ContainerIndex, CQuadItem *pArray, int Num);
-	virtual void QuadContainerAddQuads(int ContainerIndex, CFreeformItem *pArray, int Num);
-	virtual void QuadContainerReset(int ContainerIndex);
-	virtual void DeleteQuadContainer(int ContainerIndex);
-	virtual void RenderQuadContainer(int ContainerIndex, int QuadDrawNum);
-	virtual void RenderQuadContainer(int ContainerIndex, int QuadOffset, int QuadDrawNum);
-	virtual void RenderQuadContainerAsSprite(int ContainerIndex, int QuadOffset, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f);
-	virtual void RenderQuadContainerAsSpriteMultiple(int ContainerIndex, int QuadOffset, int DrawCount, SRenderSpriteInfo *pRenderInfo);
+	int CreateQuadContainer() override;
+	void QuadContainerUpload(int ContainerIndex) override;
+	void QuadContainerAddQuads(int ContainerIndex, CQuadItem *pArray, int Num) override;
+	void QuadContainerAddQuads(int ContainerIndex, CFreeformItem *pArray, int Num) override;
+	void QuadContainerReset(int ContainerIndex) override;
+	void DeleteQuadContainer(int ContainerIndex) override;
+	void RenderQuadContainer(int ContainerIndex, int QuadDrawNum) override;
+	void RenderQuadContainer(int ContainerIndex, int QuadOffset, int QuadDrawNum) override;
+	void RenderQuadContainerAsSprite(int ContainerIndex, int QuadOffset, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f) override;
+	void RenderQuadContainerAsSpriteMultiple(int ContainerIndex, int QuadOffset, int DrawCount, SRenderSpriteInfo *pRenderInfo) override;
 
-	virtual void FlushVertices(bool KeepVertices = false);
-	virtual void FlushTextVertices(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor);
+	void FlushVertices(bool KeepVertices = false) override;
+	void FlushTextVertices(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor) override;
 
-	virtual void RenderTileLayer(int BufferContainerIndex, float *pColor, char **pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffet);
-	virtual void RenderBorderTiles(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, int JumpIndex, unsigned int DrawNum);
-	virtual void RenderBorderTileLines(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, unsigned int IndexDrawNum, unsigned int RedrawNum);
-	virtual void RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo* pQuadInfo, int QuadNum);
-	virtual void RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, float* pTextColor, float* pTextoutlineColor);
+	void RenderTileLayer(int BufferContainerIndex, float *pColor, char **pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffet) override;
+	void RenderBorderTiles(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, int JumpIndex, unsigned int DrawNum) override;
+	void RenderBorderTileLines(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, unsigned int IndexDrawNum, unsigned int RedrawNum) override;
+	void RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, int QuadNum) override;
+	void RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, float *pTextColor, float *pTextoutlineColor) override;
 
 	// opengl 3.3 functions
-	virtual int CreateBufferObject(size_t UploadDataSize, void* pUploadData);
-	virtual void RecreateBufferObject(int BufferIndex, size_t UploadDataSize, void* pUploadData);
-	virtual void UpdateBufferObject(int BufferIndex, size_t UploadDataSize, void* pUploadData, void* pOffset);
-	virtual void CopyBufferObject(int WriteBufferIndex, int ReadBufferIndex, size_t WriteOffset, size_t ReadOffset, size_t CopyDataSize);
-	virtual void DeleteBufferObject(int BufferIndex);
+	int CreateBufferObject(size_t UploadDataSize, void *pUploadData) override;
+	void RecreateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData) override;
+	void UpdateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, void *pOffset) override;
+	void CopyBufferObject(int WriteBufferIndex, int ReadBufferIndex, size_t WriteOffset, size_t ReadOffset, size_t CopyDataSize) override;
+	void DeleteBufferObject(int BufferIndex) override;
 
-	virtual int CreateBufferContainer(SBufferContainerInfo *pContainerInfo);
+	int CreateBufferContainer(SBufferContainerInfo *pContainerInfo) override;
 	// destroying all buffer objects means, that all referenced VBOs are destroyed automatically, so the user does not need to save references to them
-	virtual void DeleteBufferContainer(int ContainerIndex, bool DestroyAllBO = true);
-	virtual void UpdateBufferContainer(int ContainerIndex, SBufferContainerInfo *pContainerInfo);
-	virtual void IndicesNumRequiredNotify(unsigned int RequiredIndicesCount);
+	void DeleteBufferContainer(int ContainerIndex, bool DestroyAllBO = true) override;
+	void UpdateBufferContainer(int ContainerIndex, SBufferContainerInfo *pContainerInfo) override;
+	void IndicesNumRequiredNotify(unsigned int RequiredIndicesCount) override;
 
+	int GetNumScreens() const override;
+	void Minimize() override;
+	void Maximize() override;
+	bool Fullscreen(bool State) override;
+	void SetWindowBordered(bool State) override;
+	bool SetWindowScreen(int Index) override;
+	void Resize(int w, int h) override;
+	void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser) override;
+	int GetWindowScreen() override;
 
-	virtual int GetNumScreens() const;
-	virtual void Minimize();
-	virtual void Maximize();
-	virtual bool Fullscreen(bool State);
-	virtual void SetWindowBordered(bool State);
-	virtual bool SetWindowScreen(int Index);
-	virtual void Resize(int w, int h);
-	virtual void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser);
-	virtual int GetWindowScreen();
+	int WindowActive() override;
+	int WindowOpen() override;
 
-	virtual int WindowActive();
-	virtual int WindowOpen();
+	void SetWindowGrab(bool Grab) override;
+	void NotifyWindow() override;
 
-	virtual void SetWindowGrab(bool Grab);
-	virtual void NotifyWindow();
+	int Init() override;
+	void Shutdown() override;
 
-	virtual int Init();
-	virtual void Shutdown();
+	void TakeScreenshot(const char *pFilename) override;
+	void TakeCustomScreenshot(const char *pFilename) override;
+	void Swap() override;
+	bool SetVSync(bool State) override;
 
-	virtual void TakeScreenshot(const char *pFilename);
-	virtual void TakeCustomScreenshot(const char *pFilename);
-	virtual void Swap();
-	virtual bool SetVSync(bool State);
-
-	virtual int GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen);
+	int GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen) override;
 
 	virtual int GetDesktopScreenWidth() { return m_DesktopScreenWidth; }
 	virtual int GetDesktopScreenHeight() { return m_DesktopScreenHeight; }
 
 	// synchronization
-	virtual void InsertSignal(semaphore *pSemaphore);
-	virtual bool IsIdle();
-	virtual void WaitForIdle();
+	void InsertSignal(semaphore *pSemaphore) override;
+	bool IsIdle() override;
+	void WaitForIdle() override;
 
-	virtual SGraphicsWarning *GetCurWarning();
+	SGraphicsWarning *GetCurWarning() override;
 
-	virtual bool IsTileBufferingEnabled() { return m_OpenGLTileBufferingEnabled; }
-	virtual bool IsQuadBufferingEnabled() { return m_OpenGLQuadBufferingEnabled; }
-	virtual bool IsTextBufferingEnabled() { return m_OpenGLTextBufferingEnabled; }
-	virtual bool IsQuadContainerBufferingEnabled() { return m_OpenGLQuadContainerBufferingEnabled; }
-	virtual bool HasTextureArrays() { return m_OpenGLHasTextureArrays; }
+	bool IsTileBufferingEnabled() override { return m_OpenGLTileBufferingEnabled; }
+	bool IsQuadBufferingEnabled() override { return m_OpenGLQuadBufferingEnabled; }
+	bool IsTextBufferingEnabled() override { return m_OpenGLTextBufferingEnabled; }
+	bool IsQuadContainerBufferingEnabled() override { return m_OpenGLQuadContainerBufferingEnabled; }
+	bool HasTextureArrays() override { return m_OpenGLHasTextureArrays; }
 };
 
 extern IGraphicsBackend *CreateGraphicsBackend();

@@ -587,25 +587,19 @@ void CMapLayers::OnMapLoad()
 								{
 									if(IsGameLayer)
 									{
-										Index = ((CTile*)pTiles)[y*pTMap->m_Width+x].m_Index;
-										Flags = ((CTile*)pTiles)[y*pTMap->m_Width+x].m_Flags;
-										if(!GameClient()->m_GameInfo.m_DontMaskEntities && !IsValidGameTile(Index))
-											Index = 0;
+										Index = ((CTile *)pTiles)[y * pTMap->m_Width + x].m_Index;
+										Flags = ((CTile *)pTiles)[y * pTMap->m_Width + x].m_Flags;
 									}
 									if(IsFrontLayer)
 									{
-										Index = ((CTile*)pTiles)[y*pTMap->m_Width+x].m_Index;
-										Flags = ((CTile*)pTiles)[y*pTMap->m_Width+x].m_Flags;
-										if(!GameClient()->m_GameInfo.m_DontMaskEntities && !IsValidFrontTile(Index))
-											Index = 0;
+										Index = ((CTile *)pTiles)[y * pTMap->m_Width + x].m_Index;
+										Flags = ((CTile *)pTiles)[y * pTMap->m_Width + x].m_Flags;
 									}
 									if(IsSwitchLayer)
 									{
 										Flags = 0;
-										Index = ((CSwitchTile*)pTiles)[y*pTMap->m_Width+x].m_Type;
-										if(!IsValidSwitchTile(Index))
-											Index = 0;
-										else if(CurOverlay == 0)
+										Index = ((CSwitchTile *)pTiles)[y * pTMap->m_Width + x].m_Type;
+										if(CurOverlay == 0)
 										{
 											Flags = ((CSwitchTile*)pTiles)[y*pTMap->m_Width+x].m_Flags;
 											if(Index == TILE_SWITCHTIMEDOPEN) Index = 8;
@@ -619,9 +613,7 @@ void CMapLayers::OnMapLoad()
 									{
 										Index = ((CTeleTile*)pTiles)[y*pTMap->m_Width+x].m_Type;
 										Flags = 0;
-										if(!IsValidTeleTile(Index))
-											Index = 0;
-										else if(CurOverlay == 1)
+										if(CurOverlay == 1)
 										{
 											if(Index != TILE_TELECHECKIN && Index != TILE_TELECHECKINEVIL)
 												Index = ((CTeleTile*)pTiles)[y*pTMap->m_Width+x].m_Number;
@@ -632,8 +624,8 @@ void CMapLayers::OnMapLoad()
 									{
 										Index = ((CSpeedupTile*)pTiles)[y*pTMap->m_Width+x].m_Type;
 										Flags = 0;
-										AngleRotate = ((CSpeedupTile*)pTiles)[y*pTMap->m_Width + x].m_Angle;
-										if(!IsValidSpeedupTile(Index) || ((CSpeedupTile*)pTiles)[y*pTMap->m_Width+x].m_Force == 0)
+										AngleRotate = ((CSpeedupTile *)pTiles)[y * pTMap->m_Width + x].m_Angle;
+										if(((CSpeedupTile *)pTiles)[y * pTMap->m_Width + x].m_Force == 0)
 											Index = 0;
 										else if(CurOverlay == 1)
 											Index = ((CSpeedupTile*)pTiles)[y*pTMap->m_Width+x].m_Force;
@@ -642,9 +634,7 @@ void CMapLayers::OnMapLoad()
 									}
 									if(IsTuneLayer)
 									{
-										Index = ((CTuneTile*)pTiles)[y*pTMap->m_Width+x].m_Type;
-										if(!IsValidTuneTile(Index))
-											Index = 0;
+										Index = ((CTuneTile *)pTiles)[y * pTMap->m_Width + x].m_Type;
 										Flags = 0;
 									}
 								} else
@@ -1684,7 +1674,7 @@ void CMapLayers::OnRender()
 						if(!IsGameLayer)
 							Graphics()->TextureClear();
 						else
-							Graphics()->TextureSet(m_pImages->GetEntities());
+							Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_GAME));
 					}
 					else
 						Graphics()->TextureSet(m_pImages->Get(pTMap->m_Image));
@@ -1784,7 +1774,7 @@ void CMapLayers::OnRender()
 			else if(Render && g_Config.m_ClOverlayEntities && IsFrontLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
-				Graphics()->TextureSet(m_pImages->GetEntities());
+				Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_FRONT));
 
 				CTile *pFrontTiles = (CTile *)m_pLayers->Map()->GetData(pTMap->m_Front);
 				unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Front);
@@ -1811,7 +1801,7 @@ void CMapLayers::OnRender()
 			else if(Render && g_Config.m_ClOverlayEntities && IsSwitchLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
-				Graphics()->TextureSet(m_pImages->GetEntities());
+				Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH));
 
 				CSwitchTile *pSwitchTiles = (CSwitchTile *)m_pLayers->Map()->GetData(pTMap->m_Switch);
 				unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Switch);
@@ -1844,7 +1834,7 @@ void CMapLayers::OnRender()
 			else if(Render && g_Config.m_ClOverlayEntities && IsTeleLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
-				Graphics()->TextureSet(m_pImages->GetEntities());
+				Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_TELE));
 
 				CTeleTile *pTeleTiles = (CTeleTile *)m_pLayers->Map()->GetData(pTMap->m_Tele);
 				unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Tele);
@@ -1875,7 +1865,7 @@ void CMapLayers::OnRender()
 			else if(Render && g_Config.m_ClOverlayEntities && IsSpeedupLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
-				Graphics()->TextureSet(m_pImages->GetEntities());
+				Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_SPEEDUP));
 
 				CSpeedupTile *pSpeedupTiles = (CSpeedupTile *)m_pLayers->Map()->GetData(pTMap->m_Speedup);
 				unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Speedup);
@@ -1913,7 +1903,7 @@ void CMapLayers::OnRender()
 			else if(Render && g_Config.m_ClOverlayEntities && IsTuneLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
-				Graphics()->TextureSet(m_pImages->GetEntities());
+				Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_TUNE));
 
 				CTuneTile *pTuneTiles = (CTuneTile *)m_pLayers->Map()->GetData(pTMap->m_Tune);
 				unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Tune);

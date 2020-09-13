@@ -691,9 +691,9 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	{
 		int Network = g_Config.m_UiPage == PAGE_DDNET ? IServerBrowser::NETWORK_DDNET : IServerBrowser::NETWORK_KOG;
 		// add more space
-		ServerFilter.HSplitTop(10.0f, 0, &ServerFilter);
+		ServerFilter.HSplitTop(5.0f, 0, &ServerFilter);
 		ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
-		ServerFilter.HSplitTop(95.0f, &ServerFilter, 0);
+		ServerFilter.HSplitTop(123.0f, &ServerFilter, 0);
 
 		RenderTools()->DrawUIRect(&ServerFilter, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
 
@@ -1306,97 +1306,13 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 	{
 		CUIRect Button, ButtonArea;
 		StatusBox.HSplitTop(5.0f, 0, &StatusBox);
-
-		// version note
-#if defined(CONF_AUTOUPDATE)
-		CUIRect Part;
-		StatusBox.HSplitBottom(15.0f, &StatusBox, &Button);
-		char aBuf[64];
-		int State = Updater()->GetCurrentState();
-		bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
-		if(State == IUpdater::CLEAN && NeedUpdate)
-		{
-			str_format(aBuf, sizeof(aBuf), Localize("DDNet %s is out!"), Client()->LatestVersion());
-			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
-		}
-		else if(State == IUpdater::CLEAN)
-		{
-			str_format(aBuf, sizeof(aBuf), Localize("Current version: %s"), GAME_VERSION);
-		}
-		else if(State >= IUpdater::GETTING_MANIFEST && State < IUpdater::NEED_RESTART)
-		{
-			char aCurrentFile[64];
-			Updater()->GetCurrentFile(aCurrentFile, sizeof(aCurrentFile));
-			str_format(aBuf, sizeof(aBuf), Localize("Downloading %s:"), aCurrentFile);
-		}
-		else if(State == IUpdater::FAIL)
-		{
-			str_format(aBuf, sizeof(aBuf), Localize("Update failed! Check log..."));
-			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
-		}
-		else if(State == IUpdater::NEED_RESTART)
-		{
-			str_format(aBuf, sizeof(aBuf), Localize("DDNet Client updated!"));
-			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
-		}
-		UI()->DoLabelScaled(&Button, aBuf, 14.0f, -1);
-		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-
-		Button.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1, -1.0f) + 10.0f, &Button, &Part);
-
-		if(State == IUpdater::CLEAN && NeedUpdate)
-		{
-			CUIRect Update;
-			Part.VSplitLeft(100.0f, &Update, NULL);
-
-			static int s_ButtonUpdate = 0;
-			if(DoButton_Menu(&s_ButtonUpdate, Localize("Update now"), 0, &Update))
-			{
-				Updater()->InitiateUpdate();
-			}
-		}
-		else if(State == IUpdater::NEED_RESTART)
-		{
-			CUIRect Restart;
-			Part.VSplitLeft(50.0f, &Restart, &Part);
-
-			static int s_ButtonUpdate = 0;
-			if(DoButton_Menu(&s_ButtonUpdate, Localize("Restart"), 0, &Restart))
-			{
-				Client()->Restart();
-			}
-		}
-		else if(State >= IUpdater::GETTING_MANIFEST && State < IUpdater::NEED_RESTART)
-		{
-			CUIRect ProgressBar, Percent;
-			Part.VSplitLeft(100.0f, &ProgressBar, &Percent);
-			ProgressBar.y += 2.0f;
-			ProgressBar.HMargin(1.0f, &ProgressBar);
-			RenderTools()->DrawUIRect(&ProgressBar, vec4(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 5.0f);
-			ProgressBar.w = clamp((float)Updater()->GetCurrentPercent(), 10.0f, 100.0f);
-			RenderTools()->DrawUIRect(&ProgressBar, vec4(1.0f, 1.0f, 1.0f, 0.5f), CUI::CORNER_ALL, 5.0f);
-		}
-#else
-		StatusBox.HSplitBottom(15.0f, &StatusBox, &Button);
-		char aBuf[64];
-		if(str_comp(Client()->LatestVersion(), "0") != 0)
-		{
-			str_format(aBuf, sizeof(aBuf), Localize("DDNet %s is out!"), Client()->LatestVersion());
-			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-		}
-		else
-			str_format(aBuf, sizeof(aBuf), Localize("Current version: %s"), GAME_VERSION);
-		UI()->DoLabelScaled(&Button, aBuf, 14.0f, -1);
-		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-#endif
 		// button area
-		//StatusBox.VSplitRight(80.0f, &StatusBox, 0);
 		StatusBox.VSplitRight(170.0f, &StatusBox, &ButtonArea);
-		//ButtonArea.VSplitRight(150.0f, 0, &ButtonArea);
 		ButtonArea.HSplitTop(20.0f, &Button, &ButtonArea);
 		Button.VMargin(20.0f, &Button);
 
 		static int s_RefreshButton = 0;
+		char aBuf[64];
 		if(ServerBrowser()->IsRefreshing())
 			str_format(aBuf, sizeof(aBuf), "%s (%d%%)", Localize("Refresh"), ServerBrowser()->LoadingProgression());
 		else
@@ -1438,6 +1354,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 
 		// address info
 		StatusBox.VSplitLeft(20.0f, 0, &StatusBox);
+		StatusBox.HSplitTop(5.0f, 0, &StatusBox);
 		StatusBox.HSplitTop(20.0f, &Button, &StatusBox);
 		UI()->DoLabelScaled(&Button, Localize("Host address"), 14.0f, -1);
 		StatusBox.HSplitTop(20.0f, &Button, 0);
