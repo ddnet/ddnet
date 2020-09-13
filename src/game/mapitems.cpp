@@ -7,15 +7,15 @@ bool IsValidGameTile(int Index)
 		|| (Index >= TILE_SOLID && Index <= TILE_THROUGH)
 		||  Index == TILE_FREEZE
 		|| (Index >= TILE_UNFREEZE && Index <= TILE_DUNFREEZE)
-		|| (Index >= TILE_WALLJUMP && Index <= TILE_SOLO_END)
+		|| (Index >= TILE_WALLJUMP && Index <= TILE_SOLO_DISABLE)
 		|| (Index >= TILE_REFILL_JUMPS && Index <= TILE_STOPA)
 		|| (Index >= TILE_CP && Index <= TILE_THROUGH_DIR)
 		|| (Index >= TILE_OLDLASER && Index <= TILE_UNLOCK_TEAM)
-		|| (Index >= TILE_NPC_END && Index <= TILE_NPH_END)
+		|| (Index >= TILE_NPC_DISABLE && Index <= TILE_NPH_DISABLE)
 		|| (Index >= TILE_TELE_GUN_ENABLE && Index <= TILE_TELE_GUN_DISABLE)
 		|| (Index >= TILE_TELE_GRENADE_ENABLE && Index <= TILE_TELE_GRENADE_DISABLE)
 		|| (Index >= TILE_TELE_LASER_ENABLE && Index <= TILE_TELE_LASER_DISABLE)
-		|| (Index >= TILE_NPC_START && Index <= TILE_NPH_START)
+		|| (Index >= TILE_NPC_ENABLE && Index <= TILE_NPH_ENABLE)
 		|| (Index >= TILE_ENTITIES_OFF_1 && Index <= TILE_ENTITIES_OFF_2)
 		||  IsValidEntity(Index)
 	);
@@ -29,15 +29,15 @@ bool IsValidFrontTile(int Index)
 		|| (Index >= TILE_NOLASER && Index <= TILE_THROUGH)
 		||  Index == TILE_FREEZE
 		|| (Index >= TILE_UNFREEZE && Index <= TILE_DUNFREEZE)
-		|| (Index >= TILE_WALLJUMP && Index <= TILE_SOLO_END)
+		|| (Index >= TILE_WALLJUMP && Index <= TILE_SOLO_DISABLE)
 		|| (Index >= TILE_REFILL_JUMPS && Index <= TILE_STOPA)
 		|| (Index >= TILE_CP && Index <= TILE_THROUGH_DIR)
 		|| (Index >= TILE_OLDLASER && Index <= TILE_UNLOCK_TEAM)
-		|| (Index >= TILE_NPC_END && Index <= TILE_NPH_END)
+		|| (Index >= TILE_NPC_DISABLE && Index <= TILE_NPH_DISABLE)
 		|| (Index >= TILE_TELE_GUN_ENABLE && Index <= TILE_ALLOW_BLUE_TELE_GUN)
 		|| (Index >= TILE_TELE_GRENADE_ENABLE && Index <= TILE_TELE_GRENADE_DISABLE)
 		|| (Index >= TILE_TELE_LASER_ENABLE && Index <= TILE_TELE_LASER_DISABLE)
-		|| (Index >= TILE_NPC_START && Index <= TILE_NPH_START)
+		|| (Index >= TILE_NPC_ENABLE && Index <= TILE_NPH_ENABLE)
 		|| (Index >= TILE_ENTITIES_OFF_1 && Index <= TILE_ENTITIES_OFF_2)
 		||  IsValidEntity(Index)
 	);
@@ -70,11 +70,11 @@ bool IsValidSwitchTile(int Index)
 		||  Index == TILE_FREEZE
 		||  Index == TILE_DFREEZE
 		||  Index == TILE_DUNFREEZE
-		||  Index == TILE_HIT_START
-		||  Index == TILE_HIT_END
+		||  Index == TILE_HIT_ENABLE
+		||  Index == TILE_HIT_DISABLE
 		|| (Index >= TILE_SWITCHTIMEDOPEN && Index <= TILE_SWITCHCLOSE)
-		||  Index == TILE_PENALTY
-		||  Index == TILE_BONUS
+		||  Index == TILE_ADD_TIME
+		||  Index == TILE_SUBSTRACT_TIME
 		||  Index == TILE_ALLOW_TELE_GUN
 		||  Index == TILE_ALLOW_BLUE_TELE_GUN
 		||  IsValidEntity(Index)
@@ -83,7 +83,7 @@ bool IsValidSwitchTile(int Index)
 
 bool IsValidTuneTile(int Index)
 {
-	return Index == TILE_TUNE1;
+	return Index == TILE_TUNE;
 }
 
 bool IsValidEntity(int Index)

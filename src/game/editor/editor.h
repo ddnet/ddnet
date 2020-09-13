@@ -235,7 +235,7 @@ public:
 			}
 			case LAYERTYPE_TUNE:
 			{
-				if (Index == TILE_TUNE1)
+				if (Index == TILE_TUNE)
 					return true;
 				else
 					return false;

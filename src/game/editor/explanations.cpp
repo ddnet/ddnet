@@ -77,31 +77,31 @@ const char *CEditor::Explain(int Tile, int Layer)
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "WALLJUMP: Placed next to a wall. Enables climbing up the wall.";
 		break;
-	case TILE_EHOOK_START:
+	case TILE_EHOOK_ENABLE:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "ENDLESS HOOK: Activates endless hook.";
 		break;
-	case TILE_EHOOK_END:
+	case TILE_EHOOK_DISABLE:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "ENDLESS HOOK OFF: Deactivates endless hook.";
 		break;
-	case TILE_HIT_START:
+	case TILE_HIT_ENABLE:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "HIT OTHERS: You can hit others.";
 		if(Layer == LAYER_SWITCH)
 			return "HIT OTHERS: You can activate hitting others for single weapons, using delay number to select which.";
 		break;
-	case TILE_HIT_END:
+	case TILE_HIT_DISABLE:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "HIT OTHERS: You can't hit others.";
 		if(Layer == LAYER_SWITCH)
 			return "HIT OTHERS: You can deactivate hitting others for single weapons, using delay number to select which.";
 		break;
-	case TILE_SOLO_START:
+	case TILE_SOLO_ENABLE:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "SOLO: You are now in a solo part.";
 		break;
-	case TILE_SOLO_END: // also TILE_SWITCHTIMEDOPEN
+	case TILE_SOLO_DISABLE: // also TILE_SWITCHTIMEDOPEN
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "SOLO: You are now out of the solo part.";
 		if(Layer == LAYER_SWITCH)
@@ -147,11 +147,11 @@ const char *CEditor::Explain(int Tile, int Layer)
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "REFILL JUMPS: Restores all jumps.";
 		break;
-	case TILE_BEGIN:
+	case TILE_START:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "START: Starts counting your race time.";
 		break;
-	case TILE_END:
+	case TILE_FINISH:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "FINISH: End of race.";
 		break;
@@ -179,7 +179,7 @@ const char *CEditor::Explain(int Tile, int Layer)
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "SPEEDER: Causes weapons, SHIELD, HEART and SPINNING LASER to move quickly.";
 		break;
-	case TILE_TUNE1:
+	case TILE_TUNE:
 		if(Layer == LAYER_TUNE)
 			return "TUNE ZONE: Area where defined tunes work.";
 		break;
@@ -207,43 +207,43 @@ const char *CEditor::Explain(int Tile, int Layer)
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "UNLOCK TEAM: Forces team to be unlocked so that team doesn't get killed when one dies.";
 		break;
-	case TILE_PENALTY:
+	case TILE_ADD_TIME:
 		if(Layer == LAYER_SWITCH)
 			return "PENALTY: Adds time to your current race time. Opposite of BONUS.";
 		break;
-	case TILE_NPC_END:
+	case TILE_NPC_DISABLE:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "COLLISION OFF: You can't collide with others.";
 		break;
-	case TILE_SUPER_END:
+	case TILE_UNLIMITED_JUMPS_DISABLE:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "SUPER JUMP OFF: You don't have unlimited air jumps.";
 		break;
-	case TILE_JETPACK_END:
+	case TILE_JETPACK_DISABLE:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "JETPACK OFF: You lose your jetpack gun.";
 		break;
-	case TILE_NPH_END:
+	case TILE_NPH_DISABLE:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "HOOK OTHERS OFF: You can't hook others.";
 		break;
-	case TILE_BONUS:
+	case TILE_SUBSTRACT_TIME:
 		if(Layer == LAYER_SWITCH)
 			return "BONUS: Subtracts time from your current race time. Opposite of PENALTY.";
 		break;
-	case TILE_NPC_START:
+	case TILE_NPC_ENABLE:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "COLLISION: You can collide with others.";
 		break;
-	case TILE_SUPER_START:
+	case TILE_UNLIMITED_JUMPS_ENABLE:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "SUPER JUMP: You have unlimited air jumps.";
 		break;
-	case TILE_JETPACK_START:
+	case TILE_JETPACK_ENABLE:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "JETPACK: You have a jetpack gun.";
 		break;
-	case TILE_NPH_START:
+	case TILE_NPH_ENABLE:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "HOOK OTHERS: You can hook others.";
 		break;
