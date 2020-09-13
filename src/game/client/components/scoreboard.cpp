@@ -330,7 +330,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		// make sure that we render the correct team
-		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByDDTeam[i];
+		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByDDTeamScore[i];
 		if(!pInfo || pInfo->m_Team != Team)
 			continue;
 
@@ -341,7 +341,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 		for(int j = i + 1; j < MAX_CLIENTS; j++)
 		{
-			const CNetObj_PlayerInfo *pInfo2 = m_pClient->m_Snap.m_paInfoByDDTeam[j];
+			const CNetObj_PlayerInfo *pInfo2 = m_pClient->m_Snap.m_paInfoByDDTeamScore[j];
 
 			if(!pInfo2 || pInfo2->m_Team != Team)
 				continue;
@@ -354,7 +354,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		{
 			for (int j = i - 1; j >= 0; j--)
 			{
-				const CNetObj_PlayerInfo *pInfo2 = m_pClient->m_Snap.m_paInfoByDDTeam[j];
+				const CNetObj_PlayerInfo *pInfo2 = m_pClient->m_Snap.m_paInfoByDDTeamScore[j];
 
 				if(!pInfo2 || pInfo2->m_Team != Team)
 					continue;
