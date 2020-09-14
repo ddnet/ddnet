@@ -1768,7 +1768,7 @@ public:
 		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 	}
 
-	virtual void UploadEntityLayerText(void* pTexBuff, int ImageColorChannelCount, int TexWidth, int TexHeight, const char *pText, int Length, float x, float y, int FontSize)
+	virtual void UploadEntityLayerText(void *pTexBuff, int ImageColorChannelCount, int TexWidth, int TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize)
 	{
 		if (FontSize < 1)
 			return;
@@ -1820,8 +1820,10 @@ public:
 				{
 					for(int OffX = 0; OffX < SlotW; ++OffX)
 					{
-						size_t ImageOffset = (y + OffY) * (TexWidth * ImageColorChannelCount) + ((x + OffX) + WidthLastChars) * ImageColorChannelCount;
-						size_t GlyphOffset = (OffY) * SlotW + OffX;
+						int ImgOffX = clamp(x + OffX + WidthLastChars, x, (x + TexSubWidth) - 1);
+						int ImgOffY = clamp(y + OffY, y, (y + TexSubHeight) - 1);
+						size_t ImageOffset = ImgOffY * (TexWidth * ImageColorChannelCount) + ImgOffX * ImageColorChannelCount;
+						size_t GlyphOffset = (OffY)*SlotW + OffX;
 						for(size_t i = 0; i < (size_t)ImageColorChannelCount; ++i)
 						{
 							if(i != (size_t)ImageColorChannelCount - 1)
