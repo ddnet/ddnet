@@ -261,15 +261,15 @@ class CTextRender : public IEngineTextRender
 		m_RenderFlags = Flags;
 	}
 
-	void Grow(unsigned char *pIn, unsigned char *pOut, int w, int h)
+	void Grow(unsigned char *pIn, unsigned char *pOut, int w, int h, int OutlineCount)
 	{
 		for(int y = 0; y < h; y++)
 			for(int x = 0; x < w; x++)
 			{
 				int c = pIn[y*w+x];
 
-				for(int sy = -1; sy <= 1; sy++)
-					for(int sx = -1; sx <= 1; sx++)
+				for(int sy = -OutlineCount; sy <= OutlineCount; sy++)
+					for(int sx = -OutlineCount; sx <= OutlineCount; sx++)
 					{
 						int GetX = x+sx;
 						int GetY = y+sy;
@@ -511,28 +511,13 @@ class CTextRender : public IEngineTextRender
 		}
 		UploadGlyph(pFont, 0, X, Y, (int)Width, (int)Height, ms_aGlyphData);
 
-		if(OutlineThickness == 1)
+		Grow(ms_aGlyphData, ms_aGlyphDataOutlined, Width, Height, OutlineThickness);
+
+		while(!GetCharacterSpace(pFont, 1, (int)Width, (int)Height, X, Y))
 		{
-			Grow(ms_aGlyphData, ms_aGlyphDataOutlined, Width, Height);
-			while(!GetCharacterSpace(pFont, 1, (int)Width, (int)Height, X, Y))
-			{
-				IncreaseFontTexture(pFont, 1);
-			}
-			UploadGlyph(pFont, 1, X, Y, (int)Width, (int)Height, ms_aGlyphDataOutlined);
+			IncreaseFontTexture(pFont, 1);
 		}
-		else
-		{
-			for(int i = OutlineThickness; i > 0; i-=2)
-			{
-				Grow(ms_aGlyphData, ms_aGlyphDataOutlined, Width, Height);
-				Grow(ms_aGlyphDataOutlined, ms_aGlyphData, Width, Height);
-			}
-			while(!GetCharacterSpace(pFont, 1, (int)Width, (int)Height, X, Y))
-			{
-				IncreaseFontTexture(pFont, 1);
-			}
-			UploadGlyph(pFont, 1, X, Y, (int)Width, (int)Height, ms_aGlyphData);
-		}
+		UploadGlyph(pFont, 1, X, Y, (int)Width, (int)Height, ms_aGlyphDataOutlined);
 
 		// set char info
 		{
