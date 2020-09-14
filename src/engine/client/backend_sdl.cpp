@@ -207,15 +207,6 @@ int CCommandProcessorFragment_OpenGL::TexFormatToImageColorChannelCount(int TexF
 	return 4;
 }
 
-unsigned char CCommandProcessorFragment_OpenGL::Sample(int w, int h, const unsigned char *pData, int u, int v, int Offset, int ScaleW, int ScaleH, int Bpp)
-{
-	int Value = 0;
-	for(int x = 0; x < ScaleW; x++)
-		for(int y = 0; y < ScaleH; y++)
-			Value += pData[((v+y)*w+(u+x))*Bpp+Offset];
-	return Value/(ScaleW*ScaleH);
-}
-
 static float CubicHermite(float A, float B, float C, float D, float t)
 {
 	float a = -A / 2.0f + (3.0f * B) / 2.0f - (3.0f * C) / 2.0f + D / 2.0f;
@@ -322,28 +313,6 @@ static void ResizeImage(uint8_t *pSourceImage, uint32_t SW, uint32_t SH, uint8_t
 			}
 		}
 	}
-}
-
-void *CCommandProcessorFragment_OpenGL::Rescale(int Width, int Height, int NewWidth, int NewHeight, int Format, const unsigned char *pData)
-{
-	unsigned char *pTmpData;
-	int ScaleW = Width / NewWidth;
-	int ScaleH = Height / NewHeight;
-
-	int Bpp = TexFormatToImageColorChannelCount(Format);
-
-	pTmpData = (unsigned char *)malloc(NewWidth * NewHeight * Bpp);
-
-	int c = 0;
-	for(int y = 0; y < NewHeight; y++)
-		for(int x = 0; x < NewWidth; x++, c++)
-		{
-			for(int i = 0; i < Bpp; ++i) {
-				pTmpData[c*Bpp + i] = Sample(Width, Height, pData, x*ScaleW, y*ScaleH, i, ScaleW, ScaleH, Bpp);
-			}
-		}
-
-	return pTmpData;
 }
 
 void *CCommandProcessorFragment_OpenGL::Resize(int Width, int Height, int NewWidth, int NewHeight, int Format, const unsigned char *pData)
@@ -524,7 +493,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Update(const CCommandBuffer::
 			Y /= 2;
 		}
 
-		void *pTmpData = Rescale(pCommand->m_Width, pCommand->m_Height, Width, Height, pCommand->m_Format, static_cast<const unsigned char *>(pCommand->m_pData));
+		void *pTmpData = Resize(pCommand->m_Width, pCommand->m_Height, Width, Height, pCommand->m_Format, static_cast<const unsigned char *>(pCommand->m_pData));
 		free(pTexData);
 		pTexData = pTmpData;
 	}
@@ -618,7 +587,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 				++RescaleCount;
 			} while(Width > m_MaxTexSize || Height > m_MaxTexSize);
 
-			void *pTmpData = Rescale(pCommand->m_Width, pCommand->m_Height, Width, Height, pCommand->m_Format, static_cast<const unsigned char *>(pCommand->m_pData));
+			void *pTmpData = Resize(pCommand->m_Width, pCommand->m_Height, Width, Height, pCommand->m_Format, static_cast<const unsigned char *>(pCommand->m_pData));
 			free(pTexData);
 			pTexData = pTmpData;
 		}
@@ -628,7 +597,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 			Height >>= 1;
 			++RescaleCount;
 
-			void *pTmpData = Rescale(pCommand->m_Width, pCommand->m_Height, Width, Height, pCommand->m_Format, static_cast<const unsigned char *>(pCommand->m_pData));
+			void *pTmpData = Resize(pCommand->m_Width, pCommand->m_Height, Width, Height, pCommand->m_Format, static_cast<const unsigned char *>(pCommand->m_pData));
 			free(pTexData);
 			pTexData = pTmpData;
 		}
@@ -2538,7 +2507,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Update(const CCommandBuffe
 			Y /= 2;
 		}
 
-		void *pTmpData = Rescale(pCommand->m_Width, pCommand->m_Height, Width, Height, pCommand->m_Format, static_cast<const unsigned char *>(pCommand->m_pData));
+		void *pTmpData = Resize(pCommand->m_Width, pCommand->m_Height, Width, Height, pCommand->m_Format, static_cast<const unsigned char *>(pCommand->m_pData));
 		free(pTexData);
 		pTexData = pTmpData;
 	}
@@ -2584,7 +2553,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 			}
 			while(Width > m_MaxTexSize || Height > m_MaxTexSize);
 
-			void *pTmpData = Rescale(pCommand->m_Width, pCommand->m_Height, Width, Height, pCommand->m_Format, static_cast<const unsigned char *>(pCommand->m_pData));
+			void *pTmpData = Resize(pCommand->m_Width, pCommand->m_Height, Width, Height, pCommand->m_Format, static_cast<const unsigned char *>(pCommand->m_pData));
 			free(pTexData);
 			pTexData = pTmpData;
 		}
@@ -2594,7 +2563,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 			Height>>=1;
 			++RescaleCount;
 
-			void *pTmpData = Rescale(pCommand->m_Width, pCommand->m_Height, Width, Height, pCommand->m_Format, static_cast<const unsigned char *>(pCommand->m_pData));
+			void *pTmpData = Resize(pCommand->m_Width, pCommand->m_Height, Width, Height, pCommand->m_Format, static_cast<const unsigned char *>(pCommand->m_pData));
 			free(pTexData);
 			pTexData = pTmpData;
 		}
