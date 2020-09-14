@@ -98,7 +98,7 @@ bool CheckImageDimensions(void *pItem, int Type, const char *pFilename)
 
 	CMapItemImage *pImgItem = (CMapItemImage *)pItem2;
 
-	if(pImgItem->m_Width % 16 == 0 && pImgItem->m_Height % 16 == 0)
+	if(pImgItem->m_Width % 16 == 0 && pImgItem->m_Height % 16 == 0 && pImgItem->m_Width > 0 && pImgItem->m_Height > 0)
 		return true;
 
 	char aTileLayerName[12];
