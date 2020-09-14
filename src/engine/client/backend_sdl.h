@@ -168,8 +168,6 @@ protected:
 
 	static int TexFormatToOpenGLFormat(int TexFormat);
 	static int TexFormatToImageColorChannelCount(int TexFormat);
-	static unsigned char Sample(int w, int h, const unsigned char *pData, int u, int v, int Offset, int ScaleW, int ScaleH, int Bpp);
-	static void *Rescale(int Width, int Height, int NewWidth, int NewHeight, int Format, const unsigned char *pData);
 	static void *Resize(int Width, int Height, int NewWidth, int NewHeight, int Format, const unsigned char *pData);
 
 	virtual void Cmd_Init(const SCommand_Init *pCommand);
