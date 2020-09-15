@@ -40,6 +40,7 @@ testrunner\[1\]_include.cmake
 DDNet
 DDNet-Server
 DDNet-Server-Launcher
+libsteam_api.a
 config_retrieve
 config_store
 crapnet
