@@ -8,8 +8,8 @@
 
 #include <engine/engine.h>
 #include <engine/graphics.h>
-#include <engine/storage.h>
 #include <engine/shared/config.h>
+#include <engine/storage.h>
 
 #include "skins.h"
 
