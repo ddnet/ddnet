@@ -48,7 +48,9 @@ if append_missing:
         if content[-1] != "\n":
             content.append("\n")
         for i, miss in enumerate(missing):
-            content.append(local[miss]+"\n== \n\n")
+            if local[miss][1] != "":
+                content.append("["+local[miss][1]+"]\n")
+            content.append(local[miss][0]+"\n== \n\n")
         content[-1] = content[-1][:-1]
 
 open(outfile, "w").write("".join(content))
