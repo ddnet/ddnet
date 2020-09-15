@@ -6129,6 +6129,7 @@ void CEditor::Render()
 		// render butt ugly mouse cursor
 		float mx = UI()->MouseX();
 		float my = UI()->MouseY();
+		Graphics()->WrapClamp();
 		Graphics()->TextureSet(m_CursorTexture);
 		Graphics()->QuadsBegin();
 		if(ms_pUiGotContext == UI()->HotItem())
@@ -6136,6 +6137,7 @@ void CEditor::Render()
 		IGraphics::CQuadItem QuadItem(mx,my, 16.0f, 16.0f);
 		Graphics()->QuadsDrawTL(&QuadItem, 1);
 		Graphics()->QuadsEnd();
+		Graphics()->WrapNormal();
 	}
 }
 
