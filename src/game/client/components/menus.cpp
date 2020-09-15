@@ -726,13 +726,20 @@ int CMenus::RenderMenubar(CUIRect r)
 
 	if(Client()->State() == IClient::STATE_OFFLINE)
 	{
-		Box.VSplitLeft(100.0f, &Button, &Box);
+		Box.VSplitLeft(33.0f, &Button, &Box);
 		static int s_StartButton = 0;
-		if(DoButton_MenuTab(&s_StartButton, Localize("Menu"), false, &Button, CUI::CORNER_T))
+
+		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+
+		if(DoButton_MenuTab(&s_StartButton, "\xEE\xA2\x8A", false, &Button, CUI::CORNER_T))
 		{
 			m_ShowStart = true;
 			m_DoubleClickIndex = -1;
 		}
+
+		TextRender()->SetRenderFlags(0);
+		TextRender()->SetCurFont(NULL);
 
 		Box.VSplitLeft(5.0f, 0, &Box);
 
@@ -888,6 +895,20 @@ int CMenus::RenderMenubar(CUIRect r)
 	{
 		g_Config.m_ClEditor = 1;
 	}
+
+	Box.VSplitRight(10.0f, &Box, &Button);
+	Box.VSplitRight(33.0f, &Box, &Button);
+	static int s_DemoButton = 0;
+
+	if(DoButton_MenuTab(&s_DemoButton, "\xEE\x80\xAC", m_ActivePage == PAGE_DEMOS, &Button, CUI::CORNER_T))
+		NewPage = PAGE_DEMOS;
+
+	Box.VSplitRight(10.0f, &Box, &Button);
+	Box.VSplitRight(33.0f, &Box, &Button);
+	static int s_ServerButton = 0;
+
+	if(DoButton_MenuTab(&s_ServerButton, "\xEE\xA0\x8B", m_ActivePage == g_Config.m_UiPage, &Button, CUI::CORNER_T))
+		NewPage = g_Config.m_UiPage;
 
 	TextRender()->SetRenderFlags(0);
 	TextRender()->SetCurFont(NULL);
