@@ -109,6 +109,11 @@ bool CEditor::UiPopupExists(void *pid)
 	return false;
 }
 
+bool CEditor::UiPopupOpen()
+{
+	return g_UiNumPopups > 0;
+}
+
 int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	// remove group button
