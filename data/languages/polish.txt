@@ -312,6 +312,7 @@ Ping
 Pistol
 == Pistolet
 
+[Demo browser]
 Play
 == Graj
 
@@ -1227,4 +1228,8 @@ Server executable not found, can't run server
 == 
 
 Editor
+== 
+
+[Start menu]
+Play
 == 

@@ -305,6 +305,7 @@ Ping
 Pistol
 == Pistola
 
+[Demo browser]
 Play
 == Reproduir
 
@@ -1215,4 +1216,8 @@ Server executable not found, can't run server
 == 
 
 Editor
+== 
+
+[Start menu]
+Play
 == 

@@ -10,15 +10,23 @@ class LanguageDecodeError(Exception):
 
 def decode(fileobj, elements_per_key):
     data = {}
+    current_context = ""
     current_key = None
     for index, line in enumerate(fileobj):
         line = line.encode("utf-8").decode("utf-8-sig")
         line = line[:-1]
+        context = ""
         if line and line[-1] == "\r":
             line = line[:-1]
         if not line or line[:1] == "#":
+            current_context = ""
             continue
-        if line[:3] == "== ":
+
+        if line[0] == "[":
+            if line[-1] != "]":
+                raise LanguageDecodeError("Invalid context string", fileobj.name, index)
+            current_context = line[1:-1]
+        elif line[:3] == "== ":
             if len(data[current_key]) >= 1+elements_per_key:
                 raise LanguageDecodeError("Wrong number of elements per key", fileobj.name, index)
             if current_key:
@@ -32,8 +40,8 @@ def decode(fileobj, elements_per_key):
                 data[current_key].append(index)
             if line in data:
                 raise LanguageDecodeError("Key defined multiple times: " + line, fileobj.name, index)
-            data[line] = [index]
-            current_key = line
+            data[(line, current_context)] = [index]
+            current_key = (line, current_context)
     if len(data[current_key]) != 1+elements_per_key:
         raise LanguageDecodeError("Wrong number of elements per key", fileobj.name, index)
     data[current_key].append(index+1)
@@ -42,7 +50,7 @@ def decode(fileobj, elements_per_key):
 
 def check_file(path):
     with open(path) as fileobj:
-        matches = re.findall("Localize\s*\(\s*\"([^\"]+)\"\s*\)", fileobj.read())
+        matches = re.findall("Localize\s*\(\s*\"([^\"]+)\"(?:\s*,\s*\"([^\"]+)\")?\s*\)", fileobj.read())
     return matches
 
 

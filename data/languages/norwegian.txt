@@ -308,6 +308,7 @@ Ping
 Pistol
 == Pistol
 
+[Demo browser]
 Play
 == Spill
 
@@ -1223,4 +1224,8 @@ Server executable not found, can't run server
 == 
 
 Editor
+== 
+
+[Start menu]
+Play
 == 

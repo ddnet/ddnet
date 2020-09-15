@@ -319,6 +319,7 @@ Ping
 Pistol
 == Pistool
 
+[Demo browser]
 Play
 == Spelen
 
@@ -1227,6 +1228,10 @@ Server executable not found, can't run server
 == 
 
 Editor
+== 
+
+[Start menu]
+Play
 == 
 
 Net

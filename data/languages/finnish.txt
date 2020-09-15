@@ -308,6 +308,7 @@ Ping
 Pistol
 == Pistooli
 
+[Demo browser]
 Play
 == Toista
 
@@ -1157,6 +1158,10 @@ Server executable not found, can't run server
 == 
 
 Editor
+== 
+
+[Start menu]
+Play
 == 
 
 DDNet %s is out!

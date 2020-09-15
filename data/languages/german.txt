@@ -324,6 +324,7 @@ Ping
 Pistol
 == Pistole
 
+[Demo browser]
 Play
 == Abspielen
 
@@ -1225,16 +1226,20 @@ Menu
 == Menü
 
 Warning
-== 
+== Warnung
 
 Speed
-== 
-
-https://wiki.ddnet.tw/
-== 
+== Geschwindigkeit
 
 Website
-== 
+== Website
 
 Server executable not found, can't run server
+== Server-Programm nicht gefunden, kann Server nicht starten
+
+[Start menu]
+Play
+== Spielen
+
+https://wiki.ddnet.tw/
 == 

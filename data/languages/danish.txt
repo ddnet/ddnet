@@ -307,6 +307,7 @@ Ping
 Pistol
 == Pistol
 
+[Demo browser]
 Play
 == Spil
 
@@ -1156,6 +1157,10 @@ Server executable not found, can't run server
 == 
 
 Editor
+== 
+
+[Start menu]
+Play
 == 
 
 DDNet %s is out!
