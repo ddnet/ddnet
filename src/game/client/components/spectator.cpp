@@ -445,12 +445,14 @@ void CSpectator::OnRender()
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 	// draw cursor
+	Graphics()->WrapClamp();
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CURSOR].m_Id);
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 	IGraphics::CQuadItem QuadItem(m_SelectorMouse.x+Width/2.0f, m_SelectorMouse.y+Height/2.0f, 48.0f, 48.0f);
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
+	Graphics()->WrapNormal();
 }
 
 void CSpectator::OnReset()
