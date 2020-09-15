@@ -741,7 +741,7 @@ int CMenus::RenderMenubar(CUIRect r)
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetCurFont(NULL);
 
-		Box.VSplitLeft(5.0f, 0, &Box);
+		Box.VSplitLeft(10.0f, 0, &Box);
 
 		// offline menus
 		if(m_ActivePage == PAGE_NEWS)
@@ -797,7 +797,7 @@ int CMenus::RenderMenubar(CUIRect r)
 				m_DoubleClickIndex = -1;
 			}
 
-			Box.VSplitLeft(100.0f, &Button, &Box);
+			Box.VSplitLeft(90.0f, &Button, &Box);
 			static int s_DDNetButton = 0;
 			if(DoButton_MenuTab(&s_DDNetButton, "DDNet", m_ActivePage == PAGE_DDNET, &Button, 0))
 			{
@@ -810,7 +810,7 @@ int CMenus::RenderMenubar(CUIRect r)
 				m_DoubleClickIndex = -1;
 			}
 
-			Box.VSplitLeft(100.0f, &Button, &Box);
+			Box.VSplitLeft(90.0f, &Button, &Box);
 			static int s_KoGButton = 0;
 			if(DoButton_MenuTab(&s_KoGButton, "KoG", m_ActivePage == PAGE_KOG, &Button, CUI::CORNER_TR))
 			{
