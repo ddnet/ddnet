@@ -1,11 +1,10 @@
 #ifndef ENGINE_SHARED_WEBSOCKETS_H
 #define ENGINE_SHARED_WEBSOCKETS_H
 
-#if !defined(CONF_FAMILY_UNIX)
-#error websockets only work on unix, sorry
+#if defined(CONF_FAMILY_UNIX)
+#elif defined(CONF_FAMILY_WINDOWS)
+#include <winsock2.h>
 #endif
-
-#include <netinet/in.h>
 
 int websocket_create(const char *addr, int port);
 int websocket_destroy(int socket);

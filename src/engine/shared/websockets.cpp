@@ -7,7 +7,11 @@
 #include "base/system.h"
 #include "protocol.h"
 #include "ringbuffer.h"
+#if defined(CONF_FAMILY_UNIX)
 #include <arpa/inet.h>
+#elif defined(CONF_FAMILY_WINDOWS)
+#include <Ws2tcpip.h>
+#endif
 #include <libwebsockets.h>
 
 extern "C" {
