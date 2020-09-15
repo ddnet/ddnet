@@ -309,6 +309,7 @@ Ping
 Pistol
 == Pistol
 
+[Demo browser]
 Play
 == Spela
 
@@ -1224,4 +1225,8 @@ Server executable not found, can't run server
 == 
 
 Editor
+== 
+
+[Start menu]
+Play
 == 

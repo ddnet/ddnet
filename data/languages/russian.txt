@@ -314,6 +314,7 @@ Ping
 Pistol
 == Пистолет
 
+[Demo browser]
 Play
 == Просмотр
 

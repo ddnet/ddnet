@@ -335,6 +335,7 @@ Ping
 Pistol
 == 手槍
 
+[Demo browser]
 Play
 == 播放
 
@@ -1227,4 +1228,8 @@ Server executable not found, can't run server
 == 
 
 Editor
+== 
+
+[Start menu]
+Play
 == 

@@ -238,6 +238,7 @@ Ping
 Pistol
 == Пістолет
 
+[Demo browser]
 Play
 == Перегляд
 
@@ -1222,4 +1223,8 @@ Server executable not found, can't run server
 == 
 
 Editor
+== 
+
+[Start menu]
+Play
 == 

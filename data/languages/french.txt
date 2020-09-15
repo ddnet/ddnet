@@ -319,6 +319,7 @@ Ping
 Pistol
 == Pistolet
 
+[Demo browser]
 Play
 == Jouer
 
@@ -1246,4 +1247,8 @@ Server executable not found, can't run server
 == 
 
 Editor
+== 
+
+[Start menu]
+Play
 == 
