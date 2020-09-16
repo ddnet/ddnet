@@ -896,19 +896,22 @@ int CMenus::RenderMenubar(CUIRect r)
 		g_Config.m_ClEditor = 1;
 	}
 
-	Box.VSplitRight(10.0f, &Box, &Button);
-	Box.VSplitRight(33.0f, &Box, &Button);
-	static int s_DemoButton = 0;
+	if(Client()->State() == IClient::STATE_OFFLINE)
+	{
+		Box.VSplitRight(10.0f, &Box, &Button);
+		Box.VSplitRight(33.0f, &Box, &Button);
+		static int s_DemoButton = 0;
 
-	if(DoButton_MenuTab(&s_DemoButton, "\xEE\x80\xAC", m_ActivePage == PAGE_DEMOS, &Button, CUI::CORNER_T))
-		NewPage = PAGE_DEMOS;
+		if(DoButton_MenuTab(&s_DemoButton, "\xEE\x80\xAC", m_ActivePage == PAGE_DEMOS, &Button, CUI::CORNER_T))
+			NewPage = PAGE_DEMOS;
 
-	Box.VSplitRight(10.0f, &Box, &Button);
-	Box.VSplitRight(33.0f, &Box, &Button);
-	static int s_ServerButton = 0;
+		Box.VSplitRight(10.0f, &Box, &Button);
+		Box.VSplitRight(33.0f, &Box, &Button);
+		static int s_ServerButton = 0;
 
-	if(DoButton_MenuTab(&s_ServerButton, "\xEE\xA0\x8B", m_ActivePage == g_Config.m_UiPage, &Button, CUI::CORNER_T))
-		NewPage = g_Config.m_UiPage;
+		if(DoButton_MenuTab(&s_ServerButton, "\xEE\xA0\x8B", m_ActivePage == g_Config.m_UiPage, &Button, CUI::CORNER_T))
+			NewPage = g_Config.m_UiPage;
+	}
 
 	TextRender()->SetRenderFlags(0);
 	TextRender()->SetCurFont(NULL);
