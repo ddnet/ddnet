@@ -740,7 +740,7 @@ void CMenus::UiDoGetButtons(int Start, int Stop, CUIRect View, CUIRect ScopeView
 		if(Button.y >= ScopeView.y && Button.y + Button.h <= ScopeView.y + ScopeView.h)
 		{
 			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "%s:", (const char *)Key.m_Name);
+			str_format(aBuf, sizeof(aBuf), "%s:", Localize((const char *)Key.m_Name));
 
 			UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
 			int OldId = Key.m_KeyId, OldModifier = Key.m_Modifier, NewModifier;
