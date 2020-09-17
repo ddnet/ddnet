@@ -636,9 +636,6 @@ Internet
 Max demos
 == Максимальное количество демо
 
-News
-== 
-
 Join game
 == Играть
 
@@ -842,9 +839,6 @@ Server best:
 
 Personal best:
 == Ваше лучшее:
-
-Learn
-== 
 
 Browser
 == Браузер
@@ -1229,3 +1223,12 @@ Server executable not found, can't run server
 
 Editor
 == Редактор
+
+News
+== 
+
+Download skins
+== 
+
+Learn
+== 

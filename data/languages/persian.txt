@@ -848,6 +848,9 @@ Show only supported
 V-Sync
 == 
 
+Download skins
+== 
+
 may cause delay
 == 
 

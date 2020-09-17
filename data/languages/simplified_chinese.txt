@@ -1218,6 +1218,9 @@ Speed
 Skip the main menu
 == 跳过主菜单
 
+Download skins
+== 
+
 Website
 == 网站
 

@@ -849,6 +849,9 @@ Max CSVs
 Dummy settings
 == 
 
+Download skins
+== 
+
 Vanilla skins only
 == 
 

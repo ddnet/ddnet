@@ -1202,6 +1202,9 @@ Speed
 Skip the main menu
 == 
 
+Download skins
+== 
+
 Client message
 == 
 
