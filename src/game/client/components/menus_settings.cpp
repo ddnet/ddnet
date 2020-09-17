@@ -919,6 +919,8 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	static int s_GfxColorDepth = g_Config.m_GfxColorDepth;
 	static int s_GfxVsync = g_Config.m_GfxVsync;
 	static int s_GfxFsaaSamples = g_Config.m_GfxFsaaSamples;
+	static int s_GfxTextureQuality = g_Config.m_GfxTextureQuality;
+	static int s_GfxTextureCompression = g_Config.m_GfxTextureCompression;
 	static int s_GfxOpenGLVersion = (g_Config.m_GfxOpenGLMajor == 3 && g_Config.m_GfxOpenGLMinor == 3) || g_Config.m_GfxOpenGLMajor >= 4;
 	static int s_GfxEnableTextureUnitOptimization = g_Config.m_GfxEnableTextureUnitOptimization;
 	static int s_GfxUsePreinitBuffer = g_Config.m_GfxUsePreinitBuffer;
@@ -1084,6 +1086,8 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			s_GfxColorDepth == g_Config.m_GfxColorDepth &&
 			s_GfxVsync == g_Config.m_GfxVsync &&
 			s_GfxFsaaSamples == g_Config.m_GfxFsaaSamples &&
+			s_GfxTextureQuality == g_Config.m_GfxTextureQuality &&
+			s_GfxTextureCompression == g_Config.m_GfxTextureCompression &&
 			s_GfxOpenGLVersion == (int)IsNewOpenGL &&
 			s_GfxUsePreinitBuffer == g_Config.m_GfxUsePreinitBuffer &&
 			s_GfxEnableTextureUnitOptimization == g_Config.m_GfxEnableTextureUnitOptimization &&
