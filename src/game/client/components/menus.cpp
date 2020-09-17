@@ -23,6 +23,8 @@
 #include <game/version.h>
 #include <game/generated/protocol.h>
 
+#include <engine/client/updater.h>
+
 #include <game/client/components/binds.h>
 #include <game/client/components/console.h>
 #include <game/client/components/sounds.h>
@@ -40,10 +42,13 @@
 ColorRGBA CMenus::ms_GuiColor;
 ColorRGBA CMenus::ms_ColorTabbarInactiveOutgame;
 ColorRGBA CMenus::ms_ColorTabbarActiveOutgame;
+ColorRGBA CMenus::ms_ColorTabbarHoverOutgame;
 ColorRGBA CMenus::ms_ColorTabbarInactive;
-ColorRGBA CMenus::ms_ColorTabbarActive = ColorRGBA(0,0,0,0.5f);
+ColorRGBA CMenus::ms_ColorTabbarActive = ColorRGBA(0, 0, 0, 0.5f);
+ColorRGBA CMenus::ms_ColorTabbarHover;
 ColorRGBA CMenus::ms_ColorTabbarInactiveIngame;
 ColorRGBA CMenus::ms_ColorTabbarActiveIngame;
+ColorRGBA CMenus::ms_ColorTabbarHoverIngame;
 
 float CMenus::ms_ButtonHeight = 25.0f;
 float CMenus::ms_ListheaderHeight = 17.0f;
@@ -189,12 +194,32 @@ void CMenus::DoButton_KeySelect(const void *pID, const char *pText, int Checked,
 	UI()->DoLabel(&Temp, pText, Temp.h*ms_FontmodHeight, 0);
 }
 
-int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners)
+int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners, const ColorRGBA *pDefaultColor, const ColorRGBA *pActiveColor, const ColorRGBA *pHoverColor, float EdgeRounding)
 {
 	if(Checked)
-		RenderTools()->DrawUIRect(pRect, ms_ColorTabbarActive, Corners, 10.0f);
+	{
+		ColorRGBA ColorMenuTab = ms_ColorTabbarActive;
+		if(pActiveColor)
+			ColorMenuTab = *pActiveColor;
+		RenderTools()->DrawUIRect(pRect, ColorMenuTab, Corners, EdgeRounding);
+	}
 	else
-		RenderTools()->DrawUIRect(pRect, ms_ColorTabbarInactive, Corners, 10.0f);
+	{
+		if(UI()->MouseInside(pRect))
+		{
+			ColorRGBA HoverColorMenuTab = ms_ColorTabbarHover;
+			if(pHoverColor)
+				HoverColorMenuTab = *pHoverColor;
+			RenderTools()->DrawUIRect(pRect, HoverColorMenuTab, Corners, EdgeRounding);
+		}
+		else
+		{
+			ColorRGBA ColorMenuTab = ms_ColorTabbarInactive;
+			if(pDefaultColor)
+				ColorMenuTab = *pDefaultColor;
+			RenderTools()->DrawUIRect(pRect, ColorMenuTab, Corners, EdgeRounding);
+		}
+	}
 	CUIRect Temp;
 	pRect->HMargin(2.0f, &Temp);
 	UI()->DoLabel(&Temp, pText, Temp.h*ms_FontmodHeight, 0);
@@ -500,7 +525,7 @@ int CMenus::DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, 
 	CUIRect EditBox;
 	CUIRect ClearButton;
 	pRect->VSplitRight(15.0f, &EditBox, &ClearButton);
-	if(DoEditBox(pID, &EditBox, pStr, StrSize, FontSize, Offset, Hidden, Corners&~CUI::CORNER_R, pEmptyText))
+	if(DoEditBox(pID, &EditBox, pStr, StrSize, FontSize, Offset, Hidden, Corners & ~CUI::CORNER_R, pEmptyText))
 	{
 		ReturnValue = true;
 	}
@@ -556,24 +581,25 @@ float CMenus::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 		UI()->SetHotItem(pID);
 
 	// render
-	CUIRect Rail;
-	pRect->VMargin(5.0f, &Rail);
-	RenderTools()->DrawUIRect(&Rail, ColorRGBA(1,1,1,0.25f), 0, 0.0f);
+	RenderTools()->DrawUIRect(pRect, ColorRGBA(0, 0, 0, 0.25f), CUI::CORNER_ALL, 2.5f);
 
 	CUIRect Slider = Handle;
-	Slider.w = Rail.x-Slider.x;
-	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1,1,1,0.25f), CUI::CORNER_L, 2.5f);
-	Slider.x = Rail.x+Rail.w;
-	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1,1,1,0.25f), CUI::CORNER_R, 2.5f);
+	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 2.5f);
+	Slider.Margin(2, &Slider);
 
-	Slider = Handle;
-	Slider.Margin(5.0f, &Slider);
-	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1,1,1,0.25f*ButtonColorMul(pID)), CUI::CORNER_ALL, 2.5f);
+	float ColorSlider = 0;
+
+	if(UI()->ActiveItem() == pID)
+		ColorSlider = 1.0f;
+	else if(UI()->HotItem() == pID)
+		ColorSlider = 0.9f;
+	else
+		ColorSlider = 0.75f;
+
+	RenderTools()->DrawUIRect(&Slider, ColorRGBA(ColorSlider, ColorSlider, ColorSlider, 0.75f), CUI::CORNER_ALL, 2.5f);
 
 	return ReturnValue;
 }
-
-
 
 float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current)
 {
@@ -732,7 +758,33 @@ int CMenus::RenderMenubar(CUIRect r)
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 
-		if(DoButton_MenuTab(&s_StartButton, "\xEE\xA2\x8A", false, &Button, CUI::CORNER_T))
+		bool GotNewsOrUpdate = false;
+
+#if defined(CONF_AUTOUPDATE)
+		int State = Updater()->GetCurrentState();
+		bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
+		if(State == IUpdater::CLEAN && NeedUpdate)
+		{
+			GotNewsOrUpdate = true;
+		}
+#endif
+
+		GotNewsOrUpdate |= (bool)g_Config.m_UiUnreadNews;
+
+		ColorRGBA HomeButtonColorAlert(0, 1, 0, 0.25f);
+		ColorRGBA HomeButtonColorAlertHover(0, 1, 0, 0.5f);
+		ColorRGBA *pHomeButtonColor = NULL;
+		ColorRGBA *pHomeButtonColorHover = NULL;
+
+		const char *pHomeScreenButtonLabel = "\xEE\xA2\x8A";
+		if(GotNewsOrUpdate)
+		{
+			pHomeScreenButtonLabel = "\xEE\x80\xB1";
+			pHomeButtonColor = &HomeButtonColorAlert;
+			pHomeButtonColorHover = &HomeButtonColorAlertHover;
+		}
+
+		if(DoButton_MenuTab(&s_StartButton, pHomeScreenButtonLabel, false, &Button, CUI::CORNER_T, pHomeButtonColor, pHomeButtonColor, pHomeButtonColorHover))
 		{
 			m_ShowStart = true;
 			m_DoubleClickIndex = -1;
@@ -868,8 +920,9 @@ int CMenus::RenderMenubar(CUIRect r)
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 
 	Box.VSplitRight(33.0f, &Box, &Button);
-	static int s_QuitButton=0;
-	if(DoButton_MenuTab(&s_QuitButton, "\xEE\x97\x8D", 0, &Button, CUI::CORNER_T))
+	static int s_QuitButton = 0;
+	ColorRGBA QuitColor(1, 0, 0, 0.5f);
+	if(DoButton_MenuTab(&s_QuitButton, "\xEE\x97\x8D", 0, &Button, CUI::CORNER_T, NULL, NULL, &QuitColor))
 	{
 		if(m_pClient->Editor()->HasUnsavedData() || (Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmQuitTime && g_Config.m_ClConfirmQuitTime >= 0))
 		{
@@ -1106,12 +1159,14 @@ int CMenus::Render()
 	{
 		ms_ColorTabbarInactive = ms_ColorTabbarInactiveIngame;
 		ms_ColorTabbarActive = ms_ColorTabbarActiveIngame;
+		ms_ColorTabbarHover = ms_ColorTabbarHoverIngame;
 	}
 	else
 	{
 		RenderBackground();
 		ms_ColorTabbarInactive = ms_ColorTabbarInactiveOutgame;
 		ms_ColorTabbarActive = ms_ColorTabbarActiveOutgame;
+		ms_ColorTabbarHover = ms_ColorTabbarHoverOutgame;
 	}
 
 	CUIRect TabBar;
@@ -2124,22 +2179,26 @@ void CMenus::OnRender()
 	// update colors
 	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_UiColor, true));
 
-	ms_ColorTabbarInactiveOutgame = ColorRGBA(0,0,0,0.25f);
-	ms_ColorTabbarActiveOutgame = ColorRGBA(0,0,0,0.5f);
+	ms_ColorTabbarInactiveOutgame = ColorRGBA(0, 0, 0, 0.25f);
+	ms_ColorTabbarActiveOutgame = ColorRGBA(0, 0, 0, 0.5f);
+	ms_ColorTabbarHoverOutgame = ColorRGBA(1, 1, 1, 0.25f);
 
 	float ColorIngameScaleI = 0.5f;
 	float ColorIngameAcaleA = 0.2f;
+
 	ms_ColorTabbarInactiveIngame = ColorRGBA(
-		ms_GuiColor.r*ColorIngameScaleI,
-		ms_GuiColor.g*ColorIngameScaleI,
-		ms_GuiColor.b*ColorIngameScaleI,
-		ms_GuiColor.a*0.8f);
+		ms_GuiColor.r * ColorIngameScaleI,
+		ms_GuiColor.g * ColorIngameScaleI,
+		ms_GuiColor.b * ColorIngameScaleI,
+		ms_GuiColor.a * 0.8f);
 
 	ms_ColorTabbarActiveIngame = ColorRGBA(
 		ms_GuiColor.r*ColorIngameAcaleA,
 		ms_GuiColor.g*ColorIngameAcaleA,
 		ms_GuiColor.b*ColorIngameAcaleA,
 		ms_GuiColor.a);
+
+	ms_ColorTabbarHoverIngame = ColorRGBA(1, 1, 1, 0.75f);
 
 	// update the ui
 	CUIRect *pScreen = UI()->Screen();

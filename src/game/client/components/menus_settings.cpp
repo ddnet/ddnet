@@ -792,7 +792,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	UiDoListboxStart(&s_ControlsList , &MainView, 475.0f, Localize("Controls"), "", 1, 1, s_SelectedControl, s_ScrollValue);
 
 	CUIRect MovementSettings, WeaponSettings, VotingSettings, ChatSettings, MiscSettings, ResetButton;
-	CListboxItem Item = UiDoListboxNextItem(&OldSelected, false, false);
+	CListboxItem Item = UiDoListboxNextItem(&OldSelected, false, false, true);
 	Item.m_Rect.HSplitTop(10.0f, 0, &Item.m_Rect);
 	Item.m_Rect.VSplitMid(&MovementSettings, &VotingSettings);
 
