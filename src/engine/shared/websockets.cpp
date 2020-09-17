@@ -10,7 +10,7 @@
 #if defined(CONF_FAMILY_UNIX)
 #include <arpa/inet.h>
 #elif defined(CONF_FAMILY_WINDOWS)
-#include <Ws2tcpip.h>
+#include <ws2tcpip.h>
 #endif
 #include <libwebsockets.h>
 
