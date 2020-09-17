@@ -409,9 +409,6 @@ Laser
 Join game
 == Приєднатись до гри
 
-%d of %d servers, %d players
-== %d/%d серверів, %d гравців
-
 Sound volume
 == Гучність звуку
 
@@ -444,9 +441,6 @@ Lht.
 
 UI Color
 == Колір інтерфейсу
-
-Host address
-== Адреса сервера
 
 Alpha
 == Прозор..
@@ -1186,9 +1180,6 @@ The width or height of texture %s is not divisible by 16, which might cause visu
 Warning
 == 
 
-Menu
-== 
-
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == 
 
@@ -1196,6 +1187,27 @@ Country / Region
 == 
 
 Speed
+== 
+
+Search:
+== 
+
+Exclude:
+== 
+
+Search servers:
+== 
+
+%d of %d servers
+== 
+
+%d of %d server
+== 
+
+%d players
+== 
+
+%d player
 == 
 
 Markers

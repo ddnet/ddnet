@@ -618,9 +618,6 @@ Join game
 FSAA samples
 == 全屏抗锯齿(FSAA)采样倍数
 
-%d of %d servers, %d players
-== %d / %d 个服务器，%d 位玩家
-
 Sound volume
 == 音量
 
@@ -689,9 +686,6 @@ Automatically take statboard screenshot
 
 UI Color
 == 界面颜色
-
-Host address
-== 主机地址
 
 Crc:
 == Crc:
@@ -1209,17 +1203,11 @@ The width or height of texture %s is not divisible by 16, which might cause visu
 Warning
 == 警告
 
-Menu
-== 菜单
-
 Speed
 == 速度
 
 Skip the main menu
 == 跳过主菜单
-
-Download skins
-== 
 
 Website
 == 网站
@@ -1242,3 +1230,27 @@ Server executable not found, can't run server
 
 Editor
 == 编辑器
+
+Search:
+== 
+
+Exclude:
+== 
+
+Search servers:
+== 
+
+%d of %d servers
+== 
+
+%d of %d server
+== 
+
+%d players
+== 
+
+%d player
+== 
+
+Download skins
+== 
