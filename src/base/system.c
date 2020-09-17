@@ -3244,7 +3244,7 @@ PROCESS shell_execute(const char *file)
 	if(pid == 0)
 	{
 		execv(file, argv);
-		exit(1);
+		_exit(1);
 	}
 	return pid;
 #endif
