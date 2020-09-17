@@ -261,15 +261,15 @@ class CTextRender : public IEngineTextRender
 		m_RenderFlags = Flags;
 	}
 
-	void Grow(unsigned char *pIn, unsigned char *pOut, int w, int h)
+	void Grow(unsigned char *pIn, unsigned char *pOut, int w, int h, int OutlineCount)
 	{
 		for(int y = 0; y < h; y++)
 			for(int x = 0; x < w; x++)
 			{
 				int c = pIn[y*w+x];
 
-				for(int sy = -1; sy <= 1; sy++)
-					for(int sx = -1; sx <= 1; sx++)
+				for(int sy = -OutlineCount; sy <= OutlineCount; sy++)
+					for(int sx = -OutlineCount; sx <= OutlineCount; sx++)
 					{
 						int GetX = x+sx;
 						int GetY = y+sy;
@@ -511,28 +511,13 @@ class CTextRender : public IEngineTextRender
 		}
 		UploadGlyph(pFont, 0, X, Y, (int)Width, (int)Height, ms_aGlyphData);
 
-		if(OutlineThickness == 1)
+		Grow(ms_aGlyphData, ms_aGlyphDataOutlined, Width, Height, OutlineThickness);
+
+		while(!GetCharacterSpace(pFont, 1, (int)Width, (int)Height, X, Y))
 		{
-			Grow(ms_aGlyphData, ms_aGlyphDataOutlined, Width, Height);
-			while(!GetCharacterSpace(pFont, 1, (int)Width, (int)Height, X, Y))
-			{
-				IncreaseFontTexture(pFont, 1);
-			}
-			UploadGlyph(pFont, 1, X, Y, (int)Width, (int)Height, ms_aGlyphDataOutlined);
+			IncreaseFontTexture(pFont, 1);
 		}
-		else
-		{
-			for(int i = OutlineThickness; i > 0; i-=2)
-			{
-				Grow(ms_aGlyphData, ms_aGlyphDataOutlined, Width, Height);
-				Grow(ms_aGlyphDataOutlined, ms_aGlyphData, Width, Height);
-			}
-			while(!GetCharacterSpace(pFont, 1, (int)Width, (int)Height, X, Y))
-			{
-				IncreaseFontTexture(pFont, 1);
-			}
-			UploadGlyph(pFont, 1, X, Y, (int)Width, (int)Height, ms_aGlyphData);
-		}
+		UploadGlyph(pFont, 1, X, Y, (int)Width, (int)Height, ms_aGlyphDataOutlined);
 
 		// set char info
 		{
@@ -657,18 +642,21 @@ public:
 		IOHANDLE File = pStorage->OpenFile(pFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
 		if(File)
 		{
+			size_t Size = io_length(File);
+			unsigned char *pBuf = (unsigned char *)malloc(Size);
+			io_read(File, pBuf, Size);
 			io_close(File);
-			LoadFont(aFilename);
+			LoadFont(aFilename, pBuf, Size);
 		}
 	}
 
-	virtual CFont *LoadFont(const char *pFilename)
+	virtual CFont *LoadFont(const char *pFilename, const unsigned char *pBuf, size_t Size)
 	{
 		CFont *pFont = new CFont();
 
 		str_copy(pFont->m_aFilename, pFilename, sizeof(pFont->m_aFilename));
 
-		if(FT_New_Face(m_FTLibrary, pFont->m_aFilename, 0, &pFont->m_FtFace))
+		if(FT_New_Memory_Face(m_FTLibrary, pBuf, Size, 0, &pFont->m_FtFace))
 		{
 			delete pFont;
 			return NULL;
@@ -696,12 +684,12 @@ public:
 		return pFont;
 	}
 
-	virtual bool LoadFallbackFont(CFont* pFont, const char *pFilename)
+	virtual bool LoadFallbackFont(CFont *pFont, const char *pFilename, const unsigned char *pBuf, size_t Size)
 	{
 		CFont::SFontFallBack FallbackFont;
 		str_copy(FallbackFont.m_aFilename, pFilename, sizeof(FallbackFont.m_aFilename));
 
-		if(FT_New_Face(m_FTLibrary, pFilename, 0, &FallbackFont.m_FtFace) == 0)
+		if(FT_New_Memory_Face(m_FTLibrary, pBuf, Size, 0, &FallbackFont.m_FtFace) == 0)
 		{
 			dbg_msg("textrender", "loaded fallback font from '%s'", pFilename);
 			pFont->m_FtFallbackFonts.emplace_back(std::move(FallbackFont));
@@ -1768,7 +1756,7 @@ public:
 		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 	}
 
-	virtual void UploadEntityLayerText(void* pTexBuff, int ImageColorChannelCount, int TexWidth, int TexHeight, const char *pText, int Length, float x, float y, int FontSize)
+	virtual void UploadEntityLayerText(void *pTexBuff, int ImageColorChannelCount, int TexWidth, int TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize)
 	{
 		if (FontSize < 1)
 			return;
@@ -1820,8 +1808,10 @@ public:
 				{
 					for(int OffX = 0; OffX < SlotW; ++OffX)
 					{
-						size_t ImageOffset = (y + OffY) * (TexWidth * ImageColorChannelCount) + ((x + OffX) + WidthLastChars) * ImageColorChannelCount;
-						size_t GlyphOffset = (OffY) * SlotW + OffX;
+						int ImgOffX = clamp(x + OffX + WidthLastChars, x, (x + TexSubWidth) - 1);
+						int ImgOffY = clamp(y + OffY, y, (y + TexSubHeight) - 1);
+						size_t ImageOffset = ImgOffY * (TexWidth * ImageColorChannelCount) + ImgOffX * ImageColorChannelCount;
+						size_t GlyphOffset = (OffY)*SlotW + OffX;
 						for(size_t i = 0; i < (size_t)ImageColorChannelCount; ++i)
 						{
 							if(i != (size_t)ImageColorChannelCount - 1)

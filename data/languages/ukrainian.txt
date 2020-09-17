@@ -238,6 +238,7 @@ Ping
 Pistol
 == Пістолет
 
+[Demo browser]
 Play
 == Перегляд
 
@@ -1203,6 +1204,9 @@ Markers
 Skip the main menu
 == 
 
+Download skins
+== 
+
 https://wiki.ddnet.tw/
 == 
 
@@ -1222,4 +1226,8 @@ Server executable not found, can't run server
 == 
 
 Editor
+== 
+
+[Start menu]
+Play
 == 

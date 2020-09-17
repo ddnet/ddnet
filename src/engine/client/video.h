@@ -80,8 +80,8 @@ private:
 
 	void FillAudioFrame();
 
-	void OpenVideo();
-	void OpenAudio();
+	bool OpenVideo();
+	bool OpenAudio();
 	AVFrame *AllocPicture(enum AVPixelFormat PixFmt, int Width, int Height);
 	AVFrame* AllocAudioFrame(enum AVSampleFormat SampleFmt, uint64 ChannelLayout, int SampleRate, int NbSamples);
 
@@ -89,7 +89,7 @@ private:
 	void FinishFrames(OutputStream* pStream);
 	void CloseStream(OutputStream *pStream);
 
-	void AddStream(OutputStream *pStream, AVFormatContext *pOC, AVCodec **ppCodec, enum AVCodecID CodecId);
+	bool AddStream(OutputStream *pStream, AVFormatContext *pOC, AVCodec **ppCodec, enum AVCodecID CodecId);
 
 	class CGraphics_Threaded* m_pGraphics;
 	class IStorage* m_pStorage;

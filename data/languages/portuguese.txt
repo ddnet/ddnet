@@ -322,6 +322,7 @@ Ping
 Pistol
 == Pistola
 
+[Demo browser]
 Play
 == Ver
 
@@ -1030,6 +1031,9 @@ Reset wanted weapon on death
 Skip the main menu
 == 
 
+Download skins
+== 
+
 Vanilla skins only
 == 
 
@@ -1172,6 +1176,10 @@ Server executable not found, can't run server
 == 
 
 Editor
+== 
+
+[Start menu]
+Play
 == 
 
 DDNet %s is out!

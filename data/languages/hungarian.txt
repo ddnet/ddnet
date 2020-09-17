@@ -304,6 +304,7 @@ Ping
 Pistol
 == Pisztoly
 
+[Demo browser]
 Play
 == Játék
 
@@ -1199,6 +1200,9 @@ Speed
 Skip the main menu
 == 
 
+Download skins
+== 
+
 Skin prefix
 == 
 
@@ -1227,4 +1231,8 @@ Server executable not found, can't run server
 == 
 
 Editor
+== 
+
+[Start menu]
+Play
 == 

@@ -7,6 +7,7 @@
 
 #include <base/color.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #include <vector>
 #define GRAPHICS_TYPE_UNSIGNED_BYTE 0x1401

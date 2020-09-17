@@ -325,6 +325,7 @@ Ping
 Pistol
 == Pistola
 
+[Demo browser]
 Play
 == Assistir
 
@@ -1216,6 +1217,9 @@ Speed
 Skip the main menu
 == 
 
+Download skins
+== 
+
 https://wiki.ddnet.tw/
 == 
 
@@ -1235,4 +1239,8 @@ Server executable not found, can't run server
 == 
 
 Editor
+== 
+
+[Start menu]
+Play
 == 

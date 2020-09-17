@@ -6,9 +6,10 @@
 #include <base/math.h>
 #include <ctime>
 
+#include <engine/engine.h>
 #include <engine/graphics.h>
-#include <engine/storage.h>
 #include <engine/shared/config.h>
+#include <engine/storage.h>
 
 #include "skins.h"
 
@@ -49,19 +50,25 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 			return 0;
 	}
 
-	char aBuf[512];
+	char aBuf[MAX_PATH_LENGTH];
 	str_format(aBuf, sizeof(aBuf), "skins/%s", pName);
+	return pSelf->LoadSkin(aNameWithoutPng, aBuf, DirType);
+}
+
+int CSkins::LoadSkin(const char *pName, const char *pPath, int DirType)
+{
+	char aBuf[512];
 	CImageInfo Info;
-	if(!pSelf->Graphics()->LoadPNG(&Info, aBuf, DirType))
+	if(!Graphics()->LoadPNG(&Info, pPath, DirType))
 	{
 		str_format(aBuf, sizeof(aBuf), "failed to load skin from %s", pName);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
+		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
 		return 0;
 	}
 
 	CSkin Skin;
-	Skin.m_IsVanilla = IsVanillaSkin(aNameWithoutPng);
-	Skin.m_OrgTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
+	Skin.m_IsVanilla = IsVanillaSkin(pName);
+	Skin.m_OrgTexture = Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
 
 	int BodySize = 96; // body size
 	if (BodySize > Info.m_Height)
@@ -133,21 +140,20 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 			d[y*Pitch+x*4+2] = v;
 		}
 
-	Skin.m_ColorTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
+	Skin.m_ColorTexture = Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
 	free(Info.m_pData);
 
 	// set skin data
-	str_copy(Skin.m_aName, aNameWithoutPng, sizeof(Skin.m_aName));
+	str_copy(Skin.m_aName, pName, sizeof(Skin.m_aName));
 	if(g_Config.m_Debug)
 	{
 		str_format(aBuf, sizeof(aBuf), "load skin %s", Skin.m_aName);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
+		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
 	}
-	pSelf->m_aSkins.add(Skin);
+	m_aSkins.add(Skin);
 
 	return 0;
 }
-
 
 void CSkins::OnInit()
 {
@@ -203,7 +209,7 @@ int CSkins::Find(const char *pName)
 	{
 		return -1;
 	}
-	else if(pSkinPrefix)
+	else if(pSkinPrefix && pSkinPrefix[0])
 	{
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "%s_%s", pSkinPrefix, pName);
@@ -220,8 +226,51 @@ int CSkins::Find(const char *pName)
 int CSkins::FindImpl(const char *pName)
 {
 	auto r = ::find_binary(m_aSkins.all(), pName);
-	if(r.empty())
+	if(!r.empty())
+		return &r.front() - m_aSkins.base_ptr();
+
+	if(str_comp(pName, "default") == 0)
 		return -1;
 
-	return &r.front() - m_aSkins.base_ptr();
+	if(!g_Config.m_ClDownloadSkins)
+		return -1;
+
+	if(str_find(pName, "/") != 0)
+		return -1;
+
+	auto d = ::find_binary(m_aDownloadSkins.all(), pName);
+	if(!d.empty())
+	{
+		if(d.front().m_pTask && d.front().m_pTask->State() == HTTP_DONE)
+		{
+			char aPath[MAX_PATH_LENGTH];
+			str_format(aPath, sizeof(aPath), "downloadedskins/%s.png", d.front().m_aName);
+			Storage()->RenameFile(d.front().m_aPath, aPath, IStorage::TYPE_SAVE);
+			LoadSkin(d.front().m_aName, aPath, IStorage::TYPE_SAVE);
+			d.front().m_pTask = nullptr;
+		}
+		if(d.front().m_pTask && d.front().m_pTask->State() == HTTP_ERROR)
+		{
+			Storage()->RemoveFile(d.front().m_aPath, IStorage::TYPE_SAVE);
+			d.front().m_pTask = nullptr;
+		}
+		return -1;
+	}
+
+	int DefaultIndex = CSkins::Find("default");
+
+	CDownloadSkin Skin;
+	str_copy(Skin.m_aName, pName, sizeof(Skin.m_aName));
+	Skin.m_IsVanilla = false;
+	Skin.m_OrgTexture = m_aSkins[DefaultIndex].m_OrgTexture;
+	Skin.m_ColorTexture = m_aSkins[DefaultIndex].m_ColorTexture;
+	Skin.m_BloodColor = m_aSkins[DefaultIndex].m_BloodColor;
+
+	char aUrl[256];
+	str_format(aUrl, sizeof(aUrl), "%s%s.png", g_Config.m_ClSkinDownloadUrl, pName);
+	str_format(Skin.m_aPath, sizeof(Skin.m_aPath), "downloadedskins/%s.%d.tmp", pName, pid());
+	Skin.m_pTask = std::make_shared<CGetFile>(Storage(), aUrl, Skin.m_aPath, IStorage::TYPE_SAVE, CTimeout{0, 0, 0});
+	m_pClient->Engine()->AddJob(Skin.m_pTask);
+	m_aDownloadSkins.add(Skin);
+	return -1;
 }

@@ -8,7 +8,8 @@
 #	Bananbl4	2011-07-07 02:03:04
 #	Arion WT	2011-07-07 09:39:05
 #	Arion WT	2011-08-07 12:16:28
-#	<~{Barsik}~>	2020-07-01 22:04:21
+#	gerdoe		2020-07-01 22:04:21
+#	gerdoe		2020-09-14 20:53:53
 ##### /authors #####
 
 ##### translated strings #####
@@ -134,7 +135,7 @@ Demos
 == Демо
 
 Disconnect
-== Отключить
+== Отключиться
 
 Disconnected
 == Отключено
@@ -313,6 +314,7 @@ Ping
 Pistol
 == Пистолет
 
+[Demo browser]
 Play
 == Просмотр
 
@@ -617,9 +619,7 @@ Countries
 == Страны
 
 Types
-== Тип
-
-##### needs translation #####
+== Типы
 
 New name:
 == Новое имя
@@ -635,9 +635,6 @@ Internet
 
 Max demos
 == Максимальное количество демо
-
-News
-== Новости
 
 Join game
 == Играть
@@ -688,7 +685,7 @@ Reset to defaults
 == Сбросить настройки
 
 Quit anyway?
-== Выйти?
+== Все равно выйти?
 
 Display Modes
 == Разрешение экрана
@@ -742,7 +739,7 @@ Select a name
 == Выберите имя
 
 Show other players' hook collision lines
-== Показывать линии коллизий крюка других игроков
+== Показывать коллизии крюка других игроков
 
 We will win
 == Мы выиграем
@@ -842,9 +839,6 @@ Server best:
 
 Personal best:
 == Ваше лучшее:
-
-Learn
-== Обучение
 
 Browser
 == Браузер
@@ -988,7 +982,7 @@ Pause
 == Пауза
 
 Kill
-== Самоубийство
+== Суицид
 
 Zoom in
 == Приблизить
@@ -1036,16 +1030,16 @@ UI mouse s.
 == Чувств. мыши в меню
 
 may cause delay
-== может создавать задержку
+== создает задержку
 
 Screen
 == Экран
 
 Use OpenGL 3.3 (experimental)
-== Использовать OpenGL 3.3 (экспериментально)
+== Использовать OpenGL 3.3 (тест)
 
 Preinit VBO (iGPUs only)
-== Преинициализировать VBO (только iGPU)
+== Преинициал-ть VBO (только iGPU)
 
 Multiple texture units (disable for MacOS)
 == Множество текстурных блоков (отключите для MacOS)
@@ -1054,7 +1048,7 @@ Use high DPI
 == Использовать высокую чувств.
 
 Enable long pain sound (used when shooting in freeze)
-== Включить звук продолжительной боли (при стрельбе из фриза)
+== Включить звук продолжительной боли (при стрельбе во фризе)
 
 HUD
 == HUD
@@ -1078,7 +1072,7 @@ Default length: %d
 == Стандартная длина: %d
 
 Enable replays
-== Включить повторы
+== Включить записи
 
 Gameplay
 == Игровой процесс
@@ -1090,13 +1084,13 @@ Size
 == Размер
 
 Show text entities
-== Текстовые сущности
+== Показывать текст
 
 Show others (own team only)
 == Всегда показывать вашу команду
 
 Show quads
-== Показать quads
+== Показывать quads
 
 AntiPing
 == AntiPing
@@ -1111,7 +1105,7 @@ AntiPing: predict grenade paths
 == AntiPing: предсказывать пути гранат
 
 Show other players' key presses
-== Показывать нажатия кнопок других игроков
+== Показывать нажатия других игроков
 
 Background (regular)
 == Фон (обычный)
@@ -1132,10 +1126,10 @@ Time
 == Время
 
 Manual %3d:%02d  
-== Ручная %3d:%02d  
+== Ручное %3d:%02d  
 
 Race %3d:%02d  
-== Гонка %3d:%02d  
+== Попытка %3d:%02d  
 
 Auto %3d:%02d  
 == Авто %3d:%02d  
@@ -1186,46 +1180,55 @@ Client message
 == Сообщение от клиента
 
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== 
+== Ширина или высота текстуры %s не делится на 16, что может быть причиной проблем с визуалом.
 
 Warning
-== 
+== Предупреждение
 
 Menu
-== 
+== Меню
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 
+== Используйте кнопку k, чтобы возродиться, q для паузы и наблюдением за остальными игроками. Проверьте настройки для остальных кнопок.
 
 Country / Region
-== 
+== Страна / Регион
 
 Speed
-== 
+== Скорость
 
 Markers
-== 
+== Маркеры
 
 Skip the main menu
-== 
+== Пропускать главное меню
 
 https://wiki.ddnet.tw/
-== 
+== https://wiki.ddnet.tw/
 
 Website
-== 
+== Сайт
 
 Settings
-== 
+== Настройки
 
 Stop server
-== 
+== Остановить сервер
 
 Run server
-== 
+== Запустить сервер
 
 Server executable not found, can't run server
-== 
+== Файл сервера не найден, невозможно запустить
 
 Editor
+== Редактор
+
+News
+== 
+
+Download skins
+== 
+
+Learn
 == 

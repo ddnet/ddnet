@@ -310,6 +310,7 @@ Ping
 Pistol
 == Pistolka
 
+[Demo browser]
 Play
 == Přehrát
 
@@ -852,6 +853,9 @@ Max CSVs
 Dummy settings
 == 
 
+Download skins
+== 
+
 Vanilla skins only
 == 
 
@@ -1159,6 +1163,10 @@ Server executable not found, can't run server
 == 
 
 Editor
+== 
+
+[Start menu]
+Play
 == 
 
 DDNet %s is out!

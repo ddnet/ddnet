@@ -1501,10 +1501,15 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 	}
 
 #if defined(CONF_WEBSOCKETS)
-	if(addr->type&NETTYPE_WEBSOCKET_IPV4)
+	if(addr->type & NETTYPE_WEBSOCKET_IPV4)
 	{
 		if(sock.web_ipv4sock >= 0)
-			d = websocket_send(sock.web_ipv4sock, (const unsigned char*)data, size, addr->port);
+		{
+			char addr_str[NETADDR_MAXSTRSIZE];
+			str_format(addr_str, sizeof(addr_str), "%d.%d.%d.%d", addr->ip[0], addr->ip[1], addr->ip[2], addr->ip[3]);
+			d = websocket_send(sock.web_ipv4sock, (const unsigned char *)data, size, addr_str, addr->port);
+		}
+
 		else
 			dbg_msg("net", "can't send websocket_ipv4 traffic to this socket");
 	}

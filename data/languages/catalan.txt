@@ -305,6 +305,7 @@ Ping
 Pistol
 == Pistola
 
+[Demo browser]
 Play
 == Reproduir
 
@@ -1193,6 +1194,9 @@ Speed
 Skip the main menu
 == 
 
+Download skins
+== 
+
 Client message
 == 
 
@@ -1215,4 +1219,8 @@ Server executable not found, can't run server
 == 
 
 Editor
+== 
+
+[Start menu]
+Play
 == 

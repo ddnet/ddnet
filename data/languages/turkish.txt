@@ -312,6 +312,7 @@ Ping
 Pistol
 == Tabanca
 
+[Demo browser]
 Play
 == Oynat
 
@@ -1208,6 +1209,9 @@ Speed
 Skip the main menu
 == 
 
+Download skins
+== 
+
 https://wiki.ddnet.tw/
 == 
 
@@ -1227,4 +1231,8 @@ Server executable not found, can't run server
 == 
 
 Editor
+== 
+
+[Start menu]
+Play
 == 

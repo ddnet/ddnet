@@ -125,11 +125,9 @@ void CCollision::Init(class CLayers *pLayers)
 
 			Index = m_pSwitch[i].m_Type;
 
-			if(Index <= TILE_NPH_START)
+			if(Index <= TILE_NPH_ENABLE)
 			{
-				if((Index >= TILE_JUMP && Index <= TILE_BONUS)
-						|| Index == TILE_ALLOW_TELE_GUN
-						|| Index == TILE_ALLOW_BLUE_TELE_GUN)
+				if((Index >= TILE_JUMP && Index <= TILE_SUBSTRACT_TIME) || Index == TILE_ALLOW_TELE_GUN || Index == TILE_ALLOW_BLUE_TELE_GUN)
 					m_pSwitch[i].m_Type = Index;
 				else
 					m_pSwitch[i].m_Type = 0;

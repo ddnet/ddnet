@@ -310,6 +310,7 @@ Ping
 Pistol
 == Pištolj
 
+[Demo browser]
 Play
 == Pogledaj
 
@@ -1167,6 +1168,9 @@ Skip the main menu
 Max CSVs
 == 
 
+Download skins
+== 
+
 Borderless window
 == 
 
@@ -1204,6 +1208,10 @@ Server executable not found, can't run server
 == 
 
 Editor
+== 
+
+[Start menu]
+Play
 == 
 
 Manual %3d:%02d  

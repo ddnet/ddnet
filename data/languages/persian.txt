@@ -204,157 +204,9 @@ Ping
 == ﮓﻨﯿﭘ
 Pistol
 == ﺮﯿﺗ ﺖﻔﻫ
+[Demo browser]
 Play
 == ﻥﺩﺮﻛ ىﺯﺎﺑ
-Play background music
-== ﻪﻨﯿﻣﺯ ﺲﭘ ﻚﯾﺯﻮﻣ ﻥﺩﺮﻛ ﺶﺨﭘ
-Player
-== ﻦﻜﯾﺯﺎﺑ
-Player country:
-== ﻦﻜﯾﺯﺎﺑ ﺭﻮﺸﻛ:
-Player options
-== ﻦﻜﯾﺯﺎﺑ ﺕﺎﻤﯿﻈﻨﺗ:
-Players
-== ﻥﺎﻨﻜﯾﺯﺎﺑ
-Please balance teams!
-== !ﺪﯿﻨﻛ ﻝﺩﺎﻌﺘﻣ ﺍﺭ ﺎﻫ ﻢﯿﺗ ﺎﻔﻄﻟ
-Prev. weapon
-== ﯽﻠﺒﻗ ﻪﺤﻠﺳﺍ
-Quit
-== ﻥﺪﺷ ﺝﺭﺎﺧ
-Reason:
-== ﻞﯿﻟﺩ:
-Red team
-== ﺰﻣﺮﻗ ﻢﯿﺗ
-Red team wins!
-== !ﺪﺷ ﻩﺪﻧﺮﺑ ﺰﻣﺮﻗ ﻢﯿﺗ
-Refresh
-== ﻩﺭﺎﺑﻭﺩ ىﺭﺍﺬﮔﺭﺎﺑ
-Refreshing master servers
-== ﯽﻠﺻﺍ ىﺎﻫ ﺭﻭﺮﺳ ﻩﺭﺎﺑﻭﺩ ىﺭﺍﺬﮔﺭﺎﺑ
-Remote console
-== ﻝﻮﺴﻨﮐ ﻝﺮﺘﻨﮐ
-Remove
-== ﻥﺩﺮﮐ ﻑﺬﺣ
-Remove friend
-== ﺖﺳﻭﺩ ﻥﺩﺮﮐ ﻑﺪﺣ
-Rename
-== ﻡﺎﻧ ﺮﯿﯿﻐﺗ
-Rename demo
-== ﻮﻣﺩ ﻡﺎﻧ ﺮﯿﯿﻐﺗ
-Reset filter
-== ﺮﺘﻠﯿﻓ ﻩﺭﺎﺑﻭﺩ ﻢﯿﻈﻨﺗ
-Sample rate
-== ﻪﻧﻮﻤﻧ ﺶﺠﻨﺳ
-Score
-== ﺯﺎﯿﺘﻣﺍ
-Score limit
-== ﺯﺎﯿﺘﻣﺍ ﺪﺣ
-Scoreboard
-== ﯼﺪﻨﺑ ﻪﺒﺗﺭ
-Screenshot
-== ﻪﺤﻔﺻ ﺯﺍ ﯼﺭﺍﺩﺮﺑ ﺲﮑﻋ
-Server address:
-== :ﺭﻭﺮﺳ ﺱﺭﺩﺁ
-Server details
-== ﺭﻭﺮﺳ ﺕﺎﯿﺋﺰﺟ
-Server filter
-== ﺭﻭﺮﺳ ﯽﮔﮋﯾﻭ
-Server info
-== ﺭﻭﺮﺳ ﺕﺎﻋﻼﻃﺍ
-Server not full
-== ﻩﺪﺸﻧ ﺮﭘ ﺭﻭﺮﺳ
-Shotgun
-== ىﺍ ﻪﻤﭼﺎﺳ ﮓﻨﻔﺗ
-Show chat
-== ﺖﭼ ﻥﺩﺍﺩ ﻥﺎﺸﻧ
-Show friends only
-== ﻥﺎﺘﺳﻭﺩ ﺶﯾﺎﻤﻧ ﻂﻘﻓ
-Show ingame HUD
-== ﯼﺯﺎﺑ ﺭﺩ HUD ﻥﺩﺍﺩ ﻥﺎﺸﻧ
-Show name plates
-== ﻢﺳﺍ ﻥﺩﺍﺩ ﻥﺎﺸﻧ
-Show only chat messages from friends
-== ﻥﺎﺘﺳﻭﺩ ﯼﺎﻫ ﻡﺎﯿﭘ ﻥﺩﺍﺩ ﻥﺎﺸﻧ ﻂﻘﻓ
-Show only supported
-== ﺪﻧﻮﺷ ﯽﻣ ﯽﻧﺎﺒﯿﺘﺸﭘ ﻪﻛ ﯽﯾﺎﻫ ﺖﻟﺎﺣ ﺶﯾﺎﻤﻧ ﻂﻘﻓ
-Skins
-== ﻦﯿﮑﺳﺍ
-Sound
-== ﺍﺪﺻ
-Sound error
-== ﺍﺪﺻ ﯼﺎﻄﺧ
-Spectate
-== ﺎﺷﺎﻤﺗ
-Spectate next
-== ﯼﺪﻌﺑ ﯼ ﺎﺷﺎﻤﺗ
-Spectate previous
-== ﯽﻠﺒﻗ ﯼ ﺎﺷﺎﻤﺗ
-Spectator mode
-== ﺮﮔﺎﺷﺎﻤﺗ ﺖﻟﺎﺣ
-Spectators
-== ﺎﻫ ﺮﮔﺎﺷﺎﻤﺗ
-Standard gametype
-== ﯼﺯﺎﺑ ﺩﺭﺍﺪﻧﺎﺘﺳﺍ ﯼﺎﻫ ﻝﺪﻣ
-Standard map
-== ﺩﺭﺍﺪﻧﺎﺘﺳﺍ ﯼﺎﻫ ﭗﻣ
-Stop record
-== ﻥﺩﺮﮐ ﻂﺒﺿ ﻒﻗﻮﺗ
-Strict gametype filter
-== ﯼﺯﺎﺑ ﺩﻮﻣ ﺮﺘﻠﯿﻓ
-Sudden Death
-== ﯽﻧﺎﻬﮔﺎﻧ ﮒﺮﻣ
-Switch weapon on pickup
-== ﻥﺪﺷ ﻪﺘﺷﺍﺩﺭﻭ ﺕﺭﻮﺻ ﺭﺩ ﻪﺤﻠﺳﺍ ﺮﯿﯿﻐﺗ
-Team
-== ﻢﯿﺗ
-Team chat
-== ﻢﯿﺗ ﺖﭼ
-The audio device couldn't be initialised.
-== .ﺪﺸﻧ ﻥﺪﺷ ﺐﺼﻧ ﻪﺑ ﻖﻓﻮﻣ ﺍﺪﺻ ﻩﺎﮕﺘﺳﺩ
-The server is running a non-standard tuning on a pure game type.
-== .ﺖﺳﺍ ﺮﮕﯾﺩ ﯼﺯﺎﺑ ﻝﺪﻣ ﮏﯾ ﯼﻭﺭ ﻭ ﺩﺭﺍﺪﻧﺎﺘﺳﺍ ﺮﯿﻏ ﺕﺎﻤﯿﻈﻨﺗ ﯼﺍﺭﺍﺩ ﺍﺮﺟﺍ ﻝﺎﺣ ﺭﺩ ﺭﻭﺮﺳ
-There's an unsaved map in the editor, you might want to save it before you quit the game.
-== .ﯼﺯﺎﺑ ﺯﺍ ﺝﻭﺮﺧ ﺯﺍ ﻼﺒﻗ ﺪﯿﻨﮐ ﻩﺮﯿﺧﺫ ﺍﺭ ﻥﺁ ﺪﯿﻫﺍﻮﺨﺑ ﺎﻤﺷ ﺖﺳﺍ ﻦﮑﻤﻣ , ﺮﮕﻨﯾﻭﺪﺗ ﺭﺩ ﻩﺪﺸﻧ ﻩﺮﯿﺧﺫ ﭗﻣ ﻦﯾﺍ
-Time limit
-== ﻥﺎﻣﺯ ﺖﯾﺎﻬﻧ
-Time limit: %d min
-== ﻪﻘﯿﻗﺩ d% :ﻥﺎﻣﺯ ﺖﯾﺎﻬﻧ
-Try again
-== ﻩﺭﺎﺑﻭﺩ ﺵﻼﺗ
-Type
-== ﻝﺪﻣ
-Unable to delete the demo
-== ﺩﺮﮐ ﮎﺎﭘ ﺍﺭ ﻮﻣﺩ ﻦﯾﺍ ﻥﺍﻮﺘﯿﻤﻧ
-Unable to rename the demo
-== ﺩﺮﮐ ﺽﻮﻋ ﺍﺭ ﻮﻣﺩ ﻦﯾﺍ ﻢﺳﺍ ﻥﺍﻮﺘﯿﻤﻧ
-Use sounds
-== ﺍﺪﺻ ﺯﺍ ﻩﺩﺎﻔﺘﺳﺍ
-Use team colors for name plates
-== ﺎﻫ ﻢﺳﺍ ﯼﺍﺮﺑ ﻢﯿﺗ ﮓﻧﺭ ﺯﺍ ﻩﺩﺎﻔﺘﺳﺍ
-V-Sync
-== V-Sync
-Version
-== ﻪﺨﺴﻧ
-Vote command:
-== ﯽﺠﻨﺳ ﺮﻈﻧ ﺕﺍﺭﻮﺘﺳﺩ:
-Vote description:
-== :ﯽﺠﻨﺳ ﺮﻈﻧ ﺕﺎﺤﯿﺿﻮﺗ
-Vote no
-== ﻪﻧ ﯼﺍﺭ
-Vote yes
-== ﻪﻠﺑ ﯼﺍﺭ
-Voting
-== ﯼﺮﯿﮔ ﯼﺍﺭ
-Warmup
-== ﺪﯿﻨﮐ ﻪﻠﺠﻋ
-Weapon
-== ﻪﺤﻠﺳﺍ
-Yes
-== ﻪﻠﺑ
-You must restart the game for all settings to take effect.
-== ﺪﻧﻮﺷ ﻡﺎﺠﻧﺍ ﺕﺎﻤﯿﻈﻨﺗ ﻪﮑﻨﯾﺍ ﯼﺍﺮﺑ ﺪﯿﻨﮐ ﯼﺭﺍﺰﮔﺭﺎﺑ ﻩﺭﺎﺑﻭﺩ ﺍﺭ ﯼﺯﺎﺑ ﺪﯾﺎﺑ ﺎﻤﺷ
-##### ﻪﻤﺟﺮﺗ ﻪﺑ ﺝﺎﯿﺘﺣﺍ #####
 Borderless window
 == ﺯﺮﻣ ﻩﺮﺠﻨﭘ
 Demo
@@ -786,22 +638,232 @@ The width or height of texture %s is not divisible by 16, which might cause visu
 Warning
 == 
 
+Team
+== 
+
+Sudden Death
+== 
+
+Warmup
+== 
+
+Please balance teams!
+== 
+
+Reason:
+== 
+
+Vote yes
+== 
+
+Vote no
+== 
+
+Spectate
+== 
+
 Menu
+== 
+
+Players
+== 
+
+Server info
+== 
+
+The server is running a non-standard tuning on a pure game type.
+== 
+
+Rename demo
+== 
+
+Remove friend
+== 
+
+Sound error
+== 
+
+The audio device couldn't be initialised.
+== 
+
+Try again
+== 
+
+Quit
 == 
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == 
 
+There's an unsaved map in the editor, you might want to save it before you quit the game.
+== 
+
+Yes
+== 
+
 Country / Region
+== 
+
+Unable to delete the demo
+== 
+
+Unable to rename the demo
+== 
+
+Show chat
+== 
+
+Use sounds
 == 
 
 Speed
 == 
 
+Show ingame HUD
+== 
+
+Type
+== 
+
+Refreshing master servers
+== 
+
+Server filter
+== 
+
+Server not full
+== 
+
+Show friends only
+== 
+
+Standard gametype
+== 
+
+Standard map
+== 
+
+Strict gametype filter
+== 
+
+Server address:
+== 
+
+Player country:
+== 
+
+Reset filter
+== 
+
+Server details
+== 
+
+Scoreboard
+== 
+
+Remove
+== 
+
+Refresh
+== 
+
+Rename
+== 
+
+Stop record
+== 
+
+Player options
+== 
+
+Player
+== 
+
+Version
+== 
+
+Score limit
+== 
+
+Time limit
+== 
+
+Vote description:
+== 
+
+Vote command:
+== 
+
+Switch weapon on pickup
+== 
+
+Show only chat messages from friends
+== 
+
+Show name plates
+== 
+
+Use team colors for name plates
+== 
+
 Skip the main menu
 == 
 
+Skins
+== 
+
+Shotgun
+== 
+
+Prev. weapon
+== 
+
+Team chat
+== 
+
+Spectator mode
+== 
+
+Spectate next
+== 
+
+Spectate previous
+== 
+
+Remote console
+== 
+
+Screenshot
+== 
+
+Weapon
+== 
+
+Voting
+== 
+
+Show only supported
+== 
+
+V-Sync
+== 
+
+Download skins
+== 
+
 may cause delay
+== 
+
+Play background music
+== 
+
+Sample rate
+== 
+
+Sound
+== 
+
+You must restart the game for all settings to take effect.
 == 
 
 Client message
@@ -829,4 +891,23 @@ Server executable not found, can't run server
 == 
 
 Editor
+== 
+
+[Start menu]
+Play
+== 
+
+Time limit: %d min
+== 
+
+Spectators
+== 
+
+Score
+== 
+
+Red team wins!
+== 
+
+Red team
 == 

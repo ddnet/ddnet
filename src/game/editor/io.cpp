@@ -951,14 +951,13 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 									TILE_FREEZE,
 									TILE_DFREEZE,
 									TILE_DUNFREEZE,
-									TILE_HIT_START,
-									TILE_HIT_END,
+									TILE_HIT_ENABLE,
+									TILE_HIT_DISABLE,
 									TILE_JUMP,
-									TILE_PENALTY,
-									TILE_BONUS,
+									TILE_ADD_TIME,
+									TILE_SUBSTRACT_TIME,
 									TILE_ALLOW_TELE_GUN,
-									TILE_ALLOW_BLUE_TELE_GUN
-								};
+									TILE_ALLOW_BLUE_TELE_GUN};
 								CSwitchTile *pLayerSwitchTiles = ((CLayerSwitch *)pTiles)->m_pSwitchTile;
 								mem_copy(((CLayerSwitch *)pTiles)->m_pSwitchTile, pSwitchData, pTiles->m_Width*pTiles->m_Height*sizeof(CSwitchTile));
 
@@ -996,8 +995,8 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 
 								for(int i = 0; i < pTiles->m_Width*pTiles->m_Height; i++)
 								{
-									if(pLayerTuneTiles[i].m_Type == TILE_TUNE1)
-										pTiles->m_pTiles[i].m_Index = TILE_TUNE1;
+									if(pLayerTuneTiles[i].m_Type == TILE_TUNE)
+										pTiles->m_pTiles[i].m_Index = TILE_TUNE;
 									else
 										pTiles->m_pTiles[i].m_Index = 0;
 								}

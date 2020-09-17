@@ -40,18 +40,18 @@ void CSpectator::ConSpectateNext(IConsole::IResult *pResult, void *pUserData)
 	bool GotNewSpectatorID = false;
 
 	int CurPos = -1;
-	for (int i = 0; i < MAX_CLIENTS; i++)
-		if (pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i] && pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID == pSelf->m_pClient->m_Snap.m_SpecInfo.m_SpectatorID)
-		CurPos = i;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+		if(pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i] && pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID == pSelf->m_pClient->m_Snap.m_SpecInfo.m_SpectatorID)
+			CurPos = i;
 
 	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
-			if(!pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i] || pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_Team == TEAM_SPECTATORS)
+			if(!pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i] || pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_Team == TEAM_SPECTATORS)
 				continue;
 
-			NewSpectatorID = pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID;
+			NewSpectatorID = pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID;
 			GotNewSpectatorID = true;
 			break;
 		}
@@ -60,10 +60,10 @@ void CSpectator::ConSpectateNext(IConsole::IResult *pResult, void *pUserData)
 	{
 		for(int i = CurPos + 1; i < MAX_CLIENTS; i++)
 		{
-			if(!pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i] || pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_Team == TEAM_SPECTATORS)
+			if(!pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i] || pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_Team == TEAM_SPECTATORS)
 				continue;
 
-			NewSpectatorID = pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID;
+			NewSpectatorID = pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID;
 			GotNewSpectatorID = true;
 			break;
 		}
@@ -72,10 +72,10 @@ void CSpectator::ConSpectateNext(IConsole::IResult *pResult, void *pUserData)
 		{
 			for(int i = 0; i < CurPos; i++)
 			{
-				if(!pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i] || pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_Team == TEAM_SPECTATORS)
+				if(!pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i] || pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_Team == TEAM_SPECTATORS)
 					continue;
 
-				NewSpectatorID = pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID;
+				NewSpectatorID = pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID;
 				GotNewSpectatorID = true;
 				break;
 			}
@@ -92,18 +92,18 @@ void CSpectator::ConSpectatePrevious(IConsole::IResult *pResult, void *pUserData
 	bool GotNewSpectatorID = false;
 
 	int CurPos = -1;
-	for (int i = 0; i < MAX_CLIENTS; i++)
-		if (pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i] && pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID == pSelf->m_pClient->m_Snap.m_SpecInfo.m_SpectatorID)
-		CurPos = i;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+		if(pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i] && pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID == pSelf->m_pClient->m_Snap.m_SpecInfo.m_SpectatorID)
+			CurPos = i;
 
 	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
 	{
 		for(int i = MAX_CLIENTS -1; i > -1; i--)
 		{
-			if(!pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i] || pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_Team == TEAM_SPECTATORS)
+			if(!pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i] || pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_Team == TEAM_SPECTATORS)
 				continue;
 
-			NewSpectatorID = pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID;
+			NewSpectatorID = pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID;
 			GotNewSpectatorID = true;
 			break;
 		}
@@ -112,10 +112,10 @@ void CSpectator::ConSpectatePrevious(IConsole::IResult *pResult, void *pUserData
 	{
 		for(int i = CurPos - 1; i > -1; i--)
 		{
-			if(!pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i] || pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_Team == TEAM_SPECTATORS)
+			if(!pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i] || pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_Team == TEAM_SPECTATORS)
 				continue;
 
-			NewSpectatorID = pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID;
+			NewSpectatorID = pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID;
 			GotNewSpectatorID = true;
 			break;
 		}
@@ -124,11 +124,11 @@ void CSpectator::ConSpectatePrevious(IConsole::IResult *pResult, void *pUserData
 		{
 			for(int i = MAX_CLIENTS - 1; i > CurPos; i--)
 			{
-				if(!pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i] || pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_Team == TEAM_SPECTATORS)
+				if(!pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i] || pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_Team == TEAM_SPECTATORS)
 					continue;
 
-			NewSpectatorID = pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID;
-			GotNewSpectatorID = true;
+				NewSpectatorID = pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID;
+				GotNewSpectatorID = true;
 				break;
 			}
 		}
@@ -148,10 +148,10 @@ void CSpectator::ConSpectateClosest(IConsole::IResult *pResult, void *pUserData)
 	{
 		for (int i = 0; i < MAX_CLIENTS; i++)
 		{
-			if(pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i] && pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID == pSelf->m_pClient->m_Snap.m_SpecInfo.m_SpectatorID)
+			if(pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i] && pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID == pSelf->m_pClient->m_Snap.m_SpecInfo.m_SpectatorID)
 			{
 				IndexOfTeeBeingSpectated = i;
-				const CNetObj_Character &CurCharacter = pSelf->m_pClient->m_Snap.m_aCharacters[pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID].m_Cur;
+				const CNetObj_Character &CurCharacter = pSelf->m_pClient->m_Snap.m_aCharacters[pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID].m_Cur;
 				CurPosition.x = CurCharacter.m_X;
 				CurPosition.y = CurCharacter.m_Y;
 				break;
@@ -161,9 +161,9 @@ void CSpectator::ConSpectateClosest(IConsole::IResult *pResult, void *pUserData)
 	int ClosestDistance = INT_MAX;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(i == IndexOfTeeBeingSpectated || !pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i] || pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_Team == TEAM_SPECTATORS)
+		if(i == IndexOfTeeBeingSpectated || !pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i] || pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_Team == TEAM_SPECTATORS)
 			continue;
-		int ClientID = pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID;
+		int ClientID = pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID;
 		const CNetObj_Character &MaybeClosestCharacter = pSelf->m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur;
 		int Distance = distance(CurPosition, vec2(MaybeClosestCharacter.m_X, MaybeClosestCharacter.m_Y));
 		if(NewSpectatorID == -1 || Distance < ClosestDistance)
@@ -246,7 +246,7 @@ void CSpectator::OnRender()
 
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
-		if(!m_pClient->m_Snap.m_paInfoByDDTeam[i] || m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_Team == TEAM_SPECTATORS)
+		if(!m_pClient->m_Snap.m_paInfoByDDTeamName[i] || m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_Team == TEAM_SPECTATORS)
 			continue;
 
 		++TotalPlayers;
@@ -327,7 +327,7 @@ void CSpectator::OnRender()
 
 	for(int i = 0, Count = 0; i < MAX_CLIENTS; ++i)
 	{
-		if(!m_pClient->m_Snap.m_paInfoByDDTeam[i] || m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_Team == TEAM_SPECTATORS)
+		if(!m_pClient->m_Snap.m_paInfoByDDTeamName[i] || m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_Team == TEAM_SPECTATORS)
 			continue;
 
 		++Count;
@@ -338,13 +338,13 @@ void CSpectator::OnRender()
 			y = StartY;
 		}
 
-		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByDDTeam[i];
+		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByDDTeamName[i];
 		int DDTeam = m_pClient->m_Teams.Team(pInfo->m_ClientID);
 		int NextDDTeam = 0;
 
 		for(int j = i + 1; j < MAX_CLIENTS; j++)
 		{
-			const CNetObj_PlayerInfo *pInfo2 = m_pClient->m_Snap.m_paInfoByDDTeam[j];
+			const CNetObj_PlayerInfo *pInfo2 = m_pClient->m_Snap.m_paInfoByDDTeamName[j];
 
 			if(!pInfo2 || pInfo2->m_Team == TEAM_SPECTATORS)
 				continue;
@@ -357,7 +357,7 @@ void CSpectator::OnRender()
 		{
 			for (int j = i - 1; j >= 0; j--)
 			{
-				const CNetObj_PlayerInfo *pInfo2 = m_pClient->m_Snap.m_paInfoByDDTeam[j];
+				const CNetObj_PlayerInfo *pInfo2 = m_pClient->m_Snap.m_paInfoByDDTeamName[j];
 
 				if(!pInfo2 || pInfo2->m_Team == TEAM_SPECTATORS)
 					continue;
@@ -388,8 +388,7 @@ void CSpectator::OnRender()
 
 		OldDDTeam = DDTeam;
 
-		if((Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_DemoSpecID == m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID)
-			|| (Client()->State() != IClient::STATE_DEMOPLAYBACK && m_pClient ->m_Snap.m_SpecInfo.m_SpectatorID == m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID))
+		if((Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_DemoSpecID == m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID) || (Client()->State() != IClient::STATE_DEMOPLAYBACK && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID))
 		{
 			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
@@ -402,12 +401,12 @@ void CSpectator::OnRender()
 		if(m_SelectorMouse.x >= x-10.0f && m_SelectorMouse.x < x+260.0f &&
 			m_SelectorMouse.y >= y-(LineHeight/6.0f) && m_SelectorMouse.y < y+(LineHeight*5.0f/6.0f))
 		{
-			m_SelectedSpectatorID = m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID;
+			m_SelectedSpectatorID = m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID;
 			Selected = true;
 		}
 		float TeeAlpha;
 		if(Client()->State() == IClient::STATE_DEMOPLAYBACK &&
-			!m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID].m_Active)
+			!m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID].m_Active)
 		{
 			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 0.25f);
 			TeeAlpha = 0.5f;
@@ -417,18 +416,17 @@ void CSpectator::OnRender()
 			TextRender()->TextColor(1.0f, 1.0f, 1.0f, Selected?1.0f:0.5f);
 			TeeAlpha = 1.0f;
 		}
-		TextRender()->Text(0, Width/2.0f+x+50.0f, Height / 2.0f + y + BoxMove + (LineHeight - FontSize) / 2.f, FontSize, m_pClient->m_aClients[m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID].m_aName, 220.0f);
+		TextRender()->Text(0, Width / 2.0f + x + 50.0f, Height / 2.0f + y + BoxMove + (LineHeight - FontSize) / 2.f, FontSize, m_pClient->m_aClients[m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID].m_aName, 220.0f);
 
 		// flag
-		if(m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_FLAGS &&
-			m_pClient->m_Snap.m_pGameDataObj && (m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierRed == m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID ||
-			m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue == m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID))
+		if(m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_FLAGS &&
+			m_pClient->m_Snap.m_pGameDataObj && (m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierRed == m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID || m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue == m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID))
 		{
 			Graphics()->BlendNormal();
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
 			Graphics()->QuadsBegin();
 
-			RenderTools()->SelectSprite(m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue == m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID ? SPRITE_FLAG_BLUE : SPRITE_FLAG_RED, SPRITE_FLAG_FLIP_X);
+			RenderTools()->SelectSprite(m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue == m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID ? SPRITE_FLAG_BLUE : SPRITE_FLAG_RED, SPRITE_FLAG_FLIP_X);
 
 			float Size = LineHeight;
 			IGraphics::CQuadItem QuadItem(Width/2.0f+x-LineHeight/5.0f, Height/2.0f+y-LineHeight/3.0f, Size/2.0f, Size);
@@ -436,7 +434,7 @@ void CSpectator::OnRender()
 			Graphics()->QuadsEnd();
 		}
 
-		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID].m_RenderInfo;
+		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID].m_RenderInfo;
 		TeeInfo.m_Size *= TeeSizeMod;
 		RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), vec2(Width/2.0f+x+20.0f, Height/2.0f+y+20.0f), TeeAlpha);
 
@@ -445,12 +443,14 @@ void CSpectator::OnRender()
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 	// draw cursor
+	Graphics()->WrapClamp();
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CURSOR].m_Id);
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 	IGraphics::CQuadItem QuadItem(m_SelectorMouse.x+Width/2.0f, m_SelectorMouse.y+Height/2.0f, 48.0f, 48.0f);
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
+	Graphics()->WrapNormal();
 }
 
 void CSpectator::OnReset()

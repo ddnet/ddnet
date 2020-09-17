@@ -341,8 +341,9 @@ Ping
 Pistol
 == 手枪
 
+[Demo browser]
 Play
-== 播放
+== 编辑器
 
 Play background music
 == 播放背景音乐
@@ -1203,34 +1204,41 @@ https://wiki.ddnet.tw/
 == https://docs.qq.com/doc/DWGFrV0xPRmVWVkla
 
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== 
+== 宽和高无法被16整除，这可能会导致画面异常
 
 Warning
-== 
+== 警告
 
 Menu
-== 
+== 菜单
 
 Speed
-== 
+== 速度
 
 Skip the main menu
+== 跳过主菜单
+
+Download skins
 == 
 
 Website
-== 
+== 网站
 
 Settings
-== 
+== 设置
+
+[Start menu]
+Play
+== 开始游戏
 
 Stop server
-== 
+== 停止服务器
 
 Run server
-== 
+== 运行服务器
 
 Server executable not found, can't run server
-== 
+== 找不到服务器的可执行文件，无法运行
 
 Editor
-== 
+== 编辑器
