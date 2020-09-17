@@ -212,8 +212,8 @@ unsigned char CCommandProcessorFragment_OpenGL::Sample(int w, int h, const unsig
 	int Value = 0;
 	for(int x = 0; x < ScaleW; x++)
 		for(int y = 0; y < ScaleH; y++)
-			Value += pData[((v+y)*w+(u+x))*Bpp+Offset];
-	return Value/(ScaleW*ScaleH);
+			Value += pData[((v + y) * w + (u + x)) * Bpp + Offset];
+	return Value / (ScaleW * ScaleH);
 }
 
 static float CubicHermite(float A, float B, float C, float D, float t)
@@ -338,8 +338,9 @@ void *CCommandProcessorFragment_OpenGL::Rescale(int Width, int Height, int NewWi
 	for(int y = 0; y < NewHeight; y++)
 		for(int x = 0; x < NewWidth; x++, c++)
 		{
-			for(int i = 0; i < Bpp; ++i) {
-				pTmpData[c*Bpp + i] = Sample(Width, Height, pData, x*ScaleW, y*ScaleH, i, ScaleW, ScaleH, Bpp);
+			for(int i = 0; i < Bpp; ++i)
+			{
+				pTmpData[c * Bpp + i] = Sample(Width, Height, pData, x * ScaleW, y * ScaleH, i, ScaleW, ScaleH, Bpp);
 			}
 		}
 

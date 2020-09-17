@@ -454,9 +454,9 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Heig
 	Cmd.m_Flags = 0;
 	if(Flags&IGraphics::TEXLOAD_NOMIPMAPS)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_NOMIPMAPS;
-	if(g_Config.m_GfxTextureCompression && ((Flags&IGraphics::TEXLOAD_NO_COMPRESSION) == 0))
+	if(g_Config.m_GfxTextureCompression && ((Flags & IGraphics::TEXLOAD_NO_COMPRESSION) == 0))
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_COMPRESSED;
-	if(g_Config.m_GfxTextureQuality || Flags&TEXLOAD_NORESAMPLE)
+	if(g_Config.m_GfxTextureQuality || Flags & TEXLOAD_NORESAMPLE)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_QUALITY;
 	if((Flags&IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE) != 0)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE;
