@@ -354,6 +354,7 @@ public:
 	void RenderUpdating(const char *pCaption, int current=0, int total=0);
 
 	bool IsActive() const { return m_MenuActive; }
+	void KillServer();
 
 	virtual void OnInit();
 

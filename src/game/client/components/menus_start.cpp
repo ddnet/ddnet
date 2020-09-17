@@ -107,8 +107,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	{
 		if(m_ServerProcess.Process)
 		{
-			kill_process(m_ServerProcess.Process);
-			m_ServerProcess.Process = 0;
+			KillServer();
 		}
 		else
 		{
@@ -250,5 +249,14 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	{
 		m_MenuPage = NewPage;
 		m_ShowStart = false;
+	}
+}
+
+void CMenus::KillServer()
+{
+	if(m_ServerProcess.Process)
+	{
+		kill_process(m_ServerProcess.Process);
+		m_ServerProcess.Process = 0;
 	}
 }
