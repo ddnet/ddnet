@@ -1236,25 +1236,25 @@ Play
 == Spielen
 
 Search:
-== 
+== Suche:
 
 Exclude:
-== 
+== Ausschließen:
 
 Search servers:
-== 
+== Server suchen:
 
 %d of %d servers
-== 
+== %d von %d Server
 
 %d of %d server
-== 
+== %d von %d Server
 
 %d players
-== 
+== %d Spieler
 
 %d player
-== 
+== %d Spieler
 
 https://wiki.ddnet.tw/
 == 
