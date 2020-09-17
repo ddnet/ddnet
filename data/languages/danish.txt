@@ -556,9 +556,6 @@ Join game
 FSAA samples
 == FSAA samples
 
-%d of %d servers, %d players
-== %d af %d servere, %d spillere
-
 Sound volume
 == Lydstyrke
 
@@ -616,9 +613,6 @@ Lht.
 UI Color
 == Brugergrænseflade farve
 
-Host address
-== Værtsadresse
-
 Crc:
 == Crc:
 
@@ -653,9 +647,6 @@ Server best:
 == 
 
 Personal best:
-== 
-
-Menu
 == 
 
 Browser
@@ -733,10 +724,31 @@ Show DDNet map finishes in server browser
 transmits your player name to info2.ddnet.tw
 == 
 
+Search:
+== 
+
+Exclude:
+== 
+
+Search servers:
+== 
+
 Search
 == 
 
 Exclude
+== 
+
+%d of %d servers
+== 
+
+%d of %d server
+== 
+
+%d players
+== 
+
+%d player
 == 
 
 Filter connecting players

@@ -574,9 +574,6 @@ Join game
 FSAA samples
 == Vollbild-Anti-Aliasing
 
-%d of %d servers, %d players
-== %d von %d Servern, %d Spieler
-
 Sound volume
 == Lautstärke
 
@@ -630,9 +627,6 @@ Lht.
 
 UI Color
 == Menüfarbe
-
-Host address
-== Serveradresse
 
 Crc:
 == Prüfsumme:
@@ -1222,9 +1216,6 @@ Stop server
 Editor
 == Editor
 
-Menu
-== Menü
-
 Download skins
 == Skins herunterladen
 
@@ -1243,6 +1234,27 @@ Server executable not found, can't run server
 [Start menu]
 Play
 == Spielen
+
+Search:
+== Suche:
+
+Exclude:
+== Ausschließen:
+
+Search servers:
+== Server suchen:
+
+%d of %d servers
+== %d von %d Server
+
+%d of %d server
+== %d von %d Server
+
+%d players
+== %d Spieler
+
+%d player
+== %d Spieler
 
 https://wiki.ddnet.tw/
 == 

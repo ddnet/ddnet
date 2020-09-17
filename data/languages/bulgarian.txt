@@ -553,9 +553,6 @@ Join game
 FSAA samples
 == FSAA семпли
 
-%d of %d servers, %d players
-== %d/%d сървъри, %d играчи
-
 Sound volume
 == Сила на звука
 
@@ -613,9 +610,6 @@ Lht.
 UI Color
 == Цвят на Интерфейса
 
-Host address
-== Адрес на сървъра
-
 Crc:
 == Crc:
 
@@ -650,9 +644,6 @@ Server best:
 == 
 
 Personal best:
-== 
-
-Menu
 == 
 
 Browser
@@ -730,10 +721,31 @@ Show DDNet map finishes in server browser
 transmits your player name to info2.ddnet.tw
 == 
 
+Search:
+== 
+
+Exclude:
+== 
+
+Search servers:
+== 
+
 Search
 == 
 
 Exclude
+== 
+
+%d of %d servers
+== 
+
+%d of %d server
+== 
+
+%d players
+== 
+
+%d player
 == 
 
 Filter connecting players

@@ -576,9 +576,6 @@ Created:
 Record demo
 == 데모 녹화
 
-%d of %d servers, %d players
-== %d/%d 서버, %d 플레이어
-
 Miscellaneous
 == 여러가지
 
@@ -621,9 +618,6 @@ Map:
 Lht.
 == 명도
 
-Host address
-== 호스트 주소
-
 Alpha
 == 알파
 
@@ -652,9 +646,6 @@ Server best:
 == 
 
 Personal best:
-== 
-
-Menu
 == 
 
 Browser
@@ -732,10 +723,31 @@ Show DDNet map finishes in server browser
 transmits your player name to info2.ddnet.tw
 == 
 
+Search:
+== 
+
+Exclude:
+== 
+
+Search servers:
+== 
+
 Search
 == 
 
 Exclude
+== 
+
+%d of %d servers
+== 
+
+%d of %d server
+== 
+
+%d players
+== 
+
+%d player
 == 
 
 Filter connecting players
