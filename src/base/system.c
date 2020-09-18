@@ -1148,6 +1148,10 @@ int net_host_lookup(const char *hostname, NETADDR *addr, int types)
 		hints.ai_family = AF_INET;
 	else if(types == NETTYPE_IPV6)
 		hints.ai_family = AF_INET6;
+#if defined(CONF_WEBSOCKETS)
+	if(types & NETTYPE_WEBSOCKET_IPV4)
+		hints.ai_family = AF_INET;
+#endif
 
 	e = getaddrinfo(host, NULL, &hints, &result);
 
