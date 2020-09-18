@@ -249,7 +249,7 @@ int CSkins::FindImpl(const char *pName)
 			LoadSkin(d.front().m_aName, aPath, IStorage::TYPE_SAVE);
 			d.front().m_pTask = nullptr;
 		}
-		if(d.front().m_pTask && d.front().m_pTask->State() == HTTP_ERROR)
+		if(d.front().m_pTask && (d.front().m_pTask->State() == HTTP_ERROR || d.front().m_pTask->State() == HTTP_ABORTED))
 		{
 			Storage()->RemoveFile(d.front().m_aPath, IStorage::TYPE_SAVE);
 			d.front().m_pTask = nullptr;
@@ -257,18 +257,8 @@ int CSkins::FindImpl(const char *pName)
 		return -1;
 	}
 
-	int DefaultIndex = CSkins::FindImpl("default");
-
-	// if default fails don't start any download
-	if(DefaultIndex == -1)
-		return -1;
-
 	CDownloadSkin Skin;
 	str_copy(Skin.m_aName, pName, sizeof(Skin.m_aName));
-	Skin.m_IsVanilla = false;
-	Skin.m_OrgTexture = m_aSkins[DefaultIndex].m_OrgTexture;
-	Skin.m_ColorTexture = m_aSkins[DefaultIndex].m_ColorTexture;
-	Skin.m_BloodColor = m_aSkins[DefaultIndex].m_BloodColor;
 
 	char aUrl[256];
 	str_format(aUrl, sizeof(aUrl), "%s%s.png", g_Config.m_ClSkinDownloadUrl, pName);
