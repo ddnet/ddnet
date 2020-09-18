@@ -122,6 +122,8 @@ class CGameClient : public IGameClient
 
 	static void ConTuneZone(IConsole::IResult *pResult, void *pUserData);
 
+	static void ConchainMenuMap(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+
 public:
 	IKernel *Kernel() { return IInterface::Kernel(); }
 	IEngine *Engine() const { return m_pEngine; }
@@ -377,6 +379,7 @@ public:
 	void SendKill(int ClientID);
 
 	// pointers to all systems
+	class CMenuBackground *m_pMenuBackground;
 	class CGameConsole *m_pGameConsole;
 	class CBinds *m_pBinds;
 	class CParticles *m_pParticles;

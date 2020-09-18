@@ -31,6 +31,7 @@ enum EMapImageModType
 class CMapImages : public CComponent
 {
 	friend class CBackground;
+	friend class CMenuBackground;
 
 	IGraphics::CTextureHandle m_aTextures[64];
 	int m_aTextureUsedByTileOrQuadLayerFlag[64]; // 0: nothing, 1(as flag): tile layer, 2(as flag): quad layer
