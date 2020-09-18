@@ -293,6 +293,7 @@ int websocket_fd_set(int socket, fd_set *set)
 	lws_context *context = contexts[socket].context;
 	if(context == NULL)
 		return -1;
+	lws_service(context, -1);
 	context_data *ctx_data = (context_data *)lws_context_user(context);
 	int max = 0;
 	for(auto const &x : ctx_data->port_map)
