@@ -817,6 +817,10 @@ int CMenus::RenderMenubar(CUIRect r)
 				m_DoubleClickIndex = -1;
 			}
 		}
+		else if (m_ActivePage == PAGE_SETTINGS)
+		{
+
+		}
 		else
 		{
 			Box.VSplitLeft(100.0f, &Button, &Box);
