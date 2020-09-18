@@ -26,10 +26,15 @@ public:
 		bool operator==(const char *pOther) { return !str_comp(m_aName, pOther); }
 	};
 
-	struct CDownloadSkin : public CSkin
+	struct CDownloadSkin
 	{
 		std::shared_ptr<CGetFile> m_pTask;
 		char m_aPath[MAX_PATH_LENGTH];
+		char m_aName[24];
+
+		bool operator<(const CDownloadSkin &Other) { return str_comp(m_aName, Other.m_aName) < 0; }
+		bool operator<(const char *pOther) { return str_comp(m_aName, pOther) < 0; }
+		bool operator==(const char *pOther) { return !str_comp(m_aName, pOther); }
 	};
 
 	void OnInit();
