@@ -991,12 +991,15 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	};
 
 	static CColumn s_aCols[] = {
-		{COL_ICON,     -1,            " ",                 -1,  14.0f, 0, {0}, {0}},
-		{COL_DEMONAME, SORT_DEMONAME, Localize("Demo"),     0,   0.0f, 0, {0}, {0}},
-		{COL_MARKERS,  SORT_MARKERS,  Localize("Markers"),  1,  75.0f, 0, {0}, {0}},
-		{COL_LENGTH,   SORT_LENGTH,   Localize("Length"),   1,  75.0f, 0, {0}, {0}},
-		{COL_DATE,     SORT_DATE,     Localize("Date"),     1, 160.0f, 1, {0}, {0}},
+		{COL_ICON, -1, " ", -1, 14.0f, 0, {0}, {0}},
+		{COL_DEMONAME, SORT_DEMONAME, "Demo", 0, 0.0f, 0, {0}, {0}},
+		{COL_MARKERS, SORT_MARKERS, "Markers", 1, 75.0f, 0, {0}, {0}},
+		{COL_LENGTH, SORT_LENGTH, "Length", 1, 75.0f, 0, {0}, {0}},
+		{COL_DATE, SORT_DATE, "Date", 1, 160.0f, 1, {0}, {0}},
 	};
+	/* This is just for scripts/update_localization.py to work correctly. Don't remove!
+		Localize("Demo");Localize("Markers");Localize("Length");Localize("Date");
+	*/
 
 	RenderTools()->DrawUIRect(&Headers, ColorRGBA(0.0f,0,0,0.15f), 0, 0);
 
@@ -1035,7 +1038,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	// do headers
 	for(int i = 0; i < NumCols; i++)
 	{
-		if(DoButton_GridHeader(s_aCols[i].m_Caption, s_aCols[i].m_Caption, g_Config.m_BrDemoSort == s_aCols[i].m_Sort, &s_aCols[i].m_Rect))
+		if(DoButton_GridHeader(s_aCols[i].m_Caption, Localize(s_aCols[i].m_Caption), g_Config.m_BrDemoSort == s_aCols[i].m_Sort, &s_aCols[i].m_Rect))
 		{
 			if(s_aCols[i].m_Sort != -1)
 			{
