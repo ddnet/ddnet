@@ -1597,6 +1597,18 @@ void *CGameContext::PreProcessMsg(int *MsgID, CUnpacker *pUnpacker, int ClientID
 		return m_NetObjHandler.SecureUnpackMsg(*MsgID, pUnpacker);
 }
 
+void CGameContext::CensorMessage(char *pCensoredMessage, const char *pMessage, int Size)
+{
+	str_copy(pCensoredMessage, pMessage, Size);
+
+	for(int i = 0; i < m_aCensorlist.size(); i++)
+	{
+		char *pNeedle = (char *)str_find(pCensoredMessage, m_aCensorlist[i].cstr());
+		if(pNeedle)
+			memset(pNeedle, '*', str_length(m_aCensorlist[i].cstr()));
+	}
+}
+
 void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 {
 	if(m_TeeHistorianActive)
@@ -1738,7 +1750,11 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				}
 			}
 			else
-				SendChat(ClientID, Team, pMsg->m_pMessage, ClientID);
+			{
+				char aCensoredMessage[256];
+				CensorMessage(aCensoredMessage, pMsg->m_pMessage, sizeof(aCensoredMessage));
+				SendChat(ClientID, Team, aCensoredMessage, ClientID);
+			}
 		}
 		else if(MsgID == NETMSGTYPE_CL_CALLVOTE)
 		{
@@ -3068,6 +3084,24 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	m_pController = new CGameControllerDDRace(this);
 	((CGameControllerDDRace*)m_pController)->m_Teams.Reset();
 
+	const char *pCensorFilename = "censorlist.txt";
+	IOHANDLE File = Storage()->OpenFile(pCensorFilename, IOFLAG_READ, IStorage::TYPE_ALL);
+	if(!File)
+	{
+		dbg_msg("censorlist", "failed to open '%s'", pCensorFilename);
+	}
+	else
+	{
+		CLineReader LineReader;
+		LineReader.Init(File);
+		char *pLine;
+		while((pLine = LineReader.Get()))
+		{
+			m_aCensorlist.add(pLine);
+		}
+		io_close(File);
+	}
+
 	m_TeeHistorianActive = g_Config.m_SvTeeHistorian;
 	if(m_TeeHistorianActive)
 	{
@@ -3780,6 +3814,9 @@ void CGameContext::WhisperID(int ClientID, int VictimID, const char *pMessage)
 	if(m_apPlayers[ClientID])
 		m_apPlayers[ClientID]->m_LastWhisperTo = VictimID;
 
+	char aCensoredMessage[256];
+	CensorMessage(aCensoredMessage, pMessage, sizeof(aCensoredMessage));
+
 	char aBuf[256];
 
 	if(Server()->IsSixup(ClientID))
@@ -3787,7 +3824,7 @@ void CGameContext::WhisperID(int ClientID, int VictimID, const char *pMessage)
 		protocol7::CNetMsg_Sv_Chat Msg;
 		Msg.m_ClientID = ClientID;
 		Msg.m_Mode = protocol7::CHAT_WHISPER;
-		Msg.m_pMessage = pMessage;
+		Msg.m_pMessage = aCensoredMessage;
 		Msg.m_TargetID = VictimID;
 
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
@@ -3797,7 +3834,7 @@ void CGameContext::WhisperID(int ClientID, int VictimID, const char *pMessage)
 		CNetMsg_Sv_Chat Msg;
 		Msg.m_Team = CHAT_WHISPER_SEND;
 		Msg.m_ClientID = VictimID;
-		Msg.m_pMessage = pMessage;
+		Msg.m_pMessage = aCensoredMessage;
 		if(g_Config.m_SvDemoChat)
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
 		else
@@ -3805,7 +3842,7 @@ void CGameContext::WhisperID(int ClientID, int VictimID, const char *pMessage)
 	}
 	else
 	{
-		str_format(aBuf, sizeof(aBuf), "[→ %s] %s", Server()->ClientName(VictimID), pMessage);
+		str_format(aBuf, sizeof(aBuf), "[→ %s] %s", Server()->ClientName(VictimID), aCensoredMessage);
 		SendChatTarget(ClientID, aBuf);
 	}
 
@@ -3814,7 +3851,7 @@ void CGameContext::WhisperID(int ClientID, int VictimID, const char *pMessage)
 		protocol7::CNetMsg_Sv_Chat Msg;
 		Msg.m_ClientID = ClientID;
 		Msg.m_Mode = protocol7::CHAT_WHISPER;
-		Msg.m_pMessage = pMessage;
+		Msg.m_pMessage = aCensoredMessage;
 		Msg.m_TargetID = VictimID;
 
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, VictimID);
@@ -3824,7 +3861,7 @@ void CGameContext::WhisperID(int ClientID, int VictimID, const char *pMessage)
 		CNetMsg_Sv_Chat Msg2;
 		Msg2.m_Team = CHAT_WHISPER_RECV;
 		Msg2.m_ClientID = ClientID;
-		Msg2.m_pMessage = pMessage;
+		Msg2.m_pMessage = aCensoredMessage;
 		if(g_Config.m_SvDemoChat)
 			Server()->SendPackMsg(&Msg2, MSGFLAG_VITAL, VictimID);
 		else
@@ -3832,7 +3869,7 @@ void CGameContext::WhisperID(int ClientID, int VictimID, const char *pMessage)
 	}
 	else
 	{
-		str_format(aBuf, sizeof(aBuf), "[← %s] %s", Server()->ClientName(ClientID), pMessage);
+		str_format(aBuf, sizeof(aBuf), "[← %s] %s", Server()->ClientName(ClientID), aCensoredMessage);
 		SendChatTarget(VictimID, aBuf);
 	}
 }

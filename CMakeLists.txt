@@ -738,6 +738,7 @@ set(EXPECTED_DATA
   audio/wp_switch-03.wv
   blob.png
   browse_icons.png
+  censorlist.txt
   console.png
   console_bar.png
   countryflags/AD.png
