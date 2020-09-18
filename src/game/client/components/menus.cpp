@@ -945,14 +945,6 @@ int CMenus::RenderMenubar(CUIRect r)
 	if(DoButton_MenuTab(&s_SettingsButton, "\xEE\xA2\xB8", m_ActivePage==PAGE_SETTINGS, &Button, CUI::CORNER_T))
 		NewPage = PAGE_SETTINGS;
 
-	Box.VSplitRight(10.0f, &Box, &Button);
-	Box.VSplitRight(33.0f, &Box, &Button);
-	static int s_EditorButton=0;
-	if(DoButton_MenuTab(&s_EditorButton, "\xEE\x8F\x89", 0, &Button, CUI::CORNER_T))
-	{
-		g_Config.m_ClEditor = 1;
-	}
-
 	if(Client()->State() == IClient::STATE_OFFLINE)
 	{
 		Box.VSplitRight(10.0f, &Box, &Button);
