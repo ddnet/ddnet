@@ -31,6 +31,10 @@ kitty_warpaint, kitty_x_ninja:
 Copyright Ravie
 CC0 license
 
+lightbulb, tank, emo, bunny, hedgehog, napoleon, roman, caesar, nosey, savage:
+Copyright Lappi
+CC-BY-NC-SA license
+
 demonlimekitty, nanas, nersif:
 Copyright Miper
 CC-BY-SA license

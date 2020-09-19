@@ -1179,6 +1179,8 @@ set(EXPECTED_DATA
   skins/bluestripe.png
   skins/bomb.png
   skins/brownbear.png
+  skins/bunny.png
+  skins/caesar.png
   skins/cammo.png
   skins/cammostripes.png
   skins/chinese_by_whis.png
@@ -1202,6 +1204,7 @@ set(EXPECTED_DATA
   skins/demonlimekitty.png
   skins/dino.png
   skins/dragon.png
+  skins/emo.png
   skins/evil.png
   skins/evilwolfe.png
   skins/ghost.png
@@ -1212,6 +1215,7 @@ set(EXPECTED_DATA
   skins/greyfox_2.png
   skins/hammie-chew.png
   skins/hammie-whis.png
+  skins/hedgehog.png
   skins/jeet.png
   skins/kintaro_2.png
   skins/kitty_bluestripe.png
@@ -1230,6 +1234,7 @@ set(EXPECTED_DATA
   skins/kitty_warpaint.png
   skins/kitty_x_ninja.png
   skins/license.txt
+  skins/lightbulb.png
   skins/limekitty.png
   skins/mermydon-coala.png
   skins/mermydon.png
@@ -1237,7 +1242,9 @@ set(EXPECTED_DATA
   skins/musmann.png
   skins/nanami.png
   skins/nanas.png
+  skins/napoleon.png
   skins/nersif.png
+  skins/nosey.png
   skins/oldman.png
   skins/oldschool.png
   skins/penguin.png
@@ -1245,6 +1252,7 @@ set(EXPECTED_DATA
   skins/random.png
   skins/redbopp.png
   skins/redstripe.png
+  skins/roman.png
   skins/saddo.png
   skins/santa_bluekitty.png
   skins/santa_bluestripe.png
@@ -1262,6 +1270,8 @@ set(EXPECTED_DATA
   skins/santa_twinbop.png
   skins/santa_twintri.png
   skins/santa_warpaint.png
+  skins/savage.png
+  skins/tank.png
   skins/teerasta.png
   skins/toptri.png
   skins/twinbop.png
