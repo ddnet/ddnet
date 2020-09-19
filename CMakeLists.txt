@@ -1280,6 +1280,9 @@ set(EXPECTED_DATA
   skins/x_ninja.png
   skins/x_spec.png
   themes/auto.png
+  themes/autumn.png
+  themes/autumn_day.map
+  themes/autumn_night.map
   themes/heavens.png
   themes/heavens_day.map
   themes/heavens_night.map
