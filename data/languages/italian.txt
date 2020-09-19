@@ -573,9 +573,6 @@ Max Screenshots
 Length:
 == Durata:
 
-Rifle
-== Fucile
-
 Netversion:
 == Versione net
 
@@ -635,6 +632,60 @@ Name plates size
 Type:
 == Tipo:
 
+DDNet %s is out!
+== DDNet %s è uscito
+
+%d new mentions
+== %d nuove menzioni
+
+Disconnect Dummy
+== 
+
+Are you sure that you want to disconnect your dummy?
+== 
+
+Filter connecting players
+== 
+
+9+ new mentions
+== 9+ nuova menzione
+
+Markers
+== Marcatrici
+
+Disconnect Dummy
+== Disconnetti il manichino
+
+Length
+== 
+
+Fetch Info
+== Recuperare informazioni
+
+Length
+== Lunghezza
+
+Downloading %s:
+== 
+
+Update failed! Check log...
+== Aggiornamento non riuscito! Controlla registro...
+
+Filter connecting players
+== Filtra i giocatori in connessione
+
+Time
+== Tempo
+
+Downloading %s:
+== Scarica %s
+
+Are you sure that you want to disconnect your dummy?
+== Sei sicuro di voler scollegare il tuo manichino?
+
+1 new mention
+== 1 nuova menzione
+
 Successfully saved the replay!
 == 
 
@@ -652,12 +703,6 @@ Game paused
 
 Server best:
 == 
-
-DDNet %s is out!
-== DDNet %s è uscito
-
-%d new mentions
-== %d nuove menzioni
 
 Personal best:
 == 
@@ -684,12 +729,6 @@ File already exists, do you want to overwrite it?
 == 
 
 Are you sure that you want to disconnect?
-== 
-
-Disconnect Dummy
-== 
-
-Are you sure that you want to disconnect your dummy?
 == 
 
 Welcome to DDNet
@@ -764,9 +803,6 @@ Exclude
 %d player
 == 
 
-Filter connecting players
-== 
-
 Indicate map finish
 == 
 
@@ -791,9 +827,6 @@ Remove chat
 Markers:
 == 
 
-9+ new mentions
-== 9+ nuova menzione
-
 %.2f MiB
 == 
 
@@ -803,23 +836,8 @@ Markers:
 Demo
 == 
 
-Markers
-== Marcatrici
-
-Disconnect Dummy
-== Disconnetti il manichino
-
-Length
-== 
-
 Date
 == 
-
-Fetch Info
-== Recuperare informazioni
-
-Length
-== Lunghezza
 
 Render
 == 
@@ -884,9 +902,6 @@ Max CSVs
 Dummy settings
 == 
 
-Download skins
-== 
-
 Vanilla skins only
 == 
 
@@ -927,6 +942,9 @@ Dummy copy
 == 
 
 Hammerfly dummy
+== 
+
+Laser
 == 
 
 Converse
@@ -1203,29 +1221,8 @@ Play
 DDNet %s is out!
 == 
 
-Downloading %s:
-== 
-
-Update failed! Check log...
-== Aggiornamento non riuscito! Controlla registro...
-
-Filter connecting players
-== Filtra i giocatori in connessione
-
 Restart
 == 
-
-Time
-== Tempo
-
-Downloading %s:
-== Scarica %s
-
-Are you sure that you want to disconnect your dummy?
-== Sei sicuro di voler scollegare il tuo manichino?
-
-1 new mention
-== 1 nuova menzione
 
 Manual %3d:%02d  
 == 

@@ -1043,9 +1043,6 @@ Reset wanted weapon on death
 Skip the main menu
 == 
 
-Download skins
-== 
-
 Vanilla skins only
 == 
 

@@ -1251,6 +1251,3 @@ Search servers:
 
 %d player
 == 
-
-Download skins
-== 

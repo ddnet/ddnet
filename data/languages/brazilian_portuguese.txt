@@ -1229,9 +1229,6 @@ Search servers:
 Skip the main menu
 == 
 
-Download skins
-== 
-
 https://wiki.ddnet.tw/
 == 
 

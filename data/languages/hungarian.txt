@@ -1212,9 +1212,6 @@ Search servers:
 Skip the main menu
 == 
 
-Download skins
-== 
-
 Skin prefix
 == 
 

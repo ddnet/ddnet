@@ -208,6 +208,9 @@ Pistol
 Play
 == ﻥﺩﺮﻛ ىﺯﺎﺑ
 
+may cause delay
+== 
+
 Successfully saved the replay!
 == 
 
@@ -650,9 +653,6 @@ Dummy settings
 == 
 
 Your skin
-== 
-
-Download skins
 == 
 
 Vanilla skins only

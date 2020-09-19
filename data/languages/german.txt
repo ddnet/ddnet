@@ -1216,9 +1216,6 @@ Stop server
 Editor
 == Editor
 
-Download skins
-== Skins herunterladen
-
 Warning
 == Warnung
 
