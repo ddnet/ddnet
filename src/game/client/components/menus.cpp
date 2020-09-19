@@ -2064,7 +2064,7 @@ void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
 
 	static int s_ListBox = 0;
 	static float s_ScrollValue = 0.0f;
-	UiDoListboxStart(&s_ListBox, &MainView, 26.0f, Localize("Themes"), "", ThemesRef.size(), 1, -1, s_ScrollValue);
+	UiDoListboxStart(&s_ListBox, &MainView, 26.0f, Localize("Theme"), "", ThemesRef.size(), 1, -1, s_ScrollValue);
 
 	for(int i = 0; i < (int)ThemesRef.size(); i++)
 	{
@@ -2107,8 +2107,7 @@ void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
 		else // generic
 			str_format(aName, sizeof(aName), "%s", Theme.m_Name.cstr());
 
-		Item.m_Rect.y += 2.0f;
-		UI()->DoLabel(&Item.m_Rect, aName, Item.m_Rect.h * ms_FontmodHeight * 0.8f, -1);
+		UI()->DoLabel(&Item.m_Rect, aName, 16 * ms_FontmodHeight, -1);
 	}
 
 	bool ItemActive = false;

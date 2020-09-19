@@ -76,7 +76,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 
 	char aBuf[128];
 	CUIRect Label, Button, Left, Right, Game, Client;
-	MainView.HSplitTop(180.0f, &Game, &Client);
+	MainView.HSplitTop(150.0f, &Game, &Client);
 
 	// game
 	{
@@ -178,6 +178,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			if(DoButton_CheckBox(&g_Config.m_ClAutoDemoRecord, Localize("Automatically record demos"), g_Config.m_ClAutoDemoRecord, &Button))
 				g_Config.m_ClAutoDemoRecord ^= 1;
 
+			Right.HSplitTop(30.0f, 0, &Right);
 			Right.HSplitTop(20.0f, &Button, &Right);
 			if(DoButton_CheckBox(&g_Config.m_ClAutoScreenshot, Localize("Automatically take game over screenshot"), g_Config.m_ClAutoScreenshot, &Button))
 				g_Config.m_ClAutoScreenshot ^= 1;
@@ -233,6 +234,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			m_NeedRestartGeneral = s_ClShowConsole != g_Config.m_ClShowConsole;
 #endif
 
+		Left.HSplitTop(20.0f, 0, &Left);
 		RenderThemeSelection(Left);
 
 		// auto statboard screenshot
