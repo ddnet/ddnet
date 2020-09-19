@@ -28,7 +28,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	CUIRect Status;
 
 	View.HSplitTop(ms_ListheaderHeight, &Headers, &View);
-	View.HSplitBottom(80.0f + 10.0f, &View, &Status);
+	View.HSplitBottom(70.0f, &View, &Status);
 
 	// split of the scrollbar
 	RenderTools()->DrawUIRect(&Headers, ColorRGBA(1,1,1,0.25f), CUI::CORNER_T, 5.0f);
@@ -497,26 +497,28 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			Client()->Connect(g_Config.m_UiServerAddress);
 	}
 
-	RenderTools()->DrawUIRect(&Status, ms_ColorTabbarActive, CUI::CORNER_B, 5.0f);
+	//RenderTools()->DrawUIRect(&Status, ms_ColorTabbarActive, CUI::CORNER_B, 5.0f);
 	Status.Margin(5.0f, &Status);
 
 	CUIRect SearchInfoAndAddr, ServersAndConnect, Status3;
-	Status.VSplitRight(200.0f, &SearchInfoAndAddr, &ServersAndConnect);
-	if(SearchInfoAndAddr.w > 500.0f)
-		SearchInfoAndAddr.VSplitLeft(500.0f, &SearchInfoAndAddr, NULL);
+	Status.VSplitRight(250.0f, &SearchInfoAndAddr, &ServersAndConnect);
+	if(SearchInfoAndAddr.w > 350.0f)
+		SearchInfoAndAddr.VSplitLeft(350.0f, &SearchInfoAndAddr, NULL);
 	CUIRect SearchAndInfo, ServerAddr, ConnectButtons;
-	SearchInfoAndAddr.HSplitTop(60.0f, &SearchAndInfo, &ServerAddr);
-	ServersAndConnect.HSplitTop(30.0f, &Status3, &ConnectButtons);
+	SearchInfoAndAddr.HSplitTop(40.0f, &SearchAndInfo, &ServerAddr);
+	ServersAndConnect.HSplitTop(35.0f, &Status3, &ConnectButtons);
 	CUIRect QuickSearch, QuickExclude;
 
-	CUIRect SearchInfoText, QuickExcludeAndSearch;
-	SearchAndInfo.HSplitTop(20.f, &SearchInfoText, &QuickExcludeAndSearch);
-	QuickExcludeAndSearch.HSplitTop(20.f, &QuickSearch, &QuickExclude);
+	SearchAndInfo.HSplitTop(20.f, &QuickSearch, &QuickExclude);
 	QuickSearch.Margin(2.f, &QuickSearch);
 	QuickExclude.Margin(2.f, &QuickExclude);
 
-	float SearchStrWidth = TextRender()->TextWidth(0, 14.0f, Localize("Search:"), -1, -1.0f);
-	float ExcludeStrWidth = TextRender()->TextWidth(0, 14.0f, Localize("Exclude:"), -1, -1.0f);
+	char aBufSearch[64];
+	str_format(aBufSearch, sizeof(aBufSearch), "%s:", Localize("Search"));
+	float SearchStrWidth = TextRender()->TextWidth(0, 14.0f, aBufSearch, -1, -1.0f);
+	char aBufExclude[64];
+	str_format(aBufExclude, sizeof(aBufExclude), "%s:", Localize("Exclude"));
+	float ExcludeStrWidth = TextRender()->TextWidth(0, 14.0f, aBufExclude, -1, -1.0f);
 	float ServerAddrStrWidth = TextRender()->TextWidth(0, 14.0f, Localize("Server address:"), -1, -1.0f);
 
 	float SearchExcludeAddrStrMax = maximum(maximum(SearchStrWidth, ExcludeStrWidth), ServerAddrStrWidth);
@@ -526,9 +528,6 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	float ExcludeSearchIconMax = 0;
 	const char *pSearchLabel = "\xEE\xA2\xB6"; // U+0e8b6
 	const char *pExcludeLabel = "\xEE\x85\x8B"; // U+0e14b
-
-	SearchInfoText.Margin(2.f, &SearchInfoText);
-	UI()->DoLabelScaled(&SearchInfoText, Localize("Search servers:"), 14.0f, -1);
 
 	// render quick search
 	{
@@ -543,7 +542,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		QuickSearch.VSplitLeft(ExcludeSearchIconMax, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
 
-		UI()->DoLabelScaled(&QuickSearch, Localize("Search:"), 14.0f, -1);
+		UI()->DoLabelScaled(&QuickSearch, aBufSearch, 14.0f, -1);
 		QuickSearch.VSplitLeft(SearchExcludeAddrStrMax, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
 
@@ -551,7 +550,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		if(Input()->KeyPress(KEY_F) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)))
 			UI()->SetActiveItem(&g_Config.m_BrFilterString);
 		static int s_ClearButton = 0;
-		if(DoClearableEditBox(&g_Config.m_BrFilterString, &s_ClearButton, &QuickSearch, g_Config.m_BrFilterString, sizeof(g_Config.m_BrFilterString), 12.0f, &Offset, false, CUI::CORNER_ALL, Localize("Search")))
+		if(DoClearableEditBox(&g_Config.m_BrFilterString, &s_ClearButton, &QuickSearch, g_Config.m_BrFilterString, sizeof(g_Config.m_BrFilterString), 12.0f, &Offset, false, CUI::CORNER_ALL))
 			Client()->ServerBrowserUpdate();
 	}
 
@@ -565,7 +564,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		QuickExclude.VSplitLeft(ExcludeSearchIconMax, 0, &QuickExclude);
 		QuickExclude.VSplitLeft(5.0f, 0, &QuickExclude);
 
-		UI()->DoLabelScaled(&QuickExclude, Localize("Exclude:"), 14.0f, -1);
+		UI()->DoLabelScaled(&QuickExclude, aBufExclude, 14.0f, -1);
 		QuickExclude.VSplitLeft(SearchExcludeAddrStrMax, 0, &QuickExclude);
 		QuickExclude.VSplitLeft(5.0f, 0, &QuickExclude);
 
@@ -573,7 +572,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		static float Offset = 0.0f;
 		if(Input()->KeyPress(KEY_X) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)))
 			UI()->SetActiveItem(&g_Config.m_BrExcludeString);
-		if(DoClearableEditBox(&g_Config.m_BrExcludeString, &s_ClearButton, &QuickExclude, g_Config.m_BrExcludeString, sizeof(g_Config.m_BrExcludeString), 12.0f, &Offset, false, CUI::CORNER_ALL, Localize("Exclude")))
+		if(DoClearableEditBox(&g_Config.m_BrExcludeString, &s_ClearButton, &QuickExclude, g_Config.m_BrExcludeString, sizeof(g_Config.m_BrExcludeString), 12.0f, &Offset, false, CUI::CORNER_ALL))
 			Client()->ServerBrowserUpdate();
 	}
 
@@ -610,10 +609,10 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 		// button area
 		ButtonArea = ConnectButtons;
-		ButtonArea.HSplitMid(&ButtonRefresh, &ButtonConnect);
+		ButtonArea.VSplitMid(&ButtonRefresh, &ButtonConnect);
 		ButtonRefresh.HSplitTop(5.0f, NULL, &ButtonRefresh);
-		ButtonConnect.HSplitTop(2.5f, NULL, &ButtonConnect);
-		ButtonConnect.HSplitBottom(2.5f, &ButtonConnect, NULL);
+		ButtonConnect.HSplitTop(5.0f, NULL, &ButtonConnect);
+		ButtonConnect.VSplitLeft(5.0f, NULL, &ButtonConnect);
 
 		static int s_RefreshButton = 0;
 		char aBuf[64];
@@ -1315,20 +1314,20 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 		ServerFriends.HSplitTop(19.0f, &Button, &ServerFriends);
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "%s:", Localize("Name"));
-		UI()->DoLabelScaled(&Button, aBuf, FontSize, -1);
+		UI()->DoLabelScaled(&Button, aBuf, FontSize + 2, -1);
 		Button.VSplitLeft(80.0f, 0, &Button);
 		static char s_aName[MAX_NAME_LENGTH] = {0};
 		static float s_OffsetName = 0.0f;
-		DoEditBox(&s_aName, &Button, s_aName, sizeof(s_aName), FontSize, &s_OffsetName);
+		DoEditBox(&s_aName, &Button, s_aName, sizeof(s_aName), FontSize + 2, &s_OffsetName);
 
 		ServerFriends.HSplitTop(3.0f, 0, &ServerFriends);
 		ServerFriends.HSplitTop(19.0f, &Button, &ServerFriends);
 		str_format(aBuf, sizeof(aBuf), "%s:", Localize("Clan"));
-		UI()->DoLabelScaled(&Button, aBuf, FontSize, -1);
+		UI()->DoLabelScaled(&Button, aBuf, FontSize + 2, -1);
 		Button.VSplitLeft(80.0f, 0, &Button);
 		static char s_aClan[MAX_CLAN_LENGTH] = {0};
 		static float s_OffsetClan = 0.0f;
-		DoEditBox(&s_aClan, &Button, s_aClan, sizeof(s_aClan), FontSize, &s_OffsetClan);
+		DoEditBox(&s_aClan, &Button, s_aClan, sizeof(s_aClan), FontSize + 2, &s_OffsetClan);
 
 		ServerFriends.HSplitTop(3.0f, 0, &ServerFriends);
 		ServerFriends.HSplitTop(20.0f, &Button, &ServerFriends);
