@@ -18,8 +18,7 @@ enum EMapImageEntityLayerType
 
 enum EMapImageModType
 {
-	MAP_IMAGE_MOD_TYPE_UNKNOWN = 0,
-	MAP_IMAGE_MOD_TYPE_DDNET,
+	MAP_IMAGE_MOD_TYPE_DDNET = 0,
 	MAP_IMAGE_MOD_TYPE_DDRACE,
 	MAP_IMAGE_MOD_TYPE_RACE,
 	MAP_IMAGE_MOD_TYPE_BLOCKWORLDS,
@@ -67,9 +66,9 @@ public:
 	int GetTextureScale();
 
 private:
-	bool m_EntitiesIsLoaded[MAP_IMAGE_MOD_TYPE_COUNT];
+	bool m_EntitiesIsLoaded[MAP_IMAGE_MOD_TYPE_COUNT * 2];
 	bool m_SpeedupArrowIsLoaded;
-	IGraphics::CTextureHandle m_EntitiesTextures[MAP_IMAGE_MOD_TYPE_COUNT][MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT];
+	IGraphics::CTextureHandle m_EntitiesTextures[MAP_IMAGE_MOD_TYPE_COUNT * 2][MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT];
 	IGraphics::CTextureHandle m_SpeedupArrowTexture;
 	IGraphics::CTextureHandle m_OverlayBottomTexture;
 	IGraphics::CTextureHandle m_OverlayTopTexture;
