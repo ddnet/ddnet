@@ -140,14 +140,13 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 {
 	const char *pEntities = "ddnet";
 	EMapImageModType EntitiesModType = MAP_IMAGE_MOD_TYPE_UNKNOWN;
-	bool EntitesAreMasked = !GameClient()->m_GameInfo.m_DontMaskEntities;
 
-	if(GameClient()->m_GameInfo.m_EntitiesDDNet && EntitesAreMasked)
+	if(GameClient()->m_GameInfo.m_EntitiesDDNet)
 	{
 		pEntities = "ddnet";
 		EntitiesModType = MAP_IMAGE_MOD_TYPE_DDNET;
 	}
-	else if(GameClient()->m_GameInfo.m_EntitiesDDRace && EntitesAreMasked)
+	else if(GameClient()->m_GameInfo.m_EntitiesDDRace)
 	{
 		pEntities = "ddrace";
 		EntitiesModType = MAP_IMAGE_MOD_TYPE_DDRACE;
