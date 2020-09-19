@@ -3633,6 +3633,13 @@ void CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 			return;
 	}
 
+	if(pEditor->m_Map.m_lImages.size() >= 64) // hard limit for teeworlds
+	{
+		pEditor->m_PopupEventType = pEditor->POPEVENT_IMAGE_MAX;
+		pEditor->m_PopupEventActivated = true;
+		return;
+	}
+
 	CEditorImage *pImg = new CEditorImage(pEditor);
 	*pImg = ImgInfo;
 	pImg->m_Texture = pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, CImageInfo::FORMAT_AUTO, 0);
