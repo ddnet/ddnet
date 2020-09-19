@@ -41,7 +41,6 @@ All options can be found here: https://ddnet.tw/settingscommands/
 - *Website*: https://ddnet.tw/
 - *RSS*: https://ddnet.tw/feed/
 - *Forum*: https://forum.ddnet.tw/
-- *Discord*: https://ddnet.tw/discord
 - *Source*: https://github.com/ddnet/ddnet
 
 == REPORTING BUGS
