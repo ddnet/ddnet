@@ -160,12 +160,31 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	}
 
 	// render version
-	CUIRect Version;
-	MainView.HSplitBottom(30.0f, 0, &Version);
-	MainView.HSplitBottom(20.0f, 0, &Version);
+	CUIRect Version, AlwaysShowScreen;
+	MainView.HSplitBottom(30.0f, &MainView, &Version);
+	MainView.HSplitBottom(20.0f, &MainView, &AlwaysShowScreen);
 	Version.VSplitLeft(VMargin, 0, &Version);
 	Version.VSplitRight(50.0f, &Version, 0);
 	char aBuf[64];
+
+	float AdditionalOffset = 50.0f + 5.0f;
+
+	if(AlwaysShowScreen.w < 1000)
+	{
+		AlwaysShowScreen.h /= 1.2f;
+		AdditionalOffset = 5.0f;
+	}
+
+	float TextWidth = TextRender()->TextWidth(NULL, (AlwaysShowScreen.h - 4.0f) * ms_FontmodHeight, Localize("Skip the main menu"), -1, -1);
+	float TextWidthBox = AlwaysShowScreen.h;
+
+	float FullWidth = TextWidth + TextWidthBox + AdditionalOffset;
+
+	AlwaysShowScreen.VSplitRight(FullWidth, NULL, &AlwaysShowScreen);
+	if(DoButton_CheckBox(&g_Config.m_ClSkipStartMenu, Localize("Skip the main menu"), g_Config.m_ClSkipStartMenu, &AlwaysShowScreen))
+	{
+		g_Config.m_ClSkipStartMenu ^= 1;
+	}
 
 #if defined(CONF_AUTOUPDATE)
 	CUIRect Part;
