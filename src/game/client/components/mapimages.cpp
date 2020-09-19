@@ -43,6 +43,8 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 	int Start;
 	pMap->GetType(MAPITEMTYPE_IMAGE, &Start, &m_Count);
 
+	m_Count = clamp(m_Count, 0, 64);
+
 	for(int g = 0; g < pLayers->NumGroups(); g++)
 	{
 		CMapItemGroup *pGroup = pLayers->GetGroup(g);
