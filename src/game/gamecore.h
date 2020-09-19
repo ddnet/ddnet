@@ -14,6 +14,7 @@
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
 
+#include "prng.h"
 #include "teamscore.h"
 #include "mapitems.h"
 
@@ -81,8 +82,15 @@ inline void StrToInts(int *pInts, int Num, const char *pStr)
 	while(Num)
 	{
 		char aBuf[4] = {0,0,0,0};
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds" // false positive
+#endif
 		for(int c = 0; c < 4 && pStr[Index]; c++, Index++)
 			aBuf[c] = pStr[Index];
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 		*pInts = ((aBuf[0]+128)<<24)|((aBuf[1]+128)<<16)|((aBuf[2]+128)<<8)|(aBuf[3]+128);
 		pInts++;
 		Num--;
@@ -105,8 +113,15 @@ inline void IntsToStr(const int *pInts, int Num, char *pStr)
 		Num--;
 	}
 
+#if defined(__GNUC__) && __GNUC__ >= 7
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstringop-overflow" // false positive
+#endif
 	// null terminate
 	pStr[-1] = 0;
+#if defined(__GNUC__) && __GNUC__ >= 7
+#pragma GCC diagnostic pop
+#endif
 }
 
 
@@ -173,10 +188,24 @@ public:
 	CWorldCore()
 	{
 		mem_zero(m_apCharacters, sizeof(m_apCharacters));
+		m_pPrng = 0;
+	}
+
+	int RandomOr0(int BelowThis)
+	{
+		if(BelowThis <= 1 || !m_pPrng)
+		{
+			return 0;
+		}
+		// This makes the random number slightly biased if `BelowThis`
+		// is not a power of two, but we have decided that this is not
+		// significant for DDNet and favored the simple implementation.
+		return m_pPrng->RandomBits() % BelowThis;
 	}
 
 	CTuningParams m_Tuning[2];
 	class CCharacterCore *m_apCharacters[MAX_CLIENTS];
+	CPrng *m_pPrng;
 };
 
 class CCharacterCore
@@ -240,7 +269,7 @@ public:
 	bool m_EndlessJump;
 	bool m_NoHammerHit;
 	bool m_NoGrenadeHit;
-	bool m_NoRifleHit;
+	bool m_NoLaserHit;
 	bool m_NoShotgunHit;
 	bool m_NoHookHit;
 	bool m_Super;
@@ -250,43 +279,11 @@ public:
 	int m_FreezeEnd;
 	bool m_DeepFrozen;
 
-	void LimitForce(vec2 *Force);
-	void ApplyForce(vec2 Force);
-
 private:
 
 	CTeamsCore *m_pTeams;
-	int m_TileIndex;
-	int m_TileFlags;
-	int m_TileFIndex;
-	int m_TileFFlags;
-	int m_TileSIndex;
-	int m_TileSFlags;
-	int m_TileIndexL;
-	int m_TileFlagsL;
-	int m_TileFIndexL;
-	int m_TileFFlagsL;
-	int m_TileSIndexL;
-	int m_TileSFlagsL;
-	int m_TileIndexR;
-	int m_TileFlagsR;
-	int m_TileFIndexR;
-	int m_TileFFlagsR;
-	int m_TileSIndexR;
-	int m_TileSFlagsR;
-	int m_TileIndexT;
-	int m_TileFlagsT;
-	int m_TileFIndexT;
-	int m_TileFFlagsT;
-	int m_TileSIndexT;
-	int m_TileSFlagsT;
-	int m_TileIndexB;
-	int m_TileFlagsB;
-	int m_TileFIndexB;
-	int m_TileFFlagsB;
-	int m_TileSIndexB;
-	int m_TileSFlagsB;
-	bool IsRightTeam(int MapIndex);
+	int m_MoveRestrictions;
+	static bool IsSwitchActiveCb(int Number, void *pUser);
 };
 
 //input count

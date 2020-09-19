@@ -33,7 +33,8 @@ public:
 	{
 		OFFSET_UUID_TYPE=0x4000,
 		MAX_TYPE=0x7fff,
-		MAX_SIZE=64*1024
+		MAX_PARTS=64,
+		MAX_SIZE=MAX_PARTS*1024
 	};
 
 	void Clear() { m_DataSize = 0; m_NumItems = 0; }
@@ -109,6 +110,8 @@ public:
 	CHolder *m_pFirst;
 	CHolder *m_pLast;
 
+	CSnapshotStorage() { Init(); };
+	~CSnapshotStorage() { PurgeAll(); };
 	void Init();
 	void PurgeAll();
 	void PurgeUntil(int Tick);
@@ -136,10 +139,12 @@ class CSnapshotBuilder
 	void AddExtendedItemType(int Index);
 	int GetExtendedItemTypeIndex(int TypeID);
 
+	bool m_Sixup;
+
 public:
 	CSnapshotBuilder();
 
-	void Init();
+	void Init(bool Sixup = false);
 
 	void *NewItem(int Type, int ID, int Size);
 

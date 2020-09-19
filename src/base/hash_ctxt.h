@@ -2,6 +2,7 @@
 #define BASE_HASH_CTXT_H
 
 #include "hash.h"
+#include "system.h"
 #include <stdint.h>
 
 #if defined(CONF_OPENSSL)
@@ -20,7 +21,7 @@ extern "C" {
 #else
 typedef struct
 {
-    uint64_t length;
+    uint64 length;
     uint32_t state[8];
     uint32_t curlen;
     unsigned char buf[64];

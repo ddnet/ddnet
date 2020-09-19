@@ -64,7 +64,7 @@ void CScoreboard::RenderGoals(float x, float y, float w)
 	float h = 50.0f;
 
 	Graphics()->BlendNormal();
-	Graphics()->TextureSet(-1);
+	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0,0,0,0.5f);
 	RenderTools()->DrawRoundRect(x, y, w, h, 10.0f);
@@ -77,20 +77,20 @@ void CScoreboard::RenderGoals(float x, float y, float w)
 		{
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %d", Localize("Score limit"), m_pClient->m_Snap.m_pGameInfoObj->m_ScoreLimit);
-			TextRender()->Text(0, x+10.0f, y + (h - 20.f) / 2.f, 20.0f, aBuf, -1);
+			TextRender()->Text(0, x+10.0f, y + (h - 20.f) / 2.f, 20.0f, aBuf, -1.0f);
 		}
 		if(m_pClient->m_Snap.m_pGameInfoObj->m_TimeLimit)
 		{
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), Localize("Time limit: %d min"), m_pClient->m_Snap.m_pGameInfoObj->m_TimeLimit);
-			TextRender()->Text(0, x+230.0f, y + (h - 20.f) / 2.f, 20.0f, aBuf, -1);
+			TextRender()->Text(0, x+230.0f, y + (h - 20.f) / 2.f, 20.0f, aBuf, -1.0f);
 		}
 		if(m_pClient->m_Snap.m_pGameInfoObj->m_RoundNum && m_pClient->m_Snap.m_pGameInfoObj->m_RoundCurrent)
 		{
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s %d/%d", Localize("Round"), m_pClient->m_Snap.m_pGameInfoObj->m_RoundCurrent, m_pClient->m_Snap.m_pGameInfoObj->m_RoundNum);
-			float tw = TextRender()->TextWidth(0, 20.0f, aBuf, -1);
-			TextRender()->Text(0, x+w-tw-10.0f, y + (h - 20.f) / 2.f, 20.0f, aBuf, -1);
+			float tw = TextRender()->TextWidth(0, 20.0f, aBuf, -1, -1.0f);
+			TextRender()->Text(0, x+w-tw-10.0f, y + (h - 20.f) / 2.f, 20.0f, aBuf, -1.0f);
 		}
 	}
 }
@@ -101,7 +101,7 @@ void CScoreboard::RenderSpectators(float x, float y, float w)
 
 	// background
 	Graphics()->BlendNormal();
-	Graphics()->TextureSet(-1);
+	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0,0,0,0.5f);
 	RenderTools()->DrawRoundRect(x, y, w, h, 10.0f);
@@ -180,7 +180,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 	// background
 	Graphics()->BlendNormal();
-	Graphics()->TextureSet(-1);
+	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.5f);
 	if(upper16 || upper32 || upper24)
@@ -201,19 +201,13 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			pTitle = Localize("Game over");
 		else
 		{
-			if(str_length(Client()->GetCurrentMap()) > 16)
-			{
-				str_truncate(aBuf, sizeof(aBuf), Client()->GetCurrentMap(), 16);
-				str_append(aBuf, "...", sizeof(aBuf));
-				pTitle = aBuf;
-			}
-			else
-			{
-				pTitle = Client()->GetCurrentMap();
-			}
+			str_utf8_truncate(aBuf, sizeof(aBuf), Client()->GetCurrentMap(), 16);
+			if(str_comp(aBuf, Client()->GetCurrentMap()))
+				str_append(aBuf, "…", sizeof(aBuf));
+			pTitle = aBuf;
 		}
 	}
-	TextRender()->Text(0, x + 20.0f, y + (50.f - TitleFontsize) / 2.f, TitleFontsize, pTitle, -1);
+	TextRender()->Text(0, x + 20.0f, y + (50.f - TitleFontsize) / 2.f, TitleFontsize, pTitle, -1.0f);
 
 	if(m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_TEAMS)
 	{
@@ -252,8 +246,8 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 	if (!lower16 && !lower32 && !lower24)
 	{
-		tw = TextRender()->TextWidth(0, TitleFontsize, aBuf, -1);
-		TextRender()->Text(0, x+w-tw-20.0f, y + (50.f - TitleFontsize) / 2.f, TitleFontsize, aBuf, -1);
+		tw = TextRender()->TextWidth(0, TitleFontsize, aBuf, -1, -1.0f);
+		TextRender()->Text(0, x+w-tw-20.0f, y + (50.f - TitleFontsize) / 2.f, TitleFontsize, aBuf, -1.0f);
 	}
 
 	// calculate measurements
@@ -291,7 +285,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		RoundRadius = 15.0f;
 	}
 
-	float ScoreOffset = x+10.0f, ScoreLength = TextRender()->TextWidth(0, 22.0f/*HeadlineFontsize*/, "00:00:0", -1);
+	float ScoreOffset = x+10.0f, ScoreLength = TextRender()->TextWidth(0, 22.0f/*HeadlineFontsize*/, "00:00:0", -1, -1.0f);
 	float TeeOffset = ScoreOffset+ScoreLength, TeeLength = 60*TeeSizeMod;
 	float NameOffset = TeeOffset+TeeLength, NameLength = 300.0f-TeeLength;
 	float PingOffset = x+610.0f, PingLength = 65.0f;
@@ -302,17 +296,17 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	y += 50.0f;
 	float HeadlineFontsize = 22.0f;
 	const char *pScore = (m_pClient->m_GameInfo.m_TimeScore && g_Config.m_ClDDRaceScoreBoard) ? Localize("Time") : Localize("Score");
-	float ScoreWidth = TextRender()->TextWidth(0, HeadlineFontsize, pScore, -1);
+	float ScoreWidth = TextRender()->TextWidth(0, HeadlineFontsize, pScore, -1, -1.0f);
 	tw = ScoreLength > ScoreWidth ? ScoreLength : ScoreWidth;
-	TextRender()->Text(0, ScoreOffset+ScoreLength-tw, y + (HeadlineFontsize * 2.f - HeadlineFontsize) / 2.f, HeadlineFontsize, pScore, -1);
+	TextRender()->Text(0, ScoreOffset+ScoreLength-tw, y + (HeadlineFontsize * 2.f - HeadlineFontsize) / 2.f, HeadlineFontsize, pScore, -1.0f);
 
-	TextRender()->Text(0, NameOffset, y + (HeadlineFontsize * 2.f - HeadlineFontsize) / 2.f, HeadlineFontsize, Localize("Name"), -1);
+	TextRender()->Text(0, NameOffset, y + (HeadlineFontsize * 2.f - HeadlineFontsize) / 2.f, HeadlineFontsize, Localize("Name"), -1.0f);
 
-	tw = TextRender()->TextWidth(0, HeadlineFontsize, Localize("Clan"), -1);
-	TextRender()->Text(0, ClanOffset+ClanLength/2-tw/2, y + (HeadlineFontsize * 2.f - HeadlineFontsize) / 2.f, HeadlineFontsize, Localize("Clan"), -1);
+	tw = TextRender()->TextWidth(0, HeadlineFontsize, Localize("Clan"), -1, -1.0f);
+	TextRender()->Text(0, ClanOffset+ClanLength/2-tw/2, y + (HeadlineFontsize * 2.f - HeadlineFontsize) / 2.f, HeadlineFontsize, Localize("Clan"), -1.0f);
 
-	tw = TextRender()->TextWidth(0, HeadlineFontsize, Localize("Ping"), -1);
-	TextRender()->Text(0, PingOffset+PingLength-tw, y + (HeadlineFontsize * 2.f - HeadlineFontsize) / 2.f, HeadlineFontsize, Localize("Ping"), -1);
+	tw = TextRender()->TextWidth(0, HeadlineFontsize, Localize("Ping"), -1, -1.0f);
+	TextRender()->Text(0, PingOffset+PingLength-tw, y + (HeadlineFontsize * 2.f - HeadlineFontsize) / 2.f, HeadlineFontsize, Localize("Ping"), -1.0f);
 
 	// render player entries
 	y += HeadlineFontsize*2.0f;
@@ -336,7 +330,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		// make sure that we render the correct team
-		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByDDTeam[i];
+		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByDDTeamScore[i];
 		if(!pInfo || pInfo->m_Team != Team)
 			continue;
 
@@ -347,7 +341,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 		for(int j = i + 1; j < MAX_CLIENTS; j++)
 		{
-			const CNetObj_PlayerInfo *pInfo2 = m_pClient->m_Snap.m_paInfoByDDTeam[j];
+			const CNetObj_PlayerInfo *pInfo2 = m_pClient->m_Snap.m_paInfoByDDTeamScore[j];
 
 			if(!pInfo2 || pInfo2->m_Team != Team)
 				continue;
@@ -360,7 +354,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		{
 			for (int j = i - 1; j >= 0; j--)
 			{
-				const CNetObj_PlayerInfo *pInfo2 = m_pClient->m_Snap.m_paInfoByDDTeam[j];
+				const CNetObj_PlayerInfo *pInfo2 = m_pClient->m_Snap.m_paInfoByDDTeamScore[j];
 
 				if(!pInfo2 || pInfo2->m_Team != Team)
 					continue;
@@ -372,7 +366,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 		if (DDTeam != TEAM_FLOCK)
 		{
-			Graphics()->TextureSet(-1);
+			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
 			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(DDTeam / 64.0f, 1.0f, 0.5f, 0.5f));
 			Graphics()->SetColor(rgb);
@@ -400,7 +394,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 				else
 				{
 					str_format(aBuf, sizeof(aBuf),"Team %d", DDTeam);
-					tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
+					tw = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f);
 					TextRender()->SetCursor(&Cursor, ScoreOffset+w/2.0f-tw/2.0f, y + LineHeight, FontSize/1.5f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 					Cursor.m_LineWidth = NameLength+3;
 				}
@@ -413,7 +407,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		// background so it's easy to find the local player or the followed one in spectator mode
 		if(pInfo->m_Local || (m_pClient->m_Snap.m_SpecInfo.m_Active && pInfo->m_ClientID == m_pClient->m_Snap.m_SpecInfo.m_SpectatorID))
 		{
-			Graphics()->TextureSet(-1);
+			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.25f);
 			RenderTools()->DrawRoundRect(x, y, w-20.0f, LineHeight, RoundRadius);
@@ -433,7 +427,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		}
 		else
 			str_format(aBuf, sizeof(aBuf), "%d", clamp(pInfo->m_Score, -999, 99999));
-		tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
+		tw = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f);
 		TextRender()->SetCursor(&Cursor, ScoreOffset+ScoreLength-tw, y + (LineHeight - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER);
 		TextRender()->TextEx(&Cursor, aBuf, -1);
 
@@ -491,7 +485,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		else
 			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-		tw = TextRender()->TextWidth(nullptr, FontSize, m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, -1);
+		tw = TextRender()->TextWidth(nullptr, FontSize, m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, -1, -1.0f);
 		TextRender()->SetCursor(&Cursor, ClanOffset + ClanLength / 2 - tw / 2, y + (LineHeight - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = ClanLength;
 		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, -1);
@@ -509,8 +503,8 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA((300.0f - clamp(pInfo->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f));
 			TextRender()->TextColor(rgb);
 		}
-		str_format(aBuf, sizeof(aBuf), "%d", clamp(pInfo->m_Latency, 0, 1000));
-		tw = TextRender()->TextWidth(nullptr, FontSize, aBuf, -1);
+		str_format(aBuf, sizeof(aBuf), "%d", clamp(pInfo->m_Latency, 0, 999));
+		tw = TextRender()->TextWidth(nullptr, FontSize, aBuf, -1, -1.0f);
 		TextRender()->SetCursor(&Cursor, PingOffset+PingLength-tw, y + (LineHeight - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = PingLength;
 		TextRender()->TextEx(&Cursor, aBuf, -1);
@@ -568,11 +562,11 @@ void CScoreboard::RenderRecordingNotification(float x)
 		str_append(aBuf, aBuf2, sizeof(aBuf));
 	}
 
-	float w = TextRender()->TextWidth(0, 20.0f, aBuf, -1);
+	float w = TextRender()->TextWidth(0, 20.0f, aBuf, -1, -1.0f);
 
 	//draw the box
 	Graphics()->BlendNormal();
-	Graphics()->TextureSet(-1);
+	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f);
 	RenderTools()->DrawRoundRectExt(x, 0.0f, w+60.0f, 50.0f, 15.0f, CUI::CORNER_B);
@@ -584,7 +578,7 @@ void CScoreboard::RenderRecordingNotification(float x)
 	RenderTools()->DrawRoundRect(x+20, 15.0f, 20.0f, 20.0f, 10.0f);
 	Graphics()->QuadsEnd();
 
-	TextRender()->Text(0, x+50.0f, (50.f - 20.f) / 2.f, 20.0f, aBuf, -1);
+	TextRender()->Text(0, x+50.0f, (50.f - 20.f) / 2.f, 20.0f, aBuf, -1.0f);
 }
 
 
@@ -651,8 +645,8 @@ void CScoreboard::OnRender()
 						str_copy(aText, Localize("Blue team wins!"), sizeof(aText));
 				}
 
-				float w = TextRender()->TextWidth(0, 86.0f, aText, -1);
-				TextRender()->Text(0, Width/2-w/2, 39, 86.0f, aText, -1);
+				float w = TextRender()->TextWidth(0, 86.0f, aText, -1, -1.0f);
+				TextRender()->Text(0, Width/2-w/2, 39, 86.0f, aText, -1.0f);
 			}
 
 			RenderScoreboard(Width/2-w-5.0f, 150.0f, w, TEAM_RED, pRedClanName ? pRedClanName : Localize("Red team"));

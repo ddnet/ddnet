@@ -59,7 +59,7 @@ public:
 	class CCharacter *GetCharacterByID(int ID) { return (ID >= 0 && ID < MAX_CLIENTS) ? m_apCharacters[ID] : 0; }
 
 	// from gamecontext
-	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int64_t Mask);
+	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int64 Mask);
 
 	// for client side prediction
 	struct
@@ -87,6 +87,11 @@ public:
 	void CopyWorld(CGameWorld *pFrom);
 	CEntity *FindMatch(int ObjID, int ObjType, const void *pObjData);
 	void Clear();
+
+	CTuningParams m_Tuning[2];
+	CTuningParams *m_pTuningList;
+	CTuningParams *TuningList() { return m_pTuningList; }
+	CTuningParams *GetTuning(int i) { return i == 0 ? Tuning() : &TuningList()[i]; }
 
 private:
 	void RemoveEntities();

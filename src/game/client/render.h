@@ -3,25 +3,24 @@
 #ifndef GAME_CLIENT_RENDER_H
 #define GAME_CLIENT_RENDER_H
 
+#include <engine/graphics.h>
 #include <base/vmath.h>
 #include <base/color.h>
 #include <game/mapitems.h>
 #include "ui.h"
-
 
 class CTeeRenderInfo
 {
 public:
 	CTeeRenderInfo()
 	{
-		m_Texture = -1;
 		m_ColorBody = ColorRGBA(1,1,1);
 		m_ColorFeet = ColorRGBA(1,1,1);
 		m_Size = 1.0f;
 		m_GotAirJump = 1;
 	};
 
-	int m_Texture;
+	IGraphics::CTextureHandle m_Texture;
 	ColorRGBA m_ColorBody;
 	ColorRGBA m_ColorFeet;
 	float m_Size;
@@ -67,10 +66,12 @@ public:
 	// rects
 	void DrawRoundRect(float x, float y, float w, float h, float r);
 	void DrawRoundRectExt(float x, float y, float w, float h, float r, int Corners);
+	void DrawRoundRectExt4(float x, float y, float w, float h, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, float r, int Corners);
 
 	int CreateRoundRectQuadContainer(float x, float y, float w, float h, float r, int Corners);
 
 	void DrawUIRect(const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding);
+	void DrawUIRect4(const CUIRect *pRect, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, int Corners, float Rounding);
 
 	void DrawCircle(float x, float y, float r, int Segments);
 
@@ -91,6 +92,7 @@ public:
 	void RenderTileRectangle(int RectX, int RectY, int RectW, int RectH, unsigned char IndexIn, unsigned char IndexOut, float Scale, ColorRGBA Color, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser, int ColorEnv, int ColorEnvOffset);
 
 	// helpers
+	void CalcScreenParams(float Aspect, float Zoom, float *w, float *h);
 	void MapscreenToWorld(float CenterX, float CenterY, float ParallaxX, float ParallaxY,
 		float OffsetX, float OffsetY, float Aspect, float Zoom, float *pPoints);
 

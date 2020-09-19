@@ -142,7 +142,7 @@ void CParticles::OnRender()
 
 	set_new_tick();
 	static int64 LastTime = 0;
-	int64 t = time_get();
+	int64 t = time();
 
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
@@ -178,7 +178,7 @@ void CParticles::RenderGroup(int Group)
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_PARTICLES].m_Id);
 	
 	// don't use the buffer methods here, else the old renderer gets many draw calls
-	if(Graphics()->IsBufferingEnabled())
+	if(Graphics()->IsQuadContainerBufferingEnabled())
 	{
 		int i = m_aFirstPart[Group];
 

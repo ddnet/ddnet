@@ -4,6 +4,7 @@
 #include <engine/storage.h>
 #include <engine/client.h>
 #include <engine/external/json-parser/json.h>
+#include <engine/shared/json.h>
 #include <game/version.h>
 
 #include <stdlib.h> // system
@@ -26,7 +27,7 @@ public:
 
 static const char *GetUpdaterUrl(char *pBuf, int BufSize, const char *pFile)
 {
-	str_format(pBuf, BufSize, "https://update4.ddnet.tw/%s", pFile);
+	str_format(pBuf, BufSize, "https://update6.ddnet.tw/%s", pFile);
 	return pBuf;
 }
 
@@ -41,7 +42,7 @@ static const char *GetUpdaterDestPath(char *pBuf, int BufSize, const char *pFile
 }
 
 CUpdaterFetchTask::CUpdaterFetchTask(CUpdater *pUpdater, const char *pFile, const char *pDestPath) :
-	CGetFile(pUpdater->m_pStorage, GetUpdaterUrl(m_aBuf, sizeof(m_aBuf), pFile), GetUpdaterDestPath(m_aBuf2, sizeof(m_aBuf), pFile, pDestPath), -2, false),
+	CGetFile(pUpdater->m_pStorage, GetUpdaterUrl(m_aBuf, sizeof(m_aBuf), pFile), GetUpdaterDestPath(m_aBuf2, sizeof(m_aBuf), pFile, pDestPath), -2, CTimeout{0, 0, 0}),
 	m_pUpdater(pUpdater)
 {
 }
@@ -85,6 +86,9 @@ CUpdater::CUpdater()
 	m_State = CLEAN;
 	m_Percent = 0;
 	m_Lock = lock_create();
+
+	str_format(m_aClientExecTmp, sizeof(m_aClientExecTmp), CLIENT_EXEC ".%d.tmp", pid());
+	str_format(m_aServerExecTmp, sizeof(m_aServerExecTmp), SERVER_EXEC ".%d.tmp", pid());
 }
 
 void CUpdater::Init()
@@ -146,10 +150,10 @@ bool CUpdater::MoveFile(const char *pFile)
 		return Success;
 #endif
 
-	if(!str_comp_nocase(pFile + len - 4, ".dll") || !str_comp_nocase(pFile + len - 4, ".ttf"))
+	if(!str_comp_nocase(pFile + len - 4, ".dll") || !str_comp_nocase(pFile + len - 4, ".ttf") || !str_comp_nocase(pFile + len - 3, ".so"))
 	{
 		str_format(aBuf, sizeof(aBuf), "%s.old", pFile);
-		Success &= m_pStorage->RenameBinaryFile(pFile, aBuf);
+		m_pStorage->RenameBinaryFile(pFile, aBuf);
 		str_format(aBuf, sizeof(aBuf), "update/%s", pFile);
 		Success &= m_pStorage->RenameBinaryFile(aBuf, pFile);
 	}
@@ -186,23 +190,24 @@ bool CUpdater::ReplaceClient()
 {
 	dbg_msg("updater", "replacing " PLAT_CLIENT_EXEC);
 	bool Success = true;
+	char aPath[512];
 
 	// Replace running executable by renaming twice...
 	if(!m_IsWinXP)
 	{
-		m_pStorage->RemoveBinaryFile("DDNet.old");
-		Success &= m_pStorage->RenameBinaryFile(PLAT_CLIENT_EXEC, "DDNet.old");
-		Success &= m_pStorage->RenameBinaryFile("update/DDNet.tmp", PLAT_CLIENT_EXEC);
+		m_pStorage->RemoveBinaryFile(CLIENT_EXEC ".old");
+		Success &= m_pStorage->RenameBinaryFile(PLAT_CLIENT_EXEC, CLIENT_EXEC ".old");
+		str_format(aPath, sizeof(aPath), "update/%s", m_aClientExecTmp);
+		Success &= m_pStorage->RenameBinaryFile(aPath, PLAT_CLIENT_EXEC);
 	}
 	#if !defined(CONF_FAMILY_WINDOWS)
-		char aPath[512];
 		m_pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aPath, sizeof aPath);
 		char aBuf[512];
 		str_format(aBuf, sizeof aBuf, "chmod +x %s", aPath);
 		if(system(aBuf))
 		{
 			dbg_msg("updater", "ERROR: failed to set client executable bit");
-			Success &= false;
+			Success = false;
 		}
 	#endif
 	return Success;
@@ -212,20 +217,21 @@ bool CUpdater::ReplaceServer()
 {
 	dbg_msg("updater", "replacing " PLAT_SERVER_EXEC);
 	bool Success = true;
+	char aPath[512];
 
 	//Replace running executable by renaming twice...
-	m_pStorage->RemoveBinaryFile("DDNet-Server.old");
-	Success &= m_pStorage->RenameBinaryFile(PLAT_SERVER_EXEC, "DDNet-Server.old");
-	Success &= m_pStorage->RenameBinaryFile("update/DDNet-Server.tmp", PLAT_SERVER_EXEC);
+	m_pStorage->RemoveBinaryFile(SERVER_EXEC ".old");
+	Success &= m_pStorage->RenameBinaryFile(PLAT_SERVER_EXEC, SERVER_EXEC ".old");
+	str_format(aPath, sizeof(aPath), "update/%s", m_aServerExecTmp);
+	Success &= m_pStorage->RenameBinaryFile(aPath, PLAT_SERVER_EXEC);
 	#if !defined(CONF_FAMILY_WINDOWS)
-		char aPath[512];
 		m_pStorage->GetBinaryPath(PLAT_SERVER_EXEC, aPath, sizeof aPath);
 		char aBuf[512];
 		str_format(aBuf, sizeof aBuf, "chmod +x %s", aPath);
 		if (system(aBuf))
 		{
 			dbg_msg("updater", "ERROR: failed to set server executable bit");
-			Success &= false;
+			Success = false;
 		}
 	#endif
 	return Success;
@@ -238,12 +244,14 @@ void CUpdater::ParseUpdate()
 	if(!File)
 		return;
 
-	char aBuf[4096*4];
-	mem_zero(aBuf, sizeof (aBuf));
-	io_read(File, aBuf, sizeof(aBuf));
+	long int Length = io_length(File);
+	char *pBuf = (char *)malloc(Length);
+	mem_zero(pBuf, Length);
+	io_read(File, pBuf, Length);
 	io_close(File);
 
-	json_value *pVersions = json_parse(aBuf, sizeof(aBuf));
+	json_value *pVersions = json_parse(pBuf, Length);
+	free(pBuf);
 
 	if(pVersions && pVersions->type == json_array)
 	{
@@ -287,13 +295,13 @@ void CUpdater::PerformUpdate()
 	ParseUpdate();
 	m_State = DOWNLOADING;
 
-	const char *aLastFile;
-	aLastFile = "";
+	const char *pLastFile;
+	pLastFile = "";
 	for(map<string, bool>::reverse_iterator it = m_FileJobs.rbegin(); it != m_FileJobs.rend(); ++it)
 	{
 		if(it->second)
 		{
-			aLastFile = it->first.c_str();
+			pLastFile = it->first.c_str();
 			break;
 		}
 	}
@@ -313,13 +321,24 @@ void CUpdater::PerformUpdate()
 				str_append(aBuf, pFile + len - 4, sizeof(aBuf)); // .dll
 				FetchFile(aBuf, pFile);
 #endif
+				// Ignore DLL downloads on other platforms
+			}
+			else if(!str_comp_nocase(pFile + len - 3, ".so"))
+			{
+#if defined(CONF_PLATFORM_LINUX)
+				char aBuf[512];
+				str_copy(aBuf, pFile, sizeof(aBuf)); // libsteam_api
+				str_copy(aBuf + len - 3, "-" PLAT_NAME, sizeof(aBuf) - len + 3); // -linux-x86_64
+				str_append(aBuf, pFile + len - 3, sizeof(aBuf)); // .so
+				FetchFile(aBuf, pFile);
+#endif
 				// Ignore DLL downloads on other platforms, on Linux we statically link anyway
 			}
 			else
 			{
 				FetchFile(pFile);
 			}
-			aLastFile = pFile;
+			pLastFile = pFile;
 		}
 		else
 			m_pStorage->RemoveBinaryFile(it->first.c_str());
@@ -327,16 +346,16 @@ void CUpdater::PerformUpdate()
 
 	if(m_ServerUpdate)
 	{
-		FetchFile(PLAT_SERVER_DOWN, "DDNet-Server.tmp");
-		aLastFile = "DDNet-Server.tmp";
+		FetchFile(PLAT_SERVER_DOWN, m_aServerExecTmp);
+		pLastFile = m_aServerExecTmp;
 	}
 	if(m_ClientUpdate)
 	{
-		FetchFile(PLAT_CLIENT_DOWN, "DDNet.tmp");
-		aLastFile = "DDNet.tmp";
+		FetchFile(PLAT_CLIENT_DOWN, m_aClientExecTmp);
+		pLastFile = m_aClientExecTmp;
 	}
 
-	str_copy(m_aLastFile, aLastFile, sizeof(m_aLastFile));
+	str_copy(m_aLastFile, pLastFile, sizeof(m_aLastFile));
 }
 
 void CUpdater::CommitUpdate()
@@ -371,7 +390,7 @@ void CUpdater::WinXpRestart()
 		if(!bhFile)
 			return;
 		char bBuf[512];
-		str_format(bBuf, sizeof(bBuf), ":_R\r\ndel \"DDNet.exe\"\r\nif exist \"DDNet.exe\" goto _R\r\n:_T\r\nmove /y \"update\\DDNet.tmp\" \"DDNet.exe\"\r\nif not exist \"DDNet.exe\" goto _T\r\nstart DDNet.exe\r\ndel \"du.bat\"\r\n");
+		str_format(bBuf, sizeof(bBuf), ":_R\r\ndel \"" PLAT_CLIENT_EXEC "\"\r\nif exist \"" PLAT_CLIENT_EXEC "\" goto _R\r\n:_T\r\nmove /y \"update\\%s\" \"" PLAT_CLIENT_EXEC "\"\r\nif not exist \"" PLAT_CLIENT_EXEC "\" goto _T\r\nstart " PLAT_CLIENT_EXEC "\r\ndel \"du.bat\"\r\n", m_aClientExecTmp);
 		io_write(bhFile, bBuf, str_length(bBuf));
 		io_close(bhFile);
 		shell_execute(aBuf);

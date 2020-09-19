@@ -120,7 +120,8 @@ static int Run()
 	{
 		CNetChunk p;
 		pNet->Update();
-		while(pNet->Recv(&p))
+		SECURITY_TOKEN ResponseToken;
+		while(pNet->Recv(&p, &ResponseToken))
 		{
 			if(p.m_ClientID == -1)
 			{

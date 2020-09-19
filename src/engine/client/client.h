@@ -6,7 +6,9 @@
 #include <memory>
 
 #include <base/hash.h>
+#include <engine/client/friends.h>
 #include <engine/client/http.h>
+#include <engine/client/updater.h>
 
 #define CONNECTLINK "ddnet:"
 
@@ -30,7 +32,7 @@ public:
 	void ScaleMin();
 
 	void Add(float v, float r, float g, float b);
-	void Render(IGraphics *pGraphics, int Font, float x, float y, float w, float h, const char *pDescription);
+	void Render(IGraphics *pGraphics, IGraphics::CTextureHandle FontTexture, float x, float y, float w, float h, const char *pDescription);
 };
 
 
@@ -74,6 +76,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	IConsole *m_pConsole;
 	IStorage *m_pStorage;
 	IUpdater *m_pUpdater;
+	ISteam *m_pSteam;
 	IEngineMasterServer *m_pMasterServer;
 
 	enum
@@ -82,7 +85,15 @@ class CClient : public IClient, public CDemoPlayer::IListener
 		PREDICTION_MARGIN=1000/50/2, // magic network prediction value
 	};
 
-	class CNetClient m_NetClient[3];
+	enum
+	{
+		CLIENT_MAIN,
+		CLIENT_DUMMY,
+		CLIENT_CONTACT,
+		NUM_CLIENTS,
+	};
+
+	class CNetClient m_NetClient[NUM_CLIENTS];
 	class CDemoPlayer m_DemoPlayer;
 	class CDemoRecorder m_DemoRecorder[RECORDER_MAX];
 	class CDemoEditor m_DemoEditor;
@@ -95,10 +106,12 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	char m_aServerAddressStr[256];
 
+	CUuid m_ConnectionID;
+
 	unsigned m_SnapshotParts[2];
 	int64 m_LocalStartTime;
 
-	int m_DebugFont;
+	IGraphics::CTextureHandle m_DebugFont;
 	int m_DebugSoundIndex = 0;
 
 	int64 m_LastRenderTime;
@@ -122,6 +135,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_UseTempRconCommands;
 	char m_Password[32];
 	bool m_SendPassword;
+	bool m_ButtonRender=false;
 
 	// version-checking
 	char m_aVersionStr[10];
@@ -139,6 +153,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	//
 	char m_aCmdConnect[256];
 	char m_aCmdPlayDemo[MAX_PATH_LENGTH];
+	char m_aCmdEditMap[MAX_PATH_LENGTH];
 
 	// map download
 	std::shared_ptr<CGetFile> m_pMapdownloadTask;
@@ -157,7 +172,10 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_MapDetailsCrc;
 	SHA256_DIGEST m_MapDetailsSha256;
 
+	char m_aDDNetInfoTmp[64];
 	std::shared_ptr<CGetFile> m_pDDNetInfoTask;
+
+	char m_aDummyNameBuf[16];
 
 	// time
 	CSmoothTime m_GameTime[2];
@@ -174,7 +192,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	int m_CurrentInput[2];
 	bool m_LastDummy;
-	bool m_LastDummy2;
 	bool m_DummySendConnInfo;
 
 	// graphs
@@ -237,14 +254,14 @@ public:
 	IEngineMasterServer *MasterServer() { return m_pMasterServer; }
 	IStorage *Storage() { return m_pStorage; }
 	IUpdater *Updater() { return m_pUpdater; }
+	ISteam *Steam() { return m_pSteam; }
 
 	CClient();
 
 	// ----- send functions -----
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags);
-	virtual int SendMsgExY(CMsgPacker *pMsg, int Flags, bool System=true, int NetClient=1);
+	virtual int SendMsgY(CMsgPacker *pMsg, int Flags, int NetClient=1);
 
-	int SendMsgEx(CMsgPacker *pMsg, int Flags, bool System=true);
 	void SendInfo();
 	void SendEnterGame();
 	void SendReady();
@@ -259,14 +276,14 @@ public:
 
 	virtual bool SoundInitFailed() { return m_SoundInitFailed; }
 
-	virtual int GetDebugFont() { return m_DebugFont; }
+	virtual IGraphics::CTextureHandle GetDebugFont() { return m_DebugFont; }
 
 	void DirectInput(int *pInput, int Size);
 	void SendInput();
 
 	// TODO: OPT: do this a lot smarter!
-	virtual int *GetInput(int Tick);
-	virtual int *GetDirectInput(int Tick);
+	virtual int *GetInput(int Tick, int IsDummy);
+	virtual int *GetDirectInput(int Tick, int IsDummy);
 
 	const char *LatestVersion();
 
@@ -309,6 +326,8 @@ public:
 	virtual void Restart();
 	virtual void Quit();
 
+	virtual const char *PlayerName();
+	virtual const char *DummyName();
 	virtual const char *ErrorString();
 
 	const char *LoadMap(const char *pName, const char *pFilename, SHA256_DIGEST *pWantedSha256, unsigned WantedCrc);
@@ -326,6 +345,7 @@ public:
 
 	void RequestDDNetInfo();
 	void ResetDDNetInfo();
+	bool IsDDNetInfoChanged();
 	void FinishDDNetInfo();
 	void LoadDDNetInfo();
 
@@ -359,6 +379,14 @@ public:
 	static void Con_Minimize(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Ping(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Screenshot(IConsole::IResult *pResult, void *pUserData);
+
+#if defined(CONF_VIDEORECORDER)
+	static void StartVideo(IConsole::IResult *pResult, void *pUserData, const char *pVideName);
+	static void Con_StartVideo(IConsole::IResult *pResult, void *pUserData);
+	static void Con_StopVideo(IConsole::IResult *pResult, void *pUserData);
+	const char *DemoPlayer_Render(const char *pFilename, int StorageType, const char *pVideoName, int SpeedIndex);
+#endif
+
 	static void Con_Rcon(IConsole::IResult *pResult, void *pUserData);
 	static void Con_RconAuth(IConsole::IResult *pResult, void *pUserData);
 	static void Con_RconLogin(IConsole::IResult *pResult, void *pUserData);
@@ -402,8 +430,10 @@ public:
 
 	void ServerBrowserUpdate();
 
+	void HandleConnectAddress(const NETADDR *pAddr);
 	void HandleConnectLink(const char *pLink);
 	void HandleDemoPath(const char *pPath);
+	void HandleMapPath(const char *pPath);
 
 	// gfx
 	void SwitchWindowScreen(int Index);
@@ -411,6 +441,7 @@ public:
 	void ToggleWindowBordered();
 	void ToggleWindowVSync();
 	void LoadFont();
+	void Notify(const char *pTitle, const char *pMessage);
 
 	// DDRace
 
@@ -434,7 +465,7 @@ public:
 
 	bool EditorHasUnsavedData() { return m_pEditor->HasUnsavedData(); }
 
-	virtual IFriends* Foes() {return &m_Foes; }
+	virtual IFriends* Foes() { return &m_Foes; }
 
 	void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount);
 };

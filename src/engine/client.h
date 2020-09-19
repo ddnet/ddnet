@@ -5,8 +5,8 @@
 #include "kernel.h"
 
 #include "message.h"
+#include "graphics.h"
 #include <engine/friends.h>
-#include <engine/shared/config.h>
 
 enum
 {
@@ -70,18 +70,19 @@ public:
 		STATE_ONLINE,
 		STATE_DEMOPLAYBACK,
 		STATE_QUITING,
+		STATE_RESTARTING,
 	};
 
 	//
 	inline int State() const { return m_State; }
 
 	// tick time access
-	inline int PrevGameTick() const { return m_PrevGameTick[g_Config.m_ClDummy]; }
-	inline int GameTick() const { return m_CurGameTick[g_Config.m_ClDummy]; }
-	inline int PredGameTick() const { return m_PredTick[g_Config.m_ClDummy]; }
-	inline float IntraGameTick() const { return m_GameIntraTick[g_Config.m_ClDummy]; }
-	inline float PredIntraGameTick() const { return m_PredIntraTick[g_Config.m_ClDummy]; }
-	inline float GameTickTime() const { return m_GameTickTime[g_Config.m_ClDummy]; }
+	inline int PrevGameTick(int Dummy) const { return m_PrevGameTick[Dummy]; }
+	inline int GameTick(int Dummy) const { return m_CurGameTick[Dummy]; }
+	inline int PredGameTick(int Dummy) const { return m_PredTick[Dummy]; }
+	inline float IntraGameTick(int Dummy) const { return m_GameIntraTick[Dummy]; }
+	inline float PredIntraGameTick(int Dummy) const { return m_PredIntraTick[Dummy]; }
+	inline float GameTickTime(int Dummy) const { return m_GameTickTime[Dummy]; }
 	inline int GameTickSpeed() const { return m_GameTickSpeed; }
 
 	// other time access
@@ -102,6 +103,9 @@ public:
 	virtual void Restart() = 0;
 	virtual void Quit() = 0;
 	virtual const char *DemoPlayer_Play(const char *pFilename, int StorageType) = 0;
+	#if defined(CONF_VIDEORECORDER)
+	virtual const char *DemoPlayer_Render(const char *pFilename, int StorageType, const char *pVideoName, int SpeedIndex) = 0;
+	#endif
 	virtual void DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int Recorder) = 0;
 	virtual void DemoRecorder_HandleAutoStart() = 0;
 	virtual void DemoRecorder_Stop(int Recorder, bool RemoveFile = false) = 0;
@@ -117,6 +121,7 @@ public:
 	virtual void ToggleWindowBordered() = 0;
 	virtual void ToggleWindowVSync() = 0;
 	virtual void LoadFont() = 0;
+	virtual void Notify(const char *pTitle, const char *pMessage) = 0;
 
 	// networking
 	virtual void EnterGame() = 0;
@@ -127,8 +132,8 @@ public:
 	virtual int MapDownloadTotalsize() = 0;
 
 	// input
-	virtual int *GetInput(int Tick) = 0;
-	virtual int *GetDirectInput(int Tick) = 0;
+	virtual int *GetInput(int Tick, int IsDummy = 0) = 0;
+	virtual int *GetDirectInput(int Tick, int IsDummy = 0) = 0;
 
 	// remote console
 	virtual void RconAuth(const char *pUsername, const char *pPassword) = 0;
@@ -159,25 +164,27 @@ public:
 	virtual void SnapSetStaticsize(int ItemType, int Size) = 0;
 
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags) = 0;
-	virtual int SendMsgExY(CMsgPacker *pMsg, int Flags, bool System=true, int NetClient=1) = 0;
+	virtual int SendMsgY(CMsgPacker *pMsg, int Flags, int NetClient=1) = 0;
 
 	template<class T>
 	int SendPackMsg(T *pMsg, int Flags)
 	{
-		CMsgPacker Packer(pMsg->MsgID());
+		CMsgPacker Packer(pMsg->MsgID(), false);
 		if(pMsg->Pack(&Packer))
 			return -1;
 		return SendMsg(&Packer, Flags);
 	}
 
 	//
+	virtual const char *PlayerName() = 0;
+	virtual const char *DummyName() = 0;
 	virtual const char *ErrorString() = 0;
 	virtual const char *LatestVersion() = 0;
 	virtual bool ConnectionProblems() = 0;
 
 	virtual bool SoundInitFailed() = 0;
 
-	virtual int GetDebugFont() = 0;
+	virtual IGraphics::CTextureHandle GetDebugFont() = 0; // TODO: remove this function
 
 	//DDRace
 
@@ -216,6 +223,7 @@ public:
 	virtual void OnRconType(bool UsernameReq) = 0;
 	virtual void OnRconLine(const char *pLine) = 0;
 	virtual void OnInit() = 0;
+	virtual void InvalidateSnapshot() = 0;
 	virtual void OnNewSnapshot() = 0;
 	virtual void OnEnterGame() = 0;
 	virtual void OnShutdown() = 0;
@@ -235,6 +243,8 @@ public:
 	virtual const char *GetItemName(int Type) = 0;
 	virtual const char *Version() = 0;
 	virtual const char *NetVersion() = 0;
+	virtual int DDNetVersion() = 0;
+	virtual const char *DDNetVersionStr() = 0;
 
 	virtual void OnDummyDisconnect() = 0;
 	virtual void Echo(const char *pString) = 0;

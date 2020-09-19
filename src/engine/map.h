@@ -6,6 +6,11 @@
 #include <base/hash.h>
 #include "kernel.h"
 
+enum
+{
+	MAX_MAP_LENGTH = 128
+};
+
 class IMap : public IInterface
 {
 	MACRO_INTERFACE("map", 0)

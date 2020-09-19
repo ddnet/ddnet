@@ -50,14 +50,16 @@ void CBackground::LoadBackground()
 	m_pLayers = m_pBackgroundLayers;
 	m_pImages = m_pBackgroundImages;
 
+	bool NeedImageLoading = false;
+
 	str_copy(m_aMapName, g_Config.m_ClBackgroundEntities, sizeof(m_aMapName));
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "maps/%s", g_Config.m_ClBackgroundEntities);
 	if(m_pMap->Load(aBuf))
 	{
 		m_pLayers->InitBackground(m_pMap);
-		m_pImages->LoadBackground(m_pMap);
 		RenderTools()->RenderTilemapGenerateSkip(m_pLayers);
+		NeedImageLoading = true;
 		m_Loaded = true;
 	}
 	else if(str_comp(g_Config.m_ClBackgroundEntities, CURRENT) == 0)
@@ -71,8 +73,12 @@ void CBackground::LoadBackground()
 		}
 	}
 	
-	if(m_Loaded) 
+	if(m_Loaded)
+	{
 		CMapLayers::OnMapLoad();
+		if(NeedImageLoading)
+			m_pImages->LoadBackground(m_pLayers, m_pMap);
+	}
 
 	m_LastLoad = time_get();
 }

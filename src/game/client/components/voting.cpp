@@ -193,7 +193,7 @@ void CVoting::OnMessage(int MsgType, void *pRawMsg)
 			OnReset();
 			str_copy(m_aDescription, pMsg->m_pDescription, sizeof(m_aDescription));
 			str_copy(m_aReason, pMsg->m_pReason, sizeof(m_aReason));
-			m_Closetime = time_get() + time_freq() * pMsg->m_Timeout;
+			m_Closetime = time() + time_freq() * pMsg->m_Timeout;
 		}
 		else
 			OnReset();

@@ -21,12 +21,13 @@ public:
 	void DetachAllShaders();
 	
 	//Support various types	
-	void SetUniformVec2(int Loc, int Count, const float* Value);
-	void SetUniformVec4(int Loc, int Count, const float* Value);
+	void SetUniformVec2(int Loc, int Count, const float *pValue);
+	void SetUniformVec4(int Loc, int Count, const float *pValue);
 	void SetUniform(int Loc, const int Value);
 	void SetUniform(int Loc, const unsigned int Value);
 	void SetUniform(int Loc, const bool Value);
 	void SetUniform(int Loc, const float Value);
+	void SetUniform(int Loc, int Count, const float *pValues);
 	
 	//for performance reason we do not use SetUniform with using strings... save the Locations of the variables instead
 	int GetUniformLoc(const char* Name);
@@ -41,7 +42,7 @@ protected:
 
 class CGLSLTWProgram : public CGLSLProgram {
 public:
-	CGLSLTWProgram() : m_LastTextureSampler(-1), m_LastIsTextured(-1)
+	CGLSLTWProgram() : m_LocPos(-1), m_LocIsTextured(-1), m_LocTextureSampler(-1), m_LastTextureSampler(-1), m_LastIsTextured(-1)
 	{
 		m_LastScreen[0] = m_LastScreen[1] = m_LastScreen[2] = m_LastScreen[3] = -1.f;
 	}
@@ -118,33 +119,20 @@ public:
 
 class CGLSLQuadProgram : public CGLSLTWProgram {
 public:
-	int m_LocColor;
-	int m_LocOffset;
-	int m_LocRotation;
+	int m_LocColors;
+	int m_LocOffsets;
+	int m_LocRotations;
 };
 
 class CGLSLTileProgram : public CGLSLTWProgram {
 public:
+	CGLSLTileProgram() : m_LocColor(-1), m_LocOffset(-1), m_LocDir(-1), m_LocNum(-1), m_LocJumpIndex(-1) {}
+
 	int m_LocColor;
-	int m_LocLOD;
-	int m_LocTexelOffset;
-
-	int m_LastLOD;
-};
-
-class CGLSLBorderTileProgram : public CGLSLTileProgram {
-public:
 	int m_LocOffset;
 	int m_LocDir;
 	int m_LocNum;
 	int m_LocJumpIndex;
-};
-
-class CGLSLBorderTileLineProgram : public CGLSLTileProgram {
-public:
-	int m_LocOffset;
-	int m_LocDir;
-	int m_LocNum;
 };
 
 #endif // ENGINE_CLIENT_OPENGL_SL_PROGRAM_H

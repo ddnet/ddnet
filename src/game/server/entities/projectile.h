@@ -32,7 +32,6 @@ public:
 
 private:
 	vec2 m_Direction;
-	int m_InitialLifeSpan;
 	int m_LifeSpan;
 	int m_Owner;
 	int m_Type;

@@ -55,6 +55,9 @@ public:
 				fs_makedir(GetPath(TYPE_SAVE, "screenshots/auto/stats", aPath, sizeof(aPath)));
 				fs_makedir(GetPath(TYPE_SAVE, "maps", aPath, sizeof(aPath)));
 				fs_makedir(GetPath(TYPE_SAVE, "downloadedmaps", aPath, sizeof(aPath)));
+#if defined(CONF_VIDEORECORDER)
+				fs_makedir(GetPath(TYPE_SAVE, "videos", aPath, sizeof(aPath)));
+#endif
 			}
 			fs_makedir(GetPath(TYPE_SAVE, "dumps", aPath, sizeof(aPath)));
 			fs_makedir(GetPath(TYPE_SAVE, "demos", aPath, sizeof(aPath)));
@@ -483,9 +486,9 @@ public:
 		GetPath(Type, pDir, pBuffer, BufferSize);
 	}
 
-	virtual const char* GetBinaryPath(const char *pDir, char *pBuffer, unsigned BufferSize)
+	virtual const char *GetBinaryPath(const char *pFilename, char *pBuffer, unsigned BufferSize)
 	{
-		str_format(pBuffer, BufferSize, "%s%s%s", m_aBinarydir, !m_aBinarydir[0] ? "" : "/", pDir);
+		str_format(pBuffer, BufferSize, "%s%s%s", m_aBinarydir, !m_aBinarydir[0] ? "" : "/", pFilename);
 		return pBuffer;
 	}
 

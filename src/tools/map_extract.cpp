@@ -26,10 +26,13 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 
 	CMapItemInfo *pInfo = (CMapItemInfo *)Map.FindItem(MAPITEMTYPE_INFO, 0);
 
-	dbg_msg("map_extract", "author:  %s", (char *)Map.GetData(pInfo->m_Author));
-	dbg_msg("map_extract", "version: %s", (char *)Map.GetData(pInfo->m_MapVersion));
-	dbg_msg("map_extract", "credits: %s", (char *)Map.GetData(pInfo->m_Credits));
-	dbg_msg("map_extract", "license: %s", (char *)Map.GetData(pInfo->m_License));
+	if(pInfo)
+	{
+		dbg_msg("map_extract", "author:  %s", (char *)Map.GetData(pInfo->m_Author));
+		dbg_msg("map_extract", "version: %s", (char *)Map.GetData(pInfo->m_MapVersion));
+		dbg_msg("map_extract", "credits: %s", (char *)Map.GetData(pInfo->m_Credits));
+		dbg_msg("map_extract", "license: %s", (char *)Map.GetData(pInfo->m_License));
+	}
 
 	int Start, Num;
 

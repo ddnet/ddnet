@@ -5,6 +5,7 @@
 #include <game/client/component.h>
 
 #include <vector>
+#include <cstdint>
 
 
 #define INDEX_BUFFER_GROUP_WIDTH 12

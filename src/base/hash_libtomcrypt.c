@@ -30,7 +30,7 @@ static const u32 K[64] =
     0x90befffaUL, 0xa4506cebUL, 0xbef9a3f7UL, 0xc67178f2UL
 };
 
-static u32 min(u32 x, u32 y)
+static u32 minimum(u32 x, u32 y)
 {
     return x < y ? x : y;
 }
@@ -133,7 +133,7 @@ static void sha_process(sha256_state* md, const void* src, u32 inlen)
         }
         else
         {
-            u32 n = min(inlen, (block_size - md->curlen));
+            u32 n = minimum(inlen, (block_size - md->curlen));
             memcpy(md->buf + md->curlen, in, n);
             md->curlen += n;
             in         += n;

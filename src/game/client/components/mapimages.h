@@ -4,46 +4,82 @@
 #define GAME_CLIENT_COMPONENTS_MAPIMAGES_H
 #include <game/client/component.h>
 
+enum EMapImageEntityLayerType
+{
+	MAP_IMAGE_ENTITY_LAYER_TYPE_GAME = 0,
+	MAP_IMAGE_ENTITY_LAYER_TYPE_FRONT,
+	MAP_IMAGE_ENTITY_LAYER_TYPE_SPEEDUP,
+	MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH,
+	MAP_IMAGE_ENTITY_LAYER_TYPE_TELE,
+	MAP_IMAGE_ENTITY_LAYER_TYPE_TUNE,
+
+	MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT,
+};
+
+enum EMapImageModType
+{
+	MAP_IMAGE_MOD_TYPE_UNKNOWN = 0,
+	MAP_IMAGE_MOD_TYPE_DDNET,
+	MAP_IMAGE_MOD_TYPE_DDRACE,
+	MAP_IMAGE_MOD_TYPE_RACE,
+	MAP_IMAGE_MOD_TYPE_BLOCKWORLDS,
+	MAP_IMAGE_MOD_TYPE_FNG,
+	MAP_IMAGE_MOD_TYPE_VANILLA,
+
+	MAP_IMAGE_MOD_TYPE_COUNT,
+};
+
 class CMapImages : public CComponent
 {
 	friend class CBackground;
 
-	int m_aTextures[64];
+	IGraphics::CTextureHandle m_aTextures[64];
+	int m_aTextureUsedByTileOrQuadLayerFlag[64]; // 0: nothing, 1(as flag): tile layer, 2(as flag): quad layer
 	int m_Count;
 
-	const char *m_pEntitiesGameType;
+	bool HasFrontLayer();
+	bool HasSpeedupLayer();
+	bool HasSwitchLayer();
+	bool HasTeleLayer();
+	bool HasTuneLayer();
+
 public:
 	CMapImages();
 	CMapImages(int ImageSize);
 
-	int Get(int Index) const { return m_aTextures[Index]; }
+	IGraphics::CTextureHandle Get(int Index) const { return m_aTextures[Index]; }
 	int Num() const { return m_Count; }
 
+	void OnMapLoadImpl(class CLayers *pLayers, class IMap *pMap);
 	virtual void OnMapLoad();
 	virtual void OnInit();
-	void LoadBackground(class IMap *pMap);
+	void LoadBackground(class CLayers *pLayers, class IMap *pMap);
 
 	// DDRace
-	int GetEntities();
-	
-	int GetOverlayBottom();
-	int GetOverlayTop();
-	int GetOverlayCenter();
+	IGraphics::CTextureHandle GetEntities(EMapImageEntityLayerType EntityLayerType);
+	IGraphics::CTextureHandle GetSpeedupArrow();
+
+	IGraphics::CTextureHandle GetOverlayBottom();
+	IGraphics::CTextureHandle GetOverlayTop();
+	IGraphics::CTextureHandle GetOverlayCenter();
 
 	void SetTextureScale(int Size);
 	int GetTextureScale();
 
 private:
-
-	int m_EntitiesTextures;
-	int m_OverlayBottomTexture;
-	int m_OverlayTopTexture;
-	int m_OverlayCenterTexture;
+	bool m_EntitiesIsLoaded[MAP_IMAGE_MOD_TYPE_COUNT];
+	bool m_SpeedupArrowIsLoaded;
+	IGraphics::CTextureHandle m_EntitiesTextures[MAP_IMAGE_MOD_TYPE_COUNT][MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT];
+	IGraphics::CTextureHandle m_SpeedupArrowTexture;
+	IGraphics::CTextureHandle m_OverlayBottomTexture;
+	IGraphics::CTextureHandle m_OverlayTopTexture;
+	IGraphics::CTextureHandle m_OverlayCenterTexture;
+	IGraphics::CTextureHandle m_TransparentTexture;
 	int m_TextureScale;
-	
+
 	void InitOverlayTextures();
-	int UploadEntityLayerText(int TextureSize, int YOffset);
-	void UpdateEntityLayerText(int TextureID, int TextureSize, int YOffset, int NumbersPower, int MaxNumber = -1);
+	IGraphics::CTextureHandle UploadEntityLayerText(int TextureSize, int MaxWidth, int YOffset);
+	void UpdateEntityLayerText(void* pTexBuffer, int ImageColorChannelCount, int TexWidth, int TexHeight, int TextureSize, int MaxWidth, int YOffset, int NumbersPower, int MaxNumber = -1);
 };
 
 #endif

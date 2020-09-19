@@ -30,7 +30,7 @@ endif()
 
 if(NOT WAVPACK_FOUND)
   set(WAVPACK_SRC_DIR src/engine/external/wavpack)
-  set_glob(WAVPACK_SRC GLOB ${WAVPACK_SRC_DIR}
+  set_src(WAVPACK_SRC GLOB ${WAVPACK_SRC_DIR}
     bits.c
     float.c
     metadata.c

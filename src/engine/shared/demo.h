@@ -23,7 +23,6 @@ class CDemoRecorder : public IDemoRecorder
 	int m_NumTimelineMarkers;
 	int m_aTimelineMarkers[MAX_TIMELINE_MARKERS];
 	bool m_NoMapData;
-	unsigned int m_MapSize;
 	unsigned char *m_pMapData;
 
 	DEMOFUNC_FILTER m_pfnFilter;
@@ -35,7 +34,7 @@ public:
 	CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool NoMapData = false);
 	CDemoRecorder() {}
 
-	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, SHA256_DIGEST Sha256, unsigned MapCrc, const char *pType, unsigned int MapSize, unsigned char *pMapData, IOHANDLE MapFile = 0, DEMOFUNC_FILTER pfnFilter = 0, void *pUser = 0);
+	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, SHA256_DIGEST *pSha256, unsigned MapCrc, const char *pType, unsigned int MapSize, unsigned char *pMapData, IOHANDLE MapFile = 0, DEMOFUNC_FILTER pfnFilter = 0, void *pUser = 0);
 	int Stop();
 	void AddDemoMarker();
 
@@ -78,14 +77,6 @@ public:
 		float m_TickTime;
 	};
 
-	struct CMapInfo
-	{
-		char m_aName[128];
-		SHA256_DIGEST m_Sha256;
-		int m_Crc;
-		int m_Size;
-	};
-
 private:
 	IListener *m_pListener;
 
@@ -105,6 +96,7 @@ private:
 
 	class IConsole *m_pConsole;
 	IOHANDLE m_File;
+	long m_MapOffset;
 	char m_aFilename[256];
 	CKeyFrame *m_pKeyFrames;
 	CMapInfo m_MapInfo;
@@ -121,6 +113,11 @@ private:
 	void ScanFile();
 	int NextFrame();
 
+	int64 time();
+
+	int64 m_TickTime;
+	int64 m_Time;
+
 public:
 
 	CDemoPlayer(class CSnapshotDelta *m_pSnapshotDelta);
@@ -128,6 +125,7 @@ public:
 	void SetListener(IListener *pListener);
 
 	int Load(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, int StorageType);
+	bool ExtractMap(class IStorage *pStorage);
 	int Play();
 	void Pause();
 	void Unpause();
@@ -139,7 +137,7 @@ public:
 	int SetPos(int WantedTick);
 	const CInfo *BaseInfo() const { return &m_Info.m_Info; }
 	void GetDemoName(char *pBuffer, int BufferSize) const;
-	bool GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers) const;
+	bool GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo) const;
 	const char *GetDemoFileName() { return m_aFilename; };
 	int GetDemoType() const;
 

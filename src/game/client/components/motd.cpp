@@ -18,7 +18,7 @@ void CMotd::Clear()
 
 bool CMotd::IsActive()
 {
-	return time_get() < m_ServerMotdTime;
+	return time() < m_ServerMotdTime;
 }
 
 void CMotd::OnStateChange(int NewState, int OldState)
@@ -43,13 +43,13 @@ void CMotd::OnRender()
 	float y = 150.0f;
 
 	Graphics()->BlendNormal();
-	Graphics()->TextureSet(-1);
+	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0,0,0,0.5f);
 	RenderTools()->DrawRoundRect(x, y, w, h, 40.0f);
 	Graphics()->QuadsEnd();
 
-	TextRender()->Text(0, x+40.0f, y+40.0f, 32.0f, m_aServerMotd, (int)(w-80.0f));
+	TextRender()->Text(0, x+40.0f, y+40.0f, 32.0f, m_aServerMotd, w-80.0f);
 }
 
 void CMotd::OnMessage(int MsgType, void *pRawMsg)
@@ -90,7 +90,7 @@ void CMotd::OnMessage(int MsgType, void *pRawMsg)
 			m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "motd", pLast, true);
 
 		if(m_aServerMotd[0] && g_Config.m_ClMotdTime)
-			m_ServerMotdTime = time_get()+time_freq()*g_Config.m_ClMotdTime;
+			m_ServerMotdTime = time()+time_freq()*g_Config.m_ClMotdTime;
 		else
 			m_ServerMotdTime = 0;
 	}

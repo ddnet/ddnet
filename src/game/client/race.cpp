@@ -82,16 +82,16 @@ bool CRaceHelper::IsStart(CGameClient *pClient, vec2 Prev, vec2 Pos)
 		if(!Indices.empty())
 			for(std::list < int >::iterator i = Indices.begin(); i != Indices.end(); i++)
 			{
-				if(pCollision->GetTileIndex(*i) == TILE_BEGIN)
+				if(pCollision->GetTileIndex(*i) == TILE_START)
 					return true;
-				if(pCollision->GetFTileIndex(*i) == TILE_BEGIN)
+				if(pCollision->GetFTileIndex(*i) == TILE_START)
 					return true;
 			}
 		else
 		{
-			if(pCollision->GetTileIndex(pCollision->GetPureMapIndex(Pos)) == TILE_BEGIN)
+			if(pCollision->GetTileIndex(pCollision->GetPureMapIndex(Pos)) == TILE_START)
 				return true;
-			if(pCollision->GetFTileIndex(pCollision->GetPureMapIndex(Pos)) == TILE_BEGIN)
+			if(pCollision->GetFTileIndex(pCollision->GetPureMapIndex(Pos)) == TILE_START)
 				return true;
 		}
 	}

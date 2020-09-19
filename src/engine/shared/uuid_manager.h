@@ -23,7 +23,9 @@ struct CUuid
 
 CUuid RandomUuid();
 CUuid CalculateUuid(const char *pName);
+// The buffer length should be at least UUID_MAXSTRSIZE.
 void FormatUuid(CUuid Uuid, char *pBuffer, unsigned BufferLength);
+void ParseUuid(CUuid *pUuid, char *pBuffer);
 
 struct CName
 {

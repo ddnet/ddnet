@@ -173,12 +173,13 @@ void CControls::OnConsoleInit()
 	{ static CInputState s_State = {this, &m_InputData[0].m_Hook, &m_InputData[1].m_Hook}; Console()->Register("+hook", "", CFGFLAG_CLIENT, ConKeyInputState, (void *)&s_State, "Hook"); }
 	{ static CInputState s_State = {this, &m_InputData[0].m_Fire, &m_InputData[1].m_Fire}; Console()->Register("+fire", "", CFGFLAG_CLIENT, ConKeyInputCounter, (void *)&s_State, "Fire"); }
 	{ static CInputState s_State = {this, &m_ShowHookColl[0], &m_ShowHookColl[1]}; Console()->Register("+showhookcoll", "", CFGFLAG_CLIENT, ConKeyInputState, (void *)&s_State, "Show Hook Collision"); }
+	{ static CInputState s_State = {this, &m_ResetDummy[0], &m_ResetDummy[1]}; Console()->Register("+resetdummy", "", CFGFLAG_CLIENT, ConKeyInputState, (void *)&s_State, "Reset Dummy"); }
 
 	{ static CInputSet s_Set = {this, &m_InputData[0].m_WantedWeapon, &m_InputData[1].m_WantedWeapon, 1}; Console()->Register("+weapon1", "", CFGFLAG_CLIENT, ConKeyInputSet, (void *)&s_Set, "Switch to hammer"); }
 	{ static CInputSet s_Set = {this, &m_InputData[0].m_WantedWeapon, &m_InputData[1].m_WantedWeapon, 2}; Console()->Register("+weapon2", "", CFGFLAG_CLIENT, ConKeyInputSet, (void *)&s_Set, "Switch to gun"); }
 	{ static CInputSet s_Set = {this, &m_InputData[0].m_WantedWeapon, &m_InputData[1].m_WantedWeapon, 3}; Console()->Register("+weapon3", "", CFGFLAG_CLIENT, ConKeyInputSet, (void *)&s_Set, "Switch to shotgun"); }
 	{ static CInputSet s_Set = {this, &m_InputData[0].m_WantedWeapon, &m_InputData[1].m_WantedWeapon, 4}; Console()->Register("+weapon4", "", CFGFLAG_CLIENT, ConKeyInputSet, (void *)&s_Set, "Switch to grenade"); }
-	{ static CInputSet s_Set = {this, &m_InputData[0].m_WantedWeapon, &m_InputData[1].m_WantedWeapon, 5}; Console()->Register("+weapon5", "", CFGFLAG_CLIENT, ConKeyInputSet, (void *)&s_Set, "Switch to rifle"); }
+	{ static CInputSet s_Set = {this, &m_InputData[0].m_WantedWeapon, &m_InputData[1].m_WantedWeapon, 5}; Console()->Register("+weapon5", "", CFGFLAG_CLIENT, ConKeyInputSet, (void *)&s_Set, "Switch to laser"); }
 
 	{ static CInputSet s_Set = {this, &m_InputData[0].m_NextWeapon, &m_InputData[1].m_NextWeapon, 0}; Console()->Register("+nextweapon", "", CFGFLAG_CLIENT, ConKeyInputNextPrevWeapon, (void *)&s_Set, "Switch to next weapon"); }
 	{ static CInputSet s_Set = {this, &m_InputData[0].m_PrevWeapon, &m_InputData[1].m_PrevWeapon, 0}; Console()->Register("+prevweapon", "", CFGFLAG_CLIENT, ConKeyInputNextPrevWeapon, (void *)&s_Set, "Switch to previous weapon"); }
@@ -288,6 +289,19 @@ int CControls::SnapInput(int *pData)
 			pDummyInput->m_Jump = g_Config.m_ClDummyJump;
 			pDummyInput->m_Fire = g_Config.m_ClDummyFire;
 			pDummyInput->m_Hook = g_Config.m_ClDummyHook;
+		}
+
+		if(m_ResetDummy[g_Config.m_ClDummy])
+		{
+			ResetInput(!g_Config.m_ClDummy);
+			m_InputData[!g_Config.m_ClDummy].m_Hook = 0;
+
+			CNetObj_PlayerInput *pDummyInput = &m_pClient->m_DummyInput;
+			pDummyInput->m_Hook = m_InputData[!g_Config.m_ClDummy].m_Hook;
+			pDummyInput->m_Jump = m_InputData[!g_Config.m_ClDummy].m_Jump;
+			pDummyInput->m_Direction = m_InputData[!g_Config.m_ClDummy].m_Jump;
+
+			pDummyInput->m_Fire = m_InputData[!g_Config.m_ClDummy].m_Fire;
 		}
 
 		// stress testing
@@ -457,7 +471,7 @@ void CControls::OnRender()
 			m_pClient->m_Snap.m_pLocalCharacter->m_Weapon != WEAPON_NINJA )
 		{
 			int w;
-			for( w = WEAPON_RIFLE; w > WEAPON_GUN; w-- )
+			for( w = WEAPON_LASER; w > WEAPON_GUN; w-- )
 			{
 				if( w == m_pClient->m_Snap.m_pLocalCharacter->m_Weapon )
 					continue;
@@ -504,17 +518,16 @@ void CControls::ClampMousePos()
 	else
 	{
 		float CameraMaxDistance = 200.0f;
-		float CameraMinDistance = 0.0f;
 		float FollowFactor = (g_Config.m_ClDyncam ? g_Config.m_ClDyncamFollowFactor : g_Config.m_ClMouseFollowfactor) / 100.0f;
 		float DeadZone = g_Config.m_ClDyncam ? g_Config.m_ClDyncamDeadzone : g_Config.m_ClMouseDeadzone;
 		float MaxDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance;
-		float MouseMax = minimum(CameraMaxDistance/FollowFactor + DeadZone, MaxDistance);
+		float MouseMax = minimum((FollowFactor != 0 ? CameraMaxDistance/FollowFactor + DeadZone : MaxDistance), MaxDistance);
 		float MinDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMinDistance : g_Config.m_ClMouseMinDistance;
-		float MouseMin = minimum(CameraMinDistance/FollowFactor + DeadZone, MinDistance);
+		float MouseMin = MinDistance;
 
-		if(length(m_MousePos[g_Config.m_ClDummy]) > MouseMax)
-			m_MousePos[g_Config.m_ClDummy] = normalize(m_MousePos[g_Config.m_ClDummy])*MouseMax;
 		if(length(m_MousePos[g_Config.m_ClDummy]) < MouseMin)
 			m_MousePos[g_Config.m_ClDummy] = normalize(m_MousePos[g_Config.m_ClDummy])*MouseMin;
+		if(length(m_MousePos[g_Config.m_ClDummy]) > MouseMax)
+			m_MousePos[g_Config.m_ClDummy] = normalize(m_MousePos[g_Config.m_ClDummy])*MouseMax;
 	}
 }

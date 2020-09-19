@@ -235,7 +235,7 @@ public:
 			}
 			case LAYERTYPE_TUNE:
 			{
-				if (Index == TILE_TUNE1)
+				if (Index == TILE_TUNE)
 					return true;
 				else
 					return false;
@@ -281,7 +281,6 @@ public:
 	: m_AutoMapper(pEditor)
 	{
 		m_pEditor = pEditor;
-		m_TexID = -1;
 		m_aName[0] = 0;
 		m_External = 0;
 		m_Width = 0;
@@ -294,7 +293,7 @@ public:
 
 	void AnalyseTileFlags();
 
-	int m_TexID;
+	IGraphics::CTextureHandle m_Texture;
 	int m_External;
 	char m_aName[128];
 	unsigned char m_aTileFlags[256];
@@ -454,7 +453,7 @@ public:
 	}
 
 	void Clean();
-	void CreateDefault(int EntitiesTexture);
+	void CreateDefault(IGraphics::CTextureHandle EntitiesTexture);
 
 	// io
 	int Save(class IStorage *pStorage, const char *pFilename);
@@ -538,6 +537,14 @@ public:
 	virtual void ShowInfo();
 	virtual int RenderProperties(CUIRect *pToolbox);
 
+	struct SCommonPropState {
+		bool Modified = false;
+		int Width = -1;
+		int Height = -1;
+		int Color = 0;
+	};
+	static int RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, array<CLayerTiles *> &pLayers);
+
 	virtual void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc);
 	virtual void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc);
 
@@ -547,7 +554,7 @@ public:
 
 	void FlagModified(int x, int y, int w, int h);
 
-	int m_TexID;
+	IGraphics::CTextureHandle m_Texture;
 	int m_Game;
 	int m_Image;
 	int m_Width;
@@ -664,7 +671,8 @@ public:
 		m_aFileDialogCurrentFolder[0] = 0;
 		m_aFileDialogCurrentLink[0] = 0;
 		m_pFileDialogPath = m_aFileDialogCurrentFolder;
-		m_aFileDialogActivate = false;
+		m_FileDialogActivate = false;
+		m_FileDialogOpening = false;
 		m_FileDialogScrollValue = 0.0f;
 		m_FilesSelectedIndex = -1;
 		m_FilesStartAt = 0;
@@ -709,20 +717,10 @@ public:
 		m_CommandBox = 0.0f;
 		m_aSettingsCommand[0] = 0;
 
-		ms_CheckerTexture = 0;
-		ms_BackgroundTexture = 0;
-		ms_CursorTexture = 0;
-		ms_EntitiesTexture = 0;
-
 		ms_pUiGotContext = 0;
 
 		// DDRace
 
-		ms_FrontTexture = 0;
-		ms_TeleTexture = 0;
-		ms_SpeedupTexture = 0;
-		ms_SwitchTexture = 0;
-		ms_TuneTexture = 0;
 		m_TeleNumber = 1;
 		m_SwitchNum = 1;
 		m_TuningNum = 1;
@@ -754,7 +752,8 @@ public:
 		int m_FileNum;
 		int m_ButtonId;
 		char m_aName[128];
-		int m_PreviewImage;
+		IGraphics::CTextureHandle m_PreviewImage;
+		bool m_PreviewImageIsLoaded;
 	};
 	array<CUndo> m_lUndoSteps;
 	bool m_Undo;
@@ -780,8 +779,7 @@ public:
 	CLayer *GetSelectedLayer(int Index);
 	CLayerGroup *GetSelectedGroup();
 	CSoundSource *GetSelectedSource();
-	void SelectLayer(int Index);
-
+	void SelectLayer(int LayerIndex, int GroupIndex = -1);
 	void SelectQuad(int Index);
 	void DeleteSelectedQuads();
 	bool IsQuadSelected(int Index);
@@ -811,7 +809,8 @@ public:
 		POPEVENT_NEW,
 		POPEVENT_SAVE,
 		POPEVENT_LARGELAYER,
-		POPEVENT_PREVENTUNUSEDTILES
+		POPEVENT_PREVENTUNUSEDTILES,
+		POPEVENT_IMAGEDIV16
 	};
 
 	int m_PopupEventType;
@@ -842,14 +841,16 @@ public:
 	char m_aFileDialogSearchText[64];
 	char m_aFileDialogPrevSearchText[64];
 	char *m_pFileDialogPath;
-	bool m_aFileDialogActivate;
+	bool m_FileDialogActivate;
 	int m_FileDialogFileType;
 	float m_FileDialogScrollValue;
 	int m_FilesSelectedIndex;
 	char m_FileDialogNewFolderName[64];
 	char m_FileDialogErrString[64];
-	int m_FilePreviewImage;
+	IGraphics::CTextureHandle m_FilePreviewImage;
+	bool m_PreviewImageIsLoaded;
 	CImageInfo m_FilePreviewImageInfo;
+	bool m_FileDialogOpening;
 
 
 	struct CFilelistItem
@@ -913,10 +914,10 @@ public:
 	int m_SelectedSound;
 	int m_SelectedSource;
 
-	static int ms_CheckerTexture;
-	static int ms_BackgroundTexture;
-	static int ms_CursorTexture;
-	static int ms_EntitiesTexture;
+	IGraphics::CTextureHandle m_CheckerTexture;
+	IGraphics::CTextureHandle m_BackgroundTexture;
+	IGraphics::CTextureHandle m_CursorTexture;
+	IGraphics::CTextureHandle m_EntitiesTexture;
 
 	CLayerGroup m_Brush;
 	CLayerTiles m_TilesetPicker;
@@ -951,32 +952,40 @@ public:
 
 	int DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden=false, int Corners=CUI::CORNER_ALL);
 
-	void RenderBackground(CUIRect View, int Texture, float Size, float Brightness);
+	void RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, float Size, float Brightness);
 
 	void RenderGrid(CLayerGroup *pGroup);
 
-	void UiInvokePopupMenu(void *pID, int Flags, float X, float Y, float W, float H, int (*pfnFunc)(CEditor *pEditor, CUIRect Rect), void *pExtra=0);
+	void UiInvokePopupMenu(void *pID, int Flags, float X, float Y, float W, float H, int (*pfnFunc)(CEditor *pEditor, CUIRect Rect, void *pContext), void *pExtra=0);
 	void UiDoPopupMenu();
+	bool UiPopupExists(void *pID);
+	bool UiPopupOpen();
 
 	int UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree=false, bool IsHex=false, int corners=CUI::CORNER_ALL, ColorRGBA* Color=0);
 
-	static int PopupGroup(CEditor *pEditor, CUIRect View);
-	static int PopupLayer(CEditor *pEditor, CUIRect View);
-	static int PopupQuad(CEditor *pEditor, CUIRect View);
-	static int PopupPoint(CEditor *pEditor, CUIRect View);
-	static int PopupNewFolder(CEditor *pEditor, CUIRect View);
-	static int PopupMapInfo(CEditor *pEditor, CUIRect View);
-	static int PopupEvent(CEditor *pEditor, CUIRect View);
-	static int PopupSelectImage(CEditor *pEditor, CUIRect View);
-	static int PopupSelectSound(CEditor *pEditor, CUIRect View);
-	static int PopupSelectGametileOp(CEditor *pEditor, CUIRect View);
-	static int PopupImage(CEditor *pEditor, CUIRect View);
-	static int PopupMenuFile(CEditor *pEditor, CUIRect View);
-	static int PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View);
-	static int PopupSound(CEditor *pEditor, CUIRect View);
-	static int PopupSource(CEditor *pEditor, CUIRect View);
-	static int PopupColorPicker(CEditor *pEditor, CUIRect View);
-	static int PopupEntities(CEditor *pEditor, CUIRect View);
+	static int PopupGroup(CEditor *pEditor, CUIRect View, void *pContext);
+
+	struct CLayerPopupContext
+	{
+		array<CLayerTiles *> m_aLayers;
+		CLayerTiles::SCommonPropState m_CommonPropState;
+	};
+	static int PopupLayer(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupQuad(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupPoint(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupNewFolder(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupMapInfo(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupEvent(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupSelectImage(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupSelectSound(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupSelectGametileOp(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupImage(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupMenuFile(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupSound(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupSource(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupColorPicker(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupEntities(CEditor *pEditor, CUIRect View, void *pContext);
 
 	static void CallbackOpenMap(const char *pFileName, int StorageType, void *pUser);
 	static void CallbackAppendMap(const char *pFileName, int StorageType, void *pUser);
@@ -997,7 +1006,7 @@ public:
 
 	float ButtonColorMul(const void *pID);
 
-	void DoQuadEnvelopes(const array<CQuad> &m_lQuads, int TexID = -1);
+	void DoQuadEnvelopes(const array<CQuad> &m_lQuads, IGraphics::CTextureHandle Texture = IGraphics::CTextureHandle());
 	void DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int pIndex);
 	void DoQuadPoint(CQuad *pQuad, int QuadIndex, int v);
 
@@ -1041,15 +1050,15 @@ public:
 
 	// DDRace
 
-	static int ms_FrontTexture;
-	static int ms_TeleTexture;
-	static int ms_SpeedupTexture;
-	static int ms_SwitchTexture;
-	static int ms_TuneTexture;
-	static int PopupTele(CEditor *pEditor, CUIRect View);
-	static int PopupSpeedup(CEditor *pEditor, CUIRect View);
-	static int PopupSwitch(CEditor *pEditor, CUIRect View);
-	static int PopupTune(CEditor *pEditor, CUIRect View);
+	IGraphics::CTextureHandle m_FrontTexture;
+	IGraphics::CTextureHandle m_TeleTexture;
+	IGraphics::CTextureHandle m_SpeedupTexture;
+	IGraphics::CTextureHandle m_SwitchTexture;
+	IGraphics::CTextureHandle m_TuneTexture;
+	static int PopupTele(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupSpeedup(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupTune(CEditor *pEditor, CUIRect View, void *pContext);
 	unsigned char m_TeleNumber;
 
 	unsigned char m_TuningNum;
@@ -1085,6 +1094,7 @@ public:
 	virtual void BrushFlipY();
 	virtual void BrushRotate(float Amount);
 	virtual void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect);
+	virtual bool ContainsElementWithId(int Id);
 };
 
 class CLayerSpeedup : public CLayerTiles
@@ -1094,9 +1104,9 @@ public:
 	~CLayerSpeedup();
 
 	CSpeedupTile *m_pSpeedupTile;
-	unsigned char m_SpeedupForce;
-	unsigned char m_SpeedupMaxSpeed;
-	unsigned char m_SpeedupAngle;
+	int m_SpeedupForce;
+	int m_SpeedupMaxSpeed;
+	int m_SpeedupAngle;
 
 	virtual void Resize(int NewW, int NewH);
 	virtual void Shift(int Direction);
@@ -1135,6 +1145,7 @@ public:
 	virtual void BrushFlipY();
 	virtual void BrushRotate(float Amount);
 	virtual void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect);
+	virtual bool ContainsElementWithId(int Id);
 };
 
 class CLayerTune : public CLayerTiles

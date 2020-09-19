@@ -186,8 +186,8 @@ void CGameWorld::UpdatePlayerMaps()
 				!GameServer()->m_apPlayers[i]->IsPaused() && GameServer()->m_apPlayers[i]->GetTeam() != -1 &&
 				!ch->CanCollide(i) &&
 				(!GameServer()->m_apPlayers[i] ||
-					GameServer()->m_apPlayers[i]->m_ClientVersion == VERSION_VANILLA ||
-					(GameServer()->m_apPlayers[i]->m_ClientVersion >= VERSION_DDRACE &&
+					GameServer()->m_apPlayers[i]->GetClientVersion() == VERSION_VANILLA ||
+					(GameServer()->m_apPlayers[i]->GetClientVersion() >= VERSION_DDRACE &&
 					!GameServer()->m_apPlayers[i]->m_ShowOthers
 					)
 				)
@@ -302,6 +302,9 @@ CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, v
 	for(; p; p = (CCharacter *)p->TypeNext())
 	{
 		if(p == pNotThis)
+			continue;
+
+		if(pThisOnly && p != pThisOnly)
 			continue;
 
 		if(CollideWith != -1 && !p->CanCollide(CollideWith))

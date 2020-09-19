@@ -65,7 +65,10 @@ public:
 		if(!m_pStorage || !g_Config.m_ClSaveSettings)
 			return;
 
-		m_ConfigFile = m_pStorage->OpenFile(CONFIG_FILE_TMP, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+		char aConfigFileTmp[64];
+		str_format(aConfigFileTmp, sizeof(aConfigFileTmp), CONFIG_FILE ".%d.tmp", pid());
+
+		m_ConfigFile = m_pStorage->OpenFile(aConfigFileTmp, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 
 		if(!m_ConfigFile)
 			return;
@@ -75,9 +78,9 @@ public:
 		char aLineBuf[1024*2];
 		char aEscapeBuf[1024*2];
 
-		#define MACRO_CONFIG_INT(Name,ScriptName,def,min,max,flags,desc) if((flags)&CFGFLAG_SAVE) { str_format(aLineBuf, sizeof(aLineBuf), "%s %i", #ScriptName, g_Config.m_##Name); WriteLine(aLineBuf); }
-		#define MACRO_CONFIG_COL(Name,ScriptName,def,flags,desc) if((flags)&CFGFLAG_SAVE) { str_format(aLineBuf, sizeof(aLineBuf), "%s %u", #ScriptName, g_Config.m_##Name); WriteLine(aLineBuf); }
-		#define MACRO_CONFIG_STR(Name,ScriptName,len,def,flags,desc) if((flags)&CFGFLAG_SAVE) { EscapeParam(aEscapeBuf, g_Config.m_##Name, sizeof(aEscapeBuf)); str_format(aLineBuf, sizeof(aLineBuf), "%s \"%s\"", #ScriptName, aEscapeBuf); WriteLine(aLineBuf); }
+		#define MACRO_CONFIG_INT(Name,ScriptName,def,min,max,flags,desc) if((flags)&CFGFLAG_SAVE && g_Config.m_##Name != def) { str_format(aLineBuf, sizeof(aLineBuf), "%s %i", #ScriptName, g_Config.m_##Name); WriteLine(aLineBuf); }
+		#define MACRO_CONFIG_COL(Name,ScriptName,def,flags,desc) if((flags)&CFGFLAG_SAVE && g_Config.m_##Name != def) { str_format(aLineBuf, sizeof(aLineBuf), "%s %u", #ScriptName, g_Config.m_##Name); WriteLine(aLineBuf); }
+		#define MACRO_CONFIG_STR(Name,ScriptName,len,def,flags,desc) if((flags)&CFGFLAG_SAVE && str_comp(g_Config.m_##Name, def) != 0) { EscapeParam(aEscapeBuf, g_Config.m_##Name, sizeof(aEscapeBuf)); str_format(aLineBuf, sizeof(aLineBuf), "%s \"%s\"", #ScriptName, aEscapeBuf); WriteLine(aLineBuf); }
 
 		#include "config_variables.h"
 
@@ -95,12 +98,12 @@ public:
 
 		if(m_Failed)
 		{
-			dbg_msg("config", "ERROR: writing to " CONFIG_FILE_TMP " failed");
+			dbg_msg("config", "ERROR: writing to %s failed", aConfigFileTmp);
 			return;
 		}
 
-		if(!m_pStorage->RenameFile(CONFIG_FILE_TMP, CONFIG_FILE, IStorage::TYPE_SAVE))
-			dbg_msg("config", "ERROR: renaming " CONFIG_FILE_TMP " to " CONFIG_FILE " failed");
+		if(!m_pStorage->RenameFile(aConfigFileTmp, CONFIG_FILE, IStorage::TYPE_SAVE))
+			dbg_msg("config", "ERROR: renaming %s to " CONFIG_FILE " failed", aConfigFileTmp);
 	}
 
 	virtual void RegisterCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData)

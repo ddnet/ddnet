@@ -4,6 +4,8 @@
 #include <base/math.h>
 #include <base/vmath.h>
 
+#include <antibot/antibot_data.h>
+
 #include <math.h>
 #include <engine/map.h>
 #include <engine/kernel.h>
@@ -13,6 +15,27 @@
 #include <game/collision.h>
 
 #include <engine/shared/config.h>
+
+vec2 ClampVel(int MoveRestriction, vec2 Vel)
+{
+	if(Vel.x > 0 && (MoveRestriction&CANTMOVE_RIGHT))
+	{
+		Vel.x = 0;
+	}
+	if(Vel.x < 0 && (MoveRestriction&CANTMOVE_LEFT))
+	{
+		Vel.x = 0;
+	}
+	if(Vel.y > 0 && (MoveRestriction&CANTMOVE_DOWN))
+	{
+		Vel.y = 0;
+	}
+	if(Vel.y < 0 && (MoveRestriction&CANTMOVE_UP))
+	{
+		Vel.y = 0;
+	}
+	return Vel;
+}
 
 CCollision::CCollision()
 {
@@ -102,11 +125,9 @@ void CCollision::Init(class CLayers *pLayers)
 
 			Index = m_pSwitch[i].m_Type;
 
-			if(Index <= TILE_NPH_START)
+			if(Index <= TILE_NPH_ENABLE)
 			{
-				if((Index >= TILE_JUMP && Index <= TILE_BONUS)
-						|| Index == TILE_ALLOW_TELE_GUN
-						|| Index == TILE_ALLOW_BLUE_TELE_GUN)
+				if((Index >= TILE_JUMP && Index <= TILE_SUBSTRACT_TIME) || Index == TILE_ALLOW_TELE_GUN || Index == TILE_ALLOW_BLUE_TELE_GUN)
 					m_pSwitch[i].m_Type = Index;
 				else
 					m_pSwitch[i].m_Type = 0;
@@ -129,6 +150,148 @@ void CCollision::Init(class CLayers *pLayers)
 			}
 		}
 	}
+}
+
+void CCollision::FillAntibot(CAntibotMapData *pMapData)
+{
+	pMapData->m_Width = m_Width;
+	pMapData->m_Height = m_Height;
+	pMapData->m_pTiles = (unsigned char *)malloc(m_Width * m_Height);
+	for(int i = 0; i < m_Width * m_Height; i++)
+	{
+		pMapData->m_pTiles[i] = 0;
+		if(m_pTiles[i].m_Index >= TILE_SOLID && m_pTiles[i].m_Index <= TILE_NOLASER)
+		{
+			pMapData->m_pTiles[i] = m_pTiles[i].m_Index;
+		}
+	}
+}
+
+enum
+{
+	MR_DIR_HERE=0,
+	MR_DIR_RIGHT,
+	MR_DIR_DOWN,
+	MR_DIR_LEFT,
+	MR_DIR_UP,
+	NUM_MR_DIRS
+};
+
+static int GetMoveRestrictionsRaw(int Direction, int Tile, int Flags)
+{
+	Flags = Flags&(TILEFLAG_VFLIP|TILEFLAG_HFLIP|TILEFLAG_ROTATE);
+	switch(Tile)
+	{
+	case TILE_STOP:
+		switch(Flags)
+		{
+		case ROTATION_0: return CANTMOVE_DOWN;
+		case ROTATION_90: return CANTMOVE_LEFT;
+		case ROTATION_180: return CANTMOVE_UP;
+		case ROTATION_270: return CANTMOVE_RIGHT;
+
+		case TILEFLAG_HFLIP^ROTATION_0: return CANTMOVE_UP;
+		case TILEFLAG_HFLIP^ROTATION_90: return CANTMOVE_RIGHT;
+		case TILEFLAG_HFLIP^ROTATION_180: return CANTMOVE_DOWN;
+		case TILEFLAG_HFLIP^ROTATION_270: return CANTMOVE_LEFT;
+		}
+		break;
+	case TILE_STOPS:
+		switch(Flags)
+		{
+		case ROTATION_0:
+		case ROTATION_180:
+		case TILEFLAG_HFLIP^ROTATION_0:
+		case TILEFLAG_HFLIP^ROTATION_180:
+			return CANTMOVE_DOWN|CANTMOVE_UP;
+		case ROTATION_90:
+		case ROTATION_270:
+		case TILEFLAG_HFLIP^ROTATION_90:
+		case TILEFLAG_HFLIP^ROTATION_270:
+			return CANTMOVE_LEFT|CANTMOVE_RIGHT;
+		}
+		break;
+	case TILE_STOPA:
+		return CANTMOVE_LEFT|CANTMOVE_RIGHT|CANTMOVE_UP|CANTMOVE_DOWN;
+	}
+	return 0;
+}
+
+static int GetMoveRestrictionsMask(int Direction)
+{
+	switch(Direction)
+	{
+	case MR_DIR_HERE: return 0;
+	case MR_DIR_RIGHT: return CANTMOVE_RIGHT;
+	case MR_DIR_DOWN: return CANTMOVE_DOWN;
+	case MR_DIR_LEFT: return CANTMOVE_LEFT;
+	case MR_DIR_UP: return CANTMOVE_UP;
+	default: dbg_assert(false, "invalid dir");
+	}
+	return 0;
+}
+
+static int GetMoveRestrictions(int Direction, int Tile, int Flags)
+{
+	int Result = GetMoveRestrictionsRaw(Direction, Tile, Flags);
+	// Generally, stoppers only have an effect if they block us from moving
+	// *onto* them. The one exception is one-way blockers, they can also
+	// block us from moving if we're on top of them.
+	if(Direction == MR_DIR_HERE && Tile == TILE_STOP)
+	{
+		return Result;
+	}
+	return Result&GetMoveRestrictionsMask(Direction);
+}
+
+int CCollision::GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance, int OverrideCenterTileIndex)
+{
+	static const vec2 DIRECTIONS[NUM_MR_DIRS] =
+	{
+		vec2(0, 0),
+		vec2(1, 0),
+		vec2(0, 1),
+		vec2(-1, 0),
+		vec2(0, -1)
+	};
+	dbg_assert(0.0f <= Distance && Distance <= 32.0f, "invalid distance");
+	int Restrictions = 0;
+	for(int d = 0; d < NUM_MR_DIRS; d++)
+	{
+		vec2 ModPos = Pos + DIRECTIONS[d] * Distance;
+		int ModMapIndex = GetPureMapIndex(ModPos);
+		if(d == MR_DIR_HERE && OverrideCenterTileIndex >= 0)
+		{
+			ModMapIndex = OverrideCenterTileIndex;
+		}
+		for(int Front = 0; Front < 2; Front++)
+		{
+			int Tile;
+			int Flags;
+			if(!Front)
+			{
+				Tile = GetTileIndex(ModMapIndex);
+				Flags = GetTileFlags(ModMapIndex);
+			}
+			else
+			{
+				Tile = GetFTileIndex(ModMapIndex);
+				Flags = GetFTileFlags(ModMapIndex);
+			}
+			Restrictions |= ::GetMoveRestrictions(d, Tile, Flags);
+		}
+		if(pfnSwitchActive)
+		{
+			int TeleNumber = GetDTileNumber(ModMapIndex);
+			if(pfnSwitchActive(TeleNumber, pUser))
+			{
+				int Tile = GetDTileIndex(ModMapIndex);
+				int Flags = GetDTileFlags(ModMapIndex);
+				Restrictions |= ::GetMoveRestrictions(d, Tile, Flags);
+			}
+		}
+	}
+	return Restrictions;
 }
 
 int CCollision::GetTile(int x, int y)
@@ -343,15 +506,25 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elas
 
 	if(Distance > 0.00001f)
 	{
-		//vec2 old_pos = pos;
 		float Fraction = 1.0f/(float)(Max+1);
 		for(int i = 0; i <= Max; i++)
 		{
-			//float amount = i/(float)max;
-			//if(max == 0)
-				//amount = 0;
+			// Early break as optimization to stop checking for collisions for
+			// large distances after the obstacles we have already hit reduced
+			// our speed to exactly 0.
+			if(Vel == vec2(0, 0))
+			{
+				break;
+			}
 
 			vec2 NewPos = Pos + Vel*Fraction; // TODO: this row is not nice
+
+			// Fraction can be very small and thus the calculation has no effect, no
+			// reason to continue calculating.
+			if(NewPos == Pos)
+			{
+				break;
+			}
 
 			if(TestBox(vec2(NewPos.x, NewPos.y), Size))
 			{
@@ -714,13 +887,13 @@ bool CCollision::TileExistsNext(int Index)
 		return true;
 	if((m_pTiles[TileBelow].m_Index == TILE_STOP && m_pTiles[TileBelow].m_Flags == ROTATION_0) || (m_pTiles[TileAbove].m_Index == TILE_STOP && m_pTiles[TileAbove].m_Flags == ROTATION_180))
 		return true;
-	if(m_pTiles[TileOnTheRight].m_Index == TILE_STOPA || m_pTiles[TileOnTheLeft].m_Index == TILE_STOPA || ((m_pTiles[TileOnTheRight].m_Index == TILE_STOPS || m_pTiles[TileOnTheLeft].m_Index == TILE_STOPS) && m_pTiles[TileOnTheRight].m_Flags|ROTATION_270|ROTATION_90))
+	if(m_pTiles[TileOnTheRight].m_Index == TILE_STOPA || m_pTiles[TileOnTheLeft].m_Index == TILE_STOPA || ((m_pTiles[TileOnTheRight].m_Index == TILE_STOPS || m_pTiles[TileOnTheLeft].m_Index == TILE_STOPS)))
 		return true;
 	if(m_pTiles[TileBelow].m_Index == TILE_STOPA || m_pTiles[TileAbove].m_Index == TILE_STOPA || ((m_pTiles[TileBelow].m_Index == TILE_STOPS || m_pTiles[TileAbove].m_Index == TILE_STOPS) && m_pTiles[TileBelow].m_Flags|ROTATION_180|ROTATION_0))
 		return true;
 	if(m_pFront)
 	{
-		if(m_pFront[TileOnTheRight].m_Index == TILE_STOPA || m_pFront[TileOnTheLeft].m_Index == TILE_STOPA || ((m_pFront[TileOnTheRight].m_Index == TILE_STOPS || m_pFront[TileOnTheLeft].m_Index == TILE_STOPS) && m_pFront[TileOnTheRight].m_Flags|ROTATION_270|ROTATION_90))
+		if(m_pFront[TileOnTheRight].m_Index == TILE_STOPA || m_pFront[TileOnTheLeft].m_Index == TILE_STOPA || ((m_pFront[TileOnTheRight].m_Index == TILE_STOPS || m_pFront[TileOnTheLeft].m_Index == TILE_STOPS)))
 			return true;
 		if(m_pFront[TileBelow].m_Index == TILE_STOPA || m_pFront[TileAbove].m_Index == TILE_STOPA || ((m_pFront[TileBelow].m_Index == TILE_STOPS || m_pFront[TileAbove].m_Index == TILE_STOPS) && m_pFront[TileBelow].m_Flags|ROTATION_180|ROTATION_0))
 			return true;
@@ -731,7 +904,7 @@ bool CCollision::TileExistsNext(int Index)
 	}
 	if(m_pDoor)
 	{
-		if(m_pDoor[TileOnTheRight].m_Index == TILE_STOPA || m_pDoor[TileOnTheLeft].m_Index == TILE_STOPA || ((m_pDoor[TileOnTheRight].m_Index == TILE_STOPS || m_pDoor[TileOnTheLeft].m_Index == TILE_STOPS) && m_pDoor[TileOnTheRight].m_Flags|ROTATION_270|ROTATION_90))
+		if(m_pDoor[TileOnTheRight].m_Index == TILE_STOPA || m_pDoor[TileOnTheLeft].m_Index == TILE_STOPA || ((m_pDoor[TileOnTheRight].m_Index == TILE_STOPS || m_pDoor[TileOnTheLeft].m_Index == TILE_STOPS)))
 			return true;
 		if(m_pDoor[TileBelow].m_Index == TILE_STOPA || m_pDoor[TileAbove].m_Index == TILE_STOPA || ((m_pDoor[TileBelow].m_Index == TILE_STOPS || m_pDoor[TileAbove].m_Index == TILE_STOPS) && m_pDoor[TileBelow].m_Flags|ROTATION_180|ROTATION_0))
 			return true;

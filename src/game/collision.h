@@ -8,6 +8,19 @@
 
 #include <list>
 
+enum
+{
+	CANTMOVE_LEFT=1<<0,
+	CANTMOVE_RIGHT=1<<1,
+	CANTMOVE_UP=1<<2,
+	CANTMOVE_DOWN=1<<3,
+};
+
+vec2 ClampVel(int MoveRestriction, vec2 Vel);
+
+typedef bool (*CALLBACK_SWITCHACTIVE)(int Number, void *pUser);
+struct CAntibotMapData;
+
 class CCollision
 {
 	class CTile *m_pTiles;
@@ -19,6 +32,7 @@ public:
 	CCollision();
 	~CCollision();
 	void Init(class CLayers *pLayers);
+	void FillAntibot(CAntibotMapData *pMapData);
 	bool CheckPoint(float x, float y) { return IsSolid(round_to_int(x), round_to_int(y)); }
 	bool CheckPoint(vec2 Pos) { return CheckPoint(Pos.x, Pos.y); }
 	int GetCollisionAt(float x, float y) { return GetTile(round_to_int(x), round_to_int(y)); }
@@ -47,6 +61,12 @@ public:
 	int GetIndex(int x, int y);
 	int GetIndex(vec2 PrevPos, vec2 Pos);
 	int GetFIndex(int x, int y);
+
+	int GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance = 18.0f, int OverrideCenterTileIndex = -1);
+	int GetMoveRestrictions(vec2 Pos, float Distance = 18.0f)
+	{
+		return GetMoveRestrictions(0, 0, Pos, Distance);
+	}
 
 	int GetTile(int x, int y);
 	int GetFTile(int x, int y);

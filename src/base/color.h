@@ -32,6 +32,8 @@ inline float RgbToHue(float r, float g, float b)
 	return hue / 6.0f;
 }
 
+// Curiously Recurring Template Pattern for type safety
+template <typename DerivedT>
 class color4_base
 {
 public:
@@ -89,69 +91,55 @@ public:
 		return (Alpha ? ((unsigned)(a * 255.0f) << 24) : 0) + ((unsigned)(x * 255.0f) << 16) + ((unsigned)(y * 255.0f) << 8) + (unsigned)(z * 255.0f);
 	}
 
-	color4_base SetAlpha(float alpha)
+	DerivedT WithAlpha(float alpha)
 	{
-		color4_base col;
-		col = *this;
+		DerivedT col(static_cast<DerivedT&>(*this));
 		col.a = alpha;
 		return col;
 	}
 };
 
-class ColorHSLA : public color4_base
+class ColorHSLA : public color4_base<ColorHSLA>
 {
 public:
-	bool m_Lit = false;
-
 	using color4_base::color4_base;
 	ColorHSLA() {};
-	ColorHSLA(color4_base b): color4_base(b) {};
 
-	ColorHSLA Lighten()
+	constexpr static const float DARKEST_LGT = 0.5f;
+
+	ColorHSLA UnclampLighting(float Darkest = DARKEST_LGT)
 	{
-		if(m_Lit)
-			return *this;
-
 		ColorHSLA col = *this;
-		col.l = 0.5f + l * 0.5f;
-		col.m_Lit = true;
-		return col;
-	};
-
-	ColorHSLA Darken()
-	{
-		if(!m_Lit)
-			return *this;
-
-		ColorHSLA col = *this;
-		col.l = (l - 0.5f) * 2;
-		col.m_Lit = false;
+		col.l = Darkest + col.l * (1.0f - Darkest);
 		return col;
 	}
 
 	unsigned Pack(bool Alpha = true)
 	{
-		if(m_Lit)
-			return Darken().color4_base::Pack(Alpha);
-		else
-			return color4_base::Pack(Alpha);
+		return color4_base::Pack(Alpha);
+	}
+
+	unsigned Pack(float Darkest, bool Alpha = false)
+	{
+		ColorHSLA col = *this;
+		col.l = (l - Darkest)/(1 - Darkest);
+		col.l = clamp(col.l, 0.0f, 1.0f);
+		return col.Pack(Alpha);
 	}
 };
 
-class ColorHSVA : public color4_base
+class ColorHSVA : public color4_base<ColorHSVA>
 {
 public:
 	using color4_base::color4_base;
 	ColorHSVA() {};
-	ColorHSVA(color4_base b): color4_base(b) {};
 };
 
-class ColorRGBA : public color4_base
+class ColorRGBA : public color4_base<ColorRGBA>
 {
 public:
 	using color4_base::color4_base;
 	ColorRGBA() {};
-	ColorRGBA(color4_base b): color4_base(b) {};
 };
 
 template <typename T, typename F> T color_cast(const F &f) = delete;
@@ -232,9 +220,15 @@ inline ColorHSVA color_cast(const ColorRGBA &rgb)
 }
 
 template <typename T>
-T color_scale(const color4_base &col, float s)
+T color_scale(const T &col, float s)
 {
 	return T(col.x * s, col.y * s, col.z * s, col.a * s);
+}
+
+template <typename T>
+T color_invert(const T &col)
+{
+	return T(1.0f - col.x, 1.0f - col.y, 1.0f - col.z, 1.0f - col.a);
 }
 
 #endif

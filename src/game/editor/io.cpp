@@ -439,6 +439,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 				df.AddItem(MAPITEMTYPE_LAYER, LayerCount, sizeof(Item), &Item);
 
 				CMapItemAutoMapperConfig ItemAutomapper;
+				ItemAutomapper.m_Version = CMapItemAutoMapperConfig::CURRENT_VERSION;
 				ItemAutomapper.m_GroupId = GroupCount;
 				ItemAutomapper.m_LayerId = GItem.m_NumLayers;
 				ItemAutomapper.m_AutomapperConfig = pLayer->m_AutoMapperConfig;
@@ -566,12 +567,6 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 	return 1;
 }
 
-void CEditor::LoadCurrentMap()
-{
-	Load(m_pClient->GetCurrentMapPath(), IStorage::TYPE_ALL);
-	m_ValidSaveFilename = true;
-}
-
 int CEditor::Load(const char *pFileName, int StorageType)
 {
 	Reset();
@@ -677,7 +672,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 					if(m_pEditor->Graphics()->LoadPNG(&ImgInfo, aBuf, IStorage::TYPE_ALL))
 					{
 						*pImg = ImgInfo;
-						pImg->m_TexID = m_pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, CImageInfo::FORMAT_AUTO, 0);
+						pImg->m_Texture = m_pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, CImageInfo::FORMAT_AUTO, 0);
 						ImgInfo.m_pData = 0;
 						pImg->m_External = 1;
 					}
@@ -692,7 +687,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 					void *pData = DataFile.GetData(pItem->m_ImageData);
 					pImg->m_pData = malloc(pImg->m_Width*pImg->m_Height*4);
 					mem_copy(pImg->m_pData, pData, pImg->m_Width*pImg->m_Height*4);
-					pImg->m_TexID = m_pEditor->Graphics()->LoadTextureRaw(pImg->m_Width, pImg->m_Height, pImg->m_Format, pImg->m_pData, CImageInfo::FORMAT_AUTO, 0);
+					pImg->m_Texture = m_pEditor->Graphics()->LoadTextureRaw(pImg->m_Width, pImg->m_Height, pImg->m_Format, pImg->m_pData, CImageInfo::FORMAT_AUTO, 0);
 				}
 
 				// copy image name
@@ -956,14 +951,13 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 									TILE_FREEZE,
 									TILE_DFREEZE,
 									TILE_DUNFREEZE,
-									TILE_HIT_START,
-									TILE_HIT_END,
+									TILE_HIT_ENABLE,
+									TILE_HIT_DISABLE,
 									TILE_JUMP,
-									TILE_PENALTY,
-									TILE_BONUS,
+									TILE_ADD_TIME,
+									TILE_SUBSTRACT_TIME,
 									TILE_ALLOW_TELE_GUN,
-									TILE_ALLOW_BLUE_TELE_GUN
-								};
+									TILE_ALLOW_BLUE_TELE_GUN};
 								CSwitchTile *pLayerSwitchTiles = ((CLayerSwitch *)pTiles)->m_pSwitchTile;
 								mem_copy(((CLayerSwitch *)pTiles)->m_pSwitchTile, pSwitchData, pTiles->m_Width*pTiles->m_Height*sizeof(CSwitchTile));
 
@@ -1001,8 +995,8 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 
 								for(int i = 0; i < pTiles->m_Width*pTiles->m_Height; i++)
 								{
-									if(pLayerTuneTiles[i].m_Type == TILE_TUNE1)
-										pTiles->m_pTiles[i].m_Index = TILE_TUNE1;
+									if(pLayerTuneTiles[i].m_Type == TILE_TUNE)
+										pTiles->m_pTiles[i].m_Index = TILE_TUNE;
 									else
 										pTiles->m_pTiles[i].m_Index = 0;
 								}
@@ -1294,6 +1288,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 	else
 		return 0;
 
+	m_Modified = false;
 	return 1;
 }
 

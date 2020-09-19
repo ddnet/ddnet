@@ -2,14 +2,114 @@
 #define GAME_SERVER_SCORE_H
 
 #include <memory>
+#include <atomic>
+#include <string>
+#include <vector>
 
-#include "entities/character.h"
-#include "gamecontext.h"
+#include <engine/server/databases/connection_pool.h>
+#include <engine/map.h>
+#include <game/voting.h>
+#include <game/prng.h>
+
+#include "save.h"
+
+struct ISqlData;
+class IDbConnection;
+class IServer;
+class CGameContext;
 
 enum
 {
 	NUM_CHECKPOINTS = 25,
 	TIMESTAMP_STR_LENGTH = 20, // 2019-04-02 19:38:36
+};
+
+struct CScorePlayerResult
+{
+	std::atomic_bool m_Done;
+	CScorePlayerResult();
+
+	enum {
+		MAX_MESSAGES = 7,
+	};
+
+	enum Variant
+	{
+		DIRECT,
+		ALL,
+		BROADCAST,
+		MAP_VOTE,
+		PLAYER_INFO,
+	} m_MessageKind;
+	union {
+		char m_aaMessages[MAX_MESSAGES][512];
+		char m_Broadcast[1024];
+		struct {
+			float m_Time;
+			float m_CpTime[NUM_CHECKPOINTS];
+			int m_Score;
+			int m_HasFinishScore;
+			int m_Birthday; // 0 indicates no birthday
+		} m_Info;
+		struct
+		{
+			char m_Reason[VOTE_REASON_LENGTH];
+			char m_Server[32+1];
+			char m_Map[MAX_MAP_LENGTH+1];
+		} m_MapVote;
+	} m_Data; // PLAYER_INFO
+
+	void SetVariant(Variant v);
+};
+
+struct CScoreRandomMapResult
+{
+	std::atomic_bool m_Done;
+	CScoreRandomMapResult(int ClientID) :
+		m_Done(false),
+		m_ClientID(ClientID)
+	{
+		m_Map[0] = '\0';
+		m_aMessage[0] = '\0';
+	}
+	int m_ClientID;
+	char m_Map[MAX_MAP_LENGTH];
+	char m_aMessage[512];
+};
+
+struct CScoreSaveResult
+{
+	CScoreSaveResult(int PlayerID, IGameController* Controller) :
+		m_Status(SAVE_FAILED),
+		m_SavedTeam(CSaveTeam(Controller)),
+		m_RequestingPlayer(PlayerID)
+	{
+		m_aMessage[0] = '\0';
+		m_aBroadcast[0] = '\0';
+	}
+	enum
+	{
+		SAVE_SUCCESS,
+		// load team in the following two cases
+		SAVE_FAILED,
+		LOAD_SUCCESS,
+		LOAD_FAILED,
+	} m_Status;
+	char m_aMessage[512];
+	char m_aBroadcast[512];
+	CSaveTeam m_SavedTeam;
+	int m_RequestingPlayer;
+	CUuid m_SaveID;
+};
+
+struct CScoreInitResult
+{
+	CScoreInitResult() :
+		m_Done(false),
+		m_CurrentRecord(0)
+	{ }
+	std::atomic_bool m_Done;
+	float m_CurrentRecord;
 };
 
 class CPlayerData
@@ -19,6 +119,7 @@ public:
 	{
 		Reset();
 	}
+	~CPlayerData() {}
 
 	void Reset()
 	{
@@ -31,6 +132,7 @@ public:
 	void Set(float Time, float CpTime[NUM_CHECKPOINTS])
 	{
 		m_BestTime = Time;
+		m_CurrentTime = Time;
 		for(int i = 0; i < NUM_CHECKPOINTS; i++)
 			m_aBestCpTime[i] = CpTime[i];
 	}
@@ -40,62 +142,213 @@ public:
 	float m_aBestCpTime[NUM_CHECKPOINTS];
 };
 
-// Watch this: TODO(2019-05-20): Temporary fix for the random maps race
-// condition. See you in ten years.
-class CRandomMapResult
+struct CSqlInitData : ISqlData
 {
-public:
-	bool m_Done;
-	char m_aMap[64];
+	CSqlInitData(std::shared_ptr<CScoreInitResult> pResult) :
+		m_pResult(pResult)
+	{}
+	std::shared_ptr<CScoreInitResult> m_pResult;
 
-	CRandomMapResult() : m_Done(false) {}
+	// current map
+	char m_Map[MAX_MAP_LENGTH];
 };
 
-class CMapVoteResult
+struct CSqlPlayerRequest : ISqlData
 {
-public:
-	bool m_Done;
-	char m_aMap[64];
-	char m_aServer[32];
+	CSqlPlayerRequest(std::shared_ptr<CScorePlayerResult> pResult) :
+		m_pResult(pResult)
+	{}
+	std::shared_ptr<CScorePlayerResult> m_pResult;
+	// object being requested, either map (128 bytes) or player (16 bytes)
+	char m_Name[MAX_MAP_LENGTH];
+	// current map
+	char m_Map[MAX_MAP_LENGTH];
+	char m_RequestingPlayer[MAX_NAME_LENGTH];
+	// relevant for /top5 kind of requests
+	int m_Offset;
+};
+
+struct CSqlRandomMapRequest : ISqlData
+{
+	CSqlRandomMapRequest(std::shared_ptr<CScoreRandomMapResult> pResult) :
+		m_pResult(pResult)
+	{}
+	std::shared_ptr<CScoreRandomMapResult> m_pResult;
+
+	char m_ServerType[32];
+	char m_CurrentMap[MAX_MAP_LENGTH];
+	char m_RequestingPlayer[MAX_NAME_LENGTH];
+	int m_Stars;
+};
+
+struct CSqlScoreData : ISqlData
+{
+	CSqlScoreData(std::shared_ptr<CScorePlayerResult> pResult) :
+		m_pResult(pResult)
+	{}
+	virtual ~CSqlScoreData() {};
+
+	std::shared_ptr<CScorePlayerResult> m_pResult;
+
+	char m_Map[MAX_MAP_LENGTH];
+	char m_GameUuid[UUID_MAXSTRSIZE];
+	char m_Name[MAX_MAP_LENGTH];
+
 	int m_ClientID;
-
-	CMapVoteResult() : m_Done(false) {}
+	float m_Time;
+	char m_aTimestamp[TIMESTAMP_STR_LENGTH];
+	float m_aCpCurrent[NUM_CHECKPOINTS];
+	int m_Num;
+	bool m_Search;
+	char m_aRequestingPlayer[MAX_NAME_LENGTH];
 };
 
-class IScore
+struct CSqlTeamScoreData : ISqlData
+{
+	char m_GameUuid[UUID_MAXSTRSIZE];
+	char m_Map[MAX_MAP_LENGTH];
+	float m_Time;
+	char m_aTimestamp[TIMESTAMP_STR_LENGTH];
+	unsigned int m_Size;
+	char m_aNames[MAX_CLIENTS][MAX_NAME_LENGTH];
+};
+
+struct CSqlTeamSave : ISqlData
+{
+	CSqlTeamSave(std::shared_ptr<CScoreSaveResult> pResult) :
+		m_pResult(pResult)
+	{}
+	virtual ~CSqlTeamSave() {};
+
+	std::shared_ptr<CScoreSaveResult> m_pResult;
+
+	char m_ClientName[MAX_NAME_LENGTH];
+	char m_Map[MAX_MAP_LENGTH];
+	char m_Code[128];
+	char m_aGeneratedCode[128];
+	char m_Server[5];
+};
+
+struct CSqlTeamLoad : ISqlData
+{
+	CSqlTeamLoad(std::shared_ptr<CScoreSaveResult> pResult) :
+		m_pResult(pResult)
+	{}
+	virtual ~CSqlTeamLoad() {};
+
+	std::shared_ptr<CScoreSaveResult> m_pResult;
+
+	char m_Code[128];
+	char m_Map[MAX_MAP_LENGTH];
+	char m_RequestingPlayer[MAX_NAME_LENGTH];
+	int m_ClientID;
+	// struct holding all player names in the team or an empty string
+	char m_aClientNames[MAX_CLIENTS][MAX_NAME_LENGTH];
+	int m_aClientID[MAX_CLIENTS];
+	int m_NumPlayer;
+};
+
+struct CTeamrank {
+	CUuid m_TeamID;
+	char m_aaNames[MAX_CLIENTS][MAX_NAME_LENGTH];
+	unsigned int m_NumNames;
+	CTeamrank();
+
+	// Assumes that a database query equivalent to
+	//
+	//     SELECT TeamID, Name [, ...] -- the order is important
+	//     FROM record_teamrace
+	//     ORDER BY TeamID, Name
+	//
+	// was executed and that the result line of the first team member is already selected.
+	// Afterwards the team member of the next team is selected.
+	// Returns if another team can be extracted
+	bool NextSqlResult(IDbConnection *pSqlServer);
+
+	bool SamePlayers(const std::vector<std::string> *aSortedNames);
+};
+
+class CScore
 {
 	CPlayerData m_aPlayerData[MAX_CLIENTS];
+	CDbConnectionPool *m_pPool;
+
+	static bool Init(IDbConnection *pSqlServer, const ISqlData *pGameData);
+
+	static bool RandomMapThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
+	static bool RandomUnfinishedMapThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
+	static bool MapVoteThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
+
+	static bool LoadPlayerDataThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
+	static bool MapInfoThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
+	static bool ShowRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
+	static bool ShowTeamRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
+	static bool ShowTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData);
+	static bool ShowTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData);
+	static bool ShowTimesThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
+	static bool ShowPointsThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
+	static bool ShowTopPointsThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
+	static bool GetSavesThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
+
+	static bool SaveTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure);
+	static bool LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure);
+
+	static bool SaveScoreThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure);
+	static bool SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure);
+
+	CGameContext *GameServer() const { return m_pGameServer; }
+	IServer *Server() const { return m_pServer; }
+	CGameContext *m_pGameServer;
+	IServer *m_pServer;
+
+	std::vector<std::string> m_aWordlist;
+	CPrng m_Prng;
+	void GeneratePassphrase(char *pBuf, int BufSize);
+
+	// returns new SqlResult bound to the player, if no current Thread is active for this player
+	std::shared_ptr<CScorePlayerResult> NewSqlPlayerResult(int ClientID);
+	// Creates for player database requests
+	void ExecPlayerThread(
+			bool (*pFuncPtr) (IDbConnection *, const ISqlData *),
+			const char *pThreadName,
+			int ClientID,
+			const char *pName,
+			int Offset);
+
+	// returns true if the player should be rate limited
+	bool RateLimitPlayer(int ClientID);
 
 public:
-	virtual ~IScore() {}
+	CScore(CGameContext *pGameServer, CDbConnectionPool *pPool);
+	~CScore() {}
 
 	CPlayerData *PlayerData(int ID) { return &m_aPlayerData[ID]; }
 
-	virtual void MapInfo(int ClientID, const char *pMapName) = 0;
-	virtual void MapVote(std::shared_ptr<CMapVoteResult> *ppResult, int ClientID, const char *pMapName) = 0;
-	virtual void CheckBirthday(int ClientID) = 0;
-	virtual void LoadScore(int ClientID) = 0;
-	virtual void SaveScore(int ClientID, float Time, const char *pTimestamp, float aCpTime[NUM_CHECKPOINTS], bool NotEligible) = 0;
+	void MapInfo(int ClientID, const char *pMapName);
+	void MapVote(int ClientID, const char *pMapName);
+	void LoadPlayerData(int ClientID);
+	void SaveScore(int ClientID, float Time, const char *pTimestamp, float aCpTime[NUM_CHECKPOINTS], bool NotEligible);
 
-	virtual void SaveTeamScore(int *pClientIDs, unsigned int Size, float Time, const char *pTimestamp) = 0;
+	void SaveTeamScore(int *pClientIDs, unsigned int Size, float Time, const char *pTimestamp);
 
-	virtual void ShowTop5(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut=1) = 0;
-	virtual void ShowRank(int ClientID, const char *pName, bool Search=false) = 0;
+	void ShowTop5(int ClientID, int Offset=1);
+	void ShowRank(int ClientID, const char *pName);
 
-	virtual void ShowTeamTop5(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut=1) = 0;
-	virtual void ShowTeamRank(int ClientID, const char *pName, bool Search=false) = 0;
+	void ShowTeamTop5(int ClientID, int Offset=1);
+	void ShowTeamRank(int ClientID, const char *pName);
 
-	virtual void ShowTopPoints(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut=1) = 0;
-	virtual void ShowPoints(int ClientID, const char *pName, bool Search=false) = 0;
+	void ShowTopPoints(int ClientID, int Offset=1);
+	void ShowPoints(int ClientID, const char *pName);
 
-	virtual void RandomMap(std::shared_ptr<CRandomMapResult> *ppResult, int ClientID, int Stars) = 0;
-	virtual void RandomUnfinishedMap(std::shared_ptr<CRandomMapResult> *ppResult, int ClientID, int Stars) = 0;
+	void ShowTimes(int ClientID, const char *pName, int Offset = 1);
+	void ShowTimes(int ClientID, int Offset = 1);
 
-	virtual void SaveTeam(int Team, const char *pCode, int ClientID, const char *pServer) = 0;
-	virtual void LoadTeam(const char *pCode, int ClientID) = 0;
+	void RandomMap(int ClientID, int Stars);
+	void RandomUnfinishedMap(int ClientID, int Stars);
 
-	// called when the server is shut down but not on mapchange/reload
-	virtual void OnShutdown() = 0;
+	void SaveTeam(int ClientID, const char *pCode, const char *pServer);
+	void LoadTeam(const char *pCode, int ClientID);
+	void GetSaves(int ClientID);
 };
 
 #endif // GAME_SERVER_SCORE_H

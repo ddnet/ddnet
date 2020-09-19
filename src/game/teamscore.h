@@ -16,14 +16,14 @@ class CTeamsCore
 public:
 	bool m_IsDDRace16;
 
-	CTeamsCore(void);
+	CTeamsCore();
 
-	bool SameTeam(int ClientID1, int ClientID2);
+	bool SameTeam(int ClientID1, int ClientID2) const;
 
-	bool CanKeepHook(int ClientID1, int ClientID2);
-	bool CanCollide(int ClientID1, int ClientID2);
+	bool CanKeepHook(int ClientID1, int ClientID2) const;
+	bool CanCollide(int ClientID1, int ClientID2) const;
 
-	int Team(int ClientID);
+	int Team(int ClientID) const;
 	void Team(int ClientID, int Team);
 
 	void Reset();
@@ -32,7 +32,7 @@ public:
 		m_IsSolo[ClientID] = Value;
 	}
 
-	bool GetSolo(int ClientID)
+	bool GetSolo(int ClientID) const
 	{
 		return m_IsSolo[ClientID];
 	}

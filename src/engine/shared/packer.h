@@ -7,11 +7,12 @@
 
 class CPacker
 {
+public:
 	enum
 	{
 		PACKER_BUFFER_SIZE=1024*2
 	};
-
+private:
 	unsigned char m_aBuffer[PACKER_BUFFER_SIZE];
 	unsigned char *m_pCurrent;
 	unsigned char *m_pEnd;
@@ -43,6 +44,7 @@ public:
 
 	void Reset(const void *pData, int Size);
 	int GetInt();
+	int GetIntOrDefault(int Default);
 	const char *GetString(int SanitizeType = SANITIZE);
 	const unsigned char *GetRaw(int Size);
 	bool Error() const { return m_Error; }

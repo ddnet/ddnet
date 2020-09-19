@@ -23,6 +23,7 @@ public:
 		CUuid m_GameUuid;
 		const char *m_pServerVersion;
 		time_t m_StartTime;
+		const char *m_pPrngDescription;
 
 		const char *m_pServerName;
 		int m_ServerPort;
@@ -36,6 +37,12 @@ public:
 		CConfiguration *m_pConfig;
 		CTuningParams *m_pTuning;
 		CUuidManager *m_pUuids;
+	};
+
+	enum
+	{
+		PROTOCOL_6=1,
+		PROTOCOL_7,
 	};
 
 	CTeeHistorian();
@@ -55,13 +62,20 @@ public:
 	void BeginInputs();
 	void RecordPlayerInput(int ClientID, const CNetObj_PlayerInput *pInput);
 	void RecordPlayerMessage(int ClientID, const void *pMsg, int MsgSize);
-	void RecordPlayerJoin(int ClientID);
+	void RecordPlayerJoin(int ClientID, int Protocol);
 	void RecordPlayerDrop(int ClientID, const char *pReason);
 	void RecordConsoleCommand(int ClientID, int FlagMask, const char *pCmd, IConsole::IResult *pResult);
 	void RecordTestExtra();
+	void RecordTeamSaveSuccess(int Team, CUuid SaveID, const char *pTeamSave);
+	void RecordTeamSaveFailure(int Team);
+	void RecordTeamLoadSuccess(int Team, CUuid SaveID, const char *pTeamSave);
+	void RecordTeamLoadFailure(int Team);
 	void EndInputs();
 
 	void EndTick();
+
+	void RecordDDNetVersionOld(int ClientID, int DDNetVersion);
+	void RecordDDNetVersion(int ClientID, CUuid ConnectionID, int DDNetVersion, const char *pDDNetVersionStr);
 
 	void RecordAuthInitial(int ClientID, int Level, const char *pAuthName);
 	void RecordAuthLogin(int ClientID, int Level, const char *pAuthName);

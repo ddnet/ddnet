@@ -578,10 +578,10 @@ CDataFileWriter::~CDataFileWriter()
 	m_pDatas = 0;
 }
 
-bool CDataFileWriter::OpenFile(class IStorage *pStorage, const char *pFilename)
+bool CDataFileWriter::OpenFile(class IStorage *pStorage, const char *pFilename, int StorageType)
 {
 	dbg_assert(!m_File, "a file already exists");
-	m_File = pStorage->OpenFile(pFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	m_File = pStorage->OpenFile(pFilename, IOFLAG_WRITE, StorageType);
 	return m_File != 0;
 }
 
@@ -602,10 +602,10 @@ void CDataFileWriter::Init()
 	}
 }
 
-bool CDataFileWriter::Open(class IStorage *pStorage, const char *pFilename)
+bool CDataFileWriter::Open(class IStorage *pStorage, const char *pFilename, int StorageType)
 {
 	Init();
-	return OpenFile(pStorage, pFilename);
+	return OpenFile(pStorage, pFilename, StorageType);
 }
 
 int CDataFileWriter::GetExtendedItemTypeIndex(int Type)

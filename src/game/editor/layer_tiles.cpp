@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/math.h>
+#include <base/tl/algorithm.h>
 
 #include <engine/client.h>
 #include <engine/graphics.h>
@@ -22,7 +23,6 @@ CLayerTiles::CLayerTiles(int w, int h)
 	m_Width = w;
 	m_Height = h;
 	m_Image = -1;
-	m_TexID = -1;
 	m_Game = 0;
 	m_Color.r = 255;
 	m_Color.g = 255;
@@ -83,8 +83,8 @@ void CLayerTiles::MakePalette()
 void CLayerTiles::Render(bool Tileset)
 {
 	if(m_Image >= 0 && m_Image < m_pEditor->m_Map.m_lImages.size())
-		m_TexID = m_pEditor->m_Map.m_lImages[m_Image]->m_TexID;
-	Graphics()->TextureSet(m_TexID);
+		m_Texture = m_pEditor->m_Map.m_lImages[m_Image]->m_Texture;
+	Graphics()->TextureSet(m_Texture);
 	ColorRGBA Color = ColorRGBA(m_Color.r/255.0f, m_Color.g/255.0f, m_Color.b/255.0f, m_Color.a/255.0f);
 	Graphics()->BlendNone();
 	m_pEditor->RenderTools()->RenderTilemap(m_pTiles, m_Width, m_Height, 32.0f, Color, LAYERRENDERFLAG_OPAQUE,
@@ -182,7 +182,7 @@ bool CLayerTiles::IsEmpty(CLayerTiles *pLayer)
 
 void CLayerTiles::BrushSelecting(CUIRect Rect)
 {
-	Graphics()->TextureSet(-1);
+	Graphics()->TextureClear();
 	m_pEditor->Graphics()->QuadsBegin();
 	m_pEditor->Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
 	Snap(&Rect);
@@ -191,7 +191,7 @@ void CLayerTiles::BrushSelecting(CUIRect Rect)
 	m_pEditor->Graphics()->QuadsEnd();
 	char aBuf[16];
 	str_format(aBuf, sizeof(aBuf), "%d,%d", ConvertX(Rect.w), ConvertY(Rect.h));
-	TextRender()->Text(0, Rect.x+3.0f, Rect.y+3.0f, m_pEditor->m_ShowPicker?15.0f:15.0f*m_pEditor->m_WorldZoom, aBuf, -1);
+	TextRender()->Text(0, Rect.x+3.0f, Rect.y+3.0f, m_pEditor->m_ShowPicker?15.0f:15.0f*m_pEditor->m_WorldZoom, aBuf, -1.0f);
 }
 
 int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
@@ -208,7 +208,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 	{
 		CLayerTele *pGrabbed = new CLayerTele(r.w, r.h);
 		pGrabbed->m_pEditor = m_pEditor;
-		pGrabbed->m_TexID = m_TexID;
+		pGrabbed->m_Texture = m_Texture;
 		pGrabbed->m_Image = m_Image;
 		pGrabbed->m_Game = m_Game;
 		if (m_pEditor->m_BrushColorEnabled)
@@ -230,8 +230,18 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 				for(int x = 0; x < r.w; x++)
 				{
 					pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x] = ((CLayerTele*)this)->m_pTeleTile[(r.y+y)*m_Width+(r.x+x)];
-					if(pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELEIN || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELEOUT || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELEINEVIL || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELECHECKINEVIL || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELECHECK || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELECHECKOUT || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELECHECKIN || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELEINWEAPON || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELEINHOOK)
+					if(pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELEIN
+						|| pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELEOUT 
+						|| pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELEINEVIL 
+						// || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELECHECKINEVIL 
+						|| pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELECHECK 
+						|| pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELECHECKOUT 
+						// || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELECHECKIN 
+						|| pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELEINWEAPON 
+						|| pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELEINHOOK)
+					{
 						m_pEditor->m_TeleNumber = pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Number;
+					}
 				}
 		pGrabbed->m_TeleNum = m_pEditor->m_TeleNumber;
 		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName, sizeof(pGrabbed->m_aFileName));
@@ -240,7 +250,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 	{
 		CLayerSpeedup *pGrabbed = new CLayerSpeedup(r.w, r.h);
 		pGrabbed->m_pEditor = m_pEditor;
-		pGrabbed->m_TexID = m_TexID;
+		pGrabbed->m_Texture = m_Texture;
 		pGrabbed->m_Image = m_Image;
 		pGrabbed->m_Game = m_Game;
 		if (m_pEditor->m_BrushColorEnabled)
@@ -278,7 +288,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 	{
 		CLayerSwitch *pGrabbed = new CLayerSwitch(r.w, r.h);
 		pGrabbed->m_pEditor = m_pEditor;
-		pGrabbed->m_TexID = m_TexID;
+		pGrabbed->m_Texture = m_Texture;
 		pGrabbed->m_Image = m_Image;
 		pGrabbed->m_Game = m_Game;
 		if (m_pEditor->m_BrushColorEnabled)
@@ -299,22 +309,22 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 			for(int y = 0; y < r.h; y++)
 				for(int x = 0; x < r.w; x++)
 				{
-					pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x] = ((CLayerSwitch*)this)->m_pSwitchTile[(r.y+y)*m_Width+(r.x+x)];
-					if(pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == ENTITY_DOOR + ENTITY_OFFSET
-						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_HIT_START
-						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_HIT_END
-						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_SWITCHOPEN
-						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_SWITCHCLOSE
-						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_SWITCHTIMEDOPEN
-						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_SWITCHTIMEDCLOSE
-						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == ENTITY_LASER_LONG + ENTITY_OFFSET
-						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == ENTITY_LASER_MEDIUM + ENTITY_OFFSET
-						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == ENTITY_LASER_SHORT + ENTITY_OFFSET
-						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_JUMP
-						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_PENALTY
-						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_BONUS
-						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_ALLOW_TELE_GUN
-						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_ALLOW_BLUE_TELE_GUN)
+					pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x] = ((CLayerSwitch *)this)->m_pSwitchTile[(r.y + y) * m_Width + (r.x + x)];
+					if(pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == ENTITY_DOOR + ENTITY_OFFSET ||
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_HIT_ENABLE ||
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_HIT_DISABLE ||
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_SWITCHOPEN ||
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_SWITCHCLOSE ||
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_SWITCHTIMEDOPEN ||
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_SWITCHTIMEDCLOSE ||
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == ENTITY_LASER_LONG + ENTITY_OFFSET ||
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == ENTITY_LASER_MEDIUM + ENTITY_OFFSET ||
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == ENTITY_LASER_SHORT + ENTITY_OFFSET ||
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_JUMP ||
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_ADD_TIME ||
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_SUBSTRACT_TIME ||
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_ALLOW_TELE_GUN ||
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_ALLOW_BLUE_TELE_GUN)
 					{
 						m_pEditor->m_SwitchNum = pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Number;
 						m_pEditor->m_SwitchDelay = pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Delay;
@@ -329,7 +339,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 	{
 		CLayerTune *pGrabbed = new CLayerTune(r.w, r.h);
 		pGrabbed->m_pEditor = m_pEditor;
-		pGrabbed->m_TexID = m_TexID;
+		pGrabbed->m_Texture = m_Texture;
 		pGrabbed->m_Image = m_Image;
 		pGrabbed->m_Game = m_Game;
 		if (m_pEditor->m_BrushColorEnabled)
@@ -350,8 +360,8 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 			for(int y = 0; y < r.h; y++)
 				for(int x = 0; x < r.w; x++)
 				{
-					pGrabbed->m_pTuneTile[y*pGrabbed->m_Width+x] = ((CLayerTune*)this)->m_pTuneTile[(r.y+y)*m_Width+(r.x+x)];
-					if(pGrabbed->m_pTuneTile[y*pGrabbed->m_Width+x].m_Type == TILE_TUNE1)
+					pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x] = ((CLayerTune *)this)->m_pTuneTile[(r.y + y) * m_Width + (r.x + x)];
+					if(pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Type == TILE_TUNE)
 					{
 						m_pEditor->m_TuningNum = pGrabbed->m_pTuneTile[y*pGrabbed->m_Width+x].m_Number;
 					}
@@ -363,7 +373,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 	{
 		CLayerFront *pGrabbed = new CLayerFront(r.w, r.h);
 		pGrabbed->m_pEditor = m_pEditor;
-		pGrabbed->m_TexID = m_TexID;
+		pGrabbed->m_Texture = m_Texture;
 		pGrabbed->m_Image = m_Image;
 		pGrabbed->m_Game = m_Game;
 		if (m_pEditor->m_BrushColorEnabled)
@@ -384,7 +394,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 	{
 		CLayerTiles *pGrabbed = new CLayerTiles(r.w, r.h);
 		pGrabbed->m_pEditor = m_pEditor;
-		pGrabbed->m_TexID = m_TexID;
+		pGrabbed->m_Texture = m_Texture;
 		pGrabbed->m_Image = m_Image;
 		pGrabbed->m_Game = m_Game;
 		if (m_pEditor->m_BrushColorEnabled)
@@ -509,10 +519,10 @@ void CLayerTiles::BrushFlipX()
 			m_pTiles[y*m_Width+m_Width-1-x] = Tmp;
 		}
 
-	if(m_Tele || m_Switch || m_Speedup || m_Tune)
+	if(m_Tele || m_Speedup || m_Tune)
 		return;
 
-	bool Rotate = !(m_Game || m_Front) || m_pEditor->m_AllowPlaceUnusedTiles;
+	bool Rotate = !(m_Game || m_Front || m_Switch) || m_pEditor->m_AllowPlaceUnusedTiles;
 	for(int y = 0; y < m_Height; y++)
 		for(int x = 0; x < m_Width; x++)
 			if(!Rotate && !IsRotatableTile(m_pTiles[y*m_Width+x].m_Index))
@@ -531,10 +541,10 @@ void CLayerTiles::BrushFlipY()
 			m_pTiles[(m_Height-1-y)*m_Width+x] = Tmp;
 		}
 
-	if(m_Tele || m_Switch || m_Speedup || m_Tune)
+	if(m_Tele || m_Speedup || m_Tune)
 		return;
 
-	bool Rotate = !(m_Game || m_Front) || m_pEditor->m_AllowPlaceUnusedTiles;
+	bool Rotate = !(m_Game || m_Front || m_Switch) || m_pEditor->m_AllowPlaceUnusedTiles;
 	for(int y = 0; y < m_Height; y++)
 		for(int x = 0; x < m_Width; x++)
 			if(!Rotate && !IsRotatableTile(m_pTiles[y*m_Width+x].m_Index))
@@ -862,7 +872,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		{"Shift by", m_pEditor->m_ShiftBy, PROPTYPE_INT_SCROLL, 1, 100000},
 		{"Image", m_Image, PROPTYPE_IMAGE, 0, 0},
 		{"Color", Color, PROPTYPE_COLOR, 0, 0},
-		{"Color Env", m_ColorEnv+1, PROPTYPE_INT_STEP, 0, m_pEditor->m_Map.m_lEnvelopes.size()+1},
+		{"Color Env", m_ColorEnv+1, PROPTYPE_ENVELOPE, 0, 0},
 		{"Color TO", m_ColorEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Auto Rule", m_AutoMapperConfig, PROPTYPE_AUTOMAPPER, m_Image, 0},
 		{"Seed", m_Seed, PROPTYPE_INT_SCROLL, 0, 1000000000},
@@ -911,15 +921,22 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		m_pEditor->m_ShiftBy = NewVal;
 	else if(Prop == PROP_IMAGE)
 	{
+		m_Image = NewVal;
 		if (NewVal == -1)
 		{
-			m_TexID = -1;
+			m_Texture = IGraphics::CTextureHandle();
 			m_Image = -1;
 		}
 		else
 		{
 			m_Image = NewVal%m_pEditor->m_Map.m_lImages.size();
 			m_AutoMapperConfig = -1;
+
+			if(m_pEditor->m_Map.m_lImages[m_Image]->m_Width % 16 != 0 || m_pEditor->m_Map.m_lImages[m_Image]->m_Height % 16 != 0)
+			{
+				m_pEditor->m_PopupEventType = m_pEditor->POPEVENT_IMAGEDIV16;
+				m_pEditor->m_PopupEventActivated = true;
+			}
 		}
 	}
 	else if(Prop == PROP_COLOR)
@@ -961,7 +978,117 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	return 0;
 }
 
-void CLayerTiles::FlagModified(int x, int y, int w, int h) {
+int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, array<CLayerTiles *> &pLayers)
+{
+	if(State.Modified)
+	{
+		CUIRect Commit;
+		pToolbox->HSplitBottom(20.0f, pToolbox, &Commit);
+		static int s_CommitButton = 0;
+		if(pEditor->DoButton_Editor(&s_CommitButton, "Commit", 0, &Commit, 0, "Applies the changes"))
+		{
+			dbg_msg("editor", "applying changes");
+			for_each(pLayers.all(), [&State](CLayerTiles *pLayer){
+				pLayer->Resize(State.Width, State.Height);
+
+				pLayer->m_Color.r = (State.Color>>24)&0xff;
+				pLayer->m_Color.g = (State.Color>>16)&0xff;
+				pLayer->m_Color.b = (State.Color>>8)&0xff;
+				pLayer->m_Color.a = State.Color&0xff;
+
+				pLayer->FlagModified(0, 0, pLayer->m_Width, pLayer->m_Height);
+			});
+			State.Modified = false;
+		}
+
+	}
+	else
+	{
+		for_each(pLayers.all(), [&State](CLayerTiles *pLayer){
+			if(pLayer->m_Width > State.Width)
+				State.Width = pLayer->m_Width;
+			if(pLayer->m_Height > State.Height)
+				State.Height = pLayer->m_Height;
+		});
+	}
+
+	{
+		CUIRect Warning;
+		pToolbox->HSplitTop(13.0f, &Warning, pToolbox);
+		Warning.HMargin(0.5f, &Warning);
+
+		pEditor->TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f));
+		pEditor->UI()->DoLabel(&Warning, "Editing multiple layers", 9.0f, -1, Warning.w);
+		pEditor->TextRender()->TextColor(ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
+		pToolbox->HSplitTop(2.0f, 0, pToolbox);
+	}
+
+	enum
+	{
+		PROP_WIDTH=0,
+		PROP_HEIGHT,
+		PROP_SHIFT,
+		PROP_SHIFT_BY,
+		PROP_COLOR,
+		NUM_PROPS,
+	};
+
+	CProperty aProps[] = {
+		{"Width", State.Width, PROPTYPE_INT_SCROLL, 1, 100000},
+		{"Height", State.Height, PROPTYPE_INT_SCROLL, 1, 100000},
+		{"Shift", 0, PROPTYPE_SHIFT, 0, 0},
+		{"Shift by", pEditor->m_ShiftBy, PROPTYPE_INT_SCROLL, 1, 100000},
+		{"Color", State.Color, PROPTYPE_COLOR, 0, 0},
+		{0},
+	};
+
+	static int s_aIds[NUM_PROPS] = {0};
+	int NewVal = 0;
+	int Prop = pEditor->DoProperties(pToolbox, aProps, s_aIds, &NewVal);
+
+	if(Prop == PROP_WIDTH && NewVal > 1)
+	{
+		if(NewVal > 1000 && !pEditor->m_LargeLayerWasWarned)
+		{
+			pEditor->m_PopupEventType = pEditor->POPEVENT_LARGELAYER;
+			pEditor->m_PopupEventActivated = true;
+			pEditor->m_LargeLayerWasWarned = true;
+		}
+		State.Width = NewVal;
+	}
+	else if(Prop == PROP_HEIGHT && NewVal > 1)
+	{
+		if(NewVal > 1000 && !pEditor->m_LargeLayerWasWarned)
+		{
+			pEditor->m_PopupEventType = pEditor->POPEVENT_LARGELAYER;
+			pEditor->m_PopupEventActivated = true;
+			pEditor->m_LargeLayerWasWarned = true;
+		}
+		State.Height = NewVal;
+	}
+	else if(Prop == PROP_SHIFT)
+	{
+		for_each(pLayers.all(), [NewVal](CLayerTiles *pLayer){
+			pLayer->Shift(NewVal);
+		});
+	}
+	else if(Prop == PROP_SHIFT_BY)
+		pEditor->m_ShiftBy = NewVal;
+	else if(Prop == PROP_COLOR)
+	{
+		State.Color = NewVal;
+	}
+
+	if(Prop != -1 && Prop != PROP_SHIFT)
+	{
+		State.Modified = true;
+	}
+
+	return 0;
+}
+
+void CLayerTiles::FlagModified(int x, int y, int w, int h)
+{
 	m_pEditor->m_Map.m_Modified = true;
 	if (m_Seed != 0 && m_AutoMapperConfig != -1 && m_AutoAutoMap) {
 		m_pEditor->m_Map.m_lImages[m_Image]->m_AutoMapper.ProceedLocalized(this, m_AutoMapperConfig, m_Seed, x, y, w, h);
@@ -976,6 +1103,7 @@ void CLayerTiles::ModifyImageIndex(INDEX_MODIFY_FUNC Func)
 
 void CLayerTiles::ModifyEnvelopeIndex(INDEX_MODIFY_FUNC Func)
 {
+	Func(&m_ColorEnv);
 }
 
 CLayerTele::CLayerTele(int w, int h)
@@ -1250,6 +1378,22 @@ void CLayerTele::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 	FlagModified(sx, sy, w, h);
 }
 
+bool CLayerTele::ContainsElementWithId(int Id)
+{
+	for(int y = 0; y < m_Height; ++y)
+	{
+		for(int x = 0; x < m_Width; ++x)
+		{
+			if(m_pTeleTile[y*m_Width+x].m_Number == Id)
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
 CLayerSpeedup::CLayerSpeedup(int w, int h)
 : CLayerTiles(w, h)
 {
@@ -1404,18 +1548,20 @@ void CLayerSpeedup::BrushDraw(CLayer *pBrush, float wx, float wy)
 				}
 				else
 				{
-					m_pSpeedupTile[fy*m_Width+fx].m_Force = 0;
-					m_pSpeedupTile[fy*m_Width+fx].m_MaxSpeed = 0;
-					m_pSpeedupTile[fy*m_Width+fx].m_Angle = 0;
-					m_pTiles[fy*m_Width+fx].m_Index = 0;
+					m_pSpeedupTile[fy * m_Width + fx].m_Force = 0;
+					m_pSpeedupTile[fy * m_Width + fx].m_MaxSpeed = 0;
+					m_pSpeedupTile[fy * m_Width + fx].m_Angle = 0;
+					m_pSpeedupTile[fy * m_Width + fx].m_Type = 0;
+					m_pTiles[fy * m_Width + fx].m_Index = 0;
 				}
 			}
 			else
 			{
-				m_pSpeedupTile[fy*m_Width+fx].m_Force = 0;
-				m_pSpeedupTile[fy*m_Width+fx].m_MaxSpeed = 0;
-				m_pSpeedupTile[fy*m_Width+fx].m_Angle = 0;
-				m_pTiles[fy*m_Width+fx].m_Index = 0;
+				m_pSpeedupTile[fy * m_Width + fx].m_Force = 0;
+				m_pSpeedupTile[fy * m_Width + fx].m_MaxSpeed = 0;
+				m_pSpeedupTile[fy * m_Width + fx].m_Angle = 0;
+				m_pSpeedupTile[fy * m_Width + fx].m_Type = 0;
+				m_pTiles[fy * m_Width + fx].m_Index = 0;
 			}
 		}
 	FlagModified(sx, sy, l->m_Width, l->m_Height);
@@ -1731,6 +1877,7 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 				m_pSwitchTile[fy*m_Width+fx].m_Type = l->m_pTiles[y*l->m_Width+x].m_Index;
 				m_pSwitchTile[fy*m_Width+fx].m_Flags = l->m_pTiles[y*l->m_Width+x].m_Flags;
 				m_pTiles[fy*m_Width+fx].m_Index = l->m_pTiles[y*l->m_Width+x].m_Index;
+				m_pTiles[fy*m_Width+fx].m_Flags = l->m_pTiles[y*l->m_Width+x].m_Flags;
 			}
 			else
 			{
@@ -1800,6 +1947,12 @@ void CLayerSwitch::BrushRotate(float Amount)
 			{
 				*pDst1 = pTempData1[y*m_Width+x];
 				*pDst2 = pTempData2[y*m_Width+x];
+				if(IsRotatableTile(pDst2->m_Index))
+				{
+					if(pDst2->m_Flags&TILEFLAG_ROTATE)
+						pDst2->m_Flags ^= (TILEFLAG_HFLIP|TILEFLAG_VFLIP);
+					pDst2->m_Flags ^= TILEFLAG_ROTATE;
+				}
 			}
 
 		int Temp = m_Width;
@@ -1874,6 +2027,22 @@ void CLayerSwitch::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 		}
 	}
 	FlagModified(sx, sy, w, h);
+}
+
+bool CLayerSwitch::ContainsElementWithId(int Id)
+{
+	for(int y = 0; y < m_Height; ++y)
+	{
+		for(int x = 0; x < m_Width; ++x)
+		{
+			if(m_pSwitchTile[y*m_Width+x].m_Number == Id)
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 
 //------------------------------------------------------

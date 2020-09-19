@@ -4,6 +4,9 @@
 #include "compression.h"
 #include "uuid_manager.h"
 
+#include <game/generated/protocol.h>
+#include <game/generated/protocolglue.h>
+
 // CSnapshot
 
 CSnapshotItem *CSnapshot::GetItem(int Index)
@@ -529,10 +532,11 @@ CSnapshotBuilder::CSnapshotBuilder()
 	m_NumExtendedItemTypes = 0;
 }
 
-void CSnapshotBuilder::Init()
+void CSnapshotBuilder::Init(bool Sixup)
 {
 	m_DataSize = 0;
 	m_NumItems = 0;
+	m_Sixup = Sixup;
 
 	for(int i = 0; i < m_NumExtendedItemTypes; i++)
 	{
@@ -558,6 +562,7 @@ int *CSnapshotBuilder::GetItemData(int Key)
 
 int CSnapshotBuilder::Finish(void *SpnapData)
 {
+	//dbg_msg("snap", "---------------------------");
 	// flattern and make the snapshot
 	CSnapshot *pSnap = (CSnapshot *)SpnapData;
 	int OffsetSize = sizeof(int)*m_NumItems;
@@ -615,12 +620,24 @@ void *CSnapshotBuilder::NewItem(int Type, int ID, int Size)
 		return 0;
 	}
 
+	bool Extended = false;
 	if(Type >= OFFSET_UUID)
 	{
+		Extended = true;
 		Type = GetTypeFromIndex(GetExtendedItemTypeIndex(Type));
 	}
 
 	CSnapshotItem *pObj = (CSnapshotItem *)(m_aData + m_DataSize);
+
+	if(m_Sixup && !Extended)
+	{
+		if(Type >= 0)
+			Type = Obj_SixToSeven(Type);
+		else
+			Type *= -1;
+
+		if(Type < 0) return pObj;
+	}
 
 	mem_zero(pObj, sizeof(CSnapshotItem) + Size);
 	pObj->m_TypeAndID = (Type<<16)|ID;

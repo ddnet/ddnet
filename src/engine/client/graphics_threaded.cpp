@@ -18,8 +18,13 @@
 #include <engine/storage.h>
 #include <engine/keys.h>
 #include <engine/console.h>
+#include <game/localization.h>
 
 #include <math.h> // cosf, sinf, log2f
+
+#if defined(CONF_VIDEORECORDER)
+	#include "video.h"
+#endif
 
 #include "graphics_threaded.h"
 
@@ -64,7 +69,7 @@ void CGraphics_Threaded::FlushVertices(bool KeepVertices)
 
 	if(m_Drawing == DRAWING_QUADS)
 	{
-		if(g_Config.m_GfxQuadAsTriangle && !m_UseOpenGL3_3)
+		if(g_Config.m_GfxQuadAsTriangle && !m_IsNewOpenGL)
 		{
 			Cmd.m_PrimType = CCommandBuffer::PRIMTYPE_TRIANGLES;
 			Cmd.m_PrimCount = NumVerts/3;
@@ -229,7 +234,6 @@ CGraphics_Threaded::CGraphics_Threaded()
 
 	m_Rotation = 0;
 	m_Drawing = 0;
-	m_InvalidTexture = 0;
 
 	m_TextureMemoryUsage = 0;
 
@@ -341,7 +345,7 @@ void CGraphics_Threaded::LinesDraw(const CLineItem *pArray, int Num)
 	AddVertices(2*Num);
 }
 
-int CGraphics_Threaded::UnloadTexture(int Index)
+int CGraphics_Threaded::UnloadTexture(CTextureHandle Index)
 {
 	if(Index == m_InvalidTexture)
 		return 0;
@@ -377,7 +381,7 @@ static int ImageFormatToPixelSize(int Format)
 }
 
 
-int CGraphics_Threaded::LoadTextureRawSub(int TextureID, int x, int y, int Width, int Height, int Format, const void *pData)
+int CGraphics_Threaded::LoadTextureRawSub(CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData)
 {
 	CCommandBuffer::SCommand_Texture_Update Cmd;
 	Cmd.m_Slot = TextureID;
@@ -405,13 +409,33 @@ int CGraphics_Threaded::LoadTextureRawSub(int TextureID, int x, int y, int Width
 	return 0;
 }
 
-int CGraphics_Threaded::LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags)
+IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName)
 {
 	// don't waste memory on texture if we are stress testing
 #ifdef CONF_DEBUG
 	if(g_Config.m_DbgStress)
 		return m_InvalidTexture;
 #endif
+
+	if((Flags & IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE) != 0 || (Flags & IGraphics::TEXLOAD_TO_3D_TEXTURE) != 0)
+	{
+		if(Width == 0 || (Width % 16) != 0 || Height == 0 || (Height % 16) != 0)
+		{
+			SGraphicsWarning NewWarning;
+			char aText[128];
+			aText[0] = '\0';
+			if(pTexName)
+			{
+				str_format(aText, sizeof(aText), "\"%s\"", pTexName);
+			}
+			str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg), Localize("The width or height of texture %s is not divisible by 16, which might cause visual bugs."), aText);
+
+			m_Warnings.emplace_back(NewWarning);
+		}
+	}
+
+	if(Width == 0 || Height == 0)
+		return IGraphics::CTextureHandle();
 
 	// grab texture
 	int Tex = m_FirstFreeTexture;
@@ -430,10 +454,20 @@ int CGraphics_Threaded::LoadTextureRaw(int Width, int Height, int Format, const 
 	Cmd.m_Flags = 0;
 	if(Flags&IGraphics::TEXLOAD_NOMIPMAPS)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_NOMIPMAPS;
-	if(g_Config.m_GfxTextureCompression && ((Flags&IGraphics::TEXLOAD_NO_COMPRESSION) == 0))
+	if(g_Config.m_GfxTextureCompressionOld && ((Flags & IGraphics::TEXLOAD_NO_COMPRESSION) == 0))
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_COMPRESSED;
-	if(g_Config.m_GfxTextureQuality || Flags&TEXLOAD_NORESAMPLE)
+	if(g_Config.m_GfxTextureQualityOld || Flags & TEXLOAD_NORESAMPLE)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_QUALITY;
+	if((Flags&IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE) != 0)
+		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE;
+	if((Flags&IGraphics::TEXLOAD_TO_3D_TEXTURE) != 0)
+		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_3D_TEXTURE;
+	if((Flags&IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER) != 0)
+		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER;
+	if((Flags&IGraphics::TEXLOAD_TO_3D_TEXTURE_SINGLE_LAYER) != 0)
+		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_3D_TEXTURE_SINGLE_LAYER;
+	if((Flags&IGraphics::TEXLOAD_NO_2D_TEXTURE) != 0)
+		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_NO_2D_TEXTURE;
 
 	// copy texture data
 	int MemSize = Width*Height*Cmd.m_PixelSize;
@@ -449,28 +483,28 @@ int CGraphics_Threaded::LoadTextureRaw(int Width, int Height, int Format, const 
 		m_pCommandBuffer->AddCommand(Cmd);
 	}
 
-	return Tex;
+	return CreateTextureHandle(Tex);
 }
 
 // simple uncompressed RGBA loaders
-int CGraphics_Threaded::LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags)
+IGraphics::CTextureHandle CGraphics_Threaded::LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags)
 {
 	int l = str_length(pFilename);
 	int ID;
 	CImageInfo Img;
 
 	if(l < 3)
-		return -1;
+		return CTextureHandle();
 	if(LoadPNG(&Img, pFilename, StorageType))
 	{
 		if(StoreFormat == CImageInfo::FORMAT_AUTO)
 			StoreFormat = Img.m_Format;
 
-		ID = LoadTextureRaw(Img.m_Width, Img.m_Height, Img.m_Format, Img.m_pData, StoreFormat, Flags);
+		ID = LoadTextureRaw(Img.m_Width, Img.m_Height, Img.m_Format, Img.m_pData, StoreFormat, Flags, pFilename);
 		free(Img.m_pData);
 		if(ID != m_InvalidTexture && g_Config.m_Debug)
 			dbg_msg("graphics/texture", "loaded %s", pFilename);
-		return ID;
+		return CreateTextureHandle(ID);
 	}
 
 	return m_InvalidTexture;
@@ -524,6 +558,16 @@ int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int Sto
 	return 1;
 }
 
+void CGraphics_Threaded::CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSourceBuffer, int FullWidth, int FullHeight, int ColorChannelCount, int SubOffsetX, int SubOffsetY, int SubCopyWidth, int SubCopyHeight)
+{
+	for(int Y = 0; Y < SubCopyHeight; ++Y)
+	{
+		int ImgOffset = ((SubOffsetY + Y) * FullWidth * ColorChannelCount) + (SubOffsetX * ColorChannelCount);
+		int CopySize = SubCopyWidth * ColorChannelCount;
+		mem_copy(&pDestBuffer[ImgOffset], &pSourceBuffer[ImgOffset], CopySize);
+	}
+}
+
 void CGraphics_Threaded::KickCommandBuffer()
 {
 	m_pBackend->RunBuffer(m_pCommandBuffer);
@@ -570,7 +614,7 @@ void CGraphics_Threaded::ScreenshotDirect()
 	}
 }
 
-void CGraphics_Threaded::TextureSet(int TextureID)
+void CGraphics_Threaded::TextureSet(CTextureHandle TextureID)
 {
 	dbg_assert(m_Drawing == 0, "called Graphics()->TextureSet within begin");
 	m_State.m_Texture = TextureID;
@@ -683,6 +727,17 @@ void CGraphics_Threaded::SetColor(ColorRGBA rgb)
 	SetColor(rgb.r, rgb.g, rgb.b, rgb.a);
 }
 
+void CGraphics_Threaded::SetColor4(vec4 TopLeft, vec4 TopRight, vec4 BottomLeft, vec4 BottomRight)
+{
+	dbg_assert(m_Drawing != 0, "called Graphics()->SetColor without begin");
+	CColorVertex Array[4] = {
+		CColorVertex(0, TopLeft.r, TopLeft.g, TopLeft.b, TopLeft.a),
+		CColorVertex(1, TopRight.r, TopRight.g, TopRight.b, TopRight.a),
+		CColorVertex(2, BottomRight.r, BottomRight.g, BottomRight.b, BottomRight.a),
+		CColorVertex(3, BottomLeft.r, BottomLeft.g, BottomLeft.b, BottomLeft.a)};
+	SetColorVertex(Array, 4);
+}
+
 void CGraphics_Threaded::ChangeColorOfCurrentQuadVertices(float r, float g, float b, float a)
 {
 	clampf(r, 0.f, 1.f);
@@ -702,7 +757,7 @@ void CGraphics_Threaded::ChangeColorOfCurrentQuadVertices(float r, float g, floa
 
 void CGraphics_Threaded::ChangeColorOfQuadVertices(int QuadOffset, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
 {
-	if(g_Config.m_GfxQuadAsTriangle && !m_UseOpenGL3_3)
+	if(g_Config.m_GfxQuadAsTriangle && !m_IsNewOpenGL)
 	{
 		m_aVertices[QuadOffset * 6].m_Color.r = r;
 		m_aVertices[QuadOffset * 6].m_Color.g = g;
@@ -803,7 +858,7 @@ void CGraphics_Threaded::QuadsDrawTL(const CQuadItem *pArray, int Num)
 
 	dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->QuadsDrawTL without begin");
 
-	if(g_Config.m_GfxQuadAsTriangle && !m_UseOpenGL3_3)
+	if(g_Config.m_GfxQuadAsTriangle && !m_IsNewOpenGL)
 	{
 		for(int i = 0; i < Num; ++i)
 		{
@@ -891,7 +946,7 @@ void CGraphics_Threaded::QuadsDrawFreeform(const CFreeformItem *pArray, int Num)
 {
 	dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->QuadsDrawFreeform without begin");
 
-	if(g_Config.m_GfxQuadAsTriangle && !m_UseOpenGL3_3)
+	if(g_Config.m_GfxQuadAsTriangle && !m_IsNewOpenGL)
 	{
 		for(int i = 0; i < Num; ++i)
 		{
@@ -997,15 +1052,6 @@ void CGraphics_Threaded::RenderTileLayer(int BufferContainerIndex, float *pColor
 	Cmd.m_IndicesDrawNum = NumIndicesOffet;
 	Cmd.m_BufferContainerIndex = BufferContainerIndex;
 	mem_copy(&Cmd.m_Color, pColor, sizeof(Cmd.m_Color));
-	float ScreenZoomRatio = ScreenWidth() / (m_State.m_ScreenBR.x - m_State.m_ScreenTL.x);
-	//the number of pixels we would skip in the fragment shader -- basically the LOD
-	float LODFactor = (64.f / (32.f * ScreenZoomRatio));
-	//log2 gives us the amount of halving the texture for mipmapping
-	int LOD = (int)log2f(LODFactor);
-	//5 because log2(1024/(2^5)) is 5 -- 2^5 = 32 which would mean 2 pixels per tile index
-	if(LOD > 5) LOD = 5;
-	if(LOD < 0) LOD = 0;
-	Cmd.m_LOD = LOD;
 
 	void *Data = m_pCommandBuffer->AllocData((sizeof(char*) + sizeof(unsigned int))*NumIndicesOffet);
 	if(Data == 0x0)
@@ -1062,16 +1108,6 @@ void CGraphics_Threaded::RenderBorderTiles(int BufferContainerIndex, float *pCol
 	Cmd.m_DrawNum = DrawNum;
 	Cmd.m_BufferContainerIndex = BufferContainerIndex;
 	mem_copy(&Cmd.m_Color, pColor, sizeof(Cmd.m_Color));
-	float ScreenZoomRatio = ScreenWidth() / (m_State.m_ScreenBR.x - m_State.m_ScreenTL.x);
-	//the number of pixels we would skip in the fragment shader -- basically the LOD
-	float LODFactor = (64.f / (32.f * ScreenZoomRatio));
-	//log2 gives us the amount of halving the texture for mipmapping
-	int LOD = (int)log2f(LODFactor);
-	if(LOD > 5)
-		LOD = 5;
-	if(LOD < 0)
-		LOD = 0;
-	Cmd.m_LOD = LOD;
 
 	Cmd.m_pIndicesOffset = pIndexBufferOffset;
 	Cmd.m_JumpIndex = JumpIndex;
@@ -1106,16 +1142,6 @@ void CGraphics_Threaded::RenderBorderTileLines(int BufferContainerIndex, float *
 	Cmd.m_DrawNum = RedrawNum;
 	Cmd.m_BufferContainerIndex = BufferContainerIndex;
 	mem_copy(&Cmd.m_Color, pColor, sizeof(Cmd.m_Color));
-	float ScreenZoomRatio = ScreenWidth() / (m_State.m_ScreenBR.x - m_State.m_ScreenTL.x);
-	//the number of pixels we would skip in the fragment shader -- basically the LOD
-	float LODFactor = (64.f / (32.f * ScreenZoomRatio));
-	//log2 gives us the amount of halving the texture for mipmapping
-	int LOD = (int)log2f(LODFactor);
-	if(LOD > 5)
-		LOD = 5;
-	if(LOD < 0)
-		LOD = 0;
-	Cmd.m_LOD = LOD;
 
 	Cmd.m_pIndicesOffset = pIndexBufferOffset;
 
@@ -1225,7 +1251,7 @@ int CGraphics_Threaded::CreateQuadContainer()
 
 void CGraphics_Threaded::QuadContainerUpload(int ContainerIndex)
 {
-	if(m_UseOpenGL3_3)
+	if(IsQuadContainerBufferingEnabled())
 	{
 		SQuadContainer& Container = m_QuadContainers[ContainerIndex];
 		if(Container.m_Quads.size() > 0)
@@ -1361,7 +1387,7 @@ void CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CFreeformItem
 void CGraphics_Threaded::QuadContainerReset(int ContainerIndex)
 {
 	SQuadContainer& Container = m_QuadContainers[ContainerIndex];
-	if(m_UseOpenGL3_3)
+	if(IsQuadContainerBufferingEnabled())
 	{
 		if(Container.m_QuadBufferContainerIndex != -1)
 			DeleteBufferContainer(Container.m_QuadBufferContainerIndex, true);
@@ -1394,7 +1420,7 @@ void CGraphics_Threaded::RenderQuadContainer(int ContainerIndex, int QuadOffset,
 	if((int)Container.m_Quads.size() < QuadOffset + QuadDrawNum || QuadDrawNum == 0)
 		return;
 
-	if(m_UseOpenGL3_3)
+	if(IsQuadContainerBufferingEnabled())
 	{
 		if(Container.m_QuadBufferContainerIndex == -1)
 			return;
@@ -1452,7 +1478,7 @@ void CGraphics_Threaded::RenderQuadContainerAsSprite(int ContainerIndex, int Qua
 	if((int)Container.m_Quads.size() < QuadOffset + 1)
 		return;
 
-	if(m_UseOpenGL3_3)
+	if(IsQuadContainerBufferingEnabled())
 	{
 		if(Container.m_QuadBufferContainerIndex == -1)
 			return;
@@ -1578,7 +1604,7 @@ void CGraphics_Threaded::RenderQuadContainerAsSpriteMultiple(int ContainerIndex,
 	if(DrawCount == 0)
 		return;
 
-	if(m_UseOpenGL3_3)
+	if(IsQuadContainerBufferingEnabled())
 	{
 		if(Container.m_QuadBufferContainerIndex == -1)
 			return;
@@ -1648,7 +1674,8 @@ void CGraphics_Threaded::RenderQuadContainerAsSpriteMultiple(int ContainerIndex,
 	}
 }
 
-void* CGraphics_Threaded::AllocCommandBufferData(unsigned AllocSize) {
+void* CGraphics_Threaded::AllocCommandBufferData(unsigned AllocSize)
+{
 	void* pData = m_pCommandBuffer->AllocData(AllocSize);
 	if(pData == 0x0)
 	{
@@ -2049,16 +2076,23 @@ int CGraphics_Threaded::IssueInit()
 	if(g_Config.m_GfxBorderless) Flags |= IGraphicsBackend::INITFLAG_BORDERLESS;
 	if(g_Config.m_GfxFullscreen) Flags |= IGraphicsBackend::INITFLAG_FULLSCREEN;
 	if(g_Config.m_GfxVsync) Flags |= IGraphicsBackend::INITFLAG_VSYNC;
+	if(g_Config.m_GfxHighdpi) Flags |= IGraphicsBackend::INITFLAG_HIGHDPI;
 	if(g_Config.m_GfxResizable) Flags |= IGraphicsBackend::INITFLAG_RESIZABLE;
 
 	int r = m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, g_Config.m_GfxFsaaSamples, Flags, &m_DesktopScreenWidth, &m_DesktopScreenHeight, &m_ScreenWidth, &m_ScreenHeight, m_pStorage);
-	m_UseOpenGL3_3 = m_pBackend->IsOpenGL3_3();
+	m_IsNewOpenGL = m_pBackend->IsNewOpenGL();
+	m_OpenGLTileBufferingEnabled = m_IsNewOpenGL || m_pBackend->HasTileBuffering();
+	m_OpenGLQuadBufferingEnabled = m_IsNewOpenGL || m_pBackend->HasQuadBuffering();
+	m_OpenGLQuadContainerBufferingEnabled = m_IsNewOpenGL || m_pBackend->HasQuadContainerBuffering();
+	m_OpenGLTextBufferingEnabled = m_IsNewOpenGL || (m_OpenGLQuadContainerBufferingEnabled && m_pBackend->HasTextBuffering());
+	m_OpenGLHasTextureArrays = m_IsNewOpenGL || m_pBackend->Has2DTextureArrays();
 	return r;
 }
 
 int CGraphics_Threaded::InitWindow()
 {
-	if(IssueInit() == 0)
+	int ErrorCode = IssueInit();
+	if(ErrorCode == 0)
 		return 0;
 
 	// try disabling fsaa
@@ -2071,17 +2105,84 @@ int CGraphics_Threaded::InitWindow()
 		else
 			dbg_msg("gfx", "disabling FSAA and trying again");
 
-		if(IssueInit() == 0)
+		ErrorCode = IssueInit();
+		if(ErrorCode == 0)
 			return 0;
 	}
 
-	// try using old opengl context
-	if(g_Config.m_GfxOpenGL3)
+	size_t OpenGLInitTryCount = 0;
+	while(ErrorCode == EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_OPENGL_CONTEXT_FAILED || ErrorCode == EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_OPENGL_VERSION_FAILED)
 	{
-		g_Config.m_GfxOpenGL3 = 0;
-		if(IssueInit() == 0)
+		if(ErrorCode == EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_OPENGL_CONTEXT_FAILED)
+		{
+			// try next smaller major/minor or patch version
+			if(g_Config.m_GfxOpenGLMajor >= 4)
+			{
+				g_Config.m_GfxOpenGLMajor = 3;
+				g_Config.m_GfxOpenGLMinor = 3;
+				g_Config.m_GfxOpenGLPatch = 0;
+			}
+			else if(g_Config.m_GfxOpenGLMajor == 3 && g_Config.m_GfxOpenGLMinor >= 1)
+			{
+				g_Config.m_GfxOpenGLMajor = 3;
+				g_Config.m_GfxOpenGLMinor = 0;
+				g_Config.m_GfxOpenGLPatch = 0;
+			}
+			else if(g_Config.m_GfxOpenGLMajor == 3 && g_Config.m_GfxOpenGLMinor == 0)
+			{
+				g_Config.m_GfxOpenGLMajor = 2;
+				g_Config.m_GfxOpenGLMinor = 1;
+				g_Config.m_GfxOpenGLPatch = 0;
+			}
+			else if(g_Config.m_GfxOpenGLMajor == 2 && g_Config.m_GfxOpenGLMinor >= 1)
+			{
+				g_Config.m_GfxOpenGLMajor = 2;
+				g_Config.m_GfxOpenGLMinor = 0;
+				g_Config.m_GfxOpenGLPatch = 0;
+			}
+			else if(g_Config.m_GfxOpenGLMajor == 2 && g_Config.m_GfxOpenGLMinor == 0)
+			{
+				g_Config.m_GfxOpenGLMajor = 1;
+				g_Config.m_GfxOpenGLMinor = 5;
+				g_Config.m_GfxOpenGLPatch = 0;
+			}
+			else if(g_Config.m_GfxOpenGLMajor == 1 && g_Config.m_GfxOpenGLMinor == 5)
+			{
+				g_Config.m_GfxOpenGLMajor = 1;
+				g_Config.m_GfxOpenGLMinor = 4;
+				g_Config.m_GfxOpenGLPatch = 0;
+			}
+			else if(g_Config.m_GfxOpenGLMajor == 1 && g_Config.m_GfxOpenGLMinor == 4)
+			{
+				g_Config.m_GfxOpenGLMajor = 1;
+				g_Config.m_GfxOpenGLMinor = 3;
+				g_Config.m_GfxOpenGLPatch = 0;
+			}
+			else if(g_Config.m_GfxOpenGLMajor == 1 && g_Config.m_GfxOpenGLMinor == 3)
+			{
+				g_Config.m_GfxOpenGLMajor = 1;
+				g_Config.m_GfxOpenGLMinor = 2;
+				g_Config.m_GfxOpenGLPatch = 1;
+			}
+			else if(g_Config.m_GfxOpenGLMajor == 1 && g_Config.m_GfxOpenGLMinor == 2)
+			{
+				g_Config.m_GfxOpenGLMajor = 1;
+				g_Config.m_GfxOpenGLMinor = 1;
+				g_Config.m_GfxOpenGLPatch = 0;
+			}
+		}
+
+		// new opengl version was set by backend, try again
+		ErrorCode = IssueInit();
+		if(ErrorCode == 0)
 		{
 			return 0;
+		}
+
+		if(++OpenGLInitTryCount >= 9)
+		{
+			// try something else
+			break;
 		}
 	}
 
@@ -2183,6 +2284,11 @@ bool CGraphics_Threaded::SetWindowScreen(int Index)
 
 void CGraphics_Threaded::Resize(int w, int h)
 {
+#if defined(CONF_VIDEORECORDER)
+	if (IVideo::Current() && IVideo::Current()->IsRecording())
+		return;
+#endif
+
 	if(m_ScreenWidth == w && m_ScreenHeight == h)
 		return;
 
@@ -2254,6 +2360,15 @@ void CGraphics_Threaded::TakeCustomScreenshot(const char *pFilename)
 
 void CGraphics_Threaded::Swap()
 {
+	if(!m_Warnings.empty())
+	{
+		SGraphicsWarning* pCurWarning = GetCurWarning();
+		if(pCurWarning->m_WasShown)
+		{
+			m_Warnings.erase(m_Warnings.begin());
+		}
+	}
+
 	// TODO: screenshot support
 	if(m_DoScreenshot)
 	{
@@ -2305,6 +2420,17 @@ bool CGraphics_Threaded::IsIdle()
 void CGraphics_Threaded::WaitForIdle()
 {
 	m_pBackend->WaitForIdle();
+}
+
+SGraphicsWarning *CGraphics_Threaded::GetCurWarning()
+{
+	if(m_Warnings.empty())
+		return NULL;
+	else
+	{
+		SGraphicsWarning* pCurWarning = &m_Warnings[0];
+		return pCurWarning;
+	}
 }
 
 int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen)

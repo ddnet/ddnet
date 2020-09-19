@@ -5,7 +5,7 @@ PlayerFlags = ["PLAYING", "IN_MENU", "CHATTING", "SCOREBOARD", "AIM"]
 GameFlags = ["TEAMS", "FLAGS"]
 GameStateFlags = ["GAMEOVER", "SUDDENDEATH", "PAUSED", "RACETIME"]
 CharacterFlags = ["SOLO", "JETPACK", "NO_COLLISION", "ENDLESS_HOOK", "ENDLESS_JUMP", "SUPER",
-                  "NO_HAMMER_HIT", "NO_SHOTGUN_HIT", "NO_GRENADE_HIT", "NO_RIFLE_HIT", "NO_HOOK",
+                  "NO_HAMMER_HIT", "NO_SHOTGUN_HIT", "NO_GRENADE_HIT", "NO_LASER_HIT", "NO_HOOK",
                   "TELEGUN_GUN", "TELEGUN_GRENADE", "TELEGUN_LASER",
                   "WEAPON_HAMMER", "WEAPON_GUN", "WEAPON_SHOTGUN", "WEAPON_GRENADE", "WEAPON_LASER", "WEAPON_NINJA"]
 GameInfoFlags = [
@@ -17,9 +17,9 @@ GameInfoFlags = [
 	"BUG_DDRACE_INPUT", "BUG_FNG_LASER_RANGE", "BUG_VANILLA_BOUNCE",
 	"PREDICT_FNG", "PREDICT_DDRACE", "PREDICT_DDRACE_TILES", "PREDICT_VANILLA",
 	"ENTITIES_DDNET", "ENTITIES_DDRACE", "ENTITIES_RACE", "ENTITIES_FNG",
-	"ENTITIES_VANILLA", "DONT_MASK_ENTITIES",
+	"ENTITIES_VANILLA", "DONT_MASK_ENTITIES", "ENTITIES_BW",
 ]
-ExPlayerFlags = ["AFK"]
+ExPlayerFlags = ["AFK", "PAUSED", "SPEC"]
 
 Emoticons = ["OOP", "EXCLAMATION", "HEARTS", "DROP", "DOTDOT", "MUSIC", "SORRY", "GHOST", "SUSHI", "SPLATTEE", "DEVILTEE", "ZOMG", "ZZZ", "WTF", "EYES", "QUESTION"]
 
@@ -52,7 +52,7 @@ enum
 
 enum
 {
-	GAMEINFO_CURVERSION=3,
+	GAMEINFO_CURVERSION=4,
 };
 '''
 
@@ -269,6 +269,11 @@ Objects = [
 	NetObjectEx("MyOwnEvent", "my-own-event@heinrich5991.de", [
 		NetIntAny("m_Test"),
 	]),
+
+	NetObjectEx("SpecChar", "spec-char@netobj.ddnet.tw", [
+		NetIntAny("m_X"),
+		NetIntAny("m_Y"),
+	]),
 ]
 
 Messages = [
@@ -408,19 +413,26 @@ Messages = [
 		NetIntAny("m_PlayerTimeBest"),
 	]),
 
-	NetMessage("Sv_PlayerTime", [
-		NetIntAny("m_Time"),
-		NetIntRange("m_ClientID", 0, 'MAX_CLIENTS-1'),
-	]),
+	NetMessage("Unused", []),
 
 	NetMessage("Sv_TeamsState", []),
 
-	NetMessage("Cl_ShowOthers", [
+	# deprecated, use showothers@netmsg.ddnet.tw instead
+	NetMessage("Cl_ShowOthersLegacy", [
 		NetBool("m_Show"),
 	]),
 # Can't add any NetMessages here!
 
 	NetMessageEx("Sv_MyOwnMessage", "my-own-message@heinrich5991.de", [
 		NetIntAny("m_Test"),
+	]),
+
+	NetMessageEx("Cl_ShowDistance", "show-distance@netmsg.ddnet.tw", [
+		NetIntAny("m_X"),
+		NetIntAny("m_Y"),
+	]),
+
+	NetMessageEx("Cl_ShowOthers", "showothers@netmsg.ddnet.tw", [
+		NetIntRange("m_Show", 0, 2),
 	]),
 ]

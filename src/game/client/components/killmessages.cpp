@@ -83,7 +83,7 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 
 		Kill.m_Weapon = pMsg->m_Weapon;
 		Kill.m_ModeSpecial = pMsg->m_ModeSpecial;
-		Kill.m_Tick = Client()->GameTick();
+		Kill.m_Tick = Client()->GameTick(g_Config.m_ClDummy);
 
 		Kill.m_FlagCarrierBlue = m_pClient->m_Snap.m_pGameDataObj ? m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue : -1;
 
@@ -97,7 +97,7 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 		float FontSize = 36.0f;
 		if(Kill.m_aVictimName[0] != 0)
 		{
-			Kill.m_VitctimTextWidth = TextRender()->TextWidth(0, FontSize, Kill.m_aVictimName, -1);
+			Kill.m_VitctimTextWidth = TextRender()->TextWidth(0, FontSize, Kill.m_aVictimName, -1, -1.0f);
 
 			CTextCursor Cursor;
 			TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
@@ -108,7 +108,7 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 
 		if(Kill.m_aKillerName[0] != 0)
 		{
-			Kill.m_KillerTextWidth = TextRender()->TextWidth(0, FontSize, Kill.m_aKillerName, -1);
+			Kill.m_KillerTextWidth = TextRender()->TextWidth(0, FontSize, Kill.m_aKillerName, -1, -1.0f);
 
 			CTextCursor Cursor;
 			TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
@@ -153,7 +153,7 @@ void CKillMessages::OnRender()
 	for(int i = 1; i <= MAX_KILLMSGS; i++)
 	{
 		int r = (m_KillmsgCurrent+i)%MAX_KILLMSGS;
-		if(Client()->GameTick() > m_aKillmsgs[r].m_Tick+50*10)
+		if(Client()->GameTick(g_Config.m_ClDummy) > m_aKillmsgs[r].m_Tick+50*10)
 			continue;
 
 		float x = StartX;

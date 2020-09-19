@@ -169,7 +169,7 @@ void CEffects::PlayerDeath(vec2 Pos, int ClientID)
 	if(ClientID >= 0)
 	{
 		if(m_pClient->m_aClients[ClientID].m_UseCustomColor)
-			BloodColor = color_cast<ColorRGBA>(ColorHSLA(m_pClient->m_aClients[ClientID].m_ColorBody).Lighten());
+			BloodColor = color_cast<ColorRGBA>(ColorHSLA(m_pClient->m_aClients[ClientID].m_ColorBody).UnclampLighting(0.5f));
 		else
 		{
 			const CSkins::CSkin *s = m_pClient->m_pSkins->Get(m_pClient->m_aClients[ClientID].m_SkinID);
@@ -267,18 +267,18 @@ void CEffects::OnRender()
 	{
 		const IDemoPlayer::CInfo *pInfo = DemoPlayer()->BaseInfo();
 
-		if(time_get()-LastUpdate100hz > time_freq()/(100*pInfo->m_Speed))
+		if(time()-LastUpdate100hz > time_freq()/(100*pInfo->m_Speed))
 		{
 			m_Add100hz = true;
-			LastUpdate100hz = time_get();
+			LastUpdate100hz = time();
 		}
 		else
 			m_Add100hz = false;
 
-		if(time_get()-LastUpdate50hz > time_freq()/(100*pInfo->m_Speed))
+		if(time()-LastUpdate50hz > time_freq()/(100*pInfo->m_Speed))
 		{
 			m_Add50hz = true;
-			LastUpdate50hz = time_get();
+			LastUpdate50hz = time();
 		}
 		else
 			m_Add50hz = false;
@@ -289,18 +289,18 @@ void CEffects::OnRender()
 		return;
 	}
 
-	if(time_get()-LastUpdate100hz > time_freq()/100)
+	if(time()-LastUpdate100hz > time_freq()/100)
 	{
 		m_Add100hz = true;
-		LastUpdate100hz = time_get();
+		LastUpdate100hz = time();
 	}
 	else
 		m_Add100hz = false;
 
-	if(time_get()-LastUpdate50hz > time_freq()/100)
+	if(time()-LastUpdate50hz > time_freq()/100)
 	{
 		m_Add50hz = true;
-		LastUpdate50hz = time_get();
+		LastUpdate50hz = time();
 	}
 	else
 		m_Add50hz = false;

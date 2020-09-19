@@ -1,6 +1,7 @@
 #ifndef ENGINE_GHOST_H
 #define ENGINE_GHOST_H
 
+#include <engine/map.h>
 #include <engine/shared/protocol.h>
 
 #include "kernel.h"

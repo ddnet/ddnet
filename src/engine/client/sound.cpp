@@ -14,6 +14,9 @@
 
 extern "C"
 {
+#if defined(CONF_VIDEORECORDER)
+	#include <engine/shared/video.h>
+#endif
 	#include <opusfile.h>
 	#include <wavpack.h>
 }
@@ -83,6 +86,7 @@ static int s_WVBufferPosition = 0;
 static int s_WVBufferSize = 0;
 
 const int DefaultDistance = 1500;
+int m_LastBreak = 0;
 
 // TODO: there should be a faster way todo this
 static short Int2Short(int i)
@@ -266,18 +270,28 @@ static void Mix(short *pFinalOut, unsigned Frames)
 
 			pFinalOut[j] = Int2Short(vl);
 			pFinalOut[j+1] = Int2Short(vr);
+
+			// dbg_msg("sound", "the real shit: %d %d", pFinalOut[j], pFinalOut[j+1]);
 		}
 	}
 
 #if defined(CONF_ARCH_ENDIAN_BIG)
 	swap_endian(pFinalOut, sizeof(short), Frames * 2);
 #endif
+
 }
 
 static void SdlCallback(void *pUnused, Uint8 *pStream, int Len)
 {
 	(void)pUnused;
+#if defined(CONF_VIDEORECORDER)
+	if (!(IVideo::Current() && g_Config.m_ClVideoSndEnable))
+		Mix((short *)pStream, Len/2/2);
+	else
+		IVideo::Current()->NextAudioFrame(Mix);
+#else
 	Mix((short *)pStream, Len/2/2);
+#endif
 }
 
 
@@ -345,7 +359,10 @@ int CSound::Update()
 		m_SoundVolume = WantedVolume;
 		lock_unlock(m_SoundLock);
 	}
-
+//#if defined(CONF_VIDEORECORDER)
+//	if(IVideo::Current() && g_Config.m_ClVideoSndEnable)
+//		IVideo::Current()->NextAudioFrame(Mix);
+//#endif
 	return 0;
 }
 
@@ -561,6 +578,9 @@ int CSound::DecodeWV(int SampleID, const void *pData, unsigned DataSize)
 			*pDst++ = (short)*pSrc++;
 
 		free(pBuffer);
+#ifdef CONF_WAVPACK_CLOSE_FILE 
+		WavpackCloseFile(pContext);
+#endif
 
 		pSample->m_NumFrames = NumSamples;
 		pSample->m_LoopStart = -1;
@@ -808,11 +828,11 @@ void CSound::SetVoiceTimeOffset(CVoiceHandle Voice, float offset)
 		{
 			int Tick = 0;
 			bool IsLooping = m_aVoices[VoiceID].m_Flags&ISound::FLAG_LOOP;
-			uint64_t TickOffset = m_aVoices[VoiceID].m_pSample->m_Rate * offset;
+			uint64 TickOffset = m_aVoices[VoiceID].m_pSample->m_Rate * offset;
 			if(m_aVoices[VoiceID].m_pSample->m_NumFrames > 0 && IsLooping)
 				Tick = TickOffset % m_aVoices[VoiceID].m_pSample->m_NumFrames;
 			else
-				Tick = clamp(TickOffset, (uint64_t)0, (uint64_t)m_aVoices[VoiceID].m_pSample->m_NumFrames);
+				Tick = clamp(TickOffset, (uint64)0, (uint64)m_aVoices[VoiceID].m_pSample->m_NumFrames);
 
 			// at least 200msec off, else depend on buffer size
 			float Threshold = maximum(0.2f * m_aVoices[VoiceID].m_pSample->m_Rate, (float)m_MaxFrames);
