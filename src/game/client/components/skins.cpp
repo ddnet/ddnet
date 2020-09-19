@@ -257,11 +257,7 @@ int CSkins::FindImpl(const char *pName)
 		return -1;
 	}
 
-	int DefaultIndex = CSkins::FindImpl("default");
-
-	// if default fails don't start any download
-	if(DefaultIndex == -1)
-		return -1;
+	int DefaultIndex = CSkins::Find("default");
 
 	CDownloadSkin Skin;
 	str_copy(Skin.m_aName, pName, sizeof(Skin.m_aName));
