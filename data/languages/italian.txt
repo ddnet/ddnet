@@ -4,9 +4,10 @@
 #modified by:
 #	Lanta		2010-05-30 16:26:04
 #	Lanta		2010-05-31 22:05:45
-#	Carmine		2011-01-23 17:54:06
-#	Otacon		2011-05-02 18:21:08
+#	Carmine	2011-01-23 17:54:06
+#	Otacon	2011-05-02 18:21:08
 #	Apmox		2011-07-15 01:09:59
+# NeXus   2020-09-19 02:43:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -572,8 +573,8 @@ Max Screenshots
 Length:
 == Durata:
 
-Laser
-== Laser
+Rifle
+== Fucile
 
 Netversion:
 == Versione net
@@ -651,6 +652,12 @@ Game paused
 
 Server best:
 == 
+
+DDNet %s is out!
+== DDNet %s è uscito
+
+%d new mentions
+== %d nuove menzioni
 
 Personal best:
 == 
@@ -784,6 +791,9 @@ Remove chat
 Markers:
 == 
 
+9+ new mentions
+== 9+ nuova menzione
+
 %.2f MiB
 == 
 
@@ -794,7 +804,10 @@ Demo
 == 
 
 Markers
-== 
+== Marcatrici
+
+Disconnect Dummy
+== Disconnetti il manichino
 
 Length
 == 
@@ -803,7 +816,10 @@ Date
 == 
 
 Fetch Info
-== 
+== Recuperare informazioni
+
+Length
+== Lunghezza
 
 Render
 == 
@@ -1191,13 +1207,25 @@ Downloading %s:
 == 
 
 Update failed! Check log...
-== 
+== Aggiornamento non riuscito! Controlla registro...
+
+Filter connecting players
+== Filtra i giocatori in connessione
 
 Restart
 == 
 
 Time
-== 
+== Tempo
+
+Downloading %s:
+== Scarica %s
+
+Are you sure that you want to disconnect your dummy?
+== Sei sicuro di voler scollegare il tuo manichino?
+
+1 new mention
+== 1 nuova menzione
 
 Manual %3d:%02d  
 == 
