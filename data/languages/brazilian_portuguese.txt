@@ -18,6 +18,7 @@
 # Rafael Fontenelle   2019-04-06 16:49:12
 # Rafael Fontenelle   2019-12-18 02:47:58
 # Rafael Fontenelle   2020-08-27 12:38:07
+# Rafael Fontenelle   2020-09-20 11:00:38
 ##### /authors #####
 
 ##### translated strings #####
@@ -1194,65 +1195,65 @@ Show others (own team only)
 == Mostrar outras (próprio time apenas)
 
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== 
+== A largura ou altura da textura %s não é divisível por 16, o que pode causar bugs visuais.
 
 Warning
-== 
+== Atenção
 
 Country / Region
-== 
+== País / Região
 
 Speed
-== 
+== Velocidade
 
 Search:
-== 
+== Pesquisar:
 
 Exclude:
-== 
+== Excluir:
 
 Search servers:
-== 
+== Pesquisar servidores:
 
 %d of %d servers
-== 
+== %d de %d servidores
 
 %d of %d server
-== 
+== %d de %d servidor
 
 %d players
-== 
+== %d jogadores
 
 %d player
-== 
+== %d jogador
 
 Skip the main menu
-== 
+== Pular o menu principal
 
 Download skins
-== 
+== Baixar skins
 
 https://wiki.ddnet.tw/
-== 
+== https://wiki.ddnet.tw/
 
 Website
-== 
+== Site
 
 Settings
-== 
+== Configurações
 
 Stop server
-== 
+== Parar servidor
 
 Run server
-== 
+== Iniciar servidor
 
 Server executable not found, can't run server
-== 
+== Executável de servidor não encontrado, não foi possível executar o servidor
 
 Editor
-== 
+== Editor
 
 [Start menu]
 Play
-== 
+== Jogar
