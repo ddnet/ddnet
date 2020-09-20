@@ -1453,6 +1453,8 @@ set_src(ENGINE_SHARED GLOB src/engine/shared
   datafile.h
   demo.cpp
   demo.h
+  dilate.cpp
+  dilate.h
   econ.cpp
   econ.h
   engine.cpp
