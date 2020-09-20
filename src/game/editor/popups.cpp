@@ -1415,11 +1415,10 @@ static int s_AutoMapConfigCurrent = -100;
 
 int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	CLayerTiles *pLayer = static_cast<CLayerTiles*>(pEditor->GetSelectedLayer(0));
+	CLayerTiles *pLayer = static_cast<CLayerTiles *>(pEditor->GetSelectedLayer(0));
 	CUIRect Button;
 	static int s_AutoMapperConfigButtons[256];
 	CAutoMapper *pAutoMapper = &pEditor->m_Map.m_lImages[pLayer->m_Image]->m_AutoMapper;
-
 
 	const float ButtonHeight = 12.0f;
 
@@ -1438,7 +1437,6 @@ int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pCon
 		Scroll.HMargin(5.f, &Scroll);
 		s_ScrollValue = pEditor->UiDoScrollbarV(&s_ScrollBar, &Scroll, s_ScrollValue);
 
-
 		if(pEditor->UI()->MouseInside(&View) || pEditor->UI()->MouseInside(&Scroll))
 		{
 			int ScrollNum = (int)((ListHeight / ButtonHeight) + 1);
@@ -1451,7 +1449,6 @@ int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pCon
 			}
 			else
 				ScrollNum = 0;
-
 		}
 
 		// Margin for scrollbar
@@ -1464,7 +1461,7 @@ int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pCon
 		ListStartAt = 0.0f;
 
 	float ListStopAt = ListHeight - ScrollDifference * (1 - s_ScrollValue);
-	float ListCur = 0; 
+	float ListCur = 0;
 
 	pEditor->UI()->ClipEnable(&View);
 
@@ -1473,7 +1470,7 @@ int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pCon
 		if(ListCur > ListStopAt)
 			break;
 
-		if(ListCur>= ListStartAt)
+		if(ListCur >= ListStartAt)
 		{
 			View.HSplitTop(2.0f, 0, &View);
 			View.HSplitTop(ButtonHeight, &Button, &View);
@@ -1493,7 +1490,7 @@ void CEditor::PopupSelectConfigAutoMapInvoke(int Current, float x, float y)
 	static int s_AutoMapConfigSelectID = 0;
 	s_AutoMapConfigSelected = -100;
 	s_AutoMapConfigCurrent = Current;
-	CLayerTiles *pLayer = static_cast<CLayerTiles*>(GetSelectedLayer(0));
+	CLayerTiles *pLayer = static_cast<CLayerTiles *>(GetSelectedLayer(0));
 	int ItemCount = m_Map.m_lImages[pLayer->m_Image]->m_AutoMapper.ConfigNamesNum();
 	if(ItemCount > 5)
 		ItemCount = 5;
