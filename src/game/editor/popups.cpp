@@ -1416,12 +1416,10 @@ static int s_AutoMapConfigCurrent = -100;
 int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	CLayerTiles *pLayer = static_cast<CLayerTiles*>(pEditor->GetSelectedLayer(0));
-	CUIRect Scroll;
 	CUIRect Button;
 	static int s_AutoMapperConfigButtons[256];
 	CAutoMapper *pAutoMapper = &pEditor->m_Map.m_lImages[pLayer->m_Image]->m_AutoMapper;
 
-	View.VSplitRight(15.f, &View, &Scroll);
 
 	const float ButtonHeight = 12.0f;
 
@@ -1431,27 +1429,34 @@ int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pCon
 	float ListHeight = ButtonHeight * pAutoMapper->ConfigNamesNum();
 	float ScrollDifference = ListHeight - View.h;
 
-	Scroll.HMargin(5.f, &Scroll);
-	s_ScrollValue = pEditor->UiDoScrollbarV(&s_ScrollBar, &Scroll, s_ScrollValue);
-
-
-	if(pEditor->UI()->MouseInside(&View) || pEditor->UI()->MouseInside(&Scroll))
+	// Disable scrollbar if not needed.
+	if(ListHeight > View.h)
 	{
-		int ScrollNum = (int)((ListHeight / ButtonHeight) + 1);
-		if(ScrollNum > 0)
+		CUIRect Scroll;
+		View.VSplitRight(15.f, &View, &Scroll);
+
+		Scroll.HMargin(5.f, &Scroll);
+		s_ScrollValue = pEditor->UiDoScrollbarV(&s_ScrollBar, &Scroll, s_ScrollValue);
+
+
+		if(pEditor->UI()->MouseInside(&View) || pEditor->UI()->MouseInside(&Scroll))
 		{
-			if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_UP) && pEditor->UI()->MouseInside(&View))
-				s_ScrollValue = clamp(s_ScrollValue - 1.0f / ScrollNum, 0.0f, 1.0f);
-			if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) && pEditor->UI()->MouseInside(&View))
-				s_ScrollValue = clamp(s_ScrollValue + 1.0f / ScrollNum, 0.0f, 1.0f);
+			int ScrollNum = (int)((ListHeight / ButtonHeight) + 1);
+			if(ScrollNum > 0)
+			{
+				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_UP) && pEditor->UI()->MouseInside(&View))
+					s_ScrollValue = clamp(s_ScrollValue - 1.0f / ScrollNum, 0.0f, 1.0f);
+				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) && pEditor->UI()->MouseInside(&View))
+					s_ScrollValue = clamp(s_ScrollValue + 1.0f / ScrollNum, 0.0f, 1.0f);
+			}
+			else
+				ScrollNum = 0;
+
 		}
-		else
-			ScrollNum = 0;
 
+		// Margin for scrollbar
+		View.VSplitRight(2.0f, &View, 0);
 	}
-
-	// Margin for scrollbar
-	View.VSplitRight(2.0f, &View, 0);
 
 	float ListStartAt = ScrollDifference * s_ScrollValue;
 
