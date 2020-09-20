@@ -438,6 +438,8 @@ void CCommandProcessorFragment_OpenGL::Cmd_Init(const SCommand_Init *pCommand)
 	m_pTextureMemoryUsage->store(0, std::memory_order_relaxed);
 	m_MaxTexSize = -1;
 
+	m_OpenGLTextureLodBIAS = 0;
+
 	m_Has2DArrayTextures = pCommand->m_pCapabilities->m_2DArrayTextures;
 	if(pCommand->m_pCapabilities->m_2DArrayTexturesAsExtension)
 	{
@@ -653,6 +655,8 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
 			glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+			if(m_OpenGLTextureLodBIAS != 0)
+				glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, ((GLfloat)m_OpenGLTextureLodBIAS / 1000.0f));
 			glTexImage2D(GL_TEXTURE_2D, 0, StoreOglformat, Width, Height, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
 		}
 
@@ -701,12 +705,16 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 			glTexParameteri(Target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(Target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glTexParameteri(Target, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
+			if(m_OpenGLTextureLodBIAS != 0)
+				glTexParameterf(Target, GL_TEXTURE_LOD_BIAS, ((GLfloat)m_OpenGLTextureLodBIAS / 1000.0f));
 
 			if(IsNewApi())
 			{
 				glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 				glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 				glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
+				if(m_OpenGLTextureLodBIAS != 0)
+					glSamplerParameterf(m_aTextures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_LOD_BIAS, ((GLfloat)m_OpenGLTextureLodBIAS / 1000.0f));
 
 				glBindSampler(0, 0);
 			}
@@ -1429,6 +1437,8 @@ bool CCommandProcessorFragment_OpenGL2::IsTileMapAnalysisSucceeded()
 void CCommandProcessorFragment_OpenGL2::Cmd_Init(const SCommand_Init *pCommand)
 {
 	CCommandProcessorFragment_OpenGL::Cmd_Init(pCommand);
+
+	m_OpenGLTextureLodBIAS = g_Config.m_GfxOpenGLTextureLODBIAS;
 
 	m_HasShaders = pCommand->m_pCapabilities->m_ShaderSupport;
 
@@ -2159,6 +2169,8 @@ void CCommandProcessorFragment_OpenGL3_3::UseProgram(CGLSLTWProgram *pProgram)
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand)
 {
+	m_OpenGLTextureLodBIAS = g_Config.m_GfxOpenGLTextureLODBIAS;
+
 	m_UseMultipleTextureUnits = g_Config.m_GfxEnableTextureUnitOptimization;
 	if(!m_UseMultipleTextureUnits)
 	{
@@ -2775,6 +2787,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 		{
 			glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+			if(m_OpenGLTextureLodBIAS != 0)
+				glSamplerParameterf(m_aTextures[pCommand->m_Slot].m_Sampler, GL_TEXTURE_LOD_BIAS, ((GLfloat)m_OpenGLTextureLodBIAS / 1000.0f));
 			//prevent mipmap display bugs, when zooming out far
 			if(Width >= 1024 && Height >= 1024)
 			{
@@ -2797,6 +2811,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 			glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
+			if(m_OpenGLTextureLodBIAS != 0)
+				glSamplerParameterf(m_aTextures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_LOD_BIAS, ((GLfloat)m_OpenGLTextureLodBIAS / 1000.0f));
 
 			int ImageColorChannels = TexFormatToImageColorChannelCount(pCommand->m_Format);
 
