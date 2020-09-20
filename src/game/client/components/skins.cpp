@@ -211,7 +211,7 @@ int CSkins::Find(const char *pName)
 	}
 	else if(pSkinPrefix && pSkinPrefix[0])
 	{
-		char aBuf[64];
+		char aBuf[24];
 		str_format(aBuf, sizeof(aBuf), "%s_%s", pSkinPrefix, pName);
 		// If we find something, use it, otherwise fall back to normal skins.
 		int Result = FindImpl(aBuf);

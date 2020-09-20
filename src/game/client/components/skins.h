@@ -46,7 +46,7 @@ public:
 private:
 	sorted_array<CSkin> m_aSkins;
 	sorted_array<CDownloadSkin> m_aDownloadSkins;
-	char m_EventSkinPrefix[100];
+	char m_EventSkinPrefix[24];
 
 	int LoadSkin(const char *pName, const char *pPath, int DirType);
 	int FindImpl(const char *pName);
