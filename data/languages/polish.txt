@@ -1218,6 +1218,9 @@ Search servers:
 Skip the main menu
 == 
 
+Download skins
+== 
+
 Client message
 == 
 
