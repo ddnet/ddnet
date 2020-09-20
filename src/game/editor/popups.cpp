@@ -1100,6 +1100,8 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 		pEditor->UI()->DoLabel(&Label, "Image width/height", 20.0f, 0);
 	else if(pEditor->m_PopupEventType == POPEVENT_IMAGE_MAX)
 		pEditor->UI()->DoLabel(&Label, "Max images", 20.0f, 0);
+	else if(pEditor->m_PopupEventType == POPEVENT_PLACE_BORDER_TILES)
+		pEditor->UI()->DoLabel(&Label, "Place border tiles", 20.0f, 0);
 
 	View.HSplitBottom(10.0f, &View, 0);
 	View.HSplitBottom(20.0f, &View, &ButtonBar);
@@ -1125,6 +1127,8 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 		pEditor->UI()->DoLabel(&Label, "The width or height of this image is not divisible by 16. This is required for images used in tile layers for Teeworlds 0.7 compatibility.", 10.0f, -1, Label.w - 10.0f);
 	else if(pEditor->m_PopupEventType == POPEVENT_IMAGE_MAX)
 		pEditor->UI()->DoLabel(&Label, "The client only allows a maximum of 64 images.", 10.0f, -1, Label.w - 10.0f);
+	else if(pEditor->m_PopupEventType == POPEVENT_PLACE_BORDER_TILES)
+		pEditor->UI()->DoLabel(&Label, "This is going to overwrite any existing tiles around the edges of the layer.\nContinue?", 10.0f, -1, Label.w - 10.0f);
 
 	// button bar
 	ButtonBar.VSplitLeft(30.0f, 0, &ButtonBar);
@@ -1145,6 +1149,8 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 		}
 		else if(pEditor->m_PopupEventType == POPEVENT_SAVE)
 			pEditor->CallbackSaveMap(pEditor->m_aFileSaveName, IStorage::TYPE_SAVE, pEditor);
+		else if(pEditor->m_PopupEventType == POPEVENT_PLACE_BORDER_TILES)
+			pEditor->PlaceBorderTiles();
 		pEditor->m_PopupEventWasActivated = false;
 		return 1;
 	}

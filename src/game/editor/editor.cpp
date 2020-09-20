@@ -1298,9 +1298,10 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			if(pT)
 			{
 				TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
-				if(DoButton_Ex(&s_BorderBut, "Border", 0, &Button, 0, "Adds border tiles", CUI::CORNER_ALL))
+				if(DoButton_Ex(&s_BorderBut, "Border", 0, &Button, 0, "Place tiles in a 2-tile wide border at the edges of the layer", CUI::CORNER_ALL))
 				{
-					DoMapBorder();
+					m_PopupEventType = POPEVENT_PLACE_BORDER_TILES;
+					m_PopupEventActivated = true;
 				}
 				TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
 			}
@@ -6401,7 +6402,7 @@ void CEditor::Init()
 	ms_PickerColor = ColorHSVA(1.0f, 0.0f, 0.0f);
 }
 
-void CEditor::DoMapBorder()
+void CEditor::PlaceBorderTiles()
 {
 	CLayerTiles *pT = (CLayerTiles *)GetSelectedLayerType(0, LAYERTYPE_TILES);
 
