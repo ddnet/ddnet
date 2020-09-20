@@ -1180,6 +1180,9 @@ Skip the main menu
 Max CSVs
 == 
 
+Download skins
+== 
+
 Borderless window
 == 
 
