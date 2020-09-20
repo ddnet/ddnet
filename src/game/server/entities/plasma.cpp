@@ -96,15 +96,10 @@ void CPlasma::Snap(int SnappingClient)
 			&& (!Tick))
 		return;
 
-	if(SnapPlayer && (SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->IsPaused()) && SnapPlayer->m_SpectatorID != -1
-		&& GameServer()->GetPlayerChar(SnapPlayer->m_SpectatorID)
-		&& GameServer()->GetPlayerChar(SnapPlayer->m_SpectatorID)->Team() != m_ResponsibleTeam
-		&& SnapPlayer->m_ShowOthers != 1)
+	if(SnapPlayer && (SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->IsPaused()) && SnapPlayer->m_SpectatorID != -1 && GameServer()->GetPlayerChar(SnapPlayer->m_SpectatorID) && GameServer()->GetPlayerChar(SnapPlayer->m_SpectatorID)->Team() != m_ResponsibleTeam && SnapPlayer->m_ShowOthers != 1)
 		return;
 
-	if(SnapPlayer && SnapPlayer->GetTeam() != TEAM_SPECTATORS && !SnapPlayer->IsPaused() && SnapChar
-		&& SnapChar && SnapChar->Team() != m_ResponsibleTeam
-		&& SnapPlayer->m_ShowOthers != 1)
+	if(SnapPlayer && SnapPlayer->GetTeam() != TEAM_SPECTATORS && !SnapPlayer->IsPaused() && SnapChar && SnapChar && SnapChar->Team() != m_ResponsibleTeam && SnapPlayer->m_ShowOthers != 1)
 		return;
 
 	if(SnapPlayer && (SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->IsPaused()) && SnapPlayer->m_SpectatorID == -1

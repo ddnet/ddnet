@@ -389,12 +389,12 @@ int64 CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 			{ // Actions of other players
 				if (!Character(i))
 					continue; // Player is currently dead
-				if (GetPlayer(i)->m_ShowOthers == 2)
+				if(GetPlayer(i)->m_ShowOthers == 2)
 				{
-					if (m_Core.Team(i) != Team && m_Core.Team(i) != TEAM_SUPER)
+					if(m_Core.Team(i) != Team && m_Core.Team(i) != TEAM_SUPER)
 						continue; // In different teams
 				}
-				else if (GetPlayer(i)->m_ShowOthers == 0)
+				else if(GetPlayer(i)->m_ShowOthers == 0)
 				{
 					if (m_Core.GetSolo(Asker))
 						continue; // When in solo part don't show others
@@ -411,12 +411,12 @@ int64 CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 			{ // Actions of other players
 				if (!Character(GetPlayer(i)->m_SpectatorID))
 					continue; // Player is currently dead
-				if (GetPlayer(i)->m_ShowOthers == 2)
+				if(GetPlayer(i)->m_ShowOthers == 2)
 				{
-					if (m_Core.Team(GetPlayer(i)->m_SpectatorID) != Team && m_Core.Team(GetPlayer(i)->m_SpectatorID) != TEAM_SUPER)
+					if(m_Core.Team(GetPlayer(i)->m_SpectatorID) != Team && m_Core.Team(GetPlayer(i)->m_SpectatorID) != TEAM_SUPER)
 						continue; // In different teams
 				}
-				else if (GetPlayer(i)->m_ShowOthers == 0)
+				else if(GetPlayer(i)->m_ShowOthers == 0)
 				{
 					if (m_Core.GetSolo(Asker))
 						continue; // When in solo part don't show others

@@ -188,10 +188,7 @@ void CGameWorld::UpdatePlayerMaps()
 				(!GameServer()->m_apPlayers[i] ||
 					GameServer()->m_apPlayers[i]->GetClientVersion() == VERSION_VANILLA ||
 					(GameServer()->m_apPlayers[i]->GetClientVersion() >= VERSION_DDRACE &&
-					GameServer()->m_apPlayers[i]->m_ShowOthers != 1
-					)
-				)
-			)
+						GameServer()->m_apPlayers[i]->m_ShowOthers != 1)))
 				Dist[j].first = 1e8;
 			else
 				Dist[j].first = 0;
