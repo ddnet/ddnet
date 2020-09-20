@@ -1223,12 +1223,12 @@ void CCharacter::Snap(int SnappingClient)
 
 		if(pSnapPlayer->GetTeam() == TEAM_SPECTATORS || pSnapPlayer->IsPaused())
 		{
-			if(pSnapPlayer->m_SpectatorID != -1 && !CanCollide(pSnapPlayer->m_SpectatorID) && !pSnapPlayer->m_ShowOthers)
+			if(pSnapPlayer->m_SpectatorID != -1 && !CanCollide(pSnapPlayer->m_SpectatorID) && (pSnapPlayer->m_ShowOthers == 0 || (pSnapPlayer->m_ShowOthers == 2 && !SameTeam(pSnapPlayer->m_SpectatorID))))
 				return;
 			else if(pSnapPlayer->m_SpectatorID == -1 && !CanCollide(SnappingClient) && pSnapPlayer->m_SpecTeam)
 				return;
 		}
-		else if(pSnapChar && !pSnapChar->m_Super && !CanCollide(SnappingClient) && !pSnapPlayer->m_ShowOthers)
+		else if(pSnapChar && !pSnapChar->m_Super && !CanCollide(SnappingClient) && (pSnapPlayer->m_ShowOthers == 0 || (pSnapPlayer->m_ShowOthers == 2 && !SameTeam(SnappingClient))))
 			return;
 	}
 

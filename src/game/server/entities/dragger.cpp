@@ -225,8 +225,8 @@ void CDragger::Snap(int SnappingClient)
 				continue;
 		}
 
-		if (Char && Char->IsAlive() && Target && Target->IsAlive() && Target->GetPlayer()->GetCID() != Char->GetPlayer()->GetCID() && !Char->GetPlayer()->m_ShowOthers &&
-			(Char->Teams()->m_Core.GetSolo(SnappingClient) || Char->Teams()->m_Core.GetSolo(Target->GetPlayer()->GetCID())))
+		if (Char && Char->IsAlive() && Target && Target->IsAlive() && Target->GetPlayer()->GetCID() != Char->GetPlayer()->GetCID() && (Char->GetPlayer()->m_ShowOthers == 0 || (Char->GetPlayer()->m_ShowOthers == 2 &&
+			(Char->Teams()->m_Core.GetSolo(SnappingClient) || Char->Teams()->m_Core.GetSolo(Target->GetPlayer()->GetCID())))))
 		{
 			continue;
 		}

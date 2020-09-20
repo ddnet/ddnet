@@ -414,7 +414,7 @@ void CPlayer::Snap(int SnappingClient)
 		CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
 		ShowSpec = ShowSpec && (
 			GameServer()->GetDDRaceTeam(id) == GameServer()->GetDDRaceTeam(SnappingClient)
-			|| pSnapPlayer->m_ShowOthers
+			|| pSnapPlayer->m_ShowOthers == 1
 			|| (pSnapPlayer->GetTeam() == TEAM_SPECTATORS || pSnapPlayer->IsPaused())
 			);
 	}
