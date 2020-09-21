@@ -555,8 +555,9 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	MainView.HSplitTop(20.0f, 0, &MainView);
 	MainView.HSplitTop(230.0f, &SkinList, &MainView);
 	static sorted_array<const CSkins::CSkin *> s_paSkinList;
+	static int s_SkinCount = 0;
 	static float s_ScrollValue = 0.0f;
-	if(s_InitSkinlist)
+	if(s_InitSkinlist || m_pClient->m_pSkins->Num() != s_SkinCount)
 	{
 		s_paSkinList.clear();
 		for(int i = 0; i < m_pClient->m_pSkins->Num(); ++i)
@@ -575,9 +576,10 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			if (g_Config.m_ClVanillaSkinsOnly && !s->m_IsVanilla)
 				continue;
 
-			s_paSkinList.add(s);
+			s_paSkinList.add_unsorted(s);
 		}
 		s_InitSkinlist = false;
+		s_SkinCount = m_pClient->m_pSkins->Num();
 	}
 
 	int OldSelected = -1;
