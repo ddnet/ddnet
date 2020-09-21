@@ -251,7 +251,6 @@ int CSkins::FindImpl(const char *pName)
 		}
 		if(d.front().m_pTask && (d.front().m_pTask->State() == HTTP_ERROR || d.front().m_pTask->State() == HTTP_ABORTED))
 		{
-			Storage()->RemoveFile(d.front().m_aPath, IStorage::TYPE_SAVE);
 			d.front().m_pTask = nullptr;
 		}
 		return -1;

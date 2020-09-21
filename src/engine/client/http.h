@@ -87,10 +87,12 @@ class CGetFile : public CRequest
 	virtual size_t OnData(char *pData, size_t DataSize);
 	virtual bool BeforeInit();
 	virtual bool BeforeCompletion();
+	virtual void OnCompletion();
 
 	IStorage *m_pStorage;
 
-	char m_aDest[256];
+	char m_aDest[MAX_PATH_LENGTH];
+	char m_aDestFull[MAX_PATH_LENGTH];
 	int m_StorageType;
 	IOHANDLE m_File;
 

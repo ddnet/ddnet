@@ -252,23 +252,22 @@ CGetFile::CGetFile(IStorage *pStorage, const char *pUrl, const char *pDest, int 
 	m_StorageType(StorageType)
 {
 	str_copy(m_aDest, pDest, sizeof(m_aDest));
+
+	if(m_StorageType == -2)
+		m_pStorage->GetBinaryPath(m_aDest, m_aDestFull, sizeof(m_aDestFull));
+	else
+		m_pStorage->GetCompletePath(m_StorageType, m_aDest, m_aDestFull, sizeof(m_aDestFull));
 }
 
 bool CGetFile::BeforeInit()
 {
-	char aPath[512];
-	if(m_StorageType == -2)
-		m_pStorage->GetBinaryPath(m_aDest, aPath, sizeof(aPath));
-	else
-		m_pStorage->GetCompletePath(m_StorageType, m_aDest, aPath, sizeof(aPath));
-
-	if(fs_makedir_rec_for(aPath) < 0)
+	if(fs_makedir_rec_for(m_aDestFull) < 0)
 	{
-		dbg_msg("http", "i/o error, cannot create folder for: %s", aPath);
+		dbg_msg("http", "i/o error, cannot create folder for: %s", m_aDestFull);
 		return false;
 	}
 
-	m_File = io_open(aPath, IOFLAG_WRITE);
+	m_File = io_open(m_aDestFull, IOFLAG_WRITE);
 	if(!m_File)
 	{
 		dbg_msg("http", "i/o error, cannot open file: %s", m_aDest);
@@ -285,6 +284,14 @@ size_t CGetFile::OnData(char *pData, size_t DataSize)
 bool CGetFile::BeforeCompletion()
 {
 	return io_close(m_File) == 0;
+}
+
+void CGetFile::OnCompletion()
+{
+	if(State() == HTTP_ERROR || State() == HTTP_ABORTED)
+	{
+		m_pStorage->RemoveFile(m_aDestFull, IStorage::TYPE_ABSOLUTE);
+	}
 }
 
 CPostJson::CPostJson(const char *pUrl, CTimeout Timeout, const char *pJson)
