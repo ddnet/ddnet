@@ -1040,6 +1040,7 @@ public:
 	void RenderFileDialog();
 
 	void AddFileDialogEntry(int Index, CUIRect *pView);
+	void SelectGameLayer();
 	void SortImages();
 	const char *Explain(int Tile, int Layer);
 

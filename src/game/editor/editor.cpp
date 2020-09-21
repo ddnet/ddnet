@@ -3882,6 +3882,21 @@ int CEditor::PopupSound(CEditor *pEditor, CUIRect View, void *pContext)
 	return 0;
 }
 
+void CEditor::SelectGameLayer()
+{
+	for(int g = 0; g < m_Map.m_lGroups.size(); g++)
+	{
+		for(int i = 0; i < m_Map.m_lGroups[g]->m_lLayers.size(); i++)
+		{
+			if(m_Map.m_lGroups[g]->m_lLayers[i] == m_Map.m_pGameLayer)
+			{
+				SelectLayer(i, g);
+				return;
+			}
+		}
+	}
+}
+
 static int CompareImageName(const void *pObject1, const void *pObject2)
 {
 	CEditorImage *pImage1 = *(CEditorImage**)pObject1;
@@ -6178,7 +6193,7 @@ void CEditor::Reset(bool CreateDefault)
 	if(CreateDefault)
 		m_Map.CreateDefault(m_EntitiesTexture);
 
-	SelectLayer(0, 0);
+	SelectGameLayer();
 	m_lSelectedQuads.clear();
 	m_SelectedPoints = 0;
 	m_SelectedEnvelope = 0;
