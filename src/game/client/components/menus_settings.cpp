@@ -397,7 +397,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 
 void CMenus::RenderSettingsTee(CUIRect MainView)
 {
-	CUIRect Button, Label, Button2, Dummy, DummyLabel, SkinList, QuickSearch, QuickSearchClearButton, SkinPrefix, SkinPrefixLabel;
+	CUIRect Button, Label, Button2, Dummy, DummyLabel, SkinList, QuickSearch, QuickSearchClearButton, SkinDB, SkinPrefix, SkinPrefixLabel;
 
 	static float s_ClSkinPrefix = 0.0f;
 
@@ -633,7 +633,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	// render quick search
 	{
 		MainView.HSplitBottom(ms_ButtonHeight, &MainView, &QuickSearch);
-		QuickSearch.VSplitLeft(240.0f, &QuickSearch, 0);
+		QuickSearch.VSplitLeft(240.0f, &QuickSearch, &SkinDB);
 		QuickSearch.HSplitTop(5.0f, 0, &QuickSearch);
 		const char *pSearchLabel = "\xEE\xA2\xB6";
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
@@ -651,6 +651,16 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			UI()->SetActiveItem(&g_Config.m_ClSkinFilterString);
 		if(DoClearableEditBox(&g_Config.m_ClSkinFilterString, &s_ClearButton, &QuickSearch, g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString), 14.0f, &Offset, false, CUI::CORNER_ALL, Localize("Search")))
 			s_InitSkinlist = true;
+	}
+
+	SkinDB.VSplitLeft(240.0f, &SkinDB, 0);
+	SkinDB.HSplitTop(5.0f, 0, &SkinDB);
+	if(DoButton_Menu(&SkinDB, Localize("Skin Database"), 0, &SkinDB))
+	{
+		if(!open_link("https://ddnet.tw/skins/"))
+		{
+			dbg_msg("menus", "couldn't open link");
+		}
 	}
 }
 
