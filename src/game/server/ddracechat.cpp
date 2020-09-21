@@ -906,10 +906,13 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 		{
 			int Team = pResult->GetInteger(0);
 
-			if (pPlayer->m_Last_Team
-					+ pSelf->Server()->TickSpeed()
-					* g_Config.m_SvTeamChangeDelay
-					> pSelf->Server()->Tick())
+			if(Team == pController->m_Teams.m_Core.Team(pResult->m_ClientID))
+			{
+				char aBuf[32];
+				str_format(aBuf, sizeof(aBuf), "You are in team %d already", Team);
+				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join", aBuf);
+			}
+			else if(pPlayer->m_Last_Team + pSelf->Server()->TickSpeed() * g_Config.m_SvTeamChangeDelay > pSelf->Server()->Tick())
 			{
 				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",
 						"You can\'t change teams that fast!");
