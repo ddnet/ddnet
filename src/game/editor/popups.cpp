@@ -1117,7 +1117,7 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 	else if(pEditor->m_PopupEventType == POPEVENT_PREVENTUNUSEDTILES)
 		pEditor->UI()->DoLabel(&Label, "Unused tiles can't be placed by default because they could get a use later and then destroy your map.\nActivate the 'Unused' switch to be able to place every tile.", 10.0f, -1, Label.w-10.0f);
 	else if(pEditor->m_PopupEventType == POPEVENT_IMAGEDIV16)
-		pEditor->UI()->DoLabel(&Label, "The width or height of this image is not divisible by 16. This is required for images used in tile layers for Teeworlds 0.7 compatibility.", 10.0f, -1, Label.w - 10.0f);
+		pEditor->UI()->DoLabel(&Label, "The width or height of this image is not divisible by 16. This is required for images used in tile layers.", 10.0f, -1, Label.w - 10.0f);
 	else if(pEditor->m_PopupEventType == POPEVENT_IMAGE_MAX)
 		pEditor->UI()->DoLabel(&Label, "The client only allows a maximum of 64 images.", 10.0f, -1, Label.w - 10.0f);
 	else if(pEditor->m_PopupEventType == POPEVENT_PLACE_BORDER_TILES)
@@ -1773,7 +1773,8 @@ int CEditor::PopupEntities(CEditor *pEditor, CUIRect View, void *pContext)
 				str_format(aBuf, sizeof(aBuf), "editor/entities/%s.png", Name);
 
 				pEditor->Graphics()->UnloadTexture(pEditor->m_EntitiesTexture);
-				pEditor->m_EntitiesTexture = pEditor->Graphics()->LoadTexture(aBuf, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+				int TextureLoadFlag = pEditor->Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+				pEditor->m_EntitiesTexture = pEditor->Graphics()->LoadTexture(aBuf, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, TextureLoadFlag);
 				g_UiNumPopups--;
 			}
 		}
