@@ -43,6 +43,8 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 	int Start;
 	pMap->GetType(MAPITEMTYPE_IMAGE, &Start, &m_Count);
 
+	m_Count = clamp(m_Count, 0, 64);
+
 	for(int g = 0; g < pLayers->NumGroups(); g++)
 	{
 		CMapItemGroup *pGroup = pLayers->GetGroup(g);
@@ -384,18 +386,16 @@ void CMapImages::UpdateEntityLayerText(void* pTexBuffer, int ImageColorChannelCo
 	int DigitsCount = NumbersPower+1;
 
 	int CurrentNumber = pow(10, NumbersPower);
-	
-	if (MaxNumber == -1)
-		MaxNumber = CurrentNumber*10-1;
-	
-	str_format(aBuf, 4, "%d", CurrentNumber);
-	
-	int CurrentNumberSuitableFontSize = TextRender()->AdjustFontSize(aBuf, DigitsCount, TextureSize, MaxWidth);
-	int UniversalSuitableFontSize = CurrentNumberSuitableFontSize*0.95f; // should be smoothed enough to fit any digits combination
 
-	int ApproximateTextWidth = TextRender()->CalculateTextWidth(aBuf, DigitsCount, 0, UniversalSuitableFontSize);
-	int XOffSet = (64-ApproximateTextWidth)/2;
-	YOffset += ((TextureSize - UniversalSuitableFontSize)/2);
+	if(MaxNumber == -1)
+		MaxNumber = CurrentNumber * 10 - 1;
+
+	str_format(aBuf, 4, "%d", CurrentNumber);
+
+	int CurrentNumberSuitableFontSize = TextRender()->AdjustFontSize(aBuf, DigitsCount, TextureSize, MaxWidth);
+	int UniversalSuitableFontSize = CurrentNumberSuitableFontSize * 0.92f; // should be smoothed enough to fit any digits combination
+
+	YOffset += ((TextureSize - UniversalSuitableFontSize) / 2);
 
 	for (; CurrentNumber <= MaxNumber; ++CurrentNumber)
 	{
@@ -404,7 +404,10 @@ void CMapImages::UpdateEntityLayerText(void* pTexBuffer, int ImageColorChannelCo
 		float x = (CurrentNumber%16)*64;
 		float y = (CurrentNumber/16)*64;
 
-		TextRender()->UploadEntityLayerText(pTexBuffer, ImageColorChannelCount, TexWidth, TexHeight, aBuf, DigitsCount, x+XOffSet, y+YOffset, UniversalSuitableFontSize);
+		int ApproximateTextWidth = TextRender()->CalculateTextWidth(aBuf, DigitsCount, 0, UniversalSuitableFontSize);
+		int XOffSet = (MaxWidth - clamp(ApproximateTextWidth, 0, MaxWidth)) / 2;
+
+		TextRender()->UploadEntityLayerText(pTexBuffer, ImageColorChannelCount, TexWidth, TexHeight, (TexWidth / 16) - XOffSet, (TexHeight / 16) - YOffset, aBuf, DigitsCount, x + XOffSet, y + YOffset, UniversalSuitableFontSize);
 	}
 }
 

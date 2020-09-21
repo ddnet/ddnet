@@ -316,6 +316,7 @@ Ping
 Pistol
 == Pistol
 
+[Demo browser]
 Play
 == Redă
 
@@ -567,9 +568,6 @@ Join game
 FSAA samples
 == Eșantioane FSAA
 
-%d of %d servers, %d players
-== %d/%d servere, %d jucători
-
 Sound volume
 == Volum sunet
 
@@ -627,9 +625,6 @@ Lht.
 UI Color
 == Culoare meniu
 
-Host address
-== Adresa gazdei
-
 Crc:
 == Suma de control:
 
@@ -661,9 +656,6 @@ Server best:
 == 
 
 Personal best:
-== 
-
-Menu
 == 
 
 Browser
@@ -741,10 +733,31 @@ Show DDNet map finishes in server browser
 transmits your player name to info2.ddnet.tw
 == 
 
+Search:
+== 
+
+Exclude:
+== 
+
+Search servers:
+== 
+
 Search
 == 
 
 Exclude
+== 
+
+%d of %d servers
+== 
+
+%d of %d server
+== 
+
+%d players
+== 
+
+%d player
 == 
 
 Filter connecting players
@@ -853,6 +866,9 @@ Max CSVs
 == 
 
 Dummy settings
+== 
+
+Download skins
 == 
 
 Vanilla skins only
@@ -1162,6 +1178,10 @@ Server executable not found, can't run server
 == 
 
 Editor
+== 
+
+[Start menu]
+Play
 == 
 
 DDNet %s is out!

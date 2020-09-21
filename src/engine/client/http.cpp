@@ -41,12 +41,6 @@ static void CurlUnlock(CURL *pHandle, curl_lock_data Data, void *pUser)
 
 bool HttpInit(IStorage *pStorage)
 {
-	// print curl version
-	{
-		curl_version_info_data *pVersion = curl_version_info(CURLVERSION_NOW);
-		dbg_msg("http", "libcurl version %s (compiled = " LIBCURL_VERSION ")", pVersion->version);
-	}
-
 	if(curl_global_init(CURL_GLOBAL_DEFAULT))
 	{
 		return true;
@@ -56,6 +50,12 @@ bool HttpInit(IStorage *pStorage)
 	{
 		return true;
 	}
+	// print curl version
+	{
+		curl_version_info_data *pVersion = curl_version_info(CURLVERSION_NOW);
+		dbg_msg("http", "libcurl version %s (compiled = " LIBCURL_VERSION ")", pVersion->version);
+	}
+
 	for(unsigned int i = 0; i < sizeof(gs_aLocks) / sizeof(gs_aLocks[0]); i++)
 	{
 		gs_aLocks[i] = lock_create();

@@ -708,6 +708,12 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 
 	str_format(aBuf, sizeof(aBuf), "connecting to '%s'", m_aServerAddressStr);
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
+	bool is_websocket = false;
+	if(strncmp(m_aServerAddressStr, "ws://", 5) == 0)
+	{
+		is_websocket = true;
+		str_copy(m_aServerAddressStr, pAddress + 5, sizeof(m_aServerAddressStr));
+	}
 
 	ServerInfoRequest();
 	if(net_host_lookup(m_aServerAddressStr, &m_ServerAddress, m_NetClient[CLIENT_MAIN].NetType()) != 0)
@@ -735,6 +741,10 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	m_pConsole->DeregisterTempAll();
 	if(m_ServerAddress.port == 0)
 		m_ServerAddress.port = Port;
+	if(is_websocket)
+	{
+		m_ServerAddress.type = NETTYPE_WEBSOCKET_IPV4;
+	}
 	m_NetClient[CLIENT_MAIN].Connect(&m_ServerAddress);
 	SetState(IClient::STATE_CONNECTING);
 
@@ -3949,18 +3959,24 @@ void CClient::LoadFont()
 	IOHANDLE File = Storage()->OpenFile(pFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
 	if(File)
 	{
+		size_t Size = io_length(File);
+		unsigned char *pBuf = (unsigned char *)malloc(Size);
+		io_read(File, pBuf, Size);
 		io_close(File);
 		IEngineTextRender *pTextRender = Kernel()->RequestInterface<IEngineTextRender>();
 		pDefaultFont = pTextRender->GetFont(aFilename);
 		if(pDefaultFont == NULL)
-			pDefaultFont = pTextRender->LoadFont(aFilename);
+			pDefaultFont = pTextRender->LoadFont(aFilename, pBuf, Size);
 
 		File = Storage()->OpenFile(pFallbackFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
 		if(File)
 		{
+			size_t Size = io_length(File);
+			unsigned char *pBuf = (unsigned char *)malloc(Size);
+			io_read(File, pBuf, Size);
 			io_close(File);
 			IEngineTextRender *pTextRender = Kernel()->RequestInterface<IEngineTextRender>();
-			LoadedFallbackFont = pTextRender->LoadFallbackFont(pDefaultFont, aFilename);
+			LoadedFallbackFont = pTextRender->LoadFallbackFont(pDefaultFont, aFilename, pBuf, Size);
 		}
 
 		Kernel()->RequestInterface<IEngineTextRender>()->SetDefaultFont(pDefaultFont);

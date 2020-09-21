@@ -190,8 +190,8 @@ public:
 		const CNetObj_PlayerInfo *m_paPlayerInfos[MAX_CLIENTS];
 		const CNetObj_PlayerInfo *m_paInfoByScore[MAX_CLIENTS];
 		const CNetObj_PlayerInfo *m_paInfoByName[MAX_CLIENTS];
-		//const CNetObj_PlayerInfo *m_paInfoByTeam[MAX_CLIENTS];
-		const CNetObj_PlayerInfo *m_paInfoByDDTeam[MAX_CLIENTS];
+		const CNetObj_PlayerInfo *m_paInfoByDDTeamScore[MAX_CLIENTS];
+		const CNetObj_PlayerInfo *m_paInfoByDDTeamName[MAX_CLIENTS];
 
 		int m_LocalClientID;
 		int m_NumPlayers;

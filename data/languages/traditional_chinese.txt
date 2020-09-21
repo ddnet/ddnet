@@ -335,6 +335,7 @@ Ping
 Pistol
 == 手槍
 
+[Demo browser]
 Play
 == 播放
 
@@ -611,9 +612,6 @@ Join game
 FSAA samples
 == 全屏抗鋸齒(FSAA)取樣倍數
 
-%d of %d servers, %d players
-== %d / %d 個伺服器，%d 位玩家
-
 Sound volume
 == 音量
 
@@ -682,9 +680,6 @@ Automatically take statboard screenshot
 
 UI Color
 == 介面顏色
-
-Host address
-== 主機地址
 
 Crc:
 == Crc:
@@ -1202,13 +1197,34 @@ The width or height of texture %s is not divisible by 16, which might cause visu
 Warning
 == 
 
-Menu
-== 
-
 Speed
 == 
 
+Search:
+== 
+
+Exclude:
+== 
+
+Search servers:
+== 
+
+%d of %d servers
+== 
+
+%d of %d server
+== 
+
+%d players
+== 
+
+%d player
+== 
+
 Skip the main menu
+== 
+
+Download skins
 == 
 
 Website
@@ -1227,4 +1243,8 @@ Server executable not found, can't run server
 == 
 
 Editor
+== 
+
+[Start menu]
+Play
 == 

@@ -305,6 +305,7 @@ Ping
 Pistol
 == Pistola
 
+[Demo browser]
 Play
 == Reproduir
 
@@ -569,9 +570,6 @@ Join game
 FSAA samples
 == Mostres FSAA
 
-%d of %d servers, %d players
-== %d de %d servidors, %d jugadors
-
 Sound volume
 == Volum del so
 
@@ -625,9 +623,6 @@ Lht.
 
 UI Color
 == Color del menú
-
-Host address
-== Direcció del host
 
 Crc:
 == Crc:
@@ -1178,9 +1173,6 @@ The width or height of texture %s is not divisible by 16, which might cause visu
 Warning
 == 
 
-Menu
-== 
-
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == 
 
@@ -1190,7 +1182,31 @@ Country / Region
 Speed
 == 
 
+Search:
+== 
+
+Exclude:
+== 
+
+Search servers:
+== 
+
+%d of %d servers
+== 
+
+%d of %d server
+== 
+
+%d players
+== 
+
+%d player
+== 
+
 Skip the main menu
+== 
+
+Download skins
 == 
 
 Client message
@@ -1215,4 +1231,8 @@ Server executable not found, can't run server
 == 
 
 Editor
+== 
+
+[Start menu]
+Play
 == 

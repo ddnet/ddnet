@@ -883,6 +883,7 @@ void CGameClient::OnStateChange(int NewState, int OldState)
 
 void CGameClient::OnShutdown()
 {
+	m_pMenus->KillServer();
 	m_pRaceDemo->OnReset();
 	m_pGhost->OnReset();
 }
@@ -1510,7 +1511,18 @@ void CGameClient::OnNewSnapshot()
 		for(int i = 0; i < MAX_CLIENTS && Index < MAX_CLIENTS; ++i)
 		{
 			if(m_Snap.m_paInfoByScore[i] && m_Teams.Team(m_Snap.m_paInfoByScore[i]->m_ClientID) == Team)
-				m_Snap.m_paInfoByDDTeam[Index++] = m_Snap.m_paInfoByScore[i];
+				m_Snap.m_paInfoByDDTeamScore[Index++] = m_Snap.m_paInfoByScore[i];
+		}
+	}
+
+	// sort player infos by DDRace Team (and name between)
+	Index = 0;
+	for(int Team = 0; Team <= MAX_CLIENTS; ++Team)
+	{
+		for(int i = 0; i < MAX_CLIENTS && Index < MAX_CLIENTS; ++i)
+		{
+			if(m_Snap.m_paInfoByName[i] && m_Teams.Team(m_Snap.m_paInfoByName[i]->m_ClientID) == Team)
+				m_Snap.m_paInfoByDDTeamName[Index++] = m_Snap.m_paInfoByName[i];
 		}
 	}
 

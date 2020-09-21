@@ -955,7 +955,7 @@ void CServerBrowser::Update(bool ForceResort)
 			pEntry = pEntry->m_pNextReq;
 			continue;
 		}
-		// no more then 10 concurrent requests
+		// no more than 10 concurrent requests
 		if(Count == m_CurrentMaxRequests)
 			break;
 

@@ -98,7 +98,7 @@ bool CheckImageDimensions(void *pItem, int Type, const char *pFilename)
 
 	CMapItemImage *pImgItem = (CMapItemImage *)pItem2;
 
-	if(pImgItem->m_Width % 16 == 0 && pImgItem->m_Height % 16 == 0)
+	if(pImgItem->m_Width % 16 == 0 && pImgItem->m_Height % 16 == 0 && pImgItem->m_Width > 0 && pImgItem->m_Height > 0)
 		return true;
 
 	char aTileLayerName[12];
@@ -221,6 +221,9 @@ int main(int argc, const char **argv)
 	}
 
 	bool Success = true;
+
+	if(i > 64)
+		dbg_msg("map_convert_07", "%s: Uses more textures than the client maximum of 64.", pSourceFileName);
 
 	// add all items
 	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)

@@ -304,6 +304,7 @@ Ping
 Pistol
 == Pisztoly
 
+[Demo browser]
 Play
 == Játék
 
@@ -536,9 +537,6 @@ Join game
 FSAA samples
 == FSAA minták
 
-%d of %d servers, %d players
-== %d Szerver, %d Játékos
-
 Sound volume
 == Hangerő
 
@@ -595,9 +593,6 @@ Lht.
 
 UI Color
 == UI Szín
-
-Host address
-== Szerver címe
 
 Hue
 == Színárnyalat
@@ -1184,9 +1179,6 @@ The width or height of texture %s is not divisible by 16, which might cause visu
 Warning
 == 
 
-Menu
-== 
-
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == 
 
@@ -1196,7 +1188,31 @@ Country / Region
 Speed
 == 
 
+Search:
+== 
+
+Exclude:
+== 
+
+Search servers:
+== 
+
+%d of %d servers
+== 
+
+%d of %d server
+== 
+
+%d players
+== 
+
+%d player
+== 
+
 Skip the main menu
+== 
+
+Download skins
 == 
 
 Skin prefix
@@ -1227,4 +1243,8 @@ Server executable not found, can't run server
 == 
 
 Editor
+== 
+
+[Start menu]
+Play
 == 

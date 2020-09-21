@@ -312,6 +312,7 @@ Ping
 Pistol
 == Tabanca
 
+[Demo browser]
 Play
 == Oynat
 
@@ -555,9 +556,6 @@ Join game
 FSAA samples
 == FSAA örnekleri
 
-%d of %d servers, %d players
-== %d/%d sunucu, %d oyuncu
-
 Sound volume
 == Ses seviyesi
 
@@ -616,9 +614,6 @@ Lht.
 
 UI Color
 == Menü rengi
-
-Host address
-== Sunucu adresi
 
 Crc:
 == Crc:
@@ -1196,16 +1191,37 @@ The width or height of texture %s is not divisible by 16, which might cause visu
 Warning
 == 
 
-Menu
-== 
-
 Country / Region
 == 
 
 Speed
 == 
 
+Search:
+== 
+
+Exclude:
+== 
+
+Search servers:
+== 
+
+%d of %d servers
+== 
+
+%d of %d server
+== 
+
+%d players
+== 
+
+%d player
+== 
+
 Skip the main menu
+== 
+
+Download skins
 == 
 
 https://wiki.ddnet.tw/
@@ -1227,4 +1243,8 @@ Server executable not found, can't run server
 == 
 
 Editor
+== 
+
+[Start menu]
+Play
 == 

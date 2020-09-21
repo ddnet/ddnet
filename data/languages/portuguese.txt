@@ -322,6 +322,7 @@ Ping
 Pistol
 == Pistola
 
+[Demo browser]
 Play
 == Ver
 
@@ -571,9 +572,6 @@ Join game
 New name:
 == Novo nome:
 
-%d of %d servers, %d players
-== %d de %d servidores, %d jogadores
-
 Sound volume
 == Volume de som
 
@@ -630,9 +628,6 @@ Round
 
 UI Color
 == Cor do menu
-
-Host address
-== Endereço do Host
 
 Hue
 == Matiz
@@ -904,9 +899,6 @@ Server best:
 Personal best:
 == 
 
-Menu
-== 
-
 Reconnect in %d sec
 == 
 
@@ -970,6 +962,27 @@ Show DDNet map finishes in server browser
 transmits your player name to info2.ddnet.tw
 == 
 
+Search:
+== 
+
+Exclude:
+== 
+
+Search servers:
+== 
+
+%d of %d servers
+== 
+
+%d of %d server
+== 
+
+%d players
+== 
+
+%d player
+== 
+
 Filter connecting players
 == 
 
@@ -1028,6 +1041,9 @@ Reset wanted weapon on death
 == 
 
 Skip the main menu
+== 
+
+Download skins
 == 
 
 Vanilla skins only
@@ -1172,6 +1188,10 @@ Server executable not found, can't run server
 == 
 
 Editor
+== 
+
+[Start menu]
+Play
 == 
 
 DDNet %s is out!

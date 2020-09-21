@@ -325,6 +325,7 @@ Ping
 Pistol
 == Pistola
 
+[Demo browser]
 Play
 == Assistir
 
@@ -907,9 +908,6 @@ Auto %3d:%02d
 Show clan above name plates
 == Mostrar clã sobre placas de nomes
 
-%d of %d servers, %d players
-== %d/%d servidores, %d jogadores
-
 Enable highlighted chat sound
 == Habilitar som realçado de chat
 
@@ -921,9 +919,6 @@ Hello and welcome
 
 AntiPing: predict weapons
 == AntiPing: predizer armas
-
-Host address
-== Endereço do servidor
 
 Outline color
 == Cor do contorno
@@ -1204,16 +1199,37 @@ The width or height of texture %s is not divisible by 16, which might cause visu
 Warning
 == 
 
-Menu
-== 
-
 Country / Region
 == 
 
 Speed
 == 
 
+Search:
+== 
+
+Exclude:
+== 
+
+Search servers:
+== 
+
+%d of %d servers
+== 
+
+%d of %d server
+== 
+
+%d players
+== 
+
+%d player
+== 
+
 Skip the main menu
+== 
+
+Download skins
 == 
 
 https://wiki.ddnet.tw/
@@ -1235,4 +1251,8 @@ Server executable not found, can't run server
 == 
 
 Editor
+== 
+
+[Start menu]
+Play
 == 

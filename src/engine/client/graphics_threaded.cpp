@@ -417,6 +417,26 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Heig
 		return m_InvalidTexture;
 #endif
 
+	if((Flags & IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE) != 0 || (Flags & IGraphics::TEXLOAD_TO_3D_TEXTURE) != 0)
+	{
+		if(Width == 0 || (Width % 16) != 0 || Height == 0 || (Height % 16) != 0)
+		{
+			SGraphicsWarning NewWarning;
+			char aText[128];
+			aText[0] = '\0';
+			if(pTexName)
+			{
+				str_format(aText, sizeof(aText), "\"%s\"", pTexName);
+			}
+			str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg), Localize("The width or height of texture %s is not divisible by 16, which might cause visual bugs."), aText);
+
+			m_Warnings.emplace_back(NewWarning);
+		}
+	}
+
+	if(Width == 0 || Height == 0)
+		return IGraphics::CTextureHandle();
+
 	// grab texture
 	int Tex = m_FirstFreeTexture;
 	m_FirstFreeTexture = m_aTextureIndices[Tex];
@@ -434,9 +454,9 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Heig
 	Cmd.m_Flags = 0;
 	if(Flags&IGraphics::TEXLOAD_NOMIPMAPS)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_NOMIPMAPS;
-	if(g_Config.m_GfxTextureCompression && ((Flags&IGraphics::TEXLOAD_NO_COMPRESSION) == 0))
+	if(g_Config.m_GfxTextureCompressionOld && ((Flags & IGraphics::TEXLOAD_NO_COMPRESSION) == 0))
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_COMPRESSED;
-	if(g_Config.m_GfxTextureQuality || Flags&TEXLOAD_NORESAMPLE)
+	if(g_Config.m_GfxTextureQualityOld || Flags & TEXLOAD_NORESAMPLE)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_QUALITY;
 	if((Flags&IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE) != 0)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE;
@@ -448,23 +468,6 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Heig
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_3D_TEXTURE_SINGLE_LAYER;
 	if((Flags&IGraphics::TEXLOAD_NO_2D_TEXTURE) != 0)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_NO_2D_TEXTURE;
-
-	if((Flags&IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE) != 0 || (Flags&IGraphics::TEXLOAD_TO_3D_TEXTURE) != 0)
-	{
-		if(Width == 0 || (Width % 16) != 0 || Height == 0 || (Height % 16) != 0)
-		{
-			SGraphicsWarning NewWarning;
-			char aText[128];
-			aText[0] = '\0';
-			if(pTexName)
-			{
-				str_format(aText, sizeof(aText), "\"%s\"", pTexName);
-			}
-			str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg), Localize("The width or height of texture %s is not divisible by 16, which might cause visual bugs."), aText);
-
-			m_Warnings.emplace_back(NewWarning);
-		}
-	}
 
 	// copy texture data
 	int MemSize = Width*Height*Cmd.m_PixelSize;

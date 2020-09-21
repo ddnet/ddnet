@@ -310,6 +310,7 @@ Ping
 Pistol
 == Pištolj
 
+[Demo browser]
 Play
 == Pogledaj
 
@@ -558,9 +559,6 @@ Join game
 FSAA samples
 == FSAA samples
 
-%d of %d servers, %d players
-== %d od %d server(a), %d igrač(a)
-
 Sound volume
 == Jačina zvuka
 
@@ -617,9 +615,6 @@ Lht.
 
 UI Color
 == Boja menija
-
-Host address
-== Adresa servera
 
 Crc:
 == Crc:
@@ -1149,10 +1144,28 @@ Country / Region
 Warning
 == 
 
-Menu
+Speed
 == 
 
-Speed
+Search:
+== 
+
+Exclude:
+== 
+
+Search servers:
+== 
+
+%d of %d servers
+== 
+
+%d of %d server
+== 
+
+%d players
+== 
+
+%d player
 == 
 
 %.2f MiB
@@ -1165,6 +1178,9 @@ Skip the main menu
 == 
 
 Max CSVs
+== 
+
+Download skins
 == 
 
 Borderless window
@@ -1204,6 +1220,10 @@ Server executable not found, can't run server
 == 
 
 Editor
+== 
+
+[Start menu]
+Play
 == 
 
 Manual %3d:%02d  

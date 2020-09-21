@@ -235,7 +235,7 @@ public:
 			}
 			case LAYERTYPE_TUNE:
 			{
-				if (Index == TILE_TUNE1)
+				if (Index == TILE_TUNE)
 					return true;
 				else
 					return false;
@@ -803,14 +803,16 @@ public:
 
 	enum
 	{
-		POPEVENT_EXIT=0,
+		POPEVENT_EXIT = 0,
 		POPEVENT_LOAD,
 		POPEVENT_LOADCURRENT,
 		POPEVENT_NEW,
 		POPEVENT_SAVE,
 		POPEVENT_LARGELAYER,
 		POPEVENT_PREVENTUNUSEDTILES,
-		POPEVENT_IMAGEDIV16
+		POPEVENT_IMAGEDIV16,
+		POPEVENT_IMAGE_MAX,
+		POPEVENT_PLACE_BORDER_TILES
 	};
 
 	int m_PopupEventType;
@@ -933,7 +935,7 @@ public:
 	float m_CommandBox;
 	char m_aSettingsCommand[256];
 
-	void DoMapBorder();
+	void PlaceBorderTiles();
 	int DoButton_Editor_Common(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
 	int DoButton_Editor(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
 	int DoButton_Env(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pToolTip, ColorRGBA Color);
@@ -959,6 +961,7 @@ public:
 	void UiInvokePopupMenu(void *pID, int Flags, float X, float Y, float W, float H, int (*pfnFunc)(CEditor *pEditor, CUIRect Rect, void *pContext), void *pExtra=0);
 	void UiDoPopupMenu();
 	bool UiPopupExists(void *pID);
+	bool UiPopupOpen();
 
 	int UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree=false, bool IsHex=false, int corners=CUI::CORNER_ALL, ColorRGBA* Color=0);
 

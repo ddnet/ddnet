@@ -29,11 +29,12 @@ public:
 	};
 
 	enum {
-		MODIFIER_NONE=0,
+		MODIFIER_NONE = 0,
 		MODIFIER_SHIFT,
 		MODIFIER_CTRL,
 		MODIFIER_ALT,
-		MODIFIER_COUNT
+		MODIFIER_COUNT,
+		MODIFIER_COMBINATION_COUNT = 1 << MODIFIER_COUNT
 	};
 
 	CBindsSpecial m_SpecialBinds;
@@ -48,6 +49,7 @@ public:
 	static int GetModifierMaskOfKey(int Key);
 	static bool ModifierMatchesKey(int Modifier, int Key);
 	static const char *GetModifierName(int Modifier);
+	static const char *GetKeyBindModifiersName(int Modifier);
 
 	virtual void OnConsoleInit();
 	virtual bool OnInput(IInput::CEvent Event);
@@ -57,6 +59,6 @@ public:
 	void SetDDRaceBinds(bool FreeOnly);
 
 private:
-	char *m_aapKeyBindings[MODIFIER_COUNT][KEY_LAST];
+	char *m_aapKeyBindings[MODIFIER_COMBINATION_COUNT][KEY_LAST];
 };
 #endif

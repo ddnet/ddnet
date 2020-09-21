@@ -107,8 +107,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	{
 		if(m_ServerProcess.Process)
 		{
-			kill_process(m_ServerProcess.Process);
-			m_ServerProcess.Process = 0;
+			KillServer();
 		}
 		else
 		{
@@ -118,7 +117,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 			if(File)
 			{
 				io_close(File);
-				m_ServerProcess.Process = shell_execute(PLAT_SERVER_EXEC);
+				m_ServerProcess.Process = shell_execute(aBuf);
 			}
 			else
 			{
@@ -155,7 +154,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	Menu.HSplitBottom(5.0f, &Menu, 0); // little space
 	Menu.HSplitBottom(40.0f, &Menu, &Button);
 	static int s_PlayButton;
-	if(DoButton_Menu(&s_PlayButton, Localize("Play"), 0, &Button, g_Config.m_ClShowStartMenuImages ? "play_game" : 0, CUI::CORNER_ALL, Rounding, 0.5f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)) || m_EnterPressed || CheckHotKey(KEY_P))
+	if(DoButton_Menu(&s_PlayButton, Localize("Play", "Start menu"), 0, &Button, g_Config.m_ClShowStartMenuImages ? "play_game" : 0, CUI::CORNER_ALL, Rounding, 0.5f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)) || m_EnterPressed || CheckHotKey(KEY_P))
 	{
 		NewPage = g_Config.m_UiPage >= PAGE_INTERNET && g_Config.m_UiPage <= PAGE_KOG ? g_Config.m_UiPage : PAGE_DDNET;
 	}
@@ -250,5 +249,14 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	{
 		m_MenuPage = NewPage;
 		m_ShowStart = false;
+	}
+}
+
+void CMenus::KillServer()
+{
+	if(m_ServerProcess.Process)
+	{
+		kill_process(m_ServerProcess.Process);
+		m_ServerProcess.Process = 0;
 	}
 }

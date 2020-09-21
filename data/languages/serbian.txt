@@ -310,6 +310,7 @@ Ping
 Pistol
 == Pištolj
 
+[Demo browser]
 Play
 == Pokreni
 
@@ -556,9 +557,6 @@ Join game
 FSAA samples
 == FSAA samples
 
-%d of %d servers, %d players
-== %d od %d server(a), %d igrač(a)
-
 Sound volume
 == Jačina zvuka
 
@@ -616,9 +614,6 @@ Lht.
 UI Color
 == Boja menija
 
-Host address
-== Adresa servera
-
 Crc:
 == Crc:
 
@@ -671,9 +666,6 @@ Server best:
 == 
 
 Personal best:
-== 
-
-Menu
 == 
 
 Browser
@@ -736,10 +728,31 @@ Show DDNet map finishes in server browser
 transmits your player name to info2.ddnet.tw
 == 
 
+Search:
+== 
+
+Exclude:
+== 
+
+Search servers:
+== 
+
 Search
 == 
 
 Exclude
+== 
+
+%d of %d servers
+== 
+
+%d of %d server
+== 
+
+%d players
+== 
+
+%d player
 == 
 
 Filter connecting players
@@ -851,6 +864,9 @@ Max CSVs
 == 
 
 Dummy settings
+== 
+
+Download skins
 == 
 
 Vanilla skins only
@@ -1157,6 +1173,10 @@ Server executable not found, can't run server
 == 
 
 Editor
+== 
+
+[Start menu]
+Play
 == 
 
 DDNet %s is out!
