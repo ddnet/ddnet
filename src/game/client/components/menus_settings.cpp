@@ -501,7 +501,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	MainView.HSplitTop(50.0f, &Label, &MainView);
 	Label.VSplitLeft(230.0f, &Label, 0);
-	RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1, 0), vec2(Label.x+30.0f, Label.y+28.0f));
+	RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1, 0), vec2(Label.x + 30.0f, Label.y + 28.0f));
 	Label.VSplitLeft(70.0f, 0, &Label);
 	Label.HMargin(15.0f, &Label);
 	//UI()->DoLabelScaled(&Label, Skin, 14.0f, -1, 150.0f);
@@ -663,7 +663,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		}
 	}
 }
-
 
 typedef void (*pfnAssignFuncCallback)(CConfiguration *pConfig, int Value);
 
