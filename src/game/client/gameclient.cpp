@@ -365,6 +365,9 @@ void CGameClient::OnInit()
 	m_GameWorld.m_pTuningList = m_aTuningList;
 
 	m_pMapimages->SetTextureScale(g_Config.m_ClTextEntitiesSize);
+
+	// Agressively try to grab window again since on Mac OSX we don't have focus otherwise
+	Graphics()->SetWindowGrab(true);
 }
 
 void CGameClient::OnUpdate()
