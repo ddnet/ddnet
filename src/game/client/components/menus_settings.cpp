@@ -397,7 +397,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 
 void CMenus::RenderSettingsTee(CUIRect MainView)
 {
-	CUIRect Button, Label, Button2, Dummy, DummyLabel, SkinList, QuickSearch, QuickSearchClearButton, SkinPrefix, SkinPrefixLabel;
+	CUIRect Button, Label, Button2, Dummy, DummyLabel, SkinList, QuickSearch, QuickSearchClearButton, SkinDB, SkinPrefix, SkinPrefixLabel;
 
 	static float s_ClSkinPrefix = 0.0f;
 
@@ -501,10 +501,13 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	MainView.HSplitTop(50.0f, &Label, &MainView);
 	Label.VSplitLeft(230.0f, &Label, 0);
-	RenderTools()->DrawUIRect(&Label, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 10.0f);
-	RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1, 0), vec2(Label.x+30.0f, Label.y+28.0f));
+	RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1, 0), vec2(Label.x + 30.0f, Label.y + 28.0f));
 	Label.VSplitLeft(70.0f, 0, &Label);
-	UI()->DoLabelScaled(&Label, Skin, 14.0f, -1, 150.0f);
+	Label.HMargin(15.0f, &Label);
+	//UI()->DoLabelScaled(&Label, Skin, 14.0f, -1, 150.0f);
+	static float s_OffsetSkin = 0.0f;
+	static int s_ClearButton = 0;
+	DoClearableEditBox(Skin, &s_ClearButton, &Label, Skin, sizeof(g_Config.m_ClPlayerSkin), 14.0f, &s_OffsetSkin, false, CUI::CORNER_ALL, "default");
 
 	// custom colour selector
 	MainView.HSplitTop(20.0f, 0, &MainView);
@@ -632,7 +635,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	// render quick search
 	{
 		MainView.HSplitBottom(ms_ButtonHeight, &MainView, &QuickSearch);
-		QuickSearch.VSplitLeft(240.0f, &QuickSearch, 0);
+		QuickSearch.VSplitLeft(240.0f, &QuickSearch, &SkinDB);
 		QuickSearch.HSplitTop(5.0f, 0, &QuickSearch);
 		const char *pSearchLabel = "\xEE\xA2\xB6";
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
@@ -651,8 +654,17 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		if(DoClearableEditBox(&g_Config.m_ClSkinFilterString, &s_ClearButton, &QuickSearch, g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString), 14.0f, &Offset, false, CUI::CORNER_ALL, Localize("Search")))
 			s_InitSkinlist = true;
 	}
-}
 
+	SkinDB.VSplitLeft(240.0f, &SkinDB, 0);
+	SkinDB.HSplitTop(5.0f, 0, &SkinDB);
+	if(DoButton_Menu(&SkinDB, Localize("Skin Database"), 0, &SkinDB))
+	{
+		if(!open_link("https://ddnet.tw/skins/"))
+		{
+			dbg_msg("menus", "couldn't open link");
+		}
+	}
+}
 
 typedef void (*pfnAssignFuncCallback)(CConfiguration *pConfig, int Value);
 
