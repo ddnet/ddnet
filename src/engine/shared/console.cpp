@@ -434,7 +434,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bo
 		if(pCommand)
 		{
 			if(ClientID == IConsole::CLIENT_ID_GAME
-				&& !(pCommand->m_Flags & CFGFLAG_GAME))
+				&& (!(pCommand->m_Flags & CFGFLAG_GAME) || pCommand->m_Flags & CFGFLAG_NOMAPCFG))
 			{
 				if(Stroke)
 				{
