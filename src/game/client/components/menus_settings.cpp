@@ -501,10 +501,13 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	MainView.HSplitTop(50.0f, &Label, &MainView);
 	Label.VSplitLeft(230.0f, &Label, 0);
-	RenderTools()->DrawUIRect(&Label, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 10.0f);
 	RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1, 0), vec2(Label.x+30.0f, Label.y+28.0f));
 	Label.VSplitLeft(70.0f, 0, &Label);
-	UI()->DoLabelScaled(&Label, Skin, 14.0f, -1, 150.0f);
+	Label.HMargin(15.0f, &Label);
+	//UI()->DoLabelScaled(&Label, Skin, 14.0f, -1, 150.0f);
+	static float s_OffsetSkin = 0.0f;
+	static int s_ClearButton = 0;
+	DoClearableEditBox(Skin, &s_ClearButton, &Label, Skin, sizeof(g_Config.m_ClPlayerSkin), 14.0f, &s_OffsetSkin, false, CUI::CORNER_ALL, "default");
 
 	// custom colour selector
 	MainView.HSplitTop(20.0f, 0, &MainView);
