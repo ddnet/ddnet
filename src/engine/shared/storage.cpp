@@ -31,6 +31,9 @@ public:
 		// get datadir
 		FindDatadir(ppArguments[0]);
 
+		// get binarydir
+		FindBinarydir(ppArguments[0]);
+
 		// get currentdir
 		if(!fs_getcwd(m_aCurrentdir, sizeof(m_aCurrentdir)))
 			m_aCurrentdir[0] = 0;
@@ -166,7 +169,6 @@ public:
 		if(fs_is_dir("data/mapres"))
 		{
 			str_copy(m_aDatadir, "data", sizeof(m_aDatadir));
-			str_copy(m_aBinarydir, "", sizeof(m_aBinarydir));
 			return;
 		}
 
@@ -175,11 +177,6 @@ public:
 		if(fs_is_dir(DATA_DIR "/mapres"))
 		{
 			str_copy(m_aDatadir, DATA_DIR, sizeof(m_aDatadir));
-		#if defined(BINARY_DIR)
-			str_copy(m_aBinarydir, BINARY_DIR, sizeof(m_aBinarydir));
-		#else
-			str_copy(m_aBinarydir, DATA_DIR "/..", sizeof(m_aBinarydir));
-		#endif
 			return;
 		}
 	#endif
@@ -194,15 +191,13 @@ public:
 			if(Pos < MAX_PATH_LENGTH)
 			{
 				char aBuf[MAX_PATH_LENGTH];
-				str_copy(m_aBinarydir, pArgv0, Pos+1);
-				str_format(aBuf, sizeof(aBuf), "%s/data/mapres", m_aBinarydir);
+				str_copy(aBuf, pArgv0, Pos+1);
+				str_append(aBuf, "/data/mapres", sizeof(aBuf));
 				if(fs_is_dir(aBuf))
 				{
-					str_format(m_aDatadir, sizeof(m_aDatadir), "%s/data", m_aBinarydir);
+					str_copy(m_aDatadir, aBuf, Pos+str_length("/data")+1);
 					return;
 				}
-				else
-					m_aBinarydir[0] = 0;
 			}
 		}
 
@@ -227,7 +222,6 @@ public:
 				str_format(aBuf, sizeof(aBuf), "%s/data/mapres", aDirs[i]);
 				if(fs_is_dir(aBuf))
 				{
-					str_copy(m_aBinarydir, aDirs[i], sizeof(m_aDatadir));
 					str_format(m_aDatadir, sizeof(m_aDatadir), "%s/data", aDirs[i]);
 					return;
 				}
@@ -239,6 +233,34 @@ public:
 		dbg_msg("storage", "warning no data directory found");
 	}
 
+	void FindBinarydir(const char *pArgv0)
+	{
+		// 1) check for usable path in argv[0]
+		{
+			unsigned int Pos = ~0U;
+			for(unsigned i = 0; pArgv0[i]; i++)
+				if(pArgv0[i] == '/' || pArgv0[i] == '\\')
+					Pos = i;
+
+			if(Pos < MAX_PATH_LENGTH)
+			{
+				str_copy(m_aBinarydir, pArgv0, Pos+1);
+				return;
+			}
+		}
+
+	#if defined(BINARY_DIR)
+		// 2) use compiled-in data-dir if present
+		str_copy(m_aBinarydir, BINARY_DIR, sizeof(m_aBinarydir));
+	#else
+		// 3) if no path separator in argv[0], then
+		//   UNIX: it must be in $PATH
+		//   Windows: it must be in $PWD
+		// in either case, we are safe to ignore the dir part and use the binary
+		// name directly
+		m_aBinarydir[0] = 0;
+	#endif
+	}
 
 	virtual void ListDirectoryInfo(int Type, const char *pPath, FS_LISTDIR_INFO_CALLBACK pfnCallback, void *pUser)
 	{
@@ -488,7 +510,10 @@ public:
 
 	virtual const char *GetBinaryPath(const char *pFilename, char *pBuffer, unsigned BufferSize)
 	{
-		str_format(pBuffer, BufferSize, "%s%s%s", m_aBinarydir, !m_aBinarydir[0] ? "" : "/", pFilename);
+		if(m_aBinarydir[0])
+			str_format(pBuffer, BufferSize, "%s/%s", m_aBinarydir, pFilename);
+		else
+			str_copy(pBuffer, pFilename, BufferSize);
 		return pBuffer;
 	}
 
