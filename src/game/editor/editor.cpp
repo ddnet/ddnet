@@ -30,6 +30,8 @@
 #include <game/client/ui.h>
 #include <game/generated/client_data.h>
 
+#include <engine/shared/dilate.h>
+
 #include "auto_map.h"
 #include "editor.h"
 
@@ -3606,6 +3608,20 @@ void CEditor::ReplaceImage(const char *pFileName, int StorageType, void *pUser)
 	*pImg = ImgInfo;
 	IStorage::StripPathAndExtension(pFileName, pImg->m_aName, sizeof(pImg->m_aName));
 	pImg->m_External = IsVanillaImage(pImg->m_aName);
+
+	if(!pImg->m_External && g_Config.m_ClEditorDilate == 1)
+	{
+		int ColorChannelCount = 0;
+		if(ImgInfo.m_Format == CImageInfo::FORMAT_ALPHA)
+			ColorChannelCount = 1;
+		else if(ImgInfo.m_Format == CImageInfo::FORMAT_RGB)
+			ColorChannelCount = 3;
+		else if(ImgInfo.m_Format == CImageInfo::FORMAT_RGBA)
+			ColorChannelCount = 4;
+
+		DilateImage((unsigned char *)ImgInfo.m_pData, ImgInfo.m_Width, ImgInfo.m_Height, ColorChannelCount);
+	}
+
 	pImg->m_AutoMapper.Load(pImg->m_aName);
 	pImg->m_Texture = pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, CImageInfo::FORMAT_AUTO, 0);
 	ImgInfo.m_pData = 0;
@@ -3643,9 +3659,23 @@ void CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 
 	CEditorImage *pImg = new CEditorImage(pEditor);
 	*pImg = ImgInfo;
+	pImg->m_External = IsVanillaImage(aBuf);
+
+	if(!pImg->m_External && g_Config.m_ClEditorDilate == 1)
+	{
+		int ColorChannelCount = 0;
+		if(ImgInfo.m_Format == CImageInfo::FORMAT_ALPHA)
+			ColorChannelCount = 1;
+		else if(ImgInfo.m_Format == CImageInfo::FORMAT_RGB)
+			ColorChannelCount = 3;
+		else if(ImgInfo.m_Format == CImageInfo::FORMAT_RGBA)
+			ColorChannelCount = 4;
+
+		DilateImage((unsigned char *)ImgInfo.m_pData, ImgInfo.m_Width, ImgInfo.m_Height, ColorChannelCount);
+	}
+
 	pImg->m_Texture = pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, CImageInfo::FORMAT_AUTO, 0);
 	ImgInfo.m_pData = 0;
-	pImg->m_External = IsVanillaImage(aBuf);
 	str_copy(pImg->m_aName, aBuf, sizeof(pImg->m_aName));
 	pImg->m_AutoMapper.Load(pImg->m_aName);
 	pEditor->m_Map.m_lImages.add(pImg);
