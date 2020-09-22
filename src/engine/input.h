@@ -72,6 +72,7 @@ public:
 	virtual void SetIMEState(bool Activate) = 0;
 	virtual const char* GetIMECandidate() = 0;
 	virtual int GetEditingCursor() = 0;
+	virtual void SetEditingPosition(float X, float Y) = 0;
 };
 
 

@@ -28,6 +28,7 @@ class CInput : public IEngineInput
 	// IME support
 	int m_CountEditingText;
 	char m_aEditingText[32];
+	int m_EditingTextLen;
 	int m_EditingCursor;
 
 	bool KeyState(int Key) const;
@@ -58,6 +59,7 @@ public:
 	virtual void SetIMEState(bool Activate);
 	virtual const char* GetIMECandidate();
 	virtual int GetEditingCursor();
+	virtual void SetEditingPosition(float X, float Y);
 };
 
 #endif

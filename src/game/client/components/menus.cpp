@@ -513,7 +513,10 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 
 		if((2*time_get()/time_freq()) % 2)	// make it blink
 			UI()->DoLabel(&Textbox, "|", FontSize, -1);
+
+		Input()->SetEditingPosition(Textbox.x, Textbox.y + FontSize);
 	}
+	
 	UI()->ClipDisable();
 
 	return ReturnValue;

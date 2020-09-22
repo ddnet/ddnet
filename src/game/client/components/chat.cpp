@@ -16,6 +16,7 @@
 
 #include <game/client/gameclient.h>
 
+#include <game/client/components/console.h>
 #include <game/client/components/scoreboard.h>
 #include <game/client/components/sounds.h>
 #include <game/localization.h>
@@ -35,6 +36,7 @@ CChat::CChat()
 	#include <game/server/ddracechat.h>
 	m_Commands.sort_range();
 
+	m_Mode = MODE_NONE;
 	Reset();
 }
 
@@ -69,7 +71,6 @@ void CChat::Reset()
 	m_PrevShowChat = false;
 
 	m_ReverseTAB = false;
-	m_Mode = MODE_NONE;
 	m_Show = false;
 	m_InputUpdate = false;
 	m_ChatStringOffset = 0;
@@ -81,7 +82,8 @@ void CChat::Reset()
 	m_PendingChatCounter = 0;
 	m_LastChatSend = 0;
 	m_CurrentLine = 0;
-	m_Mode = MODE_NONE;
+	DisableMode();
+
 
 	for(int i = 0; i < CHAT_NUM; ++i)
 		m_aLastSoundPlayed[i] = 0;
@@ -249,13 +251,10 @@ bool CChat::OnInput(IInput::CEvent Event)
 
 	if(Event.m_Flags&IInput::FLAG_PRESS && Event.m_Key == KEY_ESCAPE)
 	{
-		m_Mode = MODE_NONE;
+		DisableMode();
 		m_pClient->OnRelease();
 		if(g_Config.m_ClChatReset)
 			m_Input.Clear();
-
-		// abort text editing when pressing escape
-		Input()->SetIMEState(false);
 	}
 	else if(Event.m_Flags&IInput::FLAG_PRESS && (Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER))
 	{
@@ -282,12 +281,9 @@ bool CChat::OnInput(IInput::CEvent Event)
 			}
 		}
 		m_pHistoryEntry = 0x0;
-		m_Mode = MODE_NONE;
+		DisableMode();
 		m_pClient->OnRelease();
 		m_Input.Clear();
-
-		// stop text editing after send chat.
-		Input()->SetIMEState(false);
 	}
 	if(Event.m_Flags&IInput::FLAG_PRESS && Event.m_Key == KEY_TAB)
 	{
@@ -513,6 +509,15 @@ void CChat::EnableMode(int Team)
 		Input()->SetIMEState(true);
 		Input()->Clear();
 		m_CompletionChosen = -1;
+	}
+}
+
+void CChat::DisableMode()
+{
+	if(m_Mode != MODE_NONE)
+	{
+		Input()->SetIMEState(false);
+		m_Mode = MODE_NONE;
 	}
 }
 
@@ -1025,6 +1030,8 @@ void CChat::OnRender()
 		Marker.m_X -= MarkerOffset;
 		TextRender()->TextEx(&Marker, "|", -1);
 		TextRender()->TextEx(&Cursor, m_Input.GetString(Editing)+m_Input.GetCursorOffset(Editing), -1);
+		if(m_pClient->m_pGameConsole->IsClosed())
+			Input()->SetEditingPosition(Marker.m_X, Marker.m_Y + Marker.m_FontSize);
 	}
 
 #if defined(CONF_VIDEORECORDER)

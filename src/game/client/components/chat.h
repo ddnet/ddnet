@@ -100,6 +100,7 @@ public:
 	bool IsActive() const { return m_Mode != MODE_NONE; }
 	void AddLine(int ClientID, int Team, const char *pLine);
 	void EnableMode(int Team);
+	void DisableMode();
 	void Say(int Team, const char *pLine);
 	void SayChat(const char *pLine);
 	void RegisterCommand(const char *pName, const char *pParams, int flags, const char *pHelp);

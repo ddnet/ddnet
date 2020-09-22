@@ -618,6 +618,7 @@ void CGameConsole::OnRender()
 		Marker.m_LineWidth = -1;
 		TextRender()->TextEx(&Marker, "|", -1);
 		TextRender()->TextEx(&Cursor, aInputString+pConsole->m_Input.GetCursorOffset(Editing), -1);
+		Input()->SetEditingPosition(Marker.m_X, Marker.m_Y + Marker.m_FontSize);
 
 		// render possible commands
 		if(m_ConsoleType == CONSOLETYPE_LOCAL || Client()->RconAuthed())

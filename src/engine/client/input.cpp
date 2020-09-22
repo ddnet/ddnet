@@ -50,12 +50,16 @@ CInput::CInput()
 	m_pClipboardText = NULL;
 
 	m_CountEditingText = 0;
+	m_EditingTextLen = -1;
+	m_aEditingText[0] = 0;
 }
 
 void CInput::Init()
 {
 	m_pGraphics = Kernel()->RequestInterface<IEngineGraphics>();
 
+	// increase ime instance counter for menu
+	SetIMEState(true);
 	MouseModeRelative();
 }
 
@@ -134,6 +138,8 @@ void CInput::NextFrame()
 	if(i >= KEY_LAST)
 		i = KEY_LAST-1;
 	mem_copy(m_aInputState, pState, i);
+	if(m_EditingTextLen == 0)
+		m_EditingTextLen = -1;
 }
 
 bool CInput::GetIMEState()
@@ -147,8 +153,7 @@ void CInput::SetIMEState(bool Activate)
 	{
 		if(m_CountEditingText == 0)
 			SDL_StartTextInput();
-		else
-			m_CountEditingText++;
+		m_CountEditingText++;
 	}
 	else
 	{
@@ -162,7 +167,7 @@ void CInput::SetIMEState(bool Activate)
 
 const char* CInput::GetIMECandidate()
 {
-	if (str_length(m_aEditingText))
+	if(m_EditingTextLen > 0)
 		return m_aEditingText;
 	else
 		return "";
@@ -171,6 +176,24 @@ const char* CInput::GetIMECandidate()
 int CInput::GetEditingCursor()
 {
 	return m_EditingCursor;
+}
+
+void CInput::SetEditingPosition(float X, float Y)
+{
+	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+	int ScreenWidth = Graphics()->ScreenWidth();
+	int ScreenHeight = Graphics()->ScreenHeight();
+	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+
+	vec2 ScreenScale = vec2(ScreenWidth/(ScreenX1-ScreenX0), ScreenHeight/(ScreenY1-ScreenY0));
+
+	SDL_Rect ImeWindowRect;
+	ImeWindowRect.x = X * ScreenScale.x;
+	ImeWindowRect.y = Y * ScreenScale.y;
+	ImeWindowRect.h = 60;
+	ImeWindowRect.w = 1000;
+
+	SDL_SetTextInputRect(&ImeWindowRect);
 }
 
 int CInput::Update()
@@ -202,7 +225,8 @@ int CInput::Update()
 			{
 				case SDL_TEXTEDITING:
 				{
-					if(str_length(Event.edit.text))
+					m_EditingTextLen = str_length(Event.edit.text);
+					if(m_EditingTextLen)
 					{
 						str_copy(m_aEditingText, Event.edit.text, sizeof(m_aEditingText));
 						m_EditingCursor = 0;
@@ -315,7 +339,7 @@ int CInput::Update()
 					return 1;
 			}
 
-			if(Scancode > KEY_FIRST && Scancode < g_MaxKeys && !IgnoreKeys && m_CountEditingText == 0)
+			if(Scancode > KEY_FIRST && Scancode < g_MaxKeys && !IgnoreKeys && (!SDL_IsTextInputActive() || m_EditingTextLen == -1))
 			{
 				if(Action&IInput::FLAG_PRESS)
 				{
