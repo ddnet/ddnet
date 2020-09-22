@@ -36,11 +36,11 @@ class CMapImages : public CComponent
 	int m_aTextureUsedByTileOrQuadLayerFlag[64]; // 0: nothing, 1(as flag): tile layer, 2(as flag): quad layer
 	int m_Count;
 
-	bool HasFrontLayer();
-	bool HasSpeedupLayer();
-	bool HasSwitchLayer();
-	bool HasTeleLayer();
-	bool HasTuneLayer();
+	bool HasFrontLayer(EMapImageModType ModType);
+	bool HasSpeedupLayer(EMapImageModType ModType);
+	bool HasSwitchLayer(EMapImageModType ModType);
+	bool HasTeleLayer(EMapImageModType ModType);
+	bool HasTuneLayer(EMapImageModType ModType);
 
 public:
 	CMapImages();
