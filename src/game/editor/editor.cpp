@@ -2409,14 +2409,14 @@ void CEditor::DoMapEditor(CUIRect View)
 				m_QuadsetPicker.m_Image = t->m_Image;
 				m_QuadsetPicker.m_lQuads[0].m_aPoints[0].x = f2fx(View.x);
 				m_QuadsetPicker.m_lQuads[0].m_aPoints[0].y = f2fx(View.y);
-				m_QuadsetPicker.m_lQuads[0].m_aPoints[1].x = f2fx((View.x+View.w));
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[1].x = f2fx((View.x + View.w));
 				m_QuadsetPicker.m_lQuads[0].m_aPoints[1].y = f2fx(View.y);
 				m_QuadsetPicker.m_lQuads[0].m_aPoints[2].x = f2fx(View.x);
-				m_QuadsetPicker.m_lQuads[0].m_aPoints[2].y = f2fx((View.y+View.h));
-				m_QuadsetPicker.m_lQuads[0].m_aPoints[3].x = f2fx((View.x+View.w));
-				m_QuadsetPicker.m_lQuads[0].m_aPoints[3].y = f2fx((View.y+View.h));
-				m_QuadsetPicker.m_lQuads[0].m_aPoints[4].x = f2fx((View.x+View.w/2));
-				m_QuadsetPicker.m_lQuads[0].m_aPoints[4].y = f2fx((View.y+View.h/2));
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[2].y = f2fx((View.y + View.h));
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[3].x = f2fx((View.x + View.w));
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[3].y = f2fx((View.y + View.h));
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[4].x = f2fx((View.x + View.w / 2));
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[4].y = f2fx((View.y + View.h / 2));
 				m_QuadsetPicker.Render();
 			}
 		}
@@ -3357,7 +3357,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 					if (g != m_SelectedGroup)
 						SelectLayer(0, g);
 
-					if ((Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && m_SelectedGroup == g)
+					if((Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && m_SelectedGroup == g)
 					{
 						for(int i = 1; i < m_Map.m_lGroups[g]->m_lLayers.size(); i++)
 						{
@@ -3477,7 +3477,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 							}
 						}
 
-						if (!IsLayerSelected)
+						if(!IsLayerSelected)
 						{
 							SelectLayer(i, g);
 						}
