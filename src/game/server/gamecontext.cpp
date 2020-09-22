@@ -1212,12 +1212,12 @@ void CGameContext::OnClientEnter(int ClientID)
 
 		Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
-		if (g_Config.m_SvShowOthersDefault)
+		if(g_Config.m_SvShowOthersDefault > 0)
 		{
 			if (g_Config.m_SvShowOthers)
 				SendChatTarget(ClientID, "You can see other players. To disable this use DDNet client and type /showothers .");
 
-			m_apPlayers[ClientID]->m_ShowOthers = true;
+			m_apPlayers[ClientID]->m_ShowOthers = g_Config.m_SvShowOthersDefault;
 		}
 	}
 	m_VoteUpdate = true;
