@@ -251,7 +251,6 @@ int CSkins::FindImpl(const char *pName)
 		}
 		if(d.front().m_pTask && (d.front().m_pTask->State() == HTTP_ERROR || d.front().m_pTask->State() == HTTP_ABORTED))
 		{
-			Storage()->RemoveFile(d.front().m_aPath, IStorage::TYPE_SAVE);
 			d.front().m_pTask = nullptr;
 		}
 		return -1;
@@ -263,7 +262,7 @@ int CSkins::FindImpl(const char *pName)
 	char aUrl[256];
 	str_format(aUrl, sizeof(aUrl), "%s%s.png", g_Config.m_ClSkinDownloadUrl, pName);
 	str_format(Skin.m_aPath, sizeof(Skin.m_aPath), "downloadedskins/%s.%d.tmp", pName, pid());
-	Skin.m_pTask = std::make_shared<CGetFile>(Storage(), aUrl, Skin.m_aPath, IStorage::TYPE_SAVE, CTimeout{0, 0, 0});
+	Skin.m_pTask = std::make_shared<CGetFile>(Storage(), aUrl, Skin.m_aPath, IStorage::TYPE_SAVE, CTimeout{0, 0, 0}, false);
 	m_pClient->Engine()->AddJob(Skin.m_pTask);
 	m_aDownloadSkins.add(Skin);
 	return -1;

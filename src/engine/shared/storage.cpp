@@ -274,7 +274,14 @@ public:
 
 	virtual const char *GetPath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize)
 	{
-		str_format(pBuffer, BufferSize, "%s%s%s", m_aaStoragePaths[Type], !m_aaStoragePaths[Type][0] ? "" : "/", pDir);
+		if(Type == TYPE_ABSOLUTE)
+		{
+			str_copy(pBuffer, pDir, BufferSize);
+		}
+		else
+		{
+			str_format(pBuffer, BufferSize, "%s%s%s", m_aaStoragePaths[Type], !m_aaStoragePaths[Type][0] ? "" : "/", pDir);
+		}
 		return pBuffer;
 	}
 
@@ -405,7 +412,7 @@ public:
 
 	virtual bool RemoveFile(const char *pFilename, int Type)
 	{
-		if(Type < 0 || Type >= m_NumPaths)
+		if(Type < TYPE_ABSOLUTE || Type == TYPE_ALL || Type >= m_NumPaths)
 			return false;
 
 		char aBuffer[MAX_PATH_LENGTH];
