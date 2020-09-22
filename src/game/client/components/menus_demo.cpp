@@ -1153,8 +1153,14 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			if(Selected)
 			{
 				CUIRect r = Row;
-				r.Margin(1.5f, &r);
-				RenderTools()->DrawUIRect(&r, ColorRGBA(1,1,1,0.5f), CUI::CORNER_ALL, 4.0f);
+				r.Margin(0.5f, &r);
+				RenderTools()->DrawUIRect(&r, ColorRGBA(1, 1, 1, 0.5f), CUI::CORNER_ALL, 4.0f);
+			}
+			else if(UI()->MouseInside(&SelectHitBox))
+			{
+				CUIRect r = Row;
+				r.Margin(0.5f, &r);
+				RenderTools()->DrawUIRect(&r, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 4.0f);
 			}
 
 			// clip the selection
