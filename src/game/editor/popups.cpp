@@ -737,7 +737,7 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View, void *pContext)
 		{"Pos. Env", pSource->m_PosEnv+1, PROPTYPE_ENVELOPE, 0, 0},
 		{"Pos. TO", pSource->m_PosEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Sound Env", pSource->m_SoundEnv+1, PROPTYPE_ENVELOPE, 0, 0},
-		{"Sound. TO", pSource->m_PosEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Sound. TO", pSource->m_SoundEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 
 		{0},
 	};
