@@ -590,11 +590,11 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 	};
 
 	CProperty aProps[] = {
-		{"Pos X", pCurrentQuad->m_aPoints[4].x/1000, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Pos Y", pCurrentQuad->m_aPoints[4].y/1000, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Pos. Env", pCurrentQuad->m_PosEnv+1, PROPTYPE_ENVELOPE, 0, 0},
+		{"Pos X", fx2i(pCurrentQuad->m_aPoints[4].x), PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Pos Y", fx2i(pCurrentQuad->m_aPoints[4].y), PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Pos. Env", pCurrentQuad->m_PosEnv + 1, PROPTYPE_ENVELOPE, 0, 0},
 		{"Pos. TO", pCurrentQuad->m_PosEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Color Env", pCurrentQuad->m_ColorEnv+1, PROPTYPE_ENVELOPE, 0, 0},
+		{"Color Env", pCurrentQuad->m_ColorEnv + 1, PROPTYPE_ENVELOPE, 0, 0},
 		{"Color TO", pCurrentQuad->m_ColorEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 
 		{0},
@@ -606,8 +606,8 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 	if(Prop != -1)
 		pEditor->m_Map.m_Modified = true;
 
-	float OffsetX = NewVal*1000-pCurrentQuad->m_aPoints[4].x;
-	float OffsetY = NewVal*1000-pCurrentQuad->m_aPoints[4].y;
+	float OffsetX = i2fx(NewVal) - pCurrentQuad->m_aPoints[4].x;
+	float OffsetY = i2fx(NewVal) - pCurrentQuad->m_aPoints[4].y;
 
 	for(int i = 0; i < lQuads.size(); ++i)
 	{
@@ -871,10 +871,10 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View, void *pContext)
 	Color |= pCurrentQuad->m_aColors[pEditor->m_SelectedQuadPoint].b<<8;
 	Color |= pCurrentQuad->m_aColors[pEditor->m_SelectedQuadPoint].a;
 
-	int x = pCurrentQuad->m_aPoints[pEditor->m_SelectedQuadPoint].x/1000;
-	int y = pCurrentQuad->m_aPoints[pEditor->m_SelectedQuadPoint].y/1000;
-	int tu = pCurrentQuad->m_aTexcoords[pEditor->m_SelectedQuadPoint].x/1000 * 1024;
-	int tv = pCurrentQuad->m_aTexcoords[pEditor->m_SelectedQuadPoint].y/1000 * 1024;
+	int x = fx2i(pCurrentQuad->m_aPoints[pEditor->m_SelectedQuadPoint].x);
+	int y = fx2i(pCurrentQuad->m_aPoints[pEditor->m_SelectedQuadPoint].y);
+	int tu = fx2f(pCurrentQuad->m_aTexcoords[pEditor->m_SelectedQuadPoint].x) * 1024;
+	int tv = fx2f(pCurrentQuad->m_aTexcoords[pEditor->m_SelectedQuadPoint].y) * 1024;
 
 	CProperty aProps[] = {
 		{"Pos X", x, PROPTYPE_INT_SCROLL, -1000000, 1000000},
@@ -891,24 +891,19 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View, void *pContext)
 	if(Prop != -1)
 		pEditor->m_Map.m_Modified = true;
 
-	float OffsetX = NewVal*1000-x*1000;
-	float OffsetY = NewVal*1000-y*1000;
-	float OffsetU = NewVal*1000/1024-tu*1000/1024;
-	float OffsetV = NewVal*1000/1024-tv*1000/1024;
-
 	for(int i = 0; i < lQuads.size(); ++i)
 	{
 		if(Prop == PROP_POS_X)
 		{
 			for(int v = 0; v < 4; v++)
-				if(pEditor->m_SelectedPoints&(1<<v))
-					lQuads[i]->m_aPoints[v].x += OffsetX;
+				if(pEditor->m_SelectedPoints & (1 << v))
+					lQuads[i]->m_aPoints[v].x = i2fx(NewVal);
 		}
 		if(Prop == PROP_POS_Y)
 		{
 			for(int v = 0; v < 4; v++)
-				if(pEditor->m_SelectedPoints&(1<<v))
-					lQuads[i]->m_aPoints[v].y += OffsetY;
+				if(pEditor->m_SelectedPoints & (1 << v))
+					lQuads[i]->m_aPoints[v].y = i2fx(NewVal);
 		}
 		if(Prop == PROP_COLOR)
 		{
@@ -926,14 +921,14 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View, void *pContext)
 		if(Prop == PROP_TEX_U)
 		{
 			for(int v = 0; v < 4; v++)
-				if(pEditor->m_SelectedPoints&(1<<v))
-					lQuads[i]->m_aTexcoords[v].x += OffsetU;
+				if(pEditor->m_SelectedPoints & (1 << v))
+					lQuads[i]->m_aTexcoords[v].x = f2fx(NewVal / 1024.0f);
 		}
 		if(Prop == PROP_TEX_V)
 		{
 			for(int v = 0; v < 4; v++)
-				if(pEditor->m_SelectedPoints&(1<<v))
-					lQuads[i]->m_aTexcoords[v].y += OffsetV;
+				if(pEditor->m_SelectedPoints & (1 << v))
+					lQuads[i]->m_aTexcoords[v].y = f2fx(NewVal / 1024.0f);
 		}
 	}
 
@@ -1463,7 +1458,7 @@ int CEditor::PopupTele(CEditor *pEditor, CUIRect View, void *pContext)
 	NumberPicker.VSplitRight(2.f, &NumberPicker, 0);
 
 	// find empty number button
-	{ 
+	{
 		static int s_EmptySlotPid = 0;
 		if(pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot")
 			|| pEditor->Input()->KeyPress(KEY_F))
@@ -1498,7 +1493,7 @@ int CEditor::PopupTele(CEditor *pEditor, CUIRect View, void *pContext)
 			{"Number", pEditor->m_TeleNumber, PROPTYPE_INT_STEP, 1, 255},
 			{0},
 		};
-		
+
 		static int s_aIds[NUM_PROPS] = {0};
 
 		static int NewVal = 0;
@@ -1606,7 +1601,7 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext)
 			{"Number", pEditor->m_SwitchNum, PROPTYPE_INT_STEP, 1, 255},
 			{"Delay", pEditor->m_SwitchDelay, PROPTYPE_INT_STEP, 0, 255},
 			{0},
-		}; 
+		};
 
 		static int s_aIds[NUM_PROPS] = {0};
 		int NewVal = 0;
