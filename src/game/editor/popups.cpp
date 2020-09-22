@@ -728,21 +728,19 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View, void *pContext)
 	};
 
 	CProperty aProps[] = {
-		{"Pos X", pSource->m_Position.x/1000, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Pos Y", pSource->m_Position.y/1000, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Pos X", pSource->m_Position.x / 1000, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Pos Y", pSource->m_Position.y / 1000, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Loop", pSource->m_Loop, PROPTYPE_BOOL, 0, 1},
 		{"Pan", pSource->m_Pan, PROPTYPE_BOOL, 0, 1},
 		{"Delay", pSource->m_TimeDelay, PROPTYPE_INT_SCROLL, 0, 1000000},
 		{"Falloff", pSource->m_Falloff, PROPTYPE_INT_SCROLL, 0, 255},
-		{"Pos. Env", pSource->m_PosEnv+1, PROPTYPE_ENVELOPE, 0, 0},
+		{"Pos. Env", pSource->m_PosEnv + 1, PROPTYPE_ENVELOPE, 0, 0},
 		{"Pos. TO", pSource->m_PosEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Sound Env", pSource->m_SoundEnv+1, PROPTYPE_ENVELOPE, 0, 0},
+		{"Sound Env", pSource->m_SoundEnv + 1, PROPTYPE_ENVELOPE, 0, 0},
 		{"Sound. TO", pSource->m_SoundEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 
 		{0},
 	};
-
-
 
 	static int s_aIds[NUM_PROPS] = {0};
 	int NewVal = 0;
