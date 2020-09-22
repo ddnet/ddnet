@@ -1126,6 +1126,7 @@ set(EXPECTED_DATA
   mapres/winter_mountains3.png
   maps/Gold\ Mine.map
   maps/LearnToPlay.map
+  maps/Tsunami.map
   maps/ctf1.map
   maps/ctf2.map
   maps/ctf3.map
@@ -1142,6 +1143,7 @@ set(EXPECTED_DATA
   maps/license.txt
   maps7/Gold\ Mine.map
   maps7/LearnToPlay.map
+  maps7/Tsunami.map
   maps7/readme.txt
   menuimages/demos.png
   menuimages/editor.png
