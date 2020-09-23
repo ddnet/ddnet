@@ -113,29 +113,29 @@ void CMapImages::LoadBackground(class CLayers *pLayers, class IMap *pMap)
 	OnMapLoadImpl(pLayers, pMap);
 }
 
-bool CMapImages::HasFrontLayer()
+bool CMapImages::HasFrontLayer(EMapImageModType ModType)
 {
-	return GameClient()->m_GameInfo.m_EntitiesDDNet || GameClient()->m_GameInfo.m_EntitiesDDRace;
+	return ModType == MAP_IMAGE_MOD_TYPE_DDNET || ModType == MAP_IMAGE_MOD_TYPE_DDRACE;
 }
 
-bool CMapImages::HasSpeedupLayer()
+bool CMapImages::HasSpeedupLayer(EMapImageModType ModType)
 {
-	return GameClient()->m_GameInfo.m_EntitiesDDNet || GameClient()->m_GameInfo.m_EntitiesDDRace;
+	return ModType == MAP_IMAGE_MOD_TYPE_DDNET || ModType == MAP_IMAGE_MOD_TYPE_DDRACE;
 }
 
-bool CMapImages::HasSwitchLayer()
+bool CMapImages::HasSwitchLayer(EMapImageModType ModType)
 {
-	return GameClient()->m_GameInfo.m_EntitiesDDNet || GameClient()->m_GameInfo.m_EntitiesDDRace;
+	return ModType == MAP_IMAGE_MOD_TYPE_DDNET || ModType == MAP_IMAGE_MOD_TYPE_DDRACE;
 }
 
-bool CMapImages::HasTeleLayer()
+bool CMapImages::HasTeleLayer(EMapImageModType ModType)
 {
-	return GameClient()->m_GameInfo.m_EntitiesDDNet || GameClient()->m_GameInfo.m_EntitiesDDRace;
+	return ModType == MAP_IMAGE_MOD_TYPE_DDNET || ModType == MAP_IMAGE_MOD_TYPE_DDRACE;
 }
 
-bool CMapImages::HasTuneLayer()
+bool CMapImages::HasTuneLayer(EMapImageModType ModType)
 {
-	return GameClient()->m_GameInfo.m_EntitiesDDNet || GameClient()->m_GameInfo.m_EntitiesDDRace;
+	return ModType == MAP_IMAGE_MOD_TYPE_DDNET || ModType == MAP_IMAGE_MOD_TYPE_DDRACE;
 }
 
 IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType EntityLayerType)
@@ -175,9 +175,9 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 		EntitiesModType = MAP_IMAGE_MOD_TYPE_VANILLA;
 	}
 
-	if(!m_EntitiesIsLoaded[EntitiesModType + (int)EntitesAreMasked])
+	if(!m_EntitiesIsLoaded[(EntitiesModType * 2) + (int)EntitesAreMasked])
 	{
-		m_EntitiesIsLoaded[EntitiesModType + (int)EntitesAreMasked] = true;
+		m_EntitiesIsLoaded[(EntitiesModType * 2) + (int)EntitesAreMasked] = true;
 
 		// any mod that does not mask, will get all layers unmasked
 		bool WasUnknwon = !EntitesAreMasked;
@@ -185,11 +185,11 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 		char aPath[64];
 		str_format(aPath, sizeof(aPath), "editor/entities_clear/%s.png", pEntities);
 
-		bool GameTypeHasFrontLayer = HasFrontLayer() || WasUnknwon;
-		bool GameTypeHasSpeedupLayer = HasSpeedupLayer() || WasUnknwon;
-		bool GameTypeHasSwitchLayer = HasSwitchLayer() || WasUnknwon;
-		bool GameTypeHasTeleLayer = HasTeleLayer() || WasUnknwon;
-		bool GameTypeHasTuneLayer = HasTuneLayer() || WasUnknwon;
+		bool GameTypeHasFrontLayer = HasFrontLayer(EntitiesModType) || WasUnknwon;
+		bool GameTypeHasSpeedupLayer = HasSpeedupLayer(EntitiesModType) || WasUnknwon;
+		bool GameTypeHasSwitchLayer = HasSwitchLayer(EntitiesModType) || WasUnknwon;
+		bool GameTypeHasTeleLayer = HasTeleLayer(EntitiesModType) || WasUnknwon;
+		bool GameTypeHasTuneLayer = HasTuneLayer(EntitiesModType) || WasUnknwon;
 
 		int TextureLoadFlag = Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 
@@ -224,7 +224,7 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 				else if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_TUNE && !GameTypeHasTuneLayer)
 					BuildThisLayer = false;
 
-				dbg_assert(m_EntitiesTextures[EntitiesModType + (int)EntitesAreMasked][n] == -1, "entities texture already loaded when it should not be");
+				dbg_assert(m_EntitiesTextures[(EntitiesModType * 2) + (int)EntitesAreMasked][n] == -1, "entities texture already loaded when it should not be");
 
 				if(BuildThisLayer)
 				{
@@ -293,7 +293,7 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 						}
 					}
 
-					m_EntitiesTextures[EntitiesModType + (int)EntitesAreMasked][n] = Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, pBuildImgData, ImgInfo.m_Format, TextureLoadFlag, aPath);
+					m_EntitiesTextures[(EntitiesModType * 2) + (int)EntitesAreMasked][n] = Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, pBuildImgData, ImgInfo.m_Format, TextureLoadFlag, aPath);
 				}
 				else
 				{
@@ -304,7 +304,7 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 
 						m_TransparentTexture = Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, pBuildImgData, ImgInfo.m_Format, TextureLoadFlag, aPath);
 					}
-					m_EntitiesTextures[EntitiesModType + (int)EntitesAreMasked][n] = m_TransparentTexture;
+					m_EntitiesTextures[(EntitiesModType * 2) + (int)EntitesAreMasked][n] = m_TransparentTexture;
 				}
 			}
 
@@ -312,7 +312,7 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 		}
 	}
 
-	return m_EntitiesTextures[EntitiesModType + (int)EntitesAreMasked][EntityLayerType];
+	return m_EntitiesTextures[(EntitiesModType * 2) + (int)EntitesAreMasked][EntityLayerType];
 }
 
 IGraphics::CTextureHandle CMapImages::GetSpeedupArrow()
