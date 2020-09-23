@@ -1023,6 +1023,13 @@ void CGameContext::OnClientDirectInput(int ClientID, void *pInput)
 	{
 		m_TeeHistorian.RecordPlayerInput(ClientID, (CNetObj_PlayerInput *)pInput);
 	}
+		
+	if (g_Config.m_SvBanKclient) {
+		int flags = ((CNetObj_PlayerInput *)pInput)->m_PlayerFlags;
+		if ((flags & 256) || (flags & 512)) {
+			Server()->Kick(ClientID, "please update your client or use DDNet client");
+		}
+	}
 }
 
 void CGameContext::OnClientPredictedInput(int ClientID, void *pInput)
