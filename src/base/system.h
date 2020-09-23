@@ -618,6 +618,32 @@ int64 time_freq(void);
 int time_timestamp(void);
 
 /*
+	Function: time_houroftheday
+		Retrieves the hours since midnight (0..23)
+
+	Returns:
+		The current hour of the day
+*/
+int time_houroftheday(void);
+
+enum
+{
+	SEASON_SPRING = 0,
+	SEASON_SUMMER,
+	SEASON_AUTUMN,
+	SEASON_WINTER
+};
+
+/*
+	Function: time_season
+		Retrieves the current season of the year.
+
+	Returns:
+		one of the SEASON_* enum literals
+*/
+int time_season(void);
+
+/*
 Function: time_get_microseconds
 Fetches a sample from a high resolution timer and converts it in microseconds.
 

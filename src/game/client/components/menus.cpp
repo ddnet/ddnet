@@ -1,6 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include <vector>
+
 #include <base/tl/array.h>
 
 #include <math.h>
@@ -27,6 +29,7 @@
 
 #include <game/client/components/binds.h>
 #include <game/client/components/console.h>
+#include <game/client/components/menu_background.h>
 #include <game/client/components/sounds.h>
 #include <game/client/gameclient.h>
 #include <game/client/lineinput.h>
@@ -1002,7 +1005,10 @@ void CMenus::RenderLoading()
 	CUIRect Screen = *UI()->Screen();
 	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
 
-	RenderBackground();
+	if(!m_pBackground->Render())
+	{
+		RenderBackground();
+	}
 
 	float w = 700;
 	float h = 200;
@@ -1164,7 +1170,10 @@ int CMenus::Render()
 	}
 	else
 	{
-		RenderBackground();
+		if(!m_pBackground->Render())
+		{
+			RenderBackground();
+		}
 		ms_ColorTabbarInactive = ms_ColorTabbarInactiveOutgame;
 		ms_ColorTabbarActive = ms_ColorTabbarActiveOutgame;
 		ms_ColorTabbarHover = ms_ColorTabbarHoverOutgame;
@@ -1187,7 +1196,10 @@ int CMenus::Render()
 	if(m_Popup == POPUP_NONE)
 	{
 		if(m_ShowStart && Client()->State() == IClient::STATE_OFFLINE)
+		{
+			m_pBackground->ChangePosition(CMenuBackground::POS_START);
 			RenderStartMenu(Screen);
+		}
 		else
 		{
 			Screen.HSplitTop(24.0f, &TabBar, &MainView);
@@ -1224,21 +1236,44 @@ int CMenus::Render()
 					RenderSettings(MainView);
 			}
 			else if(m_MenuPage == PAGE_NEWS)
+			{
+				m_pBackground->ChangePosition(CMenuBackground::POS_NEWS);
 				RenderNews(MainView);
+			}
 			else if(m_MenuPage == PAGE_INTERNET)
+			{
+				m_pBackground->ChangePosition(CMenuBackground::POS_INTERNET);
 				RenderServerbrowser(MainView);
+			}
 			else if(m_MenuPage == PAGE_LAN)
+			{
+				m_pBackground->ChangePosition(CMenuBackground::POS_LAN);
 				RenderServerbrowser(MainView);
+			}
 			else if(m_MenuPage == PAGE_DEMOS)
+			{
+				m_pBackground->ChangePosition(CMenuBackground::POS_DEMOS);
 				RenderDemoList(MainView);
+			}
 			else if(m_MenuPage == PAGE_FAVORITES)
+			{
+				m_pBackground->ChangePosition(CMenuBackground::POS_FAVORITES);
 				RenderServerbrowser(MainView);
+			}
 			else if(m_MenuPage == PAGE_DDNET)
+			{
+				m_pBackground->ChangePosition(CMenuBackground::POS_CUSTOM0);
 				RenderServerbrowser(MainView);
+			}
 			else if(m_MenuPage == PAGE_KOG)
+			{
+				m_pBackground->ChangePosition(CMenuBackground::POS_CUSTOM0 + 1);
 				RenderServerbrowser(MainView);
+			}
 			else if(m_MenuPage == PAGE_SETTINGS)
+			{
 				RenderSettings(MainView);
+			}
 
 			// do tab bar
 			RenderMenubar(TabBar);
@@ -2011,6 +2046,78 @@ int CMenus::Render()
 			UI()->SetActiveItem(0);
 	}
 	return 0;
+}
+
+void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
+{
+	std::vector<CTheme> &ThemesRef = m_pBackground->GetThemes();
+
+	int SelectedTheme = -1;
+	for(int i = 0; i < (int)ThemesRef.size(); i++)
+	{
+		if(str_comp(ThemesRef[i].m_Name, g_Config.m_ClMenuMap) == 0)
+		{
+			SelectedTheme = i;
+			break;
+		}
+	}
+
+	static int s_ListBox = 0;
+	static float s_ScrollValue = 0.0f;
+	UiDoListboxStart(&s_ListBox, &MainView, 26.0f, Localize("Theme"), "", ThemesRef.size(), 1, -1, s_ScrollValue);
+
+	for(int i = 0; i < (int)ThemesRef.size(); i++)
+	{
+		CListboxItem Item = UiDoListboxNextItem(&ThemesRef[i].m_Name, i == SelectedTheme);
+
+		CTheme &Theme = ThemesRef[i];
+
+		if(!Item.m_Visible)
+			continue;
+
+		CUIRect Icon;
+		Item.m_Rect.VSplitLeft(Item.m_Rect.h * 2.0f, &Icon, &Item.m_Rect);
+
+		// draw icon if it exists
+		if(Theme.m_IconTexture != -1)
+		{
+			Icon.VMargin(6.0f, &Icon);
+			Icon.HMargin(3.0f, &Icon);
+			Graphics()->TextureSet(Theme.m_IconTexture);
+			Graphics()->QuadsBegin();
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+			IGraphics::CQuadItem QuadItem(Icon.x, Icon.y, Icon.w, Icon.h);
+			Graphics()->QuadsDrawTL(&QuadItem, 1);
+			Graphics()->QuadsEnd();
+		}
+
+		char aName[128];
+		if(!Theme.m_Name[0])
+			str_copy(aName, "(none)", sizeof(aName));
+		else if(str_comp(Theme.m_Name, "auto") == 0)
+			str_copy(aName, "(seasons)", sizeof(aName));
+		else if(str_comp(Theme.m_Name, "rand") == 0)
+			str_copy(aName, "(random)", sizeof(aName));
+		else if(Theme.m_HasDay && Theme.m_HasNight)
+			str_format(aName, sizeof(aName), "%s", Theme.m_Name.cstr());
+		else if(Theme.m_HasDay && !Theme.m_HasNight)
+			str_format(aName, sizeof(aName), "%s (day)", Theme.m_Name.cstr());
+		else if(!Theme.m_HasDay && Theme.m_HasNight)
+			str_format(aName, sizeof(aName), "%s (night)", Theme.m_Name.cstr());
+		else // generic
+			str_format(aName, sizeof(aName), "%s", Theme.m_Name.cstr());
+
+		UI()->DoLabel(&Item.m_Rect, aName, 16 * ms_FontmodHeight, -1);
+	}
+
+	bool ItemActive = false;
+	int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0, &ItemActive);
+
+	if(ItemActive && NewSelected != SelectedTheme)
+	{
+		str_format(g_Config.m_ClMenuMap, sizeof(g_Config.m_ClMenuMap), "%s", ThemesRef[NewSelected].m_Name.cstr());
+		m_pBackground->LoadMenuBackground(ThemesRef[NewSelected].m_HasDay, ThemesRef[NewSelected].m_HasNight);
+	}
 }
 
 void CMenus::SetActive(bool Active)

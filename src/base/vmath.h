@@ -5,6 +5,8 @@
 
 #include <math.h>
 
+#include "math.h"
+
 // ------------------------------------
 
 template<typename T>
@@ -130,6 +132,15 @@ template<typename T>
 inline T length(const vector3_base<T> &a)
 {
 	return sqrtf(a.x*a.x + a.y*a.y + a.z*a.z);
+}
+
+template<typename T>
+inline vector2_base<T> rotate(const vector2_base<T> &a, float angle)
+{
+	angle = angle * pi / 180.0f;
+	float s = sinf(angle);
+	float c = cosf(angle);
+	return vector2_base<T>((T)(c * a.x - s * a.y), (T)(s * a.x + c * a.y));
 }
 
 template<typename T>
