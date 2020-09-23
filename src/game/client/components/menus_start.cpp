@@ -160,14 +160,15 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	}
 
 	// render version
-	CUIRect Version;
-	MainView.HSplitBottom(30.0f, 0, &Version);
-	MainView.HSplitBottom(20.0f, 0, &Version);
-	Version.VSplitLeft(VMargin, 0, &Version);
-	Version.VSplitRight(50.0f, &Version, 0);
-	char aBuf[64];
+	CUIRect VersionUpdate, CurVersion;
+	MainView.HSplitBottom(30.0f, 0, 0);
+	MainView.HSplitBottom(20.0f, 0, &VersionUpdate);
+
+	VersionUpdate.VSplitRight(50.0f, &CurVersion, 0);
+	VersionUpdate.VMargin(VMargin, &VersionUpdate);
 
 #if defined(CONF_AUTOUPDATE)
+	char aBuf[64];
 	CUIRect Part;
 	int State = Updater()->GetCurrentState();
 	bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
@@ -196,10 +197,10 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		str_format(aBuf, sizeof(aBuf), Localize("DDNet Client updated!"));
 		TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 	}
-	UI()->DoLabel(&Version, aBuf, 14.0f, -1);
+	UI()->DoLabel(&VersionUpdate, aBuf, 14.0f, -1);
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-	Version.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1, -1.0f) + 10.0f, 0, &Part);
+	VersionUpdate.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1, -1.0f) + 10.0f, 0, &Part);
 
 	if(State == IUpdater::CLEAN && NeedUpdate)
 	{
@@ -233,17 +234,18 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		ProgressBar.w = clamp((float)Updater()->GetCurrentPercent(), 10.0f, 100.0f);
 		RenderTools()->DrawUIRect(&ProgressBar, vec4(1.0f, 1.0f, 1.0f, 0.5f), CUI::CORNER_ALL, 5.0f);
 	}
-#else
+#elif defined(CONF_INFORM_UPDATE)
 	if(str_comp(Client()->LatestVersion(), "0") != 0)
 	{
+		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), Localize("DDNet %s is out!"), Client()->LatestVersion());
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-		UI()->DoLabel(&Version, aBuf, 14.0f, -1);
+		UI()->DoLabel(&VersionUpdate, aBuf, 14.0f, 0);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 #endif
 
-	UI()->DoLabel(&Version, GAME_RELEASE_VERSION, 14.0f, 1);
+	UI()->DoLabel(&CurVersion, GAME_RELEASE_VERSION, 14.0f, 1);
 
 	if(NewPage != -1)
 	{
