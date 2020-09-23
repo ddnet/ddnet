@@ -1023,7 +1023,7 @@ void CGameContext::OnClientDirectInput(int ClientID, void *pInput)
 	{
 		m_TeeHistorian.RecordPlayerInput(ClientID, (CNetObj_PlayerInput *)pInput);
 	}
-		
+
 	int Flags = ((CNetObj_PlayerInput *)pInput)->m_PlayerFlags;
 	if((Flags & 256) || (Flags & 512))
 	{
