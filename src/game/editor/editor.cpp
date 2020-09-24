@@ -5899,26 +5899,6 @@ void CEditor::Render()
 		}
 	}
 
-	if(m_Dialog == DIALOG_NONE && UI()->MouseInside(&View))
-	{
-		// Determines in which direction to zoom.
-		int Zoom = 0;
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
-			Zoom--;
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
-			Zoom++;
-
-		if(Zoom != 0)
-		{
-			float OldLevel = m_ZoomLevel;
-			m_ZoomLevel = clamp(m_ZoomLevel + Zoom * 20, 50, 2000);
-			if(g_Config.m_EdZoomTarget)
-				ZoomMouseTarget((float)m_ZoomLevel / OldLevel);
-		}
-	}
-
-	m_ZoomLevel = clamp(m_ZoomLevel, 50, 2000);
-	m_WorldZoom = m_ZoomLevel/100.0f;
 	float Brightness = 0.25f;
 
 	if(m_GuiActive)
@@ -6109,6 +6089,27 @@ void CEditor::Render()
 
 	UiDoPopupMenu();
 
+	if(m_Dialog == DIALOG_NONE && !m_MouseInsidePopup && UI()->MouseInside(&View))
+	{
+		// Determines in which direction to zoom.
+		int Zoom = 0;
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
+			Zoom--;
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
+			Zoom++;
+
+		if(Zoom != 0)
+		{
+			float OldLevel = m_ZoomLevel;
+			m_ZoomLevel = clamp(m_ZoomLevel + Zoom * 20, 50, 2000);
+			if(g_Config.m_EdZoomTarget)
+				ZoomMouseTarget((float)m_ZoomLevel / OldLevel);
+		}
+	}
+
+	m_ZoomLevel = clamp(m_ZoomLevel, 50, 2000);
+	m_WorldZoom = m_ZoomLevel/100.0f;
+
 	if(m_GuiActive)
 		RenderStatusbar(StatusBar);
 
@@ -6147,6 +6148,8 @@ void CEditor::Render()
 		Graphics()->QuadsEnd();
 		Graphics()->WrapNormal();
 	}
+
+	m_MouseInsidePopup = false;
 }
 
 static int UndoStepsListdirCallback(const char *pName, int IsDir, int StorageType, void *pUser)
