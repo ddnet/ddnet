@@ -88,18 +88,19 @@ CRequest::CRequest(const char *pUrl, CTimeout Timeout, bool LogProgress)
 
 void CRequest::Run()
 {
+	int FinalState;
 	if(!BeforeInit())
 	{
-		m_State = HTTP_ERROR;
-		OnCompletion();
-		return;
+		FinalState = HTTP_ERROR;
+	}
+	else
+	{
+		CURL *pHandle = curl_easy_init();
+		FinalState = RunImpl(pHandle);
+		curl_easy_cleanup(pHandle);
 	}
 
-	CURL *pHandle = curl_easy_init();
-	m_State = RunImpl(pHandle);
-	curl_easy_cleanup(pHandle);
-
-	OnCompletion();
+	m_State = OnCompletion(FinalState);
 }
 
 int CRequest::RunImpl(CURL *pHandle)
@@ -144,10 +145,6 @@ int CRequest::RunImpl(CURL *pHandle)
 		dbg_msg("http", "http %s", m_aUrl);
 	m_State = HTTP_RUNNING;
 	int Ret = curl_easy_perform(pHandle);
-	if(!BeforeCompletion())
-	{
-		return HTTP_ERROR;
-	}
 	if(Ret != CURLE_OK)
 	{
 		if(g_Config.m_DbgCurl || m_LogProgress)
@@ -253,7 +250,8 @@ size_t CGet::OnData(char *pData, size_t DataSize)
 CGetFile::CGetFile(IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType, CTimeout Timeout, bool LogProgress)
 	: CRequest(pUrl, Timeout, LogProgress),
 	  m_pStorage(pStorage),
-	  m_StorageType(StorageType)
+	  m_StorageType(StorageType),
+	  m_File(0)
 {
 	str_copy(m_aDest, pDest, sizeof(m_aDest));
 
@@ -285,17 +283,19 @@ size_t CGetFile::OnData(char *pData, size_t DataSize)
 	return io_write(m_File, pData, DataSize);
 }
 
-bool CGetFile::BeforeCompletion()
+int CGetFile::OnCompletion(int State)
 {
-	return io_close(m_File) == 0;
-}
+	if(m_File && io_close(m_File) != 0)
+	{
+		State = HTTP_ERROR;
+	}
 
-void CGetFile::OnCompletion()
-{
-	if(State() == HTTP_ERROR || State() == HTTP_ABORTED)
+	if(State == HTTP_ERROR || State == HTTP_ABORTED)
 	{
 		m_pStorage->RemoveFile(m_aDestFull, IStorage::TYPE_ABSOLUTE);
 	}
+
+	return State;
 }
 
 CPostJson::CPostJson(const char *pUrl, CTimeout Timeout, const char *pJson)
