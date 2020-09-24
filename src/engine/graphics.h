@@ -96,10 +96,28 @@ public:
 	int m_Red, m_Green, m_Blue;
 };
 
-struct GL_SPoint { float x, y; };
-struct GL_STexCoord { float u, v; };
-struct GL_STexCoord3D { float u, v, w; };
-struct GL_SColorf { float r, g, b, a; };
+struct GL_SPoint
+{
+	float x, y;
+};
+struct GL_STexCoord
+{
+	float u, v;
+};
+struct GL_STexCoord3D
+{
+	GL_STexCoord3D &operator=(const GL_STexCoord &TexCoord)
+	{
+		u = TexCoord.u;
+		v = TexCoord.v;
+		return *this;
+	}
+	float u, v, w;
+};
+struct GL_SColorf
+{
+	float r, g, b, a;
+};
 
 //use normalized color values
 struct GL_SColor { unsigned char r, g, b, a; };
@@ -115,6 +133,13 @@ struct GL_SVertexTex3D
 {
 	GL_SPoint m_Pos;
 	GL_SColorf m_Color;
+	GL_STexCoord3D m_Tex;
+};
+
+struct GL_SVertexTex3DStream
+{
+	GL_SPoint m_Pos;
+	GL_SColor m_Color;
 	GL_STexCoord3D m_Tex;
 };
 
@@ -206,6 +231,7 @@ public:
 
 	virtual void FlushVertices(bool KeepVertices = false) = 0;
 	virtual void FlushTextVertices(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor) = 0;
+	virtual void FlushVerticesTex3D() = 0;
 
 	// specific render functions
 	virtual void RenderTileLayer(int BufferContainerIndex, float *pColor, char **pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffet) = 0;
@@ -247,11 +273,13 @@ public:
 	virtual void QuadsEnd() = 0;
 	virtual void TextQuadsBegin() = 0;
 	virtual void TextQuadsEnd(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor) = 0;
+	virtual void QuadsTex3DBegin() = 0;
+	virtual void QuadsTex3DEnd() = 0;
 	virtual void QuadsEndKeepVertices() = 0;
 	virtual void QuadsDrawCurrentVertices(bool KeepVertices = true) = 0;
 	virtual void QuadsSetRotation(float Angle) = 0;
 	virtual void QuadsSetSubset(float TopLeftU, float TopLeftV, float BottomRightU, float BottomRightV) = 0;
-	virtual void QuadsSetSubsetFree(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3) = 0;
+	virtual void QuadsSetSubsetFree(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3, int Index = -1) = 0;
 
 	struct CQuadItem
 	{
@@ -262,6 +290,8 @@ public:
 	};
 	virtual void QuadsDraw(CQuadItem *pArray, int Num) = 0;
 	virtual void QuadsDrawTL(const CQuadItem *pArray, int Num) = 0;
+
+	virtual void QuadsTex3DDrawTL(const CQuadItem *pArray, int Num) = 0;
 
 	struct CFreeformItem
 	{

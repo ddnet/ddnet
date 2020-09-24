@@ -673,7 +673,10 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 					if(m_pEditor->Graphics()->LoadPNG(&ImgInfo, aBuf, IStorage::TYPE_ALL))
 					{
 						*pImg = ImgInfo;
-						pImg->m_Texture = m_pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, CImageInfo::FORMAT_AUTO, 0);
+						int TextureLoadFlag = m_pEditor->Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+						if(ImgInfo.m_Width % 16 != 0 || ImgInfo.m_Height % 16 != 0)
+							TextureLoadFlag = 0;
+						pImg->m_Texture = m_pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, CImageInfo::FORMAT_AUTO, TextureLoadFlag, aBuf);
 						ImgInfo.m_pData = 0;
 						pImg->m_External = 1;
 					}
@@ -686,9 +689,12 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 
 					// copy image data
 					void *pData = DataFile.GetData(pItem->m_ImageData);
-					pImg->m_pData = malloc(pImg->m_Width*pImg->m_Height*4);
-					mem_copy(pImg->m_pData, pData, pImg->m_Width*pImg->m_Height*4);
-					pImg->m_Texture = m_pEditor->Graphics()->LoadTextureRaw(pImg->m_Width, pImg->m_Height, pImg->m_Format, pImg->m_pData, CImageInfo::FORMAT_AUTO, 0);
+					pImg->m_pData = malloc(pImg->m_Width * pImg->m_Height * 4);
+					mem_copy(pImg->m_pData, pData, pImg->m_Width * pImg->m_Height * 4);
+					int TextureLoadFlag = m_pEditor->Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+					if(pImg->m_Width % 16 != 0 || pImg->m_Height % 16 != 0)
+						TextureLoadFlag = 0;
+					pImg->m_Texture = m_pEditor->Graphics()->LoadTextureRaw(pImg->m_Width, pImg->m_Height, pImg->m_Format, pImg->m_pData, CImageInfo::FORMAT_AUTO, TextureLoadFlag);
 				}
 
 				// copy image name

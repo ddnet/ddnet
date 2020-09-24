@@ -936,6 +936,9 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 			{
 				m_pEditor->m_PopupEventType = m_pEditor->POPEVENT_IMAGEDIV16;
 				m_pEditor->m_PopupEventActivated = true;
+
+				m_Texture = IGraphics::CTextureHandle();
+				m_Image = -1;
 			}
 		}
 	}
