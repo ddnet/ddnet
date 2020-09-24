@@ -6108,7 +6108,7 @@ void CEditor::Render()
 	}
 
 	m_ZoomLevel = clamp(m_ZoomLevel, 50, 2000);
-	m_WorldZoom = m_ZoomLevel/100.0f;
+	m_WorldZoom = m_ZoomLevel / 100.0f;
 
 	if(m_GuiActive)
 		RenderStatusbar(StatusBar);
