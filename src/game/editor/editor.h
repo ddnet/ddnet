@@ -662,6 +662,7 @@ public:
 
 		m_PopupEventActivated = false;
 		m_PopupEventWasActivated = false;
+		m_MouseInsidePopup = false;
 
 		m_FileDialogStorageType = 0;
 		m_pFileDialogTitle = 0;
@@ -818,6 +819,7 @@ public:
 	int m_PopupEventType;
 	int m_PopupEventActivated;
 	int m_PopupEventWasActivated;
+	bool m_MouseInsidePopup;
 	bool m_LargeLayerWasWarned;
 	bool m_PreventUnusedTilesWasWarned;
 	int m_AllowPlaceUnusedTiles;
