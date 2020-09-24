@@ -21,7 +21,7 @@ GameInfoFlags = [
 	# Full, use GameInfoFlags2 for more flags
 ]
 GameInfoFlags2 = [
-	"ALLOW_X_SKINS",
+	"ALLOW_X_SKINS", "GAMETYPE_CITY",
 ]
 ExPlayerFlags = ["AFK", "PAUSED", "SPEC"]
 

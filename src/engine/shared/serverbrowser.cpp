@@ -48,14 +48,19 @@ bool IsDDRace(const CServerInfo *pInfo)
 
 bool IsBlockInfectionZ(const CServerInfo *pInfo)
 {
-	return str_find_nocase(pInfo->m_aGameType, "blockZ")
-	    || str_find_nocase(pInfo->m_aGameType, "infectionZ");
+	return str_find_nocase(pInfo->m_aGameType, "blockz")
+	    || str_find_nocase(pInfo->m_aGameType, "infectionz");
 }
 
 bool IsBlockWorlds(const CServerInfo *pInfo)
 {
 	return (str_comp_nocase_num(pInfo->m_aGameType, "bw  ", 4) == 0)
 	    || (str_comp_nocase(pInfo->m_aGameType, "bw") == 0);
+}
+
+bool IsCity(const CServerInfo *pInfo)
+{
+	return str_find_nocase(pInfo->m_aGameType, "city");
 }
 
 bool IsDDNet(const CServerInfo *pInfo)

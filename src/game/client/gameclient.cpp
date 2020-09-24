@@ -1020,6 +1020,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	bool DDRace;
 	bool DDNet;
 	bool BlockWorlds;
+	bool City;
 	bool Vanilla;
 	bool Plus;
 	bool AllowXSkins = Flags2 & GAMEINFOFLAG2_ALLOW_X_SKINS;
@@ -1031,6 +1032,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 		DDRace = IsDDRace(pFallbackServerInfo);
 		DDNet = IsDDNet(pFallbackServerInfo);
 		BlockWorlds = IsBlockWorlds(pFallbackServerInfo);
+		City = IsCity(pFallbackServerInfo);
 		Vanilla = IsVanilla(pFallbackServerInfo);
 		Plus = IsPlus(pFallbackServerInfo);
 	}
@@ -1044,6 +1046,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 		BlockWorlds = Flags&GAMEINFOFLAG_GAMETYPE_BLOCK_WORLDS;
 		Vanilla = Flags&GAMEINFOFLAG_GAMETYPE_VANILLA;
 		Plus = Flags&GAMEINFOFLAG_GAMETYPE_PLUS;
+		City = Flags2&GAMEINFOFLAG2_GAMETYPE_CITY;
 
 		// Ensure invariants upheld by the server info parsing business.
 		DDRace = DDRace || DDNet;
@@ -1056,9 +1059,9 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	Info.m_UnlimitedAmmo = Race;
 	Info.m_DDRaceRecordMessage = DDRace && !DDNet;
 	Info.m_RaceRecordMessage = DDNet || (Race && !DDRace);
-	Info.m_AllowEyeWheel = DDRace || BlockWorlds || Plus;
+	Info.m_AllowEyeWheel = DDRace || BlockWorlds || City || Plus;
 	Info.m_AllowHookColl = DDRace;
-	Info.m_AllowZoom = Race || BlockWorlds;
+	Info.m_AllowZoom = Race || BlockWorlds || City;
 	Info.m_BugDDRaceGhost = DDRace;
 	Info.m_BugDDRaceInput = DDRace;
 	Info.m_BugFNGLaserRange = FNG;
