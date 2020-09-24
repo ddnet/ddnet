@@ -90,8 +90,19 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 
 		// dynamic camera
 		Left.HSplitTop(20.0f, &Button, &Left);
-		if(DoButton_CheckBox(&g_Config.m_ClDyncam, Localize("Dynamic Camera"), g_Config.m_ClDyncam, &Button))
-			g_Config.m_ClDyncam ^= 1;
+		bool IsDyncam = g_Config.m_ClDyncam || g_Config.m_ClMouseFollowfactor > 0;
+		if(DoButton_CheckBox(&IsDyncam, Localize("Dynamic Camera"), IsDyncam, &Button))
+		{
+			if(IsDyncam)
+			{
+				g_Config.m_ClDyncam = 0;
+				g_Config.m_ClMouseFollowfactor = 0;
+			}
+			else
+			{
+				g_Config.m_ClDyncam = 1;
+			}
+		}
 
 		// weapon pickup
 		Left.HSplitTop(5.0f, 0, &Left);
