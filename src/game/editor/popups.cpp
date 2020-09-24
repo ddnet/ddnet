@@ -1442,9 +1442,9 @@ int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pCon
 			int ScrollNum = (int)((ListHeight / ButtonHeight) + 1);
 			if(ScrollNum > 0)
 			{
-				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_UP) && pEditor->UI()->MouseInside(&View))
+				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
 					s_ScrollValue = clamp(s_ScrollValue - 1.0f / ScrollNum, 0.0f, 1.0f);
-				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) && pEditor->UI()->MouseInside(&View))
+				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
 					s_ScrollValue = clamp(s_ScrollValue + 1.0f / ScrollNum, 0.0f, 1.0f);
 			}
 			else
