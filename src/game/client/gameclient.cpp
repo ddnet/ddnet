@@ -1009,6 +1009,11 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	{
 		Flags = pInfoEx->m_Flags;
 	}
+	int Flags2 = 0;
+	if(Version >= 5)
+	{
+		Flags2 = pInfoEx->m_Flags2;
+	}
 	bool Race;
 	bool FastCap;
 	bool FNG;
@@ -1017,6 +1022,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	bool BlockWorlds;
 	bool Vanilla;
 	bool Plus;
+	bool AllowXSkins = Flags2 & GAMEINFOFLAG2_ALLOW_X_SKINS;
 	if(Version < 1)
 	{
 		Race = IsRace(pFallbackServerInfo);
@@ -1069,6 +1075,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	Info.m_EntitiesBW = BlockWorlds;
 	Info.m_Race = Race;
 	Info.m_DontMaskEntities = !DDNet;
+	Info.m_AllowXSkins = AllowXSkins;
 
 	if(Version >= 0)
 	{
@@ -1199,7 +1206,7 @@ void CGameClient::OnNewSnapshot()
 					pClient->m_ColorFeet = pInfo->m_ColorFeet;
 
 					// prepare the info
-					if(pClient->m_aSkinName[0] == 'x' || pClient->m_aSkinName[1] == '_')
+					if(!m_GameInfo.m_AllowXSkins && (pClient->m_aSkinName[0] == 'x' || pClient->m_aSkinName[1] == '_'))
 						str_copy(pClient->m_aSkinName, "default", 64);
 
 					pClient->m_SkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(pClient->m_ColorBody).UnclampLighting());
