@@ -26,10 +26,15 @@ public:
 		bool operator==(const char *pOther) { return !str_comp(m_aName, pOther); }
 	};
 
-	struct CDownloadSkin : public CSkin
+	struct CDownloadSkin
 	{
 		std::shared_ptr<CGetFile> m_pTask;
 		char m_aPath[MAX_PATH_LENGTH];
+		char m_aName[24];
+
+		bool operator<(const CDownloadSkin &Other) { return str_comp(m_aName, Other.m_aName) < 0; }
+		bool operator<(const char *pOther) { return str_comp(m_aName, pOther) < 0; }
+		bool operator==(const char *pOther) { return !str_comp(m_aName, pOther); }
 	};
 
 	void OnInit();
@@ -41,7 +46,7 @@ public:
 private:
 	sorted_array<CSkin> m_aSkins;
 	sorted_array<CDownloadSkin> m_aDownloadSkins;
-	char m_EventSkinPrefix[100];
+	char m_EventSkinPrefix[24];
 
 	int LoadSkin(const char *pName, const char *pPath, int DirType);
 	int FindImpl(const char *pName);

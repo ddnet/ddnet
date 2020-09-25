@@ -18,8 +18,10 @@ class CUpdaterFetchTask : public CGetFile
 	char m_aBuf2[256];
 	CUpdater *m_pUpdater;
 
-	void OnCompletion();
-	void OnProgress();
+	virtual void OnProgress();
+
+protected:
+	virtual int OnCompletion(int State);
 
 public:
 	CUpdaterFetchTask(CUpdater *pUpdater, const char *pFile, const char *pDestPath);
@@ -55,8 +57,10 @@ void CUpdaterFetchTask::OnProgress()
 	lock_unlock(m_pUpdater->m_Lock);
 }
 
-void CUpdaterFetchTask::OnCompletion()
+int CUpdaterFetchTask::OnCompletion(int State)
 {
+	State = CGetFile::OnCompletion(State);
+
 	const char *b = 0;
 	for(const char *a = Dest(); *a; a++)
 		if(*a == '/')
@@ -64,18 +68,20 @@ void CUpdaterFetchTask::OnCompletion()
 	b = b ? b : Dest();
 	if(!str_comp(b, "update.json"))
 	{
-		if(State() == HTTP_DONE)
+		if(State == HTTP_DONE)
 			m_pUpdater->SetCurrentState(IUpdater::GOT_MANIFEST);
-		else if(State() == HTTP_ERROR)
+		else if(State == HTTP_ERROR)
 			m_pUpdater->SetCurrentState(IUpdater::FAIL);
 	}
 	else if(!str_comp(b, m_pUpdater->m_aLastFile))
 	{
-		if(State() == HTTP_DONE)
+		if(State == HTTP_DONE)
 			m_pUpdater->SetCurrentState(IUpdater::MOVE_FILES);
-		else if(State() == HTTP_ERROR)
+		else if(State == HTTP_ERROR)
 			m_pUpdater->SetCurrentState(IUpdater::FAIL);
 	}
+
+	return State;
 }
 
 CUpdater::CUpdater()

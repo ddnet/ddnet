@@ -89,6 +89,7 @@ endif()
 option(WEBSOCKETS "Enable websockets support" OFF)
 option(MYSQL "Enable mysql support" OFF)
 option(AUTOUPDATE "Enable the autoupdater" OFF)
+option(INFORM_UPDATE "Inform about available updates" ON)
 option(VIDEORECORDER "Enable video recording support via FFmpeg" OFF)
 option(UPNP "Enable UPnP support" OFF)
 option(ANTIBOT "Enable support for a dynamic anticheat library" OFF)
@@ -97,6 +98,7 @@ option(DOWNLOAD_GTEST "Download and compile GTest" ${AUTO_DEPENDENCIES_DEFAULT})
 option(STEAM "Build the Steam release version" OFF)
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
 option(DEV "Don't generate stuff necessary for packaging" OFF)
+set(VERSION ${PROJECT_VERSION} CACHE STRING "Specify version string")
 
 set(OpenGL_GL_PREFERENCE LEGACY)
 
@@ -1125,6 +1127,9 @@ set(EXPECTED_DATA
   mapres/winter_mountains2.png
   mapres/winter_mountains3.png
   maps/Gold\ Mine.map
+  maps/LearnToPlay.map
+  maps/Sunny\ Side\ Up.map
+  maps/Tsunami.map
   maps/ctf1.map
   maps/ctf2.map
   maps/ctf3.map
@@ -1140,6 +1145,9 @@ set(EXPECTED_DATA
   maps/dm9.map
   maps/license.txt
   maps7/Gold\ Mine.map
+  maps7/LearnToPlay.map
+  maps7/Sunny\ Side\ Up.map
+  maps7/Tsunami.map
   maps7/readme.txt
   menuimages/demos.png
   menuimages/editor.png
@@ -1273,6 +1281,21 @@ set(EXPECTED_DATA
   skins/whis.png
   skins/x_ninja.png
   skins/x_spec.png
+  themes/auto.png
+  themes/autumn.png
+  themes/autumn_day.map
+  themes/autumn_night.map
+  themes/heavens.png
+  themes/heavens_day.map
+  themes/heavens_night.map
+  themes/jungle.png
+  themes/jungle_day.map
+  themes/jungle_night.map
+  themes/none.png
+  themes/rand.png
+  themes/winter.png
+  themes/winter_day.map
+  themes/winter_night.map
   wordlist.txt
 )
 
@@ -1453,6 +1476,8 @@ set_src(ENGINE_SHARED GLOB src/engine/shared
   datafile.h
   demo.cpp
   demo.h
+  dilate.cpp
+  dilate.h
   econ.cpp
   econ.h
   engine.cpp
@@ -1473,6 +1498,7 @@ set_src(ENGINE_SHARED GLOB src/engine/shared
   linereader.cpp
   linereader.h
   map.cpp
+  map.h
   masterserver.cpp
   memheap.cpp
   memheap.h
@@ -1680,6 +1706,8 @@ if(CLIENT)
     components/maplayers.h
     components/mapsounds.cpp
     components/mapsounds.h
+    components/menu_background.cpp
+    components/menu_background.h
     components/menus.cpp
     components/menus.h
     components/menus_browser.cpp
@@ -2190,11 +2218,7 @@ set(CPACK_SOURCE_GENERATOR ZIP TGZ TBZ2 TXZ)
 set(CPACK_PACKAGE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
 set(CPACK_PACKAGE_VERSION_PATCH ${PROJECT_VERSION_PATCH})
-if(VERSION_PATCH STREQUAL "0")
-  set(CPACK_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR})
-else()
-  set(CPACK_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH})
-endif()
+set(CPACK_PACKAGE_VERSION ${VERSION})
 set(CPACK_SYSTEM_NAME ${CMAKE_SYSTEM_NAME})
 
 if(TARGET_OS AND TARGET_BITS)
@@ -2586,8 +2610,17 @@ foreach(target ${TARGETS_OWN})
     target_compile_definitions(${target} PRIVATE CONF_SQL)
     target_include_directories(${target} PRIVATE ${MYSQL_INCLUDE_DIRS})
   endif()
-  if(AUTOUPDATE)
+  if(AUTOUPDATE AND NOT STEAM)
     target_compile_definitions(${target} PRIVATE CONF_AUTOUPDATE)
+  endif()
+  if(INFORM_UPDATE AND NOT STEAM)
+    target_compile_definitions(${target} PRIVATE CONF_INFORM_UPDATE)
+  endif()
+  if(STEAM)
+    target_compile_definitions(${target} PRIVATE PLATFORM_SUFFIX="-steam")
+  endif()
+  if(VERSION)
+    target_compile_definitions(${target} PRIVATE GAME_RELEASE_VERSION="${VERSION}")
   endif()
 endforeach()
 

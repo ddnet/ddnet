@@ -161,7 +161,7 @@ public:
 	bool IsPlaying();
 	int64 m_Last_KickVote;
 	int64 m_Last_Team;
-	bool m_ShowOthers;
+	int m_ShowOthers;
 	bool m_ShowAll;
 	vec2 m_ShowDistance;
 	bool m_SpecTeam;

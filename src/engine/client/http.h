@@ -33,9 +33,7 @@ class CRequest : public IJob
 	virtual bool AfterInit(void *pCurl) { return true; }
 	virtual size_t OnData(char *pData, size_t DataSize) = 0;
 
-	virtual void OnProgress() { }
-	virtual bool BeforeCompletion() { return true; }
-	virtual void OnCompletion() { }
+	virtual void OnProgress() {}
 
 	char m_aUrl[256];
 
@@ -44,6 +42,7 @@ class CRequest : public IJob
 	double m_Size;
 	double m_Current;
 	int m_Progress;
+	bool m_LogProgress;
 
 	std::atomic<int> m_State;
 	std::atomic<bool> m_Abort;
@@ -54,8 +53,11 @@ class CRequest : public IJob
 	void Run();
 	int RunImpl(CURL *pHandle);
 
+protected:
+	virtual int OnCompletion(int State) { return State; }
+
 public:
-	CRequest(const char *pUrl, CTimeout Timeout);
+	CRequest(const char *pUrl, CTimeout Timeout, bool LogProgress = true);
 
 	double Current() const { return m_Current; }
 	double Size() const { return m_Size; }
@@ -86,16 +88,19 @@ class CGetFile : public CRequest
 {
 	virtual size_t OnData(char *pData, size_t DataSize);
 	virtual bool BeforeInit();
-	virtual bool BeforeCompletion();
 
 	IStorage *m_pStorage;
 
-	char m_aDest[256];
+	char m_aDest[MAX_PATH_LENGTH];
+	char m_aDestFull[MAX_PATH_LENGTH];
 	int m_StorageType;
 	IOHANDLE m_File;
 
+protected:
+	virtual int OnCompletion(int State);
+
 public:
-	CGetFile(IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType = -2, CTimeout Timeout = CTimeout{4000, 500, 5});
+	CGetFile(IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType = -2, CTimeout Timeout = CTimeout{4000, 500, 5}, bool LogProgress = true);
 
 	const char *Dest() const { return m_aDest; }
 };

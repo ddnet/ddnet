@@ -46,36 +46,29 @@ CQuad *CLayerQuads::NewQuad(int x, int y, int Width, int Height)
 
 	Width /= 2;
 	Height /= 2;
-	q->m_aPoints[0].x = x - Width;
-	q->m_aPoints[0].y = y - Height;
-	q->m_aPoints[1].x = x + Width;
-	q->m_aPoints[1].y = y - Height;
-	q->m_aPoints[2].x = x - Width;
-	q->m_aPoints[2].y = y + Height;
-	q->m_aPoints[3].x = x + Width;
-	q->m_aPoints[3].y = y + Height;
+	q->m_aPoints[0].x = i2fx(x - Width);
+	q->m_aPoints[0].y = i2fx(y - Height);
+	q->m_aPoints[1].x = i2fx(x + Width);
+	q->m_aPoints[1].y = i2fx(y - Height);
+	q->m_aPoints[2].x = i2fx(x - Width);
+	q->m_aPoints[2].y = i2fx(y + Height);
+	q->m_aPoints[3].x = i2fx(x + Width);
+	q->m_aPoints[3].y = i2fx(y + Height);
 
-	q->m_aPoints[4].x = x; // pivot
-	q->m_aPoints[4].y = y;
+	q->m_aPoints[4].x = i2fx(x); // pivot
+	q->m_aPoints[4].y = i2fx(y);
 
-	for(int i = 0; i < 5; i++)
-	{
-		q->m_aPoints[i].x <<= 10;
-		q->m_aPoints[i].y <<= 10;
-	}
+	q->m_aTexcoords[0].x = i2fx(0);
+	q->m_aTexcoords[0].y = i2fx(0);
 
+	q->m_aTexcoords[1].x = i2fx(1);
+	q->m_aTexcoords[1].y = i2fx(0);
 
-	q->m_aTexcoords[0].x = 0;
-	q->m_aTexcoords[0].y = 0;
+	q->m_aTexcoords[2].x = i2fx(0);
+	q->m_aTexcoords[2].y = i2fx(1);
 
-	q->m_aTexcoords[1].x = 1<<10;
-	q->m_aTexcoords[1].y = 0;
-
-	q->m_aTexcoords[2].x = 0;
-	q->m_aTexcoords[2].y = 1<<10;
-
-	q->m_aTexcoords[3].x = 1<<10;
-	q->m_aTexcoords[3].y = 1<<10;
+	q->m_aTexcoords[3].x = i2fx(1);
+	q->m_aTexcoords[3].y = i2fx(1);
 
 	q->m_aColors[0].r = 255; q->m_aColors[0].g = 255; q->m_aColors[0].b = 255; q->m_aColors[0].a = 255;
 	q->m_aColors[1].r = 255; q->m_aColors[1].g = 255; q->m_aColors[1].b = 255; q->m_aColors[1].a = 255;

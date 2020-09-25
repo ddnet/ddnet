@@ -177,6 +177,7 @@ protected:
 	virtual void Cmd_Texture_Create(const CCommandBuffer::SCommand_Texture_Create *pCommand);
 	virtual void Cmd_Clear(const CCommandBuffer::SCommand_Clear *pCommand);
 	virtual void Cmd_Render(const CCommandBuffer::SCommand_Render *pCommand);
+	virtual void Cmd_RenderTex3D(const CCommandBuffer::SCommand_RenderTex3D *pCommand) {}
 	virtual void Cmd_Screenshot(const CCommandBuffer::SCommand_Screenshot *pCommand);
 
 	virtual void Cmd_CreateBufferObject(const CCommandBuffer::SCommand_CreateBufferObject *pCommand) {}
@@ -241,6 +242,8 @@ protected:
 
 	void Cmd_Init(const SCommand_Init *pCommand) override;
 
+	void Cmd_RenderTex3D(const CCommandBuffer::SCommand_RenderTex3D *pCommand) override;
+
 	void Cmd_CreateBufferObject(const CCommandBuffer::SCommand_CreateBufferObject *pCommand) override;
 	void Cmd_RecreateBufferObject(const CCommandBuffer::SCommand_RecreateBufferObject *pCommand) override;
 	void Cmd_UpdateBufferObject(const CCommandBuffer::SCommand_UpdateBufferObject *pCommand) override;
@@ -304,7 +307,9 @@ class CCommandProcessorFragment_OpenGL3_3 : public CCommandProcessorFragment_Ope
 	GLuint m_LastProgramID;
 
 	GLuint m_PrimitiveDrawVertexID[MAX_STREAM_BUFFER_COUNT];
+	GLuint m_PrimitiveDrawVertexIDTex3D;
 	GLuint m_PrimitiveDrawBufferID[MAX_STREAM_BUFFER_COUNT];
+	GLuint m_PrimitiveDrawBufferIDTex3D;
 
 	GLuint m_LastIndexBufferBound[MAX_STREAM_BUFFER_COUNT];
 
@@ -334,8 +339,8 @@ protected:
 	bool IsNewApi() override { return true; }
 
 	void UseProgram(CGLSLTWProgram *pProgram);
-	void UploadStreamBufferData(unsigned int PrimitiveType, const void* pVertices, unsigned int PrimitiveCount);
-	void RenderText(const CCommandBuffer::SState& State, int DrawNum, int TextTextureIndex, int TextOutlineTextureIndex, int TextureSize, const float* pTextColor, const float* pTextOutlineColor);
+	void UploadStreamBufferData(unsigned int PrimitiveType, const void *pVertices, size_t VertSize, unsigned int PrimitiveCount, bool AsTex3D = false);
+	void RenderText(const CCommandBuffer::SState &State, int DrawNum, int TextTextureIndex, int TextOutlineTextureIndex, int TextureSize, const float *pTextColor, const float *pTextOutlineColor);
 
 	void Cmd_Init(const SCommand_Init *pCommand) override;
 	void Cmd_Shutdown(const SCommand_Shutdown *pCommand) override;
@@ -344,6 +349,7 @@ protected:
 	void Cmd_Texture_Create(const CCommandBuffer::SCommand_Texture_Create *pCommand) override;
 	void Cmd_Clear(const CCommandBuffer::SCommand_Clear *pCommand) override;
 	void Cmd_Render(const CCommandBuffer::SCommand_Render *pCommand) override;
+	void Cmd_RenderTex3D(const CCommandBuffer::SCommand_RenderTex3D *pCommand) override;
 	void Cmd_Screenshot(const CCommandBuffer::SCommand_Screenshot *pCommand) override;
 
 	void Cmd_CreateBufferObject(const CCommandBuffer::SCommand_CreateBufferObject *pCommand) override;

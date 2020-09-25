@@ -52,6 +52,9 @@ void CEditor::UiDoPopupMenu()
 		bool Inside = UI()->MouseInside(&s_UiPopups[i].m_Rect);
 		UI()->SetHotItem(&s_UiPopups[i].m_pId);
 
+		if(Inside)
+			m_MouseInsidePopup = true;
+
 		if(UI()->ActiveItem() == &s_UiPopups[i].m_pId)
 		{
 			if(!UI()->MouseButton(0))
@@ -590,11 +593,11 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 	};
 
 	CProperty aProps[] = {
-		{"Pos X", pCurrentQuad->m_aPoints[4].x/1000, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Pos Y", pCurrentQuad->m_aPoints[4].y/1000, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Pos. Env", pCurrentQuad->m_PosEnv+1, PROPTYPE_ENVELOPE, 0, 0},
+		{"Pos X", fx2i(pCurrentQuad->m_aPoints[4].x), PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Pos Y", fx2i(pCurrentQuad->m_aPoints[4].y), PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Pos. Env", pCurrentQuad->m_PosEnv + 1, PROPTYPE_ENVELOPE, 0, 0},
 		{"Pos. TO", pCurrentQuad->m_PosEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Color Env", pCurrentQuad->m_ColorEnv+1, PROPTYPE_ENVELOPE, 0, 0},
+		{"Color Env", pCurrentQuad->m_ColorEnv + 1, PROPTYPE_ENVELOPE, 0, 0},
 		{"Color TO", pCurrentQuad->m_ColorEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 
 		{0},
@@ -606,8 +609,8 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 	if(Prop != -1)
 		pEditor->m_Map.m_Modified = true;
 
-	float OffsetX = NewVal*1000-pCurrentQuad->m_aPoints[4].x;
-	float OffsetY = NewVal*1000-pCurrentQuad->m_aPoints[4].y;
+	float OffsetX = i2fx(NewVal) - pCurrentQuad->m_aPoints[4].x;
+	float OffsetY = i2fx(NewVal) - pCurrentQuad->m_aPoints[4].y;
 
 	for(int i = 0; i < lQuads.size(); ++i)
 	{
@@ -728,21 +731,19 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View, void *pContext)
 	};
 
 	CProperty aProps[] = {
-		{"Pos X", pSource->m_Position.x/1000, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Pos Y", pSource->m_Position.y/1000, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Pos X", pSource->m_Position.x / 1000, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Pos Y", pSource->m_Position.y / 1000, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Loop", pSource->m_Loop, PROPTYPE_BOOL, 0, 1},
 		{"Pan", pSource->m_Pan, PROPTYPE_BOOL, 0, 1},
 		{"Delay", pSource->m_TimeDelay, PROPTYPE_INT_SCROLL, 0, 1000000},
 		{"Falloff", pSource->m_Falloff, PROPTYPE_INT_SCROLL, 0, 255},
-		{"Pos. Env", pSource->m_PosEnv+1, PROPTYPE_ENVELOPE, 0, 0},
+		{"Pos. Env", pSource->m_PosEnv + 1, PROPTYPE_ENVELOPE, 0, 0},
 		{"Pos. TO", pSource->m_PosEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Sound Env", pSource->m_SoundEnv+1, PROPTYPE_ENVELOPE, 0, 0},
-		{"Sound. TO", pSource->m_PosEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Sound Env", pSource->m_SoundEnv + 1, PROPTYPE_ENVELOPE, 0, 0},
+		{"Sound. TO", pSource->m_SoundEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 
 		{0},
 	};
-
-
 
 	static int s_aIds[NUM_PROPS] = {0};
 	int NewVal = 0;
@@ -871,10 +872,10 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View, void *pContext)
 	Color |= pCurrentQuad->m_aColors[pEditor->m_SelectedQuadPoint].b<<8;
 	Color |= pCurrentQuad->m_aColors[pEditor->m_SelectedQuadPoint].a;
 
-	int x = pCurrentQuad->m_aPoints[pEditor->m_SelectedQuadPoint].x/1000;
-	int y = pCurrentQuad->m_aPoints[pEditor->m_SelectedQuadPoint].y/1000;
-	int tu = pCurrentQuad->m_aTexcoords[pEditor->m_SelectedQuadPoint].x/1000 * 1024;
-	int tv = pCurrentQuad->m_aTexcoords[pEditor->m_SelectedQuadPoint].y/1000 * 1024;
+	int x = fx2i(pCurrentQuad->m_aPoints[pEditor->m_SelectedQuadPoint].x);
+	int y = fx2i(pCurrentQuad->m_aPoints[pEditor->m_SelectedQuadPoint].y);
+	int tu = fx2f(pCurrentQuad->m_aTexcoords[pEditor->m_SelectedQuadPoint].x) * 1024;
+	int tv = fx2f(pCurrentQuad->m_aTexcoords[pEditor->m_SelectedQuadPoint].y) * 1024;
 
 	CProperty aProps[] = {
 		{"Pos X", x, PROPTYPE_INT_SCROLL, -1000000, 1000000},
@@ -891,24 +892,19 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View, void *pContext)
 	if(Prop != -1)
 		pEditor->m_Map.m_Modified = true;
 
-	float OffsetX = NewVal*1000-x*1000;
-	float OffsetY = NewVal*1000-y*1000;
-	float OffsetU = NewVal*1000/1024-tu*1000/1024;
-	float OffsetV = NewVal*1000/1024-tv*1000/1024;
-
 	for(int i = 0; i < lQuads.size(); ++i)
 	{
 		if(Prop == PROP_POS_X)
 		{
 			for(int v = 0; v < 4; v++)
-				if(pEditor->m_SelectedPoints&(1<<v))
-					lQuads[i]->m_aPoints[v].x += OffsetX;
+				if(pEditor->m_SelectedPoints & (1 << v))
+					lQuads[i]->m_aPoints[v].x = i2fx(NewVal);
 		}
 		if(Prop == PROP_POS_Y)
 		{
 			for(int v = 0; v < 4; v++)
-				if(pEditor->m_SelectedPoints&(1<<v))
-					lQuads[i]->m_aPoints[v].y += OffsetY;
+				if(pEditor->m_SelectedPoints & (1 << v))
+					lQuads[i]->m_aPoints[v].y = i2fx(NewVal);
 		}
 		if(Prop == PROP_COLOR)
 		{
@@ -926,14 +922,14 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View, void *pContext)
 		if(Prop == PROP_TEX_U)
 		{
 			for(int v = 0; v < 4; v++)
-				if(pEditor->m_SelectedPoints&(1<<v))
-					lQuads[i]->m_aTexcoords[v].x += OffsetU;
+				if(pEditor->m_SelectedPoints & (1 << v))
+					lQuads[i]->m_aTexcoords[v].x = f2fx(NewVal / 1024.0f);
 		}
 		if(Prop == PROP_TEX_V)
 		{
 			for(int v = 0; v < 4; v++)
-				if(pEditor->m_SelectedPoints&(1<<v))
-					lQuads[i]->m_aTexcoords[v].y += OffsetV;
+				if(pEditor->m_SelectedPoints & (1 << v))
+					lQuads[i]->m_aTexcoords[v].y = f2fx(NewVal / 1024.0f);
 		}
 	}
 
@@ -1098,6 +1094,10 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 		pEditor->UI()->DoLabel(&Label, "Unused tiles disabled", 20.0f, 0);
 	else if(pEditor->m_PopupEventType == POPEVENT_IMAGEDIV16)
 		pEditor->UI()->DoLabel(&Label, "Image width/height", 20.0f, 0);
+	else if(pEditor->m_PopupEventType == POPEVENT_IMAGE_MAX)
+		pEditor->UI()->DoLabel(&Label, "Max images", 20.0f, 0);
+	else if(pEditor->m_PopupEventType == POPEVENT_PLACE_BORDER_TILES)
+		pEditor->UI()->DoLabel(&Label, "Place border tiles", 20.0f, 0);
 
 	View.HSplitBottom(10.0f, &View, 0);
 	View.HSplitBottom(20.0f, &View, &ButtonBar);
@@ -1120,7 +1120,11 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 	else if(pEditor->m_PopupEventType == POPEVENT_PREVENTUNUSEDTILES)
 		pEditor->UI()->DoLabel(&Label, "Unused tiles can't be placed by default because they could get a use later and then destroy your map.\nActivate the 'Unused' switch to be able to place every tile.", 10.0f, -1, Label.w-10.0f);
 	else if(pEditor->m_PopupEventType == POPEVENT_IMAGEDIV16)
-		pEditor->UI()->DoLabel(&Label, "The width or height of this image is not divisible by 16. This is required for images used in tile layers for Teeworlds 0.7 compatibility.", 10.0f, -1, Label.w-10.0f);
+		pEditor->UI()->DoLabel(&Label, "The width or height of this image is not divisible by 16. This is required for images used in tile layers.", 10.0f, -1, Label.w - 10.0f);
+	else if(pEditor->m_PopupEventType == POPEVENT_IMAGE_MAX)
+		pEditor->UI()->DoLabel(&Label, "The client only allows a maximum of 64 images.", 10.0f, -1, Label.w - 10.0f);
+	else if(pEditor->m_PopupEventType == POPEVENT_PLACE_BORDER_TILES)
+		pEditor->UI()->DoLabel(&Label, "This is going to overwrite any existing tiles around the edges of the layer.\nContinue?", 10.0f, -1, Label.w - 10.0f);
 
 	// button bar
 	ButtonBar.VSplitLeft(30.0f, 0, &ButtonBar);
@@ -1141,12 +1145,14 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 		}
 		else if(pEditor->m_PopupEventType == POPEVENT_SAVE)
 			pEditor->CallbackSaveMap(pEditor->m_aFileSaveName, IStorage::TYPE_SAVE, pEditor);
+		else if(pEditor->m_PopupEventType == POPEVENT_PLACE_BORDER_TILES)
+			pEditor->PlaceBorderTiles();
 		pEditor->m_PopupEventWasActivated = false;
 		return 1;
 	}
 	ButtonBar.VSplitRight(30.0f, &ButtonBar, 0);
 	ButtonBar.VSplitRight(110.0f, &ButtonBar, &Label);
-	if(pEditor->m_PopupEventType != POPEVENT_LARGELAYER && pEditor->m_PopupEventType != POPEVENT_PREVENTUNUSEDTILES && pEditor->m_PopupEventType != POPEVENT_IMAGEDIV16)
+	if(pEditor->m_PopupEventType != POPEVENT_LARGELAYER && pEditor->m_PopupEventType != POPEVENT_PREVENTUNUSEDTILES && pEditor->m_PopupEventType != POPEVENT_IMAGEDIV16 && pEditor->m_PopupEventType != POPEVENT_IMAGE_MAX)
 	{
 		static int s_AbortButton = 0;
 		if(pEditor->DoButton_Editor(&s_AbortButton, "Abort", 0, &Label, 0, 0))
@@ -1405,18 +1411,72 @@ static int s_AutoMapConfigCurrent = -100;
 
 int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	CLayerTiles *pLayer = static_cast<CLayerTiles*>(pEditor->GetSelectedLayer(0));
+	CLayerTiles *pLayer = static_cast<CLayerTiles *>(pEditor->GetSelectedLayer(0));
 	CUIRect Button;
 	static int s_AutoMapperConfigButtons[256];
 	CAutoMapper *pAutoMapper = &pEditor->m_Map.m_lImages[pLayer->m_Image]->m_AutoMapper;
 
+	const float ButtonHeight = 12.0f;
+
+	static int s_ScrollBar = 0;
+	static float s_ScrollValue = 0;
+
+	float ListHeight = ButtonHeight * pAutoMapper->ConfigNamesNum();
+	float ScrollDifference = ListHeight - View.h;
+
+	// Disable scrollbar if not needed.
+	if(ListHeight > View.h)
+	{
+		CUIRect Scroll;
+		View.VSplitRight(15.f, &View, &Scroll);
+
+		Scroll.HMargin(5.f, &Scroll);
+		s_ScrollValue = pEditor->UiDoScrollbarV(&s_ScrollBar, &Scroll, s_ScrollValue);
+
+		if(pEditor->UI()->MouseInside(&View) || pEditor->UI()->MouseInside(&Scroll))
+		{
+			int ScrollNum = (int)((ListHeight / ButtonHeight) + 1);
+			if(ScrollNum > 0)
+			{
+				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
+					s_ScrollValue = clamp(s_ScrollValue - 1.0f / ScrollNum, 0.0f, 1.0f);
+				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
+					s_ScrollValue = clamp(s_ScrollValue + 1.0f / ScrollNum, 0.0f, 1.0f);
+			}
+			else
+				ScrollNum = 0;
+		}
+
+		// Margin for scrollbar
+		View.VSplitRight(2.0f, &View, 0);
+	}
+
+	float ListStartAt = ScrollDifference * s_ScrollValue;
+
+	if(ListStartAt < 0.0f)
+		ListStartAt = 0.0f;
+
+	float ListStopAt = ListHeight - ScrollDifference * (1 - s_ScrollValue);
+	float ListCur = 0;
+
+	pEditor->UI()->ClipEnable(&View);
+
 	for(int i = -1; i < pAutoMapper->ConfigNamesNum(); ++i)
 	{
-		View.HSplitTop(2.0f, 0, &View);
-		View.HSplitTop(12.0f, &Button, &View);
-		if(pEditor->DoButton_MenuItem(&s_AutoMapperConfigButtons[i], i == -1 ? "None" : pAutoMapper->GetConfigName(i), i == s_AutoMapConfigCurrent, &Button, 0, 0))
-			s_AutoMapConfigSelected = i;
+		if(ListCur > ListStopAt)
+			break;
+
+		if(ListCur >= ListStartAt)
+		{
+			View.HSplitTop(2.0f, 0, &View);
+			View.HSplitTop(ButtonHeight, &Button, &View);
+			if(pEditor->DoButton_MenuItem(&s_AutoMapperConfigButtons[i], i == -1 ? "None" : pAutoMapper->GetConfigName(i), i == s_AutoMapConfigCurrent, &Button, 0, 0))
+				s_AutoMapConfigSelected = i;
+		}
+		ListCur += ButtonHeight;
 	}
+
+	pEditor->UI()->ClipDisable();
 
 	return 0;
 }
@@ -1426,8 +1486,12 @@ void CEditor::PopupSelectConfigAutoMapInvoke(int Current, float x, float y)
 	static int s_AutoMapConfigSelectID = 0;
 	s_AutoMapConfigSelected = -100;
 	s_AutoMapConfigCurrent = Current;
-	CLayerTiles *pLayer = static_cast<CLayerTiles*>(GetSelectedLayer(0));
-	UiInvokePopupMenu(&s_AutoMapConfigSelectID, 0, x, y, 120.0f, 26.0f+14.0f*m_Map.m_lImages[pLayer->m_Image]->m_AutoMapper.ConfigNamesNum(), PopupSelectConfigAutoMap);
+	CLayerTiles *pLayer = static_cast<CLayerTiles *>(GetSelectedLayer(0));
+	int ItemCount = m_Map.m_lImages[pLayer->m_Image]->m_AutoMapper.ConfigNamesNum();
+	if(ItemCount > 5)
+		ItemCount = 5;
+	// Width for buttons is 120, 15 is the scrollbar width, 2 is the margin between both.
+	UiInvokePopupMenu(&s_AutoMapConfigSelectID, 0, x, y, 120.0f + 15.0f + 2.0f, 26.0f + 14.0f * ItemCount, PopupSelectConfigAutoMap);
 }
 
 int CEditor::PopupSelectConfigAutoMapResult()
@@ -1453,7 +1517,7 @@ int CEditor::PopupTele(CEditor *pEditor, CUIRect View, void *pContext)
 	NumberPicker.VSplitRight(2.f, &NumberPicker, 0);
 
 	// find empty number button
-	{ 
+	{
 		static int s_EmptySlotPid = 0;
 		if(pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot")
 			|| pEditor->Input()->KeyPress(KEY_F))
@@ -1488,7 +1552,7 @@ int CEditor::PopupTele(CEditor *pEditor, CUIRect View, void *pContext)
 			{"Number", pEditor->m_TeleNumber, PROPTYPE_INT_STEP, 1, 255},
 			{0},
 		};
-		
+
 		static int s_aIds[NUM_PROPS] = {0};
 
 		static int NewVal = 0;
@@ -1596,7 +1660,7 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext)
 			{"Number", pEditor->m_SwitchNum, PROPTYPE_INT_STEP, 1, 255},
 			{"Delay", pEditor->m_SwitchDelay, PROPTYPE_INT_STEP, 0, 255},
 			{0},
-		}; 
+		};
 
 		static int s_aIds[NUM_PROPS] = {0};
 		int NewVal = 0;
@@ -1770,7 +1834,8 @@ int CEditor::PopupEntities(CEditor *pEditor, CUIRect View, void *pContext)
 				str_format(aBuf, sizeof(aBuf), "editor/entities/%s.png", Name);
 
 				pEditor->Graphics()->UnloadTexture(pEditor->m_EntitiesTexture);
-				pEditor->m_EntitiesTexture = pEditor->Graphics()->LoadTexture(aBuf, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+				int TextureLoadFlag = pEditor->Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+				pEditor->m_EntitiesTexture = pEditor->Graphics()->LoadTexture(aBuf, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, TextureLoadFlag);
 				g_UiNumPopups--;
 			}
 		}

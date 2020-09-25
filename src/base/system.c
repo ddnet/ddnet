@@ -1148,6 +1148,10 @@ int net_host_lookup(const char *hostname, NETADDR *addr, int types)
 		hints.ai_family = AF_INET;
 	else if(types == NETTYPE_IPV6)
 		hints.ai_family = AF_INET6;
+#if defined(CONF_WEBSOCKETS)
+	if(types & NETTYPE_WEBSOCKET_IPV4)
+		hints.ai_family = AF_INET;
+#endif
 
 	e = getaddrinfo(host, NULL, &hints, &result);
 
@@ -2232,8 +2236,11 @@ int net_socket_read_wait(NETSOCKET sock, int time)
 	if(sock.web_ipv4sock >= 0)
 	{
 		int maxfd = websocket_fd_set(sock.web_ipv4sock, &readfds);
-		if (maxfd > sockid)
+		if(maxfd > sockid)
+		{
 			sockid = maxfd;
+			FD_SET(sockid, &readfds);
+		}
 	}
 #endif
 
@@ -2245,7 +2252,10 @@ int net_socket_read_wait(NETSOCKET sock, int time)
 
 	if(sock.ipv4sock >= 0 && FD_ISSET(sock.ipv4sock, &readfds))
 		return 1;
-
+#if defined(CONF_WEBSOCKETS)
+	if(sock.web_ipv4sock >= 0 && FD_ISSET(sockid, &readfds))
+		return 1;
+#endif
 	if(sock.ipv6sock >= 0 && FD_ISSET(sock.ipv6sock, &readfds))
 		return 1;
 
@@ -2255,6 +2265,46 @@ int net_socket_read_wait(NETSOCKET sock, int time)
 int time_timestamp(void)
 {
 	return time(0);
+}
+
+int time_houroftheday(void)
+{
+	time_t time_data;
+	struct tm *time_info;
+
+	time(&time_data);
+	time_info = localtime(&time_data);
+	return time_info->tm_hour;
+}
+
+int time_season(void)
+{
+	time_t time_data;
+	struct tm *time_info;
+
+	time(&time_data);
+	time_info = localtime(&time_data);
+
+	switch(time_info->tm_mon)
+	{
+	case 11:
+	case 0:
+	case 1:
+		return SEASON_WINTER;
+	case 2:
+	case 3:
+	case 4:
+		return SEASON_SPRING;
+	case 5:
+	case 6:
+	case 7:
+		return SEASON_SUMMER;
+	case 8:
+	case 9:
+	case 10:
+		return SEASON_AUTUMN;
+	}
+	return SEASON_SPRING; // should never happen
 }
 
 void str_append(char *dst, const char *src, int dst_size)
@@ -3244,7 +3294,7 @@ PROCESS shell_execute(const char *file)
 	if(pid == 0)
 	{
 		execv(file, argv);
-		exit(1);
+		_exit(1);
 	}
 	return pid;
 #endif

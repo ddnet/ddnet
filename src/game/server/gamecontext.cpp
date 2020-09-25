@@ -1023,6 +1023,12 @@ void CGameContext::OnClientDirectInput(int ClientID, void *pInput)
 	{
 		m_TeeHistorian.RecordPlayerInput(ClientID, (CNetObj_PlayerInput *)pInput);
 	}
+
+	int Flags = ((CNetObj_PlayerInput *)pInput)->m_PlayerFlags;
+	if((Flags & 256) || (Flags & 512))
+	{
+		Server()->Kick(ClientID, "please update your client or use DDNet client");
+	}
 }
 
 void CGameContext::OnClientPredictedInput(int ClientID, void *pInput)
@@ -1204,7 +1210,7 @@ void CGameContext::OnClientEnter(int ClientID)
 		SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1, CHAT_SIX);
 
 		SendChatTarget(ClientID, "DDraceNetwork Mod. Version: " GAME_VERSION);
-		SendChatTarget(ClientID, "please visit DDNet.tw or say /info for more info");
+		SendChatTarget(ClientID, "please visit DDNet.tw or say /info and make sure to read our /rules");
 
 		if(g_Config.m_SvWelcome[0]!=0)
 			SendChatTarget(ClientID,g_Config.m_SvWelcome);
@@ -1212,12 +1218,12 @@ void CGameContext::OnClientEnter(int ClientID)
 
 		Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
-		if (g_Config.m_SvShowOthersDefault)
+		if(g_Config.m_SvShowOthersDefault > 0)
 		{
 			if (g_Config.m_SvShowOthers)
 				SendChatTarget(ClientID, "You can see other players. To disable this use DDNet client and type /showothers .");
 
-			m_apPlayers[ClientID]->m_ShowOthers = true;
+			m_apPlayers[ClientID]->m_ShowOthers = g_Config.m_SvShowOthersDefault;
 		}
 	}
 	m_VoteUpdate = true;

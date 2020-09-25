@@ -84,6 +84,7 @@ public:
 		// rendering
 		CMD_CLEAR,
 		CMD_RENDER,
+		CMD_RENDER_TEX3D,
 
 		//opengl 2.0+ commands (some are just emulated and only exist in opengl 3.3+)
 		CMD_CREATE_BUFFER_OBJECT, // create vbo
@@ -163,6 +164,8 @@ public:
 	typedef GL_SColorf SColorf;
 	typedef GL_SColor SColor;
 	typedef GL_SVertex SVertex;
+	typedef GL_SVertexTex3D SVertexTex3D;
+	typedef GL_SVertexTex3DStream SVertexTex3DStream;
 
 	struct SCommand
 	{
@@ -213,6 +216,16 @@ public:
 		unsigned m_PrimType;
 		unsigned m_PrimCount;
 		SVertex *m_pVertices; // you should use the command buffer data to allocate vertices for this command
+	};
+
+	struct SCommand_RenderTex3D : public SCommand
+	{
+		SCommand_RenderTex3D()
+			: SCommand(CMD_RENDER_TEX3D) {}
+		SState m_State;
+		unsigned m_PrimType;
+		unsigned m_PrimCount;
+		SVertexTex3DStream *m_pVertices; // you should use the command buffer data to allocate vertices for this command
 	};
 
 	struct SCommand_CreateBufferObject : public SCommand
@@ -379,7 +392,8 @@ public:
 		SState m_State;
 
 		SVertex *m_pVertices;
-		int m_QuadNum;
+		unsigned m_PrimType;
+		unsigned m_PrimCount;
 
 		int m_TextureSize;
 
@@ -644,7 +658,10 @@ class CGraphics_Threaded : public IEngineGraphics
 	class IStorage *m_pStorage;
 	class IConsole *m_pConsole;
 
+	int m_CurIndex;
+
 	CCommandBuffer::SVertex m_aVertices[MAX_VERTICES];
+	CCommandBuffer::SVertexTex3DStream m_aVerticesTex3D[MAX_VERTICES];
 	int m_NumVertices;
 
 	CCommandBuffer::SColor m_aColor[4];
@@ -715,7 +732,26 @@ class CGraphics_Threaded : public IEngineGraphics
 	void* AllocCommandBufferData(unsigned AllocSize);
 
 	void AddVertices(int Count);
-	void Rotate(const CCommandBuffer::SPoint &rCenter, CCommandBuffer::SVertex *pPoints, int NumPoints);
+	void AddVertices(int Count, CCommandBuffer::SVertex *pVertices);
+	void AddVertices(int Count, CCommandBuffer::SVertexTex3DStream *pVertices);
+
+	template<typename TName>
+	void Rotate(const CCommandBuffer::SPoint &rCenter, TName *pPoints, int NumPoints)
+	{
+		float c = cosf(m_Rotation);
+		float s = sinf(m_Rotation);
+		float x, y;
+		int i;
+
+		TName *pVertices = pPoints;
+		for(i = 0; i < NumPoints; i++)
+		{
+			x = pVertices[i].m_Pos.x - rCenter.x;
+			y = pVertices[i].m_Pos.y - rCenter.y;
+			pVertices[i].m_Pos.x = x * c - y * s + rCenter.x;
+			pVertices[i].m_Pos.y = x * s + y * c + rCenter.y;
+		}
+	}
 
 	void KickCommandBuffer();
 
@@ -763,9 +799,21 @@ public:
 	void QuadsEnd() override;
 	void TextQuadsBegin() override;
 	void TextQuadsEnd(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor) override;
+	void QuadsTex3DBegin() override;
+	void QuadsTex3DEnd() override;
 	void QuadsEndKeepVertices() override;
 	void QuadsDrawCurrentVertices(bool KeepVertices = true) override;
 	void QuadsSetRotation(float Angle) override;
+
+	template<typename TName>
+	void SetColor(TName *pVertex, int ColorIndex)
+	{
+		TName *pVert = pVertex;
+		pVert->m_Color.r = m_aColor[ColorIndex].r;
+		pVert->m_Color.g = m_aColor[ColorIndex].g;
+		pVert->m_Color.b = m_aColor[ColorIndex].b;
+		pVert->m_Color.a = m_aColor[ColorIndex].a;
+	}
 
 	void SetColorVertex(const CColorVertex *pArray, int Num) override;
 	void SetColor(float r, float g, float b, float a) override;
@@ -776,15 +824,108 @@ public:
 	void ChangeColorOfCurrentQuadVertices(float r, float g, float b, float a) override;
 	void ChangeColorOfQuadVertices(int QuadOffset, unsigned char r, unsigned char g, unsigned char b, unsigned char a) override;
 
-	void SetColor(CCommandBuffer::SVertex *pVertex, int ColorIndex);
-
 	void QuadsSetSubset(float TlU, float TlV, float BrU, float BrV) override;
 	void QuadsSetSubsetFree(
 		float x0, float y0, float x1, float y1,
-		float x2, float y2, float x3, float y3) override;
+		float x2, float y2, float x3, float y3, int Index = -1) override;
 
 	void QuadsDraw(CQuadItem *pArray, int Num) override;
+
+	template<typename TName>
+	void QuadsDrawTLImpl(TName *pVertices, const CQuadItem *pArray, int Num)
+	{
+		CCommandBuffer::SPoint Center;
+
+		dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->QuadsDrawTL without begin");
+
+		if(g_Config.m_GfxQuadAsTriangle && !m_IsNewOpenGL)
+		{
+			for(int i = 0; i < Num; ++i)
+			{
+				// first triangle
+				pVertices[m_NumVertices + 6 * i].m_Pos.x = pArray[i].m_X;
+				pVertices[m_NumVertices + 6 * i].m_Pos.y = pArray[i].m_Y;
+				pVertices[m_NumVertices + 6 * i].m_Tex = m_aTexture[0];
+				SetColor(&pVertices[m_NumVertices + 6 * i], 0);
+
+				pVertices[m_NumVertices + 6 * i + 1].m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
+				pVertices[m_NumVertices + 6 * i + 1].m_Pos.y = pArray[i].m_Y;
+				pVertices[m_NumVertices + 6 * i + 1].m_Tex = m_aTexture[1];
+				SetColor(&pVertices[m_NumVertices + 6 * i + 1], 1);
+
+				pVertices[m_NumVertices + 6 * i + 2].m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
+				pVertices[m_NumVertices + 6 * i + 2].m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
+				pVertices[m_NumVertices + 6 * i + 2].m_Tex = m_aTexture[2];
+				SetColor(&pVertices[m_NumVertices + 6 * i + 2], 2);
+
+				// second triangle
+				pVertices[m_NumVertices + 6 * i + 3].m_Pos.x = pArray[i].m_X;
+				pVertices[m_NumVertices + 6 * i + 3].m_Pos.y = pArray[i].m_Y;
+				pVertices[m_NumVertices + 6 * i + 3].m_Tex = m_aTexture[0];
+				SetColor(&pVertices[m_NumVertices + 6 * i + 3], 0);
+
+				pVertices[m_NumVertices + 6 * i + 4].m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
+				pVertices[m_NumVertices + 6 * i + 4].m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
+				pVertices[m_NumVertices + 6 * i + 4].m_Tex = m_aTexture[2];
+				SetColor(&pVertices[m_NumVertices + 6 * i + 4], 2);
+
+				pVertices[m_NumVertices + 6 * i + 5].m_Pos.x = pArray[i].m_X;
+				pVertices[m_NumVertices + 6 * i + 5].m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
+				pVertices[m_NumVertices + 6 * i + 5].m_Tex = m_aTexture[3];
+				SetColor(&pVertices[m_NumVertices + 6 * i + 5], 3);
+
+				if(m_Rotation != 0)
+				{
+					Center.x = pArray[i].m_X + pArray[i].m_Width / 2;
+					Center.y = pArray[i].m_Y + pArray[i].m_Height / 2;
+
+					Rotate(Center, &pVertices[m_NumVertices + 6 * i], 6);
+				}
+			}
+
+			AddVertices(3 * 2 * Num, pVertices);
+		}
+		else
+		{
+			for(int i = 0; i < Num; ++i)
+			{
+				pVertices[m_NumVertices + 4 * i].m_Pos.x = pArray[i].m_X;
+				pVertices[m_NumVertices + 4 * i].m_Pos.y = pArray[i].m_Y;
+				pVertices[m_NumVertices + 4 * i].m_Tex = m_aTexture[0];
+				SetColor(&pVertices[m_NumVertices + 4 * i], 0);
+
+				pVertices[m_NumVertices + 4 * i + 1].m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
+				pVertices[m_NumVertices + 4 * i + 1].m_Pos.y = pArray[i].m_Y;
+				pVertices[m_NumVertices + 4 * i + 1].m_Tex = m_aTexture[1];
+				SetColor(&pVertices[m_NumVertices + 4 * i + 1], 1);
+
+				pVertices[m_NumVertices + 4 * i + 2].m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
+				pVertices[m_NumVertices + 4 * i + 2].m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
+				pVertices[m_NumVertices + 4 * i + 2].m_Tex = m_aTexture[2];
+				SetColor(&pVertices[m_NumVertices + 4 * i + 2], 2);
+
+				pVertices[m_NumVertices + 4 * i + 3].m_Pos.x = pArray[i].m_X;
+				pVertices[m_NumVertices + 4 * i + 3].m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
+				pVertices[m_NumVertices + 4 * i + 3].m_Tex = m_aTexture[3];
+				SetColor(&pVertices[m_NumVertices + 4 * i + 3], 3);
+
+				if(m_Rotation != 0)
+				{
+					Center.x = pArray[i].m_X + pArray[i].m_Width / 2;
+					Center.y = pArray[i].m_Y + pArray[i].m_Height / 2;
+
+					Rotate(Center, &pVertices[m_NumVertices + 4 * i], 4);
+				}
+			}
+
+			AddVertices(4 * Num, pVertices);
+		}
+	}
+
 	void QuadsDrawTL(const CQuadItem *pArray, int Num) override;
+
+	void QuadsTex3DDrawTL(const CQuadItem *pArray, int Num) override;
+
 	void QuadsDrawFreeform(const CFreeformItem *pArray, int Num) override;
 	void QuadsText(float x, float y, float Size, const char *pText) override;
 
@@ -799,8 +940,82 @@ public:
 	void RenderQuadContainerAsSprite(int ContainerIndex, int QuadOffset, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f) override;
 	void RenderQuadContainerAsSpriteMultiple(int ContainerIndex, int QuadOffset, int DrawCount, SRenderSpriteInfo *pRenderInfo) override;
 
+	template<typename TName>
+	void FlushVerticesImpl(bool KeepVertices, int &PrimType, int &PrimCount, int &NumVerts, TName &Command, size_t VertSize)
+	{
+		Command.m_pVertices = NULL;
+		if(m_NumVertices == 0)
+			return;
+
+		NumVerts = m_NumVertices;
+
+		if(!KeepVertices)
+			m_NumVertices = 0;
+
+		if(m_Drawing == DRAWING_QUADS)
+		{
+			if(g_Config.m_GfxQuadAsTriangle && !m_IsNewOpenGL)
+			{
+				PrimType = CCommandBuffer::PRIMTYPE_TRIANGLES;
+				PrimCount = NumVerts / 3;
+			}
+			else
+			{
+				PrimType = CCommandBuffer::PRIMTYPE_QUADS;
+				PrimCount = NumVerts / 4;
+			}
+		}
+		else if(m_Drawing == DRAWING_LINES)
+		{
+			PrimType = CCommandBuffer::PRIMTYPE_LINES;
+			PrimCount = NumVerts / 2;
+		}
+		else
+			return;
+
+		Command.m_pVertices = (decltype(Command.m_pVertices))m_pCommandBuffer->AllocData(VertSize * NumVerts);
+		if(Command.m_pVertices == NULL)
+		{
+			// kick command buffer and try again
+			KickCommandBuffer();
+
+			Command.m_pVertices = (decltype(Command.m_pVertices))m_pCommandBuffer->AllocData(VertSize * NumVerts);
+			if(Command.m_pVertices == NULL)
+			{
+				dbg_msg("graphics", "failed to allocate data for vertices");
+				return;
+			}
+		}
+
+		Command.m_State = m_State;
+
+		Command.m_PrimType = PrimType;
+		Command.m_PrimCount = PrimCount;
+
+		// check if we have enough free memory in the commandbuffer
+		if(!m_pCommandBuffer->AddCommand(Command))
+		{
+			// kick command buffer and try again
+			KickCommandBuffer();
+
+			Command.m_pVertices = (decltype(Command.m_pVertices))m_pCommandBuffer->AllocData(VertSize * NumVerts);
+			if(Command.m_pVertices == NULL)
+			{
+				dbg_msg("graphics", "failed to allocate data for vertices");
+				return;
+			}
+
+			if(!m_pCommandBuffer->AddCommand(Command))
+			{
+				dbg_msg("graphics", "failed to allocate memory for render command");
+				return;
+			}
+		}
+	}
+
 	void FlushVertices(bool KeepVertices = false) override;
 	void FlushTextVertices(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor) override;
+	void FlushVerticesTex3D() override;
 
 	void RenderTileLayer(int BufferContainerIndex, float *pColor, char **pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffet) override;
 	void RenderBorderTiles(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, int JumpIndex, unsigned int DrawNum) override;

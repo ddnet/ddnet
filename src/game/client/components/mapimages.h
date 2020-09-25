@@ -18,8 +18,7 @@ enum EMapImageEntityLayerType
 
 enum EMapImageModType
 {
-	MAP_IMAGE_MOD_TYPE_UNKNOWN = 0,
-	MAP_IMAGE_MOD_TYPE_DDNET,
+	MAP_IMAGE_MOD_TYPE_DDNET = 0,
 	MAP_IMAGE_MOD_TYPE_DDRACE,
 	MAP_IMAGE_MOD_TYPE_RACE,
 	MAP_IMAGE_MOD_TYPE_BLOCKWORLDS,
@@ -32,16 +31,17 @@ enum EMapImageModType
 class CMapImages : public CComponent
 {
 	friend class CBackground;
+	friend class CMenuBackground;
 
 	IGraphics::CTextureHandle m_aTextures[64];
 	int m_aTextureUsedByTileOrQuadLayerFlag[64]; // 0: nothing, 1(as flag): tile layer, 2(as flag): quad layer
 	int m_Count;
 
-	bool HasFrontLayer();
-	bool HasSpeedupLayer();
-	bool HasSwitchLayer();
-	bool HasTeleLayer();
-	bool HasTuneLayer();
+	bool HasFrontLayer(EMapImageModType ModType);
+	bool HasSpeedupLayer(EMapImageModType ModType);
+	bool HasSwitchLayer(EMapImageModType ModType);
+	bool HasTeleLayer(EMapImageModType ModType);
+	bool HasTuneLayer(EMapImageModType ModType);
 
 public:
 	CMapImages();
@@ -67,9 +67,9 @@ public:
 	int GetTextureScale();
 
 private:
-	bool m_EntitiesIsLoaded[MAP_IMAGE_MOD_TYPE_COUNT];
+	bool m_EntitiesIsLoaded[MAP_IMAGE_MOD_TYPE_COUNT * 2];
 	bool m_SpeedupArrowIsLoaded;
-	IGraphics::CTextureHandle m_EntitiesTextures[MAP_IMAGE_MOD_TYPE_COUNT][MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT];
+	IGraphics::CTextureHandle m_EntitiesTextures[MAP_IMAGE_MOD_TYPE_COUNT * 2][MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT];
 	IGraphics::CTextureHandle m_SpeedupArrowTexture;
 	IGraphics::CTextureHandle m_OverlayBottomTexture;
 	IGraphics::CTextureHandle m_OverlayTopTexture;

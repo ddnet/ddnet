@@ -222,6 +222,9 @@ int main(int argc, const char **argv)
 
 	bool Success = true;
 
+	if(i > 64)
+		dbg_msg("map_convert_07", "%s: Uses more textures than the client maximum of 64.", pSourceFileName);
+
 	// add all items
 	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)
 	{

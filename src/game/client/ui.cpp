@@ -49,7 +49,7 @@ int CUI::Update(float Mx, float My, float Mwx, float Mwy, int Buttons)
 
 int CUI::MouseInside(const CUIRect *r)
 {
-	if(m_MouseX >= r->x && m_MouseX <= r->x+r->w && m_MouseY >= r->y && m_MouseY <= r->y+r->h)
+	if(m_MouseX >= r->x && m_MouseX < r->x + r->w && m_MouseY >= r->y && m_MouseY < r->y + r->h)
 		return 1;
 	return 0;
 }

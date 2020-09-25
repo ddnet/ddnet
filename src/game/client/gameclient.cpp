@@ -50,11 +50,12 @@
 #include "components/mapimages.h"
 #include "components/maplayers.h"
 #include "components/mapsounds.h"
+#include "components/menu_background.h"
 #include "components/menus.h"
 #include "components/motd.h"
+#include "components/nameplates.h"
 #include "components/particles.h"
 #include "components/players.h"
-#include "components/nameplates.h"
 #include "components/scoreboard.h"
 #include "components/skins.h"
 #include "components/sounds.h"
@@ -101,6 +102,7 @@ static CMapImages gs_MapImages;
 static CMapLayers gs_MapLayersBackGround(CMapLayers::TYPE_BACKGROUND);
 static CMapLayers gs_MapLayersForeGround(CMapLayers::TYPE_FOREGROUND);
 static CBackground gs_BackGround;
+static CMenuBackground gs_MenuBackground;
 
 static CMapSounds gs_MapSounds;
 
@@ -135,6 +137,7 @@ void CGameClient::OnConsoleInit()
 #endif
 
 	// setup pointers
+	m_pMenuBackground = &::gs_MenuBackground;
 	m_pBinds = &::gs_Binds;
 	m_pGameConsole = &::gs_GameConsole;
 	m_pParticles = &::gs_Particles;
@@ -163,6 +166,8 @@ void CGameClient::OnConsoleInit()
 
 	m_pRaceDemo = &::gs_RaceDemo;
 	m_pGhost = &::gs_Ghost;
+
+	m_pMenus->SetMenuBackground(m_pMenuBackground);
 
 	gs_NamePlates.SetPlayers(m_pPlayers);
 
@@ -206,6 +211,8 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(m_pMenus);
 	m_All.Add(&m_pMenus->m_Binder);
 	m_All.Add(m_pGameConsole);
+
+	m_All.Add(m_pMenuBackground);
 
 	// build the input stack
 	m_Input.Add(&m_pMenus->m_Binder); // this will take over all input when we want to bind a key
@@ -271,6 +278,8 @@ void CGameClient::OnConsoleInit()
 
 	Console()->Chain("cl_dummy", ConchainSpecialDummy, this);
 	Console()->Chain("cl_text_entities_size", ConchainClTextEntitiesSize, this);
+
+	Console()->Chain("cl_menu_map", ConchainMenuMap, this);
 
 	//
 	m_SuppressEvents = false;
@@ -883,6 +892,7 @@ void CGameClient::OnStateChange(int NewState, int OldState)
 
 void CGameClient::OnShutdown()
 {
+	m_pMenus->KillServer();
 	m_pRaceDemo->OnReset();
 	m_pGhost->OnReset();
 }
@@ -2534,4 +2544,19 @@ void CGameClient::ConTuneZone(IConsole::IResult *pResult, void *pUserData)
 
 	if(List >= 0 && List < NUM_TUNEZONES)
 		pSelf->TuningList()[List].Set(pParamName, NewValue);
+}
+
+void CGameClient::ConchainMenuMap(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CGameClient *pSelf = (CGameClient *)pUserData;
+	if(pResult->NumArguments())
+	{
+		if(str_comp(g_Config.m_ClMenuMap, pResult->GetString(0)) != 0)
+		{
+			str_format(g_Config.m_ClMenuMap, sizeof(g_Config.m_ClMenuMap), "%s", pResult->GetString(0));
+			pSelf->m_pMenuBackground->LoadMenuBackground();
+		}
+	}
+	else
+		pfnCallback(pResult, pCallbackUserData);
 }

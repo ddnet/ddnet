@@ -24,7 +24,7 @@ public:
 protected:
 	enum
 	{
-		INPUT_BUFFER_SIZE=32
+		INPUT_BUFFER_SIZE = 32
 	};
 
 	// quick access to events
@@ -34,10 +34,10 @@ protected:
 public:
 	enum
 	{
-		FLAG_PRESS=1,
-		FLAG_RELEASE=2,
-		FLAG_REPEAT=4,
-		FLAG_TEXT=8,
+		FLAG_PRESS = 1,
+		FLAG_RELEASE = 2,
+		FLAG_REPEAT = 4,
+		FLAG_TEXT = 8,
 	};
 
 	// events
@@ -47,7 +47,7 @@ public:
 	{
 		if(Index < 0 || Index >= m_NumEvents)
 		{
-			IInput::CEvent e = {0,0};
+			IInput::CEvent e = {0, 0};
 			return e;
 		}
 		return m_aInputEvents[Index];
@@ -55,7 +55,7 @@ public:
 
 	// keys
 	virtual bool KeyIsPressed(int Key) const = 0;
-	virtual bool KeyPress(int Key, bool CheckCounter=false) const = 0;
+	virtual bool KeyPress(int Key, bool CheckCounter = false) const = 0;
 	const char *KeyName(int Key) const { return (Key >= 0 && Key < g_MaxKeys) ? g_aaKeyStrings[Key] : g_aaKeyStrings[0]; }
 	virtual void Clear() = 0;
 
@@ -63,17 +63,17 @@ public:
 	virtual void MouseModeRelative() = 0;
 	virtual void MouseModeAbsolute() = 0;
 	virtual int MouseDoubleClick() = 0;
-	virtual const char* GetClipboardText() = 0;
+	virtual const char *GetClipboardText() = 0;
 	virtual void SetClipboardText(const char *Text) = 0;
 
 	virtual void MouseRelative(float *x, float *y) = 0;
 
 	virtual bool GetIMEState() = 0;
 	virtual void SetIMEState(bool Activate) = 0;
-	virtual const char* GetIMECandidate() = 0;
+	virtual const char *GetIMECandidate() = 0;
 	virtual int GetEditingCursor() = 0;
+	virtual void SetEditingPosition(float X, float Y) = 0;
 };
-
 
 class IEngineInput : public IInput
 {

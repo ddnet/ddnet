@@ -30,6 +30,8 @@
 #include <game/client/ui.h>
 #include <game/generated/client_data.h>
 
+#include <engine/shared/dilate.h>
+
 #include "auto_map.h"
 #include "editor.h"
 
@@ -1051,7 +1053,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 
 	TB_Top.HSplitBottom(2.5f, &TB_Top, 0);
 	TB_Bottom.HSplitTop(2.5f, 0, &TB_Bottom);
-	
+
 	// top line buttons
 	{
 		// detail button
@@ -1298,9 +1300,10 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			if(pT)
 			{
 				TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
-				if(DoButton_Ex(&s_BorderBut, "Border", 0, &Button, 0, "Adds border tiles", CUI::CORNER_ALL))
+				if(DoButton_Ex(&s_BorderBut, "Border", 0, &Button, 0, "Place tiles in a 2-tile wide border at the edges of the layer", CUI::CORNER_ALL))
 				{
-					DoMapBorder();
+					m_PopupEventType = POPEVENT_PLACE_BORDER_TILES;
+					m_PopupEventActivated = true;
 				}
 				TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
 			}
@@ -2406,16 +2409,16 @@ void CEditor::DoMapEditor(CUIRect View)
 			if(t)
 			{
 				m_QuadsetPicker.m_Image = t->m_Image;
-				m_QuadsetPicker.m_lQuads[0].m_aPoints[0].x = (int)View.x << 10;
-				m_QuadsetPicker.m_lQuads[0].m_aPoints[0].y = (int)View.y << 10;
-				m_QuadsetPicker.m_lQuads[0].m_aPoints[1].x = (int)(View.x+View.w) << 10;
-				m_QuadsetPicker.m_lQuads[0].m_aPoints[1].y = (int)View.y << 10;
-				m_QuadsetPicker.m_lQuads[0].m_aPoints[2].x = (int)View.x << 10;
-				m_QuadsetPicker.m_lQuads[0].m_aPoints[2].y = (int)(View.y+View.h) << 10;
-				m_QuadsetPicker.m_lQuads[0].m_aPoints[3].x = (int)(View.x+View.w) << 10;
-				m_QuadsetPicker.m_lQuads[0].m_aPoints[3].y = (int)(View.y+View.h) << 10;
-				m_QuadsetPicker.m_lQuads[0].m_aPoints[4].x = (int)(View.x+View.w/2) << 10;
-				m_QuadsetPicker.m_lQuads[0].m_aPoints[4].y = (int)(View.y+View.h/2) << 10;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[0].x = f2fx(View.x);
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[0].y = f2fx(View.y);
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[1].x = f2fx((View.x + View.w));
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[1].y = f2fx(View.y);
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[2].x = f2fx(View.x);
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[2].y = f2fx((View.y + View.h));
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[3].x = f2fx((View.x + View.w));
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[3].y = f2fx((View.y + View.h));
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[4].x = f2fx((View.x + View.w / 2));
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[4].y = f2fx((View.y + View.h / 2));
 				m_QuadsetPicker.Render();
 			}
 		}
@@ -3355,8 +3358,8 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 				{
 					if (g != m_SelectedGroup)
 						SelectLayer(0, g);
-	
-					if ((Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && m_SelectedGroup == g)
+
+					if((Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && m_SelectedGroup == g)
 					{
 						for(int i = 1; i < m_Map.m_lGroups[g]->m_lLayers.size(); i++)
 						{
@@ -3475,8 +3478,8 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 								}
 							}
 						}
-						
-						if (!IsLayerSelected)
+
+						if(!IsLayerSelected)
 						{
 							SelectLayer(i, g);
 						}
@@ -3605,8 +3608,25 @@ void CEditor::ReplaceImage(const char *pFileName, int StorageType, void *pUser)
 	*pImg = ImgInfo;
 	IStorage::StripPathAndExtension(pFileName, pImg->m_aName, sizeof(pImg->m_aName));
 	pImg->m_External = IsVanillaImage(pImg->m_aName);
+
+	if(!pImg->m_External && g_Config.m_ClEditorDilate == 1)
+	{
+		int ColorChannelCount = 0;
+		if(ImgInfo.m_Format == CImageInfo::FORMAT_ALPHA)
+			ColorChannelCount = 1;
+		else if(ImgInfo.m_Format == CImageInfo::FORMAT_RGB)
+			ColorChannelCount = 3;
+		else if(ImgInfo.m_Format == CImageInfo::FORMAT_RGBA)
+			ColorChannelCount = 4;
+
+		DilateImage((unsigned char *)ImgInfo.m_pData, ImgInfo.m_Width, ImgInfo.m_Height, ColorChannelCount);
+	}
+
 	pImg->m_AutoMapper.Load(pImg->m_aName);
-	pImg->m_Texture = pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, CImageInfo::FORMAT_AUTO, 0);
+	int TextureLoadFlag = pEditor->Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+	if(ImgInfo.m_Width % 16 != 0 || ImgInfo.m_Height % 16 != 0)
+		TextureLoadFlag = 0;
+	pImg->m_Texture = pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, CImageInfo::FORMAT_AUTO, TextureLoadFlag, pFileName);
 	ImgInfo.m_pData = 0;
 	pEditor->SortImages();
 	for(int i = 0; i < pEditor->m_Map.m_lImages.size(); ++i)
@@ -3633,11 +3653,35 @@ void CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 			return;
 	}
 
+	if(pEditor->m_Map.m_lImages.size() >= 64) // hard limit for teeworlds
+	{
+		pEditor->m_PopupEventType = pEditor->POPEVENT_IMAGE_MAX;
+		pEditor->m_PopupEventActivated = true;
+		return;
+	}
+
 	CEditorImage *pImg = new CEditorImage(pEditor);
 	*pImg = ImgInfo;
-	pImg->m_Texture = pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, CImageInfo::FORMAT_AUTO, 0);
-	ImgInfo.m_pData = 0;
 	pImg->m_External = IsVanillaImage(aBuf);
+
+	if(!pImg->m_External && g_Config.m_ClEditorDilate == 1)
+	{
+		int ColorChannelCount = 0;
+		if(ImgInfo.m_Format == CImageInfo::FORMAT_ALPHA)
+			ColorChannelCount = 1;
+		else if(ImgInfo.m_Format == CImageInfo::FORMAT_RGB)
+			ColorChannelCount = 3;
+		else if(ImgInfo.m_Format == CImageInfo::FORMAT_RGBA)
+			ColorChannelCount = 4;
+
+		DilateImage((unsigned char *)ImgInfo.m_pData, ImgInfo.m_Width, ImgInfo.m_Height, ColorChannelCount);
+	}
+
+	int TextureLoadFlag = pEditor->Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+	if(ImgInfo.m_Width % 16 != 0 || ImgInfo.m_Height % 16 != 0)
+		TextureLoadFlag = 0;
+	pImg->m_Texture = pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, CImageInfo::FORMAT_AUTO, TextureLoadFlag, pFileName);
+	ImgInfo.m_pData = 0;
 	str_copy(pImg->m_aName, aBuf, sizeof(pImg->m_aName));
 	pImg->m_AutoMapper.Load(pImg->m_aName);
 	pEditor->m_Map.m_lImages.add(pImg);
@@ -3872,6 +3916,21 @@ int CEditor::PopupSound(CEditor *pEditor, CUIRect View, void *pContext)
 	}
 
 	return 0;
+}
+
+void CEditor::SelectGameLayer()
+{
+	for(int g = 0; g < m_Map.m_lGroups.size(); g++)
+	{
+		for(int i = 0; i < m_Map.m_lGroups[g]->m_lLayers.size(); i++)
+		{
+			if(m_Map.m_lGroups[g]->m_lLayers[i] == m_Map.m_pGameLayer)
+			{
+				SelectLayer(i, g);
+				return;
+			}
+		}
+	}
 }
 
 static int CompareImageName(const void *pObject1, const void *pObject2)
@@ -5891,26 +5950,6 @@ void CEditor::Render()
 		}
 	}
 
-	if(m_Dialog == DIALOG_NONE && UI()->MouseInside(&View))
-	{
-		// Determines in which direction to zoom.
-		int Zoom = 0;
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
-			Zoom--;
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
-			Zoom++;
-
-		if(Zoom != 0)
-		{
-			float OldLevel = m_ZoomLevel;
-			m_ZoomLevel = clamp(m_ZoomLevel + Zoom * 20, 50, 2000);
-			if(g_Config.m_EdZoomTarget)
-				ZoomMouseTarget((float)m_ZoomLevel / OldLevel);
-		}
-	}
-
-	m_ZoomLevel = clamp(m_ZoomLevel, 50, 2000);
-	m_WorldZoom = m_ZoomLevel/100.0f;
 	float Brightness = 0.25f;
 
 	if(m_GuiActive)
@@ -6101,6 +6140,27 @@ void CEditor::Render()
 
 	UiDoPopupMenu();
 
+	if(m_Dialog == DIALOG_NONE && !m_MouseInsidePopup && UI()->MouseInside(&View))
+	{
+		// Determines in which direction to zoom.
+		int Zoom = 0;
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
+			Zoom--;
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
+			Zoom++;
+
+		if(Zoom != 0)
+		{
+			float OldLevel = m_ZoomLevel;
+			m_ZoomLevel = clamp(m_ZoomLevel + Zoom * 20, 50, 2000);
+			if(g_Config.m_EdZoomTarget)
+				ZoomMouseTarget((float)m_ZoomLevel / OldLevel);
+		}
+	}
+
+	m_ZoomLevel = clamp(m_ZoomLevel, 50, 2000);
+	m_WorldZoom = m_ZoomLevel / 100.0f;
+
 	if(m_GuiActive)
 		RenderStatusbar(StatusBar);
 
@@ -6139,6 +6199,8 @@ void CEditor::Render()
 		Graphics()->QuadsEnd();
 		Graphics()->WrapNormal();
 	}
+
+	m_MouseInsidePopup = false;
 }
 
 static int UndoStepsListdirCallback(const char *pName, int IsDir, int StorageType, void *pUser)
@@ -6170,7 +6232,7 @@ void CEditor::Reset(bool CreateDefault)
 	if(CreateDefault)
 		m_Map.CreateDefault(m_EntitiesTexture);
 
-	SelectLayer(0, 0);
+	SelectGameLayer();
 	m_lSelectedQuads.clear();
 	m_SelectedPoints = 0;
 	m_SelectedEnvelope = 0;
@@ -6368,13 +6430,14 @@ void CEditor::Init()
 	m_CheckerTexture = Graphics()->LoadTexture("editor/checker.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 	m_BackgroundTexture = Graphics()->LoadTexture("editor/background.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 	m_CursorTexture = Graphics()->LoadTexture("editor/cursor.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
-	m_EntitiesTexture = Graphics()->LoadTexture("editor/entities/DDNet.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+	int TextureLoadFlag = Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+	m_EntitiesTexture = Graphics()->LoadTexture("editor/entities/DDNet.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, TextureLoadFlag);
 
-	m_FrontTexture = Graphics()->LoadTexture("editor/front.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
-	m_TeleTexture = Graphics()->LoadTexture("editor/tele.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
-	m_SpeedupTexture = Graphics()->LoadTexture("editor/speedup.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
-	m_SwitchTexture = Graphics()->LoadTexture("editor/switch.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
-	m_TuneTexture = Graphics()->LoadTexture("editor/tune.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+	m_FrontTexture = Graphics()->LoadTexture("editor/front.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, TextureLoadFlag);
+	m_TeleTexture = Graphics()->LoadTexture("editor/tele.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, TextureLoadFlag);
+	m_SpeedupTexture = Graphics()->LoadTexture("editor/speedup.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, TextureLoadFlag);
+	m_SwitchTexture = Graphics()->LoadTexture("editor/switch.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, TextureLoadFlag);
+	m_TuneTexture = Graphics()->LoadTexture("editor/tune.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, TextureLoadFlag);
 
 	m_TilesetPicker.m_pEditor = this;
 	m_TilesetPicker.MakePalette();
@@ -6394,7 +6457,7 @@ void CEditor::Init()
 	ms_PickerColor = ColorHSVA(1.0f, 0.0f, 0.0f);
 }
 
-void CEditor::DoMapBorder()
+void CEditor::PlaceBorderTiles()
 {
 	CLayerTiles *pT = (CLayerTiles *)GetSelectedLayerType(0, LAYERTYPE_TILES);
 

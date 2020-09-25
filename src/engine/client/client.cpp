@@ -2845,13 +2845,11 @@ void CClient::Update()
 		else if(m_pMapdownloadTask->State() == HTTP_ERROR)
 		{
 			dbg_msg("webdl", "http failed, falling back to gameserver");
-			Storage()->RemoveFile(m_pMapdownloadTask->Dest(), IStorage::TYPE_SAVE);
 			ResetMapDownload();
 			SendMapRequest();
 		}
 		else if(m_pMapdownloadTask->State() == HTTP_ABORTED)
 		{
-			Storage()->RemoveFile(m_pMapdownloadTask->Dest(), IStorage::TYPE_SAVE);
 			m_pMapdownloadTask = NULL;
 		}
 	}

@@ -10,6 +10,7 @@
 #	Arion WT	2011-08-07 12:16:28
 #	gerdoe		2020-07-01 22:04:21
 #	gerdoe		2020-09-14 20:53:53
+#	gerdoe		2020-09-17 22:49:22
 ##### /authors #####
 
 ##### translated strings #####
@@ -448,10 +449,10 @@ Spectators
 == Наблюдатели
 
 Standard gametype
-== Стандартный тип игры
+== Станд. тип игры
 
 Standard map
-== Стандартная карта
+== Станд. карта
 
 Stop record
 == Стоп
@@ -466,7 +467,7 @@ Switch weapon on pickup
 == Переключать оружие при подборе
 
 Switch weapon when out of ammo
-== Переключать оружие без патронов
+== Переключать пустое оружие
 
 Reset wanted weapon on death
 == Сбрасывать выбор оружия при смерти
@@ -496,7 +497,7 @@ The server is running a non-standard tuning on a pure game type.
 == Сервер запущен с нестандартными настройками на стандартном типе игры.
 
 There's an unsaved map in the editor, you might want to save it before you quit the game.
-== Есть несохранённая карта в редакторе, Вы можете сохранить её перед тем, как выйти.
+== Есть несохранённая карта в редакторе. Вы можете сохранить её перед тем, как выйти.
 
 Time limit
 == Лимит времени
@@ -523,13 +524,13 @@ Use team colors for name plates
 == Командные цвета для имен игроков
 
 V-Sync
-== Вертикальная синхронизация
+== V-Sync
 
 Version
 == Версия
 
 Vote command:
-== Комманда голосования:
+== Команда голосования:
 
 Vote description:
 == Описание голосования:
@@ -625,7 +626,7 @@ New name:
 == Новое имя
 
 Sat.
-== Контраст
+== Контр.
 
 Miscellaneous
 == Дополнительно
@@ -634,13 +635,16 @@ Internet
 == Интернет
 
 Max demos
-== Максимальное количество демо
+== Максимальное кол-во демо
 
 Join game
 == Играть
 
 FSAA samples
 == Сэмплов FSAA
+
+%d of %d servers, %d players
+== %d из %d серверов, %d игроков
 
 Sound volume
 == Громкость звука
@@ -649,7 +653,7 @@ Created:
 == Создан:
 
 Max Screenshots
-== Максимальное количество снимков
+== Максимальное кол-во снимков
 
 Length:
 == Длина
@@ -667,7 +671,7 @@ Info
 == Инфо
 
 Hue
-== Оттенок
+== Оттен.
 
 Record demo
 == Записать демо
@@ -694,16 +698,19 @@ Round
 == Раунд
 
 Lht.
-== Яркость
+== Ярк.
 
 UI Color
 == Цвет интерфейса
+
+Host address
+== Адрес сервера
 
 Crc:
 == Crc:
 
 Alpha
-== Прозрачн.
+== Прозр.
 
 LAN
 == LAN
@@ -760,10 +767,10 @@ Old mouse mode
 == Режим старой мышки
 
 Team message
-== Сообщение команды
+== Сообщение от команды
 
 Automatically create statboard csv
-== Автоматически создавать statboard csv
+== Автоматически создавать statboard CSV
 
 Are you sure that you want to disconnect?
 == Вы уверены, что хотите отключиться?
@@ -781,7 +788,7 @@ Messages
 == Сообщения
 
 New random timeout code
-== Новый случайный тайм-аут код
+== Новый тайм-аут код
 
 Loading DDNet Client
 == Загрузка DDNet Client
@@ -955,16 +962,16 @@ Clan plates size
 == Размер панели клана
 
 Refresh Rate
-== Частота обновлений
+== Частота обн.
 
 Max CSVs
 == Максимум CSV
 
 Vanilla skins only
-== Только базов. скины
+== Только станд. скины
 
 Fat skins (DDFat)
-== Толстые скины (DDFat)
+== Толстые скины
 
 Skin prefix
 == Префикс скина
@@ -985,7 +992,7 @@ Zoom out
 == Отдалить
 
 Default zoom
-== Стандартный масштаб
+== Станд. масштаб
 
 Show all
 == Показывать всех
@@ -1030,13 +1037,13 @@ Screen
 == Экран
 
 Use OpenGL 3.3 (experimental)
-== Использовать OpenGL 3.3 (тест)
+== Использовать OpenGL 3.3 (тестируется)
 
 Preinit VBO (iGPUs only)
 == Преинициал-ть VBO (только iGPU)
 
 Multiple texture units (disable for MacOS)
-== Множество текстурных блоков (отключите для MacOS)
+== Улучш. блоки текстур (откл. для MacOS)
 
 Use high DPI
 == Использовать высокую чувств.
@@ -1063,7 +1070,7 @@ Save the best demo of each race
 == Сохранять лучшее демо каждой попытки
 
 Default length: %d
-== Стандартная длина: %d
+== Станд. длина: %d
 
 Enable replays
 == Включить записи
@@ -1108,13 +1115,13 @@ Show tiles layers from BG map
 == Показывать слои с тайлами из фоновой карты
 
 Try fast HTTP map download first
-== Пытаться закачать карту быстро по HTTP
+== Быстро загружать карты по HTTP
 
 DDNet %s is available:
 == Доступен DDNet %s:
 
 Check now
-== Проверить сейчас
+== Проверить
 
 Time
 == Время
@@ -1141,7 +1148,7 @@ Deaths
 == Смерти
 
 Suicides
-== Самоубийств
+== Суицидов
 
 Ratio
 == Соотношение
@@ -1178,6 +1185,9 @@ The width or height of texture %s is not divisible by 16, which might cause visu
 
 Warning
 == Предупреждение
+
+Menu
+== Меню
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == Используйте кнопку k, чтобы возродиться, q для паузы и наблюдением за остальными игроками. Проверьте настройки для остальных кнопок.
@@ -1216,35 +1226,35 @@ Editor
 == Редактор
 
 News
-== 
+== Новости
 
 Search:
-== 
+== Искать:
 
 Exclude:
-== 
+== Исключить:
 
 Search servers:
-== 
+== Искать сервера:
 
 %d of %d servers
-== 
+== %d из %d серверов
 
 %d of %d server
-== 
+== %d из %d сервера
 
 %d players
-== 
+== %d игроков
 
 %d player
-== 
+== %d игрок
 
 Download skins
-== 
+== Скачать скины
 
 Learn
-== 
+== Обучение
 
 [Start menu]
 Play
-== 
+== Играть

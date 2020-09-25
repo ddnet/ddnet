@@ -10,14 +10,15 @@
 
 #include "background.h"
 
-CBackground::CBackground() : CMapLayers(CMapLayers::TYPE_BACKGROUND_FORCE)
+CBackground::CBackground(int MapType, bool OnlineOnly)
+	: CMapLayers(MapType, OnlineOnly)
 {
 	m_pLayers = new CLayers;
 	m_pBackgroundLayers = m_pLayers;
 	m_pImages = new CMapImages;
 	m_pBackgroundImages = m_pImages;
-	m_pMap = CreateEngineMap();
-	m_pBackgroundMap = m_pMap;
+	m_pBackgroundMap = CreateBGMap();
+	m_pMap = m_pBackgroundMap;
 	m_Loaded = false;
 	m_aMapName[0] = '\0';
 	m_LastLoad = 0;
@@ -29,10 +30,15 @@ CBackground::~CBackground()
 	delete m_pBackgroundImages;
 }
 
+CBackgroundEngineMap *CBackground::CreateBGMap()
+{
+	return new CBackgroundEngineMap;
+}
+
 void CBackground::OnInit()
 {
 	m_pImages->m_pClient = GameClient();
-	Kernel()->ReregisterInterface(m_pMap);
+	Kernel()->RegisterInterface(m_pBackgroundMap);
 	if(g_Config.m_ClBackgroundEntities[0] != '\0' && str_comp(g_Config.m_ClBackgroundEntities, CURRENT))
 		LoadBackground();
 }
@@ -72,7 +78,7 @@ void CBackground::LoadBackground()
 			m_Loaded = true;
 		}
 	}
-	
+
 	if(m_Loaded)
 	{
 		CMapLayers::OnMapLoad();

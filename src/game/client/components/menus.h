@@ -326,6 +326,7 @@ class CMenus : public CComponent
 
 	// found in menus_settings.cpp
 	void RenderLanguageSelection(CUIRect MainView);
+	void RenderThemeSelection(CUIRect MainView, bool Header = true);
 	void RenderSettingsGeneral(CUIRect MainView);
 	void RenderSettingsPlayer(CUIRect MainView);
 	void RenderSettingsDummyPlayer(CUIRect MainView);
@@ -341,8 +342,12 @@ class CMenus : public CComponent
 
 	bool CheckHotKey(int Key) const;
 
+	class CMenuBackground *m_pBackground;
+
 public:
 	void RenderBackground();
+
+	void SetMenuBackground(class CMenuBackground *pBackground) { m_pBackground = pBackground; }
 
 	void UseMouseButtons(bool Use) { m_UseMouseButtons = Use; }
 
@@ -354,6 +359,7 @@ public:
 	void RenderUpdating(const char *pCaption, int current=0, int total=0);
 
 	bool IsActive() const { return m_MenuActive; }
+	void KillServer();
 
 	virtual void OnInit();
 
