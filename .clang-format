@@ -2,12 +2,16 @@
 Language: Cpp
 AccessModifierOffset: -8
 AlignAfterOpenBracket: DontAlign
+AlignEscapedNewlines: DontAlign
 AlignTrailingComments: false
-AllowShortFunctionsOnASingleLine: Inline
+AllowShortBlocksOnASingleLine: Always
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: All
 AlwaysBreakTemplateDeclarations: true
 BasedOnStyle: LLVM
 BreakBeforeBraces: Custom
 BreakBeforeTernaryOperators: false
+BreakConstructorInitializers: AfterColon
 BreakStringLiterals: true
 BraceWrapping:
   AfterCaseLabel: true

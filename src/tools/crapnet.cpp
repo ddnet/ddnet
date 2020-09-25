@@ -31,7 +31,7 @@ struct CPingConfig
 };
 
 static CPingConfig m_aConfigPings[] = {
-//		base	flux	spike	loss	delay	delayfreq
+		// base flux spike loss delay delayfreq
 		{0,		0,		0,		0,		0,		0},
 		{40,	20,		100,		0,		0,		0},
 		{140,	40,		200,		0,		0,		0},

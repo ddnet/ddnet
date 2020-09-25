@@ -3,6 +3,8 @@
 #ifndef GAME_SERVER_ENTITIES_PROJECTILE_H
 #define GAME_SERVER_ENTITIES_PROJECTILE_H
 
+#include <game/server/entity.h>
+
 class CProjectile : public CEntity
 {
 public:

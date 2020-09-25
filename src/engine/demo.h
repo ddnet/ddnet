@@ -18,12 +18,11 @@ const double g_aSpeeds[] = {0.1, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0, 4.0,
 typedef bool (*DEMOFUNC_FILTER)(const void *pData, int DataSize, void *pUser);
 
 // TODO: Properly extend demo format using uuids
+// "6be6da4a-cebd-380c-9b5b-1289c842d780"
+// "demoitem-sha256@ddnet.tw"
 static const CUuid SHA256_EXTENSION = {{
-	// "6be6da4a-cebd-380c-9b5b-1289c842d780"
-	// "demoitem-sha256@ddnet.tw"
 	0x6b, 0xe6, 0xda, 0x4a, 0xce, 0xbd, 0x38, 0x0c,
-	0x9b, 0x5b, 0x12, 0x89, 0xc8, 0x42, 0xd7, 0x80
-}};
+	0x9b, 0x5b, 0x12, 0x89, 0xc8, 0x42, 0xd7, 0x80}};
 
 struct CDemoHeader
 {

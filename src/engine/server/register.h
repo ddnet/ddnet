@@ -4,6 +4,7 @@
 #define ENGINE_SERVER_REGISTER_H
 
 #include <engine/masterserver.h>
+#include <engine/shared/network.h>
 
 class CRegister
 {

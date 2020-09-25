@@ -52,6 +52,7 @@
 	#include <windows.h>
 	#include <winsock2.h>
 	#include <ws2tcpip.h>
+
 	#include <fcntl.h>
 	#include <direct.h>
 	#include <errno.h>
@@ -3335,8 +3336,8 @@ int os_is_winxp_or_lower(void)
 	mem_zero(&ver, sizeof(OSVERSIONINFO));
 	ver.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 	GetVersionEx(&ver);
-	return ver.dwMajorVersion < WINXP_MAJOR
-		|| (ver.dwMajorVersion == WINXP_MAJOR && ver.dwMinorVersion <= WINXP_MINOR);
+	return ver.dwMajorVersion < WINXP_MAJOR ||
+		(ver.dwMajorVersion == WINXP_MAJOR && ver.dwMinorVersion <= WINXP_MINOR);
 #else
 	return 0;
 #endif
