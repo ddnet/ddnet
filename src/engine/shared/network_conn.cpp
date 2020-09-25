@@ -1,8 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <base/system.h>
 #include "config.h"
 #include "network.h"
+#include <base/system.h>
 
 SECURITY_TOKEN ToSecurityToken(unsigned char *pData)
 {
@@ -23,7 +23,7 @@ void CNetConnection::Reset(bool Rejoin)
 	m_PeerAck = 0;
 	m_RemoteClosed = 0;
 
-	if (!Rejoin)
+	if(!Rejoin)
 	{
 		m_TimeoutProtected = false;
 		m_TimeoutSituation = false;
@@ -106,7 +106,7 @@ int CNetConnection::Flush()
 
 int CNetConnection::QueueChunkEx(int Flags, int DataSize, const void *pData, int Sequence)
 {
-	if (m_State == NET_CONNSTATE_OFFLINE || m_State == NET_CONNSTATE_ERROR)
+	if(m_State == NET_CONNSTATE_OFFLINE || m_State == NET_CONNSTATE_ERROR)
 		return -1;
 
 	unsigned char *pChunkData;
@@ -127,20 +127,20 @@ int CNetConnection::QueueChunkEx(int Flags, int DataSize, const void *pData, int
 
 	//
 	m_Construct.m_NumChunks++;
-	m_Construct.m_DataSize = (int)(pChunkData-m_Construct.m_aChunkData);
+	m_Construct.m_DataSize = (int)(pChunkData - m_Construct.m_aChunkData);
 
 	// set packet flags as well
 
-	if(Flags&NET_CHUNKFLAG_VITAL && !(Flags&NET_CHUNKFLAG_RESEND))
+	if(Flags & NET_CHUNKFLAG_VITAL && !(Flags & NET_CHUNKFLAG_RESEND))
 	{
 		// save packet if we need to resend
-		CNetChunkResend *pResend = m_Buffer.Allocate(sizeof(CNetChunkResend)+DataSize);
+		CNetChunkResend *pResend = m_Buffer.Allocate(sizeof(CNetChunkResend) + DataSize);
 		if(pResend)
 		{
 			pResend->m_Sequence = Sequence;
 			pResend->m_Flags = Flags;
 			pResend->m_DataSize = DataSize;
-			pResend->m_pData = (unsigned char *)(pResend+1);
+			pResend->m_pData = (unsigned char *)(pResend + 1);
 			pResend->m_FirstSendTime = time_get();
 			pResend->m_LastSendTime = pResend->m_FirstSendTime;
 			mem_copy(pResend->m_pData, pData, DataSize);
@@ -157,8 +157,8 @@ int CNetConnection::QueueChunkEx(int Flags, int DataSize, const void *pData, int
 
 int CNetConnection::QueueChunk(int Flags, int DataSize, const void *pData)
 {
-	if(Flags&NET_CHUNKFLAG_VITAL)
-		m_Sequence = (m_Sequence+1)%NET_MAX_SEQUENCE;
+	if(Flags & NET_CHUNKFLAG_VITAL)
+		m_Sequence = (m_Sequence + 1) % NET_MAX_SEQUENCE;
 	return QueueChunkEx(Flags, DataSize, pData, m_Sequence);
 }
 
@@ -171,7 +171,7 @@ void CNetConnection::SendControl(int ControlMsg, const void *pExtra, int ExtraSi
 
 void CNetConnection::ResendChunk(CNetChunkResend *pResend)
 {
-	QueueChunkEx(pResend->m_Flags|NET_CHUNKFLAG_RESEND, pResend->m_DataSize, pResend->m_pData, pResend->m_Sequence);
+	QueueChunkEx(pResend->m_Flags | NET_CHUNKFLAG_RESEND, pResend->m_DataSize, pResend->m_pData, pResend->m_Sequence);
 	pResend->m_LastSendTime = time_get();
 }
 
@@ -205,7 +205,7 @@ void CNetConnection::Disconnect(const char *pReason)
 		if(!m_TimeoutSituation)
 		{
 			if(pReason)
-				SendControl(NET_CTRLMSG_CLOSE, pReason, str_length(pReason)+1);
+				SendControl(NET_CTRLMSG_CLOSE, pReason, str_length(pReason) + 1);
 			else
 				SendControl(NET_CTRLMSG_CLOSE, 0, 0);
 		}
@@ -242,13 +242,13 @@ void CNetConnection::DirectInit(NETADDR &Addr, SECURITY_TOKEN SecurityToken, SEC
 
 int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_TOKEN SecurityToken)
 {
-	if (!m_Sixup && State() != NET_CONNSTATE_OFFLINE && m_SecurityToken != NET_SECURITY_TOKEN_UNKNOWN && m_SecurityToken != NET_SECURITY_TOKEN_UNSUPPORTED)
+	if(!m_Sixup && State() != NET_CONNSTATE_OFFLINE && m_SecurityToken != NET_SECURITY_TOKEN_UNKNOWN && m_SecurityToken != NET_SECURITY_TOKEN_UNSUPPORTED)
 	{
 		// supposed to have a valid token in this packet, check it
-		if (pPacket->m_DataSize < (int)sizeof(m_SecurityToken))
+		if(pPacket->m_DataSize < (int)sizeof(m_SecurityToken))
 			return 0;
 		pPacket->m_DataSize -= sizeof(m_SecurityToken);
-		if (m_SecurityToken != ToSecurityToken(&pPacket->m_aChunkData[pPacket->m_DataSize]))
+		if(m_SecurityToken != ToSecurityToken(&pPacket->m_aChunkData[pPacket->m_DataSize]))
 		{
 			if(g_Config.m_Debug)
 				dbg_msg("security", "token mismatch, expected %d got %d", m_SecurityToken, ToSecurityToken(&pPacket->m_aChunkData[pPacket->m_DataSize]));
@@ -275,11 +275,11 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 	int64 Now = time_get();
 
 	// check if resend is requested
-	if(pPacket->m_Flags&NET_PACKETFLAG_RESEND)
+	if(pPacket->m_Flags & NET_PACKETFLAG_RESEND)
 		Resend();
 
 	//
-	if(pPacket->m_Flags&NET_PACKETFLAG_CONTROL)
+	if(pPacket->m_Flags & NET_PACKETFLAG_CONTROL)
 	{
 		int CtrlMsg = pPacket->m_aChunkData[0];
 
@@ -329,9 +329,7 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 					m_LastSendTime = Now;
 					m_LastRecvTime = Now;
 					m_LastUpdateTime = Now;
-					if (m_SecurityToken == NET_SECURITY_TOKEN_UNKNOWN
-						&& pPacket->m_DataSize >= (int)(1 + sizeof(SECURITY_TOKEN_MAGIC) + sizeof(m_SecurityToken))
-						&& !mem_comp(&pPacket->m_aChunkData[1], SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC)))
+					if(m_SecurityToken == NET_SECURITY_TOKEN_UNKNOWN && pPacket->m_DataSize >= (int)(1 + sizeof(SECURITY_TOKEN_MAGIC) + sizeof(m_SecurityToken)) && !mem_comp(&pPacket->m_aChunkData[1], SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC)))
 					{
 						m_SecurityToken = NET_SECURITY_TOKEN_UNSUPPORTED;
 						if(g_Config.m_Debug)
@@ -353,9 +351,7 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 				// connection made
 				if(CtrlMsg == NET_CTRLMSG_CONNECTACCEPT)
 				{
-					if (m_SecurityToken == NET_SECURITY_TOKEN_UNKNOWN
-						&& pPacket->m_DataSize >= (int)(1 + sizeof(SECURITY_TOKEN_MAGIC) + sizeof(m_SecurityToken))
-						&& !mem_comp(&pPacket->m_aChunkData[1], SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC)))
+					if(m_SecurityToken == NET_SECURITY_TOKEN_UNKNOWN && pPacket->m_DataSize >= (int)(1 + sizeof(SECURITY_TOKEN_MAGIC) + sizeof(m_SecurityToken)) && !mem_comp(&pPacket->m_aChunkData[1], SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC)))
 					{
 						m_SecurityToken = ToSecurityToken(&pPacket->m_aChunkData[1 + sizeof(SECURITY_TOKEN_MAGIC)]);
 						if(g_Config.m_Debug)
@@ -400,7 +396,7 @@ int CNetConnection::Update()
 {
 	int64 Now = time_get();
 
-	if(State() == NET_CONNSTATE_ERROR && m_TimeoutSituation && (Now-m_LastRecvTime) > time_freq()*g_Config.m_ConnTimeoutProtection)
+	if(State() == NET_CONNSTATE_ERROR && m_TimeoutSituation && (Now - m_LastRecvTime) > time_freq() * g_Config.m_ConnTimeoutProtection)
 	{
 		m_TimeoutSituation = false;
 		SetError("Timeout Protection over");
@@ -414,7 +410,7 @@ int CNetConnection::Update()
 	// check for timeout
 	if(State() != NET_CONNSTATE_OFFLINE &&
 		State() != NET_CONNSTATE_CONNECT &&
-		(Now-m_LastRecvTime) > time_freq()*g_Config.m_ConnTimeout)
+		(Now - m_LastRecvTime) > time_freq() * g_Config.m_ConnTimeout)
 	{
 		m_State = NET_CONNSTATE_ERROR;
 		SetError("Timeout");
@@ -427,7 +423,7 @@ int CNetConnection::Update()
 		CNetChunkResend *pResend = m_Buffer.First();
 
 		// check if we have some really old stuff laying around and abort if not acked
-		if(Now-pResend->m_FirstSendTime > time_freq()*g_Config.m_ConnTimeout)
+		if(Now - pResend->m_FirstSendTime > time_freq() * g_Config.m_ConnTimeout)
 		{
 			m_State = NET_CONNSTATE_ERROR;
 			char aBuf[512];
@@ -438,7 +434,7 @@ int CNetConnection::Update()
 		else
 		{
 			// resend packet if we haven't got it acked in 1 second
-			if(Now-pResend->m_LastSendTime > time_freq())
+			if(Now - pResend->m_LastSendTime > time_freq())
 				ResendChunk(pResend);
 		}
 	}
@@ -446,24 +442,24 @@ int CNetConnection::Update()
 	// send keep alives if nothing has happened for 250ms
 	if(State() == NET_CONNSTATE_ONLINE)
 	{
-		if(time_get()-m_LastSendTime > time_freq()/2) // flush connection after 500ms if needed
+		if(time_get() - m_LastSendTime > time_freq() / 2) // flush connection after 500ms if needed
 		{
 			int NumFlushedChunks = Flush();
 			if(NumFlushedChunks && g_Config.m_Debug)
 				dbg_msg("connection", "flushed connection due to timeout. %d chunks.", NumFlushedChunks);
 		}
 
-		if(time_get()-m_LastSendTime > time_freq())
+		if(time_get() - m_LastSendTime > time_freq())
 			SendControl(NET_CTRLMSG_KEEPALIVE, 0, 0);
 	}
 	else if(State() == NET_CONNSTATE_CONNECT)
 	{
-		if(time_get()-m_LastSendTime > time_freq()/2) // send a new connect every 500ms
+		if(time_get() - m_LastSendTime > time_freq() / 2) // send a new connect every 500ms
 			SendControl(NET_CTRLMSG_CONNECT, SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC));
 	}
 	else if(State() == NET_CONNSTATE_PENDING)
 	{
-		if(time_get()-m_LastSendTime > time_freq()/2) // send a new connect/accept every 500ms
+		if(time_get() - m_LastSendTime > time_freq() / 2) // send a new connect/accept every 500ms
 			SendControl(NET_CTRLMSG_CONNECTACCEPT, SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC));
 	}
 
@@ -489,12 +485,12 @@ void CNetConnection::SetTimedOut(const NETADDR *pAddr, int Sequence, int Ack, SE
 
 	// copy resend buffer
 	m_Buffer.Init();
-	while (pResendBuffer->First())
+	while(pResendBuffer->First())
 	{
 		CNetChunkResend *First = pResendBuffer->First();
 
-		CNetChunkResend *pResend = m_Buffer.Allocate(sizeof(CNetChunkResend)+First->m_DataSize);
-		mem_copy(pResend, First, sizeof(CNetChunkResend)+First->m_DataSize);
+		CNetChunkResend *pResend = m_Buffer.Allocate(sizeof(CNetChunkResend) + First->m_DataSize);
+		mem_copy(pResend, First, sizeof(CNetChunkResend) + First->m_DataSize);
 
 		pResendBuffer->PopFirst();
 	}

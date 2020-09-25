@@ -352,8 +352,8 @@ void CGameConsole::CInstance::PrintLine(const char *pLine, bool Highlighted)
 	pEntry->m_aText[Len] = 0;
 }
 
-CGameConsole::CGameConsole()
-	: m_LocalConsole(CONSOLETYPE_LOCAL), m_RemoteConsole(CONSOLETYPE_REMOTE)
+CGameConsole::CGameConsole() :
+	m_LocalConsole(CONSOLETYPE_LOCAL), m_RemoteConsole(CONSOLETYPE_REMOTE)
 {
 	m_ConsoleType = CONSOLETYPE_LOCAL;
 	m_ConsoleState = CONSOLE_CLOSED;

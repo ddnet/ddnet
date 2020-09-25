@@ -3,8 +3,8 @@
 #include <base/math.h>
 #include <engine/console.h>
 
-#include <stdexcept>
 #include <sqlite3.h>
+#include <stdexcept>
 
 CSqliteConnection::CSqliteConnection(const char *pFilename, bool Setup) :
 	IDbConnection("record"),
@@ -30,8 +30,8 @@ void CSqliteConnection::Print(IConsole *pConsole, const char *Mode)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
-			"SQLite-%s: DB: '%s'",
-			Mode, m_aFilename);
+		"SQLite-%s: DB: '%s'",
+		Mode, m_aFilename);
 	pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 }
 
@@ -117,11 +117,11 @@ void CSqliteConnection::PrepareStatement(const char *pStmt)
 		sqlite3_finalize(m_pStmt);
 	m_pStmt = nullptr;
 	int Result = sqlite3_prepare_v2(
-			m_pDb,
-			pStmt,
-			-1, // pStmt can be any length
-			&m_pStmt,
-			NULL);
+		m_pDb,
+		pStmt,
+		-1, // pStmt can be any length
+		&m_pStmt,
+		NULL);
 	ExceptionOnError(Result);
 	m_Done = false;
 }
@@ -238,10 +238,10 @@ void CSqliteConnection::AddPoints(const char *pPlayer, int Points)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
-			"INSERT INTO %s_points(Name, Points) "
-			"VALUES (?, ?) "
-			"ON CONFLICT(Name) UPDATE SET Points=Points+?;",
-			GetPrefix());
+		"INSERT INTO %s_points(Name, Points) "
+		"VALUES (?, ?) "
+		"ON CONFLICT(Name) UPDATE SET Points=Points+?;",
+		GetPrefix());
 	PrepareStatement(aBuf);
 	BindString(1, pPlayer);
 	BindInt(2, Points);

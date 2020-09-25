@@ -4,6 +4,7 @@
 #define GAME_CLIENT_COMPONENTS_GHOST_H
 
 #include <game/client/component.h>
+#include <game/client/components/menus.h>
 
 enum
 {
@@ -59,16 +60,16 @@ private:
 		int m_ChunkSize;
 		int m_NumItems;
 
-		std::vector<CGhostCharacter*> m_lChunks;
+		std::vector<CGhostCharacter *> m_lChunks;
 
 	public:
 		CGhostPath() { Reset(); }
 		~CGhostPath() { Reset(); }
 		CGhostPath(const CGhostPath &Other) = delete;
-		CGhostPath &operator = (const CGhostPath &Other) = delete;
+		CGhostPath &operator=(const CGhostPath &Other) = delete;
 
 		CGhostPath(CGhostPath &&Other);
-		CGhostPath &operator = (CGhostPath &&Other);
+		CGhostPath &operator=(CGhostPath &&Other);
 
 		void Reset(int ChunkSize = 25 * 60); // one minute with default snap rate
 		void SetSize(int Items);

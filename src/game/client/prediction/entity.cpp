@@ -11,7 +11,7 @@ CEntity::CEntity(CGameWorld *pGameWorld, int ObjType)
 	m_pGameWorld = pGameWorld;
 
 	m_ObjType = ObjType;
-	m_Pos = vec2(0,0);
+	m_Pos = vec2(0, 0);
 	m_ProximityRadius = 0;
 
 	m_MarkedForDestroy = false;
@@ -40,8 +40,8 @@ int CEntity::NetworkClipped(vec2 ViewPos)
 
 int CEntity::NetworkClipped(vec2 CheckPos, vec2 ViewPos)
 {
-	float dx = ViewPos.x-CheckPos.x;
-	float dy = ViewPos.y-CheckPos.y;
+	float dx = ViewPos.x - CheckPos.x;
+	float dy = ViewPos.y - CheckPos.y;
 
 	if(absolute(dx) > 1000.0f || absolute(dy) > 800.0f)
 		return 1;
@@ -53,6 +53,8 @@ int CEntity::NetworkClipped(vec2 CheckPos, vec2 ViewPos)
 
 bool CEntity::GameLayerClipped(vec2 CheckPos)
 {
-	return round_to_int(CheckPos.x)/32 < -200 || round_to_int(CheckPos.x)/32 > Collision()->GetWidth()+200 ||
-			round_to_int(CheckPos.y)/32 < -200 || round_to_int(CheckPos.y)/32 > Collision()->GetHeight()+200 ? true : false;
+	return round_to_int(CheckPos.x) / 32 < -200 || round_to_int(CheckPos.x) / 32 > Collision()->GetWidth() + 200 ||
+			       round_to_int(CheckPos.y) / 32 < -200 || round_to_int(CheckPos.y) / 32 > Collision()->GetHeight() + 200 ?
+		       true :
+		       false;
 }

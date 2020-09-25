@@ -5,13 +5,12 @@
 
 #include <engine/console.h>
 #include <engine/graphics.h>
-#include <engine/storage.h>
-#include <engine/textrender.h>
 #include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
+#include <engine/storage.h>
+#include <engine/textrender.h>
 
 #include "countryflags.h"
-
 
 void CCountryFlags::LoadCountryflagsIndexfile()
 {
@@ -47,7 +46,7 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 			continue;
 		}
 
-		int CountryCode = str_toint(pReplacement+3);
+		int CountryCode = str_toint(pReplacement + 3);
 		if(CountryCode < CODE_LB || CountryCode > CODE_UB)
 		{
 			char aBuf[128];
@@ -107,7 +106,7 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 	else
 		mem_zero(m_CodeIndexLUT, sizeof(m_CodeIndexLUT));
 	for(int i = 0; i < m_aCountryFlags.size(); ++i)
-		m_CodeIndexLUT[maximum(0, (m_aCountryFlags[i].m_CountryCode-CODE_LB)%CODE_RANGE)] = i;
+		m_CodeIndexLUT[maximum(0, (m_aCountryFlags[i].m_CountryCode - CODE_LB) % CODE_RANGE)] = i;
 }
 
 void CCountryFlags::OnInit()
@@ -132,12 +131,12 @@ int CCountryFlags::Num() const
 
 const CCountryFlags::CCountryFlag *CCountryFlags::GetByCountryCode(int CountryCode) const
 {
-	return GetByIndex(m_CodeIndexLUT[maximum(0, (CountryCode-CODE_LB)%CODE_RANGE)]);
+	return GetByIndex(m_CodeIndexLUT[maximum(0, (CountryCode - CODE_LB) % CODE_RANGE)]);
 }
 
 const CCountryFlags::CCountryFlag *CCountryFlags::GetByIndex(int Index) const
 {
-	return &m_aCountryFlags[maximum(0, Index%m_aCountryFlags.size())];
+	return &m_aCountryFlags[maximum(0, Index % m_aCountryFlags.size())];
 }
 
 void CCountryFlags::Render(int CountryCode, const ColorRGBA *pColor, float x, float y, float w, float h)
@@ -155,7 +154,7 @@ void CCountryFlags::Render(int CountryCode, const ColorRGBA *pColor, float x, fl
 	else
 	{
 		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, x, y, 10.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+		TextRender()->SetCursor(&Cursor, x, y, 10.0f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = w;
 		TextRender()->TextEx(&Cursor, pFlag->m_aCountryCodeString, -1);
 	}

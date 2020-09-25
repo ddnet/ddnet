@@ -35,7 +35,7 @@ void CLayerSounds::Render(bool Tileset)
 		if(pSource->m_PosEnv >= 0)
 		{
 			float aChannels[4];
-			m_pEditor->EnvelopeEval(pSource->m_PosEnvOffset/1000.0f, pSource->m_PosEnv, aChannels, m_pEditor);
+			m_pEditor->EnvelopeEval(pSource->m_PosEnvOffset / 1000.0f, pSource->m_PosEnv, aChannels, m_pEditor);
 			OffsetX = aChannels[0];
 			OffsetY = aChannels[1];
 		}
@@ -43,34 +43,33 @@ void CLayerSounds::Render(bool Tileset)
 		switch(pSource->m_Shape.m_Type)
 		{
 		case CSoundShape::SHAPE_CIRCLE:
-			{
-				m_pEditor->RenderTools()->DrawCircle(fx2f(pSource->m_Position.x)+OffsetX, fx2f(pSource->m_Position.y)+OffsetY,
-													pSource->m_Shape.m_Circle.m_Radius, 32);
+		{
+			m_pEditor->RenderTools()->DrawCircle(fx2f(pSource->m_Position.x) + OffsetX, fx2f(pSource->m_Position.y) + OffsetY,
+				pSource->m_Shape.m_Circle.m_Radius, 32);
 
-				float Falloff = ((float)pSource->m_Falloff/255.0f);
-				if(Falloff > 0.0f)
-					m_pEditor->RenderTools()->DrawCircle(fx2f(pSource->m_Position.x)+OffsetX, fx2f(pSource->m_Position.y)+OffsetY,
-													pSource->m_Shape.m_Circle.m_Radius*Falloff, 32);
-				break;
-			}
+			float Falloff = ((float)pSource->m_Falloff / 255.0f);
+			if(Falloff > 0.0f)
+				m_pEditor->RenderTools()->DrawCircle(fx2f(pSource->m_Position.x) + OffsetX, fx2f(pSource->m_Position.y) + OffsetY,
+					pSource->m_Shape.m_Circle.m_Radius * Falloff, 32);
+			break;
+		}
 		case CSoundShape::SHAPE_RECTANGLE:
-			{
-				float Width = fx2f(pSource->m_Shape.m_Rectangle.m_Width);
-				float Height = fx2f(pSource->m_Shape.m_Rectangle.m_Height);
-				m_pEditor->RenderTools()->DrawRoundRect(fx2f(pSource->m_Position.x)+OffsetX - Width/2, fx2f(pSource->m_Position.y)+OffsetY - Height/2,
-														Width, Height, 0.0f);
+		{
+			float Width = fx2f(pSource->m_Shape.m_Rectangle.m_Width);
+			float Height = fx2f(pSource->m_Shape.m_Rectangle.m_Height);
+			m_pEditor->RenderTools()->DrawRoundRect(fx2f(pSource->m_Position.x) + OffsetX - Width / 2, fx2f(pSource->m_Position.y) + OffsetY - Height / 2,
+				Width, Height, 0.0f);
 
-				float Falloff = ((float)pSource->m_Falloff/255.0f);
-				if(Falloff > 0.0f)
-					m_pEditor->RenderTools()->DrawRoundRect(fx2f(pSource->m_Position.x)+OffsetX - Falloff*Width/2, fx2f(pSource->m_Position.y)+OffsetY - Falloff*Height/2,
-														Width*Falloff, Height*Falloff, 0.0f);
-				break;
-			}
+			float Falloff = ((float)pSource->m_Falloff / 255.0f);
+			if(Falloff > 0.0f)
+				m_pEditor->RenderTools()->DrawRoundRect(fx2f(pSource->m_Position.x) + OffsetX - Falloff * Width / 2, fx2f(pSource->m_Position.y) + OffsetY - Falloff * Height / 2,
+					Width * Falloff, Height * Falloff, 0.0f);
+			break;
+		}
 		}
 	}
 
 	Graphics()->QuadsEnd();
-
 
 	// draw handles
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_AUDIO_SOURCE].m_Id);
@@ -88,12 +87,12 @@ void CLayerSounds::Render(bool Tileset)
 		if(pSource->m_PosEnv >= 0)
 		{
 			float aChannels[4];
-			m_pEditor->EnvelopeEval(pSource->m_PosEnvOffset/1000.0f, pSource->m_PosEnv, aChannels, m_pEditor);
+			m_pEditor->EnvelopeEval(pSource->m_PosEnvOffset / 1000.0f, pSource->m_PosEnv, aChannels, m_pEditor);
 			OffsetX = aChannels[0];
 			OffsetY = aChannels[1];
 		}
 
-		m_pEditor->RenderTools()->DrawSprite(fx2f(pSource->m_Position.x)+OffsetX, fx2f(pSource->m_Position.y)+OffsetY, s_SourceVisualSize*m_pEditor->m_WorldZoom);
+		m_pEditor->RenderTools()->DrawSprite(fx2f(pSource->m_Position.x) + OffsetX, fx2f(pSource->m_Position.y) + OffsetY, s_SourceVisualSize * m_pEditor->m_WorldZoom);
 	}
 
 	Graphics()->QuadsEnd();
@@ -135,10 +134,10 @@ void CLayerSounds::BrushSelecting(CUIRect Rect)
 {
 	// draw selection rectangle
 	IGraphics::CLineItem Array[4] = {
-		IGraphics::CLineItem(Rect.x, Rect.y, Rect.x+Rect.w, Rect.y),
-		IGraphics::CLineItem(Rect.x+Rect.w, Rect.y, Rect.x+Rect.w, Rect.y+Rect.h),
-		IGraphics::CLineItem(Rect.x+Rect.w, Rect.y+Rect.h, Rect.x, Rect.y+Rect.h),
-		IGraphics::CLineItem(Rect.x, Rect.y+Rect.h, Rect.x, Rect.y)};
+		IGraphics::CLineItem(Rect.x, Rect.y, Rect.x + Rect.w, Rect.y),
+		IGraphics::CLineItem(Rect.x + Rect.w, Rect.y, Rect.x + Rect.w, Rect.y + Rect.h),
+		IGraphics::CLineItem(Rect.x + Rect.w, Rect.y + Rect.h, Rect.x, Rect.y + Rect.h),
+		IGraphics::CLineItem(Rect.x, Rect.y + Rect.h, Rect.x, Rect.y)};
 	Graphics()->TextureClear();
 	Graphics()->LinesBegin();
 	Graphics()->LinesDraw(Array, 4);
@@ -159,7 +158,7 @@ int CLayerSounds::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 		float px = fx2f(pSource->m_Position.x);
 		float py = fx2f(pSource->m_Position.y);
 
-		if(px > Rect.x && px < Rect.x+Rect.w && py > Rect.y && py < Rect.y+Rect.h)
+		if(px > Rect.x && px < Rect.x + Rect.w && py > Rect.y && py < Rect.y + Rect.h)
 		{
 			CSoundSource n;
 			n = *pSource;
@@ -171,7 +170,7 @@ int CLayerSounds::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 		}
 	}
 
-	return pGrabbed->m_lSources.size()?1:0;
+	return pGrabbed->m_lSources.size() ? 1 : 0;
 }
 
 void CLayerSounds::BrushPlace(CLayer *pBrush, float wx, float wy)
@@ -194,7 +193,7 @@ int CLayerSounds::RenderProperties(CUIRect *pToolBox)
 	//
 	enum
 	{
-		PROP_SOUND=0,
+		PROP_SOUND = 0,
 		NUM_PROPS,
 	};
 
@@ -212,7 +211,7 @@ int CLayerSounds::RenderProperties(CUIRect *pToolBox)
 	if(Prop == PROP_SOUND)
 	{
 		if(NewVal >= 0)
-			m_Sound = NewVal%m_pEditor->m_Map.m_lSounds.size();
+			m_Sound = NewVal % m_pEditor->m_Map.m_lSounds.size();
 		else
 			m_Sound = -1;
 	}

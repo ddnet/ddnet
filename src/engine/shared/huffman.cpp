@@ -1,7 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <base/system.h>
 #include "huffman.h"
+#include <base/system.h>
 
 struct CHuffmanConstructNode
 {
@@ -12,9 +12,9 @@ struct CHuffmanConstructNode
 void CHuffman::Setbits_r(CNode *pNode, int Bits, unsigned Depth)
 {
 	if(pNode->m_aLeafs[1] != 0xffff)
-		Setbits_r(&m_aNodes[pNode->m_aLeafs[1]], Bits|(1<<Depth), Depth+1);
+		Setbits_r(&m_aNodes[pNode->m_aLeafs[1]], Bits | (1 << Depth), Depth + 1);
 	if(pNode->m_aLeafs[0] != 0xffff)
-		Setbits_r(&m_aNodes[pNode->m_aLeafs[0]], Bits, Depth+1);
+		Setbits_r(&m_aNodes[pNode->m_aLeafs[0]], Bits, Depth + 1);
 
 	if(pNode->m_NumBits)
 	{
@@ -32,13 +32,13 @@ static void BubbleSort(CHuffmanConstructNode **ppList, int Size)
 	while(Changed)
 	{
 		Changed = 0;
-		for(int i = 0; i < Size-1; i++)
+		for(int i = 0; i < Size - 1; i++)
 		{
-			if(ppList[i]->m_Frequency < ppList[i+1]->m_Frequency)
+			if(ppList[i]->m_Frequency < ppList[i + 1]->m_Frequency)
 			{
 				pTemp = ppList[i];
-				ppList[i] = ppList[i+1];
-				ppList[i+1] = pTemp;
+				ppList[i] = ppList[i + 1];
+				ppList[i + 1] = pTemp;
 				Changed = 1;
 			}
 		}
@@ -66,7 +66,6 @@ void CHuffman::ConstructTree(const unsigned *pFrequencies)
 			aNodesLeftStorage[i].m_Frequency = pFrequencies[i];
 		aNodesLeftStorage[i].m_NodeId = i;
 		apNodesLeft[i] = &aNodesLeftStorage[i];
-
 	}
 
 	m_NumNodes = HUFFMAN_MAX_SYMBOLS;
@@ -78,17 +77,17 @@ void CHuffman::ConstructTree(const unsigned *pFrequencies)
 		BubbleSort(apNodesLeft, NumNodesLeft);
 
 		m_aNodes[m_NumNodes].m_NumBits = 0;
-		m_aNodes[m_NumNodes].m_aLeafs[0] = apNodesLeft[NumNodesLeft-1]->m_NodeId;
-		m_aNodes[m_NumNodes].m_aLeafs[1] = apNodesLeft[NumNodesLeft-2]->m_NodeId;
-		apNodesLeft[NumNodesLeft-2]->m_NodeId = m_NumNodes;
-		apNodesLeft[NumNodesLeft-2]->m_Frequency = apNodesLeft[NumNodesLeft-1]->m_Frequency + apNodesLeft[NumNodesLeft-2]->m_Frequency;
+		m_aNodes[m_NumNodes].m_aLeafs[0] = apNodesLeft[NumNodesLeft - 1]->m_NodeId;
+		m_aNodes[m_NumNodes].m_aLeafs[1] = apNodesLeft[NumNodesLeft - 2]->m_NodeId;
+		apNodesLeft[NumNodesLeft - 2]->m_NodeId = m_NumNodes;
+		apNodesLeft[NumNodesLeft - 2]->m_Frequency = apNodesLeft[NumNodesLeft - 1]->m_Frequency + apNodesLeft[NumNodesLeft - 2]->m_Frequency;
 
 		m_NumNodes++;
 		NumNodesLeft--;
 	}
 
 	// set start node
-	m_pStartNode = &m_aNodes[m_NumNodes-1];
+	m_pStartNode = &m_aNodes[m_NumNodes - 1];
 
 	// build symbol bits
 	Setbits_r(m_pStartNode, 0, 0);
@@ -112,7 +111,7 @@ void CHuffman::Init(const unsigned *pFrequencies)
 		CNode *pNode = m_pStartNode;
 		for(k = 0; k < HUFFMAN_LUTBITS; k++)
 		{
-			pNode = &m_aNodes[pNode->m_aLeafs[Bits&1]];
+			pNode = &m_aNodes[pNode->m_aLeafs[Bits & 1]];
 			Bits >>= 1;
 
 			if(!pNode)
@@ -128,7 +127,6 @@ void CHuffman::Init(const unsigned *pFrequencies)
 		if(k == HUFFMAN_LUTBITS)
 			m_apDecodeLut[i] = pNode;
 	}
-
 }
 
 //***************************************************************
@@ -143,7 +141,7 @@ int CHuffman::Compress(const void *pInput, int InputSize, void *pOutput, int Out
 #define HUFFMAN_MACRO_WRITE() \
 	while(Bitcount >= 8) \
 	{ \
-		*pDst++ = (unsigned char)(Bits&0xff); \
+		*pDst++ = (unsigned char)(Bits & 0xff); \
 		if(pDst == pDstEnd) \
 			return -1; \
 		Bits >>= 8; \
@@ -218,7 +216,7 @@ int CHuffman::Decompress(const void *pInput, int InputSize, void *pOutput, int O
 		// {A} try to load a node now, this will reduce dependency at location {D}
 		pNode = 0;
 		if(Bitcount >= HUFFMAN_LUTBITS)
-			pNode = m_apDecodeLut[Bits&HUFFMAN_LUTMASK];
+			pNode = m_apDecodeLut[Bits & HUFFMAN_LUTMASK];
 
 		// {B} fill with new bits
 		while(Bitcount < 24 && pSrc != pSrcEnd)
@@ -229,7 +227,7 @@ int CHuffman::Decompress(const void *pInput, int InputSize, void *pOutput, int O
 
 		// {C} load symbol now if we didn't that earlier at location {A}
 		if(!pNode)
-			pNode = m_apDecodeLut[Bits&HUFFMAN_LUTMASK];
+			pNode = m_apDecodeLut[Bits & HUFFMAN_LUTMASK];
 
 		if(!pNode)
 			return -1;
@@ -251,7 +249,7 @@ int CHuffman::Decompress(const void *pInput, int InputSize, void *pOutput, int O
 			while(1)
 			{
 				// traverse tree
-				pNode = &m_aNodes[pNode->m_aLeafs[Bits&1]];
+				pNode = &m_aNodes[pNode->m_aLeafs[Bits & 1]];
 
 				// remove bit
 				Bitcount--;

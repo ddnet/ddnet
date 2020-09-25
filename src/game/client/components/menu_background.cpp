@@ -12,8 +12,8 @@
 
 #include "menu_background.h"
 
-CMenuBackground::CMenuBackground()
-	: CBackground(CMapLayers::TYPE_FULL_DESIGN, false)
+CMenuBackground::CMenuBackground() :
+	CBackground(CMapLayers::TYPE_FULL_DESIGN, false)
 {
 	m_RotationCenter = vec2(0.0f, 0.0f);
 	m_AnimationStartPos = vec2(0.0f, 0.0f);

@@ -5,11 +5,9 @@
 
 #include <stdio.h>
 
-static const CUuid TEEWORLDS_NAMESPACE = {{
-	// "e05ddaaa-c4e6-4cfb-b642-5d48e80c0029"
+static const CUuid TEEWORLDS_NAMESPACE = {{// "e05ddaaa-c4e6-4cfb-b642-5d48e80c0029"
 	0xe0, 0x5d, 0xda, 0xaa, 0xc4, 0xe6, 0x4c, 0xfb,
-	0xb6, 0x42, 0x5d, 0x48, 0xe8, 0x0c, 0x00, 0x29
-}};
+	0xb6, 0x42, 0x5d, 0x48, 0xe8, 0x0c, 0x00, 0x29}};
 
 CUuid RandomUuid()
 {
@@ -63,12 +61,12 @@ void ParseUuid(CUuid *pUuid, char *pBuffer)
 		&p[8], &p[9], &p[10], &p[11], &p[12], &p[13], &p[14], &p[15]);
 }
 
-bool CUuid::operator==(const CUuid& Other)
+bool CUuid::operator==(const CUuid &Other)
 {
 	return mem_comp(this, &Other, sizeof(*this)) == 0;
 }
 
-bool CUuid::operator!=(const CUuid& Other)
+bool CUuid::operator!=(const CUuid &Other)
 {
 	return !(*this == Other);
 }
