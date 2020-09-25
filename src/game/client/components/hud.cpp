@@ -70,7 +70,6 @@ void CHud::OnReset()
 	m_DDRaceTime = 0;
 	m_LastReceivedTimeTick = 0;
 	m_CheckpointTick = 0;
-	m_DDRaceTick = 0;
 	m_FinishTime = false;
 	m_DDRaceTimeReceived = false;
 	m_ServerRecord = -1.0f;
@@ -122,20 +121,13 @@ void CHud::RenderGameTimer()
 		else
 			Time = (Client()->GameTick(g_Config.m_ClDummy) - m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick) / Client()->GameTickSpeed();
 
-		if(Time <= 0 && g_Config.m_ClShowDecisecs)
-			str_format(aBuf, sizeof(aBuf), "00:00.0");
-		else if(Time <= 0)
+		if(Time <= 0)
 			str_format(aBuf, sizeof(aBuf), "00:00");
-		else if(g_Config.m_ClShowDecisecs)
-			str_format(aBuf, sizeof(aBuf), "%02d:%02d.%d", Time / 60, Time % 60, m_DDRaceTick / 10);
 		else
 			str_format(aBuf, sizeof(aBuf), "%02d:%02d", Time / 60, Time % 60);
 		float FontSize = 10.0f;
 		float w;
-		if(g_Config.m_ClShowDecisecs)
-			w = TextRender()->TextWidth(0, 12, "00:00.0", -1, -1.0f);
-		else
-			w = TextRender()->TextWidth(0, 12, "00:00", -1, -1.0f);
+		w = TextRender()->TextWidth(0, 12, "00:00", -1, -1.0f);
 		// last 60 sec red, last 10 sec blink
 		if(m_pClient->m_Snap.m_pGameInfoObj->m_TimeLimit && Time <= 60 && (m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer <= 0))
 		{
@@ -804,16 +796,6 @@ void CHud::OnRender()
 			RenderRecord();
 	}
 	RenderCursor();
-
-	static int LastChangeTick = 0;
-	if(LastChangeTick != Client()->PredGameTick(g_Config.m_ClDummy))
-	{
-		m_DDRaceTick += 100 / Client()->GameTickSpeed();
-		LastChangeTick = Client()->PredGameTick(g_Config.m_ClDummy);
-	}
-
-	if(m_DDRaceTick >= 100)
-		m_DDRaceTick = 0;
 }
 
 void CHud::OnMessage(int MsgType, void *pRawMsg)
@@ -825,7 +807,6 @@ void CHud::OnMessage(int MsgType, void *pRawMsg)
 		CNetMsg_Sv_DDRaceTime *pMsg = (CNetMsg_Sv_DDRaceTime *)pRawMsg;
 
 		m_DDRaceTime = pMsg->m_Time;
-		m_DDRaceTick = 0;
 
 		m_LastReceivedTimeTick = Client()->GameTick(g_Config.m_ClDummy);
 
@@ -856,7 +837,6 @@ void CHud::OnMessage(int MsgType, void *pRawMsg)
 			m_DDRaceTimeReceived = true;
 
 			m_DDRaceTime = pMsg->m_ServerTimeBest; // First value: m_Time
-			m_DDRaceTick = 0;
 
 			m_LastReceivedTimeTick = Client()->GameTick(g_Config.m_ClDummy);
 
@@ -915,11 +895,6 @@ void CHud::RenderDDRaceEffects()
 			TextRender()->TextColor(1, 1, 1, 1);
 		}
 	}
-	/*else if(m_DDRaceTimeReceived)
-		{
-			str_format(aBuf, sizeof(aBuf), "%02d:%02d.%d", m_DDRaceTime/60, m_DDRaceTime%60, m_DDRaceTick/10);
-			TextRender()->Text(0, 150*Graphics()->ScreenAspect()-TextRender()->TextWidth(0, 12, "00:00.0", -1, -1.0f)/2, 20, 12, aBuf, -1.0f); // use fixed value for text width so its not shaky
-		}*/
 }
 
 void CHud::RenderRecord()
