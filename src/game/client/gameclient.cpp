@@ -996,9 +996,13 @@ void CGameClient::ProcessEvents()
 static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, CServerInfo *pFallbackServerInfo)
 {
 	int Version = -1;
-	if(InfoExSize >= 8)
+	if(InfoExSize >= 12)
 	{
 		Version = pInfoEx->m_Version;
+	}
+	else if(InfoExSize >= 8)
+	{
+		Version = minimum(pInfoEx->m_Version, 4);
 	}
 	else if(InfoExSize >= 4)
 	{
@@ -1009,12 +1013,18 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	{
 		Flags = pInfoEx->m_Flags;
 	}
+	int Flags2 = 0;
+	if(Version >= 5)
+	{
+		Flags2 = pInfoEx->m_Flags2;
+	}
 	bool Race;
 	bool FastCap;
 	bool FNG;
 	bool DDRace;
 	bool DDNet;
 	bool BlockWorlds;
+	bool City;
 	bool Vanilla;
 	bool Plus;
 	if(Version < 1)
@@ -1025,19 +1035,21 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 		DDRace = IsDDRace(pFallbackServerInfo);
 		DDNet = IsDDNet(pFallbackServerInfo);
 		BlockWorlds = IsBlockWorlds(pFallbackServerInfo);
+		City = IsCity(pFallbackServerInfo);
 		Vanilla = IsVanilla(pFallbackServerInfo);
 		Plus = IsPlus(pFallbackServerInfo);
 	}
 	else
 	{
-		Race = Flags&GAMEINFOFLAG_GAMETYPE_RACE;
-		FastCap = Flags&GAMEINFOFLAG_GAMETYPE_FASTCAP;
-		FNG = Flags&GAMEINFOFLAG_GAMETYPE_FNG;
-		DDRace = Flags&GAMEINFOFLAG_GAMETYPE_DDRACE;
-		DDNet = Flags&GAMEINFOFLAG_GAMETYPE_DDNET;
-		BlockWorlds = Flags&GAMEINFOFLAG_GAMETYPE_BLOCK_WORLDS;
-		Vanilla = Flags&GAMEINFOFLAG_GAMETYPE_VANILLA;
-		Plus = Flags&GAMEINFOFLAG_GAMETYPE_PLUS;
+		Race = Flags & GAMEINFOFLAG_GAMETYPE_RACE;
+		FastCap = Flags & GAMEINFOFLAG_GAMETYPE_FASTCAP;
+		FNG = Flags & GAMEINFOFLAG_GAMETYPE_FNG;
+		DDRace = Flags & GAMEINFOFLAG_GAMETYPE_DDRACE;
+		DDNet = Flags & GAMEINFOFLAG_GAMETYPE_DDNET;
+		BlockWorlds = Flags & GAMEINFOFLAG_GAMETYPE_BLOCK_WORLDS;
+		Vanilla = Flags & GAMEINFOFLAG_GAMETYPE_VANILLA;
+		Plus = Flags & GAMEINFOFLAG_GAMETYPE_PLUS;
+		City = Version >= 5 && Flags2 & GAMEINFOFLAG2_GAMETYPE_CITY;
 
 		// Ensure invariants upheld by the server info parsing business.
 		DDRace = DDRace || DDNet;
@@ -1050,9 +1062,9 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	Info.m_UnlimitedAmmo = Race;
 	Info.m_DDRaceRecordMessage = DDRace && !DDNet;
 	Info.m_RaceRecordMessage = DDNet || (Race && !DDRace);
-	Info.m_AllowEyeWheel = DDRace || BlockWorlds || Plus;
+	Info.m_AllowEyeWheel = DDRace || BlockWorlds || City || Plus;
 	Info.m_AllowHookColl = DDRace;
-	Info.m_AllowZoom = Race || BlockWorlds;
+	Info.m_AllowZoom = Race || BlockWorlds || City;
 	Info.m_BugDDRaceGhost = DDRace;
 	Info.m_BugDDRaceInput = DDRace;
 	Info.m_BugFNGLaserRange = FNG;
@@ -1069,6 +1081,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	Info.m_EntitiesBW = BlockWorlds;
 	Info.m_Race = Race;
 	Info.m_DontMaskEntities = !DDNet;
+	Info.m_AllowXSkins = false;
 
 	if(Version >= 0)
 	{
@@ -1102,10 +1115,13 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 		Info.m_Race = Flags&GAMEINFOFLAG_RACE;
 		Info.m_DontMaskEntities = Flags&GAMEINFOFLAG_DONT_MASK_ENTITIES;
 	}
-
-	if (Version >= 4)
+	if(Version >= 4)
 	{
 		Info.m_EntitiesBW = Flags&GAMEINFOFLAG_ENTITIES_BW;
+	}
+	if(Version >= 5)
+	{
+		Info.m_AllowXSkins = Flags2 & GAMEINFOFLAG2_ALLOW_X_SKINS;
 	}
 	return Info;
 }
@@ -1199,7 +1215,7 @@ void CGameClient::OnNewSnapshot()
 					pClient->m_ColorFeet = pInfo->m_ColorFeet;
 
 					// prepare the info
-					if(pClient->m_aSkinName[0] == 'x' || pClient->m_aSkinName[1] == '_')
+					if(!m_GameInfo.m_AllowXSkins && (pClient->m_aSkinName[0] == 'x' || pClient->m_aSkinName[1] == '_'))
 						str_copy(pClient->m_aSkinName, "default", 64);
 
 					pClient->m_SkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(pClient->m_ColorBody).UnclampLighting());

@@ -53,6 +53,7 @@ public:
 	bool m_Race;
 
 	bool m_DontMaskEntities;
+	bool m_AllowXSkins;
 };
 
 class CGameClient : public IGameClient

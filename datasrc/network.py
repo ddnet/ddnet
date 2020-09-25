@@ -17,7 +17,11 @@ GameInfoFlags = [
 	"BUG_DDRACE_INPUT", "BUG_FNG_LASER_RANGE", "BUG_VANILLA_BOUNCE",
 	"PREDICT_FNG", "PREDICT_DDRACE", "PREDICT_DDRACE_TILES", "PREDICT_VANILLA",
 	"ENTITIES_DDNET", "ENTITIES_DDRACE", "ENTITIES_RACE", "ENTITIES_FNG",
-	"ENTITIES_VANILLA", "DONT_MASK_ENTITIES", "ENTITIES_BW",
+	"ENTITIES_VANILLA", "DONT_MASK_ENTITIES", "ENTITIES_BW"
+	# Full, use GameInfoFlags2 for more flags
+]
+GameInfoFlags2 = [
+	"ALLOW_X_SKINS", "GAMETYPE_CITY",
 ]
 ExPlayerFlags = ["AFK", "PAUSED", "SPEC"]
 
@@ -52,7 +56,7 @@ enum
 
 enum
 {
-	GAMEINFO_CURVERSION=4,
+	GAMEINFO_CURVERSION=5,
 };
 '''
 
@@ -74,6 +78,7 @@ Flags = [
 	Flags("GAMESTATEFLAG", GameStateFlags),
 	Flags("CHARACTERFLAG", CharacterFlags),
 	Flags("GAMEINFOFLAG", GameInfoFlags),
+	Flags("GAMEINFOFLAG2", GameInfoFlags2),
 	Flags("EXPLAYERFLAG", ExPlayerFlags),
 ]
 
@@ -236,6 +241,7 @@ Objects = [
 	NetObjectEx("GameInfoEx", "gameinfo@netobj.ddnet.tw", [
 		NetIntAny("m_Flags"),
 		NetIntAny("m_Version"),
+		NetIntAny("m_Flags2"),
 	], validate_size=False),
 
 	## Events
