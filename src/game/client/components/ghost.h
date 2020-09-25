@@ -4,6 +4,7 @@
 #define GAME_CLIENT_COMPONENTS_GHOST_H
 
 #include <game/client/component.h>
+#include <game/client/components/menus.h>
 
 enum
 {

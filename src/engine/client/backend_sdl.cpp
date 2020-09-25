@@ -3651,7 +3651,7 @@ static void ParseVersionString(const GLubyte* pStr, int& VersionMajor, int& Vers
 		char aCurNumberStr[32];
 		size_t CurNumberStrLen = 0;
 		size_t TotalNumbersPassed = 0;
-		int aNumbers[3] = { 0, };
+		int aNumbers[3] = { 0 };
 		bool LastWasNumber = false;
 		while(*pStr && TotalNumbersPassed < 3)
 		{

@@ -213,8 +213,8 @@ bool CScore::LoadPlayerDataThread(IDbConnection *pSqlServer, const ISqlData *pGa
 	// get best race time
 	str_format(aBuf, sizeof(aBuf),
 			"SELECT Time, cp1, cp2, cp3, cp4, cp5, cp6, cp7, cp8, cp9, cp10, "
-				"cp11, cp12, cp13, cp14, cp15, cp16, cp17, cp18, cp19, cp20, "
-				"cp21, cp22, cp23, cp24, cp25 "
+			"  cp11, cp12, cp13, cp14, cp15, cp16, cp17, cp18, cp19, cp20, "
+			"  cp21, cp22, cp23, cp24, cp25 "
 			"FROM %s_race "
 			"WHERE Map = ? AND Name = ? "
 			"ORDER BY Time ASC "
@@ -293,9 +293,9 @@ bool CScore::MapVoteThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 			"FROM %s_maps "
 			"WHERE Map LIKE %s "
 			"ORDER BY "
-				"CASE WHEN Map = ? THEN 0 ELSE 1 END, "
-				"CASE WHEN Map LIKE ? THEN 0 ELSE 1 END, "
-				"LENGTH(Map), Map "
+			"  CASE WHEN Map = ? THEN 0 ELSE 1 END, "
+			"  CASE WHEN Map LIKE ? THEN 0 ELSE 1 END, "
+			"  LENGTH(Map), Map "
 			"LIMIT 1;",
 			pSqlServer->GetPrefix(), pSqlServer->CollateNocase());
 	pSqlServer->PrepareStatement(aBuf);
@@ -354,21 +354,21 @@ bool CScore::MapInfoThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 	char aBuf[1024];
 	str_format(aBuf, sizeof(aBuf),
 			"SELECT l.Map, l.Server, Mapper, Points, Stars, "
-				"(SELECT COUNT(Name) FROM %s_race WHERE Map = l.Map) AS Finishes, "
-				"(SELECT COUNT(DISTINCT Name) FROM %s_race WHERE Map = l.Map) AS Finishers, "
-				"(SELECT ROUND(AVG(Time)) FROM %s_race WHERE Map = l.Map) AS Average, "
-				"%s AS Stamp, "
-				"%s-%s AS Ago, "
-				"(SELECT MIN(Time) FROM %s_race WHERE Map = l.Map AND Name = ?) AS OwnTime "
+			"  (SELECT COUNT(Name) FROM %s_race WHERE Map = l.Map) AS Finishes, "
+			"  (SELECT COUNT(DISTINCT Name) FROM %s_race WHERE Map = l.Map) AS Finishers, "
+			"  (SELECT ROUND(AVG(Time)) FROM %s_race WHERE Map = l.Map) AS Average, "
+			"  %s AS Stamp, "
+			"  %s-%s AS Ago, "
+			"  (SELECT MIN(Time) FROM %s_race WHERE Map = l.Map AND Name = ?) AS OwnTime "
 			"FROM ("
-				"SELECT * FROM %s_maps "
-				"WHERE Map LIKE %s "
-				"ORDER BY "
-					"CASE WHEN Map = ? THEN 0 ELSE 1 END, "
-					"CASE WHEN Map LIKE ? THEN 0 ELSE 1 END, "
-					"LENGTH(Map), "
-					"Map "
-				"LIMIT 1"
+			"  SELECT * FROM %s_maps "
+			"  WHERE Map LIKE %s "
+			"  ORDER BY "
+			"    CASE WHEN Map = ? THEN 0 ELSE 1 END, "
+			"    CASE WHEN Map LIKE ? THEN 0 ELSE 1 END, "
+			"    LENGTH(Map), "
+			"    Map "
+			"  LIMIT 1"
 			") as l;",
 			pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->GetPrefix(),
 			aTimestamp, aCurrentTimestamp, aTimestamp,
@@ -579,9 +579,9 @@ bool CScore::SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGam
 	str_format(aBuf, sizeof(aBuf),
 			"SELECT l.ID, Name, Time "
 			"FROM (" // preselect teams with first name in team
-					"SELECT ID "
-					"FROM %s_teamrace "
-					"WHERE Map = ? AND Name = ? AND DDNet7 = false"
+			"  SELECT ID "
+			"  FROM %s_teamrace "
+			"  WHERE Map = ? AND Name = ? AND DDNet7 = false"
 			") as l INNER JOIN %s_teamrace AS r ON l.ID = r.ID "
 			"ORDER BY l.ID, Name COLLATE %s;",
 			pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->BinaryCollate());
@@ -663,11 +663,11 @@ bool CScore::ShowRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 	str_format(aBuf, sizeof(aBuf),
 			"SELECT Rank, Name, Time "
 			"FROM ("
-				"SELECT RANK() OVER w AS Rank, Name, MIN(Time) AS Time "
-				"FROM %s_race "
-				"WHERE Map = ? "
-				"GROUP BY Name "
-				"WINDOW w AS (ORDER BY Time)"
+			"  SELECT RANK() OVER w AS Rank, Name, MIN(Time) AS Time "
+			"  FROM %s_race "
+			"  WHERE Map = ? "
+			"  GROUP BY Name "
+			"  WINDOW w AS (ORDER BY Time)"
 			") as a "
 			"WHERE Name = ?;",
 			pSqlServer->GetPrefix());
@@ -721,17 +721,17 @@ bool CScore::ShowTeamRankThread(IDbConnection *pSqlServer, const ISqlData *pGame
 	str_format(aBuf, sizeof(aBuf),
 			"SELECT l.ID, Name, Time, Rank "
 			"FROM (" // teamrank score board
-				"SELECT RANK() OVER w AS Rank, ID "
-				"FROM %s_teamrace "
-				"WHERE Map = ? "
-				"GROUP BY ID "
-				"WINDOW w AS (ORDER BY Time)"
+			"  SELECT RANK() OVER w AS Rank, ID "
+			"  FROM %s_teamrace "
+			"  WHERE Map = ? "
+			"  GROUP BY ID "
+			"  WINDOW w AS (ORDER BY Time)"
 			") AS TeamRank INNER JOIN (" // select rank with Name in team
-				"SELECT ID "
-				"FROM %s_teamrace "
-				"WHERE Map = ? AND Name = ? "
-				"ORDER BY Time "
-				"LIMIT 1"
+			"  SELECT ID "
+			"  FROM %s_teamrace "
+			"  WHERE Map = ? AND Name = ? "
+			"  ORDER BY Time "
+			"  LIMIT 1"
 			") AS l ON TeamRank.ID = l.ID "
 			"INNER JOIN %s_teamrace AS r ON l.ID = r.ID ",
 			pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
@@ -799,11 +799,11 @@ bool CScore::ShowTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData
 	str_format(aBuf, sizeof(aBuf),
 			"SELECT Name, Time, Rank "
 			"FROM ("
-				"SELECT RANK() OVER w AS Rank, Name, MIN(Time) AS Time "
-				"FROM %s_race "
-				"WHERE Map = ? "
-				"GROUP BY Name "
-				"WINDOW w AS (ORDER BY Time)"
+			"  SELECT RANK() OVER w AS Rank, Name, MIN(Time) AS Time "
+			"  FROM %s_race "
+			"  WHERE Map = ? "
+			"  GROUP BY Name "
+			"  WINDOW w AS (ORDER BY Time)"
 			") as a "
 			"ORDER BY Rank %s "
 			"LIMIT %d, 5;",
@@ -856,16 +856,16 @@ bool CScore::ShowTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGame
 	str_format(aBuf, sizeof(aBuf),
 			"SELECT Name, Time, Rank, TeamSize "
 			"FROM (" // limit to 5
-				"SELECT TeamSize, Rank, ID "
-				"FROM (" // teamrank score board
-					"SELECT RANK() OVER w AS Rank, ID, COUNT(*) AS Teamsize "
-					"FROM %s_teamrace "
-					"WHERE Map = ? "
-					"GROUP BY Id "
-					"WINDOW w AS (ORDER BY Time)"
-				") as l1 "
-				"ORDER BY Rank %s "
-				"LIMIT %d, 5"
+			"  SELECT TeamSize, Rank, ID "
+			"  FROM (" // teamrank score board
+			"    SELECT RANK() OVER w AS Rank, ID, COUNT(*) AS Teamsize "
+			"    FROM %s_teamrace "
+			"    WHERE Map = ? "
+			"    GROUP BY Id "
+			"    WINDOW w AS (ORDER BY Time)"
+			"  ) as l1 "
+			"  ORDER BY Rank %s "
+			"  LIMIT %d, 5"
 			") as l2 "
 			"INNER JOIN %s_teamrace as r ON l2.ID = r.ID "
 			"ORDER BY Rank %s, r.ID, Name ASC;",
@@ -1045,8 +1045,8 @@ bool CScore::ShowPointsThread(IDbConnection *pSqlServer, const ISqlData *pGameDa
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
 			"SELECT ("
-				"SELECT COUNT(Name) + 1 FROM %s_points WHERE Points > ("
-					"SELECT points FROM %s_points WHERE Name = ?"
+			"  SELECT COUNT(Name) + 1 FROM %s_points WHERE Points > ("
+			"    SELECT points FROM %s_points WHERE Name = ?"
 			")) as Rank, Points, Name "
 			"FROM %s_points WHERE Name = ?;",
 			pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
@@ -1094,9 +1094,9 @@ bool CScore::ShowTopPointsThread(IDbConnection *pSqlServer, const ISqlData *pGam
 	str_format(aBuf, sizeof(aBuf),
 			"SELECT Rank, Points, Name "
 			"FROM ("
-				"SELECT RANK() OVER w AS Rank, Points, Name "
-				"FROM %s_points "
-				"WINDOW w as (ORDER BY Points DESC)"
+			"  SELECT RANK() OVER w AS Rank, Points, Name "
+			"  FROM %s_points "
+			"  WINDOW w as (ORDER BY Points DESC)"
 			") as a "
 			"ORDER BY Rank %s "
 			"LIMIT ?, 5;",
@@ -1203,9 +1203,9 @@ bool CScore::RandomUnfinishedMapThread(IDbConnection *pSqlServer, const ISqlData
 				"SELECT Map "
 				"FROM %s_maps "
 				"WHERE Server = ? AND Map != ? AND Stars = ? AND Map NOT IN ("
-					"SELECT Map "
-					"FROM %s_race "
-					"WHERE Name = ?"
+				"  SELECT Map "
+				"  FROM %s_race "
+				"  WHERE Name = ?"
 				") ORDER BY RAND() "
 				"LIMIT 1;",
 				pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
@@ -1221,9 +1221,9 @@ bool CScore::RandomUnfinishedMapThread(IDbConnection *pSqlServer, const ISqlData
 				"SELECT Map "
 				"FROM %s_maps AS maps "
 				"WHERE Server = ? AND Map != ? AND Map NOT IN ("
-					"SELECT Map "
-					"FROM %s_race as race "
-					"WHERE Name = ?"
+				"  SELECT Map "
+				"  FROM %s_race as race "
+				"  WHERE Name = ?"
 				") ORDER BY RAND() "
 				"LIMIT 1;",
 				pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
