@@ -95,10 +95,7 @@ void CChat::OnRelease()
 void CChat::OnStateChange(int NewState, int OldState)
 {
 	if(OldState <= IClient::STATE_CONNECTING)
-	{
 		Reset();
-		Input()->SetIMEState(false);
-	}
 }
 
 void CChat::ConSay(IConsole::IResult *pResult, void *pUserData)
