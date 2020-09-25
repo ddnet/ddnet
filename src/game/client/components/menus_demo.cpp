@@ -458,7 +458,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	// close button
 	ButtonBar.VSplitRight(ButtonbarHeight*3, &ButtonBar, &Button);
 	static int s_ExitButton = 0;
-	if(DoButton_DemoPlayer(&s_ExitButton, Localize("Close"), 0, &Button))
+	if(DoButton_DemoPlayer(&s_ExitButton, Localize("Close"), 0, &Button) || (Input()->KeyPress(KEY_C) && m_pClient->m_pGameConsole->IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE))
 	{
 		Client()->Disconnect();
 		DemolistOnUpdate(false);
@@ -627,7 +627,7 @@ CMenus::CListboxItem CMenus::UiDoListboxNextRow()
 	return Item;
 }
 
-CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected, bool KeyEvents)
+CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected, bool KeyEvents, bool NoHoverEffects)
 {
 	int ThisItemIndex = gs_ListBoxItemIndex;
 	if(Selected)
@@ -706,6 +706,12 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected,
 		CUIRect r = Item.m_Rect;
 		r.Margin(1.5f, &r);
 		RenderTools()->DrawUIRect(&r, ColorRGBA(1,1,1,0.5f), CUI::CORNER_ALL, 4.0f);
+	}
+	else if(UI()->MouseInside(&Item.m_Rect) && !NoHoverEffects)
+	{
+		CUIRect r = Item.m_Rect;
+		r.Margin(1.5f, &r);
+		RenderTools()->DrawUIRect(&r, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 4.0f);
 	}
 
 	return Item;
@@ -946,7 +952,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			UI()->DoLabelScaled(&Left, "SHA256:", 14.0f, -1);
 			char aSha[SHA256_MAXSTRSIZE];
 			sha256_str(m_lDemos[m_DemolistSelectedIndex].m_MapInfo.m_Sha256, aSha, sizeof(aSha)/2);
-			UI()->DoLabelScaled(&Right, aSha, 14.0f, -1);
+			UI()->DoLabelScaled(&Right, aSha, Right.w > 235 ? 14.0f : 11.0f, -1);
 			Labels.HSplitTop(5.0f, 0, &Labels);
 			Labels.HSplitTop(20.0f, &Left, &Labels);
 		}
@@ -985,12 +991,15 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	};
 
 	static CColumn s_aCols[] = {
-		{COL_ICON,     -1,            " ",                 -1,  14.0f, 0, {0}, {0}},
-		{COL_DEMONAME, SORT_DEMONAME, Localize("Demo"),     0,   0.0f, 0, {0}, {0}},
-		{COL_MARKERS,  SORT_MARKERS,  Localize("Markers"),  1,  75.0f, 0, {0}, {0}},
-		{COL_LENGTH,   SORT_LENGTH,   Localize("Length"),   1,  75.0f, 0, {0}, {0}},
-		{COL_DATE,     SORT_DATE,     Localize("Date"),     1, 160.0f, 1, {0}, {0}},
+		{COL_ICON, -1, " ", -1, 14.0f, 0, {0}, {0}},
+		{COL_DEMONAME, SORT_DEMONAME, "Demo", 0, 0.0f, 0, {0}, {0}},
+		{COL_MARKERS, SORT_MARKERS, "Markers", 1, 75.0f, 0, {0}, {0}},
+		{COL_LENGTH, SORT_LENGTH, "Length", 1, 75.0f, 0, {0}, {0}},
+		{COL_DATE, SORT_DATE, "Date", 1, 160.0f, 1, {0}, {0}},
 	};
+	/* This is just for scripts/update_localization.py to work correctly. Don't remove!
+		Localize("Demo");Localize("Markers");Localize("Length");Localize("Date");
+	*/
 
 	RenderTools()->DrawUIRect(&Headers, ColorRGBA(0.0f,0,0,0.15f), 0, 0);
 
@@ -1029,7 +1038,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	// do headers
 	for(int i = 0; i < NumCols; i++)
 	{
-		if(DoButton_GridHeader(s_aCols[i].m_Caption, s_aCols[i].m_Caption, g_Config.m_BrDemoSort == s_aCols[i].m_Sort, &s_aCols[i].m_Rect))
+		if(DoButton_GridHeader(s_aCols[i].m_Caption, Localize(s_aCols[i].m_Caption), g_Config.m_BrDemoSort == s_aCols[i].m_Sort, &s_aCols[i].m_Rect))
 		{
 			if(s_aCols[i].m_Sort != -1)
 			{
@@ -1144,8 +1153,14 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			if(Selected)
 			{
 				CUIRect r = Row;
-				r.Margin(1.5f, &r);
-				RenderTools()->DrawUIRect(&r, ColorRGBA(1,1,1,0.5f), CUI::CORNER_ALL, 4.0f);
+				r.Margin(0.5f, &r);
+				RenderTools()->DrawUIRect(&r, ColorRGBA(1, 1, 1, 0.5f), CUI::CORNER_ALL, 4.0f);
+			}
+			else if(UI()->MouseInside(&SelectHitBox))
+			{
+				CUIRect r = Row;
+				r.Margin(0.5f, &r);
+				RenderTools()->DrawUIRect(&r, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 4.0f);
 			}
 
 			// clip the selection
@@ -1245,7 +1260,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	}
 
 	static int s_PlayButton = 0;
-	if(DoButton_Menu(&s_PlayButton, m_DemolistSelectedIsDir?Localize("Open"):Localize("Play"), 0, &PlayRect) || Activated)
+	if(DoButton_Menu(&s_PlayButton, m_DemolistSelectedIsDir ? Localize("Open") : Localize("Play", "Demo browser"), 0, &PlayRect) || Activated || (Input()->KeyPress(KEY_P) && m_pClient->m_pGameConsole->IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE))
 	{
 		if(m_DemolistSelectedIndex >= 0)
 		{
@@ -1282,7 +1297,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	if(!m_DemolistSelectedIsDir)
 	{
 		static int s_DeleteButton = 0;
-		if(DoButton_Menu(&s_DeleteButton, Localize("Delete"), 0, &DeleteRect) || m_DeletePressed)
+		if(DoButton_Menu(&s_DeleteButton, Localize("Delete"), 0, &DeleteRect) || m_DeletePressed || (Input()->KeyPress(KEY_D) && m_pClient->m_pGameConsole->IsClosed()))
 		{
 			if(m_DemolistSelectedIndex >= 0)
 			{
@@ -1306,7 +1321,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 #if defined(CONF_VIDEORECORDER)
 		static int s_RenderButton = 0;
-		if(DoButton_Menu(&s_RenderButton, Localize("Render"), 0, &RenderRect))
+		if(DoButton_Menu(&s_RenderButton, Localize("Render"), 0, &RenderRect) || (Input()->KeyPress(KEY_R) && m_pClient->m_pGameConsole->IsClosed()))
 		{
 			if(m_DemolistSelectedIndex >= 0)
 			{
@@ -1319,5 +1334,9 @@ void CMenus::RenderDemoList(CUIRect MainView)
 #endif
 	}
 
-	UI()->DoLabelScaled(&LabelRect, aFooterLabel, 14.0f, -1);
+#if defined(CONF_VIDEORECORDER)
+	// Doesn't always fit, not so important to show
+	if(PlayRect.x > 725)
+#endif
+		UI()->DoLabelScaled(&LabelRect, aFooterLabel, 14.0f, -1);
 }

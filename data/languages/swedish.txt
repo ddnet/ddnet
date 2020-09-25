@@ -108,9 +108,6 @@ Controls
 Count players only
 == Räkna endast spelare
 
-Country
-== Land
-
 Current
 == Nuvarande
 
@@ -312,6 +309,7 @@ Ping
 Pistol
 == Pistol
 
+[Demo browser]
 Play
 == Spela
 
@@ -335,9 +333,6 @@ Please balance teams!
 
 Prev. weapon
 == Föregående vapen
-
-Quality Textures
-== Kvalitetstexturer
 
 Quit
 == Avsluta
@@ -471,9 +466,6 @@ Team
 Team chat
 == Lagchatt
 
-Texture Compression
-== Texturkompression
-
 The audio device couldn't be initialised.
 == Ljudet kunde inte startas
 
@@ -566,9 +558,6 @@ Join game
 FSAA samples
 == FSAA-samplingar
 
-%d of %d servers, %d players
-== %d av %d servrar, %d spelare
-
 Sound volume
 == Volym
 
@@ -626,17 +615,11 @@ Lht.
 UI Color
 == Gränssnittfärg
 
-Host address
-== Serveraddress
-
 Crc:
 == Crc:
 
 Alpha
 == Alpha
-
-Current version: %s
-== Nuvarande version: %s
 
 LAN
 == LAN
@@ -646,9 +629,6 @@ Name plates size
 
 Type:
 == Typ:
-
-DDNet %s is out! Download it at DDNet.tw!
-== DDNet %s har släppts! Ladda ner det från DDNet.tw!
 
 Show console window
 == Visa konsol fönster
@@ -773,8 +753,8 @@ Personal best:
 Show DDNet map finishes in server browser
 == Visa DDNet bana avklarningar i server bläddraren
 
-transmits your player name to info.ddnet.tw
-== skickar ditt spel namn till info.ddnet.tw
+transmits your player name to info2.ddnet.tw
+== skickar ditt spel namn till info2.ddnet.tw
 
 9+ new mentions
 == 9+ nya nämningar
@@ -1195,3 +1175,73 @@ Connect Dummy
 
 Show others (own team only)
 == Visa andra (eget lag endast)
+
+The width or height of texture %s is not divisible by 16, which might cause visual bugs.
+== 
+
+Warning
+== 
+
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
+Country / Region
+== 
+
+Speed
+== 
+
+Search:
+== 
+
+Exclude:
+== 
+
+Search servers:
+== 
+
+%d of %d servers
+== 
+
+%d of %d server
+== 
+
+%d players
+== 
+
+%d player
+== 
+
+Skip the main menu
+== 
+
+Download skins
+== 
+
+Client message
+== 
+
+https://wiki.ddnet.tw/
+== 
+
+Website
+== 
+
+Settings
+== 
+
+Stop server
+== 
+
+Run server
+== 
+
+Server executable not found, can't run server
+== 
+
+Editor
+== 
+
+[Start menu]
+Play
+== 

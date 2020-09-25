@@ -220,6 +220,8 @@ void CPlayer::Tick()
 
 	if(Server()->GetNetErrorString(m_ClientID)[0])
 	{
+		m_Afk = true;
+
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "'%s' would have timed out, but can use timeout protection now", Server()->ClientName(m_ClientID));
 		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
@@ -410,11 +412,7 @@ void CPlayer::Snap(int SnappingClient)
 	if(SnappingClient >= 0)
 	{
 		CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
-		ShowSpec = ShowSpec && (
-			GameServer()->GetDDRaceTeam(id) == GameServer()->GetDDRaceTeam(SnappingClient)
-			|| pSnapPlayer->m_ShowOthers
-			|| (pSnapPlayer->GetTeam() == TEAM_SPECTATORS || pSnapPlayer->IsPaused())
-			);
+		ShowSpec = ShowSpec && (GameServer()->GetDDRaceTeam(id) == GameServer()->GetDDRaceTeam(SnappingClient) || pSnapPlayer->m_ShowOthers == 1 || (pSnapPlayer->GetTeam() == TEAM_SPECTATORS || pSnapPlayer->IsPaused()));
 	}
 
 	if(ShowSpec)

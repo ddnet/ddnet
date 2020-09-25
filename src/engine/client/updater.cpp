@@ -18,8 +18,10 @@ class CUpdaterFetchTask : public CGetFile
 	char m_aBuf2[256];
 	CUpdater *m_pUpdater;
 
-	void OnCompletion();
-	void OnProgress();
+	virtual void OnProgress();
+
+protected:
+	virtual int OnCompletion(int State);
 
 public:
 	CUpdaterFetchTask(CUpdater *pUpdater, const char *pFile, const char *pDestPath);
@@ -27,7 +29,7 @@ public:
 
 static const char *GetUpdaterUrl(char *pBuf, int BufSize, const char *pFile)
 {
-	str_format(pBuf, BufSize, "https://update5.ddnet.tw/%s", pFile);
+	str_format(pBuf, BufSize, "https://update6.ddnet.tw/%s", pFile);
 	return pBuf;
 }
 
@@ -42,7 +44,7 @@ static const char *GetUpdaterDestPath(char *pBuf, int BufSize, const char *pFile
 }
 
 CUpdaterFetchTask::CUpdaterFetchTask(CUpdater *pUpdater, const char *pFile, const char *pDestPath) :
-	CGetFile(pUpdater->m_pStorage, GetUpdaterUrl(m_aBuf, sizeof(m_aBuf), pFile), GetUpdaterDestPath(m_aBuf2, sizeof(m_aBuf), pFile, pDestPath), -2, false),
+	CGetFile(pUpdater->m_pStorage, GetUpdaterUrl(m_aBuf, sizeof(m_aBuf), pFile), GetUpdaterDestPath(m_aBuf2, sizeof(m_aBuf), pFile, pDestPath), -2, CTimeout{0, 0, 0}),
 	m_pUpdater(pUpdater)
 {
 }
@@ -55,8 +57,10 @@ void CUpdaterFetchTask::OnProgress()
 	lock_unlock(m_pUpdater->m_Lock);
 }
 
-void CUpdaterFetchTask::OnCompletion()
+int CUpdaterFetchTask::OnCompletion(int State)
 {
+	State = CGetFile::OnCompletion(State);
+
 	const char *b = 0;
 	for(const char *a = Dest(); *a; a++)
 		if(*a == '/')
@@ -64,18 +68,20 @@ void CUpdaterFetchTask::OnCompletion()
 	b = b ? b : Dest();
 	if(!str_comp(b, "update.json"))
 	{
-		if(State() == HTTP_DONE)
+		if(State == HTTP_DONE)
 			m_pUpdater->SetCurrentState(IUpdater::GOT_MANIFEST);
-		else if(State() == HTTP_ERROR)
+		else if(State == HTTP_ERROR)
 			m_pUpdater->SetCurrentState(IUpdater::FAIL);
 	}
 	else if(!str_comp(b, m_pUpdater->m_aLastFile))
 	{
-		if(State() == HTTP_DONE)
+		if(State == HTTP_DONE)
 			m_pUpdater->SetCurrentState(IUpdater::MOVE_FILES);
-		else if(State() == HTTP_ERROR)
+		else if(State == HTTP_ERROR)
 			m_pUpdater->SetCurrentState(IUpdater::FAIL);
 	}
+
+	return State;
 }
 
 CUpdater::CUpdater()
@@ -150,10 +156,10 @@ bool CUpdater::MoveFile(const char *pFile)
 		return Success;
 #endif
 
-	if(!str_comp_nocase(pFile + len - 4, ".dll") || !str_comp_nocase(pFile + len - 4, ".ttf"))
+	if(!str_comp_nocase(pFile + len - 4, ".dll") || !str_comp_nocase(pFile + len - 4, ".ttf") || !str_comp_nocase(pFile + len - 3, ".so"))
 	{
 		str_format(aBuf, sizeof(aBuf), "%s.old", pFile);
-		Success &= m_pStorage->RenameBinaryFile(pFile, aBuf);
+		m_pStorage->RenameBinaryFile(pFile, aBuf);
 		str_format(aBuf, sizeof(aBuf), "update/%s", pFile);
 		Success &= m_pStorage->RenameBinaryFile(aBuf, pFile);
 	}
@@ -319,6 +325,17 @@ void CUpdater::PerformUpdate()
 				str_copy(aBuf, pFile, sizeof(aBuf)); // SDL
 				str_copy(aBuf + len - 4, "-" PLAT_NAME, sizeof(aBuf) - len + 4); // -win32
 				str_append(aBuf, pFile + len - 4, sizeof(aBuf)); // .dll
+				FetchFile(aBuf, pFile);
+#endif
+				// Ignore DLL downloads on other platforms
+			}
+			else if(!str_comp_nocase(pFile + len - 3, ".so"))
+			{
+#if defined(CONF_PLATFORM_LINUX)
+				char aBuf[512];
+				str_copy(aBuf, pFile, sizeof(aBuf)); // libsteam_api
+				str_copy(aBuf + len - 3, "-" PLAT_NAME, sizeof(aBuf) - len + 3); // -linux-x86_64
+				str_append(aBuf, pFile + len - 3, sizeof(aBuf)); // .so
 				FetchFile(aBuf, pFile);
 #endif
 				// Ignore DLL downloads on other platforms, on Linux we statically link anyway

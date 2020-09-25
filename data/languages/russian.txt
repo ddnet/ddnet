@@ -8,25 +8,27 @@
 #	Bananbl4	2011-07-07 02:03:04
 #	Arion WT	2011-07-07 09:39:05
 #	Arion WT	2011-08-07 12:16:28
-#	<~{Barsik}~>	2020-07-01 22:04:21
+#	gerdoe		2020-07-01 22:04:21
+#	gerdoe		2020-09-14 20:53:53
+#	gerdoe		2020-09-17 22:49:22
 ##### /authors #####
 
 ##### translated strings #####
 
 %ds left
-== осталось %d сек.
+== осталось %d сек
 
 %i minute left
-== Осталась %i минута!
+== Осталась %i минута
 
 %i minutes left
-== Осталось %i минут!
+== Осталось %i минут
 
 %i second left
-== Осталась %i секунда!
+== Осталась %i секунда
 
 %i seconds left
-== Осталось %i секунд!
+== Осталось %i секунд
 
 %s wins!
 == %s победил!
@@ -74,7 +76,7 @@ Body
 == Тело
 
 Call vote
-== Голосовать
+== Голосование
 
 Change settings
 == Изменить настройки
@@ -112,9 +114,6 @@ Controls
 Count players only
 == Считать только игроков
 
-Country
-== Флаг вашей страны
-
 Current
 == Текущий
 
@@ -137,7 +136,7 @@ Demos
 == Демо
 
 Disconnect
-== Отключить
+== Отключиться
 
 Disconnected
 == Отключено
@@ -197,7 +196,7 @@ Game
 == Игра
 
 Game info
-== Инфо об игре
+== Информация об игре
 
 Game over
 == Игра окончена
@@ -316,6 +315,7 @@ Ping
 Pistol
 == Пистолет
 
+[Demo browser]
 Play
 == Просмотр
 
@@ -339,9 +339,6 @@ Please balance teams!
 
 Prev. weapon
 == Пред. оружие
-
-Quality Textures
-== Качественные текстуры
 
 Quit
 == Выход
@@ -452,10 +449,10 @@ Spectators
 == Наблюдатели
 
 Standard gametype
-== Стандартный тип игры
+== Станд. тип игры
 
 Standard map
-== Стандартная карта
+== Станд. карта
 
 Stop record
 == Стоп
@@ -470,7 +467,7 @@ Switch weapon on pickup
 == Переключать оружие при подборе
 
 Switch weapon when out of ammo
-== Переключать оружие без патронов
+== Переключать пустое оружие
 
 Reset wanted weapon on death
 == Сбрасывать выбор оружия при смерти
@@ -493,9 +490,6 @@ Team
 Team chat
 == Командный чат
 
-Texture Compression
-== Сжатие текстур
-
 The audio device couldn't be initialised.
 == Аудио устройство не может быть инициализировано
 
@@ -503,7 +497,7 @@ The server is running a non-standard tuning on a pure game type.
 == Сервер запущен с нестандартными настройками на стандартном типе игры.
 
 There's an unsaved map in the editor, you might want to save it before you quit the game.
-== Есть несохранённая карта в редакторе, Вы можете сохранить её перед тем, как выйти.
+== Есть несохранённая карта в редакторе. Вы можете сохранить её перед тем, как выйти.
 
 Time limit
 == Лимит времени
@@ -530,13 +524,13 @@ Use team colors for name plates
 == Командные цвета для имен игроков
 
 V-Sync
-== Вертикальная синхронизация
+== V-Sync
 
 Version
 == Версия
 
 Vote command:
-== Комманда голосования:
+== Команда голосования:
 
 Vote description:
 == Описание голосования:
@@ -614,7 +608,7 @@ Reset
 == Сброс
 
 Dummy settings
-== Настройки dummy
+== Настройки дамми
 
 Search
 == Поиск
@@ -626,15 +620,13 @@ Countries
 == Страны
 
 Types
-== Тип
-
-##### needs translation #####
+== Типы
 
 New name:
 == Новое имя
 
 Sat.
-== Контраст
+== Контр.
 
 Miscellaneous
 == Дополнительно
@@ -643,10 +635,7 @@ Internet
 == Интернет
 
 Max demos
-== Максимальное количество демо
-
-News
-== Новости
+== Максимальное кол-во демо
 
 Join game
 == Играть
@@ -664,7 +653,7 @@ Created:
 == Создан:
 
 Max Screenshots
-== Максимальное количество снимков
+== Максимальное кол-во снимков
 
 Length:
 == Длина
@@ -682,7 +671,7 @@ Info
 == Инфо
 
 Hue
-== Оттенок
+== Оттен.
 
 Record demo
 == Записать демо
@@ -697,7 +686,7 @@ Reset to defaults
 == Сбросить настройки
 
 Quit anyway?
-== Выйти?
+== Все равно выйти?
 
 Display Modes
 == Разрешение экрана
@@ -709,7 +698,7 @@ Round
 == Раунд
 
 Lht.
-== Яркость
+== Ярк.
 
 UI Color
 == Цвет интерфейса
@@ -721,10 +710,7 @@ Crc:
 == Crc:
 
 Alpha
-== Прозрачн.
-
-Current version: %s
-== Текущая версия: %s
+== Прозр.
 
 LAN
 == LAN
@@ -745,25 +731,25 @@ No updates available
 == Нет доступных обновлений
 
 second
-== Второй
+== секунд
 
 Look out!
 == Берегись!
 
 Select a name
-== Выбрать имя
+== Выберите имя
 
 Show other players' hook collision lines
-== Показывать hook collision линию других игроков
+== Показывать коллизии крюка других игроков
 
 We will win
-== Мы выиграем!
+== Мы выиграем
 
 Hi o/
 == Привет ^^/
 
 DDNet Client needs to be restarted to complete update!
-== Перезапустите DDNet Client для завершения обновления
+== Перезапустите DDNet Client для завершения обновления!
 
 Spectator
 == Наблюдатель
@@ -781,10 +767,10 @@ Old mouse mode
 == Режим старой мышки
 
 Team message
-== Сообщение команды
+== Сообщение от команды
 
 Automatically create statboard csv
-== Автоматически создавать statboard csv
+== Автоматически создавать statboard CSV
 
 Are you sure that you want to disconnect?
 == Вы уверены, что хотите отключиться?
@@ -802,7 +788,7 @@ Messages
 == Сообщения
 
 New random timeout code
-== Новый случайный timeout код
+== Новый тайм-аут код
 
 Loading DDNet Client
 == Загрузка DDNet Client
@@ -811,10 +797,10 @@ Normal message
 == Обычное сообщение
 
 Connecting dummy
-== Присоединить dummy
+== Подключение дамми
 
 Update now
-== Обновить
+== Обновить сейчас
 
 Save ghost
 == Сохранять тень
@@ -843,23 +829,6 @@ AntiPing limit
 Inner color
 == Внутренний цвет
 
-##### generated by copy_fix.py, please translate this #####
-
-
-##### generated by copy_fix.py, please translate this #####
-
-
-##### generated by copy_fix.py, please translate this #####
-
-
-##### generated by copy_fix.py, please translate this #####
-
-
-##### generated by copy_fix.py, please translate this #####
-
-
-##### generated by copy_fix.py, please translate this #####
-
 Successfully saved the replay!
 == Повтор сохранен!
 
@@ -871,9 +840,6 @@ Server best:
 
 Personal best:
 == Ваше лучшее:
-
-Learn
-== Обучение
 
 Browser
 == Браузер
@@ -891,10 +857,10 @@ File already exists, do you want to overwrite it?
 == Файл уже существует, хотите ли Вы перезаписать его?
 
 Disconnect Dummy
-== Отключить Dummy
+== Отключить дамми
 
 Are you sure that you want to disconnect your dummy?
-== Вы уверены, что хотите отключить вашего dummy?
+== Вы уверены, что хотите отключить вашего дамми?
 
 Welcome to DDNet
 == Добро пожаловать в DDnet
@@ -903,10 +869,10 @@ DDraceNetwork is a cooperative online game where the goal is for you and your gr
 == DDraceNetwork кооперативная онлайн игра, где Вашей главной целью и целью вашей команды является достижением финиша карты. Как новенький, Вы должны начать свой путь на Novice серверах, на которых стоят лёгкие карты. Также учитывайте пинг и выбирайте ближайший к вам сервер.
 
 The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Карта содержит фриз-тайлв, который временно лишают возможности двигаться. Вы должны работать сообща, чтобы пройти эти парты.
+== Карта содержит фриз-тайлы, которые временно лишают вас возможности двигаться. Вы должны работать сообща, чтобы пройти такие уровни.
 
 The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== Колесиком мыши можно менять оружие. Молотом (ЛКМ) можно ударить других и тем самым расфризить их.
+== Колесо мыши меняет оружие. Молотком (ЛКМ) можно ударить по другим и разбудить их от замерзания.
 
 Hook (right mouse) can be used to swing through the map and to hook other tees to you.
 == Крюк (ПКМ) используется для перемещения по карте, а также для притягивания игроков к вам.
@@ -927,16 +893,16 @@ Video name:
 == Название видео:
 
 Show DDNet map finishes in server browser
-== Показывать финишированные DDnet карты в браузере
+== Показывать в браузере статус завершения карты
 
-transmits your player name to info.ddnet.tw
-== передает Ваш никнейм на info.ddnet.tw
+transmits your player name to info2.ddnet.tw
+== передает Ваш никнейм на info2.ddnet.tw
 
 Exclude
 == Исключить
 
 Filter connecting players
-== Фильтровать подключающихся игроков
+== Только подключившиеся
 
 Indicate map finish
 == Показывать финиши карт
@@ -951,13 +917,10 @@ Downloading %s:
 == Скачивание %s:
 
 Update failed! Check log...
-== Обновление прошло неудачно! Посмотреть журнал...
+== Обновление прошло неудачно! Проверьте логи...
 
 Restart
 == Рестарт
-
-DDNet %s is out! Download it at DDNet.tw!
-== Вышел DDnet %s! Скачай его на DDnet.tw!
 
 Markers:
 == Маркеры:
@@ -967,9 +930,6 @@ Markers:
 
 %.2f KiB
 == %.2f КиБ
-
-Markers
-== Маркеры
 
 Length
 == Длина
@@ -984,13 +944,13 @@ Render
 == Начать рендер
 
 Connect Dummy
-== Подключить Dummy
+== Подключить дамми
 
 Reload
 == Перезагрузить
 
 Deactivate
-== Отключить
+== Выключить
 
 Activate
 == Включить
@@ -1002,16 +962,16 @@ Clan plates size
 == Размер панели клана
 
 Refresh Rate
-== Частота обновлений
+== Частота обн.
 
 Max CSVs
 == Максимум CSV
 
 Vanilla skins only
-== Только стандартные скины
+== Только станд. скины
 
 Fat skins (DDFat)
-== Толстые скины (DDFat)
+== Толстые скины
 
 Skin prefix
 == Префикс скина
@@ -1023,7 +983,7 @@ Pause
 == Пауза
 
 Kill
-== Убить
+== Суицид
 
 Zoom in
 == Приблизить
@@ -1032,7 +992,7 @@ Zoom out
 == Отдалить
 
 Default zoom
-== Стандартный масштаб
+== Станд. масштаб
 
 Show all
 == Показывать всех
@@ -1047,49 +1007,49 @@ Toggle ghost
 == Переключить призрака
 
 Dummy copy
-== Повторение движений dummy
+== Повторение движений дамми
 
 Hammerfly dummy
-== Hammerfly dummy
+== Полёт с дамми
 
 Converse
 == Беседовать
 
 Statboard
-== Табло
+== Статистика
 
 Lock team
 == Закрыть команду
 
 Show entities
-== Показать entities
+== Показать сущности
 
 Show HUD
-== Показывать HUD
+== Показавать HUD
 
 UI mouse s.
 == Чувств. мыши в меню
 
 may cause delay
-== может создавать задержку
+== создает задержку
 
 Screen
 == Экран
 
 Use OpenGL 3.3 (experimental)
-== Использовать OpenGL 3.3 (экспериментально)
+== Использовать OpenGL 3.3 (тестируется)
 
 Preinit VBO (iGPUs only)
-== Преинициализировать VBO (только iGPU)
+== Преинициал-ть VBO (только iGPU)
 
 Multiple texture units (disable for MacOS)
-== Множество текстурных блоков (отключите для MacOS)
+== Улучш. блоки текстур (откл. для MacOS)
 
 Use high DPI
 == Использовать высокую чувств.
 
 Enable long pain sound (used when shooting in freeze)
-== Включить звук продолжительной боли (при стрельбе из фриза)
+== Включить звук продолжительной боли (при стрельбе во фризе)
 
 HUD
 == HUD
@@ -1110,10 +1070,10 @@ Save the best demo of each race
 == Сохранять лучшее демо каждой попытки
 
 Default length: %d
-== Стандартная длина: %d
+== Станд. длина: %d
 
 Enable replays
-== Включить повторы
+== Включить записи
 
 Gameplay
 == Игровой процесс
@@ -1125,13 +1085,13 @@ Size
 == Размер
 
 Show text entities
-== Показывать текстовые entities
+== Показывать текст
 
 Show others (own team only)
-== Показывать других (только вашу команду)
+== Всегда показывать вашу команду
 
 Show quads
-== Показать quads
+== Показывать quads
 
 AntiPing
 == AntiPing
@@ -1146,7 +1106,7 @@ AntiPing: predict grenade paths
 == AntiPing: предсказывать пути гранат
 
 Show other players' key presses
-== Показывать нажатия кнопок других игроков.
+== Показывать нажатия других игроков
 
 Background (regular)
 == Фон (обычный)
@@ -1155,22 +1115,22 @@ Show tiles layers from BG map
 == Показывать слои с тайлами из фоновой карты
 
 Try fast HTTP map download first
-== Сперва попробуйте быструю закачку карты по HTTP
+== Быстро загружать карты по HTTP
 
 DDNet %s is available:
 == Доступен DDNet %s:
 
 Check now
-== Проверить сейчас
+== Проверить
 
 Time
 == Время
 
 Manual %3d:%02d  
-== Ручная %3d:%02d  
+== Ручное %3d:%02d  
 
 Race %3d:%02d  
-== Гонка %3d:%02d  
+== Попытка %3d:%02d  
 
 Auto %3d:%02d  
 == Авто %3d:%02d  
@@ -1188,7 +1148,7 @@ Deaths
 == Смерти
 
 Suicides
-== Самоубийств
+== Суицидов
 
 Ratio
 == Соотношение
@@ -1216,3 +1176,85 @@ Grabs
 
 9+ new mentions
 == 9+ новых упоминаний
+
+Client message
+== Сообщение от клиента
+
+The width or height of texture %s is not divisible by 16, which might cause visual bugs.
+== Ширина или высота текстуры %s не делится на 16, что может быть причиной проблем с визуалом.
+
+Warning
+== Предупреждение
+
+Menu
+== Меню
+
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== Используйте кнопку k, чтобы возродиться, q для паузы и наблюдением за остальными игроками. Проверьте настройки для остальных кнопок.
+
+Country / Region
+== Страна / Регион
+
+Speed
+== Скорость
+
+Markers
+== Маркеры
+
+Skip the main menu
+== Пропускать главное меню
+
+https://wiki.ddnet.tw/
+== https://wiki.ddnet.tw/
+
+Website
+== Сайт
+
+Settings
+== Настройки
+
+Stop server
+== Остановить сервер
+
+Run server
+== Запустить сервер
+
+Server executable not found, can't run server
+== Файл сервера не найден, невозможно запустить
+
+Editor
+== Редактор
+
+News
+== Новости
+
+Search:
+== Искать:
+
+Exclude:
+== Исключить:
+
+Search servers:
+== Искать сервера:
+
+%d of %d servers
+== %d из %d серверов
+
+%d of %d server
+== %d из %d сервера
+
+%d players
+== %d игроков
+
+%d player
+== %d игрок
+
+Download skins
+== Скачать скины
+
+Learn
+== Обучение
+
+[Start menu]
+Play
+== Играть

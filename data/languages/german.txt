@@ -120,9 +120,6 @@ Controls
 Count players only
 == Nur Spieler zählen
 
-Country
-== Land
-
 Current
 == Aktuell
 
@@ -327,6 +324,7 @@ Ping
 Pistol
 == Pistole
 
+[Demo browser]
 Play
 == Abspielen
 
@@ -350,9 +348,6 @@ Please balance teams!
 
 Prev. weapon
 == Vorherige Waffe
-
-Quality Textures
-== Hochauflösende Texturen
 
 Quit
 == Beenden
@@ -489,9 +484,6 @@ Team
 Team chat
 == Teamchat
 
-Texture Compression
-== Texturkompression
-
 The audio device couldn't be initialised.
 == Das Audiosystem konnte nicht gestartet werden.
 
@@ -582,9 +574,6 @@ Join game
 FSAA samples
 == Vollbild-Anti-Aliasing
 
-%d of %d servers, %d players
-== %d von %d Servern, %d Spieler
-
 Sound volume
 == Lautstärke
 
@@ -639,17 +628,11 @@ Lht.
 UI Color
 == Menüfarbe
 
-Host address
-== Serveradresse
-
 Crc:
 == Prüfsumme:
 
 Alpha
 == Alpha
-
-Current version: %s
-== Aktuelle Version: %s
 
 LAN
 == LAN
@@ -924,9 +907,6 @@ Threaded sound loading
 Race %3d:%02d  
 == Rennen %3d:%02d  
 
-DDNet %s is out! Download it at DDNet.tw!
-== DDNet %s ist da! Download bei DDNet.tw!
-
 Frags
 == Abschüsse
 
@@ -1140,8 +1120,8 @@ Default length: %d
 Pause
 == Pause
 
-transmits your player name to info.ddnet.tw
-== überträgt deinen Spielernamen an info.ddnet.tw
+transmits your player name to info2.ddnet.tw
+== überträgt deinen Spielernamen an info2.ddnet.tw
 
 The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
 == Das Mausrad wechselt Waffen. Hammer (linke Maustaste) kann benutzt werden um andere Tees zu schlagen und vom Freeze aufzuwecken.
@@ -1208,3 +1188,73 @@ Toggle dyncam
 
 Show others (own team only)
 == Andere Spieler zeigen (nur eigenes Team)
+
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== Benutze die Taste k um neuzustarten, q zum pausieren und andere Spieler zu beobachten. In den Einstellungen sieht man weitere Tasten.
+
+Client message
+== Client-Nachricht
+
+Country / Region
+== Land / Region
+
+The width or height of texture %s is not divisible by 16, which might cause visual bugs.
+== Die Breite oder Höhe von Textur %s ist nicht durch 16 teilbar, was visuelle Bugs verursachen kann.
+
+Skip the main menu
+== Hauptmenü überspringen
+
+Settings
+== Einstellungen
+
+Run server
+== Server starten
+
+Stop server
+== Server stoppen
+
+Editor
+== Editor
+
+Download skins
+== Skins herunterladen
+
+Warning
+== Warnung
+
+Speed
+== Geschwindigkeit
+
+Website
+== Website
+
+Server executable not found, can't run server
+== Server-Programm nicht gefunden, kann Server nicht starten
+
+[Start menu]
+Play
+== Spielen
+
+Search:
+== Suche:
+
+Exclude:
+== Ausschließen:
+
+Search servers:
+== Server suchen:
+
+%d of %d servers
+== %d von %d Server
+
+%d of %d server
+== %d von %d Server
+
+%d players
+== %d Spieler
+
+%d player
+== %d Spieler
+
+https://wiki.ddnet.tw/
+== 

@@ -106,9 +106,6 @@ Controls
 Count players only
 == 実際のプレイヤー数を表示
 
-Country
-== 国
-
 Current
 == 現行
 
@@ -310,6 +307,7 @@ Ping
 Pistol
 == ピストル
 
+[Demo browser]
 Play
 == プレイ
 
@@ -333,9 +331,6 @@ Please balance teams!
 
 Prev. weapon
 == 前の武器
-
-Quality Textures
-== テクスチャの品質
 
 Quit
 == 終了
@@ -469,9 +464,6 @@ Team
 Team chat
 == チームチャット
 
-Texture Compression
-== テクスチャ圧縮
-
 The audio device couldn't be initialised.
 == オーディオデバイスの初期化に失敗しました。
 
@@ -582,9 +574,6 @@ Created:
 Record demo
 == デモを録画
 
-%d of %d servers, %d players
-== %d of %d サーバー, %d プレイヤー
-
 Miscellaneous
 == その他
 
@@ -627,17 +616,11 @@ Map:
 Lht.
 == 明るさ
 
-Host address
-== IPアドレス:ポート
-
 Alpha
 == 透明度
 
 Length:
 == 長さ:
-
-Current version: %s
-== クライアントのバージョン: %s
 
 Name plates size
 == 名前表示の大きさ
@@ -651,6 +634,12 @@ Successfully saved the replay!
 Replay feature is disabled!
 == 
 
+The width or height of texture %s is not divisible by 16, which might cause visual bugs.
+== 
+
+Warning
+== 
+
 Game paused
 == 
 
@@ -658,9 +647,6 @@ Server best:
 == 
 
 Personal best:
-== 
-
-Learn
 == 
 
 Browser
@@ -711,13 +697,22 @@ Hook (right mouse) can be used to swing through the map and to hook other tees t
 Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
 == 
 
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == 
 
 Please enter your nick name below.
 == 
 
+Country / Region
+== 
+
 Destination file already exist
+== 
+
+Speed
 == 
 
 Video name:
@@ -726,13 +721,34 @@ Video name:
 Show DDNet map finishes in server browser
 == 
 
-transmits your player name to info.ddnet.tw
+transmits your player name to info2.ddnet.tw
+== 
+
+Search:
+== 
+
+Exclude:
+== 
+
+Search servers:
 == 
 
 Search
 == 
 
 Exclude
+== 
+
+%d of %d servers
+== 
+
+%d of %d server
+== 
+
+%d players
+== 
+
+%d player
 == 
 
 Filter connecting players
@@ -748,27 +764,6 @@ Countries
 == 
 
 Types
-== 
-
-DDNet %s is out!
-== 
-
-Downloading %s:
-== 
-
-Update failed! Check log...
-== 
-
-DDNet Client updated!
-== 
-
-Update now
-== 
-
-Restart
-== 
-
-DDNet %s is out! Download it at DDNet.tw!
 == 
 
 Select a name
@@ -813,6 +808,12 @@ Connecting dummy
 Connect Dummy
 == 
 
+Kill
+== 
+
+Pause
+== 
+
 Reload
 == 
 
@@ -840,6 +841,9 @@ Show clan above name plates
 Clan plates size
 == 
 
+Skip the main menu
+== 
+
 Refresh Rate
 == 
 
@@ -858,6 +862,9 @@ Max CSVs
 Dummy settings
 == 
 
+Download skins
+== 
+
 Vanilla skins only
 == 
 
@@ -868,12 +875,6 @@ Skin prefix
 == 
 
 Hook collisions
-== 
-
-Pause
-== 
-
-Kill
 == 
 
 Zoom in
@@ -1041,6 +1042,9 @@ Normal message
 Hello and welcome
 == 
 
+Client message
+== 
+
 Inner color
 == 
 
@@ -1128,7 +1132,13 @@ Try fast HTTP map download first
 DDNet %s is available:
 == 
 
+Update now
+== 
+
 Updating...
+== 
+
+DDNet Client updated!
 == 
 
 No updates available
@@ -1138,6 +1148,46 @@ Check now
 == 
 
 New random timeout code
+== 
+
+Learn
+== 
+
+https://wiki.ddnet.tw/
+== 
+
+Website
+== 
+
+Settings
+== 
+
+Stop server
+== 
+
+Run server
+== 
+
+Server executable not found, can't run server
+== 
+
+Editor
+== 
+
+[Start menu]
+Play
+== 
+
+DDNet %s is out!
+== 
+
+Downloading %s:
+== 
+
+Update failed! Check log...
+== 
+
+Restart
 == 
 
 Time

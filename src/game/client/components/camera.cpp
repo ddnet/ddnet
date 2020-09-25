@@ -36,9 +36,19 @@ void CCamera::ScaleZoom(float Factor)
 	ChangeZoom(CurrentTarget * Factor);
 }
 
+float CCamera::MaxZoomLevel()
+{
+	return (Graphics()->IsTileBufferingEnabled()? 60 : 30);
+}
+
+float CCamera::MinZoomLevel()
+{
+	return 0.01f;
+}
+
 void CCamera::ChangeZoom(float Target)
 {
-	if(Target >= (Graphics()->IsBufferingEnabled()? 60 : 30))
+	if(Target > MaxZoomLevel() || Target < MinZoomLevel())
 	{
 		return;
 	}
@@ -75,6 +85,7 @@ void CCamera::OnRender()
 		{
 			m_Zoom = m_ZoomSmoothing.Evaluate(ZoomProgress(Time));
 		}
+		m_Zoom = clamp(m_Zoom, MinZoomLevel(), MaxZoomLevel());
 	}
 
 	if(!(m_pClient->m_Snap.m_SpecInfo.m_Active || GameClient()->m_GameInfo.m_AllowZoom || Client()->State() == IClient::STATE_DEMOPLAYBACK))

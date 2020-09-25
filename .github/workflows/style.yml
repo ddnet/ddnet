@@ -1,0 +1,27 @@
+name: Check style
+
+on:
+  push:
+    branches-ignore:
+      - master
+      - staging.tmp
+      - trying.tmp
+      - staging-squash-merge.tmp
+  pull_request:
+
+jobs:
+  check-style:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Install clang-format
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install clang-format -y
+    - name: Check style
+      run: |
+        clang-format -version
+        scripts/fix_style.py --dry-run --base origin/master
+        scripts/check_header_guards.py

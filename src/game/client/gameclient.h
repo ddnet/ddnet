@@ -122,6 +122,8 @@ class CGameClient : public IGameClient
 
 	static void ConTuneZone(IConsole::IResult *pResult, void *pUserData);
 
+	static void ConchainMenuMap(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+
 public:
 	IKernel *Kernel() { return IInterface::Kernel(); }
 	IEngine *Engine() const { return m_pEngine; }
@@ -190,8 +192,8 @@ public:
 		const CNetObj_PlayerInfo *m_paPlayerInfos[MAX_CLIENTS];
 		const CNetObj_PlayerInfo *m_paInfoByScore[MAX_CLIENTS];
 		const CNetObj_PlayerInfo *m_paInfoByName[MAX_CLIENTS];
-		//const CNetObj_PlayerInfo *m_paInfoByTeam[MAX_CLIENTS];
-		const CNetObj_PlayerInfo *m_paInfoByDDTeam[MAX_CLIENTS];
+		const CNetObj_PlayerInfo *m_paInfoByDDTeamScore[MAX_CLIENTS];
+		const CNetObj_PlayerInfo *m_paInfoByDDTeamName[MAX_CLIENTS];
 
 		int m_LocalClientID;
 		int m_NumPlayers;
@@ -380,6 +382,7 @@ public:
 	bool m_IsNearFinish;
 
 	// pointers to all systems
+	class CMenuBackground *m_pMenuBackground;
 	class CGameConsole *m_pGameConsole;
 	class CBinds *m_pBinds;
 	class CParticles *m_pParticles;
@@ -413,6 +416,7 @@ public:
 	CNetObj_PlayerInput m_DummyInput;
 	CNetObj_PlayerInput m_HammerInput;
 	int m_DummyFire;
+	bool m_ReceivedDDNetPlayer;
 
 	class CRaceDemo *m_pRaceDemo;
 	class CGhost *m_pGhost;

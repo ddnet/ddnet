@@ -309,22 +309,22 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 			for(int y = 0; y < r.h; y++)
 				for(int x = 0; x < r.w; x++)
 				{
-					pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x] = ((CLayerSwitch*)this)->m_pSwitchTile[(r.y+y)*m_Width+(r.x+x)];
-					if(pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == ENTITY_DOOR + ENTITY_OFFSET
-						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_HIT_START
-						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_HIT_END
-						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_SWITCHOPEN
-						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_SWITCHCLOSE
-						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_SWITCHTIMEDOPEN
-						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_SWITCHTIMEDCLOSE
-						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == ENTITY_LASER_LONG + ENTITY_OFFSET
-						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == ENTITY_LASER_MEDIUM + ENTITY_OFFSET
-						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == ENTITY_LASER_SHORT + ENTITY_OFFSET
-						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_JUMP
-						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_PENALTY
-						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_BONUS
-						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_ALLOW_TELE_GUN
-						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_ALLOW_BLUE_TELE_GUN)
+					pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x] = ((CLayerSwitch *)this)->m_pSwitchTile[(r.y + y) * m_Width + (r.x + x)];
+					if(pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == ENTITY_DOOR + ENTITY_OFFSET ||
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_HIT_ENABLE ||
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_HIT_DISABLE ||
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_SWITCHOPEN ||
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_SWITCHCLOSE ||
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_SWITCHTIMEDOPEN ||
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_SWITCHTIMEDCLOSE ||
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == ENTITY_LASER_LONG + ENTITY_OFFSET ||
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == ENTITY_LASER_MEDIUM + ENTITY_OFFSET ||
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == ENTITY_LASER_SHORT + ENTITY_OFFSET ||
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_JUMP ||
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_ADD_TIME ||
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_SUBSTRACT_TIME ||
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_ALLOW_TELE_GUN ||
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_ALLOW_BLUE_TELE_GUN)
 					{
 						m_pEditor->m_SwitchNum = pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Number;
 						m_pEditor->m_SwitchDelay = pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Delay;
@@ -360,8 +360,8 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 			for(int y = 0; y < r.h; y++)
 				for(int x = 0; x < r.w; x++)
 				{
-					pGrabbed->m_pTuneTile[y*pGrabbed->m_Width+x] = ((CLayerTune*)this)->m_pTuneTile[(r.y+y)*m_Width+(r.x+x)];
-					if(pGrabbed->m_pTuneTile[y*pGrabbed->m_Width+x].m_Type == TILE_TUNE1)
+					pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x] = ((CLayerTune *)this)->m_pTuneTile[(r.y + y) * m_Width + (r.x + x)];
+					if(pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Type == TILE_TUNE)
 					{
 						m_pEditor->m_TuningNum = pGrabbed->m_pTuneTile[y*pGrabbed->m_Width+x].m_Number;
 					}
@@ -932,10 +932,13 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 			m_Image = NewVal%m_pEditor->m_Map.m_lImages.size();
 			m_AutoMapperConfig = -1;
 
-			if(m_pEditor->m_Map.m_lImages[m_Image]->m_Width % 16 != 0)
+			if(m_pEditor->m_Map.m_lImages[m_Image]->m_Width % 16 != 0 || m_pEditor->m_Map.m_lImages[m_Image]->m_Height % 16 != 0)
 			{
 				m_pEditor->m_PopupEventType = m_pEditor->POPEVENT_IMAGEDIV16;
 				m_pEditor->m_PopupEventActivated = true;
+
+				m_Texture = IGraphics::CTextureHandle();
+				m_Image = -1;
 			}
 		}
 	}
@@ -1548,18 +1551,20 @@ void CLayerSpeedup::BrushDraw(CLayer *pBrush, float wx, float wy)
 				}
 				else
 				{
-					m_pSpeedupTile[fy*m_Width+fx].m_Force = 0;
-					m_pSpeedupTile[fy*m_Width+fx].m_MaxSpeed = 0;
-					m_pSpeedupTile[fy*m_Width+fx].m_Angle = 0;
-					m_pTiles[fy*m_Width+fx].m_Index = 0;
+					m_pSpeedupTile[fy * m_Width + fx].m_Force = 0;
+					m_pSpeedupTile[fy * m_Width + fx].m_MaxSpeed = 0;
+					m_pSpeedupTile[fy * m_Width + fx].m_Angle = 0;
+					m_pSpeedupTile[fy * m_Width + fx].m_Type = 0;
+					m_pTiles[fy * m_Width + fx].m_Index = 0;
 				}
 			}
 			else
 			{
-				m_pSpeedupTile[fy*m_Width+fx].m_Force = 0;
-				m_pSpeedupTile[fy*m_Width+fx].m_MaxSpeed = 0;
-				m_pSpeedupTile[fy*m_Width+fx].m_Angle = 0;
-				m_pTiles[fy*m_Width+fx].m_Index = 0;
+				m_pSpeedupTile[fy * m_Width + fx].m_Force = 0;
+				m_pSpeedupTile[fy * m_Width + fx].m_MaxSpeed = 0;
+				m_pSpeedupTile[fy * m_Width + fx].m_Angle = 0;
+				m_pSpeedupTile[fy * m_Width + fx].m_Type = 0;
+				m_pTiles[fy * m_Width + fx].m_Index = 0;
 			}
 		}
 	FlagModified(sx, sy, l->m_Width, l->m_Height);

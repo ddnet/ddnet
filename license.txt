@@ -20,7 +20,8 @@ freely, subject to the following restrictions:
 
 ------------------------------------------------------------------------
 
-All content under 'data' except the font files, (who have their own licenses):
+All content under 'data' except the font, language & skin files,
+(which have their own licenses):
 Apache 2.0 for the 'Icon.tff' file:
 Copyright Google
 

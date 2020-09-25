@@ -37,6 +37,25 @@
         <content_attribute id="social-chat">intense</content_attribute>
     </content_rating>
     <releases>
+        <release date="2020-09-23" version="15.0.5"/>
+        <release date="2020-09-20" version="15.0.4"/>
+        <release date="2020-09-18" version="15.0.3"/>
+        <release date="2020-09-17" version="15.0.2"/>
+        <release date="2020-09-17" version="15.0.1"/>
+        <release date="2020-09-17" version="15.0"/>
+        <release date="2020-09-08" version="14.7.1"/>
+        <release date="2020-09-07" version="14.7"/>
+        <release date="2020-09-05" version="14.6.2"/>
+        <release date="2020-09-04" version="14.6.1"/>
+        <release date="2020-09-04" version="14.6"/>
+        <release date="2020-08-26" version="14.5.1"/>
+        <release date="2020-08-26" version="14.5"/>
+        <release date="2020-08-24" version="14.4.1"/>
+        <release date="2020-08-20" version="14.4"/>
+        <release date="2020-08-18" version="14.3.3"/>
+        <release date="2020-08-11" version="14.3.2"/>
+        <release date="2020-08-11" version="14.3.1"/>
+        <release date="2020-08-10" version="14.3"/>
         <release date="2020-07-10" version="14.2"/>
         <release date="2020-06-30" version="14.1"/>
         <release date="2020-06-29" version="14.0.3"/>

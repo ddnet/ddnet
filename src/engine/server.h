@@ -41,6 +41,7 @@ public:
 	int Tick() const { return m_CurrentGameTick; }
 	int TickSpeed() const { return m_TickSpeed; }
 
+	virtual int Port() const = 0;
 	virtual int MaxClients() const = 0;
 	virtual int ClientCount() = 0;
 	virtual int DistinctClientCount() = 0;
@@ -252,7 +253,7 @@ public:
 	virtual void OnMapChange(char *pNewMapName, int MapNameSize) = 0;
 
 	// FullShutdown is true if the program is about to exit (not if the map is changed)
-	virtual void OnShutdown(bool FullShutdown = false) = 0;
+	virtual void OnShutdown() = 0;
 
 	virtual void OnTick() = 0;
 	virtual void OnPreSnap() = 0;

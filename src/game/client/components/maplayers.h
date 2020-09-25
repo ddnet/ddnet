@@ -19,6 +19,7 @@ typedef unsigned int offset_ptr32;
 class CMapLayers : public CComponent
 {
 	friend class CBackground;
+	friend class CMenuBackground;
 
 	CLayers *m_pLayers;
 	class CMapImages *m_pImages;
@@ -26,6 +27,8 @@ class CMapLayers : public CComponent
 	int m_CurrentLocalTick;
 	int m_LastLocalTick;
 	bool m_EnvelopeUpdate;
+
+	bool m_OnlineOnly;
 
 	void MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, float Zoom = 1.0f);
 
@@ -114,18 +117,22 @@ class CMapLayers : public CComponent
 	};
 	std::vector<SQuadLayerVisuals*> m_QuadLayerVisuals;
 
-	void LayersOfGroupCount(CMapItemGroup* pGroup, int& TileLayerCount, int& QuadLayerCount, bool& PassedGameLayer);
+	virtual class CCamera *GetCurCamera();
+
+	void LayersOfGroupCount(CMapItemGroup *pGroup, int &TileLayerCount, int &QuadLayerCount, bool &PassedGameLayer);
 
 	void RenderTileBorderCornerTiles(int WidthOffsetToOrigin, int HeightOffsetToOrigin, int TileCountWidth, int TileCountHeight, int BufferContainerIndex, float *pColor, offset_ptr_size IndexBufferOffset, float *pOffset, float *pDir);
 public:
 	enum
 	{
-		TYPE_BACKGROUND=0,
+		TYPE_BACKGROUND = 0,
 		TYPE_BACKGROUND_FORCE,
 		TYPE_FOREGROUND,
+		TYPE_FULL_DESIGN,
+		TYPE_ALL = -1,
 	};
 
-	CMapLayers(int Type);
+	CMapLayers(int Type, bool OnlineOnly = true);
 	virtual void OnInit();
 	virtual void OnRender();
 	virtual void OnMapLoad();

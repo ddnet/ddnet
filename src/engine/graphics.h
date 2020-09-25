@@ -6,6 +6,8 @@
 #include "kernel.h"
 
 #include <base/color.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <vector>
 #define GRAPHICS_TYPE_UNSIGNED_BYTE 0x1401
@@ -38,6 +40,22 @@ struct SQuadRenderInfo
 	float m_aColor[4];
 	float m_aOffsets[2];
 	float m_Rotation;
+};
+
+struct SGraphicTile
+{
+	vec2 m_TopLeft;
+	vec2 m_TopRight;
+	vec2 m_BottomRight;
+	vec2 m_BottomLeft;
+};
+
+struct SGraphicTileTexureCoords
+{
+	vec3 m_TexCoordTopLeft;
+	vec3 m_TexCoordTopRight;
+	vec3 m_TexCoordBottomRight;
+	vec3 m_TexCoordBottomLeft;
 };
 
 class CImageInfo
@@ -78,9 +96,28 @@ public:
 	int m_Red, m_Green, m_Blue;
 };
 
-struct GL_SPoint { float x, y; };
-struct GL_STexCoord { float u, v; };
-struct GL_SColorf { float r, g, b, a; };
+struct GL_SPoint
+{
+	float x, y;
+};
+struct GL_STexCoord
+{
+	float u, v;
+};
+struct GL_STexCoord3D
+{
+	GL_STexCoord3D &operator=(const GL_STexCoord &TexCoord)
+	{
+		u = TexCoord.u;
+		v = TexCoord.v;
+		return *this;
+	}
+	float u, v, w;
+};
+struct GL_SColorf
+{
+	float r, g, b, a;
+};
 
 //use normalized color values
 struct GL_SColor { unsigned char r, g, b, a; };
@@ -90,6 +127,27 @@ struct GL_SVertex
 	GL_SPoint m_Pos;
 	GL_STexCoord m_Tex;
 	GL_SColor m_Color;
+};
+
+struct GL_SVertexTex3D
+{
+	GL_SPoint m_Pos;
+	GL_SColorf m_Color;
+	GL_STexCoord3D m_Tex;
+};
+
+struct GL_SVertexTex3DStream
+{
+	GL_SPoint m_Pos;
+	GL_SColor m_Color;
+	GL_STexCoord3D m_Tex;
+};
+
+struct SGraphicsWarning
+{
+	SGraphicsWarning() : m_WasShown(false) {}
+	char m_aWarningMsg[128];
+	bool m_WasShown;
 };
 
 typedef void(*WINDOW_RESIZE_FUNC)(void *pUser);
@@ -111,6 +169,11 @@ public:
 		TEXLOAD_NORESAMPLE = 1<<0,
 		TEXLOAD_NOMIPMAPS = 1<<1,
 		TEXLOAD_NO_COMPRESSION = 1<<2,
+		TEXLOAD_TO_3D_TEXTURE = (1 << 3),
+		TEXLOAD_TO_2D_ARRAY_TEXTURE = (1 << 4),
+		TEXLOAD_TO_3D_TEXTURE_SINGLE_LAYER = (1 << 5),
+		TEXLOAD_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER = (1 << 6),
+		TEXLOAD_NO_2D_TEXTURE = (1 << 7),
 	};
 
 
@@ -156,8 +219,11 @@ public:
 
 	virtual int LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType) = 0;
 
+	// destination and source buffer require to have the same width and height
+	virtual void CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSourceBuffer, int FullWidth, int FullHeight, int ColorChannelCount, int SubOffsetX, int SubOffsetY, int SubCopyWidth, int SubCopyHeight) = 0;
+
 	virtual int UnloadTexture(CTextureHandle Index) = 0;
-	virtual CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags) = 0;
+	virtual CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName = NULL) = 0;
 	virtual int LoadTextureRawSub(CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData) = 0;
 	virtual CTextureHandle LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags) = 0;
 	virtual void TextureSet(CTextureHandle Texture) = 0;
@@ -165,6 +231,7 @@ public:
 
 	virtual void FlushVertices(bool KeepVertices = false) = 0;
 	virtual void FlushTextVertices(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor) = 0;
+	virtual void FlushVerticesTex3D() = 0;
 
 	// specific render functions
 	virtual void RenderTileLayer(int BufferContainerIndex, float *pColor, char **pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffet) = 0;
@@ -186,7 +253,11 @@ public:
 	virtual void UpdateBufferContainer(int ContainerIndex, struct SBufferContainerInfo *pContainerInfo) = 0;
 	virtual void IndicesNumRequiredNotify(unsigned int RequiredIndicesCount) = 0;
 
-	virtual bool IsBufferingEnabled() = 0;
+	virtual bool IsTileBufferingEnabled() = 0;
+	virtual bool IsQuadBufferingEnabled() = 0;
+	virtual bool IsTextBufferingEnabled() = 0;
+	virtual bool IsQuadContainerBufferingEnabled() = 0;
+	virtual bool HasTextureArrays() = 0;
 
 	struct CLineItem
 	{
@@ -202,11 +273,13 @@ public:
 	virtual void QuadsEnd() = 0;
 	virtual void TextQuadsBegin() = 0;
 	virtual void TextQuadsEnd(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor) = 0;
+	virtual void QuadsTex3DBegin() = 0;
+	virtual void QuadsTex3DEnd() = 0;
 	virtual void QuadsEndKeepVertices() = 0;
 	virtual void QuadsDrawCurrentVertices(bool KeepVertices = true) = 0;
 	virtual void QuadsSetRotation(float Angle) = 0;
 	virtual void QuadsSetSubset(float TopLeftU, float TopLeftV, float BottomRightU, float BottomRightV) = 0;
-	virtual void QuadsSetSubsetFree(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3) = 0;
+	virtual void QuadsSetSubsetFree(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3, int Index = -1) = 0;
 
 	struct CQuadItem
 	{
@@ -217,6 +290,8 @@ public:
 	};
 	virtual void QuadsDraw(CQuadItem *pArray, int Num) = 0;
 	virtual void QuadsDrawTL(const CQuadItem *pArray, int Num) = 0;
+
+	virtual void QuadsTex3DDrawTL(const CQuadItem *pArray, int Num) = 0;
 
 	struct CFreeformItem
 	{
@@ -258,6 +333,7 @@ public:
 	virtual void SetColorVertex(const CColorVertex *pArray, int Num) = 0;
 	virtual void SetColor(float r, float g, float b, float a) = 0;
 	virtual void SetColor(ColorRGBA rgb) = 0;
+	virtual void SetColor4(vec4 TopLeft, vec4 TopRight, vec4 BottomLeft, vec4 BottomRight) = 0;
 	virtual void ChangeColorOfCurrentQuadVertices(float r, float g, float b, float a) = 0;
 	virtual void ChangeColorOfQuadVertices(int QuadOffset, unsigned char r, unsigned char g, unsigned char b, unsigned char a) = 0;
 
@@ -276,6 +352,7 @@ public:
 	virtual void SetWindowGrab(bool Grab) = 0;
 	virtual void NotifyWindow() = 0;
 
+	virtual SGraphicsWarning *GetCurWarning() = 0;
 protected:
 	inline CTextureHandle CreateTextureHandle(int Index)
 	{

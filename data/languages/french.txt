@@ -118,9 +118,6 @@ Controls
 Count players only
 == Seulement les joueurs
 
-Country
-== Pays
-
 Current
 == Actuellement
 
@@ -322,6 +319,7 @@ Ping
 Pistol
 == Pistolet
 
+[Demo browser]
 Play
 == Jouer
 
@@ -345,9 +343,6 @@ Please balance teams!
 
 Prev. weapon
 == Arme précédente
-
-Quality Textures
-== Textures haute qualité
 
 Quit
 == Quitter
@@ -481,9 +476,6 @@ Team
 Team chat
 == Chat d'équipe
 
-Texture Compression
-== Compression des textures
-
 The audio device couldn't be initialised.
 == Le périphérique audio n'a pas pu être initialisé.
 
@@ -576,9 +568,6 @@ Join game
 FSAA samples
 == Échantillonage FSAA
 
-%d of %d servers, %d players
-== %d/%d serveurs, %d joueurs
-
 Sound volume
 == Volume du son général
 
@@ -636,17 +625,11 @@ Lht.
 UI Color
 == Couleur du menu
 
-Host address
-== Adresse hôte
-
 Crc:
 == Crc :
 
 Alpha
 == Alpha
-
-Current version: %s
-== Version actuelle : %s
 
 LAN
 == LAN
@@ -1038,9 +1021,6 @@ Show others
 %.2f MiB
 == %.2f Mio
 
-DDNet %s is out! Download it at DDNet.tw!
-== DDNet %s est disponible! Téléchargez le sur DDNet.tw!
-
 Hi o/
 == Salut o/
 
@@ -1212,8 +1192,78 @@ Please enter your nick name below.
 Show DDNet map finishes in server browser
 == Afficher les cartes de DDNet terminées dans le navigateur
 
-transmits your player name to info.ddnet.tw
-== transmet votre pseudonyme à info.ddnet.tw
+transmits your player name to info2.ddnet.tw
+== transmet votre pseudonyme à info2.ddnet.tw
+
+The width or height of texture %s is not divisible by 16, which might cause visual bugs.
+== 
+
+Warning
+== 
+
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
+Country / Region
+== 
+
+Speed
+== 
+
+Search:
+== 
+
+Exclude:
+== 
+
+Search servers:
+== 
+
+%d of %d servers
+== 
+
+%d of %d server
+== 
+
+%d players
+== 
+
+%d player
+== 
+
+Skip the main menu
+== 
+
+Download skins
+== 
+
+Client message
+== 
 
 Show others (own team only)
+== 
+
+https://wiki.ddnet.tw/
+== 
+
+Website
+== 
+
+Settings
+== 
+
+Stop server
+== 
+
+Run server
+== 
+
+Server executable not found, can't run server
+== 
+
+Editor
+== 
+
+[Start menu]
+Play
 == 

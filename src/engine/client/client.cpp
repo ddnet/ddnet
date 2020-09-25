@@ -30,6 +30,7 @@
 #include <engine/masterserver.h>
 #include <engine/serverbrowser.h>
 #include <engine/sound.h>
+#include <engine/steam.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
 
@@ -64,10 +65,9 @@
 	#include <windows.h>
 #endif
 
+#include "client.h"
 #include "friends.h"
 #include "serverbrowser.h"
-#include "updater.h"
-#include "client.h"
 
 #if defined(CONF_VIDEORECORDER)
 	#include "video.h"
@@ -599,6 +599,15 @@ void CClient::SetState(int s)
 			else if(g_Config.m_ClReconnectTimeout > 0 && (str_find_nocase(ErrorString(), "Timeout") || str_find_nocase(ErrorString(), "Too weak connection")))
 				m_ReconnectTime = time_get() + time_freq() * g_Config.m_ClReconnectTimeout;
 		}
+
+		if(s == IClient::STATE_ONLINE)
+		{
+			Steam()->SetGameInfo(m_ServerAddress, m_aCurrentMap);
+		}
+		else if(Old == IClient::STATE_ONLINE)
+		{
+			Steam()->ClearGameInfo();
+		}
 	}
 }
 
@@ -699,6 +708,12 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 
 	str_format(aBuf, sizeof(aBuf), "connecting to '%s'", m_aServerAddressStr);
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
+	bool is_websocket = false;
+	if(strncmp(m_aServerAddressStr, "ws://", 5) == 0)
+	{
+		is_websocket = true;
+		str_copy(m_aServerAddressStr, pAddress + 5, sizeof(m_aServerAddressStr));
+	}
 
 	ServerInfoRequest();
 	if(net_host_lookup(m_aServerAddressStr, &m_ServerAddress, m_NetClient[CLIENT_MAIN].NetType()) != 0)
@@ -726,6 +741,10 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	m_pConsole->DeregisterTempAll();
 	if(m_ServerAddress.port == 0)
 		m_ServerAddress.port = Port;
+	if(is_websocket)
+	{
+		m_ServerAddress.type = NETTYPE_WEBSOCKET_IPV4;
+	}
 	m_NetClient[CLIENT_MAIN].Connect(&m_ServerAddress);
 	SetState(IClient::STATE_CONNECTING);
 
@@ -1060,6 +1079,42 @@ void CClient::Restart()
 void CClient::Quit()
 {
 	SetState(IClient::STATE_QUITING);
+}
+
+const char *CClient::PlayerName()
+{
+	if(g_Config.m_PlayerName[0])
+	{
+		return g_Config.m_PlayerName;
+	}
+	if(g_Config.m_SteamName[0])
+	{
+		return g_Config.m_SteamName;
+	}
+	return "nameless tee";
+}
+
+const char *CClient::DummyName()
+{
+	if(g_Config.m_ClDummyName[0])
+	{
+		return g_Config.m_ClDummyName;
+	}
+	const char *pBase = 0;
+	if(g_Config.m_PlayerName[0])
+	{
+		pBase = g_Config.m_PlayerName;
+	}
+	else if(g_Config.m_SteamName[0])
+	{
+		pBase = g_Config.m_SteamName;
+	}
+	if(pBase)
+	{
+		str_format(m_aDummyNameBuf, sizeof(m_aDummyNameBuf), "[D] %s", pBase);
+		return m_aDummyNameBuf;
+	}
+	return "brainless tee";
 }
 
 const char *CClient::ErrorString()
@@ -1690,9 +1745,9 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 						char aUrl[256];
 						char aEscaped[256];
 						EscapeUrl(aEscaped, sizeof(aEscaped), aFilename);
-						str_format(aUrl, sizeof(aUrl), "%s/%s", g_Config.m_ClDDNetMapDownloadUrl, aEscaped);
+						str_format(aUrl, sizeof(aUrl), "%s/%s", g_Config.m_ClMapDownloadUrl, aEscaped);
 
-						m_pMapdownloadTask = std::make_shared<CGetFile>(Storage(), aUrl, m_aMapdownloadFilename, IStorage::TYPE_SAVE, true);
+						m_pMapdownloadTask = std::make_shared<CGetFile>(Storage(), aUrl, m_aMapdownloadFilename, IStorage::TYPE_SAVE, CTimeout{g_Config.m_ClMapDownloadConnectTimeoutMs, g_Config.m_ClMapDownloadLowSpeedLimit, g_Config.m_ClMapDownloadLowSpeedTime});
 						Engine()->AddJob(m_pMapdownloadTask);
 					}
 					else
@@ -2290,9 +2345,9 @@ void CClient::FinishMapDownload()
 	m_MapdownloadTotalsize = -1;
 	SHA256_DIGEST *pSha256 = m_MapdownloadSha256Present ? &m_MapdownloadSha256 : 0;
 
-	char aTmp[256];
-	char aMapFileTemp[256];
-	char aMapFile[256];
+	char aTmp[MAX_PATH_LENGTH];
+	char aMapFileTemp[MAX_PATH_LENGTH];
+	char aMapFile[MAX_PATH_LENGTH];
 	FormatMapDownloadFilename(m_aMapdownloadName, pSha256, m_MapdownloadCrc, true, aTmp, sizeof(aTmp));
 	str_format(aMapFileTemp, sizeof(aMapFileTemp), "downloadedmaps/%s", aTmp);
 	FormatMapDownloadFilename(m_aMapdownloadName, pSha256, m_MapdownloadCrc, false, aTmp, sizeof(aTmp));
@@ -2335,11 +2390,60 @@ void CClient::ResetDDNetInfo()
 	}
 }
 
+bool CClient::IsDDNetInfoChanged()
+{
+	IOHANDLE OldFile = m_pStorage->OpenFile(DDNET_INFO, IOFLAG_READ, IStorage::TYPE_SAVE);
+
+	if(!OldFile)
+		return true;
+
+	IOHANDLE NewFile = m_pStorage->OpenFile(m_aDDNetInfoTmp, IOFLAG_READ, IStorage::TYPE_SAVE);
+
+	if(NewFile)
+	{
+		char aOldData[4096];
+		char aNewData[4096];
+		unsigned OldBytes;
+		unsigned NewBytes;
+
+		do
+		{
+			OldBytes = io_read(OldFile, aOldData, sizeof(aOldData));
+			NewBytes = io_read(NewFile, aNewData, sizeof(aNewData));
+
+			if(OldBytes != NewBytes || mem_comp(aOldData, aNewData, OldBytes) != 0)
+			{
+				io_close(NewFile);
+				io_close(OldFile);
+				return true;
+			}
+		}
+		while(OldBytes > 0);
+
+		io_close(NewFile);
+	}
+
+	io_close(OldFile);
+	return false;
+}
+
 void CClient::FinishDDNetInfo()
 {
 	ResetDDNetInfo();
-	m_pStorage->RenameFile(m_aDDNetInfoTmp, DDNET_INFO, IStorage::TYPE_SAVE);
-	LoadDDNetInfo();
+	if(IsDDNetInfoChanged())
+	{
+		m_pStorage->RenameFile(m_aDDNetInfoTmp, DDNET_INFO, IStorage::TYPE_SAVE);
+		LoadDDNetInfo();
+
+		if(g_Config.m_UiPage == CMenus::PAGE_DDNET)
+			m_ServerBrowser.Refresh(IServerBrowser::TYPE_DDNET);
+		else if(g_Config.m_UiPage == CMenus::PAGE_KOG)
+			m_ServerBrowser.Refresh(IServerBrowser::TYPE_KOG);
+	}
+	else
+	{
+		m_pStorage->RemoveFile(m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
+	}
 }
 
 typedef std::tuple<int, int, int> Version;
@@ -2395,8 +2499,9 @@ void CClient::LoadDDNetInfo()
 	{
 		const char *pNewsString = json_string_get(pNews);
 
-		if(m_aNews[0] && str_comp(m_aNews, pNewsString))
-			g_Config.m_UiPage = CMenus::PAGE_NEWS;
+		// Only mark news button if something new was added to the news
+		if(m_aNews[0] && str_find(m_aNews, pNewsString) == nullptr)
+			g_Config.m_UiUnreadNews = true;
 
 		str_copy(m_aNews, pNewsString, sizeof(m_aNews));
 	}
@@ -2541,17 +2646,16 @@ void CClient::Update()
 	{
 
 #if defined(CONF_VIDEORECORDER)
-	if (m_DemoPlayer.IsPlaying() && IVideo::Current())
-	{
-		if (IVideo::Current()->FrameRendered())
-			IVideo::Current()->NextVideoFrame();
-		if (IVideo::Current()->AudioFrameRendered())
-			IVideo::Current()->NextAudioFrameTimeline();
-	}
-	else if(m_ButtonRender)
-		Disconnect();
+		if (m_DemoPlayer.IsPlaying() && IVideo::Current())
+		{
+			if (IVideo::Current()->FrameRendered())
+				IVideo::Current()->NextVideoFrame();
+			if (IVideo::Current()->AudioFrameRendered())
+				IVideo::Current()->NextAudioFrameTimeline();
+		}
+		else if(m_ButtonRender)
+			Disconnect();
 #endif
-
 
 		m_DemoPlayer.Update();
 
@@ -2757,10 +2861,12 @@ void CClient::Update()
 		else if(m_pDDNetInfoTask->State() == HTTP_ERROR)
 		{
 			dbg_msg("ddnet-info", "download failed");
+			Storage()->RemoveFile(m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
 			ResetDDNetInfo();
 		}
 		else if(m_pDDNetInfoTask->State() == HTTP_ABORTED)
 		{
+			Storage()->RemoveFile(m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
 			m_pDDNetInfoTask = NULL;
 		}
 	}
@@ -2793,6 +2899,15 @@ void CClient::Update()
 	// update gameclient
 	if(!m_EditorActive)
 		GameClient()->OnUpdate();
+
+	Steam()->Update();
+	if(Steam()->GetConnectAddress())
+	{
+		char aAddress[NETADDR_MAXSTRSIZE];
+		net_addr_str(Steam()->GetConnectAddress(), aAddress, sizeof(aAddress), true);
+		Connect(aAddress);
+		Steam()->ClearConnectAddress();
+	}
 
 	if(m_ReconnectTime > 0 && time_get() > m_ReconnectTime)
 	{
@@ -2829,6 +2944,7 @@ void CClient::InitInterfaces()
 #if defined(CONF_AUTOUPDATE)
 	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
 #endif
+	m_pSteam = Kernel()->RequestInterface<ISteam>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
 	m_DemoEditor.Init(m_pGameClient->NetVersion(), &m_SnapshotDelta, m_pConsole, m_pStorage);
@@ -2949,6 +3065,11 @@ void CClient::Run()
 	if(!LoadData())
 		return;
 
+	if(Steam()->GetPlayerName())
+	{
+		str_copy(g_Config.m_SteamName, Steam()->GetPlayerName(), sizeof(g_Config.m_SteamName));
+	}
+
 	GameClient()->OnInit();
 
 	char aBuf[256];
@@ -2984,7 +3105,6 @@ void CClient::Run()
 		RequestDDNetInfo();
 
 	bool LastD = false;
-	bool LastQ = false;
 	bool LastE = false;
 	bool LastG = false;
 
@@ -3064,13 +3184,6 @@ void CClient::Run()
 
 		// update sound
 		Sound()->Update();
-
-		// panic quit button
-		if(CtrlShiftKey(KEY_Q, LastQ))
-		{
-			Quit();
-			break;
-		}
 
 		if(CtrlShiftKey(KEY_D, LastD))
 			g_Config.m_Debug ^= 1;
@@ -3517,7 +3630,7 @@ void CClient::SaveReplay(const int Length)
 	{
 		// First we stop the recorder to slice correctly the demo after
 		DemoRecorder_Stop(RECORDER_REPLAYS);
-		char aFilename[256];
+		char aFilename[MAX_PATH_LENGTH];
 
 		char aDate[64];
 		str_timestamp(aDate, sizeof(aDate));
@@ -3837,23 +3950,40 @@ void CClient::ToggleWindowVSync()
 void CClient::LoadFont()
 {
 	static CFont *pDefaultFont = 0;
+	static bool LoadedFallbackFont = false;
 	char aFilename[512];
-	const char *pFontFile = "fonts/DejaVuSansCJKName.ttf";
-	if(str_find(g_Config.m_ClLanguagefile, "chinese") != NULL || str_find(g_Config.m_ClLanguagefile, "japanese") != NULL ||
-		str_find(g_Config.m_ClLanguagefile, "korean") != NULL)
-		pFontFile = "fonts/DejavuWenQuanYiMicroHei.ttf";
+	const char *pFontFile = "fonts/DejaVuSans.ttf";
+	const char *pFallbackFontFile = "fonts/SourceHanSansSC-Regular.otf";
 	IOHANDLE File = Storage()->OpenFile(pFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
 	if(File)
 	{
+		size_t Size = io_length(File);
+		unsigned char *pBuf = (unsigned char *)malloc(Size);
+		io_read(File, pBuf, Size);
 		io_close(File);
 		IEngineTextRender *pTextRender = Kernel()->RequestInterface<IEngineTextRender>();
 		pDefaultFont = pTextRender->GetFont(aFilename);
 		if(pDefaultFont == NULL)
-			pDefaultFont = pTextRender->LoadFont(aFilename);
+			pDefaultFont = pTextRender->LoadFont(aFilename, pBuf, Size);
+
+		File = Storage()->OpenFile(pFallbackFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
+		if(File)
+		{
+			size_t Size = io_length(File);
+			unsigned char *pBuf = (unsigned char *)malloc(Size);
+			io_read(File, pBuf, Size);
+			io_close(File);
+			IEngineTextRender *pTextRender = Kernel()->RequestInterface<IEngineTextRender>();
+			LoadedFallbackFont = pTextRender->LoadFallbackFont(pDefaultFont, aFilename, pBuf, Size);
+		}
+
 		Kernel()->RequestInterface<IEngineTextRender>()->SetDefaultFont(pDefaultFont);
 	}
 	if(!pDefaultFont)
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load font. filename='%s'", pFontFile);
+
+	if(!LoadedFallbackFont)
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load the fallback font. filename='%s'", pFallbackFontFile);
 }
 
 void CClient::Notify(const char *pTitle, const char *pMessage)
@@ -3988,6 +4118,11 @@ static CClient *CreateClient()
 	return new(pClient) CClient;
 }
 
+void CClient::HandleConnectAddress(const NETADDR *pAddr)
+{
+	net_addr_str(pAddr, m_aCmdConnect, sizeof(m_aCmdConnect), true);
+}
+
 void CClient::HandleConnectLink(const char *pLink)
 {
 	str_copy(m_aCmdConnect, pLink + sizeof(CONNECTLINK) - 1, sizeof(m_aCmdConnect));
@@ -4058,6 +4193,7 @@ int main(int argc, const char **argv) // ignore_convention
 	IEngineTextRender *pEngineTextRender = CreateEngineTextRender();
 	IEngineMap *pEngineMap = CreateEngineMap();
 	IEngineMasterServer *pEngineMasterServer = CreateEngineMasterServer();
+	ISteam *pSteam = CreateSteam();
 
 	if(RandInitFailed)
 	{
@@ -4090,6 +4226,7 @@ int main(int argc, const char **argv) // ignore_convention
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateEditor(), false);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateGameClient(), false);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pStorage);
+		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pSteam);
 
 		if(RegisterFail)
 		{
@@ -4119,10 +4256,6 @@ int main(int argc, const char **argv) // ignore_convention
 	{
 		io_close(File);
 		pConsole->ExecuteFile(CONFIG_FILE);
-	}
-	else // fallback
-	{
-		pConsole->ExecuteFile("settings.cfg");
 	}
 
 	// execute autoexec file
@@ -4157,6 +4290,12 @@ int main(int argc, const char **argv) // ignore_convention
 		pClient->HandleMapPath(argv[1]);
 	else if(argc > 1) // ignore_convention
 		pConsole->ParseArguments(argc-1, &argv[1]); // ignore_convention
+
+	if(pSteam->GetConnectAddress())
+	{
+		pClient->HandleConnectAddress(pSteam->GetConnectAddress());
+		pSteam->ClearConnectAddress();
+	}
 
 	pClient->Engine()->InitLogfile();
 
@@ -4234,19 +4373,19 @@ void CClient::RequestDDNetInfo()
 	char aUrl[256];
 	static bool s_IsWinXP = os_is_winxp_or_lower();
 	if(s_IsWinXP)
-		str_copy(aUrl, "http://info.ddnet.tw/info", sizeof(aUrl));
+		str_copy(aUrl, "http://info2.ddnet.tw/info", sizeof(aUrl));
 	else
-		str_copy(aUrl, "https://info.ddnet.tw/info", sizeof(aUrl));
+		str_copy(aUrl, "https://info2.ddnet.tw/info", sizeof(aUrl));
 
 	if(g_Config.m_BrIndicateFinished)
 	{
 		char aEscaped[128];
-		EscapeUrl(aEscaped, sizeof(aEscaped), g_Config.m_PlayerName);
+		EscapeUrl(aEscaped, sizeof(aEscaped), PlayerName());
 		str_append(aUrl, "?name=", sizeof(aUrl));
 		str_append(aUrl, aEscaped, sizeof(aUrl));
 	}
 
-	m_pDDNetInfoTask = std::make_shared<CGetFile>(Storage(), aUrl, m_aDDNetInfoTmp, IStorage::TYPE_SAVE, true);
+	m_pDDNetInfoTask = std::make_shared<CGetFile>(Storage(), aUrl, m_aDDNetInfoTmp, IStorage::TYPE_SAVE, CTimeout{10000, 500, 10});
 	Engine()->AddJob(m_pDDNetInfoTask);
 }
 

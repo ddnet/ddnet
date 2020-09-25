@@ -82,16 +82,16 @@ bool CRaceHelper::IsStart(CGameClient *pClient, vec2 Prev, vec2 Pos)
 		if(!Indices.empty())
 			for(std::list < int >::iterator i = Indices.begin(); i != Indices.end(); i++)
 			{
-				if(pCollision->GetTileIndex(*i) == TILE_BEGIN)
+				if(pCollision->GetTileIndex(*i) == TILE_START)
 					return true;
-				if(pCollision->GetFTileIndex(*i) == TILE_BEGIN)
+				if(pCollision->GetFTileIndex(*i) == TILE_START)
 					return true;
 			}
 		else
 		{
-			if(pCollision->GetTileIndex(pCollision->GetPureMapIndex(Pos)) == TILE_BEGIN)
+			if(pCollision->GetTileIndex(pCollision->GetPureMapIndex(Pos)) == TILE_START)
 				return true;
-			if(pCollision->GetFTileIndex(pCollision->GetPureMapIndex(Pos)) == TILE_BEGIN)
+			if(pCollision->GetFTileIndex(pCollision->GetPureMapIndex(Pos)) == TILE_START)
 				return true;
 		}
 	}
@@ -105,16 +105,16 @@ bool CRaceHelper::IsFinish(CGameClient *pClient, vec2 Pos1, vec2 Pos2)
 	if(!Indices.empty())
 		for(std::list < int >::iterator i = Indices.begin(); i != Indices.end(); i++)
 		{
-			if(pCollision->GetTileIndex(*i) == TILE_END)
+			if(pCollision->GetTileIndex(*i) == TILE_FINISH)
 				return true;
-			if(pCollision->GetFTileIndex(*i) == TILE_END)
+			if(pCollision->GetFTileIndex(*i) == TILE_FINISH)
 				return true;
 		}
 	else
 	{
-		if(pCollision->GetTileIndex(pCollision->GetPureMapIndex(Pos1)) == TILE_END)
+		if(pCollision->GetTileIndex(pCollision->GetPureMapIndex(Pos1)) == TILE_FINISH)
 			return true;
-		if(pCollision->GetFTileIndex(pCollision->GetPureMapIndex(Pos1)) == TILE_END)
+		if(pCollision->GetFTileIndex(pCollision->GetPureMapIndex(Pos1)) == TILE_FINISH)
 			return true;
 	}
 	return false;

@@ -32,6 +32,11 @@ if(SDL2_FOUND)
   is_bundled(SDL2_BUNDLED "${SDL2_LIBRARY}")
   if(SDL2_BUNDLED AND TARGET_OS STREQUAL "windows")
     set(SDL2_COPY_FILES "${EXTRA_SDL2_LIBDIR}/SDL2.dll")
+    if(TARGET_BITS EQUAL 32)
+      list(APPEND OPUSFILE_COPY_FILES
+        "${EXTRA_SDL2_LIBDIR}/libgcc_s_dw2-1.dll"
+      )
+    endif()
   else()
     set(SDL2_COPY_FILES)
   endif()

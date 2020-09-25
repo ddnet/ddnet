@@ -21,6 +21,7 @@ struct CDemoItem
 
 struct CDemoListParam
 {
+	const CRaceDemo *m_pThis;
 	std::vector<CDemoItem> *m_plDemos;
 	const char *pMap;
 };
@@ -32,7 +33,7 @@ void CRaceDemo::GetPath(char *pBuf, int Size, int Time) const
 	const char *pMap = Client()->GetCurrentMap();
 
 	char aPlayerName[MAX_NAME_LENGTH];
-	str_copy(aPlayerName, g_Config.m_PlayerName, sizeof(aPlayerName));
+	str_copy(aPlayerName, Client()->PlayerName(), sizeof(aPlayerName));
 	str_sanitize_filename(aPlayerName);
 
 	if(Time < 0)
@@ -190,7 +191,7 @@ int CRaceDemo::RaceDemolistFetchCallback(const char *pName, time_t Date, int IsD
 	if(g_Config.m_ClDemoName)
 	{
 		char aPlayerName[MAX_NAME_LENGTH];
-		str_copy(aPlayerName, g_Config.m_PlayerName, sizeof(aPlayerName));
+		str_copy(aPlayerName, pParam->m_pThis->Client()->PlayerName(), sizeof(aPlayerName));
 		str_sanitize_filename(aPlayerName);
 
 		if(pTEnd[0] != '_' || str_comp(pTEnd + 1, aPlayerName) != 0)
@@ -209,7 +210,7 @@ int CRaceDemo::RaceDemolistFetchCallback(const char *pName, time_t Date, int IsD
 bool CRaceDemo::CheckDemo(int Time) const
 {
 	std::vector<CDemoItem> lDemos;
-	CDemoListParam Param = { &lDemos, Client()->GetCurrentMap() };
+	CDemoListParam Param = { this, &lDemos, Client()->GetCurrentMap() };
 	Storage()->ListDirectoryInfo(IStorage::TYPE_SAVE, ms_pRaceDemoDir, RaceDemolistFetchCallback, &Param);
 
 	// loop through demo files

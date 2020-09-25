@@ -7,7 +7,7 @@
 #include <game/server/gamemodes/DDRace.h>
 #include "plasma.h"
 
-const float ACCEL = 1.1f;
+const float PLASMA_ACCEL = 1.1f;
 
 CPlasma::CPlasma(CGameWorld *pGameWorld, vec2 Pos, vec2 Dir, bool Freeze,
 		bool Explosive, int ResponsibleTeam) :
@@ -44,7 +44,7 @@ bool CPlasma::HitCharacter()
 void CPlasma::Move()
 {
 	m_Pos += m_Core;
-	m_Core *= ACCEL;
+	m_Core *= PLASMA_ACCEL;
 }
 
 void CPlasma::Reset()
@@ -96,15 +96,10 @@ void CPlasma::Snap(int SnappingClient)
 			&& (!Tick))
 		return;
 
-	if(SnapPlayer && (SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->IsPaused()) && SnapPlayer->m_SpectatorID != -1
-		&& GameServer()->GetPlayerChar(SnapPlayer->m_SpectatorID)
-		&& GameServer()->GetPlayerChar(SnapPlayer->m_SpectatorID)->Team() != m_ResponsibleTeam
-		&& !SnapPlayer->m_ShowOthers)
+	if(SnapPlayer && (SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->IsPaused()) && SnapPlayer->m_SpectatorID != -1 && GameServer()->GetPlayerChar(SnapPlayer->m_SpectatorID) && GameServer()->GetPlayerChar(SnapPlayer->m_SpectatorID)->Team() != m_ResponsibleTeam && SnapPlayer->m_ShowOthers != 1)
 		return;
 
-	if(SnapPlayer && SnapPlayer->GetTeam() != TEAM_SPECTATORS && !SnapPlayer->IsPaused() && SnapChar
-		&& SnapChar && SnapChar->Team() != m_ResponsibleTeam
-		&& !SnapPlayer->m_ShowOthers)
+	if(SnapPlayer && SnapPlayer->GetTeam() != TEAM_SPECTATORS && !SnapPlayer->IsPaused() && SnapChar && SnapChar && SnapChar->Team() != m_ResponsibleTeam && SnapPlayer->m_ShowOthers != 1)
 		return;
 
 	if(SnapPlayer && (SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->IsPaused()) && SnapPlayer->m_SpectatorID == -1

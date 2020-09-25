@@ -17,31 +17,33 @@
 #endif
 
 #if defined(CONF_FAMILY_UNIX)
-	#include <sys/time.h>
-	#include <unistd.h>
+#include <signal.h>
+#include <sys/time.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
-	/* unix net includes */
-	#include <sys/socket.h>
-	#include <sys/ioctl.h>
-	#include <errno.h>
-	#include <netdb.h>
-	#include <netinet/in.h>
-	#include <fcntl.h>
-	#include <pthread.h>
-	#include <arpa/inet.h>
+/* unix net includes */
+#include <arpa/inet.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <pthread.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
 
-	#include <dirent.h>
+#include <dirent.h>
 
-	#if defined(CONF_PLATFORM_MACOSX)
-		// some lock and pthread functions are already defined in headers
-		// included from Carbon.h
-		// this prevents having duplicate definitions of those
-		#define _lock_set_user_
-		#define _task_user_
+#if defined(CONF_PLATFORM_MACOSX)
+// some lock and pthread functions are already defined in headers
+// included from Carbon.h
+// this prevents having duplicate definitions of those
+#define _lock_set_user_
+#define _task_user_
 
-		#include <Carbon/Carbon.h>
-		#include <mach/mach_time.h>
-	#endif
+#include <Carbon/Carbon.h>
+#include <mach/mach_time.h>
+#endif
 
 #elif defined(CONF_FAMILY_WINDOWS)
 	#define WIN32_LEAN_AND_MEAN
@@ -66,12 +68,6 @@
 
 #if defined(__cplusplus)
 extern "C" {
-#endif
-
-#ifdef FUZZING
-static unsigned char gs_NetData[1024];
-static int gs_NetPosition = 0;
-static int gs_NetSize = 0;
 #endif
 
 IOHANDLE io_stdin() { return (IOHANDLE)stdin; }
@@ -1152,6 +1148,10 @@ int net_host_lookup(const char *hostname, NETADDR *addr, int types)
 		hints.ai_family = AF_INET;
 	else if(types == NETTYPE_IPV6)
 		hints.ai_family = AF_INET6;
+#if defined(CONF_WEBSOCKETS)
+	if(types & NETTYPE_WEBSOCKET_IPV4)
+		hints.ai_family = AF_INET;
+#endif
 
 	e = getaddrinfo(host, NULL, &hints, &result);
 
@@ -1475,21 +1475,12 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 	/* set non-blocking */
 	net_set_non_blocking(sock);
 
-#ifdef FUZZING
-	IOHANDLE file = io_open("bar.txt", IOFLAG_READ);
-	gs_NetPosition = 0;
-	gs_NetSize = io_length(file);
-	io_read(file, gs_NetData, 1024);
-	io_close(file);
-#endif /* FUZZING */
-
 	/* return */
 	return sock;
 }
 
 int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size)
 {
-#ifndef FUZZING
 	int d = -1;
 
 	if(addr->type&NETTYPE_IPV4)
@@ -1514,10 +1505,15 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 	}
 
 #if defined(CONF_WEBSOCKETS)
-	if(addr->type&NETTYPE_WEBSOCKET_IPV4)
+	if(addr->type & NETTYPE_WEBSOCKET_IPV4)
 	{
 		if(sock.web_ipv4sock >= 0)
-			d = websocket_send(sock.web_ipv4sock, (const unsigned char*)data, size, addr->port);
+		{
+			char addr_str[NETADDR_MAXSTRSIZE];
+			str_format(addr_str, sizeof(addr_str), "%d.%d.%d.%d", addr->ip[0], addr->ip[1], addr->ip[2], addr->ip[3]);
+			d = websocket_send(sock.web_ipv4sock, (const unsigned char *)data, size, addr_str, addr->port);
+		}
+
 		else
 			dbg_msg("net", "can't send websocket_ipv4 traffic to this socket");
 	}
@@ -1564,9 +1560,6 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 	network_stats.sent_bytes += size;
 	network_stats.sent_packets++;
 	return d;
-#else
-	return size;
-#endif /* FUZZING */
 }
 
 void net_init_mmsgs(MMSGS* m)
@@ -1592,7 +1585,6 @@ void net_init_mmsgs(MMSGS* m)
 
 int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *buffer, int maxsize, MMSGS* m, unsigned char **data)
 {
-#ifndef FUZZING
 	char sockaddrbuf[128];
 	int bytes = 0;
 
@@ -1663,34 +1655,6 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *buffer, int maxsize, MMSGS
 	else if(bytes == 0)
 		return 0;
 	return -1; /* error */
-#else /* ifdef FUZZING */
-	addr->type = NETTYPE_IPV4;
-	addr->port = 11111;
-	addr->ip[0] = 127;
-	addr->ip[1] = 0;
-	addr->ip[2] = 0;
-	addr->ip[3] = 1;
-
-	int CurrentData = 0;
-	while (gs_NetPosition < gs_NetSize && CurrentData < maxsize)
-	{
-		if(gs_NetData[gs_NetPosition] == '\n')
-		{
-			gs_NetPosition++;
-			break;
-		}
-
-		((unsigned char*)buffer)[CurrentData] = gs_NetData[gs_NetPosition];
-		*data = buffer;
-		CurrentData++;
-		gs_NetPosition++;
-	}
-
-	if (gs_NetPosition >= gs_NetSize)
-		exit(0);
-
-	return CurrentData;
-#endif /* FUZZING */
 }
 
 int net_udp_close(NETSOCKET sock)
@@ -2272,8 +2236,11 @@ int net_socket_read_wait(NETSOCKET sock, int time)
 	if(sock.web_ipv4sock >= 0)
 	{
 		int maxfd = websocket_fd_set(sock.web_ipv4sock, &readfds);
-		if (maxfd > sockid)
+		if(maxfd > sockid)
+		{
 			sockid = maxfd;
+			FD_SET(sockid, &readfds);
+		}
 	}
 #endif
 
@@ -2285,7 +2252,10 @@ int net_socket_read_wait(NETSOCKET sock, int time)
 
 	if(sock.ipv4sock >= 0 && FD_ISSET(sock.ipv4sock, &readfds))
 		return 1;
-
+#if defined(CONF_WEBSOCKETS)
+	if(sock.web_ipv4sock >= 0 && FD_ISSET(sockid, &readfds))
+		return 1;
+#endif
 	if(sock.ipv6sock >= 0 && FD_ISSET(sock.ipv6sock, &readfds))
 		return 1;
 
@@ -2295,6 +2265,46 @@ int net_socket_read_wait(NETSOCKET sock, int time)
 int time_timestamp(void)
 {
 	return time(0);
+}
+
+int time_houroftheday(void)
+{
+	time_t time_data;
+	struct tm *time_info;
+
+	time(&time_data);
+	time_info = localtime(&time_data);
+	return time_info->tm_hour;
+}
+
+int time_season(void)
+{
+	time_t time_data;
+	struct tm *time_info;
+
+	time(&time_data);
+	time_info = localtime(&time_data);
+
+	switch(time_info->tm_mon)
+	{
+	case 11:
+	case 0:
+	case 1:
+		return SEASON_WINTER;
+	case 2:
+	case 3:
+	case 4:
+		return SEASON_SPRING;
+	case 5:
+	case 6:
+	case 7:
+		return SEASON_SUMMER;
+	case 8:
+	case 9:
+	case 10:
+		return SEASON_AUTUMN;
+	}
+	return SEASON_SPRING; // should never happen
 }
 
 void str_append(char *dst, const char *src, int dst_size)
@@ -2322,9 +2332,25 @@ void str_copy(char *dst, const char *src, int dst_size)
 void str_utf8_truncate(char *dst, int dst_size, const char *src, int truncation_len)
 {
 	int size = -1;
-	for(int cursor = 0, pos = 0; pos <= truncation_len && cursor < dst_size && size != cursor; cursor = str_utf8_forward(src, cursor), pos++)
+	int cursor = 0;
+	int pos = 0;
+	while(pos <= truncation_len && cursor < dst_size && size != cursor)
+	{
 		size = cursor;
+		cursor = str_utf8_forward(src, cursor);
+		pos++;
+	}
 	str_copy(dst, src, size+1);
+}
+
+void str_truncate(char *dst, int dst_size, const char *src, int truncation_len)
+{
+	int size = dst_size;
+	if(truncation_len < size)
+	{
+		size = truncation_len + 1;
+	}
+	str_copy(dst, src, size);
 }
 
 int str_length(const char *str)
@@ -2926,11 +2952,13 @@ const char *str_utf8_find_nocase(const char *haystack, const char *needle)
 
 int str_utf8_isspace(int code)
 {
-	return !(code > 0x20 && code != 0xA0 && code != 0x034F && code != 0x2800 &&
-		(code < 0x2000 || code > 0x200F) && (code < 0x2028 || code > 0x202F) &&
-		(code < 0x205F || code > 0x2064) && (code < 0x206A || code > 0x206F) &&
-		(code < 0xFE00 || code > 0xFE0F) && code != 0xFEFF &&
-		(code < 0xFFF9 || code > 0xFFFC));
+	return code <= 0x0020 || code == 0x0085 || code == 0x00A0 ||
+		code == 0x034F || code == 0x1680 || code == 0x180E ||
+		(code >= 0x2000 && code <= 0x200F) || (code >= 0x2028 && code <= 0x202F) ||
+		(code >= 0x205F && code <= 0x2064) || (code >= 0x206A && code <= 0x206F) ||
+		code == 0x2800 || code == 0x3000 ||
+		(code >= 0xFE00 && code <= 0xFE0F) || code == 0xFEFF ||
+		(code >= 0xFFF9 && code <= 0xFFFC);
 }
 
 const char *str_utf8_skip_whitespaces(const char *str)
@@ -3174,6 +3202,10 @@ int str_utf8_check(const char *str)
 	return 1;
 }
 
+void str_utf8_copy(char *dst, const char *src, int dst_size)
+{
+	str_utf8_truncate(dst, dst_size, src, dst_size);
+}
 
 unsigned str_quickhash(const char *str)
 {
@@ -3215,8 +3247,11 @@ const char *str_next_token(const char *str, const char *delim, char *buffer, int
 {
 	int len = 0;
 	const char *tok = str_token_get(str, delim, &len);
-	if(len < 0)
+	if(len < 0 || tok == NULL)
+	{
+		buffer[0] = '\0';
 		return NULL;
+	}
 
 	len = buffer_size > len ? len : buffer_size - 1;
 	mem_copy(buffer, tok, len);
@@ -3234,18 +3269,45 @@ int pid(void)
 #endif
 }
 
-void shell_execute(const char *file)
+PROCESS shell_execute(const char *file)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	ShellExecute(NULL, NULL, file, NULL, NULL, SW_SHOWDEFAULT);
+	SHELLEXECUTEINFOA info;
+	mem_zero(&info, sizeof(SHELLEXECUTEINFOA));
+	info.cbSize = sizeof(SHELLEXECUTEINFOA);
+	info.lpVerb = "open";
+	info.lpFile = file;
+	info.nShow = SW_SHOWDEFAULT;
+	info.fMask = SEE_MASK_NOCLOSEPROCESS;
+	ShellExecuteEx(&info);
+	return info.hProcess;
 #elif defined(CONF_FAMILY_UNIX)
 	char *argv[2];
 	pid_t pid;
 	argv[0] = (char*) file;
 	argv[1] = NULL;
 	pid = fork();
-	if(!pid)
+	if(pid == -1)
+	{
+		return 0;
+	}
+	if(pid == 0)
+	{
 		execv(file, argv);
+		_exit(1);
+	}
+	return pid;
+#endif
+}
+
+int kill_process(PROCESS process)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	return TerminateProcess(process, 0);
+#elif defined(CONF_FAMILY_UNIX)
+	int status;
+	kill(process, SIGTERM);
+	return !waitpid(process, &status, 0);
 #endif
 }
 

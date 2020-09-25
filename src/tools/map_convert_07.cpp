@@ -97,13 +97,14 @@ bool CheckImageDimensions(void *pItem, int Type, const char *pFilename)
 		return true;
 
 	CMapItemImage *pImgItem = (CMapItemImage *)pItem2;
-	if(pImgItem->m_Width % 16 == 0)
+
+	if(pImgItem->m_Width % 16 == 0 && pImgItem->m_Height % 16 == 0 && pImgItem->m_Width > 0 && pImgItem->m_Height > 0)
 		return true;
 
 	char aTileLayerName[12];
 	IntsToStr(pTMap->m_aName, sizeof(pTMap->m_aName)/sizeof(int), aTileLayerName);
 	char *pName = (char *)g_DataReader.GetData(pImgItem->m_ImageName);
-	dbg_msg("map_convert_07", "%s: Tile layer \"%s\" uses image \"%s\" with width %d, which is not divisible by 16. This is not supported in Teeworlds 0.7. Please scale the image and replace it manually.", pFilename, aTileLayerName, pName, pImgItem->m_Width);
+	dbg_msg("map_convert_07", "%s: Tile layer \"%s\" uses image \"%s\" with width %d, height %d, which is not divisible by 16. This is not supported in Teeworlds 0.7. Please scale the image and replace it manually.", pFilename, aTileLayerName, pName, pImgItem->m_Width, pImgItem->m_Height);
 	return false;
 }
 
@@ -148,21 +149,46 @@ int main(int argc, const char **argv)
 
 	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC, argc, argv);
 
-	if(argc != 3)
+	if(argc < 2 || argc > 3)
 	{
 		dbg_msg("map_convert_07", "Invalid arguments");
-		dbg_msg("map_convert_07", "Usage: map_convert_07 <source map filepath> <dest map filepath>");
+		dbg_msg("map_convert_07", "Usage: map_convert_07 <source map filepath> [<dest map filepath>]");
 		return -1;
 	}
 
-	if (!pStorage)
+	if(!pStorage)
 	{
 		dbg_msg("map_convert_07", "error loading storage");
 		return -1;
 	}
 
 	const char *pSourceFileName = argv[1];
-	const char *pDestFileName = argv[2];
+
+	const char *pDestFileName;
+	char aDestFileName[MAX_PATH_LENGTH];
+
+	if(argc == 3)
+	{
+		pDestFileName = argv[2];
+	}
+	else
+	{
+		char aBuf[MAX_PATH_LENGTH];
+		IStorage::StripPathAndExtension(pSourceFileName, aBuf, sizeof(aBuf));
+		str_format(aDestFileName, sizeof(aDestFileName), "data/maps7/%s.map", aBuf);
+		pDestFileName = aDestFileName;
+		if(fs_makedir("data") != 0)
+		{
+			dbg_msg("map_convert_07", "failed to create data directory");
+			return -1;
+		}
+
+		if(fs_makedir("data/maps7") != 0)
+		{
+			dbg_msg("map_convert_07", "failed to create data/maps7 directory");
+			return -1;
+		}
+	}
 
 	int ID = 0;
 	int Type = 0;
@@ -195,6 +221,9 @@ int main(int argc, const char **argv)
 	}
 
 	bool Success = true;
+
+	if(i > 64)
+		dbg_msg("map_convert_07", "%s: Uses more textures than the client maximum of 64.", pSourceFileName);
 
 	// add all items
 	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)

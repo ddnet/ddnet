@@ -389,7 +389,12 @@ int64 CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 			{ // Actions of other players
 				if (!Character(i))
 					continue; // Player is currently dead
-				if (!GetPlayer(i)->m_ShowOthers)
+				if(GetPlayer(i)->m_ShowOthers == 2)
+				{
+					if(m_Core.Team(i) != Team && m_Core.Team(i) != TEAM_SUPER)
+						continue; // In different teams
+				}
+				else if(GetPlayer(i)->m_ShowOthers == 0)
 				{
 					if (m_Core.GetSolo(Asker))
 						continue; // When in solo part don't show others
@@ -397,7 +402,7 @@ int64 CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 						continue; // When in solo part don't show others
 					if (m_Core.Team(i) != Team && m_Core.Team(i) != TEAM_SUPER)
 						continue; // In different teams
-				} // ShowOthers
+				}
 			} // See everything of yourself
 		}
 		else if (GetPlayer(i)->m_SpectatorID != SPEC_FREEVIEW)
@@ -406,7 +411,12 @@ int64 CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 			{ // Actions of other players
 				if (!Character(GetPlayer(i)->m_SpectatorID))
 					continue; // Player is currently dead
-				if (!GetPlayer(i)->m_ShowOthers)
+				if(GetPlayer(i)->m_ShowOthers == 2)
+				{
+					if(m_Core.Team(GetPlayer(i)->m_SpectatorID) != Team && m_Core.Team(GetPlayer(i)->m_SpectatorID) != TEAM_SUPER)
+						continue; // In different teams
+				}
+				else if(GetPlayer(i)->m_ShowOthers == 0)
 				{
 					if (m_Core.GetSolo(Asker))
 						continue; // When in solo part don't show others
@@ -414,7 +424,7 @@ int64 CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 						continue; // When in solo part don't show others
 					if (m_Core.Team(GetPlayer(i)->m_SpectatorID) != Team && m_Core.Team(GetPlayer(i)->m_SpectatorID) != TEAM_SUPER)
 						continue; // In different teams
-				} // ShowOthers
+				}
 			} // See everything of player you're spectating
 		}
 		else
@@ -708,7 +718,10 @@ void CGameTeams::ProcessSaveTeam()
 			if(GameServer()->TeeHistorianActive())
 				GameServer()->TeeHistorian()->RecordTeamSaveFailure(Team);
 			if(Count(Team) > 0)
-				m_pSaveTeamResult[Team]->m_SavedTeam.load(Team);
+			{
+				// load weak/strong order to prevent switching weak/strong while saving
+				m_pSaveTeamResult[Team]->m_SavedTeam.load(Team, false);
+			}
 			break;
 		case CScoreSaveResult::LOAD_SUCCESS:
 		{
@@ -720,7 +733,10 @@ void CGameTeams::ProcessSaveTeam()
 						m_pSaveTeamResult[Team]->m_SavedTeam.GetString());
 			}
 			if(Count(Team) > 0)
-				m_pSaveTeamResult[Team]->m_SavedTeam.load(Team);
+			{
+				// keep current weak/strong order as on some maps there is no other way of switching
+				m_pSaveTeamResult[Team]->m_SavedTeam.load(Team, true);
+			}
 			char aSaveID[UUID_MAXSTRSIZE];
 			FormatUuid(m_pSaveTeamResult[Team]->m_SaveID, aSaveID, UUID_MAXSTRSIZE);
 			dbg_msg("save", "Load successful: %s", aSaveID);

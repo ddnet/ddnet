@@ -1,8 +1,8 @@
+#include "sql_string_helpers.h"
+
+#include <base/system.h>
 #include <cmath>
 #include <cstring>
-#include <base/system.h>
-
-#include "sql_string_helpers.h"
 
 void sqlstr::FuzzyString(char *pString, int size)
 {
@@ -24,39 +24,21 @@ void sqlstr::FuzzyString(char *pString, int size)
 	delete [] newString;
 }
 
-// anti SQL injection
-void sqlstr::ClearString(char *pString, int size)
+int sqlstr::EscapeLike(char *pDst, const char *pSrc, int DstSize)
 {
-	char *newString = new char [size * 2 - 1];
-	int pos = 0;
-
-	for(int i = 0; i < size; i++)
+	int Pos = 0;
+	int DstPos = 0;
+	while(DstPos + 2 < DstSize)
 	{
-		if(pString[i] == '\\')
-		{
-			newString[pos++] = '\\';
-			newString[pos++] = '\\';
-		}
-		else if(pString[i] == '\'')
-		{
-			newString[pos++] = '\\';
-			newString[pos++] = '\'';
-		}
-		else if(pString[i] == '"')
-		{
-			newString[pos++] = '\\';
-			newString[pos++] = '"';
-		}
-		else
-		{
-			newString[pos++] = pString[i];
-		}
+		if(pSrc[Pos] == '\0')
+			break;
+		if(pSrc[Pos] == '\\' || pSrc[Pos] == '%' || pSrc[Pos] == '_' || pSrc[Pos] == '[')
+			pDst[DstPos++] = '\\';
+		pDst[DstPos++] = pSrc[Pos++];
+
 	}
-
-	newString[pos] = '\0';
-
-	str_copy(pString, newString, size);
-	delete [] newString;
+	pDst[DstPos++] = '\0';
+	return DstPos;
 }
 
 void sqlstr::AgoTimeToString(int AgoTime, char *pAgoString)

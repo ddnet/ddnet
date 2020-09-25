@@ -34,7 +34,9 @@ void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
 		"Bojidar, FallenKN, ardadem, archimede67, sirius1242, Aerll,");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
-		"trafilaw, Zwelf, Patiga, Konsti, ElXreno, MikiGamer & others.");
+		"trafilaw, Zwelf, Patiga, Konsti, ElXreno, MikiGamer,");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
+		"Fireball & others.");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
 		"Based on DDRace by the DDRace developers,");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
@@ -645,40 +647,7 @@ void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
 	if(pResult->NumArguments() > 0)
 		pCode = pResult->GetString(0);
 
-	char aCountry[5];
-	if(str_length(pCode) >= 3 && pCode[0] >= 'A' && pCode[0] <= 'Z' && pCode[1] >= 'A'
-		&& pCode[1] <= 'Z' && pCode[2] >= 'A' && pCode[2] <= 'Z')
-	{
-		if(str_length(pCode) == 3 || pCode[3] == ' ')
-		{
-			str_copy(aCountry, pCode, 4);
-			pCode = str_skip_whitespaces_const(pCode + 4);
-		}
-		else if(str_length(pCode) == 4 || (str_length(pCode) > 4 && pCode[4] == ' '))
-		{
-			str_copy(aCountry, pCode, 5);
-			pCode = str_skip_whitespaces_const(pCode + 5);
-		}
-		else
-		{
-			str_copy(aCountry, g_Config.m_SvSqlServerName, sizeof(aCountry));
-		}
-	}
-	else
-	{
-		str_copy(aCountry, g_Config.m_SvSqlServerName, sizeof(aCountry));
-	}
-
-	if(str_in_list(g_Config.m_SvSqlValidServerNames, ",", aCountry))
-	{
-		pSelf->Score()->SaveTeam(pResult->m_ClientID, pCode, aCountry);
-	}
-	else
-	{
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "Unknown server name '%s'.", aCountry);
-		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-	}
+	pSelf->Score()->SaveTeam(pResult->m_ClientID, pCode, g_Config.m_SvSqlServerName);
 }
 
 void CGameContext::ConLoad(IConsole::IResult *pResult, void *pUserData)
@@ -777,13 +746,6 @@ void CGameContext::ConLockTeam(IConsole::IResult *pResult, void *pUserData)
 	if(Lock)
 	{
 		pSelf->UnlockTeam(pResult->m_ClientID, Team);
-	}
-	else if(!g_Config.m_SvTeamLock)
-	{
-		pSelf->Console()->Print(
-				IConsole::OUTPUT_LEVEL_STANDARD,
-				"print",
-				"Team locking is disabled on this server");
 	}
 	else
 	{
@@ -944,10 +906,13 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 		{
 			int Team = pResult->GetInteger(0);
 
-			if (pPlayer->m_Last_Team
-					+ pSelf->Server()->TickSpeed()
-					* g_Config.m_SvTeamChangeDelay
-					> pSelf->Server()->Tick())
+			if(Team == pController->m_Teams.m_Core.Team(pResult->m_ClientID))
+			{
+				char aBuf[32];
+				str_format(aBuf, sizeof(aBuf), "You are in team %d already", Team);
+				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join", aBuf);
+			}
+			else if(pPlayer->m_Last_Team + pSelf->Server()->TickSpeed() * g_Config.m_SvTeamChangeDelay > pSelf->Server()->Tick())
 			{
 				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",
 						"You can\'t change teams that fast!");

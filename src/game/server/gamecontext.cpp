@@ -24,10 +24,6 @@
 
 #include "gamemodes/DDRace.h"
 #include "score.h"
-#include "score/file_score.h"
-#if defined(CONF_SQL)
-#include "score/sql_score.h"
-#endif
 
 enum
 {
@@ -1027,6 +1023,12 @@ void CGameContext::OnClientDirectInput(int ClientID, void *pInput)
 	{
 		m_TeeHistorian.RecordPlayerInput(ClientID, (CNetObj_PlayerInput *)pInput);
 	}
+
+	int Flags = ((CNetObj_PlayerInput *)pInput)->m_PlayerFlags;
+	if((Flags & 256) || (Flags & 512))
+	{
+		Server()->Kick(ClientID, "please update your client or use DDNet client");
+	}
 }
 
 void CGameContext::OnClientPredictedInput(int ClientID, void *pInput)
@@ -1208,7 +1210,7 @@ void CGameContext::OnClientEnter(int ClientID)
 		SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1, CHAT_SIX);
 
 		SendChatTarget(ClientID, "DDraceNetwork Mod. Version: " GAME_VERSION);
-		SendChatTarget(ClientID, "please visit DDNet.tw or say /info for more info");
+		SendChatTarget(ClientID, "please visit DDNet.tw or say /info and make sure to read our /rules");
 
 		if(g_Config.m_SvWelcome[0]!=0)
 			SendChatTarget(ClientID,g_Config.m_SvWelcome);
@@ -1216,12 +1218,12 @@ void CGameContext::OnClientEnter(int ClientID)
 
 		Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
-		if (g_Config.m_SvShowOthersDefault)
+		if(g_Config.m_SvShowOthersDefault > 0)
 		{
 			if (g_Config.m_SvShowOthers)
 				SendChatTarget(ClientID, "You can see other players. To disable this use DDNet client and type /showothers .");
 
-			m_apPlayers[ClientID]->m_ShowOthers = true;
+			m_apPlayers[ClientID]->m_ShowOthers = g_Config.m_SvShowOthersDefault;
 		}
 	}
 	m_VoteUpdate = true;
@@ -2000,7 +2002,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 
 			if(aCmd[0] && str_comp(aCmd, "info") != 0)
-				CallVote(ClientID, aDesc, aCmd, aReason, aChatmsg, aSixupDesc);
+				CallVote(ClientID, aDesc, aCmd, aReason, aChatmsg, aSixupDesc[0] ? aSixupDesc : 0);
 		}
 		else if(MsgID == NETMSGTYPE_CL_VOTE)
 		{
@@ -2308,12 +2310,22 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 		CNetMsg_Cl_StartInfo *pMsg = (CNetMsg_Cl_StartInfo *)pRawMsg;
 
-		if(!str_utf8_check(pMsg->m_pName)
-			|| !str_utf8_check(pMsg->m_pClan)
-			|| !str_utf8_check(pMsg->m_pSkin))
+		if(!str_utf8_check(pMsg->m_pName))
 		{
+			Server()->Kick(ClientID, "name is not valid utf8");
 			return;
 		}
+		if(!str_utf8_check(pMsg->m_pClan))
+		{
+			Server()->Kick(ClientID, "clan is not valid utf8");
+			return;
+		}
+		if(!str_utf8_check(pMsg->m_pSkin))
+		{
+			Server()->Kick(ClientID, "skin is not valid utf8");
+			return;
+		}
+
 		pPlayer->m_LastChangeInfo = Server()->Tick();
 
 		// set start infos
@@ -3100,7 +3112,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		GameInfo.m_pPrngDescription = m_Prng.Description();
 
 		GameInfo.m_pServerName = g_Config.m_SvName;
-		GameInfo.m_ServerPort = g_Config.m_SvPort;
+		GameInfo.m_ServerPort = Server()->Port();
 		GameInfo.m_pGameType = m_pController->m_pGameType;
 
 		GameInfo.m_pConfig = &g_Config;
@@ -3124,17 +3136,11 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		}
 	}
 
-	// delete old score object
-	if(m_pScore)
-		delete m_pScore;
+	if(!m_pScore)
+	{
+		m_pScore = new CScore(this, ((CServer *)Server())->DbPool());
+	}
 
-	// create score object (add sql later)
-#if defined(CONF_SQL)
-	if(g_Config.m_SvUseSQL)
-		m_pScore = new CSqlScore(this);
-	else
-#endif
-		m_pScore = new CFileScore(this);
 	// setup core world
 	//for(int i = 0; i < MAX_CLIENTS; i++)
 	//	game.players[i].core.world = &game.world.core;
@@ -3384,11 +3390,8 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 	str_copy(m_aDeleteTempfile, aTemp, sizeof(m_aDeleteTempfile));
 }
 
-void CGameContext::OnShutdown(bool FullShutdown)
+void CGameContext::OnShutdown()
 {
-	if (FullShutdown)
-		Score()->OnShutdown();
-
 	Antibot()->RoundEnd();
 
 	if(m_TeeHistorianActive)

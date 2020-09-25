@@ -125,11 +125,9 @@ void CCollision::Init(class CLayers *pLayers)
 
 			Index = m_pSwitch[i].m_Type;
 
-			if(Index <= TILE_NPH_START)
+			if(Index <= TILE_NPH_ENABLE)
 			{
-				if((Index >= TILE_JUMP && Index <= TILE_BONUS)
-						|| Index == TILE_ALLOW_TELE_GUN
-						|| Index == TILE_ALLOW_BLUE_TELE_GUN)
+				if((Index >= TILE_JUMP && Index <= TILE_SUBSTRACT_TIME) || Index == TILE_ALLOW_TELE_GUN || Index == TILE_ALLOW_BLUE_TELE_GUN)
 					m_pSwitch[i].m_Type = Index;
 				else
 					m_pSwitch[i].m_Type = 0;
@@ -520,6 +518,13 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elas
 			}
 
 			vec2 NewPos = Pos + Vel*Fraction; // TODO: this row is not nice
+
+			// Fraction can be very small and thus the calculation has no effect, no
+			// reason to continue calculating.
+			if(NewPos == Pos)
+			{
+				break;
+			}
 
 			if(TestBox(vec2(NewPos.x, NewPos.y), Size))
 			{

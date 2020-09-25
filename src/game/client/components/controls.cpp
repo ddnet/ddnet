@@ -173,6 +173,7 @@ void CControls::OnConsoleInit()
 	{ static CInputState s_State = {this, &m_InputData[0].m_Hook, &m_InputData[1].m_Hook}; Console()->Register("+hook", "", CFGFLAG_CLIENT, ConKeyInputState, (void *)&s_State, "Hook"); }
 	{ static CInputState s_State = {this, &m_InputData[0].m_Fire, &m_InputData[1].m_Fire}; Console()->Register("+fire", "", CFGFLAG_CLIENT, ConKeyInputCounter, (void *)&s_State, "Fire"); }
 	{ static CInputState s_State = {this, &m_ShowHookColl[0], &m_ShowHookColl[1]}; Console()->Register("+showhookcoll", "", CFGFLAG_CLIENT, ConKeyInputState, (void *)&s_State, "Show Hook Collision"); }
+	{ static CInputState s_State = {this, &m_ResetDummy[0], &m_ResetDummy[1]}; Console()->Register("+resetdummy", "", CFGFLAG_CLIENT, ConKeyInputState, (void *)&s_State, "Reset Dummy"); }
 
 	{ static CInputSet s_Set = {this, &m_InputData[0].m_WantedWeapon, &m_InputData[1].m_WantedWeapon, 1}; Console()->Register("+weapon1", "", CFGFLAG_CLIENT, ConKeyInputSet, (void *)&s_Set, "Switch to hammer"); }
 	{ static CInputSet s_Set = {this, &m_InputData[0].m_WantedWeapon, &m_InputData[1].m_WantedWeapon, 2}; Console()->Register("+weapon2", "", CFGFLAG_CLIENT, ConKeyInputSet, (void *)&s_Set, "Switch to gun"); }
@@ -288,6 +289,19 @@ int CControls::SnapInput(int *pData)
 			pDummyInput->m_Jump = g_Config.m_ClDummyJump;
 			pDummyInput->m_Fire = g_Config.m_ClDummyFire;
 			pDummyInput->m_Hook = g_Config.m_ClDummyHook;
+		}
+
+		if(m_ResetDummy[g_Config.m_ClDummy])
+		{
+			ResetInput(!g_Config.m_ClDummy);
+			m_InputData[!g_Config.m_ClDummy].m_Hook = 0;
+
+			CNetObj_PlayerInput *pDummyInput = &m_pClient->m_DummyInput;
+			pDummyInput->m_Hook = m_InputData[!g_Config.m_ClDummy].m_Hook;
+			pDummyInput->m_Jump = m_InputData[!g_Config.m_ClDummy].m_Jump;
+			pDummyInput->m_Direction = m_InputData[!g_Config.m_ClDummy].m_Jump;
+
+			pDummyInput->m_Fire = m_InputData[!g_Config.m_ClDummy].m_Fire;
 		}
 
 		// stress testing

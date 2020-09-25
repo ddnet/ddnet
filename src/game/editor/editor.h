@@ -235,7 +235,7 @@ public:
 			}
 			case LAYERTYPE_TUNE:
 			{
-				if (Index == TILE_TUNE1)
+				if (Index == TILE_TUNE)
 					return true;
 				else
 					return false;
@@ -662,6 +662,7 @@ public:
 
 		m_PopupEventActivated = false;
 		m_PopupEventWasActivated = false;
+		m_MouseInsidePopup = false;
 
 		m_FileDialogStorageType = 0;
 		m_pFileDialogTitle = 0;
@@ -671,7 +672,8 @@ public:
 		m_aFileDialogCurrentFolder[0] = 0;
 		m_aFileDialogCurrentLink[0] = 0;
 		m_pFileDialogPath = m_aFileDialogCurrentFolder;
-		m_aFileDialogActivate = false;
+		m_FileDialogActivate = false;
+		m_FileDialogOpening = false;
 		m_FileDialogScrollValue = 0.0f;
 		m_FilesSelectedIndex = -1;
 		m_FilesStartAt = 0;
@@ -778,8 +780,7 @@ public:
 	CLayer *GetSelectedLayer(int Index);
 	CLayerGroup *GetSelectedGroup();
 	CSoundSource *GetSelectedSource();
-	void SelectLayer(int Index);
-
+	void SelectLayer(int LayerIndex, int GroupIndex = -1);
 	void SelectQuad(int Index);
 	void DeleteSelectedQuads();
 	bool IsQuadSelected(int Index);
@@ -803,19 +804,22 @@ public:
 
 	enum
 	{
-		POPEVENT_EXIT=0,
+		POPEVENT_EXIT = 0,
 		POPEVENT_LOAD,
 		POPEVENT_LOADCURRENT,
 		POPEVENT_NEW,
 		POPEVENT_SAVE,
 		POPEVENT_LARGELAYER,
 		POPEVENT_PREVENTUNUSEDTILES,
-		POPEVENT_IMAGEDIV16
+		POPEVENT_IMAGEDIV16,
+		POPEVENT_IMAGE_MAX,
+		POPEVENT_PLACE_BORDER_TILES
 	};
 
 	int m_PopupEventType;
 	int m_PopupEventActivated;
 	int m_PopupEventWasActivated;
+	bool m_MouseInsidePopup;
 	bool m_LargeLayerWasWarned;
 	bool m_PreventUnusedTilesWasWarned;
 	int m_AllowPlaceUnusedTiles;
@@ -841,7 +845,7 @@ public:
 	char m_aFileDialogSearchText[64];
 	char m_aFileDialogPrevSearchText[64];
 	char *m_pFileDialogPath;
-	bool m_aFileDialogActivate;
+	bool m_FileDialogActivate;
 	int m_FileDialogFileType;
 	float m_FileDialogScrollValue;
 	int m_FilesSelectedIndex;
@@ -850,6 +854,7 @@ public:
 	IGraphics::CTextureHandle m_FilePreviewImage;
 	bool m_PreviewImageIsLoaded;
 	CImageInfo m_FilePreviewImageInfo;
+	bool m_FileDialogOpening;
 
 
 	struct CFilelistItem
@@ -932,7 +937,7 @@ public:
 	float m_CommandBox;
 	char m_aSettingsCommand[256];
 
-	void DoMapBorder();
+	void PlaceBorderTiles();
 	int DoButton_Editor_Common(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
 	int DoButton_Editor(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
 	int DoButton_Env(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pToolTip, ColorRGBA Color);
@@ -958,6 +963,7 @@ public:
 	void UiInvokePopupMenu(void *pID, int Flags, float X, float Y, float W, float H, int (*pfnFunc)(CEditor *pEditor, CUIRect Rect, void *pContext), void *pExtra=0);
 	void UiDoPopupMenu();
 	bool UiPopupExists(void *pID);
+	bool UiPopupOpen();
 
 	int UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree=false, bool IsHex=false, int corners=CUI::CORNER_ALL, ColorRGBA* Color=0);
 
@@ -1036,6 +1042,7 @@ public:
 	void RenderFileDialog();
 
 	void AddFileDialogEntry(int Index, CUIRect *pView);
+	void SelectGameLayer();
 	void SortImages();
 	const char *Explain(int Tile, int Layer);
 

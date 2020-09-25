@@ -66,7 +66,6 @@ public:
 		CMDGROUP_CORE = 0, // commands that everyone has to implement
 		CMDGROUP_PLATFORM_OPENGL = 10000, // commands specific to a platform
 		CMDGROUP_PLATFORM_SDL = 20000,
-		CMDGROUP_PLATFORM_OPENGL3_3 = 30000,
 
 		//
 		CMD_NOP = CMDGROUP_CORE,
@@ -85,8 +84,9 @@ public:
 		// rendering
 		CMD_CLEAR,
 		CMD_RENDER,
+		CMD_RENDER_TEX3D,
 
-		//opengl 3.3 commands
+		//opengl 2.0+ commands (some are just emulated and only exist in opengl 3.3+)
 		CMD_CREATE_BUFFER_OBJECT, // create vbo
 		CMD_RECREATE_BUFFER_OBJECT, // recreate vbo
 		CMD_UPDATE_BUFFER_OBJECT, // update vbo
@@ -130,6 +130,11 @@ public:
 		TEXFLAG_NOMIPMAPS = 1,
 		TEXFLAG_COMPRESSED = 2,
 		TEXFLAG_QUALITY = 4,
+		TEXFLAG_TO_3D_TEXTURE = (1 << 3),
+		TEXFLAG_TO_2D_ARRAY_TEXTURE = (1 << 4),
+		TEXFLAG_TO_3D_TEXTURE_SINGLE_LAYER = (1 << 5),
+		TEXFLAG_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER = (1 << 6),
+		TEXFLAG_NO_2D_TEXTURE = (1 << 7),
 	};
 
 	enum
@@ -159,6 +164,8 @@ public:
 	typedef GL_SColorf SColorf;
 	typedef GL_SColor SColor;
 	typedef GL_SVertex SVertex;
+	typedef GL_SVertexTex3D SVertexTex3D;
+	typedef GL_SVertexTex3DStream SVertexTex3DStream;
 
 	struct SCommand
 	{
@@ -209,6 +216,16 @@ public:
 		unsigned m_PrimType;
 		unsigned m_PrimCount;
 		SVertex *m_pVertices; // you should use the command buffer data to allocate vertices for this command
+	};
+
+	struct SCommand_RenderTex3D : public SCommand
+	{
+		SCommand_RenderTex3D()
+			: SCommand(CMD_RENDER_TEX3D) {}
+		SState m_State;
+		unsigned m_PrimType;
+		unsigned m_PrimCount;
+		SVertexTex3DStream *m_pVertices; // you should use the command buffer data to allocate vertices for this command
 	};
 
 	struct SCommand_CreateBufferObject : public SCommand
@@ -313,7 +330,6 @@ public:
 
 		int m_IndicesDrawNum;
 		int m_BufferContainerIndex;
-		int m_LOD;
 	};
 
 	struct SCommand_RenderBorderTile : public SCommand
@@ -324,7 +340,6 @@ public:
 		char *m_pIndicesOffset; // you should use the command buffer data to allocate vertices for this command
 		unsigned int m_DrawNum;
 		int m_BufferContainerIndex;
-		int m_LOD;
 
 		float m_Offset[2];
 		float m_Dir[2];
@@ -340,7 +355,6 @@ public:
 		unsigned int m_IndexDrawNum;
 		unsigned int m_DrawNum;
 		int m_BufferContainerIndex;
-		int m_LOD;
 
 		float m_Offset[2];
 		float m_Dir[2];
@@ -378,7 +392,8 @@ public:
 		SState m_State;
 
 		SVertex *m_pVertices;
-		int m_QuadNum;
+		unsigned m_PrimType;
+		unsigned m_PrimCount;
 
 		int m_TextureSize;
 
@@ -554,6 +569,19 @@ public:
 	}
 };
 
+enum EGraphicsBackendErrorCodes
+{
+	GRAPHICS_BACKEND_ERROR_CODE_UNKNOWN = -1,
+	GRAPHICS_BACKEND_ERROR_CODE_NONE = 0,
+	GRAPHICS_BACKEND_ERROR_CODE_OPENGL_CONTEXT_FAILED,
+	GRAPHICS_BACKEND_ERROR_CODE_OPENGL_VERSION_FAILED,
+	GRAPHICS_BACKEND_ERROR_CODE_SDL_INIT_FAILED,
+	GRAPHICS_BACKEND_ERROR_CODE_SDL_SCREEN_REQUEST_FAILED,
+	GRAPHICS_BACKEND_ERROR_CODE_SDL_SCREEN_INFO_REQUEST_FAILED,
+	GRAPHICS_BACKEND_ERROR_CODE_SDL_SCREEN_RESOLUTION_REQUEST_FAILED,
+	GRAPHICS_BACKEND_ERROR_CODE_SDL_WINDOW_CREATE_FAILED,
+};
+
 // interface for the graphics backend
 // all these functions are called on the main thread
 class IGraphicsBackend
@@ -592,7 +620,12 @@ public:
 	virtual bool IsIdle() const = 0;
 	virtual void WaitForIdle() = 0;
 
-	virtual bool IsOpenGL3_3() { return false; }
+	virtual bool IsNewOpenGL() { return false; }
+	virtual bool HasTileBuffering() { return false; }
+	virtual bool HasQuadBuffering() { return false; }
+	virtual bool HasTextBuffering() { return false; }
+	virtual bool HasQuadContainerBuffering() { return false; }
+	virtual bool Has2DTextureArrays() { return false; }
 };
 
 class CGraphics_Threaded : public IEngineGraphics
@@ -610,7 +643,12 @@ class CGraphics_Threaded : public IEngineGraphics
 
 	CCommandBuffer::SState m_State;
 	IGraphicsBackend *m_pBackend;
-	bool m_UseOpenGL3_3;
+	bool m_OpenGLTileBufferingEnabled;
+	bool m_OpenGLQuadBufferingEnabled;
+	bool m_OpenGLTextBufferingEnabled;
+	bool m_OpenGLQuadContainerBufferingEnabled;
+	bool m_OpenGLHasTextureArrays;
+	bool m_IsNewOpenGL;
 
 	CCommandBuffer *m_apCommandBuffers[NUM_CMDBUFFERS];
 	CCommandBuffer *m_pCommandBuffer;
@@ -620,7 +658,10 @@ class CGraphics_Threaded : public IEngineGraphics
 	class IStorage *m_pStorage;
 	class IConsole *m_pConsole;
 
+	int m_CurIndex;
+
 	CCommandBuffer::SVertex m_aVertices[MAX_VERTICES];
+	CCommandBuffer::SVertexTex3DStream m_aVerticesTex3D[MAX_VERTICES];
 	int m_NumVertices;
 
 	CCommandBuffer::SColor m_aColor[4];
@@ -638,6 +679,8 @@ class CGraphics_Threaded : public IEngineGraphics
 	int m_aTextureIndices[MAX_TEXTURES];
 	int m_FirstFreeTexture;
 	int m_TextureMemoryUsage;
+
+	std::vector<SGraphicsWarning> m_Warnings;
 
 	struct SVertexArrayInfo
 	{
@@ -689,7 +732,26 @@ class CGraphics_Threaded : public IEngineGraphics
 	void* AllocCommandBufferData(unsigned AllocSize);
 
 	void AddVertices(int Count);
-	void Rotate(const CCommandBuffer::SPoint &rCenter, CCommandBuffer::SVertex *pPoints, int NumPoints);
+	void AddVertices(int Count, CCommandBuffer::SVertex *pVertices);
+	void AddVertices(int Count, CCommandBuffer::SVertexTex3DStream *pVertices);
+
+	template<typename TName>
+	void Rotate(const CCommandBuffer::SPoint &rCenter, TName *pPoints, int NumPoints)
+	{
+		float c = cosf(m_Rotation);
+		float s = sinf(m_Rotation);
+		float x, y;
+		int i;
+
+		TName *pVertices = pPoints;
+		for(i = 0; i < NumPoints; i++)
+		{
+			x = pVertices[i].m_Pos.x - rCenter.x;
+			y = pVertices[i].m_Pos.y - rCenter.y;
+			pVertices[i].m_Pos.x = x * c - y * s + rCenter.x;
+			pVertices[i].m_Pos.y = x * s + y * c + rCenter.y;
+		}
+	}
 
 	void KickCommandBuffer();
 
@@ -698,136 +760,323 @@ class CGraphics_Threaded : public IEngineGraphics
 public:
 	CGraphics_Threaded();
 
-	virtual void ClipEnable(int x, int y, int w, int h);
-	virtual void ClipDisable();
+	void ClipEnable(int x, int y, int w, int h) override;
+	void ClipDisable() override;
 
-	virtual void BlendNone();
-	virtual void BlendNormal();
-	virtual void BlendAdditive();
+	void BlendNone() override;
+	void BlendNormal() override;
+	void BlendAdditive() override;
 
-	virtual void WrapNormal();
-	virtual void WrapClamp();
+	void WrapNormal() override;
+	void WrapClamp() override;
 
-	virtual int MemoryUsage() const;
+	int MemoryUsage() const override;
 
-	virtual void MapScreen(float TopLeftX, float TopLeftY, float BottomRightX, float BottomRightY);
-	virtual void GetScreen(float *pTopLeftX, float *pTopLeftY, float *pBottomRightX, float *pBottomRightY);
+	void MapScreen(float TopLeftX, float TopLeftY, float BottomRightX, float BottomRightY) override;
+	void GetScreen(float *pTopLeftX, float *pTopLeftY, float *pBottomRightX, float *pBottomRightY) override;
 
-	virtual void LinesBegin();
-	virtual void LinesEnd();
-	virtual void LinesDraw(const CLineItem *pArray, int Num);
+	void LinesBegin() override;
+	void LinesEnd() override;
+	void LinesDraw(const CLineItem *pArray, int Num) override;
 
-	virtual int UnloadTexture(IGraphics::CTextureHandle Index);
-	virtual IGraphics::CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags);
-	virtual int LoadTextureRawSub(IGraphics::CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData);
+	int UnloadTexture(IGraphics::CTextureHandle Index) override;
+	IGraphics::CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName = NULL) override;
+	int LoadTextureRawSub(IGraphics::CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData) override;
 
 	// simple uncompressed RGBA loaders
-	virtual IGraphics::CTextureHandle LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags);
-	virtual int LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType);
+	IGraphics::CTextureHandle LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags) override;
+	int LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType) override;
+
+	void CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSourceBuffer, int FullWidth, int FullHeight, int ColorChannelCount, int SubOffsetX, int SubOffsetY, int SubCopyWidth, int SubCopyHeight) override;
 
 	void ScreenshotDirect();
 
-	virtual void TextureSet(CTextureHandle TextureID);
+	void TextureSet(CTextureHandle TextureID) override;
 
-	virtual void Clear(float r, float g, float b);
+	void Clear(float r, float g, float b) override;
 
-	virtual void QuadsBegin();
-	virtual void QuadsEnd();
-	virtual void TextQuadsBegin();
-	virtual void TextQuadsEnd(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float* pOutlineTextColor);
-	virtual void QuadsEndKeepVertices();
-	virtual void QuadsDrawCurrentVertices(bool KeepVertices = true);
-	virtual void QuadsSetRotation(float Angle);
+	void QuadsBegin() override;
+	void QuadsEnd() override;
+	void TextQuadsBegin() override;
+	void TextQuadsEnd(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor) override;
+	void QuadsTex3DBegin() override;
+	void QuadsTex3DEnd() override;
+	void QuadsEndKeepVertices() override;
+	void QuadsDrawCurrentVertices(bool KeepVertices = true) override;
+	void QuadsSetRotation(float Angle) override;
 
-	virtual void SetColorVertex(const CColorVertex *pArray, int Num);
-	virtual void SetColor(float r, float g, float b, float a);
-	virtual void SetColor(ColorRGBA rgb);
+	template<typename TName>
+	void SetColor(TName *pVertex, int ColorIndex)
+	{
+		TName *pVert = pVertex;
+		pVert->m_Color.r = m_aColor[ColorIndex].r;
+		pVert->m_Color.g = m_aColor[ColorIndex].g;
+		pVert->m_Color.b = m_aColor[ColorIndex].b;
+		pVert->m_Color.a = m_aColor[ColorIndex].a;
+	}
+
+	void SetColorVertex(const CColorVertex *pArray, int Num) override;
+	void SetColor(float r, float g, float b, float a) override;
+	void SetColor(ColorRGBA rgb) override;
+	void SetColor4(vec4 TopLeft, vec4 TopRight, vec4 BottomLeft, vec4 BottomRight) override;
 
 	// go through all vertices and change their color (only works for quads)
-	virtual void ChangeColorOfCurrentQuadVertices(float r, float g, float b, float a);
-	virtual void ChangeColorOfQuadVertices(int QuadOffset, unsigned char r, unsigned char g, unsigned char b, unsigned char a);
+	void ChangeColorOfCurrentQuadVertices(float r, float g, float b, float a) override;
+	void ChangeColorOfQuadVertices(int QuadOffset, unsigned char r, unsigned char g, unsigned char b, unsigned char a) override;
 
-	void SetColor(CCommandBuffer::SVertex *pVertex, int ColorIndex);
-
-	virtual void QuadsSetSubset(float TlU, float TlV, float BrU, float BrV);
-	virtual void QuadsSetSubsetFree(
+	void QuadsSetSubset(float TlU, float TlV, float BrU, float BrV) override;
+	void QuadsSetSubsetFree(
 		float x0, float y0, float x1, float y1,
-		float x2, float y2, float x3, float y3);
+		float x2, float y2, float x3, float y3, int Index = -1) override;
 
-	virtual void QuadsDraw(CQuadItem *pArray, int Num);
-	virtual void QuadsDrawTL(const CQuadItem *pArray, int Num);
-	virtual void QuadsDrawFreeform(const CFreeformItem *pArray, int Num);
-	virtual void QuadsText(float x, float y, float Size, const char *pText);
+	void QuadsDraw(CQuadItem *pArray, int Num) override;
 
-	virtual int CreateQuadContainer();
-	virtual void QuadContainerUpload(int ContainerIndex);
-	virtual void QuadContainerAddQuads(int ContainerIndex, CQuadItem *pArray, int Num);
-	virtual void QuadContainerAddQuads(int ContainerIndex, CFreeformItem *pArray, int Num);
-	virtual void QuadContainerReset(int ContainerIndex);
-	virtual void DeleteQuadContainer(int ContainerIndex);
-	virtual void RenderQuadContainer(int ContainerIndex, int QuadDrawNum);
-	virtual void RenderQuadContainer(int ContainerIndex, int QuadOffset, int QuadDrawNum);
-	virtual void RenderQuadContainerAsSprite(int ContainerIndex, int QuadOffset, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f);
-	virtual void RenderQuadContainerAsSpriteMultiple(int ContainerIndex, int QuadOffset, int DrawCount, SRenderSpriteInfo *pRenderInfo);
+	template<typename TName>
+	void QuadsDrawTLImpl(TName *pVertices, const CQuadItem *pArray, int Num)
+	{
+		CCommandBuffer::SPoint Center;
 
-	virtual void FlushVertices(bool KeepVertices = false);
-	virtual void FlushTextVertices(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor);
+		dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->QuadsDrawTL without begin");
 
-	virtual void RenderTileLayer(int BufferContainerIndex, float *pColor, char **pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffet);
-	virtual void RenderBorderTiles(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, int JumpIndex, unsigned int DrawNum);
-	virtual void RenderBorderTileLines(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, unsigned int IndexDrawNum, unsigned int RedrawNum);
-	virtual void RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo* pQuadInfo, int QuadNum);
-	virtual void RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, float* pTextColor, float* pTextoutlineColor);
+		if(g_Config.m_GfxQuadAsTriangle && !m_IsNewOpenGL)
+		{
+			for(int i = 0; i < Num; ++i)
+			{
+				// first triangle
+				pVertices[m_NumVertices + 6 * i].m_Pos.x = pArray[i].m_X;
+				pVertices[m_NumVertices + 6 * i].m_Pos.y = pArray[i].m_Y;
+				pVertices[m_NumVertices + 6 * i].m_Tex = m_aTexture[0];
+				SetColor(&pVertices[m_NumVertices + 6 * i], 0);
+
+				pVertices[m_NumVertices + 6 * i + 1].m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
+				pVertices[m_NumVertices + 6 * i + 1].m_Pos.y = pArray[i].m_Y;
+				pVertices[m_NumVertices + 6 * i + 1].m_Tex = m_aTexture[1];
+				SetColor(&pVertices[m_NumVertices + 6 * i + 1], 1);
+
+				pVertices[m_NumVertices + 6 * i + 2].m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
+				pVertices[m_NumVertices + 6 * i + 2].m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
+				pVertices[m_NumVertices + 6 * i + 2].m_Tex = m_aTexture[2];
+				SetColor(&pVertices[m_NumVertices + 6 * i + 2], 2);
+
+				// second triangle
+				pVertices[m_NumVertices + 6 * i + 3].m_Pos.x = pArray[i].m_X;
+				pVertices[m_NumVertices + 6 * i + 3].m_Pos.y = pArray[i].m_Y;
+				pVertices[m_NumVertices + 6 * i + 3].m_Tex = m_aTexture[0];
+				SetColor(&pVertices[m_NumVertices + 6 * i + 3], 0);
+
+				pVertices[m_NumVertices + 6 * i + 4].m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
+				pVertices[m_NumVertices + 6 * i + 4].m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
+				pVertices[m_NumVertices + 6 * i + 4].m_Tex = m_aTexture[2];
+				SetColor(&pVertices[m_NumVertices + 6 * i + 4], 2);
+
+				pVertices[m_NumVertices + 6 * i + 5].m_Pos.x = pArray[i].m_X;
+				pVertices[m_NumVertices + 6 * i + 5].m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
+				pVertices[m_NumVertices + 6 * i + 5].m_Tex = m_aTexture[3];
+				SetColor(&pVertices[m_NumVertices + 6 * i + 5], 3);
+
+				if(m_Rotation != 0)
+				{
+					Center.x = pArray[i].m_X + pArray[i].m_Width / 2;
+					Center.y = pArray[i].m_Y + pArray[i].m_Height / 2;
+
+					Rotate(Center, &pVertices[m_NumVertices + 6 * i], 6);
+				}
+			}
+
+			AddVertices(3 * 2 * Num, pVertices);
+		}
+		else
+		{
+			for(int i = 0; i < Num; ++i)
+			{
+				pVertices[m_NumVertices + 4 * i].m_Pos.x = pArray[i].m_X;
+				pVertices[m_NumVertices + 4 * i].m_Pos.y = pArray[i].m_Y;
+				pVertices[m_NumVertices + 4 * i].m_Tex = m_aTexture[0];
+				SetColor(&pVertices[m_NumVertices + 4 * i], 0);
+
+				pVertices[m_NumVertices + 4 * i + 1].m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
+				pVertices[m_NumVertices + 4 * i + 1].m_Pos.y = pArray[i].m_Y;
+				pVertices[m_NumVertices + 4 * i + 1].m_Tex = m_aTexture[1];
+				SetColor(&pVertices[m_NumVertices + 4 * i + 1], 1);
+
+				pVertices[m_NumVertices + 4 * i + 2].m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
+				pVertices[m_NumVertices + 4 * i + 2].m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
+				pVertices[m_NumVertices + 4 * i + 2].m_Tex = m_aTexture[2];
+				SetColor(&pVertices[m_NumVertices + 4 * i + 2], 2);
+
+				pVertices[m_NumVertices + 4 * i + 3].m_Pos.x = pArray[i].m_X;
+				pVertices[m_NumVertices + 4 * i + 3].m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
+				pVertices[m_NumVertices + 4 * i + 3].m_Tex = m_aTexture[3];
+				SetColor(&pVertices[m_NumVertices + 4 * i + 3], 3);
+
+				if(m_Rotation != 0)
+				{
+					Center.x = pArray[i].m_X + pArray[i].m_Width / 2;
+					Center.y = pArray[i].m_Y + pArray[i].m_Height / 2;
+
+					Rotate(Center, &pVertices[m_NumVertices + 4 * i], 4);
+				}
+			}
+
+			AddVertices(4 * Num, pVertices);
+		}
+	}
+
+	void QuadsDrawTL(const CQuadItem *pArray, int Num) override;
+
+	void QuadsTex3DDrawTL(const CQuadItem *pArray, int Num) override;
+
+	void QuadsDrawFreeform(const CFreeformItem *pArray, int Num) override;
+	void QuadsText(float x, float y, float Size, const char *pText) override;
+
+	int CreateQuadContainer() override;
+	void QuadContainerUpload(int ContainerIndex) override;
+	void QuadContainerAddQuads(int ContainerIndex, CQuadItem *pArray, int Num) override;
+	void QuadContainerAddQuads(int ContainerIndex, CFreeformItem *pArray, int Num) override;
+	void QuadContainerReset(int ContainerIndex) override;
+	void DeleteQuadContainer(int ContainerIndex) override;
+	void RenderQuadContainer(int ContainerIndex, int QuadDrawNum) override;
+	void RenderQuadContainer(int ContainerIndex, int QuadOffset, int QuadDrawNum) override;
+	void RenderQuadContainerAsSprite(int ContainerIndex, int QuadOffset, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f) override;
+	void RenderQuadContainerAsSpriteMultiple(int ContainerIndex, int QuadOffset, int DrawCount, SRenderSpriteInfo *pRenderInfo) override;
+
+	template<typename TName>
+	void FlushVerticesImpl(bool KeepVertices, int &PrimType, int &PrimCount, int &NumVerts, TName &Command, size_t VertSize)
+	{
+		Command.m_pVertices = NULL;
+		if(m_NumVertices == 0)
+			return;
+
+		NumVerts = m_NumVertices;
+
+		if(!KeepVertices)
+			m_NumVertices = 0;
+
+		if(m_Drawing == DRAWING_QUADS)
+		{
+			if(g_Config.m_GfxQuadAsTriangle && !m_IsNewOpenGL)
+			{
+				PrimType = CCommandBuffer::PRIMTYPE_TRIANGLES;
+				PrimCount = NumVerts / 3;
+			}
+			else
+			{
+				PrimType = CCommandBuffer::PRIMTYPE_QUADS;
+				PrimCount = NumVerts / 4;
+			}
+		}
+		else if(m_Drawing == DRAWING_LINES)
+		{
+			PrimType = CCommandBuffer::PRIMTYPE_LINES;
+			PrimCount = NumVerts / 2;
+		}
+		else
+			return;
+
+		Command.m_pVertices = (decltype(Command.m_pVertices))m_pCommandBuffer->AllocData(VertSize * NumVerts);
+		if(Command.m_pVertices == NULL)
+		{
+			// kick command buffer and try again
+			KickCommandBuffer();
+
+			Command.m_pVertices = (decltype(Command.m_pVertices))m_pCommandBuffer->AllocData(VertSize * NumVerts);
+			if(Command.m_pVertices == NULL)
+			{
+				dbg_msg("graphics", "failed to allocate data for vertices");
+				return;
+			}
+		}
+
+		Command.m_State = m_State;
+
+		Command.m_PrimType = PrimType;
+		Command.m_PrimCount = PrimCount;
+
+		// check if we have enough free memory in the commandbuffer
+		if(!m_pCommandBuffer->AddCommand(Command))
+		{
+			// kick command buffer and try again
+			KickCommandBuffer();
+
+			Command.m_pVertices = (decltype(Command.m_pVertices))m_pCommandBuffer->AllocData(VertSize * NumVerts);
+			if(Command.m_pVertices == NULL)
+			{
+				dbg_msg("graphics", "failed to allocate data for vertices");
+				return;
+			}
+
+			if(!m_pCommandBuffer->AddCommand(Command))
+			{
+				dbg_msg("graphics", "failed to allocate memory for render command");
+				return;
+			}
+		}
+	}
+
+	void FlushVertices(bool KeepVertices = false) override;
+	void FlushTextVertices(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor) override;
+	void FlushVerticesTex3D() override;
+
+	void RenderTileLayer(int BufferContainerIndex, float *pColor, char **pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffet) override;
+	void RenderBorderTiles(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, int JumpIndex, unsigned int DrawNum) override;
+	void RenderBorderTileLines(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, unsigned int IndexDrawNum, unsigned int RedrawNum) override;
+	void RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, int QuadNum) override;
+	void RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, float *pTextColor, float *pTextoutlineColor) override;
 
 	// opengl 3.3 functions
-	virtual int CreateBufferObject(size_t UploadDataSize, void* pUploadData);
-	virtual void RecreateBufferObject(int BufferIndex, size_t UploadDataSize, void* pUploadData);
-	virtual void UpdateBufferObject(int BufferIndex, size_t UploadDataSize, void* pUploadData, void* pOffset);
-	virtual void CopyBufferObject(int WriteBufferIndex, int ReadBufferIndex, size_t WriteOffset, size_t ReadOffset, size_t CopyDataSize);
-	virtual void DeleteBufferObject(int BufferIndex);
+	int CreateBufferObject(size_t UploadDataSize, void *pUploadData) override;
+	void RecreateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData) override;
+	void UpdateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, void *pOffset) override;
+	void CopyBufferObject(int WriteBufferIndex, int ReadBufferIndex, size_t WriteOffset, size_t ReadOffset, size_t CopyDataSize) override;
+	void DeleteBufferObject(int BufferIndex) override;
 
-	virtual int CreateBufferContainer(SBufferContainerInfo *pContainerInfo);
+	int CreateBufferContainer(SBufferContainerInfo *pContainerInfo) override;
 	// destroying all buffer objects means, that all referenced VBOs are destroyed automatically, so the user does not need to save references to them
-	virtual void DeleteBufferContainer(int ContainerIndex, bool DestroyAllBO = true);
-	virtual void UpdateBufferContainer(int ContainerIndex, SBufferContainerInfo *pContainerInfo);
-	virtual void IndicesNumRequiredNotify(unsigned int RequiredIndicesCount);
+	void DeleteBufferContainer(int ContainerIndex, bool DestroyAllBO = true) override;
+	void UpdateBufferContainer(int ContainerIndex, SBufferContainerInfo *pContainerInfo) override;
+	void IndicesNumRequiredNotify(unsigned int RequiredIndicesCount) override;
 
+	int GetNumScreens() const override;
+	void Minimize() override;
+	void Maximize() override;
+	bool Fullscreen(bool State) override;
+	void SetWindowBordered(bool State) override;
+	bool SetWindowScreen(int Index) override;
+	void Resize(int w, int h) override;
+	void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser) override;
+	int GetWindowScreen() override;
 
-	virtual int GetNumScreens() const;
-	virtual void Minimize();
-	virtual void Maximize();
-	virtual bool Fullscreen(bool State);
-	virtual void SetWindowBordered(bool State);
-	virtual bool SetWindowScreen(int Index);
-	virtual void Resize(int w, int h);
-	virtual void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser);
-	virtual int GetWindowScreen();
+	int WindowActive() override;
+	int WindowOpen() override;
 
-	virtual int WindowActive();
-	virtual int WindowOpen();
+	void SetWindowGrab(bool Grab) override;
+	void NotifyWindow() override;
 
-	virtual void SetWindowGrab(bool Grab);
-	virtual void NotifyWindow();
+	int Init() override;
+	void Shutdown() override;
 
-	virtual int Init();
-	virtual void Shutdown();
+	void TakeScreenshot(const char *pFilename) override;
+	void TakeCustomScreenshot(const char *pFilename) override;
+	void Swap() override;
+	bool SetVSync(bool State) override;
 
-	virtual void TakeScreenshot(const char *pFilename);
-	virtual void TakeCustomScreenshot(const char *pFilename);
-	virtual void Swap();
-	virtual bool SetVSync(bool State);
-
-	virtual int GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen);
+	int GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen) override;
 
 	virtual int GetDesktopScreenWidth() { return m_DesktopScreenWidth; }
 	virtual int GetDesktopScreenHeight() { return m_DesktopScreenHeight; }
 
 	// synchronization
-	virtual void InsertSignal(semaphore *pSemaphore);
-	virtual bool IsIdle();
-	virtual void WaitForIdle();
+	void InsertSignal(semaphore *pSemaphore) override;
+	bool IsIdle() override;
+	void WaitForIdle() override;
 
-	virtual bool IsBufferingEnabled() { return m_UseOpenGL3_3; }
+	SGraphicsWarning *GetCurWarning() override;
+
+	bool IsTileBufferingEnabled() override { return m_OpenGLTileBufferingEnabled; }
+	bool IsQuadBufferingEnabled() override { return m_OpenGLQuadBufferingEnabled; }
+	bool IsTextBufferingEnabled() override { return m_OpenGLTextBufferingEnabled; }
+	bool IsQuadContainerBufferingEnabled() override { return m_OpenGLQuadContainerBufferingEnabled; }
+	bool HasTextureArrays() override { return m_OpenGLHasTextureArrays; }
 };
 
 extern IGraphicsBackend *CreateGraphicsBackend();

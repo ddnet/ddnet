@@ -145,14 +145,27 @@ bool CServerBrowser::SortCompareNumPlayers(int Index1, int Index2) const
 {
 	CServerEntry *a = m_ppServerlist[Index1];
 	CServerEntry *b = m_ppServerlist[Index2];
-	return a->m_Info.m_NumFilteredPlayers < b->m_Info.m_NumFilteredPlayers;
+	return a->m_Info.m_NumFilteredPlayers > b->m_Info.m_NumFilteredPlayers;
 }
 
 bool CServerBrowser::SortCompareNumClients(int Index1, int Index2) const
 {
 	CServerEntry *a = m_ppServerlist[Index1];
 	CServerEntry *b = m_ppServerlist[Index2];
-	return a->m_Info.m_NumClients < b->m_Info.m_NumClients;
+	return a->m_Info.m_NumClients > b->m_Info.m_NumClients;
+}
+
+bool CServerBrowser::SortCompareNumPlayersAndPing(int Index1, int Index2) const
+{
+	CServerEntry *a = m_ppServerlist[Index1];
+	CServerEntry *b = m_ppServerlist[Index2];
+
+	if(a->m_Info.m_NumFilteredPlayers == b->m_Info.m_NumFilteredPlayers)
+		return a->m_Info.m_Latency > b->m_Info.m_Latency;
+	if(a->m_Info.m_NumFilteredPlayers == 0 || b->m_Info.m_NumFilteredPlayers == 0)
+		return a->m_Info.m_NumFilteredPlayers == 0;
+	else
+		return a->m_Info.m_NumFilteredPlayers - (a->m_Info.m_Latency/100)*MAX_CLIENTS < b->m_Info.m_NumFilteredPlayers - (b->m_Info.m_Latency/100)*MAX_CLIENTS;
 }
 
 void CServerBrowser::Filter()
@@ -205,7 +218,7 @@ void CServerBrowser::Filter()
 		{
 			Filtered = 1;
 		}
-		else if(g_Config.m_BrFilterPing < m_ppServerlist[i]->m_Info.m_Latency)
+		else if(g_Config.m_BrFilterPing && g_Config.m_BrFilterPing < m_ppServerlist[i]->m_Info.m_Latency)
 			Filtered = 1;
 		else if(g_Config.m_BrFilterCompatversion && str_comp_num(m_ppServerlist[i]->m_Info.m_aVersion, m_aNetVersion, 3) != 0)
 			Filtered = 1;
@@ -322,13 +335,13 @@ int CServerBrowser::SortHash() const
 	i |= g_Config.m_BrFilterFriends<<7;
 	i |= g_Config.m_BrFilterPw<<8;
 	i |= g_Config.m_BrSortOrder<<9;
-	i |= g_Config.m_BrFilterCompatversion<<10;
-	i |= g_Config.m_BrFilterPure<<11;
-	i |= g_Config.m_BrFilterPureMap<<12;
-	i |= g_Config.m_BrFilterGametypeStrict<<13;
-	i |= g_Config.m_BrFilterUnfinishedMap<<14;
-	i |= g_Config.m_BrFilterCountry<<15;
-	i |= g_Config.m_BrFilterConnectingPlayers<<16;
+	i |= g_Config.m_BrFilterCompatversion<<11;
+	i |= g_Config.m_BrFilterPure<<12;
+	i |= g_Config.m_BrFilterPureMap<<13;
+	i |= g_Config.m_BrFilterGametypeStrict<<14;
+	i |= g_Config.m_BrFilterUnfinishedMap<<15;
+	i |= g_Config.m_BrFilterCountry<<16;
+	i |= g_Config.m_BrFilterConnectingPlayers<<17;
 	return i;
 }
 
@@ -364,7 +377,9 @@ void CServerBrowser::Sort()
 	Filter();
 
 	// sort
-	if(g_Config.m_BrSort == IServerBrowser::SORT_NAME)
+	if(g_Config.m_BrSortOrder == 2 && (g_Config.m_BrSort == IServerBrowser::SORT_NUMPLAYERS ||g_Config.m_BrSort == IServerBrowser::SORT_PING))
+		std::stable_sort(m_pSortedServerlist, m_pSortedServerlist+m_NumSortedServers, SortWrap(this, &CServerBrowser::SortCompareNumPlayersAndPing));
+	else if(g_Config.m_BrSort == IServerBrowser::SORT_NAME)
 		std::stable_sort(m_pSortedServerlist, m_pSortedServerlist+m_NumSortedServers, SortWrap(this, &CServerBrowser::SortCompareName));
 	else if(g_Config.m_BrSort == IServerBrowser::SORT_PING)
 		std::stable_sort(m_pSortedServerlist, m_pSortedServerlist+m_NumSortedServers, SortWrap(this, &CServerBrowser::SortComparePing));
@@ -581,7 +596,25 @@ void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServer
 		}
 
 		pEntry = Find(Addr);
-		if(m_ServerlistType != IServerBrowser::TYPE_LAN)
+		
+		if(m_ServerlistType == IServerBrowser::TYPE_LAN)
+		{
+			NETADDR Broadcast;
+			mem_zero(&Broadcast, sizeof(Broadcast));
+			Broadcast.type = m_pNetClient->NetType()|NETTYPE_LINK_BROADCAST;
+			int Token = GenerateToken(Broadcast);
+			bool Drop = false;
+			Drop = Drop || BasicToken != GetBasicToken(Token);
+			Drop = Drop || (pInfo->m_Type == SERVERINFO_EXTENDED && ExtraToken != GetExtraToken(Token));
+			if(Drop)
+			{
+				return;
+			}
+
+			if(!pEntry)
+				pEntry = Add(Addr);
+		}
+		else
 		{
 			if(!pEntry)
 			{
@@ -596,34 +629,16 @@ void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServer
 				return;
 			}
 		}
-		if(!pEntry)
-			pEntry = Add(Addr);
-		if(pEntry)
+		
+		SetInfo(pEntry, *pInfo);
+		if (m_ServerlistType == IServerBrowser::TYPE_LAN)
+			pEntry->m_Info.m_Latency = minimum(static_cast<int>((time_get()-m_BroadcastTime)*1000/time_freq()), 999);
+		else if (pEntry->m_RequestTime > 0)
 		{
-			if(m_ServerlistType == IServerBrowser::TYPE_LAN)
-			{
-				NETADDR Broadcast;
-				mem_zero(&Broadcast, sizeof(Broadcast));
-				Broadcast.type = m_pNetClient->NetType()|NETTYPE_LINK_BROADCAST;
-				int Token = GenerateToken(Broadcast);
-				bool Drop = false;
-				Drop = Drop || BasicToken != GetBasicToken(Token);
-				Drop = Drop || (pInfo->m_Type == SERVERINFO_EXTENDED && ExtraToken != GetExtraToken(Token));
-				if(Drop)
-				{
-					return;
-				}
-			}
-			SetInfo(pEntry, *pInfo);
-			if (m_ServerlistType == IServerBrowser::TYPE_LAN)
-				pEntry->m_Info.m_Latency = minimum(static_cast<int>((time_get()-m_BroadcastTime)*1000/time_freq()), 999);
-			else if (pEntry->m_RequestTime > 0)
-			{
-				pEntry->m_Info.m_Latency = minimum(static_cast<int>((time_get()-pEntry->m_RequestTime)*1000/time_freq()), 999);
-				pEntry->m_RequestTime = -1; // Request has been answered
-			}
-			RemoveRequest(pEntry);
+			pEntry->m_Info.m_Latency = minimum(static_cast<int>((time_get()-pEntry->m_RequestTime)*1000/time_freq()), 999);
+			pEntry->m_RequestTime = -1; // Request has been answered
 		}
+		RemoveRequest(pEntry);
 	}
 
 	Sort();
@@ -643,6 +658,7 @@ void CServerBrowser::Refresh(int Type)
 	m_RequestNumber++;
 
 	m_ServerlistType = Type;
+	secure_random_fill(m_aTokenSeed, sizeof(m_aTokenSeed));
 
 	if(Type == IServerBrowser::TYPE_LAN)
 	{
@@ -690,16 +706,26 @@ void CServerBrowser::Refresh(int Type)
 		CountryFilterClean(NETWORK_DDNET);
 		TypeFilterClean(NETWORK_DDNET);
 
+		int MaxServers = 0;
 		for(int i = 0; i < m_aNetworks[NETWORK_DDNET].m_NumCountries; i++)
 		{
 			CNetworkCountry *pCntr = &m_aNetworks[NETWORK_DDNET].m_aCountries[i];
+			MaxServers = maximum(MaxServers, pCntr->m_NumServers);
+		}
 
-			// check for filter
-			if(DDNetFiltered(g_Config.m_BrFilterExcludeCountries, pCntr->m_aName))
-				continue;
-
-			for(int g = 0; g < pCntr->m_NumServers; g++)
+		for(int g = 0; g < MaxServers; g++)
+		{
+			for(int i = 0; i < m_aNetworks[NETWORK_DDNET].m_NumCountries; i++)
 			{
+				CNetworkCountry *pCntr = &m_aNetworks[NETWORK_DDNET].m_aCountries[i];
+
+				// check for filter
+				if(DDNetFiltered(g_Config.m_BrFilterExcludeCountries, pCntr->m_aName))
+					continue;
+
+				if(g >= pCntr->m_NumServers)
+					continue;
+
 				if(!DDNetFiltered(g_Config.m_BrFilterExcludeTypes, pCntr->m_aTypes[g]))
 					Set(pCntr->m_aServers[g], IServerBrowser::SET_DDNET_ADD, -1, 0);
 			}
@@ -711,16 +737,26 @@ void CServerBrowser::Refresh(int Type)
 		CountryFilterClean(NETWORK_KOG);
 		TypeFilterClean(NETWORK_KOG);
 
+		int MaxServers = 0;
 		for(int i = 0; i < m_aNetworks[NETWORK_KOG].m_NumCountries; i++)
 		{
 			CNetworkCountry *pCntr = &m_aNetworks[NETWORK_KOG].m_aCountries[i];
+			MaxServers = maximum(MaxServers, pCntr->m_NumServers);
+		}
 
-			// check for filter
-			if(DDNetFiltered(g_Config.m_BrFilterExcludeCountriesKoG, pCntr->m_aName))
-				continue;
-
-			for(int g = 0; g < pCntr->m_NumServers; g++)
+		for(int g = 0; g < MaxServers; g++)
+		{
+			for(int i = 0; i < m_aNetworks[NETWORK_KOG].m_NumCountries; i++)
 			{
+				CNetworkCountry *pCntr = &m_aNetworks[NETWORK_KOG].m_aCountries[i];
+
+				// check for filter
+				if(DDNetFiltered(g_Config.m_BrFilterExcludeCountriesKoG, pCntr->m_aName))
+					continue;
+
+				if(g >= pCntr->m_NumServers)
+					continue;
+
 				if(!DDNetFiltered(g_Config.m_BrFilterExcludeTypesKoG, pCntr->m_aTypes[g]))
 					Set(pCntr->m_aServers[g], IServerBrowser::SET_KOG_ADD, -1, 0);
 			}
@@ -919,7 +955,7 @@ void CServerBrowser::Update(bool ForceResort)
 			pEntry = pEntry->m_pNextReq;
 			continue;
 		}
-		// no more then 10 concurrent requests
+		// no more than 10 concurrent requests
 		if(Count == m_CurrentMaxRequests)
 			break;
 

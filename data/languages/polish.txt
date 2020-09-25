@@ -111,9 +111,6 @@ Controls
 Count players only
 == Licz tylko graczy
 
-Country
-== Kraj
-
 Current
 == Aktualnie
 
@@ -315,6 +312,7 @@ Ping
 Pistol
 == Pistolet
 
+[Demo browser]
 Play
 == Graj
 
@@ -338,9 +336,6 @@ Please balance teams!
 
 Prev. weapon
 == Poprzednia broń
-
-Quality Textures
-== Szczegółowe tekstury
 
 Quit
 == Wyjście
@@ -474,9 +469,6 @@ Team
 Team chat
 == Czat drużynowy
 
-Texture Compression
-== Kompresja tekstur
-
 The audio device couldn't be initialised.
 == Urządzenie dźwiękowe nie mogło zostać zainicjowane.
 
@@ -587,9 +579,6 @@ Join game
 FSAA samples
 == Próbkowanie FSAA (Antyaliasing)
 
-%d of %d servers, %d players
-== %d z %d serwerów, %d graczy
-
 Sound volume
 == Głośność
 
@@ -644,17 +633,11 @@ Lht.
 UI Color
 == Kolor menu
 
-Host address
-== Adres serwera
-
 Crc:
 == Crc:
 
 Alpha
 == Alfa
-
-Current version: %s
-== Aktualna wersja: %s
 
 LAN
 == LAN
@@ -1067,9 +1050,6 @@ Downloading %s:
 Show tiles layers from BG map
 == Pokaż warstwy płytek razem z tłem mapy
 
-DDNet %s is out! Download it at DDNet.tw!
-== DDNet %s już jest! Pobierz je na DDNet.tw!
-
 Show console window
 == Pokaż okno konsoli
 
@@ -1190,11 +1170,81 @@ Please enter your nick name below.
 Show DDNet map finishes in server browser
 == Pokaż ukończone mapy DDNet w wyszukiwarce serwerów
 
-transmits your player name to info.ddnet.tw
-== przenosi twój nick do info.ddnet.tw
+transmits your player name to info2.ddnet.tw
+== przenosi twój nick do info2.ddnet.tw
 
 Indicate map finish
 == Pokazuj ukończone mapy
 
 Show others (own team only)
 == Pokazuj innych (tylko drużynę)
+
+The width or height of texture %s is not divisible by 16, which might cause visual bugs.
+== 
+
+Warning
+== 
+
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
+Country / Region
+== 
+
+Speed
+== 
+
+Search:
+== 
+
+Exclude:
+== 
+
+Search servers:
+== 
+
+%d of %d servers
+== 
+
+%d of %d server
+== 
+
+%d players
+== 
+
+%d player
+== 
+
+Skip the main menu
+== 
+
+Download skins
+== 
+
+Client message
+== 
+
+https://wiki.ddnet.tw/
+== 
+
+Website
+== 
+
+Settings
+== 
+
+Stop server
+== 
+
+Run server
+== 
+
+Server executable not found, can't run server
+== 
+
+Editor
+== 
+
+[Start menu]
+Play
+== 

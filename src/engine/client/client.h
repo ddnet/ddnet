@@ -6,7 +6,9 @@
 #include <memory>
 
 #include <base/hash.h>
+#include <engine/client/friends.h>
 #include <engine/client/http.h>
+#include <engine/client/updater.h>
 
 #define CONNECTLINK "ddnet:"
 
@@ -74,6 +76,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	IConsole *m_pConsole;
 	IStorage *m_pStorage;
 	IUpdater *m_pUpdater;
+	ISteam *m_pSteam;
 	IEngineMasterServer *m_pMasterServer;
 
 	enum
@@ -172,6 +175,8 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aDDNetInfoTmp[64];
 	std::shared_ptr<CGetFile> m_pDDNetInfoTask;
 
+	char m_aDummyNameBuf[16];
+
 	// time
 	CSmoothTime m_GameTime[2];
 	CSmoothTime m_PredictedTime;
@@ -249,6 +254,7 @@ public:
 	IEngineMasterServer *MasterServer() { return m_pMasterServer; }
 	IStorage *Storage() { return m_pStorage; }
 	IUpdater *Updater() { return m_pUpdater; }
+	ISteam *Steam() { return m_pSteam; }
 
 	CClient();
 
@@ -320,6 +326,8 @@ public:
 	virtual void Restart();
 	virtual void Quit();
 
+	virtual const char *PlayerName();
+	virtual const char *DummyName();
 	virtual const char *ErrorString();
 
 	const char *LoadMap(const char *pName, const char *pFilename, SHA256_DIGEST *pWantedSha256, unsigned WantedCrc);
@@ -337,6 +345,7 @@ public:
 
 	void RequestDDNetInfo();
 	void ResetDDNetInfo();
+	bool IsDDNetInfoChanged();
 	void FinishDDNetInfo();
 	void LoadDDNetInfo();
 
@@ -421,6 +430,7 @@ public:
 
 	void ServerBrowserUpdate();
 
+	void HandleConnectAddress(const NETADDR *pAddr);
 	void HandleConnectLink(const char *pLink);
 	void HandleDemoPath(const char *pPath);
 	void HandleMapPath(const char *pPath);

@@ -17,6 +17,8 @@
 # Rafael Fontenelle   2018-07-04 07:38:13
 # Rafael Fontenelle   2019-04-06 16:49:12
 # Rafael Fontenelle   2019-12-18 02:47:58
+# Rafael Fontenelle   2020-08-27 12:38:07
+# Rafael Fontenelle   2020-09-20 11:00:38
 ##### /authors #####
 
 ##### translated strings #####
@@ -119,9 +121,6 @@ Controls
 
 Count players only
 == Contar apenas jogadores
-
-Country
-== País
 
 Current
 == Atual
@@ -327,6 +326,7 @@ Ping
 Pistol
 == Pistola
 
+[Demo browser]
 Play
 == Assistir
 
@@ -350,9 +350,6 @@ Please balance teams!
 
 Prev. weapon
 == Arma anterior
-
-Quality Textures
-== Texturas de qualidade
 
 Quit
 == Sair
@@ -489,9 +486,6 @@ Team
 Team chat
 == Chat do time
 
-Texture Compression
-== Compressão de textura
-
 The audio device couldn't be initialised.
 == O dispositivo de áudio não pôde ser inicializado.
 
@@ -610,7 +604,7 @@ Inner color
 == Cor interna
 
 Reconnect in %d sec
-== Reconnetar em %d segundos
+== Reconectar em %d segundos
 
 Save ghost
 == Salvar fantasma
@@ -730,7 +724,7 @@ Follow
 == Seguir
 
 %.2f KiB
-== %.2f KB
+== %.2f KiB
 
 Enable gun sound
 == Habilitar som da arma
@@ -759,9 +753,6 @@ Ghost
 Remove chat
 == Remover chat
 
-Current version: %s
-== Versão atual: %s
-
 Threaded sound loading
 == Carregamento de som em fluxos
 
@@ -782,9 +773,6 @@ Type:
 
 Background (regular)
 == Fundo de tela (regular)
-
-DDNet %s is out! Download it at DDNet.tw!
-== DDNet %s foi lançado! Baixe-o em DDNet.tw!
 
 Internet
 == Internet
@@ -829,7 +817,7 @@ Sat.
 == Sat.
 
 %.2f MiB
-== %.2f MB
+== %.2f MiB
 
 Refresh Rate
 == Taxa de atualização
@@ -921,9 +909,6 @@ Auto %3d:%02d
 Show clan above name plates
 == Mostrar clã sobre placas de nomes
 
-%d of %d servers, %d players
-== %d/%d servidores, %d jogadores
-
 Enable highlighted chat sound
 == Habilitar som realçado de chat
 
@@ -935,9 +920,6 @@ Hello and welcome
 
 AntiPing: predict weapons
 == AntiPing: predizer armas
-
-Host address
-== Endereço do servidor
 
 Outline color
 == Cor do contorno
@@ -1032,8 +1014,8 @@ Date
 Show DDNet map finishes in server browser
 == Mostrar finalizações de mapas do DDNet no navegador do servidor
 
-transmits your player name to info.ddnet.tw
-== transmite seu nome de jogador para info.ddnet.tw
+transmits your player name to info2.ddnet.tw
+== transmite seu nome de jogador para info2.ddnet.tw
 
 Reload
 == Recarregar
@@ -1084,7 +1066,7 @@ Length
 == 9+ novas menções
 
 Hammerfly dummy
-== Dummy de hammerfly
+== Hammerfly dummy
 
 Lock team
 == Travar time
@@ -1153,55 +1135,125 @@ Zoom out
 == Zoom out
 
 Server best:
-== 
+== Melhor servidor:
 
 Personal best:
-== 
+== Melhor pessoal:
 
 Learn
-== 
+== Aprender
 
 Render demo
-== 
+== Renderizar demo
 
 Replace video
-== 
+== Substituir vídeo
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== 
+== DDraceNetwork é um jogo online cooperativo cujo objetivo é você e seu grupo de tees chegarem à linha de chegada do mapa. Como um novato, você deve começar nos servidores Novice, que hospedam os mapas mais fáceis. Considere o ping para escolher um servidor próximo a você.
 
 The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== 
+== Os mapas contêm congelamento, o que temporariamente torna um tee incapaz de se mover. Você tem que trabalhar junto para passar por essas partes.
 
 The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== 
+== A roda do mouse muda de arma. O martelo (botão esquerdo do mouse) pode ser usado para acertar outros tees e acordá-los do congelamento.
 
 Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== 
+== O gancho (botão direito do mouse) pode ser usado para balançar pelo mapa e agarrar outros tees em você.
 
 Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== 
+== Mais importante ainda, a comunicação é a chave: não há um tutorial, então você terá que conversar (tecla t) com outros jogadores para aprender o básico e os truques do jogo.
+
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== Use a tecla k para se matar (reiniciar), q para pausar e assistir outros jogadores. Veja as configurações para outras combinações de teclas.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
-== 
+== É recomendado que você verifique as configurações para ajustá-las ao seu gosto antes de entrar em um servidor.
 
 Please enter your nick name below.
-== 
+== Por favor, insira seu apelido abaixo.
 
 Destination file already exist
-== 
+== O arquivo de destino já existe
 
 Video name:
-== 
+== Nome do vídeo
 
 Render
-== 
+== Renderizar
 
 Connect Dummy
-== 
+== Conectar dummy
 
 Use high DPI
-== 
+== Usar DPI alta
+
+Client message
+== Mensagem do cliente
 
 Show others (own team only)
-== 
+== Mostrar outras (próprio time apenas)
+
+The width or height of texture %s is not divisible by 16, which might cause visual bugs.
+== A largura ou altura da textura %s não é divisível por 16, o que pode causar bugs visuais.
+
+Warning
+== Atenção
+
+Country / Region
+== País / Região
+
+Speed
+== Velocidade
+
+Search:
+== Pesquisar:
+
+Exclude:
+== Excluir:
+
+Search servers:
+== Pesquisar servidores:
+
+%d of %d servers
+== %d de %d servidores
+
+%d of %d server
+== %d de %d servidor
+
+%d players
+== %d jogadores
+
+%d player
+== %d jogador
+
+Skip the main menu
+== Pular o menu principal
+
+Download skins
+== Baixar skins
+
+https://wiki.ddnet.tw/
+== https://wiki.ddnet.tw/
+
+Website
+== Site
+
+Settings
+== Configurações
+
+Stop server
+== Parar servidor
+
+Run server
+== Iniciar servidor
+
+Server executable not found, can't run server
+== Executável de servidor não encontrado, não foi possível executar o servidor
+
+Editor
+== Editor
+
+[Start menu]
+Play
+== Jogar

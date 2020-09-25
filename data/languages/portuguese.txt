@@ -112,9 +112,6 @@ Controls
 Count players only
 == Contar apenas jogadores
 
-Country
-== País
-
 Current
 == Atual
 
@@ -325,6 +322,7 @@ Ping
 Pistol
 == Pistola
 
+[Demo browser]
 Play
 == Ver
 
@@ -348,9 +346,6 @@ Please balance teams!
 
 Prev. weapon
 == Arma anterior
-
-Quality Textures
-== Texturas de Qualidade
 
 Quit
 == Sair
@@ -493,9 +488,6 @@ Team
 Team chat
 == Chat de equipa
 
-Texture Compression
-== Compressão de Textura
-
 The audio device couldn't be initialised.
 == O dispositivo de som não pode ser iniciado.
 
@@ -580,9 +572,6 @@ Join game
 New name:
 == Novo nome:
 
-%d of %d servers, %d players
-== %d de %d servidores, %d jogadores
-
 Sound volume
 == Volume de som
 
@@ -640,9 +629,6 @@ Round
 UI Color
 == Cor do menu
 
-Host address
-== Endereço do Host
-
 Hue
 == Matiz
 
@@ -651,9 +637,6 @@ Crc:
 
 Alpha
 == Alpha
-
-Current version: %s
-== Versão atual: %s
 
 LAN
 == LAN
@@ -790,9 +773,6 @@ Check now
 Background (regular)
 == Plano de fundo (regular)
 
-DDNet %s is out! Download it at DDNet.tw!
-== DDNet %s saiu! Saca-o em DDNet.tw!
-
 AntiPing: predict other players
 == Antiping: prever os outros jogadores
 
@@ -907,13 +887,16 @@ Successfully saved the replay!
 Replay feature is disabled!
 == 
 
+The width or height of texture %s is not divisible by 16, which might cause visual bugs.
+== 
+
+Warning
+== 
+
 Server best:
 == 
 
 Personal best:
-== 
-
-Learn
 == 
 
 Reconnect in %d sec
@@ -952,13 +935,22 @@ Hook (right mouse) can be used to swing through the map and to hook other tees t
 Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
 == 
 
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == 
 
 Please enter your nick name below.
 == 
 
+Country / Region
+== 
+
 Destination file already exist
+== 
+
+Speed
 == 
 
 Video name:
@@ -967,7 +959,28 @@ Video name:
 Show DDNet map finishes in server browser
 == 
 
-transmits your player name to info.ddnet.tw
+transmits your player name to info2.ddnet.tw
+== 
+
+Search:
+== 
+
+Exclude:
+== 
+
+Search servers:
+== 
+
+%d of %d servers
+== 
+
+%d of %d server
+== 
+
+%d players
+== 
+
+%d player
 == 
 
 Filter connecting players
@@ -977,15 +990,6 @@ Indicate map finish
 == 
 
 Unfinished map
-== 
-
-DDNet %s is out!
-== 
-
-Downloading %s:
-== 
-
-Update failed! Check log...
 == 
 
 Markers:
@@ -1015,6 +1019,12 @@ Render
 Connect Dummy
 == 
 
+Kill
+== 
+
+Pause
+== 
+
 Reload
 == 
 
@@ -1030,6 +1040,12 @@ Save
 Reset wanted weapon on death
 == 
 
+Skip the main menu
+== 
+
+Download skins
+== 
+
 Vanilla skins only
 == 
 
@@ -1040,12 +1056,6 @@ Skin prefix
 == 
 
 Hook collisions
-== 
-
-Pause
-== 
-
-Kill
 == 
 
 Zoom in
@@ -1114,6 +1124,9 @@ Threaded sound loading
 Friend message
 == 
 
+Client message
+== 
+
 Outline color
 == 
 
@@ -1151,6 +1164,43 @@ Show tiles layers from BG map
 == 
 
 Try fast HTTP map download first
+== 
+
+Learn
+== 
+
+https://wiki.ddnet.tw/
+== 
+
+Website
+== 
+
+Settings
+== 
+
+Stop server
+== 
+
+Run server
+== 
+
+Server executable not found, can't run server
+== 
+
+Editor
+== 
+
+[Start menu]
+Play
+== 
+
+DDNet %s is out!
+== 
+
+Downloading %s:
+== 
+
+Update failed! Check log...
 == 
 
 Time

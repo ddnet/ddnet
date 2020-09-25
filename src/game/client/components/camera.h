@@ -8,9 +8,11 @@
 
 class CCamera : public CComponent
 {
+	friend class CMenuBackground;
+
 	enum
 	{
-		CAMTYPE_UNDEFINED=-1,
+		CAMTYPE_UNDEFINED = -1,
 		CAMTYPE_SPEC,
 		CAMTYPE_PLAYER,
 	};
@@ -28,6 +30,8 @@ class CCamera : public CComponent
 	void ChangeZoom(float Target);
 	float ZoomProgress(float CurrentTime) const;
 
+	float MinZoomLevel();
+	float MaxZoomLevel();
 public:
 	vec2 m_Center;
 	bool m_ZoomSet;

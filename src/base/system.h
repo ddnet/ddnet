@@ -618,6 +618,32 @@ int64 time_freq(void);
 int time_timestamp(void);
 
 /*
+	Function: time_houroftheday
+		Retrieves the hours since midnight (0..23)
+
+	Returns:
+		The current hour of the day
+*/
+int time_houroftheday(void);
+
+enum
+{
+	SEASON_SPRING = 0,
+	SEASON_SUMMER,
+	SEASON_AUTUMN,
+	SEASON_WINTER
+};
+
+/*
+	Function: time_season
+		Retrieves the current season of the year.
+
+	Returns:
+		one of the SEASON_* enum literals
+*/
+int time_season(void);
+
+/*
 Function: time_get_microseconds
 Fetches a sample from a high resolution timer and converts it in microseconds.
 
@@ -1011,6 +1037,23 @@ void str_copy(char *dst, const char *src, int dst_size);
 		- Guarantees that dst string will contain zero-termination.
 */
 void str_utf8_truncate(char *dst, int dst_size, const char *src, int truncation_len);
+
+/*
+	Function: str_truncate
+		Truncates a string to a given length.
+
+	Parameters:
+		dst - Pointer to a buffer that shall receive the string.
+		dst_size - Size of the buffer dst.
+		src - String to be truncated.
+		truncation_len - Maximum length of the returned string (not
+		counting the zero termination).
+
+	Remarks:
+		- The strings are treated as zero-terminated strings.
+		- Garantees that dst string will contain zero-termination.
+*/
+void str_truncate(char *dst, int dst_size, const char *src, int truncation_len);
 
 /*
 	Function: str_length
@@ -1919,6 +1962,22 @@ int str_utf16le_encode(char *ptr, int chr);
 int str_utf8_check(const char *str);
 
 /*
+	Function: str_utf8_copy
+		Copies a utf8 string to a buffer.
+
+	Parameters:
+		dst - Pointer to a buffer that shall receive the string.
+		src - utf8 string to be copied.
+		dst_size - Size of the buffer dst.
+
+	Remarks:
+		- The strings are treated as zero-terminated strings.
+		- Guarantees that dst string will contain zero-termination.
+		- Guarantees that dst always contains a valid utf8 string.
+*/
+void str_utf8_copy(char *dst, const char *src, int dst_size);
+
+/*
 	Function: str_next_token
 		Writes the next token after str into buf, returns the rest of the string.
 	Parameters:
@@ -1948,13 +2007,42 @@ const char *str_next_token(const char *str, const char *delim, char *buffer, int
 */
 int str_in_list(const char *list, const char *delim, const char *needle);
 
+/*
+	Function: pid
+		Returns the pid of the current process.
+	
+	Returns:
+		pid of the current process
+*/
 int pid(void);
+
+#if defined(CONF_FAMILY_WINDOWS)
+typedef void *PROCESS;
+#else
+typedef pid_t PROCESS;
+#endif
 
 /*
 	Function: shell_execute
 		Executes a given file.
+
+	Returns:
+		handle/pid of the new process
 */
-void shell_execute(const char *file);
+PROCESS shell_execute(const char *file);
+
+/*
+	Function: kill_process
+		Sends kill signal to a process.
+
+	Parameters:
+		process - handle/pid of the process
+
+	Returns:
+		0 - Error
+		1 - Success
+*/
+int kill_process(PROCESS process);
 
 /*
 	Function: os_is_winxp_or_lower
@@ -1970,7 +2058,6 @@ int os_is_winxp_or_lower(void);
 	Function: generate_password
 		Generates a null-terminated password of length `2 *
 		random_length`.
-
 
 	Parameters:
 		buffer - Pointer to the start of the output buffer.

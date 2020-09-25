@@ -290,7 +290,7 @@ char* CSaveTee::GetString(const CSaveTeam *pTeam)
 	return m_aString;
 }
 
-int CSaveTee::LoadString(const char* String)
+int CSaveTee::FromString(const char* String)
 {
 	int Num;
 	Num = sscanf(String,
@@ -491,7 +491,7 @@ bool CSaveTeam::HandleSaveError(int Result, int ClientID, CGameContext *pGameCon
 	return true;
 }
 
-void CSaveTeam::load(int Team)
+void CSaveTeam::load(int Team, bool KeepCurrentWeakStrong)
 {
 	CGameTeams* pTeams = &(((CGameControllerDDRace*)m_pController)->m_Teams);
 
@@ -505,7 +505,7 @@ void CSaveTeam::load(int Team)
 		int ClientID = m_pSavedTees[i].GetClientID();
 		if(m_pController->GameServer()->m_apPlayers[ClientID] && pTeams->m_Core.Team(ClientID) == Team)
 		{
-			CCharacter *pChr = MatchCharacter(m_pSavedTees[i].GetClientID(), i);
+			CCharacter *pChr = MatchCharacter(m_pSavedTees[i].GetClientID(), i, KeepCurrentWeakStrong);
 			m_pSavedTees[i].load(pChr, Team);
 		}
 	}
@@ -522,8 +522,13 @@ void CSaveTeam::load(int Team)
 	}
 }
 
-CCharacter* CSaveTeam::MatchCharacter(int ClientID, int SaveID)
+CCharacter* CSaveTeam::MatchCharacter(int ClientID, int SaveID, bool KeepCurrentCharacter)
 {
+	if(KeepCurrentCharacter && m_pController->GameServer()->m_apPlayers[ClientID]->GetCharacter())
+	{
+		// keep old character to retain current weak/strong order
+		return m_pController->GameServer()->m_apPlayers[ClientID]->GetCharacter();
+	}
 	m_pController->GameServer()->m_apPlayers[ClientID]->KillCharacter(WEAPON_GAME);
 	return m_pController->GameServer()->m_apPlayers[ClientID]->ForceSpawn(m_pSavedTees[SaveID].GetPos());
 }
@@ -552,7 +557,7 @@ char* CSaveTeam::GetString()
 	return m_aString;
 }
 
-int CSaveTeam::LoadString(const char* String)
+int CSaveTeam::FromString(const char* String)
 {
 	char TeamStats[MAX_CLIENTS];
 	char Switcher[64];
@@ -636,7 +641,7 @@ int CSaveTeam::LoadString(const char* String)
 		if(StrSize < sizeof(SaveTee))
 		{
 			str_copy(SaveTee, CopyPos, StrSize);
-			int Num = m_pSavedTees[n].LoadString(SaveTee);
+			int Num = m_pSavedTees[n].FromString(SaveTee);
 			if(Num)
 			{
 				dbg_msg("load", "failed to load tee");

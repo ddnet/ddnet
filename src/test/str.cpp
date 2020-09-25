@@ -173,6 +173,7 @@ TEST(Str, InList)
 	EXPECT_FALSE(str_in_list("", ",", "xyz"));
 
 	EXPECT_TRUE(str_in_list("FOO,,BAR", ",", ""));
+	EXPECT_TRUE(str_in_list("abc,,def", ",", "def"));
 }
 
 TEST(Str, StrFormat)
@@ -207,4 +208,30 @@ TEST(Str, StrCopyNum)
 	char aBuf3[9];
 	str_utf8_truncate(aBuf3, sizeof(aBuf3), foo, 7);
 	EXPECT_STREQ(aBuf3, "Foobaré");
+}
+
+TEST(Str, StrCopyUtf8)
+{
+	const char *foo = "DDNet最好了";
+	char aBuf[64];
+	str_utf8_copy(aBuf, foo, 7);
+	EXPECT_STREQ(aBuf, "DDNet");
+	str_utf8_copy(aBuf, foo, 8);
+	EXPECT_STREQ(aBuf, "DDNet");
+	str_utf8_copy(aBuf, foo, 9);
+	EXPECT_STREQ(aBuf, "DDNet最");
+	str_utf8_copy(aBuf, foo, 10);
+	EXPECT_STREQ(aBuf, "DDNet最");
+	str_utf8_copy(aBuf, foo, 11);
+	EXPECT_STREQ(aBuf, "DDNet最");
+	str_utf8_copy(aBuf, foo, 12);
+	EXPECT_STREQ(aBuf, "DDNet最好");
+	str_utf8_copy(aBuf, foo, 13);
+	EXPECT_STREQ(aBuf, "DDNet最好");
+	str_utf8_copy(aBuf, foo, 14);
+	EXPECT_STREQ(aBuf, "DDNet最好");
+	str_utf8_copy(aBuf, foo, 15);
+	EXPECT_STREQ(aBuf, "DDNet最好了");
+	str_utf8_copy(aBuf, foo, 16);
+	EXPECT_STREQ(aBuf, "DDNet最好了");
 }

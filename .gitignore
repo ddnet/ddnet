@@ -3,6 +3,8 @@
 data/
 !/data/
 
+docs/
+
 bundle/
 !/other/bundle/
 
@@ -40,6 +42,7 @@ chillerbot-ux-Server
 chillerbot-ux-Server-Launcher
 DDNet-Server
 DDNet-Server-Launcher
+libsteam_api.a
 config_retrieve
 config_store
 crapnet
@@ -55,10 +58,6 @@ map_version
 mastersrv
 packetgen
 testrunner
-tileset_borderadd
-tileset_borderfix
-tileset_borderrem
-tileset_borderset
 twping
 unicode_confusables
 uuid
@@ -101,6 +100,7 @@ tags
 *.sdf
 *.sln
 *.so
+*.sqlite
 *.suo
 *.swp
 *.tar.gz

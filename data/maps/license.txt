@@ -1,0 +1,15 @@
+Gold Mine:
+Copyright <BµmM>
+CC-BY-SA license
+
+LearnToPlay:
+Copyright Tridemy & Cøke
+CC-BY-SA license
+
+Sunny Side Up:
+Copyright Ravie
+CC-BY-SA license, grass_main is redrawn from original Teeworlds grass_main mapres (Apache 2.0 license)
+
+Tsunami:
+Copyright louis
+CC-BY-SA license
