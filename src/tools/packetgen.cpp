@@ -2,7 +2,10 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/system.h>
 
-enum { NUM_SOCKETS = 64 };
+enum
+{
+	NUM_SOCKETS = 64
+};
 
 void Run(NETADDR Dest)
 {
@@ -11,7 +14,7 @@ void Run(NETADDR Dest)
 	for(int i = 0; i < NUM_SOCKETS; i++)
 	{
 		NETADDR BindAddr = {NETTYPE_IPV4, {0}, 0};
-	 	aSockets[i] = net_udp_create(BindAddr);
+		aSockets[i] = net_udp_create(BindAddr);
 	}
 
 	while(1)
@@ -30,7 +33,7 @@ void Run(NETADDR Dest)
 
 int main(int argc, char **argv)
 {
-	NETADDR Dest = {NETTYPE_IPV4, {127,0,0,1}, 8303};
+	NETADDR Dest = {NETTYPE_IPV4, {127, 0, 0, 1}, 8303};
 	Run(Dest);
 	return 0;
 }

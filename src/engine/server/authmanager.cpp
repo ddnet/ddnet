@@ -1,6 +1,6 @@
+#include "authmanager.h"
 #include <base/hash_ctxt.h>
 #include <engine/shared/config.h>
-#include "authmanager.h"
 
 #define ADMIN_IDENT "default_admin"
 #define MOD_IDENT "default_mod"

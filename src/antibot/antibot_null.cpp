@@ -2,8 +2,7 @@
 
 static CAntibotData *g_pData;
 
-extern "C"
-{
+extern "C" {
 
 int AntibotAbiVersion()
 {
@@ -14,9 +13,9 @@ void AntibotInit(CAntibotData *pData)
 	g_pData = pData;
 	g_pData->m_pfnLog("null antibot initialized", g_pData->m_pUser);
 }
-void AntibotRoundStart(CAntibotRoundData *pRoundData) { };
-void AntibotRoundEnd(void) { };
-void AntibotUpdateData(void) { }
+void AntibotRoundStart(CAntibotRoundData *pRoundData){};
+void AntibotRoundEnd(void){};
+void AntibotUpdateData(void) {}
 void AntibotDestroy(void) { g_pData = 0; }
 void AntibotDump(void)
 {
@@ -35,5 +34,4 @@ void AntibotOnEngineTick(void) {}
 void AntibotOnEngineClientJoin(int /*ClientID*/, bool /*Sixup*/) {}
 void AntibotOnEngineClientDrop(int /*ClientID*/, const char * /*pReason*/) {}
 void AntibotOnEngineClientMessage(int /*ClientID*/, const void * /*pData*/, int /*Size*/, int /*Flags*/) {}
-
 }

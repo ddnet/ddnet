@@ -1,17 +1,17 @@
 #include <base/system.h>
 
-#include <engine/shared/config.h>
-#include <engine/map.h>
 #include <engine/graphics.h>
+#include <engine/map.h>
+#include <engine/shared/config.h>
 
 #include <game/client/components/camera.h>
-#include <game/client/components/maplayers.h>
 #include <game/client/components/mapimages.h>
+#include <game/client/components/maplayers.h>
 
 #include "background.h"
 
-CBackground::CBackground(int MapType, bool OnlineOnly)
-	: CMapLayers(MapType, OnlineOnly)
+CBackground::CBackground(int MapType, bool OnlineOnly) :
+	CMapLayers(MapType, OnlineOnly)
 {
 	m_pLayers = new CLayers;
 	m_pBackgroundLayers = m_pLayers;
@@ -45,7 +45,7 @@ void CBackground::OnInit()
 
 void CBackground::LoadBackground()
 {
-	if(time_get()-m_LastLoad < 10*time_freq())
+	if(time_get() - m_LastLoad < 10 * time_freq())
 		return;
 
 	if(m_Loaded && m_pMap == m_pBackgroundMap)
@@ -112,6 +112,6 @@ void CBackground::OnRender()
 
 	if(g_Config.m_ClOverlayEntities != 100)
 		return;
-	
+
 	CMapLayers::OnRender();
 }

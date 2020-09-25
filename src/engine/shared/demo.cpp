@@ -9,7 +9,7 @@
 #include <engine/shared/config.h>
 
 #if defined(CONF_VIDEORECORDER)
-	#include <engine/shared/video.h>
+#include <engine/shared/video.h>
 #endif
 
 #include <game/generated/protocol.h>
@@ -27,7 +27,6 @@ static const unsigned char gs_Sha256Version = 6;
 static const unsigned char gs_VersionTickCompression = 5; // demo files with this version or higher will use `CHUNKTICKFLAG_TICK_COMPRESSED`
 static const int gs_LengthOffset = 152;
 static const int gs_NumMarkersOffset = 176;
-
 
 CDemoRecorder::CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool NoMapData)
 {
@@ -63,7 +62,8 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 
 	CDemoHeader Header;
 	CTimelineMarkers TimelineMarkers;
-	if(m_File) {
+	if(m_File)
+	{
 		io_close(DemoFile);
 		return -1;
 	}
@@ -130,13 +130,13 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	Header.m_Version = gs_ActVersion;
 	str_copy(Header.m_aNetversion, pNetVersion, sizeof(Header.m_aNetversion));
 	str_copy(Header.m_aMapName, pMap, sizeof(Header.m_aMapName));
-	Header.m_aMapSize[0] = (MapSize>>24)&0xff;
-	Header.m_aMapSize[1] = (MapSize>>16)&0xff;
-	Header.m_aMapSize[2] = (MapSize>>8)&0xff;
+	Header.m_aMapSize[0] = (MapSize >> 24) & 0xff;
+	Header.m_aMapSize[1] = (MapSize >> 16) & 0xff;
+	Header.m_aMapSize[2] = (MapSize >> 8) & 0xff;
 	Header.m_aMapSize[3] = (MapSize)&0xff;
-	Header.m_aMapCrc[0] = (Crc>>24)&0xff;
-	Header.m_aMapCrc[1] = (Crc>>16)&0xff;
-	Header.m_aMapCrc[2] = (Crc>>8)&0xff;
+	Header.m_aMapCrc[0] = (Crc >> 24) & 0xff;
+	Header.m_aMapCrc[1] = (Crc >> 16) & 0xff;
+	Header.m_aMapCrc[2] = (Crc >> 8) & 0xff;
 	Header.m_aMapCrc[3] = (Crc)&0xff;
 	str_copy(Header.m_aType, pType, sizeof(Header.m_aType));
 	// Header.m_Length - add this on stop
@@ -160,7 +160,7 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 		// write map data
 		while(1)
 		{
-			unsigned char aChunk[1024*64];
+			unsigned char aChunk[1024 * 64];
 			int Bytes = io_read(MapFile, &aChunk, sizeof(aChunk));
 			if(Bytes <= 0)
 				break;
@@ -221,13 +221,13 @@ enum
 
 void CDemoRecorder::WriteTickMarker(int Tick, int Keyframe)
 {
-	if(m_LastTickMarker == -1 || Tick-m_LastTickMarker > CHUNKMASK_TICK || Keyframe)
+	if(m_LastTickMarker == -1 || Tick - m_LastTickMarker > CHUNKMASK_TICK || Keyframe)
 	{
 		unsigned char aChunk[5];
 		aChunk[0] = CHUNKTYPEFLAG_TICKMARKER;
-		aChunk[1] = (Tick>>24)&0xff;
-		aChunk[2] = (Tick>>16)&0xff;
-		aChunk[3] = (Tick>>8)&0xff;
+		aChunk[1] = (Tick >> 24) & 0xff;
+		aChunk[2] = (Tick >> 16) & 0xff;
+		aChunk[3] = (Tick >> 8) & 0xff;
 		aChunk[4] = (Tick)&0xff;
 
 		if(Keyframe)
@@ -238,7 +238,7 @@ void CDemoRecorder::WriteTickMarker(int Tick, int Keyframe)
 	else
 	{
 		unsigned char aChunk[1];
-		aChunk[0] = CHUNKTYPEFLAG_TICKMARKER | CHUNKTICKFLAG_TICK_COMPRESSED | (Tick-m_LastTickMarker);
+		aChunk[0] = CHUNKTYPEFLAG_TICKMARKER | CHUNKTICKFLAG_TICK_COMPRESSED | (Tick - m_LastTickMarker);
 		io_write(m_File, aChunk, sizeof(aChunk));
 	}
 
@@ -249,20 +249,20 @@ void CDemoRecorder::WriteTickMarker(int Tick, int Keyframe)
 
 void CDemoRecorder::Write(int Type, const void *pData, int Size)
 {
-	char aBuffer[64*1024];
-	char aBuffer2[64*1024];
+	char aBuffer[64 * 1024];
+	char aBuffer2[64 * 1024];
 	unsigned char aChunk[3];
 
 	if(!m_File)
 		return;
 
-	if(Size > 64*1024)
+	if(Size > 64 * 1024)
 		return;
 
 	/* pad the data with 0 so we get an alignment of 4,
 	else the compression won't work and miss some bytes */
 	mem_copy(aBuffer2, pData, Size);
-	while(Size&3)
+	while(Size & 3)
 		aBuffer2[Size++] = 0;
 	Size = CVariableInt::Compress(aBuffer2, Size, aBuffer, sizeof(aBuffer)); // buffer2 -> buffer
 	if(Size < 0)
@@ -272,8 +272,7 @@ void CDemoRecorder::Write(int Type, const void *pData, int Size)
 	if(Size < 0)
 		return;
 
-
-	aChunk[0] = ((Type&0x3)<<5);
+	aChunk[0] = ((Type & 0x3) << 5);
 	if(Size < 30)
 	{
 		aChunk[0] |= Size;
@@ -284,14 +283,14 @@ void CDemoRecorder::Write(int Type, const void *pData, int Size)
 		if(Size < 256)
 		{
 			aChunk[0] |= 30;
-			aChunk[1] = Size&0xff;
+			aChunk[1] = Size & 0xff;
 			io_write(m_File, aChunk, 2);
 		}
 		else
 		{
 			aChunk[0] |= 31;
-			aChunk[1] = Size&0xff;
-			aChunk[2] = Size>>8;
+			aChunk[1] = Size & 0xff;
+			aChunk[2] = Size >> 8;
 			io_write(m_File, aChunk, 3);
 		}
 	}
@@ -301,7 +300,7 @@ void CDemoRecorder::Write(int Type, const void *pData, int Size)
 
 void CDemoRecorder::RecordSnapshot(int Tick, const void *pData, int Size)
 {
-	if(m_LastKeyFrame == -1 || (Tick-m_LastKeyFrame) > SERVER_TICK_SPEED*5)
+	if(m_LastKeyFrame == -1 || (Tick - m_LastKeyFrame) > SERVER_TICK_SPEED * 5)
 	{
 		// write full tickmarker
 		WriteTickMarker(Tick, 1);
@@ -315,13 +314,13 @@ void CDemoRecorder::RecordSnapshot(int Tick, const void *pData, int Size)
 	else
 	{
 		// create delta, prepend tick
-		char aDeltaData[CSnapshot::MAX_SIZE+sizeof(int)];
+		char aDeltaData[CSnapshot::MAX_SIZE + sizeof(int)];
 		int DeltaSize;
 
 		// write tickmarker
 		WriteTickMarker(Tick, 0);
 
-		DeltaSize = m_pSnapshotDelta->CreateDelta((CSnapshot*)m_aLastSnapshotData, (CSnapshot*)pData, &aDeltaData);
+		DeltaSize = m_pSnapshotDelta->CreateDelta((CSnapshot *)m_aLastSnapshotData, (CSnapshot *)pData, &aDeltaData);
 		if(DeltaSize)
 		{
 			// record delta
@@ -352,27 +351,27 @@ int CDemoRecorder::Stop()
 	io_seek(m_File, gs_LengthOffset, IOSEEK_START);
 	int DemoLength = Length();
 	char aLength[4];
-	aLength[0] = (DemoLength>>24)&0xff;
-	aLength[1] = (DemoLength>>16)&0xff;
-	aLength[2] = (DemoLength>>8)&0xff;
+	aLength[0] = (DemoLength >> 24) & 0xff;
+	aLength[1] = (DemoLength >> 16) & 0xff;
+	aLength[2] = (DemoLength >> 8) & 0xff;
 	aLength[3] = (DemoLength)&0xff;
 	io_write(m_File, aLength, sizeof(aLength));
 
 	// add the timeline markers to the header
 	io_seek(m_File, gs_NumMarkersOffset, IOSEEK_START);
 	char aNumMarkers[4];
-	aNumMarkers[0] = (m_NumTimelineMarkers>>24)&0xff;
-	aNumMarkers[1] = (m_NumTimelineMarkers>>16)&0xff;
-	aNumMarkers[2] = (m_NumTimelineMarkers>>8)&0xff;
+	aNumMarkers[0] = (m_NumTimelineMarkers >> 24) & 0xff;
+	aNumMarkers[1] = (m_NumTimelineMarkers >> 16) & 0xff;
+	aNumMarkers[2] = (m_NumTimelineMarkers >> 8) & 0xff;
 	aNumMarkers[3] = (m_NumTimelineMarkers)&0xff;
 	io_write(m_File, aNumMarkers, sizeof(aNumMarkers));
 	for(int i = 0; i < m_NumTimelineMarkers; i++)
 	{
 		int Marker = m_aTimelineMarkers[i];
 		char aMarker[4];
-		aMarker[0] = (Marker>>24)&0xff;
-		aMarker[1] = (Marker>>16)&0xff;
-		aMarker[2] = (Marker>>8)&0xff;
+		aMarker[0] = (Marker >> 24) & 0xff;
+		aMarker[1] = (Marker >> 16) & 0xff;
+		aMarker[2] = (Marker >> 8) & 0xff;
 		aMarker[3] = (Marker)&0xff;
 		io_write(m_File, aMarker, sizeof(aMarker));
 	}
@@ -393,8 +392,8 @@ void CDemoRecorder::AddDemoMarker()
 	// not more than 1 marker in a second
 	if(m_NumTimelineMarkers > 0)
 	{
-		int Diff = m_LastTickMarker - m_aTimelineMarkers[m_NumTimelineMarkers-1];
-		if(Diff < SERVER_TICK_SPEED*1.0f)
+		int Diff = m_LastTickMarker - m_aTimelineMarkers[m_NumTimelineMarkers - 1];
+		if(Diff < SERVER_TICK_SPEED * 1.0f)
 			return;
 	}
 
@@ -403,8 +402,6 @@ void CDemoRecorder::AddDemoMarker()
 	if(m_pConsole)
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", "Added timeline marker");
 }
-
-
 
 CDemoPlayer::CDemoPlayer(class CSnapshotDelta *pSnapshotDelta)
 {
@@ -424,7 +421,6 @@ void CDemoPlayer::SetListener(IListener *pListener)
 	m_pListener = pListener;
 }
 
-
 int CDemoPlayer::ReadChunkHeader(int *pType, int *pSize, int *pTick)
 {
 	unsigned char Chunk = 0;
@@ -438,19 +434,19 @@ int CDemoPlayer::ReadChunkHeader(int *pType, int *pSize, int *pTick)
 	if(io_read(m_File, &Chunk, sizeof(Chunk)) != sizeof(Chunk))
 		return -1;
 
-	if(Chunk&CHUNKTYPEFLAG_TICKMARKER)
+	if(Chunk & CHUNKTYPEFLAG_TICKMARKER)
 	{
 		// decode tick marker
-		int Tickdelta_legacy = Chunk&(CHUNKMASK_TICK_LEGACY); // compatibility
-		*pType = Chunk&(CHUNKTYPEFLAG_TICKMARKER|CHUNKTICKFLAG_KEYFRAME);
+		int Tickdelta_legacy = Chunk & (CHUNKMASK_TICK_LEGACY); // compatibility
+		*pType = Chunk & (CHUNKTYPEFLAG_TICKMARKER | CHUNKTICKFLAG_KEYFRAME);
 
 		if(m_Info.m_Header.m_Version < gs_VersionTickCompression && Tickdelta_legacy != 0)
 		{
 			*pTick += Tickdelta_legacy;
 		}
-		else if(Chunk&(CHUNKTICKFLAG_TICK_COMPRESSED))
+		else if(Chunk & (CHUNKTICKFLAG_TICK_COMPRESSED))
 		{
-			int Tickdelta = Chunk&(CHUNKMASK_TICK);
+			int Tickdelta = Chunk & (CHUNKMASK_TICK);
 			*pTick += Tickdelta;
 		}
 		else
@@ -458,15 +454,14 @@ int CDemoPlayer::ReadChunkHeader(int *pType, int *pSize, int *pTick)
 			unsigned char aTickdata[4];
 			if(io_read(m_File, aTickdata, sizeof(aTickdata)) != sizeof(aTickdata))
 				return -1;
-			*pTick = (aTickdata[0]<<24) | (aTickdata[1]<<16) | (aTickdata[2]<<8) | aTickdata[3];
+			*pTick = (aTickdata[0] << 24) | (aTickdata[1] << 16) | (aTickdata[2] << 8) | aTickdata[3];
 		}
-
 	}
 	else
 	{
 		// decode normal chunk
-		*pType = (Chunk&CHUNKMASK_TYPE)>>5;
-		*pSize = Chunk&CHUNKMASK_SIZE;
+		*pType = (Chunk & CHUNKMASK_TYPE) >> 5;
+		*pSize = Chunk & CHUNKMASK_SIZE;
 
 		if(*pSize == 30)
 		{
@@ -474,14 +469,13 @@ int CDemoPlayer::ReadChunkHeader(int *pType, int *pSize, int *pTick)
 			if(io_read(m_File, aSizedata, sizeof(aSizedata)) != sizeof(aSizedata))
 				return -1;
 			*pSize = aSizedata[0];
-
 		}
 		else if(*pSize == 31)
 		{
 			unsigned char aSizedata[2];
 			if(io_read(m_File, aSizedata, sizeof(aSizedata)) != sizeof(aSizedata))
 				return -1;
-			*pSize = (aSizedata[1]<<8) | aSizedata[0];
+			*pSize = (aSizedata[1] << 8) | aSizedata[0];
 		}
 	}
 
@@ -509,9 +503,9 @@ void CDemoPlayer::ScanFile()
 			break;
 
 		// read the chunk
-		if(ChunkType&CHUNKTYPEFLAG_TICKMARKER)
+		if(ChunkType & CHUNKTYPEFLAG_TICKMARKER)
 		{
-			if(ChunkType&CHUNKTICKFLAG_KEYFRAME)
+			if(ChunkType & CHUNKTICKFLAG_KEYFRAME)
 			{
 				CKeyFrameSearch *pKey;
 
@@ -534,7 +528,6 @@ void CDemoPlayer::ScanFile()
 		}
 		else if(ChunkSize)
 			io_skip(m_File, ChunkSize);
-
 	}
 
 	// copy all the frames to an array instead for fast access
@@ -567,10 +560,10 @@ void CDemoPlayer::DoTick()
 			// stop on error or eof
 			if(m_pConsole)
 				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", "end of file");
-			#if defined(CONF_VIDEORECORDER)
-				if (IVideo::Current())
-					Stop();
-			#endif
+#if defined(CONF_VIDEORECORDER)
+			if(IVideo::Current())
+				Stop();
+#endif
 			if(m_Info.m_PreviousTick == -1)
 			{
 				if(m_pConsole)
@@ -622,7 +615,7 @@ void CDemoPlayer::DoTick()
 
 			GotSnapshot = 1;
 
-			DataSize = m_pSnapshotDelta->UnpackDelta((CSnapshot*)m_aLastSnapshotData, (CSnapshot*)aNewsnap, aData, DataSize);
+			DataSize = m_pSnapshotDelta->UnpackDelta((CSnapshot *)m_aLastSnapshotData, (CSnapshot *)aNewsnap, aData, DataSize);
 
 			if(DataSize >= 0)
 			{
@@ -662,7 +655,7 @@ void CDemoPlayer::DoTick()
 			}
 
 			// check the remaining types
-			if(ChunkType&CHUNKTYPEFLAG_TICKMARKER)
+			if(ChunkType & CHUNKTYPEFLAG_TICKMARKER)
 			{
 				m_Info.m_NextTick = ChunkTick;
 				break;
@@ -786,11 +779,11 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 		m_DemoType = DEMOTYPE_INVALID;
 
 	// read map
-	unsigned MapSize = (m_Info.m_Header.m_aMapSize[0]<<24) | (m_Info.m_Header.m_aMapSize[1]<<16) | (m_Info.m_Header.m_aMapSize[2]<<8) | (m_Info.m_Header.m_aMapSize[3]);
+	unsigned MapSize = (m_Info.m_Header.m_aMapSize[0] << 24) | (m_Info.m_Header.m_aMapSize[1] << 16) | (m_Info.m_Header.m_aMapSize[2] << 8) | (m_Info.m_Header.m_aMapSize[3]);
 
 	// check if we already have the map
 	// TODO: improve map checking (maps folder, check crc)
-	unsigned Crc = (m_Info.m_Header.m_aMapCrc[0]<<24) | (m_Info.m_Header.m_aMapCrc[1]<<16) | (m_Info.m_Header.m_aMapCrc[2]<<8) | (m_Info.m_Header.m_aMapCrc[3]);
+	unsigned Crc = (m_Info.m_Header.m_aMapCrc[0] << 24) | (m_Info.m_Header.m_aMapCrc[1] << 16) | (m_Info.m_Header.m_aMapCrc[2] << 8) | (m_Info.m_Header.m_aMapCrc[3]);
 
 	// save byte offset of map for later use
 	m_MapOffset = io_tell(m_File);
@@ -805,14 +798,14 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	if(m_Info.m_Header.m_Version > gs_OldVersion)
 	{
 		// get timeline markers
-		int Num = ((m_Info.m_TimelineMarkers.m_aNumTimelineMarkers[0]<<24)&0xFF000000) | ((m_Info.m_TimelineMarkers.m_aNumTimelineMarkers[1]<<16)&0xFF0000) |
-					((m_Info.m_TimelineMarkers.m_aNumTimelineMarkers[2]<<8)&0xFF00) | (m_Info.m_TimelineMarkers.m_aNumTimelineMarkers[3]&0xFF);
+		int Num = ((m_Info.m_TimelineMarkers.m_aNumTimelineMarkers[0] << 24) & 0xFF000000) | ((m_Info.m_TimelineMarkers.m_aNumTimelineMarkers[1] << 16) & 0xFF0000) |
+			  ((m_Info.m_TimelineMarkers.m_aNumTimelineMarkers[2] << 8) & 0xFF00) | (m_Info.m_TimelineMarkers.m_aNumTimelineMarkers[3] & 0xFF);
 		m_Info.m_Info.m_NumTimelineMarkers = minimum(Num, (int)MAX_TIMELINE_MARKERS);
 		for(int i = 0; i < m_Info.m_Info.m_NumTimelineMarkers; i++)
 		{
 			char *pTimelineMarker = m_Info.m_TimelineMarkers.m_aTimelineMarkers[i];
-			m_Info.m_Info.m_aTimelineMarkers[i] = ((pTimelineMarker[0]<<24)&0xFF000000) | ((pTimelineMarker[1]<<16)&0xFF0000) |
-													((pTimelineMarker[2]<<8)&0xFF00) | (pTimelineMarker[3]&0xFF);
+			m_Info.m_Info.m_aTimelineMarkers[i] = ((pTimelineMarker[0] << 24) & 0xFF000000) | ((pTimelineMarker[1] << 16) & 0xFF0000) |
+							      ((pTimelineMarker[2] << 8) & 0xFF00) | (pTimelineMarker[3] & 0xFF);
 		}
 	}
 
@@ -879,9 +872,9 @@ int64 CDemoPlayer::time()
 {
 #if defined(CONF_VIDEORECORDER)
 	static bool s_Recording = false;
-	if (IVideo::Current())
+	if(IVideo::Current())
 	{
-		if (!s_Recording)
+		if(!s_Recording)
 		{
 			s_Recording = true;
 			m_Info.m_LastUpdate = IVideo::Time();
@@ -891,7 +884,7 @@ int64 CDemoPlayer::time()
 	else
 	{
 		int64 Now = time_get();
-		if (s_Recording)
+		if(s_Recording)
 		{
 			s_Recording = false;
 			m_Info.m_LastUpdate = Now;
@@ -912,7 +905,7 @@ int CDemoPlayer::Play()
 	// set start info
 	/*m_Info.start_tick = m_Info.previous_tick;
 	m_Info.start_time = time_get();*/
-	m_Info.m_CurrentTime = m_Info.m_PreviousTick*time_freq()/SERVER_TICK_SPEED;
+	m_Info.m_CurrentTime = m_Info.m_PreviousTick * time_freq() / SERVER_TICK_SPEED;
 	m_Info.m_LastUpdate = time();
 	return 0;
 }
@@ -971,14 +964,14 @@ void CDemoPlayer::SetSpeed(float Speed)
 
 void CDemoPlayer::SetSpeedIndex(int Offset)
 {
-	m_SpeedIndex = clamp(m_SpeedIndex + Offset, 0, (int)(sizeof(g_aSpeeds)/sizeof(g_aSpeeds[0])-1));
+	m_SpeedIndex = clamp(m_SpeedIndex + Offset, 0, (int)(sizeof(g_aSpeeds) / sizeof(g_aSpeeds[0]) - 1));
 	SetSpeed(g_aSpeeds[m_SpeedIndex]);
 }
 
 int CDemoPlayer::Update(bool RealTime)
 {
 	int64 Now = time();
-	int64 Deltatime = Now-m_Info.m_LastUpdate;
+	int64 Deltatime = Now - m_Info.m_LastUpdate;
 	m_Info.m_LastUpdate = Now;
 
 	if(!IsPlaying())
@@ -986,16 +979,15 @@ int CDemoPlayer::Update(bool RealTime)
 
 	if(m_Info.m_Info.m_Paused)
 	{
-
 	}
 	else
 	{
 		int64 Freq = time_freq();
-		m_Info.m_CurrentTime += (int64)(Deltatime*(double)m_Info.m_Info.m_Speed);
+		m_Info.m_CurrentTime += (int64)(Deltatime * (double)m_Info.m_Info.m_Speed);
 
 		while(1)
 		{
-			int64 CurtickStart = (m_Info.m_Info.m_CurrentTick)*Freq/SERVER_TICK_SPEED;
+			int64 CurtickStart = (m_Info.m_Info.m_CurrentTick) * Freq / SERVER_TICK_SPEED;
 
 			// break if we are ready
 			if(RealTime && CurtickStart > m_Info.m_CurrentTime)
@@ -1010,9 +1002,9 @@ int CDemoPlayer::Update(bool RealTime)
 
 		// update intratick
 		{
-			int64 CurtickStart = (m_Info.m_Info.m_CurrentTick)*Freq/SERVER_TICK_SPEED;
-			int64 PrevtickStart = (m_Info.m_PreviousTick)*Freq/SERVER_TICK_SPEED;
-			m_Info.m_IntraTick = (m_Info.m_CurrentTime - PrevtickStart) / (float)(CurtickStart-PrevtickStart);
+			int64 CurtickStart = (m_Info.m_Info.m_CurrentTick) * Freq / SERVER_TICK_SPEED;
+			int64 PrevtickStart = (m_Info.m_PreviousTick) * Freq / SERVER_TICK_SPEED;
+			m_Info.m_IntraTick = (m_Info.m_CurrentTime - PrevtickStart) / (float)(CurtickStart - PrevtickStart);
 			m_Info.m_TickTime = (m_Info.m_CurrentTime - PrevtickStart) / (float)Freq;
 		}
 
@@ -1037,8 +1029,8 @@ int CDemoPlayer::Update(bool RealTime)
 int CDemoPlayer::Stop()
 {
 #if defined(CONF_VIDEORECORDER)
-		if (IVideo::Current())
-			IVideo::Current()->Stop();
+	if(IVideo::Current())
+		IVideo::Current()->Stop();
 #endif
 
 	if(!m_File)
@@ -1062,12 +1054,12 @@ void CDemoPlayer::GetDemoName(char *pBuffer, int BufferSize) const
 	for(; *pFileName; ++pFileName)
 	{
 		if(*pFileName == '/' || *pFileName == '\\')
-			pExtractedName = pFileName+1;
+			pExtractedName = pFileName + 1;
 		else if(*pFileName == '.')
 			pEnd = pFileName;
 	}
 
-	int Length = pEnd > pExtractedName ? minimum(BufferSize, (int)(pEnd-pExtractedName+1)) : BufferSize;
+	int Length = pEnd > pExtractedName ? minimum(BufferSize, (int)(pEnd - pExtractedName + 1)) : BufferSize;
 	str_copy(pBuffer, pExtractedName, Length);
 }
 
@@ -1087,7 +1079,7 @@ bool CDemoPlayer::GetDemoInfo(class IStorage *pStorage, const char *pFilename, i
 	io_read(File, pTimelineMarkers, sizeof(CTimelineMarkers));
 
 	str_copy(pMapInfo->m_aName, pDemoHeader->m_aMapName, sizeof(pMapInfo->m_aName));
-	pMapInfo->m_Crc = (pDemoHeader->m_aMapCrc[0]<<24) | (pDemoHeader->m_aMapCrc[1]<<16) | (pDemoHeader->m_aMapCrc[2]<<8) | (pDemoHeader->m_aMapCrc[3]);
+	pMapInfo->m_Crc = (pDemoHeader->m_aMapCrc[0] << 24) | (pDemoHeader->m_aMapCrc[1] << 16) | (pDemoHeader->m_aMapCrc[2] << 8) | (pDemoHeader->m_aMapCrc[3]);
 
 	SHA256_DIGEST Sha256 = SHA256_ZEROED;
 	if(pDemoHeader->m_Version >= gs_Sha256Version)
@@ -1108,7 +1100,7 @@ bool CDemoPlayer::GetDemoInfo(class IStorage *pStorage, const char *pFilename, i
 	}
 	pMapInfo->m_Sha256 = Sha256;
 
-	pMapInfo->m_Size = (pDemoHeader->m_aMapSize[0]<<24) | (pDemoHeader->m_aMapSize[1]<<16) | (pDemoHeader->m_aMapSize[2]<<8) | (pDemoHeader->m_aMapSize[3]);
+	pMapInfo->m_Size = (pDemoHeader->m_aMapSize[0] << 24) | (pDemoHeader->m_aMapSize[1] << 16) | (pDemoHeader->m_aMapSize[2] << 8) | (pDemoHeader->m_aMapSize[3]);
 
 	io_close(File);
 	return !(mem_comp(pDemoHeader->m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) || pDemoHeader->m_Version < gs_OldVersion);
@@ -1143,7 +1135,7 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 	m_SliceTo = EndTick;
 	m_Stop = false;
 
-	if (m_pDemoPlayer->Load(m_pStorage, m_pConsole, pDemo, IStorage::TYPE_ALL) == -1)
+	if(m_pDemoPlayer->Load(m_pStorage, m_pConsole, pDemo, IStorage::TYPE_ALL) == -1)
 		return;
 
 	const CMapInfo *pMapInfo = m_pDemoPlayer->GetMapInfo();
@@ -1156,16 +1148,16 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 			Sha256 = pMapInfo->m_Sha256;
 	}
 
-	if (m_pDemoRecorder->Start(m_pStorage, m_pConsole, pDst, m_pNetVersion, pMapInfo->m_aName, &Sha256, pMapInfo->m_Crc, "client", pMapInfo->m_Size, NULL, NULL, pfnFilter, pUser) == -1)
+	if(m_pDemoRecorder->Start(m_pStorage, m_pConsole, pDst, m_pNetVersion, pMapInfo->m_aName, &Sha256, pMapInfo->m_Crc, "client", pMapInfo->m_Size, NULL, NULL, pfnFilter, pUser) == -1)
 		return;
-
 
 	m_pDemoPlayer->Play();
 
-	while (m_pDemoPlayer->IsPlaying() && !m_Stop) {
+	while(m_pDemoPlayer->IsPlaying() && !m_Stop)
+	{
 		m_pDemoPlayer->Update(false);
 
-		if (pInfo->m_Info.m_Paused)
+		if(pInfo->m_Info.m_Paused)
 			break;
 	}
 
@@ -1177,9 +1169,9 @@ void CDemoEditor::OnDemoPlayerSnapshot(void *pData, int Size)
 {
 	const CDemoPlayer::CPlaybackInfo *pInfo = m_pDemoPlayer->Info();
 
-	if (m_SliceTo != -1 && pInfo->m_Info.m_CurrentTick > m_SliceTo)
+	if(m_SliceTo != -1 && pInfo->m_Info.m_CurrentTick > m_SliceTo)
 		m_Stop = true;
-	else if (m_SliceFrom == -1 || pInfo->m_Info.m_CurrentTick >= m_SliceFrom)
+	else if(m_SliceFrom == -1 || pInfo->m_Info.m_CurrentTick >= m_SliceFrom)
 		m_pDemoRecorder->RecordSnapshot(pInfo->m_Info.m_CurrentTick, pData, Size);
 }
 
@@ -1187,8 +1179,8 @@ void CDemoEditor::OnDemoPlayerMessage(void *pData, int Size)
 {
 	const CDemoPlayer::CPlaybackInfo *pInfo = m_pDemoPlayer->Info();
 
-	if (m_SliceTo != -1 && pInfo->m_Info.m_CurrentTick > m_SliceTo)
+	if(m_SliceTo != -1 && pInfo->m_Info.m_CurrentTick > m_SliceTo)
 		m_Stop = true;
-	else if (m_SliceFrom == -1 || pInfo->m_Info.m_CurrentTick >= m_SliceFrom)
+	else if(m_SliceFrom == -1 || pInfo->m_Info.m_CurrentTick >= m_SliceFrom)
 		m_pDemoRecorder->RecordMessage(pData, Size);
 }

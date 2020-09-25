@@ -21,7 +21,7 @@ void *CEventHandler::Create(int Type, int Size, int64 Mask)
 {
 	if(m_NumEvents == MAX_EVENTS)
 		return 0;
-	if(m_CurrentOffset+Size >= MAX_DATASIZE)
+	if(m_CurrentOffset + Size >= MAX_DATASIZE)
 		return 0;
 
 	void *p = &m_aData[m_CurrentOffset];

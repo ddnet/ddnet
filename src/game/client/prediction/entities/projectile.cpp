@@ -1,26 +1,24 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <game/generated/protocol.h>
 #include "projectile.h"
+#include <game/generated/protocol.h>
 
 #include <engine/shared/config.h>
 
-CProjectile::CProjectile
-	(
-		CGameWorld *pGameWorld,
-		int Type,
-		int Owner,
-		vec2 Pos,
-		vec2 Dir,
-		int Span,
-		bool Freeze,
-		bool Explosive,
-		float Force,
-		int SoundImpact,
-		int Layer,
-		int Number
-	)
-: CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
+CProjectile::CProjectile(
+	CGameWorld *pGameWorld,
+	int Type,
+	int Owner,
+	vec2 Pos,
+	vec2 Dir,
+	int Span,
+	bool Freeze,
+	bool Explosive,
+	float Force,
+	int SoundImpact,
+	int Layer,
+	int Number) :
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
 {
 	m_Type = Type;
 	m_Pos = Pos;
@@ -49,30 +47,29 @@ vec2 CProjectile::GetPos(float Time)
 
 	switch(m_Type)
 	{
-		case WEAPON_GRENADE:
-			Curvature = pTuning->m_GrenadeCurvature;
-			Speed = pTuning->m_GrenadeSpeed;
-			break;
+	case WEAPON_GRENADE:
+		Curvature = pTuning->m_GrenadeCurvature;
+		Speed = pTuning->m_GrenadeSpeed;
+		break;
 
-		case WEAPON_SHOTGUN:
-			Curvature = pTuning->m_ShotgunCurvature;
-			Speed = pTuning->m_ShotgunSpeed;
-			break;
+	case WEAPON_SHOTGUN:
+		Curvature = pTuning->m_ShotgunCurvature;
+		Speed = pTuning->m_ShotgunSpeed;
+		break;
 
-		case WEAPON_GUN:
-			Curvature = pTuning->m_GunCurvature;
-			Speed = pTuning->m_GunSpeed;
-			break;
+	case WEAPON_GUN:
+		Curvature = pTuning->m_GunCurvature;
+		Speed = pTuning->m_GunSpeed;
+		break;
 	}
 
 	return CalcPos(m_Pos, m_Direction, Curvature, Speed, Time);
 }
 
-
 void CProjectile::Tick()
 {
-	float Pt = (GameWorld()->GameTick()-m_StartTick-1)/(float)GameWorld()->GameTickSpeed();
-	float Ct = (GameWorld()->GameTick()-m_StartTick)/(float)GameWorld()->GameTickSpeed();
+	float Pt = (GameWorld()->GameTick() - m_StartTick - 1) / (float)GameWorld()->GameTickSpeed();
+	float Ct = (GameWorld()->GameTick() - m_StartTick) / (float)GameWorld()->GameTickSpeed();
 	vec2 PrevPos = GetPos(Pt);
 	vec2 CurPos = GetPos(Ct);
 	vec2 ColPos;
@@ -90,48 +87,45 @@ void CProjectile::Tick()
 
 	int64 TeamMask = -1LL;
 	bool isWeaponCollide = false;
-	if
-	(
-			pOwnerChar &&
-			pTargetChr &&
-			pOwnerChar->IsAlive() &&
-			pTargetChr->IsAlive() &&
-			!pTargetChr->CanCollide(m_Owner)
-			)
+	if(
+		pOwnerChar &&
+		pTargetChr &&
+		pOwnerChar->IsAlive() &&
+		pTargetChr->IsAlive() &&
+		!pTargetChr->CanCollide(m_Owner))
 	{
-			isWeaponCollide = true;
+		isWeaponCollide = true;
 	}
 
-	if( ((pTargetChr && (pOwnerChar ? !(pOwnerChar->m_Hit&CCharacter::DISABLE_HIT_GRENADE) : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar)) || Collide || GameLayerClipped(CurPos)) && !isWeaponCollide)
+	if(((pTargetChr && (pOwnerChar ? !(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_GRENADE) : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar)) || Collide || GameLayerClipped(CurPos)) && !isWeaponCollide)
 	{
 		if(m_Explosive && (!pTargetChr || (pTargetChr && (!m_Freeze || (m_Type == WEAPON_SHOTGUN && Collide)))))
 		{
 			GameWorld()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()),
-			(m_Owner != -1)? TeamMask : -1LL);
+				(m_Owner != -1) ? TeamMask : -1LL);
 		}
 		else if(pTargetChr && m_Freeze && ((m_Layer == LAYER_SWITCH && Collision()->m_pSwitchers[m_Number].m_Status[pTargetChr->Team()]) || m_Layer != LAYER_SWITCH))
 			pTargetChr->Freeze();
 		if(Collide && m_Bouncing != 0)
 		{
 			m_StartTick = GameWorld()->GameTick();
-			m_Pos = NewPos+(-(m_Direction*4));
-			if (m_Bouncing == 1)
+			m_Pos = NewPos + (-(m_Direction * 4));
+			if(m_Bouncing == 1)
 				m_Direction.x = -m_Direction.x;
 			else if(m_Bouncing == 2)
 				m_Direction.y = -m_Direction.y;
-			if (fabs(m_Direction.x) < 1e-6)
+			if(fabs(m_Direction.x) < 1e-6)
 				m_Direction.x = 0;
-			if (fabs(m_Direction.y) < 1e-6)
+			if(fabs(m_Direction.y) < 1e-6)
 				m_Direction.y = 0;
 			m_Pos += m_Direction;
 		}
-		else if (m_Type == WEAPON_GUN)
+		else if(m_Type == WEAPON_GUN)
 		{
 			GameWorld()->DestroyEntity(this);
 		}
-		else
-			if (!m_Freeze)
-				GameWorld()->DestroyEntity(this);
+		else if(!m_Freeze)
+			GameWorld()->DestroyEntity(this);
 	}
 	if(m_LifeSpan == -1)
 	{
@@ -143,7 +137,7 @@ void CProjectile::Tick()
 			int64 TeamMask = -1LL;
 
 			GameWorld()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pOwnerChar ? -1 : pOwnerChar->Team()),
-			(m_Owner != -1)? TeamMask : -1LL);
+				(m_Owner != -1) ? TeamMask : -1LL);
 		}
 		GameWorld()->DestroyEntity(this);
 	}
@@ -156,8 +150,8 @@ void CProjectile::SetBouncing(int Value)
 	m_Bouncing = Value;
 }
 
-CProjectile::CProjectile(CGameWorld *pGameWorld, int ID, CNetObj_Projectile *pProj)
-: CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
+CProjectile::CProjectile(CGameWorld *pGameWorld, int ID, CNetObj_Projectile *pProj) :
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
 {
 	ExtractInfo(pProj, &m_Pos, &m_Direction);
 	if(UseExtraInfo(pProj))
@@ -191,16 +185,16 @@ void CProjectile::FillInfo(CNetObj_Projectile *pProj)
 {
 	pProj->m_X = (int)m_Pos.x;
 	pProj->m_Y = (int)m_Pos.y;
-	pProj->m_VelX = (int)(m_Direction.x*100.0f);
-	pProj->m_VelY = (int)(m_Direction.y*100.0f);
+	pProj->m_VelX = (int)(m_Direction.x * 100.0f);
+	pProj->m_VelY = (int)(m_Direction.y * 100.0f);
 	pProj->m_StartTick = m_StartTick;
 	pProj->m_Type = m_Type;
 }
 
 void CProjectile::FillExtraInfo(CNetObj_Projectile *pProj)
 {
-	const int MaxPos = 0x7fffffff/100;
-	if(abs((int)m_Pos.y)+1 >= MaxPos || abs((int)m_Pos.x)+1 >= MaxPos)
+	const int MaxPos = 0x7fffffff / 100;
+	if(abs((int)m_Pos.y) + 1 >= MaxPos || abs((int)m_Pos.x) + 1 >= MaxPos)
 	{
 		//If the modified data would be too large to fit in an integer, send normal data instead
 		FillInfo(pProj);
@@ -210,15 +204,15 @@ void CProjectile::FillExtraInfo(CNetObj_Projectile *pProj)
 	float Angle = -atan2f(m_Direction.x, m_Direction.y);
 
 	int Data = 0;
-	Data |= (abs(m_Owner) & 255)<<0;
+	Data |= (abs(m_Owner) & 255) << 0;
 	if(m_Owner < 0)
-		Data |= 1<<8;
-	Data |= 1<<9; //This bit tells the client to use the extra info
-	Data |= (m_Bouncing & 3)<<10;
+		Data |= 1 << 8;
+	Data |= 1 << 9; //This bit tells the client to use the extra info
+	Data |= (m_Bouncing & 3) << 10;
 	if(m_Explosive)
-		Data |= 1<<12;
+		Data |= 1 << 12;
 	if(m_Freeze)
-		Data |= 1<<13;
+		Data |= 1 << 13;
 
 	pProj->m_X = (int)(m_Pos.x * 100.0f);
 	pProj->m_Y = (int)(m_Pos.y * 100.0f);
@@ -243,6 +237,6 @@ bool CProjectile::Match(CProjectile *pProj)
 
 int CProjectile::NetworkClipped(vec2 ViewPos)
 {
-	float Ct = (GameWorld()->GameTick()-m_StartTick)/(float)GameWorld()->GameTickSpeed();
-	return ((CEntity*) this)->NetworkClipped(GetPos(Ct), ViewPos);
+	float Ct = (GameWorld()->GameTick() - m_StartTick) / (float)GameWorld()->GameTickSpeed();
+	return ((CEntity *)this)->NetworkClipped(GetPos(Ct), ViewPos);
 }

@@ -2,13 +2,13 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <engine/demo.h>
 #include <engine/graphics.h>
-#include <game/generated/protocol.h>
 #include <game/generated/client_data.h>
+#include <game/generated/protocol.h>
 
-#include <game/gamecore.h> // get_angle
-#include <game/client/ui.h>
-#include <game/client/render.h>
 #include "damageind.h"
+#include <game/client/render.h>
+#include <game/client/ui.h>
+#include <game/gamecore.h> // get_angle
 
 CDamageInd::CDamageInd()
 {
@@ -40,8 +40,8 @@ void CDamageInd::Create(vec2 Pos, vec2 Dir)
 	{
 		i->m_Pos = Pos;
 		i->m_StartTime = LocalTime();
-		i->m_Dir = Dir*-1;
-		i->m_StartAngle = (( (float)rand()/(float)RAND_MAX) - 1.0f) * 2.0f * pi;
+		i->m_Dir = Dir * -1;
+		i->m_StartAngle = (((float)rand() / (float)RAND_MAX) - 1.0f) * 2.0f * pi;
 	}
 }
 
@@ -55,14 +55,14 @@ void CDamageInd::OnRender()
 		{
 			const IDemoPlayer::CInfo *pInfo = DemoPlayer()->BaseInfo();
 			if(pInfo->m_Paused)
-				m_aItems[i].m_StartTime += LocalTime()-s_LastLocalTime;
+				m_aItems[i].m_StartTime += LocalTime() - s_LastLocalTime;
 			else
-				m_aItems[i].m_StartTime += (LocalTime()-s_LastLocalTime)*(1.0f-pInfo->m_Speed);
+				m_aItems[i].m_StartTime += (LocalTime() - s_LastLocalTime) * (1.0f - pInfo->m_Speed);
 		}
 		else
 		{
-			if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED)
-				m_aItems[i].m_StartTime += LocalTime()-s_LastLocalTime;
+			if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED)
+				m_aItems[i].m_StartTime += LocalTime() - s_LastLocalTime;
 		}
 
 		float Life = 0.75f - (LocalTime() - m_aItems[i].m_StartTime);
@@ -70,8 +70,8 @@ void CDamageInd::OnRender()
 			DestroyI(&m_aItems[i]);
 		else
 		{
-			vec2 Pos = mix(m_aItems[i].m_Pos+m_aItems[i].m_Dir*75.0f, m_aItems[i].m_Pos, clamp((Life-0.60f)/0.15f, 0.0f, 1.0f));
-			Graphics()->SetColor(1.0f,1.0f,1.0f, Life/0.1f);
+			vec2 Pos = mix(m_aItems[i].m_Pos + m_aItems[i].m_Dir * 75.0f, m_aItems[i].m_Pos, clamp((Life - 0.60f) / 0.15f, 0.0f, 1.0f));
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, Life / 0.1f);
 			Graphics()->QuadsSetRotation(m_aItems[i].m_StartAngle + Life * 2.0f);
 			Graphics()->RenderQuadContainerAsSprite(m_DmgIndQuadContainerIndex, 0, Pos.x, Pos.y);
 			i++;
