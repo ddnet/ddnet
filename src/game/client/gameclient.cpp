@@ -996,9 +996,13 @@ void CGameClient::ProcessEvents()
 static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, CServerInfo *pFallbackServerInfo)
 {
 	int Version = -1;
-	if(InfoExSize >= 8)
+	if(InfoExSize >= 12)
 	{
 		Version = pInfoEx->m_Version;
+	}
+	else if(InfoExSize >= 8)
+	{
+		Version = minimum(pInfoEx->m_Version, 4);
 	}
 	else if(InfoExSize >= 4)
 	{
@@ -1023,7 +1027,6 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	bool City;
 	bool Vanilla;
 	bool Plus;
-	bool AllowXSkins = Flags2 & GAMEINFOFLAG2_ALLOW_X_SKINS;
 	if(Version < 1)
 	{
 		Race = IsRace(pFallbackServerInfo);
@@ -1046,7 +1049,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 		BlockWorlds = Flags & GAMEINFOFLAG_GAMETYPE_BLOCK_WORLDS;
 		Vanilla = Flags & GAMEINFOFLAG_GAMETYPE_VANILLA;
 		Plus = Flags & GAMEINFOFLAG_GAMETYPE_PLUS;
-		City = Flags2 & GAMEINFOFLAG2_GAMETYPE_CITY;
+		City = Version >= 5 && Flags2 & GAMEINFOFLAG2_GAMETYPE_CITY;
 
 		// Ensure invariants upheld by the server info parsing business.
 		DDRace = DDRace || DDNet;
@@ -1078,7 +1081,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	Info.m_EntitiesBW = BlockWorlds;
 	Info.m_Race = Race;
 	Info.m_DontMaskEntities = !DDNet;
-	Info.m_AllowXSkins = AllowXSkins;
+	Info.m_AllowXSkins = false;
 
 	if(Version >= 0)
 	{
@@ -1112,10 +1115,13 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 		Info.m_Race = Flags&GAMEINFOFLAG_RACE;
 		Info.m_DontMaskEntities = Flags&GAMEINFOFLAG_DONT_MASK_ENTITIES;
 	}
-
-	if (Version >= 4)
+	if(Version >= 4)
 	{
 		Info.m_EntitiesBW = Flags&GAMEINFOFLAG_ENTITIES_BW;
+	}
+	if(Version >= 5)
+	{
+		Info.m_AllowXSkins = Flags2 & GAMEINFOFLAG2_ALLOW_X_SKINS;
 	}
 	return Info;
 }
