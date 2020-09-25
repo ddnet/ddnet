@@ -23,5 +23,5 @@ jobs:
     - name: Check style
       run: |
         clang-format -version
-        scripts/fix_style.py --dry-run --base origin/master
+        scripts/fix_style.py --dry-run
         scripts/check_header_guards.py
