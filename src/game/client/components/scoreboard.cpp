@@ -285,20 +285,25 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		RoundRadius = 15.0f;
 	}
 
-	float ScoreOffset = x+10.0f, ScoreLength = TextRender()->TextWidth(0, 22.0f/*HeadlineFontsize*/, "00:00:0", -1, -1.0f);
-	float TeeOffset = ScoreOffset+ScoreLength, TeeLength = 60*TeeSizeMod;
-	float NameOffset = TeeOffset+TeeLength, NameLength = 300.0f-TeeLength;
-	float PingOffset = x+610.0f, PingLength = 65.0f;
-	float CountryOffset = PingOffset-(LineHeight-Spacing-TeeSizeMod*5.0f)*2.0f, CountryLength = (LineHeight-Spacing-TeeSizeMod*5.0f)*2.0f;
-	float ClanOffset = x+360.0f, ClanLength = 240.0f-CountryLength;
+	float FontSize = 24.0f;
+	if(m_pClient->m_Snap.m_aTeamSize[Team] > 48)
+		FontSize = 16.0f;
+	else if(m_pClient->m_Snap.m_aTeamSize[Team] > 32)
+		FontSize = 20.0f;
+
+	float ScoreOffset = x + 10.0f, ScoreLength = TextRender()->TextWidth(0, FontSize, "00:00:00", -1, -1.0f);
+	float TeeOffset = ScoreOffset + ScoreLength + 15.0f, TeeLength = 60 * TeeSizeMod;
+	float NameOffset = TeeOffset + TeeLength, NameLength = 300.0f - TeeLength;
+	float PingOffset = x + 610.0f, PingLength = 65.0f;
+	float CountryOffset = PingOffset - (LineHeight - Spacing - TeeSizeMod * 5.0f) * 2.0f, CountryLength = (LineHeight - Spacing - TeeSizeMod * 5.0f) * 2.0f;
+	float ClanOffset = x + 360.0f, ClanLength = 240.0f - CountryLength;
 
 	// render headlines
 	y += 50.0f;
 	float HeadlineFontsize = 22.0f;
 	const char *pScore = (m_pClient->m_GameInfo.m_TimeScore && g_Config.m_ClDDRaceScoreBoard) ? Localize("Time") : Localize("Score");
-	float ScoreWidth = TextRender()->TextWidth(0, HeadlineFontsize, pScore, -1, -1.0f);
-	tw = ScoreLength > ScoreWidth ? ScoreLength : ScoreWidth;
-	TextRender()->Text(0, ScoreOffset+ScoreLength-tw, y + (HeadlineFontsize * 2.f - HeadlineFontsize) / 2.f, HeadlineFontsize, pScore, -1.0f);
+	tw = TextRender()->TextWidth(0, HeadlineFontsize, pScore, -1, -1.0f);
+	TextRender()->Text(0, ScoreOffset + ScoreLength - tw, y + (HeadlineFontsize * 2.f - HeadlineFontsize) / 2.f, HeadlineFontsize, pScore, -1.0f);
 
 	TextRender()->Text(0, NameOffset, y + (HeadlineFontsize * 2.f - HeadlineFontsize) / 2.f, HeadlineFontsize, Localize("Name"), -1.0f);
 
@@ -309,12 +314,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	TextRender()->Text(0, PingOffset+PingLength-tw, y + (HeadlineFontsize * 2.f - HeadlineFontsize) / 2.f, HeadlineFontsize, Localize("Ping"), -1.0f);
 
 	// render player entries
-	y += HeadlineFontsize*2.0f;
-	float FontSize = 24.0f;
-	if(m_pClient->m_Snap.m_aTeamSize[Team] > 48)
-		FontSize = 16.0f;
-	else if(m_pClient->m_Snap.m_aTeamSize[Team] > 32)
-		FontSize = 20.0f;
+	y += HeadlineFontsize * 2.0f;
 	CTextCursor Cursor;
 
 	int rendered = 0;
@@ -422,7 +422,10 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			else
 			{
 				int Time = abs(pInfo->m_Score);
-				str_format(aBuf, sizeof(aBuf), "%02d:%02d", Time/60, Time%60);
+				if(Time / 3600)
+					str_format(aBuf, sizeof(aBuf), "%02d:%02d:%02d", Time / 3600, (Time / 60) % 60, Time % 60);
+				else
+					str_format(aBuf, sizeof(aBuf), "%02d:%02d", Time / 60, Time % 60);
 			}
 		}
 		else
@@ -464,9 +467,8 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		if(g_Config.m_ClShowIDs)
 		{
 			char aId[64] = "";
-			str_format(aId, sizeof(aId)," %2d: ", pInfo->m_ClientID);
-			str_append(aId, m_pClient->m_aClients[pInfo->m_ClientID].m_aName,sizeof(aId));
-			Cursor.m_LineWidth = NameLength+8;
+			str_format(aId, sizeof(aId), "%2d: %s", pInfo->m_ClientID, m_pClient->m_aClients[pInfo->m_ClientID].m_aName);
+			Cursor.m_LineWidth = NameLength;
 			TextRender()->TextEx(&Cursor, aId, -1);
 		}
 		else
