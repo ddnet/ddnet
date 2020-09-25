@@ -671,31 +671,39 @@ void CHud::PrepareHealthAmoQuads()
 	for(int i = 0; i < NUM_WEAPONS; ++i)
 	{
 		RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[i % NUM_WEAPONS].m_pSpriteProj);
-		for(int n = 0; n < 10; n++)
-			Array[n] = IGraphics::CQuadItem(x + n * 12, y + 24, 10, 10);
+		if(i == WEAPON_GRENADE)
+		{
+			for(int n = 0; n < 10; n++)
+				Array[n] = IGraphics::CQuadItem(1 + x + n * 12, y + 24, 10, 10);
+		}
+		else
+		{
+			for(int n = 0; n < 10; n++)
+				Array[n] = IGraphics::CQuadItem(x + n * 12, y + 24, 12, 12);
+		}
 		Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
 	}
 
 	// health
 	RenderTools()->SelectSprite(SPRITE_HEALTH_FULL);
 	for(int i = 0; i < 10; ++i)
-		Array[i] = IGraphics::CQuadItem(x + i * 12, y, 10, 10);
+		Array[i] = IGraphics::CQuadItem(x + i * 12, y, 12, 12);
 	Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
 
 	RenderTools()->SelectSprite(SPRITE_HEALTH_EMPTY);
 	for(int i = 0; i < 10; ++i)
-		Array[i] = IGraphics::CQuadItem(x + i * 12, y, 10, 10);
+		Array[i] = IGraphics::CQuadItem(x + i * 12, y, 12, 12);
 	Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
 
 	// armor meter
 	RenderTools()->SelectSprite(SPRITE_ARMOR_FULL);
 	for(int i = 0; i < 10; ++i)
-		Array[i] = IGraphics::CQuadItem(x + i * 12, y + 12, 10, 10);
+		Array[i] = IGraphics::CQuadItem(x + i * 12, y + 12, 12, 12);
 	Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
 
 	RenderTools()->SelectSprite(SPRITE_ARMOR_EMPTY);
 	for(int i = 0; i < 10; ++i)
-		Array[i] = IGraphics::CQuadItem(x + i * 12, y + 12, 10, 10);
+		Array[i] = IGraphics::CQuadItem(x + i * 12, y + 12, 12, 12);
 	Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
 }
 
