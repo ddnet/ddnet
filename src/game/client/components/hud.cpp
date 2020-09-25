@@ -123,11 +123,20 @@ void CHud::RenderGameTimer()
 
 		if(Time <= 0)
 			str_format(aBuf, sizeof(aBuf), "00:00");
+		else if(Time >= 3600 * 24)
+			str_format(aBuf, sizeof(aBuf), "%dd %02d:%02d:%02d", Time / (3600 * 24), (Time % (3600 * 24)) / 3600, (Time % 3600) / 60, Time % 60);
+		else if(Time >= 3600)
+			str_format(aBuf, sizeof(aBuf), "%02d:%02d:%02d", Time / 3600, (Time % 3600) / 60, Time % 60);
 		else
 			str_format(aBuf, sizeof(aBuf), "%02d:%02d", Time / 60, Time % 60);
 		float FontSize = 10.0f;
 		float w;
-		w = TextRender()->TextWidth(0, 12, "00:00", -1, -1.0f);
+		if(Time >= 3600 * 24)
+			w = TextRender()->TextWidth(0, 12, "00d 00:00:00", -1, -1.0f);
+		else if(Time >= 3600)
+			w = TextRender()->TextWidth(0, 12, "00:00:00", -1, -1.0f);
+		else
+			w = TextRender()->TextWidth(0, 12, "00:00", -1, -1.0f);
 		// last 60 sec red, last 10 sec blink
 		if(m_pClient->m_Snap.m_pGameInfoObj->m_TimeLimit && Time <= 60 && (m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer <= 0))
 		{
