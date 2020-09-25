@@ -676,14 +676,13 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 	{
 		if (m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetCharacter())
 		{
-			if((i==30) // laser_damage is removed from 0.7
-			&& (Server()->IsSixup(ClientID)))
+			if((i == 30) // laser_damage is removed from 0.7
+				&& (Server()->IsSixup(ClientID)))
 			{
 				continue;
 			}
-			else if((i==31) // collision
-			&& (m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_SOLO
-			 || m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_NOCOLL))
+			else if((i == 31) // collision
+				&& (m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_SOLO || m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_NOCOLL))
 			{
 				Msg.AddInt(0);
 			}
