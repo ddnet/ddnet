@@ -8,10 +8,12 @@ import sys
 
 os.chdir(os.path.dirname(__file__) + "/..")
 
+ignore_files = ["src/engine/keys.h", "src/engine/client/keynames.h"]
+
 def recursive_file_list(path):
 	result = []
 	for dirpath, dirnames, filenames in os.walk(path):
-		result += [os.path.join(dirpath, filename) for filename in filenames]
+		result += filter(lambda p: p not in ignore_files, [os.path.join(dirpath, filename) for filename in filenames])
 	return result
 
 def filter_cpp(filenames):
