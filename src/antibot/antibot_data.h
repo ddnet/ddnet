@@ -6,12 +6,12 @@
 
 enum
 {
-	ANTIBOT_ABI_VERSION=3,
+	ANTIBOT_ABI_VERSION = 3,
 
-	ANTIBOT_MSGFLAG_NONVITAL=1,
-	ANTIBOT_MSGFLAG_FLUSH=2,
+	ANTIBOT_MSGFLAG_NONVITAL = 1,
+	ANTIBOT_MSGFLAG_FLUSH = 2,
 
-	ANTIBOT_MAX_CLIENTS=64,
+	ANTIBOT_MAX_CLIENTS = 64,
 };
 
 struct CAntibotMapData
@@ -64,15 +64,16 @@ struct CAntibotVersion
 	int m_SizeRoundData;
 };
 
-#define ANTIBOT_VERSION { \
-	ANTIBOT_ABI_VERSION, \
-	sizeof(CAntibotVersion), \
-	sizeof(CAntibotData), \
-	sizeof(CAntibotCharacterData), \
-	sizeof(CAntibotInputData), \
-	sizeof(CAntibotMapData), \
-	sizeof(CAntibotRoundData), \
-}
+#define ANTIBOT_VERSION \
+	{ \
+		ANTIBOT_ABI_VERSION, \
+			sizeof(CAntibotVersion), \
+			sizeof(CAntibotData), \
+			sizeof(CAntibotCharacterData), \
+			sizeof(CAntibotInputData), \
+			sizeof(CAntibotMapData), \
+			sizeof(CAntibotRoundData), \
+	}
 
 struct CAntibotData
 {

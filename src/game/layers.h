@@ -36,7 +36,6 @@ public:
 	CMapItemLayerTilemap *TuneLayer() const { return m_pTuneLayer; };
 
 private:
-
 	CMapItemLayerTilemap *m_pTeleLayer;
 	CMapItemLayerTilemap *m_pSpeedupLayer;
 	CMapItemLayerTilemap *m_pFrontLayer;

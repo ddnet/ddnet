@@ -3,8 +3,8 @@
 #ifndef GAME_CLIENT_COMPONENTS_CONTROLS_H
 #define GAME_CLIENT_COMPONENTS_CONTROLS_H
 #include <SDL_joystick.h>
-#include <base/vmath.h>
 #include <base/system.h>
+#include <base/vmath.h>
 #include <game/client/component.h>
 
 class CControls : public CComponent

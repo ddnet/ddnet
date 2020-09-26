@@ -14,13 +14,13 @@
 lock CMysqlConnection::m_SqlDriverLock;
 
 CMysqlConnection::CMysqlConnection(
-		const char *pDatabase,
-		const char *pPrefix,
-		const char *pUser,
-		const char *pPass,
-		const char *pIp,
-		int Port,
-		bool Setup) :
+	const char *pDatabase,
+	const char *pPrefix,
+	const char *pUser,
+	const char *pPass,
+	const char *pIp,
+	int Port,
+	bool Setup) :
 	IDbConnection(pPrefix),
 #if defined(CONF_SQL)
 	m_NewQuery(false),
@@ -52,8 +52,8 @@ void CMysqlConnection::Print(IConsole *pConsole, const char *Mode)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
-			"MySQL-%s: DB: '%s' Prefix: '%s' User: '%s' IP: <{'%s'}> Port: %d",
-			Mode, m_aDatabase, GetPrefix(), m_aUser, m_aIp, m_Port);
+		"MySQL-%s: DB: '%s' Prefix: '%s' User: '%s' IP: <{'%s'}> Port: %d",
+		Mode, m_aDatabase, GetPrefix(), m_aUser, m_aIp, m_Port);
 	pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 }
 
@@ -82,19 +82,19 @@ IDbConnection::Status CMysqlConnection::Connect()
 			m_pConnection->setSchema(m_aDatabase);
 			return Status::SUCCESS;
 		}
-		catch (sql::SQLException &e)
+		catch(sql::SQLException &e)
 		{
 			dbg_msg("sql", "MySQL Error: %s", e.what());
 		}
-		catch (const std::exception& ex)
+		catch(const std::exception &ex)
 		{
 			dbg_msg("sql", "MySQL Error: %s", ex.what());
 		}
-		catch (const std::string& ex)
+		catch(const std::string &ex)
 		{
 			dbg_msg("sql", "MySQL Error: %s", ex.c_str());
 		}
-		catch (...)
+		catch(...)
 		{
 			dbg_msg("sql", "Unknown Error cause by the MySQL/C++ Connector");
 		}
@@ -109,10 +109,10 @@ IDbConnection::Status CMysqlConnection::Connect()
 		m_pResults.release();
 
 		sql::ConnectOptionsMap connection_properties;
-		connection_properties["hostName"]      = sql::SQLString(m_aIp);
-		connection_properties["port"]          = m_Port;
-		connection_properties["userName"]      = sql::SQLString(m_aUser);
-		connection_properties["password"]      = sql::SQLString(m_aPass);
+		connection_properties["hostName"] = sql::SQLString(m_aIp);
+		connection_properties["port"] = m_Port;
+		connection_properties["userName"] = sql::SQLString(m_aUser);
+		connection_properties["password"] = sql::SQLString(m_aPass);
 		connection_properties["OPT_CONNECT_TIMEOUT"] = 60;
 		connection_properties["OPT_READ_TIMEOUT"] = 60;
 		connection_properties["OPT_WRITE_TIMEOUT"] = 120;
@@ -161,19 +161,19 @@ IDbConnection::Status CMysqlConnection::Connect()
 		dbg_msg("sql", "sql connection established");
 		return Status::SUCCESS;
 	}
-	catch (sql::SQLException &e)
+	catch(sql::SQLException &e)
 	{
 		dbg_msg("sql", "MySQL Error: %s", e.what());
 	}
-	catch (const std::exception& ex)
+	catch(const std::exception &ex)
 	{
 		dbg_msg("sql", "MySQL Error: %s", ex.what());
 	}
-	catch (const std::string& ex)
+	catch(const std::string &ex)
 	{
 		dbg_msg("sql", "MySQL Error: %s", ex.c_str());
 	}
-	catch (...)
+	catch(...)
 	{
 		dbg_msg("sql", "Unknown Error cause by the MySQL/C++ Connector");
 	}
@@ -230,7 +230,7 @@ void CMysqlConnection::BindBlob(int Idx, unsigned char *pBlob, int Size)
 {
 #if defined(CONF_SQL)
 	// copy blob into string
-	auto Blob = std::string(pBlob, pBlob+Size);
+	auto Blob = std::string(pBlob, pBlob + Size);
 	m_pPreparedStmt->setString(Idx, Blob);
 	m_NewQuery = true;
 #endif
@@ -316,10 +316,10 @@ void CMysqlConnection::AddPoints(const char *pPlayer, int Points)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
-			"INSERT INTO %s_points(Name, Points) "
-			"VALUES (?, ?) "
-			"ON DUPLICATE KEY UPDATE Points=Points+?;",
-			GetPrefix());
+		"INSERT INTO %s_points(Name, Points) "
+		"VALUES (?, ?) "
+		"ON DUPLICATE KEY UPDATE Points=Points+?;",
+		GetPrefix());
 	PrepareStatement(aBuf);
 	BindString(1, pPlayer);
 	BindInt(2, Points);

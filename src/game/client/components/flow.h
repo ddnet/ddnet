@@ -19,6 +19,7 @@ class CFlow : public CComponent
 
 	void DbgRender();
 	void Init();
+
 public:
 	CFlow();
 

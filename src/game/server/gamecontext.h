@@ -4,8 +4,8 @@
 #define GAME_SERVER_GAMECONTEXT_H
 
 #include <engine/antibot.h>
-#include <engine/server.h>
 #include <engine/console.h>
+#include <engine/server.h>
 #include <engine/shared/memheap.h>
 
 #include <game/layers.h>
@@ -124,6 +124,7 @@ class CGameContext : public IGameServer
 	void Construct(int Resetting);
 
 	bool m_Resetting;
+
 public:
 	IServer *Server() const { return m_pServer; }
 	IConsole *Console() { return m_pConsole; }
@@ -177,7 +178,7 @@ public:
 
 	enum
 	{
-		VOTE_ENFORCE_UNKNOWN=0,
+		VOTE_ENFORCE_UNKNOWN = 0,
 		VOTE_ENFORCE_NO,
 		VOTE_ENFORCE_YES,
 		VOTE_ENFORCE_ABORT,
@@ -187,26 +188,25 @@ public:
 	CVoteOptionServer *m_pVoteOptionLast;
 
 	// helper functions
-	void CreateDamageInd(vec2 Pos, float AngleMod, int Amount, int64 Mask=-1);
+	void CreateDamageInd(vec2 Pos, float AngleMod, int Amount, int64 Mask = -1);
 	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int64 Mask);
-	void CreateHammerHit(vec2 Pos, int64 Mask=-1);
-	void CreatePlayerSpawn(vec2 Pos, int64 Mask=-1);
-	void CreateDeath(vec2 Pos, int Who, int64 Mask=-1);
-	void CreateSound(vec2 Pos, int Sound, int64 Mask=-1);
-	void CreateSoundGlobal(int Sound, int Target=-1);
-
+	void CreateHammerHit(vec2 Pos, int64 Mask = -1);
+	void CreatePlayerSpawn(vec2 Pos, int64 Mask = -1);
+	void CreateDeath(vec2 Pos, int Who, int64 Mask = -1);
+	void CreateSound(vec2 Pos, int Sound, int64 Mask = -1);
+	void CreateSoundGlobal(int Sound, int Target = -1);
 
 	enum
 	{
-		CHAT_ALL=-2,
-		CHAT_SPEC=-1,
-		CHAT_RED=0,
-		CHAT_BLUE=1,
-		CHAT_WHISPER_SEND=2,
-		CHAT_WHISPER_RECV=3,
+		CHAT_ALL = -2,
+		CHAT_SPEC = -1,
+		CHAT_RED = 0,
+		CHAT_BLUE = 1,
+		CHAT_WHISPER_SEND = 2,
+		CHAT_WHISPER_RECV = 3,
 
-		CHAT_SIX=1<<0,
-		CHAT_SIXUP=1<<1,
+		CHAT_SIX = 1 << 0,
+		CHAT_SIXUP = 1 << 1,
 	};
 
 	// network
@@ -218,7 +218,7 @@ public:
 	void SendWeaponPickup(int ClientID, int Weapon);
 	void SendBroadcast(const char *pText, int ClientID, bool IsImportant = true);
 
-	void List(int ClientID, const char* filter);
+	void List(int ClientID, const char *filter);
 
 	//
 	void CheckPureTuning();
@@ -284,7 +284,6 @@ public:
 	std::shared_ptr<CScoreRandomMapResult> m_SqlRandomMapResult;
 
 private:
-
 	bool m_VoteWillPass;
 	class CScore *m_pScore;
 
@@ -392,8 +391,8 @@ private:
 
 	enum
 	{
-		MAX_MUTES=32,
-		MAX_VOTE_MUTES=32,
+		MAX_MUTES = 32,
+		MAX_VOTE_MUTES = 32,
 	};
 	struct CMute
 	{
@@ -426,7 +425,7 @@ public:
 		VOTE_ENFORCE_NO_ADMIN = VOTE_ENFORCE_YES + 1,
 		VOTE_ENFORCE_YES_ADMIN,
 
-		VOTE_TYPE_UNKNOWN=0,
+		VOTE_TYPE_UNKNOWN = 0,
 		VOTE_TYPE_OPTION,
 		VOTE_TYPE_KICK,
 		VOTE_TYPE_SPECTATE,
@@ -441,7 +440,7 @@ public:
 	void SendRecord(int ClientID);
 	static void SendChatResponse(const char *pLine, void *pUser, bool Highlighted = false);
 	static void SendChatResponseAll(const char *pLine, void *pUser);
-	virtual void OnSetAuthed(int ClientID,int Level);
+	virtual void OnSetAuthed(int ClientID, int Level);
 	virtual bool PlayerCollision();
 	virtual bool PlayerHooking();
 	virtual float PlayerJetpack();
@@ -453,8 +452,8 @@ public:
 };
 
 inline int64 CmaskAll() { return -1LL; }
-inline int64 CmaskOne(int ClientID) { return 1LL<<ClientID; }
-inline int64 CmaskUnset(int64 Mask, int ClientID) { return Mask^CmaskOne(ClientID); }
+inline int64 CmaskOne(int ClientID) { return 1LL << ClientID; }
+inline int64 CmaskUnset(int64 Mask, int ClientID) { return Mask ^ CmaskOne(ClientID); }
 inline int64 CmaskAllExceptOne(int ClientID) { return CmaskUnset(CmaskAll(), ClientID); }
-inline bool CmaskIsSet(int64 Mask, int ClientID) { return (Mask&CmaskOne(ClientID)) != 0; }
+inline bool CmaskIsSet(int64 Mask, int ClientID) { return (Mask & CmaskOne(ClientID)) != 0; }
 #endif

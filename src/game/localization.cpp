@@ -4,8 +4,8 @@
 #include "localization.h"
 #include <base/tl/algorithm.h>
 
-#include <engine/shared/linereader.h>
 #include <engine/console.h>
+#include <engine/shared/linereader.h>
 #include <engine/storage.h>
 
 const char *Localize(const char *pStr, const char *pContext)

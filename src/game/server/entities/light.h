@@ -2,10 +2,9 @@
 #ifndef GAME_SERVER_ENTITIES_LIGHT_H
 #define GAME_SERVER_ENTITIES_LIGHT_H
 
-
 #include <game/server/entity.h>
 
-class CLight: public CEntity
+class CLight : public CEntity
 {
 	float m_Rotation;
 	vec2 m_To;
@@ -18,6 +17,7 @@ class CLight: public CEntity
 	bool HitCharacter();
 	void Move();
 	void Step();
+
 public:
 	int m_CurveLength;
 	int m_LengthL;
@@ -26,7 +26,7 @@ public:
 	int m_Length;
 
 	CLight(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,
-			int Layer = 0, int Number = 0);
+		int Layer = 0, int Number = 0);
 
 	virtual void Reset();
 	virtual void Tick();

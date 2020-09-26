@@ -24,12 +24,12 @@ static void Expect(int NumColumns, const char *const *ppColumns, const char *pEx
 	ASSERT_EQ(aBuf[Read], '\n');
 	aBuf[Read] = 0;
 
-	#if defined(CONF_FAMILY_WINDOWS)
+#if defined(CONF_FAMILY_WINDOWS)
 	ASSERT_TRUE(Read >= 1);
 	Read -= 1;
 	ASSERT_EQ(aBuf[Read], '\r');
 	aBuf[Read] = 0;
-	#endif
+#endif
 
 	for(int i = 0; i < Read; i++)
 	{
@@ -40,17 +40,26 @@ static void Expect(int NumColumns, const char *const *ppColumns, const char *pEx
 
 TEST(Csv, Simple)
 {
-	const char *apCols1[] = {"a", "b"};     Expect(2, apCols1, "a,b");
-	const char *apCols2[] = {"こんにちは"}; Expect(1, apCols2, "こんにちは");
-	const char *apCols3[] = {"я", "", "й"}; Expect(3, apCols3, "я,,й");
-	const char *apCols4[] = {""};           Expect(1, apCols4, "");
-	const char *apCols5[] = {0};            Expect(0, apCols5, "");
+	const char *apCols1[] = {"a", "b"};
+	Expect(2, apCols1, "a,b");
+	const char *apCols2[] = {"こんにちは"};
+	Expect(1, apCols2, "こんにちは");
+	const char *apCols3[] = {"я", "", "й"};
+	Expect(3, apCols3, "я,,й");
+	const char *apCols4[] = {""};
+	Expect(1, apCols4, "");
+	const char *apCols5[] = {0};
+	Expect(0, apCols5, "");
 }
 
 TEST(Csv, LetTheQuotingBegin)
 {
-	const char *apCols1[] = {"\""};             Expect(1, apCols1, "\"\"\"\"");
-	const char *apCols2[] = {","};              Expect(1, apCols2, "\",\"");
-	const char *apCols3[] = {",,", ",\"\"\""};  Expect(2, apCols3, "\",,\",\",\"\"\"\"\"\"\"");
-	const char *apCols4[] = {"\",", " "};       Expect(2, apCols4, "\"\"\",\", ");
+	const char *apCols1[] = {"\""};
+	Expect(1, apCols1, "\"\"\"\"");
+	const char *apCols2[] = {","};
+	Expect(1, apCols2, "\",\"");
+	const char *apCols3[] = {",,", ",\"\"\""};
+	Expect(2, apCols3, "\",,\",\",\"\"\"\"\"\"\"");
+	const char *apCols4[] = {"\",", " "};
+	Expect(2, apCols4, "\"\"\",\", ");
 }

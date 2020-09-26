@@ -10,33 +10,33 @@
 
 struct CConfiguration
 {
-	#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Save,Desc) int m_##Name;
-	#define MACRO_CONFIG_COL(Name,ScriptName,Def,Save,Desc) unsigned m_##Name;
-	#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Save,Desc) char m_##Name[Len]; // Flawfinder: ignore
-	#include "config_variables.h"
-	#undef MACRO_CONFIG_INT
-	#undef MACRO_CONFIG_COL
-	#undef MACRO_CONFIG_STR
+#define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Save, Desc) int m_##Name;
+#define MACRO_CONFIG_COL(Name, ScriptName, Def, Save, Desc) unsigned m_##Name;
+#define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Save, Desc) char m_##Name[Len]; // Flawfinder: ignore
+#include "config_variables.h"
+#undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_COL
+#undef MACRO_CONFIG_STR
 };
 
 extern CConfiguration g_Config;
 
 enum
 {
-	CFGFLAG_SAVE=1<<0,
-	CFGFLAG_CLIENT=1<<1,
-	CFGFLAG_SERVER=1<<2,
-	CFGFLAG_STORE=1<<3,
-	CFGFLAG_MASTER=1<<4,
-	CFGFLAG_ECON=1<<5,
+	CFGFLAG_SAVE = 1 << 0,
+	CFGFLAG_CLIENT = 1 << 1,
+	CFGFLAG_SERVER = 1 << 2,
+	CFGFLAG_STORE = 1 << 3,
+	CFGFLAG_MASTER = 1 << 4,
+	CFGFLAG_ECON = 1 << 5,
 	// DDRace
 
-	CMDFLAG_TEST=1<<6,
-	CFGFLAG_CHAT=1<<7,
-	CFGFLAG_GAME=1<<8,
-	CFGFLAG_NONTEEHISTORIC=1<<9,
-	CFGFLAG_COLLIGHT=1<<10,
-	CFGFLAG_COLALPHA=1<<11,
+	CMDFLAG_TEST = 1 << 6,
+	CFGFLAG_CHAT = 1 << 7,
+	CFGFLAG_GAME = 1 << 8,
+	CFGFLAG_NONTEEHISTORIC = 1 << 9,
+	CFGFLAG_COLLIGHT = 1 << 10,
+	CFGFLAG_COLALPHA = 1 << 11,
 };
 
 #endif

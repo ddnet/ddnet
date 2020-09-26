@@ -18,7 +18,7 @@ public:
 	enum
 	{
 		// restrictions: Must be power of two
-		MAX_VALUES=128,
+		MAX_VALUES = 128,
 	};
 
 	float m_Min, m_Max;
@@ -34,7 +34,6 @@ public:
 	void Add(float v, float r, float g, float b);
 	void Render(IGraphics *pGraphics, IGraphics::CTextureHandle FontTexture, float x, float y, float w, float h, const char *pDescription);
 };
-
 
 class CSmoothTime
 {
@@ -81,8 +80,8 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	enum
 	{
-		NUM_SNAPSHOT_TYPES=2,
-		PREDICTION_MARGIN=1000/50/2, // magic network prediction value
+		NUM_SNAPSHOT_TYPES = 2,
+		PREDICTION_MARGIN = 1000 / 50 / 2, // magic network prediction value
 	};
 
 	enum
@@ -135,7 +134,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_UseTempRconCommands;
 	char m_Password[32];
 	bool m_SendPassword;
-	bool m_ButtonRender=false;
+	bool m_ButtonRender = false;
 
 	// version-checking
 	char m_aVersionStr[10];
@@ -228,7 +227,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	{
 		enum
 		{
-			STATE_INIT=0,
+			STATE_INIT = 0,
 			STATE_START,
 			STATE_READY,
 		};
@@ -238,7 +237,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	} m_VersionInfo;
 
 	volatile int m_GfxState;
-	static void GraphicsThreadProxy(void *pThis) { ((CClient*)pThis)->GraphicsThread(); }
+	static void GraphicsThreadProxy(void *pThis) { ((CClient *)pThis)->GraphicsThread(); }
 	void GraphicsThread();
 
 #if defined(CONF_FAMILY_UNIX)
@@ -260,7 +259,7 @@ public:
 
 	// ----- send functions -----
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags);
-	virtual int SendMsgY(CMsgPacker *pMsg, int Flags, int NetClient=1);
+	virtual int SendMsgY(CMsgPacker *pMsg, int Flags, int NetClient = 1);
 
 	void SendInfo();
 	void SendEnterGame();
@@ -465,7 +464,7 @@ public:
 
 	bool EditorHasUnsavedData() { return m_pEditor->HasUnsavedData(); }
 
-	virtual IFriends* Foes() { return &m_Foes; }
+	virtual IFriends *Foes() { return &m_Foes; }
 
 	void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount);
 };

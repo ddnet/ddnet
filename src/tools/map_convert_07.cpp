@@ -1,11 +1,11 @@
 /* (c) DDNet developers. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.  */
 
-#include <base/system.h>
 #include <base/math.h>
+#include <base/system.h>
+#include <engine/graphics.h>
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
-#include <engine/graphics.h>
 #include <game/mapitems.h>
 
 #include <pnglite.h>
@@ -39,7 +39,7 @@ int LoadPNG(CImageInfo *pImg, const char *pFilename)
 		return 0;
 	}
 
-	if(Png.depth != 8 || (Png.color_type != PNG_TRUECOLOR && Png.color_type != PNG_TRUECOLOR_ALPHA) || Png.width > (2<<12) || Png.height > (2<<12))
+	if(Png.depth != 8 || (Png.color_type != PNG_TRUECOLOR && Png.color_type != PNG_TRUECOLOR_ALPHA) || Png.width > (2 << 12) || Png.height > (2 << 12))
 	{
 		dbg_msg("map_convert_07", "invalid image format. filename='%s'", pFilename);
 		png_close_file(&Png);
@@ -64,10 +64,10 @@ inline void IntsToStr(const int *pInts, int Num, char *pStr)
 {
 	while(Num)
 	{
-		pStr[0] = (((*pInts)>>24)&0xff)-128;
-		pStr[1] = (((*pInts)>>16)&0xff)-128;
-		pStr[2] = (((*pInts)>>8)&0xff)-128;
-		pStr[3] = ((*pInts)&0xff)-128;
+		pStr[0] = (((*pInts) >> 24) & 0xff) - 128;
+		pStr[1] = (((*pInts) >> 16) & 0xff) - 128;
+		pStr[2] = (((*pInts) >> 8) & 0xff) - 128;
+		pStr[3] = ((*pInts) & 0xff) - 128;
 		pStr += 4;
 		pInts++;
 		Num--;
@@ -102,7 +102,7 @@ bool CheckImageDimensions(void *pItem, int Type, const char *pFilename)
 		return true;
 
 	char aTileLayerName[12];
-	IntsToStr(pTMap->m_aName, sizeof(pTMap->m_aName)/sizeof(int), aTileLayerName);
+	IntsToStr(pTMap->m_aName, sizeof(pTMap->m_aName) / sizeof(int), aTileLayerName);
 	char *pName = (char *)g_DataReader.GetData(pImgItem->m_ImageName);
 	dbg_msg("map_convert_07", "%s: Tile layer \"%s\" uses image \"%s\" with width %d, height %d, which is not divisible by 16. This is not supported in Teeworlds 0.7. Please scale the image and replace it manually.", pFilename, aTileLayerName, pName, pImgItem->m_Width, pImgItem->m_Height);
 	return false;
@@ -208,7 +208,7 @@ int main(int argc, const char **argv)
 		return -1;
 	}
 
-	png_init(0,0);
+	png_init(0, 0);
 
 	g_NextDataItemID = g_DataReader.NumData();
 

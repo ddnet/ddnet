@@ -245,12 +245,12 @@ struct CMapItemInfo
 	int m_MapVersion;
 	int m_Credits;
 	int m_License;
-} ;
+};
 
 struct CMapItemInfoSettings : CMapItemInfo
 {
 	int m_Settings;
-} ;
+};
 
 struct CMapItemImage
 {
@@ -260,7 +260,7 @@ struct CMapItemImage
 	int m_External;
 	int m_ImageName;
 	int m_ImageData;
-} ;
+};
 
 struct CMapItemGroup_v1
 {
@@ -272,12 +272,14 @@ struct CMapItemGroup_v1
 
 	int m_StartLayer;
 	int m_NumLayers;
-} ;
-
+};
 
 struct CMapItemGroup : public CMapItemGroup_v1
 {
-	enum { CURRENT_VERSION=3 };
+	enum
+	{
+		CURRENT_VERSION = 3
+	};
 
 	int m_UseClipping;
 	int m_ClipX;
@@ -286,14 +288,14 @@ struct CMapItemGroup : public CMapItemGroup_v1
 	int m_ClipH;
 
 	int m_aName[3];
-} ;
+};
 
 struct CMapItemLayer
 {
 	int m_Version;
 	int m_Type;
 	int m_Flags;
-} ;
+};
 
 struct CMapItemLayerTilemap
 {
@@ -320,7 +322,7 @@ struct CMapItemLayerTilemap
 	int m_Front;
 	int m_Switch;
 	int m_Tune;
-} ;
+};
 
 struct CMapItemLayerQuads
 {
@@ -332,12 +334,12 @@ struct CMapItemLayerQuads
 	int m_Image;
 
 	int m_aName[3];
-} ;
+};
 
 struct CMapItemVersion
 {
 	int m_Version;
-} ;
+};
 
 struct CEnvPoint
 {
@@ -346,7 +348,7 @@ struct CEnvPoint
 	int m_aValues[4]; // 1-4 depending on envelope (22.10 fixed point)
 
 	bool operator<(const CEnvPoint &Other) { return m_Time < Other.m_Time; }
-} ;
+};
 
 struct CMapItemEnvelope_v1
 {
@@ -355,11 +357,14 @@ struct CMapItemEnvelope_v1
 	int m_StartPoint;
 	int m_NumPoints;
 	int m_aName[8];
-} ;
+};
 
 struct CMapItemEnvelope : public CMapItemEnvelope_v1
 {
-	enum { CURRENT_VERSION=2 };
+	enum
+	{
+		CURRENT_VERSION = 2
+	};
 	int m_Synchronized;
 };
 
@@ -409,7 +414,10 @@ struct CSoundSource
 
 struct CMapItemLayerSounds
 {
-	enum { CURRENT_VERSION=2 };
+	enum
+	{
+		CURRENT_VERSION = 2
+	};
 
 	CMapItemLayer m_Layer;
 	int m_Version;
@@ -430,7 +438,7 @@ struct CMapItemSound
 	int m_SoundName;
 	int m_SoundData;
 	int m_SoundDataSize;
-} ;
+};
 
 // DDRace
 
@@ -473,7 +481,6 @@ public:
 	unsigned char m_Number;
 	unsigned char m_Type;
 };
-
 
 bool IsValidGameTile(int Index);
 bool IsValidFrontTile(int Index);

@@ -6,7 +6,7 @@
 
 void sqlstr::FuzzyString(char *pString, int size)
 {
-	char * newString = new char [size * 4 - 1];
+	char *newString = new char[size * 4 - 1];
 	int pos = 0;
 
 	for(int i = 0; i < size; i++)
@@ -15,13 +15,13 @@ void sqlstr::FuzzyString(char *pString, int size)
 			break;
 
 		newString[pos++] = pString[i];
-		if (pString[i] != '\\' && str_utf8_isstart(pString[i+1]))
+		if(pString[i] != '\\' && str_utf8_isstart(pString[i + 1]))
 			newString[pos++] = '%';
 	}
 
 	newString[pos] = '\0';
 	str_copy(pString, newString, size);
-	delete [] newString;
+	delete[] newString;
 }
 
 int sqlstr::EscapeLike(char *pDst, const char *pSrc, int DstSize)
@@ -35,7 +35,6 @@ int sqlstr::EscapeLike(char *pDst, const char *pSrc, int DstSize)
 		if(pSrc[Pos] == '\\' || pSrc[Pos] == '%' || pSrc[Pos] == '_' || pSrc[Pos] == '[')
 			pDst[DstPos++] = '\\';
 		pDst[DstPos++] = pSrc[Pos++];
-
 	}
 	pDst[DstPos++] = '\0';
 	return DstPos;
@@ -45,25 +44,23 @@ void sqlstr::AgoTimeToString(int AgoTime, char *pAgoString)
 {
 	char aBuf[20];
 	int aTimes[7] =
-	{
-			60 * 60 * 24 * 365 ,
-			60 * 60 * 24 * 30 ,
+		{
+			60 * 60 * 24 * 365,
+			60 * 60 * 24 * 30,
 			60 * 60 * 24 * 7,
-			60 * 60 * 24 ,
-			60 * 60 ,
-			60 ,
-			1
-	};
+			60 * 60 * 24,
+			60 * 60,
+			60,
+			1};
 	char aaNames[7][6] =
-	{
+		{
 			"year",
 			"month",
 			"week",
 			"day",
 			"hour",
 			"min",
-			"sec"
-	};
+			"sec"};
 
 	int Seconds = 0;
 	char aName[6];
@@ -76,7 +73,7 @@ void sqlstr::AgoTimeToString(int AgoTime, char *pAgoString)
 		Seconds = aTimes[i];
 		strcpy(aName, aaNames[i]);
 
-		Count = floor((float)AgoTime/(float)Seconds);
+		Count = floor((float)AgoTime / (float)Seconds);
 		if(Count != 0)
 		{
 			break;
@@ -85,33 +82,33 @@ void sqlstr::AgoTimeToString(int AgoTime, char *pAgoString)
 
 	if(Count == 1)
 	{
-		str_format(aBuf, sizeof(aBuf), "%d %s", 1 , aName);
+		str_format(aBuf, sizeof(aBuf), "%d %s", 1, aName);
 	}
 	else
 	{
-		str_format(aBuf, sizeof(aBuf), "%d %ss", Count , aName);
+		str_format(aBuf, sizeof(aBuf), "%d %ss", Count, aName);
 	}
 	strcat(pAgoString, aBuf);
 
-	if (i + 1 < 7)
+	if(i + 1 < 7)
 	{
 		// getting second piece now
-		int Seconds2 = aTimes[i+1];
+		int Seconds2 = aTimes[i + 1];
 		char aName2[6];
-		strcpy(aName2, aaNames[i+1]);
+		strcpy(aName2, aaNames[i + 1]);
 
 		// add second piece if it's greater than 0
 		int Count2 = floor((float)(AgoTime - (Seconds * Count)) / (float)Seconds2);
 
-		if (Count2 != 0)
+		if(Count2 != 0)
 		{
 			if(Count2 == 1)
 			{
-				str_format(aBuf, sizeof(aBuf), " and %d %s", 1 , aName2);
+				str_format(aBuf, sizeof(aBuf), " and %d %s", 1, aName2);
 			}
 			else
 			{
-				str_format(aBuf, sizeof(aBuf), " and %d %ss", Count2 , aName2);
+				str_format(aBuf, sizeof(aBuf), " and %d %ss", Count2, aName2);
 			}
 			strcat(pAgoString, aBuf);
 		}

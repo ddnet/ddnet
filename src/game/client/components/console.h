@@ -25,8 +25,8 @@ class CGameConsole : public CComponent
 			bool m_Highlighted;
 			char m_aText[1];
 		};
-		TStaticRingBuffer<CBacklogEntry, 64*1024, CRingBufferBase::FLAG_RECYCLE> m_Backlog;
-		TStaticRingBuffer<char, 64*1024, CRingBufferBase::FLAG_RECYCLE> m_History;
+		TStaticRingBuffer<CBacklogEntry, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_Backlog;
+		TStaticRingBuffer<char, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_History;
 		char *m_pHistoryEntry;
 
 		CLineInput m_Input;
@@ -99,7 +99,7 @@ class CGameConsole : public CComponent
 public:
 	enum
 	{
-		CONSOLETYPE_LOCAL=0,
+		CONSOLETYPE_LOCAL = 0,
 		CONSOLETYPE_REMOTE,
 	};
 

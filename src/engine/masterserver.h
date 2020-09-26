@@ -9,10 +9,9 @@ class IMasterServer : public IInterface
 {
 	MACRO_INTERFACE("masterserver", 0)
 public:
-
 	enum
 	{
-		MAX_MASTERSERVERS=4
+		MAX_MASTERSERVERS = 4
 	};
 
 	virtual void Init() = 0;

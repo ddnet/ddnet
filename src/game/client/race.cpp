@@ -8,7 +8,7 @@
 
 #include "race.h"
 
-int CRaceHelper::ms_aFlagIndex[2] = { -1, -1 };
+int CRaceHelper::ms_aFlagIndex[2] = {-1, -1};
 
 int CRaceHelper::TimeFromSecondsStr(const char *pStr)
 {
@@ -22,7 +22,7 @@ int CRaceHelper::TimeFromSecondsStr(const char *pStr)
 	if(*pStr == '.' || *pStr == ',')
 	{
 		pStr++;
-		static const int s_aMult[3] = { 100, 10, 1 };
+		static const int s_aMult[3] = {100, 10, 1};
 		for(int i = 0; isdigit(pStr[i]) && i < 3; i++)
 			Time += (pStr[i] - '0') * s_aMult[i];
 	}
@@ -31,8 +31,8 @@ int CRaceHelper::TimeFromSecondsStr(const char *pStr)
 
 int CRaceHelper::TimeFromStr(const char *pStr)
 {
-	static const char * const s_pMinutesStr = " minute(s) ";
-	static const char * const s_pSecondsStr = " second(s)";
+	static const char *const s_pMinutesStr = " minute(s) ";
+	static const char *const s_pSecondsStr = " second(s)";
 
 	const char *pSeconds = str_find(pStr, s_pSecondsStr);
 	if(!pSeconds)
@@ -54,7 +54,7 @@ int CRaceHelper::TimeFromStr(const char *pStr)
 
 int CRaceHelper::TimeFromFinishMessage(const char *pStr, char *pNameBuf, int NameBufSize)
 {
-	static const char * const s_pFinishedStr = " finished in: ";
+	static const char *const s_pFinishedStr = " finished in: ";
 	const char *pFinished = str_find(pStr, s_pFinishedStr);
 	if(!pFinished)
 		return -1;
@@ -78,9 +78,9 @@ bool CRaceHelper::IsStart(CGameClient *pClient, vec2 Prev, vec2 Pos)
 	}
 	else
 	{
-		std::list < int > Indices = pCollision->GetMapIndices(Prev, Pos);
+		std::list<int> Indices = pCollision->GetMapIndices(Prev, Pos);
 		if(!Indices.empty())
-			for(std::list < int >::iterator i = Indices.begin(); i != Indices.end(); i++)
+			for(std::list<int>::iterator i = Indices.begin(); i != Indices.end(); i++)
 			{
 				if(pCollision->GetTileIndex(*i) == TILE_START)
 					return true;

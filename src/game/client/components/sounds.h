@@ -40,7 +40,7 @@ public:
 	// sound channels
 	enum
 	{
-		CHN_GUI=0,
+		CHN_GUI = 0,
 		CHN_MUSIC,
 		CHN_WORLD,
 		CHN_GLOBAL,
@@ -62,6 +62,5 @@ public:
 	ISound::CVoiceHandle PlaySample(int Channel, int SampleId, float Vol, int Flags = 0);
 	ISound::CVoiceHandle PlaySampleAt(int Channel, int SampleId, float Vol, vec2 Pos, int Flags = 0);
 };
-
 
 #endif

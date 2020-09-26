@@ -1,13 +1,13 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <game/generated/protocol.h>
-#include "character.h"
 #include "laser.h"
+#include "character.h"
+#include <game/generated/protocol.h>
 
 #include <engine/shared/config.h>
 
-CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type)
-: CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
+CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type) :
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
 {
 	m_Pos = Pos;
 	m_Owner = Owner;
@@ -17,7 +17,7 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	m_Dir = Direction;
 	m_Bounces = 0;
 	m_EvalTick = 0;
-	m_TelePos = vec2(0,0);
+	m_TelePos = vec2(0, 0);
 	m_WasTele = false;
 	m_Type = Type;
 	m_TuneZone = GameWorld()->m_WorldConfig.m_PredictTiles ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
@@ -32,17 +32,17 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	CCharacter *pHit;
 	bool pDontHitSelf = g_Config.m_SvOldLaser || (m_Bounces == 0 && !m_WasTele);
 
-	if(pOwnerChar ? (!(pOwnerChar->m_Hit&CCharacter::DISABLE_HIT_LASER) && m_Type == WEAPON_LASER) || (!(pOwnerChar->m_Hit&CCharacter::DISABLE_HIT_SHOTGUN) && m_Type == WEAPON_SHOTGUN) : g_Config.m_SvHit)
+	if(pOwnerChar ? (!(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_LASER) && m_Type == WEAPON_LASER) || (!(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_SHOTGUN) && m_Type == WEAPON_SHOTGUN) : g_Config.m_SvHit)
 		pHit = GameWorld()->IntersectCharacter(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : 0, m_Owner);
 	else
 		pHit = GameWorld()->IntersectCharacter(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : 0, m_Owner, pOwnerChar);
 
-	if(!pHit || (pHit == pOwnerChar && g_Config.m_SvOldLaser) || (pHit != pOwnerChar && pOwnerChar ? (pOwnerChar->m_Hit&CCharacter::DISABLE_HIT_LASER  && m_Type == WEAPON_LASER) || (pOwnerChar->m_Hit&CCharacter::DISABLE_HIT_SHOTGUN && m_Type == WEAPON_SHOTGUN) : !g_Config.m_SvHit))
+	if(!pHit || (pHit == pOwnerChar && g_Config.m_SvOldLaser) || (pHit != pOwnerChar && pOwnerChar ? (pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_LASER && m_Type == WEAPON_LASER) || (pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_SHOTGUN && m_Type == WEAPON_SHOTGUN) : !g_Config.m_SvHit))
 		return false;
 	m_From = From;
 	m_Pos = At;
 	m_Energy = -1;
-	if (m_Type == WEAPON_SHOTGUN)
+	if(m_Type == WEAPON_SHOTGUN)
 	{
 		vec2 Temp;
 
@@ -54,7 +54,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 			Temp = pHit->Core()->m_Vel + normalize(pOwnerChar->Core()->m_Pos - pHit->Core()->m_Pos) * Strength;
 		pHit->Core()->m_Vel = ClampVel(pHit->m_MoveRestrictions, Temp);
 	}
-	else if (m_Type == WEAPON_LASER)
+	else if(m_Type == WEAPON_LASER)
 	{
 		pHit->UnFreeze();
 	}
@@ -76,11 +76,11 @@ void CLaser::DoBounce()
 	int Res;
 	int z;
 
-	if (m_WasTele)
+	if(m_WasTele)
 	{
 		m_PrevPos = m_TelePos;
 		m_Pos = m_TelePos;
-		m_TelePos = vec2(0,0);
+		m_TelePos = vec2(0, 0);
 	}
 
 	vec2 To = m_Pos + m_Dir * m_Energy;
@@ -140,18 +140,18 @@ void CLaser::Tick()
 
 	if(GameWorld()->m_WorldConfig.m_IsVanilla) // predict old physics on vanilla 0.6 servers
 	{
-		if(GameWorld()->GameTick() > m_EvalTick+(GameWorld()->GameTickSpeed()*Delay/1000.0f))
+		if(GameWorld()->GameTick() > m_EvalTick + (GameWorld()->GameTickSpeed() * Delay / 1000.0f))
 			DoBounce();
 	}
 	else
 	{
-		if((GameWorld()->GameTick() - m_EvalTick) > (GameWorld()->GameTickSpeed()*Delay/1000.0f))
+		if((GameWorld()->GameTick() - m_EvalTick) > (GameWorld()->GameTickSpeed() * Delay / 1000.0f))
 			DoBounce();
 	}
 }
 
-CLaser::CLaser(CGameWorld *pGameWorld, int ID, CNetObj_Laser *pLaser)
-: CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
+CLaser::CLaser(CGameWorld *pGameWorld, int ID, CNetObj_Laser *pLaser) :
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
 {
 	m_Pos.x = pLaser->m_X;
 	m_Pos.y = pLaser->m_Y;
@@ -191,7 +191,7 @@ bool CLaser::Match(CLaser *pLaser)
 		return false;
 	const vec2 ThisDiff = m_Pos - m_From;
 	const vec2 OtherDiff = pLaser->m_Pos - pLaser->m_From;
-	const float DirError = distance(normalize(OtherDiff)*length(ThisDiff), ThisDiff);
+	const float DirError = distance(normalize(OtherDiff) * length(ThisDiff), ThisDiff);
 	if(DirError > 2.f)
 		return false;
 	return true;

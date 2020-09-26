@@ -6,8 +6,8 @@
 #include <engine/graphics.h>
 
 #include "editor.h"
-#include <game/generated/client_data.h>
 #include <game/client/render.h>
+#include <game/generated/client_data.h>
 #include <game/localization.h>
 
 CLayerQuads::CLayerQuads()
@@ -70,10 +70,22 @@ CQuad *CLayerQuads::NewQuad(int x, int y, int Width, int Height)
 	q->m_aTexcoords[3].x = i2fx(1);
 	q->m_aTexcoords[3].y = i2fx(1);
 
-	q->m_aColors[0].r = 255; q->m_aColors[0].g = 255; q->m_aColors[0].b = 255; q->m_aColors[0].a = 255;
-	q->m_aColors[1].r = 255; q->m_aColors[1].g = 255; q->m_aColors[1].b = 255; q->m_aColors[1].a = 255;
-	q->m_aColors[2].r = 255; q->m_aColors[2].g = 255; q->m_aColors[2].b = 255; q->m_aColors[2].a = 255;
-	q->m_aColors[3].r = 255; q->m_aColors[3].g = 255; q->m_aColors[3].b = 255; q->m_aColors[3].a = 255;
+	q->m_aColors[0].r = 255;
+	q->m_aColors[0].g = 255;
+	q->m_aColors[0].b = 255;
+	q->m_aColors[0].a = 255;
+	q->m_aColors[1].r = 255;
+	q->m_aColors[1].g = 255;
+	q->m_aColors[1].b = 255;
+	q->m_aColors[1].a = 255;
+	q->m_aColors[2].r = 255;
+	q->m_aColors[2].g = 255;
+	q->m_aColors[2].b = 255;
+	q->m_aColors[2].a = 255;
+	q->m_aColors[3].r = 255;
+	q->m_aColors[3].g = 255;
+	q->m_aColors[3].b = 255;
+	q->m_aColors[3].a = 255;
 
 	return q;
 }
@@ -82,10 +94,10 @@ void CLayerQuads::BrushSelecting(CUIRect Rect)
 {
 	// draw selection rectangle
 	IGraphics::CLineItem Array[4] = {
-		IGraphics::CLineItem(Rect.x, Rect.y, Rect.x+Rect.w, Rect.y),
-		IGraphics::CLineItem(Rect.x+Rect.w, Rect.y, Rect.x+Rect.w, Rect.y+Rect.h),
-		IGraphics::CLineItem(Rect.x+Rect.w, Rect.y+Rect.h, Rect.x, Rect.y+Rect.h),
-		IGraphics::CLineItem(Rect.x, Rect.y+Rect.h, Rect.x, Rect.y)};
+		IGraphics::CLineItem(Rect.x, Rect.y, Rect.x + Rect.w, Rect.y),
+		IGraphics::CLineItem(Rect.x + Rect.w, Rect.y, Rect.x + Rect.w, Rect.y + Rect.h),
+		IGraphics::CLineItem(Rect.x + Rect.w, Rect.y + Rect.h, Rect.x, Rect.y + Rect.h),
+		IGraphics::CLineItem(Rect.x, Rect.y + Rect.h, Rect.x, Rect.y)};
 	Graphics()->TextureClear();
 	Graphics()->LinesBegin();
 	Graphics()->LinesDraw(Array, 4);
@@ -107,7 +119,7 @@ int CLayerQuads::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 		float px = fx2f(q->m_aPoints[4].x);
 		float py = fx2f(q->m_aPoints[4].y);
 
-		if(px > Rect.x && px < Rect.x+Rect.w && py > Rect.y && py < Rect.y+Rect.h)
+		if(px > Rect.x && px < Rect.x + Rect.w && py > Rect.y && py < Rect.y + Rect.h)
 		{
 			CQuad n;
 			n = *q;
@@ -122,7 +134,7 @@ int CLayerQuads::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 		}
 	}
 
-	return pGrabbed->m_lQuads.size()?1:0;
+	return pGrabbed->m_lQuads.size() ? 1 : 0;
 }
 
 void CLayerQuads::BrushPlace(CLayer *pBrush, float wx, float wy)
@@ -143,7 +155,7 @@ void CLayerQuads::BrushPlace(CLayer *pBrush, float wx, float wy)
 	m_pEditor->m_Map.m_Modified = true;
 }
 
-void Swap(CPoint& a, CPoint& b)
+void Swap(CPoint &a, CPoint &b)
 {
 	CPoint Tmp;
 	Tmp.x = a.x;
@@ -211,7 +223,8 @@ void CLayerQuads::BrushRotate(float Amount)
 
 void CLayerQuads::GetSize(float *w, float *h)
 {
-	*w = 0; *h = 0;
+	*w = 0;
+	*h = 0;
 
 	for(int i = 0; i < m_lQuads.size(); i++)
 	{
@@ -228,7 +241,7 @@ int CLayerQuads::RenderProperties(CUIRect *pToolBox)
 	// layer props
 	enum
 	{
-		PROP_IMAGE=0,
+		PROP_IMAGE = 0,
 		NUM_PROPS,
 	};
 
@@ -246,14 +259,13 @@ int CLayerQuads::RenderProperties(CUIRect *pToolBox)
 	if(Prop == PROP_IMAGE)
 	{
 		if(NewVal >= 0)
-			m_Image = NewVal%m_pEditor->m_Map.m_lImages.size();
+			m_Image = NewVal % m_pEditor->m_Map.m_lImages.size();
 		else
 			m_Image = -1;
 	}
 
 	return 0;
 }
-
 
 void CLayerQuads::ModifyImageIndex(INDEX_MODIFY_FUNC Func)
 {

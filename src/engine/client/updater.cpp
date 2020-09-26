@@ -1,16 +1,16 @@
 #include "updater.h"
 #include <base/system.h>
-#include <engine/engine.h>
-#include <engine/storage.h>
 #include <engine/client.h>
+#include <engine/engine.h>
 #include <engine/external/json-parser/json.h>
 #include <engine/shared/json.h>
+#include <engine/storage.h>
 #include <game/version.h>
 
 #include <stdlib.h> // system
 
-using std::string;
 using std::map;
+using std::string;
 
 class CUpdaterFetchTask : public CGetFile
 {
@@ -176,14 +176,14 @@ void CUpdater::Update()
 {
 	switch(m_State)
 	{
-		case IUpdater::GOT_MANIFEST:
-			PerformUpdate();
-			break;
-		case IUpdater::MOVE_FILES:
-			CommitUpdate();
-			break;
-		default:
-			return;
+	case IUpdater::GOT_MANIFEST:
+		PerformUpdate();
+		break;
+	case IUpdater::MOVE_FILES:
+		CommitUpdate();
+		break;
+	default:
+		return;
 	}
 }
 
@@ -206,16 +206,16 @@ bool CUpdater::ReplaceClient()
 		str_format(aPath, sizeof(aPath), "update/%s", m_aClientExecTmp);
 		Success &= m_pStorage->RenameBinaryFile(aPath, PLAT_CLIENT_EXEC);
 	}
-	#if !defined(CONF_FAMILY_WINDOWS)
-		m_pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aPath, sizeof aPath);
-		char aBuf[512];
-		str_format(aBuf, sizeof aBuf, "chmod +x %s", aPath);
-		if(system(aBuf))
-		{
-			dbg_msg("updater", "ERROR: failed to set client executable bit");
-			Success = false;
-		}
-	#endif
+#if !defined(CONF_FAMILY_WINDOWS)
+	m_pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aPath, sizeof aPath);
+	char aBuf[512];
+	str_format(aBuf, sizeof aBuf, "chmod +x %s", aPath);
+	if(system(aBuf))
+	{
+		dbg_msg("updater", "ERROR: failed to set client executable bit");
+		Success = false;
+	}
+#endif
 	return Success;
 }
 
@@ -230,16 +230,16 @@ bool CUpdater::ReplaceServer()
 	Success &= m_pStorage->RenameBinaryFile(PLAT_SERVER_EXEC, SERVER_EXEC ".old");
 	str_format(aPath, sizeof(aPath), "update/%s", m_aServerExecTmp);
 	Success &= m_pStorage->RenameBinaryFile(aPath, PLAT_SERVER_EXEC);
-	#if !defined(CONF_FAMILY_WINDOWS)
-		m_pStorage->GetBinaryPath(PLAT_SERVER_EXEC, aPath, sizeof aPath);
-		char aBuf[512];
-		str_format(aBuf, sizeof aBuf, "chmod +x %s", aPath);
-		if (system(aBuf))
-		{
-			dbg_msg("updater", "ERROR: failed to set server executable bit");
-			Success = false;
-		}
-	#endif
+#if !defined(CONF_FAMILY_WINDOWS)
+	m_pStorage->GetBinaryPath(PLAT_SERVER_EXEC, aPath, sizeof aPath);
+	char aBuf[512];
+	str_format(aBuf, sizeof aBuf, "chmod +x %s", aPath);
+	if(system(aBuf))
+	{
+		dbg_msg("updater", "ERROR: failed to set server executable bit");
+		Success = false;
+	}
+#endif
 	return Success;
 }
 
@@ -391,14 +391,14 @@ void CUpdater::CommitUpdate()
 
 void CUpdater::WinXpRestart()
 {
-		char aBuf[512];
-		IOHANDLE bhFile = io_open(m_pStorage->GetBinaryPath("du.bat", aBuf, sizeof aBuf), IOFLAG_WRITE);
-		if(!bhFile)
-			return;
-		char bBuf[512];
-		str_format(bBuf, sizeof(bBuf), ":_R\r\ndel \"" PLAT_CLIENT_EXEC "\"\r\nif exist \"" PLAT_CLIENT_EXEC "\" goto _R\r\n:_T\r\nmove /y \"update\\%s\" \"" PLAT_CLIENT_EXEC "\"\r\nif not exist \"" PLAT_CLIENT_EXEC "\" goto _T\r\nstart " PLAT_CLIENT_EXEC "\r\ndel \"du.bat\"\r\n", m_aClientExecTmp);
-		io_write(bhFile, bBuf, str_length(bBuf));
-		io_close(bhFile);
-		shell_execute(aBuf);
-		m_pClient->Quit();
+	char aBuf[512];
+	IOHANDLE bhFile = io_open(m_pStorage->GetBinaryPath("du.bat", aBuf, sizeof aBuf), IOFLAG_WRITE);
+	if(!bhFile)
+		return;
+	char bBuf[512];
+	str_format(bBuf, sizeof(bBuf), ":_R\r\ndel \"" PLAT_CLIENT_EXEC "\"\r\nif exist \"" PLAT_CLIENT_EXEC "\" goto _R\r\n:_T\r\nmove /y \"update\\%s\" \"" PLAT_CLIENT_EXEC "\"\r\nif not exist \"" PLAT_CLIENT_EXEC "\" goto _T\r\nstart " PLAT_CLIENT_EXEC "\r\ndel \"du.bat\"\r\n", m_aClientExecTmp);
+	io_write(bhFile, bBuf, str_length(bBuf));
+	io_close(bhFile);
+	shell_execute(aBuf);
+	m_pClient->Quit();
 }

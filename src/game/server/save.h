@@ -15,21 +15,21 @@ class CSaveTee
 public:
 	CSaveTee();
 	~CSaveTee();
-	void save(CCharacter* pchr);
-	void load(CCharacter* pchr, int Team);
-	char* GetString(const CSaveTeam *pTeam);
-	int FromString(const char* String);
+	void save(CCharacter *pchr);
+	void load(CCharacter *pchr, int Team);
+	char *GetString(const CSaveTeam *pTeam);
+	int FromString(const char *String);
 	void LoadHookedPlayer(const CSaveTeam *pTeam);
 	vec2 GetPos() const { return m_Pos; }
-	const char* GetName() const { return m_aName; }
+	const char *GetName() const { return m_aName; }
 	int GetClientID() const { return m_ClientID; }
 	void SetClientID(int ClientID) { m_ClientID = ClientID; };
 
 private:
 	int m_ClientID;
 
-	char m_aString [2048];
-	char m_aName [16];
+	char m_aString[2048];
+	char m_aName[16];
 
 	int m_Alive;
 	int m_Paused;
@@ -110,24 +110,25 @@ private:
 class CSaveTeam
 {
 public:
-	CSaveTeam(IGameController* Controller);
+	CSaveTeam(IGameController *Controller);
 	~CSaveTeam();
-	char* GetString();
+	char *GetString();
 	int GetMembersCount() const { return m_MembersCount; }
 	// MatchPlayers has to be called afterwards
-	int FromString(const char* String);
+	int FromString(const char *String);
 	// returns true if a team can load, otherwise writes a nice error Message in pMessage
 	bool MatchPlayers(const char (*paNames)[MAX_NAME_LENGTH], const int *pClientID, int NumPlayer, char *pMessage, int MessageLen);
 	int save(int Team);
 	void load(int Team, bool KeepCurrentWeakStrong);
-	CSaveTee* m_pSavedTees;
+	CSaveTee *m_pSavedTees;
 
 	// returns true if an error occured
 	static bool HandleSaveError(int Result, int ClientID, CGameContext *pGameContext);
-private:
-	CCharacter* MatchCharacter(int ClientID, int SaveID, bool KeepCurrentWeakStrong);
 
-	IGameController* m_pController;
+private:
+	CCharacter *MatchCharacter(int ClientID, int SaveID, bool KeepCurrentWeakStrong);
+
+	IGameController *m_pController;
 
 	char m_aString[65536];
 
@@ -137,7 +138,7 @@ private:
 		int m_EndTime;
 		int m_Type;
 	};
-	SSimpleSwitchers* m_pSwitchers;
+	SSimpleSwitchers *m_pSwitchers;
 
 	int m_TeamState;
 	int m_MembersCount;

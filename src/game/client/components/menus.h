@@ -3,17 +3,17 @@
 #ifndef GAME_CLIENT_COMPONENTS_MENUS_H
 #define GAME_CLIENT_COMPONENTS_MENUS_H
 
-#include <base/vmath.h>
 #include <base/tl/sorted_array.h>
+#include <base/vmath.h>
 
 #include <engine/demo.h>
 #include <engine/friends.h>
 #include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
 
-#include <game/voting.h>
 #include <game/client/component.h>
 #include <game/client/ui.h>
+#include <game/voting.h>
 
 struct CServerProcess
 {
@@ -141,7 +141,10 @@ class CMenus : public CComponent
 	void PopupMessage(const char *pTopic, const char *pBody, const char *pButton);
 
 	// TODO: this is a bit ugly but.. well.. yeah
-	enum { MAX_INPUTEVENTS = 32 };
+	enum
+	{
+		MAX_INPUTEVENTS = 32
+	};
 	static IInput::CEvent m_aInputEvents[MAX_INPUTEVENTS];
 	static int m_NumInputEvents;
 
@@ -181,7 +184,7 @@ class CMenus : public CComponent
 	// demo
 	enum
 	{
-		SORT_DEMONAME=0,
+		SORT_DEMONAME = 0,
 		SORT_MARKERS,
 		SORT_LENGTH,
 		SORT_DATE,
@@ -203,14 +206,14 @@ class CMenus : public CComponent
 
 		int NumMarkers() const
 		{
-			return ((m_TimelineMarkers.m_aNumTimelineMarkers[0]<<24)&0xFF000000) | ((m_TimelineMarkers.m_aNumTimelineMarkers[1]<<16)&0xFF0000) |
-				((m_TimelineMarkers.m_aNumTimelineMarkers[2]<<8)&0xFF00) | (m_TimelineMarkers.m_aNumTimelineMarkers[3]&0xFF);
+			return ((m_TimelineMarkers.m_aNumTimelineMarkers[0] << 24) & 0xFF000000) | ((m_TimelineMarkers.m_aNumTimelineMarkers[1] << 16) & 0xFF0000) |
+			       ((m_TimelineMarkers.m_aNumTimelineMarkers[2] << 8) & 0xFF00) | (m_TimelineMarkers.m_aNumTimelineMarkers[3] & 0xFF);
 		}
 
 		int Length() const
 		{
-			return ((m_Info.m_aLength[0]<<24)&0xFF000000) | ((m_Info.m_aLength[1]<<16)&0xFF0000) |
-				((m_Info.m_aLength[2]<<8)&0xFF00) | (m_Info.m_aLength[3]&0xFF);
+			return ((m_Info.m_aLength[0] << 24) & 0xFF000000) | ((m_Info.m_aLength[1] << 16) & 0xFF0000) |
+			       ((m_Info.m_aLength[2] << 8) & 0xFF00) | (m_Info.m_aLength[3] & 0xFF);
 		}
 
 		bool operator<(const CDemoItem &Other) const
@@ -356,7 +359,7 @@ public:
 	CMenus();
 
 	void RenderLoading();
-	void RenderUpdating(const char *pCaption, int current=0, int total=0);
+	void RenderUpdating(const char *pCaption, int current = 0, int total = 0);
 
 	bool IsActive() const { return m_MenuActive; }
 	void KillServer();
@@ -371,7 +374,7 @@ public:
 
 	enum
 	{
-		PAGE_NEWS=1,
+		PAGE_NEWS = 1,
 		PAGE_GAME,
 		PAGE_PLAYERS,
 		PAGE_SERVER_INFO,
@@ -387,7 +390,7 @@ public:
 		PAGE_NETWORK,
 		PAGE_GHOST,
 
-		SETTINGS_LANGUAGE=0,
+		SETTINGS_LANGUAGE = 0,
 		SETTINGS_GENERAL,
 		SETTINGS_PLAYER,
 		SETTINGS_TEE,
@@ -416,7 +419,8 @@ public:
 		int m_Slot;
 		bool m_Own;
 
-		CGhostItem() : m_Slot(-1), m_Own(false) { m_aFilename[0] = 0; }
+		CGhostItem() :
+			m_Slot(-1), m_Own(false) { m_aFilename[0] = 0; }
 
 		bool operator<(const CGhostItem &Other) { return m_Time < Other.m_Time; }
 
@@ -445,7 +449,7 @@ public:
 
 	enum
 	{
-		POPUP_NONE=0,
+		POPUP_NONE = 0,
 		POPUP_FIRST_LAUNCH,
 		POPUP_CONNECTING,
 		POPUP_MESSAGE,
@@ -466,7 +470,7 @@ public:
 		POPUP_WARNING,
 
 		// demo player states
-		DEMOPLAYER_NONE=0,
+		DEMOPLAYER_NONE = 0,
 		DEMOPLAYER_SLICE_SAVE,
 	};
 

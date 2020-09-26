@@ -2,19 +2,20 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <engine/graphics.h>
 #include <engine/map.h>
-#include <engine/storage.h>
 #include <engine/serverbrowser.h>
-#include <game/client/component.h>
+#include <engine/storage.h>
 #include <engine/textrender.h>
+#include <game/client/component.h>
 #include <game/mapitems.h>
 
 #include "mapimages.h"
 
-CMapImages::CMapImages() : CMapImages(100)
+CMapImages::CMapImages() :
+	CMapImages(100)
 {
 }
 
-CMapImages::CMapImages(int TextureSize) 
+CMapImages::CMapImages(int TextureSize)
 {
 	m_Count = 0;
 	m_TextureScale = TextureSize;
@@ -55,7 +56,7 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 
 		for(int l = 0; l < pGroup->m_NumLayers; l++)
 		{
-			CMapItemLayer *pLayer = pLayers->GetLayer(pGroup->m_StartLayer+l);
+			CMapItemLayer *pLayer = pLayers->GetLayer(pGroup->m_StartLayer + l);
 			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
 				CMapItemLayerTilemap *pTLayer = (CMapItemLayerTilemap *)pLayer;
@@ -81,7 +82,7 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 	for(int i = 0; i < m_Count; i++)
 	{
 		int LoadFlag = (((m_aTextureUsedByTileOrQuadLayerFlag[i] & 1) != 0) ? TextureLoadFlag : 0) | (((m_aTextureUsedByTileOrQuadLayerFlag[i] & 2) != 0) ? 0 : (Graphics()->IsTileBufferingEnabled() ? IGraphics::TEXLOAD_NO_2D_TEXTURE : 0));
-		CMapItemImage *pImg = (CMapItemImage *)pMap->GetItem(Start+i, 0, 0);
+		CMapItemImage *pImg = (CMapItemImage *)pMap->GetItem(Start + i, 0, 0);
 		if(pImg->m_External)
 		{
 			char Buf[256];
@@ -371,7 +372,7 @@ int CMapImages::GetTextureScale()
 }
 
 IGraphics::CTextureHandle CMapImages::UploadEntityLayerText(int TextureSize, int MaxWidth, int YOffset)
-{	
+{
 	void *pMem = calloc(1024 * 1024 * 4, 1);
 
 	UpdateEntityLayerText(pMem, 4, 1024, 1024, TextureSize, MaxWidth, YOffset, 0);
@@ -385,10 +386,10 @@ IGraphics::CTextureHandle CMapImages::UploadEntityLayerText(int TextureSize, int
 	return Texture;
 }
 
-void CMapImages::UpdateEntityLayerText(void* pTexBuffer, int ImageColorChannelCount, int TexWidth, int TexHeight, int TextureSize, int MaxWidth, int YOffset, int NumbersPower, int MaxNumber)
+void CMapImages::UpdateEntityLayerText(void *pTexBuffer, int ImageColorChannelCount, int TexWidth, int TexHeight, int TextureSize, int MaxWidth, int YOffset, int NumbersPower, int MaxNumber)
 {
 	char aBuf[4];
-	int DigitsCount = NumbersPower+1;
+	int DigitsCount = NumbersPower + 1;
 
 	int CurrentNumber = pow(10, NumbersPower);
 
@@ -402,12 +403,12 @@ void CMapImages::UpdateEntityLayerText(void* pTexBuffer, int ImageColorChannelCo
 
 	YOffset += ((TextureSize - UniversalSuitableFontSize) / 2);
 
-	for (; CurrentNumber <= MaxNumber; ++CurrentNumber)
+	for(; CurrentNumber <= MaxNumber; ++CurrentNumber)
 	{
 		str_format(aBuf, 4, "%d", CurrentNumber);
 
-		float x = (CurrentNumber%16)*64;
-		float y = (CurrentNumber/16)*64;
+		float x = (CurrentNumber % 16) * 64;
+		float y = (CurrentNumber / 16) * 64;
 
 		int ApproximateTextWidth = TextRender()->CalculateTextWidth(aBuf, DigitsCount, 0, UniversalSuitableFontSize);
 		int XOffSet = (MaxWidth - clamp(ApproximateTextWidth, 0, MaxWidth)) / 2;
@@ -418,17 +419,17 @@ void CMapImages::UpdateEntityLayerText(void* pTexBuffer, int ImageColorChannelCo
 
 void CMapImages::InitOverlayTextures()
 {
-	int TextureSize = 64*m_TextureScale/100;
-	int TextureToVerticalCenterOffset = (64-TextureSize)/2; // should be used to move texture to the center of 64 pixels area
-	
+	int TextureSize = 64 * m_TextureScale / 100;
+	int TextureToVerticalCenterOffset = (64 - TextureSize) / 2; // should be used to move texture to the center of 64 pixels area
+
 	if(m_OverlayBottomTexture == -1)
 	{
-		m_OverlayBottomTexture = UploadEntityLayerText(TextureSize/2, 64, 32+TextureToVerticalCenterOffset/2);
+		m_OverlayBottomTexture = UploadEntityLayerText(TextureSize / 2, 64, 32 + TextureToVerticalCenterOffset / 2);
 	}
 
 	if(m_OverlayTopTexture == -1)
 	{
-		m_OverlayTopTexture = UploadEntityLayerText(TextureSize/2, 64, TextureToVerticalCenterOffset/2);
+		m_OverlayTopTexture = UploadEntityLayerText(TextureSize / 2, 64, TextureToVerticalCenterOffset / 2);
 	}
 
 	if(m_OverlayCenterTexture == -1)

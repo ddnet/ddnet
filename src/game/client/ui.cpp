@@ -1,12 +1,12 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <base/system.h>
 #include <base/math.h>
+#include <base/system.h>
 
-#include <engine/shared/config.h>
-#include <engine/graphics.h>
-#include <engine/textrender.h>
 #include "ui.h"
+#include <engine/graphics.h>
+#include <engine/shared/config.h>
+#include <engine/textrender.h>
 
 /********************************************************
  UI
@@ -56,9 +56,9 @@ int CUI::MouseInside(const CUIRect *r)
 
 void CUI::ConvertMouseMove(float *x, float *y)
 {
-	float Fac = (float)(g_Config.m_UiMousesens)/g_Config.m_InpMousesens;
-	*x = *x*Fac;
-	*y = *y*Fac;
+	float Fac = (float)(g_Config.m_UiMousesens) / g_Config.m_InpMousesens;
+	*x = *x * Fac;
+	*y = *y * Fac;
 }
 
 CUIRect *CUI::Screen()
@@ -67,7 +67,7 @@ CUIRect *CUI::Screen()
 	float w, h;
 
 	h = 600;
-	w = Aspect*h;
+	w = Aspect * h;
 
 	m_Screen.w = w;
 	m_Screen.h = h;
@@ -77,29 +77,29 @@ CUIRect *CUI::Screen()
 
 float CUI::PixelSize()
 {
-	return Screen()->w/Graphics()->ScreenWidth();
+	return Screen()->w / Graphics()->ScreenWidth();
 }
 
 void CUI::SetScale(float s)
 {
-	g_Config.m_UiScale = (int)(s*100.0f);
+	g_Config.m_UiScale = (int)(s * 100.0f);
 }
 
 float CUI::Scale()
 {
-	return g_Config.m_UiScale/100.0f;
+	return g_Config.m_UiScale / 100.0f;
 }
 
 float CUIRect::Scale() const
 {
-	return g_Config.m_UiScale/100.0f;
+	return g_Config.m_UiScale / 100.0f;
 }
 
 void CUI::ClipEnable(const CUIRect *r)
 {
-	float XScale = Graphics()->ScreenWidth()/Screen()->w;
-	float YScale = Graphics()->ScreenHeight()/Screen()->h;
-	Graphics()->ClipEnable((int)(r->x*XScale), (int)(r->y*YScale), (int)(r->w*XScale), (int)(r->h*YScale));
+	float XScale = Graphics()->ScreenWidth() / Screen()->w;
+	float YScale = Graphics()->ScreenHeight() / Screen()->h;
+	Graphics()->ClipEnable((int)(r->x * XScale), (int)(r->y * YScale), (int)(r->w * XScale), (int)(r->h * YScale));
 }
 
 void CUI::ClipDisable()
@@ -110,7 +110,7 @@ void CUI::ClipDisable()
 void CUIRect::HSplitMid(CUIRect *pTop, CUIRect *pBottom) const
 {
 	CUIRect r = *this;
-	float Cut = r.h/2;
+	float Cut = r.h / 2;
 
 	if(pTop)
 	{
@@ -173,12 +173,11 @@ void CUIRect::HSplitBottom(float Cut, CUIRect *pTop, CUIRect *pBottom) const
 	}
 }
 
-
 void CUIRect::VSplitMid(CUIRect *pLeft, CUIRect *pRight) const
 {
 	CUIRect r = *this;
-	float Cut = r.w/2;
-//	Cut *= Scale();
+	float Cut = r.w / 2;
+	//	Cut *= Scale();
 
 	if(pLeft)
 	{
@@ -248,8 +247,8 @@ void CUIRect::Margin(float Cut, CUIRect *pOtherRect) const
 
 	pOtherRect->x = r.x + Cut;
 	pOtherRect->y = r.y + Cut;
-	pOtherRect->w = r.w - 2*Cut;
-	pOtherRect->h = r.h - 2*Cut;
+	pOtherRect->w = r.w - 2 * Cut;
+	pOtherRect->h = r.h - 2 * Cut;
 }
 
 void CUIRect::VMargin(float Cut, CUIRect *pOtherRect) const
@@ -259,7 +258,7 @@ void CUIRect::VMargin(float Cut, CUIRect *pOtherRect) const
 
 	pOtherRect->x = r.x + Cut;
 	pOtherRect->y = r.y;
-	pOtherRect->w = r.w - 2*Cut;
+	pOtherRect->w = r.w - 2 * Cut;
 	pOtherRect->h = r.h;
 }
 
@@ -271,7 +270,7 @@ void CUIRect::HMargin(float Cut, CUIRect *pOtherRect) const
 	pOtherRect->x = r.x;
 	pOtherRect->y = r.y + Cut;
 	pOtherRect->w = r.w;
-	pOtherRect->h = r.h - 2*Cut;
+	pOtherRect->h = r.h - 2 * Cut;
 }
 
 int CUI::DoButtonLogic(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
@@ -286,7 +285,7 @@ int CUI::DoButtonLogic(const void *pID, const char *pText, int Checked, const CU
 		if(!MouseButton(ButtonUsed))
 		{
 			if(Inside && Checked >= 0)
-				ReturnValue = 1+ButtonUsed;
+				ReturnValue = 1 + ButtonUsed;
 			SetActiveItem(0);
 		}
 	}
@@ -394,11 +393,11 @@ void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, in
 	{
 		float AlignedSize = 0;
 		float tw = TextRender()->TextWidth(0, Size, pText, -1, MaxWidth, &AlignedSize);
-		TextRender()->Text(0, r->x + r->w-tw, r->y + (r->h - AlignedSize) / 2.f, Size, pText, MaxWidth);
+		TextRender()->Text(0, r->x + r->w - tw, r->y + (r->h - AlignedSize) / 2.f, Size, pText, MaxWidth);
 	}
 }
 
 void CUI::DoLabelScaled(const CUIRect *r, const char *pText, float Size, int Align, int MaxWidth)
 {
-	DoLabel(r, pText, Size*Scale(), Align, MaxWidth);
+	DoLabel(r, pText, Size * Scale(), Align, MaxWidth);
 }

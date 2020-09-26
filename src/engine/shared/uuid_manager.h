@@ -7,10 +7,10 @@ enum
 {
 	UUID_MAXSTRSIZE = 37, // 12345678-0123-5678-0123-567890123456
 
-	UUID_INVALID=-2,
-	UUID_UNKNOWN=-1,
+	UUID_INVALID = -2,
+	UUID_UNKNOWN = -1,
 
-	OFFSET_UUID=1<<16,
+	OFFSET_UUID = 1 << 16,
 };
 
 struct CUuid
@@ -39,6 +39,7 @@ class CUnpacker;
 class CUuidManager
 {
 	array<CName> m_aNames;
+
 public:
 	void RegisterName(int ID, const char *pName);
 	CUuid GetUuid(int ID) const;

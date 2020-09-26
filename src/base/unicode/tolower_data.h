@@ -8,7 +8,7 @@ struct UPPER_LOWER
 
 enum
 {
-	NUM_TOLOWER=1390,
+	NUM_TOLOWER = 1390,
 };
 
 static const struct UPPER_LOWER tolower[] = {

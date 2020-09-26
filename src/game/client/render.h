@@ -3,19 +3,19 @@
 #ifndef GAME_CLIENT_RENDER_H
 #define GAME_CLIENT_RENDER_H
 
-#include <engine/graphics.h>
-#include <base/vmath.h>
-#include <base/color.h>
-#include <game/mapitems.h>
 #include "ui.h"
+#include <base/color.h>
+#include <base/vmath.h>
+#include <engine/graphics.h>
+#include <game/mapitems.h>
 
 class CTeeRenderInfo
 {
 public:
 	CTeeRenderInfo()
 	{
-		m_ColorBody = ColorRGBA(1,1,1);
-		m_ColorFeet = ColorRGBA(1,1,1);
+		m_ColorBody = ColorRGBA(1, 1, 1);
+		m_ColorFeet = ColorRGBA(1, 1, 1);
 		m_Size = 1.0f;
 		m_GotAirJump = 1;
 	};
@@ -30,13 +30,13 @@ public:
 // sprite renderings
 enum
 {
-	SPRITE_FLAG_FLIP_Y=1,
-	SPRITE_FLAG_FLIP_X=2,
+	SPRITE_FLAG_FLIP_Y = 1,
+	SPRITE_FLAG_FLIP_X = 2,
 
-	LAYERRENDERFLAG_OPAQUE=1,
-	LAYERRENDERFLAG_TRANSPARENT=2,
+	LAYERRENDERFLAG_OPAQUE = 1,
+	LAYERRENDERFLAG_TRANSPARENT = 2,
 
-	TILERENDERFLAG_EXTEND=4,
+	TILERENDERFLAG_EXTEND = 4,
 };
 
 typedef void (*ENVELOPE_EVAL)(float TimeOffset, int Env, float *pChannels, void *pUser);
@@ -44,6 +44,7 @@ typedef void (*ENVELOPE_EVAL)(float TimeOffset, int Env, float *pChannels, void 
 class CRenderTools
 {
 	int m_TeeQuadContainerIndex;
+
 public:
 	class IGraphics *m_pGraphics;
 	class CUI *m_pUI;
@@ -55,8 +56,8 @@ public:
 
 	//typedef struct SPRITE;
 
-	void SelectSprite(struct CDataSprite *pSprite, int Flags=0, int sx=0, int sy=0);
-	void SelectSprite(int id, int Flags=0, int sx=0, int sy=0);
+	void SelectSprite(struct CDataSprite *pSprite, int Flags = 0, int sx = 0, int sy = 0);
+	void SelectSprite(int id, int Flags = 0, int sx = 0, int sy = 0);
 
 	void DrawSprite(float x, float y, float size);
 	void QuadContainerAddSprite(int QuadContainerIndex, float x, float y, float size, bool DoSpriteScale = true);
@@ -98,10 +99,10 @@ public:
 
 	// DDRace
 
-	void RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale, float Alpha=1.0f);
-	void RenderSpeedupOverlay(CSpeedupTile *pTele, int w, int h, float Scale, float Alpha=1.0f);
-	void RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float Scale, float Alpha=1.0f);
-	void RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale, float Alpha=1.0f);
+	void RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale, float Alpha = 1.0f);
+	void RenderSpeedupOverlay(CSpeedupTile *pTele, int w, int h, float Scale, float Alpha = 1.0f);
+	void RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float Scale, float Alpha = 1.0f);
+	void RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale, float Alpha = 1.0f);
 	void RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
 	void RenderSpeedupmap(CSpeedupTile *pTele, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
 	void RenderSwitchmap(CSwitchTile *pSwitch, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);

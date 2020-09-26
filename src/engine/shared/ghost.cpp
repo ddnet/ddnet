@@ -3,8 +3,8 @@
 #include <engine/console.h>
 #include <engine/storage.h>
 
-#include "ghost.h"
 #include "compression.h"
+#include "ghost.h"
 #include "network.h"
 
 static const unsigned char gs_aHeaderMarker[8] = {'T', 'W', 'G', 'H', 'O', 'S', 'T', 0};
@@ -24,7 +24,7 @@ void CGhostRecorder::Init()
 }
 
 // Record
-int CGhostRecorder::Start(const char *pFilename, const char *pMap, unsigned Crc, const char* pName)
+int CGhostRecorder::Start(const char *pFilename, const char *pMap, unsigned Crc, const char *pName)
 {
 	m_File = m_pStorage->OpenFile(pFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	if(!m_File)
@@ -42,9 +42,9 @@ int CGhostRecorder::Start(const char *pFilename, const char *pMap, unsigned Crc,
 	Header.m_Version = gs_ActVersion;
 	str_copy(Header.m_aOwner, pName, sizeof(Header.m_aOwner));
 	str_copy(Header.m_aMap, pMap, sizeof(Header.m_aMap));
-	Header.m_aCrc[0] = (Crc>>24)&0xff;
-	Header.m_aCrc[1] = (Crc>>16)&0xff;
-	Header.m_aCrc[2] = (Crc>>8)&0xff;
+	Header.m_aCrc[0] = (Crc >> 24) & 0xff;
+	Header.m_aCrc[1] = (Crc >> 16) & 0xff;
+	Header.m_aCrc[2] = (Crc >> 8) & 0xff;
 	Header.m_aCrc[3] = (Crc)&0xff;
 	io_write(m_File, &Header, sizeof(Header));
 
@@ -84,7 +84,7 @@ void CGhostRecorder::WriteData(int Type, const void *pData, int Size)
 	mem_copy(Data.m_aData, pData, Size);
 
 	if(m_LastItem.m_Type == Data.m_Type)
-		DiffItem((int*)m_LastItem.m_aData, (int*)Data.m_aData, (int*)m_pBufferPos, Size/4);
+		DiffItem((int *)m_LastItem.m_aData, (int *)Data.m_aData, (int *)m_pBufferPos, Size / 4);
 	else
 	{
 		FlushChunk();
@@ -110,7 +110,7 @@ void CGhostRecorder::FlushChunk()
 	if(!m_File || Size == 0)
 		return;
 
-	while(Size&3)
+	while(Size & 3)
 		m_aBuffer[Size++] = 0;
 
 	Size = CVariableInt::Compress(m_aBuffer, Size, s_aBuffer, sizeof(s_aBuffer));
@@ -121,9 +121,9 @@ void CGhostRecorder::FlushChunk()
 	if(Size < 0)
 		return;
 
-	aChunk[0] = Type&0xff;
-	aChunk[1] = m_BufferNumItems&0xff;
-	aChunk[2] = (Size>>8)&0xff;
+	aChunk[0] = Type & 0xff;
+	aChunk[1] = m_BufferNumItems & 0xff;
+	aChunk[2] = (Size >> 8) & 0xff;
 	aChunk[3] = (Size)&0xff;
 
 	io_write(m_File, aChunk, sizeof(aChunk));
@@ -145,14 +145,14 @@ int CGhostRecorder::Stop(int Ticks, int Time)
 	unsigned char aNumTicks[4];
 	unsigned char aTime[4];
 
-	aNumTicks[0] = (Ticks>>24)&0xff;
-	aNumTicks[1] = (Ticks>>16)&0xff;
-	aNumTicks[2] = (Ticks>>8)&0xff;
+	aNumTicks[0] = (Ticks >> 24) & 0xff;
+	aNumTicks[1] = (Ticks >> 16) & 0xff;
+	aNumTicks[2] = (Ticks >> 8) & 0xff;
 	aNumTicks[3] = (Ticks)&0xff;
 
-	aTime[0] = (Time>>24)&0xff;
-	aTime[1] = (Time>>16)&0xff;
-	aTime[2] = (Time>>8)&0xff;
+	aTime[0] = (Time >> 24) & 0xff;
+	aTime[1] = (Time >> 16) & 0xff;
+	aTime[2] = (Time >> 8) & 0xff;
 	aTime[3] = (Time)&0xff;
 
 	// write down num shots and time
@@ -316,7 +316,7 @@ bool CGhostLoader::ReadData(int Type, void *pData, int Size)
 	CGhostItem Data(Type);
 
 	if(m_LastItem.m_Type == Data.m_Type)
-		UndiffItem((int*)m_LastItem.m_aData, (int*)m_pBufferPos, (int*)Data.m_aData, Size/4);
+		UndiffItem((int *)m_LastItem.m_aData, (int *)m_pBufferPos, (int *)Data.m_aData, Size / 4);
 	else
 		mem_copy(Data.m_aData, m_pBufferPos, Size);
 
@@ -379,10 +379,10 @@ bool CGhostLoader::GetGhostInfo(const char *pFilename, CGhostHeader *pGhostHeade
 inline void StrToInts(int *pInts, int Num, const char *pStr)
 {
 	int Index = 0;
-	while (Num)
+	while(Num)
 	{
-		char aBuf[4] = { 0,0,0,0 };
-		for (int c = 0; c < 4 && pStr[Index]; c++, Index++)
+		char aBuf[4] = {0, 0, 0, 0};
+		for(int c = 0; c < 4 && pStr[Index]; c++, Index++)
 			aBuf[c] = pStr[Index];
 		*pInts = ((aBuf[0] + 128) << 24) | ((aBuf[1] + 128) << 16) | ((aBuf[2] + 128) << 8) | (aBuf[3] + 128);
 		pInts++;

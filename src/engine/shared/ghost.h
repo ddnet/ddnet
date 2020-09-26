@@ -15,8 +15,10 @@ public:
 	unsigned char m_aData[MAX_ITEM_SIZE];
 	int m_Type;
 
-	CGhostItem() : m_Type(-1) {}
-	CGhostItem(int Type) : m_Type(Type) {}
+	CGhostItem() :
+		m_Type(-1) {}
+	CGhostItem(int Type) :
+		m_Type(Type) {}
 	void Reset() { m_Type = -1; }
 };
 
