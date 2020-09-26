@@ -77,25 +77,25 @@ struct CSqlTask
 	// set if m_Task is EXECUTE_THREAD
 	std::unique_ptr<struct CSqlExecData> m_ExecData;
 
-	static CSqlTask ExecuteThread(std::unique_ptr<struct CSqlExecData> pThreadData)
+	void SetExecuteThread(std::unique_ptr<struct CSqlExecData> pThreadData)
 	{
-		return CSqlTask(EXECUTE_THREAD, nullptr, std::move(pThreadData));
+		Set(EXECUTE_THREAD, nullptr, std::move(pThreadData));
 	}
-	static CSqlTask RegisterDb(std::unique_ptr<IDbConnection> pDb)
+	void SetRegisterDb(std::unique_ptr<IDbConnection> pDb)
 	{
-		return CSqlTask(ADD_SQL_SERVER, std::move(pDb), nullptr);
+		Set(ADD_SQL_SERVER, std::move(pDb), nullptr);
 	}
-	static CSqlTask SetBackupDb(std::unique_ptr<IDbConnection> pDb)
+	void SetBackupDb(std::unique_ptr<IDbConnection> pDb)
 	{
-		return CSqlTask(SET_SQL_BACKUP_SERVER, std::move(pDb), nullptr);
+		Set(SET_SQL_BACKUP_SERVER, std::move(pDb), nullptr);
 	}
-	static CSqlTask Print()
+	void SetPrint()
 	{
-		return CSqlTask(PRINT_SQL_SERVER, nullptr, nullptr);
+		Set(PRINT_SQL_SERVER, nullptr, nullptr);
 	}
-	static CSqlTask Shutdown()
+	void SetShutdown()
 	{
-		return CSqlTask(SHUTDOWN, nullptr, nullptr);
+		Set(SHUTDOWN, nullptr, nullptr);
 	}
 
 	CSqlTask()
@@ -104,9 +104,9 @@ struct CSqlTask
 	}
 
 private:
-	CSqlTask(Task t, std::unique_ptr<IDbConnection> pDb, std::unique_ptr<struct CSqlExecData> pThreadData)
-		: m_Task(t)
+	void Set(Task t, std::unique_ptr<IDbConnection> pDb, std::unique_ptr<struct CSqlExecData> pThreadData)
 	{
+		m_Task = t;
 		m_Db = std::move(pDb);
 		m_ExecData = std::move(pThreadData);
 	}
@@ -172,7 +172,11 @@ CDbConnectionPool::~CDbConnectionPool()
 void CDbConnectionPool::Print(IConsole *pConsole, Mode DatabaseMode)
 {
 	if(0 <= DatabaseMode && DatabaseMode < Mode::NUM_MODES)
-		pImpl->m_aWorker[DatabaseMode].m_Queue.Send(std::move(CSqlTask::Print()));
+	{
+		CSqlTask Task;
+		Task.SetPrint();
+		pImpl->m_aWorker[DatabaseMode].m_Queue.Send(std::move(Task));
+	}
 }
 
 void CDbConnectionPool::RegisterDatabase(std::unique_ptr<IDbConnection> pDatabase, Mode DatabaseMode)
@@ -180,16 +184,29 @@ void CDbConnectionPool::RegisterDatabase(std::unique_ptr<IDbConnection> pDatabas
 	switch(DatabaseMode)
 	{
 	case READ:
-		pImpl->m_aWorker[READ].m_Queue.Send(std::move(CSqlTask::RegisterDb(std::move(pDatabase))));
+	{
+		CSqlTask Task;
+		Task.SetRegisterDb(std::move(pDatabase));
+		pImpl->m_aWorker[READ].m_Queue.Send(std::move(Task));
 		break;
+	}
 	case WRITE:
-		pImpl->m_aWorker[WRITE].m_Queue.Send(std::move(CSqlTask::RegisterDb(
-			std::move(std::unique_ptr<IDbConnection>(pDatabase->Copy())))));
-		pImpl->m_aWorker[WRITE_BACKUP].m_Queue.Send(std::move(CSqlTask::RegisterDb(std::move(pDatabase))));
+	{
+		CSqlTask TaskWrite, TaskWriteBackup;
+		auto pDbCopy = std::unique_ptr<IDbConnection>(pDatabase->Copy());
+		TaskWrite.SetRegisterDb(std::move(pDbCopy));
+		TaskWriteBackup.SetRegisterDb(std::move(pDatabase));
+		pImpl->m_aWorker[WRITE].m_Queue.Send(std::move(TaskWrite));
+		pImpl->m_aWorker[WRITE_BACKUP].m_Queue.Send(std::move(TaskWriteBackup));
 		break;
+	}
 	case WRITE_BACKUP:
-		pImpl->m_aWorker[WRITE_BACKUP].m_Queue.Send(std::move(CSqlTask::SetBackupDb(std::move(pDatabase))));
+	{
+		CSqlTask Task;
+		Task.SetBackupDb(std::move(pDatabase));
+		pImpl->m_aWorker[WRITE_BACKUP].m_Queue.Send(std::move(Task));
 		break;
+	}
 	case NUM_MODES:
 		break;
 	}
@@ -200,9 +217,11 @@ void CDbConnectionPool::ExecuteRead(
 	std::unique_ptr<const ISqlData> pThreadData,
 	const char *pName)
 {
-	auto pTask = std::unique_ptr<CSqlExecData>(new CSqlExecData(pFunc, std::move(pThreadData), pName, false));
-	pTask->PrintPerf("Main", "Create");
-	pImpl->m_aWorker[READ].m_Queue.Send(std::move(CSqlTask::ExecuteThread(std::move(pTask))));
+	CSqlTask Task;
+	auto pExec = std::unique_ptr<CSqlExecData>(new CSqlExecData(pFunc, std::move(pThreadData), pName, false));
+	pExec->PrintPerf("Main", "Create");
+	Task.SetExecuteThread(std::move(pExec));
+	pImpl->m_aWorker[READ].m_Queue.Send(std::move(Task));
 }
 
 void CDbConnectionPool::ExecuteWrite(
@@ -210,9 +229,11 @@ void CDbConnectionPool::ExecuteWrite(
 	std::unique_ptr<const ISqlData> pThreadData,
 	const char *pName)
 {
-	auto pTask = std::unique_ptr<CSqlExecData>(new CSqlExecData(pFunc, std::move(pThreadData), pName, false));
-	pTask->PrintPerf("Main", "Create");
-	pImpl->m_aWorker[WRITE].m_Queue.Send(std::move(CSqlTask::ExecuteThread(std::move(pTask))));
+	CSqlTask Task;
+	auto pExec = std::unique_ptr<CSqlExecData>(new CSqlExecData(pFunc, std::move(pThreadData), pName, false));
+	pExec->PrintPerf("Main", "Create");
+	Task.SetExecuteThread(std::move(pExec));
+	pImpl->m_aWorker[WRITE].m_Queue.Send(std::move(Task));
 }
 
 void CDbConnectionPool::ExecuteWriteFaultTolerant(
@@ -220,9 +241,11 @@ void CDbConnectionPool::ExecuteWriteFaultTolerant(
 	std::unique_ptr<const ISqlData> pThreadData,
 	const char *pName)
 {
-	auto pTask = std::unique_ptr<CSqlExecData>(new CSqlExecData(pFunc, std::move(pThreadData), pName, true));
-	pTask->PrintPerf("Main", "Create");
-	pImpl->m_aWorker[WRITE].m_Queue.Send(std::move(CSqlTask::ExecuteThread(std::move(pTask))));
+	CSqlTask Task;
+	auto pExec = std::unique_ptr<CSqlExecData>(new CSqlExecData(pFunc, std::move(pThreadData), pName, true));
+	pExec->PrintPerf("Main", "Create");
+	Task.SetExecuteThread(std::move(pExec));
+	pImpl->m_aWorker[WRITE].m_Queue.Send(std::move(Task));
 }
 
 bool CDbConnectionPool::GetResponse(CSqlResponse *pResponse)
@@ -235,7 +258,11 @@ void CDbConnectionPool::OnShutdown()
 	pImpl->m_Shutdown.store(NUM_MODES);
 	// "close" the sender from the main thread
 	for(int i = 0; i < NUM_MODES; i++)
-		pImpl->m_aWorker[i].m_Queue.Send(std::move(CSqlTask::Shutdown()));
+	{
+		CSqlTask Task;
+		Task.SetShutdown();
+		pImpl->m_aWorker[i].m_Queue.Send(std::move(Task));
+	}
 	int i = 0;
 	while(pImpl->m_Shutdown.load() != 0)
 	{
