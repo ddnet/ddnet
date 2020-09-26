@@ -3,12 +3,29 @@
 #ifndef ENGINE_CLIENT_CLIENT_H
 #define ENGINE_CLIENT_CLIENT_H
 
+#include <list>
 #include <memory>
 
 #include <base/hash.h>
+#include <engine/client.h>
+#include <engine/client/demoedit.h>
 #include <engine/client/friends.h>
 #include <engine/client/http.h>
+#include <engine/client/serverbrowser.h>
 #include <engine/client/updater.h>
+#include <engine/editor.h>
+#include <engine/engine.h>
+#include <engine/graphics.h>
+#include <engine/input.h>
+#include <engine/map.h>
+#include <engine/masterserver.h>
+#include <engine/shared/config.h>
+#include <engine/shared/demo.h>
+#include <engine/shared/fifo.h>
+#include <engine/shared/ghost.h>
+#include <engine/shared/network.h>
+#include <engine/sound.h>
+#include <engine/steam.h>
 
 #define CONNECTLINK "ddnet:"
 

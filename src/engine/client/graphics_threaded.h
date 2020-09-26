@@ -2,6 +2,7 @@
 #define ENGINE_CLIENT_GRAPHICS_THREADED_H
 
 #include <engine/graphics.h>
+#include <engine/shared/config.h>
 
 #include <vector>
 
