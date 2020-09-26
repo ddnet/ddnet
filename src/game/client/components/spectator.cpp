@@ -17,6 +17,64 @@
 #include "camera.h"
 #include "spectator.h"
 
+bool CSpectator::CanChangeSpectator()
+{
+	// Don't change SpectatorID when not spectating
+	return m_pClient->m_Snap.m_SpecInfo.m_Active;
+}
+
+void CSpectator::SpectateNext(bool Reverse)
+{
+	int CurIndex = -1;
+	const CNetObj_PlayerInfo **paPlayerInfos = m_pClient->m_Snap.m_paInfoByDDTeamName;
+
+	// m_SpectatorID may be uninitialized if m_Active is false
+	if(m_pClient->m_Snap.m_SpecInfo.m_Active)
+	{
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(paPlayerInfos[i] && paPlayerInfos[i]->m_ClientID == m_pClient->m_Snap.m_SpecInfo.m_SpectatorID)
+			{
+				CurIndex = i;
+				break;
+			}
+		}
+	}
+
+	int Start;
+	if(CurIndex != -1)
+	{
+		if(Reverse)
+			Start = CurIndex - 1;
+		else
+			Start = CurIndex + 1;
+	}
+	else
+	{
+		if(Reverse)
+			Start = -1;
+		else
+			Start = 0;
+	}
+
+	int Increment = Reverse ? -1 : 1;
+
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		int PlayerIndex = (Start + i * Increment) % MAX_CLIENTS;
+		// % in C++ takes the sign of the dividend, not divisor
+		if(PlayerIndex < 0)
+			PlayerIndex += MAX_CLIENTS;
+
+		const CNetObj_PlayerInfo *pPlayerInfo = paPlayerInfos[PlayerIndex];
+		if(pPlayerInfo && pPlayerInfo->m_Team != TEAM_SPECTATORS)
+		{
+			Spectate(pPlayerInfo->m_ClientID);
+			break;
+		}
+	}
+}
+
 void CSpectator::ConKeySpectator(IConsole::IResult *pResult, void *pUserData)
 {
 	CSpectator *pSelf = (CSpectator *)pUserData;
@@ -29,145 +87,60 @@ void CSpectator::ConKeySpectator(IConsole::IResult *pResult, void *pUserData)
 
 void CSpectator::ConSpectate(IConsole::IResult *pResult, void *pUserData)
 {
-	((CSpectator *)pUserData)->Spectate(pResult->GetInteger(0));
+	CSpectator *pSelf = (CSpectator *)pUserData;
+	if(!pSelf->CanChangeSpectator())
+		return;
+
+	pSelf->Spectate(pResult->GetInteger(0));
 }
 
 void CSpectator::ConSpectateNext(IConsole::IResult *pResult, void *pUserData)
 {
 	CSpectator *pSelf = (CSpectator *)pUserData;
-	int NewSpectatorID;
-	bool GotNewSpectatorID = false;
+	if(!pSelf->CanChangeSpectator())
+		return;
 
-	int CurPos = -1;
-	for(int i = 0; i < MAX_CLIENTS; i++)
-		if(pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i] && pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID == pSelf->m_pClient->m_Snap.m_SpecInfo.m_SpectatorID)
-			CurPos = i;
-
-	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
-	{
-		for(int i = 0; i < MAX_CLIENTS; i++)
-		{
-			if(!pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i] || pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_Team == TEAM_SPECTATORS)
-				continue;
-
-			NewSpectatorID = pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID;
-			GotNewSpectatorID = true;
-			break;
-		}
-	}
-	else
-	{
-		for(int i = CurPos + 1; i < MAX_CLIENTS; i++)
-		{
-			if(!pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i] || pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_Team == TEAM_SPECTATORS)
-				continue;
-
-			NewSpectatorID = pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID;
-			GotNewSpectatorID = true;
-			break;
-		}
-
-		if(!GotNewSpectatorID)
-		{
-			for(int i = 0; i < CurPos; i++)
-			{
-				if(!pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i] || pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_Team == TEAM_SPECTATORS)
-					continue;
-
-				NewSpectatorID = pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID;
-				GotNewSpectatorID = true;
-				break;
-			}
-		}
-	}
-	if(GotNewSpectatorID)
-		pSelf->Spectate(NewSpectatorID);
+	pSelf->SpectateNext(false);
 }
 
 void CSpectator::ConSpectatePrevious(IConsole::IResult *pResult, void *pUserData)
 {
 	CSpectator *pSelf = (CSpectator *)pUserData;
-	int NewSpectatorID;
-	bool GotNewSpectatorID = false;
+	if(!pSelf->CanChangeSpectator())
+		return;
 
-	int CurPos = -1;
-	for(int i = 0; i < MAX_CLIENTS; i++)
-		if(pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i] && pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID == pSelf->m_pClient->m_Snap.m_SpecInfo.m_SpectatorID)
-			CurPos = i;
-
-	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
-	{
-		for(int i = MAX_CLIENTS - 1; i > -1; i--)
-		{
-			if(!pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i] || pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_Team == TEAM_SPECTATORS)
-				continue;
-
-			NewSpectatorID = pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID;
-			GotNewSpectatorID = true;
-			break;
-		}
-	}
-	else
-	{
-		for(int i = CurPos - 1; i > -1; i--)
-		{
-			if(!pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i] || pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_Team == TEAM_SPECTATORS)
-				continue;
-
-			NewSpectatorID = pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID;
-			GotNewSpectatorID = true;
-			break;
-		}
-
-		if(!GotNewSpectatorID)
-		{
-			for(int i = MAX_CLIENTS - 1; i > CurPos; i--)
-			{
-				if(!pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i] || pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_Team == TEAM_SPECTATORS)
-					continue;
-
-				NewSpectatorID = pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID;
-				GotNewSpectatorID = true;
-				break;
-			}
-		}
-	}
-	if(GotNewSpectatorID)
-		pSelf->Spectate(NewSpectatorID);
+	pSelf->SpectateNext(true);
 }
 
 void CSpectator::ConSpectateClosest(IConsole::IResult *pResult, void *pUserData)
 {
 	CSpectator *pSelf = (CSpectator *)pUserData;
+	if(!pSelf->CanChangeSpectator())
+		return;
+
+	CGameClient::CSnapState &Snap = pSelf->m_pClient->m_Snap;
+	int SpectatorID = Snap.m_SpecInfo.m_SpectatorID;
+
 	int NewSpectatorID = -1;
 
-	int IndexOfTeeBeingSpectated = -1;
 	vec2 CurPosition(pSelf->m_pClient->m_pCamera->m_Center);
-	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
+	if(SpectatorID != SPEC_FREEVIEW)
 	{
-		for(int i = 0; i < MAX_CLIENTS; i++)
-		{
-			if(pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i] && pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID == pSelf->m_pClient->m_Snap.m_SpecInfo.m_SpectatorID)
-			{
-				IndexOfTeeBeingSpectated = i;
-				const CNetObj_Character &CurCharacter = pSelf->m_pClient->m_Snap.m_aCharacters[pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID].m_Cur;
-				CurPosition.x = CurCharacter.m_X;
-				CurPosition.y = CurCharacter.m_Y;
-				break;
-			}
-		}
+		const CNetObj_Character &CurCharacter = Snap.m_aCharacters[SpectatorID].m_Cur;
+		CurPosition.x = CurCharacter.m_X;
+		CurPosition.y = CurCharacter.m_Y;
 	}
+
 	int ClosestDistance = INT_MAX;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(i == IndexOfTeeBeingSpectated || !pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i] || pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_Team == TEAM_SPECTATORS)
+		if(i == SpectatorID || !Snap.m_paPlayerInfos[i] || Snap.m_paPlayerInfos[i]->m_Team == TEAM_SPECTATORS)
 			continue;
-		int ClientID = pSelf->m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID;
-		const CNetObj_Character &MaybeClosestCharacter = pSelf->m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur;
+		const CNetObj_Character &MaybeClosestCharacter = Snap.m_aCharacters[i].m_Cur;
 		int Distance = distance(CurPosition, vec2(MaybeClosestCharacter.m_X, MaybeClosestCharacter.m_Y));
 		if(NewSpectatorID == -1 || Distance < ClosestDistance)
 		{
-			NewSpectatorID = ClientID;
+			NewSpectatorID = i;
 			ClosestDistance = Distance;
 		}
 	}
