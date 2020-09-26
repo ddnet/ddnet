@@ -325,7 +325,14 @@ void CGameClient::OnInit()
 	// setup load amount// load textures
 	for(int i = 0; i < g_pData->m_NumImages; i++)
 	{
-		g_pData->m_aImages[i].m_Id = Graphics()->LoadTexture(g_pData->m_aImages[i].m_pFilename, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+		if(i == IMAGE_GAME)
+			LoadGameSkin(g_Config.m_ClAssetGame);
+		else if(i == IMAGE_EMOTICONS)
+			LoadEmoticonsSkin(g_Config.m_ClAssetEmoticons);
+		else if(i == IMAGE_PARTICLES)
+			LoadParticlesSkin(g_Config.m_ClAssetParticles);
+		else
+			g_pData->m_aImages[i].m_Id = Graphics()->LoadTexture(g_pData->m_aImages[i].m_pFilename, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 		g_GameClient.m_pMenus->RenderLoading();
 	}
 
@@ -2493,6 +2500,120 @@ bool CGameClient::IsOtherTeam(int ClientID)
 		return true;
 
 	return m_Teams.Team(ClientID) != m_Teams.Team(m_Snap.m_LocalClientID);
+}
+
+void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
+{
+	if(g_pData->m_aImages[IMAGE_GAME].m_Id != -1)
+	{
+		Graphics()->UnloadTexture(g_pData->m_aImages[IMAGE_GAME].m_Id);
+		g_pData->m_aImages[IMAGE_GAME].m_Id = IGraphics::CTextureHandle();
+	}
+
+	char aPath[MAX_PATH_LENGTH];
+	bool IsDefault = false;
+	if(str_comp(pPath, "default") == 0)
+	{
+		str_format(aPath, sizeof(aPath), "%s", g_pData->m_aImages[IMAGE_GAME].m_pFilename);
+		IsDefault = true;
+	}
+	else
+	{
+		if(AsDir)
+			str_format(aPath, sizeof(aPath), "assets/game/%s/%s", pPath, g_pData->m_aImages[IMAGE_GAME].m_pFilename);
+		else
+			str_format(aPath, sizeof(aPath), "assets/game/%s.png", pPath);
+	}
+
+	CImageInfo ImgInfo;
+	bool PngLoaded = Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL);
+	if(!PngLoaded && !IsDefault)
+	{
+		if(AsDir)
+			LoadGameSkin("default");
+		else
+			LoadGameSkin(pPath, true);
+	}
+	else if(PngLoaded)
+	{
+		g_pData->m_aImages[IMAGE_GAME].m_Id = Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, ImgInfo.m_Format, 0, aPath);
+	}
+}
+
+void CGameClient::LoadEmoticonsSkin(const char *pPath, bool AsDir)
+{
+	if(g_pData->m_aImages[IMAGE_EMOTICONS].m_Id != -1)
+	{
+		Graphics()->UnloadTexture(g_pData->m_aImages[IMAGE_EMOTICONS].m_Id);
+		g_pData->m_aImages[IMAGE_EMOTICONS].m_Id = IGraphics::CTextureHandle();
+	}
+
+	char aPath[MAX_PATH_LENGTH];
+	bool IsDefault = false;
+	if(str_comp(pPath, "default") == 0)
+	{
+		str_format(aPath, sizeof(aPath), "%s", g_pData->m_aImages[IMAGE_EMOTICONS].m_pFilename);
+		IsDefault = true;
+	}
+	else
+	{
+		if(AsDir)
+			str_format(aPath, sizeof(aPath), "assets/emoticons/%s/%s", pPath, g_pData->m_aImages[IMAGE_EMOTICONS].m_pFilename);
+		else
+			str_format(aPath, sizeof(aPath), "assets/emoticons/%s.png", pPath);
+	}
+
+	CImageInfo ImgInfo;
+	bool PngLoaded = Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL);
+	if(!PngLoaded && !IsDefault)
+	{
+		if(AsDir)
+			LoadEmoticonsSkin("default");
+		else
+			LoadEmoticonsSkin(pPath, true);
+	}
+	else if(PngLoaded)
+	{
+		g_pData->m_aImages[IMAGE_EMOTICONS].m_Id = Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, ImgInfo.m_Format, 0, aPath);
+	}
+}
+
+void CGameClient::LoadParticlesSkin(const char *pPath, bool AsDir)
+{
+	if(g_pData->m_aImages[IMAGE_PARTICLES].m_Id != -1)
+	{
+		Graphics()->UnloadTexture(g_pData->m_aImages[IMAGE_PARTICLES].m_Id);
+		g_pData->m_aImages[IMAGE_PARTICLES].m_Id = IGraphics::CTextureHandle();
+	}
+
+	char aPath[MAX_PATH_LENGTH];
+	bool IsDefault = false;
+	if(str_comp(pPath, "default") == 0)
+	{
+		str_format(aPath, sizeof(aPath), "%s", g_pData->m_aImages[IMAGE_PARTICLES].m_pFilename);
+		IsDefault = true;
+	}
+	else
+	{
+		if(AsDir)
+			str_format(aPath, sizeof(aPath), "assets/particles/%s/%s", pPath, g_pData->m_aImages[IMAGE_PARTICLES].m_pFilename);
+		else
+			str_format(aPath, sizeof(aPath), "assets/particles/%s.png", pPath);
+	}
+
+	CImageInfo ImgInfo;
+	bool PngLoaded = Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL);
+	if(!PngLoaded && !IsDefault)
+	{
+		if(AsDir)
+			LoadParticlesSkin("default");
+		else
+			LoadParticlesSkin(pPath, true);
+	}
+	else if(PngLoaded)
+	{
+		g_pData->m_aImages[IMAGE_PARTICLES].m_Id = Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, ImgInfo.m_Format, 0, aPath);
+	}
 }
 
 void CGameClient::LoadMapSettings()

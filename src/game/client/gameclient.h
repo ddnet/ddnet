@@ -450,6 +450,10 @@ public:
 	void Echo(const char *pString);
 	bool IsOtherTeam(int ClientID);
 
+	void LoadGameSkin(const char *pPath, bool AsDir = false);
+	void LoadEmoticonsSkin(const char *pPath, bool AsDir = false);
+	void LoadParticlesSkin(const char *pPath, bool AsDir = false);
+
 private:
 	bool m_DDRaceMsgSent[2];
 	int m_ShowOthers[2];

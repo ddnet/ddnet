@@ -28,6 +28,14 @@ enum EMapImageModType
 	MAP_IMAGE_MOD_TYPE_COUNT,
 };
 
+static const char *const gs_aModEntitiesNames[] = {
+	"ddnet",
+	"ddrace",
+	"race",
+	"blockworlds",
+	"fng",
+	"vanilla"};
+
 class CMapImages : public CComponent
 {
 	friend class CBackground;
@@ -36,6 +44,8 @@ class CMapImages : public CComponent
 	IGraphics::CTextureHandle m_aTextures[64];
 	int m_aTextureUsedByTileOrQuadLayerFlag[64]; // 0: nothing, 1(as flag): tile layer, 2(as flag): quad layer
 	int m_Count;
+
+	char m_aEntitiesPath[MAX_PATH_LENGTH];
 
 	bool HasFrontLayer(EMapImageModType ModType);
 	bool HasSpeedupLayer(EMapImageModType ModType);
@@ -65,6 +75,8 @@ public:
 
 	void SetTextureScale(int Size);
 	int GetTextureScale();
+
+	void ChangeEntitiesPath(const char *pPath);
 
 private:
 	bool m_EntitiesIsLoaded[MAP_IMAGE_MOD_TYPE_COUNT * 2];

@@ -527,7 +527,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	static int s_ClearButton = 0;
 	DoClearableEditBox(Skin, &s_ClearButton, &Label, Skin, sizeof(g_Config.m_ClPlayerSkin), 14.0f, &s_OffsetSkin, false, CUI::CORNER_ALL, "default");
 
-	// custom colour selector
+	// custom color selector
 	MainView.HSplitTop(20.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	Button.VSplitMid(&Button, &Button2);
@@ -1399,7 +1399,8 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("Controls"),
 		Localize("Graphics"),
 		Localize("Sound"),
-		Localize("DDNet")};
+		Localize("DDNet"),
+		Localize("Assets")};
 
 	int NumTabs = (int)(sizeof(aTabs) / sizeof(*aTabs));
 
@@ -1457,6 +1458,11 @@ void CMenus::RenderSettings(CUIRect MainView)
 	{
 		m_pBackground->ChangePosition(CMenuBackground::POS_SETTINGS_DDNET);
 		RenderSettingsDDNet(MainView);
+	}
+	else if(g_Config.m_UiSettingsPage == SETTINGS_ASSETS)
+	{
+		m_pBackground->ChangePosition(CMenuBackground::POS_SETTINGS_ASSETS);
+		RenderSettingsCustom(MainView);
 	}
 
 	if(m_NeedRestartUpdate)

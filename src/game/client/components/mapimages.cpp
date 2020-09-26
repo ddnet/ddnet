@@ -23,11 +23,22 @@ CMapImages::CMapImages(int TextureSize)
 	m_SpeedupArrowIsLoaded = false;
 
 	mem_zero(m_aTextureUsedByTileOrQuadLayerFlag, sizeof(m_aTextureUsedByTileOrQuadLayerFlag));
+
+	str_copy(m_aEntitiesPath, "editor/entities_clear", sizeof(m_aEntitiesPath));
+
+	static_assert(sizeof(gs_aModEntitiesNames) / sizeof(gs_aModEntitiesNames[0]) == MAP_IMAGE_MOD_TYPE_COUNT, "Mod name string count is not equal to mod type count");
 }
 
 void CMapImages::OnInit()
 {
 	InitOverlayTextures();
+
+	if(str_comp(g_Config.m_ClAssetsEntites, "default") == 0)
+		str_copy(m_aEntitiesPath, "editor/entities_clear", sizeof(m_aEntitiesPath));
+	else
+	{
+		str_format(m_aEntitiesPath, sizeof(m_aEntitiesPath), "assets/entities/%s", g_Config.m_ClAssetsEntites);
+	}
 }
 
 void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
@@ -141,40 +152,21 @@ bool CMapImages::HasTuneLayer(EMapImageModType ModType)
 
 IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType EntityLayerType)
 {
-	const char *pEntities = "ddnet";
 	EMapImageModType EntitiesModType = MAP_IMAGE_MOD_TYPE_DDNET;
 	bool EntitesAreMasked = !GameClient()->m_GameInfo.m_DontMaskEntities;
 
 	if(GameClient()->m_GameInfo.m_EntitiesDDNet)
-	{
-		pEntities = "ddnet";
 		EntitiesModType = MAP_IMAGE_MOD_TYPE_DDNET;
-	}
 	else if(GameClient()->m_GameInfo.m_EntitiesDDRace)
-	{
-		pEntities = "ddrace";
 		EntitiesModType = MAP_IMAGE_MOD_TYPE_DDRACE;
-	}
 	else if(GameClient()->m_GameInfo.m_EntitiesRace)
-	{
-		pEntities = "race";
 		EntitiesModType = MAP_IMAGE_MOD_TYPE_RACE;
-	}
 	else if(GameClient()->m_GameInfo.m_EntitiesBW)
-	{
-		pEntities = "blockworlds";
 		EntitiesModType = MAP_IMAGE_MOD_TYPE_BLOCKWORLDS;
-	}
 	else if(GameClient()->m_GameInfo.m_EntitiesFNG)
-	{
-		pEntities = "fng";
 		EntitiesModType = MAP_IMAGE_MOD_TYPE_FNG;
-	}
 	else if(GameClient()->m_GameInfo.m_EntitiesVanilla)
-	{
-		pEntities = "vanilla";
 		EntitiesModType = MAP_IMAGE_MOD_TYPE_VANILLA;
-	}
 
 	if(!m_EntitiesIsLoaded[(EntitiesModType * 2) + (int)EntitesAreMasked])
 	{
@@ -184,7 +176,7 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 		bool WasUnknwon = !EntitesAreMasked;
 
 		char aPath[64];
-		str_format(aPath, sizeof(aPath), "editor/entities_clear/%s.png", pEntities);
+		str_format(aPath, sizeof(aPath), "%s/%s.png", m_aEntitiesPath, gs_aModEntitiesNames[EntitiesModType]);
 
 		bool GameTypeHasFrontLayer = HasFrontLayer(EntitiesModType) || WasUnknwon;
 		bool GameTypeHasSpeedupLayer = HasSpeedupLayer(EntitiesModType) || WasUnknwon;
@@ -195,7 +187,35 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 		int TextureLoadFlag = Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 
 		CImageInfo ImgInfo;
-		if(Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL) && ImgInfo.m_Width > 0 && ImgInfo.m_Height > 0)
+		bool ImagePNGLoaded = false;
+		if(Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL))
+			ImagePNGLoaded = true;
+		else
+		{
+			bool TryDefault = true;
+			// try as single ddnet replacement
+			if(EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET)
+			{
+				str_format(aPath, sizeof(aPath), "%s.png", m_aEntitiesPath);
+				if(Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL))
+				{
+					ImagePNGLoaded = true;
+					TryDefault = false;
+				}
+			}
+
+			if(!ImagePNGLoaded && TryDefault)
+			{
+				// try default
+				str_format(aPath, sizeof(aPath), "editor/entities_clear/%s.png", gs_aModEntitiesNames[EntitiesModType]);
+				if(Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL))
+				{
+					ImagePNGLoaded = true;
+				}
+			}
+		}
+
+		if(ImagePNGLoaded && ImgInfo.m_Width > 0 && ImgInfo.m_Height > 0)
 		{
 			int ColorChannelCount = 0;
 			if(ImgInfo.m_Format == CImageInfo::FORMAT_ALPHA)
@@ -342,6 +362,31 @@ IGraphics::CTextureHandle CMapImages::GetOverlayTop()
 IGraphics::CTextureHandle CMapImages::GetOverlayCenter()
 {
 	return m_OverlayCenterTexture;
+}
+
+void CMapImages::ChangeEntitiesPath(const char *pPath)
+{
+	if(str_comp(pPath, "default") == 0)
+		str_copy(m_aEntitiesPath, "editor/entities_clear", sizeof(m_aEntitiesPath));
+	else
+	{
+		str_format(m_aEntitiesPath, sizeof(m_aEntitiesPath), "assets/entities/%s", pPath);
+	}
+
+	for(int i = 0; i < MAP_IMAGE_MOD_TYPE_COUNT * 2; ++i)
+	{
+		if(m_EntitiesIsLoaded[i])
+		{
+			for(int n = 0; n < MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT; ++n)
+			{
+				if(m_EntitiesTextures[i][n] != -1)
+					Graphics()->UnloadTexture(m_EntitiesTextures[i][n]);
+				m_EntitiesTextures[i][n] = IGraphics::CTextureHandle();
+			}
+
+			m_EntitiesIsLoaded[i] = false;
+		}
+	}
 }
 
 void CMapImages::SetTextureScale(int Scale)

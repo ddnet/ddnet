@@ -51,11 +51,11 @@ void CMenuBackground::OnInit()
 void CMenuBackground::ResetPositions()
 {
 	m_Positions[POS_START] = vec2(500.0f, 500.0f);
-	m_Positions[POS_INTERNET] = vec2(1000.0f, 1000.0f);
-	m_Positions[POS_LAN] = vec2(1100.0f, 1000.0f);
+	m_Positions[POS_BROWSER_INTERNET] = vec2(1000.0f, 1000.0f);
+	m_Positions[POS_BROWSER_LAN] = vec2(1100.0f, 1000.0f);
 	m_Positions[POS_DEMOS] = vec2(900.0f, 100.0f);
 	m_Positions[POS_NEWS] = vec2(500.0f, 750.0f);
-	m_Positions[POS_FAVORITES] = vec2(1250.0f, 500.0f);
+	m_Positions[POS_BROWSER_FAVORITES] = vec2(1250.0f, 500.0f);
 	m_Positions[POS_SETTINGS_LANGUAGE] = vec2(500.0f, 1200.0f);
 	m_Positions[POS_SETTINGS_GENERAL] = vec2(500.0f, 1000.0f);
 	m_Positions[POS_SETTINGS_PLAYER] = vec2(600.0f, 1000.0f);
@@ -65,8 +65,13 @@ void CMenuBackground::ResetPositions()
 	m_Positions[POS_SETTINGS_GRAPHICS] = vec2(900.0f, 1000.0f);
 	m_Positions[POS_SETTINGS_SOUND] = vec2(1000.0f, 1000.0f);
 	m_Positions[POS_SETTINGS_DDNET] = vec2(1200.0f, 200.0f);
-	for(int i = 0; i < POS_CUSTOM_NUM; ++i)
-		m_Positions[POS_CUSTOM0 + i] = vec2(500.0f + (75.0f * (float)i), 1250.0f - (75.0f * (float)i));
+	m_Positions[POS_SETTINGS_ASSETS] = vec2(500.0f, 500.0f);
+	for(int i = 0; i < POS_BROWSER_CUSTOM_NUM; ++i)
+		m_Positions[POS_BROWSER_CUSTOM0 + i] = vec2(500.0f + (75.0f * (float)i), 1250.0f - (75.0f * (float)i));
+	for(int i = 0; i < POS_SETTINGS_RESERVED_NUM; ++i)
+		m_Positions[POS_SETTINGS_RESERVED0 + i] = vec2(0, 0);
+	for(int i = 0; i < POS_RESERVED_NUM; ++i)
+		m_Positions[POS_RESERVED0 + i] = vec2(0, 0);
 }
 
 int CMenuBackground::ThemeScan(const char *pName, int IsDir, int DirType, void *pUser)
