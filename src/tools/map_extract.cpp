@@ -1,8 +1,8 @@
 // Adapted from TWMapImagesRecovery by Tardo: https://github.com/Tardo/TWMapImagesRecovery
-#include <game/mapitems.h>
 #include <base/system.h>
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
+#include <game/mapitems.h>
 
 #include <pnglite.h>
 
@@ -15,7 +15,6 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 		dbg_msg("map_extract", "error opening map '%s'", pMapName);
 		return false;
 	}
-
 
 	// check version
 	CMapItemVersion *pVersion = (CMapItemVersion *)Map.FindItem(MAPITEMTYPE_VERSION, 0);
@@ -41,7 +40,7 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 
 	for(int i = 0; i < Num; i++)
 	{
-		CMapItemImage *pItem = (CMapItemImage *)Map.GetItem(Start+i, 0, 0);
+		CMapItemImage *pItem = (CMapItemImage *)Map.GetItem(Start + i, 0, 0);
 		char *pName = (char *)Map.GetData(pItem->m_ImageName);
 
 		if(pItem->m_External)
@@ -54,7 +53,7 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 		// copy image data
 		png_t Png;
 		png_open_file_write(&Png, aBuf);
-		png_set_data(&Png, pItem->m_Width, pItem->m_Height, 8, PNG_TRUECOLOR_ALPHA, (unsigned char*)Map.GetData(pItem->m_ImageData));
+		png_set_data(&Png, pItem->m_Width, pItem->m_Height, 8, PNG_TRUECOLOR_ALPHA, (unsigned char *)Map.GetData(pItem->m_ImageData));
 		png_close_file(&Png);
 	}
 
@@ -63,7 +62,7 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 
 	for(int i = 0; i < Num; i++)
 	{
-		CMapItemSound *pItem = (CMapItemSound *)Map.GetItem(Start+i, 0, 0);
+		CMapItemSound *pItem = (CMapItemSound *)Map.GetItem(Start + i, 0, 0);
 		char *pName = (char *)Map.GetData(pItem->m_SoundName);
 
 		if(pItem->m_External)
@@ -74,7 +73,7 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 		dbg_msg("map_extract", "writing sound: %s (%d B)", aBuf, pItem->m_SoundDataSize);
 
 		IOHANDLE Opus = io_open(aBuf, IOFLAG_WRITE);
-		io_write(Opus, (unsigned char*)Map.GetData(pItem->m_SoundData), pItem->m_SoundDataSize);
+		io_write(Opus, (unsigned char *)Map.GetData(pItem->m_SoundData), pItem->m_SoundDataSize);
 		io_close(Opus);
 	}
 
@@ -90,12 +89,12 @@ int main(int argc, char *argv[])
 
 	IStorage *pStorage = CreateLocalStorage();
 
-	if (argc == 2)
+	if(argc == 2)
 	{
 		str_copy(aMap, argv[1], sizeof(aMap));
 		str_copy(aDir, ".", sizeof(aMap));
 	}
-	else if (argc == 3)
+	else if(argc == 3)
 	{
 		str_copy(aMap, argv[1], sizeof(aMap));
 		str_copy(aDir, argv[2], sizeof(aDir));
@@ -106,7 +105,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	if (!fs_is_dir(aDir))
+	if(!fs_is_dir(aDir))
 	{
 		dbg_msg("usage", "directory '%s' does not exist", aDir);
 		return -1;

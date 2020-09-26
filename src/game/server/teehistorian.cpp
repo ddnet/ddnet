@@ -1,15 +1,15 @@
 #include "teehistorian.h"
 
 #include <engine/shared/config.h>
-#include <engine/shared/snapshot.h>
 #include <engine/shared/json.h>
+#include <engine/shared/snapshot.h>
 #include <game/gamecore.h>
 
 static const char TEEHISTORIAN_NAME[] = "teehistorian@ddnet.tw";
 static const CUuid TEEHISTORIAN_UUID = CalculateUuid(TEEHISTORIAN_NAME);
 static const char TEEHISTORIAN_VERSION[] = "2";
 
-#define UUID(id, name) static const CUuid UUID_ ## id = CalculateUuid(name);
+#define UUID(id, name) static const CUuid UUID_##id = CalculateUuid(name);
 #include <engine/shared/teehistorian_ex_chunks.h>
 #undef UUID
 
@@ -84,7 +84,7 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 
 	char aJson[2048];
 
-	#define E(buf, str) EscapeJson(buf, sizeof(buf), str)
+#define E(buf, str) EscapeJson(buf, sizeof(buf), str)
 
 	str_format(aJson, sizeof(aJson), "{\"comment\":\"%s\",\"version\":\"%s\",\"game_uuid\":\"%s\",\"server_version\":\"%s\",\"start_time\":\"%s\",\"server_name\":\"%s\",\"server_port\":\"%d\",\"game_type\":\"%s\",\"map_name\":\"%s\",\"map_size\":\"%d\",\"map_sha256\":\"%s\",\"map_crc\":\"%08x\",\"prng_description\":\"%s\",\"config\":{",
 		E(aCommentBuffer, TEEHISTORIAN_NAME),
@@ -106,7 +106,7 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 	char aBuffer2[1024];
 	bool First = true;
 
-	#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Flags,Desc) \
+#define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
 	if((Flags)&CFGFLAG_SERVER && !((Flags)&CFGFLAG_NONTEEHISTORIC) && pGameInfo->m_pConfig->m_##Name != (Def)) \
 	{ \
 		str_format(aJson, sizeof(aJson), "%s\"%s\":\"%d\"", \
@@ -117,9 +117,9 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 		First = false; \
 	}
 
-	#define MACRO_CONFIG_COL(Name,ScriptName,Def,Save,Desc) MACRO_CONFIG_INT(Name,ScriptName,Def,0,0,Save,Desc)
+#define MACRO_CONFIG_COL(Name, ScriptName, Def, Save, Desc) MACRO_CONFIG_INT(Name, ScriptName, Def, 0, 0, Save, Desc)
 
-	#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Flags,Desc) \
+#define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Flags, Desc) \
 	if((Flags)&CFGFLAG_SERVER && !((Flags)&CFGFLAG_NONTEEHISTORIC) && str_comp(pGameInfo->m_pConfig->m_##Name, (Def)) != 0) \
 	{ \
 		str_format(aJson, sizeof(aJson), "%s\"%s\":\"%s\"", \
@@ -130,11 +130,11 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 		First = false; \
 	}
 
-	#include <engine/shared/config_variables.h>
+#include <engine/shared/config_variables.h>
 
-	#undef MACRO_CONFIG_INT
-	#undef MACRO_CONFIG_COL
-	#undef MACRO_CONFIG_STR
+#undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_COL
+#undef MACRO_CONFIG_STR
 
 	str_format(aJson, sizeof(aJson), "},\"tuning\":{");
 	Write(aJson, str_length(aJson));
@@ -142,7 +142,7 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 	First = true;
 
 	static const float TicksPerSecond = 50.0f;
-	#define MACRO_TUNING_PARAM(Name,ScriptName,Value,Description) \
+#define MACRO_TUNING_PARAM(Name, ScriptName, Value, Description) \
 	if(pGameInfo->m_pTuning->m_##Name.Get() != (int)((Value)*100)) \
 	{ \
 		str_format(aJson, sizeof(aJson), "%s\"%s\":\"%d\"", \
@@ -152,8 +152,8 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 		Write(aJson, str_length(aJson)); \
 		First = false; \
 	}
-	#include <game/tuning.h>
-	#undef MACRO_TUNING_PARAM
+#include <game/tuning.h>
+#undef MACRO_TUNING_PARAM
 
 	str_format(aJson, sizeof(aJson), "},\"uuids\":[");
 	Write(aJson, str_length(aJson));
@@ -183,7 +183,6 @@ void CTeeHistorian::WriteExtra(CUuid Uuid, const void *pData, int DataSize)
 	Write(Ex.Data(), Ex.Size());
 	Write(pData, DataSize);
 }
-
 
 void CTeeHistorian::BeginTick(int Tick)
 {

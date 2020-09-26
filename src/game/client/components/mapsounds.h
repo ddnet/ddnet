@@ -19,7 +19,7 @@ class CMapSounds : public CComponent
 		ISound::CVoiceHandle m_Voice;
 		CSoundSource *m_pSource;
 
-		bool operator ==(const CSourceQueueEntry &Other) const { return (m_Sound == Other.m_Sound) && (m_Voice == Other.m_Voice) && (m_pSource == Other.m_pSource); }
+		bool operator==(const CSourceQueueEntry &Other) const { return (m_Sound == Other.m_Sound) && (m_Voice == Other.m_Voice) && (m_pSource == Other.m_pSource); }
 	};
 
 	array<CSourceQueueEntry> m_lSourceQueue;

@@ -1,6 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <stdio.h>	// sscanf
+#include <stdio.h> // sscanf
 
 #include <base/system.h>
 
@@ -138,7 +138,7 @@ public:
 		mem_zero(m_aMasterServers, sizeof(m_aMasterServers));
 		for(int i = 0; i < MAX_MASTERSERVERS; i++)
 		{
-			str_format(m_aMasterServers[i].m_aHostname, sizeof(m_aMasterServers[i].m_aHostname), "master%d.teeworlds.com", i+1);
+			str_format(m_aMasterServers[i].m_aHostname, sizeof(m_aMasterServers[i].m_aHostname), "master%d.teeworlds.com", i + 1);
 			m_apLookup[i] = std::make_shared<CHostLookup>();
 		}
 	}

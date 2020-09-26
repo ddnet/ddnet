@@ -16,8 +16,8 @@ class CTheme
 {
 public:
 	CTheme() {}
-	CTheme(const char *n, bool HasDay, bool HasNight)
-		: m_Name(n), m_HasDay(HasDay), m_HasNight(HasNight) {}
+	CTheme(const char *n, bool HasDay, bool HasNight) :
+		m_Name(n), m_HasDay(HasDay), m_HasNight(HasNight) {}
 
 	string m_Name;
 	bool m_HasDay;

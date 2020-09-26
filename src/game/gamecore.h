@@ -3,31 +3,39 @@
 #ifndef GAME_GAMECORE_H
 #define GAME_GAMECORE_H
 
-#include <base/system.h>
 #include <base/math.h>
+#include <base/system.h>
 
 #include <map>
 #include <vector>
 
-#include <math.h>
 #include "collision.h"
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
+#include <math.h>
 
+#include "mapitems.h"
 #include "prng.h"
 #include "teamscore.h"
-#include "mapitems.h"
-
 
 class CTuneParam
 {
 	int m_Value;
+
 public:
 	void Set(int v) { m_Value = v; }
 	int Get() const { return m_Value; }
-	CTuneParam &operator = (int v) { m_Value = (int)(v*100.0f); return *this; }
-	CTuneParam &operator = (float v) { m_Value = (int)(v*100.0f); return *this; }
-	operator float() const { return m_Value/100.0f; }
+	CTuneParam &operator=(int v)
+	{
+		m_Value = (int)(v * 100.0f);
+		return *this;
+	}
+	CTuneParam &operator=(float v)
+	{
+		m_Value = (int)(v * 100.0f);
+		return *this;
+	}
+	operator float() const { return m_Value / 100.0f; }
 };
 
 class CTuningParams
@@ -36,28 +44,30 @@ public:
 	CTuningParams()
 	{
 		const float TicksPerSecond = 50.0f;
-		#define MACRO_TUNING_PARAM(Name,ScriptName,Value,Description) m_##Name.Set((int)(Value*100.0f));
-		#include "tuning.h"
-		#undef MACRO_TUNING_PARAM
+#define MACRO_TUNING_PARAM(Name, ScriptName, Value, Description) m_##Name.Set((int)(Value * 100.0f));
+#include "tuning.h"
+#undef MACRO_TUNING_PARAM
 	}
 
 	static const char *ms_apNames[];
 
-	#define MACRO_TUNING_PARAM(Name,ScriptName,Value,Description) CTuneParam m_##Name;
-	#include "tuning.h"
-	#undef MACRO_TUNING_PARAM
+#define MACRO_TUNING_PARAM(Name, ScriptName, Value, Description) CTuneParam m_##Name;
+#include "tuning.h"
+#undef MACRO_TUNING_PARAM
 
-	static int Num() { return sizeof(CTuningParams)/sizeof(int); }
+	static int Num()
+	{
+		return sizeof(CTuningParams) / sizeof(int);
+	}
 	bool Set(int Index, float Value);
 	bool Set(const char *pName, float Value);
 	bool Get(int Index, float *pValue);
 	bool Get(const char *pName, float *pValue);
 };
 
-
 inline vec2 GetDirection(int Angle)
 {
-	float a = Angle/256.0f;
+	float a = Angle / 256.0f;
 	return vec2(cosf(a), sinf(a));
 }
 
@@ -70,9 +80,9 @@ inline float GetAngle(vec2 Dir)
 {
 	if(Dir.x == 0 && Dir.y == 0)
 		return 0.0f;
-	float a = atanf(Dir.y/Dir.x);
+	float a = atanf(Dir.y / Dir.x);
 	if(Dir.x < 0)
-		a = a+pi;
+		a = a + pi;
 	return a;
 }
 
@@ -81,7 +91,7 @@ inline void StrToInts(int *pInts, int Num, const char *pStr)
 	int Index = 0;
 	while(Num)
 	{
-		char aBuf[4] = {0,0,0,0};
+		char aBuf[4] = {0, 0, 0, 0};
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warray-bounds" // false positive
@@ -91,7 +101,7 @@ inline void StrToInts(int *pInts, int Num, const char *pStr)
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif
-		*pInts = ((aBuf[0]+128)<<24)|((aBuf[1]+128)<<16)|((aBuf[2]+128)<<8)|(aBuf[3]+128);
+		*pInts = ((aBuf[0] + 128) << 24) | ((aBuf[1] + 128) << 16) | ((aBuf[2] + 128) << 8) | (aBuf[3] + 128);
 		pInts++;
 		Num--;
 	}
@@ -104,10 +114,10 @@ inline void IntsToStr(const int *pInts, int Num, char *pStr)
 {
 	while(Num)
 	{
-		pStr[0] = (((*pInts)>>24)&0xff)-128;
-		pStr[1] = (((*pInts)>>16)&0xff)-128;
-		pStr[2] = (((*pInts)>>8)&0xff)-128;
-		pStr[3] = ((*pInts)&0xff)-128;
+		pStr[0] = (((*pInts) >> 24) & 0xff) - 128;
+		pStr[1] = (((*pInts) >> 16) & 0xff) - 128;
+		pStr[2] = (((*pInts) >> 8) & 0xff) - 128;
+		pStr[3] = ((*pInts) & 0xff) - 128;
 		pStr += 4;
 		pInts++;
 		Num--;
@@ -124,17 +134,14 @@ inline void IntsToStr(const int *pInts, int Num, char *pStr)
 #endif
 }
 
-
-
 inline vec2 CalcPos(vec2 Pos, vec2 Velocity, float Curvature, float Speed, float Time)
 {
 	vec2 n;
 	Time *= Speed;
-	n.x = Pos.x + Velocity.x*Time;
-	n.y = Pos.y + Velocity.y*Time + Curvature/10000*(Time*Time);
+	n.x = Pos.x + Velocity.x * Time;
+	n.y = Pos.y + Velocity.y * Time + Curvature / 10000 * (Time * Time);
 	return n;
 }
-
 
 template<typename T>
 inline T SaturatedAdd(T Min, T Max, T Current, T Modifier)
@@ -159,26 +166,25 @@ inline T SaturatedAdd(T Min, T Max, T Current, T Modifier)
 	}
 }
 
-
 float VelocityRamp(float Value, float Start, float Range, float Curvature);
 
 // hooking stuff
 enum
 {
-	HOOK_RETRACTED=-1,
-	HOOK_IDLE=0,
-	HOOK_RETRACT_START=1,
-	HOOK_RETRACT_END=3,
+	HOOK_RETRACTED = -1,
+	HOOK_IDLE = 0,
+	HOOK_RETRACT_START = 1,
+	HOOK_RETRACT_END = 3,
 	HOOK_FLYING,
 	HOOK_GRABBED,
 
-	COREEVENT_GROUND_JUMP=0x01,
-	COREEVENT_AIR_JUMP=0x02,
-	COREEVENT_HOOK_LAUNCH=0x04,
-	COREEVENT_HOOK_ATTACH_PLAYER=0x08,
-	COREEVENT_HOOK_ATTACH_GROUND=0x10,
-	COREEVENT_HOOK_HIT_NOHOOK=0x20,
-	COREEVENT_HOOK_RETRACT=0x40,
+	COREEVENT_GROUND_JUMP = 0x01,
+	COREEVENT_AIR_JUMP = 0x02,
+	COREEVENT_HOOK_LAUNCH = 0x04,
+	COREEVENT_HOOK_ATTACH_PLAYER = 0x08,
+	COREEVENT_HOOK_ATTACH_GROUND = 0x10,
+	COREEVENT_HOOK_HIT_NOHOOK = 0x20,
+	COREEVENT_HOOK_RETRACT = 0x40,
 	//COREEVENT_HOOK_TELE=0x80,
 };
 
@@ -213,7 +219,8 @@ class CCharacterCore
 	friend class CCharacter;
 	CWorldCore *m_pWorld;
 	CCollision *m_pCollision;
-	std::map<int, std::vector<vec2> > *m_pTeleOuts;
+	std::map<int, std::vector<vec2>> *m_pTeleOuts;
+
 public:
 	vec2 m_Pos;
 	vec2 m_Vel;
@@ -241,7 +248,7 @@ public:
 	int m_TriggeredEvents;
 
 	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams);
-	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams, std::map<int, std::vector<vec2> > *pTeleOuts);
+	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams, std::map<int, std::vector<vec2>> *pTeleOuts);
 	void Reset();
 	void Tick(bool UseInput);
 	void Move();
@@ -280,7 +287,6 @@ public:
 	bool m_DeepFrozen;
 
 private:
-
 	CTeamsCore *m_pTeams;
 	int m_MoveRestrictions;
 	static bool IsSwitchActiveCb(int Number, void *pUser);
@@ -302,8 +308,8 @@ inline CInputCount CountInput(int Prev, int Cur)
 
 	while(i != Cur)
 	{
-		i = (i+1)&INPUT_STATE_MASK;
-		if(i&1)
+		i = (i + 1) & INPUT_STATE_MASK;
+		if(i & 1)
 			c.m_Presses++;
 		else
 			c.m_Releases++;

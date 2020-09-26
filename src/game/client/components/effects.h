@@ -8,6 +8,7 @@ class CEffects : public CComponent
 {
 	bool m_Add50hz;
 	bool m_Add100hz;
+
 public:
 	CEffects();
 

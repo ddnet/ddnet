@@ -7,6 +7,7 @@ class CUIRect
 {
 	// TODO: Refactor: Redo UI scaling
 	float Scale() const;
+
 public:
 	float x, y, w, h;
 
@@ -94,7 +95,6 @@ public:
 	 * @param pOtherRect The CUIRect to place inside *this* CUIRect
 	 */
 	void HMargin(float Cut, CUIRect *pOtherRect) const;
-
 };
 
 class CUI
@@ -114,7 +114,11 @@ class CUI
 
 public:
 	// TODO: Refactor: Fill this in
-	void SetGraphics(class IGraphics *pGraphics, class ITextRender *pTextRender) { m_pGraphics = pGraphics; m_pTextRender = pTextRender;}
+	void SetGraphics(class IGraphics *pGraphics, class ITextRender *pTextRender)
+	{
+		m_pGraphics = pGraphics;
+		m_pTextRender = pTextRender;
+	}
 	class IGraphics *Graphics() { return m_pGraphics; }
 	class ITextRender *TextRender() { return m_pTextRender; }
 
@@ -122,17 +126,17 @@ public:
 
 	enum
 	{
-		CORNER_TL=1,
-		CORNER_TR=2,
-		CORNER_BL=4,
-		CORNER_BR=8,
+		CORNER_TL = 1,
+		CORNER_TR = 2,
+		CORNER_BL = 4,
+		CORNER_BR = 8,
 
-		CORNER_T=CORNER_TL|CORNER_TR,
-		CORNER_B=CORNER_BL|CORNER_BR,
-		CORNER_R=CORNER_TR|CORNER_BR,
-		CORNER_L=CORNER_TL|CORNER_BL,
+		CORNER_T = CORNER_TL | CORNER_TR,
+		CORNER_B = CORNER_BL | CORNER_BR,
+		CORNER_R = CORNER_TR | CORNER_BR,
+		CORNER_L = CORNER_TL | CORNER_BL,
 
-		CORNER_ALL=CORNER_T|CORNER_B
+		CORNER_ALL = CORNER_T | CORNER_B
 	};
 
 	int Update(float mx, float my, float Mwx, float Mwy, int m_Buttons);
@@ -141,11 +145,16 @@ public:
 	float MouseY() const { return m_MouseY; }
 	float MouseWorldX() const { return m_MouseWorldX; }
 	float MouseWorldY() const { return m_MouseWorldY; }
-	int MouseButton(int Index) const { return (m_MouseButtons>>Index)&1; }
-	int MouseButtonClicked(int Index) { return MouseButton(Index) && !((m_LastMouseButtons>>Index)&1) ; }
+	int MouseButton(int Index) const { return (m_MouseButtons >> Index) & 1; }
+	int MouseButtonClicked(int Index) { return MouseButton(Index) && !((m_LastMouseButtons >> Index) & 1); }
 
 	void SetHotItem(const void *pID) { m_pBecommingHotItem = pID; }
-	void SetActiveItem(const void *pID) { m_pActiveItem = pID; if (pID) m_pLastActiveItem = pID; }
+	void SetActiveItem(const void *pID)
+	{
+		m_pActiveItem = pID;
+		if(pID)
+			m_pLastActiveItem = pID;
+	}
 	void ClearLastActiveItem() { m_pLastActiveItem = 0; }
 	const void *HotItem() const { return m_pHotItem; }
 	const void *NextHotItem() const { return m_pBecommingHotItem; }
@@ -171,6 +180,5 @@ public:
 	void DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, int MaxWidth = -1);
 	void DoLabelScaled(const CUIRect *pRect, const char *pText, float Size, int Align, int MaxWidth = -1);
 };
-
 
 #endif

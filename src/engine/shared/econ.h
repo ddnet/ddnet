@@ -3,12 +3,13 @@
 
 #include "network.h"
 
+#include <engine/console.h>
 
 class CEcon
 {
 	enum
 	{
-		MAX_AUTH_TRIES=3,
+		MAX_AUTH_TRIES = 3,
 	};
 
 	class CClient
@@ -16,7 +17,7 @@ class CEcon
 	public:
 		enum
 		{
-			STATE_EMPTY=0,
+			STATE_EMPTY = 0,
 			STATE_CONNECTED,
 			STATE_AUTHED,
 		};
@@ -34,7 +35,7 @@ class CEcon
 	int m_PrintCBIndex;
 	int m_UserClientID;
 
-	static void SendLineCB(const char *pLine, void *pUserData,bool Highlighted);
+	static void SendLineCB(const char *pLine, void *pUserData, bool Highlighted);
 	static void ConchainEconOutputLevelUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConLogout(IConsole::IResult *pResult, void *pUserData);
 

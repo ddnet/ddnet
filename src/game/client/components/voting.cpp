@@ -2,14 +2,14 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <engine/shared/config.h>
 
-#include <game/generated/protocol.h>
+#include "voting.h"
 #include <base/vmath.h>
 #include <game/client/render.h>
-#include "voting.h"
+#include <game/generated/protocol.h>
 
 void CVoting::ConCallvote(IConsole::IResult *pResult, void *pUserData)
 {
-	CVoting *pSelf = (CVoting*)pUserData;
+	CVoting *pSelf = (CVoting *)pUserData;
 	pSelf->Callvote(pResult->GetString(0), pResult->GetString(1), pResult->NumArguments() > 2 ? pResult->GetString(2) : "");
 }
 
@@ -279,16 +279,15 @@ void CVoting::OnRender()
 {
 }
 
-
 void CVoting::RenderBars(CUIRect Bars, bool Text)
 {
-	RenderTools()->DrawUIRect(&Bars, ColorRGBA(0.8f,0.8f,0.8f,0.5f), CUI::CORNER_ALL, Bars.h/3);
+	RenderTools()->DrawUIRect(&Bars, ColorRGBA(0.8f, 0.8f, 0.8f, 0.5f), CUI::CORNER_ALL, Bars.h / 3);
 
 	CUIRect Splitter = Bars;
-	Splitter.x = Splitter.x+Splitter.w/2;
-	Splitter.w = Splitter.h/2.0f;
-	Splitter.x -= Splitter.w/2;
-	RenderTools()->DrawUIRect(&Splitter, ColorRGBA(0.4f,0.4f,0.4f,0.5f), CUI::CORNER_ALL, Splitter.h/4);
+	Splitter.x = Splitter.x + Splitter.w / 2;
+	Splitter.w = Splitter.h / 2.0f;
+	Splitter.x -= Splitter.w / 2;
+	RenderTools()->DrawUIRect(&Splitter, ColorRGBA(0.4f, 0.4f, 0.4f, 0.5f), CUI::CORNER_ALL, Splitter.h / 4);
 
 	if(m_Total)
 	{
@@ -296,14 +295,14 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 		if(m_Yes)
 		{
 			CUIRect YesArea = Bars;
-			YesArea.w *= m_Yes/(float)m_Total;
-			RenderTools()->DrawUIRect(&YesArea, ColorRGBA(0.2f,0.9f,0.2f,0.85f), CUI::CORNER_ALL, Bars.h/3);
+			YesArea.w *= m_Yes / (float)m_Total;
+			RenderTools()->DrawUIRect(&YesArea, ColorRGBA(0.2f, 0.9f, 0.2f, 0.85f), CUI::CORNER_ALL, Bars.h / 3);
 
 			if(Text)
 			{
 				char Buf[256];
 				str_format(Buf, sizeof(Buf), "%d", m_Yes);
-				UI()->DoLabel(&YesArea, Buf, Bars.h*0.75f, 0);
+				UI()->DoLabel(&YesArea, Buf, Bars.h * 0.75f, 0);
 			}
 
 			PassArea.x += YesArea.w;
@@ -313,15 +312,15 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 		if(m_No)
 		{
 			CUIRect NoArea = Bars;
-			NoArea.w *= m_No/(float)m_Total;
-			NoArea.x = (Bars.x + Bars.w)-NoArea.w;
-			RenderTools()->DrawUIRect(&NoArea, ColorRGBA(0.9f,0.2f,0.2f,0.85f), CUI::CORNER_ALL, Bars.h/3);
+			NoArea.w *= m_No / (float)m_Total;
+			NoArea.x = (Bars.x + Bars.w) - NoArea.w;
+			RenderTools()->DrawUIRect(&NoArea, ColorRGBA(0.9f, 0.2f, 0.2f, 0.85f), CUI::CORNER_ALL, Bars.h / 3);
 
 			if(Text)
 			{
 				char Buf[256];
 				str_format(Buf, sizeof(Buf), "%d", m_No);
-				UI()->DoLabel(&NoArea, Buf, Bars.h*0.75f, 0);
+				UI()->DoLabel(&NoArea, Buf, Bars.h * 0.75f, 0);
 			}
 
 			PassArea.w -= NoArea.w;
@@ -331,7 +330,7 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 		{
 			char Buf[256];
 			str_format(Buf, sizeof(Buf), "%d", m_Pass);
-			UI()->DoLabel(&PassArea, Buf, Bars.h*0.75f, 0);
+			UI()->DoLabel(&PassArea, Buf, Bars.h * 0.75f, 0);
 		}
 	}
 }

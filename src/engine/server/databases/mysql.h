@@ -1,8 +1,8 @@
 #ifndef ENGINE_SERVER_DATABASES_MYSQL_H
 #define ENGINE_SERVER_DATABASES_MYSQL_H
 
-#include <engine/server/databases/connection.h>
 #include <atomic>
+#include <engine/server/databases/connection.h>
 #include <memory>
 
 class lock;
@@ -17,13 +17,13 @@ class CMysqlConnection : public IDbConnection
 {
 public:
 	CMysqlConnection(
-			const char *pDatabase,
-			const char *pPrefix,
-			const char *pUser,
-			const char *pPass,
-			const char *pIp,
-			int Port,
-			bool Setup);
+		const char *pDatabase,
+		const char *pPrefix,
+		const char *pUser,
+		const char *pPass,
+		const char *pIp,
+		int Port,
+		bool Setup);
 	virtual ~CMysqlConnection();
 	virtual void Print(IConsole *pConsole, const char *Mode);
 

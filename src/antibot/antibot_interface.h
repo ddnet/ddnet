@@ -2,8 +2,7 @@
 #define ANTIBOT_ANTIBOT_INTERFACE_H
 
 #include "antibot_data.h"
-extern "C"
-{
+extern "C" {
 
 int AntibotAbiVersion();
 void AntibotInit(CAntibotData *pCallbackData);
@@ -25,7 +24,6 @@ void AntibotOnEngineTick(void);
 void AntibotOnEngineClientJoin(int ClientID, bool Sixup);
 void AntibotOnEngineClientDrop(int ClientID, const char *pReason);
 void AntibotOnEngineClientMessage(int ClientID, const void *pData, int Size, int Flags);
-
 }
 
 #endif // ANTIBOT_ANTIBOT_INTERFACE_H

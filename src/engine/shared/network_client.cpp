@@ -1,7 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <base/system.h>
 #include "network.h"
+#include <base/system.h>
 
 bool CNetClient::Open(NETADDR BindAddr, int Flags)
 {
@@ -27,7 +27,6 @@ int CNetClient::Close()
 	// TODO: implement me
 	return 0;
 }
-
 
 int CNetClient::Disconnect(const char *pReason)
 {
@@ -76,14 +75,14 @@ int CNetClient::Recv(CNetChunk *pChunk)
 		bool Sixup = false;
 		if(CNetBase::UnpackPacket(pData, Bytes, &m_RecvUnpacker.m_Data, Sixup) == 0)
 		{
-			if(m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONNLESS)
+			if(m_RecvUnpacker.m_Data.m_Flags & NET_PACKETFLAG_CONNLESS)
 			{
 				pChunk->m_Flags = NETSENDFLAG_CONNLESS;
 				pChunk->m_ClientID = -1;
 				pChunk->m_Address = Addr;
 				pChunk->m_DataSize = m_RecvUnpacker.m_Data.m_DataSize;
 				pChunk->m_pData = m_RecvUnpacker.m_Data.m_aChunkData;
-				if(m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_EXTENDED)
+				if(m_RecvUnpacker.m_Data.m_Flags & NET_PACKETFLAG_EXTENDED)
 				{
 					pChunk->m_Flags |= NETSENDFLAG_EXTENDED;
 					mem_copy(pChunk->m_aExtraData, m_RecvUnpacker.m_Data.m_aExtraData, sizeof(pChunk->m_aExtraData));
@@ -92,8 +91,7 @@ int CNetClient::Recv(CNetChunk *pChunk)
 			}
 			else
 			{
-				if(m_Connection.State() != NET_CONNSTATE_OFFLINE && m_Connection.State() != NET_CONNSTATE_ERROR && net_addr_comp(m_Connection.PeerAddress(), &Addr) == 0
-					&& m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr))
+				if(m_Connection.State() != NET_CONNSTATE_OFFLINE && m_Connection.State() != NET_CONNSTATE_ERROR && net_addr_comp(m_Connection.PeerAddress(), &Addr) == 0 && m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr))
 					m_RecvUnpacker.Start(&Addr, &m_Connection, 0);
 			}
 		}
@@ -109,23 +107,23 @@ int CNetClient::Send(CNetChunk *pChunk)
 		return -1;
 	}
 
-	if(pChunk->m_Flags&NETSENDFLAG_CONNLESS)
+	if(pChunk->m_Flags & NETSENDFLAG_CONNLESS)
 	{
 		// send connectionless packet
 		CNetBase::SendPacketConnless(m_Socket, &pChunk->m_Address, pChunk->m_pData, pChunk->m_DataSize,
-				pChunk->m_Flags&NETSENDFLAG_EXTENDED, pChunk->m_aExtraData);
+			pChunk->m_Flags & NETSENDFLAG_EXTENDED, pChunk->m_aExtraData);
 	}
 	else
 	{
 		int Flags = 0;
 		dbg_assert(pChunk->m_ClientID == 0, "errornous client id");
 
-		if(pChunk->m_Flags&NETSENDFLAG_VITAL)
+		if(pChunk->m_Flags & NETSENDFLAG_VITAL)
 			Flags = NET_CHUNKFLAG_VITAL;
 
 		m_Connection.QueueChunk(Flags, pChunk->m_DataSize, pChunk->m_pData);
 
-		if(pChunk->m_Flags&NETSENDFLAG_FLUSH)
+		if(pChunk->m_Flags & NETSENDFLAG_FLUSH)
 			m_Connection.Flush();
 	}
 	return 0;

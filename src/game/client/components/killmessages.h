@@ -7,6 +7,7 @@
 class CKillMessages : public CComponent
 {
 	int m_SpriteQuadContainerIndex;
+
 public:
 	// kill messages
 	struct CKillMsg

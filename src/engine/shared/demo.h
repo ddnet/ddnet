@@ -30,6 +30,7 @@ class CDemoRecorder : public IDemoRecorder
 
 	void WriteTickMarker(int Tick, int Keyframe);
 	void Write(int Type, const void *pData, int Size);
+
 public:
 	CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool NoMapData = false);
 	CDemoRecorder() {}
@@ -44,7 +45,7 @@ public:
 	bool IsRecording() const { return m_File != 0; }
 	char *GetCurrentFilename() { return m_aCurrentFilename; }
 
-	int Length() const { return (m_LastTickMarker - m_FirstTick)/SERVER_TICK_SPEED; }
+	int Length() const { return (m_LastTickMarker - m_FirstTick) / SERVER_TICK_SPEED; }
 };
 
 class CDemoPlayer : public IDemoPlayer
@@ -79,7 +80,6 @@ public:
 
 private:
 	IListener *m_pListener;
-
 
 	// Playback
 	struct CKeyFrame
@@ -119,7 +119,6 @@ private:
 	int64 m_Time;
 
 public:
-
 	CDemoPlayer(class CSnapshotDelta *m_pSnapshotDelta);
 
 	void SetListener(IListener *pListener);
@@ -141,7 +140,7 @@ public:
 	const char *GetDemoFileName() { return m_aFilename; };
 	int GetDemoType() const;
 
-	int Update(bool RealTime=true);
+	int Update(bool RealTime = true);
 
 	const CPlaybackInfo *Info() const { return &m_Info; }
 	virtual bool IsPlaying() const { return m_File != 0; }

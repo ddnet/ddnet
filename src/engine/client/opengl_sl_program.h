@@ -5,22 +5,23 @@
 
 class CGLSL;
 
-class CGLSLProgram {
+class CGLSLProgram
+{
 public:
 	void CreateProgram();
 	void DeleteProgram();
-	
-	bool AddShader(CGLSL* pShader);
-	
+
+	bool AddShader(CGLSL *pShader);
+
 	void LinkProgram();
 	void UseProgram();
 	GLuint GetProgramID();
-	
-	void DetachShader(CGLSL* pShader);
+
+	void DetachShader(CGLSL *pShader);
 	void DetachShaderByID(GLuint ShaderID);
 	void DetachAllShaders();
-	
-	//Support various types	
+
+	//Support various types
 	void SetUniformVec2(int Loc, int Count, const float *pValue);
 	void SetUniformVec4(int Loc, int Count, const float *pValue);
 	void SetUniform(int Loc, const int Value);
@@ -28,21 +29,23 @@ public:
 	void SetUniform(int Loc, const bool Value);
 	void SetUniform(int Loc, const float Value);
 	void SetUniform(int Loc, int Count, const float *pValues);
-	
+
 	//for performance reason we do not use SetUniform with using strings... save the Locations of the variables instead
-	int GetUniformLoc(const char* Name);
-	
+	int GetUniformLoc(const char *Name);
+
 	CGLSLProgram();
 	virtual ~CGLSLProgram();
-	
+
 protected:
 	GLuint m_ProgramID;
 	bool m_IsLinked;
 };
 
-class CGLSLTWProgram : public CGLSLProgram {
+class CGLSLTWProgram : public CGLSLProgram
+{
 public:
-	CGLSLTWProgram() : m_LocPos(-1), m_LocIsTextured(-1), m_LocTextureSampler(-1), m_LastTextureSampler(-1), m_LastIsTextured(-1)
+	CGLSLTWProgram() :
+		m_LocPos(-1), m_LocIsTextured(-1), m_LocTextureSampler(-1), m_LastTextureSampler(-1), m_LastIsTextured(-1)
 	{
 		m_LastScreen[0] = m_LastScreen[1] = m_LastScreen[2] = m_LastScreen[3] = -1.f;
 	}
@@ -56,9 +59,11 @@ public:
 	float m_LastScreen[4];
 };
 
-class CGLSLTextProgram : public CGLSLTWProgram {
+class CGLSLTextProgram : public CGLSLTWProgram
+{
 public:
-	CGLSLTextProgram() : CGLSLTWProgram()
+	CGLSLTextProgram() :
+		CGLSLTWProgram()
 	{
 		m_LastColor[0] = m_LastColor[1] = m_LastColor[2] = m_LastColor[3] = -1.f;
 		m_LastOutlineColor[0] = m_LastOutlineColor[1] = m_LastOutlineColor[2] = m_LastOutlineColor[3] = -1.f;
@@ -79,13 +84,16 @@ public:
 	int m_LastTextureSize;
 };
 
-class CGLSLPrimitiveProgram : public CGLSLTWProgram {
+class CGLSLPrimitiveProgram : public CGLSLTWProgram
+{
 public:
 };
 
-class CGLSLSpriteProgram : public CGLSLTWProgram {
+class CGLSLSpriteProgram : public CGLSLTWProgram
+{
 public:
-	CGLSLSpriteProgram() : CGLSLTWProgram()
+	CGLSLSpriteProgram() :
+		CGLSLTWProgram()
 	{
 		m_LastRotation = 0.f;
 		m_LastCenter[0] = m_LastCenter[1] = 0.f;
@@ -101,9 +109,11 @@ public:
 	float m_LastVertciesColor[4];
 };
 
-class CGLSLSpriteMultipleProgram : public CGLSLTWProgram {
+class CGLSLSpriteMultipleProgram : public CGLSLTWProgram
+{
 public:
-	CGLSLSpriteMultipleProgram() : CGLSLTWProgram()
+	CGLSLSpriteMultipleProgram() :
+		CGLSLTWProgram()
 	{
 		m_LastCenter[0] = m_LastCenter[1] = 0.f;
 		m_LastVertciesColor[0] = m_LastVertciesColor[1] = m_LastVertciesColor[2] = m_LastVertciesColor[3] = -1.f;
@@ -117,16 +127,19 @@ public:
 	float m_LastVertciesColor[4];
 };
 
-class CGLSLQuadProgram : public CGLSLTWProgram {
+class CGLSLQuadProgram : public CGLSLTWProgram
+{
 public:
 	int m_LocColors;
 	int m_LocOffsets;
 	int m_LocRotations;
 };
 
-class CGLSLTileProgram : public CGLSLTWProgram {
+class CGLSLTileProgram : public CGLSLTWProgram
+{
 public:
-	CGLSLTileProgram() : m_LocColor(-1), m_LocOffset(-1), m_LocDir(-1), m_LocNum(-1), m_LocJumpIndex(-1) {}
+	CGLSLTileProgram() :
+		m_LocColor(-1), m_LocOffset(-1), m_LocDir(-1), m_LocNum(-1), m_LocJumpIndex(-1) {}
 
 	int m_LocColor;
 	int m_LocOffset;

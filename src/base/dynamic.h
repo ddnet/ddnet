@@ -11,5 +11,4 @@
 #define DYNAMIC_IMPORT
 #endif
 
-
 #endif // BASE_DYNAMIC_H

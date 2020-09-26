@@ -2,11 +2,12 @@
 #define ENGINE_CLIENT_GRAPHICS_THREADED_H
 
 #include <engine/graphics.h>
+#include <engine/shared/config.h>
 
 #include <vector>
 
-#define CMD_BUFFER_DATA_BUFFER_SIZE 1024*1024*2
-#define CMD_BUFFER_CMD_BUFFER_SIZE 1024*256
+#define CMD_BUFFER_DATA_BUFFER_SIZE 1024 * 1024 * 2
+#define CMD_BUFFER_CMD_BUFFER_SIZE 1024 * 256
 
 class CCommandBuffer
 {
@@ -15,6 +16,7 @@ class CCommandBuffer
 		unsigned char *m_pData;
 		unsigned m_Size;
 		unsigned m_Used;
+
 	public:
 		CBuffer(unsigned BufferSize)
 		{
@@ -25,7 +27,7 @@ class CCommandBuffer
 
 		~CBuffer()
 		{
-			delete [] m_pData;
+			delete[] m_pData;
 			m_pData = 0x0;
 			m_Used = 0;
 			m_Size = 0;
@@ -56,8 +58,8 @@ public:
 
 	enum
 	{
-		MAX_TEXTURES=1024*4,
-		MAX_VERTICES=32*1024,
+		MAX_TEXTURES = 1024 * 4,
+		MAX_VERTICES = 32 * 1024,
 	};
 
 	enum
@@ -170,7 +172,8 @@ public:
 	struct SCommand
 	{
 	public:
-		SCommand(unsigned Cmd) : m_Cmd(Cmd), m_Size(0) {}
+		SCommand(unsigned Cmd) :
+			m_Cmd(Cmd), m_Size(0) {}
 		unsigned m_Cmd;
 		unsigned m_Size;
 	};
@@ -193,25 +196,29 @@ public:
 
 	struct SCommand_Clear : public SCommand
 	{
-		SCommand_Clear() : SCommand(CMD_CLEAR) {}
+		SCommand_Clear() :
+			SCommand(CMD_CLEAR) {}
 		SColorf m_Color;
 	};
 
 	struct SCommand_Signal : public SCommand
 	{
-		SCommand_Signal() : SCommand(CMD_SIGNAL) {}
+		SCommand_Signal() :
+			SCommand(CMD_SIGNAL) {}
 		semaphore *m_pSemaphore;
 	};
 
 	struct SCommand_RunBuffer : public SCommand
 	{
-		SCommand_RunBuffer() : SCommand(CMD_RUNBUFFER) {}
+		SCommand_RunBuffer() :
+			SCommand(CMD_RUNBUFFER) {}
 		CCommandBuffer *m_pOtherBuffer;
 	};
 
 	struct SCommand_Render : public SCommand
 	{
-		SCommand_Render() : SCommand(CMD_RENDER) {}
+		SCommand_Render() :
+			SCommand(CMD_RENDER) {}
 		SState m_State;
 		unsigned m_PrimType;
 		unsigned m_PrimCount;
@@ -220,8 +227,8 @@ public:
 
 	struct SCommand_RenderTex3D : public SCommand
 	{
-		SCommand_RenderTex3D()
-			: SCommand(CMD_RENDER_TEX3D) {}
+		SCommand_RenderTex3D() :
+			SCommand(CMD_RENDER_TEX3D) {}
 		SState m_State;
 		unsigned m_PrimType;
 		unsigned m_PrimCount;
@@ -230,7 +237,8 @@ public:
 
 	struct SCommand_CreateBufferObject : public SCommand
 	{
-		SCommand_CreateBufferObject() : SCommand(CMD_CREATE_BUFFER_OBJECT) {}
+		SCommand_CreateBufferObject() :
+			SCommand(CMD_CREATE_BUFFER_OBJECT) {}
 
 		int m_BufferIndex;
 
@@ -238,10 +246,10 @@ public:
 		size_t m_DataSize;
 	};
 
-
 	struct SCommand_RecreateBufferObject : public SCommand
 	{
-		SCommand_RecreateBufferObject() : SCommand(CMD_RECREATE_BUFFER_OBJECT) {}
+		SCommand_RecreateBufferObject() :
+			SCommand(CMD_RECREATE_BUFFER_OBJECT) {}
 
 		int m_BufferIndex;
 
@@ -251,7 +259,8 @@ public:
 
 	struct SCommand_UpdateBufferObject : public SCommand
 	{
-		SCommand_UpdateBufferObject() : SCommand(CMD_UPDATE_BUFFER_OBJECT) {}
+		SCommand_UpdateBufferObject() :
+			SCommand(CMD_UPDATE_BUFFER_OBJECT) {}
 
 		int m_BufferIndex;
 
@@ -262,7 +271,8 @@ public:
 
 	struct SCommand_CopyBufferObject : public SCommand
 	{
-		SCommand_CopyBufferObject() : SCommand(CMD_COPY_BUFFER_OBJECT) {}
+		SCommand_CopyBufferObject() :
+			SCommand(CMD_COPY_BUFFER_OBJECT) {}
 
 		int m_WriteBufferIndex;
 		int m_ReadBufferIndex;
@@ -274,38 +284,42 @@ public:
 
 	struct SCommand_DeleteBufferObject : public SCommand
 	{
-		SCommand_DeleteBufferObject() : SCommand(CMD_DELETE_BUFFER_OBJECT) {}
+		SCommand_DeleteBufferObject() :
+			SCommand(CMD_DELETE_BUFFER_OBJECT) {}
 
 		int m_BufferIndex;
 	};
 
 	struct SCommand_CreateBufferContainer : public SCommand
 	{
-		SCommand_CreateBufferContainer() : SCommand(CMD_CREATE_BUFFER_CONTAINER) {}
+		SCommand_CreateBufferContainer() :
+			SCommand(CMD_CREATE_BUFFER_CONTAINER) {}
 
 		int m_BufferContainerIndex;
 
 		int m_Stride;
 
 		int m_AttrCount;
-		SBufferContainerInfo::SAttribute* m_Attributes;
+		SBufferContainerInfo::SAttribute *m_Attributes;
 	};
 
 	struct SCommand_UpdateBufferContainer : public SCommand
 	{
-		SCommand_UpdateBufferContainer() : SCommand(CMD_UPDATE_BUFFER_CONTAINER) {}
+		SCommand_UpdateBufferContainer() :
+			SCommand(CMD_UPDATE_BUFFER_CONTAINER) {}
 
 		int m_BufferContainerIndex;
 
 		int m_Stride;
 
 		int m_AttrCount;
-		SBufferContainerInfo::SAttribute* m_Attributes;
+		SBufferContainerInfo::SAttribute *m_Attributes;
 	};
 
 	struct SCommand_DeleteBufferContainer : public SCommand
 	{
-		SCommand_DeleteBufferContainer() : SCommand(CMD_DELETE_BUFFER_CONTAINER) {}
+		SCommand_DeleteBufferContainer() :
+			SCommand(CMD_DELETE_BUFFER_CONTAINER) {}
 
 		int m_BufferContainerIndex;
 		bool m_DestroyAllBO;
@@ -313,19 +327,21 @@ public:
 
 	struct SCommand_IndicesRequiredNumNotify : public SCommand
 	{
-		SCommand_IndicesRequiredNumNotify() : SCommand(CMD_INDICES_REQUIRED_NUM_NOTIFY) {}
+		SCommand_IndicesRequiredNumNotify() :
+			SCommand(CMD_INDICES_REQUIRED_NUM_NOTIFY) {}
 
 		unsigned int m_RequiredIndicesNum;
 	};
 
 	struct SCommand_RenderTileLayer : public SCommand
 	{
-		SCommand_RenderTileLayer() : SCommand(CMD_RENDER_TILE_LAYER) {}
+		SCommand_RenderTileLayer() :
+			SCommand(CMD_RENDER_TILE_LAYER) {}
 		SState m_State;
 		SColorf m_Color; //the color of the whole tilelayer -- already envelopped
 
 		//the char offset of all indices that should be rendered, and the amount of renders
-		char** m_pIndicesOffsets;
+		char **m_pIndicesOffsets;
 		unsigned int *m_pDrawCount;
 
 		int m_IndicesDrawNum;
@@ -334,7 +350,8 @@ public:
 
 	struct SCommand_RenderBorderTile : public SCommand
 	{
-		SCommand_RenderBorderTile() : SCommand(CMD_RENDER_BORDER_TILE) {}
+		SCommand_RenderBorderTile() :
+			SCommand(CMD_RENDER_BORDER_TILE) {}
 		SState m_State;
 		SColorf m_Color; //the color of the whole tilelayer -- already envelopped
 		char *m_pIndicesOffset; // you should use the command buffer data to allocate vertices for this command
@@ -348,7 +365,8 @@ public:
 
 	struct SCommand_RenderBorderTileLine : public SCommand
 	{
-		SCommand_RenderBorderTileLine() : SCommand(CMD_RENDER_BORDER_TILE_LINE) {}
+		SCommand_RenderBorderTileLine() :
+			SCommand(CMD_RENDER_BORDER_TILE_LINE) {}
 		SState m_State;
 		SColorf m_Color; //the color of the whole tilelayer -- already envelopped
 		char *m_pIndicesOffset; // you should use the command buffer data to allocate vertices for this command
@@ -362,17 +380,19 @@ public:
 
 	struct SCommand_RenderQuadLayer : public SCommand
 	{
-		SCommand_RenderQuadLayer() : SCommand(CMD_RENDER_QUAD_LAYER) {}
+		SCommand_RenderQuadLayer() :
+			SCommand(CMD_RENDER_QUAD_LAYER) {}
 		SState m_State;
 
 		int m_BufferContainerIndex;
-		SQuadRenderInfo* m_pQuadInfo;
+		SQuadRenderInfo *m_pQuadInfo;
 		int m_QuadNum;
 	};
 
 	struct SCommand_RenderText : public SCommand
 	{
-		SCommand_RenderText() : SCommand(CMD_RENDER_TEXT) {}
+		SCommand_RenderText() :
+			SCommand(CMD_RENDER_TEXT) {}
 		SState m_State;
 
 		int m_BufferContainerIndex;
@@ -388,7 +408,8 @@ public:
 
 	struct SCommand_RenderTextStream : public SCommand
 	{
-		SCommand_RenderTextStream() : SCommand(CMD_RENDER_TEXT_STREAM) {}
+		SCommand_RenderTextStream() :
+			SCommand(CMD_RENDER_TEXT_STREAM) {}
 		SState m_State;
 
 		SVertex *m_pVertices;
@@ -405,7 +426,8 @@ public:
 
 	struct SCommand_RenderQuadContainer : public SCommand
 	{
-		SCommand_RenderQuadContainer() : SCommand(CMD_RENDER_QUAD_CONTAINER) {}
+		SCommand_RenderQuadContainer() :
+			SCommand(CMD_RENDER_QUAD_CONTAINER) {}
 		SState m_State;
 
 		int m_BufferContainerIndex;
@@ -416,7 +438,8 @@ public:
 
 	struct SCommand_RenderQuadContainerAsSprite : public SCommand
 	{
-		SCommand_RenderQuadContainerAsSprite() : SCommand(CMD_RENDER_QUAD_CONTAINER_SPRITE) {}
+		SCommand_RenderQuadContainerAsSprite() :
+			SCommand(CMD_RENDER_QUAD_CONTAINER_SPRITE) {}
 		SState m_State;
 
 		int m_BufferContainerIndex;
@@ -432,7 +455,8 @@ public:
 
 	struct SCommand_RenderQuadContainerAsSpriteMultiple : public SCommand
 	{
-		SCommand_RenderQuadContainerAsSpriteMultiple() : SCommand(CMD_RENDER_QUAD_CONTAINER_SPRITE_MULTIPLE) {}
+		SCommand_RenderQuadContainerAsSpriteMultiple() :
+			SCommand(CMD_RENDER_QUAD_CONTAINER_SPRITE_MULTIPLE) {}
 		SState m_State;
 
 		int m_BufferContainerIndex;
@@ -449,13 +473,15 @@ public:
 
 	struct SCommand_Screenshot : public SCommand
 	{
-		SCommand_Screenshot() : SCommand(CMD_SCREENSHOT) {}
+		SCommand_Screenshot() :
+			SCommand(CMD_SCREENSHOT) {}
 		CImageInfo *m_pImage; // processor will fill this out, the one who adds this command must free the data as well
 	};
 
 	struct SCommand_VideoModes : public SCommand
 	{
-		SCommand_VideoModes() : SCommand(CMD_VIDEOMODES) {}
+		SCommand_VideoModes() :
+			SCommand(CMD_VIDEOMODES) {}
 
 		CVideoMode *m_pModes; // processor will fill this in
 		int m_MaxModes; // maximum of modes the processor can write to the m_pModes
@@ -465,14 +491,16 @@ public:
 
 	struct SCommand_Swap : public SCommand
 	{
-		SCommand_Swap() : SCommand(CMD_SWAP) {}
+		SCommand_Swap() :
+			SCommand(CMD_SWAP) {}
 
 		int m_Finish;
 	};
 
 	struct SCommand_VSync : public SCommand
 	{
-		SCommand_VSync() : SCommand(CMD_VSYNC) {}
+		SCommand_VSync() :
+			SCommand(CMD_VSYNC) {}
 
 		int m_VSync;
 		bool *m_pRetOk;
@@ -480,7 +508,8 @@ public:
 
 	struct SCommand_Resize : public SCommand
 	{
-		SCommand_Resize() : SCommand(CMD_RESIZE) {}
+		SCommand_Resize() :
+			SCommand(CMD_RESIZE) {}
 
 		int m_Width;
 		int m_Height;
@@ -488,7 +517,8 @@ public:
 
 	struct SCommand_Texture_Create : public SCommand
 	{
-		SCommand_Texture_Create() : SCommand(CMD_TEXTURE_CREATE) {}
+		SCommand_Texture_Create() :
+			SCommand(CMD_TEXTURE_CREATE) {}
 
 		// texture information
 		int m_Slot;
@@ -504,7 +534,8 @@ public:
 
 	struct SCommand_Texture_Update : public SCommand
 	{
-		SCommand_Texture_Update() : SCommand(CMD_TEXTURE_UPDATE) {}
+		SCommand_Texture_Update() :
+			SCommand(CMD_TEXTURE_UPDATE) {}
 
 		// texture information
 		int m_Slot;
@@ -517,18 +548,18 @@ public:
 		void *m_pData; // will be freed by the command processor
 	};
 
-
 	struct SCommand_Texture_Destroy : public SCommand
 	{
-		SCommand_Texture_Destroy() : SCommand(CMD_TEXTURE_DESTROY) {}
+		SCommand_Texture_Destroy() :
+			SCommand(CMD_TEXTURE_DESTROY) {}
 
 		// texture information
 		int m_Slot;
 	};
 
 	//
-	CCommandBuffer(unsigned CmdBufferSize, unsigned DataBufferSize)
-	: m_CmdBuffer(CmdBufferSize), m_DataBuffer(DataBufferSize)
+	CCommandBuffer(unsigned CmdBufferSize, unsigned DataBufferSize) :
+		m_CmdBuffer(CmdBufferSize), m_DataBuffer(DataBufferSize)
 	{
 	}
 
@@ -589,11 +620,11 @@ class IGraphicsBackend
 public:
 	enum
 	{
-		INITFLAG_FULLSCREEN = 1<<0,
-		INITFLAG_VSYNC = 1<<1,
-		INITFLAG_RESIZABLE = 1<<2,
-		INITFLAG_BORDERLESS = 1<<3,
-		INITFLAG_HIGHDPI = 1<<4,
+		INITFLAG_FULLSCREEN = 1 << 0,
+		INITFLAG_VSYNC = 1 << 1,
+		INITFLAG_RESIZABLE = 1 << 2,
+		INITFLAG_BORDERLESS = 1 << 3,
+		INITFLAG_HIGHDPI = 1 << 4,
 	};
 
 	virtual ~IGraphicsBackend() {}
@@ -634,11 +665,11 @@ class CGraphics_Threaded : public IEngineGraphics
 	{
 		NUM_CMDBUFFERS = 2,
 
-		MAX_VERTICES = 32*1024,
-		MAX_TEXTURES = 1024*4,
+		MAX_VERTICES = 32 * 1024,
+		MAX_TEXTURES = 1024 * 4,
 
-		DRAWING_QUADS=1,
-		DRAWING_LINES=2
+		DRAWING_QUADS = 1,
+		DRAWING_LINES = 2
 	};
 
 	CCommandBuffer::SState m_State;
@@ -684,7 +715,8 @@ class CGraphics_Threaded : public IEngineGraphics
 
 	struct SVertexArrayInfo
 	{
-		SVertexArrayInfo() : m_FreeIndex(-1) {}
+		SVertexArrayInfo() :
+			m_FreeIndex(-1) {}
 		// keep a reference to them, so we can free their IDs
 		std::vector<int> m_AssociatedBufferObjectIndices;
 
@@ -710,7 +742,6 @@ class CGraphics_Threaded : public IEngineGraphics
 			CCommandBuffer::SVertex m_aVertices[4];
 		};
 
-
 		std::vector<SQuad> m_Quads;
 
 		int m_QuadBufferObjectIndex;
@@ -723,13 +754,14 @@ class CGraphics_Threaded : public IEngineGraphics
 
 	struct SWindowResizeListener
 	{
-		SWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser) : m_pFunc(pFunc), m_pUser(pUser) {}
+		SWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser) :
+			m_pFunc(pFunc), m_pUser(pUser) {}
 		WINDOW_RESIZE_FUNC m_pFunc;
 		void *m_pUser;
 	};
 	std::vector<SWindowResizeListener> m_ResizeListeners;
 
-	void* AllocCommandBufferData(unsigned AllocSize);
+	void *AllocCommandBufferData(unsigned AllocSize);
 
 	void AddVertices(int Count);
 	void AddVertices(int Count, CCommandBuffer::SVertex *pVertices);
@@ -757,6 +789,7 @@ class CGraphics_Threaded : public IEngineGraphics
 
 	int IssueInit();
 	int InitWindow();
+
 public:
 	CGraphics_Threaded();
 

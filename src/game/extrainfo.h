@@ -3,6 +3,8 @@
 #ifndef GAME_EXTRAINFO_H
 #define GAME_EXTRAINFO_H
 
+#include <game/generated/protocol.h>
+
 #include <base/vmath.h>
 
 bool UseExtraInfo(const CNetObj_Projectile *pProj);

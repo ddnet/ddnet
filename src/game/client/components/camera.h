@@ -32,6 +32,7 @@ class CCamera : public CComponent
 
 	float MinZoomLevel();
 	float MaxZoomLevel();
+
 public:
 	vec2 m_Center;
 	bool m_ZoomSet;

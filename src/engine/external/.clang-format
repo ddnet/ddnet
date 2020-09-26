@@ -1,0 +1,3 @@
+DisableFormat: true
+# clang-format bug: still sorts includes even if disabled
+SortIncludes: false

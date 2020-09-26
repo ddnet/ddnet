@@ -10,17 +10,18 @@ class CLineInput
 {
 	enum
 	{
-		MAX_SIZE=512,
-		MAX_CHARS=MAX_SIZE/2,
+		MAX_SIZE = 512,
+		MAX_CHARS = MAX_SIZE / 2,
 	};
 	char m_Str[MAX_SIZE];
 	int m_Len;
 	int m_CursorPos;
 	int m_NumChars;
 
-	char m_DisplayStr[MAX_SIZE+34];
+	char m_DisplayStr[MAX_SIZE + 34];
 	int m_FakeLen;
 	int m_FakeCursorPos;
+
 public:
 	static bool Manipulate(IInput::CEvent e, char *pStr, int StrMaxSize, int StrMaxChars, int *pStrLenPtr, int *pCursorPosPtr, int *pNumCharsPtr);
 

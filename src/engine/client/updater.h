@@ -1,8 +1,8 @@
 #ifndef ENGINE_CLIENT_UPDATER_H
 #define ENGINE_CLIENT_UPDATER_H
 
-#include <engine/updater.h>
 #include <engine/client/http.h>
+#include <engine/updater.h>
 #include <map>
 #include <string>
 
@@ -10,20 +10,20 @@
 #define SERVER_EXEC "DDNet-Server"
 
 #if defined(CONF_FAMILY_WINDOWS)
-	#define PLAT_EXT ".exe"
-	#define PLAT_NAME CONF_PLATFORM_STRING
+#define PLAT_EXT ".exe"
+#define PLAT_NAME CONF_PLATFORM_STRING
 #elif defined(CONF_FAMILY_UNIX)
-	#define PLAT_EXT ""
-	#if defined(CONF_ARCH_IA32)
-		#define PLAT_NAME CONF_PLATFORM_STRING "-x86"
-	#elif defined(CONF_ARCH_AMD64)
-		#define PLAT_NAME CONF_PLATFORM_STRING "-x86_64"
-	#else
-		#define PLAT_NAME CONF_PLATFORM_STRING "-unsupported"
-	#endif
+#define PLAT_EXT ""
+#if defined(CONF_ARCH_IA32)
+#define PLAT_NAME CONF_PLATFORM_STRING "-x86"
+#elif defined(CONF_ARCH_AMD64)
+#define PLAT_NAME CONF_PLATFORM_STRING "-x86_64"
 #else
-	#define PLAT_EXT ""
-	#define PLAT_NAME "unsupported-unsupported"
+#define PLAT_NAME CONF_PLATFORM_STRING "-unsupported"
+#endif
+#else
+#define PLAT_EXT ""
+#define PLAT_NAME "unsupported-unsupported"
 #endif
 
 #define PLAT_CLIENT_DOWN CLIENT_EXEC "-" PLAT_NAME PLAT_EXT

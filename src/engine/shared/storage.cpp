@@ -1,9 +1,9 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "linereader.h"
 #include <base/math.h>
 #include <base/system.h>
 #include <engine/storage.h>
-#include "linereader.h"
 
 class CStorage : public IStorage
 {
@@ -86,7 +86,7 @@ public:
 			if(Pos < MAX_PATH_LENGTH)
 			{
 				char aBuffer[MAX_PATH_LENGTH];
-				str_copy(aBuffer, pArgv0, Pos+1);
+				str_copy(aBuffer, pArgv0, Pos + 1);
 				str_append(aBuffer, "/storage.cfg", sizeof(aBuffer));
 				File = io_open(aBuffer, IOFLAG_READ);
 			}
@@ -170,19 +170,19 @@ public:
 			return;
 		}
 
-	#if defined(DATA_DIR)
+#if defined(DATA_DIR)
 		// 2) use compiled-in data-dir if present
 		if(fs_is_dir(DATA_DIR "/mapres"))
 		{
 			str_copy(m_aDatadir, DATA_DIR, sizeof(m_aDatadir));
-		#if defined(BINARY_DIR)
+#if defined(BINARY_DIR)
 			str_copy(m_aBinarydir, BINARY_DIR, sizeof(m_aBinarydir));
-		#else
+#else
 			str_copy(m_aBinarydir, DATA_DIR "/..", sizeof(m_aBinarydir));
-		#endif
+#endif
 			return;
 		}
-	#endif
+#endif
 
 		// 3) check for usable path in argv[0]
 		{
@@ -194,7 +194,7 @@ public:
 			if(Pos < MAX_PATH_LENGTH)
 			{
 				char aBuf[MAX_PATH_LENGTH];
-				str_copy(m_aBinarydir, pArgv0, Pos+1);
+				str_copy(m_aBinarydir, pArgv0, Pos + 1);
 				str_format(aBuf, sizeof(aBuf), "%s/data/mapres", m_aBinarydir);
 				if(fs_is_dir(aBuf))
 				{
@@ -206,7 +206,7 @@ public:
 			}
 		}
 
-	#if defined(CONF_FAMILY_UNIX)
+#if defined(CONF_FAMILY_UNIX)
 		// 4) check for all default locations
 		{
 			const char *aDirs[] = {
@@ -216,12 +216,11 @@ public:
 				"/usr/local/share/games/ddnet",
 				"/usr/pkg/share/ddnet",
 				"/usr/pkg/share/games/ddnet",
-				"/opt/ddnet"
-			};
+				"/opt/ddnet"};
 			const int DirsCount = sizeof(aDirs) / sizeof(aDirs[0]);
 
 			int i;
-			for (i = 0; i < DirsCount; i++)
+			for(i = 0; i < DirsCount; i++)
 			{
 				char aBuf[128];
 				str_format(aBuf, sizeof(aBuf), "%s/data/mapres", aDirs[i]);
@@ -233,12 +232,11 @@ public:
 				}
 			}
 		}
-	#endif
+#endif
 
 		// no data-dir found
 		dbg_msg("storage", "warning no data directory found");
 	}
-
 
 	virtual void ListDirectoryInfo(int Type, const char *pPath, FS_LISTDIR_INFO_CALLBACK pfnCallback, void *pUser)
 	{
@@ -303,14 +301,14 @@ public:
 			pFilename = pFilename + 10; // just start from skins/
 		}
 		if(pFilename[0] == '/' || pFilename[0] == '\\' || str_find(pFilename, "../") != NULL || str_find(pFilename, "..\\") != NULL
-		#ifdef CONF_FAMILY_WINDOWS
+#ifdef CONF_FAMILY_WINDOWS
 			|| (pFilename[0] && pFilename[1] == ':')
-		#endif
+#endif
 		)
 		{
 			// don't escape base directory
 		}
-		else if(Flags&IOFLAG_WRITE)
+		else if(Flags & IOFLAG_WRITE)
 		{
 			return io_open(GetPath(TYPE_SAVE, pFilename, pBuffer, BufferSize), Flags);
 		}

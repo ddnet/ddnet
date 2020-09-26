@@ -5,8 +5,8 @@
 
 #include <engine/storage.h>
 
-#include <base/system.h>
 #include <base/hash.h>
+#include <base/system.h>
 
 // raw datafile access
 class CDataFileReader
@@ -19,7 +19,8 @@ class CDataFileReader
 	int GetInternalItemType(int ExternalType);
 
 public:
-	CDataFileReader() : m_pDataFile(0) {}
+	CDataFileReader() :
+		m_pDataFile(0) {}
 	~CDataFileReader() { Close(); }
 
 	bool IsOpen() const { return m_pDataFile != 0; }
@@ -75,10 +76,10 @@ class CDataFileWriter
 
 	enum
 	{
-		MAX_ITEM_TYPES=0x10000,
-		MAX_ITEMS=1024,
-		MAX_DATAS=1024,
-		MAX_EXTENDED_ITEM_TYPES=64,
+		MAX_ITEM_TYPES = 0x10000,
+		MAX_ITEMS = 1024,
+		MAX_DATAS = 1024,
+		MAX_EXTENDED_ITEM_TYPES = 64,
 	};
 
 	IOHANDLE m_File;
@@ -104,6 +105,5 @@ public:
 	int AddItem(int Type, int ID, int Size, void *pData);
 	int Finish();
 };
-
 
 #endif

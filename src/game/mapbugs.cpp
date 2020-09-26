@@ -12,8 +12,8 @@ struct CMapDescription
 	bool operator==(const CMapDescription &Other) const
 	{
 		return str_comp(m_pName, Other.m_pName) == 0 &&
-			m_Size == Other.m_Size &&
-			m_Crc == Other.m_Crc;
+		       m_Size == Other.m_Size &&
+		       m_Crc == Other.m_Crc;
 	}
 };
 
@@ -43,9 +43,8 @@ static SHA256_DIGEST s(const char *pSha256)
 }
 
 static CMapBugsInternal MAP_BUGS[] =
-{
-	{{"Binary", 2022597, s("65b410e197fd2298ec270e89a84b762f6739d1d18089529f8ef6cf2104d3d600"), 0x0ae3a3d5}, BugToFlag(BUG_GRENADE_DOUBLEEXPLOSION)}
-};
+	{
+		{{"Binary", 2022597, s("65b410e197fd2298ec270e89a84b762f6739d1d18089529f8ef6cf2104d3d600"), 0x0ae3a3d5}, BugToFlag(BUG_GRENADE_DOUBLEEXPLOSION)}};
 
 CMapBugs GetMapBugs(const char *pName, int Size, SHA256_DIGEST Sha256, int Crc)
 {
@@ -79,7 +78,8 @@ int CMapBugs::Update(const char *pBug)
 	CMapBugsInternal *pInternal = (CMapBugsInternal *)m_pData;
 	int Bug = -1;
 	if(false) {}
-#define MAPBUG(constname, string) else if(str_comp(pBug, string) == 0) { Bug = constname; }
+#define MAPBUG(constname, string) \
+	else if(str_comp(pBug, string) == 0) { Bug = constname; }
 #include "mapbugs_list.h"
 #undef MAPBUG
 	if(Bug == -1)

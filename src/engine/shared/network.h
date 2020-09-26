@@ -3,8 +3,8 @@
 #ifndef ENGINE_SHARED_NETWORK_H
 #define ENGINE_SHARED_NETWORK_H
 
-#include "ringbuffer.h"
 #include "huffman.h"
+#include "ringbuffer.h"
 
 #include <base/math.h>
 
@@ -34,61 +34,60 @@ CURRENT:
 
 enum
 {
-	NETFLAG_ALLOWSTATELESS=1,
-	NETSENDFLAG_VITAL=1,
-	NETSENDFLAG_CONNLESS=2,
-	NETSENDFLAG_FLUSH=4,
-	NETSENDFLAG_EXTENDED=8,
+	NETFLAG_ALLOWSTATELESS = 1,
+	NETSENDFLAG_VITAL = 1,
+	NETSENDFLAG_CONNLESS = 2,
+	NETSENDFLAG_FLUSH = 4,
+	NETSENDFLAG_EXTENDED = 8,
 
-	NETSTATE_OFFLINE=0,
+	NETSTATE_OFFLINE = 0,
 	NETSTATE_CONNECTING,
 	NETSTATE_ONLINE,
 
-	NETBANTYPE_SOFT=1,
-	NETBANTYPE_DROP=2
+	NETBANTYPE_SOFT = 1,
+	NETBANTYPE_DROP = 2
 };
-
 
 enum
 {
 	NET_VERSION = 2,
 
 	NET_MAX_PACKETSIZE = 1400,
-	NET_MAX_PAYLOAD = NET_MAX_PACKETSIZE-6,
+	NET_MAX_PAYLOAD = NET_MAX_PACKETSIZE - 6,
 	NET_MAX_CHUNKHEADERSIZE = 5,
 	NET_PACKETHEADERSIZE = 3,
 	NET_MAX_CLIENTS = 64,
 	NET_MAX_CONSOLE_CLIENTS = 4,
-	NET_MAX_SEQUENCE = 1<<10,
-	NET_SEQUENCE_MASK = NET_MAX_SEQUENCE-1,
+	NET_MAX_SEQUENCE = 1 << 10,
+	NET_SEQUENCE_MASK = NET_MAX_SEQUENCE - 1,
 
-	NET_CONNSTATE_OFFLINE=0,
-	NET_CONNSTATE_CONNECT=1,
-	NET_CONNSTATE_PENDING=2,
-	NET_CONNSTATE_ONLINE=3,
-	NET_CONNSTATE_ERROR=4,
+	NET_CONNSTATE_OFFLINE = 0,
+	NET_CONNSTATE_CONNECT = 1,
+	NET_CONNSTATE_PENDING = 2,
+	NET_CONNSTATE_ONLINE = 3,
+	NET_CONNSTATE_ERROR = 4,
 
-	NET_PACKETFLAG_UNUSED=1<<0,
-	NET_PACKETFLAG_TOKEN=1<<1,
-	NET_PACKETFLAG_CONTROL=1<<2,
-	NET_PACKETFLAG_CONNLESS=1<<3,
-	NET_PACKETFLAG_RESEND=1<<4,
-	NET_PACKETFLAG_COMPRESSION=1<<5,
+	NET_PACKETFLAG_UNUSED = 1 << 0,
+	NET_PACKETFLAG_TOKEN = 1 << 1,
+	NET_PACKETFLAG_CONTROL = 1 << 2,
+	NET_PACKETFLAG_CONNLESS = 1 << 3,
+	NET_PACKETFLAG_RESEND = 1 << 4,
+	NET_PACKETFLAG_COMPRESSION = 1 << 5,
 	// NOT SENT VIA THE NETWORK DIRECTLY:
-	NET_PACKETFLAG_EXTENDED=1<<6,
+	NET_PACKETFLAG_EXTENDED = 1 << 6,
 
-	NET_CHUNKFLAG_VITAL=1,
-	NET_CHUNKFLAG_RESEND=2,
+	NET_CHUNKFLAG_VITAL = 1,
+	NET_CHUNKFLAG_RESEND = 2,
 
-	NET_CTRLMSG_KEEPALIVE=0,
-	NET_CTRLMSG_CONNECT=1,
-	NET_CTRLMSG_CONNECTACCEPT=2,
-	NET_CTRLMSG_ACCEPT=3,
-	NET_CTRLMSG_CLOSE=4,
+	NET_CTRLMSG_KEEPALIVE = 0,
+	NET_CTRLMSG_CONNECT = 1,
+	NET_CTRLMSG_CONNECTACCEPT = 2,
+	NET_CTRLMSG_ACCEPT = 3,
+	NET_CTRLMSG_CLOSE = 4,
 
-	NET_CONN_BUFFERSIZE=1024*32,
+	NET_CONN_BUFFERSIZE = 1024 * 32,
 
-	NET_CONNLIMIT_IPS=16,
+	NET_CONNLIMIT_IPS = 16,
 
 	NET_ENUM_TERMINATOR
 };
@@ -158,13 +157,13 @@ public:
 	unsigned char m_aExtraData[4];
 };
 
-
 class CNetConnection
 {
 	// TODO: is this needed because this needs to be aware of
 	// the ack sequencing number and is also responible for updating
 	// that. this should be fixed.
 	friend class CNetRecvUnpacker;
+
 private:
 	unsigned short m_Sequence;
 	unsigned short m_Ack;
@@ -206,7 +205,7 @@ public:
 	bool m_TimeoutProtected;
 	bool m_TimeoutSituation;
 
-	void Reset(bool Rejoin=false);
+	void Reset(bool Rejoin = false);
 	void Init(NETSOCKET Socket, bool BlockCloseMsg);
 	int Connect(NETADDR *pAddr);
 	void Disconnect(const char *pReason);
@@ -323,7 +322,6 @@ class CNetServer
 	NETFUNC_CLIENTREJOIN m_pfnClientRejoin;
 	void *m_UserPtr;
 
-
 	int m_NumConAttempts; // log flooding attacks
 	int64 m_TimeNumConAttempts;
 	unsigned char m_SecurityTokenSeed[16];
@@ -344,7 +342,7 @@ class CNetServer
 	int GetClientSlot(const NETADDR &Addr);
 	void SendControl(NETADDR &Addr, int ControlMsg, const void *pExtra, int ExtraSize, SECURITY_TOKEN SecurityToken);
 
-	int TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, bool VanillaAuth=false, bool Sixup=false, SECURITY_TOKEN Token=0);
+	int TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, bool VanillaAuth = false, bool Sixup = false, SECURITY_TOKEN Token = 0);
 	int NumClientsWithAddr(NETADDR Addr);
 	bool Connlimit(NETADDR Addr);
 	void SendMsgs(NETADDR &Addr, const CMsgPacker *Msgs[], int num);
@@ -429,13 +427,12 @@ public:
 	class CNetBan *NetBan() const { return m_pNetBan; }
 };
 
-
-
 // client side
 class CNetClient
 {
 	CNetConnection m_Connection;
 	CNetRecvUnpacker m_RecvUnpacker;
+
 public:
 	NETSOCKET m_Socket;
 	MMSGS m_MMSGS;
@@ -466,14 +463,13 @@ public:
 	bool SecurityTokenUnknown() { return m_Connection.SecurityToken() == NET_SECURITY_TOKEN_UNKNOWN; }
 };
 
-
-
 // TODO: both, fix these. This feels like a junk class for stuff that doesn't fit anywere
 class CNetBase
 {
 	static IOHANDLE ms_DataLogSent;
 	static IOHANDLE ms_DataLogRecv;
 	static CHuffman ms_Huffman;
+
 public:
 	static void OpenLog(IOHANDLE DataLogSent, IOHANDLE DataLogRecv);
 	static void CloseLog();
@@ -485,11 +481,10 @@ public:
 	static void SendPacketConnless(NETSOCKET Socket, NETADDR *pAddr, const void *pData, int DataSize, bool Extended, unsigned char aExtra[4]);
 	static void SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct *pPacket, SECURITY_TOKEN SecurityToken, bool Sixup = false, bool NoCompress = false);
 
-	static int UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool& Sixup, SECURITY_TOKEN *SecurityToken = 0, SECURITY_TOKEN *ResponseToken = 0);
+	static int UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool &Sixup, SECURITY_TOKEN *SecurityToken = 0, SECURITY_TOKEN *ResponseToken = 0);
 
 	// The backroom is ack-NET_MAX_SEQUENCE/2. Used for knowing if we acked a packet or not
 	static int IsSeqInBackroom(int Seq, int Ack);
 };
-
 
 #endif

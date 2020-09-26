@@ -2,8 +2,8 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
 #include <base/math.h>
-#include <game/generated/protocol.h>
 #include <game/generated/client_data.h>
+#include <game/generated/protocol.h>
 
 #include "animstate.h"
 
@@ -28,18 +28,18 @@ static void AnimSeqEval(CAnimSequence *pSeq, float Time, CAnimKeyframe *pFrame)
 		float Blend = 0.0f;
 
 		// TODO: make this smarter.. binary search
-		for (int i = 1; i < pSeq->m_NumFrames; i++)
+		for(int i = 1; i < pSeq->m_NumFrames; i++)
 		{
-			if (pSeq->m_aFrames[i-1].m_Time <= Time && pSeq->m_aFrames[i].m_Time >= Time)
+			if(pSeq->m_aFrames[i - 1].m_Time <= Time && pSeq->m_aFrames[i].m_Time >= Time)
 			{
-				pFrame1 = &pSeq->m_aFrames[i-1];
+				pFrame1 = &pSeq->m_aFrames[i - 1];
 				pFrame2 = &pSeq->m_aFrames[i];
 				Blend = (Time - pFrame1->m_Time) / (pFrame2->m_Time - pFrame1->m_Time);
 				break;
 			}
 		}
 
-		if (pFrame1 && pFrame2)
+		if(pFrame1 && pFrame2)
 		{
 			pFrame->m_Time = Time;
 			pFrame->m_X = mix(pFrame1->m_X, pFrame2->m_X, Blend);
@@ -51,9 +51,9 @@ static void AnimSeqEval(CAnimSequence *pSeq, float Time, CAnimKeyframe *pFrame)
 
 static void AnimAddKeyframe(CAnimKeyframe *pSeq, CAnimKeyframe *pAdded, float Amount)
 {
-	pSeq->m_X += pAdded->m_X*Amount;
-	pSeq->m_Y += pAdded->m_Y*Amount;
-	pSeq->m_Angle += pAdded->m_Angle*Amount;
+	pSeq->m_X += pAdded->m_X * Amount;
+	pSeq->m_Y += pAdded->m_Y * Amount;
+	pSeq->m_Angle += pAdded->m_Angle * Amount;
 }
 
 static void AnimAdd(CAnimState *pState, CAnimState *pAdded, float Amount)
@@ -63,7 +63,6 @@ static void AnimAdd(CAnimState *pState, CAnimState *pAdded, float Amount)
 	AnimAddKeyframe(pState->GetFrontFoot(), pAdded->GetFrontFoot(), Amount);
 	AnimAddKeyframe(pState->GetAttach(), pAdded->GetAttach(), Amount);
 }
-
 
 void CAnimState::Set(CAnimation *pAnim, float Time)
 {

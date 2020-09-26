@@ -63,10 +63,10 @@ class CImageInfo
 public:
 	enum
 	{
-		FORMAT_AUTO=-1,
-		FORMAT_RGB=0,
-		FORMAT_RGBA=1,
-		FORMAT_ALPHA=2,
+		FORMAT_AUTO = -1,
+		FORMAT_RGB = 0,
+		FORMAT_RGBA = 1,
+		FORMAT_ALPHA = 2,
 	};
 
 	/* Variable: width
@@ -120,7 +120,10 @@ struct GL_SColorf
 };
 
 //use normalized color values
-struct GL_SColor { unsigned char r, g, b, a; };
+struct GL_SColor
+{
+	unsigned char r, g, b, a;
+};
 
 struct GL_SVertex
 {
@@ -145,12 +148,13 @@ struct GL_SVertexTex3DStream
 
 struct SGraphicsWarning
 {
-	SGraphicsWarning() : m_WasShown(false) {}
+	SGraphicsWarning() :
+		m_WasShown(false) {}
 	char m_aWarningMsg[128];
 	bool m_WasShown;
 };
 
-typedef void(*WINDOW_RESIZE_FUNC)(void *pUser);
+typedef void (*WINDOW_RESIZE_FUNC)(void *pUser);
 
 class IGraphics : public IInterface
 {
@@ -160,15 +164,16 @@ protected:
 	int m_ScreenHeight;
 	int m_DesktopScreenWidth;
 	int m_DesktopScreenHeight;
+
 public:
 	/* Constants: Texture Loading Flags
 		TEXLOAD_NORESAMPLE - Prevents the texture from any resampling
 	*/
 	enum
 	{
-		TEXLOAD_NORESAMPLE = 1<<0,
-		TEXLOAD_NOMIPMAPS = 1<<1,
-		TEXLOAD_NO_COMPRESSION = 1<<2,
+		TEXLOAD_NORESAMPLE = 1 << 0,
+		TEXLOAD_NOMIPMAPS = 1 << 1,
+		TEXLOAD_NO_COMPRESSION = 1 << 2,
 		TEXLOAD_TO_3D_TEXTURE = (1 << 3),
 		TEXLOAD_TO_2D_ARRAY_TEXTURE = (1 << 4),
 		TEXLOAD_TO_3D_TEXTURE_SINGLE_LAYER = (1 << 5),
@@ -176,22 +181,23 @@ public:
 		TEXLOAD_NO_2D_TEXTURE = (1 << 7),
 	};
 
-
 	class CTextureHandle
 	{
 		friend class IGraphics;
 		int m_Id;
+
 	public:
-		CTextureHandle()
-		: m_Id(-1)
-		{}
+		CTextureHandle() :
+			m_Id(-1)
+		{
+		}
 
 		operator int() const { return m_Id; }
 	};
 
 	int ScreenWidth() const { return m_ScreenWidth; }
 	int ScreenHeight() const { return m_ScreenHeight; }
-	float ScreenAspect() const { return (float)ScreenWidth()/(float)ScreenHeight(); }
+	float ScreenAspect() const { return (float)ScreenWidth() / (float)ScreenHeight(); }
 
 	virtual bool Fullscreen(bool State) = 0;
 	virtual void SetWindowBordered(bool State) = 0;
@@ -263,7 +269,8 @@ public:
 	{
 		float m_X0, m_Y0, m_X1, m_Y1;
 		CLineItem() {}
-		CLineItem(float x0, float y0, float x1, float y1) : m_X0(x0), m_Y0(y0), m_X1(x1), m_Y1(y1) {}
+		CLineItem(float x0, float y0, float x1, float y1) :
+			m_X0(x0), m_Y0(y0), m_X1(x1), m_Y1(y1) {}
 	};
 	virtual void LinesBegin() = 0;
 	virtual void LinesEnd() = 0;
@@ -285,8 +292,15 @@ public:
 	{
 		float m_X, m_Y, m_Width, m_Height;
 		CQuadItem() {}
-		CQuadItem(float x, float y, float w, float h) : m_X(x), m_Y(y), m_Width(w), m_Height(h) {}
-		void Set(float x, float y, float w, float h) { m_X = x; m_Y = y; m_Width = w; m_Height = h; }
+		CQuadItem(float x, float y, float w, float h) :
+			m_X(x), m_Y(y), m_Width(w), m_Height(h) {}
+		void Set(float x, float y, float w, float h)
+		{
+			m_X = x;
+			m_Y = y;
+			m_Width = w;
+			m_Height = h;
+		}
 	};
 	virtual void QuadsDraw(CQuadItem *pArray, int Num) = 0;
 	virtual void QuadsDrawTL(const CQuadItem *pArray, int Num) = 0;
@@ -297,8 +311,8 @@ public:
 	{
 		float m_X0, m_Y0, m_X1, m_Y1, m_X2, m_Y2, m_X3, m_Y3;
 		CFreeformItem() {}
-		CFreeformItem(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3)
-			: m_X0(x0), m_Y0(y0), m_X1(x1), m_Y1(y1), m_X2(x2), m_Y2(y2), m_X3(x3), m_Y3(y3) {}
+		CFreeformItem(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3) :
+			m_X0(x0), m_Y0(y0), m_X1(x1), m_Y1(y1), m_X2(x2), m_Y2(y2), m_X3(x3), m_Y3(y3) {}
 	};
 
 	virtual int CreateQuadContainer() = 0;
@@ -328,7 +342,8 @@ public:
 		int m_Index;
 		float m_R, m_G, m_B, m_A;
 		CColorVertex() {}
-		CColorVertex(int i, float r, float g, float b, float a) : m_Index(i), m_R(r), m_G(g), m_B(b), m_A(a) {}
+		CColorVertex(int i, float r, float g, float b, float a) :
+			m_Index(i), m_R(r), m_G(g), m_B(b), m_A(a) {}
 	};
 	virtual void SetColorVertex(const CColorVertex *pArray, int Num) = 0;
 	virtual void SetColor(float r, float g, float b, float a) = 0;
@@ -353,6 +368,7 @@ public:
 	virtual void NotifyWindow() = 0;
 
 	virtual SGraphicsWarning *GetCurWarning() = 0;
+
 protected:
 	inline CTextureHandle CreateTextureHandle(int Index)
 	{
