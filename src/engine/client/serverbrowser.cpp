@@ -193,31 +193,6 @@ void CServerBrowser::Filter()
 			Filtered = 1;
 		else if(g_Config.m_BrFilterPw && m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_PASSWORD)
 			Filtered = 1;
-		else if(g_Config.m_BrFilterPure &&
-			(str_comp(m_ppServerlist[i]->m_Info.m_aGameType, "DM") != 0 &&
-			str_comp(m_ppServerlist[i]->m_Info.m_aGameType, "TDM") != 0 &&
-			str_comp(m_ppServerlist[i]->m_Info.m_aGameType, "CTF") != 0))
-		{
-			Filtered = 1;
-		}
-		else if(g_Config.m_BrFilterPureMap &&
-			!(str_comp(m_ppServerlist[i]->m_Info.m_aMap, "dm1") == 0 ||
-			str_comp(m_ppServerlist[i]->m_Info.m_aMap, "dm2") == 0 ||
-			str_comp(m_ppServerlist[i]->m_Info.m_aMap, "dm6") == 0 ||
-			str_comp(m_ppServerlist[i]->m_Info.m_aMap, "dm7") == 0 ||
-			str_comp(m_ppServerlist[i]->m_Info.m_aMap, "dm8") == 0 ||
-			str_comp(m_ppServerlist[i]->m_Info.m_aMap, "dm9") == 0 ||
-			str_comp(m_ppServerlist[i]->m_Info.m_aMap, "ctf1") == 0 ||
-			str_comp(m_ppServerlist[i]->m_Info.m_aMap, "ctf2") == 0 ||
-			str_comp(m_ppServerlist[i]->m_Info.m_aMap, "ctf3") == 0 ||
-			str_comp(m_ppServerlist[i]->m_Info.m_aMap, "ctf4") == 0 ||
-			str_comp(m_ppServerlist[i]->m_Info.m_aMap, "ctf5") == 0 ||
-			str_comp(m_ppServerlist[i]->m_Info.m_aMap, "ctf6") == 0 ||
-			str_comp(m_ppServerlist[i]->m_Info.m_aMap, "ctf7") == 0)
-		)
-		{
-			Filtered = 1;
-		}
 		else if(g_Config.m_BrFilterPing && g_Config.m_BrFilterPing < m_ppServerlist[i]->m_Info.m_Latency)
 			Filtered = 1;
 		else if(g_Config.m_BrFilterCompatversion && str_comp_num(m_ppServerlist[i]->m_Info.m_aVersion, m_aNetVersion, 3) != 0)
@@ -328,20 +303,18 @@ void CServerBrowser::Filter()
 
 int CServerBrowser::SortHash() const
 {
-	int i = g_Config.m_BrSort&0xff;
-	i |= g_Config.m_BrFilterEmpty<<4;
-	i |= g_Config.m_BrFilterFull<<5;
-	i |= g_Config.m_BrFilterSpectators<<6;
-	i |= g_Config.m_BrFilterFriends<<7;
-	i |= g_Config.m_BrFilterPw<<8;
-	i |= g_Config.m_BrSortOrder<<9;
-	i |= g_Config.m_BrFilterCompatversion<<11;
-	i |= g_Config.m_BrFilterPure<<12;
-	i |= g_Config.m_BrFilterPureMap<<13;
-	i |= g_Config.m_BrFilterGametypeStrict<<14;
-	i |= g_Config.m_BrFilterUnfinishedMap<<15;
-	i |= g_Config.m_BrFilterCountry<<16;
-	i |= g_Config.m_BrFilterConnectingPlayers<<17;
+	int i = g_Config.m_BrSort & 0xff;
+	i |= g_Config.m_BrFilterEmpty << 4;
+	i |= g_Config.m_BrFilterFull << 5;
+	i |= g_Config.m_BrFilterSpectators << 6;
+	i |= g_Config.m_BrFilterFriends << 7;
+	i |= g_Config.m_BrFilterPw << 8;
+	i |= g_Config.m_BrSortOrder << 9;
+	i |= g_Config.m_BrFilterCompatversion << 11;
+	i |= g_Config.m_BrFilterGametypeStrict << 12;
+	i |= g_Config.m_BrFilterUnfinishedMap << 13;
+	i |= g_Config.m_BrFilterCountry << 14;
+	i |= g_Config.m_BrFilterConnectingPlayers << 15;
 	return i;
 }
 

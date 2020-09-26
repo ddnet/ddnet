@@ -696,14 +696,6 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		g_Config.m_BrFilterCompatversion ^= 1;
 
 	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
-	if(DoButton_CheckBox(&g_Config.m_BrFilterPure, Localize("Standard gametype"), g_Config.m_BrFilterPure, &Button))
-		g_Config.m_BrFilterPure ^= 1;
-
-	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
-	if(DoButton_CheckBox(&g_Config.m_BrFilterPureMap, Localize("Standard map"), g_Config.m_BrFilterPureMap, &Button))
-		g_Config.m_BrFilterPureMap ^= 1;
-
-	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
 	if(DoButton_CheckBox(&g_Config.m_BrFilterGametypeStrict, Localize("Strict gametype filter"), g_Config.m_BrFilterGametypeStrict, &Button))
 		g_Config.m_BrFilterGametypeStrict ^= 1;
 
@@ -806,7 +798,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		// add more space
 		ServerFilter.HSplitTop(5.0f, 0, &ServerFilter);
 		ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
-		ServerFilter.HSplitTop(80.0f, &ServerFilter, 0);
+		ServerFilter.HSplitTop(140.0f, &ServerFilter, 0);
 
 		RenderTools()->DrawUIRect(&ServerFilter, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
 
@@ -997,8 +989,6 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		g_Config.m_BrFilterConnectingPlayers = 1;
 		g_Config.m_BrFilterUnfinishedMap = 0;
 		g_Config.m_BrFilterServerAddress[0] = 0;
-		g_Config.m_BrFilterPure = 0;
-		g_Config.m_BrFilterPureMap = 0;
 		g_Config.m_BrFilterCompatversion = 0;
 		g_Config.m_BrFilterExcludeCountries[0] = 0;
 		g_Config.m_BrFilterExcludeTypes[0] = 0;
