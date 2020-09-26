@@ -374,6 +374,10 @@ void CGameClient::OnInit()
 	m_GameWorld.m_pTuningList = m_aTuningList;
 
 	m_pMapimages->SetTextureScale(g_Config.m_ClTextEntitiesSize);
+
+	// Agressively try to grab window again since some Windows users report
+	// window not being focussed after starting client.
+	Graphics()->SetWindowGrab(true);
 }
 
 void CGameClient::OnUpdate()
