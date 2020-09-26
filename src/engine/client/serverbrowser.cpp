@@ -303,18 +303,18 @@ void CServerBrowser::Filter()
 
 int CServerBrowser::SortHash() const
 {
-	int i = g_Config.m_BrSort&0xff;
-	i |= g_Config.m_BrFilterEmpty<<4;
-	i |= g_Config.m_BrFilterFull<<5;
-	i |= g_Config.m_BrFilterSpectators<<6;
-	i |= g_Config.m_BrFilterFriends<<7;
-	i |= g_Config.m_BrFilterPw<<8;
-	i |= g_Config.m_BrSortOrder<<9;
-	i |= g_Config.m_BrFilterCompatversion<<11;
-	i |= g_Config.m_BrFilterGametypeStrict<<12;
-	i |= g_Config.m_BrFilterUnfinishedMap<<13;
-	i |= g_Config.m_BrFilterCountry<<14;
-	i |= g_Config.m_BrFilterConnectingPlayers<<15;
+	int i = g_Config.m_BrSort & 0xff;
+	i |= g_Config.m_BrFilterEmpty << 4;
+	i |= g_Config.m_BrFilterFull << 5;
+	i |= g_Config.m_BrFilterSpectators << 6;
+	i |= g_Config.m_BrFilterFriends << 7;
+	i |= g_Config.m_BrFilterPw << 8;
+	i |= g_Config.m_BrSortOrder << 9;
+	i |= g_Config.m_BrFilterCompatversion << 11;
+	i |= g_Config.m_BrFilterGametypeStrict << 12;
+	i |= g_Config.m_BrFilterUnfinishedMap << 13;
+	i |= g_Config.m_BrFilterCountry << 14;
+	i |= g_Config.m_BrFilterConnectingPlayers << 15;
 	return i;
 }
 
