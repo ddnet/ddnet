@@ -18,6 +18,7 @@
 #include <game/gamecore.h>
 #include <game/version.h>
 #include <new>
+#include <string.h>
 
 #include <game/generated/protocol7.h>
 #include <game/generated/protocolglue.h>
