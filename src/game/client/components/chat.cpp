@@ -854,12 +854,11 @@ void CChat::OnPrepareLines()
 
 		str_append(aName, m_aLines[r].m_aName, sizeof(aName));
 
-		if(m_aLines[r].m_TimesRepeated > 0)
-		{
-			char aCount[8];
-			str_format(aCount, sizeof(aCount), " (%d)", m_aLines[r].m_TimesRepeated);
-			str_append(aName, aCount, sizeof(aName));
-		}
+		char aCount[12];
+		if(m_aLines[r].m_ClientID < 0)
+			str_format(aCount, sizeof(aCount), "[%d] ", m_aLines[r].m_TimesRepeated + 1);
+		else
+			str_format(aCount, sizeof(aCount), " [%d]", m_aLines[r].m_TimesRepeated + 1);
 
 		// get the y offset (calculate it if we haven't done that yet)
 		if(m_aLines[r].m_YOffset[OffsetType] < 0.0f)
@@ -869,6 +868,8 @@ void CChat::OnPrepareLines()
 
 			TextRender()->TextEx(&Cursor, "♥ ", -1);
 			TextRender()->TextEx(&Cursor, aName, -1);
+			if(m_aLines[r].m_TimesRepeated > 0)
+				TextRender()->TextEx(&Cursor, aCount, -1);
 			TextRender()->TextEx(&Cursor, m_aLines[r].m_aText, -1);
 			m_aLines[r].m_YOffset[OffsetType] = Cursor.m_Y + Cursor.m_FontSize;
 		}
@@ -930,32 +931,29 @@ void CChat::OnPrepareLines()
 		else
 			TextRender()->AppendTextContainer(&Cursor, m_aLines[r].m_TextContainerIndex, aName);
 
+		if(m_aLines[r].m_TimesRepeated > 0)
+		{
+			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 0.3f);
+			if(m_aLines[r].m_TextContainerIndex == -1)
+				m_aLines[r].m_TextContainerIndex = TextRender()->CreateTextContainer(&Cursor, aCount);
+			else
+				TextRender()->AppendTextContainer(&Cursor, m_aLines[r].m_TextContainerIndex, aCount);
+		}
+
 		// render line
+		ColorRGBA Color;
 		if(m_aLines[r].m_ClientID == -1) // system
-		{
-			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageSystemColor));
-			TextRender()->TextColor(rgb);
-		}
+			Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageSystemColor));
 		else if(m_aLines[r].m_ClientID == -2) // client
-		{
-			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageClientColor));
-			TextRender()->TextColor(rgb);
-		}
+			Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageClientColor));
 		else if(m_aLines[r].m_Highlighted) // highlighted
-		{
-			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor));
-			TextRender()->TextColor(rgb);
-		}
+			Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor));
 		else if(m_aLines[r].m_Team) // team message
-		{
-			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageTeamColor));
-			TextRender()->TextColor(rgb);
-		}
+			Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageTeamColor));
 		else // regular message
-		{
-			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageColor));
-			TextRender()->TextColor(rgb);
-		}
+			Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageColor));
+
+		TextRender()->TextColor(Color);
 
 		if(m_aLines[r].m_TextContainerIndex == -1)
 			m_aLines[r].m_TextContainerIndex = TextRender()->CreateTextContainer(&Cursor, m_aLines[r].m_aText);
