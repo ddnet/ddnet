@@ -3187,11 +3187,14 @@ void CServer::ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData)
 	if(str_comp_nocase(pResult->GetString(0), "w") == 0)
 	{
 		pSelf->DbPool()->Print(pSelf->Console(), CDbConnectionPool::WRITE);
-		pSelf->DbPool()->Print(pSelf->Console(), CDbConnectionPool::WRITE_BACKUP);
 	}
 	else if(str_comp_nocase(pResult->GetString(0), "r") == 0)
 	{
 		pSelf->DbPool()->Print(pSelf->Console(), CDbConnectionPool::READ);
+	}
+	else if(str_comp_nocase(pResult->GetString(0), "b") == 0)
+	{
+		pSelf->DbPool()->Print(pSelf->Console(), CDbConnectionPool::WRITE_BACKUP);
 	}
 	else
 	{
@@ -3402,7 +3405,7 @@ void CServer::RegisterCommands()
 	Console()->Register("reload", "", CFGFLAG_SERVER, ConMapReload, this, "Reload the map");
 
 	Console()->Register("add_sqlserver", "s['r'|'w'] s[Database] s[Prefix] s[User] s[Password] s[IP] i[Port] ?i[SetUpDatabase ?]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAddSqlServer, this, "add a sqlserver");
-	Console()->Register("dump_sqlservers", "s['r'|'w']", CFGFLAG_SERVER, ConDumpSqlServers, this, "dumps all sqlservers readservers = r, writeservers = w");
+	Console()->Register("dump_sqlservers", "s['r'|'w'|'b']", CFGFLAG_SERVER, ConDumpSqlServers, this, "dumps all sqlservers readservers = r, writeservers = w, backupwriteserver = b");
 
 	Console()->Register("auth_add", "s[ident] s[level] s[pw]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAuthAdd, this, "Add a rcon key");
 	Console()->Register("auth_add_p", "s[ident] s[level] s[hash] s[salt]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAuthAddHashed, this, "Add a prehashed rcon key");

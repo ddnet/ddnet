@@ -411,7 +411,7 @@ void CDbConnectionPool::Impl::Worker(CWorker *pWorker)
 			{
 				apDb[i]->Format(aBuf, sizeof(aBuf));
 				CSqlResponse Response = CSqlResponse(CSqlResponse::CONSOLE);
-				str_format(Response.aMsg, sizeof(Response.aMsg), "%s: %s",
+				str_format(Response.aMsg, sizeof(Response.aMsg), "%s (Retry): %s",
 					ModeDesc[pWorker->m_Mode], aBuf);
 				m_Responses.Send(Response);
 			}
