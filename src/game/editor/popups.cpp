@@ -1446,11 +1446,13 @@ int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pCon
 	CAutoMapper *pAutoMapper = &pEditor->m_Map.m_lImages[pLayer->m_Image]->m_AutoMapper;
 
 	const float ButtonHeight = 12.0f;
+	const float ButtonMargin = 2.0f;
 
 	static int s_ScrollBar = 0;
 	static float s_ScrollValue = 0;
 
-	float ListHeight = ButtonHeight * pAutoMapper->ConfigNamesNum();
+	// Add 1 more for the "None" option.
+	float ListHeight = (ButtonHeight + ButtonMargin) * (pAutoMapper->ConfigNamesNum() + 1);
 	float ScrollDifference = ListHeight - View.h;
 
 	// Disable scrollbar if not needed.
@@ -1490,19 +1492,19 @@ int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pCon
 
 	pEditor->UI()->ClipEnable(&View);
 
-	for(int i = -1; i < pAutoMapper->ConfigNamesNum(); ++i)
+	for(int i = -1; i < pAutoMapper->ConfigNamesNum(); i++)
 	{
 		if(ListCur > ListStopAt)
 			break;
 
 		if(ListCur >= ListStartAt)
 		{
-			View.HSplitTop(2.0f, 0, &View);
+			View.HSplitTop(ButtonMargin, 0, &View);
 			View.HSplitTop(ButtonHeight, &Button, &View);
 			if(pEditor->DoButton_MenuItem(&s_AutoMapperConfigButtons[i], i == -1 ? "None" : pAutoMapper->GetConfigName(i), i == s_AutoMapConfigCurrent, &Button, 0, 0))
 				s_AutoMapConfigSelected = i;
 		}
-		ListCur += ButtonHeight;
+		ListCur += ButtonHeight + ButtonMargin;
 	}
 
 	pEditor->UI()->ClipDisable();
@@ -1517,8 +1519,8 @@ void CEditor::PopupSelectConfigAutoMapInvoke(int Current, float x, float y)
 	s_AutoMapConfigCurrent = Current;
 	CLayerTiles *pLayer = static_cast<CLayerTiles *>(GetSelectedLayer(0));
 	int ItemCount = m_Map.m_lImages[pLayer->m_Image]->m_AutoMapper.ConfigNamesNum();
-	if(ItemCount > 5)
-		ItemCount = 5;
+	if(ItemCount > 10)
+		ItemCount = 10;
 	// Width for buttons is 120, 15 is the scrollbar width, 2 is the margin between both.
 	UiInvokePopupMenu(&s_AutoMapConfigSelectID, 0, x, y, 120.0f + 15.0f + 2.0f, 26.0f + 14.0f * ItemCount, PopupSelectConfigAutoMap);
 }
