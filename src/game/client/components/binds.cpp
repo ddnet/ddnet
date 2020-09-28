@@ -59,7 +59,7 @@ void CBinds::Bind(int KeyID, const char *pStr, bool FreeOnly, int Modifier)
 	char aBuf[256];
 	if(!pStr[0])
 	{
-		str_format(aBuf, sizeof(aBuf), "unbound %s (%d)", Input()->KeyName(KeyID), KeyID);
+		str_format(aBuf, sizeof(aBuf), "unbound %s%s (%d)", GetKeyBindModifiersName(Modifier), Input()->KeyName(KeyID), KeyID);
 	}
 	else
 	{
