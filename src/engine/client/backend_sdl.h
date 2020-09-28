@@ -144,6 +144,8 @@ protected:
 	int m_LastBlendMode; //avoid all possible opengl state changes
 	bool m_LastClipEnable;
 
+	int m_OpenGLTextureLodBIAS;
+
 public:
 	enum
 	{
