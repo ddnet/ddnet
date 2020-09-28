@@ -318,6 +318,14 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 	}
 }
 
+void CMenus::SetNeedSendInfo()
+{
+	if(m_Dummy)
+		m_NeedSendDummyinfo = true;
+	else
+		m_NeedSendinfo = true;
+}
+
 void CMenus::RenderSettingsPlayer(CUIRect MainView)
 {
 	CUIRect Button, Label, Dummy;
@@ -346,10 +354,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	static float s_OffsetName = 0.0f;
 	if(DoEditBox(pName, &Button, pName, sizeof(g_Config.m_PlayerName), 14.0f, &s_OffsetName, false, CUI::CORNER_ALL, pNameFallback))
 	{
-		if(m_Dummy)
-			m_NeedSendDummyinfo = true;
-		else
-			m_NeedSendinfo = true;
+		SetNeedSendInfo();
 	}
 
 	// player clan
@@ -363,10 +368,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	static float s_OffsetClan = 0.0f;
 	if(DoEditBox(pClan, &Button, pClan, sizeof(g_Config.m_PlayerClan), 14.0f, &s_OffsetClan))
 	{
-		if(m_Dummy)
-			m_NeedSendDummyinfo = true;
-		else
-			m_NeedSendinfo = true;
+		SetNeedSendInfo();
 	}
 
 	if(DoButton_CheckBox(&m_Dummy, Localize("Dummy settings"), m_Dummy, &Dummy))
@@ -414,10 +416,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	if(OldSelected != NewSelected)
 	{
 		*pCountry = m_pClient->m_pCountryFlags->GetByIndex(NewSelected)->m_CountryCode;
-		if(m_Dummy)
-			m_NeedSendDummyinfo = true;
-		else
-			m_NeedSendinfo = true;
+		SetNeedSendInfo();
 	}
 }
 
@@ -533,7 +532,10 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	//UI()->DoLabelScaled(&Label, Skin, 14.0f, -1, 150.0f);
 	static float s_OffsetSkin = 0.0f;
 	static int s_ClearButton = 0;
-	DoClearableEditBox(Skin, &s_ClearButton, &Label, Skin, sizeof(g_Config.m_ClPlayerSkin), 14.0f, &s_OffsetSkin, false, CUI::CORNER_ALL, "default");
+	if(DoClearableEditBox(Skin, &s_ClearButton, &Label, Skin, sizeof(g_Config.m_ClPlayerSkin), 14.0f, &s_OffsetSkin, false, CUI::CORNER_ALL, "default"))
+	{
+		SetNeedSendInfo();
+	}
 
 	// custom color selector
 	MainView.HSplitTop(20.0f, 0, &MainView);
@@ -542,10 +544,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(DoButton_CheckBox(&ColorBody, Localize("Custom colors"), *UseCustomColor, &Button))
 	{
 		*UseCustomColor = *UseCustomColor ? 0 : 1;
-		if(m_Dummy)
-			m_NeedSendDummyinfo = true;
-		else
-			m_NeedSendinfo = true;
+		SetNeedSendInfo();
 	}
 
 	MainView.HSplitTop(5.0f, 0, &MainView);
@@ -572,10 +571,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 			if(PrevColor != *paColors[i])
 			{
-				if(m_Dummy)
-					m_NeedSendDummyinfo = true;
-				else
-					m_NeedSendinfo = true;
+				SetNeedSendInfo();
 			}
 		}
 	}
@@ -652,10 +648,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(OldSelected != NewSelected)
 	{
 		mem_copy(Skin, s_paSkinList[NewSelected]->m_aName, sizeof(g_Config.m_ClPlayerSkin));
-		if(m_Dummy)
-			m_NeedSendDummyinfo = true;
-		else
-			m_NeedSendinfo = true;
+		SetNeedSendInfo();
 	}
 
 	// render quick search
