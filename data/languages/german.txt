@@ -1239,40 +1239,40 @@ Play
 == %d Spieler
 
 Theme
-== 
+== Theme
 
 File
-== 
+== Datei
 
 Demos directory
-== 
+== Demo-Ordner
 
 Themes directory
-== 
+== Theme-Ordner
 
 Skin Database
-== 
+== Skin-Datenbank
 
 Skins directory
-== 
+== Skin-Ordner
 
 Background music volume
-== 
+== Hintergrundmusik-Lautstärke
 
 Assets
-== 
+== Assets
 
 Entities
-== 
+== Entities
 
 Emoticons
-== 
+== Emoticons
 
 Particles
-== 
+== Partikel
 
 Assets directory
-== 
+== Assets-Ordner
 
 https://wiki.ddnet.tw/
-== 
+== https://wiki.ddnet.tw/
