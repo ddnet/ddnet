@@ -862,24 +862,29 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	MainView.Margin(10.0f, &MainView);
 
 #if defined(CONF_VIDEORECORDER)
-	CUIRect ButtonBar, RefreshRect, FetchRect, PlayRect, DeleteRect, RenameRect, RenderRect, LabelRect, ListBox;
-#else
-	CUIRect ButtonBar, RefreshRect, FetchRect, PlayRect, DeleteRect, RenameRect, LabelRect, ListBox;
+	CUIRect RenderRect;
 #endif
-	MainView.HSplitBottom(ms_ButtonHeight + 5.0f, &MainView, &ButtonBar);
+	CUIRect ButtonBar, RefreshRect, FetchRect, PlayRect, DeleteRect, RenameRect, LabelRect, ListBox;
+	CUIRect ButtonBar2, DirectoryButton;
+
+	MainView.HSplitBottom((ms_ButtonHeight + 5.0f) * 2.0f, &MainView, &ButtonBar2);
+	ButtonBar2.HSplitTop(5.0f, 0, &ButtonBar2);
+	ButtonBar2.HSplitTop(ms_ButtonHeight, &ButtonBar2, &ButtonBar);
 	ButtonBar.HSplitTop(5.0f, 0, &ButtonBar);
+	ButtonBar2.VSplitLeft(110.0f, &FetchRect, &ButtonBar2);
+	ButtonBar2.VSplitLeft(10.0f, 0, &ButtonBar2);
+	ButtonBar2.VSplitLeft(230.0f, &DirectoryButton, &ButtonBar2);
+	ButtonBar2.VSplitLeft(10.0f, 0, &ButtonBar2);
 	ButtonBar.VSplitRight(110.0f, &ButtonBar, &PlayRect);
 	ButtonBar.VSplitLeft(110.0f, &RefreshRect, &ButtonBar);
-	ButtonBar.VSplitLeft(10.0f, 0, &ButtonBar);
-	ButtonBar.VSplitLeft(110.0f, &FetchRect, &ButtonBar);
 	ButtonBar.VSplitLeft(10.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(110.0f, &DeleteRect, &ButtonBar);
 	ButtonBar.VSplitLeft(10.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(110.0f, &RenameRect, &ButtonBar);
 	ButtonBar.VSplitLeft(10.0f, 0, &ButtonBar);
 #if defined(CONF_VIDEORECORDER)
-	ButtonBar.VSplitLeft(110.0f, &RenderRect, &ButtonBar);
-	ButtonBar.VSplitLeft(10.0f, 0, &ButtonBar);
+	ButtonBar2.VSplitRight(110.0f, &ButtonBar2, &RenderRect);
+	ButtonBar2.VSplitRight(10.0f, &ButtonBar2, 0);
 #endif
 	ButtonBar.VSplitLeft(110.0f, &LabelRect, &ButtonBar);
 	MainView.HSplitBottom(140.0f, &ListBox, &MainView);
@@ -1309,6 +1314,19 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		}
 	}
 
+	if(DoButton_Menu(&DirectoryButton, Localize("Demos directory"), 0, &DirectoryButton))
+	{
+		char aBuf[MAX_PATH_LENGTH];
+		char aBufFull[MAX_PATH_LENGTH + 7];
+		Storage()->GetCompletePath(IStorage::TYPE_SAVE, "demos", aBuf, sizeof(aBuf));
+		Storage()->CreateFolder("demos", IStorage::TYPE_SAVE);
+		str_format(aBufFull, sizeof(aBufFull), "file://%s", aBuf);
+		if(!open_link(aBufFull))
+		{
+			dbg_msg("menus", "couldn't open link");
+		}
+	}
+
 	if(!m_DemolistSelectedIsDir)
 	{
 		static int s_DeleteButton = 0;
@@ -1349,9 +1367,5 @@ void CMenus::RenderDemoList(CUIRect MainView)
 #endif
 	}
 
-#if defined(CONF_VIDEORECORDER)
-	// Doesn't always fit, not so important to show
-	if(PlayRect.x > 725)
-#endif
-		UI()->DoLabelScaled(&LabelRect, aFooterLabel, 14.0f, -1);
+	UI()->DoLabelScaled(&LabelRect, aFooterLabel, 14.0f, -1);
 }

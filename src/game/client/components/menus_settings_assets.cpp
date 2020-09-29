@@ -529,7 +529,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 	if(DoButton_Menu(&SkinDB, Localize("Assets directory"), 0, &SkinDB))
 	{
 		char aBuf[MAX_PATH_LENGTH];
-		char aBufFull[MAX_PATH_LENGTH];
+		char aBufFull[MAX_PATH_LENGTH + 7];
 		if(s_CurCustomTab == 0)
 			str_copy(aBufFull, "assets/entities", sizeof(aBufFull));
 		else if(s_CurCustomTab == 1)
