@@ -51,6 +51,9 @@ void CChat::OnWindowResize()
 		if(m_aLines[i].m_TextContainerIndex != -1)
 			TextRender()->DeleteTextContainer(m_aLines[i].m_TextContainerIndex);
 		m_aLines[i].m_TextContainerIndex = -1;
+		// recalculate sizes
+		m_aLines[i].m_YOffset[0] = -1.f;
+		m_aLines[i].m_YOffset[1] = -1.f;
 	}
 }
 
@@ -866,7 +869,8 @@ void CChat::OnPrepareLines()
 			TextRender()->SetCursor(&Cursor, Begin, 0.0f, FontSize, 0);
 			Cursor.m_LineWidth = LineWidth;
 
-			TextRender()->TextEx(&Cursor, "♥ ", -1);
+			if(g_Config.m_ClMessageFriend)
+				TextRender()->TextEx(&Cursor, "♥ ", -1);
 			TextRender()->TextEx(&Cursor, aName, -1);
 			if(m_aLines[r].m_TimesRepeated > 0)
 				TextRender()->TextEx(&Cursor, aCount, -1);
