@@ -612,8 +612,9 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		// address info
 		UI()->DoLabelScaled(&ServerAddr, Localize("Server address:"), 14.0f, -1);
 		ServerAddr.VSplitLeft(SearchExcludeAddrStrMax + 5.0f + ExcludeSearchIconMax + 5.0f, NULL, &ServerAddr);
+		static int s_ClearButton = 0;
 		static float Offset = 0.0f;
-		DoEditBox(&g_Config.m_UiServerAddress, &ServerAddr, g_Config.m_UiServerAddress, sizeof(g_Config.m_UiServerAddress), 12.0f, &Offset);
+		DoClearableEditBox(&g_Config.m_UiServerAddress, &s_ClearButton, &ServerAddr, g_Config.m_UiServerAddress, sizeof(g_Config.m_UiServerAddress), 12.0f, &Offset);
 
 		// button area
 		ButtonArea = ConnectButtons;
