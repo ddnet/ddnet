@@ -463,6 +463,23 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		DemolistOnUpdate(false);
 	}
 
+	// file button
+	ButtonBar.VSplitRight(Margins, &ButtonBar, 0);
+	ButtonBar.VSplitRight(ButtonbarHeight * 3, &ButtonBar, &Button);
+	static int s_FileButton = 0;
+	if(DoButton_DemoPlayer(&s_FileButton, Localize("File"), 0, &Button))
+	{
+		char aBuf[MAX_PATH_LENGTH];
+		char aBufFull[MAX_PATH_LENGTH + 7];
+		str_format(aBufFull, sizeof(aBufFull), "%s/%s", m_aCurrentDemoFolder, m_lDemos[m_DemolistSelectedIndex].m_aFilename);
+		Storage()->GetCompletePath(m_lDemos[m_DemolistSelectedIndex].m_StorageType, aBufFull, aBuf, sizeof(aBuf));
+		str_format(aBufFull, sizeof(aBufFull), "file://%s", aBuf);
+		if(!open_link(aBufFull))
+		{
+			dbg_msg("menus", "couldn't open link");
+		}
+	}
+
 	// toggle keyboard shortcuts button
 	ButtonBar.VSplitRight(Margins * 3, &ButtonBar, 0);
 	ButtonBar.VSplitRight(ButtonbarHeight, &ButtonBar, &Button);
