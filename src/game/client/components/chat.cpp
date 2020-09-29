@@ -679,6 +679,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		m_CurrentLine = (m_CurrentLine + 1) % MAX_LINES;
 
 		pCurrentLine = &m_aLines[m_CurrentLine];
+		pCurrentLine->m_TimesRepeated = 0;
 		pCurrentLine->m_Time = time();
 		pCurrentLine->m_YOffset[0] = -1.0f;
 		pCurrentLine->m_YOffset[1] = -1.0f;
