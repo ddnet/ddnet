@@ -3351,7 +3351,8 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 
 					if((Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && m_SelectedGroup == g)
 					{
-						for(int i = 1; i < m_Map.m_lGroups[g]->m_lLayers.size(); i++)
+						m_lSelectedLayers.clear();
+						for(int i = 0; i < m_Map.m_lGroups[g]->m_lLayers.size(); i++)
 						{
 							m_lSelectedLayers.add(i);
 						}
