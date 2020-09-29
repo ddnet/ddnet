@@ -91,7 +91,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		// dynamic camera
 		Left.HSplitTop(20.0f, &Button, &Left);
 		bool IsDyncam = g_Config.m_ClDyncam || g_Config.m_ClMouseFollowfactor > 0;
-		if(DoButton_CheckBox(&IsDyncam, Localize("Dynamic Camera"), IsDyncam, &Button))
+		if(DoButton_CheckBox(&g_Config.m_ClDyncam, Localize("Dynamic Camera"), IsDyncam, &Button))
 		{
 			if(IsDyncam)
 			{
