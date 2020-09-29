@@ -81,7 +81,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 	// game
 	{
 		// headline
-		Game.HSplitTop(30.0f, &Label, &Game);
+		Game.HSplitTop(20.0f, &Label, &Game);
 		UI()->DoLabelScaled(&Label, Localize("Game"), 20.0f, -1);
 		Game.Margin(5.0f, &Game);
 		Game.VSplitMid(&Left, &Right);
@@ -169,7 +169,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 	// client
 	{
 		// headline
-		Client.HSplitTop(30.0f, &Label, &Client);
+		Client.HSplitTop(20.0f, &Label, &Client);
 		UI()->DoLabelScaled(&Label, Localize("Client"), 20.0f, -1);
 		Client.Margin(5.0f, &Client);
 		Client.VSplitMid(&Left, &Right);
@@ -182,47 +182,44 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		if(DoButton_CheckBox(&g_Config.m_ClSkipStartMenu, Localize("Skip the main menu"), g_Config.m_ClSkipStartMenu, &Button))
 			g_Config.m_ClSkipStartMenu ^= 1;
 
+		float SliderGroupMargin = 20.0f;
+
 		// auto demo settings
 		{
-			Left.HSplitTop(5.0f, 0, &Left);
-			Left.HSplitTop(20.0f, &Button, &Left);
+			Right.HSplitTop(5.0f, 0, &Right);
+			Right.HSplitTop(20.0f, &Button, &Right);
 			if(DoButton_CheckBox(&g_Config.m_ClAutoDemoRecord, Localize("Automatically record demos"), g_Config.m_ClAutoDemoRecord, &Button))
 				g_Config.m_ClAutoDemoRecord ^= 1;
 
-			Right.HSplitTop(30.0f, 0, &Right);
-			Right.HSplitTop(20.0f, &Button, &Right);
-			if(DoButton_CheckBox(&g_Config.m_ClAutoScreenshot, Localize("Automatically take game over screenshot"), g_Config.m_ClAutoScreenshot, &Button))
-				g_Config.m_ClAutoScreenshot ^= 1;
-
-			Left.HSplitTop(10.0f, 0, &Left);
-			Left.HSplitTop(20.0f, &Label, &Left);
-			Button.VSplitRight(20.0f, &Button, 0);
+			Right.HSplitTop(20.0f, &Label, &Right);
 			char aBuf[64];
 			if(g_Config.m_ClAutoDemoMax)
 				str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Max demos"), g_Config.m_ClAutoDemoMax);
 			else
 				str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Max demos"), "∞");
 			UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
-			Left.HSplitTop(20.0f, &Button, 0);
+			Right.HSplitTop(20.0f, &Button, &Right);
 			Button.HMargin(2.0f, &Button);
 			g_Config.m_ClAutoDemoMax = static_cast<int>(DoScrollbarH(&g_Config.m_ClAutoDemoMax, &Button, g_Config.m_ClAutoDemoMax / 1000.0f) * 1000.0f + 0.1f);
 
-			Right.HSplitTop(10.0f, 0, &Right);
+			Right.HSplitTop(SliderGroupMargin, 0, &Right);
+			Right.HSplitTop(20.0f, &Button, &Right);
+			if(DoButton_CheckBox(&g_Config.m_ClAutoScreenshot, Localize("Automatically take game over screenshot"), g_Config.m_ClAutoScreenshot, &Button))
+				g_Config.m_ClAutoScreenshot ^= 1;
+
 			Right.HSplitTop(20.0f, &Label, &Right);
-			Button.VSplitRight(20.0f, &Button, 0);
 			if(g_Config.m_ClAutoScreenshotMax)
 				str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Max Screenshots"), g_Config.m_ClAutoScreenshotMax);
 			else
 				str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Max Screenshots"), "∞");
 			UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
-			Right.HSplitTop(20.0f, &Button, 0);
+			Right.HSplitTop(20.0f, &Button, &Right);
 			Button.HMargin(2.0f, &Button);
 			g_Config.m_ClAutoScreenshotMax = static_cast<int>(DoScrollbarH(&g_Config.m_ClAutoScreenshotMax, &Button, g_Config.m_ClAutoScreenshotMax / 1000.0f) * 1000.0f + 0.1f);
 		}
 
-		Left.HSplitTop(20.0f, 0, &Left);
+		Left.HSplitTop(10.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Label, &Left);
-		Button.VSplitRight(20.0f, &Button, 0);
 		char aBuf[64];
 		if(g_Config.m_ClRefreshRate)
 			str_format(aBuf, sizeof(aBuf), "%s: %i Hz", Localize("Refresh Rate"), g_Config.m_ClRefreshRate);
@@ -234,6 +231,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		g_Config.m_ClRefreshRate = static_cast<int>(DoScrollbarH(&g_Config.m_ClRefreshRate, &Button, g_Config.m_ClRefreshRate / 10000.0f) * 10000.0f + 0.1f);
 
 #if defined(CONF_FAMILY_WINDOWS)
+		Left.HSplitTop(10.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Button, &Left);
 		if(DoButton_CheckBox(&g_Config.m_ClShowConsole, Localize("Show console window"), g_Config.m_ClShowConsole, &Button))
 		{
@@ -245,13 +243,28 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			m_NeedRestartGeneral = s_ClShowConsole != g_Config.m_ClShowConsole;
 #endif
 
-		Left.HSplitTop(20.0f, 0, &Left);
+		Left.HSplitTop(15.0f, 0, &Left);
+		CUIRect DirectoryButton;
+		Left.HSplitBottom(25.0f, &Left, &DirectoryButton);
 		RenderThemeSelection(Left);
+
+		DirectoryButton.HSplitTop(5.0f, 0, &DirectoryButton);
+		if(DoButton_Menu(&DirectoryButton, Localize("Themes directory"), 0, &DirectoryButton))
+		{
+			char aBuf[MAX_PATH_LENGTH];
+			char aBufFull[MAX_PATH_LENGTH + 7];
+			Storage()->GetCompletePath(IStorage::TYPE_SAVE, "themes", aBuf, sizeof(aBuf));
+			Storage()->CreateFolder("themes", IStorage::TYPE_SAVE);
+			str_format(aBufFull, sizeof(aBufFull), "file://%s", aBuf);
+			if(!open_link(aBufFull))
+			{
+				dbg_msg("menus", "couldn't open link");
+			}
+		}
 
 		// auto statboard screenshot
 		{
-			Right.HSplitTop(20.0f, 0, &Right); //
-			Right.HSplitTop(20.0f, 0, &Right); // Make some distance so it looks more natural
+			Right.HSplitTop(SliderGroupMargin, 0, &Right);
 			Right.HSplitTop(20.0f, &Button, &Right);
 			if(DoButton_CheckBox(&g_Config.m_ClAutoStatboardScreenshot,
 				   Localize("Automatically take statboard screenshot"),
@@ -260,15 +273,13 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 				g_Config.m_ClAutoStatboardScreenshot ^= 1;
 			}
 
-			Right.HSplitTop(10.0f, 0, &Right);
 			Right.HSplitTop(20.0f, &Label, &Right);
-			Button.VSplitRight(20.0f, &Button, 0);
 			if(g_Config.m_ClAutoStatboardScreenshotMax)
 				str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Max Screenshots"), g_Config.m_ClAutoStatboardScreenshotMax);
 			else
 				str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Max Screenshots"), "∞");
 			UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
-			Right.HSplitTop(20.0f, &Button, 0);
+			Right.HSplitTop(20.0f, &Button, &Right);
 			Button.HMargin(2.0f, &Button);
 			g_Config.m_ClAutoStatboardScreenshotMax =
 				static_cast<int>(DoScrollbarH(&g_Config.m_ClAutoStatboardScreenshotMax,
@@ -280,8 +291,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 
 		// auto statboard csv
 		{
-			Right.HSplitTop(20.0f, 0, &Right); //
-			Right.HSplitTop(20.0f, 0, &Right); // Make some distance so it looks more natural
+			Right.HSplitTop(SliderGroupMargin, 0, &Right); //
 			Right.HSplitTop(20.0f, &Button, &Right);
 			if(DoButton_CheckBox(&g_Config.m_ClAutoCSV,
 				   Localize("Automatically create statboard csv"),
@@ -290,15 +300,13 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 				g_Config.m_ClAutoCSV ^= 1;
 			}
 
-			Right.HSplitTop(10.0f, 0, &Right);
 			Right.HSplitTop(20.0f, &Label, &Right);
-			Button.VSplitRight(20.0f, &Button, 0);
 			if(g_Config.m_ClAutoCSVMax)
 				str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Max CSVs"), g_Config.m_ClAutoCSVMax);
 			else
 				str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Max CSVs"), "∞");
 			UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
-			Right.HSplitTop(20.0f, &Button, 0);
+			Right.HSplitTop(20.0f, &Button, &Right);
 			Button.HMargin(2.0f, &Button);
 			g_Config.m_ClAutoCSVMax =
 				static_cast<int>(DoScrollbarH(&g_Config.m_ClAutoCSVMax,
@@ -673,11 +681,27 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			s_InitSkinlist = true;
 	}
 
-	SkinDB.VSplitLeft(240.0f, &SkinDB, 0);
+	CUIRect DirectoryButton;
+	SkinDB.VSplitLeft(150.0f, &SkinDB, &DirectoryButton);
 	SkinDB.HSplitTop(5.0f, 0, &SkinDB);
 	if(DoButton_Menu(&SkinDB, Localize("Skin Database"), 0, &SkinDB))
 	{
 		if(!open_link("https://ddnet.tw/skins/"))
+		{
+			dbg_msg("menus", "couldn't open link");
+		}
+	}
+
+	DirectoryButton.HSplitTop(5.0f, 0, &DirectoryButton);
+	DirectoryButton.VSplitRight(175.0f, 0, &DirectoryButton);
+	if(DoButton_Menu(&DirectoryButton, Localize("Skins directory"), 0, &DirectoryButton))
+	{
+		char aBuf[MAX_PATH_LENGTH];
+		char aBufFull[MAX_PATH_LENGTH + 7];
+		Storage()->GetCompletePath(IStorage::TYPE_SAVE, "skins", aBuf, sizeof(aBuf));
+		Storage()->CreateFolder("skins", IStorage::TYPE_SAVE);
+		str_format(aBufFull, sizeof(aBufFull), "file://%s", aBuf);
+		if(!open_link(aBufFull))
 		{
 			dbg_msg("menus", "couldn't open link");
 		}
