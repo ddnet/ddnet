@@ -1242,12 +1242,12 @@ int CMenus::Render()
 			}
 			else if(m_MenuPage == PAGE_INTERNET)
 			{
-				m_pBackground->ChangePosition(CMenuBackground::POS_INTERNET);
+				m_pBackground->ChangePosition(CMenuBackground::POS_BROWSER_INTERNET);
 				RenderServerbrowser(MainView);
 			}
 			else if(m_MenuPage == PAGE_LAN)
 			{
-				m_pBackground->ChangePosition(CMenuBackground::POS_LAN);
+				m_pBackground->ChangePosition(CMenuBackground::POS_BROWSER_LAN);
 				RenderServerbrowser(MainView);
 			}
 			else if(m_MenuPage == PAGE_DEMOS)
@@ -1257,17 +1257,17 @@ int CMenus::Render()
 			}
 			else if(m_MenuPage == PAGE_FAVORITES)
 			{
-				m_pBackground->ChangePosition(CMenuBackground::POS_FAVORITES);
+				m_pBackground->ChangePosition(CMenuBackground::POS_BROWSER_FAVORITES);
 				RenderServerbrowser(MainView);
 			}
 			else if(m_MenuPage == PAGE_DDNET)
 			{
-				m_pBackground->ChangePosition(CMenuBackground::POS_CUSTOM0);
+				m_pBackground->ChangePosition(CMenuBackground::POS_BROWSER_CUSTOM0);
 				RenderServerbrowser(MainView);
 			}
 			else if(m_MenuPage == PAGE_KOG)
 			{
-				m_pBackground->ChangePosition(CMenuBackground::POS_CUSTOM0 + 1);
+				m_pBackground->ChangePosition(CMenuBackground::POS_BROWSER_CUSTOM0 + 1);
 				RenderServerbrowser(MainView);
 			}
 			else if(m_MenuPage == PAGE_SETTINGS)

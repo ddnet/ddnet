@@ -10,6 +10,7 @@
 #include <engine/friends.h>
 #include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
+#include <game/client/components/mapimages.h>
 
 #include <game/client/component.h>
 #include <game/client/ui.h>
@@ -96,13 +97,60 @@ class CMenus : public CComponent
 	};
 
 	void UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHeight, const char *pTitle, const char *pBottomText, int NumItems,
-		int ItemsPerRow, int SelectedIndex, float ScrollValue);
+		int ItemsPerRow, int SelectedIndex, float ScrollValue, bool LogicOnly = false);
 	CListboxItem UiDoListboxNextItem(const void *pID, bool Selected = false, bool KeyEvents = true, bool NoHoverEffects = false);
 	CListboxItem UiDoListboxNextRow();
 	int UiDoListboxEnd(float *pScrollValue, bool *pItemActivated, bool *pListBoxActive = 0);
 
 	//static void demolist_listdir_callback(const char *name, int is_dir, void *user);
 	//static void demolist_list_callback(const CUIRect *rect, int index, void *user);
+
+	// menus_settings_assets.cpp
+public:
+	struct SCustomItem
+	{
+		IGraphics::CTextureHandle m_RenderTexture;
+
+		char m_aName[50];
+
+		bool operator<(const SCustomItem &Other) const { return str_comp(m_aName, Other.m_aName) < 0; }
+	};
+
+	struct SCustomEntities : public SCustomItem
+	{
+		struct SEntitiesImage
+		{
+			IGraphics::CTextureHandle m_Texture;
+		};
+		SEntitiesImage m_aImages[MAP_IMAGE_MOD_TYPE_COUNT];
+	};
+
+	struct SCustomGame : public SCustomItem
+	{
+	};
+
+	struct SCustomEmoticon : public SCustomItem
+	{
+	};
+
+	struct SCustomParticle : public SCustomItem
+	{
+	};
+
+protected:
+	sorted_array<SCustomEntities> m_EntitiesList;
+	sorted_array<SCustomGame> m_GameList;
+	sorted_array<SCustomEmoticon> m_EmoticonList;
+	sorted_array<SCustomParticle> m_ParticlesList;
+
+	static void LoadEntities(struct SCustomEntities *pEntitiesItem, void *pUser);
+	static int EntitiesScan(const char *pName, int IsDir, int DirType, void *pUser);
+
+	static int GameScan(const char *pName, int IsDir, int DirType, void *pUser);
+	static int EmoticonsScan(const char *pName, int IsDir, int DirType, void *pUser);
+	static int ParticlesScan(const char *pName, int IsDir, int DirType, void *pUser);
+
+	void ClearCustomItems(int CurTab);
 
 	int m_MenuPage;
 	int m_GamePage;
@@ -338,6 +386,7 @@ class CMenus : public CComponent
 	void RenderSettingsGraphics(CUIRect MainView);
 	void RenderSettingsSound(CUIRect MainView);
 	void RenderSettings(CUIRect MainView);
+	void RenderSettingsCustom(CUIRect MainView);
 
 	void SetActive(bool Active);
 
@@ -399,6 +448,7 @@ public:
 		SETTINGS_GRAPHICS,
 		SETTINGS_SOUND,
 		SETTINGS_DDNET,
+		SETTINGS_ASSETS,
 	};
 
 	// DDRace

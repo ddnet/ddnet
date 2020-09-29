@@ -509,25 +509,28 @@ static bool gs_ListBoxItemActivated;
 static bool gs_ListBoxClicked;
 
 void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHeight, const char *pTitle, const char *pBottomText, int NumItems,
-	int ItemsPerRow, int SelectedIndex, float ScrollValue)
+	int ItemsPerRow, int SelectedIndex, float ScrollValue, bool LogicOnly)
 {
 	CUIRect Scroll, Row;
 	CUIRect View = *pRect;
 	CUIRect Header, Footer;
 
-	// draw header
-	View.HSplitTop(ms_ListheaderHeight, &Header, &View);
-	RenderTools()->DrawUIRect(&Header, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_T, 5.0f);
-	UI()->DoLabel(&Header, pTitle, Header.h * ms_FontmodHeight, 0);
+	if(!LogicOnly)
+	{
+		// draw header
+		View.HSplitTop(ms_ListheaderHeight, &Header, &View);
+		RenderTools()->DrawUIRect(&Header, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_T, 5.0f);
+		UI()->DoLabel(&Header, pTitle, Header.h * ms_FontmodHeight, 0);
 
-	// draw footers
-	View.HSplitBottom(ms_ListheaderHeight, &View, &Footer);
-	RenderTools()->DrawUIRect(&Footer, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_B, 5.0f);
-	Footer.VSplitLeft(10.0f, 0, &Footer);
-	UI()->DoLabel(&Footer, pBottomText, Header.h * ms_FontmodHeight, 0);
+		// draw footers
+		View.HSplitBottom(ms_ListheaderHeight, &View, &Footer);
+		RenderTools()->DrawUIRect(&Footer, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_B, 5.0f);
+		Footer.VSplitLeft(10.0f, 0, &Footer);
+		UI()->DoLabel(&Footer, pBottomText, Header.h * ms_FontmodHeight, 0);
 
-	// background
-	RenderTools()->DrawUIRect(&View, ColorRGBA(0, 0, 0, 0.15f), 0, 0);
+		// background
+		RenderTools()->DrawUIRect(&View, ColorRGBA(0, 0, 0, 0.15f), 0, 0);
+	}
 
 	// prepare the scroll
 	View.VSplitRight(15, &View, &Scroll);
