@@ -2537,6 +2537,7 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 	else if(PngLoaded)
 	{
 		g_pData->m_aImages[IMAGE_GAME].m_Id = Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, ImgInfo.m_Format, 0, aPath);
+		free(ImgInfo.m_pData);
 	}
 }
 
@@ -2575,6 +2576,7 @@ void CGameClient::LoadEmoticonsSkin(const char *pPath, bool AsDir)
 	else if(PngLoaded)
 	{
 		g_pData->m_aImages[IMAGE_EMOTICONS].m_Id = Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, ImgInfo.m_Format, 0, aPath);
+		free(ImgInfo.m_pData);
 	}
 }
 
@@ -2613,6 +2615,7 @@ void CGameClient::LoadParticlesSkin(const char *pPath, bool AsDir)
 	else if(PngLoaded)
 	{
 		g_pData->m_aImages[IMAGE_PARTICLES].m_Id = Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, ImgInfo.m_Format, 0, aPath);
+		free(ImgInfo.m_pData);
 	}
 }
 
