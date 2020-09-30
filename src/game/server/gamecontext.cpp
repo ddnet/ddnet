@@ -330,10 +330,10 @@ void CGameContext::CallVote(int ClientID, const char *pDesc, const char *pCmd, c
 	if(!pSixupDesc)
 		pSixupDesc = pDesc;
 
+	m_VoteCreator = ClientID;
 	StartVote(pDesc, pCmd, pReason, pSixupDesc);
 	pPlayer->m_Vote = 1;
 	pPlayer->m_VotePos = m_VotePos = 1;
-	m_VoteCreator = ClientID;
 	pPlayer->m_LastVoteCall = Now;
 }
 
