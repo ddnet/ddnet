@@ -59,9 +59,10 @@ void CSounds::OnInit()
 {
 	// setup sound channels
 	m_MapSoundVolume = g_Config.m_SndMapSoundVolume / 100.0f;
+	m_BackgroundMusicVolume = g_Config.m_SndBackgroundMusicVolume / 100.0f;
 
 	Sound()->SetChannel(CSounds::CHN_GUI, 1.0f, 0.0f);
-	Sound()->SetChannel(CSounds::CHN_MUSIC, 1.0f, 0.0f);
+	Sound()->SetChannel(CSounds::CHN_MUSIC, m_BackgroundMusicVolume, 1.0f);
 	Sound()->SetChannel(CSounds::CHN_WORLD, 0.9f, 1.0f);
 	Sound()->SetChannel(CSounds::CHN_GLOBAL, 1.0f, 0.0f);
 	Sound()->SetChannel(CSounds::CHN_MAPSOUND, m_MapSoundVolume, 1.0f);
@@ -119,6 +120,13 @@ void CSounds::OnRender()
 	{
 		m_MapSoundVolume = NewMapSoundVol;
 		Sound()->SetChannel(CSounds::CHN_MAPSOUND, m_MapSoundVolume, 1.0f);
+	}
+
+	float NewBackgroundMusicVol = g_Config.m_SndBackgroundMusicVolume / 100.0f;
+	if(NewBackgroundMusicVol != m_BackgroundMusicVolume)
+	{
+		m_BackgroundMusicVolume = NewBackgroundMusicVol;
+		Sound()->SetChannel(CSounds::CHN_MUSIC, m_BackgroundMusicVolume, 1.0f);
 	}
 
 	// play sound from queue

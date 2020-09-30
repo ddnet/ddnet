@@ -35,6 +35,7 @@ class CSounds : public CComponent
 	int GetSampleId(int SetId);
 
 	float m_MapSoundVolume;
+	float m_BackgroundMusicVolume;
 
 public:
 	// sound channels
