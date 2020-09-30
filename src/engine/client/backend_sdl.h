@@ -211,6 +211,7 @@ protected:
 
 public:
 	CCommandProcessorFragment_OpenGL();
+	virtual ~CCommandProcessorFragment_OpenGL() = default;
 
 	bool RunCommand(const CCommandBuffer::SCommand *pBaseCommand);
 };
@@ -468,6 +469,7 @@ class CCommandProcessor_SDL_OpenGL : public CGraphicsBackend_Threaded::ICommandP
 
 public:
 	CCommandProcessor_SDL_OpenGL(int OpenGLMajor, int OpenGLMinor, int OpenGLPatch);
+	virtual ~CCommandProcessor_SDL_OpenGL();
 	virtual void RunBuffer(CCommandBuffer *pBuffer);
 };
 

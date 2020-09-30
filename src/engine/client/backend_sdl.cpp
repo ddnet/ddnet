@@ -4019,6 +4019,11 @@ CCommandProcessor_SDL_OpenGL::CCommandProcessor_SDL_OpenGL(int OpenGLMajor, int 
 	}
 }
 
+CCommandProcessor_SDL_OpenGL::~CCommandProcessor_SDL_OpenGL()
+{
+	delete m_pOpenGL;
+}
+
 // ------------ CGraphicsBackend_SDL_OpenGL
 
 static void GetGlewVersion(int &GlewMajor, int &GlewMinor, int &GlewPatch)
