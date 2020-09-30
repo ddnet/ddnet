@@ -82,7 +82,6 @@ public:
 	virtual bool LoadFallbackFont(CFont *pFont, const char *pFilename, const unsigned char *pBuf, size_t Size) = 0;
 	virtual CFont *GetFont(int FontIndex) = 0;
 	virtual CFont *GetFont(const char *pFilename) = 0;
-	virtual void DestroyFont(CFont *pFont) = 0;
 
 	virtual void SetDefaultFont(CFont *pFont) = 0;
 	virtual void SetCurFont(CFont *pFont) = 0;
