@@ -98,6 +98,8 @@ if gen_network_header:
 
 	print("#ifndef GAME_GENERATED_PROTOCOL_H")
 	print("#define GAME_GENERATED_PROTOCOL_H")
+	print("#include <engine/shared/protocol.h>")
+	print("#include <engine/message.h>")
 	print(network.RawHeader)
 
 	for e in network.Enums:
@@ -167,9 +169,9 @@ if gen_network_source:
 	# create names
 	lines = []
 
+	lines += ['#include "protocol.h"']
 	lines += ['#include <engine/shared/protocol.h>']
 	lines += ['#include <engine/message.h>']
-	lines += ['#include "protocol.h"']
 	lines += ['#include <game/mapitems_ex.h>']
 
 	lines += ['CNetObjHandler::CNetObjHandler()']
