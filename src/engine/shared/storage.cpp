@@ -278,33 +278,7 @@ public:
 			}
 		}
 
-#if defined(CONF_FAMILY_UNIX)
-		// check for all default locations
-		{
-			const char *aDirs[] = {
-				"/usr/bin",
-				"/usr/local/bin",
-				"/usr/pkg/bin",
-				"/opt/ddnet"};
-			const int DirsCount = sizeof(aDirs) / sizeof(aDirs[0]);
-
-			int i;
-			for(i = 0; i < DirsCount; i++)
-			{
-				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "%s/" PLAT_SERVER_EXEC, aDirs[i]);
-				IOHANDLE File = io_open(aBuf, IOFLAG_READ);
-				if(File)
-				{
-					io_close(File);
-					str_copy(m_aBinarydir, aDirs[i], sizeof(m_aDatadir));
-					return;
-				}
-			}
-		}
-#endif
-
-		dbg_msg("storage", "warning: no binary directory found");
+		// no binary directory found, use $PATH on Posix, $PWD on Windows
 	}
 
 	virtual void ListDirectoryInfo(int Type, const char *pPath, FS_LISTDIR_INFO_CALLBACK pfnCallback, void *pUser)
