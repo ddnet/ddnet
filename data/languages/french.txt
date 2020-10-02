@@ -1186,6 +1186,12 @@ Show DDNet map finishes in server browser
 transmits your player name to info2.ddnet.tw
 == transmet votre pseudonyme à info2.ddnet.tw
 
+Downloading ddnet-info.json failed
+== 
+
+Saving ddnet-settings.cfg failed
+== 
+
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
 == 
 
@@ -1247,6 +1253,9 @@ Client message
 == 
 
 Show others (own team only)
+== 
+
+Use current map as background
 == 
 
 Entities

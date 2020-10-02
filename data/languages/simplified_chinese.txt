@@ -1222,6 +1222,12 @@ Server executable not found, can't run server
 Editor
 == 编辑器
 
+Downloading ddnet-info.json failed
+== 
+
+Saving ddnet-settings.cfg failed
+== 
+
 Theme
 == 
 
@@ -1259,6 +1265,9 @@ Background music volume
 == 
 
 Assets
+== 
+
+Use current map as background
 == 
 
 Entities
