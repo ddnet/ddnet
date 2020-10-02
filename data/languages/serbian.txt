@@ -650,6 +650,12 @@ Video name:
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == Tipka K da se ubijes (restart), tipka q da pauziras i gledas druge igrače.
 
+Downloading ddnet-info.json failed
+== 
+
+Saving ddnet-settings.cfg failed
+== 
+
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
 == 
 
@@ -1131,6 +1137,9 @@ Background (regular)
 == 
 
 Background (entities)
+== 
+
+Use current map as background
 == 
 
 Show tiles layers from BG map

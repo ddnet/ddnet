@@ -1276,3 +1276,12 @@ Assets directory
 
 https://wiki.ddnet.tw/
 == https://wiki.ddnet.tw/
+
+Downloading ddnet-info.json failed
+== 
+
+Saving ddnet-settings.cfg failed
+== 
+
+Use current map as background
+== 

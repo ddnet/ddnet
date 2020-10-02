@@ -628,7 +628,13 @@ Name plates size
 Type:
 == Τύπος:
 
+Downloading ddnet-info.json failed
+== 
+
 Successfully saved the replay!
+== 
+
+Saving ddnet-settings.cfg failed
 == 
 
 Replay feature is disabled!
@@ -1127,6 +1133,9 @@ Background (regular)
 == 
 
 Background (entities)
+== 
+
+Use current map as background
 == 
 
 Show tiles layers from BG map

@@ -680,7 +680,13 @@ Are you sure that you want to disconnect your dummy?
 1 new mention
 == 1 nuova menzione
 
+Downloading ddnet-info.json failed
+== 
+
 Successfully saved the replay!
+== 
+
+Saving ddnet-settings.cfg failed
 == 
 
 Replay feature is disabled!
@@ -1170,6 +1176,9 @@ Background (regular)
 == 
 
 Background (entities)
+== 
+
+Use current map as background
 == 
 
 Show tiles layers from BG map
