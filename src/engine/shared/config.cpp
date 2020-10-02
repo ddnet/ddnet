@@ -70,7 +70,10 @@ public:
 		m_ConfigFile = m_pStorage->OpenFile(aConfigFileTmp, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 
 		if(!m_ConfigFile)
+		{
+			dbg_msg("config", "ERROR: opening %s failed", aConfigFileTmp);
 			return;
+		}
 
 		m_Failed = false;
 
