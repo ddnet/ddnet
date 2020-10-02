@@ -2880,7 +2880,7 @@ void CClient::Update()
 			FinishDDNetInfo();
 		else if(m_pDDNetInfoTask->State() == HTTP_ERROR)
 		{
-			dbg_msg("ddnet-info", "download failed");
+			m_Warnings.emplace_back(SWarning(Localize("Downloading ddnet-info.json failed")));
 			Storage()->RemoveFile(m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
 			ResetDDNetInfo();
 		}
@@ -3196,7 +3196,7 @@ void CClient::Run()
 
 		// update input
 		if(Input()->Update())
-			break; // SDL_QUIT
+			SetState(IClient::STATE_QUITING); // SDL_QUIT
 #if defined(CONF_AUTOUPDATE)
 		Updater()->Update();
 #endif
@@ -3311,7 +3311,20 @@ void CClient::Run()
 
 		// check conditions
 		if(State() == IClient::STATE_QUITING || State() == IClient::STATE_RESTARTING)
-			break;
+		{
+			static bool s_SavedConfig = false;
+			if(!s_SavedConfig)
+			{
+				// write down the config and quit
+				IConfig *pConfig = Kernel()->RequestInterface<IConfig>();
+				if(!pConfig->Save())
+					m_Warnings.emplace_back(SWarning(Localize("Saving ddnet-settings.cfg failed")));
+				s_SavedConfig = true;
+			}
+
+			if(m_Warnings.empty() && GameClient()->CanDisplayWarning())
+				break;
+		}
 
 #if defined(CONF_FAMILY_UNIX)
 		m_Fifo.Update();
@@ -4325,9 +4338,6 @@ int main(int argc, const char **argv) // ignore_convention
 	dbg_msg("client", "starting...");
 	pClient->Run();
 
-	// write down the config and quit
-	pConfig->Save();
-
 	bool Restarting = pClient->State() == CClient::STATE_RESTARTING;
 
 	pClient->~CClient();
@@ -4419,4 +4429,21 @@ void CClient::GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float Mix
 
 	*pSmoothTick = (int)(SmoothTime * 50 / time_freq()) + 1;
 	*pSmoothIntraTick = (SmoothTime - (*pSmoothTick - 1) * time_freq() / 50) / (float)(time_freq() / 50);
+}
+
+SWarning *CClient::GetCurWarning()
+{
+	if(m_Warnings.empty())
+	{
+		return NULL;
+	}
+	else if(m_Warnings[0].m_WasShown)
+	{
+		m_Warnings.erase(m_Warnings.begin());
+		return NULL;
+	}
+	else
+	{
+		return &m_Warnings[0];
+	}
 }

@@ -1454,6 +1454,7 @@ set_src(ENGINE_INTERFACE GLOB src/engine
   textrender.h
   updater.h
   uuid.h
+  warning.h
 )
 set_src(ENGINE_SHARED GLOB src/engine/shared
   compression.cpp

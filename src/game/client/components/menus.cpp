@@ -1110,6 +1110,8 @@ void CMenus::PopupMessage(const char *pTopic, const char *pBody, const char *pBu
 
 void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pButton, int64 Duration)
 {
+	dbg_msg(pTopic, "%s", pBody);
+
 	// reset active item
 	UI()->SetActiveItem(0);
 
@@ -1125,7 +1127,7 @@ void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pBu
 
 bool CMenus::CanDisplayWarning()
 {
-	return m_Popup == POPUP_NONE && (Client()->State() == IClient::STATE_DEMOPLAYBACK || Client()->State() == IClient::STATE_ONLINE);
+	return m_Popup == POPUP_NONE;
 }
 
 int CMenus::Render()
@@ -1479,7 +1481,10 @@ int CMenus::Render()
 
 			static int s_ButtonTryAgain = 0;
 			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
+			{
+				m_Popup = POPUP_NONE;
 				Client()->Quit();
+			}
 		}
 		else if(m_Popup == POPUP_DISCONNECT)
 		{

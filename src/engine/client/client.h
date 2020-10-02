@@ -26,6 +26,7 @@
 #include <engine/shared/network.h>
 #include <engine/sound.h>
 #include <engine/steam.h>
+#include <engine/warning.h>
 
 #define CONNECTLINK "ddnet:"
 
@@ -257,6 +258,8 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	static void GraphicsThreadProxy(void *pThis) { ((CClient *)pThis)->GraphicsThread(); }
 	void GraphicsThread();
 
+	std::vector<SWarning> m_Warnings;
+
 #if defined(CONF_FAMILY_UNIX)
 	CFifo m_Fifo;
 #endif
@@ -461,29 +464,31 @@ public:
 
 	// DDRace
 
-	void GenerateTimeoutSeed();
+	virtual void GenerateTimeoutSeed();
 	void GenerateTimeoutCodes();
 
 	virtual int GetCurrentRaceTime();
 
-	const char *GetCurrentMap();
-	const char *GetCurrentMapPath();
-	unsigned GetMapCrc();
+	virtual const char *GetCurrentMap();
+	virtual const char *GetCurrentMapPath();
+	virtual unsigned GetMapCrc();
 
-	void RaceRecord_Start(const char *pFilename);
-	void RaceRecord_Stop();
-	bool RaceRecord_IsRecording();
+	virtual void RaceRecord_Start(const char *pFilename);
+	virtual void RaceRecord_Stop();
+	virtual bool RaceRecord_IsRecording();
 
 	virtual void DemoSliceBegin();
 	virtual void DemoSliceEnd();
 	virtual void DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser);
 	virtual void SaveReplay(const int Length);
 
-	bool EditorHasUnsavedData() { return m_pEditor->HasUnsavedData(); }
+	virtual bool EditorHasUnsavedData() { return m_pEditor->HasUnsavedData(); }
 
 	virtual IFriends *Foes() { return &m_Foes; }
 
-	void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount);
+	virtual void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount);
+
+	virtual SWarning *GetCurWarning();
 };
 
 #endif

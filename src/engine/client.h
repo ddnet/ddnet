@@ -8,6 +8,8 @@
 #include "message.h"
 #include <engine/friends.h>
 
+struct SWarning;
+
 enum
 {
 	RECORDER_MANUAL = 0,
@@ -211,6 +213,8 @@ public:
 	virtual IFriends *Foes() = 0;
 
 	virtual void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount) = 0;
+
+	virtual SWarning *GetCurWarning() = 0;
 };
 
 class IGameClient : public IInterface
@@ -248,6 +252,7 @@ public:
 
 	virtual void OnDummyDisconnect() = 0;
 	virtual void Echo(const char *pString) = 0;
+	virtual bool CanDisplayWarning() = 0;
 };
 
 extern IGameClient *CreateGameClient();
