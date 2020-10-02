@@ -84,7 +84,6 @@ private:
 	int m_DDRaceTime;
 	int m_LastReceivedTimeTick;
 	int m_CheckpointTick;
-	int m_DDRaceTick;
 	bool m_FinishTime;
 	bool m_DDRaceTimeReceived;
 };
