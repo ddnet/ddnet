@@ -1278,10 +1278,10 @@ https://wiki.ddnet.tw/
 == https://wiki.ddnet.tw/
 
 Downloading ddnet-info.json failed
-== 
+== ddnet-info.json herunterzuladen ist fehlgeschlagen
 
 Saving ddnet-settings.cfg failed
-== 
+== ddnet-settings.cfg zu speichern ist fehlgeschlagen
 
 Use current map as background
-== 
+== Aktuelle Karte als Hintergrund benutzen
