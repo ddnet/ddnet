@@ -3196,7 +3196,12 @@ void CClient::Run()
 
 		// update input
 		if(Input()->Update())
-			SetState(IClient::STATE_QUITTING); // SDL_QUIT
+		{
+			if(State() == IClient::STATE_QUITTING)
+				break;
+			else
+				SetState(IClient::STATE_QUITTING); // SDL_QUIT
+		}
 #if defined(CONF_AUTOUPDATE)
 		Updater()->Update();
 #endif
