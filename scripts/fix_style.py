@@ -8,13 +8,20 @@ import sys
 
 os.chdir(os.path.dirname(__file__) + "/..")
 
-ignore_files = ["src/engine/keys.h", "src/engine/client/keynames.h"]
-
 def recursive_file_list(path):
 	result = []
 	for dirpath, dirnames, filenames in os.walk(path):
-		result += filter(lambda p: p not in ignore_files, [os.path.join(dirpath, filename) for filename in filenames])
+		result += [os.path.join(dirpath, filename) for filename in filenames]
 	return result
+
+IGNORE_FILES = [
+	"src/engine/client/keynames.h",
+	"src/engine/keys.h",
+]
+def filter_ignored(filenames):
+	return [filename for filename in filenames
+		if filename not in IGNORE_FILES
+		and not filename.startswith("src/game/generated/")]
 
 def filter_cpp(filenames):
 	return [filename for filename in filenames
@@ -31,7 +38,7 @@ def main():
 	p = argparse.ArgumentParser(description="Check and fix style of changed files")
 	p.add_argument("-n", "--dry-run", action="store_true", help="Don't fix, only warn")
 	args = p.parse_args()
-	filenames = filter_cpp(recursive_file_list("src"))
+	filenames = filter_ignored(filter_cpp(recursive_file_list("src")))
 	if not args.dry_run:
 		reformat(filenames)
 	else:
