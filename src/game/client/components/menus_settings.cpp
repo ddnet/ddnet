@@ -2178,13 +2178,13 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		DoEditBox(g_Config.m_ClBackgroundEntities, &Left, g_Config.m_ClBackgroundEntities, sizeof(g_Config.m_ClBackgroundEntities), 14.0f, &s_Map);
 
 		aRects[1].HSplitTop(20.0f, &Button, &aRects[1]);
-		bool UseCurrentMap = str_comp(g_Config.m_ClBackgroundEntities, CURRENT) == 0;
+		bool UseCurrentMap = str_comp(g_Config.m_ClBackgroundEntities, CURRENT_MAP) == 0;
 		if(DoButton_CheckBox(&UseCurrentMap, Localize("Use current map as background"), UseCurrentMap, &Button))
 		{
 			if(UseCurrentMap)
 				g_Config.m_ClBackgroundEntities[0] = '\0';
 			else
-				str_copy(g_Config.m_ClBackgroundEntities, CURRENT, sizeof(g_Config.m_ClBackgroundEntities));
+				str_copy(g_Config.m_ClBackgroundEntities, CURRENT_MAP, sizeof(g_Config.m_ClBackgroundEntities));
 		}
 
 		aRects[1].HSplitTop(20.0f, &Button, 0);
