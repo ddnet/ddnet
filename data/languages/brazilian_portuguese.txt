@@ -462,12 +462,6 @@ Spectator mode
 Spectators
 == Observadores
 
-Standard gametype
-== Tipo de jogo padrão
-
-Standard map
-== Mapa padrão
-
 Stop record
 == Parar a gravação
 
@@ -641,9 +635,6 @@ Show votes window after voting
 
 HUD
 == HUD
-
-AntiPing limit
-== Limite de AntiPing
 
 Look out!
 == Cuidado!
@@ -1206,15 +1197,6 @@ Country / Region
 Speed
 == Velocidade
 
-Search:
-== Pesquisar:
-
-Exclude:
-== Excluir:
-
-Search servers:
-== Pesquisar servidores:
-
 %d of %d servers
 == %d de %d servidores
 
@@ -1257,3 +1239,39 @@ Editor
 [Start menu]
 Play
 == Jogar
+
+Theme
+== 
+
+File
+== 
+
+Demos directory
+== 
+
+Themes directory
+== 
+
+Skin Database
+== 
+
+Skins directory
+== 
+
+Background music volume
+== 
+
+Assets
+== 
+
+Entities
+== 
+
+Emoticons
+== 
+
+Particles
+== 
+
+Assets directory
+== 

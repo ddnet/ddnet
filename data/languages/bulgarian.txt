@@ -437,12 +437,6 @@ Spectator mode
 Spectators
 == Наблюдатели
 
-Standard gametype
-== Стандартен тип игри
-
-Standard map
-== Стандартна карта
-
 Stop record
 == Спри записа
 
@@ -721,13 +715,7 @@ Show DDNet map finishes in server browser
 transmits your player name to info2.ddnet.tw
 == 
 
-Search:
-== 
-
-Exclude:
-== 
-
-Search servers:
+Theme
 == 
 
 Search
@@ -772,6 +760,9 @@ Please use a different name
 Remove chat
 == 
 
+File
+== 
+
 Markers:
 == 
 
@@ -794,6 +785,9 @@ Date
 == 
 
 Fetch Info
+== 
+
+Demos directory
 == 
 
 Render
@@ -847,6 +841,9 @@ Refresh Rate
 Show console window
 == 
 
+Themes directory
+== 
+
 Automatically take statboard screenshot
 == 
 
@@ -869,6 +866,12 @@ Fat skins (DDFat)
 == 
 
 Skin prefix
+== 
+
+Skin Database
+== 
+
+Skins directory
 == 
 
 Hook collisions
@@ -973,10 +976,16 @@ Threaded sound loading
 Map sound volume
 == 
 
+Background music volume
+== 
+
 HUD
 == 
 
 DDNet
+== 
+
+Assets
 == 
 
 DDNet Client needs to be restarted to complete update!
@@ -1093,9 +1102,6 @@ Show others (own team only)
 Show quads
 == 
 
-AntiPing limit
-== 
-
 AntiPing
 == 
 
@@ -1148,6 +1154,18 @@ Check now
 == 
 
 New random timeout code
+== 
+
+Entities
+== 
+
+Emoticons
+== 
+
+Particles
+== 
+
+Assets directory
 == 
 
 Learn

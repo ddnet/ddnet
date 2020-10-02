@@ -464,12 +464,6 @@ Spectator mode
 Spectators
 == Espectadores
 
-Standard gametype
-== Tipo de jogo normal
-
-Standard map
-== Mapa normal
-
 Stop record
 == Parar de gravar
 
@@ -875,9 +869,6 @@ Switch weapon when out of ammo
 AntiPing: predict grenade paths
 == Antiping: prever os caminhos da granada
 
-AntiPing limit
-== Limite do Antiping
-
 Inner color
 == Cor interior
 
@@ -962,13 +953,7 @@ Show DDNet map finishes in server browser
 transmits your player name to info2.ddnet.tw
 == 
 
-Search:
-== 
-
-Exclude:
-== 
-
-Search servers:
+Theme
 == 
 
 %d of %d servers
@@ -992,6 +977,9 @@ Indicate map finish
 Unfinished map
 == 
 
+File
+== 
+
 Markers:
 == 
 
@@ -1011,6 +999,9 @@ Date
 == 
 
 Fetch Info
+== 
+
+Demos directory
 == 
 
 Render
@@ -1043,6 +1034,9 @@ Reset wanted weapon on death
 Skip the main menu
 == 
 
+Themes directory
+== 
+
 Download skins
 == 
 
@@ -1053,6 +1047,12 @@ Fat skins (DDFat)
 == 
 
 Skin prefix
+== 
+
+Skin Database
+== 
+
+Skins directory
 == 
 
 Hook collisions
@@ -1121,6 +1121,12 @@ Enable long pain sound (used when shooting in freeze)
 Threaded sound loading
 == 
 
+Background music volume
+== 
+
+Assets
+== 
+
 Friend message
 == 
 
@@ -1164,6 +1170,18 @@ Show tiles layers from BG map
 == 
 
 Try fast HTTP map download first
+== 
+
+Entities
+== 
+
+Emoticons
+== 
+
+Particles
+== 
+
+Assets directory
 == 
 
 Learn

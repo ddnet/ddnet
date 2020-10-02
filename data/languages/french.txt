@@ -452,12 +452,6 @@ Spectator mode
 Spectators
 == Spectateurs
 
-Standard gametype
-== Types de jeu standards
-
-Standard map
-== Cartes standards
-
 Stop record
 == Arrêter l'enregistrement
 
@@ -1108,9 +1102,6 @@ Learn
 Restart
 == Redémarrer
 
-AntiPing limit
-== Limite de l'AntiPing
-
 AntiPing: predict weapons
 == AntiPing: prédit le comportement des armes
 
@@ -1210,13 +1201,7 @@ Country / Region
 Speed
 == 
 
-Search:
-== 
-
-Exclude:
-== 
-
-Search servers:
+Theme
 == 
 
 %d of %d servers
@@ -1231,16 +1216,49 @@ Search servers:
 %d player
 == 
 
+File
+== 
+
+Demos directory
+== 
+
 Skip the main menu
 == 
 
+Themes directory
+== 
+
 Download skins
+== 
+
+Skin Database
+== 
+
+Skins directory
+== 
+
+Background music volume
+== 
+
+Assets
 == 
 
 Client message
 == 
 
 Show others (own team only)
+== 
+
+Entities
+== 
+
+Emoticons
+== 
+
+Particles
+== 
+
+Assets directory
 == 
 
 https://wiki.ddnet.tw/
