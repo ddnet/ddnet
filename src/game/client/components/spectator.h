@@ -22,6 +22,9 @@ class CSpectator : public CComponent
 	float m_OldMouseX;
 	float m_OldMouseY;
 
+	bool CanChangeSpectator();
+	void SpectateNext(bool Reverse);
+
 	static void ConKeySpectator(IConsole::IResult *pResult, void *pUserData);
 	static void ConSpectate(IConsole::IResult *pResult, void *pUserData);
 	static void ConSpectateNext(IConsole::IResult *pResult, void *pUserData);
