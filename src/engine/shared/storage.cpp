@@ -3,6 +3,7 @@
 #include "linereader.h"
 #include <base/math.h>
 #include <base/system.h>
+#include <engine/client/updater.h>
 #include <engine/storage.h>
 
 class CStorage : public IStorage
@@ -30,6 +31,9 @@ public:
 
 		// get datadir
 		FindDatadir(ppArguments[0]);
+
+		// get binarydir
+		FindBinarydir(ppArguments[0]);
 
 		// get currentdir
 		if(!fs_getcwd(m_aCurrentdir, sizeof(m_aCurrentdir)))
@@ -166,7 +170,6 @@ public:
 		if(fs_is_dir("data/mapres"))
 		{
 			str_copy(m_aDatadir, "data", sizeof(m_aDatadir));
-			str_copy(m_aBinarydir, "", sizeof(m_aBinarydir));
 			return;
 		}
 
@@ -175,11 +178,6 @@ public:
 		if(fs_is_dir(DATA_DIR "/mapres"))
 		{
 			str_copy(m_aDatadir, DATA_DIR, sizeof(m_aDatadir));
-#if defined(BINARY_DIR)
-			str_copy(m_aBinarydir, BINARY_DIR, sizeof(m_aBinarydir));
-#else
-			str_copy(m_aBinarydir, DATA_DIR "/..", sizeof(m_aBinarydir));
-#endif
 			return;
 		}
 #endif
@@ -194,15 +192,14 @@ public:
 			if(Pos < MAX_PATH_LENGTH)
 			{
 				char aBuf[MAX_PATH_LENGTH];
-				str_copy(m_aBinarydir, pArgv0, Pos + 1);
-				str_format(aBuf, sizeof(aBuf), "%s/data/mapres", m_aBinarydir);
+				char aDir[MAX_PATH_LENGTH];
+				str_copy(aDir, pArgv0, Pos + 1);
+				str_format(aBuf, sizeof(aBuf), "%s/data/mapres", aDir);
 				if(fs_is_dir(aBuf))
 				{
-					str_format(m_aDatadir, sizeof(m_aDatadir), "%s/data", m_aBinarydir);
+					str_format(m_aDatadir, sizeof(m_aDatadir), "%s/data", aDir);
 					return;
 				}
-				else
-					m_aBinarydir[0] = 0;
 			}
 		}
 
@@ -226,7 +223,6 @@ public:
 				str_format(aBuf, sizeof(aBuf), "%s/data/mapres", aDirs[i]);
 				if(fs_is_dir(aBuf))
 				{
-					str_copy(m_aBinarydir, aDirs[i], sizeof(m_aDatadir));
 					str_format(m_aDatadir, sizeof(m_aDatadir), "%s/data", aDirs[i]);
 					return;
 				}
@@ -234,8 +230,55 @@ public:
 		}
 #endif
 
-		// no data-dir found
-		dbg_msg("storage", "warning no data directory found");
+		dbg_msg("storage", "warning: no data directory found");
+	}
+
+	void FindBinarydir(const char *pArgv0)
+	{
+#if defined(BINARY_DIR)
+		str_copy(m_aBinarydir, BINARY_DIR, sizeof(m_aBinarydir));
+		return;
+#endif
+
+		// check for usable path in argv[0]
+		{
+			unsigned int Pos = ~0U;
+			for(unsigned i = 0; pArgv0[i]; i++)
+				if(pArgv0[i] == '/' || pArgv0[i] == '\\')
+					Pos = i;
+
+			if(Pos < MAX_PATH_LENGTH)
+			{
+				char aBuf[MAX_PATH_LENGTH];
+				str_copy(m_aBinarydir, pArgv0, Pos + 1);
+				str_format(aBuf, sizeof(aBuf), "%s/" PLAT_SERVER_EXEC, m_aBinarydir);
+				IOHANDLE File = io_open(aBuf, IOFLAG_READ);
+				if(File)
+				{
+					io_close(File);
+					return;
+				}
+				else
+				{
+#if defined(CONF_PLATFORM_MACOSX)
+					str_append(m_aBinarydir, "/../../../DDNet-Server.app/Contents/MacOS", sizeof(m_aBinarydir));
+					str_format(aBuf, sizeof(aBuf), "%s/" PLAT_SERVER_EXEC, m_aBinarydir);
+					IOHANDLE File = io_open(aBuf, IOFLAG_READ);
+					if(File)
+					{
+						io_close(File);
+						return;
+					}
+					else
+						m_aBinarydir[0] = 0;
+#else
+					m_aBinarydir[0] = 0;
+#endif
+				}
+			}
+		}
+
+		// no binary directory found, use $PATH on Posix, $PWD on Windows
 	}
 
 	virtual void ListDirectoryInfo(int Type, const char *pPath, FS_LISTDIR_INFO_CALLBACK pfnCallback, void *pUser)
