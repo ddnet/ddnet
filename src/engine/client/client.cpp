@@ -573,7 +573,7 @@ int *CClient::GetDirectInput(int Tick, int IsDummy)
 // ------ state handling -----
 void CClient::SetState(int s)
 {
-	if(m_State == IClient::STATE_QUITING || m_State == IClient::STATE_RESTARTING)
+	if(m_State == IClient::STATE_QUITTING || m_State == IClient::STATE_RESTARTING)
 		return;
 
 	int Old = m_State;
@@ -1075,7 +1075,7 @@ void CClient::Restart()
 
 void CClient::Quit()
 {
-	SetState(IClient::STATE_QUITING);
+	SetState(IClient::STATE_QUITTING);
 }
 
 const char *CClient::PlayerName()
@@ -2539,7 +2539,7 @@ void CClient::PumpNetwork()
 	if(State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		// check for errors
-		if(State() != IClient::STATE_OFFLINE && State() < IClient::STATE_QUITING && m_NetClient[CLIENT_MAIN].State() == NETSTATE_OFFLINE)
+		if(State() != IClient::STATE_OFFLINE && State() < IClient::STATE_QUITTING && m_NetClient[CLIENT_MAIN].State() == NETSTATE_OFFLINE)
 		{
 			SetState(IClient::STATE_OFFLINE);
 			Disconnect();
@@ -2548,7 +2548,7 @@ void CClient::PumpNetwork()
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
 		}
 
-		if(State() != IClient::STATE_OFFLINE && State() < IClient::STATE_QUITING && m_DummyConnected &&
+		if(State() != IClient::STATE_OFFLINE && State() < IClient::STATE_QUITTING && m_DummyConnected &&
 			m_NetClient[CLIENT_DUMMY].State() == NETSTATE_OFFLINE)
 		{
 			DummyDisconnect(0);
@@ -3196,7 +3196,7 @@ void CClient::Run()
 
 		// update input
 		if(Input()->Update())
-			SetState(IClient::STATE_QUITING); // SDL_QUIT
+			SetState(IClient::STATE_QUITTING); // SDL_QUIT
 #if defined(CONF_AUTOUPDATE)
 		Updater()->Update();
 #endif
@@ -3310,7 +3310,7 @@ void CClient::Run()
 		AutoCSV_Cleanup();
 
 		// check conditions
-		if(State() == IClient::STATE_QUITING || State() == IClient::STATE_RESTARTING)
+		if(State() == IClient::STATE_QUITTING || State() == IClient::STATE_RESTARTING)
 		{
 			static bool s_SavedConfig = false;
 			if(!s_SavedConfig)
