@@ -425,12 +425,6 @@ Spectator mode
 Spectators
 == Megfigyelők
 
-Standard gametype
-== Általános játékfajta
-
-Standard map
-== Általános pálya
-
 Stop record
 == Demó megállítása
 
@@ -939,9 +933,6 @@ AntiPing: predict grenade paths
 Demo
 == Demó
 
-AntiPing limit
-== Antiping limit
-
 Inner color
 == belső szín
 
@@ -1188,13 +1179,7 @@ Country / Region
 Speed
 == 
 
-Search:
-== 
-
-Exclude:
-== 
-
-Search servers:
+Theme
 == 
 
 %d of %d servers
@@ -1209,7 +1194,16 @@ Search servers:
 %d player
 == 
 
+File
+== 
+
+Demos directory
+== 
+
 Skip the main menu
+== 
+
+Themes directory
 == 
 
 Download skins
@@ -1218,10 +1212,34 @@ Download skins
 Skin prefix
 == 
 
+Skin Database
+== 
+
+Skins directory
+== 
+
+Background music volume
+== 
+
+Assets
+== 
+
 Client message
 == 
 
 Show others (own team only)
+== 
+
+Entities
+== 
+
+Emoticons
+== 
+
+Particles
+== 
+
+Assets directory
 == 
 
 https://wiki.ddnet.tw/

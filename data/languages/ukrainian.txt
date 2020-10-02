@@ -326,12 +326,6 @@ Spectate
 Spectators
 == Спостерігачі
 
-Standard gametype
-== Стандартний тип гри
-
-Standard map
-== Стандартна карта
-
 Stop record
 == Зупинити запис
 
@@ -1066,9 +1060,6 @@ Show others (own team only)
 Show quads
 == Показувати quads
 
-AntiPing limit
-== AntiPing ліміт
-
 AntiPing
 == AntiPing
 
@@ -1189,13 +1180,7 @@ Country / Region
 Speed
 == 
 
-Search:
-== 
-
-Exclude:
-== 
-
-Search servers:
+Theme
 == 
 
 %d of %d servers
@@ -1210,13 +1195,46 @@ Search servers:
 %d player
 == 
 
+File
+== 
+
 Markers
+== 
+
+Demos directory
 == 
 
 Skip the main menu
 == 
 
+Themes directory
+== 
+
 Download skins
+== 
+
+Skin Database
+== 
+
+Skins directory
+== 
+
+Background music volume
+== 
+
+Assets
+== 
+
+Entities
+== 
+
+Emoticons
+== 
+
+Particles
+== 
+
+Assets directory
 == 
 
 https://wiki.ddnet.tw/

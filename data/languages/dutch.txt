@@ -452,12 +452,6 @@ Spectator mode
 Spectators
 == Toeschouwers
 
-Standard gametype
-== Standaard speltype
-
-Standard map
-== Standaard kaart
-
 Stop record
 == Stop met opnemen
 
@@ -1080,9 +1074,6 @@ Show others (own team only)
 Show quads
 == Laat quads zien
 
-AntiPing limit
-== AntiPing limiet
-
 AntiPing
 == AntiPing
 
@@ -1194,13 +1185,7 @@ Country / Region
 Speed
 == 
 
-Search:
-== 
-
-Exclude:
-== 
-
-Search servers:
+Theme
 == 
 
 %d of %d servers
@@ -1215,13 +1200,46 @@ Search servers:
 %d player
 == 
 
+File
+== 
+
+Demos directory
+== 
+
 Skip the main menu
+== 
+
+Themes directory
 == 
 
 Download skins
 == 
 
+Skin Database
+== 
+
+Skins directory
+== 
+
+Background music volume
+== 
+
+Assets
+== 
+
 Client message
+== 
+
+Entities
+== 
+
+Emoticons
+== 
+
+Particles
+== 
+
+Assets directory
 == 
 
 https://wiki.ddnet.tw/

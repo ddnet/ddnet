@@ -442,12 +442,6 @@ Spectator mode
 Spectators
 == İzleyiciler
 
-Standard gametype
-== Standart oyun türleri
-
-Standard map
-== Standart haritalar
-
 Stop record
 == Kaydı durdur
 
@@ -1080,9 +1074,6 @@ Show others (own team only)
 Show quads
 == Dörtgen yapıları göster
 
-AntiPing limit
-== AntiPing sınırı
-
 AntiPing
 == AntiPing
 
@@ -1197,13 +1188,7 @@ Country / Region
 Speed
 == 
 
-Search:
-== 
-
-Exclude:
-== 
-
-Search servers:
+Theme
 == 
 
 %d of %d servers
@@ -1218,10 +1203,43 @@ Search servers:
 %d player
 == 
 
+File
+== 
+
+Demos directory
+== 
+
 Skip the main menu
 == 
 
+Themes directory
+== 
+
 Download skins
+== 
+
+Skin Database
+== 
+
+Skins directory
+== 
+
+Background music volume
+== 
+
+Assets
+== 
+
+Entities
+== 
+
+Emoticons
+== 
+
+Particles
+== 
+
+Assets directory
 == 
 
 https://wiki.ddnet.tw/

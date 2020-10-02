@@ -441,12 +441,6 @@ Spectator mode
 Spectators
 == Espectadors
 
-Standard gametype
-== Tipus de joc estàndard
-
-Standard map
-== Mapa estàndard
-
 Stop record
 == Parar la grabació
 
@@ -933,9 +927,6 @@ Switch weapon when out of ammo
 AntiPing: predict grenade paths
 == AntiPing: predir el camí de la granada
 
-AntiPing limit
-== Límit del AntiPing
-
 Inner color
 == Color interior
 
@@ -1182,13 +1173,7 @@ Country / Region
 Speed
 == 
 
-Search:
-== 
-
-Exclude:
-== 
-
-Search servers:
+Theme
 == 
 
 %d of %d servers
@@ -1203,13 +1188,46 @@ Search servers:
 %d player
 == 
 
+File
+== 
+
+Demos directory
+== 
+
 Skip the main menu
+== 
+
+Themes directory
 == 
 
 Download skins
 == 
 
+Skin Database
+== 
+
+Skins directory
+== 
+
+Background music volume
+== 
+
+Assets
+== 
+
 Client message
+== 
+
+Entities
+== 
+
+Emoticons
+== 
+
+Particles
+== 
+
+Assets directory
 == 
 
 https://wiki.ddnet.tw/

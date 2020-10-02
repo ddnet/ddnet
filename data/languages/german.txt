@@ -460,12 +460,6 @@ Spectator mode
 Spectators
 == Zuschauer
 
-Standard gametype
-== Standard-Spieltyp
-
-Standard map
-== Standardkarte
-
 Stop record
 == Aufnahme be.
 
@@ -850,9 +844,6 @@ Reset wanted weapon on death
 Switch weapon when out of ammo
 == Waffe wechseln, wenn die Munition leer ist
 
-AntiPing limit
-== AntiPing-Limit
-
 Grabs
 == Griffe
 
@@ -1235,15 +1226,6 @@ Server executable not found, can't run server
 Play
 == Spielen
 
-Search:
-== Suche:
-
-Exclude:
-== Ausschließen:
-
-Search servers:
-== Server suchen:
-
 %d of %d servers
 == %d von %d Server
 
@@ -1255,6 +1237,42 @@ Search servers:
 
 %d player
 == %d Spieler
+
+Theme
+== 
+
+File
+== 
+
+Demos directory
+== 
+
+Themes directory
+== 
+
+Skin Database
+== 
+
+Skins directory
+== 
+
+Background music volume
+== 
+
+Assets
+== 
+
+Entities
+== 
+
+Emoticons
+== 
+
+Particles
+== 
+
+Assets directory
+== 
 
 https://wiki.ddnet.tw/
 == 

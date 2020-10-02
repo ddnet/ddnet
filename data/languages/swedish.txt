@@ -443,12 +443,6 @@ Spectator mode
 Spectators
 == Åskådare
 
-Standard gametype
-== Standard speltyp
-
-Standard map
-== Standardkarta
-
 Stop record
 == Sluta spela in
 
@@ -636,9 +630,6 @@ Show console window
 
 Vanilla skins only
 == Bara vanilla skins
-
-AntiPing limit
-== AntiPing gräns
 
 New random timeout code
 == Ny slumpad timeout kod
@@ -1192,15 +1183,6 @@ Country / Region
 Speed
 == Hastighet
 
-Search:
-== Sök:
-
-Exclude:
-== Exkludera:
-
-Search servers:
-== Sök servrar:
-
 %d of %d servers
 == %d av %d servrar.
 
@@ -1246,3 +1228,39 @@ Editor
 [Start menu]
 Play
 == Spela
+
+Theme
+== 
+
+File
+== 
+
+Demos directory
+== 
+
+Themes directory
+== 
+
+Skin Database
+== 
+
+Skins directory
+== 
+
+Background music volume
+== 
+
+Assets
+== 
+
+Entities
+== 
+
+Emoticons
+== 
+
+Particles
+== 
+
+Assets directory
+== 

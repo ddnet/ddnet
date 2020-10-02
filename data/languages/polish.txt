@@ -445,12 +445,6 @@ Spectator mode
 Spectators
 == Obserwatorzy
 
-Standard gametype
-== Standardowy typ gry
-
-Standard map
-== Standardowa mapa
-
 Stop record
 == Zakończ nagrywanie
 
@@ -840,9 +834,6 @@ Activate
 Render demo
 == Renderuj demo
 
-AntiPing limit
-== Limit AntyPing
-
 Automatically take statboard screenshot
 == Automatyczny zrzut ekranu tabeli wyników
 
@@ -1194,13 +1185,7 @@ Country / Region
 Speed
 == 
 
-Search:
-== 
-
-Exclude:
-== 
-
-Search servers:
+Theme
 == 
 
 %d of %d servers
@@ -1215,13 +1200,46 @@ Search servers:
 %d player
 == 
 
+File
+== 
+
+Demos directory
+== 
+
 Skip the main menu
+== 
+
+Themes directory
 == 
 
 Download skins
 == 
 
+Skin Database
+== 
+
+Skins directory
+== 
+
+Background music volume
+== 
+
+Assets
+== 
+
 Client message
+== 
+
+Entities
+== 
+
+Emoticons
+== 
+
+Particles
+== 
+
+Assets directory
 == 
 
 https://wiki.ddnet.tw/

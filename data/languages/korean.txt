@@ -424,12 +424,6 @@ Spectator mode
 Spectators
 == 관전자
 
-Standard gametype
-== 기본 게임 종류
-
-Standard map
-== 기본 맵
-
 Stop record
 == 기록 중지
 
@@ -723,13 +717,7 @@ Show DDNet map finishes in server browser
 transmits your player name to info2.ddnet.tw
 == 
 
-Search:
-== 
-
-Exclude:
-== 
-
-Search servers:
+Theme
 == 
 
 Search
@@ -774,6 +762,9 @@ Please use a different name
 Remove chat
 == 
 
+File
+== 
+
 Demofile: %s
 == 
 
@@ -799,6 +790,9 @@ Date
 == 
 
 Fetch Info
+== 
+
+Demos directory
 == 
 
 Render
@@ -849,6 +843,9 @@ Refresh Rate
 Show console window
 == 
 
+Themes directory
+== 
+
 Automatically take statboard screenshot
 == 
 
@@ -871,6 +868,12 @@ Fat skins (DDFat)
 == 
 
 Skin prefix
+== 
+
+Skin Database
+== 
+
+Skins directory
 == 
 
 Hook collisions
@@ -972,10 +975,16 @@ Threaded sound loading
 Map sound volume
 == 
 
+Background music volume
+== 
+
 HUD
 == 
 
 DDNet
+== 
+
+Assets
 == 
 
 DDNet Client needs to be restarted to complete update!
@@ -1092,9 +1101,6 @@ Show others (own team only)
 Show quads
 == 
 
-AntiPing limit
-== 
-
 AntiPing
 == 
 
@@ -1147,6 +1153,18 @@ Check now
 == 
 
 New random timeout code
+== 
+
+Entities
+== 
+
+Emoticons
+== 
+
+Particles
+== 
+
+Assets directory
 == 
 
 Learn

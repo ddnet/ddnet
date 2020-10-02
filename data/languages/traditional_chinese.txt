@@ -474,12 +474,6 @@ Spectator mode
 Spectators
 == 旁觀者
 
-Standard gametype
-== 原生遊戲模式
-
-Standard map
-== 原生地圖
-
 Stop record
 == 停止錄製
 
@@ -776,9 +770,6 @@ Show quads
 
 Default zoom
 == 預設縮放
-
-AntiPing limit
-== AntiPing 限制
 
 AntiPing: predict other players
 == AntiPing：預測其他玩家
@@ -1200,13 +1191,7 @@ Warning
 Speed
 == 
 
-Search:
-== 
-
-Exclude:
-== 
-
-Search servers:
+Theme
 == 
 
 %d of %d servers
@@ -1221,10 +1206,43 @@ Search servers:
 %d player
 == 
 
+File
+== 
+
+Demos directory
+== 
+
 Skip the main menu
 == 
 
+Themes directory
+== 
+
 Download skins
+== 
+
+Skin Database
+== 
+
+Skins directory
+== 
+
+Background music volume
+== 
+
+Assets
+== 
+
+Entities
+== 
+
+Emoticons
+== 
+
+Particles
+== 
+
+Assets directory
 == 
 
 Website
