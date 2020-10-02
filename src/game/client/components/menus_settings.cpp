@@ -2013,7 +2013,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		}
 	}
 
-	MainView.HSplitTop(310.0f, &Gameplay, &MainView);
+	MainView.HSplitTop(330.0f, &Gameplay, &MainView);
 
 	Gameplay.HSplitTop(30.0f, &Label, &Gameplay);
 	UI()->DoLabelScaled(&Label, Localize("Gameplay"), 20.0f, -1);
@@ -2176,6 +2176,16 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		Background.VSplitLeft(100.0f, &Label, &Left);
 		UI()->DoLabelScaled(&Label, Localize("Map"), 14.0f, -1);
 		DoEditBox(g_Config.m_ClBackgroundEntities, &Left, g_Config.m_ClBackgroundEntities, sizeof(g_Config.m_ClBackgroundEntities), 14.0f, &s_Map);
+
+		aRects[1].HSplitTop(20.0f, &Button, &aRects[1]);
+		bool UseCurrentMap = str_comp(g_Config.m_ClBackgroundEntities, CURRENT) == 0;
+		if(DoButton_CheckBox(&UseCurrentMap, Localize("Use current map as background"), UseCurrentMap, &Button))
+		{
+			if(UseCurrentMap)
+				g_Config.m_ClBackgroundEntities[0] = '\0';
+			else
+				str_copy(g_Config.m_ClBackgroundEntities, CURRENT, sizeof(g_Config.m_ClBackgroundEntities));
+		}
 
 		aRects[1].HSplitTop(20.0f, &Button, 0);
 		if(DoButton_CheckBox(&g_Config.m_ClBackgroundShowTilesLayers, Localize("Show tiles layers from BG map"), g_Config.m_ClBackgroundShowTilesLayers, &Button))
