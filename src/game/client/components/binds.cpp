@@ -142,6 +142,15 @@ bool CBinds::OnInput(IInput::CEvent e)
 		}
 	}
 
+	if(m_aapKeyBindings[0][e.m_Key])
+	{
+		if(e.m_Flags & IInput::FLAG_PRESS)
+			Console()->ExecuteLineStroked(1, m_aapKeyBindings[0][e.m_Key]);
+		if(e.m_Flags & IInput::FLAG_RELEASE)
+			Console()->ExecuteLineStroked(0, m_aapKeyBindings[0][e.m_Key]);
+		return true;
+	}
+
 	return false;
 }
 
