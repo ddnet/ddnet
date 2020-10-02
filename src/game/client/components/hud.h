@@ -62,11 +62,14 @@ class CHud : public CComponent
 
 	void MapscreenToGroup(float CenterX, float CenterY, struct CMapItemGroup *PGroup);
 
+	static void ConchainHudScale(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+
 public:
 	CHud();
 
 	void ResetHudContainers();
 	virtual void OnWindowResize();
+	virtual void OnConsoleInit();
 	virtual void OnReset();
 	virtual void OnRender();
 	virtual void OnInit();
