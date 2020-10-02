@@ -387,6 +387,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 				CMapItemLayerTilemap Item;
 				Item.m_Version = 3;
 
+				Item.m_Layer.m_Version = 1; // was previously uninitialized, do not rely on it being 1
 				Item.m_Layer.m_Flags = pLayer->m_Flags;
 				Item.m_Layer.m_Type = pLayer->m_Type;
 
@@ -412,6 +413,13 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 					Item.m_Flags = pLayer->m_Game ? TILESLAYERFLAG_GAME : 0;
 
 				Item.m_Image = pLayer->m_Image;
+
+				// the following values were previously uninitialized, do not rely on them being -1 when unused
+				Item.m_Tele = -1;
+				Item.m_Speedup = -1;
+				Item.m_Front = -1;
+				Item.m_Switch = -1;
+				Item.m_Tune = -1;
 
 				if(Item.m_Flags && !(pLayer->m_Game))
 				{
@@ -463,6 +471,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 				{
 					CMapItemLayerQuads Item;
 					Item.m_Version = 2;
+					Item.m_Layer.m_Version = 1; // was previously uninitialized, do not rely on it being 1
 					Item.m_Layer.m_Flags = pLayer->m_Flags;
 					Item.m_Layer.m_Type = pLayer->m_Type;
 					Item.m_Image = pLayer->m_Image;
@@ -491,6 +500,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 				{
 					CMapItemLayerSounds Item;
 					Item.m_Version = CMapItemLayerSounds::CURRENT_VERSION;
+					Item.m_Layer.m_Version = 1; // was previously uninitialized, do not rely on it being 1
 					Item.m_Layer.m_Flags = pLayer->m_Flags;
 					Item.m_Layer.m_Type = pLayer->m_Type;
 					Item.m_Sound = pLayer->m_Sound;
