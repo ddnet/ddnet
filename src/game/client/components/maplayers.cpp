@@ -387,6 +387,27 @@ void mem_copy_special(void *pDest, void *pSource, size_t Size, size_t Count, siz
 	}
 }
 
+CMapLayers::~CMapLayers()
+{
+	//clear everything and destroy all buffers
+	if(m_TileLayerVisuals.size() != 0)
+	{
+		int s = m_TileLayerVisuals.size();
+		for(int i = 0; i < s; ++i)
+		{
+			delete m_TileLayerVisuals[i];
+		}
+	}
+	if(m_QuadLayerVisuals.size() != 0)
+	{
+		int s = m_QuadLayerVisuals.size();
+		for(int i = 0; i < s; ++i)
+		{
+			delete m_QuadLayerVisuals[i];
+		}
+	}
+}
+
 void CMapLayers::OnMapLoad()
 {
 	if(!Graphics()->IsTileBufferingEnabled() && !Graphics()->IsQuadBufferingEnabled())

@@ -80,6 +80,17 @@ struct CFontSizeData
 class CFont
 {
 public:
+	~CFont()
+	{
+		free(m_pBuf);
+		delete[] m_TextureData[0];
+		delete[] m_TextureData[1];
+		for(size_t i = 0; i < m_FtFallbackFonts.size(); i++)
+		{
+			free(m_FtFallbackFonts[i].m_pBuf);
+		}
+	}
+
 	void InitFontSizes()
 	{
 		for(int i = 0; i < NUM_FONT_SIZES; ++i)
@@ -97,11 +108,13 @@ public:
 		return &m_aFontSizes[FontSize - MIN_FONT_SIZE];
 	}
 
+	void *m_pBuf;
 	char m_aFilename[512];
 	FT_Face m_FtFace;
 
 	struct SFontFallBack
 	{
+		void *m_pBuf;
 		char m_aFilename[512];
 		FT_Face m_FtFace;
 	};
@@ -584,7 +597,14 @@ public:
 	{
 		for(size_t i = 0; i < m_Fonts.size(); ++i)
 		{
-			DestroyFont(m_Fonts[i]);
+			FT_Done_Face(m_Fonts[i]->m_FtFace);
+
+			for(CFont::SFontFallBack &FallbackFont : m_Fonts[i]->m_FtFallbackFonts)
+			{
+				FT_Done_Face(FallbackFont.m_FtFace);
+			}
+
+			delete m_Fonts[i];
 		}
 
 		if(m_FTLibrary != 0)
@@ -660,6 +680,7 @@ public:
 
 		dbg_msg("textrender", "loaded pFont from '%s'", pFilename);
 
+		pFont->m_pBuf = (void *)pBuf;
 		pFont->m_CurTextureDimensions[0] = 1024;
 		pFont->m_TextureData[0] = new unsigned char[pFont->m_CurTextureDimensions[0] * pFont->m_CurTextureDimensions[0]];
 		mem_zero(pFont->m_TextureData[0], pFont->m_CurTextureDimensions[0] * pFont->m_CurTextureDimensions[0] * sizeof(unsigned char));
@@ -683,6 +704,7 @@ public:
 	virtual bool LoadFallbackFont(CFont *pFont, const char *pFilename, const unsigned char *pBuf, size_t Size)
 	{
 		CFont::SFontFallBack FallbackFont;
+		FallbackFont.m_pBuf = (void *)pBuf;
 		str_copy(FallbackFont.m_aFilename, pFilename, sizeof(FallbackFont.m_aFilename));
 
 		if(FT_New_Memory_Face(m_FTLibrary, pBuf, Size, 0, &FallbackFont.m_FtFace) == 0)
@@ -713,27 +735,6 @@ public:
 		}
 
 		return NULL;
-	}
-
-	virtual void DestroyFont(CFont *pFont)
-	{
-		for(size_t i = 0; i < m_Fonts.size(); ++i)
-		{
-			if(m_Fonts[i] == pFont)
-			{
-				m_Fonts[i] = m_Fonts[m_Fonts.size() - 1];
-				m_Fonts.pop_back();
-
-				FT_Done_Face(pFont->m_FtFace);
-
-				for(CFont::SFontFallBack &FallbackFont : pFont->m_FtFallbackFonts)
-				{
-					FT_Done_Face(FallbackFont.m_FtFace);
-				}
-
-				delete pFont;
-			}
-		}
 	}
 
 	virtual void SetDefaultFont(CFont *pFont)

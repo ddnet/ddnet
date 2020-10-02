@@ -139,6 +139,7 @@ public:
 	};
 
 	CMapLayers(int Type, bool OnlineOnly = true);
+	virtual ~CMapLayers();
 	virtual void OnInit();
 	virtual void OnRender();
 	virtual void OnMapLoad();
