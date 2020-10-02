@@ -4,6 +4,7 @@
 #define ENGINE_GRAPHICS_H
 
 #include "kernel.h"
+#include "warning.h"
 
 #include <base/color.h>
 #include <stddef.h>
@@ -144,14 +145,6 @@ struct GL_SVertexTex3DStream
 	GL_SPoint m_Pos;
 	GL_SColor m_Color;
 	GL_STexCoord3D m_Tex;
-};
-
-struct SGraphicsWarning
-{
-	SGraphicsWarning() :
-		m_WasShown(false) {}
-	char m_aWarningMsg[128];
-	bool m_WasShown;
 };
 
 typedef void (*WINDOW_RESIZE_FUNC)(void *pUser);
@@ -367,7 +360,7 @@ public:
 	virtual void SetWindowGrab(bool Grab) = 0;
 	virtual void NotifyWindow() = 0;
 
-	virtual SGraphicsWarning *GetCurWarning() = 0;
+	virtual SWarning *GetCurWarning() = 0;
 
 protected:
 	inline CTextureHandle CreateTextureHandle(int Index)

@@ -330,7 +330,7 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Heig
 	{
 		if(Width == 0 || (Width % 16) != 0 || Height == 0 || (Height % 16) != 0)
 		{
-			SGraphicsWarning NewWarning;
+			SWarning NewWarning;
 			char aText[128];
 			aText[0] = '\0';
 			if(pTexName)
@@ -2241,7 +2241,7 @@ void CGraphics_Threaded::Swap()
 {
 	if(!m_Warnings.empty())
 	{
-		SGraphicsWarning *pCurWarning = GetCurWarning();
+		SWarning *pCurWarning = GetCurWarning();
 		if(pCurWarning->m_WasShown)
 		{
 			m_Warnings.erase(m_Warnings.begin());
@@ -2301,13 +2301,13 @@ void CGraphics_Threaded::WaitForIdle()
 	m_pBackend->WaitForIdle();
 }
 
-SGraphicsWarning *CGraphics_Threaded::GetCurWarning()
+SWarning *CGraphics_Threaded::GetCurWarning()
 {
 	if(m_Warnings.empty())
 		return NULL;
 	else
 	{
-		SGraphicsWarning *pCurWarning = &m_Warnings[0];
+		SWarning *pCurWarning = &m_Warnings[0];
 		return pCurWarning;
 	}
 }

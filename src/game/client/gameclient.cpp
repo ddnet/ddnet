@@ -644,15 +644,25 @@ void CGameClient::OnRender()
 	// display gfx warnings
 	if(g_Config.m_GfxShowWarnings == 1)
 	{
-		SGraphicsWarning *pWarning = Graphics()->GetCurWarning();
+		SWarning *pWarning = Graphics()->GetCurWarning();
 		if(pWarning != NULL)
 		{
 			if(m_pMenus->CanDisplayWarning())
 			{
 				m_pMenus->PopupWarning(Localize("Warning"), pWarning->m_aWarningMsg, "Ok", 10000000);
-
 				pWarning->m_WasShown = true;
 			}
+		}
+	}
+
+	// display client warnings
+	SWarning *pWarning = Client()->GetCurWarning();
+	if(pWarning != NULL)
+	{
+		if(m_pMenus->CanDisplayWarning())
+		{
+			m_pMenus->PopupWarning(Localize("Warning"), pWarning->m_aWarningMsg, "Ok", 10000000);
+			pWarning->m_WasShown = true;
 		}
 	}
 
@@ -2689,4 +2699,9 @@ void CGameClient::ConchainMenuMap(IConsole::IResult *pResult, void *pUserData, I
 	}
 	else
 		pfnCallback(pResult, pCallbackUserData);
+}
+
+bool CGameClient::CanDisplayWarning()
+{
+	return m_pMenus->CanDisplayWarning();
 }

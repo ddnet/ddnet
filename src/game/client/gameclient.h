@@ -449,6 +449,7 @@ public:
 
 	void Echo(const char *pString);
 	bool IsOtherTeam(int ClientID);
+	bool CanDisplayWarning();
 
 	void LoadGameSkin(const char *pPath, bool AsDir = false);
 	void LoadEmoticonsSkin(const char *pPath, bool AsDir = false);

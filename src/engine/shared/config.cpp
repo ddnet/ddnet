@@ -59,10 +59,10 @@ public:
 #undef MACRO_CONFIG_STR
 	}
 
-	virtual void Save()
+	virtual bool Save()
 	{
 		if(!m_pStorage || !g_Config.m_ClSaveSettings)
-			return;
+			return true;
 
 		char aConfigFileTmp[64];
 		str_format(aConfigFileTmp, sizeof(aConfigFileTmp), CONFIG_FILE ".%d.tmp", pid());
@@ -70,7 +70,10 @@ public:
 		m_ConfigFile = m_pStorage->OpenFile(aConfigFileTmp, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 
 		if(!m_ConfigFile)
-			return;
+		{
+			dbg_msg("config", "ERROR: opening %s failed", aConfigFileTmp);
+			return false;
+		}
 
 		m_Failed = false;
 
@@ -114,11 +117,16 @@ public:
 		if(m_Failed)
 		{
 			dbg_msg("config", "ERROR: writing to %s failed", aConfigFileTmp);
-			return;
+			return false;
 		}
 
 		if(!m_pStorage->RenameFile(aConfigFileTmp, CONFIG_FILE, IStorage::TYPE_SAVE))
+		{
 			dbg_msg("config", "ERROR: renaming %s to " CONFIG_FILE " failed", aConfigFileTmp);
+			return false;
+		}
+
+		return true;
 	}
 
 	virtual void RegisterCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData)

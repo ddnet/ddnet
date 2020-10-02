@@ -13,7 +13,7 @@ public:
 
 	virtual void Init() = 0;
 	virtual void Reset() = 0;
-	virtual void Save() = 0;
+	virtual bool Save() = 0;
 
 	virtual void RegisterCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData) = 0;
 

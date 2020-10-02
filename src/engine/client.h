@@ -8,6 +8,8 @@
 #include "message.h"
 #include <engine/friends.h>
 
+struct SWarning;
+
 enum
 {
 	RECORDER_MANUAL = 0,
@@ -60,7 +62,7 @@ public:
 		STATE_LOADING - The client has connected to a server and is loading resources.
 		STATE_ONLINE - The client is connected to a server and running the game.
 		STATE_DEMOPLAYBACK - The client is playing a demo
-		STATE_QUITING - The client is quitting.
+		STATE_QUITTING - The client is quitting.
 	*/
 
 	enum
@@ -70,7 +72,7 @@ public:
 		STATE_LOADING,
 		STATE_ONLINE,
 		STATE_DEMOPLAYBACK,
-		STATE_QUITING,
+		STATE_QUITTING,
 		STATE_RESTARTING,
 	};
 
@@ -211,6 +213,8 @@ public:
 	virtual IFriends *Foes() = 0;
 
 	virtual void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount) = 0;
+
+	virtual SWarning *GetCurWarning() = 0;
 };
 
 class IGameClient : public IInterface
@@ -248,6 +252,7 @@ public:
 
 	virtual void OnDummyDisconnect() = 0;
 	virtual void Echo(const char *pString) = 0;
+	virtual bool CanDisplayWarning() = 0;
 };
 
 extern IGameClient *CreateGameClient();

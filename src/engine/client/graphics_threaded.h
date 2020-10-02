@@ -711,7 +711,7 @@ class CGraphics_Threaded : public IEngineGraphics
 	int m_FirstFreeTexture;
 	int m_TextureMemoryUsage;
 
-	std::vector<SGraphicsWarning> m_Warnings;
+	std::vector<SWarning> m_Warnings;
 
 	struct SVertexArrayInfo
 	{
@@ -1103,7 +1103,7 @@ public:
 	bool IsIdle() override;
 	void WaitForIdle() override;
 
-	SGraphicsWarning *GetCurWarning() override;
+	SWarning *GetCurWarning() override;
 
 	bool IsTileBufferingEnabled() override { return m_OpenGLTileBufferingEnabled; }
 	bool IsQuadBufferingEnabled() override { return m_OpenGLQuadBufferingEnabled; }
