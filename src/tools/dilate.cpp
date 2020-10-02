@@ -13,7 +13,7 @@ int DilateFile(const char *pFileName)
 	int Error = png_open_file(&Png, pFileName);
 	if(Error != PNG_NO_ERROR)
 	{
-		dbg_msg("dilate", "failed to open image file. filename='%s'", pFileName);
+		dbg_msg("dilate", "failed to open image file. filename='%s', pnglite: %s", pFileName, png_error_string(Error));
 		if(Error != PNG_FILE_ERROR)
 			png_close_file(&Png);
 		return 0;
@@ -27,7 +27,14 @@ int DilateFile(const char *pFileName)
 
 	unsigned char *pBuffer = (unsigned char *)malloc(Png.width * Png.height * sizeof(unsigned char) * 4);
 
-	png_get_data(&Png, pBuffer);
+	Error = png_get_data(&Png, pBuffer);
+	if(Error != PNG_NO_ERROR)
+	{
+		dbg_msg("map_convert_07", "failed to read image. filename='%s', pnglite: %s", pFileName, png_error_string(Error));
+		free(pBuffer);
+		png_close_file(&Png);
+		return 0;
+	}
 	png_close_file(&Png);
 
 	int w = Png.width;

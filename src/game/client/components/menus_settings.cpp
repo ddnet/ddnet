@@ -2078,14 +2078,6 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	Button.HMargin(2.0f, &Button);
 	g_Config.m_ClDefaultZoom = static_cast<int>(DoScrollbarH(&g_Config.m_ClDefaultZoom, &Button, g_Config.m_ClDefaultZoom / 20.0f) * 20.0f + 0.1f);
 
-	Right.HSplitTop(20.0f, &Label, &Right);
-	Label.VSplitLeft(130.0f, &Label, &Button);
-	str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("AntiPing limit"), g_Config.m_ClAntiPingLimit);
-	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
-	//Right.HSplitTop(20.0f, &Button, 0);
-	Button.HMargin(2.0f, &Button);
-	g_Config.m_ClAntiPingLimit = static_cast<int>(DoScrollbarH(&g_Config.m_ClAntiPingLimit, &Button, g_Config.m_ClAntiPingLimit / 200.0f) * 200.0f + 0.1f);
-
 	Right.HSplitTop(20.0f, &Button, &Right);
 	if(DoButton_CheckBox(&g_Config.m_ClAntiPing, Localize("AntiPing"), g_Config.m_ClAntiPing, &Button))
 	{
@@ -2117,7 +2109,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		Right.HSplitTop(60.0f, 0, &Right);
 	}
 
-	Right.HSplitTop(20.0f, 0, &Right);
+	Right.HSplitTop(40.0f, 0, &Right);
 
 	Left.HSplitTop(20.0f, &Button, &Left);
 	if(DoButton_CheckBox(&g_Config.m_ClShowHookCollOther, Localize("Show other players' hook collision lines"), g_Config.m_ClShowHookCollOther, &Button))

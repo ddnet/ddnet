@@ -440,7 +440,7 @@ int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int Sto
 	int Error = png_open_file(&Png, aCompleteFilename); // ignore_convention
 	if(Error != PNG_NO_ERROR)
 	{
-		dbg_msg("game/png", "failed to open file. filename='%s'", aCompleteFilename);
+		dbg_msg("game/png", "failed to open file. filename='%s', pnglite: %s", aCompleteFilename, png_error_string(Error));
 		if(Error != PNG_FILE_ERROR)
 			png_close_file(&Png); // ignore_convention
 		return 0;
@@ -454,7 +454,14 @@ int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int Sto
 	}
 
 	pBuffer = (unsigned char *)malloc(Png.width * Png.height * Png.bpp); // ignore_convention
-	png_get_data(&Png, pBuffer); // ignore_convention
+	Error = png_get_data(&Png, pBuffer); // ignore_convention
+	if(Error != PNG_NO_ERROR)
+	{
+		dbg_msg("game/png", "failed to read image. filename='%s', pnglite: %s", aCompleteFilename, png_error_string(Error));
+		free(pBuffer);
+		png_close_file(&Png); // ignore_convention
+		return 0;
+	}
 	png_close_file(&Png); // ignore_convention
 
 	pImg->m_Width = Png.width; // ignore_convention
