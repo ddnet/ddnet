@@ -388,6 +388,7 @@ protected:
 	void RenderSettings(CUIRect MainView);
 	void RenderSettingsCustom(CUIRect MainView);
 
+	void SetNeedSendInfo();
 	void SetActive(bool Active);
 
 	IGraphics::CTextureHandle m_TextureBlob;
