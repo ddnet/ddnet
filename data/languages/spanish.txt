@@ -1171,6 +1171,12 @@ Grabs
 9+ new mentions
 == 9+ nuevas menciones
 
+Downloading ddnet-info.json failed
+== 
+
+Saving ddnet-settings.cfg failed
+== 
+
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
 == 
 
@@ -1229,6 +1235,9 @@ Assets
 == 
 
 Client message
+== 
+
+Use current map as background
 == 
 
 Entities

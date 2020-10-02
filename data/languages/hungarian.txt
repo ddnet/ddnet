@@ -1164,6 +1164,12 @@ Length
 Are you sure that you want to disconnect your dummy?
 == Biztos, hogy kiakarod léptetni a másolatodat?
 
+Downloading ddnet-info.json failed
+== 
+
+Saving ddnet-settings.cfg failed
+== 
+
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
 == 
 
@@ -1228,6 +1234,9 @@ Client message
 == 
 
 Show others (own team only)
+== 
+
+Use current map as background
 == 
 
 Entities

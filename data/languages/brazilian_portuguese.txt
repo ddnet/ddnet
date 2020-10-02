@@ -1240,6 +1240,12 @@ Editor
 Play
 == Jogar
 
+Downloading ddnet-info.json failed
+== 
+
+Saving ddnet-settings.cfg failed
+== 
+
 Theme
 == 
 
@@ -1262,6 +1268,9 @@ Background music volume
 == 
 
 Assets
+== 
+
+Use current map as background
 == 
 
 Entities

@@ -1135,6 +1135,12 @@ The width or height of texture %s is not divisible by 16, which might cause visu
 Country / Region
 == Zemlja / Regija
 
+Downloading ddnet-info.json failed
+== 
+
+Saving ddnet-settings.cfg failed
+== 
+
 Warning
 == 
 
@@ -1205,6 +1211,9 @@ Overlay entities
 == 
 
 AntiPing
+== 
+
+Use current map as background
 == 
 
 Entities
