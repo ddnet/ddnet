@@ -24,7 +24,7 @@ public:
 	// Commands
 	virtual void Dump() = 0;
 
-	virtual ~IAntibot() { };
+	virtual ~IAntibot(){};
 };
 
 class IEngineAntibot : public IAntibot
@@ -39,7 +39,7 @@ public:
 	virtual void OnEngineClientDrop(int ClientID, const char *pReason) = 0;
 	virtual void OnEngineClientMessage(int ClientID, const void *pData, int Size, int Flags) = 0;
 
-	virtual ~IEngineAntibot() { };
+	virtual ~IEngineAntibot(){};
 };
 
 #endif //ENGINE_ANTIBOT_H

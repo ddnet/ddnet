@@ -1,11 +1,11 @@
 /* (c) DDNet developers. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.  */
 
-#include <base/system.h>
 #include <base/math.h>
+#include <base/system.h>
+#include <engine/graphics.h>
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
-#include <engine/graphics.h>
 #include <game/mapitems.h>
 
 #include <pnglite.h>
@@ -21,7 +21,7 @@ CDataFileWriter g_DataWriter;
 // global new image data (set by ReplaceImageItem)
 int g_NewNameID = -1;
 char g_aNewName[128];
-int g_NewDataID  = -1;
+int g_NewDataID = -1;
 int g_NewDataSize = 0;
 void *g_pNewData = 0;
 
@@ -33,13 +33,13 @@ int LoadPNG(CImageInfo *pImg, const char *pFilename)
 	int Error = png_open_file(&Png, pFilename);
 	if(Error != PNG_NO_ERROR)
 	{
-		dbg_msg("map_replace_image", "failed to open image file. filename='%s'", pFilename);
+		dbg_msg("map_replace_image", "failed to open image file. filename='%s', pnglite: %s", pFilename, png_error_string(Error));
 		if(Error != PNG_FILE_ERROR)
 			png_close_file(&Png);
 		return 0;
 	}
 
-	if(Png.depth != 8 || (Png.color_type != PNG_TRUECOLOR && Png.color_type != PNG_TRUECOLOR_ALPHA) || Png.width > (2<<12) || Png.height > (2<<12))
+	if(Png.depth != 8 || (Png.color_type != PNG_TRUECOLOR && Png.color_type != PNG_TRUECOLOR_ALPHA) || Png.width > (2 << 12) || Png.height > (2 << 12))
 	{
 		dbg_msg("map_replace_image", "invalid image format. filename='%s'", pFilename);
 		png_close_file(&Png);
@@ -47,7 +47,14 @@ int LoadPNG(CImageInfo *pImg, const char *pFilename)
 	}
 
 	pBuffer = (unsigned char *)malloc(Png.width * Png.height * Png.bpp);
-	png_get_data(&Png, pBuffer);
+	Error = png_get_data(&Png, pBuffer);
+	if(Error != PNG_NO_ERROR)
+	{
+		dbg_msg("map_convert_07", "failed to read image. filename='%s', pnglite: %s", pFilename, png_error_string(Error));
+		free(pBuffer);
+		png_close_file(&Png);
+		return 0;
+	}
 	png_close_file(&Png);
 
 	pImg->m_Width = Png.width;
@@ -79,7 +86,7 @@ void *ReplaceImageItem(void *pItem, int Type, const char *pImgName, const char *
 
 	*pNewImgItem = *pImgItem;
 
-	pNewImgItem->m_Width  = ImgInfo.m_Width;
+	pNewImgItem->m_Width = ImgInfo.m_Width;
 	pNewImgItem->m_Height = ImgInfo.m_Height;
 	int PixelSize = ImgInfo.m_Format == CImageInfo::FORMAT_RGB ? 3 : 4;
 
@@ -107,7 +114,7 @@ int main(int argc, const char **argv)
 		return -1;
 	}
 
-	if (!pStorage)
+	if(!pStorage)
 	{
 		dbg_msg("map_replace_image", "error loading storage");
 		return -1;
@@ -136,7 +143,7 @@ int main(int argc, const char **argv)
 		return -1;
 	}
 
-	png_init(0,0);
+	png_init(0, 0);
 
 	// add all items
 	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)
@@ -164,7 +171,7 @@ int main(int argc, const char **argv)
 			pData = g_pNewData;
 			Size = g_NewDataSize;
 		}
-		else if (Index == g_NewNameID)
+		else if(Index == g_NewNameID)
 		{
 			pData = (void *)g_aNewName;
 			Size = str_length(g_aNewName) + 1;

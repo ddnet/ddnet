@@ -80,7 +80,6 @@ void CJobPool::WorkerThread(void *pUser)
 			pJob->m_Status = IJob::STATE_DONE;
 		}
 	}
-
 }
 
 void CJobPool::Init(int NumThreads)

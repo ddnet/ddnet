@@ -13,7 +13,7 @@
 
 // TODO: Non-global pls?
 static CURLSH *gs_Share;
-static LOCK gs_aLocks[CURL_LOCK_DATA_LAST+1];
+static LOCK gs_aLocks[CURL_LOCK_DATA_LAST + 1];
 
 static int GetLockIndex(int Data)
 {
@@ -75,10 +75,11 @@ void EscapeUrl(char *pBuf, int Size, const char *pStr)
 	curl_free(pEsc);
 }
 
-CRequest::CRequest(const char *pUrl, CTimeout Timeout) :
+CRequest::CRequest(const char *pUrl, CTimeout Timeout, bool LogProgress) :
 	m_Timeout(Timeout),
 	m_Size(0),
 	m_Progress(0),
+	m_LogProgress(LogProgress),
 	m_State(HTTP_QUEUED),
 	m_Abort(false)
 {
@@ -87,18 +88,19 @@ CRequest::CRequest(const char *pUrl, CTimeout Timeout) :
 
 void CRequest::Run()
 {
+	int FinalState;
 	if(!BeforeInit())
 	{
-		m_State = HTTP_ERROR;
-		OnCompletion();
-		return;
+		FinalState = HTTP_ERROR;
+	}
+	else
+	{
+		CURL *pHandle = curl_easy_init();
+		FinalState = RunImpl(pHandle);
+		curl_easy_cleanup(pHandle);
 	}
 
-	CURL *pHandle = curl_easy_init();
-	m_State = RunImpl(pHandle);
-	curl_easy_cleanup(pHandle);
-
-	OnCompletion();
+	m_State = OnCompletion(FinalState);
 }
 
 int CRequest::RunImpl(CURL *pHandle)
@@ -139,21 +141,20 @@ int CRequest::RunImpl(CURL *pHandle)
 		return HTTP_ERROR;
 	}
 
-	dbg_msg("http", "http %s", m_aUrl);
+	if(g_Config.m_DbgCurl || m_LogProgress)
+		dbg_msg("http", "http %s", m_aUrl);
 	m_State = HTTP_RUNNING;
 	int Ret = curl_easy_perform(pHandle);
-	if(!BeforeCompletion())
-	{
-		return HTTP_ERROR;
-	}
 	if(Ret != CURLE_OK)
 	{
-		dbg_msg("http", "task failed. libcurl error: %s", aErr);
+		if(g_Config.m_DbgCurl || m_LogProgress)
+			dbg_msg("http", "task failed. libcurl error: %s", aErr);
 		return (Ret == CURLE_ABORTED_BY_CALLBACK) ? HTTP_ABORTED : HTTP_ERROR;
 	}
 	else
 	{
-		dbg_msg("http", "task done %s", m_aUrl);
+		if(g_Config.m_DbgCurl || m_LogProgress)
+			dbg_msg("http", "task done %s", m_aUrl);
 		return HTTP_DONE;
 	}
 }
@@ -246,29 +247,29 @@ size_t CGet::OnData(char *pData, size_t DataSize)
 	return DataSize;
 }
 
-CGetFile::CGetFile(IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType, CTimeout Timeout) :
-	CRequest(pUrl, Timeout),
+CGetFile::CGetFile(IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType, CTimeout Timeout, bool LogProgress) :
+	CRequest(pUrl, Timeout, LogProgress),
 	m_pStorage(pStorage),
-	m_StorageType(StorageType)
+	m_StorageType(StorageType),
+	m_File(0)
 {
 	str_copy(m_aDest, pDest, sizeof(m_aDest));
+
+	if(m_StorageType == -2)
+		m_pStorage->GetBinaryPath(m_aDest, m_aDestFull, sizeof(m_aDestFull));
+	else
+		m_pStorage->GetCompletePath(m_StorageType, m_aDest, m_aDestFull, sizeof(m_aDestFull));
 }
 
 bool CGetFile::BeforeInit()
 {
-	char aPath[512];
-	if(m_StorageType == -2)
-		m_pStorage->GetBinaryPath(m_aDest, aPath, sizeof(aPath));
-	else
-		m_pStorage->GetCompletePath(m_StorageType, m_aDest, aPath, sizeof(aPath));
-
-	if(fs_makedir_rec_for(aPath) < 0)
+	if(fs_makedir_rec_for(m_aDestFull) < 0)
 	{
-		dbg_msg("http", "i/o error, cannot create folder for: %s", aPath);
+		dbg_msg("http", "i/o error, cannot create folder for: %s", m_aDestFull);
 		return false;
 	}
 
-	m_File = io_open(aPath, IOFLAG_WRITE);
+	m_File = io_open(m_aDestFull, IOFLAG_WRITE);
 	if(!m_File)
 	{
 		dbg_msg("http", "i/o error, cannot open file: %s", m_aDest);
@@ -282,13 +283,23 @@ size_t CGetFile::OnData(char *pData, size_t DataSize)
 	return io_write(m_File, pData, DataSize);
 }
 
-bool CGetFile::BeforeCompletion()
+int CGetFile::OnCompletion(int State)
 {
-	return io_close(m_File) == 0;
+	if(m_File && io_close(m_File) != 0)
+	{
+		State = HTTP_ERROR;
+	}
+
+	if(State == HTTP_ERROR || State == HTTP_ABORTED)
+	{
+		m_pStorage->RemoveFile(m_aDestFull, IStorage::TYPE_ABSOLUTE);
+	}
+
+	return State;
 }
 
-CPostJson::CPostJson(const char *pUrl, CTimeout Timeout, const char *pJson)
-	: CRequest(pUrl, Timeout)
+CPostJson::CPostJson(const char *pUrl, CTimeout Timeout, const char *pJson) :
+	CRequest(pUrl, Timeout)
 {
 	str_copy(m_aJson, pJson, sizeof(m_aJson));
 }

@@ -460,12 +460,6 @@ Spectator mode
 Spectators
 == Zuschauer
 
-Standard gametype
-== Standard-Spieltyp
-
-Standard map
-== Standardkarte
-
 Stop record
 == Aufnahme be.
 
@@ -850,9 +844,6 @@ Reset wanted weapon on death
 Switch weapon when out of ammo
 == Waffe wechseln, wenn die Munition leer ist
 
-AntiPing limit
-== AntiPing-Limit
-
 Grabs
 == Griffe
 
@@ -1235,15 +1226,6 @@ Server executable not found, can't run server
 Play
 == Spielen
 
-Search:
-== Suche:
-
-Exclude:
-== Ausschließen:
-
-Search servers:
-== Server suchen:
-
 %d of %d servers
 == %d von %d Server
 
@@ -1256,5 +1238,50 @@ Search servers:
 %d player
 == %d Spieler
 
+Theme
+== Theme
+
+File
+== Datei
+
+Demos directory
+== Demo-Ordner
+
+Themes directory
+== Theme-Ordner
+
+Skin Database
+== Skin-Datenbank
+
+Skins directory
+== Skin-Ordner
+
+Background music volume
+== Hintergrundmusik-Lautstärke
+
+Assets
+== Assets
+
+Entities
+== Entities
+
+Emoticons
+== Emoticons
+
+Particles
+== Partikel
+
+Assets directory
+== Assets-Ordner
+
 https://wiki.ddnet.tw/
-== 
+== https://wiki.ddnet.tw/
+
+Downloading ddnet-info.json failed
+== ddnet-info.json herunterzuladen ist fehlgeschlagen
+
+Saving ddnet-settings.cfg failed
+== ddnet-settings.cfg zu speichern ist fehlgeschlagen
+
+Use current map as background
+== Aktuelle Karte als Hintergrund benutzen

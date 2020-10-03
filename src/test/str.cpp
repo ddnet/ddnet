@@ -40,10 +40,18 @@ TEST(Str, Utf8SkipWhitespaces)
 
 TEST(Str, Utf8TrimRight)
 {
-	char A1[] = "abc"; str_utf8_trim_right(A1); EXPECT_STREQ(A1, "abc");
-	char A2[] = "   abc"; str_utf8_trim_right(A2); EXPECT_STREQ(A2, "   abc");
-	char A3[] = "abc   "; str_utf8_trim_right(A3); EXPECT_STREQ(A3, "abc");
-	char A4[] = "abc \xe2\x80\x8b"; str_utf8_trim_right(A4); EXPECT_STREQ(A4, "abc");
+	char A1[] = "abc";
+	str_utf8_trim_right(A1);
+	EXPECT_STREQ(A1, "abc");
+	char A2[] = "   abc";
+	str_utf8_trim_right(A2);
+	EXPECT_STREQ(A2, "   abc");
+	char A3[] = "abc   ";
+	str_utf8_trim_right(A3);
+	EXPECT_STREQ(A3, "abc");
+	char A4[] = "abc \xe2\x80\x8b";
+	str_utf8_trim_right(A4);
+	EXPECT_STREQ(A4, "abc");
 }
 
 TEST(Str, Utf8CompConfusables)
@@ -67,7 +75,7 @@ TEST(Str, Utf8ToLower)
 	EXPECT_TRUE(str_utf8_comp_nocase("ÖlÜ", "ölüa") < 0); // NULL < a
 	EXPECT_TRUE(str_utf8_comp_nocase("ölüa", "ÖlÜ") > 0); // a < NULL
 
-#if (CHAR_MIN < 0)
+#if(CHAR_MIN < 0)
 	const char a[2] = {CHAR_MIN, 0};
 	const char b[2] = {0, 0};
 	EXPECT_TRUE(str_utf8_comp_nocase(a, b) > 0);
@@ -81,8 +89,8 @@ TEST(Str, Utf8ToLower)
 
 	const char str[] = "ÄÖÜ";
 	EXPECT_TRUE(str_utf8_find_nocase(str, "ä") == str);
-	EXPECT_TRUE(str_utf8_find_nocase(str, "ö") == str+2);
-	EXPECT_TRUE(str_utf8_find_nocase(str, "ü") == str+4);
+	EXPECT_TRUE(str_utf8_find_nocase(str, "ö") == str + 2);
+	EXPECT_TRUE(str_utf8_find_nocase(str, "ü") == str + 4);
 	EXPECT_TRUE(str_utf8_find_nocase(str, "z") == NULL);
 }
 
@@ -128,14 +136,22 @@ TEST(Str, Endswith)
 TEST(Str, HexDecode)
 {
 	char aOut[5] = {'a', 'b', 'c', 'd', 0};
-	EXPECT_EQ(str_hex_decode(aOut, 0, ""), 0); EXPECT_STREQ(aOut, "abcd");
-	EXPECT_EQ(str_hex_decode(aOut, 0, " "), 2); EXPECT_STREQ(aOut, "abcd");
-	EXPECT_EQ(str_hex_decode(aOut, 1, "1"), 2); EXPECT_STREQ(aOut + 1, "bcd");
-	EXPECT_EQ(str_hex_decode(aOut, 1, "41"), 0); EXPECT_STREQ(aOut, "Abcd");
-	EXPECT_EQ(str_hex_decode(aOut, 1, "4x"), 1); EXPECT_STREQ(aOut + 1, "bcd");
-	EXPECT_EQ(str_hex_decode(aOut, 1, "x1"), 1); EXPECT_STREQ(aOut + 1, "bcd");
-	EXPECT_EQ(str_hex_decode(aOut, 1, "411"), 2); EXPECT_STREQ(aOut + 1, "bcd");
-	EXPECT_EQ(str_hex_decode(aOut, 4, "41424344"), 0); EXPECT_STREQ(aOut, "ABCD");
+	EXPECT_EQ(str_hex_decode(aOut, 0, ""), 0);
+	EXPECT_STREQ(aOut, "abcd");
+	EXPECT_EQ(str_hex_decode(aOut, 0, " "), 2);
+	EXPECT_STREQ(aOut, "abcd");
+	EXPECT_EQ(str_hex_decode(aOut, 1, "1"), 2);
+	EXPECT_STREQ(aOut + 1, "bcd");
+	EXPECT_EQ(str_hex_decode(aOut, 1, "41"), 0);
+	EXPECT_STREQ(aOut, "Abcd");
+	EXPECT_EQ(str_hex_decode(aOut, 1, "4x"), 1);
+	EXPECT_STREQ(aOut + 1, "bcd");
+	EXPECT_EQ(str_hex_decode(aOut, 1, "x1"), 1);
+	EXPECT_STREQ(aOut + 1, "bcd");
+	EXPECT_EQ(str_hex_decode(aOut, 1, "411"), 2);
+	EXPECT_STREQ(aOut + 1, "bcd");
+	EXPECT_EQ(str_hex_decode(aOut, 4, "41424344"), 0);
+	EXPECT_STREQ(aOut, "ABCD");
 }
 
 TEST(Str, Tokenize)

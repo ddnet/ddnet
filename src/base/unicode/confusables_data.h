@@ -8,8 +8,8 @@ struct DECOMP_SLICE
 
 enum
 {
-	NUM_DECOMP_LENGTHS=8,
-	NUM_DECOMPS=9563,
+	NUM_DECOMP_LENGTHS = 8,
+	NUM_DECOMPS = 9563,
 };
 
 static const uint8_t decomp_lengths[NUM_DECOMP_LENGTHS] = {

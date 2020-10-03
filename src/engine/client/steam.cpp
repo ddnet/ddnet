@@ -129,10 +129,10 @@ class CSteamStub : public ISteam
 {
 	const char *GetPlayerName() { return 0; }
 	const NETADDR *GetConnectAddress() { return 0; }
-	void ClearConnectAddress() { }
-	void Update() { }
-	void ClearGameInfo() { }
-	void SetGameInfo(NETADDR ServerAddr, const char *pMapName) { }
+	void ClearConnectAddress() {}
+	void Update() {}
+	void ClearGameInfo() {}
+	void SetGameInfo(NETADDR ServerAddr, const char *pMapName) {}
 };
 
 ISteam *CreateSteam()

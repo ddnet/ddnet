@@ -31,7 +31,6 @@ public:
 	virtual void OnMessage(int MsgType, void *pRawMsg);
 
 private:
-
 	float m_ServerRecord;
 };
 

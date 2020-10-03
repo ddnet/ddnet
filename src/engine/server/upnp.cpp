@@ -1,12 +1,12 @@
 #ifdef CONF_UPNP
 
+#include "upnp.h"
+#include <base/system.h>
+#include <engine/shared/config.h>
+#include <game/version.h>
 #include <miniupnpc/miniupnpc.h>
 #include <miniupnpc/upnpcommands.h>
 #include <miniupnpc/upnperrors.h>
-#include <engine/shared/config.h>
-#include <base/system.h>
-#include <game/version.h>
-#include "upnp.h"
 
 void CUPnP::Open(NETADDR Address)
 {
@@ -31,10 +31,10 @@ void CUPnP::Open(NETADDR Address)
 			m_Enabled = true;
 			dbg_msg("upnp", "found valid IGD: %s", m_UPnPUrls->controlURL);
 			str_format(aPort, sizeof(aPort), "%d", m_Addr.port);
-			Error = UPNP_AddPortMapping(m_UPnPUrls->controlURL, m_UPnPData->first.servicetype, 
-					aPort, aPort, aLanAddr,
-					"DDNet Server " GAME_RELEASE_VERSION,
-					"UDP", NULL, "0");
+			Error = UPNP_AddPortMapping(m_UPnPUrls->controlURL, m_UPnPData->first.servicetype,
+				aPort, aPort, aLanAddr,
+				"DDNet Server " GAME_RELEASE_VERSION,
+				"UDP", NULL, "0");
 
 			if(Error)
 				dbg_msg("upnp", "failed to map port, error: %s", strupnperror(Error));
@@ -68,7 +68,6 @@ void CUPnP::Shutdown()
 		m_UPnPUrls = NULL;
 		m_UPnPData = NULL;
 	}
-
 }
 
 #endif

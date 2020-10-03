@@ -10,7 +10,7 @@ class CSpectator : public CComponent
 {
 	enum
 	{
-		NO_SELECTION=-3,
+		NO_SELECTION = -3,
 	};
 
 	bool m_Active;
@@ -21,6 +21,9 @@ class CSpectator : public CComponent
 
 	float m_OldMouseX;
 	float m_OldMouseY;
+
+	bool CanChangeSpectator();
+	void SpectateNext(bool Reverse);
 
 	static void ConKeySpectator(IConsole::IResult *pResult, void *pUserData);
 	static void ConSpectate(IConsole::IResult *pResult, void *pUserData);

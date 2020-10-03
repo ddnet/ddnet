@@ -4,11 +4,11 @@
 #define GAME_CLIENT_COMPONENT_H
 
 #if defined(CONF_VIDEORECORDER)
-	#include <engine/shared/video.h>
+#include <engine/shared/video.h>
 #endif
 
-#include <engine/input.h>
 #include "gameclient.h"
+#include <engine/input.h>
 
 class CComponent
 {
@@ -33,31 +33,39 @@ protected:
 	class CLayers *Layers() const { return m_pClient->Layers(); }
 	class CCollision *Collision() const { return m_pClient->Collision(); }
 #if defined(CONF_AUTOUPDATE)
-	class IUpdater *Updater() const { return m_pClient->Updater(); }
+	class IUpdater *Updater() const
+	{
+		return m_pClient->Updater();
+	}
 #endif
 
 #if defined(CONF_VIDEORECORDER)
-	int64 time() const { return IVideo::Current() ? IVideo::Time() : time_get(); }
+	int64 time() const
+	{
+		return IVideo::Current() ? IVideo::Time() : time_get();
+	}
 	float LocalTime() const { return IVideo::Current() ? IVideo::LocalTime() : Client()->LocalTime(); }
 #else
-	int64 time() const { return time_get(); }
+	int64 time() const
+	{
+		return time_get();
+	}
 	float LocalTime() const { return Client()->LocalTime(); }
 #endif
-
 
 public:
 	virtual ~CComponent() {}
 	class CGameClient *GameClient() const { return m_pClient; }
 	class IClient *Client() const { return m_pClient->Client(); }
 
-	virtual void OnStateChange(int NewState, int OldState) {};
-	virtual void OnConsoleInit() {};
-	virtual void OnInit() {};
-	virtual void OnReset() {};
+	virtual void OnStateChange(int NewState, int OldState){};
+	virtual void OnConsoleInit(){};
+	virtual void OnInit(){};
+	virtual void OnReset(){};
 	virtual void OnWindowResize() {}
-	virtual void OnRender() {};
-	virtual void OnRelease() {};
-	virtual void OnMapLoad() {};
+	virtual void OnRender(){};
+	virtual void OnRelease(){};
+	virtual void OnMapLoad(){};
 	virtual void OnMessage(int Msg, void *pRawMsg) {}
 	virtual bool OnMouseMove(float x, float y) { return false; }
 	virtual bool OnInput(IInput::CEvent e) { return false; }

@@ -9,8 +9,7 @@
 #define STEAMAPI DYNAMIC_IMPORT
 #endif
 
-extern "C"
-{
+extern "C" {
 
 typedef uint64_t CSteamID;
 typedef int32_t HSteamPipe;
@@ -26,14 +25,20 @@ struct CallbackMsg_t
 
 struct GameRichPresenceJoinRequested_t
 {
-	enum { k_iCallback = 337 };
+	enum
+	{
+		k_iCallback = 337
+	};
 	CSteamID m_steamIDFriend;
 	char m_rgchConnect[256];
 };
 
 struct NewUrlLaunchParameters_t
 {
-	enum { k_iCallback = 1014 };
+	enum
+	{
+		k_iCallback = 1014
+	};
 	unsigned char m_EmptyStructDontUse;
 };
 
@@ -57,7 +62,6 @@ STEAMAPI ISteamFriends *SteamAPI_SteamFriends_v017();
 STEAMAPI void SteamAPI_ISteamFriends_ClearRichPresence(ISteamFriends *pSelf);
 STEAMAPI const char *SteamAPI_ISteamFriends_GetPersonaName(ISteamFriends *pSelf);
 STEAMAPI bool SteamAPI_ISteamFriends_SetRichPresence(ISteamFriends *pSelf, const char *pKey, const char *pValue);
-
 }
 
 #endif // STEAM_STEAM_API_FLAT_H

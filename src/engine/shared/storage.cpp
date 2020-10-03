@@ -1,9 +1,10 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "linereader.h"
 #include <base/math.h>
 #include <base/system.h>
+#include <engine/client/updater.h>
 #include <engine/storage.h>
-#include "linereader.h"
 
 class CStorage : public IStorage
 {
@@ -30,6 +31,9 @@ public:
 
 		// get datadir
 		FindDatadir(ppArguments[0]);
+
+		// get binarydir
+		FindBinarydir(ppArguments[0]);
 
 		// get currentdir
 		if(!fs_getcwd(m_aCurrentdir, sizeof(m_aCurrentdir)))
@@ -86,7 +90,7 @@ public:
 			if(Pos < MAX_PATH_LENGTH)
 			{
 				char aBuffer[MAX_PATH_LENGTH];
-				str_copy(aBuffer, pArgv0, Pos+1);
+				str_copy(aBuffer, pArgv0, Pos + 1);
 				str_append(aBuffer, "/storage.cfg", sizeof(aBuffer));
 				File = io_open(aBuffer, IOFLAG_READ);
 			}
@@ -166,23 +170,17 @@ public:
 		if(fs_is_dir("data/mapres"))
 		{
 			str_copy(m_aDatadir, "data", sizeof(m_aDatadir));
-			str_copy(m_aBinarydir, "", sizeof(m_aBinarydir));
 			return;
 		}
 
-	#if defined(DATA_DIR)
+#if defined(DATA_DIR)
 		// 2) use compiled-in data-dir if present
 		if(fs_is_dir(DATA_DIR "/mapres"))
 		{
 			str_copy(m_aDatadir, DATA_DIR, sizeof(m_aDatadir));
-		#if defined(BINARY_DIR)
-			str_copy(m_aBinarydir, BINARY_DIR, sizeof(m_aBinarydir));
-		#else
-			str_copy(m_aBinarydir, DATA_DIR "/..", sizeof(m_aBinarydir));
-		#endif
 			return;
 		}
-	#endif
+#endif
 
 		// 3) check for usable path in argv[0]
 		{
@@ -194,19 +192,18 @@ public:
 			if(Pos < MAX_PATH_LENGTH)
 			{
 				char aBuf[MAX_PATH_LENGTH];
-				str_copy(m_aBinarydir, pArgv0, Pos+1);
-				str_format(aBuf, sizeof(aBuf), "%s/data/mapres", m_aBinarydir);
+				char aDir[MAX_PATH_LENGTH];
+				str_copy(aDir, pArgv0, Pos + 1);
+				str_format(aBuf, sizeof(aBuf), "%s/data/mapres", aDir);
 				if(fs_is_dir(aBuf))
 				{
-					str_format(m_aDatadir, sizeof(m_aDatadir), "%s/data", m_aBinarydir);
+					str_format(m_aDatadir, sizeof(m_aDatadir), "%s/data", aDir);
 					return;
 				}
-				else
-					m_aBinarydir[0] = 0;
 			}
 		}
 
-	#if defined(CONF_FAMILY_UNIX)
+#if defined(CONF_FAMILY_UNIX)
 		// 4) check for all default locations
 		{
 			const char *aDirs[] = {
@@ -216,29 +213,73 @@ public:
 				"/usr/local/share/games/ddnet",
 				"/usr/pkg/share/ddnet",
 				"/usr/pkg/share/games/ddnet",
-				"/opt/ddnet"
-			};
+				"/opt/ddnet"};
 			const int DirsCount = sizeof(aDirs) / sizeof(aDirs[0]);
 
 			int i;
-			for (i = 0; i < DirsCount; i++)
+			for(i = 0; i < DirsCount; i++)
 			{
 				char aBuf[128];
 				str_format(aBuf, sizeof(aBuf), "%s/data/mapres", aDirs[i]);
 				if(fs_is_dir(aBuf))
 				{
-					str_copy(m_aBinarydir, aDirs[i], sizeof(m_aDatadir));
 					str_format(m_aDatadir, sizeof(m_aDatadir), "%s/data", aDirs[i]);
 					return;
 				}
 			}
 		}
-	#endif
+#endif
 
-		// no data-dir found
-		dbg_msg("storage", "warning no data directory found");
+		dbg_msg("storage", "warning: no data directory found");
 	}
 
+	void FindBinarydir(const char *pArgv0)
+	{
+#if defined(BINARY_DIR)
+		str_copy(m_aBinarydir, BINARY_DIR, sizeof(m_aBinarydir));
+		return;
+#endif
+
+		// check for usable path in argv[0]
+		{
+			unsigned int Pos = ~0U;
+			for(unsigned i = 0; pArgv0[i]; i++)
+				if(pArgv0[i] == '/' || pArgv0[i] == '\\')
+					Pos = i;
+
+			if(Pos < MAX_PATH_LENGTH)
+			{
+				char aBuf[MAX_PATH_LENGTH];
+				str_copy(m_aBinarydir, pArgv0, Pos + 1);
+				str_format(aBuf, sizeof(aBuf), "%s/" PLAT_SERVER_EXEC, m_aBinarydir);
+				IOHANDLE File = io_open(aBuf, IOFLAG_READ);
+				if(File)
+				{
+					io_close(File);
+					return;
+				}
+				else
+				{
+#if defined(CONF_PLATFORM_MACOSX)
+					str_append(m_aBinarydir, "/../../../DDNet-Server.app/Contents/MacOS", sizeof(m_aBinarydir));
+					str_format(aBuf, sizeof(aBuf), "%s/" PLAT_SERVER_EXEC, m_aBinarydir);
+					IOHANDLE File = io_open(aBuf, IOFLAG_READ);
+					if(File)
+					{
+						io_close(File);
+						return;
+					}
+					else
+						m_aBinarydir[0] = 0;
+#else
+					m_aBinarydir[0] = 0;
+#endif
+				}
+			}
+		}
+
+		// no binary directory found, use $PATH on Posix, $PWD on Windows
+	}
 
 	virtual void ListDirectoryInfo(int Type, const char *pPath, FS_LISTDIR_INFO_CALLBACK pfnCallback, void *pUser)
 	{
@@ -274,7 +315,14 @@ public:
 
 	virtual const char *GetPath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize)
 	{
-		str_format(pBuffer, BufferSize, "%s%s%s", m_aaStoragePaths[Type], !m_aaStoragePaths[Type][0] ? "" : "/", pDir);
+		if(Type == TYPE_ABSOLUTE)
+		{
+			str_copy(pBuffer, pDir, BufferSize);
+		}
+		else
+		{
+			str_format(pBuffer, BufferSize, "%s%s%s", m_aaStoragePaths[Type], !m_aaStoragePaths[Type][0] ? "" : "/", pDir);
+		}
 		return pBuffer;
 	}
 
@@ -296,14 +344,14 @@ public:
 			pFilename = pFilename + 10; // just start from skins/
 		}
 		if(pFilename[0] == '/' || pFilename[0] == '\\' || str_find(pFilename, "../") != NULL || str_find(pFilename, "..\\") != NULL
-		#ifdef CONF_FAMILY_WINDOWS
+#ifdef CONF_FAMILY_WINDOWS
 			|| (pFilename[0] && pFilename[1] == ':')
-		#endif
+#endif
 		)
 		{
 			// don't escape base directory
 		}
-		else if(Flags&IOFLAG_WRITE)
+		else if(Flags & IOFLAG_WRITE)
 		{
 			return io_open(GetPath(TYPE_SAVE, pFilename, pBuffer, BufferSize), Flags);
 		}
@@ -405,7 +453,7 @@ public:
 
 	virtual bool RemoveFile(const char *pFilename, int Type)
 	{
-		if(Type < 0 || Type >= m_NumPaths)
+		if(Type < TYPE_ABSOLUTE || Type == TYPE_ALL || Type >= m_NumPaths)
 			return false;
 
 		char aBuffer[MAX_PATH_LENGTH];

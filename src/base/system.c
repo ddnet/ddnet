@@ -1,19 +1,19 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
 #include <ctype.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 #include "system.h"
 
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 
 #if defined(CONF_WEBSOCKETS)
-	#include "engine/shared/websockets.h"
+#include "engine/shared/websockets.h"
 #endif
 
 #if defined(CONF_FAMILY_UNIX)
@@ -46,31 +46,35 @@
 #endif
 
 #elif defined(CONF_FAMILY_WINDOWS)
-	#define WIN32_LEAN_AND_MEAN
-	#undef _WIN32_WINNT
-	#define _WIN32_WINNT 0x0501 /* required for mingw to get getaddrinfo to work */
-	#include <windows.h>
-	#include <winsock2.h>
-	#include <ws2tcpip.h>
-	#include <fcntl.h>
-	#include <direct.h>
-	#include <errno.h>
-	#include <process.h>
-	#include <shellapi.h>
-	#include <wincrypt.h>
+#define WIN32_LEAN_AND_MEAN
+#undef _WIN32_WINNT
+#define _WIN32_WINNT 0x0501 /* required for mingw to get getaddrinfo to work */
+#include <windows.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+
+#include <direct.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <process.h>
+#include <shellapi.h>
+#include <wincrypt.h>
 #else
-	#error NOT IMPLEMENTED
+#error NOT IMPLEMENTED
 #endif
 
 #if defined(CONF_PLATFORM_SOLARIS)
-	#include <sys/filio.h>
+#include <sys/filio.h>
 #endif
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-IOHANDLE io_stdin() { return (IOHANDLE)stdin; }
+IOHANDLE io_stdin()
+{
+	return (IOHANDLE)stdin;
+}
 IOHANDLE io_stdout() { return (IOHANDLE)stdout; }
 IOHANDLE io_stderr() { return (IOHANDLE)stderr; }
 
@@ -104,7 +108,7 @@ void dbg_break_imp(void)
 #ifdef __GNUC__
 	__builtin_trap();
 #else
-	*((volatile unsigned*)0) = 0x0;
+	*((volatile unsigned *)0) = 0x0;
 #endif
 }
 
@@ -114,7 +118,7 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 	char *msg;
 	int len;
 
-	char str[1024*4];
+	char str[1024 * 4];
 	int i;
 
 	char timestr[80];
@@ -127,9 +131,9 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 
 	va_start(args, fmt);
 #if defined(CONF_FAMILY_WINDOWS)
-	_vsnprintf(msg, sizeof(str)-len, fmt, args);
+	_vsnprintf(msg, sizeof(str) - len, fmt, args);
 #else
-	vsnprintf(msg, sizeof(str)-len, fmt, args);
+	vsnprintf(msg, sizeof(str) - len, fmt, args);
 #endif
 	va_end(args);
 
@@ -146,7 +150,6 @@ static void logger_debugger(const char *line, void *user)
 }
 #endif
 
-
 static void logger_file(const char *line, void *user)
 {
 	ASYNCIO *logfile = (ASYNCIO *)user;
@@ -160,7 +163,7 @@ static void logger_file(const char *line, void *user)
 static void logger_stdout_sync(const char *line, void *user)
 {
 	size_t length = strlen(line);
-	wchar_t *wide = malloc(length * sizeof (*wide));
+	wchar_t *wide = malloc(length * sizeof(*wide));
 	const char *p = line;
 	int wlen = 0;
 	HANDLE console;
@@ -250,7 +253,6 @@ void dbg_logger_file(const char *filename)
 		dbg_logger(logger_file, logger_file_finish, aio_new(logfile));
 	else
 		dbg_msg("dbg/logger", "failed to open '%s' for logging", filename);
-
 }
 /* */
 
@@ -264,7 +266,7 @@ void mem_move(void *dest, const void *source, unsigned size)
 	memmove(dest, source, size);
 }
 
-void mem_zero(void *block,unsigned size)
+void mem_zero(void *block, unsigned size)
 {
 	memset(block, 0, size);
 }
@@ -282,12 +284,12 @@ IOHANDLE io_open(const char *filename, int flags)
 
 unsigned io_read(IOHANDLE io, void *buffer, unsigned size)
 {
-	return fread(buffer, 1, size, (FILE*)io);
+	return fread(buffer, 1, size, (FILE *)io);
 }
 
 unsigned io_skip(IOHANDLE io, int size)
 {
-	fseek((FILE*)io, size, SEEK_CUR);
+	fseek((FILE *)io, size, SEEK_CUR);
 	return size;
 }
 
@@ -310,12 +312,12 @@ int io_seek(IOHANDLE io, int offset, int origin)
 		return -1;
 	}
 
-	return fseek((FILE*)io, offset, real_origin);
+	return fseek((FILE *)io, offset, real_origin);
 }
 
 long int io_tell(IOHANDLE io)
 {
-	return ftell((FILE*)io);
+	return ftell((FILE *)io);
 }
 
 long int io_length(IOHANDLE io)
@@ -329,33 +331,32 @@ long int io_length(IOHANDLE io)
 
 int io_error(IOHANDLE io)
 {
-	return ferror((FILE*)io);
+	return ferror((FILE *)io);
 }
 
 unsigned io_write(IOHANDLE io, const void *buffer, unsigned size)
 {
-	return fwrite(buffer, 1, size, (FILE*)io);
+	return fwrite(buffer, 1, size, (FILE *)io);
 }
 
 unsigned io_write_newline(IOHANDLE io)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	return fwrite("\r\n", 1, 2, (FILE*)io);
+	return fwrite("\r\n", 1, 2, (FILE *)io);
 #else
-	return fwrite("\n", 1, 1, (FILE*)io);
+	return fwrite("\n", 1, 1, (FILE *)io);
 #endif
 }
 
 int io_close(IOHANDLE io)
 {
-	return fclose((FILE*)io) != 0;
+	return fclose((FILE *)io) != 0;
 }
 
 int io_flush(IOHANDLE io)
 {
-	return fflush((FILE*)io);
+	return fflush((FILE *)io);
 }
-
 
 #define ASYNC_BUFSIZE 8 * 1024
 #define ASYNC_LOCAL_BUFSIZE 64 * 1024
@@ -708,12 +709,12 @@ void *thread_init(void (*threadfunc)(void *), void *u, const char *name)
 			dbg_msg("thread", "creating %s thread failed: %d", name, result);
 			return 0;
 		}
-		return (void*)id;
+		return (void *)id;
 	}
 #elif defined(CONF_FAMILY_WINDOWS)
 	return CreateThread(NULL, 0, thread_run, data, 0, NULL);
 #else
-	#error not implemented
+#error not implemented
 #endif
 }
 
@@ -727,7 +728,7 @@ void thread_wait(void *thread)
 	WaitForSingleObject((HANDLE)thread, INFINITE);
 	CloseHandle(thread);
 #else
-	#error not implemented
+#error not implemented
 #endif
 }
 
@@ -740,7 +741,7 @@ void thread_yield(void)
 #elif defined(CONF_FAMILY_WINDOWS)
 	Sleep(0);
 #else
-	#error not implemented
+#error not implemented
 #endif
 }
 
@@ -752,9 +753,9 @@ void thread_sleep(int microseconds)
 	if(result == -1 && errno != EINTR)
 		dbg_msg("thread", "sleep failed: %d", errno);
 #elif defined(CONF_FAMILY_WINDOWS)
-	Sleep(microseconds/1000);
+	Sleep(microseconds / 1000);
 #else
-	#error not implemented
+#error not implemented
 #endif
 }
 
@@ -767,7 +768,7 @@ void thread_detach(void *thread)
 #elif defined(CONF_FAMILY_WINDOWS)
 	CloseHandle(thread);
 #else
-	#error not implemented
+#error not implemented
 #endif
 }
 
@@ -779,14 +780,12 @@ void *thread_init_and_detach(void (*threadfunc)(void *), void *u, const char *na
 	return thread;
 }
 
-
-
 #if defined(CONF_FAMILY_UNIX)
 typedef pthread_mutex_t LOCKINTERNAL;
 #elif defined(CONF_FAMILY_WINDOWS)
 typedef CRITICAL_SECTION LOCKINTERNAL;
 #else
-	#error not implemented on this platform
+#error not implemented on this platform
 #endif
 
 LOCK lock_create(void)
@@ -809,7 +808,7 @@ LOCK lock_create(void)
 #elif defined(CONF_FAMILY_WINDOWS)
 	InitializeCriticalSection((LPCRITICAL_SECTION)lock);
 #else
-	#error not implemented on this platform
+#error not implemented on this platform
 #endif
 	return (LOCK)lock;
 }
@@ -823,7 +822,7 @@ void lock_destroy(LOCK lock)
 #elif defined(CONF_FAMILY_WINDOWS)
 	DeleteCriticalSection((LPCRITICAL_SECTION)lock);
 #else
-	#error not implemented on this platform
+#error not implemented on this platform
 #endif
 	free(lock);
 }
@@ -835,7 +834,7 @@ int lock_trylock(LOCK lock)
 #elif defined(CONF_FAMILY_WINDOWS)
 	return !TryEnterCriticalSection((LPCRITICAL_SECTION)lock);
 #else
-	#error not implemented on this platform
+#error not implemented on this platform
 #endif
 }
 
@@ -848,7 +847,7 @@ void lock_wait(LOCK lock)
 #elif defined(CONF_FAMILY_WINDOWS)
 	EnterCriticalSection((LPCRITICAL_SECTION)lock);
 #else
-	#error not implemented on this platform
+#error not implemented on this platform
 #endif
 }
 
@@ -861,12 +860,15 @@ void lock_unlock(LOCK lock)
 #elif defined(CONF_FAMILY_WINDOWS)
 	LeaveCriticalSection((LPCRITICAL_SECTION)lock);
 #else
-	#error not implemented on this platform
+#error not implemented on this platform
 #endif
 }
 
 #if defined(CONF_FAMILY_WINDOWS)
-void sphore_init(SEMAPHORE *sem) { *sem = CreateSemaphore(0, 0, 10000, 0); }
+void sphore_init(SEMAPHORE *sem)
+{
+	*sem = CreateSemaphore(0, 0, 10000, 0);
+}
 void sphore_wait(SEMAPHORE *sem) { WaitForSingleObject((HANDLE)*sem, INFINITE); }
 void sphore_signal(SEMAPHORE *sem) { ReleaseSemaphore((HANDLE)*sem, 1, NULL); }
 void sphore_destroy(SEMAPHORE *sem) { CloseHandle((HANDLE)*sem); }
@@ -945,17 +947,17 @@ int64 time_get_impl(void)
 			dbg_msg("clock", "gettime failed: %d", errno);
 			return 0;
 		}
-		last = (int64)spec.tv_sec*(int64)1000000 + (int64)spec.tv_nsec / 1000;
+		last = (int64)spec.tv_sec * (int64)1000000 + (int64)spec.tv_nsec / 1000;
 		return last;
 #elif defined(CONF_FAMILY_WINDOWS)
 		int64 t;
 		QueryPerformanceCounter((PLARGE_INTEGER)&t);
-		if(t<last) /* for some reason, QPC can return values in the past */
+		if(t < last) /* for some reason, QPC can return values in the past */
 			return last;
 		last = t;
 		return t;
 #else
-		#error not implemented
+#error not implemented
 #endif
 	}
 }
@@ -983,7 +985,7 @@ int64 time_freq(void)
 	QueryPerformanceFrequency((PLARGE_INTEGER)&t);
 	return t;
 #else
-	#error not implemented
+#error not implemented
 #endif
 }
 
@@ -1031,22 +1033,22 @@ static void sockaddr_to_netaddr(const struct sockaddr *src, NETADDR *dst)
 	{
 		mem_zero(dst, sizeof(NETADDR));
 		dst->type = NETTYPE_IPV4;
-		dst->port = htons(((struct sockaddr_in*)src)->sin_port);
-		mem_copy(dst->ip, &((struct sockaddr_in*)src)->sin_addr.s_addr, 4);
+		dst->port = htons(((struct sockaddr_in *)src)->sin_port);
+		mem_copy(dst->ip, &((struct sockaddr_in *)src)->sin_addr.s_addr, 4);
 	}
 	else if(src->sa_family == AF_WEBSOCKET_INET)
 	{
 		mem_zero(dst, sizeof(NETADDR));
 		dst->type = NETTYPE_WEBSOCKET_IPV4;
-		dst->port = htons(((struct sockaddr_in*)src)->sin_port);
-		mem_copy(dst->ip, &((struct sockaddr_in*)src)->sin_addr.s_addr, 4);
+		dst->port = htons(((struct sockaddr_in *)src)->sin_port);
+		mem_copy(dst->ip, &((struct sockaddr_in *)src)->sin_addr.s_addr, 4);
 	}
 	else if(src->sa_family == AF_INET6)
 	{
 		mem_zero(dst, sizeof(NETADDR));
 		dst->type = NETTYPE_IPV6;
-		dst->port = htons(((struct sockaddr_in6*)src)->sin6_port);
-		mem_copy(dst->ip, &((struct sockaddr_in6*)src)->sin6_addr.s6_addr, 16);
+		dst->port = htons(((struct sockaddr_in6 *)src)->sin6_port);
+		mem_copy(dst->ip, &((struct sockaddr_in6 *)src)->sin6_addr.s6_addr, 16);
 	}
 	else
 	{
@@ -1081,13 +1083,13 @@ void net_addr_str(const NETADDR *addr, char *string, int max_length, int add_por
 	{
 		if(add_port != 0)
 			str_format(string, max_length, "[%x:%x:%x:%x:%x:%x:%x:%x]:%d",
-				(addr->ip[0]<<8)|addr->ip[1], (addr->ip[2]<<8)|addr->ip[3], (addr->ip[4]<<8)|addr->ip[5], (addr->ip[6]<<8)|addr->ip[7],
-				(addr->ip[8]<<8)|addr->ip[9], (addr->ip[10]<<8)|addr->ip[11], (addr->ip[12]<<8)|addr->ip[13], (addr->ip[14]<<8)|addr->ip[15],
+				(addr->ip[0] << 8) | addr->ip[1], (addr->ip[2] << 8) | addr->ip[3], (addr->ip[4] << 8) | addr->ip[5], (addr->ip[6] << 8) | addr->ip[7],
+				(addr->ip[8] << 8) | addr->ip[9], (addr->ip[10] << 8) | addr->ip[11], (addr->ip[12] << 8) | addr->ip[13], (addr->ip[14] << 8) | addr->ip[15],
 				addr->port);
 		else
 			str_format(string, max_length, "[%x:%x:%x:%x:%x:%x:%x:%x]",
-				(addr->ip[0]<<8)|addr->ip[1], (addr->ip[2]<<8)|addr->ip[3], (addr->ip[4]<<8)|addr->ip[5], (addr->ip[6]<<8)|addr->ip[7],
-				(addr->ip[8]<<8)|addr->ip[9], (addr->ip[10]<<8)|addr->ip[11], (addr->ip[12]<<8)|addr->ip[13], (addr->ip[14]<<8)|addr->ip[15]);
+				(addr->ip[0] << 8) | addr->ip[1], (addr->ip[2] << 8) | addr->ip[3], (addr->ip[4] << 8) | addr->ip[5], (addr->ip[6] << 8) | addr->ip[7],
+				(addr->ip[8] << 8) | addr->ip[9], (addr->ip[10] << 8) | addr->ip[11], (addr->ip[12] << 8) | addr->ip[13], (addr->ip[14] << 8) | addr->ip[15]);
 	}
 	else
 		str_format(string, max_length, "unknown type %d", addr->type);
@@ -1104,24 +1106,24 @@ static int priv_net_extract(const char *hostname, char *host, int max_host, int 
 	{
 		// ipv6 mode
 		for(i = 1; i < max_host && hostname[i] && hostname[i] != ']'; i++)
-			host[i-1] = hostname[i];
-		host[i-1] = 0;
+			host[i - 1] = hostname[i];
+		host[i - 1] = 0;
 		if(hostname[i] != ']') // malformatted
 			return -1;
 
 		i++;
 		if(hostname[i] == ':')
-			*port = atol(hostname+i+1);
+			*port = atol(hostname + i + 1);
 	}
 	else
 	{
 		// generic mode (ipv4, hostname etc)
-		for(i = 0; i < max_host-1 && hostname[i] && hostname[i] != ':'; i++)
+		for(i = 0; i < max_host - 1 && hostname[i] && hostname[i] != ':'; i++)
 			host[i] = hostname[i];
 		host[i] = 0;
 
 		if(hostname[i] == ':')
-			*port = atol(hostname+i+1);
+			*port = atol(hostname + i + 1);
 	}
 
 	return 0;
@@ -1188,7 +1190,7 @@ static int parse_int(int *out, const char **str)
 			return 0;
 		}
 
-		i = (i*10) + (**str - '0');
+		i = (i * 10) + (**str - '0');
 		(*str)++;
 	}
 
@@ -1197,7 +1199,8 @@ static int parse_int(int *out, const char **str)
 
 static int parse_char(char c, const char **str)
 {
-	if(**str != c) return -1;
+	if(**str != c)
+		return -1;
 	(*str)++;
 	return 0;
 }
@@ -1205,8 +1208,10 @@ static int parse_char(char c, const char **str)
 static int parse_uint8(unsigned char *out, const char **str)
 {
 	int i;
-	if(parse_int(&i, str) != 0) return -1;
-	if(i < 0 || i > 0xff) return -1;
+	if(parse_int(&i, str) != 0)
+		return -1;
+	if(i < 0 || i > 0xff)
+		return -1;
 	*out = i;
 	return 0;
 }
@@ -1214,8 +1219,10 @@ static int parse_uint8(unsigned char *out, const char **str)
 static int parse_uint16(unsigned short *out, const char **str)
 {
 	int i;
-	if(parse_int(&i, str) != 0) return -1;
-	if(i < 0 || i > 0xffff) return -1;
+	if(parse_int(&i, str) != 0)
+		return -1;
+	if(i < 0 || i > 0xffff)
+		return -1;
 	*out = i;
 	return 0;
 }
@@ -1270,17 +1277,25 @@ int net_addr_from_str(NETADDR *addr, const char *string)
 	else
 	{
 		/* ipv4 */
-		if(parse_uint8(&addr->ip[0], &str)) return -1;
-		if(parse_char('.', &str)) return -1;
-		if(parse_uint8(&addr->ip[1], &str)) return -1;
-		if(parse_char('.', &str)) return -1;
-		if(parse_uint8(&addr->ip[2], &str)) return -1;
-		if(parse_char('.', &str)) return -1;
-		if(parse_uint8(&addr->ip[3], &str)) return -1;
+		if(parse_uint8(&addr->ip[0], &str))
+			return -1;
+		if(parse_char('.', &str))
+			return -1;
+		if(parse_uint8(&addr->ip[1], &str))
+			return -1;
+		if(parse_char('.', &str))
+			return -1;
+		if(parse_uint8(&addr->ip[2], &str))
+			return -1;
+		if(parse_char('.', &str))
+			return -1;
+		if(parse_uint8(&addr->ip[3], &str))
+			return -1;
 		if(*str == ':')
 		{
 			str++;
-			if(parse_uint16(&addr->port, &str)) return -1;
+			if(parse_uint16(&addr->port, &str))
+				return -1;
 		}
 
 		addr->type = NETTYPE_IPV4;
@@ -1340,7 +1355,7 @@ static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, i
 #if defined(CONF_FAMILY_WINDOWS)
 		char buf[128];
 		int error = WSAGetLastError();
-		if(FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS, 0, error, 0, buf, sizeof(buf), 0) == 0)
+		if(FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, 0, error, 0, buf, sizeof(buf), 0) == 0)
 			buf[0] = 0;
 		dbg_msg("net", "failed to create socket with domain %d and type %d (%d '%s')", domain, type, error, buf);
 #else
@@ -1352,7 +1367,7 @@ static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, i
 #if defined(CONF_FAMILY_UNIX)
 	/* on tcp sockets set SO_REUSEADDR
 		to fix port rebind on restart */
-	if (domain == AF_INET && type == SOCK_STREAM)
+	if(domain == AF_INET && type == SOCK_STREAM)
 	{
 		int option = 1;
 		if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option)) != 0)
@@ -1361,11 +1376,11 @@ static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, i
 #endif
 
 	/* set to IPv6 only if that's what we are creating */
-#if defined(IPV6_V6ONLY)	/* windows sdk 6.1 and higher */
+#if defined(IPV6_V6ONLY) /* windows sdk 6.1 and higher */
 	if(domain == AF_INET6)
 	{
 		int ipv6only = 1;
-		if(setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, (const char*)&ipv6only, sizeof(ipv6only)) != 0)
+		if(setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, (const char *)&ipv6only, sizeof(ipv6only)) != 0)
 			dbg_msg("socket", "Setting V6ONLY failed: %d", errno);
 	}
 #endif
@@ -1377,7 +1392,7 @@ static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, i
 #if defined(CONF_FAMILY_WINDOWS)
 		char buf[128];
 		int error = WSAGetLastError();
-		if(FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS, 0, error, 0, buf, sizeof(buf), 0) == 0)
+		if(FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, 0, error, 0, buf, sizeof(buf), 0) == 0)
 			buf[0] = 0;
 		dbg_msg("net", "failed to bind socket with domain %d and type %d (%d '%s')", domain, type, error, buf);
 #else
@@ -1397,7 +1412,7 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 	NETADDR tmpbindaddr = bindaddr;
 	int broadcast = 1;
 
-	if(bindaddr.type&NETTYPE_IPV4)
+	if(bindaddr.type & NETTYPE_IPV4)
 	{
 		struct sockaddr_in addr;
 		int socket = -1;
@@ -1412,21 +1427,21 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 			sock.ipv4sock = socket;
 
 			/* set broadcast */
-			if(setsockopt(socket, SOL_SOCKET, SO_BROADCAST, (const char*)&broadcast, sizeof(broadcast)) != 0)
+			if(setsockopt(socket, SOL_SOCKET, SO_BROADCAST, (const char *)&broadcast, sizeof(broadcast)) != 0)
 				dbg_msg("socket", "Setting BROADCAST on ipv4 failed: %d", errno);
 
 			{
 				/* set DSCP/TOS */
 				int iptos = 0x10 /* IPTOS_LOWDELAY */;
 				//int iptos = 46; /* High Priority */
-				if(setsockopt(socket, IPPROTO_IP, IP_TOS, (char*)&iptos, sizeof(iptos)) != 0)
+				if(setsockopt(socket, IPPROTO_IP, IP_TOS, (char *)&iptos, sizeof(iptos)) != 0)
 					dbg_msg("socket", "Setting TOS on ipv4 failed: %d", errno);
 			}
 		}
 	}
 
 #if defined(CONF_WEBSOCKETS)
-	if(bindaddr.type&NETTYPE_WEBSOCKET_IPV4)
+	if(bindaddr.type & NETTYPE_WEBSOCKET_IPV4)
 	{
 		int socket = -1;
 		char addr_str[NETADDR_MAXSTRSIZE];
@@ -1437,14 +1452,15 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 		net_addr_str(&tmpbindaddr, addr_str, sizeof(addr_str), 0);
 		socket = websocket_create(addr_str, tmpbindaddr.port);
 
-		if (socket >= 0) {
+		if(socket >= 0)
+		{
 			sock.type |= NETTYPE_WEBSOCKET_IPV4;
 			sock.web_ipv4sock = socket;
 		}
 	}
 #endif
 
-	if(bindaddr.type&NETTYPE_IPV6)
+	if(bindaddr.type & NETTYPE_IPV6)
 	{
 		struct sockaddr_in6 addr;
 		int socket = -1;
@@ -1459,14 +1475,14 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 			sock.ipv6sock = socket;
 
 			/* set broadcast */
-			if(setsockopt(socket, SOL_SOCKET, SO_BROADCAST, (const char*)&broadcast, sizeof(broadcast)) != 0)
-					dbg_msg("socket", "Setting BROADCAST on ipv6 failed: %d", errno);
+			if(setsockopt(socket, SOL_SOCKET, SO_BROADCAST, (const char *)&broadcast, sizeof(broadcast)) != 0)
+				dbg_msg("socket", "Setting BROADCAST on ipv6 failed: %d", errno);
 
 			{
 				/* set DSCP/TOS */
 				int iptos = 0x10 /* IPTOS_LOWDELAY */;
 				//int iptos = 46; /* High Priority */
-				if(setsockopt(socket, IPPROTO_IP, IP_TOS, (char*)&iptos, sizeof(iptos)) != 0)
+				if(setsockopt(socket, IPPROTO_IP, IP_TOS, (char *)&iptos, sizeof(iptos)) != 0)
 					dbg_msg("socket", "Setting TOS on ipv6 failed: %d", errno);
 			}
 		}
@@ -1483,12 +1499,12 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 {
 	int d = -1;
 
-	if(addr->type&NETTYPE_IPV4)
+	if(addr->type & NETTYPE_IPV4)
 	{
 		if(sock.ipv4sock >= 0)
 		{
 			struct sockaddr_in sa;
-			if(addr->type&NETTYPE_LINK_BROADCAST)
+			if(addr->type & NETTYPE_LINK_BROADCAST)
 			{
 				mem_zero(&sa, sizeof(sa));
 				sa.sin_port = htons(addr->port);
@@ -1498,7 +1514,7 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 			else
 				netaddr_to_sockaddr_in(addr, &sa);
 
-			d = sendto((int)sock.ipv4sock, (const char*)data, size, 0, (struct sockaddr *)&sa, sizeof(sa));
+			d = sendto((int)sock.ipv4sock, (const char *)data, size, 0, (struct sockaddr *)&sa, sizeof(sa));
 		}
 		else
 			dbg_msg("net", "can't send ipv4 traffic to this socket");
@@ -1519,12 +1535,12 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 	}
 #endif
 
-	if(addr->type&NETTYPE_IPV6)
+	if(addr->type & NETTYPE_IPV6)
 	{
 		if(sock.ipv6sock >= 0)
 		{
 			struct sockaddr_in6 sa;
-			if(addr->type&NETTYPE_LINK_BROADCAST)
+			if(addr->type & NETTYPE_LINK_BROADCAST)
 			{
 				mem_zero(&sa, sizeof(sa));
 				sa.sin6_port = htons(addr->port);
@@ -1536,7 +1552,7 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 			else
 				netaddr_to_sockaddr_in6(addr, &sa);
 
-			d = sendto((int)sock.ipv6sock, (const char*)data, size, 0, (struct sockaddr *)&sa, sizeof(sa));
+			d = sendto((int)sock.ipv6sock, (const char *)data, size, 0, (struct sockaddr *)&sa, sizeof(sa));
 		}
 		else
 			dbg_msg("net", "can't send ipv6 traffic to this socket");
@@ -1562,7 +1578,7 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 	return d;
 }
 
-void net_init_mmsgs(MMSGS* m)
+void net_init_mmsgs(MMSGS *m)
 {
 #if defined(CONF_PLATFORM_LINUX)
 	int i;
@@ -1583,7 +1599,7 @@ void net_init_mmsgs(MMSGS* m)
 #endif
 }
 
-int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *buffer, int maxsize, MMSGS* m, unsigned char **data)
+int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *buffer, int maxsize, MMSGS *m, unsigned char **data)
 {
 	char sockaddrbuf[128];
 	int bytes = 0;
@@ -1614,7 +1630,7 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *buffer, int maxsize, MMSGS
 		//network_stats.recv_bytes += bytes;
 		//network_stats.recv_packets++;
 		bytes = m->msgs[m->pos].msg_len;
-		*data = (unsigned char*)m->bufs[m->pos];
+		*data = (unsigned char *)m->bufs[m->pos];
 		m->pos++;
 		return bytes;
 	}
@@ -1622,14 +1638,14 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *buffer, int maxsize, MMSGS
 	if(bytes == 0 && sock.ipv4sock >= 0)
 	{
 		socklen_t fromlen = sizeof(struct sockaddr_in);
-		bytes = recvfrom(sock.ipv4sock, (char*)buffer, maxsize, 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
+		bytes = recvfrom(sock.ipv4sock, (char *)buffer, maxsize, 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
 		*data = buffer;
 	}
 
 	if(bytes <= 0 && sock.ipv6sock >= 0)
 	{
 		socklen_t fromlen = sizeof(struct sockaddr_in6);
-		bytes = recvfrom(sock.ipv6sock, (char*)buffer, maxsize, 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
+		bytes = recvfrom(sock.ipv6sock, (char *)buffer, maxsize, 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
 		*data = buffer;
 	}
 #endif
@@ -1667,7 +1683,7 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 	NETSOCKET sock = invalid_socket;
 	NETADDR tmpbindaddr = bindaddr;
 
-	if(bindaddr.type&NETTYPE_IPV4)
+	if(bindaddr.type & NETTYPE_IPV4)
 	{
 		struct sockaddr_in addr;
 		int socket = -1;
@@ -1683,7 +1699,7 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 		}
 	}
 
-	if(bindaddr.type&NETTYPE_IPV6)
+	if(bindaddr.type & NETTYPE_IPV6)
 	{
 		struct sockaddr_in6 addr;
 		int socket = -1;
@@ -1779,7 +1795,7 @@ int net_tcp_accept(NETSOCKET sock, NETSOCKET *new_sock, NETADDR *a)
 
 		s = accept(sock.ipv4sock, (struct sockaddr *)&addr, &sockaddr_len);
 
-		if (s != -1)
+		if(s != -1)
 		{
 			sockaddr_to_netaddr((const struct sockaddr *)&addr, a);
 			new_sock->type = NETTYPE_IPV4;
@@ -1795,7 +1811,7 @@ int net_tcp_accept(NETSOCKET sock, NETSOCKET *new_sock, NETADDR *a)
 
 		s = accept(sock.ipv6sock, (struct sockaddr *)&addr, &sockaddr_len);
 
-		if (s != -1)
+		if(s != -1)
 		{
 			sockaddr_to_netaddr((const struct sockaddr *)&addr, a);
 			new_sock->type = NETTYPE_IPV6;
@@ -1809,14 +1825,14 @@ int net_tcp_accept(NETSOCKET sock, NETSOCKET *new_sock, NETADDR *a)
 
 int net_tcp_connect(NETSOCKET sock, const NETADDR *a)
 {
-	if(a->type&NETTYPE_IPV4)
+	if(a->type & NETTYPE_IPV4)
 	{
 		struct sockaddr_in addr;
 		netaddr_to_sockaddr_in(a, &addr);
 		return connect(sock.ipv4sock, (struct sockaddr *)&addr, sizeof(addr));
 	}
 
-	if(a->type&NETTYPE_IPV6)
+	if(a->type & NETTYPE_IPV6)
 	{
 		struct sockaddr_in6 addr;
 		netaddr_to_sockaddr_in6(a, &addr);
@@ -1842,9 +1858,9 @@ int net_tcp_send(NETSOCKET sock, const void *data, int size)
 	int bytes = -1;
 
 	if(sock.ipv4sock >= 0)
-		bytes = send((int)sock.ipv4sock, (const char*)data, size, 0);
+		bytes = send((int)sock.ipv4sock, (const char *)data, size, 0);
 	if(sock.ipv6sock >= 0)
-		bytes = send((int)sock.ipv6sock, (const char*)data, size, 0);
+		bytes = send((int)sock.ipv6sock, (const char *)data, size, 0);
 
 	return bytes;
 }
@@ -1854,9 +1870,9 @@ int net_tcp_recv(NETSOCKET sock, void *data, int maxsize)
 	int bytes = -1;
 
 	if(sock.ipv4sock >= 0)
-		bytes = recv((int)sock.ipv4sock, (char*)data, maxsize, 0);
+		bytes = recv((int)sock.ipv4sock, (char *)data, maxsize, 0);
 	if(sock.ipv6sock >= 0)
-		bytes = recv((int)sock.ipv6sock, (char*)data, maxsize, 0);
+		bytes = recv((int)sock.ipv6sock, (char *)data, maxsize, 0);
 
 	return bytes;
 }
@@ -1890,7 +1906,7 @@ int net_init(void)
 	WSADATA wsaData;
 	int err = WSAStartup(MAKEWORD(1, 1), &wsaData);
 	dbg_assert(err == 0, "network initialization failed.");
-	return err==0?0:1;
+	return err == 0 ? 0 : 1;
 #endif
 
 	return 0;
@@ -1925,13 +1941,13 @@ int fs_listdir_info(const char *dir, FS_LISTDIR_INFO_CALLBACK cb, int type, void
 #if defined(CONF_FAMILY_WINDOWS)
 	WIN32_FIND_DATA finddata;
 	HANDLE handle;
-	char buffer[1024*2];
+	char buffer[1024 * 2];
 	int length;
 	str_format(buffer, sizeof(buffer), "%s/*", dir);
 
 	handle = FindFirstFileA(buffer, &finddata);
 
-	if (handle == INVALID_HANDLE_VALUE)
+	if(handle == INVALID_HANDLE_VALUE)
 		return 0;
 
 	str_format(buffer, sizeof(buffer), "%s/", dir);
@@ -1940,17 +1956,16 @@ int fs_listdir_info(const char *dir, FS_LISTDIR_INFO_CALLBACK cb, int type, void
 	/* add all the entries */
 	do
 	{
-		str_copy(buffer+length, finddata.cFileName, (int)sizeof(buffer)-length);
+		str_copy(buffer + length, finddata.cFileName, (int)sizeof(buffer) - length);
 		if(cb(finddata.cFileName, fs_getmtime(buffer), fs_is_dir(buffer), type, user))
 			break;
-	}
-	while (FindNextFileA(handle, &finddata));
+	} while(FindNextFileA(handle, &finddata));
 
 	FindClose(handle);
 	return 0;
 #else
 	struct dirent *entry;
-	char buffer[1024*2];
+	char buffer[1024 * 2];
 	int length;
 	DIR *d = opendir(dir);
 
@@ -1962,7 +1977,7 @@ int fs_listdir_info(const char *dir, FS_LISTDIR_INFO_CALLBACK cb, int type, void
 
 	while((entry = readdir(d)) != NULL)
 	{
-		str_copy(buffer+length, entry->d_name, (int)sizeof(buffer)-length);
+		str_copy(buffer + length, entry->d_name, (int)sizeof(buffer) - length);
 		if(cb(entry->d_name, fs_getmtime(buffer), fs_is_dir(buffer), type, user))
 			break;
 	}
@@ -1978,13 +1993,13 @@ int fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user)
 #if defined(CONF_FAMILY_WINDOWS)
 	WIN32_FIND_DATA finddata;
 	HANDLE handle;
-	char buffer[1024*2];
+	char buffer[1024 * 2];
 	int length;
 	str_format(buffer, sizeof(buffer), "%s/*", dir);
 
 	handle = FindFirstFileA(buffer, &finddata);
 
-	if (handle == INVALID_HANDLE_VALUE)
+	if(handle == INVALID_HANDLE_VALUE)
 		return 0;
 
 	str_format(buffer, sizeof(buffer), "%s/", dir);
@@ -1993,17 +2008,16 @@ int fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user)
 	/* add all the entries */
 	do
 	{
-		str_copy(buffer+length, finddata.cFileName, (int)sizeof(buffer)-length);
+		str_copy(buffer + length, finddata.cFileName, (int)sizeof(buffer) - length);
 		if(cb(finddata.cFileName, fs_is_dir(buffer), type, user))
 			break;
-	}
-	while (FindNextFileA(handle, &finddata));
+	} while(FindNextFileA(handle, &finddata));
 
 	FindClose(handle);
 	return 0;
 #else
 	struct dirent *entry;
-	char buffer[1024*2];
+	char buffer[1024 * 2];
 	int length;
 	DIR *d = opendir(dir);
 
@@ -2015,7 +2029,7 @@ int fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user)
 
 	while((entry = readdir(d)) != NULL)
 	{
-		str_copy(buffer+length, entry->d_name, (int)sizeof(buffer)-length);
+		str_copy(buffer + length, entry->d_name, (int)sizeof(buffer) - length);
 		if(cb(entry->d_name, fs_is_dir(buffer), type, user))
 			break;
 	}
@@ -2046,7 +2060,7 @@ int fs_storage_path(const char *appname, char *path, int max)
 	snprintf(path, max, "%s/Library/Application Support/%s", home, appname);
 #else
 	snprintf(path, max, "%s/.%s", home, appname);
-	for(i = strlen(home)+2; path[i]; i++)
+	for(i = strlen(home) + 2; path[i]; i++)
 		path[i] = tolower(path[i]);
 #endif
 
@@ -2056,10 +2070,10 @@ int fs_storage_path(const char *appname, char *path, int max)
 
 int fs_makedir_rec_for(const char *path)
 {
-	char buffer[1024*2];
+	char buffer[1024 * 2];
 	char *p;
 	str_copy(buffer, path, sizeof(buffer));
-	for(p = buffer+1; *p != '\0'; p++)
+	for(p = buffer + 1; *p != '\0'; p++)
 	{
 		if(*p == '/' && *(p + 1) != '\0')
 		{
@@ -2076,7 +2090,7 @@ int fs_makedir(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	if(_mkdir(path) == 0)
-			return 0;
+		return 0;
 	if(errno == EEXIST)
 		return 0;
 	return -1;
@@ -2095,20 +2109,20 @@ int fs_is_dir(const char *path)
 	/* TODO: do this smarter */
 	WIN32_FIND_DATA finddata;
 	HANDLE handle;
-	char buffer[1024*2];
+	char buffer[1024 * 2];
 	str_format(buffer, sizeof(buffer), "%s/*", path);
 
-	if ((handle = FindFirstFileA(buffer, &finddata)) == INVALID_HANDLE_VALUE)
+	if((handle = FindFirstFileA(buffer, &finddata)) == INVALID_HANDLE_VALUE)
 		return 0;
 
 	FindClose(handle);
 	return 1;
 #else
 	struct stat sb;
-	if (stat(path, &sb) == -1)
+	if(stat(path, &sb) == -1)
 		return 0;
 
-	if (S_ISDIR(sb.st_mode))
+	if(S_ISDIR(sb.st_mode))
 		return 1;
 	else
 		return 0;
@@ -2118,7 +2132,7 @@ int fs_is_dir(const char *path)
 time_t fs_getmtime(const char *path)
 {
 	struct stat sb;
-	if (stat(path, &sb) == -1)
+	if(stat(path, &sb) == -1)
 		return 0;
 
 	return sb.st_mtime;
@@ -2186,12 +2200,12 @@ int fs_rename(const char *oldname, const char *newname)
 
 void swap_endian(void *data, unsigned elem_size, unsigned num)
 {
-	char *src = (char*) data;
+	char *src = (char *)data;
 	char *dst = src + (elem_size - 1);
 
 	while(num)
 	{
-		unsigned n = elem_size>>1;
+		unsigned n = elem_size >> 1;
 		char tmp;
 		while(n)
 		{
@@ -2204,7 +2218,7 @@ void swap_endian(void *data, unsigned elem_size, unsigned num)
 			n--;
 		}
 
-		src = src + (elem_size>>1);
+		src = src + (elem_size >> 1);
 		dst = src + (elem_size - 1);
 		num--;
 	}
@@ -2246,9 +2260,9 @@ int net_socket_read_wait(NETSOCKET sock, int time)
 
 	/* don't care about writefds and exceptfds */
 	if(time < 0)
-		select(sockid+1, &readfds, NULL, NULL, NULL);
+		select(sockid + 1, &readfds, NULL, NULL, NULL);
 	else
-		select(sockid+1, &readfds, NULL, NULL, &tv);
+		select(sockid + 1, &readfds, NULL, NULL, &tv);
 
 	if(sock.ipv4sock >= 0 && FD_ISSET(sock.ipv4sock, &readfds))
 		return 1;
@@ -2267,6 +2281,46 @@ int time_timestamp(void)
 	return time(0);
 }
 
+int time_houroftheday(void)
+{
+	time_t time_data;
+	struct tm *time_info;
+
+	time(&time_data);
+	time_info = localtime(&time_data);
+	return time_info->tm_hour;
+}
+
+int time_season(void)
+{
+	time_t time_data;
+	struct tm *time_info;
+
+	time(&time_data);
+	time_info = localtime(&time_data);
+
+	switch(time_info->tm_mon)
+	{
+	case 11:
+	case 0:
+	case 1:
+		return SEASON_WINTER;
+	case 2:
+	case 3:
+	case 4:
+		return SEASON_SPRING;
+	case 5:
+	case 6:
+	case 7:
+		return SEASON_SUMMER;
+	case 8:
+	case 9:
+	case 10:
+		return SEASON_AUTUMN;
+	}
+	return SEASON_SPRING; // should never happen
+}
+
 void str_append(char *dst, const char *src, int dst_size)
 {
 	int s = strlen(dst);
@@ -2280,13 +2334,13 @@ void str_append(char *dst, const char *src, int dst_size)
 		i++;
 	}
 
-	dst[dst_size-1] = 0; /* assure null termination */
+	dst[dst_size - 1] = 0; /* assure null termination */
 }
 
 void str_copy(char *dst, const char *src, int dst_size)
 {
-	strncpy(dst, src, dst_size-1);
-	dst[dst_size-1] = 0; /* assure null termination */
+	strncpy(dst, src, dst_size - 1);
+	dst[dst_size - 1] = 0; /* assure null termination */
 }
 
 void str_utf8_truncate(char *dst, int dst_size, const char *src, int truncation_len)
@@ -2300,7 +2354,7 @@ void str_utf8_truncate(char *dst, int dst_size, const char *src, int truncation_
 		cursor = str_utf8_forward(src, cursor);
 		pos++;
 	}
-	str_copy(dst, src, size+1);
+	str_copy(dst, src, size + 1);
 }
 
 void str_truncate(char *dst, int dst_size, const char *src, int truncation_len)
@@ -2327,7 +2381,7 @@ int str_format(char *buffer, int buffer_size, const char *format, ...)
 	ret = _vsnprintf(buffer, buffer_size, format, ap);
 	va_end(ap);
 
-	buffer[buffer_size-1] = 0; /* assure null termination */
+	buffer[buffer_size - 1] = 0; /* assure null termination */
 
 	/* _vsnprintf is documented to return negative values on truncation, but
 	 * in practice we didn't see that. let's handle it anyway just in case. */
@@ -2351,9 +2405,9 @@ int str_format(char *buffer, int buffer_size, const char *format, ...)
 
 char *str_trim_words(char *str, int words)
 {
-	while (words && *str)
+	while(words && *str)
 	{
-		if (isspace(*str) && !isspace(*(str + 1)))
+		if(isspace(*str) && !isspace(*(str + 1)))
 			words--;
 		str++;
 	}
@@ -2472,9 +2526,9 @@ const char *str_skip_whitespaces_const(const char *str)
 int str_comp_nocase(const char *a, const char *b)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	return _stricmp(a,b);
+	return _stricmp(a, b);
 #else
-	return strcasecmp(a,b);
+	return strcasecmp(a, b);
 #endif
 }
 
@@ -2510,9 +2564,9 @@ int str_comp_filenames(const char *a, const char *b)
 			{
 				if(!result)
 					result = *a - *b;
-				++a; ++b;
-			}
-			while(*a >= '0' && *a <= '9' && *b >= '0' && *b <= '9');
+				++a;
+				++b;
+			} while(*a >= '0' && *a <= '9' && *b >= '0' && *b <= '9');
 
 			if(*a >= '0' && *a <= '9')
 				return 1;
@@ -2620,8 +2674,7 @@ int str_utf32_dist_buffer(const int *a, int a_len, const int *b, int b_len, int 
 			B(i, j) = min3(
 				B(i - 1, j) + 1,
 				B(i, j - 1) + 1,
-				B(i - 1, j - 1) + subst
-			);
+				B(i - 1, j - 1) + subst);
 		}
 	}
 	return B(a_len, b_len);
@@ -2672,7 +2725,6 @@ const char *str_find_nocase(const char *haystack, const char *needle)
 	return 0;
 }
 
-
 const char *str_find(const char *haystack, const char *needle)
 {
 	while(*haystack) /* native implementation */
@@ -2702,43 +2754,43 @@ void str_hex(char *dst, int dst_size, const void *data, int data_size)
 	static const char hex[] = "0123456789ABCDEF";
 	int b;
 
-	for(b = 0; b < data_size && b < dst_size/4-4; b++)
+	for(b = 0; b < data_size && b < dst_size / 4 - 4; b++)
 	{
-		dst[b*3] = hex[((const unsigned char *)data)[b]>>4];
-		dst[b*3+1] = hex[((const unsigned char *)data)[b]&0xf];
-		dst[b*3+2] = ' ';
-		dst[b*3+3] = 0;
+		dst[b * 3] = hex[((const unsigned char *)data)[b] >> 4];
+		dst[b * 3 + 1] = hex[((const unsigned char *)data)[b] & 0xf];
+		dst[b * 3 + 2] = ' ';
+		dst[b * 3 + 3] = 0;
 	}
 }
 
 static int hexval(char x)
 {
-    switch(x)
-    {
-    case '0': return 0;
-    case '1': return 1;
-    case '2': return 2;
-    case '3': return 3;
-    case '4': return 4;
-    case '5': return 5;
-    case '6': return 6;
-    case '7': return 7;
-    case '8': return 8;
-    case '9': return 9;
-    case 'a':
-    case 'A': return 10;
-    case 'b':
-    case 'B': return 11;
-    case 'c':
-    case 'C': return 12;
-    case 'd':
-    case 'D': return 13;
-    case 'e':
-    case 'E': return 14;
-    case 'f':
-    case 'F': return 15;
-    default: return -1;
-    }
+	switch(x)
+	{
+	case '0': return 0;
+	case '1': return 1;
+	case '2': return 2;
+	case '3': return 3;
+	case '4': return 4;
+	case '5': return 5;
+	case '6': return 6;
+	case '7': return 7;
+	case '8': return 8;
+	case '9': return 9;
+	case 'a':
+	case 'A': return 10;
+	case 'b':
+	case 'B': return 11;
+	case 'c':
+	case 'C': return 12;
+	case 'd':
+	case 'D': return 13;
+	case 'e':
+	case 'E': return 14;
+	case 'f':
+	case 'F': return 15;
+	default: return -1;
+	}
 }
 
 static int byteval(const char *byte, unsigned char *dst)
@@ -2780,7 +2832,7 @@ void str_timestamp_ex(time_t time_data, char *buffer, int buffer_size, const cha
 	struct tm *time_info;
 	time_info = localtime(&time_data);
 	strftime(buffer, buffer_size, format, time_info);
-	buffer[buffer_size-1] = 0;	/* assure null termination */
+	buffer[buffer_size - 1] = 0; /* assure null termination */
 }
 
 void str_timestamp_format(char *buffer, int buffer_size, const char *format)
@@ -2816,7 +2868,7 @@ void str_escape(char **dst, const char *src, const char *end)
 
 int mem_comp(const void *a, const void *b, int size)
 {
-	return memcmp(a,b,size);
+	return memcmp(a, b, size);
 }
 
 void net_stats(NETSTATS *stats_inout)
@@ -2829,7 +2881,7 @@ int str_isspace(char c) { return c == ' ' || c == '\n' || c == '\t'; }
 char str_uppercase(char c)
 {
 	if(c >= 'a' && c <= 'z')
-		return 'A' + (c-'a');
+		return 'A' + (c - 'a');
 	return c;
 }
 
@@ -2913,12 +2965,12 @@ const char *str_utf8_find_nocase(const char *haystack, const char *needle)
 int str_utf8_isspace(int code)
 {
 	return code <= 0x0020 || code == 0x0085 || code == 0x00A0 ||
-		code == 0x034F || code == 0x1680 || code == 0x180E ||
-		(code >= 0x2000 && code <= 0x200F) || (code >= 0x2028 && code <= 0x202F) ||
-		(code >= 0x205F && code <= 0x2064) || (code >= 0x206A && code <= 0x206F) ||
-		code == 0x2800 || code == 0x3000 ||
-		(code >= 0xFE00 && code <= 0xFE0F) || code == 0xFEFF ||
-		(code >= 0xFFF9 && code <= 0xFFFC);
+	       code == 0x034F || code == 0x1680 || code == 0x180E ||
+	       (code >= 0x2000 && code <= 0x200F) || (code >= 0x2028 && code <= 0x202F) ||
+	       (code >= 0x205F && code <= 0x2064) || (code >= 0x206A && code <= 0x206F) ||
+	       code == 0x2800 || code == 0x3000 ||
+	       (code >= 0xFE00 && code <= 0xFE0F) || code == 0xFEFF ||
+	       (code >= 0xFFF9 && code <= 0xFFFC);
 }
 
 const char *str_utf8_skip_whitespaces(const char *str)
@@ -2968,7 +3020,7 @@ void str_utf8_trim_right(char *param)
 
 int str_utf8_isstart(char c)
 {
-	if((c&0xC0) == 0x80) /* 10xxxxxx */
+	if((c & 0xC0) == 0x80) /* 10xxxxxx */
 		return 0;
 	return 1;
 }
@@ -2990,29 +3042,35 @@ int str_utf8_forward(const char *str, int cursor)
 	if(!buf[0])
 		return cursor;
 
-	if((*buf&0x80) == 0x0)  /* 0xxxxxxx */
-		return cursor+1;
-	else if((*buf&0xE0) == 0xC0) /* 110xxxxx */
+	if((*buf & 0x80) == 0x0) /* 0xxxxxxx */
+		return cursor + 1;
+	else if((*buf & 0xE0) == 0xC0) /* 110xxxxx */
 	{
-		if(!buf[1]) return cursor+1;
-		return cursor+2;
+		if(!buf[1])
+			return cursor + 1;
+		return cursor + 2;
 	}
-	else  if((*buf & 0xF0) == 0xE0)	/* 1110xxxx */
+	else if((*buf & 0xF0) == 0xE0) /* 1110xxxx */
 	{
-		if(!buf[1]) return cursor+1;
-		if(!buf[2]) return cursor+2;
-		return cursor+3;
+		if(!buf[1])
+			return cursor + 1;
+		if(!buf[2])
+			return cursor + 2;
+		return cursor + 3;
 	}
-	else if((*buf & 0xF8) == 0xF0)	/* 11110xxx */
+	else if((*buf & 0xF8) == 0xF0) /* 11110xxx */
 	{
-		if(!buf[1]) return cursor+1;
-		if(!buf[2]) return cursor+2;
-		if(!buf[3]) return cursor+3;
-		return cursor+4;
+		if(!buf[1])
+			return cursor + 1;
+		if(!buf[2])
+			return cursor + 2;
+		if(!buf[3])
+			return cursor + 3;
+		return cursor + 4;
 	}
 
 	/* invalid */
-	return cursor+1;
+	return cursor + 1;
 }
 
 int str_utf8_encode(char *ptr, int chr)
@@ -3025,23 +3083,23 @@ int str_utf8_encode(char *ptr, int chr)
 	}
 	else if(chr <= 0x7FF)
 	{
-		ptr[0] = 0xC0|((chr>>6)&0x1F);
-		ptr[1] = 0x80|(chr&0x3F);
+		ptr[0] = 0xC0 | ((chr >> 6) & 0x1F);
+		ptr[1] = 0x80 | (chr & 0x3F);
 		return 2;
 	}
 	else if(chr <= 0xFFFF)
 	{
-		ptr[0] = 0xE0|((chr>>12)&0x0F);
-		ptr[1] = 0x80|((chr>>6)&0x3F);
-		ptr[2] = 0x80|(chr&0x3F);
+		ptr[0] = 0xE0 | ((chr >> 12) & 0x0F);
+		ptr[1] = 0x80 | ((chr >> 6) & 0x3F);
+		ptr[2] = 0x80 | (chr & 0x3F);
 		return 3;
 	}
 	else if(chr <= 0x10FFFF)
 	{
-		ptr[0] = 0xF0|((chr>>18)&0x07);
-		ptr[1] = 0x80|((chr>>12)&0x3F);
-		ptr[2] = 0x80|((chr>>6)&0x3F);
-		ptr[3] = 0x80|(chr&0x3F);
+		ptr[0] = 0xF0 | ((chr >> 18) & 0x07);
+		ptr[1] = 0x80 | ((chr >> 12) & 0x3F);
+		ptr[2] = 0x80 | ((chr >> 6) & 0x3F);
+		ptr[3] = 0x80 | (chr & 0x3F);
 		return 4;
 	}
 
@@ -3110,15 +3168,19 @@ int str_utf8_decode(const char **ptr)
 			}
 			else if(0xE0 <= byte && byte <= 0xEF)
 			{
-				if(byte == 0xE0) utf8_lower_boundary = 0xA0;
-				if(byte == 0xED) utf8_upper_boundary = 0x9F;
+				if(byte == 0xE0)
+					utf8_lower_boundary = 0xA0;
+				if(byte == 0xED)
+					utf8_upper_boundary = 0x9F;
 				utf8_bytes_needed = 2;
 				utf8_code_point = byte - 0xE0;
 			}
 			else if(0xF0 <= byte && byte <= 0xF4)
 			{
-				if(byte == 0xF0) utf8_lower_boundary = 0x90;
-				if(byte == 0xF4) utf8_upper_boundary = 0x8F;
+				if(byte == 0xF0)
+					utf8_lower_boundary = 0x90;
+				if(byte == 0xF4)
+					utf8_upper_boundary = 0x8F;
 				utf8_bytes_needed = 3;
 				utf8_code_point = byte - 0xF0;
 			}
@@ -3244,7 +3306,7 @@ PROCESS shell_execute(const char *file)
 #elif defined(CONF_FAMILY_UNIX)
 	char *argv[2];
 	pid_t pid;
-	argv[0] = (char*) file;
+	argv[0] = (char *)file;
 	argv[1] = NULL;
 	pid = fork();
 	if(pid == -1)
@@ -3295,8 +3357,8 @@ int os_is_winxp_or_lower(void)
 	mem_zero(&ver, sizeof(OSVERSIONINFO));
 	ver.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 	GetVersionEx(&ver);
-	return ver.dwMajorVersion < WINXP_MAJOR
-		|| (ver.dwMajorVersion == WINXP_MAJOR && ver.dwMinorVersion <= WINXP_MINOR);
+	return ver.dwMajorVersion < WINXP_MAJOR ||
+	       (ver.dwMajorVersion == WINXP_MAJOR && ver.dwMinorVersion <= WINXP_MINOR);
 #else
 	return 0;
 #endif
@@ -3312,7 +3374,7 @@ struct SECURE_RANDOM_DATA
 #endif
 };
 
-static struct SECURE_RANDOM_DATA secure_random_data = { 0 };
+static struct SECURE_RANDOM_DATA secure_random_data = {0};
 
 int secure_random_init(void)
 {
@@ -3406,7 +3468,7 @@ int secure_rand(void)
 {
 	unsigned int i;
 	secure_random_fill(&i, sizeof(i));
-	return (int)(i%RAND_MAX);
+	return (int)(i % RAND_MAX);
 }
 
 #if defined(__cplusplus)

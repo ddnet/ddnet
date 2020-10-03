@@ -12,7 +12,7 @@ class CUPnP
 
 public:
 	void Open(NETADDR Address);
-	void Shutdown(); 
+	void Shutdown();
 };
 
 #endif

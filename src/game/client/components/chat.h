@@ -29,6 +29,8 @@ class CChat : public CComponent
 
 		int m_TextContainerIndex;
 		float m_TextYOffset;
+
+		int m_TimesRepeated;
 	};
 
 	bool m_PrevScoreBoardShowed;
@@ -40,11 +42,11 @@ class CChat : public CComponent
 	// chat
 	enum
 	{
-		MODE_NONE=0,
+		MODE_NONE = 0,
 		MODE_ALL,
 		MODE_TEAM,
 
-		CHAT_SERVER=0,
+		CHAT_SERVER = 0,
 		CHAT_HIGHLIGHT,
 		CHAT_CLIENT,
 		CHAT_NUM,
@@ -65,9 +67,9 @@ class CChat : public CComponent
 		const char *pName;
 		const char *pParams;
 
-		bool operator <(const CCommand &Other) const { return str_comp(pName, Other.pName) < 0; }
-		bool operator <=(const CCommand &Other) const { return str_comp(pName, Other.pName) <= 0; }
-		bool operator ==(const CCommand &Other) const { return str_comp(pName, Other.pName) == 0; }
+		bool operator<(const CCommand &Other) const { return str_comp(pName, Other.pName) < 0; }
+		bool operator<=(const CCommand &Other) const { return str_comp(pName, Other.pName) <= 0; }
+		bool operator==(const CCommand &Other) const { return str_comp(pName, Other.pName) == 0; }
 	};
 
 	sorted_array<CCommand> m_Commands;
@@ -79,7 +81,7 @@ class CChat : public CComponent
 		char m_aText[1];
 	};
 	CHistoryEntry *m_pHistoryEntry;
-	TStaticRingBuffer<CHistoryEntry, 64*1024, CRingBufferBase::FLAG_RECYCLE> m_History;
+	TStaticRingBuffer<CHistoryEntry, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_History;
 	int m_PendingChatCounter;
 	int64 m_LastChatSend;
 	int64 m_aLastSoundPlayed[CHAT_NUM];
@@ -100,6 +102,7 @@ public:
 	bool IsActive() const { return m_Mode != MODE_NONE; }
 	void AddLine(int ClientID, int Team, const char *pLine);
 	void EnableMode(int Team);
+	void DisableMode();
 	void Say(int Team, const char *pLine);
 	void SayChat(const char *pLine);
 	void RegisterCommand(const char *pName, const char *pParams, int flags, const char *pHelp);

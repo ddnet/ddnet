@@ -1,11 +1,13 @@
 #ifndef ENGINE_SHARED_NETBAN_H
 #define ENGINE_SHARED_NETBAN_H
 
+#include <engine/console.h>
+
 #include <base/system.h>
 
 inline int NetComp(const NETADDR *pAddr1, const NETADDR *pAddr2)
 {
-	return mem_comp(pAddr1, pAddr2, pAddr1->type==NETTYPE_IPV4 ? 8 : 20);
+	return mem_comp(pAddr1, pAddr2, pAddr1->type == NETTYPE_IPV4 ? 8 : 20);
 }
 
 class CNetRange
@@ -33,12 +35,12 @@ protected:
 	bool NetMatch(const CNetRange *pRange, const NETADDR *pAddr, int Start, int Length) const
 	{
 		return pRange->m_LB.type == pAddr->type && (Start == 0 || mem_comp(&pRange->m_LB.ip[0], &pAddr->ip[0], Start) == 0) &&
-			mem_comp(&pRange->m_LB.ip[Start], &pAddr->ip[Start], Length-Start) <= 0 && mem_comp(&pRange->m_UB.ip[Start], &pAddr->ip[Start], Length-Start) >= 0;
+		       mem_comp(&pRange->m_LB.ip[Start], &pAddr->ip[Start], Length - Start) <= 0 && mem_comp(&pRange->m_UB.ip[Start], &pAddr->ip[Start], Length - Start) >= 0;
 	}
 
 	bool NetMatch(const CNetRange *pRange, const NETADDR *pAddr) const
 	{
-		return NetMatch(pRange, pAddr, 0,  pRange->m_LB.type==NETTYPE_IPV4 ? 4 : 16);
+		return NetMatch(pRange, pAddr, 0, pRange->m_LB.type == NETTYPE_IPV4 ? 4 : 16);
 	}
 
 	const char *NetToString(const NETADDR *pData, char *pBuffer, unsigned BufferSize) const
@@ -62,7 +64,7 @@ protected:
 	{
 	public:
 		int m_Hash;
-		int m_HashIndex;	// matching parts for ranges, 0 for addr
+		int m_HashIndex; // matching parts for ranges, 0 for addr
 
 		CNetHash() {}
 		CNetHash(const NETADDR *pAddr);
@@ -75,14 +77,15 @@ protected:
 	{
 		enum
 		{
-			EXPIRES_NEVER=-1,
-			REASON_LENGTH=64,
+			EXPIRES_NEVER = -1,
+			REASON_LENGTH = 64,
 		};
 		int m_Expires;
 		char m_aReason[REASON_LENGTH];
 	};
 
-	template<class T> struct CBan
+	template<class T>
+	struct CBan
 	{
 		T m_Data;
 		CBanInfo m_Info;
@@ -97,7 +100,8 @@ protected:
 		CBan *m_pPrev;
 	};
 
-	template<class T, int HashCount> class CBanPool
+	template<class T, int HashCount>
+	class CBanPool
 	{
 	public:
 		typedef T CDataType;
@@ -127,7 +131,7 @@ protected:
 	private:
 		enum
 		{
-			MAX_BANS=1024,
+			MAX_BANS = 1024,
 		};
 
 		CBan<CDataType> *m_paaHashList[HashCount][256];
@@ -142,9 +146,12 @@ protected:
 	typedef CBan<NETADDR> CBanAddr;
 	typedef CBan<CNetRange> CBanRange;
 
-	template<class T> void MakeBanInfo(const CBan<T> *pBan, char *pBuf, unsigned BuffSize, int Type) const;
-	template<class T> int Ban(T *pBanPool, const typename T::CDataType *pData, int Seconds, const char *pReason);
-	template<class T> int Unban(T *pBanPool, const typename T::CDataType *pData);
+	template<class T>
+	void MakeBanInfo(const CBan<T> *pBan, char *pBuf, unsigned BuffSize, int Type) const;
+	template<class T>
+	int Ban(T *pBanPool, const typename T::CDataType *pData, int Seconds, const char *pReason);
+	template<class T>
+	int Unban(T *pBanPool, const typename T::CDataType *pData);
 
 	class IConsole *m_pConsole;
 	class IStorage *m_pStorage;
@@ -155,7 +162,7 @@ protected:
 public:
 	enum
 	{
-		MSGTYPE_PLAYER=0,
+		MSGTYPE_PLAYER = 0,
 		MSGTYPE_LIST,
 		MSGTYPE_BANADD,
 		MSGTYPE_BANREM,
@@ -185,7 +192,6 @@ public:
 	static void ConBansSave(class IConsole::IResult *pResult, void *pUser);
 };
 
-
 template<class T>
 void CNetBan::MakeBanInfo(const CBan<T> *pBan, char *pBuf, unsigned BuffSize, int Type) const
 {
@@ -206,11 +212,14 @@ void CNetBan::MakeBanInfo(const CBan<T> *pBan, char *pBuf, unsigned BuffSize, in
 		switch(Type)
 		{
 		case MSGTYPE_LIST:
-			str_format(aBuf, sizeof(aBuf), "%s banned", NetToString(&pBan->m_Data, aTemp, sizeof(aTemp))); break;
+			str_format(aBuf, sizeof(aBuf), "%s banned", NetToString(&pBan->m_Data, aTemp, sizeof(aTemp)));
+			break;
 		case MSGTYPE_BANADD:
-			str_format(aBuf, sizeof(aBuf), "banned %s", NetToString(&pBan->m_Data, aTemp, sizeof(aTemp))); break;
+			str_format(aBuf, sizeof(aBuf), "banned %s", NetToString(&pBan->m_Data, aTemp, sizeof(aTemp)));
+			break;
 		case MSGTYPE_BANREM:
-			str_format(aBuf, sizeof(aBuf), "unbanned %s", NetToString(&pBan->m_Data, aTemp, sizeof(aTemp))); break;
+			str_format(aBuf, sizeof(aBuf), "unbanned %s", NetToString(&pBan->m_Data, aTemp, sizeof(aTemp)));
+			break;
 		default:
 			aBuf[0] = 0;
 		}
@@ -219,7 +228,7 @@ void CNetBan::MakeBanInfo(const CBan<T> *pBan, char *pBuf, unsigned BuffSize, in
 	// add info part
 	if(pBan->m_Info.m_Expires != CBanInfo::EXPIRES_NEVER)
 	{
-		int Mins = ((pBan->m_Info.m_Expires-time_timestamp()) + 59) / 60;
+		int Mins = ((pBan->m_Info.m_Expires - time_timestamp()) + 59) / 60;
 		if(Mins <= 1)
 			str_format(pBuf, BuffSize, "%s for 1 minute (%s)", aBuf, pBan->m_Info.m_aReason);
 		else

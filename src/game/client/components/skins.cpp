@@ -2,8 +2,8 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <math.h>
 
-#include <base/system.h>
 #include <base/math.h>
+#include <base/system.h>
 #include <ctime>
 
 #include <engine/engine.h>
@@ -71,10 +71,10 @@ int CSkins::LoadSkin(const char *pName, const char *pPath, int DirType)
 	Skin.m_OrgTexture = Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
 
 	int BodySize = 96; // body size
-	if (BodySize > Info.m_Height)
+	if(BodySize > Info.m_Height)
 		return 0;
 	unsigned char *d = (unsigned char *)Info.m_pData;
-	int Pitch = Info.m_Width*4;
+	int Pitch = Info.m_Width * 4;
 
 	// dig out blood color
 	{
@@ -82,11 +82,11 @@ int CSkins::LoadSkin(const char *pName, const char *pPath, int DirType)
 		for(int y = 0; y < BodySize; y++)
 			for(int x = 0; x < BodySize; x++)
 			{
-				if(d[y*Pitch+x*4+3] > 128)
+				if(d[y * Pitch + x * 4 + 3] > 128)
 				{
-					aColors[0] += d[y*Pitch+x*4+0];
-					aColors[1] += d[y*Pitch+x*4+1];
-					aColors[2] += d[y*Pitch+x*4+2];
+					aColors[0] += d[y * Pitch + x * 4 + 0];
+					aColors[1] += d[y * Pitch + x * 4 + 1];
+					aColors[2] += d[y * Pitch + x * 4 + 2];
 				}
 			}
 
@@ -97,14 +97,13 @@ int CSkins::LoadSkin(const char *pName, const char *pPath, int DirType)
 	int Step = Info.m_Format == CImageInfo::FORMAT_RGBA ? 4 : 3;
 
 	// make the texture gray scale
-	for(int i = 0; i < Info.m_Width*Info.m_Height; i++)
+	for(int i = 0; i < Info.m_Width * Info.m_Height; i++)
 	{
-		int v = (d[i*Step]+d[i*Step+1]+d[i*Step+2])/3;
-		d[i*Step] = v;
-		d[i*Step+1] = v;
-		d[i*Step+2] = v;
+		int v = (d[i * Step] + d[i * Step + 1] + d[i * Step + 2]) / 3;
+		d[i * Step] = v;
+		d[i * Step + 1] = v;
+		d[i * Step + 2] = v;
 	}
-
 
 	int Freq[256] = {0};
 	int OrgWeight = 0;
@@ -114,8 +113,8 @@ int CSkins::LoadSkin(const char *pName, const char *pPath, int DirType)
 	for(int y = 0; y < BodySize; y++)
 		for(int x = 0; x < BodySize; x++)
 		{
-			if(d[y*Pitch+x*4+3] > 128)
-				Freq[d[y*Pitch+x*4]]++;
+			if(d[y * Pitch + x * 4 + 3] > 128)
+				Freq[d[y * Pitch + x * 4]]++;
 		}
 
 	for(int i = 1; i < 256; i++)
@@ -125,19 +124,19 @@ int CSkins::LoadSkin(const char *pName, const char *pPath, int DirType)
 	}
 
 	// reorder
-	int InvOrgWeight = 255-OrgWeight;
-	int InvNewWeight = 255-NewWeight;
+	int InvOrgWeight = 255 - OrgWeight;
+	int InvNewWeight = 255 - NewWeight;
 	for(int y = 0; y < BodySize; y++)
 		for(int x = 0; x < BodySize; x++)
 		{
-			int v = d[y*Pitch+x*4];
+			int v = d[y * Pitch + x * 4];
 			if(v <= OrgWeight)
-				v = (int)(((v/(float)OrgWeight) * NewWeight));
+				v = (int)(((v / (float)OrgWeight) * NewWeight));
 			else
-				v = (int)(((v-OrgWeight)/(float)InvOrgWeight)*InvNewWeight + NewWeight);
-			d[y*Pitch+x*4] = v;
-			d[y*Pitch+x*4+1] = v;
-			d[y*Pitch+x*4+2] = v;
+				v = (int)(((v - OrgWeight) / (float)InvOrgWeight) * InvNewWeight + NewWeight);
+			d[y * Pitch + x * 4] = v;
+			d[y * Pitch + x * 4 + 1] = v;
+			d[y * Pitch + x * 4 + 2] = v;
 		}
 
 	Skin.m_ColorTexture = Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
@@ -162,7 +161,7 @@ void CSkins::OnInit()
 	if(g_Config.m_Events)
 	{
 		time_t rawtime;
-		struct tm* timeinfo;
+		struct tm *timeinfo;
 		std::time(&rawtime);
 		timeinfo = localtime(&rawtime);
 		if(timeinfo->tm_mon == 11 && timeinfo->tm_mday >= 24 && timeinfo->tm_mday <= 26)
@@ -196,7 +195,7 @@ const CSkins::CSkin *CSkins::Get(int Index)
 	{
 		Index = Find("default");
 
-		if (Index < 0)
+		if(Index < 0)
 			Index = 0;
 	}
 	return &m_aSkins[Index % m_aSkins.size()];
@@ -251,7 +250,6 @@ int CSkins::FindImpl(const char *pName)
 		}
 		if(d.front().m_pTask && (d.front().m_pTask->State() == HTTP_ERROR || d.front().m_pTask->State() == HTTP_ABORTED))
 		{
-			Storage()->RemoveFile(d.front().m_aPath, IStorage::TYPE_SAVE);
 			d.front().m_pTask = nullptr;
 		}
 		return -1;
@@ -263,7 +261,7 @@ int CSkins::FindImpl(const char *pName)
 	char aUrl[256];
 	str_format(aUrl, sizeof(aUrl), "%s%s.png", g_Config.m_ClSkinDownloadUrl, pName);
 	str_format(Skin.m_aPath, sizeof(Skin.m_aPath), "downloadedskins/%s.%d.tmp", pName, pid());
-	Skin.m_pTask = std::make_shared<CGetFile>(Storage(), aUrl, Skin.m_aPath, IStorage::TYPE_SAVE, CTimeout{0, 0, 0});
+	Skin.m_pTask = std::make_shared<CGetFile>(Storage(), aUrl, Skin.m_aPath, IStorage::TYPE_SAVE, CTimeout{0, 0, 0}, false);
 	m_pClient->Engine()->AddJob(Skin.m_pTask);
 	m_aDownloadSkins.add(Skin);
 	return -1;

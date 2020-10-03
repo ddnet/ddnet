@@ -3,22 +3,22 @@
 #ifndef GAME_CLIENT_GAMECLIENT_H
 #define GAME_CLIENT_GAMECLIENT_H
 
+#include "render.h"
 #include <base/color.h>
 #include <base/vmath.h>
 #include <engine/client.h>
 #include <engine/console.h>
 #include <engine/shared/config.h>
+#include <game/gamecore.h>
 #include <game/layers.h>
 #include <game/localization.h>
-#include <game/gamecore.h>
-#include "render.h"
 
 #include <game/teamscore.h>
 
-#include <game/client/prediction/gameworld.h>
 #include <game/client/prediction/entities/character.h>
 #include <game/client/prediction/entities/laser.h>
 #include <game/client/prediction/entities/pickup.h>
+#include <game/client/prediction/gameworld.h>
 
 class CGameInfo
 {
@@ -53,6 +53,7 @@ public:
 	bool m_Race;
 
 	bool m_DontMaskEntities;
+	bool m_AllowXSkins;
 };
 
 class CGameClient : public IGameClient
@@ -122,6 +123,8 @@ class CGameClient : public IGameClient
 
 	static void ConTuneZone(IConsole::IResult *pResult, void *pUserData);
 
+	static void ConchainMenuMap(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+
 public:
 	IKernel *Kernel() { return IInterface::Kernel(); }
 	IEngine *Engine() const { return m_pEngine; }
@@ -143,10 +146,16 @@ public:
 	class IFriends *Friends() { return m_pFriends; }
 	class IFriends *Foes() { return m_pFoes; }
 #if defined(CONF_AUTOUPDATE)
-	class IUpdater *Updater() { return m_pUpdater; }
+	class IUpdater *Updater()
+	{
+		return m_pUpdater;
+	}
 #endif
 
-	int NetobjNumCorrections() { return m_NetObjHandler.NumObjCorrections(); }
+	int NetobjNumCorrections()
+	{
+		return m_NetObjHandler.NumObjCorrections();
+	}
 	const char *NetobjCorrectedOn() { return m_NetObjHandler.CorrectedObjOn(); }
 
 	bool m_SuppressEvents;
@@ -159,7 +168,7 @@ public:
 
 	enum
 	{
-		SERVERMODE_PURE=0,
+		SERVERMODE_PURE = 0,
 		SERVERMODE_MOD,
 		SERVERMODE_PUREMOD,
 	};
@@ -260,7 +269,6 @@ public:
 		int m_FreezeEnd;
 		bool m_DeepFrozen;
 
-
 		CCharacterCore m_Predicted;
 		CCharacterCore m_PrevPredicted;
 
@@ -324,8 +332,16 @@ public:
 		void Reset();
 
 		bool IsActive() const { return m_Active; }
-		void JoinGame(int Tick) { m_Active = true; m_JoinTick = Tick; };
-		void JoinSpec(int Tick) { m_Active = false; m_IngameTicks += Tick - m_JoinTick; };
+		void JoinGame(int Tick)
+		{
+			m_Active = true;
+			m_JoinTick = Tick;
+		};
+		void JoinSpec(int Tick)
+		{
+			m_Active = false;
+			m_IngameTicks += Tick - m_JoinTick;
+		};
 		int GetIngameTicks(int Tick) const { return m_IngameTicks + Tick - m_JoinTick; };
 		float GetFPM(int Tick, int TickSpeed) const { return (float)(m_Frags * TickSpeed * 60) / GetIngameTicks(Tick); };
 	};
@@ -377,6 +393,7 @@ public:
 	void SendKill(int ClientID);
 
 	// pointers to all systems
+	class CMenuBackground *m_pMenuBackground;
 	class CGameConsole *m_pGameConsole;
 	class CBinds *m_pBinds;
 	class CParticles *m_pParticles;
@@ -415,7 +432,7 @@ public:
 	class CGhost *m_pGhost;
 	class CTeamsCore m_Teams;
 
-	int IntersectCharacter(vec2 Pos0, vec2 Pos1, vec2& NewPos, int ownID);
+	int IntersectCharacter(vec2 Pos0, vec2 Pos1, vec2 &NewPos, int ownID);
 
 	virtual int GetLastRaceTick();
 
@@ -423,7 +440,7 @@ public:
 	bool AntiPingGrenade() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingGrenade && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK; }
 	bool AntiPingWeapons() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingWeapons && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK; }
 	bool AntiPingGunfire() { return AntiPingGrenade() && AntiPingWeapons() && g_Config.m_ClAntiPingGunfire; }
-	bool Predict() { return g_Config.m_ClPredict && !(m_Snap.m_pGameInfoObj && m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER) && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK && m_Snap.m_pLocalCharacter; }
+	bool Predict() { return g_Config.m_ClPredict && !(m_Snap.m_pGameInfoObj && m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER) && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK && m_Snap.m_pLocalCharacter; }
 	bool PredictDummy() { return g_Config.m_ClPredictDummy && Client()->DummyConnected() && m_Snap.m_LocalClientID >= 0 && m_PredictedDummyID >= 0; }
 
 	CGameWorld m_GameWorld;
@@ -432,6 +449,11 @@ public:
 
 	void Echo(const char *pString);
 	bool IsOtherTeam(int ClientID);
+	bool CanDisplayWarning();
+
+	void LoadGameSkin(const char *pPath, bool AsDir = false);
+	void LoadEmoticonsSkin(const char *pPath, bool AsDir = false);
+	void LoadParticlesSkin(const char *pPath, bool AsDir = false);
 
 private:
 	bool m_DDRaceMsgSent[2];

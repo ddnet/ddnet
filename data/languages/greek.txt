@@ -446,12 +446,6 @@ Spectator mode
 Spectators
 == Θεατές
 
-Standard gametype
-== Κανονικός τύπος παιχν.
-
-Standard map
-== Κανονικός χάρτης
-
 Stop record
 == Παύση καταγραφής
 
@@ -634,7 +628,13 @@ Name plates size
 Type:
 == Τύπος:
 
+Downloading ddnet-info.json failed
+== 
+
 Successfully saved the replay!
+== 
+
+Saving ddnet-settings.cfg failed
 == 
 
 Replay feature is disabled!
@@ -727,13 +727,7 @@ Show DDNet map finishes in server browser
 transmits your player name to info2.ddnet.tw
 == 
 
-Search:
-== 
-
-Exclude:
-== 
-
-Search servers:
+Theme
 == 
 
 Search
@@ -778,6 +772,9 @@ Please use a different name
 Remove chat
 == 
 
+File
+== 
+
 Markers:
 == 
 
@@ -800,6 +797,9 @@ Date
 == 
 
 Fetch Info
+== 
+
+Demos directory
 == 
 
 Render
@@ -850,6 +850,9 @@ Refresh Rate
 Show console window
 == 
 
+Themes directory
+== 
+
 Automatically take statboard screenshot
 == 
 
@@ -872,6 +875,12 @@ Fat skins (DDFat)
 == 
 
 Skin prefix
+== 
+
+Skin Database
+== 
+
+Skins directory
 == 
 
 Hook collisions
@@ -973,10 +982,16 @@ Threaded sound loading
 Map sound volume
 == 
 
+Background music volume
+== 
+
 HUD
 == 
 
 DDNet
+== 
+
+Assets
 == 
 
 DDNet Client needs to be restarted to complete update!
@@ -1093,9 +1108,6 @@ Show others (own team only)
 Show quads
 == 
 
-AntiPing limit
-== 
-
 AntiPing
 == 
 
@@ -1123,6 +1135,9 @@ Background (regular)
 Background (entities)
 == 
 
+Use current map as background
+== 
+
 Show tiles layers from BG map
 == 
 
@@ -1148,6 +1163,18 @@ Check now
 == 
 
 New random timeout code
+== 
+
+Entities
+== 
+
+Emoticons
+== 
+
+Particles
+== 
+
+Assets directory
 == 
 
 Learn

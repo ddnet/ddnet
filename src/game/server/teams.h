@@ -3,8 +3,8 @@
 #define GAME_SERVER_TEAMS_H
 
 #include <engine/shared/config.h>
-#include <game/teamscore.h>
 #include <game/server/gamecontext.h>
+#include <game/teamscore.h>
 
 class CGameTeams
 {
@@ -15,17 +15,20 @@ class CGameTeams
 	bool m_Practice[MAX_CLIENTS];
 	std::shared_ptr<CScoreSaveResult> m_pSaveTeamResult[MAX_CLIENTS];
 
-	class CGameContext * m_pGameContext;
+	class CGameContext *m_pGameContext;
 
 	void CheckTeamFinished(int ClientID);
 	bool TeamFinished(int Team);
-	void OnTeamFinish(CPlayer** Players, unsigned int Size, float Time, const char *pTimestamp);
-	void OnFinish(CPlayer* Player, float Time, const char *pTimestamp);
+	void OnTeamFinish(CPlayer **Players, unsigned int Size, float Time, const char *pTimestamp);
+	void OnFinish(CPlayer *Player, float Time, const char *pTimestamp);
 
 public:
 	enum
 	{
-		TEAMSTATE_EMPTY, TEAMSTATE_OPEN, TEAMSTATE_STARTED, TEAMSTATE_FINISHED
+		TEAMSTATE_EMPTY,
+		TEAMSTATE_OPEN,
+		TEAMSTATE_STARTED,
+		TEAMSTATE_FINISHED
 	};
 
 	CTeamsCore m_Core;
@@ -33,11 +36,11 @@ public:
 	CGameTeams(CGameContext *pGameContext);
 
 	//helper methods
-	CCharacter* Character(int ClientID)
+	CCharacter *Character(int ClientID)
 	{
 		return GameServer()->GetPlayerChar(ClientID);
 	}
-	CPlayer* GetPlayer(int ClientID)
+	CPlayer *GetPlayer(int ClientID)
 	{
 		return GameServer()->m_apPlayers[ClientID];
 	}
@@ -80,12 +83,12 @@ public:
 
 	int m_LastChat[MAX_CLIENTS];
 
-	int GetDDRaceState(CPlayer* Player);
-	int GetStartTime(CPlayer* Player);
-	float *GetCpCurrent(CPlayer* Player);
-	void SetDDRaceState(CPlayer* Player, int DDRaceState);
-	void SetStartTime(CPlayer* Player, int StartTime);
-	void SetCpActive(CPlayer* Player, int CpActive);
+	int GetDDRaceState(CPlayer *Player);
+	int GetStartTime(CPlayer *Player);
+	float *GetCpCurrent(CPlayer *Player);
+	void SetDDRaceState(CPlayer *Player, int DDRaceState);
+	void SetStartTime(CPlayer *Player, int StartTime);
+	void SetCpActive(CPlayer *Player, int CpActive);
 	void KillSavedTeam(int ClientID, int Team);
 	void ResetSavedTeam(int ClientID, int Team);
 	void ProcessSaveTeam();
@@ -102,7 +105,7 @@ public:
 
 	bool TeamLocked(int Team)
 	{
-		if (Team <= TEAM_FLOCK || Team >= TEAM_SUPER)
+		if(Team <= TEAM_FLOCK || Team >= TEAM_SUPER)
 			return false;
 
 		return m_TeamLocked[Team];

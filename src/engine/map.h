@@ -3,8 +3,8 @@
 #ifndef ENGINE_MAP_H
 #define ENGINE_MAP_H
 
-#include <base/hash.h>
 #include "kernel.h"
+#include <base/hash.h>
 
 enum
 {
@@ -25,7 +25,6 @@ public:
 	virtual void *FindItem(int Type, int ID) = 0;
 	virtual int NumItems() = 0;
 };
-
 
 class IEngineMap : public IMap
 {

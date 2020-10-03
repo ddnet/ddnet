@@ -18,8 +18,7 @@ enum EMapImageEntityLayerType
 
 enum EMapImageModType
 {
-	MAP_IMAGE_MOD_TYPE_UNKNOWN = 0,
-	MAP_IMAGE_MOD_TYPE_DDNET,
+	MAP_IMAGE_MOD_TYPE_DDNET = 0,
 	MAP_IMAGE_MOD_TYPE_DDRACE,
 	MAP_IMAGE_MOD_TYPE_RACE,
 	MAP_IMAGE_MOD_TYPE_BLOCKWORLDS,
@@ -29,19 +28,30 @@ enum EMapImageModType
 	MAP_IMAGE_MOD_TYPE_COUNT,
 };
 
+static const char *const gs_aModEntitiesNames[] = {
+	"ddnet",
+	"ddrace",
+	"race",
+	"blockworlds",
+	"fng",
+	"vanilla"};
+
 class CMapImages : public CComponent
 {
 	friend class CBackground;
+	friend class CMenuBackground;
 
 	IGraphics::CTextureHandle m_aTextures[64];
 	int m_aTextureUsedByTileOrQuadLayerFlag[64]; // 0: nothing, 1(as flag): tile layer, 2(as flag): quad layer
 	int m_Count;
 
-	bool HasFrontLayer();
-	bool HasSpeedupLayer();
-	bool HasSwitchLayer();
-	bool HasTeleLayer();
-	bool HasTuneLayer();
+	char m_aEntitiesPath[MAX_PATH_LENGTH];
+
+	bool HasFrontLayer(EMapImageModType ModType);
+	bool HasSpeedupLayer(EMapImageModType ModType);
+	bool HasSwitchLayer(EMapImageModType ModType);
+	bool HasTeleLayer(EMapImageModType ModType);
+	bool HasTuneLayer(EMapImageModType ModType);
 
 public:
 	CMapImages();
@@ -66,10 +76,12 @@ public:
 	void SetTextureScale(int Size);
 	int GetTextureScale();
 
+	void ChangeEntitiesPath(const char *pPath);
+
 private:
-	bool m_EntitiesIsLoaded[MAP_IMAGE_MOD_TYPE_COUNT];
+	bool m_EntitiesIsLoaded[MAP_IMAGE_MOD_TYPE_COUNT * 2];
 	bool m_SpeedupArrowIsLoaded;
-	IGraphics::CTextureHandle m_EntitiesTextures[MAP_IMAGE_MOD_TYPE_COUNT][MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT];
+	IGraphics::CTextureHandle m_EntitiesTextures[MAP_IMAGE_MOD_TYPE_COUNT * 2][MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT];
 	IGraphics::CTextureHandle m_SpeedupArrowTexture;
 	IGraphics::CTextureHandle m_OverlayBottomTexture;
 	IGraphics::CTextureHandle m_OverlayTopTexture;
@@ -79,7 +91,7 @@ private:
 
 	void InitOverlayTextures();
 	IGraphics::CTextureHandle UploadEntityLayerText(int TextureSize, int MaxWidth, int YOffset);
-	void UpdateEntityLayerText(void* pTexBuffer, int ImageColorChannelCount, int TexWidth, int TexHeight, int TextureSize, int MaxWidth, int YOffset, int NumbersPower, int MaxNumber = -1);
+	void UpdateEntityLayerText(void *pTexBuffer, int ImageColorChannelCount, int TexWidth, int TexHeight, int TextureSize, int MaxWidth, int YOffset, int NumbersPower, int MaxNumber = -1);
 };
 
 #endif

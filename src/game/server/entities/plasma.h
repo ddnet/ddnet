@@ -6,7 +6,7 @@
 
 class CGun;
 
-class CPlasma: public CEntity
+class CPlasma : public CEntity
 {
 	vec2 m_Core;
 	int m_EvalTick;
@@ -18,10 +18,10 @@ class CPlasma: public CEntity
 	bool m_Explosive;
 	bool HitCharacter();
 	void Move();
-public:
 
+public:
 	CPlasma(CGameWorld *pGameWorld, vec2 Pos, vec2 Dir, bool Freeze,
-			bool Explosive, int ResponsibleTeam);
+		bool Explosive, int ResponsibleTeam);
 
 	virtual void Reset();
 	virtual void Tick();

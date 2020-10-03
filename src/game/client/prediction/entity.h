@@ -3,12 +3,12 @@
 #ifndef GAME_CLIENT_PREDICTION_ENTITY_H
 #define GAME_CLIENT_PREDICTION_ENTITY_H
 
-#include <new>
-#include <base/vmath.h>
 #include "gameworld.h"
+#include <base/vmath.h>
+#include <new>
 
 #define MACRO_ALLOC_HEAP() \
-	public: \
+public: \
 	void *operator new(size_t Size) \
 	{ \
 		void *p = malloc(Size); \
@@ -21,19 +21,22 @@
 		/*dbg_msg("", "-- %p", p);*/ \
 		free(pPtr); \
 	} \
-	private:
+\
+private:
 
 class CEntity
 {
 	MACRO_ALLOC_HEAP()
-	friend class CGameWorld;	// entity list handling
+	friend class CGameWorld; // entity list handling
 	CEntity *m_pPrevTypeEntity;
 	CEntity *m_pNextTypeEntity;
+
 protected:
 	class CGameWorld *m_pGameWorld;
 	bool m_MarkedForDestroy;
 	int m_ID;
 	int m_ObjType;
+
 public:
 	CEntity(CGameWorld *pGameWorld, int Objtype);
 	virtual ~CEntity();
@@ -64,10 +67,18 @@ public:
 	CEntity *m_pParent;
 	CEntity *NextEntity() { return m_pNextTypeEntity; }
 	int ID() { return m_ID; }
-	void Keep() { m_SnapTicks = 0; m_MarkedForDestroy = false; }
+	void Keep()
+	{
+		m_SnapTicks = 0;
+		m_MarkedForDestroy = false;
+	}
 	void DetachFromGameWorld() { m_pGameWorld = 0; }
 
-	CEntity() { m_ID = -1; m_pGameWorld = 0; }
+	CEntity()
+	{
+		m_ID = -1;
+		m_pGameWorld = 0;
+	}
 };
 
 #endif

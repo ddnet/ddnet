@@ -8,6 +8,7 @@ class CMotd : public CComponent
 {
 	// motd
 	int64 m_ServerMotdTime;
+
 public:
 	char m_aServerMotd[900];
 

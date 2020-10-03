@@ -1,8 +1,8 @@
-#include <game/mapitems.h>
-#include <game/gamecore.h>
 #include <base/system.h>
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
+#include <game/gamecore.h>
+#include <game/mapitems.h>
 
 #include <pnglite.h>
 
@@ -46,9 +46,9 @@ bool Process(IStorage *pStorage, char **pMapNames)
 		CMapItemLayerTilemap *pTilemap[2];
 		for(int i = 0; i < 2; ++i)
 		{
-			pItem[i] = (CMapItemLayer *)Maps[i].GetItem(Start[i]+j, 0, 0);
+			pItem[i] = (CMapItemLayer *)Maps[i].GetItem(Start[i] + j, 0, 0);
 			pTilemap[i] = (CMapItemLayerTilemap *)pItem[i];
-			(void)(CTile *)Maps[i].GetData(pTilemap[i]->m_Data);
+			(void)(CTile *) Maps[i].GetData(pTilemap[i]->m_Data);
 		}
 	}
 
@@ -57,7 +57,7 @@ bool Process(IStorage *pStorage, char **pMapNames)
 	{
 		CMapItemLayer *pItem[2];
 		for(int i = 0; i < 2; ++i)
-			pItem[i] = (CMapItemLayer *)Maps[i].GetItem(Start[i]+j, 0, 0);
+			pItem[i] = (CMapItemLayer *)Maps[i].GetItem(Start[i] + j, 0, 0);
 
 		if(pItem[0]->m_Type != LAYERTYPE_TILES)
 			continue;
@@ -68,7 +68,7 @@ bool Process(IStorage *pStorage, char **pMapNames)
 		for(int i = 0; i < 2; ++i)
 		{
 			pTilemap[i] = (CMapItemLayerTilemap *)pItem[i];
-			IntsToStr(pTilemap[i]->m_aName, sizeof(pTilemap[i]->m_aName)/sizeof(int), aName[i]);
+			IntsToStr(pTilemap[i]->m_aName, sizeof(pTilemap[i]->m_aName) / sizeof(int), aName[i]);
 		}
 
 		if(str_comp(aName[0], aName[1]) != 0 || pTilemap[0]->m_Width != pTilemap[1]->m_Width || pTilemap[0]->m_Height != pTilemap[1]->m_Height)
@@ -98,7 +98,7 @@ bool Process(IStorage *pStorage, char **pMapNames)
 	return true;
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
 	dbg_logger_stdout();
 	dbg_logger_file("map_diff.txt");

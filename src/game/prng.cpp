@@ -12,7 +12,6 @@ CPrng::CPrng() :
 {
 }
 
-
 const char *CPrng::Description() const
 {
 	if(!m_Seeded)

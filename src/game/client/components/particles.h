@@ -10,7 +10,7 @@ struct CParticle
 {
 	void SetDefault()
 	{
-		m_Vel = vec2(0,0);
+		m_Vel = vec2(0, 0);
 		m_LifeSpan = 0;
 		m_StartSize = 32;
 		m_EndSize = 32;
@@ -19,7 +19,7 @@ struct CParticle
 		m_Gravity = 0;
 		m_Friction = 0;
 		m_FlowAffected = 1.0f;
-		m_Color = ColorRGBA(1,1,1,1);
+		m_Color = ColorRGBA(1, 1, 1, 1);
 	}
 
 	vec2 m_Pos;
@@ -51,10 +51,11 @@ struct CParticle
 class CParticles : public CComponent
 {
 	friend class CGameClient;
+
 public:
 	enum
 	{
-		GROUP_PROJECTILE_TRAIL=0,
+		GROUP_PROJECTILE_TRAIL = 0,
 		GROUP_EXPLOSIONS,
 		GROUP_GENERAL,
 		NUM_GROUPS
@@ -67,12 +68,13 @@ public:
 	virtual void OnReset();
 	virtual void OnRender();
 	virtual void OnInit();
+
 private:
 	int m_ParticleQuadContainerIndex;
 
 	enum
 	{
-		MAX_PARTICLES=1024*8,
+		MAX_PARTICLES = 1024 * 8,
 	};
 
 	CParticle m_aParticles[MAX_PARTICLES];

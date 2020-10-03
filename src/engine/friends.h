@@ -21,11 +21,11 @@ class IFriends : public IInterface
 public:
 	enum
 	{
-		FRIEND_NO=0,
+		FRIEND_NO = 0,
 		FRIEND_CLAN,
 		FRIEND_PLAYER,
 
-		MAX_FRIENDS=1024,
+		MAX_FRIENDS = 1024,
 	};
 
 	virtual void Init(bool Foes = false) = 0;

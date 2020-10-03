@@ -19,6 +19,7 @@ class CCubicBezier
 		this->c = c;
 		this->d = d;
 	}
+
 public:
 	CCubicBezier() {}
 	float Evaluate(float t) const;

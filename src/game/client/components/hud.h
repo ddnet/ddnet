@@ -10,7 +10,7 @@ struct SScoreInfo
 	{
 		Reset();
 	}
-	
+
 	void Reset()
 	{
 		m_TextRankContainerIndex = m_TextScoreContainerIndex = m_RoundRectQuadContainerIndex = m_OptionalNameTextContainerIndex = -1;
@@ -61,6 +61,7 @@ class CHud : public CComponent
 	void RenderLocalTime(float x);
 
 	void MapscreenToGroup(float CenterX, float CenterY, struct CMapItemGroup *PGroup);
+
 public:
 	CHud();
 
@@ -75,7 +76,6 @@ public:
 	virtual void OnMessage(int MsgType, void *pRawMsg);
 
 private:
-
 	void RenderRecord();
 	void RenderDDRaceEffects();
 	float m_CheckpointDiff;
@@ -84,7 +84,6 @@ private:
 	int m_DDRaceTime;
 	int m_LastReceivedTimeTick;
 	int m_CheckpointTick;
-	int m_DDRaceTick;
 	bool m_FinishTime;
 	bool m_DDRaceTimeReceived;
 };

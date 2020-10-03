@@ -2,19 +2,20 @@
 
 #include <engine/ghost.h>
 #include <engine/serverbrowser.h>
-#include <engine/storage.h>
 #include <engine/shared/config.h>
+#include <engine/storage.h>
 
 #include <game/client/race.h>
 
+#include "ghost.h"
+#include "menus.h"
 #include "players.h"
 #include "skins.h"
-#include "menus.h"
-#include "ghost.h"
 
 const char *CGhost::ms_pGhostDir = "ghosts";
 
-CGhost::CGhost() : m_NewRenderTick(-1), m_StartRenderTick(-1), m_LastDeathTick(-1), m_LastRaceTick(-1), m_Recording(false), m_Rendering(false) {}
+CGhost::CGhost() :
+	m_NewRenderTick(-1), m_StartRenderTick(-1), m_LastDeathTick(-1), m_LastRaceTick(-1), m_Recording(false), m_Rendering(false) {}
 
 void CGhost::GetGhostSkin(CGhostSkin *pSkin, const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet)
 {
@@ -58,14 +59,14 @@ void CGhost::GetNetObjCharacter(CNetObj_Character *pChar, const CGhostCharacter 
 	pChar->m_Tick = pGhostChar->m_Tick;
 }
 
-CGhost::CGhostPath::CGhostPath(CGhostPath &&Other)
-	: m_ChunkSize(Other.m_ChunkSize), m_NumItems(Other.m_NumItems), m_lChunks(std::move(Other.m_lChunks))
+CGhost::CGhostPath::CGhostPath(CGhostPath &&Other) :
+	m_ChunkSize(Other.m_ChunkSize), m_NumItems(Other.m_NumItems), m_lChunks(std::move(Other.m_lChunks))
 {
 	Other.m_NumItems = 0;
 	Other.m_lChunks.clear();
 }
 
-CGhost::CGhostPath &CGhost::CGhostPath::operator = (CGhostPath &&Other)
+CGhost::CGhostPath &CGhost::CGhostPath::operator=(CGhostPath &&Other)
 {
 	Reset(Other.m_ChunkSize);
 	m_NumItems = Other.m_NumItems;
@@ -264,7 +265,7 @@ void CGhost::OnNewSnapshot()
 	if(!m_pClient->m_Snap.m_pGameInfoObj || m_pClient->m_Snap.m_SpecInfo.m_Active || !m_pClient->m_Snap.m_pLocalCharacter || !m_pClient->m_Snap.m_pLocalPrevCharacter)
 		return;
 
-	bool RaceFlag = m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_RACETIME;
+	bool RaceFlag = m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_RACETIME;
 	bool ServerControl = RaceFlag && g_Config.m_ClRaceGhostServerControl;
 
 	if(g_Config.m_ClRaceGhost)
@@ -290,7 +291,7 @@ void CGhost::OnNewPredictedSnapshot()
 	if(!m_pClient->m_Snap.m_pGameInfoObj || m_pClient->m_Snap.m_SpecInfo.m_Active || !m_pClient->m_Snap.m_pLocalCharacter || !m_pClient->m_Snap.m_pLocalPrevCharacter)
 		return;
 
-	bool RaceFlag = m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_RACETIME;
+	bool RaceFlag = m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_RACETIME;
 	bool ServerControl = RaceFlag && g_Config.m_ClRaceGhostServerControl;
 
 	if(!ServerControl)
@@ -339,7 +340,7 @@ void CGhost::OnRender()
 
 		Player.m_AttackTick += Client()->GameTick(g_Config.m_ClDummy) - GhostTick;
 
-		m_pClient->m_pPlayers->RenderHook(&Prev, &Player, &pGhost->m_RenderInfo , -2, IntraTick);
+		m_pClient->m_pPlayers->RenderHook(&Prev, &Player, &pGhost->m_RenderInfo, -2, IntraTick);
 		m_pClient->m_pPlayers->RenderPlayer(&Prev, &Player, &pGhost->m_RenderInfo, -2, IntraTick);
 	}
 }

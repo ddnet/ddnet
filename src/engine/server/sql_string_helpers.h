@@ -1,8 +1,7 @@
 #ifndef ENGINE_SERVER_SQL_STRING_HELPERS_H
 #define ENGINE_SERVER_SQL_STRING_HELPERS_H
 
-namespace sqlstr
-{
+namespace sqlstr {
 
 void FuzzyString(char *pString, int size);
 
@@ -11,6 +10,6 @@ int EscapeLike(char *pDst, const char *pSrc, int DstSize);
 
 void AgoTimeToString(int agoTime, char *pAgoString);
 
-}
+} // namespace sqlstr
 
 #endif

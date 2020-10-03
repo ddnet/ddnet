@@ -11,10 +11,10 @@ class ISound : public IInterface
 public:
 	enum
 	{
-		FLAG_LOOP=1<<0,
-		FLAG_POS=1<<1,
-		FLAG_NO_PANNING=1<<2,
-		FLAG_ALL=FLAG_LOOP|FLAG_POS|FLAG_NO_PANNING,
+		FLAG_LOOP = 1 << 0,
+		FLAG_POS = 1 << 1,
+		FLAG_NO_PANNING = 1 << 2,
+		FLAG_ALL = FLAG_LOOP | FLAG_POS | FLAG_NO_PANNING,
 	};
 
 	enum
@@ -39,18 +39,19 @@ public:
 		friend class ISound;
 		int m_Id;
 		int m_Age;
+
 	public:
-		CVoiceHandle()
-		: m_Id(-1), m_Age(-1)
-		{}
+		CVoiceHandle() :
+			m_Id(-1), m_Age(-1)
+		{
+		}
 
 		bool IsValid() const { return (Id() >= 0) && (Age() >= 0); }
 		int Id() const { return m_Id; }
 		int Age() const { return m_Age; }
 
-		bool operator ==(const CVoiceHandle &Other) const { return m_Id == Other.m_Id && m_Age == Other.m_Age; }
+		bool operator==(const CVoiceHandle &Other) const { return m_Id == Other.m_Id && m_Age == Other.m_Age; }
 	};
-
 
 	virtual bool IsSoundEnabled() = 0;
 
@@ -88,7 +89,6 @@ protected:
 		return Voice;
 	}
 };
-
 
 class IEngineSound : public ISound
 {

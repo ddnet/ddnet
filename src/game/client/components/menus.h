@@ -3,17 +3,18 @@
 #ifndef GAME_CLIENT_COMPONENTS_MENUS_H
 #define GAME_CLIENT_COMPONENTS_MENUS_H
 
-#include <base/vmath.h>
 #include <base/tl/sorted_array.h>
+#include <base/vmath.h>
 
 #include <engine/demo.h>
 #include <engine/friends.h>
 #include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
+#include <game/client/components/mapimages.h>
 
-#include <game/voting.h>
 #include <game/client/component.h>
 #include <game/client/ui.h>
+#include <game/voting.h>
 
 struct CServerProcess
 {
@@ -96,13 +97,60 @@ class CMenus : public CComponent
 	};
 
 	void UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHeight, const char *pTitle, const char *pBottomText, int NumItems,
-		int ItemsPerRow, int SelectedIndex, float ScrollValue);
+		int ItemsPerRow, int SelectedIndex, float ScrollValue, bool LogicOnly = false);
 	CListboxItem UiDoListboxNextItem(const void *pID, bool Selected = false, bool KeyEvents = true, bool NoHoverEffects = false);
 	CListboxItem UiDoListboxNextRow();
 	int UiDoListboxEnd(float *pScrollValue, bool *pItemActivated, bool *pListBoxActive = 0);
 
 	//static void demolist_listdir_callback(const char *name, int is_dir, void *user);
 	//static void demolist_list_callback(const CUIRect *rect, int index, void *user);
+
+	// menus_settings_assets.cpp
+public:
+	struct SCustomItem
+	{
+		IGraphics::CTextureHandle m_RenderTexture;
+
+		char m_aName[50];
+
+		bool operator<(const SCustomItem &Other) const { return str_comp(m_aName, Other.m_aName) < 0; }
+	};
+
+	struct SCustomEntities : public SCustomItem
+	{
+		struct SEntitiesImage
+		{
+			IGraphics::CTextureHandle m_Texture;
+		};
+		SEntitiesImage m_aImages[MAP_IMAGE_MOD_TYPE_COUNT];
+	};
+
+	struct SCustomGame : public SCustomItem
+	{
+	};
+
+	struct SCustomEmoticon : public SCustomItem
+	{
+	};
+
+	struct SCustomParticle : public SCustomItem
+	{
+	};
+
+protected:
+	sorted_array<SCustomEntities> m_EntitiesList;
+	sorted_array<SCustomGame> m_GameList;
+	sorted_array<SCustomEmoticon> m_EmoticonList;
+	sorted_array<SCustomParticle> m_ParticlesList;
+
+	static void LoadEntities(struct SCustomEntities *pEntitiesItem, void *pUser);
+	static int EntitiesScan(const char *pName, int IsDir, int DirType, void *pUser);
+
+	static int GameScan(const char *pName, int IsDir, int DirType, void *pUser);
+	static int EmoticonsScan(const char *pName, int IsDir, int DirType, void *pUser);
+	static int ParticlesScan(const char *pName, int IsDir, int DirType, void *pUser);
+
+	void ClearCustomItems(int CurTab);
 
 	int m_MenuPage;
 	int m_GamePage;
@@ -141,7 +189,10 @@ class CMenus : public CComponent
 	void PopupMessage(const char *pTopic, const char *pBody, const char *pButton);
 
 	// TODO: this is a bit ugly but.. well.. yeah
-	enum { MAX_INPUTEVENTS = 32 };
+	enum
+	{
+		MAX_INPUTEVENTS = 32
+	};
 	static IInput::CEvent m_aInputEvents[MAX_INPUTEVENTS];
 	static int m_NumInputEvents;
 
@@ -181,7 +232,7 @@ class CMenus : public CComponent
 	// demo
 	enum
 	{
-		SORT_DEMONAME=0,
+		SORT_DEMONAME = 0,
 		SORT_MARKERS,
 		SORT_LENGTH,
 		SORT_DATE,
@@ -203,14 +254,14 @@ class CMenus : public CComponent
 
 		int NumMarkers() const
 		{
-			return ((m_TimelineMarkers.m_aNumTimelineMarkers[0]<<24)&0xFF000000) | ((m_TimelineMarkers.m_aNumTimelineMarkers[1]<<16)&0xFF0000) |
-				((m_TimelineMarkers.m_aNumTimelineMarkers[2]<<8)&0xFF00) | (m_TimelineMarkers.m_aNumTimelineMarkers[3]&0xFF);
+			return ((m_TimelineMarkers.m_aNumTimelineMarkers[0] << 24) & 0xFF000000) | ((m_TimelineMarkers.m_aNumTimelineMarkers[1] << 16) & 0xFF0000) |
+			       ((m_TimelineMarkers.m_aNumTimelineMarkers[2] << 8) & 0xFF00) | (m_TimelineMarkers.m_aNumTimelineMarkers[3] & 0xFF);
 		}
 
 		int Length() const
 		{
-			return ((m_Info.m_aLength[0]<<24)&0xFF000000) | ((m_Info.m_aLength[1]<<16)&0xFF0000) |
-				((m_Info.m_aLength[2]<<8)&0xFF00) | (m_Info.m_aLength[3]&0xFF);
+			return ((m_Info.m_aLength[0] << 24) & 0xFF000000) | ((m_Info.m_aLength[1] << 16) & 0xFF0000) |
+			       ((m_Info.m_aLength[2] << 8) & 0xFF00) | (m_Info.m_aLength[3] & 0xFF);
 		}
 
 		bool operator<(const CDemoItem &Other) const
@@ -326,6 +377,7 @@ class CMenus : public CComponent
 
 	// found in menus_settings.cpp
 	void RenderLanguageSelection(CUIRect MainView);
+	void RenderThemeSelection(CUIRect MainView, bool Header = true);
 	void RenderSettingsGeneral(CUIRect MainView);
 	void RenderSettingsPlayer(CUIRect MainView);
 	void RenderSettingsDummyPlayer(CUIRect MainView);
@@ -334,15 +386,21 @@ class CMenus : public CComponent
 	void RenderSettingsGraphics(CUIRect MainView);
 	void RenderSettingsSound(CUIRect MainView);
 	void RenderSettings(CUIRect MainView);
+	void RenderSettingsCustom(CUIRect MainView);
 
+	void SetNeedSendInfo();
 	void SetActive(bool Active);
 
 	IGraphics::CTextureHandle m_TextureBlob;
 
 	bool CheckHotKey(int Key) const;
 
+	class CMenuBackground *m_pBackground;
+
 public:
 	void RenderBackground();
+
+	void SetMenuBackground(class CMenuBackground *pBackground) { m_pBackground = pBackground; }
 
 	void UseMouseButtons(bool Use) { m_UseMouseButtons = Use; }
 
@@ -351,7 +409,7 @@ public:
 	CMenus();
 
 	void RenderLoading();
-	void RenderUpdating(const char *pCaption, int current=0, int total=0);
+	void RenderUpdating(const char *pCaption, int current = 0, int total = 0);
 
 	bool IsActive() const { return m_MenuActive; }
 	void KillServer();
@@ -366,7 +424,7 @@ public:
 
 	enum
 	{
-		PAGE_NEWS=1,
+		PAGE_NEWS = 1,
 		PAGE_GAME,
 		PAGE_PLAYERS,
 		PAGE_SERVER_INFO,
@@ -382,7 +440,7 @@ public:
 		PAGE_NETWORK,
 		PAGE_GHOST,
 
-		SETTINGS_LANGUAGE=0,
+		SETTINGS_LANGUAGE = 0,
 		SETTINGS_GENERAL,
 		SETTINGS_PLAYER,
 		SETTINGS_TEE,
@@ -391,6 +449,7 @@ public:
 		SETTINGS_GRAPHICS,
 		SETTINGS_SOUND,
 		SETTINGS_DDNET,
+		SETTINGS_ASSETS,
 	};
 
 	// DDRace
@@ -411,7 +470,8 @@ public:
 		int m_Slot;
 		bool m_Own;
 
-		CGhostItem() : m_Slot(-1), m_Own(false) { m_aFilename[0] = 0; }
+		CGhostItem() :
+			m_Slot(-1), m_Own(false) { m_aFilename[0] = 0; }
 
 		bool operator<(const CGhostItem &Other) { return m_Time < Other.m_Time; }
 
@@ -440,7 +500,7 @@ public:
 
 	enum
 	{
-		POPUP_NONE=0,
+		POPUP_NONE = 0,
 		POPUP_FIRST_LAUNCH,
 		POPUP_CONNECTING,
 		POPUP_MESSAGE,
@@ -461,7 +521,7 @@ public:
 		POPUP_WARNING,
 
 		// demo player states
-		DEMOPLAYER_NONE=0,
+		DEMOPLAYER_NONE = 0,
 		DEMOPLAYER_SLICE_SAVE,
 	};
 

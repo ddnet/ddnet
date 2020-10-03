@@ -1,7 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <engine/keys.h>
 #include "lineinput.h"
+#include <engine/keys.h>
 
 CLineInput::CLineInput()
 {
@@ -38,8 +38,8 @@ void CLineInput::Editing(const char *pString, int Cursor)
 	int NewTextLen = str_length(Texting);
 	int CharsLeft = (int)sizeof(m_DisplayStr) - str_length(m_DisplayStr) - 1;
 	int FillCharLen = NewTextLen < CharsLeft ? NewTextLen : CharsLeft;
-	for(int i = str_length(m_DisplayStr) - 1; i >= m_CursorPos ; i--)
-		m_DisplayStr[i+FillCharLen] = m_DisplayStr[i];
+	for(int i = str_length(m_DisplayStr) - 1; i >= m_CursorPos; i--)
+		m_DisplayStr[i + FillCharLen] = m_DisplayStr[i];
 	for(int i = 0; i < FillCharLen; i++)
 	{
 		if(Texting[i] == 28)
@@ -70,7 +70,7 @@ bool CLineInput::Manipulate(IInput::CEvent Event, char *pStr, int StrMaxSize, in
 	if(CursorPos > Len)
 		CursorPos = Len;
 
-	if(Event.m_Flags&IInput::FLAG_TEXT)
+	if(Event.m_Flags & IInput::FLAG_TEXT)
 	{
 		// gather string stats
 		int CharCount = 0;
@@ -88,11 +88,11 @@ bool CLineInput::Manipulate(IInput::CEvent Event, char *pStr, int StrMaxSize, in
 		// add new string
 		if(CharCount)
 		{
-			if(Len+CharSize < StrMaxSize && CursorPos+CharSize < StrMaxSize && NumChars+CharCount < StrMaxChars)
+			if(Len + CharSize < StrMaxSize && CursorPos + CharSize < StrMaxSize && NumChars + CharCount < StrMaxChars)
 			{
-				mem_move(pStr + CursorPos + CharSize, pStr + CursorPos, Len-CursorPos+1); // +1 == null term
+				mem_move(pStr + CursorPos + CharSize, pStr + CursorPos, Len - CursorPos + 1); // +1 == null term
 				for(int i = 0; i < CharSize; i++)
-					pStr[CursorPos+i] = Event.m_aText[i];
+					pStr[CursorPos + i] = Event.m_aText[i];
 				CursorPos += CharSize;
 				Len += CharSize;
 				NumChars += CharCount;
@@ -101,14 +101,14 @@ bool CLineInput::Manipulate(IInput::CEvent Event, char *pStr, int StrMaxSize, in
 		}
 	}
 
-	if(Event.m_Flags&IInput::FLAG_PRESS)
+	if(Event.m_Flags & IInput::FLAG_PRESS)
 	{
 		int Key = Event.m_Key;
 		if(Key == KEY_BACKSPACE && CursorPos > 0)
 		{
 			int NewCursorPos = str_utf8_rewind(pStr, CursorPos);
-			int CharSize = CursorPos-NewCursorPos;
-			mem_move(pStr+NewCursorPos, pStr+CursorPos, Len - NewCursorPos - CharSize + 1); // +1 == null term
+			int CharSize = CursorPos - NewCursorPos;
+			mem_move(pStr + NewCursorPos, pStr + CursorPos, Len - NewCursorPos - CharSize + 1); // +1 == null term
 			CursorPos = NewCursorPos;
 			Len -= CharSize;
 			if(CharSize > 0)
@@ -118,7 +118,7 @@ bool CLineInput::Manipulate(IInput::CEvent Event, char *pStr, int StrMaxSize, in
 		else if(Key == KEY_DELETE && CursorPos < Len)
 		{
 			int p = str_utf8_forward(pStr, CursorPos);
-			int CharSize = p-CursorPos;
+			int CharSize = p - CursorPos;
 			mem_move(pStr + CursorPos, pStr + CursorPos + CharSize, Len - CursorPos - CharSize + 1); // +1 == null term
 			Len -= CharSize;
 			if(CharSize > 0)
@@ -146,7 +146,8 @@ void CLineInput::DeleteUntilCursor()
 {
 	char aBuf[MAX_SIZE];
 	str_copy(aBuf, &m_Str[m_CursorPos], sizeof(aBuf));
-	Set(aBuf); SetCursorOffset(0);
+	Set(aBuf);
+	SetCursorOffset(0);
 }
 
 void CLineInput::DeleteFromCursor()

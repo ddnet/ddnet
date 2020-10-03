@@ -1,12 +1,14 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include <vector>
+
 #include <base/tl/array.h>
 
 #include <math.h>
 
-#include <base/system.h>
 #include <base/math.h>
+#include <base/system.h>
 #include <base/vmath.h>
 
 #include <engine/config.h>
@@ -16,17 +18,18 @@
 #include <engine/graphics.h>
 #include <engine/keys.h>
 #include <engine/serverbrowser.h>
+#include <engine/shared/config.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
-#include <engine/shared/config.h>
 
-#include <game/version.h>
 #include <game/generated/protocol.h>
+#include <game/version.h>
 
 #include <engine/client/updater.h>
 
 #include <game/client/components/binds.h>
 #include <game/client/components/console.h>
+#include <game/client/components/menu_background.h>
 #include <game/client/components/sounds.h>
 #include <game/client/gameclient.h>
 #include <game/client/lineinput.h>
@@ -34,10 +37,10 @@
 #include <game/localization.h>
 #include <mastersrv/mastersrv.h>
 
+#include "controls.h"
 #include "countryflags.h"
 #include "menus.h"
 #include "skins.h"
-#include "controls.h"
 
 ColorRGBA CMenus::ms_GuiColor;
 ColorRGBA CMenus::ms_ColorTabbarInactiveOutgame;
@@ -56,7 +59,6 @@ float CMenus::ms_FontmodHeight = 0.8f;
 
 IInput::CEvent CMenus::m_aInputEvents[MAX_INPUTEVENTS];
 int CMenus::m_NumInputEvents;
-
 
 CMenus::CMenus()
 {
@@ -113,12 +115,12 @@ int CMenus::DoButton_Icon(int ImageId, int SpriteId, const CUIRect *pRect)
 	// Square and center
 	if(w > h)
 	{
-		x += (w-h) / 2;
+		x += (w - h) / 2;
 		w = h;
 	}
 	else if(h > w)
 	{
-		y += (h-w) / 2;
+		y += (h - w) / 2;
 		h = w;
 	}
 
@@ -139,7 +141,7 @@ int CMenus::DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, 
 	Graphics()->QuadsBegin();
 	if(!Active)
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.5f);
-	RenderTools()->SelectSprite(Checked?SPRITE_GUIBUTTON_ON:SPRITE_GUIBUTTON_OFF);
+	RenderTools()->SelectSprite(Checked ? SPRITE_GUIBUTTON_ON : SPRITE_GUIBUTTON_OFF);
 	IGraphics::CQuadItem QuadItem(pRect->x, pRect->y, pRect->w, pRect->h);
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
 	if(UI()->HotItem() == pID && Active)
@@ -188,10 +190,10 @@ int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const
 
 void CMenus::DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {
-	RenderTools()->DrawUIRect(pRect, ColorRGBA(1,1,1,0.5f * ButtonColorMul(pID)), CUI::CORNER_ALL, 5.0f);
+	RenderTools()->DrawUIRect(pRect, ColorRGBA(1, 1, 1, 0.5f * ButtonColorMul(pID)), CUI::CORNER_ALL, 5.0f);
 	CUIRect Temp;
 	pRect->HMargin(1.0f, &Temp);
-	UI()->DoLabel(&Temp, pText, Temp.h*ms_FontmodHeight, 0);
+	UI()->DoLabel(&Temp, pText, Temp.h * ms_FontmodHeight, 0);
 }
 
 int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners, const ColorRGBA *pDefaultColor, const ColorRGBA *pActiveColor, const ColorRGBA *pHoverColor, float EdgeRounding)
@@ -222,7 +224,7 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 	}
 	CUIRect Temp;
 	pRect->HMargin(2.0f, &Temp);
-	UI()->DoLabel(&Temp, pText, Temp.h*ms_FontmodHeight, 0);
+	UI()->DoLabel(&Temp, pText, Temp.h * ms_FontmodHeight, 0);
 
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
 }
@@ -230,12 +232,12 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 int CMenus::DoButton_GridHeader(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {
 	if(Checked == 2)
-		RenderTools()->DrawUIRect(pRect, ColorRGBA(1,0.98f,0.5f,0.55f), CUI::CORNER_T, 5.0f);
+		RenderTools()->DrawUIRect(pRect, ColorRGBA(1, 0.98f, 0.5f, 0.55f), CUI::CORNER_T, 5.0f);
 	else if(Checked)
-		RenderTools()->DrawUIRect(pRect, ColorRGBA(1,1,1,0.5f), CUI::CORNER_T, 5.0f);
+		RenderTools()->DrawUIRect(pRect, ColorRGBA(1, 1, 1, 0.5f), CUI::CORNER_T, 5.0f);
 	CUIRect t;
 	pRect->VSplitLeft(5.0f, 0, &t);
-	UI()->DoLabel(&t, pText, pRect->h*ms_FontmodHeight, -1);
+	UI()->DoLabel(&t, pText, pRect->h * ms_FontmodHeight, -1);
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
 }
 
@@ -249,29 +251,28 @@ int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const c
 	t.VSplitLeft(5.0f, 0, &t);
 
 	c.Margin(2.0f, &c);
-	RenderTools()->DrawUIRect(&c, ColorRGBA(1,1,1,0.25f * ButtonColorMul(pID)), CUI::CORNER_ALL, 3.0f);
+	RenderTools()->DrawUIRect(&c, ColorRGBA(1, 1, 1, 0.25f * ButtonColorMul(pID)), CUI::CORNER_ALL, 3.0f);
 
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT);
 	bool CheckAble = *pBoxText == 'X';
 	if(CheckAble)
 	{
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
-		UI()->DoLabel(&c, "\xEE\x97\x8D", c.h*ms_FontmodHeight, 0);
+		UI()->DoLabel(&c, "\xEE\x97\x8D", c.h * ms_FontmodHeight, 0);
 		TextRender()->SetCurFont(NULL);
 	}
 	else
-		UI()->DoLabel(&c, pBoxText, c.h*ms_FontmodHeight, 0);
+		UI()->DoLabel(&c, pBoxText, c.h * ms_FontmodHeight, 0);
 	TextRender()->SetRenderFlags(0);
-	UI()->DoLabel(&t, pText, c.h*ms_FontmodHeight, -1);
+	UI()->DoLabel(&t, pText, c.h * ms_FontmodHeight, -1);
 
 	return UI()->DoButtonLogic(pID, pText, 0, pRect);
 }
 
 int CMenus::DoButton_CheckBox(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {
-	return DoButton_CheckBox_Common(pID, pText, Checked?"X":"", pRect);
+	return DoButton_CheckBox_Common(pID, pText, Checked ? "X" : "", pRect);
 }
-
 
 int CMenus::DoButton_CheckBox_Number(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {
@@ -365,15 +366,15 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 		else if(s_DoScroll)
 		{
 			// do scrolling
-			if(UI()->MouseX() < pRect->x && s_ScrollStart-UI()->MouseX() > 10.0f)
+			if(UI()->MouseX() < pRect->x && s_ScrollStart - UI()->MouseX() > 10.0f)
 			{
-				s_AtIndex = maximum(0, s_AtIndex-1);
+				s_AtIndex = maximum(0, s_AtIndex - 1);
 				s_ScrollStart = UI()->MouseX();
 				UpdateOffset = true;
 			}
-			else if(UI()->MouseX() > pRect->x+pRect->w && UI()->MouseX()-s_ScrollStart > 10.0f)
+			else if(UI()->MouseX() > pRect->x + pRect->w && UI()->MouseX() - s_ScrollStart > 10.0f)
 			{
-				s_AtIndex = minimum(Len, s_AtIndex+1);
+				s_AtIndex = minimum(Len, s_AtIndex + 1);
 				s_ScrollStart = UI()->MouseX();
 				UpdateOffset = true;
 			}
@@ -431,7 +432,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	{
 		unsigned s = str_length(pDisplayStr);
 		if(s >= sizeof(aStars))
-			s = sizeof(aStars)-1;
+			s = sizeof(aStars) - 1;
 		for(unsigned int i = 0; i < s; ++i)
 			aStars[i] = '*';
 		aStars[s] = 0;
@@ -445,21 +446,21 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 		const char *Text = Input()->GetIMECandidate();
 		if(str_length(Text))
 		{
-		int NewTextLen = str_length(Text);
-		int CharsLeft = StrSize - str_length(aInputing) - 1;
-		int FillCharLen = minimum(NewTextLen, CharsLeft);
-		//Push Char Backward
-		for(int i = str_length(aInputing); i >= s_AtIndex ; i--)
-			aInputing[i+FillCharLen] = aInputing[i];
-		for(int i = 0; i < FillCharLen; i++)
-		{
-			if(Text[i] == '\n')
-				aInputing[s_AtIndex + i] = ' ';
-			else
-				aInputing[s_AtIndex + i] = Text[i];
-		}
-		//s_AtIndex = s_AtIndex+FillCharLen;
-		pDisplayStr = aInputing;
+			int NewTextLen = str_length(Text);
+			int CharsLeft = StrSize - str_length(aInputing) - 1;
+			int FillCharLen = minimum(NewTextLen, CharsLeft);
+			//Push Char Backward
+			for(int i = str_length(aInputing); i >= s_AtIndex; i--)
+				aInputing[i + FillCharLen] = aInputing[i];
+			for(int i = 0; i < FillCharLen; i++)
+			{
+				if(Text[i] == '\n')
+					aInputing[s_AtIndex + i] = ' ';
+				else
+					aInputing[s_AtIndex + i] = Text[i];
+			}
+			//s_AtIndex = s_AtIndex+FillCharLen;
+			pDisplayStr = aInputing;
 		}
 	}
 
@@ -467,24 +468,22 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	if(UI()->LastActiveItem() == pID && !JustGotActive && (UpdateOffset || m_NumInputEvents))
 	{
 		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex, -1.0f);
-		if(w-*Offset > Textbox.w)
+		if(w - *Offset > Textbox.w)
 		{
 			// move to the left
 			float wt = TextRender()->TextWidth(0, FontSize, pDisplayStr, -1, -1.0f);
 			do
 			{
-				*Offset += minimum(wt-*Offset-Textbox.w, Textbox.w/3);
-			}
-			while(w-*Offset > Textbox.w);
+				*Offset += minimum(wt - *Offset - Textbox.w, Textbox.w / 3);
+			} while(w - *Offset > Textbox.w);
 		}
-		else if(w-*Offset < 0.0f)
+		else if(w - *Offset < 0.0f)
 		{
 			// move to the right
 			do
 			{
-				*Offset = maximum(0.0f, *Offset-Textbox.w/3);
-			}
-			while(w-*Offset < 0.0f);
+				*Offset = maximum(0.0f, *Offset - Textbox.w / 3);
+			} while(w - *Offset < 0.0f);
 		}
 	}
 	UI()->ClipEnable(pRect);
@@ -502,18 +501,21 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 			float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex + Input()->GetEditingCursor(), -1.0f);
 			Textbox = *pRect;
 			Textbox.VSplitLeft(2.0f, 0, &Textbox);
-			Textbox.x += (w-*Offset-TextRender()->TextWidth(0, FontSize, "|", -1, -1.0f)/2);
+			Textbox.x += (w - *Offset - TextRender()->TextWidth(0, FontSize, "|", -1, -1.0f) / 2);
 
 			UI()->DoLabel(&Textbox, "|", FontSize, -1);
 		}
 		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex, -1.0f);
 		Textbox = *pRect;
 		Textbox.VSplitLeft(2.0f, 0, &Textbox);
-		Textbox.x += (w-*Offset-TextRender()->TextWidth(0, FontSize, "|", -1, -1.0f)/2);
+		Textbox.x += (w - *Offset - TextRender()->TextWidth(0, FontSize, "|", -1, -1.0f) / 2);
 
-		if((2*time_get()/time_freq()) % 2)	// make it blink
+		if((2 * time_get() / time_freq()) % 2) // make it blink
 			UI()->DoLabel(&Textbox, "|", FontSize, -1);
+
+		Input()->SetEditingPosition(Textbox.x, Textbox.y + FontSize);
 	}
+
 	UI()->ClipDisable();
 
 	return ReturnValue;
@@ -547,7 +549,7 @@ float CMenus::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 	static float OffsetY;
 	pRect->HSplitTop(33, &Handle, 0);
 
-	Handle.y += (pRect->h-Handle.h)*Current;
+	Handle.y += (pRect->h - Handle.h) * Current;
 
 	// logic
 	float ReturnValue = Current;
@@ -562,18 +564,20 @@ float CMenus::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 			m_MouseSlow = true;
 
 		float Min = pRect->y;
-		float Max = pRect->h-Handle.h;
-		float Cur = UI()->MouseY()-OffsetY;
-		ReturnValue = (Cur-Min)/Max;
-		if(ReturnValue < 0.0f) ReturnValue = 0.0f;
-		if(ReturnValue > 1.0f) ReturnValue = 1.0f;
+		float Max = pRect->h - Handle.h;
+		float Cur = UI()->MouseY() - OffsetY;
+		ReturnValue = (Cur - Min) / Max;
+		if(ReturnValue < 0.0f)
+			ReturnValue = 0.0f;
+		if(ReturnValue > 1.0f)
+			ReturnValue = 1.0f;
 	}
 	else if(UI()->HotItem() == pID)
 	{
 		if(UI()->MouseButton(0))
 		{
 			UI()->SetActiveItem(pID);
-			OffsetY = UI()->MouseY()-Handle.y;
+			OffsetY = UI()->MouseY() - Handle.y;
 		}
 	}
 
@@ -607,7 +611,7 @@ float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current)
 	static float OffsetX;
 	pRect->VSplitLeft(33, &Handle, 0);
 
-	Handle.x += (pRect->w-Handle.w)*Current;
+	Handle.x += (pRect->w - Handle.w) * Current;
 
 	// logic
 	float ReturnValue = Current;
@@ -622,18 +626,20 @@ float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current)
 			m_MouseSlow = true;
 
 		float Min = pRect->x;
-		float Max = pRect->w-Handle.w;
-		float Cur = UI()->MouseX()-OffsetX;
-		ReturnValue = (Cur-Min)/Max;
-		if(ReturnValue < 0.0f) ReturnValue = 0.0f;
-		if(ReturnValue > 1.0f) ReturnValue = 1.0f;
+		float Max = pRect->w - Handle.w;
+		float Cur = UI()->MouseX() - OffsetX;
+		ReturnValue = (Cur - Min) / Max;
+		if(ReturnValue < 0.0f)
+			ReturnValue = 0.0f;
+		if(ReturnValue > 1.0f)
+			ReturnValue = 1.0f;
 	}
 	else if(UI()->HotItem() == pID)
 	{
 		if(UI()->MouseButton(0))
 		{
 			UI()->SetActiveItem(pID);
-			OffsetX = UI()->MouseX()-Handle.x;
+			OffsetX = UI()->MouseX() - Handle.x;
 		}
 	}
 
@@ -643,17 +649,17 @@ float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current)
 	// render
 	CUIRect Rail;
 	pRect->HMargin(5.0f, &Rail);
-	RenderTools()->DrawUIRect(&Rail, ColorRGBA(1,1,1,0.25f), 0, 0.0f);
+	RenderTools()->DrawUIRect(&Rail, ColorRGBA(1, 1, 1, 0.25f), 0, 0.0f);
 
 	CUIRect Slider = Handle;
-	Slider.h = Rail.y-Slider.y;
-	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1,1,1,0.25f), CUI::CORNER_T, 2.5f);
-	Slider.y = Rail.y+Rail.h;
-	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1,1,1,0.25f), CUI::CORNER_B, 2.5f);
+	Slider.h = Rail.y - Slider.y;
+	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_T, 2.5f);
+	Slider.y = Rail.y + Rail.h;
+	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_B, 2.5f);
 
 	Slider = Handle;
 	Slider.Margin(5.0f, &Slider);
-	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1,1,1,0.25f * ButtonColorMul(pID)), CUI::CORNER_ALL, 2.5f);
+	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1, 1, 1, 0.25f * ButtonColorMul(pID)), CUI::CORNER_ALL, 2.5f);
 
 	return ReturnValue;
 }
@@ -737,7 +743,6 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int Modifier, 
 	}
 	return NewKey;
 }
-
 
 int CMenus::RenderMenubar(CUIRect r)
 {
@@ -880,23 +885,23 @@ int CMenus::RenderMenubar(CUIRect r)
 	{
 		// online menus
 		Box.VSplitLeft(90.0f, &Button, &Box);
-		static int s_GameButton=0;
-		if(DoButton_MenuTab(&s_GameButton, Localize("Game"), m_ActivePage==PAGE_GAME, &Button, CUI::CORNER_TL))
+		static int s_GameButton = 0;
+		if(DoButton_MenuTab(&s_GameButton, Localize("Game"), m_ActivePage == PAGE_GAME, &Button, CUI::CORNER_TL))
 			NewPage = PAGE_GAME;
 
 		Box.VSplitLeft(90.0f, &Button, &Box);
-		static int s_PlayersButton=0;
-		if(DoButton_MenuTab(&s_PlayersButton, Localize("Players"), m_ActivePage==PAGE_PLAYERS, &Button, 0))
+		static int s_PlayersButton = 0;
+		if(DoButton_MenuTab(&s_PlayersButton, Localize("Players"), m_ActivePage == PAGE_PLAYERS, &Button, 0))
 			NewPage = PAGE_PLAYERS;
 
 		Box.VSplitLeft(130.0f, &Button, &Box);
-		static int s_ServerInfoButton=0;
-		if(DoButton_MenuTab(&s_ServerInfoButton, Localize("Server info"), m_ActivePage==PAGE_SERVER_INFO, &Button, 0))
+		static int s_ServerInfoButton = 0;
+		if(DoButton_MenuTab(&s_ServerInfoButton, Localize("Server info"), m_ActivePage == PAGE_SERVER_INFO, &Button, 0))
 			NewPage = PAGE_SERVER_INFO;
 
 		Box.VSplitLeft(90.0f, &Button, &Box);
-		static int s_NetworkButton=0;
-		if(DoButton_MenuTab(&s_NetworkButton, Localize("Browser"), m_ActivePage==PAGE_NETWORK, &Button, 0))
+		static int s_NetworkButton = 0;
+		if(DoButton_MenuTab(&s_NetworkButton, Localize("Browser"), m_ActivePage == PAGE_NETWORK, &Button, 0))
 			NewPage = PAGE_NETWORK;
 
 		{
@@ -911,8 +916,8 @@ int CMenus::RenderMenubar(CUIRect r)
 
 		Box.VSplitLeft(100.0f, &Button, &Box);
 		Box.VSplitLeft(4.0f, 0, &Box);
-		static int s_CallVoteButton=0;
-		if(DoButton_MenuTab(&s_CallVoteButton, Localize("Call vote"), m_ActivePage==PAGE_CALLVOTE, &Button, CUI::CORNER_TR))
+		static int s_CallVoteButton = 0;
+		if(DoButton_MenuTab(&s_CallVoteButton, Localize("Call vote"), m_ActivePage == PAGE_CALLVOTE, &Button, CUI::CORNER_TR))
 			NewPage = PAGE_CALLVOTE;
 	}
 
@@ -936,14 +941,14 @@ int CMenus::RenderMenubar(CUIRect r)
 
 	Box.VSplitRight(10.0f, &Box, &Button);
 	Box.VSplitRight(33.0f, &Box, &Button);
-	static int s_SettingsButton=0;
+	static int s_SettingsButton = 0;
 
-	if(DoButton_MenuTab(&s_SettingsButton, "\xEE\xA2\xB8", m_ActivePage==PAGE_SETTINGS, &Button, CUI::CORNER_T))
+	if(DoButton_MenuTab(&s_SettingsButton, "\xEE\xA2\xB8", m_ActivePage == PAGE_SETTINGS, &Button, CUI::CORNER_T))
 		NewPage = PAGE_SETTINGS;
 
 	Box.VSplitRight(10.0f, &Box, &Button);
 	Box.VSplitRight(33.0f, &Box, &Button);
-	static int s_EditorButton=0;
+	static int s_EditorButton = 0;
 	if(DoButton_MenuTab(&s_EditorButton, "\xEE\x8F\x89", 0, &Button, CUI::CORNER_T))
 	{
 		g_Config.m_ClEditor = 1;
@@ -985,11 +990,11 @@ void CMenus::RenderLoading()
 	// TODO: not supported right now due to separate render thread
 
 	static int64 LastLoadRender = 0;
-	float Percent = m_LoadCurrent++/(float)m_LoadTotal;
+	float Percent = m_LoadCurrent++ / (float)m_LoadTotal;
 
 	// make sure that we don't render for each little thing we load
 	// because that will slow down loading if we have vsync
-	if(time_get()-LastLoadRender < time_freq()/60)
+	if(time_get() - LastLoadRender < time_freq() / 60)
 		return;
 
 	LastLoadRender = time_get();
@@ -1000,35 +1005,37 @@ void CMenus::RenderLoading()
 	CUIRect Screen = *UI()->Screen();
 	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
 
-	RenderBackground();
+	if(!m_pBackground->Render())
+	{
+		RenderBackground();
+	}
 
 	float w = 700;
 	float h = 200;
-	float x = Screen.w/2-w/2;
-	float y = Screen.h/2-h/2;
+	float x = Screen.w / 2 - w / 2;
+	float y = Screen.h / 2 - h / 2;
 
 	Graphics()->BlendNormal();
 
 	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0,0,0,0.50f);
+	Graphics()->SetColor(0, 0, 0, 0.50f);
 	RenderTools()->DrawRoundRect(x, y, w, h, 40.0f);
 	Graphics()->QuadsEnd();
-
 
 	const char *pCaption = Localize("Loading DDNet Client");
 
 	CUIRect r;
 	r.x = x;
-	r.y = y+20;
+	r.y = y + 20;
 	r.w = w;
 	r.h = h - 130;
 	UI()->DoLabel(&r, pCaption, 48.0f, 0, -1);
 
 	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
-	Graphics()->SetColor(1,1,1,0.75f);
-	RenderTools()->DrawRoundRect(x+40, y+h-75, (w-80)*Percent, 25, 5.0f);
+	Graphics()->SetColor(1, 1, 1, 0.75f);
+	RenderTools()->DrawRoundRect(x + 40, y + h - 75, (w - 80) * Percent, 25, 5.0f);
 	Graphics()->QuadsEnd();
 
 	Graphics()->Swap();
@@ -1050,10 +1057,10 @@ void CMenus::RenderNews(CUIRect MainView)
 	while((pStr = str_next_token(pStr, "\n", aLine, sizeof(aLine))))
 	{
 		const int Len = str_length(aLine);
-		if(Len > 0 && aLine[0] == '|' && aLine[Len-1] == '|')
+		if(Len > 0 && aLine[0] == '|' && aLine[Len - 1] == '|')
 		{
 			MainView.HSplitTop(30.0f, &Label, &MainView);
-			aLine[Len-1] = '\0';
+			aLine[Len - 1] = '\0';
 			UI()->DoLabelScaled(&Label, aLine + 1, 20.0f, -1);
 		}
 		else
@@ -1103,6 +1110,8 @@ void CMenus::PopupMessage(const char *pTopic, const char *pBody, const char *pBu
 
 void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pButton, int64 Duration)
 {
+	dbg_msg(pTopic, "%s", pBody);
+
 	// reset active item
 	UI()->SetActiveItem(0);
 
@@ -1118,7 +1127,7 @@ void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pBu
 
 bool CMenus::CanDisplayWarning()
 {
-	return m_Popup == POPUP_NONE && (Client()->State() == IClient::STATE_DEMOPLAYBACK || Client()->State() == IClient::STATE_ONLINE);
+	return m_Popup == POPUP_NONE;
 }
 
 int CMenus::Render()
@@ -1163,7 +1172,10 @@ int CMenus::Render()
 	}
 	else
 	{
-		RenderBackground();
+		if(!m_pBackground->Render())
+		{
+			RenderBackground();
+		}
 		ms_ColorTabbarInactive = ms_ColorTabbarInactiveOutgame;
 		ms_ColorTabbarActive = ms_ColorTabbarActiveOutgame;
 		ms_ColorTabbarHover = ms_ColorTabbarHoverOutgame;
@@ -1186,7 +1198,10 @@ int CMenus::Render()
 	if(m_Popup == POPUP_NONE)
 	{
 		if(m_ShowStart && Client()->State() == IClient::STATE_OFFLINE)
+		{
+			m_pBackground->ChangePosition(CMenuBackground::POS_START);
 			RenderStartMenu(Screen);
+		}
 		else
 		{
 			Screen.HSplitTop(24.0f, &TabBar, &MainView);
@@ -1223,21 +1238,44 @@ int CMenus::Render()
 					RenderSettings(MainView);
 			}
 			else if(m_MenuPage == PAGE_NEWS)
+			{
+				m_pBackground->ChangePosition(CMenuBackground::POS_NEWS);
 				RenderNews(MainView);
+			}
 			else if(m_MenuPage == PAGE_INTERNET)
+			{
+				m_pBackground->ChangePosition(CMenuBackground::POS_BROWSER_INTERNET);
 				RenderServerbrowser(MainView);
+			}
 			else if(m_MenuPage == PAGE_LAN)
+			{
+				m_pBackground->ChangePosition(CMenuBackground::POS_BROWSER_LAN);
 				RenderServerbrowser(MainView);
+			}
 			else if(m_MenuPage == PAGE_DEMOS)
+			{
+				m_pBackground->ChangePosition(CMenuBackground::POS_DEMOS);
 				RenderDemoList(MainView);
+			}
 			else if(m_MenuPage == PAGE_FAVORITES)
+			{
+				m_pBackground->ChangePosition(CMenuBackground::POS_BROWSER_FAVORITES);
 				RenderServerbrowser(MainView);
+			}
 			else if(m_MenuPage == PAGE_DDNET)
+			{
+				m_pBackground->ChangePosition(CMenuBackground::POS_BROWSER_CUSTOM0);
 				RenderServerbrowser(MainView);
+			}
 			else if(m_MenuPage == PAGE_KOG)
+			{
+				m_pBackground->ChangePosition(CMenuBackground::POS_BROWSER_CUSTOM0 + 1);
 				RenderServerbrowser(MainView);
+			}
 			else if(m_MenuPage == PAGE_SETTINGS)
+			{
 				RenderSettings(MainView);
+			}
 
 			// do tab bar
 			RenderMenubar(TabBar);
@@ -1306,7 +1344,7 @@ int CMenus::Render()
 			pExtraText = "";
 			ExtraAlign = -1;
 		}
-	#if defined(CONF_VIDEORECORDER)
+#if defined(CONF_VIDEORECORDER)
 		else if(m_Popup == POPUP_RENDER_DEMO)
 		{
 			pTitle = Localize("Render demo");
@@ -1319,7 +1357,7 @@ int CMenus::Render()
 			pExtraText = Localize("File already exists, do you want to overwrite it?");
 			ExtraAlign = -1;
 		}
-	#endif
+#endif
 		else if(m_Popup == POPUP_REMOVE_FRIEND)
 		{
 			pTitle = Localize("Remove friend");
@@ -1386,23 +1424,23 @@ int CMenus::Render()
 		Box = Screen;
 		if(m_Popup != POPUP_FIRST_LAUNCH)
 		{
-			Box.VMargin(150.0f/UI()->Scale(), &Box);
-			Box.HMargin(150.0f/UI()->Scale(), &Box);
+			Box.VMargin(150.0f / UI()->Scale(), &Box);
+			Box.HMargin(150.0f / UI()->Scale(), &Box);
 		}
 
 		// render the box
 		RenderTools()->DrawUIRect(&Box, BgColor, CUI::CORNER_ALL, 15.0f);
 
-		Box.HSplitTop(20.f/UI()->Scale(), &Part, &Box);
-		Box.HSplitTop(24.f/UI()->Scale(), &Part, &Box);
-		Part.VMargin(20.f/UI()->Scale(), &Part);
+		Box.HSplitTop(20.f / UI()->Scale(), &Part, &Box);
+		Box.HSplitTop(24.f / UI()->Scale(), &Part, &Box);
+		Part.VMargin(20.f / UI()->Scale(), &Part);
 		if(TextRender()->TextWidth(0, 24.f, pTitle, -1, -1.0f) > Part.w)
 			UI()->DoLabelScaled(&Part, pTitle, 24.f, -1, (int)Part.w);
 		else
 			UI()->DoLabelScaled(&Part, pTitle, 24.f, 0);
-		Box.HSplitTop(20.f/UI()->Scale(), &Part, &Box);
-		Box.HSplitTop(24.f/UI()->Scale(), &Part, &Box);
-		Part.VMargin(20.f/UI()->Scale(), &Part);
+		Box.HSplitTop(20.f / UI()->Scale(), &Part, &Box);
+		Box.HSplitTop(24.f / UI()->Scale(), &Part, &Box);
+		Part.VMargin(20.f / UI()->Scale(), &Part);
 
 		float FontSize = m_Popup == POPUP_FIRST_LAUNCH ? 16.0f : 20.f;
 
@@ -1423,12 +1461,12 @@ int CMenus::Render()
 			Box.HSplitBottom(24.f, &Box, &Part);
 
 			// additional info
-			Box.VMargin(20.f/UI()->Scale(), &Box);
+			Box.VMargin(20.f / UI()->Scale(), &Box);
 			if(m_pClient->Editor()->HasUnsavedData())
 			{
 				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf), "%s\n%s", Localize("There's an unsaved map in the editor, you might want to save it before you quit the game."), Localize("Quit anyway?"));
-				UI()->DoLabelScaled(&Box, aBuf, 20.f, -1, Part.w-20.0f);
+				UI()->DoLabelScaled(&Box, aBuf, 20.f, -1, Part.w - 20.0f);
 			}
 
 			// buttons
@@ -1443,7 +1481,10 @@ int CMenus::Render()
 
 			static int s_ButtonTryAgain = 0;
 			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
+			{
+				m_Popup = POPUP_NONE;
 				Client()->Quit();
+			}
 		}
 		else if(m_Popup == POPUP_DISCONNECT)
 		{
@@ -1542,7 +1583,7 @@ int CMenus::Render()
 			if(Client()->MapDownloadTotalsize() > 0)
 			{
 				int64 Now = time_get();
-				if(Now-m_DownloadLastCheckTime >= time_freq())
+				if(Now - m_DownloadLastCheckTime >= time_freq())
 				{
 					if(m_DownloadLastCheckSize > Client()->MapDownloadAmount())
 					{
@@ -1551,10 +1592,10 @@ int CMenus::Render()
 					}
 
 					// update download speed
-					float Diff = (Client()->MapDownloadAmount()-m_DownloadLastCheckSize)/((int)((Now-m_DownloadLastCheckTime)/time_freq()));
-					float StartDiff = m_DownloadLastCheckSize-0.0f;
-					if(StartDiff+Diff > 0.0f)
-						m_DownloadSpeed = (Diff/(StartDiff+Diff))*(Diff/1.0f) + (StartDiff/(Diff+StartDiff))*m_DownloadSpeed;
+					float Diff = (Client()->MapDownloadAmount() - m_DownloadLastCheckSize) / ((int)((Now - m_DownloadLastCheckTime) / time_freq()));
+					float StartDiff = m_DownloadLastCheckSize - 0.0f;
+					if(StartDiff + Diff > 0.0f)
+						m_DownloadSpeed = (Diff / (StartDiff + Diff)) * (Diff / 1.0f) + (StartDiff / (Diff + StartDiff)) * m_DownloadSpeed;
 					else
 						m_DownloadSpeed = 0.0f;
 					m_DownloadLastCheckTime = Now;
@@ -1563,11 +1604,11 @@ int CMenus::Render()
 
 				Box.HSplitTop(64.f, 0, &Box);
 				Box.HSplitTop(24.f, &Part, &Box);
-				str_format(aBuf, sizeof(aBuf), "%d/%d KiB (%.1f KiB/s)", Client()->MapDownloadAmount()/1024, Client()->MapDownloadTotalsize()/1024,	m_DownloadSpeed/1024.0f);
+				str_format(aBuf, sizeof(aBuf), "%d/%d KiB (%.1f KiB/s)", Client()->MapDownloadAmount() / 1024, Client()->MapDownloadTotalsize() / 1024, m_DownloadSpeed / 1024.0f);
 				UI()->DoLabel(&Part, aBuf, 20.f, 0, -1);
 
 				// time left
-				int TimeLeft = maximum(1, m_DownloadSpeed > 0.0f ? static_cast<int>((Client()->MapDownloadTotalsize()-Client()->MapDownloadAmount())/m_DownloadSpeed) : 1);
+				int TimeLeft = maximum(1, m_DownloadSpeed > 0.0f ? static_cast<int>((Client()->MapDownloadTotalsize() - Client()->MapDownloadAmount()) / m_DownloadSpeed) : 1);
 				if(TimeLeft >= 60)
 				{
 					TimeLeft /= 60;
@@ -1586,7 +1627,7 @@ int CMenus::Render()
 				Box.HSplitTop(24.f, &Part, &Box);
 				Part.VMargin(40.0f, &Part);
 				RenderTools()->DrawUIRect(&Part, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 5.0f);
-				Part.w = maximum(10.0f, (Part.w*Client()->MapDownloadAmount())/Client()->MapDownloadTotalsize());
+				Part.w = maximum(10.0f, (Part.w * Client()->MapDownloadAmount()) / Client()->MapDownloadTotalsize());
 				RenderTools()->DrawUIRect(&Part, ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f), CUI::CORNER_ALL, 5.0f);
 			}
 		}
@@ -1638,8 +1679,8 @@ int CMenus::Render()
 					Item.m_Rect.Margin(5.0f, &Item.m_Rect);
 					Item.m_Rect.HSplitBottom(10.0f, &Item.m_Rect, &Label);
 					float OldWidth = Item.m_Rect.w;
-					Item.m_Rect.w = Item.m_Rect.h*2;
-					Item.m_Rect.x += (OldWidth-Item.m_Rect.w)/ 2.0f;
+					Item.m_Rect.w = Item.m_Rect.h * 2;
+					Item.m_Rect.x += (OldWidth - Item.m_Rect.w) / 2.0f;
 					ColorRGBA Color(1.0f, 1.0f, 1.0f, 1.0f);
 					m_pClient->m_pCountryFlags->Render(pEntry->m_CountryCode, &Color, Item.m_Rect.x, Item.m_Rect.y, Item.m_Rect.w, Item.m_Rect.h);
 					UI()->DoLabel(&Label, pEntry->m_aCountryCodeString, 10.0f, 0);
@@ -1729,7 +1770,7 @@ int CMenus::Render()
 					str_format(aBufOld, sizeof(aBufOld), "%s/%s", m_aCurrentDemoFolder, m_lDemos[m_DemolistSelectedIndex].m_aFilename);
 					int Length = str_length(m_aCurrentDemoFile);
 					char aBufNew[512];
-					if(Length <= 4 || m_aCurrentDemoFile[Length-5] != '.' || str_comp_nocase(m_aCurrentDemoFile+Length-4, "demo"))
+					if(Length <= 4 || m_aCurrentDemoFile[Length - 5] != '.' || str_comp_nocase(m_aCurrentDemoFile + Length - 4, "demo"))
 						str_format(aBufNew, sizeof(aBufNew), "%s/%s.demo", m_aCurrentDemoFolder, m_aCurrentDemoFile);
 					else
 						str_format(aBufNew, sizeof(aBufNew), "%s/%s", m_aCurrentDemoFolder, m_aCurrentDemoFile);
@@ -1787,7 +1828,7 @@ int CMenus::Render()
 					str_format(aBufOld, sizeof(aBufOld), "%s/%s", m_aCurrentDemoFolder, m_lDemos[m_DemolistSelectedIndex].m_aFilename);
 					int Length = str_length(m_aCurrentDemoFile);
 					char aBufNew[512];
-					if(Length <= 3 || m_aCurrentDemoFile[Length-4] != '.' || str_comp_nocase(m_aCurrentDemoFile+Length-3, "mp4"))
+					if(Length <= 3 || m_aCurrentDemoFile[Length - 4] != '.' || str_comp_nocase(m_aCurrentDemoFile + Length - 3, "mp4"))
 						str_format(aBufNew, sizeof(aBufNew), "%s.mp4", m_aCurrentDemoFile);
 					else
 						str_format(aBufNew, sizeof(aBufNew), "%s", m_aCurrentDemoFile);
@@ -1852,9 +1893,9 @@ int CMenus::Render()
 			UI()->DoLabel(&Part, aBuffer, 12.8f, -1);
 
 			if(IncDemoSpeed)
-				m_Speed = clamp(m_Speed + 1, 0, (int)(sizeof(g_aSpeeds)/sizeof(g_aSpeeds[0])-1));
+				m_Speed = clamp(m_Speed + 1, 0, (int)(sizeof(g_aSpeeds) / sizeof(g_aSpeeds[0]) - 1));
 			else if(DecDemoSpeed)
-				m_Speed = clamp(m_Speed - 1, 0, (int)(sizeof(g_aSpeeds)/sizeof(g_aSpeeds[0])-1));
+				m_Speed = clamp(m_Speed - 1, 0, (int)(sizeof(g_aSpeeds) / sizeof(g_aSpeeds[0]) - 1));
 
 			Part.VSplitLeft(107.0f, 0, &Part);
 			Part.VSplitLeft(Button.h, &Button, &Part);
@@ -2012,6 +2053,77 @@ int CMenus::Render()
 	return 0;
 }
 
+void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
+{
+	std::vector<CTheme> &ThemesRef = m_pBackground->GetThemes();
+
+	int SelectedTheme = -1;
+	for(int i = 0; i < (int)ThemesRef.size(); i++)
+	{
+		if(str_comp(ThemesRef[i].m_Name, g_Config.m_ClMenuMap) == 0)
+		{
+			SelectedTheme = i;
+			break;
+		}
+	}
+
+	static int s_ListBox = 0;
+	static float s_ScrollValue = 0.0f;
+	UiDoListboxStart(&s_ListBox, &MainView, 26.0f, Localize("Theme"), "", ThemesRef.size(), 1, -1, s_ScrollValue);
+
+	for(int i = 0; i < (int)ThemesRef.size(); i++)
+	{
+		CListboxItem Item = UiDoListboxNextItem(&ThemesRef[i].m_Name, i == SelectedTheme);
+
+		CTheme &Theme = ThemesRef[i];
+
+		if(!Item.m_Visible)
+			continue;
+
+		CUIRect Icon;
+		Item.m_Rect.VSplitLeft(Item.m_Rect.h * 2.0f, &Icon, &Item.m_Rect);
+
+		// draw icon if it exists
+		if(Theme.m_IconTexture != -1)
+		{
+			Icon.VMargin(6.0f, &Icon);
+			Icon.HMargin(3.0f, &Icon);
+			Graphics()->TextureSet(Theme.m_IconTexture);
+			Graphics()->QuadsBegin();
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+			IGraphics::CQuadItem QuadItem(Icon.x, Icon.y, Icon.w, Icon.h);
+			Graphics()->QuadsDrawTL(&QuadItem, 1);
+			Graphics()->QuadsEnd();
+		}
+
+		char aName[128];
+		if(!Theme.m_Name[0])
+			str_copy(aName, "(none)", sizeof(aName));
+		else if(str_comp(Theme.m_Name, "auto") == 0)
+			str_copy(aName, "(seasons)", sizeof(aName));
+		else if(str_comp(Theme.m_Name, "rand") == 0)
+			str_copy(aName, "(random)", sizeof(aName));
+		else if(Theme.m_HasDay && Theme.m_HasNight)
+			str_format(aName, sizeof(aName), "%s", Theme.m_Name.cstr());
+		else if(Theme.m_HasDay && !Theme.m_HasNight)
+			str_format(aName, sizeof(aName), "%s (day)", Theme.m_Name.cstr());
+		else if(!Theme.m_HasDay && Theme.m_HasNight)
+			str_format(aName, sizeof(aName), "%s (night)", Theme.m_Name.cstr());
+		else // generic
+			str_format(aName, sizeof(aName), "%s", Theme.m_Name.cstr());
+
+		UI()->DoLabel(&Item.m_Rect, aName, 16 * ms_FontmodHeight, -1);
+	}
+
+	bool ItemActive = false;
+	int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0, &ItemActive);
+
+	if(ItemActive && NewSelected != SelectedTheme)
+	{
+		str_format(g_Config.m_ClMenuMap, sizeof(g_Config.m_ClMenuMap), "%s", ThemesRef[NewSelected].m_Name.cstr());
+		m_pBackground->LoadMenuBackground(ThemesRef[NewSelected].m_HasDay, ThemesRef[NewSelected].m_HasNight);
+	}
+}
 
 void CMenus::SetActive(bool Active)
 {
@@ -2076,7 +2188,7 @@ bool CMenus::OnInput(IInput::CEvent e)
 	m_LastInput = time_get();
 
 	// special handle esc and enter for popup purposes
-	if(e.m_Flags&IInput::FLAG_PRESS)
+	if(e.m_Flags & IInput::FLAG_PRESS)
 	{
 		if(e.m_Key == KEY_ESCAPE)
 		{
@@ -2089,7 +2201,7 @@ bool CMenus::OnInput(IInput::CEvent e)
 
 	if(IsActive())
 	{
-		if(e.m_Flags&IInput::FLAG_PRESS)
+		if(e.m_Flags & IInput::FLAG_PRESS)
 		{
 			// special for popups
 			if(e.m_Key == KEY_RETURN || e.m_Key == KEY_KP_ENTER)
@@ -2112,7 +2224,7 @@ void CMenus::OnStateChange(int NewState, int OldState)
 
 	if(NewState == IClient::STATE_OFFLINE)
 	{
-		if(OldState >= IClient::STATE_ONLINE && NewState < IClient::STATE_QUITING)
+		if(OldState >= IClient::STATE_ONLINE && NewState < IClient::STATE_QUITTING)
 			m_pClient->m_pSounds->Play(CSounds::CHN_MUSIC, SOUND_MENU, 1.0f);
 		m_Popup = POPUP_NONE;
 		if(Client()->ErrorString() && Client()->ErrorString()[0] != 0)
@@ -2193,27 +2305,30 @@ void CMenus::OnRender()
 		ms_GuiColor.a * 0.8f);
 
 	ms_ColorTabbarActiveIngame = ColorRGBA(
-		ms_GuiColor.r*ColorIngameAcaleA,
-		ms_GuiColor.g*ColorIngameAcaleA,
-		ms_GuiColor.b*ColorIngameAcaleA,
+		ms_GuiColor.r * ColorIngameAcaleA,
+		ms_GuiColor.g * ColorIngameAcaleA,
+		ms_GuiColor.b * ColorIngameAcaleA,
 		ms_GuiColor.a);
 
 	ms_ColorTabbarHoverIngame = ColorRGBA(1, 1, 1, 0.75f);
 
 	// update the ui
 	CUIRect *pScreen = UI()->Screen();
-	float mx = (m_MousePos.x/(float)Graphics()->ScreenWidth())*pScreen->w;
-	float my = (m_MousePos.y/(float)Graphics()->ScreenHeight())*pScreen->h;
+	float mx = (m_MousePos.x / (float)Graphics()->ScreenWidth()) * pScreen->w;
+	float my = (m_MousePos.y / (float)Graphics()->ScreenHeight()) * pScreen->h;
 
 	int Buttons = 0;
 	if(m_UseMouseButtons)
 	{
-		if(Input()->KeyIsPressed(KEY_MOUSE_1)) Buttons |= 1;
-		if(Input()->KeyIsPressed(KEY_MOUSE_2)) Buttons |= 2;
-		if(Input()->KeyIsPressed(KEY_MOUSE_3)) Buttons |= 4;
+		if(Input()->KeyIsPressed(KEY_MOUSE_1))
+			Buttons |= 1;
+		if(Input()->KeyIsPressed(KEY_MOUSE_2))
+			Buttons |= 2;
+		if(Input()->KeyIsPressed(KEY_MOUSE_3))
+			Buttons |= 4;
 	}
 
-	UI()->Update(mx,my,mx*3.0f,my*3.0f,Buttons);
+	UI()->Update(mx, my, mx * 3.0f, my * 3.0f, Buttons);
 
 	// render
 	Render();
@@ -2222,7 +2337,7 @@ void CMenus::OnRender()
 	Graphics()->WrapClamp();
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CURSOR].m_Id);
 	Graphics()->QuadsBegin();
-	Graphics()->SetColor(1,1,1,1);
+	Graphics()->SetColor(1, 1, 1, 1);
 	IGraphics::CQuadItem QuadItem(mx, my, 24, 24);
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
@@ -2251,50 +2366,52 @@ void CMenus::RenderBackground()
 {
 	Graphics()->BlendNormal();
 
-	float sw = 300*Graphics()->ScreenAspect();
+	float sw = 300 * Graphics()->ScreenAspect();
 	float sh = 300;
 	Graphics()->MapScreen(0, 0, sw, sh);
 
 	// render background color
 	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
-		ColorRGBA Bottom(ms_GuiColor.r, ms_GuiColor.g, ms_GuiColor.b, 1.0f);
-		ColorRGBA Top(ms_GuiColor.r, ms_GuiColor.g, ms_GuiColor.b, 1.0f);
-		IGraphics::CColorVertex Array[4] = {
-			IGraphics::CColorVertex(0, Top.r, Top.g, Top.b, Top.a),
-			IGraphics::CColorVertex(1, Top.r, Top.g, Top.b, Top.a),
-			IGraphics::CColorVertex(2, Bottom.r, Bottom.g, Bottom.b, Bottom.a),
-			IGraphics::CColorVertex(3, Bottom.r, Bottom.g, Bottom.b, Bottom.a)};
-		Graphics()->SetColorVertex(Array, 4);
-		IGraphics::CQuadItem QuadItem(0, 0, sw, sh);
-		Graphics()->QuadsDrawTL(&QuadItem, 1);
+	ColorRGBA Bottom(ms_GuiColor.r, ms_GuiColor.g, ms_GuiColor.b, 1.0f);
+	ColorRGBA Top(ms_GuiColor.r, ms_GuiColor.g, ms_GuiColor.b, 1.0f);
+	IGraphics::CColorVertex Array[4] = {
+		IGraphics::CColorVertex(0, Top.r, Top.g, Top.b, Top.a),
+		IGraphics::CColorVertex(1, Top.r, Top.g, Top.b, Top.a),
+		IGraphics::CColorVertex(2, Bottom.r, Bottom.g, Bottom.b, Bottom.a),
+		IGraphics::CColorVertex(3, Bottom.r, Bottom.g, Bottom.b, Bottom.a)};
+	Graphics()->SetColorVertex(Array, 4);
+	IGraphics::CQuadItem QuadItem(0, 0, sw, sh);
+	Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
 
 	// render the tiles
 	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
-		float Size = 15.0f;
-		float OffsetTime = fmod(LocalTime()*0.15f, 2.0f);
-		for(int y = -2; y < (int)(sw/Size); y++)
-			for(int x = -2; x < (int)(sh/Size); x++)
-			{
-				Graphics()->SetColor(0,0,0,0.045f);
-				IGraphics::CQuadItem QuadItem((x-OffsetTime)*Size*2+(y&1)*Size, (y+OffsetTime)*Size, Size, Size);
-				Graphics()->QuadsDrawTL(&QuadItem, 1);
-			}
+	float Size = 15.0f;
+	float OffsetTime = fmod(LocalTime() * 0.15f, 2.0f);
+	for(int y = -2; y < (int)(sw / Size); y++)
+		for(int x = -2; x < (int)(sh / Size); x++)
+		{
+			Graphics()->SetColor(0, 0, 0, 0.045f);
+			IGraphics::CQuadItem QuadItem((x - OffsetTime) * Size * 2 + (y & 1) * Size, (y + OffsetTime) * Size, Size, Size);
+			Graphics()->QuadsDrawTL(&QuadItem, 1);
+		}
 	Graphics()->QuadsEnd();
 
 	// render border fade
 	Graphics()->TextureSet(m_TextureBlob);
 	Graphics()->QuadsBegin();
-		Graphics()->SetColor(1,1,1,1);
-		QuadItem = IGraphics::CQuadItem(-100, -100, sw+200, sh+200);
-		Graphics()->QuadsDrawTL(&QuadItem, 1);
+	Graphics()->SetColor(1, 1, 1, 1);
+	QuadItem = IGraphics::CQuadItem(-100, -100, sw + 200, sh + 200);
+	Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
 
 	// restore screen
-	{CUIRect Screen = *UI()->Screen();
-	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);}
+	{
+		CUIRect Screen = *UI()->Screen();
+		Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
+	}
 }
 
 bool CMenus::CheckHotKey(int Key) const
@@ -2324,7 +2441,7 @@ void CMenus::RenderUpdating(const char *pCaption, int current, int total)
 	// make sure that we don't render for each little thing we load
 	// because that will slow down loading if we have vsync
 	static int64 LastLoadRender = 0;
-	if(time_get()-LastLoadRender < time_freq()/60)
+	if(time_get() - LastLoadRender < time_freq() / 60)
 		return;
 	LastLoadRender = time_get();
 
@@ -2338,31 +2455,31 @@ void CMenus::RenderUpdating(const char *pCaption, int current, int total)
 
 	float w = 700;
 	float h = 200;
-	float x = Screen.w/2-w/2;
-	float y = Screen.h/2-h/2;
+	float x = Screen.w / 2 - w / 2;
+	float y = Screen.h / 2 - h / 2;
 
 	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0,0,0,0.50f);
+	Graphics()->SetColor(0, 0, 0, 0.50f);
 	RenderTools()->DrawRoundRect(0, y, Screen.w, h, 0.0f);
 	Graphics()->QuadsEnd();
 
 	CUIRect r;
 	r.x = x;
-	r.y = y+20;
+	r.y = y + 20;
 	r.w = w;
 	r.h = h;
 	UI()->DoLabel(&r, Localize(pCaption), 32.0f, 0, -1);
 
-	if(total>0)
+	if(total > 0)
 	{
-		float Percent = current/(float)total;
+		float Percent = current / (float)total;
 		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
-		Graphics()->SetColor(0.15f,0.15f,0.15f,0.75f);
-		RenderTools()->DrawRoundRect(x+40, y+h-75, w-80, 30, 5.0f);
-		Graphics()->SetColor(1,1,1,0.75f);
-		RenderTools()->DrawRoundRect(x+45, y+h-70, (w-85)*Percent, 20, 5.0f);
+		Graphics()->SetColor(0.15f, 0.15f, 0.15f, 0.75f);
+		RenderTools()->DrawRoundRect(x + 40, y + h - 75, w - 80, 30, 5.0f);
+		Graphics()->SetColor(1, 1, 1, 0.75f);
+		RenderTools()->DrawRoundRect(x + 45, y + h - 70, (w - 85) * Percent, 20, 5.0f);
 		Graphics()->QuadsEnd();
 	}
 
@@ -2395,12 +2512,12 @@ int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser
 	int Step = Info.m_Format == CImageInfo::FORMAT_RGBA ? 4 : 3;
 
 	// make the texture gray scale
-	for(int i = 0; i < Info.m_Width*Info.m_Height; i++)
+	for(int i = 0; i < Info.m_Width * Info.m_Height; i++)
 	{
-		int v = (d[i*Step]+d[i*Step+1]+d[i*Step+2])/3;
-		d[i*Step] = v;
-		d[i*Step+1] = v;
-		d[i*Step+2] = v;
+		int v = (d[i * Step] + d[i * Step + 1] + d[i * Step + 2]) / 3;
+		d[i * Step] = v;
+		d[i * Step + 1] = v;
+		d[i * Step + 2] = v;
 	}
 
 	/* same grey like sinks
