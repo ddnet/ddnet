@@ -3480,8 +3480,8 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 							bool AllTile = true;
 							for(int i = 0; AllTile && i < m_lSelectedLayers.size(); i++)
 							{
-								if(m_Map.m_lGroups[m_SelectedGroup]->m_lLayers[i]->m_Type == LAYERTYPE_TILES)
-									s_LayerPopupContext.m_aLayers.add((CLayerTiles *)m_Map.m_lGroups[m_SelectedGroup]->m_lLayers[i]);
+								if(m_Map.m_lGroups[m_SelectedGroup]->m_lLayers[m_lSelectedLayers[i]]->m_Type == LAYERTYPE_TILES)
+									s_LayerPopupContext.m_aLayers.add((CLayerTiles *)m_Map.m_lGroups[m_SelectedGroup]->m_lLayers[m_lSelectedLayers[i]]);
 								else
 									AllTile = false;
 							}
