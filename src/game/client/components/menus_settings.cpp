@@ -618,7 +618,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		if(str_comp(s->m_aName, Skin) == 0)
 			OldSelected = i;
 
-		CListboxItem Item = UiDoListboxNextItem(&s_paSkinList[i], OldSelected == i);
+		CListboxItem Item = UiDoListboxNextItem(s_paSkinList[i], OldSelected == i);
 		char aBuf[128];
 		if(Item.m_Visible)
 		{
