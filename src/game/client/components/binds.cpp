@@ -54,7 +54,7 @@ void CBinds::Bind(int KeyID, const char *pStr, bool FreeOnly, int Modifier)
 
 	// skip modifiers for +xxx binds
 	if(pStr[0] == '+')
-		Modifier = 1 << MODIFIER_NONE;
+		Modifier = 0;
 
 	char aBuf[256];
 	if(!pStr[0])
@@ -130,6 +130,7 @@ bool CBinds::OnInput(IInput::CEvent e)
 	if(!Mask)
 		Mask = 1 << MODIFIER_NONE;
 
+	bool ret = false;
 	for(int Mod = 1; Mod < MODIFIER_COMBINATION_COUNT; Mod++)
 	{
 		if(m_aapKeyBindings[Mod][e.m_Key] && (Mask == Mod))
@@ -138,11 +139,22 @@ bool CBinds::OnInput(IInput::CEvent e)
 				Console()->ExecuteLineStroked(1, m_aapKeyBindings[Mod][e.m_Key]);
 			if(e.m_Flags & IInput::FLAG_RELEASE)
 				Console()->ExecuteLineStroked(0, m_aapKeyBindings[Mod][e.m_Key]);
-			return true;
+			ret = true;
 		}
 	}
 
-	return false;
+	// shift for emoticons works while moving through map
+	// When ctrl+shift are pressed (ctrl+shift binds and also the hard-coded ctrl+shift+d, ctrl+shift+g, ctrl+shift+e), ignore other +xxx binds
+	if(m_aapKeyBindings[0][e.m_Key] && Mask != ((1 << MODIFIER_CTRL) | (1 << MODIFIER_SHIFT)) && (!ret || m_aapKeyBindings[0][e.m_Key][0] == '+'))
+	{
+		if(e.m_Flags & IInput::FLAG_PRESS)
+			Console()->ExecuteLineStroked(1, m_aapKeyBindings[0][e.m_Key]);
+		if(e.m_Flags & IInput::FLAG_RELEASE)
+			Console()->ExecuteLineStroked(0, m_aapKeyBindings[0][e.m_Key]);
+		ret = true;
+	}
+
+	return ret;
 }
 
 void CBinds::UnbindAll()
