@@ -807,7 +807,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		// add more space
 		ServerFilter.HSplitTop(5.0f, 0, &ServerFilter);
 		ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
-		ServerFilter.HSplitTop(140.0f, &ServerFilter, 0);
+		ServerFilter.HSplitTop(120.0f, &ServerFilter, 0);
 
 		RenderTools()->DrawUIRect(&ServerFilter, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
 
