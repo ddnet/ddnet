@@ -116,23 +116,17 @@ void CMapLayers::EnvelopeEval(float TimeOffset, int Env, float *pChannels, void 
 	{
 		if(pThis->m_OnlineOnly && (pItem->m_Version < 2 || pItem->m_Synchronized))
 		{
-			if(pThis->m_OnlineOnly && pThis->m_pClient->m_Snap.m_pGameInfoObj) // && !(pThis->m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED))
+			if(pThis->m_pClient->m_Snap.m_pGameInfoObj) // && !(pThis->m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED))
 			{
 				s_Time = mix((pThis->Client()->PrevGameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick) / (float)pThis->Client()->GameTickSpeed(),
 					(pThis->Client()->GameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick) / (float)pThis->Client()->GameTickSpeed(),
 					pThis->Client()->IntraGameTick(g_Config.m_ClDummy));
 			}
 		}
-		else if(pThis->m_OnlineOnly)
+		else
 		{
 			s_Time += pThis->LocalTime() - s_LastLocalTime;
 			s_LastLocalTime = pThis->LocalTime();
-		}
-		else
-		{
-			float CurTime = (float)((double)time_get_microseconds() / 1000000.0);
-			s_Time += CurTime - s_LastLocalTime;
-			s_LastLocalTime = CurTime;
 		}
 		pThis->RenderTools()->RenderEvalEnvelope(pPoints + pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time + TimeOffset, pChannels);
 	}
