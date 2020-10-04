@@ -1619,9 +1619,16 @@ void CGameContext::CensorMessage(char *pCensoredMessage, const char *pMessage, i
 
 	for(int i = 0; i < m_aCensorlist.size(); i++)
 	{
-		char *pNeedle = (char *)str_find(pCensoredMessage, m_aCensorlist[i].cstr());
-		if(pNeedle)
-			memset(pNeedle, '*', str_length(m_aCensorlist[i].cstr()));
+		char *pCurLoc = pCensoredMessage;
+		do
+		{
+			pCurLoc = (char *)str_find(pCurLoc, m_aCensorlist[i].cstr());
+			if(pCurLoc)
+			{
+				memset(pCurLoc, '*', str_length(m_aCensorlist[i].cstr()));
+				pCurLoc++;
+			}
+		} while(pCurLoc);
 	}
 }
 
