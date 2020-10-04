@@ -2705,3 +2705,8 @@ bool CGameClient::CanDisplayWarning()
 {
 	return m_pMenus->CanDisplayWarning();
 }
+
+bool CGameClient::IsDisplayingWarning()
+{
+	return m_pMenus->GetCurPopup() == CMenus::POPUP_WARNING;
+}
