@@ -338,7 +338,13 @@ void CHud::RenderScoreHud()
 					if(m_pClient->m_GameInfo.m_TimeScore && g_Config.m_ClDDRaceScoreBoard)
 					{
 						if(apPlayerInfo[t]->m_Score != -9999)
-							str_format(aScore[t], sizeof(aScore[t]), "%02d:%02d", abs(apPlayerInfo[t]->m_Score) / 60, abs(apPlayerInfo[t]->m_Score) % 60);
+						{
+							int Secs = abs(apPlayerInfo[t]->m_Score);
+							if(Secs > 3600)
+								str_format(aScore[t], sizeof(aScore[t]), "%02d:%02d:%02d", Secs / 3600, (Secs % 3600) / 60, Secs % 60);
+							else
+								str_format(aScore[t], sizeof(aScore[t]), "%02d:%02d", Secs / 60, Secs % 60);
+						}
 						else
 							aScore[t][0] = 0;
 					}
@@ -913,7 +919,10 @@ void CHud::RenderRecord()
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), Localize("Server best:"));
 		TextRender()->Text(0, 5, 40, 6, aBuf, -1.0f);
-		str_format(aBuf, sizeof(aBuf), "%02d:%05.2f", (int)m_ServerRecord / 60, m_ServerRecord - ((int)m_ServerRecord / 60 * 60));
+		if(m_ServerRecord > 3600)
+			str_format(aBuf, sizeof(aBuf), "%02d:%02d:%05.2f", (int)m_ServerRecord / 3600, ((int)m_ServerRecord % 3600) / 60, m_ServerRecord - ((int)m_ServerRecord / 60 * 60));
+		else
+			str_format(aBuf, sizeof(aBuf), "   %02d:%05.2f", (int)m_ServerRecord / 60, m_ServerRecord - ((int)m_ServerRecord / 60 * 60));
 		TextRender()->Text(0, 53, 40, 6, aBuf, -1.0f);
 	}
 
@@ -923,7 +932,10 @@ void CHud::RenderRecord()
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), Localize("Personal best:"));
 		TextRender()->Text(0, 5, 47, 6, aBuf, -1.0f);
-		str_format(aBuf, sizeof(aBuf), "%02d:%05.2f", (int)PlayerRecord / 60, PlayerRecord - ((int)PlayerRecord / 60 * 60));
+		if(PlayerRecord > 3600)
+			str_format(aBuf, sizeof(aBuf), "%02d:%02d:%05.2f", (int)PlayerRecord / 3600, ((int)PlayerRecord % 3600) / 60, PlayerRecord - ((int)PlayerRecord / 60 * 60));
+		else
+			str_format(aBuf, sizeof(aBuf), "   %02d:%05.2f", (int)PlayerRecord / 60, PlayerRecord - ((int)PlayerRecord / 60 * 60));
 		TextRender()->Text(0, 53, 47, 6, aBuf, -1.0f);
 	}
 }
