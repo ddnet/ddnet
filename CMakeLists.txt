@@ -1070,6 +1070,7 @@ set(EXPECTED_DATA
   languages/romanian.txt
   languages/russian.txt
   languages/serbian.txt
+  languages/serbian_cyrillic.txt
   languages/simplified_chinese.txt
   languages/slovak.txt
   languages/spanish.txt
