@@ -1241,46 +1241,46 @@ Play
 == Jogar
 
 Downloading ddnet-info.json failed
-== 
+== Falha ao baixar ddnet-info.json
 
 Saving ddnet-settings.cfg failed
-== 
+== Falha ao salvar ddnet-settings.cfg
 
 Theme
-== 
+== Tema
 
 File
-== 
+== Arquivo
 
 Demos directory
-== 
+== Diretório de demos
 
 Themes directory
-== 
+== Diretório de temas
 
 Skin Database
-== 
+== Banco de Dados de Skins
 
 Skins directory
-== 
+== Diretório de skins
 
 Background music volume
-== 
+== Volume da música de fundo
 
 Assets
-== 
+== Ativos
 
 Use current map as background
-== 
+== Usar o mapa atual como plano de fundo
 
 Entities
-== 
+== Entidades
 
 Emoticons
-== 
+== Emoticons
 
 Particles
-== 
+== Partículas
 
 Assets directory
-== 
+== Diretório de ativos
