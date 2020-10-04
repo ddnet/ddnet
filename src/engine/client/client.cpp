@@ -3327,7 +3327,7 @@ void CClient::Run()
 				s_SavedConfig = true;
 			}
 
-			if(m_Warnings.empty() && GameClient()->CanDisplayWarning())
+			if(m_Warnings.empty() && !GameClient()->IsDisplayingWarning())
 				break;
 		}
 
