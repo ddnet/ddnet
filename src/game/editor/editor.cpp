@@ -280,7 +280,7 @@ void CEditorImage::AnalyseTileFlags()
 	}
 }
 
-void CEditor::EnvelopeEval(float TimeOffset, int Env, float *pChannels, void *pUser)
+void CEditor::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, void *pUser)
 {
 	CEditor *pThis = (CEditor *)pUser;
 	if(Env < 0 || Env >= pThis->m_Map.m_lEnvelopes.size())
@@ -293,7 +293,7 @@ void CEditor::EnvelopeEval(float TimeOffset, int Env, float *pChannels, void *pU
 	}
 
 	CEnvelope *e = pThis->m_Map.m_lEnvelopes[Env];
-	float t = pThis->m_AnimateTime + TimeOffset;
+	float t = pThis->m_AnimateTime + (TimeOffsetMillis / 1000.0f);
 	t *= pThis->m_AnimateSpeed;
 	e->Eval(t, pChannels);
 }

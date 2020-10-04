@@ -89,7 +89,7 @@ public:
 
 	int Eval(float Time, float *pResult)
 	{
-		CRenderTools::RenderEvalEnvelope(m_lPoints.base_ptr(), m_lPoints.size(), m_Channels, Time, pResult);
+		CRenderTools::RenderEvalEnvelope(m_lPoints.base_ptr(), m_lPoints.size(), m_Channels, (int64)((double)Time * 1000000.0), pResult);
 		return m_Channels;
 	}
 
@@ -944,7 +944,7 @@ public:
 	CEditorMap m_Map;
 	int m_ShiftBy;
 
-	static void EnvelopeEval(float TimeOffset, int Env, float *pChannels, void *pUser);
+	static void EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, void *pUser);
 
 	float m_CommandBox;
 	char m_aSettingsCommand[256];

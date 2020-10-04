@@ -35,7 +35,7 @@ void CLayerSounds::Render(bool Tileset)
 		if(pSource->m_PosEnv >= 0)
 		{
 			float aChannels[4];
-			m_pEditor->EnvelopeEval(pSource->m_PosEnvOffset / 1000.0f, pSource->m_PosEnv, aChannels, m_pEditor);
+			m_pEditor->EnvelopeEval(pSource->m_PosEnvOffset, pSource->m_PosEnv, aChannels, m_pEditor);
 			OffsetX = aChannels[0];
 			OffsetY = aChannels[1];
 		}
@@ -87,7 +87,7 @@ void CLayerSounds::Render(bool Tileset)
 		if(pSource->m_PosEnv >= 0)
 		{
 			float aChannels[4];
-			m_pEditor->EnvelopeEval(pSource->m_PosEnvOffset / 1000.0f, pSource->m_PosEnv, aChannels, m_pEditor);
+			m_pEditor->EnvelopeEval(pSource->m_PosEnvOffset, pSource->m_PosEnv, aChannels, m_pEditor);
 			OffsetX = aChannels[0];
 			OffsetY = aChannels[1];
 		}
