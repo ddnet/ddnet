@@ -64,14 +64,11 @@ public:
 		if(!m_pStorage || !g_Config.m_ClSaveSettings)
 			return true;
 
-		char aConfigFileTmp[64];
-		str_format(aConfigFileTmp, sizeof(aConfigFileTmp), CONFIG_FILE ".%d.tmp", pid());
-
-		m_ConfigFile = m_pStorage->OpenFile(aConfigFileTmp, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+		m_ConfigFile = m_pStorage->OpenFile(CONFIG_FILE, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 
 		if(!m_ConfigFile)
 		{
-			dbg_msg("config", "ERROR: opening %s failed", aConfigFileTmp);
+			dbg_msg("config", "ERROR: opening " CONFIG_FILE " failed");
 			return false;
 		}
 
@@ -116,13 +113,7 @@ public:
 
 		if(m_Failed)
 		{
-			dbg_msg("config", "ERROR: writing to %s failed", aConfigFileTmp);
-			return false;
-		}
-
-		if(!m_pStorage->RenameFile(aConfigFileTmp, CONFIG_FILE, IStorage::TYPE_SAVE))
-		{
-			dbg_msg("config", "ERROR: renaming %s to " CONFIG_FILE " failed", aConfigFileTmp);
+			dbg_msg("config", "ERROR: writing to " CONFIG_FILE " failed");
 			return false;
 		}
 
