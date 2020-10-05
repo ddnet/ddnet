@@ -780,7 +780,10 @@ public:
 		CTextCursor Cursor;
 		SetCursor(&Cursor, 0, 0, Size, 0);
 		Cursor.m_LineWidth = LineWidth;
+		int OldRenderFlags = m_RenderFlags;
+		SetRenderFlags(OldRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
 		TextEx(&Cursor, pText, StrLength);
+		SetRenderFlags(OldRenderFlags);
 		if(pAlignedHeight != NULL)
 			*pAlignedHeight = Cursor.m_AlignedFontSize;
 		return Cursor.m_X;
