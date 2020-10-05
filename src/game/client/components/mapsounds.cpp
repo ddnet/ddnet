@@ -199,7 +199,7 @@ void CMapSounds::OnRender()
 						if(pVoice->m_pSource->m_PosEnv >= 0)
 						{
 							float aChannels[4];
-							CMapLayers::EnvelopeEval(pVoice->m_pSource->m_PosEnvOffset / 1000.0f, pVoice->m_pSource->m_PosEnv, aChannels, m_pClient->m_pMapLayersBackGround);
+							CMapLayers::EnvelopeEval(pVoice->m_pSource->m_PosEnvOffset, pVoice->m_pSource->m_PosEnv, aChannels, m_pClient->m_pMapLayersBackGround);
 							OffsetX = aChannels[0];
 							OffsetY = aChannels[1];
 						}
@@ -218,7 +218,7 @@ void CMapSounds::OnRender()
 						if(pVoice->m_pSource->m_SoundEnv >= 0)
 						{
 							float aChannels[4];
-							CMapLayers::EnvelopeEval(pVoice->m_pSource->m_SoundEnvOffset / 1000.0f, pVoice->m_pSource->m_SoundEnv, aChannels, m_pClient->m_pMapLayersBackGround);
+							CMapLayers::EnvelopeEval(pVoice->m_pSource->m_SoundEnvOffset, pVoice->m_pSource->m_SoundEnv, aChannels, m_pClient->m_pMapLayersBackGround);
 							float Volume = clamp(aChannels[0], 0.0f, 1.0f);
 
 							Sound()->SetVoiceVolume(pVoice->m_Voice, Volume);

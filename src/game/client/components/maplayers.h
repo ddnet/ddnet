@@ -151,7 +151,7 @@ public:
 
 	void EnvelopeUpdate();
 
-	static void EnvelopeEval(float TimeOffset, int Env, float *pChannels, void *pUser);
+	static void EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, void *pUser);
 };
 
 #endif

@@ -11,7 +11,7 @@
 #include <game/generated/client_data.h>
 #include <game/generated/protocol.h>
 
-void CRenderTools::RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Channels, float Time, float *pResult)
+void CRenderTools::RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Channels, int64 TimeMicros, float *pResult)
 {
 	if(NumPoints == 0)
 	{
@@ -31,13 +31,16 @@ void CRenderTools::RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Cha
 		return;
 	}
 
-	Time = fmod(Time, pPoints[NumPoints - 1].m_Time / 1000.0f) * 1000.0f;
+	int64 MaxPointTime = (int64)pPoints[NumPoints - 1].m_Time * 1000ll;
+	TimeMicros = TimeMicros % MaxPointTime;
+
+	int TimeMillis = (int)(TimeMicros / 1000ll);
 	for(int i = 0; i < NumPoints - 1; i++)
 	{
-		if(Time >= pPoints[i].m_Time && Time <= pPoints[i + 1].m_Time)
+		if(TimeMillis >= pPoints[i].m_Time && TimeMillis <= pPoints[i + 1].m_Time)
 		{
 			float Delta = pPoints[i + 1].m_Time - pPoints[i].m_Time;
-			float a = (Time - pPoints[i].m_Time) / Delta;
+			float a = (float)(((double)TimeMicros / 1000.0) - pPoints[i].m_Time) / Delta;
 
 			if(pPoints[i].m_Curvetype == CURVETYPE_SMOOTH)
 				a = -2 * a * a * a + 3 * a * a; // second hermite basis
@@ -102,7 +105,7 @@ void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags
 		if(q->m_ColorEnv >= 0)
 		{
 			float aChannels[4];
-			pfnEval(q->m_ColorEnvOffset / 1000.0f, q->m_ColorEnv, aChannels, pUser);
+			pfnEval(q->m_ColorEnvOffset, q->m_ColorEnv, aChannels, pUser);
 			r = aChannels[0];
 			g = aChannels[1];
 			b = aChannels[2];
@@ -133,7 +136,7 @@ void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags
 		if(q->m_PosEnv >= 0)
 		{
 			float aChannels[4];
-			pfnEval(q->m_PosEnvOffset / 1000.0f, q->m_PosEnv, aChannels, pUser);
+			pfnEval(q->m_PosEnvOffset, q->m_PosEnv, aChannels, pUser);
 			OffsetX = aChannels[0];
 			OffsetY = aChannels[1];
 			Rot = aChannels[2] / 360.0f * pi * 2;
@@ -190,7 +193,7 @@ void CRenderTools::RenderTileRectangle(int RectX, int RectY, int RectW, int Rect
 	if(ColorEnv >= 0)
 	{
 		float aChannels[4];
-		pfnEval(ColorEnvOffset / 1000.0f, ColorEnv, aChannels, pUser);
+		pfnEval(ColorEnvOffset, ColorEnv, aChannels, pUser);
 		r = aChannels[0];
 		g = aChannels[1];
 		b = aChannels[2];
@@ -266,7 +269,7 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, Color
 	if(ColorEnv >= 0)
 	{
 		float aChannels[4];
-		pfnEval(ColorEnvOffset / 1000.0f, ColorEnv, aChannels, pUser);
+		pfnEval(ColorEnvOffset, ColorEnv, aChannels, pUser);
 		r = aChannels[0];
 		g = aChannels[1];
 		b = aChannels[2];
