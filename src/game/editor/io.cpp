@@ -1284,14 +1284,15 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 				if(pItem->m_Version == CMapItemAutoMapperConfig::CURRENT_VERSION)
 				{
 					if(pItem->m_GroupId >= 0 && pItem->m_GroupId < m_lGroups.size() &&
-						pItem->m_LayerId >= 0 && pItem->m_LayerId < m_lGroups[pItem->m_GroupId]->m_lLayers.size()) {
+						pItem->m_LayerId >= 0 && pItem->m_LayerId < m_lGroups[pItem->m_GroupId]->m_lLayers.size())
+					{
 						CLayer *pLayer = m_lGroups[pItem->m_GroupId]->m_lLayers[pItem->m_LayerId];
-						if (pLayer->m_Type == LAYERTYPE_TILES)
+						if(pLayer->m_Type == LAYERTYPE_TILES)
 						{
 							CLayerTiles *pLayer = (CLayerTiles *)m_lGroups[pItem->m_GroupId]->m_lLayers[pItem->m_LayerId];
 							// only load auto mappers for tile layers (not physics layers)
-							if (!(pLayer->m_Game || pLayer->m_Tele || pLayer->m_Speedup ||
-									pLayer->m_Front || pLayer->m_Switch || pLayer->m_Tune))
+							if(!(pLayer->m_Game || pLayer->m_Tele || pLayer->m_Speedup ||
+								   pLayer->m_Front || pLayer->m_Switch || pLayer->m_Tune))
 							{
 								pLayer->m_AutoMapperConfig = pItem->m_AutomapperConfig;
 								pLayer->m_Seed = pItem->m_AutomapperSeed;
