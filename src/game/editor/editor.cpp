@@ -302,6 +302,28 @@ void CEditor::EnvelopeEval(float TimeOffset, int Env, float *pChannels, void *pU
  OTHER
 *********************************************************/
 
+int CEditor::DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners)
+{
+	bool ReturnValue = false;
+	CUIRect EditBox;
+	CUIRect ClearButton;
+	pRect->VSplitRight(15.0f, &EditBox, &ClearButton);
+	if(DoEditBox(pID, &EditBox, pStr, StrSize, FontSize, Offset, Hidden, Corners & ~CUI::CORNER_R))
+	{
+		ReturnValue = true;
+	}
+
+	RenderTools()->DrawUIRect(&ClearButton, ColorRGBA(1, 1, 1, 0.33f * ButtonColorMul(pClearID)), Corners & ~CUI::CORNER_L, 3.0f);
+	UI()->DoLabel(&ClearButton, "×", ClearButton.h * 0.8f, 0);
+	if(UI()->DoButtonLogic(pClearID, "×", 0, &ClearButton))
+	{
+		pStr[0] = 0;
+		UI()->SetActiveItem(pID);
+		ReturnValue = true;
+	}
+	return ReturnValue;
+}
+
 // copied from gc_menu.cpp, should be more generalized
 //extern int ui_do_edit_box(void *id, const CUIRect *rect, char *str, int str_size, float font_size, bool hidden=false);
 int CEditor::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners)
@@ -5552,7 +5574,8 @@ void CEditor::RenderServerSettingsEditor(CUIRect View)
 
 		Button.VSplitLeft(70.0f, 0, &Button);
 		Button.VSplitLeft(180.0f, &Button, 0);
-		DoEditBox(&m_CommandBox, &Button, m_aSettingsCommand, sizeof(m_aSettingsCommand), 12.0f, &m_CommandBox);
+		static int s_ClearButton = 0;
+		DoClearableEditBox(&m_CommandBox, &s_ClearButton, &Button, m_aSettingsCommand, sizeof(m_aSettingsCommand), 12.0f, &m_CommandBox, false, CUI::CORNER_ALL);
 
 		// buttons
 		ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
@@ -5574,18 +5597,53 @@ void CEditor::RenderServerSettingsEditor(CUIRect View)
 					CEditorMap::CSetting Setting;
 					str_copy(Setting.m_aCommand, m_aSettingsCommand, sizeof(Setting.m_aCommand));
 					m_Map.m_lSettings.add(Setting);
+					s_CommandSelectedIndex = m_Map.m_lSettings.size() - 1;
 				}
 			}
 		}
 
-		if(m_Map.m_lSettings.size())
+		if(m_Map.m_lSettings.size() && s_CommandSelectedIndex > -1 && s_CommandSelectedIndex < m_Map.m_lSettings.size())
 		{
+			ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
+			Button.VSplitRight(5.0f, &Button, 0);
+			static int s_ModButton = 0;
+			if(DoButton_Editor(&s_ModButton, "Mod", 0, &Button, 0, "Modify a command from the command list.") || (Input()->KeyPress(KEY_M) && UI()->LastActiveItem() != &m_CommandBox))
+			{
+				if(str_comp(m_Map.m_lSettings[s_CommandSelectedIndex].m_aCommand, m_aSettingsCommand) != 0 && m_aSettingsCommand[0] != 0 && str_find(m_aSettingsCommand, " "))
+				{
+					bool Found = false;
+					int i;
+					for(i = 0; i < m_Map.m_lSettings.size(); i++)
+						if(i != s_CommandSelectedIndex && !str_comp(m_Map.m_lSettings[i].m_aCommand, m_aSettingsCommand))
+						{
+							Found = true;
+							break;
+						}
+					if(Found)
+					{
+						m_Map.m_lSettings.remove_index(s_CommandSelectedIndex);
+						s_CommandSelectedIndex = i > s_CommandSelectedIndex ? i - 1 : i;
+					}
+					else
+					{
+						str_copy(m_Map.m_lSettings[s_CommandSelectedIndex].m_aCommand, m_aSettingsCommand, sizeof(m_Map.m_lSettings[s_CommandSelectedIndex].m_aCommand));
+					}
+				}
+			}
+
 			ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
 			Button.VSplitRight(5.0f, &Button, 0);
 			static int s_DelButton = 0;
 			if(DoButton_Editor(&s_DelButton, "Del", 0, &Button, 0, "Delete a command from the command list.") || (Input()->KeyPress(KEY_DELETE) && UI()->LastActiveItem() != &m_CommandBox))
-				if(s_CommandSelectedIndex > -1 && s_CommandSelectedIndex < m_Map.m_lSettings.size())
-					m_Map.m_lSettings.remove_index(s_CommandSelectedIndex);
+			{
+				m_Map.m_lSettings.remove_index(s_CommandSelectedIndex);
+				if(s_CommandSelectedIndex >= m_Map.m_lSettings.size())
+				{
+					s_CommandSelectedIndex = m_Map.m_lSettings.size() - 1;
+					if(s_CommandSelectedIndex >= 0)
+						str_copy(m_aSettingsCommand, m_Map.m_lSettings[s_CommandSelectedIndex].m_aCommand, sizeof(m_aSettingsCommand));
+				}
+			}
 		}
 	}
 
@@ -5645,7 +5703,10 @@ void CEditor::RenderServerSettingsEditor(CUIRect View)
 			Button.VSplitLeft(5.0f, 0, &Button);
 
 			if(DoButton_MenuItem(&m_Map.m_lSettings[i], m_Map.m_lSettings[i].m_aCommand, s_CommandSelectedIndex == i, &Button, 0, 0))
+			{
 				s_CommandSelectedIndex = i;
+				str_copy(m_aSettingsCommand, m_Map.m_lSettings[i].m_aCommand, sizeof(m_aSettingsCommand));
+			}
 		}
 		ListCur += 17.0f;
 	}
