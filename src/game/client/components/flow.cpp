@@ -50,7 +50,7 @@ void CFlow::Init()
 	m_Height = pTilemap->m_Height * 32 / m_Spacing;
 
 	// allocate and clear
-	m_pCells = (CCell *)calloc(m_Width * m_Height, sizeof(CCell));
+	m_pCells = (CCell *)calloc((size_t)m_Width * m_Height, sizeof(CCell));
 	for(int y = 0; y < m_Height; y++)
 		for(int x = 0; x < m_Width; x++)
 			m_pCells[y * m_Width + x].m_Vel = vec2(0.0f, 0.0f);

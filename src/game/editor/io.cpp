@@ -308,7 +308,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 			if(pImg->m_Format == CImageInfo::FORMAT_RGB)
 			{
 				// Convert to RGBA
-				unsigned char *pDataRGBA = (unsigned char *)malloc(Item.m_Width * Item.m_Height * 4);
+				unsigned char *pDataRGBA = (unsigned char *)malloc((size_t)Item.m_Width * Item.m_Height * 4);
 				unsigned char *pDataRGB = (unsigned char *)pImg->m_pData;
 				for(int i = 0; i < Item.m_Width * Item.m_Height; i++)
 				{
@@ -423,24 +423,24 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 
 				if(Item.m_Flags && !(pLayer->m_Game))
 				{
-					CTile *pEmptyTiles = (CTile *)calloc(pLayer->m_Width * pLayer->m_Height, sizeof(CTile));
-					mem_zero(pEmptyTiles, pLayer->m_Width * pLayer->m_Height * sizeof(CTile));
-					Item.m_Data = df.AddData(pLayer->m_Width * pLayer->m_Height * sizeof(CTile), pEmptyTiles);
+					CTile *pEmptyTiles = (CTile *)calloc((size_t)pLayer->m_Width * pLayer->m_Height, sizeof(CTile));
+					mem_zero(pEmptyTiles, (size_t)pLayer->m_Width * pLayer->m_Height * sizeof(CTile));
+					Item.m_Data = df.AddData((size_t)pLayer->m_Width * pLayer->m_Height * sizeof(CTile), pEmptyTiles);
 					free(pEmptyTiles);
 
 					if(pLayer->m_Tele)
-						Item.m_Tele = df.AddData(pLayer->m_Width * pLayer->m_Height * sizeof(CTeleTile), ((CLayerTele *)pLayer)->m_pTeleTile);
+						Item.m_Tele = df.AddData((size_t)pLayer->m_Width * pLayer->m_Height * sizeof(CTeleTile), ((CLayerTele *)pLayer)->m_pTeleTile);
 					else if(pLayer->m_Speedup)
-						Item.m_Speedup = df.AddData(pLayer->m_Width * pLayer->m_Height * sizeof(CSpeedupTile), ((CLayerSpeedup *)pLayer)->m_pSpeedupTile);
+						Item.m_Speedup = df.AddData((size_t)pLayer->m_Width * pLayer->m_Height * sizeof(CSpeedupTile), ((CLayerSpeedup *)pLayer)->m_pSpeedupTile);
 					else if(pLayer->m_Front)
-						Item.m_Front = df.AddData(pLayer->m_Width * pLayer->m_Height * sizeof(CTile), pLayer->m_pTiles);
+						Item.m_Front = df.AddData((size_t)pLayer->m_Width * pLayer->m_Height * sizeof(CTile), pLayer->m_pTiles);
 					else if(pLayer->m_Switch)
-						Item.m_Switch = df.AddData(pLayer->m_Width * pLayer->m_Height * sizeof(CSwitchTile), ((CLayerSwitch *)pLayer)->m_pSwitchTile);
+						Item.m_Switch = df.AddData((size_t)pLayer->m_Width * pLayer->m_Height * sizeof(CSwitchTile), ((CLayerSwitch *)pLayer)->m_pSwitchTile);
 					else if(pLayer->m_Tune)
-						Item.m_Tune = df.AddData(pLayer->m_Width * pLayer->m_Height * sizeof(CTuneTile), ((CLayerTune *)pLayer)->m_pTuneTile);
+						Item.m_Tune = df.AddData((size_t)pLayer->m_Width * pLayer->m_Height * sizeof(CTuneTile), ((CLayerTune *)pLayer)->m_pTuneTile);
 				}
 				else
-					Item.m_Data = df.AddData(pLayer->m_Width * pLayer->m_Height * sizeof(CTile), pLayer->m_pTiles);
+					Item.m_Data = df.AddData((size_t)pLayer->m_Width * pLayer->m_Height * sizeof(CTile), pLayer->m_pTiles);
 
 				// save layer name
 				StrToInts(Item.m_aName, sizeof(Item.m_aName) / sizeof(int), pLayer->m_aName);
@@ -700,7 +700,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 
 					// copy image data
 					void *pData = DataFile.GetData(pItem->m_ImageData);
-					pImg->m_pData = malloc(pImg->m_Width * pImg->m_Height * 4);
+					pImg->m_pData = malloc((size_t)pImg->m_Width * pImg->m_Height * 4);
 					mem_copy(pImg->m_pData, pData, pImg->m_Width * pImg->m_Height * 4);
 					int TextureLoadFlag = m_pEditor->Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 					if(pImg->m_Width % 16 != 0 || pImg->m_Height % 16 != 0)
@@ -899,7 +899,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						{
 							void *pTeleData = DataFile.GetData(pTilemapItem->m_Tele);
 							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Tele);
-							if(Size >= pTiles->m_Width * pTiles->m_Height * sizeof(CTeleTile))
+							if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTeleTile))
 							{
 								static const int s_aTilesRep[] = {
 									TILE_TELEIN,
@@ -911,7 +911,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 									TILE_TELECHECKOUT,
 									TILE_TELEINWEAPON,
 									TILE_TELEINHOOK};
-								mem_copy(((CLayerTele *)pTiles)->m_pTeleTile, pTeleData, pTiles->m_Width * pTiles->m_Height * sizeof(CTeleTile));
+								mem_copy(((CLayerTele *)pTiles)->m_pTeleTile, pTeleData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTeleTile));
 
 								for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
 								{
@@ -930,9 +930,9 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 							void *pSpeedupData = DataFile.GetData(pTilemapItem->m_Speedup);
 							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Speedup);
 
-							if(Size >= pTiles->m_Width * pTiles->m_Height * sizeof(CSpeedupTile))
+							if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CSpeedupTile))
 							{
-								mem_copy(((CLayerSpeedup *)pTiles)->m_pSpeedupTile, pSpeedupData, pTiles->m_Width * pTiles->m_Height * sizeof(CSpeedupTile));
+								mem_copy(((CLayerSpeedup *)pTiles)->m_pSpeedupTile, pSpeedupData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CSpeedupTile));
 
 								for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
 								{
@@ -949,8 +949,8 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						{
 							void *pFrontData = DataFile.GetData(pTilemapItem->m_Front);
 							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Front);
-							if(Size >= pTiles->m_Width * pTiles->m_Height * sizeof(CTile))
-								mem_copy(((CLayerFront *)pTiles)->m_pTiles, pFrontData, pTiles->m_Width * pTiles->m_Height * sizeof(CTile));
+							if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTile))
+								mem_copy(((CLayerFront *)pTiles)->m_pTiles, pFrontData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTile));
 
 							DataFile.UnloadData(pTilemapItem->m_Front);
 						}
@@ -958,7 +958,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						{
 							void *pSwitchData = DataFile.GetData(pTilemapItem->m_Switch);
 							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Switch);
-							if(Size >= pTiles->m_Width * pTiles->m_Height * sizeof(CSwitchTile))
+							if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CSwitchTile))
 							{
 								const int s_aTilesComp[] = {
 									TILE_SWITCHTIMEDOPEN,
@@ -976,7 +976,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 									TILE_ALLOW_TELE_GUN,
 									TILE_ALLOW_BLUE_TELE_GUN};
 								CSwitchTile *pLayerSwitchTiles = ((CLayerSwitch *)pTiles)->m_pSwitchTile;
-								mem_copy(((CLayerSwitch *)pTiles)->m_pSwitchTile, pSwitchData, pTiles->m_Width * pTiles->m_Height * sizeof(CSwitchTile));
+								mem_copy(((CLayerSwitch *)pTiles)->m_pSwitchTile, pSwitchData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CSwitchTile));
 
 								for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
 								{
@@ -1005,10 +1005,10 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						{
 							void *pTuneData = DataFile.GetData(pTilemapItem->m_Tune);
 							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Tune);
-							if(Size >= pTiles->m_Width * pTiles->m_Height * sizeof(CTuneTile))
+							if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTuneTile))
 							{
 								CTuneTile *pLayerTuneTiles = ((CLayerTune *)pTiles)->m_pTuneTile;
-								mem_copy(((CLayerTune *)pTiles)->m_pTuneTile, pTuneData, pTiles->m_Width * pTiles->m_Height * sizeof(CTuneTile));
+								mem_copy(((CLayerTune *)pTiles)->m_pTuneTile, pTuneData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTuneTile));
 
 								for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
 								{
@@ -1022,9 +1022,9 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						}
 						else // regular tile layer or game layer
 						{
-							if(Size >= pTiles->m_Width * pTiles->m_Height * sizeof(CTile))
+							if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTile))
 							{
-								mem_copy(pTiles->m_pTiles, pData, pTiles->m_Width * pTiles->m_Height * sizeof(CTile));
+								mem_copy(pTiles->m_pTiles, pData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTile));
 
 								if(pTiles->m_Game && pTilemapItem->m_Version == MakeVersion(1, *pTilemapItem))
 								{

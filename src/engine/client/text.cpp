@@ -305,7 +305,7 @@ class CTextRender : public IEngineTextRender
 		}
 		else
 		{
-			pMem = calloc(Width * Height, 1);
+			pMem = calloc((size_t)Width * Height, 1);
 		}
 
 		IGraphics::CTextureHandle Texture = Graphics()->LoadTextureRaw(Width, Height, CImageInfo::FORMAT_ALPHA, pMem, CImageInfo::FORMAT_ALPHA, IGraphics::TEXLOAD_NOMIPMAPS | IGraphics::TEXLOAD_NO_COMPRESSION);
@@ -326,7 +326,7 @@ class CTextRender : public IEngineTextRender
 		int NewDimensions = pFont->m_CurTextureDimensions[TextureIndex] * 2;
 
 		unsigned char *pTmpTexBuffer = new unsigned char[NewDimensions * NewDimensions];
-		mem_zero(pTmpTexBuffer, NewDimensions * NewDimensions * sizeof(unsigned char));
+		mem_zero(pTmpTexBuffer, (size_t)NewDimensions * NewDimensions * sizeof(unsigned char));
 
 		for(int y = 0; y < pFont->m_CurTextureDimensions[TextureIndex]; ++y)
 		{
@@ -683,10 +683,10 @@ public:
 		pFont->m_pBuf = (void *)pBuf;
 		pFont->m_CurTextureDimensions[0] = 1024;
 		pFont->m_TextureData[0] = new unsigned char[pFont->m_CurTextureDimensions[0] * pFont->m_CurTextureDimensions[0]];
-		mem_zero(pFont->m_TextureData[0], pFont->m_CurTextureDimensions[0] * pFont->m_CurTextureDimensions[0] * sizeof(unsigned char));
+		mem_zero(pFont->m_TextureData[0], (size_t)pFont->m_CurTextureDimensions[0] * pFont->m_CurTextureDimensions[0] * sizeof(unsigned char));
 		pFont->m_CurTextureDimensions[1] = 1024;
 		pFont->m_TextureData[1] = new unsigned char[pFont->m_CurTextureDimensions[1] * pFont->m_CurTextureDimensions[1]];
-		mem_zero(pFont->m_TextureData[1], pFont->m_CurTextureDimensions[1] * pFont->m_CurTextureDimensions[1] * sizeof(unsigned char));
+		mem_zero(pFont->m_TextureData[1], (size_t)pFont->m_CurTextureDimensions[1] * pFont->m_CurTextureDimensions[1] * sizeof(unsigned char));
 
 		pFont->m_aTextures[0] = InitTexture(pFont->m_CurTextureDimensions[0], pFont->m_CurTextureDimensions[0]);
 		pFont->m_aTextures[1] = InitTexture(pFont->m_CurTextureDimensions[1], pFont->m_CurTextureDimensions[1]);
@@ -1896,7 +1896,7 @@ public:
 				for(size_t k = 0; k < m_Fonts[i]->m_TextureSkyline[j].m_CurHeightOfPixelColumn.size(); ++k)
 					m_Fonts[i]->m_TextureSkyline[j].m_CurHeightOfPixelColumn[k] = 0;
 
-				mem_zero(m_Fonts[i]->m_TextureData[j], m_Fonts[i]->m_CurTextureDimensions[j] * m_Fonts[i]->m_CurTextureDimensions[j] * sizeof(unsigned char));
+				mem_zero(m_Fonts[i]->m_TextureData[j], (size_t)m_Fonts[i]->m_CurTextureDimensions[j] * m_Fonts[i]->m_CurTextureDimensions[j] * sizeof(unsigned char));
 				Graphics()->LoadTextureRawSub(m_Fonts[i]->m_aTextures[j], 0, 0, m_Fonts[i]->m_CurTextureDimensions[j], m_Fonts[i]->m_CurTextureDimensions[j], CImageInfo::FORMAT_ALPHA, m_Fonts[i]->m_TextureData[j]);
 			}
 

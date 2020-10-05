@@ -457,7 +457,7 @@ int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int Sto
 		return 0;
 	}
 
-	pBuffer = (unsigned char *)malloc(Png.width * Png.height * Png.bpp); // ignore_convention
+	pBuffer = (unsigned char *)malloc((size_t)Png.width * Png.height * Png.bpp); // ignore_convention
 	Error = png_get_data(&Png, pBuffer); // ignore_convention
 	if(Error != PNG_NO_ERROR)
 	{
