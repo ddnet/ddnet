@@ -521,15 +521,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	QuickSearch.Margin(2.f, &QuickSearch);
 	QuickExclude.Margin(2.f, &QuickExclude);
 
-	char aBufSearch[64];
-	str_format(aBufSearch, sizeof(aBufSearch), "%s:", Localize("Search"));
-	float SearchStrWidth = TextRender()->TextWidth(0, 14.0f, aBufSearch, -1, -1.0f);
-	char aBufExclude[64];
-	str_format(aBufExclude, sizeof(aBufExclude), "%s:", Localize("Exclude"));
-	float ExcludeStrWidth = TextRender()->TextWidth(0, 14.0f, aBufExclude, -1, -1.0f);
-	float ServerAddrStrWidth = TextRender()->TextWidth(0, 14.0f, Localize("Server address:"), -1, -1.0f);
-
-	float SearchExcludeAddrStrMax = maximum(maximum(SearchStrWidth, ExcludeStrWidth), ServerAddrStrWidth);
+	float SearchExcludeAddrStrMax = 130.0f;
 
 	float SearchIconWidth = 0;
 	float ExcludeIconWidth = 0;
@@ -550,6 +542,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		QuickSearch.VSplitLeft(ExcludeSearchIconMax, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
 
+		char aBufSearch[64];
+		str_format(aBufSearch, sizeof(aBufSearch), "%s:", Localize("Search"));
 		UI()->DoLabelScaled(&QuickSearch, aBufSearch, 14.0f, -1);
 		QuickSearch.VSplitLeft(SearchExcludeAddrStrMax, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
@@ -572,6 +566,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		QuickExclude.VSplitLeft(ExcludeSearchIconMax, 0, &QuickExclude);
 		QuickExclude.VSplitLeft(5.0f, 0, &QuickExclude);
 
+		char aBufExclude[64];
+		str_format(aBufExclude, sizeof(aBufExclude), "%s:", Localize("Exclude"));
 		UI()->DoLabelScaled(&QuickExclude, aBufExclude, 14.0f, -1);
 		QuickExclude.VSplitLeft(SearchExcludeAddrStrMax, 0, &QuickExclude);
 		QuickExclude.VSplitLeft(5.0f, 0, &QuickExclude);
