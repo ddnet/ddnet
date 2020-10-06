@@ -39,6 +39,7 @@ public:
 
 	void OnInit();
 
+	void Refresh();
 	int Num();
 	const CSkin *Get(int Index);
 	int Find(const char *pName);

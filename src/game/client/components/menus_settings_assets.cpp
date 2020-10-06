@@ -302,7 +302,7 @@ int InitSearchList(sorted_array<const TName *> &SearchList, sorted_array<TName> 
 
 void CMenus::RenderSettingsCustom(CUIRect MainView)
 {
-	CUIRect Label, CustomList, QuickSearch, QuickSearchClearButton, SkinDB, Page1Tab, Page2Tab, Page3Tab, Page4Tab;
+	CUIRect Label, CustomList, QuickSearch, QuickSearchClearButton, DirectoryButton, Page1Tab, Page2Tab, Page3Tab, Page4Tab, ReloadButton;
 
 	MainView.HSplitTop(20, &Label, &MainView);
 	float TabsW = Label.w;
@@ -493,7 +493,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 	// render quick search
 	{
 		MainView.HSplitBottom(ms_ButtonHeight, &MainView, &QuickSearch);
-		QuickSearch.VSplitLeft(240.0f, &QuickSearch, &SkinDB);
+		QuickSearch.VSplitLeft(240.0f, &QuickSearch, &DirectoryButton);
 		QuickSearch.HSplitTop(5.0f, 0, &QuickSearch);
 		const char *pSearchLabel = "\xEE\xA2\xB6";
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
@@ -513,20 +513,11 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 			s_InitCustomList[s_CurCustomTab] = true;
 	}
 
-	CUIRect ReloadButton;
-
-	SkinDB.VSplitRight(310.0f, 0, &SkinDB);
-	SkinDB.VSplitRight(200.0f, &ReloadButton, &SkinDB);
-
-	ReloadButton.HSplitTop(5.0f, 0, &ReloadButton);
-	ReloadButton.VSplitRight(10.0f, &ReloadButton, NULL);
-	if(DoButton_Menu(&ReloadButton, Localize("Refresh"), 0, &ReloadButton))
-	{
-		ClearCustomItems(s_CurCustomTab);
-	}
-
-	SkinDB.HSplitTop(5.0f, 0, &SkinDB);
-	if(DoButton_Menu(&SkinDB, Localize("Assets directory"), 0, &SkinDB))
+	DirectoryButton.HSplitTop(5.0f, 0, &DirectoryButton);
+	DirectoryButton.VSplitRight(175.0f, 0, &DirectoryButton);
+	DirectoryButton.VSplitRight(25.0f, &DirectoryButton, &ReloadButton);
+	DirectoryButton.VSplitRight(10.0f, &DirectoryButton, 0);
+	if(DoButton_Menu(&DirectoryButton, Localize("Assets directory"), 0, &DirectoryButton))
 	{
 		char aBuf[MAX_PATH_LENGTH];
 		char aBufFull[MAX_PATH_LENGTH + 7];
@@ -547,4 +538,13 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 			dbg_msg("menus", "couldn't open link");
 		}
 	}
+
+	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+	if(DoButton_Menu(&ReloadButton, "\xEE\x97\x95", 0, &ReloadButton))
+	{
+		ClearCustomItems(s_CurCustomTab);
+	}
+	TextRender()->SetRenderFlags(0);
+	TextRender()->SetCurFont(NULL);
 }

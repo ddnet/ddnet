@@ -171,6 +171,21 @@ void CSkins::OnInit()
 	}
 
 	// load skins
+	Refresh();
+}
+
+void CSkins::Refresh()
+{
+	for(int i = 0; i < m_aSkins.size(); ++i)
+	{
+		if(m_aSkins[i].m_OrgTexture != -1)
+			Graphics()->UnloadTexture(m_aSkins[i].m_OrgTexture);
+		m_aSkins[i].m_OrgTexture = IGraphics::CTextureHandle();
+		if(m_aSkins[i].m_ColorTexture != -1)
+			Graphics()->UnloadTexture(m_aSkins[i].m_ColorTexture);
+		m_aSkins[i].m_ColorTexture = IGraphics::CTextureHandle();
+	}
+
 	m_aSkins.clear();
 	Storage()->ListDirectory(IStorage::TYPE_ALL, "skins", SkinScan, this);
 	if(!m_aSkins.size())
