@@ -349,6 +349,7 @@ void CGameClient::OnInit()
 	m_DDRaceMsgSent[1] = false;
 	m_ShowOthers[0] = -1;
 	m_ShowOthers[1] = -1;
+	m_DataIntegrityWarned = false;
 
 	m_LastZoom = .0;
 	m_LastScreenAspect = .0;
@@ -660,6 +661,25 @@ void CGameClient::OnRender()
 		{
 			m_pMenus->PopupWarning(Localize("Warning"), pWarning->m_aWarningMsg, "Ok", 10000000);
 			pWarning->m_WasShown = true;
+		}
+	}
+
+	// check data integrity
+	if(!m_DataIntegrityWarned)
+	{
+		if(Storage()->DIStatus() == IStorage::INTEGRITY_DIRTY)
+		{
+			if(m_pMenus->CanDisplayWarning())
+			{
+				//m_pMenus->PopupDataIntegrity(Storage()->DIExtraFiles(), Storage()->DIMissingFiles(), Storage()->DIModifiedFiles());
+				dbg_msg("integrity", "integrity check failed, data directory dirty");
+				m_DataIntegrityWarned = true;
+			}
+		}
+		else if(Storage()->DIStatus() == IStorage::INTEGRITY_PURE)
+		{
+			dbg_msg("integrity", "integrity check passed");
+			m_DataIntegrityWarned = true;
 		}
 	}
 

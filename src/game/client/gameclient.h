@@ -114,6 +114,7 @@ class CGameClient : public IGameClient
 	int m_CheckInfo[NUM_DUMMIES];
 
 	char m_aDDNetVersionStr[64];
+	bool m_DataIntegrityWarned;
 
 	static void ConTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConKill(IConsole::IResult *pResult, void *pUserData);

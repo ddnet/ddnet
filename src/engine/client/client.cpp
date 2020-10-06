@@ -4363,6 +4363,7 @@ int main(int argc, const char **argv) // ignore_convention
 	}
 
 	pEngine->Init();
+	pStorage->DIStartCheck(pEngine);
 	pConfigManager->Init();
 	pConsole->Init();
 	pEngineMasterServer->Init();

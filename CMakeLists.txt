@@ -1433,6 +1433,13 @@ generate_source("src/game/generated/protocol.h" "network_header")
 generate_source("src/game/generated/server_data.cpp" "server_content_source")
 generate_source("src/game/generated/server_data.h" "server_content_header")
 
+add_custom_command(OUTPUT "src/game/generated/data_hash.h"
+  COMMAND ${PYTHON_EXECUTABLE} scripts/data_hash.py > ${PROJECT_BINARY_DIR}/src/game/generated/data_hash.h
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  DEPENDS
+    scripts/data_hash.py
+)
+
 generate_source7("src/game/generated/protocol7.cpp" "network_source")
 generate_source7("src/game/generated/protocol7.h" "network_header")
 generate_source7("src/game/generated/client_data7.cpp" "client_content_source")
@@ -1626,6 +1633,7 @@ foreach(s ${GAME_SHARED})
 endforeach()
 list(REMOVE_ITEM GAME_SHARED ${ENGINE_UUID_SHARED})
 set(GAME_GENERATED_SHARED
+  src/game/generated/data_hash.h
   src/game/generated/git_revision.cpp
   src/game/generated/protocol.h
   src/game/generated/protocol7.h
