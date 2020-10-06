@@ -647,9 +647,13 @@ public:
 	bool CanDisplayWarning();
 
 	void PopupWarning(const char *pTopic, const char *pBody, const char *pButton, int64 Duration);
-
 	int64 m_PopupWarningLastTime;
 	int64 m_PopupWarningDuration;
+
+	void PopupDataIntegrity(const std::vector<std::string> &Extra, const std::vector<std::string> &Missing, const std::vector<std::string> &Modified);
+	std::vector<std::string> m_PopupDIExtraFiles;
+	std::vector<std::string> m_PopupDIMissingFiles;
+	std::vector<std::string> m_PopupDIModifiedFiles;
 
 	int m_DemoPlayerState;
 	char m_aDemoPlayerPopupHint[256];
@@ -676,6 +680,7 @@ public:
 		POPUP_DISCONNECT,
 		POPUP_DISCONNECT_DUMMY,
 		POPUP_WARNING,
+		POPUP_DATAINTEGRITY,
 
 		// demo player states
 		DEMOPLAYER_NONE = 0,

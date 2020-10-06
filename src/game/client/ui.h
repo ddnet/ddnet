@@ -18,7 +18,7 @@ public:
 
 	/**
 	 * Splits 2 CUIRect inside *this* CUIRect horizontally. You can pass null pointers.
-	 * 
+	 *
 	 * @param pTop This rect will end up taking the top half of this CUIRect
 	 * @param pBottom This rect will end up taking the bottom half of this CUIRect
 	 */

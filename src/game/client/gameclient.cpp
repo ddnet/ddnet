@@ -671,7 +671,7 @@ void CGameClient::OnRender()
 		{
 			if(m_pMenus->CanDisplayWarning())
 			{
-				//m_pMenus->PopupDataIntegrity(Storage()->DIExtraFiles(), Storage()->DIMissingFiles(), Storage()->DIModifiedFiles());
+				m_pMenus->PopupDataIntegrity(Storage()->DIExtraFiles(), Storage()->DIMissingFiles(), Storage()->DIModifiedFiles());
 				dbg_msg("integrity", "integrity check failed, data directory dirty");
 				m_DataIntegrityWarned = true;
 			}

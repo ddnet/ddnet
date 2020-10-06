@@ -1471,6 +1471,20 @@ void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pBu
 	m_PopupWarningLastTime = time_get_microseconds();
 }
 
+void CMenus::PopupDataIntegrity(const std::vector<std::string> &Extra, const std::vector<std::string> &Missing, const std::vector<std::string> &Modified)
+{
+	// reset active item
+	UI()->SetActiveItem(0);
+
+	//TODO: Make this use rvalue references and std::move these
+	m_PopupDIExtraFiles = Extra;
+	m_PopupDIMissingFiles = Missing;
+	m_PopupDIModifiedFiles = Modified;
+
+	m_Popup = POPUP_DATAINTEGRITY;
+	SetActive(true);
+}
+
 bool CMenus::CanDisplayWarning()
 {
 	return m_Popup == POPUP_NONE;
@@ -1832,8 +1846,10 @@ int CMenus::Render()
 		const char *pExtraText = "";
 		const char *pButtonText = "";
 		int ExtraAlign = 0;
+		bool FullSize = false;
 
 		ColorRGBA BgColor = ColorRGBA{0.0f, 0.0f, 0.0f, 0.5f};
+
 		if(m_Popup == POPUP_MESSAGE)
 		{
 			pTitle = m_aMessageTopic;
@@ -1951,6 +1967,7 @@ int CMenus::Render()
 			pExtraText = aBuf;
 			pButtonText = Localize("Ok");
 			ExtraAlign = -1;
+			FullSize = true;
 		}
 		else if(m_Popup == POPUP_POINTS)
 		{
@@ -1978,10 +1995,16 @@ int CMenus::Render()
 			pButtonText = m_aMessageButton;
 			ExtraAlign = -1;
 		}
+		else if(m_Popup == POPUP_DATAINTEGRITY)
+		{
+			pTitle = "Data Integrity";
+			pExtraText = "Some text describing wtf this popup is about here";
+			FullSize = true;
+		}
 
 		CUIRect Box, Part;
 		Box = Screen;
-		if(m_Popup != POPUP_FIRST_LAUNCH)
+		if(!FullSize)
 		{
 			Box.VMargin(150.0f / UI()->Scale(), &Box);
 			Box.HMargin(150.0f / UI()->Scale(), &Box);
@@ -2618,6 +2641,72 @@ int CMenus::Render()
 				m_Popup = POPUP_NONE;
 				SetActive(false);
 			}
+		}
+		else if(m_Popup == POPUP_DATAINTEGRITY)
+		{
+			CUIRect Buttons, Extra, Missing, Modified;
+			Box.VMargin(20.0f, &Box);
+			Box.HSplitTop(10.0f, 0, &Box);
+			Box.HSplitBottom(20.0f, &Box, 0);
+			Box.HSplitBottom(24.0f, &Box, &Buttons);
+
+			Box.VSplitLeft(Box.w/3, &Extra, &Box);
+			Box.VSplitMid(&Missing, &Modified);
+
+			CUIRect ExtraHeader, MissingHeader, ModifiedHeader;
+			Extra.HSplitTop(20.0f, &ExtraHeader, &Extra);
+			Missing.HSplitTop(20.0f, &MissingHeader, &Missing);
+			Modified.HSplitTop(20.0f, &ModifiedHeader, &Modified);
+
+			UI()->DoLabel(&ExtraHeader, Localize("Extra Files"), FontSize/1.5f, 0, -1);
+			UI()->DoLabel(&MissingHeader, Localize("Missing Files"), FontSize/1.5f, 0, -1);
+			UI()->DoLabel(&ModifiedHeader, Localize("Modified Files"), FontSize/1.5f, 0, -1);
+
+			{
+				CUIRect Line;
+				unsigned i = 0;
+
+				Extra.HSplitTop(5.0f, 0, &Extra);
+				Line = Extra;
+				Line.h = FontSize/2;
+				while(Line.y + Line.h <= Extra.y + Extra.h && i < m_PopupDIExtraFiles.size())
+				{
+					UI()->DoLabel(&Line, m_PopupDIExtraFiles[i++].c_str(), FontSize/2, 0, -1);
+					Line.y += Line.h + 2.0f;
+				}
+
+				Missing.HSplitTop(5.0f, 0, &Missing);
+				Line = Missing;
+				Line.h = FontSize/2;
+				i = 0;
+				while(Line.y + Line.h <= Missing.y + Missing.h && i < m_PopupDIMissingFiles.size())
+				{
+					UI()->DoLabel(&Line, m_PopupDIMissingFiles[i++].c_str(), FontSize/2, 0, -1);
+					Line.y += Line.h + 2.0f;
+				}
+
+				Modified.HSplitTop(5.0f, 0, &Modified);
+				Line = Modified;
+				Line.h = FontSize/2;
+				i = 0;
+				while(Line.y + Line.h <= Modified.y + Modified.h && i < m_PopupDIModifiedFiles.size())
+				{
+					UI()->DoLabel(&Line, m_PopupDIModifiedFiles[i++].c_str(), FontSize/2, 0, -1);
+					Line.y += Line.h + 2.0f;
+				}
+			}
+
+			CUIRect Fix, Ignore;
+			Buttons.VSplitMid(&Fix, &Ignore);
+			Fix.VMargin(20.0f, &Fix);
+			Ignore.VMargin(20.0f, &Ignore);
+
+			static int s_FixButton = 0;
+			DoButton_Menu(&s_FixButton, Localize("Fix"), 0, &Fix);
+
+			static int s_IgnoreButton = 0;
+			if(DoButton_Menu(&s_IgnoreButton, Localize("Ignore"), 0, &Ignore))
+				m_Popup = POPUP_NONE;
 		}
 		else
 		{
