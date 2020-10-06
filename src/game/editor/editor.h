@@ -801,6 +801,7 @@ public:
 	bool IsQuadSelected(int Index);
 	int FindSelectedQuadIndex(int Index);
 
+	float ScaleFontSize(char *aBuf, float FontSize, int Width);
 	int DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, ColorRGBA Color = ColorRGBA(1, 1, 1, 0.5f));
 
 	int m_Mode;
