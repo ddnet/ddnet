@@ -1049,7 +1049,7 @@ public:
 	void RenderStatusbar(CUIRect View);
 	void RenderEnvelopeEditor(CUIRect View);
 	void RenderUndoList(CUIRect View);
-	void RenderServerSettingsEditor(CUIRect View);
+	void RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEditorLast);
 
 	void RenderMenubar(CUIRect Menubar);
 	void RenderFileDialog();

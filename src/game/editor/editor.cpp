@@ -5556,7 +5556,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 	}
 }
 
-void CEditor::RenderServerSettingsEditor(CUIRect View)
+void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEditorLast)
 {
 	static int s_CommandSelectedIndex = -1;
 
@@ -5576,6 +5576,9 @@ void CEditor::RenderServerSettingsEditor(CUIRect View)
 		Button.VSplitLeft(180.0f, &Button, 0);
 		static int s_ClearButton = 0;
 		DoClearableEditBox(&m_CommandBox, &s_ClearButton, &Button, m_aSettingsCommand, sizeof(m_aSettingsCommand), 12.0f, &m_CommandBox, false, CUI::CORNER_ALL);
+
+		if(!ShowServerSettingsEditorLast) // Just activated
+			UI()->SetActiveItem(&m_CommandBox);
 
 		// buttons
 		ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
@@ -5600,6 +5603,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View)
 					s_CommandSelectedIndex = m_Map.m_lSettings.size() - 1;
 				}
 			}
+			UI()->SetActiveItem(&m_CommandBox);
 		}
 
 		if(m_Map.m_lSettings.size() && s_CommandSelectedIndex > -1 && s_CommandSelectedIndex < m_Map.m_lSettings.size())
@@ -5629,6 +5633,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View)
 						str_copy(m_Map.m_lSettings[s_CommandSelectedIndex].m_aCommand, m_aSettingsCommand, sizeof(m_Map.m_lSettings[s_CommandSelectedIndex].m_aCommand));
 					}
 				}
+				UI()->SetActiveItem(&m_CommandBox);
 			}
 
 			ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
@@ -5638,11 +5643,10 @@ void CEditor::RenderServerSettingsEditor(CUIRect View)
 			{
 				m_Map.m_lSettings.remove_index(s_CommandSelectedIndex);
 				if(s_CommandSelectedIndex >= m_Map.m_lSettings.size())
-				{
 					s_CommandSelectedIndex = m_Map.m_lSettings.size() - 1;
-					if(s_CommandSelectedIndex >= 0)
-						str_copy(m_aSettingsCommand, m_Map.m_lSettings[s_CommandSelectedIndex].m_aCommand, sizeof(m_aSettingsCommand));
-				}
+				if(s_CommandSelectedIndex >= 0)
+					str_copy(m_aSettingsCommand, m_Map.m_lSettings[s_CommandSelectedIndex].m_aCommand, sizeof(m_aSettingsCommand));
+				UI()->SetActiveItem(&m_CommandBox);
 			}
 		}
 	}
@@ -5706,6 +5710,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View)
 			{
 				s_CommandSelectedIndex = i;
 				str_copy(m_aSettingsCommand, m_Map.m_lSettings[i].m_aCommand, sizeof(m_aSettingsCommand));
+				UI()->SetActiveItem(&m_CommandBox);
 			}
 		}
 		ListCur += 17.0f;
@@ -6147,8 +6152,12 @@ void CEditor::Render()
 				RenderEnvelopeEditor(ExtraEditor);
 			if(m_ShowUndo)
 				RenderUndoList(UndoList);
+			static bool s_ShowServerSettingsEditorLast = false;
 			if(m_ShowServerSettingsEditor)
-				RenderServerSettingsEditor(ExtraEditor);
+			{
+				RenderServerSettingsEditor(ExtraEditor, s_ShowServerSettingsEditorLast);
+			}
+			s_ShowServerSettingsEditorLast = m_ShowServerSettingsEditor;
 		}
 	}
 
