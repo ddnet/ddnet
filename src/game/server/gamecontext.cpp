@@ -1702,6 +1702,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if(Length == 0 || (pMsg->m_pMessage[0] != '/' && (g_Config.m_SvSpamprotection && pPlayer->m_LastChat && pPlayer->m_LastChat + Server()->TickSpeed() * ((31 + Length) / 32) > Server()->Tick())))
 				return;
 
+			pPlayer->UpdatePlaytime();
+
 			int GameTeam = ((CGameControllerDDRace *)m_pController)->m_Teams.m_Core.Team(pPlayer->GetCID());
 			if(Team)
 				Team = ((pPlayer->GetTeam() == -1) ? CHAT_SPEC : GameTeam);
@@ -1778,6 +1780,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		{
 			if(RateLimitPlayerVote(ClientID) || m_VoteCloseTime)
 				return;
+
+			m_apPlayers[ClientID]->UpdatePlaytime();
 
 			m_VoteType = VOTE_TYPE_UNKNOWN;
 			char aChatmsg[512] = {0};
@@ -2035,6 +2039,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			int64 Now = Server()->Tick();
 
 			pPlayer->m_LastVoteTry = Now;
+			pPlayer->UpdatePlaytime();
 
 			CNetMsg_Cl_Vote *pMsg = (CNetMsg_Cl_Vote *)pRawMsg;
 			if(!pMsg->m_Vote)
@@ -2144,6 +2149,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 
 			pPlayer->m_LastSetSpectatorMode = Server()->Tick();
+			pPlayer->UpdatePlaytime();
 			if(pMsg->m_SpectatorID >= 0 && (!m_apPlayers[pMsg->m_SpectatorID] || m_apPlayers[pMsg->m_SpectatorID]->GetTeam() == TEAM_SPECTATORS))
 				SendChatTarget(ClientID, "Invalid spectator id used");
 			else
@@ -2162,6 +2168,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 			}
 			pPlayer->m_LastChangeInfo = Server()->Tick();
+			pPlayer->UpdatePlaytime();
 
 			// set infos
 			char aOldName[MAX_NAME_LENGTH];
@@ -2252,6 +2259,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 
 			pPlayer->m_LastEmote = Server()->Tick();
+			pPlayer->UpdatePlaytime();
 
 			SendEmoticon(ClientID, pMsg->m_Emoticon);
 			CCharacter *pChr = pPlayer->GetCharacter();
