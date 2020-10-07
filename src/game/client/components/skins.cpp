@@ -187,6 +187,7 @@ void CSkins::Refresh()
 	}
 
 	m_aSkins.clear();
+	m_aDownloadSkins.clear();
 	Storage()->ListDirectory(IStorage::TYPE_ALL, "skins", SkinScan, this);
 	if(!m_aSkins.size())
 	{
