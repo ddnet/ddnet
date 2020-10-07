@@ -3,6 +3,8 @@
 #ifndef ENGINE_SHARED_CONFIG_H
 #define ENGINE_SHARED_CONFIG_H
 
+#include <base/detect.h>
+
 #define CONFIG_FILE "settings_ddnet.cfg"
 #define AUTOEXEC_FILE "autoexec.cfg"
 #define AUTOEXEC_CLIENT_FILE "autoexec_client.cfg"
