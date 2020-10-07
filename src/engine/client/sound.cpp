@@ -401,7 +401,7 @@ void CSound::RateConvert(int SampleID)
 
 	// allocate new data
 	NumFrames = (int)((pSample->m_NumFrames / (float)pSample->m_Rate) * m_MixingRate);
-	pNewData = (short *)calloc(NumFrames * pSample->m_Channels, sizeof(short));
+	pNewData = (short *)calloc((size_t)NumFrames * pSample->m_Channels, sizeof(short));
 
 	for(int i = 0; i < NumFrames; i++)
 	{
@@ -449,7 +449,7 @@ int CSound::DecodeOpus(int SampleID, const void *pData, unsigned DataSize)
 			return -1;
 		}
 
-		pSample->m_pData = (short *)calloc(NumSamples * NumChannels, sizeof(short));
+		pSample->m_pData = (short *)calloc((size_t)NumSamples * NumChannels, sizeof(short));
 
 		int Read;
 		int Pos = 0;
@@ -563,11 +563,11 @@ int CSound::DecodeWV(int SampleID, const void *pData, unsigned DataSize)
 			return -1;
 		}
 
-		int *pBuffer = (int *)calloc(NumSamples * NumChannels, sizeof(int));
+		int *pBuffer = (int *)calloc((size_t)NumSamples * NumChannels, sizeof(int));
 		WavpackUnpackSamples(pContext, pBuffer, NumSamples); // TODO: check return value
 		pSrc = pBuffer;
 
-		pSample->m_pData = (short *)calloc(NumSamples * NumChannels, sizeof(short));
+		pSample->m_pData = (short *)calloc((size_t)NumSamples * NumChannels, sizeof(short));
 		pDst = pSample->m_pData;
 
 		for(i = 0; i < NumSamples * NumChannels; i++)

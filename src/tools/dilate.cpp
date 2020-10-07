@@ -25,7 +25,7 @@ int DilateFile(const char *pFileName)
 		return 1;
 	}
 
-	unsigned char *pBuffer = (unsigned char *)malloc(Png.width * Png.height * sizeof(unsigned char) * 4);
+	unsigned char *pBuffer = (unsigned char *)malloc((size_t)Png.width * Png.height * sizeof(unsigned char) * 4);
 
 	Error = png_get_data(&Png, pBuffer);
 	if(Error != PNG_NO_ERROR)

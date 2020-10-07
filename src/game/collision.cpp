@@ -70,25 +70,25 @@ void CCollision::Init(class CLayers *pLayers)
 	if(m_pLayers->TeleLayer())
 	{
 		unsigned int Size = m_pLayers->Map()->GetDataSize(m_pLayers->TeleLayer()->m_Tele);
-		if(Size >= m_Width * m_Height * sizeof(CTeleTile))
+		if(Size >= (size_t)m_Width * m_Height * sizeof(CTeleTile))
 			m_pTele = static_cast<CTeleTile *>(m_pLayers->Map()->GetData(m_pLayers->TeleLayer()->m_Tele));
 	}
 
 	if(m_pLayers->SpeedupLayer())
 	{
 		unsigned int Size = m_pLayers->Map()->GetDataSize(m_pLayers->SpeedupLayer()->m_Speedup);
-		if(Size >= m_Width * m_Height * sizeof(CSpeedupTile))
+		if(Size >= (size_t)m_Width * m_Height * sizeof(CSpeedupTile))
 			m_pSpeedup = static_cast<CSpeedupTile *>(m_pLayers->Map()->GetData(m_pLayers->SpeedupLayer()->m_Speedup));
 	}
 
 	if(m_pLayers->SwitchLayer())
 	{
 		unsigned int Size = m_pLayers->Map()->GetDataSize(m_pLayers->SwitchLayer()->m_Switch);
-		if(Size >= m_Width * m_Height * sizeof(CSwitchTile))
+		if(Size >= (size_t)m_Width * m_Height * sizeof(CSwitchTile))
 			m_pSwitch = static_cast<CSwitchTile *>(m_pLayers->Map()->GetData(m_pLayers->SwitchLayer()->m_Switch));
 
 		m_pDoor = new CDoorTile[m_Width * m_Height];
-		mem_zero(m_pDoor, m_Width * m_Height * sizeof(CDoorTile));
+		mem_zero(m_pDoor, (size_t)m_Width * m_Height * sizeof(CDoorTile));
 	}
 	else
 	{
@@ -99,14 +99,14 @@ void CCollision::Init(class CLayers *pLayers)
 	if(m_pLayers->TuneLayer())
 	{
 		unsigned int Size = m_pLayers->Map()->GetDataSize(m_pLayers->TuneLayer()->m_Tune);
-		if(Size >= m_Width * m_Height * sizeof(CTuneTile))
+		if(Size >= (size_t)m_Width * m_Height * sizeof(CTuneTile))
 			m_pTune = static_cast<CTuneTile *>(m_pLayers->Map()->GetData(m_pLayers->TuneLayer()->m_Tune));
 	}
 
 	if(m_pLayers->FrontLayer())
 	{
 		unsigned int Size = m_pLayers->Map()->GetDataSize(m_pLayers->FrontLayer()->m_Front);
-		if(Size >= m_Width * m_Height * sizeof(CTile))
+		if(Size >= (size_t)m_Width * m_Height * sizeof(CTile))
 			m_pFront = static_cast<CTile *>(m_pLayers->Map()->GetData(m_pLayers->FrontLayer()->m_Front));
 	}
 
@@ -156,7 +156,7 @@ void CCollision::FillAntibot(CAntibotMapData *pMapData)
 {
 	pMapData->m_Width = m_Width;
 	pMapData->m_Height = m_Height;
-	pMapData->m_pTiles = (unsigned char *)malloc(m_Width * m_Height);
+	pMapData->m_pTiles = (unsigned char *)malloc((size_t)m_Width * m_Height);
 	for(int i = 0; i < m_Width * m_Height; i++)
 	{
 		pMapData->m_pTiles[i] = 0;

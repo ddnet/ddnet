@@ -326,7 +326,7 @@ void *CCommandProcessorFragment_OpenGL::Resize(int Width, int Height, int NewWid
 
 	int Bpp = TexFormatToImageColorChannelCount(Format);
 
-	pTmpData = (unsigned char *)malloc(NewWidth * NewHeight * Bpp);
+	pTmpData = (unsigned char *)malloc((size_t)NewWidth * NewHeight * Bpp);
 
 	ResizeImage((uint8_t *)pData, Width, Height, (uint8_t *)pTmpData, NewWidth, NewHeight, Bpp);
 
@@ -726,7 +726,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 			bool IsSingleLayer = (pCommand->m_Flags & (CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER | CCommandBuffer::TEXFLAG_TO_3D_TEXTURE_SINGLE_LAYER)) != 0;
 
 			if(!IsSingleLayer)
-				p3DImageData = (uint8_t *)malloc(ImageColorChannels * Width * Height);
+				p3DImageData = (uint8_t *)malloc((size_t)ImageColorChannels * Width * Height);
 			int Image3DWidth, Image3DHeight;
 
 			int ConvertWidth = Width;
@@ -832,7 +832,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Screenshot(const CCommandBuffer::SCom
 	int h = aViewport[3];
 
 	// we allocate one more row to use when we are flipping the texture
-	unsigned char *pPixelData = (unsigned char *)malloc(w * (h + 1) * 3);
+	unsigned char *pPixelData = (unsigned char *)malloc((size_t)w * (h + 1) * 3);
 	unsigned char *pTempRow = pPixelData + w * h * 3;
 
 	// fetch the pixels
@@ -1211,7 +1211,7 @@ bool CCommandProcessorFragment_OpenGL2::DoAnalyzeStep(size_t StepN, size_t Check
 	int w = aViewport[2];
 	int h = aViewport[3];
 
-	size_t PixelDataSize = w * h * 3;
+	size_t PixelDataSize = (size_t)w * h * 3;
 	if(PixelDataSize == 0)
 		return false;
 	uint8_t *pPixelData = (uint8_t *)malloc(PixelDataSize);
@@ -2821,7 +2821,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 			bool IsSingleLayer = (pCommand->m_Flags & CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER) != 0;
 
 			if(!IsSingleLayer)
-				p3DImageData = (uint8_t *)malloc(ImageColorChannels * Width * Height);
+				p3DImageData = (uint8_t *)malloc((size_t)ImageColorChannels * Width * Height);
 			int Image3DWidth, Image3DHeight;
 
 			int ConvertWidth = Width;
@@ -2995,7 +2995,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Screenshot(const CCommandBuffer::S
 	int h = aViewport[3];
 
 	// we allocate one more row to use when we are flipping the texture
-	unsigned char *pPixelData = (unsigned char *)malloc(w * (h + 1) * 3);
+	unsigned char *pPixelData = (unsigned char *)malloc((size_t)w * (h + 1) * 3);
 	unsigned char *pTempRow = pPixelData + w * h * 3;
 
 	// fetch the pixels

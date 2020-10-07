@@ -41,7 +41,7 @@ CLayerTiles::CLayerTiles(int w, int h)
 	m_AutoAutoMap = false;
 
 	m_pTiles = new CTile[m_Width * m_Height];
-	mem_zero(m_pTiles, m_Width * m_Height * sizeof(CTile));
+	mem_zero(m_pTiles, (size_t)m_Width * m_Height * sizeof(CTile));
 }
 
 CLayerTiles::~CLayerTiles()
@@ -559,7 +559,7 @@ void CLayerTiles::BrushRotate(float Amount)
 	{
 		// 90° rotation
 		CTile *pTempData = new CTile[m_Width * m_Height];
-		mem_copy(pTempData, m_pTiles, m_Width * m_Height * sizeof(CTile));
+		mem_copy(pTempData, m_pTiles, (size_t)m_Width * m_Height * sizeof(CTile));
 		CTile *pDst = m_pTiles;
 		bool Rotate = !(m_Game || m_Front) || m_pEditor->m_AllowPlaceUnusedTiles;
 		for(int x = 0; x < m_Width; ++x)
@@ -592,7 +592,7 @@ void CLayerTiles::BrushRotate(float Amount)
 void CLayerTiles::Resize(int NewW, int NewH)
 {
 	CTile *pNewData = new CTile[NewW * NewH];
-	mem_zero(pNewData, NewW * NewH * sizeof(CTile));
+	mem_zero(pNewData, (size_t)NewW * NewH * sizeof(CTile));
 
 	// copy old data
 	for(int y = 0; y < minimum(NewH, m_Height); y++)
@@ -1107,7 +1107,7 @@ CLayerTele::CLayerTele(int w, int h) :
 	m_Tele = 1;
 
 	m_pTeleTile = new CTeleTile[w * h];
-	mem_zero(m_pTeleTile, w * h * sizeof(CTeleTile));
+	mem_zero(m_pTeleTile, (size_t)w * h * sizeof(CTeleTile));
 }
 
 CLayerTele::~CLayerTele()
@@ -1119,7 +1119,7 @@ void CLayerTele::Resize(int NewW, int NewH)
 {
 	// resize tele data
 	CTeleTile *pNewTeleData = new CTeleTile[NewW * NewH];
-	mem_zero(pNewTeleData, NewW * NewH * sizeof(CTeleTile));
+	mem_zero(pNewTeleData, (size_t)NewW * NewH * sizeof(CTeleTile));
 
 	// copy old data
 	for(int y = 0; y < minimum(NewH, m_Height); y++)
@@ -1292,8 +1292,8 @@ void CLayerTele::BrushRotate(float Amount)
 		// 90° rotation
 		CTeleTile *pTempData1 = new CTeleTile[m_Width * m_Height];
 		CTile *pTempData2 = new CTile[m_Width * m_Height];
-		mem_copy(pTempData1, m_pTeleTile, m_Width * m_Height * sizeof(CTeleTile));
-		mem_copy(pTempData2, m_pTiles, m_Width * m_Height * sizeof(CTile));
+		mem_copy(pTempData1, m_pTeleTile, (size_t)m_Width * m_Height * sizeof(CTeleTile));
+		mem_copy(pTempData2, m_pTiles, (size_t)m_Width * m_Height * sizeof(CTile));
 		CTeleTile *pDst1 = m_pTeleTile;
 		CTile *pDst2 = m_pTiles;
 		for(int x = 0; x < m_Width; ++x)
@@ -1395,7 +1395,7 @@ CLayerSpeedup::CLayerSpeedup(int w, int h) :
 	m_Speedup = 1;
 
 	m_pSpeedupTile = new CSpeedupTile[w * h];
-	mem_zero(m_pSpeedupTile, w * h * sizeof(CSpeedupTile));
+	mem_zero(m_pSpeedupTile, (size_t)w * h * sizeof(CSpeedupTile));
 }
 
 CLayerSpeedup::~CLayerSpeedup()
@@ -1407,7 +1407,7 @@ void CLayerSpeedup::Resize(int NewW, int NewH)
 {
 	// resize speedup data
 	CSpeedupTile *pNewSpeedupData = new CSpeedupTile[NewW * NewH];
-	mem_zero(pNewSpeedupData, NewW * NewH * sizeof(CSpeedupTile));
+	mem_zero(pNewSpeedupData, (size_t)NewW * NewH * sizeof(CSpeedupTile));
 
 	// copy old data
 	for(int y = 0; y < minimum(NewH, m_Height); y++)
@@ -1597,8 +1597,8 @@ void CLayerSpeedup::BrushRotate(float Amount)
 		// 90° rotation
 		CSpeedupTile *pTempData1 = new CSpeedupTile[m_Width * m_Height];
 		CTile *pTempData2 = new CTile[m_Width * m_Height];
-		mem_copy(pTempData1, m_pSpeedupTile, m_Width * m_Height * sizeof(CSpeedupTile));
-		mem_copy(pTempData2, m_pTiles, m_Width * m_Height * sizeof(CTile));
+		mem_copy(pTempData1, m_pSpeedupTile, (size_t)m_Width * m_Height * sizeof(CSpeedupTile));
+		mem_copy(pTempData2, m_pTiles, (size_t)m_Width * m_Height * sizeof(CTile));
 		CSpeedupTile *pDst1 = m_pSpeedupTile;
 		CTile *pDst2 = m_pTiles;
 		for(int x = 0; x < m_Width; ++x)
@@ -1739,7 +1739,7 @@ CLayerSwitch::CLayerSwitch(int w, int h) :
 	m_Switch = 1;
 
 	m_pSwitchTile = new CSwitchTile[w * h];
-	mem_zero(m_pSwitchTile, w * h * sizeof(CSwitchTile));
+	mem_zero(m_pSwitchTile, (size_t)w * h * sizeof(CSwitchTile));
 }
 
 CLayerSwitch::~CLayerSwitch()
@@ -1751,7 +1751,7 @@ void CLayerSwitch::Resize(int NewW, int NewH)
 {
 	// resize switch data
 	CSwitchTile *pNewSwitchData = new CSwitchTile[NewW * NewH];
-	mem_zero(pNewSwitchData, NewW * NewH * sizeof(CSwitchTile));
+	mem_zero(pNewSwitchData, (size_t)NewW * NewH * sizeof(CSwitchTile));
 
 	// copy old data
 	for(int y = 0; y < minimum(NewH, m_Height); y++)
@@ -1938,8 +1938,8 @@ void CLayerSwitch::BrushRotate(float Amount)
 		// 90° rotation
 		CSwitchTile *pTempData1 = new CSwitchTile[m_Width * m_Height];
 		CTile *pTempData2 = new CTile[m_Width * m_Height];
-		mem_copy(pTempData1, m_pSwitchTile, m_Width * m_Height * sizeof(CSwitchTile));
-		mem_copy(pTempData2, m_pTiles, m_Width * m_Height * sizeof(CTile));
+		mem_copy(pTempData1, m_pSwitchTile, (size_t)m_Width * m_Height * sizeof(CSwitchTile));
+		mem_copy(pTempData2, m_pTiles, (size_t)m_Width * m_Height * sizeof(CTile));
 		CSwitchTile *pDst1 = m_pSwitchTile;
 		CTile *pDst2 = m_pTiles;
 		for(int x = 0; x < m_Width; ++x)
@@ -2055,7 +2055,7 @@ CLayerTune::CLayerTune(int w, int h) :
 	m_Tune = 1;
 
 	m_pTuneTile = new CTuneTile[w * h];
-	mem_zero(m_pTuneTile, w * h * sizeof(CTuneTile));
+	mem_zero(m_pTuneTile, (size_t)w * h * sizeof(CTuneTile));
 }
 
 CLayerTune::~CLayerTune()
@@ -2067,7 +2067,7 @@ void CLayerTune::Resize(int NewW, int NewH)
 {
 	// resize Tune data
 	CTuneTile *pNewTuneData = new CTuneTile[NewW * NewH];
-	mem_zero(pNewTuneData, NewW * NewH * sizeof(CTuneTile));
+	mem_zero(pNewTuneData, (size_t)NewW * NewH * sizeof(CTuneTile));
 
 	// copy old data
 	for(int y = 0; y < minimum(NewH, m_Height); y++)
@@ -2242,8 +2242,8 @@ void CLayerTune::BrushRotate(float Amount)
 		// 90° rotation
 		CTuneTile *pTempData1 = new CTuneTile[m_Width * m_Height];
 		CTile *pTempData2 = new CTile[m_Width * m_Height];
-		mem_copy(pTempData1, m_pTuneTile, m_Width * m_Height * sizeof(CTuneTile));
-		mem_copy(pTempData2, m_pTiles, m_Width * m_Height * sizeof(CTile));
+		mem_copy(pTempData1, m_pTuneTile, (size_t)m_Width * m_Height * sizeof(CTuneTile));
+		mem_copy(pTempData2, m_pTiles, (size_t)m_Width * m_Height * sizeof(CTile));
 		CTuneTile *pDst1 = m_pTuneTile;
 		CTile *pDst2 = m_pTiles;
 		for(int x = 0; x < m_Width; ++x)

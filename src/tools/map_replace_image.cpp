@@ -46,7 +46,7 @@ int LoadPNG(CImageInfo *pImg, const char *pFilename)
 		return 0;
 	}
 
-	pBuffer = (unsigned char *)malloc(Png.width * Png.height * Png.bpp);
+	pBuffer = (unsigned char *)malloc((size_t)Png.width * Png.height * Png.bpp);
 	Error = png_get_data(&Png, pBuffer);
 	if(Error != PNG_NO_ERROR)
 	{
