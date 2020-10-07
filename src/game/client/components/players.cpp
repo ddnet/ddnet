@@ -564,7 +564,7 @@ void CPlayers::RenderPlayer(
 		RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position);
 
 	int QuadOffsetToEmoticon = NUM_WEAPONS * 2 + 2 + 2;
-	if(Player.m_PlayerFlags & PLAYERFLAG_CHATTING)
+	if((Player.m_PlayerFlags & PLAYERFLAG_CHATTING) && !m_pClient->m_aClients[ClientID].m_Afk)
 	{
 		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_EMOTICONS].m_Id);
 		int QuadOffset = QuadOffsetToEmoticon + (SPRITE_DOTDOT - SPRITE_OOP);
@@ -578,7 +578,7 @@ void CPlayers::RenderPlayer(
 	if(ClientID < 0)
 		return;
 
-	if(g_Config.m_ClAfkEmote && m_pClient->m_aClients[ClientID].m_Afk && !(Player.m_PlayerFlags & PLAYERFLAG_CHATTING) && !(Client()->DummyConnected() && ClientID == m_pClient->m_LocalIDs[!g_Config.m_ClDummy]))
+	if(g_Config.m_ClAfkEmote && m_pClient->m_aClients[ClientID].m_Afk && !(Client()->DummyConnected() && ClientID == m_pClient->m_LocalIDs[!g_Config.m_ClDummy]))
 	{
 		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_EMOTICONS].m_Id);
 		int QuadOffset = QuadOffsetToEmoticon + (SPRITE_ZZZ - SPRITE_OOP);
