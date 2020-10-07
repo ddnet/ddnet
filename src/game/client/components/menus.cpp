@@ -1850,15 +1850,17 @@ int CMenus::Render()
 					}
 				}
 			}
-			Box.HSplitBottom(40.f, &Box, &Part);
+			Box.HSplitBottom(30.f, &Box, 0);
 			Box.HSplitBottom(20.f, &Box, &Part);
+			Box.HSplitBottom(10.f, &Box, 0);
 
+			float ButtonSize = 20.0f;
 			Part.VSplitLeft(113.0f, 0, &Part);
-			Part.VSplitLeft(Button.h, &Button, &Part);
+			Part.VSplitLeft(ButtonSize, &Button, &Part);
 			if(DoButton_CheckBox(&g_Config.m_ClVideoShowChat, Localize("Show chat"), g_Config.m_ClVideoShowChat, &Button))
 				g_Config.m_ClVideoShowChat ^= 1;
 			Part.VSplitLeft(112.0f, 0, &Part);
-			Part.VSplitLeft(Button.h, &Button, &Part);
+			Part.VSplitLeft(ButtonSize, &Button, &Part);
 			if(DoButton_CheckBox(&g_Config.m_ClVideoSndEnable, Localize("Use sounds"), g_Config.m_ClVideoSndEnable, &Button))
 				g_Config.m_ClVideoSndEnable ^= 1;
 
@@ -1874,14 +1876,14 @@ int CMenus::Render()
 			bool IncDemoSpeed = false, DecDemoSpeed = false;
 			// slowdown
 			Part.VSplitLeft(5.0f, 0, &Part);
-			Part.VSplitLeft(Button.h, &Button, &Part);
+			Part.VSplitLeft(ButtonSize, &Button, &Part);
 			static int s_SlowDownButton = 0;
 			if(DoButton_Sprite(&s_SlowDownButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_SLOWER, 0, &Button, CUI::CORNER_ALL))
 				DecDemoSpeed = true;
 
 			// fastforward
 			Part.VSplitLeft(5.0f, 0, &Part);
-			Part.VSplitLeft(Button.h, &Button, &Part);
+			Part.VSplitLeft(ButtonSize, &Button, &Part);
 			static int s_FastForwardButton = 0;
 			if(DoButton_Sprite(&s_FastForwardButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_FASTER, 0, &Button, CUI::CORNER_ALL))
 				IncDemoSpeed = true;
@@ -1898,7 +1900,7 @@ int CMenus::Render()
 				m_Speed = clamp(m_Speed - 1, 0, (int)(sizeof(g_aSpeeds) / sizeof(g_aSpeeds[0]) - 1));
 
 			Part.VSplitLeft(107.0f, 0, &Part);
-			Part.VSplitLeft(Button.h, &Button, &Part);
+			Part.VSplitLeft(ButtonSize, &Button, &Part);
 			if(DoButton_CheckBox(&g_Config.m_ClVideoShowhud, Localize("Show ingame HUD"), g_Config.m_ClVideoShowhud, &Button))
 				g_Config.m_ClVideoShowhud ^= 1;
 
