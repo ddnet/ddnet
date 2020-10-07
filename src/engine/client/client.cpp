@@ -770,6 +770,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 	m_RconAuthed[0] = 0;
 	m_CanReceiveServerCapabilities = true;
 	m_ServerSentCapabilities = false;
+	m_ServerCapabilities.m_ChatTimeoutCode = false;
 	m_UseTempRconCommands = 0;
 	m_pConsole->DeregisterTempAll();
 	m_NetClient[CLIENT_MAIN].Disconnect(pReason);
