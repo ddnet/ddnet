@@ -756,6 +756,7 @@ int CMenus::DemolistFetchCallback(const char *pName, time_t Date, int IsDir, int
 		str_format(Item.m_aName, sizeof(Item.m_aName), "%s/", pName);
 		Item.m_InfosLoaded = false;
 		Item.m_Valid = false;
+		Item.m_Date = 0;
 	}
 	else
 	{
