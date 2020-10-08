@@ -4,6 +4,7 @@
 #define BASE_TL_ALGORITHM_H
 
 #include "base/tl/range.h"
+#include <algorithm>
 #include <functional>
 
 /*
@@ -108,7 +109,7 @@ void sort_quick(R range)
 template<class R>
 void sort(R range)
 {
-	sort_bubble(range);
+	std::sort(&range.front(), &range.back() + 1);
 }
 
 template<class R>

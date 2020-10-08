@@ -347,7 +347,7 @@ struct CEnvPoint
 	int m_Curvetype;
 	int m_aValues[4]; // 1-4 depending on envelope (22.10 fixed point)
 
-	bool operator<(const CEnvPoint &Other) { return m_Time < Other.m_Time; }
+	bool operator<(const CEnvPoint &Other) const { return m_Time < Other.m_Time; }
 };
 
 struct CMapItemEnvelope_v1

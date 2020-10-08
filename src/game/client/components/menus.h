@@ -316,7 +316,7 @@ protected:
 		const CFriendInfo *m_pFriendInfo;
 		int m_NumFound;
 
-		bool operator<(const CFriendItem &Other)
+		bool operator<(const CFriendItem &Other) const
 		{
 			if(m_NumFound && !Other.m_NumFound)
 				return true;
@@ -473,7 +473,7 @@ public:
 		CGhostItem() :
 			m_Slot(-1), m_Own(false) { m_aFilename[0] = 0; }
 
-		bool operator<(const CGhostItem &Other) { return m_Time < Other.m_Time; }
+		bool operator<(const CGhostItem &Other) const { return m_Time < Other.m_Time; }
 
 		bool Active() const { return m_Slot != -1; }
 		bool HasFile() const { return m_aFilename[0]; }

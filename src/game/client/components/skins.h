@@ -20,10 +20,10 @@ public:
 		char m_aName[24];
 		ColorRGBA m_BloodColor;
 
-		bool operator<(const CSkin &Other) { return str_comp(m_aName, Other.m_aName) < 0; }
+		bool operator<(const CSkin &Other) const { return str_comp(m_aName, Other.m_aName) < 0; }
 
-		bool operator<(const char *pOther) { return str_comp(m_aName, pOther) < 0; }
-		bool operator==(const char *pOther) { return !str_comp(m_aName, pOther); }
+		bool operator<(const char *pOther) const { return str_comp(m_aName, pOther) < 0; }
+		bool operator==(const char *pOther) const { return !str_comp(m_aName, pOther); }
 	};
 
 	struct CDownloadSkin
@@ -32,9 +32,9 @@ public:
 		char m_aPath[MAX_PATH_LENGTH];
 		char m_aName[24];
 
-		bool operator<(const CDownloadSkin &Other) { return str_comp(m_aName, Other.m_aName) < 0; }
-		bool operator<(const char *pOther) { return str_comp(m_aName, pOther) < 0; }
-		bool operator==(const char *pOther) { return !str_comp(m_aName, pOther); }
+		bool operator<(const CDownloadSkin &Other) const { return str_comp(m_aName, Other.m_aName) < 0; }
+		bool operator<(const char *pOther) const { return str_comp(m_aName, pOther) < 0; }
+		bool operator==(const char *pOther) const { return !str_comp(m_aName, pOther); }
 	};
 
 	void OnInit();
