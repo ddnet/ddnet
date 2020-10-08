@@ -1302,7 +1302,7 @@ public:
 	string m_FileName;
 	int m_CountryCode;
 
-	bool operator<(const CLanguage &Other) { return m_Name < Other.m_Name; }
+	bool operator<(const CLanguage &Other) const { return m_Name < Other.m_Name; }
 };
 
 void LoadLanguageIndexfile(IStorage *pStorage, IConsole *pConsole, sorted_array<CLanguage> *pLanguages)
