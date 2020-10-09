@@ -75,6 +75,7 @@ private:
 		while((bytes = io_read(f, aBuf, sizeof(aBuf))) > 0)
 			sha256_update(&ctx, aBuf, bytes);
 
+		io_close(f);
 		SHA256_DIGEST Digest = sha256_finish(&ctx);
 		if(g_aDataHashes[Index].m_Hash != Digest)
 			return 0;
