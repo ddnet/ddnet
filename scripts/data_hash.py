@@ -43,7 +43,7 @@ SHashEntry g_aDataHashes[{1}] = {{\
 """.format(pathlen + 1, len(files)))
 
 for f in files:
-    print('\t{{"{}",{}}},'.format(f[0], f[1]))
+    print('\t{{"{}",{}}},'.format(f[0].replace("\\", "\\\\"), f[1]))
 
 print("};\n")
 print("""\
