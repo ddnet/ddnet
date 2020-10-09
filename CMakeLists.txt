@@ -1616,7 +1616,8 @@ set_src(GAME_SHARED GLOB src/game
 )
 # A bit hacky, but these are needed to register all the UUIDs, even for stuff
 # that doesn't link game.
-set(ENGINE_UUID_SHARED
+set(ENGINE_SHARED_HACK
+  src/game/generated/data_hash.h
   src/game/generated/protocolglue.h
   src/game/generated/protocol7.cpp
   src/game/generated/protocol7.h
@@ -1631,7 +1632,7 @@ foreach(s ${GAME_SHARED})
     list(REMOVE_ITEM GAME_SHARED ${s})
   endif()
 endforeach()
-list(REMOVE_ITEM GAME_SHARED ${ENGINE_UUID_SHARED})
+list(REMOVE_ITEM GAME_SHARED ${ENGINE_SHARED_HACK})
 set(GAME_GENERATED_SHARED
   src/game/generated/data_hash.h
   src/game/generated/git_revision.cpp
@@ -1654,7 +1655,7 @@ set(LIBS
 )
 
 # Targets
-add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_UUID_SHARED} ${BASE})
+add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_SHARED_HACK} ${BASE})
 add_library(game-shared EXCLUDE_FROM_ALL OBJECT ${GAME_SHARED} ${GAME_GENERATED_SHARED})
 list(APPEND TARGETS_OWN engine-shared game-shared)
 
