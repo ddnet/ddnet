@@ -12,7 +12,6 @@ public:
 		CLEAN = 0,
 		GETTING_MANIFEST,
 		GOT_MANIFEST,
-		PARSING_UPDATE,
 		DOWNLOADING,
 		MOVE_FILES,
 		NEED_RESTART,
@@ -23,8 +22,8 @@ public:
 	virtual void InitiateUpdate() = 0;
 
 	virtual int GetCurrentState() = 0;
-	virtual void GetCurrentFile(char *pBuf, int BufSize) = 0;
-	virtual int GetCurrentPercent() = 0;
+	virtual float GetCurrentProgress() = 0;
+	virtual void GetDownloadSpeed(char *pBuf, int BufSize) = 0;
 };
 
 #endif

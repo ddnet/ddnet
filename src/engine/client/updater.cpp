@@ -9,13 +9,11 @@
 
 #include <stdlib.h> // system
 
-using std::map;
-using std::string;
-
 class CUpdaterFetchTask : public CGetFile
 {
 	char m_aBuf[256];
 	char m_aBuf2[256];
+	int m_PreviousDownloaded;
 	CUpdater *m_pUpdater;
 
 	virtual void OnProgress();
@@ -45,43 +43,29 @@ static const char *GetUpdaterDestPath(char *pBuf, int BufSize, const char *pFile
 
 CUpdaterFetchTask::CUpdaterFetchTask(CUpdater *pUpdater, const char *pFile, const char *pDestPath) :
 	CGetFile(pUpdater->m_pStorage, GetUpdaterUrl(m_aBuf, sizeof(m_aBuf), pFile), GetUpdaterDestPath(m_aBuf2, sizeof(m_aBuf), pFile, pDestPath), -2, CTimeout{0, 0, 0}),
-	m_pUpdater(pUpdater)
+	m_PreviousDownloaded(0), m_pUpdater(pUpdater)
 {
-}
-
-void CUpdaterFetchTask::OnProgress()
-{
-	lock_wait(m_pUpdater->m_Lock);
-	str_copy(m_pUpdater->m_aStatus, Dest(), sizeof(m_pUpdater->m_aStatus));
-	m_pUpdater->m_Percent = Progress();
-	lock_unlock(m_pUpdater->m_Lock);
 }
 
 int CUpdaterFetchTask::OnCompletion(int State)
 {
 	State = CGetFile::OnCompletion(State);
 
-	const char *b = 0;
-	for(const char *a = Dest(); *a; a++)
-		if(*a == '/')
-			b = a + 1;
-	b = b ? b : Dest();
-	if(!str_comp(b, "update.json"))
-	{
-		if(State == HTTP_DONE)
-			m_pUpdater->SetCurrentState(IUpdater::GOT_MANIFEST);
-		else if(State == HTTP_ERROR)
-			m_pUpdater->SetCurrentState(IUpdater::FAIL);
-	}
-	else if(!str_comp(b, m_pUpdater->m_aLastFile))
-	{
-		if(State == HTTP_DONE)
-			m_pUpdater->SetCurrentState(IUpdater::MOVE_FILES);
-		else if(State == HTTP_ERROR)
-			m_pUpdater->SetCurrentState(IUpdater::FAIL);
-	}
+	if(State == HTTP_DONE)
+		m_pUpdater->m_CompletedFetchJobs++;
+	else if(State == HTTP_ERROR)
+		m_pUpdater->m_State = IUpdater::FAIL;
 
 	return State;
+}
+
+void CUpdaterFetchTask::OnProgress()
+{
+	if(m_pUpdater->m_State == IUpdater::FAIL)
+		Abort();
+
+	m_pUpdater->m_TotalDownloaded += Current() - m_PreviousDownloaded;
+	m_PreviousDownloaded = Current();
 }
 
 CUpdater::CUpdater()
@@ -90,7 +74,8 @@ CUpdater::CUpdater()
 	m_pStorage = NULL;
 	m_pEngine = NULL;
 	m_State = CLEAN;
-	m_Percent = 0;
+	m_DownloadStart = 0;
+	m_TotalDownloaded = 0;
 	m_Lock = lock_create();
 
 	str_format(m_aClientExecTmp, sizeof(m_aClientExecTmp), CLIENT_EXEC ".%d.tmp", pid());
@@ -110,39 +95,24 @@ CUpdater::~CUpdater()
 	lock_destroy(m_Lock);
 }
 
-void CUpdater::SetCurrentState(int NewState)
+float CUpdater::GetCurrentProgress()
 {
-	lock_wait(m_Lock);
-	m_State = NewState;
-	lock_unlock(m_Lock);
+	return m_CompletedFetchJobs / (float)m_FetchJobs.size();
 }
 
-int CUpdater::GetCurrentState()
+void CUpdater::GetDownloadSpeed(char *pBuf, int BufSize)
 {
-	lock_wait(m_Lock);
-	int Result = m_State;
-	lock_unlock(m_Lock);
-	return Result;
+	float KB = m_TotalDownloaded / 1024;
+	float s = (float)(time_get() - m_DownloadStart) / time_freq();
+	str_format(pBuf, BufSize, "%d KB/s", s > 0 ? round_to_int(KB/s) : 0);
 }
 
-void CUpdater::GetCurrentFile(char *pBuf, int BufSize)
+std::shared_ptr<CUpdaterFetchTask> CUpdater::FetchFile(const char *pFile, const char *pDestPath)
 {
-	lock_wait(m_Lock);
-	str_copy(pBuf, m_aStatus, BufSize);
-	lock_unlock(m_Lock);
-}
+	m_FetchJobs.emplace_back(std::make_shared<CUpdaterFetchTask>(this, pFile, pDestPath));
+	m_pEngine->AddJob(m_FetchJobs.back());
 
-int CUpdater::GetCurrentPercent()
-{
-	lock_wait(m_Lock);
-	int Result = m_Percent;
-	lock_unlock(m_Lock);
-	return Result;
-}
-
-void CUpdater::FetchFile(const char *pFile, const char *pDestPath)
-{
-	m_pEngine->AddJob(std::make_shared<CUpdaterFetchTask>(this, pFile, pDestPath));
+	return m_FetchJobs.back();
 }
 
 bool CUpdater::MoveFile(const char *pFile)
@@ -181,20 +151,29 @@ void CUpdater::Update()
 {
 	switch(m_State)
 	{
-	case IUpdater::GOT_MANIFEST:
-		PerformUpdate();
+	case GETTING_MANIFEST:
+		switch(m_ManifestJob->Status())
+		{
+		case HTTP_DONE:
+			m_State = GOT_MANIFEST;
+			break;
+		case HTTP_ERROR:
+		case HTTP_ABORTED:
+			m_State = FAIL;
+		}
 		break;
-	case IUpdater::MOVE_FILES:
+	case GOT_MANIFEST:
+		PerformUpdate(ParseUpdate());
+		break;
+	case DOWNLOADING:
+		if(m_CompletedFetchJobs == m_FetchJobs.size())
+			m_State = MOVE_FILES;
+		break;
+	case MOVE_FILES:
+		m_FetchJobs.clear();
 		CommitUpdate();
 		break;
-	default:
-		return;
 	}
-}
-
-void CUpdater::AddFileJob(const char *pFile, bool Job)
-{
-	m_FileJobs[string(pFile)] = Job;
 }
 
 bool CUpdater::ReplaceClient()
@@ -248,12 +227,14 @@ bool CUpdater::ReplaceServer()
 	return Success;
 }
 
-void CUpdater::ParseUpdate()
+std::map<std::string, bool> CUpdater::ParseUpdate()
 {
+	dbg_msg("updater", "parsing update.json");
+
 	char aPath[512];
 	IOHANDLE File = m_pStorage->OpenFile(m_pStorage->GetBinaryPath("update/update.json", aPath, sizeof aPath), IOFLAG_READ, IStorage::TYPE_ABSOLUTE);
 	if(!File)
-		return;
+		return {};
 
 	long int Length = io_length(File);
 	char *pBuf = (char *)malloc(Length);
@@ -264,6 +245,7 @@ void CUpdater::ParseUpdate()
 	json_value *pVersions = json_parse(pBuf, Length);
 	free(pBuf);
 
+	std::map<std::string, bool> Jobs;
 	if(pVersions && pVersions->type == json_array)
 	{
 		for(int i = 0; i < json_array_length(pVersions); i++)
@@ -279,46 +261,37 @@ void CUpdater::ParseUpdate()
 				if((pTemp = json_object_get(pCurrent, "download"))->type == json_array)
 				{
 					for(int j = 0; j < json_array_length(pTemp); j++)
-						AddFileJob(json_string_get(json_array_get(pTemp, j)), true);
+						Jobs[json_string_get(json_array_get(pTemp, j))] = true;
 				}
 				if((pTemp = json_object_get(pCurrent, "remove"))->type == json_array)
 				{
 					for(int j = 0; j < json_array_length(pTemp); j++)
-						AddFileJob(json_string_get(json_array_get(pTemp, j)), false);
+						Jobs[json_string_get(json_array_get(pTemp, j))] = false;
 				}
 			}
 			else
 				break;
 		}
 	}
+
+	return Jobs;
 }
 
 void CUpdater::InitiateUpdate()
 {
 	m_State = GETTING_MANIFEST;
-	FetchFile("update.json");
+	m_DownloadStart = time_get();
+	m_ManifestJob = FetchFile("update.json");
 }
 
-void CUpdater::PerformUpdate()
+void CUpdater::PerformUpdate(const std::map<std::string, bool> &Jobs)
 {
-	m_State = PARSING_UPDATE;
-	dbg_msg("updater", "parsing update.json");
-	ParseUpdate();
 	m_State = DOWNLOADING;
+	m_FileJobs = Jobs;
 
-	const char *pLastFile;
-	pLastFile = "";
-	for(map<string, bool>::reverse_iterator it = m_FileJobs.rbegin(); it != m_FileJobs.rend(); ++it)
+	for(const auto &FileJob : Jobs)
 	{
-		if(it->second)
-		{
-			pLastFile = it->first.c_str();
-			break;
-		}
-	}
-
-	for(auto &FileJob : m_FileJobs)
-	{
+		dbg_msg("debug", "considering %s %s", FileJob.first.c_str(), FileJob.second ? "true" : "false");
 		if(FileJob.second)
 		{
 			const char *pFile = FileJob.first.c_str();
@@ -349,24 +322,16 @@ void CUpdater::PerformUpdate()
 			{
 				FetchFile(pFile);
 			}
-			pLastFile = pFile;
 		}
 		else
 			m_pStorage->RemoveBinaryFile(FileJob.first.c_str());
 	}
 
 	if(m_ServerUpdate)
-	{
 		FetchFile(PLAT_SERVER_DOWN, m_aServerExecTmp);
-		pLastFile = m_aServerExecTmp;
-	}
-	if(m_ClientUpdate)
-	{
-		FetchFile(PLAT_CLIENT_DOWN, m_aClientExecTmp);
-		pLastFile = m_aClientExecTmp;
-	}
 
-	str_copy(m_aLastFile, pLastFile, sizeof(m_aLastFile));
+	if(m_ClientUpdate)
+		FetchFile(PLAT_CLIENT_DOWN, m_aClientExecTmp);
 }
 
 void CUpdater::CommitUpdate()
@@ -379,7 +344,6 @@ void CUpdater::CommitUpdate()
 
 	if(m_ClientUpdate)
 		Success &= ReplaceClient();
-	if(m_ServerUpdate)
 		Success &= ReplaceServer();
 	if(!Success)
 		m_State = FAIL;

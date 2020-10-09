@@ -183,9 +183,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	}
 	else if(State >= IUpdater::GETTING_MANIFEST && State < IUpdater::NEED_RESTART)
 	{
-		char aCurrentFile[64];
-		Updater()->GetCurrentFile(aCurrentFile, sizeof(aCurrentFile));
-		str_format(aBuf, sizeof(aBuf), Localize("Downloading %s:"), aCurrentFile);
+		Updater()->GetDownloadSpeed(aBuf, sizeof(aBuf));
 	}
 	else if(State == IUpdater::FAIL)
 	{
@@ -231,7 +229,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		ProgressBar.y += 2.0f;
 		ProgressBar.HMargin(1.0f, &ProgressBar);
 		RenderTools()->DrawUIRect(&ProgressBar, vec4(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 5.0f);
-		ProgressBar.w = clamp((float)Updater()->GetCurrentPercent(), 10.0f, 100.0f);
+		ProgressBar.w *= Updater()->GetCurrentProgress();
 		RenderTools()->DrawUIRect(&ProgressBar, vec4(1.0f, 1.0f, 1.0f, 0.5f), CUI::CORNER_ALL, 5.0f);
 	}
 #elif defined(CONF_INFORM_UPDATE)

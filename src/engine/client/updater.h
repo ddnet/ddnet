@@ -5,6 +5,7 @@
 #include <engine/updater.h>
 #include <map>
 #include <string>
+#include <vector>
 
 #define CLIENT_EXEC "DDNet"
 #define SERVER_EXEC "DDNet-Server"
@@ -32,6 +33,8 @@
 #define PLAT_CLIENT_EXEC CLIENT_EXEC PLAT_EXT
 #define PLAT_SERVER_EXEC SERVER_EXEC PLAT_EXT
 
+class CUpdaterFetchTask;
+
 class CUpdater : public IUpdater
 {
 	friend class CUpdaterFetchTask;
@@ -44,10 +47,7 @@ class CUpdater : public IUpdater
 
 	LOCK m_Lock;
 
-	int m_State;
-	char m_aStatus[256] GUARDED_BY(m_Lock);
-	int m_Percent GUARDED_BY(m_Lock);
-	char m_aLastFile[256];
+	std::atomic<int> m_State;
 	char m_aClientExecTmp[64];
 	char m_aServerExecTmp[64];
 
@@ -55,27 +55,31 @@ class CUpdater : public IUpdater
 	bool m_ServerUpdate;
 
 	std::map<std::string, bool> m_FileJobs;
+	std::vector<std::shared_ptr<CUpdaterFetchTask>> m_FetchJobs;
+	int64 m_DownloadStart;
+	std::atomic<int> m_TotalDownloaded;
+	std::atomic<unsigned> m_CompletedFetchJobs;
 
-	void AddFileJob(const char *pFile, bool Job);
-	void FetchFile(const char *pFile, const char *pDestPath = 0);
+	std::shared_ptr<CUpdaterFetchTask> m_ManifestJob;
+
+	std::shared_ptr<CUpdaterFetchTask> FetchFile(const char *pFile, const char *pDestPath = 0);
+	void OnProgress();
 	bool MoveFile(const char *pFile);
 
-	void ParseUpdate();
-	void PerformUpdate();
+	std::map<std::string, bool> ParseUpdate();
+	void PerformUpdate(const std::map<std::string, bool> &Jobs);
 	void CommitUpdate();
 
 	bool ReplaceClient();
 	bool ReplaceServer();
 
-	void SetCurrentState(int NewState);
-
 public:
 	CUpdater();
 	~CUpdater();
 
-	int GetCurrentState();
-	void GetCurrentFile(char *pBuf, int BufSize);
-	int GetCurrentPercent();
+	int GetCurrentState() { return m_State; }
+	float GetCurrentProgress();
+	void GetDownloadSpeed(char *pBuf, int BufSize);
 
 	virtual void InitiateUpdate();
 	void Init();
