@@ -15,6 +15,7 @@
 #	Ubu				2011-04-04 21:09:05
 #	Choupom			2011-07-02 19:23:49
 #	SunnyPistache & Pipou   2020-07-09 21:09:00
+#	SunnyPistache & Pipou   2020-10-03 09:29:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -451,12 +452,6 @@ Spectator mode
 
 Spectators
 == Spectateurs
-
-Standard gametype
-== Types de jeu standards
-
-Standard map
-== Cartes standards
 
 Stop record
 == Arrêter l'enregistrement
@@ -1108,9 +1103,6 @@ Learn
 Restart
 == Redémarrer
 
-AntiPing limit
-== Limite de l'AntiPing
-
 AntiPing: predict weapons
 == AntiPing: prédit le comportement des armes
 
@@ -1195,75 +1187,111 @@ Show DDNet map finishes in server browser
 transmits your player name to info2.ddnet.tw
 == transmet votre pseudonyme à info2.ddnet.tw
 
+Downloading ddnet-info.json failed
+== Le téléchargement de ddnet-info.json a échoué
+
+Saving ddnet-settings.cfg failed
+== L'enregistrement de ddnet-settings.cfg a échoué
+
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== 
+== La largeur ou la hauteur de la texture %s n'est pas divisible par 16, ce qui pourrait causer des bugs visuels
 
 Warning
-== 
+== Alerte
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 
+== Appuyez sur "k" pour mourir (recommencer) et "a" pour vous mettre en pause afin de regarder les autres joueurs. Allez dans les configurations pour voir davantage de raccourcis.
 
 Country / Region
-== 
+== Pays / Region
 
 Speed
-== 
+== Vitesse
 
-Search:
-== 
-
-Exclude:
-== 
-
-Search servers:
-== 
+Theme
+== Thème
 
 %d of %d servers
-== 
+== %d sur %d serveurs
 
 %d of %d server
-== 
+== %d sur %d serveur
 
 %d players
-== 
+== %d joueurs
 
 %d player
-== 
+== %d joueur
+
+File
+== Fichier
+
+Demos directory
+== Répertoire des enregistrements
 
 Skip the main menu
-== 
+== Passer le menu principal
+
+Themes directory
+== Répertoire des thèmes
 
 Download skins
-== 
+== Télécharger des skins
+
+Skin Database
+== Base de données de skins
+
+Skins directory
+== Répertoire des skins
+
+Background music volume
+== Volume de la musique de fond
+
+Assets
+== Assets
 
 Client message
-== 
+== Message du client
 
 Show others (own team only)
-== 
+== Montrer les autres (de sa propre équipe uniquement)
+
+Use current map as background
+== Utiliser la carte actuelle en tant qu'arrière-plan
+
+Entities
+== Entités
+
+Emoticons
+== Émoticônes
+
+Particles
+== Particles
+
+Assets directory
+== Répertoire des assets
 
 https://wiki.ddnet.tw/
-== 
+== https://wiki.ddnet.tw/
 
 Website
-== 
+== Site web
 
 Settings
-== 
+== Configurations
 
 Stop server
-== 
+== Arrêter le serveur
 
 Run server
-== 
+== Démarrer le serveur
 
 Server executable not found, can't run server
-== 
+== L'exécutable du serveur est introuvable, le serveur ne peut donc pas démarrer
 
 Editor
-== 
+== Éditeur
 
 [Start menu]
 Play
-== 
+== Jouer

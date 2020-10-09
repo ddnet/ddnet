@@ -12,12 +12,11 @@ class CSnapshotItem
 public:
 	int m_TypeAndID;
 
-	int *Data() { return (int *)(this+1); }
-	int Type() { return m_TypeAndID>>16; }
-	int ID() { return m_TypeAndID&0xffff; }
+	int *Data() { return (int *)(this + 1); }
+	int Type() { return m_TypeAndID >> 16; }
+	int ID() { return m_TypeAndID & 0xffff; }
 	int Key() { return m_TypeAndID; }
 };
-
 
 class CSnapshot
 {
@@ -25,19 +24,23 @@ class CSnapshot
 	int m_DataSize;
 	int m_NumItems;
 
-	int *Offsets() const { return (int *)(this+1); }
-	char *DataStart() const { return (char*)(Offsets()+m_NumItems); }
+	int *Offsets() const { return (int *)(this + 1); }
+	char *DataStart() const { return (char *)(Offsets() + m_NumItems); }
 
 public:
 	enum
 	{
-		OFFSET_UUID_TYPE=0x4000,
-		MAX_TYPE=0x7fff,
-		MAX_PARTS=64,
-		MAX_SIZE=MAX_PARTS*1024
+		OFFSET_UUID_TYPE = 0x4000,
+		MAX_TYPE = 0x7fff,
+		MAX_PARTS = 64,
+		MAX_SIZE = MAX_PARTS * 1024
 	};
 
-	void Clear() { m_DataSize = 0; m_NumItems = 0; }
+	void Clear()
+	{
+		m_DataSize = 0;
+		m_NumItems = 0;
+	}
 	int NumItems() const { return m_NumItems; }
 	CSnapshotItem *GetItem(int Index);
 	int GetItemSize(int Index);
@@ -48,7 +51,6 @@ public:
 	void DebugDump();
 	static void RemoveExtraInfo(unsigned char *pData);
 };
-
 
 // CSnapshotDelta
 
@@ -86,7 +88,6 @@ public:
 	int UnpackDelta(class CSnapshot *pFrom, class CSnapshot *pTo, void *pData, int DataSize);
 };
 
-
 // CSnapshotStorage
 
 class CSnapshotStorage
@@ -105,7 +106,6 @@ public:
 		CSnapshot *m_pSnap;
 		CSnapshot *m_pAltSnap;
 	};
-
 
 	CHolder *m_pFirst;
 	CHolder *m_pLast;
@@ -153,6 +153,5 @@ public:
 
 	int Finish(void *Snapdata);
 };
-
 
 #endif // ENGINE_SNAPSHOT_H

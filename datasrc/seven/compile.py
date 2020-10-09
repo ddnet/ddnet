@@ -99,6 +99,8 @@ if gen_network_header:
 
 	print("#ifndef GAME_GENERATED_PROTOCOL7_H")
 	print("#define GAME_GENERATED_PROTOCOL7_H")
+	print("#include <engine/shared/protocol.h>")
+	print("#include <engine/message.h>")
 	print("namespace protocol7 {")
 	print(network.RawHeader)
 
@@ -177,9 +179,9 @@ if gen_network_source:
 	# create names
 	lines = []
 
+	lines += ['#include "protocol7.h"']
 	lines += ['#include <engine/shared/protocol.h>']
 	lines += ['#include <engine/message.h>']
-	lines += ['#include "protocol7.h"']
 
 	lines += ['namespace protocol7 {']
 

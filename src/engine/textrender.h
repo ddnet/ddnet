@@ -10,21 +10,21 @@
 
 enum
 {
-	TEXTFLAG_RENDER=1,
-	TEXTFLAG_ALLOW_NEWLINE=2,
-	TEXTFLAG_STOP_AT_END=4
+	TEXTFLAG_RENDER = 1,
+	TEXTFLAG_ALLOW_NEWLINE = 2,
+	TEXTFLAG_STOP_AT_END = 4
 };
 
 enum ETextRenderFlags
 {
-	TEXT_RENDER_FLAG_NO_X_BEARING = 1<<0,
-	TEXT_RENDER_FLAG_NO_Y_BEARING = 1<<1,
-	TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH = 1<<2,
-	TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT = 1<<3,
-	TEXT_RENDER_FLAG_KERNING = 1<<4,
-	TEXT_RENDER_FLAG_NO_OVERSIZE = 1<<5,
-	TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING = 1<<6,
-	TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE = 1<<7,
+	TEXT_RENDER_FLAG_NO_X_BEARING = 1 << 0,
+	TEXT_RENDER_FLAG_NO_Y_BEARING = 1 << 1,
+	TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH = 1 << 2,
+	TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT = 1 << 3,
+	TEXT_RENDER_FLAG_KERNING = 1 << 4,
+	TEXT_RENDER_FLAG_NO_OVERSIZE = 1 << 5,
+	TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING = 1 << 6,
+	TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE = 1 << 7,
 };
 
 enum
@@ -82,7 +82,6 @@ public:
 	virtual bool LoadFallbackFont(CFont *pFont, const char *pFilename, const unsigned char *pBuf, size_t Size) = 0;
 	virtual CFont *GetFont(int FontIndex) = 0;
 	virtual CFont *GetFont(const char *pFilename) = 0;
-	virtual void DestroyFont(CFont *pFont) = 0;
 
 	virtual void SetDefaultFont(CFont *pFont) = 0;
 	virtual void SetCurFont(CFont *pFont) = 0;

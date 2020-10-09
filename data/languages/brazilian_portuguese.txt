@@ -462,12 +462,6 @@ Spectator mode
 Spectators
 == Observadores
 
-Standard gametype
-== Tipo de jogo padrão
-
-Standard map
-== Mapa padrão
-
 Stop record
 == Parar a gravação
 
@@ -641,9 +635,6 @@ Show votes window after voting
 
 HUD
 == HUD
-
-AntiPing limit
-== Limite de AntiPing
 
 Look out!
 == Cuidado!
@@ -1206,15 +1197,6 @@ Country / Region
 Speed
 == Velocidade
 
-Search:
-== Pesquisar:
-
-Exclude:
-== Excluir:
-
-Search servers:
-== Pesquisar servidores:
-
 %d of %d servers
 == %d de %d servidores
 
@@ -1257,3 +1239,48 @@ Editor
 [Start menu]
 Play
 == Jogar
+
+Downloading ddnet-info.json failed
+== Falha ao baixar ddnet-info.json
+
+Saving ddnet-settings.cfg failed
+== Falha ao salvar ddnet-settings.cfg
+
+Theme
+== Tema
+
+File
+== Arquivo
+
+Demos directory
+== Diretório de demos
+
+Themes directory
+== Diretório de temas
+
+Skin Database
+== Banco de Dados de Skins
+
+Skins directory
+== Diretório de skins
+
+Background music volume
+== Volume da música de fundo
+
+Assets
+== Ativos
+
+Use current map as background
+== Usar o mapa atual como plano de fundo
+
+Entities
+== Entidades
+
+Emoticons
+== Emoticons
+
+Particles
+== Partículas
+
+Assets directory
+== Diretório de ativos

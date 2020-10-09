@@ -10,15 +10,15 @@
 #include <engine/server.h>
 
 #include <engine/map.h>
-#include <engine/shared/demo.h>
-#include <engine/shared/protocol.h>
-#include <engine/shared/snapshot.h>
-#include <engine/shared/network.h>
 #include <engine/server/register.h>
 #include <engine/shared/console.h>
+#include <engine/shared/demo.h>
 #include <engine/shared/econ.h>
 #include <engine/shared/fifo.h>
 #include <engine/shared/netban.h>
+#include <engine/shared/network.h>
+#include <engine/shared/protocol.h>
+#include <engine/shared/snapshot.h>
 #include <engine/shared/uuid_manager.h>
 
 #include <base/tl/array.h>
@@ -29,15 +29,15 @@
 #include "authmanager.h"
 #include "name_ban.h"
 
-#if defined (CONF_UPNP)
-	#include "upnp.h"
+#if defined(CONF_UPNP)
+#include "upnp.h"
 #endif
 
 class CSnapIDPool
 {
 	enum
 	{
-		MAX_IDS = 16*1024,
+		MAX_IDS = 16 * 1024,
 	};
 
 	class CID
@@ -57,7 +57,6 @@ class CSnapIDPool
 	int m_InUsage;
 
 public:
-
 	CSnapIDPool();
 
 	void Reset();
@@ -67,12 +66,12 @@ public:
 	void FreeID(int ID);
 };
 
-
 class CServerBan : public CNetBan
 {
 	class CServer *m_pServer;
 
-	template<class T> int BanExt(T *pBanPool, const typename T::CDataType *pData, int Seconds, const char *pReason);
+	template<class T>
+	int BanExt(T *pBanPool, const typename T::CDataType *pData, int Seconds, const char *pReason);
 
 public:
 	class CServer *Server() const { return m_pServer; }
@@ -86,7 +85,6 @@ public:
 	static void ConBanRegion(class IConsole::IResult *pResult, void *pUser);
 	static void ConBanRegionRange(class IConsole::IResult *pResult, void *pUser);
 };
-
 
 class CServer : public IServer
 {
@@ -116,13 +114,12 @@ public:
 
 	enum
 	{
-		MAX_RCONCMD_SEND=16,
+		MAX_RCONCMD_SEND = 16,
 	};
 
 	class CClient
 	{
 	public:
-
 		enum
 		{
 			STATE_EMPTY = 0,
@@ -132,11 +129,11 @@ public:
 			STATE_READY,
 			STATE_INGAME,
 
-			SNAPRATE_INIT=0,
+			SNAPRATE_INIT = 0,
 			SNAPRATE_FULL,
 			SNAPRATE_RECOVER,
 
-			DNSBL_STATE_NONE=0,
+			DNSBL_STATE_NONE = 0,
 			DNSBL_STATE_PENDING,
 			DNSBL_STATE_BLACKLISTED,
 			DNSBL_STATE_WHITELISTED,
@@ -217,9 +214,9 @@ public:
 
 	enum
 	{
-		UNINITIALIZED=0,
-		RUNNING=1,
-		STOPPING=2
+		UNINITIALIZED = 0,
+		RUNNING = 1,
+		STOPPING = 2
 	};
 
 	int m_RunServer;
@@ -235,7 +232,7 @@ public:
 
 	enum
 	{
-		SIX=0,
+		SIX = 0,
 		SIXUP,
 	};
 
@@ -245,7 +242,7 @@ public:
 	unsigned char *m_apCurrentMapData[2];
 	unsigned int m_aCurrentMapSize[2];
 
-	CDemoRecorder m_aDemoRecorder[MAX_CLIENTS+1];
+	CDemoRecorder m_aDemoRecorder[MAX_CLIENTS + 1];
 	CRegister m_Register;
 	CRegister m_RegSixup;
 	CAuthManager m_AuthManager;
@@ -322,9 +319,11 @@ public:
 
 	void ProcessClientPacket(CNetChunk *pPacket);
 
-	class CCache {
+	class CCache
+	{
 	public:
-		class CCacheChunk {
+		class CCacheChunk
+		{
 		public:
 			CCacheChunk(const void *pData, int Size);
 			CCacheChunk(const CCacheChunk &) = delete;
@@ -412,7 +411,6 @@ public:
 
 	void RegisterCommands();
 
-
 	virtual int SnapNewID();
 	virtual void SnapFreeID(int ID);
 	virtual void *SnapNewItem(int Type, int ID, int Size);
@@ -426,13 +424,13 @@ public:
 	unsigned m_AnnouncementLastLine;
 	void RestrictRconOutput(int ClientID) { m_RconRestrict = ClientID; }
 
-	virtual int* GetIdMap(int ClientID);
+	virtual int *GetIdMap(int ClientID);
 
 	void InitDnsbl(int ClientID);
 	bool DnsblWhite(int ClientID)
 	{
 		return m_aClients[ClientID].m_DnsblState == CClient::DNSBL_STATE_NONE ||
-		m_aClients[ClientID].m_DnsblState == CClient::DNSBL_STATE_WHITELISTED;
+		       m_aClients[ClientID].m_DnsblState == CClient::DNSBL_STATE_WHITELISTED;
 	}
 	bool DnsblPending(int ClientID)
 	{
@@ -460,13 +458,12 @@ public:
 #ifdef CONF_FAMILY_UNIX
 	enum CONN_LOGGING_CMD
 	{
-		OPEN_SESSION=1,
-		CLOSE_SESSION=2,
+		OPEN_SESSION = 1,
+		CLOSE_SESSION = 2,
 	};
 
 	void SendConnLoggingCommand(CONN_LOGGING_CMD cmd, const NETADDR *pAddr);
 #endif
-
 };
 
 #endif

@@ -1,10 +1,10 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <engine/shared/config.h>
 #include <engine/graphics.h>
+#include <engine/shared/config.h>
 #include <engine/textrender.h>
-#include <game/generated/protocol.h>
 #include <game/generated/client_data.h>
+#include <game/generated/protocol.h>
 
 #include <game/client/gameclient.h>
 
@@ -23,13 +23,13 @@ void CBroadcast::OnRender()
 	if(m_pClient->m_pScoreboard->Active() || m_pClient->m_pMotd->IsActive() || !g_Config.m_ClShowBroadcasts)
 		return;
 
-	Graphics()->MapScreen(0, 0, 300*Graphics()->ScreenAspect(), 300);
+	Graphics()->MapScreen(0, 0, 300 * Graphics()->ScreenAspect(), 300);
 
 	if(Client()->GameTick(g_Config.m_ClDummy) < m_BroadcastTick)
 	{
 		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, m_BroadcastRenderOffset, 40.0f, 12.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
-		Cursor.m_LineWidth = 300*Graphics()->ScreenAspect()-m_BroadcastRenderOffset;
+		TextRender()->SetCursor(&Cursor, m_BroadcastRenderOffset, 40.0f, 12.0f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
+		Cursor.m_LineWidth = 300 * Graphics()->ScreenAspect() - m_BroadcastRenderOffset;
 		TextRender()->TextEx(&Cursor, m_aBroadcastText, -1);
 	}
 }
@@ -42,21 +42,21 @@ void CBroadcast::OnMessage(int MsgType, void *pRawMsg)
 		str_copy(m_aBroadcastText, pMsg->m_pMessage, sizeof(m_aBroadcastText));
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, 0, 0, 12.0f, TEXTFLAG_STOP_AT_END);
-		Cursor.m_LineWidth = 300*Graphics()->ScreenAspect();
+		Cursor.m_LineWidth = 300 * Graphics()->ScreenAspect();
 		TextRender()->TextEx(&Cursor, m_aBroadcastText, -1);
-		m_BroadcastRenderOffset = 150*Graphics()->ScreenAspect()-Cursor.m_X/2;
-		m_BroadcastTick = Client()->GameTick(g_Config.m_ClDummy)+Client()->GameTickSpeed()*10;
-		if (g_Config.m_ClPrintBroadcasts)
+		m_BroadcastRenderOffset = 150 * Graphics()->ScreenAspect() - Cursor.m_X / 2;
+		m_BroadcastTick = Client()->GameTick(g_Config.m_ClDummy) + Client()->GameTickSpeed() * 10;
+		if(g_Config.m_ClPrintBroadcasts)
 		{
 			char aBuf[1024];
 			int i, ii;
-			for (i = 0, ii = 0; i < str_length(m_aBroadcastText); i++)
+			for(i = 0, ii = 0; i < str_length(m_aBroadcastText); i++)
 			{
-				if (m_aBroadcastText[i] == '\n')
+				if(m_aBroadcastText[i] == '\n')
 				{
 					aBuf[ii] = '\0';
 					ii = 0;
-					if (aBuf[0])
+					if(aBuf[0])
 						m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aBuf, true);
 				}
 				else
@@ -66,7 +66,7 @@ void CBroadcast::OnMessage(int MsgType, void *pRawMsg)
 				}
 			}
 			aBuf[ii] = '\0';
-			if (aBuf[0])
+			if(aBuf[0])
 				m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aBuf, true);
 		}
 	}

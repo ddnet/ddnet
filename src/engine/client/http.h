@@ -1,9 +1,9 @@
 #ifndef ENGINE_CLIENT_HTTP_H
 #define ENGINE_CLIENT_HTTP_H
 
+#include <engine/kernel.h>
 #include <engine/shared/jobs.h>
 #include <engine/storage.h>
-#include <engine/kernel.h>
 
 typedef struct _json_value json_value;
 typedef void CURL;
@@ -78,7 +78,17 @@ public:
 	CGet(const char *pUrl, CTimeout Timeout);
 	~CGet();
 
-	size_t ResultSize() const { if(!Result()) { return 0; } else { return m_BufferSize; } }
+	size_t ResultSize() const
+	{
+		if(!Result())
+		{
+			return 0;
+		}
+		else
+		{
+			return m_BufferSize;
+		}
+	}
 	unsigned char *Result() const;
 	unsigned char *TakeResult();
 	json_value *ResultJson() const;
@@ -104,7 +114,6 @@ public:
 
 	const char *Dest() const { return m_aDest; }
 };
-
 
 class CPostJson : public CRequest
 {

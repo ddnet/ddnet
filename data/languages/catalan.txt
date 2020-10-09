@@ -441,12 +441,6 @@ Spectator mode
 Spectators
 == Espectadors
 
-Standard gametype
-== Tipus de joc estàndard
-
-Standard map
-== Mapa estàndard
-
 Stop record
 == Parar la grabació
 
@@ -933,9 +927,6 @@ Switch weapon when out of ammo
 AntiPing: predict grenade paths
 == AntiPing: predir el camí de la granada
 
-AntiPing limit
-== Límit del AntiPing
-
 Inner color
 == Color interior
 
@@ -1167,6 +1158,12 @@ Replay %3d:%02d
 9+ new mentions
 == 9+ noves mencions
 
+Downloading ddnet-info.json failed
+== 
+
+Saving ddnet-settings.cfg failed
+== 
+
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
 == 
 
@@ -1182,13 +1179,7 @@ Country / Region
 Speed
 == 
 
-Search:
-== 
-
-Exclude:
-== 
-
-Search servers:
+Theme
 == 
 
 %d of %d servers
@@ -1203,13 +1194,49 @@ Search servers:
 %d player
 == 
 
+File
+== 
+
+Demos directory
+== 
+
 Skip the main menu
+== 
+
+Themes directory
 == 
 
 Download skins
 == 
 
+Skin Database
+== 
+
+Skins directory
+== 
+
+Background music volume
+== 
+
+Assets
+== 
+
 Client message
+== 
+
+Use current map as background
+== 
+
+Entities
+== 
+
+Emoticons
+== 
+
+Particles
+== 
+
+Assets directory
 == 
 
 https://wiki.ddnet.tw/

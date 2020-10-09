@@ -208,7 +208,13 @@ Pistol
 Play
 == ﻥﺩﺮﻛ ىﺯﺎﺑ
 
+Downloading ddnet-info.json failed
+== 
+
 Successfully saved the replay!
+== 
+
+Saving ddnet-settings.cfg failed
 == 
 
 Replay feature is disabled!
@@ -388,28 +394,22 @@ Show DDNet map finishes in server browser
 transmits your player name to info2.ddnet.tw
 == 
 
+Theme
+== 
+
 Type
 == 
 
 Refreshing master servers
 == 
 
-Search:
-== 
-
-Exclude:
-== 
-
-Server address:
-== 
-
-Search servers:
-== 
-
 Search
 == 
 
 Exclude
+== 
+
+Server address:
 == 
 
 %d of %d servers
@@ -434,12 +434,6 @@ Server not full
 == 
 
 Show friends only
-== 
-
-Standard gametype
-== 
-
-Standard map
 == 
 
 Strict gametype filter
@@ -485,6 +479,9 @@ Please use a different name
 == 
 
 Remove chat
+== 
+
+File
 == 
 
 Created:
@@ -533,6 +530,9 @@ Date
 == 
 
 Fetch Info
+== 
+
+Demos directory
 == 
 
 Rename
@@ -637,6 +637,9 @@ Refresh Rate
 Show console window
 == 
 
+Themes directory
+== 
+
 Automatically take statboard screenshot
 == 
 
@@ -665,6 +668,12 @@ Skin prefix
 == 
 
 Skins
+== 
+
+Skin Database
+== 
+
+Skins directory
 == 
 
 Hook collisions
@@ -829,6 +838,9 @@ Sound volume
 Map sound volume
 == 
 
+Background music volume
+== 
+
 HUD
 == 
 
@@ -836,6 +848,9 @@ Sound
 == 
 
 DDNet
+== 
+
+Assets
 == 
 
 DDNet Client needs to be restarted to complete update!
@@ -967,9 +982,6 @@ Show others (own team only)
 Show quads
 == 
 
-AntiPing limit
-== 
-
 AntiPing
 == 
 
@@ -997,6 +1009,9 @@ Background (regular)
 Background (entities)
 == 
 
+Use current map as background
+== 
+
 Show tiles layers from BG map
 == 
 
@@ -1022,6 +1037,18 @@ Check now
 == 
 
 New random timeout code
+== 
+
+Entities
+== 
+
+Emoticons
+== 
+
+Particles
+== 
+
+Assets directory
 == 
 
 Learn

@@ -3,9 +3,12 @@
 #ifndef ENGINE_CLIENT_SERVERBROWSER_H
 #define ENGINE_CLIENT_SERVERBROWSER_H
 
-#include <engine/serverbrowser.h>
-#include <engine/shared/memheap.h>
+#include <engine/config.h>
 #include <engine/external/json-parser/json.h>
+#include <engine/masterserver.h>
+#include <engine/serverbrowser.h>
+#include <engine/shared/config.h>
+#include <engine/shared/memheap.h>
 
 class CServerBrowser : public IServerBrowser
 {
@@ -38,7 +41,12 @@ public:
 		char m_aTypes[MAX_SERVERS][32];
 		int m_NumServers;
 
-		void Reset() { m_NumServers = 0; m_FlagID = -1; m_aName[0] = '\0'; };
+		void Reset()
+		{
+			m_NumServers = 0;
+			m_FlagID = -1;
+			m_aName[0] = '\0';
+		};
 		/*void Add(NETADDR Addr, char* pType) {
 			if (m_NumServers < MAX_SERVERS)
 			{
@@ -51,9 +59,9 @@ public:
 
 	enum
 	{
-		MAX_FAVORITES=2048,
-		MAX_COUNTRIES=16,
-		MAX_TYPES=32,
+		MAX_FAVORITES = 2048,
+		MAX_COUNTRIES = 16,
+		MAX_TYPES = 32,
 	};
 
 	struct CNetwork
@@ -64,7 +72,6 @@ public:
 		char m_aTypes[MAX_TYPES][32];
 		int m_NumTypes;
 	};
-
 
 	CServerBrowser();
 	virtual ~CServerBrowser();

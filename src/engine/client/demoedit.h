@@ -2,6 +2,8 @@
 #define ENGINE_CLIENT_DEMOEDIT_H
 
 #include <engine/client/http.h>
+#include <engine/shared/demo.h>
+#include <engine/shared/snapshot.h>
 
 #define CONNECTLINK "ddnet:"
 

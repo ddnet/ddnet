@@ -1,7 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <base/system.h>
 #include "network.h"
+#include <base/system.h>
 
 void CConsoleNetConnection::Reset()
 {
@@ -16,15 +16,15 @@ void CConsoleNetConnection::Reset()
 	m_BufferOffset = 0;
 
 	m_LineEndingDetected = false;
-	#if defined(CONF_FAMILY_WINDOWS)
-		m_aLineEnding[0] = '\r';
-		m_aLineEnding[1] = '\n';
-		m_aLineEnding[2] = 0;
-	#else
-		m_aLineEnding[0] = '\n';
-		m_aLineEnding[1] = 0;
-		m_aLineEnding[2] = 0;
-	#endif
+#if defined(CONF_FAMILY_WINDOWS)
+	m_aLineEnding[0] = '\r';
+	m_aLineEnding[1] = '\n';
+	m_aLineEnding[2] = 0;
+#else
+	m_aLineEnding[0] = '\n';
+	m_aLineEnding[1] = 0;
+	m_aLineEnding[2] = 0;
+#endif
 }
 
 void CConsoleNetConnection::Init(NETSOCKET Socket, const NETADDR *pAddr)
@@ -62,7 +62,7 @@ int CConsoleNetConnection::Update()
 			return -1;
 		}
 
-		int Bytes = net_tcp_recv(m_Socket, m_aBuffer+m_BufferOffset, (int)(sizeof(m_aBuffer))-m_BufferOffset);
+		int Bytes = net_tcp_recv(m_Socket, m_aBuffer + m_BufferOffset, (int)(sizeof(m_aBuffer)) - m_BufferOffset);
 
 		if(Bytes > 0)
 		{
@@ -102,9 +102,9 @@ int CConsoleNetConnection::Recv(char *pLine, int MaxLength)
 				if(!m_LineEndingDetected)
 				{
 					m_aLineEnding[0] = m_aBuffer[StartOffset];
-					if(StartOffset+1 < m_BufferOffset && (m_aBuffer[StartOffset+1] == '\r' || m_aBuffer[StartOffset+1] == '\n') &&
-						m_aBuffer[StartOffset] != m_aBuffer[StartOffset+1])
-						m_aLineEnding[1] = m_aBuffer[StartOffset+1];
+					if(StartOffset + 1 < m_BufferOffset && (m_aBuffer[StartOffset + 1] == '\r' || m_aBuffer[StartOffset + 1] == '\n') &&
+						m_aBuffer[StartOffset] != m_aBuffer[StartOffset + 1])
+						m_aLineEnding[1] = m_aBuffer[StartOffset + 1];
 					m_LineEndingDetected = true;
 				}
 
@@ -123,7 +123,7 @@ int CConsoleNetConnection::Recv(char *pLine, int MaxLength)
 				{
 					if(StartOffset > 0)
 					{
-						mem_move(m_aBuffer, m_aBuffer+StartOffset, m_BufferOffset-StartOffset);
+						mem_move(m_aBuffer, m_aBuffer + StartOffset, m_BufferOffset - StartOffset);
 						m_BufferOffset -= StartOffset;
 					}
 					return 0;
@@ -131,19 +131,19 @@ int CConsoleNetConnection::Recv(char *pLine, int MaxLength)
 			}
 
 			// extract message and update buffer
-			if(MaxLength-1 < EndOffset-StartOffset)
+			if(MaxLength - 1 < EndOffset - StartOffset)
 			{
 				if(StartOffset > 0)
 				{
-					mem_move(m_aBuffer, m_aBuffer+StartOffset, m_BufferOffset-StartOffset);
+					mem_move(m_aBuffer, m_aBuffer + StartOffset, m_BufferOffset - StartOffset);
 					m_BufferOffset -= StartOffset;
 				}
 				return 0;
 			}
-			mem_copy(pLine, m_aBuffer+StartOffset, EndOffset-StartOffset);
-			pLine[EndOffset-StartOffset] = 0;
+			mem_copy(pLine, m_aBuffer + StartOffset, EndOffset - StartOffset);
+			pLine[EndOffset - StartOffset] = 0;
 			str_sanitize_cc(pLine);
-			mem_move(m_aBuffer, m_aBuffer+EndOffset, m_BufferOffset-EndOffset);
+			mem_move(m_aBuffer, m_aBuffer + EndOffset, m_BufferOffset - EndOffset);
 			m_BufferOffset -= EndOffset;
 			return 1;
 		}
@@ -157,11 +157,11 @@ int CConsoleNetConnection::Send(const char *pLine)
 		return -1;
 
 	char aBuf[1024];
-	str_copy(aBuf, pLine, (int)(sizeof(aBuf))-2);
+	str_copy(aBuf, pLine, (int)(sizeof(aBuf)) - 2);
 	int Length = str_length(aBuf);
 	aBuf[Length] = m_aLineEnding[0];
-	aBuf[Length+1] = m_aLineEnding[1];
-	aBuf[Length+2] = m_aLineEnding[2];
+	aBuf[Length + 1] = m_aLineEnding[1];
+	aBuf[Length + 2] = m_aLineEnding[2];
 	Length += 3;
 	const char *pData = aBuf;
 

@@ -13,24 +13,21 @@ class IInterface
 	// friend with the kernel implementation
 	friend class CKernel;
 	IKernel *m_pKernel;
+
 protected:
 	IKernel *Kernel() { return m_pKernel; }
-public:
-	IInterface() : m_pKernel(0) {}
-	virtual ~IInterface() {}
 
-	//virtual unsigned InterfaceID() = 0;
-	//virtual const char *InterfaceName() = 0;
+public:
+	IInterface() :
+		m_pKernel(0) {}
+	virtual ~IInterface() {}
 };
 
 #define MACRO_INTERFACE(Name, ver) \
-	public: \
-		static const char *InterfaceName() { return Name; } \
-	private:
-
-		//virtual unsigned InterfaceID() { return INTERFACE_ID; }
-		//virtual const char *InterfaceName() { return name; }
-
+public: \
+	static const char *InterfaceName() { return Name; } \
+\
+private:
 
 // This kernel thingie makes the structure very flat and basiclly singletons.
 // I'm not sure if this is a good idea but it works for now.
@@ -40,6 +37,7 @@ class IKernel
 	virtual bool RegisterInterfaceImpl(const char *InterfaceName, IInterface *pInterface, bool Destroy) = 0;
 	virtual bool ReregisterInterfaceImpl(const char *InterfaceName, IInterface *pInterface) = 0;
 	virtual IInterface *RequestInterfaceImpl(const char *InterfaceName) = 0;
+
 public:
 	static IKernel *Create();
 	virtual ~IKernel() {}

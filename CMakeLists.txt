@@ -607,6 +607,8 @@ endif()
 
 set(EXPECTED_DATA
   arrow.png
+  assets/entities/comfort/ddnet.png
+  assets/entities/license.txt
   audio/foley_body_impact-01.wv
   audio/foley_body_impact-02.wv
   audio/foley_body_impact-03.wv
@@ -740,6 +742,7 @@ set(EXPECTED_DATA
   audio/wp_switch-03.wv
   blob.png
   browse_icons.png
+  censorlist.txt
   console.png
   console_bar.png
   countryflags/AD.png
@@ -1071,6 +1074,7 @@ set(EXPECTED_DATA
   languages/romanian.txt
   languages/russian.txt
   languages/serbian.txt
+  languages/serbian_cyrillic.txt
   languages/simplified_chinese.txt
   languages/slovak.txt
   languages/spanish.txt
@@ -1173,15 +1177,7 @@ set(EXPECTED_DATA
   shader/text.vert
   shader/tile.frag
   shader/tile.vert
-  "skins/Ablush NeoN.png"
   skins/Aoe4leg.png
-  "skins/Apish Coke.png"
-  "skins/Black Phantom heinrich5991.png"
-  "skins/Evil Puffi.png"
-  "skins/Flying Silex.png"
-  "skins/Hidden Assassin.png"
-  "skins/Irradiated Sunny.png"
-  "skins/Mobys Skull.png"
   skins/PaladiN.png
   skins/Terrorist.png
   skins/antiantey.png
@@ -1465,6 +1461,7 @@ set_src(ENGINE_INTERFACE GLOB src/engine
   textrender.h
   updater.h
   uuid.h
+  warning.h
 )
 set_src(ENGINE_SHARED GLOB src/engine/shared
   compression.cpp
@@ -1718,6 +1715,7 @@ if(CLIENT)
     components/menus_demo.cpp
     components/menus_ingame.cpp
     components/menus_settings.cpp
+    components/menus_settings_assets.cpp
     components/menus_start.cpp
     components/motd.cpp
     components/motd.h

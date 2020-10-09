@@ -443,12 +443,6 @@ Spectator mode
 Spectators
 == Posmatrači
 
-Standard gametype
-== Standardni tip igre
-
-Standard map
-== Standardna mapa
-
 Stop record
 == Prekini snimanje
 
@@ -1141,19 +1135,19 @@ The width or height of texture %s is not divisible by 16, which might cause visu
 Country / Region
 == Zemlja / Regija
 
+Downloading ddnet-info.json failed
+== 
+
+Saving ddnet-settings.cfg failed
+== 
+
 Warning
 == 
 
 Speed
 == 
 
-Search:
-== 
-
-Exclude:
-== 
-
-Search servers:
+Theme
 == 
 
 %d of %d servers
@@ -1168,13 +1162,22 @@ Search servers:
 %d player
 == 
 
+File
+== 
+
 %.2f MiB
 == 
 
 %.2f KiB
 == 
 
+Demos directory
+== 
+
 Skip the main menu
+== 
+
+Themes directory
 == 
 
 Max CSVs
@@ -1183,7 +1186,16 @@ Max CSVs
 Download skins
 == 
 
+Skin Database
+== 
+
+Skins directory
+== 
+
 Borderless window
+== 
+
+Background music volume
 == 
 
 HUD
@@ -1192,13 +1204,28 @@ HUD
 DDNet
 == 
 
+Assets
+== 
+
 Overlay entities
 == 
 
-AntiPing limit
+AntiPing
 == 
 
-AntiPing
+Use current map as background
+== 
+
+Entities
+== 
+
+Emoticons
+== 
+
+Particles
+== 
+
+Assets directory
 == 
 
 https://wiki.ddnet.tw/

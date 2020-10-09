@@ -4,7 +4,7 @@
 
 void RegisterMapItemTypeUuids(CUuidManager *pManager)
 {
-	#define UUID(id, name) pManager->RegisterName(id, name);
-	#include "mapitems_ex_types.h"
-	#undef UUID
+#define UUID(id, name) pManager->RegisterName(id, name);
+#include "mapitems_ex_types.h"
+#undef UUID
 }

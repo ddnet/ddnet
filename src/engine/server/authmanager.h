@@ -27,6 +27,7 @@ private:
 
 	int m_aDefault[3];
 	bool m_Generated;
+
 public:
 	typedef void (*FListCallback)(const char *pIdent, int Level, void *pUser);
 

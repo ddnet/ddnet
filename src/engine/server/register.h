@@ -4,12 +4,13 @@
 #define ENGINE_SERVER_REGISTER_H
 
 #include <engine/masterserver.h>
+#include <engine/shared/network.h>
 
 class CRegister
 {
 	enum
 	{
-		REGISTERSTATE_START=0,
+		REGISTERSTATE_START = 0,
 		REGISTERSTATE_UPDATE_ADDRS,
 		REGISTERSTATE_QUERY_COUNT,
 		REGISTERSTATE_HEARTBEAT,

@@ -443,12 +443,6 @@ Spectator mode
 Spectators
 == Posmatrači
 
-Standard gametype
-== Standardni tip igre
-
-Standard map
-== Standardna mapa
-
 Stop record
 == Prekini snimanje
 
@@ -656,6 +650,12 @@ Video name:
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == Tipka K da se ubijes (restart), tipka q da pauziras i gledas druge igrače.
 
+Downloading ddnet-info.json failed
+== 
+
+Saving ddnet-settings.cfg failed
+== 
+
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
 == 
 
@@ -728,13 +728,7 @@ Show DDNet map finishes in server browser
 transmits your player name to info2.ddnet.tw
 == 
 
-Search:
-== 
-
-Exclude:
-== 
-
-Search servers:
+Theme
 == 
 
 Search
@@ -779,6 +773,9 @@ Please use a different name
 Remove chat
 == 
 
+File
+== 
+
 Markers:
 == 
 
@@ -801,6 +798,9 @@ Date
 == 
 
 Fetch Info
+== 
+
+Demos directory
 == 
 
 Render
@@ -854,6 +854,9 @@ Refresh Rate
 Show console window
 == 
 
+Themes directory
+== 
+
 Automatically take statboard screenshot
 == 
 
@@ -876,6 +879,12 @@ Fat skins (DDFat)
 == 
 
 Skin prefix
+== 
+
+Skin Database
+== 
+
+Skins directory
 == 
 
 Hook collisions
@@ -977,10 +986,16 @@ Threaded sound loading
 Map sound volume
 == 
 
+Background music volume
+== 
+
 HUD
 == 
 
 DDNet
+== 
+
+Assets
 == 
 
 DDNet Client needs to be restarted to complete update!
@@ -1097,9 +1112,6 @@ Show others (own team only)
 Show quads
 == 
 
-AntiPing limit
-== 
-
 AntiPing
 == 
 
@@ -1127,6 +1139,9 @@ Background (regular)
 Background (entities)
 == 
 
+Use current map as background
+== 
+
 Show tiles layers from BG map
 == 
 
@@ -1152,6 +1167,18 @@ Check now
 == 
 
 New random timeout code
+== 
+
+Entities
+== 
+
+Emoticons
+== 
+
+Particles
+== 
+
+Assets directory
 == 
 
 https://wiki.ddnet.tw/

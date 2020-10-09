@@ -480,12 +480,6 @@ Spectator mode
 Spectators
 == 旁观者
 
-Standard gametype
-== 原生游戏模式
-
-Standard map
-== 原生地图
-
 Stop record
 == 停止录制
 
@@ -782,9 +776,6 @@ Show quads
 
 Default zoom
 == 默认缩放
-
-AntiPing limit
-== AntiPing 限制
 
 AntiPing: predict other players
 == AntiPing：预测其他玩家
@@ -1231,13 +1222,13 @@ Server executable not found, can't run server
 Editor
 == 编辑器
 
-Search:
+Downloading ddnet-info.json failed
 == 
 
-Exclude:
+Saving ddnet-settings.cfg failed
 == 
 
-Search servers:
+Theme
 == 
 
 %d of %d servers
@@ -1252,5 +1243,41 @@ Search servers:
 %d player
 == 
 
+File
+== 
+
+Demos directory
+== 
+
+Themes directory
+== 
+
 Download skins
+== 
+
+Skin Database
+== 
+
+Skins directory
+== 
+
+Background music volume
+== 
+
+Assets
+== 
+
+Use current map as background
+== 
+
+Entities
+== 
+
+Emoticons
+== 
+
+Particles
+== 
+
+Assets directory
 == 

@@ -2,21 +2,23 @@
 #define ENGINE_CLIENT_OPENGL_SL_H
 
 #include <GL/glew.h>
-#include <vector>
 #include <string>
+#include <vector>
 
 class CGLSLCompiler;
 
-class CGLSL {
+class CGLSL
+{
 public:
-	bool LoadShader(CGLSLCompiler* pCompiler, class IStorage *pStorage, const char *pFile, int Type);
+	bool LoadShader(CGLSLCompiler *pCompiler, class IStorage *pStorage, const char *pFile, int Type);
 	void DeleteShader();
-	
+
 	bool IsLoaded();
 	GLuint GetShaderID();
-	
+
 	CGLSL();
 	virtual ~CGLSL();
+
 private:
 	GLuint m_ShaderID;
 	int m_Type;
@@ -30,7 +32,7 @@ private:
 
 	struct SGLSLCompilerDefine
 	{
-		SGLSLCompilerDefine(const std::string& DefineName, const std::string& DefineValue)
+		SGLSLCompilerDefine(const std::string &DefineName, const std::string &DefineValue)
 		{
 			m_DefineName = DefineName;
 			m_DefineValue = DefineValue;
@@ -52,11 +54,11 @@ public:
 	void SetHasTextureArray(bool TextureArray) { m_HasTextureArray = TextureArray; }
 	void SetTextureReplaceType(int TextureReplaceType) { m_TextureReplaceType = TextureReplaceType; }
 
-	void AddDefine(const std::string& DefineName, const std::string& DefineValue);
-	void AddDefine(const char* pDefineName, const char* pDefineValue);
+	void AddDefine(const std::string &DefineName, const std::string &DefineValue);
+	void AddDefine(const char *pDefineName, const char *pDefineValue);
 	void ClearDefines();
 
-	void ParseLine(std::string& Line, const char* pReadLine, int Type);
+	void ParseLine(std::string &Line, const char *pReadLine, int Type);
 
 	enum EGLSLCompilerTextureReplaceType
 	{

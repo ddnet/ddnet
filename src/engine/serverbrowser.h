@@ -72,6 +72,7 @@ bool IsFastCap(const CServerInfo *pInfo);
 bool IsDDRace(const CServerInfo *pInfo);
 bool IsDDNet(const CServerInfo *pInfo);
 bool IsBlockWorlds(const CServerInfo *pInfo);
+bool IsCity(const CServerInfo *pInfo);
 
 bool Is64Player(const CServerInfo *pInfo);
 bool IsPlus(const CServerInfo *pInfo);
@@ -80,7 +81,6 @@ class IServerBrowser : public IInterface
 {
 	MACRO_INTERFACE("serverbrowser", 0)
 public:
-
 	/* Constants: Server Browser Sorting
 		SORT_NAME - Sort by name.
 		SORT_PING - Sort by ping.
@@ -88,16 +88,17 @@ public:
 		SORT_GAMETYPE - Sort by game type. DM, TDM etc.
 		SORT_NUMPLAYERS - Sort after how many players there are on the server.
 	*/
-	enum{
+	enum
+	{
 		SORT_NAME = 0,
 		SORT_PING,
 		SORT_MAP,
 		SORT_GAMETYPE,
 		SORT_NUMPLAYERS,
 
-		QUICK_SERVERNAME=1,
-		QUICK_PLAYER=2,
-		QUICK_MAPNAME=4,
+		QUICK_SERVERNAME = 1,
+		QUICK_PLAYER = 2,
+		QUICK_MAPNAME = 4,
 
 		TYPE_NONE = 0,
 		TYPE_INTERNET = 1,
@@ -106,14 +107,14 @@ public:
 		TYPE_DDNET = 4,
 		TYPE_KOG = 5,
 
-		SET_MASTER_ADD=1,
+		SET_MASTER_ADD = 1,
 		SET_FAV_ADD,
 		SET_DDNET_ADD,
 		SET_KOG_ADD,
 		SET_TOKEN,
 
-		NETWORK_DDNET=0,
-		NETWORK_KOG=1,
+		NETWORK_DDNET = 0,
+		NETWORK_KOG = 1,
 		NUM_NETWORKS,
 	};
 

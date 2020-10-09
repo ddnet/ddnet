@@ -8,9 +8,9 @@
 
 void RegisterUuids(CUuidManager *pManager)
 {
-	#define UUID(id, name) pManager->RegisterName(id, name);
-	#include "protocol_ex_msgs.h"
-	#undef UUID
+#define UUID(id, name) pManager->RegisterName(id, name);
+#include "protocol_ex_msgs.h"
+#undef UUID
 }
 
 int UnpackMessageID(int *pID, bool *pSys, struct CUuid *pUuid, CUnpacker *pUnpacker, CMsgPacker *pPacker)
@@ -51,26 +51,26 @@ int UnpackMessageID(int *pID, bool *pSys, struct CUuid *pUuid, CUnpacker *pUnpac
 		switch(*pID)
 		{
 		case NETMSG_WHATIS:
+		{
+			CUuid Uuid2;
+			int ID2 = g_UuidManager.UnpackUuid(pUnpacker, &Uuid2);
+			if(ID2 == UUID_INVALID)
 			{
-				CUuid Uuid2;
-				int ID2 = g_UuidManager.UnpackUuid(pUnpacker, &Uuid2);
-				if(ID2 == UUID_INVALID)
-				{
-					break;
-				}
-				if(ID2 == UUID_UNKNOWN)
-				{
-					new (pPacker) CMsgPacker(NETMSG_IDONTKNOW, true);
-					pPacker->AddRaw(&Uuid2, sizeof(Uuid2));
-				}
-				else
-				{
-					new (pPacker) CMsgPacker(NETMSG_ITIS, true);
-					pPacker->AddRaw(&Uuid2, sizeof(Uuid2));
-					pPacker->AddString(g_UuidManager.GetName(ID2), 0);
-				}
-				return UNPACKMESSAGE_ANSWER;
+				break;
 			}
+			if(ID2 == UUID_UNKNOWN)
+			{
+				new(pPacker) CMsgPacker(NETMSG_IDONTKNOW, true);
+				pPacker->AddRaw(&Uuid2, sizeof(Uuid2));
+			}
+			else
+			{
+				new(pPacker) CMsgPacker(NETMSG_ITIS, true);
+				pPacker->AddRaw(&Uuid2, sizeof(Uuid2));
+				pPacker->AddString(g_UuidManager.GetName(ID2), 0);
+			}
+			return UNPACKMESSAGE_ANSWER;
+		}
 		case NETMSG_IDONTKNOW:
 			if(g_Config.m_Debug)
 			{

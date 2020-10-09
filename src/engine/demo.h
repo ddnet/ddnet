@@ -3,14 +3,14 @@
 #ifndef ENGINE_DEMO_H
 #define ENGINE_DEMO_H
 
+#include "kernel.h"
 #include <base/hash.h>
 #include <engine/map.h>
 #include <engine/shared/uuid_manager.h>
-#include "kernel.h"
 
 enum
 {
-	MAX_TIMELINE_MARKERS=64
+	MAX_TIMELINE_MARKERS = 64
 };
 
 const double g_aSpeeds[] = {0.1, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, 12.0, 16.0, 20.0, 24.0, 28.0, 32.0, 40.0, 48.0, 56.0, 64.0};
@@ -18,12 +18,11 @@ const double g_aSpeeds[] = {0.1, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0, 4.0,
 typedef bool (*DEMOFUNC_FILTER)(const void *pData, int DataSize, void *pUser);
 
 // TODO: Properly extend demo format using uuids
-static const CUuid SHA256_EXTENSION = {{
-	// "6be6da4a-cebd-380c-9b5b-1289c842d780"
-	// "demoitem-sha256@ddnet.tw"
-	0x6b, 0xe6, 0xda, 0x4a, 0xce, 0xbd, 0x38, 0x0c,
-	0x9b, 0x5b, 0x12, 0x89, 0xc8, 0x42, 0xd7, 0x80
-}};
+// "6be6da4a-cebd-380c-9b5b-1289c842d780"
+// "demoitem-sha256@ddnet.tw"
+static const CUuid SHA256_EXTENSION =
+	{{0x6b, 0xe6, 0xda, 0x4a, 0xce, 0xbd, 0x38, 0x0c,
+		0x9b, 0x5b, 0x12, 0x89, 0xc8, 0x42, 0xd7, 0x80}};
 
 struct CDemoHeader
 {
@@ -72,7 +71,7 @@ public:
 
 	enum
 	{
-		DEMOTYPE_INVALID=0,
+		DEMOTYPE_INVALID = 0,
 		DEMOTYPE_CLIENT,
 		DEMOTYPE_SERVER,
 	};
@@ -107,7 +106,6 @@ class IDemoEditor : public IInterface
 {
 	MACRO_INTERFACE("demoeditor", 0)
 public:
-
 	virtual void Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick, DEMOFUNC_FILTER pfnFilter, void *pUser) = 0;
 };
 

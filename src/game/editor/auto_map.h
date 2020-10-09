@@ -21,7 +21,7 @@ class CAutoMapper
 
 		enum
 		{
-			NORULE=0,
+			NORULE = 0,
 			INDEX,
 			NOTINDEX
 		};
@@ -55,22 +55,21 @@ class CAutoMapper
 	};
 
 public:
-
 	CAutoMapper(class CEditor *pEditor);
 
-	void Load(const char* pTileName);
-	void ProceedLocalized(class CLayerTiles *pLayer, int ConfigID, int Seed=0, int X=0, int Y=0, int Width=-1, int Height=-1);
-	void Proceed(class CLayerTiles *pLayer, int ConfigID, int Seed=0, int SeedOffsetX=0, int SeedOffsetY=0);
+	void Load(const char *pTileName);
+	void ProceedLocalized(class CLayerTiles *pLayer, int ConfigID, int Seed = 0, int X = 0, int Y = 0, int Width = -1, int Height = -1);
+	void Proceed(class CLayerTiles *pLayer, int ConfigID, int Seed = 0, int SeedOffsetX = 0, int SeedOffsetY = 0);
 
 	int ConfigNamesNum() const { return m_lConfigs.size(); }
-	const char* GetConfigName(int Index);
+	const char *GetConfigName(int Index);
 
 	bool IsLoaded() const { return m_FileLoaded; }
+
 private:
 	array<CConfiguration> m_lConfigs;
 	class CEditor *m_pEditor;
 	bool m_FileLoaded;
 };
-
 
 #endif

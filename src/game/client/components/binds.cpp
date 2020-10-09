@@ -1,8 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "binds.h"
 #include <engine/config.h>
 #include <engine/shared/config.h>
-#include "binds.h"
 
 bool CBinds::CBindsSpecial::OnInput(IInput::CEvent Event)
 {
@@ -14,8 +14,8 @@ bool CBinds::CBindsSpecial::OnInput(IInput::CEvent Event)
 		bool ret = false;
 		for(int Mod = 0; Mod < MODIFIER_COMBINATION_COUNT; Mod++)
 		{
-			if(Mask&(1 << Mod) && m_pBinds->m_aapKeyBindings[Mod][Event.m_Key])
-				m_pBinds->GetConsole()->ExecuteLineStroked(Event.m_Flags&IInput::FLAG_PRESS, m_pBinds->m_aapKeyBindings[Mod][Event.m_Key]);
+			if(Mask & (1 << Mod) && m_pBinds->m_aapKeyBindings[Mod][Event.m_Key])
+				m_pBinds->GetConsole()->ExecuteLineStroked(Event.m_Flags & IInput::FLAG_PRESS, m_pBinds->m_aapKeyBindings[Mod][Event.m_Key]);
 			ret = true;
 		}
 		return ret;
@@ -59,7 +59,7 @@ void CBinds::Bind(int KeyID, const char *pStr, bool FreeOnly, int Modifier)
 	char aBuf[256];
 	if(!pStr[0])
 	{
-		str_format(aBuf, sizeof(aBuf), "unbound %s (%d)", Input()->KeyName(KeyID), KeyID);
+		str_format(aBuf, sizeof(aBuf), "unbound %s%s (%d)", GetKeyBindModifiersName(Modifier), Input()->KeyName(KeyID), KeyID);
 	}
 	else
 	{
@@ -135,19 +135,21 @@ bool CBinds::OnInput(IInput::CEvent e)
 	{
 		if(m_aapKeyBindings[Mod][e.m_Key] && (Mask == Mod))
 		{
-			if(e.m_Flags&IInput::FLAG_PRESS)
+			if(e.m_Flags & IInput::FLAG_PRESS)
 				Console()->ExecuteLineStroked(1, m_aapKeyBindings[Mod][e.m_Key]);
-			if(e.m_Flags&IInput::FLAG_RELEASE)
+			if(e.m_Flags & IInput::FLAG_RELEASE)
 				Console()->ExecuteLineStroked(0, m_aapKeyBindings[Mod][e.m_Key]);
 			ret = true;
 		}
 	}
 
-	if(m_aapKeyBindings[0][e.m_Key] && (!ret || m_aapKeyBindings[0][e.m_Key][0] == '+')) // always trigger +xxx binds despite any modifier
+	// Shift for emoticons works while moving through map
+	if(m_aapKeyBindings[0][e.m_Key] && (!ret || m_aapKeyBindings[0][e.m_Key][0] == '+'))
 	{
-		if(e.m_Flags&IInput::FLAG_PRESS)
+		// When ctrl+shift are pressed (ctrl+shift binds and also the hard-coded ctrl+shift+d, ctrl+shift+g, ctrl+shift+e), ignore other +xxx binds
+		if(e.m_Flags & IInput::FLAG_PRESS && Mask != ((1 << MODIFIER_CTRL) | (1 << MODIFIER_SHIFT)))
 			Console()->ExecuteLineStroked(1, m_aapKeyBindings[0][e.m_Key]);
-		if(e.m_Flags&IInput::FLAG_RELEASE)
+		if(e.m_Flags & IInput::FLAG_RELEASE)
 			Console()->ExecuteLineStroked(0, m_aapKeyBindings[0][e.m_Key]);
 		ret = true;
 	}
@@ -290,14 +292,14 @@ void CBinds::ConDumpBinds(IConsole::IResult *pResult, void *pUserData)
 
 		int Modifier;
 		int id = pBinds->GetBindSlot(pKeyName, &Modifier);
-		if (!id)
+		if(!id)
 		{
 			str_format(aBuf, sizeof(aBuf), "key '%s' not found", pKeyName);
 			pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
 		}
 		else
 		{
-			if (!pBinds->m_aapKeyBindings[Modifier][id])
+			if(!pBinds->m_aapKeyBindings[Modifier][id])
 				str_format(aBuf, sizeof(aBuf), "%s (%d) is not bound", pKeyName, id);
 			else
 				str_format(aBuf, sizeof(aBuf), "%s (%d) = %s", pKeyName, id, pBinds->m_aapKeyBindings[Modifier][id]);
@@ -351,7 +353,7 @@ int CBinds::GetKeyID(const char *pKeyName)
 	// check for numeric
 	if(pKeyName[0] == '&')
 	{
-		int i = str_toint(pKeyName+1);
+		int i = str_toint(pKeyName + 1);
 		if(i > 0 && i < KEY_LAST)
 			return i; // numeric
 	}
@@ -374,16 +376,16 @@ int CBinds::GetBindSlot(const char *pBindString, int *Mod)
 	const char *pKey = str_next_token(pBindString, "+", aMod, sizeof(aMod));
 	while(aMod[0] && *(pKey))
 	{
-		if (!str_comp(aMod, "shift"))
+		if(!str_comp(aMod, "shift"))
 			*Mod |= (1 << MODIFIER_SHIFT);
-		else if (!str_comp(aMod, "ctrl"))
+		else if(!str_comp(aMod, "ctrl"))
 			*Mod |= (1 << MODIFIER_CTRL);
-		else if (!str_comp(aMod, "alt"))
+		else if(!str_comp(aMod, "alt"))
 			*Mod |= (1 << MODIFIER_ALT);
 		else
 			return 0;
 
-		if (str_find(pKey + 1, "+"))
+		if(str_find(pKey + 1, "+"))
 			pKey = str_next_token(pKey + 1, "+", aMod, sizeof(aMod));
 		else
 			break;
@@ -411,10 +413,9 @@ const char *CBinds::GetKeyBindModifiersName(int Modifier)
 {
 	static char aModifier[256];
 	aModifier[0] = '\0';
-	for (int k = 1; k < MODIFIER_COUNT; k++)
+	for(int k = 1; k < MODIFIER_COUNT; k++)
 	{
-
-		if (Modifier & (1 << k))
+		if(Modifier & (1 << k))
 		{
 			str_append(aModifier, GetModifierName(k), sizeof(aModifier));
 			str_append(aModifier, "+", sizeof(aModifier));
@@ -428,7 +429,7 @@ void CBinds::ConfigSaveCallback(IConfig *pConfig, void *pUserData)
 	CBinds *pSelf = (CBinds *)pUserData;
 
 	char aBuffer[256];
-	char *pEnd = aBuffer+sizeof(aBuffer);
+	char *pEnd = aBuffer + sizeof(aBuffer);
 	pConfig->WriteLine("unbindall");
 	for(int i = 0; i < MODIFIER_COMBINATION_COUNT; i++)
 	{

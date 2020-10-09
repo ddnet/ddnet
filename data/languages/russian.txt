@@ -448,12 +448,6 @@ Spectator mode
 Spectators
 == Наблюдатели
 
-Standard gametype
-== Станд. тип игры
-
-Standard map
-== Станд. карта
-
 Stop record
 == Стоп
 
@@ -643,9 +637,6 @@ Join game
 FSAA samples
 == Сэмплов FSAA
 
-%d of %d servers, %d players
-== %d из %d серверов, %d игроков
-
 Sound volume
 == Громкость звука
 
@@ -702,9 +693,6 @@ Lht.
 
 UI Color
 == Цвет интерфейса
-
-Host address
-== Адрес сервера
 
 Crc:
 == Crc:
@@ -822,9 +810,6 @@ Friend
 
 Demo
 == Демо
-
-AntiPing limit
-== AntiPing лимит
 
 Inner color
 == Внутренний цвет
@@ -1186,9 +1171,6 @@ The width or height of texture %s is not divisible by 16, which might cause visu
 Warning
 == Предупреждение
 
-Menu
-== Меню
-
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == Используйте кнопку k, чтобы возродиться, q для паузы и наблюдением за остальными игроками. Проверьте настройки для остальных кнопок.
 
@@ -1228,15 +1210,6 @@ Editor
 News
 == Новости
 
-Search:
-== Искать:
-
-Exclude:
-== Исключить:
-
-Search servers:
-== Искать сервера:
-
 %d of %d servers
 == %d из %d серверов
 
@@ -1258,3 +1231,48 @@ Learn
 [Start menu]
 Play
 == Играть
+
+Downloading ddnet-info.json failed
+== 
+
+Saving ddnet-settings.cfg failed
+== 
+
+Theme
+== 
+
+File
+== 
+
+Demos directory
+== 
+
+Themes directory
+== 
+
+Skin Database
+== 
+
+Skins directory
+== 
+
+Background music volume
+== 
+
+Assets
+== 
+
+Use current map as background
+== 
+
+Entities
+== 
+
+Emoticons
+== 
+
+Particles
+== 
+
+Assets directory
+== 

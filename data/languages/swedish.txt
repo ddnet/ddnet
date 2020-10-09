@@ -5,6 +5,7 @@
 #	Martin Pola		2011-04-02 11:17:09
 #	Kottizen		2011-07-02 00:34:54
 #	3edcxzaq1		2020-06-25 00:00:00
+#	cur.ie		2020-09-28 00:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -442,12 +443,6 @@ Spectator mode
 Spectators
 == Åskådare
 
-Standard gametype
-== Standard speltyp
-
-Standard map
-== Standardkarta
-
 Stop record
 == Sluta spela in
 
@@ -635,9 +630,6 @@ Show console window
 
 Vanilla skins only
 == Bara vanilla skins
-
-AntiPing limit
-== AntiPing gräns
 
 New random timeout code
 == Ny slumpad timeout kod
@@ -1177,71 +1169,107 @@ Show others (own team only)
 == Visa andra (eget lag endast)
 
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== 
+== Bredden eller höjden av texturen %s är ej delbar med 16, och kan därav skapa visuella buggar.
 
 Warning
-== 
+== Varning
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 
+== Använd knappen k för att dö (starta om), q för att pausa och se andra spelare. Se inställnignar för andra knappbindningar.
 
 Country / Region
-== 
+== Land / Region
 
 Speed
-== 
-
-Search:
-== 
-
-Exclude:
-== 
-
-Search servers:
-== 
+== Hastighet
 
 %d of %d servers
-== 
+== %d av %d servrar.
 
 %d of %d server
-== 
+== %d av %d server
 
 %d players
-== 
+== %d spelare
 
 %d player
-== 
+== %d spelare
 
 Skip the main menu
-== 
+== Skippa till huvudmenyn
 
 Download skins
-== 
+== Ladda ner skins
 
 Client message
-== 
+== Klientmeddelande
 
 https://wiki.ddnet.tw/
-== 
+== https://wiki.ddnet.tw/
 
 Website
-== 
+== Hemsida
 
 Settings
-== 
+== Inställningar
 
 Stop server
-== 
+== Stoppa servern
 
 Run server
-== 
+== Kör servern
 
 Server executable not found, can't run server
-== 
+== Server exekveringsfil hittades ej, kan ej starta servern
 
 Editor
-== 
+== Editor
 
 [Start menu]
 Play
+== Spela
+
+Downloading ddnet-info.json failed
+== 
+
+Saving ddnet-settings.cfg failed
+== 
+
+Theme
+== 
+
+File
+== 
+
+Demos directory
+== 
+
+Themes directory
+== 
+
+Skin Database
+== 
+
+Skins directory
+== 
+
+Background music volume
+== 
+
+Assets
+== 
+
+Use current map as background
+== 
+
+Entities
+== 
+
+Emoticons
+== 
+
+Particles
+== 
+
+Assets directory
 == 

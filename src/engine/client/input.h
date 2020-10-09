@@ -3,6 +3,11 @@
 #ifndef ENGINE_CLIENT_INPUT_H
 #define ENGINE_CLIENT_INPUT_H
 
+#include <engine/graphics.h>
+#include <engine/input.h>
+
+#include <stddef.h>
+
 class CInput : public IEngineInput
 {
 	IEngineGraphics *m_pGraphics;

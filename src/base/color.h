@@ -33,14 +33,26 @@ inline float RgbToHue(float r, float g, float b)
 }
 
 // Curiously Recurring Template Pattern for type safety
-template <typename DerivedT>
+template<typename DerivedT>
 class color4_base
 {
 public:
-	union { float x, r, h; };
-	union { float y, g, s; };
-	union { float z, b, l, v; };
-	union { float w, a; };
+	union
+	{
+		float x, r, h;
+	};
+	union
+	{
+		float y, g, s;
+	};
+	union
+	{
+		float z, b, l, v;
+	};
+	union
+	{
+		float w, a;
+	};
 
 	color4_base() {}
 
@@ -93,7 +105,7 @@ public:
 
 	DerivedT WithAlpha(float alpha)
 	{
-		DerivedT col(static_cast<DerivedT&>(*this));
+		DerivedT col(static_cast<DerivedT &>(*this));
 		col.a = alpha;
 		return col;
 	}
@@ -103,7 +115,7 @@ class ColorHSLA : public color4_base<ColorHSLA>
 {
 public:
 	using color4_base::color4_base;
-	ColorHSLA() {};
+	ColorHSLA(){};
 
 	constexpr static const float DARKEST_LGT = 0.5f;
 
@@ -122,7 +134,7 @@ public:
 	unsigned Pack(float Darkest, bool Alpha = false)
 	{
 		ColorHSLA col = *this;
-		col.l = (l - Darkest)/(1 - Darkest);
+		col.l = (l - Darkest) / (1 - Darkest);
 		col.l = clamp(col.l, 0.0f, 1.0f);
 		return col.Pack(Alpha);
 	}
@@ -132,19 +144,20 @@ class ColorHSVA : public color4_base<ColorHSVA>
 {
 public:
 	using color4_base::color4_base;
-	ColorHSVA() {};
+	ColorHSVA(){};
 };
 
 class ColorRGBA : public color4_base<ColorRGBA>
 {
 public:
 	using color4_base::color4_base;
-	ColorRGBA() {};
+	ColorRGBA(){};
 };
 
-template <typename T, typename F> T color_cast(const F &f) = delete;
+template<typename T, typename F>
+T color_cast(const F &f) = delete;
 
-template <>
+template<>
 inline ColorHSLA color_cast(const ColorRGBA &rgb)
 {
 	float Min = minimum(rgb.r, rgb.g, rgb.b);
@@ -153,12 +166,12 @@ inline ColorHSLA color_cast(const ColorRGBA &rgb)
 	float c = Max - Min;
 	float h = RgbToHue(rgb.r, rgb.g, rgb.b);
 	float l = 0.5f * (Max + Min);
-	float s = (Max != 0.0f && Min != 1.0f) ? (c/(1 - (absolute(2 * l - 1)))) : 0;
+	float s = (Max != 0.0f && Min != 1.0f) ? (c / (1 - (absolute(2 * l - 1)))) : 0;
 
 	return ColorHSLA(h, s, l, rgb.a);
 }
 
-template <>
+template<>
 inline ColorRGBA color_cast(const ColorHSLA &hsl)
 {
 	vec3 rgb = vec3(0, 0, 0);
@@ -167,7 +180,8 @@ inline ColorRGBA color_cast(const ColorHSLA &hsl)
 	float c = (1 - absolute(2 * hsl.l - 1)) * hsl.s;
 	float x = c * (1 - absolute(fmod(h1, 2) - 1));
 
-	switch(round_truncate(h1)) {
+	switch(round_truncate(h1))
+	{
 	case 0:
 		rgb.r = c, rgb.g = x;
 		break;
@@ -189,43 +203,43 @@ inline ColorRGBA color_cast(const ColorHSLA &hsl)
 		break;
 	}
 
-	float m = hsl.l - (c/2);
+	float m = hsl.l - (c / 2);
 	return ColorRGBA(rgb.r + m, rgb.g + m, rgb.b + m, hsl.a);
 }
 
-template <>
+template<>
 inline ColorHSLA color_cast(const ColorHSVA &hsv)
 {
 	float l = hsv.v * (1 - hsv.s * 0.5f);
-	return ColorHSLA(hsv.h, (l == 0.0f || l == 1.0f) ? 0 : (hsv.v - l)/minimum(l, 1 - l), l);
+	return ColorHSLA(hsv.h, (l == 0.0f || l == 1.0f) ? 0 : (hsv.v - l) / minimum(l, 1 - l), l);
 }
 
-template <>
+template<>
 inline ColorHSVA color_cast(const ColorHSLA &hsl)
 {
 	float v = hsl.l + hsl.s * minimum(hsl.l, 1 - hsl.l);
 	return ColorHSVA(hsl.h, v == 0.0f ? 0 : 2 - (2 * hsl.l / v), v);
 }
 
-template <>
+template<>
 inline ColorRGBA color_cast(const ColorHSVA &hsv)
 {
 	return color_cast<ColorRGBA>(color_cast<ColorHSLA>(hsv));
 }
 
-template <>
+template<>
 inline ColorHSVA color_cast(const ColorRGBA &rgb)
 {
 	return color_cast<ColorHSVA>(color_cast<ColorHSLA>(rgb));
 }
 
-template <typename T>
+template<typename T>
 T color_scale(const T &col, float s)
 {
 	return T(col.x * s, col.y * s, col.z * s, col.a * s);
 }
 
-template <typename T>
+template<typename T>
 T color_invert(const T &col)
 {
 	return T(1.0f - col.x, 1.0f - col.y, 1.0f - col.z, 1.0f - col.a);

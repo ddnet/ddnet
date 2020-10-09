@@ -445,12 +445,6 @@ Spectator mode
 Spectators
 == Spettatori
 
-Standard gametype
-== Tipo di gioco normale
-
-Standard map
-== Mappa normale
-
 Stop record
 == Ferma reg.
 
@@ -573,9 +567,6 @@ Max Screenshots
 Length:
 == Durata:
 
-Rifle
-== Fucile
-
 Netversion:
 == Versione net
 
@@ -635,7 +626,67 @@ Name plates size
 Type:
 == Tipo:
 
+DDNet %s is out!
+== DDNet %s è uscito
+
+%d new mentions
+== %d nuove menzioni
+
+Disconnect Dummy
+== 
+
+Are you sure that you want to disconnect your dummy?
+== 
+
+Filter connecting players
+== 
+
+9+ new mentions
+== 9+ nuova menzione
+
+Markers
+== Marcatrici
+
+Disconnect Dummy
+== Disconnetti il manichino
+
+Length
+== 
+
+Fetch Info
+== Recuperare informazioni
+
+Length
+== Lunghezza
+
+Downloading %s:
+== 
+
+Update failed! Check log...
+== Aggiornamento non riuscito! Controlla registro...
+
+Filter connecting players
+== Filtra i giocatori in connessione
+
+Time
+== Tempo
+
+Downloading %s:
+== Scarica %s
+
+Are you sure that you want to disconnect your dummy?
+== Sei sicuro di voler scollegare il tuo manichino?
+
+1 new mention
+== 1 nuova menzione
+
+Downloading ddnet-info.json failed
+== 
+
 Successfully saved the replay!
+== 
+
+Saving ddnet-settings.cfg failed
 == 
 
 Replay feature is disabled!
@@ -652,12 +703,6 @@ Game paused
 
 Server best:
 == 
-
-DDNet %s is out!
-== DDNet %s è uscito
-
-%d new mentions
-== %d nuove menzioni
 
 Personal best:
 == 
@@ -684,12 +729,6 @@ File already exists, do you want to overwrite it?
 == 
 
 Are you sure that you want to disconnect?
-== 
-
-Disconnect Dummy
-== 
-
-Are you sure that you want to disconnect your dummy?
 == 
 
 Welcome to DDNet
@@ -737,13 +776,7 @@ Show DDNet map finishes in server browser
 transmits your player name to info2.ddnet.tw
 == 
 
-Search:
-== 
-
-Exclude:
-== 
-
-Search servers:
+Theme
 == 
 
 Search
@@ -762,9 +795,6 @@ Exclude
 == 
 
 %d player
-== 
-
-Filter connecting players
 == 
 
 Indicate map finish
@@ -788,11 +818,11 @@ Please use a different name
 Remove chat
 == 
 
-Markers:
+File
 == 
 
-9+ new mentions
-== 9+ nuova menzione
+Markers:
+== 
 
 %.2f MiB
 == 
@@ -803,23 +833,11 @@ Markers:
 Demo
 == 
 
-Markers
-== Marcatrici
-
-Disconnect Dummy
-== Disconnetti il manichino
-
-Length
-== 
-
 Date
 == 
 
-Fetch Info
-== Recuperare informazioni
-
-Length
-== Lunghezza
+Demos directory
+== 
 
 Render
 == 
@@ -872,6 +890,9 @@ Refresh Rate
 Show console window
 == 
 
+Themes directory
+== 
+
 Automatically take statboard screenshot
 == 
 
@@ -894,6 +915,12 @@ Fat skins (DDFat)
 == 
 
 Skin prefix
+== 
+
+Skin Database
+== 
+
+Skins directory
 == 
 
 Hook collisions
@@ -927,6 +954,9 @@ Dummy copy
 == 
 
 Hammerfly dummy
+== 
+
+Laser
 == 
 
 Converse
@@ -995,10 +1025,16 @@ Threaded sound loading
 Map sound volume
 == 
 
+Background music volume
+== 
+
 HUD
 == 
 
 DDNet
+== 
+
+Assets
 == 
 
 DDNet Client needs to be restarted to complete update!
@@ -1115,9 +1151,6 @@ Show others (own team only)
 Show quads
 == 
 
-AntiPing limit
-== 
-
 AntiPing
 == 
 
@@ -1145,6 +1178,9 @@ Background (regular)
 Background (entities)
 == 
 
+Use current map as background
+== 
+
 Show tiles layers from BG map
 == 
 
@@ -1170,6 +1206,18 @@ Check now
 == 
 
 New random timeout code
+== 
+
+Entities
+== 
+
+Emoticons
+== 
+
+Particles
+== 
+
+Assets directory
 == 
 
 Learn
@@ -1203,29 +1251,8 @@ Play
 DDNet %s is out!
 == 
 
-Downloading %s:
-== 
-
-Update failed! Check log...
-== Aggiornamento non riuscito! Controlla registro...
-
-Filter connecting players
-== Filtra i giocatori in connessione
-
 Restart
 == 
-
-Time
-== Tempo
-
-Downloading %s:
-== Scarica %s
-
-Are you sure that you want to disconnect your dummy?
-== Sei sicuro di voler scollegare il tuo manichino?
-
-1 new mention
-== 1 nuova menzione
 
 Manual %3d:%02d  
 == 

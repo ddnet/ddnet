@@ -16,19 +16,18 @@ class CPlayers : public CComponent
 		const CNetObj_Character *pPlayerChar,
 		const CTeeRenderInfo *pRenderInfo,
 		int ClientID,
-		float Intra = 0.f
-	);
+		float Intra = 0.f);
 	void RenderHook(
 		const CNetObj_Character *pPrevChar,
 		const CNetObj_Character *pPlayerChar,
 		const CTeeRenderInfo *pRenderInfo,
 		int ClientID,
-		float Intra = 0.f
-	);
+		float Intra = 0.f);
 
 	int m_WeaponEmoteQuadContainerIndex;
 	int m_DirectionQuadContainerIndex;
 	int m_WeaponSpriteMuzzleQuadContainerIndex[NUM_WEAPONS];
+
 public:
 	vec2 m_CurPredictedPos[MAX_CLIENTS];
 	virtual void OnInit();

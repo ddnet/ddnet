@@ -29,6 +29,8 @@ class CChat : public CComponent
 
 		int m_TextContainerIndex;
 		float m_TextYOffset;
+
+		int m_TimesRepeated;
 	};
 
 	bool m_PrevScoreBoardShowed;

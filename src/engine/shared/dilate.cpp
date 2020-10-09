@@ -66,8 +66,8 @@ void DilateImage(unsigned char *pImageBuff, int w, int h, int BPP)
 {
 	unsigned char *pBuffer[2] = {NULL, NULL};
 
-	pBuffer[0] = (unsigned char *)malloc(w * h * sizeof(unsigned char) * BPP);
-	pBuffer[1] = (unsigned char *)malloc(w * h * sizeof(unsigned char) * BPP);
+	pBuffer[0] = (unsigned char *)malloc((size_t)w * h * sizeof(unsigned char) * BPP);
+	pBuffer[1] = (unsigned char *)malloc((size_t)w * h * sizeof(unsigned char) * BPP);
 
 	unsigned char *pPixelBuff = (unsigned char *)pImageBuff;
 

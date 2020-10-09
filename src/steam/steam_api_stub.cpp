@@ -4,8 +4,7 @@
 
 #include <stdlib.h>
 
-extern "C"
-{
+extern "C" {
 
 bool SteamAPI_Init() { return false; }
 HSteamPipe SteamAPI_GetHSteamPipe() { abort(); }
@@ -21,5 +20,4 @@ ISteamFriends *SteamAPI_SteamFriends_v017() { abort(); }
 const char *SteamAPI_ISteamFriends_GetPersonaName(ISteamFriends *pSelf) { abort(); }
 bool SteamAPI_ISteamFriends_SetRichPresence(ISteamFriends *pSelf, const char *pKey, const char *pValue) { abort(); }
 void SteamAPI_ISteamFriends_ClearRichPresence(ISteamFriends *pSelf) { abort(); }
-
 }

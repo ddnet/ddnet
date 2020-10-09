@@ -1,10 +1,10 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <engine/textrender.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
-#include <game/generated/protocol.h>
+#include <engine/textrender.h>
 #include <game/generated/client_data.h>
+#include <game/generated/protocol.h>
 
 #include <game/client/gameclient.h>
 #include <game/client/animstate.h>
@@ -13,6 +13,10 @@
 #include "nameplates.h"
 #include "controls.h"
 #include "camera.h"
+#include "controls.h"
+#include "nameplates.h"
+#include <game/client/animstate.h>
+#include <game/client/gameclient.h>
 
 #include "players.h"
 
@@ -26,8 +30,7 @@ void CNamePlates::MapscreenToGroup(float CenterX, float CenterY, CMapItemGroup *
 void CNamePlates::RenderNameplate(
 	const CNetObj_Character *pPrevChar,
 	const CNetObj_Character *pPlayerChar,
-	const CNetObj_PlayerInfo *pPlayerInfo
-	)
+	const CNetObj_PlayerInfo *pPlayerInfo)
 {
 	int ClientID = pPlayerInfo->m_ClientID;
 
@@ -55,7 +58,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
 		float a = 1;
 		if(g_Config.m_ClNameplatesAlways == 0)
-			a = clamp(1-powf(distance(m_pClient->m_pControls->m_TargetPos[g_Config.m_ClDummy], Position)/200.0f,16.0f), 0.0f, 1.0f);
+			a = clamp(1 - powf(distance(m_pClient->m_pControls->m_TargetPos[g_Config.m_ClDummy], Position) / 200.0f, 16.0f), 0.0f, 1.0f);
 
 		const char *pName = m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aName;
 		if(str_comp(pName, m_aNamePlates[ClientID].m_aName) != 0 || FontSize != m_aNamePlates[ClientID].m_NameTextFontSize)
@@ -123,10 +126,10 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		}
 		else
 		{
-			TOutlineColor.Set(0.0f, 0.0f, 0.0f, 0.5f*a);
+			TOutlineColor.Set(0.0f, 0.0f, 0.0f, 0.5f * a);
 			TColor.Set(rgb.r, rgb.g, rgb.b, a);
 		}
-		if(g_Config.m_ClNameplatesTeamcolors && m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_TEAMS)
+		if(g_Config.m_ClNameplatesTeamcolors && m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)
 		{
 			if(m_pClient->m_aClients[ClientID].m_Team == TEAM_RED)
 				TColor.Set(1.0f, 0.5f, 0.5f, a);
@@ -137,7 +140,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		TOutlineColor.m_A *= Alpha;
 		TColor.m_A *= Alpha;
 
-		float YOffset = Position.y-38;
+		float YOffset = Position.y - 38;
 
 		if(m_aNamePlates[ClientID].m_NameTextContainerIndex != -1)
 		{
@@ -152,30 +155,30 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 				TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex, &TColor, &TOutlineColor, Position.x - m_aNamePlates[ClientID].m_ClanNameTextWidth / 2.0f, YOffset);
 		}
 
-		if (g_Config.m_ClNameplatesFriendMark && m_pClient->m_aClients[ClientID].m_Friend)
+		if(g_Config.m_ClNameplatesFriendMark && m_pClient->m_aClients[ClientID].m_Friend)
 		{
 			YOffset -= FontSize;
-			char aFriendMark[]  = "♥";
+			char aFriendMark[] = "♥";
 			TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f));
-			float XOffSet = TextRender()->TextWidth(0, FontSize, aFriendMark, -1, -1.0f)/2.0f;
-			TextRender()->Text(0, Position.x-XOffSet, YOffset, FontSize, aFriendMark, -1.0f);
+			float XOffSet = TextRender()->TextWidth(0, FontSize, aFriendMark, -1, -1.0f) / 2.0f;
+			TextRender()->Text(0, Position.x - XOffSet, YOffset, FontSize, aFriendMark, -1.0f);
 		}
 
 		if(g_Config.m_Debug || g_Config.m_ClNameplatesIDs) // render client id when in debug as well
 		{
 			YOffset -= FontSize;
 			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf),"%d", pPlayerInfo->m_ClientID);
-			float XOffset = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f)/2.0f;
+			str_format(aBuf, sizeof(aBuf), "%d", pPlayerInfo->m_ClientID);
+			float XOffset = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f) / 2.0f;
 			TextRender()->TextColor(rgb);
-			TextRender()->Text(0, Position.x-XOffset, YOffset, FontSize, aBuf, -1.0f);
+			TextRender()->Text(0, Position.x - XOffset, YOffset, FontSize, aBuf, -1.0f);
 		}
 
 		if(g_Config.m_ClNameplatesHA) // render health and armor in nameplate
 		{
 			int Health = m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur.m_Health;
 			int Armor = m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur.m_Armor;
-			
+
 			if(Health > 0 || Armor > 0)
 			{
 				float HFontSize = 5.0f + 20.0f * g_Config.m_ClNameplatesHASize / 100.0f;
@@ -193,16 +196,15 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 					str_append(aArmor, "⚪", sizeof(aArmor));
 				str_append(aArmor, "\0", sizeof(aArmor));
 
-
-				YOffset -= HFontSize+AFontSize;
+				YOffset -= HFontSize + AFontSize;
 				float PosHealth = TextRender()->TextWidth(0, HFontSize, aHealth, -1, -1.0f);
 				TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f));
-				TextRender()->Text(0, Position.x-PosHealth/2.0f, YOffset, HFontSize, aHealth, -1);
+				TextRender()->Text(0, Position.x - PosHealth / 2.0f, YOffset, HFontSize, aHealth, -1);
 
-				YOffset -= -AFontSize+3.0f;
+				YOffset -= -AFontSize + 3.0f;
 				float PosArmor = TextRender()->TextWidth(0, AFontSize, aArmor, -1, -1.0f);
 				TextRender()->TextColor(ColorRGBA(1.0f, 1.0f, 0.0f));
-				TextRender()->Text(0, Position.x-PosArmor/2.0f, YOffset, AFontSize, aArmor, -1);
+				TextRender()->Text(0, Position.x - PosArmor / 2.0f, YOffset, AFontSize, aArmor, -1);
 			}
 		}
 		if(g_Config.m_ClRenderPic)
@@ -227,7 +229,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			m_pClient->m_pPlayerPics->Render(pName, &Color, Position.x-(g_Config.m_ClRenderPicWidth / 2), Position.y-(g_Config.m_ClRenderPicHeight + 100.0f), g_Config.m_ClRenderPicWidth, g_Config.m_ClRenderPicHeight);
 		}
 
-		TextRender()->TextColor(1,1,1,1);
+		TextRender()->TextColor(1, 1, 1, 1);
 		TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.3f);
 
 		TextRender()->SetRenderFlags(0);
@@ -266,7 +268,7 @@ void CNamePlates::OnRender()
 	}
 }
 
-void CNamePlates::SetPlayers(CPlayers* pPlayers)
+void CNamePlates::SetPlayers(CPlayers *pPlayers)
 {
 	m_pPlayers = pPlayers;
 }
@@ -282,7 +284,6 @@ void CNamePlates::ResetNamePlates()
 
 		m_aNamePlates[i].Reset();
 	}
-
 }
 
 void CNamePlates::OnWindowResize()

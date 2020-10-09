@@ -6,14 +6,14 @@
 
 void md5_update(MD5_CTX *ctxt, const void *data, size_t data_len)
 {
-    md5_append(ctxt, data, data_len);
+	md5_append(ctxt, data, data_len);
 }
 
 MD5_DIGEST md5_finish(MD5_CTX *ctxt)
 {
-    MD5_DIGEST result;
-    md5_finish_(ctxt, result.data);
-    return result;
+	MD5_DIGEST result;
+	md5_finish_(ctxt, result.data);
+	return result;
 }
 
 #endif

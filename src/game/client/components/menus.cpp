@@ -1123,6 +1123,8 @@ void CMenus::PopupMessage(const char *pTopic, const char *pBody, const char *pBu
 
 void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pButton, int64 Duration)
 {
+	dbg_msg(pTopic, "%s", pBody);
+
 	// reset active item
 	UI()->SetActiveItem(0);
 
@@ -1138,7 +1140,7 @@ void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pBu
 
 bool CMenus::CanDisplayWarning()
 {
-	return m_Popup == POPUP_NONE && (Client()->State() == IClient::STATE_DEMOPLAYBACK || Client()->State() == IClient::STATE_ONLINE);
+	return m_Popup == POPUP_NONE;
 }
 
 int CMenus::Render()
@@ -1255,12 +1257,12 @@ int CMenus::Render()
 			}
 			else if(m_MenuPage == PAGE_INTERNET)
 			{
-				m_pBackground->ChangePosition(CMenuBackground::POS_INTERNET);
+				m_pBackground->ChangePosition(CMenuBackground::POS_BROWSER_INTERNET);
 				RenderServerbrowser(MainView);
 			}
 			else if(m_MenuPage == PAGE_LAN)
 			{
-				m_pBackground->ChangePosition(CMenuBackground::POS_LAN);
+				m_pBackground->ChangePosition(CMenuBackground::POS_BROWSER_LAN);
 				RenderServerbrowser(MainView);
 			}
 			else if(m_MenuPage == PAGE_DEMOS)
@@ -1270,17 +1272,17 @@ int CMenus::Render()
 			}
 			else if(m_MenuPage == PAGE_FAVORITES)
 			{
-				m_pBackground->ChangePosition(CMenuBackground::POS_FAVORITES);
+				m_pBackground->ChangePosition(CMenuBackground::POS_BROWSER_FAVORITES);
 				RenderServerbrowser(MainView);
 			}
 			else if(m_MenuPage == PAGE_DDNET)
 			{
-				m_pBackground->ChangePosition(CMenuBackground::POS_CUSTOM0);
+				m_pBackground->ChangePosition(CMenuBackground::POS_BROWSER_CUSTOM0);
 				RenderServerbrowser(MainView);
 			}
 			else if(m_MenuPage == PAGE_KOG)
 			{
-				m_pBackground->ChangePosition(CMenuBackground::POS_CUSTOM0 + 1);
+				m_pBackground->ChangePosition(CMenuBackground::POS_BROWSER_CUSTOM0 + 1);
 				RenderServerbrowser(MainView);
 			}
 			else if(m_MenuPage == PAGE_SETTINGS)
@@ -1492,7 +1494,10 @@ int CMenus::Render()
 
 			static int s_ButtonTryAgain = 0;
 			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
+			{
+				m_Popup = POPUP_NONE;
 				Client()->Quit();
+			}
 		}
 		else if(m_Popup == POPUP_DISCONNECT)
 		{
@@ -1858,15 +1863,17 @@ int CMenus::Render()
 					}
 				}
 			}
-			Box.HSplitBottom(40.f, &Box, &Part);
+			Box.HSplitBottom(30.f, &Box, 0);
 			Box.HSplitBottom(20.f, &Box, &Part);
+			Box.HSplitBottom(10.f, &Box, 0);
 
+			float ButtonSize = 20.0f;
 			Part.VSplitLeft(113.0f, 0, &Part);
-			Part.VSplitLeft(Button.h, &Button, &Part);
+			Part.VSplitLeft(ButtonSize, &Button, &Part);
 			if(DoButton_CheckBox(&g_Config.m_ClVideoShowChat, Localize("Show chat"), g_Config.m_ClVideoShowChat, &Button))
 				g_Config.m_ClVideoShowChat ^= 1;
 			Part.VSplitLeft(112.0f, 0, &Part);
-			Part.VSplitLeft(Button.h, &Button, &Part);
+			Part.VSplitLeft(ButtonSize, &Button, &Part);
 			if(DoButton_CheckBox(&g_Config.m_ClVideoSndEnable, Localize("Use sounds"), g_Config.m_ClVideoSndEnable, &Button))
 				g_Config.m_ClVideoSndEnable ^= 1;
 
@@ -1882,14 +1889,14 @@ int CMenus::Render()
 			bool IncDemoSpeed = false, DecDemoSpeed = false;
 			// slowdown
 			Part.VSplitLeft(5.0f, 0, &Part);
-			Part.VSplitLeft(Button.h, &Button, &Part);
+			Part.VSplitLeft(ButtonSize, &Button, &Part);
 			static int s_SlowDownButton = 0;
 			if(DoButton_Sprite(&s_SlowDownButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_SLOWER, 0, &Button, CUI::CORNER_ALL))
 				DecDemoSpeed = true;
 
 			// fastforward
 			Part.VSplitLeft(5.0f, 0, &Part);
-			Part.VSplitLeft(Button.h, &Button, &Part);
+			Part.VSplitLeft(ButtonSize, &Button, &Part);
 			static int s_FastForwardButton = 0;
 			if(DoButton_Sprite(&s_FastForwardButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_FASTER, 0, &Button, CUI::CORNER_ALL))
 				IncDemoSpeed = true;
@@ -1906,7 +1913,7 @@ int CMenus::Render()
 				m_Speed = clamp(m_Speed - 1, 0, (int)(sizeof(g_aSpeeds) / sizeof(g_aSpeeds[0]) - 1));
 
 			Part.VSplitLeft(107.0f, 0, &Part);
-			Part.VSplitLeft(Button.h, &Button, &Part);
+			Part.VSplitLeft(ButtonSize, &Button, &Part);
 			if(DoButton_CheckBox(&g_Config.m_ClVideoShowhud, Localize("Show ingame HUD"), g_Config.m_ClVideoShowhud, &Button))
 				g_Config.m_ClVideoShowhud ^= 1;
 
@@ -2232,7 +2239,7 @@ void CMenus::OnStateChange(int NewState, int OldState)
 
 	if(NewState == IClient::STATE_OFFLINE)
 	{
-		if(OldState >= IClient::STATE_ONLINE && NewState < IClient::STATE_QUITING)
+		if(OldState >= IClient::STATE_ONLINE && NewState < IClient::STATE_QUITTING)
 			m_pClient->m_pSounds->Play(CSounds::CHN_MUSIC, SOUND_MENU, 1.0f);
 		m_Popup = POPUP_NONE;
 		if(Client()->ErrorString() && Client()->ErrorString()[0] != 0)

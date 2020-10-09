@@ -1,7 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <base/system.h>
 #include <base/hash_ctxt.h>
+#include <base/system.h>
 
 #include <engine/console.h>
 
@@ -39,8 +39,7 @@ unsigned char g_aDummyMapData[] = {
 	0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x20, 0x28, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x77, 0x00, 0x00, 0x00,
 	0x7c, 0x00, 0x00, 0x00, 0x78, 0x9c, 0x63, 0x64, 0x60, 0x60, 0x60, 0x44,
-	0xc2, 0x00, 0x00, 0x38, 0x00, 0x05
-};
+	0xc2, 0x00, 0x00, 0x38, 0x00, 0x05};
 
 static SECURITY_TOKEN ToSecurityToken(const unsigned char *pData)
 {
@@ -134,7 +133,7 @@ int CNetServer::Update()
 		m_aSlots[i].m_Connection.Update();
 		if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_ERROR &&
 			(!m_aSlots[i].m_Connection.m_TimeoutProtected ||
-			 !m_aSlots[i].m_Connection.m_TimeoutSituation))
+				!m_aSlots[i].m_Connection.m_TimeoutSituation))
 		{
 			Drop(i, m_aSlots[i].m_Connection.ErrorString());
 		}
@@ -147,14 +146,14 @@ SECURITY_TOKEN CNetServer::GetToken(const NETADDR &Addr)
 {
 	SHA256_CTX Sha256;
 	sha256_init(&Sha256);
-	sha256_update(&Sha256, (unsigned char*)m_SecurityTokenSeed, sizeof(m_SecurityTokenSeed));
-	sha256_update(&Sha256, (unsigned char*)&Addr, 20); // omit port, bad idea!
+	sha256_update(&Sha256, (unsigned char *)m_SecurityTokenSeed, sizeof(m_SecurityTokenSeed));
+	sha256_update(&Sha256, (unsigned char *)&Addr, 20); // omit port, bad idea!
 
 	SECURITY_TOKEN SecurityToken = ToSecurityToken(sha256_finish(&Sha256).data);
 
-	if (SecurityToken == NET_SECURITY_TOKEN_UNKNOWN ||
+	if(SecurityToken == NET_SECURITY_TOKEN_UNKNOWN ||
 		SecurityToken == NET_SECURITY_TOKEN_UNSUPPORTED)
-			SecurityToken = 1;
+		SecurityToken = 1;
 
 	return SecurityToken;
 }
@@ -172,7 +171,7 @@ int CNetServer::NumClientsWithAddr(NETADDR Addr)
 		if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE ||
 			(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_ERROR &&
 				(!m_aSlots[i].m_Connection.m_TimeoutProtected ||
-				 !m_aSlots[i].m_Connection.m_TimeoutSituation)))
+					!m_aSlots[i].m_Connection.m_TimeoutSituation)))
 			continue;
 
 		if(!net_addr_comp_noport(&Addr, m_aSlots[i].m_Connection.PeerAddress()))
@@ -224,7 +223,7 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, boo
 		return -1; // failed to add client?
 	}
 
-	if (Connlimit(Addr))
+	if(Connlimit(Addr))
 	{
 		const char Msg[] = "Too many connections in a short time";
 		CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, Msg, sizeof(Msg), SecurityToken, Sixup);
@@ -232,7 +231,7 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, boo
 	}
 
 	// check for sv_max_clients_per_ip
-	if (NumClientsWithAddr(Addr) + 1 > m_MaxClientsPerIP)
+	if(NumClientsWithAddr(Addr) + 1 > m_MaxClientsPerIP)
 	{
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "Only %d players with the same IP are allowed", m_MaxClientsPerIP);
@@ -250,7 +249,7 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, boo
 		}
 	}
 
-	if (Slot == -1)
+	if(Slot == -1)
 	{
 		const char FullMsg[] = "This server is full";
 		CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, FullMsg, sizeof(FullMsg), SecurityToken, Sixup);
@@ -261,7 +260,7 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, boo
 	// init connection slot
 	m_aSlots[Slot].m_Connection.DirectInit(Addr, SecurityToken, Token, Sixup);
 
-	if (VanillaAuth)
+	if(VanillaAuth)
 	{
 		// client sequence is unknown if the auth was done
 		// connection-less
@@ -270,15 +269,14 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, boo
 		m_aSlots[Slot].m_Connection.SetSequence(6);
 	}
 
-	if (g_Config.m_Debug)
+	if(g_Config.m_Debug)
 	{
 		char aAddrStr[NETADDR_MAXSTRSIZE];
 		net_addr_str(&Addr, aAddrStr, sizeof(aAddrStr), true);
 		dbg_msg("security", "client accepted %s", aAddrStr);
 	}
 
-
-	if (VanillaAuth)
+	if(VanillaAuth)
 		m_pfnNewClientNoAuth(Slot, m_UserPtr);
 	else
 		m_pfnNewClient(Slot, m_UserPtr, Sixup);
@@ -292,13 +290,13 @@ void CNetServer::SendMsgs(NETADDR &Addr, const CMsgPacker *Msgs[], int num)
 	mem_zero(&m_Construct, sizeof(m_Construct));
 	unsigned char *pChunkData = &m_Construct.m_aChunkData[m_Construct.m_DataSize];
 
-	for (int i = 0; i < num; i++)
+	for(int i = 0; i < num; i++)
 	{
 		const CMsgPacker *pMsg = Msgs[i];
 		CNetChunkHeader Header;
 		Header.m_Flags = NET_CHUNKFLAG_VITAL;
 		Header.m_Size = pMsg->Size();
-		Header.m_Sequence = i+1;
+		Header.m_Sequence = i + 1;
 		pChunkData = Header.Pack(pChunkData);
 		mem_copy(pChunkData, pMsg->Data(), pMsg->Size());
 		*pChunkData <<= 1;
@@ -308,29 +306,29 @@ void CNetServer::SendMsgs(NETADDR &Addr, const CMsgPacker *Msgs[], int num)
 	}
 
 	//
-	m_Construct.m_DataSize = (int)(pChunkData-m_Construct.m_aChunkData);
+	m_Construct.m_DataSize = (int)(pChunkData - m_Construct.m_aChunkData);
 	CNetBase::SendPacket(m_Socket, &Addr, &m_Construct, NET_SECURITY_TOKEN_UNSUPPORTED);
 }
 
 // connection-less msg packet without token-support
 void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 {
-	bool IsCtrl = Packet.m_Flags&NET_PACKETFLAG_CONTROL;
+	bool IsCtrl = Packet.m_Flags & NET_PACKETFLAG_CONTROL;
 	int CtrlMsg = m_RecvUnpacker.m_Data.m_aChunkData[0];
 
 	// log flooding
 	//TODO: remove
-	if (g_Config.m_Debug)
+	if(g_Config.m_Debug)
 	{
 		int64 Now = time_get();
 
-		if (Now - m_TimeNumConAttempts > time_freq())
+		if(Now - m_TimeNumConAttempts > time_freq())
 			// reset
 			m_NumConAttempts = 0;
 
 		m_NumConAttempts++;
 
-		if (m_NumConAttempts > 100)
+		if(m_NumConAttempts > 100)
 		{
 			dbg_msg("security", "flooding detected");
 
@@ -339,14 +337,13 @@ void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 		}
 	}
 
-
-	if (IsCtrl && CtrlMsg == NET_CTRLMSG_CONNECT)
+	if(IsCtrl && CtrlMsg == NET_CTRLMSG_CONNECT)
 	{
-		if (g_Config.m_SvVanillaAntiSpoof && g_Config.m_Password[0] == '\0')
+		if(g_Config.m_SvVanillaAntiSpoof && g_Config.m_Password[0] == '\0')
 		{
 			bool Flooding = false;
 
-			if (g_Config.m_SvVanConnPerSecond)
+			if(g_Config.m_SvVanConnPerSecond)
 			{
 				// detect flooding
 				Flooding = m_VConnNum > g_Config.m_SvVanConnPerSecond;
@@ -363,7 +360,7 @@ void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 				}
 			}
 
-			if (g_Config.m_Debug && Flooding)
+			if(g_Config.m_Debug && Flooding)
 			{
 				dbg_msg("security", "vanilla connection flooding detected");
 			}
@@ -388,7 +385,7 @@ void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 			// send mapchange + map data + con_ready + 3 x empty snap (with token)
 			CMsgPacker MapChangeMsg(NETMSG_MAP_CHANGE);
 
-			if (Flooding)
+			if(Flooding)
 			{
 				// Fallback to dm1
 				MapChangeMsg.AddString("dm1", 0);
@@ -405,7 +402,7 @@ void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 
 			CMsgPacker MapDataMsg(NETMSG_MAP_DATA);
 
-			if (Flooding)
+			if(Flooding)
 			{
 				// send empty map data to keep 0.6.4 support
 				MapDataMsg.AddInt(1); // last chunk
@@ -433,7 +430,7 @@ void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 
 			// send all chunks/msgs in one packet
 			const CMsgPacker *Msgs[] = {&MapChangeMsg, &MapDataMsg, &ConReadyMsg,
-										&SnapEmptyMsg, &SnapEmptyMsg, &SnapEmptyMsg};
+				&SnapEmptyMsg, &SnapEmptyMsg, &SnapEmptyMsg};
 			SendMsgs(Addr, Msgs, 6);
 		}
 		else
@@ -454,23 +451,22 @@ void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 		Unpacker.Reset(pData, h.m_Size);
 		int Msg = Unpacker.GetInt() >> 1;
 
-		if (Msg == NETMSG_INPUT)
+		if(Msg == NETMSG_INPUT)
 		{
 			SECURITY_TOKEN SecurityToken = Unpacker.GetInt();
-			if (SecurityToken == GetVanillaToken(Addr))
+			if(SecurityToken == GetVanillaToken(Addr))
 			{
-				if (g_Config.m_Debug)
+				if(g_Config.m_Debug)
 					dbg_msg("security", "new client (vanilla handshake)");
 				// try to accept client skipping auth state
 				TryAcceptClient(Addr, NET_SECURITY_TOKEN_UNSUPPORTED, true);
 			}
-			else if (g_Config.m_Debug)
+			else if(g_Config.m_Debug)
 				dbg_msg("security", "invalid token (vanilla handshake)");
-
 		}
 		else
 		{
-			if (g_Config.m_Debug)
+			if(g_Config.m_Debug)
 			{
 				dbg_msg("security", "invalid preconn msg %d", Msg);
 			}
@@ -480,32 +476,32 @@ void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 
 void CNetServer::OnConnCtrlMsg(NETADDR &Addr, int ClientID, int ControlMsg, const CNetPacketConstruct &Packet)
 {
-	if (ControlMsg == NET_CTRLMSG_CONNECT)
+	if(ControlMsg == NET_CTRLMSG_CONNECT)
 	{
 		// got connection attempt inside of valid session
 		// the client probably wants to reconnect
 		bool SupportsToken = Packet.m_DataSize >=
-								(int)(1 + sizeof(SECURITY_TOKEN_MAGIC) + sizeof(SECURITY_TOKEN)) &&
-								!mem_comp(&Packet.m_aChunkData[1], SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC));
+					     (int)(1 + sizeof(SECURITY_TOKEN_MAGIC) + sizeof(SECURITY_TOKEN)) &&
+				     !mem_comp(&Packet.m_aChunkData[1], SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC));
 
-		if (SupportsToken)
+		if(SupportsToken)
 		{
 			// response connection request with token
 			SECURITY_TOKEN Token = GetToken(Addr);
 			SendControl(Addr, NET_CTRLMSG_CONNECTACCEPT, SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC), Token);
 		}
 
-		if (g_Config.m_Debug)
+		if(g_Config.m_Debug)
 			dbg_msg("security", "client %d wants to reconnect", ClientID);
 	}
-	else if (ControlMsg == NET_CTRLMSG_ACCEPT && Packet.m_DataSize == 1 + sizeof(SECURITY_TOKEN))
+	else if(ControlMsg == NET_CTRLMSG_ACCEPT && Packet.m_DataSize == 1 + sizeof(SECURITY_TOKEN))
 	{
 		SECURITY_TOKEN Token = ToSecurityToken(&Packet.m_aChunkData[1]);
-		if (Token == GetToken(Addr))
+		if(Token == GetToken(Addr))
 		{
 			// correct token
 			// try to accept client
-			if (g_Config.m_Debug)
+			if(g_Config.m_Debug)
 				dbg_msg("security", "client %d reconnect", ClientID);
 
 			// reset netconn and process rejoin
@@ -519,7 +515,6 @@ void CNetServer::OnTokenCtrlMsg(NETADDR &Addr, int ControlMsg, const CNetPacketC
 {
 	if(ClientExists(Addr))
 		return; // silently ignore
-
 
 	if(Addr.type == NETTYPE_WEBSOCKET_IPV4)
 	{
@@ -559,7 +554,7 @@ int CNetServer::OnSixupCtrlMsg(NETADDR &Addr, CNetChunk *pChunk, int ControlMsg,
 	if(m_RecvUnpacker.m_Data.m_DataSize < 5 || ClientExists(Addr))
 		return 0; // silently ignore
 
-	mem_copy(&ResponseToken, Packet.m_aChunkData+1, 4);
+	mem_copy(&ResponseToken, Packet.m_aChunkData + 1, 4);
 
 	if(ControlMsg == 5)
 	{
@@ -610,20 +605,16 @@ int CNetServer::GetClientSlot(const NETADDR &Addr)
 
 static bool IsDDNetControlMsg(const CNetPacketConstruct *pPacket)
 {
-	if(!(pPacket->m_Flags&NET_PACKETFLAG_CONTROL)
-		|| pPacket->m_DataSize < 1)
+	if(!(pPacket->m_Flags & NET_PACKETFLAG_CONTROL) || pPacket->m_DataSize < 1)
 	{
 		return false;
 	}
-	if(pPacket->m_aChunkData[0] == NET_CTRLMSG_CONNECT
-		&& pPacket->m_DataSize >= (int)(1 + sizeof(SECURITY_TOKEN_MAGIC) + sizeof(SECURITY_TOKEN))
-		&& mem_comp(&pPacket->m_aChunkData[1], SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC)) == 0)
+	if(pPacket->m_aChunkData[0] == NET_CTRLMSG_CONNECT && pPacket->m_DataSize >= (int)(1 + sizeof(SECURITY_TOKEN_MAGIC) + sizeof(SECURITY_TOKEN)) && mem_comp(&pPacket->m_aChunkData[1], SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC)) == 0)
 	{
 		// DDNet CONNECT
 		return true;
 	}
-	if(pPacket->m_aChunkData[0] == NET_CTRLMSG_ACCEPT
-		&& pPacket->m_DataSize >= 1 + (int)sizeof(SECURITY_TOKEN))
+	if(pPacket->m_aChunkData[0] == NET_CTRLMSG_ACCEPT && pPacket->m_DataSize >= 1 + (int)sizeof(SECURITY_TOKEN))
 	{
 		// DDNet ACCEPT
 		return true;
@@ -657,7 +648,7 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *ResponseToken)
 		if(NetBan() && NetBan()->IsBanned(&Addr, aBuf, sizeof(aBuf)))
 		{
 			// banned, reply with a message
-			CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, aBuf, str_length(aBuf)+1, NET_SECURITY_TOKEN_UNSUPPORTED);
+			CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, aBuf, str_length(aBuf) + 1, NET_SECURITY_TOKEN_UNSUPPORTED);
 			continue;
 		}
 
@@ -666,7 +657,7 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *ResponseToken)
 		*ResponseToken = NET_SECURITY_TOKEN_UNKNOWN;
 		if(CNetBase::UnpackPacket(pData, Bytes, &m_RecvUnpacker.m_Data, Sixup, &Token, ResponseToken) == 0)
 		{
-			if(m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONNLESS)
+			if(m_RecvUnpacker.m_Data.m_Flags & NET_PACKETFLAG_CONNLESS)
 			{
 				if(Sixup && Token != GetToken(Addr))
 					continue;
@@ -676,7 +667,7 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *ResponseToken)
 				pChunk->m_Address = Addr;
 				pChunk->m_DataSize = m_RecvUnpacker.m_Data.m_DataSize;
 				pChunk->m_pData = m_RecvUnpacker.m_Data.m_aChunkData;
-				if(m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_EXTENDED)
+				if(m_RecvUnpacker.m_Data.m_Flags & NET_PACKETFLAG_EXTENDED)
 				{
 					pChunk->m_Flags |= NETSENDFLAG_EXTENDED;
 					mem_copy(pChunk->m_aExtraData, m_RecvUnpacker.m_Data.m_aExtraData, sizeof(pChunk->m_aExtraData));
@@ -686,8 +677,8 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *ResponseToken)
 			else
 			{
 				// drop invalid ctrl packets
-				if (m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONTROL &&
-						m_RecvUnpacker.m_Data.m_DataSize == 0)
+				if(m_RecvUnpacker.m_Data.m_Flags & NET_PACKETFLAG_CONTROL &&
+					m_RecvUnpacker.m_Data.m_DataSize == 0)
 					continue;
 
 				// normal packet, find matching slot
@@ -700,12 +691,12 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *ResponseToken)
 						continue;
 				}
 
-				if (Slot != -1)
+				if(Slot != -1)
 				{
 					// found
 
 					// control
-					if(m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONTROL)
+					if(m_RecvUnpacker.m_Data.m_Flags & NET_PACKETFLAG_CONTROL)
 						OnConnCtrlMsg(Addr, Slot, m_RecvUnpacker.m_Data.m_aChunkData[0], m_RecvUnpacker.m_Data);
 
 					if(m_aSlots[Slot].m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr, Token))
@@ -745,11 +736,11 @@ int CNetServer::Send(CNetChunk *pChunk)
 		return -1;
 	}
 
-	if(pChunk->m_Flags&NETSENDFLAG_CONNLESS)
+	if(pChunk->m_Flags & NETSENDFLAG_CONNLESS)
 	{
 		// send connectionless packet
 		CNetBase::SendPacketConnless(m_Socket, &pChunk->m_Address, pChunk->m_pData, pChunk->m_DataSize,
-				pChunk->m_Flags&NETSENDFLAG_EXTENDED, pChunk->m_aExtraData);
+			pChunk->m_Flags & NETSENDFLAG_EXTENDED, pChunk->m_aExtraData);
 	}
 	else
 	{
@@ -757,12 +748,12 @@ int CNetServer::Send(CNetChunk *pChunk)
 		dbg_assert(pChunk->m_ClientID >= 0, "errornous client id");
 		dbg_assert(pChunk->m_ClientID < MaxClients(), "errornous client id");
 
-		if(pChunk->m_Flags&NETSENDFLAG_VITAL)
+		if(pChunk->m_Flags & NETSENDFLAG_VITAL)
 			Flags = NET_CHUNKFLAG_VITAL;
 
 		if(m_aSlots[pChunk->m_ClientID].m_Connection.QueueChunk(Flags, pChunk->m_DataSize, pChunk->m_pData) == 0)
 		{
-			if(pChunk->m_Flags&NETSENDFLAG_FLUSH)
+			if(pChunk->m_Flags & NETSENDFLAG_FLUSH)
 				m_aSlots[pChunk->m_ClientID].m_Connection.Flush();
 		}
 		else
@@ -788,11 +779,11 @@ int CNetServer::SendConnlessSixup(CNetChunk *pChunk, SECURITY_TOKEN ResponseToke
 		return -1;
 
 	unsigned char aBuffer[NET_MAX_PACKETSIZE];
-	aBuffer[0] = NET_PACKETFLAG_CONNLESS<<2 | 1;
+	aBuffer[0] = NET_PACKETFLAG_CONNLESS << 2 | 1;
 	SECURITY_TOKEN Token = GetToken(pChunk->m_Address);
-	mem_copy(aBuffer+1, &ResponseToken, 4);
-	mem_copy(aBuffer+5, &Token, 4);
-	mem_copy(aBuffer+9, pChunk->m_pData, pChunk->m_DataSize);
+	mem_copy(aBuffer + 1, &ResponseToken, 4);
+	mem_copy(aBuffer + 5, &Token, 4);
+	mem_copy(aBuffer + 9, pChunk->m_pData, pChunk->m_DataSize);
 	net_udp_send(m_Socket, &pChunk->m_Address, aBuffer, pChunk->m_DataSize + 9);
 
 	return 0;
@@ -811,7 +802,7 @@ void CNetServer::SetMaxClientsPerIP(int Max)
 
 bool CNetServer::SetTimedOut(int ClientID, int OrigID)
 {
-	if (m_aSlots[ClientID].m_Connection.State() != NET_CONNSTATE_ERROR)
+	if(m_aSlots[ClientID].m_Connection.State() != NET_CONNSTATE_ERROR)
 		return false;
 
 	m_aSlots[ClientID].m_Connection.SetTimedOut(ClientAddr(OrigID), m_aSlots[OrigID].m_Connection.SeqSequence(), m_aSlots[OrigID].m_Connection.AckSequence(), m_aSlots[OrigID].m_Connection.SecurityToken(), m_aSlots[OrigID].m_Connection.ResendBuffer(), m_aSlots[OrigID].m_Connection.m_Sixup);

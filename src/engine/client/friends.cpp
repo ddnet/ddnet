@@ -62,7 +62,7 @@ void CFriends::Init(bool Foes)
 
 const CFriendInfo *CFriends::GetFriend(int Index) const
 {
-	return &m_aFriends[maximum(0, Index%m_NumFriends)];
+	return &m_aFriends[maximum(0, Index % m_NumFriends)];
 }
 
 int CFriends::GetFriendState(const char *pName, const char *pClan) const
@@ -139,7 +139,7 @@ void CFriends::RemoveFriend(int Index)
 {
 	if(Index >= 0 && Index < m_NumFriends)
 	{
-		mem_move(&m_aFriends[Index], &m_aFriends[Index+1], sizeof(CFriendInfo)*(m_NumFriends-(Index+1)));
+		mem_move(&m_aFriends[Index], &m_aFriends[Index + 1], sizeof(CFriendInfo) * (m_NumFriends - (Index + 1)));
 		--m_NumFriends;
 	}
 }
@@ -153,7 +153,7 @@ void CFriends::Friends()
 		for(int i = 0; i < m_NumFriends; ++i)
 		{
 			str_format(aBuf, sizeof(aBuf), "Name: %s, Clan: %s", m_aFriends[i].m_aName, m_aFriends[i].m_aClan);
-			pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, m_Foes?"foes":"friends", aBuf, true);
+			pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, m_Foes ? "foes" : "friends", aBuf, true);
 		}
 	}
 }
@@ -162,7 +162,7 @@ void CFriends::ConfigSaveCallback(IConfig *pConfig, void *pUserData)
 {
 	CFriends *pSelf = (CFriends *)pUserData;
 	char aBuf[128];
-	const char *pEnd = aBuf+sizeof(aBuf)-4;
+	const char *pEnd = aBuf + sizeof(aBuf) - 4;
 	for(int i = 0; i < pSelf->m_NumFriends; ++i)
 	{
 		str_copy(aBuf, pSelf->m_Foes ? "add_foe " : "add_friend ", sizeof(aBuf));

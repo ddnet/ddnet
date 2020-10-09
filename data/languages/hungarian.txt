@@ -425,12 +425,6 @@ Spectator mode
 Spectators
 == Megfigyelők
 
-Standard gametype
-== Általános játékfajta
-
-Standard map
-== Általános pálya
-
 Stop record
 == Demó megállítása
 
@@ -939,9 +933,6 @@ AntiPing: predict grenade paths
 Demo
 == Demó
 
-AntiPing limit
-== Antiping limit
-
 Inner color
 == belső szín
 
@@ -1173,6 +1164,12 @@ Length
 Are you sure that you want to disconnect your dummy?
 == Biztos, hogy kiakarod léptetni a másolatodat?
 
+Downloading ddnet-info.json failed
+== 
+
+Saving ddnet-settings.cfg failed
+== 
+
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
 == 
 
@@ -1188,13 +1185,7 @@ Country / Region
 Speed
 == 
 
-Search:
-== 
-
-Exclude:
-== 
-
-Search servers:
+Theme
 == 
 
 %d of %d servers
@@ -1209,7 +1200,16 @@ Search servers:
 %d player
 == 
 
+File
+== 
+
+Demos directory
+== 
+
 Skip the main menu
+== 
+
+Themes directory
 == 
 
 Download skins
@@ -1218,10 +1218,37 @@ Download skins
 Skin prefix
 == 
 
+Skin Database
+== 
+
+Skins directory
+== 
+
+Background music volume
+== 
+
+Assets
+== 
+
 Client message
 == 
 
 Show others (own team only)
+== 
+
+Use current map as background
+== 
+
+Entities
+== 
+
+Emoticons
+== 
+
+Particles
+== 
+
+Assets directory
 == 
 
 https://wiki.ddnet.tw/
