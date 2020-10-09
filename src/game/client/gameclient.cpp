@@ -132,9 +132,7 @@ void CGameClient::OnConsoleInit()
 	m_pEditor = Kernel()->RequestInterface<IEditor>();
 	m_pFriends = Kernel()->RequestInterface<IFriends>();
 	m_pFoes = Client()->Foes();
-#if defined(CONF_AUTOUPDATE)
 	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
-#endif
 
 	// setup pointers
 	m_pMenuBackground = &::gs_MenuBackground;

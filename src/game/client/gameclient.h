@@ -92,9 +92,7 @@ class CGameClient : public IGameClient
 	class IEditor *m_pEditor;
 	class IFriends *m_pFriends;
 	class IFriends *m_pFoes;
-#if defined(CONF_AUTOUPDATE)
 	class IUpdater *m_pUpdater;
-#endif
 
 	CLayers m_Layers;
 	class CCollision m_Collision;
@@ -149,12 +147,10 @@ public:
 	class IEditor *Editor() { return m_pEditor; }
 	class IFriends *Friends() { return m_pFriends; }
 	class IFriends *Foes() { return m_pFoes; }
-#if defined(CONF_AUTOUPDATE)
 	class IUpdater *Updater()
 	{
 		return m_pUpdater;
 	}
-#endif
 
 	int NetobjNumCorrections()
 	{
