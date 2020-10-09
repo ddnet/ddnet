@@ -215,6 +215,7 @@ void CSpectator::OnRender()
 	int TotalPlayers = 0;
 	int PerLine = 8;
 	float BoxMove = -10.0f;
+	float BoxOffset = 0.0f;
 
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
@@ -232,6 +233,7 @@ void CSpectator::OnRender()
 		PerLine = 16;
 		RoundRadius = 10.0f;
 		BoxMove = 3.0f;
+		BoxOffset = 6.0f;
 	}
 	if(TotalPlayers > 16)
 	{
@@ -353,7 +355,7 @@ void CSpectator::OnRender()
 			if(NextDDTeam != DDTeam)
 				Corners |= CUI::CORNER_BL | CUI::CORNER_BR;
 
-			RenderTools()->DrawRoundRectExt(Width / 2.0f + x - 10.0f, Height / 2.0f + y + BoxMove, 270.0f, LineHeight, RoundRadius, Corners);
+			RenderTools()->DrawRoundRectExt(Width / 2.0f + x - 10.0f + BoxOffset, Height / 2.0f + y + BoxMove, 270.0f - BoxOffset, LineHeight, RoundRadius, Corners);
 
 			Graphics()->QuadsEnd();
 		}
@@ -365,7 +367,7 @@ void CSpectator::OnRender()
 			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.25f);
-			RenderTools()->DrawRoundRect(Width / 2.0f + x - 10.0f, Height / 2.0f + y + BoxMove, 270.0f, LineHeight, RoundRadius);
+			RenderTools()->DrawRoundRect(Width / 2.0f + x - 10.0f + BoxOffset, Height / 2.0f + y + BoxMove, 270.0f - BoxOffset, LineHeight, RoundRadius);
 			Graphics()->QuadsEnd();
 		}
 
