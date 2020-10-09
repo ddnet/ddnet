@@ -403,6 +403,9 @@ public:
 
 	virtual int DIStatus() const
 	{
+		if(!m_pCheckJob)
+			return INTEGRITY_DISABLED;
+
 		if(m_pCheckJob->Status() != IJob::STATE_DONE)
 			return INTEGRITY_PENDING;
 

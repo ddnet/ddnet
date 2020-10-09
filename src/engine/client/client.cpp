@@ -4431,6 +4431,9 @@ int main(int argc, const char **argv) // ignore_convention
 
 	pClient->Engine()->InitLogfile();
 
+	if(g_Config.m_ClCheckDataIntegrity)
+		pStorage->DIStartCheck(pEngine);
+
 	// run the client
 	dbg_msg("client", "starting...");
 	pClient->Run();
