@@ -967,6 +967,7 @@ public:
 
 	int DoButton_ColorPicker(const void *pID, const CUIRect *pRect, ColorRGBA *pColor, const char *pToolTip = 0);
 
+	int DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners);
 	int DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden = false, int Corners = CUI::CORNER_ALL);
 
 	void RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, float Size, float Brightness);
@@ -1049,7 +1050,7 @@ public:
 	void RenderStatusbar(CUIRect View);
 	void RenderEnvelopeEditor(CUIRect View);
 	void RenderUndoList(CUIRect View);
-	void RenderServerSettingsEditor(CUIRect View);
+	void RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEditorLast);
 
 	void RenderMenubar(CUIRect Menubar);
 	void RenderFileDialog();
