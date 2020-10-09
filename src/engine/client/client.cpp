@@ -6,7 +6,6 @@
 #include <new>
 
 #include <stdarg.h>
-#include <stdlib.h> // qsort
 #include <tuple>
 
 #include <base/hash_ctxt.h>
@@ -1239,27 +1238,25 @@ const char *CClient::LoadMapSearch(const char *pMapName, SHA256_DIGEST *pWantedS
 	return pError;
 }
 
-int CClient::PlayerScoreNameComp(const void *a, const void *b)
+bool CClient::PlayerScoreNameLess(const CServerInfo::CClient &p0, const CServerInfo::CClient &p1)
 {
-	CServerInfo::CClient *p0 = (CServerInfo::CClient *)a;
-	CServerInfo::CClient *p1 = (CServerInfo::CClient *)b;
-	if(p0->m_Player && !p1->m_Player)
-		return -1;
-	if(!p0->m_Player && p1->m_Player)
-		return 1;
+	if(p0.m_Player && !p1.m_Player)
+		return true;
+	if(!p0.m_Player && p1.m_Player)
+		return false;
 
-	int Score0 = p0->m_Score;
-	int Score1 = p1->m_Score;
+	int Score0 = p0.m_Score;
+	int Score1 = p1.m_Score;
 	if(Score0 == -9999)
 		Score0 = INT_MIN;
 	if(Score1 == -9999)
 		Score1 = INT_MIN;
 
 	if(Score0 > Score1)
-		return -1;
+		return true;
 	if(Score0 < Score1)
-		return 1;
-	return str_comp_nocase(p0->m_aName, p1->m_aName);
+		return false;
+	return str_comp_nocase(p0.m_aName, p1.m_aName) < 0;
 }
 
 void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
@@ -1520,7 +1517,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 
 	if(!Up.Error() || IgnoreError)
 	{
-		qsort(Info.m_aClients, Info.m_NumReceivedClients, sizeof(*Info.m_aClients), PlayerScoreNameComp);
+		std::sort(Info.m_aClients, Info.m_aClients + Info.m_NumReceivedClients, PlayerScoreNameLess);
 
 		if(!DuplicatedPacket && (!pEntry || !pEntry->m_GotInfo || SavedType >= pEntry->m_Info.m_Type))
 		{
