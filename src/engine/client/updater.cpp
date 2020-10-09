@@ -43,7 +43,8 @@ static const char *GetUpdaterDestPath(char *pBuf, int BufSize, const char *pFile
 
 CUpdaterFetchTask::CUpdaterFetchTask(CUpdater *pUpdater, const char *pFile, const char *pDestPath) :
 	CGetFile(pUpdater->m_pStorage, GetUpdaterUrl(m_aBuf, sizeof(m_aBuf), pFile), GetUpdaterDestPath(m_aBuf2, sizeof(m_aBuf), pFile, pDestPath), -2, CTimeout{0, 0, 0}),
-	m_PreviousDownloaded(0), m_pUpdater(pUpdater)
+	m_PreviousDownloaded(0),
+	m_pUpdater(pUpdater)
 {
 }
 
@@ -99,7 +100,7 @@ char *CUpdater::Speed(char *pBuf, int BufSize) const
 {
 	float KB = m_TotalDownloaded / 1024;
 	float s = (float)(time_get() - m_DownloadStart) / time_freq();
-	str_format(pBuf, BufSize, "%d KB/s", s > 0 ? round_to_int(KB/s) : 0);
+	str_format(pBuf, BufSize, "%d KB/s", s > 0 ? round_to_int(KB / s) : 0);
 
 	return pBuf;
 }

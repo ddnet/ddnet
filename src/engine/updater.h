@@ -2,7 +2,7 @@
 #define ENGINE_UPDATER_H
 
 #include <map>
-#include<string>
+#include <string>
 
 #include "kernel.h"
 

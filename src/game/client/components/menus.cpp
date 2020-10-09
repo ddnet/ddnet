@@ -2650,7 +2650,7 @@ int CMenus::Render()
 			Box.HSplitBottom(20.0f, &Box, 0);
 			Box.HSplitBottom(24.0f, &Box, &Buttons);
 
-			Box.VSplitLeft(Box.w/3, &Extra, &Box);
+			Box.VSplitLeft(Box.w / 3, &Extra, &Box);
 			Box.VSplitMid(&Missing, &Modified);
 
 			CUIRect ExtraHeader, MissingHeader, ModifiedHeader;
@@ -2658,9 +2658,9 @@ int CMenus::Render()
 			Missing.HSplitTop(20.0f, &MissingHeader, &Missing);
 			Modified.HSplitTop(20.0f, &ModifiedHeader, &Modified);
 
-			UI()->DoLabel(&ExtraHeader, Localize("Extra Files"), FontSize/1.5f, 0, -1);
-			UI()->DoLabel(&MissingHeader, Localize("Missing Files"), FontSize/1.5f, 0, -1);
-			UI()->DoLabel(&ModifiedHeader, Localize("Modified Files"), FontSize/1.5f, 0, -1);
+			UI()->DoLabel(&ExtraHeader, Localize("Extra Files"), FontSize / 1.5f, 0, -1);
+			UI()->DoLabel(&MissingHeader, Localize("Missing Files"), FontSize / 1.5f, 0, -1);
+			UI()->DoLabel(&ModifiedHeader, Localize("Modified Files"), FontSize / 1.5f, 0, -1);
 
 			{
 				CUIRect Line;
@@ -2668,34 +2668,33 @@ int CMenus::Render()
 
 				Extra.HSplitTop(5.0f, 0, &Extra);
 				Line = Extra;
-				Line.h = FontSize/2;
+				Line.h = FontSize / 2;
 				while(Line.y + Line.h <= Extra.y + Extra.h && i < m_PopupDIExtraFiles.size())
 				{
-					UI()->DoLabel(&Line, m_PopupDIExtraFiles[i++].c_str(), FontSize/2, 0, -1);
+					UI()->DoLabel(&Line, m_PopupDIExtraFiles[i++].c_str(), FontSize / 2, 0, -1);
 					Line.y += Line.h + 2.0f;
 				}
 
 				Missing.HSplitTop(5.0f, 0, &Missing);
 				Line = Missing;
-				Line.h = FontSize/2;
+				Line.h = FontSize / 2;
 				i = 0;
 				while(Line.y + Line.h <= Missing.y + Missing.h && i < m_PopupDIMissingFiles.size())
 				{
-					UI()->DoLabel(&Line, m_PopupDIMissingFiles[i++].c_str(), FontSize/2, 0, -1);
+					UI()->DoLabel(&Line, m_PopupDIMissingFiles[i++].c_str(), FontSize / 2, 0, -1);
 					Line.y += Line.h + 2.0f;
 				}
 
 				Modified.HSplitTop(5.0f, 0, &Modified);
 				Line = Modified;
-				Line.h = FontSize/2;
+				Line.h = FontSize / 2;
 				i = 0;
 				while(Line.y + Line.h <= Modified.y + Modified.h && i < m_PopupDIModifiedFiles.size())
 				{
-					UI()->DoLabel(&Line, m_PopupDIModifiedFiles[i++].c_str(), FontSize/2, 0, -1);
+					UI()->DoLabel(&Line, m_PopupDIModifiedFiles[i++].c_str(), FontSize / 2, 0, -1);
 					Line.y += Line.h + 2.0f;
 				}
 			}
-
 
 			if(Updater()->State() == IUpdater::CLEAN)
 			{
@@ -2732,7 +2731,7 @@ int CMenus::Render()
 			{
 				static int s_RestartButton = 0;
 				if(DoButton_Menu(&s_RestartButton, Localize("Restart"), 0, &Buttons, 0, CUI::CORNER_ALL, 5.0f, 0.0f,
-					vec4(0.8f, 1.0f, 0.8f, 0.5f), vec4(0.8f, 1.0f, 0.8f, 0.75f)))
+					   vec4(0.8f, 1.0f, 0.8f, 0.5f), vec4(0.8f, 1.0f, 0.8f, 0.75f)))
 				{
 					m_Popup = POPUP_NONE;
 					Client()->Restart();
