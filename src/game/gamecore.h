@@ -226,6 +226,7 @@ public:
 	vec2 m_Vel;
 	bool m_Hook;
 	bool m_Collision;
+	bool m_HeadJump;
 
 	vec2 m_HookPos;
 	vec2 m_HookDir;

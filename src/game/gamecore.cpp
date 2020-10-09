@@ -66,6 +66,7 @@ void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore
 	m_Id = -1;
 	m_Hook = true;
 	m_Collision = true;
+	m_HeadJump = true; // TODO: Only for testing, add a tile if we want to use this
 	m_JumpedTotal = 0;
 	m_Jumps = 2;
 }
@@ -80,6 +81,7 @@ void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore
 	m_Id = -1;
 	m_Hook = true;
 	m_Collision = true;
+	m_HeadJump = true; // TODO: Only for testing, add a tile if we want to use this
 	m_JumpedTotal = 0;
 	m_Jumps = 2;
 }
@@ -100,6 +102,7 @@ void CCharacterCore::Reset()
 	m_TriggeredEvents = 0;
 	m_Hook = true;
 	m_Collision = true;
+	m_HeadJump = true; // TODO: Only for testing, add a tile if we want to use this
 
 	// DDNet Character
 	m_Solo = false;
@@ -409,6 +412,8 @@ void CCharacterCore::Tick(bool UseInput)
 				if(length(m_Vel) > 0.0001)
 					Velocity = 1 - (dot(normalize(m_Vel), Dir) + 1) / 2;
 
+				if(m_HeadJump && m_Pos.y < pCharCore->m_Pos.y)
+					m_Jumped = 0;
 				m_Vel += Dir * a * (Velocity * 0.75f);
 				m_Vel *= 0.85f;
 			}
