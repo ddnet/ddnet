@@ -147,7 +147,7 @@ bool CUpdater::MoveFile(const char *pFile)
 
 void CUpdater::Update()
 {
-	switch(m_State)
+	switch(m_State.load())
 	{
 	case GETTING_MANIFEST:
 		switch(m_ManifestJob->Status())
