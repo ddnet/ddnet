@@ -1397,6 +1397,8 @@ generate_source("src/game/generated/server_data.h" "server_content_header")
 
 generate_source7("src/game/generated/protocol7.cpp" "network_source")
 generate_source7("src/game/generated/protocol7.h" "network_header")
+generate_source7("src/game/generated/client_data7.cpp" "client_content_source")
+generate_source7("src/game/generated/client_data7.h" "client_content_header")
 
 generate_maps("src/game/generated/protocolglue.h")
 
@@ -1756,6 +1758,7 @@ if(CLIENT)
     render.cpp
     render.h
     render_map.cpp
+    skin.h
     ui.cpp
     ui.h
   )
@@ -1775,6 +1778,8 @@ if(CLIENT)
   set(GAME_GENERATED_CLIENT
     src/game/generated/client_data.cpp
     src/game/generated/client_data.h
+    src/game/generated/client_data7.cpp
+    src/game/generated/client_data7.h
   )
   set(CLIENT_SRC ${ENGINE_CLIENT} ${PLATFORM_CLIENT} ${GAME_CLIENT} ${GAME_EDITOR} ${GAME_GENERATED_CLIENT})
 

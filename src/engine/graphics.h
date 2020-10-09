@@ -149,6 +149,10 @@ struct GL_SVertexTex3DStream
 
 typedef void (*WINDOW_RESIZE_FUNC)(void *pUser);
 
+namespace client_data7 {
+struct CDataSprite;
+}
+
 class IGraphics : public IInterface
 {
 	MACRO_INTERFACE("graphics", 0)
@@ -221,12 +225,22 @@ public:
 	// destination and source buffer require to have the same width and height
 	virtual void CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSourceBuffer, int FullWidth, int FullHeight, int ColorChannelCount, int SubOffsetX, int SubOffsetY, int SubCopyWidth, int SubCopyHeight) = 0;
 
+	// destination width must be equal to the subwidth of the source
+	virtual void CopyTextureFromTextureBufferSub(uint8_t *pDestBuffer, int DestWidth, int DestHeight, uint8_t *pSourceBuffer, int SrcWidth, int SrcHeight, int ColorChannelCount, int SrcSubOffsetX, int SrcSubOffsetY, int SrcSubCopyWidth, int SrcSubCopyHeight) = 0;
+
 	virtual int UnloadTexture(CTextureHandle Index) = 0;
+	virtual int UnloadTextureNew(CTextureHandle &TextureHandle) = 0;
 	virtual CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName = NULL) = 0;
 	virtual int LoadTextureRawSub(CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData) = 0;
 	virtual CTextureHandle LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags) = 0;
 	virtual void TextureSet(CTextureHandle Texture) = 0;
 	void TextureClear() { TextureSet(CTextureHandle()); }
+
+	virtual CTextureHandle LoadSpriteTexture(CImageInfo &FromImageInfo, struct CDataSprite *pSprite) = 0;
+	virtual CTextureHandle LoadSpriteTexture(CImageInfo &FromImageInfo, struct client_data7::CDataSprite *pSprite) = 0;
+
+	virtual bool IsImageSubFullyTransparent(CImageInfo &FromImageInfo, int x, int y, int w, int h) = 0;
+	virtual bool IsSpriteTextureFullyTransparent(CImageInfo &FromImageInfo, struct client_data7::CDataSprite *pSprite) = 0;
 
 	virtual void FlushVertices(bool KeepVertices = false) = 0;
 	virtual void FlushTextVertices(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor) = 0;

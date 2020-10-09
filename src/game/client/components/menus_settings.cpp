@@ -31,6 +31,8 @@
 #include "menus.h"
 #include "skins.h"
 
+#include <utility>
+
 CMenusKeyBinder CMenus::m_Binder;
 
 CMenusKeyBinder::CMenusKeyBinder()
@@ -443,17 +445,18 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	}
 
 	// skin info
-	const CSkins::CSkin *pOwnSkin = m_pClient->m_pSkins->Get(m_pClient->m_pSkins->Find(Skin));
 	CTeeRenderInfo OwnSkinInfo;
+	const CSkin *pSkin = m_pClient->m_pSkins->Get(m_pClient->m_pSkins->Find(Skin));
+	OwnSkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
+	OwnSkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+	OwnSkinInfo.m_CustomColoredSkin = *UseCustomColor;
 	if(*UseCustomColor)
 	{
-		OwnSkinInfo.m_Texture = pOwnSkin->m_ColorTexture;
 		OwnSkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(*ColorBody).UnclampLighting());
 		OwnSkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(*ColorFeet).UnclampLighting());
 	}
 	else
 	{
-		OwnSkinInfo.m_Texture = pOwnSkin->m_OrgTexture;
 		OwnSkinInfo.m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f);
 		OwnSkinInfo.m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f);
 	}
@@ -579,7 +582,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	// skin selector
 	MainView.HSplitTop(20.0f, 0, &MainView);
 	MainView.HSplitTop(230.0f, &SkinList, &MainView);
-	static sorted_array<const CSkins::CSkin *> s_paSkinList;
+	static sorted_array<const CSkin *> s_paSkinList;
 	static int s_SkinCount = 0;
 	static float s_ScrollValue = 0.0f;
 	if(s_InitSkinlist || m_pClient->m_pSkins->Num() != s_SkinCount)
@@ -587,7 +590,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		s_paSkinList.clear();
 		for(int i = 0; i < m_pClient->m_pSkins->Num(); ++i)
 		{
-			const CSkins::CSkin *s = m_pClient->m_pSkins->Get(i);
+			const CSkin *s = m_pClient->m_pSkins->Get(i);
 
 			// filter quick search
 			if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_find_nocase(s->m_aName, g_Config.m_ClSkinFilterString))
@@ -611,7 +614,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	UiDoListboxStart(&s_InitSkinlist, &SkinList, 50.0f, Localize("Skins"), "", s_paSkinList.size(), 4, OldSelected, s_ScrollValue);
 	for(int i = 0; i < s_paSkinList.size(); ++i)
 	{
-		const CSkins::CSkin *s = s_paSkinList[i];
+		const CSkin *s = s_paSkinList[i];
 		if(s == 0)
 			continue;
 
@@ -623,7 +626,10 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		if(Item.m_Visible)
 		{
 			CTeeRenderInfo Info = OwnSkinInfo;
-			Info.m_Texture = *UseCustomColor ? s->m_ColorTexture : s->m_OrgTexture;
+			Info.m_CustomColoredSkin = *UseCustomColor;
+
+			Info.m_OriginalRenderSkin = s->m_OriginalSkin;
+			Info.m_ColorableRenderSkin = s->m_ColorableSkin;
 
 			Item.m_Rect.HSplitTop(5.0f, 0, &Item.m_Rect); // some margin from the top
 			RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, 0, vec2(1.0f, 0.0f), vec2(Item.m_Rect.x + 30, Item.m_Rect.y + Item.m_Rect.h / 2));
@@ -707,6 +713,10 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	{
 		m_pClient->m_pSkins->Refresh();
 		s_InitSkinlist = true;
+		if(Client()->State() >= IClient::STATE_ONLINE)
+		{
+			m_pClient->RefindSkins();
+		}
 	}
 	TextRender()->SetRenderFlags(0);
 	TextRender()->SetCurFont(NULL);
@@ -1910,11 +1920,10 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		// render head
 		{
 			Graphics()->BlendNormal();
-			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_PARTICLES].m_Id);
+			int SpriteIndex = time_get() % 3;
+			Graphics()->TextureSet(GameClient()->m_ParticlesSkin.m_SpriteParticleSplat[SpriteIndex]);
 			Graphics()->QuadsBegin();
 
-			int Sprites[] = {SPRITE_PART_SPLAT01, SPRITE_PART_SPLAT02, SPRITE_PART_SPLAT03};
-			RenderTools()->SelectSprite(Sprites[time_get() % 3]);
 			Graphics()->QuadsSetRotation(time_get());
 			Graphics()->SetColor(OuterColor.r, OuterColor.g, OuterColor.b, 1.0f);
 			IGraphics::CQuadItem QuadItem(Pos.x, Pos.y, 24, 24);
@@ -1925,10 +1934,11 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			Graphics()->QuadsEnd();
 		}
 		// draw laser weapon
-		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
+		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteWeaponLaser);
 		Graphics()->QuadsBegin();
 
 		RenderTools()->SelectSprite(SPRITE_WEAPON_LASER_BODY);
+		Graphics()->QuadsSetSubset(0, 0, 1, 1);
 		RenderTools()->DrawSprite(Weapon.x, Weapon.y + Weapon.h / 2.0f, 60.0f);
 
 		Graphics()->QuadsEnd();

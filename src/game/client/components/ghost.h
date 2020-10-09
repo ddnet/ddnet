@@ -168,6 +168,8 @@ public:
 	class IGhostRecorder *GhostRecorder() const { return m_pGhostRecorder; }
 
 	int GetLastRaceTick();
+
+	void RefindSkin();
 };
 
 #endif

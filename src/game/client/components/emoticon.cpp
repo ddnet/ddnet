@@ -111,9 +111,7 @@ void CEmoticon::OnRender()
 	DrawCircle(Screen.w / 2, Screen.h / 2, 190.0f, 64);
 	Graphics()->QuadsEnd();
 
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_EMOTICONS].m_Id);
-	Graphics()->QuadsBegin();
-
+	Graphics()->WrapClamp();
 	for(int i = 0; i < NUM_EMOTICONS; i++)
 	{
 		float Angle = 2 * pi * i / NUM_EMOTICONS;
@@ -124,14 +122,17 @@ void CEmoticon::OnRender()
 
 		float Size = Selected ? 80.0f : 50.0f;
 
+		Graphics()->TextureSet(GameClient()->m_EmoticonsSkin.m_SpriteEmoticons[i]);
+		Graphics()->QuadsSetSubset(0, 0, 1, 1);
+
+		Graphics()->QuadsBegin();
 		float NudgeX = 150.0f * cosf(Angle);
 		float NudgeY = 150.0f * sinf(Angle);
-		RenderTools()->SelectSprite(SPRITE_OOP + i);
 		IGraphics::CQuadItem QuadItem(Screen.w / 2 + NudgeX, Screen.h / 2 + NudgeY, Size, Size);
 		Graphics()->QuadsDraw(&QuadItem, 1);
+		Graphics()->QuadsEnd();
 	}
-
-	Graphics()->QuadsEnd();
+	Graphics()->WrapNormal();
 
 	if(GameClient()->m_GameInfo.m_AllowEyeWheel && g_Config.m_ClEyeWheel)
 	{
@@ -142,8 +143,6 @@ void CEmoticon::OnRender()
 		Graphics()->QuadsEnd();
 
 		CTeeRenderInfo *pTeeInfo = &m_pClient->m_aClients[m_pClient->m_LocalIDs[g_Config.m_ClDummy]].m_RenderInfo;
-
-		Graphics()->TextureSet(pTeeInfo->m_Texture);
 
 		for(int i = 0; i < NUM_EMOTES; i++)
 		{

@@ -18,6 +18,8 @@
 #include <engine/keys.h>
 #include <engine/shared/config.h>
 #include <engine/storage.h>
+#include <game/generated/client_data.h>
+#include <game/generated/client_data7.h>
 #include <game/localization.h>
 
 #include <math.h> // cosf, sinf, log2f
@@ -102,7 +104,7 @@ void CGraphics_Threaded::FlushVerticesTex3D()
 void CGraphics_Threaded::AddVertices(int Count)
 {
 	m_NumVertices += Count;
-	if((m_NumVertices + Count) >= MAX_VERTICES)
+	if((m_NumVertices + Count) >= CCommandBuffer::MAX_VERTICES)
 		FlushVertices();
 }
 
@@ -114,7 +116,7 @@ void CGraphics_Threaded::AddVertices(int Count, CCommandBuffer::SVertex *pVertic
 void CGraphics_Threaded::AddVertices(int Count, CCommandBuffer::SVertexTex3DStream *pVertices)
 {
 	m_NumVertices += Count;
-	if((m_NumVertices + Count) >= MAX_VERTICES)
+	if((m_NumVertices + Count) >= CCommandBuffer::MAX_VERTICES)
 		FlushVerticesTex3D();
 }
 
@@ -273,6 +275,13 @@ int CGraphics_Threaded::UnloadTexture(CTextureHandle Index)
 	return 0;
 }
 
+int CGraphics_Threaded::UnloadTextureNew(CTextureHandle &TextureHandle)
+{
+	int Ret = UnloadTexture(TextureHandle);
+	TextureHandle = IGraphics::CTextureHandle();
+	return Ret;
+}
+
 static int ImageFormatToTexFormat(int Format)
 {
 	if(Format == CImageInfo::FORMAT_RGB)
@@ -320,6 +329,74 @@ int CGraphics_Threaded::LoadTextureRawSub(CTextureHandle TextureID, int x, int y
 		m_pCommandBuffer->AddCommand(Cmd);
 	}
 	return 0;
+}
+
+IGraphics::CTextureHandle CGraphics_Threaded::LoadSpriteTextureImpl(CImageInfo &FromImageInfo, int x, int y, int w, int h)
+{
+	int bpp = ImageFormatToPixelSize(FromImageInfo.m_Format);
+
+	m_SpriteHelper.resize(w * h * bpp);
+
+	CopyTextureFromTextureBufferSub(&m_SpriteHelper[0], w, h, (uint8_t *)FromImageInfo.m_pData, FromImageInfo.m_Width, FromImageInfo.m_Height, bpp, x, y, w, h);
+
+	IGraphics::CTextureHandle RetHandle = LoadTextureRaw(w, h, FromImageInfo.m_Format, &m_SpriteHelper[0], FromImageInfo.m_Format, 0);
+
+	return RetHandle;
+}
+
+IGraphics::CTextureHandle CGraphics_Threaded::LoadSpriteTexture(CImageInfo &FromImageInfo, CDataSprite *pSprite)
+{
+	int imggx = FromImageInfo.m_Width / pSprite->m_pSet->m_Gridx;
+	int imggy = FromImageInfo.m_Height / pSprite->m_pSet->m_Gridy;
+	int x = pSprite->m_X * imggx;
+	int y = pSprite->m_Y * imggy;
+	int w = pSprite->m_W * imggx;
+	int h = pSprite->m_H * imggy;
+	return LoadSpriteTextureImpl(FromImageInfo, x, y, w, h);
+}
+
+IGraphics::CTextureHandle CGraphics_Threaded::LoadSpriteTexture(CImageInfo &FromImageInfo, client_data7::CDataSprite *pSprite)
+{
+	int imggx = FromImageInfo.m_Width / pSprite->m_pSet->m_Gridx;
+	int imggy = FromImageInfo.m_Height / pSprite->m_pSet->m_Gridy;
+	int x = pSprite->m_X * imggx;
+	int y = pSprite->m_Y * imggy;
+	int w = pSprite->m_W * imggx;
+	int h = pSprite->m_H * imggy;
+	return LoadSpriteTextureImpl(FromImageInfo, x, y, w, h);
+}
+
+bool CGraphics_Threaded::IsImageSubFullyTransparent(CImageInfo &FromImageInfo, int x, int y, int w, int h)
+{
+	if(FromImageInfo.m_Format == CImageInfo::FORMAT_ALPHA || FromImageInfo.m_Format == CImageInfo::FORMAT_RGBA)
+	{
+		uint8_t *pImgData = (uint8_t *)FromImageInfo.m_pData;
+		int bpp = ImageFormatToPixelSize(FromImageInfo.m_Format);
+		for(int iy = 0; iy < h; ++iy)
+		{
+			for(int ix = 0; ix < w; ++ix)
+			{
+				int RealOffset = (x + ix) * bpp + (y + iy) * bpp * FromImageInfo.m_Width;
+				if(pImgData[RealOffset + (bpp - 1)] > 0)
+					return false;
+			}
+		}
+
+		return true;
+	}
+	return false;
+}
+
+bool CGraphics_Threaded::IsSpriteTextureFullyTransparent(CImageInfo &FromImageInfo, client_data7::CDataSprite *pSprite)
+{
+	int imggx = FromImageInfo.m_Width / pSprite->m_pSet->m_Gridx;
+	int imggy = FromImageInfo.m_Height / pSprite->m_pSet->m_Gridy;
+	int x = pSprite->m_X * imggx;
+	int y = pSprite->m_Y * imggy;
+	int w = pSprite->m_W * imggx;
+	int h = pSprite->m_H * imggy;
+
+	return IsImageSubFullyTransparent(FromImageInfo, x, y, w, h);
 }
 
 IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName)
@@ -485,6 +562,17 @@ void CGraphics_Threaded::CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSo
 		int ImgOffset = ((SubOffsetY + Y) * FullWidth * ColorChannelCount) + (SubOffsetX * ColorChannelCount);
 		int CopySize = SubCopyWidth * ColorChannelCount;
 		mem_copy(&pDestBuffer[ImgOffset], &pSourceBuffer[ImgOffset], CopySize);
+	}
+}
+
+void CGraphics_Threaded::CopyTextureFromTextureBufferSub(uint8_t *pDestBuffer, int DestWidth, int DestHeight, uint8_t *pSourceBuffer, int SrcWidth, int SrcHeight, int ColorChannelCount, int SrcSubOffsetX, int SrcSubOffsetY, int SrcSubCopyWidth, int SrcSubCopyHeight)
+{
+	for(int Y = 0; Y < SrcSubCopyHeight; ++Y)
+	{
+		int SrcImgOffset = ((SrcSubOffsetY + Y) * SrcWidth * ColorChannelCount) + (SrcSubOffsetX * ColorChannelCount);
+		int DstImgOffset = (Y * DestWidth * ColorChannelCount);
+		int CopySize = SrcSubCopyWidth * ColorChannelCount;
+		mem_copy(&pDestBuffer[DstImgOffset], &pSourceBuffer[SrcImgOffset], CopySize);
 	}
 }
 
@@ -1183,7 +1271,7 @@ void CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CQuadItem *pA
 {
 	SQuadContainer &Container = m_QuadContainers[ContainerIndex];
 
-	if((int)Container.m_Quads.size() > Num + CCommandBuffer::MAX_VERTICES)
+	if((int)Container.m_Quads.size() > Num + CCommandBuffer::CCommandBuffer::MAX_VERTICES)
 		return;
 
 	for(int i = 0; i < Num; ++i)
@@ -1228,7 +1316,7 @@ void CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CFreeformItem
 {
 	SQuadContainer &Container = m_QuadContainers[ContainerIndex];
 
-	if((int)Container.m_Quads.size() > Num + CCommandBuffer::MAX_VERTICES)
+	if((int)Container.m_Quads.size() > Num + CCommandBuffer::CCommandBuffer::MAX_VERTICES)
 		return;
 
 	for(int i = 0; i < Num; ++i)
@@ -1301,6 +1389,8 @@ void CGraphics_Threaded::RenderQuadContainer(int ContainerIndex, int QuadOffset,
 		if(Container.m_QuadBufferContainerIndex == -1)
 			return;
 
+		WrapClamp();
+
 		CCommandBuffer::SCommand_RenderQuadContainer Cmd;
 		Cmd.m_State = m_State;
 		Cmd.m_DrawNum = (unsigned int)QuadDrawNum * 6;
@@ -1342,9 +1432,11 @@ void CGraphics_Threaded::RenderQuadContainer(int ContainerIndex, int QuadOffset,
 			m_NumVertices += 4 * QuadDrawNum;
 		}
 		m_Drawing = DRAWING_QUADS;
+		WrapClamp();
 		FlushVertices(false);
 		m_Drawing = 0;
 	}
+	WrapNormal();
 }
 
 void CGraphics_Threaded::RenderQuadContainerAsSprite(int ContainerIndex, int QuadOffset, float X, float Y, float ScaleX, float ScaleY)
@@ -1361,6 +1453,8 @@ void CGraphics_Threaded::RenderQuadContainerAsSprite(int ContainerIndex, int Qua
 
 		SQuadContainer::SQuad &Quad = Container.m_Quads[QuadOffset];
 		CCommandBuffer::SCommand_RenderQuadContainerAsSprite Cmd;
+
+		WrapClamp();
 
 		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 		GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
@@ -1468,9 +1562,11 @@ void CGraphics_Threaded::RenderQuadContainerAsSprite(int ContainerIndex, int Qua
 			m_NumVertices += 4;
 		}
 		m_Drawing = DRAWING_QUADS;
+		WrapClamp();
 		FlushVertices(false);
 		m_Drawing = 0;
 	}
+	WrapNormal();
 }
 
 void CGraphics_Threaded::RenderQuadContainerAsSpriteMultiple(int ContainerIndex, int QuadOffset, int DrawCount, SRenderSpriteInfo *pRenderInfo)
@@ -1485,6 +1581,7 @@ void CGraphics_Threaded::RenderQuadContainerAsSpriteMultiple(int ContainerIndex,
 		if(Container.m_QuadBufferContainerIndex == -1)
 			return;
 
+		WrapClamp();
 		SQuadContainer::SQuad &Quad = Container.m_Quads[0];
 		CCommandBuffer::SCommand_RenderQuadContainerAsSpriteMultiple Cmd;
 
@@ -1539,6 +1636,7 @@ void CGraphics_Threaded::RenderQuadContainerAsSpriteMultiple(int ContainerIndex,
 		}
 
 		mem_copy(Cmd.m_pRenderInfo, pRenderInfo, sizeof(IGraphics::SRenderSpriteInfo) * DrawCount);
+		WrapNormal();
 	}
 	else
 	{
@@ -2094,9 +2192,9 @@ int CGraphics_Threaded::Init()
 
 	// init textures
 	m_FirstFreeTexture = 0;
-	for(int i = 0; i < MAX_TEXTURES - 1; i++)
+	for(int i = 0; i < CCommandBuffer::MAX_TEXTURES - 1; i++)
 		m_aTextureIndices[i] = i + 1;
-	m_aTextureIndices[MAX_TEXTURES - 1] = -1;
+	m_aTextureIndices[CCommandBuffer::MAX_TEXTURES - 1] = -1;
 
 	m_FirstFreeVertexArrayInfo = -1;
 	m_FirstFreeBufferObjectIndex = -1;

@@ -352,16 +352,18 @@ void CGhost::InitRenderInfos(CGhostItem *pGhost)
 	CTeeRenderInfo *pRenderInfo = &pGhost->m_RenderInfo;
 
 	int SkinId = m_pClient->m_pSkins->Find(aSkinName);
-
+	const CSkin *pSkin = m_pClient->m_pSkins->Get(SkinId);
+	pRenderInfo->m_OriginalRenderSkin = pSkin->m_OriginalSkin;
+	pRenderInfo->m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+	pRenderInfo->m_BloodColor = pSkin->m_BloodColor;
+	pRenderInfo->m_CustomColoredSkin = pGhost->m_Skin.m_UseCustomColor;
 	if(pGhost->m_Skin.m_UseCustomColor)
 	{
-		pRenderInfo->m_Texture = m_pClient->m_pSkins->Get(SkinId)->m_ColorTexture;
 		pRenderInfo->m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(pGhost->m_Skin.m_ColorBody));
 		pRenderInfo->m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(pGhost->m_Skin.m_ColorFeet));
 	}
 	else
 	{
-		pRenderInfo->m_Texture = m_pClient->m_pSkins->Get(SkinId)->m_OrgTexture;
 		pRenderInfo->m_ColorBody = ColorRGBA(1, 1, 1);
 		pRenderInfo->m_ColorFeet = ColorRGBA(1, 1, 1);
 	}
@@ -623,4 +625,32 @@ void CGhost::OnMapLoad()
 int CGhost::GetLastRaceTick()
 {
 	return m_LastRaceTick;
+}
+
+void CGhost::RefindSkin()
+{
+	char aSkinName[64];
+	for(int i = 0; i < (int)(sizeof(m_aActiveGhosts) / sizeof(m_aActiveGhosts[0])); ++i)
+	{
+		IntsToStr(&m_aActiveGhosts[i].m_Skin.m_Skin0, 6, aSkinName);
+		if(aSkinName[0] != '\0')
+		{
+			CTeeRenderInfo *pRenderInfo = &m_aActiveGhosts[i].m_RenderInfo;
+
+			int SkinId = m_pClient->m_pSkins->Find(aSkinName);
+			const CSkin *pSkin = m_pClient->m_pSkins->Get(SkinId);
+			pRenderInfo->m_OriginalRenderSkin = pSkin->m_OriginalSkin;
+			pRenderInfo->m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+		}
+	}
+	IntsToStr(&m_CurGhost.m_Skin.m_Skin0, 6, aSkinName);
+	if(aSkinName[0] != '\0')
+	{
+		CTeeRenderInfo *pRenderInfo = &m_CurGhost.m_RenderInfo;
+
+		int SkinId = m_pClient->m_pSkins->Find(aSkinName);
+		const CSkin *pSkin = m_pClient->m_pSkins->Get(SkinId);
+		pRenderInfo->m_OriginalRenderSkin = pSkin->m_OriginalSkin;
+		pRenderInfo->m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+	}
 }
