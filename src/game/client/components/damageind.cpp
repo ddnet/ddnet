@@ -47,7 +47,7 @@ void CDamageInd::Create(vec2 Pos, vec2 Dir)
 
 void CDamageInd::OnRender()
 {
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
+	Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteStars[0]);
 	static float s_LastLocalTime = LocalTime();
 	for(int i = 0; i < m_NumItems;)
 	{
@@ -89,8 +89,10 @@ void CDamageInd::OnInit()
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 
 	m_DmgIndQuadContainerIndex = Graphics()->CreateQuadContainer();
-	RenderTools()->SelectSprite(SPRITE_STAR1);
-	RenderTools()->QuadContainerAddSprite(m_DmgIndQuadContainerIndex, 48.f);
+	float ScaleX, ScaleY;
+	RenderTools()->GetSpriteScale(SPRITE_STAR1, ScaleX, ScaleY);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
+	RenderTools()->QuadContainerAddSprite(m_DmgIndQuadContainerIndex, 48.f * ScaleX, 48.f * ScaleY);
 }
 
 void CDamageInd::Reset()

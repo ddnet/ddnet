@@ -7,6 +7,7 @@
 #include <base/color.h>
 #include <base/vmath.h>
 #include <engine/graphics.h>
+#include <game/client/skin.h>
 #include <game/mapitems.h>
 
 class CTeeRenderInfo
@@ -20,7 +21,11 @@ public:
 		m_GotAirJump = 1;
 	};
 
-	IGraphics::CTextureHandle m_Texture;
+	CSkin::SSkinTextures m_OriginalRenderSkin;
+	CSkin::SSkinTextures m_ColorableRenderSkin;
+	bool m_CustomColoredSkin;
+	ColorRGBA m_BloodColor;
+
 	ColorRGBA m_ColorBody;
 	ColorRGBA m_ColorFeet;
 	float m_Size;
@@ -48,20 +53,28 @@ class CRenderTools
 public:
 	class IGraphics *m_pGraphics;
 	class CUI *m_pUI;
+	class CGameClient *m_pGameClient;
 
 	class IGraphics *Graphics() const { return m_pGraphics; }
 	class CUI *UI() const { return m_pUI; }
+	class CGameClient *GameClient() const { return m_pGameClient; }
 
-	void Init(class IGraphics *pGraphics, class CUI *pUI);
+	void Init(class IGraphics *pGraphics, class CUI *pUI, class CGameClient *pGameClient);
 
 	//typedef struct SPRITE;
 
 	void SelectSprite(struct CDataSprite *pSprite, int Flags = 0, int sx = 0, int sy = 0);
 	void SelectSprite(int id, int Flags = 0, int sx = 0, int sy = 0);
 
+	void GetSpriteScale(client_data7::CDataSprite *pSprite, float &ScaleX, float &ScaleY);
+	void GetSpriteScale(struct CDataSprite *pSprite, float &ScaleX, float &ScaleY);
+	void GetSpriteScale(int id, float &ScaleX, float &ScaleY);
+
 	void DrawSprite(float x, float y, float size);
-	void QuadContainerAddSprite(int QuadContainerIndex, float x, float y, float size, bool DoSpriteScale = true);
-	void QuadContainerAddSprite(int QuadContainerIndex, float size, bool DoSpriteScale = true);
+	void DrawSprite(float x, float y, float ScaledWidth, float ScaledHeight);
+	void QuadContainerAddSprite(int QuadContainerIndex, float x, float y, float size);
+	void QuadContainerAddSprite(int QuadContainerIndex, float size);
+	void QuadContainerAddSprite(int QuadContainerIndex, float Width, float Height);
 	void QuadContainerAddSprite(int QuadContainerIndex, float X, float Y, float Width, float Height);
 
 	// rects

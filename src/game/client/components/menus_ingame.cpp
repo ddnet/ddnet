@@ -1127,13 +1127,14 @@ void CMenus::RenderGhost(CUIRect MainView)
 			{
 				if(pItem->Active())
 				{
-					Graphics()->TextureSet(g_pData->m_aImages[IMAGE_EMOTICONS].m_Id);
+					Graphics()->WrapClamp();
+					Graphics()->TextureSet(GameClient()->m_EmoticonsSkin.m_SpriteEmoticons[(SPRITE_OOP + 7) - SPRITE_OOP]);
 					Graphics()->QuadsBegin();
-					RenderTools()->SelectSprite(SPRITE_OOP + 7);
 					IGraphics::CQuadItem QuadItem(Button.x + Button.w / 2, Button.y + Button.h / 2, 20.0f, 20.0f);
 					Graphics()->QuadsDraw(&QuadItem, 1);
 
 					Graphics()->QuadsEnd();
+					Graphics()->WrapNormal();
 				}
 			}
 			else if(Id == COL_NAME)

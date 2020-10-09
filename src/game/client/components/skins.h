@@ -7,25 +7,11 @@
 #include <base/vmath.h>
 #include <engine/client/http.h>
 #include <game/client/component.h>
+#include <game/client/skin.h>
 
 class CSkins : public CComponent
 {
 public:
-	// do this better and nicer
-	struct CSkin
-	{
-		bool m_IsVanilla;
-		IGraphics::CTextureHandle m_OrgTexture;
-		IGraphics::CTextureHandle m_ColorTexture;
-		char m_aName[24];
-		ColorRGBA m_BloodColor;
-
-		bool operator<(const CSkin &Other) const { return str_comp(m_aName, Other.m_aName) < 0; }
-
-		bool operator<(const char *pOther) const { return str_comp(m_aName, pOther) < 0; }
-		bool operator==(const char *pOther) const { return !str_comp(m_aName, pOther); }
-	};
-
 	struct CDownloadSkin
 	{
 		std::shared_ptr<CGetFile> m_pTask;
@@ -49,7 +35,7 @@ private:
 	sorted_array<CDownloadSkin> m_aDownloadSkins;
 	char m_EventSkinPrefix[24];
 
-	int LoadSkin(const char *pName, const char *pPath, int DirType);
+	int LoadSkin(const char *pName, const char *pPath, int DirType, int *pGetSkinID = NULL);
 	int FindImpl(const char *pName);
 	static int SkinScan(const char *pName, int IsDir, int DirType, void *pUser);
 };

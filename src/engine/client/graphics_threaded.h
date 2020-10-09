@@ -58,7 +58,7 @@ public:
 
 	enum
 	{
-		MAX_TEXTURES = 1024 * 4,
+		MAX_TEXTURES = 1024 * 32,
 		MAX_VERTICES = 32 * 1024,
 	};
 
@@ -665,9 +665,6 @@ class CGraphics_Threaded : public IEngineGraphics
 	{
 		NUM_CMDBUFFERS = 2,
 
-		MAX_VERTICES = 32 * 1024,
-		MAX_TEXTURES = 1024 * 4,
-
 		DRAWING_QUADS = 1,
 		DRAWING_LINES = 2
 	};
@@ -691,8 +688,8 @@ class CGraphics_Threaded : public IEngineGraphics
 
 	int m_CurIndex;
 
-	CCommandBuffer::SVertex m_aVertices[MAX_VERTICES];
-	CCommandBuffer::SVertexTex3DStream m_aVerticesTex3D[MAX_VERTICES];
+	CCommandBuffer::SVertex m_aVertices[CCommandBuffer::MAX_VERTICES];
+	CCommandBuffer::SVertexTex3DStream m_aVerticesTex3D[CCommandBuffer::MAX_VERTICES];
 	int m_NumVertices;
 
 	CCommandBuffer::SColor m_aColor[4];
@@ -707,9 +704,11 @@ class CGraphics_Threaded : public IEngineGraphics
 
 	CTextureHandle m_InvalidTexture;
 
-	int m_aTextureIndices[MAX_TEXTURES];
+	int m_aTextureIndices[CCommandBuffer::MAX_TEXTURES];
 	int m_FirstFreeTexture;
 	int m_TextureMemoryUsage;
+
+	std::vector<uint8_t> m_SpriteHelper;
 
 	std::vector<SWarning> m_Warnings;
 
@@ -813,14 +812,23 @@ public:
 	void LinesDraw(const CLineItem *pArray, int Num) override;
 
 	int UnloadTexture(IGraphics::CTextureHandle Index) override;
+	int UnloadTextureNew(CTextureHandle &TextureHandle) override;
 	IGraphics::CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName = NULL) override;
 	int LoadTextureRawSub(IGraphics::CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData) override;
+
+	CTextureHandle LoadSpriteTextureImpl(CImageInfo &FromImageInfo, int x, int y, int w, int h);
+	CTextureHandle LoadSpriteTexture(CImageInfo &FromImageInfo, struct CDataSprite *pSprite) override;
+	CTextureHandle LoadSpriteTexture(CImageInfo &FromImageInfo, struct client_data7::CDataSprite *pSprite) override;
+
+	bool IsImageSubFullyTransparent(CImageInfo &FromImageInfo, int x, int y, int w, int h) override;
+	bool IsSpriteTextureFullyTransparent(CImageInfo &FromImageInfo, struct client_data7::CDataSprite *pSprite) override;
 
 	// simple uncompressed RGBA loaders
 	IGraphics::CTextureHandle LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags) override;
 	int LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType) override;
 
 	void CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSourceBuffer, int FullWidth, int FullHeight, int ColorChannelCount, int SubOffsetX, int SubOffsetY, int SubCopyWidth, int SubCopyHeight) override;
+	void CopyTextureFromTextureBufferSub(uint8_t *pDestBuffer, int DestWidth, int DestHeight, uint8_t *pSourceBuffer, int SrcWidth, int SrcHeight, int ColorChannelCount, int SrcSubOffsetX, int SrcSubOffsetY, int SrcSubCopyWidth, int SrcSubCopyHeight) override;
 
 	void ScreenshotDirect();
 

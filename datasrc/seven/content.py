@@ -173,7 +173,7 @@ class DataContainer(Struct):
 		self.sprites = Array(Sprite())
 		self.animations = Array(Animation())
 		self.weapons = Weapons()
-		self.explosion = Explosion()
+		#self.explosion = Explosion()
 
 def FileList(format, num):
 	return [format%(x+1) for x in range(0,num)]
