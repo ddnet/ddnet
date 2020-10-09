@@ -4549,3 +4549,28 @@ SWarning *CClient::GetCurWarning()
 		return &m_Warnings[0];
 	}
 }
+
+void CClient::CleanUpInstallation()
+{
+	auto Restore = Storage()->DIMissingFiles();
+	auto &Extra = Storage()->DIExtraFiles();
+	Restore.insert(Restore.end(), Extra.cbegin(), Extra.cend());
+
+	std::map<std::string, bool> Jobs;
+	for(const auto &f : Restore)
+	{
+		//TODO: Figure out how CStorage::Store should work
+		//Storage()->Store(f.c_str());
+		dbg_msg("dbg", "adding %s", f.c_str());
+		Jobs[f] = true;
+	}
+
+	auto Missing = Storage()->DIMissingFiles();
+	for(const auto &f : Missing)
+	{
+		dbg_msg("dbg", "adding %s", f.c_str());
+		Jobs[f] = true;
+	}
+
+	Updater()->PerformUpdate(Jobs, true);
+}

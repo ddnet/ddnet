@@ -501,6 +501,8 @@ public:
 	virtual void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount);
 
 	virtual SWarning *GetCurWarning();
+
+	virtual void CleanUpInstallation();
 };
 
 #endif

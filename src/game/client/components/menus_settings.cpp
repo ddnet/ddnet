@@ -2248,7 +2248,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		Left.HSplitBottom(25.0f, 0x0, &Label);
 		bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
 		char aBuf[256];
-		int State = Updater()->GetCurrentState();
+		int State = Updater()->State();
 
 		// Update Button
 		if(NeedUpdate && State <= IUpdater::CLEAN)

@@ -1,6 +1,9 @@
 #ifndef ENGINE_UPDATER_H
 #define ENGINE_UPDATER_H
 
+#include <map>
+#include<string>
+
 #include "kernel.h"
 
 class IUpdater : public IInterface
@@ -20,10 +23,11 @@ public:
 
 	virtual void Update() = 0;
 	virtual void InitiateUpdate() = 0;
+	virtual void PerformUpdate(const std::map<std::string, bool> &Jobs, bool PreventRestart = false) = 0;
 
-	virtual int GetCurrentState() = 0;
-	virtual float GetCurrentProgress() = 0;
-	virtual void GetDownloadSpeed(char *pBuf, int BufSize) = 0;
+	virtual int State() const = 0;
+	virtual float Progress() const = 0;
+	virtual char *Speed(char *pBuf, int BufSize) const = 0;
 };
 
 #endif

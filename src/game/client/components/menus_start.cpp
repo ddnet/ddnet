@@ -170,7 +170,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 #if defined(CONF_AUTOUPDATE)
 	char aBuf[64];
 	CUIRect Part;
-	int State = Updater()->GetCurrentState();
+	int State = Updater()->State();
 	bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
 	if(State == IUpdater::CLEAN && NeedUpdate)
 	{
@@ -181,9 +181,13 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	{
 		aBuf[0] = '\0';
 	}
-	else if(State >= IUpdater::GETTING_MANIFEST && State < IUpdater::NEED_RESTART)
+	else if(State == IUpdater::GETTING_MANIFEST)
 	{
-		Updater()->GetDownloadSpeed(aBuf, sizeof(aBuf));
+		str_format(aBuf, sizeof(aBuf), Localize("Getting the update manifest"));
+	}
+	else if(State > IUpdater::GETTING_MANIFEST && State < IUpdater::NEED_RESTART)
+	{
+		Updater()->Speed(aBuf, sizeof(aBuf));
 	}
 	else if(State == IUpdater::FAIL)
 	{
@@ -222,14 +226,14 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 			Client()->Restart();
 		}
 	}
-	else if(State >= IUpdater::GETTING_MANIFEST && State < IUpdater::NEED_RESTART)
+	else if(State > IUpdater::GETTING_MANIFEST && State < IUpdater::NEED_RESTART)
 	{
 		CUIRect ProgressBar, Percent;
 		Part.VSplitLeft(100.0f, &ProgressBar, &Percent);
 		ProgressBar.y += 2.0f;
 		ProgressBar.HMargin(1.0f, &ProgressBar);
 		RenderTools()->DrawUIRect(&ProgressBar, vec4(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 5.0f);
-		ProgressBar.w *= Updater()->GetCurrentProgress();
+		ProgressBar.w *= clamp(Updater()->Progress(), 0.1f, 1.0f);
 		RenderTools()->DrawUIRect(&ProgressBar, vec4(1.0f, 1.0f, 1.0f, 0.5f), CUI::CORNER_ALL, 5.0f);
 	}
 #elif defined(CONF_INFORM_UPDATE)

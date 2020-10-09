@@ -59,6 +59,7 @@ class CUpdater : public IUpdater
 	int64 m_DownloadStart;
 	std::atomic<int> m_TotalDownloaded;
 	std::atomic<unsigned> m_CompletedFetchJobs;
+	bool m_PreventRestart;
 
 	std::shared_ptr<CUpdaterFetchTask> m_ManifestJob;
 
@@ -67,7 +68,6 @@ class CUpdater : public IUpdater
 	bool MoveFile(const char *pFile);
 
 	std::map<std::string, bool> ParseUpdate();
-	void PerformUpdate(const std::map<std::string, bool> &Jobs);
 	void CommitUpdate();
 
 	bool ReplaceClient();
@@ -75,13 +75,13 @@ class CUpdater : public IUpdater
 
 public:
 	CUpdater();
-	~CUpdater();
 
-	int GetCurrentState() { return m_State; }
-	float GetCurrentProgress();
-	void GetDownloadSpeed(char *pBuf, int BufSize);
+	int State() const { return m_State; }
+	float Progress() const;
+	char *Speed(char *pBuf, int BufSize) const;
 
 	virtual void InitiateUpdate();
+	void PerformUpdate(const std::map<std::string, bool> &Jobs, bool PreventRestart = false);
 	void Init();
 	virtual void Update();
 	void WinXpRestart();

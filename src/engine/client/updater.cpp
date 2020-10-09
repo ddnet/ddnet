@@ -76,7 +76,7 @@ CUpdater::CUpdater()
 	m_State = CLEAN;
 	m_DownloadStart = 0;
 	m_TotalDownloaded = 0;
-	m_Lock = lock_create();
+	m_PreventRestart = false;
 
 	str_format(m_aClientExecTmp, sizeof(m_aClientExecTmp), CLIENT_EXEC ".%d.tmp", pid());
 	str_format(m_aServerExecTmp, sizeof(m_aServerExecTmp), SERVER_EXEC ".%d.tmp", pid());
@@ -90,21 +90,18 @@ void CUpdater::Init()
 	m_IsWinXP = os_is_winxp_or_lower();
 }
 
-CUpdater::~CUpdater()
-{
-	lock_destroy(m_Lock);
-}
-
-float CUpdater::GetCurrentProgress()
+float CUpdater::Progress() const
 {
 	return m_CompletedFetchJobs / (float)m_FetchJobs.size();
 }
 
-void CUpdater::GetDownloadSpeed(char *pBuf, int BufSize)
+char *CUpdater::Speed(char *pBuf, int BufSize) const
 {
 	float KB = m_TotalDownloaded / 1024;
 	float s = (float)(time_get() - m_DownloadStart) / time_freq();
 	str_format(pBuf, BufSize, "%d KB/s", s > 0 ? round_to_int(KB/s) : 0);
+
+	return pBuf;
 }
 
 std::shared_ptr<CUpdaterFetchTask> CUpdater::FetchFile(const char *pFile, const char *pDestPath)
@@ -280,12 +277,13 @@ std::map<std::string, bool> CUpdater::ParseUpdate()
 void CUpdater::InitiateUpdate()
 {
 	m_State = GETTING_MANIFEST;
-	m_DownloadStart = time_get();
 	m_ManifestJob = FetchFile("update.json");
 }
 
-void CUpdater::PerformUpdate(const std::map<std::string, bool> &Jobs)
+void CUpdater::PerformUpdate(const std::map<std::string, bool> &Jobs, bool PreventRestart)
 {
+	m_PreventRestart = PreventRestart;
+	m_DownloadStart = time_get();
 	m_State = DOWNLOADING;
 	m_FileJobs = Jobs;
 
@@ -347,7 +345,7 @@ void CUpdater::CommitUpdate()
 		Success &= ReplaceServer();
 	if(!Success)
 		m_State = FAIL;
-	else if(m_pClient->State() == IClient::STATE_ONLINE || m_pClient->EditorHasUnsavedData())
+	else if(m_pClient->State() == IClient::STATE_ONLINE || m_pClient->EditorHasUnsavedData() || m_PreventRestart)
 		m_State = NEED_RESTART;
 	else
 	{

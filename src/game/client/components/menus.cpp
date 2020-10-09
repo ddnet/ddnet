@@ -1101,7 +1101,7 @@ int CMenus::RenderMenubar(CUIRect r)
 		bool GotNewsOrUpdate = false;
 
 #if defined(CONF_AUTOUPDATE)
-		int State = Updater()->GetCurrentState();
+		int State = Updater()->State();
 		bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
 		if(State == IUpdater::CLEAN && NeedUpdate)
 		{
@@ -2696,17 +2696,48 @@ int CMenus::Render()
 				}
 			}
 
-			CUIRect Fix, Ignore;
-			Buttons.VSplitMid(&Fix, &Ignore);
-			Fix.VMargin(20.0f, &Fix);
-			Ignore.VMargin(20.0f, &Ignore);
 
-			static int s_FixButton = 0;
-			DoButton_Menu(&s_FixButton, Localize("Fix"), 0, &Fix);
+			if(Updater()->State() == IUpdater::CLEAN)
+			{
+				CUIRect Fix, Ignore;
+				Buttons.VSplitMid(&Fix, &Ignore);
+				Fix.VMargin(20.0f, &Fix);
+				Ignore.VMargin(20.0f, &Ignore);
 
-			static int s_IgnoreButton = 0;
-			if(DoButton_Menu(&s_IgnoreButton, Localize("Ignore"), 0, &Ignore))
-				m_Popup = POPUP_NONE;
+				static int s_FixButton = 0;
+				if(DoButton_Menu(&s_FixButton, Localize("Fix"), 0, &Fix))
+					Client()->CleanUpInstallation();
+
+				static int s_IgnoreButton = 0;
+				if(DoButton_Menu(&s_IgnoreButton, Localize("Ignore"), 0, &Ignore))
+					m_Popup = POPUP_NONE;
+			}
+			else if(Updater()->State() == IUpdater::DOWNLOADING)
+			{
+				char aBuf[128];
+				CUIRect t = Buttons;
+				RenderTools()->DrawUIRect(&Buttons, ColorRGBA{1.0f, 1.0f, 1.0f, 0.25f}, CUI::CORNER_ALL, 5.0f);
+				Buttons.w *= clamp(Updater()->Progress(), 0.1f, 1.0f);
+				RenderTools()->DrawUIRect(&Buttons, ColorRGBA{1.0f, 1.0f, 1.0f, 0.5f}, CUI::CORNER_ALL, 5.0f);
+				t.HMargin(2.0f, &Buttons);
+				UI()->DoLabel(&t, Updater()->Speed(aBuf, sizeof(aBuf)), t.h * ms_FontmodHeight, 0);
+			}
+			else if(Updater()->State() == IUpdater::FAIL)
+			{
+				RenderTools()->DrawUIRect(&Buttons, ColorRGBA{1.0f, 0.8f, 0.8f, 0.5f}, CUI::CORNER_ALL, 5.0f);
+				Buttons.HMargin(2.0f, &Buttons);
+				UI()->DoLabel(&Buttons, Localize("Automated fixup failed"), Buttons.h * ms_FontmodHeight, 0);
+			}
+			else if(Updater()->State() == IUpdater::NEED_RESTART)
+			{
+				static int s_RestartButton = 0;
+				if(DoButton_Menu(&s_RestartButton, Localize("Restart"), 0, &Buttons, 0, CUI::CORNER_ALL, 5.0f, 0.0f,
+					vec4(0.8f, 1.0f, 0.8f, 0.5f), vec4(0.8f, 1.0f, 0.8f, 0.75f)))
+				{
+					m_Popup = POPUP_NONE;
+					Client()->Restart();
+				}
+			}
 		}
 		else
 		{

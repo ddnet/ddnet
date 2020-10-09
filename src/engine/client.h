@@ -220,6 +220,8 @@ public:
 	virtual void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount) = 0;
 
 	virtual SWarning *GetCurWarning() = 0;
+
+	virtual void CleanUpInstallation() = 0;
 };
 
 class IGameClient : public IInterface
