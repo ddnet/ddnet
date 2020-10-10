@@ -230,7 +230,7 @@ int CSnapshotDelta::CreateDelta(CSnapshot *pFrom, CSnapshot *pTo, void *pDstData
 	}
 
 	GenerateHash(Hashlist, pFrom);
-	int aPastIndecies[1024];
+	int aPastIndices[1024];
 
 	// fetch previous indices
 	// we do this as a separate pass because it helps the cache
@@ -238,7 +238,7 @@ int CSnapshotDelta::CreateDelta(CSnapshot *pFrom, CSnapshot *pTo, void *pDstData
 	for(i = 0; i < NumItems; i++)
 	{
 		pCurItem = pTo->GetItem(i); // O(1) .. O(n)
-		aPastIndecies[i] = GetItemIndexHashed(pCurItem->Key(), Hashlist); // O(n) .. O(n^n)
+		aPastIndices[i] = GetItemIndexHashed(pCurItem->Key(), Hashlist); // O(n) .. O(n^n)
 	}
 
 	for(i = 0; i < NumItems; i++)
@@ -246,7 +246,7 @@ int CSnapshotDelta::CreateDelta(CSnapshot *pFrom, CSnapshot *pTo, void *pDstData
 		// do delta
 		ItemSize = pTo->GetItemSize(i); // O(1) .. O(n)
 		pCurItem = pTo->GetItem(i); // O(1) .. O(n)
-		PastIndex = aPastIndecies[i];
+		PastIndex = aPastIndices[i];
 
 		if(PastIndex != -1)
 		{
