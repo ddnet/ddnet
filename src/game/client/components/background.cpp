@@ -17,8 +17,6 @@ CBackground::CBackground(int MapType, bool OnlineOnly) :
 	m_pBackgroundLayers = m_pLayers;
 	m_pImages = new CMapImages;
 	m_pBackgroundImages = m_pImages;
-	m_pBackgroundMap = CreateBGMap();
-	m_pMap = m_pBackgroundMap;
 	m_Loaded = false;
 	m_aMapName[0] = '\0';
 	m_LastLoad = 0;
@@ -37,6 +35,9 @@ CBackgroundEngineMap *CBackground::CreateBGMap()
 
 void CBackground::OnInit()
 {
+	m_pBackgroundMap = CreateBGMap();
+	m_pMap = m_pBackgroundMap;
+
 	m_pImages->m_pClient = GameClient();
 	Kernel()->RegisterInterface(m_pBackgroundMap);
 	if(g_Config.m_ClBackgroundEntities[0] != '\0' && str_comp(g_Config.m_ClBackgroundEntities, CURRENT_MAP))

@@ -36,6 +36,9 @@ CBackgroundEngineMap *CMenuBackground::CreateBGMap()
 
 void CMenuBackground::OnInit()
 {
+	m_pBackgroundMap = CreateBGMap();
+	m_pMap = m_pBackgroundMap;
+
 	m_IsInit = true;
 
 	m_pImages->m_pClient = GameClient();
