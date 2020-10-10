@@ -268,7 +268,7 @@ void CCharacterCore::Tick(bool UseInput)
 			for(int i = 0; i < MAX_CLIENTS; i++)
 			{
 				CCharacterCore *pCharCore = m_pWorld->m_apCharacters[i];
-				if(!pCharCore || pCharCore == this || (!(m_Super || pCharCore->m_Super) && (!m_pTeams->CanCollide(i, m_Id) || pCharCore->m_Solo || m_Solo)))
+				if(!pCharCore || pCharCore == this || (!(m_Super || pCharCore->m_Super) && ((m_Id != -1 && !m_pTeams->CanCollide(i, m_Id)) || pCharCore->m_Solo || m_Solo)))
 					continue;
 
 				vec2 ClosestPoint = closest_point_on_line(m_HookPos, NewPos, pCharCore->m_Pos);
@@ -322,7 +322,7 @@ void CCharacterCore::Tick(bool UseInput)
 		if(m_HookedPlayer != -1)
 		{
 			CCharacterCore *pCharCore = m_pWorld->m_apCharacters[m_HookedPlayer];
-			if(pCharCore && m_pTeams->CanKeepHook(m_Id, pCharCore->m_Id))
+			if(pCharCore && m_Id != -1 && m_pTeams->CanKeepHook(m_Id, pCharCore->m_Id))
 				m_HookPos = pCharCore->m_Pos;
 			else
 			{
@@ -575,7 +575,7 @@ bool CCharacterCore::IsSwitchActiveCb(int Number, void *pUser)
 {
 	CCharacterCore *pThis = (CCharacterCore *)pUser;
 	if(pThis->Collision()->m_pSwitchers)
-		if(pThis->m_pTeams->Team(pThis->m_Id) != (pThis->m_pTeams->m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER))
+		if(pThis->m_Id != -1 && pThis->m_pTeams->Team(pThis->m_Id) != (pThis->m_pTeams->m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER))
 			return pThis->Collision()->m_pSwitchers[Number].m_Status[pThis->m_pTeams->Team(pThis->m_Id)];
 	return false;
 }
