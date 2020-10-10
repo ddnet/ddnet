@@ -64,10 +64,7 @@ void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore
 
 	m_pTeams = pTeams;
 	m_Id = -1;
-	m_Hook = true;
-	m_Collision = true;
-	m_JumpedTotal = 0;
-	m_Jumps = 2;
+	Reset();
 }
 
 void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams, std::map<int, std::vector<vec2>> *pTeleOuts)
@@ -78,10 +75,7 @@ void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore
 
 	m_pTeams = pTeams;
 	m_Id = -1;
-	m_Hook = true;
-	m_Collision = true;
-	m_JumpedTotal = 0;
-	m_Jumps = 2;
+	Reset();
 }
 
 void CCharacterCore::Reset()
