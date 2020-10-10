@@ -60,7 +60,7 @@ public:
 	enum
 	{
 		MAX_FAVORITES = 2048,
-		MAX_COUNTRIES = 16,
+		MAX_COUNTRIES = 32,
 		MAX_TYPES = 32,
 	};
 
