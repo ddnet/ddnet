@@ -10,6 +10,7 @@
 #include <engine/client.h>
 #include <engine/client/demoedit.h>
 #include <engine/client/friends.h>
+#include <engine/client/ghost.h>
 #include <engine/client/http.h>
 #include <engine/client/serverbrowser.h>
 #include <engine/client/updater.h>
@@ -22,7 +23,6 @@
 #include <engine/shared/config.h>
 #include <engine/shared/demo.h>
 #include <engine/shared/fifo.h>
-#include <engine/shared/ghost.h>
 #include <engine/shared/network.h>
 #include <engine/sound.h>
 #include <engine/steam.h>

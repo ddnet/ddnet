@@ -1485,8 +1485,6 @@ set_src(ENGINE_SHARED GLOB src/engine/shared
   fifo.h
   filecollection.cpp
   filecollection.h
-  ghost.cpp
-  ghost.h
   global_uuid_manager.cpp
   huffman.cpp
   huffman.h
@@ -1638,6 +1636,8 @@ if(CLIENT)
     demoedit.h
     friends.cpp
     friends.h
+    ghost.cpp
+    ghost.h
     graphics_threaded.cpp
     graphics_threaded.h
     http.cpp

@@ -41,7 +41,6 @@
 #include <engine/shared/demo.h>
 #include <engine/shared/fifo.h>
 #include <engine/shared/filecollection.h>
-#include <engine/shared/ghost.h>
 #include <engine/shared/json.h>
 #include <engine/shared/network.h>
 #include <engine/shared/packer.h>

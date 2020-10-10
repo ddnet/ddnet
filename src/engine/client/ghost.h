@@ -1,5 +1,5 @@
-#ifndef ENGINE_SHARED_GHOST_H
-#define ENGINE_SHARED_GHOST_H
+#ifndef ENGINE_CLIENT_GHOST_H
+#define ENGINE_CLIENT_GHOST_H
 
 #include <engine/ghost.h>
 

@@ -1,11 +1,11 @@
+#include "ghost.h"
+
 #include <base/system.h>
 
 #include <engine/console.h>
+#include <engine/shared/compression.h>
+#include <engine/shared/network.h>
 #include <engine/storage.h>
-
-#include "compression.h"
-#include "ghost.h"
-#include "network.h"
 
 static const unsigned char gs_aHeaderMarker[8] = {'T', 'W', 'G', 'H', 'O', 'S', 'T', 0};
 static const unsigned char gs_CurVersion = 6;
