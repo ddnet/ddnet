@@ -471,7 +471,8 @@ public:
 
 	virtual const char *GetCurrentMap();
 	virtual const char *GetCurrentMapPath();
-	virtual unsigned GetMapCrc();
+	virtual SHA256_DIGEST GetCurrentMapSha256();
+	virtual unsigned GetCurrentMapCrc();
 
 	virtual void RaceRecord_Start(const char *pFilename);
 	virtual void RaceRecord_Stop();

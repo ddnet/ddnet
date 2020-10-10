@@ -9,6 +9,40 @@ enum
 	NUM_ITEMS_PER_CHUNK = 50,
 };
 
+// version 4-6
+struct CGhostHeader
+{
+	unsigned char m_aMarker[8];
+	unsigned char m_Version;
+	char m_aOwner[MAX_NAME_LENGTH];
+	char m_aMap[64];
+	unsigned char m_aZeroes[4]; // Crc before version 6
+	unsigned char m_aNumTicks[4];
+	unsigned char m_aTime[4];
+	SHA256_DIGEST m_MapSha256;
+
+	int GetTicks() const
+	{
+		return (m_aNumTicks[0] << 24) | (m_aNumTicks[1] << 16) | (m_aNumTicks[2] << 8) | (m_aNumTicks[3]);
+	}
+
+	int GetTime() const
+	{
+		return (m_aTime[0] << 24) | (m_aTime[1] << 16) | (m_aTime[2] << 8) | (m_aTime[3]);
+	}
+
+	CGhostInfo ToGhostInfo() const
+	{
+		CGhostInfo Result;
+		mem_zero(&Result, sizeof(Result));
+		str_copy(Result.m_aOwner, m_aOwner, sizeof(Result.m_aOwner));
+		str_copy(Result.m_aMap, m_aMap, sizeof(Result.m_aMap));
+		Result.m_NumTicks = GetTicks();
+		Result.m_Time = GetTime();
+		return Result;
+	}
+};
+
 class CGhostItem
 {
 public:
@@ -42,7 +76,7 @@ public:
 
 	void Init();
 
-	int Start(const char *pFilename, const char *pMap, unsigned MapCrc, const char *pName);
+	int Start(const char *pFilename, const char *pMap, SHA256_DIGEST MapSha256, const char *pName);
 	int Stop(int Ticks, int Time);
 
 	void WriteData(int Type, const void *pData, int Size);
@@ -56,6 +90,7 @@ class CGhostLoader : public IGhostLoader
 	class IStorage *m_pStorage;
 
 	CGhostHeader m_Header;
+	CGhostInfo m_Info;
 
 	CGhostItem m_LastItem;
 
@@ -73,74 +108,13 @@ public:
 
 	void Init();
 
-	int Load(const char *pFilename, const char *pMap, unsigned Crc);
+	int Load(const char *pFilename, const char *pMap, SHA256_DIGEST MapSha256, unsigned MapCrc);
 	void Close();
-	const CGhostHeader *GetHeader() const { return &m_Header; }
+	const CGhostInfo *GetInfo() const { return &m_Info; }
 
 	bool ReadNextType(int *pType);
 	bool ReadData(int Type, void *pData, int Size);
 
-	bool GetGhostInfo(const char *pFilename, CGhostHeader *pGhostHeader, const char *pMap, unsigned Crc);
+	bool GetGhostInfo(const char *pFilename, CGhostInfo *pGhostInfo, const char *pMap, SHA256_DIGEST MapSha256, unsigned MapCrc);
 };
-
-class CGhostUpdater
-{
-	// all
-	struct CGhostHeaderMain
-	{
-		unsigned char m_aMarker[8];
-		unsigned char m_Version;
-	};
-
-	// version 2
-	struct CGhostHeaderV2
-	{
-		unsigned char m_aMarker[8];
-		unsigned char m_Version;
-		char m_aOwner[MAX_NAME_LENGTH];
-		char m_aMap[64];
-		unsigned char m_aCrc[4];
-		int m_NumShots;
-		float m_Time;
-	};
-
-	static const int ms_SkinSizeV2 = 17 * sizeof(int);
-	static const int ms_SkinOffsetV2 = 8 * sizeof(int);
-
-	// version 3
-	struct CGhostHeaderV3
-	{
-		unsigned char m_aMarker[8];
-		unsigned char m_Version;
-		char m_aOwner[MAX_NAME_LENGTH];
-		char m_aSkinName[64];
-		int m_UseCustomColor;
-		int m_ColorBody;
-		int m_ColorFeet;
-		char m_aMap[64];
-		unsigned char m_aCrc[4];
-		int m_NumShots;
-		float m_Time;
-	};
-
-	// actual version
-	struct CGhostSkin
-	{
-		int m_Skin0;
-		int m_Skin1;
-		int m_Skin2;
-		int m_Skin3;
-		int m_Skin4;
-		int m_Skin5;
-		int m_UseCustomColor;
-		int m_ColorBody;
-		int m_ColorFeet;
-	};
-
-	static const int ms_GhostCharacterSize = 11 * sizeof(int);
-
-public:
-	static bool Update(class IGhostRecorder *pRecorder, class IStorage *pStorage, class IConsole *pConsole, const char *pFilename);
-};
-
 #endif

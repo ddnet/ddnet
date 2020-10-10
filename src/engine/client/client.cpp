@@ -4371,7 +4371,12 @@ const char *CClient::GetCurrentMapPath()
 	return m_aCurrentMapPath;
 }
 
-unsigned CClient::GetMapCrc()
+SHA256_DIGEST CClient::GetCurrentMapSha256()
+{
+	return m_pMap->Sha256();
+}
+
+unsigned CClient::GetCurrentMapCrc()
 {
 	return m_pMap->Crc();
 }
