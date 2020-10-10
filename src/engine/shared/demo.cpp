@@ -84,15 +84,13 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 		// try the downloaded maps
 		if(pSha256)
 		{
-			str_format(aMapFilename, sizeof(aMapFilename), "downloadedmaps/%s_%08x_%s.map", pMap, Crc, aSha256);
-			MapFile = pStorage->OpenFile(aMapFilename, IOFLAG_READ, IStorage::TYPE_ALL);
+			str_format(aMapFilename, sizeof(aMapFilename), "downloadedmaps/%s_%s.map", pMap, aSha256);
 		}
-		if(!MapFile)
+		else
 		{
-			// try the downloaded maps without sha
 			str_format(aMapFilename, sizeof(aMapFilename), "downloadedmaps/%s_%08x.map", pMap, Crc);
-			MapFile = pStorage->OpenFile(aMapFilename, IOFLAG_READ, IStorage::TYPE_ALL);
 		}
+		MapFile = pStorage->OpenFile(aMapFilename, IOFLAG_READ, IStorage::TYPE_ALL);
 		if(!MapFile)
 		{
 			// try the normal maps folder
@@ -849,7 +847,7 @@ bool CDemoPlayer::ExtractMap(class IStorage *pStorage)
 	// construct name
 	char aSha[SHA256_MAXSTRSIZE], aMapFilename[128];
 	sha256_str(Sha256, aSha, sizeof(aSha));
-	str_format(aMapFilename, sizeof(aMapFilename), "downloadedmaps/%s_%08x_%s.map", m_Info.m_Header.m_aMapName, m_MapInfo.m_Crc, aSha);
+	str_format(aMapFilename, sizeof(aMapFilename), "downloadedmaps/%s_%s.map", m_Info.m_Header.m_aMapName, aSha);
 
 	// save map
 	IOHANDLE MapFile = pStorage->OpenFile(aMapFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);

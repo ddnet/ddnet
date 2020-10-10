@@ -1165,8 +1165,8 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, SHA256_DI
 		return s_aErrorMsg;
 	}
 
-	// get the crc of the map
-	if(m_pMap->Crc() != WantedCrc)
+	// Only check CRC if we don't have the secure SHA256.
+	if(!pWantedSha256 && m_pMap->Crc() != WantedCrc)
 	{
 		str_format(s_aErrorMsg, sizeof(s_aErrorMsg), "map differs from the server. %08x != %08x", m_pMap->Crc(), WantedCrc);
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", s_aErrorMsg);
@@ -1196,15 +1196,17 @@ const char *CClient::LoadMapSearch(const char *pMapName, SHA256_DIGEST *pWantedS
 	char aWanted[256];
 	char aWantedSha256[SHA256_MAXSTRSIZE];
 
-	aWanted[0] = 0;
-
 	if(pWantedSha256)
 	{
 		sha256_str(*pWantedSha256, aWantedSha256, sizeof(aWantedSha256));
-		str_format(aWanted, sizeof(aWanted), " sha256=%s", aWantedSha256);
+		str_format(aWanted, sizeof(aWanted), "sha256=%s", aWantedSha256);
+	}
+	else
+	{
+		str_format(aWanted, sizeof(aWanted), "crc=%08x", WantedCrc);
 	}
 
-	str_format(aBuf, sizeof(aBuf), "loading map, map=%s wanted%s crc=%08x", pMapName, aWanted, WantedCrc);
+	str_format(aBuf, sizeof(aBuf), "loading map, map=%s wanted %s", pMapName, aWanted);
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", aBuf);
 	SetState(IClient::STATE_LOADING);
 
@@ -1217,14 +1219,15 @@ const char *CClient::LoadMapSearch(const char *pMapName, SHA256_DIGEST *pWantedS
 	// try the downloaded maps
 	if(pWantedSha256)
 	{
-		str_format(aBuf, sizeof(aBuf), "downloadedmaps/%s_%08x_%s.map", pMapName, WantedCrc, aWantedSha256);
+		str_format(aBuf, sizeof(aBuf), "downloadedmaps/%s_%s.map", pMapName, aWantedSha256);
+	}
+	else
+	{
+		str_format(aBuf, sizeof(aBuf), "downloadedmaps/%s_%08x.map", pMapName, WantedCrc);
 		pError = LoadMap(pMapName, aBuf, pWantedSha256, WantedCrc);
 		if(!pError)
 			return pError;
 	}
-
-	// try the downloaded maps folder without appending the sha256
-	str_format(aBuf, sizeof(aBuf), "downloadedmaps/%s_%08x.map", pMapName, WantedCrc);
 	pError = LoadMap(pMapName, aBuf, pWantedSha256, WantedCrc);
 	if(!pError)
 		return pError;
@@ -1566,28 +1569,23 @@ bool CClient::ShouldSendChatTimeoutCodeHeuristic()
 
 static void FormatMapDownloadFilename(const char *pName, SHA256_DIGEST *pSha256, int Crc, bool Temp, char *pBuffer, int BufferSize)
 {
-	char aSha256[SHA256_MAXSTRSIZE + 1];
-	aSha256[0] = 0;
+	char aHash[SHA256_MAXSTRSIZE];
 	if(pSha256)
 	{
-		aSha256[0] = '_';
-		sha256_str(*pSha256, aSha256 + 1, sizeof(aSha256) - 1);
+		sha256_str(*pSha256, aHash, sizeof(aHash));
+	}
+	else
+	{
+		str_format(aHash, sizeof(aHash), "%08x", Crc);
 	}
 
 	if(Temp)
 	{
-		str_format(pBuffer, BufferSize, "%s_%08x%s.map.%d.tmp",
-			pName,
-			Crc,
-			aSha256,
-			pid());
+		str_format(pBuffer, BufferSize, "%s_%s.map.%d.tmp", pName, aHash, pid());
 	}
 	else
 	{
-		str_format(pBuffer, BufferSize, "%s_%08x%s.map",
-			pName,
-			Crc,
-			aSha256);
+		str_format(pBuffer, BufferSize, "%s_%s.map", pName, aHash);
 	}
 }
 

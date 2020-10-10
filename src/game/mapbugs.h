@@ -20,7 +20,7 @@ enum
 
 class CMapBugs
 {
-	friend CMapBugs GetMapBugs(const char *pName, int Size, SHA256_DIGEST Sha256, int Crc);
+	friend CMapBugs GetMapBugs(const char *pName, int Size, SHA256_DIGEST Sha256);
 	void *m_pData;
 	unsigned int m_Extra;
 
@@ -30,5 +30,5 @@ public:
 	void Dump() const;
 };
 
-CMapBugs GetMapBugs(const char *pName, int Size, SHA256_DIGEST Sha256, int Crc);
+CMapBugs GetMapBugs(const char *pName, int Size, SHA256_DIGEST Sha256);
 #endif // GAME_MAPBUGS_H
