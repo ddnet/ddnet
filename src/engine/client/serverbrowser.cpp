@@ -290,7 +290,7 @@ void CServerBrowser::Filter()
 		{
 			// check for friend
 			m_ppServerlist[i]->m_Info.m_FriendState = IFriends::FRIEND_NO;
-			for(p = 0; p < m_ppServerlist[i]->m_Info.m_NumClients; p++)
+			for(p = 0; p < minimum(m_ppServerlist[i]->m_Info.m_NumClients, (int)MAX_CLIENTS); p++)
 			{
 				m_ppServerlist[i]->m_Info.m_aClients[p].m_FriendState = m_pFriends->GetFriendState(m_ppServerlist[i]->m_Info.m_aClients[p].m_aName,
 					m_ppServerlist[i]->m_Info.m_aClients[p].m_aClan);
