@@ -3030,6 +3030,10 @@ void CClient::Run()
 		}
 	}
 
+	// make sure the first frame just clears everything to prevent undesired colors when waiting for io
+	Graphics()->Clear(0, 0, 0);
+	Graphics()->Swap();
+
 	// init sound, allowed to fail
 	m_SoundInitFailed = Sound()->Init() != 0;
 
