@@ -2941,7 +2941,7 @@ void CServer::ConAuthList(IConsole::IResult *pResult, void *pUser)
 void CServer::ConNameBan(IConsole::IResult *pResult, void *pUser)
 {
 	CServer *pThis = (CServer *)pUser;
-	char aBuf[128];
+	char aBuf[256];
 	const char *pName = pResult->GetString(0);
 	const char *pReason = pResult->NumArguments() > 3 ? pResult->GetString(3) : "";
 	int Distance = pResult->NumArguments() > 1 ? pResult->GetInteger(1) : str_length(pName) / 3;
@@ -2976,7 +2976,7 @@ void CServer::ConNameUnban(IConsole::IResult *pResult, void *pUser)
 		CNameBan *pBan = &pThis->m_aNameBans[i];
 		if(str_comp(pBan->m_aName, pName) == 0)
 		{
-			char aBuf[64];
+			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf), "removed name='%s' distance=%d is_substring=%d reason='%s'", pBan->m_aName, pBan->m_Distance, pBan->m_IsSubstring, pBan->m_aReason);
 			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "name_ban", aBuf);
 			pThis->m_aNameBans.remove_index(i);
@@ -2991,7 +2991,7 @@ void CServer::ConNameBans(IConsole::IResult *pResult, void *pUser)
 	for(int i = 0; i < pThis->m_aNameBans.size(); i++)
 	{
 		CNameBan *pBan = &pThis->m_aNameBans[i];
-		char aBuf[64];
+		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "name='%s' distance=%d is_substring=%d reason='%s'", pBan->m_aName, pBan->m_Distance, pBan->m_IsSubstring, pBan->m_aReason);
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "name_ban", aBuf);
 	}
