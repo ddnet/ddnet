@@ -430,7 +430,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bo
 
 		if(pCommand)
 		{
-			if(ClientID == IConsole::CLIENT_ID_GAME && !(pCommand->m_Flags & CFGFLAG_GAME))
+			if(ClientID == IConsole::CLIENT_ID_GAME && (!(pCommand->m_Flags & CFGFLAG_GAME) || pCommand->m_Flags & CFGFLAG_NOMAPCFG))
 			{
 				if(Stroke)
 				{
@@ -477,8 +477,20 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bo
 					}
 					else
 					{
-						if(pCommand->m_Flags & CMDFLAG_TEST && !g_Config.m_SvTestingCommands)
-							return;
+						if(ClientID != IConsole::CLIENT_ID_GAME && pCommand->m_Flags & CFGFLAG_GAME)
+						{
+							if(g_Config.m_SvTestingCommands)
+							{
+								m_Cheated = true;
+							}
+							else
+							{
+								char aBuf[256];
+								str_format(aBuf, sizeof(aBuf), "Command '%s' is forbidden. Test commands were disabled on the server.", Result.m_pCommand);
+								Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+								return;
+							}
+						}
 
 						if(m_pfnTeeHistorianCommandCallback && !(pCommand->m_Flags & CFGFLAG_NONTEEHISTORIC))
 						{
@@ -500,9 +512,6 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bo
 						{
 							pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
 						}
-
-						if(pCommand->m_Flags & CMDFLAG_TEST)
-							m_Cheated = true;
 					}
 				}
 			}
@@ -705,6 +714,7 @@ struct CIntVariableData
 	int m_Min;
 	int m_Max;
 	int m_OldValue;
+	bool m_Readonly;
 };
 
 struct CColVariableData
@@ -730,6 +740,12 @@ static void IntVariableCommand(IConsole::IResult *pResult, void *pUserData)
 
 	if(pResult->NumArguments())
 	{
+		if(pData->m_Readonly && pResult->m_ClientID >= 0)
+		{
+			pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "This is read only variable");
+			return;
+		}
+
 		int Val = pResult->GetInteger(0);
 
 		// do clamping
@@ -954,7 +970,7 @@ CConsole::CConsole(int FlagMask)
 // TODO: this should disappear
 #define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
 	{ \
-		static CIntVariableData Data = {this, &g_Config.m_##Name, Min, Max, Def}; \
+		static CIntVariableData Data = {this, &g_Config.m_##Name, Min, Max, Def, static_cast<bool>((Flags)&CFGFLAG_READONLY)}; \
 		Register(#ScriptName, "?i", Flags, IntVariableCommand, &Data, Desc); \
 	}
 
