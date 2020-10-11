@@ -4,6 +4,7 @@
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 
+#include <cstddef>
 #include <vector>
 
 #define CMD_BUFFER_DATA_BUFFER_SIZE 1024 * 1024 * 2
@@ -38,12 +39,14 @@ class CCommandBuffer
 			m_Used = 0;
 		}
 
-		void *Alloc(unsigned Requested)
+		void *Alloc(unsigned Requested, unsigned Alignment = alignof(std::max_align_t))
 		{
-			if(Requested + m_Used > m_Size)
+			size_t Offset = Alignment - (reinterpret_cast<uintptr_t>(m_pData + m_Used) % Alignment);
+			if(Requested + Offset + m_Used > m_Size)
 				return 0;
-			void *pPtr = &m_pData[m_Used];
-			m_Used += Requested;
+
+			void *pPtr = &m_pData[m_Used + Offset];
+			m_Used += Requested + Offset;
 			return pPtr;
 		}
 
@@ -173,10 +176,12 @@ public:
 	{
 	public:
 		SCommand(unsigned Cmd) :
-			m_Cmd(Cmd), m_Size(0) {}
+			m_Cmd(Cmd), m_pNext(nullptr) {}
 		unsigned m_Cmd;
-		unsigned m_Size;
+		SCommand *m_pNext;
 	};
+	SCommand *m_pCmdBufferHead;
+	SCommand *m_pCmdBufferTail;
 
 	struct SState
 	{
@@ -559,7 +564,7 @@ public:
 
 	//
 	CCommandBuffer(unsigned CmdBufferSize, unsigned DataBufferSize) :
-		m_CmdBuffer(CmdBufferSize), m_DataBuffer(DataBufferSize)
+		m_CmdBuffer(CmdBufferSize), m_DataBuffer(DataBufferSize), m_pCmdBufferHead(nullptr), m_pCmdBufferTail(nullptr)
 	{
 	}
 
@@ -575,26 +580,29 @@ public:
 		(void)static_cast<const SCommand *>(&Command);
 
 		// allocate and copy the command into the buffer
-		SCommand *pCmd = (SCommand *)m_CmdBuffer.Alloc(sizeof(Command));
+		T *pCmd = (T *)m_CmdBuffer.Alloc(sizeof(*pCmd), alignof(T));
 		if(!pCmd)
 			return false;
-		mem_copy(pCmd, &Command, sizeof(Command));
-		pCmd->m_Size = sizeof(Command);
+		*pCmd = Command;
+		pCmd->m_pNext = nullptr;
+
+		if(m_pCmdBufferTail)
+			m_pCmdBufferTail->m_pNext = pCmd;
+		if(!m_pCmdBufferHead)
+			m_pCmdBufferHead = pCmd;
+		m_pCmdBufferTail = pCmd;
+
 		return true;
 	}
 
-	SCommand *GetCommand(unsigned *pIndex)
+	SCommand *Head()
 	{
-		if(*pIndex >= m_CmdBuffer.DataUsed())
-			return NULL;
-
-		SCommand *pCommand = (SCommand *)&m_CmdBuffer.DataPtr()[*pIndex];
-		*pIndex += pCommand->m_Size;
-		return pCommand;
+		return m_pCmdBufferHead;
 	}
 
 	void Reset()
 	{
+		m_pCmdBufferHead = m_pCmdBufferTail = nullptr;
 		m_CmdBuffer.Reset();
 		m_DataBuffer.Reset();
 	}
