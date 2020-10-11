@@ -430,7 +430,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bo
 
 		if(pCommand)
 		{
-			if(ClientID == IConsole::CLIENT_ID_GAME && (!(pCommand->m_Flags & CFGFLAG_GAME) || pCommand->m_Flags & CFGFLAG_NOMAPCFG))
+			if(ClientID == IConsole::CLIENT_ID_GAME && !(pCommand->m_Flags & CFGFLAG_GAME))
 			{
 				if(Stroke)
 				{
@@ -477,7 +477,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bo
 					}
 					else
 					{
-						if(ClientID != IConsole::CLIENT_ID_GAME && pCommand->m_Flags & CFGFLAG_GAME)
+						if(ClientID != IConsole::CLIENT_ID_GAME && (pCommand->m_Flags & CFGFLAG_GAME || pCommand->m_Flags & CMDFLAG_TEST))
 						{
 							if(g_Config.m_SvTestingCommands)
 							{
@@ -486,7 +486,14 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bo
 							else
 							{
 								char aBuf[256];
-								str_format(aBuf, sizeof(aBuf), "Command '%s' is forbidden. Test commands were disabled on the server.", Result.m_pCommand);
+								if(pCommand->m_Flags & CFGFLAG_GAME)
+								{
+									str_format(aBuf, sizeof(aBuf), "Cannot execute game command '%s', put it into the map config or start the server with 'sv_test_cmds 1' to enable it", Result.m_pCommand);
+								}
+								else
+								{
+									str_format(aBuf, sizeof(aBuf), "Cannot execute testing command '%s', start the server with 'sv_test_cmds 1' to enable it", Result.m_pCommand);
+								}
 								Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 								return;
 							}
@@ -742,7 +749,7 @@ static void IntVariableCommand(IConsole::IResult *pResult, void *pUserData)
 	{
 		if(pData->m_Readonly && pResult->m_ClientID >= 0)
 		{
-			pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "This is read only variable");
+			pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "This is read-only variable");
 			return;
 		}
 
