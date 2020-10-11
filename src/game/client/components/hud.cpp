@@ -355,12 +355,12 @@ void CHud::RenderScoreHud()
 					aScore[t][0] = 0;
 			}
 
-			bool RecreateScore[2] = {str_comp(aScore[0], m_aScoreInfo[0].m_aScoreText) != 0, str_comp(aScore[1], m_aScoreInfo[1].m_aScoreText) != 0};
+			bool RecreateScores = str_comp(aScore[0], m_aScoreInfo[0].m_aScoreText) != 0 || str_comp(aScore[1], m_aScoreInfo[1].m_aScoreText) != 0;
 
 			bool RecreateRect = ForceScoreInfoInit;
 			for(int t = 0; t < 2; t++)
 			{
-				if(RecreateScore[t])
+				if(RecreateScores)
 				{
 					m_aScoreInfo[t].m_ScoreTextWidth = TextRender()->TextWidth(0, 14.0f, aScore[t], -1, -1.0f);
 					mem_copy(m_aScoreInfo[t].m_aScoreText, aScore[t], sizeof(m_aScoreInfo[t].m_aScoreText));
@@ -412,7 +412,7 @@ void CHud::RenderScoreHud()
 				if(m_aScoreInfo[t].m_RoundRectQuadContainerIndex != -1)
 					Graphics()->RenderQuadContainer(m_aScoreInfo[t].m_RoundRectQuadContainerIndex, -1);
 
-				if(RecreateScore[t])
+				if(RecreateScores)
 				{
 					if(m_aScoreInfo[t].m_TextScoreContainerIndex != -1)
 						TextRender()->DeleteTextContainer(m_aScoreInfo[t].m_TextScoreContainerIndex);
