@@ -744,7 +744,7 @@ bool CPlayer::AfkTimer(int NewTargetX, int NewTargetY)
 
 	if(NewTargetX != m_LastTarget_x || NewTargetY != m_LastTarget_y)
 	{
-		m_LastPlaytime = time_get();
+		UpdatePlaytime();
 		m_LastTarget_x = NewTargetX;
 		m_LastTarget_y = NewTargetY;
 		m_Sent1stAfkWarning = 0; // afk timer's 1st warning after 50% of sv_max_afk_time
@@ -783,6 +783,11 @@ bool CPlayer::AfkTimer(int NewTargetX, int NewTargetY)
 	return false;
 }
 
+void CPlayer::UpdatePlaytime()
+{
+	m_LastPlaytime = time_get();
+}
+
 void CPlayer::AfkVoteTimer(CNetObj_PlayerInput *NewTarget)
 {
 	if(g_Config.m_SvMaxAfkVoteTime == 0)
@@ -797,7 +802,7 @@ void CPlayer::AfkVoteTimer(CNetObj_PlayerInput *NewTarget)
 	}
 	else if(mem_comp(NewTarget, m_pLastTarget, sizeof(CNetObj_PlayerInput)) != 0)
 	{
-		m_LastPlaytime = time_get();
+		UpdatePlaytime();
 		mem_copy(m_pLastTarget, NewTarget, sizeof(CNetObj_PlayerInput));
 	}
 	else if(m_LastPlaytime < time_get() - time_freq() * g_Config.m_SvMaxAfkVoteTime)
