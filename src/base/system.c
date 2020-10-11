@@ -1,9 +1,10 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <stdlib.h>
+
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
@@ -59,6 +60,7 @@
 #include <process.h>
 #include <shellapi.h>
 #include <wincrypt.h>
+#define aligned_alloc(align, size) _aligned_malloc(size, align)
 #else
 #error NOT IMPLEMENTED
 #endif
@@ -269,6 +271,17 @@ void mem_move(void *dest, const void *source, unsigned size)
 void mem_zero(void *block, unsigned size)
 {
 	memset(block, 0, size);
+}
+
+void *mem_alloc_aligned(unsigned int alignment, unsigned int size)
+{
+#if defined(CONF_PLATFORM_MACOSX)
+	void *ret_ptr;
+	posix_memalign(&ret_ptr, alignment, size);
+	return ret_ptr;
+#else
+	return aligned_alloc(alignment, size);
+#endif
 }
 
 IOHANDLE io_open(const char *filename, int flags)

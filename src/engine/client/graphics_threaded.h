@@ -1,9 +1,11 @@
 #ifndef ENGINE_CLIENT_GRAPHICS_THREADED_H
 #define ENGINE_CLIENT_GRAPHICS_THREADED_H
 
+#include <base/system.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 
+#include <cstddef>
 #include <vector>
 
 #define CMD_BUFFER_DATA_BUFFER_SIZE 1024 * 1024 * 2
@@ -21,13 +23,13 @@ class CCommandBuffer
 		CBuffer(unsigned BufferSize)
 		{
 			m_Size = BufferSize;
-			m_pData = new unsigned char[m_Size];
+			m_pData = (unsigned char *)mem_alloc_aligned(alignof(std::max_align_t), m_Size);
 			m_Used = 0;
 		}
 
 		~CBuffer()
 		{
-			delete[] m_pData;
+			free(m_pData);
 			m_pData = 0x0;
 			m_Used = 0;
 			m_Size = 0;
@@ -38,12 +40,19 @@ class CCommandBuffer
 			m_Used = 0;
 		}
 
-		void *Alloc(unsigned Requested)
+		void *Alloc(unsigned Requested, unsigned int Alignment = alignof(std::max_align_t), unsigned int *pRealSize = NULL)
 		{
-			if(Requested + m_Used > m_Size)
+			unsigned RequestSizeAlignOffset = Requested % Alignment;
+			unsigned RequestSizePlusAlignment = Requested + ((RequestSizeAlignOffset > 0) ? (Alignment - RequestSizeAlignOffset) : 0);
+
+			if(RequestSizePlusAlignment + m_Used > m_Size)
 				return 0;
 			void *pPtr = &m_pData[m_Used];
-			m_Used += Requested;
+			m_Used += RequestSizePlusAlignment;
+
+			if(pRealSize)
+				*pRealSize = RequestSizePlusAlignment;
+
 			return pPtr;
 		}
 
@@ -176,6 +185,7 @@ public:
 			m_Cmd(Cmd), m_Size(0) {}
 		unsigned m_Cmd;
 		unsigned m_Size;
+		unsigned int m_RealSize;
 	};
 
 	struct SState
@@ -574,12 +584,15 @@ public:
 		// make sure that we don't do something stupid like ->AddCommand(&Cmd);
 		(void)static_cast<const SCommand *>(&Command);
 
+		unsigned int RealSize = sizeof(Command);
+
 		// allocate and copy the command into the buffer
-		SCommand *pCmd = (SCommand *)m_CmdBuffer.Alloc(sizeof(Command));
+		SCommand *pCmd = (SCommand *)m_CmdBuffer.Alloc(sizeof(Command), alignof(int *), &RealSize);
 		if(!pCmd)
 			return false;
 		mem_copy(pCmd, &Command, sizeof(Command));
 		pCmd->m_Size = sizeof(Command);
+		pCmd->m_RealSize = RealSize;
 		return true;
 	}
 
@@ -589,7 +602,7 @@ public:
 			return NULL;
 
 		SCommand *pCommand = (SCommand *)&m_CmdBuffer.DataPtr()[*pIndex];
-		*pIndex += pCommand->m_Size;
+		*pIndex += pCommand->m_RealSize;
 		return pCommand;
 	}
 

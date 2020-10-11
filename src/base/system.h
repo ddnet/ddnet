@@ -164,6 +164,19 @@ void mem_zero(void *block, unsigned size);
 */
 int mem_comp(const void *a, const void *b, int size);
 
+/*
+	Function: mem_alloc_aligned
+		Returnes heap allocated aligned memory
+
+	Parameters:
+		alignment - The alignment of the returned memory
+		size - The size of the aligned memory
+
+	Returns:
+		A pointer to the aligned memory
+*/
+void *mem_alloc_aligned(unsigned int alignment, unsigned int size);
+
 /* Group: File IO */
 enum
 {
