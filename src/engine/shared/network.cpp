@@ -310,7 +310,8 @@ void CNetBase::SendControlMsg(NETSOCKET Socket, NETADDR *pAddr, int Ack, int Con
 	Construct.m_NumChunks = 0;
 	Construct.m_DataSize = 1 + ExtraSize;
 	Construct.m_aChunkData[0] = ControlMsg;
-	mem_copy(&Construct.m_aChunkData[1], pExtra, ExtraSize);
+	if(pExtra)
+		mem_copy(&Construct.m_aChunkData[1], pExtra, ExtraSize);
 
 	// send the control message
 	CNetBase::SendPacket(Socket, pAddr, &Construct, SecurityToken, Sixup, true);

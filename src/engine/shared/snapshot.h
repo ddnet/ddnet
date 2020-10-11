@@ -47,7 +47,7 @@ public:
 	int GetItemIndex(int Key);
 	int GetItemType(int Index);
 
-	int Crc();
+	unsigned Crc();
 	void DebugDump();
 	static void RemoveExtraInfo(unsigned char *pData);
 };

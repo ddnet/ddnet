@@ -290,7 +290,7 @@ void CServerBrowser::Filter()
 		{
 			// check for friend
 			m_ppServerlist[i]->m_Info.m_FriendState = IFriends::FRIEND_NO;
-			for(p = 0; p < m_ppServerlist[i]->m_Info.m_NumClients; p++)
+			for(p = 0; p < minimum(m_ppServerlist[i]->m_Info.m_NumClients, (int)MAX_CLIENTS); p++)
 			{
 				m_ppServerlist[i]->m_Info.m_aClients[p].m_FriendState = m_pFriends->GetFriendState(m_ppServerlist[i]->m_Info.m_aClients[p].m_aName,
 					m_ppServerlist[i]->m_Info.m_aClients[p].m_aClan);
@@ -500,7 +500,8 @@ CServerBrowser::CServerEntry *CServerBrowser::Add(const NETADDR &Addr)
 		CServerEntry **ppNewlist;
 		m_NumServerCapacity += 100;
 		ppNewlist = (CServerEntry **)calloc(m_NumServerCapacity, sizeof(CServerEntry *));
-		mem_copy(ppNewlist, m_ppServerlist, m_NumServers * sizeof(CServerEntry *));
+		if(m_NumServers > 0)
+			mem_copy(ppNewlist, m_ppServerlist, m_NumServers * sizeof(CServerEntry *));
 		free(m_ppServerlist);
 		m_ppServerlist = ppNewlist;
 	}
