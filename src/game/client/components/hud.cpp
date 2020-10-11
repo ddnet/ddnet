@@ -418,7 +418,7 @@ void CHud::RenderScoreHud()
 						TextRender()->DeleteTextContainer(m_aScoreInfo[t].m_TextScoreContainerIndex);
 
 					CTextCursor Cursor;
-					TextRender()->SetCursor(&Cursor, Whole - ScoreWidthMax + (ScoreWidthMax - m_aScoreInfo[t].m_ScoreTextWidth) / 2 - Split, StartY + t * 20 + (18.f - 14.f) / 2.f, 14.0f, TEXTFLAG_RENDER);
+					TextRender()->SetCursor(&Cursor, Whole - ScoreWidthMax + (ScoreWidthMax - m_aScoreInfo[t].m_ScoreTextWidth) - Split, StartY + t * 20 + (18.f - 14.f) / 2.f, 14.0f, TEXTFLAG_RENDER);
 					Cursor.m_LineWidth = -1;
 					m_aScoreInfo[t].m_TextScoreContainerIndex = TextRender()->CreateTextContainer(&Cursor, aScore[t]);
 				}
