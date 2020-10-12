@@ -326,7 +326,9 @@ void *CCommandProcessorFragment_OpenGL::Resize(int Width, int Height, int NewWid
 
 	int Bpp = TexFormatToImageColorChannelCount(Format);
 
-	pTmpData = (unsigned char *)malloc((size_t)NewWidth * NewHeight * Bpp);
+	// All calls to Resize() ensure width & height are > 0, Bpp is always > 0,
+	// thus no allocation size 0 possible.
+	pTmpData = (unsigned char *)malloc((size_t)NewWidth * NewHeight * Bpp); // NOLINT(clang-analyzer-optin.portability.UnixAPI)
 
 	ResizeImage((uint8_t *)pData, Width, Height, (uint8_t *)pTmpData, NewWidth, NewHeight, Bpp);
 
