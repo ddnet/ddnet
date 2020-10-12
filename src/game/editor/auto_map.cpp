@@ -430,6 +430,9 @@ void CAutoMapper::ProceedLocalized(CLayerTiles *pLayer, int ConfigID, int Seed, 
 			out->m_Flags = in->m_Flags;
 		}
 	}
+
+	if(pUpdateLayer)
+		delete pUpdateLayer;
 }
 
 void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID, int Seed, int SeedOffsetX, int SeedOffsetY)
