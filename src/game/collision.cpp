@@ -310,134 +310,143 @@ int CCollision::GetTile(int x, int y)
 // TODO: rewrite this smarter!
 int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision)
 {
-	float Distance = distance(Pos0, Pos1);
-	int End(Distance + 1);
-	vec2 Last = Pos0;
-	int ix = 0, iy = 0; // Temporary position for checking collision
-	for(int i = 0; i <= End; i++)
+	if(Pos0 != Pos1)
 	{
-		float a = i / (float)End;
-		vec2 Pos = mix(Pos0, Pos1, a);
-		ix = round_to_int(Pos.x);
-		iy = round_to_int(Pos.y);
-
-		if(CheckPoint(ix, iy))
+		float Distance = distance(Pos0, Pos1);
+		int End(Distance + 1);
+		vec2 Last = Pos0;
+		int ix = 0, iy = 0; // Temporary position for checking collision
+		for(int i = 0; i <= End; i++)
 		{
-			if(pOutCollision)
-				*pOutCollision = Pos;
-			if(pOutBeforeCollision)
-				*pOutBeforeCollision = Last;
-			return GetCollisionAt(ix, iy);
-		}
+			float a = i / (float)End;
+			vec2 Pos = mix(Pos0, Pos1, a);
+			ix = round_to_int(Pos.x);
+			iy = round_to_int(Pos.y);
 
-		Last = Pos;
+			if(CheckPoint(ix, iy))
+			{
+				if(pOutCollision)
+					*pOutCollision = Pos;
+				if(pOutBeforeCollision)
+					*pOutBeforeCollision = Last;
+				return GetCollisionAt(ix, iy);
+			}
+
+			Last = Pos;
+		}
+		if(pOutCollision)
+			*pOutCollision = Pos1;
+		if(pOutBeforeCollision)
+			*pOutBeforeCollision = Pos1;
 	}
-	if(pOutCollision)
-		*pOutCollision = Pos1;
-	if(pOutBeforeCollision)
-		*pOutBeforeCollision = Pos1;
 	return 0;
 }
 
 int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr)
 {
-	float Distance = distance(Pos0, Pos1);
-	int End(Distance + 1);
-	vec2 Last = Pos0;
-	int ix = 0, iy = 0; // Temporary position for checking collision
-	int dx = 0, dy = 0; // Offset for checking the "through" tile
-	ThroughOffset(Pos0, Pos1, &dx, &dy);
-	for(int i = 0; i <= End; i++)
+	if(Pos0 != Pos1)
 	{
-		float a = i / (float)End;
-		vec2 Pos = mix(Pos0, Pos1, a);
-		ix = round_to_int(Pos.x);
-		iy = round_to_int(Pos.y);
+		float Distance = distance(Pos0, Pos1);
+		int End(Distance + 1);
+		vec2 Last = Pos0;
+		int ix = 0, iy = 0; // Temporary position for checking collision
+		int dx = 0, dy = 0; // Offset for checking the "through" tile
+		ThroughOffset(Pos0, Pos1, &dx, &dy);
+		for(int i = 0; i <= End; i++)
+		{
+			float a = i / (float)End;
+			vec2 Pos = mix(Pos0, Pos1, a);
+			ix = round_to_int(Pos.x);
+			iy = round_to_int(Pos.y);
 
-		int Index = GetPureMapIndex(Pos);
-		if(g_Config.m_SvOldTeleportHook)
-			*pTeleNr = IsTeleport(Index);
-		else
-			*pTeleNr = IsTeleportHook(Index);
-		if(*pTeleNr)
-		{
-			if(pOutCollision)
-				*pOutCollision = Pos;
-			if(pOutBeforeCollision)
-				*pOutBeforeCollision = Last;
-			return TILE_TELEINHOOK;
-		}
+			int Index = GetPureMapIndex(Pos);
+			if(g_Config.m_SvOldTeleportHook)
+				*pTeleNr = IsTeleport(Index);
+			else
+				*pTeleNr = IsTeleportHook(Index);
+			if(*pTeleNr)
+			{
+				if(pOutCollision)
+					*pOutCollision = Pos;
+				if(pOutBeforeCollision)
+					*pOutBeforeCollision = Last;
+				return TILE_TELEINHOOK;
+			}
 
-		int hit = 0;
-		if(CheckPoint(ix, iy))
-		{
-			if(!IsThrough(ix, iy, dx, dy, Pos0, Pos1))
-				hit = GetCollisionAt(ix, iy);
-		}
-		else if(IsHookBlocker(ix, iy, Pos0, Pos1))
-		{
-			hit = TILE_NOHOOK;
-		}
-		if(hit)
-		{
-			if(pOutCollision)
-				*pOutCollision = Pos;
-			if(pOutBeforeCollision)
-				*pOutBeforeCollision = Last;
-			return hit;
-		}
+			int hit = 0;
+			if(CheckPoint(ix, iy))
+			{
+				if(!IsThrough(ix, iy, dx, dy, Pos0, Pos1))
+					hit = GetCollisionAt(ix, iy);
+			}
+			else if(IsHookBlocker(ix, iy, Pos0, Pos1))
+			{
+				hit = TILE_NOHOOK;
+			}
+			if(hit)
+			{
+				if(pOutCollision)
+					*pOutCollision = Pos;
+				if(pOutBeforeCollision)
+					*pOutBeforeCollision = Last;
+				return hit;
+			}
 
-		Last = Pos;
+			Last = Pos;
+		}
+		if(pOutCollision)
+			*pOutCollision = Pos1;
+		if(pOutBeforeCollision)
+			*pOutBeforeCollision = Pos1;
 	}
-	if(pOutCollision)
-		*pOutCollision = Pos1;
-	if(pOutBeforeCollision)
-		*pOutBeforeCollision = Pos1;
 	return 0;
 }
 
 int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr)
 {
-	float Distance = distance(Pos0, Pos1);
-	int End(Distance + 1);
-	vec2 Last = Pos0;
-	int ix = 0, iy = 0; // Temporary position for checking collision
-	for(int i = 0; i <= End; i++)
+	if(Pos0 != Pos1)
 	{
-		float a = i / (float)End;
-		vec2 Pos = mix(Pos0, Pos1, a);
-		ix = round_to_int(Pos.x);
-		iy = round_to_int(Pos.y);
-
-		int Index = GetPureMapIndex(Pos);
-		if(g_Config.m_SvOldTeleportWeapons)
-			*pTeleNr = IsTeleport(Index);
-		else
-			*pTeleNr = IsTeleportWeapon(Index);
-		if(*pTeleNr)
+		float Distance = distance(Pos0, Pos1);
+		int End(Distance + 1);
+		vec2 Last = Pos0;
+		int ix = 0, iy = 0; // Temporary position for checking collision
+		for(int i = 0; i <= End; i++)
 		{
-			if(pOutCollision)
-				*pOutCollision = Pos;
-			if(pOutBeforeCollision)
-				*pOutBeforeCollision = Last;
-			return TILE_TELEINWEAPON;
-		}
+			float a = i / (float)End;
+			vec2 Pos = mix(Pos0, Pos1, a);
+			ix = round_to_int(Pos.x);
+			iy = round_to_int(Pos.y);
 
-		if(CheckPoint(ix, iy))
-		{
-			if(pOutCollision)
-				*pOutCollision = Pos;
-			if(pOutBeforeCollision)
-				*pOutBeforeCollision = Last;
-			return GetCollisionAt(ix, iy);
-		}
+			int Index = GetPureMapIndex(Pos);
+			if(g_Config.m_SvOldTeleportWeapons)
+				*pTeleNr = IsTeleport(Index);
+			else
+				*pTeleNr = IsTeleportWeapon(Index);
+			if(*pTeleNr)
+			{
+				if(pOutCollision)
+					*pOutCollision = Pos;
+				if(pOutBeforeCollision)
+					*pOutBeforeCollision = Last;
+				return TILE_TELEINWEAPON;
+			}
 
-		Last = Pos;
+			if(CheckPoint(ix, iy))
+			{
+				if(pOutCollision)
+					*pOutCollision = Pos;
+				if(pOutBeforeCollision)
+					*pOutBeforeCollision = Last;
+				return GetCollisionAt(ix, iy);
+			}
+
+			Last = Pos;
+		}
+		if(pOutCollision)
+			*pOutCollision = Pos1;
+		if(pOutBeforeCollision)
+			*pOutBeforeCollision = Pos1;
 	}
-	if(pOutCollision)
-		*pOutCollision = Pos1;
-	if(pOutBeforeCollision)
-		*pOutBeforeCollision = Pos1;
 	return 0;
 }
 

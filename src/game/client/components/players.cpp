@@ -435,16 +435,19 @@ void CPlayers::RenderPlayer(
 						Dir = vec2(pPlayerChar->m_X, pPlayerChar->m_Y) - vec2(pPrevChar->m_X, pPrevChar->m_Y);
 					else
 						Dir = vec2(m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur.m_X, m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur.m_Y) - vec2(m_pClient->m_Snap.m_aCharacters[ClientID].m_Prev.m_X, m_pClient->m_Snap.m_aCharacters[ClientID].m_Prev.m_Y);
-					Dir = normalize(Dir);
-					float HadOkenAngle = GetAngle(Dir);
-					Graphics()->QuadsSetRotation(HadOkenAngle);
-					int QuadOffset = IteX * 2;
-					vec2 DirY(-Dir.y, Dir.x);
-					p = Position;
-					float OffsetX = g_pData->m_Weapons.m_aId[iw].m_Muzzleoffsetx;
-					p -= Dir * OffsetX;
-					Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteWeaponsMuzzles[iw][IteX]);
-					Graphics()->RenderQuadContainerAsSprite(m_WeaponSpriteMuzzleQuadContainerIndex[iw], QuadOffset, p.x, p.y);
+					if(Dir.x != 0 || Dir.y != 0)
+					{
+						Dir = normalize(Dir);
+						float HadOkenAngle = GetAngle(Dir);
+						Graphics()->QuadsSetRotation(HadOkenAngle);
+						int QuadOffset = IteX * 2;
+						vec2 DirY(-Dir.y, Dir.x);
+						p = Position;
+						float OffsetX = g_pData->m_Weapons.m_aId[iw].m_Muzzleoffsetx;
+						p -= Dir * OffsetX;
+						Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteWeaponsMuzzles[iw][IteX]);
+						Graphics()->RenderQuadContainerAsSprite(m_WeaponSpriteMuzzleQuadContainerIndex[iw], QuadOffset, p.x, p.y);
+					}
 				}
 			}
 		}

@@ -1,12 +1,12 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "laser.h"
+#include <engine/shared/config.h>
 #include <game/generated/protocol.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/DDRace.h>
-
-#include <engine/shared/config.h>
 #include <game/server/teams.h>
+#include <limits>
 
 CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
@@ -47,7 +47,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	m_Energy = -1;
 	if(m_Type == WEAPON_SHOTGUN)
 	{
-		vec2 Temp;
+		vec2 Temp = pHit->Core()->m_Vel;
 
 		float Strength;
 		if(!m_TuneZone)
@@ -56,9 +56,19 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 			Strength = GameServer()->TuningList()[m_TuneZone].m_ShotgunStrength;
 
 		if(!g_Config.m_SvOldLaser)
-			Temp = pHit->Core()->m_Vel + normalize(m_PrevPos - pHit->Core()->m_Pos) * Strength;
+		{
+			if(m_PrevPos != pHit->Core()->m_Pos)
+				Temp = pHit->Core()->m_Vel + normalize(m_PrevPos - pHit->Core()->m_Pos) * Strength;
+			else
+				Temp = vec2(0, 0);
+		}
 		else if(pOwnerChar)
-			Temp = pHit->Core()->m_Vel + normalize(pOwnerChar->Core()->m_Pos - pHit->Core()->m_Pos) * Strength;
+		{
+			if(pOwnerChar->Core()->m_Pos != pHit->Core()->m_Pos)
+				Temp = pHit->Core()->m_Vel + normalize(pOwnerChar->Core()->m_Pos - pHit->Core()->m_Pos) * Strength;
+			else
+				Temp = vec2(0, 0);
+		}
 		else
 			Temp = pHit->Core()->m_Vel;
 		pHit->Core()->m_Vel = ClampVel(pHit->m_MoveRestrictions, Temp);

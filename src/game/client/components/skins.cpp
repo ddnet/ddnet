@@ -98,7 +98,10 @@ int CSkins::LoadSkin(const char *pName, const char *pPath, int DirType, int *pGe
 				}
 			}
 
-		Skin.m_BloodColor = ColorRGBA(normalize(vec3(aColors[0], aColors[1], aColors[2])));
+		if(aColors[0] != 0 && aColors[1] != 0 && aColors[2] != 0)
+			Skin.m_BloodColor = ColorRGBA(normalize(vec3(aColors[0], aColors[1], aColors[2])));
+		else
+			Skin.m_BloodColor = ColorRGBA(0, 0, 0, 1);
 	}
 
 	// create colorless version

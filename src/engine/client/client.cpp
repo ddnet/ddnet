@@ -4186,6 +4186,8 @@ void CClient::HandleMapPath(const char *pPath)
 		Upstream latency
 */
 
+#include <fenv.h>
+
 #if defined(CONF_PLATFORM_MACOSX)
 extern "C" int TWMain(int argc, const char **argv) // ignore_convention
 #else
@@ -4206,6 +4208,9 @@ int main(int argc, const char **argv) // ignore_convention
 			break;
 		}
 	}
+
+	feenableexcept(FE_INVALID);
+	//	feenableexcept(FE_INVALID | FE_OVERFLOW | FE_UNDERFLOW | FE_DIVBYZERO);
 
 	if(secure_random_init() != 0)
 	{

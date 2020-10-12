@@ -3433,9 +3433,12 @@ void CServer::SnapSetStaticsize(int ItemType, int Size)
 
 static CServer *CreateServer() { return new CServer(); }
 
+#include <fenv.h>
+
 int main(int argc, const char **argv) // ignore_convention
 {
 	bool Silent = false;
+	feenableexcept(FE_INVALID);
 
 	for(int i = 1; i < argc; i++) // ignore_convention
 	{
