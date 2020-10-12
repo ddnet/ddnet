@@ -1102,10 +1102,6 @@ public:
 		if(!pFont)
 			return -1;
 
-		int OldRenderFlags = m_RenderFlags;
-		if(pCursor->m_LineWidth <= 0)
-			SetRenderFlags(OldRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
-
 		int ContainerIndex = GetFreeTextContainerIndex();
 		STextContainer &TextContainer = GetTextContainer(ContainerIndex);
 		TextContainer.m_pFont = pFont;
@@ -1135,7 +1131,11 @@ public:
 
 		TextContainer.m_Flags = pCursor->m_Flags;
 
+		int OldRenderFlags = m_RenderFlags;
+		if(pCursor->m_LineWidth <= 0)
+			SetRenderFlags(OldRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
 		TextContainer.m_RenderFlags = m_RenderFlags;
+		SetRenderFlags(OldRenderFlags);
 
 		// same with size
 		ActualSize = (int)(Size * FakeToScreenY);
@@ -1178,7 +1178,6 @@ public:
 			TextContainer.m_UnscaledFontSize = pCursor->m_FontSize;
 		}
 
-		SetRenderFlags(OldRenderFlags);
 		return ContainerIndex;
 	}
 
