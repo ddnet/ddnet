@@ -5,6 +5,7 @@
 
 #include <engine/map.h>
 #include <engine/shared/protocol.h>
+#include <game/client/ui.h>
 
 #include "kernel.h"
 
@@ -61,6 +62,8 @@ public:
 	char m_aAddress[NETADDR_MAXSTRSIZE];
 	CClient m_aClients[MAX_CLIENTS];
 	mutable int m_NumFilteredPlayers;
+
+	mutable CUIElement *m_pUIElement;
 };
 
 bool IsVanilla(const CServerInfo *pInfo);

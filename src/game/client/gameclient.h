@@ -378,6 +378,8 @@ public:
 	void OnWindowResize();
 	static void OnWindowResizeCB(void *pUser);
 
+	void OnLanguageChange();
+
 	virtual const char *GetItemName(int Type);
 	virtual const char *Version();
 	virtual const char *NetVersion();

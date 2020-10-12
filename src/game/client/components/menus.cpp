@@ -99,10 +99,10 @@ CMenus::CMenus()
 float CMenus::ButtonColorMul(const void *pID)
 {
 	if(UI()->ActiveItem() == pID)
-		return 0.5f;
+		return ButtonColorMulActive();
 	else if(UI()->HotItem() == pID)
-		return 1.5f;
-	return 1;
+		return ButtonColorMulHot();
+	return ButtonColorMulDefault();
 }
 
 int CMenus::DoButton_Icon(int ImageId, int SpriteId, const CUIRect *pRect)
@@ -1106,6 +1106,9 @@ void CMenus::OnInit()
 		m_Popup = POPUP_LANGUAGE;
 	if(g_Config.m_ClSkipStartMenu)
 		m_ShowStart = false;
+
+	m_RefreshButton.Init(UI());
+	m_ConnectButton.Init(UI());
 
 	Console()->Chain("add_favorite", ConchainServerbrowserUpdate, this);
 	Console()->Chain("remove_favorite", ConchainServerbrowserUpdate, this);

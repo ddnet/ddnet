@@ -1091,7 +1091,7 @@ public:
 			pCursor->m_Y = DrawY;
 	}
 
-	virtual int CreateTextContainer(CTextCursor *pCursor, const char *pText)
+	virtual int CreateTextContainer(CTextCursor *pCursor, const char *pText, int Length = -1)
 	{
 		CFont *pFont = pCursor->m_pFont;
 
@@ -1144,7 +1144,7 @@ public:
 
 		TextContainer.m_FontSize = pSizeData->m_FontSize;
 
-		AppendTextContainer(pCursor, ContainerIndex, pText);
+		AppendTextContainer(pCursor, ContainerIndex, pText, Length);
 
 		if(TextContainer.m_StringInfo.m_CharacterQuads.size() == 0)
 		{
@@ -1181,7 +1181,7 @@ public:
 		return ContainerIndex;
 	}
 
-	virtual void AppendTextContainer(CTextCursor *pCursor, int TextContainerIndex, const char *pText)
+	virtual void AppendTextContainer(CTextCursor *pCursor, int TextContainerIndex, const char *pText, int Length = -1)
 	{
 		STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
 
@@ -1218,7 +1218,8 @@ public:
 		pSizeData = TextContainer.m_pFont->GetFontSize(TextContainer.m_FontSize);
 
 		// string length
-		int Length = str_length(pText);
+		if(Length < 0)
+			Length = str_length(pText);
 
 		float Scale = 1.0f / pSizeData->m_FontSize;
 
@@ -1443,19 +1444,19 @@ public:
 	}
 
 	// just deletes and creates text container
-	virtual void RecreateTextContainer(CTextCursor *pCursor, int TextContainerIndex, const char *pText)
+	virtual void RecreateTextContainer(CTextCursor *pCursor, int TextContainerIndex, const char *pText, int Length = -1)
 	{
 		DeleteTextContainer(TextContainerIndex);
-		CreateTextContainer(pCursor, pText);
+		CreateTextContainer(pCursor, pText, Length);
 	}
 
-	virtual void RecreateTextContainerSoft(CTextCursor *pCursor, int TextContainerIndex, const char *pText)
+	virtual void RecreateTextContainerSoft(CTextCursor *pCursor, int TextContainerIndex, const char *pText, int Length = -1)
 	{
 		STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
 		TextContainer.m_StringInfo.m_CharacterQuads.clear();
 		TextContainer.m_StringInfo.m_QuadNum = 0;
 		// the text buffer gets then recreated by the appended quads
-		AppendTextContainer(pCursor, TextContainerIndex, pText);
+		AppendTextContainer(pCursor, TextContainerIndex, pText, Length);
 	}
 
 	virtual void SetTextContainerSelection(int TextContainerIndex, const char *pText, int CursorPos, int SelectionStart, int SelectionEnd)

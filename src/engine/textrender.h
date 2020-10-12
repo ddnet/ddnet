@@ -61,6 +61,10 @@ struct STextRenderColor
 	{
 		Set(r, g, b, a);
 	}
+	STextRenderColor(const ColorRGBA &TextColorRGBA)
+	{
+		Set(TextColorRGBA.r, TextColorRGBA.g, TextColorRGBA.b, TextColorRGBA.a);
+	}
 
 	void Set(float r, float g, float b, float a)
 	{
@@ -89,13 +93,16 @@ public:
 
 	virtual void SetRenderFlags(unsigned int Flags) = 0;
 
+	ColorRGBA DefaultTextColor() { return ColorRGBA(1, 1, 1, 1); }
+	ColorRGBA DefaultTextOutlineColor() { return ColorRGBA(0, 0, 0, 0.3f); }
+
 	//
 	virtual void TextEx(CTextCursor *pCursor, const char *pText, int Length) = 0;
-	virtual int CreateTextContainer(CTextCursor *pCursor, const char *pText) = 0;
-	virtual void AppendTextContainer(CTextCursor *pCursor, int TextContainerIndex, const char *pText) = 0;
+	virtual int CreateTextContainer(CTextCursor *pCursor, const char *pText, int Length = -1) = 0;
+	virtual void AppendTextContainer(CTextCursor *pCursor, int TextContainerIndex, const char *pText, int Length = -1) = 0;
 	// just deletes and creates text container
-	virtual void RecreateTextContainer(CTextCursor *pCursor, int TextContainerIndex, const char *pText) = 0;
-	virtual void RecreateTextContainerSoft(CTextCursor *pCursor, int TextContainerIndex, const char *pText) = 0;
+	virtual void RecreateTextContainer(CTextCursor *pCursor, int TextContainerIndex, const char *pText, int Length = -1) = 0;
+	virtual void RecreateTextContainerSoft(CTextCursor *pCursor, int TextContainerIndex, const char *pText, int Length = -1) = 0;
 	virtual void SetTextContainerSelection(int TextContainerIndex, const char *pText, int CursorPos, int SelectionStart, int SelectionEnd) = 0;
 	virtual void DeleteTextContainer(int TextContainerIndex) = 0;
 
@@ -110,6 +117,7 @@ public:
 	virtual void TextColor(float r, float g, float b, float a) = 0;
 	virtual void TextColor(ColorRGBA rgb) = 0;
 	virtual void TextOutlineColor(float r, float g, float b, float a) = 0;
+	virtual void TextOutlineColor(ColorRGBA rgb) = 0;
 	virtual void Text(void *pFontSetV, float x, float y, float Size, const char *pText, float LineWidth) = 0;
 	virtual float TextWidth(void *pFontSetV, float Size, const char *pText, int StrLength, float LineWidth, float *pAlignedHeight = NULL, float *pMaxCharacterHeightInLine = NULL) = 0;
 	virtual int TextLineCount(void *pFontSetV, float Size, const char *pText, float LineWidth) = 0;
