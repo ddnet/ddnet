@@ -138,7 +138,7 @@ int CSkins::LoadSkin(const char *pName, const char *pPath, int DirType, int *pGe
 		for(int x = 0; x < BodySize; x++)
 		{
 			int v = d[y * Pitch + x * 4];
-			if(OrgWeight == 0)
+			if(v <= OrgWeight && OrgWeight == 0)
 				v = 0;
 			else if(v <= OrgWeight)
 				v = (int)(((v / (float)OrgWeight) * NewWeight));
