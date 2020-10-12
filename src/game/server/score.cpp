@@ -399,7 +399,7 @@ bool CScore::MapInfoThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 		char aReleasedString[60] = "\0";
 		if(Stamp != 0)
 		{
-			sqlstr::AgoTimeToString(Ago, aAgoString);
+			sqlstr::AgoTimeToString(Ago, aAgoString, sizeof(aAgoString));
 			str_format(aReleasedString, sizeof(aReleasedString), ", released %s ago", aAgoString);
 		}
 
@@ -986,7 +986,7 @@ bool CScore::ShowTimesThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		int Stamp = pSqlServer->GetInt(3);
 
 		char aAgoString[40] = "\0";
-		sqlstr::AgoTimeToString(Ago, aAgoString);
+		sqlstr::AgoTimeToString(Ago, aAgoString, sizeof(aAgoString));
 
 		if(pData->m_Name[0] != '\0') // last 5 times of a player
 		{
@@ -1550,7 +1550,7 @@ bool CScore::GetSavesThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 		char aLastSavedString[60] = "\0";
 		if(Ago)
 		{
-			sqlstr::AgoTimeToString(Ago, aAgoString);
+			sqlstr::AgoTimeToString(Ago, aAgoString, sizeof(aAgoString));
 			str_format(aLastSavedString, sizeof(aLastSavedString), ", last saved %s ago", aAgoString);
 		}
 

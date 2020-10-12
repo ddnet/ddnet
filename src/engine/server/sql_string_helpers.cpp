@@ -40,7 +40,7 @@ int sqlstr::EscapeLike(char *pDst, const char *pSrc, int DstSize)
 	return DstPos;
 }
 
-void sqlstr::AgoTimeToString(int AgoTime, char *pAgoString)
+void sqlstr::AgoTimeToString(int AgoTime, char *pAgoString, int Size)
 {
 	char aBuf[20];
 	int aTimes[7] =
@@ -71,7 +71,7 @@ void sqlstr::AgoTimeToString(int AgoTime, char *pAgoString)
 	for(i = 0; i < 7; i++)
 	{
 		Seconds = aTimes[i];
-		strcpy(aName, aaNames[i]);
+		str_copy(aName, aaNames[i], sizeof(aName));
 
 		Count = floor((float)AgoTime / (float)Seconds);
 		if(Count != 0)
@@ -88,14 +88,14 @@ void sqlstr::AgoTimeToString(int AgoTime, char *pAgoString)
 	{
 		str_format(aBuf, sizeof(aBuf), "%d %ss", Count, aName);
 	}
-	strcat(pAgoString, aBuf);
+	str_append(pAgoString, aBuf, Size);
 
 	if(i + 1 < 7)
 	{
 		// getting second piece now
 		int Seconds2 = aTimes[i + 1];
 		char aName2[6];
-		strcpy(aName2, aaNames[i + 1]);
+		str_copy(aName2, aaNames[i + 1], sizeof(aName2));
 
 		// add second piece if it's greater than 0
 		int Count2 = floor((float)(AgoTime - (Seconds * Count)) / (float)Seconds2);
@@ -110,7 +110,7 @@ void sqlstr::AgoTimeToString(int AgoTime, char *pAgoString)
 			{
 				str_format(aBuf, sizeof(aBuf), " and %d %ss", Count2, aName2);
 			}
-			strcat(pAgoString, aBuf);
+			str_append(pAgoString, aBuf, Size);
 		}
 	}
 }
