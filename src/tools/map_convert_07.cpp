@@ -222,7 +222,6 @@ int main(int argc, const char **argv)
 	int i = 0;
 	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)
 	{
-		pItem = g_DataReader.GetItem(Index, &Type, &ID);
 		if(Type == MAPITEMTYPE_IMAGE)
 			g_aImageIDs[i++] = Index;
 	}

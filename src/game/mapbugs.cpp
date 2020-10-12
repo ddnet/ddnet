@@ -27,7 +27,8 @@ static unsigned int BugToFlag(int Bug)
 {
 	unsigned int Result;
 	dbg_assert((unsigned)Bug < 8 * sizeof(Result), "invalid shift");
-	return Result = (1 << Bug);
+	Result = (1 << Bug);
+	return Result;
 }
 
 static unsigned int IsBugFlagSet(int Bug, unsigned int BugFlags)

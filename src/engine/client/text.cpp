@@ -1510,8 +1510,6 @@ public:
 			DrawY = TextContainer.m_AlignedStartY;
 		}
 
-		DrawX = TextContainer.m_X;
-		DrawY = TextContainer.m_Y;
 		LineCount = TextContainer.m_LineCount;
 
 		if(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex == -1)

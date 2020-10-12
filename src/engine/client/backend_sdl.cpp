@@ -3770,7 +3770,6 @@ void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 
 	int MajorV = pCommand->m_pCapabilities->m_ContextMajor;
 	int MinorV = pCommand->m_pCapabilities->m_ContextMinor;
-	int PatchV = pCommand->m_pCapabilities->m_ContextPatch;
 
 	*pCommand->m_pInitError = 0;
 
@@ -3786,6 +3785,7 @@ void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 		}
 		else if(MinorV == pCommand->m_RequestedMinor)
 		{
+			int PatchV = pCommand->m_pCapabilities->m_ContextPatch;
 			if(PatchV < pCommand->m_RequestedPatch)
 			{
 				*pCommand->m_pInitError = -2;
@@ -3797,7 +3797,6 @@ void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 	{
 		MajorV = pCommand->m_RequestedMajor;
 		MinorV = pCommand->m_RequestedMinor;
-		PatchV = pCommand->m_RequestedPatch;
 
 		pCommand->m_pCapabilities->m_2DArrayTexturesAsExtension = false;
 		pCommand->m_pCapabilities->m_NPOTTextures = true;

@@ -2691,13 +2691,8 @@ int str_utf8_dist_buffer(const char *a_utf8, const char *b_utf8, int *buf, int b
 	dbg_assert(buf_len >= 2 * (a_utf8_len + 1 + b_utf8_len + 1), "buffer too small");
 	if(a_utf8_len > b_utf8_len)
 	{
-		int tmp1 = a_utf8_len;
 		const char *tmp2 = a_utf8;
-
-		a_utf8_len = b_utf8_len;
 		a_utf8 = b_utf8;
-
-		b_utf8_len = tmp1;
 		b_utf8 = tmp2;
 	}
 	a = buf;

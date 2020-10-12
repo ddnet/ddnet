@@ -244,10 +244,6 @@ void CStatboard::RenderGlobalStats()
 		RenderTools()->DrawSprite(x + px, y + 15, 48 * ScaleX, 48 * ScaleY);
 		Graphics()->QuadsEnd();
 	}
-	else
-	{
-		px += 40;
-	}
 
 	y += 29.0f;
 
@@ -285,7 +281,6 @@ void CStatboard::RenderGlobalStats()
 
 		char aBuf[128];
 		CTextCursor Cursor;
-		tw = TextRender()->TextWidth(0, FontSize, m_pClient->m_aClients[pInfo->m_ClientID].m_aName, -1, -1.0f);
 		TextRender()->SetCursor(&Cursor, x + 64, y + (LineHeight * 0.95f - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = 220;
 		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[pInfo->m_ClientID].m_aName, -1);
@@ -297,7 +292,6 @@ void CStatboard::RenderGlobalStats()
 			str_format(aBuf, sizeof(aBuf), "%d", pStats->m_Frags);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f);
 			TextRender()->Text(0, x - tw + px, y + (LineHeight * 0.95f - FontSize) / 2.f, FontSize, aBuf, -1.0f);
-			px += 85;
 		}
 		// DEATHS
 		{
@@ -379,7 +373,6 @@ void CStatboard::RenderGlobalStats()
 			str_format(aBuf, sizeof(aBuf), "%d", pStats->m_FlagCaptures);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f);
 			TextRender()->Text(0, x - tw + px, y + (LineHeight * 0.95f - FontSize) / 2.f, FontSize, aBuf, -1.0f);
-			px += 85;
 		}
 		y += LineHeight;
 	}
