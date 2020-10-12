@@ -1,0 +1,30 @@
+name: Check clang-tidy
+
+on:
+  push:
+    branches-ignore:
+      - master
+      - staging.tmp
+      - trying.tmp
+      - staging-squash-merge.tmp
+  pull_request:
+
+jobs:
+  check-clang-tidy:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Install clang-tidy
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install pkg-config cmake libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev clang-tidy -y
+    - name: Build with clang-tidy
+      run: |
+        mkdir clang-tidy
+        cd clang-tidy
+        cmake -G "Unix Makefiles" -DCMAKE_CXX_CLANG_TIDY="clang-tidy;-warnings-as-errors=*" -DCMAKE_C_CLANG_TIDY="clang-tidy;-warnings-as-errors=*" -DCMAKE_BUILD_TYPE=Debug -Werror=dev -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. ..
+        cmake --build . --config Debug --parallel --target everything -- --keep-going
+
