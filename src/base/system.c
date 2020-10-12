@@ -1030,7 +1030,9 @@ static void netaddr_to_sockaddr_in6(const NETADDR *src, struct sockaddr_in6 *des
 
 static void sockaddr_to_netaddr(const struct sockaddr *src, NETADDR *dst)
 {
-	if(src->sa_family == AF_INET)
+	// Filled by accept, clang-analyzer probably can't tell because of the
+	// (struct sockaddr *) cast.
+	if(src->sa_family == AF_INET) // NOLINT(clang-analyzer-core.UndefinedBinaryOperatorResult)
 	{
 		mem_zero(dst, sizeof(NETADDR));
 		dst->type = NETTYPE_IPV4;
