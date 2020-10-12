@@ -77,6 +77,8 @@ Whether to enable client compilation. If set to OFF, DDNet will not depend on Cu
 * **-DVIDEORECORDER=[ON|OFF]** <br>
 Whether to add video recording support using FFmpeg to the client. You can use command `start_video` and `stop_video` to start and stop conversion from demo to mp4. This feature is currently experimental and not enabled by default.
 
+Dependencies needed on debian: `libx264-dev libavfilter-dev libavdevice-dev libavformat-dev libavcodec-extra libavutil-dev`
+
 * **-DDOWNLOAD_GTEST=[ON|OFF]** <br>
 Whether to download and compile GTest. Useful if GTest is not installed and, for Linux users, there is no suitable package providing it. Default value is OFF.
 
