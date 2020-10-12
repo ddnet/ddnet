@@ -803,6 +803,7 @@ LOCK lock_create(void)
 	if(result != 0)
 	{
 		dbg_msg("lock", "init failed: %d", result);
+		free(lock);
 		return 0;
 	}
 #elif defined(CONF_FAMILY_WINDOWS)
