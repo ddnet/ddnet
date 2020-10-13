@@ -1651,6 +1651,7 @@ void CCommandProcessorFragment_OpenGL2::Cmd_RenderTex3D(const CCommandBuffer::SC
 
 void CCommandProcessorFragment_OpenGL2::Cmd_CreateBufferObject(const CCommandBuffer::SCommand_CreateBufferObject *pCommand)
 {
+	void *pUploadData = pCommand->m_pUploadData;
 	int Index = pCommand->m_BufferIndex;
 	//create necessary space
 	if((size_t)Index >= m_BufferObjectIndices.size())
@@ -1667,7 +1668,7 @@ void CCommandProcessorFragment_OpenGL2::Cmd_CreateBufferObject(const CCommandBuf
 	{
 		glGenBuffers(1, &VertBufferID);
 		glBindBuffer(GL_COPY_WRITE_BUFFER, VertBufferID);
-		glBufferData(GL_COPY_WRITE_BUFFER, (GLsizeiptr)(pCommand->m_DataSize), pCommand->m_pUploadData, GL_STATIC_DRAW);
+		glBufferData(GL_COPY_WRITE_BUFFER, (GLsizeiptr)(pCommand->m_DataSize), pUploadData, GL_STATIC_DRAW);
 		glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 	}
 
@@ -1675,19 +1676,23 @@ void CCommandProcessorFragment_OpenGL2::Cmd_CreateBufferObject(const CCommandBuf
 	BufferObject.m_BufferObjectID = VertBufferID;
 	BufferObject.m_DataSize = pCommand->m_DataSize;
 	BufferObject.m_pData = malloc(pCommand->m_DataSize);
-	if(pCommand->m_pUploadData)
-		mem_copy(BufferObject.m_pData, pCommand->m_pUploadData, pCommand->m_DataSize);
+	if(pUploadData)
+		mem_copy(BufferObject.m_pData, pUploadData, pCommand->m_DataSize);
+
+	if(pCommand->m_DeletePointer)
+		free(pUploadData);
 }
 
 void CCommandProcessorFragment_OpenGL2::Cmd_RecreateBufferObject(const CCommandBuffer::SCommand_RecreateBufferObject *pCommand)
 {
+	void *pUploadData = pCommand->m_pUploadData;
 	int Index = pCommand->m_BufferIndex;
 	SBufferObject &BufferObject = m_BufferObjectIndices[Index];
 
 	if(m_HasShaders)
 	{
 		glBindBuffer(GL_COPY_WRITE_BUFFER, BufferObject.m_BufferObjectID);
-		glBufferData(GL_COPY_WRITE_BUFFER, (GLsizeiptr)(pCommand->m_DataSize), pCommand->m_pUploadData, GL_STATIC_DRAW);
+		glBufferData(GL_COPY_WRITE_BUFFER, (GLsizeiptr)(pCommand->m_DataSize), pUploadData, GL_STATIC_DRAW);
 		glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 	}
 
@@ -1695,24 +1700,31 @@ void CCommandProcessorFragment_OpenGL2::Cmd_RecreateBufferObject(const CCommandB
 	if(BufferObject.m_pData)
 		free(BufferObject.m_pData);
 	BufferObject.m_pData = malloc(pCommand->m_DataSize);
-	if(pCommand->m_pUploadData)
-		mem_copy(BufferObject.m_pData, pCommand->m_pUploadData, pCommand->m_DataSize);
+	if(pUploadData)
+		mem_copy(BufferObject.m_pData, pUploadData, pCommand->m_DataSize);
+
+	if(pCommand->m_DeletePointer)
+		free(pUploadData);
 }
 
 void CCommandProcessorFragment_OpenGL2::Cmd_UpdateBufferObject(const CCommandBuffer::SCommand_UpdateBufferObject *pCommand)
 {
+	void *pUploadData = pCommand->m_pUploadData;
 	int Index = pCommand->m_BufferIndex;
 	SBufferObject &BufferObject = m_BufferObjectIndices[Index];
 
 	if(m_HasShaders)
 	{
 		glBindBuffer(GL_COPY_WRITE_BUFFER, BufferObject.m_BufferObjectID);
-		glBufferSubData(GL_COPY_WRITE_BUFFER, (GLintptr)(pCommand->m_pOffset), (GLsizeiptr)(pCommand->m_DataSize), pCommand->m_pUploadData);
+		glBufferSubData(GL_COPY_WRITE_BUFFER, (GLintptr)(pCommand->m_pOffset), (GLsizeiptr)(pCommand->m_DataSize), pUploadData);
 		glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 	}
 
-	if(pCommand->m_pUploadData)
-		mem_copy(((uint8_t *)BufferObject.m_pData) + (ptrdiff_t)pCommand->m_pOffset, pCommand->m_pUploadData, pCommand->m_DataSize);
+	if(pUploadData)
+		mem_copy(((uint8_t *)BufferObject.m_pData) + (ptrdiff_t)pCommand->m_pOffset, pUploadData, pCommand->m_DataSize);
+
+	if(pCommand->m_DeletePointer)
+		free(pUploadData);
 }
 
 void CCommandProcessorFragment_OpenGL2::Cmd_CopyBufferObject(const CCommandBuffer::SCommand_CopyBufferObject *pCommand)
@@ -3097,6 +3109,7 @@ void CCommandProcessorFragment_OpenGL3_3::AppendIndices(unsigned int NewIndicesC
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_CreateBufferObject(const CCommandBuffer::SCommand_CreateBufferObject *pCommand)
 {
+	void *pUploadData = pCommand->m_pUploadData;
 	int Index = pCommand->m_BufferIndex;
 	//create necessary space
 	if((size_t)Index >= m_BufferObjectIndices.size())
@@ -3111,25 +3124,36 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_CreateBufferObject(const CCommandB
 
 	glGenBuffers(1, &VertBufferID);
 	glBindBuffer(GL_COPY_WRITE_BUFFER, VertBufferID);
-	glBufferData(GL_COPY_WRITE_BUFFER, (GLsizeiptr)(pCommand->m_DataSize), pCommand->m_pUploadData, GL_STATIC_DRAW);
+	glBufferData(GL_COPY_WRITE_BUFFER, (GLsizeiptr)(pCommand->m_DataSize), pUploadData, GL_STATIC_DRAW);
 
 	m_BufferObjectIndices[Index] = VertBufferID;
+
+	if(pCommand->m_DeletePointer)
+		free(pUploadData);
 }
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_RecreateBufferObject(const CCommandBuffer::SCommand_RecreateBufferObject *pCommand)
 {
+	void *pUploadData = pCommand->m_pUploadData;
 	int Index = pCommand->m_BufferIndex;
 
 	glBindBuffer(GL_COPY_WRITE_BUFFER, m_BufferObjectIndices[Index]);
-	glBufferData(GL_COPY_WRITE_BUFFER, (GLsizeiptr)(pCommand->m_DataSize), pCommand->m_pUploadData, GL_STATIC_DRAW);
+	glBufferData(GL_COPY_WRITE_BUFFER, (GLsizeiptr)(pCommand->m_DataSize), pUploadData, GL_STATIC_DRAW);
+
+	if(pCommand->m_DeletePointer)
+		free(pUploadData);
 }
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_UpdateBufferObject(const CCommandBuffer::SCommand_UpdateBufferObject *pCommand)
 {
+	void *pUploadData = pCommand->m_pUploadData;
 	int Index = pCommand->m_BufferIndex;
 
 	glBindBuffer(GL_COPY_WRITE_BUFFER, m_BufferObjectIndices[Index]);
-	glBufferSubData(GL_COPY_WRITE_BUFFER, (GLintptr)(pCommand->m_pOffset), (GLsizeiptr)(pCommand->m_DataSize), pCommand->m_pUploadData);
+	glBufferSubData(GL_COPY_WRITE_BUFFER, (GLintptr)(pCommand->m_pOffset), (GLsizeiptr)(pCommand->m_DataSize), pUploadData);
+
+	if(pCommand->m_DeletePointer)
+		free(pUploadData);
 }
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_CopyBufferObject(const CCommandBuffer::SCommand_CopyBufferObject *pCommand)

@@ -254,9 +254,10 @@ public:
 	virtual void RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, float *pTextColor, float *pTextoutlineColor) = 0;
 
 	// opengl 3.3 functions
-	virtual int CreateBufferObject(size_t UploadDataSize, void *pUploadData) = 0;
-	virtual void RecreateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData) = 0;
-	virtual void UpdateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, void *pOffset) = 0;
+	// if a pointer is passed as moved pointer, it requires to be allocated with malloc()
+	virtual int CreateBufferObject(size_t UploadDataSize, void *pUploadData, bool IsMovedPointer = false) = 0;
+	virtual void RecreateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, bool IsMovedPointer = false) = 0;
+	virtual void UpdateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, void *pOffset, bool IsMovedPointer = false) = 0;
 	virtual void CopyBufferObject(int WriteBufferIndex, int ReadBufferIndex, size_t WriteOffset, size_t ReadOffset, size_t CopyDataSize) = 0;
 	virtual void DeleteBufferObject(int BufferIndex) = 0;
 
