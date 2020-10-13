@@ -140,6 +140,8 @@ void CPlayer::Reset()
 	m_NotEligibleForFinish = false;
 	m_EligibleForFinishCheck = 0;
 	m_VotedForPractice = false;
+	// Empty = english
+	str_copy(m_pLanguage, "", sizeof(m_pLanguage));
 }
 
 static int PlayerFlags_SevenToSix(int Flags)

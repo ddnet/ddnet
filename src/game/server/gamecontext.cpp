@@ -2385,6 +2385,11 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 		Server()->ExpireServerInfo();
 	}
+	else if(MsgID == NETMSGTYPE_CL_LANGUAGE)
+	{
+		CNetMsg_Cl_Language *pMsg = (CNetMsg_Cl_Language *)pRawMsg;
+		str_copy(pPlayer->m_pLanguage, pMsg->m_pLanguage, sizeof(pPlayer->m_pLanguage));
+	}
 }
 
 void CGameContext::ConTuneParam(IConsole::IResult *pResult, void *pUserData)

@@ -441,4 +441,8 @@ Messages = [
 	NetMessageEx("Cl_ShowOthers", "showothers@netmsg.ddnet.tw", [
 		NetIntRange("m_Show", 0, 2),
 	]),
+
+        NetMessageEx("Cl_Language", "language@netmsg.ddnet.tw", [
+		NetStringStrict("m_pLanguage"),
+        ]),
 ]

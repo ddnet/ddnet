@@ -199,6 +199,7 @@ public:
 	bool m_NotEligibleForFinish;
 	int64 m_EligibleForFinishCheck;
 	bool m_VotedForPractice;
+	char m_pLanguage[255]; // same as g_Config.m_pLanguage size
 };
 
 #endif

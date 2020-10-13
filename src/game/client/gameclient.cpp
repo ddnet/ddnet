@@ -2008,18 +2008,26 @@ void CGameClient::SendInfo(bool Start)
 {
 	if(Start)
 	{
-		CNetMsg_Cl_StartInfo Msg;
-		Msg.m_pName = Client()->PlayerName();
-		Msg.m_pClan = g_Config.m_PlayerClan;
-		Msg.m_Country = g_Config.m_PlayerCountry;
-		Msg.m_pSkin = g_Config.m_ClPlayerSkin;
-		Msg.m_UseCustomColor = g_Config.m_ClPlayerUseCustomColor;
-		Msg.m_ColorBody = g_Config.m_ClPlayerColorBody;
-		Msg.m_ColorFeet = g_Config.m_ClPlayerColorFeet;
+		{
+			CNetMsg_Cl_StartInfo Msg;
+			Msg.m_pName = Client()->PlayerName();
+			Msg.m_pClan = g_Config.m_PlayerClan;
+			Msg.m_Country = g_Config.m_PlayerCountry;
+			Msg.m_pSkin = g_Config.m_ClPlayerSkin;
+			Msg.m_UseCustomColor = g_Config.m_ClPlayerUseCustomColor;
+			Msg.m_ColorBody = g_Config.m_ClPlayerColorBody;
+			Msg.m_ColorFeet = g_Config.m_ClPlayerColorFeet;
+			CMsgPacker Packer(Msg.MsgID(), false);
+			Msg.Pack(&Packer);
+			Client()->SendMsgY(&Packer, MSGFLAG_VITAL, 0);
+			m_CheckInfo[0] = -1;
+		}
+
+		CNetMsg_Cl_Language Msg;
+		Msg.m_pLanguage = g_Config.m_ClLanguagefile;
 		CMsgPacker Packer(Msg.MsgID(), false);
 		Msg.Pack(&Packer);
 		Client()->SendMsgY(&Packer, MSGFLAG_VITAL, 0);
-		m_CheckInfo[0] = -1;
 	}
 	else
 	{
@@ -2042,18 +2050,26 @@ void CGameClient::SendDummyInfo(bool Start)
 {
 	if(Start)
 	{
-		CNetMsg_Cl_StartInfo Msg;
-		Msg.m_pName = Client()->DummyName();
-		Msg.m_pClan = g_Config.m_ClDummyClan;
-		Msg.m_Country = g_Config.m_ClDummyCountry;
-		Msg.m_pSkin = g_Config.m_ClDummySkin;
-		Msg.m_UseCustomColor = g_Config.m_ClDummyUseCustomColor;
-		Msg.m_ColorBody = g_Config.m_ClDummyColorBody;
-		Msg.m_ColorFeet = g_Config.m_ClDummyColorFeet;
+		{
+			CNetMsg_Cl_StartInfo Msg;
+			Msg.m_pName = Client()->DummyName();
+			Msg.m_pClan = g_Config.m_ClDummyClan;
+			Msg.m_Country = g_Config.m_ClDummyCountry;
+			Msg.m_pSkin = g_Config.m_ClDummySkin;
+			Msg.m_UseCustomColor = g_Config.m_ClDummyUseCustomColor;
+			Msg.m_ColorBody = g_Config.m_ClDummyColorBody;
+			Msg.m_ColorFeet = g_Config.m_ClDummyColorFeet;
+			CMsgPacker Packer(Msg.MsgID(), false);
+			Msg.Pack(&Packer);
+			Client()->SendMsgY(&Packer, MSGFLAG_VITAL, 1);
+			m_CheckInfo[1] = -1;
+		}
+
+		CNetMsg_Cl_Language Msg;
+		Msg.m_pLanguage = g_Config.m_ClLanguagefile;
 		CMsgPacker Packer(Msg.MsgID(), false);
 		Msg.Pack(&Packer);
 		Client()->SendMsgY(&Packer, MSGFLAG_VITAL, 1);
-		m_CheckInfo[1] = -1;
 	}
 	else
 	{
