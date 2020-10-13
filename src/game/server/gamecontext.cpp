@@ -2176,16 +2176,23 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			Server()->SetClientName(ClientID, pMsg->m_pName);
 			if(str_comp(aOldName, Server()->ClientName(ClientID)) != 0)
 			{
-				char aChatText[256];
-				str_format(aChatText, sizeof(aChatText), "'%s' changed name to '%s'", aOldName, Server()->ClientName(ClientID));
-				SendChat(-1, CGameContext::CHAT_ALL, aChatText);
+				if(ProcessSpamProtection(ClientID))
+				{
+					Server()->SetClientName(ClientID, aOldName);
+				}
+				else
+				{
+					char aChatText[256];
+					str_format(aChatText, sizeof(aChatText), "'%s' changed name to '%s'", aOldName, Server()->ClientName(ClientID));
+					SendChat(-1, CGameContext::CHAT_ALL, aChatText);
 
-				// reload scores
-				Score()->PlayerData(ClientID)->Reset();
-				m_apPlayers[ClientID]->m_Score = -9999;
-				Score()->LoadPlayerData(ClientID);
+					// reload scores
+					Score()->PlayerData(ClientID)->Reset();
+					m_apPlayers[ClientID]->m_Score = -9999;
+					Score()->LoadPlayerData(ClientID);
 
-				SixupNeedsUpdate = true;
+					SixupNeedsUpdate = true;
+				}
 			}
 
 			if(str_comp(Server()->ClientClan(ClientID), pMsg->m_pClan))
