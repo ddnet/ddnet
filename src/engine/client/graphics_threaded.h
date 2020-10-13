@@ -41,7 +41,10 @@ class CCommandBuffer
 
 		void *Alloc(unsigned Requested, unsigned Alignment = alignof(std::max_align_t))
 		{
-			size_t Offset = Alignment - (reinterpret_cast<uintptr_t>(m_pData + m_Used) % Alignment);
+			size_t Offset = reinterpret_cast<uintptr_t>(m_pData + m_Used) % Alignment;
+			if(Offset)
+				Offset = Alignment - Offset;
+
 			if(Requested + Offset + m_Used > m_Size)
 				return 0;
 
