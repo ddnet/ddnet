@@ -1444,12 +1444,15 @@ void CGraphics_Threaded::RenderQuadContainer(int ContainerIndex, int QuadOffset,
 	WrapNormal();
 }
 
-void CGraphics_Threaded::RenderQuadContainerAsSprite(int ContainerIndex, int QuadOffset, float X, float Y, float ScaleX, float ScaleY)
+void CGraphics_Threaded::RenderQuadContainerEx(int ContainerIndex, int QuadOffset, int QuadDrawNum, float X, float Y, float ScaleX, float ScaleY)
 {
 	SQuadContainer &Container = m_QuadContainers[ContainerIndex];
 
 	if((int)Container.m_Quads.size() < QuadOffset + 1)
 		return;
+
+	if(QuadDrawNum == -1)
+		QuadDrawNum = (int)Container.m_Quads.size() - QuadOffset;
 
 	if(IsQuadContainerBufferingEnabled())
 	{
@@ -1467,7 +1470,7 @@ void CGraphics_Threaded::RenderQuadContainerAsSprite(int ContainerIndex, int Qua
 		Cmd.m_State = m_State;
 		MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 
-		Cmd.m_DrawNum = 1 * 6;
+		Cmd.m_DrawNum = QuadDrawNum * 6;
 		Cmd.m_pOffset = (void *)(QuadOffset * 6 * sizeof(unsigned int));
 		Cmd.m_BufferContainerIndex = Container.m_QuadBufferContainerIndex;
 
@@ -1499,72 +1502,70 @@ void CGraphics_Threaded::RenderQuadContainerAsSprite(int ContainerIndex, int Qua
 	{
 		if(g_Config.m_GfxQuadAsTriangle)
 		{
-			SQuadContainer::SQuad &Quad = Container.m_Quads[QuadOffset];
-			m_aVertices[0] = Quad.m_aVertices[0];
-			m_aVertices[1] = Quad.m_aVertices[1];
-			m_aVertices[2] = Quad.m_aVertices[2];
-			m_aVertices[3] = Quad.m_aVertices[0];
-			m_aVertices[4] = Quad.m_aVertices[2];
-			m_aVertices[5] = Quad.m_aVertices[3];
-
-			for(int i = 0; i < 6; ++i)
+			for(int i = 0; i < QuadDrawNum; ++i)
 			{
-				m_aVertices[i].m_Pos.x *= ScaleX;
-				m_aVertices[i].m_Pos.y *= ScaleY;
+				SQuadContainer::SQuad &Quad = Container.m_Quads[QuadOffset + i];
+				m_aVertices[i * 6 + 0] = Quad.m_aVertices[0];
+				m_aVertices[i * 6 + 1] = Quad.m_aVertices[1];
+				m_aVertices[i * 6 + 2] = Quad.m_aVertices[2];
+				m_aVertices[i * 6 + 3] = Quad.m_aVertices[0];
+				m_aVertices[i * 6 + 4] = Quad.m_aVertices[2];
+				m_aVertices[i * 6 + 5] = Quad.m_aVertices[3];
+
+				for(int n = 0; n < 6; ++n)
+				{
+					m_aVertices[i * 6 + n].m_Pos.x *= ScaleX;
+					m_aVertices[i * 6 + n].m_Pos.y *= ScaleY;
+
+					SetColor(&m_aVertices[i * 6 + n], 0);
+				}
+
+				if(m_Rotation != 0)
+				{
+					CCommandBuffer::SPoint Center;
+					Center.x = m_aVertices[i * 6 + 0].m_Pos.x + (m_aVertices[i * 6 + 1].m_Pos.x - m_aVertices[i * 6 + 0].m_Pos.x) / 2.f;
+					Center.y = m_aVertices[i * 6 + 0].m_Pos.y + (m_aVertices[i * 6 + 2].m_Pos.y - m_aVertices[i * 6 + 0].m_Pos.y) / 2.f;
+
+					Rotate(Center, &m_aVertices[i * 6 + 0], 6);
+				}
+
+				for(int n = 0; n < 6; ++n)
+				{
+					m_aVertices[i * 6 + n].m_Pos.x += X;
+					m_aVertices[i * 6 + n].m_Pos.y += Y;
+				}
+				m_NumVertices += 6;
 			}
-
-			SetColor(&m_aVertices[0], 0);
-			SetColor(&m_aVertices[1], 0);
-			SetColor(&m_aVertices[2], 0);
-			SetColor(&m_aVertices[3], 0);
-			SetColor(&m_aVertices[4], 0);
-			SetColor(&m_aVertices[5], 0);
-
-			if(m_Rotation != 0)
-			{
-				CCommandBuffer::SPoint Center;
-				Center.x = m_aVertices[0].m_Pos.x + (m_aVertices[1].m_Pos.x - m_aVertices[0].m_Pos.x) / 2.f;
-				Center.y = m_aVertices[0].m_Pos.y + (m_aVertices[2].m_Pos.y - m_aVertices[0].m_Pos.y) / 2.f;
-
-				Rotate(Center, &m_aVertices[0], 6);
-			}
-
-			for(int i = 0; i < 6; ++i)
-			{
-				m_aVertices[i].m_Pos.x += X;
-				m_aVertices[i].m_Pos.y += Y;
-			}
-			m_NumVertices += 6;
 		}
 		else
 		{
-			mem_copy(m_aVertices, &Container.m_Quads[QuadOffset], sizeof(CCommandBuffer::SVertex) * 4 * 1);
-			SetColor(&m_aVertices[0], 0);
-			SetColor(&m_aVertices[1], 0);
-			SetColor(&m_aVertices[2], 0);
-			SetColor(&m_aVertices[3], 0);
-
-			for(int i = 0; i < 4; ++i)
+			for(int i = 0; i < QuadDrawNum; ++i)
 			{
-				m_aVertices[i].m_Pos.x *= ScaleX;
-				m_aVertices[i].m_Pos.y *= ScaleY;
-			}
+				mem_copy(m_aVertices, &Container.m_Quads[QuadOffset], sizeof(CCommandBuffer::SVertex) * 4 * 1);
 
-			if(m_Rotation != 0)
-			{
-				CCommandBuffer::SPoint Center;
-				Center.x = m_aVertices[0].m_Pos.x + (m_aVertices[1].m_Pos.x - m_aVertices[0].m_Pos.x) / 2.f;
-				Center.y = m_aVertices[0].m_Pos.y + (m_aVertices[2].m_Pos.y - m_aVertices[0].m_Pos.y) / 2.f;
+				for(int n = 0; n < 4; ++n)
+				{
+					m_aVertices[i * 4 + n].m_Pos.x *= ScaleX;
+					m_aVertices[i * 4 + n].m_Pos.y *= ScaleY;
+					SetColor(&m_aVertices[i * 4 + n], 0);
+				}
 
-				Rotate(Center, &m_aVertices[0], 4);
-			}
+				if(m_Rotation != 0)
+				{
+					CCommandBuffer::SPoint Center;
+					Center.x = m_aVertices[i * 4 + 0].m_Pos.x + (m_aVertices[i * 4 + 1].m_Pos.x - m_aVertices[i * 4 + 0].m_Pos.x) / 2.f;
+					Center.y = m_aVertices[i * 4 + 0].m_Pos.y + (m_aVertices[i * 4 + 2].m_Pos.y - m_aVertices[i * 4 + 0].m_Pos.y) / 2.f;
 
-			for(int i = 0; i < 4; ++i)
-			{
-				m_aVertices[i].m_Pos.x += X;
-				m_aVertices[i].m_Pos.y += Y;
+					Rotate(Center, &m_aVertices[i * 4 + 0], 4);
+				}
+
+				for(int n = 0; n < 4; ++n)
+				{
+					m_aVertices[i * 4 + n].m_Pos.x += X;
+					m_aVertices[i * 4 + n].m_Pos.y += Y;
+				}
+				m_NumVertices += 4;
 			}
-			m_NumVertices += 4;
 		}
 		m_Drawing = DRAWING_QUADS;
 		WrapClamp();
@@ -1572,6 +1573,11 @@ void CGraphics_Threaded::RenderQuadContainerAsSprite(int ContainerIndex, int Qua
 		m_Drawing = 0;
 	}
 	WrapNormal();
+}
+
+void CGraphics_Threaded::RenderQuadContainerAsSprite(int ContainerIndex, int QuadOffset, float X, float Y, float ScaleX, float ScaleY)
+{
+	RenderQuadContainerEx(ContainerIndex, QuadOffset, 1, X, Y, ScaleX, ScaleY);
 }
 
 void CGraphics_Threaded::RenderQuadContainerAsSpriteMultiple(int ContainerIndex, int QuadOffset, int DrawCount, SRenderSpriteInfo *pRenderInfo)

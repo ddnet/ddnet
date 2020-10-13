@@ -18,6 +18,7 @@
 #include <game/generated/protocol.h>
 
 #include <game/client/animstate.h>
+#include <game/client/components/chat.h>
 #include <game/client/components/menu_background.h>
 #include <game/client/components/sounds.h>
 #include <game/client/gameclient.h>
@@ -1631,13 +1632,31 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			g_Config.m_ClShowChat ^= 1;
 		}
 
+		bool IsOldChat = !(g_Config.m_ClChatTee || g_Config.m_ClChatBackground);
+
+		Left.HSplitTop(20.0f, &Button, &Left);
+		if(DoButton_CheckBox(&g_Config.m_ClChatTee, Localize("Use old chat style"), IsOldChat, &Button))
+		{
+			if(IsOldChat)
+			{
+				g_Config.m_ClChatTee = 1;
+				g_Config.m_ClChatBackground = 1;
+			}
+			else
+			{
+				g_Config.m_ClChatTee = 0;
+				g_Config.m_ClChatBackground = 0;
+			}
+			GameClient()->m_pChat->RebuildChat();
+		}
+
 		Right.HSplitTop(20.0f, &Button, &Right);
 		if(DoButton_CheckBox(&g_Config.m_ClChatTeamColors, Localize("Show names in chat in team colors"), g_Config.m_ClChatTeamColors, &Button))
 		{
 			g_Config.m_ClChatTeamColors ^= 1;
 		}
 
-		Left.HSplitTop(20.0f, &Button, &Left);
+		Right.HSplitTop(20.0f, &Button, &Right);
 		if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Show kill messages"), g_Config.m_ClShowKillMessages, &Button))
 		{
 			g_Config.m_ClShowKillMessages ^= 1;

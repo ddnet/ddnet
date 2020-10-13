@@ -3612,6 +3612,20 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadContainerAsSprite(const 
 	UseProgram(m_pSpriteProgram);
 	SetState(pCommand->m_State, m_pSpriteProgram);
 
+	if(pCommand->m_State.m_Texture < 0)
+	{
+		if(m_UseMultipleTextureUnits && m_pSpriteProgram->m_LastTextureSampler >= 0)
+		{
+			m_TextureSlotBoundToUnit[m_pSpriteProgram->m_LastTextureSampler].m_TextureSlot = -1;
+		}
+		m_TextureSlotBoundToUnit[0].m_TextureSlot = -1;
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		m_pSpriteProgram->SetUniform(m_pSpriteProgram->m_LocTextureSampler, 0);
+		m_pSpriteProgram->m_LastTextureSampler = -1;
+		glBindSampler(0, 0);
+	}
+
 	if(pCommand->m_Rotation != 0.0f && (m_pSpriteProgram->m_LastCenter[0] != pCommand->m_Center.x || m_pSpriteProgram->m_LastCenter[1] != pCommand->m_Center.y))
 	{
 		m_pSpriteProgram->SetUniformVec2(m_pSpriteProgram->m_LocCenter, 1, (float *)&pCommand->m_Center);

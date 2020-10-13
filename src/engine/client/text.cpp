@@ -229,6 +229,12 @@ class CTextRender : public IEngineTextRender
 		m_FirstFreeTextContainerIndex = Index;
 	}
 
+	void FreeTextContainer(int Index)
+	{
+		m_TextContainers[Index].Reset();
+		FreeTextContainerIndex(Index);
+	}
+
 	STextContainer &GetTextContainer(int Index)
 	{
 		if(Index >= (int)m_TextContainers.size())
@@ -239,12 +245,6 @@ class CTextRender : public IEngineTextRender
 		}
 
 		return m_TextContainers[Index];
-	}
-
-	void FreeTextContainer(int Index)
-	{
-		m_TextContainers[Index].Reset();
-		FreeTextContainerIndex(Index);
 	}
 
 	int WordLength(const char *pText)
@@ -766,6 +766,13 @@ public:
 		pCursor->m_GlyphCount = 0;
 		pCursor->m_CharCount = 0;
 		pCursor->m_MaxCharacterHeight = 0;
+		pCursor->m_LongestLineWidth = 0;
+	}
+
+	virtual void MoveCursor(CTextCursor *pCursor, float x, float y)
+	{
+		pCursor->m_X += x;
+		pCursor->m_Y += y;
 	}
 
 	virtual void Text(void *pFontSetV, float x, float y, float Size, const char *pText, float LineWidth)
@@ -1134,6 +1141,7 @@ public:
 		int OldRenderFlags = m_RenderFlags;
 		if(pCursor->m_LineWidth <= 0)
 			SetRenderFlags(OldRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
+
 		TextContainer.m_RenderFlags = m_RenderFlags;
 		SetRenderFlags(OldRenderFlags);
 
@@ -1287,6 +1295,7 @@ public:
 
 			const char *pTmp = pCurrent;
 			int NextCharacter = str_utf8_decode(&pTmp);
+
 			while(pCurrent < pBatchEnd)
 			{
 				TextContainer.m_CharCount += pTmp - pCurrent;
@@ -1401,6 +1410,9 @@ public:
 					pCursor->m_GlyphCount++;
 					++CharacterCounter;
 				}
+
+				if(DrawX > pCursor->m_LongestLineWidth)
+					pCursor->m_LongestLineWidth = DrawX;
 			}
 
 			if(NewLine)
