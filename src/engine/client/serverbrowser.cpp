@@ -70,6 +70,12 @@ CServerBrowser::CServerBrowser()
 
 CServerBrowser::~CServerBrowser()
 {
+	if(m_ppServerlist)
+		free(m_ppServerlist);
+
+	if(m_pSortedServerlist)
+		free(m_pSortedServerlist);
+
 	if(m_pDDNetInfo)
 		json_value_free(m_pDDNetInfo);
 }
