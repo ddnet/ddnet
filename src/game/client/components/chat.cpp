@@ -1088,33 +1088,6 @@ void CChat::OnRender()
 
 	ColorRGBA BackgroundColor(0, 0, 0, 0.2f);
 	float LineWidth = m_pClient->m_pScoreboard->Active() ? 90.0f : 200.0f;
-	float BackgroundY = 300 - 28;
-
-	for(int i = 0; i < MAX_LINES; i++)
-	{
-		int r = ((m_CurrentLine - i) + MAX_LINES) % MAX_LINES;
-		if(Now > m_aLines[r].m_Time + 16 * time_freq() && !m_PrevShowChat)
-			break;
-
-		float Blend = Now > m_aLines[r].m_Time + 14 * time_freq() && !m_PrevShowChat ? 1.0f - (Now - m_aLines[r].m_Time - 14 * time_freq()) / (2.0f * time_freq()) : 1.0f;
-
-		if(BackgroundY < HeightLimit)
-			break;
-
-		if(Blend <= 0.0f)
-			break;
-
-		BackgroundY -= m_aLines[r].m_YOffset[OffsetType];
-	}
-
-	if(Now <= m_aLines[m_CurrentLine % MAX_LINES].m_Time + 16 * time_freq() || m_PrevShowChat)
-	{
-		Graphics()->TextureClear();
-		Graphics()->QuadsBegin();
-		Graphics()->SetColor(0, 0, 0, 0.13f);
-		RenderTools()->DrawRoundRect(5.0f, BackgroundY - MESSAGE_PADDING, LineWidth + 8, 300 - 28 - BackgroundY + MESSAGE_PADDING, 4);
-		Graphics()->QuadsEnd();
-	}
 
 	for(int i = 0; i < MAX_LINES; i++)
 	{
@@ -1132,6 +1105,14 @@ void CChat::OnRender()
 
 		if(m_aLines[r].m_TextContainerIndex != -1)
 		{
+			STextContainerSize LineSize = TextRender()->GetTextContainerSize(m_aLines[r].m_TextContainerIndex);
+
+			Graphics()->TextureClear();
+			Graphics()->QuadsBegin();
+			Graphics()->SetColor(0, 0, 0, 0.12f * Blend);
+			RenderTools()->DrawRoundRect(4.5f, y - MESSAGE_PADDING / 2.0f, LineSize.m_Width, LineSize.m_Height + MESSAGE_PADDING, 4);
+			Graphics()->QuadsEnd();
+
 			if(m_aLines[r].m_NeedRenderTee)
 				RenderTools()->RenderTee(CAnimState::GetIdle(), &m_aLines[r].m_AuthorRenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), vec2(11, y + FONT_SIZE / 2), Blend);
 

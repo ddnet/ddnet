@@ -74,6 +74,19 @@ struct STextRenderColor
 	float m_R, m_G, m_B, m_A;
 };
 
+struct STextContainerSize
+{
+	STextContainerSize(float w, float h)
+	{
+		m_Width = w;
+		m_Height = h;
+	}
+
+public:
+	float m_Width;
+	float m_Height;
+};
+
 class ITextRender : public IInterface
 {
 	MACRO_INTERFACE("textrender", 0)
@@ -99,6 +112,8 @@ public:
 	virtual void RecreateTextContainerSoft(CTextCursor *pCursor, int TextContainerIndex, const char *pText) = 0;
 	virtual void SetTextContainerSelection(int TextContainerIndex, const char *pText, int CursorPos, int SelectionStart, int SelectionEnd) = 0;
 	virtual void DeleteTextContainer(int TextContainerIndex) = 0;
+
+	virtual STextContainerSize GetTextContainerSize(int TextContainerIndex) = 0;
 
 	virtual void RenderTextContainer(int TextContainerIndex, STextRenderColor *pTextColor, STextRenderColor *pTextOutlineColor) = 0;
 	virtual void RenderTextContainer(int TextContainerIndex, STextRenderColor *pTextColor, STextRenderColor *pTextOutlineColor, float X, float Y) = 0;

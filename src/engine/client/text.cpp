@@ -190,6 +190,9 @@ struct STextContainer
 		m_UnscaledFontSize = 0.f;
 
 		m_RenderFlags = 0;
+
+		m_Width = 0;
+		m_Height = 0;
 	}
 };
 
@@ -232,6 +235,12 @@ class CTextRender : public IEngineTextRender
 		m_FirstFreeTextContainerIndex = Index;
 	}
 
+	void FreeTextContainer(int Index)
+	{
+		m_TextContainers[Index].Reset();
+		FreeTextContainerIndex(Index);
+	}
+
 	STextContainer &GetTextContainer(int Index)
 	{
 		if(Index >= (int)m_TextContainers.size())
@@ -242,12 +251,6 @@ class CTextRender : public IEngineTextRender
 		}
 
 		return m_TextContainers[Index];
-	}
-
-	void FreeTextContainer(int Index)
-	{
-		m_TextContainers[Index].Reset();
-		FreeTextContainerIndex(Index);
 	}
 
 	int WordLength(const char *pText)
@@ -1137,8 +1140,6 @@ public:
 		int OldRenderFlags = m_RenderFlags;
 		if(pCursor->m_LineWidth <= 0)
 			SetRenderFlags(OldRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
-		TextContainer.m_Width = 0;
-		TextContainer.m_Height = Size;
 
 		TextContainer.m_RenderFlags = m_RenderFlags;
 		SetRenderFlags(OldRenderFlags);
@@ -1182,6 +1183,8 @@ public:
 			TextContainer.m_StartY = pCursor->m_StartY;
 			TextContainer.m_LineWidth = pCursor->m_LineWidth;
 			TextContainer.m_UnscaledFontSize = pCursor->m_FontSize;
+			TextContainer.m_Width = 0;
+			TextContainer.m_Height = Size;
 		}
 
 		return ContainerIndex;
@@ -1201,6 +1204,7 @@ public:
 		float DrawX = 0.0f, DrawY = 0.0f;
 		int LineCount = 0;
 		float CursorX, CursorY;
+		float MaxDrawX = -5.0f;
 
 		float Size = pCursor->m_FontSize;
 
@@ -1282,7 +1286,8 @@ public:
 					if(WordGlyphs <= 3) // if we can't place 3 chars of the word on this line, take the next
 						Wlen = 0;
 				}
-				else if(Compare.m_X - pCursor->m_StartX - pCursor->m_NewLineOffsetX > pCursor->m_LineWidth)
+				else if(LineCount > 1 && Compare.m_X - pCursor->m_StartX - pCursor->m_NewLineOffsetX > pCursor->m_LineWidth
+					|| LineCount <= 1 && Compare.m_X - pCursor->m_StartX > pCursor->m_LineWidth)
 				{
 					NewLine = 1;
 					Wlen = 0;
@@ -1305,6 +1310,9 @@ public:
 				{
 					LastCharGlyphIndex = 0;
 					++CharacterCounter;
+
+					if(DrawX > MaxDrawX)
+						MaxDrawX = DrawX;
 
 					DrawX = pCursor->m_StartX + +pCursor->m_NewLineOffsetX;
 					DrawY += Size;
@@ -1407,14 +1415,14 @@ public:
 						DrawX += Advance * Size + CharKerning;
 					pCursor->m_GlyphCount++;
 					++CharacterCounter;
-
-					if(LineCount <= 1 && !NewLine)
-						TextContainer.m_Width += CharWidth;
 				}
 			}
 
 			if(NewLine)
 			{
+				if(DrawX > MaxDrawX)
+					MaxDrawX = DrawX;
+
 				DrawX = pCursor->m_StartX + pCursor->m_NewLineOffsetX;
 				DrawY += Size;
 				if((RenderFlags & TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) == 0)
@@ -1445,12 +1453,24 @@ public:
 			}
 		}
 
+		if(MaxDrawX < 0)
+			MaxDrawX = DrawX;
+
 		// even if no text is drawn the cursor position will be adjusted
 		pCursor->m_X = DrawX;
 		pCursor->m_LineCount = LineCount;
 
 		if(GotNewLine)
 			pCursor->m_Y = DrawY;
+
+		TextContainer.m_Width = MaxDrawX;
+	}
+
+	virtual STextContainerSize GetTextContainerSize(int TextContainerIndex)
+	{
+		STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
+		
+		return STextContainerSize(TextContainer.m_Width, TextContainer.m_Height);
 	}
 
 	// just deletes and creates text container

@@ -10,11 +10,12 @@ class CChat : public CComponent
 {
 	CLineInput m_Input;
 
+	const float MESSAGE_PADDING = 2.5f;
+	const float FONT_SIZE = 6.0f;
+
 	enum
 	{
-		MAX_LINES = 25,
-		MESSAGE_PADDING = 2,
-		FONT_SIZE = 6
+		MAX_LINES = 25
 	};
 
 	struct CLine
