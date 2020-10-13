@@ -250,6 +250,7 @@ public:
 
 		int m_BufferIndex;
 
+		bool m_DeletePointer;
 		void *m_pUploadData;
 		size_t m_DataSize;
 	};
@@ -261,6 +262,7 @@ public:
 
 		int m_BufferIndex;
 
+		bool m_DeletePointer;
 		void *m_pUploadData;
 		size_t m_DataSize;
 	};
@@ -272,6 +274,7 @@ public:
 
 		int m_BufferIndex;
 
+		bool m_DeletePointer;
 		void *m_pOffset;
 		void *m_pUploadData;
 		size_t m_DataSize;
@@ -1076,9 +1079,9 @@ public:
 	void RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, float *pTextColor, float *pTextoutlineColor) override;
 
 	// opengl 3.3 functions
-	int CreateBufferObject(size_t UploadDataSize, void *pUploadData) override;
-	void RecreateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData) override;
-	void UpdateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, void *pOffset) override;
+	int CreateBufferObject(size_t UploadDataSize, void *pUploadData, bool IsMovedPointer = false) override;
+	void RecreateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, bool IsMovedPointer = false) override;
+	void UpdateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, void *pOffset, bool IsMovedPointer = false) override;
 	void CopyBufferObject(int WriteBufferIndex, int ReadBufferIndex, size_t WriteOffset, size_t ReadOffset, size_t CopyDataSize) override;
 	void DeleteBufferObject(int BufferIndex) override;
 

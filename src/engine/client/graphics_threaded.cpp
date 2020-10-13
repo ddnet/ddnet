@@ -1666,7 +1666,7 @@ void *CGraphics_Threaded::AllocCommandBufferData(unsigned AllocSize)
 	return pData;
 }
 
-int CGraphics_Threaded::CreateBufferObject(size_t UploadDataSize, void *pUploadData)
+int CGraphics_Threaded::CreateBufferObject(size_t UploadDataSize, void *pUploadData, bool IsMovedPointer)
 {
 	int Index = -1;
 	if(m_FirstFreeBufferObjectIndex == -1)
@@ -1684,89 +1684,100 @@ int CGraphics_Threaded::CreateBufferObject(size_t UploadDataSize, void *pUploadD
 	CCommandBuffer::SCommand_CreateBufferObject Cmd;
 	Cmd.m_BufferIndex = Index;
 	Cmd.m_DataSize = UploadDataSize;
+	Cmd.m_DeletePointer = IsMovedPointer;
 
-	if(UploadDataSize <= CMD_BUFFER_DATA_BUFFER_SIZE)
+	if(IsMovedPointer)
 	{
-		Cmd.m_pUploadData = AllocCommandBufferData(UploadDataSize);
-		if(Cmd.m_pUploadData == NULL)
-			return -1;
+		Cmd.m_pUploadData = pUploadData;
 
-		// check if we have enough free memory in the commandbuffer
 		if(!m_pCommandBuffer->AddCommand(Cmd))
 		{
 			// kick command buffer and try again
 			KickCommandBuffer();
 
-			Cmd.m_pUploadData = m_pCommandBuffer->AllocData(UploadDataSize);
-			if(Cmd.m_pUploadData == 0x0)
-			{
-				dbg_msg("graphics", "failed to allocate data for upload data");
-				return -1;
-			}
-
 			if(!m_pCommandBuffer->AddCommand(Cmd))
 			{
-				dbg_msg("graphics", "failed to allocate memory for create buffer object command");
+				dbg_msg("graphics", "failed to allocate memory for update buffer object command");
 				return -1;
 			}
 		}
-		mem_copy(Cmd.m_pUploadData, pUploadData, UploadDataSize);
 	}
 	else
 	{
-		Cmd.m_pUploadData = NULL;
-		// check if we have enough free memory in the commandbuffer
-		if(!m_pCommandBuffer->AddCommand(Cmd))
+		if(UploadDataSize <= CMD_BUFFER_DATA_BUFFER_SIZE)
 		{
-			// kick command buffer and try again
-			KickCommandBuffer();
+			Cmd.m_pUploadData = AllocCommandBufferData(UploadDataSize);
+			if(Cmd.m_pUploadData == NULL)
+				return -1;
+
+			// check if we have enough free memory in the commandbuffer
 			if(!m_pCommandBuffer->AddCommand(Cmd))
 			{
-				dbg_msg("graphics", "failed to allocate memory for create buffer object command");
-				return -1;
+				// kick command buffer and try again
+				KickCommandBuffer();
+
+				Cmd.m_pUploadData = m_pCommandBuffer->AllocData(UploadDataSize);
+				if(Cmd.m_pUploadData == 0x0)
+				{
+					dbg_msg("graphics", "failed to allocate data for upload data");
+					return -1;
+				}
+
+				if(!m_pCommandBuffer->AddCommand(Cmd))
+				{
+					dbg_msg("graphics", "failed to allocate memory for create buffer object command");
+					return -1;
+				}
 			}
+			mem_copy(Cmd.m_pUploadData, pUploadData, UploadDataSize);
 		}
-
-		// update the buffer instead
-		size_t UploadDataOffset = 0;
-		while(UploadDataSize > 0)
+		else
 		{
-			size_t UpdateSize = (UploadDataSize > CMD_BUFFER_DATA_BUFFER_SIZE ? CMD_BUFFER_DATA_BUFFER_SIZE : UploadDataSize);
+			Cmd.m_pUploadData = NULL;
+			// check if we have enough free memory in the commandbuffer
+			if(!m_pCommandBuffer->AddCommand(Cmd))
+			{
+				// kick command buffer and try again
+				KickCommandBuffer();
+				if(!m_pCommandBuffer->AddCommand(Cmd))
+				{
+					dbg_msg("graphics", "failed to allocate memory for create buffer object command");
+					return -1;
+				}
+			}
 
-			UpdateBufferObject(Index, UpdateSize, (((char *)pUploadData) + UploadDataOffset), (void *)UploadDataOffset);
+			// update the buffer instead
+			size_t UploadDataOffset = 0;
+			while(UploadDataSize > 0)
+			{
+				size_t UpdateSize = (UploadDataSize > CMD_BUFFER_DATA_BUFFER_SIZE ? CMD_BUFFER_DATA_BUFFER_SIZE : UploadDataSize);
 
-			UploadDataOffset += UpdateSize;
-			UploadDataSize -= UpdateSize;
+				UpdateBufferObject(Index, UpdateSize, (((char *)pUploadData) + UploadDataOffset), (void *)UploadDataOffset);
+
+				UploadDataOffset += UpdateSize;
+				UploadDataSize -= UpdateSize;
+			}
 		}
 	}
 
 	return Index;
 }
 
-void CGraphics_Threaded::RecreateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData)
+void CGraphics_Threaded::RecreateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, bool IsMovedPointer)
 {
 	CCommandBuffer::SCommand_RecreateBufferObject Cmd;
 	Cmd.m_BufferIndex = BufferIndex;
 	Cmd.m_DataSize = UploadDataSize;
+	Cmd.m_DeletePointer = IsMovedPointer;
 
-	if(UploadDataSize <= CMD_BUFFER_DATA_BUFFER_SIZE)
+	if(IsMovedPointer)
 	{
-		Cmd.m_pUploadData = AllocCommandBufferData(UploadDataSize);
-		if(Cmd.m_pUploadData == NULL)
-			return;
+		Cmd.m_pUploadData = pUploadData;
 
-		// check if we have enough free memory in the commandbuffer
 		if(!m_pCommandBuffer->AddCommand(Cmd))
 		{
 			// kick command buffer and try again
 			KickCommandBuffer();
-
-			Cmd.m_pUploadData = m_pCommandBuffer->AllocData(UploadDataSize);
-			if(Cmd.m_pUploadData == 0x0)
-			{
-				dbg_msg("graphics", "failed to allocate data for upload data");
-				return;
-			}
 
 			if(!m_pCommandBuffer->AddCommand(Cmd))
 			{
@@ -1774,17 +1785,110 @@ void CGraphics_Threaded::RecreateBufferObject(int BufferIndex, size_t UploadData
 				return;
 			}
 		}
-
-		mem_copy(Cmd.m_pUploadData, pUploadData, UploadDataSize);
 	}
 	else
 	{
-		Cmd.m_pUploadData = NULL;
+		if(UploadDataSize <= CMD_BUFFER_DATA_BUFFER_SIZE)
+		{
+			Cmd.m_pUploadData = AllocCommandBufferData(UploadDataSize);
+			if(Cmd.m_pUploadData == NULL)
+				return;
+
+			// check if we have enough free memory in the commandbuffer
+			if(!m_pCommandBuffer->AddCommand(Cmd))
+			{
+				// kick command buffer and try again
+				KickCommandBuffer();
+
+				Cmd.m_pUploadData = m_pCommandBuffer->AllocData(UploadDataSize);
+				if(Cmd.m_pUploadData == 0x0)
+				{
+					dbg_msg("graphics", "failed to allocate data for upload data");
+					return;
+				}
+
+				if(!m_pCommandBuffer->AddCommand(Cmd))
+				{
+					dbg_msg("graphics", "failed to allocate memory for recreate buffer object command");
+					return;
+				}
+			}
+
+			mem_copy(Cmd.m_pUploadData, pUploadData, UploadDataSize);
+		}
+		else
+		{
+			Cmd.m_pUploadData = NULL;
+			// check if we have enough free memory in the commandbuffer
+			if(!m_pCommandBuffer->AddCommand(Cmd))
+			{
+				// kick command buffer and try again
+				KickCommandBuffer();
+				if(!m_pCommandBuffer->AddCommand(Cmd))
+				{
+					dbg_msg("graphics", "failed to allocate memory for update buffer object command");
+					return;
+				}
+			}
+
+			// update the buffer instead
+			size_t UploadDataOffset = 0;
+			while(UploadDataSize > 0)
+			{
+				size_t UpdateSize = (UploadDataSize > CMD_BUFFER_DATA_BUFFER_SIZE ? CMD_BUFFER_DATA_BUFFER_SIZE : UploadDataSize);
+
+				UpdateBufferObject(BufferIndex, UpdateSize, (((char *)pUploadData) + UploadDataOffset), (void *)UploadDataOffset);
+
+				UploadDataOffset += UpdateSize;
+				UploadDataSize -= UpdateSize;
+			}
+		}
+	}
+}
+
+void CGraphics_Threaded::UpdateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, void *pOffset, bool IsMovedPointer)
+{
+	CCommandBuffer::SCommand_UpdateBufferObject Cmd;
+	Cmd.m_BufferIndex = BufferIndex;
+	Cmd.m_DataSize = UploadDataSize;
+	Cmd.m_pOffset = pOffset;
+	Cmd.m_DeletePointer = IsMovedPointer;
+
+	if(IsMovedPointer)
+	{
+		Cmd.m_pUploadData = pUploadData;
+
+		if(!m_pCommandBuffer->AddCommand(Cmd))
+		{
+			// kick command buffer and try again
+			KickCommandBuffer();
+
+			if(!m_pCommandBuffer->AddCommand(Cmd))
+			{
+				dbg_msg("graphics", "failed to allocate memory for update buffer object command");
+				return;
+			}
+		}
+	}
+	else
+	{
+		Cmd.m_pUploadData = AllocCommandBufferData(UploadDataSize);
+		if(Cmd.m_pUploadData == NULL)
+			return;
+
 		// check if we have enough free memory in the commandbuffer
 		if(!m_pCommandBuffer->AddCommand(Cmd))
 		{
 			// kick command buffer and try again
 			KickCommandBuffer();
+
+			Cmd.m_pUploadData = m_pCommandBuffer->AllocData(UploadDataSize);
+			if(Cmd.m_pUploadData == 0x0)
+			{
+				dbg_msg("graphics", "failed to allocate data for upload data");
+				return;
+			}
+
 			if(!m_pCommandBuffer->AddCommand(Cmd))
 			{
 				dbg_msg("graphics", "failed to allocate memory for update buffer object command");
@@ -1792,52 +1896,8 @@ void CGraphics_Threaded::RecreateBufferObject(int BufferIndex, size_t UploadData
 			}
 		}
 
-		// update the buffer instead
-		size_t UploadDataOffset = 0;
-		while(UploadDataSize > 0)
-		{
-			size_t UpdateSize = (UploadDataSize > CMD_BUFFER_DATA_BUFFER_SIZE ? CMD_BUFFER_DATA_BUFFER_SIZE : UploadDataSize);
-
-			UpdateBufferObject(BufferIndex, UpdateSize, (((char *)pUploadData) + UploadDataOffset), (void *)UploadDataOffset);
-
-			UploadDataOffset += UpdateSize;
-			UploadDataSize -= UpdateSize;
-		}
+		mem_copy(Cmd.m_pUploadData, pUploadData, UploadDataSize);
 	}
-}
-
-void CGraphics_Threaded::UpdateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, void *pOffset)
-{
-	CCommandBuffer::SCommand_UpdateBufferObject Cmd;
-	Cmd.m_BufferIndex = BufferIndex;
-	Cmd.m_DataSize = UploadDataSize;
-	Cmd.m_pOffset = pOffset;
-
-	Cmd.m_pUploadData = AllocCommandBufferData(UploadDataSize);
-	if(Cmd.m_pUploadData == NULL)
-		return;
-
-	// check if we have enough free memory in the commandbuffer
-	if(!m_pCommandBuffer->AddCommand(Cmd))
-	{
-		// kick command buffer and try again
-		KickCommandBuffer();
-
-		Cmd.m_pUploadData = m_pCommandBuffer->AllocData(UploadDataSize);
-		if(Cmd.m_pUploadData == 0x0)
-		{
-			dbg_msg("graphics", "failed to allocate data for upload data");
-			return;
-		}
-
-		if(!m_pCommandBuffer->AddCommand(Cmd))
-		{
-			dbg_msg("graphics", "failed to allocate memory for update buffer object command");
-			return;
-		}
-	}
-
-	mem_copy(Cmd.m_pUploadData, pUploadData, UploadDataSize);
 }
 
 void CGraphics_Threaded::CopyBufferObject(int WriteBufferIndex, int ReadBufferIndex, size_t WriteOffset, size_t ReadOffset, size_t CopyDataSize)
