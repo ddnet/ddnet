@@ -15,6 +15,7 @@
 #include <game/generated/protocol.h>
 
 #include <game/client/gameclient.h>
+#include <game/client/animstate.h>
 
 #include <game/client/components/console.h>
 #include <game/client/components/scoreboard.h>
@@ -816,9 +817,9 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 
 void CChat::OnPrepareLines()
 {
-	float x = 5.0f;
+	float x = 8.0f;
 	float y = 300.0f - 28.0f;
-	float FontSize = 6.0f;
+	float FontSize = FONT_SIZE;
 
 	bool ForceRecreate = m_pClient->m_pScoreboard->Active() != m_PrevScoreBoardShowed;
 	bool ShowLargeArea = m_Show || g_Config.m_ClShowChat == 2;
@@ -848,13 +849,22 @@ void CChat::OnPrepareLines()
 
 		char aName[64] = "";
 
-		if(g_Config.m_ClShowIDs && m_aLines[r].m_ClientID >= 0 && m_aLines[r].m_aName[0] != '\0')
+		if(m_aLines[r].m_ClientID >= 0 && m_aLines[r].m_aName[0] != '\0')
 		{
-			if(m_aLines[r].m_ClientID >= 10)
-				str_format(aName, sizeof(aName), "%d: ", m_aLines[r].m_ClientID);
-			else
-				str_format(aName, sizeof(aName), " %d: ", m_aLines[r].m_ClientID);
+			m_aLines[r].m_AuthorRenderInfo = m_pClient->m_aClients[m_aLines[r].m_ClientID].m_RenderInfo;
+			m_aLines[r].m_AuthorRenderInfo.m_Size = 8;
+			m_aLines[r].m_NeedRenderTee = true;
+
+			if(g_Config.m_ClShowIDs)
+			{
+				if(m_aLines[r].m_ClientID >= 10)
+					str_format(aName, sizeof(aName), "%d: ", m_aLines[r].m_ClientID);
+				else
+					str_format(aName, sizeof(aName), " %d: ", m_aLines[r].m_ClientID);
+			}
 		}
+		else
+			m_aLines[r].m_NeedRenderTee = false;
 
 		str_append(aName, m_aLines[r].m_aName, sizeof(aName));
 
@@ -876,7 +886,7 @@ void CChat::OnPrepareLines()
 			if(m_aLines[r].m_TimesRepeated > 0)
 				TextRender()->TextEx(&Cursor, aCount, -1);
 			TextRender()->TextEx(&Cursor, m_aLines[r].m_aText, -1);
-			m_aLines[r].m_YOffset[OffsetType] = Cursor.m_Y + Cursor.m_FontSize;
+			m_aLines[r].m_YOffset[OffsetType] = Cursor.m_Y + Cursor.m_FontSize + MESSAGE_PADDING;
 		}
 		y -= m_aLines[r].m_YOffset[OffsetType];
 
@@ -890,6 +900,12 @@ void CChat::OnPrepareLines()
 		// reset the cursor
 		TextRender()->SetCursor(&Cursor, Begin, y, FontSize, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = LineWidth;
+
+		char aNameHack[64] = "";
+		str_append(aNameHack, aName, sizeof(aNameHack));
+		str_append(aNameHack, "♥ : ", sizeof(aNameHack));
+
+		Cursor.m_NewLineOffsetX = TextRender()->TextWidth(Cursor.m_pFont, Cursor.m_FontSize, aNameHack, str_length(aNameHack), LineWidth);
 
 		if(g_Config.m_ClMessageFriend)
 		{
@@ -1069,6 +1085,37 @@ void CChat::OnRender()
 	int64 Now = time();
 	float HeightLimit = m_pClient->m_pScoreboard->Active() ? 230.0f : m_PrevShowChat ? 50.0f : 200.0f;
 	int OffsetType = m_pClient->m_pScoreboard->Active() ? 1 : 0;
+
+	ColorRGBA BackgroundColor(0, 0, 0, 0.2f);
+	float LineWidth = m_pClient->m_pScoreboard->Active() ? 90.0f : 200.0f;
+	float BackgroundY = 300 - 28;
+
+	for(int i = 0; i < MAX_LINES; i++)
+	{
+		int r = ((m_CurrentLine - i) + MAX_LINES) % MAX_LINES;
+		if(Now > m_aLines[r].m_Time + 16 * time_freq() && !m_PrevShowChat)
+			break;
+
+		float Blend = Now > m_aLines[r].m_Time + 14 * time_freq() && !m_PrevShowChat ? 1.0f - (Now - m_aLines[r].m_Time - 14 * time_freq()) / (2.0f * time_freq()) : 1.0f;
+
+		if(BackgroundY < HeightLimit)
+			break;
+
+		if(Blend <= 0.0f)
+			break;
+
+		BackgroundY -= m_aLines[r].m_YOffset[OffsetType];
+	}
+
+	if(Now <= m_aLines[m_CurrentLine % MAX_LINES].m_Time + 16 * time_freq() || m_PrevShowChat)
+	{
+		Graphics()->TextureClear();
+		Graphics()->QuadsBegin();
+		Graphics()->SetColor(0, 0, 0, 0.13f);
+		RenderTools()->DrawRoundRect(5.0f, BackgroundY - MESSAGE_PADDING, LineWidth + 8, 300 - 28 - BackgroundY + MESSAGE_PADDING, 4);
+		Graphics()->QuadsEnd();
+	}
+
 	for(int i = 0; i < MAX_LINES; i++)
 	{
 		int r = ((m_CurrentLine - i) + MAX_LINES) % MAX_LINES;
@@ -1085,6 +1132,9 @@ void CChat::OnRender()
 
 		if(m_aLines[r].m_TextContainerIndex != -1)
 		{
+			if(m_aLines[r].m_NeedRenderTee)
+				RenderTools()->RenderTee(CAnimState::GetIdle(), &m_aLines[r].m_AuthorRenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), vec2(11, y + FONT_SIZE / 2), Blend);
+
 			STextRenderColor TextOutline(0.f, 0.f, 0.f, 0.3f * Blend);
 			STextRenderColor Text(1.f, 1.f, 1.f, Blend);
 			TextRender()->RenderTextContainer(m_aLines[r].m_TextContainerIndex, &Text, &TextOutline, 0, y - m_aLines[r].m_TextYOffset);

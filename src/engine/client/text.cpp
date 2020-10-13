@@ -11,11 +11,11 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-// TODO: Refactor: clean this up
+	// TODO: Refactor: clean this up
 enum
 {
-	MAX_CHARACTERS = 64,
-};
+		MAX_CHARACTERS = 64,
+	};
 
 #include <map>
 #include <vector>
@@ -167,6 +167,9 @@ struct STextContainer
 	float m_StartY;
 	float m_LineWidth;
 	float m_UnscaledFontSize;
+
+	float m_Height;
+	float m_Width;
 
 	int m_RenderFlags;
 
@@ -1134,6 +1137,9 @@ public:
 		int OldRenderFlags = m_RenderFlags;
 		if(pCursor->m_LineWidth <= 0)
 			SetRenderFlags(OldRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
+		TextContainer.m_Width = 0;
+		TextContainer.m_Height = Size;
+
 		TextContainer.m_RenderFlags = m_RenderFlags;
 		SetRenderFlags(OldRenderFlags);
 
@@ -1287,6 +1293,7 @@ public:
 
 			const char *pTmp = pCurrent;
 			int NextCharacter = str_utf8_decode(&pTmp);
+
 			while(pCurrent < pBatchEnd)
 			{
 				TextContainer.m_CharCount += pTmp - pCurrent;
@@ -1299,7 +1306,7 @@ public:
 					LastCharGlyphIndex = 0;
 					++CharacterCounter;
 
-					DrawX = pCursor->m_StartX;
+					DrawX = pCursor->m_StartX + +pCursor->m_NewLineOffsetX;
 					DrawY += Size;
 					if((RenderFlags & TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) == 0)
 					{
@@ -1400,12 +1407,15 @@ public:
 						DrawX += Advance * Size + CharKerning;
 					pCursor->m_GlyphCount++;
 					++CharacterCounter;
+
+					if(LineCount <= 1 && !NewLine)
+						TextContainer.m_Width += CharWidth;
 				}
 			}
 
 			if(NewLine)
 			{
-				DrawX = pCursor->m_StartX;
+				DrawX = pCursor->m_StartX + pCursor->m_NewLineOffsetX;
 				DrawY += Size;
 				if((RenderFlags & TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) == 0)
 				{
@@ -1414,6 +1424,7 @@ public:
 				}
 				GotNewLine = 1;
 				++LineCount;
+				TextContainer.m_Height += Size;
 			}
 		}
 

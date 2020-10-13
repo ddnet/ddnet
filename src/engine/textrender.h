@@ -46,6 +46,7 @@ public:
 	float m_StartX;
 	float m_StartY;
 	float m_LineWidth;
+	float m_NewLineOffsetX;
 	float m_X, m_Y;
 	float m_MaxCharacterHeight;
 

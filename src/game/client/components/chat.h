@@ -13,6 +13,8 @@ class CChat : public CComponent
 	enum
 	{
 		MAX_LINES = 25,
+		MESSAGE_PADDING = 2,
+		FONT_SIZE = 6
 	};
 
 	struct CLine
@@ -28,6 +30,8 @@ class CChat : public CComponent
 		bool m_Highlighted;
 
 		int m_TextContainerIndex;
+		CTeeRenderInfo m_AuthorRenderInfo;
+		bool m_NeedRenderTee;
 		float m_TextYOffset;
 
 		int m_TimesRepeated;
