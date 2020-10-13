@@ -387,7 +387,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 				CMapItemLayerTilemap Item;
 				Item.m_Version = 3;
 
-				Item.m_Layer.m_Version = 1; // was previously uninitialized, do not rely on it being 1
+				Item.m_Layer.m_Version = 0; // was previously uninitialized, do not rely on it being 0
 				Item.m_Layer.m_Flags = pLayer->m_Flags;
 				Item.m_Layer.m_Type = pLayer->m_Type;
 
@@ -475,7 +475,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 				{
 					CMapItemLayerQuads Item;
 					Item.m_Version = 2;
-					Item.m_Layer.m_Version = 1; // was previously uninitialized, do not rely on it being 1
+					Item.m_Layer.m_Version = 0; // was previously uninitialized, do not rely on it being 0
 					Item.m_Layer.m_Flags = pLayer->m_Flags;
 					Item.m_Layer.m_Type = pLayer->m_Type;
 					Item.m_Image = pLayer->m_Image;
@@ -504,7 +504,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 				{
 					CMapItemLayerSounds Item;
 					Item.m_Version = CMapItemLayerSounds::CURRENT_VERSION;
-					Item.m_Layer.m_Version = 1; // was previously uninitialized, do not rely on it being 1
+					Item.m_Layer.m_Version = 0; // was previously uninitialized, do not rely on it being 0
 					Item.m_Layer.m_Flags = pLayer->m_Flags;
 					Item.m_Layer.m_Type = pLayer->m_Type;
 					Item.m_Sound = pLayer->m_Sound;
