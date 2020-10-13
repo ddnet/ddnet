@@ -79,6 +79,7 @@ public:
 	vec2 m_Positions[NUM_POS];
 	int m_CurrentPosition;
 	vec2 m_AnimationStartPos;
+	bool m_ChangedPosition;
 	float m_MoveTime;
 
 	bool m_IsInit;
