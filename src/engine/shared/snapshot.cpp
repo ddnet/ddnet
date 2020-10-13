@@ -248,20 +248,21 @@ int CSnapshotDelta::CreateDelta(CSnapshot *pFrom, CSnapshot *pTo, void *pDstData
 		pCurItem = pTo->GetItem(i); // O(1) .. O(n)
 		PastIndex = aPastIndices[i];
 
+		const bool StaticSize = (unsigned)pCurItem->Type() < sizeof(m_aItemSizes) / sizeof(m_aItemSizes[0]) && m_aItemSizes[pCurItem->Type()];
 		if(PastIndex != -1)
 		{
 			int *pItemDataDst = pData + 3;
 
 			pPastItem = pFrom->GetItem(PastIndex);
 
-			if(m_aItemSizes[pCurItem->Type()])
+			if(StaticSize)
 				pItemDataDst = pData + 2;
 
 			if(DiffItem(pPastItem->Data(), pCurItem->Data(), pItemDataDst, ItemSize / 4))
 			{
 				*pData++ = pCurItem->Type();
 				*pData++ = pCurItem->ID();
-				if(!m_aItemSizes[pCurItem->Type()])
+				if(!StaticSize)
 					*pData++ = ItemSize / 4;
 				pData += ItemSize / 4;
 				pDelta->m_NumUpdateItems++;
@@ -271,7 +272,7 @@ int CSnapshotDelta::CreateDelta(CSnapshot *pFrom, CSnapshot *pTo, void *pDstData
 		{
 			*pData++ = pCurItem->Type();
 			*pData++ = pCurItem->ID();
-			if(!m_aItemSizes[pCurItem->Type()])
+			if(!StaticSize)
 				*pData++ = ItemSize / 4;
 
 			mem_copy(pData, pCurItem->Data(), ItemSize);
