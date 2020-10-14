@@ -258,8 +258,10 @@ public:
 
 	CServer();
 
-	int TrySetClientName(int ClientID, const char *pName);
+	bool IsClientNameAvailable(int ClientID, const char *pNameRequest);
+	bool SetClientNameImpl(int ClientID, const char *pNameRequest, bool Set);
 
+	virtual bool WouldClientNameChange(int ClientID, const char *pNameRequest);
 	virtual void SetClientName(int ClientID, const char *pName);
 	virtual void SetClientClan(int ClientID, char const *pClan);
 	virtual void SetClientCountry(int ClientID, int Country);
