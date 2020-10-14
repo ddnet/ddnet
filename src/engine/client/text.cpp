@@ -774,6 +774,12 @@ public:
 		pCursor->m_MaxCharacterHeight = 0;
 	}
 
+	virtual void MoveCursor(CTextCursor *pCursor, float x, float y)
+	{
+		pCursor->m_X += x;
+		pCursor->m_Y += y;
+	}
+
 	virtual void Text(void *pFontSetV, float x, float y, float Size, const char *pText, float LineWidth)
 	{
 		CTextCursor Cursor;

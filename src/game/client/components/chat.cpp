@@ -739,7 +739,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 
 			if(Team == 2) // whisper send
 			{
-				str_format(pCurrentLine->m_aName, sizeof(pCurrentLine->m_aName), "→ %s", m_pClient->m_aClients[ClientID].m_aName);
+				str_format(pCurrentLine->m_aName, sizeof(pCurrentLine->m_aName), "→ %s: ", m_pClient->m_aClients[ClientID].m_aName);
 				pCurrentLine->m_NameColor = TEAM_BLUE;
 				pCurrentLine->m_Highlighted = false;
 				pCurrentLine->m_Team = 0;
@@ -747,16 +747,16 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 			}
 			else if(Team == 3) // whisper recv
 			{
-				str_format(pCurrentLine->m_aName, sizeof(pCurrentLine->m_aName), "← %s", m_pClient->m_aClients[ClientID].m_aName);
+				str_format(pCurrentLine->m_aName, sizeof(pCurrentLine->m_aName), "← %s: ", m_pClient->m_aClients[ClientID].m_aName);
 				pCurrentLine->m_NameColor = TEAM_RED;
 				pCurrentLine->m_Highlighted = true;
 				pCurrentLine->m_Team = 0;
 				Highlighted = true;
 			}
 			else
-				str_copy(pCurrentLine->m_aName, m_pClient->m_aClients[ClientID].m_aName, sizeof(pCurrentLine->m_aName));
+				str_format(pCurrentLine->m_aName, sizeof(pCurrentLine->m_aName), "%s: ", m_pClient->m_aClients[ClientID].m_aName);
 
-			str_format(pCurrentLine->m_aText, sizeof(pCurrentLine->m_aText), ": %s", pLine);
+			str_format(pCurrentLine->m_aText, sizeof(pCurrentLine->m_aText), "%s", pLine);
 			pCurrentLine->m_Friend = m_pClient->m_aClients[ClientID].m_Friend;
 		}
 
@@ -816,7 +816,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 	}
 }
 
-void CChat::RefindSkin()
+void CChat::RefindSkins()
 {
 	if(!g_Config.m_ClChatTees)
 		return;
@@ -832,7 +832,7 @@ void CChat::RefindSkin()
 		if(m_aLines[r].m_ClientID >= 0 && m_aLines[r].m_aName[0] != '\0')
 		{
 			m_aLines[r].m_AuthorRenderInfo = m_pClient->m_aClients[m_aLines[r].m_ClientID].m_RenderInfo;
-			m_aLines[r].m_AuthorRenderInfo.m_Size = 8;
+			m_aLines[r].m_AuthorRenderInfo.m_Size = 8.0f;
 			m_aLines[r].m_NeedRenderTee = true;
 		}
 	}
@@ -853,13 +853,13 @@ void CChat::OnPrepareLines()
 	m_PrevChatMargin = g_Config.m_ClChatMargin;
 
 	int64 Now = time();
-	float LineWidth = m_pClient->m_pScoreboard->Active() ? 90.0f : 200.0f;
+	float LineWidth = m_pClient->m_pScoreboard->Active() ? 90.0f : 192.0f;
 	float HeightLimit = m_pClient->m_pScoreboard->Active() ? 230.0f : m_PrevShowChat ? 50.0f : 200.0f;
 	float Begin = x;
 	CTextCursor Cursor;
 	int OffsetType = m_pClient->m_pScoreboard->Active() ? 1 : 0;
 
-	RefindSkin();
+	RefindSkins();
 
 	for(int i = 0; i < MAX_LINES; i++)
 	{
@@ -878,9 +878,8 @@ void CChat::OnPrepareLines()
 			TextRender()->DeleteTextContainer(m_aLines[r].m_TextContainerIndex);
 
 		m_aLines[r].m_TextContainerIndex = -1;
-		m_aLines[r].m_NeedRenderTee = false;
 
-		char aName[64] = "";
+		char aName[64 + 12] = "";
 
 		if(m_aLines[r].m_ClientID >= 0 && m_aLines[r].m_aName[0] != '\0')
 		{
@@ -938,23 +937,34 @@ void CChat::OnPrepareLines()
 		TextRender()->SetCursor(&Cursor, Begin, y, FontSize, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = LineWidth;
 
-		// Refactor pls
+		/*
 		if(g_Config.m_ClChatTees)
 		{
-			char aNameHack[64] = "";
+			char aNameHack[64 + 12] = "";
 			str_append(aNameHack, aName, sizeof(aNameHack));
 			str_append(aNameHack, "♥ : ", sizeof(aNameHack));
 			Cursor.m_NewLineOffsetX = TextRender()->TextWidth(Cursor.m_pFont, Cursor.m_FontSize, aNameHack, str_length(aNameHack), LineWidth);
 		}
 		else
 			Cursor.m_NewLineOffsetX = TextRender()->TextWidth(Cursor.m_pFont, Cursor.m_FontSize, aName, str_length(aName), LineWidth);
+		*/
 
-		ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendColor));
-		TextRender()->TextColor(rgb.WithAlpha(m_aLines[r].m_Friend && g_Config.m_ClMessageFriend ? 1.f : 0.f)); //Less ugly hack to align messages
-		if(m_aLines[r].m_TextContainerIndex == -1)
-			m_aLines[r].m_TextContainerIndex = TextRender()->CreateTextContainer(&Cursor, "♥ ");
-		else
-			TextRender()->AppendTextContainer(&Cursor, m_aLines[r].m_TextContainerIndex, "♥ ");
+		if (m_aLines[r].m_ClientID >= 0 && m_aLines[r].m_aName[0] != '\0')
+			TextRender()->MoveCursor(&Cursor, 8.f, 0.f);
+
+		if(m_aLines[r].m_Friend && g_Config.m_ClMessageFriend)
+		{
+			CTextCursor AppendCursor = Cursor;
+			AppendCursor.m_StartX = 1.1f;
+			AppendCursor.m_X = 1.1f;
+
+			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendColor));
+			TextRender()->TextColor(rgb.WithAlpha(1.f));
+			if(m_aLines[r].m_TextContainerIndex == -1)
+				m_aLines[r].m_TextContainerIndex = TextRender()->CreateTextContainer(&AppendCursor, "♥");
+			else
+				TextRender()->AppendTextContainer(&AppendCursor, m_aLines[r].m_TextContainerIndex, "♥");
+		}
 
 		// render name
 		if(m_aLines[r].m_ClientID == -1) // system
