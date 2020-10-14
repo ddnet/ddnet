@@ -1631,13 +1631,19 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			g_Config.m_ClShowChat ^= 1;
 		}
 
+		Left.HSplitTop(20.0f, &Button, &Left);
+		if(DoButton_CheckBox(&g_Config.m_ClChatOld, Localize("Use old chat style"), g_Config.m_ClChatOld, &Button))
+		{
+			g_Config.m_ClChatOld ^= 1;
+		}
+
 		Right.HSplitTop(20.0f, &Button, &Right);
 		if(DoButton_CheckBox(&g_Config.m_ClChatTeamColors, Localize("Show names in chat in team colors"), g_Config.m_ClChatTeamColors, &Button))
 		{
 			g_Config.m_ClChatTeamColors ^= 1;
 		}
 
-		Left.HSplitTop(20.0f, &Button, &Left);
+		Right.HSplitTop(20.0f, &Button, &Right);
 		if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Show kill messages"), g_Config.m_ClShowKillMessages, &Button))
 		{
 			g_Config.m_ClShowKillMessages ^= 1;
