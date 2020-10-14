@@ -882,14 +882,14 @@ int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType
 	char aFilename[256];
 	str_format(aFilename, sizeof(aFilename), "%s/%s", pSelf->m_pClient->m_pGhost->GetGhostDir(), pName);
 
-	CGhostHeader Header;
-	if(!pSelf->m_pClient->m_pGhost->GhostLoader()->GetGhostInfo(aFilename, &Header, pMap, pSelf->Client()->GetMapCrc()))
+	CGhostInfo Info;
+	if(!pSelf->m_pClient->m_pGhost->GhostLoader()->GetGhostInfo(aFilename, &Info, pMap, pSelf->Client()->GetCurrentMapSha256(), pSelf->Client()->GetCurrentMapCrc()))
 		return 0;
 
 	CGhostItem Item;
 	str_copy(Item.m_aFilename, aFilename, sizeof(Item.m_aFilename));
-	str_copy(Item.m_aPlayer, Header.m_aOwner, sizeof(Item.m_aPlayer));
-	Item.m_Time = Header.GetTime();
+	str_copy(Item.m_aPlayer, Info.m_aOwner, sizeof(Item.m_aPlayer));
+	Item.m_Time = Info.m_Time;
 	if(Item.m_Time > 0)
 		pSelf->m_lGhosts.add(Item);
 	return 0;

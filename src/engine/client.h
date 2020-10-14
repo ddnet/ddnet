@@ -6,6 +6,7 @@
 
 #include "graphics.h"
 #include "message.h"
+#include <base/hash.h>
 #include <engine/friends.h>
 
 struct SWarning;
@@ -193,7 +194,8 @@ public:
 
 	virtual const char *GetCurrentMap() = 0;
 	virtual const char *GetCurrentMapPath() = 0;
-	virtual unsigned GetMapCrc() = 0;
+	virtual SHA256_DIGEST GetCurrentMapSha256() = 0;
+	virtual unsigned GetCurrentMapCrc() = 0;
 
 	virtual int GetCurrentRaceTime() = 0;
 
