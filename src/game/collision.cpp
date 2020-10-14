@@ -1027,9 +1027,9 @@ int CCollision::GetIndex(vec2 PrevPos, vec2 Pos)
 	int Nx = 0;
 	int Ny = 0;
 
-	for(float f = 0; f < Distance; f++)
+	for(int i = 0, id = (int)Distance; i <= id; i++)
 	{
-		a = f / Distance;
+		a = (float)i / Distance;
 		Tmp = mix(PrevPos, Pos, a);
 		Nx = clamp((int)Tmp.x / 32, 0, m_Width - 1);
 		Ny = clamp((int)Tmp.y / 32, 0, m_Height - 1);
@@ -1193,9 +1193,9 @@ int CCollision::IntersectNoLaser(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2
 	float d = distance(Pos0, Pos1);
 	vec2 Last = Pos0;
 
-	for(float f = 0; f < d; f++)
+	for(int i = 0, id = (int)d; i <= id; i++)
 	{
-		float a = f / d;
+		float a = (int)i / d;
 		vec2 Pos = mix(Pos0, Pos1, a);
 		int Nx = clamp(round_to_int(Pos.x) / 32, 0, m_Width - 1);
 		int Ny = clamp(round_to_int(Pos.y) / 32, 0, m_Height - 1);
@@ -1224,9 +1224,9 @@ int CCollision::IntersectNoLaserNW(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, ve
 	float d = distance(Pos0, Pos1);
 	vec2 Last = Pos0;
 
-	for(float f = 0; f < d; f++)
+	for(int i = 0, id = (int)d; i <= id; i++)
 	{
-		float a = f / d;
+		float a = (float)i / d;
 		vec2 Pos = mix(Pos0, Pos1, a);
 		if(IsNoLaser(round_to_int(Pos.x), round_to_int(Pos.y)) || IsFNoLaser(round_to_int(Pos.x), round_to_int(Pos.y)))
 		{
@@ -1253,9 +1253,9 @@ int CCollision::IntersectAir(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pO
 	float d = distance(Pos0, Pos1);
 	vec2 Last = Pos0;
 
-	for(float f = 0; f < d; f++)
+	for(int i = 0, id = (int)d; i <= id; i++)
 	{
-		float a = f / d;
+		float a = (float)i / d;
 		vec2 Pos = mix(Pos0, Pos1, a);
 		if(IsSolid(round_to_int(Pos.x), round_to_int(Pos.y)) || (!GetTile(round_to_int(Pos.x), round_to_int(Pos.y)) && !GetFTile(round_to_int(Pos.x), round_to_int(Pos.y))))
 		{

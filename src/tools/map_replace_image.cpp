@@ -63,6 +63,11 @@ int LoadPNG(CImageInfo *pImg, const char *pFilename)
 		pImg->m_Format = CImageInfo::FORMAT_RGB;
 	else if(Png.color_type == PNG_TRUECOLOR_ALPHA)
 		pImg->m_Format = CImageInfo::FORMAT_RGBA;
+	else
+	{
+		free(pBuffer);
+		return 0;
+	}
 	pImg->m_pData = pBuffer;
 	return 1;
 }

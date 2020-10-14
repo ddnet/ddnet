@@ -545,7 +545,7 @@ bool CVideo::OpenAudio()
 	av_opt_set_sample_fmt(m_AudioStream.pSwrCtx, "out_sample_fmt", c->sample_fmt, 0);
 
 	/* initialize the resampling context */
-	if((Ret = swr_init(m_AudioStream.pSwrCtx)) < 0)
+	if(swr_init(m_AudioStream.pSwrCtx) < 0)
 	{
 		dbg_msg("video_recorder", "Failed to initialize the resampling context");
 		return false;

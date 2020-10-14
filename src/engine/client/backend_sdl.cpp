@@ -326,7 +326,9 @@ void *CCommandProcessorFragment_OpenGL::Resize(int Width, int Height, int NewWid
 
 	int Bpp = TexFormatToImageColorChannelCount(Format);
 
-	pTmpData = (unsigned char *)malloc((size_t)NewWidth * NewHeight * Bpp);
+	// All calls to Resize() ensure width & height are > 0, Bpp is always > 0,
+	// thus no allocation size 0 possible.
+	pTmpData = (unsigned char *)malloc((size_t)NewWidth * NewHeight * Bpp); // NOLINT(clang-analyzer-optin.portability.UnixAPI)
 
 	ResizeImage((uint8_t *)pData, Width, Height, (uint8_t *)pTmpData, NewWidth, NewHeight, Bpp);
 
@@ -3768,7 +3770,6 @@ void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 
 	int MajorV = pCommand->m_pCapabilities->m_ContextMajor;
 	int MinorV = pCommand->m_pCapabilities->m_ContextMinor;
-	int PatchV = pCommand->m_pCapabilities->m_ContextPatch;
 
 	*pCommand->m_pInitError = 0;
 
@@ -3784,6 +3785,7 @@ void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 		}
 		else if(MinorV == pCommand->m_RequestedMinor)
 		{
+			int PatchV = pCommand->m_pCapabilities->m_ContextPatch;
 			if(PatchV < pCommand->m_RequestedPatch)
 			{
 				*pCommand->m_pInitError = -2;
@@ -3795,7 +3797,6 @@ void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 	{
 		MajorV = pCommand->m_RequestedMajor;
 		MinorV = pCommand->m_RequestedMinor;
-		PatchV = pCommand->m_RequestedPatch;
 
 		pCommand->m_pCapabilities->m_2DArrayTexturesAsExtension = false;
 		pCommand->m_pCapabilities->m_NPOTTextures = true;

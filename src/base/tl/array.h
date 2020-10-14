@@ -3,6 +3,7 @@
 #ifndef BASE_TL_ARRAY_H
 #define BASE_TL_ARRAY_H
 
+#include "base/math.h"
 #include "base/tl/allocator.h"
 #include "base/tl/range.h"
 
@@ -318,7 +319,7 @@ protected:
 
 	void alloc(int new_len)
 	{
-		list_size = new_len;
+		list_size = maximum(1, new_len);
 		T *new_list = ALLOCATOR::alloc_array(list_size);
 
 		int end = num_elements < list_size ? num_elements : list_size;

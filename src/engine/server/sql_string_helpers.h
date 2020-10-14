@@ -8,7 +8,7 @@ void FuzzyString(char *pString, int size);
 // written number of added bytes
 int EscapeLike(char *pDst, const char *pSrc, int DstSize);
 
-void AgoTimeToString(int agoTime, char *pAgoString);
+void AgoTimeToString(int agoTime, char *pAgoString, int Size);
 
 } // namespace sqlstr
 
