@@ -118,6 +118,7 @@ public:
 	virtual void OnConsoleInit();
 	virtual void OnStateChange(int NewState, int OldState);
 	virtual void OnRender();
+	virtual void RefindSkin();
 	virtual void OnPrepareLines();
 	virtual void OnRelease();
 	virtual void OnMessage(int MsgType, void *pRawMsg);

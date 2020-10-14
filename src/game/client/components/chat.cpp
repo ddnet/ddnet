@@ -816,9 +816,31 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 	}
 }
 
+void CChat::RefindSkin()
+{
+	if(!g_Config.m_ClChatTees)
+		return;
+
+	for(int i = 0; i < MAX_LINES; i++)
+	{
+		int r = ((m_CurrentLine - i) + MAX_LINES) % MAX_LINES;
+		if(m_aLines[r].m_TextContainerIndex == -1)
+			continue;
+
+		m_aLines[r].m_NeedRenderTee = false;
+
+		if(m_aLines[r].m_ClientID >= 0 && m_aLines[r].m_aName[0] != '\0')
+		{
+			m_aLines[r].m_AuthorRenderInfo = m_pClient->m_aClients[m_aLines[r].m_ClientID].m_RenderInfo;
+			m_aLines[r].m_AuthorRenderInfo.m_Size = 8;
+			m_aLines[r].m_NeedRenderTee = true;
+		}
+	}
+}
+
 void CChat::OnPrepareLines()
 {
-	float x = 8.0f;
+	float x = g_Config.m_ClChatTees ? 8.0f : 5.0f;
 	float y = 300.0f - 28.0f;
 	float FontSize = FONT_SIZE;
 
@@ -836,6 +858,9 @@ void CChat::OnPrepareLines()
 	float Begin = x;
 	CTextCursor Cursor;
 	int OffsetType = m_pClient->m_pScoreboard->Active() ? 1 : 0;
+
+	RefindSkin();
+
 	for(int i = 0; i < MAX_LINES; i++)
 	{
 		int r = ((m_CurrentLine - i) + MAX_LINES) % MAX_LINES;
@@ -859,13 +884,6 @@ void CChat::OnPrepareLines()
 
 		if(m_aLines[r].m_ClientID >= 0 && m_aLines[r].m_aName[0] != '\0')
 		{
-			if(g_Config.m_ClChatTees)
-			{
-				m_aLines[r].m_AuthorRenderInfo = m_pClient->m_aClients[m_aLines[r].m_ClientID].m_RenderInfo;
-				m_aLines[r].m_AuthorRenderInfo.m_Size = 8;
-				m_aLines[r].m_NeedRenderTee = true;
-			}
-
 			if(g_Config.m_ClShowIDs)
 			{
 				if(m_aLines[r].m_ClientID >= 10)
@@ -905,8 +923,13 @@ void CChat::OnPrepareLines()
 		y -= m_aLines[r].m_YOffset[OffsetType];
 
 		// cut off if msgs waste too much space
-		if(y < HeightLimit)
-			break;
+		if (y < HeightLimit)
+		{
+			if(ForceRecalculateMargin)
+				continue;
+			else
+				break;
+		}
 
 		// the position the text was created
 		m_aLines[r].m_TextYOffset = y;

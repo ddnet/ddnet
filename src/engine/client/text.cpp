@@ -1285,8 +1285,8 @@ public:
 					if(WordGlyphs <= 3) // if we can't place 3 chars of the word on this line, take the next
 						Wlen = 0;
 				}
-				else if(LineCount > 1 && Compare.m_X - pCursor->m_StartX - pCursor->m_NewLineOffsetX > pCursor->m_LineWidth
-					|| LineCount <= 1 && Compare.m_X - pCursor->m_StartX > pCursor->m_LineWidth)
+				else if(LineCount > 1 && Compare.m_X - pCursor->m_StartX - pCursor->m_NewLineOffsetX > pCursor->m_LineWidth ||
+						LineCount <= 1 && Compare.m_X - pCursor->m_StartX > pCursor->m_LineWidth)
 				{
 					NewLine = 1;
 					Wlen = 0;
@@ -1460,7 +1460,6 @@ public:
 	virtual STextContainerSize GetTextContainerSize(int TextContainerIndex)
 	{
 		STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
-		
 		return STextContainerSize(TextContainer.m_Width, TextContainer.m_Height);
 	}
 
