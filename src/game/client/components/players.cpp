@@ -146,7 +146,6 @@ void CPlayers::RenderHook(
 
 			s_HookChainRenderInfo[HookChainCount].m_Scale = 1;
 			s_HookChainRenderInfo[HookChainCount].m_Rotation = GetAngle(Dir) + pi;
-			++HookChainCount;
 		}
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteHookChain);
 		Graphics()->RenderQuadContainerAsSpriteMultiple(m_WeaponEmoteQuadContainerIndex, QuadOffset, HookChainCount, s_HookChainRenderInfo);
