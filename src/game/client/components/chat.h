@@ -40,6 +40,7 @@ class CChat : public CComponent
 
 	bool m_PrevScoreBoardShowed;
 	bool m_PrevShowChat;
+	bool m_PrevChatMargin;
 
 	CLine m_aLines[MAX_LINES];
 	int m_CurrentLine;

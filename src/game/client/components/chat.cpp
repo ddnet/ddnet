@@ -73,6 +73,7 @@ void CChat::Reset()
 	}
 	m_PrevScoreBoardShowed = false;
 	m_PrevShowChat = false;
+	m_PrevChatMargin = g_Config.m_ClChatMargin;
 
 	m_ReverseTAB = false;
 	m_Show = false;
@@ -823,9 +824,11 @@ void CChat::OnPrepareLines()
 
 	bool ForceRecreate = m_pClient->m_pScoreboard->Active() != m_PrevScoreBoardShowed;
 	bool ShowLargeArea = m_Show || g_Config.m_ClShowChat == 2;
+	bool ForceRecalculateMargin = g_Config.m_ClChatMargin != m_PrevChatMargin;
 	ForceRecreate |= ShowLargeArea != m_PrevShowChat;
 	m_PrevScoreBoardShowed = m_pClient->m_pScoreboard->Active();
 	m_PrevShowChat = ShowLargeArea;
+	m_PrevChatMargin = g_Config.m_ClChatMargin;
 
 	int64 Now = time();
 	float LineWidth = m_pClient->m_pScoreboard->Active() ? 90.0f : 200.0f;
@@ -836,11 +839,15 @@ void CChat::OnPrepareLines()
 	for(int i = 0; i < MAX_LINES; i++)
 	{
 		int r = ((m_CurrentLine - i) + MAX_LINES) % MAX_LINES;
-		if(Now > m_aLines[r].m_Time + 16 * time_freq() && !m_PrevShowChat)
-			break;
 
-		if(m_aLines[r].m_TextContainerIndex != -1 && !ForceRecreate)
-			continue;
+		if(!ForceRecalculateMargin)
+		{
+			if(Now > m_aLines[r].m_Time + 16 * time_freq() && !m_PrevShowChat)
+				break;
+
+			if(m_aLines[r].m_TextContainerIndex != -1 && !ForceRecreate)
+				continue;
+		}
 
 		if(m_aLines[r].m_TextContainerIndex != -1)
 			TextRender()->DeleteTextContainer(m_aLines[r].m_TextContainerIndex);
@@ -852,7 +859,7 @@ void CChat::OnPrepareLines()
 
 		if(m_aLines[r].m_ClientID >= 0 && m_aLines[r].m_aName[0] != '\0')
 		{
-			if(g_Config.m_ClMessageTees)
+			if(g_Config.m_ClChatTees)
 			{
 				m_aLines[r].m_AuthorRenderInfo = m_pClient->m_aClients[m_aLines[r].m_ClientID].m_RenderInfo;
 				m_aLines[r].m_AuthorRenderInfo.m_Size = 8;
@@ -877,8 +884,13 @@ void CChat::OnPrepareLines()
 			str_format(aCount, sizeof(aCount), " [%d]", m_aLines[r].m_TimesRepeated + 1);
 
 		// get the y offset (calculate it if we haven't done that yet)
-		if(m_aLines[r].m_YOffset[OffsetType] < 0.0f)
+		if(m_aLines[r].m_YOffset[OffsetType] < 0.0f || ForceRecalculateMargin)
 		{
+			float Padding = MESSAGE_PADDING;
+
+			if(!g_Config.m_ClChatMargin)
+				Padding = 0.0f;
+
 			TextRender()->SetCursor(&Cursor, Begin, 0.0f, FontSize, 0);
 			Cursor.m_LineWidth = LineWidth;
 
@@ -888,7 +900,7 @@ void CChat::OnPrepareLines()
 			if(m_aLines[r].m_TimesRepeated > 0)
 				TextRender()->TextEx(&Cursor, aCount, -1);
 			TextRender()->TextEx(&Cursor, m_aLines[r].m_aText, -1);
-			m_aLines[r].m_YOffset[OffsetType] = Cursor.m_Y + Cursor.m_FontSize + MESSAGE_PADDING;
+			m_aLines[r].m_YOffset[OffsetType] = Cursor.m_Y + Cursor.m_FontSize + Padding;
 		}
 		y -= m_aLines[r].m_YOffset[OffsetType];
 
@@ -904,7 +916,7 @@ void CChat::OnPrepareLines()
 		Cursor.m_LineWidth = LineWidth;
 
 		// Refactor pls
-		if(g_Config.m_ClMessageTees)
+		if(g_Config.m_ClChatTees)
 		{
 			char aNameHack[64] = "";
 			str_append(aNameHack, aName, sizeof(aNameHack));
@@ -1095,29 +1107,39 @@ void CChat::OnRender()
 	float bgY = y;
 
 	// Draw backgrounds for messages in one batch
-	for(int i = 0; i < MAX_LINES; i++)
+	if(g_Config.m_ClChatBackgrounds)
 	{
-		int r = ((m_CurrentLine - i) + MAX_LINES) % MAX_LINES;
-		if(Now > m_aLines[r].m_Time + 16 * time_freq() && !m_PrevShowChat)
-			break;
-
-		bgY -= m_aLines[r].m_YOffset[OffsetType];
-
-		if(bgY < HeightLimit)
-			break;
-
-		float Blend = Now > m_aLines[r].m_Time + 14 * time_freq() && !m_PrevShowChat ? 1.0f - (Now - m_aLines[r].m_Time - 14 * time_freq()) / (2.0f * time_freq()) : 1.0f;
-
-		if(m_aLines[r].m_TextContainerIndex != -1)
+		Graphics()->TextureClear();
+		Graphics()->QuadsBegin();
+		float Padding = MESSAGE_PADDING;
+		float Rounding = 4.0f;
+		if(!g_Config.m_ClChatMargin)
 		{
-			STextContainerSize LineSize = TextRender()->GetTextContainerSize(m_aLines[r].m_TextContainerIndex);
-
-			Graphics()->TextureClear();
-			Graphics()->QuadsBegin();
-			Graphics()->SetColor(0, 0, 0, 0.12f * Blend);
-			RenderTools()->DrawRoundRect(4.5f, bgY - MESSAGE_PADDING / 2.0f, LineSize.m_Width, LineSize.m_Height + MESSAGE_PADDING, 4);
-			Graphics()->QuadsEnd();
+			Padding = 0.0f;
+			Rounding = 3.0f;
 		}
+
+		for(int i = 0; i < MAX_LINES; i++)
+		{
+			int r = ((m_CurrentLine - i) + MAX_LINES) % MAX_LINES;
+			if(Now > m_aLines[r].m_Time + 16 * time_freq() && !m_PrevShowChat)
+				break;
+
+			bgY -= m_aLines[r].m_YOffset[OffsetType];
+
+			if(bgY < HeightLimit)
+				break;
+
+			float Blend = Now > m_aLines[r].m_Time + 14 * time_freq() && !m_PrevShowChat ? 1.0f - (Now - m_aLines[r].m_Time - 14 * time_freq()) / (2.0f * time_freq()) : 1.0f;
+
+			if(m_aLines[r].m_TextContainerIndex != -1)
+			{
+				STextContainerSize LineSize = TextRender()->GetTextContainerSize(m_aLines[r].m_TextContainerIndex);
+				Graphics()->SetColor(0, 0, 0, 0.12f * Blend);
+				RenderTools()->DrawRoundRect(4.5f, bgY - Padding / 2.0f, LineSize.m_Width, LineSize.m_Height + Padding, Rounding);
+			}
+		}
+		Graphics()->QuadsEnd();
 	}
 
 	// Draw tees and text for messages
