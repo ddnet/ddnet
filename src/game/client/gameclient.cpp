@@ -2884,6 +2884,7 @@ void CGameClient::RefindSkins()
 			const CSkin *pSkin = m_pSkins->Get(m_pSkins->Find(m_aClients[i].m_aSkinName));
 			m_aClients[i].m_SkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 			m_aClients[i].m_SkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+			m_aClients[i].UpdateRenderInfo();
 		}
 	}
 	m_pGhost->RefindSkin();
