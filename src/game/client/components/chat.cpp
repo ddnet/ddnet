@@ -73,7 +73,7 @@ void CChat::Reset()
 	}
 	m_PrevScoreBoardShowed = false;
 	m_PrevShowChat = false;
-	m_PrevChatMargin = g_Config.m_ClChatMargin;
+	m_PrevChatOld = g_Config.m_ClChatOld;
 
 	m_ReverseTAB = false;
 	m_Show = false;
@@ -818,7 +818,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 
 void CChat::RefindSkins()
 {
-	if(!g_Config.m_ClChatTees)
+	if(g_Config.m_ClChatOld) 
 		return;
 
 	for(int i = 0; i < MAX_LINES; i++)
@@ -840,32 +840,37 @@ void CChat::RefindSkins()
 
 void CChat::OnPrepareLines()
 {
-	float x = g_Config.m_ClChatTees ? 8.0f : 5.0f;
+	float x = !g_Config.m_ClChatOld ? 8.0f : 5.0f;
 	float y = 300.0f - 28.0f;
 	float FontSize = FONT_SIZE;
 
 	bool ForceRecreate = m_pClient->m_pScoreboard->Active() != m_PrevScoreBoardShowed;
+	bool ForceRecreateAll = g_Config.m_ClChatOld != m_PrevChatOld;
 	bool ShowLargeArea = m_Show || g_Config.m_ClShowChat == 2;
-	bool ForceRecalculateMargin = g_Config.m_ClChatMargin != m_PrevChatMargin;
+
 	ForceRecreate |= ShowLargeArea != m_PrevShowChat;
+
 	m_PrevScoreBoardShowed = m_pClient->m_pScoreboard->Active();
 	m_PrevShowChat = ShowLargeArea;
-	m_PrevChatMargin = g_Config.m_ClChatMargin;
+	m_PrevChatOld = g_Config.m_ClChatOld;
 
 	int64 Now = time();
-	float LineWidth = m_pClient->m_pScoreboard->Active() ? 90.0f : 192.0f;
+	float LineWidth = m_pClient->m_pScoreboard->Active() ? 90.0f : 175.0f;
+	
+	// Line Width for old chat
+	if(g_Config.m_ClChatOld)
+		LineWidth = m_pClient->m_pScoreboard->Active() ? 90.0f : 200.0f;
+
 	float HeightLimit = m_pClient->m_pScoreboard->Active() ? 230.0f : m_PrevShowChat ? 50.0f : 200.0f;
 	float Begin = x;
 	CTextCursor Cursor;
 	int OffsetType = m_pClient->m_pScoreboard->Active() ? 1 : 0;
 
-	RefindSkins();
-
 	for(int i = 0; i < MAX_LINES; i++)
 	{
 		int r = ((m_CurrentLine - i) + MAX_LINES) % MAX_LINES;
 
-		if(!ForceRecalculateMargin)
+		if(!ForceRecreateAll)
 		{
 			if(Now > m_aLines[r].m_Time + 16 * time_freq() && !m_PrevShowChat)
 				break;
@@ -883,6 +888,13 @@ void CChat::OnPrepareLines()
 
 		if(m_aLines[r].m_ClientID >= 0 && m_aLines[r].m_aName[0] != '\0')
 		{
+			if(!g_Config.m_ClChatOld)
+			{
+				m_aLines[r].m_AuthorRenderInfo = m_pClient->m_aClients[m_aLines[r].m_ClientID].m_RenderInfo;
+				m_aLines[r].m_AuthorRenderInfo.m_Size = 8.0f;
+				m_aLines[r].m_NeedRenderTee = true;
+			}
+
 			if(g_Config.m_ClShowIDs)
 			{
 				if(m_aLines[r].m_ClientID >= 10)
@@ -890,6 +902,10 @@ void CChat::OnPrepareLines()
 				else
 					str_format(aName, sizeof(aName), " %d: ", m_aLines[r].m_ClientID);
 			}
+		}
+		else
+		{
+			m_aLines[r].m_NeedRenderTee = false;
 		}
 
 		str_append(aName, m_aLines[r].m_aName, sizeof(aName));
@@ -901,30 +917,30 @@ void CChat::OnPrepareLines()
 			str_format(aCount, sizeof(aCount), " [%d]", m_aLines[r].m_TimesRepeated + 1);
 
 		// get the y offset (calculate it if we haven't done that yet)
-		if(m_aLines[r].m_YOffset[OffsetType] < 0.0f || ForceRecalculateMargin)
+		if(m_aLines[r].m_YOffset[OffsetType] < 0.0f || ForceRecreateAll)
 		{
-			float Padding = MESSAGE_PADDING;
-
-			if(!g_Config.m_ClChatMargin)
-				Padding = 0.0f;
+			float Padding = !g_Config.m_ClChatOld ? MESSAGE_PADDING : 0.0f;
 
 			TextRender()->SetCursor(&Cursor, Begin, 0.0f, FontSize, 0);
 			Cursor.m_LineWidth = LineWidth;
 
-			if(g_Config.m_ClMessageFriend)
+			if(g_Config.m_ClChatOld && g_Config.m_ClMessageFriend)
 				TextRender()->TextEx(&Cursor, "♥ ", -1);
+
 			TextRender()->TextEx(&Cursor, aName, -1);
 			if(m_aLines[r].m_TimesRepeated > 0)
 				TextRender()->TextEx(&Cursor, aCount, -1);
 			TextRender()->TextEx(&Cursor, m_aLines[r].m_aText, -1);
+
 			m_aLines[r].m_YOffset[OffsetType] = Cursor.m_Y + Cursor.m_FontSize + Padding;
 		}
+
 		y -= m_aLines[r].m_YOffset[OffsetType];
 
 		// cut off if msgs waste too much space
 		if (y < HeightLimit)
 		{
-			if(ForceRecalculateMargin)
+			if(ForceRecreateAll)
 				continue;
 			else
 				break;
@@ -937,33 +953,36 @@ void CChat::OnPrepareLines()
 		TextRender()->SetCursor(&Cursor, Begin, y, FontSize, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = LineWidth;
 
-		/*
-		if(g_Config.m_ClChatTees)
-		{
-			char aNameHack[64 + 12] = "";
-			str_append(aNameHack, aName, sizeof(aNameHack));
-			str_append(aNameHack, "♥ : ", sizeof(aNameHack));
-			Cursor.m_NewLineOffsetX = TextRender()->TextWidth(Cursor.m_pFont, Cursor.m_FontSize, aNameHack, str_length(aNameHack), LineWidth);
-		}
-		else
-			Cursor.m_NewLineOffsetX = TextRender()->TextWidth(Cursor.m_pFont, Cursor.m_FontSize, aName, str_length(aName), LineWidth);
-		*/
-
+		// Message is from valid player
 		if (m_aLines[r].m_ClientID >= 0 && m_aLines[r].m_aName[0] != '\0')
-			TextRender()->MoveCursor(&Cursor, 8.f, 0.f);
-
-		if(m_aLines[r].m_Friend && g_Config.m_ClMessageFriend)
 		{
-			CTextCursor AppendCursor = Cursor;
-			AppendCursor.m_StartX = 1.1f;
-			AppendCursor.m_X = 1.1f;
+			if(!g_Config.m_ClChatOld)
+			{
+				TextRender()->MoveCursor(&Cursor, 8.f, 0.f);
 
-			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendColor));
-			TextRender()->TextColor(rgb.WithAlpha(1.f));
-			if(m_aLines[r].m_TextContainerIndex == -1)
-				m_aLines[r].m_TextContainerIndex = TextRender()->CreateTextContainer(&AppendCursor, "♥");
-			else
-				TextRender()->AppendTextContainer(&AppendCursor, m_aLines[r].m_TextContainerIndex, "♥");
+				if(m_aLines[r].m_Friend && g_Config.m_ClMessageFriend)
+				{
+					CTextCursor AppendCursor = Cursor;
+					AppendCursor.m_StartX = 1.1f;
+					AppendCursor.m_X = 1.1f;
+
+					ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendColor));
+					TextRender()->TextColor(rgb.WithAlpha(1.f));
+					if(m_aLines[r].m_TextContainerIndex == -1)
+						m_aLines[r].m_TextContainerIndex = TextRender()->CreateTextContainer(&AppendCursor, "♥");
+					else
+						TextRender()->AppendTextContainer(&AppendCursor, m_aLines[r].m_TextContainerIndex, "♥");
+				}
+			}
+			else //Old Chat Style
+			{
+				ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendColor));
+				TextRender()->TextColor(rgb.WithAlpha(g_Config.m_ClMessageFriend && m_aLines[r].m_Friend ? 1.f : 0.f));
+				if(m_aLines[r].m_TextContainerIndex == -1)
+					m_aLines[r].m_TextContainerIndex = TextRender()->CreateTextContainer(&Cursor, "♥ ");
+				else
+					TextRender()->AppendTextContainer(&Cursor, m_aLines[r].m_TextContainerIndex, "♥ ");
+			}
 		}
 
 		// render name
@@ -1009,6 +1028,9 @@ void CChat::OnPrepareLines()
 			else
 				TextRender()->AppendTextContainer(&Cursor, m_aLines[r].m_TextContainerIndex, aCount);
 		}
+
+		if(!g_Config.m_ClChatOld)
+			Cursor.m_StartX = Cursor.m_X;
 
 		// render line
 		ColorRGBA Color;
@@ -1137,20 +1159,16 @@ void CChat::OnRender()
 
 	ColorRGBA BackgroundColor(0, 0, 0, 0.2f);
 	float LineWidth = m_pClient->m_pScoreboard->Active() ? 90.0f : 200.0f;
-	float bgY = y;
 
 	// Draw backgrounds for messages in one batch
-	if(g_Config.m_ClChatBackgrounds)
+	if(!g_Config.m_ClChatOld)
 	{
 		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
+
 		float Padding = MESSAGE_PADDING;
 		float Rounding = 4.0f;
-		if(!g_Config.m_ClChatMargin)
-		{
-			Padding = 0.0f;
-			Rounding = 3.0f;
-		}
+		float bgY = y;
 
 		for(int i = 0; i < MAX_LINES; i++)
 		{
@@ -1192,7 +1210,7 @@ void CChat::OnRender()
 
 		if(m_aLines[r].m_TextContainerIndex != -1)
 		{
-			if(m_aLines[r].m_NeedRenderTee)
+			if(!g_Config.m_ClChatOld && m_aLines[r].m_NeedRenderTee)
 				RenderTools()->RenderTee(CAnimState::GetIdle(), &m_aLines[r].m_AuthorRenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), vec2(11, y + FONT_SIZE / 2), Blend);
 
 			STextRenderColor TextOutline(0.f, 0.f, 0.f, 0.3f * Blend);
