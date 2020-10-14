@@ -1204,7 +1204,6 @@ public:
 		float DrawX = 0.0f, DrawY = 0.0f;
 		int LineCount = 0;
 		float CursorX, CursorY;
-		float MaxDrawX = -5.0f;
 
 		float Size = pCursor->m_FontSize;
 
@@ -1311,9 +1310,6 @@ public:
 					LastCharGlyphIndex = 0;
 					++CharacterCounter;
 
-					if(DrawX > MaxDrawX)
-						MaxDrawX = DrawX;
-
 					DrawX = pCursor->m_StartX + +pCursor->m_NewLineOffsetX;
 					DrawY += Size;
 					if((RenderFlags & TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) == 0)
@@ -1416,13 +1412,13 @@ public:
 					pCursor->m_GlyphCount++;
 					++CharacterCounter;
 				}
+
+				if(DrawX > TextContainer.m_Width)
+					TextContainer.m_Width = DrawX;
 			}
 
 			if(NewLine)
 			{
-				if(DrawX > MaxDrawX)
-					MaxDrawX = DrawX;
-
 				DrawX = pCursor->m_StartX + pCursor->m_NewLineOffsetX;
 				DrawY += Size;
 				if((RenderFlags & TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) == 0)
@@ -1453,17 +1449,12 @@ public:
 			}
 		}
 
-		if(MaxDrawX < 0)
-			MaxDrawX = DrawX;
-
 		// even if no text is drawn the cursor position will be adjusted
 		pCursor->m_X = DrawX;
 		pCursor->m_LineCount = LineCount;
 
 		if(GotNewLine)
 			pCursor->m_Y = DrawY;
-
-		TextContainer.m_Width = MaxDrawX;
 	}
 
 	virtual STextContainerSize GetTextContainerSize(int TextContainerIndex)
