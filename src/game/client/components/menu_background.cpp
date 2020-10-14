@@ -339,11 +339,18 @@ bool CMenuBackground::Render()
 		XVal = pow(XVal, 7.0f);
 
 		m_Camera.m_Center = TargetPos + Dir * (XVal * Distance);
+		if(m_CurrentPosition < 0)
+		{
+			m_AnimationStartPos = m_Camera.m_Center;
+			m_MoveTime = 0.0f;
+		}
 
 		m_ChangedPosition = false;
 	}
 
 	CMapLayers::OnRender();
+
+	m_CurrentPosition = -1;
 
 	return true;
 }
