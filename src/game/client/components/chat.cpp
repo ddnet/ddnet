@@ -907,15 +907,12 @@ void CChat::OnPrepareLines()
 
 		Cursor.m_NewLineOffsetX = TextRender()->TextWidth(Cursor.m_pFont, Cursor.m_FontSize, aNameHack, str_length(aNameHack), LineWidth);
 
-		if(g_Config.m_ClMessageFriend)
-		{
-			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendColor));
-			TextRender()->TextColor(rgb.WithAlpha(m_aLines[r].m_Friend ? 1.f : 0.f)); //Less ugly hack to align messages
-			if(m_aLines[r].m_TextContainerIndex == -1)
-				m_aLines[r].m_TextContainerIndex = TextRender()->CreateTextContainer(&Cursor, "♥ ");
-			else
-				TextRender()->AppendTextContainer(&Cursor, m_aLines[r].m_TextContainerIndex, "♥ ");
-		}
+		ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendColor));
+		TextRender()->TextColor(rgb.WithAlpha(m_aLines[r].m_Friend && g_Config.m_ClMessageFriend ? 1.f : 0.f)); //Less ugly hack to align messages
+		if(m_aLines[r].m_TextContainerIndex == -1)
+			m_aLines[r].m_TextContainerIndex = TextRender()->CreateTextContainer(&Cursor, "♥ ");
+		else
+			TextRender()->AppendTextContainer(&Cursor, m_aLines[r].m_TextContainerIndex, "♥ ");
 
 		// render name
 		if(m_aLines[r].m_ClientID == -1) // system
