@@ -846,14 +846,18 @@ void CChat::OnPrepareLines()
 			TextRender()->DeleteTextContainer(m_aLines[r].m_TextContainerIndex);
 
 		m_aLines[r].m_TextContainerIndex = -1;
+		m_aLines[r].m_NeedRenderTee = false;
 
 		char aName[64] = "";
 
 		if(m_aLines[r].m_ClientID >= 0 && m_aLines[r].m_aName[0] != '\0')
 		{
-			m_aLines[r].m_AuthorRenderInfo = m_pClient->m_aClients[m_aLines[r].m_ClientID].m_RenderInfo;
-			m_aLines[r].m_AuthorRenderInfo.m_Size = 8;
-			m_aLines[r].m_NeedRenderTee = true;
+			if(g_Config.m_ClMessageTees)
+			{
+				m_aLines[r].m_AuthorRenderInfo = m_pClient->m_aClients[m_aLines[r].m_ClientID].m_RenderInfo;
+				m_aLines[r].m_AuthorRenderInfo.m_Size = 8;
+				m_aLines[r].m_NeedRenderTee = true;
+			}
 
 			if(g_Config.m_ClShowIDs)
 			{
@@ -863,8 +867,6 @@ void CChat::OnPrepareLines()
 					str_format(aName, sizeof(aName), " %d: ", m_aLines[r].m_ClientID);
 			}
 		}
-		else
-			m_aLines[r].m_NeedRenderTee = false;
 
 		str_append(aName, m_aLines[r].m_aName, sizeof(aName));
 
@@ -901,11 +903,16 @@ void CChat::OnPrepareLines()
 		TextRender()->SetCursor(&Cursor, Begin, y, FontSize, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = LineWidth;
 
-		char aNameHack[64] = "";
-		str_append(aNameHack, aName, sizeof(aNameHack));
-		str_append(aNameHack, "♥ : ", sizeof(aNameHack));
-
-		Cursor.m_NewLineOffsetX = TextRender()->TextWidth(Cursor.m_pFont, Cursor.m_FontSize, aNameHack, str_length(aNameHack), LineWidth);
+		// Refactor pls
+		if(g_Config.m_ClMessageTees)
+		{
+			char aNameHack[64] = "";
+			str_append(aNameHack, aName, sizeof(aNameHack));
+			str_append(aNameHack, "♥ : ", sizeof(aNameHack));
+			Cursor.m_NewLineOffsetX = TextRender()->TextWidth(Cursor.m_pFont, Cursor.m_FontSize, aNameHack, str_length(aNameHack), LineWidth);
+		}
+		else
+			Cursor.m_NewLineOffsetX = TextRender()->TextWidth(Cursor.m_pFont, Cursor.m_FontSize, aName, str_length(aName), LineWidth);
 
 		ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendColor));
 		TextRender()->TextColor(rgb.WithAlpha(m_aLines[r].m_Friend && g_Config.m_ClMessageFriend ? 1.f : 0.f)); //Less ugly hack to align messages

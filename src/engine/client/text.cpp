@@ -1310,7 +1310,7 @@ public:
 					LastCharGlyphIndex = 0;
 					++CharacterCounter;
 
-					DrawX = pCursor->m_StartX + +pCursor->m_NewLineOffsetX;
+					DrawX = pCursor->m_StartX + pCursor->m_NewLineOffsetX;
 					DrawY += Size;
 					if((RenderFlags & TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) == 0)
 					{
