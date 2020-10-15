@@ -621,6 +621,8 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 	m_aTextures[pCommand->m_Slot].m_Height = Height;
 	m_aTextures[pCommand->m_Slot].m_RescaleCount = RescaleCount;
 
+	bool Supports2DTextureArrays = m_Has3DTextures || m_Has2DArrayTextures;
+
 	int Oglformat = TexFormatToOpenGLFormat(pCommand->m_Format);
 	int StoreOglformat = TexFormatToOpenGLFormat(pCommand->m_StoreFormat);
 
@@ -635,7 +637,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 		}
 	}
 
-	if((pCommand->m_Flags & CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0)
+	if((pCommand->m_Flags & CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0 || !Supports2DTextureArrays)
 	{
 		glGenTextures(1, &m_aTextures[pCommand->m_Slot].m_Tex);
 		glBindTexture(GL_TEXTURE_2D, m_aTextures[pCommand->m_Slot].m_Tex);
@@ -643,7 +645,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 
 	if(pCommand->m_Flags & CCommandBuffer::TEXFLAG_NOMIPMAPS || !m_HasMipMaps)
 	{
-		if((pCommand->m_Flags & CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0)
+		if((pCommand->m_Flags & CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0 || !Supports2DTextureArrays)
 		{
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -652,7 +654,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 	}
 	else
 	{
-		if((pCommand->m_Flags & CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0)
+		if((pCommand->m_Flags & CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0 || !Supports2DTextureArrays)
 		{
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -662,116 +664,119 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 			glTexImage2D(GL_TEXTURE_2D, 0, StoreOglformat, Width, Height, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
 		}
 
-		int Flag2DArrayTexture = (CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE | CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER);
-		int Flag3DTexture = (CCommandBuffer::TEXFLAG_TO_3D_TEXTURE | CCommandBuffer::TEXFLAG_TO_3D_TEXTURE_SINGLE_LAYER);
-		if((pCommand->m_Flags & (Flag2DArrayTexture | Flag3DTexture)) != 0)
+		if(Supports2DTextureArrays)
 		{
-			bool Is3DTexture = (pCommand->m_Flags & Flag3DTexture) != 0;
-
-			glGenTextures(1, &m_aTextures[pCommand->m_Slot].m_Tex2DArray);
-
-			GLenum Target = GL_TEXTURE_3D;
-
-			if(Is3DTexture)
+			int Flag2DArrayTexture = (CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE | CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER);
+			int Flag3DTexture = (CCommandBuffer::TEXFLAG_TO_3D_TEXTURE | CCommandBuffer::TEXFLAG_TO_3D_TEXTURE_SINGLE_LAYER);
+			if((pCommand->m_Flags & (Flag2DArrayTexture | Flag3DTexture)) != 0)
 			{
-				Target = GL_TEXTURE_3D;
-			}
-			else
-			{
-				Target = m_2DArrayTarget;
-			}
+				bool Is3DTexture = (pCommand->m_Flags & Flag3DTexture) != 0;
 
-			glBindTexture(Target, m_aTextures[pCommand->m_Slot].m_Tex2DArray);
+				glGenTextures(1, &m_aTextures[pCommand->m_Slot].m_Tex2DArray);
 
-			if(IsNewApi())
-			{
-				glGenSamplers(1, &m_aTextures[pCommand->m_Slot].m_Sampler2DArray);
-				glBindSampler(0, m_aTextures[pCommand->m_Slot].m_Sampler2DArray);
-			}
+				GLenum Target = GL_TEXTURE_3D;
 
-			glTexParameteri(Target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			if(Is3DTexture)
-			{
-				glTexParameteri(Target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				if(IsNewApi())
-					glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			}
-			else
-			{
-				glTexParameteri(Target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-				glTexParameteri(Target, GL_GENERATE_MIPMAP, GL_TRUE);
-				if(IsNewApi())
-					glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			}
-
-			glTexParameteri(Target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(Target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glTexParameteri(Target, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
-			if(m_OpenGLTextureLodBIAS != 0)
-				glTexParameterf(Target, GL_TEXTURE_LOD_BIAS, ((GLfloat)m_OpenGLTextureLodBIAS / 1000.0f));
-
-			if(IsNewApi())
-			{
-				glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-				glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-				glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
-				if(m_OpenGLTextureLodBIAS != 0)
-					glSamplerParameterf(m_aTextures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_LOD_BIAS, ((GLfloat)m_OpenGLTextureLodBIAS / 1000.0f));
-
-				glBindSampler(0, 0);
-			}
-
-			int ImageColorChannels = TexFormatToImageColorChannelCount(pCommand->m_Format);
-
-			uint8_t *p3DImageData = NULL;
-
-			bool IsSingleLayer = (pCommand->m_Flags & (CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER | CCommandBuffer::TEXFLAG_TO_3D_TEXTURE_SINGLE_LAYER)) != 0;
-
-			if(!IsSingleLayer)
-				p3DImageData = (uint8_t *)malloc((size_t)ImageColorChannels * Width * Height);
-			int Image3DWidth, Image3DHeight;
-
-			int ConvertWidth = Width;
-			int ConvertHeight = Height;
-
-			if(!IsSingleLayer)
-			{
-				if(ConvertWidth == 0 || (ConvertWidth % 16) != 0 || ConvertHeight == 0 || (ConvertHeight % 16) != 0)
+				if(Is3DTexture)
 				{
-					dbg_msg("gfx", "3D/2D array texture was resized");
-					int NewWidth = maximum<int>(HighestBit(ConvertWidth), 16);
-					int NewHeight = maximum<int>(HighestBit(ConvertHeight), 16);
-					uint8_t *pNewTexData = (uint8_t *)Resize(ConvertWidth, ConvertHeight, NewWidth, NewHeight, pCommand->m_Format, (const uint8_t *)pTexData);
-
-					ConvertWidth = NewWidth;
-					ConvertHeight = NewHeight;
-
-					free(pTexData);
-					pTexData = pNewTexData;
-				}
-			}
-
-			if(IsSingleLayer || (Texture2DTo3D(pTexData, ConvertWidth, ConvertHeight, ImageColorChannels, 16, 16, p3DImageData, Image3DWidth, Image3DHeight)))
-			{
-				if(IsSingleLayer)
-				{
-					glTexImage3D(Target, 0, StoreOglformat, ConvertWidth, ConvertHeight, 1, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
+					Target = GL_TEXTURE_3D;
 				}
 				else
 				{
-					glTexImage3D(Target, 0, StoreOglformat, Image3DWidth, Image3DHeight, 256, 0, Oglformat, GL_UNSIGNED_BYTE, p3DImageData);
+					Target = m_2DArrayTarget;
 				}
 
-				/*if(StoreOglformat == GL_R8)
-				{
-					//Bind the texture 2D.
-					GLint swizzleMask[] = {GL_ONE, GL_ONE, GL_ONE, GL_RED};
-					glTexParameteriv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
-				}*/
-			}
+				glBindTexture(Target, m_aTextures[pCommand->m_Slot].m_Tex2DArray);
 
-			if(!IsSingleLayer)
-				free(p3DImageData);
+				if(IsNewApi())
+				{
+					glGenSamplers(1, &m_aTextures[pCommand->m_Slot].m_Sampler2DArray);
+					glBindSampler(0, m_aTextures[pCommand->m_Slot].m_Sampler2DArray);
+				}
+
+				glTexParameteri(Target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				if(Is3DTexture)
+				{
+					glTexParameteri(Target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+					if(IsNewApi())
+						glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				}
+				else
+				{
+					glTexParameteri(Target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+					glTexParameteri(Target, GL_GENERATE_MIPMAP, GL_TRUE);
+					if(IsNewApi())
+						glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+				}
+
+				glTexParameteri(Target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTexParameteri(Target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				glTexParameteri(Target, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
+				if(m_OpenGLTextureLodBIAS != 0)
+					glTexParameterf(Target, GL_TEXTURE_LOD_BIAS, ((GLfloat)m_OpenGLTextureLodBIAS / 1000.0f));
+
+				if(IsNewApi())
+				{
+					glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+					glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+					glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
+					if(m_OpenGLTextureLodBIAS != 0)
+						glSamplerParameterf(m_aTextures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_LOD_BIAS, ((GLfloat)m_OpenGLTextureLodBIAS / 1000.0f));
+
+					glBindSampler(0, 0);
+				}
+
+				int ImageColorChannels = TexFormatToImageColorChannelCount(pCommand->m_Format);
+
+				uint8_t *p3DImageData = NULL;
+
+				bool IsSingleLayer = (pCommand->m_Flags & (CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER | CCommandBuffer::TEXFLAG_TO_3D_TEXTURE_SINGLE_LAYER)) != 0;
+
+				if(!IsSingleLayer)
+					p3DImageData = (uint8_t *)malloc((size_t)ImageColorChannels * Width * Height);
+				int Image3DWidth, Image3DHeight;
+
+				int ConvertWidth = Width;
+				int ConvertHeight = Height;
+
+				if(!IsSingleLayer)
+				{
+					if(ConvertWidth == 0 || (ConvertWidth % 16) != 0 || ConvertHeight == 0 || (ConvertHeight % 16) != 0)
+					{
+						dbg_msg("gfx", "3D/2D array texture was resized");
+						int NewWidth = maximum<int>(HighestBit(ConvertWidth), 16);
+						int NewHeight = maximum<int>(HighestBit(ConvertHeight), 16);
+						uint8_t *pNewTexData = (uint8_t *)Resize(ConvertWidth, ConvertHeight, NewWidth, NewHeight, pCommand->m_Format, (const uint8_t *)pTexData);
+
+						ConvertWidth = NewWidth;
+						ConvertHeight = NewHeight;
+
+						free(pTexData);
+						pTexData = pNewTexData;
+					}
+				}
+
+				if(IsSingleLayer || (Texture2DTo3D(pTexData, ConvertWidth, ConvertHeight, ImageColorChannels, 16, 16, p3DImageData, Image3DWidth, Image3DHeight)))
+				{
+					if(IsSingleLayer)
+					{
+						glTexImage3D(Target, 0, StoreOglformat, ConvertWidth, ConvertHeight, 1, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
+					}
+					else
+					{
+						glTexImage3D(Target, 0, StoreOglformat, Image3DWidth, Image3DHeight, 256, 0, Oglformat, GL_UNSIGNED_BYTE, p3DImageData);
+					}
+
+					/*if(StoreOglformat == GL_R8)
+					{
+						//Bind the texture 2D.
+						GLint swizzleMask[] = {GL_ONE, GL_ONE, GL_ONE, GL_RED};
+						glTexParameteriv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
+					}*/
+				}
+
+				if(!IsSingleLayer)
+					free(p3DImageData);
+			}
 		}
 	}
 
@@ -3906,10 +3911,10 @@ void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 			pCommand->m_pCapabilities->m_QuadContainerBuffering = false;
 			pCommand->m_pCapabilities->m_ShaderSupport = false;
 
-			pCommand->m_pCapabilities->m_MipMapping = false;
+			pCommand->m_pCapabilities->m_MipMapping = GLEW_ARB_texture_non_power_of_two;
 			pCommand->m_pCapabilities->m_3DTextures = false;
 			pCommand->m_pCapabilities->m_2DArrayTextures = false;
-			pCommand->m_pCapabilities->m_NPOTTextures = false;
+			pCommand->m_pCapabilities->m_NPOTTextures = GLEW_ARB_texture_non_power_of_two;
 		}
 	}
 }
