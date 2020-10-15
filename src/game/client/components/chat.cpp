@@ -1076,7 +1076,7 @@ void CChat::OnRender()
 	float Width = 300.0f * Graphics()->ScreenAspect();
 	Graphics()->MapScreen(0.0f, 0.0f, Width, 300.0f);
 	float x = 5.0f;
-	float y = 300.0f - 20.0f;
+	float y = 300.0f - 16.0f;
 	if(m_Mode != MODE_NONE)
 	{
 		// render chat input
@@ -1149,7 +1149,7 @@ void CChat::OnRender()
 #endif
 		return;
 
-	y -= 8.0f;
+	y -= 5.0f;
 
 	OnPrepareLines();
 
