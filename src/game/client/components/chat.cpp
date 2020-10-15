@@ -1030,7 +1030,7 @@ void CChat::OnPrepareLines()
 		}
 
 		if(!g_Config.m_ClChatOld)
-			Cursor.m_StartX = Cursor.m_X;
+			Cursor.m_NewLineStartX = Cursor.m_X;
 
 		// render line
 		ColorRGBA Color;
@@ -1158,7 +1158,11 @@ void CChat::OnRender()
 	int OffsetType = m_pClient->m_pScoreboard->Active() ? 1 : 0;
 
 	ColorRGBA BackgroundColor(0, 0, 0, 0.2f);
-	float LineWidth = m_pClient->m_pScoreboard->Active() ? 90.0f : 200.0f;
+	float LineWidth = m_pClient->m_pScoreboard->Active() ? 90.0f : 175.0f;
+	
+	// Line Width for old chat
+	if(g_Config.m_ClChatOld)
+		LineWidth = m_pClient->m_pScoreboard->Active() ? 90.0f : 200.0f;
 
 	// Draw backgrounds for messages in one batch
 	if(!g_Config.m_ClChatOld)

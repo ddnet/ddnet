@@ -44,6 +44,7 @@ public:
 	int m_MaxLines;
 
 	float m_StartX;
+	float m_NewLineStartX;
 	float m_StartY;
 	float m_LineWidth;
 	float m_X, m_Y;

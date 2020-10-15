@@ -762,6 +762,7 @@ public:
 	{
 		mem_zero(pCursor, sizeof(*pCursor));
 		pCursor->m_FontSize = FontSize;
+		pCursor->m_NewLineStartX = x;
 		pCursor->m_StartX = x;
 		pCursor->m_StartY = y;
 		pCursor->m_X = x;
@@ -1291,7 +1292,8 @@ public:
 					if(WordGlyphs <= 3) // if we can't place 3 chars of the word on this line, take the next
 						Wlen = 0;
 				}
-				else if(Compare.m_X - pCursor->m_StartX > pCursor->m_LineWidth)
+				else if((LineCount <= 1 && Compare.m_X - pCursor->m_StartX > pCursor->m_LineWidth) ||
+					(LineCount > 1 && Compare.m_X - pCursor->m_NewLineStartX > pCursor->m_LineWidth))
 				{
 					NewLine = 1;
 					Wlen = 0;
@@ -1315,7 +1317,8 @@ public:
 					LastCharGlyphIndex = 0;
 					++CharacterCounter;
 
-					DrawX = pCursor->m_StartX;
+					//DrawX = pCursor->m_StartX;
+					DrawX = pCursor->m_NewLineStartX;
 					DrawY += Size;
 					if((RenderFlags & TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) == 0)
 					{
@@ -1424,7 +1427,8 @@ public:
 
 			if(NewLine)
 			{
-				DrawX = pCursor->m_StartX;
+				//DrawX = pCursor->m_StartX;
+				DrawX = pCursor->m_NewLineStartX;
 				DrawY += Size;
 				if((RenderFlags & TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) == 0)
 				{
