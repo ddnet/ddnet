@@ -216,8 +216,7 @@ void CNamePlates::OnRender()
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		const void *pInfoRaw = Client()->SnapFindItem(IClient::SNAP_CURRENT, NETOBJTYPE_PLAYERINFO, i);
-		const CNetObj_PlayerInfo *pInfo = (CNetObj_PlayerInfo *)pInfoRaw;
+		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paPlayerInfos[i];
 		if(!pInfo)
 		{
 			continue;
