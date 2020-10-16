@@ -1041,7 +1041,7 @@ public:
 
 					pCursor->m_MaxCharacterHeight = maximum(pCursor->m_MaxCharacterHeight, CharHeight + BearingY);
 
-					if(NextCharacter == 0 && (m_RenderFlags & TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE) != 0)
+					if(NextCharacter == 0 && (m_RenderFlags & TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE) != 0 && Character != ' ')
 						DrawX += BearingX + CharKerning + CharWidth;
 					else
 						DrawX += Advance * Size + CharKerning;
@@ -1394,7 +1394,7 @@ public:
 
 					pCursor->m_MaxCharacterHeight = maximum(pCursor->m_MaxCharacterHeight, CharHeight + BearingY);
 
-					if(NextCharacter == 0 && (RenderFlags & TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE) != 0)
+					if(NextCharacter == 0 && (RenderFlags & TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE) != 0 && Character != ' ')
 						DrawX += BearingX + CharKerning + CharWidth;
 					else
 						DrawX += Advance * Size + CharKerning;
@@ -1871,6 +1871,32 @@ public:
 			FontSize = MaxSize;
 
 		return FontSize;
+	}
+
+	virtual float GetGlyphOffsetX(int FontSize, char TextCharacter)
+	{
+		CFont *pFont = m_pDefaultFont;
+		FT_Set_Pixel_Sizes(pFont->m_FtFace, 0, FontSize);
+		const char *pTmp = &TextCharacter;
+		int NextCharacter = str_utf8_decode(&pTmp);
+
+		if(NextCharacter)
+		{
+			FT_Int32 FTFlags = 0;
+#if FREETYPE_MAJOR >= 2 && FREETYPE_MINOR >= 7 && (FREETYPE_MINOR > 7 || FREETYPE_PATCH >= 1)
+			FTFlags = FT_LOAD_BITMAP_METRICS_ONLY | FT_LOAD_NO_BITMAP;
+#else
+			FTFlags = FT_LOAD_RENDER | FT_LOAD_NO_BITMAP;
+#endif
+			if(FT_Load_Char(pFont->m_FtFace, NextCharacter, FTFlags))
+			{
+				dbg_msg("GetGlyphOffsetX", "error loading glyph %d", NextCharacter);
+				return -1;
+			}
+
+			return (float)(pFont->m_FtFace->glyph->metrics.horiBearingX >> 6);
+		}
+		return 0;
 	}
 
 	virtual int CalculateTextWidth(const char *pText, int TextLength, int FontWidth, int FontHeight)
