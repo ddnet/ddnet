@@ -382,8 +382,8 @@ MACRO_CONFIG_INT(ClDemoShowSpeed, cl_demo_show_speed, 0, 0, 1, CFGFLAG_SAVE | CF
 MACRO_CONFIG_INT(ClDemoKeyboardShortcuts, cl_demo_keyboard_shortcuts, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Enable keyboard shortcuts in demo player")
 
 // opengl
-MACRO_CONFIG_INT(GfxOpenGLMajor, gfx_opengl_major, 3, 1, 10, CFGFLAG_SAVE | CFGFLAG_CLIENT, "OpenGL major version")
-MACRO_CONFIG_INT(GfxOpenGLMinor, gfx_opengl_minor, 0, 0, 10, CFGFLAG_SAVE | CFGFLAG_CLIENT, "OpenGL minor version")
+MACRO_CONFIG_INT(GfxOpenGLMajor, gfx_opengl_major, 1, 1, 10, CFGFLAG_SAVE | CFGFLAG_CLIENT, "OpenGL major version")
+MACRO_CONFIG_INT(GfxOpenGLMinor, gfx_opengl_minor, 5, 0, 10, CFGFLAG_SAVE | CFGFLAG_CLIENT, "OpenGL minor version")
 MACRO_CONFIG_INT(GfxOpenGLPatch, gfx_opengl_patch, 0, 0, 10, CFGFLAG_SAVE | CFGFLAG_CLIENT, "OpenGL patch version")
 
 // float multiplied with 1000
