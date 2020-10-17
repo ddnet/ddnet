@@ -3718,7 +3718,7 @@ void CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 	// add sound
 	CEditorSound *pSound = new CEditorSound(pEditor);
 	pSound->m_SoundID = SoundId;
-	pSound->m_External = 1; // external by default
+	pSound->m_External = 0; // embedded by default
 	pSound->m_DataSize = (unsigned)DataSize;
 	pSound->m_pData = pData;
 	str_copy(pSound->m_aName, aBuf, sizeof(pSound->m_aName));
