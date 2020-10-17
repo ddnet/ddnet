@@ -337,18 +337,10 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 		CMapItemSound Item;
 		Item.m_Version = 1;
 
-		Item.m_External = pSound->m_External;
+		Item.m_External = 0;
 		Item.m_SoundName = df.AddData(str_length(pSound->m_aName) + 1, pSound->m_aName);
-		if(pSound->m_External)
-		{
-			Item.m_SoundDataSize = 0;
-			Item.m_SoundData = -1;
-		}
-		else
-		{
-			Item.m_SoundData = df.AddData(pSound->m_DataSize, pSound->m_pData);
-			Item.m_SoundDataSize = pSound->m_DataSize;
-		}
+		Item.m_SoundData = df.AddData(pSound->m_DataSize, pSound->m_pData);
+		Item.m_SoundDataSize = pSound->m_DataSize;
 
 		df.AddItem(MAPITEMTYPE_SOUND, i, sizeof(Item), &Item);
 	}
@@ -742,7 +734,6 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 
 				// copy base info
 				CEditorSound *pSound = new CEditorSound(m_pEditor);
-				pSound->m_External = pItem->m_External;
 
 				if(pItem->m_External)
 				{
