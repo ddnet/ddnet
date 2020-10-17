@@ -1106,8 +1106,8 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		CheckSettings = true;
 		if(IsNewOpenGL)
 		{
-			g_Config.m_GfxOpenGLMajor = 1;
-			g_Config.m_GfxOpenGLMinor = 5;
+			g_Config.m_GfxOpenGLMajor = 3;
+			g_Config.m_GfxOpenGLMinor = 0;
 			g_Config.m_GfxOpenGLPatch = 0;
 			IsNewOpenGL = false;
 		}
