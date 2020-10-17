@@ -321,10 +321,26 @@ void CPlayer::Snap(int SnappingClient)
 	if(!pClientInfo)
 		return;
 
-	const char *pSkinName =
-		m_Halloween ?
-			g_aHalloweenSkins[str_quickhash(Server()->ClientName(m_ClientID)) % (sizeof(g_aHalloweenSkins) / sizeof(g_aHalloweenSkins[0]))] :
-			m_TeeInfos.m_SkinName;
+	const char *pSkinName = m_TeeInfos.m_SkinName;
+
+	if(!m_Halloween)
+	{
+		bool Found = false;
+
+		for(const auto &HalloweenSkin : g_aHalloweenSkins)
+		{
+			if(str_comp(pSkinName, HalloweenSkin) == 0)
+			{
+				Found = true;
+				break;
+			}
+		}
+
+		if(!Found)
+		{
+			pSkinName = g_aHalloweenSkins[str_quickhash(Server()->ClientName(m_ClientID)) % (sizeof(g_aHalloweenSkins) / sizeof(g_aHalloweenSkins[0]))];
+		}
+	}
 
 	StrToInts(&pClientInfo->m_Name0, 4, Server()->ClientName(m_ClientID));
 	StrToInts(&pClientInfo->m_Clan0, 3, Server()->ClientClan(m_ClientID));
