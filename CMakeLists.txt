@@ -98,7 +98,11 @@ option(DOWNLOAD_GTEST "Download and compile GTest" ${AUTO_DEPENDENCIES_DEFAULT})
 option(STEAM "Build the Steam release version" OFF)
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
 option(DEV "Don't generate stuff necessary for packaging" OFF)
-set(VERSION ${PROJECT_VERSION} CACHE STRING "Specify version string")
+
+# Set version if not explicitly set
+if(NOT VERSION)
+  set(VERSION ${PROJECT_VERSION})
+endif()
 
 set(OpenGL_GL_PREFERENCE LEGACY)
 
@@ -117,9 +121,13 @@ endif()
 
 set(DBG $<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>)
 
-set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
-  src/game/version.h
-)
+if(CMAKE_VERSION VERSION_LESS 3.0)
+  configure_file(src/game/version.h vd.h)
+else()
+  set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+    src/game/version.h
+  )
+endif()
 
 set(SERVER_EXECUTABLE DDNet-Server CACHE STRING "Name of the built server executable")
 set(CLIENT_EXECUTABLE DDNet CACHE STRING "Name of the build client executable")
