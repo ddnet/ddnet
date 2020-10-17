@@ -489,29 +489,56 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	UI()->ClipEnable(pRect);
 	Textbox.x -= *Offset;
 
+	int StrLenDispl = str_length(pDisplayStr);
 	UI()->DoLabel(&Textbox, pDisplayStr, FontSize, -1);
 
 	TextRender()->TextColor(1, 1, 1, 1);
 
+	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+	float OnePixelWidth = ((ScreenX1 - ScreenX0) / Graphics()->ScreenWidth());
+
 	// render the cursor
 	if(UI()->LastActiveItem() == pID && !JustGotActive)
 	{
+		float OffsetGlyph = TextRender()->GetGlyphOffsetX(FontSize, '|');
+		CUIRect TmpTextBox = Textbox;
 		if(str_length(aInputing))
 		{
+			float OffsetGlyphThis = OffsetGlyph;
+			if(StrLenDispl == s_AtIndex + Input()->GetEditingCursor() && pDisplayStr[StrLenDispl - 1] != ' ')
+				OffsetGlyphThis = 0;
 			float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex + Input()->GetEditingCursor(), -1.0f);
-			Textbox = *pRect;
-			Textbox.VSplitLeft(2.0f, 0, &Textbox);
-			Textbox.x += (w - *Offset - TextRender()->TextWidth(0, FontSize, "|", -1, -1.0f) / 2);
+			Textbox.x += w + OffsetGlyphThis;
 
-			UI()->DoLabel(&Textbox, "|", FontSize, -1);
+			Graphics()->TextureClear();
+			Graphics()->QuadsBegin();
+			Graphics()->SetColor(0, 0, 0, 0.3f);
+			IGraphics::CQuadItem CursorTBack(Textbox.x - (OnePixelWidth * 2.0f) / 2.0f, Textbox.y, OnePixelWidth * 2 * 2.0f, Textbox.h);
+			Graphics()->QuadsDrawTL(&CursorTBack, 1);
+			Graphics()->SetColor(1, 1, 1, 1);
+			IGraphics::CQuadItem CursorT(Textbox.x, Textbox.y + OnePixelWidth * 1.5f, OnePixelWidth * 2.0f, Textbox.h - OnePixelWidth * 1.5f * 2);
+			Graphics()->QuadsDrawTL(&CursorT, 1);
+			Graphics()->QuadsEnd();
 		}
+		if(StrLenDispl == s_AtIndex && pDisplayStr[StrLenDispl - 1] != ' ')
+			OffsetGlyph = 0;
 		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex, -1.0f);
-		Textbox = *pRect;
-		Textbox.VSplitLeft(2.0f, 0, &Textbox);
-		Textbox.x += (w - *Offset - TextRender()->TextWidth(0, FontSize, "|", -1, -1.0f) / 2);
+		Textbox = TmpTextBox;
+		Textbox.x += w + OffsetGlyph;
 
-		if((2 * time_get() / time_freq()) % 2) // make it blink
-			UI()->DoLabel(&Textbox, "|", FontSize, -1);
+		if((2 * time_get() / time_freq()) % 2)
+		{
+			Graphics()->TextureClear();
+			Graphics()->QuadsBegin();
+			Graphics()->SetColor(0, 0, 0, 0.3f);
+			IGraphics::CQuadItem CursorTBack(Textbox.x - (OnePixelWidth * 2.0f) / 2.0f, Textbox.y, OnePixelWidth * 2 * 2.0f, Textbox.h);
+			Graphics()->QuadsDrawTL(&CursorTBack, 1);
+			Graphics()->SetColor(1, 1, 1, 1);
+			IGraphics::CQuadItem CursorT(Textbox.x, Textbox.y + OnePixelWidth * 1.5f, OnePixelWidth * 2.0f, Textbox.h - OnePixelWidth * 1.5f * 2);
+			Graphics()->QuadsDrawTL(&CursorT, 1);
+			Graphics()->QuadsEnd();
+		}
 
 		Input()->SetEditingPosition(Textbox.x, Textbox.y + FontSize);
 	}

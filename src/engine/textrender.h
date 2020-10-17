@@ -115,6 +115,8 @@ public:
 	virtual int TextLineCount(void *pFontSetV, float Size, const char *pText, float LineWidth) = 0;
 
 	virtual void OnWindowResize() = 0;
+
+	virtual float GetGlyphOffsetX(int FontSize, char TextCharacter) = 0;
 };
 
 class IEngineTextRender : public ITextRender
