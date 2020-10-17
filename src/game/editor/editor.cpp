@@ -4225,7 +4225,6 @@ void CEditor::RenderSounds(CUIRect ToolBox, CUIRect View)
 
 	// separator
 	ToolBox.HSplitTop(5.0f, &Slot, &ToolBox);
-	SoundCur += 5.0f;
 	IGraphics::CLineItem LineItem(Slot.x, Slot.y + Slot.h / 2, Slot.x + Slot.w, Slot.y + Slot.h / 2);
 	Graphics()->TextureClear();
 	Graphics()->LinesBegin();
