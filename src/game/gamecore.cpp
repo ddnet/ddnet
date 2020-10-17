@@ -471,30 +471,33 @@ void CCharacterCore::Move()
 	{
 		// check player collision
 		float Distance = distance(m_Pos, NewPos);
-		int End = Distance + 1;
-		vec2 LastPos = m_Pos;
-		for(int i = 0; i < End; i++)
+		if(Distance > 0)
 		{
-			float a = i / Distance;
-			vec2 Pos = mix(m_Pos, NewPos, a);
-			for(int p = 0; p < MAX_CLIENTS; p++)
+			int End = Distance + 1;
+			vec2 LastPos = m_Pos;
+			for(int i = 0; i < End; i++)
 			{
-				CCharacterCore *pCharCore = m_pWorld->m_apCharacters[p];
-				if(!pCharCore || pCharCore == this)
-					continue;
-				if((!(pCharCore->m_Super || m_Super) && (m_Solo || pCharCore->m_Solo || !pCharCore->m_Collision || pCharCore->m_NoCollision || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, p)))))
-					continue;
-				float D = distance(Pos, pCharCore->m_Pos);
-				if(D < 28.0f && D >= 0.0f)
+				float a = i / Distance;
+				vec2 Pos = mix(m_Pos, NewPos, a);
+				for(int p = 0; p < MAX_CLIENTS; p++)
 				{
-					if(a > 0.0f)
-						m_Pos = LastPos;
-					else if(distance(NewPos, pCharCore->m_Pos) > D)
-						m_Pos = NewPos;
-					return;
+					CCharacterCore *pCharCore = m_pWorld->m_apCharacters[p];
+					if(!pCharCore || pCharCore == this)
+						continue;
+					if((!(pCharCore->m_Super || m_Super) && (m_Solo || pCharCore->m_Solo || !pCharCore->m_Collision || pCharCore->m_NoCollision || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, p)))))
+						continue;
+					float D = distance(Pos, pCharCore->m_Pos);
+					if(D < 28.0f && D >= 0.0f)
+					{
+						if(a > 0.0f)
+							m_Pos = LastPos;
+						else if(distance(NewPos, pCharCore->m_Pos) > D)
+							m_Pos = NewPos;
+						return;
+					}
 				}
+				LastPos = Pos;
 			}
-			LastPos = Pos;
 		}
 	}
 
