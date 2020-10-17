@@ -12,6 +12,11 @@
 #include <game/version.h>
 #include <time.h>
 
+static const char g_aHalloweenSkins[][64] = {
+	"Bat", "Cyclops", "darky", "dynamite", "Electro Tee", "evil", "ghost", "glitch",
+	"Lord_of_Zombie", "pumpkin", "reaper", "red_flame", "undead", "Voodoo_tee_1",
+	"zombie", "zombie1", "zombie2", "zombie3", "zombie4"};
+
 MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
 
 IServer *CPlayer::Server() const { return m_pGameServer->Server(); }
@@ -316,10 +321,15 @@ void CPlayer::Snap(int SnappingClient)
 	if(!pClientInfo)
 		return;
 
+	const char *pSkinName =
+		m_Halloween ?
+			g_aHalloweenSkins[str_quickhash(Server()->ClientName(m_ClientID)) % (sizeof(g_aHalloweenSkins) / sizeof(g_aHalloweenSkins[0]))] :
+			m_TeeInfos.m_SkinName;
+
 	StrToInts(&pClientInfo->m_Name0, 4, Server()->ClientName(m_ClientID));
 	StrToInts(&pClientInfo->m_Clan0, 3, Server()->ClientClan(m_ClientID));
 	pClientInfo->m_Country = Server()->ClientCountry(m_ClientID);
-	StrToInts(&pClientInfo->m_Skin0, 6, m_TeeInfos.m_SkinName);
+	StrToInts(&pClientInfo->m_Skin0, 6, pSkinName);
 	pClientInfo->m_UseCustomColor = m_TeeInfos.m_UseCustomColor;
 	pClientInfo->m_ColorBody = m_TeeInfos.m_ColorBody;
 	pClientInfo->m_ColorFeet = m_TeeInfos.m_ColorFeet;
