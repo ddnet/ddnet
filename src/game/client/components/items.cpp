@@ -235,50 +235,56 @@ void CItems::RenderLaser(const struct CNetObj_Laser *pCurrent, bool IsPredicted)
 	ColorRGBA RGB;
 	vec2 Pos = vec2(pCurrent->m_X, pCurrent->m_Y);
 	vec2 From = vec2(pCurrent->m_FromX, pCurrent->m_FromY);
-	vec2 Dir = normalize(Pos - From);
-
-	float Ticks;
-	if(IsPredicted)
-		Ticks = (float)(Client()->PredGameTick(g_Config.m_ClDummy) - pCurrent->m_StartTick) + Client()->PredIntraGameTick(g_Config.m_ClDummy);
-	else
-		Ticks = (float)(Client()->GameTick(g_Config.m_ClDummy) - pCurrent->m_StartTick) + Client()->IntraGameTick(g_Config.m_ClDummy);
-	float Ms = (Ticks / 50.0f) * 1000.0f;
-	float a = Ms / m_pClient->m_Tuning[g_Config.m_ClDummy].m_LaserBounceDelay;
-	a = clamp(a, 0.0f, 1.0f);
-	float Ia = 1 - a;
-
-	vec2 Out, Border;
-
-	Graphics()->TextureClear();
-	Graphics()->QuadsBegin();
-
-	// do outline
+	float Len = distance(Pos, From);
 	RGB = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClLaserOutlineColor));
 	ColorRGBA OuterColor(RGB.r, RGB.g, RGB.b, 1.0f);
-	Graphics()->SetColor(OuterColor.r, OuterColor.g, OuterColor.b, 1.0f);
-	Out = vec2(Dir.y, -Dir.x) * (7.0f * Ia);
-
-	IGraphics::CFreeformItem Freeform(
-		From.x - Out.x, From.y - Out.y,
-		From.x + Out.x, From.y + Out.y,
-		Pos.x - Out.x, Pos.y - Out.y,
-		Pos.x + Out.x, Pos.y + Out.y);
-	Graphics()->QuadsDrawFreeform(&Freeform, 1);
-
-	// do inner
 	RGB = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClLaserInnerColor));
 	ColorRGBA InnerColor(RGB.r, RGB.g, RGB.b, 1.0f);
-	Out = vec2(Dir.y, -Dir.x) * (5.0f * Ia);
-	Graphics()->SetColor(InnerColor.r, InnerColor.g, InnerColor.b, 1.0f); // center
 
-	Freeform = IGraphics::CFreeformItem(
-		From.x - Out.x, From.y - Out.y,
-		From.x + Out.x, From.y + Out.y,
-		Pos.x - Out.x, Pos.y - Out.y,
-		Pos.x + Out.x, Pos.y + Out.y);
-	Graphics()->QuadsDrawFreeform(&Freeform, 1);
+	vec2 Dir;
+	if(Len > 0)
+	{
+		Dir = normalize_pre_length(Pos - From, Len);
 
-	Graphics()->QuadsEnd();
+		float Ticks;
+		if(IsPredicted)
+			Ticks = (float)(Client()->PredGameTick(g_Config.m_ClDummy) - pCurrent->m_StartTick) + Client()->PredIntraGameTick(g_Config.m_ClDummy);
+		else
+			Ticks = (float)(Client()->GameTick(g_Config.m_ClDummy) - pCurrent->m_StartTick) + Client()->IntraGameTick(g_Config.m_ClDummy);
+		float Ms = (Ticks / 50.0f) * 1000.0f;
+		float a = Ms / m_pClient->m_Tuning[g_Config.m_ClDummy].m_LaserBounceDelay;
+		a = clamp(a, 0.0f, 1.0f);
+		float Ia = 1 - a;
+
+		vec2 Out, Border;
+
+		Graphics()->TextureClear();
+		Graphics()->QuadsBegin();
+
+		// do outline
+		Graphics()->SetColor(OuterColor.r, OuterColor.g, OuterColor.b, 1.0f);
+		Out = vec2(Dir.y, -Dir.x) * (7.0f * Ia);
+
+		IGraphics::CFreeformItem Freeform(
+			From.x - Out.x, From.y - Out.y,
+			From.x + Out.x, From.y + Out.y,
+			Pos.x - Out.x, Pos.y - Out.y,
+			Pos.x + Out.x, Pos.y + Out.y);
+		Graphics()->QuadsDrawFreeform(&Freeform, 1);
+
+		// do inner
+		Out = vec2(Dir.y, -Dir.x) * (5.0f * Ia);
+		Graphics()->SetColor(InnerColor.r, InnerColor.g, InnerColor.b, 1.0f); // center
+
+		Freeform = IGraphics::CFreeformItem(
+			From.x - Out.x, From.y - Out.y,
+			From.x + Out.x, From.y + Out.y,
+			Pos.x - Out.x, Pos.y - Out.y,
+			Pos.x + Out.x, Pos.y + Out.y);
+		Graphics()->QuadsDrawFreeform(&Freeform, 1);
+
+		Graphics()->QuadsEnd();
+	}
 
 	// render head
 	{
