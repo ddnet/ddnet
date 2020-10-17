@@ -393,41 +393,44 @@ void CCharacterCore::Tick(bool UseInput)
 
 			// handle player <-> player collision
 			float Distance = distance(m_Pos, pCharCore->m_Pos);
-			vec2 Dir = normalize(m_Pos - pCharCore->m_Pos);
-
-			bool CanCollide = (m_Super || pCharCore->m_Super) || (pCharCore->m_Collision && m_Collision && !m_NoCollision && !pCharCore->m_NoCollision && m_pWorld->m_Tuning[g_Config.m_ClDummy].m_PlayerCollision);
-
-			if(CanCollide && Distance < PhysSize * 1.25f && Distance > 0.0f)
+			if(Distance > 0)
 			{
-				float a = (PhysSize * 1.45f - Distance);
-				float Velocity = 0.5f;
+				vec2 Dir = normalize(m_Pos - pCharCore->m_Pos);
 
-				// make sure that we don't add excess force by checking the
-				// direction against the current velocity. if not zero.
-				if(length(m_Vel) > 0.0001)
-					Velocity = 1 - (dot(normalize(m_Vel), Dir) + 1) / 2;
+				bool CanCollide = (m_Super || pCharCore->m_Super) || (pCharCore->m_Collision && m_Collision && !m_NoCollision && !pCharCore->m_NoCollision && m_pWorld->m_Tuning[g_Config.m_ClDummy].m_PlayerCollision);
 
-				m_Vel += Dir * a * (Velocity * 0.75f);
-				m_Vel *= 0.85f;
-			}
-
-			// handle hook influence
-			if(m_Hook && m_HookedPlayer == i && m_pWorld->m_Tuning[g_Config.m_ClDummy].m_PlayerHooking)
-			{
-				if(Distance > PhysSize * 1.50f) // TODO: fix tweakable variable
+				if(CanCollide && Distance < PhysSize * 1.25f && Distance > 0.0f)
 				{
-					float Accel = m_pWorld->m_Tuning[g_Config.m_ClDummy].m_HookDragAccel * (Distance / m_pWorld->m_Tuning[g_Config.m_ClDummy].m_HookLength);
-					float DragSpeed = m_pWorld->m_Tuning[g_Config.m_ClDummy].m_HookDragSpeed;
+					float a = (PhysSize * 1.45f - Distance);
+					float Velocity = 0.5f;
 
-					vec2 Temp;
-					// add force to the hooked player
-					Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.x, Accel * Dir.x * 1.5f);
-					Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.y, Accel * Dir.y * 1.5f);
-					pCharCore->m_Vel = ClampVel(pCharCore->m_MoveRestrictions, Temp);
-					// add a little bit force to the guy who has the grip
-					Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.x, -Accel * Dir.x * 0.25f);
-					Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.y, -Accel * Dir.y * 0.25f);
-					m_Vel = ClampVel(m_MoveRestrictions, Temp);
+					// make sure that we don't add excess force by checking the
+					// direction against the current velocity. if not zero.
+					if(length(m_Vel) > 0.0001)
+						Velocity = 1 - (dot(normalize(m_Vel), Dir) + 1) / 2;
+
+					m_Vel += Dir * a * (Velocity * 0.75f);
+					m_Vel *= 0.85f;
+				}
+
+				// handle hook influence
+				if(m_Hook && m_HookedPlayer == i && m_pWorld->m_Tuning[g_Config.m_ClDummy].m_PlayerHooking)
+				{
+					if(Distance > PhysSize * 1.50f) // TODO: fix tweakable variable
+					{
+						float Accel = m_pWorld->m_Tuning[g_Config.m_ClDummy].m_HookDragAccel * (Distance / m_pWorld->m_Tuning[g_Config.m_ClDummy].m_HookLength);
+						float DragSpeed = m_pWorld->m_Tuning[g_Config.m_ClDummy].m_HookDragSpeed;
+
+						vec2 Temp;
+						// add force to the hooked player
+						Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.x, Accel * Dir.x * 1.5f);
+						Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.y, Accel * Dir.y * 1.5f);
+						pCharCore->m_Vel = ClampVel(pCharCore->m_MoveRestrictions, Temp);
+						// add a little bit force to the guy who has the grip
+						Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.x, -Accel * Dir.x * 0.25f);
+						Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.y, -Accel * Dir.y * 0.25f);
+						m_Vel = ClampVel(m_MoveRestrictions, Temp);
+					}
 				}
 			}
 		}
