@@ -275,15 +275,18 @@ void CCharacterCore::Tick(bool UseInput)
 				if(!pCharCore || pCharCore == this || (!(m_Super || pCharCore->m_Super) && ((m_Id != -1 && !m_pTeams->CanCollide(i, m_Id)) || pCharCore->m_Solo || m_Solo)))
 					continue;
 
-				vec2 ClosestPoint = closest_point_on_line(m_HookPos, NewPos, pCharCore->m_Pos);
-				if(distance(pCharCore->m_Pos, ClosestPoint) < PhysSize + 2.0f)
+				vec2 ClosestPoint;
+				if(closest_point_on_line(m_HookPos, NewPos, pCharCore->m_Pos, ClosestPoint))
 				{
-					if(m_HookedPlayer == -1 || distance(m_HookPos, pCharCore->m_Pos) < Distance)
+					if(distance(pCharCore->m_Pos, ClosestPoint) < PhysSize + 2.0f)
 					{
-						m_TriggeredEvents |= COREEVENT_HOOK_ATTACH_PLAYER;
-						m_HookState = HOOK_GRABBED;
-						m_HookedPlayer = i;
-						Distance = distance(m_HookPos, pCharCore->m_Pos);
+						if(m_HookedPlayer == -1 || distance(m_HookPos, pCharCore->m_Pos) < Distance)
+						{
+							m_TriggeredEvents |= COREEVENT_HOOK_ATTACH_PLAYER;
+							m_HookState = HOOK_GRABBED;
+							m_HookedPlayer = i;
+							Distance = distance(m_HookPos, pCharCore->m_Pos);
+						}
 					}
 				}
 			}

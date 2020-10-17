@@ -2161,14 +2161,17 @@ int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2 &NewPos2, in
 		if(!IsOneSuper && (!m_Teams.SameTeam(i, ownID) || IsOneSolo || OwnClientData.m_NoHookHit))
 			continue;
 
-		vec2 ClosestPoint = closest_point_on_line(HookPos, NewPos, Position);
-		if(distance(Position, ClosestPoint) < PhysSize + 2.0f)
+		vec2 ClosestPoint;
+		if(closest_point_on_line(HookPos, NewPos, Position, ClosestPoint))
 		{
-			if(ClosestID == -1 || distance(HookPos, Position) < Distance)
+			if(distance(Position, ClosestPoint) < PhysSize + 2.0f)
 			{
-				NewPos2 = ClosestPoint;
-				ClosestID = i;
-				Distance = distance(HookPos, Position);
+				if(ClosestID == -1 || distance(HookPos, Position) < Distance)
+				{
+					NewPos2 = ClosestPoint;
+					ClosestID = i;
+					Distance = distance(HookPos, Position);
+				}
 			}
 		}
 	}
