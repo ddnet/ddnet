@@ -307,7 +307,7 @@ bool CScore::MapVoteThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 		auto *MapVote = &pData->m_pResult->m_Data.m_MapVote;
 		pSqlServer->GetString(1, MapVote->m_Map, sizeof(MapVote->m_Map));
 		pSqlServer->GetString(2, MapVote->m_Server, sizeof(MapVote->m_Server));
-		strcpy(MapVote->m_Reason, "/map");
+		str_copy(MapVote->m_Reason, "/map", sizeof(MapVote->m_Reason));
 
 		for(char *p = MapVote->m_Server; *p; p++) // lower case server
 			*p = tolower(*p);
@@ -413,12 +413,12 @@ bool CScore::MapInfoThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 		char aStars[20];
 		switch(Stars)
 		{
-		case 0: strcpy(aStars, "✰✰✰✰✰"); break;
-		case 1: strcpy(aStars, "★✰✰✰✰"); break;
-		case 2: strcpy(aStars, "★★✰✰✰"); break;
-		case 3: strcpy(aStars, "★★★✰✰"); break;
-		case 4: strcpy(aStars, "★★★★✰"); break;
-		case 5: strcpy(aStars, "★★★★★"); break;
+		case 0: str_copy(aStars, "✰✰✰✰✰", sizeof(aStars)); break;
+		case 1: str_copy(aStars, "★✰✰✰✰", sizeof(aStars)); break;
+		case 2: str_copy(aStars, "★★✰✰✰", sizeof(aStars)); break;
+		case 3: str_copy(aStars, "★★★✰✰", sizeof(aStars)); break;
+		case 4: str_copy(aStars, "★★★★✰", sizeof(aStars)); break;
+		case 5: str_copy(aStars, "★★★★★", sizeof(aStars)); break;
 		default: aStars[0] = '\0';
 		}
 
@@ -813,7 +813,7 @@ bool CScore::ShowTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData
 	pSqlServer->BindString(1, pData->m_Map);
 
 	// show top5
-	strcpy(pData->m_pResult->m_Data.m_aaMessages[0], "----------- Top 5 -----------");
+	str_copy(pData->m_pResult->m_Data.m_aaMessages[0], "----------- Top 5 -----------", sizeof(pData->m_pResult->m_Data.m_aaMessages[0]));
 
 	int Line = 1;
 	while(pSqlServer->Step())
@@ -827,7 +827,7 @@ bool CScore::ShowTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData
 			"%d. %s Time: %s", Rank, aName, aBuf);
 		Line++;
 	}
-	strcpy(pData->m_pResult->m_Data.m_aaMessages[Line], "-------------------------------");
+	str_copy(pData->m_pResult->m_Data.m_aaMessages[Line], "-------------------------------", sizeof(pData->m_pResult->m_Data.m_aaMessages[Line]));
 
 	pData->m_pResult->m_Done = true;
 	return true;
@@ -873,7 +873,7 @@ bool CScore::ShowTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGame
 
 	// show teamtop5
 	int Line = 0;
-	strcpy(paMessages[Line++], "------- Team Top 5 -------");
+	str_copy(paMessages[Line++], "------- Team Top 5 -------", sizeof(paMessages[Line]));
 
 	if(pSqlServer->Step())
 	{
@@ -911,7 +911,7 @@ bool CScore::ShowTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGame
 		}
 	}
 
-	strcpy(paMessages[Line], "-------------------------------");
+	str_copy(paMessages[Line], "-------------------------------", sizeof(paMessages[Line]));
 	pData->m_pResult->m_Done = true;
 	return true;
 }
@@ -976,12 +976,12 @@ bool CScore::ShowTimesThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 	// show top5
 	if(!pSqlServer->Step())
 	{
-		strcpy(paMessages[0], "There are no times in the specified range");
+		str_copy(paMessages[0], "There are no times in the specified range", sizeof(paMessages[0]));
 		pData->m_pResult->m_Done = true;
 		return true;
 	}
 
-	strcpy(paMessages[0], "------------- Last Times -------------");
+	str_copy(paMessages[0], "------------- Last Times -------------", sizeof(paMessages[0]));
 	int Line = 1;
 
 	do
@@ -1020,7 +1020,7 @@ bool CScore::ShowTimesThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		}
 		Line++;
 	} while(pSqlServer->Step());
-	strcpy(paMessages[Line], "----------------------------------------------------");
+	str_copy(paMessages[Line], "----------------------------------------------------", sizeof(paMessages[Line]));
 
 	pData->m_pResult->m_Done = true;
 	return true;
@@ -1101,7 +1101,7 @@ bool CScore::ShowTopPointsThread(IDbConnection *pSqlServer, const ISqlData *pGam
 	pSqlServer->BindInt(1, LimitStart);
 
 	// show top points
-	strcpy(paMessages[0], "-------- Top Points --------");
+	str_copy(paMessages[0], "-------- Top Points --------", sizeof(paMessages[0]));
 
 	int Line = 1;
 	while(pSqlServer->Step())
@@ -1114,7 +1114,7 @@ bool CScore::ShowTopPointsThread(IDbConnection *pSqlServer, const ISqlData *pGam
 			"%d. %s Points: %d", Rank, aName, Points);
 		Line++;
 	}
-	strcpy(paMessages[Line], "-------------------------------");
+	str_copy(paMessages[Line], "-------------------------------", sizeof(paMessages[Line]));
 
 	pData->m_pResult->m_Done = true;
 	return true;
@@ -1343,8 +1343,9 @@ bool CScore::SaveTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 		}
 		else
 		{
-			strcpy(pData->m_pResult->m_aBroadcast,
-				"Database connection failed, teamsave written to a file instead. Admins will add it manually in a few days.");
+			str_copy(pData->m_pResult->m_aBroadcast,
+				"Database connection failed, teamsave written to a file instead. Admins will add it manually in a few days.",
+				sizeof(pData->m_pResult->m_aBroadcast));
 			if(str_comp(pData->m_Server, g_Config.m_SvSqlServerName) == 0)
 			{
 				str_format(pData->m_pResult->m_aMessage, sizeof(pData->m_pResult->m_aMessage),
@@ -1365,7 +1366,7 @@ bool CScore::SaveTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 	{
 		dbg_msg("sql", "ERROR: This save-code already exists");
 		pData->m_pResult->m_Status = CScoreSaveResult::SAVE_FAILED;
-		strcpy(pData->m_pResult->m_aMessage, "This save-code already exists");
+		str_copy(pData->m_pResult->m_aMessage, "This save-code already exists", sizeof(pData->m_pResult->m_aMessage));
 	}
 
 	pSqlServer->Unlock();
@@ -1448,7 +1449,7 @@ bool CScore::LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 
 		if(!pSqlServer->Step())
 		{
-			strcpy(pData->m_pResult->m_aMessage, "No such savegame for this map");
+			str_copy(pData->m_pResult->m_aMessage, "No such savegame for this map", sizeof(pData->m_pResult->m_aMessage));
 			goto end;
 		}
 
@@ -1468,7 +1469,7 @@ bool CScore::LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 			pSqlServer->GetString(3, aSaveID, sizeof(aSaveID));
 			if(str_length(aSaveID) + 1 != UUID_MAXSTRSIZE)
 			{
-				strcpy(pData->m_pResult->m_aMessage, "Unable to load savegame: SaveID corrupted");
+				str_copy(pData->m_pResult->m_aMessage, "Unable to load savegame: SaveID corrupted", sizeof(pData->m_pResult->m_aMessage));
 				goto end;
 			}
 			ParseUuid(&pData->m_pResult->m_SaveID, aSaveID);
@@ -1480,7 +1481,7 @@ bool CScore::LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 
 		if(Num != 0)
 		{
-			strcpy(pData->m_pResult->m_aMessage, "Unable to load savegame: data corrupted");
+			str_copy(pData->m_pResult->m_aMessage, "Unable to load savegame: data corrupted", sizeof(pData->m_pResult->m_aMessage));
 			goto end;
 		}
 
@@ -1502,7 +1503,7 @@ bool CScore::LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 		pSqlServer->Step();
 
 		pData->m_pResult->m_Status = CScoreSaveResult::LOAD_SUCCESS;
-		strcpy(pData->m_pResult->m_aMessage, "Loading successfully done");
+		str_copy(pData->m_pResult->m_aMessage, "Loading successfully done", sizeof(pData->m_pResult->m_aMessage));
 	}
 end:
 	pSqlServer->Unlock();
