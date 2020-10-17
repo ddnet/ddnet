@@ -112,6 +112,10 @@ void CCharacterCore::Reset()
 	m_HasTelegunLaser = false;
 	m_FreezeEnd = 0;
 	m_DeepFrozen = false;
+
+	// never initialize both to 0
+	m_Input.m_TargetX = 0;
+	m_Input.m_TargetY = -1;
 }
 
 void CCharacterCore::Tick(bool UseInput)

@@ -1023,6 +1023,12 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 	m_TeleCheckpoint = 0;
 	m_StrongWeakID = 0;
 
+	// never intilize both to zero
+	m_Input.m_TargetX = 0;
+	m_Input.m_TargetY = -1;
+
+	m_LatestPrevInput = m_LatestInput = m_PrevInput = m_SavedInput = m_Input;
+
 	ResetPrediction();
 	Read(pChar, pExtended, false);
 
