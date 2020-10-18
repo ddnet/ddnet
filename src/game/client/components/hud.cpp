@@ -943,7 +943,10 @@ void CHud::RenderDDRaceEffects()
 		char aBuf[64];
 		if(m_FinishTime)
 		{
-			str_format(aBuf, sizeof(aBuf), "Finish time: %02d:%02d.%02d", m_DDRaceTime / 6000, m_DDRaceTime / 100 - m_DDRaceTime / 6000 * 60, m_DDRaceTime % 100);
+			if(m_DDRaceTime > 360000)
+				str_format(aBuf, sizeof(aBuf), "Finish time: %02d:%02d:%02d.%02d", m_DDRaceTime / 360000, (m_DDRaceTime % 360000) / 6000, m_DDRaceTime / 100 - m_DDRaceTime / 6000 * 60, m_DDRaceTime % 100);
+			else
+				str_format(aBuf, sizeof(aBuf), "Finish time: %02d:%02d.%02d", m_DDRaceTime / 6000, m_DDRaceTime / 100 - m_DDRaceTime / 6000 * 60, m_DDRaceTime % 100);
 			TextRender()->Text(0, 150 * Graphics()->ScreenAspect() - TextRender()->TextWidth(0, 12, aBuf, -1, -1.0f) / 2, 20, 12, aBuf, -1.0f);
 		}
 		else if(m_CheckpointTick + Client()->GameTickSpeed() * 6 > Client()->GameTick(g_Config.m_ClDummy))
