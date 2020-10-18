@@ -18,6 +18,8 @@ enum
 	RECORDER_RACE = 2,
 	RECORDER_REPLAYS = 3,
 	RECORDER_MAX = 4,
+
+	NUM_DUMMIES = 2,
 };
 
 typedef bool (*CLIENTFUNC_FILTER)(const void *pData, int DataSize, void *pUser);
@@ -30,13 +32,13 @@ protected:
 	int m_State;
 
 	// quick access to time variables
-	int m_PrevGameTick[2];
-	int m_CurGameTick[2];
-	float m_GameIntraTick[2];
-	float m_GameTickTime[2];
+	int m_PrevGameTick[NUM_DUMMIES];
+	int m_CurGameTick[NUM_DUMMIES];
+	float m_GameIntraTick[NUM_DUMMIES];
+	float m_GameTickTime[NUM_DUMMIES];
 
-	int m_PredTick[2];
-	float m_PredIntraTick[2];
+	int m_PredTick[NUM_DUMMIES];
+	float m_PredIntraTick[NUM_DUMMIES];
 
 	float m_LocalTime;
 	float m_RenderFrameTime;

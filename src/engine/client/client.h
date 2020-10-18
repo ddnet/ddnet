@@ -104,7 +104,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	enum
 	{
-		CLIENT_MAIN,
+		CLIENT_MAIN = 0,
 		CLIENT_DUMMY,
 		CLIENT_CONTACT,
 		NUM_CLIENTS,
@@ -125,7 +125,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	CUuid m_ConnectionID;
 
-	unsigned m_SnapshotParts[2];
+	unsigned m_SnapshotParts[NUM_DUMMIES];
 	int64 m_LocalStartTime;
 
 	IGraphics::CTextureHandle m_DebugFont;
@@ -145,9 +145,9 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	bool m_SoundInitFailed;
 	bool m_ResortServerBrowser;
 
-	int m_AckGameTick[2];
-	int m_CurrentRecvTick[2];
-	int m_RconAuthed[2];
+	int m_AckGameTick[NUM_DUMMIES];
+	int m_CurrentRecvTick[NUM_DUMMIES];
+	int m_RconAuthed[NUM_DUMMIES];
 	char m_RconPassword[32];
 	int m_UseTempRconCommands;
 	char m_Password[32];
@@ -163,8 +163,8 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aCurrentMap[MAX_PATH_LENGTH];
 	char m_aCurrentMapPath[MAX_PATH_LENGTH];
 
-	char m_aTimeoutCodes[2][32];
-	bool m_aTimeoutCodeSent[2];
+	char m_aTimeoutCodes[NUM_DUMMIES][32];
+	bool m_aTimeoutCodeSent[NUM_DUMMIES];
 	bool m_GenerateTimeoutSeed;
 
 	//
@@ -195,7 +195,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aDummyNameBuf[16];
 
 	// time
-	CSmoothTime m_GameTime[2];
+	CSmoothTime m_GameTime[NUM_DUMMIES];
 	CSmoothTime m_PredictedTime;
 
 	// input
@@ -205,9 +205,9 @@ class CClient : public IClient, public CDemoPlayer::IListener
 		int m_Tick; // the tick that the input is for
 		int64 m_PredictedTime; // prediction latency when we sent this input
 		int64 m_Time;
-	} m_aInputs[2][200];
+	} m_aInputs[NUM_DUMMIES][200];
 
-	int m_CurrentInput[2];
+	int m_CurrentInput[NUM_DUMMIES];
 	bool m_LastDummy;
 	bool m_DummySendConnInfo;
 
@@ -217,10 +217,10 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	CGraph m_FpsGraph;
 
 	// the game snapshots are modifiable by the game
-	class CSnapshotStorage m_SnapshotStorage[2];
-	CSnapshotStorage::CHolder *m_aSnapshots[2][NUM_SNAPSHOT_TYPES];
+	class CSnapshotStorage m_SnapshotStorage[NUM_DUMMIES];
+	CSnapshotStorage::CHolder *m_aSnapshots[NUM_DUMMIES][NUM_SNAPSHOT_TYPES];
 
-	int m_ReceivedSnapshots[2];
+	int m_ReceivedSnapshots[NUM_DUMMIES];
 	char m_aSnapshotIncomingData[CSnapshot::MAX_SIZE];
 
 	class CSnapshotStorage::CHolder m_aDemorecSnapshotHolders[NUM_SNAPSHOT_TYPES];
