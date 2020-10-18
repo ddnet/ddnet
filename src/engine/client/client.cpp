@@ -2874,7 +2874,6 @@ void CClient::Update()
 			FinishDDNetInfo();
 		else if(m_pDDNetInfoTask->State() == HTTP_ERROR)
 		{
-			m_Warnings.emplace_back(SWarning(Localize("Downloading ddnet-info.json failed")));
 			Storage()->RemoveFile(m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
 			ResetDDNetInfo();
 		}
