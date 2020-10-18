@@ -323,7 +323,7 @@ void CPlayer::Snap(int SnappingClient)
 
 	const char *pSkinName = m_TeeInfos.m_SkinName;
 
-	if(!m_Halloween)
+	if(m_Halloween)
 	{
 		bool Found = false;
 
