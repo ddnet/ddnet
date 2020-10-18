@@ -28,6 +28,10 @@ include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(SQLite3 DEFAULT_MSG SQLite3_INCLUDEDIR SQLite3_LIBRARY)
 mark_as_advanced(SQLite3_INCLUDEDIR SQLite3_LIBRARY)
 
+if(CMAKE_VERSION VERSION_LESS 3.0 AND SQLITE3_FOUND)
+  set(SQLite3_FOUND TRUE)
+endif()
+
 if(SQLite3_FOUND)
   is_bundled(SQLite3_BUNDLED "${SQLite3_LIBRARY}")
   set(SQLite3_LIBRARIES ${SQLite3_LIBRARY})
