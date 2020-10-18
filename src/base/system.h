@@ -1500,6 +1500,35 @@ void str_timestamp_ex(time_t time, char *buffer, int buffer_size, const char *fo
 #define FORMAT_SPACE "%Y-%m-%d %H:%M:%S"
 #define FORMAT_NOSPACE "%Y-%m-%d_%H-%M-%S"
 
+enum
+{
+	TIME_DAYS,
+	TIME_HOURS,
+	TIME_MINS,
+	TIME_HOURS_CENTISECS,
+	TIME_MINS_CENTISECS,
+};
+
+/*
+	Function: str_times
+		Formats a time string.
+
+	Parameters:
+		centisecs - Time in centiseconds, minimum value clamped to 0
+		format - Format of the time string, see enum above, for example TIME_DAYS
+		buffer - Pointer to a buffer that shall receive the time stamp string.
+		buffer_size - Size of the buffer.
+
+	Returns:
+		Number of bytes written, -1 on invalid format or buffer_size <= 0
+
+	Remarks:
+		- Guarantees that buffer string will contain zero-termination, assuming
+		  buffer_size > 0.
+*/
+int str_time(int64 centisecs, int format, char *buffer, int buffer_size);
+int str_time_float(float secs, int format, char *buffer, int buffer_size);
+
 /*
 	Function: str_escape
 		Escapes \ and " characters in a string.

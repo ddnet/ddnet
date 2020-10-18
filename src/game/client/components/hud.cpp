@@ -123,6 +123,7 @@ void CHud::RenderGameTimer()
 		else
 			Time = (Client()->GameTick(g_Config.m_ClDummy) - m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick) / Client()->GameTickSpeed();
 
+		str_time_format((int64_t)Time * 100, 
 		if(Time <= 0)
 			str_format(aBuf, sizeof(aBuf), "00:00");
 		else if(Time >= 3600 * 24)
@@ -941,12 +942,11 @@ void CHud::RenderDDRaceEffects()
 	if(m_DDRaceTime)
 	{
 		char aBuf[64];
+		char aTime[32];
 		if(m_FinishTime)
 		{
-			if(m_DDRaceTime > 360000)
-				str_format(aBuf, sizeof(aBuf), "Finish time: %02d:%02d:%02d.%02d", m_DDRaceTime / 360000, (m_DDRaceTime % 360000) / 6000, m_DDRaceTime / 100 - m_DDRaceTime / 6000 * 60, m_DDRaceTime % 100);
-			else
-				str_format(aBuf, sizeof(aBuf), "Finish time: %02d:%02d.%02d", m_DDRaceTime / 6000, m_DDRaceTime / 100 - m_DDRaceTime / 6000 * 60, m_DDRaceTime % 100);
+			str_time(m_DDRaceTime, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
+			str_format(aBuf, sizeof(aBuf), "Finish time: %s", aTime);
 			TextRender()->Text(0, 150 * Graphics()->ScreenAspect() - TextRender()->TextWidth(0, 12, aBuf, -1, -1.0f) / 2, 20, 12, aBuf, -1.0f);
 		}
 		else if(m_CheckpointTick + Client()->GameTickSpeed() * 6 > Client()->GameTick(g_Config.m_ClDummy))
@@ -981,10 +981,9 @@ void CHud::RenderRecord()
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), Localize("Server best:"));
 		TextRender()->Text(0, 5, 40, 6, aBuf, -1.0f);
-		if(m_ServerRecord > 3600)
-			str_format(aBuf, sizeof(aBuf), "%02d:%02d:%05.2f", (int)m_ServerRecord / 3600, ((int)m_ServerRecord % 3600) / 60, m_ServerRecord - ((int)m_ServerRecord / 60 * 60));
-		else
-			str_format(aBuf, sizeof(aBuf), "   %02d:%05.2f", (int)m_ServerRecord / 60, m_ServerRecord - ((int)m_ServerRecord / 60 * 60));
+		char aTime[32];
+		str_time_float(m_ServerRecord, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
+		str_format(aBuf, sizeof(aBuf), "%s%s", m_ServerRecord > 3600 ? "" : "   ", aTime);
 		TextRender()->Text(0, 53, 40, 6, aBuf, -1.0f);
 	}
 
@@ -994,10 +993,9 @@ void CHud::RenderRecord()
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), Localize("Personal best:"));
 		TextRender()->Text(0, 5, 47, 6, aBuf, -1.0f);
-		if(PlayerRecord > 3600)
-			str_format(aBuf, sizeof(aBuf), "%02d:%02d:%05.2f", (int)PlayerRecord / 3600, ((int)PlayerRecord % 3600) / 60, PlayerRecord - ((int)PlayerRecord / 60 * 60));
-		else
-			str_format(aBuf, sizeof(aBuf), "   %02d:%05.2f", (int)PlayerRecord / 60, PlayerRecord - ((int)PlayerRecord / 60 * 60));
+		char aTime[32];
+		str_time_float(PlayerRecord, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
+		str_format(aBuf, sizeof(aBuf), "%s%s", PlayerRecord > 3600 ? "" : "   ", aTime);
 		TextRender()->Text(0, 53, 47, 6, aBuf, -1.0f);
 	}
 }

@@ -2848,6 +2848,54 @@ void str_timestamp(char *buffer, int buffer_size)
 #pragma GCC diagnostic pop
 #endif
 
+int str_time(int64 centisecs, int format, char *buffer, int buffer_size)
+{
+	const int sec = 100;
+	const int min = 60 * sec;
+	const int hour = 60 * min;
+	const int day = 24 * hour;
+
+	if(buffer_size <= 0)
+		return -1;
+
+	if(centisecs < 0)
+		centisecs = 0;
+
+	buffer[0] = 0;
+
+	switch(format)
+	{
+	case TIME_DAYS:
+		if(centisecs >= day)
+			return str_format(buffer, buffer_size, "%lldd %02lld:%02lld:%02lld", centisecs / day,
+				(centisecs % day) / hour, (centisecs % hour) / min, (centisecs % min) / sec);
+		// fall through
+	case TIME_HOURS:
+		if(centisecs >= hour)
+			return str_format(buffer, buffer_size, "%02lld:%02lld:%02lld", centisecs / hour,
+				(centisecs % hour) / min, (centisecs % min) / sec);
+		// fall through
+	case TIME_MINS:
+		return str_format(buffer, buffer_size, "%02lld:%02lld", centisecs / min,
+			(centisecs % min) / sec);
+	case TIME_HOURS_CENTISECS:
+		if(centisecs >= hour)
+			return str_format(buffer, buffer_size, "%02lld:%02lld:%02lld.%02lld", centisecs / hour,
+				(centisecs % hour) / min, (centisecs % min) / sec, centisecs % sec);
+		// fall through
+	case TIME_MINS_CENTISECS:
+		return str_format(buffer, buffer_size, "%02lld:%02lld.%02lld", centisecs / min,
+			(centisecs % min) / sec, centisecs % sec);
+	}
+
+	return -1;
+}
+
+int str_time_float(float secs, int format, char *buffer, int buffer_size)
+{
+	return str_time((int64)(secs * 100.0), format, buffer, buffer_size);
+}
+
 void str_escape(char **dst, const char *src, const char *end)
 {
 	while(*src && *dst + 1 < end)
