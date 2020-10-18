@@ -2072,8 +2072,10 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			{
 				pPlayer->m_LastSetTeam = Server()->Tick();
 				int TimeLeft = (pPlayer->m_TeamChangeTick - Server()->Tick()) / Server()->TickSpeed();
+				char aTime[32];
+				str_time((int64)TimeLeft * 100, TIME_HOURS, aTime, sizeof(aTime));
 				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "Time to wait before changing team: %02d:%02d", TimeLeft / 60, TimeLeft % 60);
+				str_format(aBuf, sizeof(aBuf), "Time to wait before changing team: %s", aTime);
 				SendBroadcast(aBuf, ClientID);
 				return;
 			}

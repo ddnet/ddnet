@@ -123,23 +123,12 @@ void CHud::RenderGameTimer()
 		else
 			Time = (Client()->GameTick(g_Config.m_ClDummy) - m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick) / Client()->GameTickSpeed();
 
-		str_time_format((int64_t)Time * 100, 
-		if(Time <= 0)
-			str_format(aBuf, sizeof(aBuf), "00:00");
-		else if(Time >= 3600 * 24)
-			str_format(aBuf, sizeof(aBuf), "%dd %02d:%02d:%02d", Time / (3600 * 24), (Time % (3600 * 24)) / 3600, (Time % 3600) / 60, Time % 60);
-		else if(Time >= 3600)
-			str_format(aBuf, sizeof(aBuf), "%02d:%02d:%02d", Time / 3600, (Time % 3600) / 60, Time % 60);
-		else
-			str_format(aBuf, sizeof(aBuf), "%02d:%02d", Time / 60, Time % 60);
+		str_time(Time * 100, TIME_DAYS, aBuf, sizeof(aBuf));
 		float FontSize = 10.0f;
 		float w;
-		if(Time >= 3600 * 24)
-			w = TextRender()->TextWidth(0, 12, "00d 00:00:00", -1, -1.0f);
-		else if(Time >= 3600)
-			w = TextRender()->TextWidth(0, 12, "00:00:00", -1, -1.0f);
-		else
-			w = TextRender()->TextWidth(0, 12, "00:00", -1, -1.0f);
+		w = TextRender()->TextWidth(0, 12,
+			Time >= 3600 * 24 ? "00d 00:00:00" : Time >= 3600 ? "00:00:00" : "00:00",
+			-1, -1.0f);
 		// last 60 sec red, last 10 sec blink
 		if(m_pClient->m_Snap.m_pGameInfoObj->m_TimeLimit && Time <= 60 && (m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer <= 0))
 		{
@@ -341,13 +330,7 @@ void CHud::RenderScoreHud()
 					if(m_pClient->m_GameInfo.m_TimeScore && g_Config.m_ClDDRaceScoreBoard)
 					{
 						if(apPlayerInfo[t]->m_Score != -9999)
-						{
-							int Secs = abs(apPlayerInfo[t]->m_Score);
-							if(Secs > 3600)
-								str_format(aScore[t], sizeof(aScore[t]), "%02d:%02d:%02d", Secs / 3600, (Secs % 3600) / 60, Secs % 60);
-							else
-								str_format(aScore[t], sizeof(aScore[t]), "%02d:%02d", Secs / 60, Secs % 60);
-						}
+							str_time((int64)abs(apPlayerInfo[t]->m_Score) * 100, TIME_HOURS, aScore[t], sizeof(aScore[t]));
 						else
 							aScore[t][0] = 0;
 					}

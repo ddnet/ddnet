@@ -406,7 +406,8 @@ bool CScore::MapInfoThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 		char aAverageString[60] = "\0";
 		if(Average > 0)
 		{
-			str_format(aAverageString, sizeof(aAverageString), " in %d:%02d average", Average / 60, Average % 60);
+			str_time((int64_t)Average * 100, TIME_HOURS, aBuf, sizeof(aBuf));
+			str_format(aAverageString, sizeof(aAverageString), " in %s average", aBuf);
 		}
 
 		char aStars[20];

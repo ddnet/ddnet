@@ -1122,19 +1122,18 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			else if(IsRace(pSelectedServer) && g_Config.m_ClDDRaceScoreBoard)
 			{
 				if(pSelectedServer->m_aClients[i].m_Score == -9999 || pSelectedServer->m_aClients[i].m_Score == 0)
-				{
 					aTemp[0] = 0;
-				}
 				else
-				{
-					int Time = abs(pSelectedServer->m_aClients[i].m_Score);
-					str_format(aTemp, sizeof(aTemp), "%02d:%02d", Time / 60, Time % 60);
-				}
+					str_time((int64)abs(pSelectedServer->m_aClients[i].m_Score) * 100, TIME_HOURS, aTemp, sizeof(aTemp));
 			}
 			else
 				str_format(aTemp, sizeof(aTemp), "%d", pSelectedServer->m_aClients[i].m_Score);
 
-			TextRender()->SetCursor(&Cursor, Score.x, Score.y + (Score.h - FontSize) / 2.0f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
+			float ScoreFontSize = 12.0f;
+			while(ScoreFontSize >= 4.0f && TextRender()->TextWidth(0, ScoreFontSize, aTemp, -1, -1.0f) > Score.w)
+				ScoreFontSize--;
+
+			TextRender()->SetCursor(&Cursor, Score.x, Score.y + (Score.h - ScoreFontSize) / 2.0f, ScoreFontSize, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 			Cursor.m_LineWidth = Score.w;
 			TextRender()->TextEx(&Cursor, aTemp, -1);
 

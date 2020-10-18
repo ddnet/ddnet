@@ -319,9 +319,11 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		}
 
 		// draw time
-		str_format(aBuffer, sizeof(aBuffer), "%d:%02d / %d:%02d",
-			CurrentTick / SERVER_TICK_SPEED / 60, (CurrentTick / SERVER_TICK_SPEED) % 60,
-			TotalTicks / SERVER_TICK_SPEED / 60, (TotalTicks / SERVER_TICK_SPEED) % 60);
+		char aCurrentTime[32];
+		str_time((int64)CurrentTick / SERVER_TICK_SPEED * 100, TIME_HOURS, aCurrentTime, sizeof(aCurrentTime));
+		char aTotalTime[32];
+		str_time((int64)TotalTicks / SERVER_TICK_SPEED * 100, TIME_HOURS, aTotalTime, sizeof(aTotalTime));
+		str_format(aBuffer, sizeof(aBuffer), "%s / %s", aCurrentTime, aTotalTime);
 		UI()->DoLabel(&SeekBar, aBuffer, SeekBar.h * 0.70f, 0);
 
 		// do the logic
@@ -923,7 +925,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		UI()->DoLabelScaled(&Left, Localize("Length:"), 14.0f, -1);
 		int Length = m_lDemos[m_DemolistSelectedIndex].Length();
 		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%d:%02d", Length / 60, Length % 60);
+		str_time((int64)Length * 100, TIME_HOURS, aBuf, sizeof(aBuf));
 		UI()->DoLabelScaled(&Right, aBuf, 14.0f, -1);
 		Labels.HSplitTop(5.0f, 0, &Labels);
 		Labels.HSplitTop(20.0f, &Left, &Labels);
@@ -1243,7 +1245,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			{
 				int Length = r.front().Length();
 				char aBuf[32];
-				str_format(aBuf, sizeof(aBuf), "%d:%02d", Length / 60, Length % 60);
+				str_time((int64)Length * 100, TIME_HOURS, aBuf, sizeof(aBuf));
 				Button.VMargin(4.0f, &Button);
 				UI()->DoLabelScaled(&Button, aBuf, 12.0f, 1);
 			}
