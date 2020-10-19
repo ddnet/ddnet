@@ -1490,7 +1490,7 @@ int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pCon
 
 	pEditor->UI()->ClipEnable(&View);
 
-	for(int i = -1; i < pAutoMapper->ConfigNamesNum(); i++)
+	for(int i = 0; i < pAutoMapper->ConfigNamesNum() + 1; i++)
 	{
 		if(ListCur > ListStopAt)
 			break;
@@ -1499,8 +1499,10 @@ int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pCon
 		{
 			View.HSplitTop(ButtonMargin, 0, &View);
 			View.HSplitTop(ButtonHeight, &Button, &View);
-			if(pEditor->DoButton_MenuItem(&s_AutoMapperConfigButtons[i], i == -1 ? "None" : pAutoMapper->GetConfigName(i), i == s_AutoMapConfigCurrent, &Button, 0, 0))
+			if(pEditor->DoButton_MenuItem(&s_AutoMapperConfigButtons[i], i == 0 ? "None" : pAutoMapper->GetConfigName(i - 1), i == s_AutoMapConfigCurrent, &Button, 0, 0))
+			{
 				s_AutoMapConfigSelected = i;
+			}
 		}
 		ListCur += ButtonHeight + ButtonMargin;
 	}
@@ -1530,7 +1532,7 @@ int CEditor::PopupSelectConfigAutoMapResult()
 
 	s_AutoMapConfigCurrent = s_AutoMapConfigSelected;
 	s_AutoMapConfigSelected = -100;
-	return s_AutoMapConfigCurrent;
+	return s_AutoMapConfigCurrent - 1;
 }
 
 // DDRace
