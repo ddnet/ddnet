@@ -102,14 +102,14 @@ class CGameClient : public IGameClient
 	void UpdatePositions();
 
 	int m_PredictedTick;
-	int m_LastNewPredictedTick[2];
+	int m_LastNewPredictedTick[NUM_DUMMIES];
 
 	int m_LastRoundStartTick;
 
 	int m_LastFlagCarrierRed;
 	int m_LastFlagCarrierBlue;
 
-	int m_CheckInfo[2];
+	int m_CheckInfo[NUM_DUMMIES];
 
 	char m_aDDNetVersionStr[64];
 
@@ -164,7 +164,7 @@ public:
 	int m_FlagDropTick[2];
 
 	// TODO: move this
-	CTuningParams m_Tuning[2];
+	CTuningParams m_Tuning[NUM_DUMMIES];
 
 	enum
 	{
@@ -421,7 +421,7 @@ public:
 
 	// DDRace
 
-	int m_LocalIDs[2];
+	int m_LocalIDs[NUM_DUMMIES];
 	CNetObj_PlayerInput m_DummyInput;
 	CNetObj_PlayerInput m_HammerInput;
 	int m_DummyFire;
@@ -566,8 +566,8 @@ public:
 	bool m_EmoticonsSkinLoaded;
 
 private:
-	bool m_DDRaceMsgSent[2];
-	int m_ShowOthers[2];
+	bool m_DDRaceMsgSent[NUM_DUMMIES];
+	int m_ShowOthers[NUM_DUMMIES];
 
 	void UpdatePrediction();
 	void UpdateRenderedCharacters();
