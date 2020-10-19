@@ -723,7 +723,7 @@ bool CSaveTeam::MatchPlayers(const char (*paNames)[MAX_NAME_LENGTH], const int *
 		}
 		if(!Found)
 		{
-			str_format(pMessage, MessageLen, "'%s' don't belong to this team", paNames[i]);
+			str_format(pMessage, MessageLen, "'%s' doesn't belong to this team", paNames[i]);
 			return false;
 		}
 	}
