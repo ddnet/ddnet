@@ -465,6 +465,7 @@ void CMapImages::UpdateEntityLayerText(void *pTexBuffer, int ImageColorChannelCo
 void CMapImages::InitOverlayTextures()
 {
 	int TextureSize = 64 * m_TextureScale / 100;
+	TextureSize = clamp(TextureSize, 2, 64);
 	int TextureToVerticalCenterOffset = (64 - TextureSize) / 2; // should be used to move texture to the center of 64 pixels area
 
 	if(m_OverlayBottomTexture == -1)
