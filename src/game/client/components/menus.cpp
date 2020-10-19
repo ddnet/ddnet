@@ -506,7 +506,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 		if(str_length(aInputing))
 		{
 			float OffsetGlyphThis = OffsetGlyph;
-			if(StrLenDispl == s_AtIndex + Input()->GetEditingCursor() && pDisplayStr[StrLenDispl - 1] != ' ')
+			if(StrLenDispl >= 1 && StrLenDispl == s_AtIndex + Input()->GetEditingCursor() && pDisplayStr[StrLenDispl - 1] != ' ')
 				OffsetGlyphThis = 0;
 			float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex + Input()->GetEditingCursor(), -1.0f);
 			Textbox.x += w + OffsetGlyphThis;
@@ -521,7 +521,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 			Graphics()->QuadsDrawTL(&CursorT, 1);
 			Graphics()->QuadsEnd();
 		}
-		if(StrLenDispl == s_AtIndex && pDisplayStr[StrLenDispl - 1] != ' ')
+		if(StrLenDispl >= 1 && StrLenDispl == s_AtIndex && pDisplayStr[StrLenDispl - 1] != ' ')
 			OffsetGlyph = 0;
 		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex, -1.0f);
 		Textbox = TmpTextBox;
