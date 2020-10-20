@@ -371,11 +371,14 @@ void CCommandProcessorFragment_OpenGL::SetState(const CCommandBuffer::SState &St
 	}
 
 	glDisable(GL_TEXTURE_2D);
-	if(m_Has3DTextures)
-		glDisable(GL_TEXTURE_3D);
-	if(m_Has2DArrayTextures)
+	if(!m_HasShaders)
 	{
-		glDisable(m_2DArrayTarget);
+		if(m_Has3DTextures)
+			glDisable(GL_TEXTURE_3D);
+		if(m_Has2DArrayTextures)
+		{
+			glDisable(m_2DArrayTarget);
+		}
 	}
 
 	if(m_HasShaders && IsNewApi())
@@ -413,12 +416,14 @@ void CCommandProcessorFragment_OpenGL::SetState(const CCommandBuffer::SState &St
 		{
 			if(m_Has2DArrayTextures)
 			{
-				glEnable(m_2DArrayTarget);
+				if(!m_HasShaders)
+					glEnable(m_2DArrayTarget);
 				glBindTexture(m_2DArrayTarget, m_aTextures[State.m_Texture].m_Tex2DArray);
 			}
 			else if(m_Has3DTextures)
 			{
-				glEnable(GL_TEXTURE_3D);
+				if(!m_HasShaders)
+					glEnable(GL_TEXTURE_3D);
 				glBindTexture(GL_TEXTURE_3D, m_aTextures[State.m_Texture].m_Tex2DArray);
 			}
 			else
@@ -992,11 +997,14 @@ void CCommandProcessorFragment_OpenGL2::SetState(const CCommandBuffer::SState &S
 	if(!IsNewApi())
 	{
 		glDisable(GL_TEXTURE_2D);
-		if(m_Has3DTextures)
-			glDisable(GL_TEXTURE_3D);
-		if(m_Has2DArrayTextures)
+		if(!m_HasShaders)
 		{
-			glDisable(m_2DArrayTarget);
+			if(m_Has3DTextures)
+				glDisable(GL_TEXTURE_3D);
+			if(m_Has2DArrayTextures)
+			{
+				glDisable(m_2DArrayTarget);
+			}
 		}
 	}
 
@@ -1029,7 +1037,7 @@ void CCommandProcessorFragment_OpenGL2::SetState(const CCommandBuffer::SState &S
 			Slot = 0;
 			if(!Use2DArrayTextures)
 			{
-				if(!IsNewApi())
+				if(!IsNewApi() && !m_HasShaders)
 					glEnable(GL_TEXTURE_2D);
 				glBindTexture(GL_TEXTURE_2D, m_aTextures[State.m_Texture].m_Tex);
 				if(IsNewApi())
@@ -1039,7 +1047,7 @@ void CCommandProcessorFragment_OpenGL2::SetState(const CCommandBuffer::SState &S
 			{
 				if(!m_Has2DArrayTextures)
 				{
-					if(!IsNewApi())
+					if(!IsNewApi() && !m_HasShaders)
 						glEnable(GL_TEXTURE_3D);
 					glBindTexture(GL_TEXTURE_3D, m_aTextures[State.m_Texture].m_Tex2DArray);
 					if(IsNewApi())
@@ -1047,7 +1055,7 @@ void CCommandProcessorFragment_OpenGL2::SetState(const CCommandBuffer::SState &S
 				}
 				else
 				{
-					if(!IsNewApi())
+					if(!IsNewApi() && !m_HasShaders)
 						glEnable(m_2DArrayTarget);
 					glBindTexture(m_2DArrayTarget, m_aTextures[State.m_Texture].m_Tex2DArray);
 					if(IsNewApi())
@@ -1340,23 +1348,26 @@ bool CCommandProcessorFragment_OpenGL2::IsTileMapAnalysisSucceeded()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_SCISSOR_TEST);
 
-	glDisable(GL_TEXTURE_2D);
-	if(m_Has3DTextures)
-		glDisable(GL_TEXTURE_3D);
-	if(m_Has2DArrayTextures)
+	if(!m_HasShaders)
 	{
-		glDisable(m_2DArrayTarget);
-	}
+		glDisable(GL_TEXTURE_2D);
+		if(m_Has3DTextures)
+			glDisable(GL_TEXTURE_3D);
+		if(m_Has2DArrayTextures)
+		{
+			glDisable(m_2DArrayTarget);
+		}
 
-	if(!m_Has2DArrayTextures)
-	{
-		glEnable(GL_TEXTURE_3D);
-		glBindTexture(GL_TEXTURE_3D, FakeTexture);
-	}
-	else
-	{
-		glEnable(m_2DArrayTarget);
-		glBindTexture(m_2DArrayTarget, FakeTexture);
+		if(!m_Has2DArrayTextures)
+		{
+			glEnable(GL_TEXTURE_3D);
+			glBindTexture(GL_TEXTURE_3D, FakeTexture);
+		}
+		else
+		{
+			glEnable(m_2DArrayTarget);
+			glBindTexture(m_2DArrayTarget, FakeTexture);
+		}
 	}
 
 	static_assert(sizeof(m_aStreamVertices) / sizeof(m_aStreamVertices[0]) >= 256 * 4, "Keep the number of stream vertices >= 256 * 4.");
@@ -2488,7 +2499,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 		m_pSpriteProgram->m_LocCenter = m_pSpriteProgram->GetUniformLoc("Center");
 		m_pSpriteProgram->m_LocVertciesColor = m_pSpriteProgram->GetUniformLoc("VerticesColor");
 
-		m_pSpriteProgram->SetUniform(m_pSpriteProgram->m_LocRotation, 0);
+		m_pSpriteProgram->SetUniform(m_pSpriteProgram->m_LocRotation, 0.0f);
 		float Center[2] = {0.f, 0.f};
 		m_pSpriteProgram->SetUniformVec2(m_pSpriteProgram->m_LocCenter, 1, Center);
 	}
@@ -3760,6 +3771,55 @@ static void ParseVersionString(const GLubyte *pStr, int &VersionMajor, int &Vers
 	}
 }
 
+static const char *GetGLErrorName(GLenum Type)
+{
+	if(Type == GL_DEBUG_TYPE_ERROR)
+		return "ERROR";
+	else if(Type == GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR)
+		return "DEPRECATED BEHAVIOR";
+	else if(Type == GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR)
+		return "UNDEFINED BEHAVIOR";
+	else if(Type == GL_DEBUG_TYPE_PORTABILITY)
+		return "PORTABILITY";
+	else if(Type == GL_DEBUG_TYPE_PERFORMANCE)
+		return "PERFORMANCE";
+	else if(Type == GL_DEBUG_TYPE_OTHER)
+		return "OTHER";
+	else if(Type == GL_DEBUG_TYPE_MARKER)
+		return "MARKER";
+	else if(Type == GL_DEBUG_TYPE_PUSH_GROUP)
+		return "PUSH_GROUP";
+	else if(Type == GL_DEBUG_TYPE_POP_GROUP)
+		return "POP_GROUP";
+	return "UNKNOWN";
+};
+
+static const char *GetGLSeverity(GLenum Type)
+{
+	if(Type == GL_DEBUG_SEVERITY_HIGH)
+		return "high"; // All OpenGL Errors, shader compilation/linking errors, or highly-dangerous undefined behavior
+	else if(Type == GL_DEBUG_SEVERITY_MEDIUM)
+		return "medium"; // Major performance warnings, shader compilation/linking warnings, or the use of deprecated functionality
+	else if(Type == GL_DEBUG_SEVERITY_LOW)
+		return "low"; // Redundant state change performance warning, or unimportant undefined behavior
+	else if(Type == GL_DEBUG_SEVERITY_NOTIFICATION)
+		return "notification"; // Anything that isn't an error or performance issue.
+
+	return "unknown";
+}
+
+static void GLAPIENTRY
+GfxOpenGLMessageCallback(GLenum source,
+	GLenum type,
+	GLuint id,
+	GLenum severity,
+	GLsizei length,
+	const GLchar *message,
+	const void *userParam)
+{
+	dbg_msg("gfx", "[%s] (importance: %s) %s", GetGLErrorName(type), GetGLSeverity(severity), message);
+}
+
 void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 {
 	m_GLContext = pCommand->m_GLContext;
@@ -3775,6 +3835,27 @@ void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 	glAlphaFunc(GL_GREATER, 0);
 	glEnable(GL_ALPHA_TEST);
 	glDepthMask(0);
+
+	if(g_Config.m_DbgGfx)
+	{
+		if(GLEW_KHR_debug || GLEW_ARB_debug_output)
+		{
+			// During init, enable debug output
+			if(GLEW_KHR_debug)
+			{
+				glEnable(GL_DEBUG_OUTPUT);
+				glDebugMessageCallback(GfxOpenGLMessageCallback, 0);
+			}
+			else if(GLEW_ARB_debug_output)
+			{
+				glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+				glDebugMessageCallbackARB(GfxOpenGLMessageCallback, 0);
+			}
+			dbg_msg("gfx", "Enabled OpenGL debug mode");
+		}
+		else
+			dbg_msg("gfx", "Requested OpenGL debug mode, but the driver does not support the required extension");
+	}
 
 	// check what this context can do
 	const GLubyte *pVersionString = glGetString(GL_VERSION);

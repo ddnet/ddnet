@@ -80,6 +80,8 @@ inline float GetAngle(vec2 Dir)
 {
 	if(Dir.x == 0 && Dir.y == 0)
 		return 0.0f;
+	else if(Dir.x == 0)
+		return Dir.y < 0 ? -pi / 2 : pi / 2;
 	float a = atanf(Dir.y / Dir.x);
 	if(Dir.x < 0)
 		a = a + pi;

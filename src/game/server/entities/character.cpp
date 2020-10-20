@@ -24,6 +24,12 @@ CCharacter::CCharacter(CGameWorld *pWorld) :
 	m_Health = 0;
 	m_Armor = 0;
 	m_StrongWeakID = 0;
+
+	// never intilize both to zero
+	m_Input.m_TargetX = 0;
+	m_Input.m_TargetY = -1;
+
+	m_LatestPrevPrevInput = m_LatestPrevInput = m_LatestInput = m_PrevInput = m_SavedInput = m_Input;
 }
 
 void CCharacter::Reset()
@@ -50,6 +56,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_Pos = Pos;
 
 	mem_zero(&m_LatestPrevPrevInput, sizeof(m_LatestPrevPrevInput));
+	m_LatestPrevPrevInput.m_TargetY = -1;
 	m_SpawnTick = Server()->Tick();
 	m_WeaponChangeTick = Server()->Tick();
 	Antibot()->OnSpawn(m_pPlayer->GetCID());
