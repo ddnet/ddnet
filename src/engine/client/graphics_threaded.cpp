@@ -1460,7 +1460,7 @@ void CGraphics_Threaded::RenderQuadContainerEx(int ContainerIndex, int QuadOffse
 			return;
 
 		SQuadContainer::SQuad &Quad = Container.m_Quads[QuadOffset];
-		CCommandBuffer::SCommand_RenderQuadContainerAsSprite Cmd;
+		CCommandBuffer::SCommand_RenderQuadContainerEx Cmd;
 
 		WrapClamp();
 
@@ -1493,7 +1493,7 @@ void CGraphics_Threaded::RenderQuadContainerEx(int ContainerIndex, int QuadOffse
 
 			if(!m_pCommandBuffer->AddCommand(Cmd))
 			{
-				dbg_msg("graphics", "failed to allocate memory for render quad container sprite");
+				dbg_msg("graphics", "failed to allocate memory for render quad container extended");
 				return;
 			}
 		}

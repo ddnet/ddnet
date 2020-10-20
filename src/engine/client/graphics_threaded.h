@@ -114,7 +114,7 @@ public:
 		CMD_RENDER_TEXT, // render text
 		CMD_RENDER_TEXT_STREAM, // render text stream
 		CMD_RENDER_QUAD_CONTAINER, // render a quad buffer container
-		CMD_RENDER_QUAD_CONTAINER_SPRITE, // render a quad buffer container as sprite
+		CMD_RENDER_QUAD_CONTAINER_EX, // render a quad buffer container with extended parameters
 		CMD_RENDER_QUAD_CONTAINER_SPRITE_MULTIPLE, // render a quad buffer container as sprite multiple times
 
 		// swap
@@ -447,10 +447,10 @@ public:
 		void *m_pOffset;
 	};
 
-	struct SCommand_RenderQuadContainerAsSprite : public SCommand
+	struct SCommand_RenderQuadContainerEx : public SCommand
 	{
-		SCommand_RenderQuadContainerAsSprite() :
-			SCommand(CMD_RENDER_QUAD_CONTAINER_SPRITE) {}
+		SCommand_RenderQuadContainerEx() :
+			SCommand(CMD_RENDER_QUAD_CONTAINER_EX) {}
 		SState m_State;
 
 		int m_BufferContainerIndex;

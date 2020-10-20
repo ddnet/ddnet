@@ -920,7 +920,7 @@ bool CCommandProcessorFragment_OpenGL::RunCommand(const CCommandBuffer::SCommand
 	case CCommandBuffer::CMD_RENDER_TEXT: Cmd_RenderText(static_cast<const CCommandBuffer::SCommand_RenderText *>(pBaseCommand)); break;
 	case CCommandBuffer::CMD_RENDER_TEXT_STREAM: Cmd_RenderTextStream(static_cast<const CCommandBuffer::SCommand_RenderTextStream *>(pBaseCommand)); break;
 	case CCommandBuffer::CMD_RENDER_QUAD_CONTAINER: Cmd_RenderQuadContainer(static_cast<const CCommandBuffer::SCommand_RenderQuadContainer *>(pBaseCommand)); break;
-	case CCommandBuffer::CMD_RENDER_QUAD_CONTAINER_SPRITE: Cmd_RenderQuadContainerAsSprite(static_cast<const CCommandBuffer::SCommand_RenderQuadContainerAsSprite *>(pBaseCommand)); break;
+	case CCommandBuffer::CMD_RENDER_QUAD_CONTAINER_EX: Cmd_RenderQuadContainerEx(static_cast<const CCommandBuffer::SCommand_RenderQuadContainerEx *>(pBaseCommand)); break;
 	case CCommandBuffer::CMD_RENDER_QUAD_CONTAINER_SPRITE_MULTIPLE: Cmd_RenderQuadContainerAsSpriteMultiple(static_cast<const CCommandBuffer::SCommand_RenderQuadContainerAsSpriteMultiple *>(pBaseCommand)); break;
 	default: return false;
 	}
@@ -2226,7 +2226,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	m_pQuadProgram = new CGLSLQuadProgram;
 	m_pQuadProgramTextured = new CGLSLQuadProgram;
 	m_pTextProgram = new CGLSLTextProgram;
-	m_pSpriteProgram = new CGLSLSpriteProgram;
+	m_pPrimitiveExProgram = new CGLSLPrimitiveExProgram;
+	m_pPrimitiveExProgramTextured = new CGLSLPrimitiveExProgram;
 	m_pSpriteProgramMultiple = new CGLSLSpriteMultipleProgram;
 	m_LastProgramID = 0;
 
@@ -2482,26 +2483,52 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	{
 		CGLSL PrimitiveVertexShader;
 		CGLSL PrimitiveFragmentShader;
-		PrimitiveVertexShader.LoadShader(&ShaderCompiler, pCommand->m_pStorage, "shader/sprite.vert", GL_VERTEX_SHADER);
-		PrimitiveFragmentShader.LoadShader(&ShaderCompiler, pCommand->m_pStorage, "shader/sprite.frag", GL_FRAGMENT_SHADER);
+		PrimitiveVertexShader.LoadShader(&ShaderCompiler, pCommand->m_pStorage, "shader/primex.vert", GL_VERTEX_SHADER);
+		PrimitiveFragmentShader.LoadShader(&ShaderCompiler, pCommand->m_pStorage, "shader/primex.frag", GL_FRAGMENT_SHADER);
 
-		m_pSpriteProgram->CreateProgram();
-		m_pSpriteProgram->AddShader(&PrimitiveVertexShader);
-		m_pSpriteProgram->AddShader(&PrimitiveFragmentShader);
-		m_pSpriteProgram->LinkProgram();
+		m_pPrimitiveExProgram->CreateProgram();
+		m_pPrimitiveExProgram->AddShader(&PrimitiveVertexShader);
+		m_pPrimitiveExProgram->AddShader(&PrimitiveFragmentShader);
+		m_pPrimitiveExProgram->LinkProgram();
 
-		UseProgram(m_pSpriteProgram);
+		UseProgram(m_pPrimitiveExProgram);
 
-		m_pSpriteProgram->m_LocPos = m_pSpriteProgram->GetUniformLoc("Pos");
-		m_pSpriteProgram->m_LocIsTextured = -1;
-		m_pSpriteProgram->m_LocTextureSampler = m_pSpriteProgram->GetUniformLoc("textureSampler");
-		m_pSpriteProgram->m_LocRotation = m_pSpriteProgram->GetUniformLoc("Rotation");
-		m_pSpriteProgram->m_LocCenter = m_pSpriteProgram->GetUniformLoc("Center");
-		m_pSpriteProgram->m_LocVertciesColor = m_pSpriteProgram->GetUniformLoc("VerticesColor");
+		m_pPrimitiveExProgram->m_LocPos = m_pPrimitiveExProgram->GetUniformLoc("gPos");
+		m_pPrimitiveExProgram->m_LocIsTextured = -1;
+		m_pPrimitiveExProgram->m_LocTextureSampler = -1;
+		m_pPrimitiveExProgram->m_LocRotation = m_pPrimitiveExProgram->GetUniformLoc("gRotation");
+		m_pPrimitiveExProgram->m_LocCenter = m_pPrimitiveExProgram->GetUniformLoc("gCenter");
+		m_pPrimitiveExProgram->m_LocVertciesColor = m_pPrimitiveExProgram->GetUniformLoc("gVerticesColor");
 
-		m_pSpriteProgram->SetUniform(m_pSpriteProgram->m_LocRotation, 0.0f);
+		m_pPrimitiveExProgram->SetUniform(m_pPrimitiveExProgram->m_LocRotation, 0.0f);
 		float Center[2] = {0.f, 0.f};
-		m_pSpriteProgram->SetUniformVec2(m_pSpriteProgram->m_LocCenter, 1, Center);
+		m_pPrimitiveExProgram->SetUniformVec2(m_pPrimitiveExProgram->m_LocCenter, 1, Center);
+	}
+	{
+		CGLSL PrimitiveVertexShader;
+		CGLSL PrimitiveFragmentShader;
+		ShaderCompiler.AddDefine("TW_TEXTURED", "");
+		PrimitiveVertexShader.LoadShader(&ShaderCompiler, pCommand->m_pStorage, "shader/primex.vert", GL_VERTEX_SHADER);
+		PrimitiveFragmentShader.LoadShader(&ShaderCompiler, pCommand->m_pStorage, "shader/primex.frag", GL_FRAGMENT_SHADER);
+		ShaderCompiler.ClearDefines();
+
+		m_pPrimitiveExProgramTextured->CreateProgram();
+		m_pPrimitiveExProgramTextured->AddShader(&PrimitiveVertexShader);
+		m_pPrimitiveExProgramTextured->AddShader(&PrimitiveFragmentShader);
+		m_pPrimitiveExProgramTextured->LinkProgram();
+
+		UseProgram(m_pPrimitiveExProgramTextured);
+
+		m_pPrimitiveExProgramTextured->m_LocPos = m_pPrimitiveExProgramTextured->GetUniformLoc("gPos");
+		m_pPrimitiveExProgramTextured->m_LocIsTextured = -1;
+		m_pPrimitiveExProgramTextured->m_LocTextureSampler = m_pPrimitiveExProgramTextured->GetUniformLoc("gTextureSampler");
+		m_pPrimitiveExProgramTextured->m_LocRotation = m_pPrimitiveExProgramTextured->GetUniformLoc("gRotation");
+		m_pPrimitiveExProgramTextured->m_LocCenter = m_pPrimitiveExProgramTextured->GetUniformLoc("gCenter");
+		m_pPrimitiveExProgramTextured->m_LocVertciesColor = m_pPrimitiveExProgramTextured->GetUniformLoc("gVerticesColor");
+
+		m_pPrimitiveExProgramTextured->SetUniform(m_pPrimitiveExProgramTextured->m_LocRotation, 0.0f);
+		float Center[2] = {0.f, 0.f};
+		m_pPrimitiveExProgramTextured->SetUniformVec2(m_pPrimitiveExProgramTextured->m_LocCenter, 1, Center);
 	}
 	{
 		CGLSL PrimitiveVertexShader;
@@ -2623,7 +2650,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Shutdown(const SCommand_Shutdown *
 	m_pPrimitive3DProgram->DeleteProgram();
 	m_pPrimitive3DProgramTextured->DeleteProgram();
 	m_pTextProgram->DeleteProgram();
-	m_pSpriteProgram->DeleteProgram();
+	m_pPrimitiveExProgram->DeleteProgram();
+	m_pPrimitiveExProgramTextured->DeleteProgram();
 	m_pSpriteProgramMultiple->DeleteProgram();
 
 	//clean up everything
@@ -2639,7 +2667,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Shutdown(const SCommand_Shutdown *
 	delete m_pPrimitive3DProgram;
 	delete m_pPrimitive3DProgramTextured;
 	delete m_pTextProgram;
-	delete m_pSpriteProgram;
+	delete m_pPrimitiveExProgram;
+	delete m_pPrimitiveExProgramTextured;
 	delete m_pSpriteProgramMultiple;
 
 	glBindVertexArray(0);
@@ -3597,7 +3626,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadContainer(const CCommand
 	glDrawElements(GL_TRIANGLES, pCommand->m_DrawNum, GL_UNSIGNED_INT, pCommand->m_pOffset);
 }
 
-void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadContainerAsSprite(const CCommandBuffer::SCommand_RenderQuadContainerAsSprite *pCommand)
+void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadContainerEx(const CCommandBuffer::SCommand_RenderQuadContainerEx *pCommand)
 {
 	if(pCommand->m_DrawNum == 0)
 	{
@@ -3620,43 +3649,35 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadContainerAsSprite(const 
 		BufferContainer.m_LastIndexBufferBound = m_QuadDrawIndexBufferID;
 	}
 
-	UseProgram(m_pSpriteProgram);
-	SetState(pCommand->m_State, m_pSpriteProgram);
-
-	if(pCommand->m_State.m_Texture < 0)
+	CGLSLPrimitiveExProgram *pProgram = m_pPrimitiveExProgram;
+	if(pCommand->m_State.m_Texture >= 0 && pCommand->m_State.m_Texture < CCommandBuffer::MAX_TEXTURES)
 	{
-		if(m_UseMultipleTextureUnits && m_pSpriteProgram->m_LastTextureSampler >= 0)
-		{
-			m_TextureSlotBoundToUnit[m_pSpriteProgram->m_LastTextureSampler].m_TextureSlot = -1;
-		}
-		m_TextureSlotBoundToUnit[0].m_TextureSlot = -1;
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, 0);
-		m_pSpriteProgram->SetUniform(m_pSpriteProgram->m_LocTextureSampler, 0);
-		m_pSpriteProgram->m_LastTextureSampler = -1;
-		glBindSampler(0, 0);
+		pProgram = m_pPrimitiveExProgramTextured;
 	}
 
-	if(pCommand->m_Rotation != 0.0f && (m_pSpriteProgram->m_LastCenter[0] != pCommand->m_Center.x || m_pSpriteProgram->m_LastCenter[1] != pCommand->m_Center.y))
+	UseProgram(pProgram);
+	SetState(pCommand->m_State, pProgram);
+
+	if(pCommand->m_Rotation != 0.0f && (pProgram->m_LastCenter[0] != pCommand->m_Center.x || pProgram->m_LastCenter[1] != pCommand->m_Center.y))
 	{
-		m_pSpriteProgram->SetUniformVec2(m_pSpriteProgram->m_LocCenter, 1, (float *)&pCommand->m_Center);
-		m_pSpriteProgram->m_LastCenter[0] = pCommand->m_Center.x;
-		m_pSpriteProgram->m_LastCenter[1] = pCommand->m_Center.y;
+		pProgram->SetUniformVec2(pProgram->m_LocCenter, 1, (float *)&pCommand->m_Center);
+		pProgram->m_LastCenter[0] = pCommand->m_Center.x;
+		pProgram->m_LastCenter[1] = pCommand->m_Center.y;
 	}
 
-	if(m_pSpriteProgram->m_LastRotation != pCommand->m_Rotation)
+	if(pProgram->m_LastRotation != pCommand->m_Rotation)
 	{
-		m_pSpriteProgram->SetUniform(m_pSpriteProgram->m_LocRotation, pCommand->m_Rotation);
-		m_pSpriteProgram->m_LastRotation = pCommand->m_Rotation;
+		pProgram->SetUniform(pProgram->m_LocRotation, pCommand->m_Rotation);
+		pProgram->m_LastRotation = pCommand->m_Rotation;
 	}
 
-	if(m_pSpriteProgram->m_LastVertciesColor[0] != pCommand->m_VertexColor.r || m_pSpriteProgram->m_LastVertciesColor[1] != pCommand->m_VertexColor.g || m_pSpriteProgram->m_LastVertciesColor[2] != pCommand->m_VertexColor.b || m_pSpriteProgram->m_LastVertciesColor[3] != pCommand->m_VertexColor.a)
+	if(pProgram->m_LastVertciesColor[0] != pCommand->m_VertexColor.r || pProgram->m_LastVertciesColor[1] != pCommand->m_VertexColor.g || pProgram->m_LastVertciesColor[2] != pCommand->m_VertexColor.b || pProgram->m_LastVertciesColor[3] != pCommand->m_VertexColor.a)
 	{
-		m_pSpriteProgram->SetUniformVec4(m_pSpriteProgram->m_LocVertciesColor, 1, (float *)&pCommand->m_VertexColor);
-		m_pSpriteProgram->m_LastVertciesColor[0] = pCommand->m_VertexColor.r;
-		m_pSpriteProgram->m_LastVertciesColor[1] = pCommand->m_VertexColor.g;
-		m_pSpriteProgram->m_LastVertciesColor[2] = pCommand->m_VertexColor.b;
-		m_pSpriteProgram->m_LastVertciesColor[3] = pCommand->m_VertexColor.a;
+		pProgram->SetUniformVec4(pProgram->m_LocVertciesColor, 1, (float *)&pCommand->m_VertexColor);
+		pProgram->m_LastVertciesColor[0] = pCommand->m_VertexColor.r;
+		pProgram->m_LastVertciesColor[1] = pCommand->m_VertexColor.g;
+		pProgram->m_LastVertciesColor[2] = pCommand->m_VertexColor.b;
+		pProgram->m_LastVertciesColor[3] = pCommand->m_VertexColor.a;
 	}
 
 	glDrawElements(GL_TRIANGLES, pCommand->m_DrawNum, GL_UNSIGNED_INT, pCommand->m_pOffset);
