@@ -825,7 +825,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Render(const CCommandBuffer::SCommand
 		glDrawArrays(GL_TRIANGLES, 0, pCommand->m_PrimCount * 3);
 		break;
 	default:
-		dbg_msg("render", "unknown primtype %d\n", pCommand->m_Cmd);
+		dbg_msg("render", "unknown primtype %d\n", pCommand->m_PrimType);
 	};
 }
 
@@ -1649,7 +1649,7 @@ void CCommandProcessorFragment_OpenGL2::Cmd_RenderTex3D(const CCommandBuffer::SC
 		glDrawArrays(GL_TRIANGLES, 0, pCommand->m_PrimCount * 3);
 		break;
 	default:
-		dbg_msg("render", "unknown primtype %d\n", pCommand->m_Cmd);
+		dbg_msg("render", "unknown primtype %d\n", pCommand->m_PrimType);
 	};
 
 	glDisableClientState(GL_VERTEX_ARRAY);
@@ -2957,6 +2957,9 @@ void CCommandProcessorFragment_OpenGL3_3::UploadStreamBufferData(unsigned int Pr
 	case CCommandBuffer::PRIMTYPE_LINES:
 		Count = PrimitiveCount * 2;
 		break;
+	case CCommandBuffer::PRIMTYPE_TRIANGLES:
+		Count = PrimitiveCount * 3;
+		break;
 	case CCommandBuffer::PRIMTYPE_QUADS:
 		Count = PrimitiveCount * 4;
 		break;
@@ -2997,6 +3000,9 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Render(const CCommandBuffer::SComm
 	case CCommandBuffer::PRIMTYPE_LINES:
 		glDrawArrays(GL_LINES, 0, pCommand->m_PrimCount * 2);
 		break;
+	case CCommandBuffer::PRIMTYPE_TRIANGLES:
+		glDrawArrays(GL_TRIANGLES, 0, pCommand->m_PrimCount * 3);
+		break;
 	case CCommandBuffer::PRIMTYPE_QUADS:
 		if(m_LastIndexBufferBound[m_LastStreamBuffer] != m_QuadDrawIndexBufferID)
 		{
@@ -3006,7 +3012,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Render(const CCommandBuffer::SComm
 		glDrawElements(GL_TRIANGLES, pCommand->m_PrimCount * 6, GL_UNSIGNED_INT, 0);
 		break;
 	default:
-		dbg_msg("render", "unknown primtype %d\n", pCommand->m_Cmd);
+		dbg_msg("render", "unknown primtype %d\n", pCommand->m_PrimType);
 	};
 
 	m_LastStreamBuffer = (m_LastStreamBuffer + 1 >= MAX_STREAM_BUFFER_COUNT ? 0 : m_LastStreamBuffer + 1);
@@ -3035,7 +3041,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderTex3D(const CCommandBuffer::
 		glDrawElements(GL_TRIANGLES, pCommand->m_PrimCount * 6, GL_UNSIGNED_INT, 0);
 		break;
 	default:
-		dbg_msg("render", "unknown primtype %d\n", pCommand->m_Cmd);
+		dbg_msg("render", "unknown primtype %d\n", pCommand->m_PrimType);
 	};
 }
 

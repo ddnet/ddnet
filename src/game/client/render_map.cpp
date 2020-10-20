@@ -94,7 +94,7 @@ void CRenderTools::RenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, ENV
 
 void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser, float Alpha)
 {
-	Graphics()->QuadsBegin();
+	Graphics()->TrianglesBegin();
 	float Conv = 1 / 255.0f;
 	for(int i = 0; i < NumQuads; i++)
 	{
@@ -173,7 +173,7 @@ void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags
 			fx2f(pPoints[3].x) + OffsetX, fx2f(pPoints[3].y) + OffsetY);
 		Graphics()->QuadsDrawFreeform(&Freeform, 1);
 	}
-	Graphics()->QuadsEnd();
+	Graphics()->TrianglesEnd();
 }
 
 void CRenderTools::RenderTileRectangle(int RectX, int RectY, int RectW, int RectH,
