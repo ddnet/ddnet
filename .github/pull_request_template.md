@@ -1,5 +1,3 @@
-## Summary
-
 <!-- What is the motivation for the changes of this pull request -->
 
 ## Checklist
