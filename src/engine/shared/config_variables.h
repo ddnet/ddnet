@@ -266,9 +266,6 @@ MACRO_CONFIG_INT(SvRejoinTeam0, sv_rejoin_team_0, 1, 0, 1, CFGFLAG_SERVER, "Make
 MACRO_CONFIG_INT(ClReconnectTimeout, cl_reconnect_timeout, 120, 0, 600, CFGFLAG_CLIENT | CFGFLAG_SAVE, "How many seconds to wait before reconnecting (after timeout, 0 for off)")
 MACRO_CONFIG_INT(ClReconnectFull, cl_reconnect_full, 5, 0, 600, CFGFLAG_CLIENT | CFGFLAG_SAVE, "How many seconds to wait before reconnecting (when server is full, 0 for off)")
 
-MACRO_CONFIG_INT(ClChatTee, cl_chat_tee, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show a tee before the player name in chat");
-MACRO_CONFIG_INT(ClChatBackground, cl_chat_background, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show a background for each chat message");
-
 MACRO_CONFIG_COL(ClMessageSystemColor, cl_message_system_color, 2817983, CFGFLAG_CLIENT | CFGFLAG_SAVE, "System message color")
 MACRO_CONFIG_COL(ClMessageClientColor, cl_message_client_color, 9633471, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Client message color")
 MACRO_CONFIG_COL(ClMessageHighlightColor, cl_message_highlight_color, 65471, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Highlighted message color")
@@ -362,8 +359,12 @@ MACRO_CONFIG_INT(ClPredictFreeze, cl_predict_freeze, 1, 0, 2, CFGFLAG_CLIENT | C
 MACRO_CONFIG_INT(ClShowNinja, cl_show_ninja, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show ninja skin")
 MACRO_CONFIG_INT(ClShowHookCollOther, cl_show_hook_coll_other, 1, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show other players' hook collision line (2 to always show)")
 MACRO_CONFIG_INT(ClShowHookCollOwn, cl_show_hook_coll_own, 1, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show own players' hook collision line (2 to always show)")
+
 MACRO_CONFIG_INT(ClChatTeamColors, cl_chat_teamcolors, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show names in chat in team colors")
 MACRO_CONFIG_INT(ClChatReset, cl_chat_reset, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Reset chat when pressing escape")
+MACRO_CONFIG_INT(ClChatTee, cl_chat_tee, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show a tee before the player name in chat");
+MACRO_CONFIG_INT(ClChatBackground, cl_chat_background, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show a background for each chat message");
+
 MACRO_CONFIG_INT(ClShowDirection, cl_show_direction, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Show tee direction")
 MACRO_CONFIG_INT(ClHttpMapDownload, cl_http_map_download, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Try fast HTTP map download first")
 MACRO_CONFIG_INT(ClOldGunPosition, cl_old_gun_position, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Tees hold gun a bit higher like in TW 0.6.1 and older")
