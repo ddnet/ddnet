@@ -684,6 +684,23 @@ void CGraphics_Threaded::QuadsTex3DEnd()
 	m_Drawing = 0;
 }
 
+void CGraphics_Threaded::TrianglesBegin()
+{
+	dbg_assert(m_Drawing == 0, "called Graphics()->TrianglesBegin twice");
+	m_Drawing = DRAWING_TRIANGLES;
+
+	QuadsSetSubset(0, 0, 1, 1);
+	QuadsSetRotation(0);
+	SetColor(1, 1, 1, 1);
+}
+
+void CGraphics_Threaded::TrianglesEnd()
+{
+	dbg_assert(m_Drawing == DRAWING_TRIANGLES, "called Graphics()->TrianglesEnd without begin");
+	FlushVertices();
+	m_Drawing = 0;
+}
+
 void CGraphics_Threaded::QuadsEndKeepVertices()
 {
 	dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->QuadsEndKeepVertices without begin");
@@ -914,9 +931,9 @@ void CGraphics_Threaded::QuadsTex3DDrawTL(const CQuadItem *pArray, int Num)
 
 void CGraphics_Threaded::QuadsDrawFreeform(const CFreeformItem *pArray, int Num)
 {
-	dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->QuadsDrawFreeform without begin");
+	dbg_assert(m_Drawing == DRAWING_QUADS || m_Drawing == DRAWING_TRIANGLES, "called Graphics()->QuadsDrawFreeform without begin");
 
-	if(g_Config.m_GfxQuadAsTriangle && !m_IsNewOpenGL)
+	if((g_Config.m_GfxQuadAsTriangle && !m_IsNewOpenGL) || m_Drawing == DRAWING_TRIANGLES)
 	{
 		for(int i = 0; i < Num; ++i)
 		{
@@ -1539,10 +1556,9 @@ void CGraphics_Threaded::RenderQuadContainerEx(int ContainerIndex, int QuadOffse
 		}
 		else
 		{
+			mem_copy(m_aVertices, &Container.m_Quads[QuadOffset], sizeof(CCommandBuffer::SVertex) * 4 * QuadDrawNum);
 			for(int i = 0; i < QuadDrawNum; ++i)
 			{
-				mem_copy(m_aVertices, &Container.m_Quads[QuadOffset], sizeof(CCommandBuffer::SVertex) * 4 * 1);
-
 				for(int n = 0; n < 4; ++n)
 				{
 					m_aVertices[i * 4 + n].m_Pos.x *= ScaleX;

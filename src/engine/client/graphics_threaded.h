@@ -680,7 +680,8 @@ class CGraphics_Threaded : public IEngineGraphics
 		NUM_CMDBUFFERS = 2,
 
 		DRAWING_QUADS = 1,
-		DRAWING_LINES = 2
+		DRAWING_LINES = 2,
+		DRAWING_TRIANGLES = 3
 	};
 
 	CCommandBuffer::SState m_State;
@@ -856,6 +857,8 @@ public:
 	void TextQuadsEnd(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor) override;
 	void QuadsTex3DBegin() override;
 	void QuadsTex3DEnd() override;
+	void TrianglesBegin() override;
+	void TrianglesEnd() override;
 	void QuadsEndKeepVertices() override;
 	void QuadsDrawCurrentVertices(bool KeepVertices = true) override;
 	void QuadsSetRotation(float Angle) override;
@@ -1025,6 +1028,11 @@ public:
 		{
 			PrimType = CCommandBuffer::PRIMTYPE_LINES;
 			PrimCount = NumVerts / 2;
+		}
+		else if(m_Drawing == DRAWING_TRIANGLES)
+		{
+			PrimType = CCommandBuffer::PRIMTYPE_TRIANGLES;
+			PrimCount = NumVerts / 3;
 		}
 		else
 			return;

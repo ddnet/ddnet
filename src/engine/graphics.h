@@ -290,6 +290,8 @@ public:
 	virtual void TextQuadsEnd(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor) = 0;
 	virtual void QuadsTex3DBegin() = 0;
 	virtual void QuadsTex3DEnd() = 0;
+	virtual void TrianglesBegin() = 0;
+	virtual void TrianglesEnd() = 0;
 	virtual void QuadsEndKeepVertices() = 0;
 	virtual void QuadsDrawCurrentVertices(bool KeepVertices = true) = 0;
 	virtual void QuadsSetRotation(float Angle) = 0;
