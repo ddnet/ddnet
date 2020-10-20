@@ -1103,7 +1103,7 @@ void CGameContext::ConEyeEmote(IConsole::IResult *pResult, void *pUserData)
 
 		int Duration = 1;
 		if(pResult->NumArguments() > 1)
-			Duration = pResult->GetInteger(1);
+			Duration = clamp(pResult->GetInteger(1), 1, 86400);
 
 		pPlayer->m_DefEmoteReset = pSelf->Server()->Tick() + Duration * pSelf->Server()->TickSpeed();
 		pPlayer->m_LastEyeEmote = pSelf->Server()->Tick();
