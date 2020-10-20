@@ -49,6 +49,8 @@ public:
 	float m_X, m_Y;
 	float m_MaxCharacterHeight;
 
+	float m_LongestLineWidth;
+
 	CFont *m_pFont;
 	float m_FontSize;
 	float m_AlignedFontSize;
@@ -78,6 +80,7 @@ class ITextRender : public IInterface
 	MACRO_INTERFACE("textrender", 0)
 public:
 	virtual void SetCursor(CTextCursor *pCursor, float x, float y, float FontSize, int Flags) = 0;
+	virtual void MoveCursor(CTextCursor *pCursor, float x, float y) = 0;
 
 	virtual CFont *LoadFont(const char *pFilename, const unsigned char *pBuf, size_t Size) = 0;
 	virtual bool LoadFallbackFont(CFont *pFont, const char *pFilename, const unsigned char *pBuf, size_t Size) = 0;

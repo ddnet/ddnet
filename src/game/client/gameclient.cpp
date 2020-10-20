@@ -2888,6 +2888,7 @@ void CGameClient::RefindSkins()
 		}
 	}
 	m_pGhost->RefindSkin();
+	m_pChat->RefindSkins();
 }
 
 void CGameClient::LoadMapSettings()

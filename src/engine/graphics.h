@@ -331,6 +331,7 @@ public:
 	virtual void DeleteQuadContainer(int ContainerIndex) = 0;
 	virtual void RenderQuadContainer(int ContainerIndex, int QuadDrawNum) = 0;
 	virtual void RenderQuadContainer(int ContainerIndex, int QuadOffset, int QuadDrawNum) = 0;
+	virtual void RenderQuadContainerEx(int ContainerIndex, int QuadOffset, int QuadDrawNum, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f) = 0;
 	virtual void RenderQuadContainerAsSprite(int ContainerIndex, int QuadOffset, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f) = 0;
 
 	struct SRenderSpriteInfo
