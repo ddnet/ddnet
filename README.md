@@ -197,7 +197,7 @@ $ dnf install ddnet
 Arch Linux
 
 ```bash
-$ pacman -Sy teeworlds
+$ yay -S ddnet
 ```
 
 
