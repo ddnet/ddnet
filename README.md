@@ -4,7 +4,7 @@ Our own flavor of DDRace, a Teeworlds mod. See the [website](https://ddnet.tw) f
 
 Development discussions happen on #ddnet on Quakenet ([Webchat](http://webchat.quakenet.org/?channels=ddnet&uio=d4)) or on [Discord in the developer channel](https://discord.gg/xsEd9xu).
 
-You can get binary releases on the [DDNet website](https://ddnet.tw/downloads/).
+You can get binary releases on the [DDNet website](https://ddnet.tw/downloads/), find it on [Steam](https://store.steampowered.com/app/412220/DDraceNetwork/) or [install from repository](#installation-from-repository).
 
 Cloning
 -------
@@ -168,7 +168,36 @@ $ make -j8
 $ ./DDNet-Server -f mine.cfg
 ```
 
-Repository status
-=================
+<a href="https://repology.org/metapackage/ddnet/versions">
+    <img src="https://repology.org/badge/vertical-allrepos/ddnet.svg?header=" alt="Packaging status" align="right">
+</a>
 
-[![Repository status](https://repology.org/badge/vertical-allrepos/ddnet.svg?header=)](https://repology.org/metapackage/ddnet/versions)
+Installation from Repository
+-----------------
+
+Debian/Ubuntu
+
+```bash
+$ apt-get install ddnet
+
+```
+
+MacOS
+
+```bash
+$ brew cask install ddnet
+```
+
+Fedora
+
+```bash
+$ dnf install ddnet
+```
+
+Arch Linux
+
+```bash
+$ pacman -Sy teeworlds
+```
+
+
