@@ -93,6 +93,8 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 		float Width = 400 * 3.0f * Graphics()->ScreenAspect();
 		float Height = 400 * 3.0f;
 
+		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 		Graphics()->MapScreen(0, 0, Width * 1.5f, Height * 1.5f);
 
 		float FontSize = 36.0f;
@@ -134,6 +136,7 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 		}
 
 		m_aKillmsgs[m_KillmsgCurrent] = Kill;
+		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 	}
 }
 
