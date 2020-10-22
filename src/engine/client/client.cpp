@@ -6,7 +6,6 @@
 #include <new>
 
 #include <stdarg.h>
-#include <stdlib.h> // qsort
 #include <tuple>
 
 #include <base/hash_ctxt.h>
@@ -42,7 +41,6 @@
 #include <engine/shared/demo.h>
 #include <engine/shared/fifo.h>
 #include <engine/shared/filecollection.h>
-#include <engine/shared/ghost.h>
 #include <engine/shared/json.h>
 #include <engine/shared/network.h>
 #include <engine/shared/packer.h>
@@ -502,7 +500,7 @@ void CClient::SendInput()
 
 	bool Force = false;
 	// fetch input
-	for(int Dummy = 0; Dummy < 2; Dummy++)
+	for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
 	{
 		if(!m_DummyConnected && Dummy != 0)
 		{
@@ -1166,8 +1164,8 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, SHA256_DI
 		return s_aErrorMsg;
 	}
 
-	// get the crc of the map
-	if(m_pMap->Crc() != WantedCrc)
+	// Only check CRC if we don't have the secure SHA256.
+	if(!pWantedSha256 && m_pMap->Crc() != WantedCrc)
 	{
 		str_format(s_aErrorMsg, sizeof(s_aErrorMsg), "map differs from the server. %08x != %08x", m_pMap->Crc(), WantedCrc);
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", s_aErrorMsg);
@@ -1197,15 +1195,17 @@ const char *CClient::LoadMapSearch(const char *pMapName, SHA256_DIGEST *pWantedS
 	char aWanted[256];
 	char aWantedSha256[SHA256_MAXSTRSIZE];
 
-	aWanted[0] = 0;
-
 	if(pWantedSha256)
 	{
 		sha256_str(*pWantedSha256, aWantedSha256, sizeof(aWantedSha256));
-		str_format(aWanted, sizeof(aWanted), " sha256=%s", aWantedSha256);
+		str_format(aWanted, sizeof(aWanted), "sha256=%s", aWantedSha256);
+	}
+	else
+	{
+		str_format(aWanted, sizeof(aWanted), "crc=%08x", WantedCrc);
 	}
 
-	str_format(aBuf, sizeof(aBuf), "loading map, map=%s wanted%s crc=%08x", pMapName, aWanted, WantedCrc);
+	str_format(aBuf, sizeof(aBuf), "loading map, map=%s wanted %s", pMapName, aWanted);
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", aBuf);
 	SetState(IClient::STATE_LOADING);
 
@@ -1218,14 +1218,15 @@ const char *CClient::LoadMapSearch(const char *pMapName, SHA256_DIGEST *pWantedS
 	// try the downloaded maps
 	if(pWantedSha256)
 	{
-		str_format(aBuf, sizeof(aBuf), "downloadedmaps/%s_%08x_%s.map", pMapName, WantedCrc, aWantedSha256);
+		str_format(aBuf, sizeof(aBuf), "downloadedmaps/%s_%s.map", pMapName, aWantedSha256);
+	}
+	else
+	{
+		str_format(aBuf, sizeof(aBuf), "downloadedmaps/%s_%08x.map", pMapName, WantedCrc);
 		pError = LoadMap(pMapName, aBuf, pWantedSha256, WantedCrc);
 		if(!pError)
 			return pError;
 	}
-
-	// try the downloaded maps folder without appending the sha256
-	str_format(aBuf, sizeof(aBuf), "downloadedmaps/%s_%08x.map", pMapName, WantedCrc);
 	pError = LoadMap(pMapName, aBuf, pWantedSha256, WantedCrc);
 	if(!pError)
 		return pError;
@@ -1239,27 +1240,25 @@ const char *CClient::LoadMapSearch(const char *pMapName, SHA256_DIGEST *pWantedS
 	return pError;
 }
 
-int CClient::PlayerScoreNameComp(const void *a, const void *b)
+bool CClient::PlayerScoreNameLess(const CServerInfo::CClient &p0, const CServerInfo::CClient &p1)
 {
-	CServerInfo::CClient *p0 = (CServerInfo::CClient *)a;
-	CServerInfo::CClient *p1 = (CServerInfo::CClient *)b;
-	if(p0->m_Player && !p1->m_Player)
-		return -1;
-	if(!p0->m_Player && p1->m_Player)
-		return 1;
+	if(p0.m_Player && !p1.m_Player)
+		return true;
+	if(!p0.m_Player && p1.m_Player)
+		return false;
 
-	int Score0 = p0->m_Score;
-	int Score1 = p1->m_Score;
+	int Score0 = p0.m_Score;
+	int Score1 = p1.m_Score;
 	if(Score0 == -9999)
 		Score0 = INT_MIN;
 	if(Score1 == -9999)
 		Score1 = INT_MIN;
 
 	if(Score0 > Score1)
-		return -1;
+		return true;
 	if(Score0 < Score1)
-		return 1;
-	return str_comp_nocase(p0->m_aName, p1->m_aName);
+		return false;
+	return str_comp_nocase(p0.m_aName, p1.m_aName) < 0;
 }
 
 void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
@@ -1520,7 +1519,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 
 	if(!Up.Error() || IgnoreError)
 	{
-		qsort(Info.m_aClients, Info.m_NumReceivedClients, sizeof(*Info.m_aClients), PlayerScoreNameComp);
+		std::sort(Info.m_aClients, Info.m_aClients + Info.m_NumReceivedClients, PlayerScoreNameLess);
 
 		if(!DuplicatedPacket && (!pEntry || !pEntry->m_GotInfo || SavedType >= pEntry->m_Info.m_Type))
 		{
@@ -1569,28 +1568,23 @@ bool CClient::ShouldSendChatTimeoutCodeHeuristic()
 
 static void FormatMapDownloadFilename(const char *pName, SHA256_DIGEST *pSha256, int Crc, bool Temp, char *pBuffer, int BufferSize)
 {
-	char aSha256[SHA256_MAXSTRSIZE + 1];
-	aSha256[0] = 0;
+	char aHash[SHA256_MAXSTRSIZE];
 	if(pSha256)
 	{
-		aSha256[0] = '_';
-		sha256_str(*pSha256, aSha256 + 1, sizeof(aSha256) - 1);
+		sha256_str(*pSha256, aHash, sizeof(aHash));
+	}
+	else
+	{
+		str_format(aHash, sizeof(aHash), "%08x", Crc);
 	}
 
 	if(Temp)
 	{
-		str_format(pBuffer, BufferSize, "%s_%08x%s.map.%d.tmp",
-			pName,
-			Crc,
-			aSha256,
-			pid());
+		str_format(pBuffer, BufferSize, "%s_%s.map.%d.tmp", pName, aHash, pid());
 	}
 	else
 	{
-		str_format(pBuffer, BufferSize, "%s_%08x%s.map",
-			pName,
-			Crc,
-			aSha256);
+		str_format(pBuffer, BufferSize, "%s_%s.map", pName, aHash);
 	}
 }
 
@@ -1875,7 +1869,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 			int GameTick = Unpacker.GetInt();
 			int DeltaTick = GameTick - Unpacker.GetInt();
 			int PartSize = 0;
-			int Crc = 0;
+			unsigned int Crc = 0;
 			int CompleteSize = 0;
 			const char *pData = 0;
 
@@ -2163,7 +2157,7 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 			int GameTick = Unpacker.GetInt();
 			int DeltaTick = GameTick - Unpacker.GetInt();
 			int PartSize = 0;
-			int Crc = 0;
+			unsigned int Crc = 0;
 			int CompleteSize = 0;
 			const char *pData = 0;
 
@@ -2880,7 +2874,6 @@ void CClient::Update()
 			FinishDDNetInfo();
 		else if(m_pDDNetInfoTask->State() == HTTP_ERROR)
 		{
-			m_Warnings.emplace_back(SWarning(Localize("Downloading ddnet-info.json failed")));
 			Storage()->RemoveFile(m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
 			ResetDDNetInfo();
 		}
@@ -3032,6 +3025,10 @@ void CClient::Run()
 			return;
 		}
 	}
+
+	// make sure the first frame just clears everything to prevent undesired colors when waiting for io
+	Graphics()->Clear(0, 0, 0);
+	Graphics()->Swap();
 
 	// init sound, allowed to fail
 	m_SoundInitFailed = Sound()->Init() != 0;
@@ -4372,7 +4369,12 @@ const char *CClient::GetCurrentMapPath()
 	return m_aCurrentMapPath;
 }
 
-unsigned CClient::GetMapCrc()
+SHA256_DIGEST CClient::GetCurrentMapSha256()
+{
+	return m_pMap->Sha256();
+}
+
+unsigned CClient::GetCurrentMapCrc()
 {
 	return m_pMap->Crc();
 }

@@ -1,14 +1,14 @@
+#include "ghost.h"
+
 #include <base/system.h>
 
 #include <engine/console.h>
+#include <engine/shared/compression.h>
+#include <engine/shared/network.h>
 #include <engine/storage.h>
 
-#include "compression.h"
-#include "ghost.h"
-#include "network.h"
-
 static const unsigned char gs_aHeaderMarker[8] = {'T', 'W', 'G', 'H', 'O', 'S', 'T', 0};
-static const unsigned char gs_ActVersion = 5;
+static const unsigned char gs_CurVersion = 6;
 static const int gs_NumTicksOffset = 93;
 
 CGhostRecorder::CGhostRecorder()
@@ -24,7 +24,7 @@ void CGhostRecorder::Init()
 }
 
 // Record
-int CGhostRecorder::Start(const char *pFilename, const char *pMap, unsigned Crc, const char *pName)
+int CGhostRecorder::Start(const char *pFilename, const char *pMap, SHA256_DIGEST MapSha256, const char *pName)
 {
 	m_File = m_pStorage->OpenFile(pFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	if(!m_File)
@@ -39,20 +39,17 @@ int CGhostRecorder::Start(const char *pFilename, const char *pMap, unsigned Crc,
 	CGhostHeader Header;
 	mem_zero(&Header, sizeof(Header));
 	mem_copy(Header.m_aMarker, gs_aHeaderMarker, sizeof(Header.m_aMarker));
-	Header.m_Version = gs_ActVersion;
+	Header.m_Version = gs_CurVersion;
 	str_copy(Header.m_aOwner, pName, sizeof(Header.m_aOwner));
 	str_copy(Header.m_aMap, pMap, sizeof(Header.m_aMap));
-	Header.m_aCrc[0] = (Crc >> 24) & 0xff;
-	Header.m_aCrc[1] = (Crc >> 16) & 0xff;
-	Header.m_aCrc[2] = (Crc >> 8) & 0xff;
-	Header.m_aCrc[3] = (Crc)&0xff;
+	Header.m_MapSha256 = MapSha256;
 	io_write(m_File, &Header, sizeof(Header));
 
 	m_LastItem.Reset();
 	ResetBuffer();
 
 	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "Ghost recording to '%s'", pFilename);
+	str_format(aBuf, sizeof(aBuf), "ghost recording to '%s'", pFilename);
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ghost_recorder", aBuf);
 	return 0;
 }
@@ -185,7 +182,7 @@ void CGhostLoader::ResetBuffer()
 	m_BufferPrevItem = -1;
 }
 
-int CGhostLoader::Load(const char *pFilename, const char *pMap, unsigned Crc)
+int CGhostLoader::Load(const char *pFilename, const char *pMap, SHA256_DIGEST MapSha256, unsigned MapCrc)
 {
 	m_File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_SAVE);
 	if(!m_File)
@@ -209,7 +206,7 @@ int CGhostLoader::Load(const char *pFilename, const char *pMap, unsigned Crc)
 		return -1;
 	}
 
-	if(m_Header.m_Version != gs_ActVersion && m_Header.m_Version != 4)
+	if(!(4 <= m_Header.m_Version && m_Header.m_Version <= gs_CurVersion))
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "ghost version %d is not supported", m_Header.m_Version);
@@ -219,14 +216,47 @@ int CGhostLoader::Load(const char *pFilename, const char *pMap, unsigned Crc)
 		return -1;
 	}
 
-	unsigned GhostMapCrc = (m_Header.m_aCrc[0] << 24) | (m_Header.m_aCrc[1] << 16) | (m_Header.m_aCrc[2] << 8) | (m_Header.m_aCrc[3]);
-	if(str_comp(m_Header.m_aMap, pMap) != 0 || GhostMapCrc != Crc)
+	if(str_comp(m_Header.m_aMap, pMap) != 0)
 	{
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "ghost map name '%s' does not match current map '%s'", m_Header.m_aMap, pMap);
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ghost_loader", aBuf);
 		io_close(m_File);
 		m_File = 0;
 		return -1;
 	}
+	if(m_Header.m_Version >= 6)
+	{
+		if(m_Header.m_MapSha256 != MapSha256)
+		{
+			char aGhostSha256[SHA256_MAXSTRSIZE];
+			sha256_str(m_Header.m_MapSha256, aGhostSha256, sizeof(aGhostSha256));
+			char aMapSha256[SHA256_MAXSTRSIZE];
+			sha256_str(MapSha256, aMapSha256, sizeof(aMapSha256));
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "ghost map '%s' sha256 mismatch, wanted=%s ghost=%s", pMap, aMapSha256, aGhostSha256);
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ghost_loader", aBuf);
+			io_close(m_File);
+			m_File = 0;
+			return -1;
+		}
+	}
+	else
+	{
+		io_skip(m_File, -(int)sizeof(SHA256_DIGEST));
+		unsigned GhostMapCrc = (m_Header.m_aZeroes[0] << 24) | (m_Header.m_aZeroes[1] << 16) | (m_Header.m_aZeroes[2] << 8) | (m_Header.m_aZeroes[3]);
+		if(str_comp(m_Header.m_aMap, pMap) != 0 || GhostMapCrc != MapCrc)
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "ghost map '%s' crc mismatch, wanted=%08x ghost=%08x", pMap, MapCrc, GhostMapCrc);
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ghost_loader", aBuf);
+			io_close(m_File);
+			m_File = 0;
+			return -1;
+		}
+	}
 
+	m_Info = m_Header.ToGhostInfo();
 	m_LastItem.Reset();
 	ResetBuffer();
 
@@ -336,177 +366,41 @@ void CGhostLoader::Close()
 	m_File = 0;
 }
 
-bool CGhostLoader::GetGhostInfo(const char *pFilename, CGhostHeader *pGhostHeader, const char *pMap, unsigned Crc)
+bool CGhostLoader::GetGhostInfo(const char *pFilename, CGhostInfo *pInfo, const char *pMap, SHA256_DIGEST MapSha256, unsigned MapCrc)
 {
-	if(!pGhostHeader)
-		return false;
-
-	mem_zero(pGhostHeader, sizeof(CGhostHeader));
+	CGhostHeader Header;
+	mem_zero(&Header, sizeof(Header));
 
 	IOHANDLE File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_SAVE);
 	if(!File)
 		return false;
 
-	io_read(File, pGhostHeader, sizeof(CGhostHeader));
-
-	if(mem_comp(pGhostHeader->m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) == 0 && (pGhostHeader->m_Version == 2 || pGhostHeader->m_Version == 3))
-	{
-		io_close(File);
-		// old version... try to update
-		IGhostRecorder *pRecorder = Kernel()->RequestInterface<IGhostRecorder>();
-		if(CGhostUpdater::Update(pRecorder, m_pStorage, m_pConsole, pFilename))
-		{
-			// try again
-			File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_SAVE);
-			io_read(File, pGhostHeader, sizeof(CGhostHeader));
-		}
-		else
-			return false;
-	}
-
+	io_read(File, &Header, sizeof(Header));
 	io_close(File);
 
-	if(mem_comp(pGhostHeader->m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) || (pGhostHeader->m_Version != gs_ActVersion && pGhostHeader->m_Version != 4))
+	if(mem_comp(Header.m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) || !(4 <= Header.m_Version && Header.m_Version <= gs_CurVersion))
 		return false;
 
-	unsigned GhostMapCrc = (pGhostHeader->m_aCrc[0] << 24) | (pGhostHeader->m_aCrc[1] << 16) | (pGhostHeader->m_aCrc[2] << 8) | (pGhostHeader->m_aCrc[3]);
-	if(str_comp(pGhostHeader->m_aMap, pMap) != 0 || GhostMapCrc != Crc)
-		return false;
-
-	return true;
-}
-
-inline void StrToInts(int *pInts, int Num, const char *pStr)
-{
-	int Index = 0;
-	while(Num)
+	if(str_comp(Header.m_aMap, pMap) != 0)
 	{
-		char aBuf[4] = {0, 0, 0, 0};
-		for(int c = 0; c < 4 && pStr[Index]; c++, Index++)
-			aBuf[c] = pStr[Index];
-		*pInts = ((aBuf[0] + 128) << 24) | ((aBuf[1] + 128) << 16) | ((aBuf[2] + 128) << 8) | (aBuf[3] + 128);
-		pInts++;
-		Num--;
-	}
-
-	// null terminate
-	pInts[-1] &= 0xffffff00;
-}
-
-bool CGhostUpdater::Update(class IGhostRecorder *pRecorder, class IStorage *pStorage, class IConsole *pConsole, const char *pFilename)
-{
-	pStorage->CreateFolder("ghosts/backup", IStorage::TYPE_SAVE);
-
-	const char *pExtractedName = pFilename;
-	for(const char *pSrc = pFilename; *pSrc; pSrc++)
-		if(*pSrc == '/' || *pSrc == '\\')
-			pExtractedName = pSrc + 1;
-
-	char aBackupFilename[512];
-	str_format(aBackupFilename, sizeof(aBackupFilename), "ghosts/backup/%s", pExtractedName);
-	if(!pStorage->RenameFile(pFilename, aBackupFilename, IStorage::TYPE_SAVE))
-		return false;
-
-	IOHANDLE File = pStorage->OpenFile(aBackupFilename, IOFLAG_READ, IStorage::TYPE_SAVE);
-	if(!File)
-		return false;
-
-	// read header
-	CGhostHeaderMain Header;
-	io_read(File, &Header, sizeof(Header));
-	if(mem_comp(Header.m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) != 0 || (Header.m_Version != 2 && Header.m_Version != 3))
-	{
-		pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ghost/updater", "error: no valid ghost file");
-		io_close(File);
 		return false;
 	}
-
-	io_seek(File, 0, IOSEEK_START);
-
-	int Ticks, Time;
-	if(Header.m_Version == 2)
+	if(Header.m_Version >= 6)
 	{
-		pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ghost/updater", "updating v2 ghost file");
-		CGhostHeaderV2 ExtHeader;
-		char aSkinData[ms_SkinSizeV2];
-		io_read(File, &ExtHeader, sizeof(ExtHeader));
-		io_read(File, aSkinData, sizeof(aSkinData));
-
-		Ticks = ExtHeader.m_NumShots;
-		Time = ExtHeader.m_Time * 1000;
-
-		unsigned Crc = (ExtHeader.m_aCrc[0] << 24) | (ExtHeader.m_aCrc[1] << 16) | (ExtHeader.m_aCrc[2] << 8) | (ExtHeader.m_aCrc[3]);
-		pRecorder->Start(pFilename, ExtHeader.m_aMap, Crc, ExtHeader.m_aOwner);
-
-		CGhostSkin Skin;
-		mem_copy(&Skin, aSkinData + ms_SkinOffsetV2, sizeof(Skin));
-		pRecorder->WriteData(0 /* GHOSTDATA_TYPE_SKIN */, &Skin, sizeof(Skin));
+		if(Header.m_MapSha256 != MapSha256)
+		{
+			return false;
+		}
 	}
 	else
 	{
-		pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ghost/updater", "updating v3 ghost file");
-		CGhostHeaderV3 ExtHeader;
-		io_read(File, &ExtHeader, sizeof(ExtHeader));
-
-		Ticks = ExtHeader.m_NumShots;
-		Time = ExtHeader.m_Time * 1000;
-
-		unsigned Crc = (ExtHeader.m_aCrc[0] << 24) | (ExtHeader.m_aCrc[1] << 16) | (ExtHeader.m_aCrc[2] << 8) | (ExtHeader.m_aCrc[3]);
-		pRecorder->Start(pFilename, ExtHeader.m_aMap, Crc, ExtHeader.m_aOwner);
-
-		CGhostSkin Skin;
-		StrToInts(&Skin.m_Skin0, 6, ExtHeader.m_aSkinName);
-		Skin.m_UseCustomColor = ExtHeader.m_UseCustomColor;
-		Skin.m_ColorBody = ExtHeader.m_ColorBody;
-		Skin.m_ColorFeet = ExtHeader.m_ColorFeet;
-		pRecorder->WriteData(0 /* GHOSTDATA_TYPE_SKIN */, &Skin, sizeof(Skin));
-	}
-
-	// read data
-	int Index = 0;
-	while(Index < Ticks)
-	{
-		static char s_aCompresseddata[100 * 500];
-		static char s_aDecompressed[100 * 500];
-		static char s_aData[100 * 500];
-
-		unsigned char aSize[4];
-		if(io_read(File, aSize, sizeof(aSize)) != sizeof(aSize))
-			break;
-		unsigned Size = (aSize[0] << 24) | (aSize[1] << 16) | (aSize[2] << 8) | aSize[3];
-
-		if(io_read(File, s_aCompresseddata, Size) != Size)
+		unsigned GhostMapCrc = (Header.m_aZeroes[0] << 24) | (Header.m_aZeroes[1] << 16) | (Header.m_aZeroes[2] << 8) | (Header.m_aZeroes[3]);
+		if(GhostMapCrc != MapCrc)
 		{
-			pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ghost/updater", "error reading chunk");
-			break;
-		}
-
-		int DataSize = CNetBase::Decompress(s_aCompresseddata, Size, s_aDecompressed, sizeof(s_aDecompressed));
-		if(DataSize < 0)
-		{
-			pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ghost/updater", "error during network decompression");
-			break;
-		}
-
-		DataSize = CVariableInt::Decompress(s_aDecompressed, DataSize, s_aData, sizeof(s_aData));
-		if(DataSize < 0)
-		{
-			pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ghost/updater", "error during intpack decompression");
-			break;
-		}
-
-		char *pTmp = s_aData;
-		for(int i = 0; i < DataSize / ms_GhostCharacterSize; i++)
-		{
-			pRecorder->WriteData(1 /* GHOSTDATA_TYPE_CHARACTER_NO_TICK */, pTmp, ms_GhostCharacterSize);
-			pTmp += ms_GhostCharacterSize;
-			Index++;
+			return false;
 		}
 	}
+	*pInfo = Header.ToGhostInfo();
 
-	io_close(File);
-
-	bool Error = Ticks != Index;
-	pRecorder->Stop(Index, Error ? 0 : Time);
-	return !Error;
+	return true;
 }

@@ -217,7 +217,7 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 
 		if(ImagePNGLoaded && ImgInfo.m_Width > 0 && ImgInfo.m_Height > 0)
 		{
-			int ColorChannelCount = 0;
+			int ColorChannelCount = 4;
 			if(ImgInfo.m_Format == CImageInfo::FORMAT_ALPHA)
 				ColorChannelCount = 1;
 			else if(ImgInfo.m_Format == CImageInfo::FORMAT_RGB)
@@ -465,6 +465,7 @@ void CMapImages::UpdateEntityLayerText(void *pTexBuffer, int ImageColorChannelCo
 void CMapImages::InitOverlayTextures()
 {
 	int TextureSize = 64 * m_TextureScale / 100;
+	TextureSize = clamp(TextureSize, 2, 64);
 	int TextureToVerticalCenterOffset = (64 - TextureSize) / 2; // should be used to move texture to the center of 64 pixels area
 
 	if(m_OverlayBottomTexture == -1)

@@ -167,15 +167,13 @@ void CParticles::OnInit()
 
 	for(int i = 0; i <= (SPRITE_PART9 - SPRITE_PART_SLICE); ++i)
 	{
-		RenderTools()->SelectSprite(i);
-		RenderTools()->QuadContainerAddSprite(m_ParticleQuadContainerIndex, 1.f, false);
+		Graphics()->QuadsSetSubset(0, 0, 1, 1);
+		RenderTools()->QuadContainerAddSprite(m_ParticleQuadContainerIndex, 1.f);
 	}
 }
 
 void CParticles::RenderGroup(int Group)
 {
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_PARTICLES].m_Id);
-
 	// don't use the buffer methods here, else the old renderer gets many draw calls
 	if(Graphics()->IsQuadContainerBufferingEnabled())
 	{
@@ -214,6 +212,7 @@ void CParticles::RenderGroup(int Group)
 
 			if(LastColor[0] != m_aParticles[i].m_Color.r || LastColor[1] != m_aParticles[i].m_Color.g || LastColor[2] != m_aParticles[i].m_Color.b || LastColor[3] != m_aParticles[i].m_Color.a || LastQuadOffset != QuadOffset)
 			{
+				Graphics()->TextureSet(GameClient()->m_ParticlesSkin.m_SpriteParticles[LastQuadOffset - SPRITE_PART_SLICE]);
 				Graphics()->RenderQuadContainerAsSpriteMultiple(m_ParticleQuadContainerIndex, LastQuadOffset, CurParticleRenderCount, s_aParticleRenderInfo);
 				CurParticleRenderCount = 0;
 				LastQuadOffset = QuadOffset;
@@ -241,6 +240,7 @@ void CParticles::RenderGroup(int Group)
 			i = m_aParticles[i].m_NextPart;
 		}
 
+		Graphics()->TextureSet(GameClient()->m_ParticlesSkin.m_SpriteParticles[LastQuadOffset - SPRITE_PART_SLICE]);
 		Graphics()->RenderQuadContainerAsSpriteMultiple(m_ParticleQuadContainerIndex, LastQuadOffset, CurParticleRenderCount, s_aParticleRenderInfo);
 	}
 	else
@@ -248,13 +248,12 @@ void CParticles::RenderGroup(int Group)
 		int i = m_aFirstPart[Group];
 
 		Graphics()->BlendNormal();
-		//gfx_blend_additive();
-		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_PARTICLES].m_Id);
-		Graphics()->QuadsBegin();
+		Graphics()->WrapClamp();
 
 		while(i != -1)
 		{
-			RenderTools()->SelectSprite(m_aParticles[i].m_Spr);
+			Graphics()->TextureSet(GameClient()->m_ParticlesSkin.m_SpriteParticles[m_aParticles[i].m_Spr - SPRITE_PART_SLICE]);
+			Graphics()->QuadsBegin();
 			float a = m_aParticles[i].m_Life / m_aParticles[i].m_LifeSpan;
 			vec2 p = m_aParticles[i].m_Pos;
 			float Size = mix(m_aParticles[i].m_StartSize, m_aParticles[i].m_EndSize, a);
@@ -271,8 +270,9 @@ void CParticles::RenderGroup(int Group)
 			Graphics()->QuadsDraw(&QuadItem, 1);
 
 			i = m_aParticles[i].m_NextPart;
+			Graphics()->QuadsEnd();
 		}
-		Graphics()->QuadsEnd();
+		Graphics()->WrapNormal();
 		Graphics()->BlendNormal();
 	}
 }

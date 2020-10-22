@@ -215,6 +215,7 @@ void CSpectator::OnRender()
 	int TotalPlayers = 0;
 	int PerLine = 8;
 	float BoxMove = -10.0f;
+	float BoxOffset = 0.0f;
 
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
@@ -232,6 +233,7 @@ void CSpectator::OnRender()
 		PerLine = 16;
 		RoundRadius = 10.0f;
 		BoxMove = 3.0f;
+		BoxOffset = 6.0f;
 	}
 	if(TotalPlayers > 16)
 	{
@@ -293,7 +295,7 @@ void CSpectator::OnRender()
 		TextRender()->Text(0, Width / 2.0f - (ObjWidth - 350.0f), Height / 2.0f - 280.0f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Follow"), -1.0f);
 	}
 
-	float x = -(ObjWidth - 30.0f), y = StartY;
+	float x = -(ObjWidth - 35.0f), y = StartY;
 
 	int OldDDTeam = -1;
 
@@ -353,7 +355,7 @@ void CSpectator::OnRender()
 			if(NextDDTeam != DDTeam)
 				Corners |= CUI::CORNER_BL | CUI::CORNER_BR;
 
-			RenderTools()->DrawRoundRectExt(Width / 2.0f + x - 10.0f, Height / 2.0f + y + BoxMove, 270.0f, LineHeight, RoundRadius, Corners);
+			RenderTools()->DrawRoundRectExt(Width / 2.0f + x - 10.0f + BoxOffset, Height / 2.0f + y + BoxMove, 270.0f - BoxOffset, LineHeight, RoundRadius, Corners);
 
 			Graphics()->QuadsEnd();
 		}
@@ -365,7 +367,7 @@ void CSpectator::OnRender()
 			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.25f);
-			RenderTools()->DrawRoundRect(Width / 2.0f + x - 10.0f, Height / 2.0f + y + BoxMove, 270.0f, LineHeight, RoundRadius);
+			RenderTools()->DrawRoundRect(Width / 2.0f + x - 10.0f + BoxOffset, Height / 2.0f + y + BoxMove, 270.0f - BoxOffset, LineHeight, RoundRadius);
 			Graphics()->QuadsEnd();
 		}
 
@@ -395,10 +397,13 @@ void CSpectator::OnRender()
 			m_pClient->m_Snap.m_pGameDataObj && (m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierRed == m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID || m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue == m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID))
 		{
 			Graphics()->BlendNormal();
-			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
-			Graphics()->QuadsBegin();
+			if(m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue == m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID)
+				Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteFlagBlue);
+			else
+				Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteFlagRed);
 
-			RenderTools()->SelectSprite(m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue == m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID ? SPRITE_FLAG_BLUE : SPRITE_FLAG_RED, SPRITE_FLAG_FLIP_X);
+			Graphics()->QuadsBegin();
+			Graphics()->QuadsSetSubset(1, 0, 0, 1);
 
 			float Size = LineHeight;
 			IGraphics::CQuadItem QuadItem(Width / 2.0f + x - LineHeight / 5.0f, Height / 2.0f + y - LineHeight / 3.0f, Size / 2.0f, Size);
@@ -409,6 +414,13 @@ void CSpectator::OnRender()
 		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID].m_RenderInfo;
 		TeeInfo.m_Size *= TeeSizeMod;
 		RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), vec2(Width / 2.0f + x + 20.0f, Height / 2.0f + y + 20.0f), TeeAlpha);
+
+		if(m_pClient->m_aClients[m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID].m_Friend)
+		{
+			TextRender()->TextColor(1.0f, 0.3f, 0.3f, 1.0f);
+			TextRender()->Text(0, Width / 2.0f + x - TeeInfo.m_Size / 2.0f, Height / 2.0f + y + BoxMove + (LineHeight - FontSize) / 2.f, FontSize, "♥ ", 220.0f);
+			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+		}
 
 		y += LineHeight;
 	}

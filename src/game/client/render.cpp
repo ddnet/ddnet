@@ -9,7 +9,10 @@
 #include <engine/graphics.h>
 #include <engine/map.h>
 #include <engine/shared/config.h>
+#include <game/client/components/skins.h>
+#include <game/client/gameclient.h>
 #include <game/generated/client_data.h>
+#include <game/generated/client_data7.h>
 #include <game/generated/protocol.h>
 #include <game/layers.h>
 
@@ -36,32 +39,33 @@ static void layershot_end()
 	config.cl_layershot++;
 }*/
 
-void CRenderTools::Init(IGraphics *pGraphics, CUI *pUI)
+void CRenderTools::Init(IGraphics *pGraphics, CUI *pUI, CGameClient *pGameClient)
 {
 	m_pGraphics = pGraphics;
 	m_pUI = pUI;
+	m_pGameClient = (CGameClient *)pGameClient;
 	m_TeeQuadContainerIndex = Graphics()->CreateQuadContainer();
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 
-	SelectSprite(SPRITE_TEE_BODY, 0, 0, 0);
-	QuadContainerAddSprite(m_TeeQuadContainerIndex, 64.f, false);
-	SelectSprite(SPRITE_TEE_BODY_OUTLINE, 0, 0, 0);
-	QuadContainerAddSprite(m_TeeQuadContainerIndex, 64.f, false);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
+	QuadContainerAddSprite(m_TeeQuadContainerIndex, 64.f);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
+	QuadContainerAddSprite(m_TeeQuadContainerIndex, 64.f);
 
-	SelectSprite(SPRITE_TEE_EYE_PAIN, 0, 0, 0);
-	QuadContainerAddSprite(m_TeeQuadContainerIndex, 64.f * 0.4f, false);
-	SelectSprite(SPRITE_TEE_EYE_HAPPY, 0, 0, 0);
-	QuadContainerAddSprite(m_TeeQuadContainerIndex, 64.f * 0.4f, false);
-	SelectSprite(SPRITE_TEE_EYE_SURPRISE, 0, 0, 0);
-	QuadContainerAddSprite(m_TeeQuadContainerIndex, 64.f * 0.4f, false);
-	SelectSprite(SPRITE_TEE_EYE_ANGRY, 0, 0, 0);
-	QuadContainerAddSprite(m_TeeQuadContainerIndex, 64.f * 0.4f, false);
-	SelectSprite(SPRITE_TEE_EYE_NORMAL, 0, 0, 0);
-	QuadContainerAddSprite(m_TeeQuadContainerIndex, 64.f * 0.4f, false);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
+	QuadContainerAddSprite(m_TeeQuadContainerIndex, 64.f * 0.4f);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
+	QuadContainerAddSprite(m_TeeQuadContainerIndex, 64.f * 0.4f);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
+	QuadContainerAddSprite(m_TeeQuadContainerIndex, 64.f * 0.4f);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
+	QuadContainerAddSprite(m_TeeQuadContainerIndex, 64.f * 0.4f);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
+	QuadContainerAddSprite(m_TeeQuadContainerIndex, 64.f * 0.4f);
 
-	SelectSprite(SPRITE_TEE_FOOT_OUTLINE, 0, 0, 0);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	QuadContainerAddSprite(m_TeeQuadContainerIndex, -32.f, -16.f, 64.f, 32.f);
-	SelectSprite(SPRITE_TEE_FOOT, 0, 0, 0);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	QuadContainerAddSprite(m_TeeQuadContainerIndex, -32.f, -16.f, 64.f, 32.f);
 }
 
@@ -108,38 +112,57 @@ void CRenderTools::SelectSprite(int Id, int Flags, int sx, int sy)
 	SelectSprite(&g_pData->m_aSprites[Id], Flags, sx, sy);
 }
 
+void CRenderTools::GetSpriteScale(client_data7::CDataSprite *pSprite, float &ScaleX, float &ScaleY)
+{
+	int w = pSprite->m_W;
+	int h = pSprite->m_H;
+	float f = sqrtf(h * h + w * w);
+	ScaleX = w / f;
+	ScaleY = h / f;
+}
+
+void CRenderTools::GetSpriteScale(struct CDataSprite *pSprite, float &ScaleX, float &ScaleY)
+{
+	int w = pSprite->m_W;
+	int h = pSprite->m_H;
+	float f = sqrtf(h * h + w * w);
+	ScaleX = w / f;
+	ScaleY = h / f;
+}
+
+void CRenderTools::GetSpriteScale(int id, float &ScaleX, float &ScaleY)
+{
+	GetSpriteScale(&g_pData->m_aSprites[id], ScaleX, ScaleY);
+}
+
 void CRenderTools::DrawSprite(float x, float y, float Size)
 {
 	IGraphics::CQuadItem QuadItem(x, y, Size * gs_SpriteWScale, Size * gs_SpriteHScale);
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
-void CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float x, float y, float Size, bool DoSpriteScale)
+void CRenderTools::DrawSprite(float x, float y, float ScaledWidth, float ScaledHeight)
 {
-	if(DoSpriteScale)
-	{
-		IGraphics::CQuadItem QuadItem(x, y, Size * gs_SpriteWScale, Size * gs_SpriteHScale);
-		Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
-	}
-	else
-	{
-		IGraphics::CQuadItem QuadItem(x, y, Size, Size);
-		Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
-	}
+	IGraphics::CQuadItem QuadItem(x, y, ScaledWidth, ScaledHeight);
+	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
-void CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float Size, bool DoSpriteScale)
+void CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float x, float y, float Size)
 {
-	if(DoSpriteScale)
-	{
-		IGraphics::CQuadItem QuadItem(-(Size * gs_SpriteWScale) / 2.f, -(Size * gs_SpriteHScale) / 2.f, (Size * gs_SpriteWScale), (Size * gs_SpriteHScale));
-		Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
-	}
-	else
-	{
-		IGraphics::CQuadItem QuadItem(-(Size) / 2.f, -(Size) / 2.f, (Size), (Size));
-		Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
-	}
+	IGraphics::CQuadItem QuadItem(x, y, Size, Size);
+	Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
+}
+
+void CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float Size)
+{
+	IGraphics::CQuadItem QuadItem(-(Size) / 2.f, -(Size) / 2.f, (Size), (Size));
+	Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
+}
+
+void CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float Width, float Height)
+{
+	IGraphics::CQuadItem QuadItem(-(Width) / 2.f, -(Height) / 2.f, (Width), (Height));
+	Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
 }
 
 void CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float X, float Y, float Width, float Height)
@@ -494,8 +517,7 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 	vec2 Direction = Dir;
 	vec2 Position = Pos;
 
-	//Graphics()->TextureSet(data->images[IMAGE_CHAR_DEFAULT].id);
-	Graphics()->TextureSet(pInfo->m_Texture);
+	const CSkin::SSkinTextures *pSkinTextures = pInfo->m_CustomColoredSkin ? &pInfo->m_ColorableRenderSkin : &pInfo->m_OriginalRenderSkin;
 
 	// first pass we draw the outline
 	// second pass we draw the filling
@@ -515,6 +537,7 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 				Graphics()->SetColor(pInfo->m_ColorBody.r, pInfo->m_ColorBody.g, pInfo->m_ColorBody.b, Alpha);
 				vec2 BodyPos = Position + vec2(pAnim->GetBody()->m_X, pAnim->GetBody()->m_Y) * AnimScale;
 				float BodySize = g_Config.m_ClFatSkins ? BaseSize * 1.3f : BaseSize;
+				Graphics()->TextureSet(OutLine == 1 ? pSkinTextures->m_BodyOutline : pSkinTextures->m_Body);
 				Graphics()->RenderQuadContainerAsSprite(m_TeeQuadContainerIndex, OutLine, BodyPos.x, BodyPos.y, BodySize / 64.f, BodySize / 64.f);
 
 				// draw eyes
@@ -522,19 +545,24 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 				{
 					int QuadOffset = 2;
 					int EyeQuadOffset = 0;
+					int TeeEye = 0;
 					switch(Emote)
 					{
 					case EMOTE_PAIN:
 						EyeQuadOffset = 0;
+						TeeEye = SPRITE_TEE_EYE_PAIN - SPRITE_TEE_EYE_NORMAL;
 						break;
 					case EMOTE_HAPPY:
 						EyeQuadOffset = 1;
+						TeeEye = SPRITE_TEE_EYE_HAPPY - SPRITE_TEE_EYE_NORMAL;
 						break;
 					case EMOTE_SURPRISE:
 						EyeQuadOffset = 2;
+						TeeEye = SPRITE_TEE_EYE_SURPRISE - SPRITE_TEE_EYE_NORMAL;
 						break;
 					case EMOTE_ANGRY:
 						EyeQuadOffset = 3;
+						TeeEye = SPRITE_TEE_EYE_ANGRY - SPRITE_TEE_EYE_NORMAL;
 						break;
 					default:
 						EyeQuadOffset = 4;
@@ -546,6 +574,7 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 					float EyeSeparation = (0.075f - 0.010f * absolute(Direction.x)) * BaseSize;
 					vec2 Offset = vec2(Direction.x * 0.125f, -0.05f + Direction.y * 0.10f) * BaseSize;
 
+					Graphics()->TextureSet(pSkinTextures->m_Eyes[TeeEye]);
 					Graphics()->RenderQuadContainerAsSprite(m_TeeQuadContainerIndex, QuadOffset + EyeQuadOffset, BodyPos.x - EyeSeparation + Offset.x, BodyPos.y + Offset.y, EyeScale / (64.f * 0.4f), h / (64.f * 0.4f));
 					Graphics()->RenderQuadContainerAsSprite(m_TeeQuadContainerIndex, QuadOffset + EyeQuadOffset, BodyPos.x + EyeSeparation + Offset.x, BodyPos.y + Offset.y, -EyeScale / (64.f * 0.4f), h / (64.f * 0.4f));
 				}
@@ -573,6 +602,7 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 
 			Graphics()->SetColor(pInfo->m_ColorFeet.r * cs, pInfo->m_ColorFeet.g * cs, pInfo->m_ColorFeet.b * cs, Alpha);
 
+			Graphics()->TextureSet(OutLine == 1 ? pSkinTextures->m_FeetOutline : pSkinTextures->m_Feet);
 			Graphics()->RenderQuadContainerAsSprite(m_TeeQuadContainerIndex, QuadOffset, Position.x + pFoot->m_X * AnimScale, Position.y + pFoot->m_Y * AnimScale, w / 64.f, h / 32.f);
 		}
 	}

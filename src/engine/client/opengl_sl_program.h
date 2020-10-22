@@ -89,10 +89,10 @@ class CGLSLPrimitiveProgram : public CGLSLTWProgram
 public:
 };
 
-class CGLSLSpriteProgram : public CGLSLTWProgram
+class CGLSLPrimitiveExProgram : public CGLSLTWProgram
 {
 public:
-	CGLSLSpriteProgram() :
+	CGLSLPrimitiveExProgram() :
 		CGLSLTWProgram()
 	{
 		m_LastRotation = 0.f;

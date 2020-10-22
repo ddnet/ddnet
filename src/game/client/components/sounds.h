@@ -34,6 +34,8 @@ class CSounds : public CComponent
 
 	int GetSampleId(int SetId);
 
+	float m_GuiSoundVolume;
+	float m_GameSoundVolume;
 	float m_MapSoundVolume;
 	float m_BackgroundMusicVolume;
 

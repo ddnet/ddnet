@@ -47,7 +47,7 @@ public:
 	int GetItemIndex(int Key);
 	int GetItemType(int Index);
 
-	int Crc();
+	unsigned Crc();
 	void DebugDump();
 	static void RemoveExtraInfo(unsigned char *pData);
 };
@@ -67,8 +67,11 @@ public:
 	};
 
 private:
-	// TODO: strange arbitrary number
-	short m_aItemSizes[64];
+	enum
+	{
+		MAX_NETOBJSIZES = 64
+	};
+	short m_aItemSizes[MAX_NETOBJSIZES];
 	int m_aSnapshotDataRate[0xffff];
 	int m_aSnapshotDataUpdates[0xffff];
 	int m_SnapshotCurrent;

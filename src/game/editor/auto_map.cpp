@@ -86,7 +86,7 @@ void CAutoMapper::Load(const char *pTileName)
 				int RunID = pCurrentConf->m_aRuns.add(NewRun);
 				pCurrentRun = &pCurrentConf->m_aRuns[RunID];
 			}
-			else if(str_startswith(pLine, "NewRun"))
+			else if(str_startswith(pLine, "NewRun") && pCurrentConf)
 			{
 				// add new run
 				CRun NewRun;
@@ -430,6 +430,9 @@ void CAutoMapper::ProceedLocalized(CLayerTiles *pLayer, int ConfigID, int Seed, 
 			out->m_Flags = in->m_Flags;
 		}
 	}
+
+	if(pUpdateLayer)
+		delete pUpdateLayer;
 }
 
 void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID, int Seed, int SeedOffsetX, int SeedOffsetY)

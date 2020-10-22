@@ -227,16 +227,19 @@ CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, v
 		if(CollideWith != -1 && !p->CanCollide(CollideWith))
 			continue;
 
-		vec2 IntersectPos = closest_point_on_line(Pos0, Pos1, p->m_Pos);
-		float Len = distance(p->m_Pos, IntersectPos);
-		if(Len < p->m_ProximityRadius + Radius)
+		vec2 IntersectPos;
+		if(closest_point_on_line(Pos0, Pos1, p->m_Pos, IntersectPos))
 		{
-			Len = distance(Pos0, IntersectPos);
-			if(Len < ClosestLen)
+			float Len = distance(p->m_Pos, IntersectPos);
+			if(Len < p->m_ProximityRadius + Radius)
 			{
-				NewPos = IntersectPos;
-				ClosestLen = Len;
-				pClosest = p;
+				Len = distance(Pos0, IntersectPos);
+				if(Len < ClosestLen)
+				{
+					NewPos = IntersectPos;
+					ClosestLen = Len;
+					pClosest = p;
+				}
 			}
 		}
 	}
@@ -254,11 +257,14 @@ std::list<class CCharacter *> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 
 		if(pChr == pNotThis)
 			continue;
 
-		vec2 IntersectPos = closest_point_on_line(Pos0, Pos1, pChr->m_Pos);
-		float Len = distance(pChr->m_Pos, IntersectPos);
-		if(Len < pChr->m_ProximityRadius + Radius)
+		vec2 IntersectPos;
+		if(closest_point_on_line(Pos0, Pos1, pChr->m_Pos, IntersectPos))
 		{
-			listOfChars.push_back(pChr);
+			float Len = distance(pChr->m_Pos, IntersectPos);
+			if(Len < pChr->m_ProximityRadius + Radius)
+			{
+				listOfChars.push_back(pChr);
+			}
 		}
 	}
 	return listOfChars;
@@ -475,6 +481,7 @@ void CGameWorld::NetObjEnd(int LocalID)
 						pHookedChar->m_Pos = pHookedChar->m_Core.m_Pos = pChar->m_Core.m_HookPos;
 						pHookedChar->m_Core.m_Vel = vec2(0, 0);
 						mem_zero(&pHookedChar->m_SavedInput, sizeof(pHookedChar->m_SavedInput));
+						pHookedChar->m_SavedInput.m_TargetY = -1;
 						pHookedChar->m_KeepHooked = true;
 						pHookedChar->m_MarkedForDestroy = false;
 					}

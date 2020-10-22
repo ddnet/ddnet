@@ -29,7 +29,10 @@ static void Dilate(int w, int h, int BPP, unsigned char *pSrc, unsigned char *pD
 				if(pSrc[k + AlphaCompIndex] > AlphaThreshold)
 				{
 					for(int p = 0; p < BPP - 1; ++p)
-						SumOfOpaque[p] += pSrc[k + p];
+						// Seems safe for BPP = 3, 4 which we use. clang-analyzer seems to
+						// asssume being called with larger value. TODO: Can make this
+						// safer anyway.
+						SumOfOpaque[p] += pSrc[k + p]; // NOLINT(clang-analyzer-core.uninitialized.Assign)
 					++Counter;
 					break;
 				}

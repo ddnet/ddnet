@@ -320,7 +320,7 @@ int CSaveTee::FromString(const char *String)
 		"%f\t%f\t%f\t%f\t%f\t"
 		"%d\t"
 		"%d\t%d\t%d\t"
-		"%*s\t" // discard the game uuid
+		"%36s\t"
 		"%d\t%d"
 		"%d\t%d\t%d\t%d\t"
 		"%d",
@@ -351,6 +351,7 @@ int CSaveTee::FromString(const char *String)
 		&m_aCpCurrent[20], &m_aCpCurrent[21], &m_aCpCurrent[22], &m_aCpCurrent[23], &m_aCpCurrent[24],
 		&m_NotEligibleForFinish,
 		&m_HasTelegunGun, &m_HasTelegunLaser, &m_HasTelegunGrenade,
+		m_aGameUuid,
 		&m_HookedPlayer, &m_NewHook,
 		&m_InputDirection, &m_InputJump, &m_InputFire, &m_InputHook,
 		&m_ReloadTimer);
@@ -364,7 +365,7 @@ int CSaveTee::FromString(const char *String)
 		m_HasTelegunLaser = 0;
 		m_HasTelegunGun = 0;
 		// fall through
-	case 100:
+	case 101:
 		m_HookedPlayer = -1;
 		m_NewHook = false;
 		if(m_HookState == HOOK_GRABBED)
@@ -375,7 +376,7 @@ int CSaveTee::FromString(const char *String)
 		m_InputHook = 0;
 		m_ReloadTimer = 0;
 		// fall through
-	case 107:
+	case 108:
 		return 0;
 	default:
 		dbg_msg("load", "failed to load tee-string");
@@ -722,7 +723,7 @@ bool CSaveTeam::MatchPlayers(const char (*paNames)[MAX_NAME_LENGTH], const int *
 		}
 		if(!Found)
 		{
-			str_format(pMessage, MessageLen, "'%s' don't belong to this team", paNames[i]);
+			str_format(pMessage, MessageLen, "'%s' doesn't belong to this team", paNames[i]);
 			return false;
 		}
 	}

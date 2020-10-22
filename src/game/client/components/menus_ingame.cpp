@@ -105,8 +105,13 @@ void CMenus::RenderGame(CUIRect MainView)
 	static int s_JoinRedButton = 0;
 	static int s_JoinBlueButton = 0;
 
-	bool Paused = m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Paused;
-	bool Spec = m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Spec;
+	bool Paused = false;
+	bool Spec = false;
+	if(m_pClient->m_Snap.m_LocalClientID >= 0)
+	{
+		Paused = m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Paused;
+		Spec = m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Spec;
+	}
 
 	if(m_pClient->m_Snap.m_pLocalInfo && m_pClient->m_Snap.m_pGameInfoObj && !Paused && !Spec)
 	{
@@ -650,8 +655,8 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			QuickSearch.HSplitTop(5.0f, 0, &QuickSearch);
 			const char *pSearchLabel = "\xEE\xA2\xB6";
 			TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
-			TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
-			UI()->DoLabelScaled(&QuickSearch, pSearchLabel, 14.0f, -1);
+			TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+			UI()->DoLabelScaled(&QuickSearch, pSearchLabel, 14.0f, -1, -1, 0);
 			float wSearch = TextRender()->TextWidth(0, 14.0f, pSearchLabel, -1, -1.0f);
 			TextRender()->SetRenderFlags(0);
 			TextRender()->SetCurFont(NULL);
@@ -877,14 +882,14 @@ int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType
 	char aFilename[256];
 	str_format(aFilename, sizeof(aFilename), "%s/%s", pSelf->m_pClient->m_pGhost->GetGhostDir(), pName);
 
-	CGhostHeader Header;
-	if(!pSelf->m_pClient->m_pGhost->GhostLoader()->GetGhostInfo(aFilename, &Header, pMap, pSelf->Client()->GetMapCrc()))
+	CGhostInfo Info;
+	if(!pSelf->m_pClient->m_pGhost->GhostLoader()->GetGhostInfo(aFilename, &Info, pMap, pSelf->Client()->GetCurrentMapSha256(), pSelf->Client()->GetCurrentMapCrc()))
 		return 0;
 
 	CGhostItem Item;
 	str_copy(Item.m_aFilename, aFilename, sizeof(Item.m_aFilename));
-	str_copy(Item.m_aPlayer, Header.m_aOwner, sizeof(Item.m_aPlayer));
-	Item.m_Time = Header.GetTime();
+	str_copy(Item.m_aPlayer, Info.m_aOwner, sizeof(Item.m_aPlayer));
+	Item.m_Time = Info.m_Time;
 	if(Item.m_Time > 0)
 		pSelf->m_lGhosts.add(Item);
 	return 0;
@@ -1127,13 +1132,14 @@ void CMenus::RenderGhost(CUIRect MainView)
 			{
 				if(pItem->Active())
 				{
-					Graphics()->TextureSet(g_pData->m_aImages[IMAGE_EMOTICONS].m_Id);
+					Graphics()->WrapClamp();
+					Graphics()->TextureSet(GameClient()->m_EmoticonsSkin.m_SpriteEmoticons[(SPRITE_OOP + 7) - SPRITE_OOP]);
 					Graphics()->QuadsBegin();
-					RenderTools()->SelectSprite(SPRITE_OOP + 7);
 					IGraphics::CQuadItem QuadItem(Button.x + Button.w / 2, Button.y + Button.h / 2, 20.0f, 20.0f);
 					Graphics()->QuadsDraw(&QuadItem, 1);
 
 					Graphics()->QuadsEnd();
+					Graphics()->WrapNormal();
 				}
 			}
 			else if(Id == COL_NAME)

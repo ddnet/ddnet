@@ -306,7 +306,9 @@ int CMysqlConnection::GetBlob(int Col, unsigned char *pBuffer, int BufferSize) c
 #if defined(CONF_SQL)
 	auto Blob = m_pResults->getBlob(Col);
 	Blob->read((char *)pBuffer, BufferSize);
-	return Blob->gcount();
+	int NumRead = Blob->gcount();
+	delete Blob;
+	return NumRead;
 #else
 	return 0;
 #endif

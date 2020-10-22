@@ -98,7 +98,11 @@ option(DOWNLOAD_GTEST "Download and compile GTest" ${AUTO_DEPENDENCIES_DEFAULT})
 option(STEAM "Build the Steam release version" OFF)
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
 option(DEV "Don't generate stuff necessary for packaging" OFF)
-set(VERSION ${PROJECT_VERSION} CACHE STRING "Specify version string")
+
+# Set version if not explicitly set
+if(NOT VERSION)
+  set(VERSION ${PROJECT_VERSION})
+endif()
 
 set(OpenGL_GL_PREFERENCE LEGACY)
 
@@ -117,9 +121,13 @@ endif()
 
 set(DBG $<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>)
 
-set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
-  src/game/version.h
-)
+if(CMAKE_VERSION VERSION_LESS 3.0)
+  configure_file(src/game/version.h vd.h)
+else()
+  set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+    src/game/version.h
+  )
+endif()
 
 set(SERVER_EXECUTABLE DDNet-Server CACHE STRING "Name of the built server executable")
 set(CLIENT_EXECUTABLE chillerbot-ux CACHE STRING "Name of the build client executable")
@@ -609,6 +617,7 @@ set(EXPECTED_DATA
   arrow.png
   assets/entities/comfort/ddnet.png
   assets/entities/license.txt
+  assets/game/game_06.png
   audio/foley_body_impact-01.wv
   audio/foley_body_impact-02.wv
   audio/foley_body_impact-03.wv
@@ -1167,10 +1176,10 @@ set(EXPECTED_DATA
   shader/pipeline.vert
   shader/prim.frag
   shader/prim.vert
+  shader/primex.frag
+  shader/primex.vert
   shader/quad.frag
   shader/quad.vert
-  shader/sprite.frag
-  shader/sprite.vert
   shader/spritemulti.frag
   shader/spritemulti.vert
   shader/text.frag
@@ -1401,6 +1410,8 @@ generate_source("src/game/generated/server_data.h" "server_content_header")
 
 generate_source7("src/game/generated/protocol7.cpp" "network_source")
 generate_source7("src/game/generated/protocol7.h" "network_header")
+generate_source7("src/game/generated/client_data7.cpp" "client_content_source")
+generate_source7("src/game/generated/client_data7.h" "client_content_header")
 
 generate_maps("src/game/generated/protocolglue.h")
 
@@ -1486,8 +1497,6 @@ set_src(ENGINE_SHARED GLOB src/engine/shared
   fifo.h
   filecollection.cpp
   filecollection.h
-  ghost.cpp
-  ghost.h
   global_uuid_manager.cpp
   huffman.cpp
   huffman.h
@@ -1639,6 +1648,8 @@ if(CLIENT)
     demoedit.h
     friends.cpp
     friends.h
+    ghost.cpp
+    ghost.h
     graphics_threaded.cpp
     graphics_threaded.h
     http.cpp
@@ -1762,6 +1773,7 @@ if(CLIENT)
     render.cpp
     render.h
     render_map.cpp
+    skin.h
     ui.cpp
     ui.h
   )
@@ -1781,6 +1793,8 @@ if(CLIENT)
   set(GAME_GENERATED_CLIENT
     src/game/generated/client_data.cpp
     src/game/generated/client_data.h
+    src/game/generated/client_data7.cpp
+    src/game/generated/client_data7.h
   )
   set(CLIENT_SRC ${ENGINE_CLIENT} ${PLATFORM_CLIENT} ${GAME_CLIENT} ${GAME_EDITOR} ${GAME_GENERATED_CLIENT})
 

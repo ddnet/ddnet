@@ -87,14 +87,16 @@ void CHud::OnInit()
 	// all cursors
 	for(int i = 0; i < NUM_WEAPONS; ++i)
 	{
-		RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[i].m_pSpriteCursor);
-		RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 64.f);
+		float ScaleX, ScaleY;
+		RenderTools()->GetSpriteScale(g_pData->m_Weapons.m_aId[i].m_pSpriteCursor, ScaleX, ScaleY);
+		Graphics()->QuadsSetSubset(0, 0, 1, 1);
+		RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 64.f * ScaleX, 64.f * ScaleY);
 	}
 
 	// the flags
-	RenderTools()->SelectSprite(SPRITE_FLAG_RED);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 8.f, 16.f);
-	RenderTools()->SelectSprite(SPRITE_FLAG_BLUE);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 8.f, 16.f);
 }
 
@@ -257,8 +259,8 @@ void CHud::RenderScoreHud()
 					if(FlagCarrier[t] == FLAG_ATSTAND || (FlagCarrier[t] == FLAG_TAKEN && ((Client()->GameTick(g_Config.m_ClDummy) / BlinkTimer) & 1)))
 					{
 						// draw flag
-						Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
-						int QuadOffset = NUM_WEAPONS * 10 + 40 + NUM_WEAPONS + t;
+						Graphics()->TextureSet(t == 0 ? GameClient()->m_GameSkin.m_SpriteFlagRed : GameClient()->m_GameSkin.m_SpriteFlagBlue);
+						int QuadOffset = NUM_WEAPONS * 10 * 2 + 40 * 2 + NUM_WEAPONS + t;
 						Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 						Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, QuadOffset, Whole - ScoreWidthMax - ImageSize, StartY + 1.0f + t * 20);
 					}
@@ -355,12 +357,12 @@ void CHud::RenderScoreHud()
 					aScore[t][0] = 0;
 			}
 
-			bool RecreateScore[2] = {str_comp(aScore[0], m_aScoreInfo[0].m_aScoreText) != 0, str_comp(aScore[1], m_aScoreInfo[1].m_aScoreText) != 0};
+			bool RecreateScores = str_comp(aScore[0], m_aScoreInfo[0].m_aScoreText) != 0 || str_comp(aScore[1], m_aScoreInfo[1].m_aScoreText) != 0;
 
 			bool RecreateRect = ForceScoreInfoInit;
 			for(int t = 0; t < 2; t++)
 			{
-				if(RecreateScore[t])
+				if(RecreateScores)
 				{
 					m_aScoreInfo[t].m_ScoreTextWidth = TextRender()->TextWidth(0, 14.0f, aScore[t], -1, -1.0f);
 					mem_copy(m_aScoreInfo[t].m_aScoreText, aScore[t], sizeof(m_aScoreInfo[t].m_aScoreText));
@@ -412,13 +414,13 @@ void CHud::RenderScoreHud()
 				if(m_aScoreInfo[t].m_RoundRectQuadContainerIndex != -1)
 					Graphics()->RenderQuadContainer(m_aScoreInfo[t].m_RoundRectQuadContainerIndex, -1);
 
-				if(RecreateScore[t])
+				if(RecreateScores)
 				{
 					if(m_aScoreInfo[t].m_TextScoreContainerIndex != -1)
 						TextRender()->DeleteTextContainer(m_aScoreInfo[t].m_TextScoreContainerIndex);
 
 					CTextCursor Cursor;
-					TextRender()->SetCursor(&Cursor, Whole - ScoreWidthMax + (ScoreWidthMax - m_aScoreInfo[t].m_ScoreTextWidth) / 2 - Split, StartY + t * 20 + (18.f - 14.f) / 2.f, 14.0f, TEXTFLAG_RENDER);
+					TextRender()->SetCursor(&Cursor, Whole - ScoreWidthMax + (ScoreWidthMax - m_aScoreInfo[t].m_ScoreTextWidth) - Split, StartY + t * 20 + (18.f - 14.f) / 2.f, 14.0f, TEXTFLAG_RENDER);
 					Cursor.m_LineWidth = -1;
 					m_aScoreInfo[t].m_TextScoreContainerIndex = TextRender()->CreateTextContainer(&Cursor, aScore[t]);
 				}
@@ -659,10 +661,13 @@ void CHud::RenderCursor()
 		return;
 
 	MapscreenToGroup(m_pClient->m_pCamera->m_Center.x, m_pClient->m_pCamera->m_Center.y, Layers()->GameGroup());
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
+
+	int CurWeapon = m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS;
+
+	Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteWeaponCursors[CurWeapon]);
 
 	// render cursor
-	int QuadOffset = NUM_WEAPONS * 10 + 40 + (m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS);
+	int QuadOffset = NUM_WEAPONS * 10 * 2 + 40 * 2 + (CurWeapon);
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, QuadOffset, m_pClient->m_pControls->m_TargetPos[g_Config.m_ClDummy].x, m_pClient->m_pControls->m_TargetPos[g_Config.m_ClDummy].y);
 }
@@ -677,32 +682,70 @@ void CHud::PrepareHealthAmoQuads()
 
 	for(int i = 0; i < NUM_WEAPONS; ++i)
 	{
-		RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[i % NUM_WEAPONS].m_pSpriteProj);
+		Graphics()->QuadsSetSubset(0, 0, 1, 1);
+
+		// 0.6
 		for(int n = 0; n < 10; n++)
 			Array[n] = IGraphics::CQuadItem(x + n * 12, y + 24, 10, 10);
+
+		Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
+
+		// 0.7
+		if(i == WEAPON_GRENADE)
+		{
+			// special case for 0.7 grenade
+			for(int n = 0; n < 10; n++)
+				Array[n] = IGraphics::CQuadItem(1 + x + n * 12, y + 24, 10, 10);
+		}
+		else
+		{
+			for(int n = 0; n < 10; n++)
+				Array[n] = IGraphics::CQuadItem(x + n * 12, y + 24, 12, 12);
+		}
+
 		Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
 	}
 
 	// health
-	RenderTools()->SelectSprite(SPRITE_HEALTH_FULL);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	for(int i = 0; i < 10; ++i)
 		Array[i] = IGraphics::CQuadItem(x + i * 12, y, 10, 10);
 	Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
 
-	RenderTools()->SelectSprite(SPRITE_HEALTH_EMPTY);
+	// 0.7
+	for(int i = 0; i < 10; ++i)
+		Array[i] = IGraphics::CQuadItem(x + i * 12, y, 12, 12);
+	Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
+
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	for(int i = 0; i < 10; ++i)
 		Array[i] = IGraphics::CQuadItem(x + i * 12, y, 10, 10);
+	Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
+
+	// 0.7
+	for(int i = 0; i < 10; ++i)
+		Array[i] = IGraphics::CQuadItem(x + i * 12, y, 12, 12);
 	Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
 
 	// armor meter
-	RenderTools()->SelectSprite(SPRITE_ARMOR_FULL);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	for(int i = 0; i < 10; ++i)
 		Array[i] = IGraphics::CQuadItem(x + i * 12, y + 12, 10, 10);
 	Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
 
-	RenderTools()->SelectSprite(SPRITE_ARMOR_EMPTY);
+	// 0.7
+	for(int i = 0; i < 10; ++i)
+		Array[i] = IGraphics::CQuadItem(x + i * 12, y + 12, 12, 12);
+	Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
+
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	for(int i = 0; i < 10; ++i)
 		Array[i] = IGraphics::CQuadItem(x + i * 12, y + 12, 10, 10);
+	Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
+
+	// 0.7
+	for(int i = 0; i < 10; ++i)
+		Array[i] = IGraphics::CQuadItem(x + i * 12, y + 12, 12, 12);
 	Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
 }
 
@@ -713,22 +756,38 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 	// render ammo count
 	// render gui stuff
 
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
+	bool IsSixupGameSkin = GameClient()->m_GameSkin.IsSixup();
+	int QuadOffsetSixup = (IsSixupGameSkin ? 10 : 0);
 
-	int QuadOffset = pCharacter->m_Weapon % NUM_WEAPONS * 10;
-	Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, QuadOffset, minimum(pCharacter->m_AmmoCount, 10));
+	int CurWeapon = pCharacter->m_Weapon % NUM_WEAPONS;
+	int QuadOffset = (CurWeapon * 2) * 10 + QuadOffsetSixup;
 
-	QuadOffset = NUM_WEAPONS * 10;
+	if(GameClient()->m_GameSkin.m_SpriteWeaponProjectiles[CurWeapon] != -1)
+	{
+		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteWeaponProjectiles[CurWeapon]);
+
+		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, QuadOffset, minimum(pCharacter->m_AmmoCount, 10));
+	}
+
+	Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteHealthFull);
+
+	QuadOffset = NUM_WEAPONS * 10 * 2 + QuadOffsetSixup;
 	Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, QuadOffset, minimum(pCharacter->m_Health, 10));
 
-	QuadOffset += 10 + minimum(pCharacter->m_Health, 10);
+	Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteHealthEmpty);
+
+	QuadOffset += 10 * 2 + minimum(pCharacter->m_Health, 10);
 	if(minimum(pCharacter->m_Health, 10) < 10)
 		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, QuadOffset, 10 - minimum(pCharacter->m_Health, 10));
 
-	QuadOffset = NUM_WEAPONS * 10 + 20;
+	Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteArmorFull);
+
+	QuadOffset = NUM_WEAPONS * 10 * 2 + 20 * 2 + QuadOffsetSixup;
 	Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, QuadOffset, minimum(pCharacter->m_Armor, 10));
 
-	QuadOffset += 10 + minimum(pCharacter->m_Armor, 10);
+	Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteArmorEmpty);
+
+	QuadOffset += 10 * 2 + minimum(pCharacter->m_Armor, 10);
 	if(minimum(pCharacter->m_Armor, 10) < 10)
 		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, QuadOffset, 10 - minimum(pCharacter->m_Armor, 10));
 }

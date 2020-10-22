@@ -229,6 +229,12 @@ class CTextRender : public IEngineTextRender
 		m_FirstFreeTextContainerIndex = Index;
 	}
 
+	void FreeTextContainer(int Index)
+	{
+		m_TextContainers[Index].Reset();
+		FreeTextContainerIndex(Index);
+	}
+
 	STextContainer &GetTextContainer(int Index)
 	{
 		if(Index >= (int)m_TextContainers.size())
@@ -239,12 +245,6 @@ class CTextRender : public IEngineTextRender
 		}
 
 		return m_TextContainers[Index];
-	}
-
-	void FreeTextContainer(int Index)
-	{
-		m_TextContainers[Index].Reset();
-		FreeTextContainerIndex(Index);
 	}
 
 	int WordLength(const char *pText)
@@ -765,6 +765,14 @@ public:
 		pCursor->m_Flags = Flags;
 		pCursor->m_GlyphCount = 0;
 		pCursor->m_CharCount = 0;
+		pCursor->m_MaxCharacterHeight = 0;
+		pCursor->m_LongestLineWidth = 0;
+	}
+
+	virtual void MoveCursor(CTextCursor *pCursor, float x, float y)
+	{
+		pCursor->m_X += x;
+		pCursor->m_Y += y;
 	}
 
 	virtual void Text(void *pFontSetV, float x, float y, float Size, const char *pText, float LineWidth)
@@ -772,17 +780,27 @@ public:
 		CTextCursor Cursor;
 		SetCursor(&Cursor, x, y, Size, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = LineWidth;
+		int OldRenderFlags = m_RenderFlags;
+		if(LineWidth <= 0)
+			SetRenderFlags(OldRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
 		TextEx(&Cursor, pText, -1);
+		SetRenderFlags(OldRenderFlags);
 	}
 
-	virtual float TextWidth(void *pFontSetV, float Size, const char *pText, int StrLength, float LineWidth, float *pAlignedHeight = NULL)
+	virtual float TextWidth(void *pFontSetV, float Size, const char *pText, int StrLength, float LineWidth, float *pAlignedHeight = NULL, float *pMaxCharacterHeightInLine = NULL)
 	{
 		CTextCursor Cursor;
 		SetCursor(&Cursor, 0, 0, Size, 0);
 		Cursor.m_LineWidth = LineWidth;
+		int OldRenderFlags = m_RenderFlags;
+		if(LineWidth <= 0)
+			SetRenderFlags(OldRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
 		TextEx(&Cursor, pText, StrLength);
+		SetRenderFlags(OldRenderFlags);
 		if(pAlignedHeight != NULL)
 			*pAlignedHeight = Cursor.m_AlignedFontSize;
+		if(pMaxCharacterHeightInLine != NULL)
+			*pMaxCharacterHeightInLine = Cursor.m_MaxCharacterHeight;
 		return Cursor.m_X;
 	}
 
@@ -791,7 +809,11 @@ public:
 		CTextCursor Cursor;
 		SetCursor(&Cursor, 0, 0, Size, 0);
 		Cursor.m_LineWidth = LineWidth;
+		int OldRenderFlags = m_RenderFlags;
+		if(LineWidth <= 0)
+			SetRenderFlags(OldRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
 		TextEx(&Cursor, pText, -1);
+		SetRenderFlags(OldRenderFlags);
 		return Cursor.m_LineCount;
 	}
 
@@ -997,6 +1019,21 @@ public:
 					float BearingX = (!ApplyBearingX ? 0.f : pChr->m_OffsetX) * Scale * Size;
 					float CharWidth = pChr->m_Width * Scale * Size;
 
+					float BearingY = 0.f;
+					BearingY = (((m_RenderFlags & TEXT_RENDER_FLAG_NO_Y_BEARING) != 0) ? 0.f : (pChr->m_OffsetY * Scale * Size));
+					float CharHeight = pChr->m_Height * Scale * Size;
+
+					if((m_RenderFlags & TEXT_RENDER_FLAG_NO_OVERSIZE) != 0)
+					{
+						if(CharHeight + BearingY > Size)
+						{
+							BearingY = 0;
+							float ScaleChar = (CharHeight + BearingY) / Size;
+							CharHeight = Size;
+							CharWidth /= ScaleChar;
+						}
+					}
+
 					if(pCursor->m_Flags & TEXTFLAG_RENDER && m_Color.a != 0.f)
 					{
 						if(Graphics()->IsTextBufferingEnabled())
@@ -1005,20 +1042,13 @@ public:
 							Graphics()->QuadsSetSubset(pChr->m_aUVs[0] * UVScale, pChr->m_aUVs[3] * UVScale, pChr->m_aUVs[2] * UVScale, pChr->m_aUVs[1] * UVScale);
 						float Y = (DrawY + Size);
 
-						float BearingY = 0.f;
-						BearingY = (((m_RenderFlags & TEXT_RENDER_FLAG_NO_Y_BEARING) != 0) ? 0.f : (pChr->m_OffsetY * Scale * Size));
-
-						if((m_RenderFlags & TEXT_RENDER_FLAG_NO_OVERSIZE) != 0)
-						{
-							if(pChr->m_Height * Scale * Size + BearingY > Size)
-								BearingY -= pChr->m_Height * Scale * Size - Size;
-						}
-
-						IGraphics::CQuadItem QuadItem((DrawX + CharKerning) + BearingX, Y - BearingY, CharWidth, -pChr->m_Height * Scale * Size);
+						IGraphics::CQuadItem QuadItem((DrawX + CharKerning) + BearingX, Y - BearingY, CharWidth, -CharHeight);
 						Graphics()->QuadsDrawTL(&QuadItem, 1);
 					}
 
-					if(NextCharacter == 0 && (m_RenderFlags & TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE) != 0)
+					pCursor->m_MaxCharacterHeight = maximum(pCursor->m_MaxCharacterHeight, CharHeight + BearingY);
+
+					if(NextCharacter == 0 && (m_RenderFlags & TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE) != 0 && Character != ' ')
 						DrawX += BearingX + CharKerning + CharWidth;
 					else
 						DrawX += Advance * Size + CharKerning;
@@ -1108,7 +1138,12 @@ public:
 
 		TextContainer.m_Flags = pCursor->m_Flags;
 
+		int OldRenderFlags = m_RenderFlags;
+		if(pCursor->m_LineWidth <= 0)
+			SetRenderFlags(OldRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
+
 		TextContainer.m_RenderFlags = m_RenderFlags;
+		SetRenderFlags(OldRenderFlags);
 
 		// same with size
 		ActualSize = (int)(Size * FakeToScreenY);
@@ -1260,6 +1295,7 @@ public:
 
 			const char *pTmp = pCurrent;
 			int NextCharacter = str_utf8_decode(&pTmp);
+
 			while(pCurrent < pBatchEnd)
 			{
 				TextContainer.m_CharCount += pTmp - pCurrent;
@@ -1306,6 +1342,20 @@ public:
 					float BearingX = (!ApplyBearingX ? 0.f : pChr->m_OffsetX) * Scale * Size;
 					float CharWidth = pChr->m_Width * Scale * Size;
 
+					float BearingY = (((RenderFlags & TEXT_RENDER_FLAG_NO_Y_BEARING) != 0) ? 0.f : (pChr->m_OffsetY * Scale * Size));
+					float CharHeight = pChr->m_Height * Scale * Size;
+
+					if((RenderFlags & TEXT_RENDER_FLAG_NO_OVERSIZE) != 0)
+					{
+						if(CharHeight + BearingY > Size)
+						{
+							BearingY = 0;
+							float ScaleChar = (CharHeight + BearingY) / Size;
+							CharHeight = Size;
+							CharWidth /= ScaleChar;
+						}
+					}
+
 					// don't add text that isn't drawn, the color overwrite is used for that
 					if(m_Color.a != 0.f)
 					{
@@ -1313,14 +1363,6 @@ public:
 						STextCharQuad &TextCharQuad = TextContainer.m_StringInfo.m_CharacterQuads.back();
 
 						float Y = (DrawY + Size);
-
-						float BearingY = (((RenderFlags & TEXT_RENDER_FLAG_NO_Y_BEARING) != 0) ? 0.f : (pChr->m_OffsetY * Scale * Size));
-
-						if((RenderFlags & TEXT_RENDER_FLAG_NO_OVERSIZE) != 0)
-						{
-							if(pChr->m_Height * Scale * Size + BearingY > Size)
-								BearingY -= pChr->m_Height * Scale * Size - Size;
-						}
 
 						TextCharQuad.m_Vertices[0].m_X = (DrawX + CharKerning) + BearingX;
 						TextCharQuad.m_Vertices[0].m_Y = Y - BearingY;
@@ -1341,7 +1383,7 @@ public:
 						TextCharQuad.m_Vertices[1].m_Color.m_A = (unsigned char)(m_Color.a * 255.f);
 
 						TextCharQuad.m_Vertices[2].m_X = (DrawX + CharKerning) + BearingX + CharWidth;
-						TextCharQuad.m_Vertices[2].m_Y = Y - BearingY - pChr->m_Height * Scale * Size;
+						TextCharQuad.m_Vertices[2].m_Y = Y - BearingY - CharHeight;
 						TextCharQuad.m_Vertices[2].m_U = pChr->m_aUVs[2];
 						TextCharQuad.m_Vertices[2].m_V = pChr->m_aUVs[1];
 						TextCharQuad.m_Vertices[2].m_Color.m_R = (unsigned char)(m_Color.r * 255.f);
@@ -1350,7 +1392,7 @@ public:
 						TextCharQuad.m_Vertices[2].m_Color.m_A = (unsigned char)(m_Color.a * 255.f);
 
 						TextCharQuad.m_Vertices[3].m_X = (DrawX + CharKerning) + BearingX;
-						TextCharQuad.m_Vertices[3].m_Y = Y - BearingY - pChr->m_Height * Scale * Size;
+						TextCharQuad.m_Vertices[3].m_Y = Y - BearingY - CharHeight;
 						TextCharQuad.m_Vertices[3].m_U = pChr->m_aUVs[0];
 						TextCharQuad.m_Vertices[3].m_V = pChr->m_aUVs[1];
 						TextCharQuad.m_Vertices[3].m_Color.m_R = (unsigned char)(m_Color.r * 255.f);
@@ -1359,13 +1401,18 @@ public:
 						TextCharQuad.m_Vertices[3].m_Color.m_A = (unsigned char)(m_Color.a * 255.f);
 					}
 
-					if(NextCharacter == 0 && (RenderFlags & TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE) != 0)
+					pCursor->m_MaxCharacterHeight = maximum(pCursor->m_MaxCharacterHeight, CharHeight + BearingY);
+
+					if(NextCharacter == 0 && (RenderFlags & TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE) != 0 && Character != ' ')
 						DrawX += BearingX + CharKerning + CharWidth;
 					else
 						DrawX += Advance * Size + CharKerning;
 					pCursor->m_GlyphCount++;
 					++CharacterCounter;
 				}
+
+				if(DrawX > pCursor->m_LongestLineWidth)
+					pCursor->m_LongestLineWidth = DrawX;
 			}
 
 			if(NewLine)
@@ -1475,8 +1522,6 @@ public:
 			DrawY = TextContainer.m_AlignedStartY;
 		}
 
-		DrawX = TextContainer.m_X;
-		DrawY = TextContainer.m_Y;
 		LineCount = TextContainer.m_LineCount;
 
 		if(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex == -1)
@@ -1838,6 +1883,32 @@ public:
 			FontSize = MaxSize;
 
 		return FontSize;
+	}
+
+	virtual float GetGlyphOffsetX(int FontSize, char TextCharacter)
+	{
+		CFont *pFont = m_pDefaultFont;
+		FT_Set_Pixel_Sizes(pFont->m_FtFace, 0, FontSize);
+		const char *pTmp = &TextCharacter;
+		int NextCharacter = str_utf8_decode(&pTmp);
+
+		if(NextCharacter)
+		{
+			FT_Int32 FTFlags = 0;
+#if FREETYPE_MAJOR >= 2 && FREETYPE_MINOR >= 7 && (FREETYPE_MINOR > 7 || FREETYPE_PATCH >= 1)
+			FTFlags = FT_LOAD_BITMAP_METRICS_ONLY | FT_LOAD_NO_BITMAP;
+#else
+			FTFlags = FT_LOAD_RENDER | FT_LOAD_NO_BITMAP;
+#endif
+			if(FT_Load_Char(pFont->m_FtFace, NextCharacter, FTFlags))
+			{
+				dbg_msg("GetGlyphOffsetX", "error loading glyph %d", NextCharacter);
+				return -1;
+			}
+
+			return (float)(pFont->m_FtFace->glyph->metrics.horiBearingX >> 6);
+		}
+		return 0;
 	}
 
 	virtual int CalculateTextWidth(const char *pText, int TextLength, int FontWidth, int FontHeight)

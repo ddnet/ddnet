@@ -12,6 +12,11 @@
 #include <game/version.h>
 #include <time.h>
 
+static const char g_aHalloweenSkins[][64] = {
+	"Bat", "Cyclops", "darky", "dynamite", "Electro Tee", "evil", "ghost", "glitch",
+	"Lord_of_Zombie", "pumpkin", "reaper", "red_flame", "undead", "Voodoo_tee_1",
+	"zombie", "zombie1", "zombie2", "zombie3", "zombie4"};
+
 MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
 
 IServer *CPlayer::Server() const { return m_pGameServer->Server(); }
@@ -316,10 +321,31 @@ void CPlayer::Snap(int SnappingClient)
 	if(!pClientInfo)
 		return;
 
+	const char *pSkinName = m_TeeInfos.m_SkinName;
+
+	if(m_Halloween)
+	{
+		bool Found = false;
+
+		for(const auto &HalloweenSkin : g_aHalloweenSkins)
+		{
+			if(str_comp(pSkinName, HalloweenSkin) == 0)
+			{
+				Found = true;
+				break;
+			}
+		}
+
+		if(!Found)
+		{
+			pSkinName = g_aHalloweenSkins[str_quickhash(Server()->ClientName(m_ClientID)) % (sizeof(g_aHalloweenSkins) / sizeof(g_aHalloweenSkins[0]))];
+		}
+	}
+
 	StrToInts(&pClientInfo->m_Name0, 4, Server()->ClientName(m_ClientID));
 	StrToInts(&pClientInfo->m_Clan0, 3, Server()->ClientClan(m_ClientID));
 	pClientInfo->m_Country = Server()->ClientCountry(m_ClientID);
-	StrToInts(&pClientInfo->m_Skin0, 6, m_TeeInfos.m_SkinName);
+	StrToInts(&pClientInfo->m_Skin0, 6, pSkinName);
 	pClientInfo->m_UseCustomColor = m_TeeInfos.m_UseCustomColor;
 	pClientInfo->m_ColorBody = m_TeeInfos.m_ColorBody;
 	pClientInfo->m_ColorFeet = m_TeeInfos.m_ColorFeet;
@@ -744,7 +770,7 @@ bool CPlayer::AfkTimer(int NewTargetX, int NewTargetY)
 
 	if(NewTargetX != m_LastTarget_x || NewTargetY != m_LastTarget_y)
 	{
-		m_LastPlaytime = time_get();
+		UpdatePlaytime();
 		m_LastTarget_x = NewTargetX;
 		m_LastTarget_y = NewTargetY;
 		m_Sent1stAfkWarning = 0; // afk timer's 1st warning after 50% of sv_max_afk_time
@@ -783,6 +809,11 @@ bool CPlayer::AfkTimer(int NewTargetX, int NewTargetY)
 	return false;
 }
 
+void CPlayer::UpdatePlaytime()
+{
+	m_LastPlaytime = time_get();
+}
+
 void CPlayer::AfkVoteTimer(CNetObj_PlayerInput *NewTarget)
 {
 	if(g_Config.m_SvMaxAfkVoteTime == 0)
@@ -797,7 +828,7 @@ void CPlayer::AfkVoteTimer(CNetObj_PlayerInput *NewTarget)
 	}
 	else if(mem_comp(NewTarget, m_pLastTarget, sizeof(CNetObj_PlayerInput)) != 0)
 	{
-		m_LastPlaytime = time_get();
+		UpdatePlaytime();
 		mem_copy(m_pLastTarget, NewTarget, sizeof(CNetObj_PlayerInput));
 	}
 	else if(m_LastPlaytime < time_get() - time_freq() * g_Config.m_SvMaxAfkVoteTime)

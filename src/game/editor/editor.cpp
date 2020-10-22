@@ -302,6 +302,28 @@ void CEditor::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, void
  OTHER
 *********************************************************/
 
+int CEditor::DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners)
+{
+	bool ReturnValue = false;
+	CUIRect EditBox;
+	CUIRect ClearButton;
+	pRect->VSplitRight(15.0f, &EditBox, &ClearButton);
+	if(DoEditBox(pID, &EditBox, pStr, StrSize, FontSize, Offset, Hidden, Corners & ~CUI::CORNER_R))
+	{
+		ReturnValue = true;
+	}
+
+	RenderTools()->DrawUIRect(&ClearButton, ColorRGBA(1, 1, 1, 0.33f * ButtonColorMul(pClearID)), Corners & ~CUI::CORNER_L, 3.0f);
+	UI()->DoLabel(&ClearButton, "×", ClearButton.h * 0.8f, 0);
+	if(UI()->DoButtonLogic(pClearID, "×", 0, &ClearButton))
+	{
+		pStr[0] = 0;
+		UI()->SetActiveItem(pID);
+		ReturnValue = true;
+	}
+	return ReturnValue;
+}
+
 // copied from gc_menu.cpp, should be more generalized
 //extern int ui_do_edit_box(void *id, const CUIRect *rect, char *str, int str_size, float font_size, bool hidden=false);
 int CEditor::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners)
@@ -602,11 +624,11 @@ int CEditor::DoButton_Editor_Common(const void *pID, const char *pText, int Chec
 	//return UI()->DoButton(id, text, checked, r, draw_func, 0);
 }
 
-int CEditor::DoButton_Editor(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
+int CEditor::DoButton_Editor(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int AlignVert)
 {
 	RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, Checked), CUI::CORNER_ALL, 3.0f);
 	CUIRect NewRect = *pRect;
-	UI()->DoLabel(&NewRect, pText, 10.f, 0, -1);
+	UI()->DoLabel(&NewRect, pText, 10.f, 0, -1, AlignVert);
 	Checked %= 2;
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
@@ -664,11 +686,11 @@ int CEditor::DoButton_Tab(const void *pID, const char *pText, int Checked, const
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
 
-int CEditor::DoButton_Ex(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize)
+int CEditor::DoButton_Ex(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize, int AlignVert)
 {
 	RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, Checked), Corners, 3.0f);
 	CUIRect NewRect = *pRect;
-	UI()->DoLabel(&NewRect, pText, FontSize, 0, -1);
+	UI()->DoLabel(&NewRect, pText, FontSize, 0, -1, AlignVert);
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
 
@@ -3308,7 +3330,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 			{
 				LayersBox.HSplitTop(12.0f, &Slot, &LayersBox);
 				Slot.VSplitLeft(12, &VisibleToggle, &Slot);
-				if(DoButton_Ex(&m_Map.m_lGroups[g]->m_Visible, m_Map.m_lGroups[g]->m_Visible ? "V" : "H", m_Map.m_lGroups[g]->m_Collapse ? 1 : 0, &VisibleToggle, 0, "Toggle group visibility", CUI::CORNER_L))
+				if(DoButton_Ex(&m_Map.m_lGroups[g]->m_Visible, m_Map.m_lGroups[g]->m_Visible ? "V" : "H", m_Map.m_lGroups[g]->m_Collapse ? 1 : 0, &VisibleToggle, 0, "Toggle group visibility", CUI::CORNER_L, 10.0f, 0))
 					m_Map.m_lGroups[g]->m_Visible = !m_Map.m_lGroups[g]->m_Visible;
 
 				str_format(aBuf, sizeof(aBuf), "#%d %s", g, m_Map.m_lGroups[g]->m_aName);
@@ -3359,7 +3381,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 				Slot.VSplitLeft(12.0f, 0, &Button);
 				Button.VSplitLeft(15, &VisibleToggle, &Button);
 
-				if(DoButton_Ex(&m_Map.m_lGroups[g]->m_lLayers[i]->m_Visible, m_Map.m_lGroups[g]->m_lLayers[i]->m_Visible ? "V" : "H", 0, &VisibleToggle, 0, "Toggle layer visibility", CUI::CORNER_L))
+				if(DoButton_Ex(&m_Map.m_lGroups[g]->m_lLayers[i]->m_Visible, m_Map.m_lGroups[g]->m_lLayers[i]->m_Visible ? "V" : "H", 0, &VisibleToggle, 0, "Toggle layer visibility", CUI::CORNER_L, 10.0f, 0))
 					m_Map.m_lGroups[g]->m_lLayers[i]->m_Visible = !m_Map.m_lGroups[g]->m_lLayers[i]->m_Visible;
 
 				if(m_Map.m_lGroups[g]->m_lLayers[i]->m_aName[0])
@@ -3696,7 +3718,7 @@ void CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 	// add sound
 	CEditorSound *pSound = new CEditorSound(pEditor);
 	pSound->m_SoundID = SoundId;
-	pSound->m_External = 1; // external by default
+	pSound->m_External = 0; // embedded by default
 	pSound->m_DataSize = (unsigned)DataSize;
 	pSound->m_pData = pData;
 	str_copy(pSound->m_aName, aBuf, sizeof(pSound->m_aName));
@@ -3886,43 +3908,37 @@ void CEditor::SelectGameLayer()
 	}
 }
 
-static int CompareImageName(const void *pObject1, const void *pObject2)
+static bool ImageNameLess(const CEditorImage *const &a, const CEditorImage *const &b)
 {
-	CEditorImage *pImage1 = *(CEditorImage **)pObject1;
-	CEditorImage *pImage2 = *(CEditorImage **)pObject2;
-
-	return str_comp(pImage1->m_aName, pImage2->m_aName);
+	return str_comp(a->m_aName, b->m_aName) < 0;
 }
 
 static int *gs_pSortedIndex = 0;
 static void ModifySortedIndex(int *pIndex)
 {
-	if(*pIndex > -1)
+	if(*pIndex >= 0)
 		*pIndex = gs_pSortedIndex[*pIndex];
 }
 
 void CEditor::SortImages()
 {
-	bool Sorted = true;
-	for(int i = 1; i < m_Map.m_lImages.size(); i++)
-		if(str_comp(m_Map.m_lImages[i]->m_aName, m_Map.m_lImages[i - 1]->m_aName) < 0)
-		{
-			Sorted = false;
-			break;
-		}
-
-	if(!Sorted)
+	if(!std::is_sorted(m_Map.m_lImages.base_ptr(), m_Map.m_lImages.base_ptr() + m_Map.m_lImages.size(), ImageNameLess))
 	{
 		array<CEditorImage *> lTemp = m_Map.m_lImages;
 		gs_pSortedIndex = new int[lTemp.size()];
 
-		qsort(m_Map.m_lImages.base_ptr(), m_Map.m_lImages.size(), sizeof(CEditorImage *), CompareImageName);
-
+		std::sort(m_Map.m_lImages.base_ptr(), m_Map.m_lImages.base_ptr() + m_Map.m_lImages.size(), ImageNameLess);
 		for(int OldIndex = 0; OldIndex < lTemp.size(); OldIndex++)
+		{
 			for(int NewIndex = 0; NewIndex < m_Map.m_lImages.size(); NewIndex++)
+			{
 				if(lTemp[OldIndex] == m_Map.m_lImages[NewIndex])
+				{
 					gs_pSortedIndex[OldIndex] = NewIndex;
-
+					break;
+				}
+			}
+		}
 		m_Map.ModifyImageIndex(ModifySortedIndex);
 
 		delete[] gs_pSortedIndex;
@@ -5492,7 +5508,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 	}
 }
 
-void CEditor::RenderServerSettingsEditor(CUIRect View)
+void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEditorLast)
 {
 	static int s_CommandSelectedIndex = -1;
 
@@ -5510,7 +5526,11 @@ void CEditor::RenderServerSettingsEditor(CUIRect View)
 
 		Button.VSplitLeft(70.0f, 0, &Button);
 		Button.VSplitLeft(180.0f, &Button, 0);
-		DoEditBox(&m_CommandBox, &Button, m_aSettingsCommand, sizeof(m_aSettingsCommand), 12.0f, &m_CommandBox);
+		static int s_ClearButton = 0;
+		DoClearableEditBox(&m_CommandBox, &s_ClearButton, &Button, m_aSettingsCommand, sizeof(m_aSettingsCommand), 12.0f, &m_CommandBox, false, CUI::CORNER_ALL);
+
+		if(!ShowServerSettingsEditorLast) // Just activated
+			UI()->SetActiveItem(&m_CommandBox);
 
 		// buttons
 		ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
@@ -5532,18 +5552,54 @@ void CEditor::RenderServerSettingsEditor(CUIRect View)
 					CEditorMap::CSetting Setting;
 					str_copy(Setting.m_aCommand, m_aSettingsCommand, sizeof(Setting.m_aCommand));
 					m_Map.m_lSettings.add(Setting);
+					s_CommandSelectedIndex = m_Map.m_lSettings.size() - 1;
 				}
 			}
+			UI()->SetActiveItem(&m_CommandBox);
 		}
 
-		if(m_Map.m_lSettings.size())
+		if(m_Map.m_lSettings.size() && s_CommandSelectedIndex > -1 && s_CommandSelectedIndex < m_Map.m_lSettings.size())
 		{
+			ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
+			Button.VSplitRight(5.0f, &Button, 0);
+			static int s_ModButton = 0;
+			if(DoButton_Editor(&s_ModButton, "Mod", 0, &Button, 0, "Modify a command from the command list.") || (Input()->KeyPress(KEY_M) && UI()->LastActiveItem() != &m_CommandBox))
+			{
+				if(str_comp(m_Map.m_lSettings[s_CommandSelectedIndex].m_aCommand, m_aSettingsCommand) != 0 && m_aSettingsCommand[0] != 0 && str_find(m_aSettingsCommand, " "))
+				{
+					bool Found = false;
+					int i;
+					for(i = 0; i < m_Map.m_lSettings.size(); i++)
+						if(i != s_CommandSelectedIndex && !str_comp(m_Map.m_lSettings[i].m_aCommand, m_aSettingsCommand))
+						{
+							Found = true;
+							break;
+						}
+					if(Found)
+					{
+						m_Map.m_lSettings.remove_index(s_CommandSelectedIndex);
+						s_CommandSelectedIndex = i > s_CommandSelectedIndex ? i - 1 : i;
+					}
+					else
+					{
+						str_copy(m_Map.m_lSettings[s_CommandSelectedIndex].m_aCommand, m_aSettingsCommand, sizeof(m_Map.m_lSettings[s_CommandSelectedIndex].m_aCommand));
+					}
+				}
+				UI()->SetActiveItem(&m_CommandBox);
+			}
+
 			ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
 			Button.VSplitRight(5.0f, &Button, 0);
 			static int s_DelButton = 0;
 			if(DoButton_Editor(&s_DelButton, "Del", 0, &Button, 0, "Delete a command from the command list.") || (Input()->KeyPress(KEY_DELETE) && UI()->LastActiveItem() != &m_CommandBox))
-				if(s_CommandSelectedIndex > -1 && s_CommandSelectedIndex < m_Map.m_lSettings.size())
-					m_Map.m_lSettings.remove_index(s_CommandSelectedIndex);
+			{
+				m_Map.m_lSettings.remove_index(s_CommandSelectedIndex);
+				if(s_CommandSelectedIndex >= m_Map.m_lSettings.size())
+					s_CommandSelectedIndex = m_Map.m_lSettings.size() - 1;
+				if(s_CommandSelectedIndex >= 0)
+					str_copy(m_aSettingsCommand, m_Map.m_lSettings[s_CommandSelectedIndex].m_aCommand, sizeof(m_aSettingsCommand));
+				UI()->SetActiveItem(&m_CommandBox);
+			}
 		}
 	}
 
@@ -5577,8 +5633,6 @@ void CEditor::RenderServerSettingsEditor(CUIRect View)
 				if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
 					s_ScrollValue = clamp(s_ScrollValue + 1.0f / ScrollNum, 0.0f, 1.0f);
 			}
-			else
-				ScrollNum = 0;
 		}
 	}
 
@@ -5603,7 +5657,11 @@ void CEditor::RenderServerSettingsEditor(CUIRect View)
 			Button.VSplitLeft(5.0f, 0, &Button);
 
 			if(DoButton_MenuItem(&m_Map.m_lSettings[i], m_Map.m_lSettings[i].m_aCommand, s_CommandSelectedIndex == i, &Button, 0, 0))
+			{
 				s_CommandSelectedIndex = i;
+				str_copy(m_aSettingsCommand, m_Map.m_lSettings[i].m_aCommand, sizeof(m_aSettingsCommand));
+				UI()->SetActiveItem(&m_CommandBox);
+			}
 		}
 		ListCur += 17.0f;
 	}
@@ -5761,7 +5819,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	UI()->DoLabel(&Info, aBuf, 10.0f, 1, -1);
 
 	static int s_CloseButton = 0;
-	if(DoButton_Editor(&s_CloseButton, "×", 0, &Close, 0, "Exits from the editor") || (m_Dialog == DIALOG_NONE && !UiPopupOpen() && !m_PopupEventActivated && Input()->KeyPress(KEY_ESCAPE)))
+	if(DoButton_Editor(&s_CloseButton, "×", 0, &Close, 0, "Exits from the editor", 0) || (m_Dialog == DIALOG_NONE && !UiPopupOpen() && !m_PopupEventActivated && Input()->KeyPress(KEY_ESCAPE)))
 		g_Config.m_ClEditor = 0;
 }
 
@@ -6044,8 +6102,12 @@ void CEditor::Render()
 				RenderEnvelopeEditor(ExtraEditor);
 			if(m_ShowUndo)
 				RenderUndoList(UndoList);
+			static bool s_ShowServerSettingsEditorLast = false;
 			if(m_ShowServerSettingsEditor)
-				RenderServerSettingsEditor(ExtraEditor);
+			{
+				RenderServerSettingsEditor(ExtraEditor, s_ShowServerSettingsEditorLast);
+			}
+			s_ShowServerSettingsEditorLast = m_ShowServerSettingsEditor;
 		}
 	}
 
@@ -6348,7 +6410,8 @@ void CEditor::Init()
 	m_pTextRender = Kernel()->RequestInterface<ITextRender>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pSound = Kernel()->RequestInterface<ISound>();
-	m_RenderTools.Init(m_pGraphics, &m_UI);
+	CGameClient *pGameClient = (CGameClient *)Kernel()->RequestInterface<IGameClient>();
+	m_RenderTools.Init(m_pGraphics, &m_UI, pGameClient);
 	m_UI.SetGraphics(m_pGraphics, m_pTextRender);
 	m_Map.m_pEditor = this;
 

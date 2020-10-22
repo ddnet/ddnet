@@ -21,6 +21,8 @@ CMenuBackground::CMenuBackground() :
 	m_Camera.m_PrevCenter = vec2(0.0f, 0.0f);
 	m_MenuCenter = vec2(0.0f, 0.0f);
 
+	m_ChangedPosition = false;
+
 	ResetPositions();
 
 	m_CurrentPosition = -1;
@@ -36,6 +38,9 @@ CBackgroundEngineMap *CMenuBackground::CreateBGMap()
 
 void CMenuBackground::OnInit()
 {
+	m_pBackgroundMap = CreateBGMap();
+	m_pMap = m_pBackgroundMap;
+
 	m_IsInit = true;
 
 	m_pImages->m_pClient = GameClient();
@@ -67,7 +72,7 @@ void CMenuBackground::ResetPositions()
 	m_Positions[POS_SETTINGS_DDNET] = vec2(1200.0f, 200.0f);
 	m_Positions[POS_SETTINGS_ASSETS] = vec2(500.0f, 500.0f);
 	for(int i = 0; i < POS_BROWSER_CUSTOM_NUM; ++i)
-		m_Positions[POS_BROWSER_CUSTOM0 + i] = vec2(500.0f + (75.0f * (float)i), 1250.0f - (75.0f * (float)i));
+		m_Positions[POS_BROWSER_CUSTOM0 + i] = vec2(500.0f + (75.0f * (float)i), 650.0f - (75.0f * (float)i));
 	for(int i = 0; i < POS_SETTINGS_RESERVED_NUM; ++i)
 		m_Positions[POS_SETTINGS_RESERVED0 + i] = vec2(0, 0);
 	for(int i = 0; i < POS_RESERVED_NUM; ++i)
@@ -305,7 +310,8 @@ bool CMenuBackground::Render()
 	m_Camera.m_Zoom = 0.7f;
 	static vec2 Dir = vec2(1.0f, 0.0f);
 
-	if(distance(m_Camera.m_Center, m_RotationCenter) <= (float)g_Config.m_ClRotationRadius + 0.5f)
+	float DistToCenter = distance(m_Camera.m_Center, m_RotationCenter);
+	if(!m_ChangedPosition && absolute(DistToCenter - (float)g_Config.m_ClRotationRadius) <= 0.5f)
 	{
 		// do little rotation
 		float RotPerTick = 360.0f / (float)g_Config.m_ClRotationSpeed * clamp(Client()->RenderFrameTime(), 0.0f, 0.1f);
@@ -315,9 +321,17 @@ bool CMenuBackground::Render()
 	else
 	{
 		// positions for the animation
-		Dir = normalize(m_AnimationStartPos - m_RotationCenter);
-		vec2 TargetPos = m_RotationCenter + Dir * (float)g_Config.m_ClRotationRadius;
+		vec2 DirToCenter;
+		if(DistToCenter > 0.5f)
+			DirToCenter = normalize(m_AnimationStartPos - m_RotationCenter);
+		else
+			DirToCenter = vec2(1, 0);
+		vec2 TargetPos = m_RotationCenter + DirToCenter * (float)g_Config.m_ClRotationRadius;
 		float Distance = distance(m_AnimationStartPos, TargetPos);
+		if(Distance > 0.001f)
+			Dir = normalize(m_AnimationStartPos - TargetPos);
+		else
+			Dir = vec2(1, 0);
 
 		// move time
 		m_MoveTime += clamp(Client()->RenderFrameTime(), 0.0f, 0.1f) * g_Config.m_ClCameraSpeed / 10.0f;
@@ -325,9 +339,18 @@ bool CMenuBackground::Render()
 		XVal = pow(XVal, 7.0f);
 
 		m_Camera.m_Center = TargetPos + Dir * (XVal * Distance);
+		if(m_CurrentPosition < 0)
+		{
+			m_AnimationStartPos = m_Camera.m_Center;
+			m_MoveTime = 0.0f;
+		}
+
+		m_ChangedPosition = false;
 	}
 
 	CMapLayers::OnRender();
+
+	m_CurrentPosition = -1;
 
 	return true;
 }
@@ -349,6 +372,8 @@ void CMenuBackground::ChangePosition(int PositionNumber)
 		{
 			m_CurrentPosition = POS_START;
 		}
+
+		m_ChangedPosition = true;
 	}
 	m_AnimationStartPos = m_Camera.m_Center;
 	m_RotationCenter = m_Positions[m_CurrentPosition];

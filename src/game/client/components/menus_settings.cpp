@@ -18,6 +18,7 @@
 #include <game/generated/protocol.h>
 
 #include <game/client/animstate.h>
+#include <game/client/components/chat.h>
 #include <game/client/components/menu_background.h>
 #include <game/client/components/sounds.h>
 #include <game/client/gameclient.h>
@@ -30,6 +31,8 @@
 #include "countryflags.h"
 #include "menus.h"
 #include "skins.h"
+
+#include <utility>
 
 CMenusKeyBinder CMenus::m_Binder;
 
@@ -152,17 +155,17 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			Right.HSplitTop(20.0f, &Button, &Right);
 			if(DoButton_CheckBox(&g_Config.m_ClNameplatesClan, Localize("Show clan above name plates"), g_Config.m_ClNameplatesClan, &Button))
 				g_Config.m_ClNameplatesClan ^= 1;
-		}
 
-		if(g_Config.m_ClNameplatesClan)
-		{
-			Right.HSplitTop(2.5f, 0, &Right);
-			Right.HSplitTop(20.0f, &Label, &Right);
-			Right.HSplitTop(20.0f, &Button, &Right);
-			str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Clan plates size"), g_Config.m_ClNameplatesClanSize);
-			UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
-			Button.HMargin(2.0f, &Button);
-			g_Config.m_ClNameplatesClanSize = (int)(DoScrollbarH(&g_Config.m_ClNameplatesClanSize, &Button, g_Config.m_ClNameplatesClanSize / 100.0f) * 100.0f + 0.1f);
+			if(g_Config.m_ClNameplatesClan)
+			{
+				Right.HSplitTop(2.5f, 0, &Right);
+				Right.HSplitTop(20.0f, &Label, &Right);
+				Right.HSplitTop(20.0f, &Button, &Right);
+				str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Clan plates size"), g_Config.m_ClNameplatesClanSize);
+				UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
+				Button.HMargin(2.0f, &Button);
+				g_Config.m_ClNameplatesClanSize = (int)(DoScrollbarH(&g_Config.m_ClNameplatesClanSize, &Button, g_Config.m_ClNameplatesClanSize / 100.0f) * 100.0f + 0.1f);
+			}
 		}
 	}
 
@@ -182,11 +185,11 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		if(DoButton_CheckBox(&g_Config.m_ClSkipStartMenu, Localize("Skip the main menu"), g_Config.m_ClSkipStartMenu, &Button))
 			g_Config.m_ClSkipStartMenu ^= 1;
 
-		float SliderGroupMargin = 20.0f;
+		float SliderGroupMargin = 10.0f;
 
 		// auto demo settings
 		{
-			Right.HSplitTop(5.0f, 0, &Right);
+			Right.HSplitTop(40.0f, 0, &Right);
 			Right.HSplitTop(20.0f, &Button, &Right);
 			if(DoButton_CheckBox(&g_Config.m_ClAutoDemoRecord, Localize("Automatically record demos"), g_Config.m_ClAutoDemoRecord, &Button))
 				g_Config.m_ClAutoDemoRecord ^= 1;
@@ -443,17 +446,18 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	}
 
 	// skin info
-	const CSkins::CSkin *pOwnSkin = m_pClient->m_pSkins->Get(m_pClient->m_pSkins->Find(Skin));
 	CTeeRenderInfo OwnSkinInfo;
+	const CSkin *pSkin = m_pClient->m_pSkins->Get(m_pClient->m_pSkins->Find(Skin));
+	OwnSkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
+	OwnSkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+	OwnSkinInfo.m_CustomColoredSkin = *UseCustomColor;
 	if(*UseCustomColor)
 	{
-		OwnSkinInfo.m_Texture = pOwnSkin->m_ColorTexture;
 		OwnSkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(*ColorBody).UnclampLighting());
 		OwnSkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(*ColorFeet).UnclampLighting());
 	}
 	else
 	{
-		OwnSkinInfo.m_Texture = pOwnSkin->m_OrgTexture;
 		OwnSkinInfo.m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f);
 		OwnSkinInfo.m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f);
 	}
@@ -579,7 +583,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	// skin selector
 	MainView.HSplitTop(20.0f, 0, &MainView);
 	MainView.HSplitTop(230.0f, &SkinList, &MainView);
-	static sorted_array<const CSkins::CSkin *> s_paSkinList;
+	static sorted_array<const CSkin *> s_paSkinList;
 	static int s_SkinCount = 0;
 	static float s_ScrollValue = 0.0f;
 	if(s_InitSkinlist || m_pClient->m_pSkins->Num() != s_SkinCount)
@@ -587,7 +591,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		s_paSkinList.clear();
 		for(int i = 0; i < m_pClient->m_pSkins->Num(); ++i)
 		{
-			const CSkins::CSkin *s = m_pClient->m_pSkins->Get(i);
+			const CSkin *s = m_pClient->m_pSkins->Get(i);
 
 			// filter quick search
 			if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_find_nocase(s->m_aName, g_Config.m_ClSkinFilterString))
@@ -611,7 +615,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	UiDoListboxStart(&s_InitSkinlist, &SkinList, 50.0f, Localize("Skins"), "", s_paSkinList.size(), 4, OldSelected, s_ScrollValue);
 	for(int i = 0; i < s_paSkinList.size(); ++i)
 	{
-		const CSkins::CSkin *s = s_paSkinList[i];
+		const CSkin *s = s_paSkinList[i];
 		if(s == 0)
 			continue;
 
@@ -623,7 +627,10 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		if(Item.m_Visible)
 		{
 			CTeeRenderInfo Info = OwnSkinInfo;
-			Info.m_Texture = *UseCustomColor ? s->m_ColorTexture : s->m_OrgTexture;
+			Info.m_CustomColoredSkin = *UseCustomColor;
+
+			Info.m_OriginalRenderSkin = s->m_OriginalSkin;
+			Info.m_ColorableRenderSkin = s->m_ColorableSkin;
 
 			Item.m_Rect.HSplitTop(5.0f, 0, &Item.m_Rect); // some margin from the top
 			RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, 0, vec2(1.0f, 0.0f), vec2(Item.m_Rect.x + 30, Item.m_Rect.y + Item.m_Rect.h / 2));
@@ -658,8 +665,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		QuickSearch.HSplitTop(5.0f, 0, &QuickSearch);
 		const char *pSearchLabel = "\xEE\xA2\xB6";
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
-		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
-		UI()->DoLabelScaled(&QuickSearch, pSearchLabel, 14.0f, -1);
+		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+		UI()->DoLabelScaled(&QuickSearch, pSearchLabel, 14.0f, -1, -1, 0);
 		float wSearch = TextRender()->TextWidth(0, 14.0f, pSearchLabel, -1, -1.0f);
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetCurFont(NULL);
@@ -702,11 +709,15 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	}
 
 	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
-	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
-	if(DoButton_Menu(&RefreshButton, "\xEE\x97\x95", 0, &RefreshButton))
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+	if(DoButton_Menu(&RefreshButton, "\xEE\x97\x95", 0, &RefreshButton, NULL, 15, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f), 0))
 	{
 		m_pClient->m_pSkins->Refresh();
 		s_InitSkinlist = true;
+		if(Client()->State() >= IClient::STATE_ONLINE)
+		{
+			m_pClient->RefindSkins();
+		}
 	}
 	TextRender()->SetRenderFlags(0);
 	TextRender()->SetCurFont(NULL);
@@ -1268,6 +1279,28 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		g_Config.m_SndVolume = (int)(DoScrollbarH(&g_Config.m_SndVolume, &Button, g_Config.m_SndVolume / 100.0f) * 100.0f);
 	}
 
+	// volume slider game sounds
+	{
+		CUIRect Button, Label;
+		MainView.HSplitTop(5.0f, &Button, &MainView);
+		MainView.HSplitTop(20.0f, &Button, &MainView);
+		Button.VSplitLeft(190.0f, &Label, &Button);
+		Button.HMargin(2.0f, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Game sound volume"), 14.0f, -1);
+		g_Config.m_SndGameSoundVolume = (int)(DoScrollbarH(&g_Config.m_SndGameSoundVolume, &Button, g_Config.m_SndGameSoundVolume / 100.0f) * 100.0f);
+	}
+
+	// volume slider gui sounds
+	{
+		CUIRect Button, Label;
+		MainView.HSplitTop(5.0f, &Button, &MainView);
+		MainView.HSplitTop(20.0f, &Button, &MainView);
+		Button.VSplitLeft(190.0f, &Label, &Button);
+		Button.HMargin(2.0f, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Chat sound volume"), 14.0f, -1);
+		g_Config.m_SndChatSoundVolume = (int)(DoScrollbarH(&g_Config.m_SndChatSoundVolume, &Button, g_Config.m_SndChatSoundVolume / 100.0f) * 100.0f);
+	}
+
 	// volume slider map sounds
 	{
 		CUIRect Button, Label;
@@ -1603,13 +1636,31 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			g_Config.m_ClShowChat ^= 1;
 		}
 
+		bool IsOldChat = !(g_Config.m_ClChatTee || g_Config.m_ClChatBackground);
+
+		Left.HSplitTop(20.0f, &Button, &Left);
+		if(DoButton_CheckBox(&g_Config.m_ClChatTee, Localize("Use old chat style"), IsOldChat, &Button))
+		{
+			if(IsOldChat)
+			{
+				g_Config.m_ClChatTee = 1;
+				g_Config.m_ClChatBackground = 1;
+			}
+			else
+			{
+				g_Config.m_ClChatTee = 0;
+				g_Config.m_ClChatBackground = 0;
+			}
+			GameClient()->m_pChat->RebuildChat();
+		}
+
 		Right.HSplitTop(20.0f, &Button, &Right);
 		if(DoButton_CheckBox(&g_Config.m_ClChatTeamColors, Localize("Show names in chat in team colors"), g_Config.m_ClChatTeamColors, &Button))
 		{
 			g_Config.m_ClChatTeamColors ^= 1;
 		}
 
-		Left.HSplitTop(20.0f, &Button, &Left);
+		Right.HSplitTop(20.0f, &Button, &Right);
 		if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Show kill messages"), g_Config.m_ClShowKillMessages, &Button))
 		{
 			g_Config.m_ClShowKillMessages ^= 1;
@@ -1914,11 +1965,10 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		// render head
 		{
 			Graphics()->BlendNormal();
-			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_PARTICLES].m_Id);
+			int SpriteIndex = time_get() % 3;
+			Graphics()->TextureSet(GameClient()->m_ParticlesSkin.m_SpriteParticleSplat[SpriteIndex]);
 			Graphics()->QuadsBegin();
 
-			int Sprites[] = {SPRITE_PART_SPLAT01, SPRITE_PART_SPLAT02, SPRITE_PART_SPLAT03};
-			RenderTools()->SelectSprite(Sprites[time_get() % 3]);
 			Graphics()->QuadsSetRotation(time_get());
 			Graphics()->SetColor(OuterColor.r, OuterColor.g, OuterColor.b, 1.0f);
 			IGraphics::CQuadItem QuadItem(Pos.x, Pos.y, 24, 24);
@@ -1929,10 +1979,11 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			Graphics()->QuadsEnd();
 		}
 		// draw laser weapon
-		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
+		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteWeaponLaser);
 		Graphics()->QuadsBegin();
 
 		RenderTools()->SelectSprite(SPRITE_WEAPON_LASER_BODY);
+		Graphics()->QuadsSetSubset(0, 0, 1, 1);
 		RenderTools()->DrawSprite(Weapon.x, Weapon.y + Weapon.h / 2.0f, 60.0f);
 
 		Graphics()->QuadsEnd();

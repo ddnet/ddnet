@@ -31,7 +31,7 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 	}
 	io_close(File);
 
-	pSettings = (char *)malloc(TotalLength);
+	pSettings = (char *)malloc(maximum(1, TotalLength));
 	int Offset = 0;
 	for(int i = 0; i < aLines.size(); i++)
 	{
@@ -73,6 +73,7 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 					if(DataSize == TotalLength && mem_comp(pSettings, pMapSettings, DataSize) == 0)
 					{
 						dbg_msg("config_store", "configs coincide, not updating map");
+						free(pSettings);
 						return;
 					}
 					Reader.UnloadData(pInfo->m_Settings);
@@ -121,6 +122,7 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 		Reader.UnloadData(i);
 	}
 
+	free(pSettings);
 	Reader.Close();
 	if(!Writer.OpenFile(pStorage, pMapName))
 	{

@@ -271,7 +271,8 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 				Size += str_length(m_lSettings[i].m_aCommand) + 1;
 			}
 
-			char *pSettings = (char *)malloc(Size);
+			// Checked that m_lSettings.size() is not 0, thus Size is > 0 as ell
+			char *pSettings = (char *)malloc(Size); // NOLINT(clang-analyzer-optin.portability.UnixAPI)
 			char *pNext = pSettings;
 			for(int i = 0; i < m_lSettings.size(); i++)
 			{
@@ -388,7 +389,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 				CMapItemLayerTilemap Item;
 				Item.m_Version = 3;
 
-				Item.m_Layer.m_Version = 1; // was previously uninitialized, do not rely on it being 1
+				Item.m_Layer.m_Version = 0; // was previously uninitialized, do not rely on it being 0
 				Item.m_Layer.m_Flags = pLayer->m_Flags;
 				Item.m_Layer.m_Type = pLayer->m_Type;
 
@@ -476,7 +477,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 				{
 					CMapItemLayerQuads Item;
 					Item.m_Version = 2;
-					Item.m_Layer.m_Version = 1; // was previously uninitialized, do not rely on it being 1
+					Item.m_Layer.m_Version = 0; // was previously uninitialized, do not rely on it being 0
 					Item.m_Layer.m_Flags = pLayer->m_Flags;
 					Item.m_Layer.m_Type = pLayer->m_Type;
 					Item.m_Image = pLayer->m_Image;
@@ -505,7 +506,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 				{
 					CMapItemLayerSounds Item;
 					Item.m_Version = CMapItemLayerSounds::CURRENT_VERSION;
-					Item.m_Layer.m_Version = 1; // was previously uninitialized, do not rely on it being 1
+					Item.m_Layer.m_Version = 0; // was previously uninitialized, do not rely on it being 0
 					Item.m_Layer.m_Flags = pLayer->m_Flags;
 					Item.m_Layer.m_Type = pLayer->m_Type;
 					Item.m_Sound = pLayer->m_Sound;
@@ -543,20 +544,23 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 		PointCount += Item.m_NumPoints;
 	}
 
-	// save points
-	int TotalSize = sizeof(CEnvPoint) * PointCount;
-	CEnvPoint *pPoints = (CEnvPoint *)calloc(PointCount, sizeof(*pPoints));
-	PointCount = 0;
-
-	for(int e = 0; e < m_lEnvelopes.size(); e++)
+	if(PointCount > 0)
 	{
-		int Count = m_lEnvelopes[e]->m_lPoints.size();
-		mem_copy(&pPoints[PointCount], m_lEnvelopes[e]->m_lPoints.base_ptr(), sizeof(CEnvPoint) * Count);
-		PointCount += Count;
-	}
+		// save points
+		int TotalSize = sizeof(CEnvPoint) * PointCount;
+		CEnvPoint *pPoints = (CEnvPoint *)calloc(PointCount, sizeof(*pPoints));
+		PointCount = 0;
 
-	df.AddItem(MAPITEMTYPE_ENVPOINTS, 0, TotalSize, pPoints);
-	free(pPoints);
+		for(int e = 0; e < m_lEnvelopes.size(); e++)
+		{
+			int Count = m_lEnvelopes[e]->m_lPoints.size();
+			mem_copy(&pPoints[PointCount], m_lEnvelopes[e]->m_lPoints.base_ptr(), sizeof(CEnvPoint) * Count);
+			PointCount += Count;
+		}
+
+		df.AddItem(MAPITEMTYPE_ENVPOINTS, 0, TotalSize, pPoints);
+		free(pPoints);
+	}
 
 	// finish the data file
 	df.Finish();

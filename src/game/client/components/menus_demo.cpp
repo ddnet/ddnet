@@ -136,6 +136,8 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 				{
 					m_DemoPlayerState = DEMOPLAYER_NONE;
 					Client()->DemoSlice(aPath, CMenus::DemoFilterChat, &s_RemoveChat);
+					DemolistPopulate();
+					DemolistOnUpdate(false);
 				}
 			}
 		}
@@ -956,22 +958,21 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		Labels.HSplitTop(5.0f, 0, &Labels);
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 		Left.VSplitLeft(150.0f, &Left, &Right);
-		UI()->DoLabelScaled(&Left, Localize("Crc:"), 14.0f, -1);
-		str_format(aBuf, sizeof(aBuf), "%08x", m_lDemos[m_DemolistSelectedIndex].m_MapInfo.m_Crc);
-		UI()->DoLabelScaled(&Right, aBuf, 14.0f, -1);
-		Labels.HSplitTop(5.0f, 0, &Labels);
-		Labels.HSplitTop(20.0f, &Left, &Labels);
-
 		if(m_lDemos[m_DemolistSelectedIndex].m_MapInfo.m_Sha256 != SHA256_ZEROED)
 		{
-			Left.VSplitLeft(150.0f, &Left, &Right);
 			UI()->DoLabelScaled(&Left, "SHA256:", 14.0f, -1);
 			char aSha[SHA256_MAXSTRSIZE];
 			sha256_str(m_lDemos[m_DemolistSelectedIndex].m_MapInfo.m_Sha256, aSha, sizeof(aSha) / 2);
 			UI()->DoLabelScaled(&Right, aSha, Right.w > 235 ? 14.0f : 11.0f, -1);
-			Labels.HSplitTop(5.0f, 0, &Labels);
-			Labels.HSplitTop(20.0f, &Left, &Labels);
 		}
+		else
+		{
+			UI()->DoLabelScaled(&Left, Localize("Crc:"), 14.0f, -1);
+			str_format(aBuf, sizeof(aBuf), "%08x", m_lDemos[m_DemolistSelectedIndex].m_MapInfo.m_Crc);
+			UI()->DoLabelScaled(&Right, aBuf, 14.0f, -1);
+		}
+		Labels.HSplitTop(5.0f, 0, &Labels);
+		Labels.HSplitTop(20.0f, &Left, &Labels);
 
 		Left.VSplitLeft(150.0f, &Left, &Right);
 		UI()->DoLabelScaled(&Left, Localize("Netversion:"), 14.0f, -1);

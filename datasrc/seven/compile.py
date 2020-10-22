@@ -55,18 +55,19 @@ if "server_content_header" in sys.argv: gen_server_content_header = True
 if "server_content_source" in sys.argv: gen_server_content_source = True
 
 if gen_client_content_header:
-	print("#ifndef CLIENT_CONTENT_HEADER")
-	print("#define CLIENT_CONTENT_HEADER")
+	print("#ifndef CLIENT_CONTENT7_HEADER")
+	print("#define CLIENT_CONTENT7_HEADER")
 
 if gen_server_content_header:
-	print("#ifndef SERVER_CONTENT_HEADER")
-	print("#define SERVER_CONTENT_HEADER")
+	print("#ifndef SERVER_CONTENT7_HEADER")
+	print("#define SERVER_CONTENT7_HEADER")
 
 
 if gen_client_content_header or gen_server_content_header:
 	# print some includes
 	print('#include <engine/graphics.h>')
 	print('#include <engine/sound.h>')
+	print("namespace client_data7 {")
 
 	# emit the type declarations
 	contentlines = open("datasrc/content.py", "rb").readlines()
@@ -88,11 +89,13 @@ if gen_client_content_header or gen_server_content_header:
 
 if gen_client_content_source or gen_server_content_source:
 	if gen_client_content_source:
-		print('#include "client_data.h"')
+		print('#include "client_data7.h"')
 	if gen_server_content_source:
 		print('#include "server_data.h"')
+	print("namespace client_data7 {")
 	EmitDefinition(content.container, "datacontainer")
 	print('CDataContainer *g_pData = &datacontainer;')
+	print("}")
 
 # NETWORK
 if gen_network_header:
@@ -356,4 +359,5 @@ if gen_network_source:
 		print(l)
 
 if gen_client_content_header or gen_server_content_header:
+	print("}")
 	print("#endif")

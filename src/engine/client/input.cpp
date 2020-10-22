@@ -227,7 +227,6 @@ int CInput::Update()
 		bool IgnoreKeys = false;
 		while(SDL_PollEvent(&Event))
 		{
-			int Key = -1;
 			int Scancode = 0;
 			int Action = IInput::FLAG_PRESS;
 			switch(Event.type)
@@ -265,13 +264,11 @@ int CInput::Update()
 				// Sum if you want to ignore multiple modifiers.
 				if(!(Event.key.keysym.mod & g_Config.m_InpIgnoredModifiers))
 				{
-					Key = Event.key.keysym.sym;
 					Scancode = Event.key.keysym.scancode;
 				}
 				break;
 			case SDL_KEYUP:
 				Action = IInput::FLAG_RELEASE;
-				Key = Event.key.keysym.sym;
 				Scancode = Event.key.keysym.scancode;
 				break;
 
@@ -288,37 +285,35 @@ int CInput::Update()
 				// fall through
 			case SDL_MOUSEBUTTONDOWN:
 				if(Event.button.button == SDL_BUTTON_LEFT)
-					Key = KEY_MOUSE_1; // ignore_convention
+					Scancode = KEY_MOUSE_1; // ignore_convention
 				if(Event.button.button == SDL_BUTTON_RIGHT)
-					Key = KEY_MOUSE_2; // ignore_convention
+					Scancode = KEY_MOUSE_2; // ignore_convention
 				if(Event.button.button == SDL_BUTTON_MIDDLE)
-					Key = KEY_MOUSE_3; // ignore_convention
+					Scancode = KEY_MOUSE_3; // ignore_convention
 				if(Event.button.button == SDL_BUTTON_X1)
-					Key = KEY_MOUSE_4; // ignore_convention
+					Scancode = KEY_MOUSE_4; // ignore_convention
 				if(Event.button.button == SDL_BUTTON_X2)
-					Key = KEY_MOUSE_5; // ignore_convention
+					Scancode = KEY_MOUSE_5; // ignore_convention
 				if(Event.button.button == 6)
-					Key = KEY_MOUSE_6; // ignore_convention
+					Scancode = KEY_MOUSE_6; // ignore_convention
 				if(Event.button.button == 7)
-					Key = KEY_MOUSE_7; // ignore_convention
+					Scancode = KEY_MOUSE_7; // ignore_convention
 				if(Event.button.button == 8)
-					Key = KEY_MOUSE_8; // ignore_convention
+					Scancode = KEY_MOUSE_8; // ignore_convention
 				if(Event.button.button == 9)
-					Key = KEY_MOUSE_9; // ignore_convention
-				Scancode = Key;
+					Scancode = KEY_MOUSE_9; // ignore_convention
 				break;
 
 			case SDL_MOUSEWHEEL:
 				if(Event.wheel.y > 0)
-					Key = KEY_MOUSE_WHEEL_UP; // ignore_convention
+					Scancode = KEY_MOUSE_WHEEL_UP; // ignore_convention
 				if(Event.wheel.y < 0)
-					Key = KEY_MOUSE_WHEEL_DOWN; // ignore_convention
+					Scancode = KEY_MOUSE_WHEEL_DOWN; // ignore_convention
 				if(Event.wheel.x > 0)
-					Key = KEY_MOUSE_WHEEL_LEFT; // ignore_convention
+					Scancode = KEY_MOUSE_WHEEL_LEFT; // ignore_convention
 				if(Event.wheel.x < 0)
-					Key = KEY_MOUSE_WHEEL_RIGHT; // ignore_convention
+					Scancode = KEY_MOUSE_WHEEL_RIGHT; // ignore_convention
 				Action |= IInput::FLAG_RELEASE;
-				Scancode = Key;
 				break;
 
 			case SDL_WINDOWEVENT:

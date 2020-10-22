@@ -47,6 +47,9 @@ public:
 	float m_StartY;
 	float m_LineWidth;
 	float m_X, m_Y;
+	float m_MaxCharacterHeight;
+
+	float m_LongestLineWidth;
 
 	CFont *m_pFont;
 	float m_FontSize;
@@ -77,6 +80,7 @@ class ITextRender : public IInterface
 	MACRO_INTERFACE("textrender", 0)
 public:
 	virtual void SetCursor(CTextCursor *pCursor, float x, float y, float FontSize, int Flags) = 0;
+	virtual void MoveCursor(CTextCursor *pCursor, float x, float y) = 0;
 
 	virtual CFont *LoadFont(const char *pFilename, const unsigned char *pBuf, size_t Size) = 0;
 	virtual bool LoadFallbackFont(CFont *pFont, const char *pFilename, const unsigned char *pBuf, size_t Size) = 0;
@@ -110,10 +114,12 @@ public:
 	virtual void TextColor(ColorRGBA rgb) = 0;
 	virtual void TextOutlineColor(float r, float g, float b, float a) = 0;
 	virtual void Text(void *pFontSetV, float x, float y, float Size, const char *pText, float LineWidth) = 0;
-	virtual float TextWidth(void *pFontSetV, float Size, const char *pText, int StrLength, float LineWidth, float *pAlignedHeight = NULL) = 0;
+	virtual float TextWidth(void *pFontSetV, float Size, const char *pText, int StrLength, float LineWidth, float *pAlignedHeight = NULL, float *pMaxCharacterHeightInLine = NULL) = 0;
 	virtual int TextLineCount(void *pFontSetV, float Size, const char *pText, float LineWidth) = 0;
 
 	virtual void OnWindowResize() = 0;
+
+	virtual float GetGlyphOffsetX(int FontSize, char TextCharacter) = 0;
 };
 
 class IEngineTextRender : public ITextRender

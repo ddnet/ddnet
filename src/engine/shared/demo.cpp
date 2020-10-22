@@ -84,15 +84,13 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 		// try the downloaded maps
 		if(pSha256)
 		{
-			str_format(aMapFilename, sizeof(aMapFilename), "downloadedmaps/%s_%08x_%s.map", pMap, Crc, aSha256);
-			MapFile = pStorage->OpenFile(aMapFilename, IOFLAG_READ, IStorage::TYPE_ALL);
+			str_format(aMapFilename, sizeof(aMapFilename), "downloadedmaps/%s_%s.map", pMap, aSha256);
 		}
-		if(!MapFile)
+		else
 		{
-			// try the downloaded maps without sha
 			str_format(aMapFilename, sizeof(aMapFilename), "downloadedmaps/%s_%08x.map", pMap, Crc);
-			MapFile = pStorage->OpenFile(aMapFilename, IOFLAG_READ, IStorage::TYPE_ALL);
 		}
+		MapFile = pStorage->OpenFile(aMapFilename, IOFLAG_READ, IStorage::TYPE_ALL);
 		if(!MapFile)
 		{
 			// try the normal maps folder
@@ -531,9 +529,12 @@ void CDemoPlayer::ScanFile()
 	}
 
 	// copy all the frames to an array instead for fast access
-	m_pKeyFrames = (CKeyFrame *)calloc(m_Info.m_SeekablePoints, sizeof(CKeyFrame));
-	for(pCurrentKey = pFirstKey, i = 0; pCurrentKey; pCurrentKey = pCurrentKey->m_pNext, i++)
-		m_pKeyFrames[i] = pCurrentKey->m_Frame;
+	if(m_Info.m_SeekablePoints > 0)
+	{
+		m_pKeyFrames = (CKeyFrame *)calloc(m_Info.m_SeekablePoints, sizeof(CKeyFrame));
+		for(pCurrentKey = pFirstKey, i = 0; pCurrentKey; pCurrentKey = pCurrentKey->m_pNext, i++)
+			m_pKeyFrames[i] = pCurrentKey->m_Frame;
+	}
 
 	// destroy the temporary heap and seek back to the start
 	io_seek(m_File, StartPos, IOSEEK_START);
@@ -846,7 +847,7 @@ bool CDemoPlayer::ExtractMap(class IStorage *pStorage)
 	// construct name
 	char aSha[SHA256_MAXSTRSIZE], aMapFilename[128];
 	sha256_str(Sha256, aSha, sizeof(aSha));
-	str_format(aMapFilename, sizeof(aMapFilename), "downloadedmaps/%s_%08x_%s.map", m_Info.m_Header.m_aMapName, m_MapInfo.m_Crc, aSha);
+	str_format(aMapFilename, sizeof(aMapFilename), "downloadedmaps/%s_%s.map", m_Info.m_Header.m_aMapName, aSha);
 
 	// save map
 	IOHANDLE MapFile = pStorage->OpenFile(aMapFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
@@ -1040,8 +1041,11 @@ int CDemoPlayer::Stop()
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", "Stopped playback");
 	io_close(m_File);
 	m_File = 0;
-	free(m_pKeyFrames);
-	m_pKeyFrames = 0;
+	if(m_pKeyFrames)
+	{
+		free(m_pKeyFrames);
+		m_pKeyFrames = 0;
+	}
 	str_copy(m_aFilename, "", sizeof(m_aFilename));
 	return 0;
 }

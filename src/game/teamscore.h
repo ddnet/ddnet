@@ -37,6 +37,8 @@ public:
 
 	bool GetSolo(int ClientID) const
 	{
+		if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+			return false;
 		return m_IsSolo[ClientID];
 	}
 };

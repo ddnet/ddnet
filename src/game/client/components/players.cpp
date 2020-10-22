@@ -45,8 +45,8 @@ void CPlayers::RenderHand(CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float
 	HandPos += DirX * PostRotOffset.x;
 	HandPos += DirY * PostRotOffset.y;
 
-	//Graphics()->TextureSet(data->m_aImages[IMAGE_CHAR_DEFAULT].id);
-	Graphics()->TextureSet(pInfo->m_Texture);
+	const CSkin::SSkinTextures *pSkinTextures = pInfo->m_CustomColoredSkin ? &pInfo->m_ColorableRenderSkin : &pInfo->m_OriginalRenderSkin;
+
 	Graphics()->SetColor(pInfo->m_ColorBody.r, pInfo->m_ColorBody.g, pInfo->m_ColorBody.b, Alpha);
 
 	// two passes
@@ -54,6 +54,7 @@ void CPlayers::RenderHand(CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float
 	{
 		int QuadOffset = NUM_WEAPONS * 2 + i;
 		Graphics()->QuadsSetRotation(Angle);
+		Graphics()->TextureSet(i == 0 ? pSkinTextures->m_HandsOutline : pSkinTextures->m_Hands);
 		Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, HandPos.x, HandPos.y);
 	}
 }
@@ -110,8 +111,6 @@ void CPlayers::RenderHook(
 	// draw hook
 	if(Prev.m_HookState > 0 && Player.m_HookState > 0)
 	{
-		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
-
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		if(ClientID < 0)
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.5f);
@@ -127,6 +126,7 @@ void CPlayers::RenderHook(
 		float d = distance(Pos, HookPos);
 		vec2 Dir = normalize(Pos - HookPos);
 
+		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteHookHead);
 		Graphics()->QuadsSetRotation(GetAngle(Dir) + pi);
 		// render head
 		int QuadOffset = NUM_WEAPONS * 2 + 2;
@@ -146,8 +146,8 @@ void CPlayers::RenderHook(
 
 			s_HookChainRenderInfo[HookChainCount].m_Scale = 1;
 			s_HookChainRenderInfo[HookChainCount].m_Rotation = GetAngle(Dir) + pi;
-			++HookChainCount;
 		}
+		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteHookChain);
 		Graphics()->RenderQuadContainerAsSpriteMultiple(m_WeaponEmoteQuadContainerIndex, QuadOffset, HookChainCount, s_HookChainRenderInfo);
 
 		Graphics()->QuadsSetRotation(0);
@@ -193,7 +193,7 @@ void CPlayers::RenderPlayer(
 	bool PredictLocalWeapons = false;
 	float AttackTime = (Client()->PrevGameTick(g_Config.m_ClDummy) - Player.m_AttackTick) / (float)SERVER_TICK_SPEED + Client()->GameTickTime(g_Config.m_ClDummy);
 	float LastAttackTime = (Client()->PrevGameTick(g_Config.m_ClDummy) - Player.m_AttackTick) / (float)SERVER_TICK_SPEED + s_LastGameTickTime;
-	if(m_pClient->m_aClients[ClientID].m_IsPredictedLocal && m_pClient->AntiPingGunfire())
+	if(ClientID >= 0 && m_pClient->m_aClients[ClientID].m_IsPredictedLocal && m_pClient->AntiPingGunfire())
 	{
 		PredictLocalWeapons = true;
 		AttackTime = (Client()->PredIntraGameTick(g_Config.m_ClDummy) + (Client()->PredGameTick(g_Config.m_ClDummy) - 1 - Player.m_AttackTick)) / (float)SERVER_TICK_SPEED;
@@ -356,7 +356,6 @@ void CPlayers::RenderPlayer(
 			Graphics()->LinesEnd();
 		}
 
-		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		Graphics()->QuadsSetRotation(State.GetAttach()->m_Angle * pi * 2 + Angle);
 
@@ -365,6 +364,7 @@ void CPlayers::RenderPlayer(
 
 		// normal weapons
 		int iw = clamp(Player.m_Weapon, 0, NUM_WEAPONS - 1);
+		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteWeapons[iw]);
 		int QuadOffset = iw * 2 + (Direction.x < 0 ? 1 : 0);
 
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
@@ -429,19 +429,29 @@ void CPlayers::RenderPlayer(
 				}
 				if(g_pData->m_Weapons.m_aId[iw].m_aSpriteMuzzles[IteX])
 				{
+					vec2 Pos1, Pos0;
 					vec2 Dir;
 					if(PredictLocalWeapons)
 						Dir = vec2(pPlayerChar->m_X, pPlayerChar->m_Y) - vec2(pPrevChar->m_X, pPrevChar->m_Y);
 					else
 						Dir = vec2(m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur.m_X, m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur.m_Y) - vec2(m_pClient->m_Snap.m_aCharacters[ClientID].m_Prev.m_X, m_pClient->m_Snap.m_aCharacters[ClientID].m_Prev.m_Y);
-					Dir = normalize(Dir);
-					float HadOkenAngle = GetAngle(Dir);
+					float HadOkenAngle = 0;
+					if(absolute(Dir.x) > 0.0001f || absolute(Dir.y) > 0.0001f)
+					{
+						Dir = normalize(Dir);
+						HadOkenAngle = GetAngle(Dir);
+					}
+					else
+					{
+						Dir = vec2(1, 0);
+					}
 					Graphics()->QuadsSetRotation(HadOkenAngle);
 					int QuadOffset = IteX * 2;
 					vec2 DirY(-Dir.y, Dir.x);
 					p = Position;
 					float OffsetX = g_pData->m_Weapons.m_aId[iw].m_Muzzleoffsetx;
 					p -= Dir * OffsetX;
+					Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteWeaponsMuzzles[iw][IteX]);
 					Graphics()->RenderQuadContainerAsSprite(m_WeaponSpriteMuzzleQuadContainerIndex[iw], QuadOffset, p.x, p.y);
 				}
 			}
@@ -498,6 +508,7 @@ void CPlayers::RenderPlayer(
 
 					vec2 DirY(-Dir.y, Dir.x);
 					vec2 MuzzlePos = p + Dir * g_pData->m_Weapons.m_aId[iw].m_Muzzleoffsetx + DirY * OffsetY;
+					Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteWeaponsMuzzles[iw][IteX]);
 					Graphics()->RenderQuadContainerAsSprite(m_WeaponSpriteMuzzleQuadContainerIndex[iw], QuadOffset, MuzzlePos.x, MuzzlePos.y);
 				}
 			}
@@ -566,8 +577,9 @@ void CPlayers::RenderPlayer(
 	int QuadOffsetToEmoticon = NUM_WEAPONS * 2 + 2 + 2;
 	if((Player.m_PlayerFlags & PLAYERFLAG_CHATTING) && !m_pClient->m_aClients[ClientID].m_Afk)
 	{
-		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_EMOTICONS].m_Id);
-		int QuadOffset = QuadOffsetToEmoticon + (SPRITE_DOTDOT - SPRITE_OOP);
+		int CurEmoticon = (SPRITE_DOTDOT - SPRITE_OOP);
+		Graphics()->TextureSet(GameClient()->m_EmoticonsSkin.m_SpriteEmoticons[CurEmoticon]);
+		int QuadOffset = QuadOffsetToEmoticon + CurEmoticon;
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
 		Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, Position.x + 24.f, Position.y - 40.f);
 
@@ -580,8 +592,9 @@ void CPlayers::RenderPlayer(
 
 	if(g_Config.m_ClAfkEmote && m_pClient->m_aClients[ClientID].m_Afk && !(Client()->DummyConnected() && ClientID == m_pClient->m_LocalIDs[!g_Config.m_ClDummy]))
 	{
-		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_EMOTICONS].m_Id);
-		int QuadOffset = QuadOffsetToEmoticon + (SPRITE_ZZZ - SPRITE_OOP);
+		int CurEmoticon = (SPRITE_ZZZ - SPRITE_OOP);
+		Graphics()->TextureSet(GameClient()->m_EmoticonsSkin.m_SpriteEmoticons[CurEmoticon]);
+		int QuadOffset = QuadOffsetToEmoticon + CurEmoticon;
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
 		Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, Position.x + 24.f, Position.y - 40.f);
 
@@ -591,8 +604,6 @@ void CPlayers::RenderPlayer(
 
 	if(g_Config.m_ClShowEmotes && !m_pClient->m_aClients[ClientID].m_EmoticonIgnore && m_pClient->m_aClients[ClientID].m_EmoticonStart != -1 && m_pClient->m_aClients[ClientID].m_EmoticonStart <= Client()->GameTick(g_Config.m_ClDummy) && m_pClient->m_aClients[ClientID].m_EmoticonStart + 2 * Client()->GameTickSpeed() > Client()->GameTick(g_Config.m_ClDummy))
 	{
-		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_EMOTICONS].m_Id);
-
 		int SinceStart = Client()->GameTick(g_Config.m_ClDummy) - m_pClient->m_aClients[ClientID].m_EmoticonStart;
 		int FromEnd = m_pClient->m_aClients[ClientID].m_EmoticonStart + 2 * Client()->GameTickSpeed() - Client()->GameTick(g_Config.m_ClDummy);
 
@@ -616,6 +627,7 @@ void CPlayers::RenderPlayer(
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, a * Alpha);
 		// client_datas::emoticon is an offset from the first emoticon
 		int QuadOffset = QuadOffsetToEmoticon + m_pClient->m_aClients[ClientID].m_Emoticon;
+		Graphics()->TextureSet(GameClient()->m_EmoticonsSkin.m_SpriteEmoticons[m_pClient->m_aClients[ClientID].m_Emoticon]);
 		Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, Position.x, Position.y - 23.f - 32.f * h, 1.f, (64.f * h) / 64.f);
 
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -638,18 +650,25 @@ void CPlayers::OnRender()
 			int Skin = m_pClient->m_pSkins->Find("x_ninja");
 			if(Skin != -1)
 			{
-				if(IsTeamplay)
-					m_aRenderInfo[i].m_Texture = m_pClient->m_pSkins->Get(Skin)->m_ColorTexture;
-				else
+				const CSkin *pSkin = m_pClient->m_pSkins->Get(Skin);
+				m_aRenderInfo[i].m_OriginalRenderSkin = pSkin->m_OriginalSkin;
+				m_aRenderInfo[i].m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+				m_aRenderInfo[i].m_BloodColor = pSkin->m_BloodColor;
+				m_aRenderInfo[i].m_CustomColoredSkin = IsTeamplay;
+				if(!IsTeamplay)
 				{
-					m_aRenderInfo[i].m_Texture = m_pClient->m_pSkins->Get(Skin)->m_OrgTexture;
 					m_aRenderInfo[i].m_ColorBody = ColorRGBA(1, 1, 1);
 					m_aRenderInfo[i].m_ColorFeet = ColorRGBA(1, 1, 1);
 				}
 			}
 		}
 	}
-	m_RenderInfoSpec.m_Texture = m_pClient->m_pSkins->Get(m_pClient->m_pSkins->Find("x_spec"))->m_OrgTexture;
+	int Skin = m_pClient->m_pSkins->Find("x_spec");
+	const CSkin *pSkin = m_pClient->m_pSkins->Get(Skin);
+	m_RenderInfoSpec.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
+	m_RenderInfoSpec.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+	m_RenderInfoSpec.m_BloodColor = pSkin->m_BloodColor;
+	m_RenderInfoSpec.m_CustomColoredSkin = false;
 	m_RenderInfoSpec.m_Size = 64.0f;
 
 	// render other players in three passes, first pass we render spectees,
@@ -714,27 +733,30 @@ void CPlayers::OnInit()
 
 	for(int i = 0; i < NUM_WEAPONS; ++i)
 	{
-		RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[i].m_pSpriteBody, 0);
-		RenderTools()->QuadContainerAddSprite(m_WeaponEmoteQuadContainerIndex, g_pData->m_Weapons.m_aId[i].m_VisualSize);
-		RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[i].m_pSpriteBody, SPRITE_FLAG_FLIP_Y);
-		RenderTools()->QuadContainerAddSprite(m_WeaponEmoteQuadContainerIndex, g_pData->m_Weapons.m_aId[i].m_VisualSize);
+		float ScaleX, ScaleY;
+		RenderTools()->GetSpriteScale(g_pData->m_Weapons.m_aId[i].m_pSpriteBody, ScaleX, ScaleY);
+		Graphics()->QuadsSetSubset(0, 0, 1, 1);
+		RenderTools()->QuadContainerAddSprite(m_WeaponEmoteQuadContainerIndex, g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleX, g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleY);
+		Graphics()->QuadsSetSubset(0, 1, 1, 0);
+		RenderTools()->QuadContainerAddSprite(m_WeaponEmoteQuadContainerIndex, g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleX, g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleY);
 	}
+	float ScaleX, ScaleY;
 
 	// at the end the hand
-	RenderTools()->SelectSprite(SPRITE_TEE_HAND_OUTLINE, 0, 0, 0);
-	RenderTools()->QuadContainerAddSprite(m_WeaponEmoteQuadContainerIndex, 20.f, false);
-	RenderTools()->SelectSprite(SPRITE_TEE_HAND, 0, 0, 0);
-	RenderTools()->QuadContainerAddSprite(m_WeaponEmoteQuadContainerIndex, 20.f, false);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
+	RenderTools()->QuadContainerAddSprite(m_WeaponEmoteQuadContainerIndex, 20.f);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
+	RenderTools()->QuadContainerAddSprite(m_WeaponEmoteQuadContainerIndex, 20.f);
 
-	RenderTools()->SelectSprite(SPRITE_HOOK_HEAD);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	RenderTools()->QuadContainerAddSprite(m_WeaponEmoteQuadContainerIndex, -12.f, -8.f, 24.f, 16.f);
-	RenderTools()->SelectSprite(SPRITE_HOOK_CHAIN);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	RenderTools()->QuadContainerAddSprite(m_WeaponEmoteQuadContainerIndex, -12.f, -8.f, 24.f, 16.f);
 
 	for(int i = 0; i < NUM_EMOTICONS; ++i)
 	{
-		RenderTools()->SelectSprite(SPRITE_OOP + i);
-		RenderTools()->QuadContainerAddSprite(m_WeaponEmoteQuadContainerIndex, 64.f, false);
+		Graphics()->QuadsSetSubset(0, 0, 1, 1);
+		RenderTools()->QuadContainerAddSprite(m_WeaponEmoteQuadContainerIndex, 64.f);
 	}
 
 	for(int i = 0; i < NUM_WEAPONS; ++i)
@@ -744,21 +766,18 @@ void CPlayers::OnInit()
 		{
 			if(g_pData->m_Weapons.m_aId[i].m_aSpriteMuzzles[n])
 			{
-				RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[i].m_aSpriteMuzzles[n], 0);
+				RenderTools()->GetSpriteScale(g_pData->m_Weapons.m_aId[i].m_aSpriteMuzzles[n], ScaleX, ScaleY);
 			}
 			if(WEAPON_NINJA == i)
-				RenderTools()->QuadContainerAddSprite(m_WeaponSpriteMuzzleQuadContainerIndex[i], 160.f);
+				RenderTools()->QuadContainerAddSprite(m_WeaponSpriteMuzzleQuadContainerIndex[i], 160.f * ScaleX, 160.f * ScaleY);
 			else
-				RenderTools()->QuadContainerAddSprite(m_WeaponSpriteMuzzleQuadContainerIndex[i], g_pData->m_Weapons.m_aId[i].m_VisualSize);
+				RenderTools()->QuadContainerAddSprite(m_WeaponSpriteMuzzleQuadContainerIndex[i], g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleX, g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleY);
 
-			if(g_pData->m_Weapons.m_aId[i].m_aSpriteMuzzles[n])
-			{
-				RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[i].m_aSpriteMuzzles[n], SPRITE_FLAG_FLIP_Y);
-			}
+			Graphics()->QuadsSetSubset(0, 1, 1, 0);
 			if(WEAPON_NINJA == i)
-				RenderTools()->QuadContainerAddSprite(m_WeaponSpriteMuzzleQuadContainerIndex[i], 160.f);
+				RenderTools()->QuadContainerAddSprite(m_WeaponSpriteMuzzleQuadContainerIndex[i], 160.f * ScaleX, 160.f * ScaleY);
 			else
-				RenderTools()->QuadContainerAddSprite(m_WeaponSpriteMuzzleQuadContainerIndex[i], g_pData->m_Weapons.m_aId[i].m_VisualSize);
+				RenderTools()->QuadContainerAddSprite(m_WeaponSpriteMuzzleQuadContainerIndex[i], g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleX, g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleY);
 		}
 	}
 

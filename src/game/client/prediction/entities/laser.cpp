@@ -48,10 +48,10 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 
 		float Strength = GetTuning(m_TuneZone)->m_ShotgunStrength;
 
-		if(!g_Config.m_SvOldLaser)
-			Temp = pHit->Core()->m_Vel + normalize(m_PrevPos - pHit->Core()->m_Pos) * Strength;
-		else
+		if(g_Config.m_SvOldLaser && pOwnerChar)
 			Temp = pHit->Core()->m_Vel + normalize(pOwnerChar->Core()->m_Pos - pHit->Core()->m_Pos) * Strength;
+		else
+			Temp = pHit->Core()->m_Vel + normalize(m_PrevPos - pHit->Core()->m_Pos) * Strength;
 		pHit->Core()->m_Vel = ClampVel(pHit->m_MoveRestrictions, Temp);
 	}
 	else if(m_Type == WEAPON_LASER)

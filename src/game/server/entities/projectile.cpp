@@ -198,7 +198,7 @@ void CProjectile::Tick()
 				vec2 PossiblePos;
 
 				if(!Collide)
-					Found = GetNearestAirPosPlayer(pTargetChr->m_Pos, &PossiblePos);
+					Found = GetNearestAirPosPlayer(pTargetChr ? pTargetChr->m_Pos : ColPos, &PossiblePos);
 				else
 					Found = GetNearestAirPos(NewPos, CurPos, &PossiblePos);
 

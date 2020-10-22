@@ -149,6 +149,10 @@ struct GL_SVertexTex3DStream
 
 typedef void (*WINDOW_RESIZE_FUNC)(void *pUser);
 
+namespace client_data7 {
+struct CDataSprite;
+}
+
 class IGraphics : public IInterface
 {
 	MACRO_INTERFACE("graphics", 0)
@@ -221,12 +225,22 @@ public:
 	// destination and source buffer require to have the same width and height
 	virtual void CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSourceBuffer, int FullWidth, int FullHeight, int ColorChannelCount, int SubOffsetX, int SubOffsetY, int SubCopyWidth, int SubCopyHeight) = 0;
 
+	// destination width must be equal to the subwidth of the source
+	virtual void CopyTextureFromTextureBufferSub(uint8_t *pDestBuffer, int DestWidth, int DestHeight, uint8_t *pSourceBuffer, int SrcWidth, int SrcHeight, int ColorChannelCount, int SrcSubOffsetX, int SrcSubOffsetY, int SrcSubCopyWidth, int SrcSubCopyHeight) = 0;
+
 	virtual int UnloadTexture(CTextureHandle Index) = 0;
+	virtual int UnloadTextureNew(CTextureHandle &TextureHandle) = 0;
 	virtual CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName = NULL) = 0;
 	virtual int LoadTextureRawSub(CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData) = 0;
 	virtual CTextureHandle LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags) = 0;
 	virtual void TextureSet(CTextureHandle Texture) = 0;
 	void TextureClear() { TextureSet(CTextureHandle()); }
+
+	virtual CTextureHandle LoadSpriteTexture(CImageInfo &FromImageInfo, struct CDataSprite *pSprite) = 0;
+	virtual CTextureHandle LoadSpriteTexture(CImageInfo &FromImageInfo, struct client_data7::CDataSprite *pSprite) = 0;
+
+	virtual bool IsImageSubFullyTransparent(CImageInfo &FromImageInfo, int x, int y, int w, int h) = 0;
+	virtual bool IsSpriteTextureFullyTransparent(CImageInfo &FromImageInfo, struct client_data7::CDataSprite *pSprite) = 0;
 
 	virtual void FlushVertices(bool KeepVertices = false) = 0;
 	virtual void FlushTextVertices(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor) = 0;
@@ -240,9 +254,10 @@ public:
 	virtual void RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, float *pTextColor, float *pTextoutlineColor) = 0;
 
 	// opengl 3.3 functions
-	virtual int CreateBufferObject(size_t UploadDataSize, void *pUploadData) = 0;
-	virtual void RecreateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData) = 0;
-	virtual void UpdateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, void *pOffset) = 0;
+	// if a pointer is passed as moved pointer, it requires to be allocated with malloc()
+	virtual int CreateBufferObject(size_t UploadDataSize, void *pUploadData, bool IsMovedPointer = false) = 0;
+	virtual void RecreateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, bool IsMovedPointer = false) = 0;
+	virtual void UpdateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, void *pOffset, bool IsMovedPointer = false) = 0;
 	virtual void CopyBufferObject(int WriteBufferIndex, int ReadBufferIndex, size_t WriteOffset, size_t ReadOffset, size_t CopyDataSize) = 0;
 	virtual void DeleteBufferObject(int BufferIndex) = 0;
 
@@ -275,6 +290,8 @@ public:
 	virtual void TextQuadsEnd(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor) = 0;
 	virtual void QuadsTex3DBegin() = 0;
 	virtual void QuadsTex3DEnd() = 0;
+	virtual void TrianglesBegin() = 0;
+	virtual void TrianglesEnd() = 0;
 	virtual void QuadsEndKeepVertices() = 0;
 	virtual void QuadsDrawCurrentVertices(bool KeepVertices = true) = 0;
 	virtual void QuadsSetRotation(float Angle) = 0;
@@ -316,6 +333,7 @@ public:
 	virtual void DeleteQuadContainer(int ContainerIndex) = 0;
 	virtual void RenderQuadContainer(int ContainerIndex, int QuadDrawNum) = 0;
 	virtual void RenderQuadContainer(int ContainerIndex, int QuadOffset, int QuadDrawNum) = 0;
+	virtual void RenderQuadContainerEx(int ContainerIndex, int QuadOffset, int QuadDrawNum, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f) = 0;
 	virtual void RenderQuadContainerAsSprite(int ContainerIndex, int QuadOffset, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f) = 0;
 
 	struct SRenderSpriteInfo

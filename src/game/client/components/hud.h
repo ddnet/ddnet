@@ -80,7 +80,7 @@ private:
 	void RenderDDRaceEffects();
 	float m_CheckpointDiff;
 	float m_ServerRecord;
-	float m_PlayerRecord[2];
+	float m_PlayerRecord[NUM_DUMMIES];
 	int m_DDRaceTime;
 	int m_LastReceivedTimeTick;
 	int m_CheckpointTick;

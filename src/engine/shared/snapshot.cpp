@@ -59,9 +59,9 @@ int CSnapshot::GetItemIndex(int Key)
 	return -1;
 }
 
-int CSnapshot::Crc()
+unsigned CSnapshot::Crc()
 {
-	int Crc = 0;
+	unsigned int Crc = 0;
 
 	for(int i = 0; i < m_NumItems; i++)
 	{
@@ -189,6 +189,8 @@ CSnapshotDelta::CSnapshotDelta(const CSnapshotDelta &old)
 
 void CSnapshotDelta::SetStaticsize(int ItemType, int Size)
 {
+	if(ItemType < 0 || ItemType >= MAX_NETOBJSIZES)
+		return;
 	m_aItemSizes[ItemType] = Size;
 }
 
@@ -230,7 +232,7 @@ int CSnapshotDelta::CreateDelta(CSnapshot *pFrom, CSnapshot *pTo, void *pDstData
 	}
 
 	GenerateHash(Hashlist, pFrom);
-	int aPastIndecies[1024];
+	int aPastIndices[1024];
 
 	// fetch previous indices
 	// we do this as a separate pass because it helps the cache
@@ -238,7 +240,7 @@ int CSnapshotDelta::CreateDelta(CSnapshot *pFrom, CSnapshot *pTo, void *pDstData
 	for(i = 0; i < NumItems; i++)
 	{
 		pCurItem = pTo->GetItem(i); // O(1) .. O(n)
-		aPastIndecies[i] = GetItemIndexHashed(pCurItem->Key(), Hashlist); // O(n) .. O(n^n)
+		aPastIndices[i] = GetItemIndexHashed(pCurItem->Key(), Hashlist); // O(n) .. O(n^n)
 	}
 
 	for(i = 0; i < NumItems; i++)
@@ -246,7 +248,9 @@ int CSnapshotDelta::CreateDelta(CSnapshot *pFrom, CSnapshot *pTo, void *pDstData
 		// do delta
 		ItemSize = pTo->GetItemSize(i); // O(1) .. O(n)
 		pCurItem = pTo->GetItem(i); // O(1) .. O(n)
-		PastIndex = aPastIndecies[i];
+		PastIndex = aPastIndices[i];
+
+		bool IncludeSize = pCurItem->Type() >= MAX_NETOBJSIZES || !m_aItemSizes[pCurItem->Type()];
 
 		if(PastIndex != -1)
 		{
@@ -254,14 +258,14 @@ int CSnapshotDelta::CreateDelta(CSnapshot *pFrom, CSnapshot *pTo, void *pDstData
 
 			pPastItem = pFrom->GetItem(PastIndex);
 
-			if(m_aItemSizes[pCurItem->Type()])
+			if(!IncludeSize)
 				pItemDataDst = pData + 2;
 
 			if(DiffItem(pPastItem->Data(), pCurItem->Data(), pItemDataDst, ItemSize / 4))
 			{
 				*pData++ = pCurItem->Type();
 				*pData++ = pCurItem->ID();
-				if(!m_aItemSizes[pCurItem->Type()])
+				if(IncludeSize)
 					*pData++ = ItemSize / 4;
 				pData += ItemSize / 4;
 				pDelta->m_NumUpdateItems++;
@@ -271,7 +275,7 @@ int CSnapshotDelta::CreateDelta(CSnapshot *pFrom, CSnapshot *pTo, void *pDstData
 		{
 			*pData++ = pCurItem->Type();
 			*pData++ = pCurItem->ID();
-			if(!m_aItemSizes[pCurItem->Type()])
+			if(IncludeSize)
 				*pData++ = ItemSize / 4;
 
 			mem_copy(pData, pCurItem->Data(), ItemSize);
@@ -368,8 +372,10 @@ int CSnapshotDelta::UnpackDelta(CSnapshot *pFrom, CSnapshot *pTo, void *pSrcData
 			return -1;
 
 		Type = *pData++;
+		if(Type < 0)
+			return -1;
 		ID = *pData++;
-		if((unsigned int)Type < sizeof(m_aItemSizes) / sizeof(m_aItemSizes[0]) && m_aItemSizes[Type])
+		if(Type < MAX_NETOBJSIZES && m_aItemSizes[Type])
 			ItemSize = m_aItemSizes[Type];
 		else
 		{

@@ -119,16 +119,18 @@ CGhostCharacter *CGhost::CGhostPath::Get(int Index)
 void CGhost::GetPath(char *pBuf, int Size, const char *pPlayerName, int Time) const
 {
 	const char *pMap = Client()->GetCurrentMap();
-	unsigned Crc = Client()->GetMapCrc();
+	SHA256_DIGEST Sha256 = Client()->GetCurrentMapSha256();
+	char aSha256[SHA256_MAXSTRSIZE];
+	sha256_str(Sha256, aSha256, sizeof(aSha256));
 
 	char aPlayerName[MAX_NAME_LENGTH];
 	str_copy(aPlayerName, pPlayerName, sizeof(aPlayerName));
 	str_sanitize_filename(aPlayerName);
 
 	if(Time < 0)
-		str_format(pBuf, Size, "%s/%s_%s_%08x_tmp_%d.gho", ms_pGhostDir, pMap, aPlayerName, Crc, pid());
+		str_format(pBuf, Size, "%s/%s_%s_%s_tmp_%d.gho", ms_pGhostDir, pMap, aPlayerName, aSha256, pid());
 	else
-		str_format(pBuf, Size, "%s/%s_%s_%d.%03d_%08x.gho", ms_pGhostDir, pMap, aPlayerName, Time / 1000, Time % 1000, Crc);
+		str_format(pBuf, Size, "%s/%s_%s_%d.%03d_%s.gho", ms_pGhostDir, pMap, aPlayerName, Time / 1000, Time % 1000, aSha256);
 }
 
 void CGhost::AddInfos(const CNetObj_Character *pChar)
@@ -139,7 +141,7 @@ void CGhost::AddInfos(const CNetObj_Character *pChar)
 	if(g_Config.m_ClRaceSaveGhost && !GhostRecorder()->IsRecording() && NumTicks > 0)
 	{
 		GetPath(m_aTmpFilename, sizeof(m_aTmpFilename), m_CurGhost.m_aPlayer);
-		GhostRecorder()->Start(m_aTmpFilename, Client()->GetCurrentMap(), Client()->GetMapCrc(), m_CurGhost.m_aPlayer);
+		GhostRecorder()->Start(m_aTmpFilename, Client()->GetCurrentMap(), Client()->GetCurrentMapSha256(), m_CurGhost.m_aPlayer);
 
 		GhostRecorder()->WriteData(GHOSTDATA_TYPE_START_TICK, &m_CurGhost.m_StartTick, sizeof(int));
 		GhostRecorder()->WriteData(GHOSTDATA_TYPE_SKIN, &m_CurGhost.m_Skin, sizeof(CGhostSkin));
@@ -352,16 +354,18 @@ void CGhost::InitRenderInfos(CGhostItem *pGhost)
 	CTeeRenderInfo *pRenderInfo = &pGhost->m_RenderInfo;
 
 	int SkinId = m_pClient->m_pSkins->Find(aSkinName);
-
+	const CSkin *pSkin = m_pClient->m_pSkins->Get(SkinId);
+	pRenderInfo->m_OriginalRenderSkin = pSkin->m_OriginalSkin;
+	pRenderInfo->m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+	pRenderInfo->m_BloodColor = pSkin->m_BloodColor;
+	pRenderInfo->m_CustomColoredSkin = pGhost->m_Skin.m_UseCustomColor;
 	if(pGhost->m_Skin.m_UseCustomColor)
 	{
-		pRenderInfo->m_Texture = m_pClient->m_pSkins->Get(SkinId)->m_ColorTexture;
 		pRenderInfo->m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(pGhost->m_Skin.m_ColorBody));
 		pRenderInfo->m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(pGhost->m_Skin.m_ColorFeet));
 	}
 	else
 	{
-		pRenderInfo->m_Texture = m_pClient->m_pSkins->Get(SkinId)->m_OrgTexture;
 		pRenderInfo->m_ColorBody = ColorRGBA(1, 1, 1);
 		pRenderInfo->m_ColorFeet = ColorRGBA(1, 1, 1);
 	}
@@ -443,15 +447,14 @@ int CGhost::Load(const char *pFilename)
 	if(Slot == -1)
 		return -1;
 
-	if(GhostLoader()->Load(pFilename, Client()->GetCurrentMap(), Client()->GetMapCrc()) != 0)
+	if(GhostLoader()->Load(pFilename, Client()->GetCurrentMap(), Client()->GetCurrentMapSha256(), Client()->GetCurrentMapCrc()) != 0)
 		return -1;
 
-	const CGhostHeader *pHeader = GhostLoader()->GetHeader();
+	const CGhostInfo *pInfo = GhostLoader()->GetInfo();
 
-	int NumTicks = pHeader->GetTicks();
-	int Time = pHeader->GetTime();
-	if(NumTicks <= 0 || Time <= 0)
+	if(pInfo->m_NumTicks <= 0 || pInfo->m_Time <= 0)
 	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ghost", "invalid header info");
 		GhostLoader()->Close();
 		return -1;
 	}
@@ -459,9 +462,9 @@ int CGhost::Load(const char *pFilename)
 	// select ghost
 	CGhostItem *pGhost = &m_aActiveGhosts[Slot];
 	pGhost->Reset();
-	pGhost->m_Path.SetSize(NumTicks);
+	pGhost->m_Path.SetSize(pInfo->m_NumTicks);
 
-	str_copy(pGhost->m_aPlayer, pHeader->m_aOwner, sizeof(pGhost->m_aPlayer));
+	str_copy(pGhost->m_aPlayer, pInfo->m_aOwner, sizeof(pGhost->m_aPlayer));
 
 	int Index = 0;
 	bool FoundSkin = false;
@@ -471,7 +474,7 @@ int CGhost::Load(const char *pFilename)
 	int Type;
 	while(!Error && GhostLoader()->ReadNextType(&Type))
 	{
-		if(Index == NumTicks && (Type == GHOSTDATA_TYPE_CHARACTER || Type == GHOSTDATA_TYPE_CHARACTER_NO_TICK))
+		if(Index == pInfo->m_NumTicks && (Type == GHOSTDATA_TYPE_CHARACTER || Type == GHOSTDATA_TYPE_CHARACTER_NO_TICK))
 		{
 			Error = true;
 			break;
@@ -503,8 +506,9 @@ int CGhost::Load(const char *pFilename)
 
 	GhostLoader()->Close();
 
-	if(Error || Index != NumTicks)
+	if(Error || Index != pInfo->m_NumTicks)
 	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ghost", "invalid ghost data");
 		pGhost->Reset();
 		return -1;
 	}
@@ -512,10 +516,10 @@ int CGhost::Load(const char *pFilename)
 	if(NoTick)
 	{
 		int StartTick = 0;
-		for(int i = 1; i < NumTicks; i++) // estimate start tick
+		for(int i = 1; i < pInfo->m_NumTicks; i++) // estimate start tick
 			if(pGhost->m_Path.Get(i)->m_AttackTick != pGhost->m_Path.Get(i - 1)->m_AttackTick)
 				StartTick = pGhost->m_Path.Get(i)->m_AttackTick - i;
-		for(int i = 0; i < NumTicks; i++)
+		for(int i = 0; i < pInfo->m_NumTicks; i++)
 			pGhost->m_Path.Get(i)->m_Tick = StartTick + i;
 	}
 
@@ -550,7 +554,7 @@ void CGhost::SaveGhost(CMenus::CGhostItem *pItem)
 
 	int NumTicks = pGhost->m_Path.Size();
 	GetPath(pItem->m_aFilename, sizeof(pItem->m_aFilename), pItem->m_aPlayer, pItem->m_Time);
-	GhostRecorder()->Start(pItem->m_aFilename, Client()->GetCurrentMap(), Client()->GetMapCrc(), pItem->m_aPlayer);
+	GhostRecorder()->Start(pItem->m_aFilename, Client()->GetCurrentMap(), Client()->GetCurrentMapSha256(), pItem->m_aPlayer);
 
 	GhostRecorder()->WriteData(GHOSTDATA_TYPE_START_TICK, &pGhost->m_StartTick, sizeof(int));
 	GhostRecorder()->WriteData(GHOSTDATA_TYPE_SKIN, &pGhost->m_Skin, sizeof(CGhostSkin));
@@ -595,7 +599,7 @@ void CGhost::OnMessage(int MsgType, void *pRawMsg)
 		{
 			char aName[MAX_NAME_LENGTH];
 			int Time = CRaceHelper::TimeFromFinishMessage(pMsg->m_pMessage, aName, sizeof(aName));
-			if(Time > 0 && str_comp(aName, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_aName) == 0)
+			if(Time > 0 && m_pClient->m_Snap.m_LocalClientID >= 0 && str_comp(aName, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_aName) == 0)
 			{
 				StopRecord(Time);
 				StopRender();
@@ -623,4 +627,32 @@ void CGhost::OnMapLoad()
 int CGhost::GetLastRaceTick()
 {
 	return m_LastRaceTick;
+}
+
+void CGhost::RefindSkin()
+{
+	char aSkinName[64];
+	for(int i = 0; i < (int)(sizeof(m_aActiveGhosts) / sizeof(m_aActiveGhosts[0])); ++i)
+	{
+		IntsToStr(&m_aActiveGhosts[i].m_Skin.m_Skin0, 6, aSkinName);
+		if(aSkinName[0] != '\0')
+		{
+			CTeeRenderInfo *pRenderInfo = &m_aActiveGhosts[i].m_RenderInfo;
+
+			int SkinId = m_pClient->m_pSkins->Find(aSkinName);
+			const CSkin *pSkin = m_pClient->m_pSkins->Get(SkinId);
+			pRenderInfo->m_OriginalRenderSkin = pSkin->m_OriginalSkin;
+			pRenderInfo->m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+		}
+	}
+	IntsToStr(&m_CurGhost.m_Skin.m_Skin0, 6, aSkinName);
+	if(aSkinName[0] != '\0')
+	{
+		CTeeRenderInfo *pRenderInfo = &m_CurGhost.m_RenderInfo;
+
+		int SkinId = m_pClient->m_pSkins->Find(aSkinName);
+		const CSkin *pSkin = m_pClient->m_pSkins->Get(SkinId);
+		pRenderInfo->m_OriginalRenderSkin = pSkin->m_OriginalSkin;
+		pRenderInfo->m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+	}
 }
