@@ -1440,6 +1440,24 @@ int CMenus::Render()
 			pButtonText = Localize("Ok");
 			ExtraAlign = -1;
 		}
+		else if(m_Popup == POPUP_POINTS)
+		{
+			pTitle = Localize("Existing Player");
+			if(Client()->m_Points > 50)
+			{
+				str_format(aBuf, sizeof(aBuf), Localize("Your nick name '%s' is already used (%d points). Do you still want to use it?"), Client()->PlayerName(), Client()->m_Points);
+				pExtraText = aBuf;
+			}
+			else if(Client()->m_Points >= 0)
+			{
+				m_Popup = POPUP_NONE;
+			}
+			else
+			{
+				pExtraText = Localize("Checking for existing player with your name");
+			}
+			ExtraAlign = -1;
+		}
 		else if(m_Popup == POPUP_WARNING)
 		{
 			BgColor = ColorRGBA{0.5f, 0.0f, 0.0f, 0.7f};
@@ -2024,7 +2042,12 @@ int CMenus::Render()
 			if(DoButton_Menu(&s_EnterButton, Localize("Enter"), 0, &Part) || m_EnterPressed)
 			{
 				Client()->RequestDDNetInfo();
-				m_Popup = POPUP_NONE;
+				if(g_Config.m_BrIndicateFinished)
+					m_Popup = POPUP_POINTS;
+				else
+				{
+					m_Popup = POPUP_NONE;
+				}
 			}
 
 			Box.HSplitBottom(20.f, &Box, &Part);
@@ -2049,6 +2072,27 @@ int CMenus::Render()
 			UI()->DoLabel(&Label, Localize("Nickname"), 16.0f, -1);
 			static float Offset = 0.0f;
 			DoEditBox(&g_Config.m_PlayerName, &TextBox, g_Config.m_PlayerName, sizeof(g_Config.m_PlayerName), 12.0f, &Offset, false, CUI::CORNER_ALL, Client()->PlayerName());
+		}
+		else if(m_Popup == POPUP_POINTS)
+		{
+			CUIRect Yes, No;
+
+			Box.HSplitBottom(20.f, &Box, &Part);
+			Box.HSplitBottom(24.f, &Box, &Part);
+			Part.VMargin(80.0f, &Part);
+
+			Part.VSplitMid(&No, &Yes);
+
+			Yes.VMargin(20.0f, &Yes);
+			No.VMargin(20.0f, &No);
+
+			static int s_ButtonNo = 0;
+			if(DoButton_Menu(&s_ButtonNo, Localize("No"), 0, &No) || m_EscapePressed)
+				m_Popup = POPUP_FIRST_LAUNCH;
+
+			static int s_ButtonYes = 0;
+			if(DoButton_Menu(&s_ButtonYes, Localize("Yes"), 0, &Yes) || m_EnterPressed)
+				m_Popup = POPUP_NONE;
 		}
 		else if(m_Popup == POPUP_WARNING)
 		{

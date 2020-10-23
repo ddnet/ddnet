@@ -328,6 +328,7 @@ CClient::CClient() :
 	str_format(m_aDDNetInfoTmp, sizeof(m_aDDNetInfoTmp), DDNET_INFO ".%d.tmp", pid());
 	m_pDDNetInfoTask = NULL;
 	m_aNews[0] = '\0';
+	m_Points = -1;
 
 	m_CurrentServerInfoRequestTime = -1;
 
@@ -2521,6 +2522,10 @@ void CClient::LoadDDNetInfo()
 
 		str_copy(m_aNews, pNewsString, sizeof(m_aNews));
 	}
+
+	const json_value *pPoints = json_object_get(pDDNetInfo, "points");
+	if(pPoints->type == json_integer)
+		m_Points = pPoints->u.integer;
 }
 
 void CClient::PumpNetwork()
