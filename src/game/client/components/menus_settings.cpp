@@ -107,6 +107,22 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			}
 		}
 
+		// smooth camera
+		Left.HSplitTop(5.0f, 0, &Left);
+		Left.HSplitTop(20.0f, &Button, &Left);
+		if(DoButton_CheckBox(&g_Config.m_ClCameraSmoothness, Localize("Smooth Camera"), g_Config.m_ClCameraSmoothness, &Button))
+		{
+			if(g_Config.m_ClCameraSmoothness)
+			{
+				g_Config.m_ClCameraSmoothness = 0;
+			}
+			else
+			{
+				g_Config.m_ClCameraSmoothness = 50;
+				g_Config.m_ClCameraStabilizing = 50;
+			}
+		}
+
 		// weapon pickup
 		Left.HSplitTop(5.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Button, &Left);

@@ -124,22 +124,49 @@ void CCamera::OnRender()
 			m_CamType = CAMTYPE_PLAYER;
 		}
 
-		vec2 CameraOffset(0, 0);
+		float DeltaTime = Client()->RenderFrameTime();
+		static vec2 s_LastMousePos(0, 0);
+		static vec2 s_CurrentCameraOffset[2] = {vec2(0, 0), vec2(0, 0)};
+		static float s_SpeedBias = 0.5f;
 
-		float l = length(m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy]);
+		if(g_Config.m_ClCameraSmoothness > 0)
+		{
+			float CameraSpeed = (1.0f - (g_Config.m_ClCameraSmoothness / 100.0f)) * 9.5f + 0.5f;
+			float CameraStabilizingFactor = 1 + g_Config.m_ClCameraStabilizing / 100.0f;
+
+			s_SpeedBias += CameraSpeed * DeltaTime;
+			if(g_Config.m_ClDyncam)
+			{
+				s_SpeedBias -= length(m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy] - s_LastMousePos) * log10f(CameraStabilizingFactor) * 0.02f;
+				s_SpeedBias = clamp(s_SpeedBias, 0.5f, CameraSpeed);
+			}
+			else
+			{
+				s_SpeedBias = maximum(5.0f, CameraSpeed); // make sure toggle back is fast
+			}
+		}
+
+		vec2 TargetCameraOffset(0, 0);
+		s_LastMousePos = m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy];
+		float l = length(s_LastMousePos);
 		if(l > 0.0001f) // make sure that this isn't 0
 		{
 			float DeadZone = g_Config.m_ClDyncam ? g_Config.m_ClDyncamDeadzone : g_Config.m_ClMouseDeadzone;
 			float FollowFactor = (g_Config.m_ClDyncam ? g_Config.m_ClDyncamFollowFactor : g_Config.m_ClMouseFollowfactor) / 100.0f;
 			float OffsetAmount = maximum(l - DeadZone, 0.0f) * FollowFactor;
 
-			CameraOffset = normalize(m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy]) * OffsetAmount;
+			TargetCameraOffset = normalize(m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy]) * OffsetAmount;
 		}
 
-		if(m_pClient->m_Snap.m_SpecInfo.m_Active)
-			m_Center = m_pClient->m_Snap.m_SpecInfo.m_Position + CameraOffset;
+		if(g_Config.m_ClCameraSmoothness > 0)
+			s_CurrentCameraOffset[g_Config.m_ClDummy] += (TargetCameraOffset - s_CurrentCameraOffset[g_Config.m_ClDummy]) * minimum(DeltaTime * s_SpeedBias, 1.0f);
 		else
-			m_Center = m_pClient->m_LocalCharacterPos + CameraOffset;
+			s_CurrentCameraOffset[g_Config.m_ClDummy] = TargetCameraOffset;
+
+		if(m_pClient->m_Snap.m_SpecInfo.m_Active)
+			m_Center = m_pClient->m_Snap.m_SpecInfo.m_Position + s_CurrentCameraOffset[g_Config.m_ClDummy];
+		else
+			m_Center = m_pClient->m_LocalCharacterPos + s_CurrentCameraOffset[g_Config.m_ClDummy];
 	}
 
 	m_PrevCenter = m_Center;
