@@ -8,6 +8,7 @@
 MACRO_CONFIG_INT(ClRenderPic, cl_render_pic, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Render nice thumbnails of players if there are some")
 MACRO_CONFIG_INT(ClRenderPicWidth, cl_render_pic_width, 250, 2, 1024, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Size of player pics")
 MACRO_CONFIG_INT(ClRenderPicHeight, cl_render_pic_height, 250, 2, 1024, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Size of player pics")
+MACRO_CONFIG_INT(ClRenderPicAlpha, cl_render_pic_alpha, 100, 0, 100, CFGFLAG_CLIENT|CFGFLAG_SAVE, "alpha of cl_render_pic 1")
 MACRO_CONFIG_INT(ClSaveMapInfo, cl_save_map_info, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Save map info ( off for tml compability on for everything else)")
 MACRO_CONFIG_INT(ClFinishRename, cl_finish_rename, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Change name to cl_finish_name if finish is near.")
 MACRO_CONFIG_STR(ClFinishName, cl_finish_name, 32, "chillerbot.png", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Change to this name if cl_finish_rename is active.")

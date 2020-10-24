@@ -161,8 +161,8 @@ void CPlayerPics::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		if(g_Config.m_ClRenderPic)
 		{
 			// render player pics
-			vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
-			Render(pName, &Color, Position.x-(g_Config.m_ClRenderPicWidth / 2), Position.y-(g_Config.m_ClRenderPicHeight + 100.0f), g_Config.m_ClRenderPicWidth, g_Config.m_ClRenderPicHeight);
+			vec4 Color(1.0f, 1.0f, 1.0f, g_Config.m_ClRenderPicAlpha / 100.0f);
+			Render(pName, &Color, Position.x-(g_Config.m_ClRenderPicWidth / 2), Position.y-(g_Config.m_ClRenderPicHeight + (g_Config.m_ClNameplatesClan ? 90.0f : 60.0f)), g_Config.m_ClRenderPicWidth, g_Config.m_ClRenderPicHeight);
 		}
 
 		TextRender()->TextColor(1, 1, 1, 1);

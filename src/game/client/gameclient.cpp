@@ -197,6 +197,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&gs_MapLayersBackGround); // first to render
 	m_All.Add(&m_pParticles->m_RenderTrail);
 	m_All.Add(m_pItems);
+	m_All.Add(&gs_PlayerPics);
 	m_All.Add(m_pPlayers);
 	m_All.Add(m_pGhost);
 	m_All.Add(&gs_MapLayersForeGround);
@@ -207,7 +208,6 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&gs_Hud);
 	m_All.Add(&gs_Spectator);
 	m_All.Add(&gs_Emoticon);
-	m_All.Add(&gs_PlayerPics);
 	m_All.Add(&gs_KillMessages);
 	m_All.Add(m_pChat);
 	m_All.Add(&gs_Broadcast);
