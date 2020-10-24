@@ -8,6 +8,18 @@
 #include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
 
+#include <game/generated/client_data.h>
+#include <game/generated/protocol.h>
+
+#include <game/client/gameclient.h>
+#include <game/client/animstate.h>
+#include <game/client/components/countryflags.h>
+#include <game/client/components/controls.h>
+#include <game/client/components/camera.h>
+#include <game/client/components/nameplates.h>
+#include <game/client/animstate.h>
+#include <game/client/gameclient.h>
+
 // nobo copy of countryflags.cpp
 #include "playerpics.h"
 
@@ -114,5 +126,79 @@ void CPlayerPics::Render(const char * pName, const vec4 *pColor, float x, float 
 		IGraphics::CQuadItem QuadItem(x, y, w, h);
 		Graphics()->QuadsDrawTL(&QuadItem, 1);
 		Graphics()->QuadsEnd();
+	}
+}
+
+void CPlayerPics::MapscreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup)
+{
+	float Points[4];
+	RenderTools()->MapscreenToWorld(CenterX, CenterY, pGroup->m_ParallaxX, pGroup->m_ParallaxY, pGroup->m_OffsetX, pGroup->m_OffsetY, Graphics()->ScreenAspect(), 1.0f, Points);
+	Graphics()->MapScreen(Points[0], Points[1], Points[2], Points[3]);
+}
+
+void CPlayerPics::RenderNameplate(
+	const CNetObj_Character *pPrevChar,
+	const CNetObj_Character *pPlayerChar,
+	const CNetObj_PlayerInfo *pPlayerInfo)
+{
+	int ClientID = pPlayerInfo->m_ClientID;
+
+	vec2 Position;
+	if(ClientID >= 0 && ClientID < MAX_CLIENTS)
+		Position = m_pClient->m_aClients[ClientID].m_RenderPos;
+	else
+		Position = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pPlayerChar->m_X, pPlayerChar->m_Y), Client()->IntraGameTick(g_Config.m_ClDummy));
+
+	RenderNameplatePos(Position, pPlayerInfo, 1.0f);
+}
+
+void CPlayerPics::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pPlayerInfo, float Alpha)
+{
+	// render playerpic
+	if(!pPlayerInfo->m_Local || g_Config.m_ClNameplatesOwn)
+	{
+		const char *pName = m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aName;
+		if(g_Config.m_ClRenderPic)
+		{
+			// render player pics
+			vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
+			Render(pName, &Color, Position.x-(g_Config.m_ClRenderPicWidth / 2), Position.y-(g_Config.m_ClRenderPicHeight + 100.0f), g_Config.m_ClRenderPicWidth, g_Config.m_ClRenderPicHeight);
+		}
+
+		TextRender()->TextColor(1, 1, 1, 1);
+		TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.3f);
+
+		TextRender()->SetRenderFlags(0);
+	}
+}
+
+void CPlayerPics::OnRender()
+{
+	if(!g_Config.m_ClNameplates)
+		return;
+
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paPlayerInfos[i];
+		if(!pInfo)
+		{
+			continue;
+		}
+
+		if(m_pClient->m_aClients[i].m_SpecCharPresent)
+		{
+			bool OtherTeam = m_pClient->IsOtherTeam(i);
+			float Alpha = 0.4f * (OtherTeam ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f);
+			RenderNameplatePos(m_pClient->m_aClients[i].m_SpecChar, pInfo, Alpha);
+		}
+
+		// only render active characters
+		if(m_pClient->m_Snap.m_aCharacters[i].m_Active)
+		{
+			RenderNameplate(
+				&m_pClient->m_Snap.m_aCharacters[i].m_Prev,
+				&m_pClient->m_Snap.m_aCharacters[i].m_Cur,
+				pInfo);
+		}
 	}
 }

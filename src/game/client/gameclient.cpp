@@ -151,7 +151,6 @@ void CGameClient::OnConsoleInit()
 	m_pMenus = &::gs_Menus;
 	m_pSkins = &::gs_Skins;
 	m_pCountryFlags = &::gs_CountryFlags;
-	m_pPlayerPics = &::gs_PlayerPics;
 	m_pChat = &::gs_Chat;
 	m_pFlow = &::gs_Flow;
 	m_pCamera = &::gs_Camera;
@@ -208,6 +207,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&gs_Hud);
 	m_All.Add(&gs_Spectator);
 	m_All.Add(&gs_Emoticon);
+	m_All.Add(&gs_PlayerPics);
 	m_All.Add(&gs_KillMessages);
 	m_All.Add(m_pChat);
 	m_All.Add(&gs_Broadcast);
@@ -219,10 +219,9 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&m_pMenus->m_Binder);
 	m_All.Add(m_pGameConsole);
 
-	m_All.Add(m_pMenuBackground);
-
 	m_All.Add(&gs_ChillerBotUX);
-	m_All.Add(m_pPlayerPics);
+
+	m_All.Add(m_pMenuBackground);
 
 	// build the input stack
 	m_Input.Add(&m_pMenus->m_Binder); // this will take over all input when we want to bind a key

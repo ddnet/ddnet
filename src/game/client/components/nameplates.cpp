@@ -17,8 +17,6 @@
 #include <game/client/animstate.h>
 #include <game/client/gameclient.h>
 
-#include <game/client/components/chillerbot/playerpics.h>
-
 #include "players.h"
 
 void CNamePlates::MapscreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup)
@@ -207,27 +205,6 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 				TextRender()->TextColor(ColorRGBA(1.0f, 1.0f, 0.0f));
 				TextRender()->Text(0, Position.x - PosArmor / 2.0f, YOffset, AFontSize, aArmor, -1);
 			}
-		}
-		if(g_Config.m_ClRenderPic)
-		{
-			/*
-			if (!str_comp(pName, "ChillerDragon"))
-			{
-				// render text (working but useless)
-				// TextRender()->Text(0, Position.x-2.0f, Position.y-38.0f, 28.0f, "nobo", -1);
-
-				// render big country flag (working but useless xd)
-				// vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
-				// m_pClient->m_pCountryFlags->Render(m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_Country, &Color, Position.x-2.0f, Position.y-38.0f, 250.0f, 250.0f);
-
-				// render player pics
-				vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
-				m_pClient->m_pPlayerPics->Render("ChillerDragon", &Color, Position.x-2.0f, Position.y-38.0f, 250.0f, 250.0f);
-			}
-			*/
-			// render player pics
-			vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
-			m_pClient->m_pPlayerPics->Render(pName, &Color, Position.x-(g_Config.m_ClRenderPicWidth / 2), Position.y-(g_Config.m_ClRenderPicHeight + 100.0f), g_Config.m_ClRenderPicWidth, g_Config.m_ClRenderPicHeight);
 		}
 
 		TextRender()->TextColor(1, 1, 1, 1);

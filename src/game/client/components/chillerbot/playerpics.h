@@ -6,6 +6,8 @@
 #include <base/tl/sorted_array.h>
 #include <game/client/component.h>
 
+#include <game/client/components/nameplates.h>
+
 class CPlayerPics : public CComponent
 {
 public:
@@ -35,5 +37,15 @@ private:
 
 	static int LoadImageByName(const char *pImgName, int IsDir, int DirType, void *pUser);
 	void LoadPlayerpicsIndexfile();
+
+	void MapscreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup);
+	SPlayerNamePlate m_aNamePlates[MAX_CLIENTS];
+	void RenderNameplate(
+		const CNetObj_Character *pPrevChar,
+		const CNetObj_Character *pPlayerChar,
+		const CNetObj_PlayerInfo *pPlayerInfo);
+	void RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pPlayerInfo, float Alpha);
+
+	virtual void OnRender();
 };
 #endif
