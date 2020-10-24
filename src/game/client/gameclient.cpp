@@ -40,7 +40,6 @@
 #include "components/console.h"
 #include "components/controls.h"
 #include "components/countryflags.h"
-#include "components/playerpics.h"
 #include "components/damageind.h"
 #include "components/debughud.h"
 #include "components/effects.h"
@@ -65,6 +64,9 @@
 #include "components/statboard.h"
 #include "components/voting.h"
 
+#include "components/chillerbot/chillerbotux.h"
+#include "components/chillerbot/playerpics.h"
+
 #include "components/ghost.h"
 #include "components/race_demo.h"
 #include <base/system.h>
@@ -83,7 +85,6 @@ static CParticles gs_Particles;
 static CMenus gs_Menus;
 static CSkins gs_Skins;
 static CCountryFlags gs_CountryFlags;
-static CPlayerPics gs_PlayerPics;
 static CFlow gs_Flow;
 static CHud gs_Hud;
 static CDebugHud gs_DebugHud;
@@ -111,6 +112,9 @@ static CMapSounds gs_MapSounds;
 
 static CRaceDemo gs_RaceDemo;
 static CGhost gs_Ghost;
+
+static CChillerBotUX gs_ChillerBotUX;
+static CPlayerPics gs_PlayerPics;
 
 CGameClient::CStack::CStack() { m_Num = 0; }
 void CGameClient::CStack::Add(class CComponent *pComponent) { m_paComponents[m_Num++] = pComponent; }
@@ -178,7 +182,6 @@ void CGameClient::OnConsoleInit()
 	// make a list of all the systems, make sure to add them in the correct render order
 	m_All.Add(m_pSkins);
 	m_All.Add(m_pCountryFlags);
-	m_All.Add(m_pPlayerPics);
 	m_All.Add(m_pMapimages);
 	m_All.Add(m_pEffects); // doesn't render anything, just updates effects
 	m_All.Add(m_pBinds);
@@ -217,6 +220,9 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(m_pGameConsole);
 
 	m_All.Add(m_pMenuBackground);
+
+	m_All.Add(&gs_ChillerBotUX);
+	m_All.Add(m_pPlayerPics);
 
 	// build the input stack
 	m_Input.Add(&m_pMenus->m_Binder); // this will take over all input when we want to bind a key
@@ -644,39 +650,6 @@ static void Evolve(CNetObj_Character *pCharacter, int Tick)
 	TempCore.Write(pCharacter);
 }
 
-void CGameClient::ChillerBotTick()
-{
-	if(!m_Snap.m_pLocalCharacter)
-		return;
-	if(!g_Config.m_ClFinishRename)
-		return;
-	// vec2 PrevPos = m_PredictedPrevChar.m_Pos;
-	vec2 Pos = m_PredictedChar.m_Pos;
-	if(CRaceHelper::IsNearFinish(this, Pos))
-	{
-		if(Client()->State() == IClient::STATE_ONLINE && !m_pMenus->IsActive() && g_Config.m_ClEditor == 0)
-		{
-			Graphics()->BlendNormal();
-			Graphics()->TextureClear();
-			Graphics()->QuadsBegin();
-			Graphics()->SetColor(0,0,0,0.5f);
-			RenderTools()->DrawRoundRect(10.0f, 30.0f, 150.0f, 50.0f, 10.0f);
-			Graphics()->QuadsEnd();
-			TextRender()->Text(0, 20.0f, 30.f, 20.0f, "chillerbot-ux", -1);
-			TextRender()->Text(0, 50.0f, 60.f, 10.0f, "finish rename", -1);
-		}
-		if(!m_IsNearFinish)
-		{
-			m_IsNearFinish = true;
-			SendFinishName();
-		}
-	}
-	else
-	{
-		m_IsNearFinish = false;
-	}
-}
-
 void CGameClient::OnRender()
 {
 	// update the local character and spectate position
@@ -763,7 +736,6 @@ void CGameClient::OnRender()
 				m_CheckInfo[1]--;
 		}
 	}
-	ChillerBotTick();
 }
 
 void CGameClient::OnDummyDisconnect()

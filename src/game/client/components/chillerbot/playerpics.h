@@ -1,7 +1,6 @@
-/* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
-/* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#ifndef GAME_CLIENT_COMPONENTS_PLAYERPICS_H
-#define GAME_CLIENT_COMPONENTS_PLAYERPICS_H
+#ifndef GAME_CLIENT_COMPONENTS_CHILLERBOT_PLAYERPICS_H
+#define GAME_CLIENT_COMPONENTS_CHILLERBOT_PLAYERPICS_H
+
 // nobo copy and edit of countryflags.h
 #include <base/vmath.h>
 #include <base/tl/sorted_array.h>

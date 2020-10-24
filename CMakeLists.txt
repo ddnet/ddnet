@@ -1688,6 +1688,10 @@ if(CLIENT)
     components/camera.h
     components/chat.cpp
     components/chat.h
+    components/chillerbot/chillerbotux.cpp
+    components/chillerbot/chillerbotux.h
+    components/chillerbot/playerpics.cpp
+    components/chillerbot/playerpics.h
     components/console.cpp
     components/console.h
     components/controls.cpp
@@ -1734,8 +1738,6 @@ if(CLIENT)
     components/nameplates.h
     components/particles.cpp
     components/particles.h
-    components/playerpics.cpp
-    components/playerpics.h
     components/players.cpp
     components/players.h
     components/race_demo.cpp

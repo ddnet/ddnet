@@ -9,7 +9,6 @@
 #include <game/client/gameclient.h>
 #include <game/client/animstate.h>
 #include <game/client/components/countryflags.h>
-#include <game/client/components/playerpics.h>
 #include "nameplates.h"
 #include "controls.h"
 #include "camera.h"
@@ -17,6 +16,8 @@
 #include "nameplates.h"
 #include <game/client/animstate.h>
 #include <game/client/gameclient.h>
+
+#include <game/client/components/chillerbot/playerpics.h>
 
 #include "players.h"
 

@@ -392,8 +392,6 @@ public:
 	virtual void SendDummyInfo(bool Start);
 	void SendKill(int ClientID);
 
-	bool m_IsNearFinish;
-
 	// pointers to all systems
 	class CMenuBackground *m_pMenuBackground;
 	class CGameConsole *m_pGameConsole;
@@ -590,10 +588,6 @@ private:
 	void LoadMapSettings();
 	CTuningParams m_aTuningList[NUM_TUNEZONES];
 	CTuningParams *TuningList() { return m_aTuningList; }
-
-	// chillerbot
-
-	void ChillerBotTick();
 };
 
 ColorRGBA CalculateNameColor(ColorHSLA TextColorHSL);
