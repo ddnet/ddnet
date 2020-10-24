@@ -170,10 +170,10 @@ bool CServerBrowser::SortCompareNumPlayersAndPing(int Index1, int Index2) const
 
 	if(a->m_Info.m_NumFilteredPlayers == b->m_Info.m_NumFilteredPlayers)
 		return a->m_Info.m_Latency > b->m_Info.m_Latency;
-	if(a->m_Info.m_NumFilteredPlayers == 0 || b->m_Info.m_NumFilteredPlayers == 0)
-		return a->m_Info.m_NumFilteredPlayers == 0;
+	else if(a->m_Info.m_NumFilteredPlayers == 0 || b->m_Info.m_NumFilteredPlayers == 0 || a->m_Info.m_Latency / 100 == b->m_Info.m_Latency / 100)
+		return a->m_Info.m_NumFilteredPlayers < b->m_Info.m_NumFilteredPlayers;
 	else
-		return a->m_Info.m_NumFilteredPlayers - (a->m_Info.m_Latency / 100) * MAX_CLIENTS < b->m_Info.m_NumFilteredPlayers - (b->m_Info.m_Latency / 100) * MAX_CLIENTS;
+		return a->m_Info.m_Latency > b->m_Info.m_Latency;
 }
 
 void CServerBrowser::Filter()

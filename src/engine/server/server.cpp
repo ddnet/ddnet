@@ -3574,9 +3574,9 @@ const char *CServer::GetAnnouncementLine(char const *pFileName)
 
 	std::vector<char *> v;
 	char *pLine;
-	CLineReader *lr = new CLineReader();
-	lr->Init(File);
-	while((pLine = lr->Get()))
+	CLineReader lr;
+	lr.Init(File);
+	while((pLine = lr.Get()))
 		if(str_length(pLine))
 			if(pLine[0] != '#')
 				v.push_back(pLine);

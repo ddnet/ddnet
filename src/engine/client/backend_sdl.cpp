@@ -2805,6 +2805,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 		//just tell, that we using this texture now
 		IsAndUpdateTextureSlotBound(Slot, pCommand->m_Slot);
 		glActiveTexture(GL_TEXTURE0 + Slot);
+		m_TextureSlotBoundToUnit[Slot].m_TextureSlot = -1;
+		m_TextureSlotBoundToUnit[Slot].m_Is2DArray = false;
 	}
 
 	if((pCommand->m_Flags & CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0)

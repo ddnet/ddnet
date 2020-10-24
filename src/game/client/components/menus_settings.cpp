@@ -107,6 +107,22 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			}
 		}
 
+		// smooth camera
+		Left.HSplitTop(5.0f, 0, &Left);
+		Left.HSplitTop(20.0f, &Button, &Left);
+		if(DoButton_CheckBox(&g_Config.m_ClCameraSmoothness, Localize("Smooth Camera"), g_Config.m_ClCameraSmoothness, &Button))
+		{
+			if(g_Config.m_ClCameraSmoothness)
+			{
+				g_Config.m_ClCameraSmoothness = 0;
+			}
+			else
+			{
+				g_Config.m_ClCameraSmoothness = 50;
+				g_Config.m_ClCameraStabilizing = 50;
+			}
+		}
+
 		// weapon pickup
 		Left.HSplitTop(5.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Button, &Left);
@@ -1683,6 +1699,10 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			char aBuf[64];
 			Left.HSplitTop(20.0f, &Label, &Left);
 			Label.VSplitRight(50.0f, &Label, &Button);
+			Label.VSplitLeft(25.0f, &Enable, &Label);
+
+			if(DoButton_CheckBox(&g_Config.m_ClShowChatSystem, "", g_Config.m_ClShowChatSystem, &Enable))
+				g_Config.m_ClShowChatSystem ^= 1;
 			UI()->DoLabelScaled(&Label, Localize("System message"), 16.0f, -1);
 			{
 				static int s_DefaultButton = 0;
@@ -1796,7 +1816,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 					g_Config.m_ClMessageFriendColor = ColorHSLA(0, 1, 145 / 255.0f).Pack(false);
 			}
 
-			if(DoButton_CheckBox(&g_Config.m_ClMessageFriend, "", g_Config.m_ClMessageFriend, &Enable))
+			if(DoButton_CheckBox(&g_Config.m_ClMessageFriend, Localize("Highlight"), g_Config.m_ClMessageFriend, &Enable))
 			{
 				g_Config.m_ClMessageFriend ^= 1;
 			}
