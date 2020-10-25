@@ -439,11 +439,11 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 		pDisplayStr = aStars;
 	}
 
-	char aInputing[32] = {0};
+	char aInputing[IInput::INPUT_TEXT_SIZE] = {0};
 	if(UI()->HotItem() == pID && Input()->GetIMEState())
 	{
 		str_copy(aInputing, pStr, sizeof(aInputing));
-		const char *Text = Input()->GetIMECandidate();
+		const char *Text = Input()->GetIMEEditingText();
 		if(str_length(Text))
 		{
 			int NewTextLen = str_length(Text);

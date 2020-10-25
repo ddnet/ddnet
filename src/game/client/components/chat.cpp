@@ -1152,9 +1152,9 @@ void CChat::OnRender()
 		int EditingCursor = Input()->GetEditingCursor();
 		if(Input()->GetIMEState())
 		{
-			if(str_length(Input()->GetIMECandidate()))
+			if(str_length(Input()->GetIMEEditingText()))
 			{
-				m_Input.Editing(Input()->GetIMECandidate(), EditingCursor);
+				m_Input.Editing(Input()->GetIMEEditingText(), EditingCursor);
 				Editing = true;
 			}
 		}
