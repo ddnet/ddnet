@@ -62,6 +62,7 @@ public:
 
 	virtual bool GetIMEState();
 	virtual void SetIMEState(bool Activate);
+	int GetIMEEditingTextLength() const { return m_EditingTextLen; }
 	virtual const char *GetIMEEditingText();
 	virtual int GetEditingCursor();
 	virtual void SetEditingPosition(float X, float Y);

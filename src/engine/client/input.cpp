@@ -248,7 +248,7 @@ int CInput::Update()
 				break;
 			}
 			case SDL_TEXTINPUT:
-				m_EditingTextLen = 0;
+				m_EditingTextLen = -1;
 				AddEvent(Event.text.text, 0, IInput::FLAG_TEXT);
 				break;
 			// handle keys
