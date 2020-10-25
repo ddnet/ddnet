@@ -1102,7 +1102,7 @@ void CChat::OnPrepareLines()
 		{
 			float Height = m_aLines[r].m_YOffset[OffsetType];
 			Graphics()->SetColor(1, 1, 1, 1);
-			m_aLines[r].m_QuadContainerIndex = RenderTools()->CreateRoundRectQuadContainer(Begin, y, AppendCursor.m_LongestLineWidth - Begin + RealMsgPaddingX, Height, RealMsgPaddingY, CUI::CORNER_ALL);
+			m_aLines[r].m_QuadContainerIndex = RenderTools()->CreateRoundRectQuadContainer(Begin, y, AppendCursor.m_LongestLineWidth - Begin + RealMsgPaddingX, Height, 4.f, CUI::CORNER_ALL);
 		}
 	}
 

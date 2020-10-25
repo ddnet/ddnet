@@ -15,7 +15,7 @@ class CChat : public CComponent
 	static constexpr float MESSAGE_TEE_SIZE = 8.0f;
 	static constexpr float MESSAGE_TEE_PADDING_RIGHT = 0.5f;
 	static constexpr float FONT_SIZE = 6.0f;
-	static constexpr float MESSAGE_PADDING_Y = 3.f;
+	static constexpr float MESSAGE_PADDING_Y = 2.f;
 	static_assert(FONT_SIZE + MESSAGE_PADDING_Y >= 8.0f, "Corners for background chat are too huge for this combination of font size and message padding.");
 
 	enum
