@@ -49,7 +49,7 @@ CInput::CInput()
 	m_VideoRestartNeeded = 0;
 	m_pClipboardText = NULL;
 
-	m_CountEditingText = 0;
+	m_NumTextInputInstances = 0;
 	m_EditingTextLen = -1;
 	m_aEditingText[0] = 0;
 }
@@ -144,28 +144,28 @@ void CInput::NextFrame()
 
 bool CInput::GetIMEState()
 {
-	return m_CountEditingText > 0;
+	return m_NumTextInputInstances > 0;
 }
 
 void CInput::SetIMEState(bool Activate)
 {
 	if(Activate)
 	{
-		if(m_CountEditingText == 0)
+		if(m_NumTextInputInstances == 0)
 			SDL_StartTextInput();
-		m_CountEditingText++;
+		m_NumTextInputInstances++;
 	}
 	else
 	{
-		if(m_CountEditingText == 0)
+		if(m_NumTextInputInstances == 0)
 			return;
-		m_CountEditingText--;
-		if(m_CountEditingText == 0)
+		m_NumTextInputInstances--;
+		if(m_NumTextInputInstances == 0)
 			SDL_StopTextInput();
 	}
 }
 
-const char *CInput::GetIMECandidate()
+const char *CInput::GetIMEEditingText()
 {
 	if(m_EditingTextLen > 0)
 		return m_aEditingText;
@@ -241,9 +241,14 @@ int CInput::Update()
 					for(int i = 0; i < Event.edit.start; i++)
 						m_EditingCursor = str_utf8_forward(m_aEditingText, m_EditingCursor);
 				}
+				else
+				{
+					m_aEditingText[0] = 0;
+				}
 				break;
 			}
 			case SDL_TEXTINPUT:
+				m_EditingTextLen = -1;
 				AddEvent(Event.text.text, 0, IInput::FLAG_TEXT);
 				break;
 			// handle keys

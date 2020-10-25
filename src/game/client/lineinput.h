@@ -18,7 +18,7 @@ class CLineInput
 	int m_CursorPos;
 	int m_NumChars;
 
-	char m_DisplayStr[MAX_SIZE + 34];
+	char m_DisplayStr[MAX_SIZE + IInput::INPUT_TEXT_SIZE + 2];
 	int m_FakeLen;
 	int m_FakeCursorPos;
 
