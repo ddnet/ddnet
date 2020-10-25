@@ -69,6 +69,7 @@ public:
 	void GetSpriteScale(client_data7::CDataSprite *pSprite, float &ScaleX, float &ScaleY);
 	void GetSpriteScale(struct CDataSprite *pSprite, float &ScaleX, float &ScaleY);
 	void GetSpriteScale(int id, float &ScaleX, float &ScaleY);
+	void GetSpriteScaleImpl(int Width, int Height, float &ScaleX, float &ScaleY);
 
 	void DrawSprite(float x, float y, float size);
 	void DrawSprite(float x, float y, float ScaledWidth, float ScaledHeight);

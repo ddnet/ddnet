@@ -78,9 +78,7 @@ void CRenderTools::SelectSprite(CDataSprite *pSpr, int Flags, int sx, int sy)
 	int cx = pSpr->m_pSet->m_Gridx;
 	int cy = pSpr->m_pSet->m_Gridy;
 
-	float f = sqrtf(h * h + w * w);
-	gs_SpriteWScale = w / f;
-	gs_SpriteHScale = h / f;
+	GetSpriteScaleImpl(w, h, gs_SpriteWScale, gs_SpriteHScale);
 
 	float x1 = x / (float)cx + 0.5f / (float)(cx * 32);
 	float x2 = (x + w) / (float)cx - 0.5f / (float)(cx * 32);
@@ -116,23 +114,26 @@ void CRenderTools::GetSpriteScale(client_data7::CDataSprite *pSprite, float &Sca
 {
 	int w = pSprite->m_W;
 	int h = pSprite->m_H;
-	float f = sqrtf(h * h + w * w);
-	ScaleX = w / f;
-	ScaleY = h / f;
+	GetSpriteScaleImpl(w, h, ScaleX, ScaleY);
 }
 
 void CRenderTools::GetSpriteScale(struct CDataSprite *pSprite, float &ScaleX, float &ScaleY)
 {
 	int w = pSprite->m_W;
 	int h = pSprite->m_H;
-	float f = sqrtf(h * h + w * w);
-	ScaleX = w / f;
-	ScaleY = h / f;
+	GetSpriteScaleImpl(w, h, ScaleX, ScaleY);
 }
 
 void CRenderTools::GetSpriteScale(int id, float &ScaleX, float &ScaleY)
 {
 	GetSpriteScale(&g_pData->m_aSprites[id], ScaleX, ScaleY);
+}
+
+void CRenderTools::GetSpriteScaleImpl(int Width, int Height, float &ScaleX, float &ScaleY)
+{
+	float f = sqrtf(Height * Height + Width * Width);
+	ScaleX = Width / f;
+	ScaleY = Height / f;
 }
 
 void CRenderTools::DrawSprite(float x, float y, float Size)
