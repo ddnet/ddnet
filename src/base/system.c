@@ -2963,11 +2963,11 @@ const char *str_utf8_find_nocase(const char *haystack, const char *needle)
 int str_utf8_isspace(int code)
 {
 	return code <= 0x0020 || code == 0x0085 || code == 0x00A0 ||
-	       code == 0x034F || code == 0x1680 || code == 0x180E ||
+	       code == 0x034F || code == 0x1160 || code == 0x1680 || code == 0x180E ||
 	       (code >= 0x2000 && code <= 0x200F) || (code >= 0x2028 && code <= 0x202F) ||
 	       (code >= 0x205F && code <= 0x2064) || (code >= 0x206A && code <= 0x206F) ||
-	       code == 0x2800 || code == 0x3000 ||
-	       (code >= 0xFE00 && code <= 0xFE0F) || code == 0xFEFF ||
+	       code == 0x2800 || code == 0x3000 || code == 0x3164 ||
+	       (code >= 0xFE00 && code <= 0xFE0F) || code == 0xFEFF || code == 0xFFA0 ||
 	       (code >= 0xFFF9 && code <= 0xFFFC);
 }
 
