@@ -3,6 +3,11 @@
 #ifndef GAME_CLIENT_UI_H
 #define GAME_CLIENT_UI_H
 
+#include <base/system.h>
+#include <engine/textrender.h>
+#include <string>
+#include <vector>
+
 class CUIRect
 {
 	// TODO: Refactor: Redo UI scaling
@@ -97,6 +102,65 @@ public:
 	void HMargin(float Cut, CUIRect *pOtherRect) const;
 };
 
+class CUI;
+
+class CUIElement
+{
+	friend class CUI;
+
+	CUIElement(CUI *pUI) { Init(pUI); }
+
+public:
+	struct SUIElementRect
+	{
+	public:
+		int m_UIRectQuadContainer;
+		int m_UITextContainer;
+
+		float m_X;
+		float m_Y;
+		float m_Width;
+		float m_Height;
+
+		std::string m_Text;
+
+		CTextCursor m_Cursor;
+
+		SUIElementRect() :
+			m_UIRectQuadContainer(-1), m_UITextContainer(-1), m_X(-1), m_Y(-1), m_Width(-1), m_Height(-1)
+		{
+		}
+	};
+
+protected:
+	std::vector<SUIElementRect> m_UIRects;
+
+	// used for marquees or other user implemented things
+	int64 m_ElementTime;
+
+public:
+	CUIElement() = default;
+
+	void Init(CUI *pUI);
+
+	SUIElementRect *Get(size_t Index)
+	{
+		return &m_UIRects[Index];
+	}
+
+	size_t Size()
+	{
+		return m_UIRects.size();
+	}
+
+	void Clear() { m_UIRects.clear(); }
+
+	void Add(SUIElementRect &ElRect)
+	{
+		m_UIRects.push_back(ElRect);
+	}
+};
+
 class CUI
 {
 	const void *m_pHotItem;
@@ -112,6 +176,9 @@ class CUI
 	class IGraphics *m_pGraphics;
 	class ITextRender *m_pTextRender;
 
+	std::vector<CUIElement *> m_OwnUIElements; // ui elements maintained by CUI class
+	std::vector<CUIElement *> m_UIElements;
+
 public:
 	// TODO: Refactor: Fill this in
 	void SetGraphics(class IGraphics *pGraphics, class ITextRender *pTextRender)
@@ -123,6 +190,16 @@ public:
 	class ITextRender *TextRender() { return m_pTextRender; }
 
 	CUI();
+	~CUI();
+
+	void ResetUIElement(CUIElement &UIElement);
+
+	CUIElement *GetNewUIElement();
+
+	void AddUIElement(CUIElement *pElement);
+	void OnElementsReset();
+	void OnWindowResize();
+	void OnLanguageChange();
 
 	enum
 	{
@@ -173,12 +250,16 @@ public:
 	void SetScale(float s);
 	float Scale();
 
+	int DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect);
 	int DoButtonLogic(const void *pID, const char *pText /* TODO: Refactor: Remove */, int Checked, const CUIRect *pRect);
 	int DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *pY);
 
 	// TODO: Refactor: Remove this?
 	void DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, int MaxWidth = -1, int AlignVertically = 1);
 	void DoLabelScaled(const CUIRect *pRect, const char *pText, float Size, int Align, int MaxWidth = -1, int AlignVertically = 1);
+
+	void DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, int MaxWidth = -1, int AlignVertically = 1, bool StopAtEnd = false, int StrLen = -1, class CTextCursor *pReadCursor = NULL);
+	void DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, int MaxWidth = -1, int AlignVertically = 1, bool StopAtEnd = false, int StrLen = -1, class CTextCursor *pReadCursor = NULL);
 };
 
 #endif

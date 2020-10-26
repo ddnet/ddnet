@@ -202,8 +202,8 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			}
 		}
 
-		TextRender()->TextColor(1, 1, 1, 1);
-		TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.3f);
+		TextRender()->TextColor(TextRender()->DefaultTextColor());
+		TextRender()->TextOutlineColor(TextRender()->DefaultTextOutlineColor());
 
 		TextRender()->SetRenderFlags(0);
 	}

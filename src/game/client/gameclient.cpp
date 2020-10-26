@@ -947,6 +947,7 @@ void CGameClient::OnWindowResize()
 	for(int i = 0; i < m_All.m_Num; i++)
 		m_All.m_paComponents[i]->OnWindowResize();
 
+	UI()->OnWindowResize();
 	TextRender()->OnWindowResize();
 }
 
@@ -954,6 +955,11 @@ void CGameClient::OnWindowResizeCB(void *pUser)
 {
 	CGameClient *pClient = (CGameClient *)pUser;
 	pClient->OnWindowResize();
+}
+
+void CGameClient::OnLanguageChange()
+{
+	UI()->OnLanguageChange();
 }
 
 void CGameClient::OnRconType(bool UsernameReq)
