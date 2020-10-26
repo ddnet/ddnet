@@ -186,7 +186,7 @@ protected:
 	char m_aMessageBody[512];
 	char m_aMessageButton[512];
 
-	SUIAnimator m_aUIAnimators[10];
+	SUIAnimator m_aSettingsTabAnimators[10];
 
 	void PopupMessage(const char *pTopic, const char *pBody, const char *pButton);
 
@@ -451,7 +451,8 @@ public:
 		SETTINGS_GRAPHICS,
 		SETTINGS_SOUND,
 		SETTINGS_DDNET,
-		SETTINGS_ASSETS
+		SETTINGS_ASSETS,
+		SETTINGS_LENGTH
 	};
 
 	// DDRace

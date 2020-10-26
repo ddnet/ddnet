@@ -204,7 +204,7 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 
 	if(pAnimator != NULL)
 	{
-		Time = time();	
+		Time = time();
 
 		if(pAnimator->m_Time + 1000000.f < Time)
 		{
@@ -222,6 +222,8 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 		Rect.w += pAnimator->m_Value * 5;
 		Rect.y -= pAnimator->m_Value * 2.5f;
 		Rect.h += pAnimator->m_Value * 5;
+
+		pAnimator->m_Time = Time;
 	}
 
 	if(Checked)
@@ -240,7 +242,6 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 			if(pHoverColor)
 				HoverColorMenuTab = *pHoverColor;
 
-
 			RenderTools()->DrawUIRect(&Rect, HoverColorMenuTab, Corners, EdgeRounding);
 		}
 		else
@@ -252,9 +253,6 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 			RenderTools()->DrawUIRect(&Rect, ColorMenuTab, Corners, EdgeRounding);
 		}
 	}
-
-	if(pAnimator != NULL)
-		pAnimator->m_Time = Time;
 
 	CUIRect Temp;
 	Rect.HMargin(2.0f, &Temp);
