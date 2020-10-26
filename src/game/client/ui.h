@@ -101,6 +101,7 @@ struct SUIAnimator
 {
 	bool m_Active;
 	bool m_ScaleLabel;
+	bool m_RepositionLabel;
 
 	float m_Time;
 	float m_Value;
@@ -109,7 +110,6 @@ struct SUIAnimator
 	float m_YOffset;
 	float m_WOffset;
 	float m_HOffset;
-	
 };
 
 class CUI

@@ -100,7 +100,7 @@ CMenus::CMenus()
 		animator.m_YOffset = -2.5f;
 		animator.m_HOffset = 5.0f;
 		animator.m_WOffset = 5.0f;
-		animator.m_ScaleLabel = true;
+		animator.m_RepositionLabel = true;
 	}
 
 	for(SUIAnimator &animator : m_aAnimatorsBigPage)
@@ -279,6 +279,12 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 
 	if(pAnimator != NULL)
 	{
+		if(pAnimator->m_RepositionLabel)
+		{
+			Rect.x += Rect.w - pRect->w + Rect.x - pRect->x;
+			Rect.y += Rect.h - pRect->h + Rect.y - pRect->y;
+		}
+		
 		if(!pAnimator->m_ScaleLabel)
 		{
 			Rect.w = pRect->w;
