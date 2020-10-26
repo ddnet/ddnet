@@ -114,6 +114,7 @@ class CGameContext : public IGameServer
 	static void ConRemoveVote(IConsole::IResult *pResult, void *pUserData);
 	static void ConForceVote(IConsole::IResult *pResult, void *pUserData);
 	static void ConClearVotes(IConsole::IResult *pResult, void *pUserData);
+	static void ConAddMapVotes(IConsole::IResult *pResult, void *pUserData);
 	static void ConVote(IConsole::IResult *pResult, void *pUserData);
 	static void ConVoteNo(IConsole::IResult *pResult, void *pUserData);
 	static void ConDrySave(IConsole::IResult *pResult, void *pUserData);
@@ -122,6 +123,8 @@ class CGameContext : public IGameServer
 
 	CGameContext(int Resetting);
 	void Construct(int Resetting);
+	void AddVote(const char *pDescription, const char *pCommand);
+	static int MapScan(const char *pName, int IsDir, int DirType, void *pUserData);
 
 	bool m_Resetting;
 
