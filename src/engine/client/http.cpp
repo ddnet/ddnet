@@ -287,6 +287,7 @@ int CGetFile::OnCompletion(int State)
 {
 	if(m_File && io_close(m_File) != 0)
 	{
+		dbg_msg("http", "i/o error, cannot close file: %s", m_aDest);
 		State = HTTP_ERROR;
 	}
 
