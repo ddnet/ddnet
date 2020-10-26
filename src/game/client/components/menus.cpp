@@ -218,15 +218,14 @@ void CMenus::DoButton_KeySelect(const void *pID, const char *pText, int Checked,
 
 int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners, SUIAnimator *pAnimator, const ColorRGBA *pDefaultColor, const ColorRGBA *pActiveColor, const ColorRGBA *pHoverColor, float EdgeRounding, int AlignVertically)
 {
-	int Time = 0;
 	bool MouseInside = UI()->MouseInside(pRect);
 	CUIRect Rect = *pRect;
 
 	if(pAnimator != NULL)
 	{
-		Time = time();
+		int64 Time = time_get_microseconds();
 
-		if(pAnimator->m_Time + 1000000.f < Time)
+		if(pAnimator->m_Time + 100000 < Time)
 		{
 			pAnimator->m_Value = pAnimator->m_Active ? 1 : 0;
 			pAnimator->m_Time = Time;
@@ -235,9 +234,9 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 		pAnimator->m_Active = Checked || MouseInside;
 
 		if(pAnimator->m_Active)
-			pAnimator->m_Value = clamp<float>(pAnimator->m_Value + (Time - pAnimator->m_Time) / 1000000.f, 0, 1);
+			pAnimator->m_Value = clamp<float>(pAnimator->m_Value + (Time - pAnimator->m_Time) / 100000.f, 0, 1);
 		else
-			pAnimator->m_Value = clamp<float>(pAnimator->m_Value - (Time - pAnimator->m_Time) / 1000000.f, 0, 1);
+			pAnimator->m_Value = clamp<float>(pAnimator->m_Value - (Time - pAnimator->m_Time) / 100000.f, 0, 1);
 
 		Rect.w += pAnimator->m_Value * pAnimator->m_WOffset;
 		Rect.h += pAnimator->m_Value * pAnimator->m_HOffset;
@@ -290,12 +289,9 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 			Rect.w = pRect->w;
 			Rect.h = pRect->h;
 		}
-
-		Rect.HMargin(2.0f, &Temp);
 	}
-	else
-		pRect->HMargin(2.0f, &Temp);
-
+	
+	Rect.HMargin(2.0f, &Temp);
 	UI()->DoLabel(&Temp, pText, Temp.h * ms_FontmodHeight, 0, -1, AlignVertically);
 
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);

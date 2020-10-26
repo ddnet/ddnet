@@ -103,7 +103,7 @@ struct SUIAnimator
 	bool m_ScaleLabel;
 	bool m_RepositionLabel;
 
-	float m_Time;
+	long long m_Time;
 	float m_Value;
 
 	float m_XOffset;
