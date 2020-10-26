@@ -483,7 +483,7 @@ class CTextRender : public IEngineTextRender
 
 				if(GlyphIndex == 0)
 				{
-					dbg_msg("pFont", "font has no glyph for either %d or replacement char %d", Chr, ReplacementChr);
+					dbg_msg("textrender", "font has no glyph for either %d or replacement char %d", Chr, ReplacementChr);
 					return;
 				}
 			}
@@ -491,7 +491,7 @@ class CTextRender : public IEngineTextRender
 
 		if(FT_Load_Glyph(FtFace, GlyphIndex, FT_LOAD_RENDER | FT_LOAD_NO_BITMAP))
 		{
-			dbg_msg("pFont", "error loading glyph %d", Chr);
+			dbg_msg("textrender", "error loading glyph %d", Chr);
 			return;
 		}
 
@@ -1822,7 +1822,7 @@ public:
 
 				if(FT_Load_Char(pFont->m_FtFace, NextCharacter, FT_LOAD_RENDER | FT_LOAD_NO_BITMAP))
 				{
-					dbg_msg("pFont", "error loading glyph %d", NextCharacter);
+					dbg_msg("textrender", "error loading glyph %d", NextCharacter);
 					pCurrent = pTmp;
 					continue;
 				}
@@ -1903,7 +1903,7 @@ public:
 #endif
 			if(FT_Load_Char(pFont->m_FtFace, NextCharacter, FTFlags))
 			{
-				dbg_msg("GetGlyphOffsetX", "error loading glyph %d", NextCharacter);
+				dbg_msg("textrender", "error loading glyph %d in GetGlyphOffsetX", NextCharacter);
 				return -1;
 			}
 
@@ -1935,7 +1935,7 @@ public:
 #endif
 				if(FT_Load_Char(pFont->m_FtFace, NextCharacter, FTFlags))
 				{
-					dbg_msg("pFont", "error loading glyph %d", NextCharacter);
+					dbg_msg("textrender", "error loading glyph %d in CalculateTextWidth", NextCharacter);
 					pCurrent = pTmp;
 					continue;
 				}
@@ -1956,7 +1956,7 @@ public:
 				FoundTextContainer = true;
 		if(FoundTextContainer)
 		{
-			dbg_msg("text render", "%s", "Found non empty text container");
+			dbg_msg("textrender", "%s", "Found non empty text container");
 			dbg_assert(false, "text container was not empty");
 		}
 

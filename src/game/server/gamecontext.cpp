@@ -3207,27 +3207,27 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 			if(Index == TILE_OLDLASER)
 			{
 				g_Config.m_SvOldLaser = 1;
-				dbg_msg("game layer", "found old laser tile");
+				dbg_msg("game_layer", "found old laser tile");
 			}
 			else if(Index == TILE_NPC)
 			{
 				m_Tuning.Set("player_collision", 0);
-				dbg_msg("game layer", "found no collision tile");
+				dbg_msg("game_layer", "found no collision tile");
 			}
 			else if(Index == TILE_EHOOK)
 			{
 				g_Config.m_SvEndlessDrag = 1;
-				dbg_msg("game layer", "found unlimited hook time tile");
+				dbg_msg("game_layer", "found unlimited hook time tile");
 			}
 			else if(Index == TILE_NOHIT)
 			{
 				g_Config.m_SvHit = 0;
-				dbg_msg("game layer", "found no weapons hitting others tile");
+				dbg_msg("game_layer", "found no weapons hitting others tile");
 			}
 			else if(Index == TILE_NPH)
 			{
 				m_Tuning.Set("player_hooking", 0);
-				dbg_msg("game layer", "found no player hooking tile");
+				dbg_msg("game_layer", "found no player hooking tile");
 			}
 
 			if(Index >= ENTITY_OFFSET)
@@ -3243,27 +3243,27 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 				if(Index == TILE_OLDLASER)
 				{
 					g_Config.m_SvOldLaser = 1;
-					dbg_msg("front layer", "found old laser tile");
+					dbg_msg("front_layer", "found old laser tile");
 				}
 				else if(Index == TILE_NPC)
 				{
 					m_Tuning.Set("player_collision", 0);
-					dbg_msg("front layer", "found no collision tile");
+					dbg_msg("front_layer", "found no collision tile");
 				}
 				else if(Index == TILE_EHOOK)
 				{
 					g_Config.m_SvEndlessDrag = 1;
-					dbg_msg("front layer", "found unlimited hook time tile");
+					dbg_msg("front_layer", "found unlimited hook time tile");
 				}
 				else if(Index == TILE_NOHIT)
 				{
 					g_Config.m_SvHit = 0;
-					dbg_msg("front layer", "found no weapons hitting others tile");
+					dbg_msg("front_layer", "found no weapons hitting others tile");
 				}
 				else if(Index == TILE_NPH)
 				{
 					m_Tuning.Set("player_hooking", 0);
-					dbg_msg("front layer", "found no player hooking tile");
+					dbg_msg("front_layer", "found no player hooking tile");
 				}
 				if(Index >= ENTITY_OFFSET)
 				{
