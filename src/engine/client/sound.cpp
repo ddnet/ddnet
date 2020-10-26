@@ -115,12 +115,12 @@ static void Mix(short *pFinalOut, unsigned Frames)
 
 	MasterVol = m_SoundVolume;
 
-	for(unsigned i = 0; i < NUM_VOICES; i++)
+	for(auto &m_aVoice : m_aVoices)
 	{
-		if(m_aVoices[i].m_pSample)
+		if(m_aVoice.m_pSample)
 		{
 			// mix voice
-			CVoice *v = &m_aVoices[i];
+			CVoice *v = &m_aVoice;
 			int *pOut = m_pMixBuffer;
 
 			int Step = v->m_pSample->m_Channels; // setup input sources
@@ -937,15 +937,15 @@ void CSound::Stop(int SampleID)
 	// TODO: a nice fade out
 	lock_wait(m_SoundLock);
 	CSample *pSample = &m_aSamples[SampleID];
-	for(int i = 0; i < NUM_VOICES; i++)
+	for(auto &m_aVoice : m_aVoices)
 	{
-		if(m_aVoices[i].m_pSample == pSample)
+		if(m_aVoice.m_pSample == pSample)
 		{
-			if(m_aVoices[i].m_Flags & FLAG_LOOP)
-				m_aVoices[i].m_pSample->m_PausedAt = m_aVoices[i].m_Tick;
+			if(m_aVoice.m_Flags & FLAG_LOOP)
+				m_aVoice.m_pSample->m_PausedAt = m_aVoice.m_Tick;
 			else
-				m_aVoices[i].m_pSample->m_PausedAt = 0;
-			m_aVoices[i].m_pSample = 0;
+				m_aVoice.m_pSample->m_PausedAt = 0;
+			m_aVoice.m_pSample = 0;
 		}
 	}
 	lock_unlock(m_SoundLock);
@@ -955,16 +955,16 @@ void CSound::StopAll()
 {
 	// TODO: a nice fade out
 	lock_wait(m_SoundLock);
-	for(int i = 0; i < NUM_VOICES; i++)
+	for(auto &m_aVoice : m_aVoices)
 	{
-		if(m_aVoices[i].m_pSample)
+		if(m_aVoice.m_pSample)
 		{
-			if(m_aVoices[i].m_Flags & FLAG_LOOP)
-				m_aVoices[i].m_pSample->m_PausedAt = m_aVoices[i].m_Tick;
+			if(m_aVoice.m_Flags & FLAG_LOOP)
+				m_aVoice.m_pSample->m_PausedAt = m_aVoice.m_Tick;
 			else
-				m_aVoices[i].m_pSample->m_PausedAt = 0;
+				m_aVoice.m_pSample->m_PausedAt = 0;
 		}
-		m_aVoices[i].m_pSample = 0;
+		m_aVoice.m_pSample = 0;
 	}
 	lock_unlock(m_SoundLock);
 }

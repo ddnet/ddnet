@@ -19,8 +19,8 @@ CStatboard::CStatboard()
 
 void CStatboard::OnReset()
 {
-	for(int i = 0; i < MAX_CLIENTS; i++)
-		m_pClient->m_aStats[i].Reset();
+	for(auto &m_aStat : m_pClient->m_aStats)
+		m_aStat.Reset();
 	m_Active = false;
 	m_ScreenshotTaken = false;
 	m_ScreenshotTime = -1;
@@ -136,9 +136,8 @@ void CStatboard::RenderGlobalStats()
 	int NumPlayers = 0;
 
 	// sort red or dm players by score
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(const auto *pInfo : m_pClient->m_Snap.m_paInfoByScore)
 	{
-		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByScore[i];
 		if(!pInfo || !m_pClient->m_aStats[pInfo->m_ClientID].IsActive() || m_pClient->m_aClients[pInfo->m_ClientID].m_Team != TEAM_RED)
 			continue;
 		apPlayers[NumPlayers] = pInfo;
@@ -148,9 +147,8 @@ void CStatboard::RenderGlobalStats()
 	// sort blue players by score after
 	if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)
 	{
-		for(int i = 0; i < MAX_CLIENTS; i++)
+		for(const auto *pInfo : m_pClient->m_Snap.m_paInfoByScore)
 		{
-			const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByScore[i];
 			if(!pInfo || !m_pClient->m_aStats[pInfo->m_ClientID].IsActive() || m_pClient->m_aClients[pInfo->m_ClientID].m_Team != TEAM_BLUE)
 				continue;
 			apPlayers[NumPlayers] = pInfo;
@@ -182,8 +180,8 @@ void CStatboard::RenderGlobalStats()
 		for(int j = 0; j < NUM_WEAPONS; j++)
 			aDisplayWeapon[j] = aDisplayWeapon[j] || pStats->m_aFragsWith[j] || pStats->m_aDeathsFrom[j];
 	}
-	for(int i = 0; i < NUM_WEAPONS; i++)
-		if(aDisplayWeapon[i])
+	for(bool i : aDisplayWeapon)
+		if(i)
 			StatboardContentWidth += 80;
 
 	float x = StatboardWidth / 2 - StatboardContentWidth / 2;
@@ -449,9 +447,8 @@ void CStatboard::FormatStats()
 	int NumPlayers = 0;
 
 	// sort red or dm players by score
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(const auto *pInfo : m_pClient->m_Snap.m_paInfoByScore)
 	{
-		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByScore[i];
 		if(!pInfo || !m_pClient->m_aStats[pInfo->m_ClientID].IsActive() || m_pClient->m_aClients[pInfo->m_ClientID].m_Team != TEAM_RED)
 			continue;
 		apPlayers[NumPlayers] = pInfo;
@@ -461,9 +458,8 @@ void CStatboard::FormatStats()
 	// sort blue players by score after
 	if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)
 	{
-		for(int i = 0; i < MAX_CLIENTS; i++)
+		for(const auto *pInfo : m_pClient->m_Snap.m_paInfoByScore)
 		{
-			const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByScore[i];
 			if(!pInfo || !m_pClient->m_aStats[pInfo->m_ClientID].IsActive() || m_pClient->m_aClients[pInfo->m_ClientID].m_Team != TEAM_BLUE)
 				continue;
 			apPlayers[NumPlayers] = pInfo;

@@ -27,11 +27,11 @@
 
 CChat::CChat()
 {
-	for(int i = 0; i < MAX_LINES; i++)
+	for(auto &m_aLine : m_aLines)
 	{
 		// reset the container indices, so the text containers can be deleted on reset
-		m_aLines[i].m_TextContainerIndex = -1;
-		m_aLines[i].m_QuadContainerIndex = -1;
+		m_aLine.m_TextContainerIndex = -1;
+		m_aLine.m_QuadContainerIndex = -1;
 	}
 
 #define CHAT_COMMAND(name, params, flags, callback, userdata, help) RegisterCommand(name, params, flags, help);
@@ -49,17 +49,17 @@ void CChat::RegisterCommand(const char *pName, const char *pParams, int flags, c
 
 void CChat::RebuildChat()
 {
-	for(int i = 0; i < MAX_LINES; i++)
+	for(auto &m_aLine : m_aLines)
 	{
-		if(m_aLines[i].m_TextContainerIndex != -1)
-			TextRender()->DeleteTextContainer(m_aLines[i].m_TextContainerIndex);
-		m_aLines[i].m_TextContainerIndex = -1;
-		if(m_aLines[i].m_QuadContainerIndex != -1)
-			Graphics()->DeleteQuadContainer(m_aLines[i].m_QuadContainerIndex);
-		m_aLines[i].m_QuadContainerIndex = -1;
+		if(m_aLine.m_TextContainerIndex != -1)
+			TextRender()->DeleteTextContainer(m_aLine.m_TextContainerIndex);
+		m_aLine.m_TextContainerIndex = -1;
+		if(m_aLine.m_QuadContainerIndex != -1)
+			Graphics()->DeleteQuadContainer(m_aLine.m_QuadContainerIndex);
+		m_aLine.m_QuadContainerIndex = -1;
 		// recalculate sizes
-		m_aLines[i].m_YOffset[0] = -1.f;
-		m_aLines[i].m_YOffset[1] = -1.f;
+		m_aLine.m_YOffset[0] = -1.f;
+		m_aLine.m_YOffset[1] = -1.f;
 	}
 }
 
@@ -70,20 +70,20 @@ void CChat::OnWindowResize()
 
 void CChat::Reset()
 {
-	for(int i = 0; i < MAX_LINES; i++)
+	for(auto &m_aLine : m_aLines)
 	{
-		if(m_aLines[i].m_TextContainerIndex != -1)
-			TextRender()->DeleteTextContainer(m_aLines[i].m_TextContainerIndex);
-		if(m_aLines[i].m_QuadContainerIndex != -1)
-			Graphics()->DeleteQuadContainer(m_aLines[i].m_QuadContainerIndex);
-		m_aLines[i].m_Time = 0;
-		m_aLines[i].m_aText[0] = 0;
-		m_aLines[i].m_aName[0] = 0;
-		m_aLines[i].m_Friend = false;
-		m_aLines[i].m_TextContainerIndex = -1;
-		m_aLines[i].m_QuadContainerIndex = -1;
-		m_aLines[i].m_TimesRepeated = 0;
-		m_aLines[i].m_HasRenderTee = false;
+		if(m_aLine.m_TextContainerIndex != -1)
+			TextRender()->DeleteTextContainer(m_aLine.m_TextContainerIndex);
+		if(m_aLine.m_QuadContainerIndex != -1)
+			Graphics()->DeleteQuadContainer(m_aLine.m_QuadContainerIndex);
+		m_aLine.m_Time = 0;
+		m_aLine.m_aText[0] = 0;
+		m_aLine.m_aName[0] = 0;
+		m_aLine.m_Friend = false;
+		m_aLine.m_TextContainerIndex = -1;
+		m_aLine.m_QuadContainerIndex = -1;
+		m_aLine.m_TimesRepeated = 0;
+		m_aLine.m_HasRenderTee = false;
 	}
 	m_PrevScoreBoardShowed = false;
 	m_PrevShowChat = false;
@@ -102,8 +102,8 @@ void CChat::Reset()
 	m_CurrentLine = 0;
 	DisableMode();
 
-	for(int i = 0; i < CHAT_NUM; ++i)
-		m_aLastSoundPlayed[i] = 0;
+	for(long long &i : m_aLastSoundPlayed)
+		i = 0;
 }
 
 void CChat::OnRelease()

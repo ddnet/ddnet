@@ -33,9 +33,9 @@ CBinds::CBinds()
 CBinds::~CBinds()
 {
 	for(int i = 0; i < KEY_LAST; i++)
-		for(int j = 0; j < MODIFIER_COMBINATION_COUNT; j++)
-			if(m_aapKeyBindings[j][i])
-				free(m_aapKeyBindings[j][i]);
+		for(auto &m_aapKeyBinding : m_aapKeyBindings)
+			if(m_aapKeyBinding[i])
+				free(m_aapKeyBinding[i]);
 }
 
 void CBinds::Bind(int KeyID, const char *pStr, bool FreeOnly, int Modifier)
@@ -158,13 +158,13 @@ bool CBinds::OnInput(IInput::CEvent e)
 
 void CBinds::UnbindAll()
 {
-	for(int i = 0; i < MODIFIER_COMBINATION_COUNT; i++)
+	for(auto &m_aapKeyBinding : m_aapKeyBindings)
 	{
-		for(int j = 0; j < KEY_LAST; j++)
+		for(auto & j : m_aapKeyBinding)
 		{
-			if(m_aapKeyBindings[i][j])
-				free(m_aapKeyBindings[i][j]);
-			m_aapKeyBindings[i][j] = 0;
+			if(j)
+				free(j);
+			j = 0;
 		}
 	}
 }

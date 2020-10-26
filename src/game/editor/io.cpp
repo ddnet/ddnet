@@ -915,10 +915,10 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 								for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
 								{
 									pTiles->m_pTiles[i].m_Index = 0;
-									for(unsigned e = 0; e < sizeof(s_aTilesRep) / sizeof(s_aTilesRep[0]); e++)
+									for(int e : s_aTilesRep)
 									{
-										if(((CLayerTele *)pTiles)->m_pTeleTile[i].m_Type == s_aTilesRep[e])
-											pTiles->m_pTiles[i].m_Index = s_aTilesRep[e];
+										if(((CLayerTele *)pTiles)->m_pTeleTile[i].m_Type == e)
+											pTiles->m_pTiles[i].m_Index = e;
 									}
 								}
 							}
@@ -988,11 +988,11 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 										continue;
 									}
 
-									for(unsigned e = 0; e < sizeof(s_aTilesComp) / sizeof(s_aTilesComp[0]); e++)
+									for(int e : s_aTilesComp)
 									{
-										if(pLayerSwitchTiles[i].m_Type == s_aTilesComp[e])
+										if(pLayerSwitchTiles[i].m_Type == e)
 										{
-											pTiles->m_pTiles[i].m_Index = s_aTilesComp[e];
+											pTiles->m_pTiles[i].m_Index = e;
 											pTiles->m_pTiles[i].m_Flags = pLayerSwitchTiles[i].m_Flags;
 										}
 									}

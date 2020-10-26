@@ -78,8 +78,8 @@ CGhost::CGhostPath &CGhost::CGhostPath::operator=(CGhostPath &&Other)
 
 void CGhost::CGhostPath::Reset(int ChunkSize)
 {
-	for(unsigned i = 0; i < m_lChunks.size(); i++)
-		free(m_lChunks[i]);
+	for(auto &m_lChunk : m_lChunks)
+		free(m_lChunk);
 	m_lChunks.clear();
 	m_ChunkSize = ChunkSize;
 	m_NumItems = 0;
@@ -167,8 +167,8 @@ int CGhost::GetSlot() const
 int CGhost::FreeSlots() const
 {
 	int Num = 0;
-	for(int i = 0; i < MAX_ACTIVE_GHOSTS; i++)
-		if(m_aActiveGhosts[i].Empty())
+	for(const auto &m_aActiveGhost : m_aActiveGhosts)
+		if(m_aActiveGhost.Empty())
 			Num++;
 	return Num;
 }
@@ -308,9 +308,9 @@ void CGhost::OnRender()
 
 	int PlaybackTick = Client()->PredGameTick(g_Config.m_ClDummy) - m_StartRenderTick;
 
-	for(int i = 0; i < MAX_ACTIVE_GHOSTS; i++)
+	for(auto &m_aActiveGhost : m_aActiveGhosts)
 	{
-		CGhostItem *pGhost = &m_aActiveGhosts[i];
+		CGhostItem *pGhost = &m_aActiveGhost;
 		if(pGhost->Empty())
 			continue;
 
@@ -431,8 +431,8 @@ void CGhost::StartRender(int Tick)
 {
 	m_Rendering = true;
 	m_StartRenderTick = Tick;
-	for(int i = 0; i < MAX_ACTIVE_GHOSTS; i++)
-		m_aActiveGhosts[i].m_PlaybackPos = 0;
+	for(auto &m_aActiveGhost : m_aActiveGhosts)
+		m_aActiveGhost.m_PlaybackPos = 0;
 }
 
 void CGhost::StopRender()
@@ -632,12 +632,12 @@ int CGhost::GetLastRaceTick()
 void CGhost::RefindSkin()
 {
 	char aSkinName[64];
-	for(int i = 0; i < (int)(sizeof(m_aActiveGhosts) / sizeof(m_aActiveGhosts[0])); ++i)
+	for(auto &m_aActiveGhost : m_aActiveGhosts)
 	{
-		IntsToStr(&m_aActiveGhosts[i].m_Skin.m_Skin0, 6, aSkinName);
+		IntsToStr(&m_aActiveGhost.m_Skin.m_Skin0, 6, aSkinName);
 		if(aSkinName[0] != '\0')
 		{
-			CTeeRenderInfo *pRenderInfo = &m_aActiveGhosts[i].m_RenderInfo;
+			CTeeRenderInfo *pRenderInfo = &m_aActiveGhost.m_RenderInfo;
 
 			int SkinId = m_pClient->m_pSkins->Find(aSkinName);
 			const CSkin *pSkin = m_pClient->m_pSkins->Get(SkinId);

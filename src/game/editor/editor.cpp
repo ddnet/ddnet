@@ -67,9 +67,9 @@ static const char *VANILLA_IMAGES[] = {
 
 static bool IsVanillaImage(const char *pImage)
 {
-	for(unsigned i = 0; i < sizeof(VANILLA_IMAGES) / sizeof(VANILLA_IMAGES[0]); i++)
+	for(auto &i : VANILLA_IMAGES)
 	{
-		if(str_comp(pImage, VANILLA_IMAGES[i]) == 0)
+		if(str_comp(pImage, i) == 0)
 		{
 			return true;
 		}
@@ -1687,10 +1687,10 @@ void CEditor::DoQuad(CQuad *q, int Index)
 					for(int i = 0; i < m_lSelectedQuads.size(); ++i)
 					{
 						CQuad *pCurrentQuad = &pLayer->m_lQuads[m_lSelectedQuads[i]];
-						for(int v = 0; v < 5; v++)
+						for(auto &m_aPoint : pCurrentQuad->m_aPoints)
 						{
-							pCurrentQuad->m_aPoints[v].x += OffsetX;
-							pCurrentQuad->m_aPoints[v].y += OffsetY;
+							m_aPoint.x += OffsetX;
+							m_aPoint.y += OffsetY;
 						}
 					}
 				}
@@ -1702,10 +1702,10 @@ void CEditor::DoQuad(CQuad *q, int Index)
 					for(int i = 0; i < m_lSelectedQuads.size(); ++i)
 					{
 						CQuad *pCurrentQuad = &pLayer->m_lQuads[m_lSelectedQuads[i]];
-						for(int v = 0; v < 5; v++)
+						for(auto &m_aPoint : pCurrentQuad->m_aPoints)
 						{
-							pCurrentQuad->m_aPoints[v].x += OffsetX;
-							pCurrentQuad->m_aPoints[v].y += OffsetY;
+							m_aPoint.x += OffsetX;
+							m_aPoint.y += OffsetY;
 						}
 					}
 				}

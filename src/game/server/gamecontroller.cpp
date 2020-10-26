@@ -377,9 +377,9 @@ void IGameController::ChangeMap(const char *pToMap)
 
 void IGameController::PostReset()
 {
-	for(int i = 0; i < MAX_CLIENTS; i++)
-		if(GameServer()->m_apPlayers[i])
-			GameServer()->m_apPlayers[i]->Respawn();
+	for(auto &m_apPlayer : GameServer()->m_apPlayers)
+		if(m_apPlayer)
+			m_apPlayer->Respawn();
 }
 
 int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)
@@ -462,8 +462,8 @@ void IGameController::Tick()
 					{
 						// move player to spectator if the reserved slots aren't filled yet, kick him otherwise
 						int Spectators = 0;
-						for(int j = 0; j < MAX_CLIENTS; ++j)
-							if(GameServer()->m_apPlayers[j] && GameServer()->m_apPlayers[j]->GetTeam() == TEAM_SPECTATORS)
+						for(auto &m_apPlayer : GameServer()->m_apPlayers)
+							if(m_apPlayer && m_apPlayer->GetTeam() == TEAM_SPECTATORS)
 								++Spectators;
 						if(Spectators >= g_Config.m_SvSpectatorSlots)
 							Server()->Kick(i, "Kicked for inactivity");

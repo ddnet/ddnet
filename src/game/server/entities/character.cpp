@@ -2259,9 +2259,9 @@ void CCharacter::DDRacePostCoreTick()
 	std::list<int> Indices = GameServer()->Collision()->GetMapIndices(m_PrevPos, m_Pos);
 	if(!Indices.empty())
 	{
-		for(std::list<int>::iterator i = Indices.begin(); i != Indices.end(); i++)
+		for(int &Indice : Indices)
 		{
-			HandleTiles(*i);
+			HandleTiles(Indice);
 			if(!m_Alive)
 				return;
 		}

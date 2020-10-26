@@ -269,8 +269,8 @@ void CServerBan::ConBanRegionRange(IConsole::IResult *pResult, void *pUser)
 void CServer::CClient::Reset()
 {
 	// reset input
-	for(int i = 0; i < 200; i++)
-		m_aInputs[i].m_GameTick = -1;
+	for(auto &m_aInput : m_aInputs)
+		m_aInput.m_GameTick = -1;
 	m_CurrentInput = 0;
 	mem_zero(&m_LatestInput, sizeof(m_LatestInput));
 
@@ -502,19 +502,19 @@ int64 CServer::TickStartTime(int Tick)
 
 int CServer::Init()
 {
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(auto &m_aClient : m_aClients)
 	{
-		m_aClients[i].m_State = CClient::STATE_EMPTY;
-		m_aClients[i].m_aName[0] = 0;
-		m_aClients[i].m_aClan[0] = 0;
-		m_aClients[i].m_Country = -1;
-		m_aClients[i].m_Snapshots.Init();
-		m_aClients[i].m_Traffic = 0;
-		m_aClients[i].m_TrafficSince = 0;
-		m_aClients[i].m_ShowIps = false;
-		m_aClients[i].m_AuthKey = -1;
-		m_aClients[i].m_Latency = 0;
-		m_aClients[i].m_Sixup = false;
+		m_aClient.m_State = CClient::STATE_EMPTY;
+		m_aClient.m_aName[0] = 0;
+		m_aClient.m_aClan[0] = 0;
+		m_aClient.m_Country = -1;
+		m_aClient.m_Snapshots.Init();
+		m_aClient.m_Traffic = 0;
+		m_aClient.m_TrafficSince = 0;
+		m_aClient.m_ShowIps = false;
+		m_aClient.m_AuthKey = -1;
+		m_aClient.m_Latency = 0;
+		m_aClient.m_Sixup = false;
 	}
 
 	m_CurrentGameTick = 0;
@@ -641,9 +641,9 @@ int CServer::MaxClients() const
 int CServer::ClientCount()
 {
 	int ClientCount = 0;
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(auto &m_aClient : m_aClients)
 	{
-		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
+		if(m_aClient.m_State != CClient::STATE_EMPTY)
 		{
 			ClientCount++;
 		}
@@ -2533,9 +2533,9 @@ int CServer::Run()
 			{
 				for(int c = 0; c < MAX_CLIENTS; c++)
 					if(m_aClients[c].m_State == CClient::STATE_INGAME)
-						for(int i = 0; i < 200; i++)
-							if(m_aClients[c].m_aInputs[i].m_GameTick == Tick() + 1)
-								GameServer()->OnClientPredictedEarlyInput(c, m_aClients[c].m_aInputs[i].m_aData);
+						for(auto &m_aInput : m_aClients[c].m_aInputs)
+							if(m_aInput.m_GameTick == Tick() + 1)
+								GameServer()->OnClientPredictedEarlyInput(c, m_aInput.m_aData);
 
 				m_CurrentGameTick++;
 				NewTicks++;
@@ -2545,11 +2545,11 @@ int CServer::Run()
 				{
 					if(m_aClients[c].m_State != CClient::STATE_INGAME)
 						continue;
-					for(int i = 0; i < 200; i++)
+					for(auto &m_aInput : m_aClients[c].m_aInputs)
 					{
-						if(m_aClients[c].m_aInputs[i].m_GameTick == Tick())
+						if(m_aInput.m_GameTick == Tick())
 						{
-							GameServer()->OnClientPredictedInput(c, m_aClients[c].m_aInputs[i].m_aData);
+							GameServer()->OnClientPredictedInput(c, m_aInput.m_aData);
 							break;
 						}
 					}
@@ -2590,8 +2590,8 @@ int CServer::Run()
 
 			NonActive = true;
 
-			for(int c = 0; c < MAX_CLIENTS; c++)
-				if(m_aClients[c].m_State != CClient::STATE_EMPTY)
+			for(auto &m_aClient : m_aClients)
+				if(m_aClient.m_State != CClient::STATE_EMPTY)
 					NonActive = false;
 
 			// wait for incoming data
@@ -2647,8 +2647,8 @@ int CServer::Run()
 	GameServer()->OnShutdown();
 	m_pMap->Unload();
 
-	for(int i = 0; i < 2; i++)
-		free(m_apCurrentMapData[i]);
+	for(auto &i : m_apCurrentMapData)
+		free(i);
 
 	DbPool()->OnShutdown();
 	delete m_pConnectionPool;
@@ -2760,9 +2760,9 @@ void CServer::AuthRemoveKey(int KeySlot)
 	// Update indices.
 	if(OldKeySlot != NewKeySlot)
 	{
-		for(int i = 0; i < MAX_CLIENTS; i++)
-			if(m_aClients[i].m_AuthKey == OldKeySlot)
-				m_aClients[i].m_AuthKey = NewKeySlot;
+		for(auto &m_aClient : m_aClients)
+			if(m_aClient.m_AuthKey == OldKeySlot)
+				m_aClient.m_AuthKey = NewKeySlot;
 	}
 }
 

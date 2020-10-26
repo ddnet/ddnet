@@ -241,11 +241,11 @@ void CMenus::ClearCustomItems(int CurTab)
 	{
 		for(int i = 0; i < m_EntitiesList.size(); ++i)
 		{
-			for(int n = 0; n < MAP_IMAGE_MOD_TYPE_COUNT; ++n)
+			for(auto &m_aImage : m_EntitiesList[i].m_aImages)
 			{
-				if(m_EntitiesList[i].m_aImages[n].m_Texture != -1)
-					Graphics()->UnloadTexture(m_EntitiesList[i].m_aImages[n].m_Texture);
-				m_EntitiesList[i].m_aImages[n].m_Texture = IGraphics::CTextureHandle();
+				if(m_aImage.m_Texture != -1)
+					Graphics()->UnloadTexture(m_aImage.m_Texture);
+				m_aImage.m_Texture = IGraphics::CTextureHandle();
 			}
 		}
 		m_EntitiesList.clear();

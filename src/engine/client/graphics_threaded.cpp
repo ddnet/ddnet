@@ -757,12 +757,12 @@ void CGraphics_Threaded::SetColor(float r, float g, float b, float a)
 	b *= 255.f;
 	a *= 255.f;
 
-	for(int i = 0; i < 4; ++i)
+	for(auto &i : m_aColor)
 	{
-		m_aColor[i].r = (unsigned char)(r);
-		m_aColor[i].g = (unsigned char)(g);
-		m_aColor[i].b = (unsigned char)(b);
-		m_aColor[i].a = (unsigned char)(a);
+		i.r = (unsigned char)(r);
+		i.g = (unsigned char)(g);
+		i.b = (unsigned char)(b);
+		i.a = (unsigned char)(a);
 	}
 }
 
@@ -2022,8 +2022,8 @@ int CGraphics_Threaded::CreateBufferContainer(SBufferContainerInfo *pContainerIn
 
 	mem_copy(Cmd.m_Attributes, &pContainerInfo->m_Attributes[0], Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
 
-	for(size_t i = 0; i < pContainerInfo->m_Attributes.size(); ++i)
-		m_VertexArrayInfo[Index].m_AssociatedBufferObjectIndices.push_back(pContainerInfo->m_Attributes[i].m_VertBufferBindingIndex);
+	for(auto &m_Attribute : pContainerInfo->m_Attributes)
+		m_VertexArrayInfo[Index].m_AssociatedBufferObjectIndices.push_back(m_Attribute.m_VertBufferBindingIndex);
 
 	return Index;
 }
@@ -2058,10 +2058,10 @@ void CGraphics_Threaded::DeleteBufferContainer(int ContainerIndex, bool DestroyA
 			if(BufferObjectIndex != -1)
 			{
 				// don't delete double entries
-				for(size_t n = 0; n < m_VertexArrayInfo[ContainerIndex].m_AssociatedBufferObjectIndices.size(); ++n)
+				for(int &m_AssociatedBufferObjectIndice : m_VertexArrayInfo[ContainerIndex].m_AssociatedBufferObjectIndices)
 				{
-					if(BufferObjectIndex == m_VertexArrayInfo[ContainerIndex].m_AssociatedBufferObjectIndices[n])
-						m_VertexArrayInfo[ContainerIndex].m_AssociatedBufferObjectIndices[n] = -1;
+					if(BufferObjectIndex == m_AssociatedBufferObjectIndice)
+						m_AssociatedBufferObjectIndice = -1;
 				}
 				// clear the buffer object index
 				m_BufferObjectIndices[BufferObjectIndex] = m_FirstFreeBufferObjectIndex;
@@ -2110,8 +2110,8 @@ void CGraphics_Threaded::UpdateBufferContainer(int ContainerIndex, SBufferContai
 	mem_copy(Cmd.m_Attributes, &pContainerInfo->m_Attributes[0], Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
 
 	m_VertexArrayInfo[ContainerIndex].m_AssociatedBufferObjectIndices.clear();
-	for(size_t i = 0; i < pContainerInfo->m_Attributes.size(); ++i)
-		m_VertexArrayInfo[ContainerIndex].m_AssociatedBufferObjectIndices.push_back(pContainerInfo->m_Attributes[i].m_VertBufferBindingIndex);
+	for(auto &m_Attribute : pContainerInfo->m_Attributes)
+		m_VertexArrayInfo[ContainerIndex].m_AssociatedBufferObjectIndices.push_back(m_Attribute.m_VertBufferBindingIndex);
 }
 
 void CGraphics_Threaded::IndicesNumRequiredNotify(unsigned int RequiredIndicesCount)
@@ -2292,8 +2292,8 @@ int CGraphics_Threaded::Init()
 		return -1;
 
 	// create command buffers
-	for(int i = 0; i < NUM_CMDBUFFERS; i++)
-		m_apCommandBuffers[i] = new CCommandBuffer(CMD_BUFFER_CMD_BUFFER_SIZE, CMD_BUFFER_DATA_BUFFER_SIZE);
+	for(auto &m_apCommandBuffer : m_apCommandBuffers)
+		m_apCommandBuffer = new CCommandBuffer(CMD_BUFFER_CMD_BUFFER_SIZE, CMD_BUFFER_DATA_BUFFER_SIZE);
 	m_pCommandBuffer = m_apCommandBuffers[0];
 
 	// create null texture, will get id=0
@@ -2315,8 +2315,8 @@ void CGraphics_Threaded::Shutdown()
 	m_pBackend = 0x0;
 
 	// delete the command buffers
-	for(int i = 0; i < NUM_CMDBUFFERS; i++)
-		delete m_apCommandBuffers[i];
+	for(auto &m_apCommandBuffer : m_apCommandBuffers)
+		delete m_apCommandBuffer;
 }
 
 int CGraphics_Threaded::GetNumScreens() const
@@ -2377,8 +2377,8 @@ void CGraphics_Threaded::Resize(int w, int h)
 	KickCommandBuffer();
 	WaitForIdle();
 
-	for(size_t i = 0; i < m_ResizeListeners.size(); ++i)
-		m_ResizeListeners[i].m_pFunc(m_ResizeListeners[i].m_pUser);
+	for(auto &m_ResizeListener : m_ResizeListeners)
+		m_ResizeListener.m_pFunc(m_ResizeListener.m_pUser);
 }
 
 void CGraphics_Threaded::AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser)
