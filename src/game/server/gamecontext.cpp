@@ -2939,8 +2939,11 @@ void CGameContext::ConAddMapVotes(IConsole::IResult *pResult, void *pUserData)
 		char aDescription[64];
 		str_format(aDescription, sizeof(aDescription), "Map: %s", MapList[i].m_aName);
 
-		char aCommand[MAX_PATH_LENGTH + 10];
-		str_format(aCommand, sizeof(aCommand), "change_map \"%s\"", MapList[i].m_aName);
+		char aCommand[MAX_PATH_LENGTH * 2 + 10];
+		char aMapEscaped[MAX_PATH_LENGTH * 2];
+		char *pDst = aMapEscaped;
+		str_escape(&pDst, MapList[i].m_aName, aMapEscaped + sizeof(aMapEscaped));
+		str_format(aCommand, sizeof(aCommand), "change_map \"%s\"", aMapEscaped);
 
 		pSelf->AddVote(aDescription, aCommand);
 	}
