@@ -97,6 +97,13 @@ public:
 	void HMargin(float Cut, CUIRect *pOtherRect) const;
 };
 
+struct SUIAnimator
+{
+	float m_Time;
+	float m_Value;
+	bool m_Active;
+};
+
 class CUI
 {
 	const void *m_pHotItem;
