@@ -99,9 +99,17 @@ public:
 
 struct SUIAnimator
 {
+	bool m_Active;
+	bool m_ScaleLabel;
+
 	float m_Time;
 	float m_Value;
-	bool m_Active;
+
+	float m_XOffset;
+	float m_YOffset;
+	float m_WOffset;
+	float m_HOffset;
+	
 };
 
 class CUI

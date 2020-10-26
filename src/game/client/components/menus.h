@@ -186,8 +186,6 @@ protected:
 	char m_aMessageBody[512];
 	char m_aMessageButton[512];
 
-	SUIAnimator m_aSettingsTabAnimators[10];
-
 	void PopupMessage(const char *pTopic, const char *pBody, const char *pButton);
 
 	// TODO: this is a bit ugly but.. well.. yeah
@@ -442,6 +440,8 @@ public:
 		PAGE_NETWORK,
 		PAGE_GHOST,
 
+		PAGE_LENGTH,
+
 		SETTINGS_LANGUAGE = 0,
 		SETTINGS_GENERAL,
 		SETTINGS_PLAYER,
@@ -452,8 +452,32 @@ public:
 		SETTINGS_SOUND,
 		SETTINGS_DDNET,
 		SETTINGS_ASSETS,
-		SETTINGS_LENGTH
+
+		SETTINGS_LENGTH,
+
+		BIG_TAB_NEWS = 0,
+		BIG_TAB_INTERNET,
+		BIG_TAB_LAN,
+		BIG_TAB_FAVORITES,
+		BIG_TAB_DDNET,
+		BIG_TAB_KOG,
+		BIG_TAB_DEMOS,
+
+		BIG_TAB_LENGTH,
+
+		SMALL_TAB_HOME = 0,
+		SMALL_TAB_QUIT,
+		SMALL_TAB_SETTINGS,
+		SMALL_TAB_EDITOR,
+		SMALL_TAB_DEMOBUTTON,
+		SMALL_TAB_SERVER,
+
+		SMALL_TAB_LENGTH,
 	};
+
+	SUIAnimator m_aAnimatorsBigPage[BIG_TAB_LENGTH];
+	SUIAnimator m_aAnimatorsSmallPage[SMALL_TAB_LENGTH];
+	SUIAnimator m_aAnimatorsSettingsTab[SETTINGS_LENGTH];
 
 	// DDRace
 	int DoButton_CheckBox_DontCare(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
