@@ -543,6 +543,7 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 
 	char aBuf[128];
 	SetCpActive(Player, -2);
+	// Note that the "finished in" message is parsed by the client
 	str_format(aBuf, sizeof(aBuf),
 		"%s finished in: %d minute(s) %5.2f second(s)",
 		Server()->ClientName(ClientID), (int)Time / 60,
