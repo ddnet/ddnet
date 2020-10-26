@@ -174,9 +174,11 @@ void CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float X, float
 
 void CRenderTools::DrawRoundRectExt(float x, float y, float w, float h, float r, int Corners)
 {
-	IGraphics::CFreeformItem ArrayF[32];
 	int NumItems = 0;
-	int Num = 8;
+	const int Num = 8;
+
+	IGraphics::CFreeformItem ArrayF[Num * 4];
+	
 	for(int i = 0; i < Num; i += 2)
 	{
 		float a1 = i / (float)Num * pi / 2;
