@@ -428,7 +428,7 @@ void CCommandProcessorFragment_OpenGL::SetState(const CCommandBuffer::SState &St
 			}
 			else
 			{
-				dbg_msg("OpenGL", "Error: this call should not happen.");
+				dbg_msg("opengl", "Error: this call should not happen.");
 			}
 		}
 	}
@@ -3888,7 +3888,7 @@ void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 
 	// check what this context can do
 	const GLubyte *pVersionString = glGetString(GL_VERSION);
-	dbg_msg("OpenGL", "Version string: %s", (const char *)pVersionString);
+	dbg_msg("opengl", "Version string: %s", (const char *)pVersionString);
 	// parse version string
 	ParseVersionString(pVersionString, pCommand->m_pCapabilities->m_ContextMajor, pCommand->m_pCapabilities->m_ContextMinor, pCommand->m_pCapabilities->m_ContextPatch);
 
@@ -4139,7 +4139,7 @@ void CCommandProcessor_SDL_OpenGL::RunBuffer(CCommandBuffer *pBuffer)
 		if(m_General.RunCommand(pCommand))
 			continue;
 
-		dbg_msg("graphics", "unknown command %d", pCommand->m_Cmd);
+		dbg_msg("gfx", "unknown command %d", pCommand->m_Cmd);
 	}
 }
 

@@ -1143,7 +1143,7 @@ int net_host_lookup(const char *hostname, NETADDR *addr, int types)
 	if(priv_net_extract(hostname, host, sizeof(host), &port))
 		return -1;
 
-	dbg_msg("host lookup", "host='%s' port=%d %d", host, port, types);
+	dbg_msg("host_lookup", "host='%s' port=%d %d", host, port, types);
 
 	mem_zero(&hints, sizeof(hints));
 
