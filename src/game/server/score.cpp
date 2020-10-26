@@ -275,7 +275,7 @@ void CScore::MapVote(int ClientID, const char *MapName)
 bool CScore::MapVoteThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
-	auto paMessages = pData->m_pResult->m_Data.m_aaMessages;
+	auto *paMessages = pData->m_pResult->m_Data.m_aaMessages;
 
 	char aFuzzyMap[128];
 	str_copy(aFuzzyMap, pData->m_Name, sizeof(aFuzzyMap));
@@ -304,7 +304,7 @@ bool CScore::MapVoteThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 	if(pSqlServer->Step())
 	{
 		pData->m_pResult->SetVariant(CScorePlayerResult::MAP_VOTE);
-		auto MapVote = &pData->m_pResult->m_Data.m_MapVote;
+		auto *MapVote = &pData->m_pResult->m_Data.m_MapVote;
 		pSqlServer->GetString(1, MapVote->m_Map, sizeof(MapVote->m_Map));
 		pSqlServer->GetString(2, MapVote->m_Server, sizeof(MapVote->m_Server));
 		strcpy(MapVote->m_Reason, "/map");
@@ -474,7 +474,7 @@ void CScore::SaveScore(int ClientID, float Time, const char *pTimestamp, float C
 bool CScore::SaveScoreThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure)
 {
 	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
-	auto paMessages = pData->m_pResult->m_Data.m_aaMessages;
+	auto *paMessages = pData->m_pResult->m_Data.m_aaMessages;
 
 	char aBuf[1024];
 
@@ -843,7 +843,7 @@ void CScore::ShowTeamTop5(int ClientID, int Offset)
 bool CScore::ShowTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
-	auto paMessages = pData->m_pResult->m_Data.m_aaMessages;
+	auto *paMessages = pData->m_pResult->m_Data.m_aaMessages;
 
 	int LimitStart = maximum(abs(pData->m_Offset) - 1, 0);
 	const char *pOrder = pData->m_Offset >= 0 ? "ASC" : "DESC";
@@ -933,7 +933,7 @@ void CScore::ShowTimes(int ClientID, const char *pName, int Offset)
 bool CScore::ShowTimesThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
-	auto paMessages = pData->m_pResult->m_Data.m_aaMessages;
+	auto *paMessages = pData->m_pResult->m_Data.m_aaMessages;
 
 	int LimitStart = maximum(abs(pData->m_Offset) - 1, 0);
 	const char *pOrder = pData->m_Offset >= 0 ? "DESC" : "ASC";
@@ -1036,7 +1036,7 @@ void CScore::ShowPoints(int ClientID, const char *pName)
 bool CScore::ShowPointsThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
-	auto paMessages = pData->m_pResult->m_Data.m_aaMessages;
+	auto *paMessages = pData->m_pResult->m_Data.m_aaMessages;
 
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
@@ -1081,7 +1081,7 @@ void CScore::ShowTopPoints(int ClientID, int Offset)
 bool CScore::ShowTopPointsThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
-	auto paMessages = pData->m_pResult->m_Data.m_aaMessages;
+	auto *paMessages = pData->m_pResult->m_Data.m_aaMessages;
 
 	int LimitStart = maximum(abs(pData->m_Offset) - 1, 0);
 	const char *pOrder = pData->m_Offset >= 0 ? "ASC" : "DESC";
@@ -1246,7 +1246,7 @@ void CScore::SaveTeam(int ClientID, const char *Code, const char *Server)
 {
 	if(RateLimitPlayer(ClientID))
 		return;
-	auto pController = ((CGameControllerDDRace *)(GameServer()->m_pController));
+	auto *pController = ((CGameControllerDDRace *)(GameServer()->m_pController));
 	int Team = pController->m_Teams.m_Core.Team(ClientID);
 	if(pController->m_Teams.GetSaving(Team))
 		return;
@@ -1376,7 +1376,7 @@ void CScore::LoadTeam(const char *Code, int ClientID)
 {
 	if(RateLimitPlayer(ClientID))
 		return;
-	auto pController = ((CGameControllerDDRace *)(GameServer()->m_pController));
+	auto *pController = ((CGameControllerDDRace *)(GameServer()->m_pController));
 	int Team = pController->m_Teams.m_Core.Team(ClientID);
 	if(pController->m_Teams.GetSaving(Team))
 		return;
@@ -1519,7 +1519,7 @@ void CScore::GetSaves(int ClientID)
 bool CScore::GetSavesThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
-	auto paMessages = pData->m_pResult->m_Data.m_aaMessages;
+	auto *paMessages = pData->m_pResult->m_Data.m_aaMessages;
 
 	char aSaveLike[128] = "";
 	str_append(aSaveLike, "%\n", sizeof(aSaveLike));
