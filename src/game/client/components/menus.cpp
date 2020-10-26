@@ -492,8 +492,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	UI()->ClipEnable(pRect);
 	Textbox.x -= *Offset;
 
-	int StrLenDispl = str_length(pDisplayStr);
-	UI()->DoLabel(&Textbox, pDisplayStr, FontSize, -1);
+	UI()->DoLabel(&Textbox, pDisplayStr, FontSize, -1, Textbox.w * 2.0f);
 
 	TextRender()->TextColor(1, 1, 1, 1);
 
@@ -506,9 +505,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	{
 		float OffsetGlyph = TextRender()->GetGlyphOffsetX(FontSize, '|');
 
-		if(StrLenDispl >= 1 && StrLenDispl == DispCursorPos && pDisplayStr[StrLenDispl - 1] != ' ')
-			OffsetGlyph = 0;
-		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, DispCursorPos, -1.0f);
+		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, DispCursorPos, Textbox.w * 2.0f);
 		Textbox.x += w + OffsetGlyph;
 
 		if((2 * time_get() / time_freq()) % 2)
