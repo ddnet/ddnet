@@ -479,11 +479,11 @@ CServerBrowser::CServerEntry *CServerBrowser::Add(const NETADDR &Addr)
 	}
 
 	// check if it's an official server
-	for(auto &m_aNetwork : m_aNetworks)
+	for(auto &Network : m_aNetworks)
 	{
-		for(int i = 0; i < m_aNetwork.m_NumCountries; i++)
+		for(int i = 0; i < Network.m_NumCountries; i++)
 		{
-			CNetworkCountry *pCntr = &m_aNetwork.m_aCountries[i];
+			CNetworkCountry *pCntr = &Network.m_aCountries[i];
 			for(int j = 0; j < pCntr->m_NumServers; j++)
 			{
 				if(net_addr_comp(&Addr, &pCntr->m_aServers[j]) == 0)
@@ -1139,11 +1139,11 @@ void CServerBrowser::LoadDDNetServers()
 
 void CServerBrowser::RecheckOfficial()
 {
-	for(auto &m_aNetwork : m_aNetworks)
+	for(auto &Network : m_aNetworks)
 	{
-		for(int i = 0; i < m_aNetwork.m_NumCountries; i++)
+		for(int i = 0; i < Network.m_NumCountries; i++)
 		{
-			CNetworkCountry *pCntr = &m_aNetwork.m_aCountries[i];
+			CNetworkCountry *pCntr = &Network.m_aCountries[i];
 			for(int j = 0; j < pCntr->m_NumServers; j++)
 			{
 				CServerEntry *pEntry = Find(pCntr->m_aServers[j]);
@@ -1321,11 +1321,11 @@ void CServerBrowser::CountryFilterClean(int Network)
 	char aNewList[128];
 	aNewList[0] = '\0';
 
-	for(auto &m_aNetwork : m_aNetworks)
+	for(auto &Network : m_aNetworks)
 	{
-		for(int i = 0; i < m_aNetwork.m_NumCountries; i++)
+		for(int i = 0; i < Network.m_NumCountries; i++)
 		{
-			const char *pName = m_aNetwork.m_aCountries[i].m_aName;
+			const char *pName = Network.m_aCountries[i].m_aName;
 			if(DDNetFiltered(pExcludeCountries, pName))
 			{
 				char aBuf[128];

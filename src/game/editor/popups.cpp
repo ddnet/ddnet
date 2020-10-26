@@ -638,13 +638,13 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 	{
 		if(Prop == PROP_POS_X)
 		{
-			for(auto &m_aPoint : lQuads[i]->m_aPoints)
-				m_aPoint.x += OffsetX;
+			for(auto &Point : lQuads[i]->m_aPoints)
+				Point.x += OffsetX;
 		}
 		if(Prop == PROP_POS_Y)
 		{
-			for(auto &m_aPoint : lQuads[i]->m_aPoints)
-				m_aPoint.y += OffsetY;
+			for(auto &Point : lQuads[i]->m_aPoints)
+				Point.y += OffsetY;
 		}
 		if(Prop == PROP_POS_ENV)
 		{

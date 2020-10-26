@@ -124,10 +124,10 @@ int CLayerQuads::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 			CQuad n;
 			n = *q;
 
-			for(auto &m_aPoint : n.m_aPoints)
+			for(auto &Point : n.m_aPoints)
 			{
-				m_aPoint.x -= f2fx(Rect.x);
-				m_aPoint.y -= f2fx(Rect.y);
+				Point.x -= f2fx(Rect.x);
+				Point.y -= f2fx(Rect.y);
 			}
 
 			pGrabbed->m_lQuads.add(n);
@@ -144,10 +144,10 @@ void CLayerQuads::BrushPlace(CLayer *pBrush, float wx, float wy)
 	{
 		CQuad n = l->m_lQuads[i];
 
-		for(auto &m_aPoint : n.m_aPoints)
+		for(auto &Point : n.m_aPoints)
 		{
-			m_aPoint.x += f2fx(wx);
-			m_aPoint.y += f2fx(wy);
+			Point.x += f2fx(wx);
+			Point.y += f2fx(wy);
 		}
 
 		m_lQuads.add(n);
@@ -211,12 +211,12 @@ void CLayerQuads::BrushRotate(float Amount)
 	{
 		CQuad *q = &m_lQuads[i];
 
-		for(auto &m_aPoint : q->m_aPoints)
+		for(auto &Point : q->m_aPoints)
 		{
-			vec2 Pos(fx2f(m_aPoint.x), fx2f(m_aPoint.y));
+			vec2 Pos(fx2f(Point.x), fx2f(Point.y));
 			Rotate(&Center, &Pos, Amount);
-			m_aPoint.x = f2fx(Pos.x);
-			m_aPoint.y = f2fx(Pos.y);
+			Point.x = f2fx(Pos.x);
+			Point.y = f2fx(Pos.y);
 		}
 	}
 }
@@ -228,10 +228,10 @@ void CLayerQuads::GetSize(float *w, float *h)
 
 	for(int i = 0; i < m_lQuads.size(); i++)
 	{
-		for(auto &m_aPoint : m_lQuads[i].m_aPoints)
+		for(auto &Point : m_lQuads[i].m_aPoints)
 		{
-			*w = maximum(*w, fx2f(m_aPoint.x));
-			*h = maximum(*h, fx2f(m_aPoint.y));
+			*w = maximum(*w, fx2f(Point.x));
+			*h = maximum(*h, fx2f(Point.y));
 		}
 	}
 }

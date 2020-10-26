@@ -78,8 +78,8 @@ CGhost::CGhostPath &CGhost::CGhostPath::operator=(CGhostPath &&Other)
 
 void CGhost::CGhostPath::Reset(int ChunkSize)
 {
-	for(auto &m_lChunk : m_lChunks)
-		free(m_lChunk);
+	for(auto &pChunk : m_lChunks)
+		free(pChunk);
 	m_lChunks.clear();
 	m_ChunkSize = ChunkSize;
 	m_NumItems = 0;
@@ -167,8 +167,8 @@ int CGhost::GetSlot() const
 int CGhost::FreeSlots() const
 {
 	int Num = 0;
-	for(const auto &m_aActiveGhost : m_aActiveGhosts)
-		if(m_aActiveGhost.Empty())
+	for(const auto &ActiveGhost : m_aActiveGhosts)
+		if(ActiveGhost.Empty())
 			Num++;
 	return Num;
 }
@@ -308,32 +308,31 @@ void CGhost::OnRender()
 
 	int PlaybackTick = Client()->PredGameTick(g_Config.m_ClDummy) - m_StartRenderTick;
 
-	for(auto &m_aActiveGhost : m_aActiveGhosts)
+	for(auto &Ghost : m_aActiveGhosts)
 	{
-		CGhostItem *pGhost = &m_aActiveGhost;
-		if(pGhost->Empty())
+		if(Ghost.Empty())
 			continue;
 
-		int GhostTick = pGhost->m_StartTick + PlaybackTick;
-		while(pGhost->m_PlaybackPos >= 0 && pGhost->m_Path.Get(pGhost->m_PlaybackPos)->m_Tick < GhostTick)
+		int GhostTick = Ghost.m_StartTick + PlaybackTick;
+		while(Ghost.m_PlaybackPos >= 0 && Ghost.m_Path.Get(Ghost.m_PlaybackPos)->m_Tick < GhostTick)
 		{
-			if(pGhost->m_PlaybackPos < pGhost->m_Path.Size() - 1)
-				pGhost->m_PlaybackPos++;
+			if(Ghost.m_PlaybackPos < Ghost.m_Path.Size() - 1)
+				Ghost.m_PlaybackPos++;
 			else
-				pGhost->m_PlaybackPos = -1;
+				Ghost.m_PlaybackPos = -1;
 		}
 
-		if(pGhost->m_PlaybackPos < 0)
+		if(Ghost.m_PlaybackPos < 0)
 			continue;
 
-		int CurPos = pGhost->m_PlaybackPos;
+		int CurPos = Ghost.m_PlaybackPos;
 		int PrevPos = maximum(0, CurPos - 1);
-		if(pGhost->m_Path.Get(PrevPos)->m_Tick > GhostTick)
+		if(Ghost.m_Path.Get(PrevPos)->m_Tick > GhostTick)
 			continue;
 
 		CNetObj_Character Player, Prev;
-		GetNetObjCharacter(&Player, pGhost->m_Path.Get(CurPos));
-		GetNetObjCharacter(&Prev, pGhost->m_Path.Get(PrevPos));
+		GetNetObjCharacter(&Player, Ghost.m_Path.Get(CurPos));
+		GetNetObjCharacter(&Prev, Ghost.m_Path.Get(PrevPos));
 
 		int TickDiff = Player.m_Tick - Prev.m_Tick;
 		float IntraTick = 0.f;
@@ -342,8 +341,8 @@ void CGhost::OnRender()
 
 		Player.m_AttackTick += Client()->GameTick(g_Config.m_ClDummy) - GhostTick;
 
-		m_pClient->m_pPlayers->RenderHook(&Prev, &Player, &pGhost->m_RenderInfo, -2, IntraTick);
-		m_pClient->m_pPlayers->RenderPlayer(&Prev, &Player, &pGhost->m_RenderInfo, -2, IntraTick);
+		m_pClient->m_pPlayers->RenderHook(&Prev, &Player, &Ghost.m_RenderInfo, -2, IntraTick);
+		m_pClient->m_pPlayers->RenderPlayer(&Prev, &Player, &Ghost.m_RenderInfo, -2, IntraTick);
 	}
 }
 
@@ -431,8 +430,8 @@ void CGhost::StartRender(int Tick)
 {
 	m_Rendering = true;
 	m_StartRenderTick = Tick;
-	for(auto &m_aActiveGhost : m_aActiveGhosts)
-		m_aActiveGhost.m_PlaybackPos = 0;
+	for(auto &Ghost : m_aActiveGhosts)
+		Ghost.m_PlaybackPos = 0;
 }
 
 void CGhost::StopRender()
@@ -632,12 +631,12 @@ int CGhost::GetLastRaceTick()
 void CGhost::RefindSkin()
 {
 	char aSkinName[64];
-	for(auto &m_aActiveGhost : m_aActiveGhosts)
+	for(auto &Ghost : m_aActiveGhosts)
 	{
-		IntsToStr(&m_aActiveGhost.m_Skin.m_Skin0, 6, aSkinName);
+		IntsToStr(&Ghost.m_Skin.m_Skin0, 6, aSkinName);
 		if(aSkinName[0] != '\0')
 		{
-			CTeeRenderInfo *pRenderInfo = &m_aActiveGhost.m_RenderInfo;
+			CTeeRenderInfo *pRenderInfo = &Ghost.m_RenderInfo;
 
 			int SkinId = m_pClient->m_pSkins->Find(aSkinName);
 			const CSkin *pSkin = m_pClient->m_pSkins->Get(SkinId);

@@ -529,13 +529,12 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	SkinPrefix.HSplitTop(2.0f, 0, &SkinPrefix);
 	{
 		static const char *s_aSkinPrefixes[] = {"kitty", "santa"};
-		for(auto &s_aSkinPrefixe : s_aSkinPrefixes)
+		for(auto &pPrefix : s_aSkinPrefixes)
 		{
-			const char *pPrefix = s_aSkinPrefixe;
 			CUIRect Button;
 			SkinPrefix.HSplitTop(20.0f, &Button, &SkinPrefix);
 			Button.HMargin(2.0f, &Button);
-			if(DoButton_Menu(&s_aSkinPrefixe, pPrefix, 0, &Button))
+			if(DoButton_Menu(&pPrefix, pPrefix, 0, &Button))
 			{
 				str_copy(g_Config.m_ClSkinPrefix, pPrefix, sizeof(g_Config.m_ClSkinPrefix));
 			}
@@ -848,8 +847,8 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	char aBuf[128];
 
 	// this is kinda slow, but whatever
-	for(auto &gs_aKey : gs_aKeys)
-		gs_aKey.m_KeyId = gs_aKey.m_Modifier = 0;
+	for(auto &Key : gs_aKeys)
+		Key.m_KeyId = Key.m_Modifier = 0;
 
 	for(int Mod = 0; Mod < CBinds::MODIFIER_COUNT; Mod++)
 	{
@@ -859,11 +858,11 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			if(!pBind[0])
 				continue;
 
-			for(auto &gs_aKey : gs_aKeys)
-				if(str_comp(pBind, gs_aKey.m_pCommand) == 0)
+			for(auto &Key : gs_aKeys)
+				if(str_comp(pBind, Key.m_pCommand) == 0)
 				{
-					gs_aKey.m_KeyId = KeyId;
-					gs_aKey.m_Modifier = Mod;
+					Key.m_KeyId = KeyId;
+					Key.m_Modifier = Mod;
 					break;
 				}
 		}

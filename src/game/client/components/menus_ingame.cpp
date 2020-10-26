@@ -248,12 +248,12 @@ void CMenus::RenderPlayers(CUIRect MainView)
 
 	int TotalPlayers = 0;
 
-	for(auto &i : m_pClient->m_Snap.m_paInfoByName)
+	for(auto &pInfoByName : m_pClient->m_Snap.m_paInfoByName)
 	{
-		if(!i)
+		if(!pInfoByName)
 			continue;
 
-		int Index = i->m_ClientID;
+		int Index = pInfoByName->m_ClientID;
 
 		if(Index == m_pClient->m_Snap.m_LocalClientID)
 			continue;
@@ -561,13 +561,13 @@ bool CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 	int NumOptions = 0;
 	int Selected = -1;
 	static int aPlayerIDs[MAX_CLIENTS];
-	for(auto &i : m_pClient->m_Snap.m_paInfoByName)
+	for(auto &pInfoByName : m_pClient->m_Snap.m_paInfoByName)
 	{
-		if(!i)
+		if(!pInfoByName)
 			continue;
 
-		int Index = i->m_ClientID;
-		if(Index == m_pClient->m_Snap.m_LocalClientID || (FilterSpectators && i->m_Team == TEAM_SPECTATORS))
+		int Index = pInfoByName->m_ClientID;
+		if(Index == m_pClient->m_Snap.m_LocalClientID || (FilterSpectators && pInfoByName->m_Team == TEAM_SPECTATORS))
 			continue;
 
 		if(!str_find_nocase(m_pClient->m_aClients[Index].m_aName, m_aFilterString))

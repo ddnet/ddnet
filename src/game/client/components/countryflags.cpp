@@ -102,8 +102,8 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 
 	// init LUT
 	if(DefaultIndex != 0)
-		for(int &i : m_CodeIndexLUT)
-			i = DefaultIndex;
+		for(int &CodeIndexLUT : m_CodeIndexLUT)
+			CodeIndexLUT = DefaultIndex;
 	else
 		mem_zero(m_CodeIndexLUT, sizeof(m_CodeIndexLUT));
 	for(int i = 0; i < m_aCountryFlags.size(); ++i)

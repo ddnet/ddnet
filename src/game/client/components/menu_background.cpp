@@ -108,14 +108,14 @@ int CMenuBackground::ThemeScan(const char *pName, int IsDir, int DirType, void *
 		return 0;
 
 	// try to edit an existing theme
-	for(auto &m_lTheme : pSelf->m_lThemes)
+	for(auto &Theme : pSelf->m_lThemes)
 	{
-		if(str_comp(m_lTheme.m_Name, aThemeName) == 0)
+		if(str_comp(Theme.m_Name, aThemeName) == 0)
 		{
 			if(IsDay)
-				m_lTheme.m_HasDay = true;
+				Theme.m_HasDay = true;
 			if(IsNight)
-				m_lTheme.m_HasNight = true;
+				Theme.m_HasNight = true;
 			return 0;
 		}
 	}

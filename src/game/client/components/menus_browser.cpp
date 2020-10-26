@@ -1081,10 +1081,10 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 		ServerDetails.VSplitLeft(5.0f, 0x0, &ServerDetails);
 		ServerDetails.VSplitLeft(80.0f, &LeftColumn, &RightColumn);
 
-		for(auto &s_aLabel : s_aLabels)
+		for(auto &Label : s_aLabels)
 		{
 			LeftColumn.HSplitTop(15.0f, &Row, &LeftColumn);
-			UI()->DoLabelScaled(&Row, s_aLabel, FontSize, -1);
+			UI()->DoLabelScaled(&Row, Label, FontSize, -1);
 		}
 
 		RightColumn.HSplitTop(15.0f, &Row, &RightColumn);

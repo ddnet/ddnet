@@ -56,9 +56,9 @@ bool HttpInit(IStorage *pStorage)
 		dbg_msg("http", "libcurl version %s (compiled = " LIBCURL_VERSION ")", pVersion->version);
 	}
 
-	for(auto &gs_aLock : gs_aLocks)
+	for(auto &Lock : gs_aLocks)
 	{
-		gs_aLock = lock_create();
+		Lock = lock_create();
 	}
 	curl_share_setopt(gs_Share, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
 	curl_share_setopt(gs_Share, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);

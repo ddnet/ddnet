@@ -168,11 +168,11 @@ public:
 			{
 				Info.m_Addr.port = 8300;
 				bool Added = false;
-				for(auto &m_aMasterServer : m_aMasterServers)
+				for(auto &MasterServer : m_aMasterServers)
 				{
-					if(str_comp(m_aMasterServer.m_aHostname, Info.m_aHostname) == 0)
+					if(str_comp(MasterServer.m_aHostname, Info.m_aHostname) == 0)
 					{
-						m_aMasterServer = Info;
+						MasterServer = Info;
 						Added = true;
 						break;
 					}
@@ -180,11 +180,11 @@ public:
 
 				if(!Added)
 				{
-					for(auto &m_aMasterServer : m_aMasterServers)
+					for(auto &MasterServer : m_aMasterServers)
 					{
-						if(m_aMasterServer.m_Addr.type == NETTYPE_INVALID)
+						if(MasterServer.m_Addr.type == NETTYPE_INVALID)
 						{
-							m_aMasterServer = Info;
+							MasterServer = Info;
 							Added = true;
 							break;
 						}
@@ -210,15 +210,15 @@ public:
 		if(!File)
 			return -1;
 
-		for(auto &m_aMasterServer : m_aMasterServers)
+		for(auto &MasterServer : m_aMasterServers)
 		{
 			char aAddrStr[NETADDR_MAXSTRSIZE];
-			if(m_aMasterServer.m_Addr.type != NETTYPE_INVALID)
-				net_addr_str(&m_aMasterServer.m_Addr, aAddrStr, sizeof(aAddrStr), true);
+			if(MasterServer.m_Addr.type != NETTYPE_INVALID)
+				net_addr_str(&MasterServer.m_Addr, aAddrStr, sizeof(aAddrStr), true);
 			else
 				aAddrStr[0] = 0;
 			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "%s %s", m_aMasterServer.m_aHostname, aAddrStr);
+			str_format(aBuf, sizeof(aBuf), "%s %s", MasterServer.m_aHostname, aAddrStr);
 			io_write(File, aBuf, str_length(aBuf));
 			io_write_newline(File);
 		}

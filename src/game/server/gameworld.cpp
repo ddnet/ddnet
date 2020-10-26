@@ -18,16 +18,16 @@ CGameWorld::CGameWorld()
 
 	m_Paused = false;
 	m_ResetRequested = false;
-	for(auto &m_apFirstEntityType : m_apFirstEntityTypes)
-		m_apFirstEntityType = 0;
+	for(auto &pFirstEntityType : m_apFirstEntityTypes)
+		pFirstEntityType = 0;
 }
 
 CGameWorld::~CGameWorld()
 {
 	// delete all entities
-	for(auto &m_apFirstEntityType : m_apFirstEntityTypes)
-		while(m_apFirstEntityType)
-			delete m_apFirstEntityType;
+	for(auto &pFirstEntityType : m_apFirstEntityTypes)
+		while(pFirstEntityType)
+			delete pFirstEntityType;
 }
 
 void CGameWorld::SetGameServer(CGameContext *pGameServer)

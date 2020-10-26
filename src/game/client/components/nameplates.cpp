@@ -247,14 +247,14 @@ void CNamePlates::SetPlayers(CPlayers *pPlayers)
 
 void CNamePlates::ResetNamePlates()
 {
-	for(auto &m_aNamePlate : m_aNamePlates)
+	for(auto &NamePlate : m_aNamePlates)
 	{
-		if(m_aNamePlate.m_NameTextContainerIndex != -1)
-			TextRender()->DeleteTextContainer(m_aNamePlate.m_NameTextContainerIndex);
-		if(m_aNamePlate.m_ClanNameTextContainerIndex != -1)
-			TextRender()->DeleteTextContainer(m_aNamePlate.m_ClanNameTextContainerIndex);
+		if(NamePlate.m_NameTextContainerIndex != -1)
+			TextRender()->DeleteTextContainer(NamePlate.m_NameTextContainerIndex);
+		if(NamePlate.m_ClanNameTextContainerIndex != -1)
+			TextRender()->DeleteTextContainer(NamePlate.m_ClanNameTextContainerIndex);
 
-		m_aNamePlate.Reset();
+		NamePlate.Reset();
 	}
 }
 

@@ -16,10 +16,10 @@
 //////////////////////////////////////////////////
 CGameWorld::CGameWorld()
 {
-	for(auto &m_apFirstEntityType : m_apFirstEntityTypes)
-		m_apFirstEntityType = 0;
-	for(auto &m_apCharacter : m_apCharacters)
-		m_apCharacter = 0;
+	for(auto &pFirstEntityType : m_apFirstEntityTypes)
+		pFirstEntityType = 0;
+	for(auto &pCharacter : m_apCharacters)
+		pCharacter = 0;
 	m_pCollision = 0;
 	m_GameTick = 0;
 	m_pParent = 0;
@@ -29,9 +29,9 @@ CGameWorld::CGameWorld()
 CGameWorld::~CGameWorld()
 {
 	// delete all entities
-	for(auto &m_apFirstEntityType : m_apFirstEntityTypes)
-		while(m_apFirstEntityType)
-			delete m_apFirstEntityType;
+	for(auto &pFirstEntityType : m_apFirstEntityTypes)
+		while(pFirstEntityType)
+			delete pFirstEntityType;
 	if(m_pChild && m_pChild->m_pParent == this)
 	{
 		OnModified();
@@ -534,9 +534,9 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 	m_pTuningList = pFrom->m_pTuningList;
 	m_Teams = pFrom->m_Teams;
 	// delete the previous entities
-	for(auto &m_apFirstEntityType : m_apFirstEntityTypes)
-		while(m_apFirstEntityType)
-			delete m_apFirstEntityType;
+	for(auto &pFirstEntityType : m_apFirstEntityTypes)
+		while(pFirstEntityType)
+			delete pFirstEntityType;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		m_apCharacters[i] = 0;
@@ -594,7 +594,7 @@ void CGameWorld::OnModified()
 void CGameWorld::Clear()
 {
 	// delete all entities
-	for(auto &m_apFirstEntityType : m_apFirstEntityTypes)
-		while(m_apFirstEntityType)
-			delete m_apFirstEntityType;
+	for(auto &pFirstEntityType : m_apFirstEntityTypes)
+		while(pFirstEntityType)
+			delete pFirstEntityType;
 }

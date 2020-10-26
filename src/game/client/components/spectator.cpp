@@ -217,9 +217,9 @@ void CSpectator::OnRender()
 	float BoxMove = -10.0f;
 	float BoxOffset = 0.0f;
 
-	for(auto &i : m_pClient->m_Snap.m_paInfoByDDTeamName)
+	for(auto &pInfo : m_pClient->m_Snap.m_paInfoByDDTeamName)
 	{
-		if(!i || i->m_Team == TEAM_SPECTATORS)
+		if(!pInfo || pInfo->m_Team == TEAM_SPECTATORS)
 			continue;
 
 		++TotalPlayers;

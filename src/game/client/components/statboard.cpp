@@ -19,8 +19,8 @@ CStatboard::CStatboard()
 
 void CStatboard::OnReset()
 {
-	for(auto &m_aStat : m_pClient->m_aStats)
-		m_aStat.Reset();
+	for(auto &Stat : m_pClient->m_aStats)
+		Stat.Reset();
 	m_Active = false;
 	m_ScreenshotTaken = false;
 	m_ScreenshotTime = -1;
@@ -180,8 +180,8 @@ void CStatboard::RenderGlobalStats()
 		for(int j = 0; j < NUM_WEAPONS; j++)
 			aDisplayWeapon[j] = aDisplayWeapon[j] || pStats->m_aFragsWith[j] || pStats->m_aDeathsFrom[j];
 	}
-	for(bool i : aDisplayWeapon)
-		if(i)
+	for(bool DisplayWeapon : aDisplayWeapon)
+		if(DisplayWeapon)
 			StatboardContentWidth += 80;
 
 	float x = StatboardWidth / 2 - StatboardContentWidth / 2;

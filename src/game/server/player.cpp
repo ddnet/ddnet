@@ -655,10 +655,10 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 	if(Team == TEAM_SPECTATORS)
 	{
 		// update spectator modes
-		for(auto &m_apPlayer : GameServer()->m_apPlayers)
+		for(auto &pPlayer : GameServer()->m_apPlayers)
 		{
-			if(m_apPlayer && m_apPlayer->m_SpectatorID == m_ClientID)
-				m_apPlayer->m_SpectatorID = SPEC_FREEVIEW;
+			if(pPlayer && pPlayer->m_SpectatorID == m_ClientID)
+				pPlayer->m_SpectatorID = SPEC_FREEVIEW;
 		}
 	}
 }
@@ -931,19 +931,19 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 		switch(Result.m_MessageKind)
 		{
 		case CScorePlayerResult::DIRECT:
-			for(auto &m_aaMessage : Result.m_Data.m_aaMessages)
+			for(auto &aMessage : Result.m_Data.m_aaMessages)
 			{
-				if(m_aaMessage[0] == 0)
+				if(aMessage[0] == 0)
 					break;
-				GameServer()->SendChatTarget(m_ClientID, m_aaMessage);
+				GameServer()->SendChatTarget(m_ClientID, aMessage);
 			}
 			break;
 		case CScorePlayerResult::ALL:
-			for(auto &m_aaMessage : Result.m_Data.m_aaMessages)
+			for(auto &aMessage : Result.m_Data.m_aaMessages)
 			{
-				if(m_aaMessage[0] == 0)
+				if(aMessage[0] == 0)
 					break;
-				GameServer()->SendChat(-1, CGameContext::CHAT_ALL, m_aaMessage, m_ClientID);
+				GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aMessage, m_ClientID);
 			}
 			break;
 		case CScorePlayerResult::BROADCAST:

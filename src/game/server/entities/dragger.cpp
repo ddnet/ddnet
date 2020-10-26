@@ -21,9 +21,9 @@ CDragger::CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW,
 	m_CaughtTeam = CaughtTeam;
 	GameWorld()->InsertEntity(this);
 
-	for(int &m_SoloID : m_SoloIDs)
+	for(int &SoloID : m_SoloIDs)
 	{
-		m_SoloID = -1;
+		SoloID = -1;
 	}
 }
 
@@ -84,10 +84,10 @@ void CDragger::Move()
 
 	if(m_Target)
 	{
-		for(auto &m_SoloEnt : m_SoloEnts)
+		for(auto &SoloEnt : m_SoloEnts)
 		{
-			if(m_SoloEnt == m_Target)
-				m_SoloEnt = 0;
+			if(SoloEnt == m_Target)
+				SoloEnt = 0;
 		}
 	}
 }
@@ -163,13 +163,13 @@ void CDragger::Snap(int SnappingClient)
 
 	CCharacter *Target = m_Target;
 
-	for(int &m_SoloID : m_SoloIDs)
+	for(int &SoloID : m_SoloIDs)
 	{
-		if(m_SoloID == -1)
+		if(SoloID == -1)
 			break;
 
-		Server()->SnapFreeID(m_SoloID);
-		m_SoloID = -1;
+		Server()->SnapFreeID(SoloID);
+		SoloID = -1;
 	}
 
 	int pos = 0;

@@ -917,8 +917,8 @@ void CCharacter::DDRacePostCoreTick()
 	// handle Anti-Skip tiles
 	std::list<int> Indices = Collision()->GetMapIndices(m_PrevPos, m_Pos);
 	if(!Indices.empty())
-		for(int &Indice : Indices)
-			HandleTiles(Indice);
+		for(int Index : Indices)
+			HandleTiles(Index);
 	else
 	{
 		HandleTiles(CurrentIndex);

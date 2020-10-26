@@ -1826,12 +1826,12 @@ void CCommandProcessorFragment_OpenGL2::Cmd_DeleteBufferContainer(const CCommand
 			int VertBufferID = BufferContainer.m_ContainerInfo.m_Attributes[i].m_VertBufferBindingIndex;
 			if(VertBufferID != -1)
 			{
-				for(auto &m_Attribute : BufferContainer.m_ContainerInfo.m_Attributes)
+				for(auto &Attribute : BufferContainer.m_ContainerInfo.m_Attributes)
 				{
 					// set all equal ids to zero to not double delete
-					if(VertBufferID == m_Attribute.m_VertBufferBindingIndex)
+					if(VertBufferID == Attribute.m_VertBufferBindingIndex)
 					{
-						m_Attribute.m_VertBufferBindingIndex = -1;
+						Attribute.m_VertBufferBindingIndex = -1;
 					}
 				}
 
@@ -3096,12 +3096,12 @@ void CCommandProcessorFragment_OpenGL3_3::DestroyBufferContainer(int Index, bool
 			int VertBufferID = BufferContainer.m_ContainerInfo.m_Attributes[i].m_VertBufferBindingIndex;
 			if(VertBufferID != -1)
 			{
-				for(auto &m_Attribute : BufferContainer.m_ContainerInfo.m_Attributes)
+				for(auto &Attribute : BufferContainer.m_ContainerInfo.m_Attributes)
 				{
 					// set all equal ids to zero to not double delete
-					if(VertBufferID == m_Attribute.m_VertBufferBindingIndex)
+					if(VertBufferID == Attribute.m_VertBufferBindingIndex)
 					{
-						m_Attribute.m_VertBufferBindingIndex = -1;
+						Attribute.m_VertBufferBindingIndex = -1;
 					}
 				}
 
@@ -3148,9 +3148,9 @@ void CCommandProcessorFragment_OpenGL3_3::AppendIndices(unsigned int NewIndicesC
 
 	for(unsigned int &i : m_LastIndexBufferBound)
 		i = 0;
-	for(auto &m_BufferContainer : m_BufferContainers)
+	for(auto &BufferContainer : m_BufferContainers)
 	{
-		m_BufferContainer.m_LastIndexBufferBound = 0;
+		BufferContainer.m_LastIndexBufferBound = 0;
 	}
 
 	m_CurrentIndicesInBuffer = NewIndicesCount;

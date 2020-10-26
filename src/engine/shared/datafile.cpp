@@ -549,9 +549,9 @@ SHA256_DIGEST CDataFileReader::Sha256()
 	if(!m_pDataFile)
 	{
 		SHA256_DIGEST Result;
-		for(unsigned char &i : Result.data)
+		for(unsigned char &d : Result.data)
 		{
-			i = 0xff;
+			d = 0xff;
 		}
 		return Result;
 	}

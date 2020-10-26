@@ -30,8 +30,8 @@ void CScorePlayerResult::SetVariant(Variant v)
 	{
 	case DIRECT:
 	case ALL:
-		for(auto &m_aaMessage : m_Data.m_aaMessages)
-			m_aaMessage[0] = 0;
+		for(auto &aMessage : m_Data.m_aaMessages)
+			aMessage[0] = 0;
 		break;
 	case BROADCAST:
 		m_Data.m_Broadcast[0] = 0;
@@ -46,16 +46,16 @@ void CScorePlayerResult::SetVariant(Variant v)
 		m_Data.m_Info.m_Birthday = 0;
 		m_Data.m_Info.m_HasFinishScore = false;
 		m_Data.m_Info.m_Time = 0;
-		for(float &i : m_Data.m_Info.m_CpTime)
-			i = 0;
+		for(float &CpTime : m_Data.m_Info.m_CpTime)
+			CpTime = 0;
 	}
 }
 
 CTeamrank::CTeamrank() :
 	m_NumNames(0)
 {
-	for(auto &m_aaName : m_aaNames)
-		m_aaName[0] = '\0';
+	for(auto &aName : m_aaNames)
+		aName[0] = '\0';
 	mem_zero(&m_TeamID.m_aData, sizeof(m_TeamID));
 }
 

@@ -85,9 +85,9 @@ public:
 		free(m_pBuf);
 		delete[] m_TextureData[0];
 		delete[] m_TextureData[1];
-		for(auto &m_FtFallbackFont : m_FtFallbackFonts)
+		for(auto &FtFallbackFont : m_FtFallbackFonts)
 		{
-			free(m_FtFallbackFont.m_pBuf);
+			free(FtFallbackFont.m_pBuf);
 		}
 	}
 
@@ -600,16 +600,16 @@ public:
 
 	virtual ~CTextRender()
 	{
-		for(auto &m_Font : m_Fonts)
+		for(auto &pFont : m_Fonts)
 		{
-			FT_Done_Face(m_Font->m_FtFace);
+			FT_Done_Face(pFont->m_FtFace);
 
-			for(CFont::SFontFallBack &FallbackFont : m_Font->m_FtFallbackFonts)
+			for(CFont::SFontFallBack &FallbackFont : pFont->m_FtFallbackFonts)
 			{
 				FT_Done_Face(FallbackFont.m_FtFace);
 			}
 
-			delete m_Font;
+			delete pFont;
 		}
 
 		if(m_FTLibrary != 0)
@@ -733,10 +733,10 @@ public:
 
 	CFont *GetFont(const char *pFilename)
 	{
-		for(auto &m_Font : m_Fonts)
+		for(auto &pFont : m_Fonts)
 		{
-			if(str_comp(pFilename, m_Font->m_aFilename) == 0)
-				return m_Font;
+			if(str_comp(pFilename, pFont->m_aFilename) == 0)
+				return pFont;
 		}
 
 		return NULL;
@@ -1975,8 +1975,8 @@ public:
 	virtual void OnWindowResize()
 	{
 		bool FoundTextContainer = false;
-		for(auto &m_TextContainer : m_TextContainers)
-			if(m_TextContainer.m_StringInfo.m_QuadBufferContainerIndex != -1)
+		for(auto &TextContainer : m_TextContainers)
+			if(TextContainer.m_StringInfo.m_QuadBufferContainerIndex != -1)
 				FoundTextContainer = true;
 		if(FoundTextContainer)
 		{
@@ -1984,19 +1984,19 @@ public:
 			dbg_assert(false, "text container was not empty");
 		}
 
-		for(auto &m_Font : m_Fonts)
+		for(auto &pFont : m_Fonts)
 		{
 			// reset the skylines
 			for(int j = 0; j < 2; ++j)
 			{
-				for(int & k : m_Font->m_TextureSkyline[j].m_CurHeightOfPixelColumn)
+				for(int &k : pFont->m_TextureSkyline[j].m_CurHeightOfPixelColumn)
 					k = 0;
 
-				mem_zero(m_Font->m_TextureData[j], (size_t)m_Font->m_CurTextureDimensions[j] * m_Font->m_CurTextureDimensions[j] * sizeof(unsigned char));
-				Graphics()->LoadTextureRawSub(m_Font->m_aTextures[j], 0, 0, m_Font->m_CurTextureDimensions[j], m_Font->m_CurTextureDimensions[j], CImageInfo::FORMAT_ALPHA, m_Font->m_TextureData[j]);
+				mem_zero(pFont->m_TextureData[j], (size_t)pFont->m_CurTextureDimensions[j] * pFont->m_CurTextureDimensions[j] * sizeof(unsigned char));
+				Graphics()->LoadTextureRawSub(pFont->m_aTextures[j], 0, 0, pFont->m_CurTextureDimensions[j], pFont->m_CurTextureDimensions[j], CImageInfo::FORMAT_ALPHA, pFont->m_TextureData[j]);
 			}
 
-			m_Font->InitFontSizes();
+			pFont->InitFontSizes();
 		}
 	}
 };

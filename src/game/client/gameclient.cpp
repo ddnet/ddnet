@@ -524,8 +524,8 @@ void CGameClient::OnConnected()
 	m_GameWorld.Clear();
 	m_GameWorld.m_WorldConfig.m_InfiniteAmmo = true;
 	m_PredictedDummyID = -1;
-	for(auto &m_aLastWorldCharacter : m_aLastWorldCharacters)
-		m_aLastWorldCharacter.m_Alive = false;
+	for(auto &LastWorldCharacter : m_aLastWorldCharacters)
+		LastWorldCharacter.m_Alive = false;
 	LoadMapSettings();
 
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK && g_Config.m_ClAutoDemoOnConnect)
@@ -539,8 +539,8 @@ void CGameClient::OnReset()
 
 	InvalidateSnapshot();
 
-	for(auto &m_aClient : m_aClients)
-		m_aClient.Reset();
+	for(auto &Client : m_aClients)
+		Client.Reset();
 
 	for(int i = 0; i < m_All.m_Num; i++)
 		m_All.m_paComponents[i]->OnReset();
@@ -1208,9 +1208,9 @@ void CGameClient::OnNewSnapshot()
 
 	bool FoundGameInfoEx = false;
 
-	for(auto &m_aClient : m_aClients)
+	for(auto &Client : m_aClients)
 	{
-		m_aClient.m_SpecCharPresent = false;
+		Client.m_SpecCharPresent = false;
 	}
 
 	// go trough all the items in the snapshot and gather the info we want
@@ -2243,14 +2243,14 @@ void CGameClient::UpdatePrediction()
 		if(m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_HasExtendedData)
 		{
 			int aIDs[MAX_CLIENTS];
-			for(int &aID : aIDs)
-				aID = -1;
+			for(int &ID : aIDs)
+				ID = -1;
 			for(int i = 0; i < MAX_CLIENTS; i++)
 				if(CCharacter *pChar = m_GameWorld.GetCharacterByID(i))
 					aIDs[pChar->GetStrongWeakID()] = i;
-			for(int aID : aIDs)
-				if(aID >= 0)
-					m_CharOrder.GiveStrong(aID);
+			for(int ID : aIDs)
+				if(ID >= 0)
+					m_CharOrder.GiveStrong(ID);
 		}
 		else
 		{
@@ -2545,9 +2545,9 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponNinjaCursor);
 		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponLaserCursor);
 
-		for(auto &m_SpriteWeaponCursor : m_GameSkin.m_SpriteWeaponCursors)
+		for(auto &SpriteWeaponCursor : m_GameSkin.m_SpriteWeaponCursors)
 		{
-			m_SpriteWeaponCursor = IGraphics::CTextureHandle();
+			SpriteWeaponCursor = IGraphics::CTextureHandle();
 		}
 
 		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteHookChain);
@@ -2559,19 +2559,19 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponNinja);
 		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponLaser);
 
-		for(auto &m_SpriteWeapon : m_GameSkin.m_SpriteWeapons)
+		for(auto &SpriteWeapon : m_GameSkin.m_SpriteWeapons)
 		{
-			m_SpriteWeapon = IGraphics::CTextureHandle();
+			SpriteWeapon = IGraphics::CTextureHandle();
 		}
 
-		for(auto &m_SpriteParticle : m_GameSkin.m_SpriteParticles)
+		for(auto &SpriteParticle : m_GameSkin.m_SpriteParticles)
 		{
-			Graphics()->UnloadTextureNew(m_SpriteParticle);
+			Graphics()->UnloadTextureNew(SpriteParticle);
 		}
 
-		for(auto &m_SpriteStar : m_GameSkin.m_SpriteStars)
+		for(auto &SpriteStar : m_GameSkin.m_SpriteStars)
 		{
-			Graphics()->UnloadTextureNew(m_SpriteStar);
+			Graphics()->UnloadTextureNew(SpriteStar);
 		}
 
 		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponGunProjectile);
@@ -2581,9 +2581,9 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponNinjaProjectile);
 		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponLaserProjectile);
 
-		for(auto &m_SpriteWeaponProjectile : m_GameSkin.m_SpriteWeaponProjectiles)
+		for(auto &SpriteWeaponProjectile : m_GameSkin.m_SpriteWeaponProjectiles)
 		{
-			m_SpriteWeaponProjectile = IGraphics::CTextureHandle();
+			SpriteWeaponProjectile = IGraphics::CTextureHandle();
 		}
 
 		for(int i = 0; i < 3; ++i)
@@ -2592,9 +2592,9 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 			Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponShotgunMuzzles[i]);
 			Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponNinjaMuzzles[i]);
 
-			for(auto &m_SpriteWeaponsMuzzle : m_GameSkin.m_SpriteWeaponsMuzzles)
+			for(auto &SpriteWeaponsMuzzle : m_GameSkin.m_SpriteWeaponsMuzzles)
 			{
-				m_SpriteWeaponsMuzzle[i] = IGraphics::CTextureHandle();
+				SpriteWeaponsMuzzle[i] = IGraphics::CTextureHandle();
 			}
 		}
 
@@ -2607,9 +2607,9 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 		Graphics()->UnloadTextureNew(m_GameSkin.m_SpritePickupGun);
 		Graphics()->UnloadTextureNew(m_GameSkin.m_SpritePickupHammer);
 
-		for(auto &m_SpritePickupWeapon : m_GameSkin.m_SpritePickupWeapons)
+		for(auto &SpritePickupWeapon : m_GameSkin.m_SpritePickupWeapons)
 		{
-			m_SpritePickupWeapon = IGraphics::CTextureHandle();
+			SpritePickupWeapon = IGraphics::CTextureHandle();
 		}
 
 		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteFlagBlue);
@@ -2773,8 +2773,8 @@ void CGameClient::LoadEmoticonsSkin(const char *pPath, bool AsDir)
 {
 	if(m_EmoticonsSkinLoaded)
 	{
-		for(auto &m_SpriteEmoticon : m_EmoticonsSkin.m_SpriteEmoticons)
-			Graphics()->UnloadTextureNew(m_SpriteEmoticon);
+		for(auto &SpriteEmoticon : m_EmoticonsSkin.m_SpriteEmoticons)
+			Graphics()->UnloadTextureNew(SpriteEmoticon);
 
 		m_EmoticonsSkinLoaded = false;
 	}
@@ -2819,16 +2819,16 @@ void CGameClient::LoadParticlesSkin(const char *pPath, bool AsDir)
 	{
 		Graphics()->UnloadTextureNew(m_ParticlesSkin.m_SpriteParticleSlice);
 		Graphics()->UnloadTextureNew(m_ParticlesSkin.m_SpriteParticleBall);
-		for(auto &i : m_ParticlesSkin.m_SpriteParticleSplat)
-			Graphics()->UnloadTextureNew(i);
+		for(auto &SpriteParticleSplat : m_ParticlesSkin.m_SpriteParticleSplat)
+			Graphics()->UnloadTextureNew(SpriteParticleSplat);
 		Graphics()->UnloadTextureNew(m_ParticlesSkin.m_SpriteParticleSmoke);
 		Graphics()->UnloadTextureNew(m_ParticlesSkin.m_SpriteParticleShell);
 		Graphics()->UnloadTextureNew(m_ParticlesSkin.m_SpriteParticleExpl);
 		Graphics()->UnloadTextureNew(m_ParticlesSkin.m_SpriteParticleAirJump);
 		Graphics()->UnloadTextureNew(m_ParticlesSkin.m_SpriteParticleHit);
 
-		for(auto &m_SpriteParticle : m_ParticlesSkin.m_SpriteParticles)
-			m_SpriteParticle = IGraphics::CTextureHandle();
+		for(auto &SpriteParticle : m_ParticlesSkin.m_SpriteParticles)
+			SpriteParticle = IGraphics::CTextureHandle();
 
 		m_ParticlesSkinLoaded = false;
 	}
@@ -2886,14 +2886,14 @@ void CGameClient::LoadParticlesSkin(const char *pPath, bool AsDir)
 
 void CGameClient::RefindSkins()
 {
-	for(auto &m_aClient : m_aClients)
+	for(auto &Client : m_aClients)
 	{
-		if(m_aClient.m_aSkinName[0] != '\0')
+		if(Client.m_aSkinName[0] != '\0')
 		{
-			const CSkin *pSkin = m_pSkins->Get(m_pSkins->Find(m_aClient.m_aSkinName));
-			m_aClient.m_SkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-			m_aClient.m_SkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-			m_aClient.UpdateRenderInfo();
+			const CSkin *pSkin = m_pSkins->Get(m_pSkins->Find(Client.m_aSkinName));
+			Client.m_SkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
+			Client.m_SkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+			Client.UpdateRenderInfo();
 		}
 	}
 	m_pGhost->RefindSkin();

@@ -129,8 +129,8 @@ public:
 	{
 		m_BestTime = 0;
 		m_CurrentTime = 0;
-		for(float &i : m_aBestCpTime)
-			i = 0;
+		for(float &BestCpTime : m_aBestCpTime)
+			BestCpTime = 0;
 	}
 
 	void Set(float Time, float CpTime[NUM_CHECKPOINTS])

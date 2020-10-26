@@ -757,12 +757,12 @@ void CGraphics_Threaded::SetColor(float r, float g, float b, float a)
 	b *= 255.f;
 	a *= 255.f;
 
-	for(auto &i : m_aColor)
+	for(auto &Color : m_aColor)
 	{
-		i.r = (unsigned char)(r);
-		i.g = (unsigned char)(g);
-		i.b = (unsigned char)(b);
-		i.a = (unsigned char)(a);
+		Color.r = (unsigned char)(r);
+		Color.g = (unsigned char)(g);
+		Color.b = (unsigned char)(b);
+		Color.a = (unsigned char)(a);
 	}
 }
 
@@ -2022,8 +2022,8 @@ int CGraphics_Threaded::CreateBufferContainer(SBufferContainerInfo *pContainerIn
 
 	mem_copy(Cmd.m_Attributes, &pContainerInfo->m_Attributes[0], Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
 
-	for(auto &m_Attribute : pContainerInfo->m_Attributes)
-		m_VertexArrayInfo[Index].m_AssociatedBufferObjectIndices.push_back(m_Attribute.m_VertBufferBindingIndex);
+	for(auto &Attribute : pContainerInfo->m_Attributes)
+		m_VertexArrayInfo[Index].m_AssociatedBufferObjectIndices.push_back(Attribute.m_VertBufferBindingIndex);
 
 	return Index;
 }
@@ -2110,8 +2110,8 @@ void CGraphics_Threaded::UpdateBufferContainer(int ContainerIndex, SBufferContai
 	mem_copy(Cmd.m_Attributes, &pContainerInfo->m_Attributes[0], Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
 
 	m_VertexArrayInfo[ContainerIndex].m_AssociatedBufferObjectIndices.clear();
-	for(auto &m_Attribute : pContainerInfo->m_Attributes)
-		m_VertexArrayInfo[ContainerIndex].m_AssociatedBufferObjectIndices.push_back(m_Attribute.m_VertBufferBindingIndex);
+	for(auto &Attribute : pContainerInfo->m_Attributes)
+		m_VertexArrayInfo[ContainerIndex].m_AssociatedBufferObjectIndices.push_back(Attribute.m_VertBufferBindingIndex);
 }
 
 void CGraphics_Threaded::IndicesNumRequiredNotify(unsigned int RequiredIndicesCount)
@@ -2292,8 +2292,8 @@ int CGraphics_Threaded::Init()
 		return -1;
 
 	// create command buffers
-	for(auto &m_apCommandBuffer : m_apCommandBuffers)
-		m_apCommandBuffer = new CCommandBuffer(CMD_BUFFER_CMD_BUFFER_SIZE, CMD_BUFFER_DATA_BUFFER_SIZE);
+	for(auto &pCommandBuffer : m_apCommandBuffers)
+		pCommandBuffer = new CCommandBuffer(CMD_BUFFER_CMD_BUFFER_SIZE, CMD_BUFFER_DATA_BUFFER_SIZE);
 	m_pCommandBuffer = m_apCommandBuffers[0];
 
 	// create null texture, will get id=0
@@ -2315,8 +2315,8 @@ void CGraphics_Threaded::Shutdown()
 	m_pBackend = 0x0;
 
 	// delete the command buffers
-	for(auto &m_apCommandBuffer : m_apCommandBuffers)
-		delete m_apCommandBuffer;
+	for(auto &pCommandBuffer : m_apCommandBuffers)
+		delete pCommandBuffer;
 }
 
 int CGraphics_Threaded::GetNumScreens() const
@@ -2377,8 +2377,8 @@ void CGraphics_Threaded::Resize(int w, int h)
 	KickCommandBuffer();
 	WaitForIdle();
 
-	for(auto &m_ResizeListener : m_ResizeListeners)
-		m_ResizeListener.m_pFunc(m_ResizeListener.m_pUser);
+	for(auto &ResizeListener : m_ResizeListeners)
+		ResizeListener.m_pFunc(ResizeListener.m_pUser);
 }
 
 void CGraphics_Threaded::AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser)

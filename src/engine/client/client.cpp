@@ -263,8 +263,8 @@ void CSmoothTime::Update(CGraph *pGraph, int64 Target, int TimeLeft, int AdjustD
 CClient::CClient() :
 	m_DemoPlayer(&m_SnapshotDelta)
 {
-	for(auto &i : m_DemoRecorder)
-		i = CDemoRecorder(&m_SnapshotDelta);
+	for(auto &DemoRecorder : m_DemoRecorder)
+		DemoRecorder = CDemoRecorder(&m_SnapshotDelta);
 
 	m_pEditor = 0;
 	m_pInput = 0;
@@ -2019,12 +2019,12 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 					SnapshotRemoveExtraInfo(aExtraInfoRemoved);
 
 					// add snapshot to demo
-					for(auto &i : m_DemoRecorder)
+					for(auto &DemoRecorder : m_DemoRecorder)
 					{
-						if(i.IsRecording())
+						if(DemoRecorder.IsRecording())
 						{
 							// write snapshot
-							i.RecordSnapshot(GameTick, aExtraInfoRemoved, SnapSize);
+							DemoRecorder.RecordSnapshot(GameTick, aExtraInfoRemoved, SnapSize);
 						}
 					}
 
@@ -2091,9 +2091,9 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 		if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 || Msg == NETMSGTYPE_SV_EXTRAPROJECTILE)
 		{
 			// game message
-			for(auto &i : m_DemoRecorder)
-				if(i.IsRecording())
-					i.RecordMessage(pPacket->m_pData, pPacket->m_DataSize);
+			for(auto &DemoRecorder : m_DemoRecorder)
+				if(DemoRecorder.IsRecording())
+					DemoRecorder.RecordMessage(pPacket->m_pData, pPacket->m_DataSize);
 
 			GameClient()->OnMessage(Msg, &Unpacker);
 		}
@@ -2530,9 +2530,9 @@ void CClient::LoadDDNetInfo()
 
 void CClient::PumpNetwork()
 {
-	for(auto &i : m_NetClient)
+	for(auto &NetClient : m_NetClient)
 	{
-		i.Update();
+		NetClient.Update();
 	}
 
 	if(State() != IClient::STATE_DEMOPLAYBACK)
@@ -3056,12 +3056,12 @@ void CClient::Run()
 			mem_zero(&BindAddr, sizeof(BindAddr));
 			BindAddr.type = NETTYPE_ALL;
 		}
-		for(auto &i : m_NetClient)
+		for(auto &NetClient : m_NetClient)
 		{
 			do
 			{
 				BindAddr.port = (secure_rand() % 64511) + 1024;
-			} while(!i.Open(BindAddr, 0));
+			} while(!NetClient.Open(BindAddr, 0));
 		}
 	}
 

@@ -12,30 +12,30 @@
 
 void CKillMessages::OnWindowResize()
 {
-	for(auto &m_aKillmsg : m_aKillmsgs)
+	for(auto &Killmsg : m_aKillmsgs)
 	{
-		if(m_aKillmsg.m_VictimTextContainerIndex != -1)
-			TextRender()->DeleteTextContainer(m_aKillmsg.m_VictimTextContainerIndex);
-		if(m_aKillmsg.m_KillerTextContainerIndex != -1)
-			TextRender()->DeleteTextContainer(m_aKillmsg.m_KillerTextContainerIndex);
-		m_aKillmsg.m_VictimTextContainerIndex = m_aKillmsg.m_KillerTextContainerIndex = -1;
+		if(Killmsg.m_VictimTextContainerIndex != -1)
+			TextRender()->DeleteTextContainer(Killmsg.m_VictimTextContainerIndex);
+		if(Killmsg.m_KillerTextContainerIndex != -1)
+			TextRender()->DeleteTextContainer(Killmsg.m_KillerTextContainerIndex);
+		Killmsg.m_VictimTextContainerIndex = Killmsg.m_KillerTextContainerIndex = -1;
 	}
 }
 
 void CKillMessages::OnReset()
 {
 	m_KillmsgCurrent = 0;
-	for(auto &m_aKillmsg : m_aKillmsgs)
+	for(auto &Killmsg : m_aKillmsgs)
 	{
-		m_aKillmsg.m_Tick = -100000;
+		Killmsg.m_Tick = -100000;
 
-		if(m_aKillmsg.m_VictimTextContainerIndex != -1)
-			TextRender()->DeleteTextContainer(m_aKillmsg.m_VictimTextContainerIndex);
+		if(Killmsg.m_VictimTextContainerIndex != -1)
+			TextRender()->DeleteTextContainer(Killmsg.m_VictimTextContainerIndex);
 
-		if(m_aKillmsg.m_KillerTextContainerIndex != -1)
-			TextRender()->DeleteTextContainer(m_aKillmsg.m_KillerTextContainerIndex);
+		if(Killmsg.m_KillerTextContainerIndex != -1)
+			TextRender()->DeleteTextContainer(Killmsg.m_KillerTextContainerIndex);
 
-		m_aKillmsg.m_VictimTextContainerIndex = m_aKillmsg.m_KillerTextContainerIndex = -1;
+		Killmsg.m_VictimTextContainerIndex = Killmsg.m_KillerTextContainerIndex = -1;
 	}
 }
 

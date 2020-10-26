@@ -50,11 +50,11 @@ CMapBugs GetMapBugs(const char *pName, int Size, SHA256_DIGEST Sha256)
 	CMapDescription Map = {pName, Size, Sha256};
 	CMapBugs Result;
 	Result.m_Extra = 0;
-	for(auto &i : MAP_BUGS)
+	for(auto &MapBug : MAP_BUGS)
 	{
-		if(Map == i.m_Map)
+		if(Map == MapBug.m_Map)
 		{
-			Result.m_pData = &i;
+			Result.m_pData = &MapBug;
 			return Result;
 		}
 	}

@@ -32,13 +32,13 @@ CRegister::CRegister(bool Sixup)
 void CRegister::FeedToken(NETADDR Addr, SECURITY_TOKEN ResponseToken)
 {
 	Addr.port = 0;
-	for(auto &i : m_aMasterserverInfo)
+	for(auto &MasterserverInfo : m_aMasterserverInfo)
 	{
-		NETADDR Addr2 = i.m_Addr;
+		NETADDR Addr2 = MasterserverInfo.m_Addr;
 		Addr2.port = 0;
 		if(net_addr_comp(&Addr, &Addr2) == 0)
 		{
-			i.m_Token = ResponseToken;
+			MasterserverInfo.m_Token = ResponseToken;
 			break;
 		}
 	}
@@ -108,11 +108,11 @@ void CRegister::RegisterGotCount(CNetChunk *pChunk)
 	unsigned char *pData = (unsigned char *)pChunk->m_pData;
 	int Count = (pData[sizeof(SERVERBROWSE_COUNT)] << 8) | pData[sizeof(SERVERBROWSE_COUNT) + 1];
 
-	for(auto &i : m_aMasterserverInfo)
+	for(auto &MasterserverInfo : m_aMasterserverInfo)
 	{
-		if(net_addr_comp(&i.m_Addr, &pChunk->m_Address) == 0)
+		if(net_addr_comp(&MasterserverInfo.m_Addr, &pChunk->m_Address) == 0)
 		{
-			i.m_Count = Count;
+			MasterserverInfo.m_Count = Count;
 			break;
 		}
 	}
@@ -183,21 +183,21 @@ void CRegister::RegisterUpdate(int Nettype)
 	else if(m_RegisterState == REGISTERSTATE_QUERY_COUNT)
 	{
 		int Left = 0;
-		for(auto &i : m_aMasterserverInfo)
+		for(auto &MasterserverInfo : m_aMasterserverInfo)
 		{
-			if(!i.m_Valid)
+			if(!MasterserverInfo.m_Valid)
 				continue;
 
-			if(i.m_Count == -1)
+			if(MasterserverInfo.m_Count == -1)
 			{
 				Left++;
-				if(i.m_LastSend + Freq < Now)
+				if(MasterserverInfo.m_LastSend + Freq < Now)
 				{
-					i.m_LastSend = Now;
-					if(m_Sixup && i.m_Token == NET_SECURITY_TOKEN_UNKNOWN)
-						m_pNetServer->SendTokenSixup(i.m_Addr, NET_SECURITY_TOKEN_UNKNOWN);
+					MasterserverInfo.m_LastSend = Now;
+					if(m_Sixup && MasterserverInfo.m_Token == NET_SECURITY_TOKEN_UNKNOWN)
+						m_pNetServer->SendTokenSixup(MasterserverInfo.m_Addr, NET_SECURITY_TOKEN_UNKNOWN);
 					else
-						RegisterSendCountRequest(i.m_Addr, i.m_Token);
+						RegisterSendCountRequest(MasterserverInfo.m_Addr, MasterserverInfo.m_Token);
 				}
 			}
 		}
@@ -280,9 +280,9 @@ int CRegister::RegisterProcessPacket(CNetChunk *pPacket, SECURITY_TOKEN Response
 {
 	// check for masterserver address
 	bool Valid = false;
-	for(auto &i : m_aMasterserverInfo)
+	for(auto &MasterserverInfo : m_aMasterserverInfo)
 	{
-		if(net_addr_comp_noport(&pPacket->m_Address, &i.m_Addr) == 0)
+		if(net_addr_comp_noport(&pPacket->m_Address, &MasterserverInfo.m_Addr) == 0)
 		{
 			Valid = true;
 			break;

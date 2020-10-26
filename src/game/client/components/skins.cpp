@@ -20,9 +20,9 @@ static const char *VANILLA_SKINS[] = {"bluekitty", "bluestripe", "brownbear",
 
 static bool IsVanillaSkin(const char *pName)
 {
-	for(auto &i : VANILLA_SKINS)
+	for(auto &pVanillaSkin : VANILLA_SKINS)
 	{
-		if(str_comp(pName, i) == 0)
+		if(str_comp(pName, pVanillaSkin) == 0)
 		{
 			return true;
 		}
@@ -210,8 +210,8 @@ void CSkins::Refresh()
 		Graphics()->UnloadTextureNew(m_aSkins[i].m_OriginalSkin.m_FeetOutline);
 		Graphics()->UnloadTextureNew(m_aSkins[i].m_OriginalSkin.m_Hands);
 		Graphics()->UnloadTextureNew(m_aSkins[i].m_OriginalSkin.m_HandsOutline);
-		for(auto &m_Eye : m_aSkins[i].m_OriginalSkin.m_Eyes)
-			Graphics()->UnloadTextureNew(m_Eye);
+		for(auto &Eye : m_aSkins[i].m_OriginalSkin.m_Eyes)
+			Graphics()->UnloadTextureNew(Eye);
 
 		Graphics()->UnloadTextureNew(m_aSkins[i].m_ColorableSkin.m_Body);
 		Graphics()->UnloadTextureNew(m_aSkins[i].m_ColorableSkin.m_BodyOutline);
@@ -219,8 +219,8 @@ void CSkins::Refresh()
 		Graphics()->UnloadTextureNew(m_aSkins[i].m_ColorableSkin.m_FeetOutline);
 		Graphics()->UnloadTextureNew(m_aSkins[i].m_ColorableSkin.m_Hands);
 		Graphics()->UnloadTextureNew(m_aSkins[i].m_ColorableSkin.m_HandsOutline);
-		for(auto &m_Eye : m_aSkins[i].m_ColorableSkin.m_Eyes)
-			Graphics()->UnloadTextureNew(m_Eye);
+		for(auto &Eye : m_aSkins[i].m_ColorableSkin.m_Eyes)
+			Graphics()->UnloadTextureNew(Eye);
 	}
 
 	m_aSkins.clear();

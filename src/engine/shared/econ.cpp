@@ -63,8 +63,8 @@ void CEcon::Init(IConsole *pConsole, CNetBan *pNetBan)
 {
 	m_pConsole = pConsole;
 
-	for(auto &m_aClient : m_aClients)
-		m_aClient.m_State = CClient::STATE_EMPTY;
+	for(auto &Client : m_aClients)
+		Client.m_State = CClient::STATE_EMPTY;
 
 	m_Ready = false;
 	m_UserClientID = -1;
