@@ -4261,7 +4261,6 @@ void CEditor::RenderSounds(CUIRect ToolBox, CUIRect View)
 static int EditorListdirCallback(const char *pName, int IsDir, int StorageType, void *pUser)
 {
 	CEditor *pEditor = (CEditor *)pUser;
-	int Length = str_length(pName);
 	if((pName[0] == '.' && (pName[1] == 0 ||
 				       (pName[1] == '.' && pName[2] == 0 && (!str_comp(pEditor->m_pFileDialogPath, "maps") || !str_comp(pEditor->m_pFileDialogPath, "mapres"))))) ||
 		(!IsDir && ((pEditor->m_FileDialogFileType == CEditor::FILETYPE_MAP && !str_endswith(pName, ".map")) ||
@@ -4275,10 +4274,8 @@ static int EditorListdirCallback(const char *pName, int IsDir, int StorageType, 
 		str_format(Item.m_aName, sizeof(Item.m_aName), "%s/", pName);
 	else
 	{
-		if(pEditor->m_FileDialogFileType == CEditor::FILETYPE_SOUND)
-			str_copy(Item.m_aName, pName, minimum(static_cast<int>(sizeof(Item.m_aName)), Length - 4));
-		else
-			str_copy(Item.m_aName, pName, minimum(static_cast<int>(sizeof(Item.m_aName)), Length - 3));
+		int LenEnding = pEditor->m_FileDialogFileType == CEditor::FILETYPE_SOUND ? 5 : 4;
+		str_truncate(Item.m_aName, sizeof(Item.m_aName), pName, str_length(pName) - LenEnding);
 	}
 	Item.m_IsDir = IsDir != 0;
 	Item.m_IsLink = false;
