@@ -176,13 +176,12 @@ void CRaceDemo::StopRecord(int Time)
 int CRaceDemo::RaceDemolistFetchCallback(const char *pName, time_t Date, int IsDir, int StorageType, void *pUser)
 {
 	CDemoListParam *pParam = (CDemoListParam *)pUser;
-	int Length = str_length(pName);
 	int MapLen = str_length(pParam->pMap);
 	if(IsDir || !str_endswith(pName, ".demo") || !str_startswith(pName, pParam->pMap) || pName[MapLen] != '_')
 		return 0;
 
 	CDemoItem Item;
-	str_copy(Item.m_aName, pName, minimum(static_cast<int>(sizeof(Item.m_aName)), Length - 4));
+	str_truncate(Item.m_aName, sizeof(Item.m_aName), pName, str_length(pName) - 5);
 
 	const char *pTime = Item.m_aName + MapLen + 1;
 	const char *pTEnd = pTime;
