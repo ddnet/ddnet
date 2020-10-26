@@ -2960,7 +2960,7 @@ int CGameContext::MapScan(const char *pName, int IsDir, int DirType, void *pUser
 
 	CMapNameItem Item;
 	int Length = str_length(pName);
-	str_copy(Item.m_aName, pName, minimum(static_cast<int>(sizeof(Item.m_aName)), Length - 3));
+	str_truncate(Item.m_aName, sizeof(Item.m_aName), pName, Length - 4);
 	pMapList->add(Item);
 
 	return 0;
