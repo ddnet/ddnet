@@ -10,8 +10,6 @@
 
 #include "uuid_manager.h"
 
-#include <zlib.h>
-
 static const int DEBUG = 0;
 
 enum
@@ -692,7 +690,7 @@ int CDataFileWriter::AddItem(int Type, int ID, int Size, void *pData)
 	return m_NumItems - 1;
 }
 
-int CDataFileWriter::AddData(int Size, void *pData)
+int CDataFileWriter::AddData(int Size, void *pData, int CompressionLevel)
 {
 	dbg_assert(m_NumDatas < 1024, "too much data");
 
@@ -700,7 +698,7 @@ int CDataFileWriter::AddData(int Size, void *pData)
 	unsigned long s = compressBound(Size);
 	void *pCompData = malloc(s); // temporary buffer that we use during compression
 
-	int Result = compress((Bytef *)pCompData, &s, (Bytef *)pData, Size); // ignore_convention
+	int Result = compress2((Bytef *)pCompData, &s, (Bytef *)pData, Size, CompressionLevel); // ignore_convention
 	if(Result != Z_OK)
 	{
 		dbg_msg("datafile", "compression error %d", Result);
