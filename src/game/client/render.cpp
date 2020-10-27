@@ -178,7 +178,7 @@ void CRenderTools::DrawRoundRectExt(float x, float y, float w, float h, float r,
 	const int Num = 8;
 
 	IGraphics::CFreeformItem ArrayF[Num * 4];
-	
+
 	for(int i = 0; i < Num; i += 2)
 	{
 		float a1 = i / (float)Num * pi / 2;
