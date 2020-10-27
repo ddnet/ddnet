@@ -39,7 +39,7 @@ int LoadPNG(CImageInfo *pImg, const char *pFilename)
 		return 0;
 	}
 
-	if(Png.depth != 8 || (Png.color_type != PNG_TRUECOLOR && Png.color_type != PNG_TRUECOLOR_ALPHA) || Png.width > (2 << 12) || Png.height > (2 << 12))
+	if(Png.depth != 8 || Png.color_type != PNG_TRUECOLOR_ALPHA || Png.width > (2 << 12) || Png.height > (2 << 12))
 	{
 		dbg_msg("map_convert_07", "invalid image format. filename='%s'", pFilename);
 		png_close_file(&Png);
@@ -59,10 +59,7 @@ int LoadPNG(CImageInfo *pImg, const char *pFilename)
 
 	pImg->m_Width = Png.width;
 	pImg->m_Height = Png.height;
-	if(Png.color_type == PNG_TRUECOLOR)
-		pImg->m_Format = CImageInfo::FORMAT_RGB;
-	else if(Png.color_type == PNG_TRUECOLOR_ALPHA)
-		pImg->m_Format = CImageInfo::FORMAT_RGBA;
+	pImg->m_Format = CImageInfo::FORMAT_RGBA;
 	pImg->m_pData = pBuffer;
 	return 1;
 }
@@ -129,7 +126,6 @@ void *ReplaceImageItem(void *pItem, int Type, CMapItemImage *pNewImgItem)
 	dbg_msg("map_convert_07", "embedding image '%s'", pName);
 
 	CImageInfo ImgInfo;
-	ImgInfo.m_Format = CImageInfo::FORMAT_RGB;
 	char aStr[64];
 	str_format(aStr, sizeof(aStr), "data/mapres/%s.png", pName);
 	if(!LoadPNG(&ImgInfo, aStr))
@@ -140,11 +136,10 @@ void *ReplaceImageItem(void *pItem, int Type, CMapItemImage *pNewImgItem)
 	pNewImgItem->m_Width = ImgInfo.m_Width;
 	pNewImgItem->m_Height = ImgInfo.m_Height;
 	pNewImgItem->m_External = false;
-	int PixelSize = ImgInfo.m_Format == CImageInfo::FORMAT_RGB ? 3 : 4;
 	pNewImgItem->m_ImageData = g_NextDataItemID++;
 
 	g_pNewData[g_Index] = ImgInfo.m_pData;
-	g_NewDataSize[g_Index] = ImgInfo.m_Width * ImgInfo.m_Height * PixelSize;
+	g_NewDataSize[g_Index] = ImgInfo.m_Width * ImgInfo.m_Height * 4;
 	g_Index++;
 
 	return (void *)pNewImgItem;
