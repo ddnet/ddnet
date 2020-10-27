@@ -530,7 +530,7 @@ bool CMenus::RenderServerControlServer(CUIRect MainView)
 		TotalShown++;
 	}
 
-	UiDoListboxStart(&s_VoteList, &List, 24.0f, "", "", TotalShown, 1, s_CurVoteOption, s_ScrollValue);
+	UiDoListboxStart(&s_VoteList, &List, 20.0f, "", "", TotalShown, 1, s_CurVoteOption, s_ScrollValue);
 
 	int i = -1;
 	for(CVoteOptionClient *pOption = m_pClient->m_pVoting->m_pFirst; pOption; pOption = pOption->m_pNext)
@@ -542,7 +542,7 @@ bool CMenus::RenderServerControlServer(CUIRect MainView)
 		CListboxItem Item = UiDoListboxNextItem(pOption);
 
 		if(Item.m_Visible)
-			UI()->DoLabelScaled(&Item.m_Rect, pOption->m_aDescription, 16.0f, -1);
+			UI()->DoLabelScaled(&Item.m_Rect, pOption->m_aDescription, 14.0f, -1);
 
 		if(NumVoteOptions < Total)
 			aIndices[NumVoteOptions] = i;
@@ -608,13 +608,22 @@ void CMenus::RenderServerControl(CUIRect MainView)
 	static int s_ControlPage = 0;
 
 	// render background
-	CUIRect Bottom, Extended, TabBar, Button;
+	CUIRect Bottom, RconExtension, TabBar, Button;
 	MainView.HSplitTop(20.0f, &Bottom, &MainView);
 	RenderTools()->DrawUIRect(&Bottom, ms_ColorTabbarActive, 0, 10.0f);
 	MainView.HSplitTop(20.0f, &TabBar, &MainView);
 	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
 	MainView.Margin(10.0f, &MainView);
-	MainView.HSplitBottom(90.0f, &MainView, &Extended);
+
+	if(Client()->RconAuthed())
+	{
+		MainView.HSplitBottom(90.0f, &MainView, &RconExtension);
+		
+		// background
+		RconExtension.Margin(10.0f, &RconExtension);
+		RconExtension.HSplitTop(20.0f, &Bottom, &RconExtension);
+		RconExtension.HSplitTop(5.0f, 0, &RconExtension);
+	}
 
 	// tab bar
 	{
@@ -722,14 +731,10 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		// extended features (only available when authed in rcon)
 		if(Client()->RconAuthed())
 		{
-			// background
-			Extended.Margin(10.0f, &Extended);
-			Extended.HSplitTop(20.0f, &Bottom, &Extended);
-			Extended.HSplitTop(5.0f, 0, &Extended);
-
 			// force vote
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
 			Bottom.VSplitLeft(120.0f, &Button, &Bottom);
+
 			static int s_ForceVoteButton = 0;
 			if(DoButton_Menu(&s_ForceVoteButton, Localize("Force vote"), 0, &Button))
 			{
@@ -766,7 +771,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 					m_pClient->m_pVoting->RemovevoteOption(m_CallvoteSelectedOption);
 
 				// add vote
-				Extended.HSplitTop(20.0f, &Bottom, &Extended);
+				RconExtension.HSplitTop(20.0f, &Bottom, &RconExtension);
 				Bottom.VSplitLeft(5.0f, 0, &Bottom);
 				Bottom.VSplitLeft(250.0f, &Button, &Bottom);
 				UI()->DoLabelScaled(&Button, Localize("Vote description:"), 14.0f, -1);
@@ -776,7 +781,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 
 				static char s_aVoteDescription[64] = {0};
 				static char s_aVoteCommand[512] = {0};
-				Extended.HSplitTop(20.0f, &Bottom, &Extended);
+				RconExtension.HSplitTop(20.0f, &Bottom, &RconExtension);
 				Bottom.VSplitRight(10.0f, &Bottom, 0);
 				Bottom.VSplitRight(120.0f, &Bottom, &Button);
 				static int s_AddVoteButton = 0;
