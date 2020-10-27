@@ -23,10 +23,10 @@ extern "C" {
 // ddnet client opens two connections for whatever reason
 #define WS_CLIENTS (MAX_CLIENTS * 2)
 
-typedef TStaticRingBuffer<unsigned char, WS_CLIENTS * 4 * 1024,
+typedef CStaticRingBuffer<unsigned char, WS_CLIENTS * 4 * 1024,
 	CRingBufferBase::FLAG_RECYCLE>
 	TRecvBuffer;
-typedef TStaticRingBuffer<unsigned char, 4 * 1024,
+typedef CStaticRingBuffer<unsigned char, 4 * 1024,
 	CRingBufferBase::FLAG_RECYCLE>
 	TSendBuffer;
 

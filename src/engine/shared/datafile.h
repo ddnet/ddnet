@@ -99,7 +99,7 @@ public:
 	~CDataFileWriter();
 	void Init();
 	bool OpenFile(class IStorage *pStorage, const char *pFilename, int StorageType = IStorage::TYPE_SAVE);
-	bool Open(class IStorage *pStorage, const char *Filename, int StorageType = IStorage::TYPE_SAVE);
+	bool Open(class IStorage *pStorage, const char *pFilename, int StorageType = IStorage::TYPE_SAVE);
 	int AddData(int Size, void *pData);
 	int AddDataSwapped(int Size, void *pData);
 	int AddItem(int Type, int ID, int Size, void *pData);

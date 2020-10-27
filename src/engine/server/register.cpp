@@ -66,7 +66,7 @@ void CRegister::RegisterSendFwcheckresponse(NETADDR *pAddr, SECURITY_TOKEN Respo
 
 void CRegister::RegisterSendHeartbeat(NETADDR Addr, SECURITY_TOKEN ResponseToken)
 {
-	static unsigned char aData[sizeof(SERVERBROWSE_HEARTBEAT) + 2];
+	unsigned char aData[sizeof(SERVERBROWSE_HEARTBEAT) + 2];
 	unsigned short Port = m_pNetServer->Address().port;
 	CNetChunk Packet;
 

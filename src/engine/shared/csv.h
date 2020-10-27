@@ -3,6 +3,6 @@
 
 #include <base/system.h>
 
-void CsvWrite(IOHANDLE File, int NumColumns, const char *const *pColumns);
+void CsvWrite(IOHANDLE File, int NumColumns, const char *const *ppColumns);
 
 #endif // ENGINE_SHARED_CSV_H

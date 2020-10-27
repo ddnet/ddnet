@@ -195,7 +195,7 @@ public:
 	};
 
 	CClient m_aClients[MAX_CLIENTS];
-	int IdMap[MAX_CLIENTS * VANILLA_MAX_CLIENTS];
+	int m_aIdMap[MAX_CLIENTS * VANILLA_MAX_CLIENTS];
 
 	CSnapshotDelta m_SnapshotDelta;
 	CSnapshotBuilder m_SnapshotBuilder;
@@ -334,7 +334,7 @@ public:
 			unsigned char m_aData[NET_MAX_PAYLOAD];
 		};
 
-		std::list<CCacheChunk> m_lCache;
+		std::list<CCacheChunk> m_Cache;
 
 		CCache();
 		~CCache();
@@ -342,8 +342,8 @@ public:
 		void AddChunk(const void *pData, int Size);
 		void Clear();
 	};
-	CCache m_ServerInfoCache[3 * 2];
-	CCache m_SixupServerInfoCache[2];
+	CCache m_aServerInfoCache[3 * 2];
+	CCache m_aSixupServerInfoCache[2];
 	bool m_ServerInfoNeedsUpdate;
 
 	void ExpireServerInfo();
@@ -422,7 +422,7 @@ public:
 
 	void GetClientAddr(int ClientID, NETADDR *pAddr);
 	int m_aPrevStates[MAX_CLIENTS];
-	const char *GetAnnouncementLine(char const *FileName);
+	const char *GetAnnouncementLine(char const *pFileName);
 	unsigned m_AnnouncementLastLine;
 	void RestrictRconOutput(int ClientID) { m_RconRestrict = ClientID; }
 
@@ -464,7 +464,7 @@ public:
 		CLOSE_SESSION = 2,
 	};
 
-	void SendConnLoggingCommand(CONN_LOGGING_CMD cmd, const NETADDR *pAddr);
+	void SendConnLoggingCommand(CONN_LOGGING_CMD Cmd, const NETADDR *pAddr);
 #endif
 };
 

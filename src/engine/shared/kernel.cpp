@@ -57,7 +57,7 @@ public:
 		}
 	}
 
-	virtual bool RegisterInterfaceImpl(const char *pName, IInterface *pInterface, bool destroy)
+	virtual bool RegisterInterfaceImpl(const char *pName, IInterface *pInterface, bool Destroy)
 	{
 		// TODO: More error checks here
 		if(!pInterface)
@@ -81,7 +81,7 @@ public:
 		pInterface->m_pKernel = this;
 		m_aInterfaces[m_NumInterfaces].m_pInterface = pInterface;
 		str_copy(m_aInterfaces[m_NumInterfaces].m_aName, pName, sizeof(m_aInterfaces[m_NumInterfaces].m_aName));
-		m_aInterfaces[m_NumInterfaces].m_AutoDestroy = destroy;
+		m_aInterfaces[m_NumInterfaces].m_AutoDestroy = Destroy;
 		m_NumInterfaces++;
 
 		return true;

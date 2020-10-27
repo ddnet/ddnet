@@ -25,8 +25,8 @@ class CGameConsole : public CComponent
 			bool m_Highlighted;
 			char m_aText[1];
 		};
-		TStaticRingBuffer<CBacklogEntry, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_Backlog;
-		TStaticRingBuffer<char, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_History;
+		CStaticRingBuffer<CBacklogEntry, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_Backlog;
+		CStaticRingBuffer<char, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_History;
 		char *m_pHistoryEntry;
 
 		CLineInput m_Input;
