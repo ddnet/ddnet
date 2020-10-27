@@ -530,7 +530,7 @@ bool CMenus::RenderServerControlServer(CUIRect MainView)
 		TotalShown++;
 	}
 
-	UiDoListboxStart(&s_VoteList, &List, 20.0f, "", "", TotalShown, 1, s_CurVoteOption, s_ScrollValue);
+	UiDoListboxStart(&s_VoteList, &List, 19.0f, "", "", TotalShown, 1, s_CurVoteOption, s_ScrollValue);
 
 	int i = -1;
 	for(CVoteOptionClient *pOption = m_pClient->m_pVoting->m_pFirst; pOption; pOption = pOption->m_pNext)
@@ -542,7 +542,7 @@ bool CMenus::RenderServerControlServer(CUIRect MainView)
 		CListboxItem Item = UiDoListboxNextItem(pOption);
 
 		if(Item.m_Visible)
-			UI()->DoLabelScaled(&Item.m_Rect, pOption->m_aDescription, 14.0f, -1);
+			UI()->DoLabelScaled(&Item.m_Rect, pOption->m_aDescription, 13.0f, -1);
 
 		if(NumVoteOptions < Total)
 			aIndices[NumVoteOptions] = i;
