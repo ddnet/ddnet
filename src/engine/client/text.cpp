@@ -850,6 +850,7 @@ public:
 
 		int ActualSize;
 		int GotNewLine = 0;
+		int GotNewLineLast = 0;
 		float DrawX = 0.0f, DrawY = 0.0f;
 		int LineCount = 0;
 		float CursorX, CursorY;
@@ -959,10 +960,10 @@ public:
 					Wlen = Cutter.m_CharCount;
 					NewLine = 1;
 
-					if(WordGlyphs <= 3) // if we can't place 3 chars of the word on this line, take the next
+					if(WordGlyphs <= 3 && GotNewLineLast == 0) // if we can't place 3 chars of the word on this line, take the next
 						Wlen = 0;
 				}
-				else if(Compare.m_X - pCursor->m_StartX > pCursor->m_LineWidth)
+				else if(Compare.m_X - pCursor->m_StartX > pCursor->m_LineWidth && GotNewLineLast == 0)
 				{
 					NewLine = 1;
 					Wlen = 0;
@@ -1068,8 +1069,11 @@ public:
 					DrawY = (int)(DrawY * FakeToScreenY) / FakeToScreenY;
 				}
 				GotNewLine = 1;
+				GotNewLineLast = 1;
 				++LineCount;
 			}
+			else
+				GotNewLineLast = 0;
 		}
 
 		if(pCursor->m_Flags & TEXTFLAG_RENDER)
@@ -1200,6 +1204,7 @@ public:
 
 		int ActualSize;
 		int GotNewLine = 0;
+		int GotNewLineLast = 0;
 		float DrawX = 0.0f, DrawY = 0.0f;
 		int LineCount = 0;
 		float CursorX, CursorY;
@@ -1282,10 +1287,10 @@ public:
 					Wlen = Cutter.m_CharCount;
 					NewLine = 1;
 
-					if(WordGlyphs <= 3) // if we can't place 3 chars of the word on this line, take the next
+					if(WordGlyphs <= 3 && GotNewLineLast == 0) // if we can't place 3 chars of the word on this line, take the next
 						Wlen = 0;
 				}
-				else if(Compare.m_X - pCursor->m_StartX > pCursor->m_LineWidth)
+				else if(Compare.m_X - pCursor->m_StartX > pCursor->m_LineWidth && GotNewLineLast == 0)
 				{
 					NewLine = 1;
 					Wlen = 0;
@@ -1426,8 +1431,11 @@ public:
 					DrawY = (int)(DrawY * FakeToScreenY) / FakeToScreenY;
 				}
 				GotNewLine = 1;
+				GotNewLineLast = 1;
 				++LineCount;
 			}
+			else
+				GotNewLineLast = 0;
 		}
 
 		if(TextContainer.m_StringInfo.m_CharacterQuads.size() != 0)
