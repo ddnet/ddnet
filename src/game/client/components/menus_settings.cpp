@@ -1564,6 +1564,55 @@ void CMenus::RenderSettings(CUIRect MainView)
 		UI()->DoLabelScaled(&RestartWarning, Localize("You must restart the game for all settings to take effect."), 14.0f, -1);
 }
 
+ColorHSLA CMenus::RenderHSLColorPicker(CUIRect *pRect, unsigned int *pColor, bool Alpha)
+{
+	ColorHSLA HSLColor(*pColor, false);
+	ColorRGBA RGBColor = color_cast<ColorRGBA>(HSLColor);
+
+	float OutlineCol = UI()->MouseInside(pRect) ? 0.7f : 0.5f;
+
+	ColorRGBA Outline(OutlineCol, OutlineCol, OutlineCol, 1);
+
+	const float OutlineSize = 2.0f;
+
+	CUIRect Rect;
+	pRect->Margin(OutlineSize, &Rect);
+
+	RenderTools()->DrawUIRect(pRect, Outline, 0, 0);
+	RenderTools()->DrawUIRect(&Rect, RGBColor, 0, 0);
+
+	if(UI()->DoButtonLogic(pColor, 0, pRect))
+	{
+		if(ms_ColorPicker.m_Active)
+		{
+			CUIRect PickerRect;
+			PickerRect.x = ms_ColorPicker.m_X;
+			PickerRect.y = ms_ColorPicker.m_Y;
+			PickerRect.w = ms_ColorPicker.ms_Width;
+			PickerRect.h = ms_ColorPicker.ms_Height;
+
+			if(ms_ColorPicker.m_pColor != pColor && !UI()->MouseInside(&PickerRect))
+			{
+				ms_ColorPicker.m_X = UI()->MouseX();
+				ms_ColorPicker.m_Y = UI()->MouseY();
+				ms_ColorPicker.m_pColor = pColor;
+				ms_ColorPicker.m_Active = true;
+				ms_ColorPicker.m_AttachedRect = *pRect;
+			}
+		}
+		else
+		{
+			ms_ColorPicker.m_X = UI()->MouseX();
+			ms_ColorPicker.m_Y = UI()->MouseY();
+			ms_ColorPicker.m_pColor = pColor;
+			ms_ColorPicker.m_Active = true;
+			ms_ColorPicker.m_AttachedRect = *pRect;
+		}
+	}
+
+	return HSLColor;
+}
+
 ColorHSLA CMenus::RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alpha)
 {
 	ColorHSLA Color(*pColor, Alpha);
@@ -1591,9 +1640,12 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 {
 	static int pIDP1 = 0, pIDP2 = 0;
 	static int Page = 1;
-	CUIRect Left, Right, HUD, Messages, Button, Label, Weapon, Laser, Page1Tab, Page2Tab, Enable, Heart;
+	CUIRect Left, Right, HUD, Chat, Button, Label, Weapon, Laser, Page1Tab, Page2Tab, Enable, Heart;
 
-	MainView.HSplitTop(150.0f, &HUD, &MainView);
+	MainView.VSplitMid(&HUD, &Chat);
+
+	ColorRGBA test(1, 1, 1, 0.1f);
+	RenderTools()->DrawUIRect(&MainView, test, 0, 0);
 
 	HUD.HSplitTop(30.0f, &Label, &HUD);
 	float tw = TextRender()->TextWidth(0, 20.0f, Localize("HUD"), -1, -1.0f);
@@ -1631,13 +1683,13 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			g_Config.m_ClShowIDs ^= 1;
 		}
 
-		Right.HSplitTop(20.0f, &Button, &Right);
+		Left.HSplitTop(20.0f, &Button, &Left);
 		if(DoButton_CheckBox(&g_Config.m_ClShowhudScore, Localize("Show score"), g_Config.m_ClShowhudScore, &Button))
 		{
 			g_Config.m_ClShowhudScore ^= 1;
 		}
 
-		Right.HSplitTop(20.0f, &Button, &Right);
+		Left.HSplitTop(20.0f, &Button, &Left);
 		if(DoButton_CheckBox(&g_Config.m_ClShowhudHealthAmmo, Localize("Show health + ammo"), g_Config.m_ClShowhudHealthAmmo, &Button))
 		{
 			g_Config.m_ClShowhudHealthAmmo ^= 1;
@@ -1649,9 +1701,32 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			g_Config.m_ClShowChat ^= 1;
 		}
 
-		bool IsOldChat = !(g_Config.m_ClChatTee || g_Config.m_ClChatBackground);
+		Left.HSplitTop(20.0f, &Button, &Left);
+		if(DoButton_CheckBox(&g_Config.m_ClChatTeamColors, Localize("Show names in chat in team colors"), g_Config.m_ClChatTeamColors, &Button))
+		{
+			g_Config.m_ClChatTeamColors ^= 1;
+		}
 
 		Left.HSplitTop(20.0f, &Button, &Left);
+		if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Show kill messages"), g_Config.m_ClShowKillMessages, &Button))
+		{
+			g_Config.m_ClShowKillMessages ^= 1;
+		}
+
+		Left.HSplitTop(20.0f, &Button, &Left);
+		if(DoButton_CheckBox(&g_Config.m_ClShowVotesAfterVoting, Localize("Show votes window after voting"), g_Config.m_ClShowVotesAfterVoting, &Button))
+		{
+			g_Config.m_ClShowVotesAfterVoting ^= 1;
+		}
+
+		// Chat
+
+		Chat.HSplitTop(30.0f, &Label, &Chat);
+		UI()->DoLabelScaled(&Label, Localize("Chat"), 20.0f, -1);
+
+		bool IsOldChat = !(g_Config.m_ClChatTee || g_Config.m_ClChatBackground);
+
+		Chat.HSplitTop(20.0f, &Button, &Chat);
 		if(DoButton_CheckBox(&g_Config.m_ClChatTee, Localize("Use old chat style"), IsOldChat, &Button))
 		{
 			if(IsOldChat)
@@ -1666,32 +1741,18 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			}
 			GameClient()->m_pChat->RebuildChat();
 		}
-
-		Right.HSplitTop(20.0f, &Button, &Right);
-		if(DoButton_CheckBox(&g_Config.m_ClChatTeamColors, Localize("Show names in chat in team colors"), g_Config.m_ClChatTeamColors, &Button))
-		{
-			g_Config.m_ClChatTeamColors ^= 1;
-		}
-
-		Right.HSplitTop(20.0f, &Button, &Right);
-		if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Show kill messages"), g_Config.m_ClShowKillMessages, &Button))
-		{
-			g_Config.m_ClShowKillMessages ^= 1;
-		}
-
-		Right.HSplitTop(20.0f, &Button, &Right);
-		if(DoButton_CheckBox(&g_Config.m_ClShowVotesAfterVoting, Localize("Show votes window after voting"), g_Config.m_ClShowVotesAfterVoting, &Button))
-		{
-			g_Config.m_ClShowVotesAfterVoting ^= 1;
-		}
-		MainView.HSplitTop(170.0f, &Messages, &MainView);
-		Messages.HSplitTop(30.0f, &Label, &Messages);
-		Label.VSplitMid(&Label, &Button);
-		UI()->DoLabelScaled(&Label, Localize("Messages"), 20.0f, -1);
-		Messages.Margin(5.0f, &Messages);
-		Messages.VSplitMid(&Left, &Right);
+		/*
+		Right.HSplitTop(170.0f, &Chat, &MainView);
+		Chat.HSplitTop(30.0f, &Label, &Chat);
+		UI()->DoLabelScaled(&Label, Localize("Chat"), 20.0f, -1);
+		Chat.Margin(5.0f, &Chat);
+		Chat.VSplitMid(&Left, &Right);
+		Left = Right;
 		Left.VSplitRight(5.0f, &Left, 0);
 		Right.VMargin(5.0f, &Right);
+		*/
+		/*
+		
 		{
 			char aBuf[64];
 			Left.HSplitTop(20.0f, &Label, &Left);
@@ -1700,6 +1761,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 			if(DoButton_CheckBox(&g_Config.m_ClShowChatSystem, "", g_Config.m_ClShowChatSystem, &Enable))
 				g_Config.m_ClShowChatSystem ^= 1;
+			
 			UI()->DoLabelScaled(&Label, Localize("System message"), 16.0f, -1);
 			{
 				static int s_DefaultButton = 0;
@@ -1710,11 +1772,16 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 				}
 			}
 
-			ColorHSLA SMColor = RenderHSLScrollbars(&Left, &g_Config.m_ClMessageSystemColor);
+			CUIRect PickerRect;
+			Left.HSplitTop(5.0f, 0x0, &Left);
+			Left.HSplitTop(25.0f, &PickerRect, &Left);
+			PickerRect.w = 25.0f;
+
+			ColorHSLA SMColor = RenderHSLColorPicker(&PickerRect, &g_Config.m_ClMessageSystemColor, false);
+			ColorRGBA rgb = color_cast<ColorRGBA>(SMColor);
 
 			Left.HSplitTop(10.0f, &Label, &Left);
 
-			ColorRGBA rgb = color_cast<ColorRGBA>(SMColor);
 			TextRender()->TextColor(rgb);
 
 			char aName[16];
@@ -1896,7 +1963,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			UI()->DoLabelScaled(&Label, "*** Dynamic camera activated", 12.0f, -1);
 			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			Right.HSplitTop(20.0f, 0, &Right);
-		}
+		}*/
 	}
 	else if(Page == 2)
 	{

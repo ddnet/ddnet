@@ -24,6 +24,21 @@ struct CServerProcess
 	CLineReader LineReader;
 };
 
+struct SColorPicker
+{
+public:
+	const float ms_Width = 160.0f;
+	const float ms_Height = 200.0f;
+
+	float m_X;
+	float m_Y;
+
+	bool m_Active;
+
+	CUIRect m_AttachedRect;
+	unsigned int *m_pColor;
+};
+
 // compnent to fetch keypresses, override all other input
 class CMenusKeyBinder : public CComponent
 {
@@ -48,6 +63,10 @@ class CMenus : public CComponent
 	static ColorRGBA ms_ColorTabbarInactive;
 	static ColorRGBA ms_ColorTabbarActive;
 	static ColorRGBA ms_ColorTabbarHover;
+
+	static SColorPicker ms_ColorPicker;
+	static int ms_ColorPickerID;
+	static int ms_HuePickerID;
 
 	char m_aLocalStringHelper[1024];
 
@@ -93,6 +112,8 @@ class CMenus : public CComponent
 
 	//static int ui_do_key_reader(void *id, const CUIRect *rect, int key);
 	void UiDoGetButtons(int Start, int Stop, CUIRect View, CUIRect ScopeView);
+
+	void RenderColorPicker();
 
 	// new gui with gui elements
 	template<typename T>
@@ -634,6 +655,7 @@ private:
 	// found in menus_settings.cpp
 	void RenderSettingsDDNet(CUIRect MainView);
 	void RenderSettingsHUD(CUIRect MainView);
+	ColorHSLA RenderHSLColorPicker(CUIRect *pRect, unsigned int *pColor, bool Alpha);
 	ColorHSLA RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alpha = false);
 
 	CServerProcess m_ServerProcess;

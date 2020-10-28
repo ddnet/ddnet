@@ -53,6 +53,10 @@ ColorRGBA CMenus::ms_ColorTabbarInactiveIngame;
 ColorRGBA CMenus::ms_ColorTabbarActiveIngame;
 ColorRGBA CMenus::ms_ColorTabbarHoverIngame;
 
+SColorPicker CMenus::ms_ColorPicker;
+int CMenus::ms_ColorPickerID;
+int CMenus::ms_HuePickerID;
+
 float CMenus::ms_ButtonHeight = 25.0f;
 float CMenus::ms_ListheaderHeight = 17.0f;
 float CMenus::ms_FontmodHeight = 0.8f;
@@ -1143,6 +1147,143 @@ bool CMenus::CanDisplayWarning()
 	return m_Popup == POPUP_NONE;
 }
 
+void CMenus::RenderColorPicker()
+{
+	if(!ms_ColorPicker.m_Active)
+		return;
+
+	// First check if we should disable color picker
+	CUIRect PickerRect;
+	PickerRect.x = ms_ColorPicker.m_X;
+	PickerRect.y = ms_ColorPicker.m_Y;
+	PickerRect.w = ms_ColorPicker.ms_Width;
+	PickerRect.h = ms_ColorPicker.ms_Height;
+	
+	if(UI()->MouseButtonClicked(0) && !UI()->MouseInside(&PickerRect) && !UI()->MouseInside(&ms_ColorPicker.m_AttachedRect))
+	{
+		ms_ColorPicker.m_Active = false;
+		return;
+	}
+
+	// Render
+	ColorRGBA BackgroundColor(0.1f, 0.1f, 0.1f, 1.0f);
+	ColorRGBA OutlineColor(0.21f, 0.21f, 0.21f, 1);
+	RenderTools()->DrawUIRect(&PickerRect, BackgroundColor, 0, 0);
+
+	CUIRect ColorsArea, HueArea, BottomArea, AlphaSliderArea, HexCodeArea;
+	PickerRect.Margin(3, &ColorsArea);
+
+	ColorsArea.HSplitBottom(ms_ColorPicker.ms_Height - 140.0f, &ColorsArea, &BottomArea);
+	ColorsArea.VSplitRight(20, &ColorsArea, &HueArea);
+
+	BottomArea.HSplitTop(3, 0x0, &BottomArea);
+	HueArea.VSplitLeft(3, 0x0, &HueArea);
+
+	BottomArea.HSplitBottom(14, &AlphaSliderArea, &HexCodeArea);
+	AlphaSliderArea.HSplitBottom(3, &AlphaSliderArea, 0x0);
+
+	RenderTools()->DrawUIRect(&HueArea, OutlineColor, 0, 0);
+	HueArea.Margin(1, &HueArea);
+
+	RenderTools()->DrawUIRect(&ColorsArea, OutlineColor, 0, 0);
+	ColorsArea.Margin(1, &ColorsArea);
+
+	ColorHSLA HSLColor(*ms_ColorPicker.m_pColor, false);
+	ColorHSVA PickerColor = color_cast<ColorHSVA, ColorHSLA>(HSLColor);
+
+	// Color Area
+	ColorRGBA rgb;
+	rgb = color_cast<ColorRGBA, ColorHSVA>(ColorHSVA(PickerColor.x, 0.0f, 1.0f));
+	vec4 TL(rgb.r, rgb.g, rgb.b, 1.0f);
+	rgb = color_cast<ColorRGBA, ColorHSVA>(ColorHSVA(PickerColor.x, 1.0f, 1.0f));
+	vec4 TR(rgb.r, rgb.g, rgb.b, 1.0f);
+	rgb = color_cast<ColorRGBA, ColorHSVA>(ColorHSVA(PickerColor.x, 0.0f, 1.0f));
+	vec4 BL(rgb.r, rgb.g, rgb.b, 1.0f);
+	rgb = color_cast<ColorRGBA, ColorHSVA>(ColorHSVA(PickerColor.x, 1.0f, 1.0f));
+	vec4 BR(rgb.r, rgb.g, rgb.b, 1.0f);
+
+	RenderTools()->DrawUIRect4NoRounding(&ColorsArea, TL, TR, BL, BR);
+
+	TL = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+	TR = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+	BL = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	BR = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+	RenderTools()->DrawUIRect4NoRounding(&ColorsArea, TL, TR, BL, BR);
+
+	// Hue Area
+	static const float s_aColorIndices[7][3] = {
+		{1.0f, 0.0f, 0.0f}, // red
+		{1.0f, 0.0f, 1.0f}, // magenta
+		{0.0f, 0.0f, 1.0f}, // blue
+		{0.0f, 1.0f, 1.0f}, // cyan
+		{0.0f, 1.0f, 0.0f}, // green
+		{1.0f, 1.0f, 0.0f}, // yellow
+		{1.0f, 0.0f, 0.0f} // red
+	};
+
+	float HuePickerOffset = HueArea.h / 6.0f;
+	CUIRect HuePartialArea = HueArea;
+	HuePartialArea.h = HuePickerOffset;
+
+	for(int j = 0; j < 6; j++)
+	{
+		TL = vec4(s_aColorIndices[j][0], s_aColorIndices[j][1], s_aColorIndices[j][2], 1.0f);
+		BL = vec4(s_aColorIndices[j + 1][0], s_aColorIndices[j + 1][1], s_aColorIndices[j + 1][2], 1.0f);
+
+		HuePartialArea.y = HueArea.y + HuePickerOffset * j;
+		RenderTools()->DrawUIRect4NoRounding(&HuePartialArea, TL, TL, BL, BL);
+	}
+
+	//Hex Code Area FIX <<<<<<
+	rgb = color_cast<ColorRGBA, ColorHSVA>(PickerColor);
+	char Hex[16];
+
+	str_format(Hex, sizeof(Hex), "#%06X", rgb.Pack(false));
+
+	static float HexID = 0;
+	DoEditBox(&HexID, &HexCodeArea, Hex, sizeof(Hex), 12.0f, &HexID);
+
+	// Logic
+	float PickerX, PickerY;
+	bool PickerClicked = false;
+
+	if(UI()->HotItem() != &ms_HuePickerID)
+	{
+		if(UI()->DoPickerLogic(&ms_ColorPickerID, &ColorsArea, &PickerX, &PickerY))
+		{
+			PickerColor.y = PickerX / ColorsArea.w;
+			PickerColor.z = 1.0f - PickerY / ColorsArea.h;
+			PickerClicked = true;
+		}
+	}
+	
+	if(UI()->HotItem() != &ms_ColorPickerID)
+	{
+		if(UI()->DoPickerLogic(&ms_HuePickerID, &HueArea, &PickerX, &PickerY))
+		{
+			PickerColor.x = 1.0f - PickerY / HueArea.h;
+			PickerClicked = true;
+		}
+	}
+
+	// Marker Color Area
+	float MarkerX = ColorsArea.x + ColorsArea.w * PickerColor.y;
+	float MarkerY = ColorsArea.y + ColorsArea.h * (1.0f - PickerColor.z);
+
+	int MarkerOutlineInd = PickerColor.z > 0.5f ? 0.0f : 1.0f;
+	ColorRGBA MarkerOutline(MarkerOutlineInd, MarkerOutlineInd, MarkerOutlineInd, 1.0f);
+
+	Graphics()->QuadsBegin();
+	Graphics()->SetColor(MarkerOutline);
+	RenderTools()->DrawCircle(MarkerX, MarkerY, 5.0f, 32);
+	Graphics()->SetColor(rgb);
+	RenderTools()->DrawCircle(MarkerX, MarkerY, 4.0f, 32);
+	Graphics()->QuadsEnd();
+
+	*ms_ColorPicker.m_pColor = color_cast<ColorHSLA, ColorHSVA>(PickerColor).Pack(false);
+}
+
 int CMenus::Render()
 {
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK && m_Popup == POPUP_NONE)
@@ -1288,6 +1429,9 @@ int CMenus::Render()
 			else if(m_MenuPage == PAGE_SETTINGS)
 			{
 				RenderSettings(MainView);
+
+				// Render Color Picker only on settings page and last
+				RenderColorPicker();
 			}
 
 			// do tab bar
