@@ -21,6 +21,7 @@ public:
 	virtual const char *InsertTimestampAsUtc() const { return "DATETIME(?, 'utc')"; }
 	virtual const char *CollateNocase() const { return "? COLLATE NOCASE"; }
 	virtual const char *InsertIgnore() const { return "INSERT OR IGNORE"; };
+	virtual const char *Random() const { return "RANDOM()"; };
 
 	virtual Status Connect();
 	virtual void Disconnect();

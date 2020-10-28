@@ -1144,8 +1144,8 @@ bool CScore::RandomMapThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		str_format(aBuf, sizeof(aBuf),
 			"SELECT Map FROM %s_maps "
 			"WHERE Server = ? AND Map != ? AND Stars = ? "
-			"ORDER BY RAND() LIMIT 1;",
-			pSqlServer->GetPrefix());
+			"ORDER BY %s LIMIT 1;",
+			pSqlServer->GetPrefix(), pSqlServer->Random());
 		pSqlServer->PrepareStatement(aBuf);
 		pSqlServer->BindInt(3, pData->m_Stars);
 	}
@@ -1154,8 +1154,8 @@ bool CScore::RandomMapThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		str_format(aBuf, sizeof(aBuf),
 			"SELECT Map FROM %s_maps "
 			"WHERE Server = ? AND Map != ? "
-			"ORDER BY RAND() LIMIT 1;",
-			pSqlServer->GetPrefix());
+			"ORDER BY %s LIMIT 1;",
+			pSqlServer->GetPrefix(), pSqlServer->Random());
 		pSqlServer->PrepareStatement(aBuf);
 	}
 	pSqlServer->BindString(1, pData->m_ServerType);
@@ -1202,9 +1202,9 @@ bool CScore::RandomUnfinishedMapThread(IDbConnection *pSqlServer, const ISqlData
 			"  SELECT Map "
 			"  FROM %s_race "
 			"  WHERE Name = ?"
-			") ORDER BY RAND() "
+			") ORDER BY %s "
 			"LIMIT 1;",
-			pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
+			pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->Random());
 		pSqlServer->PrepareStatement(aBuf);
 		pSqlServer->BindString(1, pData->m_ServerType);
 		pSqlServer->BindString(2, pData->m_CurrentMap);
@@ -1220,9 +1220,9 @@ bool CScore::RandomUnfinishedMapThread(IDbConnection *pSqlServer, const ISqlData
 			"  SELECT Map "
 			"  FROM %s_race as race "
 			"  WHERE Name = ?"
-			") ORDER BY RAND() "
+			") ORDER BY %s "
 			"LIMIT 1;",
-			pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
+			pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->Random());
 		pSqlServer->PrepareStatement(aBuf);
 		pSqlServer->BindString(1, pData->m_ServerType);
 		pSqlServer->BindString(2, pData->m_CurrentMap);
