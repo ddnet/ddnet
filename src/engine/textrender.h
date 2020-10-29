@@ -25,6 +25,7 @@ enum ETextRenderFlags
 	TEXT_RENDER_FLAG_NO_OVERSIZE = 1 << 5,
 	TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING = 1 << 6,
 	TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE = 1 << 7,
+	TEXT_RENDER_FLAG_NO_AUTOMATIC_QUAD_UPLOAD = 1 << 8,
 };
 
 enum
@@ -95,6 +96,7 @@ public:
 	virtual void SetCurFont(CFont *pFont) = 0;
 
 	virtual void SetRenderFlags(unsigned int Flags) = 0;
+	virtual unsigned int GetRenderFlags() = 0;
 
 	ColorRGBA DefaultTextColor() { return ColorRGBA(1, 1, 1, 1); }
 	ColorRGBA DefaultTextOutlineColor() { return ColorRGBA(0, 0, 0, 0.3f); }
@@ -108,6 +110,8 @@ public:
 	virtual void RecreateTextContainerSoft(CTextCursor *pCursor, int TextContainerIndex, const char *pText, int Length = -1) = 0;
 	virtual void SetTextContainerSelection(int TextContainerIndex, const char *pText, int CursorPos, int SelectionStart, int SelectionEnd) = 0;
 	virtual void DeleteTextContainer(int TextContainerIndex) = 0;
+
+	virtual void UploadTextContainer(int TextContainerIndex) = 0;
 
 	virtual void RenderTextContainer(int TextContainerIndex, STextRenderColor *pTextColor, STextRenderColor *pTextOutlineColor) = 0;
 	virtual void RenderTextContainer(int TextContainerIndex, STextRenderColor *pTextColor, STextRenderColor *pTextOutlineColor, float X, float Y) = 0;

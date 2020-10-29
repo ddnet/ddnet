@@ -972,21 +972,28 @@ void CChat::OnPrepareLines()
 			TextRender()->SetCursor(&Cursor, TextBegin, 0.0f, FontSize, 0);
 			Cursor.m_LineWidth = LineWidth;
 
-			Cursor.m_X += RealMsgPaddingTee;
-
-			if(m_aLines[r].m_Friend && g_Config.m_ClMessageFriend)
+			if(m_aLines[r].m_ClientID >= 0 && m_aLines[r].m_aName[0] != '\0')
 			{
-				TextRender()->TextEx(&Cursor, "♥ ", -1);
+				Cursor.m_X += RealMsgPaddingTee;
+
+				if(m_aLines[r].m_Friend && g_Config.m_ClMessageFriend)
+				{
+					TextRender()->TextEx(&Cursor, "♥ ", -1);
+				}
 			}
 
 			TextRender()->TextEx(&Cursor, aName, -1);
 			if(m_aLines[r].m_TimesRepeated > 0)
 				TextRender()->TextEx(&Cursor, aCount, -1);
 
-			TextRender()->TextEx(&Cursor, ": ", -1);
+			if(m_aLines[r].m_ClientID >= 0 && m_aLines[r].m_aName[0] != '\0')
+			{
+				TextRender()->TextEx(&Cursor, ": ", -1);
+			}
 
 			CTextCursor AppendCursor = Cursor;
 			AppendCursor.m_StartX = Cursor.m_X;
+			AppendCursor.m_LineWidth -= (Cursor.m_LongestLineWidth - Cursor.m_StartX);
 
 			TextRender()->TextEx(&AppendCursor, m_aLines[r].m_aText, -1);
 
@@ -1001,6 +1008,9 @@ void CChat::OnPrepareLines()
 
 		// the position the text was created
 		m_aLines[r].m_TextYOffset = y + RealMsgPaddingY / 2.f;
+
+		int CurRenderFlags = TextRender()->GetRenderFlags();
+		TextRender()->SetRenderFlags(CurRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_AUTOMATIC_QUAD_UPLOAD);
 
 		// reset the cursor
 		TextRender()->SetCursor(&Cursor, TextBegin, m_aLines[r].m_TextYOffset, FontSize, TEXTFLAG_RENDER);
@@ -1091,6 +1101,7 @@ void CChat::OnPrepareLines()
 		TextRender()->TextColor(Color);
 
 		CTextCursor AppendCursor = Cursor;
+		AppendCursor.m_LineWidth -= (Cursor.m_LongestLineWidth - Cursor.m_StartX);
 		AppendCursor.m_StartX = Cursor.m_X;
 
 		if(m_aLines[r].m_TextContainerIndex == -1)
@@ -1102,8 +1113,12 @@ void CChat::OnPrepareLines()
 		{
 			float Height = m_aLines[r].m_YOffset[OffsetType];
 			Graphics()->SetColor(1, 1, 1, 1);
-			m_aLines[r].m_QuadContainerIndex = RenderTools()->CreateRoundRectQuadContainer(Begin, y, AppendCursor.m_LongestLineWidth - Begin + RealMsgPaddingX, Height, RealMsgPaddingY, CUI::CORNER_ALL);
+			m_aLines[r].m_QuadContainerIndex = RenderTools()->CreateRoundRectQuadContainer(Begin, y, (AppendCursor.m_LongestLineWidth - TextBegin) + RealMsgPaddingX * 1.5f, Height, MESSAGE_ROUNDING, CUI::CORNER_ALL);
 		}
+
+		TextRender()->SetRenderFlags(CurRenderFlags);
+		if(m_aLines[r].m_TextContainerIndex != -1)
+			TextRender()->UploadTextContainer(m_aLines[r].m_TextContainerIndex);
 	}
 
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -1262,7 +1277,7 @@ void CChat::OnRender()
 				float RowHeight = FONT_SIZE + RealMsgPaddingY;
 				float OffsetTeeY = MESSAGE_TEE_SIZE / 2.0f;
 				float FullHeightMinusTee = RowHeight - MESSAGE_TEE_SIZE;
-				float TWSkinUnreliableOffset = 0.5f; // teeworlds skins were always a bit in the ground
+				float TWSkinUnreliableOffset = 1.0f; // teeworlds skins were always a bit in the ground
 
 				CAnimState *pIdleState = CAnimState::GetIdle();
 				RenderTools()->RenderTee(pIdleState, &RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), vec2(x + (RealMsgPaddingX + MESSAGE_TEE_SIZE) / 2.0f, y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset), Blend);
