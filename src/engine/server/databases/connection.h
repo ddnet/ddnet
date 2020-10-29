@@ -33,6 +33,8 @@ public:
 	virtual const char *CollateNocase() const = 0;
 	// syntax to insert a row into table or ignore if it already exists
 	virtual const char *InsertIgnore() const = 0;
+	// ORDER BY RANDOM()/RAND()
+	virtual const char *Random() const = 0;
 
 	enum Status
 	{
