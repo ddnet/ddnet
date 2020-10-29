@@ -30,8 +30,8 @@ public:
 	const float ms_Width = 160.0f;
 	const float ms_Height = 200.0f;
 
-	static int ms_ColorPickerID;
-	static int ms_HuePickerID;
+	const static int ms_ColorPickerID = 0;
+	const static int ms_HuePickerID = 0;
 
 	float m_X;
 	float m_Y;
@@ -69,8 +69,6 @@ class CMenus : public CComponent
 	static ColorRGBA ms_ColorTabbarHover;
 
 	static SColorPicker ms_ColorPicker;
-	static int ms_ColorPickerID;
-	static int ms_HuePickerID;
 
 	char m_aLocalStringHelper[1024];
 

@@ -1570,7 +1570,7 @@ ColorHSLA CMenus::RenderHSLColorPicker(const CUIRect *pRect, unsigned int *pColo
 	ColorRGBA RGBColor = color_cast<ColorRGBA>(HSLColor);
 	
 	ColorRGBA Outline(1, 1, 1, 0.25f);
-	const float OutlineSize = 2.5f;
+	const float OutlineSize = 3.0f;
 	Outline.a *= ButtonColorMul(pColor);
 
 	CUIRect Rect;

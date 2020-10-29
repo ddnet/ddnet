@@ -54,8 +54,6 @@ ColorRGBA CMenus::ms_ColorTabbarActiveIngame;
 ColorRGBA CMenus::ms_ColorTabbarHoverIngame;
 
 SColorPicker CMenus::ms_ColorPicker;
-int CMenus::ms_ColorPickerID;
-int CMenus::ms_HuePickerID;
 
 float CMenus::ms_ButtonHeight = 25.0f;
 float CMenus::ms_ListheaderHeight = 17.0f;
@@ -1381,18 +1379,18 @@ void CMenus::RenderColorPicker()
 	// Logic
 	float PickerX, PickerY;
 
-	if(UI()->HotItem() != &ms_HuePickerID)
+	if(UI()->HotItem() != &SColorPicker::ms_HuePickerID)
 	{
-		if(UI()->DoPickerLogic(&ms_ColorPickerID, &ColorsArea, &PickerX, &PickerY))
+		if(UI()->DoPickerLogic(&SColorPicker::ms_ColorPickerID, &ColorsArea, &PickerX, &PickerY))
 		{
 			PickerColor.y = PickerX / ColorsArea.w;
 			PickerColor.z = 1.0f - PickerY / ColorsArea.h;
 		}
 	}
 	
-	if(UI()->HotItem() != &ms_ColorPickerID)
+	if(UI()->HotItem() != &SColorPicker::ms_ColorPickerID)
 	{
-		if(UI()->DoPickerLogic(&ms_HuePickerID, &HueArea, &PickerX, &PickerY))
+		if(UI()->DoPickerLogic(&SColorPicker::ms_HuePickerID, &HueArea, &PickerX, &PickerY))
 			PickerColor.x = 1.0f - PickerY / HueArea.h;
 	}
 
