@@ -159,11 +159,28 @@ int CMenus::DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, 
 	return Active ? UI()->DoButtonLogic(pID, "", Checked, pRect) : 0;
 }
 
-int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pImageName, int Corners, float r, float FontFactor, vec4 ColorHot, vec4 Color, int AlignVertically)
+int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pImageName, int Corners, float r, float FontFactor, vec4 ColorHot, vec4 Color, int AlignVertically, bool CheckForActiveColorPicker)
 {
 	CUIRect Text = *pRect;
 
-	Color.a *= ButtonColorMul(pID);
+	bool MouseInsideColorPicker = false;
+
+	if(CheckForActiveColorPicker)
+	{
+		if(ms_ColorPicker.m_Active)
+		{
+			CUIRect PickerRect;
+			PickerRect.x = ms_ColorPicker.m_X;
+			PickerRect.y = ms_ColorPicker.m_Y;
+			PickerRect.w = ms_ColorPicker.ms_Width;
+			PickerRect.h = ms_ColorPicker.ms_Height;
+
+			MouseInsideColorPicker = UI()->MouseInside(&PickerRect);
+		}
+	}
+
+	if(!MouseInsideColorPicker)
+		Color.a *= ButtonColorMul(pID);
 	RenderTools()->DrawUIRect(pRect, Color, Corners, r);
 
 	if(pImageName)
@@ -189,6 +206,10 @@ int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const
 	Text.HMargin(pRect->h >= 20.0f ? 2.0f : 1.0f, &Text);
 	Text.HMargin((Text.h * FontFactor) / 2.0f, &Text);
 	UI()->DoLabel(&Text, pText, Text.h * ms_FontmodHeight, 0, -1, AlignVertically);
+
+	if(MouseInsideColorPicker)
+		return 0;
+
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
 }
 
@@ -271,6 +292,120 @@ int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const c
 	UI()->DoLabel(&t, pText, c.h * ms_FontmodHeight, -1);
 
 	return UI()->DoButtonLogic(pID, pText, 0, pRect);
+}
+
+void CMenus::DoLaserPreview(const CUIRect *pRect, const ColorHSLA LaserOutlineColor, const ColorHSLA LaserInnerColor)
+{
+	ColorRGBA LaserRGB;
+	CUIRect Section = *pRect;
+	vec2 From = vec2(Section.x, Section.y + Section.h / 2.0f);
+	vec2 Pos = vec2(Section.x + Section.w - 10.0f, Section.y + Section.h / 2.0f);
+
+	vec2 Out, Border;
+
+	Graphics()->BlendNormal();
+	Graphics()->TextureClear();
+	Graphics()->QuadsBegin();
+
+	LaserRGB = color_cast<ColorRGBA, ColorHSLA>(LaserOutlineColor);
+	ColorRGBA OuterColor(LaserRGB.r, LaserRGB.g, LaserRGB.b, 1.0f);
+	Graphics()->SetColor(LaserRGB.r, LaserRGB.g, LaserRGB.b, 1.0f);
+	Out = vec2(0.0f, -1.0f) * (3.15f);
+
+	IGraphics::CFreeformItem Freeform(From.x - Out.x, From.y - Out.y, From.x + Out.x, From.y + Out.y, Pos.x - Out.x, Pos.y - Out.y, Pos.x + Out.x, Pos.y + Out.y);
+	Graphics()->QuadsDrawFreeform(&Freeform, 1);
+
+	LaserRGB = color_cast<ColorRGBA, ColorHSLA>(LaserInnerColor);
+	ColorRGBA InnerColor(LaserRGB.r, LaserRGB.g, LaserRGB.b, 1.0f);
+	Out = vec2(0.0f, -1.0f) * (2.25f);
+	Graphics()->SetColor(InnerColor.r, InnerColor.g, InnerColor.b, 1.0f);
+
+	Freeform = IGraphics::CFreeformItem(From.x - Out.x, From.y - Out.y, From.x + Out.x, From.y + Out.y, Pos.x - Out.x, Pos.y - Out.y, Pos.x + Out.x, Pos.y + Out.y);
+	Graphics()->QuadsDrawFreeform(&Freeform, 1);
+	Graphics()->QuadsEnd();
+
+	Graphics()->BlendNormal();
+	int SpriteIndex = time_get() % 3;
+	Graphics()->TextureSet(GameClient()->m_ParticlesSkin.m_SpriteParticleSplat[SpriteIndex]);
+	Graphics()->QuadsBegin();
+	Graphics()->QuadsSetRotation(time_get());
+	Graphics()->SetColor(OuterColor.r, OuterColor.g, OuterColor.b, 1.0f);
+	IGraphics::CQuadItem QuadItem(Pos.x, Pos.y, 24, 24);
+	Graphics()->QuadsDraw(&QuadItem, 1);
+	Graphics()->SetColor(InnerColor.r, InnerColor.g, InnerColor.b, 1.0f);
+	QuadItem = IGraphics::CQuadItem(Pos.x, Pos.y, 20, 20);
+	Graphics()->QuadsDraw(&QuadItem, 1);
+	Graphics()->QuadsEnd();
+
+	Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteWeaponLaser);
+	Graphics()->QuadsBegin();
+	RenderTools()->SelectSprite(SPRITE_WEAPON_LASER_BODY);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
+	RenderTools()->DrawSprite(Section.x, Section.y + Section.h / 2.0f, 60.0f);
+	Graphics()->QuadsEnd();
+}
+
+ColorHSLA CMenus::DoLine_ColorPicker(int *pResetID, const float LineSize, const float WantedPickerPosition, const float LabelSize, const float BottomMargin, CUIRect *pMainRect, const char *pText, unsigned int *pColorValue, const ColorRGBA DefaultColor, bool CheckBoxSpacing, bool UseCheckBox, int *pCheckBoxValue)
+{
+	CUIRect Section, Button, Label;
+
+	pMainRect->HSplitTop(LineSize, &Section, pMainRect);
+	pMainRect->HSplitTop(BottomMargin, 0x0, pMainRect);
+
+	float SectionWidth = Section.w;
+
+	if(CheckBoxSpacing || UseCheckBox)
+		Section.VSplitLeft(20.0f, &Button, &Section);
+
+	if(UseCheckBox)
+	{
+		CUIRect CheckBox;
+		Button.Margin(2.0f, &CheckBox);
+
+		if(DoButton_CheckBox(pCheckBoxValue, "", *pCheckBoxValue, &CheckBox))
+			*pCheckBoxValue ^= 1;
+	}
+
+	Section.VSplitLeft(5.0f, 0x0, &Section);
+	float LabelWidth = TextRender()->TextWidth(0, 14.0f, pText, -1, -1.0f);
+	Section.VSplitLeft(LabelWidth, &Label, &Section);
+
+	UI()->DoLabelScaled(&Label, pText, LabelSize, -1);
+
+	float Cut = WantedPickerPosition - (SectionWidth - Section.w);
+	if(Cut < 5)
+		Cut = 5.0f;
+
+	Section.VSplitLeft(Cut, 0x0, &Section);
+	Section.VSplitLeft(LineSize, &Button, &Section);
+
+	ColorHSLA PickedColor = RenderHSLColorPicker(&Button, pColorValue, false);
+
+	Section.VSplitLeft(7.5f, 0x0, &Section);
+	Section.VSplitLeft(55.0f, &Button, &Section);
+	Button.HSplitTop(2.0f, 0x0, &Button);
+	Button.HSplitBottom(2.0f, &Button, 0x0);
+
+	if(DoButton_Menu(pResetID, Localize("Reset"), 0, &Button, 0, CUI::CORNER_ALL, 8.0f, 0, vec4(1, 1, 1, 0.5f), vec4(1, 1, 1, 0.25f), 1, true))
+	{
+		ColorHSLA HSL = color_cast<ColorHSLA>(DefaultColor);
+		*pColorValue = HSL.Pack(false);
+	}
+
+	return PickedColor;
+}
+
+int CMenus::DoButton_CheckBoxAutoVMarginAndSet(const void *pID, const char *pText, int *pValue, CUIRect *pRect, float VMargin)
+{
+	CUIRect CheckBoxRect;
+	pRect->HSplitTop(VMargin, &CheckBoxRect, pRect);
+
+	int Logic = DoButton_CheckBox_Common(pID, pText, *pValue ? "X" : "", &CheckBoxRect);
+
+	if(Logic)
+		*pValue ^= 1;
+
+	return Logic;
 }
 
 int CMenus::DoButton_CheckBox(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
@@ -1158,16 +1293,16 @@ void CMenus::RenderColorPicker()
 	PickerRect.y = ms_ColorPicker.m_Y;
 	PickerRect.w = ms_ColorPicker.ms_Width;
 	PickerRect.h = ms_ColorPicker.ms_Height;
-	
-	if(UI()->MouseButtonClicked(0) && !UI()->MouseInside(&PickerRect) && !UI()->MouseInside(&ms_ColorPicker.m_AttachedRect))
+
+	if(UI()->MouseButtonReleased(1) || (UI()->MouseButtonClicked(0) && !UI()->MouseInside(&PickerRect) && !UI()->MouseInside(&ms_ColorPicker.m_AttachedRect)))
 	{
 		ms_ColorPicker.m_Active = false;
 		return;
 	}
 
 	// Render
-	ColorRGBA BackgroundColor(0.1f, 0.1f, 0.1f, 1.0f);
-	ColorRGBA OutlineColor(0.21f, 0.21f, 0.21f, 1);
+	ColorRGBA BackgroundColor(0.15f, 0.15f, 0.15f, 1.0f);
+	ColorRGBA OutlineColor(0.25f, 0.25f, 0.25f, 1);
 	RenderTools()->DrawUIRect(&PickerRect, BackgroundColor, 0, 0);
 
 	CUIRect ColorsArea, HueArea, BottomArea, AlphaSliderArea, HexCodeArea;
@@ -1188,8 +1323,7 @@ void CMenus::RenderColorPicker()
 	RenderTools()->DrawUIRect(&ColorsArea, OutlineColor, 0, 0);
 	ColorsArea.Margin(1, &ColorsArea);
 
-	ColorHSLA HSLColor(*ms_ColorPicker.m_pColor, false);
-	ColorHSVA PickerColor = color_cast<ColorHSVA, ColorHSLA>(HSLColor);
+	ColorHSVA PickerColor = ms_ColorPicker.m_HSVColor;
 
 	// Color Area
 	ColorRGBA rgb;
@@ -1246,7 +1380,6 @@ void CMenus::RenderColorPicker()
 
 	// Logic
 	float PickerX, PickerY;
-	bool PickerClicked = false;
 
 	if(UI()->HotItem() != &ms_HuePickerID)
 	{
@@ -1254,17 +1387,13 @@ void CMenus::RenderColorPicker()
 		{
 			PickerColor.y = PickerX / ColorsArea.w;
 			PickerColor.z = 1.0f - PickerY / ColorsArea.h;
-			PickerClicked = true;
 		}
 	}
 	
 	if(UI()->HotItem() != &ms_ColorPickerID)
 	{
 		if(UI()->DoPickerLogic(&ms_HuePickerID, &HueArea, &PickerX, &PickerY))
-		{
 			PickerColor.x = 1.0f - PickerY / HueArea.h;
-			PickerClicked = true;
-		}
 	}
 
 	// Marker Color Area
@@ -1281,6 +1410,21 @@ void CMenus::RenderColorPicker()
 	RenderTools()->DrawCircle(MarkerX, MarkerY, 4.0f, 32);
 	Graphics()->QuadsEnd();
 
+
+	// Marker Hue Area
+	CUIRect HueMarker;
+	HueArea.Margin(-2.5f, &HueMarker);
+	HueMarker.h = 5.0f;
+	HueMarker.y = (HueArea.y + HueArea.h * (1.0f - PickerColor.x)) - HueMarker.h / 2.0f;
+
+	ColorRGBA HueMarkerOutline(1 * PickerColor.x, 1 * PickerColor.x, 1 * PickerColor.x, 1);
+	ColorRGBA HueMarkerColor = color_cast<ColorRGBA, ColorHSVA>(ColorHSVA(PickerColor.x, 1, 1, 1));
+
+	RenderTools()->DrawUIRect(&HueMarker, HueMarkerOutline, 0, 0);
+	HueMarker.Margin(1, &HueMarker);
+	RenderTools()->DrawUIRect(&HueMarker, HueMarkerColor, 0, 0);
+
+	ms_ColorPicker.m_HSVColor = PickerColor;
 	*ms_ColorPicker.m_pColor = color_cast<ColorHSLA, ColorHSVA>(PickerColor).Pack(false);
 }
 

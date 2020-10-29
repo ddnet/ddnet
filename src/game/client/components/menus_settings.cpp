@@ -1564,22 +1564,20 @@ void CMenus::RenderSettings(CUIRect MainView)
 		UI()->DoLabelScaled(&RestartWarning, Localize("You must restart the game for all settings to take effect."), 14.0f, -1);
 }
 
-ColorHSLA CMenus::RenderHSLColorPicker(CUIRect *pRect, unsigned int *pColor, bool Alpha)
+ColorHSLA CMenus::RenderHSLColorPicker(const CUIRect *pRect, unsigned int *pColor, bool Alpha)
 {
 	ColorHSLA HSLColor(*pColor, false);
 	ColorRGBA RGBColor = color_cast<ColorRGBA>(HSLColor);
-
-	float OutlineCol = UI()->MouseInside(pRect) ? 0.7f : 0.5f;
-
-	ColorRGBA Outline(OutlineCol, OutlineCol, OutlineCol, 1);
-
-	const float OutlineSize = 2.0f;
+	
+	ColorRGBA Outline(1, 1, 1, 0.25f);
+	const float OutlineSize = 2.5f;
+	Outline.a *= ButtonColorMul(pColor);
 
 	CUIRect Rect;
 	pRect->Margin(OutlineSize, &Rect);
 
-	RenderTools()->DrawUIRect(pRect, Outline, 0, 0);
-	RenderTools()->DrawUIRect(&Rect, RGBColor, 0, 0);
+	RenderTools()->DrawUIRect(pRect, Outline, CUI::CORNER_ALL, 4.0f);
+	RenderTools()->DrawUIRect(&Rect, RGBColor, CUI::CORNER_ALL, 4.0f);
 
 	if(UI()->DoButtonLogic(pColor, 0, pRect))
 	{
@@ -1598,6 +1596,7 @@ ColorHSLA CMenus::RenderHSLColorPicker(CUIRect *pRect, unsigned int *pColor, boo
 				ms_ColorPicker.m_pColor = pColor;
 				ms_ColorPicker.m_Active = true;
 				ms_ColorPicker.m_AttachedRect = *pRect;
+				ms_ColorPicker.m_HSVColor = color_cast<ColorHSVA, ColorHSLA>(HSLColor);
 			}
 		}
 		else
@@ -1607,6 +1606,7 @@ ColorHSLA CMenus::RenderHSLColorPicker(CUIRect *pRect, unsigned int *pColor, boo
 			ms_ColorPicker.m_pColor = pColor;
 			ms_ColorPicker.m_Active = true;
 			ms_ColorPicker.m_AttachedRect = *pRect;
+			ms_ColorPicker.m_HSVColor = color_cast<ColorHSVA, ColorHSLA>(HSLColor);
 		}
 	}
 
@@ -1638,459 +1638,286 @@ ColorHSLA CMenus::RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool
 
 void CMenus::RenderSettingsHUD(CUIRect MainView)
 {
-	static int pIDP1 = 0, pIDP2 = 0;
-	static int Page = 1;
-	CUIRect Left, Right, HUD, Chat, Button, Label, Weapon, Laser, Page1Tab, Page2Tab, Enable, Heart;
+	CUIRect HUD, Chat, Section, SectionTwo;
 
 	MainView.VSplitMid(&HUD, &Chat);
 
-	ColorRGBA test(1, 1, 1, 0.1f);
-	RenderTools()->DrawUIRect(&MainView, test, 0, 0);
+	HUD.HSplitTop(30.0f, &Section, &HUD);
+	UI()->DoLabelScaled(&Section, Localize("HUD"), 20.0f, -1);
+	HUD.VSplitLeft(5.0f, 0x0, &HUD);
+	HUD.HSplitTop(5.0f, 0x0, &HUD);
 
-	HUD.HSplitTop(30.0f, &Label, &HUD);
-	float tw = TextRender()->TextWidth(0, 20.0f, Localize("HUD"), -1, -1.0f);
-	Label.VSplitLeft(tw + 10.0f, &Label, &Page1Tab);
-	Page1Tab.VSplitLeft(60.0f, &Page1Tab, 0);
-	Page1Tab.VSplitLeft(30.0f, &Page1Tab, &Page2Tab);
+	Chat.HSplitTop(30.0f, &Section, &Chat);
+	UI()->DoLabelScaled(&Section, Localize("Chat"), 20.0f, -1);
+	Chat.VSplitLeft(5.0f, 0x0, &Chat);
+	Chat.HSplitTop(5.0f, 0x0, &Chat);
 
-	UI()->DoLabelScaled(&Label, Localize("HUD"), 20.0f, -1);
-	if(DoButton_MenuTab((void *)&pIDP1, "1", Page == 1, &Page1Tab, 5))
-		Page = 1;
-	if(DoButton_MenuTab((void *)&pIDP2, "2", Page == 2, &Page2Tab, 10))
-		Page = 2;
+	const float LineMargin = 20.0f;
 
-	HUD.Margin(5.0f, &HUD);
-	HUD.VSplitMid(&Left, &Right);
-	Left.VSplitRight(5.0f, &Left, 0);
-	Right.VMargin(5.0f, &Right);
+	// ***** HUD ***** //
 
-	if(Page == 1)
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhud, Localize("Show ingame HUD"), &g_Config.m_ClShowhud, &HUD, LineMargin);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClDDRaceScoreBoard, Localize("Use DDRace Scoreboard"), &g_Config.m_ClDDRaceScoreBoard, &HUD, LineMargin);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowIDs, Localize("Show client IDs"), &g_Config.m_ClShowIDs, &HUD, LineMargin);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudScore, Localize("Show score"), &g_Config.m_ClShowhudScore, &HUD, LineMargin);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudHealthAmmo, Localize("Show health + ammo"), &g_Config.m_ClShowhudHealthAmmo, &HUD, LineMargin);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowChat, Localize("Show chat"), &g_Config.m_ClShowChat, &HUD, LineMargin);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatTeamColors, Localize("Show names in chat in team colors"), &g_Config.m_ClChatTeamColors, &HUD, LineMargin);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowKillMessages, Localize("Show kill messages"), &g_Config.m_ClShowKillMessages, &HUD, LineMargin);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowVotesAfterVoting, Localize("Show votes window after voting"), &g_Config.m_ClShowVotesAfterVoting, &HUD, LineMargin);
+
+	// Laser
+
+	HUD.HSplitTop(15.0f, 0x0, &HUD);
+	HUD.HSplitTop(50.0f, &Section, &HUD);
+	Section.VSplitRight(110.0f, &Section, 0x0);
+	HUD.HSplitTop(25.0f, &SectionTwo, &HUD);
+
+	static int LasterOutResetID, LaserInResetID;
+
+	ColorHSLA LaserOutlineColor = DoLine_ColorPicker(&LasterOutResetID, 25.0f, 194.0f, 13.0f, 5.0f, &SectionTwo, Localize("Laser Outline Color"), &g_Config.m_ClLaserOutlineColor, ColorRGBA(0.074402f, 0.074402f, 0.247166f, 1.0f), false);
+
+	HUD.HSplitTop(5.0f, 0x0, &HUD);
+	HUD.HSplitTop(25.0f, &SectionTwo, &HUD);
+
+	ColorHSLA LaserInnerColor = DoLine_ColorPicker(&LaserInResetID, 25.0f, 194.0f, 13.0f, 5.0f, &SectionTwo, Localize("Laser Inner Color"), &g_Config.m_ClLaserInnerColor, ColorRGBA(0.498039f, 0.498039f, 1.0f, 1.0f), false);
+
+	Section.VSplitLeft(30.0f, 0, &Section);
+
+	DoLaserPreview(&Section, LaserOutlineColor, LaserInnerColor);
+
+	// ***** Chat ***** //
+
+	if(DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatTee, Localize("Show Tee icons in chat"), &g_Config.m_ClChatTee, &Chat, LineMargin))
+		GameClient()->m_pChat->RebuildChat();
+
+	if(DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatBackground, Localize("Show backgrounds for chat messages"), &g_Config.m_ClChatBackground, &Chat, LineMargin))
+		GameClient()->m_pChat->RebuildChat();
+
+	Chat.HSplitTop(30.0f, 0x0, &Chat);
+
+	// Message Colors and extra
+
+	Chat.HSplitTop(20.0f, &Section, &Chat);
+	Chat.HSplitTop(10.0f, 0x0, &Chat);
+	
+	UI()->DoLabelScaled(&Section, Localize("Messages"), 20.0f, -1);
+
+	const float LineSize = 25.0f;
+	const float WantedPickerPosition = 194.0f;
+	const float LabelSize = 13.0f;
+	const float LineSpacing = 5.0f;
+
+	char aBuf[64];
+
+	int i = 0;
+	static int ResetIDs[24];
+	
+
+	DoLine_ColorPicker(&ResetIDs[i++], LineSize, WantedPickerPosition, LabelSize, LineSpacing, &Chat, Localize("System message"), &g_Config.m_ClMessageSystemColor, ColorRGBA(1.0f, 1.0f, 0.5f), true, true, &g_Config.m_ClShowChatSystem);
+	DoLine_ColorPicker(&ResetIDs[i++], LineSize, WantedPickerPosition, LabelSize, LineSpacing, &Chat, Localize("Highlighted message"), &g_Config.m_ClMessageHighlightColor, ColorRGBA(1.0f, 0.5f, 0.5f));
+	DoLine_ColorPicker(&ResetIDs[i++], LineSize, WantedPickerPosition, LabelSize, LineSpacing, &Chat, Localize("Team message"), &g_Config.m_ClMessageTeamColor, ColorRGBA(0.65f, 1.0f, 0.65f));
+	DoLine_ColorPicker(&ResetIDs[i++], LineSize, WantedPickerPosition, LabelSize, LineSpacing, &Chat, Localize("Friend message"), &g_Config.m_ClMessageFriendColor, ColorRGBA(1.0f, 0.137f, 0.137f), true, true, & g_Config.m_ClMessageFriend);
+	DoLine_ColorPicker(&ResetIDs[i++], LineSize, WantedPickerPosition, LabelSize, LineSpacing, &Chat, Localize("Normal message"), &g_Config.m_ClMessageColor, ColorRGBA(1.0f, 1.0f, 1.0f));
+
+	str_format(aBuf, sizeof(aBuf), "%s (echo)", Localize("Client message"));
+	DoLine_ColorPicker(&ResetIDs[i++], LineSize, WantedPickerPosition, LabelSize, LineSpacing, &Chat, aBuf, &g_Config.m_ClMessageClientColor, ColorRGBA(0.5f, 0.78f, 1.0f));
+
+
+	// ***** Chat Preview ***** //
+
+	Chat.HSplitTop(10.0f, 0x0, &Chat);
+	Chat.HSplitTop(20.0f, &Section, &Chat);
+
+	UI()->DoLabelScaled(&Section, Localize("Preview"), 20.0f, -1);
+
+	Chat.HSplitTop(10.0f, 0x0, &Chat);
+	Chat.VSplitRight(100.0f, &Chat, 0x0);
+	RenderTools()->DrawUIRect(&Chat, ColorRGBA(0.5f, 0.5f, 0.5f, 1.0f), CUI::CORNER_ALL, 8.0f);
+	Chat.HSplitTop(10.0f, 0x0, &Chat);
+
+	ColorRGBA SystemColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageSystemColor));
+	ColorRGBA HighlightedColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageHighlightColor));
+	ColorRGBA TeamColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageTeamColor));
+	ColorRGBA FriendColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageFriendColor));
+	ColorRGBA NormalColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageColor));
+	ColorRGBA ClientColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageClientColor));
+	ColorRGBA DefaultNameColor(0.8f, 0.8f, 0.8f, 1.0f);
+
+	constexpr float RealFontSize = CChat::FONT_SIZE * 2;
+	const float RealMsgPaddingX = (g_Config.m_ClChatBackground ? CChat::MESSAGE_PADDING_X : 0) * 2;
+	const float RealMsgPaddingY = (g_Config.m_ClChatBackground ? CChat::MESSAGE_PADDING_Y : (g_Config.m_ClChatTee ? (CChat::MESSAGE_TEE_SIZE - CChat::FONT_SIZE) : 0)) * 2;
+	const float RealMsgPaddingTee = (g_Config.m_ClChatTee ? CChat::MESSAGE_TEE_SIZE + CChat::MESSAGE_TEE_PADDING_RIGHT : 0) * 2;
+	const float RealOffsetY = RealFontSize + RealMsgPaddingY;
+	
+	const float X = 5.0f + RealMsgPaddingX / 2.0f + Chat.x;
+	float Y = Chat.y;
+
+	CTextCursor Cursor;
+	TextRender()->SetCursor(&Cursor, X, Y, RealFontSize, TEXTFLAG_RENDER);
+	
+	str_copy(aBuf, Client()->PlayerName(), sizeof(aBuf));
+
+	// Backgrounds first
+	if(g_Config.m_ClChatBackground)
 	{
-		// show hud1
-		Left.HSplitTop(20.0f, &Button, &Left);
-		if(DoButton_CheckBox(&g_Config.m_ClShowhud, Localize("Show ingame HUD"), g_Config.m_ClShowhud, &Button))
-			g_Config.m_ClShowhud ^= 1;
-
-		Left.HSplitTop(20.0f, &Button, &Left);
-		if(DoButton_CheckBox(&g_Config.m_ClDDRaceScoreBoard, Localize("Use DDRace Scoreboard"), g_Config.m_ClDDRaceScoreBoard, &Button))
-		{
-			g_Config.m_ClDDRaceScoreBoard ^= 1;
-		}
-
-		Left.HSplitTop(20.0f, &Button, &Left);
-		if(DoButton_CheckBox(&g_Config.m_ClShowIDs, Localize("Show client IDs in Scoreboard"), g_Config.m_ClShowIDs, &Button))
-		{
-			g_Config.m_ClShowIDs ^= 1;
-		}
-
-		Left.HSplitTop(20.0f, &Button, &Left);
-		if(DoButton_CheckBox(&g_Config.m_ClShowhudScore, Localize("Show score"), g_Config.m_ClShowhudScore, &Button))
-		{
-			g_Config.m_ClShowhudScore ^= 1;
-		}
-
-		Left.HSplitTop(20.0f, &Button, &Left);
-		if(DoButton_CheckBox(&g_Config.m_ClShowhudHealthAmmo, Localize("Show health + ammo"), g_Config.m_ClShowhudHealthAmmo, &Button))
-		{
-			g_Config.m_ClShowhudHealthAmmo ^= 1;
-		}
-
-		Left.HSplitTop(20.0f, &Button, &Left);
-		if(DoButton_CheckBox(&g_Config.m_ClShowChat, Localize("Show chat"), g_Config.m_ClShowChat, &Button))
-		{
-			g_Config.m_ClShowChat ^= 1;
-		}
-
-		Left.HSplitTop(20.0f, &Button, &Left);
-		if(DoButton_CheckBox(&g_Config.m_ClChatTeamColors, Localize("Show names in chat in team colors"), g_Config.m_ClChatTeamColors, &Button))
-		{
-			g_Config.m_ClChatTeamColors ^= 1;
-		}
-
-		Left.HSplitTop(20.0f, &Button, &Left);
-		if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Show kill messages"), g_Config.m_ClShowKillMessages, &Button))
-		{
-			g_Config.m_ClShowKillMessages ^= 1;
-		}
-
-		Left.HSplitTop(20.0f, &Button, &Left);
-		if(DoButton_CheckBox(&g_Config.m_ClShowVotesAfterVoting, Localize("Show votes window after voting"), g_Config.m_ClShowVotesAfterVoting, &Button))
-		{
-			g_Config.m_ClShowVotesAfterVoting ^= 1;
-		}
-
-		// Chat
-
-		Chat.HSplitTop(30.0f, &Label, &Chat);
-		UI()->DoLabelScaled(&Label, Localize("Chat"), 20.0f, -1);
-
-		bool IsOldChat = !(g_Config.m_ClChatTee || g_Config.m_ClChatBackground);
-
-		Chat.HSplitTop(20.0f, &Button, &Chat);
-		if(DoButton_CheckBox(&g_Config.m_ClChatTee, Localize("Use old chat style"), IsOldChat, &Button))
-		{
-			if(IsOldChat)
-			{
-				g_Config.m_ClChatTee = 1;
-				g_Config.m_ClChatBackground = 1;
-			}
-			else
-			{
-				g_Config.m_ClChatTee = 0;
-				g_Config.m_ClChatBackground = 0;
-			}
-			GameClient()->m_pChat->RebuildChat();
-		}
-		/*
-		Right.HSplitTop(170.0f, &Chat, &MainView);
-		Chat.HSplitTop(30.0f, &Label, &Chat);
-		UI()->DoLabelScaled(&Label, Localize("Chat"), 20.0f, -1);
-		Chat.Margin(5.0f, &Chat);
-		Chat.VSplitMid(&Left, &Right);
-		Left = Right;
-		Left.VSplitRight(5.0f, &Left, 0);
-		Right.VMargin(5.0f, &Right);
-		*/
-		/*
-		
-		{
-			char aBuf[64];
-			Left.HSplitTop(20.0f, &Label, &Left);
-			Label.VSplitRight(50.0f, &Label, &Button);
-			Label.VSplitLeft(25.0f, &Enable, &Label);
-
-			if(DoButton_CheckBox(&g_Config.m_ClShowChatSystem, "", g_Config.m_ClShowChatSystem, &Enable))
-				g_Config.m_ClShowChatSystem ^= 1;
-			
-			UI()->DoLabelScaled(&Label, Localize("System message"), 16.0f, -1);
-			{
-				static int s_DefaultButton = 0;
-				if(DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
-				{
-					ColorHSLA HSL = color_cast<ColorHSLA>(ColorRGBA(1.0f, 1.0f, 0.5f));
-					g_Config.m_ClMessageSystemColor = HSL.Pack(false);
-				}
-			}
-
-			CUIRect PickerRect;
-			Left.HSplitTop(5.0f, 0x0, &Left);
-			Left.HSplitTop(25.0f, &PickerRect, &Left);
-			PickerRect.w = 25.0f;
-
-			ColorHSLA SMColor = RenderHSLColorPicker(&PickerRect, &g_Config.m_ClMessageSystemColor, false);
-			ColorRGBA rgb = color_cast<ColorRGBA>(SMColor);
-
-			Left.HSplitTop(10.0f, &Label, &Left);
-
-			TextRender()->TextColor(rgb);
-
-			char aName[16];
-			str_copy(aName, Client()->PlayerName(), sizeof(aName));
-			str_format(aBuf, sizeof(aBuf), "*** '%s' entered and joined the spectators", aName);
-			while(TextRender()->TextWidth(0, 12.0f, aBuf, -1, -1.0f) > Label.w)
-			{
-				aName[str_length(aName) - 1] = 0;
-				str_format(aBuf, sizeof(aBuf), "*** '%s' entered and joined the spectators", aName);
-			}
-			UI()->DoLabelScaled(&Label, aBuf, 12.0f, -1);
-			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-			Left.HSplitTop(20.0f, 0, &Left);
-		}
-		{
-			char aBuf[64];
-			Right.HSplitTop(20.0f, &Label, &Right);
-			Label.VSplitRight(50.0f, &Label, &Button);
-			UI()->DoLabelScaled(&Label, Localize("Highlighted message"), 16.0f, -1);
-			{
-				static int s_DefaultButton = 0;
-				if(DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
-				{
-					ColorHSLA HSL = color_cast<ColorHSLA>(ColorRGBA(1.0f, 0.5f, 0.5f));
-					g_Config.m_ClMessageHighlightColor = HSL.Pack(false);
-				}
-			}
-
-			ColorHSLA HMColor = RenderHSLScrollbars(&Right, &g_Config.m_ClMessageHighlightColor);
-
-			Right.HSplitTop(10.0f, &Label, &Right);
-
-			TextRender()->TextColor(0.75f, 0.5f, 0.75f, 1.0f);
-			float tw = TextRender()->TextWidth(0, 12.0f, Localize("Spectator"), -1, -1.0f);
-			Label.VSplitLeft(tw, &Label, &Button);
-			UI()->DoLabelScaled(&Label, Localize("Spectator"), 12.0f, -1);
-
-			ColorRGBA rgb = color_cast<ColorRGBA>(HMColor);
-			TextRender()->TextColor(rgb);
-			char aName[16];
-			str_copy(aName, Client()->PlayerName(), sizeof(aName));
-			str_format(aBuf, sizeof(aBuf), ": %s: %s", aName, Localize("Look out!"));
-			while(TextRender()->TextWidth(0, 12.0f, aBuf, -1, -1.0f) > Button.w)
-			{
-				aName[str_length(aName) - 1] = 0;
-				str_format(aBuf, sizeof(aBuf), ": %s: %s", aName, Localize("Look out!"));
-			}
-			UI()->DoLabelScaled(&Button, aBuf, 12.0f, -1);
-
-			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-			Right.HSplitTop(20.0f, 0, &Right);
-		}
-		{
-			char aBuf[64];
-			Left.HSplitTop(20.0f, &Label, &Left);
-			Label.VSplitRight(50.0f, &Label, &Button);
-			UI()->DoLabelScaled(&Label, Localize("Team message"), 16.0f, -1);
-			{
-				static int s_DefaultButton = 0;
-				if(DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
-				{
-					ColorHSLA HSL = color_cast<ColorHSLA>(ColorRGBA(0.65f, 1.0f, 0.65f));
-					g_Config.m_ClMessageTeamColor = HSL.Pack(false);
-				}
-			}
-
-			ColorHSLA TMColor = RenderHSLScrollbars(&Left, &g_Config.m_ClMessageTeamColor);
-
-			Left.HSplitTop(10.0f, &Label, &Left);
-
-			ColorRGBA rgbn = CalculateNameColor(TMColor);
-			TextRender()->TextColor(rgbn);
-			float tw = TextRender()->TextWidth(0, 12.0f, Localize("Player"), -1, -1.0f);
-			Label.VSplitLeft(tw, &Label, &Button);
-			UI()->DoLabelScaled(&Label, Localize("Player"), 12.0f, -1);
-
-			ColorRGBA rgb = color_cast<ColorRGBA>(TMColor);
-			TextRender()->TextColor(rgb);
-			str_format(aBuf, sizeof(aBuf), ": %s!", Localize("We will win"));
-			UI()->DoLabelScaled(&Button, aBuf, 12.0f, -1);
-
-			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-			Left.HSplitTop(20.0f, 0, &Left);
-		}
-		{
-			char aBuf[64];
-			Right.HSplitTop(20.0f, &Label, &Right);
-			Label.VSplitRight(50.0f, &Label, &Button);
-			float twh = TextRender()->TextWidth(0, 16.0f, Localize("Friend message"), -1, -1.0f);
-			Label.VSplitLeft(twh + 5.0f, &Label, &Enable);
-			Enable.VSplitLeft(20.0f, &Enable, 0);
-			UI()->DoLabelScaled(&Label, Localize("Friend message"), 16.0f, -1);
-			{
-				static int s_DefaultButton = 0;
-				if(DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
-					g_Config.m_ClMessageFriendColor = ColorHSLA(0, 1, 145 / 255.0f).Pack(false);
-			}
-
-			if(DoButton_CheckBox(&g_Config.m_ClMessageFriend, Localize("Highlight"), g_Config.m_ClMessageFriend, &Enable))
-			{
-				g_Config.m_ClMessageFriend ^= 1;
-			}
-
-			ColorHSLA FMColor = RenderHSLScrollbars(&Right, &g_Config.m_ClMessageFriendColor);
-
-			Right.HSplitTop(10.0f, &Label, &Right);
-
-			ColorRGBA rgbf = color_cast<ColorRGBA>(FMColor);
-			TextRender()->TextColor(rgbf);
-			float hw = TextRender()->TextWidth(0, 12.0f, "♥ ", -1, -1.0f);
-			Label.VSplitLeft(hw, &Heart, &Label);
-			UI()->DoLabelScaled(&Heart, "♥ ", 12.0f, -1);
-
-			TextRender()->TextColor(0.8f, 0.8f, 0.8f, 1.0f);
-			float tw = TextRender()->TextWidth(0, 12.0f, Localize("Friend"), -1, -1.0f);
-			Label.VSplitLeft(tw, &Label, &Button);
-			UI()->DoLabelScaled(&Label, Localize("Friend"), 12.0f, -1);
-
-			ColorRGBA rgb = color_cast<ColorRGBA>(FMColor);
-			TextRender()->TextColor(rgb);
-			str_format(aBuf, sizeof(aBuf), ": %s", Localize("Hi o/"));
-			UI()->DoLabelScaled(&Button, aBuf, 12.0f, -1);
-
-			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-			Right.HSplitTop(20.0f, 0, &Right);
-		}
-		{
-			char aBuf[64];
-			Left.HSplitTop(20.0f, &Label, &Left);
-			Label.VSplitRight(50.0f, &Label, &Button);
-			UI()->DoLabelScaled(&Label, Localize("Normal message"), 16.0f, -1);
-			{
-				static int s_DefaultButton = 0;
-				if(DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
-				{
-					ColorHSLA HSL = color_cast<ColorHSLA>(ColorRGBA(1.0f, 1.0f, 1.0f));
-					g_Config.m_ClMessageColor = HSL.Pack(false);
-				}
-			}
-
-			ColorHSLA MColor = RenderHSLScrollbars(&Left, &g_Config.m_ClMessageColor);
-
-			Left.HSplitTop(10.0f, &Label, &Left);
-
-			TextRender()->TextColor(0.8f, 0.8f, 0.8f, 1.0f);
-			float tw = TextRender()->TextWidth(0, 12.0f, Localize("Player"), -1, -1.0f);
-			Label.VSplitLeft(tw, &Label, &Button);
-			UI()->DoLabelScaled(&Label, Localize("Player"), 12.0f, -1);
-
-			ColorRGBA rgb = color_cast<ColorRGBA>(MColor);
-			TextRender()->TextColor(rgb);
-			str_format(aBuf, sizeof(aBuf), ": %s :D", Localize("Hello and welcome"));
-			UI()->DoLabelScaled(&Button, aBuf, 12.0f, -1);
-
-			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-		}
-		{
-			char aBuf[64];
-			Right.HSplitTop(20.0f, &Label, &Right);
-			Label.VSplitRight(50.0f, &Label, &Button);
-			str_format(aBuf, sizeof(aBuf), "%s (echo)", Localize("Client message"));
-			UI()->DoLabelScaled(&Label, aBuf, 16.0f, -1);
-			{
-				static int s_DefaultButton = 0;
-				if(DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
-				{
-					ColorHSLA HSL = color_cast<ColorHSLA>(ColorRGBA(0.5f, 0.78f, 1.0f));
-					g_Config.m_ClMessageClientColor = HSL.Pack(false);
-				}
-			}
-
-			ColorHSLA CMColor = RenderHSLScrollbars(&Right, &g_Config.m_ClMessageClientColor);
-
-			Right.HSplitTop(10.0f, &Label, &Right);
-
-			ColorRGBA rgb = color_cast<ColorRGBA>(CMColor);
-			TextRender()->TextColor(rgb);
-
-			UI()->DoLabelScaled(&Label, "*** Dynamic camera activated", 12.0f, -1);
-			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-			Right.HSplitTop(20.0f, 0, &Right);
-		}*/
-	}
-	else if(Page == 2)
-	{
-		Left.HSplitTop(220.0f, &Laser, &Left);
-		//RenderTools()->DrawUIRect(&Laser, vec4(1.0f, 1.0f, 1.0f, 0.1f), CUI::CORNER_ALL, 5.0f);
-		//Laser.Margin(10.0f, &Laser);
-		Laser.HSplitTop(30.0f, &Label, &Laser);
-		Label.VSplitLeft(TextRender()->TextWidth(0, 20.0f, Localize("Laser"), -1, -1.0f) + 5.0f, &Label, &Weapon);
-		UI()->DoLabelScaled(&Label, Localize("Laser"), 20.0f, -1);
-
-		Laser.HSplitTop(20.0f, &Label, &Laser);
-		Label.VSplitLeft(5.0f, 0, &Label);
-		Label.VSplitRight(50.0f, &Label, &Button);
-		UI()->DoLabelScaled(&Label, Localize("Inner color"), 16.0f, -1);
-		{
-			static int s_DefaultButton = 0;
-			if(DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
-			{
-				ColorHSLA HSL = color_cast<ColorHSLA>(ColorRGBA(0.5f, 0.5f, 1.0f));
-				g_Config.m_ClLaserInnerColor = HSL.Pack(false);
-			}
-		}
-
-		ColorHSLA LIColor = RenderHSLScrollbars(&Laser, &g_Config.m_ClLaserInnerColor);
-
-		Laser.HSplitTop(10.0f, 0, &Laser);
-
-		Laser.HSplitTop(20.0f, &Label, &Laser);
-		Label.VSplitLeft(5.0f, 0, &Label);
-		Label.VSplitRight(50.0f, &Label, &Button);
-		UI()->DoLabelScaled(&Label, Localize("Outline color"), 16.0f, -1);
-		{
-			static int s_DefaultButton = 0;
-			if(DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
-			{
-				ColorHSLA HSL = color_cast<ColorHSLA>(ColorRGBA(0.075f, 0.075f, 0.25f));
-				g_Config.m_ClLaserOutlineColor = HSL.Pack(false);
-			}
-		}
-
-		ColorHSLA LOColor = RenderHSLScrollbars(&Laser, &g_Config.m_ClLaserOutlineColor);
-
-		Weapon.VSplitLeft(30.0f, 0, &Weapon);
-
-		ColorRGBA RGB;
-		vec2 From = vec2(Weapon.x, Weapon.y + Weapon.h / 2.0f);
-		vec2 Pos = vec2(Weapon.x + Weapon.w - 10.0f, Weapon.y + Weapon.h / 2.0f);
-
-		vec2 Out, Border;
-
-		Graphics()->BlendNormal();
 		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
+		Graphics()->SetColor(0, 0, 0, 0.12f);
 
-		// do outline
-		RGB = color_cast<ColorRGBA>(LOColor);
-		ColorRGBA OuterColor(RGB.r, RGB.g, RGB.b, 1.0f);
-		Graphics()->SetColor(RGB.r, RGB.g, RGB.b, 1.0f); // outline
-		Out = vec2(0.0f, -1.0f) * (3.15f);
+		char LineBuilder[128];
+		float Width;
+		float TempY = Y;
 
-		IGraphics::CFreeformItem Freeform(
-			From.x - Out.x, From.y - Out.y,
-			From.x + Out.x, From.y + Out.y,
-			Pos.x - Out.x, Pos.y - Out.y,
-			Pos.x + Out.x, Pos.y + Out.y);
-		Graphics()->QuadsDrawFreeform(&Freeform, 1);
-
-		// do inner
-		RGB = color_cast<ColorRGBA>(LIColor);
-		ColorRGBA InnerColor(RGB.r, RGB.g, RGB.b, 1.0f);
-		Out = vec2(0.0f, -1.0f) * (2.25f);
-		Graphics()->SetColor(InnerColor.r, InnerColor.g, InnerColor.b, 1.0f); // center
-
-		Freeform = IGraphics::CFreeformItem(
-			From.x - Out.x, From.y - Out.y,
-			From.x + Out.x, From.y + Out.y,
-			Pos.x - Out.x, Pos.y - Out.y,
-			Pos.x + Out.x, Pos.y + Out.y);
-		Graphics()->QuadsDrawFreeform(&Freeform, 1);
-
-		Graphics()->QuadsEnd();
-
-		// render head
+		if(g_Config.m_ClShowChatSystem)
 		{
-			Graphics()->BlendNormal();
-			int SpriteIndex = time_get() % 3;
-			Graphics()->TextureSet(GameClient()->m_ParticlesSkin.m_SpriteParticleSplat[SpriteIndex]);
-			Graphics()->QuadsBegin();
-
-			Graphics()->QuadsSetRotation(time_get());
-			Graphics()->SetColor(OuterColor.r, OuterColor.g, OuterColor.b, 1.0f);
-			IGraphics::CQuadItem QuadItem(Pos.x, Pos.y, 24, 24);
-			Graphics()->QuadsDraw(&QuadItem, 1);
-			Graphics()->SetColor(InnerColor.r, InnerColor.g, InnerColor.b, 1.0f);
-			QuadItem = IGraphics::CQuadItem(Pos.x, Pos.y, 20, 20);
-			Graphics()->QuadsDraw(&QuadItem, 1);
-			Graphics()->QuadsEnd();
+			Width = TextRender()->TextWidth(0, RealFontSize, "*** 'Evgesha' entered and joined the game", -1, -1);
+			RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX, RealFontSize + RealMsgPaddingY, 8.0f, CUI::CORNER_ALL);
+			TempY += RealOffsetY;
 		}
-		// draw laser weapon
-		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteWeaponLaser);
-		Graphics()->QuadsBegin();
 
-		RenderTools()->SelectSprite(SPRITE_WEAPON_LASER_BODY);
-		Graphics()->QuadsSetSubset(0, 0, 1, 1);
-		RenderTools()->DrawSprite(Weapon.x, Weapon.y + Weapon.h / 2.0f, 60.0f);
+		if(g_Config.m_ClShowIDs)
+			str_copy(LineBuilder, " 7: DDRacer2002: Hey, how are you ", sizeof(LineBuilder));
+		else
+			str_copy(LineBuilder, "DDRacer2002: Hey, how are you ", sizeof(LineBuilder));
+		str_append(LineBuilder, aBuf, sizeof(LineBuilder));
+		Width = TextRender()->TextWidth(0, RealFontSize, LineBuilder, -1, -1);
+		RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, 8.0f, CUI::CORNER_ALL);
+		TempY += RealOffsetY;
+
+		if(g_Config.m_ClShowIDs)
+			str_copy(LineBuilder, "11: Your Teammate: Let's speedrun this!", sizeof(LineBuilder));
+		else
+			str_copy(LineBuilder, "Your Teammate: Let's speedrun this!", sizeof(LineBuilder));
+		Width = TextRender()->TextWidth(0, RealFontSize, LineBuilder, -1, -1);
+		RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, 8.0f, CUI::CORNER_ALL);
+		TempY += RealOffsetY;
+
+		if(g_Config.m_ClShowIDs)
+			str_copy(LineBuilder, "♥  8: Friend: Hello there", sizeof(LineBuilder));
+		else
+			str_copy(LineBuilder, "♥ Friend: Hello there", sizeof(LineBuilder));
+		Width = TextRender()->TextWidth(0, RealFontSize, LineBuilder, -1, -1);
+		RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, 8.0f, CUI::CORNER_ALL);
+		TempY += RealOffsetY;
+
+		if(g_Config.m_ClShowIDs)
+			str_copy(LineBuilder, " 9: Spammer [6]: Hey fools, I'm spamming here!", sizeof(LineBuilder));
+		else
+			str_copy(LineBuilder, "Spammer [6]: Hey fools, I'm spamming here!", sizeof(LineBuilder));
+		Width = TextRender()->TextWidth(0, RealFontSize, LineBuilder, -1, -1);
+		RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, 8.0f, CUI::CORNER_ALL);
+		TempY += RealOffsetY;
+
+		Width = TextRender()->TextWidth(0, RealFontSize, "*** Echo command executed", -1, -1);
+		RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX, RealFontSize + RealMsgPaddingY, 8.0f, CUI::CORNER_ALL);
+		TempY += RealOffsetY;
 
 		Graphics()->QuadsEnd();
 	}
-	/*
-	Left.VSplitLeft(20.0f, 0, &Left);
-	Left.HSplitTop(20.0f, &Label, &Left);
-	Button.VSplitRight(20.0f, &Button, 0);
-	char aBuf[64];
-	if(g_Config.m_ClReconnectTimeout == 1)
+
+	CAnimState *pIdleState = CAnimState::GetIdle();
+	constexpr int PreviewTeeCount = 4;
+	constexpr float RealTeeSize = CChat::MESSAGE_TEE_SIZE * 2;
+	constexpr float RealTeeSizeHalved = CChat::MESSAGE_TEE_SIZE;
+	constexpr float TWSkinUnreliableOffset = 0.5f;
+	constexpr float OffsetTeeY = RealTeeSizeHalved / 2.0f;
+	const float FullHeightMinusTee = RealOffsetY - RealTeeSize;
+
+	CTeeRenderInfo RenderInfo[PreviewTeeCount];
+
+	if(g_Config.m_ClChatTee)
 	{
-		str_format(aBuf, sizeof(aBuf), "%s %i %s", Localize("Wait before try for"), g_Config.m_ClReconnectTimeout, Localize("second"));
+		int DefaultInd = GameClient()->m_pSkins->Find("default");
+
+		for(int i = 0; i < PreviewTeeCount; i++)
+		{
+			RenderInfo[i].m_Size = RealTeeSize;
+			RenderInfo[i].m_CustomColoredSkin = false;
+		}
+
+		int ind = -1;
+		int i = 0;
+
+		RenderInfo[i++].m_OriginalRenderSkin = GameClient()->m_pSkins->Get(DefaultInd)->m_OriginalSkin;
+		RenderInfo[i++].m_OriginalRenderSkin = (ind = GameClient()->m_pSkins->Find("bluekitty")) != -1 ? GameClient()->m_pSkins->Get(ind)->m_OriginalSkin : GameClient()->m_pSkins->Get(DefaultInd)->m_OriginalSkin;
+		RenderInfo[i++].m_OriginalRenderSkin = (ind = GameClient()->m_pSkins->Find("cammostripes")) != -1 ? GameClient()->m_pSkins->Get(ind)->m_OriginalSkin : GameClient()->m_pSkins->Get(DefaultInd)->m_OriginalSkin;
+		RenderInfo[i++].m_OriginalRenderSkin = (ind = GameClient()->m_pSkins->Find("beast")) != -1 ? GameClient()->m_pSkins->Get(ind)->m_OriginalSkin : GameClient()->m_pSkins->Get(DefaultInd)->m_OriginalSkin;
 	}
+
+	// System
+	if(g_Config.m_ClShowChatSystem)
+	{
+		TextRender()->TextColor(SystemColor);
+		TextRender()->TextEx(&Cursor, "*** 'Evgesha' entered and joined the game", -1);
+		TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
+	}
+
+	// Highlighted
+	TextRender()->MoveCursor(&Cursor, RealMsgPaddingTee, 0);
+	TextRender()->TextColor(DefaultNameColor);
+	if(g_Config.m_ClShowIDs)
+		TextRender()->TextEx(&Cursor, " 7: DDRacer2002: ", -1);
 	else
+		TextRender()->TextEx(&Cursor, "DDRacer2002: ", -1);
+	TextRender()->TextColor(HighlightedColor);
+	TextRender()->TextEx(&Cursor, "Hey, how are you ", -1);
+	TextRender()->TextEx(&Cursor, aBuf, -1);
+	if(g_Config.m_ClChatTee)
+		RenderTools()->RenderTee(pIdleState, &RenderInfo[0], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
+	TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
+
+	// Team
+	TextRender()->MoveCursor(&Cursor, RealMsgPaddingTee, 0);
+	TextRender()->TextColor(TeamColor);
+	if(g_Config.m_ClShowIDs)
+		TextRender()->TextEx(&Cursor, "11: Your Teammate: ", -1);
+	else 
+		TextRender()->TextEx(&Cursor, "Your Teammate: ", -1);
+	TextRender()->TextEx(&Cursor, "Let's speedrun this!", -1);
+	if(g_Config.m_ClChatTee)
+		RenderTools()->RenderTee(pIdleState, &RenderInfo[1], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
+	TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
+
+	// Friend
+	TextRender()->MoveCursor(&Cursor, RealMsgPaddingTee, 0);
+	if(g_Config.m_ClMessageFriend)
 	{
-		str_format(aBuf, sizeof(aBuf), "%s %i %s", Localize("Wait before try for"), g_Config.m_ClReconnectTimeout, Localize("seconds"));
+		TextRender()->TextColor(FriendColor);
+		TextRender()->TextEx(&Cursor, "♥ ", -1);
 	}
-	UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
-	Left.HSplitTop(20.0f, &Button, 0);
-	Button.HMargin(2.0f, &Button);
-	g_Config.m_ClReconnectTimeout = static_cast<int>(DoScrollbarH(&g_Config.m_ClReconnectTimeout, &Button, g_Config.m_ClReconnectTimeout / 120.0f) * 120.0f);
-	if(g_Config.m_ClReconnectTimeout < 5)
-		g_Config.m_ClReconnectTimeout = 5;*/
+	TextRender()->TextColor(DefaultNameColor);
+	if(g_Config.m_ClShowIDs)
+		TextRender()->TextEx(&Cursor, " 8: Friend: ", -1);
+	else
+		TextRender()->TextEx(&Cursor, "Friend: ", -1);
+	TextRender()->TextColor(NormalColor);
+	TextRender()->TextEx(&Cursor, "Hello there", -1);
+	if(g_Config.m_ClChatTee)
+		RenderTools()->RenderTee(pIdleState, &RenderInfo[2], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
+	TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
+
+	// Normal
+	TextRender()->MoveCursor(&Cursor, RealMsgPaddingTee, 0);
+	TextRender()->TextColor(DefaultNameColor);
+	if(g_Config.m_ClShowIDs)
+		TextRender()->TextEx(&Cursor, " 9: Spammer ", -1);
+	else
+		TextRender()->TextEx(&Cursor, "Spammer ", -1);
+	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 0.3f);
+	TextRender()->TextEx(&Cursor, "[6]", -1);
+	TextRender()->TextColor(NormalColor);
+	TextRender()->TextEx(&Cursor, ": Hey fools, I'm spamming here!", -1);
+	if(g_Config.m_ClChatTee)
+		RenderTools()->RenderTee(pIdleState, &RenderInfo[3], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
+	TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
+
+	// Client
+	TextRender()->TextColor(ClientColor);
+	TextRender()->TextEx(&Cursor, "*** Echo command executed", -1);
+	TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
+
+	TextRender()->TextColor(1, 1, 1, 1);
 }
 
 void CMenus::RenderSettingsDDNet(CUIRect MainView)
