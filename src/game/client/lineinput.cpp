@@ -33,20 +33,15 @@ void CLineInput::Set(const char *pString)
 void CLineInput::Editing(const char *pString, int Cursor)
 {
 	str_copy(m_DisplayStr, m_Str, sizeof(m_DisplayStr));
-	char Texting[34];
-	str_format(Texting, sizeof(Texting), "[%s]", pString);
-	int NewTextLen = str_length(Texting);
+	char aEditingText[IInput::INPUT_TEXT_SIZE + 2];
+	str_format(aEditingText, sizeof(aEditingText), "[%s]", pString);
+	int NewTextLen = str_length(aEditingText);
 	int CharsLeft = (int)sizeof(m_DisplayStr) - str_length(m_DisplayStr) - 1;
 	int FillCharLen = NewTextLen < CharsLeft ? NewTextLen : CharsLeft;
 	for(int i = str_length(m_DisplayStr) - 1; i >= m_CursorPos; i--)
 		m_DisplayStr[i + FillCharLen] = m_DisplayStr[i];
 	for(int i = 0; i < FillCharLen; i++)
-	{
-		if(Texting[i] == 28)
-			m_DisplayStr[m_CursorPos + i] = ' ';
-		else
-			m_DisplayStr[m_CursorPos + i] = Texting[i];
-	}
+		m_DisplayStr[m_CursorPos + i] = aEditingText[i];
 	m_FakeLen = str_length(m_DisplayStr);
 	m_FakeCursorPos = m_CursorPos + Cursor + 1;
 }

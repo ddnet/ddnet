@@ -244,6 +244,7 @@ void CGameClient::OnConsoleInit()
 	Console()->Register("remove_vote", "s[name]", CFGFLAG_SERVER, 0, 0, "remove a voting option");
 	Console()->Register("force_vote", "s[name] s[command] ?r[reason]", CFGFLAG_SERVER, 0, 0, "Force a voting option");
 	Console()->Register("clear_votes", "", CFGFLAG_SERVER, 0, 0, "Clears the voting options");
+	Console()->Register("add_map_votes", "", CFGFLAG_SERVER, 0, 0, "Automatically adds voting options for all maps");
 	Console()->Register("vote", "r['yes'|'no']", CFGFLAG_SERVER, 0, 0, "Force a vote to yes/no");
 	Console()->Register("swap_teams", "", CFGFLAG_SERVER, 0, 0, "Swap the current teams");
 	Console()->Register("shuffle_teams", "", CFGFLAG_SERVER, 0, 0, "Shuffle the current teams");
@@ -947,6 +948,7 @@ void CGameClient::OnWindowResize()
 	for(int i = 0; i < m_All.m_Num; i++)
 		m_All.m_paComponents[i]->OnWindowResize();
 
+	UI()->OnWindowResize();
 	TextRender()->OnWindowResize();
 }
 
@@ -954,6 +956,11 @@ void CGameClient::OnWindowResizeCB(void *pUser)
 {
 	CGameClient *pClient = (CGameClient *)pUser;
 	pClient->OnWindowResize();
+}
+
+void CGameClient::OnLanguageChange()
+{
+	UI()->OnLanguageChange();
 }
 
 void CGameClient::OnRconType(bool UsernameReq)
@@ -2927,7 +2934,7 @@ void CGameClient::LoadMapSettings()
 		int Size = pMap->GetDataSize(pItem->m_Settings);
 		char *pSettings = (char *)pMap->GetData(pItem->m_Settings);
 		char *pNext = pSettings;
-		dbg_msg("New tune ", "%s", pNext);
+		dbg_msg("tune", "%s", pNext);
 		while(pNext < pSettings + Size)
 		{
 			int StrSize = str_length(pNext) + 1;

@@ -119,10 +119,10 @@ CMenus::CMenus()
 float CMenus::ButtonColorMul(const void *pID)
 {
 	if(UI()->ActiveItem() == pID)
-		return 0.5f;
+		return ButtonColorMulActive();
 	else if(UI()->HotItem() == pID)
-		return 1.5f;
-	return 1;
+		return ButtonColorMulHot();
+	return ButtonColorMulDefault();
 }
 
 int CMenus::DoButton_Icon(int ImageId, int SpriteId, const CUIRect *pRect)
@@ -490,12 +490,6 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	const char *pDisplayStr = pStr;
 	char aStars[128];
 
-	if(pDisplayStr[0] == '\0')
-	{
-		pDisplayStr = pEmptyText;
-		TextRender()->TextColor(1, 1, 1, 0.75f);
-	}
-
 	if(Hidden)
 	{
 		unsigned s = str_length(pDisplayStr);
@@ -507,39 +501,48 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 		pDisplayStr = aStars;
 	}
 
-	char aInputing[32] = {0};
-	if(UI()->HotItem() == pID && Input()->GetIMEState())
+	char aDispEditingText[128 + IInput::INPUT_TEXT_SIZE + 2] = {0};
+	int DispCursorPos = s_AtIndex;
+	if(UI()->LastActiveItem() == pID && Input()->GetIMEEditingTextLength() > -1)
 	{
-		str_copy(aInputing, pStr, sizeof(aInputing));
-		const char *Text = Input()->GetIMECandidate();
-		if(str_length(Text))
+		int EditingTextCursor = Input()->GetEditingCursor();
+		str_copy(aDispEditingText, pDisplayStr, sizeof(aDispEditingText));
+		char aEditingText[IInput::INPUT_TEXT_SIZE + 2];
+		if(Hidden)
 		{
-			int NewTextLen = str_length(Text);
-			int CharsLeft = StrSize - str_length(aInputing) - 1;
-			int FillCharLen = minimum(NewTextLen, CharsLeft);
-			//Push Char Backward
-			for(int i = str_length(aInputing); i >= s_AtIndex; i--)
-				aInputing[i + FillCharLen] = aInputing[i];
-			for(int i = 0; i < FillCharLen; i++)
-			{
-				if(Text[i] == '\n')
-					aInputing[s_AtIndex + i] = ' ';
-				else
-					aInputing[s_AtIndex + i] = Text[i];
-			}
-			//s_AtIndex = s_AtIndex+FillCharLen;
-			pDisplayStr = aInputing;
+			// Do not show editing text in password field
+			str_copy(aEditingText, "[*]", sizeof(aEditingText));
+			EditingTextCursor = 1;
 		}
+		else
+		{
+			str_format(aEditingText, sizeof(aEditingText), "[%s]", Input()->GetIMEEditingText());
+		}
+		int NewTextLen = str_length(aEditingText);
+		int CharsLeft = (int)sizeof(aDispEditingText) - str_length(aDispEditingText) - 1;
+		int FillCharLen = minimum(NewTextLen, CharsLeft);
+		for(int i = str_length(aDispEditingText) - 1; i >= s_AtIndex; i--)
+			aDispEditingText[i + FillCharLen] = aDispEditingText[i];
+		for(int i = 0; i < FillCharLen; i++)
+			aDispEditingText[s_AtIndex + i] = aEditingText[i];
+		DispCursorPos = s_AtIndex + EditingTextCursor + 1;
+		pDisplayStr = aDispEditingText;
+	}
+
+	if(pDisplayStr[0] == '\0')
+	{
+		pDisplayStr = pEmptyText;
+		TextRender()->TextColor(1, 1, 1, 0.75f);
 	}
 
 	// check if the text has to be moved
 	if(UI()->LastActiveItem() == pID && !JustGotActive && (UpdateOffset || m_NumInputEvents))
 	{
-		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex, -1.0f);
+		float w = TextRender()->TextWidth(0, FontSize, pStr, s_AtIndex, -1.0f);
 		if(w - *Offset > Textbox.w)
 		{
 			// move to the left
-			float wt = TextRender()->TextWidth(0, FontSize, pDisplayStr, -1, -1.0f);
+			float wt = TextRender()->TextWidth(0, FontSize, pStr, -1, -1.0f);
 			do
 			{
 				*Offset += minimum(wt - *Offset - Textbox.w, Textbox.w / 3);
@@ -557,8 +560,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	UI()->ClipEnable(pRect);
 	Textbox.x -= *Offset;
 
-	int StrLenDispl = str_length(pDisplayStr);
-	UI()->DoLabel(&Textbox, pDisplayStr, FontSize, -1);
+	UI()->DoLabel(&Textbox, pDisplayStr, FontSize, -1, Textbox.w * 2.0f);
 
 	TextRender()->TextColor(1, 1, 1, 1);
 
@@ -570,29 +572,8 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	if(UI()->LastActiveItem() == pID && !JustGotActive)
 	{
 		float OffsetGlyph = TextRender()->GetGlyphOffsetX(FontSize, '|');
-		CUIRect TmpTextBox = Textbox;
-		if(str_length(aInputing))
-		{
-			float OffsetGlyphThis = OffsetGlyph;
-			if(StrLenDispl >= 1 && StrLenDispl == s_AtIndex + Input()->GetEditingCursor() && pDisplayStr[StrLenDispl - 1] != ' ')
-				OffsetGlyphThis = 0;
-			float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex + Input()->GetEditingCursor(), -1.0f);
-			Textbox.x += w + OffsetGlyphThis;
 
-			Graphics()->TextureClear();
-			Graphics()->QuadsBegin();
-			Graphics()->SetColor(0, 0, 0, 0.3f);
-			IGraphics::CQuadItem CursorTBack(Textbox.x - (OnePixelWidth * 2.0f) / 2.0f, Textbox.y, OnePixelWidth * 2 * 2.0f, Textbox.h);
-			Graphics()->QuadsDrawTL(&CursorTBack, 1);
-			Graphics()->SetColor(1, 1, 1, 1);
-			IGraphics::CQuadItem CursorT(Textbox.x, Textbox.y + OnePixelWidth * 1.5f, OnePixelWidth * 2.0f, Textbox.h - OnePixelWidth * 1.5f * 2);
-			Graphics()->QuadsDrawTL(&CursorT, 1);
-			Graphics()->QuadsEnd();
-		}
-		if(StrLenDispl >= 1 && StrLenDispl == s_AtIndex && pDisplayStr[StrLenDispl - 1] != ' ')
-			OffsetGlyph = 0;
-		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex, -1.0f);
-		Textbox = TmpTextBox;
+		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, DispCursorPos, Textbox.w * 2.0f);
 		Textbox.x += w + OffsetGlyph;
 
 		if((2 * time_get() / time_freq()) % 2)
@@ -1174,6 +1155,9 @@ void CMenus::OnInit()
 		m_Popup = POPUP_LANGUAGE;
 	if(g_Config.m_ClSkipStartMenu)
 		m_ShowStart = false;
+
+	m_RefreshButton.Init(UI());
+	m_ConnectButton.Init(UI());
 
 	Console()->Chain("add_favorite", ConchainServerbrowserUpdate, this);
 	Console()->Chain("remove_favorite", ConchainServerbrowserUpdate, this);

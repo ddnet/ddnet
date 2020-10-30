@@ -406,7 +406,8 @@ bool CScore::MapInfoThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 		char aAverageString[60] = "\0";
 		if(Average > 0)
 		{
-			str_format(aAverageString, sizeof(aAverageString), " in %d:%02d average", Average / 60, Average % 60);
+			str_time((int64)Average * 100, TIME_HOURS, aBuf, sizeof(aBuf));
+			str_format(aAverageString, sizeof(aAverageString), " in %s average", aBuf);
 		}
 
 		char aStars[20];
@@ -424,8 +425,9 @@ bool CScore::MapInfoThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 		char aOwnFinishesString[40] = "\0";
 		if(OwnTime > 0)
 		{
+			str_time_float(OwnTime, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
 			str_format(aOwnFinishesString, sizeof(aOwnFinishesString),
-				", your time: %02d:%05.2f", (int)(OwnTime / 60), OwnTime - ((int)OwnTime / 60 * 60));
+				", your time: %s", aBuf);
 		}
 
 		str_format(pData->m_pResult->m_Data.m_aaMessages[0], sizeof(pData->m_pResult->m_Data.m_aaMessages[0]),
@@ -674,10 +676,11 @@ bool CScore::ShowRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 	{
 		int Rank = pSqlServer->GetInt(1);
 		float Time = pSqlServer->GetFloat(3);
+		str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
 		if(g_Config.m_SvHideScore)
 		{
 			str_format(pData->m_pResult->m_Data.m_aaMessages[0], sizeof(pData->m_pResult->m_Data.m_aaMessages[0]),
-				"Your time: %02d:%05.2f", (int)(Time / 60), Time - ((int)Time / 60 * 60));
+				"Your time: %s", aBuf);
 		}
 		else
 		{
@@ -685,8 +688,8 @@ bool CScore::ShowRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 			pSqlServer->GetString(2, aName, sizeof(aName));
 			pData->m_pResult->m_MessageKind = CScorePlayerResult::ALL;
 			str_format(pData->m_pResult->m_Data.m_aaMessages[0], sizeof(pData->m_pResult->m_Data.m_aaMessages[0]),
-				"%d. %s Time: %02d:%05.2f, requested by %s",
-				Rank, aName, (int)(Time / 60), Time - ((int)Time / 60 * 60), pData->m_RequestingPlayer);
+				"%d. %s Time: %s, requested by %s",
+				Rank, aName, aBuf, pData->m_RequestingPlayer);
 		}
 	}
 	else
@@ -738,6 +741,7 @@ bool CScore::ShowTeamRankThread(IDbConnection *pSqlServer, const ISqlData *pGame
 	if(pSqlServer->Step())
 	{
 		float Time = pSqlServer->GetFloat(3);
+		str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
 		int Rank = pSqlServer->GetInt(4);
 		CTeamrank Teamrank;
 		Teamrank.NextSqlResult(pSqlServer);
@@ -756,14 +760,14 @@ bool CScore::ShowTeamRankThread(IDbConnection *pSqlServer, const ISqlData *pGame
 		if(g_Config.m_SvHideScore)
 		{
 			str_format(pData->m_pResult->m_Data.m_aaMessages[0], sizeof(pData->m_pResult->m_Data.m_aaMessages[0]),
-				"Your team time: %02d:%05.02f", (int)(Time / 60), Time - ((int)Time / 60 * 60));
+				"Your team time: %s", aBuf);
 		}
 		else
 		{
 			pData->m_pResult->m_MessageKind = CScorePlayerResult::ALL;
 			str_format(pData->m_pResult->m_Data.m_aaMessages[0], sizeof(pData->m_pResult->m_Data.m_aaMessages[0]),
-				"%d. %s Team time: %02d:%05.02f, requested by %s",
-				Rank, aFormattedNames, (int)(Time / 60), Time - ((int)Time / 60 * 60), pData->m_RequestingPlayer);
+				"%d. %s Team time: %s, requested by %s",
+				Rank, aFormattedNames, aBuf, pData->m_RequestingPlayer);
 		}
 	}
 	else
@@ -817,10 +821,10 @@ bool CScore::ShowTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData
 		char aName[MAX_NAME_LENGTH];
 		pSqlServer->GetString(1, aName, sizeof(aName));
 		float Time = pSqlServer->GetFloat(2);
+		str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
 		int Rank = pSqlServer->GetInt(3);
 		str_format(pData->m_pResult->m_Data.m_aaMessages[Line], sizeof(pData->m_pResult->m_Data.m_aaMessages[Line]),
-			"%d. %s Time: %02d:%05.2f",
-			Rank, aName, (int)(Time / 60), Time - ((int)Time / 60 * 60));
+			"%d. %s Time: %s", Rank, aName, aBuf);
 		Line++;
 	}
 	strcpy(pData->m_pResult->m_Data.m_aaMessages[Line], "-------------------------------");
@@ -877,6 +881,7 @@ bool CScore::ShowTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGame
 		{
 			bool Last = false;
 			float Time = pSqlServer->GetFloat(2);
+			str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
 			int Rank = pSqlServer->GetInt(3);
 			int TeamSize = pSqlServer->GetInt(4);
 
@@ -896,8 +901,8 @@ bool CScore::ShowTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGame
 					break;
 				}
 			}
-			str_format(paMessages[Line], sizeof(paMessages[Line]), "%d. %s Team Time: %02d:%05.2f",
-				Rank, aNames, (int)(Time / 60), Time - ((int)Time / 60 * 60));
+			str_format(paMessages[Line], sizeof(paMessages[Line]), "%d. %s Team Time: %s",
+				Rank, aNames, aBuf);
 			if(Last)
 			{
 				Line++;
@@ -982,6 +987,7 @@ bool CScore::ShowTimesThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 	do
 	{
 		float Time = pSqlServer->GetFloat(1);
+		str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
 		int Ago = pSqlServer->GetInt(2);
 		int Stamp = pSqlServer->GetInt(3);
 
@@ -992,12 +998,10 @@ bool CScore::ShowTimesThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		{
 			if(Stamp == 0) // stamp is 00:00:00 cause it's an old entry from old times where there where no stamps yet
 				str_format(paMessages[Line], sizeof(paMessages[Line]),
-					"%02d:%05.02f, don't know how long ago",
-					(int)(Time / 60), Time - ((int)Time / 60 * 60));
+					"%s, don't know how long ago", aBuf);
 			else
 				str_format(paMessages[Line], sizeof(paMessages[Line]),
-					"%s ago, %02d:%05.02f",
-					aAgoString, (int)(Time / 60), Time - ((int)Time / 60 * 60));
+					"%s ago, %s", aAgoString, aBuf);
 		}
 		else // last 5 times of the server
 		{
@@ -1006,14 +1010,12 @@ bool CScore::ShowTimesThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 			if(Stamp == 0) // stamp is 00:00:00 cause it's an old entry from old times where there where no stamps yet
 			{
 				str_format(paMessages[Line], sizeof(paMessages[Line]),
-					"%s, %02d:%05.02f, don't know when",
-					aName, (int)(Time / 60), Time - ((int)Time / 60 * 60));
+					"%s, %s, don't know when", aName, aBuf);
 			}
 			else
 			{
 				str_format(paMessages[Line], sizeof(paMessages[Line]),
-					"%s, %s ago, %02d:%05.02f",
-					aName, aAgoString, (int)(Time / 60), Time - ((int)Time / 60 * 60));
+					"%s, %s ago, %s", aName, aAgoString, aBuf);
 			}
 		}
 		Line++;
@@ -1142,8 +1144,8 @@ bool CScore::RandomMapThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		str_format(aBuf, sizeof(aBuf),
 			"SELECT Map FROM %s_maps "
 			"WHERE Server = ? AND Map != ? AND Stars = ? "
-			"ORDER BY RAND() LIMIT 1;",
-			pSqlServer->GetPrefix());
+			"ORDER BY %s LIMIT 1;",
+			pSqlServer->GetPrefix(), pSqlServer->Random());
 		pSqlServer->PrepareStatement(aBuf);
 		pSqlServer->BindInt(3, pData->m_Stars);
 	}
@@ -1152,8 +1154,8 @@ bool CScore::RandomMapThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		str_format(aBuf, sizeof(aBuf),
 			"SELECT Map FROM %s_maps "
 			"WHERE Server = ? AND Map != ? "
-			"ORDER BY RAND() LIMIT 1;",
-			pSqlServer->GetPrefix());
+			"ORDER BY %s LIMIT 1;",
+			pSqlServer->GetPrefix(), pSqlServer->Random());
 		pSqlServer->PrepareStatement(aBuf);
 	}
 	pSqlServer->BindString(1, pData->m_ServerType);
@@ -1200,9 +1202,9 @@ bool CScore::RandomUnfinishedMapThread(IDbConnection *pSqlServer, const ISqlData
 			"  SELECT Map "
 			"  FROM %s_race "
 			"  WHERE Name = ?"
-			") ORDER BY RAND() "
+			") ORDER BY %s "
 			"LIMIT 1;",
-			pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
+			pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->Random());
 		pSqlServer->PrepareStatement(aBuf);
 		pSqlServer->BindString(1, pData->m_ServerType);
 		pSqlServer->BindString(2, pData->m_CurrentMap);
@@ -1218,9 +1220,9 @@ bool CScore::RandomUnfinishedMapThread(IDbConnection *pSqlServer, const ISqlData
 			"  SELECT Map "
 			"  FROM %s_race as race "
 			"  WHERE Name = ?"
-			") ORDER BY RAND() "
+			") ORDER BY %s "
 			"LIMIT 1;",
-			pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
+			pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->Random());
 		pSqlServer->PrepareStatement(aBuf);
 		pSqlServer->BindString(1, pData->m_ServerType);
 		pSqlServer->BindString(2, pData->m_CurrentMap);

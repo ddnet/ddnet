@@ -123,22 +123,12 @@ void CHud::RenderGameTimer()
 		else
 			Time = (Client()->GameTick(g_Config.m_ClDummy) - m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick) / Client()->GameTickSpeed();
 
-		if(Time <= 0)
-			str_format(aBuf, sizeof(aBuf), "00:00");
-		else if(Time >= 3600 * 24)
-			str_format(aBuf, sizeof(aBuf), "%dd %02d:%02d:%02d", Time / (3600 * 24), (Time % (3600 * 24)) / 3600, (Time % 3600) / 60, Time % 60);
-		else if(Time >= 3600)
-			str_format(aBuf, sizeof(aBuf), "%02d:%02d:%02d", Time / 3600, (Time % 3600) / 60, Time % 60);
-		else
-			str_format(aBuf, sizeof(aBuf), "%02d:%02d", Time / 60, Time % 60);
+		str_time(Time * 100, TIME_DAYS, aBuf, sizeof(aBuf));
 		float FontSize = 10.0f;
 		float w;
-		if(Time >= 3600 * 24)
-			w = TextRender()->TextWidth(0, 12, "00d 00:00:00", -1, -1.0f);
-		else if(Time >= 3600)
-			w = TextRender()->TextWidth(0, 12, "00:00:00", -1, -1.0f);
-		else
-			w = TextRender()->TextWidth(0, 12, "00:00", -1, -1.0f);
+		w = TextRender()->TextWidth(0, 12,
+			Time >= 3600 * 24 ? "00d 00:00:00" : Time >= 3600 ? "00:00:00" : "00:00",
+			-1, -1.0f);
 		// last 60 sec red, last 10 sec blink
 		if(m_pClient->m_Snap.m_pGameInfoObj->m_TimeLimit && Time <= 60 && (m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer <= 0))
 		{
@@ -340,13 +330,7 @@ void CHud::RenderScoreHud()
 					if(m_pClient->m_GameInfo.m_TimeScore && g_Config.m_ClDDRaceScoreBoard)
 					{
 						if(apPlayerInfo[t]->m_Score != -9999)
-						{
-							int Secs = abs(apPlayerInfo[t]->m_Score);
-							if(Secs > 3600)
-								str_format(aScore[t], sizeof(aScore[t]), "%02d:%02d:%02d", Secs / 3600, (Secs % 3600) / 60, Secs % 60);
-							else
-								str_format(aScore[t], sizeof(aScore[t]), "%02d:%02d", Secs / 60, Secs % 60);
-						}
+							str_time((int64)abs(apPlayerInfo[t]->m_Score) * 100, TIME_HOURS, aScore[t], sizeof(aScore[t]));
 						else
 							aScore[t][0] = 0;
 					}
@@ -941,9 +925,11 @@ void CHud::RenderDDRaceEffects()
 	if(m_DDRaceTime)
 	{
 		char aBuf[64];
+		char aTime[32];
 		if(m_FinishTime)
 		{
-			str_format(aBuf, sizeof(aBuf), "Finish time: %02d:%02d.%02d", m_DDRaceTime / 6000, m_DDRaceTime / 100 - m_DDRaceTime / 6000 * 60, m_DDRaceTime % 100);
+			str_time(m_DDRaceTime, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
+			str_format(aBuf, sizeof(aBuf), "Finish time: %s", aTime);
 			TextRender()->Text(0, 150 * Graphics()->ScreenAspect() - TextRender()->TextWidth(0, 12, aBuf, -1, -1.0f) / 2, 20, 12, aBuf, -1.0f);
 		}
 		else if(m_CheckpointTick + Client()->GameTickSpeed() * 6 > Client()->GameTick(g_Config.m_ClDummy))
@@ -978,10 +964,9 @@ void CHud::RenderRecord()
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), Localize("Server best:"));
 		TextRender()->Text(0, 5, 40, 6, aBuf, -1.0f);
-		if(m_ServerRecord > 3600)
-			str_format(aBuf, sizeof(aBuf), "%02d:%02d:%05.2f", (int)m_ServerRecord / 3600, ((int)m_ServerRecord % 3600) / 60, m_ServerRecord - ((int)m_ServerRecord / 60 * 60));
-		else
-			str_format(aBuf, sizeof(aBuf), "   %02d:%05.2f", (int)m_ServerRecord / 60, m_ServerRecord - ((int)m_ServerRecord / 60 * 60));
+		char aTime[32];
+		str_time_float(m_ServerRecord, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
+		str_format(aBuf, sizeof(aBuf), "%s%s", m_ServerRecord > 3600 ? "" : "   ", aTime);
 		TextRender()->Text(0, 53, 40, 6, aBuf, -1.0f);
 	}
 
@@ -991,10 +976,9 @@ void CHud::RenderRecord()
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), Localize("Personal best:"));
 		TextRender()->Text(0, 5, 47, 6, aBuf, -1.0f);
-		if(PlayerRecord > 3600)
-			str_format(aBuf, sizeof(aBuf), "%02d:%02d:%05.2f", (int)PlayerRecord / 3600, ((int)PlayerRecord % 3600) / 60, PlayerRecord - ((int)PlayerRecord / 60 * 60));
-		else
-			str_format(aBuf, sizeof(aBuf), "   %02d:%05.2f", (int)PlayerRecord / 60, PlayerRecord - ((int)PlayerRecord / 60 * 60));
+		char aTime[32];
+		str_time_float(PlayerRecord, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
+		str_format(aBuf, sizeof(aBuf), "%s%s", PlayerRecord > 3600 ? "" : "   ", aTime);
 		TextRender()->Text(0, 53, 47, 6, aBuf, -1.0f);
 	}
 }

@@ -766,20 +766,29 @@ void CPlayers::OnInit()
 		{
 			if(g_pData->m_Weapons.m_aId[i].m_aSpriteMuzzles[n])
 			{
-				RenderTools()->GetSpriteScale(g_pData->m_Weapons.m_aId[i].m_aSpriteMuzzles[n], ScaleX, ScaleY);
+				if(i == WEAPON_GUN || i == WEAPON_SHOTGUN)
+				{
+					// TODO: hardcoded for now to get the same particle size as before
+					RenderTools()->GetSpriteScaleImpl(96, 64, ScaleX, ScaleY);
+				}
+				else
+					RenderTools()->GetSpriteScale(g_pData->m_Weapons.m_aId[i].m_aSpriteMuzzles[n], ScaleX, ScaleY);
 			}
+
+			float SWidth = (g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleX) * (4.0f / 3.0f);
+			float SHeight = g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleY;
 
 			Graphics()->QuadsSetSubset(0, 0, 1, 1);
 			if(WEAPON_NINJA == i)
 				RenderTools()->QuadContainerAddSprite(m_WeaponSpriteMuzzleQuadContainerIndex[i], 160.f * ScaleX, 160.f * ScaleY);
 			else
-				RenderTools()->QuadContainerAddSprite(m_WeaponSpriteMuzzleQuadContainerIndex[i], g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleX, g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleY);
+				RenderTools()->QuadContainerAddSprite(m_WeaponSpriteMuzzleQuadContainerIndex[i], SWidth, SHeight);
 
 			Graphics()->QuadsSetSubset(0, 1, 1, 0);
 			if(WEAPON_NINJA == i)
 				RenderTools()->QuadContainerAddSprite(m_WeaponSpriteMuzzleQuadContainerIndex[i], 160.f * ScaleX, 160.f * ScaleY);
 			else
-				RenderTools()->QuadContainerAddSprite(m_WeaponSpriteMuzzleQuadContainerIndex[i], g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleX, g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleY);
+				RenderTools()->QuadContainerAddSprite(m_WeaponSpriteMuzzleQuadContainerIndex[i], SWidth, SHeight);
 		}
 	}
 

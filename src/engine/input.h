@@ -12,12 +12,17 @@ class IInput : public IInterface
 {
 	MACRO_INTERFACE("input", 0)
 public:
+	enum
+	{
+		INPUT_TEXT_SIZE = 128
+	};
+
 	class CEvent
 	{
 	public:
 		int m_Flags;
 		int m_Key;
-		char m_aText[32];
+		char m_aText[INPUT_TEXT_SIZE];
 		int m_InputCount;
 	};
 
@@ -70,7 +75,8 @@ public:
 
 	virtual bool GetIMEState() = 0;
 	virtual void SetIMEState(bool Activate) = 0;
-	virtual const char *GetIMECandidate() = 0;
+	virtual int GetIMEEditingTextLength() const = 0;
+	virtual const char *GetIMEEditingText() = 0;
 	virtual int GetEditingCursor() = 0;
 	virtual void SetEditingPosition(float X, float Y) = 0;
 };
