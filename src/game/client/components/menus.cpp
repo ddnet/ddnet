@@ -225,7 +225,7 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 	{
 		int64 Time = time_get_microseconds();
 
-		if(pAnimator->m_Time + 100000 < Time)
+		if(pAnimator->m_Time + (int64)100000 < Time)
 		{
 			pAnimator->m_Value = pAnimator->m_Active ? 1 : 0;
 			pAnimator->m_Time = Time;

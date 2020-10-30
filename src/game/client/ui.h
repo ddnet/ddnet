@@ -3,6 +3,8 @@
 #ifndef GAME_CLIENT_UI_H
 #define GAME_CLIENT_UI_H
 
+#include "base/system.h"
+
 class CUIRect
 {
 	// TODO: Refactor: Redo UI scaling
@@ -103,7 +105,7 @@ struct SUIAnimator
 	bool m_ScaleLabel;
 	bool m_RepositionLabel;
 
-	long long m_Time;
+	int64 m_Time;
 	float m_Value;
 
 	float m_XOffset;
