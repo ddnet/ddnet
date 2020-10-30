@@ -1768,11 +1768,12 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		char LineBuilder[128];
 		float Width;
 		float TempY = Y;
+		constexpr float RealBackgroundRounding = CChat::MESSAGE_ROUNDING * 2.0f;
 
 		if(g_Config.m_ClShowChatSystem)
 		{
 			Width = TextRender()->TextWidth(0, RealFontSize, "*** 'Evgesha' entered and joined the game", -1, -1);
-			RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX, RealFontSize + RealMsgPaddingY, 8.0f, CUI::CORNER_ALL);
+			RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, CUI::CORNER_ALL);
 			TempY += RealOffsetY;
 		}
 
@@ -1782,7 +1783,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			str_copy(LineBuilder, "DDRacer2002: Hey, how are you ", sizeof(LineBuilder));
 		str_append(LineBuilder, aBuf, sizeof(LineBuilder));
 		Width = TextRender()->TextWidth(0, RealFontSize, LineBuilder, -1, -1);
-		RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, 8.0f, CUI::CORNER_ALL);
+		RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, CUI::CORNER_ALL);
 		TempY += RealOffsetY;
 
 		if(g_Config.m_ClShowIDs)
@@ -1790,7 +1791,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		else
 			str_copy(LineBuilder, "Your Teammate: Let's speedrun this!", sizeof(LineBuilder));
 		Width = TextRender()->TextWidth(0, RealFontSize, LineBuilder, -1, -1);
-		RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, 8.0f, CUI::CORNER_ALL);
+		RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, CUI::CORNER_ALL);
 		TempY += RealOffsetY;
 
 		if(g_Config.m_ClShowIDs)
@@ -1798,7 +1799,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		else
 			str_copy(LineBuilder, "♥ Friend: Hello there", sizeof(LineBuilder));
 		Width = TextRender()->TextWidth(0, RealFontSize, LineBuilder, -1, -1);
-		RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, 8.0f, CUI::CORNER_ALL);
+		RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, CUI::CORNER_ALL);
 		TempY += RealOffsetY;
 
 		if(g_Config.m_ClShowIDs)
@@ -1806,11 +1807,11 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		else
 			str_copy(LineBuilder, "Spammer [6]: Hey fools, I'm spamming here!", sizeof(LineBuilder));
 		Width = TextRender()->TextWidth(0, RealFontSize, LineBuilder, -1, -1);
-		RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, 8.0f, CUI::CORNER_ALL);
+		RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, CUI::CORNER_ALL);
 		TempY += RealOffsetY;
 
 		Width = TextRender()->TextWidth(0, RealFontSize, "*** Echo command executed", -1, -1);
-		RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX, RealFontSize + RealMsgPaddingY, 8.0f, CUI::CORNER_ALL);
+		RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, CUI::CORNER_ALL);
 		TempY += RealOffsetY;
 
 		Graphics()->QuadsEnd();
@@ -1820,12 +1821,13 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	constexpr int PreviewTeeCount = 4;
 	constexpr float RealTeeSize = CChat::MESSAGE_TEE_SIZE * 2;
 	constexpr float RealTeeSizeHalved = CChat::MESSAGE_TEE_SIZE;
-	constexpr float TWSkinUnreliableOffset = 0.5f;
-	constexpr float OffsetTeeY = RealTeeSizeHalved / 2.0f;
+	constexpr float TWSkinUnreliableOffset = -0.25f;
+	constexpr float OffsetTeeY = RealTeeSizeHalved;
 	const float FullHeightMinusTee = RealOffsetY - RealTeeSize;
 
 	CTeeRenderInfo RenderInfo[PreviewTeeCount];
 
+	// Load skins if needed
 	if(g_Config.m_ClChatTee)
 	{
 		int DefaultInd = GameClient()->m_pSkins->Find("default");
