@@ -148,7 +148,7 @@ void CScoreboard::RenderSpectators(float x, float y, float w)
 	}
 }
 
-void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const char *pTitle)
+void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const char *pTitle, int AdditionalMeasurementTeam)
 {
 	if(Team == TEAM_SPECTATORS)
 		return;
@@ -254,28 +254,32 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	float TeeSizeMod = 1.0f;
 	float Spacing = 16.0f;
 	float RoundRadius = 15.0f;
-	if(m_pClient->m_Snap.m_aTeamSize[Team] > 48)
+	
+	if(AdditionalMeasurementTeam == -1)
+		AdditionalMeasurementTeam = Team;
+
+	if(m_pClient->m_Snap.m_aTeamSize[Team] > 48 || m_pClient->m_Snap.m_aTeamSize[AdditionalMeasurementTeam] > 48)
 	{
 		LineHeight = 20.0f;
 		TeeSizeMod = 0.4f;
 		Spacing = 0.0f;
 		RoundRadius = 5.0f;
 	}
-	else if(m_pClient->m_Snap.m_aTeamSize[Team] > 32)
+	else if(m_pClient->m_Snap.m_aTeamSize[Team] > 32 || m_pClient->m_Snap.m_aTeamSize[AdditionalMeasurementTeam] > 32)
 	{
 		LineHeight = 27.0f;
 		TeeSizeMod = 0.6f;
 		Spacing = 0.0f;
 		RoundRadius = 5.0f;
 	}
-	else if(m_pClient->m_Snap.m_aTeamSize[Team] > 12)
+	else if(m_pClient->m_Snap.m_aTeamSize[Team] > 12 || m_pClient->m_Snap.m_aTeamSize[AdditionalMeasurementTeam] > 12)
 	{
 		LineHeight = 40.0f;
 		TeeSizeMod = 0.8f;
 		Spacing = 0.0f;
 		RoundRadius = 15.0f;
 	}
-	else if(m_pClient->m_Snap.m_aTeamSize[Team] > 8)
+	else if(m_pClient->m_Snap.m_aTeamSize[Team] > 8 || m_pClient->m_Snap.m_aTeamSize[AdditionalMeasurementTeam] > 8)
 	{
 		LineHeight = 50.0f;
 		TeeSizeMod = 0.9f;
@@ -284,9 +288,9 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	}
 
 	float FontSize = 24.0f;
-	if(m_pClient->m_Snap.m_aTeamSize[Team] > 48)
+	if(m_pClient->m_Snap.m_aTeamSize[Team] > 48 || m_pClient->m_Snap.m_aTeamSize[AdditionalMeasurementTeam] > 48)
 		FontSize = 16.0f;
-	else if(m_pClient->m_Snap.m_aTeamSize[Team] > 32)
+	else if(m_pClient->m_Snap.m_aTeamSize[Team] > 32 || m_pClient->m_Snap.m_aTeamSize[AdditionalMeasurementTeam] > 32)
 		FontSize = 20.0f;
 
 	float ScoreOffset = x + 10.0f, ScoreLength = TextRender()->TextWidth(0, FontSize, "00:00:00", -1, -1.0f);
@@ -655,8 +659,8 @@ void CScoreboard::OnRender()
 				TextRender()->Text(0, Width / 2 - w / 2, 39, 86.0f, aText, -1.0f);
 			}
 
-			RenderScoreboard(Width / 2 - w - 5.0f, 150.0f, w, TEAM_RED, pRedClanName ? pRedClanName : Localize("Red team"));
-			RenderScoreboard(Width / 2 + 5.0f, 150.0f, w, TEAM_BLUE, pBlueClanName ? pBlueClanName : Localize("Blue team"));
+			RenderScoreboard(Width / 2 - w - 5.0f, 150.0f, w, TEAM_RED, pRedClanName ? pRedClanName : Localize("Red team"), TEAM_BLUE);
+			RenderScoreboard(Width / 2 + 5.0f, 150.0f, w, TEAM_BLUE, pBlueClanName ? pBlueClanName : Localize("Blue team"), TEAM_RED);
 		}
 	}
 
