@@ -11,6 +11,10 @@ class CChat : public CComponent
 {
 	CLineInput m_Input;
 
+	static constexpr float CHAT_WIDTH = 200.0f;
+	static constexpr float CHAT_HEIGHT_FULL = 200.0f;
+	static constexpr float CHAT_HEIGHT_MIN = 50.0f;
+
 	enum
 	{
 		MAX_LINES = 25
@@ -19,7 +23,7 @@ class CChat : public CComponent
 	struct CLine
 	{
 		int64 m_Time;
-		float m_YOffset[2];
+		float m_YOffset;
 		int m_ClientID;
 		int m_Team;
 		int m_NameColor;
@@ -43,7 +47,6 @@ class CChat : public CComponent
 		int m_TimesRepeated;
 	};
 
-	bool m_PrevScoreBoardShowed;
 	bool m_PrevShowChat;
 
 	CLine m_aLines[MAX_LINES];
@@ -113,11 +116,12 @@ public:
 	CChat();
 
 	static constexpr float MESSAGE_PADDING_X = 5.0f;
-	static constexpr float MESSAGE_TEE_SIZE = 8.0f;
+	static constexpr float MESSAGE_TEE_SIZE = 7.0f;
 	static constexpr float MESSAGE_TEE_PADDING_RIGHT = 0.5f;
 	static constexpr float FONT_SIZE = 6.0f;
-	static constexpr float MESSAGE_PADDING_Y = 3.f;
-	static_assert(FONT_SIZE + MESSAGE_PADDING_Y >= 8.0f, "Corners for background chat are too huge for this combination of font size and message padding.");
+	static constexpr float MESSAGE_PADDING_Y = 1.0f;
+	static constexpr float MESSAGE_ROUNDING = 3.0f;
+	static_assert(FONT_SIZE + MESSAGE_PADDING_Y >= MESSAGE_ROUNDING * 2.0f, "Corners for background chat are too huge for this combination of font size and message padding.");
 
 	bool IsActive() const { return m_Mode != MODE_NONE; }
 	void AddLine(int ClientID, int Team, const char *pLine);
