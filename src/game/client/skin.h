@@ -42,10 +42,10 @@ struct CSkin
 	char m_aName[24];
 	ColorRGBA m_BloodColor;
 
-	bool operator<(const CSkin &Other) const { return str_comp(m_aName, Other.m_aName) < 0; }
+	bool operator<(const CSkin &Other) const { return str_comp_nocase(m_aName, Other.m_aName) < 0; }
 
-	bool operator<(const char *pOther) const { return str_comp(m_aName, pOther) < 0; }
-	bool operator==(const char *pOther) const { return !str_comp(m_aName, pOther); }
+	bool operator<(const char *pOther) const { return str_comp_nocase(m_aName, pOther) < 0; }
+	bool operator==(const char *pOther) const { return !str_comp_nocase(m_aName, pOther); }
 };
 
 #endif
