@@ -616,14 +616,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 	MainView.Margin(10.0f, &MainView);
 
 	if(Client()->RconAuthed())
-	{
 		MainView.HSplitBottom(90.0f, &MainView, &RconExtension);
-		
-		// background
-		RconExtension.Margin(10.0f, &RconExtension);
-		RconExtension.HSplitTop(20.0f, &Bottom, &RconExtension);
-		RconExtension.HSplitTop(5.0f, 0, &RconExtension);
-	}
 
 	// tab bar
 	{
@@ -731,6 +724,11 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		// extended features (only available when authed in rcon)
 		if(Client()->RconAuthed())
 		{
+			// background
+			RconExtension.Margin(10.0f, &RconExtension);
+			RconExtension.HSplitTop(20.0f, &Bottom, &RconExtension);
+			RconExtension.HSplitTop(5.0f, 0, &RconExtension);
+
 			// force vote
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
 			Bottom.VSplitLeft(120.0f, &Button, &Bottom);
