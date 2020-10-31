@@ -654,11 +654,12 @@ void CScoreboard::OnRender()
 				float w = TextRender()->TextWidth(0, 86.0f, aText, -1, -1.0f);
 				TextRender()->Text(0, Width / 2 - w / 2, 39, 86.0f, aText, -1.0f);
 			}
-            
-            if(m_pClient->m_Snap.m_aTeamSize[TEAM_RED] >= m_pClient->m_Snap.m_aTeamSize[TEAM_BLUE])
-                m_pClient->m_Snap.m_aTeamSize[TEAM_BLUE] = m_pClient->m_Snap.m_aTeamSize[TEAM_RED];
-            else
-                m_pClient->m_Snap.m_aTeamSize[TEAM_RED] = m_pClient->m_Snap.m_aTeamSize[TEAM_BLUE];
+            		
+			// Fix #3216
+            		if(m_pClient->m_Snap.m_aTeamSize[TEAM_RED] >= m_pClient->m_Snap.m_aTeamSize[TEAM_BLUE])
+                		m_pClient->m_Snap.m_aTeamSize[TEAM_BLUE] = m_pClient->m_Snap.m_aTeamSize[TEAM_RED];
+           		else
+                		m_pClient->m_Snap.m_aTeamSize[TEAM_RED] = m_pClient->m_Snap.m_aTeamSize[TEAM_BLUE];
 
 			RenderScoreboard(Width / 2 - w - 5.0f, 150.0f, w, TEAM_RED, pRedClanName ? pRedClanName : Localize("Red team"));
 			RenderScoreboard(Width / 2 + 5.0f, 150.0f, w, TEAM_BLUE, pBlueClanName ? pBlueClanName : Localize("Blue team"));
