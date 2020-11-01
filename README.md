@@ -179,7 +179,7 @@ $ mkdir build
 $ cd build
 $ cmake -DMYSQL=ON ..
 $ make -j8
-$ ./trainfng -f mine.cfg
+$ ./TrainFNG-Server -f mine.cfg
 ```
 
 <a href="https://repology.org/metapackage/ddnet/versions">

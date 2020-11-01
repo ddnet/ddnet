@@ -129,7 +129,7 @@ else()
   )
 endif()
 
-set(SERVER_EXECUTABLE trainfng_srv CACHE STRING "Name of the built server executable")
+set(SERVER_EXECUTABLE TrainFNG-Server CACHE STRING "Name of the built server executable")
 set(CLIENT_EXECUTABLE DDNet CACHE STRING "Name of the build client executable")
 
 ########################################################################
