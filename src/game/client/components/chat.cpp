@@ -58,7 +58,8 @@ void CChat::RebuildChat()
 			Graphics()->DeleteQuadContainer(m_aLines[i].m_QuadContainerIndex);
 		m_aLines[i].m_QuadContainerIndex = -1;
 		// recalculate sizes
-		m_aLines[i].m_YOffset = -1.f;
+		m_aLines[i].m_YOffset[0] = -1.f;
+		m_aLines[i].m_YOffset[1] = -1.f;
 	}
 }
 
@@ -84,7 +85,7 @@ void CChat::Reset()
 		m_aLines[i].m_TimesRepeated = 0;
 		m_aLines[i].m_HasRenderTee = false;
 	}
-
+	m_PrevScoreBoardShowed = false;
 	m_PrevShowChat = false;
 
 	m_ReverseTAB = false;
@@ -701,7 +702,8 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 				Graphics()->DeleteQuadContainer(pCurrentLine->m_QuadContainerIndex);
 			pCurrentLine->m_QuadContainerIndex = -1;
 			pCurrentLine->m_Time = time();
-			pCurrentLine->m_YOffset = -1.f;
+			pCurrentLine->m_YOffset[0] = -1.f;
+			pCurrentLine->m_YOffset[1] = -1.f;
 			return;
 		}
 
@@ -710,7 +712,8 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		pCurrentLine = &m_aLines[m_CurrentLine];
 		pCurrentLine->m_TimesRepeated = 0;
 		pCurrentLine->m_Time = time();
-		pCurrentLine->m_YOffset = -1.0f;
+		pCurrentLine->m_YOffset[0] = -1.0f;
+		pCurrentLine->m_YOffset[1] = -1.0f;
 		pCurrentLine->m_ClientID = ClientID;
 		pCurrentLine->m_Team = Team;
 		pCurrentLine->m_NameColor = -2;
@@ -890,9 +893,14 @@ void CChat::OnPrepareLines()
 	float y = 300.0f - 28.0f;
 	float FontSize = FONT_SIZE;
 
-	bool ShowLargeArea = m_Show || g_Config.m_ClShowChat == 2;
-	bool ForceRecreate = ShowLargeArea != m_PrevShowChat;
+	bool IsScoreBoardOpen = m_pClient->m_pScoreboard->Active();
 
+	bool ForceRecreate = IsScoreBoardOpen != m_PrevScoreBoardShowed;
+	bool ShowLargeArea = m_Show || g_Config.m_ClShowChat == 2;
+
+	ForceRecreate |= ShowLargeArea != m_PrevShowChat;
+
+	m_PrevScoreBoardShowed = IsScoreBoardOpen;
 	m_PrevShowChat = ShowLargeArea;
 
 	float RealMsgPaddingX = MESSAGE_PADDING_X;
@@ -909,12 +917,13 @@ void CChat::OnPrepareLines()
 		RealMsgPaddingTee = 0;
 
 	int64 Now = time();
-	float LineWidth = CHAT_WIDTH - RealMsgPaddingX - RealMsgPaddingTee;
+	float LineWidth = (IsScoreBoardOpen ? 90.0f : 200.0f) - RealMsgPaddingX - RealMsgPaddingTee;
 
-	float HeightLimit = m_PrevShowChat ? CHAT_HEIGHT_MIN : CHAT_HEIGHT_FULL;
+	float HeightLimit = IsScoreBoardOpen ? 180.0f : m_PrevShowChat ? 50.0f : 200.0f;
 	float Begin = x;
 	float TextBegin = Begin + RealMsgPaddingX / 2.0f;
 	CTextCursor Cursor;
+	int OffsetType = IsScoreBoardOpen ? 1 : 0;
 
 	for(int i = 0; i < MAX_LINES; i++)
 	{
@@ -960,7 +969,7 @@ void CChat::OnPrepareLines()
 		}
 
 		// get the y offset (calculate it if we haven't done that yet)
-		if(m_aLines[r].m_YOffset < 0.0f)
+		if(m_aLines[r].m_YOffset[OffsetType] < 0.0f)
 		{
 			TextRender()->SetCursor(&Cursor, TextBegin, 0.0f, FontSize, 0);
 			Cursor.m_LineWidth = LineWidth;
@@ -985,15 +994,19 @@ void CChat::OnPrepareLines()
 			}
 
 			CTextCursor AppendCursor = Cursor;
-			AppendCursor.m_StartX = Cursor.m_X;
-			AppendCursor.m_LineWidth -= (Cursor.m_LongestLineWidth - Cursor.m_StartX);
+
+			if(!IsScoreBoardOpen)
+			{
+				AppendCursor.m_StartX = Cursor.m_X;
+				AppendCursor.m_LineWidth -= (Cursor.m_LongestLineWidth - Cursor.m_StartX);
+			}
 
 			TextRender()->TextEx(&AppendCursor, m_aLines[r].m_aText, -1);
 
-			m_aLines[r].m_YOffset = AppendCursor.m_Y + AppendCursor.m_FontSize + RealMsgPaddingY;
+			m_aLines[r].m_YOffset[OffsetType] = AppendCursor.m_Y + AppendCursor.m_FontSize + RealMsgPaddingY;
 		}
 
-		y -= m_aLines[r].m_YOffset;
+		y -= m_aLines[r].m_YOffset[OffsetType];
 
 		// cut off if msgs waste too much space
 		if(y < HeightLimit)
@@ -1094,8 +1107,11 @@ void CChat::OnPrepareLines()
 		TextRender()->TextColor(Color);
 
 		CTextCursor AppendCursor = Cursor;
-		AppendCursor.m_LineWidth -= (Cursor.m_LongestLineWidth - Cursor.m_StartX);
-		AppendCursor.m_StartX = Cursor.m_X;
+		if(!IsScoreBoardOpen)
+		{
+			AppendCursor.m_LineWidth -= (Cursor.m_LongestLineWidth - Cursor.m_StartX);
+			AppendCursor.m_StartX = Cursor.m_X;
+		}
 
 		if(m_aLines[r].m_TextContainerIndex == -1)
 			m_aLines[r].m_TextContainerIndex = TextRender()->CreateTextContainer(&AppendCursor, m_aLines[r].m_aText);
@@ -1104,7 +1120,7 @@ void CChat::OnPrepareLines()
 
 		if(g_Config.m_ClChatBackground && (m_aLines[r].m_aText[0] != '\0' || m_aLines[r].m_aName[0] != '\0'))
 		{
-			float Height = m_aLines[r].m_YOffset;
+			float Height = m_aLines[r].m_YOffset[OffsetType];
 			Graphics()->SetColor(1, 1, 1, 1);
 			m_aLines[r].m_QuadContainerIndex = RenderTools()->CreateRoundRectQuadContainer(Begin, y, (AppendCursor.m_LongestLineWidth - TextBegin) + RealMsgPaddingX * 1.5f, Height, MESSAGE_ROUNDING, CUI::CORNER_ALL);
 		}
@@ -1119,10 +1135,6 @@ void CChat::OnPrepareLines()
 
 void CChat::OnRender()
 {
-	// Do not render chat when scoreboard active
-	if(m_pClient->m_pScoreboard->Active())
-		return;
-
 	// send pending chat messages
 	if(m_PendingChatCounter > 0 && m_LastChatSend + time_freq() < time())
 	{
@@ -1219,7 +1231,8 @@ void CChat::OnRender()
 	OnPrepareLines();
 
 	int64 Now = time();
-	float HeightLimit = m_PrevShowChat ? CHAT_HEIGHT_MIN : CHAT_HEIGHT_FULL;
+	float HeightLimit = m_pClient->m_pScoreboard->Active() ? 180.0f : m_PrevShowChat ? 50.0f : 200.0f;
+	int OffsetType = m_pClient->m_pScoreboard->Active() ? 1 : 0;
 
 	float RealMsgPaddingX = MESSAGE_PADDING_X;
 	float RealMsgPaddingY = MESSAGE_PADDING_Y;
@@ -1236,7 +1249,7 @@ void CChat::OnRender()
 		if(Now > m_aLines[r].m_Time + 16 * time_freq() && !m_PrevShowChat)
 			break;
 
-		y -= m_aLines[r].m_YOffset;
+		y -= m_aLines[r].m_YOffset[OffsetType];
 
 		// cut off if msgs waste too much space
 		if(y < HeightLimit)
@@ -1273,7 +1286,7 @@ void CChat::OnRender()
 				float RowHeight = FONT_SIZE + RealMsgPaddingY;
 				float OffsetTeeY = MESSAGE_TEE_SIZE / 2.0f;
 				float FullHeightMinusTee = RowHeight - MESSAGE_TEE_SIZE;
-				float TWSkinUnreliableOffset = 0.25f; // teeworlds skins were always a bit in the ground
+				float TWSkinUnreliableOffset = 1.0f; // teeworlds skins were always a bit in the ground
 
 				CAnimState *pIdleState = CAnimState::GetIdle();
 				RenderTools()->RenderTee(pIdleState, &RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), vec2(x + (RealMsgPaddingX + MESSAGE_TEE_SIZE) / 2.0f, y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset), Blend);

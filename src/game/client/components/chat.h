@@ -11,9 +11,6 @@ class CChat : public CComponent
 {
 	CLineInput m_Input;
 
-	static constexpr float CHAT_WIDTH = 200.0f;
-	static constexpr float CHAT_HEIGHT_FULL = 200.0f;
-	static constexpr float CHAT_HEIGHT_MIN = 50.0f;
 	static constexpr float MESSAGE_PADDING_X = 5.0f;
 	static constexpr float MESSAGE_TEE_SIZE = 7.0f;
 	static constexpr float MESSAGE_TEE_PADDING_RIGHT = 0.5f;
@@ -30,7 +27,7 @@ class CChat : public CComponent
 	struct CLine
 	{
 		int64 m_Time;
-		float m_YOffset;
+		float m_YOffset[2];
 		int m_ClientID;
 		int m_Team;
 		int m_NameColor;
@@ -54,6 +51,7 @@ class CChat : public CComponent
 		int m_TimesRepeated;
 	};
 
+	bool m_PrevScoreBoardShowed;
 	bool m_PrevShowChat;
 
 	CLine m_aLines[MAX_LINES];
