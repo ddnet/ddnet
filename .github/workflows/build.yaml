@@ -85,7 +85,7 @@ jobs:
       run: |
         cd debug
         ${{ matrix.cmake-path }}cmake --build . --config Debug ${{ matrix.build-args }} --target run_tests
-        ./DDNet-Server shutdown
+        ./trainfng shutdown
 
     - name: Build in release mode
       env: ${{ matrix.env }}
@@ -98,7 +98,7 @@ jobs:
       run: |
         cd release
         ${{ matrix.cmake-path }}cmake --build . --config Release ${{ matrix.build-args }} --target run_tests
-        ./DDNet-Server shutdown
+        ./trainfng shutdown
 
     - name: Build in release mode with debug info and all features on
       if: matrix.fancy
@@ -113,7 +113,7 @@ jobs:
       run: |
         cd release
         ${{ matrix.cmake-path }}cmake --build . --config RelWithDebInfo ${{ matrix.build-args }} --target run_tests
-        ./DDNet-Server shutdown
+        ./trainfng shutdown
 
     - name: Package
       run: |

@@ -7,7 +7,7 @@
 #include <string>
 
 #define CLIENT_EXEC "DDNet"
-#define SERVER_EXEC "DDNet-Server"
+#define SERVER_EXEC "trainfng"
 
 #if defined(CONF_FAMILY_WINDOWS)
 #define PLAT_EXT ".exe"

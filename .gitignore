@@ -38,8 +38,8 @@ testrunner\[1\]_include.cmake
 # Ignore all the generated executables without extensions (for non-Windows
 # systems).
 DDNet
-DDNet-Server
-DDNet-Server-Launcher
+trainfng
+trainfng-Launcher
 libsteam_api.a
 config_retrieve
 config_store

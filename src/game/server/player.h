@@ -53,6 +53,8 @@ public:
 	//---------------------------------------------------------
 	// this is used for snapping so we know how we can clip the view for the player
 	vec2 m_ViewPos;
+	vec2 m_SpawnPos;
+	vec2 m_SpawnVel;
 	int m_TuneZone;
 	int m_TuneZoneOld;
 

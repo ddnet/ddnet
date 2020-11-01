@@ -403,3 +403,6 @@ MACRO_CONFIG_INT(GfxEnableTextureUnitOptimization, gfx_enable_texture_unit_optim
 MACRO_CONFIG_INT(GfxUsePreinitBuffer, gfx_use_preinitialized_buffer, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Use only one buffer for data, that is uploaded to the GPU(might help when using an iGPUs).")
 
 MACRO_CONFIG_INT(ClVideoRecorderFPS, cl_video_recorder_fps, 60, 1, 1000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "At which FPS the videorecorder should record demos.")
+
+// trainfng
+MACRO_CONFIG_STR(SvTrainfngTeam0Info, sv_trainfng_team_0_info, 128, "Welcome on trainfng\nTeam 01-49: laser\nTeam 50-63: grenade", CFGFLAG_SERVER, "Broadcast to display to players on team 0")

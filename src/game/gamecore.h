@@ -226,6 +226,8 @@ class CCharacterCore
 public:
 	vec2 m_Pos;
 	vec2 m_Vel;
+	vec2 m_SpawnPos;
+	vec2 m_SpawnVel;
 	bool m_Hook;
 	bool m_Collision;
 
@@ -288,10 +290,14 @@ public:
 	int m_FreezeEnd;
 	bool m_DeepFrozen;
 
+	void Lock() { lock_wait(m_GameCoreLock); }
+	void UnLock() { lock_unlock(m_GameCoreLock); }
+
 private:
 	CTeamsCore *m_pTeams;
 	int m_MoveRestrictions;
 	static bool IsSwitchActiveCb(int Number, void *pUser);
+	LOCK m_GameCoreLock = 0;
 };
 
 //input count

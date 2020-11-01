@@ -83,7 +83,7 @@ void runServer()
 		backing: NSBackingStoreBuffered
 		defer: NO];
 
-	[window setTitle: @"DDNet Server"];
+	[window setTitle: @"trainfng"];
 
 	view = [[[ServerView alloc] initWithFrame: graphicsRect] autorelease];
 	[view setEditable: NO];
@@ -94,7 +94,7 @@ void runServer()
 	[window makeKeyAndOrderFront: nil];
 
 	[view listenTo: task];
-	[task setLaunchPath: [mainBundle pathForAuxiliaryExecutable: @"DDNet-Server_sql"]];
+	[task setLaunchPath: [mainBundle pathForAuxiliaryExecutable: @"trainfng_sql"]];
 	[task setArguments: arguments];
 	[task launch];
 	[NSApp run];

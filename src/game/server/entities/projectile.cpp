@@ -160,6 +160,8 @@ void CProjectile::Tick()
 				GameServer()->CreateSound(ColPos, m_SoundImpact,
 					(m_Owner != -1) ? TeamMask : -1LL);
 			}
+			if(pTargetChr && pTargetChr->m_FreezeTime == 0)
+				pTargetChr->Freeze();
 		}
 		else if(m_Freeze)
 		{

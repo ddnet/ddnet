@@ -93,7 +93,7 @@ option(INFORM_UPDATE "Inform about available updates" ON)
 option(VIDEORECORDER "Enable video recording support via FFmpeg" OFF)
 option(UPNP "Enable UPnP support" OFF)
 option(ANTIBOT "Enable support for a dynamic anticheat library" OFF)
-option(CLIENT "Compile client" ON)
+option(CLIENT "Compile client" OFF)
 option(DOWNLOAD_GTEST "Download and compile GTest" ${AUTO_DEPENDENCIES_DEFAULT})
 option(STEAM "Build the Steam release version" OFF)
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
@@ -129,7 +129,7 @@ else()
   )
 endif()
 
-set(SERVER_EXECUTABLE DDNet-Server CACHE STRING "Name of the built server executable")
+set(SERVER_EXECUTABLE trainfng_srv CACHE STRING "Name of the built server executable")
 set(CLIENT_EXECUTABLE DDNet CACHE STRING "Name of the build client executable")
 
 ########################################################################
@@ -1139,28 +1139,9 @@ set(EXPECTED_DATA
   mapres/winter_mountains.png
   mapres/winter_mountains2.png
   mapres/winter_mountains3.png
-  maps/Gold\ Mine.map
-  maps/LearnToPlay.map
-  maps/Sunny\ Side\ Up.map
-  maps/Tsunami.map
-  maps/ctf1.map
-  maps/ctf2.map
-  maps/ctf3.map
-  maps/ctf4.map
-  maps/ctf5.map
-  maps/ctf6.map
-  maps/ctf7.map
-  maps/dm1.map
-  maps/dm2.map
-  maps/dm6.map
-  maps/dm7.map
-  maps/dm8.map
-  maps/dm9.map
+  maps/AliveFNG_solo.map
   maps/license.txt
-  maps7/Gold\ Mine.map
-  maps7/LearnToPlay.map
-  maps7/Sunny\ Side\ Up.map
-  maps7/Tsunami.map
+  maps7/AliveFNG_solo.map
   maps7/readme.txt
   menuimages/demos.png
   menuimages/editor.png
@@ -1306,7 +1287,20 @@ set(EXPECTED_DATA
 set_glob(DATA GLOB_RECURSE "frag;json;map;otf;png;rules;ttf;txt;vert;wv" data ${EXPECTED_DATA})
 
 ########################################################################
-# COPY DATA AND DLLS
+# CONF
+########################################################################
+
+set(EXPECTED_CONF
+  ddnet.cfg
+  server.cfg
+  trainfng.cfg
+  votes.cfg
+)
+
+set_glob(CONF GLOB_RECURSE "cfg" conf ${EXPECTED_CONF})
+
+########################################################################
+# COPY DATA, CONF AND DLLS
 ########################################################################
 
 foreach(datafile ${DATA})
@@ -1315,7 +1309,14 @@ foreach(datafile ${DATA})
   file(MAKE_DIRECTORY ${DESTINATION})
   file(COPY ${datafile} DESTINATION ${DESTINATION})
 endforeach()
+foreach(conffile ${CONF})
+  file(RELATIVE_PATH OUT ${PROJECT_SOURCE_DIR}/conf ${conffile})
+  get_filename_component(DESTINATION conf/${OUT} PATH)
+  file(MAKE_DIRECTORY ${DESTINATION})
+  file(COPY ${conffile} DESTINATION ${DESTINATION})
+endforeach()
 set(COPY_FILES
+  autoexec_server.cfg
   ${CURL_COPY_FILES}
   ${FREETYPE_COPY_FILES}
   ${OPUSFILE_COPY_FILES}
@@ -2272,6 +2273,7 @@ set(CPACK_SOURCE_FILES
   CMakeLists.txt
   README.md
   autoexec_server.cfg
+  conf/
   cmake/
   data/
   datasrc/

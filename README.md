@@ -1,10 +1,5 @@
-[![DDraceNetwork](https://ddnet.tw/ddnet-small.png)](https://ddnet.tw) [![](https://github.com/ddnet/ddnet/workflows/Build/badge.svg)](https://github.com/ddnet/ddnet/actions?query=workflow%3ABuild+event%3Apush+branch%3Amaster)
-
-Our own flavor of DDRace, a Teeworlds mod. See the [website](https://ddnet.tw) for more information.
-
-Development discussions happen on #ddnet on Quakenet ([Webchat](http://webchat.quakenet.org/?channels=ddnet&uio=d4)) or on [Discord in the developer channel](https://discord.gg/xsEd9xu).
-
-You can get binary releases on the [DDNet website](https://ddnet.tw/downloads/), find it on [Steam](https://store.steampowered.com/app/412220/DDraceNetwork/) or [install from repository](#installation-from-repository).
+ Trainfng is a Teeworlds mod created from [ddnet](https://ddnet.tw).
+The aim of this mod is to be able to train easily to the [fng](https://github.com/fstd/teeworlds) mod.
 
 Cloning
 -------
@@ -184,7 +179,7 @@ $ mkdir build
 $ cd build
 $ cmake -DMYSQL=ON ..
 $ make -j8
-$ ./DDNet-Server -f mine.cfg
+$ ./trainfng -f mine.cfg
 ```
 
 <a href="https://repology.org/metapackage/ddnet/versions">

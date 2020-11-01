@@ -781,6 +781,9 @@ void CGameContext::OnTick()
 
 			m_apPlayers[i]->Tick();
 			m_apPlayers[i]->PostTick();
+
+ 			if(GetDDRaceTeam(i) == 0)
+				SendBroadcast(g_Config.m_SvTrainfngTeam0Info, i);
 		}
 	}
 
@@ -1145,7 +1148,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	m_apPlayers[ClientID]->Respawn();
 	// init the player
 	Score()->PlayerData(ClientID)->Reset();
-	m_apPlayers[ClientID]->m_Score = Score()->PlayerData(ClientID)->m_BestTime ? Score()->PlayerData(ClientID)->m_BestTime : -9999;
+	m_apPlayers[ClientID]->m_Score = Score()->PlayerData(ClientID)->m_BestTime ? Score()->PlayerData(ClientID)->m_BestTime : 0;
 
 	// Can't set score here as LoadScore() is threaded, run it in
 	// LoadScoreThreaded() instead
@@ -1219,8 +1222,8 @@ void CGameContext::OnClientEnter(int ClientID)
 		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientID), m_pController->GetTeamName(m_apPlayers[ClientID]->GetTeam()));
 		SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1, CHAT_SIX);
 
-		SendChatTarget(ClientID, "DDraceNetwork Mod. Version: " GAME_VERSION);
-		SendChatTarget(ClientID, "please visit DDNet.tw or say /info and make sure to read our /rules");
+ 		SendChatTarget(ClientID, "TrainFNG Mod. Version: " GAME_VERSION);
+		SendChatTarget(ClientID, "Say /info for more info");
 
 		if(g_Config.m_SvWelcome[0] != 0)
 			SendChatTarget(ClientID, g_Config.m_SvWelcome);

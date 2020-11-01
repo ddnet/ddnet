@@ -302,6 +302,11 @@ int CCollision::GetTile(int x, int y)
 	int Ny = clamp(y / 32, 0, m_Height - 1);
 	int pos = Ny * m_Width + Nx;
 
+	int idx = m_pTiles[pos].m_Index;
+	if(idx == TILE_SPIKE_GOLD || idx == TILE_SPIKE_NORMAL || idx == TILE_SPIKE_RED ||
+		idx == TILE_SPIKE_BLUE || idx == TILE_SPIKE_GREEN || idx == TILE_SPIKE_PURPLE)
+		return TILE_DEATH;
+
 	if(m_pTiles[pos].m_Index >= TILE_SOLID && m_pTiles[pos].m_Index <= TILE_NOLASER)
 		return m_pTiles[pos].m_Index;
 	return 0;

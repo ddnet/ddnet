@@ -80,6 +80,8 @@ void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore
 
 void CCharacterCore::Reset()
 {
+	if(m_GameCoreLock == 0)
+		m_GameCoreLock = lock_create();
 	m_Pos = vec2(0, 0);
 	m_Vel = vec2(0, 0);
 	m_NewHook = false;
@@ -447,6 +449,11 @@ void CCharacterCore::Tick(bool UseInput)
 	// clamp the velocity to something sane
 	if(length(m_Vel) > 6000)
 		m_Vel = normalize(m_Vel) * 6000;
+
+	Lock();
+	m_SpawnPos = m_Pos;
+	m_SpawnVel = m_Vel;
+	UnLock();
 }
 
 void CCharacterCore::Move()

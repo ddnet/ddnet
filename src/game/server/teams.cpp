@@ -294,6 +294,18 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 
 		ResetSwitchers(Team);
 	}
+
+	CCharacter *pChar = Character(ClientID);
+	if(pChar)
+	{
+		pChar->GiveWeapon(WEAPON_GRENADE, Team < 50);
+		pChar->GiveWeapon(WEAPON_LASER, Team == 0 || Team >= 50);
+
+		if(Team >= 50)
+			pChar->SetActiveWeapon(WEAPON_GRENADE);
+		else if(Team > 0)
+			pChar->SetActiveWeapon(WEAPON_LASER);
+	}
 }
 
 void CGameTeams::ForceLeaveTeam(int ClientID)
@@ -751,14 +763,8 @@ void CGameTeams::OnCharacterSpawn(int ClientID)
 	if(GetSaving(Team))
 		return;
 
-	if(m_Core.Team(ClientID) >= TEAM_SUPER || !m_TeamLocked[Team])
-	{
-		if(g_Config.m_SvTeam != 3)
-			SetForceCharacterTeam(ClientID, TEAM_FLOCK);
-		else
-			SetForceCharacterTeam(ClientID, ClientID); // initialize team
-		CheckTeamFinished(Team);
-	}
+	Character(ClientID)->GiveWeapon(WEAPON_GRENADE, Team < 50);
+	Character(ClientID)->GiveWeapon(WEAPON_LASER, Team == 0 || Team >= 50);
 }
 
 void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
@@ -808,7 +814,6 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 	}
 	else
 	{
-		SetForceCharacterTeam(ClientID, TEAM_FLOCK);
 		CheckTeamFinished(Team);
 	}
 }

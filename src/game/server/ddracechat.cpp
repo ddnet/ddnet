@@ -14,40 +14,18 @@ void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
-		"DDNet is run by the DDNet staff (DDNet.tw/staff)");
+		"TrainFNG is a mod created by o--}====>");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
-		"Great maps and many ideas from the great community");
+		"Based on DDRace by the DDRace developers and OpenFNG by fstd");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
-		"Help and code by eeeee, HMH, east, CookieMichal, Learath2,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
-		"Savander, laxa, Tobii, BeaR, Wohoo, nuborn, timakro, Shiki,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
-		"trml, Soreu, hi_leute_gll, Lady Saavik, Chairn, heinrich5991,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
-		"swick, oy, necropotame, Ryozuki, Redix, d3fault, marcelherd,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
-		"BannZay, ACTom, SiuFuWong, PathosEthosLogos, TsFreddie,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
-		"Jupeyy, noby, ChillerDragon, ZombieToad, weez15, z6zzz,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
-		"Piepow, QingGo, RafaelFF, sctt, jao, daverck, fokkonaut,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
-		"Bojidar, FallenKN, ardadem, archimede67, sirius1242, Aerll,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
-		"trafilaw, Zwelf, Patiga, Konsti, ElXreno, MikiGamer,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
-		"Fireball & others.");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
-		"Based on DDRace by the DDRace developers,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
-		"which is a mod of Teeworlds by the Teeworlds developers.");
+		"which are mods of Teeworlds by the Teeworlds developers.");
 }
 
 void CGameContext::ConInfo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info",
-		"DDraceNetwork Mod. Version: " GAME_VERSION);
+		"TrainFNG  Mod. Version: " GAME_VERSION);
 	if(GIT_SHORTREV_HASH)
 	{
 		char aBuf[64];
@@ -112,6 +90,40 @@ void CGameContext::ConHelp(IConsole::IResult *pResult, void *pUserData)
 				"help",
 				"Command is either unknown or you have given a blank command without any parameters.");
 	}
+}
+
+void CGameContext::ConSpawnSetCurrentPosition(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if(!pPlayer)
+		return;
+
+	CCharacter *pChar = pPlayer->GetCharacter();
+	if(!pChar)
+		return;
+
+	CCharacterCore *pCore = pChar->Core();
+	pCore->Lock();
+	pPlayer->m_SpawnPos = pCore->m_SpawnPos;
+	pPlayer->m_SpawnVel = pCore->m_SpawnVel;
+	pCore->UnLock();
+	pSelf->SendChatTarget(pPlayer->GetCID(), "Spawn position updated");
+}
+
+void CGameContext::ConSpawnResetPosition(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if(!pPlayer)
+		return;
+	pPlayer->m_SpawnPos = vec2(0.0f, 0.0f);
+	pPlayer->m_SpawnVel = vec2(0.0f, 0.0f);
+	pSelf->SendChatTarget(pPlayer->GetCID(), "Spawn position reseted");
 }
 
 void CGameContext::ConSettings(IConsole::IResult *pResult, void *pUserData)
