@@ -893,12 +893,14 @@ void CChat::OnPrepareLines()
 	float y = 300.0f - 28.0f;
 	float FontSize = FONT_SIZE;
 
-	bool ForceRecreate = m_pClient->m_pScoreboard->Active() != m_PrevScoreBoardShowed;
+	bool IsScoreBoardOpen = m_pClient->m_pScoreboard->Active();
+
+	bool ForceRecreate = IsScoreBoardOpen != m_PrevScoreBoardShowed;
 	bool ShowLargeArea = m_Show || g_Config.m_ClShowChat == 2;
 
 	ForceRecreate |= ShowLargeArea != m_PrevShowChat;
 
-	m_PrevScoreBoardShowed = m_pClient->m_pScoreboard->Active();
+	m_PrevScoreBoardShowed = IsScoreBoardOpen;
 	m_PrevShowChat = ShowLargeArea;
 
 	float RealMsgPaddingX = MESSAGE_PADDING_X;
@@ -915,13 +917,13 @@ void CChat::OnPrepareLines()
 		RealMsgPaddingTee = 0;
 
 	int64 Now = time();
-	float LineWidth = (m_pClient->m_pScoreboard->Active() ? 90.0f : 200.0f) - RealMsgPaddingX - RealMsgPaddingTee;
+	float LineWidth = (IsScoreBoardOpen ? 90.0f : 200.0f) - RealMsgPaddingX - RealMsgPaddingTee;
 
-	float HeightLimit = m_pClient->m_pScoreboard->Active() ? 180.0f : m_PrevShowChat ? 50.0f : 200.0f;
+	float HeightLimit = IsScoreBoardOpen ? 180.0f : m_PrevShowChat ? 50.0f : 200.0f;
 	float Begin = x;
 	float TextBegin = Begin + RealMsgPaddingX / 2.0f;
 	CTextCursor Cursor;
-	int OffsetType = m_pClient->m_pScoreboard->Active() ? 1 : 0;
+	int OffsetType = IsScoreBoardOpen ? 1 : 0;
 
 	for(int i = 0; i < MAX_LINES; i++)
 	{
@@ -992,8 +994,12 @@ void CChat::OnPrepareLines()
 			}
 
 			CTextCursor AppendCursor = Cursor;
-			AppendCursor.m_StartX = Cursor.m_X;
-			AppendCursor.m_LineWidth -= (Cursor.m_LongestLineWidth - Cursor.m_StartX);
+
+			if(!IsScoreBoardOpen)
+			{
+				AppendCursor.m_StartX = Cursor.m_X;
+				AppendCursor.m_LineWidth -= (Cursor.m_LongestLineWidth - Cursor.m_StartX);
+			}
 
 			TextRender()->TextEx(&AppendCursor, m_aLines[r].m_aText, -1);
 
@@ -1101,8 +1107,11 @@ void CChat::OnPrepareLines()
 		TextRender()->TextColor(Color);
 
 		CTextCursor AppendCursor = Cursor;
-		AppendCursor.m_LineWidth -= (Cursor.m_LongestLineWidth - Cursor.m_StartX);
-		AppendCursor.m_StartX = Cursor.m_X;
+		if(!IsScoreBoardOpen)
+		{
+			AppendCursor.m_LineWidth -= (Cursor.m_LongestLineWidth - Cursor.m_StartX);
+			AppendCursor.m_StartX = Cursor.m_X;
+		}
 
 		if(m_aLines[r].m_TextContainerIndex == -1)
 			m_aLines[r].m_TextContainerIndex = TextRender()->CreateTextContainer(&AppendCursor, m_aLines[r].m_aText);
