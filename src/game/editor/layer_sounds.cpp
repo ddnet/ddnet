@@ -227,5 +227,8 @@ void CLayerSounds::ModifySoundIndex(INDEX_MODIFY_FUNC Func)
 void CLayerSounds::ModifyEnvelopeIndex(INDEX_MODIFY_FUNC Func)
 {
 	for(int i = 0; i < m_lSources.size(); i++)
+	{
 		Func(&m_lSources[i].m_SoundEnv);
+		Func(&m_lSources[i].m_PosEnv);
+	}
 }
