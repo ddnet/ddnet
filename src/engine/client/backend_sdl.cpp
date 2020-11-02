@@ -1826,12 +1826,12 @@ void CCommandProcessorFragment_OpenGL2::Cmd_DeleteBufferContainer(const CCommand
 			int VertBufferID = BufferContainer.m_ContainerInfo.m_Attributes[i].m_VertBufferBindingIndex;
 			if(VertBufferID != -1)
 			{
-				for(size_t j = 0; j < BufferContainer.m_ContainerInfo.m_Attributes.size(); ++j)
+				for(auto &Attribute : BufferContainer.m_ContainerInfo.m_Attributes)
 				{
 					// set all equal ids to zero to not double delete
-					if(VertBufferID == BufferContainer.m_ContainerInfo.m_Attributes[j].m_VertBufferBindingIndex)
+					if(VertBufferID == Attribute.m_VertBufferBindingIndex)
 					{
-						BufferContainer.m_ContainerInfo.m_Attributes[j].m_VertBufferBindingIndex = -1;
+						Attribute.m_VertBufferBindingIndex = -1;
 					}
 				}
 
@@ -3096,12 +3096,12 @@ void CCommandProcessorFragment_OpenGL3_3::DestroyBufferContainer(int Index, bool
 			int VertBufferID = BufferContainer.m_ContainerInfo.m_Attributes[i].m_VertBufferBindingIndex;
 			if(VertBufferID != -1)
 			{
-				for(size_t j = 0; j < BufferContainer.m_ContainerInfo.m_Attributes.size(); ++j)
+				for(auto &Attribute : BufferContainer.m_ContainerInfo.m_Attributes)
 				{
 					// set all equal ids to zero to not double delete
-					if(VertBufferID == BufferContainer.m_ContainerInfo.m_Attributes[j].m_VertBufferBindingIndex)
+					if(VertBufferID == Attribute.m_VertBufferBindingIndex)
 					{
-						BufferContainer.m_ContainerInfo.m_Attributes[j].m_VertBufferBindingIndex = -1;
+						Attribute.m_VertBufferBindingIndex = -1;
 					}
 				}
 
@@ -3146,11 +3146,11 @@ void CCommandProcessorFragment_OpenGL3_3::AppendIndices(unsigned int NewIndicesC
 	glDeleteBuffers(1, &m_QuadDrawIndexBufferID);
 	m_QuadDrawIndexBufferID = NewIndexBufferID;
 
-	for(int i = 0; i < MAX_STREAM_BUFFER_COUNT; ++i)
-		m_LastIndexBufferBound[i] = 0;
-	for(size_t i = 0; i < m_BufferContainers.size(); ++i)
+	for(unsigned int &i : m_LastIndexBufferBound)
+		i = 0;
+	for(auto &BufferContainer : m_BufferContainers)
 	{
-		m_BufferContainers[i].m_LastIndexBufferBound = 0;
+		BufferContainer.m_LastIndexBufferBound = 0;
 	}
 
 	m_CurrentIndicesInBuffer = NewIndicesCount;

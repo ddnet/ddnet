@@ -262,12 +262,12 @@ void CGameContext::ConRules(IConsole::IResult *pResult, void *pUserData)
 		_RL(9),
 		_RL(10),
 	};
-	for(unsigned i = 0; i < sizeof(pRuleLines) / sizeof(pRuleLines[0]); i++)
+	for(auto &pRuleLine : pRuleLines)
 	{
-		if(pRuleLines[i][0])
+		if(pRuleLine[0])
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD,
-				"rules", pRuleLines[i]);
+				"rules", pRuleLine);
 			Printed = true;
 		}
 	}

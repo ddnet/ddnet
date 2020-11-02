@@ -334,10 +334,8 @@ void SetFilteredPlayers(const CServerInfo &Item)
 		Item.m_NumFilteredPlayers = Item.m_NumClients;
 	if(g_Config.m_BrFilterConnectingPlayers)
 	{
-		for(int i = 0; i < MAX_CLIENTS; i++)
+		for(const auto &Client : Item.m_aClients)
 		{
-			const CServerInfo::CClient &Client = Item.m_aClients[i];
-
 			if(str_comp(Client.m_aName, "(connecting)") == 0 && Client.m_aClan[0] == '\0' && Client.m_Country == -1 && Client.m_Score == 0)
 				Item.m_NumFilteredPlayers--;
 		}
@@ -481,11 +479,11 @@ CServerBrowser::CServerEntry *CServerBrowser::Add(const NETADDR &Addr)
 	}
 
 	// check if it's an official server
-	for(int Network = 0; Network < NUM_NETWORKS; Network++)
+	for(auto &Network : m_aNetworks)
 	{
-		for(int i = 0; i < m_aNetworks[Network].m_NumCountries; i++)
+		for(int i = 0; i < Network.m_NumCountries; i++)
 		{
-			CNetworkCountry *pCntr = &m_aNetworks[Network].m_aCountries[i];
+			CNetworkCountry *pCntr = &Network.m_aCountries[i];
 			for(int j = 0; j < pCntr->m_NumServers; j++)
 			{
 				if(net_addr_comp(&Addr, &pCntr->m_aServers[j]) == 0)
@@ -1141,11 +1139,11 @@ void CServerBrowser::LoadDDNetServers()
 
 void CServerBrowser::RecheckOfficial()
 {
-	for(int Network = 0; Network < NUM_NETWORKS; Network++)
+	for(auto &Network : m_aNetworks)
 	{
-		for(int i = 0; i < m_aNetworks[Network].m_NumCountries; i++)
+		for(int i = 0; i < Network.m_NumCountries; i++)
 		{
-			CNetworkCountry *pCntr = &m_aNetworks[Network].m_aCountries[i];
+			CNetworkCountry *pCntr = &Network.m_aCountries[i];
 			for(int j = 0; j < pCntr->m_NumServers; j++)
 			{
 				CServerEntry *pEntry = Find(pCntr->m_aServers[j]);
@@ -1323,11 +1321,11 @@ void CServerBrowser::CountryFilterClean(int Network)
 	char aNewList[128];
 	aNewList[0] = '\0';
 
-	for(int Network = 0; Network < NUM_NETWORKS; Network++)
+	for(auto &Network : m_aNetworks)
 	{
-		for(int i = 0; i < m_aNetworks[Network].m_NumCountries; i++)
+		for(int i = 0; i < Network.m_NumCountries; i++)
 		{
-			const char *pName = m_aNetworks[Network].m_aCountries[i].m_aName;
+			const char *pName = Network.m_aCountries[i].m_aName;
 			if(DDNetFiltered(pExcludeCountries, pName))
 			{
 				char aBuf[128];

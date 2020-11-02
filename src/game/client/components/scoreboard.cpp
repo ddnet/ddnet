@@ -120,9 +120,8 @@ void CScoreboard::RenderSpectators(float x, float y, float w)
 	Cursor.m_LineWidth = w - 20.0f;
 	Cursor.m_MaxLines = 4;
 
-	for(int i = 0; i < MAX_CLIENTS; ++i)
+	for(const auto *pInfo : m_pClient->m_Snap.m_paInfoByName)
 	{
-		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByName[i];
 		if(!pInfo || pInfo->m_Team != TEAM_SPECTATORS)
 			continue;
 
@@ -692,9 +691,8 @@ const char *CScoreboard::GetClanName(int Team)
 {
 	int ClanPlayers = 0;
 	const char *pClanName = 0;
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(const auto *pInfo : m_pClient->m_Snap.m_paInfoByScore)
 	{
-		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByScore[i];
 		if(!pInfo || pInfo->m_Team != Team)
 			continue;
 

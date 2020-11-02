@@ -115,37 +115,36 @@ static void Mix(short *pFinalOut, unsigned Frames)
 
 	MasterVol = m_SoundVolume;
 
-	for(unsigned i = 0; i < NUM_VOICES; i++)
+	for(auto &Voice : m_aVoices)
 	{
-		if(m_aVoices[i].m_pSample)
+		if(Voice.m_pSample)
 		{
 			// mix voice
-			CVoice *v = &m_aVoices[i];
 			int *pOut = m_pMixBuffer;
 
-			int Step = v->m_pSample->m_Channels; // setup input sources
-			short *pInL = &v->m_pSample->m_pData[v->m_Tick * Step];
-			short *pInR = &v->m_pSample->m_pData[v->m_Tick * Step + 1];
+			int Step = Voice.m_pSample->m_Channels; // setup input sources
+			short *pInL = &Voice.m_pSample->m_pData[Voice.m_Tick * Step];
+			short *pInR = &Voice.m_pSample->m_pData[Voice.m_Tick * Step + 1];
 
-			unsigned End = v->m_pSample->m_NumFrames - v->m_Tick;
+			unsigned End = Voice.m_pSample->m_NumFrames - Voice.m_Tick;
 
-			int Rvol = (int)(v->m_pChannel->m_Vol * (v->m_Vol / 255.0f));
-			int Lvol = (int)(v->m_pChannel->m_Vol * (v->m_Vol / 255.0f));
+			int Rvol = (int)(Voice.m_pChannel->m_Vol * (Voice.m_Vol / 255.0f));
+			int Lvol = (int)(Voice.m_pChannel->m_Vol * (Voice.m_Vol / 255.0f));
 
 			// make sure that we don't go outside the sound data
 			if(Frames < End)
 				End = Frames;
 
 			// check if we have a mono sound
-			if(v->m_pSample->m_Channels == 1)
+			if(Voice.m_pSample->m_Channels == 1)
 				pInR = pInL;
 
 			// volume calculation
-			if(v->m_Flags & ISound::FLAG_POS && v->m_pChannel->m_Pan)
+			if(Voice.m_Flags & ISound::FLAG_POS && Voice.m_pChannel->m_Pan)
 			{
 				// TODO: we should respect the channel panning value
-				int dx = v->m_X - m_CenterX;
-				int dy = v->m_Y - m_CenterY;
+				int dx = Voice.m_X - m_CenterX;
+				int dy = Voice.m_Y - m_CenterY;
 				//
 				int p = IntAbs(dx);
 				float FalloffX = 0.0f;
@@ -154,11 +153,11 @@ static void Mix(short *pFinalOut, unsigned Frames)
 				int RangeX = 0; // for panning
 				bool InVoiceField = false;
 
-				switch(v->m_Shape)
+				switch(Voice.m_Shape)
 				{
 				case ISound::SHAPE_CIRCLE:
 				{
-					float r = v->m_Circle.m_Radius;
+					float r = Voice.m_Circle.m_Radius;
 					RangeX = r;
 
 					int Dist = (int)sqrtf((float)dx * dx + dy * dy); // nasty float
@@ -167,7 +166,7 @@ static void Mix(short *pFinalOut, unsigned Frames)
 						InVoiceField = true;
 
 						// falloff
-						int FalloffDistance = r * v->m_Falloff;
+						int FalloffDistance = r * Voice.m_Falloff;
 						if(Dist > FalloffDistance)
 							FalloffX = FalloffY = (r - Dist) / (r - FalloffDistance);
 						else
@@ -181,21 +180,21 @@ static void Mix(short *pFinalOut, unsigned Frames)
 
 				case ISound::SHAPE_RECTANGLE:
 				{
-					RangeX = v->m_Rectangle.m_Width / 2.0f;
+					RangeX = Voice.m_Rectangle.m_Width / 2.0f;
 
 					int abs_dx = abs(dx);
 					int abs_dy = abs(dy);
 
-					int w = v->m_Rectangle.m_Width / 2.0f;
-					int h = v->m_Rectangle.m_Height / 2.0f;
+					int w = Voice.m_Rectangle.m_Width / 2.0f;
+					int h = Voice.m_Rectangle.m_Height / 2.0f;
 
 					if(abs_dx < w && abs_dy < h)
 					{
 						InVoiceField = true;
 
 						// falloff
-						int fx = v->m_Falloff * w;
-						int fy = v->m_Falloff * h;
+						int fx = Voice.m_Falloff * w;
+						int fy = Voice.m_Falloff * h;
 
 						FalloffX = abs_dx > fx ? (float)(w - abs_dx) / (w - fx) : 1.0f;
 						FalloffY = abs_dy > fy ? (float)(h - abs_dy) / (h - fy) : 1.0f;
@@ -210,7 +209,7 @@ static void Mix(short *pFinalOut, unsigned Frames)
 				if(InVoiceField)
 				{
 					// panning
-					if(!(v->m_Flags & ISound::FLAG_NO_PANNING))
+					if(!(Voice.m_Flags & ISound::FLAG_NO_PANNING))
 					{
 						if(dx > 0)
 							Lvol = ((RangeX - p) * Lvol) / RangeX;
@@ -237,18 +236,18 @@ static void Mix(short *pFinalOut, unsigned Frames)
 				*pOut++ += (*pInR) * Rvol;
 				pInL += Step;
 				pInR += Step;
-				v->m_Tick++;
+				Voice.m_Tick++;
 			}
 
 			// free voice if not used any more
-			if(v->m_Tick == v->m_pSample->m_NumFrames)
+			if(Voice.m_Tick == Voice.m_pSample->m_NumFrames)
 			{
-				if(v->m_Flags & ISound::FLAG_LOOP)
-					v->m_Tick = 0;
+				if(Voice.m_Flags & ISound::FLAG_LOOP)
+					Voice.m_Tick = 0;
 				else
 				{
-					v->m_pSample = 0;
-					v->m_Age++;
+					Voice.m_pSample = 0;
+					Voice.m_Age++;
 				}
 			}
 		}
@@ -937,15 +936,15 @@ void CSound::Stop(int SampleID)
 	// TODO: a nice fade out
 	lock_wait(m_SoundLock);
 	CSample *pSample = &m_aSamples[SampleID];
-	for(int i = 0; i < NUM_VOICES; i++)
+	for(auto &Voice : m_aVoices)
 	{
-		if(m_aVoices[i].m_pSample == pSample)
+		if(Voice.m_pSample == pSample)
 		{
-			if(m_aVoices[i].m_Flags & FLAG_LOOP)
-				m_aVoices[i].m_pSample->m_PausedAt = m_aVoices[i].m_Tick;
+			if(Voice.m_Flags & FLAG_LOOP)
+				Voice.m_pSample->m_PausedAt = Voice.m_Tick;
 			else
-				m_aVoices[i].m_pSample->m_PausedAt = 0;
-			m_aVoices[i].m_pSample = 0;
+				Voice.m_pSample->m_PausedAt = 0;
+			Voice.m_pSample = 0;
 		}
 	}
 	lock_unlock(m_SoundLock);
@@ -955,16 +954,16 @@ void CSound::StopAll()
 {
 	// TODO: a nice fade out
 	lock_wait(m_SoundLock);
-	for(int i = 0; i < NUM_VOICES; i++)
+	for(auto &Voice : m_aVoices)
 	{
-		if(m_aVoices[i].m_pSample)
+		if(Voice.m_pSample)
 		{
-			if(m_aVoices[i].m_Flags & FLAG_LOOP)
-				m_aVoices[i].m_pSample->m_PausedAt = m_aVoices[i].m_Tick;
+			if(Voice.m_Flags & FLAG_LOOP)
+				Voice.m_pSample->m_PausedAt = Voice.m_Tick;
 			else
-				m_aVoices[i].m_pSample->m_PausedAt = 0;
+				Voice.m_pSample->m_PausedAt = 0;
 		}
-		m_aVoices[i].m_pSample = 0;
+		Voice.m_pSample = 0;
 	}
 	lock_unlock(m_SoundLock);
 }

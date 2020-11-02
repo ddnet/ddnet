@@ -48,10 +48,10 @@ void CTeeHistorian::Reset(const CGameInfo *pGameInfo, WRITE_CALLBACK pfnWriteCal
 	m_TickWritten = true;
 	m_MaxClientID = MAX_CLIENTS;
 	// `m_PrevMaxClientID` is initialized in `BeginTick`
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(auto &PrevPlayer : m_aPrevPlayers)
 	{
-		m_aPrevPlayers[i].m_Alive = false;
-		m_aPrevPlayers[i].m_InputExists = false;
+		PrevPlayer.m_Alive = false;
+		PrevPlayer.m_InputExists = false;
 	}
 	m_pfnWriteCallback = pfnWriteCallback;
 	m_pWriteCallbackUserdata = pUser;

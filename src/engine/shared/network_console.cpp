@@ -24,8 +24,8 @@ bool CNetConsole::Open(NETADDR BindAddr, CNetBan *pNetBan, int Flags)
 		return false;
 	net_set_non_blocking(m_Socket);
 
-	for(int i = 0; i < NET_MAX_CONSOLE_CLIENTS; i++)
-		m_aSlots[i].m_Connection.Reset();
+	for(auto &Slot : m_aSlots)
+		Slot.m_Connection.Reset();
 
 	return true;
 }
@@ -39,8 +39,8 @@ void CNetConsole::SetCallbacks(NETFUNC_NEWCLIENT_CON pfnNewClient, NETFUNC_DELCL
 
 int CNetConsole::Close()
 {
-	for(int i = 0; i < NET_MAX_CONSOLE_CLIENTS; i++)
-		m_aSlots[i].m_Connection.Disconnect("closing console");
+	for(auto &Slot : m_aSlots)
+		Slot.m_Connection.Disconnect("closing console");
 
 	net_tcp_close(m_Socket);
 

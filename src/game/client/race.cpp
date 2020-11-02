@@ -80,11 +80,11 @@ bool CRaceHelper::IsStart(CGameClient *pClient, vec2 Prev, vec2 Pos)
 	{
 		std::list<int> Indices = pCollision->GetMapIndices(Prev, Pos);
 		if(!Indices.empty())
-			for(std::list<int>::iterator i = Indices.begin(); i != Indices.end(); i++)
+			for(int &Indice : Indices)
 			{
-				if(pCollision->GetTileIndex(*i) == TILE_START)
+				if(pCollision->GetTileIndex(Indice) == TILE_START)
 					return true;
-				if(pCollision->GetFTileIndex(*i) == TILE_START)
+				if(pCollision->GetFTileIndex(Indice) == TILE_START)
 					return true;
 			}
 		else

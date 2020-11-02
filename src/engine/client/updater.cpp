@@ -312,11 +312,11 @@ void CUpdater::PerformUpdate()
 		}
 	}
 
-	for(map<string, bool>::iterator it = m_FileJobs.begin(); it != m_FileJobs.end(); ++it)
+	for(auto &FileJob : m_FileJobs)
 	{
-		if(it->second)
+		if(FileJob.second)
 		{
-			const char *pFile = it->first.c_str();
+			const char *pFile = FileJob.first.c_str();
 			size_t len = str_length(pFile);
 			if(!str_comp_nocase(pFile + len - 4, ".dll"))
 			{
@@ -347,7 +347,7 @@ void CUpdater::PerformUpdate()
 			pLastFile = pFile;
 		}
 		else
-			m_pStorage->RemoveBinaryFile(it->first.c_str());
+			m_pStorage->RemoveBinaryFile(FileJob.first.c_str());
 	}
 
 	if(m_ServerUpdate)
@@ -368,9 +368,9 @@ void CUpdater::CommitUpdate()
 {
 	bool Success = true;
 
-	for(map<std::string, bool>::iterator it = m_FileJobs.begin(); it != m_FileJobs.end(); ++it)
-		if(it->second)
-			Success &= MoveFile(it->first.c_str());
+	for(auto &FileJob : m_FileJobs)
+		if(FileJob.second)
+			Success &= MoveFile(FileJob.first.c_str());
 
 	if(m_ClientUpdate)
 		Success &= ReplaceClient();
