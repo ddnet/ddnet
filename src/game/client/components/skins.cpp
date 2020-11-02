@@ -55,7 +55,7 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 	return pSelf->LoadSkin(aNameWithoutPng, aBuf, DirType);
 }
 
-int CSkins::LoadSkin(const char *pName, const char *pPath, int DirType, int *pGetSkinID)
+int CSkins::LoadSkin(const char *pName, const char *pPath, int DirType)
 {
 	char aBuf[512];
 	CImageInfo Info;
@@ -172,10 +172,8 @@ int CSkins::LoadSkin(const char *pName, const char *pPath, int DirType, int *pGe
 		str_format(aBuf, sizeof(aBuf), "load skin %s", Skin.m_aName);
 		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
 	}
-	m_aSkins.add(Skin);
 
-	if(pGetSkinID)
-		*pGetSkinID = m_aSkins.size() - 1;
+	m_aSkins.add(Skin);
 
 	return 0;
 }
@@ -293,20 +291,19 @@ int CSkins::FindImpl(const char *pName)
 	auto d = ::find_binary(m_aDownloadSkins.all(), pName);
 	if(!d.empty())
 	{
-		int SkinID = -1;
 		if(d.front().m_pTask && d.front().m_pTask->State() == HTTP_DONE)
 		{
 			char aPath[MAX_PATH_LENGTH];
 			str_format(aPath, sizeof(aPath), "downloadedskins/%s.png", d.front().m_aName);
 			Storage()->RenameFile(d.front().m_aPath, aPath, IStorage::TYPE_SAVE);
-			LoadSkin(d.front().m_aName, aPath, IStorage::TYPE_SAVE, &SkinID);
+			LoadSkin(d.front().m_aName, aPath, IStorage::TYPE_SAVE);
 			d.front().m_pTask = nullptr;
 		}
 		if(d.front().m_pTask && (d.front().m_pTask->State() == HTTP_ERROR || d.front().m_pTask->State() == HTTP_ABORTED))
 		{
 			d.front().m_pTask = nullptr;
 		}
-		return SkinID;
+		return -1;
 	}
 
 	CDownloadSkin Skin;
