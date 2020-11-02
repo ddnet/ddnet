@@ -49,6 +49,7 @@ protected:
 
 public:
 	char m_aNews[3000];
+	int m_Points;
 	int64 m_ReconnectTime;
 
 	class CSnapItem
