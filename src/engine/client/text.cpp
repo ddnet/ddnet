@@ -1718,8 +1718,8 @@ public:
 		void *pUploadData = &TextContainer.m_StringInfo.m_CharacterQuads[0];
 		TextContainer.m_StringInfo.m_QuadBufferObjectIndex = Graphics()->CreateBufferObject(DataSize, pUploadData);
 
-		for(size_t i = 0; i < m_DefaultTextContainerInfo.m_Attributes.size(); ++i)
-			m_DefaultTextContainerInfo.m_Attributes[i].m_VertBufferBindingIndex = TextContainer.m_StringInfo.m_QuadBufferObjectIndex;
+		for(auto &Attribute : m_DefaultTextContainerInfo.m_Attributes)
+			Attribute.m_VertBufferBindingIndex = TextContainer.m_StringInfo.m_QuadBufferObjectIndex;
 
 		TextContainer.m_StringInfo.m_QuadBufferContainerIndex = Graphics()->CreateBufferContainer(&m_DefaultTextContainerInfo);
 		Graphics()->IndicesNumRequiredNotify(TextContainer.m_StringInfo.m_QuadNum * 6);
