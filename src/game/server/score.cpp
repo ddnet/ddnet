@@ -11,6 +11,7 @@
 #include <engine/shared/console.h>
 #include <engine/shared/linereader.h>
 #include <engine/storage.h>
+#include <game/generated/wordlist.h>
 
 #include <algorithm>
 #include <cstring>
@@ -149,33 +150,37 @@ CScore::CScore(CGameContext *pGameServer, CDbConnectionPool *pPool) :
 	((CGameControllerDDRace *)(pGameServer->m_pController))->m_pInitResult = InitResult;
 	str_copy(Tmp->m_Map, g_Config.m_SvMap, sizeof(Tmp->m_Map));
 
-	IOHANDLE File = GameServer()->Storage()->OpenFile("wordlist.txt", IOFLAG_READ, IStorage::TYPE_ALL);
-	if(!File)
-	{
-		dbg_msg("sql", "failed to open wordlist");
-		Server()->SetErrorShutdown("sql open wordlist error");
-		return;
-	}
-
 	uint64 aSeed[2];
 	secure_random_fill(aSeed, sizeof(aSeed));
 	m_Prng.Seed(aSeed);
-	CLineReader LineReader;
-	LineReader.Init(File);
-	char *pLine;
-	while((pLine = LineReader.Get()))
+
+	IOHANDLE File = GameServer()->Storage()->OpenFile("wordlist.txt", IOFLAG_READ, IStorage::TYPE_ALL);
+	if(File)
 	{
-		char Word[32] = {0};
-		sscanf(pLine, "%*s %31s", Word);
-		Word[31] = 0;
-		m_aWordlist.push_back(Word);
+		CLineReader LineReader;
+		LineReader.Init(File);
+		char *pLine;
+		while((pLine = LineReader.Get()))
+		{
+			char Word[32] = {0};
+			sscanf(pLine, "%*s %31s", Word);
+			Word[31] = 0;
+			m_aWordlist.push_back(Word);
+		}
 	}
+	else
+	{
+		dbg_msg("sql", "failed to open wordlist, using fallback");
+		m_aWordlist.assign(std::begin(g_aFallbackWordlist), std::end(g_aFallbackWordlist));
+	}
+
 	if(m_aWordlist.size() < 1000)
 	{
 		dbg_msg("sql", "too few words in wordlist");
 		Server()->SetErrorShutdown("sql too few words in wordlist");
 		return;
 	}
+
 	m_pPool->Execute(Init, std::move(Tmp), "load best time");
 }
 
