@@ -71,6 +71,7 @@ public:
 	void GetSpriteScale(client_data7::CDataSprite *pSprite, float &ScaleX, float &ScaleY);
 	void GetSpriteScale(struct CDataSprite *pSprite, float &ScaleX, float &ScaleY);
 	void GetSpriteScale(int id, float &ScaleX, float &ScaleY);
+	void GetSpriteScaleImpl(int Width, int Height, float &ScaleX, float &ScaleY);
 
 	void DrawSprite(float x, float y, float size);
 	void DrawSprite(float x, float y, float ScaledWidth, float ScaledHeight);
@@ -85,6 +86,8 @@ public:
 	void DrawRoundRectExt4(float x, float y, float w, float h, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, float r, int Corners);
 
 	int CreateRoundRectQuadContainer(float x, float y, float w, float h, float r, int Corners);
+
+	void DrawUIElRect(CUIElement::SUIElementRect &ElUIRect, const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding);
 
 	void DrawUIRect(const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding);
 	void DrawUIRect4(const CUIRect *pRect, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, int Corners, float Rounding);

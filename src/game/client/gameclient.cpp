@@ -253,6 +253,7 @@ void CGameClient::OnConsoleInit()
 	Console()->Register("remove_vote", "s[name]", CFGFLAG_SERVER, 0, 0, "remove a voting option");
 	Console()->Register("force_vote", "s[name] s[command] ?r[reason]", CFGFLAG_SERVER, 0, 0, "Force a voting option");
 	Console()->Register("clear_votes", "", CFGFLAG_SERVER, 0, 0, "Clears the voting options");
+	Console()->Register("add_map_votes", "", CFGFLAG_SERVER, 0, 0, "Automatically adds voting options for all maps");
 	Console()->Register("vote", "r['yes'|'no']", CFGFLAG_SERVER, 0, 0, "Force a vote to yes/no");
 	Console()->Register("swap_teams", "", CFGFLAG_SERVER, 0, 0, "Swap the current teams");
 	Console()->Register("shuffle_teams", "", CFGFLAG_SERVER, 0, 0, "Shuffle the current teams");
@@ -532,8 +533,8 @@ void CGameClient::OnConnected()
 	m_GameWorld.Clear();
 	m_GameWorld.m_WorldConfig.m_InfiniteAmmo = true;
 	m_PredictedDummyID = -1;
-	for(int i = 0; i < MAX_CLIENTS; i++)
-		m_aLastWorldCharacters[i].m_Alive = false;
+	for(auto &LastWorldCharacter : m_aLastWorldCharacters)
+		LastWorldCharacter.m_Alive = false;
 	LoadMapSettings();
 
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK && g_Config.m_ClAutoDemoOnConnect)
@@ -547,8 +548,8 @@ void CGameClient::OnReset()
 
 	InvalidateSnapshot();
 
-	for(int i = 0; i < MAX_CLIENTS; i++)
-		m_aClients[i].Reset();
+	for(auto &Client : m_aClients)
+		Client.Reset();
 
 	for(int i = 0; i < m_All.m_Num; i++)
 		m_All.m_paComponents[i]->OnReset();
@@ -956,6 +957,7 @@ void CGameClient::OnWindowResize()
 	for(int i = 0; i < m_All.m_Num; i++)
 		m_All.m_paComponents[i]->OnWindowResize();
 
+	UI()->OnWindowResize();
 	TextRender()->OnWindowResize();
 }
 
@@ -963,6 +965,11 @@ void CGameClient::OnWindowResizeCB(void *pUser)
 {
 	CGameClient *pClient = (CGameClient *)pUser;
 	pClient->OnWindowResize();
+}
+
+void CGameClient::OnLanguageChange()
+{
+	UI()->OnLanguageChange();
 }
 
 void CGameClient::OnRconType(bool UsernameReq)
@@ -1214,9 +1221,9 @@ void CGameClient::OnNewSnapshot()
 
 	bool FoundGameInfoEx = false;
 
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(auto &Client : m_aClients)
 	{
-		m_aClients[i].m_SpecCharPresent = false;
+		Client.m_SpecCharPresent = false;
 	}
 
 	// go trough all the items in the snapshot and gather the info we want
@@ -2265,14 +2272,14 @@ void CGameClient::UpdatePrediction()
 		if(m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_HasExtendedData)
 		{
 			int aIDs[MAX_CLIENTS];
-			for(int i = 0; i < MAX_CLIENTS; i++)
-				aIDs[i] = -1;
+			for(int &ID : aIDs)
+				ID = -1;
 			for(int i = 0; i < MAX_CLIENTS; i++)
 				if(CCharacter *pChar = m_GameWorld.GetCharacterByID(i))
 					aIDs[pChar->GetStrongWeakID()] = i;
-			for(int i = 0; i < MAX_CLIENTS; i++)
-				if(aIDs[i] >= 0)
-					m_CharOrder.GiveStrong(aIDs[i]);
+			for(int ID : aIDs)
+				if(ID >= 0)
+					m_CharOrder.GiveStrong(ID);
 		}
 		else
 		{
@@ -2567,9 +2574,9 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponNinjaCursor);
 		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponLaserCursor);
 
-		for(int i = 0; i < 6; ++i)
+		for(auto &SpriteWeaponCursor : m_GameSkin.m_SpriteWeaponCursors)
 		{
-			m_GameSkin.m_SpriteWeaponCursors[i] = IGraphics::CTextureHandle();
+			SpriteWeaponCursor = IGraphics::CTextureHandle();
 		}
 
 		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteHookChain);
@@ -2581,19 +2588,19 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponNinja);
 		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponLaser);
 
-		for(int i = 0; i < 6; ++i)
+		for(auto &SpriteWeapon : m_GameSkin.m_SpriteWeapons)
 		{
-			m_GameSkin.m_SpriteWeapons[i] = IGraphics::CTextureHandle();
+			SpriteWeapon = IGraphics::CTextureHandle();
 		}
 
-		for(int i = 0; i < 9; ++i)
+		for(auto &SpriteParticle : m_GameSkin.m_SpriteParticles)
 		{
-			Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteParticles[i]);
+			Graphics()->UnloadTextureNew(SpriteParticle);
 		}
 
-		for(int i = 0; i < 3; ++i)
+		for(auto &SpriteStar : m_GameSkin.m_SpriteStars)
 		{
-			Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteStars[i]);
+			Graphics()->UnloadTextureNew(SpriteStar);
 		}
 
 		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponGunProjectile);
@@ -2603,9 +2610,9 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponNinjaProjectile);
 		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponLaserProjectile);
 
-		for(int i = 0; i < 6; ++i)
+		for(auto &SpriteWeaponProjectile : m_GameSkin.m_SpriteWeaponProjectiles)
 		{
-			m_GameSkin.m_SpriteWeaponProjectiles[i] = IGraphics::CTextureHandle();
+			SpriteWeaponProjectile = IGraphics::CTextureHandle();
 		}
 
 		for(int i = 0; i < 3; ++i)
@@ -2614,9 +2621,9 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 			Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponShotgunMuzzles[i]);
 			Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponNinjaMuzzles[i]);
 
-			for(int n = 0; n < 6; ++n)
+			for(auto &SpriteWeaponsMuzzle : m_GameSkin.m_SpriteWeaponsMuzzles)
 			{
-				m_GameSkin.m_SpriteWeaponsMuzzles[n][i] = IGraphics::CTextureHandle();
+				SpriteWeaponsMuzzle[i] = IGraphics::CTextureHandle();
 			}
 		}
 
@@ -2629,9 +2636,9 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 		Graphics()->UnloadTextureNew(m_GameSkin.m_SpritePickupGun);
 		Graphics()->UnloadTextureNew(m_GameSkin.m_SpritePickupHammer);
 
-		for(int i = 0; i < 6; ++i)
+		for(auto &SpritePickupWeapon : m_GameSkin.m_SpritePickupWeapons)
 		{
-			m_GameSkin.m_SpritePickupWeapons[i] = IGraphics::CTextureHandle();
+			SpritePickupWeapon = IGraphics::CTextureHandle();
 		}
 
 		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteFlagBlue);
@@ -2795,8 +2802,8 @@ void CGameClient::LoadEmoticonsSkin(const char *pPath, bool AsDir)
 {
 	if(m_EmoticonsSkinLoaded)
 	{
-		for(int i = 0; i < 16; ++i)
-			Graphics()->UnloadTextureNew(m_EmoticonsSkin.m_SpriteEmoticons[i]);
+		for(auto &SpriteEmoticon : m_EmoticonsSkin.m_SpriteEmoticons)
+			Graphics()->UnloadTextureNew(SpriteEmoticon);
 
 		m_EmoticonsSkinLoaded = false;
 	}
@@ -2841,16 +2848,16 @@ void CGameClient::LoadParticlesSkin(const char *pPath, bool AsDir)
 	{
 		Graphics()->UnloadTextureNew(m_ParticlesSkin.m_SpriteParticleSlice);
 		Graphics()->UnloadTextureNew(m_ParticlesSkin.m_SpriteParticleBall);
-		for(int i = 0; i < 3; ++i)
-			Graphics()->UnloadTextureNew(m_ParticlesSkin.m_SpriteParticleSplat[i]);
+		for(auto &SpriteParticleSplat : m_ParticlesSkin.m_SpriteParticleSplat)
+			Graphics()->UnloadTextureNew(SpriteParticleSplat);
 		Graphics()->UnloadTextureNew(m_ParticlesSkin.m_SpriteParticleSmoke);
 		Graphics()->UnloadTextureNew(m_ParticlesSkin.m_SpriteParticleShell);
 		Graphics()->UnloadTextureNew(m_ParticlesSkin.m_SpriteParticleExpl);
 		Graphics()->UnloadTextureNew(m_ParticlesSkin.m_SpriteParticleAirJump);
 		Graphics()->UnloadTextureNew(m_ParticlesSkin.m_SpriteParticleHit);
 
-		for(int i = 0; i < (int)(sizeof(m_ParticlesSkin.m_SpriteParticles) / sizeof(m_ParticlesSkin.m_SpriteParticles[0])); ++i)
-			m_ParticlesSkin.m_SpriteParticles[i] = IGraphics::CTextureHandle();
+		for(auto &SpriteParticle : m_ParticlesSkin.m_SpriteParticles)
+			SpriteParticle = IGraphics::CTextureHandle();
 
 		m_ParticlesSkinLoaded = false;
 	}
@@ -2908,14 +2915,14 @@ void CGameClient::LoadParticlesSkin(const char *pPath, bool AsDir)
 
 void CGameClient::RefindSkins()
 {
-	for(int i = 0; i < MAX_CLIENTS; ++i)
+	for(auto &Client : m_aClients)
 	{
-		if(m_aClients[i].m_aSkinName[0] != '\0')
+		if(Client.m_aSkinName[0] != '\0')
 		{
-			const CSkin *pSkin = m_pSkins->Get(m_pSkins->Find(m_aClients[i].m_aSkinName));
-			m_aClients[i].m_SkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-			m_aClients[i].m_SkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-			m_aClients[i].UpdateRenderInfo();
+			const CSkin *pSkin = m_pSkins->Get(m_pSkins->Find(Client.m_aSkinName));
+			Client.m_SkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
+			Client.m_SkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+			Client.UpdateRenderInfo();
 		}
 	}
 	m_pGhost->RefindSkin();
@@ -2956,7 +2963,7 @@ void CGameClient::LoadMapSettings()
 		int Size = pMap->GetDataSize(pItem->m_Settings);
 		char *pSettings = (char *)pMap->GetData(pItem->m_Settings);
 		char *pNext = pSettings;
-		dbg_msg("New tune ", "%s", pNext);
+		dbg_msg("tune", "%s", pNext);
 		while(pNext < pSettings + Size)
 		{
 			int StrSize = str_length(pNext) + 1;

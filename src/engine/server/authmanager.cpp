@@ -66,15 +66,15 @@ int CAuthManager::AddKey(const char *pIdent, const char *pPw, int AuthLevel)
 int CAuthManager::RemoveKey(int Slot)
 {
 	m_aKeys.remove_index_fast(Slot);
-	for(int i = 0; i < (int)(sizeof(m_aDefault) / sizeof(m_aDefault[0])); i++)
+	for(int &Default : m_aDefault)
 	{
-		if(m_aDefault[i] == Slot)
+		if(Default == Slot)
 		{
-			m_aDefault[i] = -1;
+			Default = -1;
 		}
-		else if(m_aDefault[i] == m_aKeys.size())
+		else if(Default == m_aKeys.size())
 		{
-			m_aDefault[i] = Slot;
+			Default = Slot;
 		}
 	}
 	return m_aKeys.size();

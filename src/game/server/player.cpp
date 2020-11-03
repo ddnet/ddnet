@@ -12,11 +12,6 @@
 #include <game/version.h>
 #include <time.h>
 
-static const char g_aHalloweenSkins[][64] = {
-	"Bat", "Cyclops", "darky", "dynamite", "Electro Tee", "evil", "ghost", "glitch",
-	"Lord_of_Zombie", "pumpkin", "reaper", "red_flame", "undead", "Voodoo_tee_1",
-	"zombie", "zombie1", "zombie2", "zombie3", "zombie4"};
-
 MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
 
 IServer *CPlayer::Server() const { return m_pGameServer->Server(); }
@@ -321,31 +316,10 @@ void CPlayer::Snap(int SnappingClient)
 	if(!pClientInfo)
 		return;
 
-	const char *pSkinName = m_TeeInfos.m_SkinName;
-
-	if(m_Halloween)
-	{
-		bool Found = false;
-
-		for(const auto &HalloweenSkin : g_aHalloweenSkins)
-		{
-			if(str_comp(pSkinName, HalloweenSkin) == 0)
-			{
-				Found = true;
-				break;
-			}
-		}
-
-		if(!Found)
-		{
-			pSkinName = g_aHalloweenSkins[str_quickhash(Server()->ClientName(m_ClientID)) % (sizeof(g_aHalloweenSkins) / sizeof(g_aHalloweenSkins[0]))];
-		}
-	}
-
 	StrToInts(&pClientInfo->m_Name0, 4, Server()->ClientName(m_ClientID));
 	StrToInts(&pClientInfo->m_Clan0, 3, Server()->ClientClan(m_ClientID));
 	pClientInfo->m_Country = Server()->ClientCountry(m_ClientID);
-	StrToInts(&pClientInfo->m_Skin0, 6, pSkinName);
+	StrToInts(&pClientInfo->m_Skin0, 6, m_TeeInfos.m_SkinName);
 	pClientInfo->m_UseCustomColor = m_TeeInfos.m_UseCustomColor;
 	pClientInfo->m_ColorBody = m_TeeInfos.m_ColorBody;
 	pClientInfo->m_ColorFeet = m_TeeInfos.m_ColorFeet;
@@ -681,10 +655,10 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 	if(Team == TEAM_SPECTATORS)
 	{
 		// update spectator modes
-		for(int i = 0; i < MAX_CLIENTS; ++i)
+		for(auto &pPlayer : GameServer()->m_apPlayers)
 		{
-			if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_SpectatorID == m_ClientID)
-				GameServer()->m_apPlayers[i]->m_SpectatorID = SPEC_FREEVIEW;
+			if(pPlayer && pPlayer->m_SpectatorID == m_ClientID)
+				pPlayer->m_SpectatorID = SPEC_FREEVIEW;
 		}
 	}
 }
@@ -957,19 +931,19 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 		switch(Result.m_MessageKind)
 		{
 		case CScorePlayerResult::DIRECT:
-			for(int i = 0; i < CScorePlayerResult::MAX_MESSAGES; i++)
+			for(auto &aMessage : Result.m_Data.m_aaMessages)
 			{
-				if(Result.m_Data.m_aaMessages[i][0] == 0)
+				if(aMessage[0] == 0)
 					break;
-				GameServer()->SendChatTarget(m_ClientID, Result.m_Data.m_aaMessages[i]);
+				GameServer()->SendChatTarget(m_ClientID, aMessage);
 			}
 			break;
 		case CScorePlayerResult::ALL:
-			for(int i = 0; i < CScorePlayerResult::MAX_MESSAGES; i++)
+			for(auto &aMessage : Result.m_Data.m_aaMessages)
 			{
-				if(Result.m_Data.m_aaMessages[i][0] == 0)
+				if(aMessage[0] == 0)
 					break;
-				GameServer()->SendChat(-1, CGameContext::CHAT_ALL, Result.m_Data.m_aaMessages[i], m_ClientID);
+				GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aMessage, m_ClientID);
 			}
 			break;
 		case CScorePlayerResult::BROADCAST:

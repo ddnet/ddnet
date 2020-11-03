@@ -78,9 +78,7 @@ void CRenderTools::SelectSprite(CDataSprite *pSpr, int Flags, int sx, int sy)
 	int cx = pSpr->m_pSet->m_Gridx;
 	int cy = pSpr->m_pSet->m_Gridy;
 
-	float f = sqrtf(h * h + w * w);
-	gs_SpriteWScale = w / f;
-	gs_SpriteHScale = h / f;
+	GetSpriteScaleImpl(w, h, gs_SpriteWScale, gs_SpriteHScale);
 
 	float x1 = x / (float)cx + 0.5f / (float)(cx * 32);
 	float x2 = (x + w) / (float)cx - 0.5f / (float)(cx * 32);
@@ -116,23 +114,26 @@ void CRenderTools::GetSpriteScale(client_data7::CDataSprite *pSprite, float &Sca
 {
 	int w = pSprite->m_W;
 	int h = pSprite->m_H;
-	float f = sqrtf(h * h + w * w);
-	ScaleX = w / f;
-	ScaleY = h / f;
+	GetSpriteScaleImpl(w, h, ScaleX, ScaleY);
 }
 
 void CRenderTools::GetSpriteScale(struct CDataSprite *pSprite, float &ScaleX, float &ScaleY)
 {
 	int w = pSprite->m_W;
 	int h = pSprite->m_H;
-	float f = sqrtf(h * h + w * w);
-	ScaleX = w / f;
-	ScaleY = h / f;
+	GetSpriteScaleImpl(w, h, ScaleX, ScaleY);
 }
 
 void CRenderTools::GetSpriteScale(int id, float &ScaleX, float &ScaleY)
 {
 	GetSpriteScale(&g_pData->m_aSprites[id], ScaleX, ScaleY);
+}
+
+void CRenderTools::GetSpriteScaleImpl(int Width, int Height, float &ScaleX, float &ScaleY)
+{
+	float f = sqrtf(Height * Height + Width * Width);
+	ScaleX = Width / f;
+	ScaleY = Height / f;
 }
 
 void CRenderTools::DrawSprite(float x, float y, float Size)
@@ -173,9 +174,11 @@ void CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float X, float
 
 void CRenderTools::DrawRoundRectExt(float x, float y, float w, float h, float r, int Corners)
 {
-	IGraphics::CFreeformItem ArrayF[32];
 	int NumItems = 0;
-	int Num = 8;
+	const int Num = 8;
+
+	IGraphics::CFreeformItem ArrayF[Num * 4];
+
 	for(int i = 0; i < Num; i += 2)
 	{
 		float a1 = i / (float)Num * pi / 2;
@@ -453,6 +456,31 @@ int CRenderTools::CreateRoundRectQuadContainer(float x, float y, float w, float 
 	Graphics()->QuadContainerAddQuads(ContainerIndex, ArrayQ, NumItems);
 
 	return ContainerIndex;
+}
+
+void CRenderTools::DrawUIElRect(CUIElement::SUIElementRect &ElUIRect, const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding)
+{
+	bool NeedsRecreate = false;
+	if(ElUIRect.m_UIRectQuadContainer == -1 || ElUIRect.m_X != pRect->x || ElUIRect.m_Y != pRect->y || ElUIRect.m_Width != pRect->w || ElUIRect.m_Height != pRect->h)
+	{
+		if(ElUIRect.m_UIRectQuadContainer != -1)
+			Graphics()->DeleteQuadContainer(ElUIRect.m_UIRectQuadContainer);
+		NeedsRecreate = true;
+	}
+	if(NeedsRecreate)
+	{
+		ElUIRect.m_X = pRect->x;
+		ElUIRect.m_Y = pRect->y;
+		ElUIRect.m_Width = pRect->w;
+		ElUIRect.m_Height = pRect->h;
+
+		Graphics()->SetColor(Color);
+		ElUIRect.m_UIRectQuadContainer = CreateRoundRectQuadContainer(pRect->x, pRect->y, pRect->w, pRect->h, Rounding, Corners);
+		Graphics()->SetColor(1, 1, 1, 1);
+	}
+
+	Graphics()->TextureClear();
+	Graphics()->RenderQuadContainer(ElUIRect.m_UIRectQuadContainer, -1);
 }
 
 void CRenderTools::DrawRoundRect(float x, float y, float w, float h, float r)

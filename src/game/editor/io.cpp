@@ -338,18 +338,10 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 		CMapItemSound Item;
 		Item.m_Version = 1;
 
-		Item.m_External = pSound->m_External;
+		Item.m_External = 0;
 		Item.m_SoundName = df.AddData(str_length(pSound->m_aName) + 1, pSound->m_aName);
-		if(pSound->m_External)
-		{
-			Item.m_SoundDataSize = 0;
-			Item.m_SoundData = -1;
-		}
-		else
-		{
-			Item.m_SoundData = df.AddData(pSound->m_DataSize, pSound->m_pData);
-			Item.m_SoundDataSize = pSound->m_DataSize;
-		}
+		Item.m_SoundData = df.AddData(pSound->m_DataSize, pSound->m_pData);
+		Item.m_SoundDataSize = pSound->m_DataSize;
 
 		df.AddItem(MAPITEMTYPE_SOUND, i, sizeof(Item), &Item);
 	}
@@ -744,7 +736,6 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 
 				// copy base info
 				CEditorSound *pSound = new CEditorSound(m_pEditor);
-				pSound->m_External = pItem->m_External;
 
 				if(pItem->m_External)
 				{
@@ -926,10 +917,10 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 								for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
 								{
 									pTiles->m_pTiles[i].m_Index = 0;
-									for(unsigned e = 0; e < sizeof(s_aTilesRep) / sizeof(s_aTilesRep[0]); e++)
+									for(int TilesRep : s_aTilesRep)
 									{
-										if(((CLayerTele *)pTiles)->m_pTeleTile[i].m_Type == s_aTilesRep[e])
-											pTiles->m_pTiles[i].m_Index = s_aTilesRep[e];
+										if(((CLayerTele *)pTiles)->m_pTeleTile[i].m_Type == TilesRep)
+											pTiles->m_pTiles[i].m_Index = TilesRep;
 									}
 								}
 							}
@@ -999,11 +990,11 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 										continue;
 									}
 
-									for(unsigned e = 0; e < sizeof(s_aTilesComp) / sizeof(s_aTilesComp[0]); e++)
+									for(int TilesComp : s_aTilesComp)
 									{
-										if(pLayerSwitchTiles[i].m_Type == s_aTilesComp[e])
+										if(pLayerSwitchTiles[i].m_Type == TilesComp)
 										{
-											pTiles->m_pTiles[i].m_Index = s_aTilesComp[e];
+											pTiles->m_pTiles[i].m_Index = TilesComp;
 											pTiles->m_pTiles[i].m_Flags = pLayerSwitchTiles[i].m_Flags;
 										}
 									}

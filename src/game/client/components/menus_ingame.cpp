@@ -248,12 +248,12 @@ void CMenus::RenderPlayers(CUIRect MainView)
 
 	int TotalPlayers = 0;
 
-	for(int i = 0; i < MAX_CLIENTS; ++i)
+	for(auto &pInfoByName : m_pClient->m_Snap.m_paInfoByName)
 	{
-		if(!m_pClient->m_Snap.m_paInfoByName[i])
+		if(!pInfoByName)
 			continue;
 
-		int Index = m_pClient->m_Snap.m_paInfoByName[i]->m_ClientID;
+		int Index = pInfoByName->m_ClientID;
 
 		if(Index == m_pClient->m_Snap.m_LocalClientID)
 			continue;
@@ -530,7 +530,7 @@ bool CMenus::RenderServerControlServer(CUIRect MainView)
 		TotalShown++;
 	}
 
-	UiDoListboxStart(&s_VoteList, &List, 24.0f, "", "", TotalShown, 1, s_CurVoteOption, s_ScrollValue);
+	UiDoListboxStart(&s_VoteList, &List, 19.0f, "", "", TotalShown, 1, s_CurVoteOption, s_ScrollValue);
 
 	int i = -1;
 	for(CVoteOptionClient *pOption = m_pClient->m_pVoting->m_pFirst; pOption; pOption = pOption->m_pNext)
@@ -542,7 +542,7 @@ bool CMenus::RenderServerControlServer(CUIRect MainView)
 		CListboxItem Item = UiDoListboxNextItem(pOption);
 
 		if(Item.m_Visible)
-			UI()->DoLabelScaled(&Item.m_Rect, pOption->m_aDescription, 16.0f, -1);
+			UI()->DoLabelScaled(&Item.m_Rect, pOption->m_aDescription, 13.0f, -1);
 
 		if(NumVoteOptions < Total)
 			aIndices[NumVoteOptions] = i;
@@ -561,13 +561,13 @@ bool CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 	int NumOptions = 0;
 	int Selected = -1;
 	static int aPlayerIDs[MAX_CLIENTS];
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(auto &pInfoByName : m_pClient->m_Snap.m_paInfoByName)
 	{
-		if(!m_pClient->m_Snap.m_paInfoByName[i])
+		if(!pInfoByName)
 			continue;
 
-		int Index = m_pClient->m_Snap.m_paInfoByName[i]->m_ClientID;
-		if(Index == m_pClient->m_Snap.m_LocalClientID || (FilterSpectators && m_pClient->m_Snap.m_paInfoByName[i]->m_Team == TEAM_SPECTATORS))
+		int Index = pInfoByName->m_ClientID;
+		if(Index == m_pClient->m_Snap.m_LocalClientID || (FilterSpectators && pInfoByName->m_Team == TEAM_SPECTATORS))
 			continue;
 
 		if(!str_find_nocase(m_pClient->m_aClients[Index].m_aName, m_aFilterString))
@@ -608,13 +608,15 @@ void CMenus::RenderServerControl(CUIRect MainView)
 	static int s_ControlPage = 0;
 
 	// render background
-	CUIRect Bottom, Extended, TabBar, Button;
+	CUIRect Bottom, RconExtension, TabBar, Button;
 	MainView.HSplitTop(20.0f, &Bottom, &MainView);
 	RenderTools()->DrawUIRect(&Bottom, ms_ColorTabbarActive, 0, 10.0f);
 	MainView.HSplitTop(20.0f, &TabBar, &MainView);
 	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
 	MainView.Margin(10.0f, &MainView);
-	MainView.HSplitBottom(90.0f, &MainView, &Extended);
+
+	if(Client()->RconAuthed())
+		MainView.HSplitBottom(90.0f, &MainView, &RconExtension);
 
 	// tab bar
 	{
@@ -723,13 +725,14 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		if(Client()->RconAuthed())
 		{
 			// background
-			Extended.Margin(10.0f, &Extended);
-			Extended.HSplitTop(20.0f, &Bottom, &Extended);
-			Extended.HSplitTop(5.0f, 0, &Extended);
+			RconExtension.Margin(10.0f, &RconExtension);
+			RconExtension.HSplitTop(20.0f, &Bottom, &RconExtension);
+			RconExtension.HSplitTop(5.0f, 0, &RconExtension);
 
 			// force vote
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
 			Bottom.VSplitLeft(120.0f, &Button, &Bottom);
+
 			static int s_ForceVoteButton = 0;
 			if(DoButton_Menu(&s_ForceVoteButton, Localize("Force vote"), 0, &Button))
 			{
@@ -766,7 +769,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 					m_pClient->m_pVoting->RemovevoteOption(m_CallvoteSelectedOption);
 
 				// add vote
-				Extended.HSplitTop(20.0f, &Bottom, &Extended);
+				RconExtension.HSplitTop(20.0f, &Bottom, &RconExtension);
 				Bottom.VSplitLeft(5.0f, 0, &Bottom);
 				Bottom.VSplitLeft(250.0f, &Button, &Bottom);
 				UI()->DoLabelScaled(&Button, Localize("Vote description:"), 14.0f, -1);
@@ -776,7 +779,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 
 				static char s_aVoteDescription[64] = {0};
 				static char s_aVoteCommand[512] = {0};
-				Extended.HSplitTop(20.0f, &Bottom, &Extended);
+				RconExtension.HSplitTop(20.0f, &Bottom, &RconExtension);
 				Bottom.VSplitRight(10.0f, &Bottom, 0);
 				Bottom.VSplitRight(120.0f, &Bottom, &Button);
 				static int s_AddVoteButton = 0;
@@ -1157,7 +1160,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 				Cursor.m_LineWidth = Button.w;
 
 				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf), "%02d:%02d.%03d", pItem->m_Time / (60 * 1000), (pItem->m_Time / 1000) % 60, pItem->m_Time % 1000);
+				str_time(pItem->m_Time / 10, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
 				TextRender()->TextEx(&Cursor, aBuf, -1);
 			}
 		}

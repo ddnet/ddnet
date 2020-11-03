@@ -176,13 +176,12 @@ void CRaceDemo::StopRecord(int Time)
 int CRaceDemo::RaceDemolistFetchCallback(const char *pName, time_t Date, int IsDir, int StorageType, void *pUser)
 {
 	CDemoListParam *pParam = (CDemoListParam *)pUser;
-	int Length = str_length(pName);
 	int MapLen = str_length(pParam->pMap);
 	if(IsDir || !str_endswith(pName, ".demo") || !str_startswith(pName, pParam->pMap) || pName[MapLen] != '_')
 		return 0;
 
 	CDemoItem Item;
-	str_copy(Item.m_aName, pName, minimum(static_cast<int>(sizeof(Item.m_aName)), Length - 4));
+	str_truncate(Item.m_aName, sizeof(Item.m_aName), pName, str_length(pName) - 5);
 
 	const char *pTime = Item.m_aName + MapLen + 1;
 	const char *pTEnd = pTime;
@@ -215,14 +214,14 @@ bool CRaceDemo::CheckDemo(int Time) const
 	Storage()->ListDirectoryInfo(IStorage::TYPE_SAVE, ms_pRaceDemoDir, RaceDemolistFetchCallback, &Param);
 
 	// loop through demo files
-	for(unsigned i = 0; i < lDemos.size(); i++)
+	for(auto &Demo : lDemos)
 	{
-		if(Time >= lDemos[i].m_Time) // found a better demo
+		if(Time >= Demo.m_Time) // found a better demo
 			return false;
 
 		// delete old demo
 		char aFilename[512];
-		str_format(aFilename, sizeof(aFilename), "%s/%s.demo", ms_pRaceDemoDir, lDemos[i].m_aName);
+		str_format(aFilename, sizeof(aFilename), "%s/%s.demo", ms_pRaceDemoDir, Demo.m_aName);
 		Storage()->RemoveFile(aFilename, IStorage::TYPE_SAVE);
 	}
 

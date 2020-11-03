@@ -313,7 +313,6 @@ public:
 	{
 		m_pEditor = pEditor;
 		m_aName[0] = 0;
-		m_External = 0;
 		m_SoundID = 0;
 
 		m_pData = 0x0;
@@ -323,7 +322,6 @@ public:
 	~CEditorSound();
 
 	int m_SoundID;
-	int m_External;
 	char m_aName[128];
 
 	void *m_pData;

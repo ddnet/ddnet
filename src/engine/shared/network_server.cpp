@@ -76,8 +76,8 @@ bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int Ma
 
 	secure_random_fill(m_SecurityTokenSeed, sizeof(m_SecurityTokenSeed));
 
-	for(int i = 0; i < NET_MAX_CLIENTS; i++)
-		m_aSlots[i].m_Connection.Init(m_Socket, true);
+	for(auto &Slot : m_aSlots)
+		Slot.m_Connection.Init(m_Socket, true);
 
 	net_init_mmsgs(&m_MMSGS);
 

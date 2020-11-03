@@ -428,7 +428,7 @@ void CCommandProcessorFragment_OpenGL::SetState(const CCommandBuffer::SState &St
 			}
 			else
 			{
-				dbg_msg("OpenGL", "Error: this call should not happen.");
+				dbg_msg("opengl", "Error: this call should not happen.");
 			}
 		}
 	}
@@ -1826,12 +1826,12 @@ void CCommandProcessorFragment_OpenGL2::Cmd_DeleteBufferContainer(const CCommand
 			int VertBufferID = BufferContainer.m_ContainerInfo.m_Attributes[i].m_VertBufferBindingIndex;
 			if(VertBufferID != -1)
 			{
-				for(size_t j = 0; j < BufferContainer.m_ContainerInfo.m_Attributes.size(); ++j)
+				for(auto &Attribute : BufferContainer.m_ContainerInfo.m_Attributes)
 				{
 					// set all equal ids to zero to not double delete
-					if(VertBufferID == BufferContainer.m_ContainerInfo.m_Attributes[j].m_VertBufferBindingIndex)
+					if(VertBufferID == Attribute.m_VertBufferBindingIndex)
 					{
-						BufferContainer.m_ContainerInfo.m_Attributes[j].m_VertBufferBindingIndex = -1;
+						Attribute.m_VertBufferBindingIndex = -1;
 					}
 				}
 
@@ -3096,12 +3096,12 @@ void CCommandProcessorFragment_OpenGL3_3::DestroyBufferContainer(int Index, bool
 			int VertBufferID = BufferContainer.m_ContainerInfo.m_Attributes[i].m_VertBufferBindingIndex;
 			if(VertBufferID != -1)
 			{
-				for(size_t j = 0; j < BufferContainer.m_ContainerInfo.m_Attributes.size(); ++j)
+				for(auto &Attribute : BufferContainer.m_ContainerInfo.m_Attributes)
 				{
 					// set all equal ids to zero to not double delete
-					if(VertBufferID == BufferContainer.m_ContainerInfo.m_Attributes[j].m_VertBufferBindingIndex)
+					if(VertBufferID == Attribute.m_VertBufferBindingIndex)
 					{
-						BufferContainer.m_ContainerInfo.m_Attributes[j].m_VertBufferBindingIndex = -1;
+						Attribute.m_VertBufferBindingIndex = -1;
 					}
 				}
 
@@ -3146,11 +3146,11 @@ void CCommandProcessorFragment_OpenGL3_3::AppendIndices(unsigned int NewIndicesC
 	glDeleteBuffers(1, &m_QuadDrawIndexBufferID);
 	m_QuadDrawIndexBufferID = NewIndexBufferID;
 
-	for(int i = 0; i < MAX_STREAM_BUFFER_COUNT; ++i)
-		m_LastIndexBufferBound[i] = 0;
-	for(size_t i = 0; i < m_BufferContainers.size(); ++i)
+	for(unsigned int &i : m_LastIndexBufferBound)
+		i = 0;
+	for(auto &BufferContainer : m_BufferContainers)
 	{
-		m_BufferContainers[i].m_LastIndexBufferBound = 0;
+		BufferContainer.m_LastIndexBufferBound = 0;
 	}
 
 	m_CurrentIndicesInBuffer = NewIndicesCount;
@@ -3888,7 +3888,7 @@ void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 
 	// check what this context can do
 	const GLubyte *pVersionString = glGetString(GL_VERSION);
-	dbg_msg("OpenGL", "Version string: %s", (const char *)pVersionString);
+	dbg_msg("opengl", "Version string: %s", (const char *)pVersionString);
 	// parse version string
 	ParseVersionString(pVersionString, pCommand->m_pCapabilities->m_ContextMajor, pCommand->m_pCapabilities->m_ContextMinor, pCommand->m_pCapabilities->m_ContextPatch);
 
@@ -4139,7 +4139,7 @@ void CCommandProcessor_SDL_OpenGL::RunBuffer(CCommandBuffer *pBuffer)
 		if(m_General.RunCommand(pCommand))
 			continue;
 
-		dbg_msg("graphics", "unknown command %d", pCommand->m_Cmd);
+		dbg_msg("gfx", "unknown command %d", pCommand->m_Cmd);
 	}
 }
 

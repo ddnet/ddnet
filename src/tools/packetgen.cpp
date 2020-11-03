@@ -11,10 +11,10 @@ void Run(NETADDR Dest)
 {
 	NETSOCKET aSockets[NUM_SOCKETS];
 
-	for(int i = 0; i < NUM_SOCKETS; i++)
+	for(auto &Socket : aSockets)
 	{
 		NETADDR BindAddr = {NETTYPE_IPV4, {0}, 0};
-		aSockets[i] = net_udp_create(BindAddr);
+		Socket = net_udp_create(BindAddr);
 	}
 
 	while(1)

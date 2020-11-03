@@ -1188,7 +1188,6 @@ set(EXPECTED_DATA
   shader/tile.vert
   skins/Aoe4leg.png
   skins/PaladiN.png
-  skins/Terrorist.png
   skins/antiantey.png
   skins/beast.png
   skins/blacktee.png

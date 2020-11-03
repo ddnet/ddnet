@@ -120,9 +120,8 @@ void CScoreboard::RenderSpectators(float x, float y, float w)
 	Cursor.m_LineWidth = w - 20.0f;
 	Cursor.m_MaxLines = 4;
 
-	for(int i = 0; i < MAX_CLIENTS; ++i)
+	for(const auto *pInfo : m_pClient->m_Snap.m_paInfoByName)
 	{
-		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByName[i];
 		if(!pInfo || pInfo->m_Team != TEAM_SPECTATORS)
 			continue;
 
@@ -235,9 +234,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	if(m_pClient->m_GameInfo.m_TimeScore && g_Config.m_ClDDRaceScoreBoard)
 	{
 		if(m_ServerRecord > 0)
-		{
-			str_format(aBuf, sizeof(aBuf), "%02d:%02d", ((int)m_ServerRecord) / 60, ((int)m_ServerRecord) % 60);
-		}
+			str_time_float(m_ServerRecord, TIME_HOURS, aBuf, sizeof(aBuf));
 		else
 			aBuf[0] = 0;
 	}
@@ -421,13 +418,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			if(pInfo->m_Score == -9999)
 				aBuf[0] = 0;
 			else
-			{
-				int Time = abs(pInfo->m_Score);
-				if(Time / 3600)
-					str_format(aBuf, sizeof(aBuf), "%02d:%02d:%02d", Time / 3600, (Time / 60) % 60, Time % 60);
-				else
-					str_format(aBuf, sizeof(aBuf), "%02d:%02d", Time / 60, Time % 60);
-			}
+				str_time((int64)abs(pInfo->m_Score) * 100, TIME_HOURS, aBuf, sizeof(aBuf));
 		}
 		else
 			str_format(aBuf, sizeof(aBuf), "%d", clamp(pInfo->m_Score, -999, 99999));
@@ -548,30 +539,30 @@ void CScoreboard::RenderRecordingNotification(float x)
 	//draw the text
 	char aBuf[64] = "\0";
 	char aBuf2[64];
-	int Seconds;
+	char aTime[32];
 
 	if(m_pClient->DemoRecorder(RECORDER_MANUAL)->IsRecording())
 	{
-		Seconds = m_pClient->DemoRecorder(RECORDER_MANUAL)->Length();
-		str_format(aBuf2, sizeof(aBuf2), Localize("Manual %3d:%02d  "), Seconds / 60, Seconds % 60);
+		str_time((int64)m_pClient->DemoRecorder(RECORDER_MANUAL)->Length() * 100, TIME_HOURS, aTime, sizeof(aTime));
+		str_format(aBuf2, sizeof(aBuf2), "%s %s  ", Localize("Manual"), aTime);
 		str_append(aBuf, aBuf2, sizeof(aBuf));
 	}
 	if(m_pClient->DemoRecorder(RECORDER_RACE)->IsRecording())
 	{
-		Seconds = m_pClient->DemoRecorder(RECORDER_RACE)->Length();
-		str_format(aBuf2, sizeof(aBuf2), Localize("Race %3d:%02d  "), Seconds / 60, Seconds % 60);
+		str_time((int64)m_pClient->DemoRecorder(RECORDER_RACE)->Length() * 100, TIME_HOURS, aTime, sizeof(aTime));
+		str_format(aBuf2, sizeof(aBuf2), "%s %s  ", Localize("Race"), aTime);
 		str_append(aBuf, aBuf2, sizeof(aBuf));
 	}
 	if(m_pClient->DemoRecorder(RECORDER_AUTO)->IsRecording())
 	{
-		Seconds = m_pClient->DemoRecorder(RECORDER_AUTO)->Length();
-		str_format(aBuf2, sizeof(aBuf2), Localize("Auto %3d:%02d  "), Seconds / 60, Seconds % 60);
+		str_time((int64)m_pClient->DemoRecorder(RECORDER_AUTO)->Length() * 100, TIME_HOURS, aTime, sizeof(aTime));
+		str_format(aBuf2, sizeof(aBuf2), "%s %s  ", Localize("Auto"), aTime);
 		str_append(aBuf, aBuf2, sizeof(aBuf));
 	}
 	if(m_pClient->DemoRecorder(RECORDER_REPLAYS)->IsRecording())
 	{
-		Seconds = m_pClient->DemoRecorder(RECORDER_REPLAYS)->Length();
-		str_format(aBuf2, sizeof(aBuf2), Localize("Replay %3d:%02d  "), Seconds / 60, Seconds % 60);
+		str_time((int64)m_pClient->DemoRecorder(RECORDER_REPLAYS)->Length() * 100, TIME_HOURS, aTime, sizeof(aTime));
+		str_format(aBuf2, sizeof(aBuf2), "%s %s  ", Localize("Replay"), aTime);
 		str_append(aBuf, aBuf2, sizeof(aBuf));
 	}
 
@@ -700,9 +691,8 @@ const char *CScoreboard::GetClanName(int Team)
 {
 	int ClanPlayers = 0;
 	const char *pClanName = 0;
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(const auto *pInfo : m_pClient->m_Snap.m_paInfoByScore)
 	{
-		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByScore[i];
 		if(!pInfo || pInfo->m_Team != Team)
 			continue;
 

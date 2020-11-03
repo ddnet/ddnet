@@ -35,7 +35,7 @@ private:
 	sorted_array<CDownloadSkin> m_aDownloadSkins;
 	char m_EventSkinPrefix[24];
 
-	int LoadSkin(const char *pName, const char *pPath, int DirType, int *pGetSkinID = NULL);
+	int LoadSkin(const char *pName, const char *pPath, int DirType);
 	int FindImpl(const char *pName);
 	static int SkinScan(const char *pName, int IsDir, int DirType, void *pUser);
 };

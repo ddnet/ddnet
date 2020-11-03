@@ -10,6 +10,7 @@
 #include <engine/friends.h>
 #include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
+#include <engine/textrender.h>
 #include <game/client/components/mapimages.h>
 
 #include <game/client/component.h>
@@ -48,6 +49,11 @@ class CMenus : public CComponent
 	static ColorRGBA ms_ColorTabbarActive;
 	static ColorRGBA ms_ColorTabbarHover;
 
+	char m_aLocalStringHelper[1024];
+
+	float ButtonColorMulActive() { return 0.5f; }
+	float ButtonColorMulHot() { return 1.5f; }
+	float ButtonColorMulDefault() { return 1.0f; }
 	float ButtonColorMul(const void *pID);
 
 	int DoButton_DemoPlayer(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
@@ -87,6 +93,95 @@ class CMenus : public CComponent
 
 	//static int ui_do_key_reader(void *id, const CUIRect *rect, int key);
 	void UiDoGetButtons(int Start, int Stop, CUIRect View, CUIRect ScopeView);
+
+	// new gui with gui elements
+	template<typename T>
+	int DoButtonMenu(CUIElement &UIElement, const void *pID, T &&GetTextLambda, int Checked, const CUIRect *pRect, bool HintRequiresStringCheck, bool HintCanChangePositionOrSize = false, int Corners = CUI::CORNER_ALL, float r = 5.0f, float FontFactor = 0.0f, vec4 ColorHot = vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4 Color = vec4(1, 1, 1, 0.5f), int AlignVertically = 1)
+	{
+		CUIRect Text = *pRect;
+		Text.HMargin(pRect->h >= 20.0f ? 2.0f : 1.0f, &Text);
+		Text.HMargin((Text.h * FontFactor) / 2.0f, &Text);
+
+		if(UIElement.Size() != 3 || HintRequiresStringCheck || HintCanChangePositionOrSize)
+		{
+			bool NeedsRecalc = UIElement.Size() != 3;
+			if(HintCanChangePositionOrSize)
+			{
+				if(UIElement.Size() == 3)
+				{
+					if(UIElement.Get(0)->m_X != pRect->x || UIElement.Get(0)->m_Y != pRect->y || UIElement.Get(0)->m_Width != pRect->w || UIElement.Get(0)->m_Y != pRect->h)
+					{
+						NeedsRecalc = true;
+					}
+				}
+			}
+			const char *pText = NULL;
+			if(HintRequiresStringCheck)
+			{
+				if(UIElement.Size() == 3)
+				{
+					pText = GetTextLambda();
+					if(str_comp(UIElement.Get(0)->m_Text.c_str(), pText) != 0)
+					{
+						NeedsRecalc = true;
+					}
+				}
+			}
+			if(NeedsRecalc)
+			{
+				if(UIElement.Size() > 0)
+				{
+					UI()->ResetUIElement(UIElement);
+				}
+
+				vec4 RealColor = Color;
+				for(int i = 0; i < 3; ++i)
+				{
+					Color.a = RealColor.a;
+					if(i == 0)
+						Color.a *= ButtonColorMulActive();
+					else if(i == 1)
+						Color.a *= ButtonColorMulHot();
+					else if(i == 2)
+						Color.a *= ButtonColorMulDefault();
+					Graphics()->SetColor(Color);
+
+					CUIElement::SUIElementRect NewRect;
+					NewRect.m_UIRectQuadContainer = RenderTools()->CreateRoundRectQuadContainer(pRect->x, pRect->y, pRect->w, pRect->h, r, Corners);
+
+					NewRect.m_X = pRect->x;
+					NewRect.m_Y = pRect->y;
+					NewRect.m_Width = pRect->w;
+					NewRect.m_Height = pRect->h;
+
+					if(i == 0)
+					{
+						if(pText == NULL)
+							pText = GetTextLambda();
+						NewRect.m_Text = pText;
+						UI()->DoLabel(NewRect, &Text, pText, Text.h * ms_FontmodHeight, 0, -1, AlignVertically);
+					}
+					UIElement.Add(NewRect);
+				}
+				Graphics()->SetColor(1, 1, 1, 1);
+			}
+		}
+
+		// render
+		size_t Index = 2;
+		if(UI()->ActiveItem() == pID)
+			Index = 0;
+		else if(UI()->HotItem() == pID)
+			Index = 1;
+		Graphics()->TextureClear();
+		Graphics()->RenderQuadContainer(UIElement.Get(Index)->m_UIRectQuadContainer, -1);
+		STextRenderColor ColorText(TextRender()->DefaultTextColor());
+		STextRenderColor ColorTextOutline(TextRender()->DefaultTextOutlineColor());
+		if(UIElement.Get(0)->m_UITextContainer != -1)
+			TextRender()->RenderTextContainer(UIElement.Get(0)->m_UITextContainer, &ColorText, &ColorTextOutline);
+
+		return UI()->DoButtonLogic(pID, Checked, pRect);
+	}
 
 	struct CListboxItem
 	{
@@ -185,6 +280,9 @@ protected:
 	char m_aMessageTopic[512];
 	char m_aMessageBody[512];
 	char m_aMessageButton[512];
+
+	CUIElement m_RefreshButton;
+	CUIElement m_ConnectButton;
 
 	void PopupMessage(const char *pTopic, const char *pBody, const char *pButton);
 
@@ -503,6 +601,7 @@ public:
 	{
 		POPUP_NONE = 0,
 		POPUP_FIRST_LAUNCH,
+		POPUP_POINTS,
 		POPUP_CONNECTING,
 		POPUP_MESSAGE,
 		POPUP_DISCONNECTED,

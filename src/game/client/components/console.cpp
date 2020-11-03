@@ -580,9 +580,9 @@ void CGameConsole::OnRender()
 		int EditingCursor = Input()->GetEditingCursor();
 		if(Input()->GetIMEState())
 		{
-			if(str_length(Input()->GetIMECandidate()))
+			if(str_length(Input()->GetIMEEditingText()))
 			{
-				pConsole->m_Input.Editing(Input()->GetIMECandidate(), EditingCursor);
+				pConsole->m_Input.Editing(Input()->GetIMEEditingText(), EditingCursor);
 				Editing = true;
 			}
 		}

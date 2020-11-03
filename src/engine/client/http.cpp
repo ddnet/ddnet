@@ -56,9 +56,9 @@ bool HttpInit(IStorage *pStorage)
 		dbg_msg("http", "libcurl version %s (compiled = " LIBCURL_VERSION ")", pVersion->version);
 	}
 
-	for(unsigned int i = 0; i < sizeof(gs_aLocks) / sizeof(gs_aLocks[0]); i++)
+	for(auto &Lock : gs_aLocks)
 	{
-		gs_aLocks[i] = lock_create();
+		Lock = lock_create();
 	}
 	curl_share_setopt(gs_Share, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
 	curl_share_setopt(gs_Share, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
@@ -287,6 +287,7 @@ int CGetFile::OnCompletion(int State)
 {
 	if(m_File && io_close(m_File) != 0)
 	{
+		dbg_msg("http", "i/o error, cannot close file: %s", m_aDest);
 		State = HTTP_ERROR;
 	}
 
