@@ -3,4 +3,6 @@ status = [
   "build-cmake (ubuntu-16.04)",
   "build-cmake (macOS-latest)",
   "build-cmake (windows-latest)",
+  "check-clang-tidy",
+  "check-style",
 ]
