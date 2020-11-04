@@ -41,11 +41,6 @@ CMysqlConnection::CMysqlConnection(
 
 CMysqlConnection::~CMysqlConnection()
 {
-#if defined(CONF_SQL)
-	m_pStmt.release();
-	m_pPreparedStmt.release();
-	m_pConnection.release();
-#endif
 }
 
 void CMysqlConnection::Print(IConsole *pConsole, const char *Mode)
@@ -104,9 +99,9 @@ IDbConnection::Status CMysqlConnection::Connect()
 
 	try
 	{
-		m_pConnection.release();
-		m_pPreparedStmt.release();
-		m_pResults.release();
+		m_pConnection.reset();
+		m_pPreparedStmt.reset();
+		m_pResults.reset();
 
 		sql::ConnectOptionsMap connection_properties;
 		connection_properties["hostName"] = sql::SQLString(m_aIp);
