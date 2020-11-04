@@ -1241,7 +1241,7 @@ void CGameClient::OnNewSnapshot()
 					pClient->m_ColorFeet = pInfo->m_ColorFeet;
 
 					// prepare the info
-					if(!m_GameInfo.m_AllowXSkins && (pClient->m_aSkinName[0] == 'x' || pClient->m_aSkinName[1] == '_'))
+					if(!m_GameInfo.m_AllowXSkins && (pClient->m_aSkinName[0] == 'x' && pClient->m_aSkinName[1] == '_'))
 						str_copy(pClient->m_aSkinName, "default", 64);
 
 					pClient->m_SkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(pClient->m_ColorBody).UnclampLighting());
