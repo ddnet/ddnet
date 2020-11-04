@@ -150,7 +150,7 @@ struct GL_SVertexTex3DStream
 typedef void (*WINDOW_RESIZE_FUNC)(void *pUser);
 
 namespace client_data7 {
-struct CDataSprite;
+struct CDataSprite; // NOLINT(bugprone-forward-declaration-namespace)
 }
 
 class IGraphics : public IInterface
