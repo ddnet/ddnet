@@ -11,6 +11,14 @@
 
 Checks: >
   -*,
+  bugprone-*,
+  -bugprone-branch-clone,
+  -bugprone-incorrect-roundings,
+  -bugprone-integer-division,
+  -bugprone-macro-parentheses,
+  -bugprone-narrowing-conversions,
+  -bugprone-parent-virtual-call,
+  -bugprone-unhandled-self-assignment,
   clang-analyzer-*,
   -clang-analyzer-optin.cplusplus.UninitializedObject,
   -clang-analyzer-optin.cplusplus.VirtualCall,

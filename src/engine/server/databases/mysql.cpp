@@ -304,7 +304,7 @@ void CMysqlConnection::GetString(int Col, char *pBuffer, int BufferSize) const
 int CMysqlConnection::GetBlob(int Col, unsigned char *pBuffer, int BufferSize) const
 {
 #if defined(CONF_SQL)
-	auto Blob = m_pResults->getBlob(Col);
+	auto *Blob = m_pResults->getBlob(Col);
 	Blob->read((char *)pBuffer, BufferSize);
 	int NumRead = Blob->gcount();
 	delete Blob;
