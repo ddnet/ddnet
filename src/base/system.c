@@ -2064,7 +2064,7 @@ int fs_storage_path(const char *appname, char *path, int max)
 #else
 	snprintf(path, max, "%s/.%s", home, appname);
 	for(i = strlen(home) + 2; path[i]; i++)
-		path[i] = tolower(path[i]);
+		path[i] = tolower((unsigned char)path[i]);
 #endif
 
 	return 0;
@@ -2710,7 +2710,7 @@ const char *str_find_nocase(const char *haystack, const char *needle)
 	{
 		const char *a = haystack;
 		const char *b = needle;
-		while(*a && *b && tolower(*a) == tolower(*b))
+		while(*a && *b && tolower((unsigned char)*a) == tolower((unsigned char)*b))
 		{
 			a++;
 			b++;
