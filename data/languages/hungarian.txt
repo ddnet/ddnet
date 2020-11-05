@@ -1122,7 +1122,7 @@ Most importantly communication is key: There is no tutorial so you'll have to ch
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Ajánlott, hogy ellenőrizze a beállításokat, hogy a kedvéhez igazítsa őket, mielőtt csatlakozna egy szerverhez. (Tipp: szűrők)
 
-Please enter your nick name below.
+Please enter your nickname below.
 == Írja be lent a becenevét.
 
 9+ new mentions
@@ -1170,7 +1170,7 @@ Use k key to kill (restart), q to pause and watch other players. See settings fo
 Existing Player
 == 
 
-Your nick name '%s' is already used (%d points). Do you still want to use it?
+Your nickname '%s' is already used (%d points). Do you still want to use it?
 == 
 
 Checking for existing player with your name

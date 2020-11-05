@@ -1122,7 +1122,7 @@ Most importantly communication is key: There is no tutorial so you'll have to ch
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == 推薦在進入伺服器前，先將設定調整到符合你的習慣。
 
-Please enter your nick name below.
+Please enter your nickname below.
 == 請輸入你的暱稱。
 
 Render
@@ -1185,7 +1185,7 @@ Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 Existing Player
 == 
 
-Your nick name '%s' is already used (%d points). Do you still want to use it?
+Your nickname '%s' is already used (%d points). Do you still want to use it?
 == 
 
 Checking for existing player with your name
