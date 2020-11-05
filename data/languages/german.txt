@@ -1269,40 +1269,40 @@ Use current map as background
 == Aktuelle Karte als Hintergrund benutzen
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== 
+== Debug-Modus aktiviert. Drück Strg+Shift+D um den Debug-Modus zu deaktivieren.
 
 Existing Player
-== 
+== Existierender Spieler
 
 Your nick name '%s' is already used (%d points). Do you still want to use it?
-== 
+== Dein Spitzname '%s' wird bereits genutzt (%d Punkte). Willst du ihn dennoch nutzen?
 
 Checking for existing player with your name
-== 
+== Prüfe auf existierenden Spieler mit deinem Namen
 
 Smooth Camera
-== 
+== Weiche Kamera
 
 Game sound volume
-== 
+== Spiel-Lautstärke
 
 Chat sound volume
-== 
+== Chat-Lautstärke
 
 Use old chat style
-== 
+== Alten Chat-Stil nutzen
 
 Highlight
-== 
+== Hervorheben
 
 Manual
-== 
+== Manuell
 
 Race
-== 
+== Rennen
 
 Auto
-== 
+== Auto
 
 Replay
-== 
+== Wiederholung
