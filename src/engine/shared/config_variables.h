@@ -362,8 +362,7 @@ MACRO_CONFIG_INT(ClShowHookCollOwn, cl_show_hook_coll_own, 1, 0, 2, CFGFLAG_CLIE
 
 MACRO_CONFIG_INT(ClChatTeamColors, cl_chat_teamcolors, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show names in chat in team colors")
 MACRO_CONFIG_INT(ClChatReset, cl_chat_reset, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Reset chat when pressing escape")
-MACRO_CONFIG_INT(ClChatTee, cl_chat_tee, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show a tee before the player name in chat");
-MACRO_CONFIG_INT(ClChatBackground, cl_chat_background, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show a background for each chat message");
+MACRO_CONFIG_INT(ClChatOld, cl_chat_old, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Old chat style: No tee, no background");
 
 MACRO_CONFIG_INT(ClShowDirection, cl_show_direction, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Show tee direction")
 MACRO_CONFIG_INT(ClHttpMapDownload, cl_http_map_download, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Try fast HTTP map download first")
