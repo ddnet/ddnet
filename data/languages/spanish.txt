@@ -1120,18 +1120,6 @@ New random timeout code
 Time
 == Tiempo
 
-Manual %3d:%02d  
-== Manual %3d:%02d  
-
-Race %3d:%02d  
-== Carrera %3d:%02d 
-
-Auto %3d:%02d  
-== Auto %3d:%02d
-
-Replay %3d:%02d  
-== Repetición %3d:%02d
-
 Follow
 == Seguir
 
@@ -1171,9 +1159,6 @@ Grabs
 9+ new mentions
 == 9+ nuevas menciones
 
-Downloading ddnet-info.json failed
-== 
-
 Saving ddnet-settings.cfg failed
 == 
 
@@ -1183,7 +1168,19 @@ The width or height of texture %s is not divisible by 16, which might cause visu
 Warning
 == 
 
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== 
+
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
+Existing Player
+== 
+
+Your nick name '%s' is already used (%d points). Do you still want to use it?
+== 
+
+Checking for existing player with your name
 == 
 
 Country / Region
@@ -1207,10 +1204,10 @@ Theme
 %d player
 == 
 
-File
+Demos directory
 == 
 
-Demos directory
+Smooth Camera
 == 
 
 Skip the main menu
@@ -1228,10 +1225,22 @@ Skin Database
 Skins directory
 == 
 
+Game sound volume
+== 
+
+Chat sound volume
+== 
+
 Background music volume
 == 
 
 Assets
+== 
+
+Use old chat style
+== 
+
+Highlight
 == 
 
 Client message
@@ -1275,4 +1284,16 @@ Editor
 
 [Start menu]
 Play
+== 
+
+Manual
+== 
+
+Race
+== 
+
+Auto
+== 
+
+Replay
 == 

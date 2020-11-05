@@ -741,9 +741,6 @@ Show health + ammo
 Team message
 == Csapat üzenet
 
-Manual %3d:%02d  
-== Manuális %3d:%02  
-
 Automatically create statboard csv
 == Magától készítsen csv pontszámtáblát
 
@@ -767,9 +764,6 @@ Remove chat
 
 Check now
 == Nézd meg
-
-Race %3d:%02d  
-== Verseny %3d:%02d 
 
 Background (regular)
 == Háttér (pálya)
@@ -890,9 +884,6 @@ Clan plates size
 
 Update now
 == Feljeszd most
-
-Auto %3d:%02d  
-== Auto %3d:%02d  
 
 Show clan above name plates
 == Klán mutatása a nevek fölött
@@ -1019,9 +1010,6 @@ Personal best:
 
 Show entities
 == Entitások mutatása
-
-Replay %3d:%02d  
-== Visszajátszás %3d:%02d  
 
 Video name:
 == Videó neve:
@@ -1164,9 +1152,6 @@ Length
 Are you sure that you want to disconnect your dummy?
 == Biztos, hogy kiakarod léptetni a másolatodat?
 
-Downloading ddnet-info.json failed
-== 
-
 Saving ddnet-settings.cfg failed
 == 
 
@@ -1176,7 +1161,19 @@ The width or height of texture %s is not divisible by 16, which might cause visu
 Warning
 == 
 
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== 
+
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
+Existing Player
+== 
+
+Your nick name '%s' is already used (%d points). Do you still want to use it?
+== 
+
+Checking for existing player with your name
 == 
 
 Country / Region
@@ -1200,10 +1197,10 @@ Theme
 %d player
 == 
 
-File
+Demos directory
 == 
 
-Demos directory
+Smooth Camera
 == 
 
 Skip the main menu
@@ -1224,10 +1221,22 @@ Skin Database
 Skins directory
 == 
 
+Game sound volume
+== 
+
+Chat sound volume
+== 
+
 Background music volume
 == 
 
 Assets
+== 
+
+Use old chat style
+== 
+
+Highlight
 == 
 
 Client message
@@ -1274,4 +1283,16 @@ Editor
 
 [Start menu]
 Play
+== 
+
+Manual
+== 
+
+Race
+== 
+
+Auto
+== 
+
+Replay
 == 

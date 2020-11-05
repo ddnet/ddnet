@@ -872,9 +872,6 @@ AntiPing: predict grenade paths
 Inner color
 == Cor interior
 
-Downloading ddnet-info.json failed
-== 
-
 Successfully saved the replay!
 == 
 
@@ -888,6 +885,9 @@ The width or height of texture %s is not divisible by 16, which might cause visu
 == 
 
 Warning
+== 
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 
 
 Server best:
@@ -941,6 +941,15 @@ It's recommended that you check the settings to adjust them to your liking befor
 Please enter your nick name below.
 == 
 
+Existing Player
+== 
+
+Your nick name '%s' is already used (%d points). Do you still want to use it?
+== 
+
+Checking for existing player with your name
+== 
+
 Country / Region
 == 
 
@@ -981,9 +990,6 @@ Indicate map finish
 == 
 
 Unfinished map
-== 
-
-File
 == 
 
 Markers:
@@ -1032,6 +1038,9 @@ Activate
 == 
 
 Save
+== 
+
+Smooth Camera
 == 
 
 Reset wanted weapon on death
@@ -1127,13 +1136,25 @@ Enable long pain sound (used when shooting in freeze)
 Threaded sound loading
 == 
 
+Game sound volume
+== 
+
+Chat sound volume
+== 
+
 Background music volume
 == 
 
 Assets
 == 
 
+Use old chat style
+== 
+
 Friend message
+== 
+
+Highlight
 == 
 
 Client message
@@ -1233,16 +1254,16 @@ Update failed! Check log...
 Time
 == 
 
-Manual %3d:%02d  
+Manual
 == 
 
-Race %3d:%02d  
+Race
 == 
 
-Auto %3d:%02d  
+Auto
 == 
 
-Replay %3d:%02d  
+Replay
 == 
 
 Frags

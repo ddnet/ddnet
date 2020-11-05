@@ -1111,18 +1111,6 @@ Check now
 Time
 == Время
 
-Manual %3d:%02d  
-== Ручное %3d:%02d  
-
-Race %3d:%02d  
-== Попытка %3d:%02d  
-
-Auto %3d:%02d  
-== Авто %3d:%02d  
-
-Replay %3d:%02d  
-== Повтор %3d:%02d  
-
 Follow
 == Следить
 
@@ -1232,19 +1220,28 @@ Learn
 Play
 == Играть
 
-Downloading ddnet-info.json failed
+Saving ddnet-settings.cfg failed
 == 
 
-Saving ddnet-settings.cfg failed
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== 
+
+Existing Player
+== 
+
+Your nick name '%s' is already used (%d points). Do you still want to use it?
+== 
+
+Checking for existing player with your name
 == 
 
 Theme
 == 
 
-File
+Demos directory
 == 
 
-Demos directory
+Smooth Camera
 == 
 
 Themes directory
@@ -1256,10 +1253,22 @@ Skin Database
 Skins directory
 == 
 
+Game sound volume
+== 
+
+Chat sound volume
+== 
+
 Background music volume
 == 
 
 Assets
+== 
+
+Use old chat style
+== 
+
+Highlight
 == 
 
 Use current map as background
@@ -1275,4 +1284,16 @@ Particles
 == 
 
 Assets directory
+== 
+
+Manual
+== 
+
+Race
+== 
+
+Auto
+== 
+
+Replay
 == 
