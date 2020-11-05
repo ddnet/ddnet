@@ -715,7 +715,7 @@ public:
 		if(FT_New_Memory_Face(m_FTLibrary, pBuf, Size, 0, &FallbackFont.m_FtFace) == 0)
 		{
 			dbg_msg("textrender", "loaded fallback font from '%s'", pFilename);
-			pFont->m_FtFallbackFonts.emplace_back(std::move(FallbackFont));
+			pFont->m_FtFallbackFonts.emplace_back(FallbackFont);
 
 			return true;
 		}

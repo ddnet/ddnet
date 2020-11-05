@@ -26,4 +26,5 @@ Checks: >
   -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
   modernize-loop-convert,
   readability-qualified-auto,
+  performance-*,
 HeaderFilterRegex: 'src/.*'
