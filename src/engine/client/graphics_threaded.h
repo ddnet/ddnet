@@ -671,6 +671,7 @@ public:
 	virtual bool HasTextBuffering() { return false; }
 	virtual bool HasQuadContainerBuffering() { return false; }
 	virtual bool Has2DTextureArrays() { return false; }
+	virtual const char *GetErrorString() { return NULL; }
 };
 
 class CGraphics_Threaded : public IEngineGraphics
@@ -800,6 +801,8 @@ class CGraphics_Threaded : public IEngineGraphics
 	}
 
 	void KickCommandBuffer();
+
+	void AddBackEndWarningIfExists();
 
 	int IssueInit();
 	int InitWindow();
