@@ -51,7 +51,6 @@ class CChat : public CComponent
 		int m_TimesRepeated;
 	};
 
-	bool m_PrevScoreBoardShowed;
 	bool m_PrevShowChat;
 
 	CLine m_aLines[MAX_LINES];
