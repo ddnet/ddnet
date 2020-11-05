@@ -7,7 +7,7 @@ struct ListDirectoryContext
 	IStorage *pStorage;
 };
 
-void ProcessItem(const char *pItemName, IStorage *pStorage)
+inline void ProcessItem(const char *pItemName, IStorage *pStorage)
 {
 	char aConfig[2048];
 
@@ -44,7 +44,7 @@ static int ListdirCallback(const char *pItemName, int IsDir, int StorageType, vo
 	return 0;
 }
 
-int main(int argc, const char **argv)
+int main(int argc, const char **argv) // NOLINT(misc-definitions-in-headers)
 {
 	dbg_logger_stdout();
 	IStorage *pStorage = CreateLocalStorage();
