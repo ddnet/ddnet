@@ -1644,6 +1644,8 @@ if(CLIENT)
   set_src(ENGINE_CLIENT GLOB src/engine/client
     backend_sdl.cpp
     backend_sdl.h
+    blocklist_driver.cpp
+    blocklist_driver.h
     client.cpp
     client.h
     demoedit.cpp
@@ -2114,6 +2116,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
   set_src(TESTS GLOB src/test
     aio.cpp
     bezier.cpp
+    blocklist_driver.cpp
     color.cpp
     csv.cpp
     datafile.cpp
@@ -2135,6 +2138,8 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     unix.cpp
   )
   set(TESTS_EXTRA
+    src/engine/client/blocklist_driver.cpp
+    src/engine/client/blocklist_driver.h
     src/engine/server/name_ban.cpp
     src/engine/server/name_ban.h
     src/game/server/teehistorian.cpp

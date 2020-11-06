@@ -3754,7 +3754,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadContainerAsSpriteMultipl
 
 // ------------ CCommandProcessorFragment_SDL
 
-static void ParseVersionString(const GLubyte *pStr, int &VersionMajor, int &VersionMinor, int &VersionPatch)
+static void ParseVersionString(const char *pStr, int &VersionMajor, int &VersionMinor, int &VersionPatch)
 {
 	if(pStr)
 	{
@@ -3765,12 +3765,12 @@ static void ParseVersionString(const GLubyte *pStr, int &VersionMajor, int &Vers
 		bool LastWasNumber = false;
 		while(*pStr && TotalNumbersPassed < 3)
 		{
-			if(*pStr >= (GLubyte)'0' && *pStr <= (GLubyte)'9')
+			if(*pStr >= '0' && *pStr <= '9')
 			{
 				aCurNumberStr[CurNumberStrLen++] = (char)*pStr;
 				LastWasNumber = true;
 			}
-			else if(LastWasNumber && (*pStr == (GLubyte)'.' || *pStr == (GLubyte)' ' || *pStr == (GLubyte)'\0'))
+			else if(LastWasNumber && (*pStr == '.' || *pStr == ' ' || *pStr == '\0'))
 			{
 				int CurNumber = 0;
 				if(CurNumberStrLen > 0)
@@ -3783,7 +3783,7 @@ static void ParseVersionString(const GLubyte *pStr, int &VersionMajor, int &Vers
 
 				LastWasNumber = false;
 
-				if(*pStr != (GLubyte)'.')
+				if(*pStr != '.')
 					break;
 			}
 			else
@@ -3798,81 +3798,6 @@ static void ParseVersionString(const GLubyte *pStr, int &VersionMajor, int &Vers
 		VersionMinor = aNumbers[1];
 		VersionPatch = aNumbers[2];
 	}
-}
-
-/* TODO: move this somewhere nice, generalize it more for other drivers / vendors */
-struct SBackEndDriverBlockList
-{
-	int m_VersionIdentifierMin;
-	int m_VersionIdentifierMax;
-	int m_VersionMajorMin;
-	int m_VersionMajorMax;
-	int m_VersionMinorMin;
-	int m_VersionMinorMax;
-	int m_VersionPatchMin;
-	int m_VersionPatchMax;
-	const char *m_pReason;
-};
-
-static SBackEndDriverBlockList gs_aBlockList[] = {
-	{26, 26, 20, 20, 100, 100, 7800, 7999, "This Intel driver version can cause crashes, please update it to a newer version and remove any gfx_opengl* config from ddnet_settings.cfg."}};
-
-static const char *ParseBlocklistDriverVersions(const GLubyte *pVendorStrGL, const GLubyte *pVersionStrGL)
-{
-	if(str_find_nocase((const char *)pVendorStrGL, "Intel") == NULL)
-		return NULL;
-
-	const char *pVersionStrStart = str_find_nocase((const char *)pVersionStrGL, "Build ");
-	if(pVersionStrStart == NULL)
-		return NULL;
-
-	// ignore "Build ", after that, it should directly start with the driver version
-	pVersionStrStart += (ptrdiff_t)str_length("Build ");
-
-	// get the "major" version
-	char aVersionStrHelper[512]; // the size is random, but shouldn't be too small probably
-	const char *pIdentifier = str_next_token(pVersionStrStart, ".", aVersionStrHelper, sizeof(aVersionStrHelper));
-	if(pIdentifier == NULL)
-		return NULL;
-
-	pVersionStrStart = pIdentifier;
-	int VIdentifier = str_toint(aVersionStrHelper);
-	const char *pMajor = str_next_token(pVersionStrStart, ".", aVersionStrHelper, sizeof(aVersionStrHelper));
-	if(pMajor == NULL)
-		return NULL;
-
-	pVersionStrStart = pMajor;
-	int VMajor = str_toint(aVersionStrHelper);
-	const char *pMinor = str_next_token(pVersionStrStart, ".", aVersionStrHelper, sizeof(aVersionStrHelper));
-	if(pMinor == NULL)
-		return NULL;
-
-	pVersionStrStart = pMinor;
-	int VMinor = str_toint(aVersionStrHelper);
-	const char *pPatch = str_next_token(pVersionStrStart, ".", aVersionStrHelper, sizeof(aVersionStrHelper));
-	if(pPatch == NULL)
-		return NULL;
-
-	int VPatch = str_toint(aVersionStrHelper);
-
-	for(auto &BlockListItem : gs_aBlockList)
-	{
-		if(VIdentifier < BlockListItem.m_VersionIdentifierMin || VIdentifier > BlockListItem.m_VersionIdentifierMax)
-			continue;
-
-		if(VMajor < BlockListItem.m_VersionMajorMin || VMajor > BlockListItem.m_VersionMajorMax)
-			continue;
-
-		if(VMinor < BlockListItem.m_VersionMinorMin || VMinor > BlockListItem.m_VersionMinorMax)
-			continue;
-
-		if(VPatch < BlockListItem.m_VersionPatchMin || VPatch > BlockListItem.m_VersionPatchMax)
-			continue;
-
-		return BlockListItem.m_pReason;
-	}
-
-	return NULL;
 }
 
 static const char *GetGLErrorName(GLenum Type)
@@ -3961,12 +3886,12 @@ void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 			dbg_msg("gfx", "Requested OpenGL debug mode, but the driver does not support the required extension");
 	}
 
-	const GLubyte *pVendorString = glGetString(GL_VENDOR);
-	dbg_msg("opengl", "Vendor string: %s", (const char *)pVendorString);
+	const char *pVendorString = (const char *)glGetString(GL_VENDOR);
+	dbg_msg("opengl", "Vendor string: %s", pVendorString);
 
 	// check what this context can do
-	const GLubyte *pVersionString = glGetString(GL_VERSION);
-	dbg_msg("opengl", "Version string: %s", (const char *)pVersionString);
+	const char *pVersionString = (const char *)glGetString(GL_VERSION);
+	dbg_msg("opengl", "Version string: %s", pVersionString);
 	// parse version string
 	ParseVersionString(pVersionString, pCommand->m_pCapabilities->m_ContextMajor, pCommand->m_pCapabilities->m_ContextMinor, pCommand->m_pCapabilities->m_ContextPatch);
 
