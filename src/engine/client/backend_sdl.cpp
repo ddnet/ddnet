@@ -3901,9 +3901,9 @@ void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 	//if the driver is buggy, and the requested GL version is the default, fallback
 	if(pErrString != NULL && pCommand->m_RequestedMajor == 3 && pCommand->m_RequestedMinor == 0 && pCommand->m_RequestedPatch == 0)
 	{
-		// fallback to lowest GL version
-		pCommand->m_pCapabilities->m_ContextMajor = 1;
-		pCommand->m_pCapabilities->m_ContextMinor = 5;
+		// fallback to known good GL version
+		pCommand->m_pCapabilities->m_ContextMajor = 2;
+		pCommand->m_pCapabilities->m_ContextMinor = 0;
 		pCommand->m_pCapabilities->m_ContextPatch = 0;
 
 		// set backend error string
