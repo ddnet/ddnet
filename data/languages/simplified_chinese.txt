@@ -1008,20 +1008,11 @@ Time
 Show entities
 == 实体层显示开关
 
-Race %3d:%02d  
-== 竞速赛 %3d:%02d  
-
-Replay %3d:%02d  
-== 回放 %3d:%02d  
-
 Show all
 == 显示所有玩家
 
 Downloading %s:
 == 正在下载 %s:
-
-Manual %3d:%02d  
-== 手动 %3d:%02d  
 
 %d new mentions
 == %d 条新提示
@@ -1083,9 +1074,6 @@ Size
 Dummy copy
 == 分身同步动作
 
-Auto %3d:%02d  
-== 自动 %3d:%02d  
-
 9+ new mentions
 == 9+ 条新提示
 
@@ -1140,7 +1128,7 @@ Most importantly communication is key: There is no tutorial so you'll have to ch
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == 推荐在进入服务器前，先将设置调整到符合你的习惯。
 
-Please enter your nick name below.
+Please enter your nickname below.
 == 请输入你的昵称。
 
 Render
@@ -1222,10 +1210,19 @@ Server executable not found, can't run server
 Editor
 == 编辑器
 
-Downloading ddnet-info.json failed
+Saving ddnet-settings.cfg failed
 == 
 
-Saving ddnet-settings.cfg failed
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== 
+
+Existing Player
+== 
+
+Your nickname '%s' is already used (%d points). Do you still want to use it?
+== 
+
+Checking for existing player with your name
 == 
 
 Theme
@@ -1243,10 +1240,10 @@ Theme
 %d player
 == 
 
-File
+Demos directory
 == 
 
-Demos directory
+Smooth Camera
 == 
 
 Themes directory
@@ -1261,10 +1258,22 @@ Skin Database
 Skins directory
 == 
 
+Game sound volume
+== 
+
+Chat sound volume
+== 
+
 Background music volume
 == 
 
 Assets
+== 
+
+Use old chat style
+== 
+
+Highlight
 == 
 
 Use current map as background
@@ -1280,4 +1289,16 @@ Particles
 == 
 
 Assets directory
+== 
+
+Manual
+== 
+
+Race
+== 
+
+Auto
+== 
+
+Replay
 == 

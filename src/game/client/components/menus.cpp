@@ -1419,7 +1419,7 @@ int CMenus::Render()
 				Localize("Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game."),
 				Localize("Use k key to kill (restart), q to pause and watch other players. See settings for other key binds."),
 				Localize("It's recommended that you check the settings to adjust them to your liking before joining a server."),
-				Localize("Please enter your nick name below."));
+				Localize("Please enter your nickname below."));
 			pExtraText = aBuf;
 			pButtonText = Localize("Ok");
 			ExtraAlign = -1;
@@ -1429,7 +1429,7 @@ int CMenus::Render()
 			pTitle = Localize("Existing Player");
 			if(Client()->m_Points > 50)
 			{
-				str_format(aBuf, sizeof(aBuf), Localize("Your nick name '%s' is already used (%d points). Do you still want to use it?"), Client()->PlayerName(), Client()->m_Points);
+				str_format(aBuf, sizeof(aBuf), Localize("Your nickname '%s' is already used (%d points). Do you still want to use it?"), Client()->PlayerName(), Client()->m_Points);
 				pExtraText = aBuf;
 			}
 			else if(Client()->m_Points >= 0)
