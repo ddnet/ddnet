@@ -280,6 +280,12 @@ Objects = [
 		NetIntAny("m_X"),
 		NetIntAny("m_Y"),
 	]),
+
+	NetObjectEx("SpectatorInfoEx", "spec-info-ex@teeworlds.cn", [
+		NetIntAny("m_Weapon"),
+		NetIntAny("m_TargetX"),
+		NetIntAny("m_TargetY"),
+	]),
 ]
 
 Messages = [

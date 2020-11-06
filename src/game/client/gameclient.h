@@ -190,7 +190,9 @@ public:
 		const CNetObj_Character *m_pLocalPrevCharacter;
 		const CNetObj_PlayerInfo *m_pLocalInfo;
 		const CNetObj_SpectatorInfo *m_pSpectatorInfo;
+		const CNetObj_SpectatorInfoEx *m_pSpectatorInfoEx;
 		const CNetObj_SpectatorInfo *m_pPrevSpectatorInfo;
+		const CNetObj_SpectatorInfoEx *m_pPrevSpectatorInfoEx;
 		const CNetObj_Flag *m_paFlags[2];
 		const CNetObj_GameInfo *m_pGameInfoObj;
 		const CNetObj_GameData *m_pGameDataObj;
@@ -212,6 +214,7 @@ public:
 			bool m_Active;
 			int m_SpectatorID;
 			bool m_UsePosition;
+			vec2 m_TargetPos;
 			vec2 m_Position;
 		} m_SpecInfo;
 

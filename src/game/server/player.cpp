@@ -373,6 +373,21 @@ void CPlayer::Snap(int SnappingClient)
 			pSpectatorInfo->m_SpectatorID = m_SpectatorID;
 			pSpectatorInfo->m_X = m_ViewPos.x;
 			pSpectatorInfo->m_Y = m_ViewPos.y;
+
+			CPlayer *pSpectatingPlayer = GameServer()->m_apPlayers[m_SpectatorID];
+			if(m_SpectatorID != SPEC_FREEVIEW && pSpectatingPlayer->m_pLastTarget)
+			{
+				CNetObj_SpectatorInfoEx *pSpectatorInfoEx = static_cast<CNetObj_SpectatorInfoEx *>(Server()->SnapNewItem(NETOBJTYPE_SPECTATORINFOEX, m_ClientID, sizeof(CNetObj_SpectatorInfoEx)));
+				if(!pSpectatorInfoEx)
+					return;
+				if(pSpectatingPlayer->GetCharacter())
+					pSpectatorInfoEx->m_Weapon = pSpectatingPlayer->GetCharacter()->GetActiveWeapon();
+				else
+					pSpectatorInfoEx->m_Weapon = WEAPON_HAMMER;
+				
+				pSpectatorInfoEx->m_TargetX = pSpectatingPlayer->m_pLastTarget->m_TargetX;
+				pSpectatorInfoEx->m_TargetY = pSpectatingPlayer->m_pLastTarget->m_TargetY;
+			}
 		}
 		else
 		{

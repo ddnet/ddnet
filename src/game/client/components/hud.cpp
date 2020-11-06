@@ -641,19 +641,31 @@ void CHud::RenderVoting()
 
 void CHud::RenderCursor()
 {
-	if(!m_pClient->m_Snap.m_pLocalCharacter || Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	int CurWeapon = WEAPON_HAMMER;
+	vec2 TargetPos = vec2(0, 0);
+
+	if(Client()->State() != IClient::STATE_DEMOPLAYBACK && m_pClient->m_Snap.m_pLocalCharacter)
+	{
+		// render local cursor
+		CurWeapon = m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS;
+		TargetPos = m_pClient->m_pControls->m_TargetPos[g_Config.m_ClDummy];
+	}
+	else if(m_pClient->m_Snap.m_pSpectatorInfoEx && m_pClient->m_Snap.m_pSpectatorInfo->m_SpectatorID != SPEC_FREEVIEW)
+	{
+		// render spec cursor
+		CurWeapon = m_pClient->m_Snap.m_pSpectatorInfoEx->m_Weapon % NUM_WEAPONS;
+		TargetPos = m_pClient->m_Snap.m_SpecInfo.m_Position + m_pClient->m_Snap.m_SpecInfo.m_TargetPos;
+	}
+	else
+	{
 		return;
-
+	}
+	
 	MapscreenToGroup(m_pClient->m_pCamera->m_Center.x, m_pClient->m_pCamera->m_Center.y, Layers()->GameGroup());
-
-	int CurWeapon = m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS;
-
 	Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteWeaponCursors[CurWeapon]);
-
-	// render cursor
 	int QuadOffset = NUM_WEAPONS * 10 * 2 + 40 * 2 + (CurWeapon);
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
-	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, QuadOffset, m_pClient->m_pControls->m_TargetPos[g_Config.m_ClDummy].x, m_pClient->m_pControls->m_TargetPos[g_Config.m_ClDummy].y);
+	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, QuadOffset, TargetPos.x, TargetPos.y);
 }
 
 void CHud::PrepareHealthAmoQuads()
