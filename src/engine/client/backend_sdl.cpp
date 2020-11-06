@@ -3819,69 +3819,57 @@ static SBackEndDriverBlockList gs_aBlockList[] = {
 
 static const char *ParseBlocklistDriverVersions(const GLubyte *pVendorStrGL, const GLubyte *pVersionStrGL)
 {
-	const char *pVendorStr = (const char *)pVendorStrGL;
-	const char *pVersionStr = (const char *)pVersionStrGL;
-	if(str_find_nocase(pVendorStr, "Intel") != NULL)
+	if(str_find_nocase((const char *)pVendorStrGL, "Intel") == NULL)
+		return NULL;
+
+	const char *pVersionStrStart = str_find_nocase((const char *)pVersionStrGL, "Build ");
+	if(pVersionStrStart == NULL)
+		return NULL;
+
+	// ignore "Build ", after that, it should directly start with the driver version
+	pVersionStrStart += (ptrdiff_t)str_length("Build ");
+
+	// get the "major" version
+	char aVersionStrHelper[512]; // the size is random, but shouldn't be too small probably
+	const char *pIdentifier = str_next_token(pVersionStrStart, ".", aVersionStrHelper, sizeof(aVersionStrHelper));
+	if(pIdentifier == NULL)
+		return NULL;
+
+	pVersionStrStart = pIdentifier;
+	int VIdentifier = str_toint(aVersionStrHelper);
+	const char *pMajor = str_next_token(pVersionStrStart, ".", aVersionStrHelper, sizeof(aVersionStrHelper));
+	if(pMajor == NULL)
+		return NULL;
+
+	pVersionStrStart = pMajor;
+	int VMajor = str_toint(aVersionStrHelper);
+	const char *pMinor = str_next_token(pVersionStrStart, ".", aVersionStrHelper, sizeof(aVersionStrHelper));
+	if(pMinor == NULL)
+		return NULL;
+
+	pVersionStrStart = pMinor;
+	int VMinor = str_toint(aVersionStrHelper);
+	const char *pPatch = str_next_token(pVersionStrStart, ".", aVersionStrHelper, sizeof(aVersionStrHelper));
+	if(pPatch == NULL)
+		return NULL;
+
+	int VPatch = str_toint(aVersionStrHelper);
+
+	for(auto &BlockListItem : gs_aBlockList)
 	{
-		const char *pVersionStrStart = str_find_nocase(pVersionStr, "Build ");
-		if(pVersionStrStart != NULL)
-		{
-			// ignore "Build ", after that, it should directly start with the driver version
-			pVersionStrStart += (ptrdiff_t)str_length("Build ");
+		if(VIdentifier < BlockListItem.m_VersionIdentifierMin || VIdentifier > BlockListItem.m_VersionIdentifierMax)
+			continue;
 
-			// get the "major" version
-			char aVersionStrHelper[MAX_PATH_LENGTH]; // the size is random, but shouldn't be too small probably
-			const char *pIdentifier = str_next_token(pVersionStrStart, ".", aVersionStrHelper, sizeof(aVersionStrHelper) / sizeof(aVersionStrHelper[0]));
-			bool CheckDriver = false;
-			int VIdentifier = -1;
-			int VMajor = -1;
-			int VMinor = -1;
-			int VPatch = -1;
-			if(pIdentifier != NULL)
-			{
-				pVersionStrStart = pIdentifier;
-				VIdentifier = str_toint(aVersionStrHelper);
-				const char *pMajor = str_next_token(pVersionStrStart, ".", aVersionStrHelper, sizeof(aVersionStrHelper) / sizeof(aVersionStrHelper[0]));
-				if(pMajor != NULL)
-				{
-					pVersionStrStart = pMajor;
-					VMajor = str_toint(aVersionStrHelper);
-					const char *pMinor = str_next_token(pVersionStrStart, ".", aVersionStrHelper, sizeof(aVersionStrHelper) / sizeof(aVersionStrHelper[0]));
-					if(pMinor != NULL)
-					{
-						pVersionStrStart = pMinor;
-						VMinor = str_toint(aVersionStrHelper);
-						const char *pPatch = str_next_token(pVersionStrStart, ".", aVersionStrHelper, sizeof(aVersionStrHelper) / sizeof(aVersionStrHelper[0]));
-						if(pPatch != NULL)
-						{
-							//pVersionStrStart = pPatch;
-							VPatch = str_toint(aVersionStrHelper);
-							CheckDriver = true;
-						}
-					}
-				}
-			}
+		if(VMajor < BlockListItem.m_VersionMajorMin || VMajor > BlockListItem.m_VersionMajorMax)
+			continue;
 
-			if(CheckDriver)
-			{
-				for(auto &BlockListItem : gs_aBlockList)
-				{
-					if(VIdentifier >= BlockListItem.m_VersionIdentifierMin && VIdentifier <= BlockListItem.m_VersionIdentifierMax)
-					{
-						if(VMajor >= BlockListItem.m_VersionMajorMin && VMajor <= BlockListItem.m_VersionMajorMax)
-						{
-							if(VMinor >= BlockListItem.m_VersionMinorMin && VMinor <= BlockListItem.m_VersionMinorMax)
-							{
-								if(VPatch >= BlockListItem.m_VersionPatchMin && VPatch <= BlockListItem.m_VersionPatchMax)
-								{
-									return BlockListItem.m_pReason;
-								}
-							}
-						}
-					}
-				}
-			}
-		}
+		if(VMinor < BlockListItem.m_VersionMinorMin || VMinor > BlockListItem.m_VersionMinorMax)
+			continue;
+
+		if(VPatch < BlockListItem.m_VersionPatchMin || VPatch > BlockListItem.m_VersionPatchMax)
+			continue;
+
+		return BlockListItem.m_pReason;
 	}
 
 	return NULL;
