@@ -4,6 +4,7 @@
 #include "SDL.h"
 #include "SDL_opengl.h"
 
+#include "blocklist_driver.h"
 #include "graphics_threaded.h"
 
 #include <base/tl/threading.h>
