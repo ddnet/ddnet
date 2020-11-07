@@ -1649,21 +1649,10 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			g_Config.m_ClShowChat ^= 1;
 		}
 
-		bool IsOldChat = !(g_Config.m_ClChatTee || g_Config.m_ClChatBackground);
-
 		Left.HSplitTop(20.0f, &Button, &Left);
-		if(DoButton_CheckBox(&g_Config.m_ClChatTee, Localize("Use old chat style"), IsOldChat, &Button))
+		if(DoButton_CheckBox(&g_Config.m_ClChatOld, Localize("Use old chat style"), g_Config.m_ClChatOld, &Button))
 		{
-			if(IsOldChat)
-			{
-				g_Config.m_ClChatTee = 1;
-				g_Config.m_ClChatBackground = 1;
-			}
-			else
-			{
-				g_Config.m_ClChatTee = 0;
-				g_Config.m_ClChatBackground = 0;
-			}
+			g_Config.m_ClChatOld ^= 1;
 			GameClient()->m_pChat->RebuildChat();
 		}
 
