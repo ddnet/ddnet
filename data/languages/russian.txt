@@ -1287,7 +1287,7 @@ Assets directory
 == Папка с графикой
 
 Manual
-== 
+== Ручное
 
 Race
 == Гонка
