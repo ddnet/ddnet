@@ -1241,8 +1241,8 @@ Theme
 Demos directory
 == Папка с демо
 
-Smooth Camera
-== Плавная камера
+Smooth Dynamic Camera
+== Плавная Динамическая камера
 
 Themes directory
 == Папка с темами
