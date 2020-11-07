@@ -26,13 +26,19 @@ struct SBackEndDriverBlockList
 {
 	SVersion m_VersionMin;
 	SVersion m_VersionMax;
+
+	// the OpenGL version, that is supported
+	int m_AllowedMajor;
+	int m_AllowedMinor;
+	int m_AllowedPatch;
+
 	const char *m_pReason;
 };
 
 static SBackEndDriverBlockList gs_aBlockList[] = {
-	{{26, 20, 100, 7800}, {26, 20, 100, 7999}, "This Intel driver version can cause crashes, please update it to a newer version and remove any gfx_opengl* config from ddnet_settings.cfg."}};
+	{{26, 20, 100, 7800}, {26, 20, 100, 7999}, 2, 0, 0, "This Intel driver version can cause crashes, please update it to a newer version."}};
 
-const char *ParseBlocklistDriverVersions(const char *pVendorStr, const char *pVersionStr)
+const char *ParseBlocklistDriverVersions(const char *pVendorStr, const char *pVersionStr, int &BlocklistMajor, int &BlocklistMinor, int &BlocklistPatch)
 {
 	if(str_find_nocase(pVendorStr, "Intel") == NULL)
 		return NULL;
@@ -59,7 +65,12 @@ const char *ParseBlocklistDriverVersions(const char *pVendorStr, const char *pVe
 	for(const auto &BlockListItem : gs_aBlockList)
 	{
 		if(BlockListItem.m_VersionMin <= Version && Version <= BlockListItem.m_VersionMax)
+		{
+			BlocklistMajor = BlockListItem.m_AllowedMajor;
+			BlocklistMinor = BlockListItem.m_AllowedMinor;
+			BlocklistPatch = BlockListItem.m_AllowedPatch;
 			return BlockListItem.m_pReason;
+		}
 	}
 
 	return NULL;

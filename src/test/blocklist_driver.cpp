@@ -4,15 +4,17 @@
 
 TEST(BlocklistDriver, Valid)
 {
-	EXPECT_STREQ(ParseBlocklistDriverVersions("Intel", "Build 26.20.100.7810"), "This Intel driver version can cause crashes, please update it to a newer version and remove any gfx_opengl* config from ddnet_settings.cfg.");
-	EXPECT_STREQ(ParseBlocklistDriverVersions("Intel", "Build 26.20.100.7926"), "This Intel driver version can cause crashes, please update it to a newer version and remove any gfx_opengl* config from ddnet_settings.cfg.");
-	EXPECT_STREQ(ParseBlocklistDriverVersions("Intel", "Build 26.20.100.7985"), "This Intel driver version can cause crashes, please update it to a newer version and remove any gfx_opengl* config from ddnet_settings.cfg.");
+	int Major, Minor, Patch;
+	EXPECT_STREQ(ParseBlocklistDriverVersions("Intel", "Build 26.20.100.7810", Major, Minor, Patch), "This Intel driver version can cause crashes, please update it to a newer version.");
+	EXPECT_STREQ(ParseBlocklistDriverVersions("Intel", "Build 26.20.100.7926", Major, Minor, Patch), "This Intel driver version can cause crashes, please update it to a newer version.");
+	EXPECT_STREQ(ParseBlocklistDriverVersions("Intel", "Build 26.20.100.7985", Major, Minor, Patch), "This Intel driver version can cause crashes, please update it to a newer version.");
 }
 
 TEST(BlocklistDriver, Invalid)
 {
-	EXPECT_STREQ(ParseBlocklistDriverVersions("Intel", "Build 25.20.100.7810"), NULL);
-	EXPECT_STREQ(ParseBlocklistDriverVersions("Intel", "Build 26.20.100.7799"), NULL);
-	EXPECT_STREQ(ParseBlocklistDriverVersions("Intel", "Build 26.20.100.8000"), NULL);
-	EXPECT_STREQ(ParseBlocklistDriverVersions("Intel", "Build 27.20.100.7900"), NULL);
+	int Major, Minor, Patch;
+	EXPECT_STREQ(ParseBlocklistDriverVersions("Intel", "Build 25.20.100.7810", Major, Minor, Patch), NULL);
+	EXPECT_STREQ(ParseBlocklistDriverVersions("Intel", "Build 26.20.100.7799", Major, Minor, Patch), NULL);
+	EXPECT_STREQ(ParseBlocklistDriverVersions("Intel", "Build 26.20.100.8000", Major, Minor, Patch), NULL);
+	EXPECT_STREQ(ParseBlocklistDriverVersions("Intel", "Build 27.20.100.7900", Major, Minor, Patch), NULL);
 }

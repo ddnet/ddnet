@@ -3897,18 +3897,37 @@ void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 
 	*pCommand->m_pInitError = 0;
 
-	const char *pErrString = ParseBlocklistDriverVersions(pVendorString, pVersionString);
+	int BlocklistMajor = -1, BlocklistMinor = -1, BlocklistPatch = -1;
+	const char *pErrString = ParseBlocklistDriverVersions(pVendorString, pVersionString, BlocklistMajor, BlocklistMinor, BlocklistPatch);
 	//if the driver is buggy, and the requested GL version is the default, fallback
 	if(pErrString != NULL && pCommand->m_RequestedMajor == 3 && pCommand->m_RequestedMinor == 0 && pCommand->m_RequestedPatch == 0)
 	{
-		// fallback to known good GL version
-		pCommand->m_pCapabilities->m_ContextMajor = 2;
+		// if not already in the error state, set the GL version
+		if(g_Config.m_GfxDriverIsBlocked == 0)
+		{
+			// fallback to known good GL version
+			pCommand->m_pCapabilities->m_ContextMajor = BlocklistMajor;
+			pCommand->m_pCapabilities->m_ContextMinor = BlocklistMinor;
+			pCommand->m_pCapabilities->m_ContextPatch = BlocklistPatch;
+
+			// set backend error string
+			*pCommand->m_pErrStringPtr = pErrString;
+			*pCommand->m_pInitError = -2;
+
+			g_Config.m_GfxDriverIsBlocked = 1;
+		}
+	}
+	// if the driver was in a blocked error state, but is not anymore, reset all config variables
+	else if(pErrString == NULL && g_Config.m_GfxDriverIsBlocked == 1)
+	{
+		pCommand->m_pCapabilities->m_ContextMajor = 3;
 		pCommand->m_pCapabilities->m_ContextMinor = 0;
 		pCommand->m_pCapabilities->m_ContextPatch = 0;
 
-		// set backend error string
-		*pCommand->m_pErrStringPtr = pErrString;
+		// tell the caller to reinitialize the context
 		*pCommand->m_pInitError = -2;
+
+		g_Config.m_GfxDriverIsBlocked = 0;
 	}
 
 	int MajorV = pCommand->m_pCapabilities->m_ContextMajor;
