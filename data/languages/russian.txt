@@ -1221,79 +1221,79 @@ Play
 == Играть
 
 Saving ddnet-settings.cfg failed
-== 
+== Неудачное сохранение ddnet-settings.cfg
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== 
+== Отладочный режим включен. Нажмите Ctrl+Shift+D, чтобы выйти.
 
 Existing Player
-== 
+== Существующий игрок
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== 
+== Твой никнейм '%s' уже существует (%d поинтов). Вы уверены, что хотите использовать его?
 
 Checking for existing player with your name
-== 
+== Проверка существования игрока с таким же именем
 
 Theme
-== 
+== Тема
 
 Demos directory
-== 
+== Папка с демо
 
 Smooth Camera
-== 
+== Плавная камера
 
 Themes directory
-== 
+== Папка с темами
 
 Skin Database
-== 
+== База данных скинов
 
 Skins directory
-== 
+== Папка со скинами
 
 Game sound volume
-== 
+== Громкость игры
 
 Chat sound volume
-== 
+== Громкость звуков чата
 
 Background music volume
-== 
+== Громкость фоновой музыки
 
 Assets
-== 
+== Графика
 
 Use old chat style
-== 
+== Использовать старый чат
 
 Highlight
-== 
+== Подсветка
 
 Use current map as background
-== 
+== Использовать данную карту как фон
 
 Entities
 == 
 
 Emoticons
-== 
+== Эмоции
 
 Particles
-== 
+== Частицы
 
 Assets directory
-== 
+== Папка с графикой
 
 Manual
 == 
 
 Race
-== 
+== Гонка
 
 Auto
-== 
+== Авто
 
 Replay
-== 
+== Запись
