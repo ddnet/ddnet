@@ -525,7 +525,12 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		const CServerInfo *pItem = ServerBrowser()->SortedGet(NewSelected);
 		str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress, sizeof(g_Config.m_UiServerAddress));
 		if(Input()->MouseDoubleClick() && DoubleClicked)
-			Client()->Connect(g_Config.m_UiServerAddress);
+		{
+			if(Client()->State() == IClient::STATE_ONLINE && Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
+				m_Popup = POPUP_DISCONNECT;
+			else
+				Client()->Connect(g_Config.m_UiServerAddress);
+		}
 	}
 
 	//RenderTools()->DrawUIRect(&Status, ms_ColorTabbarActive, CUI::CORNER_B, 5.0f);
@@ -681,7 +686,10 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			   m_ConnectButton, &s_JoinButton, []() -> const char * { return Localize("Connect"); }, 0, &ButtonConnect, false, false, CUI::CORNER_ALL, 5, 0, vec4(0.7f, 1, 0.7f, 0.1f), vec4(0.7f, 1, 0.7f, 0.2f)) ||
 			m_EnterPressed)
 		{
-			Client()->Connect(g_Config.m_UiServerAddress);
+			if(Client()->State() == IClient::STATE_ONLINE && Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
+				m_Popup = POPUP_DISCONNECT;
+			else
+				Client()->Connect(g_Config.m_UiServerAddress);
 			m_EnterPressed = false;
 		}
 	}
