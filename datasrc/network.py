@@ -281,7 +281,7 @@ Objects = [
 		NetIntAny("m_Y"),
 	]),
 
-	NetObjectEx("SpectatorInfoEx", "spec-info-ex@teeworlds.cn", [
+	NetObjectEx("CursorInfo", "cursor-info@netobj.teeworlds.cn", [
 		NetIntAny("m_Weapon"),
 		NetIntAny("m_TargetX"),
 		NetIntAny("m_TargetY"),

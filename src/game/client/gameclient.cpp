@@ -614,16 +614,16 @@ void CGameClient::UpdatePositions()
 				m_Snap.m_SpecInfo.m_Position = vec2(m_Snap.m_pSpectatorInfo->m_X, m_Snap.m_pSpectatorInfo->m_Y);
 			m_Snap.m_SpecInfo.m_UsePosition = true;
 		}
+	}
 
-		// solve cursor position
-		if(m_Snap.m_pSpectatorInfoEx && ((Client()->State() == IClient::STATE_DEMOPLAYBACK && m_DemoSpecID == SPEC_FOLLOW) || (Client()->State() != IClient::STATE_DEMOPLAYBACK && m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)))
-		{
-			if(m_Snap.m_pPrevSpectatorInfoEx)
-				m_Snap.m_SpecInfo.m_TargetPos = mix(vec2(m_Snap.m_pPrevSpectatorInfoEx->m_TargetX, m_Snap.m_pPrevSpectatorInfoEx->m_TargetY),
-					vec2(m_Snap.m_pSpectatorInfoEx->m_TargetX, m_Snap.m_pSpectatorInfoEx->m_TargetY), Client()->IntraGameTick(g_Config.m_ClDummy));
-			else
-				m_Snap.m_SpecInfo.m_TargetPos = vec2(m_Snap.m_pSpectatorInfoEx->m_TargetX, m_Snap.m_pSpectatorInfoEx->m_TargetY);
-		}
+	// cursor position
+	if(m_Snap.m_pCursorInfo)
+	{
+		if(m_Snap.m_pPrevCursorInfo)
+			m_Snap.m_DisplayCursorPos = mix(vec2(m_Snap.m_pPrevCursorInfo->m_TargetX, m_Snap.m_pPrevCursorInfo->m_TargetY),
+				vec2(m_Snap.m_pCursorInfo->m_TargetX, m_Snap.m_pCursorInfo->m_TargetY), Client()->IntraGameTick(g_Config.m_ClDummy));
+		else
+			m_Snap.m_DisplayCursorPos = vec2(m_Snap.m_pCursorInfo->m_TargetX, m_Snap.m_pCursorInfo->m_TargetY);
 	}
 
 	UpdateRenderedCharacters();
@@ -1409,10 +1409,10 @@ void CGameClient::OnNewSnapshot()
 
 				m_Snap.m_SpecInfo.m_SpectatorID = m_Snap.m_pSpectatorInfo->m_SpectatorID;
 			}
-			else if(Item.m_Type == NETOBJTYPE_SPECTATORINFOEX)
+			else if(Item.m_Type == NETOBJTYPE_CURSORINFO)
 			{
-				m_Snap.m_pSpectatorInfoEx = (const CNetObj_SpectatorInfoEx *)pData;
-				m_Snap.m_pPrevSpectatorInfoEx = (const CNetObj_SpectatorInfoEx *)Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_SPECTATORINFOEX, Item.m_ID);
+				m_Snap.m_pCursorInfo = (const CNetObj_CursorInfo *)pData;
+				m_Snap.m_pPrevCursorInfo = (const CNetObj_CursorInfo *)Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_CURSORINFO, Item.m_ID);
 			}
 			else if(Item.m_Type == NETOBJTYPE_GAMEINFO)
 			{

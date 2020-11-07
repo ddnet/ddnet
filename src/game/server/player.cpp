@@ -362,6 +362,25 @@ void CPlayer::Snap(int SnappingClient)
 		pPlayerInfo->m_Latency = Latency;
 	}
 
+	if(m_ClientID == SnappingClient && (SnappingClient < 0 || !Server()->IsSixup(SnappingClient)))
+	{
+		CPlayer *pCursorOwner = this;
+		if(m_Team == TEAM_SPECTATORS && m_SpectatorID != SPEC_FREEVIEW)
+			pCursorOwner = GameServer()->m_apPlayers[m_SpectatorID];
+		CCharacter *pCursorOwnerChar = pCursorOwner->GetCharacter();
+		if(pCursorOwnerChar && pCursorOwnerChar->IsAlive() && pCursorOwner->m_pLastTarget)
+		{
+			CNetObj_CursorInfo *pCursorInfo = static_cast<CNetObj_CursorInfo *>(Server()->SnapNewItem(NETOBJTYPE_CURSORINFO, m_ClientID, sizeof(CNetObj_CursorInfo)));
+			if(pCursorInfo)
+			{
+				pCursorInfo->m_Weapon = pCursorOwnerChar->GetActiveWeapon();
+
+				pCursorInfo->m_TargetX = pCursorOwner->m_pLastTarget->m_TargetX;
+				pCursorInfo->m_TargetY = pCursorOwner->m_pLastTarget->m_TargetY;
+			}
+		}
+	}
+
 	if(m_ClientID == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused))
 	{
 		if(SnappingClient < 0 || !Server()->IsSixup(SnappingClient))
@@ -373,21 +392,6 @@ void CPlayer::Snap(int SnappingClient)
 			pSpectatorInfo->m_SpectatorID = m_SpectatorID;
 			pSpectatorInfo->m_X = m_ViewPos.x;
 			pSpectatorInfo->m_Y = m_ViewPos.y;
-
-			CPlayer *pSpectatingPlayer = GameServer()->m_apPlayers[m_SpectatorID];
-			if(m_SpectatorID != SPEC_FREEVIEW && pSpectatingPlayer->m_pLastTarget)
-			{
-				CNetObj_SpectatorInfoEx *pSpectatorInfoEx = static_cast<CNetObj_SpectatorInfoEx *>(Server()->SnapNewItem(NETOBJTYPE_SPECTATORINFOEX, m_ClientID, sizeof(CNetObj_SpectatorInfoEx)));
-				if(!pSpectatorInfoEx)
-					return;
-				if(pSpectatingPlayer->GetCharacter())
-					pSpectatorInfoEx->m_Weapon = pSpectatingPlayer->GetCharacter()->GetActiveWeapon();
-				else
-					pSpectatorInfoEx->m_Weapon = WEAPON_HAMMER;
-				
-				pSpectatorInfoEx->m_TargetX = pSpectatingPlayer->m_pLastTarget->m_TargetX;
-				pSpectatorInfoEx->m_TargetY = pSpectatingPlayer->m_pLastTarget->m_TargetY;
-			}
 		}
 		else
 		{

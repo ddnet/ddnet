@@ -650,17 +650,20 @@ void CHud::RenderCursor()
 		CurWeapon = m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS;
 		TargetPos = m_pClient->m_pControls->m_TargetPos[g_Config.m_ClDummy];
 	}
-	else if(m_pClient->m_Snap.m_pSpectatorInfoEx && m_pClient->m_Snap.m_pSpectatorInfo->m_SpectatorID != SPEC_FREEVIEW)
+	else if(m_pClient->m_Snap.m_pCursorInfo)
 	{
 		// render spec cursor
-		CurWeapon = m_pClient->m_Snap.m_pSpectatorInfoEx->m_Weapon % NUM_WEAPONS;
-		TargetPos = m_pClient->m_Snap.m_SpecInfo.m_Position + m_pClient->m_Snap.m_SpecInfo.m_TargetPos;
+		CurWeapon = m_pClient->m_Snap.m_pCursorInfo->m_Weapon % NUM_WEAPONS;
+		if(m_pClient->m_Snap.m_SpecInfo.m_Active)
+			TargetPos = m_pClient->m_Snap.m_SpecInfo.m_Position + m_pClient->m_Snap.m_DisplayCursorPos;
+		else
+			TargetPos = m_pClient->m_LocalCharacterPos + m_pClient->m_Snap.m_DisplayCursorPos;
 	}
 	else
 	{
 		return;
 	}
-	
+
 	MapscreenToGroup(m_pClient->m_pCamera->m_Center.x, m_pClient->m_pCamera->m_Center.y, Layers()->GameGroup());
 	Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteWeaponCursors[CurWeapon]);
 	int QuadOffset = NUM_WEAPONS * 10 * 2 + 40 * 2 + (CurWeapon);

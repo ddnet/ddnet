@@ -2787,7 +2787,7 @@ void CClient::Update()
 				int DeltaTick = m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_Tick - m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick;
 				if(DeltaTick > 0)
 					m_GameIntraTick[g_Config.m_ClDummy] = ((Now - PrevtickStart) / (float)(CurtickStart - PrevtickStart)) / (float)DeltaTick;
-					
+
 				m_GameTickTime[g_Config.m_ClDummy] = (Now - PrevtickStart) / (float)Freq; //(float)SERVER_TICK_SPEED);
 				CurtickStart = NewPredTick * time_freq() / 50;
 				PrevtickStart = PrevPredTick * time_freq() / 50;
