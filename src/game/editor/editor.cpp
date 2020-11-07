@@ -2962,9 +2962,9 @@ void CEditor::DoMapEditor(CUIRect View)
 	//UI()->ClipDisable();
 }
 
-float CEditor::ScaleFontSize(char *aBuf, float FontSize, int Width)
+float CEditor::ScaleFontSize(char *pText, int TextSize, float FontSize, int Width)
 {
-	while(TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f) > Width)
+	while(TextRender()->TextWidth(0, FontSize, pText, -1, -1.0f) > Width)
 	{
 		if(FontSize > 6.0f)
 		{
@@ -2972,8 +2972,8 @@ float CEditor::ScaleFontSize(char *aBuf, float FontSize, int Width)
 		}
 		else
 		{
-			aBuf[str_length(aBuf) - 4] = '\0';
-			str_append(aBuf, "...", sizeof(aBuf));
+			pText[str_length(pText) - 4] = '\0';
+			str_append(pText, "...", TextSize);
 		}
 	}
 	return FontSize;
@@ -3140,7 +3140,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			else
 				str_format(aBuf, sizeof(aBuf), "%s", m_Map.m_lImages[pProps[i].m_Value]->m_aName);
 
-			float FontSize = ScaleFontSize(aBuf, 10.0f, Shifter.w);
+			float FontSize = ScaleFontSize(aBuf, sizeof(aBuf), 10.0f, Shifter.w);
 			if(DoButton_Ex(&pIDs[i], aBuf, 0, &Shifter, 0, 0, CUI::CORNER_ALL, FontSize))
 				PopupSelectImageInvoke(pProps[i].m_Value, UI()->MouseX(), UI()->MouseY());
 
@@ -3194,7 +3194,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			else
 				str_format(aBuf, sizeof(aBuf), "%s", m_Map.m_lSounds[pProps[i].m_Value]->m_aName);
 
-			float FontSize = ScaleFontSize(aBuf, 10.0f, Shifter.w);
+			float FontSize = ScaleFontSize(aBuf, sizeof(aBuf), 10.0f, Shifter.w);
 			if(DoButton_Ex(&pIDs[i], aBuf, 0, &Shifter, 0, 0, CUI::CORNER_ALL, FontSize))
 				PopupSelectSoundInvoke(pProps[i].m_Value, UI()->MouseX(), UI()->MouseY());
 
@@ -3213,7 +3213,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			else
 				str_format(aBuf, sizeof(aBuf), "%s", m_Map.m_lImages[pProps[i].m_Min]->m_AutoMapper.GetConfigName(pProps[i].m_Value));
 
-			float FontSize = ScaleFontSize(aBuf, 10.0f, Shifter.w);
+			float FontSize = ScaleFontSize(aBuf, sizeof(aBuf), 10.0f, Shifter.w);
 			if(DoButton_Ex(&pIDs[i], aBuf, 0, &Shifter, 0, 0, CUI::CORNER_ALL, FontSize))
 				PopupSelectConfigAutoMapInvoke(pProps[i].m_Value, UI()->MouseX(), UI()->MouseY());
 
@@ -3240,7 +3240,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			else
 				str_format(aBuf, sizeof(aBuf), "%d", CurValue);
 
-			float FontSize = ScaleFontSize(aBuf, 10.0f, Shifter.w);
+			float FontSize = ScaleFontSize(aBuf, sizeof(aBuf), 10.0f, Shifter.w);
 			RenderTools()->DrawUIRect(&Shifter, Color, 0, 5.0f);
 			UI()->DoLabel(&Shifter, aBuf, FontSize, 0, -1);
 
@@ -4785,7 +4785,7 @@ void CEditor::RenderStatusbar(CUIRect View)
 		else
 			str_copy(aBuf, m_pTooltip, sizeof(aBuf));
 
-		float FontSize = ScaleFontSize(aBuf, 10.0f, View.w);
+		float FontSize = ScaleFontSize(aBuf, sizeof(aBuf), 10.0f, View.w);
 		UI()->DoLabel(&View, aBuf, FontSize, -1, View.w);
 	}
 }
