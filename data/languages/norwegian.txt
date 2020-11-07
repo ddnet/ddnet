@@ -1202,7 +1202,7 @@ Theme
 Demos directory
 == 
 
-Smooth Camera
+Smooth Dynamic Camera
 == 
 
 Skip the main menu
@@ -1282,13 +1282,13 @@ Play
 == 
 
 Manual
-== 
+== Manuell
 
 Race
-== 
+== Løp
 
 Auto
-== 
+== Auto
 
 Replay
-== 
+== Opptak

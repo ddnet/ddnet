@@ -1259,7 +1259,7 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 Checking for existing player with your name
 == 
 
-Smooth Camera
+Smooth Dynamic Camera
 == 
 
 Game sound volume
@@ -1281,13 +1281,13 @@ Use current map as background
 == 
 
 Manual
-== 
+== Упутство
 
 Race
-== 
+== Трка
 
 Auto
-== 
+== Ауто
 
 Replay
-== 
+== Помнови

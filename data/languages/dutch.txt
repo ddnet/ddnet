@@ -1206,7 +1206,7 @@ Theme
 Demos directory
 == 
 
-Smooth Camera
+Smooth Dynamic Camera
 == 
 
 Skip the main menu
@@ -1286,16 +1286,16 @@ Play
 == 
 
 Manual
-== 
+== Manual
 
 Race
-== 
+== Race
 
 Auto
-== 
+== Automatisch
 
 Replay
-== 
+== Herhaling
 
 Net
 == 

@@ -1212,7 +1212,7 @@ Theme
 Demos directory
 == 
 
-Smooth Camera
+Smooth Dynamic Camera
 == 
 
 Skip the main menu
@@ -1286,13 +1286,13 @@ Play
 == 
 
 Manual
-== 
+== 手動
 
 Race
-== 
+== 競速賽
 
 Auto
-== 
+== 自動
 
 Replay
-== 
+== 回放

@@ -832,7 +832,7 @@ Activate
 Save
 == 
 
-Smooth Camera
+Smooth Dynamic Camera
 == 
 
 Switch weapon when out of ammo
