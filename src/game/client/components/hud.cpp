@@ -650,14 +650,16 @@ void CHud::RenderCursor()
 		CurWeapon = m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS;
 		TargetPos = m_pClient->m_pControls->m_TargetPos[g_Config.m_ClDummy];
 	}
-	else if(m_pClient->m_Snap.m_pCursorInfo)
+	else if(m_pClient->m_Snap.m_pCursorInfo && m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
 	{
 		// render spec cursor
 		CurWeapon = m_pClient->m_Snap.m_pCursorInfo->m_Weapon % NUM_WEAPONS;
-		if(m_pClient->m_Snap.m_SpecInfo.m_Active)
-			TargetPos = m_pClient->m_Snap.m_SpecInfo.m_Position + m_pClient->m_Snap.m_DisplayCursorPos;
-		else
-			TargetPos = m_pClient->m_LocalCharacterPos + m_pClient->m_Snap.m_DisplayCursorPos;
+		TargetPos = m_pClient->m_Snap.m_SpecInfo.m_Position + m_pClient->m_Snap.m_DisplayCursorPos;
+	}
+	else if(m_pClient->m_Snap.m_pCursorInfo && Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_Snap.m_pLocalCharacter)
+	{
+		CurWeapon = m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS;
+		TargetPos = m_pClient->m_LocalCharacterPos + m_pClient->m_Snap.m_DisplayCursorPos;
 	}
 	else
 	{
