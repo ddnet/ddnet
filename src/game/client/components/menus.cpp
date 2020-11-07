@@ -1605,7 +1605,7 @@ int CMenus::Render()
 			Part.VMargin(120.0f, &Part);
 
 			static int s_Button = 0;
-			if(DoButton_Menu(&s_Button, pButtonText, 0, &Part) || m_EscapePressed || m_EnterPressed)
+			if(DoButton_Menu(&s_Button, pButtonText, 0, &Part) || m_EscapePressed || (m_EnterPressed && m_Popup != POPUP_CONNECTING))
 			{
 				Client()->Disconnect();
 				m_Popup = POPUP_NONE;
