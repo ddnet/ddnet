@@ -129,10 +129,10 @@ void CCamera::OnRender()
 		static vec2 s_CurrentCameraOffset[2] = {vec2(0, 0), vec2(0, 0)};
 		static float s_SpeedBias = 0.5f;
 
-		if(g_Config.m_ClCameraSmoothness > 0)
+		if(g_Config.m_ClDyncamSmoothness > 0)
 		{
-			float CameraSpeed = (1.0f - (g_Config.m_ClCameraSmoothness / 100.0f)) * 9.5f + 0.5f;
-			float CameraStabilizingFactor = 1 + g_Config.m_ClCameraStabilizing / 100.0f;
+			float CameraSpeed = (1.0f - (g_Config.m_ClDyncamSmoothness / 100.0f)) * 9.5f + 0.5f;
+			float CameraStabilizingFactor = 1 + g_Config.m_ClDyncamStabilizing / 100.0f;
 
 			s_SpeedBias += CameraSpeed * DeltaTime;
 			if(g_Config.m_ClDyncam)
@@ -158,7 +158,7 @@ void CCamera::OnRender()
 			TargetCameraOffset = normalize(m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy]) * OffsetAmount;
 		}
 
-		if(g_Config.m_ClCameraSmoothness > 0)
+		if(g_Config.m_ClDyncamSmoothness > 0)
 			s_CurrentCameraOffset[g_Config.m_ClDummy] += (TargetCameraOffset - s_CurrentCameraOffset[g_Config.m_ClDummy]) * minimum(DeltaTime * s_SpeedBias, 1.0f);
 		else
 			s_CurrentCameraOffset[g_Config.m_ClDummy] = TargetCameraOffset;
