@@ -1208,8 +1208,8 @@ Theme
 Demos directory
 == Directorio de demos
 
-Smooth Camera
-== Cámara suave
+Smooth Dynamic Camera
+== Cámara dinámica suave
 
 Skip the main menu
 == Saltar el menú principal

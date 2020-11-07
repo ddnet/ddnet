@@ -1204,7 +1204,7 @@ Markers
 Demos directory
 == 
 
-Smooth Camera
+Smooth Dynamic Camera
 == 
 
 Skip the main menu
@@ -1281,13 +1281,13 @@ Play
 == 
 
 Manual
-== 
+== Ручна
 
 Race
-== 
+== Гонка
 
 Auto
-== 
+== Авто
 
 Replay
-== 
+== Повтор

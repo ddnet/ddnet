@@ -1243,7 +1243,7 @@ Theme
 Demos directory
 == 
 
-Smooth Camera
+Smooth Dynamic Camera
 == 
 
 Themes directory
@@ -1292,13 +1292,13 @@ Assets directory
 == 
 
 Manual
-== 
+== 手动
 
 Race
-== 
+== 竞速赛
 
 Auto
-== 
+== 自动
 
 Replay
-== 
+== 回放

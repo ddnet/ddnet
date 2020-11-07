@@ -1280,9 +1280,6 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 Checking for existing player with your name
 == Prüfe auf existierenden Spieler mit deinem Namen
 
-Smooth Camera
-== Weiche Kamera
-
 Game sound volume
 == Spiel-Lautstärke
 
@@ -1306,3 +1303,6 @@ Auto
 
 Replay
 == Wiederholung
+
+Smooth Dynamic Camera
+== Weiche Dynamische Kamera

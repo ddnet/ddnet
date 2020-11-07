@@ -107,19 +107,22 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			}
 		}
 
-		// smooth camera
+		// smooth dynamic camera
 		Left.HSplitTop(5.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Button, &Left);
-		if(DoButton_CheckBox(&g_Config.m_ClCameraSmoothness, Localize("Smooth Camera"), g_Config.m_ClCameraSmoothness, &Button))
+		if(g_Config.m_ClDyncam)
 		{
-			if(g_Config.m_ClCameraSmoothness)
+			if(DoButton_CheckBox(&g_Config.m_ClDyncamSmoothness, Localize("Smooth Dynamic Camera"), g_Config.m_ClDyncamSmoothness, &Button))
 			{
-				g_Config.m_ClCameraSmoothness = 0;
-			}
-			else
-			{
-				g_Config.m_ClCameraSmoothness = 50;
-				g_Config.m_ClCameraStabilizing = 50;
+				if(g_Config.m_ClDyncamSmoothness)
+				{
+					g_Config.m_ClDyncamSmoothness = 0;
+				}
+				else
+				{
+					g_Config.m_ClDyncamSmoothness = 50;
+					g_Config.m_ClDyncamStabilizing = 50;
+				}
 			}
 		}
 
