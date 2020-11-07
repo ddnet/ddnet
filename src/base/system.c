@@ -1928,7 +1928,7 @@ int net_unix_send(UNIXSOCKET sock, UNIXSOCKETADDR *addr, void *data, int size)
 
 void net_unix_set_addr(UNIXSOCKETADDR *addr, const char *path)
 {
-	mem_zero(addr, sizeof(UNIXSOCKETADDR));
+	mem_zero(addr, sizeof(*addr));
 	addr->sun_family = AF_UNIX;
 	str_copy(addr->sun_path, path, sizeof(addr->sun_path));
 }
