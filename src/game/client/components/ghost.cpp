@@ -59,14 +59,14 @@ void CGhost::GetNetObjCharacter(CNetObj_Character *pChar, const CGhostCharacter 
 	pChar->m_Tick = pGhostChar->m_Tick;
 }
 
-CGhost::CGhostPath::CGhostPath(CGhostPath &&Other) :
+CGhost::CGhostPath::CGhostPath(CGhostPath &&Other) noexcept :
 	m_ChunkSize(Other.m_ChunkSize), m_NumItems(Other.m_NumItems), m_lChunks(std::move(Other.m_lChunks))
 {
 	Other.m_NumItems = 0;
 	Other.m_lChunks.clear();
 }
 
-CGhost::CGhostPath &CGhost::CGhostPath::operator=(CGhostPath &&Other)
+CGhost::CGhostPath &CGhost::CGhostPath::operator=(CGhostPath &&Other) noexcept
 {
 	Reset(Other.m_ChunkSize);
 	m_NumItems = Other.m_NumItems;

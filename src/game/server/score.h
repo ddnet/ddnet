@@ -4,6 +4,7 @@
 #include <atomic>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <engine/map.h>
@@ -149,7 +150,7 @@ public:
 struct CSqlInitData : ISqlData
 {
 	CSqlInitData(std::shared_ptr<CScoreInitResult> pResult) :
-		m_pResult(pResult)
+		m_pResult(std::move(pResult))
 	{
 	}
 	std::shared_ptr<CScoreInitResult> m_pResult;
@@ -161,7 +162,7 @@ struct CSqlInitData : ISqlData
 struct CSqlPlayerRequest : ISqlData
 {
 	CSqlPlayerRequest(std::shared_ptr<CScorePlayerResult> pResult) :
-		m_pResult(pResult)
+		m_pResult(std::move(pResult))
 	{
 	}
 	std::shared_ptr<CScorePlayerResult> m_pResult;
@@ -177,7 +178,7 @@ struct CSqlPlayerRequest : ISqlData
 struct CSqlRandomMapRequest : ISqlData
 {
 	CSqlRandomMapRequest(std::shared_ptr<CScoreRandomMapResult> pResult) :
-		m_pResult(pResult)
+		m_pResult(std::move(pResult))
 	{
 	}
 	std::shared_ptr<CScoreRandomMapResult> m_pResult;
@@ -191,7 +192,7 @@ struct CSqlRandomMapRequest : ISqlData
 struct CSqlScoreData : ISqlData
 {
 	CSqlScoreData(std::shared_ptr<CScorePlayerResult> pResult) :
-		m_pResult(pResult)
+		m_pResult(std::move(pResult))
 	{
 	}
 	virtual ~CSqlScoreData(){};
@@ -224,7 +225,7 @@ struct CSqlTeamScoreData : ISqlData
 struct CSqlTeamSave : ISqlData
 {
 	CSqlTeamSave(std::shared_ptr<CScoreSaveResult> pResult) :
-		m_pResult(pResult)
+		m_pResult(std::move(pResult))
 	{
 	}
 	virtual ~CSqlTeamSave(){};
@@ -241,7 +242,7 @@ struct CSqlTeamSave : ISqlData
 struct CSqlTeamLoad : ISqlData
 {
 	CSqlTeamLoad(std::shared_ptr<CScoreSaveResult> pResult) :
-		m_pResult(pResult)
+		m_pResult(std::move(pResult))
 	{
 	}
 	virtual ~CSqlTeamLoad(){};

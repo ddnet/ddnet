@@ -73,7 +73,7 @@ void sqlstr::AgoTimeToString(int AgoTime, char *pAgoString, int Size)
 		Seconds = aTimes[i];
 		str_copy(aName, aaNames[i], sizeof(aName));
 
-		Count = floor((float)AgoTime / (float)Seconds);
+		Count = std::floor((float)AgoTime / (float)Seconds);
 		if(Count != 0)
 		{
 			break;
@@ -98,7 +98,7 @@ void sqlstr::AgoTimeToString(int AgoTime, char *pAgoString, int Size)
 		str_copy(aName2, aaNames[i + 1], sizeof(aName2));
 
 		// add second piece if it's greater than 0
-		int Count2 = floor((float)(AgoTime - (Seconds * Count)) / (float)Seconds2);
+		int Count2 = std::floor((float)(AgoTime - (Seconds * Count)) / (float)Seconds2);
 
 		if(Count2 != 0)
 		{

@@ -6,6 +6,8 @@
 #include <game/server/gamecontext.h>
 #include <game/teamscore.h>
 
+#include <utility>
+
 class CGameTeams
 {
 	int m_TeamState[MAX_CLIENTS];
@@ -123,7 +125,7 @@ public:
 
 	void SetSaving(int TeamID, std::shared_ptr<CScoreSaveResult> SaveResult)
 	{
-		m_pSaveTeamResult[TeamID] = SaveResult;
+		m_pSaveTeamResult[TeamID] = std::move(SaveResult);
 	}
 
 	bool GetSaving(int TeamID)

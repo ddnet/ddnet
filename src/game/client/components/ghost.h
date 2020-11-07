@@ -68,8 +68,8 @@ private:
 		CGhostPath(const CGhostPath &Other) = delete;
 		CGhostPath &operator=(const CGhostPath &Other) = delete;
 
-		CGhostPath(CGhostPath &&Other);
-		CGhostPath &operator=(CGhostPath &&Other);
+		CGhostPath(CGhostPath &&Other) noexcept;
+		CGhostPath &operator=(CGhostPath &&Other) noexcept;
 
 		void Reset(int ChunkSize = 25 * 60); // one minute with default snap rate
 		void SetSize(int Items);

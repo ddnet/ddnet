@@ -6,7 +6,7 @@
 
 #include <string.h>
 
-const char g_aaKeyStrings[512][20] =
+const char g_aaKeyStrings[512][20] = // NOLINT(misc-definitions-in-headers)
 {
 	"unknown",
 	"&1",

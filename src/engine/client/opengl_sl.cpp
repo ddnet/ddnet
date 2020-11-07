@@ -188,7 +188,7 @@ void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, int Type
 						++pBuff;
 					}
 
-					if(*pBuff && *pBuff == ' ' && *(pBuff + 1) && *(pBuff + 1) == 'i' && *(pBuff + 2) == 'n')
+					if(*pBuff == ' ' && *(pBuff + 1) && *(pBuff + 1) == 'i' && *(pBuff + 2) == 'n')
 					{
 						pBuff += 3;
 						Line.append("attribute");
