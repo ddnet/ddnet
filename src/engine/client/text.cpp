@@ -897,7 +897,7 @@ public:
 		//the outlined texture is always the same size as the current
 		float UVScale = 1.0f / pFont->m_CurTextureDimensions[0];
 
-		const char *pCurrent = (char *)pText;
+		const char *pCurrent = pText;
 		const char *pEnd = pCurrent + Length;
 
 		if((m_RenderFlags & TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) != 0)
@@ -941,7 +941,7 @@ public:
 			const char *pBatchEnd = pEnd;
 			if(pCursor->m_LineWidth > 0 && !(pCursor->m_Flags & TEXTFLAG_STOP_AT_END))
 			{
-				int Wlen = minimum(WordLength((char *)pCurrent), (int)(pEnd - pCurrent));
+				int Wlen = minimum(WordLength(pCurrent), (int)(pEnd - pCurrent));
 				CTextCursor Compare = *pCursor;
 				Compare.m_X = DrawX;
 				Compare.m_Y = DrawY;
