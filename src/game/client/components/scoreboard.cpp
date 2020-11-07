@@ -152,9 +152,6 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	if(Team == TEAM_SPECTATORS)
 		return;
 
-	if(NumPlayers < 0)
-		NumPlayers = m_pClient->m_Snap.m_aTeamSize[Team];
-
 	bool lower16 = false;
 	bool upper16 = false;
 	bool lower24 = false;
@@ -177,6 +174,9 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 	if(Team < -1)
 		Team = 0;
+
+	if(NumPlayers < 0)
+		NumPlayers = m_pClient->m_Snap.m_aTeamSize[Team];
 
 	float h = 760.0f;
 
