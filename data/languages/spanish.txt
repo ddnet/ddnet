@@ -1182,7 +1182,7 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 == Tu nombre '%s' ya está usado (%d puntos). ¿Deseas seguir usándolo?
 
 Checking for existing player with your name
-== Comprobando si ya hay un jugador con tu nombre
+== Comprobando si ya existe un jugador con tu nombre
 
 Country / Region
 == País / Región
