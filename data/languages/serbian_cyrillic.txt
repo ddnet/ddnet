@@ -1281,13 +1281,13 @@ Use current map as background
 == 
 
 Manual
-== 
+== Упутство
 
 Race
-== 
+== Трка
 
 Auto
-== 
+== Ауто
 
 Replay
-== 
+== Помнови

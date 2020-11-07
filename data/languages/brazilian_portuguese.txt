@@ -1295,13 +1295,13 @@ Highlight
 == 
 
 Manual
-== 
+== Manual
 
 Race
-== 
+== Corrida
 
 Auto
-== 
+== Auto
 
 Replay
-== 
+== Reproduzir

@@ -1286,13 +1286,13 @@ Play
 == 
 
 Manual
-== 
+== Manual
 
 Race
-== 
+== Yarış
 
 Auto
-== 
+== Otomatik
 
 Replay
-== 
+== Yeniden oynatma

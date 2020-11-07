@@ -1286,13 +1286,13 @@ Play
 == 
 
 Manual
-== 
+== Instrukcja
 
 Race
-== 
+== Wyścig
 
 Auto
-== 
+== Auto
 
 Replay
-== 
+== Powtórka

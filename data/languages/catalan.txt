@@ -1274,13 +1274,13 @@ Play
 == 
 
 Manual
-== 
+== Manual
 
 Race
-== 
+== Carrera
 
 Auto
-== 
+== Auto
 
 Replay
-== 
+== Repetició

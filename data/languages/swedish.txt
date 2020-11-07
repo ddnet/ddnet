@@ -1284,13 +1284,13 @@ Assets directory
 == 
 
 Manual
-== 
+== Manual
 
 Race
-== 
+== Race
 
 Auto
-== 
+== Auto
 
 Replay
-== 
+== Repris

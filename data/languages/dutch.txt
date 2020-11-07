@@ -1286,16 +1286,16 @@ Play
 == 
 
 Manual
-== 
+== Manual
 
 Race
-== 
+== Race
 
 Auto
-== 
+== Automatisch
 
 Replay
-== 
+== Herhaling
 
 Net
 == 

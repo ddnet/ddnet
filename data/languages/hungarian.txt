@@ -1286,13 +1286,13 @@ Play
 == 
 
 Manual
-== 
+== Manuális
 
 Race
-== 
+== Verseny
 
 Auto
-== 
+== Auto
 
 Replay
-== 
+== Visszajátszás
