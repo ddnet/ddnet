@@ -461,7 +461,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				if(g_Config.m_BrFilterString[0] && (pItem->m_QuickSearchHit & IServerBrowser::QUICK_PLAYER))
 					TextRender()->TextColor(0.4f, 0.4f, 1.0f, 1);
 				float FontSize = 12.0f * UI()->Scale();
-				UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColPlayers), &Button, aTemp, FontSize, -1, Button.w, 1, true);
+				UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColPlayers), &Button, aTemp, FontSize, 1, Button.w, 1, true);
 				TextRender()->TextColor(1, 1, 1, 1);
 			}
 			else if(ID == COL_PING)
@@ -474,14 +474,14 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				}
 
 				float FontSize = 12.0f * UI()->Scale();
-				UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColPing), &Button, aTemp, FontSize, -1, Button.w, 1, true);
+				UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColPing), &Button, aTemp, FontSize, 1, Button.w, 1, true);
 				TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 			else if(ID == COL_VERSION)
 			{
 				const char *pVersion = pItem->m_aVersion;
 				float FontSize = 12.0f * UI()->Scale();
-				UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColVersion), &Button, pVersion, FontSize, -1, Button.w, 1, true);
+				UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColVersion), &Button, pVersion, FontSize, 1, Button.w, 1, true);
 			}
 			else if(ID == COL_GAMETYPE)
 			{
