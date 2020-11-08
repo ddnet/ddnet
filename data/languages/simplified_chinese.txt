@@ -1210,6 +1210,18 @@ Server executable not found, can't run server
 Editor
 == 编辑器
 
+Manual
+== 手动
+
+Race
+== 竞速赛
+
+Auto
+== 自动
+
+Replay
+== 回放
+
 Saving ddnet-settings.cfg failed
 == 
 
@@ -1290,15 +1302,3 @@ Particles
 
 Assets directory
 == 
-
-Manual
-== 手动
-
-Race
-== 竞速赛
-
-Auto
-== 自动
-
-Replay
-== 回放

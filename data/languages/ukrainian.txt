@@ -1153,6 +1153,18 @@ Grabs
 9+ new mentions
 == 9+ нових згадок
 
+Manual
+== Ручна
+
+Race
+== Гонка
+
+Auto
+== Авто
+
+Replay
+== Повтор
+
 Saving ddnet-settings.cfg failed
 == 
 
@@ -1279,15 +1291,3 @@ Editor
 [Start menu]
 Play
 == 
-
-Manual
-== Ручна
-
-Race
-== Гонка
-
-Auto
-== Авто
-
-Replay
-== Повтор

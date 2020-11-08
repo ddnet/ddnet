@@ -1,4 +1,4 @@
-﻿﻿##### authors #####
+﻿##### authors #####
 #originally created by:
 #	Feca
 #modified by:
@@ -1260,9 +1260,6 @@ Particles
 Assets directory
 == Kinézet Helye
 
-https://wiki.ddnet.tw/
-== 
-
 Website
 == Weboldal
 
@@ -1296,3 +1293,6 @@ Auto
 
 Replay
 == Visszajátszás
+
+https://wiki.ddnet.tw/
+== 
