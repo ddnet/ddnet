@@ -840,6 +840,9 @@ public:
 	}
 	virtual void TextOutlineColor(ColorRGBA rgb) { m_OutlineColor = rgb; };
 
+	virtual ColorRGBA GetTextColor() { return m_Color; }
+	virtual ColorRGBA GetTextOutlineColor() { return m_OutlineColor; }
+
 	virtual void TextEx(CTextCursor *pCursor, const char *pText, int Length)
 	{
 		dbg_assert(pText != NULL, "null text pointer");
