@@ -78,11 +78,24 @@ int CSkins::LoadSkin(const char *pName, const char *pPath, int DirType)
 	for(int i = 0; i < 6; ++i)
 		Skin.m_OriginalSkin.m_Eyes[i] = Graphics()->LoadSpriteTexture(Info, &g_pData->m_aSprites[SPRITE_TEE_EYE_NORMAL + i]);
 
-	int BodySize = 96; // body size
+	int FeetGridPixelsWidth = (Info.m_Width / g_pData->m_aSprites[SPRITE_TEE_FOOT].m_pSet->m_Gridx);
+	int FeetGridPixelsHeight = (Info.m_Height / g_pData->m_aSprites[SPRITE_TEE_FOOT].m_pSet->m_Gridy);
+	int FeetWidth = g_pData->m_aSprites[SPRITE_TEE_FOOT].m_W * FeetGridPixelsWidth;
+	int FeetHeight = g_pData->m_aSprites[SPRITE_TEE_FOOT].m_H * FeetGridPixelsHeight;
+
+	int FeetOffsetX = g_pData->m_aSprites[SPRITE_TEE_FOOT].m_X * FeetGridPixelsWidth;
+	int FeetOffsetY = g_pData->m_aSprites[SPRITE_TEE_FOOT].m_Y * FeetGridPixelsHeight;
+
+	int BodySize = g_pData->m_aSprites[SPRITE_TEE_BODY].m_H * (Info.m_Height / g_pData->m_aSprites[SPRITE_TEE_BODY].m_pSet->m_Gridy); // body size
 	if(BodySize > Info.m_Height)
 		return 0;
 	unsigned char *d = (unsigned char *)Info.m_pData;
 	int Pitch = Info.m_Width * 4;
+
+	int MaxBodyY = -1;
+	int MinBodyY = BodySize + 1;
+	int MaxBodyX = -1;
+	int MinBodyX = BodySize + 1;
 
 	// dig out blood color
 	{
@@ -90,17 +103,72 @@ int CSkins::LoadSkin(const char *pName, const char *pPath, int DirType)
 		for(int y = 0; y < BodySize; y++)
 			for(int x = 0; x < BodySize; x++)
 			{
-				if(d[y * Pitch + x * 4 + 3] > 128)
+				uint8_t AlphaValue = d[y * Pitch + x * 4 + 3];
+				if(AlphaValue > 128)
 				{
 					aColors[0] += d[y * Pitch + x * 4 + 0];
 					aColors[1] += d[y * Pitch + x * 4 + 1];
 					aColors[2] += d[y * Pitch + x * 4 + 2];
+				}
+				if(AlphaValue > 0)
+				{
+					if(MaxBodyY < y)
+						MaxBodyY = y;
+					if(MinBodyY > y)
+						MinBodyY = y;
+					if(MaxBodyX < x)
+						MaxBodyX = x;
+					if(MinBodyX > x)
+						MinBodyX = x;
 				}
 			}
 		if(aColors[0] != 0 && aColors[1] != 0 && aColors[2] != 0)
 			Skin.m_BloodColor = ColorRGBA(normalize(vec3(aColors[0], aColors[1], aColors[2])));
 		else
 			Skin.m_BloodColor = ColorRGBA(0, 0, 0, 1);
+	}
+
+	Skin.m_Metrics.m_BodyHeight = clamp((MaxBodyY - MinBodyY) + 1, 1, BodySize);
+	Skin.m_Metrics.m_BodyWidth = clamp((MaxBodyX - MinBodyX) + 1, 1, BodySize);
+	Skin.m_Metrics.m_BodyOffsetX = clamp(MinBodyX, 0, BodySize - 1);
+	Skin.m_Metrics.m_BodyOffsetY = clamp(MinBodyY, 0, BodySize - 1);
+
+	Skin.m_Metrics.m_BodyMaxWidth = BodySize;
+	Skin.m_Metrics.m_BodyMaxHeight = BodySize;
+
+	// get feet size
+	{
+		int MaxFeetY = -1;
+		int MinFeetY = FeetHeight + 1;
+		int MaxFeetX = -1;
+		int MinFeetX = FeetWidth + 1;
+
+		for(int y = 0; y < FeetHeight; y++)
+		{
+			for(int x = 0; x < FeetWidth; x++)
+			{
+				int OffsetAlpha = (y + FeetOffsetY) * Pitch + (x + FeetOffsetX) * 4 + 3;
+				uint8_t AlphaValue = d[OffsetAlpha];
+				if(AlphaValue > 0)
+				{
+					if(MaxFeetY < y)
+						MaxFeetY = y;
+					if(MinFeetY > y)
+						MinFeetY = y;
+					if(MaxFeetX < x)
+						MaxFeetX = x;
+					if(MinFeetX > x)
+						MinFeetX = x;
+				}
+			}
+		}
+
+		Skin.m_Metrics.m_FeetWidth = clamp((MaxFeetX - MinFeetX) + 1, 1, FeetWidth);
+		Skin.m_Metrics.m_FeetHeight = clamp((MaxFeetY - MinFeetY) + 1, 1, FeetHeight);
+		Skin.m_Metrics.m_FeetOffsetX = clamp(MinFeetX, 0, FeetWidth - 1);
+		Skin.m_Metrics.m_FeetOffsetY = clamp(MinFeetY, 0, FeetHeight - 1);
+		Skin.m_Metrics.m_FeetMaxWidth = FeetWidth;
+		Skin.m_Metrics.m_FeetMaxHeight = FeetHeight;
 	}
 
 	// create colorless version

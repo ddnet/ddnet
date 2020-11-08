@@ -810,6 +810,8 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 				str_copy(pCurrentLine->m_aSkinName, m_pClient->m_aClients[pCurrentLine->m_ClientID].m_aSkinName, sizeof(pCurrentLine->m_aSkinName));
 				pCurrentLine->m_ColorBody = m_pClient->m_aClients[pCurrentLine->m_ClientID].m_RenderInfo.m_ColorBody;
 				pCurrentLine->m_ColorFeet = m_pClient->m_aClients[pCurrentLine->m_ClientID].m_RenderInfo.m_ColorFeet;
+
+				pCurrentLine->m_RenderSkinMetrics = m_pClient->m_aClients[pCurrentLine->m_ClientID].m_RenderInfo.m_SkinMetrics;
 				pCurrentLine->m_HasRenderTee = true;
 			}
 		}
@@ -883,6 +885,8 @@ void CChat::RefindSkins()
 				m_aLines[r].m_RenderSkin = pSkin->m_ColorableSkin;
 			else
 				m_aLines[r].m_RenderSkin = pSkin->m_OriginalSkin;
+
+			m_aLines[r].m_RenderSkinMetrics = pSkin->m_Metrics;
 		}
 	}
 }
@@ -1281,6 +1285,7 @@ void CChat::OnRender()
 					RenderInfo.m_ColorableRenderSkin = m_aLines[r].m_RenderSkin;
 				else
 					RenderInfo.m_OriginalRenderSkin = m_aLines[r].m_RenderSkin;
+				RenderInfo.m_SkinMetrics = m_aLines[r].m_RenderSkinMetrics;
 
 				RenderInfo.m_ColorBody = m_aLines[r].m_ColorBody;
 				RenderInfo.m_ColorFeet = m_aLines[r].m_ColorFeet;
@@ -1289,10 +1294,12 @@ void CChat::OnRender()
 				float RowHeight = FONT_SIZE + RealMsgPaddingY;
 				float OffsetTeeY = MESSAGE_TEE_SIZE / 2.0f;
 				float FullHeightMinusTee = RowHeight - MESSAGE_TEE_SIZE;
-				float TWSkinUnreliableOffset = 1.0f; // teeworlds skins were always a bit in the ground
 
 				CAnimState *pIdleState = CAnimState::GetIdle();
-				RenderTools()->RenderTee(pIdleState, &RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), vec2(x + (RealMsgPaddingX + MESSAGE_TEE_SIZE) / 2.0f, y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset), Blend);
+				vec2 OffsetToMid;
+				RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &RenderInfo, OffsetToMid);
+				vec2 TeeRenderPos(x + (RealMsgPaddingX + MESSAGE_TEE_SIZE) / 2.0f, y + OffsetTeeY + FullHeightMinusTee / 2.0f + OffsetToMid.y);
+				RenderTools()->RenderTee(pIdleState, &RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), TeeRenderPos, Blend);
 			}
 
 			STextRenderColor TextOutline(0.f, 0.f, 0.f, 0.3f * Blend);

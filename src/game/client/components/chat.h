@@ -41,6 +41,7 @@ class CChat : public CComponent
 
 		char m_aSkinName[sizeof(g_Config.m_ClPlayerSkin) / sizeof(g_Config.m_ClPlayerSkin[0])];
 		CSkin::SSkinTextures m_RenderSkin;
+		CSkin::SSkinMetrics m_RenderSkinMetrics;
 		bool m_CustomColoredSkin;
 		ColorRGBA m_ColorBody;
 		ColorRGBA m_ColorFeet;
