@@ -511,12 +511,15 @@ void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, cons
 
 	RectEl.m_UITextContainer = TextRender()->CreateTextContainer(&Cursor, pText, StrLen);
 	RectEl.m_Cursor = Cursor;
+	RectEl.m_TextColor = TextRender()->GetTextColor();
+	RectEl.m_TextOutlineColor = TextRender()->GetTextOutlineColor();
 }
 
 void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, int MaxWidth, int AlignVertically, bool StopAtEnd, int StrLen, CTextCursor *pReadCursor)
 {
 	bool NeedsRecreate = false;
-	if(RectEl.m_UITextContainer == -1 || RectEl.m_X != pRect->x || RectEl.m_Y != pRect->y || RectEl.m_Width != pRect->w || RectEl.m_Height != pRect->h)
+	bool ColorChanged = RectEl.m_TextColor != TextRender()->GetTextColor() || RectEl.m_TextOutlineColor != TextRender()->GetTextOutlineColor();
+	if(RectEl.m_UITextContainer == -1 || RectEl.m_X != pRect->x || RectEl.m_Y != pRect->y || RectEl.m_Width != pRect->w || RectEl.m_Height != pRect->h || ColorChanged)
 	{
 		NeedsRecreate = true;
 	}
