@@ -1217,6 +1217,18 @@ Editor
 Play
 == Spela
 
+Manual
+== Manual
+
+Race
+== Race
+
+Auto
+== Auto
+
+Replay
+== Repris
+
 Saving ddnet-settings.cfg failed
 == 
 
@@ -1282,15 +1294,3 @@ Particles
 
 Assets directory
 == 
-
-Manual
-== Manual
-
-Race
-== Race
-
-Auto
-== Auto
-
-Replay
-== Repris

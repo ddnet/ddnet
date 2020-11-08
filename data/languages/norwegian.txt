@@ -1154,6 +1154,18 @@ Grabs
 9+ new mentions
 == nevnt 9+ ganger
 
+Manual
+== Manuell
+
+Race
+== Løp
+
+Auto
+== Auto
+
+Replay
+== Opptak
+
 Saving ddnet-settings.cfg failed
 == 
 
@@ -1280,15 +1292,3 @@ Editor
 [Start menu]
 Play
 == 
-
-Manual
-== Manuell
-
-Race
-== Løp
-
-Auto
-== Auto
-
-Replay
-== Opptak

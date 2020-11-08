@@ -1170,6 +1170,18 @@ Country / Region
 https://wiki.ddnet.tw/
 == https://docs.qq.com/doc/DWGFrV0xPRmVWVkla
 
+Manual
+== 手動
+
+Race
+== 競速賽
+
+Auto
+== 自動
+
+Replay
+== 回放
+
 Saving ddnet-settings.cfg failed
 == 
 
@@ -1284,15 +1296,3 @@ Editor
 [Start menu]
 Play
 == 
-
-Manual
-== 手動
-
-Race
-== 競速賽
-
-Auto
-== 自動
-
-Replay
-== 回放

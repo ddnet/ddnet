@@ -1244,6 +1244,18 @@ Grabs
 9+ new mentions
 == 9+ нових помињања
 
+Manual
+== Упутство
+
+Race
+== Трка
+
+Auto
+== Ауто
+
+Replay
+== Помнови
+
 Saving ddnet-settings.cfg failed
 == 
 
@@ -1279,15 +1291,3 @@ Highlight
 
 Use current map as background
 == 
-
-Manual
-== Упутство
-
-Race
-== Трка
-
-Auto
-== Ауто
-
-Replay
-== Помнови
