@@ -654,6 +654,7 @@ void CPlayers::OnRender()
 				m_aRenderInfo[i].m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 				m_aRenderInfo[i].m_ColorableRenderSkin = pSkin->m_ColorableSkin;
 				m_aRenderInfo[i].m_BloodColor = pSkin->m_BloodColor;
+				m_aRenderInfo[i].m_SkinMetrics = pSkin->m_Metrics;
 				m_aRenderInfo[i].m_CustomColoredSkin = IsTeamplay;
 				if(!IsTeamplay)
 				{
@@ -668,6 +669,7 @@ void CPlayers::OnRender()
 	m_RenderInfoSpec.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 	m_RenderInfoSpec.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
 	m_RenderInfoSpec.m_BloodColor = pSkin->m_BloodColor;
+	m_RenderInfoSpec.m_SkinMetrics = pSkin->m_Metrics;
 	m_RenderInfoSpec.m_CustomColoredSkin = false;
 	m_RenderInfoSpec.m_Size = 64.0f;
 

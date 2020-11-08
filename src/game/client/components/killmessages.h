@@ -52,6 +52,8 @@ public:
 	virtual void OnRender();
 	virtual void OnMessage(int MsgType, void *pRawMsg);
 	virtual void OnInit();
+
+	void RefindSkins();
 };
 
 #endif
