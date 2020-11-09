@@ -394,7 +394,9 @@ bool CServer::SetClientNameImpl(int ClientID, const char *pNameRequest, bool Set
 		// auto rename
 		for(int i = 1;; i++)
 		{
-			str_format(aNameTry, sizeof(aNameTry), "(%d)%s", i, aTrimmedName);
+			char aNameTryBrokenEnd[MAX_NAME_LENGTH];
+			str_format(aNameTryBrokenEnd, sizeof(aNameTryBrokenEnd), "(%d)%s", i, aTrimmedName);
+			str_utf8_copy(aNameTry, aNameTryBrokenEnd, sizeof(aNameTry));
 			if(IsClientNameAvailable(ClientID, aNameTry))
 				break;
 		}
