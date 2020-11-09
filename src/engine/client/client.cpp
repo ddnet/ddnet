@@ -3706,6 +3706,13 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 {
 	int Crc;
 	const char *pError;
+
+	IOHANDLE File = Storage()->OpenFile(pFilename, IOFLAG_READ, StorageType);
+	if(!File)
+		return "error opening demo file";
+
+	io_close(File);
+
 	Disconnect();
 	m_NetClient[CLIENT_MAIN].ResetErrorString();
 
@@ -3780,7 +3787,9 @@ const char *CClient::DemoPlayer_Render(const char *pFilename, int StorageType, c
 void CClient::Con_Play(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
-	pSelf->DemoPlayer_Play(pResult->GetString(0), IStorage::TYPE_ALL);
+	const char *pError = pSelf->DemoPlayer_Play(pResult->GetString(0), IStorage::TYPE_ALL);
+	if(pError)
+		pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", pError);
 }
 
 void CClient::Con_DemoPlay(IConsole::IResult *pResult, void *pUserData)
