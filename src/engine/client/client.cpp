@@ -3706,14 +3706,15 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 {
 	int Crc;
 	const char *pError;
-	Disconnect();
-	m_NetClient[CLIENT_MAIN].ResetErrorString();
 
 	// try to start playback
 	m_DemoPlayer.SetListener(this);
 
 	if(m_DemoPlayer.Load(Storage(), m_pConsole, pFilename, StorageType))
 		return "error loading demo";
+
+	Disconnect();
+	m_NetClient[CLIENT_MAIN].ResetErrorString();
 
 	// load map
 	Crc = m_DemoPlayer.GetMapInfo()->m_Crc;
