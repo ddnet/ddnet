@@ -1274,9 +1274,6 @@ Highlight
 Use current map as background
 == Использовать данную карту как фон
 
-Entities
-== 
-
 Emoticons
 == Эмоции
 
@@ -1297,3 +1294,6 @@ Auto
 
 Replay
 == Запись
+
+Entities
+== 

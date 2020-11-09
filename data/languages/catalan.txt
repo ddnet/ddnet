@@ -1146,6 +1146,18 @@ Time
 9+ new mentions
 == 9+ noves mencions
 
+Manual
+== Manual
+
+Race
+== Carrera
+
+Auto
+== Auto
+
+Replay
+== Repetició
+
 Saving ddnet-settings.cfg failed
 == 
 
@@ -1272,15 +1284,3 @@ Editor
 [Start menu]
 Play
 == 
-
-Manual
-== Manual
-
-Race
-== Carrera
-
-Auto
-== Auto
-
-Replay
-== Repetició

@@ -1158,6 +1158,18 @@ Indicate map finish
 Show others (own team only)
 == Pokazuj innych (tylko drużynę)
 
+Manual
+== Instrukcja
+
+Race
+== Wyścig
+
+Auto
+== Auto
+
+Replay
+== Powtórka
+
 Saving ddnet-settings.cfg failed
 == 
 
@@ -1284,15 +1296,3 @@ Editor
 [Start menu]
 Play
 == 
-
-Manual
-== Instrukcja
-
-Race
-== Wyścig
-
-Auto
-== Auto
-
-Replay
-== Powtórka

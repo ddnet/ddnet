@@ -1164,6 +1164,18 @@ Grabs
 9+ new mentions
 == 9+ yeni bildirim
 
+Manual
+== Manual
+
+Race
+== Yarış
+
+Auto
+== Otomatik
+
+Replay
+== Yeniden oynatma
+
 Saving ddnet-settings.cfg failed
 == 
 
@@ -1284,15 +1296,3 @@ Editor
 [Start menu]
 Play
 == 
-
-Manual
-== Manual
-
-Race
-== Yarış
-
-Auto
-== Otomatik
-
-Replay
-== Yeniden oynatma
