@@ -469,6 +469,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	const CSkin *pSkin = m_pClient->m_pSkins->Get(m_pClient->m_pSkins->Find(Skin));
 	OwnSkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 	OwnSkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+	OwnSkinInfo.m_SkinMetrics = pSkin->m_Metrics;
 	OwnSkinInfo.m_CustomColoredSkin = *UseCustomColor;
 	if(*UseCustomColor)
 	{
@@ -649,6 +650,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 			Info.m_OriginalRenderSkin = s->m_OriginalSkin;
 			Info.m_ColorableRenderSkin = s->m_ColorableSkin;
+			Info.m_SkinMetrics = s->m_Metrics;
 
 			Item.m_Rect.HSplitTop(5.0f, 0, &Item.m_Rect); // some margin from the top
 			RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, 0, vec2(1.0f, 0.0f), vec2(Item.m_Rect.x + 30, Item.m_Rect.y + Item.m_Rect.h / 2));
