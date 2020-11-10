@@ -689,8 +689,9 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected,
 					{
 						// scroll
 						float Offset = (NewIndex / gs_ListBoxItemsPerRow - gs_ListBoxNewSelected / gs_ListBoxItemsPerRow) * gs_ListBoxRowHeight;
-						int Scroll = gs_ListBoxOriginalView.y > Item.m_Rect.y + Offset ? -1 :
-														 gs_ListBoxOriginalView.y + gs_ListBoxOriginalView.h < Item.m_Rect.y + Item.m_Rect.h + Offset ? 1 : 0;
+						int Scroll = gs_ListBoxOriginalView.y > Item.m_Rect.y + Offset                                            ? -1 :
+							     gs_ListBoxOriginalView.y + gs_ListBoxOriginalView.h < Item.m_Rect.y + Item.m_Rect.h + Offset ? 1 :
+                                                                                                                                                            0;
 						if(Scroll)
 						{
 							int NumViewable = (int)(gs_ListBoxOriginalView.h / gs_ListBoxRowHeight) + 1;
@@ -812,8 +813,9 @@ void CMenus::DemolistOnUpdate(bool Reset)
 			m_DemolistSelectedIndex = SelectedIndex;
 	}
 
-	m_DemolistSelectedIndex = Reset ? m_lDemos.size() > 0 ? 0 : -1 :
-					  m_DemolistSelectedIndex >= m_lDemos.size() ? m_lDemos.size() - 1 : m_DemolistSelectedIndex;
+	m_DemolistSelectedIndex = Reset                                      ? m_lDemos.size() > 0 ? 0 : -1 :
+				  m_DemolistSelectedIndex >= m_lDemos.size() ? m_lDemos.size() - 1 :
+                                                                               m_DemolistSelectedIndex;
 	m_DemolistSelectedIsDir = m_DemolistSelectedIndex < 0 ? false : m_lDemos[m_DemolistSelectedIndex].m_IsDir;
 }
 
@@ -1124,7 +1126,8 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			{
 				//scroll
 				float IndexY = ListBox.y - s_ScrollValue * ScrollNum * s_aCols[0].m_Rect.h + NewIndex * s_aCols[0].m_Rect.h;
-				int Scroll = ListBox.y > IndexY ? -1 : ListBox.y + ListBox.h < IndexY + s_aCols[0].m_Rect.h ? 1 : 0;
+				int Scroll = ListBox.y > IndexY ? -1 : ListBox.y + ListBox.h < IndexY + s_aCols[0].m_Rect.h ? 1 :
+                                                                                                                              0;
 				if(Scroll)
 				{
 					if(Scroll < 0)

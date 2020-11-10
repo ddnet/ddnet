@@ -127,7 +127,9 @@ void CHud::RenderGameTimer()
 		float FontSize = 10.0f;
 		float w;
 		w = TextRender()->TextWidth(0, 12,
-			Time >= 3600 * 24 ? "00d 00:00:00" : Time >= 3600 ? "00:00:00" : "00:00",
+			Time >= 3600 * 24 ? "00d 00:00:00" :
+			Time >= 3600      ? "00:00:00" :
+                                            "00:00",
 			-1, -1.0f);
 		// last 60 sec red, last 10 sec blink
 		if(m_pClient->m_Snap.m_pGameInfoObj->m_TimeLimit && Time <= 60 && (m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer <= 0))
@@ -244,8 +246,8 @@ void CHud::RenderScoreHud()
 				{
 					int BlinkTimer = (m_pClient->m_FlagDropTick[t] != 0 &&
 								 (Client()->GameTick(g_Config.m_ClDummy) - m_pClient->m_FlagDropTick[t]) / Client()->GameTickSpeed() >= 25) ?
-								 10 :
-								 20;
+                                                                 10 :
+                                                                 20;
 					if(FlagCarrier[t] == FLAG_ATSTAND || (FlagCarrier[t] == FLAG_TAKEN && ((Client()->GameTick(g_Config.m_ClDummy) / BlinkTimer) & 1)))
 					{
 						// draw flag

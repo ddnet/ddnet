@@ -220,7 +220,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		{
 			//scroll
 			float IndexY = View.y - s_ScrollValue * ScrollNum * s_aCols[0].m_Rect.h + NewIndex * s_aCols[0].m_Rect.h;
-			int Scroll = View.y > IndexY ? -1 : View.y + View.h < IndexY + s_aCols[0].m_Rect.h ? 1 : 0;
+			int Scroll = View.y > IndexY ? -1 : View.y + View.h < IndexY + s_aCols[0].m_Rect.h ? 1 :
+                                                                                                             0;
 			if(Scroll)
 			{
 				if(Scroll < 0)
@@ -1142,8 +1143,8 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			}
 
 			ColorRGBA Color = pSelectedServer->m_aClients[i].m_FriendState == IFriends::FRIEND_NO ?
-						  ColorRGBA(1.0f, 1.0f, 1.0f, (i % 2 + 1) * 0.05f) :
-						  ColorRGBA(0.5f, 1.0f, 0.5f, 0.15f + (i % 2 + 1) * 0.05f);
+                                                  ColorRGBA(1.0f, 1.0f, 1.0f, (i % 2 + 1) * 0.05f) :
+                                                  ColorRGBA(0.5f, 1.0f, 0.5f, 0.15f + (i % 2 + 1) * 0.05f);
 			RenderTools()->DrawUIRect(&Name, Color, CUI::CORNER_ALL, 4.0f);
 			Name.VSplitLeft(5.0f, 0, &Name);
 			Name.VSplitLeft(34.0f, &Score, &Name);

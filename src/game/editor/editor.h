@@ -879,7 +879,10 @@ public:
 		int m_StorageType;
 		bool m_IsVisible;
 
-		bool operator<(const CFilelistItem &Other) const { return !str_comp(m_aFilename, "..") ? true : !str_comp(Other.m_aFilename, "..") ? false : m_IsDir && !Other.m_IsDir ? true : !m_IsDir && Other.m_IsDir ? false : str_comp_nocase(m_aFilename, Other.m_aFilename) < 0; }
+		bool operator<(const CFilelistItem &Other) const { return !str_comp(m_aFilename, "..") ? true : !str_comp(Other.m_aFilename, "..") ? false :
+													m_IsDir && !Other.m_IsDir                  ? true :
+													!m_IsDir && Other.m_IsDir                  ? false :
+                                                                                                                                                     str_comp_nocase(m_aFilename, Other.m_aFilename) < 0; }
 	};
 	sorted_array<CFilelistItem> m_FileList;
 	int m_FilesStartAt;

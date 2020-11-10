@@ -41,7 +41,8 @@ public:
 	const char *GetString(bool Editing = false) const { return Editing ? m_DisplayStr : m_Str; }
 	int GetLength(bool Editing = false) const { return Editing ? m_FakeLen : m_Len; }
 	int GetCursorOffset(bool Editing = false) const { return Editing ? m_FakeCursorPos : m_CursorPos; }
-	void SetCursorOffset(int Offset) { m_CursorPos = Offset > m_Len ? m_Len : Offset < 0 ? 0 : Offset; }
+	void SetCursorOffset(int Offset) { m_CursorPos = Offset > m_Len ? m_Len : Offset < 0 ? 0 :
+                                                                                               Offset; }
 	void DeleteUntilCursor();
 	void DeleteFromCursor();
 };

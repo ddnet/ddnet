@@ -923,7 +923,10 @@ void CChat::OnPrepareLines()
 	int64 Now = time();
 	float LineWidth = (IsScoreBoardOpen ? 85.0f : 200.0f) - (RealMsgPaddingX * 1.5f) - RealMsgPaddingTee;
 
-	float HeightLimit = IsScoreBoardOpen ? 180.0f : m_PrevShowChat ? 50.0f : 200.0f;
+	float HeightLimit =
+		IsScoreBoardOpen ? 180.0f :
+		m_PrevShowChat   ? 50.0f :
+                                   200.0f;
 	float Begin = x;
 	float TextBegin = Begin + RealMsgPaddingX / 2.0f;
 	CTextCursor Cursor;
@@ -1238,7 +1241,10 @@ void CChat::OnRender()
 	bool IsScoreBoardOpen = m_pClient->m_pScoreboard->Active() && (ScreenRatio > 1.7f); // only assume scoreboard when screen ratio is widescreen(something around 16:9)
 
 	int64 Now = time();
-	float HeightLimit = IsScoreBoardOpen ? 180.0f : m_PrevShowChat ? 50.0f : 200.0f;
+	float HeightLimit =
+		IsScoreBoardOpen ? 180.0f :
+		m_PrevShowChat   ? 50.0f :
+                                   200.0f;
 	int OffsetType = IsScoreBoardOpen ? 1 : 0;
 
 	float RealMsgPaddingX = MESSAGE_PADDING_X;

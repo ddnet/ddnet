@@ -1049,7 +1049,8 @@ void CMenus::RenderGhost(CUIRect MainView)
 		{
 			//scroll
 			float IndexY = View.y - s_ScrollValue * ScrollNum * s_aCols[0].m_Rect.h + NewIndex * s_aCols[0].m_Rect.h;
-			int Scroll = View.y > IndexY ? -1 : View.y + View.h < IndexY + s_aCols[0].m_Rect.h ? 1 : 0;
+			int Scroll = View.y > IndexY ? -1 : View.y + View.h < IndexY + s_aCols[0].m_Rect.h ? 1 :
+                                                                                                             0;
 			if(Scroll)
 			{
 				if(Scroll < 0)
