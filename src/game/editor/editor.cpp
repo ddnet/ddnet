@@ -4504,7 +4504,8 @@ void CEditor::RenderFileDialog()
 		{
 			int w = m_FilePreviewImageInfo.m_Width;
 			int h = m_FilePreviewImageInfo.m_Height;
-			if(m_FilePreviewImageInfo.m_Width > Preview.w)
+			// Only get here on IMG type, then Preview is initialized
+			if(m_FilePreviewImageInfo.m_Width > Preview.w) // NOLINT(clang-analyzer-core.UndefinedBinaryOperatorResult)
 			{
 				h = m_FilePreviewImageInfo.m_Height * Preview.w / m_FilePreviewImageInfo.m_Width;
 				w = Preview.w;
