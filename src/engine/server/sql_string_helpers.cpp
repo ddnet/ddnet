@@ -4,24 +4,24 @@
 #include <cmath>
 #include <cstring>
 
-void sqlstr::FuzzyString(char *pString, int size)
+void sqlstr::FuzzyString(char *pString, int Size)
 {
-	char *newString = new char[size * 4 - 1];
-	int pos = 0;
+	char *pNewString = new char[Size * 4 - 1];
+	int OutPos = 0;
 
-	for(int i = 0; i < size; i++)
+	for(int i = 0; i < Size; i++)
 	{
 		if(!pString[i])
 			break;
 
-		newString[pos++] = pString[i];
+		pNewString[OutPos++] = pString[i];
 		if(pString[i] != '\\' && str_utf8_isstart(pString[i + 1]))
-			newString[pos++] = '%';
+			pNewString[OutPos++] = '%';
 	}
 
-	newString[pos] = '\0';
-	str_copy(pString, newString, size);
-	delete[] newString;
+	pNewString[OutPos] = '\0';
+	str_copy(pString, pNewString, Size);
+	delete[] pNewString;
 }
 
 int sqlstr::EscapeLike(char *pDst, const char *pSrc, int DstSize)

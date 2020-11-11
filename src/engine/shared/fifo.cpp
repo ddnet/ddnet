@@ -23,17 +23,17 @@ void CFifo::Init(IConsole *pConsole, char *pFifoFile, int Flag)
 
 	mkfifo(pFifoFile, 0600);
 
-	struct stat attribute;
-	stat(pFifoFile, &attribute);
+	struct stat Attribute;
+	stat(pFifoFile, &Attribute);
 
-	if(!S_ISFIFO(attribute.st_mode))
+	if(!S_ISFIFO(Attribute.st_mode))
 	{
 		dbg_msg("fifo", "'%s' is not a fifo, removing", pFifoFile);
 		fs_remove(pFifoFile);
 		mkfifo(pFifoFile, 0600);
-		stat(pFifoFile, &attribute);
+		stat(pFifoFile, &Attribute);
 
-		if(!S_ISFIFO(attribute.st_mode))
+		if(!S_ISFIFO(Attribute.st_mode))
 		{
 			dbg_msg("fifo", "can't remove file '%s', quitting", pFifoFile);
 			exit(2);

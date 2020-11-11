@@ -62,11 +62,11 @@ typename CNetBan::CBan<T> *CNetBan::CBanPool<T, HashCount>::Add(const T *pData, 
 		m_pFirstFree = pBan->m_pNext;
 
 	// add it to the hash list
-	if(m_paaHashList[pNetHash->m_HashIndex][pNetHash->m_Hash])
-		m_paaHashList[pNetHash->m_HashIndex][pNetHash->m_Hash]->m_pHashPrev = pBan;
+	if(m_aapHashList[pNetHash->m_HashIndex][pNetHash->m_Hash])
+		m_aapHashList[pNetHash->m_HashIndex][pNetHash->m_Hash]->m_pHashPrev = pBan;
 	pBan->m_pHashPrev = 0;
-	pBan->m_pHashNext = m_paaHashList[pNetHash->m_HashIndex][pNetHash->m_Hash];
-	m_paaHashList[pNetHash->m_HashIndex][pNetHash->m_Hash] = pBan;
+	pBan->m_pHashNext = m_aapHashList[pNetHash->m_HashIndex][pNetHash->m_Hash];
+	m_aapHashList[pNetHash->m_HashIndex][pNetHash->m_Hash] = pBan;
 
 	// insert it into the used list
 	if(m_pFirstUsed)
@@ -120,7 +120,7 @@ int CNetBan::CBanPool<T, HashCount>::Remove(CBan<T> *pBan)
 	if(pBan->m_pHashPrev)
 		pBan->m_pHashPrev->m_pHashNext = pBan->m_pHashNext;
 	else
-		m_paaHashList[pBan->m_NetHash.m_HashIndex][pBan->m_NetHash.m_Hash] = pBan->m_pHashNext;
+		m_aapHashList[pBan->m_NetHash.m_HashIndex][pBan->m_NetHash.m_Hash] = pBan->m_pHashNext;
 	pBan->m_pHashNext = pBan->m_pHashPrev = 0;
 
 	// remove from used list
@@ -201,7 +201,7 @@ void CNetBan::UnbanAll()
 template<class T, int HashCount>
 void CNetBan::CBanPool<T, HashCount>::Reset()
 {
-	mem_zero(m_paaHashList, sizeof(m_paaHashList));
+	mem_zero(m_aapHashList, sizeof(m_aapHashList));
 	mem_zero(m_aBans, sizeof(m_aBans));
 	m_pFirstUsed = 0;
 	m_CountUsed = 0;
@@ -394,13 +394,13 @@ int CNetBan::UnbanByIndex(int Index)
 
 bool CNetBan::IsBanned(const NETADDR *pOrigAddr, char *pBuf, unsigned BufferSize) const
 {
-	NETADDR addr;
+	NETADDR Addr;
 	const NETADDR *pAddr = pOrigAddr;
 	if(pOrigAddr->type == NETTYPE_WEBSOCKET_IPV4)
 	{
-		mem_copy(&addr, pOrigAddr, sizeof(NETADDR));
-		pAddr = &addr;
-		addr.type = NETTYPE_IPV4;
+		mem_copy(&Addr, pOrigAddr, sizeof(NETADDR));
+		pAddr = &Addr;
+		Addr.type = NETTYPE_IPV4;
 	}
 	CNetHash aHash[17];
 	int Length = CNetHash::MakeHashArray(pAddr, aHash);

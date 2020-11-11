@@ -34,7 +34,7 @@ void CNetConsole::SetCallbacks(NETFUNC_NEWCLIENT_CON pfnNewClient, NETFUNC_DELCL
 {
 	m_pfnNewClient = pfnNewClient;
 	m_pfnDelClient = pfnDelClient;
-	m_UserPtr = pUser;
+	m_pUser = pUser;
 }
 
 int CNetConsole::Close()
@@ -50,7 +50,7 @@ int CNetConsole::Close()
 int CNetConsole::Drop(int ClientID, const char *pReason)
 {
 	if(m_pfnDelClient)
-		m_pfnDelClient(ClientID, pReason, m_UserPtr);
+		m_pfnDelClient(ClientID, pReason, m_pUser);
 
 	m_aSlots[ClientID].m_Connection.Disconnect(pReason);
 
@@ -82,7 +82,7 @@ int CNetConsole::AcceptClient(NETSOCKET Socket, const NETADDR *pAddr)
 	{
 		m_aSlots[FreeSlot].m_Connection.Init(Socket, pAddr);
 		if(m_pfnNewClient)
-			m_pfnNewClient(FreeSlot, m_UserPtr);
+			m_pfnNewClient(FreeSlot, m_pUser);
 		return 0;
 	}
 
