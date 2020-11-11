@@ -786,7 +786,7 @@ Markers:
 == %.2f MiB
 
 %.2f KiB
-== %2f KiB
+== %.2f KiB
 
 Demo
 == Demo
