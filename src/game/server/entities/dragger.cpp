@@ -80,10 +80,9 @@ void CDragger::Move()
 	}
 
 	if(!m_Target)
-	{
 		m_Target = Id != -1 ? TempEnts[Id] : 0;
-	}
-	else
+
+	if(m_Target)
 	{
 		for(auto &SoloEnt : m_SoloEnts)
 		{
