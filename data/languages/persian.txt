@@ -79,7 +79,7 @@ Delete demo
 Demo details
 == ﻮﻣﺩ ﺕﺎﯿﺋﺰﺟ
 Demofile: %s
-== s% :ﻮﻣﺩ ﻞﯾﺎﻓ
+== %s :ﻮﻣﺩ ﻞﯾﺎﻓ
 Demos
 == ﺎﻫ ﻮﻣﺩ
 Disconnect

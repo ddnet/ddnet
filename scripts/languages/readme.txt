@@ -38,7 +38,7 @@ $ ./find_unchanged.py ../spanish.txt
 
 To update all languages:
 
-$ for i in data/languages/*.txt; do [ "${i:t}" != "license.txt" ] && [ "${i:t}" != "index.txt" ] && scripts/languages/copy_fix.py $i $i.$$.tmp --delete-unused --append-missing && mv $i.$$.tmp $i; done
+$ ./update_all.py
 
 To get a statistic of how complete the translation is:
 

@@ -127,7 +127,7 @@ Demo details
 == Demo ayrıntıları
 
 Demofile: %s
-== Demo dosyası
+== Demo dosyası: %s
 
 Demos
 == Demolar

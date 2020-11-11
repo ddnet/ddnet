@@ -23,3 +23,4 @@ jobs:
         clang-format -version
         scripts/fix_style.py --dry-run
         scripts/check_header_guards.py
+        scripts/languages/update_all.py
