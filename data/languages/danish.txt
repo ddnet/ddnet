@@ -633,7 +633,7 @@ Replay feature is disabled!
 == Afspilningsfunktionen er deaktiveret!
 
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== Bredden eller højden af tekstur% s kan ikke deles med 16, hvilket kan forårsage visuelle fejl.
+== Bredden eller højden af tekstur%s kan ikke deles med 16, hvilket kan forårsage visuelle fejl.
 
 Warning
 == Advarsel

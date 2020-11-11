@@ -1233,7 +1233,7 @@ Existing Player
 == 玩家已存在
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== 你使用的昵称在DDNet中有%d分的记录，这可能代表改昵称已经被其他人使用过。确认要使用这个名字吗？
+== 你使用的昵称"%s"在DDNet中有%d分的记录，这可能代表该昵称已经被其他人使用过。确认要使用这个名字吗？
 
 Checking for existing player with your name
 == 正在查找该昵称的DDNet记录
