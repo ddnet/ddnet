@@ -3,7 +3,7 @@
 #	SnOrKilll
 #modified by:
 #	matiasmunk		2011-08-06 22:49:11
-#   Fin (b3z)       2020-11-11 20:05:00
+#	Fin (b3z) 	 	2020-11-11 20:05:00
 ##### /authors #####
 
 ##### translated strings #####
