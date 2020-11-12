@@ -5,6 +5,7 @@
 #include <base/tl/sorted_array.h>
 #include <base/vmath.h>
 #include <engine/graphics.h>
+#include <limits>
 
 // do this better and nicer
 struct CSkin
@@ -42,16 +43,80 @@ struct CSkin
 	char m_aName[24];
 	ColorRGBA m_BloodColor;
 
-	struct SSkinMetrics
+	template<bool IsSizeType>
+	struct SSkinMetricVariableInt
 	{
-		int m_BodyWidth;
-		int m_BodyHeight;
-		int m_BodyOffsetX;
-		int m_BodyOffsetY;
+		int m_Value;
+		operator int() { return m_Value; }
+		SSkinMetricVariableInt &operator=(int NewVal)
+		{
+			if(IsSizeType)
+				m_Value = maximum(m_Value, NewVal);
+			else
+				m_Value = minimum(m_Value, NewVal);
+			return *this;
+		}
+
+		SSkinMetricVariableInt()
+		{
+			Reset();
+		}
+
+		void Reset()
+		{
+			if(IsSizeType)
+				m_Value = std::numeric_limits<int>::lowest();
+			else
+				m_Value = std::numeric_limits<int>::max();
+		}
+	};
+
+	struct SSkinMetricVariable
+	{
+		SSkinMetricVariableInt<true> m_Width;
+		SSkinMetricVariableInt<true> m_Height;
+		SSkinMetricVariableInt<false> m_OffsetX;
+		SSkinMetricVariableInt<false> m_OffsetY;
 
 		// these can be used to normalize the metrics
-		int m_BodyMaxWidth;
-		int m_BodyMaxHeight;
+		SSkinMetricVariableInt<true> m_MaxWidth;
+		SSkinMetricVariableInt<true> m_MaxHeight;
+
+		float WidthNormalized()
+		{
+			return (float)m_Width / (float)m_MaxWidth;
+		}
+
+		float HeightNormalized()
+		{
+			return (float)m_Height / (float)m_MaxHeight;
+		}
+
+		float OffsetXNormalized()
+		{
+			return (float)m_OffsetX / (float)m_MaxWidth;
+		}
+
+		float OffsetYNormalized()
+		{
+			return (float)m_OffsetY / (float)m_MaxHeight;
+		}
+
+		void Reset()
+		{
+			m_Width.Reset();
+			m_Height.Reset();
+			m_OffsetX.Reset();
+			m_OffsetY.Reset();
+			m_MaxWidth.Reset();
+			m_MaxHeight.Reset();
+		}
+	};
+
+	struct SSkinMetrics
+	{
+		SSkinMetricVariable m_Body;
+		SSkinMetricVariable m_Feet;
 
 		int m_FeetWidth;
 		int m_FeetHeight;
@@ -64,47 +129,13 @@ struct CSkin
 
 		void Reset()
 		{
-			m_BodyWidth = m_BodyHeight = m_BodyOffsetX = m_BodyOffsetY = m_FeetWidth = m_FeetHeight = m_FeetOffsetX = m_FeetOffsetY = -1;
+			m_Body.Reset();
+			m_Feet.Reset();
 		}
 
-		float BodyWidthNormalized()
+		SSkinMetrics()
 		{
-			return (float)m_BodyWidth / (float)m_BodyMaxWidth;
-		}
-
-		float BodyHeightNormalized()
-		{
-			return (float)m_BodyHeight / (float)m_BodyMaxHeight;
-		}
-
-		float BodyOffsetXNormalized()
-		{
-			return (float)m_BodyOffsetX / (float)m_BodyMaxWidth;
-		}
-
-		float BodyOffsetYNormalized()
-		{
-			return (float)m_BodyOffsetY / (float)m_BodyMaxHeight;
-		}
-
-		float FeetWidthNormalized()
-		{
-			return (float)m_FeetWidth / (float)m_FeetMaxWidth;
-		}
-
-		float FeetHeightNormalized()
-		{
-			return (float)m_FeetHeight / (float)m_FeetMaxHeight;
-		}
-
-		float FeetOffsetXNormalized()
-		{
-			return (float)m_FeetOffsetX / (float)m_FeetMaxWidth;
-		}
-
-		float FeetOffsetYNormalized()
-		{
-			return (float)m_FeetOffsetY / (float)m_FeetMaxHeight;
+			Reset();
 		}
 	};
 	SSkinMetrics m_Metrics;
