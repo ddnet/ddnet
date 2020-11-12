@@ -481,7 +481,7 @@ public:
 
 		bool Success = !fs_remove(aBuffer);
 		if(!Success)
-			dbg_msg("storage", "failed to remove: %s", aBuffer);
+			dbg_msg("storage", "failed to remove binary: %s", aBuffer);
 		return Success;
 	}
 
