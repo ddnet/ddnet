@@ -3763,7 +3763,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadContainerAsSpriteMultipl
 
 // ------------ CCommandProcessorFragment_SDL
 
-static void ParseVersionString(const GLubyte *pStr, int &VersionMajor, int &VersionMinor, int &VersionPatch)
+static void ParseVersionString(const char *pStr, int &VersionMajor, int &VersionMinor, int &VersionPatch)
 {
 	if(pStr)
 	{
@@ -3774,12 +3774,12 @@ static void ParseVersionString(const GLubyte *pStr, int &VersionMajor, int &Vers
 		bool LastWasNumber = false;
 		while(*pStr && TotalNumbersPassed < 3)
 		{
-			if(*pStr >= (GLubyte)'0' && *pStr <= (GLubyte)'9')
+			if(*pStr >= '0' && *pStr <= '9')
 			{
 				aCurNumberStr[CurNumberStrLen++] = (char)*pStr;
 				LastWasNumber = true;
 			}
-			else if(LastWasNumber && (*pStr == (GLubyte)'.' || *pStr == (GLubyte)' ' || *pStr == (GLubyte)'\0'))
+			else if(LastWasNumber && (*pStr == '.' || *pStr == ' ' || *pStr == '\0'))
 			{
 				int CurNumber = 0;
 				if(CurNumberStrLen > 0)
@@ -3792,7 +3792,7 @@ static void ParseVersionString(const GLubyte *pStr, int &VersionMajor, int &Vers
 
 				LastWasNumber = false;
 
-				if(*pStr != (GLubyte)'.')
+				if(*pStr != '.')
 					break;
 			}
 			else
@@ -3895,33 +3895,72 @@ void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 			dbg_msg("gfx", "Requested OpenGL debug mode, but the driver does not support the required extension");
 	}
 
+	const char *pVendorString = (const char *)glGetString(GL_VENDOR);
+	dbg_msg("opengl", "Vendor string: %s", pVendorString);
+
 	// check what this context can do
-	const GLubyte *pVersionString = glGetString(GL_VERSION);
-	dbg_msg("opengl", "Version string: %s", (const char *)pVersionString);
+	const char *pVersionString = (const char *)glGetString(GL_VERSION);
+	dbg_msg("opengl", "Version string: %s", pVersionString);
 	// parse version string
 	ParseVersionString(pVersionString, pCommand->m_pCapabilities->m_ContextMajor, pCommand->m_pCapabilities->m_ContextMinor, pCommand->m_pCapabilities->m_ContextPatch);
+
+	*pCommand->m_pInitError = 0;
+
+	int BlocklistMajor = -1, BlocklistMinor = -1, BlocklistPatch = -1;
+	const char *pErrString = ParseBlocklistDriverVersions(pVendorString, pVersionString, BlocklistMajor, BlocklistMinor, BlocklistPatch);
+	//if the driver is buggy, and the requested GL version is the default, fallback
+	if(pErrString != NULL && pCommand->m_RequestedMajor == 3 && pCommand->m_RequestedMinor == 0 && pCommand->m_RequestedPatch == 0)
+	{
+		// if not already in the error state, set the GL version
+		if(g_Config.m_GfxDriverIsBlocked == 0)
+		{
+			// fallback to known good GL version
+			pCommand->m_pCapabilities->m_ContextMajor = BlocklistMajor;
+			pCommand->m_pCapabilities->m_ContextMinor = BlocklistMinor;
+			pCommand->m_pCapabilities->m_ContextPatch = BlocklistPatch;
+
+			// set backend error string
+			*pCommand->m_pErrStringPtr = pErrString;
+			*pCommand->m_pInitError = -2;
+
+			g_Config.m_GfxDriverIsBlocked = 1;
+		}
+	}
+	// if the driver was in a blocked error state, but is not anymore, reset all config variables
+	else if(pErrString == NULL && g_Config.m_GfxDriverIsBlocked == 1)
+	{
+		pCommand->m_pCapabilities->m_ContextMajor = 3;
+		pCommand->m_pCapabilities->m_ContextMinor = 0;
+		pCommand->m_pCapabilities->m_ContextPatch = 0;
+
+		// tell the caller to reinitialize the context
+		*pCommand->m_pInitError = -2;
+
+		g_Config.m_GfxDriverIsBlocked = 0;
+	}
 
 	int MajorV = pCommand->m_pCapabilities->m_ContextMajor;
 	int MinorV = pCommand->m_pCapabilities->m_ContextMinor;
 
-	*pCommand->m_pInitError = 0;
-
-	if(MajorV < pCommand->m_RequestedMajor)
+	if(*pCommand->m_pInitError == 0)
 	{
-		*pCommand->m_pInitError = -2;
-	}
-	else if(MajorV == pCommand->m_RequestedMajor)
-	{
-		if(MinorV < pCommand->m_RequestedMinor)
+		if(MajorV < pCommand->m_RequestedMajor)
 		{
 			*pCommand->m_pInitError = -2;
 		}
-		else if(MinorV == pCommand->m_RequestedMinor)
+		else if(MajorV == pCommand->m_RequestedMajor)
 		{
-			int PatchV = pCommand->m_pCapabilities->m_ContextPatch;
-			if(PatchV < pCommand->m_RequestedPatch)
+			if(MinorV < pCommand->m_RequestedMinor)
 			{
 				*pCommand->m_pInitError = -2;
+			}
+			else if(MinorV == pCommand->m_RequestedMinor)
+			{
+				int PatchV = pCommand->m_pCapabilities->m_ContextPatch;
+				if(PatchV < pCommand->m_RequestedPatch)
+				{
+					*pCommand->m_pInitError = -2;
+				}
 			}
 		}
 	}
@@ -4657,6 +4696,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	GetGlewVersion(GlewMajor, GlewMinor, GlewPatch);
 
 	int InitError = 0;
+	const char *pErrorStr = NULL;
 
 	InitError = IsVersionSupportedGlew(g_Config.m_GfxOpenGLMajor, g_Config.m_GfxOpenGLMinor, g_Config.m_GfxOpenGLPatch, GlewMajor, GlewMinor, GlewPatch);
 
@@ -4681,6 +4721,8 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	m_pProcessor = new CCommandProcessor_SDL_OpenGL(g_Config.m_GfxOpenGLMajor, g_Config.m_GfxOpenGLMinor, g_Config.m_GfxOpenGLPatch);
 	StartProcessor(m_pProcessor);
 
+	mem_zero(m_aErrorString, sizeof(m_aErrorString) / sizeof(m_aErrorString[0]));
+
 	// issue init commands for OpenGL and SDL
 	CCommandBuffer CmdBuffer(1024, 512);
 	//run sdl first to have the context in the thread
@@ -4695,6 +4737,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	CmdSDL.m_GlewMinor = GlewMinor;
 	CmdSDL.m_GlewPatch = GlewPatch;
 	CmdSDL.m_pInitError = &InitError;
+	CmdSDL.m_pErrStringPtr = &pErrorStr;
 	CmdBuffer.AddCommand(CmdSDL);
 	RunBuffer(&CmdBuffer);
 	WaitForIdle();
@@ -4748,6 +4791,11 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 			g_Config.m_GfxOpenGLMajor = m_Capabilites.m_ContextMajor;
 			g_Config.m_GfxOpenGLMinor = m_Capabilites.m_ContextMinor;
 			g_Config.m_GfxOpenGLPatch = m_Capabilites.m_ContextPatch;
+		}
+
+		if(pErrorStr != NULL)
+		{
+			str_copy(m_aErrorString, pErrorStr, sizeof(m_aErrorString) / sizeof(m_aErrorString[0]));
 		}
 
 		return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_OPENGL_VERSION_FAILED;

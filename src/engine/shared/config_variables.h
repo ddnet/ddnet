@@ -394,6 +394,7 @@ MACRO_CONFIG_INT(GfxOpenGLPatch, gfx_opengl_patch, 0, 0, 10, CFGFLAG_SAVE | CFGF
 MACRO_CONFIG_INT(GfxOpenGLTextureLODBIAS, gfx_opengl_texture_lod_bias, -500, -15000, 15000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "The lod bias for OpenGL texture sampling multiplied by 1000")
 
 MACRO_CONFIG_INT(Gfx3DTextureAnalysisDone, gfx_3d_texture_analysis_done, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Analyzed, if sampling 3D/2D array textures was correct")
+MACRO_CONFIG_INT(GfxDriverIsBlocked, gfx_driver_is_blocked, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "If 1, the current driver is in a blocked error state.")
 #if !defined(CONF_PLATFORM_MACOSX)
 MACRO_CONFIG_INT(GfxEnableTextureUnitOptimization, gfx_enable_texture_unit_optimization, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Use multiple texture units, instead of only one.")
 #else

@@ -4,6 +4,7 @@
 #include "SDL.h"
 #include "SDL_opengl.h"
 
+#include "blocklist_driver.h"
 #include "graphics_threaded.h"
 
 #include <base/tl/threading.h>
@@ -425,6 +426,8 @@ public:
 		SDL_GLContext m_GLContext;
 		SBackendCapabilites *m_pCapabilities;
 
+		const char **m_pErrStringPtr;
+
 		int *m_pInitError;
 
 		int m_RequestedMajor;
@@ -493,6 +496,8 @@ class CGraphicsBackend_SDL_OpenGL : public CGraphicsBackend_Threaded
 
 	bool m_UseNewOpenGL;
 
+	char m_aErrorString[256];
+
 public:
 	virtual int Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, class IStorage *pStorage);
 	virtual int Shutdown();
@@ -518,6 +523,14 @@ public:
 	virtual bool HasTextBuffering() { return m_Capabilites.m_TextBuffering; }
 	virtual bool HasQuadContainerBuffering() { return m_Capabilites.m_QuadContainerBuffering; }
 	virtual bool Has2DTextureArrays() { return m_Capabilites.m_2DArrayTextures; }
+
+	virtual const char *GetErrorString()
+	{
+		if(m_aErrorString[0] != '\0')
+			return m_aErrorString;
+
+		return NULL;
+	}
 };
 
 #endif // ENGINE_CLIENT_BACKEND_SDL_H
