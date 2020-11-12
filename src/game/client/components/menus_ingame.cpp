@@ -559,7 +559,7 @@ bool CMenus::RenderServerControlServer(CUIRect MainView)
 bool CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 {
 	int NumOptions = 0;
-	int Selected = -1;
+	int Selected = 0;
 	static int aPlayerIDs[MAX_CLIENTS];
 	for(auto &pInfoByName : m_pClient->m_Snap.m_paInfoByName)
 	{
@@ -1015,68 +1015,21 @@ void CMenus::RenderGhost(CUIRect MainView)
 	View.VSplitRight(15, &View, &Scroll);
 
 	int NumGhosts = m_lGhosts.size();
-
-	int Num = (int)(View.h / s_aCols[0].m_Rect.h) + 1;
 	static int s_ScrollBar = 0;
 	static float s_ScrollValue = 0;
+	static int s_SelectedIndex = 0;
 
 	Scroll.HMargin(5.0f, &Scroll);
 	s_ScrollValue = DoScrollbarV(&s_ScrollBar, &Scroll, s_ScrollValue);
 
-	int ScrollNum = NumGhosts - Num + 1;
-	if(ScrollNum > 0)
-	{
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
-			s_ScrollValue -= 1.0f / ScrollNum;
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
-			s_ScrollValue += 1.0f / ScrollNum;
-	}
-	else
-		ScrollNum = 0;
-
-	static int s_SelectedIndex = 0;
-	for(int i = 0; i < m_NumInputEvents; i++)
-	{
-		int NewIndex = -1;
-		if(m_aInputEvents[i].m_Flags & IInput::FLAG_PRESS)
-		{
-			if(m_aInputEvents[i].m_Key == KEY_DOWN)
-				NewIndex = s_SelectedIndex + 1;
-			if(m_aInputEvents[i].m_Key == KEY_UP)
-				NewIndex = s_SelectedIndex - 1;
-		}
-		if(NewIndex > -1 && NewIndex < NumGhosts)
-		{
-			//scroll
-			float IndexY = View.y - s_ScrollValue * ScrollNum * s_aCols[0].m_Rect.h + NewIndex * s_aCols[0].m_Rect.h;
-			int Scroll = View.y > IndexY ? -1 : View.y + View.h < IndexY + s_aCols[0].m_Rect.h ? 1 : 0;
-			if(Scroll)
-			{
-				if(Scroll < 0)
-				{
-					int NumScrolls = (View.y - IndexY + s_aCols[0].m_Rect.h - 1.0f) / s_aCols[0].m_Rect.h;
-					s_ScrollValue -= (1.0f / ScrollNum) * NumScrolls;
-				}
-				else
-				{
-					int NumScrolls = (IndexY + s_aCols[0].m_Rect.h - (View.y + View.h) + s_aCols[0].m_Rect.h - 1.0f) / s_aCols[0].m_Rect.h;
-					s_ScrollValue += (1.0f / ScrollNum) * NumScrolls;
-				}
-			}
-
-			s_SelectedIndex = NewIndex;
-		}
-	}
-
-	if(s_ScrollValue < 0)
-		s_ScrollValue = 0;
-	if(s_ScrollValue > 1)
-		s_ScrollValue = 1;
+	HandleListInputs(View, s_ScrollValue, 1.0f, nullptr, s_aCols[0].m_Rect.h, s_SelectedIndex, NumGhosts);
 
 	// set clipping
 	UI()->ClipEnable(&View);
 
 	CUIRect OriginalView = View;
+	int Num = (int)(View.h / s_aCols[0].m_Rect.h) + 1;
+	int ScrollNum = NumGhosts - Num + 1;
 	View.y -= s_ScrollValue * ScrollNum * s_aCols[0].m_Rect.h;
 
 	int NewSelected = -1;
@@ -1180,7 +1133,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 	Status.VSplitLeft(120.0f, &Button, &Status);
 
 	static int s_ReloadButton = 0;
-	if(DoButton_Menu(&s_ReloadButton, Localize("Reload"), 0, &Button))
+	if(DoButton_Menu(&s_ReloadButton, Localize("Reload"), 0, &Button) || Input()->KeyPress(KEY_F5))
 	{
 		m_pClient->m_pGhost->UnloadAll();
 		GhostlistPopulate();
