@@ -329,6 +329,17 @@ CServer::CServer() :
 	Init();
 }
 
+CServer::~CServer()
+{
+	for(auto &pCurrentMapData : m_apCurrentMapData)
+	{
+		if(pCurrentMapData)
+			free(pCurrentMapData);
+	}
+
+	delete m_pConnectionPool;
+}
+
 bool CServer::IsClientNameAvailable(int ClientID, const char *pNameRequest)
 {
 	// check for empty names
@@ -2649,11 +2660,7 @@ int CServer::Run()
 	GameServer()->OnShutdown();
 	m_pMap->Unload();
 
-	for(auto &pCurrentMapData : m_apCurrentMapData)
-		free(pCurrentMapData);
-
 	DbPool()->OnShutdown();
-	delete m_pConnectionPool;
 
 #if defined(CONF_UPNP)
 	m_UPnP.Shutdown();

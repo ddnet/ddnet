@@ -3873,7 +3873,8 @@ void CClient::DemoRecorder_Stop(int Recorder, bool RemoveFile)
 	if(RemoveFile)
 	{
 		const char *pFilename = (&m_DemoRecorder[Recorder])->GetCurrentFilename();
-		Storage()->RemoveFile(pFilename, IStorage::TYPE_SAVE);
+		if(pFilename[0] != '\0')
+			Storage()->RemoveFile(pFilename, IStorage::TYPE_SAVE);
 	}
 }
 

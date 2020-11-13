@@ -257,6 +257,7 @@ public:
 	array<CNameBan> m_aNameBans;
 
 	CServer();
+	~CServer();
 
 	bool IsClientNameAvailable(int ClientID, const char *pNameRequest);
 	bool SetClientNameImpl(int ClientID, const char *pNameRequest, bool Set);
