@@ -566,10 +566,10 @@ void CRenderTools::GetRenderTeeBodySize(CAnimState *pAnim, CTeeRenderInfo *pInfo
 	float BodyScale;
 	GetRenderTeeBodyScale(BaseSize, BodyScale);
 
-	Width = pInfo->m_SkinMetrics.BodyWidthNormalized() * 64.0f * BodyScale;
-	Height = pInfo->m_SkinMetrics.BodyHeightNormalized() * 64.0f * BodyScale;
-	BodyOffset.x = pInfo->m_SkinMetrics.BodyOffsetXNormalized() * 64.0f * BodyScale;
-	BodyOffset.y = pInfo->m_SkinMetrics.BodyOffsetYNormalized() * 64.0f * BodyScale;
+	Width = pInfo->m_SkinMetrics.m_Body.WidthNormalized() * 64.0f * BodyScale;
+	Height = pInfo->m_SkinMetrics.m_Body.HeightNormalized() * 64.0f * BodyScale;
+	BodyOffset.x = pInfo->m_SkinMetrics.m_Body.OffsetXNormalized() * 64.0f * BodyScale;
+	BodyOffset.y = pInfo->m_SkinMetrics.m_Body.OffsetYNormalized() * 64.0f * BodyScale;
 }
 
 void CRenderTools::GetRenderTeeFeetSize(CAnimState *pAnim, CTeeRenderInfo *pInfo, vec2 &FeetOffset, float &Width, float &Height)
@@ -580,10 +580,10 @@ void CRenderTools::GetRenderTeeFeetSize(CAnimState *pAnim, CTeeRenderInfo *pInfo
 	float FeetScaleWidth, FeetScaleHeight;
 	GetRenderTeeFeetScale(BaseSize, FeetScaleWidth, FeetScaleHeight);
 
-	Width = pInfo->m_SkinMetrics.FeetWidthNormalized() * 64.0f * FeetScaleWidth;
-	Height = pInfo->m_SkinMetrics.FeetHeightNormalized() * 32.0f * FeetScaleHeight;
-	FeetOffset.x = pInfo->m_SkinMetrics.FeetOffsetXNormalized() * 64.0f * FeetScaleWidth;
-	FeetOffset.y = pInfo->m_SkinMetrics.FeetOffsetYNormalized() * 32.0f * FeetScaleHeight;
+	Width = pInfo->m_SkinMetrics.m_Feet.WidthNormalized() * 64.0f * FeetScaleWidth;
+	Height = pInfo->m_SkinMetrics.m_Feet.HeightNormalized() * 32.0f * FeetScaleHeight;
+	FeetOffset.x = pInfo->m_SkinMetrics.m_Feet.OffsetXNormalized() * 64.0f * FeetScaleWidth;
+	FeetOffset.y = pInfo->m_SkinMetrics.m_Feet.OffsetYNormalized() * 32.0f * FeetScaleHeight;
 }
 
 void CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, vec2 &TeeOffsetToMid)

@@ -55,6 +55,41 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 	return pSelf->LoadSkin(aNameWithoutPng, aBuf, DirType);
 }
 
+static void CheckMetrics(CSkin::SSkinMetricVariable &Metrics, uint8_t *pImg, int ImgWidth, int ImgX, int ImgY, int CheckWidth, int CheckHeight)
+{
+	int MaxY = -1;
+	int MinY = CheckHeight + 1;
+	int MaxX = -1;
+	int MinX = CheckWidth + 1;
+
+	for(int y = 0; y < CheckHeight; y++)
+	{
+		for(int x = 0; x < CheckWidth; x++)
+		{
+			int OffsetAlpha = (y + ImgY) * ImgWidth + (x + ImgX) * 4 + 3;
+			uint8_t AlphaValue = pImg[OffsetAlpha];
+			if(AlphaValue > 0)
+			{
+				if(MaxY < y)
+					MaxY = y;
+				if(MinY > y)
+					MinY = y;
+				if(MaxX < x)
+					MaxX = x;
+				if(MinX > x)
+					MinX = x;
+			}
+		}
+	}
+
+	Metrics.m_Width = clamp((MaxX - MinX) + 1, 1, CheckWidth);
+	Metrics.m_Height = clamp((MaxY - MinY) + 1, 1, CheckHeight);
+	Metrics.m_OffsetX = clamp(MinX, 0, CheckWidth - 1);
+	Metrics.m_OffsetY = clamp(MinY, 0, CheckHeight - 1);
+	Metrics.m_MaxWidth = CheckWidth;
+	Metrics.m_MaxHeight = CheckHeight;
+}
+
 int CSkins::LoadSkin(const char *pName, const char *pPath, int DirType)
 {
 	char aBuf[512];
@@ -86,16 +121,26 @@ int CSkins::LoadSkin(const char *pName, const char *pPath, int DirType)
 	int FeetOffsetX = g_pData->m_aSprites[SPRITE_TEE_FOOT].m_X * FeetGridPixelsWidth;
 	int FeetOffsetY = g_pData->m_aSprites[SPRITE_TEE_FOOT].m_Y * FeetGridPixelsHeight;
 
+	int FeetOutlineGridPixelsWidth = (Info.m_Width / g_pData->m_aSprites[SPRITE_TEE_FOOT_OUTLINE].m_pSet->m_Gridx);
+	int FeetOutlineGridPixelsHeight = (Info.m_Height / g_pData->m_aSprites[SPRITE_TEE_FOOT_OUTLINE].m_pSet->m_Gridy);
+	int FeetOutlineWidth = g_pData->m_aSprites[SPRITE_TEE_FOOT_OUTLINE].m_W * FeetOutlineGridPixelsWidth;
+	int FeetOutlineHeight = g_pData->m_aSprites[SPRITE_TEE_FOOT_OUTLINE].m_H * FeetOutlineGridPixelsHeight;
+
+	int FeetOutlineOffsetX = g_pData->m_aSprites[SPRITE_TEE_FOOT_OUTLINE].m_X * FeetOutlineGridPixelsWidth;
+	int FeetOutlineOffsetY = g_pData->m_aSprites[SPRITE_TEE_FOOT_OUTLINE].m_Y * FeetOutlineGridPixelsHeight;
+
+	int BodyOutlineGridPixelsWidth = (Info.m_Width / g_pData->m_aSprites[SPRITE_TEE_BODY_OUTLINE].m_pSet->m_Gridx);
+	int BodyOutlineGridPixelsHeight = (Info.m_Height / g_pData->m_aSprites[SPRITE_TEE_BODY_OUTLINE].m_pSet->m_Gridy);
+	int BodyOutlineSize = g_pData->m_aSprites[SPRITE_TEE_BODY_OUTLINE].m_H * BodyOutlineGridPixelsHeight;
+
+	int BodyOutlineOffsetX = g_pData->m_aSprites[SPRITE_TEE_BODY_OUTLINE].m_X * BodyOutlineGridPixelsWidth;
+	int BodyOutlineOffsetY = g_pData->m_aSprites[SPRITE_TEE_BODY_OUTLINE].m_Y * BodyOutlineGridPixelsHeight;
+
 	int BodySize = g_pData->m_aSprites[SPRITE_TEE_BODY].m_H * (Info.m_Height / g_pData->m_aSprites[SPRITE_TEE_BODY].m_pSet->m_Gridy); // body size
 	if(BodySize > Info.m_Height)
 		return 0;
 	unsigned char *d = (unsigned char *)Info.m_pData;
 	int Pitch = Info.m_Width * 4;
-
-	int MaxBodyY = -1;
-	int MinBodyY = BodySize + 1;
-	int MaxBodyX = -1;
-	int MinBodyX = BodySize + 1;
 
 	// dig out blood color
 	{
@@ -110,17 +155,6 @@ int CSkins::LoadSkin(const char *pName, const char *pPath, int DirType)
 					aColors[1] += d[y * Pitch + x * 4 + 1];
 					aColors[2] += d[y * Pitch + x * 4 + 2];
 				}
-				if(AlphaValue > 0)
-				{
-					if(MaxBodyY < y)
-						MaxBodyY = y;
-					if(MinBodyY > y)
-						MinBodyY = y;
-					if(MaxBodyX < x)
-						MaxBodyX = x;
-					if(MinBodyX > x)
-						MinBodyX = x;
-				}
 			}
 		if(aColors[0] != 0 && aColors[1] != 0 && aColors[2] != 0)
 			Skin.m_BloodColor = ColorRGBA(normalize(vec3(aColors[0], aColors[1], aColors[2])));
@@ -128,48 +162,16 @@ int CSkins::LoadSkin(const char *pName, const char *pPath, int DirType)
 			Skin.m_BloodColor = ColorRGBA(0, 0, 0, 1);
 	}
 
-	Skin.m_Metrics.m_BodyHeight = clamp((MaxBodyY - MinBodyY) + 1, 1, BodySize);
-	Skin.m_Metrics.m_BodyWidth = clamp((MaxBodyX - MinBodyX) + 1, 1, BodySize);
-	Skin.m_Metrics.m_BodyOffsetX = clamp(MinBodyX, 0, BodySize - 1);
-	Skin.m_Metrics.m_BodyOffsetY = clamp(MinBodyY, 0, BodySize - 1);
+	CheckMetrics(Skin.m_Metrics.m_Body, d, Pitch, 0, 0, BodySize, BodySize);
 
-	Skin.m_Metrics.m_BodyMaxWidth = BodySize;
-	Skin.m_Metrics.m_BodyMaxHeight = BodySize;
+	// body outline metrics
+	CheckMetrics(Skin.m_Metrics.m_Body, d, Pitch, BodyOutlineOffsetX, BodyOutlineOffsetY, BodyOutlineSize, BodyOutlineSize);
 
 	// get feet size
-	{
-		int MaxFeetY = -1;
-		int MinFeetY = FeetHeight + 1;
-		int MaxFeetX = -1;
-		int MinFeetX = FeetWidth + 1;
+	CheckMetrics(Skin.m_Metrics.m_Feet, d, Pitch, FeetOffsetX, FeetOffsetY, FeetWidth, FeetHeight);
 
-		for(int y = 0; y < FeetHeight; y++)
-		{
-			for(int x = 0; x < FeetWidth; x++)
-			{
-				int OffsetAlpha = (y + FeetOffsetY) * Pitch + (x + FeetOffsetX) * 4 + 3;
-				uint8_t AlphaValue = d[OffsetAlpha];
-				if(AlphaValue > 0)
-				{
-					if(MaxFeetY < y)
-						MaxFeetY = y;
-					if(MinFeetY > y)
-						MinFeetY = y;
-					if(MaxFeetX < x)
-						MaxFeetX = x;
-					if(MinFeetX > x)
-						MinFeetX = x;
-				}
-			}
-		}
-
-		Skin.m_Metrics.m_FeetWidth = clamp((MaxFeetX - MinFeetX) + 1, 1, FeetWidth);
-		Skin.m_Metrics.m_FeetHeight = clamp((MaxFeetY - MinFeetY) + 1, 1, FeetHeight);
-		Skin.m_Metrics.m_FeetOffsetX = clamp(MinFeetX, 0, FeetWidth - 1);
-		Skin.m_Metrics.m_FeetOffsetY = clamp(MinFeetY, 0, FeetHeight - 1);
-		Skin.m_Metrics.m_FeetMaxWidth = FeetWidth;
-		Skin.m_Metrics.m_FeetMaxHeight = FeetHeight;
-	}
+	// get feet outline size
+	CheckMetrics(Skin.m_Metrics.m_Feet, d, Pitch, FeetOutlineOffsetX, FeetOutlineOffsetY, FeetOutlineWidth, FeetOutlineHeight);
 
 	// create colorless version
 	int Step = Info.m_Format == CImageInfo::FORMAT_RGBA ? 4 : 3;
