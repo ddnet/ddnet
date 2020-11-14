@@ -938,8 +938,12 @@ public:
 		FT_UInt LastCharGlyphIndex = 0;
 		size_t CharacterCounter = 0;
 
-		while(pCurrent < pEnd && (pCursor->m_MaxLines < 1 || LineCount <= pCursor->m_MaxLines))
+		// check if loop is making no progress and exit to prevent infinite loop
+		const char *pLast = 0;
+
+		while(pCurrent != pLast && pCurrent < pEnd && (pCursor->m_MaxLines < 1 || LineCount <= pCursor->m_MaxLines))
 		{
+			pLast = pCurrent;
 			int NewLine = 0;
 			const char *pBatchEnd = pEnd;
 			if(pCursor->m_LineWidth > 0 && !(pCursor->m_Flags & TEXTFLAG_STOP_AT_END))
