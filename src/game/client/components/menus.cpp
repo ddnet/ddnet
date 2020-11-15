@@ -42,6 +42,8 @@
 #include "menus.h"
 #include "skins.h"
 
+#include <limits>
+
 ColorRGBA CMenus::ms_GuiColor;
 ColorRGBA CMenus::ms_ColorTabbarInactiveOutgame;
 ColorRGBA CMenus::ms_ColorTabbarActiveOutgame;
@@ -351,7 +353,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 
 			for(int i = 1; i <= Len; i++)
 			{
-				if(TextRender()->TextWidth(0, FontSize, pStr, i, -1.0f) - *Offset > MxRel)
+				if(TextRender()->TextWidth(0, FontSize, pStr, i, std::numeric_limits<float>::max()) - *Offset > MxRel)
 				{
 					s_AtIndex = i - 1;
 					break;
@@ -473,11 +475,11 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	// check if the text has to be moved
 	if(UI()->LastActiveItem() == pID && !JustGotActive && (UpdateOffset || m_NumInputEvents))
 	{
-		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, DispCursorPos, -1.0f);
+		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, DispCursorPos, std::numeric_limits<float>::max());
 		if(w - *Offset > Textbox.w)
 		{
 			// move to the left
-			float wt = TextRender()->TextWidth(0, FontSize, pDisplayStr, -1, -1.0f);
+			float wt = TextRender()->TextWidth(0, FontSize, pDisplayStr, -1, std::numeric_limits<float>::max());
 			do
 			{
 				*Offset += minimum(wt - *Offset - Textbox.w, Textbox.w / 3);
@@ -506,10 +508,8 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	// render the cursor
 	if(UI()->LastActiveItem() == pID && !JustGotActive)
 	{
-		float OffsetGlyph = TextRender()->GetGlyphOffsetX(FontSize, '|');
-
-		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, DispCursorPos, -1);
-		Textbox.x += w + OffsetGlyph;
+		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, DispCursorPos, std::numeric_limits<float>::max());
+		Textbox.x += w;
 
 		if((2 * time_get() / time_freq()) % 2)
 		{
