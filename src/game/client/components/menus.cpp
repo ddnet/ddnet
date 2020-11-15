@@ -483,7 +483,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 			do
 			{
 				*Offset += minimum(wt - *Offset - Textbox.w, Textbox.w / 3);
-			} while(w - *Offset > Textbox.w);
+			} while(w - *Offset > Textbox.w + 0.0001f);
 		}
 		else if(w - *Offset < 0.0f)
 		{
@@ -491,7 +491,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 			do
 			{
 				*Offset = maximum(0.0f, *Offset - Textbox.w / 3);
-			} while(w - *Offset < 0.0f);
+			} while(w - *Offset < -0.0001f);
 		}
 	}
 	UI()->ClipEnable(pRect);
