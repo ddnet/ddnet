@@ -290,6 +290,7 @@ void CStatboard::RenderGlobalStats()
 			str_format(aBuf, sizeof(aBuf), "%d", pStats->m_Frags);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f);
 			TextRender()->Text(0, x - tw + px, y + (LineHeight * 0.95f - FontSize) / 2.f, FontSize, aBuf, -1.0f);
+			px += 85;
 		}
 		// DEATHS
 		{
