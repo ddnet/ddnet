@@ -459,6 +459,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 			aDispEditingText[s_AtIndex + i] = aEditingText[i];
 		DispCursorPos = s_AtIndex + EditingTextCursor + 1;
 		pDisplayStr = aDispEditingText;
+		UpdateOffset = true;
 	}
 
 	if(pDisplayStr[0] == '\0')
@@ -467,14 +468,16 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 		TextRender()->TextColor(1, 1, 1, 0.75f);
 	}
 
+	DispCursorPos = minimum(DispCursorPos, str_length(pDisplayStr));
+
 	// check if the text has to be moved
 	if(UI()->LastActiveItem() == pID && !JustGotActive && (UpdateOffset || m_NumInputEvents))
 	{
-		float w = TextRender()->TextWidth(0, FontSize, pStr, s_AtIndex, -1.0f);
+		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, DispCursorPos, -1.0f);
 		if(w - *Offset > Textbox.w)
 		{
 			// move to the left
-			float wt = TextRender()->TextWidth(0, FontSize, pStr, -1, -1.0f);
+			float wt = TextRender()->TextWidth(0, FontSize, pDisplayStr, -1, -1.0f);
 			do
 			{
 				*Offset += minimum(wt - *Offset - Textbox.w, Textbox.w / 3);
@@ -492,7 +495,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	UI()->ClipEnable(pRect);
 	Textbox.x -= *Offset;
 
-	UI()->DoLabel(&Textbox, pDisplayStr, FontSize, -1, Textbox.w * 2.0f);
+	UI()->DoLabel(&Textbox, pDisplayStr, FontSize, -1);
 
 	TextRender()->TextColor(1, 1, 1, 1);
 
@@ -505,7 +508,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	{
 		float OffsetGlyph = TextRender()->GetGlyphOffsetX(FontSize, '|');
 
-		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, DispCursorPos, Textbox.w * 2.0f);
+		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, DispCursorPos, -1);
 		Textbox.x += w + OffsetGlyph;
 
 		if((2 * time_get() / time_freq()) % 2)
