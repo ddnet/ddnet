@@ -42,6 +42,8 @@
 #include "menus.h"
 #include "skins.h"
 
+#include <limits>
+
 ColorRGBA CMenus::ms_GuiColor;
 ColorRGBA CMenus::ms_ColorTabbarInactiveOutgame;
 ColorRGBA CMenus::ms_ColorTabbarActiveOutgame;
@@ -351,7 +353,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 
 			for(int i = 1; i <= Len; i++)
 			{
-				if(TextRender()->TextWidth(0, FontSize, pStr, i, -1.0f) - *Offset > MxRel)
+				if(TextRender()->TextWidth(0, FontSize, pStr, i, std::numeric_limits<float>::max()) - *Offset > MxRel)
 				{
 					s_AtIndex = i - 1;
 					break;
@@ -459,6 +461,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 			aDispEditingText[s_AtIndex + i] = aEditingText[i];
 		DispCursorPos = s_AtIndex + EditingTextCursor + 1;
 		pDisplayStr = aDispEditingText;
+		UpdateOffset = true;
 	}
 
 	if(pDisplayStr[0] == '\0')
@@ -467,18 +470,20 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 		TextRender()->TextColor(1, 1, 1, 0.75f);
 	}
 
+	DispCursorPos = minimum(DispCursorPos, str_length(pDisplayStr));
+
 	// check if the text has to be moved
 	if(UI()->LastActiveItem() == pID && !JustGotActive && (UpdateOffset || m_NumInputEvents))
 	{
-		float w = TextRender()->TextWidth(0, FontSize, pStr, s_AtIndex, -1.0f);
+		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, DispCursorPos, std::numeric_limits<float>::max());
 		if(w - *Offset > Textbox.w)
 		{
 			// move to the left
-			float wt = TextRender()->TextWidth(0, FontSize, pStr, -1, -1.0f);
+			float wt = TextRender()->TextWidth(0, FontSize, pDisplayStr, -1, std::numeric_limits<float>::max());
 			do
 			{
 				*Offset += minimum(wt - *Offset - Textbox.w, Textbox.w / 3);
-			} while(w - *Offset > Textbox.w);
+			} while(w - *Offset > Textbox.w + 0.0001f);
 		}
 		else if(w - *Offset < 0.0f)
 		{
@@ -486,13 +491,13 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 			do
 			{
 				*Offset = maximum(0.0f, *Offset - Textbox.w / 3);
-			} while(w - *Offset < 0.0f);
+			} while(w - *Offset < -0.0001f);
 		}
 	}
 	UI()->ClipEnable(pRect);
 	Textbox.x -= *Offset;
 
-	UI()->DoLabel(&Textbox, pDisplayStr, FontSize, -1, Textbox.w * 2.0f);
+	UI()->DoLabel(&Textbox, pDisplayStr, FontSize, -1);
 
 	TextRender()->TextColor(1, 1, 1, 1);
 
@@ -503,10 +508,8 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	// render the cursor
 	if(UI()->LastActiveItem() == pID && !JustGotActive)
 	{
-		float OffsetGlyph = TextRender()->GetGlyphOffsetX(FontSize, '|');
-
-		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, DispCursorPos, Textbox.w * 2.0f);
-		Textbox.x += w + OffsetGlyph;
+		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, DispCursorPos, std::numeric_limits<float>::max());
+		Textbox.x += w;
 
 		if((2 * time_get() / time_freq()) % 2)
 		{
