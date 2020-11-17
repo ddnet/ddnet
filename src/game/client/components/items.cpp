@@ -24,20 +24,22 @@ void CItems::OnReset()
 
 void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 {
+	int CurWeapon = clamp(pCurrent->m_Type, 0, NUM_WEAPONS - 1);
+
 	// get positions
 	float Curvature = 0;
 	float Speed = 0;
-	if(pCurrent->m_Type == WEAPON_GRENADE)
+	if(CurWeapon == WEAPON_GRENADE)
 	{
 		Curvature = m_pClient->m_Tuning[g_Config.m_ClDummy].m_GrenadeCurvature;
 		Speed = m_pClient->m_Tuning[g_Config.m_ClDummy].m_GrenadeSpeed;
 	}
-	else if(pCurrent->m_Type == WEAPON_SHOTGUN)
+	else if(CurWeapon == WEAPON_SHOTGUN)
 	{
 		Curvature = m_pClient->m_Tuning[g_Config.m_ClDummy].m_ShotgunCurvature;
 		Speed = m_pClient->m_Tuning[g_Config.m_ClDummy].m_ShotgunSpeed;
 	}
-	else if(pCurrent->m_Type == WEAPON_GUN)
+	else if(CurWeapon == WEAPON_GUN)
 	{
 		Curvature = m_pClient->m_Tuning[g_Config.m_ClDummy].m_GunCurvature;
 		Speed = m_pClient->m_Tuning[g_Config.m_ClDummy].m_GunSpeed;
@@ -77,7 +79,40 @@ void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 			Alpha = g_Config.m_ClShowOthersAlpha / 100.0f;
 	}
 
-	int CurWeapon = clamp(pCurrent->m_Type, 0, NUM_WEAPONS - 1);
+	vec2 Vel = Pos - PrevPos;
+
+	// add particle for this projectile
+	// don't check for validity of the projectile for the current weapon here, so particle effects are rendered for mod compability
+	if(CurWeapon == WEAPON_GRENADE)
+	{
+		m_pClient->m_pEffects->SmokeTrail(Pos, Vel * -1, Alpha);
+		static float s_Time = 0.0f;
+		static float s_LastLocalTime = LocalTime();
+
+		if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
+		{
+			const IDemoPlayer::CInfo *pInfo = DemoPlayer()->BaseInfo();
+			if(!pInfo->m_Paused)
+				s_Time += (LocalTime() - s_LastLocalTime) * pInfo->m_Speed;
+		}
+		else
+		{
+			if(m_pClient->m_Snap.m_pGameInfoObj && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED))
+				s_Time += LocalTime() - s_LastLocalTime;
+		}
+
+		Graphics()->QuadsSetRotation(s_Time * pi * 2 * 2 + ItemID);
+		s_LastLocalTime = LocalTime();
+	}
+	else
+	{
+		m_pClient->m_pEffects->BulletTrail(Pos, Alpha);
+
+		if(length(Vel) > 0.00001f)
+			Graphics()->QuadsSetRotation(GetAngle(Vel));
+		else
+			Graphics()->QuadsSetRotation(0);
+	}
 
 	if(GameClient()->m_GameSkin.m_SpriteWeaponProjectiles[CurWeapon] != -1)
 	{
@@ -85,41 +120,6 @@ void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 		Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
 
 		int QuadOffset = 2 + 8 + NUM_WEAPONS + CurWeapon;
-
-		vec2 Vel = Pos - PrevPos;
-		//vec2 pos = mix(vec2(prev->x, prev->y), vec2(current->x, current->y), Client()->IntraGameTick(g_Config.m_ClDummy));
-
-		// add particle for this projectile
-		if(pCurrent->m_Type == WEAPON_GRENADE)
-		{
-			m_pClient->m_pEffects->SmokeTrail(Pos, Vel * -1, Alpha);
-			static float s_Time = 0.0f;
-			static float s_LastLocalTime = LocalTime();
-
-			if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
-			{
-				const IDemoPlayer::CInfo *pInfo = DemoPlayer()->BaseInfo();
-				if(!pInfo->m_Paused)
-					s_Time += (LocalTime() - s_LastLocalTime) * pInfo->m_Speed;
-			}
-			else
-			{
-				if(m_pClient->m_Snap.m_pGameInfoObj && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED))
-					s_Time += LocalTime() - s_LastLocalTime;
-			}
-
-			Graphics()->QuadsSetRotation(s_Time * pi * 2 * 2 + ItemID);
-			s_LastLocalTime = LocalTime();
-		}
-		else
-		{
-			m_pClient->m_pEffects->BulletTrail(Pos, Alpha);
-
-			if(length(Vel) > 0.00001f)
-				Graphics()->QuadsSetRotation(GetAngle(Vel));
-			else
-				Graphics()->QuadsSetRotation(0);
-		}
 
 		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, QuadOffset, Pos.x, Pos.y);
 	}
