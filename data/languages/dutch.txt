@@ -1045,7 +1045,7 @@ Save the best demo of each race
 == Sla de beste demo op van elke race
 
 Default length: %d
-== Standaart lengte
+== Standaart lengte: %d
 
 Enable replays
 == Replays aan zetten

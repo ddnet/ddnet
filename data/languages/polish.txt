@@ -28,7 +28,7 @@
 == Pozostało sekund: %i
 
 %s wins!
-== Wygrał %d!
+== Wygrał %s!
 
 -Page %d-
 == -Strona %d-
