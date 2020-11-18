@@ -2417,19 +2417,6 @@ char *str_trim_words(char *str, int words)
 	return str;
 }
 
-/* makes sure that the string only contains the characters between 32 and 127 */
-void str_sanitize_strong(char *str_in)
-{
-	unsigned char *str = (unsigned char *)str_in;
-	while(*str)
-	{
-		*str &= 0x7f;
-		if(*str < 32)
-			*str = 32;
-		str++;
-	}
-}
-
 /* makes sure that the string only contains the characters between 32 and 255 */
 void str_sanitize_cc(char *str_in)
 {
