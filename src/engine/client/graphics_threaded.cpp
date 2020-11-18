@@ -270,7 +270,7 @@ int CGraphics_Threaded::UnloadTexture(CTextureHandle Index)
 	Cmd.m_Slot = Index;
 	m_pCommandBuffer->AddCommand(Cmd);
 
-	m_aTextureIndices[Index] = m_FirstFreeTexture;
+	m_TextureIndices[Index] = m_FirstFreeTexture;
 	m_FirstFreeTexture = Index;
 	return 0;
 }
@@ -429,8 +429,20 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Heig
 
 	// grab texture
 	int Tex = m_FirstFreeTexture;
-	m_FirstFreeTexture = m_aTextureIndices[Tex];
-	m_aTextureIndices[Tex] = -1;
+	if(Tex == -1)
+	{
+		size_t CurSize = m_TextureIndices.size();
+		m_TextureIndices.resize(CurSize * 2);
+		for(size_t i = 0; i < CurSize - 1; ++i)
+		{
+			m_TextureIndices[CurSize + i] = CurSize + i + 1;
+		}
+		m_TextureIndices.back() = -1;
+
+		Tex = CurSize;
+	}
+	m_FirstFreeTexture = m_TextureIndices[Tex];
+	m_TextureIndices[Tex] = -1;
 
 	CCommandBuffer::SCommand_Texture_Create Cmd;
 	Cmd.m_Slot = Tex;
@@ -2291,9 +2303,10 @@ int CGraphics_Threaded::Init()
 
 	// init textures
 	m_FirstFreeTexture = 0;
-	for(int i = 0; i < CCommandBuffer::MAX_TEXTURES - 1; i++)
-		m_aTextureIndices[i] = i + 1;
-	m_aTextureIndices[CCommandBuffer::MAX_TEXTURES - 1] = -1;
+	m_TextureIndices.resize(CCommandBuffer::MAX_TEXTURES);
+	for(int i = 0; i < (int)m_TextureIndices.size() - 1; i++)
+		m_TextureIndices[i] = i + 1;
+	m_TextureIndices.back() = -1;
 
 	m_FirstFreeVertexArrayInfo = -1;
 	m_FirstFreeBufferObjectIndex = -1;

@@ -64,7 +64,7 @@ public:
 
 	enum
 	{
-		MAX_TEXTURES = 1024 * 32,
+		MAX_TEXTURES = 1024 * 8,
 		MAX_VERTICES = 32 * 1024,
 	};
 
@@ -720,7 +720,7 @@ class CGraphics_Threaded : public IEngineGraphics
 
 	CTextureHandle m_InvalidTexture;
 
-	int m_aTextureIndices[CCommandBuffer::MAX_TEXTURES];
+	std::vector<int> m_TextureIndices;
 	int m_FirstFreeTexture;
 	int m_TextureMemoryUsage;
 
