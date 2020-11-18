@@ -94,7 +94,7 @@ int CSkins::LoadSkin(const char *pName, const char *pPath, int DirType)
 {
 	char aBuf[512];
 	CImageInfo Info;
-	if(!Graphics()->LoadPNG(&Info, pPath, DirType))
+	if(!Graphics()->LoadPNG(&Info, pPath, DirType) || !Graphics()->CheckImageDivisibility(pPath, Info, g_pData->m_aSprites[SPRITE_TEE_BODY].m_pSet->m_Gridx, g_pData->m_aSprites[SPRITE_TEE_BODY].m_pSet->m_Gridy, true))
 	{
 		str_format(aBuf, sizeof(aBuf), "failed to load skin from %s", pName);
 		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);

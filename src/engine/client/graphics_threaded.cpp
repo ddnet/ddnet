@@ -22,6 +22,8 @@
 #include <game/generated/client_data7.h>
 #include <game/localization.h>
 
+#include <engine/shared/image_manipulation.h>
+
 #include <math.h> // cosf, sinf, log2f
 
 #if defined(CONF_VIDEORECORDER)
@@ -558,6 +560,56 @@ int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int Sto
 	}
 	pImg->m_pData = pBuffer;
 	return 1;
+}
+
+bool CGraphics_Threaded::CheckImageDivisibility(const char *pFileName, CImageInfo &Img, int DivX, int DivY, bool AllowResize)
+{
+	dbg_assert(DivX != 0 && DivY != 0, "Passing 0 to this function is not allowed.");
+	bool ImageIsValid = true;
+	bool WidthBroken = Img.m_Width == 0 || (Img.m_Width % DivX) != 0;
+	bool HeightBroken = Img.m_Height == 0 || (Img.m_Height % DivY) != 0;
+	if(WidthBroken || HeightBroken)
+	{
+		SWarning NewWarning;
+		str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg), Localize("The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs."), pFileName, DivX, DivY);
+
+		m_Warnings.emplace_back(NewWarning);
+
+		ImageIsValid = false;
+	}
+
+	if(AllowResize && !ImageIsValid && Img.m_Width > 0 && Img.m_Height > 0)
+	{
+		int NewWidth = DivX;
+		int NewHeight = DivY;
+		if(WidthBroken)
+		{
+			NewWidth = maximum<int>(HighestBit(Img.m_Width), DivX);
+			NewHeight = (NewWidth / DivX) * DivY;
+		}
+		else
+		{
+			NewHeight = maximum<int>(HighestBit(Img.m_Height), DivY);
+			NewWidth = (NewHeight / DivY) * DivX;
+		}
+
+		int ColorChannelCount = 4;
+		if(Img.m_Format == CImageInfo::FORMAT_ALPHA)
+			ColorChannelCount = 1;
+		else if(Img.m_Format == CImageInfo::FORMAT_RGB)
+			ColorChannelCount = 3;
+		else if(Img.m_Format == CImageInfo::FORMAT_RGBA)
+			ColorChannelCount = 4;
+
+		uint8_t *pNewImg = ResizeImage((uint8_t *)Img.m_pData, Img.m_Width, Img.m_Height, NewWidth, NewHeight, ColorChannelCount);
+		free(Img.m_pData);
+		Img.m_pData = pNewImg;
+		Img.m_Width = NewWidth;
+		Img.m_Height = NewHeight;
+		ImageIsValid = true;
+	}
+
+	return ImageIsValid;
 }
 
 void CGraphics_Threaded::CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSourceBuffer, int FullWidth, int FullHeight, int ColorChannelCount, int SubOffsetX, int SubOffsetY, int SubCopyWidth, int SubCopyHeight)
