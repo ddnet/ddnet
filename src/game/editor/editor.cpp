@@ -30,7 +30,7 @@
 #include <game/generated/client_data.h>
 #include <game/localization.h>
 
-#include <engine/shared/dilate.h>
+#include <engine/shared/image_manipulation.h>
 
 #include "auto_map.h"
 #include "editor.h"

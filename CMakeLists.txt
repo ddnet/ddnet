@@ -1490,8 +1490,6 @@ set_src(ENGINE_SHARED GLOB src/engine/shared
   datafile.h
   demo.cpp
   demo.h
-  dilate.cpp
-  dilate.h
   econ.cpp
   econ.h
   engine.cpp
@@ -1502,6 +1500,8 @@ set_src(ENGINE_SHARED GLOB src/engine/shared
   global_uuid_manager.cpp
   huffman.cpp
   huffman.h
+  image_manipulation.cpp
+  image_manipulation.h
   jobs.cpp
   jobs.h
   json.cpp
