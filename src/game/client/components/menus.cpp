@@ -2645,3 +2645,76 @@ void CMenus::SetMenuPage(int NewPage)
 	if(NewPage >= PAGE_INTERNET && NewPage <= PAGE_KOG)
 		g_Config.m_UiPage = NewPage;
 }
+
+bool CMenus::HandleListInputs(const CUIRect &View, float &ScrollValue, const float ScrollAmount, int *pScrollOffset, const float ElemHeight, int &SelectedIndex, const int NumElems)
+{
+	int NewIndex = -1;
+	int Num = (int)(View.h / ElemHeight) + 1;
+	int ScrollNum = NumElems - Num + 1;
+	if(ScrollNum > 0)
+	{
+		if(pScrollOffset && *pScrollOffset >= 0)
+		{
+			ScrollValue = (float)(*pScrollOffset) / ScrollNum;
+			*pScrollOffset = -1;
+		}
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) && UI()->MouseInside(&View))
+			ScrollValue -= 3.0f / ScrollNum;
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) && UI()->MouseInside(&View))
+			ScrollValue += 3.0f / ScrollNum;
+	}
+	else
+		ScrollNum = 0;
+
+	if(ScrollValue < 0)
+		ScrollValue = 0;
+	if(ScrollValue > 1)
+		ScrollValue = 1;
+
+	if(SelectedIndex < 0)
+		SelectedIndex = 0;
+	if(SelectedIndex >= NumElems)
+		SelectedIndex = NumElems;
+
+	for(int i = 0; i < m_NumInputEvents; i++)
+	{
+		if(m_aInputEvents[i].m_Flags & IInput::FLAG_PRESS)
+		{
+			if(m_aInputEvents[i].m_Key == KEY_DOWN)
+				NewIndex = minimum(SelectedIndex + 1, NumElems - 1);
+			else if(m_aInputEvents[i].m_Key == KEY_UP)
+				NewIndex = maximum(SelectedIndex - 1, 0);
+			else if(m_aInputEvents[i].m_Key == KEY_PAGEUP)
+				NewIndex = maximum(SelectedIndex - 25, 0);
+			else if(m_aInputEvents[i].m_Key == KEY_PAGEDOWN)
+				NewIndex = minimum(SelectedIndex + 25, NumElems - 1);
+			else if(m_aInputEvents[i].m_Key == KEY_HOME)
+				NewIndex = 0;
+			else if(m_aInputEvents[i].m_Key == KEY_END)
+				NewIndex = NumElems - 1;
+		}
+		if(NewIndex > -1 && NewIndex < NumElems)
+		{
+			//scroll
+			float IndexY = View.y - ScrollValue * ScrollNum * ElemHeight + NewIndex * ElemHeight;
+			int Scroll = View.y > IndexY ? -1 : View.y + View.h < IndexY + ElemHeight ? 1 : 0;
+			if(Scroll)
+			{
+				if(Scroll < 0)
+				{
+					int NumScrolls = (View.y - IndexY + ElemHeight - 1.0f) / ElemHeight;
+					ScrollValue -= (1.0f / ScrollNum) * NumScrolls;
+				}
+				else
+				{
+					int NumScrolls = (IndexY + ElemHeight - (View.y + View.h) + ElemHeight - 1.0f) / ElemHeight;
+					ScrollValue += (1.0f / ScrollNum) * NumScrolls;
+				}
+			}
+
+			SelectedIndex = NewIndex;
+		}
+	}
+
+	return NewIndex != -1;
+}
