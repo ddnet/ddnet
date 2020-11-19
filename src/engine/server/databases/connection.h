@@ -14,7 +14,7 @@ public:
 		str_copy(m_aPrefix, pPrefix, sizeof(m_aPrefix));
 	}
 	virtual ~IDbConnection() {}
-	IDbConnection& operator=(const IDbConnection&) = delete;
+	IDbConnection &operator=(const IDbConnection &) = delete;
 	virtual void Print(IConsole *pConsole, const char *Mode) = 0;
 
 	// copies the credentials, not the active connection
@@ -33,6 +33,8 @@ public:
 	virtual const char *CollateNocase() const = 0;
 	// syntax to insert a row into table or ignore if it already exists
 	virtual const char *InsertIgnore() const = 0;
+	// ORDER BY RANDOM()/RAND()
+	virtual const char *Random() const = 0;
 
 	enum Status
 	{

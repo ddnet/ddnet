@@ -21,10 +21,10 @@ extern "C" {
 #else
 typedef struct
 {
-    uint64 length;
-    uint32_t state[8];
-    uint32_t curlen;
-    unsigned char buf[64];
+	uint64 length;
+	uint32_t state[8];
+	uint32_t curlen;
+	unsigned char buf[64];
 } SHA256_CTX;
 typedef md5_state_t MD5_CTX;
 #endif

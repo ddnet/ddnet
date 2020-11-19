@@ -3,8 +3,8 @@
 #ifndef GAME_SERVER_ENTITIES_GUN_H
 #define GAME_SERVER_ENTITIES_GUN_H
 
-#include <game/server/entity.h>
 #include <game/gamecore.h>
+#include <game/server/entity.h>
 
 class CCharacter;
 

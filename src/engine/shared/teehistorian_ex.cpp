@@ -4,7 +4,7 @@
 
 void RegisterTeehistorianUuids(CUuidManager *pManager)
 {
-	#define UUID(id, name) pManager->RegisterName(id, name);
-	#include "teehistorian_ex_chunks.h"
-	#undef UUID
+#define UUID(id, name) pManager->RegisterName(id, name);
+#include "teehistorian_ex_chunks.h"
+#undef UUID
 }

@@ -4,7 +4,7 @@ Our own flavor of DDRace, a Teeworlds mod. See the [website](https://ddnet.tw) f
 
 Development discussions happen on #ddnet on Quakenet ([Webchat](http://webchat.quakenet.org/?channels=ddnet&uio=d4)) or on [Discord in the developer channel](https://discord.gg/xsEd9xu).
 
-You can get binary releases on the [DDNet website](https://ddnet.tw/downloads/).
+You can get binary releases on the [DDNet website](https://ddnet.tw/downloads/), find it on [Steam](https://store.steampowered.com/app/412220/DDraceNetwork/) or [install from repository](#installation-from-repository).
 
 Cloning
 -------
@@ -77,6 +77,8 @@ Whether to enable client compilation. If set to OFF, DDNet will not depend on Cu
 * **-DVIDEORECORDER=[ON|OFF]** <br>
 Whether to add video recording support using FFmpeg to the client. You can use command `start_video` and `stop_video` to start and stop conversion from demo to mp4. This feature is currently experimental and not enabled by default.
 
+Dependencies needed on debian: `libx264-dev libavfilter-dev libavdevice-dev libavformat-dev libavcodec-extra libavutil-dev`
+
 * **-DDOWNLOAD_GTEST=[ON|OFF]** <br>
 Whether to download and compile GTest. Useful if GTest is not installed and, for Linux users, there is no suitable package providing it. Default value is OFF.
 
@@ -108,6 +110,25 @@ sudo cp *.a /usr/lib
 
 To run the tests you must target `run_tests` with make:
 `make run_tests`
+
+Using AddressSanitizer + UndefinedBehaviourSanitizer or Valgrind's Memcheck
+---------------------------------------------------------------------------
+ASan+UBSan and Memcheck are useful to find code problems more easily. Please use them to test your changes if you can.
+
+For ASan+UBSan compile with:
+```bash
+CC=clang CXX=clang++ CXXFLAGS="-fsanitize=address,undefined -fsanitize-recover=address,undefined -fno-omit-frame-pointer" CFLAGS="-fsanitize=address,undefined -fsanitize-recover=address,undefined -fno-omit-frame-pointer" cmake -DCMAKE_BUILD_TYPE=Debug .
+make
+```
+and run with:
+```bash
+UBSAN_OPTIONS=log_path=./SAN:print_stacktrace=1:halt_on_errors=0 ASAN_OPTIONS=log_path=./SAN:print_stacktrace=1:check_initialization_order=1:detect_leaks=1:halt_on_errors=0 ./DDNet
+```
+
+Check the SAN.\* files afterwards. This finds more problems than memcheck, runs faster, but requires a modern GCC/Clang compiler.
+
+For valgrind's memcheck compile a normal Debug build and run with: `valgrind --tool=memcheck ./DDNet`
+Expect a large slow down.
 
 Building on Windows with Visual Studio
 --------------------------------------
@@ -166,7 +187,36 @@ $ make -j8
 $ ./DDNet-Server -f mine.cfg
 ```
 
-Repository status
-=================
+<a href="https://repology.org/metapackage/ddnet/versions">
+    <img src="https://repology.org/badge/vertical-allrepos/ddnet.svg?header=" alt="Packaging status" align="right">
+</a>
 
-[![Repository status](https://repology.org/badge/vertical-allrepos/ddnet.svg?header=)](https://repology.org/metapackage/ddnet/versions)
+Installation from Repository
+-----------------
+
+Debian/Ubuntu
+
+```bash
+$ apt-get install ddnet
+
+```
+
+MacOS
+
+```bash
+$ brew cask install ddnet
+```
+
+Fedora
+
+```bash
+$ dnf install ddnet
+```
+
+Arch Linux
+
+```bash
+$ yay -S ddnet
+```
+
+

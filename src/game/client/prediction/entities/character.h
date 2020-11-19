@@ -3,8 +3,8 @@
 #ifndef GAME_CLIENT_PREDICTION_ENTITIES_CHARACTER_H
 #define GAME_CLIENT_PREDICTION_ENTITIES_CHARACTER_H
 
-#include <game/client/prediction/entity.h>
 #include "projectile.h"
+#include <game/client/prediction/entity.h>
 
 #include <game/gamecore.h>
 #include <game/generated/client_data.h>
@@ -31,6 +31,7 @@ enum
 class CCharacter : public CEntity
 {
 	friend class CGameWorld;
+
 public:
 	//character's size
 	static const int ms_PhysSize = 28;
@@ -64,7 +65,7 @@ public:
 
 	bool m_Alive;
 
-	CTeamsCore* TeamsCore();
+	CTeamsCore *TeamsCore();
 	bool Freeze(int Time);
 	bool Freeze();
 	bool UnFreeze();
@@ -83,11 +84,11 @@ public:
 	bool m_EndlessHook;
 	enum
 	{
-		HIT_ALL=0,
-		DISABLE_HIT_HAMMER=1,
-		DISABLE_HIT_SHOTGUN=2,
-		DISABLE_HIT_GRENADE=4,
-		DISABLE_HIT_LASER=8
+		HIT_ALL = 0,
+		DISABLE_HIT_HAMMER = 1,
+		DISABLE_HIT_SHOTGUN = 2,
+		DISABLE_HIT_GRENADE = 4,
+		DISABLE_HIT_LASER = 8
 	};
 	int m_Hit;
 	int m_TuneZone;
@@ -108,7 +109,7 @@ public:
 	void SetActiveWeapon(int ActiveWeap);
 	CCharacterCore GetCore() { return m_Core; };
 	void SetCore(CCharacterCore Core) { m_Core = Core; };
-	CCharacterCore* Core() { return &m_Core; };
+	CCharacterCore *Core() { return &m_Core; };
 	bool GetWeaponGot(int Type) { return m_aWeapons[Type].m_Got; };
 	void SetWeaponGot(int Type, bool Value) { m_aWeapons[Type].m_Got = Value; };
 	int GetWeaponAmmo(int Type) { return m_aWeapons[Type].m_Ammo; };
@@ -117,7 +118,15 @@ public:
 	void SetNinjaActivationTick(int ActivationTick) { m_Ninja.m_ActivationTick = ActivationTick; };
 	void SetNinjaCurrentMoveTime(int CurrentMoveTime) { m_Ninja.m_CurrentMoveTime = CurrentMoveTime; };
 	int GetCID() { return m_ID; }
-	void SetInput(CNetObj_PlayerInput *pNewInput) { m_LatestInput = m_Input = *pNewInput; };
+	void SetInput(CNetObj_PlayerInput *pNewInput)
+	{
+		m_LatestInput = m_Input = *pNewInput;
+		// it is not allowed to aim in the center
+		if(m_Input.m_TargetX == 0 && m_Input.m_TargetY == 0)
+		{
+			m_Input.m_TargetY = m_LatestInput.m_TargetY = -1;
+		}
+	};
 	int GetJumped() { return m_Core.m_Jumped; }
 	int GetAttackTick() { return m_AttackTick; }
 	int GetStrongWeakID() { return m_StrongWeakID; }

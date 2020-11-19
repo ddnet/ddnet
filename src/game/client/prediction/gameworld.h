@@ -13,6 +13,7 @@ class CCharacter;
 class CGameWorld
 {
 	friend class CCharacter;
+
 public:
 	enum
 	{

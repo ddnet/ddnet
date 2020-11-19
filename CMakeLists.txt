@@ -98,7 +98,11 @@ option(DOWNLOAD_GTEST "Download and compile GTest" ${AUTO_DEPENDENCIES_DEFAULT})
 option(STEAM "Build the Steam release version" OFF)
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
 option(DEV "Don't generate stuff necessary for packaging" OFF)
-set(VERSION ${PROJECT_VERSION} CACHE STRING "Specify version string")
+
+# Set version if not explicitly set
+if(NOT VERSION)
+  set(VERSION ${PROJECT_VERSION})
+endif()
 
 set(OpenGL_GL_PREFERENCE LEGACY)
 
@@ -117,9 +121,13 @@ endif()
 
 set(DBG $<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>)
 
-set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
-  src/game/version.h
-)
+if(CMAKE_VERSION VERSION_LESS 3.0)
+  configure_file(src/game/version.h vd.h)
+else()
+  set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+    src/game/version.h
+  )
+endif()
 
 set(SERVER_EXECUTABLE DDNet-Server CACHE STRING "Name of the built server executable")
 set(CLIENT_EXECUTABLE DDNet CACHE STRING "Name of the build client executable")
@@ -607,6 +615,9 @@ endif()
 
 set(EXPECTED_DATA
   arrow.png
+  assets/entities/comfort/ddnet.png
+  assets/entities/license.txt
+  assets/game/game_06.png
   audio/foley_body_impact-01.wv
   audio/foley_body_impact-02.wv
   audio/foley_body_impact-03.wv
@@ -740,6 +751,7 @@ set(EXPECTED_DATA
   audio/wp_switch-03.wv
   blob.png
   browse_icons.png
+  censorlist.txt
   console.png
   console_bar.png
   countryflags/AD.png
@@ -1069,6 +1081,7 @@ set(EXPECTED_DATA
   languages/romanian.txt
   languages/russian.txt
   languages/serbian.txt
+  languages/serbian_cyrillic.txt
   languages/simplified_chinese.txt
   languages/slovak.txt
   languages/spanish.txt
@@ -1159,27 +1172,18 @@ set(EXPECTED_DATA
   shader/pipeline.vert
   shader/prim.frag
   shader/prim.vert
+  shader/primex.frag
+  shader/primex.vert
   shader/quad.frag
   shader/quad.vert
-  shader/sprite.frag
-  shader/sprite.vert
   shader/spritemulti.frag
   shader/spritemulti.vert
   shader/text.frag
   shader/text.vert
   shader/tile.frag
   shader/tile.vert
-  "skins/Ablush NeoN.png"
   skins/Aoe4leg.png
-  "skins/Apish Coke.png"
-  "skins/Black Phantom heinrich5991.png"
-  "skins/Evil Puffi.png"
-  "skins/Flying Silex.png"
-  "skins/Hidden Assassin.png"
-  "skins/Irradiated Sunny.png"
-  "skins/Mobys Skull.png"
   skins/PaladiN.png
-  skins/Terrorist.png
   skins/antiantey.png
   skins/beast.png
   skins/blacktee.png
@@ -1401,8 +1405,17 @@ generate_source("src/game/generated/server_data.h" "server_content_header")
 
 generate_source7("src/game/generated/protocol7.cpp" "network_source")
 generate_source7("src/game/generated/protocol7.h" "network_header")
+generate_source7("src/game/generated/client_data7.cpp" "client_content_source")
+generate_source7("src/game/generated/client_data7.h" "client_content_header")
 
 generate_maps("src/game/generated/protocolglue.h")
+
+add_custom_command(OUTPUT "src/game/generated/wordlist.h"
+  COMMAND ${PYTHON_EXECUTABLE} scripts/wordlist.py > ${PROJECT_BINARY_DIR}/src/game/generated/wordlist.h
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  DEPENDS
+    scripts/wordlist.py
+)
 
 ########################################################################
 # SHARED
@@ -1461,6 +1474,7 @@ set_src(ENGINE_INTERFACE GLOB src/engine
   textrender.h
   updater.h
   uuid.h
+  warning.h
 )
 set_src(ENGINE_SHARED GLOB src/engine/shared
   compression.cpp
@@ -1476,8 +1490,6 @@ set_src(ENGINE_SHARED GLOB src/engine/shared
   datafile.h
   demo.cpp
   demo.h
-  dilate.cpp
-  dilate.h
   econ.cpp
   econ.h
   engine.cpp
@@ -1485,11 +1497,11 @@ set_src(ENGINE_SHARED GLOB src/engine/shared
   fifo.h
   filecollection.cpp
   filecollection.h
-  ghost.cpp
-  ghost.h
   global_uuid_manager.cpp
   huffman.cpp
   huffman.h
+  image_manipulation.cpp
+  image_manipulation.h
   jobs.cpp
   jobs.h
   json.cpp
@@ -1632,12 +1644,16 @@ if(CLIENT)
   set_src(ENGINE_CLIENT GLOB src/engine/client
     backend_sdl.cpp
     backend_sdl.h
+    blocklist_driver.cpp
+    blocklist_driver.h
     client.cpp
     client.h
     demoedit.cpp
     demoedit.h
     friends.cpp
     friends.h
+    ghost.cpp
+    ghost.h
     graphics_threaded.cpp
     graphics_threaded.h
     http.cpp
@@ -1714,6 +1730,7 @@ if(CLIENT)
     components/menus_demo.cpp
     components/menus_ingame.cpp
     components/menus_settings.cpp
+    components/menus_settings_assets.cpp
     components/menus_start.cpp
     components/motd.cpp
     components/motd.h
@@ -1758,6 +1775,7 @@ if(CLIENT)
     render.cpp
     render.h
     render_map.cpp
+    skin.h
     ui.cpp
     ui.h
   )
@@ -1777,6 +1795,8 @@ if(CLIENT)
   set(GAME_GENERATED_CLIENT
     src/game/generated/client_data.cpp
     src/game/generated/client_data.h
+    src/game/generated/client_data7.cpp
+    src/game/generated/client_data7.h
   )
   set(CLIENT_SRC ${ENGINE_CLIENT} ${PLATFORM_CLIENT} ${GAME_CLIENT} ${GAME_EDITOR} ${GAME_GENERATED_CLIENT})
 
@@ -1965,6 +1985,7 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
 set(GAME_GENERATED_SERVER
   "src/game/generated/server_data.cpp"
   "src/game/generated/server_data.h"
+  "src/game/generated/wordlist.h"
 )
 set(SERVER_SRC ${ENGINE_SERVER} ${GAME_SERVER} ${GAME_GENERATED_SERVER})
 if(TARGET_OS STREQUAL "windows")
@@ -2095,6 +2116,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
   set_src(TESTS GLOB src/test
     aio.cpp
     bezier.cpp
+    blocklist_driver.cpp
     color.cpp
     csv.cpp
     datafile.cpp
@@ -2116,6 +2138,8 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     unix.cpp
   )
   set(TESTS_EXTRA
+    src/engine/client/blocklist_driver.cpp
+    src/engine/client/blocklist_driver.h
     src/engine/server/name_ban.cpp
     src/engine/server/name_ban.h
     src/game/server/teehistorian.cpp

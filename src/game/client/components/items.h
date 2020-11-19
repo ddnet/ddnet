@@ -8,7 +8,7 @@ class CItems : public CComponent
 {
 	enum
 	{
-		MAX_EXTRA_PROJECTILES=32,
+		MAX_EXTRA_PROJECTILES = 32,
 	};
 
 	CNetObj_Projectile m_aExtraProjectiles[MAX_EXTRA_PROJECTILES];
@@ -20,6 +20,7 @@ class CItems : public CComponent
 	void RenderLaser(const struct CNetObj_Laser *pCurrent, bool IsPredicted = false);
 
 	int m_ItemsQuadContainerIndex;
+
 public:
 	virtual void OnReset();
 	virtual void OnRender();

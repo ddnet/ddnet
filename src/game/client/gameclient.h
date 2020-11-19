@@ -3,22 +3,22 @@
 #ifndef GAME_CLIENT_GAMECLIENT_H
 #define GAME_CLIENT_GAMECLIENT_H
 
+#include "render.h"
 #include <base/color.h>
 #include <base/vmath.h>
 #include <engine/client.h>
 #include <engine/console.h>
 #include <engine/shared/config.h>
+#include <game/gamecore.h>
 #include <game/layers.h>
 #include <game/localization.h>
-#include <game/gamecore.h>
-#include "render.h"
 
 #include <game/teamscore.h>
 
-#include <game/client/prediction/gameworld.h>
 #include <game/client/prediction/entities/character.h>
 #include <game/client/prediction/entities/laser.h>
 #include <game/client/prediction/entities/pickup.h>
+#include <game/client/prediction/gameworld.h>
 
 class CGameInfo
 {
@@ -53,6 +53,7 @@ public:
 	bool m_Race;
 
 	bool m_DontMaskEntities;
+	bool m_AllowXSkins;
 };
 
 class CGameClient : public IGameClient
@@ -101,14 +102,14 @@ class CGameClient : public IGameClient
 	void UpdatePositions();
 
 	int m_PredictedTick;
-	int m_LastNewPredictedTick[2];
+	int m_LastNewPredictedTick[NUM_DUMMIES];
 
 	int m_LastRoundStartTick;
 
 	int m_LastFlagCarrierRed;
 	int m_LastFlagCarrierBlue;
 
-	int m_CheckInfo[2];
+	int m_CheckInfo[NUM_DUMMIES];
 
 	char m_aDDNetVersionStr[64];
 
@@ -145,10 +146,16 @@ public:
 	class IFriends *Friends() { return m_pFriends; }
 	class IFriends *Foes() { return m_pFoes; }
 #if defined(CONF_AUTOUPDATE)
-	class IUpdater *Updater() { return m_pUpdater; }
+	class IUpdater *Updater()
+	{
+		return m_pUpdater;
+	}
 #endif
 
-	int NetobjNumCorrections() { return m_NetObjHandler.NumObjCorrections(); }
+	int NetobjNumCorrections()
+	{
+		return m_NetObjHandler.NumObjCorrections();
+	}
 	const char *NetobjCorrectedOn() { return m_NetObjHandler.CorrectedObjOn(); }
 
 	bool m_SuppressEvents;
@@ -157,11 +164,11 @@ public:
 	int m_FlagDropTick[2];
 
 	// TODO: move this
-	CTuningParams m_Tuning[2];
+	CTuningParams m_Tuning[NUM_DUMMIES];
 
 	enum
 	{
-		SERVERMODE_PURE=0,
+		SERVERMODE_PURE = 0,
 		SERVERMODE_MOD,
 		SERVERMODE_PUREMOD,
 	};
@@ -240,7 +247,6 @@ public:
 		char m_aClan[MAX_CLAN_LENGTH];
 		int m_Country;
 		char m_aSkinName[64];
-		int m_SkinID;
 		int m_SkinColor;
 		int m_Team;
 		int m_Emoticon;
@@ -261,7 +267,6 @@ public:
 		bool m_HasTelegunLaser;
 		int m_FreezeEnd;
 		bool m_DeepFrozen;
-
 
 		CCharacterCore m_Predicted;
 		CCharacterCore m_PrevPredicted;
@@ -326,8 +331,16 @@ public:
 		void Reset();
 
 		bool IsActive() const { return m_Active; }
-		void JoinGame(int Tick) { m_Active = true; m_JoinTick = Tick; };
-		void JoinSpec(int Tick) { m_Active = false; m_IngameTicks += Tick - m_JoinTick; };
+		void JoinGame(int Tick)
+		{
+			m_Active = true;
+			m_JoinTick = Tick;
+		};
+		void JoinSpec(int Tick)
+		{
+			m_Active = false;
+			m_IngameTicks += Tick - m_JoinTick;
+		};
 		int GetIngameTicks(int Tick) const { return m_IngameTicks + Tick - m_JoinTick; };
 		float GetFPM(int Tick, int TickSpeed) const { return (float)(m_Frags * TickSpeed * 60) / GetIngameTicks(Tick); };
 	};
@@ -364,6 +377,8 @@ public:
 
 	void OnWindowResize();
 	static void OnWindowResizeCB(void *pUser);
+
+	void OnLanguageChange();
 
 	virtual const char *GetItemName(int Type);
 	virtual const char *Version();
@@ -408,7 +423,7 @@ public:
 
 	// DDRace
 
-	int m_LocalIDs[2];
+	int m_LocalIDs[NUM_DUMMIES];
 	CNetObj_PlayerInput m_DummyInput;
 	CNetObj_PlayerInput m_HammerInput;
 	int m_DummyFire;
@@ -418,7 +433,7 @@ public:
 	class CGhost *m_pGhost;
 	class CTeamsCore m_Teams;
 
-	int IntersectCharacter(vec2 Pos0, vec2 Pos1, vec2& NewPos, int ownID);
+	int IntersectCharacter(vec2 Pos0, vec2 Pos1, vec2 &NewPos, int ownID);
 
 	virtual int GetLastRaceTick();
 
@@ -426,7 +441,7 @@ public:
 	bool AntiPingGrenade() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingGrenade && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK; }
 	bool AntiPingWeapons() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingWeapons && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK; }
 	bool AntiPingGunfire() { return AntiPingGrenade() && AntiPingWeapons() && g_Config.m_ClAntiPingGunfire; }
-	bool Predict() { return g_Config.m_ClPredict && !(m_Snap.m_pGameInfoObj && m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER) && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK && m_Snap.m_pLocalCharacter; }
+	bool Predict() { return g_Config.m_ClPredict && !(m_Snap.m_pGameInfoObj && m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER) && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK && m_Snap.m_pLocalCharacter; }
 	bool PredictDummy() { return g_Config.m_ClPredictDummy && Client()->DummyConnected() && m_Snap.m_LocalClientID >= 0 && m_PredictedDummyID >= 0; }
 
 	CGameWorld m_GameWorld;
@@ -435,10 +450,126 @@ public:
 
 	void Echo(const char *pString);
 	bool IsOtherTeam(int ClientID);
+	bool CanDisplayWarning();
+	bool IsDisplayingWarning();
+
+	void LoadGameSkin(const char *pPath, bool AsDir = false);
+	void LoadEmoticonsSkin(const char *pPath, bool AsDir = false);
+	void LoadParticlesSkin(const char *pPath, bool AsDir = false);
+
+	void RefindSkins();
+
+	struct SClientGameSkin
+	{
+		// health armor hud
+		IGraphics::CTextureHandle m_SpriteHealthFull;
+		IGraphics::CTextureHandle m_SpriteHealthEmpty;
+		IGraphics::CTextureHandle m_SpriteArmorFull;
+		IGraphics::CTextureHandle m_SpriteArmorEmpty;
+
+		// cursors
+		IGraphics::CTextureHandle m_SpriteWeaponHammerCursor;
+		IGraphics::CTextureHandle m_SpriteWeaponGunCursor;
+		IGraphics::CTextureHandle m_SpriteWeaponShotgunCursor;
+		IGraphics::CTextureHandle m_SpriteWeaponGrenadeCursor;
+		IGraphics::CTextureHandle m_SpriteWeaponNinjaCursor;
+		IGraphics::CTextureHandle m_SpriteWeaponLaserCursor;
+
+		IGraphics::CTextureHandle m_SpriteWeaponCursors[6];
+
+		// weapons and hook
+		IGraphics::CTextureHandle m_SpriteHookChain;
+		IGraphics::CTextureHandle m_SpriteHookHead;
+		IGraphics::CTextureHandle m_SpriteWeaponHammer;
+		IGraphics::CTextureHandle m_SpriteWeaponGun;
+		IGraphics::CTextureHandle m_SpriteWeaponShotgun;
+		IGraphics::CTextureHandle m_SpriteWeaponGrenade;
+		IGraphics::CTextureHandle m_SpriteWeaponNinja;
+		IGraphics::CTextureHandle m_SpriteWeaponLaser;
+
+		IGraphics::CTextureHandle m_SpriteWeapons[6];
+
+		// particles
+		IGraphics::CTextureHandle m_SpriteParticles[9];
+
+		// stars
+		IGraphics::CTextureHandle m_SpriteStars[3];
+
+		// projectiles
+		IGraphics::CTextureHandle m_SpriteWeaponGunProjectile;
+		IGraphics::CTextureHandle m_SpriteWeaponShotgunProjectile;
+		IGraphics::CTextureHandle m_SpriteWeaponGrenadeProjectile;
+		IGraphics::CTextureHandle m_SpriteWeaponHammerProjectile;
+		IGraphics::CTextureHandle m_SpriteWeaponNinjaProjectile;
+		IGraphics::CTextureHandle m_SpriteWeaponLaserProjectile;
+
+		IGraphics::CTextureHandle m_SpriteWeaponProjectiles[6];
+
+		// muzzles
+		IGraphics::CTextureHandle m_SpriteWeaponGunMuzzles[3];
+		IGraphics::CTextureHandle m_SpriteWeaponShotgunMuzzles[3];
+		IGraphics::CTextureHandle m_SpriteWeaponNinjaMuzzles[3];
+
+		IGraphics::CTextureHandle m_SpriteWeaponsMuzzles[6][3];
+
+		// pickups
+		IGraphics::CTextureHandle m_SpritePickupHealth;
+		IGraphics::CTextureHandle m_SpritePickupArmor;
+		IGraphics::CTextureHandle m_SpritePickupGrenade;
+		IGraphics::CTextureHandle m_SpritePickupShotgun;
+		IGraphics::CTextureHandle m_SpritePickupLaser;
+		IGraphics::CTextureHandle m_SpritePickupNinja;
+		IGraphics::CTextureHandle m_SpritePickupGun;
+		IGraphics::CTextureHandle m_SpritePickupHammer;
+
+		IGraphics::CTextureHandle m_SpritePickupWeapons[6];
+
+		// flags
+		IGraphics::CTextureHandle m_SpriteFlagBlue;
+		IGraphics::CTextureHandle m_SpriteFlagRed;
+
+		// ninja bar (0.7)
+		IGraphics::CTextureHandle m_SpriteNinjaBarFullLeft;
+		IGraphics::CTextureHandle m_SpriteNinjaBarFull;
+		IGraphics::CTextureHandle m_SpriteNinjaBarEmpty;
+		IGraphics::CTextureHandle m_SpriteNinjaBarEmptyRight;
+
+		bool IsSixup()
+		{
+			return m_SpriteNinjaBarFullLeft != -1;
+		}
+	};
+
+	SClientGameSkin m_GameSkin;
+	bool m_GameSkinLoaded;
+
+	struct SClientParticlesSkin
+	{
+		IGraphics::CTextureHandle m_SpriteParticleSlice;
+		IGraphics::CTextureHandle m_SpriteParticleBall;
+		IGraphics::CTextureHandle m_SpriteParticleSplat[3];
+		IGraphics::CTextureHandle m_SpriteParticleSmoke;
+		IGraphics::CTextureHandle m_SpriteParticleShell;
+		IGraphics::CTextureHandle m_SpriteParticleExpl;
+		IGraphics::CTextureHandle m_SpriteParticleAirJump;
+		IGraphics::CTextureHandle m_SpriteParticleHit;
+		IGraphics::CTextureHandle m_SpriteParticles[10];
+	};
+
+	SClientParticlesSkin m_ParticlesSkin;
+	bool m_ParticlesSkinLoaded;
+
+	struct SClientEmoticonsSkin
+	{
+		IGraphics::CTextureHandle m_SpriteEmoticons[16];
+	};
+
+	SClientEmoticonsSkin m_EmoticonsSkin;
+	bool m_EmoticonsSkinLoaded;
 
 private:
-	bool m_DDRaceMsgSent[2];
-	int m_ShowOthers[2];
+	bool m_DDRaceMsgSent[NUM_DUMMIES];
+	int m_ShowOthers[NUM_DUMMIES];
 
 	void UpdatePrediction();
 	void UpdateRenderedCharacters();

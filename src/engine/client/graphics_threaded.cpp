@@ -13,44 +13,51 @@
 
 #include <pnglite.h>
 
-#include <engine/shared/config.h>
-#include <engine/graphics.h>
-#include <engine/storage.h>
-#include <engine/keys.h>
 #include <engine/console.h>
+#include <engine/graphics.h>
+#include <engine/keys.h>
+#include <engine/shared/config.h>
+#include <engine/storage.h>
+#include <game/generated/client_data.h>
+#include <game/generated/client_data7.h>
 #include <game/localization.h>
+
+#include <engine/shared/image_manipulation.h>
 
 #include <math.h> // cosf, sinf, log2f
 
 #if defined(CONF_VIDEORECORDER)
-	#include "video.h"
+#include "video.h"
 #endif
 
 #include "graphics_threaded.h"
 
 static CVideoMode g_aFakeModes[] = {
-	{320,240,8,8,8}, {400,300,8,8,8}, {640,480,8,8,8},
-	{720,400,8,8,8}, {768,576,8,8,8}, {800,600,8,8,8},
-	{1024,600,8,8,8}, {1024,768,8,8,8}, {1152,864,8,8,8},
-	{1280,768,8,8,8}, {1280,800,8,8,8}, {1280,960,8,8,8},
-	{1280,1024,8,8,8}, {1368,768,8,8,8}, {1400,1050,8,8,8},
-	{1440,900,8,8,8}, {1440,1050,8,8,8}, {1600,1000,8,8,8},
-	{1600,1200,8,8,8}, {1680,1050,8,8,8}, {1792,1344,8,8,8},
-	{1800,1440,8,8,8}, {1856,1392,8,8,8}, {1920,1080,8,8,8},
-	{1920,1200,8,8,8}, {1920,1440,8,8,8}, {1920,2400,8,8,8},
-	{2048,1536,8,8,8},
+	{8192, 4320, 8, 8, 8}, {7680, 4320, 8, 8, 8}, {5120, 2880, 8, 8, 8},
+	{4096, 2160, 8, 8, 8}, {3840, 2160, 8, 8, 8}, {2560, 1440, 8, 8, 8},
+	{2048, 1536, 8, 8, 8}, {1920, 2400, 8, 8, 8}, {1920, 1440, 8, 8, 8},
+	{1920, 1200, 8, 8, 8}, {1920, 1080, 8, 8, 8}, {1856, 1392, 8, 8, 8},
+	{1800, 1440, 8, 8, 8}, {1792, 1344, 8, 8, 8}, {1680, 1050, 8, 8, 8},
+	{1600, 1200, 8, 8, 8}, {1600, 1000, 8, 8, 8}, {1440, 1050, 8, 8, 8},
+	{1440, 900, 8, 8, 8}, {1400, 1050, 8, 8, 8}, {1368, 768, 8, 8, 8},
+	{1280, 1024, 8, 8, 8}, {1280, 960, 8, 8, 8}, {1280, 800, 8, 8, 8},
+	{1280, 768, 8, 8, 8}, {1152, 864, 8, 8, 8}, {1024, 768, 8, 8, 8},
+	{1024, 600, 8, 8, 8}, {800, 600, 8, 8, 8}, {768, 576, 8, 8, 8},
+	{720, 400, 8, 8, 8}, {640, 480, 8, 8, 8}, {400, 300, 8, 8, 8},
+	{320, 240, 8, 8, 8},
 
-	{320,240,5,6,5}, {400,300,5,6,5}, {640,480,5,6,5},
-	{720,400,5,6,5}, {768,576,5,6,5}, {800,600,5,6,5},
-	{1024,600,5,6,5}, {1024,768,5,6,5}, {1152,864,5,6,5},
-	{1280,768,5,6,5}, {1280,800,5,6,5}, {1280,960,5,6,5},
-	{1280,1024,5,6,5}, {1368,768,5,6,5}, {1400,1050,5,6,5},
-	{1440,900,5,6,5}, {1440,1050,5,6,5}, {1600,1000,5,6,5},
-	{1600,1200,5,6,5}, {1680,1050,5,6,5}, {1792,1344,5,6,5},
-	{1800,1440,5,6,5}, {1856,1392,5,6,5}, {1920,1080,5,6,5},
-	{1920,1200,5,6,5}, {1920,1440,5,6,5}, {1920,2400,5,6,5},
-	{2048,1536,5,6,5}
-};
+	{8192, 4320, 5, 6, 5}, {7680, 4320, 5, 6, 5}, {5120, 2880, 5, 6, 5},
+	{4096, 2160, 5, 6, 5}, {3840, 2160, 5, 6, 5}, {2560, 1440, 5, 6, 5},
+	{2048, 1536, 5, 6, 5}, {1920, 2400, 5, 6, 5}, {1920, 1440, 5, 6, 5},
+	{1920, 1200, 5, 6, 5}, {1920, 1080, 5, 6, 5}, {1856, 1392, 5, 6, 5},
+	{1800, 1440, 5, 6, 5}, {1792, 1344, 5, 6, 5}, {1680, 1050, 5, 6, 5},
+	{1600, 1200, 5, 6, 5}, {1600, 1000, 5, 6, 5}, {1440, 1050, 5, 6, 5},
+	{1440, 900, 5, 6, 5}, {1400, 1050, 5, 6, 5}, {1368, 768, 5, 6, 5},
+	{1280, 1024, 5, 6, 5}, {1280, 960, 5, 6, 5}, {1280, 800, 5, 6, 5},
+	{1280, 768, 5, 6, 5}, {1152, 864, 5, 6, 5}, {1024, 768, 5, 6, 5},
+	{1024, 600, 5, 6, 5}, {800, 600, 5, 6, 5}, {768, 576, 5, 6, 5},
+	{720, 400, 5, 6, 5}, {640, 480, 5, 6, 5}, {400, 300, 5, 6, 5},
+	{320, 240, 5, 6, 5}};
 
 void CGraphics_Threaded::FlushVertices(bool KeepVertices)
 {
@@ -65,7 +72,7 @@ void CGraphics_Threaded::FlushVertices(bool KeepVertices)
 	}
 }
 
-void CGraphics_Threaded::FlushTextVertices(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float* pOutlineTextColor)
+void CGraphics_Threaded::FlushTextVertices(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor)
 {
 	CCommandBuffer::SCommand_RenderTextStream Cmd;
 	int PrimType, PrimCount, NumVerts;
@@ -99,7 +106,7 @@ void CGraphics_Threaded::FlushVerticesTex3D()
 void CGraphics_Threaded::AddVertices(int Count)
 {
 	m_NumVertices += Count;
-	if((m_NumVertices + Count) >= MAX_VERTICES)
+	if((m_NumVertices + Count) >= CCommandBuffer::MAX_VERTICES)
 		FlushVertices();
 }
 
@@ -111,7 +118,7 @@ void CGraphics_Threaded::AddVertices(int Count, CCommandBuffer::SVertex *pVertic
 void CGraphics_Threaded::AddVertices(int Count, CCommandBuffer::SVertexTex3DStream *pVertices)
 {
 	m_NumVertices += Count;
-	if((m_NumVertices + Count) >= MAX_VERTICES)
+	if((m_NumVertices + Count) >= CCommandBuffer::MAX_VERTICES)
 		FlushVerticesTex3D();
 }
 
@@ -158,12 +165,12 @@ void CGraphics_Threaded::ClipEnable(int x, int y, int w, int h)
 
 	x = clamp(x, 0, ScreenWidth());
 	y = clamp(y, 0, ScreenHeight());
-	w = clamp(w, 0, ScreenWidth()-x);
-	h = clamp(h, 0, ScreenHeight()-y);
+	w = clamp(w, 0, ScreenWidth() - x);
+	h = clamp(h, 0, ScreenHeight() - y);
 
 	m_State.m_ClipEnable = true;
 	m_State.m_ClipX = x;
-	m_State.m_ClipY = ScreenHeight()-(y+h);
+	m_State.m_ClipY = ScreenHeight() - (y + h);
 	m_State.m_ClipW = w;
 	m_State.m_ClipH = h;
 }
@@ -223,7 +230,7 @@ void CGraphics_Threaded::LinesBegin()
 {
 	dbg_assert(m_Drawing == 0, "called Graphics()->LinesBegin twice");
 	m_Drawing = DRAWING_LINES;
-	SetColor(1,1,1,1);
+	SetColor(1, 1, 1, 1);
 }
 
 void CGraphics_Threaded::LinesEnd()
@@ -239,18 +246,18 @@ void CGraphics_Threaded::LinesDraw(const CLineItem *pArray, int Num)
 
 	for(int i = 0; i < Num; ++i)
 	{
-		m_aVertices[m_NumVertices + 2*i].m_Pos.x = pArray[i].m_X0;
-		m_aVertices[m_NumVertices + 2*i].m_Pos.y = pArray[i].m_Y0;
-		m_aVertices[m_NumVertices + 2*i].m_Tex = m_aTexture[0];
-		SetColor(&m_aVertices[m_NumVertices + 2*i], 0);
+		m_aVertices[m_NumVertices + 2 * i].m_Pos.x = pArray[i].m_X0;
+		m_aVertices[m_NumVertices + 2 * i].m_Pos.y = pArray[i].m_Y0;
+		m_aVertices[m_NumVertices + 2 * i].m_Tex = m_aTexture[0];
+		SetColor(&m_aVertices[m_NumVertices + 2 * i], 0);
 
-		m_aVertices[m_NumVertices + 2*i + 1].m_Pos.x = pArray[i].m_X1;
-		m_aVertices[m_NumVertices + 2*i + 1].m_Pos.y = pArray[i].m_Y1;
-		m_aVertices[m_NumVertices + 2*i + 1].m_Tex = m_aTexture[1];
-		SetColor(&m_aVertices[m_NumVertices + 2*i + 1], 1);
+		m_aVertices[m_NumVertices + 2 * i + 1].m_Pos.x = pArray[i].m_X1;
+		m_aVertices[m_NumVertices + 2 * i + 1].m_Pos.y = pArray[i].m_Y1;
+		m_aVertices[m_NumVertices + 2 * i + 1].m_Tex = m_aTexture[1];
+		SetColor(&m_aVertices[m_NumVertices + 2 * i + 1], 1);
 	}
 
-	AddVertices(2*Num);
+	AddVertices(2 * Num);
 }
 
 int CGraphics_Threaded::UnloadTexture(CTextureHandle Index)
@@ -265,16 +272,26 @@ int CGraphics_Threaded::UnloadTexture(CTextureHandle Index)
 	Cmd.m_Slot = Index;
 	m_pCommandBuffer->AddCommand(Cmd);
 
-	m_aTextureIndices[Index] = m_FirstFreeTexture;
+	m_TextureIndices[Index] = m_FirstFreeTexture;
 	m_FirstFreeTexture = Index;
 	return 0;
 }
 
+int CGraphics_Threaded::UnloadTextureNew(CTextureHandle &TextureHandle)
+{
+	int Ret = UnloadTexture(TextureHandle);
+	TextureHandle = IGraphics::CTextureHandle();
+	return Ret;
+}
+
 static int ImageFormatToTexFormat(int Format)
 {
-	if(Format == CImageInfo::FORMAT_RGB) return CCommandBuffer::TEXFORMAT_RGB;
-	if(Format == CImageInfo::FORMAT_RGBA) return CCommandBuffer::TEXFORMAT_RGBA;
-	if(Format == CImageInfo::FORMAT_ALPHA) return CCommandBuffer::TEXFORMAT_ALPHA;
+	if(Format == CImageInfo::FORMAT_RGB)
+		return CCommandBuffer::TEXFORMAT_RGB;
+	if(Format == CImageInfo::FORMAT_RGBA)
+		return CCommandBuffer::TEXFORMAT_RGBA;
+	if(Format == CImageInfo::FORMAT_ALPHA)
+		return CCommandBuffer::TEXFORMAT_ALPHA;
 	return CCommandBuffer::TEXFORMAT_RGBA;
 }
 
@@ -288,7 +305,6 @@ static int ImageFormatToPixelSize(int Format)
 	}
 }
 
-
 int CGraphics_Threaded::LoadTextureRawSub(CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData)
 {
 	CCommandBuffer::SCommand_Texture_Update Cmd;
@@ -300,7 +316,7 @@ int CGraphics_Threaded::LoadTextureRawSub(CTextureHandle TextureID, int x, int y
 	Cmd.m_Format = ImageFormatToTexFormat(Format);
 
 	// calculate memory usage
-	int MemSize = Width*Height*ImageFormatToPixelSize(Format);
+	int MemSize = Width * Height * ImageFormatToPixelSize(Format);
 
 	// copy texture data
 	void *pTmpData = malloc(MemSize);
@@ -317,6 +333,74 @@ int CGraphics_Threaded::LoadTextureRawSub(CTextureHandle TextureID, int x, int y
 	return 0;
 }
 
+IGraphics::CTextureHandle CGraphics_Threaded::LoadSpriteTextureImpl(CImageInfo &FromImageInfo, int x, int y, int w, int h)
+{
+	int bpp = ImageFormatToPixelSize(FromImageInfo.m_Format);
+
+	m_SpriteHelper.resize(w * h * bpp);
+
+	CopyTextureFromTextureBufferSub(&m_SpriteHelper[0], w, h, (uint8_t *)FromImageInfo.m_pData, FromImageInfo.m_Width, FromImageInfo.m_Height, bpp, x, y, w, h);
+
+	IGraphics::CTextureHandle RetHandle = LoadTextureRaw(w, h, FromImageInfo.m_Format, &m_SpriteHelper[0], FromImageInfo.m_Format, 0);
+
+	return RetHandle;
+}
+
+IGraphics::CTextureHandle CGraphics_Threaded::LoadSpriteTexture(CImageInfo &FromImageInfo, CDataSprite *pSprite)
+{
+	int imggx = FromImageInfo.m_Width / pSprite->m_pSet->m_Gridx;
+	int imggy = FromImageInfo.m_Height / pSprite->m_pSet->m_Gridy;
+	int x = pSprite->m_X * imggx;
+	int y = pSprite->m_Y * imggy;
+	int w = pSprite->m_W * imggx;
+	int h = pSprite->m_H * imggy;
+	return LoadSpriteTextureImpl(FromImageInfo, x, y, w, h);
+}
+
+IGraphics::CTextureHandle CGraphics_Threaded::LoadSpriteTexture(CImageInfo &FromImageInfo, client_data7::CDataSprite *pSprite)
+{
+	int imggx = FromImageInfo.m_Width / pSprite->m_pSet->m_Gridx;
+	int imggy = FromImageInfo.m_Height / pSprite->m_pSet->m_Gridy;
+	int x = pSprite->m_X * imggx;
+	int y = pSprite->m_Y * imggy;
+	int w = pSprite->m_W * imggx;
+	int h = pSprite->m_H * imggy;
+	return LoadSpriteTextureImpl(FromImageInfo, x, y, w, h);
+}
+
+bool CGraphics_Threaded::IsImageSubFullyTransparent(CImageInfo &FromImageInfo, int x, int y, int w, int h)
+{
+	if(FromImageInfo.m_Format == CImageInfo::FORMAT_ALPHA || FromImageInfo.m_Format == CImageInfo::FORMAT_RGBA)
+	{
+		uint8_t *pImgData = (uint8_t *)FromImageInfo.m_pData;
+		int bpp = ImageFormatToPixelSize(FromImageInfo.m_Format);
+		for(int iy = 0; iy < h; ++iy)
+		{
+			for(int ix = 0; ix < w; ++ix)
+			{
+				int RealOffset = (x + ix) * bpp + (y + iy) * bpp * FromImageInfo.m_Width;
+				if(pImgData[RealOffset + (bpp - 1)] > 0)
+					return false;
+			}
+		}
+
+		return true;
+	}
+	return false;
+}
+
+bool CGraphics_Threaded::IsSpriteTextureFullyTransparent(CImageInfo &FromImageInfo, client_data7::CDataSprite *pSprite)
+{
+	int imggx = FromImageInfo.m_Width / pSprite->m_pSet->m_Gridx;
+	int imggy = FromImageInfo.m_Height / pSprite->m_pSet->m_Gridy;
+	int x = pSprite->m_X * imggx;
+	int y = pSprite->m_Y * imggy;
+	int w = pSprite->m_W * imggx;
+	int h = pSprite->m_H * imggy;
+
+	return IsImageSubFullyTransparent(FromImageInfo, x, y, w, h);
+}
+
 IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName)
 {
 	// don't waste memory on texture if we are stress testing
@@ -329,7 +413,7 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Heig
 	{
 		if(Width == 0 || (Width % 16) != 0 || Height == 0 || (Height % 16) != 0)
 		{
-			SGraphicsWarning NewWarning;
+			SWarning NewWarning;
 			char aText[128];
 			aText[0] = '\0';
 			if(pTexName)
@@ -347,8 +431,20 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Heig
 
 	// grab texture
 	int Tex = m_FirstFreeTexture;
-	m_FirstFreeTexture = m_aTextureIndices[Tex];
-	m_aTextureIndices[Tex] = -1;
+	if(Tex == -1)
+	{
+		size_t CurSize = m_TextureIndices.size();
+		m_TextureIndices.resize(CurSize * 2);
+		for(size_t i = 0; i < CurSize - 1; ++i)
+		{
+			m_TextureIndices[CurSize + i] = CurSize + i + 1;
+		}
+		m_TextureIndices.back() = -1;
+
+		Tex = CurSize;
+	}
+	m_FirstFreeTexture = m_TextureIndices[Tex];
+	m_TextureIndices[Tex] = -1;
 
 	CCommandBuffer::SCommand_Texture_Create Cmd;
 	Cmd.m_Slot = Tex;
@@ -360,25 +456,25 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Heig
 
 	// flags
 	Cmd.m_Flags = 0;
-	if(Flags&IGraphics::TEXLOAD_NOMIPMAPS)
+	if(Flags & IGraphics::TEXLOAD_NOMIPMAPS)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_NOMIPMAPS;
 	if(g_Config.m_GfxTextureCompressionOld && ((Flags & IGraphics::TEXLOAD_NO_COMPRESSION) == 0))
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_COMPRESSED;
 	if(g_Config.m_GfxTextureQualityOld || Flags & TEXLOAD_NORESAMPLE)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_QUALITY;
-	if((Flags&IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE) != 0)
+	if((Flags & IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE) != 0)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE;
-	if((Flags&IGraphics::TEXLOAD_TO_3D_TEXTURE) != 0)
+	if((Flags & IGraphics::TEXLOAD_TO_3D_TEXTURE) != 0)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_3D_TEXTURE;
-	if((Flags&IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER) != 0)
+	if((Flags & IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER) != 0)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER;
-	if((Flags&IGraphics::TEXLOAD_TO_3D_TEXTURE_SINGLE_LAYER) != 0)
+	if((Flags & IGraphics::TEXLOAD_TO_3D_TEXTURE_SINGLE_LAYER) != 0)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_3D_TEXTURE_SINGLE_LAYER;
-	if((Flags&IGraphics::TEXLOAD_NO_2D_TEXTURE) != 0)
+	if((Flags & IGraphics::TEXLOAD_NO_2D_TEXTURE) != 0)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_NO_2D_TEXTURE;
 
 	// copy texture data
-	int MemSize = Width*Height*Cmd.m_PixelSize;
+	int MemSize = Width * Height * Cmd.m_PixelSize;
 	void *pTmpData = malloc(MemSize);
 	mem_copy(pTmpData, pData, MemSize);
 	Cmd.m_pData = pTmpData;
@@ -425,7 +521,7 @@ int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int Sto
 	png_t Png; // ignore_convention
 
 	// open file for reading
-	png_init(0,0); // ignore_convention
+	png_init(0, 0); // ignore_convention
 
 	IOHANDLE File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, StorageType, aCompleteFilename, sizeof(aCompleteFilename));
 	if(File)
@@ -439,7 +535,7 @@ int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int Sto
 	int Error = png_open_file(&Png, aCompleteFilename); // ignore_convention
 	if(Error != PNG_NO_ERROR)
 	{
-		dbg_msg("game/png", "failed to open file. filename='%s'", aCompleteFilename);
+		dbg_msg("game/png", "failed to open file. filename='%s', pnglite: %s", aCompleteFilename, png_error_string(Error));
 		if(Error != PNG_FILE_ERROR)
 			png_close_file(&Png); // ignore_convention
 		return 0;
@@ -452,8 +548,15 @@ int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int Sto
 		return 0;
 	}
 
-	pBuffer = (unsigned char *)malloc(Png.width * Png.height * Png.bpp); // ignore_convention
-	png_get_data(&Png, pBuffer); // ignore_convention
+	pBuffer = (unsigned char *)malloc((size_t)Png.width * Png.height * Png.bpp); // ignore_convention
+	Error = png_get_data(&Png, pBuffer); // ignore_convention
+	if(Error != PNG_NO_ERROR)
+	{
+		dbg_msg("game/png", "failed to read image. filename='%s', pnglite: %s", aCompleteFilename, png_error_string(Error));
+		free(pBuffer);
+		png_close_file(&Png); // ignore_convention
+		return 0;
+	}
 	png_close_file(&Png); // ignore_convention
 
 	pImg->m_Width = Png.width; // ignore_convention
@@ -462,8 +565,63 @@ int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int Sto
 		pImg->m_Format = CImageInfo::FORMAT_RGB;
 	else if(Png.color_type == PNG_TRUECOLOR_ALPHA) // ignore_convention
 		pImg->m_Format = CImageInfo::FORMAT_RGBA;
+	else
+	{
+		free(pBuffer);
+		return 0;
+	}
 	pImg->m_pData = pBuffer;
 	return 1;
+}
+
+bool CGraphics_Threaded::CheckImageDivisibility(const char *pFileName, CImageInfo &Img, int DivX, int DivY, bool AllowResize)
+{
+	dbg_assert(DivX != 0 && DivY != 0, "Passing 0 to this function is not allowed.");
+	bool ImageIsValid = true;
+	bool WidthBroken = Img.m_Width == 0 || (Img.m_Width % DivX) != 0;
+	bool HeightBroken = Img.m_Height == 0 || (Img.m_Height % DivY) != 0;
+	if(WidthBroken || HeightBroken)
+	{
+		SWarning NewWarning;
+		str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg), Localize("The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs."), pFileName, DivX, DivY);
+
+		m_Warnings.emplace_back(NewWarning);
+
+		ImageIsValid = false;
+	}
+
+	if(AllowResize && !ImageIsValid && Img.m_Width > 0 && Img.m_Height > 0)
+	{
+		int NewWidth = DivX;
+		int NewHeight = DivY;
+		if(WidthBroken)
+		{
+			NewWidth = maximum<int>(HighestBit(Img.m_Width), DivX);
+			NewHeight = (NewWidth / DivX) * DivY;
+		}
+		else
+		{
+			NewHeight = maximum<int>(HighestBit(Img.m_Height), DivY);
+			NewWidth = (NewHeight / DivY) * DivX;
+		}
+
+		int ColorChannelCount = 4;
+		if(Img.m_Format == CImageInfo::FORMAT_ALPHA)
+			ColorChannelCount = 1;
+		else if(Img.m_Format == CImageInfo::FORMAT_RGB)
+			ColorChannelCount = 3;
+		else if(Img.m_Format == CImageInfo::FORMAT_RGBA)
+			ColorChannelCount = 4;
+
+		uint8_t *pNewImg = ResizeImage((uint8_t *)Img.m_pData, Img.m_Width, Img.m_Height, NewWidth, NewHeight, ColorChannelCount);
+		free(Img.m_pData);
+		Img.m_pData = pNewImg;
+		Img.m_Width = NewWidth;
+		Img.m_Height = NewHeight;
+		ImageIsValid = true;
+	}
+
+	return ImageIsValid;
 }
 
 void CGraphics_Threaded::CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSourceBuffer, int FullWidth, int FullHeight, int ColorChannelCount, int SubOffsetX, int SubOffsetY, int SubCopyWidth, int SubCopyHeight)
@@ -473,6 +631,17 @@ void CGraphics_Threaded::CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSo
 		int ImgOffset = ((SubOffsetY + Y) * FullWidth * ColorChannelCount) + (SubOffsetX * ColorChannelCount);
 		int CopySize = SubCopyWidth * ColorChannelCount;
 		mem_copy(&pDestBuffer[ImgOffset], &pSourceBuffer[ImgOffset], CopySize);
+	}
+}
+
+void CGraphics_Threaded::CopyTextureFromTextureBufferSub(uint8_t *pDestBuffer, int DestWidth, int DestHeight, uint8_t *pSourceBuffer, int SrcWidth, int SrcHeight, int ColorChannelCount, int SrcSubOffsetX, int SrcSubOffsetY, int SrcSubCopyWidth, int SrcSubCopyHeight)
+{
+	for(int Y = 0; Y < SrcSubCopyHeight; ++Y)
+	{
+		int SrcImgOffset = ((SrcSubOffsetY + Y) * SrcWidth * ColorChannelCount) + (SrcSubOffsetX * ColorChannelCount);
+		int DstImgOffset = (Y * DestWidth * ColorChannelCount);
+		int CopySize = SrcSubCopyWidth * ColorChannelCount;
+		mem_copy(&pDestBuffer[DstImgOffset], &pSourceBuffer[SrcImgOffset], CopySize);
 	}
 }
 
@@ -560,7 +729,7 @@ void CGraphics_Threaded::TextQuadsBegin()
 	QuadsBegin();
 }
 
-void CGraphics_Threaded::TextQuadsEnd(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float* pOutlineTextColor)
+void CGraphics_Threaded::TextQuadsEnd(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor)
 {
 	dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->TextQuadsEnd without begin");
 	FlushTextVertices(TextureSize, TextTextureIndex, TextOutlineTextureIndex, pOutlineTextColor);
@@ -576,6 +745,23 @@ void CGraphics_Threaded::QuadsTex3DEnd()
 {
 	dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->QuadsEnd without begin");
 	FlushVerticesTex3D();
+	m_Drawing = 0;
+}
+
+void CGraphics_Threaded::TrianglesBegin()
+{
+	dbg_assert(m_Drawing == 0, "called Graphics()->TrianglesBegin twice");
+	m_Drawing = DRAWING_TRIANGLES;
+
+	QuadsSetSubset(0, 0, 1, 1);
+	QuadsSetRotation(0);
+	SetColor(1, 1, 1, 1);
+}
+
+void CGraphics_Threaded::TrianglesEnd()
+{
+	dbg_assert(m_Drawing == DRAWING_TRIANGLES, "called Graphics()->TrianglesEnd without begin");
+	FlushVertices();
 	m_Drawing = 0;
 }
 
@@ -598,10 +784,12 @@ void CGraphics_Threaded::QuadsSetRotation(float Angle)
 	m_Rotation = Angle;
 }
 
-inline void clampf(float& Value, float Min, float Max)
+inline void clampf(float &Value, float Min, float Max)
 {
-	if(Value > Max) Value = Max;
-	else if(Value < Min) Value = Min;
+	if(Value > Max)
+		Value = Max;
+	else if(Value < Min)
+		Value = Min;
 }
 
 void CGraphics_Threaded::SetColorVertex(const CColorVertex *pArray, int Num)
@@ -615,10 +803,10 @@ void CGraphics_Threaded::SetColorVertex(const CColorVertex *pArray, int Num)
 		clampf(g, 0.f, 1.f);
 		clampf(b, 0.f, 1.f);
 		clampf(a, 0.f, 1.f);
-		m_aColor[pArray[i].m_Index].r = (unsigned char)(r*255.f);
-		m_aColor[pArray[i].m_Index].g = (unsigned char)(g*255.f);
-		m_aColor[pArray[i].m_Index].b = (unsigned char)(b*255.f);
-		m_aColor[pArray[i].m_Index].a = (unsigned char)(a*255.f);
+		m_aColor[pArray[i].m_Index].r = (unsigned char)(r * 255.f);
+		m_aColor[pArray[i].m_Index].g = (unsigned char)(g * 255.f);
+		m_aColor[pArray[i].m_Index].b = (unsigned char)(b * 255.f);
+		m_aColor[pArray[i].m_Index].a = (unsigned char)(a * 255.f);
 	}
 }
 
@@ -633,12 +821,12 @@ void CGraphics_Threaded::SetColor(float r, float g, float b, float a)
 	b *= 255.f;
 	a *= 255.f;
 
-	for(int i = 0; i < 4; ++i)
+	for(auto &Color : m_aColor)
 	{
-		m_aColor[i].r = (unsigned char)(r);
-		m_aColor[i].g = (unsigned char)(g);
-		m_aColor[i].b = (unsigned char)(b);
-		m_aColor[i].a = (unsigned char)(a);
+		Color.r = (unsigned char)(r);
+		Color.g = (unsigned char)(g);
+		Color.b = (unsigned char)(b);
+		Color.a = (unsigned char)(a);
 	}
 }
 
@@ -664,10 +852,10 @@ void CGraphics_Threaded::ChangeColorOfCurrentQuadVertices(float r, float g, floa
 	clampf(g, 0.f, 1.f);
 	clampf(b, 0.f, 1.f);
 	clampf(a, 0.f, 1.f);
-	m_aColor[0].r = (unsigned char)(r*255.f);
-	m_aColor[0].g = (unsigned char)(g*255.f);
-	m_aColor[0].b = (unsigned char)(b*255.f);
-	m_aColor[0].a = (unsigned char)(a*255.f);
+	m_aColor[0].r = (unsigned char)(r * 255.f);
+	m_aColor[0].g = (unsigned char)(g * 255.f);
+	m_aColor[0].b = (unsigned char)(b * 255.f);
+	m_aColor[0].a = (unsigned char)(a * 255.f);
 
 	for(int i = 0; i < m_NumVertices; ++i)
 	{
@@ -735,11 +923,15 @@ void CGraphics_Threaded::ChangeColorOfQuadVertices(int QuadOffset, unsigned char
 
 void CGraphics_Threaded::QuadsSetSubset(float TlU, float TlV, float BrU, float BrV)
 {
-	m_aTexture[0].u = TlU;	m_aTexture[1].u = BrU;
-	m_aTexture[0].v = TlV;	m_aTexture[1].v = TlV;
+	m_aTexture[0].u = TlU;
+	m_aTexture[1].u = BrU;
+	m_aTexture[0].v = TlV;
+	m_aTexture[1].v = TlV;
 
-	m_aTexture[3].u = TlU;	m_aTexture[2].u = BrU;
-	m_aTexture[3].v = BrV;	m_aTexture[2].v = BrV;
+	m_aTexture[3].u = TlU;
+	m_aTexture[2].u = BrU;
+	m_aTexture[3].v = BrV;
+	m_aTexture[2].v = BrV;
 }
 
 void CGraphics_Threaded::QuadsSetSubsetFree(
@@ -761,8 +953,8 @@ void CGraphics_Threaded::QuadsDraw(CQuadItem *pArray, int Num)
 {
 	for(int i = 0; i < Num; ++i)
 	{
-		pArray[i].m_X -= pArray[i].m_Width/2;
-		pArray[i].m_Y -= pArray[i].m_Height/2;
+		pArray[i].m_X -= pArray[i].m_Width / 2;
+		pArray[i].m_Y -= pArray[i].m_Height / 2;
 	}
 
 	QuadsDrawTL(pArray, Num);
@@ -803,71 +995,71 @@ void CGraphics_Threaded::QuadsTex3DDrawTL(const CQuadItem *pArray, int Num)
 
 void CGraphics_Threaded::QuadsDrawFreeform(const CFreeformItem *pArray, int Num)
 {
-	dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->QuadsDrawFreeform without begin");
+	dbg_assert(m_Drawing == DRAWING_QUADS || m_Drawing == DRAWING_TRIANGLES, "called Graphics()->QuadsDrawFreeform without begin");
 
-	if(g_Config.m_GfxQuadAsTriangle && !m_IsNewOpenGL)
+	if((g_Config.m_GfxQuadAsTriangle && !m_IsNewOpenGL) || m_Drawing == DRAWING_TRIANGLES)
 	{
 		for(int i = 0; i < Num; ++i)
 		{
-			m_aVertices[m_NumVertices + 6*i].m_Pos.x = pArray[i].m_X0;
-			m_aVertices[m_NumVertices + 6*i].m_Pos.y = pArray[i].m_Y0;
-			m_aVertices[m_NumVertices + 6*i].m_Tex = m_aTexture[0];
-			SetColor(&m_aVertices[m_NumVertices + 6*i], 0);
+			m_aVertices[m_NumVertices + 6 * i].m_Pos.x = pArray[i].m_X0;
+			m_aVertices[m_NumVertices + 6 * i].m_Pos.y = pArray[i].m_Y0;
+			m_aVertices[m_NumVertices + 6 * i].m_Tex = m_aTexture[0];
+			SetColor(&m_aVertices[m_NumVertices + 6 * i], 0);
 
-			m_aVertices[m_NumVertices + 6*i + 1].m_Pos.x = pArray[i].m_X1;
-			m_aVertices[m_NumVertices + 6*i + 1].m_Pos.y = pArray[i].m_Y1;
-			m_aVertices[m_NumVertices + 6*i + 1].m_Tex = m_aTexture[1];
-			SetColor(&m_aVertices[m_NumVertices + 6*i + 1], 1);
+			m_aVertices[m_NumVertices + 6 * i + 1].m_Pos.x = pArray[i].m_X1;
+			m_aVertices[m_NumVertices + 6 * i + 1].m_Pos.y = pArray[i].m_Y1;
+			m_aVertices[m_NumVertices + 6 * i + 1].m_Tex = m_aTexture[1];
+			SetColor(&m_aVertices[m_NumVertices + 6 * i + 1], 1);
 
-			m_aVertices[m_NumVertices + 6*i + 2].m_Pos.x = pArray[i].m_X3;
-			m_aVertices[m_NumVertices + 6*i + 2].m_Pos.y = pArray[i].m_Y3;
-			m_aVertices[m_NumVertices + 6*i + 2].m_Tex = m_aTexture[3];
-			SetColor(&m_aVertices[m_NumVertices + 6*i + 2], 3);
+			m_aVertices[m_NumVertices + 6 * i + 2].m_Pos.x = pArray[i].m_X3;
+			m_aVertices[m_NumVertices + 6 * i + 2].m_Pos.y = pArray[i].m_Y3;
+			m_aVertices[m_NumVertices + 6 * i + 2].m_Tex = m_aTexture[3];
+			SetColor(&m_aVertices[m_NumVertices + 6 * i + 2], 3);
 
-			m_aVertices[m_NumVertices + 6*i + 3].m_Pos.x = pArray[i].m_X0;
-			m_aVertices[m_NumVertices + 6*i + 3].m_Pos.y = pArray[i].m_Y0;
-			m_aVertices[m_NumVertices + 6*i + 3].m_Tex = m_aTexture[0];
-			SetColor(&m_aVertices[m_NumVertices + 6*i + 3], 0);
+			m_aVertices[m_NumVertices + 6 * i + 3].m_Pos.x = pArray[i].m_X0;
+			m_aVertices[m_NumVertices + 6 * i + 3].m_Pos.y = pArray[i].m_Y0;
+			m_aVertices[m_NumVertices + 6 * i + 3].m_Tex = m_aTexture[0];
+			SetColor(&m_aVertices[m_NumVertices + 6 * i + 3], 0);
 
-			m_aVertices[m_NumVertices + 6*i + 4].m_Pos.x = pArray[i].m_X3;
-			m_aVertices[m_NumVertices + 6*i + 4].m_Pos.y = pArray[i].m_Y3;
-			m_aVertices[m_NumVertices + 6*i + 4].m_Tex = m_aTexture[3];
-			SetColor(&m_aVertices[m_NumVertices + 6*i + 4], 3);
+			m_aVertices[m_NumVertices + 6 * i + 4].m_Pos.x = pArray[i].m_X3;
+			m_aVertices[m_NumVertices + 6 * i + 4].m_Pos.y = pArray[i].m_Y3;
+			m_aVertices[m_NumVertices + 6 * i + 4].m_Tex = m_aTexture[3];
+			SetColor(&m_aVertices[m_NumVertices + 6 * i + 4], 3);
 
-			m_aVertices[m_NumVertices + 6*i + 5].m_Pos.x = pArray[i].m_X2;
-			m_aVertices[m_NumVertices + 6*i + 5].m_Pos.y = pArray[i].m_Y2;
-			m_aVertices[m_NumVertices + 6*i + 5].m_Tex = m_aTexture[2];
-			SetColor(&m_aVertices[m_NumVertices + 6*i + 5], 2);
+			m_aVertices[m_NumVertices + 6 * i + 5].m_Pos.x = pArray[i].m_X2;
+			m_aVertices[m_NumVertices + 6 * i + 5].m_Pos.y = pArray[i].m_Y2;
+			m_aVertices[m_NumVertices + 6 * i + 5].m_Tex = m_aTexture[2];
+			SetColor(&m_aVertices[m_NumVertices + 6 * i + 5], 2);
 		}
 
-		AddVertices(3*2*Num);
+		AddVertices(3 * 2 * Num);
 	}
 	else
 	{
 		for(int i = 0; i < Num; ++i)
 		{
-			m_aVertices[m_NumVertices + 4*i].m_Pos.x = pArray[i].m_X0;
-			m_aVertices[m_NumVertices + 4*i].m_Pos.y = pArray[i].m_Y0;
-			m_aVertices[m_NumVertices + 4*i].m_Tex = m_aTexture[0];
-			SetColor(&m_aVertices[m_NumVertices + 4*i], 0);
+			m_aVertices[m_NumVertices + 4 * i].m_Pos.x = pArray[i].m_X0;
+			m_aVertices[m_NumVertices + 4 * i].m_Pos.y = pArray[i].m_Y0;
+			m_aVertices[m_NumVertices + 4 * i].m_Tex = m_aTexture[0];
+			SetColor(&m_aVertices[m_NumVertices + 4 * i], 0);
 
-			m_aVertices[m_NumVertices + 4*i + 1].m_Pos.x = pArray[i].m_X1;
-			m_aVertices[m_NumVertices + 4*i + 1].m_Pos.y = pArray[i].m_Y1;
-			m_aVertices[m_NumVertices + 4*i + 1].m_Tex = m_aTexture[1];
-			SetColor(&m_aVertices[m_NumVertices + 4*i + 1], 1);
+			m_aVertices[m_NumVertices + 4 * i + 1].m_Pos.x = pArray[i].m_X1;
+			m_aVertices[m_NumVertices + 4 * i + 1].m_Pos.y = pArray[i].m_Y1;
+			m_aVertices[m_NumVertices + 4 * i + 1].m_Tex = m_aTexture[1];
+			SetColor(&m_aVertices[m_NumVertices + 4 * i + 1], 1);
 
-			m_aVertices[m_NumVertices + 4*i + 2].m_Pos.x = pArray[i].m_X3;
-			m_aVertices[m_NumVertices + 4*i + 2].m_Pos.y = pArray[i].m_Y3;
-			m_aVertices[m_NumVertices + 4*i + 2].m_Tex = m_aTexture[3];
-			SetColor(&m_aVertices[m_NumVertices + 4*i + 2], 3);
+			m_aVertices[m_NumVertices + 4 * i + 2].m_Pos.x = pArray[i].m_X3;
+			m_aVertices[m_NumVertices + 4 * i + 2].m_Pos.y = pArray[i].m_Y3;
+			m_aVertices[m_NumVertices + 4 * i + 2].m_Tex = m_aTexture[3];
+			SetColor(&m_aVertices[m_NumVertices + 4 * i + 2], 3);
 
-			m_aVertices[m_NumVertices + 4*i + 3].m_Pos.x = pArray[i].m_X2;
-			m_aVertices[m_NumVertices + 4*i + 3].m_Pos.y = pArray[i].m_Y2;
-			m_aVertices[m_NumVertices + 4*i + 3].m_Tex = m_aTexture[2];
-			SetColor(&m_aVertices[m_NumVertices + 4*i + 3], 2);
+			m_aVertices[m_NumVertices + 4 * i + 3].m_Pos.x = pArray[i].m_X2;
+			m_aVertices[m_NumVertices + 4 * i + 3].m_Pos.y = pArray[i].m_Y2;
+			m_aVertices[m_NumVertices + 4 * i + 3].m_Tex = m_aTexture[2];
+			SetColor(&m_aVertices[m_NumVertices + 4 * i + 3], 2);
 		}
 
-		AddVertices(4*Num);
+		AddVertices(4 * Num);
 	}
 }
 
@@ -888,19 +1080,19 @@ void CGraphics_Threaded::QuadsText(float x, float y, float Size, const char *pTe
 		else
 		{
 			QuadsSetSubset(
-				(c%16)/16.0f,
-				(c/16)/16.0f,
-				(c%16)/16.0f+1.0f/16.0f,
-				(c/16)/16.0f+1.0f/16.0f);
+				(c % 16) / 16.0f,
+				(c / 16) / 16.0f,
+				(c % 16) / 16.0f + 1.0f / 16.0f,
+				(c / 16) / 16.0f + 1.0f / 16.0f);
 
 			CQuadItem QuadItem(x, y, Size, Size);
 			QuadsDrawTL(&QuadItem, 1);
-			x += Size/2;
+			x += Size / 2;
 		}
 	}
 }
 
-void CGraphics_Threaded::RenderTileLayer(int BufferContainerIndex, float *pColor, char** pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffet)
+void CGraphics_Threaded::RenderTileLayer(int BufferContainerIndex, float *pColor, char **pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffet)
 {
 	if(NumIndicesOffet == 0)
 		return;
@@ -912,21 +1104,21 @@ void CGraphics_Threaded::RenderTileLayer(int BufferContainerIndex, float *pColor
 	Cmd.m_BufferContainerIndex = BufferContainerIndex;
 	mem_copy(&Cmd.m_Color, pColor, sizeof(Cmd.m_Color));
 
-	void *Data = m_pCommandBuffer->AllocData((sizeof(char*) + sizeof(unsigned int))*NumIndicesOffet);
+	void *Data = m_pCommandBuffer->AllocData((sizeof(char *) + sizeof(unsigned int)) * NumIndicesOffet);
 	if(Data == 0x0)
 	{
 		// kick command buffer and try again
 		KickCommandBuffer();
 
-		void *Data = m_pCommandBuffer->AllocData((sizeof(char*) + sizeof(unsigned int))*NumIndicesOffet);
+		void *Data = m_pCommandBuffer->AllocData((sizeof(char *) + sizeof(unsigned int)) * NumIndicesOffet);
 		if(Data == 0x0)
 		{
 			dbg_msg("graphics", "failed to allocate data for vertices");
 			return;
 		}
 	}
-	Cmd.m_pIndicesOffsets = (char**)Data;
-	Cmd.m_pDrawCount = (unsigned int*)(((char*)Data) + (sizeof(char*)*NumIndicesOffet));
+	Cmd.m_pIndicesOffsets = (char **)Data;
+	Cmd.m_pDrawCount = (unsigned int *)(((char *)Data) + (sizeof(char *) * NumIndicesOffet));
 
 	// check if we have enough free memory in the commandbuffer
 	if(!m_pCommandBuffer->AddCommand(Cmd))
@@ -934,14 +1126,14 @@ void CGraphics_Threaded::RenderTileLayer(int BufferContainerIndex, float *pColor
 		// kick command buffer and try again
 		KickCommandBuffer();
 
-		Data = m_pCommandBuffer->AllocData((sizeof(char*) + sizeof(unsigned int))*NumIndicesOffet);
+		Data = m_pCommandBuffer->AllocData((sizeof(char *) + sizeof(unsigned int)) * NumIndicesOffet);
 		if(Data == 0x0)
 		{
 			dbg_msg("graphics", "failed to allocate data for vertices");
 			return;
 		}
-		Cmd.m_pIndicesOffsets = (char**)Data;
-		Cmd.m_pDrawCount = (unsigned int*)(((char*)Data) + (sizeof(char*)*NumIndicesOffet));
+		Cmd.m_pIndicesOffsets = (char **)Data;
+		Cmd.m_pDrawCount = (unsigned int *)(((char *)Data) + (sizeof(char *) * NumIndicesOffet));
 
 		if(!m_pCommandBuffer->AddCommand(Cmd))
 		{
@@ -950,9 +1142,8 @@ void CGraphics_Threaded::RenderTileLayer(int BufferContainerIndex, float *pColor
 		}
 	}
 
-
-	mem_copy(Cmd.m_pIndicesOffsets, pOffsets, sizeof(char*)*NumIndicesOffet);
-	mem_copy(Cmd.m_pDrawCount, IndicedVertexDrawNum, sizeof(unsigned int)*NumIndicesOffet);
+	mem_copy(Cmd.m_pIndicesOffsets, pOffsets, sizeof(char *) * NumIndicesOffet);
+	mem_copy(Cmd.m_pDrawCount, IndicedVertexDrawNum, sizeof(unsigned int) * NumIndicesOffet);
 
 	//todo max indices group check!!
 }
@@ -1023,7 +1214,7 @@ void CGraphics_Threaded::RenderBorderTileLines(int BufferContainerIndex, float *
 	}
 }
 
-void CGraphics_Threaded::RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo* pQuadInfo, int QuadNum)
+void CGraphics_Threaded::RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, int QuadNum)
 {
 	if(QuadNum == 0)
 		return;
@@ -1034,7 +1225,7 @@ void CGraphics_Threaded::RenderQuadLayer(int BufferContainerIndex, SQuadRenderIn
 	Cmd.m_QuadNum = QuadNum;
 	Cmd.m_BufferContainerIndex = BufferContainerIndex;
 
-	Cmd.m_pQuadInfo = (SQuadRenderInfo*)AllocCommandBufferData(QuadNum * sizeof(SQuadRenderInfo));
+	Cmd.m_pQuadInfo = (SQuadRenderInfo *)AllocCommandBufferData(QuadNum * sizeof(SQuadRenderInfo));
 	if(Cmd.m_pQuadInfo == 0x0)
 		return;
 
@@ -1044,7 +1235,7 @@ void CGraphics_Threaded::RenderQuadLayer(int BufferContainerIndex, SQuadRenderIn
 		// kick command buffer and try again
 		KickCommandBuffer();
 
-		Cmd.m_pQuadInfo = (SQuadRenderInfo*)m_pCommandBuffer->AllocData(QuadNum * sizeof(SQuadRenderInfo));
+		Cmd.m_pQuadInfo = (SQuadRenderInfo *)m_pCommandBuffer->AllocData(QuadNum * sizeof(SQuadRenderInfo));
 		if(Cmd.m_pQuadInfo == 0x0)
 		{
 			dbg_msg("graphics", "failed to allocate data for the quad info");
@@ -1061,7 +1252,7 @@ void CGraphics_Threaded::RenderQuadLayer(int BufferContainerIndex, SQuadRenderIn
 	mem_copy(Cmd.m_pQuadInfo, pQuadInfo, sizeof(SQuadRenderInfo) * QuadNum);
 }
 
-void CGraphics_Threaded::RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, float* pTextColor, float* pTextoutlineColor)
+void CGraphics_Threaded::RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, float *pTextColor, float *pTextoutlineColor)
 {
 	if(BufferContainerIndex == -1)
 		return;
@@ -1112,7 +1303,7 @@ void CGraphics_Threaded::QuadContainerUpload(int ContainerIndex)
 {
 	if(IsQuadContainerBufferingEnabled())
 	{
-		SQuadContainer& Container = m_QuadContainers[ContainerIndex];
+		SQuadContainer &Container = m_QuadContainers[ContainerIndex];
 		if(Container.m_Quads.size() > 0)
 		{
 			if(Container.m_QuadBufferObjectIndex == -1)
@@ -1132,7 +1323,7 @@ void CGraphics_Threaded::QuadContainerUpload(int ContainerIndex)
 				Info.m_Stride = sizeof(CCommandBuffer::SVertex);
 
 				Info.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
-				SBufferContainerInfo::SAttribute* pAttr = &Info.m_Attributes.back();
+				SBufferContainerInfo::SAttribute *pAttr = &Info.m_Attributes.back();
 				pAttr->m_DataTypeCount = 2;
 				pAttr->m_FuncType = 0;
 				pAttr->m_Normalized = false;
@@ -1144,7 +1335,7 @@ void CGraphics_Threaded::QuadContainerUpload(int ContainerIndex)
 				pAttr->m_DataTypeCount = 2;
 				pAttr->m_FuncType = 0;
 				pAttr->m_Normalized = false;
-				pAttr->m_pOffset = (void*)(sizeof(float) * 2);
+				pAttr->m_pOffset = (void *)(sizeof(float) * 2);
 				pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
 				pAttr->m_VertBufferBindingIndex = Container.m_QuadBufferObjectIndex;
 				Info.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
@@ -1152,7 +1343,7 @@ void CGraphics_Threaded::QuadContainerUpload(int ContainerIndex)
 				pAttr->m_DataTypeCount = 4;
 				pAttr->m_FuncType = 0;
 				pAttr->m_Normalized = true;
-				pAttr->m_pOffset = (void*)(sizeof(float) * 2 + sizeof(float) * 2);
+				pAttr->m_pOffset = (void *)(sizeof(float) * 2 + sizeof(float) * 2);
 				pAttr->m_Type = GRAPHICS_TYPE_UNSIGNED_BYTE;
 				pAttr->m_VertBufferBindingIndex = Container.m_QuadBufferObjectIndex;
 
@@ -1164,15 +1355,15 @@ void CGraphics_Threaded::QuadContainerUpload(int ContainerIndex)
 
 void CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CQuadItem *pArray, int Num)
 {
-	SQuadContainer& Container = m_QuadContainers[ContainerIndex];
+	SQuadContainer &Container = m_QuadContainers[ContainerIndex];
 
-	if((int)Container.m_Quads.size() > Num + CCommandBuffer::MAX_VERTICES)
+	if((int)Container.m_Quads.size() > Num + CCommandBuffer::CCommandBuffer::MAX_VERTICES)
 		return;
 
 	for(int i = 0; i < Num; ++i)
 	{
 		Container.m_Quads.push_back(SQuadContainer::SQuad());
-		SQuadContainer::SQuad& Quad = Container.m_Quads.back();
+		SQuadContainer::SQuad &Quad = Container.m_Quads.back();
 
 		Quad.m_aVertices[0].m_Pos.x = pArray[i].m_X;
 		Quad.m_aVertices[0].m_Pos.y = pArray[i].m_Y;
@@ -1209,15 +1400,15 @@ void CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CQuadItem *pA
 
 void CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CFreeformItem *pArray, int Num)
 {
-	SQuadContainer& Container = m_QuadContainers[ContainerIndex];
+	SQuadContainer &Container = m_QuadContainers[ContainerIndex];
 
-	if((int)Container.m_Quads.size() > Num + CCommandBuffer::MAX_VERTICES)
+	if((int)Container.m_Quads.size() > Num + CCommandBuffer::CCommandBuffer::MAX_VERTICES)
 		return;
 
 	for(int i = 0; i < Num; ++i)
 	{
 		Container.m_Quads.push_back(SQuadContainer::SQuad());
-		SQuadContainer::SQuad& Quad = Container.m_Quads.back();
+		SQuadContainer::SQuad &Quad = Container.m_Quads.back();
 
 		Quad.m_aVertices[0].m_Pos.x = pArray[i].m_X0;
 		Quad.m_aVertices[0].m_Pos.y = pArray[i].m_Y0;
@@ -1245,7 +1436,7 @@ void CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CFreeformItem
 
 void CGraphics_Threaded::QuadContainerReset(int ContainerIndex)
 {
-	SQuadContainer& Container = m_QuadContainers[ContainerIndex];
+	SQuadContainer &Container = m_QuadContainers[ContainerIndex];
 	if(IsQuadContainerBufferingEnabled())
 	{
 		if(Container.m_QuadBufferContainerIndex != -1)
@@ -1271,7 +1462,7 @@ void CGraphics_Threaded::RenderQuadContainer(int ContainerIndex, int QuadDrawNum
 
 void CGraphics_Threaded::RenderQuadContainer(int ContainerIndex, int QuadOffset, int QuadDrawNum)
 {
-	SQuadContainer& Container = m_QuadContainers[ContainerIndex];
+	SQuadContainer &Container = m_QuadContainers[ContainerIndex];
 
 	if(QuadDrawNum == -1)
 		QuadDrawNum = (int)Container.m_Quads.size() - QuadOffset;
@@ -1284,10 +1475,12 @@ void CGraphics_Threaded::RenderQuadContainer(int ContainerIndex, int QuadOffset,
 		if(Container.m_QuadBufferContainerIndex == -1)
 			return;
 
+		WrapClamp();
+
 		CCommandBuffer::SCommand_RenderQuadContainer Cmd;
 		Cmd.m_State = m_State;
 		Cmd.m_DrawNum = (unsigned int)QuadDrawNum * 6;
-		Cmd.m_pOffset = (void*)(QuadOffset * 6 * sizeof(unsigned int));
+		Cmd.m_pOffset = (void *)(QuadOffset * 6 * sizeof(unsigned int));
 		Cmd.m_BufferContainerIndex = Container.m_QuadBufferContainerIndex;
 
 		// check if we have enough free memory in the commandbuffer
@@ -1309,7 +1502,7 @@ void CGraphics_Threaded::RenderQuadContainer(int ContainerIndex, int QuadOffset,
 		{
 			for(int i = 0; i < QuadDrawNum; ++i)
 			{
-				SQuadContainer::SQuad& Quad = Container.m_Quads[QuadOffset + i];
+				SQuadContainer::SQuad &Quad = Container.m_Quads[QuadOffset + i];
 				m_aVertices[i * 6] = Quad.m_aVertices[0];
 				m_aVertices[i * 6 + 1] = Quad.m_aVertices[1];
 				m_aVertices[i * 6 + 2] = Quad.m_aVertices[2];
@@ -1325,25 +1518,32 @@ void CGraphics_Threaded::RenderQuadContainer(int ContainerIndex, int QuadOffset,
 			m_NumVertices += 4 * QuadDrawNum;
 		}
 		m_Drawing = DRAWING_QUADS;
+		WrapClamp();
 		FlushVertices(false);
 		m_Drawing = 0;
 	}
+	WrapNormal();
 }
 
-void CGraphics_Threaded::RenderQuadContainerAsSprite(int ContainerIndex, int QuadOffset, float X, float Y, float ScaleX, float ScaleY)
+void CGraphics_Threaded::RenderQuadContainerEx(int ContainerIndex, int QuadOffset, int QuadDrawNum, float X, float Y, float ScaleX, float ScaleY)
 {
-	SQuadContainer& Container = m_QuadContainers[ContainerIndex];
+	SQuadContainer &Container = m_QuadContainers[ContainerIndex];
 
 	if((int)Container.m_Quads.size() < QuadOffset + 1)
 		return;
+
+	if(QuadDrawNum == -1)
+		QuadDrawNum = (int)Container.m_Quads.size() - QuadOffset;
 
 	if(IsQuadContainerBufferingEnabled())
 	{
 		if(Container.m_QuadBufferContainerIndex == -1)
 			return;
 
-		SQuadContainer::SQuad& Quad = Container.m_Quads[QuadOffset];
-		CCommandBuffer::SCommand_RenderQuadContainerAsSprite Cmd;
+		SQuadContainer::SQuad &Quad = Container.m_Quads[QuadOffset];
+		CCommandBuffer::SCommand_RenderQuadContainerEx Cmd;
+
+		WrapClamp();
 
 		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 		GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
@@ -1351,8 +1551,8 @@ void CGraphics_Threaded::RenderQuadContainerAsSprite(int ContainerIndex, int Qua
 		Cmd.m_State = m_State;
 		MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 
-		Cmd.m_DrawNum = 1 * 6;
-		Cmd.m_pOffset = (void*)(QuadOffset * 6 * sizeof(unsigned int));
+		Cmd.m_DrawNum = QuadDrawNum * 6;
+		Cmd.m_pOffset = (void *)(QuadOffset * 6 * sizeof(unsigned int));
 		Cmd.m_BufferContainerIndex = Container.m_QuadBufferContainerIndex;
 
 		Cmd.m_VertexColor.r = (float)m_aColor[0].r / 255.f;
@@ -1374,7 +1574,7 @@ void CGraphics_Threaded::RenderQuadContainerAsSprite(int ContainerIndex, int Qua
 
 			if(!m_pCommandBuffer->AddCommand(Cmd))
 			{
-				dbg_msg("graphics", "failed to allocate memory for render quad container sprite");
+				dbg_msg("graphics", "failed to allocate memory for render quad container extended");
 				return;
 			}
 		}
@@ -1383,82 +1583,86 @@ void CGraphics_Threaded::RenderQuadContainerAsSprite(int ContainerIndex, int Qua
 	{
 		if(g_Config.m_GfxQuadAsTriangle)
 		{
-			SQuadContainer::SQuad& Quad = Container.m_Quads[QuadOffset];
-			m_aVertices[0] = Quad.m_aVertices[0];
-			m_aVertices[1] = Quad.m_aVertices[1];
-			m_aVertices[2] = Quad.m_aVertices[2];
-			m_aVertices[3] = Quad.m_aVertices[0];
-			m_aVertices[4] = Quad.m_aVertices[2];
-			m_aVertices[5] = Quad.m_aVertices[3];
-
-			for(int i = 0; i < 6; ++i)
+			for(int i = 0; i < QuadDrawNum; ++i)
 			{
-				m_aVertices[i].m_Pos.x *= ScaleX;
-				m_aVertices[i].m_Pos.y *= ScaleY;
+				SQuadContainer::SQuad &Quad = Container.m_Quads[QuadOffset + i];
+				m_aVertices[i * 6 + 0] = Quad.m_aVertices[0];
+				m_aVertices[i * 6 + 1] = Quad.m_aVertices[1];
+				m_aVertices[i * 6 + 2] = Quad.m_aVertices[2];
+				m_aVertices[i * 6 + 3] = Quad.m_aVertices[0];
+				m_aVertices[i * 6 + 4] = Quad.m_aVertices[2];
+				m_aVertices[i * 6 + 5] = Quad.m_aVertices[3];
+
+				for(int n = 0; n < 6; ++n)
+				{
+					m_aVertices[i * 6 + n].m_Pos.x *= ScaleX;
+					m_aVertices[i * 6 + n].m_Pos.y *= ScaleY;
+
+					SetColor(&m_aVertices[i * 6 + n], 0);
+				}
+
+				if(m_Rotation != 0)
+				{
+					CCommandBuffer::SPoint Center;
+					Center.x = m_aVertices[i * 6 + 0].m_Pos.x + (m_aVertices[i * 6 + 1].m_Pos.x - m_aVertices[i * 6 + 0].m_Pos.x) / 2.f;
+					Center.y = m_aVertices[i * 6 + 0].m_Pos.y + (m_aVertices[i * 6 + 2].m_Pos.y - m_aVertices[i * 6 + 0].m_Pos.y) / 2.f;
+
+					Rotate(Center, &m_aVertices[i * 6 + 0], 6);
+				}
+
+				for(int n = 0; n < 6; ++n)
+				{
+					m_aVertices[i * 6 + n].m_Pos.x += X;
+					m_aVertices[i * 6 + n].m_Pos.y += Y;
+				}
+				m_NumVertices += 6;
 			}
-
-			SetColor(&m_aVertices[0], 0);
-			SetColor(&m_aVertices[1], 0);
-			SetColor(&m_aVertices[2], 0);
-			SetColor(&m_aVertices[3], 0);
-			SetColor(&m_aVertices[4], 0);
-			SetColor(&m_aVertices[5], 0);
-
-			if(m_Rotation != 0)
-			{
-				CCommandBuffer::SPoint Center;
-				Center.x = m_aVertices[0].m_Pos.x + (m_aVertices[1].m_Pos.x - m_aVertices[0].m_Pos.x) / 2.f;
-				Center.y = m_aVertices[0].m_Pos.y + (m_aVertices[2].m_Pos.y - m_aVertices[0].m_Pos.y) / 2.f;
-
-				Rotate(Center, &m_aVertices[0], 6);
-			}
-
-			for(int i = 0; i < 6; ++i)
-			{
-				m_aVertices[i].m_Pos.x += X;
-				m_aVertices[i].m_Pos.y += Y;
-			}
-			m_NumVertices += 6;
 		}
 		else
 		{
-			mem_copy(m_aVertices, &Container.m_Quads[QuadOffset], sizeof(CCommandBuffer::SVertex) * 4 * 1);
-			SetColor(&m_aVertices[0], 0);
-			SetColor(&m_aVertices[1], 0);
-			SetColor(&m_aVertices[2], 0);
-			SetColor(&m_aVertices[3], 0);
-
-			for(int i = 0; i < 4; ++i)
+			mem_copy(m_aVertices, &Container.m_Quads[QuadOffset], sizeof(CCommandBuffer::SVertex) * 4 * QuadDrawNum);
+			for(int i = 0; i < QuadDrawNum; ++i)
 			{
-				m_aVertices[i].m_Pos.x *= ScaleX;
-				m_aVertices[i].m_Pos.y *= ScaleY;
-			}
+				for(int n = 0; n < 4; ++n)
+				{
+					m_aVertices[i * 4 + n].m_Pos.x *= ScaleX;
+					m_aVertices[i * 4 + n].m_Pos.y *= ScaleY;
+					SetColor(&m_aVertices[i * 4 + n], 0);
+				}
 
-			if(m_Rotation != 0)
-			{
-				CCommandBuffer::SPoint Center;
-				Center.x = m_aVertices[0].m_Pos.x + (m_aVertices[1].m_Pos.x - m_aVertices[0].m_Pos.x) / 2.f;
-				Center.y = m_aVertices[0].m_Pos.y + (m_aVertices[2].m_Pos.y - m_aVertices[0].m_Pos.y) / 2.f;
+				if(m_Rotation != 0)
+				{
+					CCommandBuffer::SPoint Center;
+					Center.x = m_aVertices[i * 4 + 0].m_Pos.x + (m_aVertices[i * 4 + 1].m_Pos.x - m_aVertices[i * 4 + 0].m_Pos.x) / 2.f;
+					Center.y = m_aVertices[i * 4 + 0].m_Pos.y + (m_aVertices[i * 4 + 2].m_Pos.y - m_aVertices[i * 4 + 0].m_Pos.y) / 2.f;
 
-				Rotate(Center, &m_aVertices[0], 4);
-			}
+					Rotate(Center, &m_aVertices[i * 4 + 0], 4);
+				}
 
-			for(int i = 0; i < 4; ++i)
-			{
-				m_aVertices[i].m_Pos.x += X;
-				m_aVertices[i].m_Pos.y += Y;
+				for(int n = 0; n < 4; ++n)
+				{
+					m_aVertices[i * 4 + n].m_Pos.x += X;
+					m_aVertices[i * 4 + n].m_Pos.y += Y;
+				}
+				m_NumVertices += 4;
 			}
-			m_NumVertices += 4;
 		}
 		m_Drawing = DRAWING_QUADS;
+		WrapClamp();
 		FlushVertices(false);
 		m_Drawing = 0;
 	}
+	WrapNormal();
+}
+
+void CGraphics_Threaded::RenderQuadContainerAsSprite(int ContainerIndex, int QuadOffset, float X, float Y, float ScaleX, float ScaleY)
+{
+	RenderQuadContainerEx(ContainerIndex, QuadOffset, 1, X, Y, ScaleX, ScaleY);
 }
 
 void CGraphics_Threaded::RenderQuadContainerAsSpriteMultiple(int ContainerIndex, int QuadOffset, int DrawCount, SRenderSpriteInfo *pRenderInfo)
 {
-	SQuadContainer& Container = m_QuadContainers[ContainerIndex];
+	SQuadContainer &Container = m_QuadContainers[ContainerIndex];
 
 	if(DrawCount == 0)
 		return;
@@ -1468,14 +1672,15 @@ void CGraphics_Threaded::RenderQuadContainerAsSpriteMultiple(int ContainerIndex,
 		if(Container.m_QuadBufferContainerIndex == -1)
 			return;
 
-		SQuadContainer::SQuad& Quad = Container.m_Quads[0];
+		WrapClamp();
+		SQuadContainer::SQuad &Quad = Container.m_Quads[0];
 		CCommandBuffer::SCommand_RenderQuadContainerAsSpriteMultiple Cmd;
 
 		Cmd.m_State = m_State;
 
 		Cmd.m_DrawNum = 1 * 6;
 		Cmd.m_DrawCount = DrawCount;
-		Cmd.m_pOffset = (void*)(QuadOffset * 6 * sizeof(unsigned int));
+		Cmd.m_pOffset = (void *)(QuadOffset * 6 * sizeof(unsigned int));
 		Cmd.m_BufferContainerIndex = Container.m_QuadBufferContainerIndex;
 
 		Cmd.m_VertexColor.r = (float)m_aColor[0].r / 255.f;
@@ -1522,6 +1727,7 @@ void CGraphics_Threaded::RenderQuadContainerAsSpriteMultiple(int ContainerIndex,
 		}
 
 		mem_copy(Cmd.m_pRenderInfo, pRenderInfo, sizeof(IGraphics::SRenderSpriteInfo) * DrawCount);
+		WrapNormal();
 	}
 	else
 	{
@@ -1533,9 +1739,9 @@ void CGraphics_Threaded::RenderQuadContainerAsSpriteMultiple(int ContainerIndex,
 	}
 }
 
-void* CGraphics_Threaded::AllocCommandBufferData(unsigned AllocSize)
+void *CGraphics_Threaded::AllocCommandBufferData(unsigned AllocSize)
 {
-	void* pData = m_pCommandBuffer->AllocData(AllocSize);
+	void *pData = m_pCommandBuffer->AllocData(AllocSize);
 	if(pData == 0x0)
 	{
 		// kick command buffer and try again
@@ -1551,7 +1757,7 @@ void* CGraphics_Threaded::AllocCommandBufferData(unsigned AllocSize)
 	return pData;
 }
 
-int CGraphics_Threaded::CreateBufferObject(size_t UploadDataSize, void *pUploadData)
+int CGraphics_Threaded::CreateBufferObject(size_t UploadDataSize, void *pUploadData, bool IsMovedPointer)
 {
 	int Index = -1;
 	if(m_FirstFreeBufferObjectIndex == -1)
@@ -1569,87 +1775,100 @@ int CGraphics_Threaded::CreateBufferObject(size_t UploadDataSize, void *pUploadD
 	CCommandBuffer::SCommand_CreateBufferObject Cmd;
 	Cmd.m_BufferIndex = Index;
 	Cmd.m_DataSize = UploadDataSize;
+	Cmd.m_DeletePointer = IsMovedPointer;
 
-	if(UploadDataSize <= CMD_BUFFER_DATA_BUFFER_SIZE)
+	if(IsMovedPointer)
 	{
-		Cmd.m_pUploadData = AllocCommandBufferData(UploadDataSize);
-		if(Cmd.m_pUploadData == NULL)
-			return -1;
+		Cmd.m_pUploadData = pUploadData;
 
-		// check if we have enough free memory in the commandbuffer
 		if(!m_pCommandBuffer->AddCommand(Cmd))
 		{
 			// kick command buffer and try again
 			KickCommandBuffer();
 
-			Cmd.m_pUploadData = m_pCommandBuffer->AllocData(UploadDataSize);
-			if(Cmd.m_pUploadData == 0x0)
-			{
-				dbg_msg("graphics", "failed to allocate data for upload data");
-				return -1;
-			}
-
 			if(!m_pCommandBuffer->AddCommand(Cmd))
 			{
-				dbg_msg("graphics", "failed to allocate memory for create buffer object command");
+				dbg_msg("graphics", "failed to allocate memory for update buffer object command");
 				return -1;
 			}
 		}
-		mem_copy(Cmd.m_pUploadData, pUploadData, UploadDataSize);
 	}
-	else {
-		Cmd.m_pUploadData = NULL;
-		// check if we have enough free memory in the commandbuffer
-		if(!m_pCommandBuffer->AddCommand(Cmd))
+	else
+	{
+		if(UploadDataSize <= CMD_BUFFER_DATA_BUFFER_SIZE)
 		{
-			// kick command buffer and try again
-			KickCommandBuffer();
+			Cmd.m_pUploadData = AllocCommandBufferData(UploadDataSize);
+			if(Cmd.m_pUploadData == NULL)
+				return -1;
+
+			// check if we have enough free memory in the commandbuffer
 			if(!m_pCommandBuffer->AddCommand(Cmd))
 			{
-				dbg_msg("graphics", "failed to allocate memory for create buffer object command");
-				return -1;
+				// kick command buffer and try again
+				KickCommandBuffer();
+
+				Cmd.m_pUploadData = m_pCommandBuffer->AllocData(UploadDataSize);
+				if(Cmd.m_pUploadData == 0x0)
+				{
+					dbg_msg("graphics", "failed to allocate data for upload data");
+					return -1;
+				}
+
+				if(!m_pCommandBuffer->AddCommand(Cmd))
+				{
+					dbg_msg("graphics", "failed to allocate memory for create buffer object command");
+					return -1;
+				}
 			}
+			mem_copy(Cmd.m_pUploadData, pUploadData, UploadDataSize);
 		}
+		else
+		{
+			Cmd.m_pUploadData = NULL;
+			// check if we have enough free memory in the commandbuffer
+			if(!m_pCommandBuffer->AddCommand(Cmd))
+			{
+				// kick command buffer and try again
+				KickCommandBuffer();
+				if(!m_pCommandBuffer->AddCommand(Cmd))
+				{
+					dbg_msg("graphics", "failed to allocate memory for create buffer object command");
+					return -1;
+				}
+			}
 
-		// update the buffer instead
-		size_t UploadDataOffset = 0;
-		while(UploadDataSize > 0) {
-			size_t UpdateSize = (UploadDataSize > CMD_BUFFER_DATA_BUFFER_SIZE ? CMD_BUFFER_DATA_BUFFER_SIZE : UploadDataSize);
+			// update the buffer instead
+			size_t UploadDataOffset = 0;
+			while(UploadDataSize > 0)
+			{
+				size_t UpdateSize = (UploadDataSize > CMD_BUFFER_DATA_BUFFER_SIZE ? CMD_BUFFER_DATA_BUFFER_SIZE : UploadDataSize);
 
-			UpdateBufferObject(Index, UpdateSize, (((char*)pUploadData) + UploadDataOffset), (void*)UploadDataOffset);
+				UpdateBufferObject(Index, UpdateSize, (((char *)pUploadData) + UploadDataOffset), (void *)UploadDataOffset);
 
-			UploadDataOffset += UpdateSize;
-			UploadDataSize -= UpdateSize;
+				UploadDataOffset += UpdateSize;
+				UploadDataSize -= UpdateSize;
+			}
 		}
 	}
 
 	return Index;
 }
 
-void CGraphics_Threaded::RecreateBufferObject(int BufferIndex, size_t UploadDataSize, void* pUploadData)
+void CGraphics_Threaded::RecreateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, bool IsMovedPointer)
 {
 	CCommandBuffer::SCommand_RecreateBufferObject Cmd;
 	Cmd.m_BufferIndex = BufferIndex;
 	Cmd.m_DataSize = UploadDataSize;
+	Cmd.m_DeletePointer = IsMovedPointer;
 
-	if(UploadDataSize <= CMD_BUFFER_DATA_BUFFER_SIZE)
+	if(IsMovedPointer)
 	{
-		Cmd.m_pUploadData = AllocCommandBufferData(UploadDataSize);
-		if(Cmd.m_pUploadData == NULL)
-			return;
+		Cmd.m_pUploadData = pUploadData;
 
-		// check if we have enough free memory in the commandbuffer
 		if(!m_pCommandBuffer->AddCommand(Cmd))
 		{
 			// kick command buffer and try again
 			KickCommandBuffer();
-
-			Cmd.m_pUploadData = m_pCommandBuffer->AllocData(UploadDataSize);
-			if(Cmd.m_pUploadData == 0x0)
-			{
-				dbg_msg("graphics", "failed to allocate data for upload data");
-				return;
-			}
 
 			if(!m_pCommandBuffer->AddCommand(Cmd))
 			{
@@ -1657,16 +1876,110 @@ void CGraphics_Threaded::RecreateBufferObject(int BufferIndex, size_t UploadData
 				return;
 			}
 		}
-
-		mem_copy(Cmd.m_pUploadData, pUploadData, UploadDataSize);
 	}
-	else {
-		Cmd.m_pUploadData = NULL;
+	else
+	{
+		if(UploadDataSize <= CMD_BUFFER_DATA_BUFFER_SIZE)
+		{
+			Cmd.m_pUploadData = AllocCommandBufferData(UploadDataSize);
+			if(Cmd.m_pUploadData == NULL)
+				return;
+
+			// check if we have enough free memory in the commandbuffer
+			if(!m_pCommandBuffer->AddCommand(Cmd))
+			{
+				// kick command buffer and try again
+				KickCommandBuffer();
+
+				Cmd.m_pUploadData = m_pCommandBuffer->AllocData(UploadDataSize);
+				if(Cmd.m_pUploadData == 0x0)
+				{
+					dbg_msg("graphics", "failed to allocate data for upload data");
+					return;
+				}
+
+				if(!m_pCommandBuffer->AddCommand(Cmd))
+				{
+					dbg_msg("graphics", "failed to allocate memory for recreate buffer object command");
+					return;
+				}
+			}
+
+			mem_copy(Cmd.m_pUploadData, pUploadData, UploadDataSize);
+		}
+		else
+		{
+			Cmd.m_pUploadData = NULL;
+			// check if we have enough free memory in the commandbuffer
+			if(!m_pCommandBuffer->AddCommand(Cmd))
+			{
+				// kick command buffer and try again
+				KickCommandBuffer();
+				if(!m_pCommandBuffer->AddCommand(Cmd))
+				{
+					dbg_msg("graphics", "failed to allocate memory for update buffer object command");
+					return;
+				}
+			}
+
+			// update the buffer instead
+			size_t UploadDataOffset = 0;
+			while(UploadDataSize > 0)
+			{
+				size_t UpdateSize = (UploadDataSize > CMD_BUFFER_DATA_BUFFER_SIZE ? CMD_BUFFER_DATA_BUFFER_SIZE : UploadDataSize);
+
+				UpdateBufferObject(BufferIndex, UpdateSize, (((char *)pUploadData) + UploadDataOffset), (void *)UploadDataOffset);
+
+				UploadDataOffset += UpdateSize;
+				UploadDataSize -= UpdateSize;
+			}
+		}
+	}
+}
+
+void CGraphics_Threaded::UpdateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, void *pOffset, bool IsMovedPointer)
+{
+	CCommandBuffer::SCommand_UpdateBufferObject Cmd;
+	Cmd.m_BufferIndex = BufferIndex;
+	Cmd.m_DataSize = UploadDataSize;
+	Cmd.m_pOffset = pOffset;
+	Cmd.m_DeletePointer = IsMovedPointer;
+
+	if(IsMovedPointer)
+	{
+		Cmd.m_pUploadData = pUploadData;
+
+		if(!m_pCommandBuffer->AddCommand(Cmd))
+		{
+			// kick command buffer and try again
+			KickCommandBuffer();
+
+			if(!m_pCommandBuffer->AddCommand(Cmd))
+			{
+				dbg_msg("graphics", "failed to allocate memory for update buffer object command");
+				return;
+			}
+		}
+	}
+	else
+	{
+		Cmd.m_pUploadData = AllocCommandBufferData(UploadDataSize);
+		if(Cmd.m_pUploadData == NULL)
+			return;
+
 		// check if we have enough free memory in the commandbuffer
 		if(!m_pCommandBuffer->AddCommand(Cmd))
 		{
 			// kick command buffer and try again
 			KickCommandBuffer();
+
+			Cmd.m_pUploadData = m_pCommandBuffer->AllocData(UploadDataSize);
+			if(Cmd.m_pUploadData == 0x0)
+			{
+				dbg_msg("graphics", "failed to allocate data for upload data");
+				return;
+			}
+
 			if(!m_pCommandBuffer->AddCommand(Cmd))
 			{
 				dbg_msg("graphics", "failed to allocate memory for update buffer object command");
@@ -1674,51 +1987,8 @@ void CGraphics_Threaded::RecreateBufferObject(int BufferIndex, size_t UploadData
 			}
 		}
 
-		// update the buffer instead
-		size_t UploadDataOffset = 0;
-		while(UploadDataSize > 0) {
-			size_t UpdateSize = (UploadDataSize > CMD_BUFFER_DATA_BUFFER_SIZE ? CMD_BUFFER_DATA_BUFFER_SIZE : UploadDataSize);
-
-			UpdateBufferObject(BufferIndex, UpdateSize, (((char*)pUploadData) + UploadDataOffset), (void*)UploadDataOffset);
-
-			UploadDataOffset += UpdateSize;
-			UploadDataSize -= UpdateSize;
-		}
+		mem_copy(Cmd.m_pUploadData, pUploadData, UploadDataSize);
 	}
-}
-
-void CGraphics_Threaded::UpdateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, void *pOffset)
-{
-	CCommandBuffer::SCommand_UpdateBufferObject Cmd;
-	Cmd.m_BufferIndex = BufferIndex;
-	Cmd.m_DataSize = UploadDataSize;
-	Cmd.m_pOffset = pOffset;
-
-	Cmd.m_pUploadData = AllocCommandBufferData(UploadDataSize);
-	if(Cmd.m_pUploadData == NULL)
-		return;
-
-	// check if we have enough free memory in the commandbuffer
-	if(!m_pCommandBuffer->AddCommand(Cmd))
-	{
-		// kick command buffer and try again
-		KickCommandBuffer();
-
-		Cmd.m_pUploadData = m_pCommandBuffer->AllocData(UploadDataSize);
-		if(Cmd.m_pUploadData == 0x0)
-		{
-			dbg_msg("graphics", "failed to allocate data for upload data");
-			return;
-		}
-
-		if(!m_pCommandBuffer->AddCommand(Cmd))
-		{
-			dbg_msg("graphics", "failed to allocate memory for update buffer object command");
-			return;
-		}
-	}
-
-	mem_copy(Cmd.m_pUploadData, pUploadData, UploadDataSize);
 }
 
 void CGraphics_Threaded::CopyBufferObject(int WriteBufferIndex, int ReadBufferIndex, size_t WriteOffset, size_t ReadOffset, size_t CopyDataSize)
@@ -1790,7 +2060,7 @@ int CGraphics_Threaded::CreateBufferContainer(SBufferContainerInfo *pContainerIn
 	Cmd.m_AttrCount = (int)pContainerInfo->m_Attributes.size();
 	Cmd.m_Stride = pContainerInfo->m_Stride;
 
-	Cmd.m_Attributes = (SBufferContainerInfo::SAttribute*)AllocCommandBufferData(Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
+	Cmd.m_Attributes = (SBufferContainerInfo::SAttribute *)AllocCommandBufferData(Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
 	if(Cmd.m_Attributes == NULL)
 		return -1;
 
@@ -1800,7 +2070,7 @@ int CGraphics_Threaded::CreateBufferContainer(SBufferContainerInfo *pContainerIn
 		// kick command buffer and try again
 		KickCommandBuffer();
 
-		Cmd.m_Attributes = (SBufferContainerInfo::SAttribute*)m_pCommandBuffer->AllocData(Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
+		Cmd.m_Attributes = (SBufferContainerInfo::SAttribute *)m_pCommandBuffer->AllocData(Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
 		if(Cmd.m_Attributes == 0x0)
 		{
 			dbg_msg("graphics", "failed to allocate data for upload data");
@@ -1816,8 +2086,8 @@ int CGraphics_Threaded::CreateBufferContainer(SBufferContainerInfo *pContainerIn
 
 	mem_copy(Cmd.m_Attributes, &pContainerInfo->m_Attributes[0], Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
 
-	for(size_t i = 0; i < pContainerInfo->m_Attributes.size(); ++i)
-		m_VertexArrayInfo[Index].m_AssociatedBufferObjectIndices.push_back(pContainerInfo->m_Attributes[i].m_VertBufferBindingIndex);
+	for(auto &Attribute : pContainerInfo->m_Attributes)
+		m_VertexArrayInfo[Index].m_AssociatedBufferObjectIndices.push_back(Attribute.m_VertBufferBindingIndex);
 
 	return Index;
 }
@@ -1852,10 +2122,10 @@ void CGraphics_Threaded::DeleteBufferContainer(int ContainerIndex, bool DestroyA
 			if(BufferObjectIndex != -1)
 			{
 				// don't delete double entries
-				for(size_t n = 0; n < m_VertexArrayInfo[ContainerIndex].m_AssociatedBufferObjectIndices.size(); ++n)
+				for(int &m_AssociatedBufferObjectIndice : m_VertexArrayInfo[ContainerIndex].m_AssociatedBufferObjectIndices)
 				{
-					if(BufferObjectIndex == m_VertexArrayInfo[ContainerIndex].m_AssociatedBufferObjectIndices[n])
-						m_VertexArrayInfo[ContainerIndex].m_AssociatedBufferObjectIndices[n] = -1;
+					if(BufferObjectIndex == m_AssociatedBufferObjectIndice)
+						m_AssociatedBufferObjectIndice = -1;
 				}
 				// clear the buffer object index
 				m_BufferObjectIndices[BufferObjectIndex] = m_FirstFreeBufferObjectIndex;
@@ -1864,7 +2134,6 @@ void CGraphics_Threaded::DeleteBufferContainer(int ContainerIndex, bool DestroyA
 		}
 	}
 	m_VertexArrayInfo[ContainerIndex].m_AssociatedBufferObjectIndices.clear();
-
 
 	// also clear the buffer object index
 	m_VertexArrayInfo[ContainerIndex].m_FreeIndex = m_FirstFreeVertexArrayInfo;
@@ -1878,7 +2147,7 @@ void CGraphics_Threaded::UpdateBufferContainer(int ContainerIndex, SBufferContai
 	Cmd.m_AttrCount = (int)pContainerInfo->m_Attributes.size();
 	Cmd.m_Stride = pContainerInfo->m_Stride;
 
-	Cmd.m_Attributes = (SBufferContainerInfo::SAttribute*)AllocCommandBufferData(Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
+	Cmd.m_Attributes = (SBufferContainerInfo::SAttribute *)AllocCommandBufferData(Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
 	if(Cmd.m_Attributes == NULL)
 		return;
 
@@ -1888,7 +2157,7 @@ void CGraphics_Threaded::UpdateBufferContainer(int ContainerIndex, SBufferContai
 		// kick command buffer and try again
 		KickCommandBuffer();
 
-		Cmd.m_Attributes = (SBufferContainerInfo::SAttribute*)m_pCommandBuffer->AllocData(Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
+		Cmd.m_Attributes = (SBufferContainerInfo::SAttribute *)m_pCommandBuffer->AllocData(Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
 		if(Cmd.m_Attributes == 0x0)
 		{
 			dbg_msg("graphics", "failed to allocate data for upload data");
@@ -1905,8 +2174,8 @@ void CGraphics_Threaded::UpdateBufferContainer(int ContainerIndex, SBufferContai
 	mem_copy(Cmd.m_Attributes, &pContainerInfo->m_Attributes[0], Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
 
 	m_VertexArrayInfo[ContainerIndex].m_AssociatedBufferObjectIndices.clear();
-	for(size_t i = 0; i < pContainerInfo->m_Attributes.size(); ++i)
-		m_VertexArrayInfo[ContainerIndex].m_AssociatedBufferObjectIndices.push_back(pContainerInfo->m_Attributes[i].m_VertBufferBindingIndex);
+	for(auto &Attribute : pContainerInfo->m_Attributes)
+		m_VertexArrayInfo[ContainerIndex].m_AssociatedBufferObjectIndices.push_back(Attribute.m_VertBufferBindingIndex);
 }
 
 void CGraphics_Threaded::IndicesNumRequiredNotify(unsigned int RequiredIndicesCount)
@@ -1932,13 +2201,19 @@ int CGraphics_Threaded::IssueInit()
 {
 	int Flags = 0;
 
-	if(g_Config.m_GfxBorderless) Flags |= IGraphicsBackend::INITFLAG_BORDERLESS;
-	if(g_Config.m_GfxFullscreen) Flags |= IGraphicsBackend::INITFLAG_FULLSCREEN;
-	if(g_Config.m_GfxVsync) Flags |= IGraphicsBackend::INITFLAG_VSYNC;
-	if(g_Config.m_GfxHighdpi) Flags |= IGraphicsBackend::INITFLAG_HIGHDPI;
-	if(g_Config.m_GfxResizable) Flags |= IGraphicsBackend::INITFLAG_RESIZABLE;
+	if(g_Config.m_GfxBorderless)
+		Flags |= IGraphicsBackend::INITFLAG_BORDERLESS;
+	if(g_Config.m_GfxFullscreen)
+		Flags |= IGraphicsBackend::INITFLAG_FULLSCREEN;
+	if(g_Config.m_GfxVsync)
+		Flags |= IGraphicsBackend::INITFLAG_VSYNC;
+	if(g_Config.m_GfxHighdpi)
+		Flags |= IGraphicsBackend::INITFLAG_HIGHDPI;
+	if(g_Config.m_GfxResizable)
+		Flags |= IGraphicsBackend::INITFLAG_RESIZABLE;
 
 	int r = m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, g_Config.m_GfxFsaaSamples, Flags, &m_DesktopScreenWidth, &m_DesktopScreenHeight, &m_ScreenWidth, &m_ScreenHeight, m_pStorage);
+	AddBackEndWarningIfExists();
 	m_IsNewOpenGL = m_pBackend->IsNewOpenGL();
 	m_OpenGLTileBufferingEnabled = m_IsNewOpenGL || m_pBackend->HasTileBuffering();
 	m_OpenGLQuadBufferingEnabled = m_IsNewOpenGL || m_pBackend->HasQuadBuffering();
@@ -1946,6 +2221,17 @@ int CGraphics_Threaded::IssueInit()
 	m_OpenGLTextBufferingEnabled = m_IsNewOpenGL || (m_OpenGLQuadContainerBufferingEnabled && m_pBackend->HasTextBuffering());
 	m_OpenGLHasTextureArrays = m_IsNewOpenGL || m_pBackend->Has2DTextureArrays();
 	return r;
+}
+
+void CGraphics_Threaded::AddBackEndWarningIfExists()
+{
+	const char *pErrStr = m_pBackend->GetErrorString();
+	if(pErrStr != NULL)
+	{
+		SWarning NewWarning;
+		str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg), "%s", Localize(pErrStr));
+		m_Warnings.emplace_back(NewWarning);
+	}
 }
 
 int CGraphics_Threaded::InitWindow()
@@ -2069,9 +2355,10 @@ int CGraphics_Threaded::Init()
 
 	// init textures
 	m_FirstFreeTexture = 0;
-	for(int i = 0; i < MAX_TEXTURES-1; i++)
-		m_aTextureIndices[i] = i+1;
-	m_aTextureIndices[MAX_TEXTURES-1] = -1;
+	m_TextureIndices.resize(CCommandBuffer::MAX_TEXTURES);
+	for(int i = 0; i < (int)m_TextureIndices.size() - 1; i++)
+		m_TextureIndices[i] = i + 1;
+	m_TextureIndices.back() = -1;
 
 	m_FirstFreeVertexArrayInfo = -1;
 	m_FirstFreeBufferObjectIndex = -1;
@@ -2082,19 +2369,18 @@ int CGraphics_Threaded::Init()
 		return -1;
 
 	// create command buffers
-	for(int i = 0; i < NUM_CMDBUFFERS; i++)
-		m_apCommandBuffers[i] = new CCommandBuffer(CMD_BUFFER_CMD_BUFFER_SIZE, CMD_BUFFER_DATA_BUFFER_SIZE);
+	for(auto &pCommandBuffer : m_apCommandBuffers)
+		pCommandBuffer = new CCommandBuffer(CMD_BUFFER_CMD_BUFFER_SIZE, CMD_BUFFER_DATA_BUFFER_SIZE);
 	m_pCommandBuffer = m_apCommandBuffers[0];
 
 	// create null texture, will get id=0
 	static const unsigned char s_aNullTextureData[] = {
-		0xff,0x00,0x00,0xff, 0xff,0x00,0x00,0xff, 0x00,0xff,0x00,0xff, 0x00,0xff,0x00,0xff,
-		0xff,0x00,0x00,0xff, 0xff,0x00,0x00,0xff, 0x00,0xff,0x00,0xff, 0x00,0xff,0x00,0xff,
-		0x00,0x00,0xff,0xff, 0x00,0x00,0xff,0xff, 0xff,0xff,0x00,0xff, 0xff,0xff,0x00,0xff,
-		0x00,0x00,0xff,0xff, 0x00,0x00,0xff,0xff, 0xff,0xff,0x00,0xff, 0xff,0xff,0x00,0xff,
-	};
+		0xff, 0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff,
+		0xff, 0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff,
+		0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0xff,
+		0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0xff};
 
-	m_InvalidTexture = LoadTextureRaw(4,4,CImageInfo::FORMAT_RGBA,s_aNullTextureData,CImageInfo::FORMAT_RGBA,TEXLOAD_NORESAMPLE);
+	m_InvalidTexture = LoadTextureRaw(4, 4, CImageInfo::FORMAT_RGBA, s_aNullTextureData, CImageInfo::FORMAT_RGBA, TEXLOAD_NORESAMPLE);
 	return 0;
 }
 
@@ -2106,8 +2392,8 @@ void CGraphics_Threaded::Shutdown()
 	m_pBackend = 0x0;
 
 	// delete the command buffers
-	for(int i = 0; i < NUM_CMDBUFFERS; i++)
-		delete m_apCommandBuffers[i];
+	for(auto &pCommandBuffer : m_apCommandBuffers)
+		delete pCommandBuffer;
 }
 
 int CGraphics_Threaded::GetNumScreens() const
@@ -2144,17 +2430,17 @@ bool CGraphics_Threaded::SetWindowScreen(int Index)
 void CGraphics_Threaded::Resize(int w, int h)
 {
 #if defined(CONF_VIDEORECORDER)
-	if (IVideo::Current() && IVideo::Current()->IsRecording())
+	if(IVideo::Current() && IVideo::Current()->IsRecording())
 		return;
 #endif
 
 	if(m_ScreenWidth == w && m_ScreenHeight == h)
 		return;
 
-	if(h > 4*w/5)
-		h = 4*w/5;
-	if(w > 21*h/9)
-		w = 21*h/9;
+	if(h > 4 * w / 5)
+		h = 4 * w / 5;
+	if(w > 21 * h / 9)
+		w = 21 * h / 9;
 
 	m_ScreenWidth = w;
 	m_ScreenHeight = h;
@@ -2168,8 +2454,8 @@ void CGraphics_Threaded::Resize(int w, int h)
 	KickCommandBuffer();
 	WaitForIdle();
 
-	for(size_t i = 0; i < m_ResizeListeners.size(); ++i)
-		m_ResizeListeners[i].m_pFunc(m_ResizeListeners[i].m_pUser);
+	for(auto &ResizeListener : m_ResizeListeners)
+		ResizeListener.m_pFunc(ResizeListener.m_pUser);
 }
 
 void CGraphics_Threaded::AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser)
@@ -2207,7 +2493,7 @@ void CGraphics_Threaded::TakeScreenshot(const char *pFilename)
 	// TODO: screenshot support
 	char aDate[20];
 	str_timestamp(aDate, sizeof(aDate));
-	str_format(m_aScreenshotName, sizeof(m_aScreenshotName), "screenshots/%s_%s.png", pFilename?pFilename:"screenshot", aDate);
+	str_format(m_aScreenshotName, sizeof(m_aScreenshotName), "screenshots/%s_%s.png", pFilename ? pFilename : "screenshot", aDate);
 	m_DoScreenshot = true;
 }
 
@@ -2221,7 +2507,7 @@ void CGraphics_Threaded::Swap()
 {
 	if(!m_Warnings.empty())
 	{
-		SGraphicsWarning* pCurWarning = GetCurWarning();
+		SWarning *pCurWarning = GetCurWarning();
 		if(pCurWarning->m_WasShown)
 		{
 			m_Warnings.erase(m_Warnings.begin());
@@ -2281,13 +2567,13 @@ void CGraphics_Threaded::WaitForIdle()
 	m_pBackend->WaitForIdle();
 }
 
-SGraphicsWarning *CGraphics_Threaded::GetCurWarning()
+SWarning *CGraphics_Threaded::GetCurWarning()
 {
 	if(m_Warnings.empty())
 		return NULL;
 	else
 	{
-		SGraphicsWarning* pCurWarning = &m_Warnings[0];
+		SWarning *pCurWarning = &m_Warnings[0];
 		return pCurWarning;
 	}
 }
@@ -2296,7 +2582,7 @@ int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes, int Scre
 {
 	if(g_Config.m_GfxDisplayAllModes)
 	{
-		int Count = sizeof(g_aFakeModes)/sizeof(CVideoMode);
+		int Count = sizeof(g_aFakeModes) / sizeof(CVideoMode);
 		mem_copy(pModes, g_aFakeModes, sizeof(g_aFakeModes));
 		if(MaxModes < Count)
 			Count = MaxModes;

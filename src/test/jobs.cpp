@@ -2,8 +2,8 @@
 #include <gtest/gtest.h>
 
 #include <base/system.h>
-#include <engine/shared/jobs.h>
 #include <engine/engine.h>
+#include <engine/shared/jobs.h>
 
 #include <functional>
 
@@ -29,8 +29,10 @@ class CJob : public IJob
 {
 	std::function<void()> m_JobFunction;
 	void Run() { m_JobFunction(); }
+
 public:
-	CJob(std::function<void()>&& JobFunction) : m_JobFunction(JobFunction) {}
+	CJob(std::function<void()> &&JobFunction) :
+		m_JobFunction(JobFunction) {}
 };
 
 TEST_F(Jobs, Constructor)
@@ -81,8 +83,7 @@ TEST_F(Jobs, Many)
 	sphore_init(&sphore);
 	for(int i = 0; i < TEST_NUM_THREADS; i++)
 	{
-		std::shared_ptr<IJob> pJob = std::make_shared<CJob>([&]
-		{
+		std::shared_ptr<IJob> pJob = std::make_shared<CJob>([&] {
 			int Prev = ThreadsRunning.fetch_add(1);
 			if(Prev == TEST_NUM_THREADS - 1)
 			{
@@ -92,14 +93,14 @@ TEST_F(Jobs, Many)
 		EXPECT_EQ(pJob->Status(), IJob::STATE_PENDING);
 		apJobs.push_back(pJob);
 	}
-	for(auto &pJob: apJobs)
+	for(auto &pJob : apJobs)
 	{
 		Add(pJob);
 	}
 	sphore_wait(&sphore);
 	sphore_destroy(&sphore);
 	m_Pool.~CJobPool();
-	for(auto &pJob: apJobs)
+	for(auto &pJob : apJobs)
 	{
 		EXPECT_EQ(pJob->Status(), IJob::STATE_DONE);
 	}

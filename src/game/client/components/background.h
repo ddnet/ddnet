@@ -5,7 +5,7 @@
 #include <game/client/components/maplayers.h>
 
 // Special value to use background of current map
-#define CURRENT "%current%"
+#define CURRENT_MAP "%current%"
 
 class CBackgroundEngineMap : public CMap
 {

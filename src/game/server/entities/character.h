@@ -4,10 +4,10 @@
 #define GAME_SERVER_ENTITIES_CHARACTER_H
 
 #include <engine/antibot.h>
+#include <game/generated/protocol.h>
+#include <game/generated/server_data.h>
 #include <game/server/entity.h>
 #include <game/server/save.h>
-#include <game/generated/server_data.h>
-#include <game/generated/protocol.h>
 
 #include <game/gamecore.h>
 
@@ -87,7 +87,7 @@ public:
 
 	void Rescue();
 
-	int NeededFaketuning() { return m_NeededFaketuning;}
+	int NeededFaketuning() { return m_NeededFaketuning; }
 	bool IsAlive() const { return m_Alive; }
 	bool IsPaused() const { return m_Paused; }
 	class CPlayer *GetPlayer() { return m_pPlayer; }
@@ -184,7 +184,7 @@ private:
 	bool m_Solo;
 
 public:
-	CGameTeams* Teams();
+	CGameTeams *Teams();
 	void FillAntibot(CAntibotCharacterData *pData);
 	void Pause(bool Pause);
 	bool Freeze(int Time);
@@ -208,11 +208,11 @@ public:
 	bool m_FreezeHammer;
 	enum
 	{
-		HIT_ALL=0,
-		DISABLE_HIT_HAMMER=1,
-		DISABLE_HIT_SHOTGUN=2,
-		DISABLE_HIT_GRENADE=4,
-		DISABLE_HIT_LASER=8
+		HIT_ALL = 0,
+		DISABLE_HIT_HAMMER = 1,
+		DISABLE_HIT_SHOTGUN = 2,
+		DISABLE_HIT_GRENADE = 4,
+		DISABLE_HIT_LASER = 8
 	};
 	int m_Hit;
 	int m_TuneZone;
@@ -255,7 +255,7 @@ public:
 	void SetArmor(int Armor) { m_Armor = Armor; };
 	CCharacterCore GetCore() { return m_Core; };
 	void SetCore(CCharacterCore Core) { m_Core = Core; };
-	CCharacterCore* Core() { return &m_Core; };
+	CCharacterCore *Core() { return &m_Core; };
 	bool GetWeaponGot(int Type) { return m_aWeapons[Type].m_Got; };
 	void SetWeaponGot(int Type, bool Value) { m_aWeapons[Type].m_Got = Value; };
 	int GetWeaponAmmo(int Type) { return m_aWeapons[Type].m_Ammo; };

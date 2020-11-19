@@ -4,6 +4,7 @@
 #define ENGINE_GRAPHICS_H
 
 #include "kernel.h"
+#include "warning.h"
 
 #include <base/color.h>
 #include <stddef.h>
@@ -63,10 +64,10 @@ class CImageInfo
 public:
 	enum
 	{
-		FORMAT_AUTO=-1,
-		FORMAT_RGB=0,
-		FORMAT_RGBA=1,
-		FORMAT_ALPHA=2,
+		FORMAT_AUTO = -1,
+		FORMAT_RGB = 0,
+		FORMAT_RGBA = 1,
+		FORMAT_ALPHA = 2,
 	};
 
 	/* Variable: width
@@ -120,7 +121,10 @@ struct GL_SColorf
 };
 
 //use normalized color values
-struct GL_SColor { unsigned char r, g, b, a; };
+struct GL_SColor
+{
+	unsigned char r, g, b, a;
+};
 
 struct GL_SVertex
 {
@@ -143,14 +147,11 @@ struct GL_SVertexTex3DStream
 	GL_STexCoord3D m_Tex;
 };
 
-struct SGraphicsWarning
-{
-	SGraphicsWarning() : m_WasShown(false) {}
-	char m_aWarningMsg[128];
-	bool m_WasShown;
-};
+typedef void (*WINDOW_RESIZE_FUNC)(void *pUser);
 
-typedef void(*WINDOW_RESIZE_FUNC)(void *pUser);
+namespace client_data7 {
+struct CDataSprite; // NOLINT(bugprone-forward-declaration-namespace)
+}
 
 class IGraphics : public IInterface
 {
@@ -160,15 +161,16 @@ protected:
 	int m_ScreenHeight;
 	int m_DesktopScreenWidth;
 	int m_DesktopScreenHeight;
+
 public:
 	/* Constants: Texture Loading Flags
 		TEXLOAD_NORESAMPLE - Prevents the texture from any resampling
 	*/
 	enum
 	{
-		TEXLOAD_NORESAMPLE = 1<<0,
-		TEXLOAD_NOMIPMAPS = 1<<1,
-		TEXLOAD_NO_COMPRESSION = 1<<2,
+		TEXLOAD_NORESAMPLE = 1 << 0,
+		TEXLOAD_NOMIPMAPS = 1 << 1,
+		TEXLOAD_NO_COMPRESSION = 1 << 2,
 		TEXLOAD_TO_3D_TEXTURE = (1 << 3),
 		TEXLOAD_TO_2D_ARRAY_TEXTURE = (1 << 4),
 		TEXLOAD_TO_3D_TEXTURE_SINGLE_LAYER = (1 << 5),
@@ -176,22 +178,23 @@ public:
 		TEXLOAD_NO_2D_TEXTURE = (1 << 7),
 	};
 
-
 	class CTextureHandle
 	{
 		friend class IGraphics;
 		int m_Id;
+
 	public:
-		CTextureHandle()
-		: m_Id(-1)
-		{}
+		CTextureHandle() :
+			m_Id(-1)
+		{
+		}
 
 		operator int() const { return m_Id; }
 	};
 
 	int ScreenWidth() const { return m_ScreenWidth; }
 	int ScreenHeight() const { return m_ScreenHeight; }
-	float ScreenAspect() const { return (float)ScreenWidth()/(float)ScreenHeight(); }
+	float ScreenAspect() const { return (float)ScreenWidth() / (float)ScreenHeight(); }
 
 	virtual bool Fullscreen(bool State) = 0;
 	virtual void SetWindowBordered(bool State) = 0;
@@ -219,15 +222,27 @@ public:
 
 	virtual int LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType) = 0;
 
+	virtual bool CheckImageDivisibility(const char *pFileName, CImageInfo &Img, int DivX, int DivY, bool AllowResize) = 0;
+
 	// destination and source buffer require to have the same width and height
 	virtual void CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSourceBuffer, int FullWidth, int FullHeight, int ColorChannelCount, int SubOffsetX, int SubOffsetY, int SubCopyWidth, int SubCopyHeight) = 0;
 
+	// destination width must be equal to the subwidth of the source
+	virtual void CopyTextureFromTextureBufferSub(uint8_t *pDestBuffer, int DestWidth, int DestHeight, uint8_t *pSourceBuffer, int SrcWidth, int SrcHeight, int ColorChannelCount, int SrcSubOffsetX, int SrcSubOffsetY, int SrcSubCopyWidth, int SrcSubCopyHeight) = 0;
+
 	virtual int UnloadTexture(CTextureHandle Index) = 0;
+	virtual int UnloadTextureNew(CTextureHandle &TextureHandle) = 0;
 	virtual CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName = NULL) = 0;
 	virtual int LoadTextureRawSub(CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData) = 0;
 	virtual CTextureHandle LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags) = 0;
 	virtual void TextureSet(CTextureHandle Texture) = 0;
 	void TextureClear() { TextureSet(CTextureHandle()); }
+
+	virtual CTextureHandle LoadSpriteTexture(CImageInfo &FromImageInfo, struct CDataSprite *pSprite) = 0;
+	virtual CTextureHandle LoadSpriteTexture(CImageInfo &FromImageInfo, struct client_data7::CDataSprite *pSprite) = 0;
+
+	virtual bool IsImageSubFullyTransparent(CImageInfo &FromImageInfo, int x, int y, int w, int h) = 0;
+	virtual bool IsSpriteTextureFullyTransparent(CImageInfo &FromImageInfo, struct client_data7::CDataSprite *pSprite) = 0;
 
 	virtual void FlushVertices(bool KeepVertices = false) = 0;
 	virtual void FlushTextVertices(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor) = 0;
@@ -241,9 +256,10 @@ public:
 	virtual void RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, float *pTextColor, float *pTextoutlineColor) = 0;
 
 	// opengl 3.3 functions
-	virtual int CreateBufferObject(size_t UploadDataSize, void *pUploadData) = 0;
-	virtual void RecreateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData) = 0;
-	virtual void UpdateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, void *pOffset) = 0;
+	// if a pointer is passed as moved pointer, it requires to be allocated with malloc()
+	virtual int CreateBufferObject(size_t UploadDataSize, void *pUploadData, bool IsMovedPointer = false) = 0;
+	virtual void RecreateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, bool IsMovedPointer = false) = 0;
+	virtual void UpdateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, void *pOffset, bool IsMovedPointer = false) = 0;
 	virtual void CopyBufferObject(int WriteBufferIndex, int ReadBufferIndex, size_t WriteOffset, size_t ReadOffset, size_t CopyDataSize) = 0;
 	virtual void DeleteBufferObject(int BufferIndex) = 0;
 
@@ -263,7 +279,8 @@ public:
 	{
 		float m_X0, m_Y0, m_X1, m_Y1;
 		CLineItem() {}
-		CLineItem(float x0, float y0, float x1, float y1) : m_X0(x0), m_Y0(y0), m_X1(x1), m_Y1(y1) {}
+		CLineItem(float x0, float y0, float x1, float y1) :
+			m_X0(x0), m_Y0(y0), m_X1(x1), m_Y1(y1) {}
 	};
 	virtual void LinesBegin() = 0;
 	virtual void LinesEnd() = 0;
@@ -275,6 +292,8 @@ public:
 	virtual void TextQuadsEnd(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor) = 0;
 	virtual void QuadsTex3DBegin() = 0;
 	virtual void QuadsTex3DEnd() = 0;
+	virtual void TrianglesBegin() = 0;
+	virtual void TrianglesEnd() = 0;
 	virtual void QuadsEndKeepVertices() = 0;
 	virtual void QuadsDrawCurrentVertices(bool KeepVertices = true) = 0;
 	virtual void QuadsSetRotation(float Angle) = 0;
@@ -285,8 +304,15 @@ public:
 	{
 		float m_X, m_Y, m_Width, m_Height;
 		CQuadItem() {}
-		CQuadItem(float x, float y, float w, float h) : m_X(x), m_Y(y), m_Width(w), m_Height(h) {}
-		void Set(float x, float y, float w, float h) { m_X = x; m_Y = y; m_Width = w; m_Height = h; }
+		CQuadItem(float x, float y, float w, float h) :
+			m_X(x), m_Y(y), m_Width(w), m_Height(h) {}
+		void Set(float x, float y, float w, float h)
+		{
+			m_X = x;
+			m_Y = y;
+			m_Width = w;
+			m_Height = h;
+		}
 	};
 	virtual void QuadsDraw(CQuadItem *pArray, int Num) = 0;
 	virtual void QuadsDrawTL(const CQuadItem *pArray, int Num) = 0;
@@ -297,8 +323,8 @@ public:
 	{
 		float m_X0, m_Y0, m_X1, m_Y1, m_X2, m_Y2, m_X3, m_Y3;
 		CFreeformItem() {}
-		CFreeformItem(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3)
-			: m_X0(x0), m_Y0(y0), m_X1(x1), m_Y1(y1), m_X2(x2), m_Y2(y2), m_X3(x3), m_Y3(y3) {}
+		CFreeformItem(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3) :
+			m_X0(x0), m_Y0(y0), m_X1(x1), m_Y1(y1), m_X2(x2), m_Y2(y2), m_X3(x3), m_Y3(y3) {}
 	};
 
 	virtual int CreateQuadContainer() = 0;
@@ -309,6 +335,7 @@ public:
 	virtual void DeleteQuadContainer(int ContainerIndex) = 0;
 	virtual void RenderQuadContainer(int ContainerIndex, int QuadDrawNum) = 0;
 	virtual void RenderQuadContainer(int ContainerIndex, int QuadOffset, int QuadDrawNum) = 0;
+	virtual void RenderQuadContainerEx(int ContainerIndex, int QuadOffset, int QuadDrawNum, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f) = 0;
 	virtual void RenderQuadContainerAsSprite(int ContainerIndex, int QuadOffset, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f) = 0;
 
 	struct SRenderSpriteInfo
@@ -328,7 +355,8 @@ public:
 		int m_Index;
 		float m_R, m_G, m_B, m_A;
 		CColorVertex() {}
-		CColorVertex(int i, float r, float g, float b, float a) : m_Index(i), m_R(r), m_G(g), m_B(b), m_A(a) {}
+		CColorVertex(int i, float r, float g, float b, float a) :
+			m_Index(i), m_R(r), m_G(g), m_B(b), m_A(a) {}
 	};
 	virtual void SetColorVertex(const CColorVertex *pArray, int Num) = 0;
 	virtual void SetColor(float r, float g, float b, float a) = 0;
@@ -352,7 +380,8 @@ public:
 	virtual void SetWindowGrab(bool Grab) = 0;
 	virtual void NotifyWindow() = 0;
 
-	virtual SGraphicsWarning *GetCurWarning() = 0;
+	virtual SWarning *GetCurWarning() = 0;
+
 protected:
 	inline CTextureHandle CreateTextureHandle(int Index)
 	{

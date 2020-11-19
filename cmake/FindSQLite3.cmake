@@ -4,30 +4,32 @@ if(NOT PREFER_BUNDLED_LIBS)
   set(CMAKE_MODULE_PATH ${OWN_CMAKE_MODULE_PATH})
 endif()
 
-if(NOT SQLite3_FOUND)
-  if(NOT CMAKE_CROSSCOMPILING)
-    find_package(PkgConfig QUIET)
-    pkg_check_modules(PC_SQLite3 sqlite3)
-  endif()
+if(NOT CMAKE_CROSSCOMPILING)
+  find_package(PkgConfig QUIET)
+  pkg_check_modules(PC_SQLite3 sqlite3)
+endif()
 
-  set_extra_dirs_lib(SQLite3 sqlite3)
-  find_library(SQLite3_LIBRARY
-    NAMES sqlite3 sqlite3.0
-    HINTS ${HINTS_SQLite3_LIBDIR} ${PC_SQLite3_LIBDIR} ${PC_SQLite3_LIBRARY_DIRS}
-    PATHS ${PATHS_SQLite3_LIBDIR}
-    ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
-  )
-  set_extra_dirs_include(SQLite3 sqlite3 "${SQLite3_LIBRARY}")
-  find_path(SQLite3_INCLUDEDIR sqlite3.h
-    PATH_SUFFIXES sqlite3
-    HINTS ${HINTS_SQLite3_INCLUDEDIR} ${PC_SQLite3_INCLUDEDIR} ${PC_SQLite3_INCLUDE_DIRS}
-    PATHS ${PATHS_SQLite3_INCLUDEDIR}
-    ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
-  )
+set_extra_dirs_lib(SQLite3 sqlite3)
+find_library(SQLite3_LIBRARY
+  NAMES sqlite3 sqlite3.0
+  HINTS ${HINTS_SQLite3_LIBDIR} ${PC_SQLite3_LIBDIR} ${PC_SQLite3_LIBRARY_DIRS}
+  PATHS ${PATHS_SQLite3_LIBDIR}
+  ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
+)
+set_extra_dirs_include(SQLite3 sqlite3 "${SQLite3_LIBRARY}")
+find_path(SQLite3_INCLUDEDIR sqlite3.h
+  PATH_SUFFIXES sqlite3
+  HINTS ${HINTS_SQLite3_INCLUDEDIR} ${PC_SQLite3_INCLUDEDIR} ${PC_SQLite3_INCLUDE_DIRS}
+  PATHS ${PATHS_SQLite3_INCLUDEDIR}
+  ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
+)
 
-  include(FindPackageHandleStandardArgs)
-  find_package_handle_standard_args(SQLite3 DEFAULT_MSG SQLite3_INCLUDEDIR SQLite3_LIBRARY)
-  mark_as_advanced(SQLite3_INCLUDEDIR SQLite3_LIBRARY)
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(SQLite3 DEFAULT_MSG SQLite3_INCLUDEDIR SQLite3_LIBRARY)
+mark_as_advanced(SQLite3_INCLUDEDIR SQLite3_LIBRARY)
+
+if(CMAKE_VERSION VERSION_LESS 3.0 AND SQLITE3_FOUND)
+  set(SQLite3_FOUND TRUE)
 endif()
 
 if(SQLite3_FOUND)

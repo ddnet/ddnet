@@ -1,18 +1,18 @@
 #include "opengl_sl.h"
 #include <engine/shared/linereader.h>
 #include <engine/storage.h>
-#include <vector>
 #include <stdio.h>
 #include <string>
+#include <vector>
 
-bool CGLSL::LoadShader(CGLSLCompiler* pCompiler, IStorage *pStorage, const char *pFile, int Type)
+bool CGLSL::LoadShader(CGLSLCompiler *pCompiler, IStorage *pStorage, const char *pFile, int Type)
 {
-	if (m_IsLoaded)
+	if(m_IsLoaded)
 		return true;
 	IOHANDLE f = pStorage->OpenFile(pFile, IOFLAG_READ, IStorage::TYPE_ALL);
 
 	std::vector<std::string> Lines;
-	if (f)
+	if(f)
 	{
 		bool IsNewOpenGL = pCompiler->m_OpenGLVersionMajor >= 4 || (pCompiler->m_OpenGLVersionMajor == 3 && pCompiler->m_OpenGLVersionMinor == 3);
 		//add compiler specific values
@@ -38,7 +38,7 @@ bool CGLSL::LoadShader(CGLSLCompiler* pCompiler, IStorage *pStorage, const char 
 			}
 		}
 
-		for(CGLSLCompiler::SGLSLCompilerDefine& Define : pCompiler->m_Defines)
+		for(CGLSLCompiler::SGLSLCompilerDefine &Define : pCompiler->m_Defines)
 		{
 			Lines.push_back(std::string("#define ") + Define.m_DefineName + std::string(" ") + Define.m_DefineValue + std::string("\r\n"));
 		}
@@ -50,8 +50,8 @@ bool CGLSL::LoadShader(CGLSLCompiler* pCompiler, IStorage *pStorage, const char 
 
 		CLineReader LineReader;
 		LineReader.Init(f);
-		char* ReadLine = NULL;
-		while ((ReadLine = LineReader.Get()))
+		char *ReadLine = NULL;
+		while((ReadLine = LineReader.Get()))
 		{
 			std::string Line;
 			pCompiler->ParseLine(Line, ReadLine, Type);
@@ -60,9 +60,9 @@ bool CGLSL::LoadShader(CGLSLCompiler* pCompiler, IStorage *pStorage, const char 
 		}
 		io_close(f);
 
-		const char** ShaderCode = new const char*[Lines.size()];
+		const char **ShaderCode = new const char *[Lines.size()];
 
-		for (size_t i = 0; i < Lines.size(); ++i)
+		for(size_t i = 0; i < Lines.size(); ++i)
 		{
 			ShaderCode[i] = Lines[i].c_str();
 		}
@@ -77,7 +77,7 @@ bool CGLSL::LoadShader(CGLSLCompiler* pCompiler, IStorage *pStorage, const char 
 		int CompilationStatus;
 		glGetShaderiv(shader, GL_COMPILE_STATUS, &CompilationStatus);
 
-		if (CompilationStatus == GL_FALSE)
+		if(CompilationStatus == GL_FALSE)
 		{
 			char buff[3000];
 
@@ -86,7 +86,7 @@ bool CGLSL::LoadShader(CGLSLCompiler* pCompiler, IStorage *pStorage, const char 
 
 			glGetShaderInfoLog(shader, maxLength, &maxLength, buff);
 
-			dbg_msg("GLSL", "%s: %s", pFile, buff);
+			dbg_msg("glsl", "%s: %s", pFile, buff);
 			glDeleteShader(shader);
 			return false;
 		}
@@ -97,13 +97,14 @@ bool CGLSL::LoadShader(CGLSLCompiler* pCompiler, IStorage *pStorage, const char 
 
 		return true;
 	}
-	else return false;
-
+	else
+		return false;
 }
 
 void CGLSL::DeleteShader()
 {
-	if (!IsLoaded()) return;
+	if(!IsLoaded())
+		return;
 	m_IsLoaded = false;
 	glDeleteShader(m_ShaderID);
 }
@@ -138,12 +139,12 @@ CGLSLCompiler::CGLSLCompiler(int OpenGLVersionMajor, int OpenGLVersionMinor, int
 	m_TextureReplaceType = 0;
 }
 
-void CGLSLCompiler::AddDefine(const std::string& DefineName, const std::string& DefineValue)
+void CGLSLCompiler::AddDefine(const std::string &DefineName, const std::string &DefineValue)
 {
 	m_Defines.emplace_back(SGLSLCompilerDefine(DefineName, DefineValue));
 }
 
-void CGLSLCompiler::AddDefine(const char* pDefineName, const char* pDefineValue)
+void CGLSLCompiler::AddDefine(const char *pDefineName, const char *pDefineValue)
 {
 	AddDefine(std::string(pDefineName), std::string(pDefineValue));
 }
@@ -153,12 +154,12 @@ void CGLSLCompiler::ClearDefines()
 	m_Defines.clear();
 }
 
-void CGLSLCompiler::ParseLine(std::string& Line, const char* pReadLine, int Type)
+void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, int Type)
 {
 	bool IsNewOpenGL = m_OpenGLVersionMajor >= 4 || (m_OpenGLVersionMajor == 3 && m_OpenGLVersionMinor == 3);
 	if(!IsNewOpenGL)
 	{
-		const char* pBuff = pReadLine;
+		const char *pBuff = pReadLine;
 		char aTmpStr[1024];
 		size_t TmpStrSize = 0;
 		while(*pBuff)
@@ -168,13 +169,13 @@ void CGLSLCompiler::ParseLine(std::string& Line, const char* pReadLine, int Type
 				Line.append(1, *pBuff);
 				++pBuff;
 			}
-			
+
 			while(*pBuff && !str_isspace(*pBuff) && *pBuff != '(' && *pBuff != '.')
 			{
 				aTmpStr[TmpStrSize++] = *pBuff;
 				++pBuff;
 			}
-			
+
 			if(TmpStrSize > 0)
 			{
 				aTmpStr[TmpStrSize] = 0;
@@ -187,7 +188,7 @@ void CGLSLCompiler::ParseLine(std::string& Line, const char* pReadLine, int Type
 						++pBuff;
 					}
 
-					if(*pBuff && *pBuff == ' ' && *(pBuff + 1) && *(pBuff + 1) == 'i' && *(pBuff + 2) == 'n')
+					if(*pBuff == ' ' && *(pBuff + 1) && *(pBuff + 1) == 'i' && *(pBuff + 2) == 'n')
 					{
 						pBuff += 3;
 						Line.append("attribute");
@@ -196,7 +197,7 @@ void CGLSLCompiler::ParseLine(std::string& Line, const char* pReadLine, int Type
 					}
 					else
 					{
-						dbg_msg("Shader compiler", "Fix shader for older OpenGL versions.");
+						dbg_msg("shadercompiler", "Fix shader for older OpenGL versions.");
 					}
 				}
 				else if(str_comp(aTmpStr, "noperspective") == 0 || str_comp(aTmpStr, "smooth") == 0 || str_comp(aTmpStr, "flat") == 0)
@@ -221,10 +222,10 @@ void CGLSLCompiler::ParseLine(std::string& Line, const char* pReadLine, int Type
 							Found = true;
 						}
 					}
-					
+
 					if(!Found)
 					{
-						dbg_msg("Shader compiler", "Fix shader for older OpenGL versions.");
+						dbg_msg("shadercompiler", "Fix shader for older OpenGL versions.");
 					}
 
 					Line.append("varying");
@@ -261,9 +262,9 @@ void CGLSLCompiler::ParseLine(std::string& Line, const char* pReadLine, int Type
 				else
 				{
 					Line.append(aTmpStr);
-				}				
+				}
 			}
-		
+
 			if(*pBuff)
 			{
 				Line.append(1, *pBuff);

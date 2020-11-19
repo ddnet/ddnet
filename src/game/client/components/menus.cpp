@@ -42,6 +42,8 @@
 #include "menus.h"
 #include "skins.h"
 
+#include <limits>
+
 ColorRGBA CMenus::ms_GuiColor;
 ColorRGBA CMenus::ms_ColorTabbarInactiveOutgame;
 ColorRGBA CMenus::ms_ColorTabbarActiveOutgame;
@@ -99,10 +101,10 @@ CMenus::CMenus()
 float CMenus::ButtonColorMul(const void *pID)
 {
 	if(UI()->ActiveItem() == pID)
-		return 0.5f;
+		return ButtonColorMulActive();
 	else if(UI()->HotItem() == pID)
-		return 1.5f;
-	return 1;
+		return ButtonColorMulHot();
+	return ButtonColorMulDefault();
 }
 
 int CMenus::DoButton_Icon(int ImageId, int SpriteId, const CUIRect *pRect)
@@ -155,7 +157,7 @@ int CMenus::DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, 
 	return Active ? UI()->DoButtonLogic(pID, "", Checked, pRect) : 0;
 }
 
-int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pImageName, int Corners, float r, float FontFactor, vec4 ColorHot, vec4 Color)
+int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pImageName, int Corners, float r, float FontFactor, vec4 ColorHot, vec4 Color, int AlignVertically)
 {
 	CUIRect Text = *pRect;
 
@@ -184,7 +186,7 @@ int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const
 
 	Text.HMargin(pRect->h >= 20.0f ? 2.0f : 1.0f, &Text);
 	Text.HMargin((Text.h * FontFactor) / 2.0f, &Text);
-	UI()->DoLabel(&Text, pText, Text.h * ms_FontmodHeight, 0);
+	UI()->DoLabel(&Text, pText, Text.h * ms_FontmodHeight, 0, -1, AlignVertically);
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
 }
 
@@ -196,7 +198,7 @@ void CMenus::DoButton_KeySelect(const void *pID, const char *pText, int Checked,
 	UI()->DoLabel(&Temp, pText, Temp.h * ms_FontmodHeight, 0);
 }
 
-int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners, const ColorRGBA *pDefaultColor, const ColorRGBA *pActiveColor, const ColorRGBA *pHoverColor, float EdgeRounding)
+int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners, const ColorRGBA *pDefaultColor, const ColorRGBA *pActiveColor, const ColorRGBA *pHoverColor, float EdgeRounding, int AlignVertically)
 {
 	if(Checked)
 	{
@@ -224,7 +226,7 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 	}
 	CUIRect Temp;
 	pRect->HMargin(2.0f, &Temp);
-	UI()->DoLabel(&Temp, pText, Temp.h * ms_FontmodHeight, 0);
+	UI()->DoLabel(&Temp, pText, Temp.h * ms_FontmodHeight, 0, -1, AlignVertically);
 
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
 }
@@ -253,16 +255,16 @@ int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const c
 	c.Margin(2.0f, &c);
 	RenderTools()->DrawUIRect(&c, ColorRGBA(1, 1, 1, 0.25f * ButtonColorMul(pID)), CUI::CORNER_ALL, 3.0f);
 
-	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT);
 	bool CheckAble = *pBoxText == 'X';
 	if(CheckAble)
 	{
+		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT);
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
-		UI()->DoLabel(&c, "\xEE\x97\x8D", c.h * ms_FontmodHeight, 0);
+		UI()->DoLabel(&c, "\xEE\x97\x8D", c.h * ms_FontmodHeight, 0, -1, 0);
 		TextRender()->SetCurFont(NULL);
 	}
 	else
-		UI()->DoLabel(&c, pBoxText, c.h * ms_FontmodHeight, 0);
+		UI()->DoLabel(&c, pBoxText, c.h * ms_FontmodHeight, 0, -1, 0);
 	TextRender()->SetRenderFlags(0);
 	UI()->DoLabel(&t, pText, c.h * ms_FontmodHeight, -1);
 
@@ -351,7 +353,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 
 			for(int i = 1; i <= Len; i++)
 			{
-				if(TextRender()->TextWidth(0, FontSize, pStr, i, -1.0f) - *Offset > MxRel)
+				if(TextRender()->TextWidth(0, FontSize, pStr, i, std::numeric_limits<float>::max()) - *Offset > MxRel)
 				{
 					s_AtIndex = i - 1;
 					break;
@@ -422,12 +424,6 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	const char *pDisplayStr = pStr;
 	char aStars[128];
 
-	if(pDisplayStr[0] == '\0')
-	{
-		pDisplayStr = pEmptyText;
-		TextRender()->TextColor(1, 1, 1, 0.75f);
-	}
-
 	if(Hidden)
 	{
 		unsigned s = str_length(pDisplayStr);
@@ -439,43 +435,55 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 		pDisplayStr = aStars;
 	}
 
-	char aInputing[32] = {0};
-	if(UI()->HotItem() == pID && Input()->GetIMEState())
+	char aDispEditingText[128 + IInput::INPUT_TEXT_SIZE + 2] = {0};
+	int DispCursorPos = s_AtIndex;
+	if(UI()->LastActiveItem() == pID && Input()->GetIMEEditingTextLength() > -1)
 	{
-		str_copy(aInputing, pStr, sizeof(aInputing));
-		const char *Text = Input()->GetIMECandidate();
-		if(str_length(Text))
+		int EditingTextCursor = Input()->GetEditingCursor();
+		str_copy(aDispEditingText, pDisplayStr, sizeof(aDispEditingText));
+		char aEditingText[IInput::INPUT_TEXT_SIZE + 2];
+		if(Hidden)
 		{
-			int NewTextLen = str_length(Text);
-			int CharsLeft = StrSize - str_length(aInputing) - 1;
-			int FillCharLen = minimum(NewTextLen, CharsLeft);
-			//Push Char Backward
-			for(int i = str_length(aInputing); i >= s_AtIndex; i--)
-				aInputing[i + FillCharLen] = aInputing[i];
-			for(int i = 0; i < FillCharLen; i++)
-			{
-				if(Text[i] == '\n')
-					aInputing[s_AtIndex + i] = ' ';
-				else
-					aInputing[s_AtIndex + i] = Text[i];
-			}
-			//s_AtIndex = s_AtIndex+FillCharLen;
-			pDisplayStr = aInputing;
+			// Do not show editing text in password field
+			str_copy(aEditingText, "[*]", sizeof(aEditingText));
+			EditingTextCursor = 1;
 		}
+		else
+		{
+			str_format(aEditingText, sizeof(aEditingText), "[%s]", Input()->GetIMEEditingText());
+		}
+		int NewTextLen = str_length(aEditingText);
+		int CharsLeft = (int)sizeof(aDispEditingText) - str_length(aDispEditingText) - 1;
+		int FillCharLen = minimum(NewTextLen, CharsLeft);
+		for(int i = str_length(aDispEditingText) - 1; i >= s_AtIndex; i--)
+			aDispEditingText[i + FillCharLen] = aDispEditingText[i];
+		for(int i = 0; i < FillCharLen; i++)
+			aDispEditingText[s_AtIndex + i] = aEditingText[i];
+		DispCursorPos = s_AtIndex + EditingTextCursor + 1;
+		pDisplayStr = aDispEditingText;
+		UpdateOffset = true;
 	}
+
+	if(pDisplayStr[0] == '\0')
+	{
+		pDisplayStr = pEmptyText;
+		TextRender()->TextColor(1, 1, 1, 0.75f);
+	}
+
+	DispCursorPos = minimum(DispCursorPos, str_length(pDisplayStr));
 
 	// check if the text has to be moved
 	if(UI()->LastActiveItem() == pID && !JustGotActive && (UpdateOffset || m_NumInputEvents))
 	{
-		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex, -1.0f);
+		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, DispCursorPos, std::numeric_limits<float>::max());
 		if(w - *Offset > Textbox.w)
 		{
 			// move to the left
-			float wt = TextRender()->TextWidth(0, FontSize, pDisplayStr, -1, -1.0f);
+			float wt = TextRender()->TextWidth(0, FontSize, pDisplayStr, -1, std::numeric_limits<float>::max());
 			do
 			{
 				*Offset += minimum(wt - *Offset - Textbox.w, Textbox.w / 3);
-			} while(w - *Offset > Textbox.w);
+			} while(w - *Offset > Textbox.w + 0.0001f);
 		}
 		else if(w - *Offset < 0.0f)
 		{
@@ -483,7 +491,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 			do
 			{
 				*Offset = maximum(0.0f, *Offset - Textbox.w / 3);
-			} while(w - *Offset < 0.0f);
+			} while(w - *Offset < -0.0001f);
 		}
 	}
 	UI()->ClipEnable(pRect);
@@ -493,25 +501,28 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 
 	TextRender()->TextColor(1, 1, 1, 1);
 
+	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+	float OnePixelWidth = ((ScreenX1 - ScreenX0) / Graphics()->ScreenWidth());
+
 	// render the cursor
 	if(UI()->LastActiveItem() == pID && !JustGotActive)
 	{
-		if(str_length(aInputing))
+		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, DispCursorPos, std::numeric_limits<float>::max());
+		Textbox.x += w;
+
+		if((2 * time_get() / time_freq()) % 2)
 		{
-			float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex + Input()->GetEditingCursor(), -1.0f);
-			Textbox = *pRect;
-			Textbox.VSplitLeft(2.0f, 0, &Textbox);
-			Textbox.x += (w - *Offset - TextRender()->TextWidth(0, FontSize, "|", -1, -1.0f) / 2);
-
-			UI()->DoLabel(&Textbox, "|", FontSize, -1);
+			Graphics()->TextureClear();
+			Graphics()->QuadsBegin();
+			Graphics()->SetColor(0, 0, 0, 0.3f);
+			IGraphics::CQuadItem CursorTBack(Textbox.x - (OnePixelWidth * 2.0f) / 2.0f, Textbox.y, OnePixelWidth * 2 * 2.0f, Textbox.h);
+			Graphics()->QuadsDrawTL(&CursorTBack, 1);
+			Graphics()->SetColor(1, 1, 1, 1);
+			IGraphics::CQuadItem CursorT(Textbox.x, Textbox.y + OnePixelWidth * 1.5f, OnePixelWidth * 2.0f, Textbox.h - OnePixelWidth * 1.5f * 2);
+			Graphics()->QuadsDrawTL(&CursorT, 1);
+			Graphics()->QuadsEnd();
 		}
-		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex, -1.0f);
-		Textbox = *pRect;
-		Textbox.VSplitLeft(2.0f, 0, &Textbox);
-		Textbox.x += (w - *Offset - TextRender()->TextWidth(0, FontSize, "|", -1, -1.0f) / 2);
-
-		if((2 * time_get() / time_freq()) % 2) // make it blink
-			UI()->DoLabel(&Textbox, "|", FontSize, -1);
 
 		Input()->SetEditingPosition(Textbox.x, Textbox.y + FontSize);
 	}
@@ -532,8 +543,10 @@ int CMenus::DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, 
 		ReturnValue = true;
 	}
 
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT);
 	RenderTools()->DrawUIRect(&ClearButton, ColorRGBA(1, 1, 1, 0.33f * ButtonColorMul(pClearID)), Corners & ~CUI::CORNER_L, 3.0f);
-	UI()->DoLabel(&ClearButton, "×", ClearButton.h * ms_FontmodHeight, 0);
+	UI()->DoLabel(&ClearButton, "×", ClearButton.h * ms_FontmodHeight, 0, -1, 0);
+	TextRender()->SetRenderFlags(0);
 	if(UI()->DoButtonLogic(pClearID, "×", 0, &ClearButton))
 	{
 		pStr[0] = 0;
@@ -761,7 +774,7 @@ int CMenus::RenderMenubar(CUIRect r)
 		static int s_StartButton = 0;
 
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
-		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 
 		bool GotNewsOrUpdate = false;
 
@@ -789,7 +802,7 @@ int CMenus::RenderMenubar(CUIRect r)
 			pHomeButtonColorHover = &HomeButtonColorAlertHover;
 		}
 
-		if(DoButton_MenuTab(&s_StartButton, pHomeScreenButtonLabel, false, &Button, CUI::CORNER_T, pHomeButtonColor, pHomeButtonColor, pHomeButtonColorHover))
+		if(DoButton_MenuTab(&s_StartButton, pHomeScreenButtonLabel, false, &Button, CUI::CORNER_T, pHomeButtonColor, pHomeButtonColor, pHomeButtonColorHover, 10.0f, 0))
 		{
 			m_ShowStart = true;
 			m_DoubleClickIndex = -1;
@@ -922,12 +935,12 @@ int CMenus::RenderMenubar(CUIRect r)
 	}
 
 	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
-	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 
 	Box.VSplitRight(33.0f, &Box, &Button);
 	static int s_QuitButton = 0;
 	ColorRGBA QuitColor(1, 0, 0, 0.5f);
-	if(DoButton_MenuTab(&s_QuitButton, "\xEE\x97\x8D", 0, &Button, CUI::CORNER_T, NULL, NULL, &QuitColor))
+	if(DoButton_MenuTab(&s_QuitButton, "\xEE\x97\x8D", 0, &Button, CUI::CORNER_T, NULL, NULL, &QuitColor, 10.0f, 0))
 	{
 		if(m_pClient->Editor()->HasUnsavedData() || (Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmQuitTime && g_Config.m_ClConfirmQuitTime >= 0))
 		{
@@ -943,13 +956,13 @@ int CMenus::RenderMenubar(CUIRect r)
 	Box.VSplitRight(33.0f, &Box, &Button);
 	static int s_SettingsButton = 0;
 
-	if(DoButton_MenuTab(&s_SettingsButton, "\xEE\xA2\xB8", m_ActivePage == PAGE_SETTINGS, &Button, CUI::CORNER_T))
+	if(DoButton_MenuTab(&s_SettingsButton, "\xEE\xA2\xB8", m_ActivePage == PAGE_SETTINGS, &Button, CUI::CORNER_T, NULL, NULL, NULL, 10.0f, 0))
 		NewPage = PAGE_SETTINGS;
 
 	Box.VSplitRight(10.0f, &Box, &Button);
 	Box.VSplitRight(33.0f, &Box, &Button);
 	static int s_EditorButton = 0;
-	if(DoButton_MenuTab(&s_EditorButton, "\xEE\x8F\x89", 0, &Button, CUI::CORNER_T))
+	if(DoButton_MenuTab(&s_EditorButton, "\xEE\x8F\x89", 0, &Button, CUI::CORNER_T, NULL, NULL, NULL, 10.0f, 0))
 	{
 		g_Config.m_ClEditor = 1;
 	}
@@ -960,14 +973,14 @@ int CMenus::RenderMenubar(CUIRect r)
 		Box.VSplitRight(33.0f, &Box, &Button);
 		static int s_DemoButton = 0;
 
-		if(DoButton_MenuTab(&s_DemoButton, "\xEE\x80\xAC", m_ActivePage == PAGE_DEMOS, &Button, CUI::CORNER_T))
+		if(DoButton_MenuTab(&s_DemoButton, "\xEE\x80\xAC", m_ActivePage == PAGE_DEMOS, &Button, CUI::CORNER_T, NULL, NULL, NULL, 10.0f, 0))
 			NewPage = PAGE_DEMOS;
 
 		Box.VSplitRight(10.0f, &Box, &Button);
 		Box.VSplitRight(33.0f, &Box, &Button);
 		static int s_ServerButton = 0;
 
-		if(DoButton_MenuTab(&s_ServerButton, "\xEE\xA0\x8B", m_ActivePage == g_Config.m_UiPage, &Button, CUI::CORNER_T))
+		if(DoButton_MenuTab(&s_ServerButton, "\xEE\xA0\x8B", m_ActivePage == g_Config.m_UiPage, &Button, CUI::CORNER_T, NULL, NULL, NULL, 10.0f, 0))
 			NewPage = g_Config.m_UiPage;
 	}
 
@@ -1078,6 +1091,9 @@ void CMenus::OnInit()
 	if(g_Config.m_ClSkipStartMenu)
 		m_ShowStart = false;
 
+	m_RefreshButton.Init(UI());
+	m_ConnectButton.Init(UI());
+
 	Console()->Chain("add_favorite", ConchainServerbrowserUpdate, this);
 	Console()->Chain("remove_favorite", ConchainServerbrowserUpdate, this);
 	Console()->Chain("add_friend", ConchainFriendlistUpdate, this);
@@ -1110,6 +1126,8 @@ void CMenus::PopupMessage(const char *pTopic, const char *pBody, const char *pBu
 
 void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pButton, int64 Duration)
 {
+	dbg_msg(pTopic, "%s", pBody);
+
 	// reset active item
 	UI()->SetActiveItem(0);
 
@@ -1125,7 +1143,7 @@ void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pBu
 
 bool CMenus::CanDisplayWarning()
 {
-	return m_Popup == POPUP_NONE && (Client()->State() == IClient::STATE_DEMOPLAYBACK || Client()->State() == IClient::STATE_ONLINE);
+	return m_Popup == POPUP_NONE;
 }
 
 int CMenus::Render()
@@ -1242,12 +1260,12 @@ int CMenus::Render()
 			}
 			else if(m_MenuPage == PAGE_INTERNET)
 			{
-				m_pBackground->ChangePosition(CMenuBackground::POS_INTERNET);
+				m_pBackground->ChangePosition(CMenuBackground::POS_BROWSER_INTERNET);
 				RenderServerbrowser(MainView);
 			}
 			else if(m_MenuPage == PAGE_LAN)
 			{
-				m_pBackground->ChangePosition(CMenuBackground::POS_LAN);
+				m_pBackground->ChangePosition(CMenuBackground::POS_BROWSER_LAN);
 				RenderServerbrowser(MainView);
 			}
 			else if(m_MenuPage == PAGE_DEMOS)
@@ -1257,17 +1275,17 @@ int CMenus::Render()
 			}
 			else if(m_MenuPage == PAGE_FAVORITES)
 			{
-				m_pBackground->ChangePosition(CMenuBackground::POS_FAVORITES);
+				m_pBackground->ChangePosition(CMenuBackground::POS_BROWSER_FAVORITES);
 				RenderServerbrowser(MainView);
 			}
 			else if(m_MenuPage == PAGE_DDNET)
 			{
-				m_pBackground->ChangePosition(CMenuBackground::POS_CUSTOM0);
+				m_pBackground->ChangePosition(CMenuBackground::POS_BROWSER_CUSTOM0);
 				RenderServerbrowser(MainView);
 			}
 			else if(m_MenuPage == PAGE_KOG)
 			{
-				m_pBackground->ChangePosition(CMenuBackground::POS_CUSTOM0 + 1);
+				m_pBackground->ChangePosition(CMenuBackground::POS_BROWSER_CUSTOM0 + 1);
 				RenderServerbrowser(MainView);
 			}
 			else if(m_MenuPage == PAGE_SETTINGS)
@@ -1404,9 +1422,27 @@ int CMenus::Render()
 				Localize("Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game."),
 				Localize("Use k key to kill (restart), q to pause and watch other players. See settings for other key binds."),
 				Localize("It's recommended that you check the settings to adjust them to your liking before joining a server."),
-				Localize("Please enter your nick name below."));
+				Localize("Please enter your nickname below."));
 			pExtraText = aBuf;
 			pButtonText = Localize("Ok");
+			ExtraAlign = -1;
+		}
+		else if(m_Popup == POPUP_POINTS)
+		{
+			pTitle = Localize("Existing Player");
+			if(Client()->m_Points > 50)
+			{
+				str_format(aBuf, sizeof(aBuf), Localize("Your nickname '%s' is already used (%d points). Do you still want to use it?"), Client()->PlayerName(), Client()->m_Points);
+				pExtraText = aBuf;
+			}
+			else if(Client()->m_Points >= 0)
+			{
+				m_Popup = POPUP_NONE;
+			}
+			else
+			{
+				pExtraText = Localize("Checking for existing player with your name");
+			}
 			ExtraAlign = -1;
 		}
 		else if(m_Popup == POPUP_WARNING)
@@ -1479,7 +1515,10 @@ int CMenus::Render()
 
 			static int s_ButtonTryAgain = 0;
 			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
+			{
+				m_Popup = POPUP_NONE;
 				Client()->Quit();
+			}
 		}
 		else if(m_Popup == POPUP_DISCONNECT)
 		{
@@ -1569,7 +1608,7 @@ int CMenus::Render()
 			Part.VMargin(120.0f, &Part);
 
 			static int s_Button = 0;
-			if(DoButton_Menu(&s_Button, pButtonText, 0, &Part) || m_EscapePressed || m_EnterPressed)
+			if(DoButton_Menu(&s_Button, pButtonText, 0, &Part) || m_EscapePressed || (m_EnterPressed && m_Popup != POPUP_CONNECTING))
 			{
 				Client()->Disconnect();
 				m_Popup = POPUP_NONE;
@@ -1845,15 +1884,17 @@ int CMenus::Render()
 					}
 				}
 			}
-			Box.HSplitBottom(40.f, &Box, &Part);
+			Box.HSplitBottom(30.f, &Box, 0);
 			Box.HSplitBottom(20.f, &Box, &Part);
+			Box.HSplitBottom(10.f, &Box, 0);
 
+			float ButtonSize = 20.0f;
 			Part.VSplitLeft(113.0f, 0, &Part);
-			Part.VSplitLeft(Button.h, &Button, &Part);
+			Part.VSplitLeft(ButtonSize, &Button, &Part);
 			if(DoButton_CheckBox(&g_Config.m_ClVideoShowChat, Localize("Show chat"), g_Config.m_ClVideoShowChat, &Button))
 				g_Config.m_ClVideoShowChat ^= 1;
 			Part.VSplitLeft(112.0f, 0, &Part);
-			Part.VSplitLeft(Button.h, &Button, &Part);
+			Part.VSplitLeft(ButtonSize, &Button, &Part);
 			if(DoButton_CheckBox(&g_Config.m_ClVideoSndEnable, Localize("Use sounds"), g_Config.m_ClVideoSndEnable, &Button))
 				g_Config.m_ClVideoSndEnable ^= 1;
 
@@ -1869,14 +1910,14 @@ int CMenus::Render()
 			bool IncDemoSpeed = false, DecDemoSpeed = false;
 			// slowdown
 			Part.VSplitLeft(5.0f, 0, &Part);
-			Part.VSplitLeft(Button.h, &Button, &Part);
+			Part.VSplitLeft(ButtonSize, &Button, &Part);
 			static int s_SlowDownButton = 0;
 			if(DoButton_Sprite(&s_SlowDownButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_SLOWER, 0, &Button, CUI::CORNER_ALL))
 				DecDemoSpeed = true;
 
 			// fastforward
 			Part.VSplitLeft(5.0f, 0, &Part);
-			Part.VSplitLeft(Button.h, &Button, &Part);
+			Part.VSplitLeft(ButtonSize, &Button, &Part);
 			static int s_FastForwardButton = 0;
 			if(DoButton_Sprite(&s_FastForwardButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_FASTER, 0, &Button, CUI::CORNER_ALL))
 				IncDemoSpeed = true;
@@ -1893,7 +1934,7 @@ int CMenus::Render()
 				m_Speed = clamp(m_Speed - 1, 0, (int)(sizeof(g_aSpeeds) / sizeof(g_aSpeeds[0]) - 1));
 
 			Part.VSplitLeft(107.0f, 0, &Part);
-			Part.VSplitLeft(Button.h, &Button, &Part);
+			Part.VSplitLeft(ButtonSize, &Button, &Part);
 			if(DoButton_CheckBox(&g_Config.m_ClVideoShowhud, Localize("Show ingame HUD"), g_Config.m_ClVideoShowhud, &Button))
 				g_Config.m_ClVideoShowhud ^= 1;
 
@@ -1988,7 +2029,12 @@ int CMenus::Render()
 			if(DoButton_Menu(&s_EnterButton, Localize("Enter"), 0, &Part) || m_EnterPressed)
 			{
 				Client()->RequestDDNetInfo();
-				m_Popup = POPUP_NONE;
+				if(g_Config.m_BrIndicateFinished)
+					m_Popup = POPUP_POINTS;
+				else
+				{
+					m_Popup = POPUP_NONE;
+				}
 			}
 
 			Box.HSplitBottom(20.f, &Box, &Part);
@@ -2013,6 +2059,27 @@ int CMenus::Render()
 			UI()->DoLabel(&Label, Localize("Nickname"), 16.0f, -1);
 			static float Offset = 0.0f;
 			DoEditBox(&g_Config.m_PlayerName, &TextBox, g_Config.m_PlayerName, sizeof(g_Config.m_PlayerName), 12.0f, &Offset, false, CUI::CORNER_ALL, Client()->PlayerName());
+		}
+		else if(m_Popup == POPUP_POINTS)
+		{
+			CUIRect Yes, No;
+
+			Box.HSplitBottom(20.f, &Box, &Part);
+			Box.HSplitBottom(24.f, &Box, &Part);
+			Part.VMargin(80.0f, &Part);
+
+			Part.VSplitMid(&No, &Yes);
+
+			Yes.VMargin(20.0f, &Yes);
+			No.VMargin(20.0f, &No);
+
+			static int s_ButtonNo = 0;
+			if(DoButton_Menu(&s_ButtonNo, Localize("No"), 0, &No) || m_EscapePressed)
+				m_Popup = POPUP_FIRST_LAUNCH;
+
+			static int s_ButtonYes = 0;
+			if(DoButton_Menu(&s_ButtonYes, Localize("Yes"), 0, &Yes) || m_EnterPressed)
+				m_Popup = POPUP_NONE;
 		}
 		else if(m_Popup == POPUP_WARNING)
 		{
@@ -2219,7 +2286,7 @@ void CMenus::OnStateChange(int NewState, int OldState)
 
 	if(NewState == IClient::STATE_OFFLINE)
 	{
-		if(OldState >= IClient::STATE_ONLINE && NewState < IClient::STATE_QUITING)
+		if(OldState >= IClient::STATE_ONLINE && NewState < IClient::STATE_QUITTING)
 			m_pClient->m_pSounds->Play(CSounds::CHN_MUSIC, SOUND_MENU, 1.0f);
 		m_Popup = POPUP_NONE;
 		if(Client()->ErrorString() && Client()->ErrorString()[0] != 0)
@@ -2577,4 +2644,77 @@ void CMenus::SetMenuPage(int NewPage)
 	m_MenuPage = NewPage;
 	if(NewPage >= PAGE_INTERNET && NewPage <= PAGE_KOG)
 		g_Config.m_UiPage = NewPage;
+}
+
+bool CMenus::HandleListInputs(const CUIRect &View, float &ScrollValue, const float ScrollAmount, int *pScrollOffset, const float ElemHeight, int &SelectedIndex, const int NumElems)
+{
+	int NewIndex = -1;
+	int Num = (int)(View.h / ElemHeight) + 1;
+	int ScrollNum = NumElems - Num + 1;
+	if(ScrollNum > 0)
+	{
+		if(pScrollOffset && *pScrollOffset >= 0)
+		{
+			ScrollValue = (float)(*pScrollOffset) / ScrollNum;
+			*pScrollOffset = -1;
+		}
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) && UI()->MouseInside(&View))
+			ScrollValue -= 3.0f / ScrollNum;
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) && UI()->MouseInside(&View))
+			ScrollValue += 3.0f / ScrollNum;
+	}
+	else
+		ScrollNum = 0;
+
+	if(ScrollValue < 0)
+		ScrollValue = 0;
+	if(ScrollValue > 1)
+		ScrollValue = 1;
+
+	if(SelectedIndex < 0)
+		SelectedIndex = 0;
+	if(SelectedIndex >= NumElems)
+		SelectedIndex = NumElems;
+
+	for(int i = 0; i < m_NumInputEvents; i++)
+	{
+		if(m_aInputEvents[i].m_Flags & IInput::FLAG_PRESS)
+		{
+			if(m_aInputEvents[i].m_Key == KEY_DOWN)
+				NewIndex = minimum(SelectedIndex + 1, NumElems - 1);
+			else if(m_aInputEvents[i].m_Key == KEY_UP)
+				NewIndex = maximum(SelectedIndex - 1, 0);
+			else if(m_aInputEvents[i].m_Key == KEY_PAGEUP)
+				NewIndex = maximum(SelectedIndex - 25, 0);
+			else if(m_aInputEvents[i].m_Key == KEY_PAGEDOWN)
+				NewIndex = minimum(SelectedIndex + 25, NumElems - 1);
+			else if(m_aInputEvents[i].m_Key == KEY_HOME)
+				NewIndex = 0;
+			else if(m_aInputEvents[i].m_Key == KEY_END)
+				NewIndex = NumElems - 1;
+		}
+		if(NewIndex > -1 && NewIndex < NumElems)
+		{
+			//scroll
+			float IndexY = View.y - ScrollValue * ScrollNum * ElemHeight + NewIndex * ElemHeight;
+			int Scroll = View.y > IndexY ? -1 : View.y + View.h < IndexY + ElemHeight ? 1 : 0;
+			if(Scroll)
+			{
+				if(Scroll < 0)
+				{
+					int NumScrolls = (View.y - IndexY + ElemHeight - 1.0f) / ElemHeight;
+					ScrollValue -= (1.0f / ScrollNum) * NumScrolls;
+				}
+				else
+				{
+					int NumScrolls = (IndexY + ElemHeight - (View.y + View.h) + ElemHeight - 1.0f) / ElemHeight;
+					ScrollValue += (1.0f / ScrollNum) * NumScrolls;
+				}
+			}
+
+			SelectedIndex = NewIndex;
+		}
+	}
+
+	return NewIndex != -1;
 }

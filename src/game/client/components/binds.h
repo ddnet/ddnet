@@ -2,8 +2,8 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_BINDS_H
 #define GAME_CLIENT_COMPONENTS_BINDS_H
-#include <game/client/component.h>
 #include <engine/keys.h>
+#include <game/client/component.h>
 
 class CBinds : public CComponent
 {
@@ -28,7 +28,8 @@ public:
 		virtual bool OnInput(IInput::CEvent Event);
 	};
 
-	enum {
+	enum
+	{
 		MODIFIER_NONE = 0,
 		MODIFIER_SHIFT,
 		MODIFIER_CTRL,

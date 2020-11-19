@@ -462,12 +462,6 @@ Spectator mode
 Spectators
 == Observadores
 
-Standard gametype
-== Tipo de jogo padrão
-
-Standard map
-== Mapa padrão
-
 Stop record
 == Parar a gravação
 
@@ -642,9 +636,6 @@ Show votes window after voting
 HUD
 == HUD
 
-AntiPing limit
-== Limite de AntiPing
-
 Look out!
 == Cuidado!
 
@@ -732,9 +723,6 @@ Enable gun sound
 Team message
 == Mensagem do time
 
-Manual %3d:%02d  
-== Manual %3d:%02d  
-
 Save the best demo of each race
 == Salvar a melhor demo de cada corrida
 
@@ -764,9 +752,6 @@ Exclude
 
 DDNet Client updated!
 == DDNet Client atualizado!
-
-Race %3d:%02d  
-== Corrida %3d:%02d  
 
 Type:
 == Tipo:
@@ -902,9 +887,6 @@ Map:
 
 Lht.
 == Lumin.
-
-Auto %3d:%02d  
-== Auto %3d:%02d  
 
 Show clan above name plates
 == Mostrar clã sobre placas de nomes
@@ -1116,9 +1098,6 @@ Pause
 Converse
 == Conversar
 
-Replay %3d:%02d  
-== Reproduzir %3d:%02d
-
 Successfully saved the replay!
 == A reprodução foi salva com sucesso
 
@@ -1170,7 +1149,7 @@ Use k key to kill (restart), q to pause and watch other players. See settings fo
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == É recomendado que você verifique as configurações para ajustá-las ao seu gosto antes de entrar em um servidor.
 
-Please enter your nick name below.
+Please enter your nickname below.
 == Por favor, insira seu apelido abaixo.
 
 Destination file already exist
@@ -1205,15 +1184,6 @@ Country / Region
 
 Speed
 == Velocidade
-
-Search:
-== Pesquisar:
-
-Exclude:
-== Excluir:
-
-Search servers:
-== Pesquisar servidores:
 
 %d of %d servers
 == %d de %d servidores
@@ -1257,3 +1227,81 @@ Editor
 [Start menu]
 Play
 == Jogar
+
+Saving ddnet-settings.cfg failed
+== Falha ao salvar ddnet-settings.cfg
+
+Theme
+== Tema
+
+Demos directory
+== Diretório de demos
+
+Themes directory
+== Diretório de temas
+
+Skin Database
+== Banco de Dados de Skins
+
+Skins directory
+== Diretório de skins
+
+Background music volume
+== Volume da música de fundo
+
+Assets
+== Ativos
+
+Use current map as background
+== Usar o mapa atual como plano de fundo
+
+Entities
+== Entidades
+
+Emoticons
+== Emoticons
+
+Particles
+== Partículas
+
+Assets directory
+== Diretório de ativos
+
+Manual
+== Manual
+
+Race
+== Corrida
+
+Auto
+== Auto
+
+Replay
+== Reproduzir
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== 
+
+Existing Player
+== 
+
+Your nickname '%s' is already used (%d points). Do you still want to use it?
+== 
+
+Checking for existing player with your name
+== 
+
+Smooth Dynamic Camera
+== 
+
+Game sound volume
+== 
+
+Chat sound volume
+== 
+
+Use old chat style
+== 
+
+Highlight
+== 

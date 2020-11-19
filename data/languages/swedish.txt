@@ -5,6 +5,7 @@
 #	Martin Pola		2011-04-02 11:17:09
 #	Kottizen		2011-07-02 00:34:54
 #	3edcxzaq1		2020-06-25 00:00:00
+#	cur.ie		2020-09-28 00:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -442,12 +443,6 @@ Spectator mode
 Spectators
 == Åskådare
 
-Standard gametype
-== Standard speltyp
-
-Standard map
-== Standardkarta
-
 Stop record
 == Sluta spela in
 
@@ -636,9 +631,6 @@ Show console window
 Vanilla skins only
 == Bara vanilla skins
 
-AntiPing limit
-== AntiPing gräns
-
 New random timeout code
 == Ny slumpad timeout kod
 
@@ -777,7 +769,7 @@ Most importantly communication is key: There is no tutorial so you'll have to ch
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Det är rekomenderad att du kollar igenom inställningarna och ändra dom så de passar dig innan du ansluter dig till en server.
 
-Please enter your nick name below.
+Please enter your nickname below.
 == Skriv ditt smeknamn nedanför.
 
 Render
@@ -891,9 +883,6 @@ Show text entities
 Show ghost
 == Visa spöke
 
-Replay %3d:%02d  
-== Repris %3d:%02d
-
 1 new mention
 == 1 ny nämning
 
@@ -944,9 +933,6 @@ Follow
 
 Restart
 == Starta om
-
-Manual %3d:%02d  
-== Manual %3d:%02d
 
 Background (regular)
 == Bakgrund (vanlig)
@@ -1116,9 +1102,6 @@ Gameplay
 Loading DDNet Client
 == Laddar DDNet Klienten
 
-Auto %3d:%02d  
-== Auto %3d:%02d
-
 Show HUD
 == Visa HUD
 
@@ -1133,9 +1116,6 @@ Spree
 
 Show others
 == Visa andra
-
-Race %3d:%02d  
-== Race %3d:%02d
 
 Unfinished map
 == Oavslutat bana
@@ -1177,71 +1157,140 @@ Show others (own team only)
 == Visa andra (eget lag endast)
 
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== 
+== Bredden eller höjden av texturen %s är ej delbar med 16, och kan därav skapa visuella buggar.
 
 Warning
-== 
+== Varning
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 
+== Använd knappen k för att dö (starta om), q för att pausa och se andra spelare. Se inställnignar för andra knappbindningar.
 
 Country / Region
-== 
+== Land / Region
 
 Speed
-== 
-
-Search:
-== 
-
-Exclude:
-== 
-
-Search servers:
-== 
+== Hastighet
 
 %d of %d servers
-== 
+== %d av %d servrar.
 
 %d of %d server
-== 
+== %d av %d server
 
 %d players
-== 
+== %d spelare
 
 %d player
-== 
+== %d spelare
 
 Skip the main menu
-== 
+== Skippa till huvudmenyn
 
 Download skins
-== 
+== Ladda ner skins
 
 Client message
-== 
+== Klientmeddelande
 
 https://wiki.ddnet.tw/
-== 
+== https://wiki.ddnet.tw/
 
 Website
-== 
+== Hemsida
 
 Settings
-== 
+== Inställningar
 
 Stop server
-== 
+== Stoppa servern
 
 Run server
-== 
+== Kör servern
 
 Server executable not found, can't run server
-== 
+== Server exekveringsfil hittades ej, kan ej starta servern
 
 Editor
-== 
+== Editor
 
 [Start menu]
 Play
+== Spela
+
+Manual
+== Manual
+
+Race
+== Race
+
+Auto
+== Auto
+
+Replay
+== Repris
+
+Saving ddnet-settings.cfg failed
+== 
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== 
+
+Existing Player
+== 
+
+Your nickname '%s' is already used (%d points). Do you still want to use it?
+== 
+
+Checking for existing player with your name
+== 
+
+Theme
+== 
+
+Demos directory
+== 
+
+Smooth Dynamic Camera
+== 
+
+Themes directory
+== 
+
+Skin Database
+== 
+
+Skins directory
+== 
+
+Game sound volume
+== 
+
+Chat sound volume
+== 
+
+Background music volume
+== 
+
+Assets
+== 
+
+Use old chat style
+== 
+
+Highlight
+== 
+
+Use current map as background
+== 
+
+Entities
+== 
+
+Emoticons
+== 
+
+Particles
+== 
+
+Assets directory
 == 

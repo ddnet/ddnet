@@ -16,7 +16,7 @@ void NotificationsUninit()
 }
 void NotificationsNotify(const char *pTitle, const char *pMessage)
 {
-	NotifyNotification *pNotif = notify_notification_new(pTitle, pMessage, NULL);
+	NotifyNotification *pNotif = notify_notification_new(pTitle, pMessage, "ddnet");
 	notify_notification_show(pNotif, NULL);
 	g_object_unref(G_OBJECT(pNotif));
 }

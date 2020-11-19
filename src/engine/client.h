@@ -4,17 +4,22 @@
 #define ENGINE_CLIENT_H
 #include "kernel.h"
 
-#include "message.h"
 #include "graphics.h"
+#include "message.h"
+#include <base/hash.h>
 #include <engine/friends.h>
+
+struct SWarning;
 
 enum
 {
-	RECORDER_MANUAL=0,
-	RECORDER_AUTO=1,
-	RECORDER_RACE=2,
-	RECORDER_REPLAYS=3,
-	RECORDER_MAX=4,
+	RECORDER_MANUAL = 0,
+	RECORDER_AUTO = 1,
+	RECORDER_RACE = 2,
+	RECORDER_REPLAYS = 3,
+	RECORDER_MAX = 4,
+
+	NUM_DUMMIES = 2,
 };
 
 typedef bool (*CLIENTFUNC_FILTER)(const void *pData, int DataSize, void *pUser);
@@ -27,13 +32,13 @@ protected:
 	int m_State;
 
 	// quick access to time variables
-	int m_PrevGameTick[2];
-	int m_CurGameTick[2];
-	float m_GameIntraTick[2];
-	float m_GameTickTime[2];
+	int m_PrevGameTick[NUM_DUMMIES];
+	int m_CurGameTick[NUM_DUMMIES];
+	float m_GameIntraTick[NUM_DUMMIES];
+	float m_GameTickTime[NUM_DUMMIES];
 
-	int m_PredTick[2];
-	float m_PredIntraTick[2];
+	int m_PredTick[NUM_DUMMIES];
+	float m_PredIntraTick[NUM_DUMMIES];
 
 	float m_LocalTime;
 	float m_RenderFrameTime;
@@ -41,8 +46,10 @@ protected:
 	int m_GameTickSpeed;
 
 	float m_FrameTimeAvg;
+
 public:
 	char m_aNews[3000];
+	int m_Points;
 	int64 m_ReconnectTime;
 
 	class CSnapItem
@@ -59,17 +66,17 @@ public:
 		STATE_LOADING - The client has connected to a server and is loading resources.
 		STATE_ONLINE - The client is connected to a server and running the game.
 		STATE_DEMOPLAYBACK - The client is playing a demo
-		STATE_QUITING - The client is quitting.
+		STATE_QUITTING - The client is quitting.
 	*/
 
 	enum
 	{
-		STATE_OFFLINE=0,
+		STATE_OFFLINE = 0,
 		STATE_CONNECTING,
 		STATE_LOADING,
 		STATE_ONLINE,
 		STATE_DEMOPLAYBACK,
-		STATE_QUITING,
+		STATE_QUITTING,
 		STATE_RESTARTING,
 	};
 
@@ -103,9 +110,9 @@ public:
 	virtual void Restart() = 0;
 	virtual void Quit() = 0;
 	virtual const char *DemoPlayer_Play(const char *pFilename, int StorageType) = 0;
-	#if defined(CONF_VIDEORECORDER)
+#if defined(CONF_VIDEORECORDER)
 	virtual const char *DemoPlayer_Render(const char *pFilename, int StorageType, const char *pVideoName, int SpeedIndex) = 0;
-	#endif
+#endif
 	virtual void DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int Recorder) = 0;
 	virtual void DemoRecorder_HandleAutoStart() = 0;
 	virtual void DemoRecorder_Stop(int Recorder, bool RemoveFile = false) = 0;
@@ -150,8 +157,8 @@ public:
 
 	enum
 	{
-		SNAP_CURRENT=0,
-		SNAP_PREV=1
+		SNAP_CURRENT = 0,
+		SNAP_PREV = 1
 	};
 
 	// TODO: Refactor: should redo this a bit i think, too many virtual calls
@@ -164,7 +171,7 @@ public:
 	virtual void SnapSetStaticsize(int ItemType, int Size) = 0;
 
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags) = 0;
-	virtual int SendMsgY(CMsgPacker *pMsg, int Flags, int NetClient=1) = 0;
+	virtual int SendMsgY(CMsgPacker *pMsg, int Flags, int NetClient = 1) = 0;
 
 	template<class T>
 	int SendPackMsg(T *pMsg, int Flags)
@@ -190,7 +197,8 @@ public:
 
 	virtual const char *GetCurrentMap() = 0;
 	virtual const char *GetCurrentMapPath() = 0;
-	virtual unsigned GetMapCrc() = 0;
+	virtual SHA256_DIGEST GetCurrentMapSha256() = 0;
+	virtual unsigned GetCurrentMapCrc() = 0;
 
 	virtual int GetCurrentRaceTime() = 0;
 
@@ -207,10 +215,11 @@ public:
 
 	virtual void GenerateTimeoutSeed() = 0;
 
-	virtual IFriends* Foes() = 0;
+	virtual IFriends *Foes() = 0;
 
 	virtual void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount) = 0;
 
+	virtual SWarning *GetCurWarning() = 0;
 };
 
 class IGameClient : public IInterface
@@ -248,6 +257,8 @@ public:
 
 	virtual void OnDummyDisconnect() = 0;
 	virtual void Echo(const char *pString) = 0;
+	virtual bool CanDisplayWarning() = 0;
+	virtual bool IsDisplayingWarning() = 0;
 };
 
 extern IGameClient *CreateGameClient();

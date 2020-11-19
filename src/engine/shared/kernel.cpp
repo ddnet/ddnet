@@ -7,7 +7,7 @@ class CKernel : public IKernel
 {
 	enum
 	{
-		MAX_INTERFACES=32,
+		MAX_INTERFACES = 32,
 	};
 
 	class CInterfaceInfo
@@ -39,7 +39,6 @@ class CKernel : public IKernel
 	}
 
 public:
-
 	CKernel()
 	{
 		m_NumInterfaces = 0;
@@ -48,7 +47,7 @@ public:
 	virtual ~CKernel()
 	{
 		// delete interfaces in reverse order just the way it would happen to objects on the stack
-		for(int i = m_NumInterfaces - 1; i >= 0 ; i--)
+		for(int i = m_NumInterfaces - 1; i >= 0; i--)
 		{
 			if(m_aInterfaces[i].m_AutoDestroy)
 			{
@@ -58,8 +57,7 @@ public:
 		}
 	}
 
-
-	virtual bool RegisterInterfaceImpl(const char *pName, IInterface *pInterface, bool destroy)
+	virtual bool RegisterInterfaceImpl(const char *pName, IInterface *pInterface, bool Destroy)
 	{
 		// TODO: More error checks here
 		if(!pInterface)
@@ -83,7 +81,7 @@ public:
 		pInterface->m_pKernel = this;
 		m_aInterfaces[m_NumInterfaces].m_pInterface = pInterface;
 		str_copy(m_aInterfaces[m_NumInterfaces].m_aName, pName, sizeof(m_aInterfaces[m_NumInterfaces].m_aName));
-		m_aInterfaces[m_NumInterfaces].m_AutoDestroy = destroy;
+		m_aInterfaces[m_NumInterfaces].m_AutoDestroy = Destroy;
 		m_NumInterfaces++;
 
 		return true;

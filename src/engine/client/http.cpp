@@ -13,7 +13,7 @@
 
 // TODO: Non-global pls?
 static CURLSH *gs_Share;
-static LOCK gs_aLocks[CURL_LOCK_DATA_LAST+1];
+static LOCK gs_aLocks[CURL_LOCK_DATA_LAST + 1];
 
 static int GetLockIndex(int Data)
 {
@@ -56,9 +56,9 @@ bool HttpInit(IStorage *pStorage)
 		dbg_msg("http", "libcurl version %s (compiled = " LIBCURL_VERSION ")", pVersion->version);
 	}
 
-	for(unsigned int i = 0; i < sizeof(gs_aLocks) / sizeof(gs_aLocks[0]); i++)
+	for(auto &Lock : gs_aLocks)
 	{
-		gs_aLocks[i] = lock_create();
+		Lock = lock_create();
 	}
 	curl_share_setopt(gs_Share, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
 	curl_share_setopt(gs_Share, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
@@ -75,13 +75,13 @@ void EscapeUrl(char *pBuf, int Size, const char *pStr)
 	curl_free(pEsc);
 }
 
-CRequest::CRequest(const char *pUrl, CTimeout Timeout, bool LogProgress)
-	: m_Timeout(Timeout),
-	  m_Size(0),
-	  m_Progress(0),
-	  m_LogProgress(LogProgress),
-	  m_State(HTTP_QUEUED),
-	  m_Abort(false)
+CRequest::CRequest(const char *pUrl, CTimeout Timeout, bool LogProgress) :
+	m_Timeout(Timeout),
+	m_Size(0),
+	m_Progress(0),
+	m_LogProgress(LogProgress),
+	m_State(HTTP_QUEUED),
+	m_Abort(false)
 {
 	str_copy(m_aUrl, pUrl, sizeof(m_aUrl));
 }
@@ -247,11 +247,11 @@ size_t CGet::OnData(char *pData, size_t DataSize)
 	return DataSize;
 }
 
-CGetFile::CGetFile(IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType, CTimeout Timeout, bool LogProgress)
-	: CRequest(pUrl, Timeout, LogProgress),
-	  m_pStorage(pStorage),
-	  m_StorageType(StorageType),
-	  m_File(0)
+CGetFile::CGetFile(IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType, CTimeout Timeout, bool LogProgress) :
+	CRequest(pUrl, Timeout, LogProgress),
+	m_pStorage(pStorage),
+	m_StorageType(StorageType),
+	m_File(0)
 {
 	str_copy(m_aDest, pDest, sizeof(m_aDest));
 
@@ -287,6 +287,7 @@ int CGetFile::OnCompletion(int State)
 {
 	if(m_File && io_close(m_File) != 0)
 	{
+		dbg_msg("http", "i/o error, cannot close file: %s", m_aDest);
 		State = HTTP_ERROR;
 	}
 
@@ -298,8 +299,8 @@ int CGetFile::OnCompletion(int State)
 	return State;
 }
 
-CPostJson::CPostJson(const char *pUrl, CTimeout Timeout, const char *pJson)
-	: CRequest(pUrl, Timeout)
+CPostJson::CPostJson(const char *pUrl, CTimeout Timeout, const char *pJson) :
+	CRequest(pUrl, Timeout)
 {
 	str_copy(m_aJson, pJson, sizeof(m_aJson));
 }

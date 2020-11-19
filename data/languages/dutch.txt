@@ -452,12 +452,6 @@ Spectator mode
 Spectators
 == Toeschouwers
 
-Standard gametype
-== Standaard speltype
-
-Standard map
-== Standaard kaart
-
 Stop record
 == Stop met opnemen
 
@@ -709,7 +703,7 @@ Most importantly communication is key: There is no tutorial so you'll have to ch
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Het wordt aangeraden dat je de instellingen bekijkt en ze aanpast naar jouw wensen voordat je met een server verbindt.
 
-Please enter your nick name below.
+Please enter your nickname below.
 == Voer je bijnaam in a.u.b.
 
 Destination file already exist
@@ -1051,7 +1045,7 @@ Save the best demo of each race
 == Sla de beste demo op van elke race
 
 Default length: %d
-== Standaart lengte
+== Standaart lengte: %d
 
 Enable replays
 == Replays aan zetten
@@ -1079,9 +1073,6 @@ Show others (own team only)
 
 Show quads
 == Laat quads zien
-
-AntiPing limit
-== AntiPing limiet
 
 AntiPing
 == AntiPing
@@ -1134,18 +1125,6 @@ New random timeout code
 Time
 == Tijd
 
-Manual %3d:%02d  
-== Manual %3d:%02d
-
-Race %3d:%02d  
-== Race %3d:%02d
-
-Auto %3d:%02d  
-== Automatisch %3d:%02d
-
-Replay %3d:%02d  
-== Herhaling %3d:%02d
-
 Follow
 == Volg
 
@@ -1179,13 +1158,40 @@ Grabs
 9+ new mentions
 == 9+ nieuwe berichten
 
+Manual
+== Manual
+
+Race
+== Race
+
+Auto
+== Automatisch
+
+Replay
+== Herhaling
+
+Saving ddnet-settings.cfg failed
+== 
+
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
 == 
 
 Warning
 == 
 
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== 
+
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
+Existing Player
+== 
+
+Your nickname '%s' is already used (%d points). Do you still want to use it?
+== 
+
+Checking for existing player with your name
 == 
 
 Country / Region
@@ -1194,13 +1200,7 @@ Country / Region
 Speed
 == 
 
-Search:
-== 
-
-Exclude:
-== 
-
-Search servers:
+Theme
 == 
 
 %d of %d servers
@@ -1215,13 +1215,61 @@ Search servers:
 %d player
 == 
 
+Demos directory
+== 
+
+Smooth Dynamic Camera
+== 
+
 Skip the main menu
+== 
+
+Themes directory
 == 
 
 Download skins
 == 
 
+Skin Database
+== 
+
+Skins directory
+== 
+
+Game sound volume
+== 
+
+Chat sound volume
+== 
+
+Background music volume
+== 
+
+Assets
+== 
+
+Use old chat style
+== 
+
+Highlight
+== 
+
 Client message
+== 
+
+Use current map as background
+== 
+
+Entities
+== 
+
+Emoticons
+== 
+
+Particles
+== 
+
+Assets directory
 == 
 
 https://wiki.ddnet.tw/

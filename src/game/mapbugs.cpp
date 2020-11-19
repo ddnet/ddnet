@@ -7,13 +7,11 @@ struct CMapDescription
 	const char *m_pName;
 	int m_Size;
 	SHA256_DIGEST m_Sha256;
-	int m_Crc;
 
 	bool operator==(const CMapDescription &Other) const
 	{
 		return str_comp(m_pName, Other.m_pName) == 0 &&
-			m_Size == Other.m_Size &&
-			m_Crc == Other.m_Crc;
+		       m_Size == Other.m_Size;
 	}
 };
 
@@ -27,7 +25,8 @@ static unsigned int BugToFlag(int Bug)
 {
 	unsigned int Result;
 	dbg_assert((unsigned)Bug < 8 * sizeof(Result), "invalid shift");
-	return Result = (1 << Bug);
+	Result = (1 << Bug);
+	return Result;
 }
 
 static unsigned int IsBugFlagSet(int Bug, unsigned int BugFlags)
@@ -43,20 +42,19 @@ static SHA256_DIGEST s(const char *pSha256)
 }
 
 static CMapBugsInternal MAP_BUGS[] =
-{
-	{{"Binary", 2022597, s("65b410e197fd2298ec270e89a84b762f6739d1d18089529f8ef6cf2104d3d600"), 0x0ae3a3d5}, BugToFlag(BUG_GRENADE_DOUBLEEXPLOSION)}
-};
+	{
+		{{"Binary", 2022597, s("65b410e197fd2298ec270e89a84b762f6739d1d18089529f8ef6cf2104d3d600")}, BugToFlag(BUG_GRENADE_DOUBLEEXPLOSION)}};
 
-CMapBugs GetMapBugs(const char *pName, int Size, SHA256_DIGEST Sha256, int Crc)
+CMapBugs GetMapBugs(const char *pName, int Size, SHA256_DIGEST Sha256)
 {
-	CMapDescription Map = {pName, Size, Sha256, Crc};
+	CMapDescription Map = {pName, Size, Sha256};
 	CMapBugs Result;
 	Result.m_Extra = 0;
-	for(unsigned int i = 0; i < sizeof(MAP_BUGS) / sizeof(MAP_BUGS[0]); i++)
+	for(auto &MapBug : MAP_BUGS)
 	{
-		if(Map == MAP_BUGS[i].m_Map)
+		if(Map == MapBug.m_Map)
 		{
-			Result.m_pData = &MAP_BUGS[i];
+			Result.m_pData = &MapBug;
 			return Result;
 		}
 	}
@@ -79,7 +77,8 @@ int CMapBugs::Update(const char *pBug)
 	CMapBugsInternal *pInternal = (CMapBugsInternal *)m_pData;
 	int Bug = -1;
 	if(false) {}
-#define MAPBUG(constname, string) else if(str_comp(pBug, string) == 0) { Bug = constname; }
+#define MAPBUG(constname, string) \
+	else if(str_comp(pBug, string) == 0) { Bug = constname; }
 #include "mapbugs_list.h"
 #undef MAPBUG
 	if(Bug == -1)
@@ -121,10 +120,9 @@ void CMapBugs::Dump() const
 	{
 		char aSha256[SHA256_MAXSTRSIZE];
 		sha256_str(pInternal->m_Map.m_Sha256, aSha256, sizeof(aSha256));
-		dbg_msg("mapbugs", "map='%s' map_size=%d map_sha256=%s map_crc=%08x",
+		dbg_msg("mapbugs", "map='%s' map_size=%d map_sha256=%s",
 			pInternal->m_Map.m_pName,
 			pInternal->m_Map.m_Size,
-			aSha256,
-			pInternal->m_Map.m_Crc);
+			aSha256);
 	}
 }

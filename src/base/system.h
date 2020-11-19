@@ -23,8 +23,8 @@
 #endif
 
 #ifdef CONF_PLATFORM_LINUX
-#include <sys/socket.h>
 #include <netinet/in.h>
+#include <sys/socket.h>
 #endif
 
 #ifdef __cplusplus
@@ -47,17 +47,16 @@ extern "C" {
 		<dbg_break>
 */
 #ifdef CONF_DEBUG
-#define dbg_assert(test,msg) dbg_assert_imp(__FILE__, __LINE__, test, msg)
+#define dbg_assert(test, msg) dbg_assert_imp(__FILE__, __LINE__, test, msg)
 #else
-#define dbg_assert(test,msg)
+#define dbg_assert(test, msg)
 #endif
 void dbg_assert_imp(const char *filename, int line, int test, const char *msg);
-
 
 #ifdef __clang_analyzer__
 #include <assert.h>
 #undef dbg_assert
-#define dbg_assert(test,msg) assert(test)
+#define dbg_assert(test, msg) assert(test)
 #endif
 
 #ifdef __GNUC__
@@ -99,7 +98,7 @@ void dbg_break_imp(void);
 		<dbg_assert>
 */
 void dbg_msg(const char *sys, const char *fmt, ...)
-GNUC_ATTRIBUTE((format(printf, 2, 3)));
+	GNUC_ATTRIBUTE((format(printf, 2, 3)));
 
 /* Group: Memory */
 
@@ -166,7 +165,8 @@ void mem_zero(void *block, unsigned size);
 int mem_comp(const void *a, const void *b, int size);
 
 /* Group: File IO */
-enum {
+enum
+{
 	IOFLAG_READ = 1,
 	IOFLAG_WRITE = 2,
 	IOFLAG_RANDOM = 4,
@@ -320,7 +320,6 @@ int io_flush(IOHANDLE io);
 		Returns nonzero on error, 0 otherwise.
 */
 int io_error(IOHANDLE io);
-
 
 /*
 	Function: io_stdin
@@ -532,7 +531,7 @@ void thread_detach(void *thread);
 void *thread_init_and_detach(void (*threadfunc)(void *), void *user, const char *name);
 
 /* Group: Locks */
-typedef void* LOCK;
+typedef void *LOCK;
 
 LOCK lock_create(void);
 void lock_destroy(LOCK lock);
@@ -541,18 +540,17 @@ int lock_trylock(LOCK lock);
 void lock_wait(LOCK lock);
 void lock_unlock(LOCK lock);
 
-
 /* Group: Semaphores */
 #if defined(CONF_FAMILY_WINDOWS)
-	typedef void* SEMAPHORE;
+typedef void *SEMAPHORE;
 #elif defined(CONF_PLATFORM_MACOSX)
-	#include <semaphore.h>
-	typedef sem_t* SEMAPHORE;
+#include <semaphore.h>
+typedef sem_t *SEMAPHORE;
 #elif defined(CONF_FAMILY_UNIX)
-	#include <semaphore.h>
-	typedef sem_t SEMAPHORE;
+#include <semaphore.h>
+typedef sem_t SEMAPHORE;
 #else
-	#error not implemented on this platform
+#error not implemented on this platform
 #endif
 
 void sphore_init(SEMAPHORE *sem);
@@ -663,14 +661,14 @@ typedef struct
 
 enum
 {
-	NETADDR_MAXSTRSIZE = 1+(8*4+7)+1+1+5+1, // [XXXX:XXXX:XXXX:XXXX:XXXX:XXXX:XXXX:XXXX]:XXXXX
+	NETADDR_MAXSTRSIZE = 1 + (8 * 4 + 7) + 1 + 1 + 5 + 1, // [XXXX:XXXX:XXXX:XXXX:XXXX:XXXX:XXXX:XXXX]:XXXXX
 
 	NETTYPE_INVALID = 0,
 	NETTYPE_IPV4 = 1,
 	NETTYPE_IPV6 = 2,
 	NETTYPE_LINK_BROADCAST = 4,
 	NETTYPE_WEBSOCKET_IPV4 = 8,
-	NETTYPE_ALL = NETTYPE_IPV4|NETTYPE_IPV6|NETTYPE_WEBSOCKET_IPV4
+	NETTYPE_ALL = NETTYPE_IPV4 | NETTYPE_IPV6 | NETTYPE_WEBSOCKET_IPV4
 };
 
 typedef struct
@@ -813,7 +811,7 @@ typedef struct
 #endif
 } MMSGS;
 
-void net_init_mmsgs(MMSGS* m);
+void net_init_mmsgs(MMSGS *m);
 
 /*
 	Function: net_udp_recv
@@ -830,7 +828,7 @@ void net_init_mmsgs(MMSGS* m);
 		On success it returns the number of bytes received. Returns -1
 		on error.
 */
-int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *buffer, int maxsize, MMSGS* m, unsigned char **data);
+int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *buffer, int maxsize, MMSGS *m, unsigned char **data);
 
 /*
 	Function: net_udp_close
@@ -843,7 +841,6 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *buffer, int maxsize, MMSGS
 		Returns 0 on success. -1 on error.
 */
 int net_udp_close(NETSOCKET sock);
-
 
 /* Group: Network TCP */
 
@@ -1086,7 +1083,7 @@ int str_length(const char *str);
 		- Guarantees that dst string will contain zero-termination.
 */
 int str_format(char *buffer, int buffer_size, const char *format, ...)
-GNUC_ATTRIBUTE((format(printf, 3, 4)));
+	GNUC_ATTRIBUTE((format(printf, 3, 4)));
 
 /*
 	Function: str_trim_words
@@ -1103,18 +1100,6 @@ GNUC_ATTRIBUTE((format(printf, 3, 4)));
 		- The strings are treated as zero-terminated strings.
 */
 char *str_trim_words(char *str, int words);
-
-/*
-	Function: str_sanitize_strong
-		Replaces all characters below 32 and above 127 with whitespace.
-
-	Parameters:
-		str - String to sanitize.
-
-	Remarks:
-		- The strings are treated as zero-terminated strings.
-*/
-void str_sanitize_strong(char *str);
 
 /*
 	Function: str_sanitize_cc
@@ -1495,13 +1480,42 @@ int str_hex_decode(void *dst, int dst_size, const char *src);
 */
 void str_timestamp(char *buffer, int buffer_size);
 void str_timestamp_format(char *buffer, int buffer_size, const char *format)
-GNUC_ATTRIBUTE((format(strftime, 3, 0)));
+	GNUC_ATTRIBUTE((format(strftime, 3, 0)));
 void str_timestamp_ex(time_t time, char *buffer, int buffer_size, const char *format)
-GNUC_ATTRIBUTE((format(strftime, 4, 0)));
+	GNUC_ATTRIBUTE((format(strftime, 4, 0)));
 
 #define FORMAT_TIME "%H:%M:%S"
 #define FORMAT_SPACE "%Y-%m-%d %H:%M:%S"
 #define FORMAT_NOSPACE "%Y-%m-%d_%H-%M-%S"
+
+enum
+{
+	TIME_DAYS,
+	TIME_HOURS,
+	TIME_MINS,
+	TIME_HOURS_CENTISECS,
+	TIME_MINS_CENTISECS,
+};
+
+/*
+	Function: str_times
+		Formats a time string.
+
+	Parameters:
+		centisecs - Time in centiseconds, minimum value clamped to 0
+		format - Format of the time string, see enum above, for example TIME_DAYS
+		buffer - Pointer to a buffer that shall receive the time stamp string.
+		buffer_size - Size of the buffer.
+
+	Returns:
+		Number of bytes written, -1 on invalid format or buffer_size <= 0
+
+	Remarks:
+		- Guarantees that buffer string will contain zero-termination, assuming
+		  buffer_size > 0.
+*/
+int str_time(int64 centisecs, int format, char *buffer, int buffer_size);
+int str_time_float(float secs, int format, char *buffer, int buffer_size);
 
 /*
 	Function: str_escape
@@ -1660,7 +1674,6 @@ int fs_rename(const char *oldname, const char *newname);
 	Group: Undocumented
 */
 
-
 /*
 	Function: net_tcp_connect_non_blocking
 
@@ -1715,7 +1728,6 @@ int open_link(const char *link);
 
 void swap_endian(void *data, unsigned elem_size, unsigned num);
 
-
 typedef void (*DBG_LOGGER)(const char *line, void *user);
 typedef void (*DBG_LOGGER_FINISH)(void *user);
 void dbg_logger(DBG_LOGGER logger, DBG_LOGGER_FINISH finish, void *user);
@@ -1731,7 +1743,6 @@ typedef struct
 	int recv_packets;
 	int recv_bytes;
 } NETSTATS;
-
 
 void net_stats(NETSTATS *stats);
 

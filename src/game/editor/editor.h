@@ -3,9 +3,9 @@
 #ifndef GAME_EDITOR_EDITOR_H
 #define GAME_EDITOR_EDITOR_H
 
-#include <vector>
-#include <string>
 #include <math.h>
+#include <string>
+#include <vector>
 
 #include <base/math.h>
 #include <base/system.h>
@@ -15,14 +15,14 @@
 #include <base/tl/sorted_array.h>
 #include <base/tl/string.h>
 
+#include <game/client/render.h>
 #include <game/client/ui.h>
 #include <game/mapitems.h>
-#include <game/client/render.h>
 
-#include <engine/shared/config.h>
-#include <engine/shared/datafile.h>
 #include <engine/editor.h>
 #include <engine/graphics.h>
+#include <engine/shared/config.h>
+#include <engine/shared/datafile.h>
 #include <engine/sound.h>
 #include <engine/storage.h>
 
@@ -35,11 +35,11 @@ typedef void (*INDEX_MODIFY_FUNC)(int *pIndex);
 // CEditor SPECIFIC
 enum
 {
-	MODE_LAYERS=0,
+	MODE_LAYERS = 0,
 	MODE_IMAGES,
 	MODE_SOUNDS,
 
-	DIALOG_NONE=0,
+	DIALOG_NONE = 0,
 	DIALOG_FILE,
 };
 
@@ -75,11 +75,13 @@ public:
 		{
 			for(int c = 0; c < m_Channels; c++)
 			{
-				if(ChannelMask&(1<<c))
+				if(ChannelMask & (1 << c))
 				{
 					float v = fx2f(m_lPoints[i].m_aValues[c]);
-					if(v > m_Top) m_Top = v;
-					if(v < m_Bottom) m_Bottom = v;
+					if(v > m_Top)
+						m_Top = v;
+					if(v < m_Bottom)
+						m_Bottom = v;
 				}
 			}
 		}
@@ -87,11 +89,11 @@ public:
 
 	int Eval(float Time, float *pResult)
 	{
-		CRenderTools::RenderEvalEnvelope(m_lPoints.base_ptr(), m_lPoints.size(), m_Channels, Time, pResult);
+		CRenderTools::RenderEvalEnvelope(m_lPoints.base_ptr(), m_lPoints.size(), m_Channels, (int64)((double)Time * 1000000.0), pResult);
 		return m_Channels;
 	}
 
-	void AddPoint(int Time, int v0, int v1=0, int v2=0, int v3=0)
+	void AddPoint(int Time, int v0, int v1 = 0, int v2 = 0, int v3 = 0)
 	{
 		CEnvPoint p;
 		p.m_Time = Time;
@@ -107,11 +109,10 @@ public:
 	float EndTime()
 	{
 		if(m_lPoints.size())
-			return m_lPoints[m_lPoints.size()-1].m_Time*(1.0f/1000.0f);
+			return m_lPoints[m_lPoints.size() - 1].m_Time * (1.0f / 1000.0f);
 		return 0;
 	}
 };
-
 
 class CLayer;
 class CLayerGroup;
@@ -139,7 +140,6 @@ public:
 	{
 	}
 
-
 	virtual void BrushSelecting(CUIRect Rect) {}
 	virtual int BrushGrab(CLayerGroup *pBrush, CUIRect Rect) { return 0; }
 	virtual void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect) {}
@@ -156,7 +156,11 @@ public:
 	virtual void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) {}
 	virtual void ModifySoundIndex(INDEX_MODIFY_FUNC pfnFunc) {}
 
-	virtual void GetSize(float *w, float *h) { *w = 0; *h = 0;}
+	virtual void GetSize(float *w, float *h)
+	{
+		*w = 0;
+		*h = 0;
+	}
 
 	char m_aName[12];
 	int m_Type;
@@ -173,7 +177,7 @@ class CLayerGroup
 public:
 	class CEditorMap *m_pMap;
 
-	array<CLayer*> m_lLayers;
+	array<CLayer *> m_lLayers;
 
 	int m_OffsetX;
 	int m_OffsetY;
@@ -277,8 +281,8 @@ class CEditorImage : public CImageInfo
 public:
 	CEditor *m_pEditor;
 
-	CEditorImage(CEditor *pEditor)
-	: m_AutoMapper(pEditor)
+	CEditorImage(CEditor *pEditor) :
+		m_AutoMapper(pEditor)
 	{
 		m_pEditor = pEditor;
 		m_aName[0] = 0;
@@ -309,7 +313,6 @@ public:
 	{
 		m_pEditor = pEditor;
 		m_aName[0] = 0;
-		m_External = 0;
 		m_SoundID = 0;
 
 		m_pData = 0x0;
@@ -319,7 +322,6 @@ public:
 	~CEditorSound();
 
 	int m_SoundID;
-	int m_External;
 	char m_aName[128];
 
 	void *m_pData;
@@ -330,6 +332,7 @@ class CEditorMap
 {
 	void MakeGameGroup(CLayerGroup *pGroup);
 	void MakeGameLayer(CLayer *pLayer);
+
 public:
 	CEditor *m_pEditor;
 	bool m_Modified;
@@ -345,10 +348,10 @@ public:
 		Clean();
 	}
 
-	array<CLayerGroup*> m_lGroups;
-	array<CEditorImage*> m_lImages;
-	array<CEnvelope*> m_lEnvelopes;
-	array<CEditorSound*> m_lSounds;
+	array<CLayerGroup *> m_lGroups;
+	array<CEditorImage *> m_lImages;
+	array<CEnvelope *> m_lEnvelopes;
+	array<CEditorSound *> m_lSounds;
 
 	class CMapInfo
 	{
@@ -410,9 +413,12 @@ public:
 
 	int SwapGroups(int Index0, int Index1)
 	{
-		if(Index0 < 0 || Index0 >= m_lGroups.size()) return Index0;
-		if(Index1 < 0 || Index1 >= m_lGroups.size()) return Index0;
-		if(Index0 == Index1) return Index0;
+		if(Index0 < 0 || Index0 >= m_lGroups.size())
+			return Index0;
+		if(Index1 < 0 || Index1 >= m_lGroups.size())
+			return Index0;
+		if(Index0 == Index1)
+			return Index0;
 		m_Modified = true;
 		m_UndoModified++;
 		swap(m_lGroups[Index0], m_lGroups[Index1]);
@@ -421,7 +427,8 @@ public:
 
 	void DeleteGroup(int Index)
 	{
-		if(Index < 0 || Index >= m_lGroups.size()) return;
+		if(Index < 0 || Index >= m_lGroups.size())
+			return;
 		m_Modified = true;
 		m_UndoModified++;
 		delete m_lGroups[Index];
@@ -473,7 +480,6 @@ public:
 	void MakeTuneLayer(CLayer *pLayer);
 };
 
-
 struct CProperty
 {
 	const char *m_pName;
@@ -485,7 +491,7 @@ struct CProperty
 
 enum
 {
-	PROPTYPE_NULL=0,
+	PROPTYPE_NULL = 0,
 	PROPTYPE_BOOL,
 	PROPTYPE_INT_STEP,
 	PROPTYPE_INT_SCROLL,
@@ -537,7 +543,8 @@ public:
 	virtual void ShowInfo();
 	virtual int RenderProperties(CUIRect *pToolbox);
 
-	struct SCommonPropState {
+	struct SCommonPropState
+	{
 		bool Modified = false;
 		int Width = -1;
 		int Height = -1;
@@ -550,7 +557,11 @@ public:
 
 	void PrepareForSave();
 
-	void GetSize(float *w, float *h) { *w = m_Width*32.0f; *h = m_Height*32.0f; }
+	void GetSize(float *w, float *h)
+	{
+		*w = m_Width * 32.0f;
+		*h = m_Height * 32.0f;
+	}
 
 	void FlagModified(int x, int y, int w, int h);
 
@@ -627,6 +638,7 @@ class CEditor : public IEditor
 	class IStorage *m_pStorage;
 	CRenderTools m_RenderTools;
 	CUI m_UI;
+
 public:
 	class IInput *Input() { return m_pInput; };
 	class IClient *Client() { return m_pClient; };
@@ -638,7 +650,8 @@ public:
 	CUI *UI() { return &m_UI; }
 	CRenderTools *RenderTools() { return &m_RenderTools; }
 
-	CEditor() : m_TilesetPicker(16, 16)
+	CEditor() :
+		m_TilesetPicker(16, 16)
 	{
 		m_pInput = 0;
 		m_pClient = 0;
@@ -768,7 +781,7 @@ public:
 		const char *pBasepath, const char *pDefaultName,
 		void (*pfnFunc)(const char *pFilename, int StorageType, void *pUser), void *pUser);
 
-	void Reset(bool CreateDefault=true);
+	void Reset(bool CreateDefault = true);
 	virtual int Save(const char *pFilename);
 	virtual int Load(const char *pFilename, int StorageType);
 	int Append(const char *pFilename, int StorageType);
@@ -786,7 +799,8 @@ public:
 	bool IsQuadSelected(int Index);
 	int FindSelectedQuadIndex(int Index);
 
-	int DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, ColorRGBA Color = ColorRGBA(1,1,1,0.5f));
+	float ScaleFontSize(char *pText, int TextSize, float FontSize, int Width);
+	int DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, ColorRGBA Color = ColorRGBA(1, 1, 1, 0.5f));
 
 	int m_Mode;
 	int m_Dialog;
@@ -856,7 +870,6 @@ public:
 	CImageInfo m_FilePreviewImageInfo;
 	bool m_FileDialogOpening;
 
-
 	struct CFilelistItem
 	{
 		char m_aFilename[128];
@@ -866,9 +879,7 @@ public:
 		int m_StorageType;
 		bool m_IsVisible;
 
-		bool operator<(const CFilelistItem &Other) { return !str_comp(m_aFilename, "..") ? true : !str_comp(Other.m_aFilename, "..") ? false :
-														m_IsDir && !Other.m_IsDir ? true : !m_IsDir && Other.m_IsDir ? false :
-														str_comp_nocase(m_aFilename, Other.m_aFilename) < 0; }
+		bool operator<(const CFilelistItem &Other) const { return !str_comp(m_aFilename, "..") ? true : !str_comp(Other.m_aFilename, "..") ? false : m_IsDir && !Other.m_IsDir ? true : !m_IsDir && Other.m_IsDir ? false : str_comp_nocase(m_aFilename, Other.m_aFilename) < 0; }
 	};
 	sorted_array<CFilelistItem> m_FileList;
 	int m_FilesStartAt;
@@ -932,40 +943,41 @@ public:
 	CEditorMap m_Map;
 	int m_ShiftBy;
 
-	static void EnvelopeEval(float TimeOffset, int Env, float *pChannels, void *pUser);
+	static void EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, void *pUser);
 
 	float m_CommandBox;
 	char m_aSettingsCommand[256];
 
 	void PlaceBorderTiles();
 	int DoButton_Editor_Common(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
-	int DoButton_Editor(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
+	int DoButton_Editor(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int AlignVert = 1);
 	int DoButton_Env(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pToolTip, ColorRGBA Color);
 
 	int DoButton_Tab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
-	int DoButton_Ex(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize=10.0f);
+	int DoButton_Ex(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize = 10.0f, int AlignVert = 1);
 	int DoButton_ButtonDec(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
 	int DoButton_ButtonInc(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
 
 	int DoButton_File(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
 
 	int DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
-	int DoButton_MenuItem(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags=0, const char *pToolTip=0);
+	int DoButton_MenuItem(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags = 0, const char *pToolTip = 0);
 
-	int DoButton_ColorPicker(const void *pID, const CUIRect *pRect, ColorRGBA *pColor, const char *pToolTip=0);
+	int DoButton_ColorPicker(const void *pID, const CUIRect *pRect, ColorRGBA *pColor, const char *pToolTip = 0);
 
-	int DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden=false, int Corners=CUI::CORNER_ALL);
+	int DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners);
+	int DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden = false, int Corners = CUI::CORNER_ALL);
 
 	void RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, float Size, float Brightness);
 
 	void RenderGrid(CLayerGroup *pGroup);
 
-	void UiInvokePopupMenu(void *pID, int Flags, float X, float Y, float W, float H, int (*pfnFunc)(CEditor *pEditor, CUIRect Rect, void *pContext), void *pExtra=0);
+	void UiInvokePopupMenu(void *pID, int Flags, float X, float Y, float W, float H, int (*pfnFunc)(CEditor *pEditor, CUIRect Rect, void *pContext), void *pExtra = 0);
 	void UiDoPopupMenu();
 	bool UiPopupExists(void *pID);
 	bool UiPopupOpen();
 
-	int UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree=false, bool IsHex=false, int corners=CUI::CORNER_ALL, ColorRGBA* Color=0);
+	int UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree = false, bool IsHex = false, int corners = CUI::CORNER_ALL, ColorRGBA *Color = 0);
 
 	static int PopupGroup(CEditor *pEditor, CUIRect View, void *pContext);
 
@@ -1036,7 +1048,7 @@ public:
 	void RenderStatusbar(CUIRect View);
 	void RenderEnvelopeEditor(CUIRect View);
 	void RenderUndoList(CUIRect View);
-	void RenderServerSettingsEditor(CUIRect View);
+	void RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEditorLast);
 
 	void RenderMenubar(CUIRect Menubar);
 	void RenderFileDialog();
@@ -1193,6 +1205,5 @@ public:
 	int m_Sound;
 	array<CSoundSource> m_lSources;
 };
-
 
 #endif

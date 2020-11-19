@@ -1,6 +1,6 @@
-uniform sampler2D textureSampler;
+uniform sampler2D gTextureSampler;
 
-uniform vec4 VerticesColor;
+uniform vec4 gVerticesColor;
 
 noperspective in vec2 texCoord;
 noperspective in vec4 vertColor;
@@ -8,6 +8,6 @@ noperspective in vec4 vertColor;
 out vec4 FragClr;
 void main()
 {
-	vec4 tex = texture(textureSampler, texCoord);
-	FragClr = tex * vertColor * VerticesColor;
+	vec4 tex = texture(gTextureSampler, texCoord);
+	FragClr = tex * vertColor * gVerticesColor;
 }

@@ -14,8 +14,6 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
     - name: Install clang-format
       run: |
         sudo apt-get update -y
@@ -23,5 +21,6 @@ jobs:
     - name: Check style
       run: |
         clang-format -version
-        scripts/fix_style.py --dry-run --base origin/master
+        scripts/fix_style.py --dry-run
         scripts/check_header_guards.py
+        scripts/languages/update_all.py

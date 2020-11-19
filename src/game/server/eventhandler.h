@@ -8,7 +8,7 @@
 class CEventHandler
 {
 	static const int MAX_EVENTS = 128;
-	static const int MAX_DATASIZE = 128*64;
+	static const int MAX_DATASIZE = 128 * 64;
 
 	int m_aTypes[MAX_EVENTS]; // TODO: remove some of these arrays
 	int m_aOffsets[MAX_EVENTS];
@@ -20,6 +20,7 @@ class CEventHandler
 
 	int m_CurrentOffset;
 	int m_NumEvents;
+
 public:
 	CGameContext *GameServer() const { return m_pGameServer; }
 	void SetGameServer(CGameContext *pGameServer);

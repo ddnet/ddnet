@@ -3,12 +3,30 @@
 #ifndef ENGINE_CLIENT_CLIENT_H
 #define ENGINE_CLIENT_CLIENT_H
 
+#include <list>
 #include <memory>
 
 #include <base/hash.h>
+#include <engine/client.h>
+#include <engine/client/demoedit.h>
 #include <engine/client/friends.h>
+#include <engine/client/ghost.h>
 #include <engine/client/http.h>
+#include <engine/client/serverbrowser.h>
 #include <engine/client/updater.h>
+#include <engine/editor.h>
+#include <engine/engine.h>
+#include <engine/graphics.h>
+#include <engine/input.h>
+#include <engine/map.h>
+#include <engine/masterserver.h>
+#include <engine/shared/config.h>
+#include <engine/shared/demo.h>
+#include <engine/shared/fifo.h>
+#include <engine/shared/network.h>
+#include <engine/sound.h>
+#include <engine/steam.h>
+#include <engine/warning.h>
 
 #define CONNECTLINK "ddnet:"
 
@@ -18,7 +36,7 @@ public:
 	enum
 	{
 		// restrictions: Must be power of two
-		MAX_VALUES=128,
+		MAX_VALUES = 128,
 	};
 
 	float m_Min, m_Max;
@@ -34,7 +52,6 @@ public:
 	void Add(float v, float r, float g, float b);
 	void Render(IGraphics *pGraphics, IGraphics::CTextureHandle FontTexture, float x, float y, float w, float h, const char *pDescription);
 };
-
 
 class CSmoothTime
 {
@@ -81,13 +98,13 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	enum
 	{
-		NUM_SNAPSHOT_TYPES=2,
-		PREDICTION_MARGIN=1000/50/2, // magic network prediction value
+		NUM_SNAPSHOT_TYPES = 2,
+		PREDICTION_MARGIN = 1000 / 50 / 2, // magic network prediction value
 	};
 
 	enum
 	{
-		CLIENT_MAIN,
+		CLIENT_MAIN = 0,
 		CLIENT_DUMMY,
 		CLIENT_CONTACT,
 		NUM_CLIENTS,
@@ -108,7 +125,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	CUuid m_ConnectionID;
 
-	unsigned m_SnapshotParts[2];
+	unsigned m_SnapshotParts[NUM_DUMMIES];
 	int64 m_LocalStartTime;
 
 	IGraphics::CTextureHandle m_DebugFont;
@@ -128,14 +145,14 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	bool m_SoundInitFailed;
 	bool m_ResortServerBrowser;
 
-	int m_AckGameTick[2];
-	int m_CurrentRecvTick[2];
-	int m_RconAuthed[2];
+	int m_AckGameTick[NUM_DUMMIES];
+	int m_CurrentRecvTick[NUM_DUMMIES];
+	int m_RconAuthed[NUM_DUMMIES];
 	char m_RconPassword[32];
 	int m_UseTempRconCommands;
 	char m_Password[32];
 	bool m_SendPassword;
-	bool m_ButtonRender=false;
+	bool m_ButtonRender = false;
 
 	// version-checking
 	char m_aVersionStr[10];
@@ -146,8 +163,8 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aCurrentMap[MAX_PATH_LENGTH];
 	char m_aCurrentMapPath[MAX_PATH_LENGTH];
 
-	char m_aTimeoutCodes[2][32];
-	bool m_aTimeoutCodeSent[2];
+	char m_aTimeoutCodes[NUM_DUMMIES][32];
+	bool m_aTimeoutCodeSent[NUM_DUMMIES];
 	bool m_GenerateTimeoutSeed;
 
 	//
@@ -178,7 +195,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aDummyNameBuf[16];
 
 	// time
-	CSmoothTime m_GameTime[2];
+	CSmoothTime m_GameTime[NUM_DUMMIES];
 	CSmoothTime m_PredictedTime;
 
 	// input
@@ -188,9 +205,9 @@ class CClient : public IClient, public CDemoPlayer::IListener
 		int m_Tick; // the tick that the input is for
 		int64 m_PredictedTime; // prediction latency when we sent this input
 		int64 m_Time;
-	} m_aInputs[2][200];
+	} m_aInputs[NUM_DUMMIES][200];
 
-	int m_CurrentInput[2];
+	int m_CurrentInput[NUM_DUMMIES];
 	bool m_LastDummy;
 	bool m_DummySendConnInfo;
 
@@ -200,10 +217,10 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	CGraph m_FpsGraph;
 
 	// the game snapshots are modifiable by the game
-	class CSnapshotStorage m_SnapshotStorage[2];
-	CSnapshotStorage::CHolder *m_aSnapshots[2][NUM_SNAPSHOT_TYPES];
+	class CSnapshotStorage m_SnapshotStorage[NUM_DUMMIES];
+	CSnapshotStorage::CHolder *m_aSnapshots[NUM_DUMMIES][NUM_SNAPSHOT_TYPES];
 
-	int m_ReceivedSnapshots[2];
+	int m_ReceivedSnapshots[NUM_DUMMIES];
 	char m_aSnapshotIncomingData[CSnapshot::MAX_SIZE];
 
 	class CSnapshotStorage::CHolder m_aDemorecSnapshotHolders[NUM_SNAPSHOT_TYPES];
@@ -228,7 +245,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	{
 		enum
 		{
-			STATE_INIT=0,
+			STATE_INIT = 0,
 			STATE_START,
 			STATE_READY,
 		};
@@ -238,8 +255,10 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	} m_VersionInfo;
 
 	volatile int m_GfxState;
-	static void GraphicsThreadProxy(void *pThis) { ((CClient*)pThis)->GraphicsThread(); }
+	static void GraphicsThreadProxy(void *pThis) { ((CClient *)pThis)->GraphicsThread(); }
 	void GraphicsThread();
+
+	std::vector<SWarning> m_Warnings;
 
 #if defined(CONF_FAMILY_UNIX)
 	CFifo m_Fifo;
@@ -260,7 +279,7 @@ public:
 
 	// ----- send functions -----
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags);
-	virtual int SendMsgY(CMsgPacker *pMsg, int Flags, int NetClient=1);
+	virtual int SendMsgY(CMsgPacker *pMsg, int Flags, int NetClient = 1);
 
 	void SendInfo();
 	void SendEnterGame();
@@ -333,7 +352,7 @@ public:
 	const char *LoadMap(const char *pName, const char *pFilename, SHA256_DIGEST *pWantedSha256, unsigned WantedCrc);
 	const char *LoadMapSearch(const char *pMapName, SHA256_DIGEST *pWantedSha256, int WantedCrc);
 
-	static int PlayerScoreNameComp(const void *a, const void *b);
+	static bool PlayerScoreNameLess(const CServerInfo::CClient &p0, const CServerInfo::CClient &p1);
 
 	void ProcessConnlessPacket(CNetChunk *pPacket);
 	void ProcessServerInfo(int Type, NETADDR *pFrom, const void *pData, int DataSize);
@@ -445,29 +464,32 @@ public:
 
 	// DDRace
 
-	void GenerateTimeoutSeed();
+	virtual void GenerateTimeoutSeed();
 	void GenerateTimeoutCodes();
 
 	virtual int GetCurrentRaceTime();
 
-	const char *GetCurrentMap();
-	const char *GetCurrentMapPath();
-	unsigned GetMapCrc();
+	virtual const char *GetCurrentMap();
+	virtual const char *GetCurrentMapPath();
+	virtual SHA256_DIGEST GetCurrentMapSha256();
+	virtual unsigned GetCurrentMapCrc();
 
-	void RaceRecord_Start(const char *pFilename);
-	void RaceRecord_Stop();
-	bool RaceRecord_IsRecording();
+	virtual void RaceRecord_Start(const char *pFilename);
+	virtual void RaceRecord_Stop();
+	virtual bool RaceRecord_IsRecording();
 
 	virtual void DemoSliceBegin();
 	virtual void DemoSliceEnd();
 	virtual void DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser);
 	virtual void SaveReplay(const int Length);
 
-	bool EditorHasUnsavedData() { return m_pEditor->HasUnsavedData(); }
+	virtual bool EditorHasUnsavedData() { return m_pEditor->HasUnsavedData(); }
 
-	virtual IFriends* Foes() { return &m_Foes; }
+	virtual IFriends *Foes() { return &m_Foes; }
 
-	void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount);
+	virtual void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount);
+
+	virtual SWarning *GetCurWarning();
 };
 
 #endif

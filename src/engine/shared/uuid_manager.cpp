@@ -5,11 +5,9 @@
 
 #include <stdio.h>
 
-static const CUuid TEEWORLDS_NAMESPACE = {{
-	// "e05ddaaa-c4e6-4cfb-b642-5d48e80c0029"
+static const CUuid TEEWORLDS_NAMESPACE = {{// "e05ddaaa-c4e6-4cfb-b642-5d48e80c0029"
 	0xe0, 0x5d, 0xda, 0xaa, 0xc4, 0xe6, 0x4c, 0xfb,
-	0xb6, 0x42, 0x5d, 0x48, 0xe8, 0x0c, 0x00, 0x29
-}};
+	0xb6, 0x42, 0x5d, 0x48, 0xe8, 0x0c, 0x00, 0x29}};
 
 CUuid RandomUuid()
 {
@@ -63,12 +61,12 @@ void ParseUuid(CUuid *pUuid, char *pBuffer)
 		&p[8], &p[9], &p[10], &p[11], &p[12], &p[13], &p[14], &p[15]);
 }
 
-bool CUuid::operator==(const CUuid& Other)
+bool CUuid::operator==(const CUuid &Other) const
 {
 	return mem_comp(this, &Other, sizeof(*this)) == 0;
 }
 
-bool CUuid::operator!=(const CUuid& Other)
+bool CUuid::operator!=(const CUuid &Other) const
 {
 	return !(*this == Other);
 }
@@ -92,6 +90,11 @@ void CUuidManager::RegisterName(int ID, const char *pName)
 	dbg_assert(LookupUuid(Name.m_Uuid) == -1, "duplicate uuid");
 
 	m_aNames.add(Name);
+
+	CNameIndexed NameIndexed;
+	NameIndexed.m_Uuid = Name.m_Uuid;
+	NameIndexed.m_ID = GetIndex(ID);
+	m_aNamesSorted.add(NameIndexed);
 }
 
 CUuid CUuidManager::GetUuid(int ID) const
@@ -106,12 +109,10 @@ const char *CUuidManager::GetName(int ID) const
 
 int CUuidManager::LookupUuid(CUuid Uuid) const
 {
-	for(int i = 0; i < m_aNames.size(); i++)
+	sorted_array<CNameIndexed>::range Pos = ::find_binary(m_aNamesSorted.all(), Uuid);
+	if(!Pos.empty())
 	{
-		if(Uuid == m_aNames[i].m_Uuid)
-		{
-			return GetID(i);
-		}
+		return GetID(Pos.front().m_ID);
 	}
 	return UUID_UNKNOWN;
 }

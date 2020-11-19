@@ -3,8 +3,8 @@
 #ifndef BASE_TL_BASE_H
 #define BASE_TL_BASE_H
 
-#include <base/system.h>
 #include <algorithm>
+#include <base/system.h>
 #include <utility>
 
 using std::swap;

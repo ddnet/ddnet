@@ -6,8 +6,8 @@
 #include <engine/graphics.h>
 
 #include "editor.h"
-#include <game/generated/client_data.h>
 #include <game/client/render.h>
+#include <game/generated/client_data.h>
 #include <game/localization.h>
 
 CLayerQuads::CLayerQuads()
@@ -70,10 +70,22 @@ CQuad *CLayerQuads::NewQuad(int x, int y, int Width, int Height)
 	q->m_aTexcoords[3].x = i2fx(1);
 	q->m_aTexcoords[3].y = i2fx(1);
 
-	q->m_aColors[0].r = 255; q->m_aColors[0].g = 255; q->m_aColors[0].b = 255; q->m_aColors[0].a = 255;
-	q->m_aColors[1].r = 255; q->m_aColors[1].g = 255; q->m_aColors[1].b = 255; q->m_aColors[1].a = 255;
-	q->m_aColors[2].r = 255; q->m_aColors[2].g = 255; q->m_aColors[2].b = 255; q->m_aColors[2].a = 255;
-	q->m_aColors[3].r = 255; q->m_aColors[3].g = 255; q->m_aColors[3].b = 255; q->m_aColors[3].a = 255;
+	q->m_aColors[0].r = 255;
+	q->m_aColors[0].g = 255;
+	q->m_aColors[0].b = 255;
+	q->m_aColors[0].a = 255;
+	q->m_aColors[1].r = 255;
+	q->m_aColors[1].g = 255;
+	q->m_aColors[1].b = 255;
+	q->m_aColors[1].a = 255;
+	q->m_aColors[2].r = 255;
+	q->m_aColors[2].g = 255;
+	q->m_aColors[2].b = 255;
+	q->m_aColors[2].a = 255;
+	q->m_aColors[3].r = 255;
+	q->m_aColors[3].g = 255;
+	q->m_aColors[3].b = 255;
+	q->m_aColors[3].a = 255;
 
 	return q;
 }
@@ -82,10 +94,10 @@ void CLayerQuads::BrushSelecting(CUIRect Rect)
 {
 	// draw selection rectangle
 	IGraphics::CLineItem Array[4] = {
-		IGraphics::CLineItem(Rect.x, Rect.y, Rect.x+Rect.w, Rect.y),
-		IGraphics::CLineItem(Rect.x+Rect.w, Rect.y, Rect.x+Rect.w, Rect.y+Rect.h),
-		IGraphics::CLineItem(Rect.x+Rect.w, Rect.y+Rect.h, Rect.x, Rect.y+Rect.h),
-		IGraphics::CLineItem(Rect.x, Rect.y+Rect.h, Rect.x, Rect.y)};
+		IGraphics::CLineItem(Rect.x, Rect.y, Rect.x + Rect.w, Rect.y),
+		IGraphics::CLineItem(Rect.x + Rect.w, Rect.y, Rect.x + Rect.w, Rect.y + Rect.h),
+		IGraphics::CLineItem(Rect.x + Rect.w, Rect.y + Rect.h, Rect.x, Rect.y + Rect.h),
+		IGraphics::CLineItem(Rect.x, Rect.y + Rect.h, Rect.x, Rect.y)};
 	Graphics()->TextureClear();
 	Graphics()->LinesBegin();
 	Graphics()->LinesDraw(Array, 4);
@@ -107,22 +119,22 @@ int CLayerQuads::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 		float px = fx2f(q->m_aPoints[4].x);
 		float py = fx2f(q->m_aPoints[4].y);
 
-		if(px > Rect.x && px < Rect.x+Rect.w && py > Rect.y && py < Rect.y+Rect.h)
+		if(px > Rect.x && px < Rect.x + Rect.w && py > Rect.y && py < Rect.y + Rect.h)
 		{
 			CQuad n;
 			n = *q;
 
-			for(int p = 0; p < 5; p++)
+			for(auto &Point : n.m_aPoints)
 			{
-				n.m_aPoints[p].x -= f2fx(Rect.x);
-				n.m_aPoints[p].y -= f2fx(Rect.y);
+				Point.x -= f2fx(Rect.x);
+				Point.y -= f2fx(Rect.y);
 			}
 
 			pGrabbed->m_lQuads.add(n);
 		}
 	}
 
-	return pGrabbed->m_lQuads.size()?1:0;
+	return pGrabbed->m_lQuads.size() ? 1 : 0;
 }
 
 void CLayerQuads::BrushPlace(CLayer *pBrush, float wx, float wy)
@@ -132,10 +144,10 @@ void CLayerQuads::BrushPlace(CLayer *pBrush, float wx, float wy)
 	{
 		CQuad n = l->m_lQuads[i];
 
-		for(int p = 0; p < 5; p++)
+		for(auto &Point : n.m_aPoints)
 		{
-			n.m_aPoints[p].x += f2fx(wx);
-			n.m_aPoints[p].y += f2fx(wy);
+			Point.x += f2fx(wx);
+			Point.y += f2fx(wy);
 		}
 
 		m_lQuads.add(n);
@@ -143,7 +155,7 @@ void CLayerQuads::BrushPlace(CLayer *pBrush, float wx, float wy)
 	m_pEditor->m_Map.m_Modified = true;
 }
 
-void Swap(CPoint& a, CPoint& b)
+void Swap(CPoint &a, CPoint &b)
 {
 	CPoint Tmp;
 	Tmp.x = a.x;
@@ -199,26 +211,27 @@ void CLayerQuads::BrushRotate(float Amount)
 	{
 		CQuad *q = &m_lQuads[i];
 
-		for(int p = 0; p < 5; p++)
+		for(auto &Point : q->m_aPoints)
 		{
-			vec2 Pos(fx2f(q->m_aPoints[p].x), fx2f(q->m_aPoints[p].y));
+			vec2 Pos(fx2f(Point.x), fx2f(Point.y));
 			Rotate(&Center, &Pos, Amount);
-			q->m_aPoints[p].x = f2fx(Pos.x);
-			q->m_aPoints[p].y = f2fx(Pos.y);
+			Point.x = f2fx(Pos.x);
+			Point.y = f2fx(Pos.y);
 		}
 	}
 }
 
 void CLayerQuads::GetSize(float *w, float *h)
 {
-	*w = 0; *h = 0;
+	*w = 0;
+	*h = 0;
 
 	for(int i = 0; i < m_lQuads.size(); i++)
 	{
-		for(int p = 0; p < 5; p++)
+		for(auto &Point : m_lQuads[i].m_aPoints)
 		{
-			*w = maximum(*w, fx2f(m_lQuads[i].m_aPoints[p].x));
-			*h = maximum(*h, fx2f(m_lQuads[i].m_aPoints[p].y));
+			*w = maximum(*w, fx2f(Point.x));
+			*h = maximum(*h, fx2f(Point.y));
 		}
 	}
 }
@@ -228,7 +241,7 @@ int CLayerQuads::RenderProperties(CUIRect *pToolBox)
 	// layer props
 	enum
 	{
-		PROP_IMAGE=0,
+		PROP_IMAGE = 0,
 		NUM_PROPS,
 	};
 
@@ -246,14 +259,13 @@ int CLayerQuads::RenderProperties(CUIRect *pToolBox)
 	if(Prop == PROP_IMAGE)
 	{
 		if(NewVal >= 0)
-			m_Image = NewVal%m_pEditor->m_Map.m_lImages.size();
+			m_Image = NewVal % m_pEditor->m_Map.m_lImages.size();
 		else
 			m_Image = -1;
 	}
 
 	return 0;
 }
-
 
 void CLayerQuads::ModifyImageIndex(INDEX_MODIFY_FUNC Func)
 {

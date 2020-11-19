@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_CHAT_H
 #define GAME_CLIENT_COMPONENTS_CHAT_H
+#include <engine/shared/config.h>
 #include <engine/shared/ringbuffer.h>
 #include <game/client/component.h>
 #include <game/client/lineinput.h>
@@ -10,9 +11,17 @@ class CChat : public CComponent
 {
 	CLineInput m_Input;
 
+	static constexpr float MESSAGE_PADDING_X = 5.0f;
+	static constexpr float MESSAGE_TEE_SIZE = 7.0f;
+	static constexpr float MESSAGE_TEE_PADDING_RIGHT = 0.5f;
+	static constexpr float FONT_SIZE = 6.0f;
+	static constexpr float MESSAGE_PADDING_Y = 1.0f;
+	static constexpr float MESSAGE_ROUNDING = 3.0f;
+	static_assert(FONT_SIZE + MESSAGE_PADDING_Y >= MESSAGE_ROUNDING * 2.0f, "Corners for background chat are too huge for this combination of font size and message padding.");
+
 	enum
 	{
-		MAX_LINES = 25,
+		MAX_LINES = 25
 	};
 
 	struct CLine
@@ -28,7 +37,19 @@ class CChat : public CComponent
 		bool m_Highlighted;
 
 		int m_TextContainerIndex;
+		int m_QuadContainerIndex;
+
+		char m_aSkinName[sizeof(g_Config.m_ClPlayerSkin) / sizeof(g_Config.m_ClPlayerSkin[0])];
+		CSkin::SSkinTextures m_RenderSkin;
+		CSkin::SSkinMetrics m_RenderSkinMetrics;
+		bool m_CustomColoredSkin;
+		ColorRGBA m_ColorBody;
+		ColorRGBA m_ColorFeet;
+
+		bool m_HasRenderTee;
 		float m_TextYOffset;
+
+		int m_TimesRepeated;
 	};
 
 	bool m_PrevScoreBoardShowed;
@@ -79,7 +100,7 @@ class CChat : public CComponent
 		char m_aText[1];
 	};
 	CHistoryEntry *m_pHistoryEntry;
-	TStaticRingBuffer<CHistoryEntry, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_History;
+	CStaticRingBuffer<CHistoryEntry, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_History;
 	int m_PendingChatCounter;
 	int64 m_LastChatSend;
 	int64 m_aLastSoundPlayed[CHAT_NUM];
@@ -89,6 +110,9 @@ class CChat : public CComponent
 	static void ConChat(IConsole::IResult *pResult, void *pUserData);
 	static void ConShowChat(IConsole::IResult *pResult, void *pUserData);
 	static void ConEcho(IConsole::IResult *pResult, void *pUserData);
+
+	static void ConchainChatTee(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainChatBackground(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	bool LineShouldHighlight(const char *pLine, const char *pName);
 	void StoreSave(const char *pText);
@@ -110,9 +134,12 @@ public:
 	virtual void OnConsoleInit();
 	virtual void OnStateChange(int NewState, int OldState);
 	virtual void OnRender();
+	virtual void RefindSkins();
 	virtual void OnPrepareLines();
 	virtual void OnRelease();
 	virtual void OnMessage(int MsgType, void *pRawMsg);
 	virtual bool OnInput(IInput::CEvent Event);
+
+	void RebuildChat();
 };
 #endif

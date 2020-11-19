@@ -11,13 +11,13 @@
 struct CSqlExecData
 {
 	CSqlExecData(
-			CDbConnectionPool::FRead pFunc,
-			std::unique_ptr<const ISqlData> pThreadData,
-			const char *pName);
+		CDbConnectionPool::FRead pFunc,
+		std::unique_ptr<const ISqlData> pThreadData,
+		const char *pName);
 	CSqlExecData(
-			CDbConnectionPool::FWrite pFunc,
-			std::unique_ptr<const ISqlData> pThreadData,
-			const char *pName);
+		CDbConnectionPool::FWrite pFunc,
+		std::unique_ptr<const ISqlData> pThreadData,
+		const char *pName);
 	~CSqlExecData() {}
 
 	enum
@@ -39,9 +39,9 @@ CSqlExecData::CSqlExecData(
 	CDbConnectionPool::FRead pFunc,
 	std::unique_ptr<const ISqlData> pThreadData,
 	const char *pName) :
-			m_Mode(READ_ACCESS),
-			m_pThreadData(std::move(pThreadData)),
-			m_pName(pName)
+	m_Mode(READ_ACCESS),
+	m_pThreadData(std::move(pThreadData)),
+	m_pName(pName)
 {
 	m_Ptr.m_pReadFunc = pFunc;
 }
@@ -50,9 +50,9 @@ CSqlExecData::CSqlExecData(
 	CDbConnectionPool::FWrite pFunc,
 	std::unique_ptr<const ISqlData> pThreadData,
 	const char *pName) :
-			m_Mode(WRITE_ACCESS),
-			m_pThreadData(std::move(pThreadData)),
-			m_pName(pName)
+	m_Mode(WRITE_ACCESS),
+	m_pThreadData(std::move(pThreadData)),
+	m_pName(pName)
 {
 	m_Ptr.m_pWriteFunc = pFunc;
 }
@@ -86,9 +86,9 @@ void CDbConnectionPool::RegisterDatabase(std::unique_ptr<IDbConnection> pDatabas
 }
 
 void CDbConnectionPool::Execute(
-		FRead pFunc,
-		std::unique_ptr<const ISqlData> pThreadData,
-		const char *pName)
+	FRead pFunc,
+	std::unique_ptr<const ISqlData> pThreadData,
+	const char *pName)
 {
 	m_aTasks[FirstElem++].reset(new CSqlExecData(pFunc, std::move(pThreadData), pName));
 	FirstElem %= sizeof(m_aTasks) / sizeof(m_aTasks[0]);
@@ -96,9 +96,9 @@ void CDbConnectionPool::Execute(
 }
 
 void CDbConnectionPool::ExecuteWrite(
-		FWrite pFunc,
-		std::unique_ptr<const ISqlData> pThreadData,
-		const char *pName)
+	FWrite pFunc,
+	std::unique_ptr<const ISqlData> pThreadData,
+	const char *pName)
 {
 	m_aTasks[FirstElem++].reset(new CSqlExecData(pFunc, std::move(pThreadData), pName));
 	FirstElem %= sizeof(m_aTasks) / sizeof(m_aTasks[0]);
@@ -112,13 +112,14 @@ void CDbConnectionPool::OnShutdown()
 	int i = 0;
 	while(m_Shutdown.load())
 	{
-		if (i > 600)  {
+		if(i > 600)
+		{
 			dbg_msg("sql", "Waited 60 seconds for score-threads to complete, quitting anyway");
 			break;
 		}
 
 		// print a log about every two seconds
-		if (i % 20 == 0)
+		if(i % 20 == 0)
 			dbg_msg("sql", "Waiting for score-threads to complete (%ds)", i / 10);
 		++i;
 		thread_sleep(100000);
@@ -163,7 +164,8 @@ void CDbConnectionPool::Worker()
 					break;
 				}
 			}
-		} break;
+		}
+		break;
 		case CSqlExecData::WRITE_ACCESS:
 		{
 			for(int i = 0; i < (int)m_aapDbConnections[Mode::WRITE].size(); i++)
@@ -189,7 +191,8 @@ void CDbConnectionPool::Worker()
 					}
 				}
 			}
-		} break;
+		}
+		break;
 		}
 		if(!Success)
 			dbg_msg("sql", "%s failed on all databases", pThreadData->m_pName);
@@ -216,16 +219,16 @@ bool CDbConnectionPool::ExecSqlFunc(IDbConnection *pConnection, CSqlExecData *pD
 		}
 	}
 #if defined(CONF_SQL)
-	catch (sql::SQLException &e)
+	catch(sql::SQLException &e)
 	{
 		dbg_msg("sql", "%s MySQL Error: %s", pData->m_pName, e.what());
 	}
 #endif
-	catch (std::runtime_error &e)
+	catch(std::runtime_error &e)
 	{
 		dbg_msg("sql", "%s SQLite Error: %s", pData->m_pName, e.what());
 	}
-	catch (...)
+	catch(...)
 	{
 		dbg_msg("sql", "%s Unexpected exception caught", pData->m_pName);
 	}
@@ -234,16 +237,16 @@ bool CDbConnectionPool::ExecSqlFunc(IDbConnection *pConnection, CSqlExecData *pD
 		pConnection->Unlock();
 	}
 #if defined(CONF_SQL)
-	catch (sql::SQLException &e)
+	catch(sql::SQLException &e)
 	{
 		dbg_msg("sql", "%s MySQL Error during unlock: %s", pData->m_pName, e.what());
 	}
 #endif
-	catch (std::runtime_error &e)
+	catch(std::runtime_error &e)
 	{
 		dbg_msg("sql", "%s SQLite Error during unlock: %s", pData->m_pName, e.what());
 	}
-	catch (...)
+	catch(...)
 	{
 		dbg_msg("sql", "%s Unexpected exception caught during unlock", pData->m_pName);
 	}
@@ -252,4 +255,3 @@ bool CDbConnectionPool::ExecSqlFunc(IDbConnection *pConnection, CSqlExecData *pD
 		dbg_msg("sql", "%s failed", pData->m_pName);
 	return Success;
 }
-

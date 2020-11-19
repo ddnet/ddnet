@@ -12,14 +12,16 @@
 
 #include "menu_background.h"
 
-CMenuBackground::CMenuBackground()
-	: CBackground(CMapLayers::TYPE_FULL_DESIGN, false)
+CMenuBackground::CMenuBackground() :
+	CBackground(CMapLayers::TYPE_FULL_DESIGN, false)
 {
 	m_RotationCenter = vec2(0.0f, 0.0f);
 	m_AnimationStartPos = vec2(0.0f, 0.0f);
 	m_Camera.m_Center = vec2(0.0f, 0.0f);
 	m_Camera.m_PrevCenter = vec2(0.0f, 0.0f);
 	m_MenuCenter = vec2(0.0f, 0.0f);
+
+	m_ChangedPosition = false;
 
 	ResetPositions();
 
@@ -36,6 +38,9 @@ CBackgroundEngineMap *CMenuBackground::CreateBGMap()
 
 void CMenuBackground::OnInit()
 {
+	m_pBackgroundMap = CreateBGMap();
+	m_pMap = m_pBackgroundMap;
+
 	m_IsInit = true;
 
 	m_pImages->m_pClient = GameClient();
@@ -51,11 +56,11 @@ void CMenuBackground::OnInit()
 void CMenuBackground::ResetPositions()
 {
 	m_Positions[POS_START] = vec2(500.0f, 500.0f);
-	m_Positions[POS_INTERNET] = vec2(1000.0f, 1000.0f);
-	m_Positions[POS_LAN] = vec2(1100.0f, 1000.0f);
+	m_Positions[POS_BROWSER_INTERNET] = vec2(1000.0f, 1000.0f);
+	m_Positions[POS_BROWSER_LAN] = vec2(1100.0f, 1000.0f);
 	m_Positions[POS_DEMOS] = vec2(900.0f, 100.0f);
 	m_Positions[POS_NEWS] = vec2(500.0f, 750.0f);
-	m_Positions[POS_FAVORITES] = vec2(1250.0f, 500.0f);
+	m_Positions[POS_BROWSER_FAVORITES] = vec2(1250.0f, 500.0f);
 	m_Positions[POS_SETTINGS_LANGUAGE] = vec2(500.0f, 1200.0f);
 	m_Positions[POS_SETTINGS_GENERAL] = vec2(500.0f, 1000.0f);
 	m_Positions[POS_SETTINGS_PLAYER] = vec2(600.0f, 1000.0f);
@@ -65,8 +70,13 @@ void CMenuBackground::ResetPositions()
 	m_Positions[POS_SETTINGS_GRAPHICS] = vec2(900.0f, 1000.0f);
 	m_Positions[POS_SETTINGS_SOUND] = vec2(1000.0f, 1000.0f);
 	m_Positions[POS_SETTINGS_DDNET] = vec2(1200.0f, 200.0f);
-	for(int i = 0; i < POS_CUSTOM_NUM; ++i)
-		m_Positions[POS_CUSTOM0 + i] = vec2(500.0f + (75.0f * (float)i), 1250.0f - (75.0f * (float)i));
+	m_Positions[POS_SETTINGS_ASSETS] = vec2(500.0f, 500.0f);
+	for(int i = 0; i < POS_BROWSER_CUSTOM_NUM; ++i)
+		m_Positions[POS_BROWSER_CUSTOM0 + i] = vec2(500.0f + (75.0f * (float)i), 650.0f - (75.0f * (float)i));
+	for(int i = 0; i < POS_SETTINGS_RESERVED_NUM; ++i)
+		m_Positions[POS_SETTINGS_RESERVED0 + i] = vec2(0, 0);
+	for(int i = 0; i < POS_RESERVED_NUM; ++i)
+		m_Positions[POS_RESERVED0 + i] = vec2(0, 0);
 }
 
 int CMenuBackground::ThemeScan(const char *pName, int IsDir, int DirType, void *pUser)
@@ -98,14 +108,14 @@ int CMenuBackground::ThemeScan(const char *pName, int IsDir, int DirType, void *
 		return 0;
 
 	// try to edit an existing theme
-	for(int i = 0; i < (int)pSelf->m_lThemes.size(); i++)
+	for(auto &Theme : pSelf->m_lThemes)
 	{
-		if(str_comp(pSelf->m_lThemes[i].m_Name, aThemeName) == 0)
+		if(str_comp(Theme.m_Name, aThemeName) == 0)
 		{
 			if(IsDay)
-				pSelf->m_lThemes[i].m_HasDay = true;
+				Theme.m_HasDay = true;
 			if(IsNight)
-				pSelf->m_lThemes[i].m_HasNight = true;
+				Theme.m_HasNight = true;
 			return 0;
 		}
 	}
@@ -300,7 +310,8 @@ bool CMenuBackground::Render()
 	m_Camera.m_Zoom = 0.7f;
 	static vec2 Dir = vec2(1.0f, 0.0f);
 
-	if(distance(m_Camera.m_Center, m_RotationCenter) <= (float)g_Config.m_ClRotationRadius + 0.5f)
+	float DistToCenter = distance(m_Camera.m_Center, m_RotationCenter);
+	if(!m_ChangedPosition && absolute(DistToCenter - (float)g_Config.m_ClRotationRadius) <= 0.5f)
 	{
 		// do little rotation
 		float RotPerTick = 360.0f / (float)g_Config.m_ClRotationSpeed * clamp(Client()->RenderFrameTime(), 0.0f, 0.1f);
@@ -310,9 +321,17 @@ bool CMenuBackground::Render()
 	else
 	{
 		// positions for the animation
-		Dir = normalize(m_AnimationStartPos - m_RotationCenter);
-		vec2 TargetPos = m_RotationCenter + Dir * (float)g_Config.m_ClRotationRadius;
+		vec2 DirToCenter;
+		if(DistToCenter > 0.5f)
+			DirToCenter = normalize(m_AnimationStartPos - m_RotationCenter);
+		else
+			DirToCenter = vec2(1, 0);
+		vec2 TargetPos = m_RotationCenter + DirToCenter * (float)g_Config.m_ClRotationRadius;
 		float Distance = distance(m_AnimationStartPos, TargetPos);
+		if(Distance > 0.001f)
+			Dir = normalize(m_AnimationStartPos - TargetPos);
+		else
+			Dir = vec2(1, 0);
 
 		// move time
 		m_MoveTime += clamp(Client()->RenderFrameTime(), 0.0f, 0.1f) * g_Config.m_ClCameraSpeed / 10.0f;
@@ -320,9 +339,18 @@ bool CMenuBackground::Render()
 		XVal = pow(XVal, 7.0f);
 
 		m_Camera.m_Center = TargetPos + Dir * (XVal * Distance);
+		if(m_CurrentPosition < 0)
+		{
+			m_AnimationStartPos = m_Camera.m_Center;
+			m_MoveTime = 0.0f;
+		}
+
+		m_ChangedPosition = false;
 	}
 
 	CMapLayers::OnRender();
+
+	m_CurrentPosition = -1;
 
 	return true;
 }
@@ -344,6 +372,8 @@ void CMenuBackground::ChangePosition(int PositionNumber)
 		{
 			m_CurrentPosition = POS_START;
 		}
+
+		m_ChangedPosition = true;
 	}
 	m_AnimationStartPos = m_Camera.m_Center;
 	m_RotationCenter = m_Positions[m_CurrentPosition];

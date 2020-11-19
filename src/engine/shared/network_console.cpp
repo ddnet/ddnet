@@ -7,7 +7,6 @@
 #include "netban.h"
 #include "network.h"
 
-
 bool CNetConsole::Open(NETADDR BindAddr, CNetBan *pNetBan, int Flags)
 {
 	// zero out the whole structure
@@ -25,8 +24,8 @@ bool CNetConsole::Open(NETADDR BindAddr, CNetBan *pNetBan, int Flags)
 		return false;
 	net_set_non_blocking(m_Socket);
 
-	for(int i = 0; i < NET_MAX_CONSOLE_CLIENTS; i++)
-		m_aSlots[i].m_Connection.Reset();
+	for(auto &Slot : m_aSlots)
+		Slot.m_Connection.Reset();
 
 	return true;
 }
@@ -35,13 +34,13 @@ void CNetConsole::SetCallbacks(NETFUNC_NEWCLIENT_CON pfnNewClient, NETFUNC_DELCL
 {
 	m_pfnNewClient = pfnNewClient;
 	m_pfnDelClient = pfnDelClient;
-	m_UserPtr = pUser;
+	m_pUser = pUser;
 }
 
 int CNetConsole::Close()
 {
-	for(int i = 0; i < NET_MAX_CONSOLE_CLIENTS; i++)
-		m_aSlots[i].m_Connection.Disconnect("closing console");
+	for(auto &Slot : m_aSlots)
+		Slot.m_Connection.Disconnect("closing console");
 
 	net_tcp_close(m_Socket);
 
@@ -51,7 +50,7 @@ int CNetConsole::Close()
 int CNetConsole::Drop(int ClientID, const char *pReason)
 {
 	if(m_pfnDelClient)
-		m_pfnDelClient(ClientID, pReason, m_UserPtr);
+		m_pfnDelClient(ClientID, pReason, m_pUser);
 
 	m_aSlots[ClientID].m_Connection.Disconnect(pReason);
 
@@ -60,7 +59,7 @@ int CNetConsole::Drop(int ClientID, const char *pReason)
 
 int CNetConsole::AcceptClient(NETSOCKET Socket, const NETADDR *pAddr)
 {
-	char aError[256] = { 0 };
+	char aError[256] = {0};
 	int FreeSlot = -1;
 
 	// look for free slot or multiple client
@@ -83,7 +82,7 @@ int CNetConsole::AcceptClient(NETSOCKET Socket, const NETADDR *pAddr)
 	{
 		m_aSlots[FreeSlot].m_Connection.Init(Socket, pAddr);
 		if(m_pfnNewClient)
-			m_pfnNewClient(FreeSlot, m_UserPtr);
+			m_pfnNewClient(FreeSlot, m_pUser);
 		return 0;
 	}
 

@@ -1,8 +1,8 @@
 #ifndef ENGINE_SERVER_DATABASES_CONNECTION_POOL_H
 #define ENGINE_SERVER_DATABASES_CONNECTION_POOL_H
 
-#include <base/tl/threading.h>
 #include <atomic>
+#include <base/tl/threading.h>
 #include <memory>
 #include <vector>
 
@@ -10,7 +10,7 @@ class IDbConnection;
 
 struct ISqlData
 {
-	virtual ~ISqlData() {};
+	virtual ~ISqlData(){};
 };
 
 class IConsole;
@@ -20,7 +20,7 @@ class CDbConnectionPool
 public:
 	CDbConnectionPool();
 	~CDbConnectionPool();
-	CDbConnectionPool& operator=(const CDbConnectionPool&) = delete;
+	CDbConnectionPool &operator=(const CDbConnectionPool &) = delete;
 
 	typedef bool (*FRead)(IDbConnection *, const ISqlData *);
 	typedef bool (*FWrite)(IDbConnection *, const ISqlData *, bool);
@@ -38,14 +38,14 @@ public:
 	void RegisterDatabase(std::unique_ptr<IDbConnection> pDatabase, Mode DatabaseMode);
 
 	void Execute(
-			FRead pFunc,
-			std::unique_ptr<const ISqlData> pSqlRequestData,
-			const char *pName);
+		FRead pFunc,
+		std::unique_ptr<const ISqlData> pSqlRequestData,
+		const char *pName);
 	// writes to WRITE_BACKUP server in case of failure
 	void ExecuteWrite(
-			FWrite pFunc,
-			std::unique_ptr<const ISqlData> pSqlRequestData,
-			const char *pName);
+		FWrite pFunc,
+		std::unique_ptr<const ISqlData> pSqlRequestData,
+		const char *pName);
 
 	void OnShutdown();
 

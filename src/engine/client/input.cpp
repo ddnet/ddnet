@@ -49,7 +49,7 @@ CInput::CInput()
 	m_VideoRestartNeeded = 0;
 	m_pClipboardText = NULL;
 
-	m_CountEditingText = 0;
+	m_NumTextInputInstances = 0;
 	m_EditingTextLen = -1;
 	m_aEditingText[0] = 0;
 }
@@ -144,28 +144,28 @@ void CInput::NextFrame()
 
 bool CInput::GetIMEState()
 {
-	return m_CountEditingText > 0;
+	return m_NumTextInputInstances > 0;
 }
 
 void CInput::SetIMEState(bool Activate)
 {
 	if(Activate)
 	{
-		if(m_CountEditingText == 0)
+		if(m_NumTextInputInstances == 0)
 			SDL_StartTextInput();
-		m_CountEditingText++;
+		m_NumTextInputInstances++;
 	}
 	else
 	{
-		if(m_CountEditingText == 0)
+		if(m_NumTextInputInstances == 0)
 			return;
-		m_CountEditingText--;
-		if(m_CountEditingText == 0)
+		m_NumTextInputInstances--;
+		if(m_NumTextInputInstances == 0)
 			SDL_StopTextInput();
 	}
 }
 
-const char *CInput::GetIMECandidate()
+const char *CInput::GetIMEEditingText()
 {
 	if(m_EditingTextLen > 0)
 		return m_aEditingText;
@@ -227,7 +227,6 @@ int CInput::Update()
 		bool IgnoreKeys = false;
 		while(SDL_PollEvent(&Event))
 		{
-			int Key = -1;
 			int Scancode = 0;
 			int Action = IInput::FLAG_PRESS;
 			switch(Event.type)
@@ -242,9 +241,14 @@ int CInput::Update()
 					for(int i = 0; i < Event.edit.start; i++)
 						m_EditingCursor = str_utf8_forward(m_aEditingText, m_EditingCursor);
 				}
+				else
+				{
+					m_aEditingText[0] = 0;
+				}
 				break;
 			}
 			case SDL_TEXTINPUT:
+				m_EditingTextLen = -1;
 				AddEvent(Event.text.text, 0, IInput::FLAG_TEXT);
 				break;
 			// handle keys
@@ -265,13 +269,11 @@ int CInput::Update()
 				// Sum if you want to ignore multiple modifiers.
 				if(!(Event.key.keysym.mod & g_Config.m_InpIgnoredModifiers))
 				{
-					Key = Event.key.keysym.sym;
 					Scancode = Event.key.keysym.scancode;
 				}
 				break;
 			case SDL_KEYUP:
 				Action = IInput::FLAG_RELEASE;
-				Key = Event.key.keysym.sym;
 				Scancode = Event.key.keysym.scancode;
 				break;
 
@@ -288,37 +290,35 @@ int CInput::Update()
 				// fall through
 			case SDL_MOUSEBUTTONDOWN:
 				if(Event.button.button == SDL_BUTTON_LEFT)
-					Key = KEY_MOUSE_1; // ignore_convention
+					Scancode = KEY_MOUSE_1; // ignore_convention
 				if(Event.button.button == SDL_BUTTON_RIGHT)
-					Key = KEY_MOUSE_2; // ignore_convention
+					Scancode = KEY_MOUSE_2; // ignore_convention
 				if(Event.button.button == SDL_BUTTON_MIDDLE)
-					Key = KEY_MOUSE_3; // ignore_convention
+					Scancode = KEY_MOUSE_3; // ignore_convention
 				if(Event.button.button == SDL_BUTTON_X1)
-					Key = KEY_MOUSE_4; // ignore_convention
+					Scancode = KEY_MOUSE_4; // ignore_convention
 				if(Event.button.button == SDL_BUTTON_X2)
-					Key = KEY_MOUSE_5; // ignore_convention
+					Scancode = KEY_MOUSE_5; // ignore_convention
 				if(Event.button.button == 6)
-					Key = KEY_MOUSE_6; // ignore_convention
+					Scancode = KEY_MOUSE_6; // ignore_convention
 				if(Event.button.button == 7)
-					Key = KEY_MOUSE_7; // ignore_convention
+					Scancode = KEY_MOUSE_7; // ignore_convention
 				if(Event.button.button == 8)
-					Key = KEY_MOUSE_8; // ignore_convention
+					Scancode = KEY_MOUSE_8; // ignore_convention
 				if(Event.button.button == 9)
-					Key = KEY_MOUSE_9; // ignore_convention
-				Scancode = Key;
+					Scancode = KEY_MOUSE_9; // ignore_convention
 				break;
 
 			case SDL_MOUSEWHEEL:
 				if(Event.wheel.y > 0)
-					Key = KEY_MOUSE_WHEEL_UP; // ignore_convention
+					Scancode = KEY_MOUSE_WHEEL_UP; // ignore_convention
 				if(Event.wheel.y < 0)
-					Key = KEY_MOUSE_WHEEL_DOWN; // ignore_convention
+					Scancode = KEY_MOUSE_WHEEL_DOWN; // ignore_convention
 				if(Event.wheel.x > 0)
-					Key = KEY_MOUSE_WHEEL_LEFT; // ignore_convention
+					Scancode = KEY_MOUSE_WHEEL_LEFT; // ignore_convention
 				if(Event.wheel.x < 0)
-					Key = KEY_MOUSE_WHEEL_RIGHT; // ignore_convention
+					Scancode = KEY_MOUSE_WHEEL_RIGHT; // ignore_convention
 				Action |= IInput::FLAG_RELEASE;
-				Scancode = Key;
 				break;
 
 			case SDL_WINDOWEVENT:

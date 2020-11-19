@@ -37,20 +37,20 @@ class CNamePlates : public CComponent
 	void RenderNameplate(
 		const CNetObj_Character *pPrevChar,
 		const CNetObj_Character *pPlayerChar,
-		const CNetObj_PlayerInfo *pPlayerInfo
-	);
+		const CNetObj_PlayerInfo *pPlayerInfo);
 	void RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pPlayerInfo, float Alpha);
 
 	SPlayerNamePlate m_aNamePlates[MAX_CLIENTS];
-	class CPlayers* m_pPlayers;
-	
+	class CPlayers *m_pPlayers;
+
 	void ResetNamePlates();
+
 public:
 	virtual void OnWindowResize();
 	virtual void OnInit();
 	virtual void OnRender();
 
-	void SetPlayers(class CPlayers* pPlayers);
+	void SetPlayers(class CPlayers *pPlayers);
 };
 
 #endif
