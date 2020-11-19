@@ -569,22 +569,10 @@ void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHe
 			gs_ListBoxScrollValue += Num == 1 ? 0.1f : 3.0f / Num;
 	}
 
-	// TODO: Still have to press twice after updating search, why?
 	if(gs_ListBoxScrollValue < 0.0f)
 		gs_ListBoxScrollValue = 0.0f;
 	if(gs_ListBoxScrollValue > 1.0f)
 		gs_ListBoxScrollValue = 1.0f;
-
-	if(gs_ListBoxSelectedIndex < 0)
-	{
-		gs_ListBoxSelectedIndex = 0;
-		gs_ListBoxNewSelected = 0;
-	}
-	if(gs_ListBoxSelectedIndex >= NumItems)
-	{
-		gs_ListBoxSelectedIndex = NumItems - 1;
-		gs_ListBoxNewSelected = NumItems - 1;
-	}
 
 	Scroll.HMargin(5.0f, &Scroll);
 	gs_ListBoxScrollValue = DoScrollbarV(pID, &Scroll, gs_ListBoxScrollValue);
