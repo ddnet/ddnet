@@ -1936,7 +1936,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		vec2 From = vec2(Weapon.x, Weapon.y + Weapon.h / 2.0f);
 		vec2 Pos = vec2(Weapon.x + Weapon.w - 10.0f, Weapon.y + Weapon.h / 2.0f);
 
-		vec2 Out, Border;
+		vec2 Out;
 
 		Graphics()->BlendNormal();
 		Graphics()->TextureClear();

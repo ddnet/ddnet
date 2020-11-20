@@ -256,7 +256,7 @@ void CItems::RenderLaser(const struct CNetObj_Laser *pCurrent, bool IsPredicted)
 		a = clamp(a, 0.0f, 1.0f);
 		float Ia = 1 - a;
 
-		vec2 Out, Border;
+		vec2 Out;
 
 		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
