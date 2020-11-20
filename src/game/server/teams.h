@@ -19,7 +19,6 @@ class CGameTeams
 
 	class CGameContext *m_pGameContext;
 
-	void CheckTeamFinished(int ClientID);
 	bool TeamFinished(int Team);
 	void OnTeamFinish(CPlayer **Players, unsigned int Size, float Time, const char *pTimestamp);
 	void OnFinish(CPlayer *Player, float Time, const char *pTimestamp);
@@ -62,6 +61,7 @@ public:
 	void OnCharacterDeath(int ClientID, int Weapon);
 
 	bool SetCharacterTeam(int ClientID, int Team);
+	void CheckTeamFinished(int ClientID);
 
 	void ChangeTeamState(int Team, int State);
 	void onChangeTeamState(int Team, int State, int OldState);
