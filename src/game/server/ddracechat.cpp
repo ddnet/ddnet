@@ -1383,6 +1383,44 @@ void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void CGameContext::ConRoll(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	// no need to check valid player here, fifo console can also roll, shown as (invalid)
+	const char *pName = pSelf->Server()->ClientName(pResult->m_ClientID);
+	int X = 1;
+	int Y = 100;
+
+	if(pResult->NumArguments() == 2)
+	{
+		X = pResult->GetInteger(0);
+		Y = pResult->GetInteger(1);
+	}
+	else if(pResult->NumArguments() == 1)
+	{
+		Y = pResult->GetInteger(0);
+	}
+
+	char aBuf[64];
+	if(Y <= X || X <= 0 - (1 << 30) || Y >= (1 << 30))
+	{
+		if(!CheckClientID(pResult->m_ClientID))
+			return;
+		CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+		if(!pPlayer)
+			return;
+
+		str_format(aBuf, sizeof(aBuf), "Can't roll, %d is less than %d", Y, X);
+		pSelf->SendChatTarget(pPlayer->GetCID(), aBuf);
+		return;
+	}
+
+	// with rand() we'd get the same numbers on a fresh server all the time
+	int Val = X + secure_rand() % (Y + 1 - X);
+	str_format(aBuf, sizeof(aBuf), "%s rolls %d (%d - %d)", pName, Val, X, Y);
+	pSelf->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pResult->m_ClientID);
+}
+
 void CGameContext::ConPoints(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
