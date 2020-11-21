@@ -2,7 +2,7 @@
 #include <base/math.h>
 #include <base/system.h>
 
-static void Dilate(int w, int h, int BPP, unsigned char *pSrc, unsigned char *pDest, unsigned char AlphaThreshold = 30)
+static void Dilate(int w, int h, int BPP, unsigned char *pSrc, unsigned char *pDest, unsigned char AlphaThreshold = TW_DILATE_ALPHA_THRESHOLD)
 {
 	int ix, iy;
 	const int aDirX[] = {0, -1, 1, 0};
@@ -68,25 +68,49 @@ static void CopyColorValues(int w, int h, int BPP, unsigned char *pSrc, unsigned
 
 void DilateImage(unsigned char *pImageBuff, int w, int h, int BPP)
 {
+	DilateImageSub(pImageBuff, w, h, BPP, 0, 0, w, h);
+}
+
+void DilateImageSub(unsigned char *pImageBuff, int w, int h, int BPP, int x, int y, int sw, int sh)
+{
 	unsigned char *apBuffer[2] = {NULL, NULL};
 
-	apBuffer[0] = (unsigned char *)malloc((size_t)w * h * sizeof(unsigned char) * BPP);
-	apBuffer[1] = (unsigned char *)malloc((size_t)w * h * sizeof(unsigned char) * BPP);
+	apBuffer[0] = (unsigned char *)malloc((size_t)sw * sh * sizeof(unsigned char) * BPP);
+	apBuffer[1] = (unsigned char *)malloc((size_t)sw * sh * sizeof(unsigned char) * BPP);
+	unsigned char *pBufferOriginal = (unsigned char *)malloc((size_t)sw * sh * sizeof(unsigned char) * BPP);
 
 	unsigned char *pPixelBuff = (unsigned char *)pImageBuff;
 
-	Dilate(w, h, BPP, pPixelBuff, apBuffer[0]);
+	for(int Y = 0; Y < sh; ++Y)
+	{
+		int SrcImgOffset = ((y + Y) * w * BPP) + (x * BPP);
+		int DstImgOffset = (Y * sw * BPP);
+		int CopySize = sw * BPP;
+		mem_copy(&pBufferOriginal[DstImgOffset], &pPixelBuff[SrcImgOffset], CopySize);
+	}
+
+	Dilate(sw, sh, BPP, pBufferOriginal, apBuffer[0]);
 
 	for(int i = 0; i < 5; i++)
 	{
-		Dilate(w, h, BPP, apBuffer[0], apBuffer[1]);
-		Dilate(w, h, BPP, apBuffer[1], apBuffer[0]);
+		Dilate(sw, sh, BPP, apBuffer[0], apBuffer[1]);
+		Dilate(sw, sh, BPP, apBuffer[1], apBuffer[0]);
 	}
 
-	CopyColorValues(w, h, BPP, apBuffer[0], pPixelBuff);
+	CopyColorValues(sw, sh, BPP, apBuffer[0], pBufferOriginal);
 
 	free(apBuffer[0]);
 	free(apBuffer[1]);
+
+	for(int Y = 0; Y < sh; ++Y)
+	{
+		int SrcImgOffset = ((y + Y) * w * BPP) + (x * BPP);
+		int DstImgOffset = (Y * sw * BPP);
+		int CopySize = sw * BPP;
+		mem_copy(&pPixelBuff[SrcImgOffset], &pBufferOriginal[DstImgOffset], CopySize);
+	}
+
+	free(pBufferOriginal);
 }
 
 static float CubicHermite(float A, float B, float C, float D, float t)
