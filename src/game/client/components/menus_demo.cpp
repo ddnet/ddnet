@@ -569,13 +569,8 @@ void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHe
 			gs_ListBoxScrollValue += Num == 1 ? 0.1f : 3.0f / Num;
 	}
 
-	if(gs_ListBoxScrollValue < 0.0f)
-		gs_ListBoxScrollValue = 0.0f;
-	if(gs_ListBoxScrollValue > 1.0f)
-		gs_ListBoxScrollValue = 1.0f;
-
 	Scroll.HMargin(5.0f, &Scroll);
-	gs_ListBoxScrollValue = DoScrollbarV(pID, &Scroll, gs_ListBoxScrollValue);
+	gs_ListBoxScrollValue = clamp(DoScrollbarV(pID, &Scroll, gs_ListBoxScrollValue), 0.0f, 1.0f);
 
 	// the list
 	gs_ListBoxView = gs_ListBoxOriginalView;
@@ -1078,7 +1073,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 	CUIRect OriginalView = ListBox;
 	int Num = (int)(ListBox.h / s_aCols[0].m_Rect.h) + 1;
-	int ScrollNum = m_lDemos.size() - Num + 1;
+	int ScrollNum = maximum(m_lDemos.size() - Num + 1, 0);
 	ListBox.y -= s_ScrollValue * ScrollNum * s_aCols[0].m_Rect.h;
 
 	int NewSelected = -1;

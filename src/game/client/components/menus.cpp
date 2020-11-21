@@ -2650,7 +2650,7 @@ bool CMenus::HandleListInputs(const CUIRect &View, float &ScrollValue, const flo
 {
 	int NewIndex = -1;
 	int Num = (int)(View.h / ElemHeight) + 1;
-	int ScrollNum = NumElems - Num + 1;
+	int ScrollNum = maximum(NumElems - Num + 1, 0);
 	if(ScrollNum > 0)
 	{
 		if(pScrollOffset && *pScrollOffset >= 0)
@@ -2663,18 +2663,9 @@ bool CMenus::HandleListInputs(const CUIRect &View, float &ScrollValue, const flo
 		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) && UI()->MouseInside(&View))
 			ScrollValue += 3.0f / ScrollNum;
 	}
-	else
-		ScrollNum = 0;
 
-	if(ScrollValue < 0)
-		ScrollValue = 0;
-	if(ScrollValue > 1)
-		ScrollValue = 1;
-
-	if(SelectedIndex < 0)
-		SelectedIndex = 0;
-	if(SelectedIndex >= NumElems)
-		SelectedIndex = NumElems;
+	ScrollValue = clamp(ScrollValue, 0.0f, 1.0f);
+	SelectedIndex = clamp(SelectedIndex, 0, NumElems);
 
 	for(int i = 0; i < m_NumInputEvents; i++)
 	{
