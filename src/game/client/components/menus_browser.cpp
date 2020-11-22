@@ -190,7 +190,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 	CUIRect OriginalView = View;
 	int Num = (int)(View.h / s_aCols[0].m_Rect.h) + 1;
-	int ScrollNum = NumServers - Num + 1;
+	int ScrollNum = maximum(NumServers - Num + 1, 0);
 	View.y -= s_ScrollValue * ScrollNum * s_aCols[0].m_Rect.h;
 
 	int NewSelected = -1;
