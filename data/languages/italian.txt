@@ -690,7 +690,7 @@ Replay feature is disabled!
 == Il replay è disabilitato!
 
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== La largezza o altezza della texture %s non è divisibile per 16, quindi potrebbe causare dei bug visivi.
+== La larghezza o altezza della texture %s non è divisibile per 16, quindi potrebbe causare dei bug visivi.
 
 Warning
 == Attenzione
@@ -741,7 +741,7 @@ The maps contain freeze, which temporarily make a tee unable to move. You have t
 == Le mappe contengono freeze, che rendono temporaneamente impossibile il movimento per un tee. Devi fare gioco di squadra per superare queste parti.
 
 The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== La rotellina del mouse cambia le armi.Il Martello (tasto sinistro mouse) può essere usato per colpire altri tee e svegliarli quando sono stati gelati nel freeze.
+== La rotellina del mouse cambia le armi. Il Martello (tasto sinistro mouse) può essere usato per colpire altri tee e svegliarli quando sono stati gelati nel freeze.
 
 Hook (right mouse) can be used to swing through the map and to hook other tees to you.
 == Il Rampino (tasto destro mouse) può essere usato per aggrapparsi ad alcune superfici e per agganciare altri tee.
@@ -784,7 +784,7 @@ Show DDNet map finishes in server browser
 
 transmits your player name to info2.ddnet.tw
 
-== Transmette il tuo nome da giocatore a info2.ddnet.tw
+== Trasmette il tuo nome da giocatore a info2.ddnet.tw
 
 
 Theme
@@ -890,7 +890,7 @@ Refresh Rate
 == Frequenza di aggiornamento
 
 Show console window
-== Monstra la console
+== Mostra la console
 
 Themes directory
 == Cartella dei temi
@@ -1043,7 +1043,7 @@ Assets
 == Asset
 
 DDNet Client needs to be restarted to complete update!
-== Il Client DDNet deve essere riavviato per completare l'update!
+== Il Client DDNet deve essere riavviato per completare l'aggiornamento!
 
 Use DDRace Scoreboard
 == Usa il tabellone segnapunti DDRace
@@ -1258,7 +1258,7 @@ Play
 == Gioca
 
 DDNet %s is out!
-== E' uscito DDNet %s!
+== È uscito DDNet %s!
 
 Restart
 == Ricomincia
