@@ -667,8 +667,15 @@ int CDataFileWriter::AddItem(int Type, int ID, int Size, void *pData)
 	m_pItems[m_NumItems].m_Size = Size;
 
 	// copy data
-	m_pItems[m_NumItems].m_pData = malloc(Size);
-	mem_copy(m_pItems[m_NumItems].m_pData, pData, Size);
+	if(Size > 0)
+	{
+		m_pItems[m_NumItems].m_pData = malloc(Size);
+		mem_copy(m_pItems[m_NumItems].m_pData, pData, Size);
+	}
+	else
+	{
+		m_pItems[m_NumItems].m_pData = 0;
+	}
 
 	if(!m_pItemTypes[Type].m_Num) // count item types
 		m_NumItemTypes++;
@@ -881,7 +888,8 @@ int CDataFileWriter::Finish()
 				swap_endian(m_pItems[k].m_pData, sizeof(int), m_pItems[k].m_Size / sizeof(int));
 #endif
 				io_write(m_File, &Item, sizeof(Item));
-				io_write(m_File, m_pItems[k].m_pData, m_pItems[k].m_Size);
+				if(m_pItems[k].m_Size > 0)
+					io_write(m_File, m_pItems[k].m_pData, m_pItems[k].m_Size);
 
 				// next
 				k = m_pItems[k].m_Next;
@@ -900,8 +908,11 @@ int CDataFileWriter::Finish()
 	// free data
 	for(int i = 0; i < m_NumItems; i++)
 	{
-		free(m_pItems[i].m_pData);
-		m_pItems[i].m_pData = 0;
+		if(m_pItems[i].m_pData)
+		{
+			free(m_pItems[i].m_pData);
+			m_pItems[i].m_pData = 0;
+		}
 	}
 	for(int i = 0; i < m_NumDatas; ++i)
 	{

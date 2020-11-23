@@ -535,23 +535,23 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 		PointCount += Item.m_NumPoints;
 	}
 
+	// save points
+	int TotalSize = sizeof(CEnvPoint) * PointCount;
+	CEnvPoint *pPoints = 0;
 	if(PointCount > 0)
+		pPoints = (CEnvPoint *)calloc(PointCount, sizeof(*pPoints));
+	PointCount = 0;
+
+	for(int e = 0; e < m_lEnvelopes.size(); e++)
 	{
-		// save points
-		int TotalSize = sizeof(CEnvPoint) * PointCount;
-		CEnvPoint *pPoints = (CEnvPoint *)calloc(PointCount, sizeof(*pPoints));
-		PointCount = 0;
-
-		for(int e = 0; e < m_lEnvelopes.size(); e++)
-		{
-			int Count = m_lEnvelopes[e]->m_lPoints.size();
-			mem_copy(&pPoints[PointCount], m_lEnvelopes[e]->m_lPoints.base_ptr(), sizeof(CEnvPoint) * Count);
-			PointCount += Count;
-		}
-
-		df.AddItem(MAPITEMTYPE_ENVPOINTS, 0, TotalSize, pPoints);
-		free(pPoints);
+		int Count = m_lEnvelopes[e]->m_lPoints.size();
+		mem_copy(&pPoints[PointCount], m_lEnvelopes[e]->m_lPoints.base_ptr(), sizeof(CEnvPoint) * Count);
+		PointCount += Count;
 	}
+
+	df.AddItem(MAPITEMTYPE_ENVPOINTS, 0, TotalSize, pPoints);
+	if(pPoints)
+		free(pPoints);
 
 	// finish the data file
 	df.Finish();
