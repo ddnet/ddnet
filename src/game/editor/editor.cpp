@@ -4497,7 +4497,9 @@ void CEditor::RenderFileDialog()
 				if(Graphics()->LoadPNG(&m_FilePreviewImageInfo, aBuffer, IStorage::TYPE_ALL))
 				{
 					m_FilePreviewImage = Graphics()->LoadTextureRaw(m_FilePreviewImageInfo.m_Width, m_FilePreviewImageInfo.m_Height, m_FilePreviewImageInfo.m_Format, m_FilePreviewImageInfo.m_pData, m_FilePreviewImageInfo.m_Format, IGraphics::TEXLOAD_NORESAMPLE);
-					free(m_FilePreviewImageInfo.m_pData);
+					CImageInfo DummyInfo = m_FilePreviewImageInfo;
+					m_FilePreviewImageInfo.m_pData = NULL;
+					Graphics()->FreePNG(&DummyInfo);
 					m_PreviewImageIsLoaded = true;
 				}
 			}

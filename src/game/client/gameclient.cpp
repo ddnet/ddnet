@@ -2774,7 +2774,7 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 
 		m_GameSkinLoaded = true;
 
-		free(ImgInfo.m_pData);
+		Graphics()->FreePNG(&ImgInfo);
 	}
 }
 
@@ -2818,7 +2818,7 @@ void CGameClient::LoadEmoticonsSkin(const char *pPath, bool AsDir)
 			m_EmoticonsSkin.m_SpriteEmoticons[i] = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_OOP + i]);
 
 		m_EmoticonsSkinLoaded = true;
-		free(ImgInfo.m_pData);
+		Graphics()->FreePNG(&ImgInfo);
 	}
 }
 

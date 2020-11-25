@@ -22,7 +22,7 @@ void CMenus::LoadEntities(SCustomEntities *pEntitiesItem, void *pUser)
 			if(pThis->Graphics()->LoadPNG(&ImgInfo, aBuff, IStorage::TYPE_ALL))
 			{
 				pEntitiesItem->m_aImages[i].m_Texture = pThis->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, ImgInfo.m_Format, 0);
-				free(ImgInfo.m_pData);
+				pThis->Graphics()->FreePNG(&ImgInfo);
 
 				if(pEntitiesItem->m_RenderTexture == -1)
 					pEntitiesItem->m_RenderTexture = pEntitiesItem->m_aImages[i].m_Texture;
@@ -38,7 +38,7 @@ void CMenus::LoadEntities(SCustomEntities *pEntitiesItem, void *pUser)
 			if(pThis->Graphics()->LoadPNG(&ImgInfo, aBuff, IStorage::TYPE_ALL))
 			{
 				pEntitiesItem->m_aImages[i].m_Texture = pThis->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, ImgInfo.m_Format, 0);
-				free(ImgInfo.m_pData);
+				pThis->Graphics()->FreePNG(&ImgInfo);
 
 				if(pEntitiesItem->m_RenderTexture == -1)
 					pEntitiesItem->m_RenderTexture = pEntitiesItem->m_aImages[i].m_Texture;
@@ -50,7 +50,7 @@ void CMenus::LoadEntities(SCustomEntities *pEntitiesItem, void *pUser)
 				if(pThis->Graphics()->LoadPNG(&ImgInfo, aBuff, IStorage::TYPE_ALL))
 				{
 					pEntitiesItem->m_aImages[i].m_Texture = pThis->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, ImgInfo.m_Format, 0);
-					free(ImgInfo.m_pData);
+					pThis->Graphics()->FreePNG(&ImgInfo);
 
 					if(pEntitiesItem->m_RenderTexture == -1)
 						pEntitiesItem->m_RenderTexture = pEntitiesItem->m_aImages[i].m_Texture;
@@ -109,7 +109,7 @@ static void LoadAsset(TName *pAssetItem, const char *pAssetName, IGraphics *pGra
 		if(pGraphics->LoadPNG(&ImgInfo, aBuff, IStorage::TYPE_ALL))
 		{
 			pAssetItem->m_RenderTexture = pGraphics->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, ImgInfo.m_Format, 0);
-			free(ImgInfo.m_pData);
+			pGraphics->FreePNG(&ImgInfo);
 		}
 	}
 	else
@@ -119,7 +119,7 @@ static void LoadAsset(TName *pAssetItem, const char *pAssetName, IGraphics *pGra
 		if(pGraphics->LoadPNG(&ImgInfo, aBuff, IStorage::TYPE_ALL))
 		{
 			pAssetItem->m_RenderTexture = pGraphics->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, ImgInfo.m_Format, 0);
-			free(ImgInfo.m_pData);
+			pGraphics->FreePNG(&ImgInfo);
 		}
 		else
 		{
@@ -128,7 +128,7 @@ static void LoadAsset(TName *pAssetItem, const char *pAssetName, IGraphics *pGra
 			if(pGraphics->LoadPNG(&ImgInfo, aBuff, IStorage::TYPE_ALL))
 			{
 				pAssetItem->m_RenderTexture = pGraphics->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, ImgInfo.m_Format, 0);
-				free(ImgInfo.m_pData);
+				pGraphics->FreePNG(&ImgInfo);
 			}
 		}
 	}

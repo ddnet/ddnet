@@ -129,10 +129,7 @@ public:
 		STextRenderColor m_TextColor;
 		STextRenderColor m_TextOutlineColor;
 
-		SUIElementRect() :
-			m_UIRectQuadContainer(-1), m_UITextContainer(-1), m_X(-1), m_Y(-1), m_Width(-1), m_Height(-1)
-		{
-		}
+		SUIElementRect();
 	};
 
 protected:

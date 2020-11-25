@@ -78,7 +78,7 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 		if(LoadCountryFlags)
 		{
 			CountryFlag.m_Texture = Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
-			free(Info.m_pData);
+			Graphics()->FreePNG(&Info);
 		}
 
 		if(g_Config.m_Debug)

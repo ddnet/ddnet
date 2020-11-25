@@ -233,7 +233,7 @@ int CSkins::LoadSkin(const char *pName, const char *pPath, int DirType)
 	for(int i = 0; i < 6; ++i)
 		Skin.m_ColorableSkin.m_Eyes[i] = Graphics()->LoadSpriteTexture(Info, &g_pData->m_aSprites[SPRITE_TEE_EYE_NORMAL + i]);
 
-	free(Info.m_pData);
+	Graphics()->FreePNG(&Info);
 
 	// set skin data
 	str_copy(Skin.m_aName, pName, sizeof(Skin.m_aName));
