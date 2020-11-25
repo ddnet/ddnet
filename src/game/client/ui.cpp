@@ -13,6 +13,14 @@ void CUIElement::Init(CUI *pUI)
 	pUI->AddUIElement(this);
 }
 
+CUIElement::SUIElementRect::SUIElementRect() :
+	m_UIRectQuadContainer(-1), m_UITextContainer(-1), m_X(-1), m_Y(-1), m_Width(-1), m_Height(-1)
+{
+	mem_zero(&m_Cursor, sizeof(m_Cursor));
+	mem_zero(&m_TextColor, sizeof(m_TextColor));
+	mem_zero(&m_TextOutlineColor, sizeof(m_TextOutlineColor));
+}
+
 /********************************************************
  UI
 *********************************************************/
