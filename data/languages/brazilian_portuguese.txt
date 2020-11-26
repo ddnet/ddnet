@@ -1280,28 +1280,28 @@ Replay
 == Reproduzir
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== 
+== Modo de depuração habilitado. Pressione Ctrl+Shift+D para desabilitar o modo de depuração.
 
 Existing Player
-== 
+== Jogador existente
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== 
+== Seu apelido "%s" já está sendo usado (%d pontos). Ainda assim, você deseja usá-lo?
 
 Checking for existing player with your name
-== 
+== Conferindo por jogador existente com seu nome
 
 Smooth Dynamic Camera
-== 
+== Câmera dinâmica suave
 
 Game sound volume
-== 
+== Volume de som do jogo
 
 Chat sound volume
-== 
+== Volume de som do chat
 
 Use old chat style
-== 
+== Usar estilo de chat antigo
 
 Highlight
-== 
+== Realce
