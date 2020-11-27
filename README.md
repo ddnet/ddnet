@@ -204,7 +204,7 @@ $ apt-get install ddnet
 MacOS
 
 ```bash
-$ brew cask install ddnet
+$ brew insatll --cask ddnet
 ```
 
 Fedora
