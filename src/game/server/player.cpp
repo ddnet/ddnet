@@ -631,7 +631,13 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 	{
 		CGameControllerDDRace *Controller = (CGameControllerDDRace *)GameServer()->m_pController;
 		if(g_Config.m_SvTeam != 3)
+		{
+			// Joining spectators should not kill a locked team, but should still
+			// check if the team finished by you leaving it.
+			int DDRTeam = m_pCharacter->Team();
 			Controller->m_Teams.SetForceCharacterTeam(m_ClientID, TEAM_FLOCK);
+			Controller->m_Teams.CheckTeamFinished(DDRTeam);
+		}
 	}
 
 	KillCharacter();
