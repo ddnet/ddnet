@@ -1404,7 +1404,7 @@ void CCharacter::HandleSkippableTiles(int Index)
 	// handle speedup tiles
 	if(GameServer()->Collision()->IsSpeedup(Index))
 	{
-		vec2 Direction, MaxVel, TempVel = m_Core.m_Vel;
+		vec2 Direction, TempVel = m_Core.m_Vel;
 		int Force, MaxSpeed = 0;
 		float TeeAngle, SpeederAngle, DiffAngle, SpeedLeft, TeeSpeed;
 		GameServer()->Collision()->GetSpeedup(Index, &Direction, &Force, &MaxSpeed);

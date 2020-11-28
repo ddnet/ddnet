@@ -160,7 +160,7 @@ void CLaser::DoBounce()
 	}
 
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-	if(m_Owner >= 0 && m_Energy <= 0 && m_Pos && !m_TeleportCancelled && pOwnerChar &&
+	if(m_Owner >= 0 && m_Energy <= 0 && !m_TeleportCancelled && pOwnerChar &&
 		pOwnerChar->IsAlive() && pOwnerChar->HasTelegunLaser() && m_Type == WEAPON_LASER)
 	{
 		vec2 PossiblePos;
@@ -180,14 +180,14 @@ void CLaser::DoBounce()
 		else
 			Found = GetNearestAirPos(m_Pos, m_From, &PossiblePos);
 
-		if(Found && PossiblePos)
+		if(Found)
 		{
 			pOwnerChar->m_TeleGunPos = PossiblePos;
 			pOwnerChar->m_TeleGunTeleport = true;
 			pOwnerChar->m_IsBlueTeleGunTeleport = m_IsBlueTeleport;
 		}
 	}
-	else if(m_Owner >= 0 && m_Pos)
+	else if(m_Owner >= 0)
 	{
 		int MapIndex = GameServer()->Collision()->GetPureMapIndex(Coltile);
 		int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);

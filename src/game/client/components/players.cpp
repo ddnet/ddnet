@@ -429,7 +429,6 @@ void CPlayers::RenderPlayer(
 				}
 				if(g_pData->m_Weapons.m_aId[iw].m_aSpriteMuzzles[IteX])
 				{
-					vec2 Pos1, Pos0;
 					vec2 Dir;
 					if(PredictLocalWeapons)
 						Dir = vec2(pPlayerChar->m_X, pPlayerChar->m_Y) - vec2(pPrevChar->m_X, pPrevChar->m_Y);
