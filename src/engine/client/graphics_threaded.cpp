@@ -2556,7 +2556,7 @@ bool CGraphics_Threaded::SetVSync(bool State)
 }
 
 // synchronization
-void CGraphics_Threaded::InsertSignal(semaphore *pSemaphore)
+void CGraphics_Threaded::InsertSignal(CSemaphore *pSemaphore)
 {
 	CCommandBuffer::SCommand_Signal Cmd;
 	Cmd.m_pSemaphore = pSemaphore;

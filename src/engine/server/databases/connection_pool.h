@@ -57,7 +57,7 @@ private:
 	bool ExecSqlFunc(IDbConnection *pConnection, struct CSqlExecData *pData, bool Failure);
 
 	std::atomic_bool m_Shutdown;
-	semaphore m_NumElem;
+	CSemaphore m_NumElem;
 	int FirstElem;
 	int LastElem;
 	std::unique_ptr<struct CSqlExecData> m_aTasks[512];

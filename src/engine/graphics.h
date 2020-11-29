@@ -374,7 +374,7 @@ public:
 	virtual int GetNumScreens() const = 0;
 
 	// synchronization
-	virtual void InsertSignal(class semaphore *pSemaphore) = 0;
+	virtual void InsertSignal(class CSemaphore *pSemaphore) = 0;
 	virtual bool IsIdle() = 0;
 	virtual void WaitForIdle() = 0;
 

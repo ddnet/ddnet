@@ -62,8 +62,8 @@ private:
 	ICommandProcessor *m_pProcessor;
 	CCommandBuffer *volatile m_pBuffer;
 	volatile bool m_Shutdown;
-	semaphore m_Activity;
-	semaphore m_BufferDone;
+	CSemaphore m_Activity;
+	CSemaphore m_BufferDone;
 	void *m_pThread;
 
 	static void ThreadFunc(void *pUser);
