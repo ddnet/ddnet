@@ -212,6 +212,8 @@ public:
 	virtual void MapScreen(float TopLeftX, float TopLeftY, float BottomRightX, float BottomRightY) = 0;
 	virtual void GetScreen(float *pTopLeftX, float *pTopLeftY, float *pBottomRightX, float *pBottomRightY) = 0;
 
+	virtual bool IsPosVisible(vec2 Pos, float Width, float Height) = 0;
+
 	// TODO: These should perhaps not be virtuals
 	virtual void BlendNone() = 0;
 	virtual void BlendNormal() = 0;

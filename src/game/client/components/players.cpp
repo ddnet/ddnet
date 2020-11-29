@@ -182,6 +182,15 @@ void CPlayers::RenderPlayer(
 	if(ClientID >= 0)
 		IntraTick = m_pClient->m_aClients[ClientID].m_IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
 
+	vec2 Position;
+	if(in_range(ClientID, MAX_CLIENTS - 1))
+		Position = m_pClient->m_aClients[ClientID].m_RenderPos;
+	else
+		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
+
+	if(!m_pClient->Graphics()->IsPosVisible(Position, 7 * 32.f, 7 * 32.f))
+		return;
+
 	static float s_LastGameTickTime = Client()->GameTickTime(g_Config.m_ClDummy);
 	static float s_LastPredIntraTick = Client()->PredIntraGameTick(g_Config.m_ClDummy);
 	if(m_pClient->m_Snap.m_pGameInfoObj && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED))
@@ -225,12 +234,6 @@ void CPlayers::RenderPlayer(
 	}
 
 	vec2 Direction = GetDirection((int)(Angle * 256.0f));
-	vec2 Position;
-	if(in_range(ClientID, MAX_CLIENTS - 1))
-		Position = m_pClient->m_aClients[ClientID].m_RenderPos;
-	else
-		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
-
 	vec2 Vel = mix(vec2(Prev.m_VelX / 256.0f, Prev.m_VelY / 256.0f), vec2(Player.m_VelX / 256.0f, Player.m_VelY / 256.0f), IntraTick);
 
 	m_pClient->m_pFlow->Add(Position, Vel * 100.0f, 10.0f);

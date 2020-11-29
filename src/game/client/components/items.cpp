@@ -70,6 +70,10 @@ void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 	vec2 Pos = CalcPos(StartPos, StartVel, Curvature, Speed, Ct);
 	vec2 PrevPos = CalcPos(StartPos, StartVel, Curvature, Speed, Ct - 0.001f);
 
+	// only render visible (with some extra margin make sure smoketrails outside screen are kept)
+	if(!m_pClient->Graphics()->IsPosVisible(Pos, 30 * 32.f, 30 * 32.f))
+		return;
+
 	float Alpha = 1.f;
 	if(UseExtraInfo(pCurrent))
 	{
@@ -127,6 +131,10 @@ void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 
 void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCurrent, bool IsPredicted)
 {
+	// only render visible
+	if(!m_pClient->Graphics()->IsPosVisible(vec2(pCurrent->m_X, pCurrent->m_Y), 7 * 32.f, 7 * 32.f))
+		return;
+
 	const int c[] = {
 		SPRITE_PICKUP_HEALTH,
 		SPRITE_PICKUP_ARMOR,
@@ -236,6 +244,11 @@ void CItems::RenderLaser(const struct CNetObj_Laser *pCurrent, bool IsPredicted)
 	vec2 Pos = vec2(pCurrent->m_X, pCurrent->m_Y);
 	vec2 From = vec2(pCurrent->m_FromX, pCurrent->m_FromY);
 	float Len = distance(Pos, From);
+
+	// only render visible
+	if(!m_pClient->Graphics()->IsPosVisible(mix(From, Pos, 0.5f), fabs(From.x - Pos.x) / 2 + 7 * 32.f, fabs(From.y - Pos.y) / 2 + 7 * 32.f))
+		return;
+
 	RGB = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClLaserOutlineColor));
 	ColorRGBA OuterColor(RGB.r, RGB.g, RGB.b, 1.0f);
 	RGB = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClLaserInnerColor));

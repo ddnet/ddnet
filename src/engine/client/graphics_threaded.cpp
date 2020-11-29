@@ -226,6 +226,11 @@ void CGraphics_Threaded::GetScreen(float *pTopLeftX, float *pTopLeftY, float *pB
 	*pBottomRightY = m_State.m_ScreenBR.y;
 }
 
+bool CGraphics_Threaded::IsPosVisible(vec2 Pos, float Width, float Height)
+{
+	return in_range(Pos.x, m_State.m_ScreenTL.x - Width / 2.f, m_State.m_ScreenBR.x + Width / 2.f) && in_range(Pos.y, m_State.m_ScreenTL.y - Height / 2.f, m_State.m_ScreenBR.y + Height / 2.f);
+}
+
 void CGraphics_Threaded::LinesBegin()
 {
 	dbg_assert(m_Drawing == 0, "called Graphics()->LinesBegin twice");

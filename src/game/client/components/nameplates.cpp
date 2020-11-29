@@ -39,6 +39,9 @@ void CNamePlates::RenderNameplate(
 
 void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pPlayerInfo, float Alpha)
 {
+	if(!m_pClient->Graphics()->IsPosVisible(Position, 15 * 32.f, 15 * 32.f))
+		return;
+
 	int ClientID = pPlayerInfo->m_ClientID;
 
 	bool OtherTeam = m_pClient->IsOtherTeam(ClientID);

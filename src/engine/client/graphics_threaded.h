@@ -825,6 +825,8 @@ public:
 	void MapScreen(float TopLeftX, float TopLeftY, float BottomRightX, float BottomRightY) override;
 	void GetScreen(float *pTopLeftX, float *pTopLeftY, float *pBottomRightX, float *pBottomRightY) override;
 
+	bool IsPosVisible(vec2 Pos, float Width, float Height) override;
+
 	void LinesBegin() override;
 	void LinesEnd() override;
 	void LinesDraw(const CLineItem *pArray, int Num) override;
