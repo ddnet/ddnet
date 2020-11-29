@@ -213,7 +213,7 @@ public:
 	{
 		SCommand_Signal() :
 			SCommand(CMD_SIGNAL) {}
-		semaphore *m_pSemaphore;
+		CSemaphore *m_pSemaphore;
 	};
 
 	struct SCommand_RunBuffer : public SCommand
@@ -1136,7 +1136,7 @@ public:
 	virtual int GetDesktopScreenHeight() { return m_DesktopScreenHeight; }
 
 	// synchronization
-	void InsertSignal(semaphore *pSemaphore) override;
+	void InsertSignal(CSemaphore *pSemaphore) override;
 	bool IsIdle() override;
 	void WaitForIdle() override;
 

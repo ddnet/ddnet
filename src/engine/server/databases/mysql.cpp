@@ -11,7 +11,7 @@
 
 #include <string>
 
-lock CMysqlConnection::m_SqlDriverLock;
+CLock CMysqlConnection::m_SqlDriverLock;
 
 CMysqlConnection::CMysqlConnection(
 	const char *pDatabase,
@@ -117,7 +117,7 @@ IDbConnection::Status CMysqlConnection::Connect()
 
 		// Create connection
 		{
-			scope_lock GlobalLockScope(&m_SqlDriverLock);
+			CScopeLock GlobalLockScope(&m_SqlDriverLock);
 			sql::Driver *pDriver = get_driver_instance();
 			m_pConnection.reset(pDriver->connect(connection_properties));
 		}

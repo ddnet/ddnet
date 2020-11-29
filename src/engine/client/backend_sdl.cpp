@@ -71,7 +71,7 @@ void CGraphicsBackend_Threaded::ThreadFunc(void *pUser)
 
 	while(!pThis->m_Shutdown)
 	{
-		pThis->m_Activity.wait();
+		pThis->m_Activity.Wait();
 		if(pThis->m_pBuffer)
 		{
 #ifdef CONF_PLATFORM_MACOSX
@@ -81,7 +81,7 @@ void CGraphicsBackend_Threaded::ThreadFunc(void *pUser)
 
 			sync_barrier();
 			pThis->m_pBuffer = 0x0;
-			pThis->m_BufferDone.signal();
+			pThis->m_BufferDone.Signal();
 		}
 #if defined(CONF_VIDEORECORDER)
 		if(IVideo::Current())
@@ -102,13 +102,13 @@ void CGraphicsBackend_Threaded::StartProcessor(ICommandProcessor *pProcessor)
 	m_Shutdown = false;
 	m_pProcessor = pProcessor;
 	m_pThread = thread_init(ThreadFunc, this, "CGraphicsBackend_Threaded");
-	m_BufferDone.signal();
+	m_BufferDone.Signal();
 }
 
 void CGraphicsBackend_Threaded::StopProcessor()
 {
 	m_Shutdown = true;
-	m_Activity.signal();
+	m_Activity.Signal();
 	if(m_pThread)
 		thread_wait(m_pThread);
 }
@@ -117,7 +117,7 @@ void CGraphicsBackend_Threaded::RunBuffer(CCommandBuffer *pBuffer)
 {
 	WaitForIdle();
 	m_pBuffer = pBuffer;
-	m_Activity.signal();
+	m_Activity.Signal();
 }
 
 bool CGraphicsBackend_Threaded::IsIdle() const
@@ -128,7 +128,7 @@ bool CGraphicsBackend_Threaded::IsIdle() const
 void CGraphicsBackend_Threaded::WaitForIdle()
 {
 	while(m_pBuffer != 0x0)
-		m_BufferDone.wait();
+		m_BufferDone.Wait();
 }
 
 static bool Texture2DTo3D(void *pImageBuffer, int ImageWidth, int ImageHeight, int ImageColorChannelCount, int SplitCountWidth, int SplitCountHeight, void *pTarget3DImageData, int &Target3DImageWidth, int &Target3DImageHeight)
@@ -162,7 +162,7 @@ static bool Texture2DTo3D(void *pImageBuffer, int ImageWidth, int ImageHeight, i
 
 void CCommandProcessorFragment_General::Cmd_Signal(const CCommandBuffer::SCommand_Signal *pCommand)
 {
-	pCommand->m_pSemaphore->signal();
+	pCommand->m_pSemaphore->Signal();
 }
 
 bool CCommandProcessorFragment_General::RunCommand(const CCommandBuffer::SCommand *pBaseCommand)
