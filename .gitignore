@@ -43,6 +43,8 @@ chillerbot-ux-Server-Launcher
 DDNet-Server
 DDNet-Server-Launcher
 libsteam_api.a
+chillpw
+chillpw_*
 config_retrieve
 config_store
 crapnet

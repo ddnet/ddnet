@@ -30,7 +30,6 @@ void CChillPw::OnRender()
 void CChillPw::OnInit()
 {
     IOHANDLE File = Storage()->OpenFile(PASSWORD_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
-
 	char aBuf[128];
     int Line = 0;
 	if(!File)
