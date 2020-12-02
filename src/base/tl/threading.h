@@ -15,25 +15,25 @@ public:
 	void Signal() { sphore_signal(&m_Sem); }
 };
 
-class CLock
+class SCOPED_CAPABILITY CLock
 {
 	LOCK m_Lock;
 
 public:
-	CLock()
+	CLock() ACQUIRE(m_Lock)
 	{
 		m_Lock = lock_create();
 	}
 
-	~CLock()
+	~CLock() RELEASE()
 	{
 		lock_destroy(m_Lock);
 	}
 
 	CLock(const CLock &) = delete;
 
-	void Take() { lock_wait(m_Lock); }
-	void Release() { lock_unlock(m_Lock); }
+	void Take() ACQUIRE(m_Lock) { lock_wait(m_Lock); }
+	void Release() RELEASE() { lock_unlock(m_Lock); }
 };
 
 class CScopeLock
