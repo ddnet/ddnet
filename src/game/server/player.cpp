@@ -630,7 +630,7 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 	if(Team == TEAM_SPECTATORS)
 	{
 		CGameControllerDDRace *Controller = (CGameControllerDDRace *)GameServer()->m_pController;
-		if(g_Config.m_SvTeam != 3)
+		if(g_Config.m_SvTeam != 3 && m_pCharacter)
 		{
 			// Joining spectators should not kill a locked team, but should still
 			// check if the team finished by you leaving it.
