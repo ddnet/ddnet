@@ -4,6 +4,7 @@
 #modified by:
 #	MertenNor		2011-07-02 08:46:16
 #	nuborn			2020-08-31 23:00:00
+#	nuborn			2020-11-12 00:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -692,7 +693,7 @@ Most importantly communication is key: There is no tutorial so you'll have to ch
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Det anbefales å sjekke innstillingene og justere dem slik det passer deg før du går inn på en server.
 
-Please enter your nick name below.
+Please enter your nickname below.
 == Skriv inn ditt ønskede kallenavn under.
 
 Destination file already exist
@@ -1115,18 +1116,6 @@ New random timeout code
 Time
 == Tid
 
-Manual %3d:%02d  
-== Manuell %3d:%02d
-
-Race %3d:%02d  
-== Løp %3d:%02d
-
-Auto %3d:%02d  
-== Auto %3d:%02d
-
-Replay %3d:%02d  
-== Opptak %3d:%02d
-
 Follow
 == Følg
 
@@ -1166,108 +1155,141 @@ Grabs
 9+ new mentions
 == nevnt 9+ ganger
 
-Downloading ddnet-info.json failed
-== 
+Manual
+== Manuell
+
+Race
+== Løp
+
+Auto
+== Auto
+
+Replay
+== Opptak
 
 Saving ddnet-settings.cfg failed
-== 
+== Lagring av ddnet-settings.cfg mislyktes
 
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== 
+== Bredden eller høyden til tekstur %s er ikke delelig med 16, noe som kan gi visuelle feil.
 
 Warning
-== 
+== Advarsel
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== Feilsøkemodus aktivert. Trykk Ctrl+Shift+D for å deaktivere feilsøkemodus.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 
+== Bruk k-tasten for å drepe (restarte), q for å pause og se på andre spillere. Se innstillinger for andre tasteoppsett.
+
+Existing Player
+== Eksisterende Spiller
+
+Your nickname '%s' is already used (%d points). Do you still want to use it?
+== Ditt kallenavn '%s' er allerede i bruk (%d poeng). Vil du fortsatt bruke det?
+
+Checking for existing player with your name
+== Sjekker etter eksisterende spiller med ditt navn
 
 Country / Region
-== 
+== Land / Region
 
 Speed
-== 
+== Hastighet
 
 Theme
-== 
+== Tema
 
 %d of %d servers
-== 
+== %d av %d servere
 
 %d of %d server
-== 
+== %d av %d server
 
 %d players
-== 
+== %d spillere
 
 %d player
-== 
-
-File
-== 
+== %d spiller
 
 Demos directory
-== 
+== Demomappe
+
+Smooth Dynamic Camera
+== Mykt dynamisk kamera
 
 Skip the main menu
-== 
+== Hopp over hovedmeny
 
 Themes directory
-== 
+== Temamappe
 
 Download skins
-== 
+== Last ned skins
 
 Skin Database
-== 
+== Skin-database
 
 Skins directory
-== 
+== Skinmappe
+
+Game sound volume
+== Lydvolum spill
+
+Chat sound volume
+== Lydvolum chat
 
 Background music volume
-== 
+== Bakgrunnsmusikkvolum
 
 Assets
-== 
+== Ressurser
+
+Use old chat style
+== Bruk gammel chattestil
+
+Highlight
+== Uthev
 
 Client message
-== 
+== Klientmelding
 
 Use current map as background
-== 
+== Bruk nåværende bane som bakgrunn
 
 Entities
-== 
+== Entities
 
 Emoticons
-== 
+== Emotikoner
 
 Particles
-== 
+== Partikler
 
 Assets directory
-== 
+== Ressursmappe
 
 https://wiki.ddnet.tw/
-== 
+== https://wiki.ddnet.tw/
 
 Website
-== 
+== Webside
 
 Settings
-== 
+== Innstillinger
 
 Stop server
-== 
+== Stopp server
 
 Run server
-== 
+== Start server
 
 Server executable not found, can't run server
-== 
+== Server-programfil ikke funnet, kan ikke starte server
 
 Editor
-== 
+== Baneredigerer
 
 [Start menu]
 Play
-== 
+== Spill

@@ -12,6 +12,7 @@ CDragger::CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW,
 	int CaughtTeam, int Layer, int Number) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
 {
+	m_Target = 0;
 	m_Layer = Layer;
 	m_Number = Number;
 	m_Pos = Pos;
@@ -56,10 +57,9 @@ void CDragger::Move()
 			continue;
 		}
 		int Res =
-			m_NW ? GameServer()->Collision()->IntersectNoLaserNW(m_Pos,
-				       Temp->m_Pos, 0, 0) :
-			       GameServer()->Collision()->IntersectNoLaser(m_Pos,
-				       Temp->m_Pos, 0, 0);
+			m_NW ?
+				GameServer()->Collision()->IntersectNoLaserNW(m_Pos, Temp->m_Pos, 0, 0) :
+				GameServer()->Collision()->IntersectNoLaser(m_Pos, Temp->m_Pos, 0, 0);
 
 		if(Res == 0)
 		{
@@ -94,38 +94,38 @@ void CDragger::Move()
 
 void CDragger::Drag()
 {
-	if(m_Target)
+	if(!m_Target)
+		return;
+
+	CCharacter *Target = m_Target;
+
+	for(int i = -1; i < MAX_CLIENTS; i++)
 	{
-		CCharacter *Target = m_Target;
+		if(i >= 0)
+			Target = m_SoloEnts[i];
 
-		for(int i = -1; i < MAX_CLIENTS; i++)
+		if(!Target)
+			continue;
+
+		int Res = 0;
+		if(!m_NW)
+			Res = GameServer()->Collision()->IntersectNoLaser(m_Pos,
+				Target->m_Pos, 0, 0);
+		else
+			Res = GameServer()->Collision()->IntersectNoLaserNW(m_Pos,
+				Target->m_Pos, 0, 0);
+		if(Res || length(m_Pos - Target->m_Pos) > g_Config.m_SvDraggerRange)
 		{
-			if(i >= 0)
-				Target = m_SoloEnts[i];
-
-			if(!Target)
-				continue;
-
-			int Res = 0;
-			if(!m_NW)
-				Res = GameServer()->Collision()->IntersectNoLaser(m_Pos,
-					Target->m_Pos, 0, 0);
+			Target = 0;
+			if(i == -1)
+				m_Target = 0;
 			else
-				Res = GameServer()->Collision()->IntersectNoLaserNW(m_Pos,
-					Target->m_Pos, 0, 0);
-			if(Res || length(m_Pos - Target->m_Pos) > g_Config.m_SvDraggerRange)
-			{
-				Target = 0;
-				if(i == -1)
-					m_Target = 0;
-				else
-					m_SoloEnts[i] = 0;
-			}
-			else if(length(m_Pos - Target->m_Pos) > 28)
-			{
-				vec2 Temp = Target->Core()->m_Vel + (normalize(m_Pos - Target->m_Pos) * m_Strength);
-				Target->Core()->m_Vel = ClampVel(Target->m_MoveRestrictions, Temp);
-			}
+				m_SoloEnts[i] = 0;
+		}
+		else if(length(m_Pos - Target->m_Pos) > 28)
+		{
+			vec2 Temp = Target->Core()->m_Vel + (normalize(m_Pos - Target->m_Pos) * m_Strength);
+			Target->Core()->m_Vel = ClampVel(Target->m_MoveRestrictions, Temp);
 		}
 	}
 }

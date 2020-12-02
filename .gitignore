@@ -63,6 +63,10 @@ unicode_confusables
 uuid
 versionsrv
 
+# But we still should allow to download mastersrv/twping sources
+!src/mastersrv
+!src/twping
+
 generated
 
 # IDE project files

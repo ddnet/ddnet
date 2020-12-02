@@ -41,6 +41,7 @@ class CChat : public CComponent
 
 		char m_aSkinName[sizeof(g_Config.m_ClPlayerSkin) / sizeof(g_Config.m_ClPlayerSkin[0])];
 		CSkin::SSkinTextures m_RenderSkin;
+		CSkin::SSkinMetrics m_RenderSkinMetrics;
 		bool m_CustomColoredSkin;
 		ColorRGBA m_ColorBody;
 		ColorRGBA m_ColorFeet;
@@ -99,7 +100,7 @@ class CChat : public CComponent
 		char m_aText[1];
 	};
 	CHistoryEntry *m_pHistoryEntry;
-	TStaticRingBuffer<CHistoryEntry, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_History;
+	CStaticRingBuffer<CHistoryEntry, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_History;
 	int m_PendingChatCounter;
 	int64 m_LastChatSend;
 	int64 m_aLastSoundPlayed[CHAT_NUM];

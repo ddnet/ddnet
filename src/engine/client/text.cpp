@@ -715,7 +715,7 @@ public:
 		if(FT_New_Memory_Face(m_FTLibrary, pBuf, Size, 0, &FallbackFont.m_FtFace) == 0)
 		{
 			dbg_msg("textrender", "loaded fallback font from '%s'", pFilename);
-			pFont->m_FtFallbackFonts.emplace_back(std::move(FallbackFont));
+			pFont->m_FtFallbackFonts.emplace_back(FallbackFont);
 
 			return true;
 		}
@@ -840,6 +840,9 @@ public:
 	}
 	virtual void TextOutlineColor(ColorRGBA rgb) { m_OutlineColor = rgb; };
 
+	virtual ColorRGBA GetTextColor() { return m_Color; }
+	virtual ColorRGBA GetTextOutlineColor() { return m_OutlineColor; }
+
 	virtual void TextEx(CTextCursor *pCursor, const char *pText, int Length)
 	{
 		dbg_assert(pText != NULL, "null text pointer");
@@ -897,7 +900,7 @@ public:
 		//the outlined texture is always the same size as the current
 		float UVScale = 1.0f / pFont->m_CurTextureDimensions[0];
 
-		const char *pCurrent = (char *)pText;
+		const char *pCurrent = pText;
 		const char *pEnd = pCurrent + Length;
 
 		if((m_RenderFlags & TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) != 0)
@@ -941,7 +944,7 @@ public:
 			const char *pBatchEnd = pEnd;
 			if(pCursor->m_LineWidth > 0 && !(pCursor->m_Flags & TEXTFLAG_STOP_AT_END))
 			{
-				int Wlen = minimum(WordLength((char *)pCurrent), (int)(pEnd - pCurrent));
+				int Wlen = minimum(WordLength(pCurrent), (int)(pEnd - pCurrent));
 				CTextCursor Compare = *pCursor;
 				Compare.m_X = DrawX;
 				Compare.m_Y = DrawY;
@@ -1718,8 +1721,8 @@ public:
 		void *pUploadData = &TextContainer.m_StringInfo.m_CharacterQuads[0];
 		TextContainer.m_StringInfo.m_QuadBufferObjectIndex = Graphics()->CreateBufferObject(DataSize, pUploadData);
 
-		for(size_t i = 0; i < m_DefaultTextContainerInfo.m_Attributes.size(); ++i)
-			m_DefaultTextContainerInfo.m_Attributes[i].m_VertBufferBindingIndex = TextContainer.m_StringInfo.m_QuadBufferObjectIndex;
+		for(auto &Attribute : m_DefaultTextContainerInfo.m_Attributes)
+			Attribute.m_VertBufferBindingIndex = TextContainer.m_StringInfo.m_QuadBufferObjectIndex;
 
 		TextContainer.m_StringInfo.m_QuadBufferContainerIndex = Graphics()->CreateBufferContainer(&m_DefaultTextContainerInfo);
 		Graphics()->IndicesNumRequiredNotify(TextContainer.m_StringInfo.m_QuadNum * 6);

@@ -2,7 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/math.h>
 #include <base/system.h>
-#include <engine/shared/dilate.h>
+#include <engine/shared/image_manipulation.h>
 #include <pnglite.h>
 
 int DilateFile(const char *pFileName)

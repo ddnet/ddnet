@@ -30,10 +30,12 @@
 #include <game/generated/client_data.h>
 #include <game/localization.h>
 
-#include <engine/shared/dilate.h>
+#include <engine/shared/image_manipulation.h>
 
 #include "auto_map.h"
 #include "editor.h"
+
+#include <limits>
 
 static const char *VANILLA_IMAGES[] = {
 	"bg_cloud1",
@@ -352,7 +354,7 @@ int CEditor::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned Str
 
 			for(int i = 1; i <= Len; i++)
 			{
-				if(TextRender()->TextWidth(0, FontSize, pStr, i, -1.0f) - *Offset > MxRel)
+				if(TextRender()->TextWidth(0, FontSize, pStr, i, std::numeric_limits<float>::max()) - *Offset > MxRel)
 				{
 					s_AtIndex = i - 1;
 					break;
@@ -451,15 +453,15 @@ int CEditor::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned Str
 	// check if the text has to be moved
 	if(UI()->LastActiveItem() == pID && !JustGotActive && (UpdateOffset || Input()->NumEvents()))
 	{
-		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex, -1.0f);
+		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex, std::numeric_limits<float>::max());
 		if(w - *Offset > Textbox.w)
 		{
 			// move to the left
-			float wt = TextRender()->TextWidth(0, FontSize, pDisplayStr, -1, -1.0f);
+			float wt = TextRender()->TextWidth(0, FontSize, pDisplayStr, -1, std::numeric_limits<float>::max());
 			do
 			{
 				*Offset += minimum(wt - *Offset - Textbox.w, Textbox.w / 3);
-			} while(w - *Offset > Textbox.w);
+			} while(w - *Offset > Textbox.w + 0.0001f);
 		}
 		else if(w - *Offset < 0.0f)
 		{
@@ -467,24 +469,24 @@ int CEditor::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned Str
 			do
 			{
 				*Offset = maximum(0.0f, *Offset - Textbox.w / 3);
-			} while(w - *Offset < 0.0f);
+			} while(w - *Offset < -0.0001f);
 		}
 	}
 	UI()->ClipEnable(pRect);
 	Textbox.x -= *Offset;
 
-	UI()->DoLabel(&Textbox, pDisplayStr, FontSize, -1, Textbox.w * 2.0f);
+	UI()->DoLabel(&Textbox, pDisplayStr, FontSize, -1, std::numeric_limits<float>::max());
 
 	// render the cursor
 	if(UI()->LastActiveItem() == pID && !JustGotActive)
 	{
-		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex, Textbox.w * 2.0f);
+		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex, std::numeric_limits<float>::max());
 		Textbox = *pRect;
 		Textbox.VSplitLeft(2.0f, 0, &Textbox);
-		Textbox.x += (w - *Offset - TextRender()->TextWidth(0, FontSize, "|", -1, Textbox.w * 2.0f) / 2);
+		Textbox.x += (w - *Offset - TextRender()->TextWidth(0, FontSize, "|", -1, std::numeric_limits<float>::max()) / 2);
 
 		if((2 * time_get() / time_freq()) % 2) // make it blink
-			UI()->DoLabel(&Textbox, "|", FontSize, -1, Textbox.w * 2.0f);
+			UI()->DoLabel(&Textbox, "|", FontSize, -1, std::numeric_limits<float>::max());
 	}
 	UI()->ClipDisable();
 
@@ -2075,7 +2077,7 @@ void CEditor::DoQuadEnvelopes(const array<CQuad> &lQuads, IGraphics::CTextureHan
 {
 	int Num = lQuads.size();
 	CEnvelope **apEnvelope = new CEnvelope *[Num];
-	mem_zero(apEnvelope, sizeof(CEnvelope *) * Num);
+	mem_zero(apEnvelope, sizeof(CEnvelope *) * Num); // NOLINT(bugprone-sizeof-expression)
 	for(int i = 0; i < Num; i++)
 	{
 		if((m_ShowEnvelopePreview == 1 && lQuads[i].m_PosEnv == m_SelectedEnvelope) || m_ShowEnvelopePreview == 2)
@@ -2962,9 +2964,9 @@ void CEditor::DoMapEditor(CUIRect View)
 	//UI()->ClipDisable();
 }
 
-float CEditor::ScaleFontSize(char *aBuf, float FontSize, int Width)
+float CEditor::ScaleFontSize(char *pText, int TextSize, float FontSize, int Width)
 {
-	while(TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f) > Width)
+	while(TextRender()->TextWidth(0, FontSize, pText, -1, -1.0f) > Width)
 	{
 		if(FontSize > 6.0f)
 		{
@@ -2972,8 +2974,8 @@ float CEditor::ScaleFontSize(char *aBuf, float FontSize, int Width)
 		}
 		else
 		{
-			aBuf[str_length(aBuf) - 4] = '\0';
-			str_append(aBuf, "...", sizeof(aBuf));
+			pText[str_length(pText) - 4] = '\0';
+			str_append(pText, "...", TextSize);
 		}
 	}
 	return FontSize;
@@ -3140,7 +3142,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			else
 				str_format(aBuf, sizeof(aBuf), "%s", m_Map.m_lImages[pProps[i].m_Value]->m_aName);
 
-			float FontSize = ScaleFontSize(aBuf, 10.0f, Shifter.w);
+			float FontSize = ScaleFontSize(aBuf, sizeof(aBuf), 10.0f, Shifter.w);
 			if(DoButton_Ex(&pIDs[i], aBuf, 0, &Shifter, 0, 0, CUI::CORNER_ALL, FontSize))
 				PopupSelectImageInvoke(pProps[i].m_Value, UI()->MouseX(), UI()->MouseY());
 
@@ -3194,7 +3196,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			else
 				str_format(aBuf, sizeof(aBuf), "%s", m_Map.m_lSounds[pProps[i].m_Value]->m_aName);
 
-			float FontSize = ScaleFontSize(aBuf, 10.0f, Shifter.w);
+			float FontSize = ScaleFontSize(aBuf, sizeof(aBuf), 10.0f, Shifter.w);
 			if(DoButton_Ex(&pIDs[i], aBuf, 0, &Shifter, 0, 0, CUI::CORNER_ALL, FontSize))
 				PopupSelectSoundInvoke(pProps[i].m_Value, UI()->MouseX(), UI()->MouseY());
 
@@ -3213,7 +3215,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			else
 				str_format(aBuf, sizeof(aBuf), "%s", m_Map.m_lImages[pProps[i].m_Min]->m_AutoMapper.GetConfigName(pProps[i].m_Value));
 
-			float FontSize = ScaleFontSize(aBuf, 10.0f, Shifter.w);
+			float FontSize = ScaleFontSize(aBuf, sizeof(aBuf), 10.0f, Shifter.w);
 			if(DoButton_Ex(&pIDs[i], aBuf, 0, &Shifter, 0, 0, CUI::CORNER_ALL, FontSize))
 				PopupSelectConfigAutoMapInvoke(pProps[i].m_Value, UI()->MouseX(), UI()->MouseY());
 
@@ -3240,7 +3242,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			else
 				str_format(aBuf, sizeof(aBuf), "%d", CurValue);
 
-			float FontSize = ScaleFontSize(aBuf, 10.0f, Shifter.w);
+			float FontSize = ScaleFontSize(aBuf, sizeof(aBuf), 10.0f, Shifter.w);
 			RenderTools()->DrawUIRect(&Shifter, Color, 0, 5.0f);
 			UI()->DoLabel(&Shifter, aBuf, FontSize, 0, -1);
 
@@ -4495,7 +4497,9 @@ void CEditor::RenderFileDialog()
 				if(Graphics()->LoadPNG(&m_FilePreviewImageInfo, aBuffer, IStorage::TYPE_ALL))
 				{
 					m_FilePreviewImage = Graphics()->LoadTextureRaw(m_FilePreviewImageInfo.m_Width, m_FilePreviewImageInfo.m_Height, m_FilePreviewImageInfo.m_Format, m_FilePreviewImageInfo.m_pData, m_FilePreviewImageInfo.m_Format, IGraphics::TEXLOAD_NORESAMPLE);
-					free(m_FilePreviewImageInfo.m_pData);
+					CImageInfo DummyInfo = m_FilePreviewImageInfo;
+					m_FilePreviewImageInfo.m_pData = NULL;
+					Graphics()->FreePNG(&DummyInfo);
 					m_PreviewImageIsLoaded = true;
 				}
 			}
@@ -4785,7 +4789,7 @@ void CEditor::RenderStatusbar(CUIRect View)
 		else
 			str_copy(aBuf, m_pTooltip, sizeof(aBuf));
 
-		float FontSize = ScaleFontSize(aBuf, 10.0f, View.w);
+		float FontSize = ScaleFontSize(aBuf, sizeof(aBuf), 10.0f, View.w);
 		UI()->DoLabel(&View, aBuf, FontSize, -1, View.w);
 	}
 }

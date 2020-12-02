@@ -77,6 +77,11 @@ struct STextRenderColor
 		m_A = a;
 	}
 
+	bool operator!=(const STextRenderColor &Other)
+	{
+		return m_R != Other.m_R || m_G != Other.m_G || m_B != Other.m_B || m_A != Other.m_A;
+	}
+
 	float m_R, m_G, m_B, m_A;
 };
 
@@ -128,6 +133,9 @@ public:
 	virtual void Text(void *pFontSetV, float x, float y, float Size, const char *pText, float LineWidth) = 0;
 	virtual float TextWidth(void *pFontSetV, float Size, const char *pText, int StrLength, float LineWidth, float *pAlignedHeight = NULL, float *pMaxCharacterHeightInLine = NULL) = 0;
 	virtual int TextLineCount(void *pFontSetV, float Size, const char *pText, float LineWidth) = 0;
+
+	virtual ColorRGBA GetTextColor() = 0;
+	virtual ColorRGBA GetTextOutlineColor() = 0;
 
 	virtual void OnWindowResize() = 0;
 

@@ -3,8 +3,6 @@
 #ifndef ENGINE_SHARED_RINGBUFFER_H
 #define ENGINE_SHARED_RINGBUFFER_H
 
-typedef struct RINGBUFFER RINGBUFFER;
-
 class CRingBufferBase
 {
 	class CItem
@@ -49,12 +47,12 @@ public:
 };
 
 template<typename T, int TSIZE, int TFLAGS = 0>
-class TStaticRingBuffer : public CRingBufferBase
+class CStaticRingBuffer : public CRingBufferBase
 {
 	unsigned char m_aBuffer[TSIZE];
 
 public:
-	TStaticRingBuffer() { Init(); }
+	CStaticRingBuffer() { Init(); }
 
 	void Init() { CRingBufferBase::Init(m_aBuffer, TSIZE, TFLAGS); }
 

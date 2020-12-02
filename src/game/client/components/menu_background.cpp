@@ -157,6 +157,7 @@ int CMenuBackground::ThemeIconScan(const char *pName, int IsDir, int DirType, vo
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
 
 			Theme.m_IconTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
+			pSelf->Graphics()->FreePNG(&Info);
 			return 0;
 		}
 	}

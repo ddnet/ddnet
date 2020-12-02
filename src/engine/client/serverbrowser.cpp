@@ -503,9 +503,9 @@ CServerBrowser::CServerEntry *CServerBrowser::Add(const NETADDR &Addr)
 	{
 		CServerEntry **ppNewlist;
 		m_NumServerCapacity += 100;
-		ppNewlist = (CServerEntry **)calloc(m_NumServerCapacity, sizeof(CServerEntry *));
+		ppNewlist = (CServerEntry **)calloc(m_NumServerCapacity, sizeof(CServerEntry *)); // NOLINT(bugprone-sizeof-expression)
 		if(m_NumServers > 0)
-			mem_copy(ppNewlist, m_ppServerlist, m_NumServers * sizeof(CServerEntry *));
+			mem_copy(ppNewlist, m_ppServerlist, m_NumServers * sizeof(CServerEntry *)); // NOLINT(bugprone-sizeof-expression)
 		free(m_ppServerlist);
 		m_ppServerlist = ppNewlist;
 	}

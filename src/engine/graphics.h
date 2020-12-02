@@ -150,7 +150,7 @@ struct GL_SVertexTex3DStream
 typedef void (*WINDOW_RESIZE_FUNC)(void *pUser);
 
 namespace client_data7 {
-struct CDataSprite;
+struct CDataSprite; // NOLINT(bugprone-forward-declaration-namespace)
 }
 
 class IGraphics : public IInterface
@@ -221,6 +221,9 @@ public:
 	virtual int MemoryUsage() const = 0;
 
 	virtual int LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType) = 0;
+	virtual void FreePNG(CImageInfo *pImg) = 0;
+
+	virtual bool CheckImageDivisibility(const char *pFileName, CImageInfo &Img, int DivX, int DivY, bool AllowResize) = 0;
 
 	// destination and source buffer require to have the same width and height
 	virtual void CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSourceBuffer, int FullWidth, int FullHeight, int ColorChannelCount, int SubOffsetX, int SubOffsetY, int SubCopyWidth, int SubCopyHeight) = 0;
@@ -371,7 +374,7 @@ public:
 	virtual int GetNumScreens() const = 0;
 
 	// synchronization
-	virtual void InsertSignal(class semaphore *pSemaphore) = 0;
+	virtual void InsertSignal(class CSemaphore *pSemaphore) = 0;
 	virtual bool IsIdle() = 0;
 	virtual void WaitForIdle() = 0;
 

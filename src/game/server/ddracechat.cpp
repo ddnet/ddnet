@@ -36,7 +36,7 @@ void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
 		"trafilaw, Zwelf, Patiga, Konsti, ElXreno, MikiGamer,");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
-		"Fireball & others.");
+		"Fireball, Banana090, axblk, yangfl & others.");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
 		"Based on DDRace by the DDRace developers,");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
@@ -1206,7 +1206,7 @@ void CGameContext::ConSayTime(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	int ClientID;
-	char aBufname[MAX_NAME_LENGTH];
+	char aBufName[MAX_NAME_LENGTH];
 
 	if(pResult->NumArguments() > 0)
 	{
@@ -1217,11 +1217,11 @@ void CGameContext::ConSayTime(IConsole::IResult *pResult, void *pUserData)
 		if(ClientID == MAX_CLIENTS)
 			return;
 
-		str_format(aBufname, sizeof(aBufname), "%s's", pSelf->Server()->ClientName(ClientID));
+		str_format(aBufName, sizeof(aBufName), "%s's", pSelf->Server()->ClientName(ClientID));
 	}
 	else
 	{
-		str_copy(aBufname, "Your", sizeof(aBufname));
+		str_copy(aBufName, "Your", sizeof(aBufName));
 		ClientID = pResult->m_ClientID;
 	}
 
@@ -1234,13 +1234,12 @@ void CGameContext::ConSayTime(IConsole::IResult *pResult, void *pUserData)
 	if(pChr->m_DDRaceState != DDRACE_STARTED)
 		return;
 
-	char aBuftime[64];
-	int IntTime = (int)((float)(pSelf->Server()->Tick() - pChr->m_StartTime) / ((float)pSelf->Server()->TickSpeed()));
-	str_format(aBuftime, sizeof(aBuftime), "%s time is %s%d:%s%d",
-		aBufname,
-		((IntTime / 60) > 9) ? "" : "0", IntTime / 60,
-		((IntTime % 60) > 9) ? "" : "0", IntTime % 60);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "time", aBuftime);
+	char aBufTime[32];
+	char aBuf[64];
+	int64 Time = (int64)100 * (float)(pSelf->Server()->Tick() - pChr->m_StartTime) / ((float)pSelf->Server()->TickSpeed());
+	str_time(Time, TIME_HOURS, aBufTime, sizeof(aBufTime));
+	str_format(aBuf, sizeof(aBuf), "%s current race time is %s", aBufName, aBufTime);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "time", aBuf);
 }
 
 void CGameContext::ConSayTimeAll(IConsole::IResult *pResult, void *pUserData)
@@ -1258,14 +1257,13 @@ void CGameContext::ConSayTimeAll(IConsole::IResult *pResult, void *pUserData)
 	if(pChr->m_DDRaceState != DDRACE_STARTED)
 		return;
 
-	char aBuftime[64];
-	int IntTime = (int)((float)(pSelf->Server()->Tick() - pChr->m_StartTime) / ((float)pSelf->Server()->TickSpeed()));
-	str_format(aBuftime, sizeof(aBuftime),
-		"%s\'s current race time is %s%d:%s%d",
-		pSelf->Server()->ClientName(pResult->m_ClientID),
-		((IntTime / 60) > 9) ? "" : "0", IntTime / 60,
-		((IntTime % 60) > 9) ? "" : "0", IntTime % 60);
-	pSelf->SendChat(-1, CGameContext::CHAT_ALL, aBuftime, pResult->m_ClientID);
+	char aBufTime[32];
+	char aBuf[64];
+	int64 Time = (int64)100 * (float)(pSelf->Server()->Tick() - pChr->m_StartTime) / ((float)pSelf->Server()->TickSpeed());
+	const char *pName = pSelf->Server()->ClientName(pResult->m_ClientID);
+	str_time(Time, TIME_HOURS, aBufTime, sizeof(aBufTime));
+	str_format(aBuf, sizeof(aBuf), "%s\'s current race time is %s", pName, aBufTime);
+	pSelf->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pResult->m_ClientID);
 }
 
 void CGameContext::ConTime(IConsole::IResult *pResult, void *pUserData)
@@ -1281,12 +1279,12 @@ void CGameContext::ConTime(IConsole::IResult *pResult, void *pUserData)
 	if(!pChr)
 		return;
 
-	char aBuftime[64];
-	int IntTime = (int)((float)(pSelf->Server()->Tick() - pChr->m_StartTime) / ((float)pSelf->Server()->TickSpeed()));
-	str_format(aBuftime, sizeof(aBuftime), "Your time is %s%d:%s%d",
-		((IntTime / 60) > 9) ? "" : "0", IntTime / 60,
-		((IntTime % 60) > 9) ? "" : "0", IntTime % 60);
-	pSelf->SendBroadcast(aBuftime, pResult->m_ClientID);
+	char aBufTime[32];
+	char aBuf[64];
+	int64 Time = (int64)100 * (float)(pSelf->Server()->Tick() - pChr->m_StartTime) / ((float)pSelf->Server()->TickSpeed());
+	str_time(Time, TIME_HOURS, aBufTime, sizeof(aBufTime));
+	str_format(aBuf, sizeof(aBuf), "Your time is %s", aBufTime);
+	pSelf->SendBroadcast(aBuf, pResult->m_ClientID);
 }
 
 static const char s_aaMsg[4][128] = {"game/round timer.", "broadcast.", "both game/round timer and broadcast.", "racetime."};
@@ -1382,12 +1380,6 @@ void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)
 	if(g_Config.m_SvKillProtection != 0 && CurrTime >= (60 * g_Config.m_SvKillProtection) && pChr->m_DDRaceState == DDRACE_STARTED)
 	{
 		pPlayer->KillCharacter(WEAPON_SELF);
-
-		//char aBuf[64];
-		//str_format(aBuf, sizeof(aBuf), "You killed yourself in: %s%d:%s%d",
-		//		((CurrTime / 60) > 9) ? "" : "0", CurrTime / 60,
-		//		((CurrTime % 60) > 9) ? "" : "0", CurrTime % 60);
-		//pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	}
 }
 

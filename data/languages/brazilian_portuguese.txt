@@ -723,9 +723,6 @@ Enable gun sound
 Team message
 == Mensagem do time
 
-Manual %3d:%02d  
-== Manual %3d:%02d  
-
 Save the best demo of each race
 == Salvar a melhor demo de cada corrida
 
@@ -755,9 +752,6 @@ Exclude
 
 DDNet Client updated!
 == DDNet Client atualizado!
-
-Race %3d:%02d  
-== Corrida %3d:%02d  
 
 Type:
 == Tipo:
@@ -893,9 +887,6 @@ Map:
 
 Lht.
 == Lumin.
-
-Auto %3d:%02d  
-== Auto %3d:%02d  
 
 Show clan above name plates
 == Mostrar clã sobre placas de nomes
@@ -1107,9 +1098,6 @@ Pause
 Converse
 == Conversar
 
-Replay %3d:%02d  
-== Reproduzir %3d:%02d
-
 Successfully saved the replay!
 == A reprodução foi salva com sucesso
 
@@ -1161,7 +1149,7 @@ Use k key to kill (restart), q to pause and watch other players. See settings fo
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == É recomendado que você verifique as configurações para ajustá-las ao seu gosto antes de entrar em um servidor.
 
-Please enter your nick name below.
+Please enter your nickname below.
 == Por favor, insira seu apelido abaixo.
 
 Destination file already exist
@@ -1240,17 +1228,11 @@ Editor
 Play
 == Jogar
 
-Downloading ddnet-info.json failed
-== Falha ao baixar ddnet-info.json
-
 Saving ddnet-settings.cfg failed
 == Falha ao salvar ddnet-settings.cfg
 
 Theme
 == Tema
-
-File
-== Arquivo
 
 Demos directory
 == Diretório de demos
@@ -1284,3 +1266,42 @@ Particles
 
 Assets directory
 == Diretório de ativos
+
+Manual
+== Manual
+
+Race
+== Corrida
+
+Auto
+== Auto
+
+Replay
+== Reproduzir
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== Modo de depuração habilitado. Pressione Ctrl+Shift+D para desabilitar o modo de depuração.
+
+Existing Player
+== Jogador existente
+
+Your nickname '%s' is already used (%d points). Do you still want to use it?
+== Seu apelido "%s" já está sendo usado (%d pontos). Ainda assim, você deseja usá-lo?
+
+Checking for existing player with your name
+== Conferindo por jogador existente com seu nome
+
+Smooth Dynamic Camera
+== Câmera dinâmica suave
+
+Game sound volume
+== Volume de som do jogo
+
+Chat sound volume
+== Volume de som do chat
+
+Use old chat style
+== Usar estilo de chat antigo
+
+Highlight
+== Realce

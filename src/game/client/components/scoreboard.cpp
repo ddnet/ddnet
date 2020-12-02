@@ -147,7 +147,7 @@ void CScoreboard::RenderSpectators(float x, float y, float w)
 	}
 }
 
-void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const char *pTitle)
+void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const char *pTitle, int NumPlayers)
 {
 	if(Team == TEAM_SPECTATORS)
 		return;
@@ -174,6 +174,9 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 	if(Team < -1)
 		Team = 0;
+
+	if(NumPlayers < 0)
+		NumPlayers = m_pClient->m_Snap.m_aTeamSize[Team];
 
 	float h = 760.0f;
 
@@ -253,40 +256,37 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	float TeeSizeMod = 1.0f;
 	float Spacing = 16.0f;
 	float RoundRadius = 15.0f;
-	if(m_pClient->m_Snap.m_aTeamSize[Team] > 48)
+	float FontSize = 24.0f;
+	if(NumPlayers > 48)
 	{
 		LineHeight = 20.0f;
 		TeeSizeMod = 0.4f;
 		Spacing = 0.0f;
 		RoundRadius = 5.0f;
+		FontSize = 16.0f;
 	}
-	else if(m_pClient->m_Snap.m_aTeamSize[Team] > 32)
+	else if(NumPlayers > 32)
 	{
 		LineHeight = 27.0f;
 		TeeSizeMod = 0.6f;
 		Spacing = 0.0f;
 		RoundRadius = 5.0f;
+		FontSize = 20.0f;
 	}
-	else if(m_pClient->m_Snap.m_aTeamSize[Team] > 12)
+	else if(NumPlayers > 12)
 	{
 		LineHeight = 40.0f;
 		TeeSizeMod = 0.8f;
 		Spacing = 0.0f;
 		RoundRadius = 15.0f;
 	}
-	else if(m_pClient->m_Snap.m_aTeamSize[Team] > 8)
+	else if(NumPlayers > 8)
 	{
 		LineHeight = 50.0f;
 		TeeSizeMod = 0.9f;
 		Spacing = 5.0f;
 		RoundRadius = 15.0f;
 	}
-
-	float FontSize = 24.0f;
-	if(m_pClient->m_Snap.m_aTeamSize[Team] > 48)
-		FontSize = 16.0f;
-	else if(m_pClient->m_Snap.m_aTeamSize[Team] > 32)
-		FontSize = 20.0f;
 
 	float ScoreOffset = x + 10.0f, ScoreLength = TextRender()->TextWidth(0, FontSize, "00:00:00", -1, -1.0f);
 	float TeeOffset = ScoreOffset + ScoreLength + 15.0f, TeeLength = 60 * TeeSizeMod;
@@ -654,8 +654,9 @@ void CScoreboard::OnRender()
 				TextRender()->Text(0, Width / 2 - w / 2, 39, 86.0f, aText, -1.0f);
 			}
 
-			RenderScoreboard(Width / 2 - w - 5.0f, 150.0f, w, TEAM_RED, pRedClanName ? pRedClanName : Localize("Red team"));
-			RenderScoreboard(Width / 2 + 5.0f, 150.0f, w, TEAM_BLUE, pBlueClanName ? pBlueClanName : Localize("Blue team"));
+			int NumPlayers = maximum(m_pClient->m_Snap.m_aTeamSize[TEAM_RED], m_pClient->m_Snap.m_aTeamSize[TEAM_BLUE]);
+			RenderScoreboard(Width / 2 - w - 5.0f, 150.0f, w, TEAM_RED, pRedClanName ? pRedClanName : Localize("Red team"), NumPlayers);
+			RenderScoreboard(Width / 2 + 5.0f, 150.0f, w, TEAM_BLUE, pBlueClanName ? pBlueClanName : Localize("Blue team"), NumPlayers);
 		}
 	}
 

@@ -10,6 +10,7 @@
 # 2020.8.14 Night_L
 # 2020.8.19 TsFreddie
 # 2020.8.20 Dan_cao
+# 2020.11.12 TsFreddie
 ##### /authors #####
 
 ##### translated strings #####
@@ -793,13 +794,13 @@ Show other players' key presses
 == 显示其他玩家的按键
 
 Background (regular)
-== 背景(常规)
+== 背景(常规模式)
 
 Background (entities)
-== 背景(实体)
+== 背景(实体层模式)
 
 Show tiles layers from BG map
-== 在背景地图显示图块层
+== 显示实体层背景地图的图块层
 
 Try fast HTTP map download first
 == 优先尝试用HTTP快速下载地图
@@ -918,7 +919,7 @@ Refresh Rate
 == 刷新率
 
 New random timeout code
-== 新随机超时代码
+== 随机生成新的超时代码(Timeout代码)
 
 Suicides
 == 自杀数
@@ -1008,20 +1009,11 @@ Time
 Show entities
 == 实体层显示开关
 
-Race %3d:%02d  
-== 竞速赛 %3d:%02d  
-
-Replay %3d:%02d  
-== 回放 %3d:%02d  
-
 Show all
 == 显示所有玩家
 
 Downloading %s:
 == 正在下载 %s:
-
-Manual %3d:%02d  
-== 手动 %3d:%02d  
 
 %d new mentions
 == %d 条新提示
@@ -1083,9 +1075,6 @@ Size
 Dummy copy
 == 分身同步动作
 
-Auto %3d:%02d  
-== 自动 %3d:%02d  
-
 9+ new mentions
 == 9+ 条新提示
 
@@ -1140,7 +1129,7 @@ Most importantly communication is key: There is no tutorial so you'll have to ch
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == 推荐在进入服务器前，先将设置调整到符合你的习惯。
 
-Please enter your nick name below.
+Please enter your nickname below.
 == 请输入你的昵称。
 
 Render
@@ -1150,7 +1139,7 @@ Server best:
 == 服务器最佳
 
 Learn
-== 学习
+== 教程
 
 Use high DPI
 == 使用高 DPI
@@ -1189,7 +1178,7 @@ https://wiki.ddnet.tw/
 == https://docs.qq.com/doc/DWGFrV0xPRmVWVkla
 
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== 宽和高无法被16整除，这可能会导致画面异常
+== 材质 %s 的宽和高无法被16整除，这可能会导致画面异常。
 
 Warning
 == 警告
@@ -1201,7 +1190,7 @@ Skip the main menu
 == 跳过主菜单
 
 Website
-== 网站
+== 官网
 
 Settings
 == 设置
@@ -1222,62 +1211,95 @@ Server executable not found, can't run server
 Editor
 == 编辑器
 
-Downloading ddnet-info.json failed
-== 
+Manual
+== 手动
+
+Race
+== 竞速
+
+Auto
+== 自动
+
+Replay
+== 回放
 
 Saving ddnet-settings.cfg failed
-== 
+== 配置文件 ddnet-settings.cfg 保存失败
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== 调试模式已启用。按 Ctrl+Shift+D 禁用调试模式。
+
+Existing Player
+== 玩家已存在
+
+Your nickname '%s' is already used (%d points). Do you still want to use it?
+== 你使用的昵称"%s"在DDNet中有%d分的记录，这可能代表该昵称已经被其他人使用过。确认要使用这个名字吗？
+
+Checking for existing player with your name
+== 正在查找该昵称的DDNet记录
 
 Theme
-== 
+== 主题
 
 %d of %d servers
-== 
+== 符合条件 %d / 总共 %d 个服务器
 
 %d of %d server
-== 
+== 符合条件 %d / 总共 %d 个服务器
 
 %d players
-== 
+== %d 在线玩家
 
 %d player
-== 
-
-File
-== 
+== %d 在线玩家
 
 Demos directory
-== 
+== 回放目录
+
+Smooth Dynamic Camera
+== 平滑动态镜头
 
 Themes directory
-== 
+== 主题目录
 
 Download skins
-== 
+== 在线获取皮肤
 
 Skin Database
-== 
+== 皮肤数据库
 
 Skins directory
-== 
+== 皮肤目录
+
+Game sound volume
+== 游戏音效音量
+
+Chat sound volume
+== 聊天提示音量
 
 Background music volume
-== 
+== 背景音樂音量
 
 Assets
-== 
+== 材质
+
+Use old chat style
+== 旧版聊天框
+
+Highlight
+== 高亮
 
 Use current map as background
-== 
+== 使用当前地图作为实体层背景地图
 
 Entities
-== 
+== 实体层
 
 Emoticons
-== 
+== 表情
 
 Particles
-== 
+== 粒子
 
 Assets directory
-== 
+== 材质目录

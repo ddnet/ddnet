@@ -240,7 +240,7 @@ void CSqliteConnection::AddPoints(const char *pPlayer, int Points)
 	str_format(aBuf, sizeof(aBuf),
 		"INSERT INTO %s_points(Name, Points) "
 		"VALUES (?, ?) "
-		"ON CONFLICT(Name) UPDATE SET Points=Points+?;",
+		"ON CONFLICT(Name) DO UPDATE SET Points=Points+?;",
 		GetPrefix());
 	PrepareStatement(aBuf);
 	BindString(1, pPlayer);

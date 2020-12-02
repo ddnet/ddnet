@@ -11,7 +11,7 @@
 
 #include <string>
 
-lock CMysqlConnection::m_SqlDriverLock;
+CLock CMysqlConnection::m_SqlDriverLock;
 
 CMysqlConnection::CMysqlConnection(
 	const char *pDatabase,
@@ -41,11 +41,6 @@ CMysqlConnection::CMysqlConnection(
 
 CMysqlConnection::~CMysqlConnection()
 {
-#if defined(CONF_SQL)
-	m_pStmt.release();
-	m_pPreparedStmt.release();
-	m_pConnection.release();
-#endif
 }
 
 void CMysqlConnection::Print(IConsole *pConsole, const char *Mode)
@@ -104,9 +99,9 @@ IDbConnection::Status CMysqlConnection::Connect()
 
 	try
 	{
-		m_pConnection.release();
-		m_pPreparedStmt.release();
-		m_pResults.release();
+		m_pConnection.reset();
+		m_pPreparedStmt.reset();
+		m_pResults.reset();
 
 		sql::ConnectOptionsMap connection_properties;
 		connection_properties["hostName"] = sql::SQLString(m_aIp);
@@ -122,7 +117,7 @@ IDbConnection::Status CMysqlConnection::Connect()
 
 		// Create connection
 		{
-			scope_lock GlobalLockScope(&m_SqlDriverLock);
+			CScopeLock GlobalLockScope(&m_SqlDriverLock);
 			sql::Driver *pDriver = get_driver_instance();
 			m_pConnection.reset(pDriver->connect(connection_properties));
 		}
@@ -304,7 +299,7 @@ void CMysqlConnection::GetString(int Col, char *pBuffer, int BufferSize) const
 int CMysqlConnection::GetBlob(int Col, unsigned char *pBuffer, int BufferSize) const
 {
 #if defined(CONF_SQL)
-	auto Blob = m_pResults->getBlob(Col);
+	auto *Blob = m_pResults->getBlob(Col);
 	Blob->read((char *)pBuffer, BufferSize);
 	int NumRead = Blob->gcount();
 	delete Blob;

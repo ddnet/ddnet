@@ -59,14 +59,14 @@ void CGhost::GetNetObjCharacter(CNetObj_Character *pChar, const CGhostCharacter 
 	pChar->m_Tick = pGhostChar->m_Tick;
 }
 
-CGhost::CGhostPath::CGhostPath(CGhostPath &&Other) :
+CGhost::CGhostPath::CGhostPath(CGhostPath &&Other) noexcept :
 	m_ChunkSize(Other.m_ChunkSize), m_NumItems(Other.m_NumItems), m_lChunks(std::move(Other.m_lChunks))
 {
 	Other.m_NumItems = 0;
 	Other.m_lChunks.clear();
 }
 
-CGhost::CGhostPath &CGhost::CGhostPath::operator=(CGhostPath &&Other)
+CGhost::CGhostPath &CGhost::CGhostPath::operator=(CGhostPath &&Other) noexcept
 {
 	Reset(Other.m_ChunkSize);
 	m_NumItems = Other.m_NumItems;
@@ -357,6 +357,7 @@ void CGhost::InitRenderInfos(CGhostItem *pGhost)
 	pRenderInfo->m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 	pRenderInfo->m_ColorableRenderSkin = pSkin->m_ColorableSkin;
 	pRenderInfo->m_BloodColor = pSkin->m_BloodColor;
+	pRenderInfo->m_SkinMetrics = pSkin->m_Metrics;
 	pRenderInfo->m_CustomColoredSkin = pGhost->m_Skin.m_UseCustomColor;
 	if(pGhost->m_Skin.m_UseCustomColor)
 	{
@@ -642,6 +643,7 @@ void CGhost::RefindSkin()
 			const CSkin *pSkin = m_pClient->m_pSkins->Get(SkinId);
 			pRenderInfo->m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 			pRenderInfo->m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+			pRenderInfo->m_SkinMetrics = pSkin->m_Metrics;
 		}
 	}
 	IntsToStr(&m_CurGhost.m_Skin.m_Skin0, 6, aSkinName);
@@ -653,5 +655,6 @@ void CGhost::RefindSkin()
 		const CSkin *pSkin = m_pClient->m_pSkins->Get(SkinId);
 		pRenderInfo->m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 		pRenderInfo->m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+		pRenderInfo->m_SkinMetrics = pSkin->m_Metrics;
 	}
 }

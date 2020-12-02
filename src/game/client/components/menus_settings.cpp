@@ -107,19 +107,22 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			}
 		}
 
-		// smooth camera
+		// smooth dynamic camera
 		Left.HSplitTop(5.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Button, &Left);
-		if(DoButton_CheckBox(&g_Config.m_ClCameraSmoothness, Localize("Smooth Camera"), g_Config.m_ClCameraSmoothness, &Button))
+		if(g_Config.m_ClDyncam)
 		{
-			if(g_Config.m_ClCameraSmoothness)
+			if(DoButton_CheckBox(&g_Config.m_ClDyncamSmoothness, Localize("Smooth Dynamic Camera"), g_Config.m_ClDyncamSmoothness, &Button))
 			{
-				g_Config.m_ClCameraSmoothness = 0;
-			}
-			else
-			{
-				g_Config.m_ClCameraSmoothness = 50;
-				g_Config.m_ClCameraStabilizing = 50;
+				if(g_Config.m_ClDyncamSmoothness)
+				{
+					g_Config.m_ClDyncamSmoothness = 0;
+				}
+				else
+				{
+					g_Config.m_ClDyncamSmoothness = 50;
+					g_Config.m_ClDyncamStabilizing = 50;
+				}
 			}
 		}
 
@@ -466,6 +469,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	const CSkin *pSkin = m_pClient->m_pSkins->Get(m_pClient->m_pSkins->Find(Skin));
 	OwnSkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 	OwnSkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+	OwnSkinInfo.m_SkinMetrics = pSkin->m_Metrics;
 	OwnSkinInfo.m_CustomColoredSkin = *UseCustomColor;
 	if(*UseCustomColor)
 	{
@@ -646,6 +650,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 			Info.m_OriginalRenderSkin = s->m_OriginalSkin;
 			Info.m_ColorableRenderSkin = s->m_ColorableSkin;
+			Info.m_SkinMetrics = s->m_Metrics;
 
 			Item.m_Rect.HSplitTop(5.0f, 0, &Item.m_Rect); // some margin from the top
 			RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, 0, vec2(1.0f, 0.0f), vec2(Item.m_Rect.x + 30, Item.m_Rect.y + Item.m_Rect.h / 2));
@@ -1650,21 +1655,10 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			g_Config.m_ClShowChat ^= 1;
 		}
 
-		bool IsOldChat = !(g_Config.m_ClChatTee || g_Config.m_ClChatBackground);
-
 		Left.HSplitTop(20.0f, &Button, &Left);
-		if(DoButton_CheckBox(&g_Config.m_ClChatTee, Localize("Use old chat style"), IsOldChat, &Button))
+		if(DoButton_CheckBox(&g_Config.m_ClChatOld, Localize("Use old chat style"), g_Config.m_ClChatOld, &Button))
 		{
-			if(IsOldChat)
-			{
-				g_Config.m_ClChatTee = 1;
-				g_Config.m_ClChatBackground = 1;
-			}
-			else
-			{
-				g_Config.m_ClChatTee = 0;
-				g_Config.m_ClChatBackground = 0;
-			}
+			g_Config.m_ClChatOld ^= 1;
 			GameClient()->m_pChat->RebuildChat();
 		}
 
@@ -1946,7 +1940,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		vec2 From = vec2(Weapon.x, Weapon.y + Weapon.h / 2.0f);
 		vec2 Pos = vec2(Weapon.x + Weapon.w - 10.0f, Weapon.y + Weapon.h / 2.0f);
 
-		vec2 Out, Border;
+		vec2 Out;
 
 		Graphics()->BlendNormal();
 		Graphics()->TextureClear();

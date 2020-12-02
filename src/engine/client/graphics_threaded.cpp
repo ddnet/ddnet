@@ -22,6 +22,8 @@
 #include <game/generated/client_data7.h>
 #include <game/localization.h>
 
+#include <engine/shared/image_manipulation.h>
+
 #include <math.h> // cosf, sinf, log2f
 
 #if defined(CONF_VIDEORECORDER)
@@ -270,7 +272,7 @@ int CGraphics_Threaded::UnloadTexture(CTextureHandle Index)
 	Cmd.m_Slot = Index;
 	m_pCommandBuffer->AddCommand(Cmd);
 
-	m_aTextureIndices[Index] = m_FirstFreeTexture;
+	m_TextureIndices[Index] = m_FirstFreeTexture;
 	m_FirstFreeTexture = Index;
 	return 0;
 }
@@ -429,8 +431,20 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Heig
 
 	// grab texture
 	int Tex = m_FirstFreeTexture;
-	m_FirstFreeTexture = m_aTextureIndices[Tex];
-	m_aTextureIndices[Tex] = -1;
+	if(Tex == -1)
+	{
+		size_t CurSize = m_TextureIndices.size();
+		m_TextureIndices.resize(CurSize * 2);
+		for(size_t i = 0; i < CurSize - 1; ++i)
+		{
+			m_TextureIndices[CurSize + i] = CurSize + i + 1;
+		}
+		m_TextureIndices.back() = -1;
+
+		Tex = CurSize;
+	}
+	m_FirstFreeTexture = m_TextureIndices[Tex];
+	m_TextureIndices[Tex] = -1;
 
 	CCommandBuffer::SCommand_Texture_Create Cmd;
 	Cmd.m_Slot = Tex;
@@ -558,6 +572,62 @@ int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int Sto
 	}
 	pImg->m_pData = pBuffer;
 	return 1;
+}
+
+void CGraphics_Threaded::FreePNG(CImageInfo *pImg)
+{
+	free(pImg->m_pData);
+	pImg->m_pData = NULL;
+}
+
+bool CGraphics_Threaded::CheckImageDivisibility(const char *pFileName, CImageInfo &Img, int DivX, int DivY, bool AllowResize)
+{
+	dbg_assert(DivX != 0 && DivY != 0, "Passing 0 to this function is not allowed.");
+	bool ImageIsValid = true;
+	bool WidthBroken = Img.m_Width == 0 || (Img.m_Width % DivX) != 0;
+	bool HeightBroken = Img.m_Height == 0 || (Img.m_Height % DivY) != 0;
+	if(WidthBroken || HeightBroken)
+	{
+		SWarning NewWarning;
+		str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg), Localize("The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs."), pFileName, DivX, DivY);
+
+		m_Warnings.emplace_back(NewWarning);
+
+		ImageIsValid = false;
+	}
+
+	if(AllowResize && !ImageIsValid && Img.m_Width > 0 && Img.m_Height > 0)
+	{
+		int NewWidth = DivX;
+		int NewHeight = DivY;
+		if(WidthBroken)
+		{
+			NewWidth = maximum<int>(HighestBit(Img.m_Width), DivX);
+			NewHeight = (NewWidth / DivX) * DivY;
+		}
+		else
+		{
+			NewHeight = maximum<int>(HighestBit(Img.m_Height), DivY);
+			NewWidth = (NewHeight / DivY) * DivX;
+		}
+
+		int ColorChannelCount = 4;
+		if(Img.m_Format == CImageInfo::FORMAT_ALPHA)
+			ColorChannelCount = 1;
+		else if(Img.m_Format == CImageInfo::FORMAT_RGB)
+			ColorChannelCount = 3;
+		else if(Img.m_Format == CImageInfo::FORMAT_RGBA)
+			ColorChannelCount = 4;
+
+		uint8_t *pNewImg = ResizeImage((uint8_t *)Img.m_pData, Img.m_Width, Img.m_Height, NewWidth, NewHeight, ColorChannelCount);
+		free(Img.m_pData);
+		Img.m_pData = pNewImg;
+		Img.m_Width = NewWidth;
+		Img.m_Height = NewHeight;
+		ImageIsValid = true;
+	}
+
+	return ImageIsValid;
 }
 
 void CGraphics_Threaded::CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSourceBuffer, int FullWidth, int FullHeight, int ColorChannelCount, int SubOffsetX, int SubOffsetY, int SubCopyWidth, int SubCopyHeight)
@@ -2149,6 +2219,7 @@ int CGraphics_Threaded::IssueInit()
 		Flags |= IGraphicsBackend::INITFLAG_RESIZABLE;
 
 	int r = m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, g_Config.m_GfxFsaaSamples, Flags, &m_DesktopScreenWidth, &m_DesktopScreenHeight, &m_ScreenWidth, &m_ScreenHeight, m_pStorage);
+	AddBackEndWarningIfExists();
 	m_IsNewOpenGL = m_pBackend->IsNewOpenGL();
 	m_OpenGLTileBufferingEnabled = m_IsNewOpenGL || m_pBackend->HasTileBuffering();
 	m_OpenGLQuadBufferingEnabled = m_IsNewOpenGL || m_pBackend->HasQuadBuffering();
@@ -2156,6 +2227,17 @@ int CGraphics_Threaded::IssueInit()
 	m_OpenGLTextBufferingEnabled = m_IsNewOpenGL || (m_OpenGLQuadContainerBufferingEnabled && m_pBackend->HasTextBuffering());
 	m_OpenGLHasTextureArrays = m_IsNewOpenGL || m_pBackend->Has2DTextureArrays();
 	return r;
+}
+
+void CGraphics_Threaded::AddBackEndWarningIfExists()
+{
+	const char *pErrStr = m_pBackend->GetErrorString();
+	if(pErrStr != NULL)
+	{
+		SWarning NewWarning;
+		str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg), "%s", Localize(pErrStr));
+		m_Warnings.emplace_back(NewWarning);
+	}
 }
 
 int CGraphics_Threaded::InitWindow()
@@ -2279,9 +2361,10 @@ int CGraphics_Threaded::Init()
 
 	// init textures
 	m_FirstFreeTexture = 0;
-	for(int i = 0; i < CCommandBuffer::MAX_TEXTURES - 1; i++)
-		m_aTextureIndices[i] = i + 1;
-	m_aTextureIndices[CCommandBuffer::MAX_TEXTURES - 1] = -1;
+	m_TextureIndices.resize(CCommandBuffer::MAX_TEXTURES);
+	for(int i = 0; i < (int)m_TextureIndices.size() - 1; i++)
+		m_TextureIndices[i] = i + 1;
+	m_TextureIndices.back() = -1;
 
 	m_FirstFreeVertexArrayInfo = -1;
 	m_FirstFreeBufferObjectIndex = -1;
@@ -2473,7 +2556,7 @@ bool CGraphics_Threaded::SetVSync(bool State)
 }
 
 // synchronization
-void CGraphics_Threaded::InsertSignal(semaphore *pSemaphore)
+void CGraphics_Threaded::InsertSignal(CSemaphore *pSemaphore)
 {
 	CCommandBuffer::SCommand_Signal Cmd;
 	Cmd.m_pSemaphore = pSemaphore;

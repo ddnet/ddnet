@@ -25,6 +25,9 @@ public:
 	IGraphics::CTextureHandle m_PlayerPicTexture;
 	CSkin::SSkinTextures m_OriginalRenderSkin;
 	CSkin::SSkinTextures m_ColorableRenderSkin;
+
+	CSkin::SSkinMetrics m_SkinMetrics;
+
 	bool m_CustomColoredSkin;
 	ColorRGBA m_BloodColor;
 
@@ -51,6 +54,10 @@ typedef void (*ENVELOPE_EVAL)(int TimeOffsetMillis, int Env, float *pChannels, v
 class CRenderTools
 {
 	int m_TeeQuadContainerIndex;
+
+	void GetRenderTeeAnimScaleAndBaseSize(class CAnimState *pAnim, CTeeRenderInfo *pInfo, float &AnimScale, float &BaseSize);
+	void GetRenderTeeBodyScale(float BaseSize, float &BodyScale);
+	void GetRenderTeeFeetScale(float BaseSize, float &FeetScaleWidth, float &FeetScaleHeight);
 
 public:
 	class IGraphics *m_pGraphics;
@@ -97,6 +104,11 @@ public:
 	// larger rendering methods
 	void RenderTilemapGenerateSkip(class CLayers *pLayers);
 
+	void GetRenderTeeBodySize(class CAnimState *pAnim, CTeeRenderInfo *pInfo, vec2 &BodyOffset, float &Width, float &Height);
+	void GetRenderTeeFeetSize(class CAnimState *pAnim, CTeeRenderInfo *pInfo, vec2 &FeetOffset, float &Width, float &Height);
+
+	// returns the offset to use, to render the tee with @see RenderTee exactly in the mid
+	void GetRenderTeeOffsetToRenderedTee(class CAnimState *pAnim, CTeeRenderInfo *pInfo, vec2 &TeeOffsetToMid);
 	// object render methods (gc_render_obj.cpp)
 	void RenderTee(class CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos, float Alpha = 1.0f);
 

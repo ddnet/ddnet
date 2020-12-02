@@ -1414,6 +1414,13 @@ generate_source7("src/game/generated/client_data7.h" "client_content_header")
 
 generate_maps("src/game/generated/protocolglue.h")
 
+add_custom_command(OUTPUT "src/game/generated/wordlist.h"
+  COMMAND ${PYTHON_EXECUTABLE} scripts/wordlist.py > ${PROJECT_BINARY_DIR}/src/game/generated/wordlist.h
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  DEPENDS
+    scripts/wordlist.py
+)
+
 ########################################################################
 # SHARED
 ########################################################################
@@ -1487,8 +1494,6 @@ set_src(ENGINE_SHARED GLOB src/engine/shared
   datafile.h
   demo.cpp
   demo.h
-  dilate.cpp
-  dilate.h
   econ.cpp
   econ.h
   engine.cpp
@@ -1499,6 +1504,8 @@ set_src(ENGINE_SHARED GLOB src/engine/shared
   global_uuid_manager.cpp
   huffman.cpp
   huffman.h
+  image_manipulation.cpp
+  image_manipulation.h
   jobs.cpp
   jobs.h
   json.cpp
@@ -1641,6 +1648,8 @@ if(CLIENT)
   set_src(ENGINE_CLIENT GLOB src/engine/client
     backend_sdl.cpp
     backend_sdl.h
+    blocklist_driver.cpp
+    blocklist_driver.h
     client.cpp
     client.h
     demoedit.cpp
@@ -1984,6 +1993,7 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
 set(GAME_GENERATED_SERVER
   "src/game/generated/server_data.cpp"
   "src/game/generated/server_data.h"
+  "src/game/generated/wordlist.h"
 )
 set(SERVER_SRC ${ENGINE_SERVER} ${GAME_SERVER} ${GAME_GENERATED_SERVER})
 if(TARGET_OS STREQUAL "windows")
@@ -2064,6 +2074,7 @@ set_src(TOOLS GLOB src/tools
   map_convert_07.cpp
   map_diff.cpp
   map_extract.cpp
+  map_optimize.cpp
   map_replace_image.cpp
   map_resave.cpp
   packetgen.cpp
@@ -2076,7 +2087,7 @@ foreach(ABS_T ${TOOLS})
     string(REGEX REPLACE "\\.cpp$" "" TOOL "${T}")
     set(TOOL_DEPS ${DEPS})
     set(TOOL_LIBS ${LIBS})
-    if(TOOL MATCHES "^(tileset_.*|dilate|map_convert_07|map_extract|map_replace_image)$")
+    if(TOOL MATCHES "^(dilate|map_convert_07|map_optimize|map_extract|map_replace_image)$")
       list(APPEND TOOL_DEPS ${PNGLITE_DEP})
       list(APPEND TOOL_LIBS ${PNGLITE_LIBRARIES})
       list(APPEND TOOL_INCLUDE_DIRS ${PNGLITE_INCLUDE_DIRS})
@@ -2114,6 +2125,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
   set_src(TESTS GLOB src/test
     aio.cpp
     bezier.cpp
+    blocklist_driver.cpp
     color.cpp
     csv.cpp
     datafile.cpp
@@ -2135,6 +2147,8 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     unix.cpp
   )
   set(TESTS_EXTRA
+    src/engine/client/blocklist_driver.cpp
+    src/engine/client/blocklist_driver.h
     src/engine/server/name_ban.cpp
     src/engine/server/name_ban.h
     src/game/server/teehistorian.cpp

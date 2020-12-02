@@ -362,8 +362,7 @@ MACRO_CONFIG_INT(ClShowHookCollOwn, cl_show_hook_coll_own, 1, 0, 2, CFGFLAG_CLIE
 
 MACRO_CONFIG_INT(ClChatTeamColors, cl_chat_teamcolors, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show names in chat in team colors")
 MACRO_CONFIG_INT(ClChatReset, cl_chat_reset, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Reset chat when pressing escape")
-MACRO_CONFIG_INT(ClChatTee, cl_chat_tee, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show a tee before the player name in chat");
-MACRO_CONFIG_INT(ClChatBackground, cl_chat_background, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show a background for each chat message");
+MACRO_CONFIG_INT(ClChatOld, cl_chat_old, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Old chat style: No tee, no background");
 
 MACRO_CONFIG_INT(ClShowDirection, cl_show_direction, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Show tee direction")
 MACRO_CONFIG_INT(ClHttpMapDownload, cl_http_map_download, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Try fast HTTP map download first")
@@ -395,6 +394,7 @@ MACRO_CONFIG_INT(GfxOpenGLPatch, gfx_opengl_patch, 0, 0, 10, CFGFLAG_SAVE | CFGF
 MACRO_CONFIG_INT(GfxOpenGLTextureLODBIAS, gfx_opengl_texture_lod_bias, -500, -15000, 15000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "The lod bias for OpenGL texture sampling multiplied by 1000")
 
 MACRO_CONFIG_INT(Gfx3DTextureAnalysisDone, gfx_3d_texture_analysis_done, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Analyzed, if sampling 3D/2D array textures was correct")
+MACRO_CONFIG_INT(GfxDriverIsBlocked, gfx_driver_is_blocked, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "If 1, the current driver is in a blocked error state.")
 #if !defined(CONF_PLATFORM_MACOSX)
 MACRO_CONFIG_INT(GfxEnableTextureUnitOptimization, gfx_enable_texture_unit_optimization, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Use multiple texture units, instead of only one.")
 #else

@@ -196,7 +196,8 @@ void CKillMessages::OnRender()
 			}
 		}
 
-		RenderTools()->RenderTee(CAnimState::GetIdle(), &m_aKillmsgs[r].m_VictimRenderInfo, EMOTE_PAIN, vec2(-1, 0), vec2(x, y + 28));
+		if(m_aKillmsgs[r].m_VictimID >= 0)
+			RenderTools()->RenderTee(CAnimState::GetIdle(), &m_aKillmsgs[r].m_VictimRenderInfo, EMOTE_PAIN, vec2(-1, 0), vec2(x, y + 28));
 		x -= 32.0f;
 
 		// render weapon
@@ -229,7 +230,8 @@ void CKillMessages::OnRender()
 
 			// render killer tee
 			x -= 24.0f;
-			RenderTools()->RenderTee(CAnimState::GetIdle(), &m_aKillmsgs[r].m_KillerRenderInfo, EMOTE_ANGRY, vec2(1, 0), vec2(x, y + 28));
+			if(m_aKillmsgs[r].m_KillerID >= 0)
+				RenderTools()->RenderTee(CAnimState::GetIdle(), &m_aKillmsgs[r].m_KillerRenderInfo, EMOTE_ANGRY, vec2(1, 0), vec2(x, y + 28));
 			x -= 32.0f;
 
 			// render killer name
@@ -240,5 +242,33 @@ void CKillMessages::OnRender()
 		}
 
 		y += 46.0f;
+	}
+}
+
+void CKillMessages::RefindSkins()
+{
+	for(int i = 0; i < MAX_KILLMSGS; i++)
+	{
+		int r = i % MAX_KILLMSGS;
+		if(Client()->GameTick(g_Config.m_ClDummy) > m_aKillmsgs[r].m_Tick + 50 * 10)
+			continue;
+
+		if(m_aKillmsgs[r].m_KillerID >= 0)
+		{
+			CGameClient::CClientData &Client = GameClient()->m_aClients[m_aKillmsgs[r].m_KillerID];
+			if(Client.m_aSkinName[0] != '\0')
+				m_aKillmsgs[r].m_KillerRenderInfo = Client.m_RenderInfo;
+			else
+				m_aKillmsgs[r].m_KillerID = -1;
+		}
+
+		if(m_aKillmsgs[r].m_VictimID >= 0)
+		{
+			CGameClient::CClientData &Client = GameClient()->m_aClients[m_aKillmsgs[r].m_VictimID];
+			if(Client.m_aSkinName[0] != '\0')
+				m_aKillmsgs[r].m_VictimRenderInfo = Client.m_RenderInfo;
+			else
+				m_aKillmsgs[r].m_VictimID = -1;
+		}
 	}
 }

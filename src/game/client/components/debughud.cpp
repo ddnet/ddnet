@@ -54,7 +54,11 @@ void CDebugHud::RenderNetCorrections()
 	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1, -1.0f);
 	TextRender()->Text(0, x - w, y, Fontsize, aBuf, -1.0f);
 	y += LineHeight;
-	str_format(aBuf, sizeof(aBuf), "%d", m_pClient->m_GameWorld.GetCharacterByID(m_pClient->m_Snap.m_LocalClientID)->m_TeleCheckpoint);
+	const CCharacter *pCharacter = m_pClient->m_GameWorld.GetCharacterByID(m_pClient->m_Snap.m_LocalClientID);
+	if(pCharacter)
+		str_format(aBuf, sizeof(aBuf), "%d", pCharacter->m_TeleCheckpoint);
+	else
+		str_copy(aBuf, "-1", sizeof(aBuf));
 	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1, -1.0f);
 	TextRender()->Text(0, x - w, y, Fontsize, aBuf, -1.0f);
 	y += 2 * LineHeight;

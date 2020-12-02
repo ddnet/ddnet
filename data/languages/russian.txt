@@ -868,7 +868,7 @@ Most importantly communication is key: There is no tutorial so you'll have to ch
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Перед посещением сервера рекомендуем изменить настройки на Ваш вкус.
 
-Please enter your nick name below.
+Please enter your nickname below.
 == Пожалуйста, ниже укажите свой никнейм.
 
 Destination file already exist
@@ -1111,18 +1111,6 @@ Check now
 Time
 == Время
 
-Manual %3d:%02d  
-== Ручное %3d:%02d  
-
-Race %3d:%02d  
-== Попытка %3d:%02d  
-
-Auto %3d:%02d  
-== Авто %3d:%02d  
-
-Replay %3d:%02d  
-== Повтор %3d:%02d  
-
 Follow
 == Следить
 
@@ -1232,47 +1220,80 @@ Learn
 Play
 == Играть
 
-Downloading ddnet-info.json failed
-== 
-
 Saving ddnet-settings.cfg failed
-== 
+== Неудачное сохранение ddnet-settings.cfg
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== Отладочный режим включен. Нажмите Ctrl+Shift+D, чтобы выйти.
+
+Existing Player
+== Существующий игрок
+
+Your nickname '%s' is already used (%d points). Do you still want to use it?
+== Твой никнейм '%s' уже существует (%d поинтов). Вы уверены, что хотите использовать его?
+
+Checking for existing player with your name
+== Проверка существования игрока с таким же именем
 
 Theme
-== 
-
-File
-== 
+== Тема
 
 Demos directory
-== 
+== Папка с демо
+
+Smooth Dynamic Camera
+== Плавная Динамическая камера
 
 Themes directory
-== 
+== Папка с темами
 
 Skin Database
-== 
+== База данных скинов
 
 Skins directory
-== 
+== Папка со скинами
+
+Game sound volume
+== Громкость игры
+
+Chat sound volume
+== Громкость звуков чата
 
 Background music volume
-== 
+== Громкость фоновой музыки
 
 Assets
-== 
+== Графика
+
+Use old chat style
+== Использовать старый чат
+
+Highlight
+== Подсветка
 
 Use current map as background
-== 
-
-Entities
-== 
+== Использовать данную карту как фон
 
 Emoticons
-== 
+== Эмоции
 
 Particles
-== 
+== Частицы
 
 Assets directory
+== Папка с графикой
+
+Manual
+== Ручное
+
+Race
+== Гонка
+
+Auto
+== Авто
+
+Replay
+== Запись
+
+Entities
 == 

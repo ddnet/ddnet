@@ -799,7 +799,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 
 		if(pCurrentLine->m_ClientID >= 0 && pCurrentLine->m_aName[0] != '\0')
 		{
-			if(g_Config.m_ClChatTee)
+			if(!g_Config.m_ClChatOld)
 			{
 				pCurrentLine->m_CustomColoredSkin = m_pClient->m_aClients[pCurrentLine->m_ClientID].m_RenderInfo.m_CustomColoredSkin;
 				if(pCurrentLine->m_CustomColoredSkin)
@@ -810,6 +810,8 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 				str_copy(pCurrentLine->m_aSkinName, m_pClient->m_aClients[pCurrentLine->m_ClientID].m_aSkinName, sizeof(pCurrentLine->m_aSkinName));
 				pCurrentLine->m_ColorBody = m_pClient->m_aClients[pCurrentLine->m_ClientID].m_RenderInfo.m_ColorBody;
 				pCurrentLine->m_ColorFeet = m_pClient->m_aClients[pCurrentLine->m_ClientID].m_RenderInfo.m_ColorFeet;
+
+				pCurrentLine->m_RenderSkinMetrics = m_pClient->m_aClients[pCurrentLine->m_ClientID].m_RenderInfo.m_SkinMetrics;
 				pCurrentLine->m_HasRenderTee = true;
 			}
 		}
@@ -883,6 +885,8 @@ void CChat::RefindSkins()
 				m_aLines[r].m_RenderSkin = pSkin->m_ColorableSkin;
 			else
 				m_aLines[r].m_RenderSkin = pSkin->m_OriginalSkin;
+
+			m_aLines[r].m_RenderSkinMetrics = pSkin->m_Metrics;
 		}
 	}
 }
@@ -893,7 +897,9 @@ void CChat::OnPrepareLines()
 	float y = 300.0f - 28.0f;
 	float FontSize = FONT_SIZE;
 
-	bool IsScoreBoardOpen = m_pClient->m_pScoreboard->Active();
+	float ScreenRatio = Graphics()->ScreenAspect();
+
+	bool IsScoreBoardOpen = m_pClient->m_pScoreboard->Active() && (ScreenRatio > 1.7f); // only assume scoreboard when screen ratio is widescreen(something around 16:9)
 
 	bool ForceRecreate = IsScoreBoardOpen != m_PrevScoreBoardShowed;
 	bool ShowLargeArea = m_Show || g_Config.m_ClShowChat == 2;
@@ -907,17 +913,15 @@ void CChat::OnPrepareLines()
 	float RealMsgPaddingY = MESSAGE_PADDING_Y;
 	float RealMsgPaddingTee = MESSAGE_TEE_SIZE + MESSAGE_TEE_PADDING_RIGHT;
 
-	if(!g_Config.m_ClChatBackground)
+	if(g_Config.m_ClChatOld)
 	{
 		RealMsgPaddingX = 0;
-		RealMsgPaddingY = (g_Config.m_ClChatTee ? (MESSAGE_TEE_SIZE - FONT_SIZE) : 0);
+		RealMsgPaddingY = 0;
+		RealMsgPaddingTee = 0;
 	}
 
-	if(!g_Config.m_ClChatTee)
-		RealMsgPaddingTee = 0;
-
 	int64 Now = time();
-	float LineWidth = (IsScoreBoardOpen ? 90.0f : 200.0f) - RealMsgPaddingX - RealMsgPaddingTee;
+	float LineWidth = (IsScoreBoardOpen ? 85.0f : 200.0f) - (RealMsgPaddingX * 1.5f) - RealMsgPaddingTee;
 
 	float HeightLimit = IsScoreBoardOpen ? 180.0f : m_PrevShowChat ? 50.0f : 200.0f;
 	float Begin = x;
@@ -963,7 +967,7 @@ void CChat::OnPrepareLines()
 		else
 			str_format(aCount, sizeof(aCount), " [%d]", m_aLines[r].m_TimesRepeated + 1);
 
-		if(!g_Config.m_ClChatTee)
+		if(g_Config.m_ClChatOld)
 		{
 			m_aLines[r].m_HasRenderTee = false;
 		}
@@ -1118,7 +1122,7 @@ void CChat::OnPrepareLines()
 		else
 			TextRender()->AppendTextContainer(&AppendCursor, m_aLines[r].m_TextContainerIndex, m_aLines[r].m_aText);
 
-		if(g_Config.m_ClChatBackground && (m_aLines[r].m_aText[0] != '\0' || m_aLines[r].m_aName[0] != '\0'))
+		if(!g_Config.m_ClChatOld && (m_aLines[r].m_aText[0] != '\0' || m_aLines[r].m_aName[0] != '\0'))
 		{
 			float Height = m_aLines[r].m_YOffset[OffsetType];
 			Graphics()->SetColor(1, 1, 1, 1);
@@ -1230,17 +1234,20 @@ void CChat::OnRender()
 
 	OnPrepareLines();
 
+	float ScreenRatio = Graphics()->ScreenAspect();
+	bool IsScoreBoardOpen = m_pClient->m_pScoreboard->Active() && (ScreenRatio > 1.7f); // only assume scoreboard when screen ratio is widescreen(something around 16:9)
+
 	int64 Now = time();
-	float HeightLimit = m_pClient->m_pScoreboard->Active() ? 180.0f : m_PrevShowChat ? 50.0f : 200.0f;
-	int OffsetType = m_pClient->m_pScoreboard->Active() ? 1 : 0;
+	float HeightLimit = IsScoreBoardOpen ? 180.0f : m_PrevShowChat ? 50.0f : 200.0f;
+	int OffsetType = IsScoreBoardOpen ? 1 : 0;
 
 	float RealMsgPaddingX = MESSAGE_PADDING_X;
 	float RealMsgPaddingY = MESSAGE_PADDING_Y;
 
-	if(!g_Config.m_ClChatBackground)
+	if(g_Config.m_ClChatOld)
 	{
 		RealMsgPaddingX = 0;
-		RealMsgPaddingY = (g_Config.m_ClChatTee ? (MESSAGE_TEE_SIZE - FONT_SIZE) : 0);
+		RealMsgPaddingY = 0;
 	}
 
 	for(int i = 0; i < MAX_LINES; i++)
@@ -1258,7 +1265,7 @@ void CChat::OnRender()
 		float Blend = Now > m_aLines[r].m_Time + 14 * time_freq() && !m_PrevShowChat ? 1.0f - (Now - m_aLines[r].m_Time - 14 * time_freq()) / (2.0f * time_freq()) : 1.0f;
 
 		// Draw backgrounds for messages in one batch
-		if(g_Config.m_ClChatBackground)
+		if(!g_Config.m_ClChatOld)
 		{
 			Graphics()->TextureClear();
 			if(m_aLines[r].m_QuadContainerIndex != -1)
@@ -1270,7 +1277,7 @@ void CChat::OnRender()
 
 		if(m_aLines[r].m_TextContainerIndex != -1)
 		{
-			if(g_Config.m_ClChatTee && m_aLines[r].m_HasRenderTee)
+			if(!g_Config.m_ClChatOld && m_aLines[r].m_HasRenderTee)
 			{
 				CTeeRenderInfo RenderInfo;
 				RenderInfo.m_CustomColoredSkin = m_aLines[r].m_CustomColoredSkin;
@@ -1278,6 +1285,7 @@ void CChat::OnRender()
 					RenderInfo.m_ColorableRenderSkin = m_aLines[r].m_RenderSkin;
 				else
 					RenderInfo.m_OriginalRenderSkin = m_aLines[r].m_RenderSkin;
+				RenderInfo.m_SkinMetrics = m_aLines[r].m_RenderSkinMetrics;
 
 				RenderInfo.m_ColorBody = m_aLines[r].m_ColorBody;
 				RenderInfo.m_ColorFeet = m_aLines[r].m_ColorFeet;
@@ -1286,10 +1294,12 @@ void CChat::OnRender()
 				float RowHeight = FONT_SIZE + RealMsgPaddingY;
 				float OffsetTeeY = MESSAGE_TEE_SIZE / 2.0f;
 				float FullHeightMinusTee = RowHeight - MESSAGE_TEE_SIZE;
-				float TWSkinUnreliableOffset = 1.0f; // teeworlds skins were always a bit in the ground
 
 				CAnimState *pIdleState = CAnimState::GetIdle();
-				RenderTools()->RenderTee(pIdleState, &RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), vec2(x + (RealMsgPaddingX + MESSAGE_TEE_SIZE) / 2.0f, y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset), Blend);
+				vec2 OffsetToMid;
+				RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &RenderInfo, OffsetToMid);
+				vec2 TeeRenderPos(x + (RealMsgPaddingX + MESSAGE_TEE_SIZE) / 2.0f, y + OffsetTeeY + FullHeightMinusTee / 2.0f + OffsetToMid.y);
+				RenderTools()->RenderTee(pIdleState, &RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), TeeRenderPos, Blend);
 			}
 
 			STextRenderColor TextOutline(0.f, 0.f, 0.f, 0.3f * Blend);

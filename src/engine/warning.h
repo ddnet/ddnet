@@ -10,7 +10,7 @@ struct SWarning
 	{
 		str_copy(m_aWarningMsg, pMsg, sizeof(m_aWarningMsg));
 	}
-	char m_aWarningMsg[128];
+	char m_aWarningMsg[256];
 	bool m_WasShown;
 };
 

@@ -14,12 +14,28 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
-    - name: Install clang-format
+      with:
+        submodules: true
+    - name: Prepare
       run: |
         sudo apt-get update -y
-        sudo apt-get install clang-format -y
+        sudo apt-get install clang-format imagemagick ddnet-tools -y
     - name: Check style
       run: |
         clang-format -version
         scripts/fix_style.py --dry-run
         scripts/check_header_guards.py
+        scripts/languages/update_all.py
+    - name: Prepare build dilate
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install pkg-config cmake libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev -y
+    - name: Build dilate
+      run: |
+        mkdir release
+        cd release
+        cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DDOWNLOAD_GTEST=OFF -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. ..
+        cmake --build . --config Release --target dilate --parallel
+    - name: Check if images are dilated
+      run: |
+        scripts/check_dilate.sh release data

@@ -39,14 +39,14 @@ void CLayerGame::SetTile(int x, int y, CTile tile)
 		CTile nohook = {TILE_NOHOOK};
 		CLayerTiles::SetTile(x, y, nohook);
 		CTile through_cut = {TILE_THROUGH_CUT};
-		m_pEditor->m_Map.m_pFrontLayer->CLayerTiles::SetTile(x, y, through_cut);
+		m_pEditor->m_Map.m_pFrontLayer->CLayerTiles::SetTile(x, y, through_cut); // NOLINT(bugprone-parent-virtual-call)
 	}
 	else
 	{
 		if(m_pEditor->m_Map.m_pFrontLayer && m_pEditor->m_Map.m_pFrontLayer->GetTile(x, y).m_Index == TILE_THROUGH_CUT)
 		{
 			CTile air = {TILE_AIR};
-			m_pEditor->m_Map.m_pFrontLayer->CLayerTiles::SetTile(x, y, air);
+			m_pEditor->m_Map.m_pFrontLayer->CLayerTiles::SetTile(x, y, air); // NOLINT(bugprone-parent-virtual-call)
 		}
 		if(m_pEditor->m_AllowPlaceUnusedTiles || IsValidGameTile(tile.m_Index))
 		{
