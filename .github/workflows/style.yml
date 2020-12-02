@@ -19,7 +19,7 @@ jobs:
     - name: Prepare
       run: |
         sudo apt-get update -y
-        sudo apt-get install clang-format imagemagick ddnet-tools -y
+        sudo apt-get install clang-format imagemagick ddnet-tools shellcheck -y
     - name: Check style
       run: |
         clang-format -version
@@ -39,3 +39,5 @@ jobs:
     - name: Check if images are dilated
       run: |
         scripts/check_dilate.sh release data
+    - name: Shellcheck
+      run: find . -name "*.sh" | xargs shellcheck
