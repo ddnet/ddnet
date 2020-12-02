@@ -546,7 +546,7 @@ endif()
 
 if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
   # Change to the 1.9.0 release tag once that works.
-  set(DDNET_GTEST_VERSION 7b6561c56e353100aca8458d7bc49c4e0119bae8)
+  set(DDNET_GTEST_VERSION 32f4f52d95dc99c35f51deed552a6ba700567f94)
   configure_file(cmake/Download_GTest_CMakeLists.txt.in googletest-download/CMakeLists.txt)
   execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
     RESULT_VARIABLE result
