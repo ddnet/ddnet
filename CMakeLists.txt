@@ -1698,6 +1698,8 @@ if(CLIENT)
     components/chat.h
     components/chillerbot/chillerbotux.cpp
     components/chillerbot/chillerbotux.h
+    components/chillerbot/chillpw.cpp
+    components/chillerbot/chillpw.h
     components/chillerbot/playerpics.cpp
     components/chillerbot/playerpics.h
     components/console.cpp

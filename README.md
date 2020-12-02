@@ -4,6 +4,39 @@
 
 Made for main client usage. Based on DDNet which is based on DDrace which is based on Teeworlds.
 
+Features
+--------
+
+### password manager
+
+Go to your teeworlds directory and create the file ``chillpw_secret.txt``
+
+
+Format is ``hostname:port,dummy,command``
+* hostname:port
+    - server ip and port
+* dummy
+    - 0 for main tee 1 for dummy
+* command
+    - local console command to execute
+
+example:
+
+~/.teeworlds/chillpw_secret.txt
+```
+51.210.171.47:7303,0,say /login ChillerDragon password
+51.210.171.47:7303,1,say /login ChillerDragon2 password2
+```
+
+### render pictures
+
+if ``cl_render_pic`` is set to ``1`` it renders images found in the ``playerpics/`` directory above the tees if their ingame name matches the image name.
+
+### rename on finish
+
+if ``cl_finish_rename`` is set to ``1`` the client will automatically rename the player if a finish tile is near by.
+The name is changed to ``cl_finish_name``.
+
 Cloning
 -------
 

@@ -65,6 +65,7 @@
 #include "components/voting.h"
 
 #include "components/chillerbot/chillerbotux.h"
+#include "components/chillerbot/chillpw.h"
 #include "components/chillerbot/playerpics.h"
 
 #include "components/ghost.h"
@@ -114,6 +115,7 @@ static CRaceDemo gs_RaceDemo;
 static CGhost gs_Ghost;
 
 static CChillerBotUX gs_ChillerBotUX;
+static CChillPw gs_ChillPw;
 static CPlayerPics gs_PlayerPics;
 
 CGameClient::CStack::CStack() { m_Num = 0; }
@@ -220,6 +222,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(m_pGameConsole);
 
 	m_All.Add(&gs_ChillerBotUX);
+	m_All.Add(&gs_ChillPw);
 
 	m_All.Add(m_pMenuBackground);
 
