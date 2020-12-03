@@ -36,7 +36,7 @@ struct SBackEndDriverBlockList
 };
 
 static SBackEndDriverBlockList gs_aBlockList[] = {
-	{{26, 20, 100, 7800}, {26, 20, 100, 7999}, 2, 0, 0, "This Intel driver version can cause crashes, please update it to a newer version."}};
+	{{26, 20, 100, 7800}, {27, 20, 100, 8853}, 2, 0, 0, "This Intel driver version can cause crashes, please update it to a newer version."}};
 
 const char *ParseBlocklistDriverVersions(const char *pVendorStr, const char *pVersionStr, int &BlocklistMajor, int &BlocklistMinor, int &BlocklistPatch)
 {
