@@ -123,9 +123,9 @@ public:
 		m_TeeFinished[ClientID] = finished;
 	}
 
-	void SetSaving(int TeamID, std::shared_ptr<CScoreSaveResult> SaveResult)
+	void SetSaving(int TeamID, std::shared_ptr<CScoreSaveResult> &SaveResult)
 	{
-		m_pSaveTeamResult[TeamID] = std::move(SaveResult);
+		m_pSaveTeamResult[TeamID] = SaveResult;
 	}
 
 	bool GetSaving(int TeamID)
