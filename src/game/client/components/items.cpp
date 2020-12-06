@@ -17,11 +17,6 @@
 
 #include "items.h"
 
-void CItems::OnReset()
-{
-	m_NumExtraProjectiles = 0;
-}
-
 void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemID)
 {
 	int CurWeapon = clamp(pCurrent->m_Type, 0, NUM_WEAPONS - 1);
@@ -475,21 +470,6 @@ void CItems::OnRender()
 		}
 	}
 
-	// render extra projectiles
-	for(int i = 0; i < m_NumExtraProjectiles; i++)
-	{
-		if(m_aExtraProjectiles[i].m_StartTick < Client()->GameTick(g_Config.m_ClDummy))
-		{
-			m_aExtraProjectiles[i] = m_aExtraProjectiles[m_NumExtraProjectiles - 1];
-			m_NumExtraProjectiles--;
-		}
-		else if(!UsePredicted)
-		{
-			CProjectileData Data = ExtractProjectileInfo(&m_aExtraProjectiles[i], &GameClient()->m_GameWorld);
-			RenderProjectile(&Data, 0);
-		}
-	}
-
 	Graphics()->QuadsSetRotation(0);
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 }
@@ -553,15 +533,6 @@ void CItems::OnInit()
 	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 24.f);
 
 	Graphics()->QuadContainerUpload(m_ItemsQuadContainerIndex);
-}
-
-void CItems::AddExtraProjectile(CNetObj_Projectile *pProj)
-{
-	if(m_NumExtraProjectiles != MAX_EXTRA_PROJECTILES)
-	{
-		m_aExtraProjectiles[m_NumExtraProjectiles] = *pProj;
-		m_NumExtraProjectiles++;
-	}
 }
 
 void CItems::ReconstructSmokeTrail(const CProjectileData *pCurrent, int DestroyTick)

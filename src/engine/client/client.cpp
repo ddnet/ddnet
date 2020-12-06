@@ -2094,7 +2094,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 	}
 	else
 	{
-		if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 || Msg == NETMSGTYPE_SV_EXTRAPROJECTILE)
+		if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0)
 		{
 			// game message
 			for(auto &DemoRecorder : m_DemoRecorder)
