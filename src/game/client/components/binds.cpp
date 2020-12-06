@@ -471,6 +471,7 @@ void CBinds::SetDDRaceBinds(bool FreeOnly)
 		Bind(KEY_M, "emote 5", FreeOnly);
 		Bind(KEY_S, "+showhookcoll", FreeOnly);
 		Bind(KEY_X, "toggle cl_dummy 0 1", FreeOnly);
+		Bind(KEY_W, "toggle cl_dummy_hammer 0 1", FreeOnly);
 		Bind(KEY_PAGEDOWN, "toggle cl_show_quads 0 1", FreeOnly);
 		Bind(KEY_PAGEUP, "toggle cl_overlay_entities 0 100", FreeOnly);
 		Bind(KEY_KP_0, "say /emote normal 999999", FreeOnly);
