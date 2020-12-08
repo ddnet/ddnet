@@ -219,6 +219,12 @@ Arch Linux
 $ yay -S ddnet
 ```
 
+FreeBSD
+
+```bash
+$ pkg install DDNet
+```
+
 Benchmarking
 ------------
 
