@@ -681,7 +681,7 @@ void CGameTeams::ProcessSaveTeam()
 {
 	for(int Team = 0; Team < MAX_CLIENTS; Team++)
 	{
-		if(m_pSaveTeamResult[Team] == nullptr || m_pSaveTeamResult[Team].use_count() != 1)
+		if(m_pSaveTeamResult[Team] == nullptr || !m_pSaveTeamResult[Team]->m_Completed)
 			continue;
 		if(m_pSaveTeamResult[Team]->m_aBroadcast[0] != '\0')
 			GameServer()->SendBroadcast(m_pSaveTeamResult[Team]->m_aBroadcast, -1);

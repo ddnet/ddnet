@@ -196,6 +196,11 @@ void CDbConnectionPool::Worker()
 		}
 		if(!Success)
 			dbg_msg("sql", "%s failed on all databases", pThreadData->m_pName);
+		if(pThreadData->m_pThreadData->m_pResult != nullptr)
+		{
+			pThreadData->m_pThreadData->m_pResult->m_Success = Success;
+			pThreadData->m_pThreadData->m_pResult->m_Completed.store(true);
+		}
 	}
 }
 

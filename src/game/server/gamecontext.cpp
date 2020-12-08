@@ -995,9 +995,9 @@ void CGameContext::OnTick()
 		}
 	}
 
-	if(m_SqlRandomMapResult != nullptr && m_SqlRandomMapResult.use_count() == 1)
+	if(m_SqlRandomMapResult != nullptr && m_SqlRandomMapResult->m_Completed)
 	{
-		if(m_SqlRandomMapResult->m_Done)
+		if(m_SqlRandomMapResult->m_Success)
 		{
 			if(PlayerExists(m_SqlRandomMapResult->m_ClientID) && m_SqlRandomMapResult->m_aMessage[0] != '\0')
 				SendChatTarget(m_SqlRandomMapResult->m_ClientID, m_SqlRandomMapResult->m_aMessage);

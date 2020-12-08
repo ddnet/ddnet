@@ -169,12 +169,12 @@ void CPlayer::Tick()
 #ifdef CONF_DEBUG
 	if(!g_Config.m_DbgDummies || m_ClientID < MAX_CLIENTS - g_Config.m_DbgDummies)
 #endif
-		if(m_ScoreQueryResult != nullptr && m_ScoreQueryResult.use_count() == 1)
+		if(m_ScoreQueryResult != nullptr && m_ScoreQueryResult->m_Completed)
 		{
 			ProcessScoreResult(*m_ScoreQueryResult);
 			m_ScoreQueryResult = nullptr;
 		}
-	if(m_ScoreFinishResult != nullptr && m_ScoreFinishResult.use_count() == 1)
+	if(m_ScoreFinishResult != nullptr && m_ScoreFinishResult->m_Completed)
 	{
 		ProcessScoreResult(*m_ScoreFinishResult);
 		m_ScoreFinishResult = nullptr;
@@ -932,7 +932,7 @@ void CPlayer::SpectatePlayerName(const char *pName)
 
 void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 {
-	if(Result.m_Done) // SQL request was successful
+	if(Result.m_Success) // SQL request was successful
 	{
 		switch(Result.m_MessageKind)
 		{
