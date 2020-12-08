@@ -8,9 +8,27 @@
 
 class IDbConnection;
 
+struct ISqlResult
+{
+	// using atomic_bool to indicate completed sql query since usage_count
+	// from shard_ptr isn't safe in multithreaded environment
+	// the main thread must only access the remaining result data if set to true
+	std::atomic_bool m_Completed{false};
+	// indicate whether the thread indicated a successful completion (returned true)
+	bool m_Success = false;
+
+	virtual ~ISqlResult() = default;
+};
+
 struct ISqlData
 {
+	ISqlData(std::shared_ptr<ISqlResult> pResult) :
+		m_pResult(std::move(pResult))
+	{
+	}
 	virtual ~ISqlData(){};
+
+	mutable std::shared_ptr<ISqlResult> m_pResult;
 };
 
 class IConsole;
