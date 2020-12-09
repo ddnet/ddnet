@@ -2552,6 +2552,8 @@ endmacro()
 source_group_tree(src)
 
 if(ANTIBOT)
+  # Allow the antibot library to use functions from the server binary.
+  add_c_compiler_flag_if_supported(OUR_FLAGS_LINK -rdynamic)
   set_own_rpath(${TARGET_SERVER})
 endif()
 
