@@ -1,4 +1,5 @@
 from collections import namedtuple
+import argparse
 import os
 import shlex
 import subprocess
@@ -10,7 +11,7 @@ ConfigHdiutil = namedtuple('Config', 'hdiutil verbose')
 def chunks(l, n):
 	"""
 	Yield successive n-sized chunks from l.
-	
+
 	From https://stackoverflow.com/a/312464.
 	"""
 	for i in range(0, len(l), n):
@@ -74,7 +75,6 @@ class Hdiutil(Dmg):
 		self._hdiutil('create', '-volname', volume_name, '-srcdir', directory, dmg)
 
 def main():
-	import argparse
 	p = argparse.ArgumentParser(description="Manipulate dmg archives")
 
 	subcommands = p.add_subparsers(help="Subcommand", dest='command', metavar="COMMAND")
