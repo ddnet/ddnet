@@ -290,6 +290,7 @@ class CScore
 	static bool ShowTeamRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
 	static bool ShowTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData);
 	static bool ShowTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData);
+	static bool ShowPlayerTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData);
 	static bool ShowTimesThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
 	static bool ShowPointsThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
 	static bool ShowTopPointsThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
@@ -340,6 +341,7 @@ public:
 	void ShowRank(int ClientID, const char *pName);
 
 	void ShowTeamTop5(int ClientID, int Offset = 1);
+	void ShowTeamTop5(int ClientID, const char *pName, int Offset = 1);
 	void ShowTeamRank(int ClientID, const char *pName);
 
 	void ShowTopPoints(int ClientID, int Offset = 1);
