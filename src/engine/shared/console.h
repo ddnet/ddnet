@@ -60,7 +60,7 @@ class CConsole : public IConsole
 	static void ConCommandAccess(IResult *pResult, void *pUser);
 	static void ConCommandStatus(IConsole::IResult *pResult, void *pUser);
 
-	void ExecuteLineStroked(int Stroke, const char *pStr, int ClientID = -1, bool InterpretSemicolons = true);
+	void ExecuteLineStroked(int Stroke, const char *pStr, int ClientID = -1, bool InterpretSemicolons = true, bool IgnoreUnknown = false);
 
 	struct
 	{
@@ -209,8 +209,8 @@ public:
 	virtual void StoreCommands(bool Store);
 
 	virtual bool LineIsValid(const char *pStr);
-	virtual void ExecuteLine(const char *pStr, int ClientID = -1, bool InterpretSemicolons = true);
-	virtual void ExecuteLineFlag(const char *pStr, int FlagMask, int ClientID = -1, bool InterpretSemicolons = true);
+	virtual void ExecuteLine(const char *pStr, int ClientID = -1, bool InterpretSemicolons = true, bool IgnoreUnknown = false);
+	virtual void ExecuteLineFlag(const char *pStr, int FlagMask, int ClientID = -1, bool InterpretSemicolons = true, bool IgnoreUnknown = false);
 	virtual void ExecuteFile(const char *pFilename, int ClientID = -1, bool LogFailure = false, int StorageType = IStorage::TYPE_ALL);
 
 	virtual int RegisterPrintCallback(int OutputLevel, FPrintCallback pfnPrintCallback, void *pUserData);

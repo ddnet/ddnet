@@ -2950,7 +2950,7 @@ void CGameClient::LoadMapSettings()
 		while(pNext < pSettings + Size)
 		{
 			int StrSize = str_length(pNext) + 1;
-			Console()->ExecuteLine(pNext, IConsole::CLIENT_ID_GAME);
+			Console()->ExecuteLine(pNext, IConsole::CLIENT_ID_GAME, true, true);
 			pNext += StrSize;
 		}
 		pMap->UnloadData(pItem->m_Settings);

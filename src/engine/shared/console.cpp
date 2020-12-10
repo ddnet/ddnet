@@ -381,7 +381,7 @@ bool CConsole::LineIsValid(const char *pStr)
 	return true;
 }
 
-void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bool InterpretSemicolons)
+void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bool InterpretSemicolons, bool IgnoreUnknown)
 {
 	const char *pWithoutPrefix = str_startswith(pStr, "mc;");
 	if(pWithoutPrefix)
@@ -513,7 +513,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bo
 				Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 			}
 		}
-		else if(Stroke)
+		else if(Stroke && !IgnoreUnknown)
 		{
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "No such command: %s.", Result.m_pCommand);
@@ -550,17 +550,17 @@ CConsole::CCommand *CConsole::FindCommand(const char *pName, int FlagMask)
 	return 0x0;
 }
 
-void CConsole::ExecuteLine(const char *pStr, int ClientID, bool InterpretSemicolons)
+void CConsole::ExecuteLine(const char *pStr, int ClientID, bool InterpretSemicolons, bool IgnoreUnknown)
 {
-	CConsole::ExecuteLineStroked(1, pStr, ClientID, InterpretSemicolons); // press it
-	CConsole::ExecuteLineStroked(0, pStr, ClientID, InterpretSemicolons); // then release it
+	CConsole::ExecuteLineStroked(1, pStr, ClientID, InterpretSemicolons, IgnoreUnknown); // press it
+	CConsole::ExecuteLineStroked(0, pStr, ClientID, InterpretSemicolons, IgnoreUnknown); // then release it
 }
 
-void CConsole::ExecuteLineFlag(const char *pStr, int FlagMask, int ClientID, bool InterpretSemicolons)
+void CConsole::ExecuteLineFlag(const char *pStr, int FlagMask, int ClientID, bool InterpretSemicolons, bool IgnoreUnknown)
 {
 	int Temp = m_FlagMask;
 	m_FlagMask = FlagMask;
-	ExecuteLine(pStr, ClientID, InterpretSemicolons);
+	ExecuteLine(pStr, ClientID, InterpretSemicolons, IgnoreUnknown);
 	m_FlagMask = Temp;
 }
 
