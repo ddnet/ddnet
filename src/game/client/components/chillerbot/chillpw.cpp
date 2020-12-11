@@ -45,6 +45,8 @@ void CChillPw::OnInit()
 
     while((pLine = Reader.Get()) && Line < MAX_PASSWORDS)
     {
+        if (pLine[0] == '#' || pLine[0] == '\0')
+            continue;
         const char *p = strtok(pLine, ",");CheckToken(p, Line, pLine);
         str_copy(m_aaHostnames[Line], p, sizeof(m_aaHostnames[Line]));
         p = strtok(NULL, ",");CheckToken(p, Line, pLine);
