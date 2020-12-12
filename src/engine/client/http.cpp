@@ -250,8 +250,8 @@ size_t CGet::OnData(char *pData, size_t DataSize)
 CGetFile::CGetFile(IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType, CTimeout Timeout, bool LogProgress) :
 	CRequest(pUrl, Timeout, LogProgress),
 	m_pStorage(pStorage),
-	m_StorageType(StorageType),
-	m_File(0)
+	m_File(0),
+	m_StorageType(StorageType)
 {
 	str_copy(m_aDest, pDest, sizeof(m_aDest));
 
