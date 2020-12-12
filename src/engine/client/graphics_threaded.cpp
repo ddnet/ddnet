@@ -154,6 +154,8 @@ CGraphics_Threaded::CGraphics_Threaded()
 
 	m_RenderEnable = true;
 	m_DoScreenshot = false;
+
+	png_init(0, 0); // ignore_convention
 }
 
 void CGraphics_Threaded::ClipEnable(int x, int y, int w, int h)
@@ -521,8 +523,6 @@ int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int Sto
 	png_t Png; // ignore_convention
 
 	// open file for reading
-	png_init(0, 0); // ignore_convention
-
 	IOHANDLE File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, StorageType, aCompleteFilename, sizeof(aCompleteFilename));
 	if(File)
 		io_close(File);
