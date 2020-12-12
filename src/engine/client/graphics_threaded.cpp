@@ -2433,27 +2433,33 @@ bool CGraphics_Threaded::SetWindowScreen(int Index)
 	return m_pBackend->SetWindowScreen(Index);
 }
 
-void CGraphics_Threaded::Resize(int w, int h)
+void CGraphics_Threaded::Resize(int w, int h, bool SetWindowSize)
 {
 #if defined(CONF_VIDEORECORDER)
 	if(IVideo::Current() && IVideo::Current()->IsRecording())
 		return;
 #endif
 
-	if(m_ScreenWidth == w && m_ScreenHeight == h)
+	if(m_DesktopScreenWidth == w && m_DesktopScreenHeight == h)
 		return;
 
-	if(h > 4 * w / 5)
-		h = 4 * w / 5;
-	if(w > 21 * h / 9)
-		w = 21 * h / 9;
+	if(SetWindowSize)
+		m_pBackend->ResizeWindow(w, h);
 
-	m_ScreenWidth = w;
-	m_ScreenHeight = h;
+	m_DesktopScreenWidth = w;
+	m_DesktopScreenHeight = h;
+
+	m_pBackend->GetViewportSize(m_ScreenWidth, m_ScreenHeight);
+
+	// adjust the viewport to only allow certain aspect ratios
+	if(m_ScreenHeight > 4 * m_ScreenWidth / 5)
+		m_ScreenHeight = 4 * m_ScreenWidth / 5;
+	if(m_ScreenWidth > 21 * m_ScreenHeight / 9)
+		m_ScreenWidth = 21 * m_ScreenHeight / 9;
 
 	CCommandBuffer::SCommand_Resize Cmd;
-	Cmd.m_Width = w;
-	Cmd.m_Height = h;
+	Cmd.m_Width = m_ScreenWidth;
+	Cmd.m_Height = m_ScreenHeight;
 	m_pCommandBuffer->AddCommand(Cmd);
 
 	// kick the command buffer

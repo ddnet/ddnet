@@ -327,9 +327,7 @@ int CInput::Update()
 				switch(Event.window.event)
 				{
 				case SDL_WINDOWEVENT_RESIZED:
-#if defined(SDL_VIDEO_DRIVER_X11)
 					Graphics()->Resize(Event.window.data1, Event.window.data2);
-#endif
 					break;
 				case SDL_WINDOWEVENT_FOCUS_GAINED:
 					if(m_InputGrabbed)
