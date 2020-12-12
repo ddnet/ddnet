@@ -52,6 +52,7 @@ class CHud : public CComponent
 	void PrepareHealthAmoQuads();
 	void RenderHealthAndAmmo(const CNetObj_Character *pCharacter);
 
+	void RenderDummyCopyAndDummyHammer();
 	void RenderGameTimer();
 	void RenderPauseNotification();
 	void RenderSuddenDeath();
