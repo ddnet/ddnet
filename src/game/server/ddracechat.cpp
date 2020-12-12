@@ -387,10 +387,37 @@ void CGameContext::ConTeamTop5(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	if(pResult->NumArguments() > 0)
-		pSelf->Score()->ShowTeamTop5(pResult->m_ClientID, pResult->GetInteger(0));
+	if(pResult->NumArguments() == 0)
+	{
+		pSelf->Score()->ShowTeamTop5(pResult->m_ClientID, 1);
+	}
+	else if(pResult->NumArguments() == 1)
+	{
+		if(pResult->GetInteger(0) != 0)
+		{
+			pSelf->Score()->ShowTeamTop5(pResult->m_ClientID, pResult->GetInteger(0));
+		}
+		else
+		{
+			const char *pRequestedName = (str_comp(pResult->GetString(0), "me") == 0) ?
+							     pSelf->Server()->ClientName(pResult->m_ClientID) :
+							     pResult->GetString(0);
+			pSelf->Score()->ShowTeamTop5(pResult->m_ClientID, pRequestedName, 0);
+		}
+	}
+	else if(pResult->NumArguments() == 2 && pResult->GetInteger(1) != 0)
+	{
+		const char *pRequestedName = (str_comp(pResult->GetString(0), "me") == 0) ?
+						     pSelf->Server()->ClientName(pResult->m_ClientID) :
+						     pResult->GetString(0);
+		pSelf->Score()->ShowTeamTop5(pResult->m_ClientID, pRequestedName, pResult->GetInteger(1));
+	}
 	else
-		pSelf->Score()->ShowTeamTop5(pResult->m_ClientID);
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "teamtop5", "/top5team needs 0, 1 or 2 parameter. 1. = name, 2. = start number");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "teamtop5", "Example: /top5team, /top5team me, /top5team Hans, /top5team \"Papa Smurf\" 5");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "teamtop5", "Bad: /top5team Papa Smurf 5 # Good: /top5team \"Papa Smurf\" 5 ");
+	}
 }
 
 void CGameContext::ConTop5(IConsole::IResult *pResult, void *pUserData)

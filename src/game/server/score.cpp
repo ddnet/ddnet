@@ -918,6 +918,93 @@ bool CScore::ShowTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGame
 	return true;
 }
 
+void CScore::ShowTeamTop5(int ClientID, const char *pName, int Offset)
+{
+	if(RateLimitPlayer(ClientID))
+		return;
+	ExecPlayerThread(ShowPlayerTeamTop5Thread, "show team top5 player", ClientID, pName, Offset);
+}
+
+bool CScore::ShowPlayerTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData)
+{
+	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
+	CScorePlayerResult *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
+	auto *paMessages = pResult->m_Data.m_aaMessages;
+
+	int LimitStart = maximum(abs(pData->m_Offset) - 1, 0);
+	const char *pOrder = pData->m_Offset >= 0 ? "ASC" : "DESC";
+
+	// check sort method
+	char aBuf[2400];
+
+	str_format(aBuf, sizeof(aBuf),
+		"SELECT l.ID, Name, Time, Rank "
+		"FROM (" // teamrank score board
+		"  SELECT RANK() OVER w AS Rank, ID "
+		"  FROM %s_teamrace "
+		"  WHERE Map = ? "
+		"  GROUP BY ID "
+		"  WINDOW w AS (ORDER BY Time)"
+		") AS TeamRank INNER JOIN (" // select rank with Name in team
+		"  SELECT ID "
+		"  FROM %s_teamrace "
+		"  WHERE Map = ? AND Name = ? "
+		"  ORDER BY Time %s "
+		"  LIMIT %d, 5 "
+		") AS l ON TeamRank.ID = l.ID "
+		"INNER JOIN %s_teamrace AS r ON l.ID = r.ID "
+		"ORDER BY Time %s, l.ID ",
+		pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pOrder, LimitStart, pSqlServer->GetPrefix(), pOrder);
+	pSqlServer->PrepareStatement(aBuf);
+	pSqlServer->BindString(1, pData->m_Map);
+	pSqlServer->BindString(2, pData->m_Map);
+	pSqlServer->BindString(3, pData->m_Name);
+
+	if(pSqlServer->Step())
+	{
+		// show teamtop5
+		int Line = 0;
+		str_copy(paMessages[Line++], "------- Team Top 5 -------", sizeof(paMessages[Line]));
+
+		for(Line = 1; Line < 6; Line++) // print
+		{
+			float Time = pSqlServer->GetFloat(3);
+			str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
+			int Rank = pSqlServer->GetInt(4);
+			CTeamrank Teamrank;
+			bool Last = !Teamrank.NextSqlResult(pSqlServer);
+
+			char aFormattedNames[512] = "";
+			for(unsigned int Name = 0; Name < Teamrank.m_NumNames; Name++)
+			{
+				str_append(aFormattedNames, Teamrank.m_aaNames[Name], sizeof(aFormattedNames));
+
+				if(Name < Teamrank.m_NumNames - 2)
+					str_append(aFormattedNames, ", ", sizeof(aFormattedNames));
+				else if(Name < Teamrank.m_NumNames - 1)
+					str_append(aFormattedNames, " & ", sizeof(aFormattedNames));
+			}
+
+			str_format(paMessages[Line], sizeof(paMessages[Line]), "%d. %s Team Time: %s",
+				Rank, aFormattedNames, aBuf);
+			if(Last)
+			{
+				Line++;
+				break;
+			}
+		}
+		str_copy(paMessages[Line], "-------------------------------", sizeof(paMessages[Line]));
+	}
+	else
+	{
+		if(pData->m_Offset == 0)
+			str_format(paMessages[0], sizeof(paMessages[0]), "%s has no team ranks", pData->m_Name);
+		else
+			str_format(paMessages[0], sizeof(paMessages[0]), "%s has no team ranks in the specified range", pData->m_Name);
+	}
+	return true;
+}
+
 void CScore::ShowTimes(int ClientID, int Offset)
 {
 	if(RateLimitPlayer(ClientID))
