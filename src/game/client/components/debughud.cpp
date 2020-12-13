@@ -54,7 +54,11 @@ void CDebugHud::RenderNetCorrections()
 	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1, -1.0f);
 	TextRender()->Text(0, x - w, y, Fontsize, aBuf, -1.0f);
 	y += LineHeight;
-	str_format(aBuf, sizeof(aBuf), "%d", m_pClient->m_GameWorld.GetCharacterByID(m_pClient->m_Snap.m_LocalClientID)->m_TeleCheckpoint);
+	const CCharacter *pCharacter = m_pClient->m_GameWorld.GetCharacterByID(m_pClient->m_Snap.m_LocalClientID);
+	if(pCharacter)
+		str_format(aBuf, sizeof(aBuf), "%d", pCharacter->m_TeleCheckpoint);
+	else
+		str_copy(aBuf, "-1", sizeof(aBuf));
 	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1, -1.0f);
 	TextRender()->Text(0, x - w, y, Fontsize, aBuf, -1.0f);
 	y += 2 * LineHeight;
@@ -143,8 +147,20 @@ void CDebugHud::RenderTuning()
 	TextRender()->TextColor(1, 1, 1, 1);
 }
 
+void CDebugHud::RenderHint()
+{
+	if(!g_Config.m_Debug)
+		return;
+
+	float Width = 300 * Graphics()->ScreenAspect();
+	Graphics()->MapScreen(0, 0, Width, 300);
+	TextRender()->TextColor(1, 1, 1, 1);
+	TextRender()->Text(0x0, 5, 290, 5, Localize("Debug mode enabled. Press Ctrl+Shift+D to disable debug mode."), -1.0f);
+}
+
 void CDebugHud::OnRender()
 {
 	RenderTuning();
 	RenderNetCorrections();
+	RenderHint();
 }

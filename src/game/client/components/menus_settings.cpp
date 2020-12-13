@@ -107,19 +107,22 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			}
 		}
 
-		// smooth camera
+		// smooth dynamic camera
 		Left.HSplitTop(5.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Button, &Left);
-		if(DoButton_CheckBox(&g_Config.m_ClCameraSmoothness, Localize("Smooth Camera"), g_Config.m_ClCameraSmoothness, &Button))
+		if(g_Config.m_ClDyncam)
 		{
-			if(g_Config.m_ClCameraSmoothness)
+			if(DoButton_CheckBox(&g_Config.m_ClDyncamSmoothness, Localize("Smooth Dynamic Camera"), g_Config.m_ClDyncamSmoothness, &Button))
 			{
-				g_Config.m_ClCameraSmoothness = 0;
-			}
-			else
-			{
-				g_Config.m_ClCameraSmoothness = 50;
-				g_Config.m_ClCameraStabilizing = 50;
+				if(g_Config.m_ClDyncamSmoothness)
+				{
+					g_Config.m_ClDyncamSmoothness = 0;
+				}
+				else
+				{
+					g_Config.m_ClDyncamSmoothness = 50;
+					g_Config.m_ClDyncamStabilizing = 50;
+				}
 			}
 		}
 
@@ -466,6 +469,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	const CSkin *pSkin = m_pClient->m_pSkins->Get(m_pClient->m_pSkins->Find(Skin));
 	OwnSkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 	OwnSkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+	OwnSkinInfo.m_SkinMetrics = pSkin->m_Metrics;
 	OwnSkinInfo.m_CustomColoredSkin = *UseCustomColor;
 	if(*UseCustomColor)
 	{
@@ -529,13 +533,12 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	SkinPrefix.HSplitTop(2.0f, 0, &SkinPrefix);
 	{
 		static const char *s_aSkinPrefixes[] = {"kitty", "santa"};
-		for(unsigned i = 0; i < sizeof(s_aSkinPrefixes) / sizeof(s_aSkinPrefixes[0]); i++)
+		for(auto &pPrefix : s_aSkinPrefixes)
 		{
-			const char *pPrefix = s_aSkinPrefixes[i];
 			CUIRect Button;
 			SkinPrefix.HSplitTop(20.0f, &Button, &SkinPrefix);
 			Button.HMargin(2.0f, &Button);
-			if(DoButton_Menu(&s_aSkinPrefixes[i], pPrefix, 0, &Button))
+			if(DoButton_Menu(&pPrefix, pPrefix, 0, &Button))
 			{
 				str_copy(g_Config.m_ClSkinPrefix, pPrefix, sizeof(g_Config.m_ClSkinPrefix));
 			}
@@ -647,6 +650,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 			Info.m_OriginalRenderSkin = s->m_OriginalSkin;
 			Info.m_ColorableRenderSkin = s->m_ColorableSkin;
+			Info.m_SkinMetrics = s->m_Metrics;
 
 			Item.m_Rect.HSplitTop(5.0f, 0, &Item.m_Rect); // some margin from the top
 			RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, 0, vec2(1.0f, 0.0f), vec2(Item.m_Rect.x + 30, Item.m_Rect.y + Item.m_Rect.h / 2));
@@ -813,8 +817,6 @@ static CKeyInfo gs_aKeys[] =
 	Localize("Lock team");Localize("Show entities");Localize("Show HUD");
 */
 
-const int g_KeyCount = sizeof(gs_aKeys) / sizeof(CKeyInfo);
-
 void CMenus::UiDoGetButtons(int Start, int Stop, CUIRect View, CUIRect ScopeView)
 {
 	for(int i = Start; i < Stop; i++)
@@ -850,8 +852,8 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	char aBuf[128];
 
 	// this is kinda slow, but whatever
-	for(int i = 0; i < g_KeyCount; i++)
-		gs_aKeys[i].m_KeyId = gs_aKeys[i].m_Modifier = 0;
+	for(auto &Key : gs_aKeys)
+		Key.m_KeyId = Key.m_Modifier = 0;
 
 	for(int Mod = 0; Mod < CBinds::MODIFIER_COUNT; Mod++)
 	{
@@ -861,11 +863,11 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			if(!pBind[0])
 				continue;
 
-			for(int i = 0; i < g_KeyCount; i++)
-				if(str_comp(pBind, gs_aKeys[i].m_pCommand) == 0)
+			for(auto &Key : gs_aKeys)
+				if(str_comp(pBind, Key.m_pCommand) == 0)
 				{
-					gs_aKeys[i].m_KeyId = KeyId;
-					gs_aKeys[i].m_Modifier = Mod;
+					Key.m_KeyId = KeyId;
+					Key.m_Modifier = Mod;
 					break;
 				}
 		}
@@ -1054,11 +1056,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		g_Config.m_GfxColorDepth = Depth;
 		g_Config.m_GfxScreenWidth = s_aModes[NewSelected].m_Width;
 		g_Config.m_GfxScreenHeight = s_aModes[NewSelected].m_Height;
-#if defined(SDL_VIDEO_DRIVER_X11)
-		Graphics()->Resize(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight);
-#else
-		CheckSettings = true;
-#endif
+		Graphics()->Resize(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight, true);
 	}
 
 	// switches
@@ -1649,21 +1647,10 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			g_Config.m_ClShowChat ^= 1;
 		}
 
-		bool IsOldChat = !(g_Config.m_ClChatTee || g_Config.m_ClChatBackground);
-
 		Left.HSplitTop(20.0f, &Button, &Left);
-		if(DoButton_CheckBox(&g_Config.m_ClChatTee, Localize("Use old chat style"), IsOldChat, &Button))
+		if(DoButton_CheckBox(&g_Config.m_ClChatOld, Localize("Use old chat style"), g_Config.m_ClChatOld, &Button))
 		{
-			if(IsOldChat)
-			{
-				g_Config.m_ClChatTee = 1;
-				g_Config.m_ClChatBackground = 1;
-			}
-			else
-			{
-				g_Config.m_ClChatTee = 0;
-				g_Config.m_ClChatBackground = 0;
-			}
+			g_Config.m_ClChatOld ^= 1;
 			GameClient()->m_pChat->RebuildChat();
 		}
 
@@ -1945,7 +1932,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		vec2 From = vec2(Weapon.x, Weapon.y + Weapon.h / 2.0f);
 		vec2 Pos = vec2(Weapon.x + Weapon.w - 10.0f, Weapon.y + Weapon.h / 2.0f);
 
-		vec2 Out, Border;
+		vec2 Out;
 
 		Graphics()->BlendNormal();
 		Graphics()->TextureClear();

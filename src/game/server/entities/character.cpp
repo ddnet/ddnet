@@ -470,7 +470,7 @@ void CCharacter::FireWeapon()
 
 	case WEAPON_GUN:
 	{
-		if(!m_Jetpack || !m_pPlayer->m_NinjaJetpack)
+		if(!m_Jetpack || !m_pPlayer->m_NinjaJetpack || m_Core.m_HasTelegunGun)
 		{
 			int Lifetime;
 			if(!m_TuneZone)
@@ -1119,7 +1119,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 	}
 
 	// change eyes, use ninja graphic and set ammo count if player has ninjajetpack
-	if(m_pPlayer->m_NinjaJetpack && m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN && !m_DeepFreeze && !(m_FreezeTime > 0 || m_FreezeTime == -1))
+	if(m_pPlayer->m_NinjaJetpack && m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN && !m_DeepFreeze && !(m_FreezeTime > 0 || m_FreezeTime == -1) && !m_Core.m_HasTelegunGun)
 	{
 		if(Emote == EMOTE_NORMAL)
 			Emote = EMOTE_HAPPY;
@@ -1251,13 +1251,13 @@ void CCharacter::Snap(int SnappingClient)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_SUPER;
 	if(m_EndlessHook)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_ENDLESS_HOOK;
-	if(!m_Core.m_Collision)
+	if(!m_Core.m_Collision || !GameServer()->Tuning()->m_PlayerCollision)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_COLLISION;
-	if(!m_Core.m_Hook)
+	if(!m_Core.m_Hook || !GameServer()->Tuning()->m_PlayerHooking)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_HOOK;
 	if(m_SuperJump)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_ENDLESS_JUMP;
-	if(m_Jetpack || m_NinjaJetpack)
+	if(m_Jetpack)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_JETPACK;
 	if(m_Hit & DISABLE_HIT_GRENADE)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_GRENADE_HIT;
@@ -1367,10 +1367,10 @@ void CCharacter::HandleBroadcast()
 	}
 	else if((m_pPlayer->m_TimerType == CPlayer::TIMERTYPE_BROADCAST || m_pPlayer->m_TimerType == CPlayer::TIMERTYPE_GAMETIMER_AND_BROADCAST) && m_DDRaceState == DDRACE_STARTED && m_LastBroadcast + Server()->TickSpeed() * g_Config.m_SvTimeInBroadcastInterval <= Server()->Tick())
 	{
-		char aBuftime[64];
-		int IntTime = (int)((float)(Server()->Tick() - m_StartTime) / ((float)Server()->TickSpeed()));
-		str_format(aBuftime, sizeof(aBuftime), "%s%d:%s%d", ((IntTime / 60) > 9) ? "" : "0", IntTime / 60, ((IntTime % 60) > 9) ? "" : "0", IntTime % 60);
-		GameServer()->SendBroadcast(aBuftime, m_pPlayer->GetCID(), false);
+		char aBuf[32];
+		int Time = (int64)100 * ((float)(Server()->Tick() - m_StartTime) / ((float)Server()->TickSpeed()));
+		str_time(Time, TIME_HOURS, aBuf, sizeof(aBuf));
+		GameServer()->SendBroadcast(aBuf, m_pPlayer->GetCID(), false);
 		m_CpLastBroadcast = m_CpActive;
 		m_LastBroadcast = Server()->Tick();
 	}
@@ -1404,7 +1404,7 @@ void CCharacter::HandleSkippableTiles(int Index)
 	// handle speedup tiles
 	if(GameServer()->Collision()->IsSpeedup(Index))
 	{
-		vec2 Direction, MaxVel, TempVel = m_Core.m_Vel;
+		vec2 Direction, TempVel = m_Core.m_Vel;
 		int Force, MaxSpeed = 0;
 		float TeeAngle, SpeederAngle, DiffAngle, SpeedLeft, TeeSpeed;
 		GameServer()->Collision()->GetSpeedup(Index, &Direction, &Force, &MaxSpeed);
@@ -2259,9 +2259,9 @@ void CCharacter::DDRacePostCoreTick()
 	std::list<int> Indices = GameServer()->Collision()->GetMapIndices(m_PrevPos, m_Pos);
 	if(!Indices.empty())
 	{
-		for(std::list<int>::iterator i = Indices.begin(); i != Indices.end(); i++)
+		for(int &Index : Indices)
 		{
-			HandleTiles(*i);
+			HandleTiles(Index);
 			if(!m_Alive)
 				return;
 		}

@@ -78,7 +78,7 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 		if(LoadCountryFlags)
 		{
 			CountryFlag.m_Texture = Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
-			free(Info.m_pData);
+			Graphics()->FreePNG(&Info);
 		}
 
 		if(g_Config.m_Debug)
@@ -102,8 +102,8 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 
 	// init LUT
 	if(DefaultIndex != 0)
-		for(int i = 0; i < CODE_RANGE; ++i)
-			m_CodeIndexLUT[i] = DefaultIndex;
+		for(int &CodeIndexLUT : m_CodeIndexLUT)
+			CodeIndexLUT = DefaultIndex;
 	else
 		mem_zero(m_CodeIndexLUT, sizeof(m_CodeIndexLUT));
 	for(int i = 0; i < m_aCountryFlags.size(); ++i)

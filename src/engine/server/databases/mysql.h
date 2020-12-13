@@ -5,7 +5,7 @@
 #include <engine/server/databases/connection.h>
 #include <memory>
 
-class lock;
+class CLock;
 namespace sql {
 class Connection;
 class PreparedStatement;
@@ -79,7 +79,7 @@ private:
 	bool m_Setup;
 
 	std::atomic_bool m_InUse;
-	static lock m_SqlDriverLock;
+	static CLock m_SqlDriverLock;
 };
 
 #endif // ENGINE_SERVER_DATABASES_MYSQL_H

@@ -85,9 +85,9 @@ public:
 		free(m_pBuf);
 		delete[] m_TextureData[0];
 		delete[] m_TextureData[1];
-		for(size_t i = 0; i < m_FtFallbackFonts.size(); i++)
+		for(auto &FtFallbackFont : m_FtFallbackFonts)
 		{
-			free(m_FtFallbackFonts[i].m_pBuf);
+			free(FtFallbackFont.m_pBuf);
 		}
 	}
 
@@ -600,16 +600,16 @@ public:
 
 	virtual ~CTextRender()
 	{
-		for(size_t i = 0; i < m_Fonts.size(); ++i)
+		for(auto &pFont : m_Fonts)
 		{
-			FT_Done_Face(m_Fonts[i]->m_FtFace);
+			FT_Done_Face(pFont->m_FtFace);
 
-			for(CFont::SFontFallBack &FallbackFont : m_Fonts[i]->m_FtFallbackFonts)
+			for(CFont::SFontFallBack &FallbackFont : pFont->m_FtFallbackFonts)
 			{
 				FT_Done_Face(FallbackFont.m_FtFace);
 			}
 
-			delete m_Fonts[i];
+			delete pFont;
 		}
 
 		if(m_FTLibrary != 0)
@@ -715,7 +715,7 @@ public:
 		if(FT_New_Memory_Face(m_FTLibrary, pBuf, Size, 0, &FallbackFont.m_FtFace) == 0)
 		{
 			dbg_msg("textrender", "loaded fallback font from '%s'", pFilename);
-			pFont->m_FtFallbackFonts.emplace_back(std::move(FallbackFont));
+			pFont->m_FtFallbackFonts.emplace_back(FallbackFont);
 
 			return true;
 		}
@@ -733,10 +733,10 @@ public:
 
 	CFont *GetFont(const char *pFilename)
 	{
-		for(size_t i = 0; i < m_Fonts.size(); ++i)
+		for(auto &pFont : m_Fonts)
 		{
-			if(str_comp(pFilename, m_Fonts[i]->m_aFilename) == 0)
-				return m_Fonts[i];
+			if(str_comp(pFilename, pFont->m_aFilename) == 0)
+				return pFont;
 		}
 
 		return NULL;
@@ -840,6 +840,9 @@ public:
 	}
 	virtual void TextOutlineColor(ColorRGBA rgb) { m_OutlineColor = rgb; };
 
+	virtual ColorRGBA GetTextColor() { return m_Color; }
+	virtual ColorRGBA GetTextOutlineColor() { return m_OutlineColor; }
+
 	virtual void TextEx(CTextCursor *pCursor, const char *pText, int Length)
 	{
 		dbg_assert(pText != NULL, "null text pointer");
@@ -897,7 +900,7 @@ public:
 		//the outlined texture is always the same size as the current
 		float UVScale = 1.0f / pFont->m_CurTextureDimensions[0];
 
-		const char *pCurrent = (char *)pText;
+		const char *pCurrent = pText;
 		const char *pEnd = pCurrent + Length;
 
 		if((m_RenderFlags & TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) != 0)
@@ -941,7 +944,7 @@ public:
 			const char *pBatchEnd = pEnd;
 			if(pCursor->m_LineWidth > 0 && !(pCursor->m_Flags & TEXTFLAG_STOP_AT_END))
 			{
-				int Wlen = minimum(WordLength((char *)pCurrent), (int)(pEnd - pCurrent));
+				int Wlen = minimum(WordLength(pCurrent), (int)(pEnd - pCurrent));
 				CTextCursor Compare = *pCursor;
 				Compare.m_X = DrawX;
 				Compare.m_Y = DrawY;
@@ -1718,8 +1721,8 @@ public:
 		void *pUploadData = &TextContainer.m_StringInfo.m_CharacterQuads[0];
 		TextContainer.m_StringInfo.m_QuadBufferObjectIndex = Graphics()->CreateBufferObject(DataSize, pUploadData);
 
-		for(size_t i = 0; i < m_DefaultTextContainerInfo.m_Attributes.size(); ++i)
-			m_DefaultTextContainerInfo.m_Attributes[i].m_VertBufferBindingIndex = TextContainer.m_StringInfo.m_QuadBufferObjectIndex;
+		for(auto &Attribute : m_DefaultTextContainerInfo.m_Attributes)
+			Attribute.m_VertBufferBindingIndex = TextContainer.m_StringInfo.m_QuadBufferObjectIndex;
 
 		TextContainer.m_StringInfo.m_QuadBufferContainerIndex = Graphics()->CreateBufferContainer(&m_DefaultTextContainerInfo);
 		Graphics()->IndicesNumRequiredNotify(TextContainer.m_StringInfo.m_QuadNum * 6);
@@ -1975,8 +1978,8 @@ public:
 	virtual void OnWindowResize()
 	{
 		bool FoundTextContainer = false;
-		for(size_t i = 0; i < m_TextContainers.size(); ++i)
-			if(m_TextContainers[i].m_StringInfo.m_QuadBufferContainerIndex != -1)
+		for(auto &TextContainer : m_TextContainers)
+			if(TextContainer.m_StringInfo.m_QuadBufferContainerIndex != -1)
 				FoundTextContainer = true;
 		if(FoundTextContainer)
 		{
@@ -1984,19 +1987,19 @@ public:
 			dbg_assert(false, "text container was not empty");
 		}
 
-		for(size_t i = 0; i < m_Fonts.size(); ++i)
+		for(auto &pFont : m_Fonts)
 		{
 			// reset the skylines
 			for(int j = 0; j < 2; ++j)
 			{
-				for(size_t k = 0; k < m_Fonts[i]->m_TextureSkyline[j].m_CurHeightOfPixelColumn.size(); ++k)
-					m_Fonts[i]->m_TextureSkyline[j].m_CurHeightOfPixelColumn[k] = 0;
+				for(int &k : pFont->m_TextureSkyline[j].m_CurHeightOfPixelColumn)
+					k = 0;
 
-				mem_zero(m_Fonts[i]->m_TextureData[j], (size_t)m_Fonts[i]->m_CurTextureDimensions[j] * m_Fonts[i]->m_CurTextureDimensions[j] * sizeof(unsigned char));
-				Graphics()->LoadTextureRawSub(m_Fonts[i]->m_aTextures[j], 0, 0, m_Fonts[i]->m_CurTextureDimensions[j], m_Fonts[i]->m_CurTextureDimensions[j], CImageInfo::FORMAT_ALPHA, m_Fonts[i]->m_TextureData[j]);
+				mem_zero(pFont->m_TextureData[j], (size_t)pFont->m_CurTextureDimensions[j] * pFont->m_CurTextureDimensions[j] * sizeof(unsigned char));
+				Graphics()->LoadTextureRawSub(pFont->m_aTextures[j], 0, 0, pFont->m_CurTextureDimensions[j], pFont->m_CurTextureDimensions[j], CImageInfo::FORMAT_ALPHA, pFont->m_TextureData[j]);
 			}
 
-			m_Fonts[i]->InitFontSizes();
+			pFont->InitFontSizes();
 		}
 	}
 };

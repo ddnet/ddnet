@@ -750,9 +750,6 @@ Show health + ammo
 Team message
 == Missatge d'equip
 
-Manual %3d:%02d  
-== Manual %3d:%02d
-
 Automatically create statboard csv
 == Crear un fitxer csv d'estadístiques automàticament
 
@@ -779,9 +776,6 @@ Threaded sound loading
 
 Check now
 == Comprova ara
-
-Race %3d:%02d  
-== Carrera %3d:%02d  
 
 Background (regular)
 == Fons (regular)
@@ -887,9 +881,6 @@ Clan plates size
 
 Update now
 == Actualitza ara
-
-Auto %3d:%02d  
-== Auto %3d:%02d 
 
 Show clan above name plates
 == Mostrar el clan a sobre dels noms
@@ -1035,7 +1026,7 @@ Most importantly communication is key: There is no tutorial so you'll have to ch
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == És recomanat que miris la configuració i ho canviïs al teu gust abans d'entrar a un servidor.
 
-Please enter your nick name below.
+Please enter your nickname below.
 == Si us plau, escriu el teu nom a sota.
 
 Destination file already exist
@@ -1146,9 +1137,6 @@ Show others (own team only)
 Time
 == Temps
 
-Replay %3d:%02d  
-== Repetició %3d:%02d  
-
 1 new mention
 == 1 nova menció
 
@@ -1158,8 +1146,17 @@ Replay %3d:%02d
 9+ new mentions
 == 9+ noves mencions
 
-Downloading ddnet-info.json failed
-== 
+Manual
+== Manual
+
+Race
+== Carrera
+
+Auto
+== Auto
+
+Replay
+== Repetició
 
 Saving ddnet-settings.cfg failed
 == 
@@ -1170,7 +1167,19 @@ The width or height of texture %s is not divisible by 16, which might cause visu
 Warning
 == 
 
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== 
+
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
+Existing Player
+== 
+
+Your nickname '%s' is already used (%d points). Do you still want to use it?
+== 
+
+Checking for existing player with your name
 == 
 
 Country / Region
@@ -1194,10 +1203,10 @@ Theme
 %d player
 == 
 
-File
+Demos directory
 == 
 
-Demos directory
+Smooth Dynamic Camera
 == 
 
 Skip the main menu
@@ -1215,10 +1224,22 @@ Skin Database
 Skins directory
 == 
 
+Game sound volume
+== 
+
+Chat sound volume
+== 
+
 Background music volume
 == 
 
 Assets
+== 
+
+Use old chat style
+== 
+
+Highlight
 == 
 
 Client message

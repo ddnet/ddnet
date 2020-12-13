@@ -48,12 +48,12 @@ void CNetConnection::Reset(bool Rejoin)
 
 const char *CNetConnection::ErrorString()
 {
-	return m_ErrorString;
+	return m_aErrorString;
 }
 
 void CNetConnection::SetError(const char *pString)
 {
-	str_copy(m_ErrorString, pString, sizeof(m_ErrorString));
+	str_copy(m_aErrorString, pString, sizeof(m_aErrorString));
 }
 
 void CNetConnection::Init(NETSOCKET Socket, bool BlockCloseMsg)
@@ -63,7 +63,7 @@ void CNetConnection::Init(NETSOCKET Socket, bool BlockCloseMsg)
 
 	m_Socket = Socket;
 	m_BlockCloseMsg = BlockCloseMsg;
-	mem_zero(m_ErrorString, sizeof(m_ErrorString));
+	mem_zero(m_aErrorString, sizeof(m_aErrorString));
 }
 
 void CNetConnection::AckChunks(int Ack)
@@ -189,7 +189,7 @@ int CNetConnection::Connect(NETADDR *pAddr)
 	// init connection
 	Reset();
 	m_PeerAddr = *pAddr;
-	mem_zero(m_ErrorString, sizeof(m_ErrorString));
+	mem_zero(m_aErrorString, sizeof(m_aErrorString));
 	m_State = NET_CONNSTATE_CONNECT;
 	SendControl(NET_CTRLMSG_CONNECT, SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC));
 	return 0;
@@ -210,11 +210,11 @@ void CNetConnection::Disconnect(const char *pReason)
 				SendControl(NET_CTRLMSG_CLOSE, 0, 0);
 		}
 
-		if(pReason != m_ErrorString)
+		if(pReason != m_aErrorString)
 		{
-			m_ErrorString[0] = 0;
+			m_aErrorString[0] = 0;
 			if(pReason)
-				str_copy(m_ErrorString, pReason, sizeof(m_ErrorString));
+				str_copy(m_aErrorString, pReason, sizeof(m_aErrorString));
 		}
 	}
 
@@ -228,7 +228,7 @@ void CNetConnection::DirectInit(NETADDR &Addr, SECURITY_TOKEN SecurityToken, SEC
 	m_State = NET_CONNSTATE_ONLINE;
 
 	m_PeerAddr = Addr;
-	mem_zero(m_ErrorString, sizeof(m_ErrorString));
+	mem_zero(m_aErrorString, sizeof(m_aErrorString));
 
 	int64 Now = time_get();
 	m_LastSendTime = Now;
@@ -290,25 +290,22 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 				m_State = NET_CONNSTATE_ERROR;
 				m_RemoteClosed = 1;
 
-				char Str[128] = {0};
+				char aStr[128] = {0};
 				if(pPacket->m_DataSize > 1)
 				{
 					// make sure to sanitize the error string form the other party
-					if(pPacket->m_DataSize < 128)
-						str_copy(Str, (char *)&pPacket->m_aChunkData[1], pPacket->m_DataSize);
-					else
-						str_copy(Str, (char *)&pPacket->m_aChunkData[1], sizeof(Str));
-					str_sanitize_strong(Str);
+					str_utf8_copy(aStr, (char *)&pPacket->m_aChunkData[1], minimum(pPacket->m_DataSize, (int)sizeof(aStr)));
+					str_sanitize_cc(aStr);
 				}
 
 				if(!m_BlockCloseMsg)
 				{
 					// set the error string
-					SetError(Str);
+					SetError(aStr);
 				}
 
 				if(g_Config.m_Debug)
-					dbg_msg("conn", "closed reason='%s'", Str);
+					dbg_msg("conn", "closed reason='%s'", aStr);
 			}
 			return 0;
 		}
@@ -325,7 +322,7 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 					Reset();
 					m_State = NET_CONNSTATE_PENDING;
 					m_PeerAddr = *pAddr;
-					mem_zero(m_ErrorString, sizeof(m_ErrorString));
+					mem_zero(m_aErrorString, sizeof(m_aErrorString));
 					m_LastSendTime = Now;
 					m_LastRecvTime = Now;
 					m_LastUpdateTime = Now;
@@ -466,7 +463,7 @@ int CNetConnection::Update()
 	return 0;
 }
 
-void CNetConnection::SetTimedOut(const NETADDR *pAddr, int Sequence, int Ack, SECURITY_TOKEN SecurityToken, TStaticRingBuffer<CNetChunkResend, NET_CONN_BUFFERSIZE> *pResendBuffer, bool Sixup)
+void CNetConnection::SetTimedOut(const NETADDR *pAddr, int Sequence, int Ack, SECURITY_TOKEN SecurityToken, CStaticRingBuffer<CNetChunkResend, NET_CONN_BUFFERSIZE> *pResendBuffer, bool Sixup)
 {
 	int64 Now = time_get();
 
@@ -476,7 +473,7 @@ void CNetConnection::SetTimedOut(const NETADDR *pAddr, int Sequence, int Ack, SE
 
 	m_State = NET_CONNSTATE_ONLINE;
 	m_PeerAddr = *pAddr;
-	mem_zero(m_ErrorString, sizeof(m_ErrorString));
+	mem_zero(m_aErrorString, sizeof(m_aErrorString));
 	m_LastSendTime = Now;
 	m_LastRecvTime = Now;
 	m_LastUpdateTime = Now;
@@ -487,10 +484,10 @@ void CNetConnection::SetTimedOut(const NETADDR *pAddr, int Sequence, int Ack, SE
 	m_Buffer.Init();
 	while(pResendBuffer->First())
 	{
-		CNetChunkResend *First = pResendBuffer->First();
+		CNetChunkResend *pFirst = pResendBuffer->First();
 
-		CNetChunkResend *pResend = m_Buffer.Allocate(sizeof(CNetChunkResend) + First->m_DataSize);
-		mem_copy(pResend, First, sizeof(CNetChunkResend) + First->m_DataSize);
+		CNetChunkResend *pResend = m_Buffer.Allocate(sizeof(CNetChunkResend) + pFirst->m_DataSize);
+		mem_copy(pResend, pFirst, sizeof(CNetChunkResend) + pFirst->m_DataSize);
 
 		pResendBuffer->PopFirst();
 	}

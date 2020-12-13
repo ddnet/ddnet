@@ -33,9 +33,9 @@ CBinds::CBinds()
 CBinds::~CBinds()
 {
 	for(int i = 0; i < KEY_LAST; i++)
-		for(int j = 0; j < MODIFIER_COMBINATION_COUNT; j++)
-			if(m_aapKeyBindings[j][i])
-				free(m_aapKeyBindings[j][i]);
+		for(auto &apKeyBinding : m_aapKeyBindings)
+			if(apKeyBinding[i])
+				free(apKeyBinding[i]);
 }
 
 void CBinds::Bind(int KeyID, const char *pStr, bool FreeOnly, int Modifier)
@@ -143,8 +143,7 @@ bool CBinds::OnInput(IInput::CEvent e)
 		}
 	}
 
-	// Shift for emoticons works while moving through map
-	if(m_aapKeyBindings[0][e.m_Key] && (!ret || m_aapKeyBindings[0][e.m_Key][0] == '+'))
+	if(m_aapKeyBindings[0][e.m_Key] && !ret)
 	{
 		// When ctrl+shift are pressed (ctrl+shift binds and also the hard-coded ctrl+shift+d, ctrl+shift+g, ctrl+shift+e), ignore other +xxx binds
 		if(e.m_Flags & IInput::FLAG_PRESS && Mask != ((1 << MODIFIER_CTRL) | (1 << MODIFIER_SHIFT)))
@@ -159,13 +158,13 @@ bool CBinds::OnInput(IInput::CEvent e)
 
 void CBinds::UnbindAll()
 {
-	for(int i = 0; i < MODIFIER_COMBINATION_COUNT; i++)
+	for(auto &apKeyBinding : m_aapKeyBindings)
 	{
-		for(int j = 0; j < KEY_LAST; j++)
+		for(auto &pKeyBinding : apKeyBinding)
 		{
-			if(m_aapKeyBindings[i][j])
-				free(m_aapKeyBindings[i][j]);
-			m_aapKeyBindings[i][j] = 0;
+			if(pKeyBinding)
+				free(pKeyBinding);
+			pKeyBinding = 0;
 		}
 	}
 }

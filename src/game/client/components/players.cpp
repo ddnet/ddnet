@@ -429,7 +429,6 @@ void CPlayers::RenderPlayer(
 				}
 				if(g_pData->m_Weapons.m_aId[iw].m_aSpriteMuzzles[IteX])
 				{
-					vec2 Pos1, Pos0;
 					vec2 Dir;
 					if(PredictLocalWeapons)
 						Dir = vec2(pPlayerChar->m_X, pPlayerChar->m_Y) - vec2(pPrevChar->m_X, pPrevChar->m_Y);
@@ -654,6 +653,7 @@ void CPlayers::OnRender()
 				m_aRenderInfo[i].m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 				m_aRenderInfo[i].m_ColorableRenderSkin = pSkin->m_ColorableSkin;
 				m_aRenderInfo[i].m_BloodColor = pSkin->m_BloodColor;
+				m_aRenderInfo[i].m_SkinMetrics = pSkin->m_Metrics;
 				m_aRenderInfo[i].m_CustomColoredSkin = IsTeamplay;
 				if(!IsTeamplay)
 				{
@@ -668,6 +668,7 @@ void CPlayers::OnRender()
 	m_RenderInfoSpec.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 	m_RenderInfoSpec.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
 	m_RenderInfoSpec.m_BloodColor = pSkin->m_BloodColor;
+	m_RenderInfoSpec.m_SkinMetrics = pSkin->m_Metrics;
 	m_RenderInfoSpec.m_CustomColoredSkin = false;
 	m_RenderInfoSpec.m_Size = 64.0f;
 

@@ -591,7 +591,7 @@ Size:
 ##### translated strings #####
 
 Reset to defaults
-== Reimposta
+== Reimposta predefinito
 
 Quit anyway?
 == Vuoi chiudere comunque?
@@ -609,7 +609,7 @@ Lht.
 == Luminosità
 
 UI Color
-== Color interfaccia
+== Colore interfaccia
 
 Crc:
 == Crc:
@@ -627,31 +627,31 @@ Type:
 == Tipo:
 
 DDNet %s is out!
-== DDNet %s è uscito
+== DDNet %s è uscito!
 
 %d new mentions
 == %d nuove menzioni
 
 Disconnect Dummy
-== 
+== Disconnetti Dummy
 
 Are you sure that you want to disconnect your dummy?
-== 
+== Sei sicuro di voler disconnettere il tuo dummy?
 
 Filter connecting players
-== 
+== Filtra i giocatori in conness.
 
 9+ new mentions
-== 9+ nuova menzione
+== 9+ nuove menzioni
 
 Markers
 == Marcatrici
 
 Disconnect Dummy
-== Disconnetti il manichino
+== Disconnetti il dummy
 
 Length
-== 
+== Lunghezza
 
 Fetch Info
 == Recuperare informazioni
@@ -660,13 +660,13 @@ Length
 == Lunghezza
 
 Downloading %s:
-== 
+== Scaricando %s:
 
 Update failed! Check log...
 == Aggiornamento non riuscito! Controlla registro...
 
 Filter connecting players
-== Filtra i giocatori in connessione
+== Filtra i giocatori in conness.
 
 Time
 == Tempo
@@ -675,151 +675,641 @@ Downloading %s:
 == Scarica %s
 
 Are you sure that you want to disconnect your dummy?
-== Sei sicuro di voler scollegare il tuo manichino?
+== Sei sicuro di voler scollegare il tuo dummy?
 
 1 new mention
 == 1 nuova menzione
 
-Downloading ddnet-info.json failed
-== 
-
 Successfully saved the replay!
-== 
+== Hai salvato il replay con successo!
 
 Saving ddnet-settings.cfg failed
-== 
+== Salvataggio di ddnet-settings.cfg non riuscito
 
 Replay feature is disabled!
-== 
+== Il replay è disabilitato!
 
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== 
+== La larghezza o altezza della texture %s non è divisibile per 16, quindi potrebbe causare dei bug visivi.
 
 Warning
-== 
+== Attenzione
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== Modalità debug attivata. Premi Ctrl+Shift+D per disattivare la modalità debug.
 
 Game paused
-== 
+== Gioco in pausa
 
 Server best:
-== 
+== Migliore del server
 
 Personal best:
-== 
+== Miglior tempo personale
 
 Browser
-== 
+== Browser
 
 Ghost
-== 
+== Ghost
 
 Loading DDNet Client
-== 
+== Caricando Client DDNet
 
 Reconnect in %d sec
-== 
+== Riconnettiti in %d secondi
 
 Render demo
-== 
+== Renderizza demo
 
 Replace video
-== 
+== Rimpiazza video
 
 File already exists, do you want to overwrite it?
-== 
+== Il file già esiste, vuoi sovrascriverlo?
 
 Are you sure that you want to disconnect?
-== 
+== Sei sicuro di volerti disconnettere?
 
 Welcome to DDNet
-== 
+== Benvenuto in DDNet
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== 
+== DDraceNetwork è un gioco online cooperativo dove l'obbiettivo è per te ed il tuo gruppo di tee di raggiungere la linea del traguardo della mappa. Da nuovo arrivato dovresti iniziare sui server Novice, dove sono ospitate le mappe più facili. Considera il ping per scegliere un server vicino a te.
 
 The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== 
+== Le mappe contengono freeze, che rendono temporaneamente impossibile il movimento per un tee. Devi fare gioco di squadra per superare queste parti.
 
 The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== 
+== La rotellina del mouse cambia le armi. Il Martello (tasto sinistro mouse) può essere usato per colpire altri tee e svegliarli quando sono stati gelati nel freeze.
 
 Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== 
+== Il Rampino (tasto destro mouse) può essere usato per aggrapparsi ad alcune superfici e per agganciare altri tee.
 
 Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== 
+== La cosa più importante è la comunicazione: Non ci sono tutorial quindi dovrai scrivere in chat (tasto t) con altri giocatori per imparare le basi e i trucchi del gioco.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 
+== Usa il tasto k per ucciderti (respawn), il tasto q per andare in modalità pausa e guardare altri giocatori. Guarda le impostazioni per gli altri tasti.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
-== 
+== E' raccomandato controllare le impostazioni e aggiustarle a tuo piacimento prima di entrare in un server.
 
-Please enter your nick name below.
-== 
+Please enter your nickname below.
+== Per favore inserisci il tuo nickname qui sotto.
+
+Existing Player
+== Giocatore esistente
+
+Your nickname '%s' is already used (%d points). Do you still want to use it?
+== Il tuo nickname '%s' è già usato (punti %d). Vuoi comunque usarlo?
+
+Checking for existing player with your name
+== Controllando per un giocatore esistente con il tuo nome
 
 Country / Region
-== 
+== Paese / Regione
 
 Destination file already exist
-== 
+== Il file destinazione esiste già
 
 Speed
-== 
+== Velocità
 
 Video name:
-== 
+== Nome del video:
 
 Show DDNet map finishes in server browser
-== 
+== Mostra le mappe finite in DDNet nel tuo browser dei server
 
 transmits your player name to info2.ddnet.tw
-== 
+
+== Trasmette il tuo nome da giocatore a info2.ddnet.tw
+
 
 Theme
-== 
+== Tema
 
 Search
-== 
+== Cerca
 
 Exclude
-== 
+== Escludi
 
 %d of %d servers
-== 
+== %d di %d server
 
 %d of %d server
-== 
+== %d di %d server
 
 %d players
-== 
+== %d giocatori
 
 %d player
-== 
+== %d giocatore
 
 Indicate map finish
-== 
+== Indica una mappa finita
 
 Unfinished map
-== 
+== Mappa non finita
 
 Countries
-== 
+== Paesi
 
 Types
-== 
+== Tipi
 
 Select a name
-== 
+== Seleziona un nome
 
 Please use a different name
-== 
+== Per favore usa un nome differente
 
 Remove chat
-== 
+== Rimuovi chat
 
-File
-== 
+Demo
+== Demo
+
+Date
+== Data
+
+Demos directory
+== Cartella delle demo
+
+Render
+== Renderizza
+
+Connecting dummy
+== Connettendo dummy
+
+Connect Dummy
+== Connetti Dummy
+
+Kill
+== Respawn
+
+Pause
+== Pausa
+
+Reload
+== Ricarica
+
+Deactivate
+== Disattiva
+
+Activate
+== Attiva
+
+Save
+== Salva
+
+Smooth Dynamic Camera
+== Camera dinamica liscia
+
+Switch weapon when out of ammo
+== Cambia arma quando senza munizioni
+
+Reset wanted weapon on death
+== Resetta l'arma voluta quando muori
+
+Show only chat messages from friends
+== Mostra solo messaggi da parte di amici
+
+Show clan above name plates
+== Mostra clan sopra la targa dei nomi
+
+Clan plates size
+== Grandezza della targa del clan
+
+Skip the main menu
+== Salta il menu principale
+
+Refresh Rate
+== Frequenza di aggiornamento
+
+Show console window
+== Mostra la console
+
+Themes directory
+== Cartella dei temi
+
+Automatically take statboard screenshot
+== Fai una cattura di schermata automaticamente alla statboard
+
+Automatically create statboard csv
+== Crea automaticamente massimo valore separato da virgole (CSV) in statboard
+
+Max CSVs
+== Massimo valore separato da virgole (CSV)
+
+Dummy settings
+== Impostazioni Dummy
+
+Download skins
+== Scarica skin
+
+Vanilla skins only
+== Solo skin vanilla
+
+Fat skins (DDFat)
+== Skin grasse (DDFat)
+
+Skin prefix
+== Prefisso skin
+
+Skin Database
+== Database delle skin
+
+Skins directory
+== Cartella delle skin
+
+Hook collisions
+== Linea dell'hook
+
+Zoom in
+== Ingrandisci in dentro
+
+Zoom out
+== Ingrandisci in fuori
+
+Default zoom
+== Zoom predefinito
+
+Show others
+== Mostra altri
+
+Show all
+== Mostra tutti
+
+Toggle dyncam
+== Attiva/disattiva dyncam
+
+Toggle dummy
+== Attiva/disattiva dummy
+
+Toggle ghost
+== Attiva/disattiva ghost
+
+Dummy copy
+== Dummy copy 
+
+Hammerfly dummy
+== Hammerfly dummy 
+
+Laser
+== Laser/cecchino
+
+Statboard
+== Tabellone segnapunti
+
+Lock team
+== Blocca la squadra (team)
+
+Show entities
+== Mostra entities
+
+Show HUD
+== Mostra interf. utente
+
+UI mouse s.
+== Sensibilità mouse nei menu
+
+Borderless window
+== Finestra senza bordi
+
+may cause delay
+== Può esserci ritardo
+
+Screen
+== Schermo
+
+Use OpenGL 3.3 (experimental)
+== Usa OpenGL 3.3 (sperimentale)
+
+Preinit VBO (iGPUs only)
+== Preinit VBO (solo iGPU)
+
+Multiple texture units (disable for MacOS)
+== Unità multiple di texture
+
+Use high DPI
+== Usa DPI alti
+
+Enable game sounds
+== Abilita suoni del gioco
+
+Enable gun sound
+== Abilita suono delle armi
+
+Enable long pain sound (used when shooting in freeze)
+== Abilita suono di dolore (quando premi tasto sinistro nel freeze)
+
+Enable server message sound
+== Abilita suono del messaggio del server
+
+Enable regular chat sound
+== Abilita suono della chat normale
+
+Enable team chat sound
+== Abilita suono della chat di squadra
+
+Enable highlighted chat sound
+== Abilita suono della chat evidenziata
+
+Threaded sound loading
+== Suono filettato
+
+Game sound volume
+== Volume del gioco
+
+Chat sound volume
+== Volume della chat
+
+Map sound volume
+== Volume della mappa
+
+Background music volume
+== Volume della musica in sottofondo
+
+HUD
+== Interf. utente
+
+DDNet
+== DDNet
+
+Assets
+== Asset
+
+DDNet Client needs to be restarted to complete update!
+== Il Client DDNet deve essere riavviato per completare l'aggiornamento!
+
+Use DDRace Scoreboard
+== Usa il tabellone segnapunti DDRace
+
+Show client IDs in Scoreboard
+== Mostra gli ID nella Scoreboard
+
+Show score
+== Mostra punteggio/tempo
+
+Show health + ammo
+== Mostra vita + armatura
+
+Use old chat style
+== Usa il modello della vecchia chat
+
+Show names in chat in team colors
+== Mostra i nomi in chat nei colori delle squadre
+
+Show kill messages
+== Mostra i messaggi delle morti
+
+Show votes window after voting
+== Mostra la finestra del voto dopo aver votato
+
+Messages
+== Messaggi
+
+System message
+== Messaggio di sistema
+
+Reset
+== Ripristina
+
+Highlighted message
+== Messaggio evidenziato
+
+Spectator
+== Spettatore
+
+Look out!
+== Attento!
+
+Team message
+== Messaggio della squadra
+
+We will win
+== Vinceremo
+
+Friend message
+== Messaggio di un amico
+
+Highlight
+== Evidenzia
+
+Friend
+== Amico
+
+Hi o/
+== Ciao o/
+
+Normal message
+== Messaggio normale
+
+Hello and welcome
+== Ciao e benvenuto
+
+Client message
+== Messaggio del Client
+
+Inner color
+== Colore interno
+
+Outline color
+== Colore del contorno
+
+Wait before try for
+== Aspetta prima di provare per
+
+second
+== secondo
+
+seconds
+== secondi
+
+Save the best demo of each race
+== Salva la miglior demo di ogni partita
+
+Default length: %d
+== Lunghezza predefinita: %d
+
+Enable replays
+== Abilita i replay
+
+Show ghost
+== Mostra ghost
+
+Save ghost
+== Salva ghost
+
+Gameplay
+== Gameplay
+
+Size
+== Grandezza
+
+Show text entities
+== Mostra i testi delle entità (entities)
+
+Show others (own team only)
+== Mostra altri (solo la propria squadra)
+
+Show quads
+== Mostra quads
+
+AntiPing
+== AntiPing
+
+AntiPing: predict other players
+== AntiPing: prevedi altri giocatori
+
+AntiPing: predict weapons
+== AntiPing: prevedi le armi
+
+AntiPing: predict grenade paths
+== AntiPing: prevedi i percorsi dei colpi del lanciagranate
+
+Show other players' hook collision lines
+== Mostra la linea di collisione del rampino degli altri giocatori
+
+Show other players' key presses
+== Mostra i tasti degli altri giocatori
+
+Old mouse mode
+== Modalità mouse vecchio
+
+Background (regular)
+== Sfondo (regolare)
+
+Background (entities)
+== Sfondo (entità)
+
+Use current map as background
+== Usa la mappa attuale come sfondo
+
+Show tiles layers from BG map
+== Mostra i layer dei tile dalla mappa in sfondo
+
+Try fast HTTP map download first
+== Prova un download veloce della mappa con HTTP
+
+DDNet %s is available:
+== DDNet %s è disponibile:
+
+Update now
+== Aggiorna ora
+
+Updating...
+== Aggiornamento in corso...
+
+DDNet Client updated!
+== Client DDNet aggiornato!
+
+No updates available
+== Non ci sono aggiornamenti disponibili
+
+Check now
+== Controlla adesso
+
+New random timeout code
+== Nuovo codice timeout a caso
+
+Entities
+== Entità
+
+Emoticons
+== Emoticon
+
+Particles
+== Particelle
+
+Assets directory
+== Cartella degli asset
+
+Learn
+== Impara
+
+https://wiki.ddnet.tw/
+== https://wiki.ddnet.tw/
+
+
+Website
+== Sito web
+
+Settings
+== Impostazioni
+
+Stop server
+== Arresta server
+
+Run server
+== Attiva server
+
+Server executable not found, can't run server
+== Server eseguibile non trovato, non si può attivare il server
+
+Editor
+== Editor
+
+[Start menu]
+Play
+== Gioca
+
+DDNet %s is out!
+== È uscito DDNet %s!
+
+Restart
+== Ricomincia
+
+Manual
+== Manuale
+
+Race
+== Gara
+
+Auto
+== Automatico
+
+Replay
+== Replay
+
+Follow
+== Segui
+
+Frags
+== Uccisioni
+
+Deaths
+== Morti
+
+Suicides
+== Suicidi
+
+Ratio
+== Rapporto
+
+Net
+== Net
+
+Spree
+== Carneficina
+
+Best
+== Migliore
+
+Grabs
+== Agganci
+
+1 new mention
+== 1 nuova menzione
+
+%d new mentions
+== %d nuove menzioni
+
+9+ new mentions
+== +9 nuove menzioni
 
 Markers:
 == 
@@ -830,477 +1320,11 @@ Markers:
 %.2f KiB
 == 
 
-Demo
-== 
-
-Date
-== 
-
-Demos directory
-== 
-
-Render
-== 
-
-Connecting dummy
-== 
-
-Connect Dummy
-== 
-
-Kill
-== 
-
-Pause
-== 
-
-Reload
-== 
-
-Deactivate
-== 
-
-Activate
-== 
-
-Save
-== 
-
-Switch weapon when out of ammo
-== 
-
-Reset wanted weapon on death
-== 
-
-Show only chat messages from friends
-== 
-
-Show clan above name plates
-== 
-
-Clan plates size
-== 
-
-Skip the main menu
-== 
-
-Refresh Rate
-== 
-
-Show console window
-== 
-
-Themes directory
-== 
-
-Automatically take statboard screenshot
-== 
-
-Automatically create statboard csv
-== 
-
-Max CSVs
-== 
-
-Dummy settings
-== 
-
-Download skins
-== 
-
-Vanilla skins only
-== 
-
-Fat skins (DDFat)
-== 
-
-Skin prefix
-== 
-
-Skin Database
-== 
-
-Skins directory
-== 
-
-Hook collisions
-== 
-
-Zoom in
-== 
-
-Zoom out
-== 
-
-Default zoom
-== 
-
-Show others
-== 
-
-Show all
-== 
-
-Toggle dyncam
-== 
-
-Toggle dummy
-== 
-
-Toggle ghost
-== 
-
-Dummy copy
-== 
-
-Hammerfly dummy
-== 
-
-Laser
-== 
-
 Converse
-== 
-
-Statboard
-== 
-
-Lock team
-== 
-
-Show entities
-== 
-
-Show HUD
-== 
-
-UI mouse s.
-== 
-
-Borderless window
-== 
-
-may cause delay
-== 
-
-Screen
-== 
-
-Use OpenGL 3.3 (experimental)
-== 
-
-Preinit VBO (iGPUs only)
-== 
-
-Multiple texture units (disable for MacOS)
-== 
-
-Use high DPI
-== 
-
-Enable game sounds
-== 
-
-Enable gun sound
-== 
-
-Enable long pain sound (used when shooting in freeze)
-== 
-
-Enable server message sound
-== 
-
-Enable regular chat sound
-== 
-
-Enable team chat sound
-== 
-
-Enable highlighted chat sound
-== 
-
-Threaded sound loading
-== 
-
-Map sound volume
-== 
-
-Background music volume
-== 
-
-HUD
-== 
-
-DDNet
-== 
-
-Assets
-== 
-
-DDNet Client needs to be restarted to complete update!
-== 
-
-Use DDRace Scoreboard
-== 
-
-Show client IDs in Scoreboard
-== 
-
-Show score
-== 
-
-Show health + ammo
-== 
-
-Show names in chat in team colors
-== 
-
-Show kill messages
-== 
-
-Show votes window after voting
-== 
-
-Messages
-== 
-
-System message
-== 
-
-Reset
-== 
-
-Highlighted message
-== 
-
-Spectator
-== 
-
-Look out!
-== 
-
-Team message
-== 
-
-We will win
-== 
-
-Friend message
-== 
-
-Friend
-== 
-
-Hi o/
-== 
-
-Normal message
-== 
-
-Hello and welcome
-== 
-
-Client message
-== 
-
-Inner color
-== 
-
-Outline color
-== 
-
-Wait before try for
-== 
-
-second
-== 
-
-seconds
-== 
-
-Save the best demo of each race
-== 
-
-Default length: %d
-== 
-
-Enable replays
-== 
-
-Show ghost
-== 
-
-Save ghost
-== 
-
-Gameplay
 == 
 
 Overlay entities
 == 
 
-Size
-== 
-
-Show text entities
-== 
-
-Show others (own team only)
-== 
-
-Show quads
-== 
-
-AntiPing
-== 
-
-AntiPing: predict other players
-== 
-
-AntiPing: predict weapons
-== 
-
-AntiPing: predict grenade paths
-== 
-
-Show other players' hook collision lines
-== 
-
-Show other players' key presses
-== 
-
-Old mouse mode
-== 
-
-Background (regular)
-== 
-
-Background (entities)
-== 
-
-Use current map as background
-== 
-
-Show tiles layers from BG map
-== 
-
-Try fast HTTP map download first
-== 
-
-DDNet %s is available:
-== 
-
-Update now
-== 
-
-Updating...
-== 
-
-DDNet Client updated!
-== 
-
-No updates available
-== 
-
-Check now
-== 
-
-New random timeout code
-== 
-
-Entities
-== 
-
-Emoticons
-== 
-
-Particles
-== 
-
-Assets directory
-== 
-
-Learn
-== 
-
-https://wiki.ddnet.tw/
-== 
-
-Website
-== 
-
-Settings
-== 
-
-Stop server
-== 
-
-Run server
-== 
-
-Server executable not found, can't run server
-== 
-
-Editor
-== 
-
-[Start menu]
-Play
-== 
-
-DDNet %s is out!
-== 
-
-Restart
-== 
-
-Manual %3d:%02d  
-== 
-
-Race %3d:%02d  
-== 
-
-Auto %3d:%02d  
-== 
-
-Replay %3d:%02d  
-== 
-
-Follow
-== 
-
-Frags
-== 
-
-Deaths
-== 
-
-Suicides
-== 
-
-Ratio
-== 
-
-Net
-== 
-
 FPM
-== 
-
-Spree
-== 
-
-Best
-== 
-
-Grabs
-== 
-
-1 new mention
-== 
-
-%d new mentions
-== 
-
-9+ new mentions
 == 

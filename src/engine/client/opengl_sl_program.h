@@ -45,13 +45,12 @@ class CGLSLTWProgram : public CGLSLProgram
 {
 public:
 	CGLSLTWProgram() :
-		m_LocPos(-1), m_LocIsTextured(-1), m_LocTextureSampler(-1), m_LastTextureSampler(-1), m_LastIsTextured(-1)
+		m_LocPos(-1), m_LocTextureSampler(-1), m_LastTextureSampler(-1), m_LastIsTextured(-1)
 	{
 		m_LastScreen[0] = m_LastScreen[1] = m_LastScreen[2] = m_LastScreen[3] = -1.f;
 	}
 
 	int m_LocPos;
-	int m_LocIsTextured;
 	int m_LocTextureSampler;
 
 	int m_LastTextureSampler;

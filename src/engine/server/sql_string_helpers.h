@@ -3,12 +3,12 @@
 
 namespace sqlstr {
 
-void FuzzyString(char *pString, int size);
+void FuzzyString(char *pString, int Size);
 
 // written number of added bytes
 int EscapeLike(char *pDst, const char *pSrc, int DstSize);
 
-void AgoTimeToString(int agoTime, char *pAgoString, int Size);
+void AgoTimeToString(int AgoTime, char *pAgoString, int Size);
 
 } // namespace sqlstr
 

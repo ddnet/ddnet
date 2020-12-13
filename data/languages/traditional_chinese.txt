@@ -4,6 +4,7 @@
 #modified by:
 # 2020.8.19 TsFreddie
 # 2020.8.20 Dan_cao
+# 2020.11.12 TsFreddie
 ##### /authors #####
 
 ##### translated strings #####
@@ -207,7 +208,7 @@ General
 == 常規
 
 Graphics
-== 影象
+== 顯示
 
 Grenade
 == 榴彈槍
@@ -793,7 +794,7 @@ Background (entities)
 == 背景(實體)
 
 Show tiles layers from BG map
-== 在背景地圖顯示圖塊層
+== 顯示實體層背景地圖的圖塊層
 
 Try fast HTTP map download first
 == 優先嚐試用HTTP高速下載地圖
@@ -1122,7 +1123,7 @@ Most importantly communication is key: There is no tutorial so you'll have to ch
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == 推薦在進入伺服器前，先將設定調整到符合你的習慣。
 
-Please enter your nick name below.
+Please enter your nickname below.
 == 請輸入你的暱稱。
 
 Render
@@ -1132,7 +1133,7 @@ Server best:
 == 伺服器最佳
 
 Learn
-== 學習
+== 教程
 
 Use high DPI
 == 使用高 DPI
@@ -1167,111 +1168,132 @@ Use k key to kill (restart), q to pause and watch other players. See settings fo
 Country / Region
 == 國家/地區
 
-Manual %3d:%02d  
-== 手動 %3d:%02d  
-
-Race %3d:%02d  
-== 競速賽 %3d:%02d  
-
-Auto %3d:%02d  
-== 自動 %3d:%02d  
-
-Replay %3d:%02d  
-== 回放 %3d:%02d  
-
 https://wiki.ddnet.tw/
 == https://docs.qq.com/doc/DWGFrV0xPRmVWVkla
 
-Downloading ddnet-info.json failed
-== 
-
-Saving ddnet-settings.cfg failed
-== 
-
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== 
+== 材質 %s 的寬和高無法被16整除，這可能會導致畫面異常。
 
 Warning
-== 
+== 警告
 
 Speed
-== 
-
-Theme
-== 
-
-%d of %d servers
-== 
-
-%d of %d server
-== 
-
-%d players
-== 
-
-%d player
-== 
-
-File
-== 
-
-Demos directory
-== 
+== 速度
 
 Skip the main menu
-== 
-
-Themes directory
-== 
-
-Download skins
-== 
-
-Skin Database
-== 
-
-Skins directory
-== 
-
-Background music volume
-== 
-
-Assets
-== 
-
-Use current map as background
-== 
-
-Entities
-== 
-
-Emoticons
-== 
-
-Particles
-== 
-
-Assets directory
-== 
+== 跳過主選單
 
 Website
-== 
+== 網站
 
 Settings
-== 
-
-Stop server
-== 
-
-Run server
-== 
-
-Server executable not found, can't run server
-== 
-
-Editor
-== 
+== 設定
 
 [Start menu]
 Play
-== 
+== 開始遊戲
+
+Stop server
+== 停止伺服器
+
+Run server
+== 開啟伺服器
+
+Server executable not found, can't run server
+== 找不到伺服器的可執行檔案，無法開啟
+
+Editor
+== 編輯器
+
+Manual
+== 手動
+
+Race
+== 競速
+
+Auto
+== 自動
+
+Replay
+== 回放
+
+Saving ddnet-settings.cfg failed
+== 配置檔案 ddnet-settings.cfg 儲存失敗
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== 偵錯模式已啟用。按 Ctrl+Shift+D 禁用偵錯模式。
+
+Existing Player
+== 玩家已存在
+
+Your nickname '%s' is already used (%d points). Do you still want to use it?
+== 你使用的暱稱"%s"在DDNet中有%d分的記錄，這可能代表這個暱稱已經被其他人使用過。確認要使用這個名字嗎？
+
+Checking for existing player with your name
+== 正在查詢該暱稱的DDNet記錄
+
+Theme
+== 主題
+
+%d of %d servers
+== 符合條件 %d / 總共 %d 個伺服器
+
+%d of %d server
+== 符合條件 %d / 總共 %d 個伺服器
+
+%d players
+== %d 在線玩家
+
+%d player
+== %d 在線玩家
+
+Demos directory
+== 回放目錄
+
+Smooth Dynamic Camera
+== 動態視距平滑化
+
+Themes directory
+== 主題目錄
+
+Download skins
+== 在線獲取外觀
+
+Skin Database
+== 外觀數據庫
+
+Skins directory
+== 外觀目錄
+
+Game sound volume
+== 遊戲音效音量
+
+Chat sound volume
+== 聊天提示音量
+
+Background music volume
+== 背景音樂音量
+
+Assets
+== 材質
+
+Use old chat style
+== 舊版聊天框
+
+Highlight
+== 高亮
+
+Use current map as background
+== 使用當前地圖作爲實體層背景地圖
+
+Entities
+== 實體層
+
+Emoticons
+== 表情
+
+Particles
+== 粒子
+
+Assets directory
+== 材質目錄

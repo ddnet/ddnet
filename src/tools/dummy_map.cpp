@@ -59,12 +59,12 @@ void CreateEmptyMap(IStorage *pStorage)
 	Writer.AddItem(MAPITEMTYPE_LAYER, 1, sizeof(Layer) - sizeof(Layer.m_aName), &Layer);
 
 	CTile Tiles[4];
-	for(int i = 0; i < 4; i++)
+	for(auto &Tile : Tiles)
 	{
-		Tiles[i].m_Index = 1;
-		Tiles[i].m_Flags = 0;
-		Tiles[i].m_Skip = 0;
-		Tiles[i].m_Reserved = 0;
+		Tile.m_Index = 1;
+		Tile.m_Flags = 0;
+		Tile.m_Skip = 0;
+		Tile.m_Reserved = 0;
 	}
 	Writer.AddData(sizeof(Tiles), &Tiles);
 

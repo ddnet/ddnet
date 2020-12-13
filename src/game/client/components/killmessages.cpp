@@ -12,30 +12,30 @@
 
 void CKillMessages::OnWindowResize()
 {
-	for(int i = 0; i < MAX_KILLMSGS; i++)
+	for(auto &Killmsg : m_aKillmsgs)
 	{
-		if(m_aKillmsgs[i].m_VictimTextContainerIndex != -1)
-			TextRender()->DeleteTextContainer(m_aKillmsgs[i].m_VictimTextContainerIndex);
-		if(m_aKillmsgs[i].m_KillerTextContainerIndex != -1)
-			TextRender()->DeleteTextContainer(m_aKillmsgs[i].m_KillerTextContainerIndex);
-		m_aKillmsgs[i].m_VictimTextContainerIndex = m_aKillmsgs[i].m_KillerTextContainerIndex = -1;
+		if(Killmsg.m_VictimTextContainerIndex != -1)
+			TextRender()->DeleteTextContainer(Killmsg.m_VictimTextContainerIndex);
+		if(Killmsg.m_KillerTextContainerIndex != -1)
+			TextRender()->DeleteTextContainer(Killmsg.m_KillerTextContainerIndex);
+		Killmsg.m_VictimTextContainerIndex = Killmsg.m_KillerTextContainerIndex = -1;
 	}
 }
 
 void CKillMessages::OnReset()
 {
 	m_KillmsgCurrent = 0;
-	for(int i = 0; i < MAX_KILLMSGS; i++)
+	for(auto &Killmsg : m_aKillmsgs)
 	{
-		m_aKillmsgs[i].m_Tick = -100000;
+		Killmsg.m_Tick = -100000;
 
-		if(m_aKillmsgs[i].m_VictimTextContainerIndex != -1)
-			TextRender()->DeleteTextContainer(m_aKillmsgs[i].m_VictimTextContainerIndex);
+		if(Killmsg.m_VictimTextContainerIndex != -1)
+			TextRender()->DeleteTextContainer(Killmsg.m_VictimTextContainerIndex);
 
-		if(m_aKillmsgs[i].m_KillerTextContainerIndex != -1)
-			TextRender()->DeleteTextContainer(m_aKillmsgs[i].m_KillerTextContainerIndex);
+		if(Killmsg.m_KillerTextContainerIndex != -1)
+			TextRender()->DeleteTextContainer(Killmsg.m_KillerTextContainerIndex);
 
-		m_aKillmsgs[i].m_VictimTextContainerIndex = m_aKillmsgs[i].m_KillerTextContainerIndex = -1;
+		Killmsg.m_VictimTextContainerIndex = Killmsg.m_KillerTextContainerIndex = -1;
 	}
 }
 
@@ -60,6 +60,32 @@ void CKillMessages::OnInit()
 		Graphics()->QuadsSetSubset(0, 0, 1, 1);
 		RenderTools()->GetSpriteScale(g_pData->m_Weapons.m_aId[i].m_pSpriteBody, ScaleX, ScaleY);
 		RenderTools()->QuadContainerAddSprite(m_SpriteQuadContainerIndex, 96.f * ScaleX, 96.f * ScaleY);
+	}
+}
+
+void CKillMessages::CreateKillmessageNamesIfNotCreated(CKillMsg &Kill)
+{
+	const float FontSize = 36.0f;
+	if(Kill.m_VictimTextContainerIndex == -1 && Kill.m_aVictimName[0] != 0)
+	{
+		Kill.m_VitctimTextWidth = TextRender()->TextWidth(0, FontSize, Kill.m_aVictimName, -1, -1.0f);
+
+		CTextCursor Cursor;
+		TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
+		Cursor.m_LineWidth = -1;
+
+		Kill.m_VictimTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, Kill.m_aVictimName);
+	}
+
+	if(Kill.m_KillerTextContainerIndex == -1 && Kill.m_aKillerName[0] != 0)
+	{
+		Kill.m_KillerTextWidth = TextRender()->TextWidth(0, FontSize, Kill.m_aKillerName, -1, -1.0f);
+
+		CTextCursor Cursor;
+		TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
+		Cursor.m_LineWidth = -1;
+
+		Kill.m_KillerTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, Kill.m_aKillerName);
 	}
 }
 
@@ -97,28 +123,7 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 		Graphics()->MapScreen(0, 0, Width * 1.5f, Height * 1.5f);
 
-		float FontSize = 36.0f;
-		if(Kill.m_aVictimName[0] != 0)
-		{
-			Kill.m_VitctimTextWidth = TextRender()->TextWidth(0, FontSize, Kill.m_aVictimName, -1, -1.0f);
-
-			CTextCursor Cursor;
-			TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
-			Cursor.m_LineWidth = -1;
-
-			Kill.m_VictimTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, Kill.m_aVictimName);
-		}
-
-		if(Kill.m_aKillerName[0] != 0)
-		{
-			Kill.m_KillerTextWidth = TextRender()->TextWidth(0, FontSize, Kill.m_aKillerName, -1, -1.0f);
-
-			CTextCursor Cursor;
-			TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
-			Cursor.m_LineWidth = -1;
-
-			Kill.m_KillerTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, Kill.m_aKillerName);
-		}
+		CreateKillmessageNamesIfNotCreated(Kill);
 
 		// add the message
 		m_KillmsgCurrent = (m_KillmsgCurrent + 1) % MAX_KILLMSGS;
@@ -173,6 +178,8 @@ void CKillMessages::OnRender()
 			TColor.Set(rgb.r, rgb.g, rgb.b, 1.0f);
 		}
 
+		CreateKillmessageNamesIfNotCreated(m_aKillmsgs[r]);
+
 		if(m_aKillmsgs[r].m_VictimTextContainerIndex != -1)
 			TextRender()->RenderTextContainer(m_aKillmsgs[r].m_VictimTextContainerIndex, &TColor, &TOutlineColor, x, y + (46.f - 36.f) / 2.f);
 
@@ -196,7 +203,8 @@ void CKillMessages::OnRender()
 			}
 		}
 
-		RenderTools()->RenderTee(CAnimState::GetIdle(), &m_aKillmsgs[r].m_VictimRenderInfo, EMOTE_PAIN, vec2(-1, 0), vec2(x, y + 28));
+		if(m_aKillmsgs[r].m_VictimID >= 0)
+			RenderTools()->RenderTee(CAnimState::GetIdle(), &m_aKillmsgs[r].m_VictimRenderInfo, EMOTE_PAIN, vec2(-1, 0), vec2(x, y + 28));
 		x -= 32.0f;
 
 		// render weapon
@@ -229,7 +237,8 @@ void CKillMessages::OnRender()
 
 			// render killer tee
 			x -= 24.0f;
-			RenderTools()->RenderTee(CAnimState::GetIdle(), &m_aKillmsgs[r].m_KillerRenderInfo, EMOTE_ANGRY, vec2(1, 0), vec2(x, y + 28));
+			if(m_aKillmsgs[r].m_KillerID >= 0)
+				RenderTools()->RenderTee(CAnimState::GetIdle(), &m_aKillmsgs[r].m_KillerRenderInfo, EMOTE_ANGRY, vec2(1, 0), vec2(x, y + 28));
 			x -= 32.0f;
 
 			// render killer name
@@ -240,5 +249,33 @@ void CKillMessages::OnRender()
 		}
 
 		y += 46.0f;
+	}
+}
+
+void CKillMessages::RefindSkins()
+{
+	for(int i = 0; i < MAX_KILLMSGS; i++)
+	{
+		int r = i % MAX_KILLMSGS;
+		if(Client()->GameTick(g_Config.m_ClDummy) > m_aKillmsgs[r].m_Tick + 50 * 10)
+			continue;
+
+		if(m_aKillmsgs[r].m_KillerID >= 0)
+		{
+			CGameClient::CClientData &Client = GameClient()->m_aClients[m_aKillmsgs[r].m_KillerID];
+			if(Client.m_aSkinName[0] != '\0')
+				m_aKillmsgs[r].m_KillerRenderInfo = Client.m_RenderInfo;
+			else
+				m_aKillmsgs[r].m_KillerID = -1;
+		}
+
+		if(m_aKillmsgs[r].m_VictimID >= 0)
+		{
+			CGameClient::CClientData &Client = GameClient()->m_aClients[m_aKillmsgs[r].m_VictimID];
+			if(Client.m_aSkinName[0] != '\0')
+				m_aKillmsgs[r].m_VictimRenderInfo = Client.m_RenderInfo;
+			else
+				m_aKillmsgs[r].m_VictimID = -1;
+		}
 	}
 }

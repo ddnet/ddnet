@@ -108,14 +108,14 @@ int CMenuBackground::ThemeScan(const char *pName, int IsDir, int DirType, void *
 		return 0;
 
 	// try to edit an existing theme
-	for(int i = 0; i < (int)pSelf->m_lThemes.size(); i++)
+	for(auto &Theme : pSelf->m_lThemes)
 	{
-		if(str_comp(pSelf->m_lThemes[i].m_Name, aThemeName) == 0)
+		if(str_comp(Theme.m_Name, aThemeName) == 0)
 		{
 			if(IsDay)
-				pSelf->m_lThemes[i].m_HasDay = true;
+				Theme.m_HasDay = true;
 			if(IsNight)
-				pSelf->m_lThemes[i].m_HasNight = true;
+				Theme.m_HasNight = true;
 			return 0;
 		}
 	}
@@ -157,6 +157,7 @@ int CMenuBackground::ThemeIconScan(const char *pName, int IsDir, int DirType, vo
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
 
 			Theme.m_IconTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
+			pSelf->Graphics()->FreePNG(&Info);
 			return 0;
 		}
 	}

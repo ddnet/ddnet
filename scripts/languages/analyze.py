@@ -6,25 +6,25 @@ import twlang
 os.chdir(os.path.dirname(__file__) + "/../..")
 
 if len(sys.argv) > 1:
-    langs = sys.argv[1:]
+	langs = sys.argv[1:]
 else:
-    langs = twlang.languages()
+	langs = twlang.languages()
 local = twlang.localizes()
 table = []
 for lang in langs:
-    trans = twlang.translations(lang)
-    empty = 0
-    supported = 0
-    unused = 0
-    for tran, (_, expr, _) in trans.items():
-        if not expr:
-            empty += 1
-        else:
-            if tran in local:
-                supported += 1
-            else:
-                unused += 1
-    table.append([lang, len(trans), empty, len(local)-supported, unused])
+	trans = twlang.translations(lang)
+	empty = 0
+	supported = 0
+	unused = 0
+	for tran, (_, expr, _) in trans.items():
+		if not expr:
+			empty += 1
+		else:
+			if tran in local:
+				supported += 1
+			else:
+				unused += 1
+	table.append([lang, len(trans), empty, len(local)-supported, unused])
 
 table.sort(key=lambda l: l[3])
 table = [["filename", "total", "empty", "missing", "unused"]] + table

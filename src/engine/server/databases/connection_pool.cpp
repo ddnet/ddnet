@@ -92,7 +92,7 @@ void CDbConnectionPool::Execute(
 {
 	m_aTasks[FirstElem++].reset(new CSqlExecData(pFunc, std::move(pThreadData), pName));
 	FirstElem %= sizeof(m_aTasks) / sizeof(m_aTasks[0]);
-	m_NumElem.signal();
+	m_NumElem.Signal();
 }
 
 void CDbConnectionPool::ExecuteWrite(
@@ -102,13 +102,13 @@ void CDbConnectionPool::ExecuteWrite(
 {
 	m_aTasks[FirstElem++].reset(new CSqlExecData(pFunc, std::move(pThreadData), pName));
 	FirstElem %= sizeof(m_aTasks) / sizeof(m_aTasks[0]);
-	m_NumElem.signal();
+	m_NumElem.Signal();
 }
 
 void CDbConnectionPool::OnShutdown()
 {
 	m_Shutdown.store(true);
-	m_NumElem.signal();
+	m_NumElem.Signal();
 	int i = 0;
 	while(m_Shutdown.load())
 	{
@@ -139,7 +139,7 @@ void CDbConnectionPool::Worker()
 	int WriteServer = 0;
 	while(1)
 	{
-		m_NumElem.wait();
+		m_NumElem.Wait();
 		auto pThreadData = std::move(m_aTasks[LastElem++]);
 		// work through all database jobs after OnShutdown is called before exiting the thread
 		if(pThreadData == nullptr)
@@ -196,6 +196,11 @@ void CDbConnectionPool::Worker()
 		}
 		if(!Success)
 			dbg_msg("sql", "%s failed on all databases", pThreadData->m_pName);
+		if(pThreadData->m_pThreadData->m_pResult != nullptr)
+		{
+			pThreadData->m_pThreadData->m_pResult->m_Success = Success;
+			pThreadData->m_pThreadData->m_pResult->m_Completed.store(true);
+		}
 	}
 }
 

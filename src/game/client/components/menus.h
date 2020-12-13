@@ -627,6 +627,7 @@ public:
 	{
 		POPUP_NONE = 0,
 		POPUP_FIRST_LAUNCH,
+		POPUP_POINTS,
 		POPUP_CONNECTING,
 		POPUP_MESSAGE,
 		POPUP_DISCONNECTED,
@@ -653,6 +654,7 @@ public:
 private:
 	static int GhostlistFetchCallback(const char *pName, int IsDir, int StorageType, void *pUser);
 	void SetMenuPage(int NewPage);
+	bool HandleListInputs(const CUIRect &View, float &ScrollValue, float ScrollAmount, int *pScrollOffset, float ElemHeight, int &SelectedIndex, int NumElems);
 
 	// found in menus_ingame.cpp
 	void RenderInGameNetwork(CUIRect MainView);

@@ -1,5 +1,4 @@
-import copy
-from datatypes import *
+from datatypes import Array, Float, Int, Pointer, String, Struct, TextureHandle
 
 class Sound(Struct):
 	def __init__(self, filename=""):
@@ -8,13 +7,13 @@ class Sound(Struct):
 		self.filename = String(filename)
 
 class SoundSet(Struct):
-	def __init__(self, name="", files=[]):
+	def __init__(self, name="", files=()):
 		Struct.__init__(self, "CDataSoundset")
 		self.name = String(name)
 		self.sounds = Array(Sound())
 		self.last = Int(-1)
-		for name in files:
-			self.sounds.Add(Sound(name))
+		for filename in files:
+			self.sounds.Add(Sound(filename))
 
 class Image(Struct):
 	def __init__(self, name="", filename=""):
@@ -24,7 +23,7 @@ class Image(Struct):
 		self.id = TextureHandle()
 
 class SpriteSet(Struct):
-	def __init__(self, name="", image=None, gridx=0, gridy=0):
+	def __init__(self, _name="", image=None, gridx=0, gridy=0):
 		Struct.__init__(self, "CDataSpriteset")
 		self.image = Pointer(Image, image) # TODO
 		self.gridx = Int(gridx)
@@ -70,7 +69,7 @@ class Animation(Struct):
 		self.attach = AnimSequence()
 
 class WeaponSpec(Struct):
-	def __init__(self, container=None, name=""):
+	def __init__(self, cont=None, name=""):
 		Struct.__init__(self, "CDataWeaponspec")
 		self.name = String(name)
 		self.sprite_body = Pointer(Sprite, Sprite())
@@ -91,11 +90,14 @@ class WeaponSpec(Struct):
 		self.muzzleduration = Float(5)
 
 		# dig out sprites if we have a container
-		if container:
-			for sprite in container.sprites.items:
-				if sprite.name.value == "weapon_"+name+"_body": self.sprite_body.Set(sprite)
-				elif sprite.name.value == "weapon_"+name+"_cursor": self.sprite_cursor.Set(sprite)
-				elif sprite.name.value == "weapon_"+name+"_proj": self.sprite_proj.Set(sprite)
+		if cont:
+			for sprite in cont.sprites.items:
+				if sprite.name.value == "weapon_"+name+"_body":
+					self.sprite_body.Set(sprite)
+				elif sprite.name.value == "weapon_"+name+"_cursor":
+					self.sprite_cursor.Set(sprite)
+				elif sprite.name.value == "weapon_"+name+"_proj":
+					self.sprite_proj.Set(sprite)
 				elif "weapon_"+name+"_muzzle" in sprite.name.value:
 					self.sprite_muzzles.Add(Pointer(Sprite, sprite))
 
@@ -168,8 +170,8 @@ class DataContainer(Struct):
 		self.animations = Array(Animation())
 		self.weapons = Weapons()
 
-def FileList(format, num):
-	return [format%(x+1) for x in range(0,num)]
+def FileList(fmt, num):
+	return [fmt%(x+1) for x in range(0,num)]
 
 container = DataContainer()
 container.sounds.Add(SoundSet("gun_fire", FileList("audio/wp_gun_fire-%02d.wv", 3)))

@@ -559,6 +559,9 @@ void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 	m_NoHookHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_HOOK;
 	m_Super = pObjDDNet->m_Flags & CHARACTERFLAG_SUPER;
 
+	m_Hook = !m_NoHookHit;
+	m_Collision = !m_NoCollision;
+
 	// Endless
 	m_EndlessHook = pObjDDNet->m_Flags & CHARACTERFLAG_ENDLESS_HOOK;
 	m_EndlessJump = pObjDDNet->m_Flags & CHARACTERFLAG_ENDLESS_JUMP;

@@ -723,7 +723,7 @@ Use k key to kill (restart), q to pause and watch other players. See settings fo
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Препоручује се да проверите подешавања како бисте их прилагодили пре него што се придружите серверу.
 
-Please enter your nick name below.
+Please enter your nickname below.
 == Молимо вас напишите ваш надимак испод.
 
 Country / Region
@@ -1102,9 +1102,6 @@ Show others (own team only)
 Show quads
 == Прикажи quads
 
-AntiPing limit
-== AntiPing ограничења
-
 AntiPing
 == AntiPing
 
@@ -1208,18 +1205,6 @@ Restart
 Time
 == Време
 
-Manual %3d:%02d  
-== Упутство %3d:%02d
-
-Race %3d:%02d  
-== Трка %3d:%02d
-
-Auto %3d:%02d  
-== Ауто %3d:%02d
-
-Replay %3d:%02d  
-== Помнови %3d:%02d
-
 Follow
 == Прати
 
@@ -1258,3 +1243,51 @@ Grabs
 
 9+ new mentions
 == 9+ нових помињања
+
+Manual
+== Упутство
+
+Race
+== Трка
+
+Auto
+== Ауто
+
+Replay
+== Помнови
+
+Saving ddnet-settings.cfg failed
+== 
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== 
+
+Existing Player
+== 
+
+Your nickname '%s' is already used (%d points). Do you still want to use it?
+== 
+
+Checking for existing player with your name
+== 
+
+Smooth Dynamic Camera
+== 
+
+Game sound volume
+== 
+
+Chat sound volume
+== 
+
+Background music volume
+== 
+
+Use old chat style
+== 
+
+Highlight
+== 
+
+Use current map as background
+== 

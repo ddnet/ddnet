@@ -109,10 +109,10 @@ const char *CUuidManager::GetName(int ID) const
 
 int CUuidManager::LookupUuid(CUuid Uuid) const
 {
-	sorted_array<CNameIndexed>::range it = ::find_binary(m_aNamesSorted.all(), Uuid);
-	if(!it.empty())
+	sorted_array<CNameIndexed>::range Pos = ::find_binary(m_aNamesSorted.all(), Uuid);
+	if(!Pos.empty())
 	{
-		return GetID(it.front().m_ID);
+		return GetID(Pos.front().m_ID);
 	}
 	return UUID_UNKNOWN;
 }

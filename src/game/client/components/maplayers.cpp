@@ -601,7 +601,7 @@ void CMapLayers::OnMapLoad()
 
 						if(!DoTextureCoords)
 						{
-							tmpTiles.reserve((size_t)(pTMap->m_Width * pTMap->m_Height));
+							tmpTiles.reserve((size_t)pTMap->m_Width * pTMap->m_Height);
 							tmpBorderTopTiles.reserve((size_t)pTMap->m_Width);
 							tmpBorderBottomTiles.reserve((size_t)pTMap->m_Width);
 							tmpBorderLeftTiles.reserve((size_t)pTMap->m_Height);
@@ -610,7 +610,7 @@ void CMapLayers::OnMapLoad()
 						}
 						else
 						{
-							tmpTileTexCoords.reserve((size_t)(pTMap->m_Width * pTMap->m_Height));
+							tmpTileTexCoords.reserve((size_t)pTMap->m_Width * pTMap->m_Height);
 							tmpBorderTopTilesTexCoords.reserve((size_t)pTMap->m_Width);
 							tmpBorderBottomTilesTexCoords.reserve((size_t)pTMap->m_Width);
 							tmpBorderLeftTilesTexCoords.reserve((size_t)pTMap->m_Height);
