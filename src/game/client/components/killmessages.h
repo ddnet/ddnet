@@ -44,6 +44,10 @@ public:
 		MAX_KILLMSGS = 5,
 	};
 
+private:
+	void CreateKillmessageNamesIfNotCreated(CKillMsg &Kill);
+
+public:
 	CKillMsg m_aKillmsgs[MAX_KILLMSGS];
 	int m_KillmsgCurrent;
 
