@@ -285,14 +285,14 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 			Rect.x += Rect.w - pRect->w + Rect.x - pRect->x;
 			Rect.y += Rect.h - pRect->h + Rect.y - pRect->y;
 		}
-		
+
 		if(!pAnimator->m_ScaleLabel)
 		{
 			Rect.w = pRect->w;
 			Rect.h = pRect->h;
 		}
 	}
-	
+
 	Rect.HMargin(2.0f, &Temp);
 	UI()->DoLabel(&Temp, pText, Temp.h * ms_FontmodHeight, 0, -1, AlignVertically);
 
