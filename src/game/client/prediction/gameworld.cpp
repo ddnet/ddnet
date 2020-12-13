@@ -16,10 +16,10 @@
 //////////////////////////////////////////////////
 CGameWorld::CGameWorld()
 {
-	for(int i = 0; i < NUM_ENTTYPES; i++)
-		m_apFirstEntityTypes[i] = 0;
-	for(int i = 0; i < MAX_CLIENTS; i++)
-		m_apCharacters[i] = 0;
+	for(auto &pFirstEntityType : m_apFirstEntityTypes)
+		pFirstEntityType = 0;
+	for(auto &pCharacter : m_apCharacters)
+		pCharacter = 0;
 	m_pCollision = 0;
 	m_GameTick = 0;
 	m_pParent = 0;
@@ -29,9 +29,9 @@ CGameWorld::CGameWorld()
 CGameWorld::~CGameWorld()
 {
 	// delete all entities
-	for(int i = 0; i < NUM_ENTTYPES; i++)
-		while(m_apFirstEntityTypes[i])
-			delete m_apFirstEntityTypes[i];
+	for(auto &pFirstEntityType : m_apFirstEntityTypes)
+		while(pFirstEntityType)
+			delete pFirstEntityType;
 	if(m_pChild && m_pChild->m_pParent == this)
 	{
 		OnModified();
@@ -165,8 +165,8 @@ void CGameWorld::RemoveEntity(CEntity *pEnt)
 void CGameWorld::RemoveEntities()
 {
 	// destroy objects marked for destruction
-	for(int i = 0; i < NUM_ENTTYPES; i++)
-		for(CEntity *pEnt = m_apFirstEntityTypes[i]; pEnt;)
+	for(auto *pEnt : m_apFirstEntityTypes)
+		for(; pEnt;)
 		{
 			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 			if(pEnt->m_MarkedForDestroy)
@@ -186,16 +186,16 @@ bool distCompare(std::pair<float, int> a, std::pair<float, int> b)
 void CGameWorld::Tick()
 {
 	// update all objects
-	for(int i = 0; i < NUM_ENTTYPES; i++)
-		for(CEntity *pEnt = m_apFirstEntityTypes[i]; pEnt;)
+	for(auto *pEnt : m_apFirstEntityTypes)
+		for(; pEnt;)
 		{
 			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 			pEnt->Tick();
 			pEnt = m_pNextTraverseEntity;
 		}
 
-	for(int i = 0; i < NUM_ENTTYPES; i++)
-		for(CEntity *pEnt = m_apFirstEntityTypes[i]; pEnt;)
+	for(auto *pEnt : m_apFirstEntityTypes)
+		for(; pEnt;)
 		{
 			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 			pEnt->TickDefered();
@@ -534,9 +534,9 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 	m_pTuningList = pFrom->m_pTuningList;
 	m_Teams = pFrom->m_Teams;
 	// delete the previous entities
-	for(int i = 0; i < NUM_ENTTYPES; i++)
-		while(m_apFirstEntityTypes[i])
-			delete m_apFirstEntityTypes[i];
+	for(auto &pFirstEntityType : m_apFirstEntityTypes)
+		while(pFirstEntityType)
+			delete pFirstEntityType;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		m_apCharacters[i] = 0;
@@ -594,7 +594,7 @@ void CGameWorld::OnModified()
 void CGameWorld::Clear()
 {
 	// delete all entities
-	for(int i = 0; i < NUM_ENTTYPES; i++)
-		while(m_apFirstEntityTypes[i])
-			delete m_apFirstEntityTypes[i];
+	for(auto &pFirstEntityType : m_apFirstEntityTypes)
+		while(pFirstEntityType)
+			delete pFirstEntityType;
 }

@@ -1102,18 +1102,6 @@ int str_format(char *buffer, int buffer_size, const char *format, ...)
 char *str_trim_words(char *str, int words);
 
 /*
-	Function: str_sanitize_strong
-		Replaces all characters below 32 and above 127 with whitespace.
-
-	Parameters:
-		str - String to sanitize.
-
-	Remarks:
-		- The strings are treated as zero-terminated strings.
-*/
-void str_sanitize_strong(char *str);
-
-/*
 	Function: str_sanitize_cc
 		Replaces all characters below 32 with whitespace.
 

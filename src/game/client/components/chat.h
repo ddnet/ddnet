@@ -23,7 +23,7 @@ class CChat : public CComponent
 	struct CLine
 	{
 		int64 m_Time;
-		float m_YOffset;
+		float m_YOffset[2];
 		int m_ClientID;
 		int m_Team;
 		int m_NameColor;
@@ -37,6 +37,7 @@ class CChat : public CComponent
 
 		char m_aSkinName[sizeof(g_Config.m_ClPlayerSkin) / sizeof(g_Config.m_ClPlayerSkin[0])];
 		CSkin::SSkinTextures m_RenderSkin;
+		CSkin::SSkinMetrics m_RenderSkinMetrics;
 		bool m_CustomColoredSkin;
 		ColorRGBA m_ColorBody;
 		ColorRGBA m_ColorFeet;
@@ -47,6 +48,7 @@ class CChat : public CComponent
 		int m_TimesRepeated;
 	};
 
+	bool m_PrevScoreBoardShowed;
 	bool m_PrevShowChat;
 
 	CLine m_aLines[MAX_LINES];
@@ -94,7 +96,7 @@ class CChat : public CComponent
 		char m_aText[1];
 	};
 	CHistoryEntry *m_pHistoryEntry;
-	TStaticRingBuffer<CHistoryEntry, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_History;
+	CStaticRingBuffer<CHistoryEntry, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_History;
 	int m_PendingChatCounter;
 	int64 m_LastChatSend;
 	int64 m_aLastSoundPlayed[CHAT_NUM];

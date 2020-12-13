@@ -1,5 +1,4 @@
-import sys, os
-
+# pylint: skip-file
 # generate keys.h file
 f = file("src/engine/keys.h", "w")
 
@@ -74,4 +73,3 @@ print >>f, "};"
 print >>f, ""
 
 f.close()
-

@@ -214,14 +214,14 @@ bool CRaceDemo::CheckDemo(int Time) const
 	Storage()->ListDirectoryInfo(IStorage::TYPE_SAVE, ms_pRaceDemoDir, RaceDemolistFetchCallback, &Param);
 
 	// loop through demo files
-	for(unsigned i = 0; i < lDemos.size(); i++)
+	for(auto &Demo : lDemos)
 	{
-		if(Time >= lDemos[i].m_Time) // found a better demo
+		if(Time >= Demo.m_Time) // found a better demo
 			return false;
 
 		// delete old demo
 		char aFilename[512];
-		str_format(aFilename, sizeof(aFilename), "%s/%s.demo", ms_pRaceDemoDir, lDemos[i].m_aName);
+		str_format(aFilename, sizeof(aFilename), "%s/%s.demo", ms_pRaceDemoDir, Demo.m_aName);
 		Storage()->RemoveFile(aFilename, IStorage::TYPE_SAVE);
 	}
 

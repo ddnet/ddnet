@@ -264,6 +264,9 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	CFifo m_Fifo;
 #endif
 
+	IOHANDLE m_BenchmarkFile;
+	int64 m_BenchmarkStopTime;
+
 public:
 	IEngine *Engine() { return m_pEngine; }
 	IEngineGraphics *Graphics() { return m_pGraphics; }
@@ -415,6 +418,7 @@ public:
 	static void Con_Record(IConsole::IResult *pResult, void *pUserData);
 	static void Con_StopRecord(IConsole::IResult *pResult, void *pUserData);
 	static void Con_AddDemoMarker(IConsole::IResult *pResult, void *pUserData);
+	static void Con_BenchmarkQuit(IConsole::IResult *pResult, void *pUserData);
 	static void ConchainServerBrowserUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainFullscreen(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainWindowBordered(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -461,6 +465,7 @@ public:
 	void ToggleWindowVSync();
 	void LoadFont();
 	void Notify(const char *pTitle, const char *pMessage);
+	void BenchmarkQuit(int Seconds, const char *pFilename);
 
 	// DDRace
 

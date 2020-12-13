@@ -880,9 +880,6 @@ Follow
 Reset
 == Zurücks.
 
-Manual %3d:%02d  
-== Manuell %3d:%02d  
-
 Automatically create statboard csv
 == Automatisch Punktetafel-CSV erstellen
 
@@ -894,9 +891,6 @@ Remove chat
 
 Threaded sound loading
 == Sounds in Threads laden
-
-Race %3d:%02d  
-== Rennen %3d:%02d  
 
 Frags
 == Abschüsse
@@ -939,9 +933,6 @@ Best
 
 Screen
 == Bildschirm
-
-Auto %3d:%02d  
-== Auto %3d:%02d  
 
 Exclude
 == Ausschließen
@@ -1078,9 +1069,6 @@ Enable replays
 Toggle dummy
 == Dummy wechseln
 
-Replay %3d:%02d  
-== Wiederholung %3d:%02d  
-
 Markers:
 == Markierungen:
 
@@ -1147,7 +1135,7 @@ Personal best:
 Kill
 == Kill
 
-Please enter your nick name below.
+Please enter your nickname below.
 == Bitte gib deinen Spitznamen unten ein.
 
 The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
@@ -1241,9 +1229,6 @@ Play
 Theme
 == Theme
 
-File
-== Datei
-
 Demos directory
 == Demo-Ordner
 
@@ -1277,11 +1262,47 @@ Assets directory
 https://wiki.ddnet.tw/
 == https://wiki.ddnet.tw/
 
-Downloading ddnet-info.json failed
-== ddnet-info.json herunterzuladen ist fehlgeschlagen
-
 Saving ddnet-settings.cfg failed
 == ddnet-settings.cfg zu speichern ist fehlgeschlagen
 
 Use current map as background
 == Aktuelle Karte als Hintergrund benutzen
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== Debug-Modus aktiviert. Drück Strg+Shift+D um den Debug-Modus zu deaktivieren.
+
+Existing Player
+== Existierender Spieler
+
+Your nickname '%s' is already used (%d points). Do you still want to use it?
+== Dein Spitzname '%s' wird bereits genutzt (%d Punkte). Willst du ihn dennoch nutzen?
+
+Checking for existing player with your name
+== Prüfe auf existierenden Spieler mit deinem Namen
+
+Game sound volume
+== Spiel-Lautstärke
+
+Chat sound volume
+== Chat-Lautstärke
+
+Use old chat style
+== Alten Chat-Stil nutzen
+
+Highlight
+== Hervorheben
+
+Manual
+== Manuell
+
+Race
+== Rennen
+
+Auto
+== Auto
+
+Replay
+== Wiederholung
+
+Smooth Dynamic Camera
+== Weiche Dynamische Kamera

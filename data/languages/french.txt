@@ -16,6 +16,7 @@
 #	Choupom			2011-07-02 19:23:49
 #	SunnyPistache & Pipou   2020-07-09 21:09:00
 #	SunnyPistache & Pipou   2020-10-03 09:29:00
+#	SunnyPistache & Pipou   2020-11-07 11:30:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -785,9 +786,6 @@ Statboard
 Show text entities
 == Afficher le texte des entités
 
-Race %3d:%02d  
-== Course %3d:%02d
-
 Connecting dummy
 == Connection du dummy
 
@@ -893,12 +891,6 @@ Messages
 Fetch Info
 == Afficher les détails
 
-Auto %3d:%02d  
-== Auto %3d:%02d
-
-Replay %3d:%02d  
-== Replay %3d:%02d
-
 Show only chat messages from friends
 == Ne montrer que les messages des amis
 
@@ -952,9 +944,6 @@ Exclude
 
 Disconnect Dummy
 == Deconnecter le dummy
-
-Manual %3d:%02d  
-== Manuel %3d:%02d
 
 Show clan above name plates
 == Afficher le clan au dessus du pseudonyme
@@ -1178,7 +1167,7 @@ Most importantly communication is key: There is no tutorial so you'll have to ch
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Il est recommandé d'ajuster les configurations à votre goût avant de rejoindre un serveur.
 
-Please enter your nick name below.
+Please enter your nickname below.
 == Veuillez entrer votre pseudonyme ci-dessous.
 
 Show DDNet map finishes in server browser
@@ -1186,9 +1175,6 @@ Show DDNet map finishes in server browser
 
 transmits your player name to info2.ddnet.tw
 == transmet votre pseudonyme à info2.ddnet.tw
-
-Downloading ddnet-info.json failed
-== Le téléchargement de ddnet-info.json a échoué
 
 Saving ddnet-settings.cfg failed
 == L'enregistrement de ddnet-settings.cfg a échoué
@@ -1222,9 +1208,6 @@ Theme
 
 %d player
 == %d joueur
-
-File
-== Fichier
 
 Demos directory
 == Répertoire des enregistrements
@@ -1295,3 +1278,42 @@ Editor
 [Start menu]
 Play
 == Jouer
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== Mode développeur activé. Appuyez sur Ctrl+Maj+D pour le désactiver.
+
+Existing Player
+== Joueur existant
+
+Your nickname '%s' is already used (%d points). Do you still want to use it?
+== Le pseudonyme '%s' est déjà pris (%d points). Voulez-vous tout de même le garder ?
+
+Checking for existing player with your name
+== Vérification de la disponibilité du pseudonyme
+
+Smooth Dynamic Camera
+== Caméra dynamique fluide
+
+Game sound volume
+== Volume des sons du jeu
+
+Chat sound volume
+== Volume des sons du chat
+
+Use old chat style
+== Utiliser l'ancien chat
+
+Highlight
+== Surbrillance
+
+Manual
+== Manuel
+
+Race
+== Race
+
+Auto
+== Auto
+
+Replay
+== Replay

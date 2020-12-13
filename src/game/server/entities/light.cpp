@@ -27,10 +27,8 @@ bool CLight::HitCharacter()
 		GameServer()->m_World.IntersectedCharacters(m_Pos, m_To, 0.0f, 0);
 	if(HitCharacters.empty())
 		return false;
-	for(std::list<CCharacter *>::iterator i = HitCharacters.begin();
-		i != HitCharacters.end(); i++)
+	for(auto *Char : HitCharacters)
 	{
-		CCharacter *Char = *i;
 		if(m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()])
 			continue;
 		Char->Freeze();

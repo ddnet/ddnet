@@ -13,12 +13,12 @@ CURL_RE=re.compile(r"\bcurl_\w*")
 
 def get_curl_calls(path):
 	names = set()
-	for dir, _, files in os.walk(path):
+	for directory, _, files in os.walk(path):
 		for filename in files:
 			if (filename.endswith(".cpp") or
 					filename.endswith(".c") or
 					filename.endswith(".h")):
-				with open(os.path.join(dir, filename)) as f:
+				with open(os.path.join(directory, filename)) as f:
 					contents = f.read()
 				names = names.union(CURL_RE.findall(contents))
 	return names

@@ -79,7 +79,7 @@ Delete demo
 Demo details
 == ﻮﻣﺩ ﺕﺎﯿﺋﺰﺟ
 Demofile: %s
-== s% :ﻮﻣﺩ ﻞﯾﺎﻓ
+== %s :ﻮﻣﺩ ﻞﯾﺎﻓ
 Demos
 == ﺎﻫ ﻮﻣﺩ
 Disconnect
@@ -208,9 +208,6 @@ Pistol
 Play
 == ﻥﺩﺮﻛ ىﺯﺎﺑ
 
-Downloading ddnet-info.json failed
-== 
-
 Successfully saved the replay!
 == 
 
@@ -227,6 +224,9 @@ Warning
 == 
 
 Team
+== 
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 
 
 Sudden Death
@@ -346,7 +346,16 @@ Use k key to kill (restart), q to pause and watch other players. See settings fo
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == 
 
-Please enter your nick name below.
+Please enter your nickname below.
+== 
+
+Existing Player
+== 
+
+Your nickname '%s' is already used (%d points). Do you still want to use it?
+== 
+
+Checking for existing player with your name
 == 
 
 There's an unsaved map in the editor, you might want to save it before you quit the game.
@@ -409,9 +418,6 @@ Search
 Exclude
 == 
 
-Server address:
-== 
-
 %d of %d servers
 == 
 
@@ -422,6 +428,9 @@ Server address:
 == 
 
 %d player
+== 
+
+Server address:
 == 
 
 Refresh
@@ -479,9 +488,6 @@ Please use a different name
 == 
 
 Remove chat
-== 
-
-File
 == 
 
 Created:
@@ -593,6 +599,9 @@ Activate
 == 
 
 Save
+== 
+
+Smooth Dynamic Camera
 == 
 
 Switch weapon on pickup
@@ -835,6 +844,12 @@ Sample rate
 Sound volume
 == 
 
+Game sound volume
+== 
+
+Chat sound volume
+== 
+
 Map sound volume
 == 
 
@@ -883,6 +898,9 @@ Show score
 Show health + ammo
 == 
 
+Use old chat style
+== 
+
 Show names in chat in team colors
 == 
 
@@ -917,6 +935,9 @@ We will win
 == 
 
 Friend message
+== 
+
+Highlight
 == 
 
 Friend
@@ -1106,16 +1127,16 @@ Time
 Score
 == 
 
-Manual %3d:%02d  
+Manual
 == 
 
-Race %3d:%02d  
+Race
 == 
 
-Auto %3d:%02d  
+Auto
 == 
 
-Replay %3d:%02d  
+Replay
 == 
 
 Red team wins!

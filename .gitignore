@@ -50,6 +50,7 @@ fake_server
 map_convert_07
 map_diff
 map_extract
+map_optimize
 map_replace_image
 map_resave
 map_version
@@ -60,6 +61,10 @@ twping
 unicode_confusables
 uuid
 versionsrv
+
+# But we still should allow to download mastersrv/twping sources
+!src/mastersrv
+!src/twping
 
 generated
 

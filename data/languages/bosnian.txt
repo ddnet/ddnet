@@ -697,7 +697,7 @@ Use k key to kill (restart), q to pause and watch other players. See settings fo
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Preporučeno je da provjeriš i podesiš postavke najbolje za tebe prije nego uđeš na server.
 
-Please enter your nick name below.
+Please enter your nickname below.
 == Molimo unesite vaš nadimak dole.
 
 Destination file already exist
@@ -1135,13 +1135,22 @@ The width or height of texture %s is not divisible by 16, which might cause visu
 Country / Region
 == Zemlja / Regija
 
-Downloading ddnet-info.json failed
-== 
-
 Saving ddnet-settings.cfg failed
 == 
 
 Warning
+== 
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== 
+
+Existing Player
+== 
+
+Your nickname '%s' is already used (%d points). Do you still want to use it?
+== 
+
+Checking for existing player with your name
 == 
 
 Speed
@@ -1162,9 +1171,6 @@ Theme
 %d player
 == 
 
-File
-== 
-
 %.2f MiB
 == 
 
@@ -1172,6 +1178,9 @@ File
 == 
 
 Demos directory
+== 
+
+Smooth Dynamic Camera
 == 
 
 Skip the main menu
@@ -1195,6 +1204,12 @@ Skins directory
 Borderless window
 == 
 
+Game sound volume
+== 
+
+Chat sound volume
+== 
+
 Background music volume
 == 
 
@@ -1205,6 +1220,12 @@ DDNet
 == 
 
 Assets
+== 
+
+Use old chat style
+== 
+
+Highlight
 == 
 
 Overlay entities
@@ -1253,16 +1274,16 @@ Editor
 Play
 == 
 
-Manual %3d:%02d  
+Manual
 == 
 
-Race %3d:%02d  
+Race
 == 
 
-Auto %3d:%02d  
+Auto
 == 
 
-Replay %3d:%02d  
+Replay
 == 
 
 FPM

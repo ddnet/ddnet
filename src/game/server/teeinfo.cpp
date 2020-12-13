@@ -58,15 +58,15 @@ void CTeeInfo::ToSixup()
 	}
 
 	// check for std skin
-	for(int s = 0; s < 16; s++)
+	for(auto &StdSkin : g_StdSkins)
 	{
-		if(!str_comp(m_SkinName, g_StdSkins[s].m_SkinName))
+		if(!str_comp(m_SkinName, StdSkin.m_SkinName))
 		{
 			for(int p = 0; p < 6; p++)
 			{
-				str_copy(m_apSkinPartNames[p], g_StdSkins[s].m_apSkinPartNames[p], 24);
-				m_aUseCustomColors[p] = g_StdSkins[s].m_aUseCustomColors[p];
-				m_aSkinPartColors[p] = g_StdSkins[s].m_aSkinPartColors[p];
+				str_copy(m_apSkinPartNames[p], StdSkin.m_apSkinPartNames[p], 24);
+				m_aUseCustomColors[p] = StdSkin.m_aUseCustomColors[p];
+				m_aSkinPartColors[p] = StdSkin.m_aSkinPartColors[p];
 			}
 			break;
 		}
@@ -98,12 +98,12 @@ void CTeeInfo::FromSixup()
 	m_ColorFeet = 0;
 
 	// check for std skin
-	for(int s = 0; s < 16; s++)
+	for(auto &StdSkin : g_StdSkins)
 	{
 		bool match = true;
 		for(int p = 0; p < 6; p++)
 		{
-			if(str_comp(m_apSkinPartNames[p], g_StdSkins[s].m_apSkinPartNames[p]) || m_aUseCustomColors[p] != g_StdSkins[s].m_aUseCustomColors[p] || (m_aUseCustomColors[p] && m_aSkinPartColors[p] != g_StdSkins[s].m_aSkinPartColors[p]))
+			if(str_comp(m_apSkinPartNames[p], StdSkin.m_apSkinPartNames[p]) || m_aUseCustomColors[p] != StdSkin.m_aUseCustomColors[p] || (m_aUseCustomColors[p] && m_aSkinPartColors[p] != StdSkin.m_aSkinPartColors[p]))
 			{
 				match = false;
 				break;
@@ -111,7 +111,7 @@ void CTeeInfo::FromSixup()
 		}
 		if(match)
 		{
-			str_copy(m_SkinName, g_StdSkins[s].m_SkinName, sizeof(m_SkinName));
+			str_copy(m_SkinName, StdSkin.m_SkinName, sizeof(m_SkinName));
 			return;
 		}
 	}

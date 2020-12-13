@@ -22,7 +22,7 @@ public:
 		T y, v;
 	};
 
-	vector2_base() {}
+	vector2_base() = default;
 	vector2_base(T nx, T ny)
 	{
 		x = nx;
@@ -76,8 +76,6 @@ public:
 
 	bool operator==(const vector2_base &v) const { return x == v.x && y == v.y; } //TODO: do this with an eps instead
 	bool operator!=(const vector2_base &v) const { return x != v.x || y != v.y; }
-
-	operator const T *() { return &x; }
 
 	T &operator[](const int index) { return index ? y : x; }
 };
@@ -152,7 +150,7 @@ public:
 		T z, b, v, l;
 	};
 
-	vector3_base() {}
+	vector3_base() = default;
 	vector3_base(T nx, T ny, T nz)
 	{
 		x = nx;
@@ -212,8 +210,6 @@ public:
 	}
 
 	bool operator==(const vector3_base &v) const { return x == v.x && y == v.y && z == v.z; } //TODO: do this with an eps instead
-
-	operator const T *() { return &x; }
 };
 
 template<typename T>
@@ -286,7 +282,7 @@ public:
 		T w, a;
 	};
 
-	vector4_base() {}
+	vector4_base() = default;
 	vector4_base(T nx, T ny, T nz, T nw)
 	{
 		x = nx;
@@ -353,8 +349,6 @@ public:
 	}
 
 	bool operator==(const vector4_base &v) const { return x == v.x && y == v.y && z == v.z && w == v.w; } //TODO: do this with an eps instead
-
-	operator const T *() { return &x; }
 };
 
 typedef vector4_base<float> vec4;

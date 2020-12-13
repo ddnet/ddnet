@@ -20,13 +20,13 @@
 #include "network.h"
 #include "snapshot.h"
 
-static const unsigned char gs_aHeaderMarker[7] = {'T', 'W', 'D', 'E', 'M', 'O', 0};
-static const unsigned char gs_ActVersion = 6;
-static const unsigned char gs_OldVersion = 3;
-static const unsigned char gs_Sha256Version = 6;
-static const unsigned char gs_VersionTickCompression = 5; // demo files with this version or higher will use `CHUNKTICKFLAG_TICK_COMPRESSED`
-static const int gs_LengthOffset = 152;
-static const int gs_NumMarkersOffset = 176;
+static const unsigned char s_aHeaderMarker[7] = {'T', 'W', 'D', 'E', 'M', 'O', 0};
+static const unsigned char s_CurVersion = 6;
+static const unsigned char s_OldVersion = 3;
+static const unsigned char s_Sha256Version = 6;
+static const unsigned char s_VersionTickCompression = 5; // demo files with this version or higher will use `CHUNKTICKFLAG_TICK_COMPRESSED`
+static const int s_LengthOffset = 152;
+static const int s_NumMarkersOffset = 176;
 
 CDemoRecorder::CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool NoMapData)
 {
@@ -124,8 +124,8 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 
 	// write header
 	mem_zero(&Header, sizeof(Header));
-	mem_copy(Header.m_aMarker, gs_aHeaderMarker, sizeof(Header.m_aMarker));
-	Header.m_Version = gs_ActVersion;
+	mem_copy(Header.m_aMarker, s_aHeaderMarker, sizeof(Header.m_aMarker));
+	Header.m_Version = s_CurVersion;
 	str_copy(Header.m_aNetversion, pNetVersion, sizeof(Header.m_aNetversion));
 	str_copy(Header.m_aMapName, pMap, sizeof(Header.m_aMapName));
 	Header.m_aMapSize[0] = (MapSize >> 24) & 0xff;
@@ -346,7 +346,7 @@ int CDemoRecorder::Stop()
 		return -1;
 
 	// add the demo length to the header
-	io_seek(m_File, gs_LengthOffset, IOSEEK_START);
+	io_seek(m_File, s_LengthOffset, IOSEEK_START);
 	int DemoLength = Length();
 	char aLength[4];
 	aLength[0] = (DemoLength >> 24) & 0xff;
@@ -356,7 +356,7 @@ int CDemoRecorder::Stop()
 	io_write(m_File, aLength, sizeof(aLength));
 
 	// add the timeline markers to the header
-	io_seek(m_File, gs_NumMarkersOffset, IOSEEK_START);
+	io_seek(m_File, s_NumMarkersOffset, IOSEEK_START);
 	char aNumMarkers[4];
 	aNumMarkers[0] = (m_NumTimelineMarkers >> 24) & 0xff;
 	aNumMarkers[1] = (m_NumTimelineMarkers >> 16) & 0xff;
@@ -438,7 +438,7 @@ int CDemoPlayer::ReadChunkHeader(int *pType, int *pSize, int *pTick)
 		int Tickdelta_legacy = Chunk & (CHUNKMASK_TICK_LEGACY); // compatibility
 		*pType = Chunk & (CHUNKTYPEFLAG_TICKMARKER | CHUNKTICKFLAG_KEYFRAME);
 
-		if(m_Info.m_Header.m_Version < gs_VersionTickCompression && Tickdelta_legacy != 0)
+		if(m_Info.m_Header.m_Version < s_VersionTickCompression && Tickdelta_legacy != 0)
 		{
 			*pTick += Tickdelta_legacy;
 		}
@@ -542,9 +542,9 @@ void CDemoPlayer::ScanFile()
 
 void CDemoPlayer::DoTick()
 {
-	static char aCompresseddata[CSnapshot::MAX_SIZE];
-	static char aDecompressed[CSnapshot::MAX_SIZE];
-	static char aData[CSnapshot::MAX_SIZE];
+	static char s_aCompresseddata[CSnapshot::MAX_SIZE];
+	static char s_aDecompressed[CSnapshot::MAX_SIZE];
+	static char s_aData[CSnapshot::MAX_SIZE];
 	int ChunkType, ChunkTick, ChunkSize;
 	int DataSize = 0;
 	int GotSnapshot = 0;
@@ -579,7 +579,7 @@ void CDemoPlayer::DoTick()
 		// read the chunk
 		if(ChunkSize)
 		{
-			if(io_read(m_File, aCompresseddata, ChunkSize) != (unsigned)ChunkSize)
+			if(io_read(m_File, s_aCompresseddata, ChunkSize) != (unsigned)ChunkSize)
 			{
 				// stop on error or eof
 				if(m_pConsole)
@@ -588,7 +588,7 @@ void CDemoPlayer::DoTick()
 				break;
 			}
 
-			DataSize = CNetBase::Decompress(aCompresseddata, ChunkSize, aDecompressed, sizeof(aDecompressed));
+			DataSize = CNetBase::Decompress(s_aCompresseddata, ChunkSize, s_aDecompressed, sizeof(s_aDecompressed));
 			if(DataSize < 0)
 			{
 				// stop on error or eof
@@ -598,7 +598,7 @@ void CDemoPlayer::DoTick()
 				break;
 			}
 
-			DataSize = CVariableInt::Decompress(aDecompressed, DataSize, aData, sizeof(aData));
+			DataSize = CVariableInt::Decompress(s_aDecompressed, DataSize, s_aData, sizeof(s_aData));
 
 			if(DataSize < 0)
 			{
@@ -612,19 +612,19 @@ void CDemoPlayer::DoTick()
 		if(ChunkType == CHUNKTYPE_DELTA)
 		{
 			// process delta snapshot
-			static char aNewsnap[CSnapshot::MAX_SIZE];
+			static char s_aNewsnap[CSnapshot::MAX_SIZE];
 
 			GotSnapshot = 1;
 
-			DataSize = m_pSnapshotDelta->UnpackDelta((CSnapshot *)m_aLastSnapshotData, (CSnapshot *)aNewsnap, aData, DataSize);
+			DataSize = m_pSnapshotDelta->UnpackDelta((CSnapshot *)m_aLastSnapshotData, (CSnapshot *)s_aNewsnap, s_aData, DataSize);
 
 			if(DataSize >= 0)
 			{
 				if(m_pListener)
-					m_pListener->OnDemoPlayerSnapshot(aNewsnap, DataSize);
+					m_pListener->OnDemoPlayerSnapshot(s_aNewsnap, DataSize);
 
 				m_LastSnapshotDataSize = DataSize;
-				mem_copy(m_aLastSnapshotData, aNewsnap, DataSize);
+				mem_copy(m_aLastSnapshotData, s_aNewsnap, DataSize);
 			}
 			else
 			{
@@ -642,9 +642,9 @@ void CDemoPlayer::DoTick()
 			GotSnapshot = 1;
 
 			m_LastSnapshotDataSize = DataSize;
-			mem_copy(m_aLastSnapshotData, aData, DataSize);
+			mem_copy(m_aLastSnapshotData, s_aData, DataSize);
 			if(m_pListener)
-				m_pListener->OnDemoPlayerSnapshot(aData, DataSize);
+				m_pListener->OnDemoPlayerSnapshot(s_aData, DataSize);
 		}
 		else
 		{
@@ -664,7 +664,7 @@ void CDemoPlayer::DoTick()
 			else if(ChunkType == CHUNKTYPE_MESSAGE)
 			{
 				if(m_pListener)
-					m_pListener->OnDemoPlayerMessage(aData, DataSize);
+					m_pListener->OnDemoPlayerMessage(s_aData, DataSize);
 			}
 		}
 	}
@@ -725,7 +725,7 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 
 	// read the header
 	io_read(m_File, &m_Info.m_Header, sizeof(m_Info.m_Header));
-	if(mem_comp(m_Info.m_Header.m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) != 0)
+	if(mem_comp(m_Info.m_Header.m_aMarker, s_aHeaderMarker, sizeof(s_aHeaderMarker)) != 0)
 	{
 		if(m_pConsole)
 		{
@@ -738,7 +738,7 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 		return -1;
 	}
 
-	if(m_Info.m_Header.m_Version < gs_OldVersion)
+	if(m_Info.m_Header.m_Version < s_OldVersion)
 	{
 		if(m_pConsole)
 		{
@@ -750,11 +750,11 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 		m_File = 0;
 		return -1;
 	}
-	else if(m_Info.m_Header.m_Version > gs_OldVersion)
+	else if(m_Info.m_Header.m_Version > s_OldVersion)
 		io_read(m_File, &m_Info.m_TimelineMarkers, sizeof(m_Info.m_TimelineMarkers));
 
 	SHA256_DIGEST Sha256 = SHA256_ZEROED;
-	if(m_Info.m_Header.m_Version >= gs_Sha256Version)
+	if(m_Info.m_Header.m_Version >= s_Sha256Version)
 	{
 		CUuid ExtensionUuid = {};
 		io_read(m_File, &ExtensionUuid.m_aData, sizeof(ExtensionUuid.m_aData));
@@ -796,7 +796,7 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	m_MapInfo.m_Size = MapSize;
 	str_copy(m_MapInfo.m_aName, m_Info.m_Header.m_aMapName, sizeof(m_MapInfo.m_aName));
 
-	if(m_Info.m_Header.m_Version > gs_OldVersion)
+	if(m_Info.m_Header.m_Version > s_OldVersion)
 	{
 		// get timeline markers
 		int Num = ((m_Info.m_TimelineMarkers.m_aNumTimelineMarkers[0] << 24) & 0xFF000000) | ((m_Info.m_TimelineMarkers.m_aNumTimelineMarkers[1] << 16) & 0xFF0000) |
@@ -836,7 +836,7 @@ bool CDemoPlayer::ExtractMap(class IStorage *pStorage)
 
 	// handle sha256
 	SHA256_DIGEST Sha256 = SHA256_ZEROED;
-	if(m_Info.m_Header.m_Version >= gs_Sha256Version)
+	if(m_Info.m_Header.m_Version >= s_Sha256Version)
 		Sha256 = m_MapInfo.m_Sha256;
 	else
 	{
@@ -1086,7 +1086,7 @@ bool CDemoPlayer::GetDemoInfo(class IStorage *pStorage, const char *pFilename, i
 	pMapInfo->m_Crc = (pDemoHeader->m_aMapCrc[0] << 24) | (pDemoHeader->m_aMapCrc[1] << 16) | (pDemoHeader->m_aMapCrc[2] << 8) | (pDemoHeader->m_aMapCrc[3]);
 
 	SHA256_DIGEST Sha256 = SHA256_ZEROED;
-	if(pDemoHeader->m_Version >= gs_Sha256Version)
+	if(pDemoHeader->m_Version >= s_Sha256Version)
 	{
 		CUuid ExtensionUuid = {};
 		io_read(File, &ExtensionUuid.m_aData, sizeof(ExtensionUuid.m_aData));
@@ -1107,7 +1107,7 @@ bool CDemoPlayer::GetDemoInfo(class IStorage *pStorage, const char *pFilename, i
 	pMapInfo->m_Size = (pDemoHeader->m_aMapSize[0] << 24) | (pDemoHeader->m_aMapSize[1] << 16) | (pDemoHeader->m_aMapSize[2] << 8) | (pDemoHeader->m_aMapSize[3]);
 
 	io_close(File);
-	return !(mem_comp(pDemoHeader->m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) || pDemoHeader->m_Version < gs_OldVersion);
+	return !(mem_comp(pDemoHeader->m_aMarker, s_aHeaderMarker, sizeof(s_aHeaderMarker)) || pDemoHeader->m_Version < s_OldVersion);
 }
 
 int CDemoPlayer::GetDemoType() const
@@ -1146,7 +1146,7 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 	const CDemoPlayer::CPlaybackInfo *pInfo = m_pDemoPlayer->Info();
 
 	SHA256_DIGEST Sha256 = pMapInfo->m_Sha256;
-	if(pInfo->m_Header.m_Version < gs_Sha256Version)
+	if(pInfo->m_Header.m_Version < s_Sha256Version)
 	{
 		if(m_pDemoPlayer->ExtractMap(m_pStorage))
 			Sha256 = pMapInfo->m_Sha256;

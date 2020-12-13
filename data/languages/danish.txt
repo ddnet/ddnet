@@ -3,6 +3,7 @@
 #	SnOrKilll
 #modified by:
 #	matiasmunk		2011-08-06 22:49:11
+#	Fin (b3z) 	 	2020-11-11 20:05:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -622,651 +623,672 @@ Name plates size
 Type:
 == Type:
 
-Downloading ddnet-info.json failed
-== 
-
 Successfully saved the replay!
-== 
+== Afspilning blev gemt! 
 
 Saving ddnet-settings.cfg failed
-== 
+== Gemning af ddnet-settings.cfg mislykkedes
 
 Replay feature is disabled!
-== 
+== Afspilningsfunktionen er deaktiveret!
 
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== 
+== Bredden eller højden af tekstur%s kan ikke deles med 16, hvilket kan forårsage visuelle fejl.
 
 Warning
-== 
+== Advarsel
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== Fejlfindingstilstand aktiveret. Tryk på Ctrl+Shift+D for at deaktivere fejlretningstilstand.
 
 Game paused
-== 
+== Spillet sat på pause
 
 Server best:
-== 
+== Server bedst:
 
 Personal best:
-== 
+== Personlig bedst:
 
 Browser
-== 
+== Browser
 
 Ghost
-== 
+== Spøgelse
 
 Loading DDNet Client
-== 
+== Indlæser DDNet Klient
 
 Reconnect in %d sec
-== 
+== Tilslut igen om %d sek
 
 Render demo
-== 
+== Gengive demo
 
 Replace video
-== 
+== Udskift video
 
 File already exists, do you want to overwrite it?
-== 
+== Filen findes allerede. Vil du overskrive den?
 
 Are you sure that you want to disconnect?
-== 
+== Er du sikker på, at du vil afbryde forbindelsen?
 
 Disconnect Dummy
-== 
+== Afbryd dummy
 
 Are you sure that you want to disconnect your dummy?
-== 
+== Er du sikker på, at du vil afbryde din dummy?
 
 Welcome to DDNet
-== 
+== Velkommen til DDNet
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== 
+== DDraceNetwork er et samarbejdsvilligt onlinespil, hvor målet er, at du og din gruppe tees når målstregen på kortet. Som nybegynder skal du starte på Novice-servere, som er vært for de nemmeste kort. Overvej ping for at vælge en server tæt på dig.
 
 The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== 
+== Kortene indeholder frysning, hvilket midlertidigt gør, at en tee ikke kan bevæge sig. Du er nødt til at arbejde sammen for at komme igennem disse dele.
 
 The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== 
+== Mushjulet skifter våben. Hammer (venstre mus) kan bruges til at ramme andre tees og vække dem fra at være frossne.
 
 Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== 
+== Krog (højre mus) kan bruges til at svinge gennem kortet og til at trække andre tees til dig.
 
 Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== 
+== Vigtigst er kommunikation nøglen: Der er ingen tutorial, så du bliver nødt til at chatte (t tasten) med andre spillere for at lære de grundlæggende og tricks i spillet. 
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 
+== Brug k tasten til at dræbe (genstart), q for at sætte pause og se andre spillere. Se indstillinger for andre tastebindinger.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
-== 
+== Det anbefales, at du kontrollerer indstillingerne for at justere dem efter eget valg, før du opretter forbindelse til en server.
 
-Please enter your nick name below.
-== 
+Please enter your nickname below.
+== Indtast dit kaldenavn nedenfor.
+
+Existing Player
+== Eksisterende Spiller
+
+Your nickname '%s' is already used (%d points). Do you still want to use it?
+== Your nickname '%s' is already in use (%d points). Do you still want to use it?
+
+Checking for existing player with your name
+== Kontrollerer for eksisterende spiller med dit navn
 
 Country / Region
-== 
+== Land / Region
 
 Destination file already exist
-== 
+== Destinationsfil findes allerede
 
 Speed
-== 
+== Hastighed
 
 Video name:
-== 
+== Video navn:
 
 Show DDNet map finishes in server browser
-== 
+== Vis DDNet kort færdig i serverbrowseren
 
 transmits your player name to info2.ddnet.tw
-== 
+== sender dit spillernavn til info2.ddnet.tw
 
 Theme
-== 
+== Tema
 
 Search
-== 
+== Søg
 
 Exclude
-== 
+== Udelukke
 
 %d of %d servers
-== 
+== %d ud af %d servere
 
 %d of %d server
-== 
+==  %d af %d server
 
 %d players
-== 
+== %d spillere
 
 %d player
-== 
+== %d spiller
 
 Filter connecting players
-== 
+== Filtrer forbindende spillere
 
 Indicate map finish
-== 
+== Angiv, om kortet er færdigt
 
 Unfinished map
-== 
+== Ufærdigt kort
 
 Countries
-== 
+== Lande
 
 Types
-== 
+== Typer
 
 Select a name
-== 
+== Vælg et navn
 
 Please use a different name
-== 
+== Brug et andet navn
 
 Remove chat
-== 
-
-File
-== 
+== Fjern chat
 
 Markers:
-== 
+== Markører:
 
 %.2f MiB
-== 
+== %.2f MiB
 
 %.2f KiB
-== 
+== %.2f KiB
 
 Demo
-== 
+== Demo
 
 Markers
-== 
+== Markører
 
 Length
-== 
+== Længde
 
 Date
-== 
+== Dato
 
 Fetch Info
-== 
+== Hent info
 
 Demos directory
-== 
+== Demoer vejviser
 
 Render
-== 
+== Gør
 
 Connecting dummy
-== 
+== Forbinder dummy
 
 Connect Dummy
-== 
+== Forbind dummy
 
 Kill
-== 
+== Dræbe
 
 Pause
-== 
+== Pause
 
 Reload
-== 
+== Genindlæs
 
 Deactivate
-== 
+== Deaktiver
 
 Activate
-== 
+== Aktivér
 
 Save
-== 
+== Gemme
+
+Smooth Dynamic Camera
+== Glat Dynamisk Kamera
 
 Switch weapon when out of ammo
-== 
+== Skift våben, når du er ude af ammunition
 
 Reset wanted weapon on death
-== 
+== Nulstil ønsket våben ved døden
 
 Show only chat messages from friends
-== 
+== Vis kun chatbeskeder fra venner
 
 Show clan above name plates
-== 
+== Vis klan over navneskilt
 
 Clan plates size
-== 
+== Klanetiketstørrelse
 
 Skip the main menu
-== 
+== Spring hovedmenuen over
 
 Refresh Rate
-== 
+== Opdateringshastighed
 
 Show console window
-== 
+== Vis konsolvindue
 
 Themes directory
-== 
+== Tema vejviser
 
 Automatically take statboard screenshot
-== 
+== Tag automatisk skærmbillede på statboard
 
 Automatically create statboard csv
-== 
+== Opret automatisk statboard csv
 
 Max CSVs
-== 
+== Maks CSVs
 
 Dummy settings
-== 
+== Dummy indstillinger
 
 Download skins
-== 
+== Download skind
 
 Vanilla skins only
-== 
+== Kun vaniljeskind
 
 Fat skins (DDFat)
-== 
+== Fed skind (DDFat)
 
 Skin prefix
-== 
+== Hudpræfiks
 
 Skin Database
-== 
+== Huddatabase
 
 Skins directory
-== 
+== Skind vejviser
 
 Hook collisions
-== 
+== Krogkollisioner
 
 Zoom in
-== 
+== Zoome ind
 
 Zoom out
-== 
+== Zoome ud
 
 Default zoom
-== 
+== Standard zoom
 
 Show others
-== 
+== Vis andre
 
 Show all
-== 
+== Vis alt
 
 Toggle dyncam
-== 
+== Skift dyncam
 
 Toggle dummy
-== 
+== Skift dummy
 
 Toggle ghost
-== 
+== Skift spøgelse
 
 Dummy copy
-== 
+== Skift kopi
 
 Hammerfly dummy
-== 
+== Hammerflyve dummy
 
 Converse
-== 
+== Snak
 
 Statboard
-== 
+== Statboard
 
 Lock team
-== 
+== Lås team
 
 Show entities
-== 
+== Vis entities
 
 Show HUD
-== 
+== Vis HUD
 
 UI mouse s.
-== 
+== UI mus s.
 
 Borderless window
-== 
+== Kantløs vindue
 
 may cause delay
-== 
+== kan forårsage forsinkelse
 
 Screen
-== 
+== Skærm
 
 Use OpenGL 3.3 (experimental)
-== 
+== Brug OpenGL 3.3 (eksperimentel)
 
 Preinit VBO (iGPUs only)
-== 
+== Præinit VBO (iGPUs alene)
 
 Multiple texture units (disable for MacOS)
-== 
+== Flere teksturenheder (deaktiver for MacOS)
 
 Use high DPI
-== 
+== Brug højt DPI
 
 Enable game sounds
-== 
+== Aktivér spillyde
 
 Enable gun sound
-== 
+== Aktivér pistollyd
 
 Enable long pain sound (used when shooting in freeze)
-== 
+== Aktivér lyd med lang smerte (bruges når du falder i frysepunkt)
 
 Enable server message sound
-== 
+== Aktivér serverbeskedlyd
 
 Enable regular chat sound
-== 
+== Aktivér regelmæssig chatlyd
 
 Enable team chat sound
-== 
+== Aktivér teamchat-lyd
 
 Enable highlighted chat sound
-== 
+== Aktivér fremhævet chatlyd
 
 Threaded sound loading
-== 
+== Trådet lydindlæsning
+
+Game sound volume
+== Spillydstyrke
+
+Chat sound volume
+== Chatlydstyrke
 
 Map sound volume
-== 
+== Kortlydstyrke
 
 Background music volume
-== 
+== Baggrundsmusikvolumen
 
 HUD
-== 
+== HUD
 
 DDNet
-== 
+== DDNet
 
 Assets
-== 
+== Assets
 
 DDNet Client needs to be restarted to complete update!
-== 
+== DDNet Klient skal genstartes for at fuldføre opdateringen!
 
 Use DDRace Scoreboard
-== 
+== Brug DDRace resultattavle
 
 Show client IDs in Scoreboard
-== 
+== Vis klient-id'er på resultattavlen
 
 Show score
-== 
+== Vis score
 
 Show health + ammo
-== 
+== Vis sundhed + ammo
+
+Use old chat style
+== Brug gammel chat-stil
 
 Show names in chat in team colors
-== 
+== Vis navne i chat i teamfarver
 
 Show kill messages
-== 
+== Vis dræb beskeder
 
 Show votes window after voting
-== 
+== Vis vinduet med stemmer efter afstemning
 
 Messages
-== 
+== Beskeder
 
 System message
-== 
+== Systemmeddelelse
 
 Reset
-== 
+== Nulstil
 
 Highlighted message
-== 
+== Fremhævet besked
 
 Spectator
-== 
+== Tilskuer
 
 Look out!
-== 
+== Pas på!
 
 Team message
-== 
+== Team besked
 
 We will win
-== 
+== Vi vil vinde
 
 Friend message
-== 
+== Ven besked
+
+Highlight
+== Fremhæve
 
 Friend
-== 
+== Ven
 
 Hi o/
-== 
+== Hej o/
 
 Normal message
-== 
+== Normal besked
 
 Hello and welcome
-== 
+== Hej og velkommen
 
 Client message
-== 
+== Klient besked
 
 Inner color
-== 
+== Indre farve
 
 Outline color
-== 
+== Ydre farve
 
 Wait before try for
-== 
+== Vent inden du prøver
 
 second
-== 
+== sekund
 
 seconds
-== 
+== sekunder
 
 Save the best demo of each race
-== 
+== Gem den bedste demo af hvert løb
 
 Default length: %d
-== 
+== Standardlængde: %d
 
 Enable replays
-== 
+== Aktivér gentagelser
 
 Show ghost
-== 
+== Vis spøgelse
 
 Save ghost
-== 
+== Gem spøgelse
 
 Gameplay
-== 
+== Gameplay
 
 Overlay entities
-== 
+== Dække entities
 
 Size
-== 
+== Størrelse
 
 Show text entities
-== 
+== Vis tekst entities
 
 Show others (own team only)
-== 
+== Vis andre (kun eget hold)
 
 Show quads
-== 
+== Vis quads
 
 AntiPing
-== 
+== AntiPing
 
 AntiPing: predict other players
-== 
+== AntiPing: forudsige andre spillere
 
 AntiPing: predict weapons
-== 
+== AntiPing: forudsige våben
 
 AntiPing: predict grenade paths
-== 
+== AbtiPing: forudsige granatstier
 
 Show other players' hook collision lines
-== 
+== Vis andre spillers kroge kollisionslinjer
 
 Show other players' key presses
-== 
+== Vis andre spillers tastetryk
 
 Old mouse mode
-== 
+== Gammel musetilstand
 
 Background (regular)
-== 
+== Baggrund (almindelig)
 
 Background (entities)
-== 
+== Baggrund (entities)
 
 Use current map as background
-== 
+== Brug det aktuelle kort som baggrund
 
 Show tiles layers from BG map
-== 
+== Vis fliselag fra baggrundskortet
 
 Try fast HTTP map download first
-== 
+== Prøv hurtig download af HTTP kort først
 
 DDNet %s is available:
-== 
+== DDNet %s er tilgængelig:
 
 Update now
-== 
+== Opdatere nu
 
 Updating...
-== 
+== Opdaterer...
 
 DDNet Client updated!
-== 
+== DDNet Klient opdateret!
 
 No updates available
-== 
+== Ingen opdateringer tilgængelige
 
 Check now
-== 
+== Tjek nu
 
 New random timeout code
-== 
+== Ny tilfældig timeout kode
 
 Entities
-== 
+== Entities
 
 Emoticons
-== 
+== Humørikoner
 
 Particles
-== 
+== Partikler
 
 Assets directory
-== 
+== Assets vejviser
 
 Learn
-== 
+== Lære
 
 https://wiki.ddnet.tw/
-== 
+== https://wiki.ddnet.tw/
 
 Website
-== 
+== Internet side
 
 Settings
-== 
+== Indstillinger
 
 Stop server
-== 
+== Stop server
 
 Run server
-== 
+== Kør server
 
 Server executable not found, can't run server
-== 
+== Server eksekverbar blev ikke fundet, kan ikke køre server 
 
 Editor
-== 
+== Redaktør
 
 [Start menu]
 Play
-== 
+== Spil
 
 DDNet %s is out!
-== 
+== DDNet %s er ude!
 
 Downloading %s:
-== 
+== Downloader %s:
 
 Update failed! Check log...
-== 
+== Opdatering fejlede! Tjek log...
 
 Restart
-== 
+== Genstart
 
 Time
-== 
+== Tid
 
-Manual %3d:%02d  
-== 
+Manual
+== Manual
 
-Race %3d:%02d  
-== 
+Race
+== Race
 
-Auto %3d:%02d  
-== 
+Auto
+== Auto
 
-Replay %3d:%02d  
-== 
+Replay
+== Afspil igen
 
 Follow
-== 
+== Følge med
 
 Frags
-== 
+== Frags
 
 Deaths
-== 
+== Dødsfalder
 
 Suicides
-== 
+== Selvmord
 
 Ratio
-== 
+== Forhold
 
 Net
-== 
+== Net
 
 FPM
-== 
+== FPM
 
 Spree
-== 
+== Spree
 
 Best
-== 
+== Bedst
 
 Grabs
-== 
+== Tager fat
 
 1 new mention
-== 
+== 1 ny nævne
 
 %d new mentions
-== 
+== %d ny nævner
 
 9+ new mentions
-== 
+== 9+ ny nævner

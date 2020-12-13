@@ -30,8 +30,8 @@ void CParticles::OnReset()
 	m_aParticles[MAX_PARTICLES - 1].m_NextPart = -1;
 	m_FirstFree = 0;
 
-	for(int i = 0; i < NUM_GROUPS; i++)
-		m_aFirstPart[i] = -1;
+	for(int &FirstPart : m_aFirstPart)
+		FirstPart = -1;
 }
 
 void CParticles::Add(int Group, CParticle *pPart, float TimePassed)
@@ -89,9 +89,9 @@ void CParticles::Update(float TimePassed)
 		FrictionFraction -= 0.05f;
 	}
 
-	for(int g = 0; g < NUM_GROUPS; g++)
+	for(int &FirstPart : m_aFirstPart)
 	{
-		int i = m_aFirstPart[g];
+		int i = FirstPart;
 		while(i != -1)
 		{
 			int Next = m_aParticles[i].m_NextPart;
@@ -116,7 +116,7 @@ void CParticles::Update(float TimePassed)
 				if(m_aParticles[i].m_PrevPart != -1)
 					m_aParticles[m_aParticles[i].m_PrevPart].m_NextPart = m_aParticles[i].m_NextPart;
 				else
-					m_aFirstPart[g] = m_aParticles[i].m_NextPart;
+					FirstPart = m_aParticles[i].m_NextPart;
 
 				if(m_aParticles[i].m_NextPart != -1)
 					m_aParticles[m_aParticles[i].m_NextPart].m_PrevPart = m_aParticles[i].m_PrevPart;

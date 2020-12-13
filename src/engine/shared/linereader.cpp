@@ -2,12 +2,12 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "linereader.h"
 
-void CLineReader::Init(IOHANDLE io)
+void CLineReader::Init(IOHANDLE File)
 {
 	m_BufferMaxSize = sizeof(m_aBuffer);
 	m_BufferSize = 0;
 	m_BufferPos = 0;
-	m_IO = io;
+	m_File = File;
 }
 
 char *CLineReader::Get()
@@ -32,7 +32,7 @@ char *CLineReader::Get()
 			m_BufferPos = Left;
 
 			// fill the buffer
-			Read = io_read(m_IO, &m_aBuffer[m_BufferPos], m_BufferMaxSize - m_BufferPos);
+			Read = io_read(m_File, &m_aBuffer[m_BufferPos], m_BufferMaxSize - m_BufferPos);
 			m_BufferSize = Left + Read;
 			LineStart = 0;
 

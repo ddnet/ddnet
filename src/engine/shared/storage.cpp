@@ -215,7 +215,7 @@ public:
 #if defined(CONF_FAMILY_UNIX)
 		// 4) check for all default locations
 		{
-			const char *aDirs[] = {
+			const char *apDirs[] = {
 				"/usr/share/ddnet",
 				"/usr/share/games/ddnet",
 				"/usr/local/share/ddnet",
@@ -223,16 +223,16 @@ public:
 				"/usr/pkg/share/ddnet",
 				"/usr/pkg/share/games/ddnet",
 				"/opt/ddnet"};
-			const int DirsCount = sizeof(aDirs) / sizeof(aDirs[0]);
+			const int DirsCount = sizeof(apDirs) / sizeof(apDirs[0]);
 
 			int i;
 			for(i = 0; i < DirsCount; i++)
 			{
 				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "%s/data/mapres", aDirs[i]);
+				str_format(aBuf, sizeof(aBuf), "%s/data/mapres", apDirs[i]);
 				if(fs_is_dir(aBuf))
 				{
-					str_format(m_aDatadir, sizeof(m_aDatadir), "%s/data", aDirs[i]);
+					str_format(m_aDatadir, sizeof(m_aDatadir), "%s/data", apDirs[i]);
 					return;
 				}
 			}
@@ -393,11 +393,11 @@ public:
 
 	struct CFindCBData
 	{
-		CStorage *pStorage;
-		const char *pFilename;
-		const char *pPath;
-		char *pBuffer;
-		int BufferSize;
+		CStorage *m_pStorage;
+		const char *m_pFilename;
+		const char *m_pPath;
+		char *m_pBuffer;
+		int m_BufferSize;
 	};
 
 	static int FindFileCallback(const char *pName, int IsDir, int Type, void *pUser)
@@ -411,16 +411,16 @@ public:
 			// search within the folder
 			char aBuf[MAX_PATH_LENGTH];
 			char aPath[MAX_PATH_LENGTH];
-			str_format(aPath, sizeof(aPath), "%s/%s", Data.pPath, pName);
-			Data.pPath = aPath;
-			fs_listdir(Data.pStorage->GetPath(Type, aPath, aBuf, sizeof(aBuf)), FindFileCallback, Type, &Data);
-			if(Data.pBuffer[0])
+			str_format(aPath, sizeof(aPath), "%s/%s", Data.m_pPath, pName);
+			Data.m_pPath = aPath;
+			fs_listdir(Data.m_pStorage->GetPath(Type, aPath, aBuf, sizeof(aBuf)), FindFileCallback, Type, &Data);
+			if(Data.m_pBuffer[0])
 				return 1;
 		}
-		else if(!str_comp(pName, Data.pFilename))
+		else if(!str_comp(pName, Data.m_pFilename))
 		{
 			// found the file = end
-			str_format(Data.pBuffer, Data.BufferSize, "%s/%s", Data.pPath, Data.pFilename);
+			str_format(Data.m_pBuffer, Data.m_BufferSize, "%s/%s", Data.m_pPath, Data.m_pFilename);
 			return 1;
 		}
 
@@ -435,11 +435,11 @@ public:
 		pBuffer[0] = 0;
 		char aBuf[MAX_PATH_LENGTH];
 		CFindCBData Data;
-		Data.pStorage = this;
-		Data.pFilename = pFilename;
-		Data.pPath = pPath;
-		Data.pBuffer = pBuffer;
-		Data.BufferSize = BufferSize;
+		Data.m_pStorage = this;
+		Data.m_pFilename = pFilename;
+		Data.m_pPath = pPath;
+		Data.m_pBuffer = pBuffer;
+		Data.m_BufferSize = BufferSize;
 
 		if(Type == TYPE_ALL)
 		{
@@ -468,10 +468,10 @@ public:
 		char aBuffer[MAX_PATH_LENGTH];
 		GetPath(Type, pFilename, aBuffer, sizeof(aBuffer));
 
-		bool success = !fs_remove(aBuffer);
-		if(!success)
+		bool Success = !fs_remove(aBuffer);
+		if(!Success)
 			dbg_msg("storage", "failed to remove: %s", aBuffer);
-		return success;
+		return Success;
 	}
 
 	virtual bool RemoveBinaryFile(const char *pFilename)
@@ -479,10 +479,10 @@ public:
 		char aBuffer[MAX_PATH_LENGTH];
 		GetBinaryPath(pFilename, aBuffer, sizeof(aBuffer));
 
-		bool success = !fs_remove(aBuffer);
-		if(!success)
-			dbg_msg("storage", "failed to remove: %s", aBuffer);
-		return success;
+		bool Success = !fs_remove(aBuffer);
+		if(!Success)
+			dbg_msg("storage", "failed to remove binary: %s", aBuffer);
+		return Success;
 	}
 
 	virtual bool RenameFile(const char *pOldFilename, const char *pNewFilename, int Type)
@@ -495,10 +495,10 @@ public:
 		GetPath(Type, pOldFilename, aOldBuffer, sizeof(aOldBuffer));
 		GetPath(Type, pNewFilename, aNewBuffer, sizeof(aNewBuffer));
 
-		bool success = !fs_rename(aOldBuffer, aNewBuffer);
-		if(!success)
+		bool Success = !fs_rename(aOldBuffer, aNewBuffer);
+		if(!Success)
 			dbg_msg("storage", "failed to rename: %s -> %s", aOldBuffer, aNewBuffer);
-		return success;
+		return Success;
 	}
 
 	virtual bool RenameBinaryFile(const char *pOldFilename, const char *pNewFilename)
@@ -511,10 +511,10 @@ public:
 		if(fs_makedir_rec_for(aNewBuffer) < 0)
 			dbg_msg("storage", "cannot create folder for: %s", aNewBuffer);
 
-		bool success = !fs_rename(aOldBuffer, aNewBuffer);
-		if(!success)
+		bool Success = !fs_rename(aOldBuffer, aNewBuffer);
+		if(!Success)
 			dbg_msg("storage", "failed to rename: %s -> %s", aOldBuffer, aNewBuffer);
-		return success;
+		return Success;
 	}
 
 	virtual bool CreateFolder(const char *pFoldername, int Type)
@@ -525,10 +525,10 @@ public:
 		char aBuffer[MAX_PATH_LENGTH];
 		GetPath(Type, pFoldername, aBuffer, sizeof(aBuffer));
 
-		bool success = !fs_makedir(aBuffer);
-		if(!success)
+		bool Success = !fs_makedir(aBuffer);
+		if(!Success)
 			dbg_msg("storage", "failed to create folder: %s", aBuffer);
-		return success;
+		return Success;
 	}
 
 	virtual void GetCompletePath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize)

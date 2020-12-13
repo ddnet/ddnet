@@ -1,4 +1,7 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.12...3.19.1)
+if(CMAKE_VERSION VERSION_LESS 3.12)
+  cmake_policy(VERSION ${CMAKE_VERSION})
+endif()
 
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.9 CACHE INTERNAL "")
 if(CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS 10.9)
@@ -22,23 +25,8 @@ else()
   message(FATAL_ERROR "Couldn't parse version from src/game/version.h")
 endif()
 
-if(POLICY CMP0017)
-  cmake_policy(SET CMP0017 NEW)
-endif()
-
-if(POLICY CMP0042)
-  cmake_policy(SET CMP0042 NEW)
-endif()
-
-if(POLICY CMP0048)
-  cmake_policy(SET CMP0048 NEW)
-  if(VERSION_PATCH STREQUAL "0")
-    project(DDNet VERSION ${VERSION_MAJOR}.${VERSION_MINOR})
-  else()
-    project(DDNet VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
-  endif()
-else()
-  project(DDNet)
+# Extra support for CMake pre-3.0
+if(NOT POLICY CMP0048)
   set(PROJECT_VERSION_MAJOR ${VERSION_MAJOR})
   set(PROJECT_VERSION_MINOR ${VERSION_MINOR})
   set(PROJECT_VERSION_PATCH ${VERSION_PATCH})
@@ -47,6 +35,11 @@ else()
   else()
     set(PROJECT_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
   endif()
+endif()
+if(VERSION_PATCH STREQUAL "0")
+  project(DDNet VERSION ${VERSION_MAJOR}.${VERSION_MINOR})
+else()
+  project(DDNet VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 endif()
 
 set(ORIGINAL_CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
@@ -545,8 +538,7 @@ endif()
 ########################################################################
 
 if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
-  # Change to the 1.9.0 release tag once that works.
-  set(DDNET_GTEST_VERSION 7b6561c56e353100aca8458d7bc49c4e0119bae8)
+  set(DDNET_GTEST_VERSION release-1.10.0) # 703bd9caab50b139428cea1aaff9974ebee5742e
   configure_file(cmake/Download_GTest_CMakeLists.txt.in googletest-download/CMakeLists.txt)
   execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
     RESULT_VARIABLE result
@@ -564,6 +556,15 @@ if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
       message(WARNING "Build step for googletest failed: ${result}")
       set(DOWNLOAD_GTEST OFF)
     else()
+      file(GLOB_RECURSE DDNET_GTEST_CMAKELISTS ${CMAKE_BINARY_DIR}/googletest-src/CMakeLists.txt)
+      foreach(file ${DDNET_GTEST_CMAKELISTS})
+        file(READ ${file} CONTENTS)
+        string(REPLACE "cmake_minimum_required(VERSION 2.6.4)" "cmake_minimum_required(VERSION 2.8.12...3.19.1)" CONTENTS "${CONTENTS}")
+        string(REPLACE "cmake_minimum_required(VERSION 2.6.4)" "cmake_minimum_required(VERSION 2.8.12...3.19.1)" CONTENTS "${CONTENTS}")
+        string(REPLACE "cmake_minimum_required(VERSION 2.8.8)" "cmake_minimum_required(VERSION 2.8.12...3.19.1)" CONTENTS "${CONTENTS}")
+        file(WRITE ${file} "${CONTENTS}")
+      endforeach()
+
       # Prevent overriding the parent project's compiler/linker settings on Windows
       set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
@@ -1410,6 +1411,13 @@ generate_source7("src/game/generated/client_data7.h" "client_content_header")
 
 generate_maps("src/game/generated/protocolglue.h")
 
+add_custom_command(OUTPUT "src/game/generated/wordlist.h"
+  COMMAND ${PYTHON_EXECUTABLE} scripts/wordlist.py > ${PROJECT_BINARY_DIR}/src/game/generated/wordlist.h
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  DEPENDS
+    scripts/wordlist.py
+)
+
 ########################################################################
 # SHARED
 ########################################################################
@@ -1483,8 +1491,6 @@ set_src(ENGINE_SHARED GLOB src/engine/shared
   datafile.h
   demo.cpp
   demo.h
-  dilate.cpp
-  dilate.h
   econ.cpp
   econ.h
   engine.cpp
@@ -1495,6 +1501,8 @@ set_src(ENGINE_SHARED GLOB src/engine/shared
   global_uuid_manager.cpp
   huffman.cpp
   huffman.h
+  image_manipulation.cpp
+  image_manipulation.h
   jobs.cpp
   jobs.h
   json.cpp
@@ -1637,6 +1645,8 @@ if(CLIENT)
   set_src(ENGINE_CLIENT GLOB src/engine/client
     backend_sdl.cpp
     backend_sdl.h
+    blocklist_driver.cpp
+    blocklist_driver.h
     client.cpp
     client.h
     demoedit.cpp
@@ -1976,6 +1986,7 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
 set(GAME_GENERATED_SERVER
   "src/game/generated/server_data.cpp"
   "src/game/generated/server_data.h"
+  "src/game/generated/wordlist.h"
 )
 set(SERVER_SRC ${ENGINE_SERVER} ${GAME_SERVER} ${GAME_GENERATED_SERVER})
 if(TARGET_OS STREQUAL "windows")
@@ -2056,6 +2067,7 @@ set_src(TOOLS GLOB src/tools
   map_convert_07.cpp
   map_diff.cpp
   map_extract.cpp
+  map_optimize.cpp
   map_replace_image.cpp
   map_resave.cpp
   packetgen.cpp
@@ -2068,7 +2080,7 @@ foreach(ABS_T ${TOOLS})
     string(REGEX REPLACE "\\.cpp$" "" TOOL "${T}")
     set(TOOL_DEPS ${DEPS})
     set(TOOL_LIBS ${LIBS})
-    if(TOOL MATCHES "^(tileset_.*|dilate|map_convert_07|map_extract|map_replace_image)$")
+    if(TOOL MATCHES "^(dilate|map_convert_07|map_optimize|map_extract|map_replace_image)$")
       list(APPEND TOOL_DEPS ${PNGLITE_DEP})
       list(APPEND TOOL_LIBS ${PNGLITE_LIBRARIES})
       list(APPEND TOOL_INCLUDE_DIRS ${PNGLITE_INCLUDE_DIRS})
@@ -2106,6 +2118,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
   set_src(TESTS GLOB src/test
     aio.cpp
     bezier.cpp
+    blocklist_driver.cpp
     color.cpp
     csv.cpp
     datafile.cpp
@@ -2127,6 +2140,8 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     unix.cpp
   )
   set(TESTS_EXTRA
+    src/engine/client/blocklist_driver.cpp
+    src/engine/client/blocklist_driver.h
     src/engine/server/name_ban.cpp
     src/engine/server/name_ban.h
     src/game/server/teehistorian.cpp
@@ -2537,6 +2552,8 @@ endmacro()
 source_group_tree(src)
 
 if(ANTIBOT)
+  # Allow the antibot library to use functions from the server binary.
+  add_c_compiler_flag_if_supported(OUR_FLAGS_LINK -rdynamic)
   set_own_rpath(${TARGET_SERVER})
 endif()
 

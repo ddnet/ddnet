@@ -71,8 +71,8 @@ void CControls::OnReset()
 	m_JoystickFirePressed = false;
 	m_JoystickRunPressed = false;
 	m_JoystickTapTime = 0;
-	for(int i = 0; i < NUM_WEAPONS; i++)
-		m_AmmoCount[i] = 0;
+	for(int &AmmoCount : m_AmmoCount)
+		AmmoCount = 0;
 	m_OldMouseX = m_OldMouseY = 0.0f;
 }
 
@@ -100,8 +100,8 @@ void CControls::OnPlayerDeath()
 {
 	if(g_Config.m_ClResetWantedWeaponOnDeath)
 		m_LastData[g_Config.m_ClDummy].m_WantedWeapon = m_InputData[g_Config.m_ClDummy].m_WantedWeapon = 0;
-	for(int i = 0; i < NUM_WEAPONS; i++)
-		m_AmmoCount[i] = 0;
+	for(int &AmmoCount : m_AmmoCount)
+		AmmoCount = 0;
 	m_JoystickTapTime = 0; // Do not launch hook on first tap
 }
 

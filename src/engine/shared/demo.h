@@ -119,7 +119,7 @@ private:
 	int64 m_Time;
 
 public:
-	CDemoPlayer(class CSnapshotDelta *m_pSnapshotDelta);
+	CDemoPlayer(class CSnapshotDelta *pSnapshotDelta);
 
 	void SetListener(IListener *pListener);
 

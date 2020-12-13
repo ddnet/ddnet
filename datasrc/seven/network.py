@@ -1,4 +1,4 @@
-from .datatypes import *
+from .datatypes import Enum, Flags, NetArray, NetBool, NetEnum, NetEvent, NetFlag, NetIntAny, NetIntRange, NetMessage, NetObject, NetString, NetStringStrict, NetTick
 
 Pickups = Enum("PICKUP", ["HEALTH", "ARMOR", "GRENADE", "SHOTGUN", "LASER", "NINJA", "GUN", "HAMMER"])
 Emotes = Enum("EMOTE", ["NORMAL", "PAIN", "HAPPY", "SURPRISE", "ANGRY", "BLINK"])

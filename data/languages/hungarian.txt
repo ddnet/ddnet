@@ -2,7 +2,7 @@
 #originally created by:
 #	Feca
 #modified by:
-#
+#	Boti.
 ##### /authors #####
 
 ##### translated strings #####
@@ -92,7 +92,7 @@ Connect
 == Csatlakozás
 
 Connecting to
-== Csatlakozás a
+== Csatlakozás..
 
 Connection Problems...
 == Csatlakozási problémák...
@@ -131,7 +131,7 @@ Disconnected
 == Lekapcsolódott
 
 Downloading map
-== Pálya letöltése
+== Pálya letöltése..
 
 Draw!
 == Döntetlen!
@@ -149,7 +149,7 @@ Error
 == Hiba
 
 Error loading demo
-== Hiba a demó betöltése közben
+== Hiba történt a demó betöltése közben
 
 Favorite
 == Kedvenc
@@ -170,7 +170,7 @@ Folder
 == Mappa
 
 Force vote
-== Különleges szavazás
+== Szavazás kényszerítése
 
 Free-View
 == Szabad-nézet
@@ -290,7 +290,7 @@ Open
 == Megnyit
 
 Parent Folder
-== Szülői mappa
+== Főmappa
 
 Password
 == Jelszó
@@ -441,7 +441,7 @@ Team chat
 == Csapat chat
 
 The audio device couldn't be initialised.
-== A hangeszköz nem kezdeményezhető.
+== A hangeszköz nem érzékelhető.
 
 The server is running a non-standard tuning on a pure game type.
 == A szerver egy nem szabványos hangolást futtat a tiszta játék típuson.
@@ -520,7 +520,7 @@ Internet
 
 
 Max demos
-== Maximum Demó
+== Maximum Demók
 
 News
 == Hírek
@@ -607,7 +607,7 @@ Type:
 == Típus:
 
 Dummy settings
-== Másolat beállításai
+== Dummy beállításai
 
 AntiPing
 == Antiping
@@ -643,7 +643,7 @@ DDNet
 == DDNet
 
 No updates available
-== Nem elérhető fejlesztés
+== Nincs elérhető frissítés
 
 Enable server message sound
 == Szerver chat hang engedélyezése
@@ -652,7 +652,7 @@ second
 == másodperc
 
 Show votes window after voting
-== Szavazási ablak mutatása
+== Szavazási ablak mutatása szavazás után
 
 HUD
 == HUD
@@ -661,10 +661,10 @@ Spectate previous
 == Előző nézése
 
 Look out!
-== Nézz oda!
+== Vigyázz!
 
 Spectate next
-== Utáni nézése
+== Következő nézése
 
 Show names in chat in team colors
 == Csapatszínben jelennek meg a játékosok a chatben
@@ -688,10 +688,10 @@ Deaths
 == Halálok
 
 Enable game sounds
-== Játék hang engedélyezése
+== Játék hangok engedélyezése
 
 DDNet Client needs to be restarted to complete update!
-== Újra kell indítani a DDNet Klienst a fejlesztés befejezéséhez!
+== Újra kell indítani a DDNet Klienst a frissítés befejezéséhez!
 
 Spectator
 == Néző
@@ -741,9 +741,6 @@ Show health + ammo
 Team message
 == Csapat üzenet
 
-Manual %3d:%02d  
-== Manuális %3d:%02  
-
 Automatically create statboard csv
 == Magától készítsen csv pontszámtáblát
 
@@ -767,9 +764,6 @@ Remove chat
 
 Check now
 == Nézd meg
-
-Race %3d:%02d  
-== Verseny %3d:%02d 
 
 Background (regular)
 == Háttér (pálya)
@@ -799,7 +793,7 @@ DDNet %s is available:
 == DDnet %s verzió elérhető
 
 Updating...
-== Fejlesztés...
+== Frissítés...
 
 Overlay entities
 == Entitás jelenése
@@ -862,7 +856,7 @@ Strict gametype filter
 == Szigorú játékmód szűrő
 
 Try fast HTTP map download first
-== Próbálja meg letölteni a HTTP Fájlokat elösször
+== Próbálja meg a gyors HTTP letöltést először
 
 Use DDRace Scoreboard
 == DDRace pontszámtábla használata
@@ -889,10 +883,7 @@ Clan plates size
 == Klán felirat mérete
 
 Update now
-== Feljeszd most
-
-Auto %3d:%02d  
-== Auto %3d:%02d  
+== frissíts most
 
 Show clan above name plates
 == Klán mutatása a nevek fölött
@@ -913,10 +904,10 @@ AntiPing: predict weapons
 == Antiping: fegyvereknél
 
 DDNet Client updated!
-== DDNet Kliens fejlesztve van!
+== DDNet Kliens frissítve van!
 
 Outline color
-== Vázolt szín
+== Körvonal szín
 
 Highlighted message
 == Kiemelt üzenet
@@ -958,10 +949,10 @@ Deactivate
 == Deaktiválás
 
 Welcome to DDNet
-== Üzvözlet a DDNet-en
+== Üdvözlet a DDNet-en
 
 Preinit VBO (iGPUs only)
-== VBO használata (csak iGPU-nak)
+== VBO használata (csak iGPU)
 
 Threaded sound loading
 == Csavarmenetes hang betöltése
@@ -994,7 +985,7 @@ Date
 == Idő
 
 Show DDNet map finishes in server browser
-== Mutassa a DDNet befejezett pályákat a keresőben
+== Mutassa a befejezett pályákat a keresőben
 
 transmits your player name to info2.ddnet.tw
 == Keress rá a játékosnevedre az info2.ddnet.tw oldalon
@@ -1003,7 +994,7 @@ Reload
 == újratöltés
 
 Hammerfly dummy
-== Másolat kalapács
+== Dummy Kalapács
 
 Downloading %s:
 == Letöltés %s:
@@ -1020,26 +1011,23 @@ Personal best:
 Show entities
 == Entitások mutatása
 
-Replay %3d:%02d  
-== Visszajátszás %3d:%02d  
-
 Video name:
 == Videó neve:
 
 Connect Dummy
-== Másolat belépése
+== Dummy Csatlakoztatása
 
 Disconnect Dummy
-== Másolat kilépése
+== Dummy Lecsatlakoztatása
 
 Filter connecting players
-== "Connecting" szűrés
+== Csatlakozók szűrése
 
 Pause
 == Nézetváltás
 
 Toggle dummy
-== Másolat irányítása
+== Dummy irányítása
 
 Fetch Info
 == Minden infó
@@ -1066,7 +1054,7 @@ Show all
 == Mutasson mindent
 
 Learn
-== Wiki
+== Wikipédia
 
 Successfully saved the replay!
 == Sikeresen elmentette a visszajátszást!
@@ -1087,7 +1075,7 @@ Use high DPI
 == Magas DPI használata
 
 Update failed! Check log...
-== Fejlesztés sikertelen! Tekintsen a naplóba...
+== Frissítés sikertelen! nézd meg a logot...
 
 Toggle dyncam
 == Dinamikus kamera
@@ -1117,10 +1105,10 @@ Markers:
 == 1 új értesítés
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== A DDraceNetwork együttműködésen alapuló online játékként tekinthető, ahol a cél az, hogy te és egy csapat Tee elérje a célvonalat. Ha újonc vagy, a kezdő szervereket ajánljuk, ahol a legegyszerűbb versenyeket tároljuk. A lehető legkisebb ping választása alapján válasszon egy szervert.
+== A DDraceNetwork együttműködésen alapuló online játékként tekinthető, ahol a cél az, hogy te és egy csapat Tee elérje a célvonalat. Ha újonc vagy, a kezdő (Novice) szervereket ajánljuk, ahol a legegyszerűbb versenyeket tároljuk. A lehető legkisebb ping választása alapján válassz egy szervert.
 
 The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== A pályákon fagyasztó részeket találtok, melyek ideiglenesen blokkolják a játékos mozgását. Együtt kell dolgoznod a pályarészek átjutásán.
+== A pályákon fagyasztó részeket találtok, melyek ideiglenesen blokkolják a játékos mozgását. Együtt kell dolgoznod a pályarészekkel az átjutáshoz.
 
 The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
 == A görgő megváltoztatja a fegyvereket. A kalapács (bal egérgomb) segítségével más Tee-ket megüthetsz és ütésekkel kiolvadhatnak a fagyásból.
@@ -1129,19 +1117,19 @@ Hook (right mouse) can be used to swing through the map and to hook other tees t
 == A horoggal (jobb egérgomb) megkapaszkodhatsz néhány platformon és más Tee-ket is megragadhatsz vele.
 
 Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== A legfontosabb kulcsa a sikerhez: Nincs oktatóprogram, így mindenki magától tanulja meg más játékosok által. (T gombbal tudsz Chattelni)
+== A legfontosabb kulcs a sikerhez: Nincs oktatóprogram, így mindenki magától tanulja meg más játékosok által. (T gombbal tudsz Chattelni)
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
-== Ajánlott, hogy ellenőrizze a beállításokat, hogy a kedvéhez igazítsa őket, mielőtt csatlakozna egy szerverhez. (Tipp: szűrők)
+== Ajánlott, hogy ellenőrizd a beállításokat, hogy a kedvedhez igazítsd őket, mielőtt csatlakoznál egy szerverhez. (Tipp: szűrők)
 
-Please enter your nick name below.
+Please enter your nickname below.
 == Írja be lent a becenevét.
 
 9+ new mentions
 == 9+ új értesítés
 
 Replay feature is disabled!
-== Visszajátszás mód kikapcsolva van!
+== Visszajátszás mód kikapcsolva!
 
 Lock team
 == Csapat lezárása
@@ -1162,116 +1150,149 @@ Length
 == Hossz
 
 Are you sure that you want to disconnect your dummy?
-== Biztos, hogy kiakarod léptetni a másolatodat?
-
-Downloading ddnet-info.json failed
-== 
+== Biztos, hogy kiakarod léptetni a dummy-d?
 
 Saving ddnet-settings.cfg failed
-== 
+== nem sikerült elmenteni ddnet-settings.cfg fájlt
 
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== 
+==  A mérete a texturának %s nem látható, ami látható bugokhoz vezethet.
 
 Warning
-== 
+== Figyelmeztetés
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== Debug mód bekapcsolva. nyomd meg a Ctrl+Shift+D billentyű kombinációt a kikapcsolásához
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 
+==  Használd a k gombot az újraéledéshez, q betű a megfigyeléshez. nézd meg a beállításokat a többi bindért.
+
+Existing Player
+== Létező Játékos
+
+Your nickname '%s' is already used (%d points). Do you still want to use it?
+== A Neved '%s' már használva volt (%d ponttal). Biztosan szeretnéd használni?
+
+Checking for existing player with your name
+== Keresés már létező játékos után a neveddel
 
 Country / Region
-== 
+== Ország / Régió
 
 Speed
-== 
+== Sebesség
 
 Theme
-== 
+== Téma
 
 %d of %d servers
-== 
+== %d a %d szerverből
 
 %d of %d server
-== 
+== %d ből %d szerver
 
 %d players
-== 
+== %d játékos
 
 %d player
-== 
-
-File
-== 
+== %d játékos
 
 Demos directory
-== 
+== Demók Helye
+
+Smooth Dynamic Camera
+== Egyenletesen dinamikus kamera
 
 Skip the main menu
-== 
+== főmenű kihagyása
 
 Themes directory
-== 
+== Témák Helye
 
 Download skins
-== 
+== Skinek letöltése
 
 Skin prefix
-== 
+== Karakter prefix
 
 Skin Database
-== 
+== Több skin
 
 Skins directory
-== 
+== Skinek Helye
+
+Game sound volume
+== Játék Hangerő
+
+Chat sound volume
+== Chat Hangerő
 
 Background music volume
-== 
+== Háttér Zene hangerő
 
 Assets
-== 
+== Kinézet
+
+Use old chat style
+== régi chat stílus használata
+
+Highlight
+== kijelöl
 
 Client message
-== 
+== Kliens Üzenet
 
 Show others (own team only)
-== 
+== Mások mutatása (csak csapatok)
 
 Use current map as background
-== 
+== Jelenlegi map használta háttérként
 
 Entities
-== 
+== Entitások
 
 Emoticons
-== 
+== Hangulatjelek
 
 Particles
-== 
+== effektek
 
 Assets directory
-== 
-
-https://wiki.ddnet.tw/
-== 
+== Kinézet Helye
 
 Website
-== 
+== Weboldal
 
 Settings
-== 
+== Beállítások
 
 Stop server
-== 
+== Szerver leállítása
 
 Run server
-== 
+== Szerver indítása
 
 Server executable not found, can't run server
-== 
+== nem sikerült elindítani a szervert
 
 Editor
-== 
+== Szerkesztő
 
 [Start menu]
 Play
+== Játszás
+
+Manual
+== Manuális
+
+Race
+== Verseny
+
+Auto
+== Autómatikus
+
+Replay
+== Visszajátszás
+
+https://wiki.ddnet.tw/
 == 

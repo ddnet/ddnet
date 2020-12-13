@@ -192,7 +192,7 @@ $ ./DDNet-Server -f mine.cfg
 </a>
 
 Installation from Repository
------------------
+----------------------------
 
 Debian/Ubuntu
 
@@ -204,7 +204,7 @@ $ apt-get install ddnet
 MacOS
 
 ```bash
-$ brew cask install ddnet
+$ brew install --cask ddnet
 ```
 
 Fedora
@@ -219,4 +219,17 @@ Arch Linux
 $ yay -S ddnet
 ```
 
+FreeBSD
 
+```bash
+$ pkg install DDNet
+```
+
+Benchmarking
+------------
+
+DDNet is available in the [Phoronix Test Suite](https://openbenchmarking.org/test/pts/ddnet). If you have PTS installed you can easily benchmark DDNet on your own system like this:
+
+```bash
+$ phoronix-test-suite benchmark ddnet
+```

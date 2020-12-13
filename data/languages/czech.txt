@@ -310,10 +310,6 @@ Ping
 Pistol
 == Pistolka
 
-[Demo browser]
-Play
-== Přehrát
-
 Play background music
 == Přehrávat hudbu na pozadí
 
@@ -625,651 +621,676 @@ Name plates size
 Type:
 == Typ:
 
-Downloading ddnet-info.json failed
-== 
-
 Successfully saved the replay!
-== 
-
-Saving ddnet-settings.cfg failed
-== 
+== Záznam byl úspěšně uložen!
 
 Replay feature is disabled!
-== 
-
-The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== 
-
-Warning
-== 
+== Funkce opakovaného přehrávání je zakázána!
 
 Game paused
-== 
+== Game paused
 
 Server best:
-== 
+== Server best:
 
 Personal best:
-== 
-
-Browser
-== 
-
-Ghost
-== 
-
-Loading DDNet Client
-== 
-
-Reconnect in %d sec
-== 
-
-Render demo
-== 
-
-Replace video
-== 
-
-File already exists, do you want to overwrite it?
-== 
-
-Are you sure that you want to disconnect?
-== 
-
-Disconnect Dummy
-== 
-
-Are you sure that you want to disconnect your dummy?
-== 
-
-Welcome to DDNet
-== 
-
-DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== 
-
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== 
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== 
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== 
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== 
-
-Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 
-
-It's recommended that you check the settings to adjust them to your liking before joining a server.
-== 
-
-Please enter your nick name below.
-== 
-
-Country / Region
-== 
-
-Destination file already exist
-== 
-
-Speed
-== 
-
-Video name:
-== 
-
-Show DDNet map finishes in server browser
-== 
-
-transmits your player name to info2.ddnet.tw
-== 
-
-Theme
-== 
-
-Search
-== 
-
-Exclude
-== 
-
-%d of %d servers
-== 
-
-%d of %d server
-== 
-
-%d players
-== 
-
-%d player
-== 
-
-Filter connecting players
-== 
-
-Indicate map finish
-== 
-
-Unfinished map
-== 
-
-Countries
-== 
-
-Types
-== 
-
-Select a name
-== 
-
-Please use a different name
-== 
-
-Remove chat
-== 
-
-File
-== 
-
-Markers:
-== 
-
-%.2f MiB
-== 
-
-%.2f KiB
-== 
-
-Demo
-== 
-
-Markers
-== 
-
-Length
-== 
-
-Date
-== 
-
-Fetch Info
-== 
-
-Demos directory
-== 
-
-Render
-== 
-
-Connecting dummy
-== 
-
-Connect Dummy
-== 
-
-Kill
-== 
-
-Pause
-== 
-
-Reload
-== 
-
-Deactivate
-== 
-
-Activate
-== 
-
-Save
-== 
-
-Switch weapon when out of ammo
-== 
-
-Reset wanted weapon on death
-== 
-
-Show only chat messages from friends
-== 
-
-Show clan above name plates
-== 
-
-Clan plates size
-== 
-
-Skip the main menu
-== 
-
-Refresh Rate
-== 
-
-Show console window
-== 
-
-Themes directory
-== 
-
-Automatically take statboard screenshot
-== 
-
-Automatically create statboard csv
-== 
-
-Max CSVs
-== 
-
-Dummy settings
-== 
-
-Download skins
-== 
-
-Vanilla skins only
-== 
-
-Fat skins (DDFat)
-== 
-
-Skin prefix
-== 
-
-Skin Database
-== 
-
-Skins directory
-== 
-
-Hook collisions
-== 
-
-Zoom in
-== 
-
-Zoom out
-== 
-
-Default zoom
-== 
-
-Show others
-== 
-
-Show all
-== 
-
-Toggle dyncam
-== 
-
-Toggle dummy
-== 
-
-Toggle ghost
-== 
-
-Dummy copy
-== 
-
-Hammerfly dummy
-== 
-
-Converse
-== 
-
-Statboard
-== 
-
-Lock team
-== 
-
-Show entities
-== 
-
-Show HUD
-== 
-
-UI mouse s.
-== 
-
-Borderless window
-== 
-
-may cause delay
-== 
-
-Screen
-== 
-
-Use OpenGL 3.3 (experimental)
-== 
-
-Preinit VBO (iGPUs only)
-== 
-
-Multiple texture units (disable for MacOS)
-== 
-
-Use high DPI
-== 
-
-Enable game sounds
-== 
-
-Enable gun sound
-== 
-
-Enable long pain sound (used when shooting in freeze)
-== 
-
-Enable server message sound
-== 
-
-Enable regular chat sound
-== 
-
-Enable team chat sound
-== 
-
-Enable highlighted chat sound
-== 
-
-Threaded sound loading
-== 
-
-Map sound volume
-== 
-
-Background music volume
-== 
-
-HUD
-== 
-
-DDNet
-== 
-
-Assets
-== 
-
-DDNet Client needs to be restarted to complete update!
-== 
-
-Use DDRace Scoreboard
-== 
-
-Show client IDs in Scoreboard
-== 
-
-Show score
-== 
-
-Show health + ammo
-== 
-
-Show names in chat in team colors
-== 
-
-Show kill messages
-== 
-
-Show votes window after voting
-== 
-
-Messages
-== 
-
-System message
-== 
-
-Reset
-== 
-
-Highlighted message
-== 
-
-Spectator
-== 
-
-Look out!
-== 
-
-Team message
-== 
-
-We will win
-== 
-
-Friend message
-== 
-
-Friend
-== 
-
-Hi o/
-== 
-
-Normal message
-== 
-
-Hello and welcome
-== 
-
-Client message
-== 
-
-Inner color
-== 
-
-Outline color
-== 
-
-Wait before try for
-== 
-
-second
-== 
-
-seconds
-== 
-
-Save the best demo of each race
-== 
-
-Default length: %d
-== 
-
-Enable replays
-== 
-
-Show ghost
-== 
-
-Save ghost
-== 
-
-Gameplay
-== 
-
-Overlay entities
-== 
-
-Size
-== 
-
-Show text entities
-== 
-
-Show others (own team only)
-== 
-
-Show quads
-== 
-
-AntiPing
-== 
-
-AntiPing: predict other players
-== 
-
-AntiPing: predict weapons
-== 
-
-AntiPing: predict grenade paths
-== 
-
-Show other players' hook collision lines
-== 
-
-Show other players' key presses
-== 
-
-Old mouse mode
-== 
-
-Background (regular)
-== 
-
-Background (entities)
-== 
-
-Use current map as background
-== 
-
-Show tiles layers from BG map
-== 
-
-Try fast HTTP map download first
-== 
-
-DDNet %s is available:
-== 
-
-Update now
-== 
-
-Updating...
-== 
-
-DDNet Client updated!
-== 
-
-No updates available
-== 
-
-Check now
-== 
-
-New random timeout code
-== 
-
-Entities
-== 
-
-Emoticons
-== 
-
-Particles
-== 
-
-Assets directory
-== 
+== Personal best:
 
 Learn
-== 
+== Učit se
+
+Browser
+== Browser
+
+Ghost
+== Duch
+
+Loading DDNet Client
+== Načítání DDNet klienta
+
+Reconnect in %d sec
+== Opětovné připojení za %d sekund
+
+Render demo
+== Vyrenderovat demo
+
+Replace video
+== Nahradit video
+
+File already exists, do you want to overwrite it?
+== Soubor již existuje, chcete jej přepsat?
+
+Are you sure that you want to disconnect?
+== Jste si jisti, že se chcete odpojit?
+
+Disconnect Dummy
+== Odpojit Dummyho
+
+Are you sure that you want to disconnect your dummy?
+== Jste si jisti, že chcete odpojit svého dummyho?
+
+Welcome to DDNet
+== Vítejte na DDNetu
+
+DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
+== DDraceNetwork je kooperativní online hra, kde je cílem pro vás a vaši skupinu dosáhnout cílové čáry mapy. Jako nováček byste měli začít na začínajících serverech, které hostují nejjednodušší mapy. Zvažte ping a vyberte si server, který je vám nejblíž.
+
+The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
+== Mapy obsahují zmrazení, které dočasně znemožňuje vašemu tee pohyb. Abyste se dostali přes tyto části, musíte spolupracovat.
+
+The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
+== Kolečko myši mění zbraně. Kladivo (levé tlačítko myši) lze použít k zasažení ostatních tee a jejich rozmražení.
+
+Hook (right mouse) can be used to swing through the map and to hook other tees to you.
+== Hák (pravé tlačítko myši) lze použít k zhoupnutí se skrz mapu a k přitáhnutí ostatních tee k vám.
+
+Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
+== A co je nejdůležitější, klíčem je komunikace. Neexistuje žádný návod, takže budete muset chatovat (klávesou t) s ostatními hráči, abyste se naučili základy a triky hry.
+
+It's recommended that you check the settings to adjust them to your liking before joining a server.
+== Před připojením k serveru se doporučuje zkontrolovat nastavení a upravit je podle vašich představ.
+
+Destination file already exist
+== Cílový soubor již existuje
+
+Video name:
+== Název videa:
+
+Show DDNet map finishes in server browser
+== Zobrazit dokončení DDNet map v prohlížeči serveru
+
+Search
+== Hledat
+
+Exclude
+== Vyloučit
+
+Filter connecting players
+== Filtrovat připojující se hráče
+
+Indicate map finish
+== Indikovat dokončení mapy
+
+Unfinished map
+== Nedokončená mapa
+
+Countries
+== Země
+
+Types
+== Typy 
+
+DDNet %s is out!
+== DDNet %s je venku!
+
+Downloading %s:
+== Stahování %s:
+
+DDNet Client updated!
+== Aktualizace selhala! Zkontrolujte log...
+
+Update now
+== Aktualizovat nyní
+
+Restart
+== Restartovat
+
+Select a name
+== Vyberte jméno
+
+Please use a different name
+== Použijte jiné jméno
+
+Remove chat
+== Odebrat chat
+
+Markers:
+== Markery:
+
+%.2f MiB
+== %.2f MiB
+
+%.2f KiB
+== %.2f KiB
+
+Demo
+== Demo
+
+Markers
+== Markery
+
+Length
+== Délka
+
+Date
+== Datum
+
+Fetch Info
+== Načíst informace
+
+Render
+== Render
+
+Connecting dummy
+== Připojování dummyho
+
+Connect Dummy
+== Připojit dummyho
+
+Reload
+== Znovu načíst
+
+Deactivate
+== Deaktivovat
+
+Activate
+== Aktivovat
+
+Save
+== Uložit
+
+Switch weapon when out of ammo
+== Změnit zbraň když vám dojdou náboje
+
+Reset wanted weapon on death
+== Resetujte hledanou zbraň po smrti
+
+Show only chat messages from friends
+== Zobrazit pouze zprávy od přátel
+
+Show clan above name plates
+== Ukázat klan nad jménem
+
+Clan plates size
+== Velikost klanových jmenovek
+
+Refresh Rate
+== Obnovovací frekvence
+
+Show console window
+== Zobrazit konzolové okno
+
+Automatically take statboard screenshot
+== Automaticky pořídit snímek obrazovky statboardu
+
+Automatically create statboard csv
+== Automaticky vytvořit statboard csv
+
+Max CSVs
+== Maximální CSV
+
+Dummy settings
+== Nastavení dummyho
+
+Vanilla skins only
+== Pouze vanilla skiny
+
+Fat skins (DDFat)
+== Tlusté skiny (DDFat)
+
+Skin prefix
+== Skin prefix
+
+Hook collisions
+== Kolize háku
+
+Pause
+== Pauza
+
+Kill
+== Zabít
+
+Zoom in
+== Přiblížit
+
+Zoom out
+== Oddálit
+
+Default zoom
+== Výchozí zvětšení
+
+Show others
+== Ukázat ostatní
+
+Show all
+== Ukázat všechny
+
+Toggle dyncam
+== Přepnout dyncam
+
+Toggle dummy
+== Přepnout dummyho
+
+Toggle ghost
+== Přepnout ducha
+
+Dummy copy
+== Dummy kopírovat
+
+Hammerfly dummy
+== Dummy hammerfly
+
+Converse
+== Konverzovat
+
+Statboard
+== Statboard
+
+Lock team
+== Zamknout tým
+
+Show entities
+== Zobrazit entity
+
+Show HUD
+== Zobrazit HUD
+
+UI mouse s.
+== UI mouse s.
+
+Borderless window
+== Okno bez okrajů
+
+may cause delay
+== může způsobit zpoždění
+
+Screen
+== Obrazovka
+
+Use OpenGL 3.3 (experimental)
+== Použít OpenGL 3.3 (experimentální)
+
+Preinit VBO (iGPUs only)
+== Preinit VBO (pouze iGPU)
+
+Multiple texture units (disable for MacOS)
+== Více texturových jednotek (deaktivovat pro MacOS)
+
+Use high DPI
+== Použít vysoké DPI
+
+Enable game sounds
+== Povolit zvuky hry
+
+Enable gun sound
+== Povolit zvuk zbraně
+
+Enable long pain sound (used when shooting in freeze)
+== Povolit zvuk dlouhé bolesti (používá se při střílení ve zmrazení)
+
+Enable server message sound
+== Povolit zvuk zpráv serveru
+
+Enable regular chat sound
+== Povolit normální zvuk chatu
+
+Enable team chat sound
+== Povolit zvuk týmového chatu
+
+Enable highlighted chat sound
+== Povolit zvuk zvýrazněné zprávy
+
+Threaded sound loading
+== Načítání Threaded zvuku
+
+Map sound volume
+== Hlasitost zvuků mapy
+
+HUD
+== HUD
+
+DDNet
+== DDNet
+
+DDNet Client needs to be restarted to complete update!
+== K dokončení aktualizace je nutné restartovat klienta DDNet!
+
+Use DDRace Scoreboard
+== Použijte hodnotící tabuli DDRace
+
+Show client IDs in Scoreboard
+== Zobrazit ID klienta ve výsledkové tabulce
+
+Show score
+== Zobrazit skóre
+
+Show health + ammo
+== Ukázat zdraví + munici
+
+Show names in chat in team colors
+== Zobrazit jména v chatu v týmových barvách
+
+Show kill messages
+== Zobrazit zprávy zabití
+
+Show votes window after voting
+== Zobrazit okno hlasování po hlasování
+
+Messages
+== Zprávy
+
+System message
+== Systémová zpráva
+
+Reset
+== Resetovat
+
+Highlighted message
+== Zvýrazněná zpráva
+
+Spectator
+== Divák
+
+Look out!
+== Pozor!
+
+Team message
+== Týmová zpráva
+
+We will win
+== Vyhrajeme
+
+Friend message
+== Zpráva od přítele
+
+Friend
+== Přítel
+
+Hi o/
+== Ahoj o/
+
+Normal message
+== Normální zpráva
+
+Hello and welcome
+== Ahoj a vítejte
+
+Inner color
+== Vnitřní barva
+
+Outline color
+== Barva obrysu
+
+Wait before try for
+== Počkejte, než to zkusíte
+
+second
+== sekunda
+
+seconds
+== sekundy
+
+Save the best demo of each race
+== Uložte si nejlepší demo každého závodu
+
+Default length: %d
+== Výchozí délka: %d
+
+Enable replays
+== Povolit záznamy
+
+Show ghost
+== Ukázat ducha
+
+Save ghost
+== Uložit ducha
+
+Gameplay
+== Hratelnost
+
+Overlay entities
+== Překrytí entit
+
+Size
+== Velikost
+
+Show text entities
+== Zobrazit textové entity
+
+Show others (own team only)
+== Zobrazit ostatní (pouze vlastní tým)
+
+Show quads
+== Zobrazit quads
+
+AntiPing
+== AntiPing
+
+AntiPing: predict other players
+== AntiPing: předvídání ostatních hráčů
+
+AntiPing: predict weapons
+== AntiPing: předvídání zbraní
+
+AntiPing: predict grenade paths
+== AntiPing: předvídání cest granátů
+
+Show other players' hook collision lines
+== Zobrazit čáru kolize háků ostatních hráčů
+
+Show other players' key presses
+== Zobrazit stisknutí kláves ostatních hráčů
+
+Old mouse mode
+== Starý režim myši
+
+Background (regular)
+== Pozadí (běžné)
+
+Background (entities)
+== Pozadí (entity)
+
+Show tiles layers from BG map
+== Zobrazit vrstvy dlaždic z mapy BG
+
+Try fast HTTP map download first
+== Zkusit rychlé HTTP stáhnutí map jako první
+
+DDNet %s is available:
+== DDNet %s je k dispozici:
+
+Updating...
+== Aktualizace...
+
+No updates available
+== Nejsou k dispozici žádné aktualizace
+
+Check now
+== Zkontrolovat nyní
+
+New random timeout code
+== Nový náhodný timeout kód
+
+Time
+== Čas
+
+Manual
+== Manuál
+
+Race
+== Závod
+
+Auto
+== Auto
+
+Replay
+== Replay
+
+Follow
+== Následovat
+
+Frags
+== Fragy
+
+Deaths
+== Smrti
+
+Suicides
+== Sebevraždy
+
+Ratio
+== Poměr
+
+Net
+== Net
+
+FPM
+== FPM
+
+Spree
+== Řádění
+
+Best
+== Nejlepší
+
+Grabs
+== Chycení
+
+1 new mention
+== 1 nová zmínka
+
+%d new mentions
+== %d nových zmínek
+
+9+ new mentions
+== 9+ nových zmínek
+
+Saving ddnet-settings.cfg failed
+== Uložení souboru ddnet-settings.cfg se nezdařilo
+
+The width or height of texture %s is not divisible by 16, which might cause visual bugs.
+== Šířka nebo výška textury %s není dělitelná 16, což může způsobit vizuální chyby.
+
+Warning
+== Varování
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== Režim ladění povolen. Stisknutím kláves Ctrl + Shift + D deaktivujte režim ladění.
+
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== Pomocí klávesy k se zabijete (restartujte), pomocí q se zapauzijete a můžete sledovat ostatní hráče. Viz nastavení pro další klávesové zkratky.
+
+Please enter your nickname below.
+== Níže zadejte svou přezdívku.
+
+Existing Player
+== Stávající hráč
+
+Your nickname '%s' is already used (%d points). Do you still want to use it?
+== Vaše přezdívka '%s' je již použita (%d bodů). Chcete jej i přes to používat?
+
+Checking for existing player with your name
+== Kontrola pro existujícího hráče s vaším jménem
+
+Country / Region
+== Země / Region
+
+Speed
+== Rychlost
+
+transmits your player name to info2.ddnet.tw
+== přenese vaše jméno hráče na info2.ddnet.tw
+
+Theme
+== Téma
+
+%d of %d servers
+== %d z %d serverů
+
+%d of %d server
+== %d z %d serverů
+
+%d players
+== %d hráčů
+
+%d player
+==  %d hráč
+
+[Demo browser]
+Play
+== Přehrát
+
+Demos directory
+== Adresář dem
+
+Smooth Dynamic Camera
+== Hladká dynamická kamera
+
+Skip the main menu
+== Přeskočit hlavní nabídku
+
+Themes directory
+== Adresář témat
+
+Download skins
+== Stáhnout skiny
+
+Skin Database
+== Databáze skinů
+
+Skins directory
+== Adresář skinů
+
+Game sound volume
+== Hlasitost zvuku hry
+
+Chat sound volume
+== Hlasitost chatu
+
+Background music volume
+== Hlasitost hudby na pozadí
+
+Assets
+== Aktiva
+
+Use old chat style
+== Použijte starý styl chatu
+
+Highlight
+== Zvýraznit
+
+Client message
+== Zpráva klienta
+
+Use current map as background
+== Použít aktuální mapu jako pozadí
+
+Entities
+== Entity
+
+Emoticons
+== Emotikony
+
+Particles
+== Částice
+
+Assets directory
+== Adresář aktiv
 
 https://wiki.ddnet.tw/
-== 
+== https://wiki.ddnet.tw/
 
 Website
-== 
+== webová stránka
 
 Settings
-== 
+== Nastavení
 
 Stop server
-== 
+== Zastavit server
 
 Run server
-== 
+== Spustit server
 
 Server executable not found, can't run server
-== 
+== Spustitelný soubor serveru nebyl nalezen, server nelze spustit
 
 Editor
-== 
+== Editor
 
 [Start menu]
 Play
-== 
-
-DDNet %s is out!
-== 
-
-Downloading %s:
-== 
+== Hrát
 
 Update failed! Check log...
-== 
-
-Restart
-== 
-
-Time
-== 
-
-Manual %3d:%02d  
-== 
-
-Race %3d:%02d  
-== 
-
-Auto %3d:%02d  
-== 
-
-Replay %3d:%02d  
-== 
-
-Follow
-== 
-
-Frags
-== 
-
-Deaths
-== 
-
-Suicides
-== 
-
-Ratio
-== 
-
-Net
-== 
-
-FPM
-== 
-
-Spree
-== 
-
-Best
-== 
-
-Grabs
-== 
-
-1 new mention
-== 
-
-%d new mentions
-== 
-
-9+ new mentions
-== 
+== Aktualizace selhala! Zkontrolujte log...

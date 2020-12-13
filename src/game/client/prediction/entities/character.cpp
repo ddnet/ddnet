@@ -613,7 +613,7 @@ void CCharacter::HandleSkippableTiles(int Index)
 	// handle speedup tiles
 	if(Collision()->IsSpeedup(Index))
 	{
-		vec2 Direction, MaxVel, TempVel = m_Core.m_Vel;
+		vec2 Direction, TempVel = m_Core.m_Vel;
 		int Force, MaxSpeed = 0;
 		float TeeAngle, SpeederAngle, DiffAngle, SpeedLeft, TeeSpeed;
 		Collision()->GetSpeedup(Index, &Direction, &Force, &MaxSpeed);
@@ -917,8 +917,8 @@ void CCharacter::DDRacePostCoreTick()
 	// handle Anti-Skip tiles
 	std::list<int> Indices = Collision()->GetMapIndices(m_PrevPos, m_Pos);
 	if(!Indices.empty())
-		for(std::list<int>::iterator i = Indices.begin(); i != Indices.end(); i++)
-			HandleTiles(*i);
+		for(int Index : Indices)
+			HandleTiles(Index);
 	else
 	{
 		HandleTiles(CurrentIndex);

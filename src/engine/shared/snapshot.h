@@ -63,7 +63,7 @@ public:
 		int m_NumDeletedItems;
 		int m_NumUpdateItems;
 		int m_NumTempItems; // needed?
-		int m_pData[1];
+		int m_aData[1];
 	};
 
 private:
@@ -82,7 +82,7 @@ private:
 public:
 	static int DiffItem(int *pPast, int *pCurrent, int *pOut, int Size);
 	CSnapshotDelta();
-	CSnapshotDelta(const CSnapshotDelta &old);
+	CSnapshotDelta(const CSnapshotDelta &Old);
 	int GetDataRate(int Index) { return m_aSnapshotDataRate[Index]; }
 	int GetDataUpdates(int Index) { return m_aSnapshotDataUpdates[Index]; }
 	void SetStaticsize(int ItemType, int Size);
@@ -119,7 +119,7 @@ public:
 	void PurgeAll();
 	void PurgeUntil(int Tick);
 	void Add(int Tick, int64 Tagtime, int DataSize, void *pData, int CreateAlt);
-	int Get(int Tick, int64 *Tagtime, CSnapshot **pData, CSnapshot **ppAltData);
+	int Get(int Tick, int64 *pTagtime, CSnapshot **ppData, CSnapshot **ppAltData);
 };
 
 class CSnapshotBuilder
@@ -154,7 +154,7 @@ public:
 	CSnapshotItem *GetItem(int Index);
 	int *GetItemData(int Key);
 
-	int Finish(void *Snapdata);
+	int Finish(void *pSnapdata);
 };
 
 #endif // ENGINE_SNAPSHOT_H

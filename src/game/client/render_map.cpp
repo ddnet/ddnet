@@ -32,7 +32,10 @@ void CRenderTools::RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Cha
 	}
 
 	int64 MaxPointTime = (int64)pPoints[NumPoints - 1].m_Time * 1000ll;
-	TimeMicros = TimeMicros % MaxPointTime;
+	if(MaxPointTime > 0) // TODO: remove this check when implementing a IO check for maps(in this case broken envelopes)
+		TimeMicros = TimeMicros % MaxPointTime;
+	else
+		TimeMicros = 0;
 
 	int TimeMillis = (int)(TimeMicros / 1000ll);
 	for(int i = 0; i < NumPoints - 1; i++)

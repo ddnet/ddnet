@@ -350,7 +350,7 @@ TEST_F(TeeHistorian, DDNetVersion)
 		'6', '2', '3', 'f', '5', 'e', '4', 'c',
 		'd', '1', '8', '4', '5', '5', '6', ')',
 		0x00,
-		// EX uuid=1397b63e-ee4e-3919-b86a-b058887fcaf5 data_len=4
+		// EX uuid=41b49541-f26f-325d-8715-9baf4b544ef9 data_len=4
 		0x4a,
 		0x41, 0xb4, 0x95, 0x41, 0xf2, 0x6f, 0x32, 0x5d,
 		0x87, 0x15, 0x9b, 0xaf, 0x4b, 0x54, 0x4e, 0xf9,

@@ -769,7 +769,7 @@ Most importantly communication is key: There is no tutorial so you'll have to ch
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Det är rekomenderad att du kollar igenom inställningarna och ändra dom så de passar dig innan du ansluter dig till en server.
 
-Please enter your nick name below.
+Please enter your nickname below.
 == Skriv ditt smeknamn nedanför.
 
 Render
@@ -883,9 +883,6 @@ Show text entities
 Show ghost
 == Visa spöke
 
-Replay %3d:%02d  
-== Repris %3d:%02d
-
 1 new mention
 == 1 ny nämning
 
@@ -936,9 +933,6 @@ Follow
 
 Restart
 == Starta om
-
-Manual %3d:%02d  
-== Manual %3d:%02d
 
 Background (regular)
 == Bakgrund (vanlig)
@@ -1108,9 +1102,6 @@ Gameplay
 Loading DDNet Client
 == Laddar DDNet Klienten
 
-Auto %3d:%02d  
-== Auto %3d:%02d
-
 Show HUD
 == Visa HUD
 
@@ -1125,9 +1116,6 @@ Spree
 
 Show others
 == Visa andra
-
-Race %3d:%02d  
-== Race %3d:%02d
 
 Unfinished map
 == Oavslutat bana
@@ -1229,19 +1217,40 @@ Editor
 Play
 == Spela
 
-Downloading ddnet-info.json failed
-== 
+Manual
+== Manual
+
+Race
+== Race
+
+Auto
+== Auto
+
+Replay
+== Repris
 
 Saving ddnet-settings.cfg failed
+== 
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== 
+
+Existing Player
+== 
+
+Your nickname '%s' is already used (%d points). Do you still want to use it?
+== 
+
+Checking for existing player with your name
 == 
 
 Theme
 == 
 
-File
+Demos directory
 == 
 
-Demos directory
+Smooth Dynamic Camera
 == 
 
 Themes directory
@@ -1253,10 +1262,22 @@ Skin Database
 Skins directory
 == 
 
+Game sound volume
+== 
+
+Chat sound volume
+== 
+
 Background music volume
 == 
 
 Assets
+== 
+
+Use old chat style
+== 
+
+Highlight
 == 
 
 Use current map as background
