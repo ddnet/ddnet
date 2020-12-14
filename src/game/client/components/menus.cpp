@@ -1548,13 +1548,16 @@ void CMenus::RenderColorPicker()
 	// Logic
 	float PickerX, PickerY;
 
-	if(UI()->DoPickerLogic(&SColorPicker::ms_ColorPickerID, &ColorsArea, &PickerX, &PickerY))
+	static int ColorPickerID = 0;
+	static int HuePickerID = 0;
+
+	if(UI()->DoPickerLogic(&ColorPickerID, &ColorsArea, &PickerX, &PickerY))
 	{
 		PickerColorHSV.y = PickerX / ColorsArea.w;
 		PickerColorHSV.z = 1.0f - PickerY / ColorsArea.h;
 	}
 
-	if(UI()->DoPickerLogic(&SColorPicker::ms_HuePickerID, &HueArea, &PickerX, &PickerY))
+	if(UI()->DoPickerLogic(&HuePickerID, &HueArea, &PickerX, &PickerY))
 		PickerColorHSV.x = 1.0f - PickerY / HueArea.h;
 
 	// Marker Color Area
