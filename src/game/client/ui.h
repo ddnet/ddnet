@@ -168,6 +168,7 @@ class CUI
 	const void *m_pLastActiveItem;
 	const void *m_pBecommingHotItem;
 	float m_MouseX, m_MouseY; // in gui space
+	float m_MouseDeltaX, m_MouseDeltaY; // in gui space
 	float m_MouseWorldX, m_MouseWorldY; // in world space
 	unsigned m_MouseButtons;
 	unsigned m_LastMouseButtons;
@@ -218,6 +219,8 @@ public:
 
 	int Update(float mx, float my, float Mwx, float Mwy, int m_Buttons);
 
+	float MouseDeltaX() const { return m_MouseDeltaX; }
+	float MouseDeltaY() const { return m_MouseDeltaY; }
 	float MouseX() const { return m_MouseX; }
 	float MouseY() const { return m_MouseY; }
 	float MouseWorldX() const { return m_MouseWorldX; }

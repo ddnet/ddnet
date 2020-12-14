@@ -1594,7 +1594,7 @@ ColorHSLA CMenus::RenderHSLColorPicker(const CUIRect *pRect, unsigned int *pColo
 				ms_ColorPicker.m_pColor = pColor;
 				ms_ColorPicker.m_Active = true;
 				ms_ColorPicker.m_AttachedRect = *pRect;
-				ms_ColorPicker.m_HSVColor = color_cast<ColorHSVA, ColorHSLA>(HSLColor);
+				ms_ColorPicker.m_HSVColor = color_cast<ColorHSVA, ColorHSLA>(HSLColor).Pack(false);
 			}
 		}
 		else
@@ -1604,7 +1604,7 @@ ColorHSLA CMenus::RenderHSLColorPicker(const CUIRect *pRect, unsigned int *pColo
 			ms_ColorPicker.m_pColor = pColor;
 			ms_ColorPicker.m_Active = true;
 			ms_ColorPicker.m_AttachedRect = *pRect;
-			ms_ColorPicker.m_HSVColor = color_cast<ColorHSVA, ColorHSLA>(HSLColor);
+			ms_ColorPicker.m_HSVColor = color_cast<ColorHSVA, ColorHSLA>(HSLColor).Pack(false);
 		}
 	}
 
@@ -1686,10 +1686,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 	// ***** Chat ***** //
 
-	if(DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatTee, Localize("Show Tee icons in chat"), &g_Config.m_ClChatTee, &Chat, LineMargin))
-		GameClient()->m_pChat->RebuildChat();
-
-	if(DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatBackground, Localize("Show backgrounds for chat messages"), &g_Config.m_ClChatBackground, &Chat, LineMargin))
+	if(DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatOld, Localize("Use old chat style"), &g_Config.m_ClChatOld, &Chat, LineMargin))
 		GameClient()->m_pChat->RebuildChat();
 
 	Chat.HSplitTop(30.0f, 0x0, &Chat);
@@ -1731,7 +1728,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 	Chat.HSplitTop(10.0f, 0x0, &Chat);
 	Chat.VSplitRight(100.0f, &Chat, 0x0);
-	RenderTools()->DrawUIRect(&Chat, ColorRGBA(0.5f, 0.5f, 0.5f, 1.0f), CUI::CORNER_ALL, 8.0f);
+	RenderTools()->DrawUIRect(&Chat, ColorRGBA(1, 1, 1, 0.1f), CUI::CORNER_ALL, 8.0f);
 	Chat.HSplitTop(10.0f, 0x0, &Chat);
 
 	ColorRGBA SystemColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageSystemColor));
@@ -1743,9 +1740,9 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	ColorRGBA DefaultNameColor(0.8f, 0.8f, 0.8f, 1.0f);
 
 	constexpr float RealFontSize = CChat::FONT_SIZE * 2;
-	const float RealMsgPaddingX = (g_Config.m_ClChatBackground ? CChat::MESSAGE_PADDING_X : 0) * 2;
-	const float RealMsgPaddingY = (g_Config.m_ClChatBackground ? CChat::MESSAGE_PADDING_Y : (g_Config.m_ClChatTee ? (CChat::MESSAGE_TEE_SIZE - CChat::FONT_SIZE) : 0)) * 2;
-	const float RealMsgPaddingTee = (g_Config.m_ClChatTee ? CChat::MESSAGE_TEE_SIZE + CChat::MESSAGE_TEE_PADDING_RIGHT : 0) * 2;
+	const float RealMsgPaddingX = (!g_Config.m_ClChatOld ? CChat::MESSAGE_PADDING_X : 0) * 2;
+	const float RealMsgPaddingY = (!g_Config.m_ClChatOld ? CChat::MESSAGE_PADDING_Y : 0) * 2;
+	const float RealMsgPaddingTee = (!g_Config.m_ClChatOld ? CChat::MESSAGE_TEE_SIZE + CChat::MESSAGE_TEE_PADDING_RIGHT : 0) * 2;
 	const float RealOffsetY = RealFontSize + RealMsgPaddingY;
 	
 	const float X = 5.0f + RealMsgPaddingX / 2.0f + Chat.x;
@@ -1756,8 +1753,18 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	
 	str_copy(aBuf, Client()->PlayerName(), sizeof(aBuf));
 
+	CAnimState *pIdleState = CAnimState::GetIdle();
+	constexpr int PreviewTeeCount = 4;
+	constexpr float RealTeeSize = CChat::MESSAGE_TEE_SIZE * 2;
+	constexpr float RealTeeSizeHalved = CChat::MESSAGE_TEE_SIZE;
+	constexpr float TWSkinUnreliableOffset = -0.25f;
+	constexpr float OffsetTeeY = RealTeeSizeHalved;
+	const float FullHeightMinusTee = RealOffsetY - RealTeeSize;
+
+	CTeeRenderInfo RenderInfo[PreviewTeeCount];
+
 	// Backgrounds first
-	if(g_Config.m_ClChatBackground)
+	if(!g_Config.m_ClChatOld)
 	{
 		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
@@ -1770,15 +1777,18 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 		if(g_Config.m_ClShowChatSystem)
 		{
-			Width = TextRender()->TextWidth(0, RealFontSize, "*** 'Evgesha' entered and joined the game", -1, -1);
+			str_copy(LineBuilder, "*** '", sizeof(LineBuilder));
+			str_append(LineBuilder, aBuf, sizeof(LineBuilder));
+			str_append(LineBuilder, "' entered and joined the game", sizeof(LineBuilder));
+			Width = TextRender()->TextWidth(0, RealFontSize, LineBuilder, -1, -1);
 			RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, CUI::CORNER_ALL);
 			TempY += RealOffsetY;
 		}
 
 		if(g_Config.m_ClShowIDs)
-			str_copy(LineBuilder, " 7: DDRacer2002: Hey, how are you ", sizeof(LineBuilder));
+			str_copy(LineBuilder, " 7: Evgesha: Hey, how are you ", sizeof(LineBuilder));
 		else
-			str_copy(LineBuilder, "DDRacer2002: Hey, how are you ", sizeof(LineBuilder));
+			str_copy(LineBuilder, "Evgesha: Hey, how are you ", sizeof(LineBuilder));
 		str_append(LineBuilder, aBuf, sizeof(LineBuilder));
 		Width = TextRender()->TextWidth(0, RealFontSize, LineBuilder, -1, -1);
 		RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, CUI::CORNER_ALL);
@@ -1813,21 +1823,9 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		TempY += RealOffsetY;
 
 		Graphics()->QuadsEnd();
-	}
 
-	CAnimState *pIdleState = CAnimState::GetIdle();
-	constexpr int PreviewTeeCount = 4;
-	constexpr float RealTeeSize = CChat::MESSAGE_TEE_SIZE * 2;
-	constexpr float RealTeeSizeHalved = CChat::MESSAGE_TEE_SIZE;
-	constexpr float TWSkinUnreliableOffset = -0.25f;
-	constexpr float OffsetTeeY = RealTeeSizeHalved;
-	const float FullHeightMinusTee = RealOffsetY - RealTeeSize;
+		// Load skins
 
-	CTeeRenderInfo RenderInfo[PreviewTeeCount];
-
-	// Load skins if needed
-	if(g_Config.m_ClChatTee)
-	{
 		int DefaultInd = GameClient()->m_pSkins->Find("default");
 
 		for(int i = 0; i < PreviewTeeCount; i++)
@@ -1840,16 +1838,18 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		int i = 0;
 
 		RenderInfo[i++].m_OriginalRenderSkin = GameClient()->m_pSkins->Get(DefaultInd)->m_OriginalSkin;
-		RenderInfo[i++].m_OriginalRenderSkin = (ind = GameClient()->m_pSkins->Find("bluekitty")) != -1 ? GameClient()->m_pSkins->Get(ind)->m_OriginalSkin : GameClient()->m_pSkins->Get(DefaultInd)->m_OriginalSkin;
-		RenderInfo[i++].m_OriginalRenderSkin = (ind = GameClient()->m_pSkins->Find("cammostripes")) != -1 ? GameClient()->m_pSkins->Get(ind)->m_OriginalSkin : GameClient()->m_pSkins->Get(DefaultInd)->m_OriginalSkin;
-		RenderInfo[i++].m_OriginalRenderSkin = (ind = GameClient()->m_pSkins->Find("beast")) != -1 ? GameClient()->m_pSkins->Get(ind)->m_OriginalSkin : GameClient()->m_pSkins->Get(DefaultInd)->m_OriginalSkin;
+		RenderInfo[i++].m_OriginalRenderSkin = (ind = GameClient()->m_pSkins->Find("planet_uranus")) != -1 ? GameClient()->m_pSkins->Get(ind)->m_OriginalSkin : RenderInfo[0].m_OriginalRenderSkin;
+		RenderInfo[i++].m_OriginalRenderSkin = (ind = GameClient()->m_pSkins->Find("cammostripes")) != -1 ? GameClient()->m_pSkins->Get(ind)->m_OriginalSkin : RenderInfo[0].m_OriginalRenderSkin;
+		RenderInfo[i++].m_OriginalRenderSkin = (ind = GameClient()->m_pSkins->Find("beast")) != -1 ? GameClient()->m_pSkins->Get(ind)->m_OriginalSkin : RenderInfo[0].m_OriginalRenderSkin;
 	}
 
 	// System
 	if(g_Config.m_ClShowChatSystem)
 	{
 		TextRender()->TextColor(SystemColor);
-		TextRender()->TextEx(&Cursor, "*** 'Evgesha' entered and joined the game", -1);
+		TextRender()->TextEx(&Cursor, "*** '", -1);
+		TextRender()->TextEx(&Cursor, aBuf, -1);
+		TextRender()->TextEx(&Cursor, "' entered and joined the game", -1);
 		TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
 	}
 
@@ -1857,14 +1857,14 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	TextRender()->MoveCursor(&Cursor, RealMsgPaddingTee, 0);
 	TextRender()->TextColor(DefaultNameColor);
 	if(g_Config.m_ClShowIDs)
-		TextRender()->TextEx(&Cursor, " 7: DDRacer2002: ", -1);
+		TextRender()->TextEx(&Cursor, " 7: Evgesha: ", -1);
 	else
-		TextRender()->TextEx(&Cursor, "DDRacer2002: ", -1);
+		TextRender()->TextEx(&Cursor, "Evgesha: ", -1);
 	TextRender()->TextColor(HighlightedColor);
 	TextRender()->TextEx(&Cursor, "Hey, how are you ", -1);
 	TextRender()->TextEx(&Cursor, aBuf, -1);
-	if(g_Config.m_ClChatTee)
-		RenderTools()->RenderTee(pIdleState, &RenderInfo[0], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
+	if(!g_Config.m_ClChatOld)
+		RenderTools()->RenderTee(pIdleState, &RenderInfo[1], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
 	TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
 
 	// Team
@@ -1875,8 +1875,8 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	else 
 		TextRender()->TextEx(&Cursor, "Your Teammate: ", -1);
 	TextRender()->TextEx(&Cursor, "Let's speedrun this!", -1);
-	if(g_Config.m_ClChatTee)
-		RenderTools()->RenderTee(pIdleState, &RenderInfo[1], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
+	if(!g_Config.m_ClChatOld)
+		RenderTools()->RenderTee(pIdleState, &RenderInfo[0], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
 	TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
 
 	// Friend
@@ -1893,7 +1893,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		TextRender()->TextEx(&Cursor, "Friend: ", -1);
 	TextRender()->TextColor(NormalColor);
 	TextRender()->TextEx(&Cursor, "Hello there", -1);
-	if(g_Config.m_ClChatTee)
+	if(!g_Config.m_ClChatOld)
 		RenderTools()->RenderTee(pIdleState, &RenderInfo[2], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
 	TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
 
@@ -1908,7 +1908,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	TextRender()->TextEx(&Cursor, "[6]", -1);
 	TextRender()->TextColor(NormalColor);
 	TextRender()->TextEx(&Cursor, ": Hey fools, I'm spamming here!", -1);
-	if(g_Config.m_ClChatTee)
+	if(!g_Config.m_ClChatOld)
 		RenderTools()->RenderTee(pIdleState, &RenderInfo[3], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
 	TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
 

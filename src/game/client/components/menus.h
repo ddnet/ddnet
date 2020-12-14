@@ -28,7 +28,7 @@ struct SColorPicker
 {
 public:
 	const float ms_Width = 160.0f;
-	const float ms_Height = 200.0f;
+	const float ms_Height = 186.0f;
 
 	const static int ms_ColorPickerID = 0;
 	const static int ms_HuePickerID = 0;
@@ -40,7 +40,7 @@ public:
 
 	CUIRect m_AttachedRect;
 	unsigned int *m_pColor;
-	ColorHSVA m_HSVColor;
+	unsigned int m_HSVColor;
 };
 
 // compnent to fetch keypresses, override all other input
@@ -69,6 +69,7 @@ class CMenus : public CComponent
 	static ColorRGBA ms_ColorTabbarHover;
 
 	static SColorPicker ms_ColorPicker;
+	static bool ms_ValueSelectorTextMode;
 
 	char m_aLocalStringHelper[1024];
 
@@ -94,7 +95,7 @@ class CMenus : public CComponent
 	static void ui_draw_menu_tab_button(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
 	static void ui_draw_settings_tab_button(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
 	*/
-
+	int DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool UseScroll, int Current, int Min, int Max, int Step, float Scale, bool IsHex, float Round, ColorRGBA *Color);
 	int DoButton_Icon(int ImageId, int SpriteId, const CUIRect *pRect);
 	int DoButton_GridHeader(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 
