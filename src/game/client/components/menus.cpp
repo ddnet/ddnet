@@ -887,7 +887,8 @@ float CMenus::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 	static float OffsetY;
 	pRect->HSplitTop(33, &Handle, 0);
 
-	Handle.y += (pRect->h - Handle.h) * Current;
+	Current = clamp(Current, 0.0f, 1.0f);
+	Handle.y = pRect->y + (pRect->h - Handle.h) * Current;
 
 	// logic
 	float ReturnValue = Current;

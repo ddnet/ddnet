@@ -1012,14 +1012,13 @@ void CMenus::RenderGhost(CUIRect MainView)
 	RenderTools()->DrawUIRect(&View, ColorRGBA(0, 0, 0, 0.15f), 0, 0);
 
 	CUIRect Scroll;
-	View.VSplitRight(15, &View, &Scroll);
+	View.VSplitRight(10, &View, &Scroll);
 
 	int NumGhosts = m_lGhosts.size();
 	static int s_ScrollBar = 0;
 	static float s_ScrollValue = 0;
 	static int s_SelectedIndex = 0;
 
-	Scroll.HMargin(5.0f, &Scroll);
 	s_ScrollValue = DoScrollbarV(&s_ScrollBar, &Scroll, s_ScrollValue);
 
 	HandleListInputs(View, s_ScrollValue, 1.0f, nullptr, s_aCols[0].m_Rect.h, s_SelectedIndex, NumGhosts);

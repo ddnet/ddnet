@@ -148,7 +148,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	RenderTools()->DrawUIRect(&View, ColorRGBA(0, 0, 0, 0.15f), 0, 0);
 
 	CUIRect Scroll;
-	View.VSplitRight(15, &View, &Scroll);
+	View.VSplitRight(10, &View, &Scroll);
 
 	int NumServers = ServerBrowser()->NumSortedServers();
 
@@ -168,7 +168,6 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	static int s_ScrollBar = 0;
 	static float s_ScrollValue = 0;
 
-	Scroll.HMargin(5.0f, &Scroll);
 	s_ScrollValue = DoScrollbarV(&s_ScrollBar, &Scroll, s_ScrollValue);
 
 	if(Input()->KeyPress(KEY_TAB) && m_pClient->m_pGameConsole->IsClosed())

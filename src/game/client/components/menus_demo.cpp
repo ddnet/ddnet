@@ -521,18 +521,10 @@ void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHe
 
 	if(!LogicOnly)
 	{
-		// draw header
-		/*
-		View.HSplitTop(ms_ListheaderHeight, &Header, &View);
-		RenderTools()->DrawUIRect(&Header, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_T, 5.0f);
-		UI()->DoLabel(&Header, pTitle, Header.h * ms_FontmodHeight, 0);
-		*/
-
 		// background
 		RenderTools()->DrawUIRect(&View, ColorRGBA(0, 0, 0, 0.15f), CUI::CORNER_ALL, 5.0f);
 	}
 
-	// prepare the scroll
 	View.VSplitRight(10, &View, &Scroll);
 
 	// setup the variables
@@ -565,7 +557,6 @@ void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHe
 			gs_ListBoxScrollValue += Num == 1 ? 0.1f : 3.0f / Num;
 	}
 
-	//Scroll.HMargin(5.0f, &Scroll);
 	gs_ListBoxScrollValue = clamp(DoScrollbarV(pID, &Scroll, gs_ListBoxScrollValue), 0.0f, 1.0f);
 
 	// the list
