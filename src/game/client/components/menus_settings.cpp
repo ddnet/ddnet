@@ -1750,7 +1750,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 	CTextCursor Cursor;
 	TextRender()->SetCursor(&Cursor, X, Y, RealFontSize, TEXTFLAG_RENDER);
-	
+
 	str_copy(aBuf, Client()->PlayerName(), sizeof(aBuf));
 
 	CAnimState *pIdleState = CAnimState::GetIdle();

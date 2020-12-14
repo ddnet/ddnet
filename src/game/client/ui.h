@@ -227,7 +227,7 @@ public:
 	float MouseWorldY() const { return m_MouseWorldY; }
 	int MouseButton(int Index) const { return (m_MouseButtons >> Index) & 1; }
 	int MouseButtonClicked(int Index) { return MouseButton(Index) && !((m_LastMouseButtons >> Index) & 1); }
-	int MouseButtonReleased(int Index) {return ((m_LastMouseButtons >> Index) & 1) && !MouseButton(Index); }
+	int MouseButtonReleased(int Index) { return ((m_LastMouseButtons >> Index) & 1) && !MouseButton(Index); }
 
 	void SetHotItem(const void *pID) { m_pBecommingHotItem = pID; }
 	void SetActiveItem(const void *pID)

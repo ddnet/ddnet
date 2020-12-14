@@ -302,8 +302,6 @@ void CMenus::DoLaserPreview(const CUIRect *pRect, const ColorHSLA LaserOutlineCo
 	vec2 From = vec2(Section.x, Section.y + Section.h / 2.0f);
 	vec2 Pos = vec2(Section.x + Section.w - 10.0f, Section.y + Section.h / 2.0f);
 
-	vec2 Out, Border;
-
 	Graphics()->BlendNormal();
 	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
@@ -311,7 +309,7 @@ void CMenus::DoLaserPreview(const CUIRect *pRect, const ColorHSLA LaserOutlineCo
 	LaserRGB = color_cast<ColorRGBA, ColorHSLA>(LaserOutlineColor);
 	ColorRGBA OuterColor(LaserRGB.r, LaserRGB.g, LaserRGB.b, 1.0f);
 	Graphics()->SetColor(LaserRGB.r, LaserRGB.g, LaserRGB.b, 1.0f);
-	Out = vec2(0.0f, -1.0f) * (3.15f);
+	vec2 Out = vec2(0.0f, -1.0f) * (3.15f);
 
 	IGraphics::CFreeformItem Freeform(From.x - Out.x, From.y - Out.y, From.x + Out.x, From.y + Out.y, Pos.x - Out.x, Pos.y - Out.y, Pos.x + Out.x, Pos.y + Out.y);
 	Graphics()->QuadsDrawFreeform(&Freeform, 1);
@@ -1542,9 +1540,8 @@ void CMenus::RenderColorPicker()
 	if(HEX != NEWHEX)
 		PickerColorHSV = color_cast<ColorHSVA, ColorRGBA>(NEWHEX);
 
-	static int ALPHAID = 0;
-
 	// TODO : ALPHA SUPPORT
+	//static int ALPHAID = 0;
 	UI()->DoLabel(&ALPHARect, "A: 255", 10, 0, -1);
 	RenderTools()->DrawUIRect(&ALPHARect, ColorRGBA(0, 0, 0, 0.65f), CUI::CORNER_ALL, 5.0f);
 
