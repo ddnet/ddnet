@@ -522,22 +522,18 @@ void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHe
 	if(!LogicOnly)
 	{
 		// draw header
+		/*
 		View.HSplitTop(ms_ListheaderHeight, &Header, &View);
 		RenderTools()->DrawUIRect(&Header, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_T, 5.0f);
 		UI()->DoLabel(&Header, pTitle, Header.h * ms_FontmodHeight, 0);
-
-		// draw footers
-		View.HSplitBottom(ms_ListheaderHeight, &View, &Footer);
-		RenderTools()->DrawUIRect(&Footer, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_B, 5.0f);
-		Footer.VSplitLeft(10.0f, 0, &Footer);
-		UI()->DoLabel(&Footer, pBottomText, Header.h * ms_FontmodHeight, 0);
+		*/
 
 		// background
-		RenderTools()->DrawUIRect(&View, ColorRGBA(0, 0, 0, 0.15f), 0, 0);
+		RenderTools()->DrawUIRect(&View, ColorRGBA(0, 0, 0, 0.15f), CUI::CORNER_ALL, 5.0f);
 	}
 
 	// prepare the scroll
-	View.VSplitRight(15, &View, &Scroll);
+	View.VSplitRight(10, &View, &Scroll);
 
 	// setup the variables
 	gs_ListBoxOriginalView = View;
@@ -569,8 +565,8 @@ void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHe
 			gs_ListBoxScrollValue += Num == 1 ? 0.1f : 3.0f / Num;
 	}
 
-	Scroll.HMargin(5.0f, &Scroll);
-	gs_ListBoxScrollValue = clamp(DoScrollbarV(pID, &Scroll, clamp(gs_ListBoxScrollValue, 0.0f, 1.0f)), 0.0f, 1.0f);
+	//Scroll.HMargin(5.0f, &Scroll);
+	gs_ListBoxScrollValue = clamp(DoScrollbarV(pID, &Scroll, gs_ListBoxScrollValue), 0.0f, 1.0f);
 
 	// the list
 	gs_ListBoxView = gs_ListBoxOriginalView;
