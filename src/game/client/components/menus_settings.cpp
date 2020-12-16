@@ -1490,6 +1490,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("Assets")};
 
 	int NumTabs = (int)(sizeof(aTabs) / sizeof(*aTabs));
+	int PreviousPage = g_Config.m_UiSettingsPage;
 
 	for(int i = 0; i < NumTabs; i++)
 	{
@@ -1498,6 +1499,9 @@ void CMenus::RenderSettings(CUIRect MainView)
 		if(DoButton_MenuTab(aTabs[i], aTabs[i], g_Config.m_UiSettingsPage == i, &Button, CUI::CORNER_R))
 			g_Config.m_UiSettingsPage = i;
 	}
+
+	if(PreviousPage != g_Config.m_UiSettingsPage)
+		ms_ColorPicker.m_Active = false;
 
 	MainView.Margin(10.0f, &MainView);
 
@@ -1560,6 +1564,8 @@ void CMenus::RenderSettings(CUIRect MainView)
 	}
 	else if(m_NeedRestartGeneral || m_NeedRestartSkins || m_NeedRestartGraphics || m_NeedRestartSound || m_NeedRestartDDNet)
 		UI()->DoLabelScaled(&RestartWarning, Localize("You must restart the game for all settings to take effect."), 14.0f, -1);
+
+	RenderColorPicker();
 }
 
 ColorHSLA CMenus::RenderHSLColorPicker(const CUIRect *pRect, unsigned int *pColor, bool Alpha)
@@ -1707,7 +1713,6 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 	int i = 0;
 	static int ResetIDs[24];
-	
 
 	DoLine_ColorPicker(&ResetIDs[i++], LineSize, WantedPickerPosition, LabelSize, LineSpacing, &Chat, Localize("System message"), &g_Config.m_ClMessageSystemColor, ColorRGBA(1.0f, 1.0f, 0.5f), true, true, &g_Config.m_ClShowChatSystem);
 	DoLine_ColorPicker(&ResetIDs[i++], LineSize, WantedPickerPosition, LabelSize, LineSpacing, &Chat, Localize("Highlighted message"), &g_Config.m_ClMessageHighlightColor, ColorRGBA(1.0f, 0.5f, 0.5f));
@@ -2121,36 +2126,32 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	if(CheckSettings)
 		m_NeedRestartDDNet = s_InpMouseOld != g_Config.m_InpMouseOld;
 
-	CUIRect aRects[2];
 	Left.HSplitTop(5.0f, &Button, &Left);
 	Right.HSplitTop(25.0f, &Button, &Right);
-	aRects[0] = Left;
-	aRects[1] = Right;
-	aRects[0].VSplitRight(10.0f, &aRects[0], 0);
-	aRects[1].VSplitLeft(10.0f, 0, &aRects[1]);
+	Left.VSplitRight(10.0f, &Left, 0x0);
+	Right.VSplitLeft(10.0f, 0x0, &Right);
+	Left.HSplitTop(25.0f, 0x0, &Left);
+	CUIRect TempLabel;
+	Right.HSplitTop(25.0f, &TempLabel, &Right);
+	Right.HSplitTop(5.0f, 0x0, &Right);
 
-	unsigned *paColors[2] = {&g_Config.m_ClBackgroundColor, &g_Config.m_ClBackgroundEntitiesColor};
-	const char *paParts[2] = {Localize("Background (regular)"), Localize("Background (entities)")};
+	static int ResetID1 = 0;
+	static int ResetID2 = 0;
+	ColorRGBA GreyDefault(0.5f, 0.5f, 0.5f, 1);
+	DoLine_ColorPicker(&ResetID1, 25.0f, 194.0f, 13.0f, 5.0f, &Left, Localize("Background (regular)"), &g_Config.m_ClBackgroundColor, GreyDefault, false);
+	DoLine_ColorPicker(&ResetID2, 25.0f, 194.0f, 13.0f, 5.0f, &Left, Localize("Background (entities)"), &g_Config.m_ClBackgroundEntitiesColor, GreyDefault, false);
 
-	for(int i = 0; i < 2; i++)
-	{
-		aRects[i].HSplitTop(20.0f, &Label, &aRects[i]);
-		UI()->DoLabelScaled(&Label, paParts[i], 14.0f, -1);
-		aRects[i].VSplitLeft(10.0f, 0, &aRects[i]);
-		aRects[i].HSplitTop(2.5f, 0, &aRects[i]);
-
-		RenderHSLScrollbars(&aRects[i], paColors[i]);
-	}
+	UI()->DoLabelScaled(&TempLabel, Localize("Background (entities)"), 20.0f, -1);
 
 	{
 		static float s_Map = 0.0f;
-		aRects[1].HSplitTop(25.0f, &Background, &aRects[1]);
+		Right.HSplitTop(25.0f, &Background, &Right);
 		Background.HSplitTop(20.0f, &Background, 0);
 		Background.VSplitLeft(100.0f, &Label, &Left);
 		UI()->DoLabelScaled(&Label, Localize("Map"), 14.0f, -1);
 		DoEditBox(g_Config.m_ClBackgroundEntities, &Left, g_Config.m_ClBackgroundEntities, sizeof(g_Config.m_ClBackgroundEntities), 14.0f, &s_Map);
 
-		aRects[1].HSplitTop(20.0f, &Button, &aRects[1]);
+		Right.HSplitTop(20.0f, &Button, &Right);
 		bool UseCurrentMap = str_comp(g_Config.m_ClBackgroundEntities, CURRENT_MAP) == 0;
 		if(DoButton_CheckBox(&UseCurrentMap, Localize("Use current map as background"), UseCurrentMap, &Button))
 		{
@@ -2160,7 +2161,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 				str_copy(g_Config.m_ClBackgroundEntities, CURRENT_MAP, sizeof(g_Config.m_ClBackgroundEntities));
 		}
 
-		aRects[1].HSplitTop(20.0f, &Button, 0);
+		Right.HSplitTop(20.0f, &Button, 0);
 		if(DoButton_CheckBox(&g_Config.m_ClBackgroundShowTilesLayers, Localize("Show tiles layers from BG map"), g_Config.m_ClBackgroundShowTilesLayers, &Button))
 		{
 			g_Config.m_ClBackgroundShowTilesLayers ^= 1;

@@ -1249,7 +1249,10 @@ int CMenus::RenderMenubar(CUIRect r)
 		if(Client()->State() == IClient::STATE_OFFLINE)
 			SetMenuPage(NewPage);
 		else
+		{
+			m_PrevGamePage = m_GamePage;
 			m_GamePage = NewPage;
+		}
 	}
 
 	return 0;
@@ -1736,12 +1739,7 @@ int CMenus::Render()
 				RenderServerbrowser(MainView);
 			}
 			else if(m_MenuPage == PAGE_SETTINGS)
-			{
 				RenderSettings(MainView);
-
-				// Render Color Picker only on settings page and last
-				RenderColorPicker();
-			}
 
 			// do tab bar
 			RenderMenubar(TabBar);
@@ -2640,7 +2638,10 @@ void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
 void CMenus::SetActive(bool Active)
 {
 	if(Active != m_MenuActive)
+	{
+		ms_ColorPicker.m_Active = false;
 		Input()->SetIMEState(Active);
+	}
 	m_MenuActive = Active;
 	if(!m_MenuActive)
 	{
@@ -3091,6 +3092,7 @@ const CMenus::CMenuImage *CMenus::FindMenuImage(const char *pName)
 
 void CMenus::SetMenuPage(int NewPage)
 {
+	m_PrevMenuPage = m_MenuPage;
 	m_MenuPage = NewPage;
 	if(NewPage >= PAGE_INTERNET && NewPage <= PAGE_KOG)
 		g_Config.m_UiPage = NewPage;
