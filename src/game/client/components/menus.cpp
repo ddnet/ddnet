@@ -984,13 +984,10 @@ float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current)
 	// render
 	CUIRect Rail;
 	pRect->HMargin(5.0f, &Rail);
-	RenderTools()->DrawUIRect(&Rail, ColorRGBA(1, 1, 1, 0.25f), 0, 0.0f);
+	RenderTools()->DrawUIRect(&Rail, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 3.0f);
 
 	CUIRect Slider = Handle;
-	Slider.h = Rail.y - Slider.y;
-	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_T, 2.5f);
-	Slider.y = Rail.y + Rail.h;
-	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_B, 2.5f);
+	RenderTools()->DrawUIRect(&Slider, ColorRGBA(0.5f, 0.5f, 0.5f, 1), CUI::CORNER_ALL, 3.0f);
 
 	Slider = Handle;
 	Slider.Margin(5.0f, &Slider);
