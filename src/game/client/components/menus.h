@@ -271,9 +271,7 @@ protected:
 	void ClearCustomItems(int CurTab);
 
 	int m_MenuPage;
-	int m_PrevMenuPage;
 	int m_GamePage;
-	int m_PrevGamePage;
 	int m_Popup;
 	int m_ActivePage;
 	bool m_ShowStart;

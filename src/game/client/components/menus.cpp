@@ -1249,10 +1249,7 @@ int CMenus::RenderMenubar(CUIRect r)
 		if(Client()->State() == IClient::STATE_OFFLINE)
 			SetMenuPage(NewPage);
 		else
-		{
-			m_PrevGamePage = m_GamePage;
 			m_GamePage = NewPage;
-		}
 	}
 
 	return 0;
@@ -3092,7 +3089,6 @@ const CMenus::CMenuImage *CMenus::FindMenuImage(const char *pName)
 
 void CMenus::SetMenuPage(int NewPage)
 {
-	m_PrevMenuPage = m_MenuPage;
 	m_MenuPage = NewPage;
 	if(NewPage >= PAGE_INTERNET && NewPage <= PAGE_KOG)
 		g_Config.m_UiPage = NewPage;
