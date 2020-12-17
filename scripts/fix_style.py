@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 
-from collections import defaultdict
 import os
-import re
 import subprocess
 import sys
+import argparse
 
 os.chdir(os.path.dirname(__file__) + "/..")
 
 def recursive_file_list(path):
 	result = []
-	for dirpath, dirnames, filenames in os.walk(path):
+	for dirpath, _, filenames in os.walk(path):
 		result += [os.path.join(dirpath, filename) for filename in filenames]
 	return result
 
@@ -34,7 +33,6 @@ def warn(filenames):
 	return subprocess.call(["clang-format", "-Werror", "--dry-run"] + filenames)
 
 def main():
-	import argparse
 	p = argparse.ArgumentParser(description="Check and fix style of changed files")
 	p.add_argument("-n", "--dry-run", action="store_true", help="Don't fix, only warn")
 	args = p.parse_args()

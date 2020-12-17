@@ -34,6 +34,4 @@ TEST(BlocklistDriver, Invalid)
 	int Major, Minor, Patch;
 	EXPECT_STREQ(ParseBlocklistDriverVersions("Intel", "Build 25.20.100.7810", Major, Minor, Patch), NULL);
 	EXPECT_STREQ(ParseBlocklistDriverVersions("Intel", "Build 26.20.100.7799", Major, Minor, Patch), NULL);
-	EXPECT_STREQ(ParseBlocklistDriverVersions("Intel", "Build 26.20.100.8000", Major, Minor, Patch), NULL);
-	EXPECT_STREQ(ParseBlocklistDriverVersions("Intel", "Build 27.20.100.7900", Major, Minor, Patch), NULL);
 }

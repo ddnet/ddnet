@@ -1,6 +1,6 @@
 # coding: utf-8
-from socket import *
-import struct
+# pylint: skip-file
+from socket import socket, AF_INET, SOCK_DGRAM
 import sys
 import threading
 import time
@@ -25,9 +25,9 @@ PACKET_GETINFO3 = "\xff\xff\xff\xff\xff\xff\xff\xff\xff\xffgie3" + "\x00"
 
 class Server_Info(threading.Thread):
 
-	def __init__(self, address, type):
+	def __init__(self, address, typ):
 		self.address = address
-		self.type = type
+		self.type = typ
 		self.finished = False
 		threading.Thread.__init__(self, target = self.run)
 
@@ -45,9 +45,9 @@ class Server_Info(threading.Thread):
 def get_server_info(address):
 	try:
 		sock = socket(AF_INET, SOCK_DGRAM)
-		sock.settimeout(TIMEOUT);
+		sock.settimeout(TIMEOUT)
 		sock.sendto(PACKET_GETINFO, address)
-		data, addr = sock.recvfrom(1024)
+		data, _addr = sock.recvfrom(1024)
 		sock.close()
 
 		data = data[14:] # skip header
@@ -64,7 +64,7 @@ def get_server_info(address):
 		server_info["max_players"] = int(slots[7])
 		server_info["players"] = []
 
-		for i in xrange(0, server_info["num_players"]):
+		for i in range(0, server_info["num_players"]):
 			player = {}
 			player["name"] = slots[8+i*2]
 			player["score"] = int(slots[8+i*2+1])
@@ -80,9 +80,9 @@ def get_server_info(address):
 def get_server_info2(address):
 	try:
 		sock = socket(AF_INET, SOCK_DGRAM)
-		sock.settimeout(TIMEOUT);
+		sock.settimeout(TIMEOUT)
 		sock.sendto(PACKET_GETINFO2, address)
-		data, addr = sock.recvfrom(1024)
+		data, _addr = sock.recvfrom(1024)
 		sock.close()
 
 		data = data[14:] # skip header
@@ -100,7 +100,7 @@ def get_server_info2(address):
 		server_info["max_players"] = int(slots[8])
 		server_info["players"] = []
 
-		for i in xrange(0, server_info["num_players"]):
+		for i in range(0, server_info["num_players"]):
 			player = {}
 			player["name"] = slots[9+i*2]
 			player["score"] = int(slots[9+i*2+1])
@@ -116,7 +116,7 @@ def get_server_info2(address):
 def get_server_info3(address):
 	try:
 		sock = socket(AF_INET, SOCK_DGRAM)
-		sock.settimeout(TIMEOUT);
+		sock.settimeout(TIMEOUT)
 		sock.sendto(PACKET_GETINFO3, address)
 		data, addr = sock.recvfrom(1400)
 		sock.close()
@@ -137,7 +137,7 @@ def get_server_info3(address):
 		server_info["max_clients"] = int(slots[9])
 		server_info["players"] = []
 
-		for i in xrange(0, server_info["num_clients"]):
+		for i in range(0, server_info["num_clients"]):
 			player = {}
 			player["name"] = slots[10+i*5]
 			player["clan"] = slots[10+i*5+1]
@@ -178,7 +178,7 @@ def get_list(address):
 		sock.sendto(PACKET_GETLIST, address)
 
 		while 1:
-			data, addr = sock.recvfrom(1024)
+			data, _addr = sock.recvfrom(1024)
 
 			data = data[14:]
 			num_servers = len(data) / 6
@@ -203,12 +203,12 @@ def get_list2(address):
 		sock.sendto(PACKET_GETLIST2, address)
 
 		while 1:
-			data, addr = sock.recvfrom(1400)
-			
+			data, _addr = sock.recvfrom(1400)
+
 			data = data[14:]
 			num_servers = len(data) / 18
 
-			for n in range(0, num_servers): 
+			for n in range(0, num_servers):
 				if data[n*18:n*18+12] == "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xff":
 					ip = ".".join(map(str, map(ord, data[n*18+12:n*18+16])))
 				else:
@@ -234,7 +234,7 @@ for i in range(1, NUM_MASTERSERVERS+1):
 servers = []
 
 while len(master_servers) != 0:
-	if master_servers[0].finished == True:
+	if master_servers[0].finished:
 		if master_servers[0].servers:
 			servers += master_servers[0].servers
 		del master_servers[0]
@@ -242,7 +242,7 @@ while len(master_servers) != 0:
 
 servers_info = []
 
-print str(len(servers)) + " servers"
+print(str(len(servers)) + " servers")
 
 for server in servers:
 	s = Server_Info(server[0], server[1])
@@ -254,7 +254,7 @@ num_players = 0
 num_clients = 0
 
 while len(servers_info) != 0:
-	if servers_info[0].finished == True:
+	if servers_info[0].finished:
 
 		if servers_info[0].info:
 			num_players += servers_info[0].info["num_players"]
@@ -267,4 +267,4 @@ while len(servers_info) != 0:
 
 	time.sleep(0.001) # be nice
 
-print str(num_players) + " players and " + str(num_clients-num_players) + " spectators"
+print(str(num_players) + " players and " + str(num_clients-num_players) + " spectators")

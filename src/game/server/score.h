@@ -25,9 +25,8 @@ enum
 	TIMESTAMP_STR_LENGTH = 20, // 2019-04-02 19:38:36
 };
 
-struct CScorePlayerResult
+struct CScorePlayerResult : ISqlResult
 {
-	std::atomic_bool m_Done;
 	CScorePlayerResult();
 
 	enum
@@ -66,11 +65,9 @@ struct CScorePlayerResult
 	void SetVariant(Variant v);
 };
 
-struct CScoreRandomMapResult
+struct CScoreRandomMapResult : ISqlResult
 {
-	std::atomic_bool m_Done;
 	CScoreRandomMapResult(int ClientID) :
-		m_Done(false),
 		m_ClientID(ClientID)
 	{
 		m_Map[0] = '\0';
@@ -81,7 +78,7 @@ struct CScoreRandomMapResult
 	char m_aMessage[512];
 };
 
-struct CScoreSaveResult
+struct CScoreSaveResult : ISqlResult
 {
 	CScoreSaveResult(int PlayerID, IGameController *Controller) :
 		m_Status(SAVE_FAILED),
@@ -106,14 +103,12 @@ struct CScoreSaveResult
 	CUuid m_SaveID;
 };
 
-struct CScoreInitResult
+struct CScoreInitResult : ISqlResult
 {
 	CScoreInitResult() :
-		m_Done(false),
 		m_CurrentRecord(0)
 	{
 	}
-	std::atomic_bool m_Done;
 	float m_CurrentRecord;
 };
 
@@ -150,10 +145,9 @@ public:
 struct CSqlInitData : ISqlData
 {
 	CSqlInitData(std::shared_ptr<CScoreInitResult> pResult) :
-		m_pResult(std::move(pResult))
+		ISqlData(std::move(pResult))
 	{
 	}
-	std::shared_ptr<CScoreInitResult> m_pResult;
 
 	// current map
 	char m_Map[MAX_MAP_LENGTH];
@@ -162,10 +156,10 @@ struct CSqlInitData : ISqlData
 struct CSqlPlayerRequest : ISqlData
 {
 	CSqlPlayerRequest(std::shared_ptr<CScorePlayerResult> pResult) :
-		m_pResult(std::move(pResult))
+		ISqlData(std::move(pResult))
 	{
 	}
-	std::shared_ptr<CScorePlayerResult> m_pResult;
+
 	// object being requested, either map (128 bytes) or player (16 bytes)
 	char m_Name[MAX_MAP_LENGTH];
 	// current map
@@ -178,10 +172,9 @@ struct CSqlPlayerRequest : ISqlData
 struct CSqlRandomMapRequest : ISqlData
 {
 	CSqlRandomMapRequest(std::shared_ptr<CScoreRandomMapResult> pResult) :
-		m_pResult(std::move(pResult))
+		ISqlData(std::move(pResult))
 	{
 	}
-	std::shared_ptr<CScoreRandomMapResult> m_pResult;
 
 	char m_ServerType[32];
 	char m_CurrentMap[MAX_MAP_LENGTH];
@@ -192,12 +185,11 @@ struct CSqlRandomMapRequest : ISqlData
 struct CSqlScoreData : ISqlData
 {
 	CSqlScoreData(std::shared_ptr<CScorePlayerResult> pResult) :
-		m_pResult(std::move(pResult))
+		ISqlData(std::move(pResult))
 	{
 	}
-	virtual ~CSqlScoreData(){};
 
-	std::shared_ptr<CScorePlayerResult> m_pResult;
+	virtual ~CSqlScoreData(){};
 
 	char m_Map[MAX_MAP_LENGTH];
 	char m_GameUuid[UUID_MAXSTRSIZE];
@@ -214,6 +206,11 @@ struct CSqlScoreData : ISqlData
 
 struct CSqlTeamScoreData : ISqlData
 {
+	CSqlTeamScoreData() :
+		ISqlData(nullptr)
+	{
+	}
+
 	char m_GameUuid[UUID_MAXSTRSIZE];
 	char m_Map[MAX_MAP_LENGTH];
 	float m_Time;
@@ -225,12 +222,10 @@ struct CSqlTeamScoreData : ISqlData
 struct CSqlTeamSave : ISqlData
 {
 	CSqlTeamSave(std::shared_ptr<CScoreSaveResult> pResult) :
-		m_pResult(std::move(pResult))
+		ISqlData(std::move(pResult))
 	{
 	}
 	virtual ~CSqlTeamSave(){};
-
-	std::shared_ptr<CScoreSaveResult> m_pResult;
 
 	char m_ClientName[MAX_NAME_LENGTH];
 	char m_Map[MAX_MAP_LENGTH];
@@ -242,12 +237,10 @@ struct CSqlTeamSave : ISqlData
 struct CSqlTeamLoad : ISqlData
 {
 	CSqlTeamLoad(std::shared_ptr<CScoreSaveResult> pResult) :
-		m_pResult(std::move(pResult))
+		ISqlData(std::move(pResult))
 	{
 	}
 	virtual ~CSqlTeamLoad(){};
-
-	std::shared_ptr<CScoreSaveResult> m_pResult;
 
 	char m_Code[128];
 	char m_Map[MAX_MAP_LENGTH];
@@ -297,6 +290,7 @@ class CScore
 	static bool ShowTeamRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
 	static bool ShowTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData);
 	static bool ShowTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData);
+	static bool ShowPlayerTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData);
 	static bool ShowTimesThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
 	static bool ShowPointsThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
 	static bool ShowTopPointsThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
@@ -347,6 +341,7 @@ public:
 	void ShowRank(int ClientID, const char *pName);
 
 	void ShowTeamTop5(int ClientID, int Offset = 1);
+	void ShowTeamTop5(int ClientID, const char *pName, int Offset = 1);
 	void ShowTeamRank(int ClientID, const char *pName);
 
 	void ShowTopPoints(int ClientID, int Offset = 1);

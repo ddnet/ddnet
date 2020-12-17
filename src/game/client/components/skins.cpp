@@ -30,6 +30,22 @@ static bool IsVanillaSkin(const char *pName)
 	return false;
 }
 
+int CSkins::CGetPngFile::OnCompletion(int State)
+{
+	State = CGetFile::OnCompletion(State);
+
+	if(State != HTTP_ERROR && State != HTTP_ABORTED && !m_pSkins->LoadSkinPNG(m_Info, m_aDest, m_aDest, m_StorageType))
+	{
+		State = HTTP_ERROR;
+	}
+	return State;
+}
+
+CSkins::CGetPngFile::CGetPngFile(CSkins *pSkins, IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType, CTimeout Timeout, bool LogProgress) :
+	CGetFile(pStorage, pUrl, pDest, StorageType, Timeout, LogProgress), m_pSkins(pSkins)
+{
+}
+
 int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
 	CSkins *pSelf = (CSkins *)pUser;
@@ -92,11 +108,31 @@ static void CheckMetrics(CSkin::SSkinMetricVariable &Metrics, uint8_t *pImg, int
 
 int CSkins::LoadSkin(const char *pName, const char *pPath, int DirType)
 {
-	char aBuf[512];
 	CImageInfo Info;
-	if(!Graphics()->LoadPNG(&Info, pPath, DirType) || !Graphics()->CheckImageDivisibility(pPath, Info, g_pData->m_aSprites[SPRITE_TEE_BODY].m_pSet->m_Gridx, g_pData->m_aSprites[SPRITE_TEE_BODY].m_pSet->m_Gridy, true))
+	if(!LoadSkinPNG(Info, pName, pPath, DirType))
+		return 0;
+	return LoadSkin(pName, Info);
+}
+
+bool CSkins::LoadSkinPNG(CImageInfo &Info, const char *pName, const char *pPath, int DirType)
+{
+	char aBuf[512];
+	if(!Graphics()->LoadPNG(&Info, pPath, DirType))
 	{
 		str_format(aBuf, sizeof(aBuf), "failed to load skin from %s", pName);
+		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
+		return false;
+	}
+	return true;
+}
+
+int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
+{
+	char aBuf[512];
+
+	if(!Graphics()->CheckImageDivisibility(pName, Info, g_pData->m_aSprites[SPRITE_TEE_BODY].m_pSet->m_Gridx, g_pData->m_aSprites[SPRITE_TEE_BODY].m_pSet->m_Gridy, true))
+	{
+		str_format(aBuf, sizeof(aBuf), "skin failed image divisibility: %s", pName);
 		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
 		return 0;
 	}
@@ -366,7 +402,7 @@ int CSkins::FindImpl(const char *pName)
 			char aPath[MAX_PATH_LENGTH];
 			str_format(aPath, sizeof(aPath), "downloadedskins/%s.png", d.front().m_aName);
 			Storage()->RenameFile(d.front().m_aPath, aPath, IStorage::TYPE_SAVE);
-			LoadSkin(d.front().m_aName, aPath, IStorage::TYPE_SAVE);
+			LoadSkin(d.front().m_aName, d.front().m_pTask->m_Info);
 			d.front().m_pTask = nullptr;
 		}
 		if(d.front().m_pTask && (d.front().m_pTask->State() == HTTP_ERROR || d.front().m_pTask->State() == HTTP_ABORTED))
@@ -382,7 +418,7 @@ int CSkins::FindImpl(const char *pName)
 	char aUrl[256];
 	str_format(aUrl, sizeof(aUrl), "%s%s.png", g_Config.m_ClSkinDownloadUrl, pName);
 	str_format(Skin.m_aPath, sizeof(Skin.m_aPath), "downloadedskins/%s.%d.tmp", pName, pid());
-	Skin.m_pTask = std::make_shared<CGetFile>(Storage(), aUrl, Skin.m_aPath, IStorage::TYPE_SAVE, CTimeout{0, 0, 0}, false);
+	Skin.m_pTask = std::make_shared<CGetPngFile>(this, Storage(), aUrl, Skin.m_aPath, IStorage::TYPE_SAVE, CTimeout{0, 0, 0}, false);
 	m_pClient->Engine()->AddJob(Skin.m_pTask);
 	m_aDownloadSkins.add(Skin);
 	return -1;

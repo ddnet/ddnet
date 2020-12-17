@@ -80,7 +80,7 @@ def main():
 
 	print('{} new entries in backup database found ({} ranks, {} teamranks, {} saves'.format(num, num_ranks, num_teamranks, num_saves))
 	print('Moving entries from {} to {}'.format(
-			os.path.abspath(args.f), 
+			os.path.abspath(args.f),
 			os.path.abspath(args.to)))
 	sql_file = 'ddnet-server-' + strftime('%Y-%m-%d') + '.sql'
 	print("You can use the following commands to import the entries to MySQL (use sed 's/record_/prefix_/' for other database prefixes):")

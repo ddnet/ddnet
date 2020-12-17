@@ -9,13 +9,13 @@
 import unicode
 
 def generate_cases():
-    ud = unicode.data()
-    return [(unicode.unhex(u["Value"]), unicode.unhex(u["Simple_Lowercase_Mapping"])) for u in ud if u["Simple_Lowercase_Mapping"]]
+	ud = unicode.data()
+	return [(unicode.unhex(u["Value"]), unicode.unhex(u["Simple_Lowercase_Mapping"])) for u in ud if u["Simple_Lowercase_Mapping"]]
 
 def main():
-    cases = generate_cases()
+	cases = generate_cases()
 
-    print("""\
+	print("""\
 #include <stdint.h>
 
 struct UPPER_LOWER
@@ -30,9 +30,9 @@ enum
 }};
 
 static const struct UPPER_LOWER tolower[NUM_TOLOWER] = {{""".format(len(cases)))
-    for upper_code, lower_code in cases:
-        print("\t{{{}, {}}},".format(upper_code, lower_code))
-    print("};")
+	for upper_code, lower_code in cases:
+		print("\t{{{}, {}}},".format(upper_code, lower_code))
+	print("};")
 
 if __name__ == '__main__':
-    main()
+	main()
