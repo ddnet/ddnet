@@ -103,11 +103,11 @@ bool CRaceHelper::IsFinish(CGameClient *pClient, vec2 Pos1, vec2 Pos2)
 	CCollision *pCollision = pClient->Collision();
 	std::list < int > Indices = pCollision->GetMapIndices(Pos2, Pos1);
 	if(!Indices.empty())
-		for(std::list < int >::iterator i = Indices.begin(); i != Indices.end(); i++)
+		for(int &Indice : Indices)
 		{
-			if(pCollision->GetTileIndex(*i) == TILE_FINISH)
+			if(pCollision->GetTileIndex(Indice) == TILE_FINISH)
 				return true;
-			if(pCollision->GetFTileIndex(*i) == TILE_FINISH)
+			if(pCollision->GetFTileIndex(Indice) == TILE_FINISH)
 				return true;
 		}
 	else
