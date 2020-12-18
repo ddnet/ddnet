@@ -60,7 +60,7 @@ class CHud : public CComponent
 	void RenderWarmupTimer();
 	void RenderLocalTime(float x);
 
-	void MapscreenToGroup(float CenterX, float CenterY, struct CMapItemGroup *PGroup);
+	void MapscreenToGroup(float CenterX, float CenterY, struct CMapItemGroup *PGroup, float Zoom = 1.0f);
 
 public:
 	CHud();

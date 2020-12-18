@@ -1669,6 +1669,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatTeamColors, Localize("Show names in chat in team colors"), &g_Config.m_ClChatTeamColors, &HUD, LineMargin);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowKillMessages, Localize("Show kill messages"), &g_Config.m_ClShowKillMessages, &HUD, LineMargin);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowVotesAfterVoting, Localize("Show votes window after voting"), &g_Config.m_ClShowVotesAfterVoting, &HUD, LineMargin);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClZoomCursor, Localize("Zoom ingame cursor"), &g_Config.m_ClZoomCursor, &HUD, LineMargin);
 
 	// Laser
 
