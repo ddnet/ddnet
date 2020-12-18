@@ -188,15 +188,20 @@ void CVoting::OnMessage(int MsgType, void *pRawMsg)
 	if(MsgType == NETMSGTYPE_SV_VOTESET)
 	{
 		CNetMsg_Sv_VoteSet *pMsg = (CNetMsg_Sv_VoteSet *)pRawMsg;
+		OnReset();
 		if(pMsg->m_Timeout)
 		{
-			OnReset();
 			str_copy(m_aDescription, pMsg->m_pDescription, sizeof(m_aDescription));
 			str_copy(m_aReason, pMsg->m_pReason, sizeof(m_aReason));
 			m_Closetime = time() + time_freq() * pMsg->m_Timeout;
+
+			if(Client()->RconAuthed())
+			{
+				char aBuf[512];
+				str_format(aBuf, sizeof(aBuf), "%s (%s)", m_aDescription, m_aReason);
+				Client()->Notify("DDNet Vote", aBuf);
+			}
 		}
-		else
-			OnReset();
 	}
 	else if(MsgType == NETMSGTYPE_SV_VOTESTATUS)
 	{
