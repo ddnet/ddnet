@@ -1831,7 +1831,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 		int DefaultInd = GameClient()->m_pSkins->Find("default");
 
-		for(auto & i : RenderInfo)
+		for(auto &i : RenderInfo)
 		{
 			i.m_Size = RealTeeSize;
 			i.m_CustomColoredSkin = false;
@@ -2146,53 +2146,43 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	ColorRGBA GreyDefault(0.5f, 0.5f, 0.5f, 1);
 	DoLine_ColorPicker(&ResetID2, 25.0f, 194.0f, 13.0f, 5.0f, &Left, Localize("Entities Background color"), &g_Config.m_ClBackgroundEntitiesColor, GreyDefault, false);
 
+	static float s_Map = 0.0f;
+	Left.VSplitLeft(5.0f, 0x0, &Left);
+	Left.HSplitTop(25.0f, &Background, &Left);
+	Background.HSplitTop(20.0f, &Background, 0);
+	Background.VSplitLeft(100.0f, &Label, &TempLabel);
+	UI()->DoLabelScaled(&Label, Localize("Map"), 14.0f, -1);
+	DoEditBox(g_Config.m_ClBackgroundEntities, &TempLabel, g_Config.m_ClBackgroundEntities, sizeof(g_Config.m_ClBackgroundEntities), 14.0f, &s_Map);
+
+	Left.HSplitTop(20.0f, &Button, &Left);
+	bool UseCurrentMap = str_comp(g_Config.m_ClBackgroundEntities, CURRENT_MAP) == 0;
+	if(DoButton_CheckBox(&UseCurrentMap, Localize("Use current map as background"), UseCurrentMap, &Button))
 	{
-		static float s_Map = 0.0f;
-		Left.VSplitLeft(5.0f, 0x0, &Left);
-		Left.HSplitTop(25.0f, &Background, &Left);
-		Background.HSplitTop(20.0f, &Background, 0);
-		Background.VSplitLeft(100.0f, &Label, &TempLabel);
-		UI()->DoLabelScaled(&Label, Localize("Map"), 14.0f, -1);
-		DoEditBox(g_Config.m_ClBackgroundEntities, &TempLabel, g_Config.m_ClBackgroundEntities, sizeof(g_Config.m_ClBackgroundEntities), 14.0f, &s_Map);
-
-		Left.HSplitTop(20.0f, &Button, &Left);
-		bool UseCurrentMap = str_comp(g_Config.m_ClBackgroundEntities, CURRENT_MAP) == 0;
-		if(DoButton_CheckBox(&UseCurrentMap, Localize("Use current map as background"), UseCurrentMap, &Button))
-		{
-			if(UseCurrentMap)
-				g_Config.m_ClBackgroundEntities[0] = '\0';
-			else
-				str_copy(g_Config.m_ClBackgroundEntities, CURRENT_MAP, sizeof(g_Config.m_ClBackgroundEntities));
-		}
-
-		Left.HSplitTop(20.0f, &Button, &Left);
-		if(DoButton_CheckBox(&g_Config.m_ClBackgroundShowTilesLayers, Localize("Show tiles layers from BG map"), g_Config.m_ClBackgroundShowTilesLayers, &Button))
-		{
-			g_Config.m_ClBackgroundShowTilesLayers ^= 1;
-		}
+		if(UseCurrentMap)
+			g_Config.m_ClBackgroundEntities[0] = '\0';
+		else
+			str_copy(g_Config.m_ClBackgroundEntities, CURRENT_MAP, sizeof(g_Config.m_ClBackgroundEntities));
 	}
 
+	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_ClBackgroundShowTilesLayers, Localize("Show tiles layers from BG map"), g_Config.m_ClBackgroundShowTilesLayers, &Button))
+		g_Config.m_ClBackgroundShowTilesLayers ^= 1;
 
 	Miscellaneous.HSplitTop(25.0f, &Button, &Right);
 	DoLine_ColorPicker(&ResetID1, 25.0f, 194.0f, 13.0f, 5.0f, &Button, Localize("Regular Background Color"), &g_Config.m_ClBackgroundColor, GreyDefault, false);
 	Right.HSplitTop(5.0f, 0x0, &Right);
 	Right.HSplitTop(20.0f, &Button, &Right);
 	if(DoButton_CheckBox(&g_Config.m_ClHttpMapDownload, Localize("Try fast HTTP map download first"), g_Config.m_ClHttpMapDownload, &Button))
-	{
 		g_Config.m_ClHttpMapDownload ^= 1;
-	}
 
+	static int s_ButtonTimeout = 0;
+	Right.HSplitTop(10.0f, 0x0, &Right);
+	Right.HSplitTop(20.0f, &Button, &Right);
+	if(DoButton_Menu(&s_ButtonTimeout, Localize("New random timeout code"), 0, &Button))
 	{
-		static int s_ButtonTimeout = 0;
-		Right.HSplitTop(10.0f, 0x0, &Right);
-		Right.HSplitTop(20.0f, &Button, &Right);
-		if(DoButton_Menu(&s_ButtonTimeout, Localize("New random timeout code"), 0, &Button))
-		{
-			Client()->GenerateTimeoutSeed();
-		}
+		Client()->GenerateTimeoutSeed();
 	}
-
-		// Updater
+	// Updater
 #if defined(CONF_AUTOUPDATE)
 	{
 		MainView.VSplitMid(&Left, &Right);
@@ -2209,7 +2199,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 			Label.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1, -1.0f) + 10.0f, &Label, &Button);
 			Button.VSplitLeft(100.0f, &Button, 0);
 			static int s_ButtonUpdate = 0;
-			if (DoButton_Menu(&s_ButtonUpdate, Localize("Update now"), 0, &Button))
+			if(DoButton_Menu(&s_ButtonUpdate, Localize("Update now"), 0, &Button))
 			{
 				Updater()->InitiateUpdate();
 			}
