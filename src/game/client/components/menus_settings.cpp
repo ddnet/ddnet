@@ -761,6 +761,7 @@ static CKeyInfo gs_aKeys[] =
 		{"Fire", "+fire", 0, 0},
 		{"Hook", "+hook", 0, 0},
 		{"Hook collisions", "+showhookcoll", 0, 0},
+		{"45° aim", "+toggle cl_mouse_max_distance 2 400; +toggle inp_mousesens 1 200", 0, 0},
 		{"Pause", "say /pause", 0, 0},
 		{"Kill", "kill", 0, 0},
 		{"Zoom in", "zoom+", 0, 0},
@@ -769,10 +770,7 @@ static CKeyInfo gs_aKeys[] =
 		{"Show others", "say /showothers", 0, 0},
 		{"Show all", "say /showall", 0, 0},
 		{"Toggle dyncam", "toggle cl_dyncam 0 1", 0, 0},
-		{"Toggle dummy", "toggle cl_dummy 0 1", 0, 0},
 		{"Toggle ghost", "toggle cl_race_show_ghost 0 1", 0, 0},
-		{"Dummy copy", "toggle cl_dummy_copy_moves 0 1", 0, 0},
-		{"Hammerfly dummy", "toggle cl_dummy_hammer 0 1", 0, 0},
 
 		{"Hammer", "+weapon1", 0, 0},
 		{"Pistol", "+weapon2", 0, 0},
@@ -788,7 +786,14 @@ static CKeyInfo gs_aKeys[] =
 		{"Chat", "+show_chat; chat all", 0, 0},
 		{"Team chat", "+show_chat; chat team", 0, 0},
 		{"Converse", "+show_chat; chat all /c ", 0, 0},
+		{"Chat command", "+show_chat; chat all /", 0, 0},
 		{"Show chat", "+show_chat", 0, 0},
+
+		{"Toggle dummy", "toggle cl_dummy 0 1", 0, 0},
+		{"Dummy copy", "toggle cl_dummy_copy_moves 0 1", 0, 0},
+		{"Hammerfly dummy", "toggle cl_dummy_hammer 0 1", 0, 0},
+		{"Deepfly on", "bind mouse1 \"+fire; +toggle cl_dummy_hammer 1 0\"", 0, 0},
+		{"Deepfly off", "bind mouse1 \"+fire\"", 0, 0},
 
 		{"Emoticon", "+emote", 0, 0},
 		{"Spectator mode", "+spectate", 0, 0},
@@ -814,7 +819,8 @@ static CKeyInfo gs_aKeys[] =
 	Localize("Chat");Localize("Team chat");Localize("Converse");Localize("Show chat");Localize("Emoticon");
 	Localize("Spectator mode");Localize("Spectate next");Localize("Spectate previous");Localize("Console");
 	Localize("Remote console");Localize("Screenshot");Localize("Scoreboard");Localize("Statboard");
-	Localize("Lock team");Localize("Show entities");Localize("Show HUD");
+	Localize("Lock team");Localize("Show entities");Localize("Show HUD");Localize("45° aim");
+	Localize("Chat command";Localize("Deepfly on");Localize("Deepfly off");
 */
 
 void CMenus::UiDoGetButtons(int Start, int Stop, CUIRect View, CUIRect ScopeView)
@@ -880,7 +886,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	int OldSelected = s_SelectedControl;
 	UiDoListboxStart(&s_ControlsList, &MainView, 475.0f, Localize("Controls"), "", 1, 1, s_SelectedControl, s_ScrollValue);
 
-	CUIRect MovementSettings, WeaponSettings, VotingSettings, ChatSettings, MiscSettings, ResetButton;
+	CUIRect MovementSettings, WeaponSettings, VotingSettings, ChatSettings, DummySettings, MiscSettings, ResetButton;
 	CListboxItem Item = UiDoListboxNextItem(&OldSelected, false, false, true);
 	Item.m_Rect.HSplitTop(10.0f, 0, &Item.m_Rect);
 	Item.m_Rect.VSplitMid(&MovementSettings, &VotingSettings);
@@ -888,7 +894,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	// movement settings
 	{
 		MovementSettings.VMargin(5.0f, &MovementSettings);
-		MovementSettings.HSplitTop(515.0f, &MovementSettings, &WeaponSettings);
+		MovementSettings.HSplitTop(510.0f, &MovementSettings, &WeaponSettings);
 		RenderTools()->DrawUIRect(&MovementSettings, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 10.0f);
 		MovementSettings.VMargin(10.0f, &MovementSettings);
 
@@ -928,14 +934,14 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	// weapon settings
 	{
 		WeaponSettings.HSplitTop(10.0f, 0, &WeaponSettings);
-		WeaponSettings.HSplitTop(190.0f, &WeaponSettings, &ResetButton);
+		WeaponSettings.HSplitTop(145.0f, &WeaponSettings, &ResetButton);
 		RenderTools()->DrawUIRect(&WeaponSettings, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 10.0f);
 		WeaponSettings.VMargin(10.0f, &WeaponSettings);
 
 		TextRender()->Text(0, WeaponSettings.x, WeaponSettings.y + (14.0f + 5.0f + 10.0f - 14.0f * UI()->Scale()) / 2.f, 14.0f * UI()->Scale(), Localize("Weapon"), -1.0f);
 
 		WeaponSettings.HSplitTop(14.0f + 5.0f + 10.0f, 0, &WeaponSettings);
-		UiDoGetButtons(18, 25, WeaponSettings, MainView);
+		UiDoGetButtons(18, 23, WeaponSettings, MainView);
 	}
 
 	// defaults
@@ -961,20 +967,33 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		TextRender()->Text(0, VotingSettings.x, VotingSettings.y + (14.0f + 5.0f + 10.0f - 14.0f * UI()->Scale()) / 2.f, 14.0f * UI()->Scale(), Localize("Voting"), -1.0f);
 
 		VotingSettings.HSplitTop(14.0f + 5.0f + 10.0f, 0, &VotingSettings);
-		UiDoGetButtons(25, 27, VotingSettings, MainView);
+		UiDoGetButtons(23, 25, VotingSettings, MainView);
 	}
 
 	// chat settings
 	{
 		ChatSettings.HSplitTop(10.0f, 0, &ChatSettings);
-		ChatSettings.HSplitTop(125.0f, &ChatSettings, &MiscSettings);
+		ChatSettings.HSplitTop(145.0f, &ChatSettings, &DummySettings);
 		RenderTools()->DrawUIRect(&ChatSettings, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 10.0f);
 		ChatSettings.VMargin(10.0f, &ChatSettings);
 
 		TextRender()->Text(0, ChatSettings.x, ChatSettings.y + (14.0f + 5.0f + 10.0f - 14.0f * UI()->Scale()) / 2.f, 14.0f * UI()->Scale(), Localize("Chat"), -1.0f);
 
 		ChatSettings.HSplitTop(14.0f + 5.0f + 10.0f, 0, &ChatSettings);
-		UiDoGetButtons(27, 31, ChatSettings, MainView);
+		UiDoGetButtons(25, 30, ChatSettings, MainView);
+	}
+
+	// dummy settings
+	{
+		DummySettings.HSplitTop(10.0f, 0, &DummySettings);
+		DummySettings.HSplitTop(145.0f, &DummySettings, &MiscSettings);
+		RenderTools()->DrawUIRect(&DummySettings, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 10.0f);
+		DummySettings.VMargin(10.0f, &DummySettings);
+
+		TextRender()->Text(0, DummySettings.x, DummySettings.y + (14.0f + 5.0f + 10.0f - 14.0f * UI()->Scale()) / 2.f, 14.0f * UI()->Scale(), Localize("Dummy"), -1.0f);
+
+		DummySettings.HSplitTop(14.0f + 5.0f + 10.0f, 0, &DummySettings);
+		UiDoGetButtons(30, 35, DummySettings, MainView);
 	}
 
 	// misc settings
@@ -987,7 +1006,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		TextRender()->Text(0, MiscSettings.x, MiscSettings.y + (14.0f + 5.0f + 10.0f - 14.0f * UI()->Scale()) / 2.f, 14.0f * UI()->Scale(), Localize("Miscellaneous"), -1.0f);
 
 		MiscSettings.HSplitTop(14.0f + 5.0f + 10.0f, 0, &MiscSettings);
-		UiDoGetButtons(31, 43, MiscSettings, MainView);
+		UiDoGetButtons(35, 47, MiscSettings, MainView);
 	}
 
 	UiDoListboxEnd(&s_ScrollValue, 0);
