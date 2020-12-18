@@ -99,6 +99,26 @@ CMenus::CMenus()
 
 	m_ServerProcess.Process = 0;
 	m_ServerProcess.Initialized = false;
+
+	for(SUIAnimator &animator : m_aAnimatorsSettingsTab)
+	{
+		animator.m_YOffset = -2.5f;
+		animator.m_HOffset = 5.0f;
+		animator.m_WOffset = 5.0f;
+		animator.m_RepositionLabel = true;
+	}
+
+	for(SUIAnimator &animator : m_aAnimatorsBigPage)
+	{
+		animator.m_YOffset = -5.0f;
+		animator.m_HOffset = 5.0f;
+	}
+
+	for(SUIAnimator &animator : m_aAnimatorsSmallPage)
+	{
+		animator.m_YOffset = -2.5f;
+		animator.m_HOffset = 2.5f;
+	}
 }
 
 float CMenus::ButtonColorMul(const void *pID)
@@ -222,14 +242,43 @@ void CMenus::DoButton_KeySelect(const void *pID, const char *pText, int Checked,
 	UI()->DoLabel(&Temp, pText, Temp.h * ms_FontmodHeight, 0);
 }
 
-int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners, const ColorRGBA *pDefaultColor, const ColorRGBA *pActiveColor, const ColorRGBA *pHoverColor, float EdgeRounding, int AlignVertically)
+int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners, SUIAnimator *pAnimator, const ColorRGBA *pDefaultColor, const ColorRGBA *pActiveColor, const ColorRGBA *pHoverColor, float EdgeRounding, int AlignVertically)
 {
+	bool MouseInside = UI()->MouseInside(pRect);
+	CUIRect Rect = *pRect;
+
+	if(pAnimator != NULL)
+	{
+		int64 Time = time_get_microseconds();
+
+		if(pAnimator->m_Time + (int64)100000 < Time)
+		{
+			pAnimator->m_Value = pAnimator->m_Active ? 1 : 0;
+			pAnimator->m_Time = Time;
+		}
+
+		pAnimator->m_Active = Checked || MouseInside;
+
+		if(pAnimator->m_Active)
+			pAnimator->m_Value = clamp<float>(pAnimator->m_Value + (Time - pAnimator->m_Time) / 100000.f, 0, 1);
+		else
+			pAnimator->m_Value = clamp<float>(pAnimator->m_Value - (Time - pAnimator->m_Time) / 100000.f, 0, 1);
+
+		Rect.w += pAnimator->m_Value * pAnimator->m_WOffset;
+		Rect.h += pAnimator->m_Value * pAnimator->m_HOffset;
+		Rect.x += pAnimator->m_Value * pAnimator->m_XOffset;
+		Rect.y += pAnimator->m_Value * pAnimator->m_YOffset;
+
+		pAnimator->m_Time = Time;
+	}
+
 	if(Checked)
 	{
 		ColorRGBA ColorMenuTab = ms_ColorTabbarActive;
 		if(pActiveColor)
 			ColorMenuTab = *pActiveColor;
-		RenderTools()->DrawUIRect(pRect, ColorMenuTab, Corners, EdgeRounding);
+
+		RenderTools()->DrawUIRect(&Rect, ColorMenuTab, Corners, EdgeRounding);
 	}
 	else
 	{
@@ -238,18 +287,37 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 			ColorRGBA HoverColorMenuTab = ms_ColorTabbarHover;
 			if(pHoverColor)
 				HoverColorMenuTab = *pHoverColor;
-			RenderTools()->DrawUIRect(pRect, HoverColorMenuTab, Corners, EdgeRounding);
+
+			RenderTools()->DrawUIRect(&Rect, HoverColorMenuTab, Corners, EdgeRounding);
 		}
 		else
 		{
 			ColorRGBA ColorMenuTab = ms_ColorTabbarInactive;
 			if(pDefaultColor)
 				ColorMenuTab = *pDefaultColor;
-			RenderTools()->DrawUIRect(pRect, ColorMenuTab, Corners, EdgeRounding);
+
+			RenderTools()->DrawUIRect(&Rect, ColorMenuTab, Corners, EdgeRounding);
 		}
 	}
+
 	CUIRect Temp;
-	pRect->HMargin(2.0f, &Temp);
+
+	if(pAnimator != NULL)
+	{
+		if(pAnimator->m_RepositionLabel)
+		{
+			Rect.x += Rect.w - pRect->w + Rect.x - pRect->x;
+			Rect.y += Rect.h - pRect->h + Rect.y - pRect->y;
+		}
+
+		if(!pAnimator->m_ScaleLabel)
+		{
+			Rect.w = pRect->w;
+			Rect.h = pRect->h;
+		}
+	}
+
+	Rect.HMargin(2.0f, &Temp);
 	UI()->DoLabel(&Temp, pText, Temp.h * ms_FontmodHeight, 0, -1, AlignVertically);
 
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
@@ -1059,7 +1127,7 @@ int CMenus::RenderMenubar(CUIRect r)
 			pHomeButtonColorHover = &HomeButtonColorAlertHover;
 		}
 
-		if(DoButton_MenuTab(&s_StartButton, pHomeScreenButtonLabel, false, &Button, CUI::CORNER_T, pHomeButtonColor, pHomeButtonColor, pHomeButtonColorHover, 10.0f, 0))
+		if(DoButton_MenuTab(&s_StartButton, pHomeScreenButtonLabel, false, &Button, CUI::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_HOME], pHomeButtonColor, pHomeButtonColor, pHomeButtonColorHover, 10.0f, 0))
 		{
 			m_ShowStart = true;
 			m_DoubleClickIndex = -1;
@@ -1075,7 +1143,7 @@ int CMenus::RenderMenubar(CUIRect r)
 		{
 			Box.VSplitLeft(100.0f, &Button, &Box);
 			static int s_NewsButton = 0;
-			if(DoButton_MenuTab(&s_NewsButton, Localize("News"), m_ActivePage == PAGE_NEWS, &Button, CUI::CORNER_T))
+			if(DoButton_MenuTab(&s_NewsButton, Localize("News"), m_ActivePage == PAGE_NEWS, &Button, CUI::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_NEWS]))
 			{
 				NewPage = PAGE_NEWS;
 				m_DoubleClickIndex = -1;
@@ -1085,7 +1153,7 @@ int CMenus::RenderMenubar(CUIRect r)
 		{
 			Box.VSplitLeft(100.0f, &Button, &Box);
 			static int s_DemosButton = 0;
-			if(DoButton_MenuTab(&s_DemosButton, Localize("Demos"), m_ActivePage == PAGE_DEMOS, &Button, CUI::CORNER_T))
+			if(DoButton_MenuTab(&s_DemosButton, Localize("Demos"), m_ActivePage == PAGE_DEMOS, &Button, CUI::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_DEMOS]))
 			{
 				DemolistPopulate();
 				NewPage = PAGE_DEMOS;
@@ -1096,7 +1164,7 @@ int CMenus::RenderMenubar(CUIRect r)
 		{
 			Box.VSplitLeft(100.0f, &Button, &Box);
 			static int s_InternetButton = 0;
-			if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), m_ActivePage == PAGE_INTERNET, &Button, CUI::CORNER_TL))
+			if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), m_ActivePage == PAGE_INTERNET, &Button, CUI::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_INTERNET]))
 			{
 				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_INTERNET)
 					ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
@@ -1106,7 +1174,7 @@ int CMenus::RenderMenubar(CUIRect r)
 
 			Box.VSplitLeft(100.0f, &Button, &Box);
 			static int s_LanButton = 0;
-			if(DoButton_MenuTab(&s_LanButton, Localize("LAN"), m_ActivePage == PAGE_LAN, &Button, 0))
+			if(DoButton_MenuTab(&s_LanButton, Localize("LAN"), m_ActivePage == PAGE_LAN, &Button, CUI::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_LAN]))
 			{
 				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_LAN)
 					ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
@@ -1116,7 +1184,7 @@ int CMenus::RenderMenubar(CUIRect r)
 
 			Box.VSplitLeft(100.0f, &Button, &Box);
 			static int s_FavoritesButton = 0;
-			if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), m_ActivePage == PAGE_FAVORITES, &Button, 0))
+			if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), m_ActivePage == PAGE_FAVORITES, &Button, CUI::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_FAVORITES]))
 			{
 				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_FAVORITES)
 					ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
@@ -1126,7 +1194,7 @@ int CMenus::RenderMenubar(CUIRect r)
 
 			Box.VSplitLeft(90.0f, &Button, &Box);
 			static int s_DDNetButton = 0;
-			if(DoButton_MenuTab(&s_DDNetButton, "DDNet", m_ActivePage == PAGE_DDNET, &Button, 0))
+			if(DoButton_MenuTab(&s_DDNetButton, "DDNet", m_ActivePage == PAGE_DDNET, &Button, CUI::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_DDNET]))
 			{
 				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_DDNET)
 				{
@@ -1139,7 +1207,7 @@ int CMenus::RenderMenubar(CUIRect r)
 
 			Box.VSplitLeft(90.0f, &Button, &Box);
 			static int s_KoGButton = 0;
-			if(DoButton_MenuTab(&s_KoGButton, "KoG", m_ActivePage == PAGE_KOG, &Button, CUI::CORNER_TR))
+			if(DoButton_MenuTab(&s_KoGButton, "KoG", m_ActivePage == PAGE_KOG, &Button, CUI::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_KOG]))
 			{
 				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_KOG)
 				{
@@ -1197,7 +1265,7 @@ int CMenus::RenderMenubar(CUIRect r)
 	Box.VSplitRight(33.0f, &Box, &Button);
 	static int s_QuitButton = 0;
 	ColorRGBA QuitColor(1, 0, 0, 0.5f);
-	if(DoButton_MenuTab(&s_QuitButton, "\xEE\x97\x8D", 0, &Button, CUI::CORNER_T, NULL, NULL, &QuitColor, 10.0f, 0))
+	if(DoButton_MenuTab(&s_QuitButton, "\xEE\x97\x8D", 0, &Button, CUI::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_QUIT], NULL, NULL, &QuitColor, 10.0f, 0))
 	{
 		if(m_pClient->Editor()->HasUnsavedData() || (Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmQuitTime && g_Config.m_ClConfirmQuitTime >= 0))
 		{
@@ -1213,13 +1281,13 @@ int CMenus::RenderMenubar(CUIRect r)
 	Box.VSplitRight(33.0f, &Box, &Button);
 	static int s_SettingsButton = 0;
 
-	if(DoButton_MenuTab(&s_SettingsButton, "\xEE\xA2\xB8", m_ActivePage == PAGE_SETTINGS, &Button, CUI::CORNER_T, NULL, NULL, NULL, 10.0f, 0))
+	if(DoButton_MenuTab(&s_SettingsButton, "\xEE\xA2\xB8", m_ActivePage == PAGE_SETTINGS, &Button, CUI::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_SETTINGS], NULL, NULL, NULL, 10.0f, 0))
 		NewPage = PAGE_SETTINGS;
 
 	Box.VSplitRight(10.0f, &Box, &Button);
 	Box.VSplitRight(33.0f, &Box, &Button);
 	static int s_EditorButton = 0;
-	if(DoButton_MenuTab(&s_EditorButton, "\xEE\x8F\x89", 0, &Button, CUI::CORNER_T, NULL, NULL, NULL, 10.0f, 0))
+	if(DoButton_MenuTab(&s_EditorButton, "\xEE\x8F\x89", 0, &Button, CUI::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_EDITOR], NULL, NULL, NULL, 10.0f, 0))
 	{
 		g_Config.m_ClEditor = 1;
 	}
@@ -1230,14 +1298,14 @@ int CMenus::RenderMenubar(CUIRect r)
 		Box.VSplitRight(33.0f, &Box, &Button);
 		static int s_DemoButton = 0;
 
-		if(DoButton_MenuTab(&s_DemoButton, "\xEE\x80\xAC", m_ActivePage == PAGE_DEMOS, &Button, CUI::CORNER_T, NULL, NULL, NULL, 10.0f, 0))
+		if(DoButton_MenuTab(&s_DemoButton, "\xEE\x80\xAC", m_ActivePage == PAGE_DEMOS, &Button, CUI::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_DEMOBUTTON], NULL, NULL, NULL, 10.0f, 0))
 			NewPage = PAGE_DEMOS;
 
 		Box.VSplitRight(10.0f, &Box, &Button);
 		Box.VSplitRight(33.0f, &Box, &Button);
 		static int s_ServerButton = 0;
 
-		if(DoButton_MenuTab(&s_ServerButton, "\xEE\xA0\x8B", m_ActivePage == g_Config.m_UiPage, &Button, CUI::CORNER_T, NULL, NULL, NULL, 10.0f, 0))
+		if(DoButton_MenuTab(&s_ServerButton, "\xEE\xA0\x8B", m_ActivePage == g_Config.m_UiPage, &Button, CUI::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_SERVER], NULL, NULL, NULL, 10.0f, 0))
 			NewPage = g_Config.m_UiPage;
 	}
 

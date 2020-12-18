@@ -1496,7 +1496,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 	{
 		TabBar.HSplitTop(10, &Button, &TabBar);
 		TabBar.HSplitTop(26, &Button, &TabBar);
-		if(DoButton_MenuTab(aTabs[i], aTabs[i], g_Config.m_UiSettingsPage == i, &Button, CUI::CORNER_R))
+		if(DoButton_MenuTab(aTabs[i], aTabs[i], g_Config.m_UiSettingsPage == i, &Button, CUI::CORNER_R, &m_aAnimatorsSettingsTab[i]))
 			g_Config.m_UiSettingsPage = i;
 	}
 
@@ -1572,7 +1572,7 @@ ColorHSLA CMenus::RenderHSLColorPicker(const CUIRect *pRect, unsigned int *pColo
 {
 	ColorHSLA HSLColor(*pColor, false);
 	ColorRGBA RGBColor = color_cast<ColorRGBA>(HSLColor);
-	
+
 	ColorRGBA Outline(1, 1, 1, 0.25f);
 	const float OutlineSize = 3.0f;
 	Outline.a *= ButtonColorMul(pColor);
@@ -1701,7 +1701,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 	Chat.HSplitTop(20.0f, &Section, &Chat);
 	Chat.HSplitTop(10.0f, 0x0, &Chat);
-	
+
 	UI()->DoLabelScaled(&Section, Localize("Messages"), 20.0f, -1);
 
 	const float LineSize = 25.0f;
@@ -1717,12 +1717,11 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	DoLine_ColorPicker(&ResetIDs[i++], LineSize, WantedPickerPosition, LabelSize, LineSpacing, &Chat, Localize("System message"), &g_Config.m_ClMessageSystemColor, ColorRGBA(1.0f, 1.0f, 0.5f), true, true, &g_Config.m_ClShowChatSystem);
 	DoLine_ColorPicker(&ResetIDs[i++], LineSize, WantedPickerPosition, LabelSize, LineSpacing, &Chat, Localize("Highlighted message"), &g_Config.m_ClMessageHighlightColor, ColorRGBA(1.0f, 0.5f, 0.5f));
 	DoLine_ColorPicker(&ResetIDs[i++], LineSize, WantedPickerPosition, LabelSize, LineSpacing, &Chat, Localize("Team message"), &g_Config.m_ClMessageTeamColor, ColorRGBA(0.65f, 1.0f, 0.65f));
-	DoLine_ColorPicker(&ResetIDs[i++], LineSize, WantedPickerPosition, LabelSize, LineSpacing, &Chat, Localize("Friend message"), &g_Config.m_ClMessageFriendColor, ColorRGBA(1.0f, 0.137f, 0.137f), true, true, & g_Config.m_ClMessageFriend);
+	DoLine_ColorPicker(&ResetIDs[i++], LineSize, WantedPickerPosition, LabelSize, LineSpacing, &Chat, Localize("Friend message"), &g_Config.m_ClMessageFriendColor, ColorRGBA(1.0f, 0.137f, 0.137f), true, true, &g_Config.m_ClMessageFriend);
 	DoLine_ColorPicker(&ResetIDs[i++], LineSize, WantedPickerPosition, LabelSize, LineSpacing, &Chat, Localize("Normal message"), &g_Config.m_ClMessageColor, ColorRGBA(1.0f, 1.0f, 1.0f));
 
 	str_format(aBuf, sizeof(aBuf), "%s (echo)", Localize("Client message"));
 	DoLine_ColorPicker(&ResetIDs[i++], LineSize, WantedPickerPosition, LabelSize, LineSpacing, &Chat, aBuf, &g_Config.m_ClMessageClientColor, ColorRGBA(0.5f, 0.78f, 1.0f));
-
 
 	// ***** Chat Preview ***** //
 
@@ -1749,7 +1748,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	const float RealMsgPaddingY = (!g_Config.m_ClChatOld ? CChat::MESSAGE_PADDING_Y : 0) * 2;
 	const float RealMsgPaddingTee = (!g_Config.m_ClChatOld ? CChat::MESSAGE_TEE_SIZE + CChat::MESSAGE_TEE_PADDING_RIGHT : 0) * 2;
 	const float RealOffsetY = RealFontSize + RealMsgPaddingY;
-	
+
 	const float X = 5.0f + RealMsgPaddingX / 2.0f + Chat.x;
 	float Y = Chat.y;
 
@@ -1877,7 +1876,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	TextRender()->TextColor(TeamColor);
 	if(g_Config.m_ClShowIDs)
 		TextRender()->TextEx(&Cursor, "11: Your Teammate: ", -1);
-	else 
+	else
 		TextRender()->TextEx(&Cursor, "Your Teammate: ", -1);
 	TextRender()->TextEx(&Cursor, "Let's speedrun this!", -1);
 	if(!g_Config.m_ClChatOld)

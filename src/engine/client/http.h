@@ -101,12 +101,13 @@ class CGetFile : public CRequest
 
 	IStorage *m_pStorage;
 
-	char m_aDest[MAX_PATH_LENGTH];
 	char m_aDestFull[MAX_PATH_LENGTH];
-	int m_StorageType;
 	IOHANDLE m_File;
 
 protected:
+	char m_aDest[MAX_PATH_LENGTH];
+	int m_StorageType;
+
 	virtual int OnCompletion(int State);
 
 public:
