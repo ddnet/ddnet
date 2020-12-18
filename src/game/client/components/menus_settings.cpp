@@ -1825,7 +1825,6 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 		Width = TextRender()->TextWidth(0, RealFontSize, "*** Echo command executed", -1, -1);
 		RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, CUI::CORNER_ALL);
-		TempY += RealOffsetY;
 
 		Graphics()->QuadsEnd();
 
@@ -1833,10 +1832,10 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 		int DefaultInd = GameClient()->m_pSkins->Find("default");
 
-		for(int i = 0; i < PreviewTeeCount; i++)
+		for(auto & i : RenderInfo)
 		{
-			RenderInfo[i].m_Size = RealTeeSize;
-			RenderInfo[i].m_CustomColoredSkin = false;
+			i.m_Size = RealTeeSize;
+			i.m_CustomColoredSkin = false;
 		}
 
 		int ind = -1;
@@ -1920,7 +1919,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	// Client
 	TextRender()->TextColor(ClientColor);
 	TextRender()->TextEx(&Cursor, "*** Echo command executed", -1);
-	TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
+	TextRender()->SetCursorPosition(&Cursor, X, Y);
 
 	TextRender()->TextColor(1, 1, 1, 1);
 }
@@ -2132,26 +2131,32 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	Right.VSplitLeft(10.0f, 0x0, &Right);
 	Left.HSplitTop(25.0f, 0x0, &Left);
 	CUIRect TempLabel;
+	Left.HSplitTop(25.0f, &TempLabel, &Left);
+	Left.HSplitTop(5.0f, 0x0, &Left);
+
+	UI()->DoLabelScaled(&TempLabel, Localize("Background"), 20.0f, -1);
+
+	Right.HSplitTop(25.0f, 0x0, &Right);
 	Right.HSplitTop(25.0f, &TempLabel, &Right);
-	Right.HSplitTop(5.0f, 0x0, &Right);
+	Right.HSplitTop(5.0f, 0x0, &Miscellaneous);
+
+	UI()->DoLabelScaled(&TempLabel, Localize("Miscellaneous"), 20.0f, -1);
 
 	static int ResetID1 = 0;
 	static int ResetID2 = 0;
 	ColorRGBA GreyDefault(0.5f, 0.5f, 0.5f, 1);
-	DoLine_ColorPicker(&ResetID1, 25.0f, 194.0f, 13.0f, 5.0f, &Left, Localize("Background (regular)"), &g_Config.m_ClBackgroundColor, GreyDefault, false);
-	DoLine_ColorPicker(&ResetID2, 25.0f, 194.0f, 13.0f, 5.0f, &Left, Localize("Background (entities)"), &g_Config.m_ClBackgroundEntitiesColor, GreyDefault, false);
-
-	UI()->DoLabelScaled(&TempLabel, Localize("Background (entities)"), 20.0f, -1);
+	DoLine_ColorPicker(&ResetID2, 25.0f, 194.0f, 13.0f, 5.0f, &Left, Localize("Entities Background color"), &g_Config.m_ClBackgroundEntitiesColor, GreyDefault, false);
 
 	{
 		static float s_Map = 0.0f;
-		Right.HSplitTop(25.0f, &Background, &Right);
+		Left.VSplitLeft(5.0f, 0x0, &Left);
+		Left.HSplitTop(25.0f, &Background, &Left);
 		Background.HSplitTop(20.0f, &Background, 0);
-		Background.VSplitLeft(100.0f, &Label, &Left);
+		Background.VSplitLeft(100.0f, &Label, &TempLabel);
 		UI()->DoLabelScaled(&Label, Localize("Map"), 14.0f, -1);
-		DoEditBox(g_Config.m_ClBackgroundEntities, &Left, g_Config.m_ClBackgroundEntities, sizeof(g_Config.m_ClBackgroundEntities), 14.0f, &s_Map);
+		DoEditBox(g_Config.m_ClBackgroundEntities, &TempLabel, g_Config.m_ClBackgroundEntities, sizeof(g_Config.m_ClBackgroundEntities), 14.0f, &s_Map);
 
-		Right.HSplitTop(20.0f, &Button, &Right);
+		Left.HSplitTop(20.0f, &Button, &Left);
 		bool UseCurrentMap = str_comp(g_Config.m_ClBackgroundEntities, CURRENT_MAP) == 0;
 		if(DoButton_CheckBox(&UseCurrentMap, Localize("Use current map as background"), UseCurrentMap, &Button))
 		{
@@ -2161,30 +2166,39 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 				str_copy(g_Config.m_ClBackgroundEntities, CURRENT_MAP, sizeof(g_Config.m_ClBackgroundEntities));
 		}
 
-		Right.HSplitTop(20.0f, &Button, 0);
+		Left.HSplitTop(20.0f, &Button, &Left);
 		if(DoButton_CheckBox(&g_Config.m_ClBackgroundShowTilesLayers, Localize("Show tiles layers from BG map"), g_Config.m_ClBackgroundShowTilesLayers, &Button))
 		{
 			g_Config.m_ClBackgroundShowTilesLayers ^= 1;
 		}
 	}
 
-	MainView.HSplitTop(30.0f, &Label, &Miscellaneous);
-	UI()->DoLabelScaled(&Label, Localize("Miscellaneous"), 20.0f, -1);
-	Miscellaneous.VMargin(5.0f, &Miscellaneous);
-	Miscellaneous.VSplitMid(&Left, &Right);
-	Left.VSplitRight(5.0f, &Left, 0);
-	Right.VMargin(5.0f, &Right);
 
-	Left.HSplitTop(20.0f, &Button, &Left);
+	Miscellaneous.HSplitTop(25.0f, &Button, &Right);
+	DoLine_ColorPicker(&ResetID1, 25.0f, 194.0f, 13.0f, 5.0f, &Button, Localize("Regular Background Color"), &g_Config.m_ClBackgroundColor, GreyDefault, false);
+	Right.HSplitTop(5.0f, 0x0, &Right);
+	Right.HSplitTop(20.0f, &Button, &Right);
 	if(DoButton_CheckBox(&g_Config.m_ClHttpMapDownload, Localize("Try fast HTTP map download first"), g_Config.m_ClHttpMapDownload, &Button))
 	{
 		g_Config.m_ClHttpMapDownload ^= 1;
 	}
 
-	// Updater
+	{
+		static int s_ButtonTimeout = 0;
+		Right.HSplitTop(10.0f, 0x0, &Right);
+		Right.HSplitTop(20.0f, &Button, &Right);
+		if(DoButton_Menu(&s_ButtonTimeout, Localize("New random timeout code"), 0, &Button))
+		{
+			Client()->GenerateTimeoutSeed();
+		}
+	}
+
+		// Updater
 #if defined(CONF_AUTOUPDATE)
 	{
-		Left.HSplitTop(20.0f, &Label, &Left);
+		MainView.VSplitMid(&Left, &Right);
+		Left.w += 20.0f;
+		Left.HSplitBottom(25.0f, 0x0, &Label);
 		bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
 		char aBuf[256];
 		int State = Updater()->GetCurrentState();
@@ -2196,8 +2210,10 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 			Label.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1, -1.0f) + 10.0f, &Label, &Button);
 			Button.VSplitLeft(100.0f, &Button, 0);
 			static int s_ButtonUpdate = 0;
-			if(DoButton_Menu(&s_ButtonUpdate, Localize("Update now"), 0, &Button))
+			if (DoButton_Menu(&s_ButtonUpdate, Localize("Update now"), 0, &Button))
+			{
 				Updater()->InitiateUpdate();
+			}
 		}
 		else if(State >= IUpdater::GETTING_MANIFEST && State < IUpdater::NEED_RESTART)
 			str_format(aBuf, sizeof(aBuf), Localize("Updating..."));
@@ -2221,13 +2237,4 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 #endif
-
-	{
-		static int s_ButtonTimeout = 0;
-		Right.HSplitTop(20.0f, &Button, &Right);
-		if(DoButton_Menu(&s_ButtonTimeout, Localize("New random timeout code"), 0, &Button))
-		{
-			Client()->GenerateTimeoutSeed();
-		}
-	}
 }
