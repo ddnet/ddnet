@@ -79,7 +79,7 @@ class CMenus : public CComponent
 	int DoButton_Sprite(const void *pID, int ImageID, int SpriteID, int Checked, const CUIRect *pRect, int Corners);
 	int DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, bool Active);
 	int DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pImageName = 0, int Corners = CUI::CORNER_ALL, float r = 5.0f, float FontFactor = 0.0f, vec4 ColorHot = vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4 Color = vec4(1, 1, 1, 0.5f), int AlignVertically = 1, bool CheckForActiveColorPicker = false);
-	int DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners, const ColorRGBA *pDefaultColor = NULL, const ColorRGBA *pActiveColor = NULL, const ColorRGBA *pHoverColor = NULL, float EdgeRounding = 10, int AlignVertically = 1);
+	int DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners, SUIAnimator *pAnimator = NULL, const ColorRGBA *pDefaultColor = NULL, const ColorRGBA *pActiveColor = NULL, const ColorRGBA *pHoverColor = NULL, float EdgeRounding = 10, int AlignVertically = 1);
 
 	int DoButton_CheckBox_Common(const void *pID, const char *pText, const char *pBoxText, const CUIRect *pRect);
 	int DoButton_CheckBox(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
@@ -561,6 +561,8 @@ public:
 		PAGE_NETWORK,
 		PAGE_GHOST,
 
+		PAGE_LENGTH,
+
 		SETTINGS_LANGUAGE = 0,
 		SETTINGS_GENERAL,
 		SETTINGS_PLAYER,
@@ -571,7 +573,32 @@ public:
 		SETTINGS_SOUND,
 		SETTINGS_DDNET,
 		SETTINGS_ASSETS,
+
+		SETTINGS_LENGTH,
+
+		BIG_TAB_NEWS = 0,
+		BIG_TAB_INTERNET,
+		BIG_TAB_LAN,
+		BIG_TAB_FAVORITES,
+		BIG_TAB_DDNET,
+		BIG_TAB_KOG,
+		BIG_TAB_DEMOS,
+
+		BIG_TAB_LENGTH,
+
+		SMALL_TAB_HOME = 0,
+		SMALL_TAB_QUIT,
+		SMALL_TAB_SETTINGS,
+		SMALL_TAB_EDITOR,
+		SMALL_TAB_DEMOBUTTON,
+		SMALL_TAB_SERVER,
+
+		SMALL_TAB_LENGTH,
 	};
+
+	SUIAnimator m_aAnimatorsBigPage[BIG_TAB_LENGTH];
+	SUIAnimator m_aAnimatorsSmallPage[SMALL_TAB_LENGTH];
+	SUIAnimator m_aAnimatorsSettingsTab[SETTINGS_LENGTH];
 
 	// DDRace
 	int DoButton_CheckBox_DontCare(const void *pID, const char *pText, int Checked, const CUIRect *pRect);

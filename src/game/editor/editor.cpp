@@ -5524,6 +5524,24 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 					str_copy(m_aSettingsCommand, m_Map.m_lSettings[s_CommandSelectedIndex].m_aCommand, sizeof(m_aSettingsCommand));
 				UI()->SetActiveItem(&m_CommandBox);
 			}
+
+			ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
+			Button.VSplitRight(5.0f, &Button, 0);
+			static int s_DownButton = 0;
+			if(s_CommandSelectedIndex < m_Map.m_lSettings.size() - 1 && DoButton_Editor(&s_DownButton, "▼", 0, &Button, 0, "Move command down"))
+			{
+				std::swap(m_Map.m_lSettings[s_CommandSelectedIndex], m_Map.m_lSettings[s_CommandSelectedIndex + 1]);
+				s_CommandSelectedIndex++;
+			}
+
+			ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
+			Button.VSplitRight(5.0f, &Button, 0);
+			static int s_UpButton = 0;
+			if(s_CommandSelectedIndex > 0 && DoButton_Editor(&s_UpButton, "▲", 0, &Button, 0, "Move command up"))
+			{
+				std::swap(m_Map.m_lSettings[s_CommandSelectedIndex], m_Map.m_lSettings[s_CommandSelectedIndex - 1]);
+				s_CommandSelectedIndex--;
+			}
 		}
 	}
 
