@@ -370,26 +370,23 @@ bool CServer::SetClientNameImpl(int ClientID, const char *pNameRequest, bool Set
 	if(m_aClients[ClientID].m_State < CClient::STATE_READY)
 		return false;
 
-	if(Set)
+	CNameBan *pBanned = IsNameBanned(pNameRequest, m_aNameBans.base_ptr(), m_aNameBans.size());
+	if(pBanned)
 	{
-		CNameBan *pBanned = IsNameBanned(pNameRequest, m_aNameBans.base_ptr(), m_aNameBans.size());
-		if(pBanned)
+		if(m_aClients[ClientID].m_State == CClient::STATE_READY && Set)
 		{
-			if(m_aClients[ClientID].m_State == CClient::STATE_READY)
+			char aBuf[256];
+			if(pBanned->m_aReason[0])
 			{
-				char aBuf[256];
-				if(pBanned->m_aReason[0])
-				{
-					str_format(aBuf, sizeof(aBuf), "Kicked (your name is banned: %s)", pBanned->m_aReason);
-				}
-				else
-				{
-					str_copy(aBuf, "Kicked (your name is banned)", sizeof(aBuf));
-				}
-				Kick(ClientID, aBuf);
+				str_format(aBuf, sizeof(aBuf), "Kicked (your name is banned: %s)", pBanned->m_aReason);
 			}
-			return true;
+			else
+			{
+				str_copy(aBuf, "Kicked (your name is banned)", sizeof(aBuf));
+			}
+			Kick(ClientID, aBuf);
 		}
+		return false;
 	}
 
 	// trim the name
