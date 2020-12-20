@@ -14,6 +14,7 @@
 #include "controls.h"
 
 #include <engine/serverbrowser.h>
+#include <limits>
 
 const float ZoomStep = 0.866025f;
 
@@ -38,7 +39,7 @@ void CCamera::ScaleZoom(float Factor)
 
 float CCamera::MaxZoomLevel()
 {
-	return (Graphics()->IsTileBufferingEnabled() ? 60 : 30);
+	return (g_Config.m_ClLimitMaxZoomLevel) ? ((Graphics()->IsTileBufferingEnabled() ? 60 : 30)) : std::numeric_limits<float>::max();
 }
 
 float CCamera::MinZoomLevel()
