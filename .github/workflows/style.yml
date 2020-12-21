@@ -1,0 +1,42 @@
+name: Check style
+
+on:
+  push:
+    branches-ignore:
+      - master
+      - staging.tmp
+      - trying.tmp
+      - staging-squash-merge.tmp
+  pull_request:
+
+jobs:
+  check-style:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: Prepare
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install clang-format imagemagick ddnet-tools shellcheck pkg-config cmake libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev pylint3 python3-clang -y
+        mkdir release
+        cd release
+        cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DDOWNLOAD_GTEST=OFF -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. ..
+        cmake --build . --config Release --target dilate --parallel
+    - name: Check clang-format
+      run: clang-format -version
+    - name: Check fix_style
+      run: scripts/fix_style.py --dry-run
+    - name: Check header guards
+      run: scripts/check_header_guards.py
+    - name: Check languages
+      run: scripts/languages/update_all.py
+    - name: Check dilated images
+      run: scripts/check_dilate.sh release data
+    - name: Shellcheck
+      run: find . -type f -name '*.sh' -print0 | xargs -0 shellcheck
+    - name: Pylint
+      run: |
+        pylint --version
+        find . -type f -name "*.py" -print0 | xargs -0 pylint

@@ -3,6 +3,8 @@
 #ifndef ENGINE_SHARED_DEMO_H
 #define ENGINE_SHARED_DEMO_H
 
+#include <base/hash.h>
+
 #include <engine/demo.h>
 #include <engine/shared/protocol.h>
 
@@ -12,6 +14,7 @@ class CDemoRecorder : public IDemoRecorder
 {
 	class IConsole *m_pConsole;
 	IOHANDLE m_File;
+	char m_aCurrentFilename[256];
 	int m_LastTickMarker;
 	int m_LastKeyFrame;
 	int m_FirstTick;
@@ -20,7 +23,6 @@ class CDemoRecorder : public IDemoRecorder
 	int m_NumTimelineMarkers;
 	int m_aTimelineMarkers[MAX_TIMELINE_MARKERS];
 	bool m_NoMapData;
-	unsigned int m_MapSize;
 	unsigned char *m_pMapData;
 
 	DEMOFUNC_FILTER m_pfnFilter;
@@ -28,11 +30,12 @@ class CDemoRecorder : public IDemoRecorder
 
 	void WriteTickMarker(int Tick, int Keyframe);
 	void Write(int Type, const void *pData, int Size);
+
 public:
 	CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool NoMapData = false);
 	CDemoRecorder() {}
 
-	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, unsigned MapCrc, const char *pType, unsigned int MapSize, unsigned char *pMapData, IOHANDLE MapFile = 0, DEMOFUNC_FILTER pfnFilter = 0, void *pUser = 0);
+	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, SHA256_DIGEST *pSha256, unsigned MapCrc, const char *pType, unsigned int MapSize, unsigned char *pMapData, IOHANDLE MapFile = 0, DEMOFUNC_FILTER pfnFilter = 0, void *pUser = 0);
 	int Stop();
 	void AddDemoMarker();
 
@@ -40,8 +43,9 @@ public:
 	void RecordMessage(const void *pData, int Size);
 
 	bool IsRecording() const { return m_File != 0; }
+	char *GetCurrentFilename() { return m_aCurrentFilename; }
 
-	int Length() const { return (m_LastTickMarker - m_FirstTick)/SERVER_TICK_SPEED; }
+	int Length() const { return (m_LastTickMarker - m_FirstTick) / SERVER_TICK_SPEED; }
 };
 
 class CDemoPlayer : public IDemoPlayer
@@ -74,16 +78,8 @@ public:
 		float m_TickTime;
 	};
 
-	struct CMapInfo
-	{
-		char m_aName[128];
-		int m_Crc;
-		int m_Size;
-	};
-
 private:
 	IListener *m_pListener;
-
 
 	// Playback
 	struct CKeyFrame
@@ -100,6 +96,7 @@ private:
 
 	class IConsole *m_pConsole;
 	IOHANDLE m_File;
+	long m_MapOffset;
 	char m_aFilename[256];
 	CKeyFrame *m_pKeyFrames;
 	CMapInfo m_MapInfo;
@@ -116,27 +113,34 @@ private:
 	void ScanFile();
 	int NextFrame();
 
-public:
+	int64 time();
 
-	CDemoPlayer(class CSnapshotDelta *m_pSnapshotDelta);
+	int64 m_TickTime;
+	int64 m_Time;
+
+public:
+	CDemoPlayer(class CSnapshotDelta *pSnapshotDelta);
 
 	void SetListener(IListener *pListener);
 
 	int Load(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, int StorageType);
+	bool ExtractMap(class IStorage *pStorage);
 	int Play();
 	void Pause();
 	void Unpause();
 	int Stop();
 	void SetSpeed(float Speed);
 	void SetSpeedIndex(int Offset);
-	int SetPos(float Percent);
+	int SeekPercent(float Percent);
+	int SeekTime(float Seconds);
+	int SetPos(int WantedTick);
 	const CInfo *BaseInfo() const { return &m_Info.m_Info; }
 	void GetDemoName(char *pBuffer, int BufferSize) const;
-	bool GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader) const;
+	bool GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo) const;
 	const char *GetDemoFileName() { return m_aFilename; };
 	int GetDemoType() const;
 
-	int Update(bool RealTime=true);
+	int Update(bool RealTime = true);
 
 	const CPlaybackInfo *Info() const { return &m_Info; }
 	virtual bool IsPlaying() const { return m_File != 0; }

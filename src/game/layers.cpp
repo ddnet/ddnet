@@ -36,13 +36,13 @@ void CLayers::Init(class IKernel *pKernel)
 		CMapItemGroup *pGroup = GetGroup(g);
 		for(int l = 0; l < pGroup->m_NumLayers; l++)
 		{
-			CMapItemLayer *pLayer = GetLayer(pGroup->m_StartLayer+l);
+			CMapItemLayer *pLayer = GetLayer(pGroup->m_StartLayer + l);
 
 			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
 				CMapItemLayerTilemap *pTilemap = reinterpret_cast<CMapItemLayerTilemap *>(pLayer);
 
-				if(pTilemap->m_Flags&TILESLAYERFLAG_GAME)
+				if(pTilemap->m_Flags & TILESLAYERFLAG_GAME)
 				{
 					m_pGameLayer = pTilemap;
 					m_pGameGroup = pGroup;
@@ -64,43 +64,43 @@ void CLayers::Init(class IKernel *pKernel)
 
 					//break;
 				}
-				if(pTilemap->m_Flags&TILESLAYERFLAG_TELE)
+				if(pTilemap->m_Flags & TILESLAYERFLAG_TELE)
 				{
 					if(pTilemap->m_Version <= 2)
 					{
-						pTilemap->m_Tele = *((int*)(pTilemap) + 15);
+						pTilemap->m_Tele = *((int *)(pTilemap) + 15);
 					}
 					m_pTeleLayer = pTilemap;
 				}
-				if(pTilemap->m_Flags&TILESLAYERFLAG_SPEEDUP)
+				if(pTilemap->m_Flags & TILESLAYERFLAG_SPEEDUP)
 				{
 					if(pTilemap->m_Version <= 2)
 					{
-						pTilemap->m_Speedup = *((int*)(pTilemap) + 16);
+						pTilemap->m_Speedup = *((int *)(pTilemap) + 16);
 					}
 					m_pSpeedupLayer = pTilemap;
 				}
-				if(pTilemap->m_Flags&TILESLAYERFLAG_FRONT)
+				if(pTilemap->m_Flags & TILESLAYERFLAG_FRONT)
 				{
 					if(pTilemap->m_Version <= 2)
 					{
-						pTilemap->m_Front = *((int*)(pTilemap) + 17);
+						pTilemap->m_Front = *((int *)(pTilemap) + 17);
 					}
 					m_pFrontLayer = pTilemap;
 				}
-				if(pTilemap->m_Flags&TILESLAYERFLAG_SWITCH)
+				if(pTilemap->m_Flags & TILESLAYERFLAG_SWITCH)
 				{
 					if(pTilemap->m_Version <= 2)
 					{
-						pTilemap->m_Switch = *((int*)(pTilemap) + 18);
+						pTilemap->m_Switch = *((int *)(pTilemap) + 18);
 					}
 					m_pSwitchLayer = pTilemap;
 				}
-				if(pTilemap->m_Flags&TILESLAYERFLAG_TUNE)
+				if(pTilemap->m_Flags & TILESLAYERFLAG_TUNE)
 				{
 					if(pTilemap->m_Version <= 2)
 					{
-						pTilemap->m_Tune = *((int*)(pTilemap) + 19);
+						pTilemap->m_Tune = *((int *)(pTilemap) + 19);
 					}
 					m_pTuneLayer = pTilemap;
 				}
@@ -127,13 +127,13 @@ void CLayers::InitBackground(class IMap *pMap)
 		CMapItemGroup *pGroup = GetGroup(g);
 		for(int l = 0; l < pGroup->m_NumLayers; l++)
 		{
-			CMapItemLayer *pLayer = GetLayer(pGroup->m_StartLayer+l);
+			CMapItemLayer *pLayer = GetLayer(pGroup->m_StartLayer + l);
 
 			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
 				CMapItemLayerTilemap *pTilemap = reinterpret_cast<CMapItemLayerTilemap *>(pLayer);
 
-				if(pTilemap->m_Flags&TILESLAYERFLAG_GAME)
+				if(pTilemap->m_Flags & TILESLAYERFLAG_GAME)
 				{
 					m_pGameLayer = pTilemap;
 					m_pGameGroup = pGroup;
@@ -161,11 +161,10 @@ void CLayers::InitBackground(class IMap *pMap)
 
 CMapItemGroup *CLayers::GetGroup(int Index) const
 {
-	return static_cast<CMapItemGroup *>(m_pMap->GetItem(m_GroupsStart+Index, 0, 0));
+	return static_cast<CMapItemGroup *>(m_pMap->GetItem(m_GroupsStart + Index, 0, 0));
 }
 
 CMapItemLayer *CLayers::GetLayer(int Index) const
 {
-	return static_cast<CMapItemLayer *>(m_pMap->GetItem(m_LayersStart+Index, 0, 0));
+	return static_cast<CMapItemLayer *>(m_pMap->GetItem(m_LayersStart + Index, 0, 0));
 }
-

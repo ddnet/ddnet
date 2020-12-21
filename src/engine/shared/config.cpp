@@ -1,9 +1,9 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <engine/config.h>
-#include <engine/storage.h>
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
+#include <engine/storage.h>
 
 CConfiguration g_Config;
 
@@ -11,6 +11,7 @@ class CConfig : public IConfig
 {
 	IStorage *m_pStorage;
 	IOHANDLE m_ConfigFile;
+	bool m_Failed;
 
 	struct CCallback
 	{
@@ -32,11 +33,11 @@ class CConfig : public IConfig
 	}
 
 public:
-
 	CConfig()
 	{
 		m_ConfigFile = 0;
 		m_NumCallbacks = 0;
+		m_Failed = false;
 	}
 
 	virtual void Init()
@@ -47,40 +48,85 @@ public:
 
 	virtual void Reset()
 	{
-		#define MACRO_CONFIG_INT(Name,ScriptName,def,min,max,flags,desc) g_Config.m_##Name = def;
-		#define MACRO_CONFIG_STR(Name,ScriptName,len,def,flags,desc) str_copy(g_Config.m_##Name, def, len);
+#define MACRO_CONFIG_INT(Name, ScriptName, def, min, max, flags, desc) g_Config.m_##Name = def;
+#define MACRO_CONFIG_COL(Name, ScriptName, def, flags, desc) MACRO_CONFIG_INT(Name, ScriptName, def, 0, 0, flags, desc)
+#define MACRO_CONFIG_STR(Name, ScriptName, len, def, flags, desc) str_copy(g_Config.m_##Name, def, len);
 
-		#include "config_variables.h"
+#include "config_variables.h"
 
-		#undef MACRO_CONFIG_INT
-		#undef MACRO_CONFIG_STR
+#undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_COL
+#undef MACRO_CONFIG_STR
 	}
 
-	virtual void Save()
+	virtual bool Save()
 	{
 		if(!m_pStorage || !g_Config.m_ClSaveSettings)
-			return;
-		m_ConfigFile = m_pStorage->OpenFile(CONFIG_FILE, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+			return true;
+
+		char aConfigFileTmp[64];
+		str_format(aConfigFileTmp, sizeof(aConfigFileTmp), CONFIG_FILE ".%d.tmp", pid());
+
+		m_ConfigFile = m_pStorage->OpenFile(aConfigFileTmp, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 
 		if(!m_ConfigFile)
-			return;
+		{
+			dbg_msg("config", "ERROR: opening %s failed", aConfigFileTmp);
+			return false;
+		}
 
-		char aLineBuf[1024*2];
-		char aEscapeBuf[1024*2];
+		m_Failed = false;
 
-		#define MACRO_CONFIG_INT(Name,ScriptName,def,min,max,flags,desc) if((flags)&CFGFLAG_SAVE) { str_format(aLineBuf, sizeof(aLineBuf), "%s %i", #ScriptName, g_Config.m_##Name); WriteLine(aLineBuf); }
-		#define MACRO_CONFIG_STR(Name,ScriptName,len,def,flags,desc) if((flags)&CFGFLAG_SAVE) { EscapeParam(aEscapeBuf, g_Config.m_##Name, sizeof(aEscapeBuf)); str_format(aLineBuf, sizeof(aLineBuf), "%s \"%s\"", #ScriptName, aEscapeBuf); WriteLine(aLineBuf); }
+		char aLineBuf[1024 * 2];
+		char aEscapeBuf[1024 * 2];
 
-		#include "config_variables.h"
+#define MACRO_CONFIG_INT(Name, ScriptName, def, min, max, flags, desc) \
+	if((flags)&CFGFLAG_SAVE && g_Config.m_##Name != def) \
+	{ \
+		str_format(aLineBuf, sizeof(aLineBuf), "%s %i", #ScriptName, g_Config.m_##Name); \
+		WriteLine(aLineBuf); \
+	}
+#define MACRO_CONFIG_COL(Name, ScriptName, def, flags, desc) \
+	if((flags)&CFGFLAG_SAVE && g_Config.m_##Name != def) \
+	{ \
+		str_format(aLineBuf, sizeof(aLineBuf), "%s %u", #ScriptName, g_Config.m_##Name); \
+		WriteLine(aLineBuf); \
+	}
+#define MACRO_CONFIG_STR(Name, ScriptName, len, def, flags, desc) \
+	if((flags)&CFGFLAG_SAVE && str_comp(g_Config.m_##Name, def) != 0) \
+	{ \
+		EscapeParam(aEscapeBuf, g_Config.m_##Name, sizeof(aEscapeBuf)); \
+		str_format(aLineBuf, sizeof(aLineBuf), "%s \"%s\"", #ScriptName, aEscapeBuf); \
+		WriteLine(aLineBuf); \
+	}
 
-		#undef MACRO_CONFIG_INT
-		#undef MACRO_CONFIG_STR
+#include "config_variables.h"
+
+#undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_COL
+#undef MACRO_CONFIG_STR
 
 		for(int i = 0; i < m_NumCallbacks; i++)
 			m_aCallbacks[i].m_pfnFunc(this, m_aCallbacks[i].m_pUserData);
 
-		io_close(m_ConfigFile);
+		if(io_close(m_ConfigFile) != 0)
+			m_Failed = true;
+
 		m_ConfigFile = 0;
+
+		if(m_Failed)
+		{
+			dbg_msg("config", "ERROR: writing to %s failed", aConfigFileTmp);
+			return false;
+		}
+
+		if(!m_pStorage->RenameFile(aConfigFileTmp, CONFIG_FILE, IStorage::TYPE_SAVE))
+		{
+			dbg_msg("config", "ERROR: renaming %s to " CONFIG_FILE " failed", aConfigFileTmp);
+			return false;
+		}
+
+		return true;
 	}
 
 	virtual void RegisterCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData)
@@ -93,10 +139,14 @@ public:
 
 	virtual void WriteLine(const char *pLine)
 	{
-		if(!m_ConfigFile)
-			return;
-		io_write(m_ConfigFile, pLine, str_length(pLine));
-		io_write_newline(m_ConfigFile);
+		if(!m_ConfigFile ||
+			io_write(m_ConfigFile, pLine, str_length(pLine)) != static_cast<unsigned>(str_length(pLine)) ||
+#if defined(CONF_FAMILY_WINDOWS)
+			io_write_newline(m_ConfigFile) != 2)
+#else
+			io_write_newline(m_ConfigFile) != 1)
+#endif
+			m_Failed = true;
 	}
 };
 

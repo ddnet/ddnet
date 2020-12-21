@@ -5,10 +5,10 @@
 
 #include <engine/shared/config.h>
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <stdlib.h>
 #include <fcntl.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 void CFifo::Init(IConsole *pConsole, char *pFifoFile, int Flag)
@@ -23,24 +23,24 @@ void CFifo::Init(IConsole *pConsole, char *pFifoFile, int Flag)
 
 	mkfifo(pFifoFile, 0600);
 
-	struct stat attribute;
-	stat(pFifoFile, &attribute);
+	struct stat Attribute;
+	stat(pFifoFile, &Attribute);
 
-	if(!S_ISFIFO(attribute.st_mode))
+	if(!S_ISFIFO(Attribute.st_mode))
 	{
 		dbg_msg("fifo", "'%s' is not a fifo, removing", pFifoFile);
 		fs_remove(pFifoFile);
 		mkfifo(pFifoFile, 0600);
-		stat(pFifoFile, &attribute);
+		stat(pFifoFile, &Attribute);
 
-		if(!S_ISFIFO(attribute.st_mode))
+		if(!S_ISFIFO(Attribute.st_mode))
 		{
 			dbg_msg("fifo", "can't remove file '%s', quitting", pFifoFile);
 			exit(2);
 		}
 	}
 
-	m_File = open(pFifoFile, O_RDONLY|O_NONBLOCK);
+	m_File = open(pFifoFile, O_RDONLY | O_NONBLOCK);
 	if(m_File < 0)
 		dbg_msg("fifo", "can't open file '%s'", pFifoFile);
 }
@@ -68,9 +68,9 @@ void CFifo::Update()
 			continue;
 		aBuf[i] = '\0';
 		m_pConsole->ExecuteLineFlag(pCur, m_Flag, -1);
-		pCur = aBuf+i+1;
+		pCur = aBuf + i + 1;
 	}
-	if(pCur < aBuf+Length) // missed the last line
+	if(pCur < aBuf + Length) // missed the last line
 		m_pConsole->ExecuteLineFlag(pCur, m_Flag, -1);
 }
 #endif

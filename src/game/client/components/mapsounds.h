@@ -1,5 +1,5 @@
-
-#pragma once
+#ifndef GAME_CLIENT_COMPONENTS_MAPSOUNDS_H
+#define GAME_CLIENT_COMPONENTS_MAPSOUNDS_H
 
 #include <base/tl/array.h>
 
@@ -19,7 +19,7 @@ class CMapSounds : public CComponent
 		ISound::CVoiceHandle m_Voice;
 		CSoundSource *m_pSource;
 
-		bool operator ==(const CSourceQueueEntry &Other) const { return (m_Sound == Other.m_Sound) && (m_Voice == Other.m_Voice) && (m_pSource == Other.m_pSource); }
+		bool operator==(const CSourceQueueEntry &Other) const { return (m_Sound == Other.m_Sound) && (m_Voice == Other.m_Voice) && (m_pSource == Other.m_pSource); }
 	};
 
 	array<CSourceQueueEntry> m_lSourceQueue;
@@ -33,3 +33,5 @@ public:
 	virtual void OnRender();
 	virtual void OnStateChange(int NewState, int OldState);
 };
+
+#endif // GAME_CLIENT_COMPONENTS_MAPSOUNDS_H

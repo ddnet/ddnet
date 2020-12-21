@@ -3,6 +3,8 @@
 #ifndef ENGINE_CLIENT_FRIENDS_H
 #define ENGINE_CLIENT_FRIENDS_H
 
+#include <engine/config.h>
+#include <engine/console.h>
 #include <engine/friends.h>
 
 class CFriends : public IFriends

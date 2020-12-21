@@ -17,8 +17,13 @@
 // The second example shows how you could add a message if you don't own a
 // domain, but need a message for your minetee client/server.
 
-UUID(NETMSG_WHATIS,       "what-is@ddnet.tw")
-UUID(NETMSG_ITIS,         "it-is@ddnet.tw")
-UUID(NETMSG_IDONTKNOW,    "i-dont-know@ddnet.tw")
+// This file can be included several times.
 
-UUID(NETMSG_RCONTYPE,     "rcon-type@ddnet.tw")
+UUID(NETMSG_WHATIS, "what-is@ddnet.tw")
+UUID(NETMSG_ITIS, "it-is@ddnet.tw")
+UUID(NETMSG_IDONTKNOW, "i-dont-know@ddnet.tw")
+
+UUID(NETMSG_RCONTYPE, "rcon-type@ddnet.tw")
+UUID(NETMSG_MAP_DETAILS, "map-details@ddnet.tw")
+UUID(NETMSG_CAPABILITIES, "capabilities@ddnet.tw")
+UUID(NETMSG_CLIENTVER, "clientver@ddnet.tw")

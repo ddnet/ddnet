@@ -3,9 +3,12 @@
 #ifndef ENGINE_CLIENT_SERVERBROWSER_H
 #define ENGINE_CLIENT_SERVERBROWSER_H
 
-#include <engine/serverbrowser.h>
-#include <engine/shared/memheap.h>
+#include <engine/config.h>
 #include <engine/external/json-parser/json.h>
+#include <engine/masterserver.h>
+#include <engine/serverbrowser.h>
+#include <engine/shared/config.h>
+#include <engine/shared/memheap.h>
 
 class CServerBrowser : public IServerBrowser
 {
@@ -25,9 +28,8 @@ public:
 		CServerEntry *m_pNextReq;
 	};
 
-	class CDDNetCountry
+	struct CNetworkCountry
 	{
-	public:
 		enum
 		{
 			MAX_SERVERS = 1024
@@ -39,7 +41,12 @@ public:
 		char m_aTypes[MAX_SERVERS][32];
 		int m_NumServers;
 
-		void Reset() { m_NumServers = 0; m_FlagID = -1; m_aName[0] = '\0'; };
+		void Reset()
+		{
+			m_NumServers = 0;
+			m_FlagID = -1;
+			m_aName[0] = '\0';
+		};
 		/*void Add(NETADDR Addr, char* pType) {
 			if (m_NumServers < MAX_SERVERS)
 			{
@@ -52,9 +59,18 @@ public:
 
 	enum
 	{
-		MAX_FAVORITES=2048,
-		MAX_DDNET_COUNTRIES=16,
-		MAX_DDNET_TYPES=32,
+		MAX_FAVORITES = 2048,
+		MAX_COUNTRIES = 32,
+		MAX_TYPES = 32,
+	};
+
+	struct CNetwork
+	{
+		CNetworkCountry m_aCountries[MAX_COUNTRIES];
+		int m_NumCountries;
+
+		char m_aTypes[MAX_TYPES][32];
+		int m_NumTypes;
 	};
 
 	CServerBrowser();
@@ -68,6 +84,16 @@ public:
 
 	int NumServers() const { return m_NumServers; }
 
+	int Players(const CServerInfo &Item) const
+	{
+		return g_Config.m_BrFilterSpectators ? Item.m_NumPlayers : Item.m_NumClients;
+	}
+
+	int Max(const CServerInfo &Item) const
+	{
+		return g_Config.m_BrFilterSpectators ? Item.m_MaxPlayers : Item.m_MaxClients;
+	}
+
 	int NumSortedServers() const { return m_NumSortedServers; }
 	const CServerInfo *SortedGet(int Index) const;
 
@@ -76,22 +102,23 @@ public:
 	void RemoveFavorite(const NETADDR &Addr);
 
 	void LoadDDNetRanks();
+	void RecheckOfficial();
 	void LoadDDNetServers();
 	void LoadDDNetInfoJson();
 	const json_value *LoadDDNetInfo();
 	int HasRank(const char *pMap);
-	int NumDDNetCountries() { return m_NumDDNetCountries; };
-	int GetDDNetCountryFlag(int Index) { return m_aDDNetCountries[Index].m_FlagID; };
-	const char *GetDDNetCountryName(int Index) { return m_aDDNetCountries[Index].m_aName; };
+	int NumCountries(int Network) { return m_aNetworks[Network].m_NumCountries; };
+	int GetCountryFlag(int Network, int Index) { return m_aNetworks[Network].m_aCountries[Index].m_FlagID; };
+	const char *GetCountryName(int Network, int Index) { return m_aNetworks[Network].m_aCountries[Index].m_aName; };
 
-	int NumDDNetTypes() { return m_NumDDNetTypes; };
-	const char *GetDDNetType(int Index) { return m_aDDNetTypes[Index]; };
+	int NumTypes(int Network) { return m_aNetworks[Network].m_NumTypes; };
+	const char *GetType(int Network, int Index) { return m_aNetworks[Network].m_aTypes[Index]; };
 
 	void DDNetFilterAdd(char *pFilter, const char *pName);
 	void DDNetFilterRem(char *pFilter, const char *pName);
 	bool DDNetFiltered(char *pFilter, const char *pName);
-	void DDNetCountryFilterClean();
-	void DDNetTypeFilterClean();
+	void CountryFilterClean(int Network);
+	void TypeFilterClean(int Network);
 
 	//
 	void Update(bool ForceResort);
@@ -119,11 +146,7 @@ private:
 	NETADDR m_aFavoriteServers[MAX_FAVORITES];
 	int m_NumFavoriteServers;
 
-	CDDNetCountry m_aDDNetCountries[MAX_DDNET_COUNTRIES];
-	int m_NumDDNetCountries;
-
-	char m_aDDNetTypes[MAX_DDNET_TYPES][32];
-	int m_NumDDNetTypes;
+	CNetwork m_aNetworks[NUM_NETWORKS];
 
 	json_value *m_pDDNetInfo;
 
@@ -166,6 +189,7 @@ private:
 	bool SortCompareGametype(int Index1, int Index2) const;
 	bool SortCompareNumPlayers(int Index1, int Index2) const;
 	bool SortCompareNumClients(int Index1, int Index2) const;
+	bool SortCompareNumPlayersAndPing(int Index1, int Index2) const;
 
 	//
 	void Filter();

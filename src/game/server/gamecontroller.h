@@ -4,15 +4,16 @@
 #define GAME_SERVER_GAMECONTROLLER_H
 
 #include <base/vmath.h>
+#include <engine/map.h>
 
 class CDoor;
-#ifdef _MSC_VER
+#if !defined(_MSC_VER) || _MSC_VER >= 1600
+#include <stdint.h>
+#else
 typedef __int32 int32_t;
 typedef unsigned __int32 uint32_t;
-typedef __int64 int64_t;
-typedef unsigned __int64 uint64_t;
-#else
-#include <stdint.h>
+typedef __int64 int64;
+typedef unsigned __int64 uint64;
 #endif
 
 /*
@@ -40,7 +41,7 @@ protected:
 		{
 			m_Got = false;
 			m_FriendlyTeam = -1;
-			m_Pos = vec2(100,100);
+			m_Pos = vec2(100, 100);
 		}
 
 		vec2 m_Pos;
@@ -52,17 +53,13 @@ protected:
 	float EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos);
 	void EvaluateSpawnType(CSpawnEval *pEval, int Type);
 
-	//void CycleMap();
 	void ResetGame();
 
-	char m_aMapWish[128];
-
+	char m_aMapWish[MAX_MAP_LENGTH];
 
 	int m_RoundStartTick;
 	int m_GameOverTick;
 	int m_SuddenDeath;
-
-	//int m_aTeamscore[2];
 
 	int m_Warmup;
 	int m_RoundCount;
@@ -74,13 +71,8 @@ protected:
 public:
 	const char *m_pGameType;
 
-	//bool IsTeamplay() const;
-	//bool IsGameOver() const { return m_GameOverTick != -1; }
-
 	IGameController(class CGameContext *pGameServer);
 	virtual ~IGameController();
-
-	// virtual void DoWincheck();
 
 	void DoWarmup(int Seconds);
 
@@ -137,9 +129,6 @@ public:
 	*/
 	virtual int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon);
 
-
-	//virtual void OnPlayerInfoChange(class CPlayer *pP);
-
 	//
 	virtual bool CanSpawn(int Team, vec2 *pPos);
 
@@ -149,8 +138,6 @@ public:
 	virtual const char *GetTeamName(int Team);
 	virtual int GetAutoTeam(int NotThisID);
 	virtual bool CanJoinTeam(int Team, int NotThisID);
-	//bool CheckTeamBalance();
-	//bool CanChangeTeam(CPlayer *pPplayer, int JoinTeam);
 	int ClampTeam(int Team);
 
 	virtual void PostReset();

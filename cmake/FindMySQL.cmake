@@ -1,6 +1,6 @@
 if(NOT CMAKE_CROSSCOMPILING)
   find_program(MYSQL_CONFIG
-    NAMES mysql_config
+    NAMES mysql_config mariadb_config
   )
 
   if(MYSQL_CONFIG)

@@ -3,6 +3,8 @@
 #ifndef ENGINE_SHARED_JOBS_H
 #define ENGINE_SHARED_JOBS_H
 
+#include <base/system.h>
+
 #include <atomic>
 #include <memory>
 
@@ -11,7 +13,7 @@ class CJobPool;
 
 class IJob
 {
-	friend CJobPool;
+	friend class CJobPool;
 
 private:
 	std::shared_ptr<IJob> m_pNext;
@@ -28,7 +30,7 @@ public:
 
 	enum
 	{
-		STATE_PENDING=0,
+		STATE_PENDING = 0,
 		STATE_RUNNING,
 		STATE_DONE
 	};
@@ -38,7 +40,7 @@ class CJobPool
 {
 	enum
 	{
-		MAX_THREADS=32
+		MAX_THREADS = 32
 	};
 	int m_NumThreads;
 	void *m_apThreads[MAX_THREADS];

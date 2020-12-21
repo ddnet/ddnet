@@ -1,0 +1,74 @@
+{
+   io_write false positive
+   Memcheck:Param
+   write(buf)
+   fun:write
+   fun:_IO_file_write@@GLIBC*
+   fun:new_do_write
+   fun:_IO_do_write@@GLIBC*
+   fun:_IO_file_xsputn@@GLIBC*
+   fun:fwrite
+   fun:io_write
+   fun:_ZN13CDemoRecorder5StartEP8IStorageP8IConsolePKcS5_S5_P13SHA256_DIGESTjS5_jPhP10IOINTERNALPFbPKviPvESD_
+   fun:_ZN7CClient18DemoRecorder_StartEPKcbi
+   fun:_ZN7CClient28DemoRecorder_HandleAutoStartEv
+   fun:_ZN7CClient19ProcessServerPacketEP9CNetChunk
+   fun:_ZN7CClient11PumpNetworkEv
+}
+
+{
+	curl leak
+	Memcheck:Leak
+	...
+	fun:malloc
+	fun:strdup
+	obj:/usr/lib/libcurl.so.*
+	...
+}
+
+{
+	libdl leak
+	Memcheck:Leak
+	...
+	obj:/usr/lib/libdl-*.so
+	...
+}
+
+{
+	libLLVM leak
+	Memcheck:Leak
+	...
+	fun:malloc
+	...
+	obj:/usr/lib/libLLVM-*.so
+	...
+}
+
+{
+	driver leak
+	Memcheck:Leak
+	...
+	fun:malloc
+	...
+	obj:/usr/lib/dri/*_dri.so
+	...
+}
+
+{
+	libssl leak
+	Memcheck:Leak
+	...
+	fun:malloc
+	obj:/usr/lib/libssl.so.*
+	...
+}
+
+{
+	libcrypto leak
+	Memcheck:Leak
+	match-leak-kinds: possible
+	fun:malloc
+	fun:CRYPTO_zalloc
+	obj:/usr/lib/libcrypto.so.*
+	...
+}

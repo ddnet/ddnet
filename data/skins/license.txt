@@ -1,0 +1,47 @@
+bluekitty, bluestripe, brownbear, cammo, cammostripes, coala, default,
+limekitty, pinky, redbopp, redstripe, saddo, toptri, twinbop, twintri,
+warpaint:
+Copyright Magnus Auvinen
+zlib license
+
+antiantey, beast, chinese_by_whis, dino, evil, evilwolfe, ghostjtj, ghost,
+giraffe, greensward, greyfox, hammie-chew, hammie-whis, jeet, kintaro_2,
+mermydon-coala, mermydon, mouse, musmann, nanami, oldman, oldschool, PaladiN,
+penguin, random, veteran, voodoo_tee, whis:
+Copyright Whis
+CC-BY license
+
+coala_bluekitty, coala_bluestripe, coala_cammo, coala_cammostripes,
+coala_default, coala_limekitty, coala_pinky, coala_redbopp, coala_redstripe,
+coala_saddo, coala_toptri, coala_twinbop, coala_twintri, coala_warpaint,
+coala_x_ninja:
+Copyright DanilBest
+CC-BY-SA license
+
+santa_bluekitty, santa_bluestripe, santa_brownbear, santa_cammo, santa_coala,
+santa_default, santa_limekitty, santa_pinky, santa_redbopp, santa_redstripe,
+santa_saddo, santa_toptri, santa_twinbop, santa_twintri, santa_warpaint:
+Copyright forsaken
+CC-BY-SA license
+
+bomb, kitty_bluekitty, kitty_bluestripe, kitty_brownbear, kitty_cammo,
+kitty_coala, kitty_default, kitty_limekitty, kitty_pinky, kitty_redbopp,
+kitty_redstripe, kitty_saddo, kitty_toptri, kitty_twinbop, kitty_twintri,
+kitty_warpaint, kitty_x_ninja:
+Copyright Ravie
+CC0 license
+
+demonlimekitty, nanas, nersif:
+Copyright Miper
+CC-BY-SA license
+
+wartee:
+Copyright Obst
+zlib license
+
+Aoe4legs:
+Copyright Aoe
+CC0 license
+
+All other skins:
+All content is released under CC-BY-SA 3.0 (http://creativecommons.org/licenses/by-sa/3.0/).

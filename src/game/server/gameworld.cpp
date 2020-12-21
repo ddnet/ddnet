@@ -5,8 +5,8 @@
 #include "entity.h"
 #include "gamecontext.h"
 #include <algorithm>
-#include <utility>
 #include <engine/shared/config.h>
+#include <utility>
 
 //////////////////////////////////////////////////
 // game world
@@ -18,16 +18,16 @@ CGameWorld::CGameWorld()
 
 	m_Paused = false;
 	m_ResetRequested = false;
-	for(int i = 0; i < NUM_ENTTYPES; i++)
-		m_apFirstEntityTypes[i] = 0;
+	for(auto &pFirstEntityType : m_apFirstEntityTypes)
+		pFirstEntityType = 0;
 }
 
 CGameWorld::~CGameWorld()
 {
 	// delete all entities
-	for(int i = 0; i < NUM_ENTTYPES; i++)
-		while(m_apFirstEntityTypes[i])
-			delete m_apFirstEntityTypes[i];
+	for(auto &pFirstEntityType : m_apFirstEntityTypes)
+		while(pFirstEntityType)
+			delete pFirstEntityType;
 }
 
 void CGameWorld::SetGameServer(CGameContext *pGameServer)
@@ -47,9 +47,9 @@ int CGameWorld::FindEntities(vec2 Pos, float Radius, CEntity **ppEnts, int Max, 
 		return 0;
 
 	int Num = 0;
-	for(CEntity *pEnt = m_apFirstEntityTypes[Type];	pEnt; pEnt = pEnt->m_pNextTypeEntity)
+	for(CEntity *pEnt = m_apFirstEntityTypes[Type]; pEnt; pEnt = pEnt->m_pNextTypeEntity)
 	{
-		if(distance(pEnt->m_Pos, Pos) < Radius+pEnt->m_ProximityRadius)
+		if(distance(pEnt->m_Pos, Pos) < Radius + pEnt->m_ProximityRadius)
 		{
 			if(ppEnts)
 				ppEnts[Num] = pEnt;
@@ -107,8 +107,8 @@ void CGameWorld::RemoveEntity(CEntity *pEnt)
 //
 void CGameWorld::Snap(int SnappingClient)
 {
-	for(int i = 0; i < NUM_ENTTYPES; i++)
-		for(CEntity *pEnt = m_apFirstEntityTypes[i]; pEnt; )
+	for(auto *pEnt : m_apFirstEntityTypes)
+		for(; pEnt;)
 		{
 			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 			pEnt->Snap(SnappingClient);
@@ -119,8 +119,8 @@ void CGameWorld::Snap(int SnappingClient)
 void CGameWorld::Reset()
 {
 	// reset all entities
-	for(int i = 0; i < NUM_ENTTYPES; i++)
-		for(CEntity *pEnt = m_apFirstEntityTypes[i]; pEnt; )
+	for(auto *pEnt : m_apFirstEntityTypes)
+		for(; pEnt;)
 		{
 			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 			pEnt->Reset();
@@ -137,8 +137,8 @@ void CGameWorld::Reset()
 void CGameWorld::RemoveEntities()
 {
 	// destroy objects marked for destruction
-	for(int i = 0; i < NUM_ENTTYPES; i++)
-		for(CEntity *pEnt = m_apFirstEntityTypes[i]; pEnt; )
+	for(auto *pEnt : m_apFirstEntityTypes)
+		for(; pEnt;)
 		{
 			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 			if(pEnt->m_MarkedForDestroy)
@@ -150,48 +150,48 @@ void CGameWorld::RemoveEntities()
 		}
 }
 
-bool distCompare(std::pair<float,int> a, std::pair<float,int> b)
+bool distCompare(std::pair<float, int> a, std::pair<float, int> b)
 {
 	return (a.first < b.first);
 }
 
 void CGameWorld::UpdatePlayerMaps()
 {
-	if (Server()->Tick() % g_Config.m_SvMapUpdateRate != 0) return;
+	if(Server()->Tick() % g_Config.m_SvMapUpdateRate != 0)
+		return;
 
-	std::pair<float,int> Dist[MAX_CLIENTS];
-	for (int i = 0; i < MAX_CLIENTS; i++)
+	std::pair<float, int> Dist[MAX_CLIENTS];
+	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if (!Server()->ClientIngame(i)) continue;
+		if(!Server()->ClientIngame(i))
+			continue;
 		int *pMap = Server()->GetIdMap(i);
 
 		// compute distances
-		for (int j = 0; j < MAX_CLIENTS; j++)
+		for(int j = 0; j < MAX_CLIENTS; j++)
 		{
 			Dist[j].second = j;
-			if (!Server()->ClientIngame(j) || !GameServer()->m_apPlayers[j])
+			if(!Server()->ClientIngame(j) || !GameServer()->m_apPlayers[j])
 			{
 				Dist[j].first = 1e10;
 				continue;
 			}
-			CCharacter* ch = GameServer()->m_apPlayers[j]->GetCharacter();
-			if (!ch)
+			CCharacter *ch = GameServer()->m_apPlayers[j]->GetCharacter();
+			if(!ch)
 			{
 				Dist[j].first = 1e9;
 				continue;
 			}
 			// copypasted chunk from character.cpp Snap() follows
-			CCharacter* SnapChar = GameServer()->GetPlayerChar(i);
+			CCharacter *SnapChar = GameServer()->GetPlayerChar(i);
 			if(SnapChar && !SnapChar->m_Super &&
 				!GameServer()->m_apPlayers[i]->IsPaused() && GameServer()->m_apPlayers[i]->GetTeam() != -1 &&
 				!ch->CanCollide(i) &&
 				(!GameServer()->m_apPlayers[i] ||
-					GameServer()->m_apPlayers[i]->m_ClientVersion == VERSION_VANILLA ||
-					(GameServer()->m_apPlayers[i]->m_ClientVersion >= VERSION_DDRACE &&
-					!GameServer()->m_apPlayers[i]->m_ShowOthers
-					)
-				)
-			)
+					GameServer()->m_apPlayers[i]->GetClientVersion() == VERSION_VANILLA ||
+					(GameServer()->m_apPlayers[i]->GetClientVersion() >= VERSION_DDRACE &&
+						(GameServer()->m_apPlayers[i]->m_ShowOthers == 0 ||
+							(GameServer()->m_apPlayers[i]->m_ShowOthers == 2 && !GameServer()->m_apPlayers[i]->GetCharacter()->SameTeam(j))))))
 				Dist[j].first = 1e8;
 			else
 				Dist[j].first = 0;
@@ -204,35 +204,40 @@ void CGameWorld::UpdatePlayerMaps()
 
 		// compute reverse map
 		int rMap[MAX_CLIENTS];
-		for (int j = 0; j < MAX_CLIENTS; j++)
+		for(int &j : rMap)
 		{
-			rMap[j] = -1;
+			j = -1;
 		}
-		for (int j = 0; j < VANILLA_MAX_CLIENTS; j++)
+		for(int j = 0; j < VANILLA_MAX_CLIENTS; j++)
 		{
-			if (pMap[j] == -1) continue;
-			if (Dist[pMap[j]].first > 5e9) pMap[j] = -1;
-			else rMap[pMap[j]] = j;
+			if(pMap[j] == -1)
+				continue;
+			if(Dist[pMap[j]].first > 5e9)
+				pMap[j] = -1;
+			else
+				rMap[pMap[j]] = j;
 		}
 
 		std::nth_element(&Dist[0], &Dist[VANILLA_MAX_CLIENTS - 1], &Dist[MAX_CLIENTS], distCompare);
 
 		int Mapc = 0;
 		int Demand = 0;
-		for (int j = 0; j < VANILLA_MAX_CLIENTS - 1; j++)
+		for(int j = 0; j < VANILLA_MAX_CLIENTS - 1; j++)
 		{
 			int k = Dist[j].second;
-			if (rMap[k] != -1 || Dist[j].first > 5e9) continue;
-			while (Mapc < VANILLA_MAX_CLIENTS && pMap[Mapc] != -1) Mapc++;
-			if (Mapc < VANILLA_MAX_CLIENTS - 1)
+			if(rMap[k] != -1 || Dist[j].first > 5e9)
+				continue;
+			while(Mapc < VANILLA_MAX_CLIENTS && pMap[Mapc] != -1)
+				Mapc++;
+			if(Mapc < VANILLA_MAX_CLIENTS - 1)
 				pMap[Mapc] = k;
 			else
 				Demand++;
 		}
-		for (int j = MAX_CLIENTS - 1; j > VANILLA_MAX_CLIENTS - 2; j--)
+		for(int j = MAX_CLIENTS - 1; j > VANILLA_MAX_CLIENTS - 2; j--)
 		{
 			int k = Dist[j].second;
-			if (rMap[k] != -1 && Demand-- > 0)
+			if(rMap[k] != -1 && Demand-- > 0)
 				pMap[rMap[k]] = -1;
 		}
 		pMap[VANILLA_MAX_CLIENTS - 1] = -1; // player with empty name to say chat msgs
@@ -249,16 +254,16 @@ void CGameWorld::Tick()
 		if(GameServer()->m_pController->IsForceBalanced())
 			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, "Teams have been balanced");
 		// update all objects
-		for(int i = 0; i < NUM_ENTTYPES; i++)
-			for(CEntity *pEnt = m_apFirstEntityTypes[i]; pEnt; )
+		for(auto *pEnt : m_apFirstEntityTypes)
+			for(; pEnt;)
 			{
 				m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 				pEnt->Tick();
 				pEnt = m_pNextTraverseEntity;
 			}
 
-		for(int i = 0; i < NUM_ENTTYPES; i++)
-			for(CEntity *pEnt = m_apFirstEntityTypes[i]; pEnt; )
+		for(auto *pEnt : m_apFirstEntityTypes)
+			for(; pEnt;)
 			{
 				m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 				pEnt->TickDefered();
@@ -268,8 +273,8 @@ void CGameWorld::Tick()
 	else
 	{
 		// update all objects
-		for(int i = 0; i < NUM_ENTTYPES; i++)
-			for(CEntity *pEnt = m_apFirstEntityTypes[i]; pEnt; )
+		for(auto *pEnt : m_apFirstEntityTypes)
+			for(; pEnt;)
 			{
 				m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 				pEnt->TickPaused();
@@ -280,11 +285,19 @@ void CGameWorld::Tick()
 	RemoveEntities();
 
 	UpdatePlayerMaps();
+
+	// find the characters' strong/weak id
+	int StrongWeakID = 0;
+	for(CCharacter *pChar = (CCharacter *)FindFirst(ENTTYPE_CHARACTER); pChar; pChar = (CCharacter *)pChar->TypeNext())
+	{
+		pChar->m_StrongWeakID = StrongWeakID;
+		StrongWeakID++;
+	}
 }
 
 // TODO: should be more general
 //CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, CEntity *pNotThis)
-CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, CCharacter *pNotThis, int CollideWith, class CCharacter *pThisOnly)
+CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, CCharacter *pNotThis, int CollideWith, class CCharacter *pThisOnly)
 {
 	// Find other players
 	float ClosestLen = distance(Pos0, Pos1) * 100.0f;
@@ -296,19 +309,25 @@ CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, v
 		if(p == pNotThis)
 			continue;
 
+		if(pThisOnly && p != pThisOnly)
+			continue;
+
 		if(CollideWith != -1 && !p->CanCollide(CollideWith))
 			continue;
 
-		vec2 IntersectPos = closest_point_on_line(Pos0, Pos1, p->m_Pos);
-		float Len = distance(p->m_Pos, IntersectPos);
-		if(Len < p->m_ProximityRadius+Radius)
+		vec2 IntersectPos;
+		if(closest_point_on_line(Pos0, Pos1, p->m_Pos, IntersectPos))
 		{
-			Len = distance(Pos0, IntersectPos);
-			if(Len < ClosestLen)
+			float Len = distance(p->m_Pos, IntersectPos);
+			if(Len < p->m_ProximityRadius + Radius)
 			{
-				NewPos = IntersectPos;
-				ClosestLen = Len;
-				pClosest = p;
+				Len = distance(Pos0, IntersectPos);
+				if(Len < ClosestLen)
+				{
+					NewPos = IntersectPos;
+					ClosestLen = Len;
+					pClosest = p;
+				}
 			}
 		}
 	}
@@ -316,11 +335,10 @@ CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, v
 	return pClosest;
 }
 
-
 CCharacter *CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity *pNotThis)
 {
 	// Find other players
-	float ClosestRange = Radius*2;
+	float ClosestRange = Radius * 2;
 	CCharacter *pClosest = 0;
 
 	CCharacter *p = (CCharacter *)GameServer()->m_World.FindFirst(ENTTYPE_CHARACTER);
@@ -330,7 +348,7 @@ CCharacter *CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity *pNotTh
 			continue;
 
 		float Len = distance(Pos, p->m_Pos);
-		if(Len < p->m_ProximityRadius+Radius)
+		if(Len < p->m_ProximityRadius + Radius)
 		{
 			if(Len < ClosestRange)
 			{
@@ -345,7 +363,7 @@ CCharacter *CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity *pNotTh
 
 std::list<class CCharacter *> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, class CEntity *pNotThis)
 {
-	std::list< CCharacter * > listOfChars;
+	std::list<CCharacter *> listOfChars;
 
 	CCharacter *pChr = (CCharacter *)FindFirst(CGameWorld::ENTTYPE_CHARACTER);
 	for(; pChr; pChr = (CCharacter *)pChr->TypeNext())
@@ -353,12 +371,15 @@ std::list<class CCharacter *> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 
 		if(pChr == pNotThis)
 			continue;
 
-		vec2 IntersectPos = closest_point_on_line(Pos0, Pos1, pChr->m_Pos);
-		float Len = distance(pChr->m_Pos, IntersectPos);
-		if(Len < pChr->m_ProximityRadius+Radius)
+		vec2 IntersectPos;
+		if(closest_point_on_line(Pos0, Pos1, pChr->m_Pos, IntersectPos))
 		{
-			pChr->m_Intersection = IntersectPos;
-			listOfChars.push_back(pChr);
+			float Len = distance(pChr->m_Pos, IntersectPos);
+			if(Len < pChr->m_ProximityRadius + Radius)
+			{
+				pChr->m_Intersection = IntersectPos;
+				listOfChars.push_back(pChr);
+			}
 		}
 	}
 	return listOfChars;
@@ -367,15 +388,15 @@ std::list<class CCharacter *> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 
 void CGameWorld::ReleaseHooked(int ClientID)
 {
 	CCharacter *pChr = (CCharacter *)CGameWorld::FindFirst(CGameWorld::ENTTYPE_CHARACTER);
-		for(; pChr; pChr = (CCharacter *)pChr->TypeNext())
+	for(; pChr; pChr = (CCharacter *)pChr->TypeNext())
+	{
+		CCharacterCore *Core = pChr->Core();
+		if(Core->m_HookedPlayer == ClientID && !pChr->m_Super)
 		{
-			CCharacterCore* Core = pChr->Core();
-			if(Core->m_HookedPlayer == ClientID && !pChr->m_Super)
-			{
-				Core->m_HookedPlayer = -1;
-				Core->m_HookState = HOOK_RETRACTED;
-				Core->m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
-				Core->m_HookState = HOOK_RETRACTED;
-			}
+			Core->m_HookedPlayer = -1;
+			Core->m_HookState = HOOK_RETRACTED;
+			Core->m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
+			Core->m_HookState = HOOK_RETRACTED;
 		}
+	}
 }

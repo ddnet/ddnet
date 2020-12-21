@@ -1,5 +1,4 @@
-import copy
-from datatypes import *
+from datatypes import Array, Float, Int, Pointer, String, Struct, TextureHandle
 
 class Sound(Struct):
 	def __init__(self, filename=""):
@@ -8,23 +7,23 @@ class Sound(Struct):
 		self.filename = String(filename)
 
 class SoundSet(Struct):
-	def __init__(self, name="", files=[]):
+	def __init__(self, name="", files=()):
 		Struct.__init__(self, "CDataSoundset")
 		self.name = String(name)
 		self.sounds = Array(Sound())
 		self.last = Int(-1)
-		for name in files:
-			self.sounds.Add(Sound(name))
+		for filename in files:
+			self.sounds.Add(Sound(filename))
 
 class Image(Struct):
 	def __init__(self, name="", filename=""):
 		Struct.__init__(self, "CDataImage")
 		self.name = String(name)
 		self.filename = String(filename)
-		self.id = Int(-1)
+		self.id = TextureHandle()
 
 class SpriteSet(Struct):
-	def __init__(self, name="", image=None, gridx=0, gridy=0):
+	def __init__(self, _name="", image=None, gridx=0, gridy=0):
 		Struct.__init__(self, "CDataSpriteset")
 		self.image = Pointer(Image, image) # TODO
 		self.gridx = Int(gridx)
@@ -70,7 +69,7 @@ class Animation(Struct):
 		self.attach = AnimSequence()
 
 class WeaponSpec(Struct):
-	def __init__(self, container=None, name=""):
+	def __init__(self, cont=None, name=""):
 		Struct.__init__(self, "CDataWeaponspec")
 		self.name = String(name)
 		self.sprite_body = Pointer(Sprite, Sprite())
@@ -91,11 +90,14 @@ class WeaponSpec(Struct):
 		self.muzzleduration = Float(5)
 
 		# dig out sprites if we have a container
-		if container:
-			for sprite in container.sprites.items:
-				if sprite.name.value == "weapon_"+name+"_body": self.sprite_body.Set(sprite)
-				elif sprite.name.value == "weapon_"+name+"_cursor": self.sprite_cursor.Set(sprite)
-				elif sprite.name.value == "weapon_"+name+"_proj": self.sprite_proj.Set(sprite)
+		if cont:
+			for sprite in cont.sprites.items:
+				if sprite.name.value == "weapon_"+name+"_body":
+					self.sprite_body.Set(sprite)
+				elif sprite.name.value == "weapon_"+name+"_cursor":
+					self.sprite_cursor.Set(sprite)
+				elif sprite.name.value == "weapon_"+name+"_proj":
+					self.sprite_proj.Set(sprite)
 				elif "weapon_"+name+"_muzzle" in sprite.name.value:
 					self.sprite_muzzles.Add(Pointer(Sprite, sprite))
 
@@ -129,9 +131,9 @@ class Weapon_Grenade(Struct):
 		self.speed = Float(1000)
 		self.lifetime = Float(2.0)
 
-class Weapon_Rifle(Struct):
+class Weapon_Laser(Struct):
 	def __init__(self):
-		Struct.__init__(self, "CDataWeaponspecRifle")
+		Struct.__init__(self, "CDataWeaponspecLaser")
 		self.base = Pointer(WeaponSpec, WeaponSpec())
 		self.reach = Float(800.0)
 		self.bounce_delay = Int(150)
@@ -153,7 +155,7 @@ class Weapons(Struct):
 		self.gun = Weapon_Gun()
 		self.shotgun = Weapon_Shotgun()
 		self.grenade = Weapon_Grenade()
-		self.rifle = Weapon_Rifle()
+		self.laser = Weapon_Laser()
 		self.ninja = Weapon_Ninja()
 		self.id = Array(WeaponSpec())
 
@@ -168,8 +170,8 @@ class DataContainer(Struct):
 		self.animations = Array(Animation())
 		self.weapons = Weapons()
 
-def FileList(format, num):
-	return [format%(x+1) for x in range(0,num)]
+def FileList(fmt, num):
+	return [fmt%(x+1) for x in range(0,num)]
 
 container = DataContainer()
 container.sounds.Add(SoundSet("gun_fire", FileList("audio/wp_gun_fire-%02d.wv", 3)))
@@ -181,8 +183,8 @@ container.sounds.Add(SoundSet("hammer_hit", FileList("audio/wp_hammer_hit-%02d.w
 container.sounds.Add(SoundSet("ninja_fire", FileList("audio/wp_ninja_attack-%02d.wv", 3)))
 container.sounds.Add(SoundSet("grenade_explode", FileList("audio/wp_flump_explo-%02d.wv", 3)))
 container.sounds.Add(SoundSet("ninja_hit", FileList("audio/wp_ninja_hit-%02d.wv", 3)))
-container.sounds.Add(SoundSet("rifle_fire", FileList("audio/wp_rifle_fire-%02d.wv", 3)))
-container.sounds.Add(SoundSet("rifle_bounce", FileList("audio/wp_rifle_bnce-%02d.wv", 3)))
+container.sounds.Add(SoundSet("laser_fire", FileList("audio/wp_laser_fire-%02d.wv", 3)))
+container.sounds.Add(SoundSet("laser_bounce", FileList("audio/wp_laser_bnce-%02d.wv", 3)))
 container.sounds.Add(SoundSet("weapon_switch", FileList("audio/wp_switch-%02d.wv", 3)))
 
 container.sounds.Add(SoundSet("player_pain_short", FileList("audio/vo_teefault_pain_short-%02d.wv", 12)))
@@ -269,8 +271,8 @@ set_speedup_arrow = SpriteSet("speedup_arrow", image_speedup_arrow, 1, 1)
 set_demobuttons = SpriteSet("demobuttons", image_demobuttons, 5, 1)
 set_fileicons = SpriteSet("fileicons", image_fileicons, 8, 1)
 set_guibuttons = SpriteSet("guibuttons", image_guibuttons, 12, 4)
-set_guiicons = SpriteSet("guiicons", image_guiicons, 8, 2)
-set_demobuttons2 = SpriteSet("demobuttons2", image_demobuttons2, 3, 1)
+set_guiicons = SpriteSet("guiicons", image_guiicons, 12, 2)
+set_demobuttons2 = SpriteSet("demobuttons2", image_demobuttons2, 4, 1)
 set_audio_source = SpriteSet("audio_source", image_audio_source, 1, 1)
 
 container.spritesets.Add(set_particles)
@@ -320,16 +322,16 @@ container.sprites.Add(Sprite("part9", set_game, 13,0,2,2))
 container.sprites.Add(Sprite("weapon_gun_body", set_game, 2,4,4,2))
 container.sprites.Add(Sprite("weapon_gun_cursor", set_game, 0,4,2,2))
 container.sprites.Add(Sprite("weapon_gun_proj", set_game, 6,4,2,2))
-container.sprites.Add(Sprite("weapon_gun_muzzle1", set_game, 8,4,3,2))
-container.sprites.Add(Sprite("weapon_gun_muzzle2", set_game, 12,4,3,2))
-container.sprites.Add(Sprite("weapon_gun_muzzle3", set_game, 16,4,3,2))
+container.sprites.Add(Sprite("weapon_gun_muzzle1", set_game, 8,4,4,2))
+container.sprites.Add(Sprite("weapon_gun_muzzle2", set_game, 12,4,4,2))
+container.sprites.Add(Sprite("weapon_gun_muzzle3", set_game, 16,4,4,2))
 
 container.sprites.Add(Sprite("weapon_shotgun_body", set_game, 2,6,8,2))
 container.sprites.Add(Sprite("weapon_shotgun_cursor", set_game, 0,6,2,2))
 container.sprites.Add(Sprite("weapon_shotgun_proj", set_game, 10,6,2,2))
-container.sprites.Add(Sprite("weapon_shotgun_muzzle1", set_game, 12,6,3,2))
-container.sprites.Add(Sprite("weapon_shotgun_muzzle2", set_game, 16,6,3,2))
-container.sprites.Add(Sprite("weapon_shotgun_muzzle3", set_game, 20,6,3,2))
+container.sprites.Add(Sprite("weapon_shotgun_muzzle1", set_game, 12,6,4,2))
+container.sprites.Add(Sprite("weapon_shotgun_muzzle2", set_game, 16,6,4,2))
+container.sprites.Add(Sprite("weapon_shotgun_muzzle3", set_game, 20,6,4,2))
 
 container.sprites.Add(Sprite("weapon_grenade_body", set_game, 2,8,7,2))
 container.sprites.Add(Sprite("weapon_grenade_cursor", set_game, 0,8,2,2))
@@ -343,9 +345,9 @@ container.sprites.Add(Sprite("weapon_ninja_body", set_game, 2,10,8,2))
 container.sprites.Add(Sprite("weapon_ninja_cursor", set_game, 0,10,2,2))
 container.sprites.Add(Sprite("weapon_ninja_proj", set_game, 0,0,0,0))
 
-container.sprites.Add(Sprite("weapon_rifle_body", set_game, 2,12,7,3))
-container.sprites.Add(Sprite("weapon_rifle_cursor", set_game, 0,12,2,2))
-container.sprites.Add(Sprite("weapon_rifle_proj", set_game, 10,12,2,2))
+container.sprites.Add(Sprite("weapon_laser_body", set_game, 2,12,7,3))
+container.sprites.Add(Sprite("weapon_laser_cursor", set_game, 0,12,2,2))
+container.sprites.Add(Sprite("weapon_laser_proj", set_game, 10,12,2,2))
 
 container.sprites.Add(Sprite("hook_chain", set_game, 2,0,1,1))
 container.sprites.Add(Sprite("hook_head", set_game, 3,0,2,1))
@@ -395,7 +397,7 @@ container.sprites.Add(Sprite("question", set_emoticons, 3, 3, 1, 1))
 container.sprites.Add(Sprite("browse_lock", set_browseicons, 0,0,1,1))
 container.sprites.Add(Sprite("browse_heart", set_browseicons, 1,0,1,1))
 container.sprites.Add(Sprite("browse_unpure", set_browseicons, 3,0,1,1))
-container.sprites.Add(Sprite("browse_norank", set_browseicons, 4,0,1,1))
+container.sprites.Add(Sprite("browse_ddnet", set_browseicons, 4,0,1,1))
 container.sprites.Add(Sprite("browse_rank", set_browseicons, 5,0,1,1))
 
 container.sprites.Add(Sprite("speedup_arrow", set_speedup_arrow, 0,0,1,1))
@@ -408,6 +410,8 @@ container.sprites.Add(Sprite("demobutton_faster", set_demobuttons, 4,0,1,1))
 
 container.sprites.Add(Sprite("demobutton_slice_begin", set_demobuttons2, 0,0,1,1))
 container.sprites.Add(Sprite("demobutton_slice_end", set_demobuttons2, 1,0,1,1))
+container.sprites.Add(Sprite("demobutton_shortcuts_enabled", set_demobuttons2, 2,0,1,1))
+container.sprites.Add(Sprite("demobutton_shortcuts_disabled", set_demobuttons2, 3,0,1,1))
 
 container.sprites.Add(Sprite("file_demo1", set_fileicons, 0,0,1,1))
 container.sprites.Add(Sprite("file_demo2", set_fileicons, 1,0,1,1))
@@ -420,7 +424,8 @@ container.sprites.Add(Sprite("guibutton_on", set_guibuttons, 4,0,4,4))
 container.sprites.Add(Sprite("guibutton_hover", set_guibuttons, 8,0,4,4))
 
 container.sprites.Add(Sprite("guiicon_mute", set_guiicons, 0,0,4,2))
-container.sprites.Add(Sprite("guiicon_friend", set_guiicons, 4,0,4,2))
+container.sprites.Add(Sprite("guiicon_emoticon_mute", set_guiicons, 4,0,4,2))
+container.sprites.Add(Sprite("guiicon_friend", set_guiicons, 8,0,4,2))
 
 container.sprites.Add(Sprite("audio_source", set_audio_source, 0,0,1,1))
 
@@ -495,7 +500,14 @@ weapon.ammoregentime.Set(500)
 weapon.visual_size.Set(64)
 weapon.offsetx.Set(32)
 weapon.offsety.Set(4)
-weapon.muzzleoffsetx.Set(50)
+# the number after the plus sign is the sprite scale, which is calculated for all sprites ( w / sqrt(w² * h²) ) of the additionally added x offset, which is added now,
+# since the muzzle image is 32 pixels bigger, devided by 2, because a sprite's position is always at the center of the sprite image itself
+# => the offset added, bcs the sprite is bigger now, but should not be shifted to the left
+# => 96 / sqrt(64×64+96×96)  (the original sprite scale)
+# => 64 × original sprite scale (the actual size of the sprite ingame see weapon.visual_size above)
+# => (actual image sprite) / 3 (the new sprite is 128 instead of 96, so 4 / 3 times as big(bcs it should look the same as before, not scaled down because of this bigger number), so basically, 1 / 3 of the original size is added)
+# => (new sprite width) / 2 (bcs the sprite is at center, only add half of that new extra width)
+weapon.muzzleoffsetx.Set(50 + 8.8752)
 weapon.muzzleoffsety.Set(6)
 container.weapons.gun.base.Set(weapon)
 container.weapons.id.Add(weapon)
@@ -505,7 +517,7 @@ weapon.firedelay.Set(500)
 weapon.visual_size.Set(96)
 weapon.offsetx.Set(24)
 weapon.offsety.Set(-2)
-weapon.muzzleoffsetx.Set(70)
+weapon.muzzleoffsetx.Set(70 + 13.3128) # see gun for the number after the plus sign
 weapon.muzzleoffsety.Set(6)
 container.weapons.shotgun.base.Set(weapon)
 container.weapons.id.Add(weapon)
@@ -518,13 +530,13 @@ weapon.offsety.Set(-2)
 container.weapons.grenade.base.Set(weapon)
 container.weapons.id.Add(weapon)
 
-weapon = WeaponSpec(container, "rifle")
+weapon = WeaponSpec(container, "laser")
 weapon.firedelay.Set(800)
 weapon.visual_size.Set(92)
 weapon.damage.Set(5)
 weapon.offsetx.Set(24)
 weapon.offsety.Set(-2)
-container.weapons.rifle.base.Set(weapon)
+container.weapons.laser.base.Set(weapon)
 container.weapons.id.Add(weapon)
 
 weapon = WeaponSpec(container, "ninja")

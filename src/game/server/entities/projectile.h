@@ -3,11 +3,12 @@
 #ifndef GAME_SERVER_ENTITIES_PROJECTILE_H
 #define GAME_SERVER_ENTITIES_PROJECTILE_H
 
+#include <game/server/entity.h>
+
 class CProjectile : public CEntity
 {
 public:
-	CProjectile
-	(
+	CProjectile(
 		CGameWorld *pGameWorld,
 		int Type,
 		int Owner,
@@ -18,10 +19,8 @@ public:
 		bool Explosive,
 		float Force,
 		int SoundImpact,
-		int Weapon,
 		int Layer = 0,
-		int Number = 0
-	);
+		int Number = 0);
 
 	vec2 GetPos(float Time);
 	void FillInfo(CNetObj_Projectile *pProj);
@@ -38,7 +37,6 @@ private:
 	int m_Type;
 	//int m_Damage;
 	int m_SoundImpact;
-	int m_Weapon;
 	float m_Force;
 	int m_StartTick;
 	bool m_Explosive;
@@ -50,7 +48,6 @@ private:
 	int m_TuneZone;
 
 public:
-
 	void SetBouncing(int Value);
 	void FillExtraInfo(CNetObj_Projectile *pProj);
 };

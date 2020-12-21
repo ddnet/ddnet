@@ -1,13 +1,34 @@
-from datatypes import *
+from datatypes import Enum, Flags, NetBool, NetEvent, NetIntAny, NetIntRange, NetMessage, NetMessageEx, NetObject, NetObjectEx, NetString, NetStringHalfStrict, NetStringStrict, NetTick
 
 Emotes = ["NORMAL", "PAIN", "HAPPY", "SURPRISE", "ANGRY", "BLINK"]
 PlayerFlags = ["PLAYING", "IN_MENU", "CHATTING", "SCOREBOARD", "AIM"]
 GameFlags = ["TEAMS", "FLAGS"]
 GameStateFlags = ["GAMEOVER", "SUDDENDEATH", "PAUSED", "RACETIME"]
+CharacterFlags = ["SOLO", "JETPACK", "NO_COLLISION", "ENDLESS_HOOK", "ENDLESS_JUMP", "SUPER",
+                  "NO_HAMMER_HIT", "NO_SHOTGUN_HIT", "NO_GRENADE_HIT", "NO_LASER_HIT", "NO_HOOK",
+                  "TELEGUN_GUN", "TELEGUN_GRENADE", "TELEGUN_LASER",
+                  "WEAPON_HAMMER", "WEAPON_GUN", "WEAPON_SHOTGUN", "WEAPON_GRENADE", "WEAPON_LASER", "WEAPON_NINJA"]
+GameInfoFlags = [
+	"TIMESCORE", "GAMETYPE_RACE", "GAMETYPE_FASTCAP", "GAMETYPE_FNG",
+	"GAMETYPE_DDRACE", "GAMETYPE_DDNET", "GAMETYPE_BLOCK_WORLDS",
+	"GAMETYPE_VANILLA", "GAMETYPE_PLUS", "FLAG_STARTS_RACE", "RACE",
+	"UNLIMITED_AMMO", "DDRACE_RECORD_MESSAGE", "RACE_RECORD_MESSAGE",
+	"ALLOW_EYE_WHEEL", "ALLOW_HOOK_COLL", "ALLOW_ZOOM", "BUG_DDRACE_GHOST",
+	"BUG_DDRACE_INPUT", "BUG_FNG_LASER_RANGE", "BUG_VANILLA_BOUNCE",
+	"PREDICT_FNG", "PREDICT_DDRACE", "PREDICT_DDRACE_TILES", "PREDICT_VANILLA",
+	"ENTITIES_DDNET", "ENTITIES_DDRACE", "ENTITIES_RACE", "ENTITIES_FNG",
+	"ENTITIES_VANILLA", "DONT_MASK_ENTITIES", "ENTITIES_BW"
+	# Full, use GameInfoFlags2 for more flags
+]
+GameInfoFlags2 = [
+	"ALLOW_X_SKINS", "GAMETYPE_CITY",
+]
+ExPlayerFlags = ["AFK", "PAUSED", "SPEC"]
 
 Emoticons = ["OOP", "EXCLAMATION", "HEARTS", "DROP", "DOTDOT", "MUSIC", "SORRY", "GHOST", "SUSHI", "SPLATTEE", "DEVILTEE", "ZOMG", "ZZZ", "WTF", "EYES", "QUESTION"]
 
 Powerups = ["HEALTH", "ARMOR", "WEAPON", "NINJA"]
+Authed = ["NO", "HELPER", "MOD", "ADMIN"]
 
 RawHeader = '''
 
@@ -32,6 +53,11 @@ enum
 	SPEC_FREEVIEW=-1,
 	SPEC_FOLLOW=-2,
 };
+
+enum
+{
+	GAMEINFO_CURVERSION=5,
+};
 '''
 
 RawSource = '''
@@ -42,13 +68,18 @@ RawSource = '''
 Enums = [
 	Enum("EMOTE", Emotes),
 	Enum("POWERUP", Powerups),
-	Enum("EMOTICON", Emoticons)
+	Enum("EMOTICON", Emoticons),
+	Enum("AUTHED", Authed),
 ]
 
 Flags = [
 	Flags("PLAYERFLAG", PlayerFlags),
 	Flags("GAMEFLAG", GameFlags),
-	Flags("GAMESTATEFLAG", GameStateFlags)
+	Flags("GAMESTATEFLAG", GameStateFlags),
+	Flags("CHARACTERFLAG", CharacterFlags),
+	Flags("GAMEINFOFLAG", GameInfoFlags),
+	Flags("GAMEINFOFLAG2", GameInfoFlags2),
+	Flags("EXPLAYERFLAG", ExPlayerFlags),
 ]
 
 Objects = [
@@ -194,6 +225,25 @@ Objects = [
 		NetIntAny("m_Test"),
 	]),
 
+	NetObjectEx("DDNetCharacter", "character@netobj.ddnet.tw", [
+		NetIntAny("m_Flags"),
+		NetTick("m_FreezeEnd"),
+		NetIntRange("m_Jumps", 0, 255),
+		NetIntAny("m_TeleCheckpoint"),
+		NetIntRange("m_StrongWeakID", 0, 'MAX_CLIENTS-1'),
+	]),
+
+	NetObjectEx("DDNetPlayer", "player@netobj.ddnet.tw", [
+		NetIntAny("m_Flags"),
+		NetIntRange("m_AuthLevel", "AUTHED_NO", "AUTHED_ADMIN"),
+	]),
+
+	NetObjectEx("GameInfoEx", "gameinfo@netobj.ddnet.tw", [
+		NetIntAny("m_Flags"),
+		NetIntAny("m_Version"),
+		NetIntAny("m_Flags2"),
+	], validate_size=False),
+
 	## Events
 
 	NetEvent("Common", [
@@ -224,6 +274,11 @@ Objects = [
 
 	NetObjectEx("MyOwnEvent", "my-own-event@heinrich5991.de", [
 		NetIntAny("m_Test"),
+	]),
+
+	NetObjectEx("SpecChar", "spec-char@netobj.ddnet.tw", [
+		NetIntAny("m_X"),
+		NetIntAny("m_Y"),
 	]),
 ]
 
@@ -364,19 +419,26 @@ Messages = [
 		NetIntAny("m_PlayerTimeBest"),
 	]),
 
-	NetMessage("Sv_PlayerTime", [
-		NetIntAny("m_Time"),
-		NetIntRange("m_ClientID", 0, 'MAX_CLIENTS-1'),
-	]),
+	NetMessage("Unused", []),
 
 	NetMessage("Sv_TeamsState", []),
 
-	NetMessage("Cl_ShowOthers", [
+	# deprecated, use showothers@netmsg.ddnet.tw instead
+	NetMessage("Cl_ShowOthersLegacy", [
 		NetBool("m_Show"),
 	]),
 # Can't add any NetMessages here!
 
 	NetMessageEx("Sv_MyOwnMessage", "my-own-message@heinrich5991.de", [
 		NetIntAny("m_Test"),
+	]),
+
+	NetMessageEx("Cl_ShowDistance", "show-distance@netmsg.ddnet.tw", [
+		NetIntAny("m_X"),
+		NetIntAny("m_Y"),
+	]),
+
+	NetMessageEx("Cl_ShowOthers", "showothers@netmsg.ddnet.tw", [
+		NetIntRange("m_Show", 0, 2),
 	]),
 ]

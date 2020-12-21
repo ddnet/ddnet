@@ -3,15 +3,15 @@
 #include <engine/graphics.h>
 #include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
-#include <game/generated/protocol.h>
 #include <game/generated/client_data.h>
+#include <game/generated/protocol.h>
 
-#include <game/gamecore.h> // get_angle
-#include <game/client/animstate.h>
-#include <game/client/ui.h>
-#include <game/client/render.h>
 #include "chat.h"
 #include "emoticon.h"
+#include <game/client/animstate.h>
+#include <game/client/render.h>
+#include <game/client/ui.h>
+#include <game/gamecore.h> // get_angle
 
 CEmoticon::CEmoticon()
 {
@@ -54,12 +54,8 @@ bool CEmoticon::OnMouseMove(float x, float y)
 	if(!m_Active)
 		return false;
 
-#if defined(__ANDROID__) // No relative mouse on Android
-	m_SelectorMouse = vec2(x,y);
-#else
 	UI()->ConvertMouseMove(&x, &y);
-	m_SelectorMouse += vec2(x,y);
-#endif
+	m_SelectorMouse += vec2(x, y);
 	return true;
 }
 
@@ -67,7 +63,6 @@ void CEmoticon::DrawCircle(float x, float y, float r, int Segments)
 {
 	RenderTools()->DrawCircle(x, y, r, Segments);
 }
-
 
 void CEmoticon::OnRender()
 {
@@ -90,20 +85,19 @@ void CEmoticon::OnRender()
 
 	m_WasActive = true;
 
-	if (length(m_SelectorMouse) > 170.0f)
+	if(length(m_SelectorMouse) > 170.0f)
 		m_SelectorMouse = normalize(m_SelectorMouse) * 170.0f;
 
-	float SelectedAngle = GetAngle(m_SelectorMouse) + 2*pi/24;
-	if (SelectedAngle < 0)
-		SelectedAngle += 2*pi;
+	float SelectedAngle = GetAngle(m_SelectorMouse) + 2 * pi / 24;
+	if(SelectedAngle < 0)
+		SelectedAngle += 2 * pi;
 
 	m_SelectedEmote = -1;
 	m_SelectedEyeEmote = -1;
-	if (length(m_SelectorMouse) > 110.0f)
-		m_SelectedEmote = (int)(SelectedAngle / (2*pi) * NUM_EMOTICONS);
+	if(length(m_SelectorMouse) > 110.0f)
+		m_SelectedEmote = (int)(SelectedAngle / (2 * pi) * NUM_EMOTICONS);
 	else if(length(m_SelectorMouse) > 40.0f)
-		m_SelectedEyeEmote = (int)(SelectedAngle / (2*pi) * NUM_EMOTES);
-
+		m_SelectedEyeEmote = (int)(SelectedAngle / (2 * pi) * NUM_EMOTES);
 
 	CUIRect Screen = *UI()->Screen();
 
@@ -111,57 +105,50 @@ void CEmoticon::OnRender()
 
 	Graphics()->BlendNormal();
 
-	Graphics()->TextureSet(-1);
+	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0,0,0,0.3f);
-	DrawCircle(Screen.w/2, Screen.h/2, 190.0f, 64);
+	Graphics()->SetColor(0, 0, 0, 0.3f);
+	DrawCircle(Screen.w / 2, Screen.h / 2, 190.0f, 64);
 	Graphics()->QuadsEnd();
 
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_EMOTICONS].m_Id);
-	Graphics()->QuadsBegin();
-
-	for (int i = 0; i < NUM_EMOTICONS; i++)
+	Graphics()->WrapClamp();
+	for(int i = 0; i < NUM_EMOTICONS; i++)
 	{
-		float Angle = 2*pi*i/NUM_EMOTICONS;
-		if (Angle > pi)
-			Angle -= 2*pi;
+		float Angle = 2 * pi * i / NUM_EMOTICONS;
+		if(Angle > pi)
+			Angle -= 2 * pi;
 
 		bool Selected = m_SelectedEmote == i;
 
 		float Size = Selected ? 80.0f : 50.0f;
 
+		Graphics()->TextureSet(GameClient()->m_EmoticonsSkin.m_SpriteEmoticons[i]);
+		Graphics()->QuadsSetSubset(0, 0, 1, 1);
+
+		Graphics()->QuadsBegin();
 		float NudgeX = 150.0f * cosf(Angle);
 		float NudgeY = 150.0f * sinf(Angle);
-		RenderTools()->SelectSprite(SPRITE_OOP + i);
-		IGraphics::CQuadItem QuadItem(Screen.w/2 + NudgeX, Screen.h/2 + NudgeY, Size, Size);
+		IGraphics::CQuadItem QuadItem(Screen.w / 2 + NudgeX, Screen.h / 2 + NudgeY, Size, Size);
 		Graphics()->QuadsDraw(&QuadItem, 1);
+		Graphics()->QuadsEnd();
 	}
+	Graphics()->WrapNormal();
 
-	Graphics()->QuadsEnd();
-
-	CServerInfo pServerInfo;
-	Client()->GetServerInfo(&pServerInfo);
-	if((IsDDRace(&pServerInfo) || IsDDNet(&pServerInfo) || IsPlus(&pServerInfo)) && g_Config.m_ClEyeWheel)
+	if(GameClient()->m_GameInfo.m_AllowEyeWheel && g_Config.m_ClEyeWheel)
 	{
-		Graphics()->TextureSet(-1);
+		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
-		Graphics()->SetColor(1.0,1.0,1.0,0.3f);
-		DrawCircle(Screen.w/2, Screen.h/2, 100.0f, 64);
+		Graphics()->SetColor(1.0, 1.0, 1.0, 0.3f);
+		DrawCircle(Screen.w / 2, Screen.h / 2, 100.0f, 64);
 		Graphics()->QuadsEnd();
 
-		CTeeRenderInfo *pTeeInfo;
-		if(g_Config.m_ClDummy)
-			pTeeInfo = &m_pClient->m_aClients[m_pClient->m_LocalIDs[1]].m_RenderInfo;
-		else
-			pTeeInfo = &m_pClient->m_aClients[m_pClient->m_LocalIDs[0]].m_RenderInfo;
+		CTeeRenderInfo *pTeeInfo = &m_pClient->m_aClients[m_pClient->m_LocalIDs[g_Config.m_ClDummy]].m_RenderInfo;
 
-		Graphics()->TextureSet(pTeeInfo->m_Texture);
-
-		for (int i = 0; i < NUM_EMOTES; i++)
+		for(int i = 0; i < NUM_EMOTES; i++)
 		{
-			float Angle = 2*pi*i/NUM_EMOTES;
-			if (Angle > pi)
-				Angle -= 2*pi;
+			float Angle = 2 * pi * i / NUM_EMOTES;
+			if(Angle > pi)
+				Angle -= 2 * pi;
 
 			bool Selected = m_SelectedEyeEmote == i;
 
@@ -169,25 +156,27 @@ void CEmoticon::OnRender()
 			float NudgeY = 70.0f * sinf(Angle);
 
 			pTeeInfo->m_Size = Selected ? 64.0f : 48.0f;
-			RenderTools()->RenderTee(CAnimState::GetIdle(), pTeeInfo, i, vec2(-1,0), vec2(Screen.w/2 + NudgeX, Screen.h/2 + NudgeY));
+			RenderTools()->RenderTee(CAnimState::GetIdle(), pTeeInfo, i, vec2(-1, 0), vec2(Screen.w / 2 + NudgeX, Screen.h / 2 + NudgeY));
 			pTeeInfo->m_Size = 64.0f;
 		}
 
-		Graphics()->TextureSet(-1);
+		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
-		Graphics()->SetColor(0,0,0,0.3f);
-		DrawCircle(Screen.w/2, Screen.h/2, 30.0f, 64);
+		Graphics()->SetColor(0, 0, 0, 0.3f);
+		DrawCircle(Screen.w / 2, Screen.h / 2, 30.0f, 64);
 		Graphics()->QuadsEnd();
 	}
 	else
 		m_SelectedEyeEmote = -1;
 
+	Graphics()->WrapClamp();
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CURSOR].m_Id);
 	Graphics()->QuadsBegin();
-	Graphics()->SetColor(1,1,1,1);
-	IGraphics::CQuadItem QuadItem(m_SelectorMouse.x+Screen.w/2,m_SelectorMouse.y+Screen.h/2,24,24);
+	Graphics()->SetColor(1, 1, 1, 1);
+	IGraphics::CQuadItem QuadItem(m_SelectorMouse.x + Screen.w / 2, m_SelectorMouse.y + Screen.h / 2, 24, 24);
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
+	Graphics()->WrapNormal();
 }
 
 void CEmoticon::Emote(int Emoticon)
@@ -198,9 +187,9 @@ void CEmoticon::Emote(int Emoticon)
 
 	if(g_Config.m_ClDummyCopyMoves)
 	{
-		CMsgPacker Msg(NETMSGTYPE_CL_EMOTICON);
+		CMsgPacker Msg(NETMSGTYPE_CL_EMOTICON, false);
 		Msg.AddInt(Emoticon);
-		Client()->SendMsgExY(&Msg, MSGFLAG_VITAL, false, !g_Config.m_ClDummy);
+		Client()->SendMsgY(&Msg, MSGFLAG_VITAL, !g_Config.m_ClDummy);
 	}
 }
 

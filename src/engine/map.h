@@ -4,6 +4,12 @@
 #define ENGINE_MAP_H
 
 #include "kernel.h"
+#include <base/hash.h>
+
+enum
+{
+	MAX_MAP_LENGTH = 128
+};
 
 class IMap : public IInterface
 {
@@ -20,7 +26,6 @@ public:
 	virtual int NumItems() = 0;
 };
 
-
 class IEngineMap : public IMap
 {
 	MACRO_INTERFACE("enginemap", 0)
@@ -28,6 +33,7 @@ public:
 	virtual bool Load(const char *pMapName) = 0;
 	virtual bool IsLoaded() = 0;
 	virtual void Unload() = 0;
+	virtual SHA256_DIGEST Sha256() = 0;
 	virtual unsigned Crc() = 0;
 	virtual int MapSize() = 0;
 	virtual IOHANDLE File() = 0;

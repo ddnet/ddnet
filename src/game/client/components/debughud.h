@@ -8,6 +8,8 @@ class CDebugHud : public CComponent
 {
 	void RenderNetCorrections();
 	void RenderTuning();
+	void RenderHint();
+
 public:
 	virtual void OnRender();
 };

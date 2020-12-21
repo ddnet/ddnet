@@ -3,10 +3,12 @@
 #ifndef GAME_EXTRAINFO_H
 #define GAME_EXTRAINFO_H
 
+#include <game/generated/protocol.h>
+
 #include <base/vmath.h>
 
 bool UseExtraInfo(const CNetObj_Projectile *pProj);
-void ExtractInfo(const CNetObj_Projectile *pProj, vec2 *StartPos, vec2 *StartVel, bool IsDDNet);
+void ExtractInfo(const CNetObj_Projectile *pProj, vec2 *StartPos, vec2 *StartVel);
 void ExtractExtraInfo(const CNetObj_Projectile *pProj, int *Owner, bool *Explosive, int *Bouncing, bool *Freeze);
 void SnapshotRemoveExtraInfo(unsigned char *pData);
 

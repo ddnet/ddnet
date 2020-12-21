@@ -6,6 +6,9 @@
 // this include should perhaps be removed
 #include "entities/character.h"
 #include "gamecontext.h"
+#include "score.h"
+#include "teeinfo.h"
+#include <memory>
 
 // player object
 class CPlayer
@@ -22,10 +25,12 @@ public:
 
 	void TryRespawn();
 	void Respawn(bool WeakHook = false); // with WeakHook == true the character will be spawned after all calls of Tick from other Players
-	CCharacter* ForceSpawn(vec2 Pos); // required for loading savegames
-	void SetTeam(int Team, bool DoChatMsg=true);
+	CCharacter *ForceSpawn(vec2 Pos); // required for loading savegames
+	void SetTeam(int Team, bool DoChatMsg = true);
 	int GetTeam() const { return m_Team; };
 	int GetCID() const { return m_ClientID; };
+	int GetClientVersion() const;
+	bool SetTimerType(int NewType);
 
 	void Tick();
 	void PostTick();
@@ -37,13 +42,12 @@ public:
 
 	void OnDirectInput(CNetObj_PlayerInput *NewInput);
 	void OnPredictedInput(CNetObj_PlayerInput *NewInput);
+	void OnPredictedEarlyInput(CNetObj_PlayerInput *NewInput);
 	void OnDisconnect(const char *pReason);
 
-	void ThreadKillCharacter(int Weapon = WEAPON_GAME);
 	void KillCharacter(int Weapon = WEAPON_GAME);
 	CCharacter *GetCharacter();
 
-	void FindDuplicateSkins();
 	void SpectatePlayerName(const char *pName);
 
 	//---------------------------------------------------------
@@ -82,21 +86,14 @@ public:
 
 	int m_SendVoteIndex;
 
-	// TODO: clean this up
-	struct
-	{
-		char m_SkinName[64];
-		int m_UseCustomColor;
-		int m_ColorBody;
-		int m_ColorFeet;
-	} m_TeeInfos;
+	CTeeInfo m_TeeInfos;
 
 	int m_DieTick;
+	int m_PreviousDieTick;
 	int m_Score;
 	int m_JoinTick;
 	bool m_ForceBalanced;
 	int m_LastActionTick;
-	bool m_StolenSkin;
 	int m_TeamChangeTick;
 	bool m_SentSemicolonTip;
 	struct
@@ -134,21 +131,21 @@ private:
 	int64 m_ForcePauseTime;
 	int64 m_LastPause;
 
-	// DDRace
-
 public:
 	enum
 	{
-		PAUSE_NONE=0,
+		PAUSE_NONE = 0,
 		PAUSE_PAUSED,
 		PAUSE_SPEC
 	};
-	
+
 	enum
 	{
-		TIMERTYPE_GAMETIMER=0,
+		TIMERTYPE_DEFAULT = -1,
+		TIMERTYPE_GAMETIMER = 0,
 		TIMERTYPE_BROADCAST,
 		TIMERTYPE_GAMETIMER_AND_BROADCAST,
+		TIMERTYPE_SIXUP,
 		TIMERTYPE_NONE,
 	};
 
@@ -164,13 +161,12 @@ public:
 	bool IsPlaying();
 	int64 m_Last_KickVote;
 	int64 m_Last_Team;
-	int m_ClientVersion;
-	bool m_ShowOthers;
+	int m_ShowOthers;
 	bool m_ShowAll;
+	vec2 m_ShowDistance;
 	bool m_SpecTeam;
 	bool m_NinjaJetpack;
 	bool m_Afk;
-	int m_KillMe;
 	bool m_HasFinishScore;
 
 	int m_ChatScore;
@@ -178,12 +174,15 @@ public:
 	bool m_Moderating;
 
 	bool AfkTimer(int new_target_x, int new_target_y); //returns true if kicked
+	void UpdatePlaytime();
 	void AfkVoteTimer(CNetObj_PlayerInput *NewTarget);
 	int64 m_LastPlaytime;
 	int64 m_LastEyeEmote;
+	int64 m_LastBroadcast;
+	bool m_LastBroadcastImportance;
 	int m_LastTarget_x;
 	int m_LastTarget_y;
-	CNetObj_PlayerInput m_LastTarget;
+	CNetObj_PlayerInput *m_pLastTarget;
 	int m_Sent1stAfkWarning; // afk timer's 1st warning after 50% of sv_max_afk_time
 	int m_Sent2ndAfkWarning; // afk timer's 2nd warning after 90% of sv_max_afk_time
 	char m_pAfkMsg[160];
@@ -193,9 +192,13 @@ public:
 	int m_DefEmoteReset;
 	bool m_Halloween;
 	bool m_FirstPacket;
-#if defined(CONF_SQL)
 	int64 m_LastSQLQuery;
-#endif
+	void ProcessScoreResult(CScorePlayerResult &Result);
+	std::shared_ptr<CScorePlayerResult> m_ScoreQueryResult;
+	std::shared_ptr<CScorePlayerResult> m_ScoreFinishResult;
+	bool m_NotEligibleForFinish;
+	int64 m_EligibleForFinishCheck;
+	bool m_VotedForPractice;
 };
 
 #endif

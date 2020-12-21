@@ -24,21 +24,21 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 	while((pLine = LineReader.Get()))
 	{
 		int Length = str_length(pLine) + 1;
-		char *pCopy = (char *)mem_alloc(Length, 1);
+		char *pCopy = (char *)malloc(Length);
 		mem_copy(pCopy, pLine, Length);
 		aLines.add(pCopy);
 		TotalLength += Length;
 	}
 	io_close(File);
 
-	pSettings = (char *)mem_alloc(TotalLength, 1);
+	pSettings = (char *)malloc(maximum(1, TotalLength));
 	int Offset = 0;
 	for(int i = 0; i < aLines.size(); i++)
 	{
 		int Length = str_length(aLines[i]) + 1;
 		mem_copy(pSettings + Offset, aLines[i], Length);
 		Offset += Length;
-		mem_free(aLines[i]);
+		free(aLines[i]);
 	}
 
 	CDataFileReader Reader;
@@ -73,6 +73,7 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 					if(DataSize == TotalLength && mem_comp(pSettings, pMapSettings, DataSize) == 0)
 					{
 						dbg_msg("config_store", "configs coincide, not updating map");
+						free(pSettings);
 						return;
 					}
 					Reader.UnloadData(pInfo->m_Settings);
@@ -121,6 +122,7 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 		Reader.UnloadData(i);
 	}
 
+	free(pSettings);
 	Reader.Close();
 	if(!Writer.OpenFile(pStorage, pMapName))
 	{

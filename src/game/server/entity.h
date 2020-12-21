@@ -3,32 +3,32 @@
 #ifndef GAME_SERVER_ENTITY_H
 #define GAME_SERVER_ENTITY_H
 
-#include <new>
 #include <base/vmath.h>
 #include <game/server/gameworld.h>
+#include <new>
 
 #define MACRO_ALLOC_HEAP() \
-	public: \
+public: \
 	void *operator new(size_t Size) \
 	{ \
-		void *p = mem_alloc(Size, 1); \
-		/*dbg_msg("", "++ %p %d", p, size);*/ \
+		void *p = malloc(Size); \
 		mem_zero(p, Size); \
 		return p; \
 	} \
 	void operator delete(void *pPtr) \
 	{ \
-		/*dbg_msg("", "-- %p", p);*/ \
-		mem_free(pPtr); \
+		free(pPtr); \
 	} \
-	private:
+\
+private:
 
 #define MACRO_ALLOC_POOL_ID() \
-	public: \
+public: \
 	void *operator new(size_t Size, int id); \
 	void operator delete(void *p, int id); \
-	void operator delete(void *p); \
-	private:
+	void operator delete(void *p); /* NOLINT(misc-new-delete-overloads) */ \
+\
+private:
 
 #define MACRO_ALLOC_POOL_ID_IMPL(POOLTYPE, PoolSize) \
 	static char ms_PoolData##POOLTYPE[PoolSize][sizeof(POOLTYPE)] = {{0}}; \
@@ -45,14 +45,14 @@
 	void POOLTYPE::operator delete(void *p, int id) \
 	{ \
 		dbg_assert(ms_PoolUsed##POOLTYPE[id], "not used"); \
-		dbg_assert(id == (POOLTYPE*)p - (POOLTYPE*)ms_PoolData##POOLTYPE, "invalid id"); \
+		dbg_assert(id == (POOLTYPE *)p - (POOLTYPE *)ms_PoolData##POOLTYPE, "invalid id"); \
 		/*dbg_msg("pool", "-- %s %d", #POOLTYPE, id);*/ \
 		ms_PoolUsed##POOLTYPE[id] = 0; \
 		mem_zero(ms_PoolData##POOLTYPE[id], sizeof(POOLTYPE)); \
 	} \
-	void POOLTYPE::operator delete(void *p) \
+	void POOLTYPE::operator delete(void *p) /* NOLINT(misc-new-delete-overloads) */ \
 	{ \
-		int id = (POOLTYPE*)p - (POOLTYPE*)ms_PoolData##POOLTYPE; \
+		int id = (POOLTYPE *)p - (POOLTYPE *)ms_PoolData##POOLTYPE; \
 		dbg_assert(ms_PoolUsed##POOLTYPE[id], "not used"); \
 		/*dbg_msg("pool", "-- %s %d", #POOLTYPE, id);*/ \
 		ms_PoolUsed##POOLTYPE[id] = 0; \
@@ -67,7 +67,7 @@ class CEntity
 {
 	MACRO_ALLOC_HEAP()
 
-	friend class CGameWorld;	// entity list handling
+	friend class CGameWorld; // entity list handling
 	CEntity *m_pPrevTypeEntity;
 	CEntity *m_pNextTypeEntity;
 
@@ -76,6 +76,7 @@ protected:
 	bool m_MarkedForDestroy;
 	int m_ID;
 	int m_ObjType;
+
 public:
 	CEntity(CGameWorld *pGameWorld, int Objtype);
 	virtual ~CEntity();
@@ -84,13 +85,12 @@ public:
 	class CGameContext *GameServer() { return GameWorld()->GameServer(); }
 	class IServer *Server() { return GameWorld()->Server(); }
 
-
 	CEntity *TypeNext() { return m_pNextTypeEntity; }
 	CEntity *TypePrev() { return m_pPrevTypeEntity; }
 
 	/*
 		Function: destroy
-			Destorys the entity.
+			Destroys the entity.
 	*/
 	virtual void Destroy() { delete this; }
 
@@ -165,6 +165,9 @@ public:
 	vec2 m_Pos;
 
 	// DDRace
+
+	bool GetNearestAirPos(vec2 Pos, vec2 ColPos, vec2 *pOutPos);
+	bool GetNearestAirPosPlayer(vec2 PlayerPos, vec2 *OutPos);
 
 	int m_Number;
 	int m_Layer;

@@ -1,15 +1,13 @@
 #include "uuid_manager.h"
 
-#include <engine/external/md5/md5.h>
+#include <base/hash_ctxt.h>
 #include <engine/shared/packer.h>
 
 #include <stdio.h>
 
-static const CUuid TEEWORLDS_NAMESPACE = {{
-	// "e05ddaaa-c4e6-4cfb-b642-5d48e80c0029"
+static const CUuid TEEWORLDS_NAMESPACE = {{// "e05ddaaa-c4e6-4cfb-b642-5d48e80c0029"
 	0xe0, 0x5d, 0xda, 0xaa, 0xc4, 0xe6, 0x4c, 0xfb,
-	0xb6, 0x42, 0x5d, 0x48, 0xe8, 0x0c, 0x00, 0x29
-}};
+	0xb6, 0x42, 0x5d, 0x48, 0xe8, 0x0c, 0x00, 0x29}};
 
 CUuid RandomUuid()
 {
@@ -26,19 +24,17 @@ CUuid RandomUuid()
 
 CUuid CalculateUuid(const char *pName)
 {
-	md5_state_t Md5;
-	md5_byte_t aDigest[16];
+	MD5_CTX Md5;
 	md5_init(&Md5);
-
-	md5_append(&Md5, TEEWORLDS_NAMESPACE.m_aData, sizeof(TEEWORLDS_NAMESPACE.m_aData));
+	md5_update(&Md5, TEEWORLDS_NAMESPACE.m_aData, sizeof(TEEWORLDS_NAMESPACE.m_aData));
 	// Without terminating NUL.
-	md5_append(&Md5, (const unsigned char *)pName, str_length(pName));
-	md5_finish(&Md5, aDigest);
+	md5_update(&Md5, (const unsigned char *)pName, str_length(pName));
+	MD5_DIGEST Digest = md5_finish(&Md5);
 
 	CUuid Result;
 	for(unsigned i = 0; i < sizeof(Result.m_aData); i++)
 	{
-		Result.m_aData[i] = aDigest[i];
+		Result.m_aData[i] = Digest.data[i];
 	}
 
 	Result.m_aData[6] &= 0x0f;
@@ -57,12 +53,20 @@ void FormatUuid(CUuid Uuid, char *pBuffer, unsigned BufferLength)
 		p[8], p[9], p[10], p[11], p[12], p[13], p[14], p[15]);
 }
 
-bool CUuid::operator==(const CUuid& Other)
+void ParseUuid(CUuid *pUuid, char *pBuffer)
+{
+	unsigned char *p = pUuid->m_aData;
+	sscanf(pBuffer, "%02hhX%02hhX%02hhX%02hhX-%02hhX%02hhX-%02hhX%02hhX-%02hhX%02hhX-%02hhX%02hhX%02hhX%02hhX%02hhX%02hhX",
+		&p[0], &p[1], &p[2], &p[3], &p[4], &p[5], &p[6], &p[7],
+		&p[8], &p[9], &p[10], &p[11], &p[12], &p[13], &p[14], &p[15]);
+}
+
+bool CUuid::operator==(const CUuid &Other) const
 {
 	return mem_comp(this, &Other, sizeof(*this)) == 0;
 }
 
-bool CUuid::operator!=(const CUuid& Other)
+bool CUuid::operator!=(const CUuid &Other) const
 {
 	return !(*this == Other);
 }
@@ -86,6 +90,11 @@ void CUuidManager::RegisterName(int ID, const char *pName)
 	dbg_assert(LookupUuid(Name.m_Uuid) == -1, "duplicate uuid");
 
 	m_aNames.add(Name);
+
+	CNameIndexed NameIndexed;
+	NameIndexed.m_Uuid = Name.m_Uuid;
+	NameIndexed.m_ID = GetIndex(ID);
+	m_aNamesSorted.add(NameIndexed);
 }
 
 CUuid CUuidManager::GetUuid(int ID) const
@@ -100,12 +109,10 @@ const char *CUuidManager::GetName(int ID) const
 
 int CUuidManager::LookupUuid(CUuid Uuid) const
 {
-	for(int i = 0; i < m_aNames.size(); i++)
+	sorted_array<CNameIndexed>::range Pos = ::find_binary(m_aNamesSorted.all(), Uuid);
+	if(!Pos.empty())
 	{
-		if(Uuid == m_aNames[i].m_Uuid)
-		{
-			return GetID(i);
-		}
+		return GetID(Pos.front().m_ID);
 	}
 	return UUID_UNKNOWN;
 }

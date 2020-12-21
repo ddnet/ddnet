@@ -9,7 +9,7 @@ static void Nothing(void *pUser)
 
 TEST(Thread, Detach)
 {
-	void *pThread = thread_init(Nothing, 0);
+	void *pThread = thread_init(Nothing, 0, "detach");
 	thread_detach(pThread);
 }
 
@@ -21,7 +21,7 @@ static void SetToOne(void *pUser)
 TEST(Thread, Wait)
 {
 	int Integer = 0;
-	void *pThread = thread_init(SetToOne, &Integer);
+	void *pThread = thread_init(SetToOne, &Integer, "wait");
 	thread_wait(pThread);
 	EXPECT_EQ(Integer, 1);
 }
@@ -60,7 +60,7 @@ TEST(Thread, SemaphoreMultiThreaded)
 	SEMAPHORE Semaphore;
 	sphore_init(&Semaphore);
 	sphore_signal(&Semaphore);
-	void *pThread = thread_init(SemaphoreThread, &Semaphore);
+	void *pThread = thread_init(SemaphoreThread, &Semaphore, "semaphore");
 	thread_wait(pThread);
 	sphore_destroy(&Semaphore);
 }
@@ -76,7 +76,7 @@ TEST(Thread, Lock)
 {
 	LOCK Lock = lock_create();
 	lock_wait(Lock);
-	void *pThread = thread_init(LockThread, &Lock);
+	void *pThread = thread_init(LockThread, &Lock, "lock");
 	lock_unlock(Lock);
 	thread_wait(pThread);
 }

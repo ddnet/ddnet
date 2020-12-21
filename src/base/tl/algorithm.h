@@ -4,7 +4,8 @@
 #define BASE_TL_ALGORITHM_H
 
 #include "base/tl/range.h"
-
+#include <algorithm>
+#include <functional>
 
 /*
 	insert 4
@@ -12,7 +13,6 @@
 	1 2 3 4 5 6
 
 */
-
 
 template<class R, class T>
 R partition_linear(R range, T value)
@@ -28,7 +28,6 @@ R partition_linear(R range, T value)
 	}
 	return range;
 }
-
 
 template<class R, class T>
 R partition_binary(R range, T value)
@@ -46,11 +45,11 @@ R partition_binary(R range, T value)
 
 	while(range.size() > 1)
 	{
-		unsigned pivot = (range.size()-1)/2;
+		unsigned pivot = (range.size() - 1) / 2;
 		if(range.index(pivot) < value)
-			range = range.slice(pivot+1, range.size()-1);
+			range = range.slice(pivot + 1, range.size() - 1);
 		else
-			range = range.slice(0, pivot+1);
+			range = range.slice(0, pivot + 1);
 	}
 	return range;
 }
@@ -69,12 +68,13 @@ R find_linear(R range, T value)
 template<class R, class T>
 R find_binary(R range, T value)
 {
-	range = partition_linear(range, value);
-	if(range.empty()) return range;
-	if(range.front() == value) return range;
+	range = partition_binary(range, value);
+	if(range.empty())
+		return range;
+	if(range.front() == value)
+		return range;
 	return R();
 }
-
 
 template<class R>
 void sort_bubble(R range)
@@ -106,13 +106,11 @@ void sort_quick(R range)
 	concept_index::check(range);
 }*/
 
-
 template<class R>
 void sort(R range)
 {
-	sort_bubble(range);
+	std::sort(&range.front(), &range.back() + 1);
 }
-
 
 template<class R>
 bool sort_verify(R range)
@@ -132,6 +130,19 @@ bool sort_verify(R range)
 	}
 
 	return true;
+}
+
+template<class R>
+void for_each(R range, std::function<void(typename R::type)> fcn)
+{
+	concept_empty::check(range);
+	concept_forwarditeration::check(range);
+
+	for(; !range.empty(); range.pop_front())
+	{
+		typename R::type *cur = &range.front();
+		fcn(*cur);
+	}
 }
 
 #endif // TL_FILE_ALGORITHMS_HPP

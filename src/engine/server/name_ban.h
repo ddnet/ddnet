@@ -1,21 +1,21 @@
-#ifndef ENGINE_SERVER_NAME_BANS_H
-#define ENGINE_SERVER_NAME_BANS_H
+#ifndef ENGINE_SERVER_NAME_BAN_H
+#define ENGINE_SERVER_NAME_BAN_H
 
 #include <base/system.h>
 #include <engine/shared/protocol.h>
 
 enum
 {
-	MAX_NAME_SKELETON_LENGTH=MAX_NAME_LENGTH*4,
-	MAX_NAMEBAN_REASON_LENGTH=64
+	MAX_NAME_SKELETON_LENGTH = MAX_NAME_LENGTH * 4,
+	MAX_NAMEBAN_REASON_LENGTH = 64
 };
 
 class CNameBan
 {
 public:
 	CNameBan() {}
-	CNameBan(const char *pName, int Distance, const char *pReason = "") :
-		m_Distance(Distance)
+	CNameBan(const char *pName, int Distance, int IsSubstring, const char *pReason = "") :
+		m_Distance(Distance), m_IsSubstring(IsSubstring)
 	{
 		str_copy(m_aName, pName, sizeof(m_aName));
 		m_SkeletonLength = str_utf8_to_skeleton(m_aName, m_aSkeleton, sizeof(m_aSkeleton) / sizeof(m_aSkeleton[0]));
@@ -26,8 +26,9 @@ public:
 	int m_aSkeleton[MAX_NAME_SKELETON_LENGTH];
 	int m_SkeletonLength;
 	int m_Distance;
+	int m_IsSubstring;
 };
 
 CNameBan *IsNameBanned(const char *pName, CNameBan *pNameBans, int NumNameBans);
 
-#endif // ENGINE_SERVER_NAME_BANS_H
+#endif // ENGINE_SERVER_NAME_BAN_H

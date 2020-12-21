@@ -12,12 +12,11 @@ class CSnapshotItem
 public:
 	int m_TypeAndID;
 
-	int *Data() { return (int *)(this+1); }
-	int Type() { return m_TypeAndID>>16; }
-	int ID() { return m_TypeAndID&0xffff; }
+	int *Data() { return (int *)(this + 1); }
+	int Type() { return m_TypeAndID >> 16; }
+	int ID() { return m_TypeAndID & 0xffff; }
 	int Key() { return m_TypeAndID; }
 };
-
 
 class CSnapshot
 {
@@ -25,29 +24,33 @@ class CSnapshot
 	int m_DataSize;
 	int m_NumItems;
 
-	int *Offsets() const { return (int *)(this+1); }
-	char *DataStart() const { return (char*)(Offsets()+m_NumItems); }
+	int *Offsets() const { return (int *)(this + 1); }
+	char *DataStart() const { return (char *)(Offsets() + m_NumItems); }
 
 public:
 	enum
 	{
-		OFFSET_UUID_TYPE=0x4000,
-		MAX_TYPE=0x7fff,
-		MAX_SIZE=64*1024
+		OFFSET_UUID_TYPE = 0x4000,
+		MAX_TYPE = 0x7fff,
+		MAX_PARTS = 64,
+		MAX_SIZE = MAX_PARTS * 1024
 	};
 
-	void Clear() { m_DataSize = 0; m_NumItems = 0; }
+	void Clear()
+	{
+		m_DataSize = 0;
+		m_NumItems = 0;
+	}
 	int NumItems() const { return m_NumItems; }
 	CSnapshotItem *GetItem(int Index);
 	int GetItemSize(int Index);
 	int GetItemIndex(int Key);
 	int GetItemType(int Index);
 
-	int Crc();
+	unsigned Crc();
 	void DebugDump();
 	static void RemoveExtraInfo(unsigned char *pData);
 };
-
 
 // CSnapshotDelta
 
@@ -60,12 +63,15 @@ public:
 		int m_NumDeletedItems;
 		int m_NumUpdateItems;
 		int m_NumTempItems; // needed?
-		int m_pData[1];
+		int m_aData[1];
 	};
 
 private:
-	// TODO: strange arbitrary number
-	short m_aItemSizes[64];
+	enum
+	{
+		MAX_NETOBJSIZES = 64
+	};
+	short m_aItemSizes[MAX_NETOBJSIZES];
 	int m_aSnapshotDataRate[0xffff];
 	int m_aSnapshotDataUpdates[0xffff];
 	int m_SnapshotCurrent;
@@ -76,6 +82,7 @@ private:
 public:
 	static int DiffItem(int *pPast, int *pCurrent, int *pOut, int Size);
 	CSnapshotDelta();
+	CSnapshotDelta(const CSnapshotDelta &Old);
 	int GetDataRate(int Index) { return m_aSnapshotDataRate[Index]; }
 	int GetDataUpdates(int Index) { return m_aSnapshotDataUpdates[Index]; }
 	void SetStaticsize(int ItemType, int Size);
@@ -83,7 +90,6 @@ public:
 	int CreateDelta(class CSnapshot *pFrom, class CSnapshot *pTo, void *pData);
 	int UnpackDelta(class CSnapshot *pFrom, class CSnapshot *pTo, void *pData, int DataSize);
 };
-
 
 // CSnapshotStorage
 
@@ -104,15 +110,16 @@ public:
 		CSnapshot *m_pAltSnap;
 	};
 
-
 	CHolder *m_pFirst;
 	CHolder *m_pLast;
 
+	CSnapshotStorage() { Init(); };
+	~CSnapshotStorage() { PurgeAll(); };
 	void Init();
 	void PurgeAll();
 	void PurgeUntil(int Tick);
 	void Add(int Tick, int64 Tagtime, int DataSize, void *pData, int CreateAlt);
-	int Get(int Tick, int64 *Tagtime, CSnapshot **pData, CSnapshot **ppAltData);
+	int Get(int Tick, int64 *pTagtime, CSnapshot **ppData, CSnapshot **ppAltData);
 };
 
 class CSnapshotBuilder
@@ -135,18 +142,19 @@ class CSnapshotBuilder
 	void AddExtendedItemType(int Index);
 	int GetExtendedItemTypeIndex(int TypeID);
 
+	bool m_Sixup;
+
 public:
 	CSnapshotBuilder();
 
-	void Init();
+	void Init(bool Sixup = false);
 
 	void *NewItem(int Type, int ID, int Size);
 
 	CSnapshotItem *GetItem(int Index);
 	int *GetItemData(int Key);
 
-	int Finish(void *Snapdata);
+	int Finish(void *pSnapdata);
 };
-
 
 #endif // ENGINE_SNAPSHOT_H

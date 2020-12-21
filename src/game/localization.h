@@ -2,8 +2,8 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_LOCALIZATION_H
 #define GAME_LOCALIZATION_H
-#include <base/tl/string.h>
 #include <base/tl/sorted_array.h>
+#include <base/tl/string.h>
 
 class CLocalizationDatabase
 {
@@ -11,13 +11,14 @@ class CLocalizationDatabase
 	{
 	public:
 		unsigned m_Hash;
+		unsigned m_ContextHash;
 
 		// TODO: do this as an const char * and put everything on a incremental heap
 		string m_Replacement;
 
-		bool operator <(const CString &Other) const { return m_Hash < Other.m_Hash; }
-		bool operator <=(const CString &Other) const { return m_Hash <= Other.m_Hash; }
-		bool operator ==(const CString &Other) const { return m_Hash == Other.m_Hash; }
+		bool operator<(const CString &Other) const { return m_Hash < Other.m_Hash || (m_Hash == Other.m_Hash && m_ContextHash < Other.m_ContextHash); }
+		bool operator<=(const CString &Other) const { return m_Hash < Other.m_Hash || (m_Hash == Other.m_Hash && m_ContextHash <= Other.m_ContextHash); }
+		bool operator==(const CString &Other) const { return m_Hash == Other.m_Hash && m_ContextHash == Other.m_ContextHash; }
 	};
 
 	sorted_array<CString> m_Strings;
@@ -31,8 +32,8 @@ public:
 
 	int Version() { return m_CurrentVersion; }
 
-	void AddString(const char *pOrgStr, const char *pNewStr);
-	const char *FindString(unsigned Hash);
+	void AddString(const char *pOrgStr, const char *pNewStr, const char *pContext);
+	const char *FindString(unsigned Hash, unsigned ContextHash);
 };
 
 extern CLocalizationDatabase g_Localization;
@@ -42,9 +43,11 @@ class CLocConstString
 	const char *m_pDefaultStr;
 	const char *m_pCurrentStr;
 	unsigned m_Hash;
+	unsigned m_ContextHash;
 	int m_Version;
+
 public:
-	CLocConstString(const char *pStr);
+	CLocConstString(const char *pStr, const char *pContext = "");
 	void Reload();
 
 	inline operator const char *()
@@ -55,7 +58,6 @@ public:
 	}
 };
 
-
-extern const char *Localize(const char *pStr)
-GNUC_ATTRIBUTE((format_arg(1)));
+extern const char *Localize(const char *pStr, const char *pContext = "")
+	GNUC_ATTRIBUTE((format_arg(1)));
 #endif

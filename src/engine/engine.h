@@ -34,6 +34,6 @@ public:
 	virtual void AddJob(std::shared_ptr<IJob> pJob) = 0;
 };
 
-extern IEngine *CreateEngine(const char *pAppname, bool Silent);
+extern IEngine *CreateEngine(const char *pAppname, bool Silent, int Jobs);
 
 #endif

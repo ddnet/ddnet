@@ -1,16 +1,25 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <base/system.h>
 #include <base/math.h>
+#include <base/system.h>
 
-#include <engine/shared/config.h>
-#include <engine/graphics.h>
-#include <engine/textrender.h>
 #include "ui.h"
+#include <engine/graphics.h>
+#include <engine/shared/config.h>
+#include <engine/textrender.h>
 
-#if defined(__ANDROID__)
-#include <SDL_screenkeyboard.h>
-#endif
+void CUIElement::Init(CUI *pUI)
+{
+	pUI->AddUIElement(this);
+}
+
+CUIElement::SUIElementRect::SUIElementRect() :
+	m_UIRectQuadContainer(-1), m_UITextContainer(-1), m_X(-1), m_Y(-1), m_Width(-1), m_Height(-1)
+{
+	mem_zero(&m_Cursor, sizeof(m_Cursor));
+	mem_zero(&m_TextColor, sizeof(m_TextColor));
+	mem_zero(&m_TextOutlineColor, sizeof(m_TextOutlineColor));
+}
 
 /********************************************************
  UI
@@ -36,8 +45,66 @@ CUI::CUI()
 	m_Screen.h = 480.0f;
 }
 
+CUI::~CUI()
+{
+	for(CUIElement *&pEl : m_OwnUIElements)
+	{
+		delete pEl;
+	}
+	m_OwnUIElements.clear();
+}
+
+CUIElement *CUI::GetNewUIElement()
+{
+	CUIElement *pNewEl = new CUIElement(this);
+
+	m_OwnUIElements.push_back(pNewEl);
+
+	return pNewEl;
+}
+
+void CUI::AddUIElement(CUIElement *pElement)
+{
+	m_UIElements.push_back(pElement);
+}
+
+void CUI::ResetUIElement(CUIElement &UIElement)
+{
+	for(CUIElement::SUIElementRect &Rect : UIElement.m_UIRects)
+	{
+		if(Rect.m_UIRectQuadContainer != -1)
+			Graphics()->DeleteQuadContainer(Rect.m_UIRectQuadContainer);
+		Rect.m_UIRectQuadContainer = -1;
+		if(Rect.m_UITextContainer != -1)
+			TextRender()->DeleteTextContainer(Rect.m_UITextContainer);
+		Rect.m_UITextContainer = -1;
+	}
+
+	UIElement.Clear();
+}
+
+void CUI::OnElementsReset()
+{
+	for(CUIElement *pEl : m_UIElements)
+	{
+		ResetUIElement(*pEl);
+	}
+}
+
+void CUI::OnWindowResize()
+{
+	OnElementsReset();
+}
+
+void CUI::OnLanguageChange()
+{
+	OnElementsReset();
+}
+
 int CUI::Update(float Mx, float My, float Mwx, float Mwy, int Buttons)
 {
+	m_MouseDeltaX = Mx - m_MouseX;
+	m_MouseDeltaY = My - m_MouseY;
 	m_MouseX = Mx;
 	m_MouseY = My;
 	m_MouseWorldX = Mwx;
@@ -53,138 +120,16 @@ int CUI::Update(float Mx, float My, float Mwx, float Mwy, int Buttons)
 
 int CUI::MouseInside(const CUIRect *r)
 {
-	if(m_MouseX >= r->x && m_MouseX <= r->x+r->w && m_MouseY >= r->y && m_MouseY <= r->y+r->h)
+	if(m_MouseX >= r->x && m_MouseX < r->x + r->w && m_MouseY >= r->y && m_MouseY < r->y + r->h)
 		return 1;
 	return 0;
 }
 
 void CUI::ConvertMouseMove(float *x, float *y)
 {
-#if defined(__ANDROID__)
-	//*x = *x * 500 / g_Config.m_GfxScreenWidth;
-	//*y = *y * 500 / g_Config.m_GfxScreenHeight;
-#else
-	float Fac = (float)(g_Config.m_UiMousesens)/g_Config.m_InpMousesens;
-	*x = *x*Fac;
-	*y = *y*Fac;
-#endif
-}
-
-void CUI::AndroidShowScreenKeys(bool shown)
-{
-#if defined(__ANDROID__)
-	static bool ScreenKeyboardInitialized = false;
-	static bool ScreenKeyboardShown = true;
-	static SDL_Rect Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_NUM];
-	static SDL_Rect ButtonHidden = { 0, 0, 0, 0 };
-	if( !ScreenKeyboardInitialized )
-	{
-		ScreenKeyboardInitialized = true;
-
-		for( int i = 0; i < SDL_ANDROID_SCREENKEYBOARD_BUTTON_NUM; i++ )
-			SDL_ANDROID_GetScreenKeyboardButtonPos( i, &Buttons[i] );
-
-		if( !SDL_ANDROID_GetScreenKeyboardRedefinedByUser() )
-		{
-			int ScreenW = Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_DPAD2].x +
-							Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_DPAD2].w;
-			int ScreenH = Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_DPAD2].y +
-							Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_DPAD2].h;
-			// Hide Hook button(it was above Weapnext)
-			Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_0].x =
-				Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_1].x;
-			Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_0].y =
-				Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_1].y -
-				Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_0].h;
-			Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_0].w = 0;
-			Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_0].h = 0;
-			// Hide Weapprev button
-			Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_2].x =
-				Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_0].x;
-			Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_2].y =
-				Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_1].y -
-				Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_2].h;
-			Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_2].w = 0;
-			Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_2].h = 0;
-			// Scores button above left joystick
-			Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_3].x = 0;
-			Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_3].y =
-				Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_DPAD].y -
-				Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_3].h * 2.0f;
-			// Text input button above scores
-			//Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_TEXT].w =
-			//	Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_3].w;
-			//Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_TEXT].h =
-			//	Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_3].h;
-			Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_TEXT].x = 0;
-			Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_TEXT].y =
-				Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_3].y -
-				Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_TEXT].h;
-			// Spec next button
-			Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_5].x =
-				ScreenW - Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_4].w;
-			Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_5].y =
-				Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_DPAD2].y -
-				Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_5].h;
-			// Spec prev button
-			Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_4].x =
-				Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_5].x -
-				Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_4].w;
-			Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_4].y =
-				Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_5].y;
-			// Weap next button
-			Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_1].x =
-				ScreenW - Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_1].w;
-			Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_1].y =
-				Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_5].y -
-				Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_1].h;
-			// Bigger joysticks
-			/*
-			Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_DPAD].w *= 1.25;
-			Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_DPAD].h *= 1.25;
-			Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_DPAD].y =
-				ScreenH - Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_DPAD].h;
-			Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_DPAD2].w *= 1.25;
-			Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_DPAD2].h *= 1.25;
-			Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_DPAD2].x =
-				ScreenW - Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_DPAD2].w;
-			Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_DPAD2].y =
-				ScreenH - Buttons[SDL_ANDROID_SCREENKEYBOARD_BUTTON_DPAD2].h;
-			*/
-		}
-	}
-
-	if( ScreenKeyboardShown == shown )
-		return;
-	ScreenKeyboardShown = shown;
-	for( int i = 0; i < SDL_ANDROID_SCREENKEYBOARD_BUTTON_NUM; i++ )
-		SDL_ANDROID_SetScreenKeyboardButtonPos( i, shown ? &Buttons[i] : &ButtonHidden );
-#endif
-}
-
-void CUI::AndroidShowTextInput(const char *text, const char *hintText)
-{
-#if defined(__ANDROID__)
-	SDL_ANDROID_SetScreenKeyboardHintMesage(hintText);
-	SDL_ANDROID_ToggleScreenKeyboardTextInput(text);
-#endif
-}
-
-void CUI::AndroidBlockAndGetTextInput(char *text, int textLength, const char *hintText)
-{
-#if defined(__ANDROID__)
-	SDL_ANDROID_SetScreenKeyboardHintMesage(hintText);
-	SDL_ANDROID_GetScreenKeyboardTextInput(text, textLength);
-#endif
-}
-
-bool CUI::AndroidTextInputShown()
-{
-#if defined(__ANDROID__)
-	return SDL_IsScreenKeyboardShown(NULL);
-#else
-	return false;
-#endif
+	float Fac = (float)(g_Config.m_UiMousesens) / g_Config.m_InpMousesens;
+	*x = *x * Fac;
+	*y = *y * Fac;
 }
 
 CUIRect *CUI::Screen()
@@ -193,7 +138,7 @@ CUIRect *CUI::Screen()
 	float w, h;
 
 	h = 600;
-	w = Aspect*h;
+	w = Aspect * h;
 
 	m_Screen.w = w;
 	m_Screen.h = h;
@@ -203,29 +148,29 @@ CUIRect *CUI::Screen()
 
 float CUI::PixelSize()
 {
-	return Screen()->w/Graphics()->ScreenWidth();
+	return Screen()->w / Graphics()->ScreenWidth();
 }
 
 void CUI::SetScale(float s)
 {
-	g_Config.m_UiScale = (int)(s*100.0f);
+	g_Config.m_UiScale = (int)(s * 100.0f);
 }
 
 float CUI::Scale()
 {
-	return g_Config.m_UiScale/100.0f;
+	return g_Config.m_UiScale / 100.0f;
 }
 
 float CUIRect::Scale() const
 {
-	return g_Config.m_UiScale/100.0f;
+	return g_Config.m_UiScale / 100.0f;
 }
 
 void CUI::ClipEnable(const CUIRect *r)
 {
-	float XScale = Graphics()->ScreenWidth()/Screen()->w;
-	float YScale = Graphics()->ScreenHeight()/Screen()->h;
-	Graphics()->ClipEnable((int)(r->x*XScale), (int)(r->y*YScale), (int)(r->w*XScale), (int)(r->h*YScale));
+	float XScale = Graphics()->ScreenWidth() / Screen()->w;
+	float YScale = Graphics()->ScreenHeight() / Screen()->h;
+	Graphics()->ClipEnable((int)(r->x * XScale), (int)(r->y * YScale), (int)(r->w * XScale), (int)(r->h * YScale));
 }
 
 void CUI::ClipDisable()
@@ -236,7 +181,7 @@ void CUI::ClipDisable()
 void CUIRect::HSplitMid(CUIRect *pTop, CUIRect *pBottom) const
 {
 	CUIRect r = *this;
-	float Cut = r.h/2;
+	float Cut = r.h / 2;
 
 	if(pTop)
 	{
@@ -260,7 +205,7 @@ void CUIRect::HSplitTop(float Cut, CUIRect *pTop, CUIRect *pBottom) const
 	CUIRect r = *this;
 	Cut *= Scale();
 
-	if (pTop)
+	if(pTop)
 	{
 		pTop->x = r.x;
 		pTop->y = r.y;
@@ -268,7 +213,7 @@ void CUIRect::HSplitTop(float Cut, CUIRect *pTop, CUIRect *pBottom) const
 		pTop->h = Cut;
 	}
 
-	if (pBottom)
+	if(pBottom)
 	{
 		pBottom->x = r.x;
 		pBottom->y = r.y + Cut;
@@ -282,7 +227,7 @@ void CUIRect::HSplitBottom(float Cut, CUIRect *pTop, CUIRect *pBottom) const
 	CUIRect r = *this;
 	Cut *= Scale();
 
-	if (pTop)
+	if(pTop)
 	{
 		pTop->x = r.x;
 		pTop->y = r.y;
@@ -290,7 +235,7 @@ void CUIRect::HSplitBottom(float Cut, CUIRect *pTop, CUIRect *pBottom) const
 		pTop->h = r.h - Cut;
 	}
 
-	if (pBottom)
+	if(pBottom)
 	{
 		pBottom->x = r.x;
 		pBottom->y = r.y + r.h - Cut;
@@ -299,14 +244,13 @@ void CUIRect::HSplitBottom(float Cut, CUIRect *pTop, CUIRect *pBottom) const
 	}
 }
 
-
 void CUIRect::VSplitMid(CUIRect *pLeft, CUIRect *pRight) const
 {
 	CUIRect r = *this;
-	float Cut = r.w/2;
-//	Cut *= Scale();
+	float Cut = r.w / 2;
+	//	Cut *= Scale();
 
-	if (pLeft)
+	if(pLeft)
 	{
 		pLeft->x = r.x;
 		pLeft->y = r.y;
@@ -314,7 +258,7 @@ void CUIRect::VSplitMid(CUIRect *pLeft, CUIRect *pRight) const
 		pLeft->h = r.h;
 	}
 
-	if (pRight)
+	if(pRight)
 	{
 		pRight->x = r.x + Cut;
 		pRight->y = r.y;
@@ -328,7 +272,7 @@ void CUIRect::VSplitLeft(float Cut, CUIRect *pLeft, CUIRect *pRight) const
 	CUIRect r = *this;
 	Cut *= Scale();
 
-	if (pLeft)
+	if(pLeft)
 	{
 		pLeft->x = r.x;
 		pLeft->y = r.y;
@@ -336,7 +280,7 @@ void CUIRect::VSplitLeft(float Cut, CUIRect *pLeft, CUIRect *pRight) const
 		pLeft->h = r.h;
 	}
 
-	if (pRight)
+	if(pRight)
 	{
 		pRight->x = r.x + Cut;
 		pRight->y = r.y;
@@ -350,7 +294,7 @@ void CUIRect::VSplitRight(float Cut, CUIRect *pLeft, CUIRect *pRight) const
 	CUIRect r = *this;
 	Cut *= Scale();
 
-	if (pLeft)
+	if(pLeft)
 	{
 		pLeft->x = r.x;
 		pLeft->y = r.y;
@@ -358,7 +302,7 @@ void CUIRect::VSplitRight(float Cut, CUIRect *pLeft, CUIRect *pRight) const
 		pLeft->h = r.h;
 	}
 
-	if (pRight)
+	if(pRight)
 	{
 		pRight->x = r.x + r.w - Cut;
 		pRight->y = r.y;
@@ -374,8 +318,8 @@ void CUIRect::Margin(float Cut, CUIRect *pOtherRect) const
 
 	pOtherRect->x = r.x + Cut;
 	pOtherRect->y = r.y + Cut;
-	pOtherRect->w = r.w - 2*Cut;
-	pOtherRect->h = r.h - 2*Cut;
+	pOtherRect->w = r.w - 2 * Cut;
+	pOtherRect->h = r.h - 2 * Cut;
 }
 
 void CUIRect::VMargin(float Cut, CUIRect *pOtherRect) const
@@ -385,7 +329,7 @@ void CUIRect::VMargin(float Cut, CUIRect *pOtherRect) const
 
 	pOtherRect->x = r.x + Cut;
 	pOtherRect->y = r.y;
-	pOtherRect->w = r.w - 2*Cut;
+	pOtherRect->w = r.w - 2 * Cut;
 	pOtherRect->h = r.h;
 }
 
@@ -397,10 +341,15 @@ void CUIRect::HMargin(float Cut, CUIRect *pOtherRect) const
 	pOtherRect->x = r.x;
 	pOtherRect->y = r.y + Cut;
 	pOtherRect->w = r.w;
-	pOtherRect->h = r.h - 2*Cut;
+	pOtherRect->h = r.h - 2 * Cut;
 }
 
 int CUI::DoButtonLogic(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
+{
+	return DoButtonLogic(pID, Checked, pRect);
+}
+
+int CUI::DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect)
 {
 	// logic
 	int ReturnValue = 0;
@@ -412,7 +361,7 @@ int CUI::DoButtonLogic(const void *pID, const char *pText, int Checked, const CU
 		if(!MouseButton(ButtonUsed))
 		{
 			if(Inside && Checked >= 0)
-				ReturnValue = 1+ButtonUsed;
+				ReturnValue = 1 + ButtonUsed;
 			SetActiveItem(0);
 		}
 	}
@@ -438,20 +387,16 @@ int CUI::DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *
 {
 	int Inside = MouseInside(pRect);
 
-	if(ActiveItem() == pID)
-	{
-		if(!MouseButton(0))
-			SetActiveItem(0);
-	}
-	else if(HotItem() == pID)
-	{
-		if(MouseButton(0))
-			SetActiveItem(pID);
-	}
-	else if(Inside)
+	if(Inside)
 		SetHotItem(pID);
 
-	if(!Inside || !MouseButton(0))
+	if(HotItem() == pID && MouseButtonClicked(0))
+		SetActiveItem(pID);
+
+	if(ActiveItem() == pID && !MouseButton(0))
+		SetActiveItem(0);
+
+	if(ActiveItem() != pID)
 		return 0;
 
 	if(pX)
@@ -502,25 +447,125 @@ int CUI::DoButton(const void *id, const char *text, int checked, const CUIRect *
 	return ret;
 }*/
 
-void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, int MaxWidth)
+void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically)
 {
-	// TODO: FIX ME!!!!
-	//Graphics()->BlendNormal();
+	float AlignedSize = 0;
+	float MaxCharacterHeightInLine = 0;
+	float tw = TextRender()->TextWidth(0, Size, pText, -1, MaxWidth, &AlignedSize, &MaxCharacterHeightInLine);
+	float AlignmentVert = r->y + (r->h - AlignedSize) / 2.f;
+	if(AlignVertically == 0)
+	{
+		AlignmentVert = r->y + (r->h - AlignedSize) / 2.f - (AlignedSize - MaxCharacterHeightInLine) / 2.f;
+	}
 	if(Align == 0)
 	{
-		float tw = TextRender()->TextWidth(0, Size, pText, MaxWidth);
-		TextRender()->Text(0, r->x + r->w/2-tw/2, r->y - Size/10, Size, pText, MaxWidth);
+		TextRender()->Text(0, r->x + (r->w - tw) / 2.f, AlignmentVert, Size, pText, MaxWidth);
 	}
 	else if(Align < 0)
-		TextRender()->Text(0, r->x, r->y - Size/10, Size, pText, MaxWidth);
+	{
+		TextRender()->Text(0, r->x, AlignmentVert, Size, pText, MaxWidth);
+	}
 	else if(Align > 0)
 	{
-		float tw = TextRender()->TextWidth(0, Size, pText, MaxWidth);
-		TextRender()->Text(0, r->x + r->w-tw, r->y - Size/10, Size, pText, MaxWidth);
+		TextRender()->Text(0, r->x + r->w - tw, AlignmentVert, Size, pText, MaxWidth);
 	}
 }
 
-void CUI::DoLabelScaled(const CUIRect *r, const char *pText, float Size, int Align, int MaxWidth)
+void CUI::DoLabelScaled(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically)
 {
-	DoLabel(r, pText, Size*Scale(), Align, MaxWidth);
+	DoLabel(r, pText, Size * Scale(), Align, MaxWidth, AlignVertically);
+}
+
+void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically, bool StopAtEnd, int StrLen, CTextCursor *pReadCursor)
+{
+	float AlignedSize = 0;
+	float MaxCharacterHeightInLine = 0;
+	float tw = TextRender()->TextWidth(0, Size, pText, -1, MaxWidth, &AlignedSize, &MaxCharacterHeightInLine);
+	float AlignmentVert = pRect->y + (pRect->h - AlignedSize) / 2.f;
+	float AlignmentHori = 0;
+
+	CTextCursor Cursor;
+
+	int Flags = TEXTFLAG_RENDER | (StopAtEnd ? TEXTFLAG_STOP_AT_END : 0);
+
+	if(AlignVertically == 0)
+	{
+		AlignmentVert = pRect->y + (pRect->h - AlignedSize) / 2.f - (AlignedSize - MaxCharacterHeightInLine) / 2.f;
+	}
+	if(Align == 0)
+	{
+		AlignmentHori = pRect->x + (pRect->w - tw) / 2.f;
+	}
+	else if(Align < 0)
+	{
+		AlignmentHori = pRect->x;
+	}
+	else if(Align > 0)
+	{
+		AlignmentHori = pRect->x + pRect->w - tw;
+	}
+
+	if(pReadCursor)
+	{
+		Cursor = *pReadCursor;
+	}
+	else
+	{
+		TextRender()->SetCursor(&Cursor, AlignmentHori, AlignmentVert, Size, Flags);
+	}
+	Cursor.m_LineWidth = MaxWidth;
+
+	RectEl.m_UITextContainer = TextRender()->CreateTextContainer(&Cursor, pText, StrLen);
+	RectEl.m_Cursor = Cursor;
+	RectEl.m_TextColor = TextRender()->GetTextColor();
+	RectEl.m_TextOutlineColor = TextRender()->GetTextOutlineColor();
+}
+
+void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically, bool StopAtEnd, int StrLen, CTextCursor *pReadCursor)
+{
+	bool NeedsRecreate = false;
+	bool ColorChanged = RectEl.m_TextColor != TextRender()->GetTextColor() || RectEl.m_TextOutlineColor != TextRender()->GetTextOutlineColor();
+	if(RectEl.m_UITextContainer == -1 || RectEl.m_X != pRect->x || RectEl.m_Y != pRect->y || RectEl.m_Width != pRect->w || RectEl.m_Height != pRect->h || ColorChanged)
+	{
+		NeedsRecreate = true;
+	}
+	else
+	{
+		if(StrLen <= -1)
+		{
+			if(str_comp(RectEl.m_Text.c_str(), pText) != 0)
+				NeedsRecreate = true;
+		}
+		else
+		{
+			if(StrLen != (int)RectEl.m_Text.size() || str_comp_num(RectEl.m_Text.c_str(), pText, StrLen) != 0)
+				NeedsRecreate = true;
+		}
+	}
+
+	if(NeedsRecreate)
+	{
+		if(RectEl.m_UITextContainer != -1)
+			TextRender()->DeleteTextContainer(RectEl.m_UITextContainer);
+		RectEl.m_UITextContainer = -1;
+
+		RectEl.m_X = pRect->x;
+		RectEl.m_Y = pRect->y;
+		RectEl.m_Width = pRect->w;
+		RectEl.m_Height = pRect->h;
+
+		if(StrLen > 0)
+			RectEl.m_Text = std::string(pText, StrLen);
+		else if(StrLen < 0)
+			RectEl.m_Text = pText;
+		else
+			RectEl.m_Text.clear();
+
+		DoLabel(RectEl, pRect, pText, Size, Align, MaxWidth, AlignVertically, StopAtEnd, StrLen, pReadCursor);
+	}
+
+	STextRenderColor ColorText(TextRender()->DefaultTextColor());
+	STextRenderColor ColorTextOutline(TextRender()->DefaultTextOutlineColor());
+	if(RectEl.m_UITextContainer != -1)
+		TextRender()->RenderTextContainer(RectEl.m_UITextContainer, &ColorText, &ColorTextOutline);
 }

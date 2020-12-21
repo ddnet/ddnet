@@ -3,7 +3,9 @@
 #ifndef ENGINE_CLIENT_SOUND_H
 #define ENGINE_CLIENT_SOUND_H
 
+#include <engine/graphics.h>
 #include <engine/sound.h>
+#include <engine/storage.h>
 
 #include "SDL.h"
 

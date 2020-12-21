@@ -1,3 +1,5 @@
+import argparse
+import tempfile
 import binascii
 import hashlib
 import os
@@ -21,6 +23,9 @@ def auth_add_p_line(username, level, pwhash, salt):
 		print("Warning: level ({}) contains weird symbols, config line is possibly malformed.".format(level), file=sys.stderr)
 	if repr(username) != "'{}'".format(username):
 		print("Warning: username ({}) contains weird symbols, config line is possibly malformed.".format(username), file=sys.stderr)
+	username = username.replace('"', '\\"')
+	if ' ' in username or ';' in username:
+		username = '"{}"'.format(username)
 	return "auth_add_p {} {} {} {}".format(username, level, pwhash, salt)
 
 def auth_add_p_line_from_pw(username, level, password):
@@ -35,16 +40,13 @@ def parse_line(line):
 		if AUTH_ADD_PRESENT_REGEX.search(line):
 			print("Warning: Funny-looking line with 'auth_add', not touching it:")
 			print(line, end="")
-		return
+		return None
 	password = m.group('password')
 	if password.startswith('"'):
 		password = password[1:-1] # Strip quotes.
 	return m.group('username'), m.group('level'), password
 
 def main():
-	import argparse
-	import tempfile
-
 	p = argparse.ArgumentParser(description="Hash passwords in a way suitable for DDNet configs.")
 	p.add_argument('--new', '-n', nargs=3, metavar=("USERNAME", "LEVEL", "PASSWORD"), action='append', default=[], help="username, level and password of the new user")
 	p.add_argument('config', nargs='?', metavar="CONFIG", help="config file to update.")

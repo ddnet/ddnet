@@ -3,15 +3,14 @@
 
 #include <base/tl/array.h>
 
+#include "sounds.h"
 #include <engine/engine.h>
-#include <engine/sound.h>
 #include <engine/shared/config.h>
-#include <game/generated/client_data.h>
-#include <game/client/gameclient.h>
+#include <engine/sound.h>
 #include <game/client/components/camera.h>
 #include <game/client/components/menus.h>
-#include "sounds.h"
-
+#include <game/client/gameclient.h>
+#include <game/generated/client_data.h>
 
 CSoundLoading::CSoundLoading(CGameClient *pGameClient, bool Render) :
 	m_pGameClient(pGameClient),
@@ -51,8 +50,7 @@ int CSounds::GetSampleId(int SetId)
 	do
 	{
 		Id = rand() % pSet->m_NumSounds;
-	}
-	while(Id == pSet->m_Last);
+	} while(Id == pSet->m_Last);
 	pSet->m_Last = Id;
 	return pSet->m_aSounds[Id].m_Id;
 }
@@ -60,12 +58,15 @@ int CSounds::GetSampleId(int SetId)
 void CSounds::OnInit()
 {
 	// setup sound channels
-	m_MapSoundVolume = g_Config.m_SndMapSoundVolume/100.0f;
+	m_GuiSoundVolume = g_Config.m_SndChatSoundVolume / 100.0f;
+	m_GameSoundVolume = g_Config.m_SndGameSoundVolume / 100.0f;
+	m_MapSoundVolume = g_Config.m_SndMapSoundVolume / 100.0f;
+	m_BackgroundMusicVolume = g_Config.m_SndBackgroundMusicVolume / 100.0f;
 
-	Sound()->SetChannel(CSounds::CHN_GUI, 1.0f, 0.0f);
-	Sound()->SetChannel(CSounds::CHN_MUSIC, 1.0f, 0.0f);
-	Sound()->SetChannel(CSounds::CHN_WORLD, 0.9f, 1.0f);
-	Sound()->SetChannel(CSounds::CHN_GLOBAL, 1.0f, 0.0f);
+	Sound()->SetChannel(CSounds::CHN_GUI, m_GuiSoundVolume, 0.0f);
+	Sound()->SetChannel(CSounds::CHN_MUSIC, m_BackgroundMusicVolume, 1.0f);
+	Sound()->SetChannel(CSounds::CHN_WORLD, 0.9f * m_GameSoundVolume, 1.0f);
+	Sound()->SetChannel(CSounds::CHN_GLOBAL, m_GameSoundVolume, 0.0f);
 	Sound()->SetChannel(CSounds::CHN_MAPSOUND, m_MapSoundVolume, 1.0f);
 
 	Sound()->SetListenerPos(0.0f, 0.0f);
@@ -112,27 +113,49 @@ void CSounds::OnRender()
 			return;
 	}
 
-	// set listner pos
+	// set listener pos
 	Sound()->SetListenerPos(m_pClient->m_pCamera->m_Center.x, m_pClient->m_pCamera->m_Center.y);
 
 	// update volume
-	float NewMapSoundVol = g_Config.m_SndMapSoundVolume/100.0f;
+	float NewGuiSoundVol = g_Config.m_SndChatSoundVolume / 100.0f;
+	if(NewGuiSoundVol != m_GuiSoundVolume)
+	{
+		m_GuiSoundVolume = NewGuiSoundVol;
+		Sound()->SetChannel(CSounds::CHN_GUI, m_GuiSoundVolume, 1.0f);
+	}
+
+	float NewGameSoundVol = g_Config.m_SndGameSoundVolume / 100.0f;
+	if(NewGameSoundVol != m_GameSoundVolume)
+	{
+		m_GameSoundVolume = NewGameSoundVol;
+		Sound()->SetChannel(CSounds::CHN_WORLD, 0.9f * m_GameSoundVolume, 1.0f);
+		Sound()->SetChannel(CSounds::CHN_GLOBAL, m_GameSoundVolume, 1.0f);
+	}
+
+	float NewMapSoundVol = g_Config.m_SndMapSoundVolume / 100.0f;
 	if(NewMapSoundVol != m_MapSoundVolume)
 	{
 		m_MapSoundVolume = NewMapSoundVol;
 		Sound()->SetChannel(CSounds::CHN_MAPSOUND, m_MapSoundVolume, 1.0f);
 	}
 
+	float NewBackgroundMusicVol = g_Config.m_SndBackgroundMusicVolume / 100.0f;
+	if(NewBackgroundMusicVol != m_BackgroundMusicVolume)
+	{
+		m_BackgroundMusicVolume = NewBackgroundMusicVol;
+		Sound()->SetChannel(CSounds::CHN_MUSIC, m_BackgroundMusicVolume, 1.0f);
+	}
+
 	// play sound from queue
 	if(m_QueuePos > 0)
 	{
-		int64 Now = time_get();
+		int64 Now = time();
 		if(m_QueueWaitTime <= Now)
 		{
 			Play(m_aQueue[0].m_Channel, m_aQueue[0].m_SetId, 1.0f);
-			m_QueueWaitTime = Now+time_freq()*3/10; // wait 300ms before playing the next one
+			m_QueueWaitTime = Now + time_freq() * 3 / 10; // wait 300ms before playing the next one
 			if(--m_QueuePos > 0)
-				mem_move(m_aQueue, m_aQueue+1, m_QueuePos*sizeof(QueueEntry));
+				mem_move(m_aQueue, m_aQueue + 1, m_QueuePos * sizeof(QueueEntry));
 		}
 	}
 }
@@ -141,7 +164,7 @@ void CSounds::ClearQueue()
 {
 	mem_zero(m_aQueue, sizeof(m_aQueue));
 	m_QueuePos = 0;
-	m_QueueWaitTime = time_get();
+	m_QueueWaitTime = time();
 }
 
 void CSounds::Enqueue(int Channel, int SetId)
@@ -161,7 +184,7 @@ void CSounds::PlayAndRecord(int Chn, int SetId, float Vol, vec2 Pos)
 {
 	CNetMsg_Sv_SoundGlobal Msg;
 	Msg.m_SoundID = SetId;
-	Client()->SendPackMsg(&Msg, MSGFLAG_NOSEND|MSGFLAG_RECORD);
+	Client()->SendPackMsg(&Msg, MSGFLAG_NOSEND | MSGFLAG_RECORD);
 
 	Play(Chn, SetId, Vol);
 }

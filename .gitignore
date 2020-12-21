@@ -3,6 +3,8 @@
 data/
 !/data/
 
+docs/
+
 bundle/
 !/other/bundle/
 
@@ -27,7 +29,7 @@ googletest-download/
 googletest-src/
 gtest.pc
 gtest_main.pc
-install_manifest_portable.txt
+install_manifest*.txt
 ninja_package
 pack_*/
 rules.ninja
@@ -38,36 +40,46 @@ testrunner\[1\]_include.cmake
 DDNet
 DDNet-Server
 DDNet-Server-Launcher
+libsteam_api.a
 config_retrieve
 config_store
-confusables
 crapnet
 dilate
 dummy_map
 fake_server
+map_convert_07
 map_diff
 map_extract
+map_optimize
 map_replace_image
 map_resave
 map_version
 mastersrv
 packetgen
 testrunner
-tileset_borderadd
-tileset_borderfix
-tileset_borderrem
-tileset_borderset
 twping
+unicode_confusables
 uuid
 versionsrv
 
+# But we still should allow to download mastersrv/twping sources
+!src/mastersrv
+!src/twping
+
 generated
 
+# IDE project files
 .cproject
+.idea
 .project
 .settings
+.vs
+.vscode
+compile_commands.json
 cscope.files
 cscope.out
+out
+tags
 
 # bam ignores
 /.bam
@@ -90,12 +102,14 @@ cscope.out
 *.res
 *.sdf
 *.sln
+*.so
+*.sqlite
 *.suo
 *.swp
 *.tar.gz
 *.tar.xz
 *.teehistorian
+*.tmp
 *.user
 *.vcxproj
-*.vs
 *.zip

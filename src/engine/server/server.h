@@ -3,44 +3,48 @@
 #ifndef ENGINE_SERVER_SERVER_H
 #define ENGINE_SERVER_SERVER_H
 
+#include <base/hash.h>
+#include <base/math.h>
+
 #include <engine/engine.h>
 #include <engine/server.h>
 
 #include <engine/map.h>
-#include <engine/shared/demo.h>
-#include <engine/shared/protocol.h>
-#include <engine/shared/snapshot.h>
-#include <engine/shared/network.h>
 #include <engine/server/register.h>
 #include <engine/shared/console.h>
-#include <base/math.h>
+#include <engine/shared/demo.h>
 #include <engine/shared/econ.h>
 #include <engine/shared/fifo.h>
 #include <engine/shared/netban.h>
+#include <engine/shared/network.h>
+#include <engine/shared/protocol.h>
+#include <engine/shared/snapshot.h>
 #include <engine/shared/uuid_manager.h>
 
 #include <base/tl/array.h>
 
+#include <list>
+
+#include "antibot.h"
 #include "authmanager.h"
 #include "name_ban.h"
 
-#if defined (CONF_SQL)
-	#include "sql_connector.h"
-	#include "sql_server.h"
+#if defined(CONF_UPNP)
+#include "upnp.h"
 #endif
 
 class CSnapIDPool
 {
 	enum
 	{
-		MAX_IDS = 16*1024,
+		MAX_IDS = 16 * 1024,
 	};
 
 	class CID
 	{
 	public:
 		short m_Next;
-		short m_State; // 0 = free, 1 = alloced, 2 = timed
+		short m_State; // 0 = free, 1 = allocated, 2 = timed
 		int m_Timeout;
 	};
 
@@ -53,7 +57,6 @@ class CSnapIDPool
 	int m_InUsage;
 
 public:
-
 	CSnapIDPool();
 
 	void Reset();
@@ -63,12 +66,12 @@ public:
 	void FreeID(int ID);
 };
 
-
 class CServerBan : public CNetBan
 {
 	class CServer *m_pServer;
 
-	template<class T> int BanExt(T *pBanPool, const typename T::CDataType *pData, int Seconds, const char *pReason);
+	template<class T>
+	int BanExt(T *pBanPool, const typename T::CDataType *pData, int Seconds, const char *pReason);
 
 public:
 	class CServer *Server() const { return m_pServer; }
@@ -79,18 +82,19 @@ public:
 	virtual int BanRange(const CNetRange *pRange, int Seconds, const char *pReason);
 
 	static void ConBanExt(class IConsole::IResult *pResult, void *pUser);
+	static void ConBanRegion(class IConsole::IResult *pResult, void *pUser);
+	static void ConBanRegionRange(class IConsole::IResult *pResult, void *pUser);
 };
-
 
 class CServer : public IServer
 {
 	class IGameServer *m_pGameServer;
 	class IConsole *m_pConsole;
 	class IStorage *m_pStorage;
+	class IEngineAntibot *m_pAntibot;
 
-#if defined(CONF_SQL)
-	CSqlServer *m_apSqlReadServers[MAX_SQLSERVERS];
-	CSqlServer *m_apSqlWriteServers[MAX_SQLSERVERS];
+#if defined(CONF_UPNP)
+	CUPnP m_UPnP;
 #endif
 
 #if defined(CONF_FAMILY_UNIX)
@@ -99,33 +103,37 @@ class CServer : public IServer
 	UNIXSOCKET m_ConnLoggingSocket;
 #endif
 
+	class CDbConnectionPool *m_pConnectionPool;
+
 public:
 	class IGameServer *GameServer() { return m_pGameServer; }
 	class IConsole *Console() { return m_pConsole; }
 	class IStorage *Storage() { return m_pStorage; }
+	class IEngineAntibot *Antibot() { return m_pAntibot; }
+	class CDbConnectionPool *DbPool() { return m_pConnectionPool; }
 
 	enum
 	{
-		MAX_RCONCMD_SEND=16,
+		MAX_RCONCMD_SEND = 16,
 	};
 
 	class CClient
 	{
 	public:
-
 		enum
 		{
 			STATE_EMPTY = 0,
+			STATE_PREAUTH,
 			STATE_AUTH,
 			STATE_CONNECTING,
 			STATE_READY,
 			STATE_INGAME,
 
-			SNAPRATE_INIT=0,
+			SNAPRATE_INIT = 0,
 			SNAPRATE_FULL,
 			SNAPRATE_RECOVER,
 
-			DNSBL_STATE_NONE=0,
+			DNSBL_STATE_NONE = 0,
 			DNSBL_STATE_PENDING,
 			DNSBL_STATE_BLACKLISTED,
 			DNSBL_STATE_WHITELISTED,
@@ -140,6 +148,7 @@ public:
 
 		// connection state info
 		int m_State;
+		bool m_SupportsMapSha256;
 		int m_Latency;
 		int m_SnapRate;
 
@@ -162,6 +171,8 @@ public:
 		int m_AuthKey;
 		int m_AuthTries;
 		int m_NextMapChunk;
+		int m_Flags;
+		bool m_ShowIps;
 
 		const IConsole::CCommandInfo *m_pRconCmdToSend;
 
@@ -170,14 +181,21 @@ public:
 		// DDRace
 
 		NETADDR m_Addr;
+		bool m_GotDDNetVersionPacket;
+		bool m_DDNetVersionSettled;
+		int m_DDNetVersion;
+		char m_aDDNetVersionStr[64];
+		CUuid m_ConnectionID;
 
 		// DNSBL
 		int m_DnsblState;
 		std::shared_ptr<CHostLookup> m_pDnsblLookup;
+
+		bool m_Sixup;
 	};
 
 	CClient m_aClients[MAX_CLIENTS];
-	int IdMap[MAX_CLIENTS * VANILLA_MAX_CLIENTS];
+	int m_aIdMap[MAX_CLIENTS * VANILLA_MAX_CLIENTS];
 
 	CSnapshotDelta m_SnapshotDelta;
 	CSnapshotBuilder m_SnapshotBuilder;
@@ -193,7 +211,16 @@ public:
 
 	int64 m_GameStartTime;
 	//int m_CurrentGameTick;
+
+	enum
+	{
+		UNINITIALIZED = 0,
+		RUNNING = 1,
+		STOPPING = 2
+	};
+
 	int m_RunServer;
+
 	int m_MapReload;
 	bool m_ReloadedWhenEmpty;
 	int m_RconClientID;
@@ -203,18 +230,25 @@ public:
 	int64 m_Lastheartbeat;
 	//static NETADDR4 master_server;
 
-	char m_aCurrentMap[64];
-	unsigned m_CurrentMapCrc;
-	unsigned char *m_pCurrentMapData;
-	unsigned int m_CurrentMapSize;
+	enum
+	{
+		SIX = 0,
+		SIXUP,
+	};
 
-	CDemoRecorder m_aDemoRecorder[MAX_CLIENTS+1];
+	char m_aCurrentMap[MAX_PATH_LENGTH];
+	SHA256_DIGEST m_aCurrentMapSha256[2];
+	unsigned m_aCurrentMapCrc[2];
+	unsigned char *m_apCurrentMapData[2];
+	unsigned int m_aCurrentMapSize[2];
+
+	CDemoRecorder m_aDemoRecorder[MAX_CLIENTS + 1];
 	CRegister m_Register;
+	CRegister m_RegSixup;
 	CAuthManager m_AuthManager;
 
 	int m_RconRestrict;
 
-	bool m_ServerInfoHighLoad;
 	int64 m_ServerInfoFirstRequest;
 	int m_ServerInfoNumRequests;
 
@@ -223,15 +257,20 @@ public:
 	array<CNameBan> m_aNameBans;
 
 	CServer();
+	~CServer();
 
-	int TrySetClientName(int ClientID, const char *pName);
+	bool IsClientNameAvailable(int ClientID, const char *pNameRequest);
+	bool SetClientNameImpl(int ClientID, const char *pNameRequest, bool Set);
 
+	virtual bool WouldClientNameChange(int ClientID, const char *pNameRequest);
 	virtual void SetClientName(int ClientID, const char *pName);
 	virtual void SetClientClan(int ClientID, char const *pClan);
 	virtual void SetClientCountry(int ClientID, int Country);
 	virtual void SetClientScore(int ClientID, int Score);
+	virtual void SetClientFlags(int ClientID, int Flags);
 
 	void Kick(int ClientID, const char *pReason);
+	void Ban(int ClientID, int Seconds, const char *pReason);
 
 	void DemoRecorder_HandleAutoStart();
 	bool DemoRecorder_IsRecording();
@@ -245,27 +284,32 @@ public:
 	void SetRconCID(int ClientID);
 	int GetAuthedState(int ClientID);
 	const char *GetAuthName(int ClientID);
-	void GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, int *pMapCrc);
+	void GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_DIGEST *pMapSha256, int *pMapCrc);
 	int GetClientInfo(int ClientID, CClientInfo *pInfo);
+	void SetClientDDNetVersion(int ClientID, int DDNetVersion);
 	void GetClientAddr(int ClientID, char *pAddrStr, int Size);
 	const char *ClientName(int ClientID);
 	const char *ClientClan(int ClientID);
 	int ClientCountry(int ClientID);
 	bool ClientIngame(int ClientID);
+	bool ClientAuthed(int ClientID);
+	int Port() const;
 	int MaxClients() const;
+	int ClientCount();
+	int DistinctClientCount();
 
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags, int ClientID);
-	int SendMsgEx(CMsgPacker *pMsg, int Flags, int ClientID, bool System);
 
 	void DoSnapshot();
 
-	static int NewClientCallback(int ClientID, void *pUser);
-	static int NewClientNoAuthCallback(int ClientID, bool Reset, void *pUser);
+	static int NewClientCallback(int ClientID, void *pUser, bool Sixup);
+	static int NewClientNoAuthCallback(int ClientID, void *pUser);
 	static int DelClientCallback(int ClientID, const char *pReason, void *pUser);
 
 	static int ClientRejoinCallback(int ClientID, void *pUser);
 
 	void SendRconType(int ClientID, bool UsernameReq);
+	void SendCapabilities(int ClientID);
 	void SendMap(int ClientID);
 	void SendMapData(int ClientID, int Chunk);
 	void SendConnectionReady(int ClientID);
@@ -278,11 +322,41 @@ public:
 
 	void ProcessClientPacket(CNetChunk *pPacket);
 
-	void SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool SendClients);
-	void SendServerInfoConnless(const NETADDR *pAddr, int Token, int Type);
-	void UpdateServerInfo();
+	class CCache
+	{
+	public:
+		class CCacheChunk
+		{
+		public:
+			CCacheChunk(const void *pData, int Size);
+			CCacheChunk(const CCacheChunk &) = delete;
 
-	void PumpNetwork();
+			int m_DataSize;
+			unsigned char m_aData[NET_MAX_PAYLOAD];
+		};
+
+		std::list<CCacheChunk> m_Cache;
+
+		CCache();
+		~CCache();
+
+		void AddChunk(const void *pData, int Size);
+		void Clear();
+	};
+	CCache m_aServerInfoCache[3 * 2];
+	CCache m_aSixupServerInfoCache[2];
+	bool m_ServerInfoNeedsUpdate;
+
+	void ExpireServerInfo();
+	void CacheServerInfo(CCache *pCache, int Type, bool SendClients);
+	void CacheServerInfoSixup(CCache *pCache, bool SendClients);
+	void SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool SendClients);
+	void GetServerInfoSixup(CPacker *pPacker, int Token, bool SendClients);
+	bool RateLimitServerInfoConnless();
+	void SendServerInfoConnless(const NETADDR *pAddr, int Token, int Type);
+	void UpdateServerInfo(bool Resend = false);
+
+	void PumpNetwork(bool PacketWaiting);
 
 	char *GetMapName();
 	int LoadMap(const char *pMapName);
@@ -304,7 +378,7 @@ public:
 	static void ConStopRecord(IConsole::IResult *pResult, void *pUser);
 	static void ConMapReload(IConsole::IResult *pResult, void *pUser);
 	static void ConLogout(IConsole::IResult *pResult, void *pUser);
-	static void ConDnsblStatus(IConsole::IResult *pResult, void *pUser);
+	static void ConShowIps(IConsole::IResult *pResult, void *pUser);
 
 	static void ConAuthAdd(IConsole::IResult *pResult, void *pUser);
 	static void ConAuthAddHashed(IConsole::IResult *pResult, void *pUser);
@@ -317,15 +391,9 @@ public:
 	static void ConNameUnban(IConsole::IResult *pResult, void *pUser);
 	static void ConNameBans(IConsole::IResult *pResult, void *pUser);
 
-	static void StatusImpl(IConsole::IResult *pResult, void *pUser, bool DnsblBlacklistedOnly);
-
-#if defined (CONF_SQL)
 	// console commands for sqlmasters
 	static void ConAddSqlServer(IConsole::IResult *pResult, void *pUserData);
 	static void ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData);
-
-	static void CreateTablesThread(void *pData);
-#endif
 
 	static void ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainMaxclientsperipUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -346,7 +414,6 @@ public:
 
 	void RegisterCommands();
 
-
 	virtual int SnapNewID();
 	virtual void SnapFreeID(int ID);
 	virtual void *SnapNewItem(int Type, int ID, int Size);
@@ -356,17 +423,25 @@ public:
 
 	void GetClientAddr(int ClientID, NETADDR *pAddr);
 	int m_aPrevStates[MAX_CLIENTS];
-	const char *GetAnnouncementLine(char const *FileName);
+	const char *GetAnnouncementLine(char const *pFileName);
 	unsigned m_AnnouncementLastLine;
 	void RestrictRconOutput(int ClientID) { m_RconRestrict = ClientID; }
 
-	virtual int* GetIdMap(int ClientID);
+	virtual int *GetIdMap(int ClientID);
 
 	void InitDnsbl(int ClientID);
 	bool DnsblWhite(int ClientID)
 	{
 		return m_aClients[ClientID].m_DnsblState == CClient::DNSBL_STATE_NONE ||
-		m_aClients[ClientID].m_DnsblState == CClient::DNSBL_STATE_WHITELISTED;
+		       m_aClients[ClientID].m_DnsblState == CClient::DNSBL_STATE_WHITELISTED;
+	}
+	bool DnsblPending(int ClientID)
+	{
+		return m_aClients[ClientID].m_DnsblState == CClient::DNSBL_STATE_PENDING;
+	}
+	bool DnsblBlack(int ClientID)
+	{
+		return m_aClients[ClientID].m_DnsblState == CClient::DNSBL_STATE_BLACKLISTED;
 	}
 
 	void AuthRemoveKey(int KeySlot);
@@ -376,19 +451,22 @@ public:
 	bool SetTimedOut(int ClientID, int OrigID);
 	void SetTimeoutProtected(int ClientID) { m_NetServer.SetTimeoutProtected(ClientID); };
 
+	void SendMsgRaw(int ClientID, const void *pData, int Size, int Flags);
+
 	bool ErrorShutdown() const { return m_aErrorShutdownReason[0] != 0; }
 	void SetErrorShutdown(const char *pReason);
+
+	bool IsSixup(int ClientID) const { return m_aClients[ClientID].m_Sixup; }
 
 #ifdef CONF_FAMILY_UNIX
 	enum CONN_LOGGING_CMD
 	{
-		OPEN_SESSION=1,
-		CLOSE_SESSION=2,
+		OPEN_SESSION = 1,
+		CLOSE_SESSION = 2,
 	};
 
-	void SendConnLoggingCommand(CONN_LOGGING_CMD cmd, const NETADDR *pAddr);
+	void SendConnLoggingCommand(CONN_LOGGING_CMD Cmd, const NETADDR *pAddr);
 #endif
-
 };
 
 #endif

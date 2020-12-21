@@ -3,13 +3,17 @@
 #ifndef GAME_SERVER_ENTITIES_CHARACTER_H
 #define GAME_SERVER_ENTITIES_CHARACTER_H
 
-#include <game/server/entity.h>
-#include <game/generated/server_data.h>
+#include <engine/antibot.h>
 #include <game/generated/protocol.h>
+#include <game/generated/server_data.h>
+#include <game/server/entity.h>
+#include <game/server/save.h>
 
 #include <game/gamecore.h>
 
+class CAntibot;
 class CGameTeams;
+struct CAntibotCharacterData;
 
 enum
 {
@@ -83,7 +87,7 @@ public:
 
 	void Rescue();
 
-	int NeededFaketuning() {return m_NeededFaketuning;}
+	int NeededFaketuning() { return m_NeededFaketuning; }
 	bool IsAlive() const { return m_Alive; }
 	bool IsPaused() const { return m_Paused; }
 	class CPlayer *GetPlayer() { return m_pPlayer; }
@@ -125,6 +129,7 @@ private:
 	int m_LastNoAmmoSound;
 
 	// these are non-heldback inputs
+	CNetObj_PlayerInput m_LatestPrevPrevInput;
 	CNetObj_PlayerInput m_LatestPrevInput;
 	CNetObj_PlayerInput m_LatestInput;
 
@@ -159,23 +164,28 @@ private:
 
 	// DDRace
 
-
+	void SnapCharacter(int SnappingClient, int ID);
+	static bool IsSwitchActiveCb(int Number, void *pUser);
 	void HandleTiles(int Index);
 	float m_Time;
 	int m_LastBroadcast;
 	void DDRaceInit();
 	void HandleSkippableTiles(int Index);
+	void SetRescue();
 	void DDRaceTick();
 	void DDRacePostCoreTick();
 	void HandleBroadcast();
 	void HandleTuneLayer();
 	void SendZoneMsgs();
+	IAntibot *Antibot();
 
 	bool m_SetSavePos;
-	vec2 m_PrevSavePos;
+	CSaveTee m_RescueTee;
+	bool m_Solo;
 
 public:
-	CGameTeams* Teams();
+	CGameTeams *Teams();
+	void FillAntibot(CAntibotCharacterData *pData);
 	void Pause(bool Pause);
 	bool Freeze(int Time);
 	bool Freeze();
@@ -192,16 +202,17 @@ public:
 	int m_TeamBeforeSuper;
 	int m_FreezeTime;
 	int m_FreezeTick;
+	bool m_FrozenLastTick;
 	bool m_DeepFreeze;
 	bool m_EndlessHook;
 	bool m_FreezeHammer;
 	enum
 	{
-		HIT_ALL=0,
-		DISABLE_HIT_HAMMER=1,
-		DISABLE_HIT_SHOTGUN=2,
-		DISABLE_HIT_GRENADE=4,
-		DISABLE_HIT_RIFLE=8
+		HIT_ALL = 0,
+		DISABLE_HIT_HAMMER = 1,
+		DISABLE_HIT_SHOTGUN = 2,
+		DISABLE_HIT_GRENADE = 4,
+		DISABLE_HIT_LASER = 8
 	};
 	int m_Hit;
 	int m_TuneZone;
@@ -216,53 +227,35 @@ public:
 	int m_CpLastBroadcast;
 	float m_CpCurrent[25];
 	int m_TileIndex;
-	int m_TileFlags;
 	int m_TileFIndex;
-	int m_TileFFlags;
-	int m_TileSIndex;
-	int m_TileSFlags;
-	int m_TileIndexL;
-	int m_TileFlagsL;
-	int m_TileFIndexL;
-	int m_TileFFlagsL;
-	int m_TileSIndexL;
-	int m_TileSFlagsL;
-	int m_TileIndexR;
-	int m_TileFlagsR;
-	int m_TileFIndexR;
-	int m_TileFFlagsR;
-	int m_TileSIndexR;
-	int m_TileSFlagsR;
-	int m_TileIndexT;
-	int m_TileFlagsT;
-	int m_TileFIndexT;
-	int m_TileFFlagsT;
-	int m_TileSIndexT;
-	int m_TileSFlagsT;
-	int m_TileIndexB;
-	int m_TileFlagsB;
-	int m_TileFIndexB;
-	int m_TileFFlagsB;
-	int m_TileSIndexB;
-	int m_TileSFlagsB;
+
+	int m_MoveRestrictions;
+
 	vec2 m_Intersection;
 	int64 m_LastStartWarning;
 	int64 m_LastRescue;
 	bool m_LastRefillJumps;
 	bool m_LastPenalty;
 	bool m_LastBonus;
+	vec2 m_TeleGunPos;
+	bool m_TeleGunTeleport;
+	bool m_IsBlueTeleGunTeleport;
+	int m_StrongWeakID;
+
+	int m_SpawnTick;
+	int m_WeaponChangeTick;
 
 	// Setters/Getters because i don't want to modify vanilla vars access modifiers
 	int GetLastWeapon() { return m_LastWeapon; };
-	void SetLastWeapon(int LastWeap) {m_LastWeapon = LastWeap; };
+	void SetLastWeapon(int LastWeap) { m_LastWeapon = LastWeap; };
 	int GetActiveWeapon() { return m_Core.m_ActiveWeapon; };
-	void SetActiveWeapon(int ActiveWeap) {m_Core.m_ActiveWeapon = ActiveWeap; };
-	void SetLastAction(int LastAction) {m_LastAction = LastAction; };
+	void SetActiveWeapon(int ActiveWeap) { m_Core.m_ActiveWeapon = ActiveWeap; };
+	void SetLastAction(int LastAction) { m_LastAction = LastAction; };
 	int GetArmor() { return m_Armor; };
-	void SetArmor(int Armor) {m_Armor = Armor; };
+	void SetArmor(int Armor) { m_Armor = Armor; };
 	CCharacterCore GetCore() { return m_Core; };
-	void SetCore(CCharacterCore Core) {m_Core = Core; };
-	CCharacterCore* Core() { return &m_Core; };
+	void SetCore(CCharacterCore Core) { m_Core = Core; };
+	CCharacterCore *Core() { return &m_Core; };
 	bool GetWeaponGot(int Type) { return m_aWeapons[Type].m_Got; };
 	void SetWeaponGot(int Type, bool Value) { m_aWeapons[Type].m_Got = Value; };
 	int GetWeaponAmmo(int Type) { return m_aWeapons[Type].m_Ammo; };
@@ -273,6 +266,10 @@ public:
 	void SetNinjaActivationDir(vec2 ActivationDir) { m_Ninja.m_ActivationDir = ActivationDir; };
 	void SetNinjaActivationTick(int ActivationTick) { m_Ninja.m_ActivationTick = ActivationTick; };
 	void SetNinjaCurrentMoveTime(int CurrentMoveTime) { m_Ninja.m_CurrentMoveTime = CurrentMoveTime; };
+
+	bool HasTelegunGun() { return m_Core.m_HasTelegunGun; };
+	bool HasTelegunGrenade() { return m_Core.m_HasTelegunGrenade; };
+	bool HasTelegunLaser() { return m_Core.m_HasTelegunLaser; };
 };
 
 enum

@@ -3,10 +3,10 @@
 #ifndef ENGINE_SHARED_CONSOLE_H
 #define ENGINE_SHARED_CONSOLE_H
 
+#include "memheap.h"
+#include <base/math.h>
 #include <engine/console.h>
 #include <engine/storage.h>
-#include <base/math.h>
-#include "memheap.h"
 
 class CConsole : public IConsole
 {
@@ -24,7 +24,6 @@ class CConsole : public IConsole
 		void SetAccessLevel(int AccessLevel) { m_AccessLevel = clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_USER)); }
 	};
 
-
 	class CChain
 	{
 	public:
@@ -36,7 +35,7 @@ class CConsole : public IConsole
 
 	int m_FlagMask;
 	bool m_StoreCommands;
-	const char *m_paStrokeStr[2];
+	const char *m_apStrokeStr[2];
 	CCommand *m_pFirstCommand;
 
 	class CExecFile
@@ -77,19 +76,20 @@ class CConsole : public IConsole
 	enum
 	{
 		CONSOLE_MAX_STR_LENGTH = 8192,
-		MAX_PARTS = (CONSOLE_MAX_STR_LENGTH+1)/2
+		MAX_PARTS = (CONSOLE_MAX_STR_LENGTH + 1) / 2
 	};
 
 	class CResult : public IResult
 	{
 	public:
-		char m_aStringStorage[CONSOLE_MAX_STR_LENGTH+1];
+		char m_aStringStorage[CONSOLE_MAX_STR_LENGTH + 1];
 		char *m_pArgsStart;
 
 		const char *m_pCommand;
 		const char *m_apArgs[MAX_PARTS];
 
-		CResult() : IResult()
+		CResult() :
+			IResult()
 		{
 			mem_zero(m_aStringStorage, sizeof(m_aStringStorage));
 			m_pArgsStart = 0;
@@ -97,16 +97,16 @@ class CConsole : public IConsole
 			mem_zero(m_apArgs, sizeof(m_apArgs));
 		}
 
-		CResult &operator =(const CResult &Other)
+		CResult &operator=(const CResult &Other)
 		{
 			if(this != &Other)
 			{
 				IResult::operator=(Other);
 				mem_copy(m_aStringStorage, Other.m_aStringStorage, sizeof(m_aStringStorage));
-				m_pArgsStart = m_aStringStorage+(Other.m_pArgsStart-Other.m_aStringStorage);
-				m_pCommand = m_aStringStorage+(Other.m_pCommand-Other.m_aStringStorage);
+				m_pArgsStart = m_aStringStorage + (Other.m_pArgsStart - Other.m_aStringStorage);
+				m_pCommand = m_aStringStorage + (Other.m_pCommand - Other.m_aStringStorage);
 				for(unsigned i = 0; i < Other.m_NumArgs; ++i)
-					m_apArgs[i] = m_aStringStorage+(Other.m_apArgs[i]-Other.m_aStringStorage);
+					m_apArgs[i] = m_aStringStorage + (Other.m_apArgs[i] - Other.m_aStringStorage);
 			}
 			return *this;
 		}
@@ -119,14 +119,24 @@ class CConsole : public IConsole
 		virtual const char *GetString(unsigned Index);
 		virtual int GetInteger(unsigned Index);
 		virtual float GetFloat(unsigned Index);
+		virtual ColorHSLA GetColor(unsigned Index, bool Light);
+
+		virtual void RemoveArgument(unsigned Index)
+		{
+			dbg_assert(Index < m_NumArgs, "invalid argument index");
+			for(unsigned i = Index; i < m_NumArgs - 1; i++)
+				m_apArgs[i] = m_apArgs[i + 1];
+
+			m_apArgs[m_NumArgs--] = 0;
+		}
 
 		// DDRace
 
 		enum
 		{
-			VICTIM_NONE=-3,
-			VICTIM_ME=-2,
-			VICTIM_ALL=-1,
+			VICTIM_NONE = -3,
+			VICTIM_ME = -2,
+			VICTIM_ALL = -1,
 		};
 
 		int m_Victim;
@@ -159,7 +169,7 @@ class CConsole : public IConsole
 			FCommandCallback m_pfnCommandCallback;
 			void *m_pCommandUserData;
 			CResult m_Result;
-		} *m_pFirst, *m_pLast;
+		} * m_pFirst, *m_pLast;
 
 		void AddEntry()
 		{
@@ -205,6 +215,7 @@ public:
 
 	virtual int RegisterPrintCallback(int OutputLevel, FPrintCallback pfnPrintCallback, void *pUserData);
 	virtual void SetPrintOutputLevel(int Index, int OutputLevel);
+	virtual char *Format(char *pBuf, int Size, const char *pFrom, const char *pStr);
 	virtual void Print(int Level, const char *pFrom, const char *pStr, bool Highlighted = false);
 	virtual void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser);
 

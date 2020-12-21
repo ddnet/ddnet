@@ -3,41 +3,56 @@
 #ifndef BASE_MATH_H
 #define BASE_MATH_H
 
+#include <math.h>
 #include <stdlib.h>
 
-template <typename T>
-inline T clamp(T val, T min, T max)
+template<typename T>
+constexpr inline T clamp(T val, T min, T max)
 {
-	if(val < min)
-		return min;
-	if(val > max)
-		return max;
-	return val;
+	return val < min ? min : (val > max ? max : val);
 }
 
-inline float sign(float f)
+constexpr inline float sign(float f)
 {
-	return f<0.0f?-1.0f:1.0f;
+	return f < 0.0f ? -1.0f : 1.0f;
 }
 
-inline int round_to_int(float f)
+constexpr inline int round_to_int(float f)
 {
-	if(f > 0)
-		return (int)(f+0.5f);
-	return (int)(f-0.5f);
+	return f > 0 ? (int)(f + 0.5f) : (int)(f - 0.5f);
+}
+
+constexpr inline int round_truncate(float f)
+{
+	return (int)f;
+}
+
+inline int round_ceil(float f)
+{
+	return (int)ceilf(f);
 }
 
 template<typename T, typename TB>
-inline T mix(const T a, const T b, TB amount)
+constexpr inline T mix(const T a, const T b, TB amount)
 {
-	return a + (b-a)*amount;
+	return a + (b - a) * amount;
 }
 
-inline float frandom() { return rand()/(float)(RAND_MAX); }
+inline float frandom() { return rand() / (float)(RAND_MAX); }
 
 // float to fixed
-inline int f2fx(float v) { return (int)(v*(float)(1<<10)); }
-inline float fx2f(int v) { return v*(1.0f/(1<<10)); }
+constexpr inline int f2fx(float v) { return (int)(v * (float)(1 << 10)); }
+constexpr inline float fx2f(int v) { return v * (1.0f / (1 << 10)); }
+
+// int to fixed
+inline int i2fx(int v)
+{
+	return v << 10;
+}
+inline int fx2i(int v)
+{
+	return v >> 10;
+}
 
 inline int gcd(int a, int b)
 {
@@ -53,18 +68,60 @@ inline int gcd(int a, int b)
 class fxp
 {
 	int value;
+
 public:
 	void set(int v) { value = v; }
 	int get() const { return value; }
-	fxp &operator = (int v) { value = v<<10; return *this; }
-	fxp &operator = (float v) { value = (int)(v*(float)(1<<10)); return *this; }
-	operator float() const { return value/(float)(1<<10); }
+	fxp &operator=(int v)
+	{
+		value = v << 10;
+		return *this;
+	}
+	fxp &operator=(float v)
+	{
+		value = (int)(v * (float)(1 << 10));
+		return *this;
+	}
+	operator float() const { return value / (float)(1 << 10); }
 };
 
-const float pi = 3.1415926535897932384626433f;
+constexpr float pi = 3.1415926535897932384626433f;
 
-template <typename T> inline T min(T a, T b) { return a<b?a:b; }
-template <typename T> inline T max(T a, T b) { return a>b?a:b; }
-template <typename T> inline T absolute(T a) { return a<T(0)?-a:a; }
+template<typename T>
+constexpr inline T minimum(T a, T b)
+{
+	return a < b ? a : b;
+}
+template<typename T>
+constexpr inline T minimum(T a, T b, T c)
+{
+	return minimum(minimum(a, b), c);
+}
+template<typename T>
+constexpr inline T maximum(T a, T b)
+{
+	return a > b ? a : b;
+}
+template<typename T>
+constexpr inline T maximum(T a, T b, T c)
+{
+	return maximum(maximum(a, b), c);
+}
+template<typename T>
+constexpr inline T absolute(T a)
+{
+	return a < T(0) ? -a : a;
+}
+
+template<typename T>
+constexpr inline T in_range(T a, T lower, T upper)
+{
+	return lower <= a && a <= upper;
+}
+template<typename T>
+constexpr inline T in_range(T a, T upper)
+{
+	return in_range(a, 0, upper);
+}
 
 #endif // BASE_MATH_H

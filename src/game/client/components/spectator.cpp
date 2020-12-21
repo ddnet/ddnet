@@ -1,9 +1,12 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+
+#include <limits.h>
+
 #include <engine/demo.h>
 #include <engine/graphics.h>
-#include <engine/textrender.h>
 #include <engine/shared/config.h>
+#include <engine/textrender.h>
 
 #include <game/generated/client_data.h>
 #include <game/generated/protocol.h>
@@ -11,8 +14,66 @@
 #include <game/client/animstate.h>
 #include <game/client/render.h>
 
+#include "camera.h"
 #include "spectator.h"
 
+bool CSpectator::CanChangeSpectator()
+{
+	// Don't change SpectatorID when not spectating
+	return m_pClient->m_Snap.m_SpecInfo.m_Active;
+}
+
+void CSpectator::SpectateNext(bool Reverse)
+{
+	int CurIndex = -1;
+	const CNetObj_PlayerInfo **paPlayerInfos = m_pClient->m_Snap.m_paInfoByDDTeamName;
+
+	// m_SpectatorID may be uninitialized if m_Active is false
+	if(m_pClient->m_Snap.m_SpecInfo.m_Active)
+	{
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(paPlayerInfos[i] && paPlayerInfos[i]->m_ClientID == m_pClient->m_Snap.m_SpecInfo.m_SpectatorID)
+			{
+				CurIndex = i;
+				break;
+			}
+		}
+	}
+
+	int Start;
+	if(CurIndex != -1)
+	{
+		if(Reverse)
+			Start = CurIndex - 1;
+		else
+			Start = CurIndex + 1;
+	}
+	else
+	{
+		if(Reverse)
+			Start = -1;
+		else
+			Start = 0;
+	}
+
+	int Increment = Reverse ? -1 : 1;
+
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		int PlayerIndex = (Start + i * Increment) % MAX_CLIENTS;
+		// % in C++ takes the sign of the dividend, not divisor
+		if(PlayerIndex < 0)
+			PlayerIndex += MAX_CLIENTS;
+
+		const CNetObj_PlayerInfo *pPlayerInfo = paPlayerInfos[PlayerIndex];
+		if(pPlayerInfo && pPlayerInfo->m_Team != TEAM_SPECTATORS)
+		{
+			Spectate(pPlayerInfo->m_ClientID);
+			break;
+		}
+	}
+}
 
 void CSpectator::ConKeySpectator(IConsole::IResult *pResult, void *pUserData)
 {
@@ -26,110 +87,64 @@ void CSpectator::ConKeySpectator(IConsole::IResult *pResult, void *pUserData)
 
 void CSpectator::ConSpectate(IConsole::IResult *pResult, void *pUserData)
 {
-	((CSpectator *)pUserData)->Spectate(pResult->GetInteger(0));
+	CSpectator *pSelf = (CSpectator *)pUserData;
+	if(!pSelf->CanChangeSpectator())
+		return;
+
+	pSelf->Spectate(pResult->GetInteger(0));
 }
 
 void CSpectator::ConSpectateNext(IConsole::IResult *pResult, void *pUserData)
 {
 	CSpectator *pSelf = (CSpectator *)pUserData;
-	int NewSpectatorID;
-	bool GotNewSpectatorID = false;
+	if(!pSelf->CanChangeSpectator())
+		return;
 
-	int CurPos = -1;
-	for (int i = 0; i < MAX_CLIENTS; i++)
-		if (pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i] && pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID == pSelf->m_pClient->m_Snap.m_SpecInfo.m_SpectatorID)
-		CurPos = i;
-
-	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
-	{
-		for(int i = 0; i < MAX_CLIENTS; i++)
-		{
-			if(!pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i] || pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_Team == TEAM_SPECTATORS)
-				continue;
-
-			NewSpectatorID = pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID;
-			GotNewSpectatorID = true;
-			break;
-		}
-	}
-	else
-	{
-		for(int i = CurPos + 1; i < MAX_CLIENTS; i++)
-		{
-			if(!pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i] || pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_Team == TEAM_SPECTATORS)
-				continue;
-
-			NewSpectatorID = pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID;
-			GotNewSpectatorID = true;
-			break;
-		}
-
-		if(!GotNewSpectatorID)
-		{
-			for(int i = 0; i < CurPos; i++)
-			{
-				if(!pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i] || pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_Team == TEAM_SPECTATORS)
-					continue;
-
-				NewSpectatorID = pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID;
-				GotNewSpectatorID = true;
-				break;
-			}
-		}
-	}
-	if(GotNewSpectatorID)
-		pSelf->Spectate(NewSpectatorID);
+	pSelf->SpectateNext(false);
 }
 
 void CSpectator::ConSpectatePrevious(IConsole::IResult *pResult, void *pUserData)
 {
 	CSpectator *pSelf = (CSpectator *)pUserData;
-	int NewSpectatorID;
-	bool GotNewSpectatorID = false;
+	if(!pSelf->CanChangeSpectator())
+		return;
 
-	int CurPos = -1;
-	for (int i = 0; i < MAX_CLIENTS; i++)
-		if (pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i] && pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID == pSelf->m_pClient->m_Snap.m_SpecInfo.m_SpectatorID)
-		CurPos = i;
+	pSelf->SpectateNext(true);
+}
 
-	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
+void CSpectator::ConSpectateClosest(IConsole::IResult *pResult, void *pUserData)
+{
+	CSpectator *pSelf = (CSpectator *)pUserData;
+	if(!pSelf->CanChangeSpectator())
+		return;
+
+	CGameClient::CSnapState &Snap = pSelf->m_pClient->m_Snap;
+	int SpectatorID = Snap.m_SpecInfo.m_SpectatorID;
+
+	int NewSpectatorID = -1;
+
+	vec2 CurPosition(pSelf->m_pClient->m_pCamera->m_Center);
+	if(SpectatorID != SPEC_FREEVIEW)
 	{
-		for(int i = MAX_CLIENTS -1; i > -1; i--)
-		{
-			if(!pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i] || pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_Team == TEAM_SPECTATORS)
-				continue;
+		const CNetObj_Character &CurCharacter = Snap.m_aCharacters[SpectatorID].m_Cur;
+		CurPosition.x = CurCharacter.m_X;
+		CurPosition.y = CurCharacter.m_Y;
+	}
 
-			NewSpectatorID = pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID;
-			GotNewSpectatorID = true;
-			break;
+	int ClosestDistance = INT_MAX;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(i == SpectatorID || !Snap.m_paPlayerInfos[i] || Snap.m_paPlayerInfos[i]->m_Team == TEAM_SPECTATORS)
+			continue;
+		const CNetObj_Character &MaybeClosestCharacter = Snap.m_aCharacters[i].m_Cur;
+		int Distance = distance(CurPosition, vec2(MaybeClosestCharacter.m_X, MaybeClosestCharacter.m_Y));
+		if(NewSpectatorID == -1 || Distance < ClosestDistance)
+		{
+			NewSpectatorID = i;
+			ClosestDistance = Distance;
 		}
 	}
-	else
-	{
-		for(int i = CurPos - 1; i > -1; i--)
-		{
-			if(!pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i] || pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_Team == TEAM_SPECTATORS)
-				continue;
-
-			NewSpectatorID = pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID;
-			GotNewSpectatorID = true;
-			break;
-		}
-
-		if(!GotNewSpectatorID)
-		{
-			for(int i = MAX_CLIENTS - 1; i > CurPos; i--)
-			{
-				if(!pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i] || pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_Team == TEAM_SPECTATORS)
-					continue;
-
-			NewSpectatorID = pSelf->m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID;
-			GotNewSpectatorID = true;
-				break;
-			}
-		}
-	}
-	if(GotNewSpectatorID)
+	if(NewSpectatorID > -1)
 		pSelf->Spectate(NewSpectatorID);
 }
 
@@ -145,6 +160,7 @@ void CSpectator::OnConsoleInit()
 	Console()->Register("spectate", "i[spectator-id]", CFGFLAG_CLIENT, ConSpectate, this, "Switch spectator mode");
 	Console()->Register("spectate_next", "", CFGFLAG_CLIENT, ConSpectateNext, this, "Spectate the next player");
 	Console()->Register("spectate_previous", "", CFGFLAG_CLIENT, ConSpectatePrevious, this, "Spectate the previous player");
+	Console()->Register("spectate_closest", "", CFGFLAG_CLIENT, ConSpectateClosest, this, "Spectate the closest player");
 }
 
 bool CSpectator::OnMouseMove(float x, float y)
@@ -152,18 +168,8 @@ bool CSpectator::OnMouseMove(float x, float y)
 	if(!m_Active)
 		return false;
 
-#if defined(__ANDROID__) // No relative mouse on Android
-	m_SelectorMouse = vec2(x,y);
-	if( m_OldMouseX != x || m_OldMouseY != y )
-	{
-		m_OldMouseX = x;
-		m_OldMouseY = y;
-		m_SelectorMouse = vec2((x - Graphics()->ScreenWidth()/2), (y - Graphics()->ScreenHeight()/2));
-	}
-#else
 	UI()->ConvertMouseMove(&x, &y);
-	m_SelectorMouse += vec2(x,y);
-#endif
+	m_SelectorMouse += vec2(x, y);
 	return true;
 }
 
@@ -196,8 +202,8 @@ void CSpectator::OnRender()
 	m_SelectedSpectatorID = NO_SELECTION;
 
 	// draw background
-	float Width = 400*3.0f*Graphics()->ScreenAspect();
-	float Height = 400*3.0f;
+	float Width = 400 * 3.0f * Graphics()->ScreenAspect();
+	float Height = 400 * 3.0f;
 	float ObjWidth = 300.0f;
 	float FontSize = 20.0f;
 	float BigFontSize = 20.0f;
@@ -209,16 +215,17 @@ void CSpectator::OnRender()
 	int TotalPlayers = 0;
 	int PerLine = 8;
 	float BoxMove = -10.0f;
+	float BoxOffset = 0.0f;
 
-	for(int i = 0; i < MAX_CLIENTS; ++i)
+	for(auto &pInfo : m_pClient->m_Snap.m_paInfoByDDTeamName)
 	{
-		if(!m_pClient->m_Snap.m_paInfoByDDTeam[i] || m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_Team == TEAM_SPECTATORS)
+		if(!pInfo || pInfo->m_Team == TEAM_SPECTATORS)
 			continue;
 
 		++TotalPlayers;
 	}
 
-	if (TotalPlayers > 32)
+	if(TotalPlayers > 32)
 	{
 		FontSize = 18.0f;
 		LineHeight = 30.0f;
@@ -226,8 +233,9 @@ void CSpectator::OnRender()
 		PerLine = 16;
 		RoundRadius = 10.0f;
 		BoxMove = 3.0f;
+		BoxOffset = 6.0f;
 	}
-	if (TotalPlayers > 16)
+	if(TotalPlayers > 16)
 	{
 		ObjWidth = 600.0f;
 	}
@@ -235,10 +243,10 @@ void CSpectator::OnRender()
 	Graphics()->MapScreen(0, 0, Width, Height);
 
 	Graphics()->BlendNormal();
-	Graphics()->TextureSet(-1);
+	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.3f);
-	RenderTools()->DrawRoundRect(Width/2.0f-ObjWidth, Height/2.0f-300.0f, ObjWidth*2, 600.0f, 20.0f);
+	RenderTools()->DrawRoundRect(Width / 2.0f - ObjWidth, Height / 2.0f - 300.0f, ObjWidth * 2, 600.0f, 20.0f);
 	Graphics()->QuadsEnd();
 
 	// clamp mouse position to selector area
@@ -247,178 +255,187 @@ void CSpectator::OnRender()
 
 	// draw selections
 	if((Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_DemoSpecID == SPEC_FREEVIEW) ||
-		 m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
+		m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
 	{
-		Graphics()->TextureSet(-1);
+		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.25f);
-		RenderTools()->DrawRoundRect(Width/2.0f-(ObjWidth - 20.0f), Height/2.0f-280.0f, 270.0f, 60.0f, 20.0f);
+		RenderTools()->DrawRoundRect(Width / 2.0f - (ObjWidth - 20.0f), Height / 2.0f - 280.0f, 270.0f, 60.0f, 20.0f);
 		Graphics()->QuadsEnd();
 	}
 
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_DemoSpecID == SPEC_FOLLOW)
 	{
-		Graphics()->TextureSet(-1);
+		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.25f);
-		RenderTools()->DrawRoundRect(Width/2.0f-(ObjWidth - 310.0f), Height/2.0f-280.0f, 270.0f, 60.0f, 20.0f);
+		RenderTools()->DrawRoundRect(Width / 2.0f - (ObjWidth - 310.0f), Height / 2.0f - 280.0f, 270.0f, 60.0f, 20.0f);
 		Graphics()->QuadsEnd();
 	}
 
-	if(m_SelectorMouse.x >= -(ObjWidth-20.0f) && m_SelectorMouse.x <= -(ObjWidth-290+10.0f) &&
+	if(m_SelectorMouse.x >= -(ObjWidth - 20.0f) && m_SelectorMouse.x <= -(ObjWidth - 290 + 10.0f) &&
 		m_SelectorMouse.y >= -280.0f && m_SelectorMouse.y <= -220.0f)
 	{
 		m_SelectedSpectatorID = SPEC_FREEVIEW;
 		Selected = true;
 	}
-	TextRender()->TextColor(1.0f, 1.0f, 1.0f, Selected?1.0f:0.5f);
-	TextRender()->Text(0, Width/2.0f-(ObjWidth-60.0f), Height/2.0f-265.0f, BigFontSize, Localize("Free-View"), -1);
+	TextRender()->TextColor(1.0f, 1.0f, 1.0f, Selected ? 1.0f : 0.5f);
+	TextRender()->Text(0, Width / 2.0f - (ObjWidth - 60.0f), Height / 2.0f - 280.f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Free-View"), -1.0f);
 
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		Selected = false;
-		if(m_SelectorMouse.x > -(ObjWidth-290.0f) && m_SelectorMouse.x <= -(ObjWidth-590.0f) &&
+		if(m_SelectorMouse.x > -(ObjWidth - 290.0f) && m_SelectorMouse.x <= -(ObjWidth - 590.0f) &&
 			m_SelectorMouse.y >= -280.0f && m_SelectorMouse.y <= -220.0f)
 		{
 			m_SelectedSpectatorID = SPEC_FOLLOW;
 			Selected = true;
 		}
-		TextRender()->TextColor(1.0f, 1.0f, 1.0f, Selected?1.0f:0.5f);
-		TextRender()->Text(0, Width/2.0f-(ObjWidth-350.0f), Height/2.0f-265.0f, BigFontSize, Localize("Follow"), -1);
+		TextRender()->TextColor(1.0f, 1.0f, 1.0f, Selected ? 1.0f : 0.5f);
+		TextRender()->Text(0, Width / 2.0f - (ObjWidth - 350.0f), Height / 2.0f - 280.0f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Follow"), -1.0f);
 	}
 
-	float x = -(ObjWidth - 30.0f), y = StartY;
+	float x = -(ObjWidth - 35.0f), y = StartY;
 
 	int OldDDTeam = -1;
 
 	for(int i = 0, Count = 0; i < MAX_CLIENTS; ++i)
 	{
-		if(!m_pClient->m_Snap.m_paInfoByDDTeam[i] || m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_Team == TEAM_SPECTATORS)
+		if(!m_pClient->m_Snap.m_paInfoByDDTeamName[i] || m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_Team == TEAM_SPECTATORS)
 			continue;
 
 		++Count;
 
-		if(Count == PerLine + 1 || (Count > PerLine + 1 && (Count-1)%PerLine == 0))
+		if(Count == PerLine + 1 || (Count > PerLine + 1 && (Count - 1) % PerLine == 0))
 		{
 			x += 290.0f;
 			y = StartY;
 		}
 
-		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByDDTeam[i];
-		int DDTeam = ((CGameClient *) m_pClient)->m_Teams.Team(pInfo->m_ClientID);
+		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByDDTeamName[i];
+		int DDTeam = m_pClient->m_Teams.Team(pInfo->m_ClientID);
 		int NextDDTeam = 0;
 
 		for(int j = i + 1; j < MAX_CLIENTS; j++)
 		{
-			const CNetObj_PlayerInfo *pInfo2 = m_pClient->m_Snap.m_paInfoByDDTeam[j];
+			const CNetObj_PlayerInfo *pInfo2 = m_pClient->m_Snap.m_paInfoByDDTeamName[j];
 
 			if(!pInfo2 || pInfo2->m_Team == TEAM_SPECTATORS)
 				continue;
 
-			NextDDTeam = ((CGameClient *) m_pClient)->m_Teams.Team(pInfo2->m_ClientID);
+			NextDDTeam = m_pClient->m_Teams.Team(pInfo2->m_ClientID);
 			break;
 		}
 
-		if (OldDDTeam == -1)
+		if(OldDDTeam == -1)
 		{
-			for (int j = i - 1; j >= 0; j--)
+			for(int j = i - 1; j >= 0; j--)
 			{
-				const CNetObj_PlayerInfo *pInfo2 = m_pClient->m_Snap.m_paInfoByDDTeam[j];
+				const CNetObj_PlayerInfo *pInfo2 = m_pClient->m_Snap.m_paInfoByDDTeamName[j];
 
 				if(!pInfo2 || pInfo2->m_Team == TEAM_SPECTATORS)
 					continue;
 
-				OldDDTeam = ((CGameClient *) m_pClient)->m_Teams.Team(pInfo2->m_ClientID);
+				OldDDTeam = m_pClient->m_Teams.Team(pInfo2->m_ClientID);
 				break;
 			}
 		}
 
-		if (DDTeam != TEAM_FLOCK)
+		if(DDTeam != TEAM_FLOCK)
 		{
-			Graphics()->TextureSet(-1);
+			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
-			vec3 rgb = HslToRgb(vec3(DDTeam / 64.0f, 1.0f, 0.5f));
-			Graphics()->SetColor(rgb.r, rgb.g, rgb.b, 0.5f);
+			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(DDTeam / 64.0f, 1.0f, 0.5f, 0.5f));
+			Graphics()->SetColor(rgb);
 
 			int Corners = 0;
 
-			if (OldDDTeam != DDTeam)
+			if(OldDDTeam != DDTeam)
 				Corners |= CUI::CORNER_TL | CUI::CORNER_TR;
-			if (NextDDTeam != DDTeam)
+			if(NextDDTeam != DDTeam)
 				Corners |= CUI::CORNER_BL | CUI::CORNER_BR;
 
-			RenderTools()->DrawRoundRectExt(Width/2.0f+x-10.0f, Height/2.0f+y+BoxMove, 270.0f, LineHeight, RoundRadius, Corners);
+			RenderTools()->DrawRoundRectExt(Width / 2.0f + x - 10.0f + BoxOffset, Height / 2.0f + y + BoxMove, 270.0f - BoxOffset, LineHeight, RoundRadius, Corners);
 
 			Graphics()->QuadsEnd();
 		}
 
 		OldDDTeam = DDTeam;
 
-		if((Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_DemoSpecID == m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID)
-			|| (Client()->State() != IClient::STATE_DEMOPLAYBACK && m_pClient ->m_Snap.m_SpecInfo.m_SpectatorID == m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID))
+		if((Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_DemoSpecID == m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID) || (Client()->State() != IClient::STATE_DEMOPLAYBACK && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID))
 		{
-			Graphics()->TextureSet(-1);
+			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.25f);
-			RenderTools()->DrawRoundRect(Width/2.0f+x-10.0f, Height/2.0f+y+BoxMove, 270.0f, LineHeight, RoundRadius);
+			RenderTools()->DrawRoundRect(Width / 2.0f + x - 10.0f + BoxOffset, Height / 2.0f + y + BoxMove, 270.0f - BoxOffset, LineHeight, RoundRadius);
 			Graphics()->QuadsEnd();
 		}
 
 		Selected = false;
-		if(m_SelectorMouse.x >= x-10.0f && m_SelectorMouse.x < x+260.0f &&
-			m_SelectorMouse.y >= y-(LineHeight/6.0f) && m_SelectorMouse.y < y+(LineHeight*5.0f/6.0f))
+		if(m_SelectorMouse.x >= x - 10.0f && m_SelectorMouse.x < x + 260.0f &&
+			m_SelectorMouse.y >= y - (LineHeight / 6.0f) && m_SelectorMouse.y < y + (LineHeight * 5.0f / 6.0f))
 		{
-			m_SelectedSpectatorID = m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID;
+			m_SelectedSpectatorID = m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID;
 			Selected = true;
 		}
 		float TeeAlpha;
 		if(Client()->State() == IClient::STATE_DEMOPLAYBACK &&
-			!m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID].m_Active)
+			!m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID].m_Active)
 		{
 			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 0.25f);
 			TeeAlpha = 0.5f;
 		}
 		else
 		{
-			TextRender()->TextColor(1.0f, 1.0f, 1.0f, Selected?1.0f:0.5f);
+			TextRender()->TextColor(1.0f, 1.0f, 1.0f, Selected ? 1.0f : 0.5f);
 			TeeAlpha = 1.0f;
 		}
-		TextRender()->Text(0, Width/2.0f+x+50.0f, Height/2.0f+y+5.0f, FontSize, m_pClient->m_aClients[m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID].m_aName, 220.0f);
+		TextRender()->Text(0, Width / 2.0f + x + 50.0f, Height / 2.0f + y + BoxMove + (LineHeight - FontSize) / 2.f, FontSize, m_pClient->m_aClients[m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID].m_aName, 220.0f);
 
 		// flag
-		if(m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_FLAGS &&
-			m_pClient->m_Snap.m_pGameDataObj && (m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierRed == m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID ||
-			m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue == m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID))
+		if(m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_FLAGS &&
+			m_pClient->m_Snap.m_pGameDataObj && (m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierRed == m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID || m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue == m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID))
 		{
 			Graphics()->BlendNormal();
-			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
-			Graphics()->QuadsBegin();
+			if(m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue == m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID)
+				Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteFlagBlue);
+			else
+				Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteFlagRed);
 
-			RenderTools()->SelectSprite(m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_Team==TEAM_RED ? SPRITE_FLAG_BLUE : SPRITE_FLAG_RED, SPRITE_FLAG_FLIP_X);
+			Graphics()->QuadsBegin();
+			Graphics()->QuadsSetSubset(1, 0, 0, 1);
 
 			float Size = LineHeight;
-			IGraphics::CQuadItem QuadItem(Width/2.0f+x-LineHeight/5.0f, Height/2.0f+y-LineHeight/3.0f, Size/2.0f, Size);
+			IGraphics::CQuadItem QuadItem(Width / 2.0f + x - LineHeight / 5.0f, Height / 2.0f + y - LineHeight / 3.0f, Size / 2.0f, Size);
 			Graphics()->QuadsDrawTL(&QuadItem, 1);
 			Graphics()->QuadsEnd();
 		}
 
-		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID].m_RenderInfo;
-		TeeInfo.m_ColorBody.a = TeeAlpha;
-		TeeInfo.m_ColorFeet.a = TeeAlpha;
+		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID].m_RenderInfo;
 		TeeInfo.m_Size *= TeeSizeMod;
-		RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), vec2(Width/2.0f+x+20.0f, Height/2.0f+y+20.0f), true);
+		RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), vec2(Width / 2.0f + x + 20.0f, Height / 2.0f + y + 20.0f), TeeAlpha);
+
+		if(m_pClient->m_aClients[m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID].m_Friend)
+		{
+			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendColor));
+			TextRender()->TextColor(rgb.WithAlpha(1.f));
+			TextRender()->Text(0, Width / 2.0f + x - TeeInfo.m_Size / 2.0f, Height / 2.0f + y + BoxMove + (LineHeight - FontSize) / 2.f, FontSize, "♥", 220.0f);
+			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+		}
 
 		y += LineHeight;
 	}
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 	// draw cursor
+	Graphics()->WrapClamp();
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CURSOR].m_Id);
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-	IGraphics::CQuadItem QuadItem(m_SelectorMouse.x+Width/2.0f, m_SelectorMouse.y+Height/2.0f, 48.0f, 48.0f);
+	IGraphics::CQuadItem QuadItem(m_SelectorMouse.x + Width / 2.0f, m_SelectorMouse.y + Height / 2.0f, 48.0f, 48.0f);
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
+	Graphics()->WrapNormal();
 }
 
 void CSpectator::OnReset()
@@ -432,7 +449,7 @@ void CSpectator::Spectate(int SpectatorID)
 {
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
-		m_pClient->m_DemoSpecID = clamp(SpectatorID, (int)SPEC_FOLLOW, MAX_CLIENTS-1);
+		m_pClient->m_DemoSpecID = clamp(SpectatorID, (int)SPEC_FOLLOW, MAX_CLIENTS - 1);
 		return;
 	}
 
