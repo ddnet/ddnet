@@ -824,7 +824,7 @@ void CGameContext::OnTick()
 				int64 Now = Server()->Tick();
 				for(int i = 0; i < MAX_CLIENTS; i++)
 				{
-					if(!m_apPlayers[i] || aVoteChecked[i])
+					if(!m_apPlayers[i])
 						continue;
 
 					if((IsKickVote() || IsSpecVote()) && (m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS ||
@@ -850,25 +850,29 @@ void CGameContext::OnTick()
 					int ActVote = m_apPlayers[i]->m_Vote;
 					int ActVotePos = m_apPlayers[i]->m_VotePos;
 
-					// check for more players with the same ip (only use the vote of the one who voted first)
-					for(int j = i + 1; j < MAX_CLIENTS; ++j)
+					// only allow IPs to vote once, but keep veto ability
+					if(!aVoteChecked[i])
 					{
-						if(!m_apPlayers[j] || aVoteChecked[j] || str_comp(aaBuf[j], aaBuf[i]))
-							continue;
-
-						aVoteChecked[j] = true;
-						if(m_apPlayers[j]->m_Vote && (!ActVote || ActVotePos > m_apPlayers[j]->m_VotePos))
+						// check for more players with the same ip (only use the vote of the one who voted first)
+						for(int j = i + 1; j < MAX_CLIENTS; ++j)
 						{
-							ActVote = m_apPlayers[j]->m_Vote;
-							ActVotePos = m_apPlayers[j]->m_VotePos;
-						}
-					}
+							if(!m_apPlayers[j] || aVoteChecked[j] || str_comp(aaBuf[j], aaBuf[i]))
+								continue;
 
-					Total++;
-					if(ActVote > 0)
-						Yes++;
-					else if(ActVote < 0)
-						No++;
+							aVoteChecked[j] = true;
+							if(m_apPlayers[j]->m_Vote && (!ActVote || ActVotePos > m_apPlayers[j]->m_VotePos))
+							{
+								ActVote = m_apPlayers[j]->m_Vote;
+								ActVotePos = m_apPlayers[j]->m_VotePos;
+							}
+						}
+
+						Total++;
+						if(ActVote > 0)
+							Yes++;
+						else if(ActVote < 0)
+							No++;
+					}
 
 					// veto right for players who have been active on server for long and who're not afk
 					if(!IsKickVote() && !IsSpecVote() && m_apPlayers[i] &&
