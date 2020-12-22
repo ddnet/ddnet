@@ -2173,10 +2173,11 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			pPlayer->UpdatePlaytime();
 
 			// set infos
-			char aOldName[MAX_NAME_LENGTH];
-			str_copy(aOldName, Server()->ClientName(ClientID), sizeof(aOldName));
 			if(Server()->WouldClientNameChange(ClientID, pMsg->m_pName) && !ProcessSpamProtection(ClientID))
 			{
+				char aOldName[MAX_NAME_LENGTH];
+				str_copy(aOldName, Server()->ClientName(ClientID), sizeof(aOldName));
+
 				Server()->SetClientName(ClientID, pMsg->m_pName);
 
 				char aChatText[256];
