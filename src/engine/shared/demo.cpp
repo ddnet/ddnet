@@ -1161,7 +1161,7 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 
 	m_pDemoPlayer->Stop();
 	m_pDemoRecorder->Stop();
-}
+} // NOLINT(clang-analyzer-unix.Malloc)
 
 void CDemoEditor::OnDemoPlayerSnapshot(void *pData, int Size)
 {
