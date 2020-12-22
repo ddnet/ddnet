@@ -1053,6 +1053,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	bool City;
 	bool Vanilla;
 	bool Plus;
+	bool FDDrace;
 	if(Version < 1)
 	{
 		Race = IsRace(pFallbackServerInfo);
@@ -1064,6 +1065,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 		City = IsCity(pFallbackServerInfo);
 		Vanilla = IsVanilla(pFallbackServerInfo);
 		Plus = IsPlus(pFallbackServerInfo);
+		FDDrace = false;
 	}
 	else
 	{
@@ -1076,9 +1078,10 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 		Vanilla = Flags & GAMEINFOFLAG_GAMETYPE_VANILLA;
 		Plus = Flags & GAMEINFOFLAG_GAMETYPE_PLUS;
 		City = Version >= 5 && Flags2 & GAMEINFOFLAG2_GAMETYPE_CITY;
+		FDDrace = Version >= 6 && Flags2 & GAMEINFOFLAG2_GAMETYPE_FDDRACE;
 
 		// Ensure invariants upheld by the server info parsing business.
-		DDRace = DDRace || DDNet;
+		DDRace = DDRace || DDNet || FDDrace;
 		Race = Race || FastCap || DDRace;
 	}
 
@@ -1108,6 +1111,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	Info.m_Race = Race;
 	Info.m_DontMaskEntities = !DDNet;
 	Info.m_AllowXSkins = false;
+	Info.m_EntitiesFDDrace = FDDrace;
 
 	if(Version >= 0)
 	{
@@ -1148,6 +1152,10 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	if(Version >= 5)
 	{
 		Info.m_AllowXSkins = Flags2 & GAMEINFOFLAG2_ALLOW_X_SKINS;
+	}
+	if(Version >= 6)
+	{
+		Info.m_EntitiesFDDrace = Flags2 & GAMEINFOFLAG2_ENTITIES_FDDRACE;
 	}
 	return Info;
 }
