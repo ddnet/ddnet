@@ -66,6 +66,8 @@ CServerBrowser::CServerBrowser()
 	m_RequestNumber = 0;
 
 	m_pDDNetInfo = 0;
+
+	m_SortOnNextUpdate = false;
 }
 
 CServerBrowser::~CServerBrowser()
@@ -369,10 +371,6 @@ void CServerBrowser::Sort()
 	else if(g_Config.m_BrSort == IServerBrowser::SORT_GAMETYPE)
 		std::stable_sort(m_pSortedServerlist, m_pSortedServerlist + m_NumSortedServers, SortWrap(this, &CServerBrowser::SortCompareGametype));
 
-	// set indexes
-	for(i = 0; i < m_NumSortedServers; i++)
-		m_ppServerlist[m_pSortedServerlist[i]]->m_Info.m_SortedIndex = i;
-
 	str_copy(m_aFilterGametypeString, g_Config.m_BrFilterGametype, sizeof(m_aFilterGametypeString));
 	str_copy(m_aFilterString, g_Config.m_BrFilterString, sizeof(m_aFilterString));
 	m_Sorthash = SortHash();
@@ -621,7 +619,7 @@ void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServer
 		RemoveRequest(pEntry);
 	}
 
-	Sort();
+	m_SortOnNextUpdate = true;
 }
 
 void CServerBrowser::Refresh(int Type)
@@ -981,8 +979,11 @@ void CServerBrowser::Update(bool ForceResort)
 	}
 
 	// check if we need to resort
-	if(m_Sorthash != SortHash() || ForceResort)
+	if(m_Sorthash != SortHash() || ForceResort || m_SortOnNextUpdate)
+	{
 		Sort();
+		m_SortOnNextUpdate = false;
+	}
 }
 
 bool CServerBrowser::IsFavorite(const NETADDR &Addr) const

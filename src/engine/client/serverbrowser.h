@@ -178,6 +178,8 @@ private:
 	int m_RequestNumber;
 	unsigned char m_aTokenSeed[16];
 
+	bool m_SortOnNextUpdate;
+
 	int GenerateToken(const NETADDR &Addr) const;
 	static int GetBasicToken(int Token);
 	static int GetExtraToken(int Token);
