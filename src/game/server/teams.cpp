@@ -437,7 +437,7 @@ void CGameTeams::SendTeamsState(int ClientID)
 	if(g_Config.m_SvTeam == 3)
 		return;
 
-	if(!m_pGameContext->m_apPlayers[ClientID] || m_pGameContext->m_apPlayers[ClientID]->GetClientVersion() <= VERSION_DDRACE)
+	if(!m_pGameContext->m_apPlayers[ClientID] || (!Server()->IsSixup(ClientID) && m_pGameContext->m_apPlayers[ClientID]->GetClientVersion() <= VERSION_DDRACE))
 		return;
 
 	CMsgPacker Msg(NETMSGTYPE_SV_TEAMSSTATE);
