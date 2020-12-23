@@ -697,43 +697,49 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 {
 	int MsgId = pMsg->m_MsgID;
 	Packer.Reset();
-	if(MsgId < OFFSET_UUID)
+
+	if(Sixup && !pMsg->m_NoTranslate)
 	{
-		if(Sixup && !pMsg->m_NoTranslate)
+		if(pMsg->m_System)
 		{
-			if(pMsg->m_System)
-			{
-				if(MsgId >= NETMSG_MAP_CHANGE && MsgId <= NETMSG_MAP_DATA)
-					;
-				else if(MsgId >= NETMSG_CON_READY && MsgId <= NETMSG_INPUTTIMING)
-					MsgId += 1;
-				else if(MsgId == NETMSG_RCON_LINE)
-					MsgId = 13;
-				else if(MsgId >= NETMSG_AUTH_CHALLANGE && MsgId <= NETMSG_AUTH_RESULT)
-					MsgId += 4;
-				else if(MsgId >= NETMSG_PING && MsgId <= NETMSG_ERROR)
-					MsgId += 4;
-				else if(MsgId >= NETMSG_RCON_CMD_ADD && MsgId <= NETMSG_RCON_CMD_REM)
-					MsgId -= 11;
-				else
-				{
-					dbg_msg("net", "DROP send sys %d", MsgId);
-					return true;
-				}
-			}
+			if(MsgId >= OFFSET_UUID)
+				;
+			else if(MsgId >= NETMSG_MAP_CHANGE && MsgId <= NETMSG_MAP_DATA)
+				;
+			else if(MsgId >= NETMSG_CON_READY && MsgId <= NETMSG_INPUTTIMING)
+				MsgId += 1;
+			else if(MsgId == NETMSG_RCON_LINE)
+				MsgId = 13;
+			else if(MsgId >= NETMSG_AUTH_CHALLANGE && MsgId <= NETMSG_AUTH_RESULT)
+				MsgId += 4;
+			else if(MsgId >= NETMSG_PING && MsgId <= NETMSG_ERROR)
+				MsgId += 4;
+			else if(MsgId >= NETMSG_RCON_CMD_ADD && MsgId <= NETMSG_RCON_CMD_REM)
+				MsgId -= 11;
 			else
 			{
-				if(MsgId >= 0)
-					MsgId = Msg_SixToSeven(MsgId);
-
-				if(MsgId < 0)
-					return true;
+				dbg_msg("net", "DROP send sys %d", MsgId);
+				return true;
 			}
 		}
+		else
+		{
+			if(MsgId == NETMSGTYPE_SV_TEAMSSTATE)
+				MsgId = NETMSGTYPE_SV_TEAMSSTATEEX;
 
+			if(MsgId >= 0 && MsgId < OFFSET_UUID)
+				MsgId = Msg_SixToSeven(MsgId);
+
+			if(MsgId < 0)
+				return true;
+		}
+	}
+
+	if(MsgId < OFFSET_UUID)
+	{
 		Packer.AddInt((MsgId << 1) | (pMsg->m_System ? 1 : 0));
 	}
-	else if(!Sixup)
+	else
 	{
 		Packer.AddInt((0 << 1) | (pMsg->m_System ? 1 : 0)); // NETMSG_EX, NETMSGTYPE_EX
 		g_UuidManager.PackUuid(MsgId, &Packer);
@@ -1312,7 +1318,7 @@ static inline int MsgFromSixup(int Msg, bool System)
 			Msg += 11;
 		else if(Msg >= 18 && Msg <= 28)
 			Msg = NETMSG_READY + Msg - 18;
-		else
+		else if(Msg < OFFSET_UUID)
 			return -1;
 	}
 

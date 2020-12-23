@@ -23,7 +23,7 @@ GameInfoFlags = [
 GameInfoFlags2 = [
 	"ALLOW_X_SKINS", "GAMETYPE_CITY", "GAMETYPE_FDDRACE", "ENTITIES_FDDRACE",
 ]
-ExPlayerFlags = ["AFK", "PAUSED", "SPEC"]
+ExPlayerFlags = ["AFK", "PAUSED", "SPEC", "AIM"]
 
 Emoticons = ["OOP", "EXCLAMATION", "HEARTS", "DROP", "DOTDOT", "MUSIC", "SORRY", "GHOST", "SUSHI", "SPLATTEE", "DEVILTEE", "ZOMG", "ZZZ", "WTF", "EYES", "QUESTION"]
 
@@ -441,4 +441,12 @@ Messages = [
 	NetMessageEx("Cl_ShowOthers", "showothers@netmsg.ddnet.tw", [
 		NetIntRange("m_Show", 0, 2),
 	]),
+
+	NetMessageEx("Sv_TeamsStateEx", "teamsstate@netmsg.ddnet.tw", []),
+
+	NetMessageEx("Cl_ExPlayerFlags", "explayerflags@netmsg.7.ddnet.tw", [
+		NetIntAny("m_Flags"),
+	]),
+
+	NetMessageEx("Cl_IsDDrace", "isddrace@netmsg.7.ddnet.tw", []),
 ]
