@@ -95,5 +95,7 @@ private:
 	CRenderGroup<GROUP_PROJECTILE_TRAIL> m_RenderTrail;
 	CRenderGroup<GROUP_EXPLOSIONS> m_RenderExplosions;
 	CRenderGroup<GROUP_GENERAL> m_RenderGeneral;
+
+	bool ParticleIsVisibleOnScreen(const vec2 &CurPos, float CurSize);
 };
 #endif
