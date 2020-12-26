@@ -297,6 +297,8 @@ private:
 	static void ConKillPlayer(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConNinja(IConsole::IResult *pResult, void *pUserData);
+	static void ConEndlessHook(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnEndlessHook(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnSolo(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnDeep(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnSuper(IConsole::IResult *pResult, void *pUserData);

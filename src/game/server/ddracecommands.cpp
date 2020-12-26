@@ -94,6 +94,30 @@ void CGameContext::ConNinja(IConsole::IResult *pResult, void *pUserData)
 	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_NINJA, false);
 }
 
+void CGameContext::ConEndlessHook(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+	if(pChr)
+	{
+		pChr->SetEndlessHook(true);
+	}
+}
+
+void CGameContext::ConUnEndlessHook(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+	if(pChr)
+	{
+		pChr->SetEndlessHook(false);
+	}
+}
+
 void CGameContext::ConSuper(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

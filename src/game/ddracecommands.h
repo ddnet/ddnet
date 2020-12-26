@@ -27,6 +27,8 @@ CONSOLE_COMMAND("unweapons", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConUnWeapons, th
 CONSOLE_COMMAND("ninja", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConNinja, this, "Makes you a ninja")
 CONSOLE_COMMAND("super", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConSuper, this, "Makes you super")
 CONSOLE_COMMAND("unsuper", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConUnSuper, this, "Removes super from you")
+CONSOLE_COMMAND("endless_hook", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConEndlessHook, this, "Gives you endless hook")
+CONSOLE_COMMAND("unendless_hook", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConUnEndlessHook, this, "Removes endless hook from you")
 CONSOLE_COMMAND("unsolo", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConUnSolo, this, "Puts you out of solo part")
 CONSOLE_COMMAND("undeep", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConUnDeep, this, "Puts you out of deep freeze")
 CONSOLE_COMMAND("left", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConGoLeft, this, "Makes you move 1 tile left")

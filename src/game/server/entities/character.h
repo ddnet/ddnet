@@ -82,6 +82,7 @@ public:
 	void GiveWeapon(int Weapon, bool Remove = false);
 	void GiveNinja();
 	void RemoveNinja();
+	void SetEndlessHook(bool Enable);
 
 	void SetEmote(int Emote, int Tick);
 

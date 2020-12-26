@@ -1606,17 +1606,13 @@ void CCharacter::HandleTiles(int Index)
 		m_DeepFreeze = false;
 
 	// endless hook
-	if(((m_TileIndex == TILE_EHOOK_ENABLE) || (m_TileFIndex == TILE_EHOOK_ENABLE)) && !m_EndlessHook)
+	if(((m_TileIndex == TILE_EHOOK_ENABLE) || (m_TileFIndex == TILE_EHOOK_ENABLE)))
 	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Endless hook has been activated");
-		m_EndlessHook = true;
-		m_Core.m_EndlessHook = true;
+		SetEndlessHook(true);
 	}
-	else if(((m_TileIndex == TILE_EHOOK_DISABLE) || (m_TileFIndex == TILE_EHOOK_DISABLE)) && m_EndlessHook)
+	else if(((m_TileIndex == TILE_EHOOK_DISABLE) || (m_TileFIndex == TILE_EHOOK_DISABLE)))
 	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Endless hook has been deactivated");
-		m_EndlessHook = false;
-		m_Core.m_EndlessHook = false;
+		SetEndlessHook(false);
 	}
 
 	// hit others
@@ -2353,6 +2349,18 @@ void CCharacter::GiveAllWeapons()
 	{
 		GiveWeapon(i);
 	}
+}
+
+void CCharacter::SetEndlessHook(bool Enable)
+{
+	if(m_EndlessHook == Enable)
+	{
+		return;
+	}
+
+	GameServer()->SendChatTarget(GetPlayer()->GetCID(), Enable ? "Endless hook has been activated" : "Endless hook has been deactived");
+	m_EndlessHook = Enable;
+	m_Core.m_EndlessHook = Enable;
 }
 
 void CCharacter::Pause(bool Pause)
