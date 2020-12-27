@@ -1807,7 +1807,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			TempY += RealOffsetY;
 		}
 
-		str_format(LineBuilder, sizeof(LineBuilder), "%snameless tee: Hey, how are you %s?", g_Config.m_ClShowIDs ? " 7: " : "", aBuf);
+		str_format(LineBuilder, sizeof(LineBuilder), "%snameless tee: Hey, how are you %s?", g_Config.m_ClShowIDs ? " 7: " : "", aBuf);
 		Width = TextRender()->TextWidth(0, RealFontSize, LineBuilder, -1, -1);
 		RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, CUI::CORNER_ALL);
 		TempY += RealOffsetY;
@@ -1821,7 +1821,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		TempY += RealOffsetY;
 
 		if(g_Config.m_ClShowIDs)
-			str_copy(LineBuilder, "♥  8: Friend: Hello there", sizeof(LineBuilder));
+			str_copy(LineBuilder, "♥  8: Friend: Hello there", sizeof(LineBuilder));
 		else
 			str_copy(LineBuilder, "♥ Friend: Hello there", sizeof(LineBuilder));
 		Width = TextRender()->TextWidth(0, RealFontSize, LineBuilder, -1, -1);
@@ -1829,7 +1829,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		TempY += RealOffsetY;
 
 		if(g_Config.m_ClShowIDs)
-			str_copy(LineBuilder, " 9: Spammer [6]: Hey fools, I'm spamming here!", sizeof(LineBuilder));
+			str_copy(LineBuilder, " 9: Spammer [6]: Hey fools, I'm spamming here!", sizeof(LineBuilder));
 		else
 			str_copy(LineBuilder, "Spammer [6]: Hey fools, I'm spamming here!", sizeof(LineBuilder));
 		Width = TextRender()->TextWidth(0, RealFontSize, LineBuilder, -1, -1);
@@ -1874,7 +1874,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	TextRender()->MoveCursor(&Cursor, RealMsgPaddingTee, 0);
 	TextRender()->TextColor(DefaultNameColor);
 	if(g_Config.m_ClShowIDs)
-		TextRender()->TextEx(&Cursor, " 7: ", -1);
+		TextRender()->TextEx(&Cursor, " 7: ", -1);
 	TextRender()->TextEx(&Cursor, "nameless tee: ", -1);
 	TextRender()->TextColor(HighlightedColor);
 	TextRender()->TextEx(&Cursor, "Hey, how are you ", -1);
@@ -1905,7 +1905,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	}
 	TextRender()->TextColor(DefaultNameColor);
 	if(g_Config.m_ClShowIDs)
-		TextRender()->TextEx(&Cursor, " 8: Friend: ", -1);
+		TextRender()->TextEx(&Cursor, " 8: Friend: ", -1);
 	else
 		TextRender()->TextEx(&Cursor, "Friend: ", -1);
 	TextRender()->TextColor(NormalColor);
@@ -1918,7 +1918,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	TextRender()->MoveCursor(&Cursor, RealMsgPaddingTee, 0);
 	TextRender()->TextColor(DefaultNameColor);
 	if(g_Config.m_ClShowIDs)
-		TextRender()->TextEx(&Cursor, " 9: Spammer ", -1);
+		TextRender()->TextEx(&Cursor, " 9: Spammer ", -1);
 	else
 		TextRender()->TextEx(&Cursor, "Spammer ", -1);
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 0.3f);

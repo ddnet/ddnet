@@ -461,7 +461,14 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		if(g_Config.m_ClShowIDs)
 		{
 			char aId[64] = "";
-			str_format(aId, sizeof(aId), "%2d: %s", pInfo->m_ClientID, m_pClient->m_aClients[pInfo->m_ClientID].m_aName);
+			if(pInfo->m_ClientID < 10)
+			{
+				str_format(aId, sizeof(aId), " %d: %s", pInfo->m_ClientID, m_pClient->m_aClients[pInfo->m_ClientID].m_aName);
+			}
+			else
+			{
+				str_format(aId, sizeof(aId), "%d: %s", pInfo->m_ClientID, m_pClient->m_aClients[pInfo->m_ClientID].m_aName);
+			}
 			Cursor.m_LineWidth = NameLength;
 			TextRender()->TextEx(&Cursor, aId, -1);
 		}
