@@ -1799,39 +1799,28 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 		if(g_Config.m_ClShowChatSystem)
 		{
-			str_copy(LineBuilder, "*** '", sizeof(LineBuilder));
-			str_append(LineBuilder, aBuf, sizeof(LineBuilder));
-			str_append(LineBuilder, "' entered and joined the game", sizeof(LineBuilder));
+			str_format(LineBuilder, sizeof(LineBuilder), "*** '%s' entered and joined the game", aBuf);
 			Width = TextRender()->TextWidth(0, RealFontSize, LineBuilder, -1, -1);
 			RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, CUI::CORNER_ALL);
 			TempY += RealOffsetY;
 		}
 
-		str_format(LineBuilder, sizeof(LineBuilder), "%snameless tee: Hey, how are you %s?", g_Config.m_ClShowIDs ? " 7: " : "", aBuf);
+		str_format(LineBuilder, sizeof(LineBuilder), "%sRandom Tee: Hey, how are you %s?", g_Config.m_ClShowIDs ? " 7: " : "", aBuf);
 		Width = TextRender()->TextWidth(0, RealFontSize, LineBuilder, -1, -1);
 		RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, CUI::CORNER_ALL);
 		TempY += RealOffsetY;
 
-		if(g_Config.m_ClShowIDs)
-			str_copy(LineBuilder, "11: Your Teammate: Let's speedrun this!", sizeof(LineBuilder));
-		else
-			str_copy(LineBuilder, "Your Teammate: Let's speedrun this!", sizeof(LineBuilder));
+		str_format(LineBuilder, sizeof(LineBuilder), "%sYour Teammate: Let's speedrun this!", g_Config.m_ClShowIDs ? "11: " : "");
 		Width = TextRender()->TextWidth(0, RealFontSize, LineBuilder, -1, -1);
 		RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, CUI::CORNER_ALL);
 		TempY += RealOffsetY;
 
-		if(g_Config.m_ClShowIDs)
-			str_copy(LineBuilder, "♥  8: Friend: Hello there", sizeof(LineBuilder));
-		else
-			str_copy(LineBuilder, "♥ Friend: Hello there", sizeof(LineBuilder));
+		str_format(LineBuilder, sizeof(LineBuilder), "%s%sFriend: Hello there", g_Config.m_ClMessageFriend ? "♥ " : "", g_Config.m_ClShowIDs ? " 8: " : "");
 		Width = TextRender()->TextWidth(0, RealFontSize, LineBuilder, -1, -1);
 		RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, CUI::CORNER_ALL);
 		TempY += RealOffsetY;
 
-		if(g_Config.m_ClShowIDs)
-			str_copy(LineBuilder, " 9: Spammer [6]: Hey fools, I'm spamming here!", sizeof(LineBuilder));
-		else
-			str_copy(LineBuilder, "Spammer [6]: Hey fools, I'm spamming here!", sizeof(LineBuilder));
+		str_format(LineBuilder, sizeof(LineBuilder), "%sSpammer [6]: Hey fools, I'm spamming here!", g_Config.m_ClShowIDs ? " 9: " : "");
 		Width = TextRender()->TextWidth(0, RealFontSize, LineBuilder, -1, -1);
 		RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, CUI::CORNER_ALL);
 		TempY += RealOffsetY;
@@ -1875,7 +1864,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	TextRender()->TextColor(DefaultNameColor);
 	if(g_Config.m_ClShowIDs)
 		TextRender()->TextEx(&Cursor, " 7: ", -1);
-	TextRender()->TextEx(&Cursor, "nameless tee: ", -1);
+	TextRender()->TextEx(&Cursor, "Random Tee: ", -1);
 	TextRender()->TextColor(HighlightedColor);
 	TextRender()->TextEx(&Cursor, "Hey, how are you ", -1);
 	TextRender()->TextEx(&Cursor, aBuf, -1);
@@ -1888,10 +1877,8 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	TextRender()->MoveCursor(&Cursor, RealMsgPaddingTee, 0);
 	TextRender()->TextColor(TeamColor);
 	if(g_Config.m_ClShowIDs)
-		TextRender()->TextEx(&Cursor, "11: Your Teammate: ", -1);
-	else
-		TextRender()->TextEx(&Cursor, "Your Teammate: ", -1);
-	TextRender()->TextEx(&Cursor, "Let's speedrun this!", -1);
+		TextRender()->TextEx(&Cursor, "11: ", -1);
+	TextRender()->TextEx(&Cursor, "Your Teammate: Let's speedrun this!", -1);
 	if(!g_Config.m_ClChatOld)
 		RenderTools()->RenderTee(pIdleState, &RenderInfo[0], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
 	TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
@@ -1905,9 +1892,8 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	}
 	TextRender()->TextColor(DefaultNameColor);
 	if(g_Config.m_ClShowIDs)
-		TextRender()->TextEx(&Cursor, " 8: Friend: ", -1);
-	else
-		TextRender()->TextEx(&Cursor, "Friend: ", -1);
+		TextRender()->TextEx(&Cursor, " 8: ", -1);
+	TextRender()->TextEx(&Cursor, "Friend: ", -1);
 	TextRender()->TextColor(NormalColor);
 	TextRender()->TextEx(&Cursor, "Hello there", -1);
 	if(!g_Config.m_ClChatOld)
@@ -1918,9 +1904,8 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	TextRender()->MoveCursor(&Cursor, RealMsgPaddingTee, 0);
 	TextRender()->TextColor(DefaultNameColor);
 	if(g_Config.m_ClShowIDs)
-		TextRender()->TextEx(&Cursor, " 9: Spammer ", -1);
-	else
-		TextRender()->TextEx(&Cursor, "Spammer ", -1);
+		TextRender()->TextEx(&Cursor, " 9: ", -1);
+	TextRender()->TextEx(&Cursor, "Spammer ", -1);
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 0.3f);
 	TextRender()->TextEx(&Cursor, "[6]", -1);
 	TextRender()->TextColor(NormalColor);
