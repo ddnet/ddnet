@@ -877,10 +877,11 @@ void CGameContext::OnTick()
 					// veto right for players who have been active on server for long and who're not afk
 					if(!IsKickVote() && !IsSpecVote() && g_Config.m_SvVoteVetoTime)
 					{
-						// look through all players with same IP again
-						for(int j = i + 1; j < MAX_CLIENTS; j++)
+						// look through all players with same IP again, including the current player
+						for(int j = i; j < MAX_CLIENTS; j++)
 						{
-							if(!m_apPlayers[j] || str_comp(aaBuf[j], aaBuf[i]) != 0)
+							// no need to check ip address of current player
+							if(i != j && (!m_apPlayers[j] || str_comp(aaBuf[j], aaBuf[i]) != 0))
 								continue;
 
 							if(m_apPlayers[j] && !m_apPlayers[j]->m_Afk && m_apPlayers[j]->GetTeam() != TEAM_SPECTATORS &&
