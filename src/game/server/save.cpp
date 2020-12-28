@@ -364,6 +364,7 @@ int CSaveTee::FromString(const char *String)
 		m_HasTelegunGrenade = 0;
 		m_HasTelegunLaser = 0;
 		m_HasTelegunGun = 0;
+		FormatUuid(CalculateUuid("game-uuid-nonexistent@ddnet.tw"), m_aGameUuid, sizeof(m_aGameUuid));
 		// fall through
 	case 101:
 		m_HookedPlayer = -1;
