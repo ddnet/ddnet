@@ -1295,6 +1295,8 @@ set(EXPECTED_DATA
   themes/jungle.png
   themes/jungle_day.map
   themes/jungle_night.map
+  themes/newyear.map
+  themes/newyear.png
   themes/none.png
   themes/rand.png
   themes/winter.png
