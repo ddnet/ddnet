@@ -3329,6 +3329,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadLayer(const CCommandBuff
 
 	int QuadsLeft = pCommand->m_QuadNum;
 	size_t QuadOffset = 0;
+	// the extra offset is not related to the information from the command, but an actual offset in the buffer
+	size_t QuadOffsetExtra = pCommand->m_QuadOffset;
 
 	vec4 aColors[m_MaxQuadsPossible];
 	vec2 aOffsets[m_MaxQuadsPossible];
@@ -3348,8 +3350,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadLayer(const CCommandBuff
 		pProgram->SetUniformVec4(pProgram->m_LocColors, ActualQuadCount, (float *)aColors);
 		pProgram->SetUniformVec2(pProgram->m_LocOffsets, ActualQuadCount, (float *)aOffsets);
 		pProgram->SetUniform(pProgram->m_LocRotations, ActualQuadCount, (float *)aRotations);
-		pProgram->SetUniform(pProgram->m_LocQuadOffset, (int)QuadOffset);
-		glDrawElements(GL_TRIANGLES, ActualQuadCount * 6, GL_UNSIGNED_INT, (void *)(QuadOffset * 6 * sizeof(unsigned int)));
+		pProgram->SetUniform(pProgram->m_LocQuadOffset, (int)(QuadOffset + QuadOffsetExtra));
+		glDrawElements(GL_TRIANGLES, ActualQuadCount * 6, GL_UNSIGNED_INT, (void *)((QuadOffset + QuadOffsetExtra) * 6 * sizeof(unsigned int)));
 
 		QuadsLeft -= ActualQuadCount;
 		QuadOffset += (size_t)ActualQuadCount;
