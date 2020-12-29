@@ -1150,7 +1150,7 @@ void CGraphics_Threaded::RenderBorderTileLines(int BufferContainerIndex, float *
 	}
 }
 
-void CGraphics_Threaded::RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, int QuadNum)
+void CGraphics_Threaded::RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, int QuadNum, int QuadOffset)
 {
 	if(QuadNum == 0)
 		return;
@@ -1159,6 +1159,7 @@ void CGraphics_Threaded::RenderQuadLayer(int BufferContainerIndex, SQuadRenderIn
 	CCommandBuffer::SCommand_RenderQuadLayer Cmd;
 	Cmd.m_State = m_State;
 	Cmd.m_QuadNum = QuadNum;
+	Cmd.m_QuadOffset = QuadOffset;
 	Cmd.m_BufferContainerIndex = BufferContainerIndex;
 
 	Cmd.m_pQuadInfo = (SQuadRenderInfo *)AllocCommandBufferData(QuadNum * sizeof(SQuadRenderInfo));

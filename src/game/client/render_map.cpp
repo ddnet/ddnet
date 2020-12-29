@@ -115,6 +115,9 @@ void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags
 			a = aChannels[3];
 		}
 
+		if(a <= 0)
+			continue;
+
 		bool Opaque = false;
 		/* TODO: Analyze quadtexture
 		if(a < 0.01f || (q->m_aColors[0].a < 0.01f && q->m_aColors[1].a < 0.01f && q->m_aColors[2].a < 0.01f && q->m_aColors[3].a < 0.01f))

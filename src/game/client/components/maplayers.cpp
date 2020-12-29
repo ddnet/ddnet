@@ -1388,6 +1388,8 @@ void CMapLayers::RenderQuadLayer(int LayerIndex, CMapItemLayerQuads *pQuadLayer,
 	static std::vector<SQuadRenderInfo> s_QuadRenderInfo;
 
 	s_QuadRenderInfo.resize(pQuadLayer->m_NumQuads);
+	size_t QuadsRenderCount = 0;
+	size_t CurQuadOffset = 0;
 	for(int i = 0; i < pQuadLayer->m_NumQuads; ++i)
 	{
 		CQuad *q = &pQuads[i];
@@ -1412,13 +1414,24 @@ void CMapLayers::RenderQuadLayer(int LayerIndex, CMapItemLayerQuads *pQuadLayer,
 			Rot = aChannels[2] / 180.0f * pi;
 		}
 
-		SQuadRenderInfo &QInfo = s_QuadRenderInfo[i];
-		mem_copy(QInfo.m_aColor, aColor, sizeof(aColor));
-		QInfo.m_aOffsets[0] = OffsetX;
-		QInfo.m_aOffsets[1] = OffsetY;
-		QInfo.m_Rotation = Rot;
+		if(aColor[3] > 0)
+		{
+			SQuadRenderInfo &QInfo = s_QuadRenderInfo[QuadsRenderCount++];
+			mem_copy(QInfo.m_aColor, aColor, sizeof(aColor));
+			QInfo.m_aOffsets[0] = OffsetX;
+			QInfo.m_aOffsets[1] = OffsetY;
+			QInfo.m_Rotation = Rot;
+		}
+		else
+		{
+			// render quads of the current offset directly(cancel batching)
+			Graphics()->RenderQuadLayer(Visuals.m_BufferContainerIndex, &s_QuadRenderInfo[0], QuadsRenderCount, CurQuadOffset);
+			QuadsRenderCount = 0;
+			// since this quad is ignored, the offset is the next quad
+			CurQuadOffset = i + 1;
+		}
 	}
-	Graphics()->RenderQuadLayer(Visuals.m_BufferContainerIndex, &s_QuadRenderInfo[0], pQuadLayer->m_NumQuads);
+	Graphics()->RenderQuadLayer(Visuals.m_BufferContainerIndex, &s_QuadRenderInfo[0], QuadsRenderCount, CurQuadOffset);
 }
 
 void CMapLayers::LayersOfGroupCount(CMapItemGroup *pGroup, int &TileLayerCount, int &QuadLayerCount, bool &PassedGameLayer)
