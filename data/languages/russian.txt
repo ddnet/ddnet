@@ -833,10 +833,10 @@ Reconnect in %d sec
 == Переподключение через %d сек.
 
 Render demo
-== Начать рендер демо
+== Рендер
 
 Replace video
-== Переместить видео
+== Переместить
 
 File already exists, do you want to overwrite it?
 == Файл уже существует, хотите ли Вы перезаписать его?
@@ -848,10 +848,10 @@ Are you sure that you want to disconnect your dummy?
 == Вы уверены, что хотите отключить вашего дамми?
 
 Welcome to DDNet
-== Добро пожаловать в DDnet
+== Добро пожаловать в DDNet
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== DDraceNetwork кооперативная онлайн игра, где Вашей главной целью и целью вашей команды является достижением финиша карты. Как новенький, Вы должны начать свой путь на Novice серверах, на которых стоят лёгкие карты. Также учитывайте пинг и выбирайте ближайший к вам сервер.
+== DDraceNetwork кооперативная онлайн-игра, где Вашей главной целью и целью вашей команды является достижением финиша карты. Как новенький, Вы должны начать свой путь на Novice серверах, на которых стоят лёгкие карты. Также учитывайте пинг и выбирайте ближайший к вам сервер.
 
 The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
 == Карта содержит фриз-тайлы, которые временно лишают вас возможности двигаться. Вы должны работать сообща, чтобы пройти такие уровни.
@@ -869,7 +869,7 @@ It's recommended that you check the settings to adjust them to your liking befor
 == Перед посещением сервера рекомендуем изменить настройки на Ваш вкус.
 
 Please enter your nickname below.
-== Пожалуйста, ниже укажите свой никнейм.
+== Пожалуйста, укажите ниже свой никнейм.
 
 Destination file already exist
 == Конечный файл уже существует
@@ -923,7 +923,7 @@ Date
 == Дата
 
 Fetch Info
-== Проверить информацию
+== Показать
 
 Render
 == Начать рендер
@@ -983,16 +983,16 @@ Show all
 == Показывать всех
 
 Toggle dyncam
-== Переключить дин. камеру
+== Смен. дин. камеры
 
 Toggle dummy
-== Переключить дамми
+== Сменить ти
 
 Toggle ghost
-== Переключить призрака
+== Вкл./выкл. призрака
 
 Dummy copy
-== Повторение движений дамми
+== Повт. движений
 
 Hammerfly dummy
 == Полёт с дамми
@@ -1007,7 +1007,7 @@ Lock team
 == Закрыть команду
 
 Show entities
-== Показать сущности
+== Показать тайлы
 
 Show HUD
 == Показавать HUD
@@ -1064,7 +1064,7 @@ Gameplay
 == Игровой процесс
 
 Overlay entities
-== Наложить entities
+== Наложить тайлы
 
 Size
 == Размер
@@ -1076,7 +1076,7 @@ Show others (own team only)
 == Всегда показывать вашу команду
 
 Show quads
-== Показывать quads
+== Показывать квады
 
 AntiPing
 == AntiPing
@@ -1263,7 +1263,7 @@ Background music volume
 == Громкость фоновой музыки
 
 Assets
-== Графика
+== Текстуры
 
 Use old chat style
 == Использовать старый чат
@@ -1275,13 +1275,13 @@ Use current map as background
 == Использовать данную карту как фон
 
 Emoticons
-== Эмоции
+== Значки-эмоции
 
 Particles
 == Частицы
 
 Assets directory
-== Папка с графикой
+== Расп. текстур
 
 Manual
 == Ручное
@@ -1296,4 +1296,4 @@ Replay
 == Запись
 
 Entities
-== 
+== Тайлы
