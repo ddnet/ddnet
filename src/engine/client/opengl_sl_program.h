@@ -133,6 +133,7 @@ public:
 	int m_LocColors;
 	int m_LocOffsets;
 	int m_LocRotations;
+	int m_LocQuadOffset;
 };
 
 class CGLSLTileProgram : public CGLSLTWProgram
