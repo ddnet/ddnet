@@ -551,7 +551,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	// render status
 	char aBufSvr[128];
 	char aBufPyr[128];
-	if(ServerBrowser()->NumSortedServers() != 1)
+	if(ServerBrowser()->NumServers() != 1)
 		str_format(aBufSvr, sizeof(aBufSvr), Localize("%d of %d servers"), ServerBrowser()->NumSortedServers(), ServerBrowser()->NumServers());
 	else
 		str_format(aBufSvr, sizeof(aBufSvr), Localize("%d of %d server"), ServerBrowser()->NumSortedServers(), ServerBrowser()->NumServers());
