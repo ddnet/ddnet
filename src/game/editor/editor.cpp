@@ -2975,7 +2975,7 @@ float CEditor::ScaleFontSize(char *pText, int TextSize, float FontSize, int Widt
 		else
 		{
 			pText[str_length(pText) - 4] = '\0';
-			str_append(pText, "...", TextSize);
+			str_append(pText, "…", TextSize);
 		}
 	}
 	return FontSize;
