@@ -1496,7 +1496,7 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 
 	if(UI()->ActiveItem() == pID)
 	{
-		if(m_MouseDeltaWx * m_MouseDeltaWx + m_MouseDeltaWy * m_MouseDeltaWy > 0.05f)
+		if(m_MouseDeltaWx * m_MouseDeltaWx + m_MouseDeltaWy * m_MouseDeltaWy > 0.0f)
 		{
 			if(s_Operation == OP_MOVE)
 			{
@@ -1635,7 +1635,7 @@ void CEditor::DoQuad(CQuad *q, int Index)
 
 	if(UI()->ActiveItem() == pID)
 	{
-		if(m_MouseDeltaWx * m_MouseDeltaWx + m_MouseDeltaWy * m_MouseDeltaWy > 0.05f)
+		if(m_MouseDeltaWx * m_MouseDeltaWx + m_MouseDeltaWy * m_MouseDeltaWy > 0.0f)
 		{
 			// check if we only should move pivot
 			if(s_Operation == OP_MOVE_PIVOT)
@@ -1901,7 +1901,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 	{
 		if(!s_Moved)
 		{
-			if(m_MouseDeltaWx * m_MouseDeltaWx + m_MouseDeltaWy * m_MouseDeltaWy > 0.05f)
+			if(m_MouseDeltaWx * m_MouseDeltaWx + m_MouseDeltaWy * m_MouseDeltaWy > 0.0f)
 				s_Moved = true;
 		}
 
