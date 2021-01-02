@@ -94,6 +94,14 @@ class CGameClient : public IGameClient
 #if defined(CONF_AUTOUPDATE)
 	class IUpdater *m_pUpdater;
 #endif
+#if defined(CONF_DISCORD)
+	struct CDiscordApp
+	{
+		struct IDiscordCore *m_Core;
+		struct IDiscordActivityEvents *m_ActivityEvents;
+		struct IDiscordActivityManager *m_ActivityManager;
+	} m_DiscordApp;
+#endif
 
 	CLayers m_Layers;
 	class CCollision m_Collision;
@@ -351,6 +359,10 @@ public:
 	CRenderTools m_RenderTools;
 
 	void OnReset();
+
+#if defined(CONF_DISCORD)
+	void SetDiscordActivity(const char *pDetails, const char *pState);
+#endif
 
 	// hooks
 	virtual void OnConnected();
