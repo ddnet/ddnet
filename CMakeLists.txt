@@ -89,6 +89,7 @@ option(ANTIBOT "Enable support for a dynamic anticheat library" OFF)
 option(CLIENT "Compile client" ON)
 option(DOWNLOAD_GTEST "Download and compile GTest" ${AUTO_DEPENDENCIES_DEFAULT})
 option(STEAM "Build the Steam release version" OFF)
+option(DISCORD "Enable discord rich presence support" OFF)
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
 option(DEV "Don't generate stuff necessary for packaging" OFF)
 
@@ -368,6 +369,9 @@ find_package(Pnglite)
 find_package(PythonInterp 3)
 find_package(SDL2)
 find_package(SQLite3)
+if(DISCORD)
+  find_package(DiscordSdk)
+endif()
 if(UNIX)
   # Use -pthread instead of -lpthread to draw dependencies other than libpthread
   set(THREADS_PREFER_PTHREAD_FLAG TRUE)
@@ -455,6 +459,9 @@ show_dependency_status("SDL2" SDL2)
 show_dependency_status("SQLite3" SQLite3)
 show_dependency_status("Wavpack" WAVPACK)
 show_dependency_status("Zlib" ZLIB)
+if(DISCORD)
+  show_dependency_status("DiscordSdk" DiscordSdk)
+endif()
 if(WEBSOCKETS)
   show_dependency_status("Websockets" WEBSOCKETS)
 endif()
@@ -479,6 +486,10 @@ endif()
 
 if(UPNP AND NOT(MINIUPNPC_FOUND))
   message(SEND_ERROR "You must install miniupnpc to compile the DDNet server with UPnP support")
+endif()
+
+if(DISCORD AND NOT(DISCORDSDK_FOUND))
+  message(SEND_ERROR "You must install the discord sdk to compile the DDNet client with Discord support")
 endif()
 
 if(CLIENT AND NOT(FREETYPE_FOUND))
@@ -1332,6 +1343,7 @@ set(COPY_FILES
   ${SQLite3_COPY_FILES}
   ${FFMPEG_COPY_FILES}
   ${WEBSOCKETS_COPY_FILES}
+  ${DISCORDSDK_COPY_FILES}
 )
 file(COPY ${COPY_FILES} DESTINATION .)
 
@@ -1630,6 +1642,13 @@ add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_S
 add_library(game-shared EXCLUDE_FROM_ALL OBJECT ${GAME_SHARED} ${GAME_GENERATED_SHARED})
 list(APPEND TARGETS_OWN engine-shared game-shared)
 
+if(DISCORD)
+  add_library(discord-shared SHARED IMPORTED)
+  set_target_properties(discord-shared PROPERTIES
+    IMPORTED_LOCATION "${DISCORDSDK_LIBRARIES}"
+    INTERFACE_INCLUDE_DIRECTORIES "${DISCORDSDK_INCLUDE_DIRS}"
+  )
+endif()
 
 ########################################################################
 # CLIENT
@@ -1837,6 +1856,10 @@ if(CLIENT)
     ${CMAKE_THREAD_LIBS_INIT}
   )
 
+  if(DISCORD)
+    list(APPEND LIBS_CLIENT discord-shared)
+  endif()
+
   if(TARGET_OS STREQUAL "windows")
     set(CLIENT_ICON "other/icons/DDNet.rc")
     if(NOT MINGW)
@@ -1873,6 +1896,7 @@ if(CLIENT)
     ${SDL2_INCLUDE_DIRS}
     ${WAVPACK_INCLUDE_DIRS}
     ${FFMPEG_INCLUDE_DIRS}
+    ${DISCORDSDK_INCLUDE_DIRS}
 
     ${PLATFORM_CLIENT_INCLUDE_DIRS}
   )
@@ -2656,6 +2680,9 @@ foreach(target ${TARGETS_OWN})
   endif()
   if(STEAM)
     target_compile_definitions(${target} PRIVATE PLATFORM_SUFFIX="-steam")
+  endif()
+  if(DISCORD)
+    target_compile_definitions(${target} PRIVATE CONF_DISCORD)
   endif()
   if(VERSION)
     target_compile_definitions(${target} PRIVATE GAME_RELEASE_VERSION="${VERSION}")
