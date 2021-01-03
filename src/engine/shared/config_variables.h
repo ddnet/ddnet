@@ -404,4 +404,6 @@ MACRO_CONFIG_INT(GfxUsePreinitBuffer, gfx_use_preinitialized_buffer, 0, 0, 1, CF
 
 MACRO_CONFIG_INT(ClVideoRecorderFPS, cl_video_recorder_fps, 60, 1, 1000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "At which FPS the videorecorder should record demos.")
 
+#if defined(CONF_DISCORD)
 MACRO_CONFIG_INT(ClDiscordEnablePresence, cl_discord_enable_presence, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Enable discord rich presence.")
+#endif
