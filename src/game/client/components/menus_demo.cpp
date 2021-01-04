@@ -517,7 +517,6 @@ void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHe
 {
 	CUIRect Scroll, Row;
 	CUIRect View = *pRect;
-	CUIRect Header, Footer;
 
 	if(!LogicOnly)
 	{
