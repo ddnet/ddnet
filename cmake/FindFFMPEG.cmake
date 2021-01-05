@@ -122,8 +122,8 @@ mark_as_advanced(
 )
 
 set(FFMPEG_LIBRARIES
+  ${AVFORMAT_LIBRARY} # has to come before avcodec
   ${AVCODEC_LIBRARY}
-  ${AVFORMAT_LIBRARY}
   ${AVUTIL_LIBRARY}
   ${SWSCALE_LIBRARY}
   ${SWRESAMPLE_LIBRARY}
