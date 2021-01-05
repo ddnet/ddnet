@@ -46,10 +46,13 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 	float FontSize = 18.0f + 20.0f * g_Config.m_ClNameplatesSize / 100.0f;
 	float FontSizeClan = 18.0f + 20.0f * g_Config.m_ClNameplatesClanSize / 100.0f;
 
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
+	float YOffset = Position.y - 38;
+	ColorRGBA rgb = ColorRGBA(1.0f, 1.0f, 1.0f);
+
 	// render name plate
 	if(!pPlayerInfo->m_Local || g_Config.m_ClNameplatesOwn)
 	{
-		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
 		float a = 1;
 		if(g_Config.m_ClNameplatesAlways == 0)
 			a = clamp(1 - powf(distance(m_pClient->m_pControls->m_TargetPos[g_Config.m_ClDummy], Position) / 200.0f, 16.0f), 0.0f, 1.0f);
@@ -106,7 +109,6 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		}
 
 		float tw = m_aNamePlates[ClientID].m_NameTextWidth;
-		ColorRGBA rgb = ColorRGBA(1.0f, 1.0f, 1.0f);
 		if(g_Config.m_ClNameplatesTeamcolors && m_pClient->m_Teams.Team(ClientID))
 			rgb = color_cast<ColorRGBA>(ColorHSLA(m_pClient->m_Teams.Team(ClientID) / 64.0f, 1.0f, 0.75f));
 
@@ -133,8 +135,6 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 
 		TOutlineColor.m_A *= Alpha;
 		TColor.m_A *= Alpha;
-
-		float YOffset = Position.y - 38;
 
 		if(m_aNamePlates[ClientID].m_NameTextContainerIndex != -1)
 		{
@@ -201,12 +201,26 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 				TextRender()->Text(0, Position.x - PosArmor / 2.0f, YOffset, AFontSize, aArmor, -1);
 			}
 		}
-
-		TextRender()->TextColor(TextRender()->DefaultTextColor());
-		TextRender()->TextOutlineColor(TextRender()->DefaultTextOutlineColor());
-
-		TextRender()->SetRenderFlags(0);
 	}
+
+	if(g_Config.m_Debug)
+	{
+		CCharacter *pCharacter = m_pClient->m_GameWorld.GetCharacterByID(pPlayerInfo->m_ClientID);
+		if(pCharacter)
+		{
+			YOffset -= FontSize;
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "%d", pCharacter->GetStrongWeakID());
+			float XOffset = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f) / 2.0f;
+			TextRender()->TextColor(rgb);
+			TextRender()->Text(0, Position.x - XOffset, YOffset, FontSize, aBuf, -1.0f);
+		}
+	}
+
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
+	TextRender()->TextOutlineColor(TextRender()->DefaultTextOutlineColor());
+
+	TextRender()->SetRenderFlags(0);
 }
 
 void CNamePlates::OnRender()
