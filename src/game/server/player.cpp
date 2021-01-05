@@ -404,6 +404,8 @@ void CPlayer::Snap(int SnappingClient)
 		GameServer()->m_apPlayers[SnappingClient]->m_TimerType == TIMERTYPE_SIXUP)
 	{
 		protocol7::CNetObj_PlayerInfoRace *pRaceInfo = static_cast<protocol7::CNetObj_PlayerInfoRace *>(Server()->SnapNewItem(-protocol7::NETOBJTYPE_PLAYERINFORACE, id, sizeof(protocol7::CNetObj_PlayerInfoRace)));
+		if(!pRaceInfo)
+			return;
 		pRaceInfo->m_RaceStartTick = m_pCharacter->m_StartTime;
 	}
 
@@ -418,6 +420,9 @@ void CPlayer::Snap(int SnappingClient)
 	if(ShowSpec)
 	{
 		CNetObj_SpecChar *pSpecChar = static_cast<CNetObj_SpecChar *>(Server()->SnapNewItem(NETOBJTYPE_SPECCHAR, id, sizeof(CNetObj_SpecChar)));
+		if(!pSpecChar)
+			return;
+
 		pSpecChar->m_X = m_pCharacter->Core()->m_Pos.x;
 		pSpecChar->m_Y = m_pCharacter->Core()->m_Pos.y;
 	}
