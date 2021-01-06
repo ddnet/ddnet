@@ -570,7 +570,7 @@ void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHe
 	}
 
 	Scroll.HMargin(5.0f, &Scroll);
-	gs_ListBoxScrollValue = clamp(DoScrollbarV(pID, &Scroll, gs_ListBoxScrollValue), 0.0f, 1.0f);
+	gs_ListBoxScrollValue = clamp(DoScrollbarV(pID, &Scroll, clamp(gs_ListBoxScrollValue, 0.0f, 1.0f)), 0.0f, 1.0f);
 
 	// the list
 	gs_ListBoxView = gs_ListBoxOriginalView;
