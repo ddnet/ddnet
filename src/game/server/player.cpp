@@ -625,12 +625,8 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 		return;
 
 	char aBuf[512];
-	DoChatMsg = false;
-	if(DoChatMsg)
-	{
-		str_format(aBuf, sizeof(aBuf), "'%s' joined the %s", Server()->ClientName(m_ClientID), GameServer()->m_pController->GetTeamName(Team));
-		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
-	}
+	str_format(aBuf, sizeof(aBuf), "'%s' joined the %s", Server()->ClientName(m_ClientID), GameServer()->m_pController->GetTeamName(Team));
+	GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 
 	if(Team == TEAM_SPECTATORS)
 	{
