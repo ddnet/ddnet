@@ -1066,7 +1066,13 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	Scroll.HMargin(5.0f, &Scroll);
 	s_ScrollValue = DoScrollbarV(&s_ScrollBar, &Scroll, s_ScrollValue);
 
+	int PreviousIndex = m_DemolistSelectedIndex;
 	HandleListInputs(ListBox, s_ScrollValue, 3.0f, &m_ScrollOffset, s_aCols[0].m_Rect.h, m_DemolistSelectedIndex, m_lDemos.size());
+	if(PreviousIndex != m_DemolistSelectedIndex)
+	{
+		str_copy(g_Config.m_UiDemoSelected, m_lDemos[m_DemolistSelectedIndex].m_aName, sizeof(g_Config.m_UiDemoSelected));
+		DemolistOnUpdate(false);
+	}
 
 	// set clipping
 	UI()->ClipEnable(&ListBox);
