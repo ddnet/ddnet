@@ -113,6 +113,7 @@ void CPlayer::Reset()
 	m_NinjaJetpack = false;
 
 	m_Paused = PAUSE_NONE;
+	m_PauseTime = false;
 	m_DND = false;
 
 	m_LastPause = 0;
@@ -833,6 +834,17 @@ void CPlayer::ProcessPause()
 		m_pCharacter->Pause(true);
 		GameServer()->CreateDeath(m_pCharacter->m_Pos, m_ClientID, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
 		GameServer()->CreateSound(m_pCharacter->m_Pos, SOUND_PLAYER_DIE, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
+	}
+
+	if(m_PauseTime && m_pCharacter->m_DDRaceState == DDRACE_STARTED)
+	{
+		// pause time in /pause and /spec
+		if(m_Paused)
+			m_pCharacter->m_StartTime++;
+
+		// resume if we have moved to avoid cheating time
+		if(m_pCharacter->m_Pos != m_pCharacter->m_PrevPos)
+			Pause(CPlayer::PAUSE_NONE, true);
 	}
 }
 

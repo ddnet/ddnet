@@ -157,6 +157,8 @@ public:
 	int Pause(int State, bool Force);
 	int ForcePause(int Time);
 	int IsPaused();
+	bool m_PauseTime;
+	void HandlePauseTime();
 
 	bool IsPlaying();
 	int64 m_Last_KickVote;

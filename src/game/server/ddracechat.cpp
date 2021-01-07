@@ -278,6 +278,40 @@ void CGameContext::ConRules(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void CGameContext::ConPauseTime(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if(!pPlayer)
+		return;
+
+	if(!g_Config.m_SvSoloServer)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "This is not a solo server");
+		return;
+	}
+
+	if(pResult->NumArguments())
+	{
+		if(pPlayer->m_PauseTime == (bool)pResult->GetInteger(0))
+			return;
+
+		pPlayer->m_PauseTime = pResult->GetInteger(0);
+	}
+	else
+	{
+		pPlayer->m_PauseTime = !pPlayer->m_PauseTime;
+	}
+
+	if(pPlayer->m_PauseTime)
+		pSelf->SendChatTarget(pResult->m_ClientID, "Your time will now be paused while spectating");
+	else
+		pSelf->SendChatTarget(pResult->m_ClientID, "Your time will no longer be paused while spectating");
+}
+
 void ToggleSpecPause(IConsole::IResult *pResult, void *pUserData, int PauseType)
 {
 	if(!CheckClientID(pResult->m_ClientID))

@@ -333,6 +333,7 @@ private:
 	static void ConSettings(IConsole::IResult *pResult, void *pUserData);
 	static void ConRules(IConsole::IResult *pResult, void *pUserData);
 	static void ConKill(IConsole::IResult *pResult, void *pUserData);
+	static void ConPauseTime(IConsole::IResult *pResult, void *pUserData);
 	static void ConTogglePause(IConsole::IResult *pResult, void *pUserData);
 	static void ConTogglePauseVoted(IConsole::IResult *pResult, void *pUserData);
 	static void ConToggleSpec(IConsole::IResult *pResult, void *pUserData);
