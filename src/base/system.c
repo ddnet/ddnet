@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <ctype.h>
+#include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -2885,7 +2886,7 @@ int str_time(int64 centisecs, int format, char *buffer, int buffer_size)
 
 int str_time_float(float secs, int format, char *buffer, int buffer_size)
 {
-	return str_time((int64)(secs * 100.0), format, buffer, buffer_size);
+	return str_time(llroundf(secs * 100.0), format, buffer, buffer_size);
 }
 
 void str_escape(char **dst, const char *src, const char *end)
