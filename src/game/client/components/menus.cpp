@@ -887,7 +887,8 @@ float CMenus::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 	static float OffsetY;
 	pRect->HSplitTop(33, &Handle, 0);
 
-	Handle.y += (pRect->h - Handle.h) * Current;
+	Current = clamp(Current, 0.0f, 1.0f);
+	Handle.y = pRect->y + (pRect->h - Handle.h) * Current;
 
 	// logic
 	float ReturnValue = Current;
@@ -923,11 +924,7 @@ float CMenus::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 		UI()->SetHotItem(pID);
 
 	// render
-	RenderTools()->DrawUIRect(pRect, ColorRGBA(0, 0, 0, 0.25f), CUI::CORNER_ALL, 2.5f);
-
-	CUIRect Slider = Handle;
-	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 2.5f);
-	Slider.Margin(2, &Slider);
+	RenderTools()->DrawUIRect(pRect, ColorRGBA(0, 0, 0, 0.25f), CUI::CORNER_ALL, 5.0f);
 
 	float ColorSlider = 0;
 
@@ -938,7 +935,7 @@ float CMenus::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 	else
 		ColorSlider = 0.75f;
 
-	RenderTools()->DrawUIRect(&Slider, ColorRGBA(ColorSlider, ColorSlider, ColorSlider, 0.75f), CUI::CORNER_ALL, 2.5f);
+	RenderTools()->DrawUIRect(&Handle, ColorRGBA(ColorSlider, ColorSlider, ColorSlider, 0.75f), CUI::CORNER_ALL, 5.0f);
 
 	return ReturnValue;
 }
@@ -3165,8 +3162,8 @@ void CMenus::SetMenuPage(int NewPage)
 bool CMenus::HandleListInputs(const CUIRect &View, float &ScrollValue, const float ScrollAmount, int *pScrollOffset, const float ElemHeight, int &SelectedIndex, const int NumElems)
 {
 	int NewIndex = -1;
-	int Num = (int)(View.h / ElemHeight) + 1;
-	int ScrollNum = maximum(NumElems - Num + 1, 0);
+	int Num = (int)(View.h / ElemHeight);
+	int ScrollNum = maximum(NumElems - Num, 0);
 	if(ScrollNum > 0)
 	{
 		if(pScrollOffset && *pScrollOffset >= 0)

@@ -624,6 +624,9 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			if(g_Config.m_ClVanillaSkinsOnly && !s->m_IsVanilla)
 				continue;
 
+			if(s == 0)
+				continue;
+
 			s_paSkinList.add_unsorted(s);
 		}
 		s_InitSkinlist = false;
@@ -635,8 +638,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	for(int i = 0; i < s_paSkinList.size(); ++i)
 	{
 		const CSkin *s = s_paSkinList[i];
-		if(s == 0)
-			continue;
 
 		if(str_comp(s->m_aName, Skin) == 0)
 			OldSelected = i;
@@ -884,7 +885,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	static int s_SelectedControl = -1;
 	static float s_ScrollValue = 0;
 	int OldSelected = s_SelectedControl;
-	UiDoListboxStart(&s_ControlsList, &MainView, 475.0f, Localize("Controls"), "", 1, 1, s_SelectedControl, s_ScrollValue);
+	UiDoListboxStart(&s_ControlsList, &MainView, 500.0f, Localize("Controls"), "", 1, 1, s_SelectedControl, s_ScrollValue);
 
 	CUIRect MovementSettings, WeaponSettings, VotingSettings, ChatSettings, DummySettings, MiscSettings, ResetButton;
 	CListboxItem Item = UiDoListboxNextItem(&OldSelected, false, false, true);
