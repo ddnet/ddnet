@@ -17,13 +17,6 @@ struct CAntibotCharacterData;
 
 enum
 {
-	WEAPON_GAME = -3, // team switching etc
-	WEAPON_SELF = -2, // console kill command
-	WEAPON_WORLD = -1, // death tiles etc
-};
-
-enum
-{
 	FAKETUNE_FREEZE = 1,
 	FAKETUNE_SOLO = 2,
 	FAKETUNE_NOJUMP = 4,
