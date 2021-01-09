@@ -2,7 +2,6 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "player.h"
 #include <engine/shared/config.h>
-#include <new>
 
 #include "entities/character.h"
 #include "gamecontext.h"
@@ -11,7 +10,6 @@
 #include <game/gamecore.h>
 #include <game/server/teams.h>
 #include <game/version.h>
-#include <time.h>
 
 MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
 

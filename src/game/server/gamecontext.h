@@ -6,7 +6,6 @@
 #include <engine/antibot.h>
 #include <engine/console.h>
 #include <engine/server.h>
-#include <engine/shared/memheap.h>
 
 #include <game/layers.h>
 #include <game/mapbugs.h>
@@ -16,7 +15,7 @@
 #include <base/tl/string.h>
 
 #include "eventhandler.h"
-#include "gamecontroller.h"
+//#include "gamecontroller.h"
 #include "gameworld.h"
 #include "teehistorian.h"
 
@@ -57,8 +56,11 @@ enum
 	NUM_TUNEZONES = 256
 };
 
+class CHeap;
+class CPlayer;
 class CScore;
 class IConsole;
+class IGameController;
 class IEngine;
 class IStorage;
 struct CAntibotData;

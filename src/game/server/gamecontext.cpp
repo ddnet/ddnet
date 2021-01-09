@@ -13,11 +13,11 @@
 #include <engine/shared/config.h>
 #include <engine/shared/datafile.h>
 #include <engine/shared/linereader.h>
+#include <engine/shared/memheap.h>
 #include <engine/storage.h>
 #include <game/collision.h>
 #include <game/gamecore.h>
 #include <game/version.h>
-#include <new>
 #include <string.h>
 
 #include <game/generated/protocol7.h>

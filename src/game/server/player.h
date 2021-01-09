@@ -3,11 +3,11 @@
 #ifndef GAME_SERVER_PLAYER_H
 #define GAME_SERVER_PLAYER_H
 
+#include "alloc.h"
+
 // this include should perhaps be removed
-#include "gamecontext.h"
 #include "score.h"
 #include "teeinfo.h"
-#include <memory>
 
 enum
 {
