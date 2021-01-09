@@ -21,7 +21,6 @@ private:
 	CEntity *m_pPrevTypeEntity;
 	CEntity *m_pNextTypeEntity;
 
-protected:
 	/* Identity */
 	class CGameWorld *m_pGameWorld;
 
