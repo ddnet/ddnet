@@ -5,6 +5,7 @@
 #include <game/generated/protocol.h>
 #include <game/mapitems.h>
 #include <game/server/gamecontext.h>
+#include <game/server/player.h>
 
 #include "character.h"
 

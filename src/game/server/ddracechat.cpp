@@ -8,6 +8,7 @@
 #include <game/version.h>
 
 #include "entities/character.h"
+#include "player.h"
 
 bool CheckClientID(int ClientID);
 

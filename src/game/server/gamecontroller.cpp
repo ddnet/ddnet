@@ -9,6 +9,7 @@
 #include "entities/pickup.h"
 #include "gamecontext.h"
 #include "gamecontroller.h"
+#include "player.h"
 
 #include "entities/door.h"
 #include "entities/dragger.h"

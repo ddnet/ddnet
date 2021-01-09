@@ -5,6 +5,7 @@
 #include "entities/character.h"
 #include "entity.h"
 #include "gamecontext.h"
+#include "player.h"
 #include <algorithm>
 #include <engine/shared/config.h>
 #include <utility>
