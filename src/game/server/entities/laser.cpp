@@ -8,6 +8,8 @@
 #include <engine/shared/config.h>
 #include <game/server/teams.h>
 
+#include "character.h"
+
 CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
 {

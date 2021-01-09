@@ -4,6 +4,7 @@
 #include <engine/shared/config.h>
 #include <new>
 
+#include "entities/character.h"
 #include "gamecontext.h"
 #include "gamemodes/DDRace.h"
 #include <engine/server.h>

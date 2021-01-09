@@ -8,6 +8,8 @@
 #include <engine/shared/config.h>
 #include <game/server/teams.h>
 
+#include "character.h"
+
 CProjectile::CProjectile(
 	CGameWorld *pGameWorld,
 	int Type,

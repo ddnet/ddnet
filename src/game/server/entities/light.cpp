@@ -6,6 +6,8 @@
 #include <game/mapitems.h>
 #include <game/server/gamecontext.h>
 
+#include "character.h"
+
 CLight::CLight(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,
 	int Layer, int Number) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)

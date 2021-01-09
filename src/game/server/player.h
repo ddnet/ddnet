@@ -4,7 +4,6 @@
 #define GAME_SERVER_PLAYER_H
 
 // this include should perhaps be removed
-#include "entities/character.h"
 #include "gamecontext.h"
 #include "score.h"
 #include "teeinfo.h"

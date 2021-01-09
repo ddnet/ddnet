@@ -7,6 +7,8 @@
 #include <game/server/gamemodes/DDRace.h>
 #include <game/server/teams.h>
 
+#include "character.h"
+
 const float PLASMA_ACCEL = 1.1f;
 
 CPlasma::CPlasma(CGameWorld *pGameWorld, vec2 Pos, vec2 Dir, bool Freeze,

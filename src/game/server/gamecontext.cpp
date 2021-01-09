@@ -23,6 +23,7 @@
 #include <game/generated/protocol7.h>
 #include <game/generated/protocolglue.h>
 
+#include "entities/character.h"
 #include "gamemodes/DDRace.h"
 #include "score.h"
 

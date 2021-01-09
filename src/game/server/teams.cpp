@@ -4,6 +4,8 @@
 #include "teehistorian.h"
 #include <engine/shared/config.h>
 
+#include "entities/character.h"
+
 CGameTeams::CGameTeams(CGameContext *pGameContext) :
 	m_pGameContext(pGameContext)
 {

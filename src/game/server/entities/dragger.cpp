@@ -8,6 +8,8 @@
 #include <game/server/gamemodes/DDRace.h>
 #include <game/server/teams.h>
 
+#include "character.h"
+
 CDragger::CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW,
 	int CaughtTeam, int Layer, int Number) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)

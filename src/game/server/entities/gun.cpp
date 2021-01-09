@@ -5,6 +5,7 @@
 #include <game/server/gamecontext.h>
 #include <game/server/teams.h>
 
+#include "character.h"
 #include "gun.h"
 #include "plasma.h"
 

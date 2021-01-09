@@ -5,6 +5,7 @@
 
 #include <game/generated/protocol.h>
 
+#include "entities/character.h"
 #include "entities/pickup.h"
 #include "gamecontext.h"
 #include "gamecontroller.h"

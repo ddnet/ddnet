@@ -7,6 +7,8 @@
 #include <game/server/teams.h>
 #include <game/version.h>
 
+#include "entities/character.h"
+
 bool CheckClientID(int ClientID);
 
 void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
