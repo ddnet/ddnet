@@ -1629,12 +1629,11 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *buffer, int maxsize, MMSGS
 	if(m->pos < m->size)
 	{
 		sockaddr_to_netaddr((struct sockaddr *)&(m->sockaddrs[m->pos]), addr);
-		// TODO: network_stats
-		//network_stats.recv_bytes += bytes;
-		//network_stats.recv_packets++;
 		bytes = m->msgs[m->pos].msg_len;
 		*data = (unsigned char *)m->bufs[m->pos];
 		m->pos++;
+		network_stats.recv_bytes += bytes;
+		network_stats.recv_packets++;
 		return bytes;
 	}
 #else
