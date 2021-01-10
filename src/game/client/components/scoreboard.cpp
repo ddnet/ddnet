@@ -197,13 +197,16 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 	// render title
 	float TitleFontsize = 40.0f;
+	int TitleWidth = (lower32 || lower24 || lower16) ? 1140 : 440;
 	if(!pTitle)
 	{
 		if(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER)
 			pTitle = Localize("Game over");
 		else
 		{
-			str_utf8_truncate(aBuf, sizeof(aBuf), Client()->GetCurrentMap(), 16);
+			str_utf8_copy(aBuf, Client()->GetCurrentMap(), sizeof(aBuf));
+			while(TextRender()->TextWidth(0, TitleFontsize, aBuf, -1, -1.0f) > TitleWidth)
+				aBuf[str_length(aBuf) - 1] = '\0';
 			if(str_comp(aBuf, Client()->GetCurrentMap()))
 				str_append(aBuf, "…", sizeof(aBuf));
 			pTitle = aBuf;
@@ -614,18 +617,18 @@ void CScoreboard::OnRender()
 		{
 			if(m_pClient->m_Snap.m_aTeamSize[0] > 48)
 			{
-				RenderScoreboard(Width / 2 - w, 150.0f, w, -4, 0);
 				RenderScoreboard(Width / 2, 150.0f, w, -5, "");
+				RenderScoreboard(Width / 2 - w, 150.0f, w, -4, 0);
 			}
 			else if(m_pClient->m_Snap.m_aTeamSize[0] > 32)
 			{
-				RenderScoreboard(Width / 2 - w, 150.0f, w, -7, 0);
 				RenderScoreboard(Width / 2, 150.0f, w, -8, "");
+				RenderScoreboard(Width / 2 - w, 150.0f, w, -7, 0);
 			}
 			else if(m_pClient->m_Snap.m_aTeamSize[0] > 16)
 			{
-				RenderScoreboard(Width / 2 - w, 150.0f, w, -6, 0);
 				RenderScoreboard(Width / 2, 150.0f, w, -3, "");
+				RenderScoreboard(Width / 2 - w, 150.0f, w, -6, 0);
 			}
 			else
 			{
