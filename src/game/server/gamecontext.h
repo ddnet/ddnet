@@ -6,7 +6,6 @@
 #include <engine/antibot.h>
 #include <engine/console.h>
 #include <engine/server.h>
-#include <engine/shared/memheap.h>
 
 #include <game/layers.h>
 #include <game/mapbugs.h>
@@ -16,9 +15,8 @@
 #include <base/tl/string.h>
 
 #include "eventhandler.h"
-#include "gamecontroller.h"
+//#include "gamecontroller.h"
 #include "gameworld.h"
-#include "player.h"
 #include "teehistorian.h"
 
 #include <memory>
@@ -58,8 +56,12 @@ enum
 	NUM_TUNEZONES = 256
 };
 
+class CConfig;
+class CHeap;
+class CPlayer;
 class CScore;
 class IConsole;
+class IGameController;
 class IEngine;
 class IStorage;
 struct CAntibotData;
@@ -68,6 +70,7 @@ struct CScoreRandomMapResult;
 class CGameContext : public IGameServer
 {
 	IServer *m_pServer;
+	CConfig *m_pConfig;
 	IConsole *m_pConsole;
 	IEngine *m_pEngine;
 	IStorage *m_pStorage;
@@ -130,6 +133,7 @@ class CGameContext : public IGameServer
 
 public:
 	IServer *Server() const { return m_pServer; }
+	CConfig *Config() { return m_pConfig; }
 	IConsole *Console() { return m_pConsole; }
 	IEngine *Engine() { return m_pEngine; }
 	IStorage *Storage() { return m_pStorage; }
@@ -219,6 +223,8 @@ public:
 	void SendChat(int ClientID, int Team, const char *pText, int SpamProtectionClientID = -1, int Flags = CHAT_SIX | CHAT_SIXUP);
 	void SendEmoticon(int ClientID, int Emoticon);
 	void SendWeaponPickup(int ClientID, int Weapon);
+	void SendMotd(int ClientID);
+	void SendSettings(int ClientID);
 	void SendBroadcast(const char *pText, int ClientID, bool IsImportant = true);
 
 	void List(int ClientID, const char *filter);

@@ -17,7 +17,7 @@ class CFriends : public IFriends
 	static void ConRemoveFriend(IConsole::IResult *pResult, void *pUserData);
 	static void ConFriends(IConsole::IResult *pResult, void *pUserData);
 
-	static void ConfigSaveCallback(IConfig *pConfig, void *pUserData);
+	static void ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData);
 
 public:
 	CFriends();

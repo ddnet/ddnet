@@ -89,9 +89,9 @@ void CServerBrowser::SetBaseInfo(class CNetClient *pClient, const char *pNetVers
 	m_pMasterServer = Kernel()->RequestInterface<IMasterServer>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	m_pFriends = Kernel()->RequestInterface<IFriends>();
-	IConfig *pConfig = Kernel()->RequestInterface<IConfig>();
-	if(pConfig)
-		pConfig->RegisterCallback(ConfigSaveCallback, this);
+	IConfigManager *pConfigManager = Kernel()->RequestInterface<IConfigManager>();
+	if(pConfigManager)
+		pConfigManager->RegisterCallback(ConfigSaveCallback, this);
 }
 
 const CServerInfo *CServerBrowser::SortedGet(int Index) const
@@ -1264,7 +1264,7 @@ int CServerBrowser::LoadingProgression() const
 	return 100.0f * Loaded / Servers;
 }
 
-void CServerBrowser::ConfigSaveCallback(IConfig *pConfig, void *pUserData)
+void CServerBrowser::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData)
 {
 	CServerBrowser *pSelf = (CServerBrowser *)pUserData;
 
@@ -1274,7 +1274,7 @@ void CServerBrowser::ConfigSaveCallback(IConfig *pConfig, void *pUserData)
 	{
 		net_addr_str(&pSelf->m_aFavoriteServers[i], aAddrStr, sizeof(aAddrStr), true);
 		str_format(aBuffer, sizeof(aBuffer), "add_favorite %s", aAddrStr);
-		pConfig->WriteLine(aBuffer);
+		pConfigManager->WriteLine(aBuffer);
 	}
 }
 

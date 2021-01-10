@@ -29,10 +29,12 @@ class IGameController
 	int m_aNumSpawnPoints[3];
 
 	class CGameContext *m_pGameServer;
+	class CConfig *m_pConfig;
 	class IServer *m_pServer;
 
 protected:
 	CGameContext *GameServer() const { return m_pGameServer; }
+	CConfig *Config() { return m_pConfig; }
 	IServer *Server() const { return m_pServer; }
 
 	struct CSpawnEval

@@ -5,9 +5,11 @@
 
 #include <game/generated/protocol.h>
 
+#include "entities/character.h"
 #include "entities/pickup.h"
 #include "gamecontext.h"
 #include "gamecontroller.h"
+#include "player.h"
 
 #include "entities/door.h"
 #include "entities/dragger.h"
@@ -20,6 +22,7 @@
 IGameController::IGameController(class CGameContext *pGameServer)
 {
 	m_pGameServer = pGameServer;
+	m_pConfig = m_pGameServer->Config();
 	m_pServer = m_pGameServer->Server();
 	m_pGameType = "unknown";
 
@@ -81,7 +84,7 @@ void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type)
 				break;
 			for(int c = 0; c < Num; ++c)
 				if(GameServer()->Collision()->CheckPoint(m_aaSpawnPoints[Type][i] + Positions[Index]) ||
-					distance(aEnts[c]->m_Pos, m_aaSpawnPoints[Type][i] + Positions[Index]) <= aEnts[c]->m_ProximityRadius)
+					distance(aEnts[c]->m_Pos, m_aaSpawnPoints[Type][i] + Positions[Index]) <= aEnts[c]->GetProximityRadius())
 				{
 					Result = -1;
 					break;

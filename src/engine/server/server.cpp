@@ -2335,10 +2335,10 @@ int CServer::LoadMap(const char *pMapName)
 	return 1;
 }
 
-void CServer::InitRegister(CNetServer *pNetServer, IEngineMasterServer *pMasterServer, IConsole *pConsole)
+void CServer::InitRegister(CNetServer *pNetServer, IEngineMasterServer *pMasterServer, CConfig *pConfig, IConsole *pConsole)
 {
-	m_Register.Init(pNetServer, pMasterServer, pConsole);
-	m_RegSixup.Init(pNetServer, pMasterServer, pConsole);
+	m_Register.Init(pNetServer, pMasterServer, pConfig, pConsole);
+	m_RegSixup.Init(pNetServer, pMasterServer, pConfig, pConsole);
 }
 
 int CServer::Run()
@@ -2407,7 +2407,7 @@ int CServer::Run()
 
 	m_NetServer.SetCallbacks(NewClientCallback, NewClientNoAuthCallback, ClientRejoinCallback, DelClientCallback, this);
 
-	m_Econ.Init(Console(), &m_ServerBan);
+	m_Econ.Init(Config(), Console(), &m_ServerBan);
 
 #if defined(CONF_FAMILY_UNIX)
 	m_Fifo.Init(Console(), g_Config.m_SvInputFifo, CFGFLAG_SERVER);
@@ -3495,10 +3495,10 @@ int main(int argc, const char **argv) // ignore_convention
 	IConsole *pConsole = CreateConsole(CFGFLAG_SERVER | CFGFLAG_ECON);
 	IEngineMasterServer *pEngineMasterServer = CreateEngineMasterServer();
 	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_SERVER, argc, argv); // ignore_convention
-	IConfig *pConfig = CreateConfig();
+	IConfigManager *pConfigManager = CreateConfigManager();
 	IEngineAntibot *pEngineAntibot = CreateEngineAntibot();
 
-	pServer->InitRegister(&pServer->m_NetServer, pEngineMasterServer, pConsole);
+	pServer->InitRegister(&pServer->m_NetServer, pEngineMasterServer, pConfigManager->Values(), pConsole);
 
 	{
 		bool RegisterFail = false;
@@ -3510,7 +3510,7 @@ int main(int argc, const char **argv) // ignore_convention
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pGameServer);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConsole);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pStorage);
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConfig);
+		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConfigManager);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngineMasterServer); // register as both
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IMasterServer *>(pEngineMasterServer), false);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngineAntibot);
@@ -3524,7 +3524,8 @@ int main(int argc, const char **argv) // ignore_convention
 	}
 
 	pEngine->Init();
-	pConfig->Init();
+	pConfigManager->Init();
+	pConsole->Init();
 	pEngineMasterServer->Init();
 	pEngineMasterServer->Load();
 

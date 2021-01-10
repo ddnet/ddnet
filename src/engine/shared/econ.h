@@ -5,6 +5,8 @@
 
 #include <engine/console.h>
 
+class CConfig;
+
 class CEcon
 {
 	enum
@@ -28,6 +30,7 @@ class CEcon
 	};
 	CClient m_aClients[NET_MAX_CONSOLE_CLIENTS];
 
+	CConfig *m_pConfig;
 	IConsole *m_pConsole;
 	CNetConsole m_NetConsole;
 
@@ -45,7 +48,7 @@ class CEcon
 public:
 	IConsole *Console() { return m_pConsole; }
 
-	void Init(IConsole *pConsole, class CNetBan *pNetBan);
+	void Init(CConfig *pConfig, IConsole *pConsole, class CNetBan *pNetBan);
 	void Update();
 	void Send(int ClientID, const char *pLine);
 	void Shutdown();

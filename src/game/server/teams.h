@@ -4,6 +4,7 @@
 
 #include <engine/shared/config.h>
 #include <game/server/gamecontext.h>
+#include <game/server/score.h>
 #include <game/teamscore.h>
 
 #include <utility>

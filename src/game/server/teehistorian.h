@@ -9,7 +9,7 @@
 
 #include <time.h>
 
-struct CConfiguration;
+class CConfig;
 class CTuningParams;
 class CUuidManager;
 
@@ -34,7 +34,7 @@ public:
 		SHA256_DIGEST m_MapSha256;
 		int m_MapCrc;
 
-		CConfiguration *m_pConfig;
+		CConfig *m_pConfig;
 		CTuningParams *m_pTuning;
 		CUuidManager *m_pUuids;
 	};

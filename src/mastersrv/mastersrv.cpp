@@ -332,17 +332,18 @@ int main(int argc, const char **argv) // ignore_convention
 
 	IKernel *pKernel = IKernel::Create();
 	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC, argc, argv);
-	IConfig *pConfig = CreateConfig();
+	IConfigManager *pConfigManager = CreateConfigManager();
 	m_pConsole = CreateConsole(CFGFLAG_MASTER);
 
 	bool RegisterFail = !pKernel->RegisterInterface(pStorage);
 	RegisterFail |= !pKernel->RegisterInterface(m_pConsole);
-	RegisterFail |= !pKernel->RegisterInterface(pConfig);
+	RegisterFail |= !pKernel->RegisterInterface(pConfigManager);
 
 	if(RegisterFail)
 		return -1;
 
-	pConfig->Init();
+	pConfigManager->Init();
+	m_pConsole->Init();
 	m_NetBan.Init(m_pConsole, pStorage);
 	if(argc > 1) // ignore_convention
 		m_pConsole->ParseArguments(argc - 1, &argv[1]); // ignore_convention

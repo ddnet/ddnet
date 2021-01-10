@@ -272,6 +272,8 @@ CClient::CClient() :
 	m_pSound = 0;
 	m_pGameClient = 0;
 	m_pMap = 0;
+	m_pConfigManager = 0;
+	m_pConfig = 0;
 	m_pConsole = 0;
 
 	m_RenderFrameTime = 0.0001f;
@@ -2961,6 +2963,8 @@ void CClient::InitInterfaces()
 	m_pInput = Kernel()->RequestInterface<IEngineInput>();
 	m_pMap = Kernel()->RequestInterface<IEngineMap>();
 	m_pMasterServer = Kernel()->RequestInterface<IEngineMasterServer>();
+	m_pConfigManager = Kernel()->RequestInterface<IConfigManager>();
+	m_pConfig = m_pConfigManager->Values();
 #if defined(CONF_AUTOUPDATE)
 	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
 #endif
@@ -3338,8 +3342,7 @@ void CClient::Run()
 			if(!s_SavedConfig)
 			{
 				// write down the config and quit
-				IConfig *pConfig = Kernel()->RequestInterface<IConfig>();
-				if(!pConfig->Save())
+				if(!m_pConfigManager->Save())
 					m_Warnings.emplace_back(SWarning(Localize("Saving ddnet-settings.cfg failed")));
 				s_SavedConfig = true;
 			}
@@ -4265,7 +4268,7 @@ int main(int argc, const char **argv) // ignore_convention
 	IEngine *pEngine = CreateEngine("DDNet", Silent, 1);
 	IConsole *pConsole = CreateConsole(CFGFLAG_CLIENT);
 	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_CLIENT, argc, argv); // ignore_convention
-	IConfig *pConfig = CreateConfig();
+	IConfigManager *pConfigManager = CreateConfigManager();
 	IEngineSound *pEngineSound = CreateEngineSound();
 	IEngineInput *pEngineInput = CreateEngineInput();
 	IEngineTextRender *pEngineTextRender = CreateEngineTextRender();
@@ -4284,7 +4287,7 @@ int main(int argc, const char **argv) // ignore_convention
 
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngine);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConsole);
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConfig);
+		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConfigManager);
 
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngineSound); // IEngineSound
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<ISound *>(pEngineSound), false);
@@ -4316,7 +4319,8 @@ int main(int argc, const char **argv) // ignore_convention
 	}
 
 	pEngine->Init();
-	pConfig->Init();
+	pConfigManager->Init();
+	pConsole->Init();
 	pEngineMasterServer->Init();
 	pEngineMasterServer->Load();
 

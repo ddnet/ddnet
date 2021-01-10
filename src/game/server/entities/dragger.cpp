@@ -6,7 +6,10 @@
 #include <game/generated/protocol.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/DDRace.h>
+#include <game/server/player.h>
 #include <game/server/teams.h>
+
+#include "character.h"
 
 CDragger::CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW,
 	int CaughtTeam, int Layer, int Number) :
@@ -222,7 +225,7 @@ void CDragger::Snap(int SnappingClient)
 		if(i == -1)
 		{
 			obj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
-				NETOBJTYPE_LASER, m_ID, sizeof(CNetObj_Laser)));
+				NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
 		}
 		else
 		{

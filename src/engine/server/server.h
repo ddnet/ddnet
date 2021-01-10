@@ -89,6 +89,7 @@ public:
 class CServer : public IServer
 {
 	class IGameServer *m_pGameServer;
+	class CConfig *m_pConfig;
 	class IConsole *m_pConsole;
 	class IStorage *m_pStorage;
 	class IEngineAntibot *m_pAntibot;
@@ -107,6 +108,7 @@ class CServer : public IServer
 
 public:
 	class IGameServer *GameServer() { return m_pGameServer; }
+	class CConfig *Config() { return m_pConfig; }
 	class IConsole *Console() { return m_pConsole; }
 	class IStorage *Storage() { return m_pStorage; }
 	class IEngineAntibot *Antibot() { return m_pAntibot; }
@@ -366,7 +368,7 @@ public:
 	void StopRecord(int ClientID);
 	bool IsRecording(int ClientID);
 
-	void InitRegister(CNetServer *pNetServer, IEngineMasterServer *pMasterServer, IConsole *pConsole);
+	void InitRegister(CNetServer *pNetServer, IEngineMasterServer *pMasterServer, CConfig *pConfig, IConsole *pConsole);
 	int Run();
 
 	static void ConTestingCommands(IConsole::IResult *pResult, void *pUser);
