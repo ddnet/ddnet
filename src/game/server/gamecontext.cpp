@@ -2123,7 +2123,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				SendBroadcast(aBuf, ClientID);
 			}
 		}
-		else if(MsgID == NETMSGTYPE_CL_ISDDNET)
+		else if(MsgID == NETMSGTYPE_CL_ISDDNETLEGACY)
 		{
 			IServer::CClientInfo Info;
 			Server()->GetClientInfo(ClientID, &Info);
