@@ -971,6 +971,7 @@ CConsole::~CConsole()
 
 void CConsole::Init()
 {
+	m_pConfig = Kernel()->RequestInterface<IConfigManager>()->Values();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
 // TODO: this should disappear

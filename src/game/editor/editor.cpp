@@ -6346,6 +6346,7 @@ void CEditor::Init()
 {
 	m_pInput = Kernel()->RequestInterface<IInput>();
 	m_pClient = Kernel()->RequestInterface<IClient>();
+	m_pConfig = Kernel()->RequestInterface<IConfigManager>()->Values();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	m_pGraphics = Kernel()->RequestInterface<IGraphics>();
 	m_pTextRender = Kernel()->RequestInterface<ITextRender>();

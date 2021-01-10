@@ -56,6 +56,7 @@ enum
 	NUM_TUNEZONES = 256
 };
 
+class CConfig;
 class CHeap;
 class CPlayer;
 class CScore;
@@ -69,6 +70,7 @@ struct CScoreRandomMapResult;
 class CGameContext : public IGameServer
 {
 	IServer *m_pServer;
+	CConfig *m_pConfig;
 	IConsole *m_pConsole;
 	IEngine *m_pEngine;
 	IStorage *m_pStorage;
@@ -131,6 +133,7 @@ class CGameContext : public IGameServer
 
 public:
 	IServer *Server() const { return m_pServer; }
+	CConfig *Config() { return m_pConfig; }
 	IConsole *Console() { return m_pConsole; }
 	IEngine *Engine() { return m_pEngine; }
 	IStorage *Storage() { return m_pStorage; }

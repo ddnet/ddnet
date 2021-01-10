@@ -38,9 +38,9 @@ void CFriends::Init(bool Foes)
 {
 	m_Foes = Foes;
 
-	IConfig *pConfig = Kernel()->RequestInterface<IConfig>();
-	if(pConfig)
-		pConfig->RegisterCallback(ConfigSaveCallback, this);
+	IConfigManager *pConfigManager = Kernel()->RequestInterface<IConfigManager>();
+	if(pConfigManager)
+		pConfigManager->RegisterCallback(ConfigSaveCallback, this);
 
 	IConsole *pConsole = Kernel()->RequestInterface<IConsole>();
 	if(pConsole)
@@ -158,7 +158,7 @@ void CFriends::Friends()
 	}
 }
 
-void CFriends::ConfigSaveCallback(IConfig *pConfig, void *pUserData)
+void CFriends::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData)
 {
 	CFriends *pSelf = (CFriends *)pUserData;
 	char aBuf[128];
@@ -175,6 +175,6 @@ void CFriends::ConfigSaveCallback(IConfig *pConfig, void *pUserData)
 		str_escape(&pDst, pSelf->m_aFriends[i].m_aClan, pEnd);
 		str_append(aBuf, "\"", sizeof(aBuf));
 
-		pConfig->WriteLine(aBuf);
+		pConfigManager->WriteLine(aBuf);
 	}
 }

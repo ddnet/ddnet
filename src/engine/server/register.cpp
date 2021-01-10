@@ -118,10 +118,11 @@ void CRegister::RegisterGotCount(CNetChunk *pChunk)
 	}
 }
 
-void CRegister::Init(CNetServer *pNetServer, IEngineMasterServer *pMasterServer, IConsole *pConsole)
+void CRegister::Init(CNetServer *pNetServer, IEngineMasterServer *pMasterServer, CConfig *pConfig, IConsole *pConsole)
 {
 	m_pNetServer = pNetServer;
 	m_pMasterServer = pMasterServer;
+	m_pConfig = pConfig;
 	m_pConsole = pConsole;
 }
 

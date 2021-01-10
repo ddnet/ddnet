@@ -90,6 +90,8 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	IEngineSound *m_pSound;
 	IGameClient *m_pGameClient;
 	IEngineMap *m_pMap;
+	IConfigManager *m_pConfigManager;
+	CConfig *m_pConfig;
 	IConsole *m_pConsole;
 	IStorage *m_pStorage;
 	IUpdater *m_pUpdater;
@@ -274,6 +276,8 @@ public:
 	IEngineSound *Sound() { return m_pSound; }
 	IGameClient *GameClient() { return m_pGameClient; }
 	IEngineMasterServer *MasterServer() { return m_pMasterServer; }
+	IConfigManager *ConfigManager() { return m_pConfigManager; }
+	CConfig *Config() { return m_pConfig; }
 	IStorage *Storage() { return m_pStorage; }
 	IUpdater *Updater() { return m_pUpdater; }
 	ISteam *Steam() { return m_pSteam; }

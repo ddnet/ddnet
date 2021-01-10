@@ -744,8 +744,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	TextRender()->SetCurFont(NULL);
 }
 
-typedef void (*pfnAssignFuncCallback)(CConfiguration *pConfig, int Value);
-
 typedef struct
 {
 	CLocConstString m_Name;

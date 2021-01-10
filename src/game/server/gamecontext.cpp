@@ -3006,6 +3006,7 @@ void CGameContext::ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *p
 void CGameContext::OnConsoleInit()
 {
 	m_pServer = Kernel()->RequestInterface<IServer>();
+	m_pConfig = Kernel()->RequestInterface<IConfigManager>()->Values();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	m_pEngine = Kernel()->RequestInterface<IEngine>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
@@ -3052,6 +3053,7 @@ void CGameContext::OnConsoleInit()
 void CGameContext::OnInit(/*class IKernel *pKernel*/)
 {
 	m_pServer = Kernel()->RequestInterface<IServer>();
+	m_pConfig = Kernel()->RequestInterface<IConfigManager>()->Values();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	m_pEngine = Kernel()->RequestInterface<IEngine>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();

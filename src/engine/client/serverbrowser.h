@@ -206,7 +206,7 @@ private:
 
 	void SetInfo(CServerEntry *pEntry, const CServerInfo &Info);
 
-	static void ConfigSaveCallback(IConfig *pConfig, void *pUserData);
+	static void ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData);
 };
 
 #endif
