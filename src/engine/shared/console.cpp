@@ -572,8 +572,6 @@ void CConsole::ExecuteFile(const char *pFilename, int ClientID, bool LogFailure,
 			return;
 
 	if(!m_pStorage)
-		m_pStorage = Kernel()->RequestInterface<IStorage>();
-	if(!m_pStorage)
 		return;
 
 	// push this one to the stack
@@ -951,6 +949,30 @@ CConsole::CConsole(int FlagMask)
 	Register("access_status", "i[accesslevel]", CFGFLAG_SERVER, ConCommandStatus, this, "List all commands which are accessible for admin = 0, moderator = 1, helper = 2, all = 3");
 	Register("cmdlist", "", CFGFLAG_SERVER | CFGFLAG_CHAT, ConUserCommandStatus, this, "List all commands which are accessible for users");
 
+	// DDRace
+
+	m_Cheated = false;
+}
+
+CConsole::~CConsole()
+{
+	CCommand *pCommand = m_pFirstCommand;
+	while(pCommand)
+	{
+		CCommand *pNext = pCommand->m_pNext;
+		if(pCommand->m_pfnCallback == Con_Chain)
+			delete static_cast<CChain *>(pCommand->m_pUserData);
+		// Temp commands are on m_TempCommands heap, so don't delete them
+		if(!pCommand->m_Temp)
+			delete pCommand;
+		pCommand = pNext;
+	}
+}
+
+void CConsole::Init()
+{
+	m_pStorage = Kernel()->RequestInterface<IStorage>();
+
 // TODO: this should disappear
 #define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
 	{ \
@@ -977,25 +999,6 @@ CConsole::CConsole(int FlagMask)
 #undef MACRO_CONFIG_INT
 #undef MACRO_CONFIG_COL
 #undef MACRO_CONFIG_STR
-
-	// DDRace
-
-	m_Cheated = false;
-}
-
-CConsole::~CConsole()
-{
-	CCommand *pCommand = m_pFirstCommand;
-	while(pCommand)
-	{
-		CCommand *pNext = pCommand->m_pNext;
-		if(pCommand->m_pfnCallback == Con_Chain)
-			delete static_cast<CChain *>(pCommand->m_pUserData);
-		// Temp commands are on m_TempCommands heap, so don't delete them
-		if(!pCommand->m_Temp)
-			delete pCommand;
-		pCommand = pNext;
-	}
 }
 
 void CConsole::ParseArguments(int NumArgs, const char **ppArguments)
