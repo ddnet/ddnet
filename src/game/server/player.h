@@ -171,7 +171,6 @@ public:
 	bool m_ShowAll;
 	vec2 m_ShowDistance;
 	bool m_SpecTeam;
-	bool m_Aim;
 	bool m_NinjaJetpack;
 	bool m_Afk;
 	bool m_HasFinishScore;

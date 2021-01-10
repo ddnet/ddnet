@@ -2139,20 +2139,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			Server()->SetClientDDNetVersion(ClientID, DDNetVersion);
 			OnClientDDNetVersionKnown(ClientID);
 		}
-		else if(MsgID == NETMSGTYPE_CL_ISDDRACE)
-		{
-			int Version = pUnpacker->GetInt();
-			if(pUnpacker->Error())
-				Version = -1;
-
-			dbg_msg("ddrace", "%d using custom 0.7 client. ddrace version: %d", ClientID, Version);
-			((CGameControllerDDRace *)m_pController)->m_Teams.SendTeamsState(ClientID);
-		}
-		else if(MsgID == NETMSGTYPE_CL_EXPLAYERFLAGS)
-		{
-			CNetMsg_Cl_ExPlayerFlags *pMsg = (CNetMsg_Cl_ExPlayerFlags *)pRawMsg;
-			pPlayer->m_Aim = pMsg->m_Flags & EXPLAYERFLAG_AIM;
-		}
 		else if(MsgID == NETMSGTYPE_CL_SHOWOTHERSLEGACY)
 		{
 			if(g_Config.m_SvShowOthers && !g_Config.m_SvShowOthersDefault)

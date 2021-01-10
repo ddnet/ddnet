@@ -724,9 +724,6 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 		}
 		else
 		{
-			if(MsgId == NETMSGTYPE_SV_TEAMSSTATE)
-				MsgId = NETMSGTYPE_SV_TEAMSSTATEEX;
-
 			if(MsgId >= 0 && MsgId < OFFSET_UUID)
 				MsgId = Msg_SixToSeven(MsgId);
 
@@ -1151,7 +1148,7 @@ void CServer::SendCapabilities(int ClientID)
 {
 	CMsgPacker Msg(NETMSG_CAPABILITIES, true);
 	Msg.AddInt(SERVERCAP_CURVERSION); // version
-	Msg.AddInt(SERVERCAPFLAG_DDNET | SERVERCAPFLAG_CHATTIMEOUTCODE); // flags
+	Msg.AddInt(SERVERCAPFLAG_DDNET | SERVERCAPFLAG_CHATTIMEOUTCODE | SERVERCAPFLAG_ANYPLAYERFLAG); // flags
 	SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 
