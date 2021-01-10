@@ -32,6 +32,8 @@ extern "C" {
 #include <engine/shared/video.h>
 #define ALEN 2048
 
+extern LOCK g_WriteLock;
+
 // a wrapper around a single output AVStream
 typedef struct OutputStream
 {
@@ -83,7 +85,7 @@ private:
 	AVFrame *AllocPicture(enum AVPixelFormat PixFmt, int Width, int Height);
 	AVFrame *AllocAudioFrame(enum AVSampleFormat SampleFmt, uint64 ChannelLayout, int SampleRate, int NbSamples);
 
-	void WriteFrame(OutputStream *pStream);
+	void WriteFrame(OutputStream *pStream) REQUIRES(g_WriteLock);
 	void FinishFrames(OutputStream *pStream);
 	void CloseStream(OutputStream *pStream);
 

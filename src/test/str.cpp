@@ -309,4 +309,7 @@ TEST(Str, StrTimeFloat)
 	char aBuf[64];
 	EXPECT_EQ(str_time_float(123456.78, TIME_DAYS, aBuf, sizeof(aBuf)), 11);
 	EXPECT_STREQ(aBuf, "1d 10:17:36");
+
+	EXPECT_EQ(str_time_float(12.16, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf)), 8);
+	EXPECT_STREQ(aBuf, "00:12.16");
 }

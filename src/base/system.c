@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <ctype.h>
+#include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -361,6 +362,7 @@ int io_flush(IOHANDLE io)
 #define ASYNC_BUFSIZE 8 * 1024
 #define ASYNC_LOCAL_BUFSIZE 64 * 1024
 
+// TODO: Use Thread Safety Analysis when this file is converted to C++
 struct ASYNCIO
 {
 	LOCK lock;
@@ -410,7 +412,7 @@ static void buffer_ptrs(ASYNCIO *aio, struct BUFFERS *buffers)
 	}
 }
 
-static void aio_handle_free_and_unlock(ASYNCIO *aio)
+static void aio_handle_free_and_unlock(ASYNCIO *aio) RELEASE(aio->lock)
 {
 	int do_free;
 	aio->refcount--;
@@ -546,12 +548,12 @@ static unsigned int next_buffer_size(unsigned int cur_size, unsigned int need_si
 	return cur_size;
 }
 
-void aio_lock(ASYNCIO *aio)
+void aio_lock(ASYNCIO *aio) ACQUIRE(aio->lock)
 {
 	lock_wait(aio->lock);
 }
 
-void aio_unlock(ASYNCIO *aio)
+void aio_unlock(ASYNCIO *aio) RELEASE(aio->lock)
 {
 	lock_unlock(aio->lock);
 	sphore_signal(&aio->sphore);
@@ -839,6 +841,10 @@ int lock_trylock(LOCK lock)
 #endif
 }
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wthread-safety-analysis"
+#endif
 void lock_wait(LOCK lock)
 {
 #if defined(CONF_FAMILY_UNIX)
@@ -864,6 +870,9 @@ void lock_unlock(LOCK lock)
 #error not implemented on this platform
 #endif
 }
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 #if defined(CONF_FAMILY_WINDOWS)
 void sphore_init(SEMAPHORE *sem)
@@ -2884,7 +2893,7 @@ int str_time(int64 centisecs, int format, char *buffer, int buffer_size)
 
 int str_time_float(float secs, int format, char *buffer, int buffer_size)
 {
-	return str_time((int64)(secs * 100.0), format, buffer, buffer_size);
+	return str_time(llroundf(secs * 100.0), format, buffer, buffer_size);
 }
 
 void str_escape(char **dst, const char *src, const char *end)
