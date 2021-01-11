@@ -23,6 +23,8 @@ public:
 	void InitTeleporter();
 	virtual void Tick();
 
+	void OnTeamChange(int ClientID, int Team);
+
 	std::shared_ptr<CScoreInitResult> m_pInitResult;
 };
 #endif // GAME_SERVER_DDRACE_GAMECONTROLLER_H

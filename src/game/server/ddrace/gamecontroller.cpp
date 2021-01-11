@@ -40,6 +40,22 @@ void CGameControllerDDRace::Tick()
 	}
 }
 
+void CGameControllerDDRace::OnTeamChange(int ClientID, int Team)
+{
+	if(Team != TEAM_SPECTATORS)
+		return;
+
+	CCharacter *pCharacter = GameServer()->GetPlayerChar(ClientID);
+	if(g_Config.m_SvTeam != 3 && pCharacter)
+	{
+		// Joining spectators should not kill a locked team, but should still
+		// check if the team finished by you leaving it.
+		int DDRTeam = pCharacter->Team();
+		m_Teams.SetForceCharacterTeam(ClientID, TEAM_FLOCK);
+		m_Teams.CheckTeamFinished(DDRTeam);
+	}
+}
+
 void CGameControllerDDRace::InitTeleporter()
 {
 	if(!GameServer()->Collision()->Layers()->TeleLayer())

@@ -142,6 +142,7 @@ public:
 	virtual const char *GetTeamName(int Team);
 	virtual int GetAutoTeam(int NotThisID);
 	virtual bool CanJoinTeam(int Team, int NotThisID);
+	virtual void OnTeamChange(int ClientID, int Team);
 	int ClampTeam(int Team);
 
 	virtual void PostReset();

@@ -49,6 +49,10 @@ IGameController::~IGameController()
 {
 }
 
+void IGameController::OnTeamChange(int, int)
+{
+}
+
 void IGameController::DoActivityCheck()
 {
 	if(g_Config.m_SvInactiveKickTime == 0)

@@ -3,7 +3,6 @@
 #include "player.h"
 #include <engine/shared/config.h>
 
-#include "ddrace/gamecontroller.h"
 #include "entities/character.h"
 #include "gamecontext.h"
 #include <engine/server.h>
@@ -600,25 +599,13 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 	if(m_Team == Team)
 		return;
 
+	GameServer()->m_pController->OnTeamChange(m_ClientID, Team);
 	char aBuf[512];
 	DoChatMsg = false;
 	if(DoChatMsg)
 	{
 		str_format(aBuf, sizeof(aBuf), "'%s' joined the %s", Server()->ClientName(m_ClientID), GameServer()->m_pController->GetTeamName(Team));
 		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
-	}
-
-	if(Team == TEAM_SPECTATORS)
-	{
-		CGameControllerDDRace *Controller = (CGameControllerDDRace *)GameServer()->m_pController;
-		if(g_Config.m_SvTeam != 3 && m_pCharacter)
-		{
-			// Joining spectators should not kill a locked team, but should still
-			// check if the team finished by you leaving it.
-			int DDRTeam = m_pCharacter->Team();
-			Controller->m_Teams.SetForceCharacterTeam(m_ClientID, TEAM_FLOCK);
-			Controller->m_Teams.CheckTeamFinished(DDRTeam);
-		}
 	}
 
 	KillCharacter();
