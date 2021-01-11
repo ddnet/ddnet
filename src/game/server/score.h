@@ -80,7 +80,7 @@ struct CScoreRandomMapResult : ISqlResult
 
 struct CScoreSaveResult : ISqlResult
 {
-	CScoreSaveResult(int PlayerID, IGameController *Controller) :
+	CScoreSaveResult(int PlayerID, CGameControllerDDRace *Controller) :
 		m_Status(SAVE_FAILED),
 		m_SavedTeam(CSaveTeam(Controller)),
 		m_RequestingPlayer(PlayerID)

@@ -5,8 +5,8 @@
 #include <game/generated/protocol.h>
 #include <game/server/gamecontroller.h>
 
-class IGameController;
 class CGameContext;
+class CGameControllerDDRace;
 class CCharacter;
 class CSaveTeam;
 
@@ -110,7 +110,7 @@ private:
 class CSaveTeam
 {
 public:
-	CSaveTeam(IGameController *Controller);
+	CSaveTeam(CGameControllerDDRace *Controller);
 	~CSaveTeam();
 	char *GetString();
 	int GetMembersCount() const { return m_MembersCount; }
@@ -128,7 +128,7 @@ public:
 private:
 	CCharacter *MatchCharacter(int ClientID, int SaveID, bool KeepCurrentWeakStrong);
 
-	IGameController *m_pController;
+	CGameControllerDDRace *m_pController;
 
 	char m_aString[65536];
 

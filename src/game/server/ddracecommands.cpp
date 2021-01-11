@@ -1,6 +1,6 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
-#include "gamecontext.h"
 #include <engine/shared/config.h>
+#include <game/server/ddrace/gamecontext.h>
 #include <game/server/ddrace/gamecontroller.h>
 #include <game/server/entities/character.h>
 #include <game/server/player.h>
@@ -746,16 +746,16 @@ void CGameContext::ConVoteNo(IConsole::IResult *pResult, void *pUserData)
 	pSelf->ForceVote(pResult->m_ClientID, false);
 }
 
-void CGameContext::ConDrySave(IConsole::IResult *pResult, void *pUserData)
+void CGameContextDDRace::ConDrySave(IConsole::IResult *pResult, void *pUserData)
 {
-	CGameContext *pSelf = (CGameContext *)pUserData;
+	CGameContextDDRace *pSelf = (CGameContextDDRace *)pUserData;
 
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
 
 	if(!pPlayer || pSelf->Server()->GetAuthedState(pResult->m_ClientID) != AUTHED_ADMIN)
 		return;
 
-	CSaveTeam SavedTeam(pSelf->m_pController);
+	CSaveTeam SavedTeam(pSelf->m_pDDRaceController);
 	int Result = SavedTeam.save(pPlayer->GetTeam());
 	if(CSaveTeam::HandleSaveError(Result, pResult->m_ClientID, pSelf))
 		return;

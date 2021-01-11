@@ -7,6 +7,8 @@
 class CGameContextDDRace : public CGameContext
 {
 protected:
+	static void ConDrySave(IConsole::IResult *pResult, void *pUserData);
+
 	CGameContextDDRace(int Resetting);
 
 	void ResetContext() override;
