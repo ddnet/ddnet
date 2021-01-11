@@ -28,12 +28,6 @@
 #include "player.h"
 #include "score.h"
 
-enum
-{
-	RESET,
-	NO_RESET
-};
-
 void CGameContext::Construct(int Resetting)
 {
 	m_Resetting = 0;
@@ -70,6 +64,13 @@ CGameContext::CGameContext(int Resetting)
 	Construct(Resetting);
 }
 
+void CGameContext::ResetContext()
+{
+	this->~CGameContext();
+	mem_zero(this, sizeof(*this));
+	new(this) CGameContext(RESET);
+}
+
 CGameContext::CGameContext()
 {
 	Construct(NO_RESET);
@@ -93,11 +94,9 @@ void CGameContext::Clear()
 	CVoteOptionServer *pVoteOptionLast = m_pVoteOptionLast;
 	int NumVoteOptions = m_NumVoteOptions;
 	CTuningParams Tuning = m_Tuning;
-
 	m_Resetting = true;
-	this->~CGameContext();
-	mem_zero(this, sizeof(*this));
-	new(this) CGameContext(RESET);
+
+	ResetContext();
 
 	m_pVoteOptionHeap = pVoteOptionHeap;
 	m_pVoteOptionFirst = pVoteOptionFirst;

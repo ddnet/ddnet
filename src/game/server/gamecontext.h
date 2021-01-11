@@ -69,6 +69,13 @@ struct CScoreRandomMapResult;
 
 class CGameContext : public IGameServer
 {
+protected:
+	enum
+	{
+		RESET,
+		NO_RESET
+	};
+
 	IServer *m_pServer;
 	CConfig *m_pConfig;
 	IConsole *m_pConsole;
@@ -126,6 +133,8 @@ class CGameContext : public IGameServer
 
 	CGameContext(int Resetting);
 	void Construct(int Resetting);
+	virtual void ResetContext();
+
 	void AddVote(const char *pDescription, const char *pCommand);
 	static int MapScan(const char *pName, int IsDir, int DirType, void *pUserData);
 
