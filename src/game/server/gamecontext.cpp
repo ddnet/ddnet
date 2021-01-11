@@ -3047,7 +3047,7 @@ void CGameContext::OnConsoleInit()
 #define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, callback, userdata, help);
 #include <game/ddracecommands.h>
 #define CHAT_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, callback, userdata, help);
-#include "ddracechat.h"
+#include <game/ddracechat.h>
 }
 
 void CGameContext::OnInit(/*class IKernel *pKernel*/)
