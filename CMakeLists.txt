@@ -1976,7 +1976,6 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   gamecontroller.h
   gamemodes/DDRace.cpp
   gamemodes/DDRace.h
-  gamemodes/gamemode.h
   gameworld.cpp
   gameworld.h
   player.cpp
