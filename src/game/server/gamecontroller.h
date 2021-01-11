@@ -37,6 +37,8 @@ protected:
 	CConfig *Config() { return m_pConfig; }
 	IServer *Server() const { return m_pServer; }
 
+	void DoActivityCheck();
+
 	struct CSpawnEval
 	{
 		CSpawnEval()
