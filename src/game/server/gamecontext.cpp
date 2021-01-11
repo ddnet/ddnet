@@ -3162,7 +3162,6 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	}
 
 	m_pController = new CGameControllerDDRace(this);
-	((CGameControllerDDRace *)m_pController)->m_Teams.Reset();
 
 	const char *pCensorFilename = "censorlist.txt";
 	IOHANDLE File = Storage()->OpenFile(pCensorFilename, IOFLAG_READ, IStorage::TYPE_ALL);
