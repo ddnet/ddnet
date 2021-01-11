@@ -21,8 +21,6 @@ class CPlayer
 {
 	MACRO_ALLOC_POOL_ID()
 
-	friend class CSaveTee;
-
 public:
 	CPlayer(CGameContext *pGameServer, int ClientID, int Team);
 	~CPlayer();
