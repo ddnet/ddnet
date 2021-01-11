@@ -341,21 +341,7 @@ int CGameTeams::Count(int Team) const
 
 void CGameTeams::ChangeTeamState(int Team, int State)
 {
-	int OldState = m_TeamState[Team];
 	m_TeamState[Team] = State;
-	onChangeTeamState(Team, State, OldState);
-}
-
-void CGameTeams::onChangeTeamState(int Team, int State, int OldState)
-{
-	if(OldState != State && State == TEAMSTATE_STARTED)
-	{
-		// OnTeamStateStarting
-	}
-	if(OldState != State && State == TEAMSTATE_FINISHED)
-	{
-		// OnTeamStateFinishing
-	}
 }
 
 bool CGameTeams::TeamFinished(int Team)
