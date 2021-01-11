@@ -3627,6 +3627,7 @@ bool CServer::SetTimedOut(int ClientID, int OrigID)
 	DelClientCallback(OrigID, "Timeout Protection used", this);
 	m_aClients[ClientID].m_Authed = AUTHED_NO;
 	m_aClients[ClientID].m_Flags = m_aClients[OrigID].m_Flags;
+	LogoutClient(ClientID, "Timeout Protection");
 	return true;
 }
 
