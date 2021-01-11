@@ -54,8 +54,6 @@ public:
 	virtual void TickDefered() {}
 
 	bool GameLayerClipped(vec2 CheckPos);
-	virtual int NetworkClipped(vec2 ViewPos);
-	virtual int NetworkClipped(vec2 CheckPos, vec2 ViewPos);
 	float m_ProximityRadius;
 	vec2 m_Pos;
 	int m_Number;
