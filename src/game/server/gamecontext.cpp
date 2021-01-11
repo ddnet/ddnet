@@ -64,13 +64,6 @@ CGameContext::CGameContext(int Resetting)
 	Construct(Resetting);
 }
 
-void CGameContext::ResetContext()
-{
-	this->~CGameContext();
-	mem_zero(this, sizeof(*this));
-	new(this) CGameContext(RESET);
-}
-
 CGameContext::CGameContext()
 {
 	Construct(NO_RESET);
@@ -3160,7 +3153,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		}
 	}
 
-	m_pController = new CGameControllerDDRace(this);
+	m_pController = CreateGameController();
 
 	const char *pCensorFilename = "censorlist.txt";
 	IOHANDLE File = Storage()->OpenFile(pCensorFilename, IOFLAG_READ, IStorage::TYPE_ALL);

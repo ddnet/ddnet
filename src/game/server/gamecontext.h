@@ -133,7 +133,8 @@ protected:
 
 	CGameContext(int Resetting);
 	void Construct(int Resetting);
-	virtual void ResetContext();
+	virtual void ResetContext() = 0;
+	virtual IGameController *CreateGameController() = 0;
 
 	void AddVote(const char *pDescription, const char *pCommand);
 	static int MapScan(const char *pName, int IsDir, int DirType, void *pUserData);

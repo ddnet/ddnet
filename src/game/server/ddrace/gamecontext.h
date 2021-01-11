@@ -13,6 +13,12 @@ protected:
 
 public:
 	CGameContextDDRace();
+
+	IGameController *CreateGameController() override;
+	void OnShutdown() override;
+
+protected:
+	class CGameControllerDDRace *m_pDDRaceController = nullptr;
 };
 
 #endif // GAME_SERVER_DDRACE_GAMECONTEXT_H

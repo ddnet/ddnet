@@ -2,6 +2,8 @@
 /* Based on Race mod stuff and tweaked by GreYFoX@GTi and others to fit our DDRace needs. */
 #include "gamecontext.h"
 
+#include "gamecontroller.h"
+
 CGameContextDDRace::CGameContextDDRace(int Resetting) :
 	CGameContext(Resetting)
 {
@@ -17,6 +19,18 @@ void CGameContextDDRace::ResetContext()
 CGameContextDDRace::CGameContextDDRace() :
 	CGameContext()
 {
+}
+
+IGameController *CGameContextDDRace::CreateGameController()
+{
+	m_pDDRaceController = new CGameControllerDDRace(this);
+	return m_pDDRaceController;
+}
+
+void CGameContextDDRace::OnShutdown()
+{
+	CGameContext::OnShutdown();
+	m_pDDRaceController = nullptr;
 }
 
 IGameServer *CreateGameServer() { return new CGameContextDDRace; }
