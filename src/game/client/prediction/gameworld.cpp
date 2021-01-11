@@ -485,14 +485,6 @@ void CGameWorld::NetObjEnd(int LocalID)
 						pHookedChar->m_KeepHooked = true;
 						pHookedChar->m_MarkedForDestroy = false;
 					}
-	// keep entities that are out of view for a short while, for some entity types
-	if(CCharacter *pLocal = GetCharacterByID(LocalID))
-		for(int i : {ENTTYPE_CHARACTER, ENTTYPE_PROJECTILE, ENTTYPE_LASER})
-			for(CEntity *pEnt = FindFirst(i); pEnt; pEnt = pEnt->TypeNext())
-				if(pEnt->m_MarkedForDestroy)
-					if(pEnt->m_SnapTicks < 2 * SERVER_TICK_SPEED || (i != ENTTYPE_CHARACTER && pEnt->m_SnapTicks < 5 * SERVER_TICK_SPEED))
-						if(pEnt->NetworkClipped(pLocal->m_Core.m_Pos))
-							pEnt->m_MarkedForDestroy = false;
 	RemoveEntities();
 
 	// Update character IDs and pointers

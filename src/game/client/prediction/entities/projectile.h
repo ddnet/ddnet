@@ -40,7 +40,6 @@ public:
 	const int &GetOwner() { return m_Owner; }
 	const int &GetStartTick() { return m_StartTick; }
 	CProjectile(CGameWorld *pGameWorld, int ID, CNetObj_Projectile *pProj);
-	virtual int NetworkClipped(vec2 ViewPos);
 
 private:
 	vec2 m_Direction;
