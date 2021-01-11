@@ -3607,7 +3607,8 @@ const char *CGameContext::GameType() { return m_pController && m_pController->m_
 const char *CGameContext::Version() { return GAME_VERSION; }
 const char *CGameContext::NetVersion() { return GAME_NETVERSION; }
 
-IGameServer *CreateGameServer() { return new CGameContext; }
+// The code moved to the mod-specific gamecontext source file
+// IGameServer *CreateGameServer() { return new CGameContext; }
 
 void CGameContext::SendChatResponseAll(const char *pLine, void *pUser)
 {

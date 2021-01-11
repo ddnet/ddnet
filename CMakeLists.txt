@@ -1944,6 +1944,8 @@ set_src(ENGINE_SERVER GLOB_RECURSE src/engine/server
 )
 set_src(GAME_SERVER GLOB_RECURSE src/game/server
   alloc.h
+  ddrace/gamecontext.cpp
+  ddrace/gamecontext.h
   ddrace/gamecontroller.cpp
   ddrace/gamecontroller.h
   ddracechat.cpp
