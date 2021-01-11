@@ -468,34 +468,11 @@ void CPlayer::FakeSnap()
 	pSpectatorInfo->m_Y = m_ViewPos.y;
 }
 
-void CPlayer::OnDisconnect(const char *pReason)
+void CPlayer::OnDisconnect()
 {
 	KillCharacter();
 
-	if(Server()->ClientIngame(m_ClientID))
-	{
-		char aBuf[512];
-		if(pReason && *pReason)
-			str_format(aBuf, sizeof(aBuf), "'%s' has left the game (%s)", Server()->ClientName(m_ClientID), pReason);
-		else
-			str_format(aBuf, sizeof(aBuf), "'%s' has left the game", Server()->ClientName(m_ClientID));
-		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1, CGameContext::CHAT_SIX);
-
-		str_format(aBuf, sizeof(aBuf), "leave player='%d:%s'", m_ClientID, Server()->ClientName(m_ClientID));
-		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
-
-		bool WasModerator = m_Moderating;
-
-		// Set this to false, otherwise PlayerModerating() will return true.
-		m_Moderating = false;
-
-		if(!GameServer()->PlayerModerating() && WasModerator)
-			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, "Server kick/spec votes are no longer actively moderated.");
-	}
-
-	CGameControllerDDRace *Controller = (CGameControllerDDRace *)GameServer()->m_pController;
-	if(g_Config.m_SvTeam != 3)
-		Controller->m_Teams.SetForceCharacterTeam(m_ClientID, TEAM_FLOCK);
+	m_Moderating = false;
 }
 
 void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)

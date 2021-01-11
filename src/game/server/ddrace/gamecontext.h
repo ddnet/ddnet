@@ -17,6 +17,8 @@ public:
 	IGameController *CreateGameController() override;
 	void OnShutdown() override;
 
+	void OnClientDrop(int ClientID, const char *pReason) override;
+
 protected:
 	class CGameControllerDDRace *m_pDDRaceController = nullptr;
 };
