@@ -4,7 +4,8 @@
 #define GAME_SERVER_EVENTHANDLER_H
 
 #include <base/system.h>
-//
+#include <base/vmath.h>
+
 class CEventHandler
 {
 	static const int MAX_EVENTS = 128;
