@@ -10,6 +10,7 @@
 #include <engine/shared/config.h>
 
 #include <game/client/component.h>
+#include <game/client/components/camera.h>
 #include <game/client/components/chat.h>
 #include <game/client/components/menus.h>
 #include <game/client/components/scoreboard.h>
@@ -558,6 +559,13 @@ bool CControls::OnMouseMove(float x, float y)
 		x = x * g_Config.m_ClDyncamMousesens / g_Config.m_InpMousesens;
 		y = y * g_Config.m_ClDyncamMousesens / g_Config.m_InpMousesens;
 	}
+
+	if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID < 0)
+	{
+		x = x * m_pClient->m_pCamera->m_Zoom;
+		y = y * m_pClient->m_pCamera->m_Zoom;
+	}
+
 	m_MousePos[g_Config.m_ClDummy] += vec2(x, y); // TODO: ugly
 	ClampMousePos();
 
