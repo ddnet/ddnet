@@ -13,7 +13,7 @@
 #include "projectile.h"
 
 #include "light.h"
-#include <game/server/gamemodes/DDRace.h>
+#include <game/server/ddrace/gamecontroller.h>
 #include <game/server/score.h>
 
 MACRO_ALLOC_POOL_ID_IMPL(CCharacter, MAX_CLIENTS)

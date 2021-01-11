@@ -3,8 +3,8 @@
 #include <cstdio>
 #include <new>
 
+#include "ddrace/gamecontroller.h"
 #include "entities/character.h"
-#include "gamemodes/DDRace.h"
 #include "player.h"
 #include "teams.h"
 #include <engine/shared/config.h>

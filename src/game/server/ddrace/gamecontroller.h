@@ -1,6 +1,6 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
-#ifndef GAME_SERVER_GAMEMODES_DDRACE_H
-#define GAME_SERVER_GAMEMODES_DDRACE_H
+#ifndef GAME_SERVER_DDRACE_GAMECONTROLLER_H
+#define GAME_SERVER_DDRACE_GAMECONTROLLER_H
 #include <game/server/entities/door.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/teams.h>
@@ -25,4 +25,4 @@ public:
 
 	std::shared_ptr<CScoreInitResult> m_pInitResult;
 };
-#endif // GAME_SERVER_GAMEMODES_DDRACE_H
+#endif // GAME_SERVER_DDRACE_GAMECONTROLLER_H

@@ -2,8 +2,8 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "projectile.h"
 #include <game/generated/protocol.h>
+#include <game/server/ddrace/gamecontroller.h>
 #include <game/server/gamecontext.h>
-#include <game/server/gamemodes/DDRace.h>
 #include <game/server/player.h>
 
 #include <engine/shared/config.h>

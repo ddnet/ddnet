@@ -3,7 +3,7 @@
 #include <engine/engine.h>
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
-#include <game/server/gamemodes/DDRace.h>
+#include <game/server/ddrace/gamecontroller.h>
 #include <game/server/teams.h>
 #include <game/version.h>
 
