@@ -3035,11 +3035,6 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("dump_antibot", "", CFGFLAG_SERVER, ConDumpAntibot, this, "Dumps the antibot status");
 
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
-
-#define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, callback, userdata, help);
-#include <game/ddracecommands.h>
-#define CHAT_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, callback, userdata, help);
-#include <game/ddracechat.h>
 }
 
 void CGameContext::OnInit(/*class IKernel *pKernel*/)

@@ -15,6 +15,8 @@ public:
 	CGameContextDDRace();
 
 	IGameController *CreateGameController() override;
+
+	void OnConsoleInit() override;
 	void OnShutdown() override;
 
 	void OnClientDrop(int ClientID, const char *pReason) override;

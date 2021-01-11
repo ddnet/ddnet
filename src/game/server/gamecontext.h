@@ -302,7 +302,7 @@ public:
 
 	std::shared_ptr<CScoreRandomMapResult> m_SqlRandomMapResult;
 
-private:
+protected:
 	bool m_VoteWillPass;
 	class CScore *m_pScore;
 

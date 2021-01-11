@@ -29,6 +29,16 @@ IGameController *CGameContextDDRace::CreateGameController()
 	return m_pDDRaceController;
 }
 
+void CGameContextDDRace::OnConsoleInit()
+{
+	CGameContext::OnConsoleInit();
+
+#define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, callback, userdata, help);
+#include <game/ddracecommands.h>
+#define CHAT_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, callback, userdata, help);
+#include <game/ddracechat.h>
+}
+
 void CGameContextDDRace::OnShutdown()
 {
 	CGameContext::OnShutdown();
