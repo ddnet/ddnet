@@ -856,6 +856,7 @@ void CGameTeams::ResetSavedTeam(int ClientID, int Team)
 	{
 		ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
 		ResetSwitchers(Team);
+		m_Practice[Team] = false;
 	}
 	else
 	{
