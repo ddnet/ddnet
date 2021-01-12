@@ -1128,8 +1128,11 @@ void CGameContext::ConEyeEmote(IConsole::IResult *pResult, void *pUserData)
 		else if(!str_comp(pResult->GetString(0), "normal"))
 			pPlayer->m_DefEmote = EMOTE_NORMAL;
 		else
+		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD,
 				"emote", "Unknown emote... Say /emote");
+			return;
+		}
 
 		int Duration = 1;
 		if(pResult->NumArguments() > 1)
