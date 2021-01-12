@@ -135,6 +135,11 @@ private:
 	int64 m_ForcePauseTime;
 	int64 m_LastPause;
 
+	int m_DefEmote;
+	int m_OverrideEmote;
+	int m_OverrideEmoteReset;
+	bool m_Halloween;
+
 public:
 	enum
 	{
@@ -197,10 +202,6 @@ public:
 	void OverrideDefaultEmote(int Emote, int Tick);
 	bool CanOverrideDefaultEmote() const;
 
-	int m_DefEmote;
-	int m_OverrideEmote;
-	int m_OverrideEmoteReset;
-	bool m_Halloween;
 	bool m_FirstPacket;
 	int64 m_LastSQLQuery;
 	void ProcessScoreResult(CScorePlayerResult &Result);
