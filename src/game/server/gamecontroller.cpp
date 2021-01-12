@@ -9,7 +9,6 @@
 #include "entities/pickup.h"
 #include "gamecontext.h"
 #include "gamecontroller.h"
-#include "gamemodes/DDRace.h"
 #include "player.h"
 
 #include "entities/door.h"
@@ -387,8 +386,6 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 
 void IGameController::OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason)
 {
-	bool WasModerator = pPlayer->m_Moderating;
-
 	pPlayer->OnDisconnect();
 	int ClientID = pPlayer->GetCID();
 	if(Server()->ClientIngame(ClientID))
@@ -402,14 +399,7 @@ void IGameController::OnPlayerDisconnect(class CPlayer *pPlayer, const char *pRe
 
 		str_format(aBuf, sizeof(aBuf), "leave player='%d:%s'", ClientID, Server()->ClientName(ClientID));
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
-
-		if(!GameServer()->PlayerModerating() && WasModerator)
-			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, "Server kick/spec votes are no longer actively moderated.");
 	}
-
-	CGameControllerDDRace *Controller = (CGameControllerDDRace *)GameServer()->m_pController;
-	if(g_Config.m_SvTeam != 3)
-		Controller->m_Teams.SetForceCharacterTeam(ClientID, TEAM_FLOCK);
 }
 
 void IGameController::EndRound()
@@ -668,23 +658,8 @@ void IGameController::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
 	if(Team == pPlayer->GetTeam())
 		return;
 
-	int ClientID = pPlayer->GetCID();
-	CCharacter *pCharacter = GameServer()->GetPlayerChar(ClientID);
-
-	if(Team == TEAM_SPECTATORS)
-	{
-		CGameControllerDDRace *pController = (CGameControllerDDRace *)this;
-		if(g_Config.m_SvTeam != 3 && pCharacter)
-		{
-			// Joining spectators should not kill a locked team, but should still
-			// check if the team finished by you leaving it.
-			int DDRTeam = pCharacter->Team();
-			pController->m_Teams.SetForceCharacterTeam(ClientID, TEAM_FLOCK);
-			pController->m_Teams.CheckTeamFinished(DDRTeam);
-		}
-	}
-
 	pPlayer->SetTeam(Team);
+	int ClientID = pPlayer->GetCID();
 
 	char aBuf[128];
 	DoChatMsg = false;

@@ -22,6 +22,20 @@ CGameControllerDDRace::~CGameControllerDDRace()
 	// Nothing to clean
 }
 
+void CGameControllerDDRace::OnPlayerDisconnect(CPlayer *pPlayer, const char *pReason)
+{
+	int ClientID = pPlayer->GetCID();
+	bool WasModerator = pPlayer->m_Moderating && Server()->ClientIngame(ClientID);
+
+	IGameController::OnPlayerDisconnect(pPlayer, pReason);
+
+	if(!GameServer()->PlayerModerating() && WasModerator)
+		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, "Server kick/spec votes are no longer actively moderated.");
+
+	if(g_Config.m_SvTeam != 3)
+		m_Teams.SetForceCharacterTeam(ClientID, TEAM_FLOCK);
+}
+
 void CGameControllerDDRace::Tick()
 {
 	IGameController::Tick();
@@ -35,6 +49,29 @@ void CGameControllerDDRace::Tick()
 		}
 		m_pInitResult = nullptr;
 	}
+}
+
+void CGameControllerDDRace::DoTeamChange(class CPlayer *pPlayer, int Team, bool DoChatMsg)
+{
+	Team = ClampTeam(Team);
+	if(Team == pPlayer->GetTeam())
+		return;
+
+	CCharacter *pCharacter = pPlayer->GetCharacter();
+
+	if(Team == TEAM_SPECTATORS)
+	{
+		if(g_Config.m_SvTeam != 3 && pCharacter)
+		{
+			// Joining spectators should not kill a locked team, but should still
+			// check if the team finished by you leaving it.
+			int DDRTeam = pCharacter->Team();
+			m_Teams.SetForceCharacterTeam(pPlayer->GetCID(), TEAM_FLOCK);
+			m_Teams.CheckTeamFinished(DDRTeam);
+		}
+	}
+
+	IGameController::DoTeamChange(pPlayer, Team, DoChatMsg);
 }
 
 void CGameControllerDDRace::InitTeleporter()

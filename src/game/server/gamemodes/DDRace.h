@@ -15,7 +15,11 @@ public:
 	CGameControllerDDRace(class CGameContext *pGameServer);
 	~CGameControllerDDRace();
 
+	void OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason) override;
+
 	void Tick() override;
+
+	void DoTeamChange(class CPlayer *pPlayer, int Team, bool DoChatMsg = true) override;
 
 	void InitTeleporter();
 

@@ -113,7 +113,7 @@ public:
 	*/
 	virtual bool OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Number = 0);
 
-	void OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason);
+	virtual void OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason);
 
 	void OnReset();
 
@@ -140,7 +140,7 @@ public:
 	//spawn
 	virtual bool CanSpawn(int Team, vec2 *pPos);
 
-	void DoTeamChange(class CPlayer *pPlayer, int Team, bool DoChatMsg = true);
+	virtual void DoTeamChange(class CPlayer *pPlayer, int Team, bool DoChatMsg = true);
 	/*
 
 	*/
