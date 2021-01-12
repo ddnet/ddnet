@@ -209,8 +209,8 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		if(pCharacter)
 		{
 			YOffset -= FontSize;
-			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "%d", pCharacter->GetStrongWeakID());
+			char aBuf[8];
+			str_format(aBuf, sizeof(aBuf), "⇢ %d", pCharacter->GetStrongWeakID());
 			float XOffset = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f) / 2.0f;
 			TextRender()->TextColor(rgb);
 			TextRender()->Text(0, Position.x - XOffset, YOffset, FontSize, aBuf, -1.0f);
