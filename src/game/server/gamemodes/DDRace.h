@@ -15,6 +15,8 @@ public:
 	CGameControllerDDRace(class CGameContext *pGameServer);
 	~CGameControllerDDRace();
 
+	void HandleCharacterTiles(class CCharacter *pChr, int MapIndex) override;
+
 	void OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason) override;
 
 	void Tick() override;

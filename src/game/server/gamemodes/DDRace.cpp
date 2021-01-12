@@ -22,6 +22,66 @@ CGameControllerDDRace::~CGameControllerDDRace()
 	// Nothing to clean
 }
 
+void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
+{
+	CPlayer *pPlayer = pChr->GetPlayer();
+	int ClientID = pPlayer->GetCID();
+
+	int m_TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
+	int m_TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
+
+	//Sensitivity
+	int S1 = GameServer()->Collision()->GetPureMapIndex(vec2(pChr->GetPos().x + pChr->GetProximityRadius() / 3.f, pChr->GetPos().y - pChr->GetProximityRadius() / 3.f));
+	int S2 = GameServer()->Collision()->GetPureMapIndex(vec2(pChr->GetPos().x + pChr->GetProximityRadius() / 3.f, pChr->GetPos().y + pChr->GetProximityRadius() / 3.f));
+	int S3 = GameServer()->Collision()->GetPureMapIndex(vec2(pChr->GetPos().x - pChr->GetProximityRadius() / 3.f, pChr->GetPos().y - pChr->GetProximityRadius() / 3.f));
+	int S4 = GameServer()->Collision()->GetPureMapIndex(vec2(pChr->GetPos().x - pChr->GetProximityRadius() / 3.f, pChr->GetPos().y + pChr->GetProximityRadius() / 3.f));
+	int Tile1 = GameServer()->Collision()->GetTileIndex(S1);
+	int Tile2 = GameServer()->Collision()->GetTileIndex(S2);
+	int Tile3 = GameServer()->Collision()->GetTileIndex(S3);
+	int Tile4 = GameServer()->Collision()->GetTileIndex(S4);
+	int FTile1 = GameServer()->Collision()->GetFTileIndex(S1);
+	int FTile2 = GameServer()->Collision()->GetFTileIndex(S2);
+	int FTile3 = GameServer()->Collision()->GetFTileIndex(S3);
+	int FTile4 = GameServer()->Collision()->GetFTileIndex(S4);
+
+	const int PlayerDDRaceState = pChr->m_DDRaceState;
+	// start
+	if(((m_TileIndex == TILE_START) || (m_TileFIndex == TILE_START) || FTile1 == TILE_START || FTile2 == TILE_START || FTile3 == TILE_START || FTile4 == TILE_START || Tile1 == TILE_START || Tile2 == TILE_START || Tile3 == TILE_START || Tile4 == TILE_START) && (PlayerDDRaceState == DDRACE_NONE || PlayerDDRaceState == DDRACE_FINISHED || (PlayerDDRaceState == DDRACE_STARTED && !GetPlayerTeam(ClientID) && g_Config.m_SvTeam != 3)))
+	{
+		if(m_Teams.GetSaving(GetPlayerTeam(ClientID)))
+		{
+			if(pChr->m_LastStartWarning < Server()->Tick() - 3 * Server()->TickSpeed())
+			{
+				GameServer()->SendChatTarget(ClientID, "You can't start while loading/saving of team is in progress");
+				pChr->m_LastStartWarning = Server()->Tick();
+			}
+			pChr->Die(ClientID, WEAPON_WORLD);
+			return;
+		}
+		if(g_Config.m_SvTeam == 2 && (GetPlayerTeam(ClientID) == TEAM_FLOCK || m_Teams.Count(GetPlayerTeam(ClientID)) <= 1))
+		{
+			if(pChr->m_LastStartWarning < Server()->Tick() - 3 * Server()->TickSpeed())
+			{
+				GameServer()->SendChatTarget(ClientID, "You have to be in a team with other tees to start");
+				pChr->m_LastStartWarning = Server()->Tick();
+			}
+			pChr->Die(ClientID, WEAPON_WORLD);
+			return;
+		}
+		if(g_Config.m_SvResetPickups)
+		{
+			pChr->ResetPickups();
+		}
+
+		m_Teams.OnCharacterStart(ClientID);
+		pChr->m_CpActive = -2;
+	}
+
+	// finish
+	if(((m_TileIndex == TILE_FINISH) || (m_TileFIndex == TILE_FINISH) || FTile1 == TILE_FINISH || FTile2 == TILE_FINISH || FTile3 == TILE_FINISH || FTile4 == TILE_FINISH || Tile1 == TILE_FINISH || Tile2 == TILE_FINISH || Tile3 == TILE_FINISH || Tile4 == TILE_FINISH) && PlayerDDRaceState == DDRACE_STARTED)
+		m_Teams.OnCharacterFinish(ClientID);
+}
+
 void CGameControllerDDRace::OnPlayerDisconnect(CPlayer *pPlayer, const char *pReason)
 {
 	int ClientID = pPlayer->GetCID();
