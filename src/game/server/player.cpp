@@ -619,41 +619,12 @@ CCharacter *CPlayer::ForceSpawn(vec2 Pos)
 
 void CPlayer::SetTeam(int Team, bool DoChatMsg)
 {
-	Team = GameServer()->m_pController->ClampTeam(Team);
-	if(m_Team == Team)
-		return;
-
-	char aBuf[512];
-	DoChatMsg = false;
-	if(DoChatMsg)
-	{
-		str_format(aBuf, sizeof(aBuf), "'%s' joined the %s", Server()->ClientName(m_ClientID), GameServer()->m_pController->GetTeamName(Team));
-		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
-	}
-
-	if(Team == TEAM_SPECTATORS)
-	{
-		CGameControllerDDRace *Controller = (CGameControllerDDRace *)GameServer()->m_pController;
-		if(g_Config.m_SvTeam != 3 && m_pCharacter)
-		{
-			// Joining spectators should not kill a locked team, but should still
-			// check if the team finished by you leaving it.
-			int DDRTeam = m_pCharacter->Team();
-			Controller->m_Teams.SetForceCharacterTeam(m_ClientID, TEAM_FLOCK);
-			Controller->m_Teams.CheckTeamFinished(DDRTeam);
-		}
-	}
-
 	KillCharacter();
 
 	m_Team = Team;
 	m_LastSetTeam = Server()->Tick();
 	m_LastActionTick = Server()->Tick();
 	m_SpectatorID = SPEC_FREEVIEW;
-	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' m_Team=%d", m_ClientID, Server()->ClientName(m_ClientID), m_Team);
-	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
-
-	//GameServer()->m_pController->OnPlayerInfoChange(GameServer()->m_apPlayers[m_ClientID]);
 
 	protocol7::CNetMsg_Sv_Team Msg;
 	Msg.m_ClientID = m_ClientID;

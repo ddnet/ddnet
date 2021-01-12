@@ -9,6 +9,7 @@
 #include "entities/pickup.h"
 #include "gamecontext.h"
 #include "gamecontroller.h"
+#include "gamemodes/DDRace.h"
 #include "player.h"
 
 #include "entities/door.h"
@@ -72,7 +73,7 @@ void IGameController::DoActivityCheck()
 				case 0:
 				{
 					// move player to spectator
-					GameServer()->m_apPlayers[i]->SetTeam(TEAM_SPECTATORS);
+					DoTeamChange(GameServer()->m_apPlayers[i], TEAM_SPECTATORS);
 				}
 				break;
 				case 1:
@@ -85,7 +86,7 @@ void IGameController::DoActivityCheck()
 					if(Spectators >= g_Config.m_SvSpectatorSlots)
 						Server()->Kick(i, "Kicked for inactivity");
 					else
-						GameServer()->m_apPlayers[i]->SetTeam(TEAM_SPECTATORS);
+						DoTeamChange(GameServer()->m_apPlayers[i], TEAM_SPECTATORS);
 				}
 				break;
 				case 2:
@@ -632,4 +633,42 @@ int IGameController::ClampTeam(int Team)
 	if(Team < 0)
 		return TEAM_SPECTATORS;
 	return 0;
+}
+
+void IGameController::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
+{
+	Team = ClampTeam(Team);
+	if(Team == pPlayer->GetTeam())
+		return;
+
+	int ClientID = pPlayer->GetCID();
+	CCharacter *pCharacter = GameServer()->GetPlayerChar(ClientID);
+
+	if(Team == TEAM_SPECTATORS)
+	{
+		CGameControllerDDRace *pController = (CGameControllerDDRace *)this;
+		if(g_Config.m_SvTeam != 3 && pCharacter)
+		{
+			// Joining spectators should not kill a locked team, but should still
+			// check if the team finished by you leaving it.
+			int DDRTeam = pCharacter->Team();
+			pController->m_Teams.SetForceCharacterTeam(ClientID, TEAM_FLOCK);
+			pController->m_Teams.CheckTeamFinished(DDRTeam);
+		}
+	}
+
+	pPlayer->SetTeam(Team);
+
+	char aBuf[128];
+	DoChatMsg = false;
+	if(DoChatMsg)
+	{
+		str_format(aBuf, sizeof(aBuf), "'%s' joined the %s", Server()->ClientName(ClientID), GameServer()->m_pController->GetTeamName(Team));
+		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+	}
+
+	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' m_Team=%d", ClientID, Server()->ClientName(ClientID), Team);
+	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
+
+	// OnPlayerInfoChange(pPlayer);
 }

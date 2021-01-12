@@ -138,6 +138,7 @@ public:
 	//spawn
 	virtual bool CanSpawn(int Team, vec2 *pPos);
 
+	void DoTeamChange(class CPlayer *pPlayer, int Team, bool DoChatMsg = true);
 	/*
 
 	*/
