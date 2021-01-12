@@ -1549,12 +1549,7 @@ void CCharacter::HandleTiles(int Index)
 		}
 		if(g_Config.m_SvResetPickups)
 		{
-			for(int i = WEAPON_SHOTGUN; i < NUM_WEAPONS; ++i)
-			{
-				m_aWeapons[i].m_Got = false;
-				if(m_Core.m_ActiveWeapon == i)
-					m_Core.m_ActiveWeapon = WEAPON_GUN;
-			}
+			ResetPickups();
 		}
 
 		Teams()->OnCharacterStart(m_pPlayer->GetCID());
@@ -1967,10 +1962,7 @@ void CCharacter::HandleTiles(int Index)
 			m_Core.m_HookPos = m_Core.m_Pos;
 		}
 		if(g_Config.m_SvTeleportLoseWeapons)
-		{
-			for(int i = WEAPON_SHOTGUN; i < NUM_WEAPONS - 1; i++)
-				m_aWeapons[i].m_Got = false;
-		}
+			ResetPickups();
 		return;
 	}
 	int evilz = GameServer()->Collision()->IsEvilTeleport(MapIndex);
@@ -1994,8 +1986,7 @@ void CCharacter::HandleTiles(int Index)
 			}
 			if(g_Config.m_SvTeleportLoseWeapons)
 			{
-				for(int i = WEAPON_SHOTGUN; i < NUM_WEAPONS - 1; i++)
-					m_aWeapons[i].m_Got = false;
+				ResetPickups();
 			}
 		}
 		return;
@@ -2313,6 +2304,16 @@ void CCharacter::GiveAllWeapons()
 	for(int i = WEAPON_GUN; i < NUM_WEAPONS - 1; i++)
 	{
 		GiveWeapon(i);
+	}
+}
+
+void CCharacter::ResetPickups()
+{
+	for(int i = WEAPON_SHOTGUN; i < NUM_WEAPONS - 1; i++)
+	{
+		m_aWeapons[i].m_Got = false;
+		if(m_Core.m_ActiveWeapon == i)
+			m_Core.m_ActiveWeapon = WEAPON_GUN;
 	}
 }
 
