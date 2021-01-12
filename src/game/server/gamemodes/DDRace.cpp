@@ -164,6 +164,14 @@ void CGameControllerDDRace::DoTeamChange(class CPlayer *pPlayer, int Team, bool 
 	IGameController::DoTeamChange(pPlayer, Team, DoChatMsg);
 }
 
+int64 CGameControllerDDRace::GetMaskForPlayerWorldEvent(int Asker, int ExceptID)
+{
+	if(Asker == -1)
+		return CmaskAllExceptOne(ExceptID);
+
+	return m_Teams.TeamMask(GetPlayerTeam(Asker), ExceptID, Asker);
+}
+
 void CGameControllerDDRace::InitTeleporter()
 {
 	if(!GameServer()->Collision()->Layers()->TeleLayer())

@@ -151,6 +151,8 @@ public:
 	virtual bool CanJoinTeam(int Team, int NotThisID);
 	int ClampTeam(int Team);
 
+	virtual int64 GetMaskForPlayerWorldEvent(int Asker, int ExceptID = -1);
+
 	// DDRace
 
 	float m_CurrentRecord;
