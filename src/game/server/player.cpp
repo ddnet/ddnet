@@ -102,7 +102,7 @@ void CPlayer::Reset()
 			m_DefEmote = EMOTE_NORMAL;
 		}
 	}
-	m_DefEmoteReset = -1;
+	m_OverrideEmoteReset = -1;
 
 	GameServer()->Score()->PlayerData(m_ClientID)->Reset();
 
@@ -270,10 +270,9 @@ void CPlayer::Tick()
 		GameServer()->SendTuningParams(m_ClientID, m_TuneZone);
 	}
 
-	if(m_DefEmoteReset >= 0 && m_DefEmoteReset <= Server()->Tick())
+	if(m_OverrideEmoteReset >= 0 && m_OverrideEmoteReset <= Server()->Tick())
 	{
-		m_DefEmoteReset = -1;
-		m_DefEmote = EMOTE_NORMAL;
+		m_OverrideEmoteReset = -1;
 	}
 
 	if(m_Halloween && m_pCharacter && !m_pCharacter->IsPaused())
@@ -789,13 +788,16 @@ void CPlayer::AfkVoteTimer(CNetObj_PlayerInput *NewTarget)
 
 int CPlayer::GetDefaultEmote() const
 {
+	if(m_OverrideEmoteReset >= 0)
+		return m_OverrideEmote;
+
 	return m_DefEmote;
 }
 
 void CPlayer::OverrideDefaultEmote(int Emote, int Tick)
 {
-	m_DefEmote = Emote;
-	m_DefEmoteReset = Tick;
+	m_OverrideEmote = Emote;
+	m_OverrideEmoteReset = Tick;
 	m_LastEyeEmote = Server()->Tick();
 }
 

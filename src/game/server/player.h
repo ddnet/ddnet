@@ -198,7 +198,8 @@ public:
 	bool CanOverrideDefaultEmote() const;
 
 	int m_DefEmote;
-	int m_DefEmoteReset;
+	int m_OverrideEmote;
+	int m_OverrideEmoteReset;
 	bool m_Halloween;
 	bool m_FirstPacket;
 	int64 m_LastSQLQuery;
