@@ -1644,28 +1644,6 @@ void CCharacter::HandleTiles(int Index)
 		m_Core.m_Jetpack = false;
 	}
 
-	// unlock team
-	else if(((m_TileIndex == TILE_UNLOCK_TEAM) || (m_TileFIndex == TILE_UNLOCK_TEAM)) && Teams()->TeamLocked(Team()))
-	{
-		Teams()->SetTeamLock(Team(), false);
-
-		for(int i = 0; i < MAX_CLIENTS; i++)
-			if(Teams()->m_Core.Team(i) == Team())
-				GameServer()->SendChatTarget(i, "Your team was unlocked by an unlock team tile");
-	}
-
-	// solo part
-	if(((m_TileIndex == TILE_SOLO_ENABLE) || (m_TileFIndex == TILE_SOLO_ENABLE)) && !Teams()->m_Core.GetSolo(m_pPlayer->GetCID()))
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You are now in a solo part");
-		SetSolo(true);
-	}
-	else if(((m_TileIndex == TILE_SOLO_DISABLE) || (m_TileFIndex == TILE_SOLO_DISABLE)) && Teams()->m_Core.GetSolo(m_pPlayer->GetCID()))
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You are now out of the solo part");
-		SetSolo(false);
-	}
-
 	// refill jumps
 	if(((m_TileIndex == TILE_REFILL_JUMPS) || (m_TileFIndex == TILE_REFILL_JUMPS)) && !m_LastRefillJumps)
 	{

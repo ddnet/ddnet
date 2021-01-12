@@ -80,6 +80,28 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 	// finish
 	if(((m_TileIndex == TILE_FINISH) || (m_TileFIndex == TILE_FINISH) || FTile1 == TILE_FINISH || FTile2 == TILE_FINISH || FTile3 == TILE_FINISH || FTile4 == TILE_FINISH || Tile1 == TILE_FINISH || Tile2 == TILE_FINISH || Tile3 == TILE_FINISH || Tile4 == TILE_FINISH) && PlayerDDRaceState == DDRACE_STARTED)
 		m_Teams.OnCharacterFinish(ClientID);
+
+	// unlock team
+	else if(((m_TileIndex == TILE_UNLOCK_TEAM) || (m_TileFIndex == TILE_UNLOCK_TEAM)) && m_Teams.TeamLocked(GetPlayerTeam(ClientID)))
+	{
+		m_Teams.SetTeamLock(GetPlayerTeam(ClientID), false);
+
+		for(int i = 0; i < MAX_CLIENTS; i++)
+			if(GetPlayerTeam(i) == GetPlayerTeam(ClientID))
+				GameServer()->SendChatTarget(i, "Your team was unlocked by an unlock team tile");
+	}
+
+	// solo part
+	if(((m_TileIndex == TILE_SOLO_ENABLE) || (m_TileFIndex == TILE_SOLO_ENABLE)) && !m_Teams.m_Core.GetSolo(ClientID))
+	{
+		GameServer()->SendChatTarget(ClientID, "You are now in a solo part");
+		pChr->SetSolo(true);
+	}
+	else if(((m_TileIndex == TILE_SOLO_DISABLE) || (m_TileFIndex == TILE_SOLO_DISABLE)) && m_Teams.m_Core.GetSolo(ClientID))
+	{
+		GameServer()->SendChatTarget(ClientID, "You are now out of the solo part");
+		pChr->SetSolo(false);
+	}
 }
 
 void CGameControllerDDRace::OnPlayerDisconnect(CPlayer *pPlayer, const char *pReason)
