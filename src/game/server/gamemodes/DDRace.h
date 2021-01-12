@@ -23,6 +23,8 @@ public:
 
 	void InitTeleporter();
 
+	int GetPlayerTeam(int ClientID) const;
+
 	CGameTeams m_Teams;
 
 	std::map<int, std::vector<vec2>> m_TeleOuts;
