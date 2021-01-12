@@ -13,8 +13,8 @@
 #include "projectile.h"
 
 #include "light.h"
-#include <game/server/gamemodes/DDRace.h>
 #include <game/server/score.h>
+#include <game/server/teams.h>
 
 MACRO_ALLOC_POOL_ID_IMPL(CCharacter, MAX_CLIENTS)
 
@@ -63,7 +63,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	Antibot()->OnSpawn(m_pPlayer->GetCID());
 
 	m_Core.Reset();
-	m_Core.Init(&GameServer()->m_World.m_Core, GameServer()->Collision(), &((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.m_Core);
+	m_Core.Init(&GameServer()->m_World.m_Core, GameServer()->Collision());
 	m_Core.m_ActiveWeapon = WEAPON_GUN;
 	m_Core.m_Pos = m_Pos;
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()] = &m_Core;
@@ -76,8 +76,6 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_Alive = true;
 
 	GameServer()->m_pController->OnCharacterSpawn(this);
-
-	Teams()->OnCharacterSpawn(GetPlayer()->GetCID());
 
 	DDRaceInit();
 
@@ -1301,11 +1299,6 @@ int CCharacter::Team()
 	return Teams()->m_Core.Team(m_pPlayer->GetCID());
 }
 
-CGameTeams *CCharacter::Teams()
-{
-	return &((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams;
-}
-
 void CCharacter::SetTeleports(std::map<int, std::vector<vec2>> *pTeleOuts, std::map<int, std::vector<vec2>> *pTeleCheckOuts)
 {
 	m_pTeleOuts = pTeleOuts;
@@ -2068,6 +2061,12 @@ void CCharacter::SendZoneMsgs()
 IAntibot *CCharacter::Antibot()
 {
 	return GameServer()->Antibot();
+}
+
+void CCharacter::SetTeams(CGameTeams *pTeams)
+{
+	m_pTeams = pTeams;
+	m_Core.SetTeamsCore(&m_pTeams->m_Core);
 }
 
 void CCharacter::SetRescue()

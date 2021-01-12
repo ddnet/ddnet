@@ -576,6 +576,11 @@ void CCharacterCore::Quantize()
 
 // DDRace
 
+void CCharacterCore::SetTeamsCore(CTeamsCore *pTeams)
+{
+	m_pTeams = pTeams;
+}
+
 void CCharacterCore::SetTeleOuts(std::map<int, std::vector<vec2>> *pTeleOuts)
 {
 	m_pTeleOuts = pTeleOuts;

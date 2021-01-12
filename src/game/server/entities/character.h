@@ -144,6 +144,7 @@ private:
 
 	// the player core for the physics
 	CCharacterCore m_Core;
+	CGameTeams *m_pTeams = nullptr;
 
 	std::map<int, std::vector<vec2>> *m_pTeleOuts = nullptr;
 	std::map<int, std::vector<vec2>> *m_pTeleCheckOuts = nullptr;
@@ -175,7 +176,8 @@ private:
 	bool m_Solo;
 
 public:
-	CGameTeams *Teams();
+	CGameTeams *Teams() { return m_pTeams; }
+	void SetTeams(CGameTeams *pTeams);
 	void SetTeleports(std::map<int, std::vector<vec2>> *pTeleOuts, std::map<int, std::vector<vec2>> *pTeleCheckOuts);
 
 	void FillAntibot(CAntibotCharacterData *pData);
