@@ -214,6 +214,23 @@ int CSqliteConnection::GetBlob(int Col, unsigned char *pBuffer, int BufferSize) 
 	return Size;
 }
 
+const char *CSqliteConnection::MedianMapTime(char *pBuffer, int BufferSize) const
+{
+	str_format(pBuffer, BufferSize,
+		"SELECT AVG("
+		"  CASE counter %% 2 "
+		"    WHEN 0 THEN CASE WHEN rn IN (counter / 2, counter / 2 + 1) THEN Time END "
+		"    WHEN 1 THEN CASE WHEN rn = counter / 2 + 1 THEN Time END END) "
+		"  OVER (PARTITION BY Map) AS Median "
+		"FROM ("
+		"  SELECT *, ROW_NUMBER() "
+		"  OVER (PARTITION BY Map ORDER BY Time) rn, COUNT(*) "
+		"  OVER (PARTITION BY Map) counter "
+		"  FROM %s_race where Map = l.Map) as r",
+		GetPrefix());
+	return pBuffer;
+}
+
 bool CSqliteConnection::Execute(const char *pQuery)
 {
 	char *pErrorMsg;
