@@ -22,6 +22,12 @@ CGameControllerDDRace::~CGameControllerDDRace()
 	// Nothing to clean
 }
 
+void CGameControllerDDRace::OnCharacterSpawn(CCharacter *pChr)
+{
+	IGameController::OnCharacterSpawn(pChr);
+	pChr->SetTeleports(&m_TeleOuts, &m_TeleCheckOuts);
+}
+
 void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 {
 	CPlayer *pPlayer = pChr->GetPlayer();

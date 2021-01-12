@@ -247,6 +247,7 @@ public:
 	bool m_LeftWall;
 
 	// DDnet Character
+	void SetTeleOuts(std::map<int, std::vector<vec2>> *pTeleOuts);
 	void ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet);
 	bool m_Solo;
 	bool m_Jetpack;

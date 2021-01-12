@@ -587,6 +587,11 @@ void CCharacterCore::Quantize()
 
 // DDRace
 
+void CCharacterCore::SetTeleOuts(std::map<int, std::vector<vec2>> *pTeleOuts)
+{
+	m_pTeleOuts = pTeleOuts;
+}
+
 bool CCharacterCore::IsSwitchActiveCb(int Number, void *pUser)
 {
 	CCharacterCore *pThis = (CCharacterCore *)pUser;
