@@ -15,13 +15,14 @@ public:
 	CGameControllerDDRace(class CGameContext *pGameServer);
 	~CGameControllerDDRace();
 
+	void Tick() override;
+
+	void InitTeleporter();
+
 	CGameTeams m_Teams;
 
 	std::map<int, std::vector<vec2>> m_TeleOuts;
 	std::map<int, std::vector<vec2>> m_TeleCheckOuts;
-
-	void InitTeleporter();
-	virtual void Tick();
 
 	std::shared_ptr<CScoreInitResult> m_pInitResult;
 };
