@@ -385,6 +385,33 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	return false;
 }
 
+void IGameController::OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason)
+{
+	bool WasModerator = pPlayer->m_Moderating;
+
+	pPlayer->OnDisconnect();
+	int ClientID = pPlayer->GetCID();
+	if(Server()->ClientIngame(ClientID))
+	{
+		char aBuf[512];
+		if(pReason && *pReason)
+			str_format(aBuf, sizeof(aBuf), "'%s' has left the game (%s)", Server()->ClientName(ClientID), pReason);
+		else
+			str_format(aBuf, sizeof(aBuf), "'%s' has left the game", Server()->ClientName(ClientID));
+		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1, CGameContext::CHAT_SIX);
+
+		str_format(aBuf, sizeof(aBuf), "leave player='%d:%s'", ClientID, Server()->ClientName(ClientID));
+		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+		if(!GameServer()->PlayerModerating() && WasModerator)
+			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, "Server kick/spec votes are no longer actively moderated.");
+	}
+
+	CGameControllerDDRace *Controller = (CGameControllerDDRace *)GameServer()->m_pController;
+	if(g_Config.m_SvTeam != 3)
+		Controller->m_Teams.SetForceCharacterTeam(ClientID, TEAM_FLOCK);
+}
+
 void IGameController::EndRound()
 {
 	if(m_Warmup) // game can't end when we are running warmup

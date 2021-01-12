@@ -113,6 +113,8 @@ public:
 	*/
 	virtual bool OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Number = 0);
 
+	void OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason);
+
 	void OnReset();
 
 	// game
