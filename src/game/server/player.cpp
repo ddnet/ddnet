@@ -269,6 +269,12 @@ void CPlayer::Tick()
 		GameServer()->SendTuningParams(m_ClientID, m_TuneZone);
 	}
 
+	if(m_DefEmoteReset >= 0 && m_DefEmoteReset <= Server()->Tick())
+	{
+		m_DefEmoteReset = -1;
+		m_DefEmote = EMOTE_NORMAL;
+	}
+
 	if(m_Halloween && m_pCharacter && !m_pCharacter->IsPaused())
 	{
 		if(1200 - ((Server()->Tick() - m_pCharacter->GetLastAction()) % (1200)) < 5)

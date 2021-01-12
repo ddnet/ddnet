@@ -2193,13 +2193,6 @@ void CCharacter::DDRacePostCoreTick()
 {
 	m_Time = (float)(Server()->Tick() - m_StartTime) / ((float)Server()->TickSpeed());
 
-	if(m_pPlayer->m_DefEmoteReset >= 0 && m_pPlayer->m_DefEmoteReset <= Server()->Tick())
-	{
-		m_pPlayer->m_DefEmoteReset = -1;
-		m_EmoteType = m_pPlayer->m_DefEmote = EMOTE_NORMAL;
-		m_EmoteStop = -1;
-	}
-
 	if(m_EndlessHook || (m_Super && g_Config.m_SvEndlessSuperHook))
 		m_Core.m_HookTick = 0;
 
