@@ -5,7 +5,6 @@
 
 #include "entities/character.h"
 #include "gamecontext.h"
-#include "gamemodes/DDRace.h"
 #include <engine/server.h>
 #include <game/gamecore.h>
 #include <game/server/teams.h>
