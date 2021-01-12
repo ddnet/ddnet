@@ -1110,23 +1110,24 @@ void CGameContext::ConEyeEmote(IConsole::IResult *pResult, void *pUserData)
 	}
 	else
 	{
-		if(pPlayer->m_LastEyeEmote + (int64_t)g_Config.m_SvEyeEmoteChangeDelay * pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
+		if(!pPlayer->CanOverrideDefaultEmote())
 			return;
 
+		int EmoteType = 0;
 		if(!str_comp(pResult->GetString(0), "angry"))
-			pPlayer->m_DefEmote = EMOTE_ANGRY;
+			EmoteType = EMOTE_ANGRY;
 		else if(!str_comp(pResult->GetString(0), "blink"))
-			pPlayer->m_DefEmote = EMOTE_BLINK;
+			EmoteType = EMOTE_BLINK;
 		else if(!str_comp(pResult->GetString(0), "close"))
-			pPlayer->m_DefEmote = EMOTE_BLINK;
+			EmoteType = EMOTE_BLINK;
 		else if(!str_comp(pResult->GetString(0), "happy"))
-			pPlayer->m_DefEmote = EMOTE_HAPPY;
+			EmoteType = EMOTE_HAPPY;
 		else if(!str_comp(pResult->GetString(0), "pain"))
-			pPlayer->m_DefEmote = EMOTE_PAIN;
+			EmoteType = EMOTE_PAIN;
 		else if(!str_comp(pResult->GetString(0), "surprise"))
-			pPlayer->m_DefEmote = EMOTE_SURPRISE;
+			EmoteType = EMOTE_SURPRISE;
 		else if(!str_comp(pResult->GetString(0), "normal"))
-			pPlayer->m_DefEmote = EMOTE_NORMAL;
+			EmoteType = EMOTE_NORMAL;
 		else
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD,
@@ -1138,8 +1139,7 @@ void CGameContext::ConEyeEmote(IConsole::IResult *pResult, void *pUserData)
 		if(pResult->NumArguments() > 1)
 			Duration = clamp(pResult->GetInteger(1), 1, 86400);
 
-		pPlayer->m_DefEmoteReset = pSelf->Server()->Tick() + Duration * pSelf->Server()->TickSpeed();
-		pPlayer->m_LastEyeEmote = pSelf->Server()->Tick();
+		pPlayer->OverrideDefaultEmote(EmoteType, pSelf->Server()->Tick() + Duration * pSelf->Server()->TickSpeed());
 	}
 }
 

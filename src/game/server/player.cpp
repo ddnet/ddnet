@@ -787,6 +787,23 @@ void CPlayer::AfkVoteTimer(CNetObj_PlayerInput *NewTarget)
 	m_Afk = false;
 }
 
+int CPlayer::GetDefaultEmote() const
+{
+	return m_DefEmote;
+}
+
+void CPlayer::OverrideDefaultEmote(int Emote, int Tick)
+{
+	m_DefEmote = Emote;
+	m_DefEmoteReset = Tick;
+	m_LastEyeEmote = Server()->Tick();
+}
+
+bool CPlayer::CanOverrideDefaultEmote() const
+{
+	return m_LastEyeEmote > 0 && m_LastEyeEmote + (int64_t)g_Config.m_SvEyeEmoteChangeDelay * Server()->TickSpeed() >= Server()->Tick();
+}
+
 void CPlayer::ProcessPause()
 {
 	if(m_ForcePauseTime && m_ForcePauseTime < Server()->Tick())

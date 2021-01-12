@@ -192,6 +192,11 @@ public:
 	char m_pAfkMsg[160];
 	bool m_EyeEmoteEnabled;
 	int m_TimerType;
+
+	int GetDefaultEmote() const;
+	void OverrideDefaultEmote(int Emote, int Tick);
+	bool CanOverrideDefaultEmote() const;
+
 	int m_DefEmote;
 	int m_DefEmoteReset;
 	bool m_Halloween;
