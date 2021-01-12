@@ -268,6 +268,14 @@ void CPlayer::Tick()
 	{
 		GameServer()->SendTuningParams(m_ClientID, m_TuneZone);
 	}
+
+	if(m_Halloween && m_pCharacter && !m_pCharacter->IsPaused())
+	{
+		if(1200 - ((Server()->Tick() - m_pCharacter->GetLastAction()) % (1200)) < 5)
+		{
+			GameServer()->SendEmoticon(GetCID(), EMOTICON_GHOST);
+		}
+	}
 }
 
 void CPlayer::PostTick()

@@ -1151,14 +1151,6 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 			Emote = EMOTE_BLINK;
 	}
 
-	if(m_pPlayer->m_Halloween)
-	{
-		if(1200 - ((Server()->Tick() - m_LastAction) % (1200)) < 5)
-		{
-			GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_GHOST);
-		}
-	}
-
 	if(!Server()->IsSixup(SnappingClient))
 	{
 		CNetObj_Character *pCharacter = static_cast<CNetObj_Character *>(Server()->SnapNewItem(NETOBJTYPE_CHARACTER, ID, sizeof(CNetObj_Character)));
