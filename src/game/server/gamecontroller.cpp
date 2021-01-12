@@ -428,7 +428,7 @@ void IGameController::ChangeMap(const char *pToMap)
 	str_copy(g_Config.m_SvMap, pToMap, sizeof(g_Config.m_SvMap));
 }
 
-void IGameController::PostReset()
+void IGameController::OnReset()
 {
 	for(auto &pPlayer : GameServer()->m_apPlayers)
 		if(pPlayer)

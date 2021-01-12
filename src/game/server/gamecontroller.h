@@ -78,6 +78,44 @@ public:
 	IGameController(class CGameContext *pGameServer);
 	virtual ~IGameController();
 
+	// event
+	/*
+		Function: OnCharacterDeath
+			Called when a CCharacter in the world dies.
+
+		Arguments:
+			victim - The CCharacter that died.
+			killer - The player that killed it.
+			weapon - What weapon that killed it. Can be -1 for undefined
+				weapon when switching team or player suicides.
+	*/
+	virtual int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon);
+	/*
+		Function: OnCharacterSpawn
+			Called when a CCharacter spawns into the game world.
+
+		Arguments:
+			chr - The CCharacter that was spawned.
+	*/
+	virtual void OnCharacterSpawn(class CCharacter *pChr);
+
+	/*
+		Function: OnEntity
+			Called when the map is loaded to process an entity
+			in the map.
+
+		Arguments:
+			index - Entity index.
+			pos - Where the entity is located in the world.
+
+		Returns:
+			bool?
+	*/
+	virtual bool OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Number = 0);
+
+	void OnReset();
+
+	// game
 	void DoWarmup(int Seconds);
 
 	void StartRound();
@@ -97,43 +135,7 @@ public:
 
 	virtual void Snap(int SnappingClient);
 
-	/*
-		Function: on_entity
-			Called when the map is loaded to process an entity
-			in the map.
-
-		Arguments:
-			index - Entity index.
-			pos - Where the entity is located in the world.
-
-		Returns:
-			bool?
-	*/
-	//virtual bool OnEntity(int Index, vec2 Pos);
-	virtual bool OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Number = 0);
-
-	/*
-		Function: on_CCharacter_spawn
-			Called when a CCharacter spawns into the game world.
-
-		Arguments:
-			chr - The CCharacter that was spawned.
-	*/
-	virtual void OnCharacterSpawn(class CCharacter *pChr);
-
-	/*
-		Function: on_CCharacter_death
-			Called when a CCharacter in the world dies.
-
-		Arguments:
-			victim - The CCharacter that died.
-			killer - The player that killed it.
-			weapon - What weapon that killed it. Can be -1 for undefined
-				weapon when switching team or player suicides.
-	*/
-	virtual int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon);
-
-	//
+	//spawn
 	virtual bool CanSpawn(int Team, vec2 *pPos);
 
 	/*
@@ -143,8 +145,6 @@ public:
 	virtual int GetAutoTeam(int NotThisID);
 	virtual bool CanJoinTeam(int Team, int NotThisID);
 	int ClampTeam(int Team);
-
-	virtual void PostReset();
 
 	// DDRace
 
