@@ -99,6 +99,8 @@ public:
 	*/
 	virtual void OnCharacterSpawn(class CCharacter *pChr);
 
+	virtual void HandleCharacterTiles(class CCharacter *pChr, int MapIndex);
+
 	/*
 		Function: OnEntity
 			Called when the map is loaded to process an entity

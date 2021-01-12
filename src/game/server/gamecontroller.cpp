@@ -468,6 +468,11 @@ void IGameController::OnCharacterSpawn(class CCharacter *pChr)
 	pChr->GiveWeapon(WEAPON_GUN);
 }
 
+void IGameController::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
+{
+	// Do nothing by default
+}
+
 void IGameController::DoWarmup(int Seconds)
 {
 	if(Seconds < 0)
