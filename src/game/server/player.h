@@ -190,7 +190,7 @@ public:
 	int m_Sent1stAfkWarning; // afk timer's 1st warning after 50% of sv_max_afk_time
 	int m_Sent2ndAfkWarning; // afk timer's 2nd warning after 90% of sv_max_afk_time
 	char m_pAfkMsg[160];
-	bool m_EyeEmote;
+	bool m_EyeEmoteEnabled;
 	int m_TimerType;
 	int m_DefEmote;
 	int m_DefEmoteReset;

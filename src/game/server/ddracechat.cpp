@@ -1061,21 +1061,21 @@ void CGameContext::ConSetEyeEmote(IConsole::IResult *pResult,
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
 			"emote",
-			(pPlayer->m_EyeEmote) ?
+			(pPlayer->m_EyeEmoteEnabled) ?
 				"You can now use the preset eye emotes." :
 				"You don't have any eye emotes, remember to bind some. (until you die)");
 		return;
 	}
 	else if(str_comp_nocase(pResult->GetString(0), "on") == 0)
-		pPlayer->m_EyeEmote = true;
+		pPlayer->m_EyeEmoteEnabled = true;
 	else if(str_comp_nocase(pResult->GetString(0), "off") == 0)
-		pPlayer->m_EyeEmote = false;
+		pPlayer->m_EyeEmoteEnabled = false;
 	else if(str_comp_nocase(pResult->GetString(0), "toggle") == 0)
-		pPlayer->m_EyeEmote = !pPlayer->m_EyeEmote;
+		pPlayer->m_EyeEmoteEnabled = !pPlayer->m_EyeEmoteEnabled;
 	pSelf->Console()->Print(
 		IConsole::OUTPUT_LEVEL_STANDARD,
 		"emote",
-		(pPlayer->m_EyeEmote) ?
+		(pPlayer->m_EyeEmoteEnabled) ?
 			"You can now use the preset eye emotes." :
 			"You don't have any eye emotes, remember to bind some. (until you die)");
 }

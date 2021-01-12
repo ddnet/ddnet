@@ -61,7 +61,7 @@ void CPlayer::Reset()
 	m_Sent2ndAfkWarning = 0;
 	m_ChatScore = 0;
 	m_Moderating = false;
-	m_EyeEmote = true;
+	m_EyeEmoteEnabled = true;
 	if(Server()->IsSixup(m_ClientID))
 		m_TimerType = TIMERTYPE_SIXUP;
 	else

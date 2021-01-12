@@ -2290,7 +2290,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			SendEmoticon(ClientID, pMsg->m_Emoticon);
 			CCharacter *pChr = pPlayer->GetCharacter();
-			if(pChr && g_Config.m_SvEmotionalTees && pPlayer->m_EyeEmote)
+			if(pChr && g_Config.m_SvEmotionalTees && pPlayer->m_EyeEmoteEnabled)
 			{
 				int EmoteType = EMOTE_NORMAL;
 				switch(pMsg->m_Emoticon)
