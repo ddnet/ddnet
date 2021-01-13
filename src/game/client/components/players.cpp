@@ -223,7 +223,7 @@ void CPlayers::RenderPlayer(
 		Angle = mix((float)Prev.m_Angle, (float)Player.m_Angle, AngleIntraTick) / 256.0f;
 	}
 
-	vec2 Direction = vec2(direction(Angle));
+	vec2 Direction = direction(Angle);
 	vec2 Position;
 	if(in_range(ClientID, MAX_CLIENTS - 1))
 		Position = m_pClient->m_aClients[ClientID].m_RenderPos;
