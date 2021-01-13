@@ -22,6 +22,11 @@ CGameControllerDDRace::~CGameControllerDDRace()
 	// Nothing to clean
 }
 
+CScore *CGameControllerDDRace::Score()
+{
+	return GameServer()->Score();
+}
+
 void CGameControllerDDRace::OnCharacterSpawn(CCharacter *pChr)
 {
 	IGameController::OnCharacterSpawn(pChr);

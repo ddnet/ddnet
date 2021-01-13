@@ -15,6 +15,8 @@ public:
 	CGameControllerDDRace(class CGameContext *pGameServer);
 	~CGameControllerDDRace();
 
+	CScore *Score();
+
 	void OnCharacterSpawn(class CCharacter *pChr) override;
 	void HandleCharacterTiles(class CCharacter *pChr, int MapIndex) override;
 
