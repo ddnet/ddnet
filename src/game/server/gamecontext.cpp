@@ -1181,15 +1181,6 @@ void CGameContext::OnClientEnter(int ClientID)
 {
 	m_pController->OnPlayerConnect(m_apPlayers[ClientID]);
 
-	//world.insert_entity(&players[client_id]);
-	// init the player
-	Score()->PlayerData(ClientID)->Reset();
-	m_apPlayers[ClientID]->m_Score = Score()->PlayerData(ClientID)->m_BestTime ? Score()->PlayerData(ClientID)->m_BestTime : -9999;
-
-	// Can't set score here as LoadScore() is threaded, run it in
-	// LoadScoreThreaded() instead
-	Score()->LoadPlayerData(ClientID);
-
 	if(Server()->IsSixup(ClientID))
 	{
 		{
@@ -1247,13 +1238,6 @@ void CGameContext::OnClientEnter(int ClientID)
 
 	if(!Server()->ClientPrevIngame(ClientID))
 	{
-		char aBuf[512];
-		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientID), m_pController->GetTeamName(m_apPlayers[ClientID]->GetTeam()));
-		SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1, CHAT_SIX);
-
-		SendChatTarget(ClientID, "DDraceNetwork Mod. Version: " GAME_VERSION);
-		SendChatTarget(ClientID, "please visit DDNet.tw or say /info and make sure to read our /rules");
-
 		if(g_Config.m_SvWelcome[0] != 0)
 			SendChatTarget(ClientID, g_Config.m_SvWelcome);
 

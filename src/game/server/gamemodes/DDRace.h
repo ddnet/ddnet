@@ -20,6 +20,7 @@ public:
 	void OnCharacterSpawn(class CCharacter *pChr) override;
 	void HandleCharacterTiles(class CCharacter *pChr, int MapIndex) override;
 
+	void OnPlayerConnect(class CPlayer *pPlayer) override;
 	void OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason) override;
 
 	void Tick() override;
