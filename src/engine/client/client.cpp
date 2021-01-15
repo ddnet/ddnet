@@ -2122,7 +2122,7 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 	}
 	else if(Result == UNPACKMESSAGE_ANSWER)
 	{
-		SendMsg(&Packer, MSGFLAG_VITAL);
+		SendMsgY(&Packer, MSGFLAG_VITAL, !g_Config.m_ClDummy);
 	}
 
 	if(Sys)
