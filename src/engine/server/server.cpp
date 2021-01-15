@@ -2735,7 +2735,7 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 			char aClientStr[128];
 			if(pThis->m_aClients[i].m_Sixup)
 			{
-				str_format(aClientStr, sizeof(aClientStr), "sixup");
+				str_copy(aClientStr, "sixup", sizeof(aClientStr));
 			}
 			else
 			{
