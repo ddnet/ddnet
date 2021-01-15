@@ -3349,6 +3349,9 @@ void CClient::Run()
 
 			if(m_Warnings.empty() && !GameClient()->IsDisplayingWarning())
 				break;
+
+			if(m_aDDNetInfoTmp[0])
+				m_pStorage->RemoveFile(m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
 		}
 
 #if defined(CONF_FAMILY_UNIX)
