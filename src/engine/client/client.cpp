@@ -3347,6 +3347,13 @@ void CClient::Run()
 				s_SavedConfig = true;
 			}
 
+			IOHANDLE File = m_pStorage->OpenFile(m_aDDNetInfoTmp, IOFLAG_READ, IStorage::TYPE_SAVE);
+			if(File)
+			{
+				io_close(File);	
+				m_pStorage->RemoveFile(m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
+			}
+
 			if(m_Warnings.empty() && !GameClient()->IsDisplayingWarning())
 				break;
 		}
