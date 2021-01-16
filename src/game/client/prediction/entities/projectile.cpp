@@ -234,9 +234,3 @@ bool CProjectile::Match(CProjectile *pProj)
 		return false;
 	return true;
 }
-
-int CProjectile::NetworkClipped(vec2 ViewPos)
-{
-	float Ct = (GameWorld()->GameTick() - m_StartTick) / (float)GameWorld()->GameTickSpeed();
-	return ((CEntity *)this)->NetworkClipped(GetPos(Ct), ViewPos);
-}

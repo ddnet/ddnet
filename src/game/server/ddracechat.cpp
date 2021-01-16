@@ -7,6 +7,9 @@
 #include <game/server/teams.h>
 #include <game/version.h>
 
+#include "entities/character.h"
+#include "player.h"
+
 bool CheckClientID(int ClientID);
 
 void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
@@ -791,7 +794,7 @@ void CGameContext::ConLockTeam(IConsole::IResult *pResult, void *pUserData)
 	{
 		((CGameControllerDDRace *)pSelf->m_pController)->m_Teams.SetTeamLock(Team, true);
 
-		str_format(aBuf, sizeof(aBuf), "'%s' locked your team. After the race started killing will kill everyone in your team.", pSelf->Server()->ClientName(pResult->m_ClientID));
+		str_format(aBuf, sizeof(aBuf), "'%s' locked your team. After the race starts, killing will kill everyone in your team.", pSelf->Server()->ClientName(pResult->m_ClientID));
 
 		for(int i = 0; i < MAX_CLIENTS; i++)
 			if(((CGameControllerDDRace *)pSelf->m_pController)->m_Teams.m_Core.Team(i) == Team)

@@ -4,6 +4,7 @@
 
 #include <engine/shared/config.h>
 #include <game/server/gamecontext.h>
+#include <game/server/score.h>
 #include <game/teamscore.h>
 
 #include <utility>
@@ -64,7 +65,6 @@ public:
 	void CheckTeamFinished(int ClientID);
 
 	void ChangeTeamState(int Team, int State);
-	void onChangeTeamState(int Team, int State, int OldState);
 
 	int64 TeamMask(int Team, int ExceptID = -1, int Asker = -1);
 

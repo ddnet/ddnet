@@ -4,23 +4,12 @@
 #define GAME_SERVER_ENTITIES_CHARACTER_H
 
 #include <engine/antibot.h>
-#include <game/generated/protocol.h>
-#include <game/generated/server_data.h>
 #include <game/server/entity.h>
 #include <game/server/save.h>
-
-#include <game/gamecore.h>
 
 class CAntibot;
 class CGameTeams;
 struct CAntibotCharacterData;
-
-enum
-{
-	WEAPON_GAME = -3, // team switching etc
-	WEAPON_SELF = -2, // console kill command
-	WEAPON_WORLD = -1, // death tiles etc
-};
 
 enum
 {
@@ -51,8 +40,6 @@ public:
 	virtual void TickDefered();
 	virtual void TickPaused();
 	virtual void Snap(int SnappingClient);
-	virtual int NetworkClipped(int SnappingClient);
-	virtual int NetworkClipped(int SnappingClient, vec2 CheckPos);
 
 	bool IsGrounded();
 
@@ -82,6 +69,7 @@ public:
 	void GiveWeapon(int Weapon, bool Remove = false);
 	void GiveNinja();
 	void RemoveNinja();
+	void SetEndlessHook(bool Enable);
 
 	void SetEmote(int Emote, int Tick);
 

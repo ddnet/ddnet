@@ -1,3 +1,6 @@
+# pylint: skip-file
+# See https://github.com/ddnet/ddnet/issues/3507
+
 from datatypes import Enum, Flags, NetBool, NetEvent, NetIntAny, NetIntRange, NetMessage, NetMessageEx, NetObject, NetObjectEx, NetString, NetStringHalfStrict, NetStringStrict, NetTick
 
 Emotes = ["NORMAL", "PAIN", "HAPPY", "SURPRISE", "ANGRY", "BLINK"]
@@ -21,7 +24,7 @@ GameInfoFlags = [
 	# Full, use GameInfoFlags2 for more flags
 ]
 GameInfoFlags2 = [
-	"ALLOW_X_SKINS", "GAMETYPE_CITY",
+	"ALLOW_X_SKINS", "GAMETYPE_CITY", "GAMETYPE_FDDRACE", "ENTITIES_FDDRACE",
 ]
 ExPlayerFlags = ["AFK", "PAUSED", "SPEC"]
 
@@ -56,7 +59,7 @@ enum
 
 enum
 {
-	GAMEINFO_CURVERSION=5,
+	GAMEINFO_CURVERSION=6,
 };
 '''
 

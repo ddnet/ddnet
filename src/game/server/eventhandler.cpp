@@ -1,7 +1,10 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "eventhandler.h"
+
+#include "entity.h"
 #include "gamecontext.h"
+#include "player.h"
 
 //////////////////////////////////////////////////
 // Event handler
@@ -47,7 +50,7 @@ void CEventHandler::Snap(int SnappingClient)
 		if(SnappingClient == -1 || CmaskIsSet(m_aClientMasks[i], SnappingClient))
 		{
 			CNetEvent_Common *ev = (CNetEvent_Common *)&m_aData[m_aOffsets[i]];
-			if(SnappingClient == -1 || distance(GameServer()->m_apPlayers[SnappingClient]->m_ViewPos, vec2(ev->m_X, ev->m_Y)) < 1500.0f)
+			if(!NetworkClipped(GameServer(), SnappingClient, vec2(ev->m_X, ev->m_Y)))
 			{
 				int Type = m_aTypes[i];
 				int Size = m_aSizes[i];

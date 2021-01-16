@@ -3,7 +3,9 @@
 #include <game/generated/protocol.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/DDRace.h>
+#include <game/server/player.h>
 
+#include "character.h"
 #include "door.h"
 
 CDoor::CDoor(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,
@@ -64,7 +66,7 @@ void CDoor::Snap(int SnappingClient)
 		return;
 
 	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
-		NETOBJTYPE_LASER, m_ID, sizeof(CNetObj_Laser)));
+		NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
 
 	if(!pObj)
 		return;

@@ -15,7 +15,7 @@ class CBinds : public CComponent
 	static void ConUnbindAll(IConsole::IResult *pResult, void *pUserData);
 	class IConsole *GetConsole() const { return Console(); }
 
-	static void ConfigSaveCallback(class IConfig *pConfig, void *pUserData);
+	static void ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData);
 
 public:
 	CBinds();

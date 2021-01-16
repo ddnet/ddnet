@@ -1496,7 +1496,7 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 
 	if(UI()->ActiveItem() == pID)
 	{
-		if(m_MouseDeltaWx * m_MouseDeltaWx + m_MouseDeltaWy * m_MouseDeltaWy > 0.05f)
+		if(m_MouseDeltaWx * m_MouseDeltaWx + m_MouseDeltaWy * m_MouseDeltaWy > 0.0f)
 		{
 			if(s_Operation == OP_MOVE)
 			{
@@ -1635,7 +1635,7 @@ void CEditor::DoQuad(CQuad *q, int Index)
 
 	if(UI()->ActiveItem() == pID)
 	{
-		if(m_MouseDeltaWx * m_MouseDeltaWx + m_MouseDeltaWy * m_MouseDeltaWy > 0.05f)
+		if(m_MouseDeltaWx * m_MouseDeltaWx + m_MouseDeltaWy * m_MouseDeltaWy > 0.0f)
 		{
 			// check if we only should move pivot
 			if(s_Operation == OP_MOVE_PIVOT)
@@ -1901,7 +1901,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 	{
 		if(!s_Moved)
 		{
-			if(m_MouseDeltaWx * m_MouseDeltaWx + m_MouseDeltaWy * m_MouseDeltaWy > 0.05f)
+			if(m_MouseDeltaWx * m_MouseDeltaWx + m_MouseDeltaWy * m_MouseDeltaWy > 0.0f)
 				s_Moved = true;
 		}
 
@@ -2975,7 +2975,7 @@ float CEditor::ScaleFontSize(char *pText, int TextSize, float FontSize, int Widt
 		else
 		{
 			pText[str_length(pText) - 4] = '\0';
-			str_append(pText, "...", TextSize);
+			str_append(pText, "…", TextSize);
 		}
 	}
 	return FontSize;
@@ -6347,6 +6347,7 @@ void CEditor::Init()
 {
 	m_pInput = Kernel()->RequestInterface<IInput>();
 	m_pClient = Kernel()->RequestInterface<IClient>();
+	m_pConfig = Kernel()->RequestInterface<IConfigManager>()->Values();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	m_pGraphics = Kernel()->RequestInterface<IGraphics>();
 	m_pTextRender = Kernel()->RequestInterface<ITextRender>();

@@ -358,10 +358,12 @@ int CSnapshotDelta::UnpackDelta(CSnapshot *pFrom, CSnapshot *pTo, void *pSrcData
 
 		if(Keep)
 		{
+			void *pObj = Builder.NewItem(pFromItem->Type(), pFromItem->ID(), ItemSize);
+			if(!pObj)
+				return -4;
+
 			// keep it
-			mem_copy(
-				Builder.NewItem(pFromItem->Type(), pFromItem->ID(), ItemSize),
-				pFromItem->Data(), ItemSize);
+			mem_copy(pObj, pFromItem->Data(), ItemSize);
 		}
 	}
 
@@ -397,7 +399,8 @@ int CSnapshotDelta::UnpackDelta(CSnapshot *pFrom, CSnapshot *pTo, void *pSrcData
 		if(!pNewData)
 			pNewData = (int *)Builder.NewItem(Key >> 16, Key & 0xffff, ItemSize);
 
-		//if(range_check(pEnd, pNewData, ItemSize)) return -4;
+		if(!pNewData)
+			return -4;
 
 		FromIndex = pFrom->GetItemIndex(Key);
 		if(FromIndex != -1)
@@ -588,13 +591,16 @@ void CSnapshotBuilder::AddExtendedItemType(int Index)
 	int TypeID = m_aExtendedItemTypes[Index];
 	CUuid Uuid = g_UuidManager.GetUuid(TypeID);
 	int *pUuidItem = (int *)NewItem(0, GetTypeFromIndex(Index), sizeof(Uuid)); // NETOBJTYPE_EX
-	for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
+	if(pUuidItem)
 	{
-		pUuidItem[i] =
-			(Uuid.m_aData[i * 4 + 0] << 24) |
-			(Uuid.m_aData[i * 4 + 1] << 16) |
-			(Uuid.m_aData[i * 4 + 2] << 8) |
-			(Uuid.m_aData[i * 4 + 3]);
+		for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
+		{
+			pUuidItem[i] =
+				(Uuid.m_aData[i * 4 + 0] << 24) |
+				(Uuid.m_aData[i * 4 + 1] << 16) |
+				(Uuid.m_aData[i * 4 + 2] << 8) |
+				(Uuid.m_aData[i * 4 + 3]);
+		}
 	}
 }
 

@@ -24,7 +24,7 @@ static int GetLockIndex(int Data)
 	return Data;
 }
 
-static void CurlLock(CURL *pHandle, curl_lock_data Data, curl_lock_access Access, void *pUser)
+static void CurlLock(CURL *pHandle, curl_lock_data Data, curl_lock_access Access, void *pUser) ACQUIRE(gs_aLocks[GetLockIndex(Data)])
 {
 	(void)pHandle;
 	(void)Access;
@@ -32,7 +32,7 @@ static void CurlLock(CURL *pHandle, curl_lock_data Data, curl_lock_access Access
 	lock_wait(gs_aLocks[GetLockIndex(Data)]);
 }
 
-static void CurlUnlock(CURL *pHandle, curl_lock_data Data, void *pUser)
+static void CurlUnlock(CURL *pHandle, curl_lock_data Data, void *pUser) RELEASE(gs_aLocks[GetLockIndex(Data)])
 {
 	(void)pHandle;
 	(void)pUser;

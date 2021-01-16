@@ -2348,6 +2348,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 		m_pQuadProgram->m_LocColors = m_pQuadProgram->GetUniformLoc("gVertColors");
 		m_pQuadProgram->m_LocRotations = m_pQuadProgram->GetUniformLoc("gRotations");
 		m_pQuadProgram->m_LocOffsets = m_pQuadProgram->GetUniformLoc("gOffsets");
+		m_pQuadProgram->m_LocQuadOffset = m_pQuadProgram->GetUniformLoc("gQuadOffset");
 	}
 	{
 		CGLSL VertexShader;
@@ -2370,6 +2371,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 		m_pQuadProgramTextured->m_LocColors = m_pQuadProgramTextured->GetUniformLoc("gVertColors");
 		m_pQuadProgramTextured->m_LocRotations = m_pQuadProgramTextured->GetUniformLoc("gRotations");
 		m_pQuadProgramTextured->m_LocOffsets = m_pQuadProgramTextured->GetUniformLoc("gOffsets");
+		m_pQuadProgramTextured->m_LocQuadOffset = m_pQuadProgramTextured->GetUniformLoc("gQuadOffset");
 	}
 	{
 		CGLSL VertexShader;
@@ -3327,6 +3329,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadLayer(const CCommandBuff
 
 	int QuadsLeft = pCommand->m_QuadNum;
 	size_t QuadOffset = 0;
+	// the extra offset is not related to the information from the command, but an actual offset in the buffer
+	size_t QuadOffsetExtra = pCommand->m_QuadOffset;
 
 	vec4 aColors[m_MaxQuadsPossible];
 	vec2 aOffsets[m_MaxQuadsPossible];
@@ -3346,7 +3350,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadLayer(const CCommandBuff
 		pProgram->SetUniformVec4(pProgram->m_LocColors, ActualQuadCount, (float *)aColors);
 		pProgram->SetUniformVec2(pProgram->m_LocOffsets, ActualQuadCount, (float *)aOffsets);
 		pProgram->SetUniform(pProgram->m_LocRotations, ActualQuadCount, (float *)aRotations);
-		glDrawElements(GL_TRIANGLES, ActualQuadCount * 6, GL_UNSIGNED_INT, (void *)(QuadOffset * 6 * sizeof(unsigned int)));
+		pProgram->SetUniform(pProgram->m_LocQuadOffset, (int)(QuadOffset + QuadOffsetExtra));
+		glDrawElements(GL_TRIANGLES, ActualQuadCount * 6, GL_UNSIGNED_INT, (void *)((QuadOffset + QuadOffsetExtra) * 6 * sizeof(unsigned int)));
 
 		QuadsLeft -= ActualQuadCount;
 		QuadOffset += (size_t)ActualQuadCount;

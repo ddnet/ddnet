@@ -76,7 +76,7 @@ static int m_CenterY = 0;
 static int m_MixingRate = 48000;
 static volatile int m_SoundVolume = 100;
 
-static int m_NextVoice = 0;
+static int m_NextVoice GUARDED_BY(m_SoundLock) = 0;
 static int *m_pMixBuffer = 0; // buffer only used by the thread callback function
 static unsigned m_MaxFrames = 0;
 

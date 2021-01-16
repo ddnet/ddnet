@@ -370,26 +370,23 @@ bool CServer::SetClientNameImpl(int ClientID, const char *pNameRequest, bool Set
 	if(m_aClients[ClientID].m_State < CClient::STATE_READY)
 		return false;
 
-	if(Set)
+	CNameBan *pBanned = IsNameBanned(pNameRequest, m_aNameBans.base_ptr(), m_aNameBans.size());
+	if(pBanned)
 	{
-		CNameBan *pBanned = IsNameBanned(pNameRequest, m_aNameBans.base_ptr(), m_aNameBans.size());
-		if(pBanned)
+		if(m_aClients[ClientID].m_State == CClient::STATE_READY && Set)
 		{
-			if(m_aClients[ClientID].m_State == CClient::STATE_READY)
+			char aBuf[256];
+			if(pBanned->m_aReason[0])
 			{
-				char aBuf[256];
-				if(pBanned->m_aReason[0])
-				{
-					str_format(aBuf, sizeof(aBuf), "Kicked (your name is banned: %s)", pBanned->m_aReason);
-				}
-				else
-				{
-					str_copy(aBuf, "Kicked (your name is banned)", sizeof(aBuf));
-				}
-				Kick(ClientID, aBuf);
+				str_format(aBuf, sizeof(aBuf), "Kicked (your name is banned: %s)", pBanned->m_aReason);
 			}
-			return true;
+			else
+			{
+				str_copy(aBuf, "Kicked (your name is banned)", sizeof(aBuf));
+			}
+			Kick(ClientID, aBuf);
 		}
+		return false;
 	}
 
 	// trim the name
@@ -2338,10 +2335,10 @@ int CServer::LoadMap(const char *pMapName)
 	return 1;
 }
 
-void CServer::InitRegister(CNetServer *pNetServer, IEngineMasterServer *pMasterServer, IConsole *pConsole)
+void CServer::InitRegister(CNetServer *pNetServer, IEngineMasterServer *pMasterServer, CConfig *pConfig, IConsole *pConsole)
 {
-	m_Register.Init(pNetServer, pMasterServer, pConsole);
-	m_RegSixup.Init(pNetServer, pMasterServer, pConsole);
+	m_Register.Init(pNetServer, pMasterServer, pConfig, pConsole);
+	m_RegSixup.Init(pNetServer, pMasterServer, pConfig, pConsole);
 }
 
 int CServer::Run()
@@ -2410,7 +2407,7 @@ int CServer::Run()
 
 	m_NetServer.SetCallbacks(NewClientCallback, NewClientNoAuthCallback, ClientRejoinCallback, DelClientCallback, this);
 
-	m_Econ.Init(Console(), &m_ServerBan);
+	m_Econ.Init(Config(), Console(), &m_ServerBan);
 
 #if defined(CONF_FAMILY_UNIX)
 	m_Fifo.Init(Console(), g_Config.m_SvInputFifo, CFGFLAG_SERVER);
@@ -2735,8 +2732,17 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 				str_format(aAuthStr, sizeof(aAuthStr), " key=%s %s", pThis->m_AuthManager.KeyIdent(pThis->m_aClients[i].m_AuthKey), pAuthStr);
 			}
 
-			str_format(aBuf, sizeof(aBuf), "id=%d addr=<{%s}> name='%s' client=%d secure=%s flags=%d%s%s",
-				i, aAddrStr, pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_DDNetVersion,
+			char aClientStr[128];
+			if(pThis->m_aClients[i].m_Sixup)
+			{
+				str_copy(aClientStr, "sixup", sizeof(aClientStr));
+			}
+			else
+			{
+				str_format(aClientStr, sizeof(aClientStr), "%d", pThis->m_aClients[i].m_DDNetVersion);
+			}
+			str_format(aBuf, sizeof(aBuf), "id=%d addr=<{%s}> name='%s' client=%s secure=%s flags=%d%s%s",
+				i, aAddrStr, pThis->m_aClients[i].m_aName, aClientStr,
 				pThis->m_NetServer.HasSecurityToken(i) ? "yes" : "no", pThis->m_aClients[i].m_Flags, aDnsblStr, aAuthStr);
 		}
 		else
@@ -3498,10 +3504,10 @@ int main(int argc, const char **argv) // ignore_convention
 	IConsole *pConsole = CreateConsole(CFGFLAG_SERVER | CFGFLAG_ECON);
 	IEngineMasterServer *pEngineMasterServer = CreateEngineMasterServer();
 	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_SERVER, argc, argv); // ignore_convention
-	IConfig *pConfig = CreateConfig();
+	IConfigManager *pConfigManager = CreateConfigManager();
 	IEngineAntibot *pEngineAntibot = CreateEngineAntibot();
 
-	pServer->InitRegister(&pServer->m_NetServer, pEngineMasterServer, pConsole);
+	pServer->InitRegister(&pServer->m_NetServer, pEngineMasterServer, pConfigManager->Values(), pConsole);
 
 	{
 		bool RegisterFail = false;
@@ -3513,7 +3519,7 @@ int main(int argc, const char **argv) // ignore_convention
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pGameServer);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConsole);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pStorage);
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConfig);
+		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConfigManager);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngineMasterServer); // register as both
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IMasterServer *>(pEngineMasterServer), false);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngineAntibot);
@@ -3527,7 +3533,8 @@ int main(int argc, const char **argv) // ignore_convention
 	}
 
 	pEngine->Init();
-	pConfig->Init();
+	pConfigManager->Init();
+	pConsole->Init();
 	pEngineMasterServer->Init();
 	pEngineMasterServer->Load();
 

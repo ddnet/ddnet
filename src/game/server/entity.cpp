@@ -3,17 +3,18 @@
 
 #include "entity.h"
 #include "gamecontext.h"
+#include "player.h"
 
 //////////////////////////////////////////////////
 // Entity
 //////////////////////////////////////////////////
-CEntity::CEntity(CGameWorld *pGameWorld, int ObjType)
+CEntity::CEntity(CGameWorld *pGameWorld, int ObjType, vec2 Pos, int ProximityRadius)
 {
 	m_pGameWorld = pGameWorld;
 
 	m_ObjType = ObjType;
-	m_Pos = vec2(0, 0);
-	m_ProximityRadius = 0;
+	m_Pos = Pos;
+	m_ProximityRadius = ProximityRadius;
 
 	m_MarkedForDestroy = false;
 	m_ID = Server()->SnapNewID();
@@ -28,25 +29,14 @@ CEntity::~CEntity()
 	Server()->SnapFreeID(m_ID);
 }
 
-int CEntity::NetworkClipped(int SnappingClient)
+bool CEntity::NetworkClipped(int SnappingClient)
 {
-	return NetworkClipped(SnappingClient, m_Pos);
+	return ::NetworkClipped(GameServer(), SnappingClient, m_Pos);
 }
 
-int CEntity::NetworkClipped(int SnappingClient, vec2 CheckPos)
+bool CEntity::NetworkClipped(int SnappingClient, vec2 CheckPos)
 {
-	if(SnappingClient == -1)
-		return 0;
-
-	float dx = GameServer()->m_apPlayers[SnappingClient]->m_ViewPos.x - CheckPos.x;
-	float dy = GameServer()->m_apPlayers[SnappingClient]->m_ViewPos.y - CheckPos.y;
-
-	if(absolute(dx) > 1000.0f || absolute(dy) > 800.0f)
-		return 1;
-
-	if(distance(GameServer()->m_apPlayers[SnappingClient]->m_ViewPos, CheckPos) > 4000.0f)
-		return 1;
-	return 0;
+	return ::NetworkClipped(GameServer(), SnappingClient, CheckPos);
 }
 
 bool CEntity::GameLayerClipped(vec2 CheckPos)
@@ -93,5 +83,21 @@ bool CEntity::GetNearestAirPosPlayer(vec2 PlayerPos, vec2 *OutPos)
 			return true;
 		}
 	}
+	return false;
+}
+
+bool NetworkClipped(CGameContext *pGameServer, int SnappingClient, vec2 CheckPos)
+{
+	if(SnappingClient == -1 || pGameServer->m_apPlayers[SnappingClient]->m_ShowAll)
+		return false;
+
+	float dx = pGameServer->m_apPlayers[SnappingClient]->m_ViewPos.x - CheckPos.x;
+	if(absolute(dx) > pGameServer->m_apPlayers[SnappingClient]->m_ShowDistance.x)
+		return true;
+
+	float dy = pGameServer->m_apPlayers[SnappingClient]->m_ViewPos.y - CheckPos.y;
+	if(absolute(dy) > pGameServer->m_apPlayers[SnappingClient]->m_ShowDistance.y)
+		return true;
+
 	return false;
 }

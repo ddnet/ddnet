@@ -6,7 +6,10 @@
 #include <game/generated/protocol.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/DDRace.h>
+#include <game/server/player.h>
 #include <game/server/teams.h>
+
+#include "character.h"
 
 CDragger::CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW,
 	int CaughtTeam, int Layer, int Number) :
@@ -212,7 +215,7 @@ void CDragger::Snap(int SnappingClient)
 				continue;
 		}
 
-		if(Char && Char->IsAlive() && Target && Target->IsAlive() && Target->GetPlayer()->GetCID() != Char->GetPlayer()->GetCID() && (Char->GetPlayer()->m_ShowOthers == 0 || (Char->GetPlayer()->m_ShowOthers == 2 && (Char->Teams()->m_Core.GetSolo(SnappingClient) || Char->Teams()->m_Core.GetSolo(Target->GetPlayer()->GetCID())))))
+		if(Char && Char->IsAlive() && Target && Target->IsAlive() && Target->GetPlayer()->GetCID() != Char->GetPlayer()->GetCID() && ((Char->GetPlayer()->m_ShowOthers == 0 && (Char->Teams()->m_Core.GetSolo(SnappingClient) || Char->Teams()->m_Core.GetSolo(Target->GetPlayer()->GetCID()))) || (Char->GetPlayer()->m_ShowOthers == 2 && !Target->SameTeam(SnappingClient))))
 		{
 			continue;
 		}
@@ -222,7 +225,7 @@ void CDragger::Snap(int SnappingClient)
 		if(i == -1)
 		{
 			obj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
-				NETOBJTYPE_LASER, m_ID, sizeof(CNetObj_Laser)));
+				NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
 		}
 		else
 		{

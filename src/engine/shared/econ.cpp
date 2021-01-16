@@ -59,8 +59,9 @@ void CEcon::ConLogout(IConsole::IResult *pResult, void *pUserData)
 		pThis->m_NetConsole.Drop(pThis->m_UserClientID, "Logout");
 }
 
-void CEcon::Init(IConsole *pConsole, CNetBan *pNetBan)
+void CEcon::Init(CConfig *pConfig, IConsole *pConsole, CNetBan *pNetBan)
 {
+	m_pConfig = pConfig;
 	m_pConsole = pConsole;
 
 	for(auto &Client : m_aClients)

@@ -508,6 +508,19 @@ void CRenderTools::DrawUIRect4(const CUIRect *r, vec4 ColorTopLeft, vec4 ColorTo
 	Graphics()->QuadsEnd();
 }
 
+void CRenderTools::DrawUIRect4NoRounding(const CUIRect *r, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight)
+{
+	Graphics()->TextureClear();
+
+	Graphics()->QuadsBegin();
+
+	Graphics()->SetColor4(ColorTopLeft, ColorTopRight, ColorBottomLeft, ColorBottomRight);
+	IGraphics::CQuadItem ItemQ = IGraphics::CQuadItem(r->x, r->y, r->w, r->h);
+	Graphics()->QuadsDrawTL(&ItemQ, 1);
+
+	Graphics()->QuadsEnd();
+}
+
 void CRenderTools::DrawCircle(float x, float y, float r, int Segments)
 {
 	IGraphics::CFreeformItem Array[32];

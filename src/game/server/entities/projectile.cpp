@@ -4,9 +4,12 @@
 #include <game/generated/protocol.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/DDRace.h>
+#include <game/server/player.h>
 
 #include <engine/shared/config.h>
 #include <game/server/teams.h>
+
+#include "character.h"
 
 CProjectile::CProjectile(
 	CGameWorld *pGameWorld,
@@ -316,7 +319,7 @@ void CProjectile::Snap(int SnappingClient)
 	if(m_Owner != -1 && !CmaskIsSet(TeamMask, SnappingClient))
 		return;
 
-	CNetObj_Projectile *pProj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_ID, sizeof(CNetObj_Projectile)));
+	CNetObj_Projectile *pProj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, GetID(), sizeof(CNetObj_Projectile)));
 	if(pProj)
 	{
 		if(SnappingClient > -1 && GameServer()->m_apPlayers[SnappingClient] && GameServer()->m_apPlayers[SnappingClient]->GetClientVersion() >= VERSION_DDNET_ANTIPING_PROJECTILE)

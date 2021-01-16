@@ -517,27 +517,14 @@ void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHe
 {
 	CUIRect Scroll, Row;
 	CUIRect View = *pRect;
-	CUIRect Header, Footer;
 
 	if(!LogicOnly)
 	{
-		// draw header
-		View.HSplitTop(ms_ListheaderHeight, &Header, &View);
-		RenderTools()->DrawUIRect(&Header, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_T, 5.0f);
-		UI()->DoLabel(&Header, pTitle, Header.h * ms_FontmodHeight, 0);
-
-		// draw footers
-		View.HSplitBottom(ms_ListheaderHeight, &View, &Footer);
-		RenderTools()->DrawUIRect(&Footer, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_B, 5.0f);
-		Footer.VSplitLeft(10.0f, 0, &Footer);
-		UI()->DoLabel(&Footer, pBottomText, Header.h * ms_FontmodHeight, 0);
-
 		// background
-		RenderTools()->DrawUIRect(&View, ColorRGBA(0, 0, 0, 0.15f), 0, 0);
+		RenderTools()->DrawUIRect(&View, ColorRGBA(0, 0, 0, 0.15f), CUI::CORNER_ALL, 5.0f);
 	}
 
-	// prepare the scroll
-	View.VSplitRight(15, &View, &Scroll);
+	View.VSplitRight(10, &View, &Scroll);
 
 	// setup the variables
 	gs_ListBoxOriginalView = View;
@@ -555,8 +542,9 @@ void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHe
 	// do the scrollbar
 	View.HSplitTop(gs_ListBoxRowHeight, &Row, 0);
 
-	int NumViewable = (int)(gs_ListBoxOriginalView.h / Row.h) + 1;
-	int Num = (NumItems + gs_ListBoxItemsPerRow - 1) / gs_ListBoxItemsPerRow - NumViewable + 1;
+	int NumViewable = (int)(gs_ListBoxOriginalView.h / Row.h) * gs_ListBoxItemsPerRow;
+	//int Num = (NumItems + gs_ListBoxItemsPerRow - 1) / gs_ListBoxItemsPerRow - NumViewable + 1;
+	int Num = ceil((NumItems - NumViewable) / (float)gs_ListBoxItemsPerRow);
 	if(Num <= 0)
 	{
 		Num = 0;
@@ -569,8 +557,10 @@ void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHe
 			gs_ListBoxScrollValue += Num == 1 ? 0.1f : 3.0f / Num;
 	}
 
-	Scroll.HMargin(5.0f, &Scroll);
-	gs_ListBoxScrollValue = clamp(DoScrollbarV(pID, &Scroll, gs_ListBoxScrollValue), 0.0f, 1.0f);
+	if(Num == 0)
+		gs_ListBoxScrollValue = 0;
+	else
+		gs_ListBoxScrollValue = clamp(DoScrollbarV(pID, &Scroll, gs_ListBoxScrollValue), 0.0f, 1.0f);
 
 	// the list
 	gs_ListBoxView = gs_ListBoxOriginalView;
@@ -1066,7 +1056,13 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	Scroll.HMargin(5.0f, &Scroll);
 	s_ScrollValue = DoScrollbarV(&s_ScrollBar, &Scroll, s_ScrollValue);
 
+	int PreviousIndex = m_DemolistSelectedIndex;
 	HandleListInputs(ListBox, s_ScrollValue, 3.0f, &m_ScrollOffset, s_aCols[0].m_Rect.h, m_DemolistSelectedIndex, m_lDemos.size());
+	if(PreviousIndex != m_DemolistSelectedIndex)
+	{
+		str_copy(g_Config.m_UiDemoSelected, m_lDemos[m_DemolistSelectedIndex].m_aName, sizeof(g_Config.m_UiDemoSelected));
+		DemolistOnUpdate(false);
+	}
 
 	// set clipping
 	UI()->ClipEnable(&ListBox);

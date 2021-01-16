@@ -178,6 +178,8 @@ private:
 	int m_RequestNumber;
 	unsigned char m_aTokenSeed[16];
 
+	bool m_SortOnNextUpdate;
+
 	int GenerateToken(const NETADDR &Addr) const;
 	static int GetBasicToken(int Token);
 	static int GetExtraToken(int Token);
@@ -204,7 +206,7 @@ private:
 
 	void SetInfo(CServerEntry *pEntry, const CServerInfo &Info);
 
-	static void ConfigSaveCallback(IConfig *pConfig, void *pUserData);
+	static void ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData);
 };
 
 #endif

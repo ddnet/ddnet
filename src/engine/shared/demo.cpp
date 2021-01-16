@@ -529,12 +529,9 @@ void CDemoPlayer::ScanFile()
 	}
 
 	// copy all the frames to an array instead for fast access
-	if(m_Info.m_SeekablePoints > 0)
-	{
-		m_pKeyFrames = (CKeyFrame *)calloc(m_Info.m_SeekablePoints, sizeof(CKeyFrame));
-		for(pCurrentKey = pFirstKey, i = 0; pCurrentKey; pCurrentKey = pCurrentKey->m_pNext, i++)
-			m_pKeyFrames[i] = pCurrentKey->m_Frame;
-	}
+	m_pKeyFrames = (CKeyFrame *)calloc(std::max(m_Info.m_SeekablePoints, 1), sizeof(CKeyFrame));
+	for(pCurrentKey = pFirstKey, i = 0; pCurrentKey; pCurrentKey = pCurrentKey->m_pNext, i++)
+		m_pKeyFrames[i] = pCurrentKey->m_Frame;
 
 	// destroy the temporary heap and seek back to the start
 	io_seek(m_File, StartPos, IOSEEK_START);
@@ -1041,11 +1038,8 @@ int CDemoPlayer::Stop()
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", "Stopped playback");
 	io_close(m_File);
 	m_File = 0;
-	if(m_pKeyFrames)
-	{
-		free(m_pKeyFrames);
-		m_pKeyFrames = 0;
-	}
+	free(m_pKeyFrames);
+	m_pKeyFrames = 0;
 	str_copy(m_aFilename, "", sizeof(m_aFilename));
 	return 0;
 }
@@ -1167,7 +1161,7 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 
 	m_pDemoPlayer->Stop();
 	m_pDemoRecorder->Stop();
-}
+} // NOLINT(clang-analyzer-unix.Malloc)
 
 void CDemoEditor::OnDemoPlayerSnapshot(void *pData, int Size)
 {

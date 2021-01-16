@@ -32,7 +32,6 @@ public:
 		int m_FriendState;
 	};
 
-	int m_SortedIndex;
 	int m_ServerIndex;
 
 	int m_Type;

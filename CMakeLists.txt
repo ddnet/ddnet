@@ -202,6 +202,7 @@ if(NOT MSVC)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-branches)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wlogical-op)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wrestrict)
+  add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wthread-safety)
   # TODO: Enable for C++ code except gtest
   #add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN "-Wuseless-cast")
 endif()
@@ -367,6 +368,10 @@ find_package(Pnglite)
 find_package(PythonInterp 3)
 find_package(SDL2)
 find_package(SQLite3)
+if(UNIX)
+  # Use -pthread instead of -lpthread to draw dependencies other than libpthread
+  set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+endif()
 find_package(Threads)
 find_package(Wavpack)
 if(WEBSOCKETS)
@@ -1026,6 +1031,7 @@ set(EXPECTED_DATA
   editor/entities_clear/blockworlds.png
   editor/entities_clear/ddnet.png
   editor/entities_clear/ddrace.png
+  editor/entities_clear/f-ddrace.png
   editor/entities_clear/fddracepp.png
   editor/entities_clear/fng.png
   editor/entities_clear/race.png
@@ -1300,6 +1306,8 @@ set(EXPECTED_DATA
   themes/jungle.png
   themes/jungle_day.map
   themes/jungle_night.map
+  themes/newyear.map
+  themes/newyear.png
   themes/none.png
   themes/rand.png
   themes/winter.png
@@ -1944,6 +1952,7 @@ set_src(ENGINE_SERVER GLOB_RECURSE src/engine/server
   upnp.h
 )
 set_src(GAME_SERVER GLOB_RECURSE src/game/server
+  alloc.h
   ddracechat.cpp
   ddracechat.h
   ddracecommands.cpp

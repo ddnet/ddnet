@@ -11,7 +11,7 @@
 #define STREAM_PIX_FMT AV_PIX_FMT_YUV420P /* default pix_fmt */
 
 const size_t FORMAT_NCHANNELS = 3;
-static LOCK g_WriteLock = 0;
+LOCK g_WriteLock = 0;
 
 CVideo::CVideo(CGraphics_Threaded *pGraphics, IStorage *pStorage, IConsole *pConsole, int Width, int Height, const char *pName) :
 	m_pGraphics(pGraphics),
@@ -667,7 +667,6 @@ bool CVideo::AddStream(OutputStream *pStream, AVFormatContext *pOC, AVCodec **pp
 
 void CVideo::WriteFrame(OutputStream *pStream)
 {
-	//lock_wait(g_WriteLock);
 	int RetRecv = 0;
 
 	AVPacket Packet = {0};
@@ -701,7 +700,6 @@ void CVideo::WriteFrame(OutputStream *pStream)
 	{
 		dbg_msg("video_recorder", "Error encoding frame, error: %d", RetRecv);
 	}
-	//lock_unlock(g_WriteLock);
 }
 
 void CVideo::FinishFrames(OutputStream *pStream)

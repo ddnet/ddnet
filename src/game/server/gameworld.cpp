@@ -2,8 +2,10 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
 #include "gameworld.h"
+#include "entities/character.h"
 #include "entity.h"
 #include "gamecontext.h"
+#include "player.h"
 #include <algorithm>
 #include <engine/shared/config.h>
 #include <utility>
@@ -14,6 +16,7 @@
 CGameWorld::CGameWorld()
 {
 	m_pGameServer = 0x0;
+	m_pConfig = 0x0;
 	m_pServer = 0x0;
 
 	m_Paused = false;
@@ -33,6 +36,7 @@ CGameWorld::~CGameWorld()
 void CGameWorld::SetGameServer(CGameContext *pGameServer)
 {
 	m_pGameServer = pGameServer;
+	m_pConfig = m_pGameServer->Config();
 	m_pServer = m_pGameServer->Server();
 }
 

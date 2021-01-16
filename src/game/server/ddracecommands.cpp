@@ -1,7 +1,9 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 #include "gamecontext.h"
 #include <engine/shared/config.h>
+#include <game/server/entities/character.h>
 #include <game/server/gamemodes/DDRace.h>
+#include <game/server/player.h>
 #include <game/server/save.h>
 #include <game/server/teams.h>
 #include <game/version.h>
@@ -92,6 +94,30 @@ void CGameContext::ConNinja(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_NINJA, false);
+}
+
+void CGameContext::ConEndlessHook(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+	if(pChr)
+	{
+		pChr->SetEndlessHook(true);
+	}
+}
+
+void CGameContext::ConUnEndlessHook(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+	if(pChr)
+	{
+		pChr->SetEndlessHook(false);
+	}
 }
 
 void CGameContext::ConSuper(IConsole::IResult *pResult, void *pUserData)

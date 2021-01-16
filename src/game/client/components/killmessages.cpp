@@ -6,6 +6,7 @@
 #include <game/generated/client_data.h>
 #include <game/generated/protocol.h>
 
+#include "engine/shared/protocol.h"
 #include "killmessages.h"
 #include <game/client/animstate.h>
 #include <game/client/gameclient.h>
@@ -97,16 +98,25 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 
 		// unpack messages
 		CKillMsg Kill;
+		Kill.m_aVictimName[0] = '\0';
+		Kill.m_aKillerName[0] = '\0';
+
 		Kill.m_VictimID = pMsg->m_Victim;
-		Kill.m_VictimTeam = m_pClient->m_aClients[Kill.m_VictimID].m_Team;
-		Kill.m_VictimDDTeam = m_pClient->m_Teams.Team(Kill.m_VictimID);
-		str_copy(Kill.m_aVictimName, m_pClient->m_aClients[Kill.m_VictimID].m_aName, sizeof(Kill.m_aVictimName));
-		Kill.m_VictimRenderInfo = m_pClient->m_aClients[Kill.m_VictimID].m_RenderInfo;
+		if(Kill.m_VictimID >= 0 && Kill.m_VictimID < MAX_CLIENTS)
+		{
+			Kill.m_VictimTeam = m_pClient->m_aClients[Kill.m_VictimID].m_Team;
+			Kill.m_VictimDDTeam = m_pClient->m_Teams.Team(Kill.m_VictimID);
+			str_copy(Kill.m_aVictimName, m_pClient->m_aClients[Kill.m_VictimID].m_aName, sizeof(Kill.m_aVictimName));
+			Kill.m_VictimRenderInfo = m_pClient->m_aClients[Kill.m_VictimID].m_RenderInfo;
+		}
 
 		Kill.m_KillerID = pMsg->m_Killer;
-		Kill.m_KillerTeam = m_pClient->m_aClients[Kill.m_KillerID].m_Team;
-		str_copy(Kill.m_aKillerName, m_pClient->m_aClients[Kill.m_KillerID].m_aName, sizeof(Kill.m_aKillerName));
-		Kill.m_KillerRenderInfo = m_pClient->m_aClients[Kill.m_KillerID].m_RenderInfo;
+		if(Kill.m_KillerID >= 0 && Kill.m_KillerID < MAX_CLIENTS)
+		{
+			Kill.m_KillerTeam = m_pClient->m_aClients[Kill.m_KillerID].m_Team;
+			str_copy(Kill.m_aKillerName, m_pClient->m_aClients[Kill.m_KillerID].m_aName, sizeof(Kill.m_aKillerName));
+			Kill.m_KillerRenderInfo = m_pClient->m_aClients[Kill.m_KillerID].m_RenderInfo;
+		}
 
 		Kill.m_Weapon = pMsg->m_Weapon;
 		Kill.m_ModeSpecial = pMsg->m_ModeSpecial;
@@ -125,22 +135,29 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 
 		CreateKillmessageNamesIfNotCreated(Kill);
 
-		// add the message
-		m_KillmsgCurrent = (m_KillmsgCurrent + 1) % MAX_KILLMSGS;
-
-		if(m_aKillmsgs[m_KillmsgCurrent].m_VictimTextContainerIndex != -1)
+		bool KillMsgValid = (Kill.m_VictimRenderInfo.m_CustomColoredSkin && Kill.m_VictimRenderInfo.m_ColorableRenderSkin.m_Body != -1) || (!Kill.m_VictimRenderInfo.m_CustomColoredSkin && Kill.m_VictimRenderInfo.m_OriginalRenderSkin.m_Body != -1);
+		// if killer != victim, killer must be valid too
+		KillMsgValid &= Kill.m_KillerID == Kill.m_VictimID || ((Kill.m_KillerRenderInfo.m_CustomColoredSkin && Kill.m_KillerRenderInfo.m_ColorableRenderSkin.m_Body != -1) || (!Kill.m_KillerRenderInfo.m_CustomColoredSkin && Kill.m_KillerRenderInfo.m_OriginalRenderSkin.m_Body != -1));
+		if(KillMsgValid)
 		{
-			TextRender()->DeleteTextContainer(m_aKillmsgs[m_KillmsgCurrent].m_VictimTextContainerIndex);
-			m_aKillmsgs[m_KillmsgCurrent].m_VictimTextContainerIndex = -1;
+			// add the message
+			m_KillmsgCurrent = (m_KillmsgCurrent + 1) % MAX_KILLMSGS;
+
+			if(m_aKillmsgs[m_KillmsgCurrent].m_VictimTextContainerIndex != -1)
+			{
+				TextRender()->DeleteTextContainer(m_aKillmsgs[m_KillmsgCurrent].m_VictimTextContainerIndex);
+				m_aKillmsgs[m_KillmsgCurrent].m_VictimTextContainerIndex = -1;
+			}
+
+			if(m_aKillmsgs[m_KillmsgCurrent].m_KillerTextContainerIndex != -1)
+			{
+				TextRender()->DeleteTextContainer(m_aKillmsgs[m_KillmsgCurrent].m_KillerTextContainerIndex);
+				m_aKillmsgs[m_KillmsgCurrent].m_KillerTextContainerIndex = -1;
+			}
+
+			m_aKillmsgs[m_KillmsgCurrent] = Kill;
 		}
 
-		if(m_aKillmsgs[m_KillmsgCurrent].m_KillerTextContainerIndex != -1)
-		{
-			TextRender()->DeleteTextContainer(m_aKillmsgs[m_KillmsgCurrent].m_KillerTextContainerIndex);
-			m_aKillmsgs[m_KillmsgCurrent].m_KillerTextContainerIndex = -1;
-		}
-
-		m_aKillmsgs[m_KillmsgCurrent] = Kill;
 		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 	}
 }

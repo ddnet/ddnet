@@ -4,6 +4,9 @@
 #include "teehistorian.h"
 #include <engine/shared/config.h>
 
+#include "entities/character.h"
+#include "player.h"
+
 CGameTeams::CGameTeams(CGameContext *pGameContext) :
 	m_pGameContext(pGameContext)
 {
@@ -338,21 +341,7 @@ int CGameTeams::Count(int Team) const
 
 void CGameTeams::ChangeTeamState(int Team, int State)
 {
-	int OldState = m_TeamState[Team];
 	m_TeamState[Team] = State;
-	onChangeTeamState(Team, State, OldState);
-}
-
-void CGameTeams::onChangeTeamState(int Team, int State, int OldState)
-{
-	if(OldState != State && State == TEAMSTATE_STARTED)
-	{
-		// OnTeamStateStarting
-	}
-	if(OldState != State && State == TEAMSTATE_FINISHED)
-	{
-		// OnTeamStateFinishing
-	}
 }
 
 bool CGameTeams::TeamFinished(int Team)
@@ -853,6 +842,7 @@ void CGameTeams::ResetSavedTeam(int ClientID, int Team)
 	{
 		ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
 		ResetSwitchers(Team);
+		m_Practice[Team] = false;
 	}
 	else
 	{

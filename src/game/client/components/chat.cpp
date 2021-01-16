@@ -151,13 +151,7 @@ void CChat::ConEcho(IConsole::IResult *pResult, void *pUserData)
 	((CChat *)pUserData)->Echo(pResult->GetString(0));
 }
 
-void CChat::ConchainChatTee(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
-{
-	pfnCallback(pResult, pCallbackUserData);
-	((CChat *)pUserData)->RebuildChat();
-}
-
-void CChat::ConchainChatBackground(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+void CChat::ConchainChatOld(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
 	((CChat *)pUserData)->RebuildChat();
@@ -175,8 +169,7 @@ void CChat::OnConsoleInit()
 	Console()->Register("chat", "s['team'|'all'] ?r[message]", CFGFLAG_CLIENT, ConChat, this, "Enable chat with all/team mode");
 	Console()->Register("+show_chat", "", CFGFLAG_CLIENT, ConShowChat, this, "Show chat");
 	Console()->Register("echo", "r[message]", CFGFLAG_CLIENT, ConEcho, this, "Echo the text in chat window");
-	Console()->Chain("cl_chat_tee", ConchainChatTee, this);
-	Console()->Chain("cl_chat_background", ConchainChatBackground, this);
+	Console()->Chain("cl_chat_old", ConchainChatOld, this);
 }
 
 bool CChat::OnInput(IInput::CEvent Event)
@@ -954,7 +947,7 @@ void CChat::OnPrepareLines()
 		if(g_Config.m_ClShowIDs && m_aLines[r].m_ClientID >= 0 && m_aLines[r].m_aName[0] != '\0')
 		{
 			if(m_aLines[r].m_ClientID < 10)
-				str_format(aName, sizeof(aName), " %d: ", m_aLines[r].m_ClientID);
+				str_format(aName, sizeof(aName), " %d: ", m_aLines[r].m_ClientID);
 			else
 				str_format(aName, sizeof(aName), "%d: ", m_aLines[r].m_ClientID);
 		}

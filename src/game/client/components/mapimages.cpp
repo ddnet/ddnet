@@ -155,7 +155,9 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 	EMapImageModType EntitiesModType = MAP_IMAGE_MOD_TYPE_DDNET;
 	bool EntitesAreMasked = !GameClient()->m_GameInfo.m_DontMaskEntities;
 
-	if(GameClient()->m_GameInfo.m_EntitiesDDNet)
+	if(GameClient()->m_GameInfo.m_EntitiesFDDrace)
+		EntitiesModType = MAP_IMAGE_MOD_TYPE_FDDRACE;
+	else if(GameClient()->m_GameInfo.m_EntitiesDDNet)
 		EntitiesModType = MAP_IMAGE_MOD_TYPE_DDNET;
 	else if(GameClient()->m_GameInfo.m_EntitiesDDRace)
 		EntitiesModType = MAP_IMAGE_MOD_TYPE_DDRACE;

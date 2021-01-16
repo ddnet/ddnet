@@ -250,9 +250,9 @@ void CBinds::SetDefaults()
 void CBinds::OnConsoleInit()
 {
 	// bindings
-	IConfig *pConfig = Kernel()->RequestInterface<IConfig>();
-	if(pConfig)
-		pConfig->RegisterCallback(ConfigSaveCallback, this);
+	IConfigManager *pConfigManager = Kernel()->RequestInterface<IConfigManager>();
+	if(pConfigManager)
+		pConfigManager->RegisterCallback(ConfigSaveCallback, this);
 
 	Console()->Register("bind", "s[key] r[command]", CFGFLAG_CLIENT, ConBind, this, "Bind key to execute the command");
 	Console()->Register("dump_binds", "?s[key]", CFGFLAG_CLIENT, ConDumpBinds, this, "Print command executed by this keybindind or all binds");
@@ -423,13 +423,13 @@ const char *CBinds::GetKeyBindModifiersName(int Modifier)
 	return aModifier;
 }
 
-void CBinds::ConfigSaveCallback(IConfig *pConfig, void *pUserData)
+void CBinds::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData)
 {
 	CBinds *pSelf = (CBinds *)pUserData;
 
 	char aBuffer[256];
 	char *pEnd = aBuffer + sizeof(aBuffer);
-	pConfig->WriteLine("unbindall");
+	pConfigManager->WriteLine("unbindall");
 	for(int i = 0; i < MODIFIER_COMBINATION_COUNT; i++)
 	{
 		for(int j = 0; j < KEY_LAST; j++)
@@ -443,7 +443,7 @@ void CBinds::ConfigSaveCallback(IConfig *pConfig, void *pUserData)
 			str_escape(&pDst, pSelf->m_aapKeyBindings[i][j], pEnd);
 			str_append(aBuffer, "\"", sizeof(aBuffer));
 
-			pConfig->WriteLine(aBuffer);
+			pConfigManager->WriteLine(aBuffer);
 		}
 	}
 }
@@ -466,11 +466,12 @@ void CBinds::SetDDRaceBinds(bool FreeOnly)
 		Bind(KEY_C, "say /rank", FreeOnly);
 		Bind(KEY_V, "say /info", FreeOnly);
 		Bind(KEY_B, "say /top5", FreeOnly);
-		Bind(KEY_X, "emote 14", FreeOnly);
-		Bind(KEY_H, "emote 2", FreeOnly);
-		Bind(KEY_M, "emote 5", FreeOnly);
 		Bind(KEY_S, "+showhookcoll", FreeOnly);
 		Bind(KEY_X, "toggle cl_dummy 0 1", FreeOnly);
+		Bind(KEY_H, "toggle cl_dummy_hammer 0 1", FreeOnly);
+		Bind(KEY_UP, "bind mouse1 \"+fire; +toggle cl_dummy_hammer 1 0\"", FreeOnly);
+		Bind(KEY_DOWN, "bind mouse1 \"+fire\"", FreeOnly);
+		Bind(KEY_SLASH, "+show_chat; chat all /", FreeOnly);
 		Bind(KEY_PAGEDOWN, "toggle cl_show_quads 0 1", FreeOnly);
 		Bind(KEY_PAGEUP, "toggle cl_overlay_entities 0 100", FreeOnly);
 		Bind(KEY_KP_0, "say /emote normal 999999", FreeOnly);

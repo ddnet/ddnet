@@ -24,6 +24,7 @@ enum EMapImageModType
 	MAP_IMAGE_MOD_TYPE_BLOCKWORLDS,
 	MAP_IMAGE_MOD_TYPE_FNG,
 	MAP_IMAGE_MOD_TYPE_VANILLA,
+	MAP_IMAGE_MOD_TYPE_FDDRACE,
 
 	MAP_IMAGE_MOD_TYPE_COUNT,
 };
@@ -34,7 +35,8 @@ static const char *const gs_aModEntitiesNames[] = {
 	"race",
 	"blockworlds",
 	"fng",
-	"vanilla"};
+	"vanilla",
+	"f-ddrace"};
 
 class CMapImages : public CComponent
 {

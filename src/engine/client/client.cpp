@@ -272,6 +272,8 @@ CClient::CClient() :
 	m_pSound = 0;
 	m_pGameClient = 0;
 	m_pMap = 0;
+	m_pConfigManager = 0;
+	m_pConfig = 0;
 	m_pConsole = 0;
 
 	m_RenderFrameTime = 0.0001f;
@@ -2120,7 +2122,7 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 	}
 	else if(Result == UNPACKMESSAGE_ANSWER)
 	{
-		SendMsg(&Packer, MSGFLAG_VITAL);
+		SendMsgY(&Packer, MSGFLAG_VITAL, !g_Config.m_ClDummy);
 	}
 
 	if(Sys)
@@ -2961,6 +2963,8 @@ void CClient::InitInterfaces()
 	m_pInput = Kernel()->RequestInterface<IEngineInput>();
 	m_pMap = Kernel()->RequestInterface<IEngineMap>();
 	m_pMasterServer = Kernel()->RequestInterface<IEngineMasterServer>();
+	m_pConfigManager = Kernel()->RequestInterface<IConfigManager>();
+	m_pConfig = m_pConfigManager->Values();
 #if defined(CONF_AUTOUPDATE)
 	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
 #endif
@@ -3176,7 +3180,7 @@ void CClient::Run()
 			MsgVer.AddRaw(&m_ConnectionID, sizeof(m_ConnectionID));
 			MsgVer.AddInt(GameClient()->DDNetVersion());
 			MsgVer.AddString(GameClient()->DDNetVersionStr(), 0);
-			SendMsg(&MsgVer, MSGFLAG_VITAL);
+			SendMsgY(&MsgVer, MSGFLAG_VITAL, 1);
 
 			CMsgPacker MsgInfo(NETMSG_INFO, true);
 			MsgInfo.AddString(GameClient()->NetVersion(), 128);
@@ -3338,10 +3342,16 @@ void CClient::Run()
 			if(!s_SavedConfig)
 			{
 				// write down the config and quit
-				IConfig *pConfig = Kernel()->RequestInterface<IConfig>();
-				if(!pConfig->Save())
+				if(!m_pConfigManager->Save())
 					m_Warnings.emplace_back(SWarning(Localize("Saving ddnet-settings.cfg failed")));
 				s_SavedConfig = true;
+			}
+
+			IOHANDLE File = m_pStorage->OpenFile(m_aDDNetInfoTmp, IOFLAG_READ, IStorage::TYPE_SAVE);
+			if(File)
+			{
+				io_close(File);
+				m_pStorage->RemoveFile(m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
 			}
 
 			if(m_Warnings.empty() && !GameClient()->IsDisplayingWarning())
@@ -4265,7 +4275,7 @@ int main(int argc, const char **argv) // ignore_convention
 	IEngine *pEngine = CreateEngine("DDNet", Silent, 1);
 	IConsole *pConsole = CreateConsole(CFGFLAG_CLIENT);
 	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_CLIENT, argc, argv); // ignore_convention
-	IConfig *pConfig = CreateConfig();
+	IConfigManager *pConfigManager = CreateConfigManager();
 	IEngineSound *pEngineSound = CreateEngineSound();
 	IEngineInput *pEngineInput = CreateEngineInput();
 	IEngineTextRender *pEngineTextRender = CreateEngineTextRender();
@@ -4284,7 +4294,7 @@ int main(int argc, const char **argv) // ignore_convention
 
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngine);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConsole);
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConfig);
+		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConfigManager);
 
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngineSound); // IEngineSound
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<ISound *>(pEngineSound), false);
@@ -4316,7 +4326,8 @@ int main(int argc, const char **argv) // ignore_convention
 	}
 
 	pEngine->Init();
-	pConfig->Init();
+	pConfigManager->Init();
+	pConsole->Init();
 	pEngineMasterServer->Init();
 	pEngineMasterServer->Load();
 
