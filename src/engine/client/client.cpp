@@ -3350,7 +3350,7 @@ void CClient::Run()
 			IOHANDLE File = m_pStorage->OpenFile(m_aDDNetInfoTmp, IOFLAG_READ, IStorage::TYPE_SAVE);
 			if(File)
 			{
-				io_close(File);	
+				io_close(File);
 				m_pStorage->RemoveFile(m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
 			}
 
