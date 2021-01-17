@@ -50,7 +50,6 @@
 #include <engine/shared/snapshot.h>
 #include <engine/shared/uuid_manager.h>
 
-#include <game/extrainfo.h>
 #include <game/version.h>
 
 #include <mastersrv/mastersrv.h>
@@ -2025,7 +2024,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 					// for antiping: if the projectile netobjects from the server contains extra data, this is removed and the original content restored before recording demo
 					unsigned char aExtraInfoRemoved[CSnapshot::MAX_SIZE];
 					mem_copy(aExtraInfoRemoved, pTmpBuffer3, SnapSize);
-					SnapshotRemoveExtraInfo(aExtraInfoRemoved);
+					SnapshotRemoveExtraProjectileInfo(aExtraInfoRemoved);
 
 					// add snapshot to demo
 					for(auto &DemoRecorder : m_DemoRecorder)

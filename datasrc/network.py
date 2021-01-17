@@ -24,6 +24,10 @@ GameInfoFlags2 = [
 	"ALLOW_X_SKINS", "GAMETYPE_CITY", "GAMETYPE_FDDRACE", "ENTITIES_FDDRACE",
 ]
 ExPlayerFlags = ["AFK", "PAUSED", "SPEC"]
+ProjectileFlags = ["CLIENTID_BIT{}".format(i) for i in range(8)] + [
+	"NO_OWNER", "IS_DDNET", "BOUNCE_HORIZONTAL", "BOUNCE_VERTICAL",
+	"EXPLOSIVE", "FREEZE",
+]
 
 Emoticons = ["OOP", "EXCLAMATION", "HEARTS", "DROP", "DOTDOT", "MUSIC", "SORRY", "GHOST", "SUSHI", "SPLATTEE", "DEVILTEE", "ZOMG", "ZZZ", "WTF", "EYES", "QUESTION"]
 
@@ -80,6 +84,7 @@ Flags = [
 	Flags("GAMEINFOFLAG", GameInfoFlags),
 	Flags("GAMEINFOFLAG2", GameInfoFlags2),
 	Flags("EXPLAYERFLAG", ExPlayerFlags),
+	Flags("PROJECTILEFLAG", ProjectileFlags),
 ]
 
 Objects = [
@@ -243,6 +248,17 @@ Objects = [
 		NetIntAny("m_Version"),
 		NetIntAny("m_Flags2"),
 	], validate_size=False),
+
+	# The code assumes that this has the same in-memory representation as
+	# the Projectile net object.
+	NetObjectEx("DDNetProjectile", "projectile@netobj.ddnet.tw", [
+		NetIntAny("m_X"),
+		NetIntAny("m_Y"),
+		NetIntAny("m_Angle"),
+		NetIntAny("m_Data"),
+		NetIntRange("m_Type", 0, 'NUM_WEAPONS-1'),
+		NetTick("m_StartTick"),
+	]),
 
 	## Events
 

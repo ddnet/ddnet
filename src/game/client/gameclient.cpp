@@ -26,7 +26,6 @@
 
 #include "race.h"
 #include "render.h"
-#include <game/extrainfo.h>
 #include <game/localization.h>
 #include <game/version.h>
 
