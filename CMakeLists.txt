@@ -89,7 +89,7 @@ option(ANTIBOT "Enable support for a dynamic anticheat library" OFF)
 option(CLIENT "Compile client" ON)
 option(DOWNLOAD_GTEST "Download and compile GTest" ${AUTO_DEPENDENCIES_DEFAULT})
 option(STEAM "Build the Steam release version" OFF)
-option(DISCORD "Enable discord rich presence support" OFF)
+option(DISCORD "Enable Discord rich presence support" OFF)
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
 option(DEV "Don't generate stuff necessary for packaging" OFF)
 
@@ -489,7 +489,7 @@ if(UPNP AND NOT(MINIUPNPC_FOUND))
 endif()
 
 if(DISCORD AND NOT(DISCORDSDK_FOUND))
-  message(SEND_ERROR "You must install the discord sdk to compile the DDNet client with Discord support")
+  message(SEND_ERROR "You must install the Discord SDK to compile the DDNet client with Discord support")
 endif()
 
 if(CLIENT AND NOT(FREETYPE_FOUND))
@@ -1476,6 +1476,7 @@ set_src(ENGINE_INTERFACE GLOB src/engine
   config.h
   console.h
   demo.h
+  discord.h
   editor.h
   engine.h
   friends.h
@@ -1679,6 +1680,7 @@ if(CLIENT)
     client.h
     demoedit.cpp
     demoedit.h
+    discord.cpp
     friends.cpp
     friends.h
     ghost.cpp

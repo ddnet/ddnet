@@ -68,10 +68,6 @@
 #include "components/race_demo.h"
 #include <base/system.h>
 
-#if defined(CONF_DISCORD)
-#include <discord_game_sdk.h>
-#endif
-
 CGameClient g_GameClient;
 
 // instantiate all systems
@@ -397,27 +393,6 @@ void CGameClient::OnInit()
 	// Agressively try to grab window again since some Windows users report
 	// window not being focussed after starting client.
 	Graphics()->SetWindowGrab(true);
-
-#if defined(CONF_DISCORD)
-	mem_zero(&m_DiscordApp, sizeof(CDiscordApp));
-	m_DiscordApp.m_ActivityEvents = (struct IDiscordActivityEvents *)malloc(sizeof(struct IDiscordActivityEvents));
-	mem_zero(m_DiscordApp.m_ActivityEvents, sizeof(IDiscordActivityEvents));
-
-	struct DiscordCreateParams Params;
-	DiscordCreateParamsSetDefault(&Params);
-	Params.client_id = 752165779117441075;
-	Params.flags = EDiscordCreateFlags::DiscordCreateFlags_Default;
-	Params.event_data = &m_DiscordApp;
-	Params.activity_events = m_DiscordApp.m_ActivityEvents;
-	if(DiscordCreate(DISCORD_VERSION, &Params, &m_DiscordApp.m_Core) != DiscordResult_Ok)
-		dbg_msg("discord", "Error creating discord instance.");
-	else
-		dbg_msg("discord", "Created discord instance, version: %d", DISCORD_VERSION);
-
-	m_DiscordApp.m_ActivityManager = m_DiscordApp.m_Core->get_activity_manager(m_DiscordApp.m_Core);
-
-	SetDiscordActivity("In Menus", "Offline");
-#endif
 }
 
 void CGameClient::OnUpdate()
@@ -447,9 +422,6 @@ void CGameClient::OnUpdate()
 				break;
 		}
 	}
-#if defined(CONF_DISCORD)
-	m_DiscordApp.m_Core->run_callbacks(m_DiscordApp.m_Core);
-#endif
 }
 
 void CGameClient::OnDummySwap()
@@ -941,11 +913,6 @@ void CGameClient::OnStateChange(int NewState, int OldState)
 	if(NewState < IClient::STATE_ONLINE)
 		OnReset();
 
-#if defined(CONF_DISCORD)
-	if(NewState == IClient::STATE_OFFLINE)
-		SetDiscordActivity("In Menus", "Offline");
-#endif
-
 	// then change the state
 	for(int i = 0; i < m_All.m_Num; i++)
 		m_All.m_paComponents[i]->OnStateChange(NewState, OldState);
@@ -961,11 +928,6 @@ void CGameClient::OnShutdown()
 void CGameClient::OnEnterGame()
 {
 	g_GameClient.m_pEffects->ResetDamageIndicator();
-#if defined(CONF_DISCORD)
-	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "Playing %s", Client()->GetCurrentMap());
-	SetDiscordActivity(aBuf, "Online");
-#endif
 }
 
 void CGameClient::OnGameOver()
@@ -3044,24 +3006,3 @@ bool CGameClient::IsDisplayingWarning()
 {
 	return m_pMenus->GetCurPopup() == CMenus::POPUP_WARNING;
 }
-
-#if defined(CONF_DISCORD)
-void CGameClient::SetDiscordActivity(const char *pDetails, const char *pState)
-{
-	if(!g_Config.m_ClDiscordEnablePresence)
-	{
-		dbg_msg("discord", "rich presence disabled");
-		m_DiscordApp.m_ActivityManager->clear_activity(m_DiscordApp.m_ActivityManager, 0, 0);
-		return;
-	}
-	struct DiscordActivity Activity;
-	mem_zero(&Activity, sizeof(DiscordActivity));
-	str_copy(Activity.assets.large_image, "ddnet_logo", sizeof(Activity.assets.large_image));
-	str_copy(Activity.assets.large_text, "DDNet logo", sizeof(Activity.assets.large_text));
-	Activity.timestamps.start = time_timestamp();
-	str_copy(Activity.details, pDetails, sizeof(Activity.details));
-	str_copy(Activity.state, pState, sizeof(Activity.state));
-	m_DiscordApp.m_ActivityManager->update_activity(m_DiscordApp.m_ActivityManager, &Activity, 0, 0);
-	dbg_msg("discord", "updated activity, details='%s' state='%s'", pDetails, pState);
-}
-#endif

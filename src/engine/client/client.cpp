@@ -601,10 +601,12 @@ void CClient::SetState(int s)
 
 		if(s == IClient::STATE_ONLINE)
 		{
+			Discord()->SetGameInfo(m_ServerAddress, m_aCurrentMap);
 			Steam()->SetGameInfo(m_ServerAddress, m_aCurrentMap);
 		}
 		else if(Old == IClient::STATE_ONLINE)
 		{
+			Discord()->ClearGameInfo();
 			Steam()->ClearGameInfo();
 		}
 	}
@@ -2922,6 +2924,7 @@ void CClient::Update()
 	if(!m_EditorActive)
 		GameClient()->OnUpdate();
 
+	Discord()->Update();
 	Steam()->Update();
 	if(Steam()->GetConnectAddress())
 	{
@@ -2968,6 +2971,7 @@ void CClient::InitInterfaces()
 #if defined(CONF_AUTOUPDATE)
 	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
 #endif
+	m_pDiscord = Kernel()->RequestInterface<IDiscord>();
 	m_pSteam = Kernel()->RequestInterface<ISteam>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
@@ -4281,6 +4285,7 @@ int main(int argc, const char **argv) // ignore_convention
 	IEngineTextRender *pEngineTextRender = CreateEngineTextRender();
 	IEngineMap *pEngineMap = CreateEngineMap();
 	IEngineMasterServer *pEngineMasterServer = CreateEngineMasterServer();
+	IDiscord *pDiscord = CreateDiscord();
 	ISteam *pSteam = CreateSteam();
 
 	if(RandInitFailed)
@@ -4314,6 +4319,7 @@ int main(int argc, const char **argv) // ignore_convention
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateEditor(), false);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateGameClient(), false);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pStorage);
+		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pDiscord);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pSteam);
 
 		if(RegisterFail)
