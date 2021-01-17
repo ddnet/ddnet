@@ -309,6 +309,18 @@ int CMysqlConnection::GetBlob(int Col, unsigned char *pBuffer, int BufferSize) c
 #endif
 }
 
+const char *CMysqlConnection::MedianMapTime(char *pBuffer, int BufferSize) const
+{
+	str_format(pBuffer, BufferSize,
+		"SELECT MEDIAN(Time) "
+		"OVER (PARTITION BY Map) "
+		"FROM %s_race "
+		"GROUP BY Map "
+		"HAVING Map = l.Map",
+		GetPrefix());
+	return pBuffer;
+}
+
 void CMysqlConnection::AddPoints(const char *pPlayer, int Points)
 {
 	char aBuf[512];

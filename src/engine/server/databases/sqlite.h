@@ -22,6 +22,7 @@ public:
 	virtual const char *CollateNocase() const { return "? COLLATE NOCASE"; }
 	virtual const char *InsertIgnore() const { return "INSERT OR IGNORE"; };
 	virtual const char *Random() const { return "RANDOM()"; };
+	virtual const char *MedianMapTime(char *pBuffer, int BufferSize) const;
 
 	virtual Status Connect();
 	virtual void Disconnect();

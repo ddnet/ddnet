@@ -355,12 +355,13 @@ bool CScore::MapInfoThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 	char aTimestamp[512];
 	pSqlServer->ToUnixTimestamp("l.Timestamp", aTimestamp, sizeof(aTimestamp));
 
-	char aBuf[1024];
+	char aMedianMapTime[2048];
+	char aBuf[4096];
 	str_format(aBuf, sizeof(aBuf),
 		"SELECT l.Map, l.Server, Mapper, Points, Stars, "
 		"  (SELECT COUNT(Name) FROM %s_race WHERE Map = l.Map) AS Finishes, "
 		"  (SELECT COUNT(DISTINCT Name) FROM %s_race WHERE Map = l.Map) AS Finishers, "
-		"  (SELECT ROUND(AVG(Time)) FROM %s_race WHERE Map = l.Map) AS Average, "
+		"  (%s) AS Median, "
 		"  %s AS Stamp, "
 		"  %s-%s AS Ago, "
 		"  (SELECT MIN(Time) FROM %s_race WHERE Map = l.Map AND Name = ?) AS OwnTime "
@@ -374,7 +375,8 @@ bool CScore::MapInfoThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 		"    Map "
 		"  LIMIT 1"
 		") as l;",
-		pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->GetPrefix(),
+		pSqlServer->GetPrefix(), pSqlServer->GetPrefix(),
+		pSqlServer->MedianMapTime(aMedianMapTime, sizeof(aMedianMapTime)),
 		aTimestamp, aCurrentTimestamp, aTimestamp,
 		pSqlServer->GetPrefix(), pSqlServer->GetPrefix(),
 		pSqlServer->CollateNocase());
@@ -396,7 +398,7 @@ bool CScore::MapInfoThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 		int Stars = pSqlServer->GetInt(5);
 		int Finishes = pSqlServer->GetInt(6);
 		int Finishers = pSqlServer->GetInt(7);
-		int Average = pSqlServer->GetInt(8);
+		float Median = pSqlServer->GetInt(8);
 		int Stamp = pSqlServer->GetInt(9);
 		int Ago = pSqlServer->GetInt(10);
 		float OwnTime = pSqlServer->GetFloat(11);
@@ -409,11 +411,11 @@ bool CScore::MapInfoThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 			str_format(aReleasedString, sizeof(aReleasedString), ", released %s ago", aAgoString);
 		}
 
-		char aAverageString[60] = "\0";
-		if(Average > 0)
+		char aMedianString[60] = "\0";
+		if(Median > 0)
 		{
-			str_time((int64)Average * 100, TIME_HOURS, aBuf, sizeof(aBuf));
-			str_format(aAverageString, sizeof(aAverageString), " in %s average", aBuf);
+			str_time((int64)Median * 100, TIME_HOURS, aBuf, sizeof(aBuf));
+			str_format(aMedianString, sizeof(aMedianString), " in %s median", aBuf);
 		}
 
 		char aStars[20];
@@ -443,7 +445,7 @@ bool CScore::MapInfoThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 			aReleasedString,
 			Finishes, Finishes == 1 ? "finish" : "finishes",
 			Finishers, Finishers == 1 ? "tee" : "tees",
-			aAverageString, aOwnFinishesString);
+			aMedianString, aOwnFinishesString);
 	}
 	else
 	{

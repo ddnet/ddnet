@@ -21,7 +21,7 @@ public:
 	virtual IDbConnection *Copy() = 0;
 
 	// returns the database prefix
-	const char *GetPrefix() { return m_aPrefix; }
+	const char *GetPrefix() const { return m_aPrefix; }
 	virtual const char *BinaryCollate() const = 0;
 	// can be inserted into queries to convert a timestamp variable to the unix timestamp
 	virtual void ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize) = 0;
@@ -35,6 +35,8 @@ public:
 	virtual const char *InsertIgnore() const = 0;
 	// ORDER BY RANDOM()/RAND()
 	virtual const char *Random() const = 0;
+	// Get Median Map Time from l.Map
+	virtual const char *MedianMapTime(char *pBuffer, int BufferSize) const = 0;
 
 	enum Status
 	{
