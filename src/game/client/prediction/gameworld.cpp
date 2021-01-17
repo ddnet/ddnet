@@ -185,6 +185,93 @@ bool distCompare(std::pair<float, int> a, std::pair<float, int> b)
 
 void CGameWorld::Tick()
 {
+	constexpr float PhysSize = 28.0f;
+	CEntity *pEnt = m_apFirstEntityTypes[ENTTYPE_CHARACTER];
+	static std::vector<CEntity *> ToChange;
+	static std::vector<int> ToChangeID;
+	for(; pEnt;)
+	{
+		m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
+
+		CCharacter *pChar = (CCharacter *)pEnt;
+		CCharacterCore *pCore = &pChar->m_Core;
+
+		if(pCore->m_HookState == HOOK_FLYING)
+		{
+			vec2 NewPos = pCore->m_HookPos + pCore->m_HookDir * pCore->m_pWorld->m_Tuning[g_Config.m_ClDummy].m_HookFireSpeed;
+			if((!pCore->m_NewHook && distance(pCore->m_Pos, NewPos) > pCore->m_pWorld->m_Tuning[g_Config.m_ClDummy].m_HookLength) || (pCore->m_NewHook && distance(pCore->m_HookTeleBase, NewPos) > pCore->m_pWorld->m_Tuning[g_Config.m_ClDummy].m_HookLength))
+			{
+				NewPos = pCore->m_Pos + normalize(NewPos - pCore->m_Pos) * pCore->m_pWorld->m_Tuning[g_Config.m_ClDummy].m_HookLength;
+			}
+
+			int TuneZone = pChar->m_TuneZone;
+			pCore->m_pWorld->m_Tuning[g_Config.m_ClDummy] = *GetTuning(TuneZone);
+
+			if(pCore->m_Hook && pCore->m_pWorld && pCore->m_pWorld->m_Tuning[g_Config.m_ClDummy].m_PlayerHooking)
+			{
+				float Distance = 0.0f;
+				for(int i = 0; i < MAX_CLIENTS; i++)
+				{
+					CCharacterCore *pCharCore = pCore->m_pWorld->m_apCharacters[i];
+					if(!pCharCore || pCharCore == pCore || (!(pCore->m_Super || pCharCore->m_Super) && ((pCore->m_Id != -1 && !pCore->m_pTeams->CanCollide(i, pCore->m_Id)) || pCharCore->m_Solo || pCore->m_Solo)))
+						continue;
+
+					vec2 ClosestPoint;
+					if(closest_point_on_line(pCore->m_HookPos, NewPos, pCharCore->m_Pos, ClosestPoint))
+					{
+						if(distance(pCharCore->m_Pos, ClosestPoint) < PhysSize + 2.0f)
+						{
+							if(pCore->m_HookedPlayer == -1 || distance(pCore->m_HookPos, pCharCore->m_Pos) < Distance)
+							{
+								if(pCharCore->m_HookedPlayer != pCore->m_Id)
+								{
+									ToChangeID.push_back(i);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		pEnt = m_pNextTraverseEntity;
+	}
+
+	for(int i : ToChangeID)
+	{
+		CEntity *pEnt = m_apFirstEntityTypes[ENTTYPE_CHARACTER];
+		for(; pEnt;)
+		{
+			if(((CCharacter *)pEnt)->m_Core.m_Id == i)
+			{
+				ToChange.push_back(pEnt);
+				break;
+			}
+			pEnt = pEnt->m_pNextTypeEntity;
+		}
+	}
+
+	for(CEntity *pE : ToChange)
+	{
+		if(pE == m_apFirstEntityTypes[ENTTYPE_CHARACTER])
+			continue;
+
+		CEntity *prev = pE->m_pPrevTypeEntity;
+		CEntity *next = pE->m_pNextTypeEntity;
+		if(prev)
+			prev->m_pNextTypeEntity = next;
+		if(next)
+			next->m_pPrevTypeEntity = prev;
+
+		CEntity *first = m_apFirstEntityTypes[ENTTYPE_CHARACTER];
+		first->m_pPrevTypeEntity = pE;
+		pE->m_pNextTypeEntity = first;
+		m_apFirstEntityTypes[ENTTYPE_CHARACTER] = pE;
+		pE->m_pPrevTypeEntity = nullptr;
+	}
+
+	ToChange.clear();
+	ToChangeID.clear();
+
 	// update all objects
 	for(auto *pEnt : m_apFirstEntityTypes)
 		for(; pEnt;)
