@@ -319,7 +319,7 @@ void CGameWorld::Tick()
 			CEntity *pEnt = m_apFirstEntityTypes[ENTTYPE_CHARACTER];
 			for(; pEnt;)
 			{
-				if (((CCharacter*)pEnt)->m_Core.m_Id == i)
+				if(((CCharacter *)pEnt)->m_Core.m_Id == i)
 				{
 					ToChange.push_back(pEnt);
 					break;
@@ -328,7 +328,7 @@ void CGameWorld::Tick()
 			}
 		}
 
-		for(CEntity* pE : ToChange)
+		for(CEntity *pE : ToChange)
 		{
 			if(pE == m_apFirstEntityTypes[ENTTYPE_CHARACTER])
 				continue;

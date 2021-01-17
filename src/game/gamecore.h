@@ -288,9 +288,9 @@ public:
 	bool m_HasTelegunLaser;
 	int m_FreezeEnd;
 	bool m_DeepFrozen;
+	CTeamsCore *m_pTeams;
 
 private:
-	CTeamsCore *m_pTeams;
 	int m_MoveRestrictions;
 	static bool IsSwitchActiveCb(int Number, void *pUser);
 };
