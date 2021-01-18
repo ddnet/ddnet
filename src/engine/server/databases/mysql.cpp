@@ -315,8 +315,8 @@ const char *CMysqlConnection::MedianMapTime(char *pBuffer, int BufferSize) const
 		"SELECT MEDIAN(Time) "
 		"OVER (PARTITION BY Map) "
 		"FROM %s_race "
-		"GROUP BY Map "
-		"HAVING Map = l.Map",
+		"WHERE Map = l.Map "
+		"LIMIT 1",
 		GetPrefix());
 	return pBuffer;
 }
