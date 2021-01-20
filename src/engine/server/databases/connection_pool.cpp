@@ -237,24 +237,6 @@ bool CDbConnectionPool::ExecSqlFunc(IDbConnection *pConnection, CSqlExecData *pD
 	{
 		dbg_msg("sql", "%s Unexpected exception caught", pData->m_pName);
 	}
-	try
-	{
-		pConnection->Unlock();
-	}
-#if defined(CONF_SQL)
-	catch(sql::SQLException &e)
-	{
-		dbg_msg("sql", "%s MySQL Error during unlock: %s", pData->m_pName, e.what());
-	}
-#endif
-	catch(std::runtime_error &e)
-	{
-		dbg_msg("sql", "%s SQLite Error during unlock: %s", pData->m_pName, e.what());
-	}
-	catch(...)
-	{
-		dbg_msg("sql", "%s Unexpected exception caught during unlock", pData->m_pName);
-	}
 	pConnection->Disconnect();
 	if(!Success)
 		dbg_msg("sql", "%s failed", pData->m_pName);

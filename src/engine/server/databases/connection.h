@@ -49,10 +49,6 @@ public:
 	// has to be called to return the connection back to the pool
 	virtual void Disconnect() = 0;
 
-	// get exclusive read/write access to the database
-	virtual void Lock(const char *pTable) = 0;
-	virtual void Unlock() = 0;
-
 	// ? for Placeholders, connection has to be established, can overwrite previous prepared statements
 	virtual void PrepareStatement(const char *pStmt) = 0;
 
