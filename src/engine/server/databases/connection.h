@@ -67,6 +67,9 @@ public:
 	// executes the query and returns if a result row exists and selects it
 	// when called multiple times the next row is selected
 	virtual bool Step() = 0;
+	// executes the query and returns the number of rows affected by the update/insert/delete
+	// FIXME(2020-01-20): change function to AffectedRows() when moved to c-api of MySQL
+	virtual int ExecuteUpdate() = 0;
 
 	virtual bool IsNull(int Col) const = 0;
 	virtual float GetFloat(int Col) const = 0;

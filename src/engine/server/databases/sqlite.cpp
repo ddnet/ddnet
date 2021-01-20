@@ -190,6 +190,12 @@ bool CSqliteConnection::Step()
 	return false;
 }
 
+int CSqliteConnection::ExecuteUpdate()
+{
+	Step();
+	return sqlite3_changes(m_pDb);
+}
+
 bool CSqliteConnection::IsNull(int Col) const
 {
 	return sqlite3_column_type(m_pStmt, Col - 1) == SQLITE_NULL;

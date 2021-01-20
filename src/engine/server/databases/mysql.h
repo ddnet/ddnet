@@ -52,6 +52,7 @@ public:
 
 	virtual void Print() {}
 	virtual bool Step();
+	virtual int ExecuteUpdate();
 
 	virtual bool IsNull(int Col) const;
 	virtual float GetFloat(int Col) const;

@@ -261,6 +261,18 @@ bool CMysqlConnection::Step()
 #endif
 }
 
+int CMysqlConnection::ExecuteUpdate()
+{
+#if defined(CONF_SQL)
+	if(m_NewQuery)
+	{
+		m_NewQuery = false;
+		return m_pPreparedStmt->executeUpdate();
+	}
+#endif
+	return -1;
+}
+
 bool CMysqlConnection::IsNull(int Col) const
 {
 #if defined(CONF_SQL)

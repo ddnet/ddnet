@@ -39,6 +39,7 @@ public:
 
 	virtual void Print();
 	virtual bool Step();
+	virtual int ExecuteUpdate();
 
 	virtual bool IsNull(int Col) const;
 	virtual float GetFloat(int Col) const;
@@ -58,7 +59,7 @@ private:
 	sqlite3_stmt *m_pStmt;
 	bool m_Done; // no more rows available for Step
 	bool m_Locked;
-	// returns true, if the query succeded
+	// returns true, if the query succeeded
 	bool Execute(const char *pQuery);
 
 	void ExceptionOnError(int Result);
