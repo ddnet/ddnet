@@ -144,6 +144,10 @@ private:
 
 	// the player core for the physics
 	CCharacterCore m_Core;
+	CGameTeams *m_pTeams = nullptr;
+
+	std::map<int, std::vector<vec2>> *m_pTeleOuts = nullptr;
+	std::map<int, std::vector<vec2>> *m_pTeleCheckOuts = nullptr;
 
 	// info for dead reckoning
 	int m_ReckoningTick; // tick that we are performing dead reckoning From
@@ -172,13 +176,17 @@ private:
 	bool m_Solo;
 
 public:
-	CGameTeams *Teams();
+	CGameTeams *Teams() { return m_pTeams; }
+	void SetTeams(CGameTeams *pTeams);
+	void SetTeleports(std::map<int, std::vector<vec2>> *pTeleOuts, std::map<int, std::vector<vec2>> *pTeleCheckOuts);
+
 	void FillAntibot(CAntibotCharacterData *pData);
 	void Pause(bool Pause);
 	bool Freeze(int Time);
 	bool Freeze();
 	bool UnFreeze();
 	void GiveAllWeapons();
+	void ResetPickups();
 	int m_DDRaceState;
 	int Team();
 	bool CanCollide(int ClientID);
@@ -249,11 +257,11 @@ public:
 	int GetWeaponAmmo(int Type) { return m_aWeapons[Type].m_Ammo; };
 	void SetWeaponAmmo(int Type, int Value) { m_aWeapons[Type].m_Ammo = Value; };
 	bool IsAlive() { return m_Alive; };
-	void SetEmoteType(int EmoteType) { m_EmoteType = EmoteType; };
-	void SetEmoteStop(int EmoteStop) { m_EmoteStop = EmoteStop; };
 	void SetNinjaActivationDir(vec2 ActivationDir) { m_Ninja.m_ActivationDir = ActivationDir; };
 	void SetNinjaActivationTick(int ActivationTick) { m_Ninja.m_ActivationTick = ActivationTick; };
 	void SetNinjaCurrentMoveTime(int CurrentMoveTime) { m_Ninja.m_CurrentMoveTime = CurrentMoveTime; };
+
+	int GetLastAction() const { return m_LastAction; }
 
 	bool HasTelegunGun() { return m_Core.m_HasTelegunGun; };
 	bool HasTelegunGrenade() { return m_Core.m_HasTelegunGrenade; };

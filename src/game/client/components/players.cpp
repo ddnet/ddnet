@@ -15,7 +15,6 @@
 #include <game/client/gameclient.h>
 #include <game/client/render.h>
 #include <game/client/ui.h>
-#include <game/gamecore.h> // get_angle
 
 #include <game/client/components/controls.h>
 #include <game/client/components/effects.h>
@@ -30,7 +29,7 @@
 void CPlayers::RenderHand(CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float AngleOffset, vec2 PostRotOffset, float Alpha)
 {
 	vec2 HandPos = CenterPos + Dir;
-	float Angle = GetAngle(Dir);
+	float Angle = angle(Dir);
 	if(Dir.x < 0)
 		Angle -= AngleOffset;
 	else
@@ -127,7 +126,7 @@ void CPlayers::RenderHook(
 		vec2 Dir = normalize(Pos - HookPos);
 
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteHookHead);
-		Graphics()->QuadsSetRotation(GetAngle(Dir) + pi);
+		Graphics()->QuadsSetRotation(angle(Dir) + pi);
 		// render head
 		int QuadOffset = NUM_WEAPONS * 2 + 2;
 		if(OtherTeam)
@@ -145,7 +144,7 @@ void CPlayers::RenderHook(
 			s_HookChainRenderInfo[HookChainCount].m_Pos[1] = p.y;
 
 			s_HookChainRenderInfo[HookChainCount].m_Scale = 1;
-			s_HookChainRenderInfo[HookChainCount].m_Rotation = GetAngle(Dir) + pi;
+			s_HookChainRenderInfo[HookChainCount].m_Rotation = angle(Dir) + pi;
 		}
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteHookChain);
 		Graphics()->RenderQuadContainerAsSpriteMultiple(m_WeaponEmoteQuadContainerIndex, QuadOffset, HookChainCount, s_HookChainRenderInfo);
@@ -205,7 +204,7 @@ void CPlayers::RenderPlayer(
 	if(Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		// just use the direct input if it's the local player we are rendering
-		Angle = GetAngle(m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy]);
+		Angle = angle(m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy]);
 	}
 	else
 	{
@@ -224,7 +223,7 @@ void CPlayers::RenderPlayer(
 		Angle = mix((float)Prev.m_Angle, (float)Player.m_Angle, AngleIntraTick) / 256.0f;
 	}
 
-	vec2 Direction = GetDirection((int)(Angle * 256.0f));
+	vec2 Direction = direction(Angle);
 	vec2 Position;
 	if(in_range(ClientID, MAX_CLIENTS - 1))
 		Position = m_pClient->m_aClients[ClientID].m_RenderPos;
@@ -438,7 +437,7 @@ void CPlayers::RenderPlayer(
 					if(absolute(Dir.x) > 0.0001f || absolute(Dir.y) > 0.0001f)
 					{
 						Dir = normalize(Dir);
-						HadOkenAngle = GetAngle(Dir);
+						HadOkenAngle = angle(Dir);
 					}
 					else
 					{

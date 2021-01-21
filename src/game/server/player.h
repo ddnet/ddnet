@@ -21,8 +21,6 @@ class CPlayer
 {
 	MACRO_ALLOC_POOL_ID()
 
-	friend class CSaveTee;
-
 public:
 	CPlayer(CGameContext *pGameServer, int ClientID, int Team);
 	~CPlayer();
@@ -49,7 +47,7 @@ public:
 	void OnDirectInput(CNetObj_PlayerInput *NewInput);
 	void OnPredictedInput(CNetObj_PlayerInput *NewInput);
 	void OnPredictedEarlyInput(CNetObj_PlayerInput *NewInput);
-	void OnDisconnect(const char *pReason);
+	void OnDisconnect();
 
 	void KillCharacter(int Weapon = WEAPON_GAME);
 	CCharacter *GetCharacter();
@@ -137,6 +135,11 @@ private:
 	int64 m_ForcePauseTime;
 	int64 m_LastPause;
 
+	int m_DefEmote;
+	int m_OverrideEmote;
+	int m_OverrideEmoteReset;
+	bool m_Halloween;
+
 public:
 	enum
 	{
@@ -192,11 +195,13 @@ public:
 	int m_Sent1stAfkWarning; // afk timer's 1st warning after 50% of sv_max_afk_time
 	int m_Sent2ndAfkWarning; // afk timer's 2nd warning after 90% of sv_max_afk_time
 	char m_pAfkMsg[160];
-	bool m_EyeEmote;
+	bool m_EyeEmoteEnabled;
 	int m_TimerType;
-	int m_DefEmote;
-	int m_DefEmoteReset;
-	bool m_Halloween;
+
+	int GetDefaultEmote() const;
+	void OverrideDefaultEmote(int Emote, int Tick);
+	bool CanOverrideDefaultEmote() const;
+
 	bool m_FirstPacket;
 	int64 m_LastSQLQuery;
 	void ProcessScoreResult(CScorePlayerResult &Result);
