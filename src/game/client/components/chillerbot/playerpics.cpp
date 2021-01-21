@@ -3,21 +3,19 @@
 
 #include <engine/console.h>
 #include <engine/graphics.h>
-#include <engine/storage.h>
-#include <engine/textrender.h>
 #include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
+#include <engine/storage.h>
+#include <engine/textrender.h>
 
 #include <game/generated/client_data.h>
 #include <game/generated/protocol.h>
 
-#include <game/client/gameclient.h>
 #include <game/client/animstate.h>
-#include <game/client/components/countryflags.h>
-#include <game/client/components/controls.h>
 #include <game/client/components/camera.h>
+#include <game/client/components/controls.h>
+#include <game/client/components/countryflags.h>
 #include <game/client/components/nameplates.h>
-#include <game/client/animstate.h>
 #include <game/client/gameclient.h>
 
 // nobo copy of countryflags.cpp
@@ -54,7 +52,6 @@ int CPlayerPics::LoadImageByName(const char *pImgName, int IsDir, int DirType, v
 		str_format(aMsg, sizeof(aMsg), "SUCCESS loading '%s'", aBuf);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "playerpics", aMsg);
 	}
-
 
 	// add entry
 	CPlayerPic CountryFlag;
@@ -95,7 +92,7 @@ int CPlayerPics::Num() const
 	return m_aPlayerPics.size();
 }
 
-const CPlayerPics::CPlayerPic *CPlayerPics::GetByName(const char * pName) const
+const CPlayerPics::CPlayerPic *CPlayerPics::GetByName(const char *pName) const
 {
 	for(int i = 0; i < m_aPlayerPics.size(); i++)
 	{
@@ -109,13 +106,13 @@ const CPlayerPics::CPlayerPic *CPlayerPics::GetByName(const char * pName) const
 
 const CPlayerPics::CPlayerPic *CPlayerPics::GetByIndex(int Index) const
 {
-	return &m_aPlayerPics[maximum(0, Index%m_aPlayerPics.size())];
+	return &m_aPlayerPics[maximum(0, Index % m_aPlayerPics.size())];
 }
 
-void CPlayerPics::Render(const char * pName, const vec4 *pColor, float x, float y, float w, float h)
+void CPlayerPics::Render(const char *pName, const vec4 *pColor, float x, float y, float w, float h)
 {
 	const CPlayerPic *pFlag = GetByName(pName);
-	if (!pFlag)
+	if(!pFlag)
 		return;
 
 	if(pFlag->m_Texture != -1)
@@ -162,7 +159,7 @@ void CPlayerPics::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		{
 			// render player pics
 			vec4 Color(1.0f, 1.0f, 1.0f, g_Config.m_ClRenderPicAlpha / 100.0f);
-			Render(pName, &Color, Position.x-(g_Config.m_ClRenderPicWidth / 2), Position.y-(g_Config.m_ClRenderPicHeight + (g_Config.m_ClNameplatesClan ? 90.0f : 60.0f)), g_Config.m_ClRenderPicWidth, g_Config.m_ClRenderPicHeight);
+			Render(pName, &Color, Position.x - (g_Config.m_ClRenderPicWidth / 2), Position.y - (g_Config.m_ClRenderPicHeight + (g_Config.m_ClNameplatesClan ? 90.0f : 60.0f)), g_Config.m_ClRenderPicWidth, g_Config.m_ClRenderPicHeight);
 		}
 
 		TextRender()->TextColor(1, 1, 1, 1);

@@ -1506,8 +1506,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("Sound"),
 		Localize("DDNet"),
 		Localize("Assets"),
-		("chillerbot")
-	};
+		("chillerbot")};
 
 	int NumTabs = (int)(sizeof(aTabs) / sizeof(*aTabs));
 	int PreviousPage = g_Config.m_UiSettingsPage;

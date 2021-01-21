@@ -101,7 +101,7 @@ bool CRaceHelper::IsStart(CGameClient *pClient, vec2 Prev, vec2 Pos)
 bool CRaceHelper::IsFinish(CGameClient *pClient, vec2 Pos1, vec2 Pos2)
 {
 	CCollision *pCollision = pClient->Collision();
-	std::list < int > Indices = pCollision->GetMapIndices(Pos2, Pos1);
+	std::list<int> Indices = pCollision->GetMapIndices(Pos2, Pos1);
 	if(!Indices.empty())
 		for(int &Indice : Indices)
 		{

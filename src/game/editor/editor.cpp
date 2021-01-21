@@ -6297,7 +6297,7 @@ void CEditorMap::Clean()
 	m_lImages.delete_all();
 	m_lSounds.delete_all();
 
-	if (g_Config.m_ClSaveMapInfo)
+	if(g_Config.m_ClSaveMapInfo)
 		m_MapInfo.Reset();
 
 	m_lSettings.clear();

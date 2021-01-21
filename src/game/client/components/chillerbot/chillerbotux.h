@@ -7,7 +7,7 @@ class CChillerBotUX : public CComponent
 {
 	bool m_IsNearFinish;
 
-    virtual void OnTick();
+	virtual void OnTick();
 };
 
 #endif

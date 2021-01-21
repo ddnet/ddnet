@@ -1025,8 +1025,8 @@ void CGameClient::ProcessEvents()
 		else if(Item.m_Type == NETEVENTTYPE_SOUNDWORLD)
 		{
 			CNetEvent_SoundWorld *ev = (CNetEvent_SoundWorld *)pData;
-			if (!g_Config.m_SndLongPain)
-				if (ev->m_SoundID == SOUND_PLAYER_PAIN_LONG)
+			if(!g_Config.m_SndLongPain)
+				if(ev->m_SoundID == SOUND_PLAYER_PAIN_LONG)
 					ev->m_SoundID = SOUND_PICKUP_HEALTH;
 
 			if(g_Config.m_SndGame && (ev->m_SoundID != SOUND_GUN_FIRE || g_Config.m_SndGun))

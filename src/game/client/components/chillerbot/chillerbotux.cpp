@@ -3,10 +3,10 @@
 #include <engine/config.h>
 #include <engine/graphics.h>
 #include <engine/textrender.h>
-#include <game/client/render.h>
-#include <game/client/race.h>
-#include <game/generated/protocol.h>
 #include <game/client/components/menus.h>
+#include <game/client/race.h>
+#include <game/client/render.h>
+#include <game/generated/protocol.h>
 
 #include "chillerbotux.h"
 
@@ -24,7 +24,7 @@ void CChillerBotUX::OnTick()
 			Graphics()->BlendNormal();
 			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
-			Graphics()->SetColor(0,0,0,0.5f);
+			Graphics()->SetColor(0, 0, 0, 0.5f);
 			RenderTools()->DrawRoundRect(10.0f, 30.0f, 150.0f, 50.0f, 10.0f);
 			Graphics()->QuadsEnd();
 			TextRender()->Text(0, 20.0f, 30.f, 20.0f, "chillerbot-ux", -1);

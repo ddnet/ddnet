@@ -240,7 +240,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 	}
 
 	// save map info
-	if (g_Config.m_ClSaveMapInfo)
+	if(g_Config.m_ClSaveMapInfo)
 	{
 		CMapItemInfoSettings Item;
 		Item.m_Version = 1;
@@ -618,7 +618,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 		//editor.reset(false);
 
 		// load map info
-		if (g_Config.m_ClSaveMapInfo)
+		if(g_Config.m_ClSaveMapInfo)
 		{
 			int Start, Num;
 			DataFile.GetType(MAPITEMTYPE_INFO, &Start, &Num);

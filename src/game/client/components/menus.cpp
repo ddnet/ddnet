@@ -1366,8 +1366,7 @@ void CMenus::RenderLoading()
 		"you zooz you loose",
 		"I am LIBAN",
 		"das große ßßßßßß",
-		"ddnet++ > ddnet"
-	};
+		"ddnet++ > ddnet"};
 	static int len = sizeof(apMsg) / sizeof(*apMsg);
 	static int index = rand() % len;
 

@@ -6,15 +6,11 @@
 #include <game/generated/client_data.h>
 #include <game/generated/protocol.h>
 
-#include <game/client/gameclient.h>
-#include <game/client/animstate.h>
-#include <game/client/components/countryflags.h>
-#include "nameplates.h"
-#include "controls.h"
 #include "camera.h"
 #include "controls.h"
 #include "nameplates.h"
 #include <game/client/animstate.h>
+#include <game/client/components/countryflags.h>
 #include <game/client/gameclient.h>
 
 #include "players.h"
