@@ -1394,7 +1394,7 @@ void CGameContext::OnClientConnected(int ClientID)
 void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 {
 	AbortVoteKickOnDisconnect(ClientID);
-	m_apPlayers[ClientID]->OnDisconnect(pReason);
+	m_pController->OnPlayerDisconnect(m_apPlayers[ClientID], pReason);
 	delete m_apPlayers[ClientID];
 	m_apPlayers[ClientID] = 0;
 
@@ -2112,7 +2112,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				{
 					if(pPlayer->GetTeam() == TEAM_SPECTATORS || pMsg->m_Team == TEAM_SPECTATORS)
 						m_VoteUpdate = true;
-					pPlayer->SetTeam(pMsg->m_Team);
+					m_pController->DoTeamChange(pPlayer, pMsg->m_Team);
 					pPlayer->m_TeamChangeTick = Server()->Tick();
 				}
 			}
@@ -2290,41 +2290,41 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			SendEmoticon(ClientID, pMsg->m_Emoticon);
 			CCharacter *pChr = pPlayer->GetCharacter();
-			if(pChr && g_Config.m_SvEmotionalTees && pPlayer->m_EyeEmote)
+			if(pChr && g_Config.m_SvEmotionalTees && pPlayer->m_EyeEmoteEnabled)
 			{
+				int EmoteType = EMOTE_NORMAL;
 				switch(pMsg->m_Emoticon)
 				{
 				case EMOTICON_EXCLAMATION:
 				case EMOTICON_GHOST:
 				case EMOTICON_QUESTION:
 				case EMOTICON_WTF:
-					pChr->SetEmoteType(EMOTE_SURPRISE);
+					EmoteType = EMOTE_SURPRISE;
 					break;
 				case EMOTICON_DOTDOT:
 				case EMOTICON_DROP:
 				case EMOTICON_ZZZ:
-					pChr->SetEmoteType(EMOTE_BLINK);
+					EmoteType = EMOTE_BLINK;
 					break;
 				case EMOTICON_EYES:
 				case EMOTICON_HEARTS:
 				case EMOTICON_MUSIC:
-					pChr->SetEmoteType(EMOTE_HAPPY);
+					EmoteType = EMOTE_HAPPY;
 					break;
 				case EMOTICON_OOP:
 				case EMOTICON_SORRY:
 				case EMOTICON_SUSHI:
-					pChr->SetEmoteType(EMOTE_PAIN);
+					EmoteType = EMOTE_PAIN;
 					break;
 				case EMOTICON_DEVILTEE:
 				case EMOTICON_SPLATTEE:
 				case EMOTICON_ZOMG:
-					pChr->SetEmoteType(EMOTE_ANGRY);
+					EmoteType = EMOTE_ANGRY;
 					break;
 				default:
-					pChr->SetEmoteType(EMOTE_NORMAL);
 					break;
 				}
-				pChr->SetEmoteStop(Server()->Tick() + 2 * Server()->TickSpeed());
+				pChr->SetEmote(EmoteType, Server()->Tick() + 2 * Server()->TickSpeed());
 			}
 		}
 		else if(MsgID == NETMSGTYPE_CL_KILL && !m_World.m_Paused)
@@ -2695,7 +2695,7 @@ void CGameContext::ConSetTeam(IConsole::IResult *pResult, void *pUserData)
 
 	pSelf->m_apPlayers[ClientID]->Pause(CPlayer::PAUSE_NONE, false); // reset /spec and /pause to allow rejoin
 	pSelf->m_apPlayers[ClientID]->m_TeamChangeTick = pSelf->Server()->Tick() + pSelf->Server()->TickSpeed() * Delay * 60;
-	pSelf->m_apPlayers[ClientID]->SetTeam(Team);
+	pSelf->m_pController->DoTeamChange(pSelf->m_apPlayers[ClientID], Team);
 	if(Team == TEAM_SPECTATORS)
 		pSelf->m_apPlayers[ClientID]->Pause(CPlayer::PAUSE_NONE, true);
 }
@@ -2711,7 +2711,7 @@ void CGameContext::ConSetTeamAll(IConsole::IResult *pResult, void *pUserData)
 
 	for(auto &pPlayer : pSelf->m_apPlayers)
 		if(pPlayer)
-			pPlayer->SetTeam(Team, false);
+			pSelf->m_pController->DoTeamChange(pPlayer, Team, false);
 }
 
 void CGameContext::ConAddVote(IConsole::IResult *pResult, void *pUserData)
@@ -3047,7 +3047,7 @@ void CGameContext::OnConsoleInit()
 #define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, callback, userdata, help);
 #include <game/ddracecommands.h>
 #define CHAT_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, callback, userdata, help);
-#include "ddracechat.h"
+#include <game/ddracechat.h>
 }
 
 void CGameContext::OnInit(/*class IKernel *pKernel*/)
@@ -3162,7 +3162,6 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	}
 
 	m_pController = new CGameControllerDDRace(this);
-	((CGameControllerDDRace *)m_pController)->m_Teams.Reset();
 
 	const char *pCensorFilename = "censorlist.txt";
 	IOHANDLE File = Storage()->OpenFile(pCensorFilename, IOFLAG_READ, IStorage::TYPE_ALL);

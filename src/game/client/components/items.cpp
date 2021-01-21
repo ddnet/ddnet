@@ -109,7 +109,7 @@ void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 		m_pClient->m_pEffects->BulletTrail(Pos, Alpha);
 
 		if(length(Vel) > 0.00001f)
-			Graphics()->QuadsSetRotation(GetAngle(Vel));
+			Graphics()->QuadsSetRotation(angle(Vel));
 		else
 			Graphics()->QuadsSetRotation(0);
 	}

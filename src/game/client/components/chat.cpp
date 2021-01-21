@@ -35,7 +35,7 @@ CChat::CChat()
 	}
 
 #define CHAT_COMMAND(name, params, flags, callback, userdata, help) RegisterCommand(name, params, flags, help);
-#include <game/server/ddracechat.h>
+#include <game/ddracechat.h>
 	m_Commands.sort_range();
 
 	m_Mode = MODE_NONE;

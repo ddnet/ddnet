@@ -1564,6 +1564,7 @@ set_src(GAME_SHARED GLOB src/game
   bezier.h
   collision.cpp
   collision.h
+  ddracechat.h
   ddracecommands.h
   extrainfo.cpp
   extrainfo.h
@@ -1954,7 +1955,6 @@ set_src(ENGINE_SERVER GLOB_RECURSE src/engine/server
 set_src(GAME_SERVER GLOB_RECURSE src/game/server
   alloc.h
   ddracechat.cpp
-  ddracechat.h
   ddracecommands.cpp
   entities/character.cpp
   entities/character.h

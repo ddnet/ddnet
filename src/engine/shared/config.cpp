@@ -7,15 +7,9 @@
 
 CConfig g_Config;
 
-void EscapeParam(char *pDst, const char *pSrc, int size)
+void EscapeParam(char *pDst, const char *pSrc, int Size)
 {
-	for(int i = 0; *pSrc && i < size - 1; ++i)
-	{
-		if(*pSrc == '"' || *pSrc == '\\') // escape \ and "
-			*pDst++ = '\\';
-		*pDst++ = *pSrc++;
-	}
-	*pDst = 0;
+	str_escape(&pDst, pSrc, pDst + Size);
 }
 
 CConfigManager::CConfigManager()

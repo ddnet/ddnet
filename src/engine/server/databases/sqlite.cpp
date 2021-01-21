@@ -12,7 +12,6 @@ CSqliteConnection::CSqliteConnection(const char *pFilename, bool Setup) :
 	m_pDb(nullptr),
 	m_pStmt(nullptr),
 	m_Done(true),
-	m_Locked(false),
 	m_InUse(false)
 {
 	str_copy(m_aFilename, pFilename, sizeof(m_aFilename));
@@ -83,7 +82,6 @@ IDbConnection::Status CSqliteConnection::Connect()
 			return Status::FAILURE;
 		m_Setup = false;
 	}
-	m_Locked = false;
 	return Status::SUCCESS;
 }
 
@@ -93,22 +91,6 @@ void CSqliteConnection::Disconnect()
 		sqlite3_finalize(m_pStmt);
 	m_pStmt = nullptr;
 	m_InUse.store(false);
-}
-
-void CSqliteConnection::Lock(const char *pTable)
-{
-	// locks the whole database read/write
-	Execute("BEGIN EXCLUSIVE TRANSACTION;");
-	m_Locked = true;
-}
-
-void CSqliteConnection::Unlock()
-{
-	if(m_Locked)
-	{
-		Execute("COMMIT TRANSACTION;");
-		m_Locked = false;
-	}
 }
 
 void CSqliteConnection::PrepareStatement(const char *pStmt)
@@ -190,6 +172,12 @@ bool CSqliteConnection::Step()
 	return false;
 }
 
+int CSqliteConnection::ExecuteUpdate()
+{
+	Step();
+	return sqlite3_changes(m_pDb);
+}
+
 bool CSqliteConnection::IsNull(int Col) const
 {
 	return sqlite3_column_type(m_pStmt, Col - 1) == SQLITE_NULL;
@@ -216,6 +204,23 @@ int CSqliteConnection::GetBlob(int Col, unsigned char *pBuffer, int BufferSize) 
 	Size = minimum(Size, BufferSize);
 	mem_copy(pBuffer, sqlite3_column_blob(m_pStmt, Col - 1), Size);
 	return Size;
+}
+
+const char *CSqliteConnection::MedianMapTime(char *pBuffer, int BufferSize) const
+{
+	str_format(pBuffer, BufferSize,
+		"SELECT AVG("
+		"  CASE counter %% 2 "
+		"    WHEN 0 THEN CASE WHEN rn IN (counter / 2, counter / 2 + 1) THEN Time END "
+		"    WHEN 1 THEN CASE WHEN rn = counter / 2 + 1 THEN Time END END) "
+		"  OVER (PARTITION BY Map) AS Median "
+		"FROM ("
+		"  SELECT *, ROW_NUMBER() "
+		"  OVER (PARTITION BY Map ORDER BY Time) rn, COUNT(*) "
+		"  OVER (PARTITION BY Map) counter "
+		"  FROM %s_race where Map = l.Map) as r",
+		GetPrefix());
+	return pBuffer;
 }
 
 bool CSqliteConnection::Execute(const char *pQuery)

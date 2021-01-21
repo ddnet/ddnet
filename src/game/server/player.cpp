@@ -5,10 +5,8 @@
 
 #include "entities/character.h"
 #include "gamecontext.h"
-#include "gamemodes/DDRace.h"
 #include <engine/server.h>
 #include <game/gamecore.h>
-#include <game/server/teams.h>
 #include <game/version.h>
 
 MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
@@ -57,11 +55,12 @@ void CPlayer::Reset()
 
 	m_LastCommandPos = 0;
 	m_LastPlaytime = 0;
+	m_LastEyeEmote = 0;
 	m_Sent1stAfkWarning = 0;
 	m_Sent2ndAfkWarning = 0;
 	m_ChatScore = 0;
 	m_Moderating = false;
-	m_EyeEmote = true;
+	m_EyeEmoteEnabled = true;
 	if(Server()->IsSixup(m_ClientID))
 		m_TimerType = TIMERTYPE_SIXUP;
 	else
@@ -101,7 +100,7 @@ void CPlayer::Reset()
 			m_DefEmote = EMOTE_NORMAL;
 		}
 	}
-	m_DefEmoteReset = -1;
+	m_OverrideEmoteReset = -1;
 
 	GameServer()->Score()->PlayerData(m_ClientID)->Reset();
 
@@ -267,6 +266,19 @@ void CPlayer::Tick()
 	if(m_TuneZone != m_TuneZoneOld) // don't send tunings all the time
 	{
 		GameServer()->SendTuningParams(m_ClientID, m_TuneZone);
+	}
+
+	if(m_OverrideEmoteReset >= 0 && m_OverrideEmoteReset <= Server()->Tick())
+	{
+		m_OverrideEmoteReset = -1;
+	}
+
+	if(m_Halloween && m_pCharacter && !m_pCharacter->IsPaused())
+	{
+		if(1200 - ((Server()->Tick() - m_pCharacter->GetLastAction()) % (1200)) < 5)
+		{
+			GameServer()->SendEmoticon(GetCID(), EMOTICON_GHOST);
+		}
 	}
 }
 
@@ -468,34 +480,11 @@ void CPlayer::FakeSnap()
 	pSpectatorInfo->m_Y = m_ViewPos.y;
 }
 
-void CPlayer::OnDisconnect(const char *pReason)
+void CPlayer::OnDisconnect()
 {
 	KillCharacter();
 
-	if(Server()->ClientIngame(m_ClientID))
-	{
-		char aBuf[512];
-		if(pReason && *pReason)
-			str_format(aBuf, sizeof(aBuf), "'%s' has left the game (%s)", Server()->ClientName(m_ClientID), pReason);
-		else
-			str_format(aBuf, sizeof(aBuf), "'%s' has left the game", Server()->ClientName(m_ClientID));
-		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1, CGameContext::CHAT_SIX);
-
-		str_format(aBuf, sizeof(aBuf), "leave player='%d:%s'", m_ClientID, Server()->ClientName(m_ClientID));
-		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
-
-		bool WasModerator = m_Moderating;
-
-		// Set this to false, otherwise PlayerModerating() will return true.
-		m_Moderating = false;
-
-		if(!GameServer()->PlayerModerating() && WasModerator)
-			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, "Server kick/spec votes are no longer actively moderated.");
-	}
-
-	CGameControllerDDRace *Controller = (CGameControllerDDRace *)GameServer()->m_pController;
-	if(g_Config.m_SvTeam != 3)
-		Controller->m_Teams.SetForceCharacterTeam(m_ClientID, TEAM_FLOCK);
+	m_Moderating = false;
 }
 
 void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)
@@ -619,41 +608,12 @@ CCharacter *CPlayer::ForceSpawn(vec2 Pos)
 
 void CPlayer::SetTeam(int Team, bool DoChatMsg)
 {
-	Team = GameServer()->m_pController->ClampTeam(Team);
-	if(m_Team == Team)
-		return;
-
-	char aBuf[512];
-	DoChatMsg = false;
-	if(DoChatMsg)
-	{
-		str_format(aBuf, sizeof(aBuf), "'%s' joined the %s", Server()->ClientName(m_ClientID), GameServer()->m_pController->GetTeamName(Team));
-		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
-	}
-
-	if(Team == TEAM_SPECTATORS)
-	{
-		CGameControllerDDRace *Controller = (CGameControllerDDRace *)GameServer()->m_pController;
-		if(g_Config.m_SvTeam != 3 && m_pCharacter)
-		{
-			// Joining spectators should not kill a locked team, but should still
-			// check if the team finished by you leaving it.
-			int DDRTeam = m_pCharacter->Team();
-			Controller->m_Teams.SetForceCharacterTeam(m_ClientID, TEAM_FLOCK);
-			Controller->m_Teams.CheckTeamFinished(DDRTeam);
-		}
-	}
-
 	KillCharacter();
 
 	m_Team = Team;
 	m_LastSetTeam = Server()->Tick();
 	m_LastActionTick = Server()->Tick();
 	m_SpectatorID = SPEC_FREEVIEW;
-	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' m_Team=%d", m_ClientID, Server()->ClientName(m_ClientID), m_Team);
-	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
-
-	//GameServer()->m_pController->OnPlayerInfoChange(GameServer()->m_apPlayers[m_ClientID]);
 
 	protocol7::CNetMsg_Sv_Team Msg;
 	Msg.m_ClientID = m_ClientID;
@@ -730,7 +690,7 @@ void CPlayer::TryRespawn()
 	m_Spawning = false;
 	m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World);
 	m_pCharacter->Spawn(this, SpawnPos);
-	GameServer()->CreatePlayerSpawn(SpawnPos, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
+	GameServer()->CreatePlayerSpawn(SpawnPos, GameServer()->m_pController->GetMaskForPlayerWorldEvent(m_ClientID));
 
 	if(g_Config.m_SvTeam == 3)
 		m_pCharacter->SetSolo(true);
@@ -824,6 +784,26 @@ void CPlayer::AfkVoteTimer(CNetObj_PlayerInput *NewTarget)
 	m_Afk = false;
 }
 
+int CPlayer::GetDefaultEmote() const
+{
+	if(m_OverrideEmoteReset >= 0)
+		return m_OverrideEmote;
+
+	return m_DefEmote;
+}
+
+void CPlayer::OverrideDefaultEmote(int Emote, int Tick)
+{
+	m_OverrideEmote = Emote;
+	m_OverrideEmoteReset = Tick;
+	m_LastEyeEmote = Server()->Tick();
+}
+
+bool CPlayer::CanOverrideDefaultEmote() const
+{
+	return m_LastEyeEmote > 0 && m_LastEyeEmote + (int64_t)g_Config.m_SvEyeEmoteChangeDelay * Server()->TickSpeed() >= Server()->Tick();
+}
+
 void CPlayer::ProcessPause()
 {
 	if(m_ForcePauseTime && m_ForcePauseTime < Server()->Tick())
@@ -835,8 +815,8 @@ void CPlayer::ProcessPause()
 	if(m_Paused == PAUSE_SPEC && !m_pCharacter->IsPaused() && m_pCharacter->IsGrounded() && m_pCharacter->m_Pos == m_pCharacter->m_PrevPos)
 	{
 		m_pCharacter->Pause(true);
-		GameServer()->CreateDeath(m_pCharacter->m_Pos, m_ClientID, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
-		GameServer()->CreateSound(m_pCharacter->m_Pos, SOUND_PLAYER_DIE, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
+		GameServer()->CreateDeath(m_pCharacter->m_Pos, m_ClientID, GameServer()->m_pController->GetMaskForPlayerWorldEvent(m_ClientID));
+		GameServer()->CreateSound(m_pCharacter->m_Pos, SOUND_PLAYER_DIE, GameServer()->m_pController->GetMaskForPlayerWorldEvent(m_ClientID));
 	}
 }
 
@@ -864,7 +844,7 @@ int CPlayer::Pause(int State, bool Force)
 					return m_Paused; // Do not update state. Do not collect $200
 				}
 				m_pCharacter->Pause(false);
-				GameServer()->CreatePlayerSpawn(m_pCharacter->m_Pos, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
+				GameServer()->CreatePlayerSpawn(m_pCharacter->m_Pos, GameServer()->m_pController->GetMaskForPlayerWorldEvent(m_ClientID));
 			}
 			// fall-thru
 		case PAUSE_SPEC:

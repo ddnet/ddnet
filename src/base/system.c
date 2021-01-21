@@ -3345,7 +3345,7 @@ PROCESS shell_execute(const char *file)
 	info.cbSize = sizeof(SHELLEXECUTEINFOA);
 	info.lpVerb = "open";
 	info.lpFile = file;
-	info.nShow = SW_SHOWDEFAULT;
+	info.nShow = SW_SHOWMINNOACTIVE;
 	info.fMask = SEE_MASK_NOCLOSEPROCESS;
 	ShellExecuteEx(&info);
 	return info.hProcess;

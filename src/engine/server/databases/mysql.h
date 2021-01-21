@@ -35,12 +35,10 @@ public:
 	virtual const char *CollateNocase() const { return "CONVERT(? USING utf8mb4) COLLATE utf8mb4_general_ci"; }
 	virtual const char *InsertIgnore() const { return "INSERT IGNORE"; };
 	virtual const char *Random() const { return "RAND()"; };
+	virtual const char *MedianMapTime(char *pBuffer, int BufferSize) const;
 
 	virtual Status Connect();
 	virtual void Disconnect();
-
-	virtual void Lock(const char *pTable);
-	virtual void Unlock();
 
 	virtual void PrepareStatement(const char *pStmt);
 
@@ -51,6 +49,7 @@ public:
 
 	virtual void Print() {}
 	virtual bool Step();
+	virtual int ExecuteUpdate();
 
 	virtual bool IsNull(int Col) const;
 	virtual float GetFloat(int Col) const;
@@ -67,7 +66,6 @@ private:
 	std::unique_ptr<sql::Statement> m_pStmt;
 	std::unique_ptr<sql::ResultSet> m_pResults;
 	bool m_NewQuery;
-	bool m_Locked;
 #endif
 
 	// copy of config vars

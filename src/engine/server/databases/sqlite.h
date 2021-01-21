@@ -22,12 +22,10 @@ public:
 	virtual const char *CollateNocase() const { return "? COLLATE NOCASE"; }
 	virtual const char *InsertIgnore() const { return "INSERT OR IGNORE"; };
 	virtual const char *Random() const { return "RANDOM()"; };
+	virtual const char *MedianMapTime(char *pBuffer, int BufferSize) const;
 
 	virtual Status Connect();
 	virtual void Disconnect();
-
-	virtual void Lock(const char *pTable);
-	virtual void Unlock();
 
 	virtual void PrepareStatement(const char *pStmt);
 
@@ -38,6 +36,7 @@ public:
 
 	virtual void Print();
 	virtual bool Step();
+	virtual int ExecuteUpdate();
 
 	virtual bool IsNull(int Col) const;
 	virtual float GetFloat(int Col) const;
@@ -56,8 +55,7 @@ private:
 	sqlite3 *m_pDb;
 	sqlite3_stmt *m_pStmt;
 	bool m_Done; // no more rows available for Step
-	bool m_Locked;
-	// returns true, if the query succeded
+	// returns true, if the query succeeded
 	bool Execute(const char *pQuery);
 
 	void ExceptionOnError(int Result);

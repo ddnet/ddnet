@@ -20,7 +20,7 @@ CSaveTee::~CSaveTee()
 void CSaveTee::save(CCharacter *pChr)
 {
 	m_ClientID = pChr->m_pPlayer->GetCID();
-	str_copy(m_aName, pChr->m_pPlayer->Server()->ClientName(m_ClientID), sizeof(m_aName));
+	str_copy(m_aName, pChr->Server()->ClientName(m_ClientID), sizeof(m_aName));
 
 	m_Alive = pChr->m_Alive;
 	m_Paused = abs(pChr->m_pPlayer->IsPaused());

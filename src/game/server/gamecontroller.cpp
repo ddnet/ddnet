@@ -49,6 +49,56 @@ IGameController::~IGameController()
 {
 }
 
+void IGameController::DoActivityCheck()
+{
+	if(g_Config.m_SvInactiveKickTime == 0)
+		return;
+
+	for(int i = 0; i < MAX_CLIENTS; ++i)
+	{
+#ifdef CONF_DEBUG
+		if(g_Config.m_DbgDummies)
+		{
+			if(i >= MAX_CLIENTS - g_Config.m_DbgDummies)
+				break;
+		}
+#endif
+		if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS && Server()->GetAuthedState(i) == AUTHED_NO)
+		{
+			if(Server()->Tick() > GameServer()->m_apPlayers[i]->m_LastActionTick + g_Config.m_SvInactiveKickTime * Server()->TickSpeed() * 60)
+			{
+				switch(g_Config.m_SvInactiveKick)
+				{
+				case 0:
+				{
+					// move player to spectator
+					DoTeamChange(GameServer()->m_apPlayers[i], TEAM_SPECTATORS);
+				}
+				break;
+				case 1:
+				{
+					// move player to spectator if the reserved slots aren't filled yet, kick him otherwise
+					int Spectators = 0;
+					for(auto &pPlayer : GameServer()->m_apPlayers)
+						if(pPlayer && pPlayer->GetTeam() == TEAM_SPECTATORS)
+							++Spectators;
+					if(Spectators >= g_Config.m_SvSpectatorSlots)
+						Server()->Kick(i, "Kicked for inactivity");
+					else
+						DoTeamChange(GameServer()->m_apPlayers[i], TEAM_SPECTATORS);
+				}
+				break;
+				case 2:
+				{
+					// kick the player
+					Server()->Kick(i, "Kicked for inactivity");
+				}
+				}
+			}
+		}
+	}
+}
+
 float IGameController::EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos)
 {
 	float Score = 0.0f;
@@ -334,6 +384,24 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	return false;
 }
 
+void IGameController::OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason)
+{
+	pPlayer->OnDisconnect();
+	int ClientID = pPlayer->GetCID();
+	if(Server()->ClientIngame(ClientID))
+	{
+		char aBuf[512];
+		if(pReason && *pReason)
+			str_format(aBuf, sizeof(aBuf), "'%s' has left the game (%s)", Server()->ClientName(ClientID), pReason);
+		else
+			str_format(aBuf, sizeof(aBuf), "'%s' has left the game", Server()->ClientName(ClientID));
+		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1, CGameContext::CHAT_SIX);
+
+		str_format(aBuf, sizeof(aBuf), "leave player='%d:%s'", ClientID, Server()->ClientName(ClientID));
+		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+	}
+}
+
 void IGameController::EndRound()
 {
 	if(m_Warmup) // game can't end when we are running warmup
@@ -378,7 +446,7 @@ void IGameController::ChangeMap(const char *pToMap)
 	str_copy(g_Config.m_SvMap, pToMap, sizeof(g_Config.m_SvMap));
 }
 
-void IGameController::PostReset()
+void IGameController::OnReset()
 {
 	for(auto &pPlayer : GameServer()->m_apPlayers)
 		if(pPlayer)
@@ -398,6 +466,11 @@ void IGameController::OnCharacterSpawn(class CCharacter *pChr)
 	// give default weapons
 	pChr->GiveWeapon(WEAPON_HAMMER);
 	pChr->GiveWeapon(WEAPON_GUN);
+}
+
+void IGameController::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
+{
+	// Do nothing by default
 }
 
 void IGameController::DoWarmup(int Seconds)
@@ -437,53 +510,8 @@ void IGameController::Tick()
 			m_RoundCount++;
 		}
 	}
-	// check for inactive players
-	if(g_Config.m_SvInactiveKickTime > 0)
-	{
-		for(int i = 0; i < MAX_CLIENTS; ++i)
-		{
-#ifdef CONF_DEBUG
-			if(g_Config.m_DbgDummies)
-			{
-				if(i >= MAX_CLIENTS - g_Config.m_DbgDummies)
-					break;
-			}
-#endif
-			if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS && Server()->GetAuthedState(i) == AUTHED_NO)
-			{
-				if(Server()->Tick() > GameServer()->m_apPlayers[i]->m_LastActionTick + g_Config.m_SvInactiveKickTime * Server()->TickSpeed() * 60)
-				{
-					switch(g_Config.m_SvInactiveKick)
-					{
-					case 0:
-					{
-						// move player to spectator
-						GameServer()->m_apPlayers[i]->SetTeam(TEAM_SPECTATORS);
-					}
-					break;
-					case 1:
-					{
-						// move player to spectator if the reserved slots aren't filled yet, kick him otherwise
-						int Spectators = 0;
-						for(auto &pPlayer : GameServer()->m_apPlayers)
-							if(pPlayer && pPlayer->GetTeam() == TEAM_SPECTATORS)
-								++Spectators;
-						if(Spectators >= g_Config.m_SvSpectatorSlots)
-							Server()->Kick(i, "Kicked for inactivity");
-						else
-							GameServer()->m_apPlayers[i]->SetTeam(TEAM_SPECTATORS);
-					}
-					break;
-					case 2:
-					{
-						// kick the player
-						Server()->Kick(i, "Kicked for inactivity");
-					}
-					}
-				}
-			}
-		}
-	}
+
+	DoActivityCheck();
 }
 
 void IGameController::Snap(int SnappingClient)
@@ -627,4 +655,33 @@ int IGameController::ClampTeam(int Team)
 	if(Team < 0)
 		return TEAM_SPECTATORS;
 	return 0;
+}
+
+int64 IGameController::GetMaskForPlayerWorldEvent(int Asker, int ExceptID)
+{
+	// Send all world events to everyone by default
+	return CmaskAllExceptOne(ExceptID);
+}
+
+void IGameController::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
+{
+	Team = ClampTeam(Team);
+	if(Team == pPlayer->GetTeam())
+		return;
+
+	pPlayer->SetTeam(Team);
+	int ClientID = pPlayer->GetCID();
+
+	char aBuf[128];
+	DoChatMsg = false;
+	if(DoChatMsg)
+	{
+		str_format(aBuf, sizeof(aBuf), "'%s' joined the %s", Server()->ClientName(ClientID), GameServer()->m_pController->GetTeamName(Team));
+		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+	}
+
+	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' m_Team=%d", ClientID, Server()->ClientName(ClientID), Team);
+	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
+
+	// OnPlayerInfoChange(pPlayer);
 }

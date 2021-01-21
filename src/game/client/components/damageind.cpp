@@ -8,7 +8,6 @@
 #include "damageind.h"
 #include <game/client/render.h>
 #include <game/client/ui.h>
-#include <game/gamecore.h> // get_angle
 
 CDamageInd::CDamageInd()
 {
