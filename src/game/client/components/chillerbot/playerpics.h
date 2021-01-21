@@ -16,7 +16,7 @@ public:
 		char m_aPlayerName[32];
 		IGraphics::CTextureHandle m_Texture;
 
-		bool operator<(const CPlayerPic &Other) { return str_comp(m_aPlayerName, Other.m_aPlayerName) < 0; }
+		bool operator<(const CPlayerPic &Other) const { return str_comp(m_aPlayerName, Other.m_aPlayerName) < 0; }
 	};
 
 	void OnInit();
