@@ -40,9 +40,6 @@ public:
 	virtual Status Connect();
 	virtual void Disconnect();
 
-	virtual void Lock(const char *pTable);
-	virtual void Unlock();
-
 	virtual void PrepareStatement(const char *pStmt);
 
 	virtual void BindString(int Idx, const char *pString);
@@ -52,6 +49,7 @@ public:
 
 	virtual void Print() {}
 	virtual bool Step();
+	virtual int ExecuteUpdate();
 
 	virtual bool IsNull(int Col) const;
 	virtual float GetFloat(int Col) const;
@@ -68,7 +66,6 @@ private:
 	std::unique_ptr<sql::Statement> m_pStmt;
 	std::unique_ptr<sql::ResultSet> m_pResults;
 	bool m_NewQuery;
-	bool m_Locked;
 #endif
 
 	// copy of config vars

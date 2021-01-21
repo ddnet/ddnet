@@ -49,10 +49,6 @@ public:
 	// has to be called to return the connection back to the pool
 	virtual void Disconnect() = 0;
 
-	// get exclusive read/write access to the database
-	virtual void Lock(const char *pTable) = 0;
-	virtual void Unlock() = 0;
-
 	// ? for Placeholders, connection has to be established, can overwrite previous prepared statements
 	virtual void PrepareStatement(const char *pStmt) = 0;
 
@@ -67,6 +63,9 @@ public:
 	// executes the query and returns if a result row exists and selects it
 	// when called multiple times the next row is selected
 	virtual bool Step() = 0;
+	// executes the query and returns the number of rows affected by the update/insert/delete
+	// FIXME(2020-01-20): change function to AffectedRows() when moved to c-api of MySQL
+	virtual int ExecuteUpdate() = 0;
 
 	virtual bool IsNull(int Col) const = 0;
 	virtual float GetFloat(int Col) const = 0;
