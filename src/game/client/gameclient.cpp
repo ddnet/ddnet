@@ -351,6 +351,10 @@ void CGameClient::OnInit()
 	m_ShowOthers[0] = -1;
 	m_ShowOthers[1] = -1;
 
+	m_LastZoom = .0;
+	m_LastScreenAspect = .0;
+	m_LastDummyConnected = false;
+
 	// Set free binds to DDRace binds if it's active
 	gs_Binds.SetDDRaceBinds(true);
 
@@ -558,6 +562,10 @@ void CGameClient::OnReset()
 	m_DDRaceMsgSent[1] = false;
 	m_ShowOthers[0] = -1;
 	m_ShowOthers[1] = -1;
+
+	m_LastZoom = .0;
+	m_LastScreenAspect = .0;
+	m_LastDummyConnected = false;
 
 	m_ReceivedDDNetPlayer = false;
 }
@@ -1637,33 +1645,30 @@ void CGameClient::OnNewSnapshot()
 		m_ShowOthers[g_Config.m_ClDummy] = g_Config.m_ClShowOthers;
 	}
 
-	static float LastZoom = .0;
-	static float LastScreenAspect = .0;
-	static bool LastDummyConnected = false;
 	float ZoomToSend = m_pCamera->m_ZoomSmoothingTarget == .0 ? m_pCamera->m_Zoom // Initial
 								    :
 								    m_pCamera->m_ZoomSmoothingTarget > m_pCamera->m_Zoom ? m_pCamera->m_ZoomSmoothingTarget // Zooming out
 															   :
-															   m_pCamera->m_ZoomSmoothingTarget < m_pCamera->m_Zoom ? LastZoom // Zooming in
+															   m_pCamera->m_ZoomSmoothingTarget < m_pCamera->m_Zoom ? m_LastZoom // Zooming in
 																						  :
 																						  m_pCamera->m_Zoom; // Not zooming
-	if(ZoomToSend != LastZoom || Graphics()->ScreenAspect() != LastScreenAspect || (Client()->DummyConnected() && !LastDummyConnected))
+	if(ZoomToSend != m_LastZoom || Graphics()->ScreenAspect() != m_LastScreenAspect || (Client()->DummyConnected() && !m_LastDummyConnected))
 	{
 		CNetMsg_Cl_ShowDistance Msg;
 		float x, y;
-		RenderTools()->CalcScreenParams(Graphics()->ScreenAspect(), ZoomToSend * 1.25, &x, &y);
+		RenderTools()->CalcScreenParams(Graphics()->ScreenAspect(), ZoomToSend, &x, &y);
 		Msg.m_X = x;
 		Msg.m_Y = y;
 		CMsgPacker Packer(Msg.MsgID(), false);
 		Msg.Pack(&Packer);
-		if(ZoomToSend != LastZoom)
+		if(ZoomToSend != m_LastZoom)
 			Client()->SendMsgY(&Packer, MSGFLAG_VITAL, 0);
 		if(Client()->DummyConnected())
 			Client()->SendMsgY(&Packer, MSGFLAG_VITAL, 1);
-		LastZoom = ZoomToSend;
-		LastScreenAspect = Graphics()->ScreenAspect();
+		m_LastZoom = ZoomToSend;
+		m_LastScreenAspect = Graphics()->ScreenAspect();
 	}
-	LastDummyConnected = Client()->DummyConnected();
+	m_LastDummyConnected = Client()->DummyConnected();
 
 	m_pGhost->OnNewSnapshot();
 	m_pRaceDemo->OnNewSnapshot();
