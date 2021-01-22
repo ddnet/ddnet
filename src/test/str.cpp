@@ -217,6 +217,8 @@ TEST(Str, StrCopyNum)
 	EXPECT_STREQ(aBuf, "Foobar");
 	str_utf8_truncate(aBuf, sizeof(aBuf), foo, 7);
 	EXPECT_STREQ(aBuf, "Foobaré");
+	str_utf8_truncate(aBuf, sizeof(aBuf), foo, 0);
+	EXPECT_STREQ(aBuf, "");
 
 	char aBuf2[8];
 	str_utf8_truncate(aBuf2, sizeof(aBuf2), foo, 7);
