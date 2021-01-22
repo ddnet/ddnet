@@ -1533,17 +1533,16 @@ bool CScore::LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 		return true;
 	}
 
-	char aSaveID[UUID_MAXSTRSIZE];
 	memset(pResult->m_SaveID.m_aData, 0, sizeof(pResult->m_SaveID.m_aData));
 	if(!pSqlServer->IsNull(3))
 	{
+		char aSaveID[UUID_MAXSTRSIZE];
 		pSqlServer->GetString(3, aSaveID, sizeof(aSaveID));
-		if(str_length(aSaveID) + 1 != UUID_MAXSTRSIZE)
+		if(ParseUuid(&pResult->m_SaveID, aSaveID))
 		{
 			str_copy(pResult->m_aMessage, "Unable to load savegame: SaveID corrupted", sizeof(pResult->m_aMessage));
 			return true;
 		}
-		ParseUuid(&pResult->m_SaveID, aSaveID);
 	}
 
 	char aSaveString[65536];
