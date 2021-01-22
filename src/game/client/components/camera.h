@@ -51,6 +51,9 @@ private:
 	static void ConZoomPlus(IConsole::IResult *pResult, void *pUserData);
 	static void ConZoomMinus(IConsole::IResult *pResult, void *pUserData);
 	static void ConZoomReset(IConsole::IResult *pResult, void *pUserData);
+	static void ConSetView(IConsole::IResult *pResult, void *pUserData);
+
+	vec2 m_ForceFreeviewPos;
 };
 
 #endif

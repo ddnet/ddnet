@@ -24,6 +24,7 @@ CCamera::CCamera()
 	m_ZoomSet = false;
 	m_Zoom = 1.0f;
 	m_Zooming = false;
+	m_ForceFreeviewPos = vec2(-1, -1);
 }
 
 float CCamera::ZoomProgress(float CurrentTime) const
@@ -170,6 +171,11 @@ void CCamera::OnRender()
 			m_Center = m_pClient->m_LocalCharacterPos + s_CurrentCameraOffset[g_Config.m_ClDummy];
 	}
 
+	if(m_ForceFreeviewPos != vec2(-1, -1) && m_CamType == CAMTYPE_SPEC)
+	{
+		m_Center = m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy] = m_ForceFreeviewPos;
+		m_ForceFreeviewPos = vec2(-1, -1);
+	}
 	m_PrevCenter = m_Center;
 }
 
@@ -178,6 +184,7 @@ void CCamera::OnConsoleInit()
 	Console()->Register("zoom+", "", CFGFLAG_CLIENT, ConZoomPlus, this, "Zoom increase");
 	Console()->Register("zoom-", "", CFGFLAG_CLIENT, ConZoomMinus, this, "Zoom decrease");
 	Console()->Register("zoom", "", CFGFLAG_CLIENT, ConZoomReset, this, "Zoom reset");
+	Console()->Register("set_view", "i[x]i[y]", CFGFLAG_CLIENT, ConSetView, this, "Set camera position to x and y in the map");
 }
 
 void CCamera::OnReset()
@@ -205,4 +212,12 @@ void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData)
 void CCamera::ConZoomReset(IConsole::IResult *pResult, void *pUserData)
 {
 	((CCamera *)pUserData)->ChangeZoom(pow(ZoomStep, g_Config.m_ClDefaultZoom - 10));
+}
+void CCamera::ConSetView(IConsole::IResult *pResult, void *pUserData)
+{
+	CCamera *pSelf = (CCamera *)pUserData;
+	// wait until free view camera type to update the position
+	pSelf->m_ForceFreeviewPos = vec2(
+		clamp(pResult->GetInteger(0) * 32.0f, 200.0f, pSelf->Collision()->GetWidth() * 32 - 200.0f),
+		clamp(pResult->GetInteger(1) * 32.0f, 200.0f, pSelf->Collision()->GetWidth() * 32 - 200.0f));
 }
