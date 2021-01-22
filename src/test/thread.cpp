@@ -79,4 +79,5 @@ TEST(Thread, Lock)
 	void *pThread = thread_init(LockThread, &Lock, "lock");
 	lock_unlock(Lock);
 	thread_wait(pThread);
+	lock_destroy(Lock);
 }
