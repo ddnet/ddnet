@@ -32,7 +32,7 @@ bool CLight::HitCharacter()
 		return false;
 	for(auto *Char : HitCharacters)
 	{
-		if(m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()])
+		if(m_Layer == LAYER_SWITCH && m_Number > 0 && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()])
 			continue;
 		Char->Freeze();
 	}
@@ -111,7 +111,7 @@ void CLight::Snap(int SnappingClient)
 
 	int Tick = (Server()->Tick() % Server()->TickSpeed()) % 6;
 
-	if(Char && Char->IsAlive() && m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()] && (Tick))
+	if(Char && Char->IsAlive() && m_Layer == LAYER_SWITCH && m_Number > 0 && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()] && (Tick))
 		return;
 
 	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
