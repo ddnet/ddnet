@@ -687,6 +687,15 @@ void CGameTeams::ProcessSaveTeam()
 					m_pSaveTeamResult[Team]->m_SaveID,
 					m_pSaveTeamResult[Team]->m_SavedTeam.GetString());
 			}
+			for(int i = 0; i < m_pSaveTeamResult[Team]->m_SavedTeam.GetMembersCount(); i++)
+			{
+				if(m_pSaveTeamResult[Team]->m_SavedTeam.m_pSavedTees->IsHooking())
+				{
+					int ClientID = m_pSaveTeamResult[Team]->m_SavedTeam.m_pSavedTees->GetClientID();
+					if(GameServer()->m_apPlayers[ClientID] != nullptr)
+						GameServer()->SendChatTarget(ClientID, "Start holding the hook before loading the savegame to keep the hook");
+				}
+			}
 			ResetSavedTeam(m_pSaveTeamResult[Team]->m_RequestingPlayer, Team);
 			char aSaveID[UUID_MAXSTRSIZE];
 			FormatUuid(m_pSaveTeamResult[Team]->m_SaveID, aSaveID, UUID_MAXSTRSIZE);
