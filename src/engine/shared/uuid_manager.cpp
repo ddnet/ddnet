@@ -53,12 +53,30 @@ void FormatUuid(CUuid Uuid, char *pBuffer, unsigned BufferLength)
 		p[8], p[9], p[10], p[11], p[12], p[13], p[14], p[15]);
 }
 
-void ParseUuid(CUuid *pUuid, char *pBuffer)
+int ParseUuid(CUuid *pUuid, const char *pBuffer)
 {
-	unsigned char *p = pUuid->m_aData;
-	sscanf(pBuffer, "%02hhX%02hhX%02hhX%02hhX-%02hhX%02hhX-%02hhX%02hhX-%02hhX%02hhX-%02hhX%02hhX%02hhX%02hhX%02hhX%02hhX",
-		&p[0], &p[1], &p[2], &p[3], &p[4], &p[5], &p[6], &p[7],
-		&p[8], &p[9], &p[10], &p[11], &p[12], &p[13], &p[14], &p[15]);
+	if(str_length(pBuffer) + 1 != UUID_MAXSTRSIZE)
+	{
+		return 2;
+	}
+	char aCopy[UUID_MAXSTRSIZE];
+	str_copy(aCopy, pBuffer, sizeof(aCopy));
+	// 01234567-9012-4567-9012-456789012345
+	if(aCopy[8] != '-' || aCopy[13] != '-' || aCopy[18] != '-' || aCopy[23] != '-')
+	{
+		return 1;
+	}
+	aCopy[8] = aCopy[13] = aCopy[18] = aCopy[23] = 0;
+	if(0 ||
+		str_hex_decode(pUuid->m_aData + 0, 4, aCopy + 0) ||
+		str_hex_decode(pUuid->m_aData + 4, 2, aCopy + 9) ||
+		str_hex_decode(pUuid->m_aData + 6, 2, aCopy + 14) ||
+		str_hex_decode(pUuid->m_aData + 8, 2, aCopy + 19) ||
+		str_hex_decode(pUuid->m_aData + 10, 6, aCopy + 24))
+	{
+		return 1;
+	}
+	return 0;
 }
 
 bool CUuid::operator==(const CUuid &Other) const
