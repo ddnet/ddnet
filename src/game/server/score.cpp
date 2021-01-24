@@ -671,9 +671,9 @@ bool CScore::ShowRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 	char aBuf[600];
 
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT Rank, Name, Time "
+		"SELECT Rank, Time, PercentRank "
 		"FROM ("
-		"  SELECT RANK() OVER w AS Rank, Name, MIN(Time) AS Time "
+		"  SELECT RANK() OVER w AS Rank, PERCENT_RANK() OVER w as PercentRank, Name, MIN(Time) AS Time "
 		"  FROM %s_race "
 		"  WHERE Map = ? "
 		"  GROUP BY Name "
@@ -688,21 +688,21 @@ bool CScore::ShowRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 	if(pSqlServer->Step())
 	{
 		int Rank = pSqlServer->GetInt(1);
-		float Time = pSqlServer->GetFloat(3);
+		float Time = pSqlServer->GetFloat(2);
+		// CEIL and FLOOR are not supported in SQLite
+		int BetterThanPercent = std::floor(100.0 - 100.0 * pSqlServer->GetFloat(3));
 		str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
 		if(g_Config.m_SvHideScore)
 		{
 			str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
-				"Your time: %s", aBuf);
+				"Your time: %s, better than %d%%", aBuf, BetterThanPercent);
 		}
 		else
 		{
-			char aName[MAX_NAME_LENGTH];
-			pSqlServer->GetString(2, aName, sizeof(aName));
 			pResult->m_MessageKind = CScorePlayerResult::ALL;
 			str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
-				"%d. %s Time: %s, requested by %s",
-				Rank, aName, aBuf, pData->m_RequestingPlayer);
+				"%d. %s Time: %s, better than %d%%, requested by %s",
+				Rank, pData->m_Name, aBuf, BetterThanPercent, pData->m_RequestingPlayer);
 		}
 	}
 	else
@@ -729,9 +729,9 @@ bool CScore::ShowTeamRankThread(IDbConnection *pSqlServer, const ISqlData *pGame
 	char aBuf[2400];
 
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT l.ID, Name, Time, Rank "
+		"SELECT l.ID, Name, Time, Rank, PercentRank "
 		"FROM (" // teamrank score board
-		"  SELECT RANK() OVER w AS Rank, ID "
+		"  SELECT RANK() OVER w AS Rank, PERCENT_RANK() OVER w AS PercentRank, ID "
 		"  FROM %s_teamrace "
 		"  WHERE Map = ? "
 		"  GROUP BY ID "
@@ -755,6 +755,8 @@ bool CScore::ShowTeamRankThread(IDbConnection *pSqlServer, const ISqlData *pGame
 		float Time = pSqlServer->GetFloat(3);
 		str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
 		int Rank = pSqlServer->GetInt(4);
+		// CEIL and FLOOR are not supported in SQLite
+		int BetterThanPercent = std::floor(100.0 - 100.0 * pSqlServer->GetFloat(5));
 		CTeamrank Teamrank;
 		Teamrank.NextSqlResult(pSqlServer);
 
@@ -772,14 +774,14 @@ bool CScore::ShowTeamRankThread(IDbConnection *pSqlServer, const ISqlData *pGame
 		if(g_Config.m_SvHideScore)
 		{
 			str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
-				"Your team time: %s", aBuf);
+				"Your team time: %s, better than %d%%", aBuf, BetterThanPercent);
 		}
 		else
 		{
 			pResult->m_MessageKind = CScorePlayerResult::ALL;
 			str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
-				"%d. %s Team time: %s, requested by %s",
-				Rank, aFormattedNames, aBuf, pData->m_RequestingPlayer);
+				"%d. %s Team time: %s, better than %d%%, requested by %s",
+				Rank, aFormattedNames, aBuf, BetterThanPercent, pData->m_RequestingPlayer);
 		}
 	}
 	else
