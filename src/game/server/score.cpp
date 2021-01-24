@@ -665,31 +665,26 @@ bool CScore::ShowRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 	char aBuf[600];
 
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT Rank, Time, "
-		"  100.0 - 100.0 * (Rank - 1) / ("
-		"    SELECT COUNT(DISTINCT Name) - 1 "
-		"    FROM %s_race WHERE Map = ?"
-		"  ) AS BetterThanPercent "
+		"SELECT Rank, Time, PercentRank "
 		"FROM ("
-		"  SELECT RANK() OVER w AS Rank, Name, MIN(Time) AS Time "
+		"  SELECT RANK() OVER w AS Rank, PERCENT_RANK() OVER w as PercentRank, Name, MIN(Time) AS Time "
 		"  FROM %s_race "
 		"  WHERE Map = ? "
 		"  GROUP BY Name "
 		"  WINDOW w AS (ORDER BY Time)"
 		") as a "
 		"WHERE Name = ?;",
-		pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
+		pSqlServer->GetPrefix());
 	pSqlServer->PrepareStatement(aBuf);
 	pSqlServer->BindString(1, pData->m_Map);
-	pSqlServer->BindString(2, pData->m_Map);
-	pSqlServer->BindString(3, pData->m_Name);
+	pSqlServer->BindString(2, pData->m_Name);
 
 	if(pSqlServer->Step())
 	{
 		int Rank = pSqlServer->GetInt(1);
 		float Time = pSqlServer->GetFloat(2);
 		// CEIL and FLOOR are not supported in SQLite
-		int BetterThanPercent = std::floor(pSqlServer->GetFloat(3));
+		int BetterThanPercent = std::floor(100.0 - 100.0 * pSqlServer->GetFloat(3));
 		str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
 		if(g_Config.m_SvHideScore)
 		{
@@ -728,13 +723,9 @@ bool CScore::ShowTeamRankThread(IDbConnection *pSqlServer, const ISqlData *pGame
 	char aBuf[2400];
 
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT l.ID, Name, Time, Rank, "
-		"  100.0 - 100.0 * (Rank - 1) / ("
-		"    SELECT COUNT(DISTINCT ID) - 1 "
-		"    FROM %s_teamrace WHERE Map = ?"
-		"  ) AS BetterThanPercent "
+		"SELECT l.ID, Name, Time, Rank, PercentRank "
 		"FROM (" // teamrank score board
-		"  SELECT RANK() OVER w AS Rank, ID "
+		"  SELECT RANK() OVER w AS Rank, PERCENT_RANK() OVER w AS PercentRank, ID "
 		"  FROM %s_teamrace "
 		"  WHERE Map = ? "
 		"  GROUP BY ID "
@@ -747,13 +738,11 @@ bool CScore::ShowTeamRankThread(IDbConnection *pSqlServer, const ISqlData *pGame
 		"  LIMIT 1"
 		") AS l ON TeamRank.ID = l.ID "
 		"INNER JOIN %s_teamrace AS r ON l.ID = r.ID ",
-		pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->GetPrefix(),
-		pSqlServer->GetPrefix());
+		pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
 	pSqlServer->PrepareStatement(aBuf);
 	pSqlServer->BindString(1, pData->m_Map);
 	pSqlServer->BindString(2, pData->m_Map);
-	pSqlServer->BindString(3, pData->m_Map);
-	pSqlServer->BindString(4, pData->m_Name);
+	pSqlServer->BindString(3, pData->m_Name);
 
 	if(pSqlServer->Step())
 	{
@@ -761,7 +750,7 @@ bool CScore::ShowTeamRankThread(IDbConnection *pSqlServer, const ISqlData *pGame
 		str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
 		int Rank = pSqlServer->GetInt(4);
 		// CEIL and FLOOR are not supported in SQLite
-		int BetterThanPercent = std::floor(pSqlServer->GetFloat(5));
+		int BetterThanPercent = std::floor(100.0 - 100.0 * pSqlServer->GetFloat(5));
 		CTeamrank Teamrank;
 		Teamrank.NextSqlResult(pSqlServer);
 
