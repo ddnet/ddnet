@@ -395,6 +395,11 @@ void CSaveTee::LoadHookedPlayer(const CSaveTeam *pTeam)
 	m_HookedPlayer = pTeam->m_pSavedTees[m_HookedPlayer].GetClientID();
 }
 
+bool CSaveTee::IsHooking() const
+{
+	return m_HookState == HOOK_GRABBED || m_HookState == HOOK_FLYING;
+}
+
 CSaveTeam::CSaveTeam(IGameController *Controller)
 {
 	m_pController = Controller;
