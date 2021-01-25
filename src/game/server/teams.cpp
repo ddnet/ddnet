@@ -229,44 +229,41 @@ void CGameTeams::CheckTeamFinished(int Team)
 
 			for(unsigned int i = 0; i < PlayersCount; ++i)
 				OnFinish(TeamPlayers[i], Time, aTimestamp);
-			ChangeTeamState(Team, TEAMSTATE_FINISHED); //TODO: Make it better
-			//ChangeTeamState(Team, TEAMSTATE_OPEN);
+			ChangeTeamState(Team, TEAMSTATE_FINISHED); // TODO: Make it better
 			OnTeamFinish(TeamPlayers, PlayersCount, Time, aTimestamp);
 		}
 	}
 }
 
-bool CGameTeams::SetCharacterTeam(int ClientID, int Team)
+const char *CGameTeams::SetCharacterTeam(int ClientID, int Team)
 {
-	//Check on wrong parameters. +1 for TEAM_SUPER
-	if(ClientID < 0 || ClientID >= MAX_CLIENTS || Team < 0 || Team >= MAX_CLIENTS + 1)
-		return false;
-	//You can join to TEAM_SUPER at any time, but any other group you cannot if it started
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return "Invalid client ID";
+	if(Team < 0 || Team >= MAX_CLIENTS + 1)
+		return "Invalid team number";
 	if(Team != TEAM_SUPER && m_TeamState[Team] > TEAMSTATE_OPEN)
-		return false;
-	//No need to switch team if you there
+		return "This team started already";
 	if(m_Core.Team(ClientID) == Team)
-		return false;
+		return "You are in this team already";
 	if(!Character(ClientID))
-		return false;
-	//You cannot be in TEAM_SUPER if you not super
+		return "Your character is not valid";
 	if(Team == TEAM_SUPER && !Character(ClientID)->m_Super)
-		return false;
-	//if you begin race
-	if(Character(ClientID)->m_DDRaceState != DDRACE_NONE && Team != TEAM_SUPER)
-		return false;
-	//No cheating through noob filter with practice and then leaving team
+		return "You can't join super team if you don't have super rights";
+	if(Team != TEAM_SUPER && Character(ClientID)->m_DDRaceState != DDRACE_NONE)
+		return "You have started racing already";
+	// No cheating through noob filter with practice and then leaving team
 	if(m_Practice[m_Core.Team(ClientID)])
-		return false;
+		return "You have used practice mode already";
 
-	//you can not join a team which is currently in the process of saving,
-	//because the save-process can fail and then the team is reset into the game
-	if((Team != TEAM_SUPER && GetSaving(Team)) || (m_Core.Team(ClientID) != TEAM_SUPER && GetSaving(m_Core.Team(ClientID))))
-		return false;
+	// you can not join a team which is currently in the process of saving,
+	// because the save-process can fail and then the team is reset into the game
+	if(Team != TEAM_SUPER && GetSaving(Team))
+		return "Your team is currently saving";
+	if(m_Core.Team(ClientID) != TEAM_SUPER && GetSaving(m_Core.Team(ClientID)))
+		return "This team is currently saving";
+
 	SetForceCharacterTeam(ClientID, Team);
-
-	//GameServer()->CreatePlayerSpawn(Character(id)->m_Core.m_Pos, TeamMask());
-	return true;
+	return nullptr;
 }
 
 void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
@@ -309,7 +306,7 @@ void CGameTeams::ForceLeaveTeam(int ClientID)
 		for(int i = 0; i < MAX_CLIENTS; ++i)
 			if(i != ClientID && m_Core.Team(ClientID) == m_Core.Team(i))
 			{
-				NoOneInOldTeam = false; //all good exists someone in old team
+				NoOneInOldTeam = false; // all good exists someone in old team
 				break;
 			}
 		if(NoOneInOldTeam)
@@ -526,7 +523,7 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 {
 	if(!Player || !Player->IsPlaying())
 		return;
-	//TODO:DDRace:btd: this ugly
+	// TODO:DDRace:btd: this ugly
 	const int ClientID = Player->GetCID();
 	CPlayerData *pData = GameServer()->Score()->PlayerData(ClientID);
 
@@ -578,7 +575,7 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 				str_format(aBuf, sizeof(aBuf),
 					"%5.2f second(s) worse, better luck next time.",
 					Diff);
-			GameServer()->SendChatTarget(ClientID, aBuf, CGameContext::CHAT_SIX); //this is private, sent only to the tee
+			GameServer()->SendChatTarget(ClientID, aBuf, CGameContext::CHAT_SIX); // this is private, sent only to the tee
 		}
 	}
 	else
@@ -608,7 +605,6 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 		if(g_Config.m_SvNamelessScore || !str_startswith(Server()->ClientName(ClientID), "nameless tee"))
 		{
 			GameServer()->m_pController->m_CurrentRecord = Time;
-			//dbg_msg("character", "Finish");
 			NeedToSendNewRecord = true;
 		}
 	}
