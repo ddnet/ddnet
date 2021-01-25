@@ -593,6 +593,10 @@ private:
 	void LoadMapSettings();
 	CTuningParams m_aTuningList[NUM_TUNEZONES];
 	CTuningParams *TuningList() { return m_aTuningList; }
+
+	float m_LastZoom;
+	float m_LastScreenAspect;
+	float m_LastDummyConnected;
 };
 
 ColorRGBA CalculateNameColor(ColorHSLA TextColorHSL);

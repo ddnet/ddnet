@@ -106,7 +106,7 @@ void CPlayer::Reset()
 
 	m_ShowOthers = g_Config.m_SvShowOthersDefault;
 	m_ShowAll = g_Config.m_SvShowAllDefault;
-	m_ShowDistance = vec2(1000, 800);
+	m_ShowDistance = vec2(1200, 800);
 	m_SpecTeam = 0;
 	m_NinjaJetpack = false;
 
@@ -801,7 +801,7 @@ void CPlayer::OverrideDefaultEmote(int Emote, int Tick)
 
 bool CPlayer::CanOverrideDefaultEmote() const
 {
-	return m_LastEyeEmote > 0 && m_LastEyeEmote + (int64_t)g_Config.m_SvEyeEmoteChangeDelay * Server()->TickSpeed() >= Server()->Tick();
+	return m_LastEyeEmote == 0 || m_LastEyeEmote + (int64_t)g_Config.m_SvEyeEmoteChangeDelay * Server()->TickSpeed() < Server()->Tick();
 }
 
 void CPlayer::ProcessPause()

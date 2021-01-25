@@ -19,6 +19,12 @@
 #include <fstream>
 #include <random>
 
+// "6b407e81-8b77-3e04-a207-8da17f37d000"
+// "save-no-save-id@ddnet.tw"
+static const CUuid UUID_NO_SAVE_ID =
+	{{0x6b, 0x40, 0x7e, 0x81, 0x8b, 0x77, 0x3e, 0x04,
+		0xa2, 0x07, 0x8d, 0xa1, 0x7f, 0x37, 0xd0, 0x00}};
+
 CScorePlayerResult::CScorePlayerResult()
 {
 	SetVariant(Variant::DIRECT);
@@ -665,9 +671,9 @@ bool CScore::ShowRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 	char aBuf[600];
 
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT Rank, Name, Time "
+		"SELECT Rank, Time, PercentRank "
 		"FROM ("
-		"  SELECT RANK() OVER w AS Rank, Name, MIN(Time) AS Time "
+		"  SELECT RANK() OVER w AS Rank, PERCENT_RANK() OVER w as PercentRank, Name, MIN(Time) AS Time "
 		"  FROM %s_race "
 		"  WHERE Map = ? "
 		"  GROUP BY Name "
@@ -682,21 +688,21 @@ bool CScore::ShowRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 	if(pSqlServer->Step())
 	{
 		int Rank = pSqlServer->GetInt(1);
-		float Time = pSqlServer->GetFloat(3);
+		float Time = pSqlServer->GetFloat(2);
+		// CEIL and FLOOR are not supported in SQLite
+		int BetterThanPercent = std::floor(100.0 - 100.0 * pSqlServer->GetFloat(3));
 		str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
 		if(g_Config.m_SvHideScore)
 		{
 			str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
-				"Your time: %s", aBuf);
+				"Your time: %s, better than %d%%", aBuf, BetterThanPercent);
 		}
 		else
 		{
-			char aName[MAX_NAME_LENGTH];
-			pSqlServer->GetString(2, aName, sizeof(aName));
 			pResult->m_MessageKind = CScorePlayerResult::ALL;
 			str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
-				"%d. %s Time: %s, requested by %s",
-				Rank, aName, aBuf, pData->m_RequestingPlayer);
+				"%d. %s Time: %s, better than %d%%, requested by %s",
+				Rank, pData->m_Name, aBuf, BetterThanPercent, pData->m_RequestingPlayer);
 		}
 	}
 	else
@@ -723,9 +729,9 @@ bool CScore::ShowTeamRankThread(IDbConnection *pSqlServer, const ISqlData *pGame
 	char aBuf[2400];
 
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT l.ID, Name, Time, Rank "
+		"SELECT l.ID, Name, Time, Rank, PercentRank "
 		"FROM (" // teamrank score board
-		"  SELECT RANK() OVER w AS Rank, ID "
+		"  SELECT RANK() OVER w AS Rank, PERCENT_RANK() OVER w AS PercentRank, ID "
 		"  FROM %s_teamrace "
 		"  WHERE Map = ? "
 		"  GROUP BY ID "
@@ -749,6 +755,8 @@ bool CScore::ShowTeamRankThread(IDbConnection *pSqlServer, const ISqlData *pGame
 		float Time = pSqlServer->GetFloat(3);
 		str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
 		int Rank = pSqlServer->GetInt(4);
+		// CEIL and FLOOR are not supported in SQLite
+		int BetterThanPercent = std::floor(100.0 - 100.0 * pSqlServer->GetFloat(5));
 		CTeamrank Teamrank;
 		Teamrank.NextSqlResult(pSqlServer);
 
@@ -766,14 +774,14 @@ bool CScore::ShowTeamRankThread(IDbConnection *pSqlServer, const ISqlData *pGame
 		if(g_Config.m_SvHideScore)
 		{
 			str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
-				"Your team time: %s", aBuf);
+				"Your team time: %s, better than %d%%", aBuf, BetterThanPercent);
 		}
 		else
 		{
 			pResult->m_MessageKind = CScorePlayerResult::ALL;
 			str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
-				"%d. %s Team time: %s, requested by %s",
-				Rank, aFormattedNames, aBuf, pData->m_RequestingPlayer);
+				"%d. %s Team time: %s, better than %d%%, requested by %s",
+				Rank, aFormattedNames, aBuf, BetterThanPercent, pData->m_RequestingPlayer);
 		}
 	}
 	else
@@ -1533,17 +1541,16 @@ bool CScore::LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 		return true;
 	}
 
-	char aSaveID[UUID_MAXSTRSIZE];
-	memset(pResult->m_SaveID.m_aData, 0, sizeof(pResult->m_SaveID.m_aData));
+	pResult->m_SaveID = UUID_NO_SAVE_ID;
 	if(!pSqlServer->IsNull(3))
 	{
+		char aSaveID[UUID_MAXSTRSIZE];
 		pSqlServer->GetString(3, aSaveID, sizeof(aSaveID));
-		if(str_length(aSaveID) + 1 != UUID_MAXSTRSIZE)
+		if(ParseUuid(&pResult->m_SaveID, aSaveID) || pResult->m_SaveID == UUID_NO_SAVE_ID)
 		{
 			str_copy(pResult->m_aMessage, "Unable to load savegame: SaveID corrupted", sizeof(pResult->m_aMessage));
 			return true;
 		}
-		ParseUuid(&pResult->m_SaveID, aSaveID);
 	}
 
 	char aSaveString[65536];
@@ -1564,12 +1571,19 @@ bool CScore::LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 		return true;
 
 	str_format(aBuf, sizeof(aBuf),
-		"DELETE FROM  %s_saves "
-		"WHERE Code = ? AND Map = ?;",
-		pSqlServer->GetPrefix());
+		"DELETE FROM %s_saves "
+		"WHERE Code = ? AND Map = ? AND SaveID %s;",
+		pSqlServer->GetPrefix(),
+		pResult->m_SaveID != UUID_NO_SAVE_ID ? "= ?" : "IS NULL");
 	pSqlServer->PrepareStatement(aBuf);
 	pSqlServer->BindString(1, pData->m_Code);
 	pSqlServer->BindString(2, pData->m_Map);
+	char aUuid[UUID_MAXSTRSIZE];
+	if(pResult->m_SaveID != UUID_NO_SAVE_ID)
+	{
+		FormatUuid(pResult->m_SaveID, aUuid, sizeof(aUuid));
+		pSqlServer->BindString(3, aUuid);
+	}
 	pSqlServer->Print();
 	int NumDeleted = pSqlServer->ExecuteUpdate();
 

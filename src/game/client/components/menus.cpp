@@ -631,7 +631,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 			if(Text)
 			{
 				int Offset = str_length(pStr);
-				int CharsLeft = StrSize - Offset - 1;
+				int CharsLeft = StrSize - Offset;
 				char *pCur = pStr + Offset;
 				str_utf8_copy(pCur, Text, CharsLeft);
 				for(int i = 0; i < CharsLeft; i++)

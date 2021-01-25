@@ -2158,6 +2158,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     test.h
     thread.cpp
     unix.cpp
+    uuid.cpp
   )
   set(TESTS_EXTRA
     src/engine/client/blocklist_driver.cpp

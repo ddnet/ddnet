@@ -20,6 +20,7 @@ public:
 	char *GetString(const CSaveTeam *pTeam);
 	int FromString(const char *String);
 	void LoadHookedPlayer(const CSaveTeam *pTeam);
+	bool IsHooking() const;
 	vec2 GetPos() const { return m_Pos; }
 	const char *GetName() const { return m_aName; }
 	int GetClientID() const { return m_ClientID; }

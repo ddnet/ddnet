@@ -950,13 +950,7 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 		{
 			int Team = pResult->GetInteger(0);
 
-			if(Team == pController->m_Teams.m_Core.Team(pResult->m_ClientID))
-			{
-				char aBuf[32];
-				str_format(aBuf, sizeof(aBuf), "You are in team %d already", Team);
-				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join", aBuf);
-			}
-			else if(pPlayer->m_Last_Team + (int64_t)pSelf->Server()->TickSpeed() * g_Config.m_SvTeamChangeDelay > pSelf->Server()->Tick())
+			if(pPlayer->m_Last_Team + (int64_t)pSelf->Server()->TickSpeed() * g_Config.m_SvTeamChangeDelay > pSelf->Server()->Tick())
 			{
 				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",
 					"You can\'t change teams that fast!");
@@ -974,7 +968,11 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 				str_format(aBuf, sizeof(aBuf), "This team already has the maximum allowed size of %d players", g_Config.m_SvTeamMaxSize);
 				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join", aBuf);
 			}
-			else if(pController->m_Teams.SetCharacterTeam(pPlayer->GetCID(), Team))
+			else if(const char *pError = pController->m_Teams.SetCharacterTeam(pPlayer->GetCID(), Team))
+			{
+				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join", pError);
+			}
+			else
 			{
 				char aBuf[512];
 				str_format(aBuf, sizeof(aBuf), "%s joined team %d",
@@ -985,11 +983,6 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 
 				if(pController->m_Teams.IsPractice(Team))
 					pSelf->SendChatTarget(pPlayer->GetCID(), "Practice mode enabled for your team, happy practicing!");
-			}
-			else
-			{
-				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",
-					"You cannot join this team at this time");
 			}
 		}
 	}
