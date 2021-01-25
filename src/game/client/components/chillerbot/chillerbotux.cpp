@@ -13,12 +13,42 @@
 
 void CChillerBotUX::OnRender()
 {
-	if(m_LastGreet < time_get())
+	if(time_get() % 10 == 0)
 	{
-		m_LastGreet = 0;
-		m_aGreetName[0] = '\0';
+		if(m_LastGreet < time_get())
+		{
+			m_LastGreet = 0;
+			m_aGreetName[0] = '\0';
+		}
+		// if tabbing into tw and going afk set to inactive again over time
+		if(m_AfkActivity && time_get() % 100 == 0)
+			m_AfkActivity--;
+	}
+	if(m_AfkTill)
+	{
+		Graphics()->BlendNormal();
+		Graphics()->TextureClear();
+		Graphics()->QuadsBegin();
+		Graphics()->SetColor(0, 0, 0, 0.5f);
+		RenderTools()->DrawRoundRect(10.0f, 30.0f, 150.0f, 50.0f, 10.0f);
+		Graphics()->QuadsEnd();
+		TextRender()->Text(0, 20.0f, 30.f, 20.0f, "chillerbot-ux", -1);
+		TextRender()->Text(0, 50.0f, 55.f, 10.0f, "afk mode", -1);
+		TextRender()->Text(0, 20.0f, 70.f, 5.0f, m_aLastAfkPing, -1);
 	}
 	FinishRenameTick();
+}
+
+bool CChillerBotUX::OnMouseMove(float x, float y)
+{
+	ReturnFromAfk();
+	return false;
+}
+
+bool CChillerBotUX::OnInput(IInput::CEvent e)
+{
+	ReturnFromAfk();
+	return false;
 }
 
 void CChillerBotUX::FinishRenameTick()
@@ -126,16 +156,44 @@ void CChillerBotUX::OnInit()
 {
 	m_aGreetName[0] = '\0';
 	m_LastGreet = 0;
+	m_AfkTill = 0;
+	m_AfkActivity = 0;
+	m_aLastAfkPing[0] = '\0';
 }
 
 void CChillerBotUX::OnConsoleInit()
 {
 	Console()->Register("say_hi", "", CFGFLAG_CLIENT, ConSayHi, this, "Respond to the last greeting in chat");
+	Console()->Register("afk", "?i[minutes]", CFGFLAG_CLIENT, ConAfk, this, "Activate afk mode (auto chat respond)");
 }
 
 void CChillerBotUX::ConSayHi(IConsole::IResult *pResult, void *pUserData)
 {
 	((CChillerBotUX *)pUserData)->DoGreet();
+}
+
+void CChillerBotUX::ConAfk(IConsole::IResult *pResult, void *pUserData)
+{
+	((CChillerBotUX *)pUserData)->GoAfk(pResult->NumArguments() ? pResult->GetInteger(0) : -1);
+}
+
+void CChillerBotUX::GoAfk(int Minutes)
+{
+	m_AfkTill = time_get() + time_freq() * 60 * Minutes;
+	m_AfkActivity = 0;
+	m_aLastAfkPing[0] = '\0';
+}
+
+void CChillerBotUX::ReturnFromAfk()
+{
+	if(!m_AfkTill)
+		return;
+	if(time_get() % 10 == 0)
+		m_AfkActivity++;
+	if(m_AfkActivity < 200)
+		return;
+	m_pClient->m_pChat->AddLine(-2, 0, "[chillerbot-ux] welcome back :)");
+	m_AfkTill = 0;
 }
 
 void CChillerBotUX::DoGreet()
@@ -172,7 +230,6 @@ void CChillerBotUX::OnChatMessage(int ClientID, int Team, const char *pMsg)
 		Highlighted = true;
 	if(!Highlighted)
 		return;
-
 	char aName[64];
 	str_copy(aName, m_pClient->m_aClients[ClientID].m_aName, sizeof(aName));
 	if(ClientID == 63 && !str_comp_num(m_pClient->m_aClients[ClientID].m_aName, " ", 2))
@@ -185,10 +242,22 @@ void CChillerBotUX::OnChatMessage(int ClientID, int Team, const char *pMsg)
 		return;
 	if(!str_comp(aName, m_pClient->m_aClients[m_pClient->m_LocalIDs[1]].m_aName))
 		return;
+
 	if(IsGreeting(pMsg))
 	{
 		str_copy(m_aGreetName, aName, sizeof(m_aGreetName));
 		m_LastGreet = time_get() + time_freq() * 10;
+	}
+	if(m_AfkTill)
+	{
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "%s: I am currently afk.", aName);
+		if(m_AfkTill > time_get() + time_freq() * 61)
+			str_format(aBuf, sizeof(aBuf), "%s: I am currently afk. Estimated return in %lld minutes.", aName, (m_AfkTill - time_get()) / time_freq() / 60);
+		else if(m_AfkTill > time_get() + time_freq() * 10)
+			str_format(aBuf, sizeof(aBuf), "%s: I am currently afk. Estimated return in %lld seconds.", aName, (m_AfkTill - time_get()) / time_freq());
+		m_pClient->m_pChat->Say(0, aBuf);
+		str_copy(m_aLastAfkPing, pMsg, sizeof(m_aLastAfkPing));
 	}
 }
 

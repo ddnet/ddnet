@@ -226,6 +226,8 @@ void CGameClient::OnConsoleInit()
 
 	m_All.Add(m_pMenuBackground);
 
+	m_Input.Add(&gs_ChillerBotUX);
+
 	// build the input stack
 	m_Input.Add(&m_pMenus->m_Binder); // this will take over all input when we want to bind a key
 	m_Input.Add(&m_pBinds->m_SpecialBinds);
