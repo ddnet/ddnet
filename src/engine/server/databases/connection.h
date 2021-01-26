@@ -64,16 +64,15 @@ public:
 	// when called multiple times the next row is selected
 	virtual bool Step() = 0;
 	// executes the query and returns the number of rows affected by the update/insert/delete
-	// FIXME(2020-01-20): change function to AffectedRows() when moved to c-api of MySQL
 	virtual int ExecuteUpdate() = 0;
 
-	virtual bool IsNull(int Col) const = 0;
-	virtual float GetFloat(int Col) const = 0;
-	virtual int GetInt(int Col) const = 0;
+	virtual bool IsNull(int Col) = 0;
+	virtual float GetFloat(int Col) = 0;
+	virtual int GetInt(int Col) = 0;
 	// ensures that the string is null terminated
-	virtual void GetString(int Col, char *pBuffer, int BufferSize) const = 0;
+	virtual void GetString(int Col, char *pBuffer, int BufferSize) = 0;
 	// returns number of bytes read into the buffer
-	virtual int GetBlob(int Col, unsigned char *pBuffer, int BufferSize) const = 0;
+	virtual int GetBlob(int Col, unsigned char *pBuffer, int BufferSize) = 0;
 
 	// SQL statements, that can't be abstracted, has side effects to the result
 	virtual void AddPoints(const char *pPlayer, int Points) = 0;
@@ -88,5 +87,19 @@ protected:
 	void FormatCreateSaves(char *aBuf, unsigned int BufferSize);
 	void FormatCreatePoints(char *aBuf, unsigned int BufferSize);
 };
+
+int MysqlInit();
+void MysqlUninit();
+
+IDbConnection *CreateSqliteConnection(const char *pFilename, bool Setup);
+// Returns nullptr if MySQL support is not compiled in.
+IDbConnection *CreateMysqlConnection(
+	const char *pDatabase,
+	const char *pPrefix,
+	const char *pUser,
+	const char *pPass,
+	const char *pIp,
+	int Port,
+	bool Setup);
 
 #endif // ENGINE_SERVER_DATABASES_CONNECTION_H

@@ -1964,9 +1964,7 @@ set_src(ENGINE_SERVER GLOB_RECURSE src/engine/server
   databases/connection_pool.cpp
   databases/connection_pool.h
   databases/mysql.cpp
-  databases/mysql.h
   databases/sqlite.cpp
-  databases/sqlite.h
   name_ban.cpp
   name_ban.h
   register.cpp

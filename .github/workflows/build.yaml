@@ -63,7 +63,7 @@ jobs:
     - name: Prepare Linux (fancy)
       if: contains(matrix.os, 'ubuntu') && matrix.fancy
       run: |
-        sudo apt-get install libboost-dev libmariadbclient-dev libmysqlcppconn-dev libwebsockets-dev -y
+        sudo apt-get install libmariadbclient-dev libwebsockets-dev -y
 
     - name: Prepare MacOS
       if: contains(matrix.os, 'macOS')

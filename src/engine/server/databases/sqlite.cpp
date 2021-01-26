@@ -1,10 +1,68 @@
-#include "sqlite.h"
+#include "connection.h"
+
+#include <sqlite3.h>
 
 #include <base/math.h>
 #include <engine/console.h>
 
-#include <sqlite3.h>
+#include <atomic>
 #include <stdexcept>
+
+class CSqliteConnection : public IDbConnection
+{
+public:
+	CSqliteConnection(const char *pFilename, bool Setup);
+	virtual ~CSqliteConnection();
+	virtual void Print(IConsole *pConsole, const char *Mode);
+
+	virtual CSqliteConnection *Copy();
+
+	virtual const char *BinaryCollate() const { return "BINARY"; }
+	virtual void ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize);
+	virtual const char *InsertTimestampAsUtc() const { return "DATETIME(?, 'utc')"; }
+	virtual const char *CollateNocase() const { return "? COLLATE NOCASE"; }
+	virtual const char *InsertIgnore() const { return "INSERT OR IGNORE"; };
+	virtual const char *Random() const { return "RANDOM()"; };
+	virtual const char *MedianMapTime(char *pBuffer, int BufferSize) const;
+
+	virtual Status Connect();
+	virtual void Disconnect();
+
+	virtual void PrepareStatement(const char *pStmt);
+
+	virtual void BindString(int Idx, const char *pString);
+	virtual void BindBlob(int Idx, unsigned char *pBlob, int Size);
+	virtual void BindInt(int Idx, int Value);
+	virtual void BindFloat(int Idx, float Value);
+
+	virtual void Print();
+	virtual bool Step();
+	virtual int ExecuteUpdate();
+
+	virtual bool IsNull(int Col);
+	virtual float GetFloat(int Col);
+	virtual int GetInt(int Col);
+	virtual void GetString(int Col, char *pBuffer, int BufferSize);
+	// passing a negative buffer size is undefined behavior
+	virtual int GetBlob(int Col, unsigned char *pBuffer, int BufferSize);
+
+	virtual void AddPoints(const char *pPlayer, int Points);
+
+private:
+	// copy of config vars
+	char m_aFilename[512];
+	bool m_Setup;
+
+	sqlite3 *m_pDb;
+	sqlite3_stmt *m_pStmt;
+	bool m_Done; // no more rows available for Step
+	// returns true, if the query succeeded
+	bool Execute(const char *pQuery);
+
+	void ExceptionOnError(int Result);
+
+	std::atomic_bool m_InUse;
+};
 
 CSqliteConnection::CSqliteConnection(const char *pFilename, bool Setup) :
 	IDbConnection("record"),
@@ -178,27 +236,27 @@ int CSqliteConnection::ExecuteUpdate()
 	return sqlite3_changes(m_pDb);
 }
 
-bool CSqliteConnection::IsNull(int Col) const
+bool CSqliteConnection::IsNull(int Col)
 {
 	return sqlite3_column_type(m_pStmt, Col - 1) == SQLITE_NULL;
 }
 
-float CSqliteConnection::GetFloat(int Col) const
+float CSqliteConnection::GetFloat(int Col)
 {
 	return (float)sqlite3_column_double(m_pStmt, Col - 1);
 }
 
-int CSqliteConnection::GetInt(int Col) const
+int CSqliteConnection::GetInt(int Col)
 {
 	return sqlite3_column_int(m_pStmt, Col - 1);
 }
 
-void CSqliteConnection::GetString(int Col, char *pBuffer, int BufferSize) const
+void CSqliteConnection::GetString(int Col, char *pBuffer, int BufferSize)
 {
 	str_copy(pBuffer, (const char *)sqlite3_column_text(m_pStmt, Col - 1), BufferSize);
 }
 
-int CSqliteConnection::GetBlob(int Col, unsigned char *pBuffer, int BufferSize) const
+int CSqliteConnection::GetBlob(int Col, unsigned char *pBuffer, int BufferSize)
 {
 	int Size = sqlite3_column_bytes(m_pStmt, Col - 1);
 	Size = minimum(Size, BufferSize);
@@ -256,4 +314,9 @@ void CSqliteConnection::AddPoints(const char *pPlayer, int Points)
 	BindInt(2, Points);
 	BindInt(3, Points);
 	Step();
+}
+
+IDbConnection *CreateSqliteConnection(const char *pFilename, bool Setup)
+{
+	return new CSqliteConnection(pFilename, Setup);
 }

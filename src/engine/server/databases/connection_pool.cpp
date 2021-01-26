@@ -2,9 +2,6 @@
 #include "connection.h"
 
 #include <engine/console.h>
-#if defined(CONF_SQL)
-#include <cppconn/exception.h>
-#endif
 #include <stdexcept>
 
 // helper struct to hold thread data
@@ -223,12 +220,6 @@ bool CDbConnectionPool::ExecSqlFunc(IDbConnection *pConnection, CSqlExecData *pD
 			break;
 		}
 	}
-#if defined(CONF_SQL)
-	catch(sql::SQLException &e)
-	{
-		dbg_msg("sql", "%s MySQL Error: %s", pData->m_pName, e.what());
-	}
-#endif
 	catch(std::runtime_error &e)
 	{
 		dbg_msg("sql", "%s SQLite Error: %s", pData->m_pName, e.what());
