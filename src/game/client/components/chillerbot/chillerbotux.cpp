@@ -156,9 +156,7 @@ void CChillerBotUX::SelectCampArea(int Key)
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf),
 			"Set camp[%d] %d",
-			m_CampClick == 2 ?
-                                1 :
-                                2,
+			m_CampClick == 2 ? 1 : 2,
 			GameClient()->m_Snap.m_pLocalCharacter->m_X / 32);
 		GameClient()->m_pChat->AddLine(-2, 0, aBuf);
 	}
@@ -386,7 +384,7 @@ void CChillerBotUX::OnChatMessage(int ClientID, int Team, const char *pMsg)
 		else if(m_AfkTill > time_get() + time_freq() * 10)
 			str_format(aBuf, sizeof(aBuf), "%s: I am currently afk. Estimated return in %lld seconds.", aName, (m_AfkTill - time_get()) / time_freq());
 		m_pClient->m_pChat->Say(0, aBuf);
-		str_copy(m_aLastAfkPing, pMsg, sizeof(m_aLastAfkPing));
+		str_format(m_aLastAfkPing, sizeof(m_aLastAfkPing), "%s: %s", m_pClient->m_aClients[ClientID].m_aName, pMsg);
 	}
 }
 

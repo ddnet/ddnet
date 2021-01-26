@@ -12,7 +12,7 @@ MACRO_CONFIG_INT(ClRenderPicAlpha, cl_render_pic_alpha, 100, 0, 100, CFGFLAG_CLI
 MACRO_CONFIG_INT(ClSaveMapInfo, cl_save_map_info, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Save map info ( off for tml compability on for everything else)")
 MACRO_CONFIG_INT(ClFinishRename, cl_finish_rename, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Change name to cl_finish_name if finish is near.")
 MACRO_CONFIG_STR(ClFinishName, cl_finish_name, 32, "chillerbot.png", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Change to this name if cl_finish_rename is active.")
-MACRO_CONFIG_INT(ClCampHack, cl_camp_hack, 0, 0, 2, CFGFLAG_CLIENT|CFGFLAG_SAVE, "fire with gun to mark camp area")
+MACRO_CONFIG_INT(ClCampHack, cl_camp_hack, 0, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "fire with gun to mark camp area")
 
 // client
 MACRO_CONFIG_INT(ClPredict, cl_predict, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Predict client movements")
