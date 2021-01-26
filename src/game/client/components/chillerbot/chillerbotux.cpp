@@ -67,20 +67,32 @@ void CChillerBotUX::CampHackTick()
 		return;
 	if(Layers()->GameGroup())
 	{
-		CAnimState State;
-		State.Set(&g_pData->m_aAnimations[ANIM_BASE], 0);
-		CTeeRenderInfo RenderInfo = m_pClient->m_aClients[m_pClient->m_LocalIDs[0]].m_RenderInfo;
 		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 		MapScreenToGroup(m_pClient->m_pCamera->m_Center.x, m_pClient->m_pCamera->m_Center.y, Layers()->GameGroup(), m_pClient->m_pCamera->m_Zoom);
-		RenderTools()->RenderTee(&State, &RenderInfo, 0, vec2(0, 0), vec2(m_CampHackX1, m_CampHackY1));
-		RenderTools()->RenderTee(&State, &RenderInfo, 0, vec2(0, 0), vec2(m_CampHackX2, m_CampHackY2));
+		Graphics()->BlendNormal();
+		Graphics()->TextureClear();
+		Graphics()->QuadsBegin();
+		Graphics()->SetColor(0, 0, 0, 0.4f);
+		RenderTools()->DrawRoundRect(m_CampHackX1, m_CampHackY1, 20.0f, 20.0f, 3.0f);
+		RenderTools()->DrawRoundRect(m_CampHackX2, m_CampHackY2, 20.0f, 20.0f, 3.0f);
+		if(m_CampHackX1 && m_CampHackX2 && m_CampHackY1 && m_CampHackY2)
+		{
+			if(m_CampHackX1 < m_CampHackX2)
+				Graphics()->SetColor(0, 1, 0, 0.2f);
+			else
+				Graphics()->SetColor(1, 0, 0, 0.2f);
+			RenderTools()->DrawRoundRect(m_CampHackX1, m_CampHackY1, m_CampHackX2 - m_CampHackX1, m_CampHackY2 - m_CampHackY1, 3.0f);
+		}
+		Graphics()->QuadsEnd();
+		TextRender()->Text(0, m_CampHackX1, m_CampHackY1, 10.0f, "1", -1);
+		TextRender()->Text(0, m_CampHackX2, m_CampHackY2, 10.0f, "2", -1);
 		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 	}
 	TextRender()->Text(0, 20.0f, 100.f, 10.0f, "CampHack", -1);
-	if(g_Config.m_ClCampHack < 2 || GameClient()->m_Snap.m_pLocalCharacter->m_Weapon != WEAPON_HAMMER)
-		return;
 	if(!m_CampHackX1 || !m_CampHackX2 || !m_CampHackY1 || !m_CampHackY2)
+		return;
+	if(g_Config.m_ClCampHack < 2 || GameClient()->m_Snap.m_pLocalCharacter->m_Weapon != WEAPON_HAMMER)
 		return;
 	if(m_CampHackX1 > GameClient()->m_Snap.m_pLocalCharacter->m_X)
 	{
@@ -318,7 +330,7 @@ void CChillerBotUX::ConSayFormat(IConsole::IResult *pResult, void *pUserData)
 		}
 		aBuf[buf_i++] = pMsg[i];
 	}
-	aBuf[minimum(sizeof(aBuf) - 1, buf_i)] = '\0';
+	aBuf[minimum((unsigned long)sizeof(aBuf) - 1, buf_i)] = '\0';
 	pSelf->m_pClient->m_pChat->Say(0, aBuf);
 }
 
@@ -333,10 +345,13 @@ void CChillerBotUX::ConchainCampHack(IConsole::IResult *pResult, void *pUserData
 	pfnCallback(pResult, pCallbackUserData);
 	pSelf->m_pClient->m_pControls->m_InputDirectionRight[g_Config.m_ClDummy] = 0;
 	pSelf->m_pClient->m_pControls->m_InputDirectionLeft[g_Config.m_ClDummy] = 0;
-	pSelf->m_CampHackX1 = pSelf->GameClient()->m_Snap.m_pLocalCharacter->m_X - 32 * 3;
-	pSelf->m_CampHackY1 = pSelf->GameClient()->m_Snap.m_pLocalCharacter->m_Y;
-	pSelf->m_CampHackX2 = pSelf->GameClient()->m_Snap.m_pLocalCharacter->m_X + 32 * 3;
-	pSelf->m_CampHackY2 = pSelf->GameClient()->m_Snap.m_pLocalCharacter->m_Y;
+	if(pSelf->GameClient()->m_Snap.m_pLocalCharacter)
+	{
+		pSelf->m_CampHackX1 = pSelf->GameClient()->m_Snap.m_pLocalCharacter->m_X - 32 * 3;
+		pSelf->m_CampHackY1 = pSelf->GameClient()->m_Snap.m_pLocalCharacter->m_Y;
+		pSelf->m_CampHackX2 = pSelf->GameClient()->m_Snap.m_pLocalCharacter->m_X + 32 * 3;
+		pSelf->m_CampHackY2 = pSelf->GameClient()->m_Snap.m_pLocalCharacter->m_Y;
+	}
 }
 
 void CChillerBotUX::GoAfk(int Minutes)
