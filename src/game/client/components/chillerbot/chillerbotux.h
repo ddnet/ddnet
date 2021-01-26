@@ -7,6 +7,7 @@ class CChillerBotUX : public CComponent
 {
 	bool m_IsNearFinish;
 	char m_aGreetName[32];
+	char m_aLastPingName[32];
 	int64 m_LastGreet;
 	int64 m_AfkTill;
 	int m_AfkActivity;
@@ -38,6 +39,7 @@ class CChillerBotUX : public CComponent
 	virtual bool OnInput(IInput::CEvent e);
 
 	static void ConSayHi(IConsole::IResult *pResult, void *pUserData);
+	static void ConSayFormat(IConsole::IResult *pResult, void *pUserData);
 	static void ConAfk(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConchainCampHack(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);

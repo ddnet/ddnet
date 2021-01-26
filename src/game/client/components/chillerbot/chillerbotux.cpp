@@ -272,11 +272,13 @@ void CChillerBotUX::OnInit()
 	m_AfkTill = 0;
 	m_AfkActivity = 0;
 	m_aLastAfkPing[0] = '\0';
+	m_aLastPingName[0] = '\0';
 }
 
 void CChillerBotUX::OnConsoleInit()
 {
 	Console()->Register("say_hi", "", CFGFLAG_CLIENT, ConSayHi, this, "Respond to the last greeting in chat");
+	Console()->Register("say_format", "s[message]?ssssssss", CFGFLAG_CLIENT, ConSayFormat, this, "send message replacing %s with last ping name");
 	Console()->Register("afk", "?i[minutes]", CFGFLAG_CLIENT, ConAfk, this, "Activate afk mode (auto chat respond)");
 
 	Console()->Chain("cl_camp_hack", ConchainCampHack, this);
@@ -285,6 +287,39 @@ void CChillerBotUX::OnConsoleInit()
 void CChillerBotUX::ConSayHi(IConsole::IResult *pResult, void *pUserData)
 {
 	((CChillerBotUX *)pUserData)->DoGreet();
+}
+
+void CChillerBotUX::ConSayFormat(IConsole::IResult *pResult, void *pUserData)
+{
+	CChillerBotUX *pSelf = (CChillerBotUX *)pUserData;
+	char aBuf[1028] = {0};
+	long unsigned int i = 0;
+	long unsigned int buf_i = 0;
+	const char *pMsg = pResult->GetString(0);
+	int str_index = 1;
+	for(i = 0; pMsg[i] && i < sizeof(aBuf); i++)
+	{
+		if(pMsg[i] == '%' && pMsg[maximum((int)i - 1, 0)] != '\\')
+		{
+			if(pMsg[i + 1] == 'n')
+			{
+				str_append(aBuf, pSelf->m_aLastPingName, sizeof(aBuf));
+				buf_i += str_length(pSelf->m_aLastPingName);
+				i++;
+				continue;
+			}
+			else if(pMsg[i + 1] == 's')
+			{
+				str_append(aBuf, pResult->GetString(str_index), sizeof(aBuf));
+				buf_i += str_length(pResult->GetString(str_index++));
+				i++;
+				continue;
+			}
+		}
+		aBuf[buf_i++] = pMsg[i];
+	}
+	aBuf[minimum(sizeof(aBuf) - 1, buf_i)] = '\0';
+	pSelf->m_pClient->m_pChat->Say(0, aBuf);
 }
 
 void CChillerBotUX::ConAfk(IConsole::IResult *pResult, void *pUserData)
@@ -370,6 +405,7 @@ void CChillerBotUX::OnChatMessage(int ClientID, int Team, const char *pMsg)
 	if(!str_comp(aName, m_pClient->m_aClients[m_pClient->m_LocalIDs[1]].m_aName))
 		return;
 
+	str_copy(m_aLastPingName, aName, sizeof(m_aLastPingName));
 	if(IsGreeting(pMsg))
 	{
 		str_copy(m_aGreetName, aName, sizeof(m_aGreetName));
