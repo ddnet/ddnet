@@ -11,6 +11,13 @@ class CChillerBotUX : public CComponent
 	int64 m_AfkTill;
 	int m_AfkActivity;
 	char m_aLastAfkPing[2048];
+	int m_CampHackX1;
+	int m_CampHackY1;
+	int m_CampHackX2;
+	int m_CampHackY2;
+	int m_CampClick;
+	int m_ForceDir;
+	int m_LastForceDir;
 
 	void OnChatMessage(int ClientID, int Team, const char *pMsg);
 	bool LineShouldHighlight(const char *pLine, const char *pName);
@@ -19,6 +26,9 @@ class CChillerBotUX : public CComponent
 	void DoGreet();
 	void GoAfk(int Minutes);
 	void FinishRenameTick();
+	void CampHackTick();
+	void SelectCampArea(int Key);
+	void MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, float Zoom);
 
 	virtual void OnRender();
 	virtual void OnMessage(int MsgType, void *pRawMsg);
@@ -29,6 +39,8 @@ class CChillerBotUX : public CComponent
 
 	static void ConSayHi(IConsole::IResult *pResult, void *pUserData);
 	static void ConAfk(IConsole::IResult *pResult, void *pUserData);
+
+	static void ConchainCampHack(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 public:
 	void ReturnFromAfk();

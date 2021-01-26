@@ -2,8 +2,12 @@
 
 #include <engine/config.h>
 #include <engine/graphics.h>
+#include <engine/keys.h>
 #include <engine/textrender.h>
+#include <game/client/animstate.h>
+#include <game/client/components/camera.h>
 #include <game/client/components/chat.h>
+#include <game/client/components/controls.h>
 #include <game/client/components/menus.h>
 #include <game/client/race.h>
 #include <game/client/render.h>
@@ -37,6 +41,59 @@ void CChillerBotUX::OnRender()
 		TextRender()->Text(0, 20.0f, 70.f, 5.0f, m_aLastAfkPing, -1);
 	}
 	FinishRenameTick();
+	m_ForceDir = 0;
+	CampHackTick();
+	if(!m_ForceDir && m_LastForceDir)
+	{
+		m_pClient->m_pControls->m_InputDirectionRight[g_Config.m_ClDummy] = 0;
+		m_pClient->m_pControls->m_InputDirectionLeft[g_Config.m_ClDummy] = 0;
+	}
+	m_LastForceDir = m_ForceDir;
+}
+
+void CChillerBotUX::MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, float Zoom)
+{
+	float Points[4];
+	RenderTools()->MapscreenToWorld(CenterX, CenterY, pGroup->m_ParallaxX, pGroup->m_ParallaxY,
+		pGroup->m_OffsetX, pGroup->m_OffsetY, Graphics()->ScreenAspect(), Zoom, Points);
+	Graphics()->MapScreen(Points[0], Points[1], Points[2], Points[3]);
+}
+
+void CChillerBotUX::CampHackTick()
+{
+	if(!GameClient()->m_Snap.m_pLocalCharacter)
+		return;
+	if(!g_Config.m_ClCampHack)
+		return;
+	if(Layers()->GameGroup())
+	{
+		CAnimState State;
+		State.Set(&g_pData->m_aAnimations[ANIM_BASE], 0);
+		CTeeRenderInfo RenderInfo = m_pClient->m_aClients[m_pClient->m_LocalIDs[0]].m_RenderInfo;
+		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+		MapScreenToGroup(m_pClient->m_pCamera->m_Center.x, m_pClient->m_pCamera->m_Center.y, Layers()->GameGroup(), m_pClient->m_pCamera->m_Zoom);
+		RenderTools()->RenderTee(&State, &RenderInfo, 0, vec2(0, 0), vec2(m_CampHackX1, m_CampHackY1));
+		RenderTools()->RenderTee(&State, &RenderInfo, 0, vec2(0, 0), vec2(m_CampHackX2, m_CampHackY2));
+		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+	}
+	TextRender()->Text(0, 20.0f, 100.f, 10.0f, "CampHack", -1);
+	if(g_Config.m_ClCampHack < 2 || GameClient()->m_Snap.m_pLocalCharacter->m_Weapon != WEAPON_HAMMER)
+		return;
+	if(!m_CampHackX1 || !m_CampHackX2 || !m_CampHackY1 || !m_CampHackY2)
+		return;
+	if(m_CampHackX1 > GameClient()->m_Snap.m_pLocalCharacter->m_X)
+	{
+		m_pClient->m_pControls->m_InputDirectionRight[g_Config.m_ClDummy] = 1;
+		m_pClient->m_pControls->m_InputDirectionLeft[g_Config.m_ClDummy] = 0;
+		m_ForceDir = 1;
+	}
+	else if(m_CampHackX2 < GameClient()->m_Snap.m_pLocalCharacter->m_X)
+	{
+		m_pClient->m_pControls->m_InputDirectionRight[g_Config.m_ClDummy] = 0;
+		m_pClient->m_pControls->m_InputDirectionLeft[g_Config.m_ClDummy] = 1;
+		m_ForceDir = -1;
+	}
 }
 
 bool CChillerBotUX::OnMouseMove(float x, float y)
@@ -48,7 +105,65 @@ bool CChillerBotUX::OnMouseMove(float x, float y)
 bool CChillerBotUX::OnInput(IInput::CEvent e)
 {
 	ReturnFromAfk();
+	SelectCampArea(e.m_Key);
 	return false;
+}
+
+void CChillerBotUX::SelectCampArea(int Key)
+{
+	if(!GameClient()->m_Snap.m_pLocalCharacter)
+		return;
+	if(!g_Config.m_ClCampHack)
+		return;
+	if(Key != KEY_MOUSE_1)
+		return;
+	if(GameClient()->m_Snap.m_pLocalCharacter->m_Weapon != WEAPON_GUN)
+		return;
+	m_CampClick++;
+	if(m_CampClick % 2 == 0)
+	{
+		// UNSET IF CLOSE
+		vec2 Current = vec2(GameClient()->m_Snap.m_pLocalCharacter->m_X, GameClient()->m_Snap.m_pLocalCharacter->m_Y);
+		vec2 CrackPos1 = vec2(m_CampHackX1, m_CampHackY1);
+		float dist = distance(CrackPos1, Current);
+		if(dist < 100.0f)
+		{
+			m_CampHackX1 = 0;
+			m_CampHackY1 = 0;
+			GameClient()->m_pChat->AddLine(-2, 0, "Unset camp[1]");
+			return;
+		}
+		vec2 CrackPos2 = vec2(m_CampHackX2, m_CampHackY2);
+		dist = distance(CrackPos2, Current);
+		if(dist < 100.0f)
+		{
+			m_CampHackX2 = 0;
+			m_CampHackY2 = 0;
+			GameClient()->m_pChat->AddLine(-2, 0, "Unset camp[2]");
+			return;
+		}
+		// SET OTHERWISE
+		if(m_CampClick == 2)
+		{
+			m_CampHackX1 = GameClient()->m_Snap.m_pLocalCharacter->m_X;
+			m_CampHackY1 = GameClient()->m_Snap.m_pLocalCharacter->m_Y;
+		}
+		else
+		{
+			m_CampHackX2 = GameClient()->m_Snap.m_pLocalCharacter->m_X;
+			m_CampHackY2 = GameClient()->m_Snap.m_pLocalCharacter->m_Y;
+		}
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf),
+			"Set camp[%d] %d",
+			m_CampClick == 2 ?
+                                1 :
+                                2,
+			GameClient()->m_Snap.m_pLocalCharacter->m_X / 32);
+		GameClient()->m_pChat->AddLine(-2, 0, aBuf);
+	}
+	if(m_CampClick > 3)
+		m_CampClick = 0;
 }
 
 void CChillerBotUX::FinishRenameTick()
@@ -165,6 +280,8 @@ void CChillerBotUX::OnConsoleInit()
 {
 	Console()->Register("say_hi", "", CFGFLAG_CLIENT, ConSayHi, this, "Respond to the last greeting in chat");
 	Console()->Register("afk", "?i[minutes]", CFGFLAG_CLIENT, ConAfk, this, "Activate afk mode (auto chat respond)");
+
+	Console()->Chain("cl_camp_hack", ConchainCampHack, this);
 }
 
 void CChillerBotUX::ConSayHi(IConsole::IResult *pResult, void *pUserData)
@@ -175,6 +292,18 @@ void CChillerBotUX::ConSayHi(IConsole::IResult *pResult, void *pUserData)
 void CChillerBotUX::ConAfk(IConsole::IResult *pResult, void *pUserData)
 {
 	((CChillerBotUX *)pUserData)->GoAfk(pResult->NumArguments() ? pResult->GetInteger(0) : -1);
+}
+
+void CChillerBotUX::ConchainCampHack(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CChillerBotUX *pSelf = (CChillerBotUX *)pUserData;
+	pfnCallback(pResult, pCallbackUserData);
+	pSelf->m_pClient->m_pControls->m_InputDirectionRight[g_Config.m_ClDummy] = 0;
+	pSelf->m_pClient->m_pControls->m_InputDirectionLeft[g_Config.m_ClDummy] = 0;
+	pSelf->m_CampHackX1 = pSelf->GameClient()->m_Snap.m_pLocalCharacter->m_X - 32 * 3;
+	pSelf->m_CampHackY1 = pSelf->GameClient()->m_Snap.m_pLocalCharacter->m_Y;
+	pSelf->m_CampHackX2 = pSelf->GameClient()->m_Snap.m_pLocalCharacter->m_X + 32 * 3;
+	pSelf->m_CampHackY2 = pSelf->GameClient()->m_Snap.m_pLocalCharacter->m_Y;
 }
 
 void CChillerBotUX::GoAfk(int Minutes)
