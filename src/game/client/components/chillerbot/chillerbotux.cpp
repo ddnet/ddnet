@@ -37,7 +37,9 @@ void CChillerBotUX::OnRender()
 		RenderTools()->DrawRoundRect(10.0f, 30.0f, 150.0f, 50.0f, 10.0f);
 		Graphics()->QuadsEnd();
 		TextRender()->Text(0, 20.0f, 30.f, 20.0f, "chillerbot-ux", -1);
-		TextRender()->Text(0, 50.0f, 55.f, 10.0f, "afk mode", -1);
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "afk mode (%d/%d)", m_AfkActivity, 200);
+		TextRender()->Text(0, 50.0f, 55.f, 10.0f, aBuf, -1);
 		TextRender()->Text(0, 20.0f, 70.f, 5.0f, m_aLastAfkPing, -1);
 	}
 	FinishRenameTick();
@@ -110,7 +112,8 @@ void CChillerBotUX::CampHackTick()
 
 bool CChillerBotUX::OnMouseMove(float x, float y)
 {
-	ReturnFromAfk();
+	if(time_get() % 10 == 0)
+		ReturnFromAfk();
 	return false;
 }
 
@@ -365,8 +368,7 @@ void CChillerBotUX::ReturnFromAfk()
 {
 	if(!m_AfkTill)
 		return;
-	if(time_get() % 10 == 0)
-		m_AfkActivity++;
+	m_AfkActivity++;
 	if(m_AfkActivity < 200)
 		return;
 	m_pClient->m_pChat->AddLine(-2, 0, "[chillerbot-ux] welcome back :)");
