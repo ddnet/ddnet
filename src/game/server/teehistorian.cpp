@@ -491,6 +491,8 @@ void CTeeHistorian::RecordTestExtra()
 
 void CTeeHistorian::RecordTeamSaveSuccess(int Team, CUuid SaveID, const char *pTeamSave)
 {
+	EnsureTickWritten();
+
 	CPacker Buffer;
 	Buffer.Reset();
 	Buffer.AddInt(Team);
@@ -509,6 +511,8 @@ void CTeeHistorian::RecordTeamSaveSuccess(int Team, CUuid SaveID, const char *pT
 
 void CTeeHistorian::RecordTeamSaveFailure(int Team)
 {
+	EnsureTickWritten();
+
 	CPacker Buffer;
 	Buffer.Reset();
 	Buffer.AddInt(Team);
@@ -523,6 +527,8 @@ void CTeeHistorian::RecordTeamSaveFailure(int Team)
 
 void CTeeHistorian::RecordTeamLoadSuccess(int Team, CUuid SaveID, const char *pTeamSave)
 {
+	EnsureTickWritten();
+
 	CPacker Buffer;
 	Buffer.Reset();
 	Buffer.AddInt(Team);
@@ -541,6 +547,8 @@ void CTeeHistorian::RecordTeamLoadSuccess(int Team, CUuid SaveID, const char *pT
 
 void CTeeHistorian::RecordTeamLoadFailure(int Team)
 {
+	EnsureTickWritten();
+
 	CPacker Buffer;
 	Buffer.Reset();
 	Buffer.AddInt(Team);
