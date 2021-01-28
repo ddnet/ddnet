@@ -973,7 +973,10 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		g_Config.m_BrFilterCompatversion = 0;
 		g_Config.m_BrFilterExcludeCountries[0] = 0;
 		g_Config.m_BrFilterExcludeTypes[0] = 0;
-		Client()->ServerBrowserUpdate();
+		if(g_Config.m_UiPage == PAGE_DDNET || g_Config.m_UiPage == PAGE_KOG)
+			ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
+		else
+			Client()->ServerBrowserUpdate();
 	}
 }
 
