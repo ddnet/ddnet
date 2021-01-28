@@ -2104,8 +2104,13 @@ void CCharacter::DDRaceTick()
 	// look for save position for rescue feature
 	if(g_Config.m_SvRescue || ((g_Config.m_SvTeam == 3 || Team() > TEAM_FLOCK) && Team() >= TEAM_FLOCK && Team() < TEAM_SUPER))
 	{
-		if(IsGrounded() && !m_FreezeTime && !m_DeepFreeze)
+		int index = GameServer()->Collision()->GetPureMapIndex(m_Pos);
+		int tile = GameServer()->Collision()->GetTileIndex(index);
+		int ftile = GameServer()->Collision()->GetFTileIndex(index);
+		if(IsGrounded() && tile != TILE_FREEZE && tile != TILE_DFREEZE && ftile != TILE_FREEZE && ftile != TILE_DFREEZE && !m_DeepFreeze)
+		{
 			SetRescue();
+		}
 	}
 
 	m_Core.m_Id = GetPlayer()->GetCID();
