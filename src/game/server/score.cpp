@@ -1502,13 +1502,6 @@ bool CScore::LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 	CScoreSaveResult *pResult = dynamic_cast<CScoreSaveResult *>(pGameData->m_pResult.get());
 	pResult->m_Status = CScoreSaveResult::LOAD_FAILED;
 
-	char aSaveLike[128] = "";
-	str_append(aSaveLike, "%\n", sizeof(aSaveLike));
-	sqlstr::EscapeLike(aSaveLike + str_length(aSaveLike),
-		pData->m_RequestingPlayer,
-		sizeof(aSaveLike) - str_length(aSaveLike));
-	str_append(aSaveLike, "\t%", sizeof(aSaveLike));
-
 	char aCurrentTimestamp[512];
 	pSqlServer->ToUnixTimestamp("CURRENT_TIMESTAMP", aCurrentTimestamp, sizeof(aCurrentTimestamp));
 	char aTimestamp[512];
@@ -1518,26 +1511,16 @@ bool CScore::LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 	str_format(aBuf, sizeof(aBuf),
 		"SELECT Savegame, %s-%s AS Ago, SaveID "
 		"FROM %s_saves "
-		"where Code = ? AND Map = ? AND DDNet7 = false AND Savegame LIKE ?;",
+		"where Code = ? AND Map = ? AND DDNet7 = false;",
 		aCurrentTimestamp, aTimestamp,
 		pSqlServer->GetPrefix());
 	pSqlServer->PrepareStatement(aBuf);
 	pSqlServer->BindString(1, pData->m_Code);
 	pSqlServer->BindString(2, pData->m_Map);
-	pSqlServer->BindString(3, aSaveLike);
 
 	if(!pSqlServer->Step())
 	{
 		str_copy(pResult->m_aMessage, "No such savegame for this map", sizeof(pResult->m_aMessage));
-		return true;
-	}
-
-	int Since = pSqlServer->GetInt(2);
-	if(Since < g_Config.m_SvSaveGamesDelay)
-	{
-		str_format(pResult->m_aMessage, sizeof(pResult->m_aMessage),
-			"You have to wait %d seconds until you can load this savegame",
-			g_Config.m_SvSaveGamesDelay - Since);
 		return true;
 	}
 
@@ -1560,6 +1543,30 @@ bool CScore::LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 	if(Num != 0)
 	{
 		str_copy(pResult->m_aMessage, "Unable to load savegame: data corrupted", sizeof(pResult->m_aMessage));
+		return true;
+	}
+
+	bool Found = false;
+	for(int i = 0; i < pResult->m_SavedTeam.GetMembersCount(); i++)
+	{
+		if(str_comp(pResult->m_SavedTeam.m_pSavedTees->GetName(), pData->m_RequestingPlayer) == 0)
+		{
+			Found = true;
+			break;
+		}
+	}
+	if(!Found)
+	{
+		str_copy(pResult->m_aMessage, "You don't belong to this team", sizeof(pResult->m_aMessage));
+		return true;
+	}
+
+	int Since = pSqlServer->GetInt(2);
+	if(Since < g_Config.m_SvSaveGamesDelay)
+	{
+		str_format(pResult->m_aMessage, sizeof(pResult->m_aMessage),
+			"You have to wait %d seconds until you can load this savegame",
+			g_Config.m_SvSaveGamesDelay - Since);
 		return true;
 	}
 
