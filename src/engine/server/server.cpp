@@ -2436,6 +2436,9 @@ int CServer::Run()
 		dbg_msg("server", "+-------------------------+");
 	}
 
+	m_SnapshotCycle = 2;
+	m_SnapshotSkip = 0;
+
 	// start game
 	{
 		bool NonActive = false;
@@ -2575,8 +2578,20 @@ int CServer::Run()
 			// snap game
 			if(NewTicks)
 			{
-				if(g_Config.m_SvHighBandwidth || (m_CurrentGameTick % 2) == 0)
+				bool Skipping = true;
+				if(m_SnapshotSkip % m_SnapshotCycle == 0)
+				{
+					m_SnapshotCycle += 1;
+					if(m_SnapshotCycle > g_Config.m_SvSnapshotSkip + 1)
+						m_SnapshotCycle = 2;
+					m_SnapshotSkip = 0;
+					Skipping = false;
+				}
+
+				if(g_Config.m_SvHighBandwidth || !Skipping)
 					DoSnapshot();
+
+				m_SnapshotSkip++;
 
 				UpdateClientRconCommands();
 
