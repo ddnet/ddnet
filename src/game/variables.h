@@ -13,6 +13,8 @@ MACRO_CONFIG_INT(ClSaveMapInfo, cl_save_map_info, 1, 0, 1, CFGFLAG_CLIENT | CFGF
 MACRO_CONFIG_INT(ClFinishRename, cl_finish_rename, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Change name to cl_finish_name if finish is near.")
 MACRO_CONFIG_STR(ClFinishName, cl_finish_name, 32, "chillerbot.png", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Change to this name if cl_finish_rename is active.")
 MACRO_CONFIG_INT(ClCampHack, cl_camp_hack, 0, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "fire with gun to mark camp area")
+MACRO_CONFIG_INT(ClAutoReply, cl_auto_reply, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Respond with cl_auto_reply_msg when pinged in chat.")
+MACRO_CONFIG_STR(ClAutoReplyMsg, cl_auto_reply_msg, 32, "%n (chillerbot-ux auto reply)", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Change to this name if cl_finish_rename is active.")
 
 // client
 MACRO_CONFIG_INT(ClPredict, cl_predict, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Predict client movements")

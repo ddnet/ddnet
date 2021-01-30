@@ -2231,24 +2231,46 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 void CMenus::RenderSettingsChillerbot(CUIRect MainView)
 {
-	CUIRect Button, Label, Finish;
+	CUIRect Button, Label;
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
-	char *Name = g_Config.m_ClFinishName;
+	char *pName = g_Config.m_ClFinishName;
+	char *pReplyMsg = g_Config.m_ClAutoReplyMsg;
+	char aBuf[128];
 
 	// finish name
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	Button.VSplitLeft(110.0f, &Label, &Button);
-	Button.VSplitLeft(200.0f, &Button, &Finish);
-	Button.VSplitLeft(150.0f, &Button, 0);
-	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "%s:", "Finish name");
-	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
-	static float s_OffsetName = 0.0f;
-	DoEditBox(Name, &Button, Name, sizeof(g_Config.m_ClFinishName), 14.0f, &s_OffsetName);
-
-	if(DoButton_CheckBox(&g_Config.m_ClFinishRename, "Rename on finish", g_Config.m_ClFinishRename, &Finish))
 	{
-		g_Config.m_ClFinishRename ^= 1;
+		CUIRect Checkbox;
+		MainView.HSplitTop(20.0f, &Button, &MainView);
+		Button.VSplitLeft(120.0f, &Label, &Button);
+		Button.VSplitLeft(200.0f, &Button, &Checkbox);
+		Button.VSplitLeft(150.0f, &Button, 0);
+		str_format(aBuf, sizeof(aBuf), "%s:", "Finish name");
+		UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
+		static float s_OffsetName = 0.0f;
+		DoEditBox(pName, &Button, pName, sizeof(g_Config.m_ClFinishName), 14.0f, &s_OffsetName);
+		if(DoButton_CheckBox(&g_Config.m_ClFinishRename, "Rename on finish", g_Config.m_ClFinishRename, &Checkbox))
+		{
+			g_Config.m_ClFinishRename ^= 1;
+		}
+	}
+
+	MainView.HSplitTop(5.0f, 0, &MainView);
+
+	// auto reply
+	{
+		CUIRect Checkbox;
+		MainView.HSplitTop(20.0f, &Button, &MainView);
+		Button.VSplitLeft(120.0f, &Label, &Button);
+		Button.VSplitLeft(200.0f, &Button, &Checkbox);
+		Button.VSplitLeft(150.0f, &Button, 0);
+		str_format(aBuf, sizeof(aBuf), "%s:", "auto reply msg");
+		UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
+		static float s_ReplyMsg = 0.0f;
+		DoEditBox(pReplyMsg, &Button, pReplyMsg, sizeof(g_Config.m_ClAutoReplyMsg), 14.0f, &s_ReplyMsg);
+		if(DoButton_CheckBox(&g_Config.m_ClAutoReply, "Auto reply", g_Config.m_ClAutoReply, &Checkbox))
+		{
+			g_Config.m_ClAutoReply ^= 1;
+		}
 	}
 }

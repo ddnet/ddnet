@@ -293,7 +293,7 @@ void CChillerBotUX::OnInit()
 void CChillerBotUX::OnConsoleInit()
 {
 	Console()->Register("say_hi", "", CFGFLAG_CLIENT, ConSayHi, this, "Respond to the last greeting in chat");
-	Console()->Register("say_format", "s[message]?ssssssss", CFGFLAG_CLIENT, ConSayFormat, this, "send message replacing %s with last ping name");
+	Console()->Register("say_format", "s[message]", CFGFLAG_CLIENT, ConSayFormat, this, "send message replacing %n with last ping name");
 	Console()->Register("afk", "?i[minutes]", CFGFLAG_CLIENT, ConAfk, this, "Activate afk mode (auto chat respond)");
 
 	Console()->Chain("cl_camp_hack", ConchainCampHack, this);
@@ -306,27 +306,29 @@ void CChillerBotUX::ConSayHi(IConsole::IResult *pResult, void *pUserData)
 
 void CChillerBotUX::ConSayFormat(IConsole::IResult *pResult, void *pUserData)
 {
-	CChillerBotUX *pSelf = (CChillerBotUX *)pUserData;
+	((CChillerBotUX *)pUserData)->SayFormat(pResult->GetString(0));
+}
+
+void CChillerBotUX::SayFormat(const char *pMsg)
+{
 	char aBuf[1028] = {0};
 	long unsigned int i = 0;
 	long unsigned int buf_i = 0;
-	const char *pMsg = pResult->GetString(0);
-	int str_index = 1;
 	for(i = 0; pMsg[i] && i < sizeof(aBuf); i++)
 	{
 		if(pMsg[i] == '%' && pMsg[maximum((int)i - 1, 0)] != '\\')
 		{
 			if(pMsg[i + 1] == 'n')
 			{
-				str_append(aBuf, pSelf->m_aLastPingName, sizeof(aBuf));
-				buf_i += str_length(pSelf->m_aLastPingName);
+				str_append(aBuf, m_aLastPingName, sizeof(aBuf));
+				buf_i += str_length(m_aLastPingName);
 				i++;
 				continue;
 			}
-			else if(pMsg[i + 1] == 's')
+			else if(pMsg[i + 1] == 'g')
 			{
-				str_append(aBuf, pResult->GetString(str_index), sizeof(aBuf));
-				buf_i += str_length(pResult->GetString(str_index++));
+				str_append(aBuf, m_aGreetName, sizeof(aBuf));
+				buf_i += str_length(m_aGreetName);
 				i++;
 				continue;
 			}
@@ -334,7 +336,7 @@ void CChillerBotUX::ConSayFormat(IConsole::IResult *pResult, void *pUserData)
 		aBuf[buf_i++] = pMsg[i];
 	}
 	aBuf[minimum((unsigned long)sizeof(aBuf) - 1, buf_i)] = '\0';
-	pSelf->m_pClient->m_pChat->Say(0, aBuf);
+	m_pClient->m_pChat->Say(0, aBuf);
 }
 
 void CChillerBotUX::ConAfk(IConsole::IResult *pResult, void *pUserData)
@@ -438,7 +440,10 @@ void CChillerBotUX::OnChatMessage(int ClientID, int Team, const char *pMsg)
 			str_format(aBuf, sizeof(aBuf), "%s: I am currently afk. Estimated return in %lld seconds.", aName, (m_AfkTill - time_get()) / time_freq());
 		m_pClient->m_pChat->Say(0, aBuf);
 		str_format(m_aLastAfkPing, sizeof(m_aLastAfkPing), "%s: %s", m_pClient->m_aClients[ClientID].m_aName, pMsg);
+		return;
 	}
+	if(g_Config.m_ClAutoReply)
+		SayFormat(g_Config.m_ClAutoReplyMsg);
 }
 
 void CChillerBotUX::OnMessage(int MsgType, void *pRawMsg)

@@ -25,6 +25,7 @@ class CChillerBotUX : public CComponent
 	bool IsGreeting(const char *pMsg);
 	void Get128Name(const char *pMsg, char *pName);
 	void DoGreet();
+	void SayFormat(const char *pMsg);
 	void GoAfk(int Minutes);
 	void FinishRenameTick();
 	void CampHackTick();
