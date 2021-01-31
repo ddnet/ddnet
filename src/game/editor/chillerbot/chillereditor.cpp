@@ -58,7 +58,7 @@ void CChillerEditor::DoMapEditor()
 			m_pEditor->Graphics()->WrapClamp();
 			m_pEditor->Graphics()->TextureSet(m_CursorTextTexture);
 			m_pEditor->Graphics()->QuadsBegin();
-			m_pEditor->Graphics()->SetColor(1, 0, 0, 1);
+			m_pEditor->Graphics()->SetColor(1, 1, 1, 1);
 			IGraphics::CQuadItem QuadItem(m_TextIndexX * 32, m_TextIndexY * 32, 32.0f, 32.0f);
 			m_pEditor->Graphics()->QuadsDrawTL(&QuadItem, 1);
 			m_pEditor->Graphics()->QuadsEnd();
