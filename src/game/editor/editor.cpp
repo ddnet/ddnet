@@ -6387,6 +6387,8 @@ void CEditor::Init()
 	m_LastUndoUpdateTime = time_get();
 
 	ms_PickerColor = ColorHSVA(1.0f, 0.0f, 0.0f);
+
+	m_ChillerEditor.Init(this);
 }
 
 void CEditor::PlaceBorderTiles()

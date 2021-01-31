@@ -1029,6 +1029,7 @@ set(EXPECTED_DATA
   editor/basic_freeze.rules
   editor/checker.png
   editor/cursor.png
+  editor/cursor_text.png
   editor/ddmax_freeze.rules
   editor/ddnet_tiles.rules
   editor/ddnet_walls.rules
