@@ -667,6 +667,8 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 	if(*p == 0)
 		return;
 
+	bool IgnoreLine = false;
+
 	while(*p)
 	{
 		Highlighted = false;
@@ -697,7 +699,11 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 			pCurrentLine->m_Time = time();
 			pCurrentLine->m_YOffset[0] = -1.f;
 			pCurrentLine->m_YOffset[1] = -1.f;
-			return;
+			// Can't return here because we still want to log the message to console,
+			// even if we ignore it in chat. We will set the new line, fill it out
+			// totally, but then in the end revert back m_CurrentLine after writing
+			// the message to console.
+			IgnoreLine = true;
 		}
 
 		m_CurrentLine = (m_CurrentLine + 1) % MAX_LINES;
@@ -812,6 +818,12 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		char aBuf[1024];
 		str_format(aBuf, sizeof(aBuf), "%s: %s", pCurrentLine->m_aName, pCurrentLine->m_aText);
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, Team >= 2 ? "whisper" : (pCurrentLine->m_Team ? "teamchat" : "chat"), aBuf, Highlighted);
+	}
+
+	if(IgnoreLine)
+	{
+		m_CurrentLine = (m_CurrentLine + MAX_LINES - 1) % MAX_LINES;
+		return;
 	}
 
 	// play sound
