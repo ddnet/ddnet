@@ -73,7 +73,14 @@ void CChillerEditor::DoMapEditor(CEditor *pEditor, int Inside)
 			return;
 		if(pEditor->Input()->KeyPress(e.m_Key))
 			return;
-		// dbg_msg("chillerbot", "key=%d", e.m_Key);
+		// escape -> end text mode
+		if(e.m_Key == KEY_ESCAPE)
+		{
+			if(pEditor->m_Dialog == -1)
+				pEditor->m_Dialog = DIALOG_NONE;
+			m_EditorMode = CE_MODE_NONE;
+			return;
+		}
 		// letters
 		if(e.m_Key > 3 && e.m_Key < 30)
 		{
@@ -81,8 +88,6 @@ void CChillerEditor::DoMapEditor(CEditor *pEditor, int Inside)
 			Tile.m_Index = e.m_Key - 3;
 			pLayer->SetTile(m_TextIndexX++, m_TextIndexY, Tile);
 			m_TextLineLen++;
-			m_NextCursorBlink = time_get() + time_freq();
-			m_DrawCursor = true;
 		}
 		// deletion
 		if(e.m_Key == KEY_BACKSPACE)
@@ -91,8 +96,6 @@ void CChillerEditor::DoMapEditor(CEditor *pEditor, int Inside)
 			Tile.m_Index = 0;
 			pLayer->SetTile(--m_TextIndexX, m_TextIndexY, Tile);
 			m_TextLineLen--;
-			m_NextCursorBlink = time_get() + time_freq();
-			m_DrawCursor = true;
 		}
 		// space
 		if(e.m_Key == KEY_SPACE)
@@ -101,8 +104,6 @@ void CChillerEditor::DoMapEditor(CEditor *pEditor, int Inside)
 			Tile.m_Index = 0;
 			pLayer->SetTile(m_TextIndexX++, m_TextIndexY, Tile);
 			m_TextLineLen++;
-			m_NextCursorBlink = time_get() + time_freq();
-			m_DrawCursor = true;
 		}
 		// newline
 		if(e.m_Key == KEY_RETURN)
@@ -110,17 +111,50 @@ void CChillerEditor::DoMapEditor(CEditor *pEditor, int Inside)
 			m_TextIndexY++;
 			m_TextIndexX -= m_TextLineLen;
 			m_TextLineLen = 0;
-			m_NextCursorBlink = time_get() + time_freq();
-			m_DrawCursor = true;
 		}
-		// escape -> end text mode
-		if(e.m_Key == KEY_ESCAPE)
+		// arrow key navigation
+		if(e.m_Key == KEY_LEFT)
 		{
-			if(pEditor->m_Dialog == -1)
-				pEditor->m_Dialog = 0;
-			m_EditorMode = CE_MODE_NONE;
+			m_TextIndexX--;
+			m_TextLineLen--;
+			if(pEditor->Input()->KeyIsPressed(KEY_LCTRL))
+			{
+				while(pLayer->GetTile(m_TextIndexX, m_TextIndexY).m_Index)
+				{
+					if(m_TextIndexX < 1 || m_TextIndexX > pLayer->m_Width - 2)
+						break;
+					if(e.m_Key != KEY_LEFT)
+						break;
+					m_TextIndexX--;
+					m_TextLineLen--;
+				}
+			}
 		}
+		if(e.m_Key == KEY_RIGHT)
+		{
+			m_TextIndexX++;
+			m_TextLineLen++;
+			if(pEditor->Input()->KeyIsPressed(KEY_LCTRL))
+			{
+				while(pLayer->GetTile(m_TextIndexX, m_TextIndexY).m_Index)
+				{
+					if(m_TextIndexX < 1 || m_TextIndexX > pLayer->m_Width - 2)
+						break;
+					if(e.m_Key != KEY_RIGHT)
+						break;
+					m_TextIndexX++;
+					m_TextLineLen++;
+				}
+			}
+		}
+		if(e.m_Key == KEY_UP)
+			m_TextIndexY--;
+		if(e.m_Key == KEY_DOWN)
+			m_TextIndexY++;
+		m_NextCursorBlink = time_get() + time_freq();
+		m_DrawCursor = true;
 		m_TextIndexX = clamp(m_TextIndexX, 0, pLayer->m_Width - 1);
 		m_TextIndexY = clamp(m_TextIndexY, 0, pLayer->m_Height - 1);
+		dbg_msg("chillerbot", "key=%d dialog=%d", e.m_Key, pEditor->m_Dialog);
 	}
 }
