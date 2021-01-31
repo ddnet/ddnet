@@ -16,6 +16,8 @@ class CChillerEditor
 	int m_TextLineLen;
 	int64 m_NextCursorBlink;
 	bool m_DrawCursor;
+	int m_LetterOffset;
+	int m_NumberOffset;
 	IGraphics::CTextureHandle m_CursorTextTexture;
 	class CEditor *m_pEditor;
 

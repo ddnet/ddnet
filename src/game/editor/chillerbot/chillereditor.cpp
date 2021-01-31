@@ -13,6 +13,8 @@ CChillerEditor::CChillerEditor()
 	m_TextLineLen = 0;
 	m_NextCursorBlink = 0;
 	m_pEditor = 0;
+	m_LetterOffset = 0;
+	m_NumberOffset = 53;
 }
 
 void CChillerEditor::Init(class CEditor *pEditor)
@@ -83,7 +85,15 @@ void CChillerEditor::DoMapEditor()
 		if(e.m_Key > 3 && e.m_Key < 30)
 		{
 			CTile Tile;
-			Tile.m_Index = e.m_Key - 3;
+			Tile.m_Index = e.m_Key - 3 + m_LetterOffset;
+			pLayer->SetTile(m_TextIndexX++, m_TextIndexY, Tile);
+			m_TextLineLen++;
+		}
+		// numbers
+		if(e.m_Key >= 30 && e.m_Key < 40)
+		{
+			CTile Tile;
+			Tile.m_Index = e.m_Key - 29 + m_NumberOffset;
 			pLayer->SetTile(m_TextIndexX++, m_TextIndexY, Tile);
 			m_TextLineLen++;
 		}
