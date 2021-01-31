@@ -50,7 +50,6 @@
 #include <engine/shared/snapshot.h>
 #include <engine/shared/uuid_manager.h>
 
-#include <game/extrainfo.h>
 #include <game/version.h>
 
 #include <mastersrv/mastersrv.h>
@@ -1605,9 +1604,14 @@ static CServerCapabilities GetServerCapabilities(int Version, int Flags)
 		DDNet = Flags & SERVERCAPFLAG_DDNET;
 	}
 	Result.m_ChatTimeoutCode = DDNet;
+	Result.m_AnyPlayerFlag = DDNet;
 	if(Version >= 1)
 	{
 		Result.m_ChatTimeoutCode = Flags & SERVERCAPFLAG_CHATTIMEOUTCODE;
+	}
+	if(Version >= 2)
+	{
+		Result.m_AnyPlayerFlag = Flags & SERVERCAPFLAG_ANYPLAYERFLAG;
 	}
 	return Result;
 }
@@ -2024,7 +2028,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 					// for antiping: if the projectile netobjects from the server contains extra data, this is removed and the original content restored before recording demo
 					unsigned char aExtraInfoRemoved[CSnapshot::MAX_SIZE];
 					mem_copy(aExtraInfoRemoved, pTmpBuffer3, SnapSize);
-					SnapshotRemoveExtraInfo(aExtraInfoRemoved);
+					SnapshotRemoveExtraProjectileInfo(aExtraInfoRemoved);
 
 					// add snapshot to demo
 					for(auto &DemoRecorder : m_DemoRecorder)

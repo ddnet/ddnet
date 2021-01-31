@@ -26,7 +26,6 @@
 
 #include "race.h"
 #include "render.h"
-#include <game/extrainfo.h>
 #include <game/localization.h>
 #include <game/version.h>
 
@@ -862,7 +861,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)
 				g_GameClient.m_pSounds->Play(CSounds::CHN_GLOBAL, pMsg->m_SoundID, 1.0f);
 		}
 	}
-	else if(MsgId == NETMSGTYPE_SV_TEAMSSTATE)
+	else if(MsgId == NETMSGTYPE_SV_TEAMSSTATE || MsgId == NETMSGTYPE_SV_TEAMSSTATELEGACY)
 	{
 		unsigned int i;
 
@@ -1619,7 +1618,7 @@ void CGameClient::OnNewSnapshot()
 
 	if(!m_DDRaceMsgSent[0] && m_Snap.m_pLocalInfo)
 	{
-		CMsgPacker Msg(NETMSGTYPE_CL_ISDDNET, false);
+		CMsgPacker Msg(NETMSGTYPE_CL_ISDDNETLEGACY, false);
 		Msg.AddInt(CLIENT_VERSIONNR);
 		Client()->SendMsgY(&Msg, MSGFLAG_VITAL, 0);
 		m_DDRaceMsgSent[0] = true;
@@ -1627,7 +1626,7 @@ void CGameClient::OnNewSnapshot()
 
 	if(!m_DDRaceMsgSent[1] && m_Snap.m_pLocalInfo && Client()->DummyConnected())
 	{
-		CMsgPacker Msg(NETMSGTYPE_CL_ISDDNET, false);
+		CMsgPacker Msg(NETMSGTYPE_CL_ISDDNETLEGACY, false);
 		Msg.AddInt(CLIENT_VERSIONNR);
 		Client()->SendMsgY(&Msg, MSGFLAG_VITAL, 1);
 		m_DDRaceMsgSent[1] = true;

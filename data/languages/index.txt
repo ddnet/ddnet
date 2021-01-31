@@ -1,5 +1,9 @@
 ##### language indices #####
 
+arabic
+== ﻲﺑﺮﻋ
+== 682
+
 belarusian
 == Беларуская
 == 112

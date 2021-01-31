@@ -47,7 +47,7 @@ void CTeeHistorian::Reset(const CGameInfo *pGameInfo, WRITE_CALLBACK pfnWriteCal
 	// Tick 0 is implicit at the start, game starts as tick 1.
 	m_TickWritten = true;
 	m_MaxClientID = MAX_CLIENTS;
-	// `m_PrevMaxClientID` is initialized in `BeginTick`
+	// `m_PrevMaxClientID` is initialized in `BeginPlayers`
 	for(auto &PrevPlayer : m_aPrevPlayers)
 	{
 		PrevPlayer.m_Alive = false;
@@ -204,6 +204,8 @@ void CTeeHistorian::BeginPlayers()
 	dbg_assert(m_State == STATE_BEFORE_PLAYERS, "invalid teehistorian state");
 
 	m_PrevMaxClientID = m_MaxClientID;
+	// ensure that PLAYER_{DIFF, NEW, OLD} don't cause an implicit tick after a TICK_SKIP
+	// by not overwriting m_MaxClientID during RecordPlayer
 	m_MaxClientID = -1;
 
 	m_State = STATE_PLAYERS;
@@ -491,6 +493,8 @@ void CTeeHistorian::RecordTestExtra()
 
 void CTeeHistorian::RecordTeamSaveSuccess(int Team, CUuid SaveID, const char *pTeamSave)
 {
+	EnsureTickWritten();
+
 	CPacker Buffer;
 	Buffer.Reset();
 	Buffer.AddInt(Team);
@@ -509,6 +513,8 @@ void CTeeHistorian::RecordTeamSaveSuccess(int Team, CUuid SaveID, const char *pT
 
 void CTeeHistorian::RecordTeamSaveFailure(int Team)
 {
+	EnsureTickWritten();
+
 	CPacker Buffer;
 	Buffer.Reset();
 	Buffer.AddInt(Team);
@@ -523,6 +529,8 @@ void CTeeHistorian::RecordTeamSaveFailure(int Team)
 
 void CTeeHistorian::RecordTeamLoadSuccess(int Team, CUuid SaveID, const char *pTeamSave)
 {
+	EnsureTickWritten();
+
 	CPacker Buffer;
 	Buffer.Reset();
 	Buffer.AddInt(Team);
@@ -541,6 +549,8 @@ void CTeeHistorian::RecordTeamLoadSuccess(int Team, CUuid SaveID, const char *pT
 
 void CTeeHistorian::RecordTeamLoadFailure(int Team)
 {
+	EnsureTickWritten();
+
 	CPacker Buffer;
 	Buffer.Reset();
 	Buffer.AddInt(Team);

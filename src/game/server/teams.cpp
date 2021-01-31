@@ -423,15 +423,24 @@ void CGameTeams::SendTeamsState(int ClientID)
 	if(g_Config.m_SvTeam == 3)
 		return;
 
-	if(!m_pGameContext->m_apPlayers[ClientID] || m_pGameContext->m_apPlayers[ClientID]->GetClientVersion() <= VERSION_DDRACE)
+	if(!m_pGameContext->m_apPlayers[ClientID])
 		return;
 
 	CMsgPacker Msg(NETMSGTYPE_SV_TEAMSSTATE);
+	CMsgPacker MsgLegacy(NETMSGTYPE_SV_TEAMSSTATELEGACY);
 
 	for(unsigned i = 0; i < MAX_CLIENTS; i++)
+	{
 		Msg.AddInt(m_Core.Team(i));
+		MsgLegacy.AddInt(m_Core.Team(i));
+	}
 
 	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
+	int ClientVersion = m_pGameContext->m_apPlayers[ClientID]->GetClientVersion();
+	if(!Server()->IsSixup(ClientID) && VERSION_DDRACE < ClientVersion && ClientVersion <= VERSION_DDNET_MSG_LEGACY)
+	{
+		Server()->SendMsg(&MsgLegacy, MSGFLAG_VITAL, ClientID);
+	}
 }
 
 int CGameTeams::GetDDRaceState(CPlayer *Player)
@@ -628,20 +637,24 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 		}
 	}
 
-	if(Player->GetClientVersion() >= VERSION_DDRACE)
 	{
 		CNetMsg_Sv_DDRaceTime Msg;
-		Msg.m_Time = (int)(Time * 100.0f);
-		Msg.m_Check = 0;
-		Msg.m_Finish = 1;
+		CNetMsg_Sv_DDRaceTimeLegacy MsgLegacy;
+		MsgLegacy.m_Time = Msg.m_Time = (int)(Time * 100.0f);
+		MsgLegacy.m_Check = Msg.m_Check = 0;
+		MsgLegacy.m_Finish = Msg.m_Finish = 1;
 
 		if(pData->m_BestTime)
 		{
 			float Diff = (Time - pData->m_BestTime) * 100;
-			Msg.m_Check = (int)Diff;
+			MsgLegacy.m_Check = Msg.m_Check = (int)Diff;
 		}
 
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
+		if(!Server()->IsSixup(ClientID) && VERSION_DDRACE <= Player->GetClientVersion() && Player->GetClientVersion() <= VERSION_DDNET_MSG_LEGACY)
+		{
+			Server()->SendPackMsg(&MsgLegacy, MSGFLAG_VITAL, ClientID);
+		}
 	}
 
 	{
