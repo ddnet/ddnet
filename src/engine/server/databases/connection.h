@@ -38,14 +38,10 @@ public:
 	// Get Median Map Time from l.Map
 	virtual const char *MedianMapTime(char *pBuffer, int BufferSize) const = 0;
 
-	enum Status
-	{
-		IN_USE,
-		SUCCESS,
-		FAILURE,
-	};
 	// tries to allocate the connection from the pool established
-	virtual Status Connect() = 0;
+	//
+	// returns true on failure
+	virtual bool Connect() = 0;
 	// has to be called to return the connection back to the pool
 	virtual void Disconnect() = 0;
 

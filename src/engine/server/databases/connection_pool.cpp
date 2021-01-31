@@ -203,8 +203,10 @@ void CDbConnectionPool::Worker()
 
 bool CDbConnectionPool::ExecSqlFunc(IDbConnection *pConnection, CSqlExecData *pData, bool Failure)
 {
-	if(pConnection->Connect() != IDbConnection::SUCCESS)
+	if(pConnection->Connect())
+	{
 		return false;
+	}
 	bool Success = false;
 	try
 	{

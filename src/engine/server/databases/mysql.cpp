@@ -75,7 +75,7 @@ public:
 	virtual const char *Random() const { return "RAND()"; };
 	virtual const char *MedianMapTime(char *pBuffer, int BufferSize) const;
 
-	virtual Status Connect();
+	virtual bool Connect();
 	virtual void Disconnect();
 
 	virtual void PrepareStatement(const char *pStmt);
@@ -217,19 +217,21 @@ void CMysqlConnection::ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsig
 	str_format(aBuf, BufferSize, "UNIX_TIMESTAMP(%s)", pTimestamp);
 }
 
-IDbConnection::Status CMysqlConnection::Connect()
+bool CMysqlConnection::Connect()
 {
 	if(m_InUse.exchange(true))
-		return Status::IN_USE;
+	{
+		dbg_assert(0, "Tried connecting while the connection is in use");
+	}
 
 	m_NewQuery = true;
 	if(ConnectImpl())
 	{
 		dbg_msg("mysql", "connect error %s", m_aErrorDetail);
 		m_InUse.store(false);
-		return Status::FAILURE;
+		return true;
 	}
-	return Status::SUCCESS;
+	return false;
 }
 
 bool CMysqlConnection::ConnectImpl()

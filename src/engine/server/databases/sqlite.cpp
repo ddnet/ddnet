@@ -25,7 +25,7 @@ public:
 	virtual const char *Random() const { return "RANDOM()"; };
 	virtual const char *MedianMapTime(char *pBuffer, int BufferSize) const;
 
-	virtual Status Connect();
+	virtual bool Connect();
 	virtual void Disconnect();
 
 	virtual void PrepareStatement(const char *pStmt);
@@ -102,19 +102,23 @@ CSqliteConnection *CSqliteConnection::Copy()
 	return new CSqliteConnection(m_aFilename, m_Setup);
 }
 
-IDbConnection::Status CSqliteConnection::Connect()
+bool CSqliteConnection::Connect()
 {
 	if(m_InUse.exchange(true))
-		return Status::IN_USE;
+	{
+		dbg_assert(0, "Tried connecting while the connection is in use");
+	}
 
 	if(m_pDb != nullptr)
-		return Status::SUCCESS;
+	{
+		return false;
+	}
 
 	int Result = sqlite3_open(m_aFilename, &m_pDb);
 	if(Result != SQLITE_OK)
 	{
 		dbg_msg("sql", "Can't open sqlite database: '%s'", sqlite3_errmsg(m_pDb));
-		return Status::FAILURE;
+		return true;
 	}
 
 	// wait for database to unlock so we don't have to handle SQLITE_BUSY errors
@@ -125,22 +129,22 @@ IDbConnection::Status CSqliteConnection::Connect()
 		char aBuf[1024];
 		FormatCreateRace(aBuf, sizeof(aBuf));
 		if(!Execute(aBuf))
-			return Status::FAILURE;
+			return true;
 		FormatCreateTeamrace(aBuf, sizeof(aBuf), "BLOB");
 		if(!Execute(aBuf))
-			return Status::FAILURE;
+			return true;
 		FormatCreateMaps(aBuf, sizeof(aBuf));
 		if(!Execute(aBuf))
-			return Status::FAILURE;
+			return true;
 		FormatCreateSaves(aBuf, sizeof(aBuf));
 		if(!Execute(aBuf))
-			return Status::FAILURE;
+			return true;
 		FormatCreatePoints(aBuf, sizeof(aBuf));
 		if(!Execute(aBuf))
-			return Status::FAILURE;
+			return true;
 		m_Setup = false;
 	}
-	return Status::SUCCESS;
+	return false;
 }
 
 void CSqliteConnection::Disconnect()
