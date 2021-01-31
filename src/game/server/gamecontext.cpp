@@ -1066,11 +1066,6 @@ void CGameContext::OnClientDirectInput(int ClientID, void *pInput)
 	if(!m_World.m_Paused)
 		m_apPlayers[ClientID]->OnDirectInput((CNetObj_PlayerInput *)pInput);
 
-	if(m_TeeHistorianActive)
-	{
-		m_TeeHistorian.RecordPlayerInput(ClientID, (CNetObj_PlayerInput *)pInput);
-	}
-
 	int Flags = ((CNetObj_PlayerInput *)pInput)->m_PlayerFlags;
 	if((Flags & 256) || (Flags & 512))
 	{
@@ -1088,6 +1083,11 @@ void CGameContext::OnClientPredictedEarlyInput(int ClientID, void *pInput)
 {
 	if(!m_World.m_Paused)
 		m_apPlayers[ClientID]->OnPredictedEarlyInput((CNetObj_PlayerInput *)pInput);
+
+	if(m_TeeHistorianActive)
+	{
+		m_TeeHistorian.RecordPlayerInput(ClientID, (CNetObj_PlayerInput *)pInput);
+	}
 }
 
 struct CVoteOptionServer *CGameContext::GetVoteOption(int Index)
@@ -1488,7 +1488,7 @@ void CGameContext::OnClientDDNetVersionKnown(int ClientID)
 
 void *CGameContext::PreProcessMsg(int *MsgID, CUnpacker *pUnpacker, int ClientID)
 {
-	if(Server()->IsSixup(ClientID))
+	if(Server()->IsSixup(ClientID) && *MsgID < OFFSET_UUID)
 	{
 		void *pRawMsg = m_NetObjHandler7.SecureUnpackMsg(*MsgID, pUnpacker);
 		if(!pRawMsg)
@@ -2123,7 +2123,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				SendBroadcast(aBuf, ClientID);
 			}
 		}
-		else if(MsgID == NETMSGTYPE_CL_ISDDNET)
+		else if(MsgID == NETMSGTYPE_CL_ISDDNETLEGACY)
 		{
 			IServer::CClientInfo Info;
 			Server()->GetClientInfo(ClientID, &Info);

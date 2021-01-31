@@ -6,8 +6,6 @@
 #	Tsin			2011-04-06 23:15:58
 #	Shymwo			2011-07-15 01:27:45
 #	Shymwo			2011-07-21 18:54:53
-#	TortiLeq		2020-06-26 13:14:09 (with Ertee :D)
-#   TortiLeq		2020-07-21 12:48:38
 ##### /authors #####
 
 ##### translated strings #####
@@ -407,19 +405,19 @@ Shotgun
 == Shotgun
 
 Show chat
-== Pokaż czat
+== Pokazuj czat
 
 Show friends only
-== Pokaż tylko znajomych
+== Pokazuj tylko znajomych
 
 Show ingame HUD
-== Pokaż HUD
+== Pokazuj HUD
 
 Show name plates
-== Pokaż nicki
+== Pokazuj nicki
 
 Show only supported
-== Pokaż tylko wspierane
+== Pokazuj tylko wspierane
 
 Skins
 == Motywy
@@ -497,7 +495,7 @@ Use team colors for name plates
 == Użyj koloru drużyn dla wyświetlania nicków
 
 V-Sync
-== Synchronizacja pionowa (V-Sync)
+== V-Sync
 
 Version
 == Wersja
@@ -529,7 +527,7 @@ Yes
 You must restart the game for all settings to take effect.
 == Uruchom ponownie grę, aby użyć nowych ustawień.
 
-##### needs translation #####
+#####
 
 Demo
 == Demo
@@ -571,10 +569,10 @@ Join game
 == Dołącz
 
 FSAA samples
-== Próbkowanie FSAA (Antyaliasing)
+== FSAA (Antyaliasing)
 
 Sound volume
-== Głośność
+== Głośność ogólna
 
 Created:
 == Utworzono:
@@ -643,16 +641,16 @@ Type:
 == Typ:
 
 Show others
-== Pokaż innych
+== Pokazuj innych
 
 Show quads
-== Pokaż quady
+== Pokazuj quady
 
 Show other players' hook collision lines
-== Pokaż linie kolizyjne innych graczy
+== Pokazuj linie kolizyjne innych graczy
 
 Show other players' key presses
-== Pokaż naciśnięcia klawiszy innych graczy
+== Pokazuj naciśnięcia klawiszy innych graczy
 
 Background (regular)
 == Tło (regularne)
@@ -694,7 +692,7 @@ Default zoom
 == Domyślny zoom
 
 Overlay entities
-== Pokaż entities
+== Pokazuj entities
 
 Select a name
 == Wybierz nazwę
@@ -880,7 +878,7 @@ Deactivate
 == Dezaktywuj
 
 Pause
-== Zapauzuj
+== Pauza
 
 1 new mention
 == 1 raz wspomniano o tobie
@@ -898,7 +896,7 @@ Wait before try for
 == Poczekaj zanim spróbujesz
 
 Enable long pain sound (used when shooting in freeze)
-== Włącz długi jęk (używany gdy krzyczysz we freezie)
+== Włącz dźwięk długiego jęku (używany, gdy strzelasz we freezie)
 
 DDNet
 == DDNet
@@ -907,7 +905,7 @@ seconds
 == sekundy
 
 Show HUD
-== Pokaż HUD
+== Pokazuj HUD
 
 Frags
 == Fragi
@@ -922,7 +920,7 @@ Suicides
 == Samobójstwa
 
 Show clan above name plates
-== Pokazuj klan nad nazwyą gracza
+== Pokazuj klan nad nazwą gracza
 
 Loading DDNet Client
 == Ładowanie klienta DDNet
@@ -937,7 +935,7 @@ Update failed! Check log...
 == Niepowodzenie aktualizacji! Sprawdź logi...
 
 Friend message
-== Wiadomość od znajowego
+== Wiadomość od znajomego
 
 %.2f MiB
 == %.2f MiB
@@ -961,7 +959,7 @@ File already exists, do you want to overwrite it?
 == Plik już istnieje, chcesz go nadpisać?
 
 Show entities
-== Pokaż entities
+== Pokazuj entities
 
 Size
 == Rozmiar
@@ -979,7 +977,7 @@ Ratio
 == Stosunek
 
 Browser
-== Wyszukiwarka
+== Serwery
 
 Time
 == Czas
@@ -1012,7 +1010,7 @@ Connecting dummy
 == Przyślij kukłę
 
 Show all
-== Pokaż wszystkich
+== Pokazuj wszystkich
 
 Use high DPI
 == Użyj dużego DPI
@@ -1033,10 +1031,10 @@ Downloading %s:
 == Pobieranie %s:
 
 Show tiles layers from BG map
-== Pokaż warstwy płytek razem z tłem mapy
+== Pokazuj warstwy płytek razem z tłem mapy
 
 Show console window
-== Pokaż okno konsoli
+== Pokazuj okno konsoli
 
 Max CSVs
 == Maksymalne CSV
@@ -1114,7 +1112,7 @@ Personal best:
 == Najlepszy wynik gracza:
 
 Show text entities
-== Pokaż entities tekstu
+== Pokazuj entities tekstu
 
 Friend
 == Znajomy
@@ -1147,7 +1145,7 @@ Please enter your nickname below.
 == Proszę wpisać swój nick poniżej.
 
 Show DDNet map finishes in server browser
-== Pokaż ukończone mapy DDNet w wyszukiwarce serwerów
+== Pokazuj ukończone mapy DDNet w wyszukiwarce
 
 transmits your player name to info2.ddnet.tw
 == przenosi twój nick do info2.ddnet.tw
@@ -1171,128 +1169,128 @@ Replay
 == Powtórka
 
 Saving ddnet-settings.cfg failed
-== 
+== Zapisywanie ddnet-settings.cfg nie powiodło się
 
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== 
+== Szerokość lub wysokość tekstury %s nie jest podzielna przez 16, co może powodować błędy.
 
 Warning
-== 
+== Ostrzeżenie
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== 
+== Tryb debugowania jest włączony. Naciśnij Ctrl+Shift+D, aby wyłączyć tryb debugowania.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 
+== Użyj klawisza K - aby zginąć (zacząć od nowa), Q - aby zapauzować postać i oglądać innych graczy. Sprawdź ustawienia dla innych kombinacji klawiszy.
 
 Existing Player
-== 
+== Istniejący gracz
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== 
+== Twój nick '%s' jest zajęty (%d points). Czy dalej chcesz go użyć?
 
 Checking for existing player with your name
-== 
+== Sprawdzanie, czy istnieje gracz pociadający twój nick
 
 Country / Region
-== 
+== Kraj / Region
 
 Speed
-== 
+== Prędkość
 
 Theme
-== 
+== Motyw
 
 %d of %d servers
-== 
+== %d z %d serwerów
 
 %d of %d server
-== 
+== %d z %d serwer
 
 %d players
-== 
+== %d graczy
 
 %d player
-== 
+== %d gracz
 
 Demos directory
-== 
+== Katalog dem
 
 Smooth Dynamic Camera
-== 
+== Gładka dynamiczna kamera
 
 Skip the main menu
-== 
+== Pomiń menu główne
 
 Themes directory
-== 
+== Katalog motywów
 
 Download skins
-== 
+== Pobieraj skiny
 
 Skin Database
-== 
+== Baza danych
 
 Skins directory
-== 
+== Katalog skinów
 
 Game sound volume
-== 
+== Głośność gry
 
 Chat sound volume
-== 
+== Głośność czatu
 
 Background music volume
-== 
+== Głośność muzyki w tle
 
 Assets
-== 
+== Zasoby
 
 Use old chat style
-== 
+== Użyj klasycznego wyglądu czatu
 
 Highlight
-== 
+== Podkreślenie
 
 Client message
-== 
+== Wiadomość klienta
 
 Use current map as background
-== 
+== Użyj bieżącej mapy jako tło
 
 Entities
-== 
+== Entities
 
 Emoticons
-== 
+== Emotikony
 
 Particles
-== 
+== Cząstki
 
 Assets directory
-== 
+== Katalog zasobów
 
 https://wiki.ddnet.tw/
-== 
+== https://wiki.ddnet.tw/
 
 Website
-== 
+== Strona
 
 Settings
-== 
+== Ustawienia
 
 Stop server
-== 
+== Zatrzymaj serwer
 
 Run server
-== 
+== Uruchom serwer
 
 Server executable not found, can't run server
-== 
+== Nie znaleziono pliku wykonywalnego serwera, nie można uruchomić serwera
 
 Editor
-== 
+== Edytor
 
 [Start menu]
 Play
-== 
+== Graj

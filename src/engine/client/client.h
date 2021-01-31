@@ -14,6 +14,7 @@
 #include <engine/client/http.h>
 #include <engine/client/serverbrowser.h>
 #include <engine/client/updater.h>
+#include <engine/discord.h>
 #include <engine/editor.h>
 #include <engine/engine.h>
 #include <engine/graphics.h>
@@ -78,6 +79,7 @@ class CServerCapabilities
 {
 public:
 	bool m_ChatTimeoutCode;
+	bool m_AnyPlayerFlag;
 };
 
 class CClient : public IClient, public CDemoPlayer::IListener
@@ -95,6 +97,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	IConsole *m_pConsole;
 	IStorage *m_pStorage;
 	IUpdater *m_pUpdater;
+	IDiscord *m_pDiscord;
 	ISteam *m_pSteam;
 	IEngineMasterServer *m_pMasterServer;
 
@@ -280,6 +283,7 @@ public:
 	CConfig *Config() { return m_pConfig; }
 	IStorage *Storage() { return m_pStorage; }
 	IUpdater *Updater() { return m_pUpdater; }
+	IDiscord *Discord() { return m_pDiscord; }
 	ISteam *Steam() { return m_pSteam; }
 
 	CClient();

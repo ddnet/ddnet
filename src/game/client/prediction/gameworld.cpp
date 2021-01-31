@@ -9,6 +9,7 @@
 #include "entity.h"
 #include <algorithm>
 #include <engine/shared/config.h>
+#include <game/client/projectile_data.h>
 #include <utility>
 
 //////////////////////////////////////////////////
@@ -368,9 +369,18 @@ void CGameWorld::NetCharAdd(int ObjID, CNetObj_Character *pCharObj, CNetObj_DDNe
 
 void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData)
 {
-	if(ObjType == NETOBJTYPE_PROJECTILE && m_WorldConfig.m_PredictWeapons)
+	if((ObjType == NETOBJTYPE_PROJECTILE || ObjType == NETOBJTYPE_DDNETPROJECTILE) && m_WorldConfig.m_PredictWeapons)
 	{
-		CProjectile NetProj = CProjectile(this, ObjID, (CNetObj_Projectile *)pObjData);
+		CProjectileData Data;
+		if(ObjType == NETOBJTYPE_PROJECTILE)
+		{
+			Data = ExtractProjectileInfo((const CNetObj_Projectile *)pObjData);
+		}
+		else
+		{
+			Data = ExtractProjectileInfoDDNet((const CNetObj_DDNetProjectile *)pObjData);
+		}
+		CProjectile NetProj = CProjectile(this, ObjID, &Data);
 
 		if(NetProj.m_Type != WEAPON_SHOTGUN && fabs(length(NetProj.m_Direction) - 1.f) > 0.02f) // workaround to skip grenades on ball mod
 			return;
@@ -385,7 +395,7 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData)
 				return;
 			}
 		}
-		if(!UseExtraInfo((CNetObj_Projectile *)pObjData))
+		if(!Data.m_ExtraInfo)
 		{
 			// try to match the newly received (unrecognized) projectile with a locally fired one
 			for(CProjectile *pProj = (CProjectile *)FindFirst(CGameWorld::ENTTYPE_PROJECTILE); pProj; pProj = (CProjectile *)pProj->TypeNext())
@@ -570,7 +580,25 @@ CEntity *CGameWorld::FindMatch(int ObjID, int ObjType, const void *pObjData)
 	switch(ObjType)
 	{
 	case NETOBJTYPE_CHARACTER: FindType(ENTTYPE_CHARACTER, CCharacter, CNetObj_Character);
-	case NETOBJTYPE_PROJECTILE: FindType(ENTTYPE_PROJECTILE, CProjectile, CNetObj_Projectile);
+	case NETOBJTYPE_PROJECTILE:
+	case NETOBJTYPE_DDNETPROJECTILE:
+	{
+		CProjectileData Data;
+		if(ObjType == NETOBJTYPE_PROJECTILE)
+		{
+			Data = ExtractProjectileInfo((const CNetObj_Projectile *)pObjData);
+		}
+		else
+		{
+			Data = ExtractProjectileInfoDDNet((const CNetObj_DDNetProjectile *)pObjData);
+		}
+		CProjectile *pEnt = (CProjectile *)GetEntity(ObjID, ENTTYPE_PROJECTILE);
+		if(pEnt && CProjectile(this, ObjID, &Data).Match(pEnt))
+		{
+			return pEnt;
+		}
+		return 0;
+	}
 	case NETOBJTYPE_LASER: FindType(ENTTYPE_LASER, CLaser, CNetObj_Laser);
 	case NETOBJTYPE_PICKUP: FindType(ENTTYPE_PICKUP, CPickup, CNetObj_Pickup);
 	}
