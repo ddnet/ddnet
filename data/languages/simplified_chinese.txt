@@ -806,7 +806,7 @@ Try fast HTTP map download first
 == 优先尝试用HTTP快速下载地图
 
 DDNet %s is available:
-== DDnet %s 现已可用：
+== DDNet %s 现已可用：
 
 Update now
 == 现在更新

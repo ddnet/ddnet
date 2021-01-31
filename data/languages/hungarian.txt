@@ -790,7 +790,7 @@ Enable long pain sound (used when shooting in freeze)
 == Hosszú fájdalom hang lejátszása (mikor a játékos lő,ha lefagyott)
 
 DDNet %s is available:
-== DDnet %s verzió elérhető
+== DDNet %s verzió elérhető
 
 Updating...
 == Frissítés...
