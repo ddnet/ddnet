@@ -12,42 +12,40 @@ CChillerEditor::CChillerEditor()
 	m_TextIndexY = -1;
 	m_TextLineLen = 0;
 	m_NextCursorBlink = 0;
+	m_pEditor = 0;
 }
 
 void CChillerEditor::Init(class CEditor *pEditor)
 {
+	m_pEditor = pEditor;
 	m_CursorTextTexture = pEditor->Graphics()->LoadTexture("editor/cursor_text.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 }
 
-void CChillerEditor::SetCursor(CEditor *pEditor)
+void CChillerEditor::SetCursor()
 {
-	float wx = pEditor->UI()->MouseWorldX();
-	float wy = pEditor->UI()->MouseWorldY();
+	float wx = m_pEditor->UI()->MouseWorldX();
+	float wy = m_pEditor->UI()->MouseWorldY();
 	m_TextIndexX = (int)(wx / 32);
 	m_TextIndexY = (int)(wy / 32);
 	m_TextLineLen = 0;
 }
 
-void CChillerEditor::DoMapEditor(CEditor *pEditor, int Inside)
+void CChillerEditor::DoMapEditor()
 {
-	if(pEditor->UI()->MouseButton(0))
-	{
-		SetCursor(pEditor);
-	}
-	if(pEditor->Input()->KeyPress(KEY_T) && m_EditorMode != CE_MODE_TEXT && Inside && pEditor->m_Dialog == DIALOG_NONE && pEditor->m_EditBoxActive == 0)
+	if(m_pEditor->UI()->MouseButton(0))
+		SetCursor();
+	if(m_pEditor->Input()->KeyPress(KEY_T) && m_EditorMode != CE_MODE_TEXT && m_pEditor->m_Dialog == DIALOG_NONE && m_pEditor->m_EditBoxActive == 0)
 	{
 		m_EditorMode = CE_MODE_TEXT;
-		pEditor->m_Dialog = -1; // hack to not close editor when pressing ESC
-		SetCursor(pEditor);
+		m_pEditor->m_Dialog = -1; // hack to not close editor when pressing ESC
+		SetCursor();
 	}
 	if(m_EditorMode == CE_MODE_TEXT)
 	{
-		pEditor->m_pTooltip = "Type on your keyboard to insert letters. Press ESC to end text mode.";
-		CLayerTiles *pLayer = (CLayerTiles *)pEditor->GetSelectedLayerType(0, LAYERTYPE_TILES);
-		if(m_TextIndexX < 0 || m_TextIndexX > pLayer->m_Width - 1)
-			return;
-		if(m_TextIndexY < 0 || m_TextIndexY > pLayer->m_Height - 1)
-			return;
+		m_pEditor->m_pTooltip = "Type on your keyboard to insert letters. Press ESC to end text mode.";
+		CLayerTiles *pLayer = (CLayerTiles *)m_pEditor->GetSelectedLayerType(0, LAYERTYPE_TILES);
+		m_TextIndexX = clamp(m_TextIndexX, 0, pLayer->m_Width - 1);
+		m_TextIndexY = clamp(m_TextIndexY, 0, pLayer->m_Height - 1);
 		if(time_get() > m_NextCursorBlink)
 		{
 			m_NextCursorBlink = time_get() + time_freq() / 1.5;
@@ -55,29 +53,29 @@ void CChillerEditor::DoMapEditor(CEditor *pEditor, int Inside)
 		}
 		if(m_DrawCursor)
 		{
-			CLayerGroup *g = pEditor->GetSelectedGroup();
+			CLayerGroup *g = m_pEditor->GetSelectedGroup();
 			g->MapScreen();
-			pEditor->Graphics()->WrapClamp();
-			pEditor->Graphics()->TextureSet(m_CursorTextTexture);
-			pEditor->Graphics()->QuadsBegin();
-			pEditor->Graphics()->SetColor(1, 0, 0, 1);
+			m_pEditor->Graphics()->WrapClamp();
+			m_pEditor->Graphics()->TextureSet(m_CursorTextTexture);
+			m_pEditor->Graphics()->QuadsBegin();
+			m_pEditor->Graphics()->SetColor(1, 0, 0, 1);
 			IGraphics::CQuadItem QuadItem(m_TextIndexX * 32, m_TextIndexY * 32, 32.0f, 32.0f);
-			pEditor->Graphics()->QuadsDrawTL(&QuadItem, 1);
-			pEditor->Graphics()->QuadsEnd();
-			pEditor->Graphics()->WrapNormal();
-			pEditor->Graphics()->MapScreen(pEditor->UI()->Screen()->x, pEditor->UI()->Screen()->y, pEditor->UI()->Screen()->w, pEditor->UI()->Screen()->h);
+			m_pEditor->Graphics()->QuadsDrawTL(&QuadItem, 1);
+			m_pEditor->Graphics()->QuadsEnd();
+			m_pEditor->Graphics()->WrapNormal();
+			m_pEditor->Graphics()->MapScreen(m_pEditor->UI()->Screen()->x, m_pEditor->UI()->Screen()->y, m_pEditor->UI()->Screen()->w, m_pEditor->UI()->Screen()->h);
 		}
 		// handle key presses
-		IInput::CEvent e = pEditor->Input()->GetEvent(0);
-		if(!pEditor->Input()->IsEventValid(&e))
+		IInput::CEvent e = m_pEditor->Input()->GetEvent(0);
+		if(!m_pEditor->Input()->IsEventValid(&e))
 			return;
-		if(pEditor->Input()->KeyPress(e.m_Key))
+		if(m_pEditor->Input()->KeyPress(e.m_Key))
 			return;
 		// escape -> end text mode
 		if(e.m_Key == KEY_ESCAPE)
 		{
-			if(pEditor->m_Dialog == -1)
-				pEditor->m_Dialog = DIALOG_NONE;
+			if(m_pEditor->m_Dialog == -1)
+				m_pEditor->m_Dialog = DIALOG_NONE;
 			m_EditorMode = CE_MODE_NONE;
 			return;
 		}
@@ -117,7 +115,7 @@ void CChillerEditor::DoMapEditor(CEditor *pEditor, int Inside)
 		{
 			m_TextIndexX--;
 			m_TextLineLen--;
-			if(pEditor->Input()->KeyIsPressed(KEY_LCTRL))
+			if(m_pEditor->Input()->KeyIsPressed(KEY_LCTRL))
 			{
 				while(pLayer->GetTile(m_TextIndexX, m_TextIndexY).m_Index)
 				{
@@ -134,7 +132,7 @@ void CChillerEditor::DoMapEditor(CEditor *pEditor, int Inside)
 		{
 			m_TextIndexX++;
 			m_TextLineLen++;
-			if(pEditor->Input()->KeyIsPressed(KEY_LCTRL))
+			if(m_pEditor->Input()->KeyIsPressed(KEY_LCTRL))
 			{
 				while(pLayer->GetTile(m_TextIndexX, m_TextIndexY).m_Index)
 				{
@@ -153,8 +151,6 @@ void CChillerEditor::DoMapEditor(CEditor *pEditor, int Inside)
 			m_TextIndexY++;
 		m_NextCursorBlink = time_get() + time_freq();
 		m_DrawCursor = true;
-		m_TextIndexX = clamp(m_TextIndexX, 0, pLayer->m_Width - 1);
-		m_TextIndexY = clamp(m_TextIndexY, 0, pLayer->m_Height - 1);
-		dbg_msg("chillerbot", "key=%d dialog=%d", e.m_Key, pEditor->m_Dialog);
+		dbg_msg("chillerbot", "key=%d dialog=%d", e.m_Key, m_pEditor->m_Dialog);
 	}
 }

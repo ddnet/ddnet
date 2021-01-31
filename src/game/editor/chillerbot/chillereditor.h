@@ -17,12 +17,13 @@ class CChillerEditor
 	int64 m_NextCursorBlink;
 	bool m_DrawCursor;
 	IGraphics::CTextureHandle m_CursorTextTexture;
+	class CEditor *m_pEditor;
 
-	void SetCursor(class CEditor *pEditor);
+	void SetCursor();
 
 public:
 	CChillerEditor();
-	void DoMapEditor(class CEditor *pEditor, int Inside);
+	void DoMapEditor();
 	void Init(class CEditor *pEditor);
 };
 
