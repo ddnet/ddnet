@@ -49,6 +49,7 @@ protected:
 
 public:
 	char m_aNews[3000];
+	char m_aMapDownloadUrl[256];
 	int m_Points;
 	int64 m_ReconnectTime;
 
