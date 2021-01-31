@@ -40,8 +40,9 @@ public:
 	~CDbConnectionPool();
 	CDbConnectionPool &operator=(const CDbConnectionPool &) = delete;
 
-	typedef bool (*FRead)(IDbConnection *, const ISqlData *);
-	typedef bool (*FWrite)(IDbConnection *, const ISqlData *, bool);
+	// Returns false on success.
+	typedef bool (*FRead)(IDbConnection *, const ISqlData *, char *pError, int ErrorSize);
+	typedef bool (*FWrite)(IDbConnection *, const ISqlData *, bool, char *pError, int ErrorSize);
 
 	enum Mode
 	{

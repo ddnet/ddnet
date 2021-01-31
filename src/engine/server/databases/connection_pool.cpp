@@ -2,7 +2,6 @@
 #include "connection.h"
 
 #include <engine/console.h>
-#include <stdexcept>
 
 // helper struct to hold thread data
 struct CSqlExecData
@@ -203,35 +202,26 @@ void CDbConnectionPool::Worker()
 
 bool CDbConnectionPool::ExecSqlFunc(IDbConnection *pConnection, CSqlExecData *pData, bool Failure)
 {
-	if(pConnection->Connect())
+	char aError[256] = "error message not initialized";
+	if(pConnection->Connect(aError, sizeof(aError)))
 	{
+		dbg_msg("sql", "failed connecting to db: %s", aError);
 		return false;
 	}
 	bool Success = false;
-	try
+	switch(pData->m_Mode)
 	{
-		switch(pData->m_Mode)
-		{
-		case CSqlExecData::READ_ACCESS:
-			if(pData->m_Ptr.m_pReadFunc(pConnection, pData->m_pThreadData.get()))
-				Success = true;
-			break;
-		case CSqlExecData::WRITE_ACCESS:
-			if(pData->m_Ptr.m_pWriteFunc(pConnection, pData->m_pThreadData.get(), Failure))
-				Success = true;
-			break;
-		}
-	}
-	catch(std::runtime_error &e)
-	{
-		dbg_msg("sql", "%s SQLite Error: %s", pData->m_pName, e.what());
-	}
-	catch(...)
-	{
-		dbg_msg("sql", "%s Unexpected exception caught", pData->m_pName);
+	case CSqlExecData::READ_ACCESS:
+		Success = !pData->m_Ptr.m_pReadFunc(pConnection, pData->m_pThreadData.get(), aError, sizeof(aError));
+		break;
+	case CSqlExecData::WRITE_ACCESS:
+		Success = !pData->m_Ptr.m_pWriteFunc(pConnection, pData->m_pThreadData.get(), Failure, aError, sizeof(aError));
+		break;
 	}
 	pConnection->Disconnect();
 	if(!Success)
-		dbg_msg("sql", "%s failed", pData->m_pName);
+	{
+		dbg_msg("sql", "%s failed: %s", pData->m_pName, aError);
+	}
 	return Success;
 }

@@ -8,7 +8,6 @@
 
 #include <atomic>
 #include <memory>
-#include <stdexcept>
 #include <vector>
 
 enum
@@ -75,10 +74,10 @@ public:
 	virtual const char *Random() const { return "RAND()"; };
 	virtual const char *MedianMapTime(char *pBuffer, int BufferSize) const;
 
-	virtual bool Connect();
+	virtual bool Connect(char *pError, int ErrorSize);
 	virtual void Disconnect();
 
-	virtual void PrepareStatement(const char *pStmt);
+	virtual bool PrepareStatement(const char *pStmt, char *pError, int ErrorSize);
 
 	virtual void BindString(int Idx, const char *pString);
 	virtual void BindBlob(int Idx, unsigned char *pBlob, int Size);
@@ -86,8 +85,8 @@ public:
 	virtual void BindFloat(int Idx, float Value);
 
 	virtual void Print() {}
-	virtual bool Step();
-	virtual int ExecuteUpdate();
+	virtual bool Step(bool *pEnd, char *pError, int ErrorSize);
+	virtual bool ExecuteUpdate(int *pNumUpdated, char *pError, int ErrorSize);
 
 	virtual bool IsNull(int Col);
 	virtual float GetFloat(int Col);
@@ -95,7 +94,7 @@ public:
 	virtual void GetString(int Col, char *pBuffer, int BufferSize);
 	virtual int GetBlob(int Col, unsigned char *pBuffer, int BufferSize);
 
-	virtual void AddPoints(const char *pPlayer, int Points);
+	virtual bool AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize);
 
 private:
 	class CStmtDeleter
@@ -217,7 +216,7 @@ void CMysqlConnection::ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsig
 	str_format(aBuf, BufferSize, "UNIX_TIMESTAMP(%s)", pTimestamp);
 }
 
-bool CMysqlConnection::Connect()
+bool CMysqlConnection::Connect(char *pError, int ErrorSize)
 {
 	if(m_InUse.exchange(true))
 	{
@@ -227,7 +226,7 @@ bool CMysqlConnection::Connect()
 	m_NewQuery = true;
 	if(ConnectImpl())
 	{
-		dbg_msg("mysql", "connect error %s", m_aErrorDetail);
+		str_copy(pError, m_aErrorDetail, ErrorSize);
 		m_InUse.store(false);
 		return true;
 	}
@@ -331,14 +330,13 @@ void CMysqlConnection::Disconnect()
 	m_InUse.store(false);
 }
 
-void CMysqlConnection::PrepareStatement(const char *pStmt)
+bool CMysqlConnection::PrepareStatement(const char *pStmt, char *pError, int ErrorSize)
 {
 	if(mysql_stmt_prepare(m_pStmt.get(), pStmt, str_length(pStmt)))
 	{
 		StoreErrorStmt("prepare");
-		dbg_msg("mysql", "error preparing statement %s", m_aErrorDetail);
-		throw std::runtime_error(m_aErrorDetail);
-		// TODO: return true;
+		str_copy(pError, m_aErrorDetail, ErrorSize);
+		return true;
 	}
 	m_NewQuery = true;
 	unsigned NumParameters = mysql_stmt_param_count(m_pStmt.get());
@@ -346,7 +344,7 @@ void CMysqlConnection::PrepareStatement(const char *pStmt)
 	m_aStmtParameterExtras.resize(NumParameters);
 	mem_zero(&m_aStmtParameters[0], sizeof(m_aStmtParameters[0]) * m_aStmtParameters.size());
 	mem_zero(&m_aStmtParameterExtras[0], sizeof(m_aStmtParameterExtras[0]) * m_aStmtParameterExtras.size());
-	// TODO: return false;
+	return false;
 }
 
 void CMysqlConnection::BindString(int Idx, const char *pString)
@@ -418,7 +416,7 @@ void CMysqlConnection::BindFloat(int Idx, float Value)
 	pParam->error = nullptr;
 }
 
-bool CMysqlConnection::Step()
+bool CMysqlConnection::Step(bool *pEnd, char *pError, int ErrorSize)
 {
 	if(m_NewQuery)
 	{
@@ -426,38 +424,30 @@ bool CMysqlConnection::Step()
 		if(mysql_stmt_bind_param(m_pStmt.get(), &m_aStmtParameters[0]))
 		{
 			StoreErrorStmt("bind_param");
-			dbg_msg("mysql", "error binding params %s", m_aErrorDetail);
-			throw std::runtime_error(m_aErrorDetail);
-			// TODO: error handling
+			str_copy(pError, m_aErrorDetail, ErrorSize);
+			return true;
 		}
 		if(mysql_stmt_execute(m_pStmt.get()))
 		{
 			StoreErrorStmt("execute");
-			dbg_msg("mysql", "error executing query %s", m_aErrorDetail);
-			throw std::runtime_error(m_aErrorDetail);
-			// TODO: error handling
-			return false;
+			str_copy(pError, m_aErrorDetail, ErrorSize);
+			return true;
 		}
 	}
 	int Result = mysql_stmt_fetch(m_pStmt.get());
 	if(Result == 1)
 	{
 		StoreErrorStmt("fetch");
-		dbg_msg("mysql", "error fetching row %s", m_aErrorDetail);
-		throw std::runtime_error(m_aErrorDetail);
-		// TODO: error handling
-		return false;
+		str_copy(pError, m_aErrorDetail, ErrorSize);
+		return true;
 	}
-	if(Result == MYSQL_NO_DATA)
-	{
-		return false;
-	}
+	*pEnd = (Result == MYSQL_NO_DATA);
 	// `Result` is now either `MYSQL_DATA_TRUNCATED` (which we ignore, we
 	// fetch our columns in a different way) or `0` aka success.
-	return true;
+	return false;
 }
 
-int CMysqlConnection::ExecuteUpdate()
+bool CMysqlConnection::ExecuteUpdate(int *pNumUpdated, char *pError, int ErrorSize)
 {
 	if(m_NewQuery)
 	{
@@ -465,22 +455,20 @@ int CMysqlConnection::ExecuteUpdate()
 		if(mysql_stmt_bind_param(m_pStmt.get(), &m_aStmtParameters[0]))
 		{
 			StoreErrorStmt("bind_param");
-			dbg_msg("mysql", "error binding params %s", m_aErrorDetail);
-			throw std::runtime_error(m_aErrorDetail);
-			// TODO: error handling
-			return -1;
+			str_copy(pError, m_aErrorDetail, ErrorSize);
+			return true;
 		}
 		if(mysql_stmt_execute(m_pStmt.get()))
 		{
 			StoreErrorStmt("execute");
-			dbg_msg("mysql", "error executing update %s", m_aErrorDetail);
-			throw std::runtime_error(m_aErrorDetail);
-			// TODO: error handling
-			return -1;
+			str_copy(pError, m_aErrorDetail, ErrorSize);
+			return true;
 		}
-		return mysql_stmt_affected_rows(m_pStmt.get());
+		*pNumUpdated = mysql_stmt_affected_rows(m_pStmt.get());
+		return false;
 	}
-	return -1;
+	str_copy(pError, "tried to execute update without query", ErrorSize);
+	return true;
 }
 
 bool CMysqlConnection::IsNull(int Col)
@@ -644,7 +632,7 @@ const char *CMysqlConnection::MedianMapTime(char *pBuffer, int BufferSize) const
 	return pBuffer;
 }
 
-void CMysqlConnection::AddPoints(const char *pPlayer, int Points)
+bool CMysqlConnection::AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
@@ -652,11 +640,19 @@ void CMysqlConnection::AddPoints(const char *pPlayer, int Points)
 		"VALUES (?, ?) "
 		"ON DUPLICATE KEY UPDATE Points=Points+?",
 		GetPrefix());
-	PrepareStatement(aBuf);
+	if(PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return true;
+	}
 	BindString(1, pPlayer);
 	BindInt(2, Points);
 	BindInt(3, Points);
-	Step();
+	bool End;
+	if(Step(&End, pError, ErrorSize))
+	{
+		return true;
+	}
+	return false;
 }
 
 IDbConnection *CreateMysqlConnection(

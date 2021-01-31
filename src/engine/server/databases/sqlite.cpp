@@ -6,7 +6,6 @@
 #include <engine/console.h>
 
 #include <atomic>
-#include <stdexcept>
 
 class CSqliteConnection : public IDbConnection
 {
@@ -25,10 +24,10 @@ public:
 	virtual const char *Random() const { return "RANDOM()"; };
 	virtual const char *MedianMapTime(char *pBuffer, int BufferSize) const;
 
-	virtual bool Connect();
+	virtual bool Connect(char *pError, int ErrorSize);
 	virtual void Disconnect();
 
-	virtual void PrepareStatement(const char *pStmt);
+	virtual bool PrepareStatement(const char *pStmt, char *pError, int ErrorSize);
 
 	virtual void BindString(int Idx, const char *pString);
 	virtual void BindBlob(int Idx, unsigned char *pBlob, int Size);
@@ -36,8 +35,8 @@ public:
 	virtual void BindFloat(int Idx, float Value);
 
 	virtual void Print();
-	virtual bool Step();
-	virtual int ExecuteUpdate();
+	virtual bool Step(bool *pEnd, char *pError, int ErrorSize);
+	virtual bool ExecuteUpdate(int *pNumUpdated, char *pError, int ErrorSize);
 
 	virtual bool IsNull(int Col);
 	virtual float GetFloat(int Col);
@@ -46,7 +45,7 @@ public:
 	// passing a negative buffer size is undefined behavior
 	virtual int GetBlob(int Col, unsigned char *pBuffer, int BufferSize);
 
-	virtual void AddPoints(const char *pPlayer, int Points);
+	virtual bool AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize);
 
 private:
 	// copy of config vars
@@ -56,10 +55,12 @@ private:
 	sqlite3 *m_pDb;
 	sqlite3_stmt *m_pStmt;
 	bool m_Done; // no more rows available for Step
-	// returns true, if the query succeeded
-	bool Execute(const char *pQuery);
+	// returns false, if the query succeeded
+	bool Execute(const char *pQuery, char *pError, int ErrorSize);
 
-	void ExceptionOnError(int Result);
+	// returns true if an error was formatted
+	bool FormatError(int Result, char *pError, int ErrorSize);
+	void AssertNoError(int Result);
 
 	std::atomic_bool m_InUse;
 };
@@ -102,7 +103,7 @@ CSqliteConnection *CSqliteConnection::Copy()
 	return new CSqliteConnection(m_aFilename, m_Setup);
 }
 
-bool CSqliteConnection::Connect()
+bool CSqliteConnection::Connect(char *pError, int ErrorSize)
 {
 	if(m_InUse.exchange(true))
 	{
@@ -117,7 +118,7 @@ bool CSqliteConnection::Connect()
 	int Result = sqlite3_open(m_aFilename, &m_pDb);
 	if(Result != SQLITE_OK)
 	{
-		dbg_msg("sql", "Can't open sqlite database: '%s'", sqlite3_errmsg(m_pDb));
+		str_format(pError, ErrorSize, "Can't open sqlite database: '%s'", sqlite3_errmsg(m_pDb));
 		return true;
 	}
 
@@ -128,19 +129,19 @@ bool CSqliteConnection::Connect()
 	{
 		char aBuf[1024];
 		FormatCreateRace(aBuf, sizeof(aBuf));
-		if(!Execute(aBuf))
+		if(Execute(aBuf, pError, ErrorSize))
 			return true;
 		FormatCreateTeamrace(aBuf, sizeof(aBuf), "BLOB");
-		if(!Execute(aBuf))
+		if(Execute(aBuf, pError, ErrorSize))
 			return true;
 		FormatCreateMaps(aBuf, sizeof(aBuf));
-		if(!Execute(aBuf))
+		if(Execute(aBuf, pError, ErrorSize))
 			return true;
 		FormatCreateSaves(aBuf, sizeof(aBuf));
-		if(!Execute(aBuf))
+		if(Execute(aBuf, pError, ErrorSize))
 			return true;
 		FormatCreatePoints(aBuf, sizeof(aBuf));
-		if(!Execute(aBuf))
+		if(Execute(aBuf, pError, ErrorSize))
 			return true;
 		m_Setup = false;
 	}
@@ -155,7 +156,7 @@ void CSqliteConnection::Disconnect()
 	m_InUse.store(false);
 }
 
-void CSqliteConnection::PrepareStatement(const char *pStmt)
+bool CSqliteConnection::PrepareStatement(const char *pStmt, char *pError, int ErrorSize)
 {
 	if(m_pStmt != nullptr)
 		sqlite3_finalize(m_pStmt);
@@ -166,35 +167,39 @@ void CSqliteConnection::PrepareStatement(const char *pStmt)
 		-1, // pStmt can be any length
 		&m_pStmt,
 		NULL);
-	ExceptionOnError(Result);
+	if(FormatError(Result, pError, ErrorSize))
+	{
+		return true;
+	}
 	m_Done = false;
+	return false;
 }
 
 void CSqliteConnection::BindString(int Idx, const char *pString)
 {
 	int Result = sqlite3_bind_text(m_pStmt, Idx, pString, -1, NULL);
-	ExceptionOnError(Result);
+	AssertNoError(Result);
 	m_Done = false;
 }
 
 void CSqliteConnection::BindBlob(int Idx, unsigned char *pBlob, int Size)
 {
 	int Result = sqlite3_bind_blob(m_pStmt, Idx, pBlob, Size, NULL);
-	ExceptionOnError(Result);
+	AssertNoError(Result);
 	m_Done = false;
 }
 
 void CSqliteConnection::BindInt(int Idx, int Value)
 {
 	int Result = sqlite3_bind_int(m_pStmt, Idx, Value);
-	ExceptionOnError(Result);
+	AssertNoError(Result);
 	m_Done = false;
 }
 
 void CSqliteConnection::BindFloat(int Idx, float Value)
 {
 	int Result = sqlite3_bind_double(m_pStmt, Idx, (double)Value);
-	ExceptionOnError(Result);
+	AssertNoError(Result);
 	m_Done = false;
 }
 
@@ -213,31 +218,45 @@ void CSqliteConnection::Print()
 	}
 }
 
-bool CSqliteConnection::Step()
+bool CSqliteConnection::Step(bool *pEnd, char *pError, int ErrorSize)
 {
 	if(m_Done)
+	{
+		*pEnd = true;
 		return false;
+	}
 	int Result = sqlite3_step(m_pStmt);
 	if(Result == SQLITE_ROW)
 	{
-		return true;
+		*pEnd = false;
+		return false;
 	}
 	else if(Result == SQLITE_DONE)
 	{
 		m_Done = true;
+		*pEnd = true;
 		return false;
 	}
 	else
 	{
-		ExceptionOnError(Result);
+		if(FormatError(Result, pError, ErrorSize))
+		{
+			return true;
+		}
 	}
+	*pEnd = true;
 	return false;
 }
 
-int CSqliteConnection::ExecuteUpdate()
+bool CSqliteConnection::ExecuteUpdate(int *pNumUpdated, char *pError, int ErrorSize)
 {
-	Step();
-	return sqlite3_changes(m_pDb);
+	bool End;
+	if(Step(&End, pError, ErrorSize))
+	{
+		return true;
+	}
+	*pNumUpdated = sqlite3_changes(m_pDb);
+	return false;
 }
 
 bool CSqliteConnection::IsNull(int Col)
@@ -285,27 +304,40 @@ const char *CSqliteConnection::MedianMapTime(char *pBuffer, int BufferSize) cons
 	return pBuffer;
 }
 
-bool CSqliteConnection::Execute(const char *pQuery)
+bool CSqliteConnection::Execute(const char *pQuery, char *pError, int ErrorSize)
 {
 	char *pErrorMsg;
 	int Result = sqlite3_exec(m_pDb, pQuery, NULL, NULL, &pErrorMsg);
 	if(Result != SQLITE_OK)
 	{
-		dbg_msg("sql", "error executing query: '%s'", pErrorMsg);
+		str_format(pError, ErrorSize, "error executing query: '%s'", pErrorMsg);
 		sqlite3_free(pErrorMsg);
+		return true;
 	}
-	return Result == SQLITE_OK;
+	return false;
 }
 
-void CSqliteConnection::ExceptionOnError(int Result)
+bool CSqliteConnection::FormatError(int Result, char *pError, int ErrorSize)
 {
 	if(Result != SQLITE_OK)
 	{
-		throw std::runtime_error(sqlite3_errmsg(m_pDb));
+		str_copy(pError, sqlite3_errmsg(m_pDb), ErrorSize);
+		return true;
+	}
+	return false;
+}
+
+void CSqliteConnection::AssertNoError(int Result)
+{
+	char aBuf[128];
+	if(FormatError(Result, aBuf, sizeof(aBuf)))
+	{
+		dbg_msg("sqlite", "unexpected sqlite error: %s", aBuf);
+		dbg_assert(0, "sqlite error");
 	}
 }
 
-void CSqliteConnection::AddPoints(const char *pPlayer, int Points)
+bool CSqliteConnection::AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
@@ -313,11 +345,19 @@ void CSqliteConnection::AddPoints(const char *pPlayer, int Points)
 		"VALUES (?, ?) "
 		"ON CONFLICT(Name) DO UPDATE SET Points=Points+?;",
 		GetPrefix());
-	PrepareStatement(aBuf);
+	if(PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return true;
+	}
 	BindString(1, pPlayer);
 	BindInt(2, Points);
 	BindInt(3, Points);
-	Step();
+	bool End;
+	if(Step(&End, pError, ErrorSize))
+	{
+		return true;
+	}
+	return false;
 }
 
 IDbConnection *CreateSqliteConnection(const char *pFilename, bool Setup)

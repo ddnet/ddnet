@@ -41,12 +41,14 @@ public:
 	// tries to allocate the connection from the pool established
 	//
 	// returns true on failure
-	virtual bool Connect() = 0;
+	virtual bool Connect(char *pError, int ErrorSize) = 0;
 	// has to be called to return the connection back to the pool
 	virtual void Disconnect() = 0;
 
 	// ? for Placeholders, connection has to be established, can overwrite previous prepared statements
-	virtual void PrepareStatement(const char *pStmt) = 0;
+	//
+	// returns true on failure
+	virtual bool PrepareStatement(const char *pStmt, char *pError, int ErrorSize) = 0;
 
 	// PrepareStatement has to be called beforehand,
 	virtual void BindString(int Idx, const char *pString) = 0;
@@ -56,11 +58,16 @@ public:
 
 	// Print expanded sql statement
 	virtual void Print() = 0;
+
 	// executes the query and returns if a result row exists and selects it
 	// when called multiple times the next row is selected
-	virtual bool Step() = 0;
+	//
+	// returns true on failure
+	virtual bool Step(bool *pEnd, char *pError, int ErrorSize) = 0;
 	// executes the query and returns the number of rows affected by the update/insert/delete
-	virtual int ExecuteUpdate() = 0;
+	//
+	// returns true on failure
+	virtual bool ExecuteUpdate(int *pNumUpdated, char *pError, int ErrorSize) = 0;
 
 	virtual bool IsNull(int Col) = 0;
 	virtual float GetFloat(int Col) = 0;
@@ -71,7 +78,7 @@ public:
 	virtual int GetBlob(int Col, unsigned char *pBuffer, int BufferSize) = 0;
 
 	// SQL statements, that can't be abstracted, has side effects to the result
-	virtual void AddPoints(const char *pPlayer, int Points) = 0;
+	virtual bool AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize) = 0;
 
 private:
 	char m_aPrefix[64];
