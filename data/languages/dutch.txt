@@ -659,7 +659,7 @@ Ghost
 == Spook
 
 Loading DDNet Client
-== DDnet Client laden
+== DDNet Client laden
 
 Reconnect in %d sec
 == Opnieuw verbinden in %d sec
@@ -683,7 +683,7 @@ Are you sure that you want to disconnect your dummy?
 == Weet je zeker dat je je dummy wilt loskoppelen?
 
 Welcome to DDNet
-== Welkom bij DDnet
+== Welkom bij DDNet
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDraceNetwork is een coöperatief online spel waar het doel is om met jezelf en je medespelers de finish van de map te behalen. Als een nieuwkomer kun je het best starten op een Novice server, waar je de makkelijkste maps zult vinden. Neem je ping in overweging bij het kiezen van een server.
@@ -740,7 +740,7 @@ Types
 == Types
 
 DDNet %s is out!
-== DDnet %s is beschikbaar!
+== DDNet %s is beschikbaar!
 
 Downloading %s:
 == Downloaden %s:
@@ -749,7 +749,7 @@ Update failed! Check log...
 == Update fout! Check log...
 
 DDNet Client updated!
-== DDnet Client is geüpdate
+== DDNet Client is geüpdate
 
 Update now
 == Nu updaten
@@ -961,10 +961,10 @@ HUD
 == HUD
 
 DDNet
-== DDnet
+== DDNet
 
 DDNet Client needs to be restarted to complete update!
-== DDnet Client moet herstart worden om de update te voltooien!
+== DDNet Client moet herstart worden om de update te voltooien!
 
 Use DDRace Scoreboard
 == Gebruik DDrace Scorebord
@@ -1108,7 +1108,7 @@ Try fast HTTP map download first
 == Probeer eerst een snelle HTTP download voor deze map
 
 DDNet %s is available:
-== DDnet %s is beschikbaar
+== DDNet %s is beschikbaar
 
 Updating...
 == Aan het updaten

@@ -896,7 +896,7 @@ Unfinished map
 == Нефинишированная карта
 
 DDNet %s is out!
-== Вышел DDnet %s!
+== Вышел DDNet %s!
 
 Downloading %s:
 == Скачивание %s:
