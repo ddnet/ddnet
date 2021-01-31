@@ -1031,7 +1031,8 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	static int s_GfxHighdpi = g_Config.m_GfxHighdpi;
 
 	CUIRect ModeList;
-	MainView.VSplitLeft(300.0f, &MainView, &ModeList);
+	MainView.VSplitLeft(350.0f, &MainView, &ModeList);
+	MainView.VSplitLeft(340.0f, &MainView, 0);
 
 	// draw allmodes switch
 	ModeList.HSplitTop(20, &Button, &ModeList);
@@ -1195,7 +1196,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	}
 
 	MainView.HSplitTop(20.0f, &Label, &MainView);
-	Label.VSplitLeft(130.0f, &Label, &Button);
+	Label.VSplitLeft(160.0f, &Label, &Button);
 	if(g_Config.m_GfxRefreshRate)
 		str_format(aBuf, sizeof(aBuf), "%s: %i Hz", Localize("Refresh Rate"), g_Config.m_GfxRefreshRate);
 	else
