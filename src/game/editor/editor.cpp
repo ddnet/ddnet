@@ -2962,6 +2962,7 @@ void CEditor::DoMapEditor(CUIRect View)
 
 	Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
 	//UI()->ClipDisable();
+	m_ChillerEditor.DoMapEditor(this, Inside);
 }
 
 float CEditor::ScaleFontSize(char *pText, int TextSize, float FontSize, int Width)

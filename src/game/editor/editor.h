@@ -28,6 +28,8 @@
 
 #include "auto_map.h"
 
+#include "chillerbot/chillereditor.h"
+
 typedef void (*INDEX_MODIFY_FUNC)(int *pIndex);
 
 //CRenderTools m_RenderTools;
@@ -639,6 +641,8 @@ class CEditor : public IEditor
 	class IStorage *m_pStorage;
 	CRenderTools m_RenderTools;
 	CUI m_UI;
+
+	CChillerEditor m_ChillerEditor;
 
 public:
 	class IInput *Input() { return m_pInput; };

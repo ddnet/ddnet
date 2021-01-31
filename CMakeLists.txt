@@ -1799,9 +1799,11 @@ if(CLIENT)
     ui.cpp
     ui.h
   )
-  set_src(GAME_EDITOR GLOB src/game/editor
+  set_src(GAME_EDITOR GLOB_RECURSE src/game/editor
     auto_map.cpp
     auto_map.h
+    chillerbot/chillereditor.cpp
+    chillerbot/chillereditor.h
     editor.cpp
     editor.h
     explanations.cpp
