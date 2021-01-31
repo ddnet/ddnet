@@ -1862,6 +1862,10 @@ if(CLIENT)
 
   if(DISCORD)
     list(APPEND LIBS_CLIENT discord-shared)
+
+    if(TARGET_OS STREQUAL "linux")
+      list(APPEND LIBS_CLIENT -Wl,--unresolved-symbols=ignore-in-shared-libs)
+    endif()
   endif()
 
   if(TARGET_OS STREQUAL "windows")
