@@ -1182,22 +1182,21 @@ bool CScore::ShowTopPointsThread(IDbConnection *pSqlServer, const ISqlData *pGam
 	CScorePlayerResult *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 	auto *paMessages = pResult->m_Data.m_aaMessages;
 
-	int LimitStart = maximum(abs(pData->m_Offset) - 1, 0);
-	const char *pOrder = pData->m_Offset >= 0 ? "ASC" : "DESC";
+	int LimitStart = maximum(pData->m_Offset - 1, 0);
 
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT Rank, Points, Name "
+		"SELECT RANK() OVER (ORDER BY a.Points DESC) as Rank, Points, Name "
 		"FROM ("
-		"  SELECT RANK() OVER w AS Rank, Points, Name "
+		"  SELECT Points, Name "
 		"  FROM %s_points "
-		"  WINDOW w as (ORDER BY Points DESC)"
+		"  ORDER BY Points DESC LIMIT ?"
 		") as a "
-		"ORDER BY Rank %s "
 		"LIMIT ?, 5;",
-		pSqlServer->GetPrefix(), pOrder);
+		pSqlServer->GetPrefix());
 	pSqlServer->PrepareStatement(aBuf);
-	pSqlServer->BindInt(1, LimitStart);
+	pSqlServer->BindInt(1, LimitStart + 5);
+	pSqlServer->BindInt(2, LimitStart);
 
 	// show top points
 	str_copy(paMessages[0], "-------- Top Points --------", sizeof(paMessages[0]));
