@@ -1470,6 +1470,13 @@ bool CMenus::CanDisplayWarning()
 
 void CMenus::RenderColorPicker()
 {
+	if(m_EscapePressed)
+	{
+		ms_ColorPicker.m_Active = false;
+		ms_ValueSelectorTextMode = false;
+		UI()->SetActiveItem(0);
+	}
+
 	if(!ms_ColorPicker.m_Active)
 		return;
 
