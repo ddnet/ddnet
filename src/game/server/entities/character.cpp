@@ -1840,7 +1840,7 @@ void CCharacter::HandleTiles(int Index)
 
 		m_LastPenalty = true;
 	}
-	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_SUBSTRACT_TIME && !m_LastBonus)
+	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_SUBTRACT_TIME && !m_LastBonus)
 	{
 		int min = GameServer()->Collision()->GetSwitchDelay(MapIndex);
 		int sec = GameServer()->Collision()->GetSwitchNumber(MapIndex);
@@ -1872,7 +1872,7 @@ void CCharacter::HandleTiles(int Index)
 		m_LastPenalty = false;
 	}
 
-	if(GameServer()->Collision()->IsSwitch(MapIndex) != TILE_SUBSTRACT_TIME)
+	if(GameServer()->Collision()->IsSwitch(MapIndex) != TILE_SUBTRACT_TIME)
 	{
 		m_LastBonus = false;
 	}
