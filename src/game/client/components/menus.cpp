@@ -453,7 +453,7 @@ ColorHSLA CMenus::DoLine_ColorPicker(int *pResetID, const float LineSize, const 
 	Button.HSplitTop(2.0f, 0x0, &Button);
 	Button.HSplitBottom(2.0f, &Button, 0x0);
 
-	if(DoButton_Menu(pResetID, Localize("Reset"), 0, &Button, 0, CUI::CORNER_ALL, 8.0f, 0, vec4(1, 1, 1, 0.5f), vec4(1, 1, 1, 0.25f), 1, true))
+	if(pResetID != nullptr && DoButton_Menu(pResetID, Localize("Reset"), 0, &Button, 0, CUI::CORNER_ALL, 8.0f, 0, vec4(1, 1, 1, 0.5f), vec4(1, 1, 1, 0.25f), 1, true))
 	{
 		ColorHSLA HSL = color_cast<ColorHSLA>(DefaultColor);
 		*pColorValue = HSL.Pack(false);

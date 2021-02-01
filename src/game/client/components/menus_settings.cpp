@@ -563,34 +563,29 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	// custom color selector
 	MainView.HSplitTop(20.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	Button.VSplitMid(&Button, &Button2);
+	Button.VSplitLeft(200.0f, &Button, &Button2);
 	if(DoButton_CheckBox(&ColorBody, Localize("Custom colors"), *UseCustomColor, &Button))
 	{
 		*UseCustomColor = *UseCustomColor ? 0 : 1;
 		SetNeedSendInfo();
 	}
 
-	MainView.HSplitTop(5.0f, 0, &MainView);
-	MainView.HSplitTop(82.5f, &Label, &MainView);
 	if(*UseCustomColor)
 	{
 		CUIRect aRects[2];
-		Label.VSplitMid(&aRects[0], &aRects[1]);
+		Button2.VSplitLeft(140.0f, &aRects[0], &aRects[1]);
 		aRects[0].VSplitRight(10.0f, &aRects[0], 0);
 		aRects[1].VSplitLeft(10.0f, 0, &aRects[1]);
 
 		unsigned *paColors[2] = {ColorBody, ColorFeet};
 		const char *paParts[] = {Localize("Body"), Localize("Feet")};
+		ColorRGBA ColorDefault(1.0f, 0.0f, 0.0f, 1);
 
 		for(int i = 0; i < 2; i++)
 		{
 			aRects[i].HSplitTop(20.0f, &Label, &aRects[i]);
-			UI()->DoLabelScaled(&Label, paParts[i], 14.0f, -1);
-			aRects[i].VSplitLeft(10.0f, 0, &aRects[i]);
-			aRects[i].HSplitTop(2.5f, 0, &aRects[i]);
-
 			unsigned PrevColor = *paColors[i];
-			RenderHSLScrollbars(&aRects[i], paColors[i]);
+			DoLine_ColorPicker(nullptr, 25.0f, 80.0f, 13.0f, 5.0f, &Label, paParts[i], paColors[i], ColorDefault, false);
 
 			if(PrevColor != *paColors[i])
 			{
@@ -601,7 +596,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	// skin selector
 	MainView.HSplitTop(20.0f, 0, &MainView);
-	MainView.HSplitTop(230.0f, &SkinList, &MainView);
+	MainView.HSplitTop(300.0f, &SkinList, &MainView);
 	static sorted_array<const CSkin *> s_paSkinList;
 	static int s_SkinCount = 0;
 	static float s_ScrollValue = 0.0f;
