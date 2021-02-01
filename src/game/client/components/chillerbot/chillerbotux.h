@@ -10,6 +10,7 @@ class CChillerBotUX : public CComponent
 	char m_aLastPingName[32];
 	int64 m_LastGreet;
 	int64 m_AfkTill;
+	char m_aAfkMessage[32];
 	int m_AfkActivity;
 	char m_aLastAfkPing[2048];
 	int m_CampHackX1;
@@ -26,7 +27,7 @@ class CChillerBotUX : public CComponent
 	void Get128Name(const char *pMsg, char *pName);
 	void DoGreet();
 	void SayFormat(const char *pMsg);
-	void GoAfk(int Minutes);
+	void GoAfk(int Minutes, const char *pMsg = 0);
 	void FinishRenameTick();
 	void CampHackTick();
 	void SelectCampArea(int Key);

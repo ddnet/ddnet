@@ -1,6 +1,7 @@
 // ChillerDragon 2020 - chillerbot ux
 
 #include <engine/config.h>
+#include <engine/console.h>
 #include <engine/graphics.h>
 #include <engine/keys.h>
 #include <engine/textrender.h>
@@ -288,13 +289,14 @@ void CChillerBotUX::OnInit()
 	m_AfkActivity = 0;
 	m_aLastAfkPing[0] = '\0';
 	m_aLastPingName[0] = '\0';
+	m_aAfkMessage[0] = '\0';
 }
 
 void CChillerBotUX::OnConsoleInit()
 {
 	Console()->Register("say_hi", "", CFGFLAG_CLIENT, ConSayHi, this, "Respond to the last greeting in chat");
 	Console()->Register("say_format", "s[message]", CFGFLAG_CLIENT, ConSayFormat, this, "send message replacing %n with last ping name");
-	Console()->Register("afk", "?i[minutes]", CFGFLAG_CLIENT, ConAfk, this, "Activate afk mode (auto chat respond)");
+	Console()->Register("afk", "?i[minutes]?r[message]", CFGFLAG_CLIENT, ConAfk, this, "Activate afk mode (auto chat respond)");
 
 	Console()->Chain("cl_camp_hack", ConchainCampHack, this);
 }
@@ -341,7 +343,7 @@ void CChillerBotUX::SayFormat(const char *pMsg)
 
 void CChillerBotUX::ConAfk(IConsole::IResult *pResult, void *pUserData)
 {
-	((CChillerBotUX *)pUserData)->GoAfk(pResult->NumArguments() ? pResult->GetInteger(0) : -1);
+	((CChillerBotUX *)pUserData)->GoAfk(pResult->NumArguments() ? pResult->GetInteger(0) : -1, pResult->GetString(1));
 }
 
 void CChillerBotUX::ConchainCampHack(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
@@ -359,8 +361,19 @@ void CChillerBotUX::ConchainCampHack(IConsole::IResult *pResult, void *pUserData
 	}
 }
 
-void CChillerBotUX::GoAfk(int Minutes)
+void CChillerBotUX::GoAfk(int Minutes, const char *pMsg)
 {
+	if(pMsg)
+	{
+		str_copy(m_aAfkMessage, pMsg, sizeof(m_aAfkMessage));
+		if((unsigned long)str_length(pMsg) > sizeof(m_aAfkMessage))
+		{
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "error: afk message too long %d/%lu", str_length(pMsg), sizeof(m_aAfkMessage));
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+			return;
+		}
+	}
 	m_AfkTill = time_get() + time_freq() * 60 * Minutes;
 	m_AfkActivity = 0;
 	m_aLastAfkPing[0] = '\0';
@@ -433,11 +446,17 @@ void CChillerBotUX::OnChatMessage(int ClientID, int Team, const char *pMsg)
 	if(m_AfkTill)
 	{
 		char aBuf[256];
+		char aNote[128];
 		str_format(aBuf, sizeof(aBuf), "%s: I am currently afk.", aName);
 		if(m_AfkTill > time_get() + time_freq() * 61)
 			str_format(aBuf, sizeof(aBuf), "%s: I am currently afk. Estimated return in %lld minutes.", aName, (m_AfkTill - time_get()) / time_freq() / 60);
 		else if(m_AfkTill > time_get() + time_freq() * 10)
 			str_format(aBuf, sizeof(aBuf), "%s: I am currently afk. Estimated return in %lld seconds.", aName, (m_AfkTill - time_get()) / time_freq());
+		if(m_aAfkMessage[0])
+		{
+			str_format(aNote, sizeof(aNote), " (%s)", m_aAfkMessage);
+			str_append(aBuf, aNote, sizeof(aBuf));
+		}
 		m_pClient->m_pChat->Say(0, aBuf);
 		str_format(m_aLastAfkPing, sizeof(m_aLastAfkPing), "%s: %s", m_pClient->m_aClients[ClientID].m_aName, pMsg);
 		return;
