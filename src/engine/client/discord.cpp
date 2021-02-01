@@ -3,6 +3,26 @@
 #if defined(CONF_DISCORD)
 #include <discord_game_sdk.h>
 
+typedef enum EDiscordResult (*FDiscordCreate)(DiscordVersion, struct DiscordCreateParams *, struct IDiscordCore **);
+
+#if defined(CONF_DISCORD_DYNAMIC)
+#include <dlfcn.h>
+FDiscordCreate GetDiscordCreate()
+{
+	void *pSdk = dlopen("discord_game_sdk.so", RTLD_NOW);
+	if(!pSdk)
+	{
+		return nullptr;
+	}
+	return (FDiscordCreate)dlsym(pSdk, "DiscordCreate");
+}
+#else
+FDiscordCreate GetDiscordCreate()
+{
+	return DiscordCreate;
+}
+#endif
+
 class CDiscord : public IDiscord
 {
 	IDiscordCore *m_pCore;
@@ -10,7 +30,7 @@ class CDiscord : public IDiscord
 	IDiscordActivityManager *m_pActivityManager;
 
 public:
-	bool Init()
+	bool Init(FDiscordCreate pfnDiscordCreate)
 	{
 		m_pCore = 0;
 		mem_zero(&m_ActivityEvents, sizeof(m_ActivityEvents));
@@ -23,7 +43,7 @@ public:
 		Params.flags = EDiscordCreateFlags::DiscordCreateFlags_NoRequireDiscord;
 		Params.event_data = this;
 		Params.activity_events = &m_ActivityEvents;
-		int Error = DiscordCreate(DISCORD_VERSION, &Params, &m_pCore);
+		int Error = pfnDiscordCreate(DISCORD_VERSION, &Params, &m_pCore);
 		if(Error != DiscordResult_Ok)
 		{
 			dbg_msg("discord", "error initializing discord instance, error=%d", Error);
@@ -55,8 +75,13 @@ public:
 
 IDiscord *CreateDiscordImpl()
 {
+	FDiscordCreate pfnDiscordCreate = GetDiscordCreate();
+	if(!pfnDiscordCreate)
+	{
+		return 0;
+	}
 	CDiscord *pDiscord = new CDiscord();
-	if(pDiscord->Init())
+	if(pDiscord->Init(pfnDiscordCreate))
 	{
 		delete pDiscord;
 		return 0;
