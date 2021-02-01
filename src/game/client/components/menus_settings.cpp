@@ -1612,25 +1612,17 @@ ColorHSLA CMenus::RenderHSLColorPicker(const CUIRect *pRect, unsigned int *pColo
 			PickerRect.w = ms_ColorPicker.ms_Width;
 			PickerRect.h = ms_ColorPicker.ms_Height;
 
-			if(ms_ColorPicker.m_pColor != pColor && !UI()->MouseInside(&PickerRect))
-			{
-				ms_ColorPicker.m_X = UI()->MouseX();
-				ms_ColorPicker.m_Y = UI()->MouseY();
-				ms_ColorPicker.m_pColor = pColor;
-				ms_ColorPicker.m_Active = true;
-				ms_ColorPicker.m_AttachedRect = *pRect;
-				ms_ColorPicker.m_HSVColor = color_cast<ColorHSVA, ColorHSLA>(HSLColor).Pack(false);
-			}
+			if(ms_ColorPicker.m_pColor == pColor || UI()->MouseInside(&PickerRect))
+				return HSLColor;
 		}
-		else
-		{
-			ms_ColorPicker.m_X = UI()->MouseX();
-			ms_ColorPicker.m_Y = UI()->MouseY();
-			ms_ColorPicker.m_pColor = pColor;
-			ms_ColorPicker.m_Active = true;
-			ms_ColorPicker.m_AttachedRect = *pRect;
-			ms_ColorPicker.m_HSVColor = color_cast<ColorHSVA, ColorHSLA>(HSLColor).Pack(false);
-		}
+
+		CUIRect *pScreen = UI()->Screen();
+		ms_ColorPicker.m_X = minimum(UI()->MouseX(), pScreen->w - ms_ColorPicker.ms_Width);
+		ms_ColorPicker.m_Y = minimum(UI()->MouseY(), pScreen->h - ms_ColorPicker.ms_Height);
+		ms_ColorPicker.m_pColor = pColor;
+		ms_ColorPicker.m_Active = true;
+		ms_ColorPicker.m_AttachedRect = *pRect;
+		ms_ColorPicker.m_HSVColor = color_cast<ColorHSVA, ColorHSLA>(HSLColor).Pack(false);
 	}
 
 	return HSLColor;

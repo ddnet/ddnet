@@ -74,7 +74,7 @@ bool IsValidSwitchTile(int Index)
 		Index == TILE_SUBTRACT_TIME ||
 		Index == TILE_ALLOW_TELE_GUN ||
 		Index == TILE_ALLOW_BLUE_TELE_GUN ||
-		IsValidEntity(Index));
+		(IsValidEntity(Index) && Index >= ENTITY_OFFSET + ENTITY_ARMOR_1));
 }
 
 bool IsValidTuneTile(int Index)
