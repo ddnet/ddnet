@@ -379,10 +379,12 @@ void CChillerBotUX::GoAfk(int Minutes, const char *pMsg)
 	m_aLastAfkPing[0] = '\0';
 }
 
-void CChillerBotUX::ReturnFromAfk()
+void CChillerBotUX::ReturnFromAfk(const char *pChatMessage)
 {
 	if(!m_AfkTill)
 		return;
+	if(pChatMessage && pChatMessage[0] != '/')
+		m_AfkActivity += 400;
 	m_AfkActivity++;
 	if(m_AfkActivity < 200)
 		return;

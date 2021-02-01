@@ -438,6 +438,8 @@ public:
 	class CGhost *m_pGhost;
 	class CTeamsCore m_Teams;
 
+	class CChillerBotUX *m_pChillerBotUX;
+
 	int IntersectCharacter(vec2 Pos0, vec2 Pos1, vec2 &NewPos, int ownID);
 
 	virtual int GetLastRaceTick();

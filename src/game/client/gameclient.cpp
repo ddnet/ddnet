@@ -175,6 +175,8 @@ void CGameClient::OnConsoleInit()
 	m_pRaceDemo = &::gs_RaceDemo;
 	m_pGhost = &::gs_Ghost;
 
+	m_pChillerBotUX = &::gs_ChillerBotUX;
+
 	m_pMenus->SetMenuBackground(m_pMenuBackground);
 
 	gs_NamePlates.SetPlayers(m_pPlayers);
@@ -220,12 +222,12 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&m_pMenus->m_Binder);
 	m_All.Add(m_pGameConsole);
 
-	m_All.Add(&gs_ChillerBotUX);
+	m_All.Add(m_pChillerBotUX);
 	m_All.Add(&gs_ChillPw);
 
 	m_All.Add(m_pMenuBackground);
 
-	m_Input.Add(&gs_ChillerBotUX);
+	m_Input.Add(m_pChillerBotUX);
 
 	// build the input stack
 	m_Input.Add(&m_pMenus->m_Binder); // this will take over all input when we want to bind a key

@@ -17,6 +17,8 @@
 #include <game/client/animstate.h>
 #include <game/client/gameclient.h>
 
+#include <game/client/components/chillerbot/chillerbotux.h>
+
 #include <game/client/components/console.h>
 #include <game/client/components/scoreboard.h>
 #include <game/client/components/skins.h>
@@ -1323,6 +1325,8 @@ void CChat::Say(int Team, const char *pLine)
 	Msg.m_Team = Team;
 	Msg.m_pMessage = pLine;
 	Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+
+	m_pClient->m_pChillerBotUX->ReturnFromAfk(pLine);
 }
 
 void CChat::SayChat(const char *pLine)
