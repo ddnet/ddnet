@@ -39,12 +39,12 @@ void CChillerEditor::DoMapEditor()
 	if(m_pEditor->Input()->KeyPress(KEY_T) && m_EditorMode != CE_MODE_TEXT && m_pEditor->m_Dialog == DIALOG_NONE && m_pEditor->m_EditBoxActive == 0)
 	{
 		m_EditorMode = CE_MODE_TEXT;
-		m_pEditor->m_Dialog = -1; // hack to not close editor when pressing ESC
+		m_pEditor->m_Dialog = -1; // hack to not close editor when pressing Escape
 		SetCursor();
 	}
 	if(m_EditorMode == CE_MODE_TEXT)
 	{
-		m_pEditor->m_pTooltip = "Type on your keyboard to insert letters. Press ESC to end text mode.";
+		m_pEditor->m_pTooltip = "Type on your keyboard to insert letters. Press Escape to end text mode.";
 		CLayerTiles *pLayer = (CLayerTiles *)m_pEditor->GetSelectedLayerType(0, LAYERTYPE_TILES);
 		m_TextIndexX = clamp(m_TextIndexX, 0, pLayer->m_Width - 1);
 		m_TextIndexY = clamp(m_TextIndexY, 0, pLayer->m_Height - 1);
