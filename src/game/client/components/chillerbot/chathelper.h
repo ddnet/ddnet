@@ -3,14 +3,19 @@
 
 #include <game/client/component.h>
 
+#define MAX_CHAT_BUFFER_LEN 8
+
 class CChatHelper : public CComponent
 {
 	class CChillerBotUX *m_pChillerBot;
-	int64 m_LastGreet;
+
+	int64 m_NextGreetClear;
+	int64 m_NextMessageSend;
 
 	char m_aGreetName[32];
 	char m_aLastPingName[32];
 	char m_aLastAfkPing[2048];
+	char m_aSendBuffer[MAX_CHAT_BUFFER_LEN][2048];
 
 	bool LineShouldHighlight(const char *pLine, const char *pName);
 	bool IsGreeting(const char *pMsg);
@@ -33,6 +38,14 @@ public:
 	const char *GetPingName() { return m_aLastPingName; }
 	const char *LastAfkPingMessage() { return m_aLastAfkPing; }
 	void ClearLastAfkPingMessage() { m_aLastAfkPing[0] = '\0'; }
+	/*
+		Function: SayBuffer
+			Adds message to spam safe queue.
+
+		Parameters:
+			StayAfk - Do not deactivate afk mode.
+	*/
+	void SayBuffer(const char *pMsg, bool StayAfk = false);
 };
 
 #endif

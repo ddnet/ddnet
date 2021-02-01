@@ -10,21 +10,53 @@ void CChatHelper::OnInit()
 	m_pChillerBot = m_pClient->m_pChillerBotUX;
 
 	m_aGreetName[0] = '\0';
-	m_LastGreet = 0;
+	m_NextGreetClear = 0;
+	m_NextMessageSend = 0;
 	m_aLastAfkPing[0] = '\0';
 	m_aLastPingName[0] = '\0';
+	mem_zero(m_aSendBuffer, sizeof(m_aSendBuffer));
 }
 
 void CChatHelper::OnRender()
 {
-	if(time_get() % 10 == 0)
+	int64 time_now = time_get();
+	if(time_now % 10 == 0)
 	{
-		if(m_LastGreet < time_get())
+		if(m_NextGreetClear < time_now)
 		{
-			m_LastGreet = 0;
+			m_NextGreetClear = 0;
 			m_aGreetName[0] = '\0';
 		}
+		if(m_NextMessageSend < time_now)
+		{
+			if(m_aSendBuffer[0][0])
+			{
+				m_pClient->m_pChat->Say(0, m_aSendBuffer[0]);
+				for(int i = 0; i < MAX_CHAT_BUFFER_LEN - 1; i++)
+					str_copy(m_aSendBuffer[i], m_aSendBuffer[i + 1], sizeof(m_aSendBuffer[i]));
+				m_aSendBuffer[MAX_CHAT_BUFFER_LEN - 1][0] = '\0';
+				m_NextMessageSend = time_now + time_freq() * 5;
+			}
+		}
 	}
+}
+
+void CChatHelper::SayBuffer(const char *pMsg, bool StayAfk)
+{
+	if(StayAfk)
+		m_pClient->m_pChillerBotUX->m_IgnoreChatAfk++;
+	// append at end
+	for(auto &buf : m_aSendBuffer)
+	{
+		if(buf[0])
+			continue;
+		str_copy(buf, pMsg, sizeof(buf));
+		return;
+	}
+	// full -> shift buffer and overwrite oldest element (index 0)
+	for(int i = 0; i < MAX_CHAT_BUFFER_LEN - 1; i++)
+		str_copy(m_aSendBuffer[i], m_aSendBuffer[i + 1], sizeof(m_aSendBuffer[i]));
+	str_copy(m_aSendBuffer[MAX_CHAT_BUFFER_LEN - 1], pMsg, sizeof(m_aSendBuffer[MAX_CHAT_BUFFER_LEN - 1]));
 }
 
 void CChatHelper::OnConsoleInit()
@@ -192,7 +224,7 @@ void CChatHelper::OnChatMessage(int ClientID, int Team, const char *pMsg)
 	if(IsGreeting(pMsg))
 	{
 		str_copy(m_aGreetName, aName, sizeof(m_aGreetName));
-		m_LastGreet = time_get() + time_freq() * 10;
+		m_NextGreetClear = time_get() + time_freq() * 10;
 	}
 	int64 AfkTill = m_pChillerBot->GetAfkTime();
 	if(AfkTill)
@@ -209,7 +241,7 @@ void CChatHelper::OnChatMessage(int ClientID, int Team, const char *pMsg)
 			str_format(aNote, sizeof(aNote), " (%s)", m_pChillerBot->GetAfkMessage());
 			str_append(aBuf, aNote, sizeof(aBuf));
 		}
-		m_pClient->m_pChat->Say(0, aBuf);
+		SayBuffer(aBuf, true);
 		str_format(m_aLastAfkPing, sizeof(m_aLastAfkPing), "%s: %s", m_pClient->m_aClients[ClientID].m_aName, pMsg);
 		return;
 	}

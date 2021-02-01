@@ -266,8 +266,9 @@ void CChillerBotUX::ReturnFromAfk(const char *pChatMessage)
 {
 	if(!m_AfkTill)
 		return;
-	if(pChatMessage && pChatMessage[0] != '/')
+	if(!m_IgnoreChatAfk && pChatMessage && pChatMessage[0] != '/')
 		m_AfkActivity += 400;
+	m_IgnoreChatAfk = maximum(m_IgnoreChatAfk--, 0);
 	m_AfkActivity++;
 	if(m_AfkActivity < 200)
 		return;

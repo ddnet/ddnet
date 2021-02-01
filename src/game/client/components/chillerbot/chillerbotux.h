@@ -41,6 +41,8 @@ class CChillerBotUX : public CComponent
 	static void ConchainCampHack(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 public:
+	int m_IgnoreChatAfk;
+
 	void ReturnFromAfk(const char *pChatMessage = 0);
 	int64 GetAfkTime() { return m_AfkTill; }
 	const char *GetAfkMessage() { return m_aAfkMessage; }
