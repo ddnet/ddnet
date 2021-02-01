@@ -8,6 +8,7 @@
 #include <game/client/animstate.h>
 #include <game/client/components/camera.h>
 #include <game/client/components/chat.h>
+#include <game/client/components/chillerbot/chathelper.h>
 #include <game/client/components/controls.h>
 #include <game/client/components/menus.h>
 #include <game/client/race.h>
@@ -20,11 +21,6 @@ void CChillerBotUX::OnRender()
 {
 	if(time_get() % 10 == 0)
 	{
-		if(m_LastGreet < time_get())
-		{
-			m_LastGreet = 0;
-			m_aGreetName[0] = '\0';
-		}
 		// if tabbing into tw and going afk set to inactive again over time
 		if(m_AfkActivity && time_get() % 100 == 0)
 			m_AfkActivity--;
@@ -41,7 +37,7 @@ void CChillerBotUX::OnRender()
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "afk mode (%d/%d)", m_AfkActivity, 200);
 		TextRender()->Text(0, 50.0f, 55.f, 10.0f, aBuf, -1);
-		TextRender()->Text(0, 20.0f, 70.f, 5.0f, m_aLastAfkPing, -1);
+		TextRender()->Text(0, 20.0f, 70.f, 5.0f, m_pChatHelper->LastAfkPingMessage(), -1);
 	}
 	FinishRenameTick();
 	m_ForceDir = 0;
@@ -212,133 +208,20 @@ void CChillerBotUX::FinishRenameTick()
 	}
 }
 
-bool CChillerBotUX::LineShouldHighlight(const char *pLine, const char *pName)
-{
-	const char *pHL = str_find_nocase(pLine, pName);
-
-	if(pHL)
-	{
-		int Length = str_length(pName);
-
-		if((pLine == pHL || pHL[-1] == ' ') && (pHL[Length] == 0 || pHL[Length] == ' ' || pHL[Length] == '.' || pHL[Length] == '!' || pHL[Length] == ',' || pHL[Length] == '?' || pHL[Length] == ':'))
-			return true;
-	}
-
-	return false;
-}
-
-bool CChillerBotUX::IsGreeting(const char *pMsg)
-{
-	const char aGreetings[][128] = {
-		"hi",
-		"hay",
-		"hey",
-		"heey",
-		"heeey",
-		"heeeey",
-		"haay",
-		"haaay",
-		"haaaay",
-		"haaaaay",
-		"henlo",
-		"hello",
-		"hallo",
-		"hellu",
-		"hallu",
-		"helu",
-		"henlu",
-		"hemnlo",
-		"herro",
-		"moin",
-		"servus",
-		"guten tag",
-		"priviet",
-		"ola",
-		"ay",
-		"ayy",
-		"ayyy",
-		"ayyyy",
-		"aayyy",
-		"aaay",
-		"aaaay",
-		"yo",
-		"yoo",
-		"yooo",
-		"sup",
-		"selam"};
-	for(const auto &aGreeting : aGreetings)
-	{
-		const char *pHL = str_find_nocase(pMsg, aGreeting);
-		while(pHL)
-		{
-			int Length = str_length(aGreeting);
-
-			if((pMsg == pHL || pHL[-1] == ' ') && (pHL[Length] == 0 || pHL[Length] == ' ' || pHL[Length] == '.' || pHL[Length] == '!' || pHL[Length] == ',' || pHL[Length] == '1' || pHL[Length] == pHL[Length - 1]))
-				return true;
-			pHL = str_find_nocase(pHL + 1, aGreeting);
-		}
-	}
-	return false;
-}
-
 void CChillerBotUX::OnInit()
 {
-	m_aGreetName[0] = '\0';
-	m_LastGreet = 0;
+	m_pChatHelper = m_pClient->m_pChatHelper;
+
 	m_AfkTill = 0;
 	m_AfkActivity = 0;
-	m_aLastAfkPing[0] = '\0';
-	m_aLastPingName[0] = '\0';
 	m_aAfkMessage[0] = '\0';
 }
 
 void CChillerBotUX::OnConsoleInit()
 {
-	Console()->Register("say_hi", "", CFGFLAG_CLIENT, ConSayHi, this, "Respond to the last greeting in chat");
-	Console()->Register("say_format", "s[message]", CFGFLAG_CLIENT, ConSayFormat, this, "send message replacing %n with last ping name");
 	Console()->Register("afk", "?i[minutes]?r[message]", CFGFLAG_CLIENT, ConAfk, this, "Activate afk mode (auto chat respond)");
 
 	Console()->Chain("cl_camp_hack", ConchainCampHack, this);
-}
-
-void CChillerBotUX::ConSayHi(IConsole::IResult *pResult, void *pUserData)
-{
-	((CChillerBotUX *)pUserData)->DoGreet();
-}
-
-void CChillerBotUX::ConSayFormat(IConsole::IResult *pResult, void *pUserData)
-{
-	((CChillerBotUX *)pUserData)->SayFormat(pResult->GetString(0));
-}
-
-void CChillerBotUX::SayFormat(const char *pMsg)
-{
-	char aBuf[1028] = {0};
-	long unsigned int i = 0;
-	long unsigned int buf_i = 0;
-	for(i = 0; pMsg[i] && i < sizeof(aBuf); i++)
-	{
-		if(pMsg[i] == '%' && pMsg[maximum((int)i - 1, 0)] != '\\')
-		{
-			if(pMsg[i + 1] == 'n')
-			{
-				str_append(aBuf, m_aLastPingName, sizeof(aBuf));
-				buf_i += str_length(m_aLastPingName);
-				i++;
-				continue;
-			}
-			else if(pMsg[i + 1] == 'g')
-			{
-				str_append(aBuf, m_aGreetName, sizeof(aBuf));
-				buf_i += str_length(m_aGreetName);
-				i++;
-				continue;
-			}
-		}
-		aBuf[buf_i++] = pMsg[i];
-	}
-	aBuf[minimum((unsigned long)sizeof(aBuf) - 1, buf_i)] = '\0';
-	m_pClient->m_pChat->Say(0, aBuf);
 }
 
 void CChillerBotUX::ConAfk(IConsole::IResult *pResult, void *pUserData)
@@ -376,7 +259,7 @@ void CChillerBotUX::GoAfk(int Minutes, const char *pMsg)
 	}
 	m_AfkTill = time_get() + time_freq() * 60 * Minutes;
 	m_AfkActivity = 0;
-	m_aLastAfkPing[0] = '\0';
+	m_pChatHelper->ClearLastAfkPingMessage();
 }
 
 void CChillerBotUX::ReturnFromAfk(const char *pChatMessage)
@@ -390,88 +273,4 @@ void CChillerBotUX::ReturnFromAfk(const char *pChatMessage)
 		return;
 	m_pClient->m_pChat->AddLine(-2, 0, "[chillerbot-ux] welcome back :)");
 	m_AfkTill = 0;
-}
-
-void CChillerBotUX::DoGreet()
-{
-	if(m_aGreetName[0])
-	{
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "hi %s", m_aGreetName);
-		m_pClient->m_pChat->Say(0, aBuf);
-		return;
-	}
-	m_pClient->m_pChat->Say(0, "hi");
-}
-
-void CChillerBotUX::Get128Name(const char *pMsg, char *pName)
-{
-	for(int i = 0; pMsg[i] && i < 17; i++)
-	{
-		if(pMsg[i] == ':')
-		{
-			str_copy(pName, pMsg, i + 1);
-			return;
-		}
-	}
-	str_copy(pName, " ", 2);
-}
-
-void CChillerBotUX::OnChatMessage(int ClientID, int Team, const char *pMsg)
-{
-	bool Highlighted = false;
-	if(LineShouldHighlight(pMsg, m_pClient->m_aClients[m_pClient->m_LocalIDs[0]].m_aName))
-		Highlighted = true;
-	if(m_pClient->Client()->DummyConnected() && LineShouldHighlight(pMsg, m_pClient->m_aClients[m_pClient->m_LocalIDs[1]].m_aName))
-		Highlighted = true;
-	if(!Highlighted)
-		return;
-	char aName[64];
-	str_copy(aName, m_pClient->m_aClients[ClientID].m_aName, sizeof(aName));
-	if(ClientID == 63 && !str_comp_num(m_pClient->m_aClients[ClientID].m_aName, " ", 2))
-	{
-		Get128Name(pMsg, aName);
-		// dbg_msg("chillerbot", "fixname 128 player '%s' -> '%s'", m_pClient->m_aClients[ClientID].m_aName, aName);
-	}
-	// ignore own and dummys messages
-	if(!str_comp(aName, m_pClient->m_aClients[m_pClient->m_LocalIDs[0]].m_aName))
-		return;
-	if(!str_comp(aName, m_pClient->m_aClients[m_pClient->m_LocalIDs[1]].m_aName))
-		return;
-
-	str_copy(m_aLastPingName, aName, sizeof(m_aLastPingName));
-	if(IsGreeting(pMsg))
-	{
-		str_copy(m_aGreetName, aName, sizeof(m_aGreetName));
-		m_LastGreet = time_get() + time_freq() * 10;
-	}
-	if(m_AfkTill)
-	{
-		char aBuf[256];
-		char aNote[128];
-		str_format(aBuf, sizeof(aBuf), "%s: I am currently afk.", aName);
-		if(m_AfkTill > time_get() + time_freq() * 61)
-			str_format(aBuf, sizeof(aBuf), "%s: I am currently afk. Estimated return in %lld minutes.", aName, (m_AfkTill - time_get()) / time_freq() / 60);
-		else if(m_AfkTill > time_get() + time_freq() * 10)
-			str_format(aBuf, sizeof(aBuf), "%s: I am currently afk. Estimated return in %lld seconds.", aName, (m_AfkTill - time_get()) / time_freq());
-		if(m_aAfkMessage[0])
-		{
-			str_format(aNote, sizeof(aNote), " (%s)", m_aAfkMessage);
-			str_append(aBuf, aNote, sizeof(aBuf));
-		}
-		m_pClient->m_pChat->Say(0, aBuf);
-		str_format(m_aLastAfkPing, sizeof(m_aLastAfkPing), "%s: %s", m_pClient->m_aClients[ClientID].m_aName, pMsg);
-		return;
-	}
-	if(g_Config.m_ClAutoReply)
-		SayFormat(g_Config.m_ClAutoReplyMsg);
-}
-
-void CChillerBotUX::OnMessage(int MsgType, void *pRawMsg)
-{
-	if(MsgType == NETMSGTYPE_SV_CHAT)
-	{
-		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
-		OnChatMessage(pMsg->m_ClientID, pMsg->m_Team, pMsg->m_pMessage);
-	}
 }

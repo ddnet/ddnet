@@ -439,6 +439,7 @@ public:
 	class CTeamsCore m_Teams;
 
 	class CChillerBotUX *m_pChillerBotUX;
+	class CChatHelper *m_pChatHelper;
 
 	int IntersectCharacter(vec2 Pos0, vec2 Pos1, vec2 &NewPos, int ownID);
 

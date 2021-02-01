@@ -1728,6 +1728,8 @@ if(CLIENT)
     components/camera.h
     components/chat.cpp
     components/chat.h
+    components/chillerbot/chathelper.cpp
+    components/chillerbot/chathelper.h
     components/chillerbot/chillerbotux.cpp
     components/chillerbot/chillerbotux.h
     components/chillerbot/chillpw.cpp
