@@ -15,6 +15,7 @@ CChillerEditor::CChillerEditor()
 	m_pEditor = 0;
 	m_LetterOffset = 0;
 	m_NumberOffset = 53;
+	m_pLastLayer = 0;
 }
 
 void CChillerEditor::Init(class CEditor *pEditor)
@@ -32,8 +33,18 @@ void CChillerEditor::SetCursor()
 	m_TextLineLen = 0;
 }
 
+void CChillerEditor::ExitTextMode()
+{
+	if(m_pEditor->m_Dialog == -1)
+		m_pEditor->m_Dialog = DIALOG_NONE;
+	m_EditorMode = CE_MODE_NONE;
+}
+
 void CChillerEditor::DoMapEditor()
 {
+	// debug
+	if(m_pEditor->Input()->KeyPress(KEY_D))
+		dbg_msg("chillerbot", "editormode=%d dialog=%d editbox=%d", m_EditorMode, m_pEditor->m_Dialog, m_pEditor->m_EditBoxActive);
 	if(m_pEditor->UI()->MouseButton(0))
 		SetCursor();
 	if(m_pEditor->Input()->KeyPress(KEY_T) && m_EditorMode != CE_MODE_TEXT && m_pEditor->m_Dialog == DIALOG_NONE && m_pEditor->m_EditBoxActive == 0)
@@ -46,6 +57,20 @@ void CChillerEditor::DoMapEditor()
 	{
 		m_pEditor->m_pTooltip = "Type on your keyboard to insert letters. Press Escape to end text mode.";
 		CLayerTiles *pLayer = (CLayerTiles *)m_pEditor->GetSelectedLayerType(0, LAYERTYPE_TILES);
+		// exit if selected layer changes
+		if(m_pLastLayer && m_pLastLayer != pLayer)
+		{
+			ExitTextMode();
+			m_pLastLayer = pLayer;
+			return;
+		}
+		// exit if dialog or edit box pops up
+		if(m_pEditor->m_Dialog != -1 || m_pEditor->m_EditBoxActive)
+		{
+			ExitTextMode();
+			return;
+		}
+		m_pLastLayer = pLayer;
 		m_TextIndexX = clamp(m_TextIndexX, 0, pLayer->m_Width - 1);
 		m_TextIndexY = clamp(m_TextIndexY, 0, pLayer->m_Height - 1);
 		if(time_get() > m_NextCursorBlink)
@@ -76,9 +101,7 @@ void CChillerEditor::DoMapEditor()
 		// escape -> end text mode
 		if(e.m_Key == KEY_ESCAPE)
 		{
-			if(m_pEditor->m_Dialog == -1)
-				m_pEditor->m_Dialog = DIALOG_NONE;
-			m_EditorMode = CE_MODE_NONE;
+			ExitTextMode();
 			return;
 		}
 		// letters

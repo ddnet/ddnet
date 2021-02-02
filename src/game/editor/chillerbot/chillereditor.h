@@ -14,14 +14,20 @@ class CChillerEditor
 	int m_TextIndexX;
 	int m_TextIndexY;
 	int m_TextLineLen;
-	int64 m_NextCursorBlink;
-	bool m_DrawCursor;
 	int m_LetterOffset;
 	int m_NumberOffset;
+
+	bool m_DrawCursor;
+
+	int64 m_NextCursorBlink;
+
 	IGraphics::CTextureHandle m_CursorTextTexture;
+
 	class CEditor *m_pEditor;
+	class CLayerTiles *m_pLastLayer;
 
 	void SetCursor();
+	void ExitTextMode();
 
 public:
 	CChillerEditor();
