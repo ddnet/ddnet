@@ -241,7 +241,16 @@ void CChatHelper::OnChatMessage(int ClientID, int Team, const char *pMsg)
 			str_format(aNote, sizeof(aNote), " (%s)", m_pChillerBot->GetAfkMessage());
 			str_append(aBuf, aNote, sizeof(aBuf));
 		}
-		SayBuffer(aBuf, true);
+		if(aBuf[0] == '/' || aBuf[0] == '.' || aBuf[0] == '!')
+		{
+			char aEscape[256];
+			str_format(aEscape, sizeof(aEscape), ".%s", aBuf);
+			SayBuffer(aEscape, true);
+		}
+		else
+		{
+			SayBuffer(aBuf, true);
+		}
 		str_format(m_aLastAfkPing, sizeof(m_aLastAfkPing), "%s: %s", m_pClient->m_aClients[ClientID].m_aName, pMsg);
 		return;
 	}
