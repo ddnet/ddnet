@@ -1,5 +1,8 @@
+#include <engine/console.h>
 #include <engine/input.h>
 #include <engine/keys.h>
+
+#include <engine/external/json-parser/json.h>
 
 #include <game/editor/editor.h>
 
@@ -16,6 +19,50 @@ CChillerEditor::CChillerEditor()
 	m_LetterOffset = 0;
 	m_NumberOffset = 53;
 	m_pLastLayer = 0;
+}
+
+void CChillerEditor::LoadMapresMetaFile(const char *pImage)
+{
+	char aFilepath[1024];
+	str_format(aFilepath, sizeof(aFilepath), "mapres/%s.json", pImage);
+	// read file data into buffer
+	IOHANDLE File = m_pEditor->Storage()->OpenFile(aFilepath, IOFLAG_READ, IStorage::TYPE_ALL);
+	if(!File)
+		return;
+	int FileSize = (int)io_length(File);
+	char *pFileData = (char *)malloc(FileSize);
+	io_read(File, pFileData, FileSize);
+	io_close(File);
+
+	// parse json data
+	json_settings JsonSettings;
+	mem_zero(&JsonSettings, sizeof(JsonSettings));
+	char aError[256];
+	json_value *pJsonData = json_parse_ex(&JsonSettings, pFileData, FileSize, aError);
+	free(pFileData);
+
+	if(pJsonData == 0)
+	{
+		m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, aFilepath, aError);
+		return;
+	}
+
+	dbg_msg("chillerbot", "loading mapres meta data for %s", pImage);
+	if((*pJsonData)["type"].type == json_string)
+		dbg_msg("chillerbot", "type=%s", (const char *)(*pJsonData)["type"]);
+	if((*pJsonData)["offset_alphabet"].type == json_integer)
+	{
+		dbg_msg("chillerbot", "alphabet=%ld", (long int)(*pJsonData)["offset_alphabet"].u.integer);
+		m_LetterOffset = (*pJsonData)["offset_alphabet"].u.integer - 1;
+	}
+	if((*pJsonData)["offset_numbers"].type == json_integer)
+	{
+		dbg_msg("chillerbot", "numbers=%ld", (long int)(*pJsonData)["offset_numbers"].u.integer);
+		m_NumberOffset = (*pJsonData)["offset_numbers"].u.integer - 1;
+	}
+
+	// clean up
+	json_value_free(pJsonData);
 }
 
 void CChillerEditor::Init(class CEditor *pEditor)
@@ -52,6 +99,9 @@ void CChillerEditor::DoMapEditor()
 		m_EditorMode = CE_MODE_TEXT;
 		m_pEditor->m_Dialog = -1; // hack to not close editor when pressing Escape
 		SetCursor();
+		CLayerTiles *pLayer = (CLayerTiles *)m_pEditor->GetSelectedLayerType(0, LAYERTYPE_TILES);
+		if(pLayer->m_Image >= 0 && pLayer->m_Image < m_pEditor->m_Map.m_lImages.size())
+			LoadMapresMetaFile(m_pEditor->m_Map.m_lImages[pLayer->m_Image]->m_aName);
 	}
 	if(m_EditorMode == CE_MODE_TEXT)
 	{

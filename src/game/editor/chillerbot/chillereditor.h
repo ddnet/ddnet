@@ -28,6 +28,7 @@ class CChillerEditor
 
 	void SetCursor();
 	void ExitTextMode();
+	void LoadMapresMetaFile(const char *pImage);
 
 public:
 	CChillerEditor();

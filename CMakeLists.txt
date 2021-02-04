@@ -1122,6 +1122,7 @@ set(EXPECTED_DATA
   mapres/bg_cloud3.png
   mapres/ddmax_freeze.png
   mapres/ddnet_start.png
+  mapres/ddnet_tiles.json
   mapres/ddnet_tiles.png
   mapres/ddnet_walls.png
   mapres/desert_background.png
@@ -1134,7 +1135,9 @@ set(EXPECTED_DATA
   mapres/desert_sun.png
   mapres/entities.png
   mapres/fadeout.png
+  mapres/font_teeworlds.json
   mapres/font_teeworlds.png
+  mapres/font_teeworlds_alt.json
   mapres/font_teeworlds_alt.png
   mapres/generic_clear.png
   mapres/generic_deathtiles.png
