@@ -9,6 +9,7 @@ void CChillPw::OnMapLoad()
 {
 	m_ChatDelay[0] = time_get() + time_freq() * 2;
 	m_ChatDelay[1] = time_get() + time_freq() * 2;
+	str_copy(m_aCurrentServerAddr, g_Config.m_UiServerAddress, sizeof(m_aCurrentServerAddr));
 }
 
 void CChillPw::OnRender()
@@ -81,7 +82,7 @@ bool CChillPw::AuthChatAccount(int Dummy)
 {
 	for(int i = 0; i < MAX_PASSWORDS; i++)
 	{
-		if(str_comp(g_Config.m_UiServerAddress, m_aaHostnames[i]))
+		if(str_comp(m_aCurrentServerAddr, m_aaHostnames[i]))
 			continue;
 		if(Dummy != m_aDummy[i])
 			continue;
