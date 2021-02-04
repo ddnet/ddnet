@@ -800,7 +800,7 @@ Try fast HTTP map download first
 == 優先嚐試用HTTP高速下載地圖
 
 DDNet %s is available:
-== DDnet %s 現已可用：
+== DDNet %s 現已可用：
 
 Update now
 == 現在更新

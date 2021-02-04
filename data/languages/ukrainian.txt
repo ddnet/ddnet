@@ -635,7 +635,7 @@ Add Friend
 == Додати друга
 
 DDNet %s is out!
-== Вийшов DDnet %s!
+== Вийшов DDNet %s!
 
 Downloading %s:
 == Завантаження %s:

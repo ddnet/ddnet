@@ -227,7 +227,7 @@ const char *CEditor::Explain(int Tile, int Layer)
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "HOOK OTHERS OFF: You can't hook others.";
 		break;
-	case TILE_SUBSTRACT_TIME:
+	case TILE_SUBTRACT_TIME:
 		if(Layer == LAYER_SWITCH)
 			return "BONUS: Subtracts time from your current race time. Opposite of PENALTY.";
 		break;

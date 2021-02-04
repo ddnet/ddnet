@@ -1031,7 +1031,8 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	static int s_GfxHighdpi = g_Config.m_GfxHighdpi;
 
 	CUIRect ModeList;
-	MainView.VSplitLeft(300.0f, &MainView, &ModeList);
+	MainView.VSplitLeft(350.0f, &MainView, &ModeList);
+	MainView.VSplitLeft(340.0f, &MainView, 0);
 
 	// draw allmodes switch
 	ModeList.HSplitTop(20, &Button, &ModeList);
@@ -1195,7 +1196,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	}
 
 	MainView.HSplitTop(20.0f, &Label, &MainView);
-	Label.VSplitLeft(130.0f, &Label, &Button);
+	Label.VSplitLeft(160.0f, &Label, &Button);
 	if(g_Config.m_GfxRefreshRate)
 		str_format(aBuf, sizeof(aBuf), "%s: %i Hz", Localize("Refresh Rate"), g_Config.m_GfxRefreshRate);
 	else
@@ -1614,25 +1615,17 @@ ColorHSLA CMenus::RenderHSLColorPicker(const CUIRect *pRect, unsigned int *pColo
 			PickerRect.w = ms_ColorPicker.ms_Width;
 			PickerRect.h = ms_ColorPicker.ms_Height;
 
-			if(ms_ColorPicker.m_pColor != pColor && !UI()->MouseInside(&PickerRect))
-			{
-				ms_ColorPicker.m_X = UI()->MouseX();
-				ms_ColorPicker.m_Y = UI()->MouseY();
-				ms_ColorPicker.m_pColor = pColor;
-				ms_ColorPicker.m_Active = true;
-				ms_ColorPicker.m_AttachedRect = *pRect;
-				ms_ColorPicker.m_HSVColor = color_cast<ColorHSVA, ColorHSLA>(HSLColor).Pack(false);
-			}
+			if(ms_ColorPicker.m_pColor == pColor || UI()->MouseInside(&PickerRect))
+				return HSLColor;
 		}
-		else
-		{
-			ms_ColorPicker.m_X = UI()->MouseX();
-			ms_ColorPicker.m_Y = UI()->MouseY();
-			ms_ColorPicker.m_pColor = pColor;
-			ms_ColorPicker.m_Active = true;
-			ms_ColorPicker.m_AttachedRect = *pRect;
-			ms_ColorPicker.m_HSVColor = color_cast<ColorHSVA, ColorHSLA>(HSLColor).Pack(false);
-		}
+
+		CUIRect *pScreen = UI()->Screen();
+		ms_ColorPicker.m_X = minimum(UI()->MouseX(), pScreen->w - ms_ColorPicker.ms_Width);
+		ms_ColorPicker.m_Y = minimum(UI()->MouseY(), pScreen->h - ms_ColorPicker.ms_Height);
+		ms_ColorPicker.m_pColor = pColor;
+		ms_ColorPicker.m_Active = true;
+		ms_ColorPicker.m_AttachedRect = *pRect;
+		ms_ColorPicker.m_HSVColor = color_cast<ColorHSVA, ColorHSLA>(HSLColor).Pack(false);
 	}
 
 	return HSLColor;
