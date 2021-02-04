@@ -1034,6 +1034,7 @@ set(EXPECTED_DATA
   editor/basic_freeze.rules
   editor/checker.png
   editor/cursor.png
+  editor/cursor_text.png
   editor/ddmax_freeze.rules
   editor/ddnet_tiles.rules
   editor/ddnet_walls.rules
@@ -1119,6 +1120,7 @@ set(EXPECTED_DATA
   mapres/bg_cloud3.png
   mapres/ddmax_freeze.png
   mapres/ddnet_start.png
+  mapres/ddnet_tiles.json
   mapres/ddnet_tiles.png
   mapres/ddnet_walls.png
   mapres/desert_background.png
@@ -1131,7 +1133,9 @@ set(EXPECTED_DATA
   mapres/desert_sun.png
   mapres/entities.png
   mapres/fadeout.png
+  mapres/font_teeworlds.json
   mapres/font_teeworlds.png
+  mapres/font_teeworlds_alt.json
   mapres/font_teeworlds_alt.png
   mapres/generic_clear.png
   mapres/generic_deathtiles.png
@@ -1822,6 +1826,8 @@ if(CLIENT)
     editor.cpp
     editor.h
     explanations.cpp
+    font_typer.cpp
+    font_typer.h
     io.cpp
     layer_game.cpp
     layer_quads.cpp

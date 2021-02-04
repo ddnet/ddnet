@@ -27,6 +27,7 @@
 #include <engine/storage.h>
 
 #include "auto_map.h"
+#include "font_typer.h"
 
 typedef void (*INDEX_MODIFY_FUNC)(int *pIndex);
 
@@ -639,6 +640,8 @@ class CEditor : public IEditor
 	class IStorage *m_pStorage;
 	CRenderTools m_RenderTools;
 	CUI m_UI;
+
+	CFontTyper m_FontTyper;
 
 public:
 	class IInput *Input() { return m_pInput; };
