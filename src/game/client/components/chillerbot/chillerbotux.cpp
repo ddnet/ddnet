@@ -125,7 +125,7 @@ void CChillerBotUX::SelectCampArea(int Key)
 {
 	if(!GameClient()->m_Snap.m_pLocalCharacter)
 		return;
-	if(!g_Config.m_ClCampHack)
+	if(g_Config.m_ClCampHack != 1)
 		return;
 	if(Key != KEY_MOUSE_1)
 		return;
