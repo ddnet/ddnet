@@ -264,6 +264,7 @@ void CChatHelper::OnChatMessage(int ClientID, int Team, const char *pMsg)
 			SayBuffer(aBuf, true);
 		}
 		str_format(m_aLastAfkPing, sizeof(m_aLastAfkPing), "%s: %s", m_pClient->m_aClients[ClientID].m_aName, pMsg);
+		m_pChillerBot->SetComponentNoteLong("afk", m_aLastAfkPing);
 		return;
 	}
 	if(g_Config.m_ClAutoReply)

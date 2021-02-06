@@ -2222,6 +2222,8 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 #endif
 }
 
+#include <game/client/components/chillerbot/chillerbotux.h>
+
 void CMenus::RenderSettingsChillerbot(CUIRect MainView)
 {
 	CUIRect Button, Label;
@@ -2245,6 +2247,7 @@ void CMenus::RenderSettingsChillerbot(CUIRect MainView)
 		if(DoButton_CheckBox(&g_Config.m_ClFinishRename, "Rename on finish", g_Config.m_ClFinishRename, &Checkbox))
 		{
 			g_Config.m_ClFinishRename ^= 1;
+			m_pClient->m_pChillerBotUX->UpdateComponents();
 		}
 	}
 
@@ -2264,6 +2267,20 @@ void CMenus::RenderSettingsChillerbot(CUIRect MainView)
 		if(DoButton_CheckBox(&g_Config.m_ClAutoReply, "Auto reply", g_Config.m_ClAutoReply, &Checkbox))
 		{
 			g_Config.m_ClAutoReply ^= 1;
+			m_pClient->m_pChillerBotUX->UpdateComponents();
+		}
+	}
+
+	MainView.HSplitTop(5.0f, 0, &MainView);
+
+	// chillerbot hud
+	{
+		CUIRect Checkbox;
+		MainView.HSplitTop(20.0f, &Checkbox, &MainView);
+		if(DoButton_CheckBox(&g_Config.m_ClChillerbotHud, "show component hud", g_Config.m_ClChillerbotHud, &Checkbox))
+		{
+			g_Config.m_ClChillerbotHud ^= 1;
+			m_pClient->m_pChillerBotUX->UpdateComponents();
 		}
 	}
 }

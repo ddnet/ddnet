@@ -3,6 +3,9 @@
 
 #include <game/client/component.h>
 
+#define MAX_COMPONENT_LEN 16
+#define MAX_COMPONENTS_ENABLED 8
+
 class CChillerBotUX : public CComponent
 {
 	class CChatHelper *m_pChatHelper;
@@ -13,6 +16,14 @@ class CChillerBotUX : public CComponent
 
 	char m_aAfkMessage[32];
 	char m_aLastAfkPing[2048];
+
+	struct CUiComponent
+	{
+		char m_aName[MAX_COMPONENT_LEN];
+		char m_aNoteShort[16];
+		char m_aNoteLong[2048];
+	};
+	CUiComponent m_aEnabledComponents[MAX_COMPONENTS_ENABLED];
 
 	int m_AfkActivity;
 	int m_CampHackX1;
@@ -29,6 +40,7 @@ class CChillerBotUX : public CComponent
 	void CampHackTick();
 	void SelectCampArea(int Key);
 	void MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, float Zoom);
+	void RenderEnabledComponents();
 
 	virtual void OnRender();
 	virtual void OnConsoleInit();
@@ -41,12 +53,23 @@ class CChillerBotUX : public CComponent
 	static void ConCampHackAbs(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnCampHack(IConsole::IResult *pResult, void *pUserData);
 
+	static void ConchainCampHack(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainChillerbotHud(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainAutoReply(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainFinishRename(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+
 public:
 	int m_IgnoreChatAfk;
 
 	void ReturnFromAfk(const char *pChatMessage = 0);
 	int64 GetAfkTime() { return m_AfkTill; }
 	const char *GetAfkMessage() { return m_aAfkMessage; }
+
+	void EnableComponent(const char *pComponent, const char *pNoteShort = 0, const char *pNoteLong = 0);
+	void DisableComponent(const char *pComponent);
+	bool SetComponentNoteShort(const char *pComponent, const char *pNoteShort = 0);
+	bool SetComponentNoteLong(const char *pComponent, const char *pNoteLong = 0);
+	void UpdateComponents();
 };
 
 #endif

@@ -27,18 +27,11 @@ void CChillerBotUX::OnRender()
 	}
 	if(m_AfkTill)
 	{
-		Graphics()->BlendNormal();
-		Graphics()->TextureClear();
-		Graphics()->QuadsBegin();
-		Graphics()->SetColor(0, 0, 0, 0.5f);
-		RenderTools()->DrawRoundRect(10.0f, 30.0f, 150.0f, 50.0f, 10.0f);
-		Graphics()->QuadsEnd();
-		TextRender()->Text(0, 20.0f, 30.f, 20.0f, "chillerbot-ux", -1);
 		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "afk mode (%d/%d)", m_AfkActivity, 200);
-		TextRender()->Text(0, 50.0f, 55.f, 10.0f, aBuf, -1);
-		TextRender()->Text(0, 20.0f, 70.f, 5.0f, m_pChatHelper->LastAfkPingMessage(), -1);
+		str_format(aBuf, sizeof(aBuf), "(%d/%d)", m_AfkActivity, 200);
+		SetComponentNoteShort("afk", aBuf);
 	}
+	RenderEnabledComponents();
 	FinishRenameTick();
 	m_ForceDir = 0;
 	CampHackTick();
@@ -48,6 +41,102 @@ void CChillerBotUX::OnRender()
 		m_pClient->m_pControls->m_InputDirectionLeft[g_Config.m_ClDummy] = 0;
 	}
 	m_LastForceDir = m_ForceDir;
+}
+
+void CChillerBotUX::RenderEnabledComponents()
+{
+	if(m_pClient->m_pMenus->IsActive())
+		return;
+	if(!g_Config.m_ClChillerbotHud)
+		return;
+	for(int i = 0; i < MAX_COMPONENTS_ENABLED; i++)
+	{
+		if(m_aEnabledComponents[i].m_aName[0] == '\0')
+			continue;
+		float TwName = TextRender()->TextWidth(0, 10.0f, m_aEnabledComponents[i].m_aName, -1, -1);
+		float TwNoteShort = 2.f;
+		if(m_aEnabledComponents[i].m_aNoteShort[0])
+			TwNoteShort += TextRender()->TextWidth(0, 10.0f, m_aEnabledComponents[i].m_aNoteShort, -1, -1);
+		Graphics()->BlendNormal();
+		Graphics()->TextureClear();
+		Graphics()->QuadsBegin();
+		Graphics()->SetColor(0, 0, 0, 0.5f);
+		RenderTools()->DrawRoundRect(4.0f, 60.f + i * 15, TwName + TwNoteShort, 14.0f, 3.0f);
+		Graphics()->QuadsEnd();
+		TextRender()->Text(0, 5.0f, 60.f + i * 15, 10.0f, m_aEnabledComponents[i].m_aName, -1);
+		TextRender()->Text(0, 5.0f + TwName + 2.f, 60.f + i * 15, 10.0f, m_aEnabledComponents[i].m_aNoteShort, -1);
+		TextRender()->Text(0, 5.0f, 60.f + i * 15 + 10, 4.0f, m_aEnabledComponents[i].m_aNoteLong, -1);
+	}
+}
+
+void CChillerBotUX::EnableComponent(const char *pComponent, const char *pNoteShort, const char *pNoteLong)
+{
+	// update
+	for(auto &Component : m_aEnabledComponents)
+	{
+		if(str_comp(Component.m_aName, pComponent))
+			continue;
+		str_copy(Component.m_aName, pComponent, sizeof(Component.m_aName));
+		if(pNoteShort)
+			str_copy(Component.m_aNoteShort, pNoteShort, sizeof(Component.m_aNoteShort));
+		if(pNoteLong)
+			str_copy(Component.m_aNoteLong, pNoteLong, sizeof(Component.m_aNoteLong));
+		return;
+	}
+	// insert
+	for(auto &Component : m_aEnabledComponents)
+	{
+		if(Component.m_aName[0] != '\0')
+			continue;
+		str_copy(Component.m_aName, pComponent, sizeof(Component.m_aName));
+		Component.m_aNoteShort[0] = '\0';
+		Component.m_aNoteLong[0] = '\0';
+		if(pNoteShort)
+			str_copy(Component.m_aNoteShort, pNoteShort, sizeof(Component.m_aNoteShort));
+		if(pNoteLong)
+			str_copy(Component.m_aNoteLong, pNoteLong, sizeof(Component.m_aNoteLong));
+		return;
+	}
+}
+
+void CChillerBotUX::DisableComponent(const char *pComponent)
+{
+	// update
+	for(auto &Component : m_aEnabledComponents)
+	{
+		if(str_comp(Component.m_aName, pComponent))
+			continue;
+		Component.m_aName[0] = '\0';
+		return;
+	}
+}
+
+bool CChillerBotUX::SetComponentNoteShort(const char *pComponent, const char *pNote)
+{
+	if(!pNote)
+		return false;
+	for(auto &Component : m_aEnabledComponents)
+	{
+		if(str_comp(Component.m_aName, pComponent))
+			continue;
+		str_copy(Component.m_aNoteShort, pNote, sizeof(Component.m_aNoteShort));
+		return true;
+	}
+	return false;
+}
+
+bool CChillerBotUX::SetComponentNoteLong(const char *pComponent, const char *pNote)
+{
+	if(!pNote)
+		return false;
+	for(auto &Component : m_aEnabledComponents)
+	{
+		if(str_comp(Component.m_aName, pComponent))
+			continue;
+		str_copy(Component.m_aNoteLong, pNote, sizeof(Component.m_aNoteLong));
+		return true;
+	}
+	return false;
 }
 
 void CChillerBotUX::MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, float Zoom)
@@ -88,7 +177,6 @@ void CChillerBotUX::CampHackTick()
 		TextRender()->Text(0, m_CampHackX2, m_CampHackY2, 10.0f, "2", -1);
 		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 	}
-	TextRender()->Text(0, 20.0f, 100.f, 10.0f, "CampHack", -1);
 	if(!m_CampHackX1 || !m_CampHackX2 || !m_CampHackY1 || !m_CampHackY2)
 		return;
 	if(g_Config.m_ClCampHack < 2 || GameClient()->m_Snap.m_pLocalCharacter->m_Weapon != WEAPON_HAMMER)
@@ -215,6 +303,35 @@ void CChillerBotUX::OnInit()
 	m_AfkTill = 0;
 	m_AfkActivity = 0;
 	m_aAfkMessage[0] = '\0';
+
+	for(auto &c : m_aEnabledComponents)
+	{
+		c.m_aName[0] = '\0';
+		c.m_aNoteShort[0] = '\0';
+		c.m_aNoteLong[0] = '\0';
+	}
+	UpdateComponents();
+}
+
+void CChillerBotUX::UpdateComponents()
+{
+	// TODO: make this auto or nicer
+	if(g_Config.m_ClChillerbotHud)
+		EnableComponent("chillerbot hud");
+	else
+		DisableComponent("chillerbot hud");
+	if(g_Config.m_ClCampHack)
+		EnableComponent("camp hack");
+	else
+		DisableComponent("camp hack");
+	if(g_Config.m_ClAutoReply)
+		EnableComponent("auto reply");
+	else
+		DisableComponent("auto reply");
+	if(g_Config.m_ClFinishRename)
+		EnableComponent("finish rename");
+	else
+		DisableComponent("finish rename");
 }
 
 void CChillerBotUX::OnConsoleInit()
@@ -223,6 +340,52 @@ void CChillerBotUX::OnConsoleInit()
 	Console()->Register("camp", "?i[left]i[right]?s[tile|raw]", CFGFLAG_CLIENT, ConCampHack, this, "Activate camp mode relative to tee");
 	Console()->Register("camp_abs", "i[x1]i[y1]i[x2]i[y2]?s[tile|raw]", CFGFLAG_CLIENT, ConCampHackAbs, this, "Activate camp mode absolute in the map");
 	Console()->Register("uncamp", "", CFGFLAG_CLIENT, ConUnCampHack, this, "Same as cl_camp_hack 0 but resets walk input");
+
+	Console()->Chain("cl_camp_hack", ConchainCampHack, this);
+	Console()->Chain("cl_chillerbot_hud", ConchainChillerbotHud, this);
+	Console()->Chain("cl_auto_reply", ConchainAutoReply, this);
+	Console()->Chain("cL_finish_rename", ConchainFinishRename, this);
+}
+
+void CChillerBotUX::ConchainCampHack(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CChillerBotUX *pSelf = (CChillerBotUX *)pUserData;
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->GetInteger(0))
+		pSelf->EnableComponent("camp hack");
+	else
+		pSelf->DisableComponent("camp hack");
+}
+
+void CChillerBotUX::ConchainChillerbotHud(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CChillerBotUX *pSelf = (CChillerBotUX *)pUserData;
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->GetInteger(0))
+		pSelf->EnableComponent("chillerbot hud");
+	else
+		pSelf->DisableComponent("chillerbot hud");
+	pSelf->UpdateComponents();
+}
+
+void CChillerBotUX::ConchainAutoReply(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CChillerBotUX *pSelf = (CChillerBotUX *)pUserData;
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->GetInteger(0))
+		pSelf->EnableComponent("auto reply");
+	else
+		pSelf->DisableComponent("auto reply");
+}
+
+void CChillerBotUX::ConchainFinishRename(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CChillerBotUX *pSelf = (CChillerBotUX *)pUserData;
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->GetInteger(0))
+		pSelf->EnableComponent("finish rename");
+	else
+		pSelf->DisableComponent("finish rename");
 }
 
 void CChillerBotUX::ConAfk(IConsole::IResult *pResult, void *pUserData)
@@ -287,6 +450,7 @@ void CChillerBotUX::ConUnCampHack(IConsole::IResult *pResult, void *pUserData)
 {
 	CChillerBotUX *pSelf = (CChillerBotUX *)pUserData;
 	g_Config.m_ClCampHack = 0;
+	pSelf->DisableComponent("camp hack");
 	pSelf->m_pClient->m_pControls->m_InputDirectionRight[g_Config.m_ClDummy] = 0;
 	pSelf->m_pClient->m_pControls->m_InputDirectionLeft[g_Config.m_ClDummy] = 0;
 }
@@ -307,6 +471,7 @@ void CChillerBotUX::GoAfk(int Minutes, const char *pMsg)
 	m_AfkTill = time_get() + time_freq() * 60 * Minutes;
 	m_AfkActivity = 0;
 	m_pChatHelper->ClearLastAfkPingMessage();
+	EnableComponent("afk");
 }
 
 void CChillerBotUX::ReturnFromAfk(const char *pChatMessage)
@@ -325,4 +490,5 @@ void CChillerBotUX::ReturnFromAfk(const char *pChatMessage)
 		return;
 	m_pClient->m_pChat->AddLine(-2, 0, "[chillerbot-ux] welcome back :)");
 	m_AfkTill = 0;
+	DisableComponent("afk");
 }
