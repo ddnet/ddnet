@@ -11,10 +11,12 @@ class CChatHelper : public CComponent
 
 	int64 m_NextGreetClear;
 	int64 m_NextMessageSend;
+	int64 m_NextPingMsgClear;
 
 	char m_aGreetName[32];
 	char m_aLastPingName[32];
 	char m_aLastAfkPing[2048];
+	char m_aLastPingMessage[2048];
 	char m_aSendBuffer[MAX_CHAT_BUFFER_LEN][2048];
 
 	bool LineShouldHighlight(const char *pLine, const char *pName);

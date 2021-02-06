@@ -12,7 +12,9 @@ void CChatHelper::OnInit()
 	m_aGreetName[0] = '\0';
 	m_NextGreetClear = 0;
 	m_NextMessageSend = 0;
+	m_NextPingMsgClear = 0;
 	m_aLastAfkPing[0] = '\0';
+	m_aLastPingMessage[0] = '\0';
 	m_aLastPingName[0] = '\0';
 	mem_zero(m_aSendBuffer, sizeof(m_aSendBuffer));
 }
@@ -26,6 +28,11 @@ void CChatHelper::OnRender()
 		{
 			m_NextGreetClear = 0;
 			m_aGreetName[0] = '\0';
+		}
+		if(m_NextPingMsgClear < time_now)
+		{
+			m_NextPingMsgClear = 0;
+			m_aLastPingMessage[0] = '\0';
 		}
 		if(m_NextMessageSend < time_now)
 		{
@@ -226,6 +233,11 @@ void CChatHelper::OnChatMessage(int ClientID, int Team, const char *pMsg)
 		str_copy(m_aGreetName, aName, sizeof(m_aGreetName));
 		m_NextGreetClear = time_get() + time_freq() * 10;
 	}
+	// ignore duplicated messages
+	if(!str_comp(m_aLastPingMessage, pMsg))
+		return;
+	str_copy(m_aLastPingMessage, pMsg, sizeof(m_aLastPingMessage));
+	m_NextPingMsgClear = time_get() + time_freq() * 60;
 	int64 AfkTill = m_pChillerBot->GetAfkTime();
 	if(AfkTill)
 	{
