@@ -128,7 +128,7 @@ bool CScore::RateLimitPlayer(int ClientID)
 	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientID];
 	if(pPlayer == 0)
 		return true;
-	if(pPlayer->m_LastSQLQuery + (int64_t)g_Config.m_SvSqlQueriesDelay * Server()->TickSpeed() >= Server()->Tick())
+	if(pPlayer->m_LastSQLQuery + (int64)g_Config.m_SvSqlQueriesDelay * Server()->TickSpeed() >= Server()->Tick())
 		return true;
 	pPlayer->m_LastSQLQuery = Server()->Tick();
 	return false;
