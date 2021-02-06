@@ -220,8 +220,9 @@ void CChillerBotUX::OnInit()
 void CChillerBotUX::OnConsoleInit()
 {
 	Console()->Register("afk", "?i[minutes]?r[message]", CFGFLAG_CLIENT, ConAfk, this, "Activate afk mode (auto chat respond)");
-
-	Console()->Chain("cl_camp_hack", ConchainCampHack, this);
+	Console()->Register("camp", "?i[left]i[right]?s[tile|raw]", CFGFLAG_CLIENT, ConCampHack, this, "Activate camp mode relative to tee");
+	Console()->Register("camp_abs", "i[x1]i[y1]i[x2]i[y2]?s[tile|raw]", CFGFLAG_CLIENT, ConCampHackAbs, this, "Activate camp mode absolute in the map");
+	Console()->Register("uncamp", "", CFGFLAG_CLIENT, ConUnCampHack, this, "Same as cl_camp_hack 0 but resets walk input");
 }
 
 void CChillerBotUX::ConAfk(IConsole::IResult *pResult, void *pUserData)
@@ -229,19 +230,65 @@ void CChillerBotUX::ConAfk(IConsole::IResult *pResult, void *pUserData)
 	((CChillerBotUX *)pUserData)->GoAfk(pResult->NumArguments() ? pResult->GetInteger(0) : -1, pResult->GetString(1));
 }
 
-void CChillerBotUX::ConchainCampHack(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+void CChillerBotUX::ConCampHackAbs(IConsole::IResult *pResult, void *pUserData)
 {
 	CChillerBotUX *pSelf = (CChillerBotUX *)pUserData;
-	pfnCallback(pResult, pCallbackUserData);
+	int Tile = 32;
+	if(!str_comp(pResult->GetString(0), "raw"))
+		Tile = 1;
+	g_Config.m_ClCampHack = 2;
+	// absolute all coords
+	if(pResult->NumArguments() > 1)
+	{
+		if(pSelf->GameClient()->m_Snap.m_pLocalCharacter)
+		{
+			pSelf->m_CampHackX1 = Tile * pResult->GetInteger(0);
+			pSelf->m_CampHackY1 = Tile * pResult->GetInteger(1);
+			pSelf->m_CampHackX2 = Tile * pResult->GetInteger(2);
+			pSelf->m_CampHackY2 = Tile * pResult->GetInteger(3);
+		}
+		return;
+	}
+}
+
+void CChillerBotUX::ConCampHack(IConsole::IResult *pResult, void *pUserData)
+{
+	CChillerBotUX *pSelf = (CChillerBotUX *)pUserData;
+	int Tile = 32;
+	if(!str_comp(pResult->GetString(0), "raw"))
+		Tile = 1;
+	g_Config.m_ClCampHack = 2;
+	if(!pResult->NumArguments())
+	{
+		if(pSelf->GameClient()->m_Snap.m_pLocalCharacter)
+		{
+			pSelf->m_CampHackX1 = pSelf->GameClient()->m_Snap.m_pLocalCharacter->m_X - 32 * 3;
+			pSelf->m_CampHackY1 = pSelf->GameClient()->m_Snap.m_pLocalCharacter->m_Y;
+			pSelf->m_CampHackX2 = pSelf->GameClient()->m_Snap.m_pLocalCharacter->m_X + 32 * 3;
+			pSelf->m_CampHackY2 = pSelf->GameClient()->m_Snap.m_pLocalCharacter->m_Y;
+		}
+		return;
+	}
+	// relative left and right
+	if(pResult->NumArguments() > 1)
+	{
+		if(pSelf->GameClient()->m_Snap.m_pLocalCharacter)
+		{
+			pSelf->m_CampHackX1 = pSelf->GameClient()->m_Snap.m_pLocalCharacter->m_X - Tile * pResult->GetInteger(0);
+			pSelf->m_CampHackY1 = pSelf->GameClient()->m_Snap.m_pLocalCharacter->m_Y;
+			pSelf->m_CampHackX2 = pSelf->GameClient()->m_Snap.m_pLocalCharacter->m_X + Tile * pResult->GetInteger(1);
+			pSelf->m_CampHackY2 = pSelf->GameClient()->m_Snap.m_pLocalCharacter->m_Y;
+		}
+		return;
+	}
+}
+
+void CChillerBotUX::ConUnCampHack(IConsole::IResult *pResult, void *pUserData)
+{
+	CChillerBotUX *pSelf = (CChillerBotUX *)pUserData;
+	g_Config.m_ClCampHack = 0;
 	pSelf->m_pClient->m_pControls->m_InputDirectionRight[g_Config.m_ClDummy] = 0;
 	pSelf->m_pClient->m_pControls->m_InputDirectionLeft[g_Config.m_ClDummy] = 0;
-	if(pSelf->GameClient()->m_Snap.m_pLocalCharacter)
-	{
-		pSelf->m_CampHackX1 = pSelf->GameClient()->m_Snap.m_pLocalCharacter->m_X - 32 * 3;
-		pSelf->m_CampHackY1 = pSelf->GameClient()->m_Snap.m_pLocalCharacter->m_Y;
-		pSelf->m_CampHackX2 = pSelf->GameClient()->m_Snap.m_pLocalCharacter->m_X + 32 * 3;
-		pSelf->m_CampHackY2 = pSelf->GameClient()->m_Snap.m_pLocalCharacter->m_Y;
-	}
 }
 
 void CChillerBotUX::GoAfk(int Minutes, const char *pMsg)

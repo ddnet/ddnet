@@ -37,8 +37,9 @@ class CChillerBotUX : public CComponent
 	virtual bool OnInput(IInput::CEvent e);
 
 	static void ConAfk(IConsole::IResult *pResult, void *pUserData);
-
-	static void ConchainCampHack(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConCampHack(IConsole::IResult *pResult, void *pUserData);
+	static void ConCampHackAbs(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnCampHack(IConsole::IResult *pResult, void *pUserData);
 
 public:
 	int m_IgnoreChatAfk;
