@@ -1332,8 +1332,26 @@ void CGameContext::OnClientEnter(int ClientID)
 	}
 }
 
-void CGameContext::OnClientConnected(int ClientID)
+bool CGameContext::OnClientDataPersist(int ClientID, void *pData)
 {
+	CPersistentClientData *pPersistent = (CPersistentClientData *)pData;
+	if(!m_apPlayers[ClientID])
+	{
+		return false;
+	}
+	pPersistent->m_IsSpectator = m_apPlayers[ClientID]->GetTeam() == TEAM_SPECTATORS;
+	return true;
+}
+
+void CGameContext::OnClientConnected(int ClientID, void *pData)
+{
+	CPersistentClientData *pPersistentData = (CPersistentClientData *)pData;
+	bool Spec = false;
+	if(pPersistentData)
+	{
+		Spec = pPersistentData->m_IsSpectator;
+	}
+
 	{
 		bool Empty = true;
 		for(auto &pPlayer : m_apPlayers)
@@ -1351,7 +1369,7 @@ void CGameContext::OnClientConnected(int ClientID)
 	}
 
 	// Check which team the player should be on
-	const int StartTeam = g_Config.m_SvTournamentMode ? TEAM_SPECTATORS : m_pController->GetAutoTeam(ClientID);
+	const int StartTeam = (Spec || g_Config.m_SvTournamentMode) ? TEAM_SPECTATORS : m_pController->GetAutoTeam(ClientID);
 
 	if(!m_apPlayers[ClientID])
 		m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, StartTeam);
@@ -3350,7 +3368,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	{
 		for(int i = 0; i < g_Config.m_DbgDummies; i++)
 		{
-			OnClientConnected(MAX_CLIENTS - i - 1);
+			OnClientConnected(MAX_CLIENTS - i - 1, 0);
 		}
 	}
 #endif
@@ -3593,7 +3611,7 @@ bool CGameContext::IsClientReady(int ClientID) const
 
 bool CGameContext::IsClientPlayer(int ClientID) const
 {
-	return m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetTeam() == TEAM_SPECTATORS ? false : true;
+	return m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetTeam() != TEAM_SPECTATORS;
 }
 
 CUuid CGameContext::GameUuid() const { return m_GameUuid; }

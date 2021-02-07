@@ -178,6 +178,9 @@ public:
 
 		const IConsole::CCommandInfo *m_pRconCmdToSend;
 
+		bool m_HasPersistentData;
+		void *m_pPersistentData;
+
 		void Reset();
 
 		// DDRace

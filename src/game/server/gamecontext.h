@@ -123,6 +123,11 @@ class CGameContext : public IGameServer
 
 	bool m_Resetting;
 
+	struct CPersistentClientData
+	{
+		bool m_IsSpectator;
+	};
+
 public:
 	IServer *Server() const { return m_pServer; }
 	CConfig *Config() { return m_pConfig; }
@@ -246,7 +251,8 @@ public:
 	void CensorMessage(char *pCensoredMessage, const char *pMessage, int Size);
 	virtual void OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID);
 
-	virtual void OnClientConnected(int ClientID);
+	virtual bool OnClientDataPersist(int ClientID, void *pData);
+	virtual void OnClientConnected(int ClientID, void *pData);
 	virtual void OnClientEnter(int ClientID);
 	virtual void OnClientDrop(int ClientID, const char *pReason);
 	virtual void OnClientDirectInput(int ClientID, void *pInput);
@@ -258,6 +264,7 @@ public:
 
 	virtual bool IsClientReady(int ClientID) const;
 	virtual bool IsClientPlayer(int ClientID) const;
+	virtual int PersistentClientDataSize() const { return sizeof(CPersistentClientData); }
 
 	virtual CUuid GameUuid() const;
 	virtual const char *GameType() const;

@@ -1465,7 +1465,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		}
 		else if(Msg == NETMSG_READY)
 		{
-			if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && m_aClients[ClientID].m_State == CClient::STATE_CONNECTING)
+			if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && (m_aClients[ClientID].m_State == CClient::STATE_CONNECTING))
 			{
 				char aAddrStr[NETADDR_MAXSTRSIZE];
 				net_addr_str(m_NetServer.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), true);
@@ -1473,8 +1473,15 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf), "player is ready. ClientID=%d addr=<{%s}> secure=%s", ClientID, aAddrStr, m_NetServer.HasSecurityToken(ClientID) ? "yes" : "no");
 				Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
+
+				void *pPersistentData = 0;
+				if(m_aClients[ClientID].m_HasPersistentData)
+				{
+					pPersistentData = m_aClients[ClientID].m_pPersistentData;
+					m_aClients[ClientID].m_HasPersistentData = false;
+				}
 				m_aClients[ClientID].m_State = CClient::STATE_READY;
-				GameServer()->OnClientConnected(ClientID);
+				GameServer()->OnClientConnected(ClientID, pPersistentData);
 			}
 
 			SendConnectionReady(ClientID);
@@ -2349,6 +2356,14 @@ int CServer::Run()
 
 	m_PrintCBIndex = Console()->RegisterPrintCallback(g_Config.m_ConsoleOutputLevel, SendRconLineAuthed, this);
 
+	{
+		int Size = GameServer()->PersistentClientDataSize();
+		for(auto &Client : m_aClients)
+		{
+			Client.m_pPersistentData = malloc(Size);
+		}
+	}
+
 	// load map
 	if(!LoadMap(g_Config.m_SvMap))
 	{
@@ -2458,6 +2473,16 @@ int CServer::Run()
 				if(LoadMap(g_Config.m_SvMap))
 				{
 					// new map loaded
+
+					// ask the game to for the data it wants to persist past a map change
+					for(int i = 0; i < MAX_CLIENTS; i++)
+					{
+						if(m_aClients[i].m_State == CClient::STATE_INGAME)
+						{
+							m_aClients[i].m_HasPersistentData = GameServer()->OnClientDataPersist(i, m_aClients[i].m_pPersistentData);
+						}
+					}
+
 					GameServer()->OnShutdown();
 
 					for(int ClientID = 0; ClientID < MAX_CLIENTS; ClientID++)
@@ -2466,7 +2491,9 @@ int CServer::Run()
 							continue;
 
 						SendMap(ClientID);
+						bool HasPersistentData = m_aClients[ClientID].m_HasPersistentData;
 						m_aClients[ClientID].Reset();
+						m_aClients[ClientID].m_HasPersistentData = HasPersistentData;
 						m_aClients[ClientID].m_State = CClient::STATE_CONNECTING;
 					}
 
