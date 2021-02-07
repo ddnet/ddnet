@@ -1728,11 +1728,19 @@ void CGameClient::OnPredict()
 	bool Dummy = g_Config.m_ClDummy ^ m_IsDummySwapping;
 	m_PredictedWorld.CopyWorld(&m_GameWorld);
 
-	// don't predict inactive players
+	// don't predict inactive players, or entities from other teams
 	for(int i = 0; i < MAX_CLIENTS; i++)
 		if(CCharacter *pChar = m_PredictedWorld.GetCharacterByID(i))
-			if(!m_Snap.m_aCharacters[i].m_Active && pChar->m_SnapTicks > 10)
+			if((!m_Snap.m_aCharacters[i].m_Active && pChar->m_SnapTicks > 10) || IsOtherTeam(i))
 				pChar->Destroy();
+
+	CProjectile *pProjNext = 0;
+	for(CProjectile *pProj = (CProjectile *)m_PredictedWorld.FindFirst(CGameWorld::ENTTYPE_PROJECTILE); pProj; pProj = pProjNext)
+	{
+		pProjNext = (CProjectile *)pProj->TypeNext();
+		if(IsOtherTeam(pProj->GetOwner()))
+			m_PredictedWorld.RemoveEntity(pProj);
+	}
 
 	CCharacter *pLocalChar = m_PredictedWorld.GetCharacterByID(m_Snap.m_LocalClientID);
 	if(!pLocalChar)
@@ -2349,6 +2357,7 @@ void CGameClient::UpdatePrediction()
 				m_Snap.m_aCharacters[i].m_HasExtendedData ? &m_Snap.m_aCharacters[i].m_ExtendedData : 0,
 				GameTeam, IsLocal);
 		}
+
 	for(int Index = 0; Index < Num; Index++)
 	{
 		IClient::CSnapItem Item;
@@ -2382,7 +2391,7 @@ void CGameClient::UpdateRenderedCharacters()
 			Client()->IntraGameTick(g_Config.m_ClDummy));
 		vec2 Pos = UnpredPos;
 
-		if(Predict() && (i == m_Snap.m_LocalClientID || AntiPingPlayers()))
+		if(Predict() && (i == m_Snap.m_LocalClientID || (AntiPingPlayers() && !IsOtherTeam(i))))
 		{
 			m_aClients[i].m_Predicted.Write(&m_aClients[i].m_RenderCur);
 			m_aClients[i].m_PrevPredicted.Write(&m_aClients[i].m_RenderPrev);
