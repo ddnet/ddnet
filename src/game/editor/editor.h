@@ -106,7 +106,7 @@ public:
 		Resort();
 	}
 
-	float EndTime()
+	float EndTime() const
 	{
 		if(m_lPoints.size())
 			return m_lPoints[m_lPoints.size() - 1].m_Time * (1.0f / 1000.0f);
@@ -204,7 +204,7 @@ public:
 	void MapScreen();
 	void Mapping(float *pPoints);
 
-	void GetSize(float *w, float *h);
+	void GetSize(float *w, float *h) const;
 
 	void DeleteLayer(int Index);
 	int SwapLayers(int Index0, int Index1);
@@ -754,7 +754,7 @@ public:
 
 	virtual void Init();
 	virtual void UpdateAndRender();
-	virtual bool HasUnsavedData() { return m_Map.m_Modified; }
+	virtual bool HasUnsavedData() const { return m_Map.m_Modified; }
 	virtual void UpdateMentions() { m_Mentions++; }
 	virtual void ResetMentions() { m_Mentions = 0; }
 
@@ -791,15 +791,15 @@ public:
 	void Render();
 
 	array<CQuad *> GetSelectedQuads();
-	CLayer *GetSelectedLayerType(int Index, int Type);
-	CLayer *GetSelectedLayer(int Index);
-	CLayerGroup *GetSelectedGroup();
+	CLayer *GetSelectedLayerType(int Index, int Type) const;
+	CLayer *GetSelectedLayer(int Index) const;
+	CLayerGroup *GetSelectedGroup() const;
 	CSoundSource *GetSelectedSource();
 	void SelectLayer(int LayerIndex, int GroupIndex = -1);
 	void SelectQuad(int Index);
 	void DeleteSelectedQuads();
-	bool IsQuadSelected(int Index);
-	int FindSelectedQuadIndex(int Index);
+	bool IsQuadSelected(int Index) const;
+	int FindSelectedQuadIndex(int Index) const;
 
 	float ScaleFontSize(char *pText, int TextSize, float FontSize, int Width);
 	int DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, ColorRGBA Color = ColorRGBA(1, 1, 1, 0.5f));
@@ -1041,7 +1041,7 @@ public:
 	static void AddImage(const char *pFilename, int StorageType, void *pUser);
 	static void AddSound(const char *pFileName, int StorageType, void *pUser);
 
-	bool IsEnvelopeUsed(int EnvelopeIndex);
+	bool IsEnvelopeUsed(int EnvelopeIndex) const;
 
 	void RenderImages(CUIRect Toolbox, CUIRect View);
 	void RenderLayers(CUIRect Toolbox, CUIRect View);
@@ -1058,9 +1058,9 @@ public:
 	void AddFileDialogEntry(int Index, CUIRect *pView);
 	void SelectGameLayer();
 	void SortImages();
-	const char *Explain(int Tile, int Layer);
+	static const char *Explain(int Tile, int Layer);
 
-	int GetLineDistance();
+	int GetLineDistance() const;
 	void ZoomMouseTarget(float ZoomFactor);
 
 	static ColorHSVA ms_PickerColor;

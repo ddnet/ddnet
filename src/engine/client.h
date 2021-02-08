@@ -135,22 +135,22 @@ public:
 	virtual void EnterGame() = 0;
 
 	//
-	virtual const char *MapDownloadName() = 0;
-	virtual int MapDownloadAmount() = 0;
-	virtual int MapDownloadTotalsize() = 0;
+	virtual const char *MapDownloadName() const = 0;
+	virtual int MapDownloadAmount() const = 0;
+	virtual int MapDownloadTotalsize() const = 0;
 
 	// input
-	virtual int *GetInput(int Tick, int IsDummy = 0) = 0;
-	virtual int *GetDirectInput(int Tick, int IsDummy = 0) = 0;
+	virtual int *GetInput(int Tick, int IsDummy = 0) const = 0;
+	virtual int *GetDirectInput(int Tick, int IsDummy = 0) const = 0;
 
 	// remote console
 	virtual void RconAuth(const char *pUsername, const char *pPassword) = 0;
-	virtual bool RconAuthed() = 0;
-	virtual bool UseTempRconCommands() = 0;
+	virtual bool RconAuthed() const = 0;
+	virtual bool UseTempRconCommands() const = 0;
 	virtual void Rcon(const char *pLine) = 0;
 
 	// server info
-	virtual void GetServerInfo(class CServerInfo *pServerInfo) = 0;
+	virtual void GetServerInfo(class CServerInfo *pServerInfo) const = 0;
 
 	virtual int GetPredictionTime() = 0;
 
@@ -163,10 +163,10 @@ public:
 	};
 
 	// TODO: Refactor: should redo this a bit i think, too many virtual calls
-	virtual int SnapNumItems(int SnapID) = 0;
-	virtual void *SnapFindItem(int SnapID, int Type, int ID) = 0;
-	virtual void *SnapGetItem(int SnapID, int Index, CSnapItem *pItem) = 0;
-	virtual int SnapItemSize(int SnapID, int Index) = 0;
+	virtual int SnapNumItems(int SnapID) const = 0;
+	virtual void *SnapFindItem(int SnapID, int Type, int ID) const = 0;
+	virtual void *SnapGetItem(int SnapID, int Index, CSnapItem *pItem) const = 0;
+	virtual int SnapItemSize(int SnapID, int Index) const = 0;
 	virtual void SnapInvalidateItem(int SnapID, int Index) = 0;
 
 	virtual void SnapSetStaticsize(int ItemType, int Size) = 0;
@@ -184,22 +184,22 @@ public:
 	}
 
 	//
-	virtual const char *PlayerName() = 0;
-	virtual const char *DummyName() = 0;
-	virtual const char *ErrorString() = 0;
-	virtual const char *LatestVersion() = 0;
-	virtual bool ConnectionProblems() = 0;
+	virtual const char *PlayerName() const = 0;
+	virtual const char *DummyName() const = 0;
+	virtual const char *ErrorString() const = 0;
+	virtual const char *LatestVersion() const = 0;
+	virtual bool ConnectionProblems() const = 0;
 
-	virtual bool SoundInitFailed() = 0;
+	virtual bool SoundInitFailed() const = 0;
 
-	virtual IGraphics::CTextureHandle GetDebugFont() = 0; // TODO: remove this function
+	virtual IGraphics::CTextureHandle GetDebugFont() const = 0; // TODO: remove this function
 
 	//DDRace
 
-	virtual const char *GetCurrentMap() = 0;
-	virtual const char *GetCurrentMapPath() = 0;
-	virtual SHA256_DIGEST GetCurrentMapSha256() = 0;
-	virtual unsigned GetCurrentMapCrc() = 0;
+	virtual const char *GetCurrentMap() const = 0;
+	virtual const char *GetCurrentMapPath() const = 0;
+	virtual SHA256_DIGEST GetCurrentMapSha256() const = 0;
+	virtual unsigned GetCurrentMapCrc() const = 0;
 
 	virtual int GetCurrentRaceTime() = 0;
 
@@ -212,7 +212,7 @@ public:
 	virtual void DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser) = 0;
 
 	virtual void RequestDDNetInfo() = 0;
-	virtual bool EditorHasUnsavedData() = 0;
+	virtual bool EditorHasUnsavedData() const = 0;
 
 	virtual void GenerateTimeoutSeed() = 0;
 
@@ -250,11 +250,11 @@ public:
 	virtual void SendDummyInfo(bool Start) = 0;
 	virtual int GetLastRaceTick() = 0;
 
-	virtual const char *GetItemName(int Type) = 0;
-	virtual const char *Version() = 0;
-	virtual const char *NetVersion() = 0;
-	virtual int DDNetVersion() = 0;
-	virtual const char *DDNetVersionStr() = 0;
+	virtual const char *GetItemName(int Type) const = 0;
+	virtual const char *Version() const = 0;
+	virtual const char *NetVersion() const = 0;
+	virtual int DDNetVersion() const = 0;
+	virtual const char *DDNetVersionStr() const = 0;
 
 	virtual void OnDummyDisconnect() = 0;
 	virtual void Echo(const char *pString) = 0;

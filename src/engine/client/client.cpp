@@ -478,7 +478,7 @@ void CClient::Rcon(const char *pCmd)
 	SendMsg(&Msg, MSGFLAG_VITAL);
 }
 
-bool CClient::ConnectionProblems()
+bool CClient::ConnectionProblems() const
 {
 	return m_NetClient[g_Config.m_ClDummy].GotProblems() != 0;
 }
@@ -543,13 +543,13 @@ void CClient::SendInput()
 	}
 }
 
-const char *CClient::LatestVersion()
+const char *CClient::LatestVersion() const
 {
 	return m_aVersionStr;
 }
 
 // TODO: OPT: do this a lot smarter!
-int *CClient::GetInput(int Tick, int IsDummy)
+int *CClient::GetInput(int Tick, int IsDummy) const
 {
 	int Best = -1;
 	const int d = IsDummy ^ g_Config.m_ClDummy;
@@ -564,7 +564,7 @@ int *CClient::GetInput(int Tick, int IsDummy)
 	return 0;
 }
 
-int *CClient::GetDirectInput(int Tick, int IsDummy)
+int *CClient::GetDirectInput(int Tick, int IsDummy) const
 {
 	const int d = IsDummy ^ g_Config.m_ClDummy;
 	for(int i = 0; i < 200; i++)
@@ -899,7 +899,7 @@ int CClient::SendMsgY(CMsgPacker *pMsg, int Flags, int NetClient)
 	return 0;
 }
 
-void CClient::GetServerInfo(CServerInfo *pServerInfo)
+void CClient::GetServerInfo(CServerInfo *pServerInfo) const
 {
 	mem_copy(pServerInfo, &m_CurrentServerInfo, sizeof(m_CurrentServerInfo));
 
@@ -921,7 +921,7 @@ int CClient::LoadData()
 
 // ---
 
-void *CClient::SnapGetItem(int SnapID, int Index, CSnapItem *pItem)
+void *CClient::SnapGetItem(int SnapID, int Index, CSnapItem *pItem) const
 {
 	CSnapshotItem *i;
 	dbg_assert(SnapID >= 0 && SnapID < NUM_SNAPSHOT_TYPES, "invalid SnapID");
@@ -932,7 +932,7 @@ void *CClient::SnapGetItem(int SnapID, int Index, CSnapItem *pItem)
 	return (void *)i->Data();
 }
 
-int CClient::SnapItemSize(int SnapID, int Index)
+int CClient::SnapItemSize(int SnapID, int Index) const
 {
 	dbg_assert(SnapID >= 0 && SnapID < NUM_SNAPSHOT_TYPES, "invalid SnapID");
 	return m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItemSize(Index);
@@ -953,7 +953,7 @@ void CClient::SnapInvalidateItem(int SnapID, int Index)
 	}
 }
 
-void *CClient::SnapFindItem(int SnapID, int Type, int ID)
+void *CClient::SnapFindItem(int SnapID, int Type, int ID) const
 {
 	// TODO: linear search. should be fixed.
 	int i;
@@ -970,7 +970,7 @@ void *CClient::SnapFindItem(int SnapID, int Type, int ID)
 	return 0x0;
 }
 
-int CClient::SnapNumItems(int SnapID)
+int CClient::SnapNumItems(int SnapID) const
 {
 	dbg_assert(SnapID >= 0 && SnapID < NUM_SNAPSHOT_TYPES, "invalid SnapID");
 	if(!m_aSnapshots[g_Config.m_ClDummy][SnapID])
@@ -1083,7 +1083,7 @@ void CClient::Quit()
 	SetState(IClient::STATE_QUITTING);
 }
 
-const char *CClient::PlayerName()
+const char *CClient::PlayerName() const
 {
 	if(g_Config.m_PlayerName[0])
 	{
@@ -1096,7 +1096,7 @@ const char *CClient::PlayerName()
 	return "nameless tee";
 }
 
-const char *CClient::DummyName()
+const char *CClient::DummyName() const
 {
 	if(g_Config.m_ClDummyName[0])
 	{
@@ -1113,13 +1113,14 @@ const char *CClient::DummyName()
 	}
 	if(pBase)
 	{
-		str_format(m_aDummyNameBuf, sizeof(m_aDummyNameBuf), "[D] %s", pBase);
-		return m_aDummyNameBuf;
+		static char aDummyNameBuf[16];
+		str_format(aDummyNameBuf, sizeof(aDummyNameBuf), "[D] %s", pBase);
+		return aDummyNameBuf;
 	}
 	return "brainless tee";
 }
 
-const char *CClient::ErrorString()
+const char *CClient::ErrorString() const
 {
 	return m_NetClient[CLIENT_MAIN].ErrorString();
 }
@@ -4435,22 +4436,22 @@ int main(int argc, const char **argv) // ignore_convention
 
 // DDRace
 
-const char *CClient::GetCurrentMap()
+const char *CClient::GetCurrentMap() const
 {
 	return m_aCurrentMap;
 }
 
-const char *CClient::GetCurrentMapPath()
+const char *CClient::GetCurrentMapPath() const
 {
 	return m_aCurrentMapPath;
 }
 
-SHA256_DIGEST CClient::GetCurrentMapSha256()
+SHA256_DIGEST CClient::GetCurrentMapSha256() const
 {
 	return m_pMap->Sha256();
 }
 
-unsigned CClient::GetCurrentMapCrc()
+unsigned CClient::GetCurrentMapCrc() const
 {
 	return m_pMap->Crc();
 }

@@ -112,11 +112,11 @@ static CGhost gs_Ghost;
 CGameClient::CStack::CStack() { m_Num = 0; }
 void CGameClient::CStack::Add(class CComponent *pComponent) { m_paComponents[m_Num++] = pComponent; }
 
-const char *CGameClient::Version() { return GAME_VERSION; }
-const char *CGameClient::NetVersion() { return GAME_NETVERSION; }
-int CGameClient::DDNetVersion() { return CLIENT_VERSIONNR; }
-const char *CGameClient::DDNetVersionStr() { return m_aDDNetVersionStr; }
-const char *CGameClient::GetItemName(int Type) { return m_NetObjHandler.GetObjName(Type); }
+const char *CGameClient::Version() const { return GAME_VERSION; }
+const char *CGameClient::NetVersion() const { return GAME_NETVERSION; }
+int CGameClient::DDNetVersion() const { return CLIENT_VERSIONNR; }
+const char *CGameClient::DDNetVersionStr() const { return m_aDDNetVersionStr; }
+const char *CGameClient::GetItemName(int Type) const { return m_NetObjHandler.GetObjName(Type); }
 
 void CGameClient::OnConsoleInit()
 {

@@ -43,16 +43,16 @@ public:
 
 	virtual int Port() const = 0;
 	virtual int MaxClients() const = 0;
-	virtual int ClientCount() = 0;
-	virtual int DistinctClientCount() = 0;
-	virtual const char *ClientName(int ClientID) = 0;
-	virtual const char *ClientClan(int ClientID) = 0;
-	virtual int ClientCountry(int ClientID) = 0;
-	virtual bool ClientIngame(int ClientID) = 0;
-	virtual bool ClientAuthed(int ClientID) = 0;
-	virtual int GetClientInfo(int ClientID, CClientInfo *pInfo) = 0;
+	virtual int ClientCount() const = 0;
+	virtual int DistinctClientCount() const = 0;
+	virtual const char *ClientName(int ClientID) const = 0;
+	virtual const char *ClientClan(int ClientID) const = 0;
+	virtual int ClientCountry(int ClientID) const = 0;
+	virtual bool ClientIngame(int ClientID) const = 0;
+	virtual bool ClientAuthed(int ClientID) const = 0;
+	virtual int GetClientInfo(int ClientID, CClientInfo *pInfo) const = 0;
 	virtual void SetClientDDNetVersion(int ClientID, int DDNetVersion) = 0;
-	virtual void GetClientAddr(int ClientID, char *pAddrStr, int Size) = 0;
+	virtual void GetClientAddr(int ClientID, char *pAddrStr, int Size) const = 0;
 	virtual void RestrictRconOutput(int ClientID) = 0;
 
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags, int ClientID) = 0;
@@ -209,8 +209,8 @@ public:
 		RCON_CID_VOTE = -2,
 	};
 	virtual void SetRconCID(int ClientID) = 0;
-	virtual int GetAuthedState(int ClientID) = 0;
-	virtual const char *GetAuthName(int ClientID) = 0;
+	virtual int GetAuthedState(int ClientID) const = 0;
+	virtual const char *GetAuthName(int ClientID) const = 0;
 	virtual void Kick(int ClientID, const char *pReason) = 0;
 	virtual void Ban(int ClientID, int Seconds, const char *pReason) = 0;
 
@@ -224,7 +224,7 @@ public:
 	virtual void StopRecord(int ClientID) = 0;
 	virtual bool IsRecording(int ClientID) = 0;
 
-	virtual void GetClientAddr(int ClientID, NETADDR *pAddr) = 0;
+	virtual void GetClientAddr(int ClientID, NETADDR *pAddr) const = 0;
 
 	virtual int *GetIdMap(int ClientID) = 0;
 
@@ -243,7 +243,7 @@ public:
 
 	virtual void SendMsgRaw(int ClientID, const void *pData, int Size, int Flags) = 0;
 
-	virtual char *GetMapName() = 0;
+	virtual char *GetMapName() const = 0;
 
 	virtual bool IsSixup(int ClientID) const = 0;
 };
@@ -274,18 +274,18 @@ public:
 	virtual void OnClientPredictedInput(int ClientID, void *pInput) = 0;
 	virtual void OnClientPredictedEarlyInput(int ClientID, void *pInput) = 0;
 
-	virtual bool IsClientReady(int ClientID) = 0;
-	virtual bool IsClientPlayer(int ClientID) = 0;
+	virtual bool IsClientReady(int ClientID) const = 0;
+	virtual bool IsClientPlayer(int ClientID) const = 0;
 
-	virtual CUuid GameUuid() = 0;
-	virtual const char *GameType() = 0;
-	virtual const char *Version() = 0;
-	virtual const char *NetVersion() = 0;
+	virtual CUuid GameUuid() const = 0;
+	virtual const char *GameType() const = 0;
+	virtual const char *Version() const = 0;
+	virtual const char *NetVersion() const = 0;
 
 	// DDRace
 
 	virtual void OnSetAuthed(int ClientID, int Level) = 0;
-	virtual bool PlayerExists(int ClientID) = 0;
+	virtual bool PlayerExists(int ClientID) const = 0;
 
 	virtual void OnClientEngineJoin(int ClientID, bool Sixup) = 0;
 	virtual void OnClientEngineDrop(int ClientID, const char *pReason) = 0;

@@ -3586,20 +3586,20 @@ void CGameContext::OnPostSnap()
 	m_Events.Clear();
 }
 
-bool CGameContext::IsClientReady(int ClientID)
+bool CGameContext::IsClientReady(int ClientID) const
 {
 	return m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_IsReady ? true : false;
 }
 
-bool CGameContext::IsClientPlayer(int ClientID)
+bool CGameContext::IsClientPlayer(int ClientID) const
 {
 	return m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetTeam() == TEAM_SPECTATORS ? false : true;
 }
 
-CUuid CGameContext::GameUuid() { return m_GameUuid; }
-const char *CGameContext::GameType() { return m_pController && m_pController->m_pGameType ? m_pController->m_pGameType : ""; }
-const char *CGameContext::Version() { return GAME_VERSION; }
-const char *CGameContext::NetVersion() { return GAME_NETVERSION; }
+CUuid CGameContext::GameUuid() const { return m_GameUuid; }
+const char *CGameContext::GameType() const { return m_pController && m_pController->m_pGameType ? m_pController->m_pGameType : ""; }
+const char *CGameContext::Version() const { return GAME_VERSION; }
+const char *CGameContext::NetVersion() const { return GAME_NETVERSION; }
 
 IGameServer *CreateGameServer() { return new CGameContext; }
 
@@ -4011,16 +4011,16 @@ void CGameContext::List(int ClientID, const char *pFilter)
 	SendChatTarget(ClientID, aBuf);
 }
 
-int CGameContext::GetClientVersion(int ClientID)
+int CGameContext::GetClientVersion(int ClientID) const
 {
 	IServer::CClientInfo Info = {0};
 	Server()->GetClientInfo(ClientID, &Info);
 	return Info.m_DDNetVersion;
 }
 
-bool CGameContext::PlayerModerating()
+bool CGameContext::PlayerModerating() const
 {
-	for(auto &pPlayer : m_apPlayers)
+	for(const auto &pPlayer : m_apPlayers)
 	{
 		if(pPlayer && pPlayer->m_Moderating)
 			return true;

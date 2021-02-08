@@ -223,7 +223,7 @@ void CLayerGroup::DeleteLayer(int Index)
 	m_pMap->m_UndoModified++;
 }
 
-void CLayerGroup::GetSize(float *w, float *h)
+void CLayerGroup::GetSize(float *w, float *h) const
 {
 	*w = 0;
 	*h = 0;
@@ -888,14 +888,14 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 	return Current;
 }
 
-CLayerGroup *CEditor::GetSelectedGroup()
+CLayerGroup *CEditor::GetSelectedGroup() const
 {
 	if(m_SelectedGroup >= 0 && m_SelectedGroup < m_Map.m_lGroups.size())
 		return m_Map.m_lGroups[m_SelectedGroup];
 	return 0x0;
 }
 
-CLayer *CEditor::GetSelectedLayer(int Index)
+CLayer *CEditor::GetSelectedLayer(int Index) const
 {
 	CLayerGroup *pGroup = GetSelectedGroup();
 	if(!pGroup)
@@ -911,7 +911,7 @@ CLayer *CEditor::GetSelectedLayer(int Index)
 	return 0x0;
 }
 
-CLayer *CEditor::GetSelectedLayerType(int Index, int Type)
+CLayer *CEditor::GetSelectedLayerType(int Index, int Type) const
 {
 	CLayer *p = GetSelectedLayer(Index);
 	if(p && p->m_Type == Type)
@@ -973,7 +973,7 @@ void CEditor::DeleteSelectedQuads()
 	}
 }
 
-bool CEditor::IsQuadSelected(int Index)
+bool CEditor::IsQuadSelected(int Index) const
 {
 	for(int i = 0; i < m_lSelectedQuads.size(); ++i)
 		if(m_lSelectedQuads[i] == Index)
@@ -981,7 +981,7 @@ bool CEditor::IsQuadSelected(int Index)
 	return false;
 }
 
-int CEditor::FindSelectedQuadIndex(int Index)
+int CEditor::FindSelectedQuadIndex(int Index) const
 {
 	for(int i = 0; i < m_lSelectedQuads.size(); ++i)
 		if(m_lSelectedQuads[i] == Index)
@@ -4856,7 +4856,7 @@ void CEditor::RenderUndoList(CUIRect View)
 	}
 }
 
-bool CEditor::IsEnvelopeUsed(int EnvelopeIndex)
+bool CEditor::IsEnvelopeUsed(int EnvelopeIndex) const
 {
 	for(int i = 0; i < m_Map.m_lGroups.size(); i++)
 	{
@@ -6197,7 +6197,7 @@ void CEditor::Reset(bool CreateDefault)
 	m_LastUndoUpdateTime = time_get();
 }
 
-int CEditor::GetLineDistance()
+int CEditor::GetLineDistance() const
 {
 	int LineDistance = 512;
 

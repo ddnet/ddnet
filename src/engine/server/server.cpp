@@ -539,12 +539,12 @@ void CServer::SetRconCID(int ClientID)
 	m_RconClientID = ClientID;
 }
 
-int CServer::GetAuthedState(int ClientID)
+int CServer::GetAuthedState(int ClientID) const
 {
 	return m_aClients[ClientID].m_Authed;
 }
 
-const char *CServer::GetAuthName(int ClientID)
+const char *CServer::GetAuthName(int ClientID) const
 {
 	int Key = m_aClients[ClientID].m_AuthKey;
 	if(Key == -1)
@@ -554,7 +554,7 @@ const char *CServer::GetAuthName(int ClientID)
 	return m_AuthManager.KeyIdent(Key);
 }
 
-int CServer::GetClientInfo(int ClientID, CClientInfo *pInfo)
+int CServer::GetClientInfo(int ClientID, CClientInfo *pInfo) const
 {
 	dbg_assert(ClientID >= 0 && ClientID < MAX_CLIENTS, "client_id is not valid");
 	dbg_assert(pInfo != 0, "info can not be null");
@@ -591,13 +591,13 @@ void CServer::SetClientDDNetVersion(int ClientID, int DDNetVersion)
 	}
 }
 
-void CServer::GetClientAddr(int ClientID, char *pAddrStr, int Size)
+void CServer::GetClientAddr(int ClientID, char *pAddrStr, int Size) const
 {
 	if(ClientID >= 0 && ClientID < MAX_CLIENTS && m_aClients[ClientID].m_State == CClient::STATE_INGAME)
 		net_addr_str(m_NetServer.ClientAddr(ClientID), pAddrStr, Size, false);
 }
 
-const char *CServer::ClientName(int ClientID)
+const char *CServer::ClientName(int ClientID) const
 {
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State == CServer::CClient::STATE_EMPTY)
 		return "(invalid)";
@@ -607,7 +607,7 @@ const char *CServer::ClientName(int ClientID)
 		return "(connecting)";
 }
 
-const char *CServer::ClientClan(int ClientID)
+const char *CServer::ClientClan(int ClientID) const
 {
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State == CServer::CClient::STATE_EMPTY)
 		return "";
@@ -617,7 +617,7 @@ const char *CServer::ClientClan(int ClientID)
 		return "";
 }
 
-int CServer::ClientCountry(int ClientID)
+int CServer::ClientCountry(int ClientID) const
 {
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State == CServer::CClient::STATE_EMPTY)
 		return -1;
@@ -627,12 +627,12 @@ int CServer::ClientCountry(int ClientID)
 		return -1;
 }
 
-bool CServer::ClientIngame(int ClientID)
+bool CServer::ClientIngame(int ClientID) const
 {
 	return ClientID >= 0 && ClientID < MAX_CLIENTS && m_aClients[ClientID].m_State == CServer::CClient::STATE_INGAME;
 }
 
-bool CServer::ClientAuthed(int ClientID)
+bool CServer::ClientAuthed(int ClientID) const
 {
 	return ClientID >= 0 && ClientID < MAX_CLIENTS && m_aClients[ClientID].m_Authed;
 }
@@ -647,10 +647,10 @@ int CServer::MaxClients() const
 	return m_NetServer.MaxClients();
 }
 
-int CServer::ClientCount()
+int CServer::ClientCount() const
 {
 	int ClientCount = 0;
-	for(auto &Client : m_aClients)
+	for(const auto &Client : m_aClients)
 	{
 		if(Client.m_State != CClient::STATE_EMPTY)
 		{
@@ -661,7 +661,7 @@ int CServer::ClientCount()
 	return ClientCount;
 }
 
-int CServer::DistinctClientCount()
+int CServer::DistinctClientCount() const
 {
 	NETADDR aAddresses[MAX_CLIENTS];
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -2234,7 +2234,7 @@ void CServer::PumpNetwork(bool PacketWaiting)
 	m_Econ.Update();
 }
 
-char *CServer::GetMapName()
+char *CServer::GetMapName() const
 {
 	// get the name of the map without his path
 	char *pMapShortName = &g_Config.m_SvMap[0];
@@ -3564,7 +3564,7 @@ int main(int argc, const char **argv) // ignore_convention
 
 // DDRace
 
-void CServer::GetClientAddr(int ClientID, NETADDR *pAddr)
+void CServer::GetClientAddr(int ClientID, NETADDR *pAddr) const
 {
 	if(ClientID >= 0 && ClientID < MAX_CLIENTS && m_aClients[ClientID].m_State == CClient::STATE_INGAME)
 	{

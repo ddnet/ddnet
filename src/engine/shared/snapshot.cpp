@@ -9,19 +9,19 @@
 
 // CSnapshot
 
-CSnapshotItem *CSnapshot::GetItem(int Index)
+CSnapshotItem *CSnapshot::GetItem(int Index) const
 {
 	return (CSnapshotItem *)(DataStart() + Offsets()[Index]);
 }
 
-int CSnapshot::GetItemSize(int Index)
+int CSnapshot::GetItemSize(int Index) const
 {
 	if(Index == m_NumItems - 1)
 		return (m_DataSize - Offsets()[Index]) - sizeof(CSnapshotItem);
 	return (Offsets()[Index + 1] - Offsets()[Index]) - sizeof(CSnapshotItem);
 }
 
-int CSnapshot::GetItemType(int Index)
+int CSnapshot::GetItemType(int Index) const
 {
 	int InternalType = GetItem(Index)->Type();
 	if(InternalType < OFFSET_UUID_TYPE)
@@ -48,7 +48,7 @@ int CSnapshot::GetItemType(int Index)
 	return g_UuidManager.LookupUuid(Uuid);
 }
 
-int CSnapshot::GetItemIndex(int Key)
+int CSnapshot::GetItemIndex(int Key) const
 {
 	// TODO: OPT: this should not be a linear search. very bad
 	for(int i = 0; i < m_NumItems; i++)

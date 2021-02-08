@@ -256,13 +256,13 @@ public:
 	virtual void OnClientEngineJoin(int ClientID, bool Sixup);
 	virtual void OnClientEngineDrop(int ClientID, const char *pReason);
 
-	virtual bool IsClientReady(int ClientID);
-	virtual bool IsClientPlayer(int ClientID);
+	virtual bool IsClientReady(int ClientID) const;
+	virtual bool IsClientPlayer(int ClientID) const;
 
-	virtual CUuid GameUuid();
-	virtual const char *GameType();
-	virtual const char *Version();
-	virtual const char *NetVersion();
+	virtual CUuid GameUuid() const;
+	virtual const char *GameType() const;
+	virtual const char *Version() const;
+	virtual const char *NetVersion() const;
 
 	// DDRace
 	bool OnClientDDNetVersionKnown(int ClientID);
@@ -272,10 +272,10 @@ public:
 	// Describes the time when the first player joined the server.
 	int64 m_NonEmptySince;
 	int64 m_LastMapVote;
-	int GetClientVersion(int ClientID);
-	bool PlayerExists(int ClientID) { return m_apPlayers[ClientID]; };
+	int GetClientVersion(int ClientID) const;
+	bool PlayerExists(int ClientID) const { return m_apPlayers[ClientID]; }
 	// Returns true if someone is actively moderating.
-	bool PlayerModerating();
+	bool PlayerModerating() const;
 	void ForceVote(int EnforcerID, bool Success);
 
 	// Checks if player can vote and notify them about the reason
