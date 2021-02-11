@@ -138,8 +138,6 @@ void CPlayer::Reset()
 	m_NotEligibleForFinish = false;
 	m_EligibleForFinishCheck = 0;
 	m_VotedForPractice = false;
-
-	m_Aim = 0;
 }
 
 static int PlayerFlags_SevenToSix(int Flags)
@@ -412,8 +410,6 @@ void CPlayer::Snap(int SnappingClient)
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_SPEC;
 	if(m_Paused == PAUSE_PAUSED)
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_PAUSED;
-	if(m_Aim)
-		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_AIM;
 
 	if(SnappingClient >= 0 && Server()->IsSixup(SnappingClient) && m_pCharacter && m_pCharacter->m_DDRaceState == DDRACE_STARTED &&
 		GameServer()->m_apPlayers[SnappingClient]->m_TimerType == TIMERTYPE_SIXUP)
@@ -515,8 +511,6 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 {
 	if(Server()->IsSixup(m_ClientID))
 		NewInput->m_PlayerFlags = PlayerFlags_SevenToSix(NewInput->m_PlayerFlags);
-	else
-		m_Aim = NewInput->m_PlayerFlags & PLAYERFLAG_AIM;
 
 	if(NewInput->m_PlayerFlags)
 		Server()->SetClientFlags(m_ClientID, NewInput->m_PlayerFlags);

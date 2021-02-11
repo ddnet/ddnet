@@ -1173,8 +1173,6 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 		pCharacter->m_Health = Health;
 		pCharacter->m_Armor = Armor;
 		pCharacter->m_PlayerFlags = GetPlayer()->m_PlayerFlags;
-		if(m_pPlayer->m_Aim)
-			pCharacter->m_PlayerFlags |= PLAYERFLAG_AIM;
 	}
 	else
 	{
