@@ -1619,7 +1619,7 @@ void CGameClient::OnNewSnapshot()
 
 	if(!m_DDRaceMsgSent[0] && m_Snap.m_pLocalInfo)
 	{
-		CMsgPacker Msg(NETMSGTYPE_CL_ISDDNETLEGACY, false);
+		CMsgPacker Msg(NETMSGTYPE_CL_ISDDNET, false);
 		Msg.AddInt(CLIENT_VERSIONNR);
 		Client()->SendMsgY(&Msg, MSGFLAG_VITAL, 0);
 		m_DDRaceMsgSent[0] = true;
@@ -1627,7 +1627,7 @@ void CGameClient::OnNewSnapshot()
 
 	if(!m_DDRaceMsgSent[1] && m_Snap.m_pLocalInfo && Client()->DummyConnected())
 	{
-		CMsgPacker Msg(NETMSGTYPE_CL_ISDDNETLEGACY, false);
+		CMsgPacker Msg(NETMSGTYPE_CL_ISDDNET, false);
 		Msg.AddInt(CLIENT_VERSIONNR);
 		Client()->SendMsgY(&Msg, MSGFLAG_VITAL, 1);
 		m_DDRaceMsgSent[1] = true;

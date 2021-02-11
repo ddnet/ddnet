@@ -409,15 +409,15 @@ Messages = [
 		NetStringStrict("m_Reason"),
 	], teehistorian=False),
 
-	NetMessage("Cl_IsDDNetLegacy", []),
+	NetMessage("Cl_IsDDNet", []),
 
-	NetMessage("Sv_DDRaceTimeLegacy", [
+	NetMessage("Sv_DDRaceTime", [
 		NetIntAny("m_Time"),
 		NetIntAny("m_Check"),
 		NetIntRange("m_Finish", 0, 1),
 	]),
 
-	NetMessage("Sv_RecordLegacy", [
+	NetMessage("Sv_Record", [
 		NetIntAny("m_ServerTimeBest"),
 		NetIntAny("m_PlayerTimeBest"),
 	]),
@@ -446,15 +446,4 @@ Messages = [
 	]),
 
 	NetMessageEx("Sv_TeamsState", "teamsstate@netmsg.ddnet.tw", []),
-
-	NetMessageEx("Sv_DDRaceTime", "ddrace-time@netmsg.ddnet.tw", [
-		NetIntAny("m_Time"),
-		NetIntAny("m_Check"),
-		NetIntRange("m_Finish", 0, 1),
-	]),
-
-	NetMessageEx("Sv_Record", "weird-record@netmsg.ddnet.tw", [
-		NetIntAny("m_ServerTimeBest"),
-		NetIntAny("m_PlayerTimeBest"),
-	]),
 ]

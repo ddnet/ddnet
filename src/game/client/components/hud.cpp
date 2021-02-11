@@ -859,7 +859,7 @@ void CHud::OnRender()
 
 void CHud::OnMessage(int MsgType, void *pRawMsg)
 {
-	if(MsgType == NETMSGTYPE_SV_DDRACETIME || MsgType == NETMSGTYPE_SV_DDRACETIMELEGACY)
+	if(MsgType == NETMSGTYPE_SV_DDRACETIME)
 	{
 		m_DDRaceTimeReceived = true;
 
@@ -877,7 +877,7 @@ void CHud::OnMessage(int MsgType, void *pRawMsg)
 			m_CheckpointTick = Client()->GameTick(g_Config.m_ClDummy);
 		}
 	}
-	else if(MsgType == NETMSGTYPE_SV_RECORD || MsgType == NETMSGTYPE_SV_RECORDLEGACY)
+	else if(MsgType == NETMSGTYPE_SV_RECORD)
 	{
 		CNetMsg_Sv_Record *pMsg = (CNetMsg_Sv_Record *)pRawMsg;
 
