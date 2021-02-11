@@ -46,7 +46,7 @@ void CScoreboard::OnRelease()
 
 void CScoreboard::OnMessage(int MsgType, void *pRawMsg)
 {
-	if(MsgType == NETMSGTYPE_SV_RECORD)
+	if(MsgType == NETMSGTYPE_SV_RECORD || MsgType == NETMSGTYPE_SV_RECORDLEGACY)
 	{
 		CNetMsg_Sv_Record *pMsg = (CNetMsg_Sv_Record *)pRawMsg;
 		m_ServerRecord = (float)pMsg->m_ServerTimeBest / 100;
