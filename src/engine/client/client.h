@@ -79,7 +79,6 @@ class CServerCapabilities
 {
 public:
 	bool m_ChatTimeoutCode;
-	bool m_AnyPlayerFlag;
 };
 
 class CClient : public IClient, public CDemoPlayer::IListener

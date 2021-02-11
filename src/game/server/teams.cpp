@@ -423,24 +423,15 @@ void CGameTeams::SendTeamsState(int ClientID)
 	if(g_Config.m_SvTeam == 3)
 		return;
 
-	if(!m_pGameContext->m_apPlayers[ClientID])
+	if(!m_pGameContext->m_apPlayers[ClientID] || (!Server()->IsSixup(ClientID) && m_pGameContext->m_apPlayers[ClientID]->GetClientVersion() <= VERSION_DDRACE))
 		return;
 
 	CMsgPacker Msg(NETMSGTYPE_SV_TEAMSSTATE);
-	CMsgPacker MsgLegacy(NETMSGTYPE_SV_TEAMSSTATELEGACY);
 
 	for(unsigned i = 0; i < MAX_CLIENTS; i++)
-	{
 		Msg.AddInt(m_Core.Team(i));
-		MsgLegacy.AddInt(m_Core.Team(i));
-	}
 
 	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
-	int ClientVersion = m_pGameContext->m_apPlayers[ClientID]->GetClientVersion();
-	if(!Server()->IsSixup(ClientID) && VERSION_DDRACE < ClientVersion && ClientVersion <= VERSION_DDNET_TEAMSSTATE_LEGACY)
-	{
-		Server()->SendMsg(&MsgLegacy, MSGFLAG_VITAL, ClientID);
-	}
 }
 
 int CGameTeams::GetDDRaceState(CPlayer *Player)
