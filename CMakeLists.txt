@@ -1581,6 +1581,8 @@ set_src(GAME_SHARED GLOB src/game
   collision.h
   ddracechat.h
   ddracecommands.h
+  extrainfo.cpp
+  extrainfo.h
   gamecore.cpp
   gamecore.h
   layers.cpp
@@ -1805,8 +1807,6 @@ if(CLIENT)
     prediction/entity.h
     prediction/gameworld.cpp
     prediction/gameworld.h
-    projectile_data.cpp
-    projectile_data.h
     race.cpp
     race.h
     render.cpp

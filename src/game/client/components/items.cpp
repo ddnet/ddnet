@@ -8,9 +8,9 @@
 #include <game/generated/protocol.h>
 
 #include <game/client/gameclient.h>
-#include <game/client/projectile_data.h>
 #include <game/client/render.h>
 #include <game/client/ui.h>
+#include <game/extrainfo.h>
 
 #include <game/client/components/effects.h>
 #include <game/client/components/flow.h>
@@ -22,7 +22,7 @@ void CItems::OnReset()
 	m_NumExtraProjectiles = 0;
 }
 
-void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemID)
+void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 {
 	int CurWeapon = clamp(pCurrent->m_Type, 0, NUM_WEAPONS - 1);
 
@@ -62,13 +62,21 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemID)
 	if(Ct < 0)
 		return; // projectile haven't been shot yet
 
-	vec2 Pos = CalcPos(pCurrent->m_StartPos, pCurrent->m_StartVel, Curvature, Speed, Ct);
-	vec2 PrevPos = CalcPos(pCurrent->m_StartPos, pCurrent->m_StartVel, Curvature, Speed, Ct - 0.001f);
+	vec2 StartPos;
+	vec2 StartVel;
+
+	ExtractInfo(pCurrent, &StartPos, &StartVel);
+
+	vec2 Pos = CalcPos(StartPos, StartVel, Curvature, Speed, Ct);
+	vec2 PrevPos = CalcPos(StartPos, StartVel, Curvature, Speed, Ct - 0.001f);
 
 	float Alpha = 1.f;
-	if(pCurrent->m_ExtraInfo && pCurrent->m_Owner >= 0 && m_pClient->IsOtherTeam(pCurrent->m_Owner))
+	if(UseExtraInfo(pCurrent))
 	{
-		Alpha = g_Config.m_ClShowOthersAlpha / 100.0f;
+		int Owner;
+		ExtractExtraInfo(pCurrent, &Owner, 0, 0, 0);
+		if(Owner >= 0 && m_pClient->IsOtherTeam(Owner))
+			Alpha = g_Config.m_ClShowOthersAlpha / 100.0f;
 	}
 
 	vec2 Vel = Pos - PrevPos;
@@ -302,7 +310,11 @@ void CItems::OnRender()
 	{
 		for(auto *pProj = (CProjectile *)GameClient()->m_PredictedWorld.FindFirst(CGameWorld::ENTTYPE_PROJECTILE); pProj; pProj = (CProjectile *)pProj->NextEntity())
 		{
-			CProjectileData Data = pProj->GetData();
+			CNetObj_Projectile Data;
+			if(pProj->m_Type != WEAPON_SHOTGUN || pProj->m_Explosive || pProj->m_Freeze)
+				pProj->FillExtraInfo(&Data);
+			else
+				pProj->FillInfo(&Data);
 			RenderProjectile(&Data, pProj->ID());
 		}
 		for(auto *pLaser = (CLaser *)GameClient()->m_PredictedWorld.FindFirst(CGameWorld::ENTTYPE_LASER); pLaser; pLaser = (CLaser *)pLaser->NextEntity())
@@ -331,17 +343,8 @@ void CItems::OnRender()
 		IClient::CSnapItem Item;
 		const void *pData = Client()->SnapGetItem(IClient::SNAP_CURRENT, i, &Item);
 
-		if(Item.m_Type == NETOBJTYPE_PROJECTILE || Item.m_Type == NETOBJTYPE_DDNETPROJECTILE)
+		if(Item.m_Type == NETOBJTYPE_PROJECTILE)
 		{
-			CProjectileData Data;
-			if(Item.m_Type == NETOBJTYPE_PROJECTILE)
-			{
-				Data = ExtractProjectileInfo((const CNetObj_Projectile *)pData);
-			}
-			else
-			{
-				Data = ExtractProjectileInfoDDNet((const CNetObj_DDNetProjectile *)pData);
-			}
 			if(UsePredicted)
 			{
 				if(auto *pProj = (CProjectile *)GameClient()->m_GameWorld.FindMatch(Item.m_ID, Item.m_Type, pData))
@@ -351,13 +354,13 @@ void CItems::OnRender()
 						&& (pProj->GetOwner() < 0 || !GameClient()->m_aClients[pProj->GetOwner()].m_IsPredictedLocal) // skip locally predicted projectiles
 						&& !Client()->SnapFindItem(IClient::SNAP_PREV, Item.m_Type, Item.m_ID))
 					{
-						ReconstructSmokeTrail(&Data, pProj->m_DestroyTick);
+						ReconstructSmokeTrail((const CNetObj_Projectile *)pData, Item.m_ID, pProj->m_DestroyTick);
 					}
 					pProj->m_LastRenderTick = Client()->GameTick(g_Config.m_ClDummy);
 					continue;
 				}
 			}
-			RenderProjectile(&Data, Item.m_ID);
+			RenderProjectile((const CNetObj_Projectile *)pData, Item.m_ID);
 		}
 		else if(Item.m_Type == NETOBJTYPE_PICKUP)
 		{
@@ -406,10 +409,7 @@ void CItems::OnRender()
 			m_NumExtraProjectiles--;
 		}
 		else if(!UsePredicted)
-		{
-			CProjectileData Data = ExtractProjectileInfo(&m_aExtraProjectiles[i]);
-			RenderProjectile(&Data, 0);
-		}
+			RenderProjectile(&m_aExtraProjectiles[i], 0);
 	}
 
 	Graphics()->QuadsSetRotation(0);
@@ -484,7 +484,7 @@ void CItems::AddExtraProjectile(CNetObj_Projectile *pProj)
 	}
 }
 
-void CItems::ReconstructSmokeTrail(const CProjectileData *pCurrent, int DestroyTick)
+void CItems::ReconstructSmokeTrail(const CNetObj_Projectile *pCurrent, int ItemID, int DestroyTick)
 {
 	bool LocalPlayerInGame = false;
 
@@ -520,10 +520,18 @@ void CItems::ReconstructSmokeTrail(const CProjectileData *pCurrent, int DestroyT
 
 	float Gt = (Client()->PrevGameTick(g_Config.m_ClDummy) - pCurrent->m_StartTick) / (float)SERVER_TICK_SPEED + Client()->GameTickTime(g_Config.m_ClDummy);
 
+	vec2 StartPos;
+	vec2 StartVel;
+
+	ExtractInfo(pCurrent, &StartPos, &StartVel);
+
 	float Alpha = 1.f;
-	if(pCurrent->m_ExtraInfo && pCurrent->m_Owner >= 0 && m_pClient->IsOtherTeam(pCurrent->m_Owner))
+	if(UseExtraInfo(pCurrent))
 	{
-		Alpha = g_Config.m_ClShowOthersAlpha / 100.0f;
+		int Owner;
+		ExtractExtraInfo(pCurrent, &Owner, 0, 0, 0);
+		if(Owner >= 0 && m_pClient->IsOtherTeam(Owner))
+			Alpha = g_Config.m_ClShowOthersAlpha / 100.0f;
 	}
 
 	float T = Pt;
@@ -535,8 +543,8 @@ void CItems::ReconstructSmokeTrail(const CProjectileData *pCurrent, int DestroyT
 	for(int i = 1 + (int)(Gt / Step); i < (int)(T / Step); i++)
 	{
 		float t = Step * (float)i + 0.4f * Step * (frandom() - 0.5f);
-		vec2 Pos = CalcPos(pCurrent->m_StartPos, pCurrent->m_StartVel, Curvature, Speed, t);
-		vec2 PrevPos = CalcPos(pCurrent->m_StartPos, pCurrent->m_StartVel, Curvature, Speed, t - 0.001f);
+		vec2 Pos = CalcPos(StartPos, StartVel, Curvature, Speed, t);
+		vec2 PrevPos = CalcPos(StartPos, StartVel, Curvature, Speed, t - 0.001f);
 		vec2 Vel = Pos - PrevPos;
 		float TimePassed = Pt - t;
 		if(Pt - MinTrailSpan > 0.01f)

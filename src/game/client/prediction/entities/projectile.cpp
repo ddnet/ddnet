@@ -1,7 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "projectile.h"
-#include <game/client/projectile_data.h>
 #include <game/generated/protocol.h>
 
 #include <engine/shared/config.h>
@@ -151,23 +150,16 @@ void CProjectile::SetBouncing(int Value)
 	m_Bouncing = Value;
 }
 
-CProjectile::CProjectile(CGameWorld *pGameWorld, int ID, CProjectileData *pProj) :
+CProjectile::CProjectile(CGameWorld *pGameWorld, int ID, CNetObj_Projectile *pProj) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
 {
-	m_Pos = pProj->m_StartPos;
-	m_Direction = pProj->m_StartVel;
-	if(pProj->m_ExtraInfo)
-	{
-		m_Owner = pProj->m_Owner;
-		m_Explosive = pProj->m_Explosive;
-		m_Bouncing = pProj->m_Bouncing;
-		m_Freeze = pProj->m_Freeze;
-	}
+	ExtractInfo(pProj, &m_Pos, &m_Direction);
+	if(UseExtraInfo(pProj))
+		ExtractExtraInfo(pProj, &m_Owner, &m_Explosive, &m_Bouncing, &m_Freeze);
 	else
 	{
 		m_Owner = -1;
-		m_Bouncing = 0;
-		m_Freeze = 0;
+		m_Bouncing = m_Freeze = 0;
 		m_Explosive = (pProj->m_Type == WEAPON_GRENADE) && (fabs(1.0f - length(m_Direction)) < 0.015f);
 	}
 	m_Type = pProj->m_Type;
@@ -189,19 +181,45 @@ CProjectile::CProjectile(CGameWorld *pGameWorld, int ID, CProjectileData *pProj)
 	m_ID = ID;
 }
 
-CProjectileData CProjectile::GetData() const
+void CProjectile::FillInfo(CNetObj_Projectile *pProj)
 {
-	CProjectileData Result;
-	Result.m_StartPos = m_Pos;
-	Result.m_StartVel = m_Direction;
-	Result.m_Type = m_Type;
-	Result.m_StartTick = m_StartTick;
-	Result.m_ExtraInfo = true;
-	Result.m_Owner = m_Owner;
-	Result.m_Explosive = m_Explosive;
-	Result.m_Bouncing = m_Bouncing;
-	Result.m_Freeze = m_Freeze;
-	return Result;
+	pProj->m_X = (int)m_Pos.x;
+	pProj->m_Y = (int)m_Pos.y;
+	pProj->m_VelX = (int)(m_Direction.x * 100.0f);
+	pProj->m_VelY = (int)(m_Direction.y * 100.0f);
+	pProj->m_StartTick = m_StartTick;
+	pProj->m_Type = m_Type;
+}
+
+void CProjectile::FillExtraInfo(CNetObj_Projectile *pProj)
+{
+	const int MaxPos = 0x7fffffff / 100;
+	if(abs((int)m_Pos.y) + 1 >= MaxPos || abs((int)m_Pos.x) + 1 >= MaxPos)
+	{
+		//If the modified data would be too large to fit in an integer, send normal data instead
+		FillInfo(pProj);
+		return;
+	}
+	//Send additional/modified info, by modifiying the fields of the netobj
+	float Angle = -atan2f(m_Direction.x, m_Direction.y);
+
+	int Data = 0;
+	Data |= (abs(m_Owner) & 255) << 0;
+	if(m_Owner < 0)
+		Data |= 1 << 8;
+	Data |= 1 << 9; //This bit tells the client to use the extra info
+	Data |= (m_Bouncing & 3) << 10;
+	if(m_Explosive)
+		Data |= 1 << 12;
+	if(m_Freeze)
+		Data |= 1 << 13;
+
+	pProj->m_X = (int)(m_Pos.x * 100.0f);
+	pProj->m_Y = (int)(m_Pos.y * 100.0f);
+	pProj->m_VelX = (int)(Angle * 1000000.0f);
+	pProj->m_VelY = Data;
+	pProj->m_StartTick = m_StartTick;
+	pProj->m_Type = m_Type;
 }
 
 bool CProjectile::Match(CProjectile *pProj)

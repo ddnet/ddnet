@@ -5,8 +5,7 @@
 
 #include "character.h"
 #include <game/client/prediction/entity.h>
-
-class CProjectileData;
+#include <game/extrainfo.h>
 
 class CProjectile : public CEntity
 {
@@ -29,17 +28,18 @@ public:
 		int Number = 0);
 
 	vec2 GetPos(float Time);
-	CProjectileData GetData() const;
+	void FillInfo(CNetObj_Projectile *pProj);
 
 	virtual void Tick();
 
 	bool Match(CProjectile *pProj);
 	void SetBouncing(int Value);
+	void FillExtraInfo(CNetObj_Projectile *pProj);
 
 	const vec2 &GetDirection() { return m_Direction; }
 	const int &GetOwner() { return m_Owner; }
 	const int &GetStartTick() { return m_StartTick; }
-	CProjectile(CGameWorld *pGameWorld, int ID, CProjectileData *pProj);
+	CProjectile(CGameWorld *pGameWorld, int ID, CNetObj_Projectile *pProj);
 
 private:
 	vec2 m_Direction;

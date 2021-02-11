@@ -262,7 +262,5 @@ public:
 	virtual bool IsDisplayingWarning() = 0;
 };
 
-void SnapshotRemoveExtraProjectileInfo(unsigned char *pData);
-
 extern IGameClient *CreateGameClient();
 #endif
