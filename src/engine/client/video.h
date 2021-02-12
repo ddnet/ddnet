@@ -10,7 +10,7 @@
 #else
 #include "SDL_opengl.h"
 
-#if defined(CONF_PLATFORM_MACOSX)
+#if defined(CONF_PLATFORM_MACOS)
 #include "OpenGL/glu.h"
 #else
 #include "GL/glu.h"

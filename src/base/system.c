@@ -35,7 +35,7 @@
 
 #include <dirent.h>
 
-#if defined(CONF_PLATFORM_MACOSX)
+#if defined(CONF_PLATFORM_MACOS)
 // some lock and pthread functions are already defined in headers
 // included from Carbon.h
 // this prevents having duplicate definitions of those
@@ -882,7 +882,7 @@ void sphore_init(SEMAPHORE *sem)
 void sphore_wait(SEMAPHORE *sem) { WaitForSingleObject((HANDLE)*sem, INFINITE); }
 void sphore_signal(SEMAPHORE *sem) { ReleaseSemaphore((HANDLE)*sem, 1, NULL); }
 void sphore_destroy(SEMAPHORE *sem) { CloseHandle((HANDLE)*sem); }
-#elif defined(CONF_PLATFORM_MACOSX)
+#elif defined(CONF_PLATFORM_MACOS)
 void sphore_init(SEMAPHORE *sem)
 {
 	char aBuf[64];
@@ -935,7 +935,7 @@ int64 time_get_impl(void)
 {
 	static int64 last = 0;
 	{
-#if defined(CONF_PLATFORM_MACOSX)
+#if defined(CONF_PLATFORM_MACOS)
 		static int got_timebase = 0;
 		mach_timebase_info_data_t timebase;
 		uint64 time;
@@ -986,7 +986,7 @@ int64 time_get(void)
 
 int64 time_freq(void)
 {
-#if defined(CONF_PLATFORM_MACOSX)
+#if defined(CONF_PLATFORM_MACOS)
 	return 1000000000;
 #elif defined(CONF_FAMILY_UNIX)
 	return 1000000;
@@ -2061,13 +2061,13 @@ int fs_storage_path(const char *appname, char *path, int max)
 	return 0;
 #else
 	char *home = getenv("HOME");
-#if !defined(CONF_PLATFORM_MACOSX)
+#if !defined(CONF_PLATFORM_MACOS)
 	int i;
 #endif
 	if(!home)
 		return -1;
 
-#if defined(CONF_PLATFORM_MACOSX)
+#if defined(CONF_PLATFORM_MACOS)
 	snprintf(path, max, "%s/Library/Application Support/%s", home, appname);
 #else
 	snprintf(path, max, "%s/.%s", home, appname);
