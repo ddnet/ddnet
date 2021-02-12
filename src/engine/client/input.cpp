@@ -347,7 +347,7 @@ int CInput::Update()
 						m_InputGrabbed = true;
 					}
 					break;
-#if defined(CONF_PLATFORM_MACOSX) // Todo: remove this when fixed in SDL
+#if defined(CONF_PLATFORM_MACOS) // Todo: remove this when fixed in SDL
 				case SDL_WINDOWEVENT_MAXIMIZED:
 					MouseModeAbsolute();
 					MouseModeRelative();

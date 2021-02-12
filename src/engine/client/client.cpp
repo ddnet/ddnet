@@ -4255,7 +4255,7 @@ void CClient::HandleMapPath(const char *pPath)
 		Upstream latency
 */
 
-#if defined(CONF_PLATFORM_MACOSX)
+#if defined(CONF_PLATFORM_MACOS)
 extern "C" int TWMain(int argc, const char **argv) // ignore_convention
 #else
 int main(int argc, const char **argv) // ignore_convention

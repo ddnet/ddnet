@@ -215,7 +215,7 @@ void CVideo::NextVideoFrameThread()
 {
 	if(m_NextFrame && m_Recording)
 	{
-		// #ifdef CONF_PLATFORM_MACOSX
+		// #ifdef CONF_PLATFORM_MACOS
 		// 	CAutoreleasePool AutoreleasePool;
 		// #endif
 		m_Vseq += 1;
@@ -243,7 +243,7 @@ void CVideo::NextVideoFrame()
 {
 	if(m_Recording)
 	{
-		// #ifdef CONF_PLATFORM_MACOSX
+		// #ifdef CONF_PLATFORM_MACOS
 		// 	CAutoreleasePool AutoreleasePool;
 		// #endif
 

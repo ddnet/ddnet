@@ -98,7 +98,7 @@ MACRO_CONFIG_INT(SndHighlight, snd_highlight, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CL
 MACRO_CONFIG_INT(GfxScreen, gfx_screen, 0, 0, 15, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Screen index")
 MACRO_CONFIG_INT(GfxScreenWidth, gfx_screen_width, 0, 0, 0, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Screen resolution width")
 MACRO_CONFIG_INT(GfxScreenHeight, gfx_screen_height, 0, 0, 0, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Screen resolution height")
-#if !defined(CONF_PLATFORM_MACOSX)
+#if !defined(CONF_PLATFORM_MACOS)
 MACRO_CONFIG_INT(GfxBorderless, gfx_borderless, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Borderless window (not to be used with fullscreen)")
 MACRO_CONFIG_INT(GfxFullscreen, gfx_fullscreen, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Fullscreen")
 #else
@@ -395,7 +395,7 @@ MACRO_CONFIG_INT(GfxOpenGLTextureLODBIAS, gfx_opengl_texture_lod_bias, -500, -15
 
 MACRO_CONFIG_INT(Gfx3DTextureAnalysisDone, gfx_3d_texture_analysis_done, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Analyzed, if sampling 3D/2D array textures was correct")
 MACRO_CONFIG_INT(GfxDriverIsBlocked, gfx_driver_is_blocked, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "If 1, the current driver is in a blocked error state.")
-#if !defined(CONF_PLATFORM_MACOSX)
+#if !defined(CONF_PLATFORM_MACOS)
 MACRO_CONFIG_INT(GfxEnableTextureUnitOptimization, gfx_enable_texture_unit_optimization, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Use multiple texture units, instead of only one.")
 #else
 MACRO_CONFIG_INT(GfxEnableTextureUnitOptimization, gfx_enable_texture_unit_optimization, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Use multiple texture units, instead of only one.")
