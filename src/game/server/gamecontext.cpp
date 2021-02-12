@@ -1246,13 +1246,6 @@ void CGameContext::OnClientEnter(int ClientID)
 
 	if(!Server()->ClientPrevIngame(ClientID))
 	{
-		IServer::CClientInfo Info;
-		Server()->GetClientInfo(ClientID, &Info);
-		if(Info.m_GotDDNetVersion)
-		{
-			OnClientDDNetVersionKnown(ClientID);
-		}
-
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientID), m_pController->GetTeamName(m_apPlayers[ClientID]->GetTeam()));
 		SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1, CHAT_SIX);
@@ -1265,6 +1258,14 @@ void CGameContext::OnClientEnter(int ClientID)
 		str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' team=%d", ClientID, Server()->ClientName(ClientID), m_apPlayers[ClientID]->GetTeam());
 
 		Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
+
+		IServer::CClientInfo Info;
+		Server()->GetClientInfo(ClientID, &Info);
+		if(Info.m_GotDDNetVersion)
+		{
+			if(OnClientDDNetVersionKnown(ClientID))
+				return; // kicked
+		}
 
 		if(g_Config.m_SvShowOthersDefault > 0)
 		{
@@ -1440,7 +1441,7 @@ void CGameContext::OnClientEngineDrop(int ClientID, const char *pReason)
 	}
 }
 
-void CGameContext::OnClientDDNetVersionKnown(int ClientID)
+bool CGameContext::OnClientDDNetVersionKnown(int ClientID)
 {
 	IServer::CClientInfo Info;
 	Server()->GetClientInfo(ClientID, &Info);
@@ -1457,6 +1458,13 @@ void CGameContext::OnClientDDNetVersionKnown(int ClientID)
 		{
 			m_TeeHistorian.RecordDDNetVersionOld(ClientID, ClientVersion);
 		}
+	}
+
+	// Autoban known bot versions.
+	if(g_Config.m_SvBannedVersions[0] != '\0' && IsVersionBanned(ClientVersion))
+	{
+		Server()->Kick(ClientID, "unsupported client");
+		return true;
 	}
 
 	CPlayer *pPlayer = m_apPlayers[ClientID];
@@ -1479,11 +1487,8 @@ void CGameContext::OnClientDDNetVersionKnown(int ClientID)
 	// Tell known bot clients that they're botting and we know it.
 	if(((ClientVersion >= 15 && ClientVersion < 100) || ClientVersion == 502) && g_Config.m_SvClientSuggestionBot[0] != '\0')
 		SendBroadcast(g_Config.m_SvClientSuggestionBot, ClientID);
-	// Autoban known bot versions.
-	if(g_Config.m_SvBannedVersions[0] != '\0' && IsVersionBanned(ClientVersion))
-	{
-		Server()->Kick(ClientID, "unsupported client");
-	}
+
+	return false;
 }
 
 void *CGameContext::PreProcessMsg(int *MsgID, CUnpacker *pUnpacker, int ClientID)
