@@ -156,6 +156,11 @@ bool CUpdater::MoveFile(const char *pFile)
 		return Success;
 #endif
 
+#if !defined(CONF_PLATFORM_LINUX)
+	if(!str_comp_nocase(pFile + len - 4, ".so"))
+		return Success;
+#endif
+
 	if(!str_comp_nocase(pFile + len - 4, ".dll") || !str_comp_nocase(pFile + len - 4, ".ttf") || !str_comp_nocase(pFile + len - 3, ".so"))
 	{
 		str_format(aBuf, sizeof(aBuf), "%s.old", pFile);
