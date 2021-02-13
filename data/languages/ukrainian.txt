@@ -952,9 +952,6 @@ DDNet Client needs to be restarted to complete update!
 Use DDRace Scoreboard
 == Використовувати DDRace табло
 
-Show client IDs in Scoreboard
-== Показувати ID клієнтів в табло
-
 Show score
 == Показувати лідерів
 
@@ -982,50 +979,17 @@ Reset
 Highlighted message
 == Виділене повідомлення
 
-Spectator
-== Спостерігач
-
-Look out!
-== Стережися!
-
 Team message
 == Повідомлення команди
-
-We will win
-== Ми переможемо
 
 Friend message
 == Повідомлення від друга
 
-Friend
-== Друг
-
-Hi o/
-== Привіт o/
-
 Normal message
 == Звичайне повідомлення
 
-Hello and welcome
-== Привіт і ласкаво просимо
-
 Client message
 == Повідомлення від клієнта
-
-Inner color
-== Внутрішній колір
-
-Outline color
-== колір контуру
-
-Wait before try for
-== Зачекайте перш ніж повторити
-
-second
-== секнуда
-
-seconds
-== секунд
 
 Save the best demo of each race
 == Зберігати краще демо кожної спроби
@@ -1080,12 +1044,6 @@ Show other players' key presses
 
 Old mouse mode
 == Режим старої мишки
-
-Background (regular)
-== Фон (звичайний)
-
-Background (entities)
-== Задній фон
 
 Show tiles layers from BG map
 == Показувати шари з тайлами з фонової карти
@@ -1171,6 +1129,9 @@ Saving ddnet-settings.cfg failed
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
 == 
 
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 
+
 Warning
 == 
 
@@ -1234,6 +1195,18 @@ Skin Database
 Skins directory
 == 
 
+45° aim
+== 
+
+Deepfly on
+== 
+
+Deepfly off
+== 
+
+Dummy
+== 
+
 Game sound volume
 == 
 
@@ -1246,13 +1219,31 @@ Background music volume
 Assets
 == 
 
+Show client IDs
+== 
+
+Laser Outline Color
+== 
+
+Laser Inner Color
+== 
+
 Use old chat style
 == 
 
-Highlight
+Preview
+== 
+
+Background
+== 
+
+Entities Background color
 == 
 
 Use current map as background
+== 
+
+Regular Background Color
 == 
 
 Entities

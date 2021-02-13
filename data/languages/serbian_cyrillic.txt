@@ -1000,9 +1000,6 @@ DDNet Client needs to be restarted to complete update!
 Use DDRace Scoreboard
 == Користи DDRace табелу резултата
 
-Show client IDs in Scoreboard
-== Прикажи клијент идиове у табели резултата
-
 Show score
 == Прикажи бодове
 
@@ -1027,50 +1024,17 @@ System message
 Highlighted message
 == Истакнута порука
 
-Spectator
-== Разгледач
-
-Look out!
-== Пази!
-
 Team message
 == Тимска порука
-
-We will win
-== Победићемо
 
 Friend message
 == Порука пријатеља
 
-Friend
-== Пријатељ
-
-Hi o/
-== Здраво
-
 Normal message
 == Класична порука
 
-Hello and welcome
-== Здраво и добро дошли
-
 Client message
 == Порука клијента
-
-Inner color
-== Унутрашња боја
-
-Outline color
-== Спољашња боја
-
-Wait before try for
-== Сачекајте пре него што покушате
-
-second
-== Секунда
-
-seconds
-== Секунде
 
 Save the best demo of each race
 == Сачувајте најбољи снимак сваке трке
@@ -1122,12 +1086,6 @@ Show other players' key presses
 
 Old mouse mode
 == Стари мод миша
-
-Background (regular)
-== Позадина (редовно)
-
-Background (entities)
-== Позадина (entities)
 
 Show tiles layers from BG map
 == Прикажи слојеве плочица са BG мапе
@@ -1259,6 +1217,9 @@ Replay
 Saving ddnet-settings.cfg failed
 == 
 
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 
+
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 
 
@@ -1274,6 +1235,18 @@ Checking for existing player with your name
 Smooth Dynamic Camera
 == 
 
+45° aim
+== 
+
+Deepfly on
+== 
+
+Deepfly off
+== 
+
+Dummy
+== 
+
 Game sound volume
 == 
 
@@ -1283,11 +1256,29 @@ Chat sound volume
 Background music volume
 == 
 
+Show client IDs
+== 
+
+Laser Outline Color
+== 
+
+Laser Inner Color
+== 
+
 Use old chat style
 == 
 
-Highlight
+Preview
+== 
+
+Background
+== 
+
+Entities Background color
 == 
 
 Use current map as background
+== 
+
+Regular Background Color
 == 

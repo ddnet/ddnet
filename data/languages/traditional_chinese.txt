@@ -694,9 +694,6 @@ Type:
 Use DDRace Scoreboard
 == 使用 DDRace 計分板
 
-Show client IDs in Scoreboard
-== 在計分板上顯示客戶端ID
-
 Show score
 == 顯示比分
 
@@ -721,29 +718,14 @@ System message
 Highlighted message
 == 被提及訊息
 
-Look out!
-== 小心!
-
 Team message
 == 隊伍訊息
-
-We will win
-== 我們贏定了
 
 Normal message
 == 普通訊息
 
-Hello and welcome
-== 你好,歡迎
-
 Friend message
 == 好友訊息
-
-Inner color
-== 內部顏色
-
-Outline color
-== 外部顏色
 
 Save the best demo of each race
 == 儲存競速模式最高記錄的回放
@@ -787,12 +769,6 @@ Show other players' hook collision lines
 Show other players' key presses
 == 顯示其他玩家的按鍵
 
-Background (regular)
-== 背景(常規)
-
-Background (entities)
-== 背景(實體)
-
 Show tiles layers from BG map
 == 顯示實體層背景地圖的圖塊層
 
@@ -826,9 +802,6 @@ Browser
 Connecting dummy
 == 正在連線分身
 
-Spectator
-== 旁觀者
-
 Search
 == 搜尋
 
@@ -861,23 +834,14 @@ Grabs
 DDNet
 == DDNet
 
-second
-== 秒
-
 Select a name
 == 另存為
-
-Hi o/
-== 你好
 
 Deaths
 == 死亡數
 
 Please use a different name
 == 請換一個不同的檔名
-
-Wait before try for
-== 請等待
 
 Restart
 == 重新開始
@@ -934,9 +898,6 @@ Spree
 Max CSVs
 == 最大csv檔案數
 
-seconds
-== 秒
-
 %.2f KiB
 == %.2f KiB
 
@@ -945,9 +906,6 @@ Best
 
 Exclude
 == 排除
-
-Friend
-== 好友
 
 may cause delay
 == 可能會產生延遲
@@ -1280,9 +1238,6 @@ Assets
 Use old chat style
 == 舊版聊天框
 
-Highlight
-== 高亮
-
 Use current map as background
 == 使用當前地圖作爲實體層背景地圖
 
@@ -1297,3 +1252,39 @@ Particles
 
 Assets directory
 == 材質目錄
+
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 
+
+45° aim
+== 
+
+Deepfly on
+== 
+
+Deepfly off
+== 
+
+Dummy
+== 
+
+Show client IDs
+== 
+
+Laser Outline Color
+== 
+
+Laser Inner Color
+== 
+
+Preview
+== 
+
+Background
+== 
+
+Entities Background color
+== 
+
+Regular Background Color
+== 

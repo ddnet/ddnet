@@ -643,9 +643,6 @@ Select a name
 Enable long pain sound (used when shooting in freeze)
 == Aktivera ett långt ont ljud (använt vid sjutning i freeze)
 
-We will win
-== Vi kommer att vinna
-
 Default zoom
 == Standard zoom
 
@@ -708,9 +705,6 @@ Browser
 
 Default length: %d
 == Standard längd: %d
-
-Hello and welcome
-== Hej och välkommen
 
 Switch weapon when out of ammo
 == Byt vapen vid slut av ammunition
@@ -820,9 +814,6 @@ Time
 Filter connecting players
 == Filtrera spelare som ansluter
 
-Friend
-== Vän
-
 Enable game sounds
 == Aktivera spel ljud
 
@@ -832,9 +823,6 @@ Max CSVs
 Zoom in
 == Zooma in
 
-Hi o/
-== Hej o/
-
 Update failed! Check log...
 == Updatering misslyckades! Kolla logg...
 
@@ -843,9 +831,6 @@ Update failed! Check log...
 
 Check now
 == Kolla nu
-
-second
-== sekund
 
 Reset wanted weapon on death
 == Återställ önskade vapen vid död
@@ -885,9 +870,6 @@ Show ghost
 
 1 new mention
 == 1 ny nämning
-
-Wait before try for
-== Vänta innan försök för
 
 Are you sure that you want to disconnect your dummy?
 == Är du säker att du vill koppla ifrån din dummy?
@@ -934,9 +916,6 @@ Follow
 Restart
 == Starta om
 
-Background (regular)
-== Bakgrund (vanlig)
-
 Hammerfly dummy
 == Hammerfly dummy
 
@@ -949,14 +928,8 @@ Enable team chat sound
 Disconnect Dummy
 == Koppla ifrån dummy
 
-Background (entities)
-== Bakgrund (entities)
-
 Replace video
 == Ersätt video
-
-Look out!
-== Se upp!
 
 Server best:
 == Serverens bästa:
@@ -972,12 +945,6 @@ Fat skins (DDFat)
 
 Net
 == Nät
-
-seconds
-== sekunder
-
-Spectator
-== Åskådare
 
 Demo
 == Demo
@@ -1036,9 +1003,6 @@ Preinit VBO (iGPUs only)
 Clan plates size
 == Klanskylt storlek
 
-Outline color
-== Kontur färg
-
 Size
 == Storlek
 
@@ -1072,9 +1036,6 @@ Please use a different name
 Destination file already exist
 == Destinations fil finns redan
 
-Show client IDs in Scoreboard
-== Visa klient IDen i poänglista
-
 Game paused
 == Spel pausad
 
@@ -1086,9 +1047,6 @@ Automatically create statboard csv
 
 Old mouse mode
 == Gammal mus metod
-
-Inner color
-== Innre färg
 
 Enable regular chat sound
 == Aktivera vanligt chatt ljud
@@ -1232,6 +1190,9 @@ Replay
 Saving ddnet-settings.cfg failed
 == 
 
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 
+
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 
 
@@ -1262,6 +1223,18 @@ Skin Database
 Skins directory
 == 
 
+45° aim
+== 
+
+Deepfly on
+== 
+
+Deepfly off
+== 
+
+Dummy
+== 
+
 Game sound volume
 == 
 
@@ -1274,13 +1247,31 @@ Background music volume
 Assets
 == 
 
+Show client IDs
+== 
+
+Laser Outline Color
+== 
+
+Laser Inner Color
+== 
+
 Use old chat style
 == 
 
-Highlight
+Preview
+== 
+
+Background
+== 
+
+Entities Background color
 == 
 
 Use current map as background
+== 
+
+Regular Background Color
 == 
 
 Entities

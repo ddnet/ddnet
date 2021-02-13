@@ -634,6 +634,9 @@ Replay feature is disabled!
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
 == 
 
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 
+
 Warning
 == 
 
@@ -647,6 +650,9 @@ Server best:
 == 
 
 Personal best:
+== 
+
+Reset
 == 
 
 Browser
@@ -940,7 +946,19 @@ Show entities
 Show HUD
 == 
 
+45° aim
+== 
+
+Deepfly on
+== 
+
+Deepfly off
+== 
+
 UI mouse s.
+== 
+
+Dummy
 == 
 
 Borderless window
@@ -1015,16 +1033,13 @@ DDNet Client needs to be restarted to complete update!
 Use DDRace Scoreboard
 == 
 
-Show client IDs in Scoreboard
+Show client IDs
 == 
 
 Show score
 == 
 
 Show health + ammo
-== 
-
-Use old chat style
 == 
 
 Show names in chat in team colors
@@ -1036,64 +1051,37 @@ Show kill messages
 Show votes window after voting
 == 
 
+Laser Outline Color
+== 
+
+Laser Inner Color
+== 
+
+Use old chat style
+== 
+
 Messages
 == 
 
 System message
 == 
 
-Reset
-== 
-
 Highlighted message
-== 
-
-Spectator
-== 
-
-Look out!
 == 
 
 Team message
 == 
 
-We will win
-== 
-
 Friend message
-== 
-
-Highlight
-== 
-
-Friend
-== 
-
-Hi o/
 == 
 
 Normal message
 == 
 
-Hello and welcome
-== 
-
 Client message
 == 
 
-Inner color
-== 
-
-Outline color
-== 
-
-Wait before try for
-== 
-
-second
-== 
-
-seconds
+Preview
 == 
 
 Save the best demo of each race
@@ -1150,10 +1138,10 @@ Show other players' key presses
 Old mouse mode
 == 
 
-Background (regular)
+Background
 == 
 
-Background (entities)
+Entities Background color
 == 
 
 Use current map as background
@@ -1162,7 +1150,13 @@ Use current map as background
 Show tiles layers from BG map
 == 
 
+Regular Background Color
+== 
+
 Try fast HTTP map download first
+== 
+
+New random timeout code
 == 
 
 DDNet %s is available:
@@ -1181,9 +1175,6 @@ No updates available
 == 
 
 Check now
-== 
-
-New random timeout code
 == 
 
 Entities

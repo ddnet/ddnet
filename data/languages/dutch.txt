@@ -969,9 +969,6 @@ DDNet Client needs to be restarted to complete update!
 Use DDRace Scoreboard
 == Gebruik DDrace Scorebord
 
-Show client IDs in Scoreboard
-== Laat Client IDs zien in het Scorebord
-
 Show score
 == Laat score zien
 
@@ -999,47 +996,14 @@ Reset
 Highlighted message
 == Gemarkeerd bericht
 
-Spectator
-== Toeschouwer
-
-Look out!
-== Pas op!
-
 Team message
 == Team bericht
-
-We will win
-== We gaan winnen!
 
 Friend message
 == Bericht van een vriend
 
-Friend
-== Vriend
-
-Hi o/
-== Hoi o/
-
 Normal message
 == Normaal bericht
-
-Hello and welcome
-== Hallo en welkom
-
-Inner color
-== Binnenkleur
-
-Outline color
-== Randkleur
-
-Wait before try for
-== Wacht voordat je probeert voor
-
-second
-== seconde
-
-seconds
-== seconden
 
 Save the best demo of each race
 == Sla de beste demo op van elke race
@@ -1094,12 +1058,6 @@ Show other players' key presses
 
 Old mouse mode
 == Oude muis modus
-
-Background (regular)
-== Achtergrond (normaal)
-
-Background (entities)
-== achtergrond (entities)
 
 Show tiles layers from BG map
 == Laat tegel lagen van achtergrondmap zien
@@ -1176,6 +1134,9 @@ Saving ddnet-settings.cfg failed
 The width or height of texture %s is not divisible by 16, which might cause visual bugs.
 == 
 
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 
+
 Warning
 == 
 
@@ -1236,6 +1197,18 @@ Skin Database
 Skins directory
 == 
 
+45° aim
+== 
+
+Deepfly on
+== 
+
+Deepfly off
+== 
+
+Dummy
+== 
+
 Game sound volume
 == 
 
@@ -1248,16 +1221,34 @@ Background music volume
 Assets
 == 
 
-Use old chat style
+Show client IDs
 == 
 
-Highlight
+Laser Outline Color
+== 
+
+Laser Inner Color
+== 
+
+Use old chat style
 == 
 
 Client message
 == 
 
+Preview
+== 
+
+Background
+== 
+
+Entities Background color
+== 
+
 Use current map as background
+== 
+
+Regular Background Color
 == 
 
 Entities

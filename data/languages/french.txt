@@ -660,9 +660,6 @@ Toggle dummy
 Reset wanted weapon on death
 == Réinitialiser l'arme choisie après être mort
 
-Inner color
-== Couleur intérieur
-
 No updates available
 == Pas de mise à jour disponible
 
@@ -726,9 +723,6 @@ Show ghost
 Friend message
 == Message d'ami
 
-We will win
-== On va gagner
-
 AntiPing: predict other players
 == AntiPing: prédit le déplacement des autres joueurs
 
@@ -777,9 +771,6 @@ Welcome to DDNet
 Max CSVs
 == CSV maximum
 
-Spectator
-== Spectateur
-
 Statboard
 == Tableau des stats
 
@@ -788,12 +779,6 @@ Show text entities
 
 Connecting dummy
 == Connection du dummy
-
-Hello and welcome
-== Bonjour et bienvenue
-
-second
-== seconde
 
 Render demo
 == Convertir une démo
@@ -843,9 +828,6 @@ Update failed! Check log...
 %.2f KiB
 == %.2f Kio
 
-Background (regular)
-== Arrière-plan (défaut)
-
 Reset
 == Défaut
 
@@ -860,9 +842,6 @@ Grabs
 
 Update now
 == Mettre à jour
-
-Wait before try for
-== Avant votre prochain essai, veuillez attendre
 
 Follow
 == Suivre
@@ -912,20 +891,8 @@ Deaths
 Length
 == Durée
 
-Outline color
-== Couleur du contour
-
 Normal message
 == Message normal
-
-Show client IDs in Scoreboard
-== Afficher les IDs des clients dans le tableau des scores
-
-seconds
-== secondes
-
-Friend
-== Ami
 
 Dummy copy
 == Copiage du dummy
@@ -1005,9 +972,6 @@ Show others
 %.2f MiB
 == %.2f Mio
 
-Hi o/
-== Salut o/
-
 Unfinished map
 == Carte non terminée
 
@@ -1037,9 +1001,6 @@ Zoom in
 
 Ghost
 == Fantôme
-
-Look out!
-== Attention!
 
 Show console window
 == Afficher la fenêtre de la console
@@ -1073,9 +1034,6 @@ Replace video
 
 Show tiles layers from BG map
 == Utiliser les tuiles de la carte de fond
-
-Background (entities)
-== Arrière-plan (entités)
 
 Show votes window after voting
 == Afficher la fenêtre de vote après avoir voté
@@ -1303,9 +1261,6 @@ Chat sound volume
 Use old chat style
 == Utiliser l'ancien chat
 
-Highlight
-== Surbrillance
-
 Manual
 == Manuel
 
@@ -1317,3 +1272,39 @@ Auto
 
 Replay
 == Replay
+
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 
+
+45° aim
+== 
+
+Deepfly on
+== 
+
+Deepfly off
+== 
+
+Dummy
+== 
+
+Show client IDs
+== 
+
+Laser Outline Color
+== 
+
+Laser Inner Color
+== 
+
+Preview
+== 
+
+Background
+== 
+
+Entities Background color
+== 
+
+Regular Background Color
+== 

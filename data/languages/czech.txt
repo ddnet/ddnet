@@ -948,9 +948,6 @@ DDNet Client needs to be restarted to complete update!
 Use DDRace Scoreboard
 == Použijte hodnotící tabuli DDRace
 
-Show client IDs in Scoreboard
-== Zobrazit ID klienta ve výsledkové tabulce
-
 Show score
 == Zobrazit skóre
 
@@ -978,47 +975,14 @@ Reset
 Highlighted message
 == Zvýrazněná zpráva
 
-Spectator
-== Divák
-
-Look out!
-== Pozor!
-
 Team message
 == Týmová zpráva
-
-We will win
-== Vyhrajeme
 
 Friend message
 == Zpráva od přítele
 
-Friend
-== Přítel
-
-Hi o/
-== Ahoj o/
-
 Normal message
 == Normální zpráva
-
-Hello and welcome
-== Ahoj a vítejte
-
-Inner color
-== Vnitřní barva
-
-Outline color
-== Barva obrysu
-
-Wait before try for
-== Počkejte, než to zkusíte
-
-second
-== sekunda
-
-seconds
-== sekundy
 
 Save the best demo of each race
 == Uložte si nejlepší demo každého závodu
@@ -1073,12 +1037,6 @@ Show other players' key presses
 
 Old mouse mode
 == Starý režim myši
-
-Background (regular)
-== Pozadí (běžné)
-
-Background (entities)
-== Pozadí (entity)
 
 Show tiles layers from BG map
 == Zobrazit vrstvy dlaždic z mapy BG
@@ -1246,9 +1204,6 @@ Assets
 Use old chat style
 == Použijte starý styl chatu
 
-Highlight
-== Zvýraznit
-
 Client message
 == Zpráva klienta
 
@@ -1294,3 +1249,39 @@ Play
 
 Update failed! Check log...
 == Aktualizace selhala! Zkontrolujte log...
+
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 
+
+45° aim
+== 
+
+Deepfly on
+== 
+
+Deepfly off
+== 
+
+Dummy
+== 
+
+Show client IDs
+== 
+
+Laser Outline Color
+== 
+
+Laser Inner Color
+== 
+
+Preview
+== 
+
+Background
+== 
+
+Entities Background color
+== 
+
+Regular Background Color
+== 

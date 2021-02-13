@@ -965,9 +965,6 @@ DDNet Client needs to be restarted to complete update!
 Use DDRace Scoreboard
 == Utiliza el marcador DDRace
 
-Show client IDs in Scoreboard
-== Mostrar IDs de clientes en el marcador
-
 Show score
 == Mostrar puntaje
 
@@ -995,47 +992,14 @@ Reset
 Highlighted message
 == Mensaje resaltado
 
-Spectator
-== Espectador
-
-Look out!
-== ¡Ten cuidado!
-
 Team message
 == Mensaje del equipo
-
-We will win
-== Nosotros ganaremos
 
 Friend message
 == Mensaje de un amigo
 
-Friend
-== Amigo
-
-Hi o/
-== Hola o/
-
 Normal message
 == Mensaje normal
-
-Hello and welcome
-== Hola y bienvenido
-
-Inner color
-== Color interior
-
-Outline color
-== Color de contorno
-
-Wait before try for
-== Espera antes de intentar
-
-second
-== segundo
-
-seconds
-== segundos
 
 Save the best demo of each race
 == Guardar la mejor demo de cada carrera
@@ -1090,12 +1054,6 @@ Show other players' key presses
 
 Old mouse mode
 == Modo de mouse viejo
-
-Background (regular)
-== Fondo (regular)
-
-Background (entities)
-== Fondo (entidades)
 
 Show tiles layers from BG map
 == Mostrar capas de tiles del mapa BG
@@ -1241,9 +1199,6 @@ Assets
 Use old chat style
 == Usar estilo viejo de chat
 
-Highlight
-== Resaltado
-
 Client message
 == Mensaje de cliente
 
@@ -1298,3 +1253,39 @@ Auto
 
 Replay
 == Repetición
+
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 
+
+45° aim
+== 
+
+Deepfly on
+== 
+
+Deepfly off
+== 
+
+Dummy
+== 
+
+Show client IDs
+== 
+
+Laser Outline Color
+== 
+
+Laser Inner Color
+== 
+
+Preview
+== 
+
+Background
+== 
+
+Entities Background color
+== 
+
+Regular Background Color
+== 
