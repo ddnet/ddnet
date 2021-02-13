@@ -966,9 +966,6 @@ DDNet Client needs to be restarted to complete update!
 Use DDRace Scoreboard
 == DDRace Skor Tahtası kulan
 
-Show client IDs in Scoreboard
-== Client ID'lerini skor tahtasında göster
-
 Show score
 == Skoru göster
 
@@ -996,50 +993,17 @@ Reset
 Highlighted message
 == Vurgulanmış mesaj
 
-Spectator
-== İzleyici
-
-Look out!
-== Dikkat et!
-
 Team message
 == Takım mesajı
-
-We will win
-== Kazanacağız
 
 Friend message
 == Arkadaş mesajı
 
-Friend
-== Arkadaş
-
-Hi o/
-== Selam o/
-
 Normal message
 == Normal mesaj
 
-Hello and welcome
-== Selam ve hoşgeldin
-
 Client message
 == İstemci mesajı
-
-Inner color
-== İç renk
-
-Outline color
-== Dış renk
-
-Wait before try for
-== Denemeden önce şu kadar bekle:
-
-second
-== saniye
-
-seconds
-== saniye
 
 Save the best demo of each race
 == Her yarış için en iyi demoyu kaydet
@@ -1094,12 +1058,6 @@ Show other players' key presses
 
 Old mouse mode
 == Eski mouse modu
-
-Background (regular)
-== Arkaplan (normal)
-
-Background (entities)
-== Arkaplan (yapı)
 
 Show tiles layers from BG map
 == Yapı katmanlarını göster
@@ -1179,7 +1137,7 @@ Replay
 Saving ddnet-settings.cfg failed
 == 
 
-The width or height of texture %s is not divisible by 16, which might cause visual bugs.
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
 Warning
@@ -1239,6 +1197,18 @@ Skin Database
 Skins directory
 == 
 
+45° aim
+== 
+
+Deepfly on
+== 
+
+Deepfly off
+== 
+
+Dummy
+== 
+
 Game sound volume
 == 
 
@@ -1251,13 +1221,31 @@ Background music volume
 Assets
 == 
 
+Show client IDs
+== 
+
+Laser Outline Color
+== 
+
+Laser Inner Color
+== 
+
 Use old chat style
 == 
 
-Highlight
+Preview
+== 
+
+Background
+== 
+
+Entities Background color
 == 
 
 Use current map as background
+== 
+
+Regular Background Color
 == 
 
 Entities

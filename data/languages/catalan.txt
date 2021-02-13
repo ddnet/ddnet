@@ -657,9 +657,6 @@ Reconnect in %d sec
 Grabs
 == Agafa
 
-Background (entities)
-== Fons (entitats)
-
 Show kill messages
 == Mostrar missatges de mort
 
@@ -675,17 +672,11 @@ No updates available
 Enable server message sound
 == Activa el so del missatge del servidor
 
-second
-== segon
-
 Show votes window after voting
 == Mostrar la finestra de votacions després de votar
 
 HUD
 == HUD
-
-Look out!
-== Estigues atent!
 
 Select a name
 == Selecciona un nom
@@ -696,12 +687,6 @@ Enable team chat sound
 Show other players' hook collision lines
 == Mostra les línies de col·lisió d'altres jugadors
 
-We will win
-== Nosaltres guanyarem
-
-Hi o/
-== Hola o/
-
 Deaths
 == Morts
 
@@ -711,14 +696,8 @@ Enable game sounds
 DDNet Client needs to be restarted to complete update!
 == El client DDNet necessita reiniciar-se per completar l'actualització!
 
-Spectator
-== Espectador
-
 Please use a different name
 == Si us plau, fes servir un nom diferent
-
-Wait before try for
-== Espereu abans de provar-ho
 
 Show console window
 == Mostra la finestra de la consola
@@ -776,9 +755,6 @@ Threaded sound loading
 
 Check now
 == Comprova ara
-
-Background (regular)
-== Fons (regular)
 
 Reset wanted weapon on death
 == Reiniciar l'arma desitjada al morir
@@ -843,14 +819,8 @@ Show score
 Spree
 == Spree
 
-Show client IDs in Scoreboard
-== Mostrar les IDs dels clients a la taula d'estadístiques
-
 Max CSVs
 == CSVs màxims
-
-seconds
-== segons
 
 %.2f KiB
 == %.2f KiB
@@ -894,32 +864,20 @@ Exclude
 Enable highlighted chat sound
 == Activar el so del xat destacat
 
-Hello and welcome
-== Hola i benvingut
-
 AntiPing: predict weapons
 == AntiPing: predir armes
 
 DDNet Client updated!
 == El client DDNet s'ha actualitzat!
 
-Outline color
-== Color del contorn
-
 Highlighted message
 == Missatge destacat
-
-Friend
-== Amic
 
 Switch weapon when out of ammo
 == Canviar d'arma en quedar-se sense munició
 
 AntiPing: predict grenade paths
 == AntiPing: predir el camí de la granada
-
-Inner color
-== Color interior
 
 Friend message
 == Missatge d'amics
@@ -1161,7 +1119,7 @@ Replay
 Saving ddnet-settings.cfg failed
 == 
 
-The width or height of texture %s is not divisible by 16, which might cause visual bugs.
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
 Warning
@@ -1224,6 +1182,18 @@ Skin Database
 Skins directory
 == 
 
+45° aim
+== 
+
+Deepfly on
+== 
+
+Deepfly off
+== 
+
+Dummy
+== 
+
 Game sound volume
 == 
 
@@ -1236,16 +1206,34 @@ Background music volume
 Assets
 == 
 
-Use old chat style
+Show client IDs
 == 
 
-Highlight
+Laser Outline Color
+== 
+
+Laser Inner Color
+== 
+
+Use old chat style
 == 
 
 Client message
 == 
 
+Preview
+== 
+
+Background
+== 
+
+Entities Background color
+== 
+
 Use current map as background
+== 
+
+Regular Background Color
 == 
 
 Entities

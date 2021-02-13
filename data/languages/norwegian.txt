@@ -960,9 +960,6 @@ DDNet Client needs to be restarted to complete update!
 Use DDRace Scoreboard
 == Bruk DDRace-poengliste
 
-Show client IDs in Scoreboard
-== Vis klient-ID i poengliste
-
 Show score
 == Vis poeng
 
@@ -990,47 +987,14 @@ Reset
 Highlighted message
 == Uthevet melding
 
-Spectator
-== Tilskuer
-
-Look out!
-== Se opp!
-
 Team message
 == Lagmelding
-
-We will win
-== Vi kommer til å vinne
 
 Friend message
 == Vennemelding
 
-Friend
-== Venn
-
-Hi o/
-== Hei o/
-
 Normal message
 == Vanlig melding
-
-Hello and welcome
-== Hei og velkommen
-
-Inner color
-== Indre farge
-
-Outline color
-== Kantfarge
-
-Wait before try for
-== Vent før nytt forsøk i
-
-second
-== sekund
-
-seconds
-== sekunder
 
 Save the best demo of each race
 == Lagre beste demo for hvert løp
@@ -1085,12 +1049,6 @@ Show other players' key presses
 
 Old mouse mode
 == Gammel musemodus
-
-Background (regular)
-== Bakgrunn (vanlig)
-
-Background (entities)
-== Bakgrunn (entities)
 
 Show tiles layers from BG map
 == Vis tile-lag fra BG-bane
@@ -1170,9 +1128,6 @@ Replay
 Saving ddnet-settings.cfg failed
 == Lagring av ddnet-settings.cfg mislyktes
 
-The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== Bredden eller høyden til tekstur %s er ikke delelig med 16, noe som kan gi visuelle feil.
-
 Warning
 == Advarsel
 
@@ -1248,9 +1203,6 @@ Assets
 Use old chat style
 == Bruk gammel chattestil
 
-Highlight
-== Uthev
-
 Client message
 == Klientmelding
 
@@ -1293,3 +1245,39 @@ Editor
 [Start menu]
 Play
 == Spill
+
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 
+
+45° aim
+== 
+
+Deepfly on
+== 
+
+Deepfly off
+== 
+
+Dummy
+== 
+
+Show client IDs
+== 
+
+Laser Outline Color
+== 
+
+Laser Inner Color
+== 
+
+Preview
+== 
+
+Background
+== 
+
+Entities Background color
+== 
+
+Regular Background Color
+== 
