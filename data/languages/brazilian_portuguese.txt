@@ -19,6 +19,7 @@
 # Rafael Fontenelle   2019-12-18 02:47:58
 # Rafael Fontenelle   2020-08-27 12:38:07
 # Rafael Fontenelle   2020-09-20 11:00:38
+# Rafael Fontenelle   2021-02-13 07:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -895,7 +896,7 @@ Automatically create statboard csv
 == Criar csv de statboard automaticamente
 
 Enable long pain sound (used when shooting in freeze)
-== Habilita som de dor longa (usado ao atirar em congelamento)
+== Habilitar som de dor longa (usado ao atirar em congelamento)
 
 Spree
 == Sequência
@@ -934,7 +935,7 @@ Use OpenGL 3.3 (experimental)
 == Usar OpenGL 3.3 (experimental)
 
 UI mouse s.
-== s. mouse UI
+== Sens. mouse de UI
 
 File already exists, do you want to overwrite it?
 == O arquivo já existe, você deseja sobrescrevê-lo?
@@ -970,7 +971,7 @@ Update failed! Check log...
 == 1 nova menção
 
 Fetch Info
-== Obter informações
+== Obter info
 
 %d new mentions
 == %d novas menções
@@ -1262,37 +1263,37 @@ Use old chat style
 == Usar estilo de chat antigo
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
+== A largura da textura %s não é divisível por %d ou a altura não é divisível por %d, o que pode causar erros visuais.
 
 45° aim
-== 
+== Mirar em 45º
 
 Deepfly on
-== 
+== Ativar deepfly
 
 Deepfly off
-== 
+== Desativar deepfly
 
 Dummy
-== 
+== Dummy
 
 Show client IDs
-== 
+== Mostrar IDs de cliente
 
 Laser Outline Color
-== 
+== Cor de contorno do laser
 
 Laser Inner Color
-== 
+== Cor interna do laser
 
 Preview
-== 
+== Visualizar
 
 Background
-== 
+== Plano de fundo
 
 Entities Background color
-== 
+== Cor de fundo das entidades
 
 Regular Background Color
-== 
+== Cor de fundo comum
