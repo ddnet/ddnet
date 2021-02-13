@@ -1260,37 +1260,37 @@ Smooth Dynamic Camera
 == Weiche Dynamische Kamera
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
+== Die Breite von Textur %s ist nicht durch %d teilbar, oder die Höhe nicht durch %d teilbar, was Visuelle Fehler verursachen könnte.
 
 45° aim
-== 
+== 45°-Zielen
 
 Deepfly on
-== 
+== Deepfly an
 
 Deepfly off
-== 
+== Deepfly aus
 
 Dummy
-== 
+== Dummy
 
 Show client IDs
-== 
+== Zeige Client-IDs
 
 Laser Outline Color
-== 
+== Laser-Konturfarbe
 
 Laser Inner Color
-== 
+== Laser-Innenfarbe
 
 Preview
-== 
+== Vorschau
 
 Background
-== 
+== Hintergrund
 
 Entities Background color
-== 
+== Entities-Hintergrundfarbe
 
 Regular Background Color
-== 
+== Normale Hintergrundfarbe
