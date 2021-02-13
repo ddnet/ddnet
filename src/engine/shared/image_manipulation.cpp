@@ -61,7 +61,10 @@ static void CopyColorValues(int w, int h, int BPP, unsigned char *pSrc, unsigned
 		for(int x = 0; x < w; x++, m += BPP)
 		{
 			for(int i = 0; i < BPP - 1; ++i)
-				pDest[m + i] = pSrc[m + i];
+			{
+				if(pDest[m + 3] == 0)
+					pDest[m + i] = pSrc[m + i];
+			}
 		}
 	}
 }
