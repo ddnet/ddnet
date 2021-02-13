@@ -594,17 +594,11 @@ Crc:
 FSAA samples
 == Amostras FSAA
 
-Inner color
-== Cor interna
-
 Reconnect in %d sec
 == Reconectar em %d segundos
 
 Save ghost
 == Salvar fantasma
-
-Background (entities)
-== Papel de parede (entidades)
 
 Show kill messages
 == Mostrar mensagens de kill
@@ -627,17 +621,11 @@ Update now
 Enable server message sound
 == Habilitar som de mensagem do servidor
 
-second
-== segundo
-
 Show votes window after voting
 == Mostrar janela de votos após votar
 
 HUD
 == HUD
-
-Look out!
-== Cuidado!
 
 Show names in chat in team colors
 == Mostrar nomes no chat com cores do time
@@ -654,9 +642,6 @@ Enable team chat sound
 Show other players' hook collision lines
 == Mostra linhas de colisão dos outros jogadores
 
-We will win
-== Nós vamos vencer
-
 Your skin
 == Sua skin
 
@@ -668,9 +653,6 @@ Enable game sounds
 
 DDNet Client needs to be restarted to complete update!
 == O Cliente DDNet precisa ser reiniciado para completar a atualização!
-
-Spectator
-== Observador
 
 Max Screenshots
 == Máximo de capturas de tela
@@ -686,9 +668,6 @@ Hue
 
 Please use a different name
 == Por favor, use um nome diferente
-
-Wait before try for
-== Aguarde antes de tentar para
 
 Show others
 == Mostrar outros
@@ -755,9 +734,6 @@ DDNet Client updated!
 
 Type:
 == Tipo:
-
-Background (regular)
-== Fundo de tela (regular)
 
 Internet
 == Internet
@@ -840,12 +816,6 @@ Default zoom
 Show score
 == Mostrar pontuação
 
-Show client IDs in Scoreboard
-== Mostrar IDs de clientes no placar
-
-seconds
-== segundos
-
 UI Color
 == Cor da UI
 
@@ -897,14 +867,8 @@ Enable highlighted chat sound
 Reset to defaults
 == Redefinir valores
 
-Hello and welcome
-== Olá e bem-vindo
-
 AntiPing: predict weapons
 == AntiPing: predizer armas
-
-Outline color
-== Cor do contorno
 
 Highlighted message
 == Mensagem realçada
@@ -927,9 +891,6 @@ Name plates size
 Grabs
 == Pega
 
-Hi o/
-== Olá o/
-
 Automatically create statboard csv
 == Criar csv de statboard automaticamente
 
@@ -941,9 +902,6 @@ Spree
 
 Max CSVs
 == CSVs máx
-
-Friend
-== Amigo
 
 Friend message
 == Mensagem de amigo
@@ -1173,9 +1131,6 @@ Client message
 Show others (own team only)
 == Mostrar outras (próprio time apenas)
 
-The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== A largura ou altura da textura %s não é divisível por 16, o que pode causar bugs visuais.
-
 Warning
 == Atenção
 
@@ -1303,5 +1258,38 @@ Chat sound volume
 Use old chat style
 == Usar estilo de chat antigo
 
-Highlight
-== Realce
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 
+
+45° aim
+== 
+
+Deepfly on
+== 
+
+Deepfly off
+== 
+
+Dummy
+== 
+
+Show client IDs
+== 
+
+Laser Outline Color
+== 
+
+Laser Inner Color
+== 
+
+Preview
+== 
+
+Background
+== 
+
+Entities Background color
+== 
+
+Regular Background Color
+== 

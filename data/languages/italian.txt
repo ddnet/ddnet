@@ -689,9 +689,6 @@ Saving ddnet-settings.cfg failed
 Replay feature is disabled!
 == Il replay è disabilitato!
 
-The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== La larghezza o altezza della texture %s non è divisibile per 16, quindi potrebbe causare dei bug visivi.
-
 Warning
 == Attenzione
 
@@ -1048,9 +1045,6 @@ DDNet Client needs to be restarted to complete update!
 Use DDRace Scoreboard
 == Usa il tabellone segnapunti DDRace
 
-Show client IDs in Scoreboard
-== Mostra gli ID nella Scoreboard
-
 Show score
 == Mostra punteggio/tempo
 
@@ -1081,53 +1075,17 @@ Reset
 Highlighted message
 == Messaggio evidenziato
 
-Spectator
-== Spettatore
-
-Look out!
-== Attento!
-
 Team message
 == Messaggio della squadra
-
-We will win
-== Vinceremo
 
 Friend message
 == Messaggio di un amico
 
-Highlight
-== Evidenzia
-
-Friend
-== Amico
-
-Hi o/
-== Ciao o/
-
 Normal message
 == Messaggio normale
 
-Hello and welcome
-== Ciao e benvenuto
-
 Client message
 == Messaggio del Client
-
-Inner color
-== Colore interno
-
-Outline color
-== Colore del contorno
-
-Wait before try for
-== Aspetta prima di provare per
-
-second
-== secondo
-
-seconds
-== secondi
 
 Save the best demo of each race
 == Salva la miglior demo di ogni partita
@@ -1179,12 +1137,6 @@ Show other players' key presses
 
 Old mouse mode
 == Modalità mouse vecchio
-
-Background (regular)
-== Sfondo (regolare)
-
-Background (entities)
-== Sfondo (entità)
 
 Use current map as background
 == Usa la mappa attuale come sfondo
@@ -1311,6 +1263,9 @@ Grabs
 9+ new mentions
 == +9 nuove menzioni
 
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 
+
 Markers:
 == 
 
@@ -1323,7 +1278,40 @@ Markers:
 Converse
 == 
 
+45° aim
+== 
+
+Deepfly on
+== 
+
+Deepfly off
+== 
+
+Dummy
+== 
+
+Show client IDs
+== 
+
+Laser Outline Color
+== 
+
+Laser Inner Color
+== 
+
+Preview
+== 
+
 Overlay entities
+== 
+
+Background
+== 
+
+Entities Background color
+== 
+
+Regular Background Color
 == 
 
 FPM

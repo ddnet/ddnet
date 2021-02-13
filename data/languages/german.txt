@@ -658,12 +658,6 @@ Countries
 Types
 == Typen
 
-Inner color
-== Innere Farbe
-
-Background (entities)
-== Hintergrund (Entities)
-
 Show kill messages
 == Kill-Nachrichten anzeigen
 
@@ -679,17 +673,11 @@ Update now
 Enable server message sound
 == Ton für Server-Nachrichten aktivieren
 
-second
-== Sekunde
-
 Show votes window after voting
 == Abstimmungsfenster nach Abstimmung zeigen
 
 HUD
 == Aussehen
-
-Look out!
-== Pass auf!
 
 Show names in chat in team colors
 == Namen im Chat in Teamfarben anzeigen
@@ -700,9 +688,6 @@ Enable team chat sound
 Show other players' hook collision lines
 == Hakenkollisionen von anderen Spielern anzeigen
 
-We will win
-== Wir werden gewinnen
-
 Deaths
 == Tode
 
@@ -711,9 +696,6 @@ Enable game sounds
 
 DDNet Client needs to be restarted to complete update!
 == Der DDNet-Client muss neu gestartet werden, um das Update abzuschließen!
-
-Spectator
-== Zuschauer
 
 Show others
 == Andere zeigen
@@ -736,9 +718,6 @@ Team message
 Save the best demo of each race
 == Beste Aufnahme von jedem Rennen speichern
 
-Outline color
-== Äußere Farbe
-
 Are you sure that you want to disconnect?
 == Bist du sicher, dass du die Verbindung trennen möchtest?
 
@@ -750,9 +729,6 @@ Check now
 
 DDNet Client updated!
 == Der DDNet-Client wurde aktualisiert!
-
-Background (regular)
-== Hintergrund (Normal)
 
 AntiPing: predict other players
 == AntiPing: Andere Spieler vorberechnen
@@ -790,12 +766,6 @@ Default zoom
 Show score
 == Punktestand anzeigen
 
-Show client IDs in Scoreboard
-== Client-IDs in der Punktetafel anzeigen
-
-seconds
-== Sekunden
-
 %.2f KiB
 == %.2f KiB
 
@@ -832,9 +802,6 @@ Enable highlighted chat sound
 AntiPing: predict weapons
 == AntiPing: Waffen vorberechnen
 
-Hello and welcome
-== Hallo und willkommen
-
 Highlighted message
 == Hervorgehobene Nachricht
 
@@ -850,17 +817,11 @@ Grabs
 Select a name
 == Namen wählen
 
-Hi o/
-== Hallo o/
-
 Automatically take game over screenshot
 == Automatisch Bildschirmfoto am Spielende aufnehmen
 
 Please use a different name
 == Bitte anderen Namen wählen
-
-Wait before try for
-== Vor dem Versuch warten für
 
 Show console window
 == Konsolenfenster zeigen
@@ -936,9 +897,6 @@ Screen
 
 Exclude
 == Ausschließen
-
-Friend
-== Freund
 
 Demo
 == Aufnahme
@@ -1177,9 +1135,6 @@ Client message
 Country / Region
 == Land / Region
 
-The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== Die Breite oder Höhe von Textur %s ist nicht durch 16 teilbar, was visuelle Bugs verursachen kann.
-
 Skip the main menu
 == Hauptmenü überspringen
 
@@ -1289,9 +1244,6 @@ Chat sound volume
 Use old chat style
 == Alten Chat-Stil nutzen
 
-Highlight
-== Hervorheben
-
 Manual
 == Manuell
 
@@ -1306,3 +1258,39 @@ Replay
 
 Smooth Dynamic Camera
 == Weiche Dynamische Kamera
+
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 
+
+45° aim
+== 
+
+Deepfly on
+== 
+
+Deepfly off
+== 
+
+Dummy
+== 
+
+Show client IDs
+== 
+
+Laser Outline Color
+== 
+
+Laser Inner Color
+== 
+
+Preview
+== 
+
+Background
+== 
+
+Entities Background color
+== 
+
+Regular Background Color
+== 
