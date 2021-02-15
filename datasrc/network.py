@@ -469,7 +469,7 @@ Messages = [
 		NetIntRange("m_Finish", 0, 1),
 	]),
 
-	NetMessageEx("Sv_Record", "weird-record@netmsg.ddnet.tw", [
+	NetMessageEx("Sv_Record", "record@netmsg.ddnet.tw", [
 		NetIntAny("m_ServerTimeBest"),
 		NetIntAny("m_PlayerTimeBest"),
 	]),

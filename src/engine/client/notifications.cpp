@@ -2,8 +2,8 @@
 
 #include <base/detect.h>
 
-#if defined(CONF_PLATFORM_MACOSX)
-// Code is in src/osx/notification.mm.
+#if defined(CONF_PLATFORM_MACOS)
+// Code is in src/macos/notification.mm.
 #elif defined(CONF_FAMILY_UNIX)
 #include <libnotify/notify.h>
 void NotificationsInit()

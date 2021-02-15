@@ -21,7 +21,8 @@ freely, subject to the following restrictions:
 ------------------------------------------------------------------------
 
 All content under 'data' except the assets, font, language & skin files,
-(which have their own licenses):
+(which have their own licenses) are released under
+CC-BY-SA 3.0 (http://creativecommons.org/licenses/by-sa/3.0/).
 Apache 2.0 for the 'Icon.tff' file:
 Copyright Google
 

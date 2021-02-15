@@ -273,7 +273,7 @@ public:
 	virtual const char *NetVersion();
 
 	// DDRace
-	void OnClientDDNetVersionKnown(int ClientID);
+	bool OnClientDDNetVersionKnown(int ClientID);
 	virtual void FillAntibot(CAntibotRoundData *pData);
 	int ProcessSpamProtection(int ClientID);
 	int GetDDRaceTeam(int ClientID);
