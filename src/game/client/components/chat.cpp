@@ -877,21 +877,17 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 
 void CChat::RefindSkins()
 {
-	for(int i = 0; i < MAX_LINES; i++)
+	for(auto &Line : m_aLines)
 	{
-		int r = ((m_CurrentLine - i) + MAX_LINES) % MAX_LINES;
-		if(m_aLines[r].m_TextContainerIndex == -1)
-			continue;
-
-		if(m_aLines[r].m_HasRenderTee)
+		if(Line.m_HasRenderTee)
 		{
-			const CSkin *pSkin = m_pClient->m_pSkins->Get(m_pClient->m_pSkins->Find(m_aLines[r].m_aSkinName));
-			if(m_aLines[r].m_CustomColoredSkin)
-				m_aLines[r].m_RenderSkin = pSkin->m_ColorableSkin;
+			const CSkin *pSkin = m_pClient->m_pSkins->Get(m_pClient->m_pSkins->Find(Line.m_aSkinName));
+			if(Line.m_CustomColoredSkin)
+				Line.m_RenderSkin = pSkin->m_ColorableSkin;
 			else
-				m_aLines[r].m_RenderSkin = pSkin->m_OriginalSkin;
+				Line.m_RenderSkin = pSkin->m_OriginalSkin;
 
-			m_aLines[r].m_RenderSkinMetrics = pSkin->m_Metrics;
+			Line.m_RenderSkinMetrics = pSkin->m_Metrics;
 		}
 	}
 }

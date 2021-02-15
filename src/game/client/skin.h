@@ -118,15 +118,6 @@ struct CSkin
 		SSkinMetricVariable m_Body;
 		SSkinMetricVariable m_Feet;
 
-		int m_FeetWidth;
-		int m_FeetHeight;
-		int m_FeetOffsetX;
-		int m_FeetOffsetY;
-
-		// these can be used to normalize the metrics
-		int m_FeetMaxWidth;
-		int m_FeetMaxHeight;
-
 		void Reset()
 		{
 			m_Body.Reset();
