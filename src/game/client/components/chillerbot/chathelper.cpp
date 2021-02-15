@@ -238,9 +238,9 @@ void CChatHelper::OnChatMessage(int ClientID, int Team, const char *pMsg)
 		return;
 	str_copy(m_aLastPingMessage, pMsg, sizeof(m_aLastPingMessage));
 	m_NextPingMsgClear = time_get() + time_freq() * 60;
-	int64 AfkTill = m_pChillerBot->GetAfkTime();
-	if(AfkTill)
+	if(m_pChillerBot->GetAfkActivity() < 25)
 	{
+		int64 AfkTill = m_pChillerBot->GetAfkTime();
 		char aBuf[256];
 		char aNote[128];
 		str_format(aBuf, sizeof(aBuf), "%s: I am currently afk.", aName);

@@ -64,6 +64,7 @@ public:
 	void ReturnFromAfk(const char *pChatMessage = 0);
 	int64 GetAfkTime() { return m_AfkTill; }
 	const char *GetAfkMessage() { return m_aAfkMessage; }
+	int GetAfkActivity() { return m_AfkActivity; }
 
 	void EnableComponent(const char *pComponent, const char *pNoteShort = 0, const char *pNoteLong = 0);
 	void DisableComponent(const char *pComponent);
