@@ -592,9 +592,8 @@ private:
 	CTuningParams m_aTuningList[NUM_TUNEZONES];
 	CTuningParams *TuningList() { return m_aTuningList; }
 
-	float m_LastZoom;
-	float m_LastScreenAspect;
-	float m_LastDummyConnected;
+	float m_LastZoom[NUM_DUMMIES];
+	float m_LastScreenAspect[NUM_DUMMIES];
 };
 
 ColorRGBA CalculateNameColor(ColorHSLA TextColorHSL);
