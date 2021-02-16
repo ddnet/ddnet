@@ -17,7 +17,7 @@ CSaveTee::~CSaveTee()
 {
 }
 
-void CSaveTee::save(CCharacter *pChr)
+void CSaveTee::Save(CCharacter *pChr)
 {
 	m_ClientID = pChr->m_pPlayer->GetCID();
 	str_copy(m_aName, pChr->Server()->ClientName(m_ClientID), sizeof(m_aName));
@@ -108,7 +108,7 @@ void CSaveTee::save(CCharacter *pChr)
 	FormatUuid(pChr->GameServer()->GameUuid(), m_aGameUuid, sizeof(m_aGameUuid));
 }
 
-void CSaveTee::load(CCharacter *pChr, int Team)
+void CSaveTee::Load(CCharacter *pChr, int Team)
 {
 	pChr->m_pPlayer->Pause(m_Paused, true);
 
@@ -415,7 +415,7 @@ CSaveTeam::~CSaveTeam()
 		delete[] m_pSavedTees;
 }
 
-int CSaveTeam::save(int Team)
+int CSaveTeam::Save(int Team)
 {
 	if(g_Config.m_SvTeam == 3 || (Team > 0 && Team < MAX_CLIENTS))
 	{
@@ -447,7 +447,7 @@ int CSaveTeam::save(int Team)
 				continue;
 			if(m_MembersCount == j)
 				return 3;
-			m_pSavedTees[j].save(p);
+			m_pSavedTees[j].Save(p);
 			j++;
 		}
 		if(m_MembersCount != j)
@@ -498,7 +498,7 @@ bool CSaveTeam::HandleSaveError(int Result, int ClientID, CGameContext *pGameCon
 	return true;
 }
 
-void CSaveTeam::load(int Team, bool KeepCurrentWeakStrong)
+void CSaveTeam::Load(int Team, bool KeepCurrentWeakStrong)
 {
 	CGameTeams *pTeams = &(((CGameControllerDDRace *)m_pController)->m_Teams);
 
@@ -513,7 +513,7 @@ void CSaveTeam::load(int Team, bool KeepCurrentWeakStrong)
 		if(m_pController->GameServer()->m_apPlayers[ClientID] && pTeams->m_Core.Team(ClientID) == Team)
 		{
 			CCharacter *pChr = MatchCharacter(m_pSavedTees[i].GetClientID(), i, KeepCurrentWeakStrong);
-			m_pSavedTees[i].load(pChr, Team);
+			m_pSavedTees[i].Load(pChr, Team);
 		}
 	}
 

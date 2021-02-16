@@ -2071,7 +2071,7 @@ void CCharacter::SetTeams(CGameTeams *pTeams)
 
 void CCharacter::SetRescue()
 {
-	m_RescueTee.save(this);
+	m_RescueTee.Save(this);
 	m_SetSavePos = true;
 }
 
@@ -2344,7 +2344,7 @@ void CCharacter::Rescue()
 		}
 
 		float StartTime = m_StartTime;
-		m_RescueTee.load(this, Team());
+		m_RescueTee.Load(this, Team());
 		// Don't load these from saved tee:
 		m_Core.m_Vel = vec2(0, 0);
 		m_Core.m_HookState = HOOK_IDLE;
