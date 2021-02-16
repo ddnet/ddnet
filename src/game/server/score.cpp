@@ -1349,7 +1349,7 @@ void CScore::SaveTeam(int ClientID, const char *Code, const char *Server)
 
 	auto SaveResult = std::make_shared<CScoreSaveResult>(ClientID, pController);
 	SaveResult->m_SaveID = RandomUuid();
-	int Result = SaveResult->m_SavedTeam.save(Team);
+	int Result = SaveResult->m_SavedTeam.Save(Team);
 	if(CSaveTeam::HandleSaveError(Result, ClientID, GameServer()))
 		return;
 	pController->m_Teams.SetSaving(Team, SaveResult);

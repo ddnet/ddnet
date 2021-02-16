@@ -15,8 +15,8 @@ class CSaveTee
 public:
 	CSaveTee();
 	~CSaveTee();
-	void save(CCharacter *pchr);
-	void load(CCharacter *pchr, int Team);
+	void Save(CCharacter *pchr);
+	void Load(CCharacter *pchr, int Team);
 	char *GetString(const CSaveTeam *pTeam);
 	int FromString(const char *String);
 	void LoadHookedPlayer(const CSaveTeam *pTeam);
@@ -119,8 +119,8 @@ public:
 	int FromString(const char *String);
 	// returns true if a team can load, otherwise writes a nice error Message in pMessage
 	bool MatchPlayers(const char (*paNames)[MAX_NAME_LENGTH], const int *pClientID, int NumPlayer, char *pMessage, int MessageLen);
-	int save(int Team);
-	void load(int Team, bool KeepCurrentWeakStrong);
+	int Save(int Team);
+	void Load(int Team, bool KeepCurrentWeakStrong);
 	CSaveTee *m_pSavedTees;
 
 	// returns true if an error occured
