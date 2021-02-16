@@ -368,7 +368,7 @@ void CCharacterCore::Tick(bool UseInput)
 
 	if(m_pWorld)
 	{
-		for(int i = 0; i < MAX_CLIENTS; i++)
+		for(int i = 0; i < m_Id; i++)
 		{
 			CCharacterCore *pCharCore = m_pWorld->m_apCharacters[i];
 			if(!pCharCore)
@@ -377,8 +377,8 @@ void CCharacterCore::Tick(bool UseInput)
 			//player *p = (player*)ent;
 			//if(pCharCore == this) // || !(p->flags&FLAG_ALIVE)
 
-			if(pCharCore == this || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, i)))
-				continue; // make sure that we don't nudge our self
+			if(m_Id != -1 && !m_pTeams->CanCollide(m_Id, i))
+				continue;
 
 			if(!(m_Super || pCharCore->m_Super) && (m_Solo || pCharCore->m_Solo))
 				continue;
@@ -388,6 +388,7 @@ void CCharacterCore::Tick(bool UseInput)
 			if(Distance > 0)
 			{
 				vec2 Dir = normalize(m_Pos - pCharCore->m_Pos);
+				vec2 OtherDir = -Dir;
 
 				bool CanCollide = (m_Super || pCharCore->m_Super) || (pCharCore->m_Collision && m_Collision && !m_NoCollision && !pCharCore->m_NoCollision && m_pWorld->m_Tuning[g_Config.m_ClDummy].m_PlayerCollision);
 
@@ -403,17 +404,25 @@ void CCharacterCore::Tick(bool UseInput)
 
 					m_Vel += Dir * a * (Velocity * 0.75f);
 					m_Vel *= 0.85f;
+
+					Velocity = 0.5f;
+					// make sure that we don't add excess force by checking the
+					// direction against the current velocity. if not zero.
+					if(length(pCharCore->m_Vel) > 0.0001)
+						Velocity = 1 - (dot(normalize(pCharCore->m_Vel), OtherDir) + 1) / 2;
+
+					pCharCore->m_Vel += OtherDir * a * (Velocity * 0.75f);
+					pCharCore->m_Vel *= 0.85f;
 				}
 
 				// handle hook influence
-				if(m_Hook && m_HookedPlayer == i && m_pWorld->m_Tuning[g_Config.m_ClDummy].m_PlayerHooking)
+				if(Distance > PhysSize * 1.50f && m_pWorld->m_Tuning[g_Config.m_ClDummy].m_PlayerHooking) // TODO: fix tweakable variable
 				{
-					if(Distance > PhysSize * 1.50f) // TODO: fix tweakable variable
+					float Accel = m_pWorld->m_Tuning[g_Config.m_ClDummy].m_HookDragAccel * (Distance / m_pWorld->m_Tuning[g_Config.m_ClDummy].m_HookLength);
+					float DragSpeed = m_pWorld->m_Tuning[g_Config.m_ClDummy].m_HookDragSpeed;
+					vec2 Temp;
+					if(m_Hook && m_HookedPlayer == i)
 					{
-						float Accel = m_pWorld->m_Tuning[g_Config.m_ClDummy].m_HookDragAccel * (Distance / m_pWorld->m_Tuning[g_Config.m_ClDummy].m_HookLength);
-						float DragSpeed = m_pWorld->m_Tuning[g_Config.m_ClDummy].m_HookDragSpeed;
-
-						vec2 Temp;
 						// add force to the hooked player
 						Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.x, Accel * Dir.x * 1.5f);
 						Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.y, Accel * Dir.y * 1.5f);
@@ -422,6 +431,17 @@ void CCharacterCore::Tick(bool UseInput)
 						Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.x, -Accel * Dir.x * 0.25f);
 						Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.y, -Accel * Dir.y * 0.25f);
 						m_Vel = ClampVel(m_MoveRestrictions, Temp);
+					}
+					if(pCharCore->m_Hook && pCharCore->m_HookedPlayer == m_Id)
+					{
+						// add force to the hooked player
+						Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.x, Accel * OtherDir.x * 1.5f);
+						Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.y, Accel * OtherDir.y * 1.5f);
+						m_Vel = ClampVel(m_MoveRestrictions, Temp);
+						// add a little bit force to the guy who has the grip
+						Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.x, -Accel * OtherDir.x * 0.25f);
+						Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.y, -Accel * OtherDir.y * 0.25f);
+						pCharCore->m_Vel = ClampVel(pCharCore->m_MoveRestrictions, Temp);
 					}
 				}
 			}
