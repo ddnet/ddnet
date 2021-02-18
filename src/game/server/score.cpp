@@ -1062,7 +1062,7 @@ bool CScore::ShowTimesThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 	else // last 5 times of server
 	{
 		str_format(aBuf, sizeof(aBuf),
-			"SELECT Time, (%s-%s) as Ago, %s as Stamp, Name "
+			"SELECT Time, (%s-%s) as Ago, %s as Stamp, Name, Server "
 			"FROM %s_race "
 			"WHERE Map = ? "
 			"ORDER BY Timestamp %s "
@@ -1090,6 +1090,11 @@ bool CScore::ShowTimesThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
 		int Ago = pSqlServer->GetInt(2);
 		int Stamp = pSqlServer->GetInt(3);
+		char aServer[5];
+		pSqlServer->GetString(5, aServer, sizeof(aServer));
+		char aServerFormatted[8] = "\0";
+		if(str_comp(aServer, "UNK") != 0)
+			str_format(aServerFormatted, sizeof(aServerFormatted), "[%s] ", aServer);
 
 		char aAgoString[40] = "\0";
 		sqlstr::AgoTimeToString(Ago, aAgoString, sizeof(aAgoString));
@@ -1098,10 +1103,10 @@ bool CScore::ShowTimesThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		{
 			if(Stamp == 0) // stamp is 00:00:00 cause it's an old entry from old times where there where no stamps yet
 				str_format(paMessages[Line], sizeof(paMessages[Line]),
-					"%s, don't know how long ago", aBuf);
+					"%s%s, don't know how long ago", aServerFormatted, aBuf);
 			else
 				str_format(paMessages[Line], sizeof(paMessages[Line]),
-					"%s ago, %s", aAgoString, aBuf);
+					"%s%s ago, %s", aServerFormatted, aAgoString, aBuf);
 		}
 		else // last 5 times of the server
 		{
@@ -1110,12 +1115,12 @@ bool CScore::ShowTimesThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 			if(Stamp == 0) // stamp is 00:00:00 cause it's an old entry from old times where there where no stamps yet
 			{
 				str_format(paMessages[Line], sizeof(paMessages[Line]),
-					"%s, %s, don't know when", aName, aBuf);
+					"%s%s, %s, don't know when", aServerFormatted, aName, aBuf);
 			}
 			else
 			{
 				str_format(paMessages[Line], sizeof(paMessages[Line]),
-					"%s, %s ago, %s", aName, aAgoString, aBuf);
+					"%s%s, %s ago, %s", aServerFormatted, aName, aAgoString, aBuf);
 			}
 		}
 		Line++;
