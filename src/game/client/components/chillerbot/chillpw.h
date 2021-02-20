@@ -7,7 +7,7 @@
 #define MAX_PASSWORD_LENGTH 2048
 #define MAX_HOSTNAME_LENGTH 128
 
-#define PASSWORD_FILE "chillpw_secret.txt"
+#define PASSWORD_FILE "chillerbot/chillpw_secret.txt"
 
 class CChillPw : public CComponent
 {

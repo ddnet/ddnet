@@ -9,7 +9,7 @@ Features
 
 ### password manager
 
-Go to your teeworlds directory and create the file ``chillpw_secret.txt``
+Go to your teeworlds/chillerbot directory and create the file ``chillpw_secret.txt``
 
 
 Format is ``hostname:port,dummy,command``
@@ -22,7 +22,7 @@ Format is ``hostname:port,dummy,command``
 
 example:
 
-~/.teeworlds/chillpw_secret.txt
+~/.teeworlds/chillerbot/chillpw_secret.txt
 ```
 51.210.171.47:7303,0,say /login ChillerDragon password
 51.210.171.47:7303,1,say /login ChillerDragon2 password2
