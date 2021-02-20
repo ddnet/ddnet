@@ -1629,13 +1629,15 @@ void CGameClient::OnNewSnapshot()
 		m_ShowOthers[g_Config.m_ClDummy] = g_Config.m_ClShowOthers;
 	}
 
-	float ZoomToSend = m_pCamera->m_ZoomSmoothingTarget == .0 ? m_pCamera->m_Zoom // Initial
-								    :
-								    m_pCamera->m_ZoomSmoothingTarget > m_pCamera->m_Zoom ? m_pCamera->m_ZoomSmoothingTarget // Zooming out
-															   :
-															   m_pCamera->m_ZoomSmoothingTarget < m_pCamera->m_Zoom ? m_LastZoom // Zooming in
-																						  :
-																						  m_pCamera->m_Zoom; // Not zooming
+	float ZoomToSend = m_pCamera->m_Zoom;
+	if(m_pCamera->m_ZoomSmoothingTarget != .0)
+	{
+		if(m_pCamera->m_ZoomSmoothingTarget > m_pCamera->m_Zoom) // Zooming out
+			ZoomToSend = m_pCamera->m_ZoomSmoothingTarget;
+		else if(m_pCamera->m_ZoomSmoothingTarget < m_pCamera->m_Zoom && m_LastZoom > 0) // Zooming in
+			ZoomToSend = m_LastZoom;
+	}
+
 	if(ZoomToSend != m_LastZoom || Graphics()->ScreenAspect() != m_LastScreenAspect || (Client()->DummyConnected() && !m_LastDummyConnected))
 	{
 		CNetMsg_Cl_ShowDistance Msg;
