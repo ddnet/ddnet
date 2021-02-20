@@ -653,25 +653,10 @@ void CGameClient::OnRender()
 	// update the local character and spectate position
 	UpdatePositions();
 
-	// display gfx warnings
-	if(g_Config.m_GfxShowWarnings == 1)
+	// display gfx & client warnings
+	for(SWarning *pWarning : {Graphics()->GetCurWarning(), Client()->GetCurWarning()})
 	{
-		SWarning *pWarning = Graphics()->GetCurWarning();
-		if(pWarning != NULL)
-		{
-			if(m_pMenus->CanDisplayWarning())
-			{
-				m_pMenus->PopupWarning(Localize("Warning"), pWarning->m_aWarningMsg, "Ok", 10000000);
-				pWarning->m_WasShown = true;
-			}
-		}
-	}
-
-	// display client warnings
-	SWarning *pWarning = Client()->GetCurWarning();
-	if(pWarning != NULL)
-	{
-		if(m_pMenus->CanDisplayWarning())
+		if(pWarning != NULL && m_pMenus->CanDisplayWarning())
 		{
 			m_pMenus->PopupWarning(Localize("Warning"), pWarning->m_aWarningMsg, "Ok", 10000000);
 			pWarning->m_WasShown = true;

@@ -652,12 +652,6 @@ Show other players' hook collision lines
 Show other players' key presses
 == Pokazuj naciśnięcia klawiszy innych graczy
 
-Background (regular)
-== Tło (regularne)
-
-Background (entities)
-== Tło (entities)
-
 Try fast HTTP map download first
 == Próbuj najpierw ściągać mapy z serwera HTTP.
 
@@ -730,20 +724,11 @@ Team message
 Normal message
 == Wiadomość standardowa
 
-Inner color
-== Wewnętrzny kolor
-
-Outline color
-== Zewnętrzny kolor
-
 Use DDRace Scoreboard
 == Użyj tabeli wyników z DDRace
 
 Show kill messages
 == Pokazuj wiadomości śmierci
-
-Show client IDs in Scoreboard
-== Pokazuj ID graczy w tabeli wyników
 
 Countries
 == Kraje
@@ -799,18 +784,6 @@ DDNet Client updated!
 Check now
 == Sprawdź
 
-Look out!
-== Uważaj!
-
-Spectator
-== Obserwator
-
-We will win
-== Wygramy to
-
-Hello and welcome
-== Cześć i siema
-
 DDNet Client needs to be restarted to complete update!
 == DDNet Client wymaga ponownego uruchomienia, aby zakończyć aktualizację!
 
@@ -859,9 +832,6 @@ Fat skins (DDFat)
 Grabs
 == Przechwycenia
 
-second
-== sekund
-
 Kill
 == Restart
 
@@ -883,26 +853,17 @@ Pause
 1 new mention
 == 1 raz wspomniano o tobie
 
-Hi o/
-== Cześć o/
-
 Welcome to DDNet
 == Witaj w DDNet
 
 New random timeout code
 == Nowy losowy kod timeout
 
-Wait before try for
-== Poczekaj zanim spróbujesz
-
 Enable long pain sound (used when shooting in freeze)
 == Włącz dźwięk długiego jęku (używany, gdy strzelasz we freezie)
 
 DDNet
 == DDNet
-
-seconds
-== sekundy
 
 Show HUD
 == Pokazuj HUD
@@ -1114,9 +1075,6 @@ Personal best:
 Show text entities
 == Pokazuj entities tekstu
 
-Friend
-== Znajomy
-
 Skin prefix
 == Motyw skinów
 
@@ -1170,9 +1128,6 @@ Replay
 
 Saving ddnet-settings.cfg failed
 == Zapisywanie ddnet-settings.cfg nie powiodło się
-
-The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== Szerokość lub wysokość tekstury %s nie jest podzielna przez 16, co może powodować błędy.
 
 Warning
 == Ostrzeżenie
@@ -1249,9 +1204,6 @@ Assets
 Use old chat style
 == Użyj klasycznego wyglądu czatu
 
-Highlight
-== Podkreślenie
-
 Client message
 == Wiadomość klienta
 
@@ -1294,3 +1246,39 @@ Editor
 [Start menu]
 Play
 == Graj
+
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 
+
+45° aim
+== 
+
+Deepfly on
+== 
+
+Deepfly off
+== 
+
+Dummy
+== 
+
+Show client IDs
+== 
+
+Laser Outline Color
+== 
+
+Laser Inner Color
+== 
+
+Preview
+== 
+
+Background
+== 
+
+Entities Background color
+== 
+
+Regular Background Color
+== 

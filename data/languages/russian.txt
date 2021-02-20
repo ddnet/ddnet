@@ -580,9 +580,6 @@ Borderless window
 Use DDRace Scoreboard
 == Использовать DDRace табло
 
-Show client IDs in Scoreboard
-== Показывать ID клиентов в табло
-
 Show kill messages
 == Показывать сообщения о смерти
 
@@ -709,20 +706,11 @@ Name plates size
 Type:
 == Тип:
 
-Background (entities)
-== Задний фон
-
 Show ghost
 == Показать тень
 
 No updates available
 == Нет доступных обновлений
-
-second
-== секунд
-
-Look out!
-== Берегись!
 
 Select a name
 == Выберите имя
@@ -730,17 +718,8 @@ Select a name
 Show other players' hook collision lines
 == Показывать коллизии крюка других игроков
 
-We will win
-== Мы выиграем
-
-Hi o/
-== Привет ^^/
-
 DDNet Client needs to be restarted to complete update!
 == Перезапустите DDNet Client для завершения обновления!
-
-Spectator
-== Наблюдатель
 
 Please use a different name
 == Пожалуйста, используйте другое имя
@@ -793,26 +772,14 @@ Update now
 Save ghost
 == Сохранять тень
 
-Hello and welcome
-== Привет и добро пожаловать
-
 DDNet Client updated!
 == DDNet Client обновлён!
-
-Outline color
-== Цвет контура
 
 Highlighted message
 == Выделенное сообщение
 
-Friend
-== Друг
-
 Demo
 == Демо
-
-Inner color
-== Внутренний цвет
 
 Successfully saved the replay!
 == Повтор сохранен!
@@ -1045,12 +1012,6 @@ DDNet
 Friend message
 == Сообщение от друга
 
-Wait before try for
-== Подождите прежде чем повторить
-
-seconds
-== секунд
-
 Save the best demo of each race
 == Сохранять лучшее демо каждой попытки
 
@@ -1092,9 +1053,6 @@ AntiPing: predict grenade paths
 
 Show other players' key presses
 == Показывать нажатия других игроков
-
-Background (regular)
-== Фон (обычный)
 
 Show tiles layers from BG map
 == Показывать слои с тайлами из фоновой карты
@@ -1152,9 +1110,6 @@ Grabs
 
 Client message
 == Сообщение от клиента
-
-The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== Ширина или высота текстуры %s не делится на 16, что может быть причиной проблем с визуалом.
 
 Warning
 == Предупреждение
@@ -1268,9 +1223,6 @@ Assets
 Use old chat style
 == Использовать старый чат
 
-Highlight
-== Подсветка
-
 Use current map as background
 == Использовать данную карту как фон
 
@@ -1297,3 +1249,39 @@ Replay
 
 Entities
 == Тайлы
+
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 
+
+45° aim
+== 
+
+Deepfly on
+== 
+
+Deepfly off
+== 
+
+Dummy
+== 
+
+Show client IDs
+== 
+
+Laser Outline Color
+== 
+
+Laser Inner Color
+== 
+
+Preview
+== 
+
+Background
+== 
+
+Entities Background color
+== 
+
+Regular Background Color
+== 
