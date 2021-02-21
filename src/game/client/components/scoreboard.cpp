@@ -172,6 +172,8 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	else if(Team == -8)
 		upper24 = true;
 
+	bool IsTeamplayTeam = Team > TEAM_SPECTATORS;
+
 	if(Team < -1)
 		Team = 0;
 
@@ -254,7 +256,6 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	}
 
 	// calculate measurements
-	x += 10.0f;
 	float LineHeight = 60.0f;
 	float TeeSizeMod = 1.0f;
 	float Spacing = 16.0f;
@@ -291,14 +292,20 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		RoundRadius = 15.0f;
 	}
 
-	float ScoreOffset = x + 10.0f, ScoreLength = TextRender()->TextWidth(0, FontSize, "00:00:00", -1, -1.0f);
+	float ScoreOffset = x + 10.0f + 10.0f, ScoreLength = TextRender()->TextWidth(0, FontSize, "00:00:00", -1, -1.0f);
+	if(IsTeamplayTeam)
+		ScoreLength = TextRender()->TextWidth(0, FontSize, "99999", -1, -1.0f);
 	float TeeOffset = ScoreOffset + ScoreLength + 15.0f, TeeLength = 60 * TeeSizeMod;
 	float NameOffset = TeeOffset + TeeLength, NameLength = 300.0f - TeeLength;
-	float PingOffset = x + 610.0f, PingLength = 65.0f;
-	float CountryOffset = PingOffset - (LineHeight - Spacing - TeeSizeMod * 5.0f) * 2.0f, CountryLength = (LineHeight - Spacing - TeeSizeMod * 5.0f) * 2.0f;
-	float ClanOffset = x + 360.0f, ClanLength = 240.0f - CountryLength;
+	float CountryLength = (LineHeight - Spacing - TeeSizeMod * 5.0f) * 2.0f;
+	float PingLength = 65.0f;
+	float PingOffset = x + w - PingLength - 10.0f - 10.0f;
+	float CountryOffset = PingOffset - CountryLength;
+	float ClanLength = w - ((NameOffset - x) + NameLength) - (w - (CountryOffset - x));
+	float ClanOffset = CountryOffset - ClanLength;
 
 	// render headlines
+	x += 10.0f;
 	y += 50.0f;
 	float HeadlineFontsize = 22.0f;
 	const char *pScore = (m_pClient->m_GameInfo.m_TimeScore && g_Config.m_ClDDRaceScoreBoard) ? Localize("Time") : Localize("Score");
@@ -308,7 +315,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	TextRender()->Text(0, NameOffset, y + (HeadlineFontsize * 2.f - HeadlineFontsize) / 2.f, HeadlineFontsize, Localize("Name"), -1.0f);
 
 	tw = TextRender()->TextWidth(0, HeadlineFontsize, Localize("Clan"), -1, -1.0f);
-	TextRender()->Text(0, ClanOffset + ClanLength / 2 - tw / 2, y + (HeadlineFontsize * 2.f - HeadlineFontsize) / 2.f, HeadlineFontsize, Localize("Clan"), -1.0f);
+	TextRender()->Text(0, ClanOffset + (ClanLength - tw) / 2, y + (HeadlineFontsize * 2.f - HeadlineFontsize) / 2.f, HeadlineFontsize, Localize("Clan"), -1.0f);
 
 	tw = TextRender()->TextWidth(0, HeadlineFontsize, Localize("Ping"), -1, -1.0f);
 	TextRender()->Text(0, PingOffset + PingLength - tw, y + (HeadlineFontsize * 2.f - HeadlineFontsize) / 2.f, HeadlineFontsize, Localize("Ping"), -1.0f);
@@ -491,8 +498,8 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		else
 			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-		tw = TextRender()->TextWidth(nullptr, FontSize, m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, -1, -1.0f);
-		TextRender()->SetCursor(&Cursor, ClanOffset + ClanLength / 2 - tw / 2, y + (LineHeight - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
+		tw = minimum(TextRender()->TextWidth(nullptr, FontSize, m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, -1, -1.0f), ClanLength);
+		TextRender()->SetCursor(&Cursor, ClanOffset + (ClanLength - tw) / 2, y + (LineHeight - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = ClanLength;
 		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, -1);
 
@@ -609,7 +616,8 @@ void CScoreboard::OnRender()
 
 	Graphics()->MapScreen(0, 0, Width, Height);
 
-	float w = 700.0f;
+	float w = 750.0f;
+	float ExtraWidthSingle = 20.0f;
 
 	if(m_pClient->m_Snap.m_pGameInfoObj)
 	{
@@ -632,7 +640,8 @@ void CScoreboard::OnRender()
 			}
 			else
 			{
-				RenderScoreboard(Width / 2 - w / 2, 150.0f, w, 0, 0);
+				w += ExtraWidthSingle;
+				RenderScoreboard(Width / 2 - w / 2, 150.0f, w, -2, 0);
 			}
 		}
 		else
@@ -663,6 +672,9 @@ void CScoreboard::OnRender()
 				float w = TextRender()->TextWidth(0, 86.0f, aText, -1, -1.0f);
 				TextRender()->Text(0, Width / 2 - w / 2, 39, 86.0f, aText, -1.0f);
 			}
+
+			//decrease width, because team games use additional offsets
+			w -= 10.0f;
 
 			int NumPlayers = maximum(m_pClient->m_Snap.m_aTeamSize[TEAM_RED], m_pClient->m_Snap.m_aTeamSize[TEAM_BLUE]);
 			RenderScoreboard(Width / 2 - w - 5.0f, 150.0f, w, TEAM_RED, pRedClanName ? pRedClanName : Localize("Red team"), NumPlayers);
