@@ -614,7 +614,7 @@ Types
 == Типы
 
 New name:
-== Новое имя
+== Новое имя:
 
 Sat.
 == Контр.
@@ -632,7 +632,7 @@ Join game
 == Играть
 
 FSAA samples
-== Сэмплов FSAA
+== FSAA сэмплов 
 
 Sound volume
 == Громкость звука
@@ -707,7 +707,7 @@ Type:
 == Тип:
 
 Show ghost
-== Показать тень
+== Показывать тень
 
 No updates available
 == Нет доступных обновлений
@@ -836,7 +836,7 @@ It's recommended that you check the settings to adjust them to your liking befor
 == Перед посещением сервера рекомендуем изменить настройки на Ваш вкус.
 
 Please enter your nickname below.
-== Пожалуйста, укажите ниже свой никнейм.
+== Пожалуйста, укажите ниже ваш псевдоним.
 
 Destination file already exist
 == Конечный файл уже существует
@@ -848,7 +848,7 @@ Show DDNet map finishes in server browser
 == Показывать в браузере статус завершения карты
 
 transmits your player name to info2.ddnet.tw
-== передает Ваш никнейм на info2.ddnet.tw
+== передает ваш псевдоним на info2.ddnet.tw
 
 Exclude
 == Исключить
@@ -869,7 +869,7 @@ Downloading %s:
 == Скачивание %s:
 
 Update failed! Check log...
-== Обновление прошло неудачно! Проверьте логи...
+== Провал. Проверьте логи...
 
 Restart
 == Рестарт
@@ -944,7 +944,7 @@ Zoom out
 == Отдалить
 
 Default zoom
-== Станд. масштаб
+== Ст. масштаб
 
 Show all
 == Показывать всех
@@ -953,7 +953,7 @@ Toggle dyncam
 == Смен. дин. камеры
 
 Toggle dummy
-== Сменить ти
+== Смена Tee
 
 Toggle ghost
 == Вкл./выкл. призрака
@@ -977,7 +977,7 @@ Show entities
 == Показать тайлы
 
 Show HUD
-== Показавать HUD
+== Показывать HUD
 
 UI mouse s.
 == Чувств. мыши в меню
@@ -1025,7 +1025,7 @@ Gameplay
 == Игровой процесс
 
 Overlay entities
-== Наложить тайлы
+== Наложение
 
 Size
 == Размер
@@ -1115,7 +1115,7 @@ Warning
 == Предупреждение
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== Используйте кнопку k, чтобы возродиться, q для паузы и наблюдением за остальными игроками. Проверьте настройки для остальных кнопок.
+== Используйте кнопку k, чтобы возродиться, q для паузы и наблюдения за остальными игроками. Проверьте настройки остальных кнопок.
 
 Country / Region
 == Страна / Регион
@@ -1179,13 +1179,13 @@ Saving ddnet-settings.cfg failed
 == Неудачное сохранение ddnet-settings.cfg
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== Отладочный режим включен. Нажмите Ctrl+Shift+D, чтобы выйти.
+== Отладка включена. Нажмите Ctrl+Shift+D, чтобы выйти.
 
 Existing Player
 == Существующий игрок
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== Твой никнейм '%s' уже существует (%d поинтов). Вы уверены, что хотите использовать его?
+== Ваш псевдоним '%s' уже существует (%d поинтов). Вы уверены, что хотите использовать его?
 
 Checking for existing player with your name
 == Проверка существования игрока с таким же именем
@@ -1197,7 +1197,7 @@ Demos directory
 == Папка с демо
 
 Smooth Dynamic Camera
-== Плавная Динамическая камера
+== Плавная дин. камера
 
 Themes directory
 == Папка с темами
@@ -1227,7 +1227,7 @@ Use current map as background
 == Использовать данную карту как фон
 
 Emoticons
-== Значки-эмоции
+== Эмоции
 
 Particles
 == Частицы
@@ -1251,37 +1251,37 @@ Entities
 == Тайлы
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
+== Ширина текстуры %s не делится на %d или же его высота не делится на %d, что может повлиять на графику.
 
 45° aim
-== 
+== Прицел 45°
 
 Deepfly on
-== 
+== Вкл. Deepfly
 
 Deepfly off
-== 
+== Выкл. Deepfly
 
 Dummy
-== 
+== Дамми
 
 Show client IDs
-== 
+== Показывать ID игроков
 
 Laser Outline Color
-== 
+== Цвет обводки лазера
 
 Laser Inner Color
-== 
+== Цвет лазера
 
 Preview
-== 
+== Превью
 
 Background
-== 
+== Фон
 
 Entities Background color
-== 
+== Цвет фона при наложении
 
 Regular Background Color
-== 
+== Станд. фоновый цвет
