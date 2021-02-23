@@ -42,7 +42,7 @@ extern "C" {
 		msg - Message that should be printed if the test fails.
 
 	Remarks:
-		Does nothing in release version of the library.
+		Also works in release mode.
 
 	See Also:
 		<dbg_break>
@@ -67,7 +67,7 @@ void dbg_assert_imp(const char *filename, int line, int test, const char *msg);
 		Breaks into the debugger.
 
 	Remarks:
-		Does nothing in release version of the library.
+		Also works in release mode.
 
 	See Also:
 		<dbg_assert>
@@ -84,7 +84,7 @@ void dbg_break();
 		fmt - A printf styled format string.
 
 	Remarks:
-		Does nothing in release version of the library.
+		Also works in release mode.
 
 	See Also:
 		<dbg_assert>
