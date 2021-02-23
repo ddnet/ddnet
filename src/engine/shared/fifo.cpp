@@ -19,36 +19,40 @@ void CFifo::Init(IConsole *pConsole, char *pFifoFile, int Flag)
 	if(pFifoFile[0] == '\0')
 		return;
 
+	str_copy(m_aFilename, pFifoFile, sizeof(m_aFilename));
 	m_Flag = Flag;
 
-	mkfifo(pFifoFile, 0600);
+	mkfifo(m_aFilename, 0600);
 
 	struct stat Attribute;
-	stat(pFifoFile, &Attribute);
+	stat(m_aFilename, &Attribute);
 
 	if(!S_ISFIFO(Attribute.st_mode))
 	{
-		dbg_msg("fifo", "'%s' is not a fifo, removing", pFifoFile);
-		fs_remove(pFifoFile);
-		mkfifo(pFifoFile, 0600);
-		stat(pFifoFile, &Attribute);
+		dbg_msg("fifo", "'%s' is not a fifo, removing", m_aFilename);
+		fs_remove(m_aFilename);
+		mkfifo(m_aFilename, 0600);
+		stat(m_aFilename, &Attribute);
 
 		if(!S_ISFIFO(Attribute.st_mode))
 		{
-			dbg_msg("fifo", "can't remove file '%s', quitting", pFifoFile);
+			dbg_msg("fifo", "can't remove file '%s', quitting", m_aFilename);
 			exit(2);
 		}
 	}
 
-	m_File = open(pFifoFile, O_RDONLY | O_NONBLOCK);
+	m_File = open(m_aFilename, O_RDONLY | O_NONBLOCK);
 	if(m_File < 0)
-		dbg_msg("fifo", "can't open file '%s'", pFifoFile);
+		dbg_msg("fifo", "can't open file '%s'", m_aFilename);
 }
 
 void CFifo::Shutdown()
 {
 	if(m_File >= 0)
+	{
 		close(m_File);
+		fs_remove(m_aFilename);
+	}
 }
 
 void CFifo::Update()
