@@ -114,7 +114,7 @@ void dbg_assert_imp(const char *filename, int line, int test, const char *msg)
 	if(!test)
 	{
 		dbg_msg("assert", "%s(%d): %s", filename, line, msg);
-		dbg_break_imp();
+		dbg_break();
 	}
 }
 
