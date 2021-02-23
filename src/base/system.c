@@ -104,7 +104,7 @@ void dbg_assert_imp(const char *filename, int line, int test, const char *msg)
 	}
 }
 
-void dbg_break_imp(void)
+void dbg_break(void)
 {
 #ifdef __GNUC__
 	__builtin_trap();
