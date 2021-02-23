@@ -2570,7 +2570,7 @@ void CGraphics_Threaded::InsertSignal(CSemaphore *pSemaphore)
 	m_pCommandBuffer->AddCommand(Cmd);
 }
 
-bool CGraphics_Threaded::IsIdle()
+bool CGraphics_Threaded::IsIdle() const
 {
 	return m_pBackend->IsIdle();
 }

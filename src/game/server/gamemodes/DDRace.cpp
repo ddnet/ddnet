@@ -1,18 +1,22 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 /* Based on Race mod stuff and tweaked by GreYFoX@GTi and others to fit our DDRace needs. */
 #include "DDRace.h"
-#include "gamemode.h"
+
 #include <engine/server.h>
 #include <engine/shared/config.h>
 #include <game/mapitems.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
+#include <game/version.h>
+
+#define GAME_TYPE_NAME "DDraceNetwork"
+#define TEST_TYPE_NAME "TestDDraceNetwork"
 
 CGameControllerDDRace::CGameControllerDDRace(class CGameContext *pGameServer) :
 	IGameController(pGameServer), m_Teams(pGameServer), m_pInitResult(nullptr)
 {
-	m_pGameType = g_Config.m_SvTestingCommands ? TEST_NAME : GAME_NAME;
+	m_pGameType = g_Config.m_SvTestingCommands ? TEST_TYPE_NAME : GAME_TYPE_NAME;
 
 	InitTeleporter();
 }
@@ -20,6 +24,11 @@ CGameControllerDDRace::CGameControllerDDRace(class CGameContext *pGameServer) :
 CGameControllerDDRace::~CGameControllerDDRace()
 {
 	// Nothing to clean
+}
+
+CScore *CGameControllerDDRace::Score()
+{
+	return GameServer()->Score();
 }
 
 void CGameControllerDDRace::OnCharacterSpawn(CCharacter *pChr)
@@ -109,6 +118,30 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 	{
 		GameServer()->SendChatTarget(ClientID, "You are now out of the solo part");
 		pChr->SetSolo(false);
+	}
+}
+
+void CGameControllerDDRace::OnPlayerConnect(CPlayer *pPlayer)
+{
+	IGameController::OnPlayerConnect(pPlayer);
+	int ClientID = pPlayer->GetCID();
+
+	// init the player
+	Score()->PlayerData(ClientID)->Reset();
+	pPlayer->m_Score = Score()->PlayerData(ClientID)->m_BestTime ? Score()->PlayerData(ClientID)->m_BestTime : -9999;
+
+	// Can't set score here as LoadScore() is threaded, run it in
+	// LoadScoreThreaded() instead
+	Score()->LoadPlayerData(ClientID);
+
+	if(!Server()->ClientPrevIngame(ClientID))
+	{
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientID), GetTeamName(pPlayer->GetTeam()));
+		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1, CGameContext::CHAT_SIX);
+
+		GameServer()->SendChatTarget(ClientID, "DDraceNetwork Mod. Version: " GAME_VERSION);
+		GameServer()->SendChatTarget(ClientID, "please visit DDNet.tw or say /info and make sure to read our /rules");
 	}
 }
 
