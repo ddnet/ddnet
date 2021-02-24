@@ -618,7 +618,8 @@ bool CScore::SaveScoreThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 	pSqlServer->BindString(4, g_Config.m_SvSqlServerName);
 	pSqlServer->BindString(5, pData->m_GameUuid);
 	pSqlServer->Print();
-	if(pSqlServer->Step(&End, pError, ErrorSize))
+	int NumInserted;
+	if(pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize))
 	{
 		return true;
 	}
@@ -743,7 +744,8 @@ bool CScore::SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGam
 			pSqlServer->BindBlob(4, GameID.m_aData, sizeof(GameID.m_aData));
 			pSqlServer->BindString(5, pData->m_GameUuid);
 			pSqlServer->Print();
-			if(pSqlServer->Step(&End, pError, ErrorSize))
+			int NumInserted;
+			if(pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize))
 			{
 				return true;
 			}
@@ -1778,7 +1780,7 @@ bool CScore::LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 	if(!Found)
 	{
 		str_copy(pResult->m_aMessage, "You don't belong to this team", sizeof(pResult->m_aMessage));
-		return true;
+		return false;
 	}
 
 	int Since = pSqlServer->GetInt(2);
@@ -1787,7 +1789,7 @@ bool CScore::LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 		str_format(pResult->m_aMessage, sizeof(pResult->m_aMessage),
 			"You have to wait %d seconds until you can load this savegame",
 			g_Config.m_SvSaveGamesDelay - Since);
-		return true;
+		return false;
 	}
 
 	bool CanLoad = pResult->m_SavedTeam.MatchPlayers(
