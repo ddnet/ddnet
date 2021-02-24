@@ -3,6 +3,8 @@
 
 #define _WIN32_WINNT 0x0501
 
+#include "server.h"
+
 #include <base/math.h>
 #include <base/system.h>
 
@@ -35,17 +37,14 @@
 #include <vector>
 #include <zlib.h>
 
+#include "databases/connection.h"
+#include "databases/connection_pool.h"
 #include "register.h"
-#include "server.h"
 
 #if defined(CONF_FAMILY_WINDOWS)
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #endif
-
-#include <engine/server/databases/connection_pool.h>
-#include <engine/server/databases/mysql.h>
-#include <engine/server/databases/sqlite.h>
 
 CSnapIDPool::CSnapIDPool()
 {
@@ -2373,7 +2372,7 @@ int CServer::Run()
 
 	if(g_Config.m_SvSqliteFile[0] != '\0')
 	{
-		auto pSqlServers = std::unique_ptr<CSqliteConnection>(new CSqliteConnection(
+		auto pSqlServers = std::unique_ptr<IDbConnection>(CreateSqliteConnection(
 			g_Config.m_SvSqliteFile, true));
 
 		if(g_Config.m_SvUseSQL)
@@ -2382,7 +2381,7 @@ int CServer::Run()
 		}
 		else
 		{
-			auto pCopy = std::unique_ptr<CSqliteConnection>(pSqlServers->Copy());
+			auto pCopy = std::unique_ptr<IDbConnection>(pSqlServers->Copy());
 			DbPool()->RegisterDatabase(std::move(pSqlServers), CDbConnectionPool::READ);
 			DbPool()->RegisterDatabase(std::move(pCopy), CDbConnectionPool::WRITE);
 		}
@@ -3193,14 +3192,20 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 
 	bool SetUpDb = pResult->NumArguments() == 8 ? pResult->GetInteger(7) : true;
 
-	auto pSqlServers = std::unique_ptr<CMysqlConnection>(new CMysqlConnection(
+	auto pSqlServers = std::unique_ptr<IDbConnection>(CreateMysqlConnection(
 		pResult->GetString(1), pResult->GetString(2), pResult->GetString(3),
 		pResult->GetString(4), pResult->GetString(5), pResult->GetInteger(6),
 		SetUpDb));
 
+	if(!pSqlServers)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "can't add MySQL server: compiled without MySQL support");
+		return;
+	}
+
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
-		"Added new Sql%sServer: DB: '%s' Prefix: '%s' User: '%s' IP: <{'%s'}> Port: %d",
+		"Added new Sql%sServer: DB: '%s' Prefix: '%s' User: '%s' IP: <{%s}> Port: %d",
 		ReadOnly ? "Read" : "Write",
 		pResult->GetString(1), pResult->GetString(2), pResult->GetString(3),
 		pResult->GetString(5), pResult->GetInteger(6));
@@ -3510,6 +3515,11 @@ int main(int argc, const char **argv) // ignore_convention
 		dbg_msg("secure", "could not initialize secure RNG");
 		return -1;
 	}
+	if(MysqlInit() != 0)
+	{
+		dbg_msg("mysql", "failed to initialize MySQL library");
+		return -1;
+	}
 
 	CServer *pServer = CreateServer();
 	IKernel *pKernel = IKernel::Create();
@@ -3582,6 +3592,8 @@ int main(int argc, const char **argv) // ignore_convention
 	// run the server
 	dbg_msg("server", "starting...");
 	int Ret = pServer->Run();
+
+	MysqlUninit();
 
 	// free
 	delete pKernel;

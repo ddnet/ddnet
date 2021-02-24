@@ -267,8 +267,11 @@ struct CTeamrank
 	//
 	// was executed and that the result line of the first team member is already selected.
 	// Afterwards the team member of the next team is selected.
-	// Returns if another team can be extracted
-	bool NextSqlResult(IDbConnection *pSqlServer);
+	//
+	// Returns true on SQL failure
+	//
+	// if another team can be extracted
+	bool NextSqlResult(IDbConnection *pSqlServer, bool *pEnd, char *pError, int ErrorSize);
 
 	bool SamePlayers(const std::vector<std::string> *aSortedNames);
 };
@@ -278,29 +281,29 @@ class CScore
 	CPlayerData m_aPlayerData[MAX_CLIENTS];
 	CDbConnectionPool *m_pPool;
 
-	static bool Init(IDbConnection *pSqlServer, const ISqlData *pGameData);
+	static bool Init(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 
-	static bool RandomMapThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
-	static bool RandomUnfinishedMapThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
-	static bool MapVoteThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
+	static bool RandomMapThread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
+	static bool RandomUnfinishedMapThread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
+	static bool MapVoteThread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 
-	static bool LoadPlayerDataThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
-	static bool MapInfoThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
-	static bool ShowRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
-	static bool ShowTeamRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
-	static bool ShowTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData);
-	static bool ShowTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData);
-	static bool ShowPlayerTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData);
-	static bool ShowTimesThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
-	static bool ShowPointsThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
-	static bool ShowTopPointsThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
-	static bool GetSavesThread(IDbConnection *pSqlServer, const ISqlData *pGameData);
+	static bool LoadPlayerDataThread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
+	static bool MapInfoThread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
+	static bool ShowRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
+	static bool ShowTeamRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
+	static bool ShowTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
+	static bool ShowTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
+	static bool ShowPlayerTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
+	static bool ShowTimesThread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
+	static bool ShowPointsThread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
+	static bool ShowTopPointsThread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
+	static bool GetSavesThread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 
-	static bool SaveTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure);
-	static bool LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure);
+	static bool SaveTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure, char *pError, int ErrorSize);
+	static bool LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure, char *pError, int ErrorSize);
 
-	static bool SaveScoreThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure);
-	static bool SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure);
+	static bool SaveScoreThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure, char *pError, int ErrorSize);
+	static bool SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure, char *pError, int ErrorSize);
 
 	CGameContext *GameServer() const { return m_pGameServer; }
 	IServer *Server() const { return m_pServer; }
@@ -315,7 +318,7 @@ class CScore
 	std::shared_ptr<CScorePlayerResult> NewSqlPlayerResult(int ClientID);
 	// Creates for player database requests
 	void ExecPlayerThread(
-		bool (*pFuncPtr)(IDbConnection *, const ISqlData *),
+		bool (*pFuncPtr)(IDbConnection *, const ISqlData *, char *pError, int ErrorSize),
 		const char *pThreadName,
 		int ClientID,
 		const char *pName,
