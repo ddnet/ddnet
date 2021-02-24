@@ -325,7 +325,7 @@ void CProjectile::Snap(int SnappingClient)
 	CNetObj_DDNetProjectile DDNetProjectile;
 	if(SnappingClientVersion >= VERSION_DDNET_ANTIPING_PROJECTILE && FillExtraInfo(&DDNetProjectile))
 	{
-		int Type = SnappingClientVersion <= VERSION_DDNET_MSG_LEGACY ? (int)NETOBJTYPE_PROJECTILE : NETOBJTYPE_DDNETPROJECTILE;
+		int Type = SnappingClientVersion < VERSION_DDNET_MSG_LEGACY ? (int)NETOBJTYPE_PROJECTILE : NETOBJTYPE_DDNETPROJECTILE;
 		void *pProj = Server()->SnapNewItem(Type, GetID(), sizeof(DDNetProjectile));
 		if(!pProj)
 		{

@@ -437,7 +437,7 @@ void CGameTeams::SendTeamsState(int ClientID)
 
 	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
 	int ClientVersion = m_pGameContext->m_apPlayers[ClientID]->GetClientVersion();
-	if(!Server()->IsSixup(ClientID) && VERSION_DDRACE < ClientVersion && ClientVersion <= VERSION_DDNET_MSG_LEGACY)
+	if(!Server()->IsSixup(ClientID) && VERSION_DDRACE < ClientVersion && ClientVersion < VERSION_DDNET_MSG_LEGACY)
 	{
 		Server()->SendMsg(&MsgLegacy, MSGFLAG_VITAL, ClientID);
 	}
@@ -651,7 +651,7 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 		}
 
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
-		if(!Server()->IsSixup(ClientID) && VERSION_DDRACE <= Player->GetClientVersion() && Player->GetClientVersion() <= VERSION_DDNET_MSG_LEGACY)
+		if(!Server()->IsSixup(ClientID) && VERSION_DDRACE <= Player->GetClientVersion() && Player->GetClientVersion() < VERSION_DDNET_MSG_LEGACY)
 		{
 			Server()->SendPackMsg(&MsgLegacy, MSGFLAG_VITAL, ClientID);
 		}
