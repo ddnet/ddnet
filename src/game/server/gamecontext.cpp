@@ -3722,10 +3722,15 @@ void CGameContext::OnSetAuthed(int ClientID, int Level)
 
 void CGameContext::SendRecord(int ClientID)
 {
-	CNetMsg_Sv_Record RecordsMsg;
-	RecordsMsg.m_PlayerTimeBest = Score()->PlayerData(ClientID)->m_BestTime * 100.0f;
-	RecordsMsg.m_ServerTimeBest = m_pController->m_CurrentRecord * 100.0f; //TODO: finish this
-	Server()->SendPackMsg(&RecordsMsg, MSGFLAG_VITAL, ClientID);
+	CNetMsg_Sv_Record Msg;
+	CNetMsg_Sv_RecordLegacy MsgLegacy;
+	MsgLegacy.m_PlayerTimeBest = Msg.m_PlayerTimeBest = Score()->PlayerData(ClientID)->m_BestTime * 100.0f;
+	MsgLegacy.m_ServerTimeBest = Msg.m_ServerTimeBest = m_pController->m_CurrentRecord * 100.0f; //TODO: finish this
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
+	if(!Server()->IsSixup(ClientID) && GetClientVersion(ClientID) < VERSION_DDNET_MSG_LEGACY)
+	{
+		Server()->SendPackMsg(&MsgLegacy, MSGFLAG_VITAL, ClientID);
+	}
 }
 
 int CGameContext::ProcessSpamProtection(int ClientID)
