@@ -618,7 +618,8 @@ bool CScore::SaveScoreThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 	pSqlServer->BindString(4, g_Config.m_SvSqlServerName);
 	pSqlServer->BindString(5, pData->m_GameUuid);
 	pSqlServer->Print();
-	if(pSqlServer->Step(&End, pError, ErrorSize))
+	int NumInserted;
+	if(pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize))
 	{
 		return true;
 	}
@@ -743,7 +744,8 @@ bool CScore::SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGam
 			pSqlServer->BindBlob(4, GameID.m_aData, sizeof(GameID.m_aData));
 			pSqlServer->BindString(5, pData->m_GameUuid);
 			pSqlServer->Print();
-			if(pSqlServer->Step(&End, pError, ErrorSize))
+			int NumInserted;
+			if(pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize))
 			{
 				return true;
 			}
