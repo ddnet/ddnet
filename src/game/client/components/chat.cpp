@@ -816,7 +816,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		}
 
 		char aBuf[1024];
-		str_format(aBuf, sizeof(aBuf), "%s: %s", pCurrentLine->m_aName, pCurrentLine->m_aText);
+		str_format(aBuf, sizeof(aBuf), "%s%s%s", pCurrentLine->m_aName, ClientID >= 0 ? ": " : "", pCurrentLine->m_aText);
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, Team >= 2 ? "whisper" : (pCurrentLine->m_Team ? "teamchat" : "chat"), aBuf, Highlighted);
 	}
 
