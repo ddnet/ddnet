@@ -647,8 +647,8 @@ bool CMysqlConnection::AddPoints(const char *pPlayer, int Points, char *pError, 
 	BindString(1, pPlayer);
 	BindInt(2, Points);
 	BindInt(3, Points);
-	bool End;
-	if(Step(&End, pError, ErrorSize))
+	int NumUpdated;
+	if(ExecuteUpdate(&NumUpdated, pError, ErrorSize))
 	{
 		return true;
 	}
