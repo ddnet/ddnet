@@ -686,7 +686,7 @@ bool CScore::SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGam
 	}
 	if(!End)
 	{
-		bool SearchTeamEnd = true;
+		bool SearchTeamEnd = false;
 		while(!SearchTeamEnd)
 		{
 			Time = pSqlServer->GetFloat(3);
