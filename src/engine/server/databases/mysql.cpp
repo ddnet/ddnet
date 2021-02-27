@@ -117,6 +117,7 @@ private:
 		float f;
 	};
 
+	bool m_HaveUnfinishedResultSet = false;
 	bool m_NewQuery = false;
 	bool m_HaveConnection = false;
 	MYSQL m_Mysql;
@@ -254,6 +255,7 @@ bool CMysqlConnection::ConnectImpl()
 		mysql_init(&m_Mysql);
 	}
 
+	m_HaveUnfinishedResultSet = false;
 	m_pStmt = nullptr;
 	unsigned int OptConnectTimeout = 60;
 	unsigned int OptReadTimeout = 60;
@@ -332,6 +334,21 @@ void CMysqlConnection::Disconnect()
 
 bool CMysqlConnection::PrepareStatement(const char *pStmt, char *pError, int ErrorSize)
 {
+	if(m_HaveUnfinishedResultSet)
+	{
+		int Result = 0;
+		while(Result != MYSQL_NO_DATA)
+		{
+			Result = mysql_stmt_fetch(m_pStmt.get());
+			if(Result == 1)
+			{
+				StoreErrorStmt("prepare_fetch");
+				str_copy(pError, m_aErrorDetail, ErrorSize);
+				return true;
+			}
+		}
+		m_HaveUnfinishedResultSet = false;
+	}
 	if(mysql_stmt_prepare(m_pStmt.get(), pStmt, str_length(pStmt)))
 	{
 		StoreErrorStmt("prepare");
@@ -437,11 +454,13 @@ bool CMysqlConnection::Step(bool *pEnd, char *pError, int ErrorSize)
 	int Result = mysql_stmt_fetch(m_pStmt.get());
 	if(Result == 1)
 	{
+		m_HaveUnfinishedResultSet = false;
 		StoreErrorStmt("fetch");
 		str_copy(pError, m_aErrorDetail, ErrorSize);
 		return true;
 	}
 	*pEnd = (Result == MYSQL_NO_DATA);
+	m_HaveUnfinishedResultSet = !*pEnd;
 	// `Result` is now either `MYSQL_DATA_TRUNCATED` (which we ignore, we
 	// fetch our columns in a different way) or `0` aka success.
 	return false;
