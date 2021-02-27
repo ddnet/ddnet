@@ -11,7 +11,7 @@ public:
 	virtual ~IEditor() {}
 	virtual void Init() = 0;
 	virtual void UpdateAndRender() = 0;
-	virtual bool HasUnsavedData() = 0;
+	virtual bool HasUnsavedData() const = 0;
 	virtual int Load(const char *pFilename, int StorageType) = 0;
 	virtual int Save(const char *pFilename) = 0;
 	virtual void UpdateMentions() = 0;

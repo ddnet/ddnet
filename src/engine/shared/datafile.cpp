@@ -278,7 +278,7 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 	return true;
 }
 
-int CDataFileReader::NumData()
+int CDataFileReader::NumData() const
 {
 	if(!m_pDataFile)
 	{
@@ -395,7 +395,7 @@ void CDataFileReader::UnloadData(int Index)
 	m_pDataFile->m_ppDataPtrs[Index] = 0x0;
 }
 
-int CDataFileReader::GetItemSize(int Index)
+int CDataFileReader::GetItemSize(int Index) const
 {
 	if(!m_pDataFile)
 		return 0;
@@ -519,7 +519,7 @@ void *CDataFileReader::FindItem(int Type, int ID)
 	return GetItem(Index, 0, 0);
 }
 
-int CDataFileReader::NumItems()
+int CDataFileReader::NumItems() const
 {
 	if(!m_pDataFile)
 		return 0;
@@ -542,7 +542,7 @@ bool CDataFileReader::Close()
 	return true;
 }
 
-SHA256_DIGEST CDataFileReader::Sha256()
+SHA256_DIGEST CDataFileReader::Sha256() const
 {
 	if(!m_pDataFile)
 	{
@@ -556,14 +556,14 @@ SHA256_DIGEST CDataFileReader::Sha256()
 	return m_pDataFile->m_Sha256;
 }
 
-unsigned CDataFileReader::Crc()
+unsigned CDataFileReader::Crc() const
 {
 	if(!m_pDataFile)
 		return 0xFFFFFFFF;
 	return m_pDataFile->m_Crc;
 }
 
-int CDataFileReader::MapSize()
+int CDataFileReader::MapSize() const
 {
 	if(!m_pDataFile)
 		return 0;

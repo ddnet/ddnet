@@ -422,7 +422,7 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Heig
 			{
 				str_format(aText, sizeof(aText), "\"%s\"", pTexName);
 			}
-			str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg), Localize("The width or height of texture %s is not divisible by 16, which might cause visual bugs."), aText);
+			str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg), Localize("The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs."), aText, 16, 16);
 
 			m_Warnings.emplace_back(NewWarning);
 		}
@@ -2570,7 +2570,7 @@ void CGraphics_Threaded::InsertSignal(CSemaphore *pSemaphore)
 	m_pCommandBuffer->AddCommand(Cmd);
 }
 
-bool CGraphics_Threaded::IsIdle()
+bool CGraphics_Threaded::IsIdle() const
 {
 	return m_pBackend->IsIdle();
 }

@@ -21,14 +21,6 @@
 
 #include <memory>
 
-#ifdef _MSC_VER
-typedef __int32 int32_t;
-typedef unsigned __int32 uint32_t;
-typedef __int64 int64;
-typedef unsigned __int64 uint64;
-#else
-#include <stdint.h>
-#endif
 /*
 	Tick
 		Game Context (CGameContext::tick)
@@ -130,6 +122,11 @@ class CGameContext : public IGameServer
 	static int MapScan(const char *pName, int IsDir, int DirType, void *pUserData);
 
 	bool m_Resetting;
+
+	struct CPersistentClientData
+	{
+		bool m_IsSpectator;
+	};
 
 public:
 	IServer *Server() const { return m_pServer; }
@@ -254,7 +251,8 @@ public:
 	void CensorMessage(char *pCensoredMessage, const char *pMessage, int Size);
 	virtual void OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID);
 
-	virtual void OnClientConnected(int ClientID);
+	virtual bool OnClientDataPersist(int ClientID, void *pData);
+	virtual void OnClientConnected(int ClientID, void *pData);
 	virtual void OnClientEnter(int ClientID);
 	virtual void OnClientDrop(int ClientID, const char *pReason);
 	virtual void OnClientDirectInput(int ClientID, void *pInput);
@@ -264,13 +262,14 @@ public:
 	virtual void OnClientEngineJoin(int ClientID, bool Sixup);
 	virtual void OnClientEngineDrop(int ClientID, const char *pReason);
 
-	virtual bool IsClientReady(int ClientID);
-	virtual bool IsClientPlayer(int ClientID);
+	virtual bool IsClientReady(int ClientID) const;
+	virtual bool IsClientPlayer(int ClientID) const;
+	virtual int PersistentClientDataSize() const { return sizeof(CPersistentClientData); }
 
-	virtual CUuid GameUuid();
-	virtual const char *GameType();
-	virtual const char *Version();
-	virtual const char *NetVersion();
+	virtual CUuid GameUuid() const;
+	virtual const char *GameType() const;
+	virtual const char *Version() const;
+	virtual const char *NetVersion() const;
 
 	// DDRace
 	bool OnClientDDNetVersionKnown(int ClientID);
@@ -280,10 +279,10 @@ public:
 	// Describes the time when the first player joined the server.
 	int64 m_NonEmptySince;
 	int64 m_LastMapVote;
-	int GetClientVersion(int ClientID);
-	bool PlayerExists(int ClientID) { return m_apPlayers[ClientID]; };
+	int GetClientVersion(int ClientID) const;
+	bool PlayerExists(int ClientID) const { return m_apPlayers[ClientID]; }
 	// Returns true if someone is actively moderating.
-	bool PlayerModerating();
+	bool PlayerModerating() const;
 	void ForceVote(int EnforcerID, bool Success);
 
 	// Checks if player can vote and notify them about the reason

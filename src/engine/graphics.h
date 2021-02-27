@@ -375,7 +375,7 @@ public:
 
 	// synchronization
 	virtual void InsertSignal(class CSemaphore *pSemaphore) = 0;
-	virtual bool IsIdle() = 0;
+	virtual bool IsIdle() const = 0;
 	virtual void WaitForIdle() = 0;
 
 	virtual void SetWindowGrab(bool Grab) = 0;

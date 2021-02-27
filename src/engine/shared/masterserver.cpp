@@ -97,12 +97,12 @@ public:
 		}
 	}
 
-	virtual int IsRefreshing()
+	virtual bool IsRefreshing() const
 	{
 		return m_State != STATE_READY;
 	}
 
-	virtual NETADDR GetAddr(int Index)
+	virtual NETADDR GetAddr(int Index) const
 	{
 		return m_aMasterServers[Index].m_Addr;
 	}
@@ -112,17 +112,17 @@ public:
 		m_aMasterServers[Index].m_Count = Count;
 	}
 
-	virtual int GetCount(int Index)
+	virtual int GetCount(int Index) const
 	{
 		return m_aMasterServers[Index].m_Count;
 	}
 
-	virtual const char *GetName(int Index)
+	virtual const char *GetName(int Index) const
 	{
 		return m_aMasterServers[Index].m_aHostname;
 	}
 
-	virtual bool IsValid(int Index)
+	virtual bool IsValid(int Index) const
 	{
 		return m_aMasterServers[Index].m_Valid;
 	}

@@ -617,6 +617,14 @@ void CGameContext::SendVoteSet(int ClientID)
 
 void CGameContext::SendVoteStatus(int ClientID, int Total, int Yes, int No)
 {
+	if(ClientID == -1)
+	{
+		for(int i = 0; i < MAX_CLIENTS; ++i)
+			if(Server()->ClientIngame(i))
+				SendVoteStatus(i, Total, Yes, No);
+		return;
+	}
+
 	if(Total > VANILLA_MAX_CLIENTS && m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetClientVersion() <= VERSION_DDRACE)
 	{
 		Yes = float(Yes) * VANILLA_MAX_CLIENTS / float(Total);
@@ -981,9 +989,7 @@ void CGameContext::OnTick()
 			else if(m_VoteUpdate)
 			{
 				m_VoteUpdate = false;
-				for(int i = 0; i < MAX_CLIENTS; ++i)
-					if(Server()->ClientIngame(i))
-						SendVoteStatus(i, Total, Yes, No);
+				SendVoteStatus(-1, Total, Yes, No);
 			}
 		}
 	}
@@ -1179,15 +1185,7 @@ void CGameContext::ProgressVoteOptions(int ClientID)
 
 void CGameContext::OnClientEnter(int ClientID)
 {
-	//world.insert_entity(&players[client_id]);
-	m_apPlayers[ClientID]->Respawn();
-	// init the player
-	Score()->PlayerData(ClientID)->Reset();
-	m_apPlayers[ClientID]->m_Score = Score()->PlayerData(ClientID)->m_BestTime ? Score()->PlayerData(ClientID)->m_BestTime : -9999;
-
-	// Can't set score here as LoadScore() is threaded, run it in
-	// LoadScoreThreaded() instead
-	Score()->LoadPlayerData(ClientID);
+	m_pController->OnPlayerConnect(m_apPlayers[ClientID]);
 
 	if(Server()->IsSixup(ClientID))
 	{
@@ -1246,18 +1244,8 @@ void CGameContext::OnClientEnter(int ClientID)
 
 	if(!Server()->ClientPrevIngame(ClientID))
 	{
-		char aBuf[512];
-		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientID), m_pController->GetTeamName(m_apPlayers[ClientID]->GetTeam()));
-		SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1, CHAT_SIX);
-
-		SendChatTarget(ClientID, "DDraceNetwork Mod. Version: " GAME_VERSION);
-		SendChatTarget(ClientID, "please visit DDNet.tw or say /info and make sure to read our /rules");
-
 		if(g_Config.m_SvWelcome[0] != 0)
 			SendChatTarget(ClientID, g_Config.m_SvWelcome);
-		str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' team=%d", ClientID, Server()->ClientName(ClientID), m_apPlayers[ClientID]->GetTeam());
-
-		Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
 		IServer::CClientInfo Info;
 		Server()->GetClientInfo(ClientID, &Info);
@@ -1344,8 +1332,26 @@ void CGameContext::OnClientEnter(int ClientID)
 	}
 }
 
-void CGameContext::OnClientConnected(int ClientID)
+bool CGameContext::OnClientDataPersist(int ClientID, void *pData)
 {
+	CPersistentClientData *pPersistent = (CPersistentClientData *)pData;
+	if(!m_apPlayers[ClientID])
+	{
+		return false;
+	}
+	pPersistent->m_IsSpectator = m_apPlayers[ClientID]->GetTeam() == TEAM_SPECTATORS;
+	return true;
+}
+
+void CGameContext::OnClientConnected(int ClientID, void *pData)
+{
+	CPersistentClientData *pPersistentData = (CPersistentClientData *)pData;
+	bool Spec = false;
+	if(pPersistentData)
+	{
+		Spec = pPersistentData->m_IsSpectator;
+	}
+
 	{
 		bool Empty = true;
 		for(auto &pPlayer : m_apPlayers)
@@ -1363,7 +1369,7 @@ void CGameContext::OnClientConnected(int ClientID)
 	}
 
 	// Check which team the player should be on
-	const int StartTeam = g_Config.m_SvTournamentMode ? TEAM_SPECTATORS : m_pController->GetAutoTeam(ClientID);
+	const int StartTeam = (Spec || g_Config.m_SvTournamentMode) ? TEAM_SPECTATORS : m_pController->GetAutoTeam(ClientID);
 
 	if(!m_apPlayers[ClientID])
 		m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, StartTeam);
@@ -3362,7 +3368,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	{
 		for(int i = 0; i < g_Config.m_DbgDummies; i++)
 		{
-			OnClientConnected(MAX_CLIENTS - i - 1);
+			OnClientConnected(MAX_CLIENTS - i - 1, 0);
 		}
 	}
 #endif
@@ -3598,20 +3604,20 @@ void CGameContext::OnPostSnap()
 	m_Events.Clear();
 }
 
-bool CGameContext::IsClientReady(int ClientID)
+bool CGameContext::IsClientReady(int ClientID) const
 {
 	return m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_IsReady ? true : false;
 }
 
-bool CGameContext::IsClientPlayer(int ClientID)
+bool CGameContext::IsClientPlayer(int ClientID) const
 {
-	return m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetTeam() == TEAM_SPECTATORS ? false : true;
+	return m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetTeam() != TEAM_SPECTATORS;
 }
 
-CUuid CGameContext::GameUuid() { return m_GameUuid; }
-const char *CGameContext::GameType() { return m_pController && m_pController->m_pGameType ? m_pController->m_pGameType : ""; }
-const char *CGameContext::Version() { return GAME_VERSION; }
-const char *CGameContext::NetVersion() { return GAME_NETVERSION; }
+CUuid CGameContext::GameUuid() const { return m_GameUuid; }
+const char *CGameContext::GameType() const { return m_pController && m_pController->m_pGameType ? m_pController->m_pGameType : ""; }
+const char *CGameContext::Version() const { return GAME_VERSION; }
+const char *CGameContext::NetVersion() const { return GAME_NETVERSION; }
 
 IGameServer *CreateGameServer() { return new CGameContext; }
 
@@ -3716,10 +3722,15 @@ void CGameContext::OnSetAuthed(int ClientID, int Level)
 
 void CGameContext::SendRecord(int ClientID)
 {
-	CNetMsg_Sv_Record RecordsMsg;
-	RecordsMsg.m_PlayerTimeBest = Score()->PlayerData(ClientID)->m_BestTime * 100.0f;
-	RecordsMsg.m_ServerTimeBest = m_pController->m_CurrentRecord * 100.0f; //TODO: finish this
-	Server()->SendPackMsg(&RecordsMsg, MSGFLAG_VITAL, ClientID);
+	CNetMsg_Sv_Record Msg;
+	CNetMsg_Sv_RecordLegacy MsgLegacy;
+	MsgLegacy.m_PlayerTimeBest = Msg.m_PlayerTimeBest = Score()->PlayerData(ClientID)->m_BestTime * 100.0f;
+	MsgLegacy.m_ServerTimeBest = Msg.m_ServerTimeBest = m_pController->m_CurrentRecord * 100.0f; //TODO: finish this
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
+	if(!Server()->IsSixup(ClientID) && GetClientVersion(ClientID) < VERSION_DDNET_MSG_LEGACY)
+	{
+		Server()->SendPackMsg(&MsgLegacy, MSGFLAG_VITAL, ClientID);
+	}
 }
 
 int CGameContext::ProcessSpamProtection(int ClientID)
@@ -4023,16 +4034,16 @@ void CGameContext::List(int ClientID, const char *pFilter)
 	SendChatTarget(ClientID, aBuf);
 }
 
-int CGameContext::GetClientVersion(int ClientID)
+int CGameContext::GetClientVersion(int ClientID) const
 {
 	IServer::CClientInfo Info = {0};
 	Server()->GetClientInfo(ClientID, &Info);
 	return Info.m_DDNetVersion;
 }
 
-bool CGameContext::PlayerModerating()
+bool CGameContext::PlayerModerating() const
 {
-	for(auto &pPlayer : m_apPlayers)
+	for(const auto &pPlayer : m_apPlayers)
 	{
 		if(pPlayer && pPlayer->m_Moderating)
 			return true;

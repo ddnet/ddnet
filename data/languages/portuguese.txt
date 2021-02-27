@@ -653,9 +653,6 @@ Map sound volume
 Countries
 == Países
 
-Background (entities)
-== Plano de fundo (entidades)
-
 Show kill messages
 == Mostrar mensagens de morte
 
@@ -671,17 +668,11 @@ No updates available
 Enable server message sound
 == Ativar o som de mensagem do servidor
 
-second
-== segundo
-
 Show votes window after voting
 == Mostrar janela de voto depois de votar
 
 HUD
 == HUD
-
-Look out!
-== Cuidado!
 
 Show names in chat in team colors
 == Mostrar nomes no chat com cores da equipa
@@ -692,12 +683,6 @@ Select a name
 Enable team chat sound
 == Ativar o som do chat de equipa
 
-We will win
-== Nós vamos ganhar
-
-Hi o/
-== Olá o/
-
 Deaths
 == Mortes
 
@@ -706,9 +691,6 @@ Enable game sounds
 
 DDNet Client needs to be restarted to complete update!
 == O cliente DDNet precisa de ser reiniciado para completar a atualização!
-
-Spectator
-== Espectador
 
 Please use a different name
 == Por favor usa um nome diferente
@@ -764,9 +746,6 @@ Remove chat
 Check now
 == Verifica agora
 
-Background (regular)
-== Plano de fundo (regular)
-
 AntiPing: predict other players
 == Antiping: prever os outros jogadores
 
@@ -803,14 +782,8 @@ Default zoom
 Show score
 == Mostrar pontuação
 
-Show client IDs in Scoreboard
-== Mostrar os IDs do cliente na tabela de pontuação
-
 Max CSVs
 == CSVs máximos
-
-seconds
-== segundos
 
 Use DDRace Scoreboard
 == Usa a tabela de pontuações de DDRace
@@ -848,9 +821,6 @@ Exclude
 Enable highlighted chat sound
 == Ativar o som do chat em destaque
 
-Hello and welcome
-== Olá e bem-vindo
-
 AntiPing: predict weapons
 == AntiPing: prever as armas
 
@@ -860,17 +830,11 @@ DDNet Client updated!
 Highlighted message
 == Mensagem em destaque
 
-Friend
-== Amigo
-
 Switch weapon when out of ammo
 == Mudar de arma quando ficar sem munição
 
 AntiPing: predict grenade paths
 == Antiping: prever os caminhos da granada
-
-Inner color
-== Cor interior
 
 Successfully saved the replay!
 == 
@@ -881,7 +845,7 @@ Saving ddnet-settings.cfg failed
 Replay feature is disabled!
 == 
 
-The width or height of texture %s is not divisible by 16, which might cause visual bugs.
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
 Warning
@@ -1112,7 +1076,19 @@ Show entities
 Show HUD
 == 
 
+45° aim
+== 
+
+Deepfly on
+== 
+
+Deepfly off
+== 
+
 UI mouse s.
+== 
+
+Dummy
 == 
 
 may cause delay
@@ -1148,22 +1124,25 @@ Background music volume
 Assets
 == 
 
+Show client IDs
+== 
+
+Laser Outline Color
+== 
+
+Laser Inner Color
+== 
+
 Use old chat style
 == 
 
 Friend message
 == 
 
-Highlight
-== 
-
 Client message
 == 
 
-Outline color
-== 
-
-Wait before try for
+Preview
 == 
 
 Default length: %d
@@ -1193,10 +1172,19 @@ Show other players' hook collision lines
 Show other players' key presses
 == 
 
+Background
+== 
+
+Entities Background color
+== 
+
 Use current map as background
 == 
 
 Show tiles layers from BG map
+== 
+
+Regular Background Color
 == 
 
 Try fast HTTP map download first

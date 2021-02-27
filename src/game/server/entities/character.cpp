@@ -2071,7 +2071,7 @@ void CCharacter::SetTeams(CGameTeams *pTeams)
 
 void CCharacter::SetRescue()
 {
-	m_RescueTee.save(this);
+	m_RescueTee.Save(this);
 	m_SetSavePos = true;
 }
 
@@ -2335,16 +2335,16 @@ void CCharacter::Rescue()
 {
 	if(m_SetSavePos && !m_Super)
 	{
-		if(m_LastRescue + (int64_t)g_Config.m_SvRescueDelay * Server()->TickSpeed() > Server()->Tick())
+		if(m_LastRescue + (int64)g_Config.m_SvRescueDelay * Server()->TickSpeed() > Server()->Tick())
 		{
 			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "You have to wait %d seconds until you can rescue yourself", (int)((m_LastRescue + (int64_t)g_Config.m_SvRescueDelay * Server()->TickSpeed() - Server()->Tick()) / Server()->TickSpeed()));
+			str_format(aBuf, sizeof(aBuf), "You have to wait %d seconds until you can rescue yourself", (int)((m_LastRescue + (int64)g_Config.m_SvRescueDelay * Server()->TickSpeed() - Server()->Tick()) / Server()->TickSpeed()));
 			GameServer()->SendChatTarget(GetPlayer()->GetCID(), aBuf);
 			return;
 		}
 
 		float StartTime = m_StartTime;
-		m_RescueTee.load(this, Team());
+		m_RescueTee.Load(this, Team());
 		// Don't load these from saved tee:
 		m_Core.m_Vel = vec2(0, 0);
 		m_Core.m_HookState = HOOK_IDLE;

@@ -223,7 +223,7 @@ void CLayerGroup::DeleteLayer(int Index)
 	m_pMap->m_UndoModified++;
 }
 
-void CLayerGroup::GetSize(float *w, float *h)
+void CLayerGroup::GetSize(float *w, float *h) const
 {
 	*w = 0;
 	*h = 0;
@@ -888,14 +888,14 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 	return Current;
 }
 
-CLayerGroup *CEditor::GetSelectedGroup()
+CLayerGroup *CEditor::GetSelectedGroup() const
 {
 	if(m_SelectedGroup >= 0 && m_SelectedGroup < m_Map.m_lGroups.size())
 		return m_Map.m_lGroups[m_SelectedGroup];
 	return 0x0;
 }
 
-CLayer *CEditor::GetSelectedLayer(int Index)
+CLayer *CEditor::GetSelectedLayer(int Index) const
 {
 	CLayerGroup *pGroup = GetSelectedGroup();
 	if(!pGroup)
@@ -911,7 +911,7 @@ CLayer *CEditor::GetSelectedLayer(int Index)
 	return 0x0;
 }
 
-CLayer *CEditor::GetSelectedLayerType(int Index, int Type)
+CLayer *CEditor::GetSelectedLayerType(int Index, int Type) const
 {
 	CLayer *p = GetSelectedLayer(Index);
 	if(p && p->m_Type == Type)
@@ -973,7 +973,7 @@ void CEditor::DeleteSelectedQuads()
 	}
 }
 
-bool CEditor::IsQuadSelected(int Index)
+bool CEditor::IsQuadSelected(int Index) const
 {
 	for(int i = 0; i < m_lSelectedQuads.size(); ++i)
 		if(m_lSelectedQuads[i] == Index)
@@ -981,7 +981,7 @@ bool CEditor::IsQuadSelected(int Index)
 	return false;
 }
 
-int CEditor::FindSelectedQuadIndex(int Index)
+int CEditor::FindSelectedQuadIndex(int Index) const
 {
 	for(int i = 0; i < m_lSelectedQuads.size(); ++i)
 		if(m_lSelectedQuads[i] == Index)
@@ -1069,6 +1069,7 @@ static int EntitiesListdirCallback(const char *pName, int IsDir, int StorageType
 void CEditor::DoToolbar(CUIRect ToolBar)
 {
 	bool CtrlPressed = Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL);
+	bool ShiftPressed = Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT);
 
 	CUIRect TB_Top, TB_Bottom;
 	CUIRect Button;
@@ -1449,7 +1450,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			TB_Bottom.VSplitLeft(65.0f, &Button, &TB_Bottom);
 			static int s_BrushDrawModeButton = 0;
 			if(DoButton_Editor(&s_BrushDrawModeButton, "Destructive", m_BrushDrawDestructive, &Button, 0, "[ctrl+d] Toggle brush draw mode") ||
-				(Input()->KeyPress(KEY_D) && CtrlPressed))
+				(Input()->KeyPress(KEY_D) && CtrlPressed && !ShiftPressed))
 				m_BrushDrawDestructive = !m_BrushDrawDestructive;
 			TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
 		}
@@ -4856,7 +4857,7 @@ void CEditor::RenderUndoList(CUIRect View)
 	}
 }
 
-bool CEditor::IsEnvelopeUsed(int EnvelopeIndex)
+bool CEditor::IsEnvelopeUsed(int EnvelopeIndex) const
 {
 	for(int i = 0; i < m_Map.m_lGroups.size(); i++)
 	{
@@ -6197,7 +6198,7 @@ void CEditor::Reset(bool CreateDefault)
 	m_LastUndoUpdateTime = time_get();
 }
 
-int CEditor::GetLineDistance()
+int CEditor::GetLineDistance() const
 {
 	int LineDistance = 512;
 

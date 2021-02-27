@@ -946,9 +946,6 @@ DDNet Client needs to be restarted to complete update!
 Use DDRace Scoreboard
 == Koristi DDRace tablicu bodova
 
-Show client IDs in Scoreboard
-== Prikaži ID-eve klijenta na tablici bodova
-
 Show score
 == Prikaži bodove
 
@@ -976,50 +973,17 @@ Reset
 Highlighted message
 == Označene poruke
 
-Spectator
-== Posmatrač
-
-Look out!
-== Pazi!
-
 Team message
 == Timske poruke
-
-We will win
-== Mi ćemo pobijediti
 
 Friend message
 == Poruka prijatelja
 
-Friend
-== Prijatelj
-
-Hi o/
-== Ćao o/
-
 Normal message
 == Normalna poruka
 
-Hello and welcome
-== Ćao i dobrodošao
-
 Client message
 == Poruka klijenta
-
-Inner color
-== Unutrašnja boja
-
-Outline color
-== Vanjska boja
-
-Wait before try for
-== Pričekaj prije nego pokušaš
-
-second
-== sekunda
-
-seconds
-== sekunde
 
 Save the best demo of each race
 == Sačuvaj najbolji demo-snimak svake trke
@@ -1068,12 +1032,6 @@ Show other players' key presses
 
 Old mouse mode
 == Stari način miša
-
-Background (regular)
-== Pozadina (regularno)
-
-Background (entities)
-== Pozadina (entities)
 
 Show tiles layers from BG map
 == Prikaži slojeve od pozadinske mape
@@ -1129,13 +1087,13 @@ Best
 9+ new mentions
 == 9+ novih označenja
 
-The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== Širina ili visina teksture %s nije djeljiva sa 16, zbog toga mogu nastati vizuelne greške.
-
 Country / Region
 == Zemlja / Regija
 
 Saving ddnet-settings.cfg failed
+== 
+
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
 Warning
@@ -1201,6 +1159,18 @@ Skin Database
 Skins directory
 == 
 
+45° aim
+== 
+
+Deepfly on
+== 
+
+Deepfly off
+== 
+
+Dummy
+== 
+
 Borderless window
 == 
 
@@ -1222,10 +1192,19 @@ DDNet
 Assets
 == 
 
+Show client IDs
+== 
+
+Laser Outline Color
+== 
+
+Laser Inner Color
+== 
+
 Use old chat style
 == 
 
-Highlight
+Preview
 == 
 
 Overlay entities
@@ -1234,7 +1213,16 @@ Overlay entities
 AntiPing
 == 
 
+Background
+== 
+
+Entities Background color
+== 
+
 Use current map as background
+== 
+
+Regular Background Color
 == 
 
 Entities

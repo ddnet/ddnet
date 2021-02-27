@@ -437,7 +437,7 @@ void CGameTeams::SendTeamsState(int ClientID)
 
 	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
 	int ClientVersion = m_pGameContext->m_apPlayers[ClientID]->GetClientVersion();
-	if(!Server()->IsSixup(ClientID) && VERSION_DDRACE < ClientVersion && ClientVersion <= VERSION_DDNET_MSG_LEGACY)
+	if(!Server()->IsSixup(ClientID) && VERSION_DDRACE < ClientVersion && ClientVersion < VERSION_DDNET_MSG_LEGACY)
 	{
 		Server()->SendMsg(&MsgLegacy, MSGFLAG_VITAL, ClientID);
 	}
@@ -651,7 +651,7 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 		}
 
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
-		if(!Server()->IsSixup(ClientID) && VERSION_DDRACE <= Player->GetClientVersion() && Player->GetClientVersion() <= VERSION_DDNET_MSG_LEGACY)
+		if(!Server()->IsSixup(ClientID) && VERSION_DDRACE <= Player->GetClientVersion() && Player->GetClientVersion() < VERSION_DDNET_MSG_LEGACY)
 		{
 			Server()->SendPackMsg(&MsgLegacy, MSGFLAG_VITAL, ClientID);
 		}
@@ -717,7 +717,7 @@ void CGameTeams::ProcessSaveTeam()
 			if(Count(Team) > 0)
 			{
 				// load weak/strong order to prevent switching weak/strong while saving
-				m_pSaveTeamResult[Team]->m_SavedTeam.load(Team, false);
+				m_pSaveTeamResult[Team]->m_SavedTeam.Load(Team, false);
 			}
 			break;
 		case CScoreSaveResult::LOAD_SUCCESS:
@@ -732,7 +732,7 @@ void CGameTeams::ProcessSaveTeam()
 			if(Count(Team) > 0)
 			{
 				// keep current weak/strong order as on some maps there is no other way of switching
-				m_pSaveTeamResult[Team]->m_SavedTeam.load(Team, true);
+				m_pSaveTeamResult[Team]->m_SavedTeam.Load(Team, true);
 			}
 			char aSaveID[UUID_MAXSTRSIZE];
 			FormatUuid(m_pSaveTeamResult[Team]->m_SaveID, aSaveID, UUID_MAXSTRSIZE);

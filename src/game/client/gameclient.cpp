@@ -122,11 +122,11 @@ static CPlayerPics gs_PlayerPics;
 CGameClient::CStack::CStack() { m_Num = 0; }
 void CGameClient::CStack::Add(class CComponent *pComponent) { m_paComponents[m_Num++] = pComponent; }
 
-const char *CGameClient::Version() { return GAME_VERSION; }
-const char *CGameClient::NetVersion() { return GAME_NETVERSION; }
-int CGameClient::DDNetVersion() { return CLIENT_VERSIONNR; }
-const char *CGameClient::DDNetVersionStr() { return m_aDDNetVersionStr; }
-const char *CGameClient::GetItemName(int Type) { return m_NetObjHandler.GetObjName(Type); }
+const char *CGameClient::Version() const { return GAME_VERSION; }
+const char *CGameClient::NetVersion() const { return GAME_NETVERSION; }
+int CGameClient::DDNetVersion() const { return CLIENT_VERSIONNR; }
+const char *CGameClient::DDNetVersionStr() const { return m_aDDNetVersionStr; }
+const char *CGameClient::GetItemName(int Type) const { return m_NetObjHandler.GetObjName(Type); }
 
 void CGameClient::OnConsoleInit()
 {
@@ -673,25 +673,10 @@ void CGameClient::OnRender()
 	// update the local character and spectate position
 	UpdatePositions();
 
-	// display gfx warnings
-	if(g_Config.m_GfxShowWarnings == 1)
+	// display gfx & client warnings
+	for(SWarning *pWarning : {Graphics()->GetCurWarning(), Client()->GetCurWarning()})
 	{
-		SWarning *pWarning = Graphics()->GetCurWarning();
-		if(pWarning != NULL)
-		{
-			if(m_pMenus->CanDisplayWarning())
-			{
-				m_pMenus->PopupWarning(Localize("Warning"), pWarning->m_aWarningMsg, "Ok", 10000000);
-				pWarning->m_WasShown = true;
-			}
-		}
-	}
-
-	// display client warnings
-	SWarning *pWarning = Client()->GetCurWarning();
-	if(pWarning != NULL)
-	{
-		if(m_pMenus->CanDisplayWarning())
+		if(pWarning != NULL && m_pMenus->CanDisplayWarning())
 		{
 			m_pMenus->PopupWarning(Localize("Warning"), pWarning->m_aWarningMsg, "Ok", 10000000);
 			pWarning->m_WasShown = true;
@@ -1668,13 +1653,15 @@ void CGameClient::OnNewSnapshot()
 		m_ShowOthers[g_Config.m_ClDummy] = g_Config.m_ClShowOthers;
 	}
 
-	float ZoomToSend = m_pCamera->m_ZoomSmoothingTarget == .0 ? m_pCamera->m_Zoom // Initial
-								    :
-								    m_pCamera->m_ZoomSmoothingTarget > m_pCamera->m_Zoom ? m_pCamera->m_ZoomSmoothingTarget // Zooming out
-															   :
-															   m_pCamera->m_ZoomSmoothingTarget < m_pCamera->m_Zoom ? m_LastZoom // Zooming in
-																						  :
-																						  m_pCamera->m_Zoom; // Not zooming
+	float ZoomToSend = m_pCamera->m_Zoom;
+	if(m_pCamera->m_ZoomSmoothingTarget != .0)
+	{
+		if(m_pCamera->m_ZoomSmoothingTarget > m_pCamera->m_Zoom) // Zooming out
+			ZoomToSend = m_pCamera->m_ZoomSmoothingTarget;
+		else if(m_pCamera->m_ZoomSmoothingTarget < m_pCamera->m_Zoom && m_LastZoom > 0) // Zooming in
+			ZoomToSend = m_LastZoom;
+	}
+
 	if(ZoomToSend != m_LastZoom || Graphics()->ScreenAspect() != m_LastScreenAspect || (Client()->DummyConnected() && !m_LastDummyConnected))
 	{
 		CNetMsg_Cl_ShowDistance Msg;

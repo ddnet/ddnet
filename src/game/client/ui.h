@@ -202,8 +202,8 @@ public:
 		m_pGraphics = pGraphics;
 		m_pTextRender = pTextRender;
 	}
-	class IGraphics *Graphics() { return m_pGraphics; }
-	class ITextRender *TextRender() { return m_pTextRender; }
+	class IGraphics *Graphics() const { return m_pGraphics; }
+	class ITextRender *TextRender() const { return m_pTextRender; }
 
 	CUI();
 	~CUI();
@@ -241,8 +241,8 @@ public:
 	float MouseWorldX() const { return m_MouseWorldX; }
 	float MouseWorldY() const { return m_MouseWorldY; }
 	int MouseButton(int Index) const { return (m_MouseButtons >> Index) & 1; }
-	int MouseButtonClicked(int Index) { return MouseButton(Index) && !((m_LastMouseButtons >> Index) & 1); }
-	int MouseButtonReleased(int Index) { return ((m_LastMouseButtons >> Index) & 1) && !MouseButton(Index); }
+	int MouseButtonClicked(int Index) const { return MouseButton(Index) && !((m_LastMouseButtons >> Index) & 1); }
+	int MouseButtonReleased(int Index) const { return ((m_LastMouseButtons >> Index) & 1) && !MouseButton(Index); }
 
 	void SetHotItem(const void *pID) { m_pBecommingHotItem = pID; }
 	void SetActiveItem(const void *pID)
@@ -257,8 +257,8 @@ public:
 	const void *ActiveItem() const { return m_pActiveItem; }
 	const void *LastActiveItem() const { return m_pLastActiveItem; }
 
-	int MouseInside(const CUIRect *pRect);
-	void ConvertMouseMove(float *x, float *y);
+	int MouseInside(const CUIRect *pRect) const;
+	void ConvertMouseMove(float *x, float *y) const;
 
 	CUIRect *Screen();
 	float PixelSize();
@@ -267,7 +267,7 @@ public:
 
 	// TODO: Refactor: Redo UI scaling
 	void SetScale(float s);
-	float Scale();
+	float Scale() const;
 
 	int DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect);
 	int DoButtonLogic(const void *pID, const char *pText /* TODO: Refactor: Remove */, int Checked, const CUIRect *pRect);

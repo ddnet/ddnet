@@ -756,7 +756,7 @@ void CGameContext::ConDrySave(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	CSaveTeam SavedTeam(pSelf->m_pController);
-	int Result = SavedTeam.save(pPlayer->GetTeam());
+	int Result = SavedTeam.Save(pPlayer->GetTeam());
 	if(CSaveTeam::HandleSaveError(Result, pResult->m_ClientID, pSelf))
 		return;
 

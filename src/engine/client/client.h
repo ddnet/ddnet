@@ -197,8 +197,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aDDNetInfoTmp[64];
 	std::shared_ptr<CGetFile> m_pDDNetInfoTask;
 
-	char m_aDummyNameBuf[16];
-
 	// time
 	CSmoothTime m_GameTime[NUM_DUMMIES];
 	CSmoothTime m_PredictedTime;
@@ -297,25 +295,25 @@ public:
 	void SendReady();
 	void SendMapRequest();
 
-	virtual bool RconAuthed() { return m_RconAuthed[g_Config.m_ClDummy] != 0; }
-	virtual bool UseTempRconCommands() { return m_UseTempRconCommands != 0; }
+	virtual bool RconAuthed() const { return m_RconAuthed[g_Config.m_ClDummy] != 0; }
+	virtual bool UseTempRconCommands() const { return m_UseTempRconCommands != 0; }
 	void RconAuth(const char *pName, const char *pPassword);
 	virtual void Rcon(const char *pCmd);
 
-	virtual bool ConnectionProblems();
+	virtual bool ConnectionProblems() const;
 
-	virtual bool SoundInitFailed() { return m_SoundInitFailed; }
+	virtual bool SoundInitFailed() const { return m_SoundInitFailed; }
 
-	virtual IGraphics::CTextureHandle GetDebugFont() { return m_DebugFont; }
+	virtual IGraphics::CTextureHandle GetDebugFont() const { return m_DebugFont; }
 
 	void DirectInput(int *pInput, int Size);
 	void SendInput();
 
 	// TODO: OPT: do this a lot smarter!
-	virtual int *GetInput(int Tick, int IsDummy);
-	virtual int *GetDirectInput(int Tick, int IsDummy);
+	virtual int *GetInput(int Tick, int IsDummy) const;
+	virtual int *GetDirectInput(int Tick, int IsDummy) const;
 
-	const char *LatestVersion();
+	const char *LatestVersion() const;
 
 	// ------ state handling -----
 	void SetState(int s);
@@ -335,7 +333,7 @@ public:
 	int m_DummyConnected;
 	int m_LastDummyConnectTime;
 
-	virtual void GetServerInfo(CServerInfo *pServerInfo);
+	virtual void GetServerInfo(CServerInfo *pServerInfo) const;
 	void ServerInfoRequest();
 
 	int LoadData();
@@ -343,11 +341,11 @@ public:
 	// ---
 
 	int GetPredictionTime();
-	void *SnapGetItem(int SnapID, int Index, CSnapItem *pItem);
-	int SnapItemSize(int SnapID, int Index);
+	void *SnapGetItem(int SnapID, int Index, CSnapItem *pItem) const;
+	int SnapItemSize(int SnapID, int Index) const;
 	void SnapInvalidateItem(int SnapID, int Index);
-	void *SnapFindItem(int SnapID, int Type, int ID);
-	int SnapNumItems(int SnapID);
+	void *SnapFindItem(int SnapID, int Type, int ID) const;
+	int SnapNumItems(int SnapID) const;
 	void SnapSetStaticsize(int ItemType, int Size);
 
 	void Render();
@@ -356,9 +354,9 @@ public:
 	virtual void Restart();
 	virtual void Quit();
 
-	virtual const char *PlayerName();
-	virtual const char *DummyName();
-	virtual const char *ErrorString();
+	virtual const char *PlayerName() const;
+	virtual const char *DummyName() const;
+	virtual const char *ErrorString() const;
 
 	const char *LoadMap(const char *pName, const char *pFilename, SHA256_DIGEST *pWantedSha256, unsigned WantedCrc);
 	const char *LoadMapSearch(const char *pMapName, SHA256_DIGEST *pWantedSha256, int WantedCrc);
@@ -379,9 +377,9 @@ public:
 	void FinishDDNetInfo();
 	void LoadDDNetInfo();
 
-	virtual const char *MapDownloadName() { return m_aMapdownloadName; }
-	virtual int MapDownloadAmount() { return !m_pMapdownloadTask ? m_MapdownloadAmount : (int)m_pMapdownloadTask->Current(); }
-	virtual int MapDownloadTotalsize() { return !m_pMapdownloadTask ? m_MapdownloadTotalsize : (int)m_pMapdownloadTask->Size(); }
+	virtual const char *MapDownloadName() const { return m_aMapdownloadName; }
+	virtual int MapDownloadAmount() const { return !m_pMapdownloadTask ? m_MapdownloadAmount : (int)m_pMapdownloadTask->Current(); }
+	virtual int MapDownloadTotalsize() const { return !m_pMapdownloadTask ? m_MapdownloadTotalsize : (int)m_pMapdownloadTask->Size(); }
 
 	void PumpNetwork();
 
@@ -482,10 +480,10 @@ public:
 
 	virtual int GetCurrentRaceTime();
 
-	virtual const char *GetCurrentMap();
-	virtual const char *GetCurrentMapPath();
-	virtual SHA256_DIGEST GetCurrentMapSha256();
-	virtual unsigned GetCurrentMapCrc();
+	virtual const char *GetCurrentMap() const;
+	virtual const char *GetCurrentMapPath() const;
+	virtual SHA256_DIGEST GetCurrentMapSha256() const;
+	virtual unsigned GetCurrentMapCrc() const;
 
 	virtual void RaceRecord_Start(const char *pFilename);
 	virtual void RaceRecord_Stop();
@@ -496,7 +494,7 @@ public:
 	virtual void DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser);
 	virtual void SaveReplay(const int Length);
 
-	virtual bool EditorHasUnsavedData() { return m_pEditor->HasUnsavedData(); }
+	virtual bool EditorHasUnsavedData() const { return m_pEditor->HasUnsavedData(); }
 
 	virtual IFriends *Foes() { return &m_Foes; }
 

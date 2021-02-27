@@ -143,14 +143,14 @@ int CNetClient::Flush()
 	return m_Connection.Flush();
 }
 
-int CNetClient::GotProblems()
+int CNetClient::GotProblems() const
 {
 	if(time_get() - m_Connection.LastRecvTime() > time_freq())
 		return 1;
 	return 0;
 }
 
-const char *CNetClient::ErrorString()
+const char *CNetClient::ErrorString() const
 {
 	return m_Connection.ErrorString();
 }

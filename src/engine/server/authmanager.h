@@ -37,17 +37,17 @@ public:
 	int AddKeyHash(const char *pIdent, MD5_DIGEST Hash, const unsigned char *pSalt, int AuthLevel);
 	int AddKey(const char *pIdent, const char *pPw, int AuthLevel);
 	int RemoveKey(int Slot); // Returns the old key slot that is now in the named one.
-	int FindKey(const char *pIdent);
-	bool CheckKey(int Slot, const char *pPw);
-	int DefaultKey(int AuthLevel);
-	int KeyLevel(int Slot);
-	const char *KeyIdent(int Slot);
+	int FindKey(const char *pIdent) const;
+	bool CheckKey(int Slot, const char *pPw) const;
+	int DefaultKey(int AuthLevel) const;
+	int KeyLevel(int Slot) const;
+	const char *KeyIdent(int Slot) const;
 	void UpdateKeyHash(int Slot, MD5_DIGEST Hash, const unsigned char *pSalt, int AuthLevel);
 	void UpdateKey(int Slot, const char *pPw, int AuthLevel);
 	void ListKeys(FListCallback pfnListCallbac, void *pUser);
 	void AddDefaultKey(int Level, const char *pPw);
-	bool IsGenerated();
-	int NumNonDefaultKeys();
+	bool IsGenerated() const;
+	int NumNonDefaultKeys() const;
 };
 
 #endif //ENGINE_SERVER_AUTHMANAGER_H

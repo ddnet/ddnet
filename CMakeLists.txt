@@ -171,6 +171,9 @@ if(NOT MSVC)
   # -fstack-protector-all doesn't work on MinGW.
   add_c_compiler_flag_if_supported(OUR_FLAGS -fstack-protector-all)
 
+  # Disable exceptions as DDNet does not use them.
+  add_c_compiler_flag_if_supported(OUR_FLAGS -fno-exceptions)
+
   # Inaccurate floating point numbers cause problems on mingw-w64-gcc when
   # compiling for x86, might cause problems elsewhere. So don't store floats
   # in registers but keep them at higher accuracy.
@@ -1982,9 +1985,7 @@ set_src(ENGINE_SERVER GLOB_RECURSE src/engine/server
   databases/connection_pool.cpp
   databases/connection_pool.h
   databases/mysql.cpp
-  databases/mysql.h
   databases/sqlite.cpp
-  databases/sqlite.h
   name_ban.cpp
   name_ban.h
   register.cpp
@@ -2030,7 +2031,6 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   gamecontroller.h
   gamemodes/DDRace.cpp
   gamemodes/DDRace.h
-  gamemodes/gamemode.h
   gameworld.cpp
   gameworld.h
   player.cpp
