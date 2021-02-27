@@ -1196,7 +1196,7 @@ bool CScore::ShowTimesThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 	if(pData->m_Name[0] != '\0') // last 5 times of a player
 	{
 		str_format(aBuf, sizeof(aBuf),
-			"SELECT Time, (%s-%s) as Ago, %s as Stamp "
+			"SELECT Time, (%s-%s) as Ago, %s as Stamp, Server "
 			"FROM %s_race "
 			"WHERE Map = ? AND Name = ? "
 			"ORDER BY Timestamp %s "
@@ -1214,7 +1214,7 @@ bool CScore::ShowTimesThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 	else // last 5 times of server
 	{
 		str_format(aBuf, sizeof(aBuf),
-			"SELECT Time, (%s-%s) as Ago, %s as Stamp, Name, Server "
+			"SELECT Time, (%s-%s) as Ago, %s as Stamp, Server, Name "
 			"FROM %s_race "
 			"WHERE Map = ? "
 			"ORDER BY Timestamp %s "
@@ -1251,7 +1251,7 @@ bool CScore::ShowTimesThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		int Ago = pSqlServer->GetInt(2);
 		int Stamp = pSqlServer->GetInt(3);
 		char aServer[5];
-		pSqlServer->GetString(5, aServer, sizeof(aServer));
+		pSqlServer->GetString(4, aServer, sizeof(aServer));
 		char aServerFormatted[8] = "\0";
 		if(str_comp(aServer, "UNK") != 0)
 			str_format(aServerFormatted, sizeof(aServerFormatted), "[%s] ", aServer);
@@ -1271,7 +1271,7 @@ bool CScore::ShowTimesThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		else // last 5 times of the server
 		{
 			char aName[MAX_NAME_LENGTH];
-			pSqlServer->GetString(4, aName, sizeof(aName));
+			pSqlServer->GetString(5, aName, sizeof(aName));
 			if(Stamp == 0) // stamp is 00:00:00 cause it's an old entry from old times where there where no stamps yet
 			{
 				str_format(paMessages[Line], sizeof(paMessages[Line]),
