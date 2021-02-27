@@ -27,3 +27,5 @@ UUID(NETMSG_RCONTYPE, "rcon-type@ddnet.tw")
 UUID(NETMSG_MAP_DETAILS, "map-details@ddnet.tw")
 UUID(NETMSG_CAPABILITIES, "capabilities@ddnet.tw")
 UUID(NETMSG_CLIENTVER, "clientver@ddnet.tw")
+
+UUID(NETMSG_IAMCHILLERBOT_UX, "i-am-chillerbot-ux@chillerbot.github.io")

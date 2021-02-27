@@ -9,11 +9,13 @@
 #include <game/client/components/camera.h>
 #include <game/client/components/chat.h>
 #include <game/client/components/chillerbot/chathelper.h>
+#include <game/client/components/chillerbot/version.h>
 #include <game/client/components/controls.h>
 #include <game/client/components/menus.h>
 #include <game/client/race.h>
 #include <game/client/render.h>
 #include <game/generated/protocol.h>
+#include <game/version.h>
 
 #include "chillerbotux.h"
 

@@ -13,6 +13,7 @@
 #include <base/system.h>
 #include <base/vmath.h>
 
+#include <game/client/components/chillerbot/version.h>
 #include <game/client/components/menus.h>
 #include <game/client/gameclient.h>
 #include <game/editor/editor.h>
@@ -420,8 +421,22 @@ int CClient::SendMsg(CMsgPacker *pMsg, int Flags)
 	return 0;
 }
 
+void CClient::SendChillerBotUX(bool Dummy)
+{
+	CMsgPacker Msg(NETMSG_IAMCHILLERBOT_UX, true);
+	Msg.AddInt(CHILLERBOT_VERSIONNR);
+	Msg.AddString(
+		"chillerbot-ux " CHILLERBOT_VERSION
+		" (DDNet " GAME_VERSION
+		", built on " CHILLERBOT_BUILD_DATE
+		")",
+		0);
+	SendMsgY(&Msg, MSGFLAG_VITAL, Dummy);
+}
+
 void CClient::SendInfo()
 {
+	SendChillerBotUX(false);
 	CMsgPacker MsgVer(NETMSG_CLIENTVER, true);
 	MsgVer.AddRaw(&m_ConnectionID, sizeof(m_ConnectionID));
 	MsgVer.AddInt(GameClient()->DDNetVersion());
@@ -3194,6 +3209,7 @@ void CClient::Run()
 			m_DummySendConnInfo = false;
 
 			// send client info
+			SendChillerBotUX(true);
 			CMsgPacker MsgVer(NETMSG_CLIENTVER, true);
 			MsgVer.AddRaw(&m_ConnectionID, sizeof(m_ConnectionID));
 			MsgVer.AddInt(GameClient()->DDNetVersion());
