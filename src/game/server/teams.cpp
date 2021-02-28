@@ -833,7 +833,7 @@ void CGameTeams::ResetInvited(int Team)
 
 void CGameTeams::IncreaseTeamTime(int Team, int Time)
 {
-	for (int i = 0; i < MAX_CLIENTS; i++)
+	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
 		{
