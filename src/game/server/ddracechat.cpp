@@ -712,44 +712,37 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 		}
 	}
 
-	bool TargetNotFound = TargetClientId < 0;
-	if(TargetNotFound)
+	if(TargetClientId < 0)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Player not found");
 		return;
 	}
 
-	bool TargetIsSelf = TargetClientId == pResult->m_ClientID;
-	if(TargetIsSelf)
+	if(TargetClientId == pResult->m_ClientID)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Can't swap with yourself.");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Can't swap with yourself");
 		return;
 	}
 
 	int TargetTeam = Teams.m_Core.Team(TargetClientId);
 
-	bool DifferentTeam = TargetTeam != Team;
-	if(DifferentTeam)
+	if(TargetTeam != Team)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Player on a different team");
 		return;
 	}
 
-	CPlayer *pSwapPlayer = pSelf->m_apPlayers[TargetClientId];
-	if(!pSwapPlayer)
-	{ //Not sure what could cause this state.
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Swap failed, try again in a few seconds.");
-		return;
-	}
+	CPlayer *pSwapPlayer = pSelf->m_apPlayers[TargetClientId];	
+	
 
 	bool SwapPending = pSwapPlayer->m_ClientSwapID != pResult->m_ClientID;
 	if(SwapPending)
 	{
 		pPlayer->m_ClientSwapID = TargetClientId;
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Swap request sent. Player needs to confirm swap.");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Swap request sent. The player needs to confirm it.");
 
 		char aBuf[512];
-		str_format(aBuf, sizeof(aBuf), "'%s' has requested to swap positions with you. Type /swap to confirm the swap.)", pSelf->Server()->ClientName(pResult->m_ClientID));
+		str_format(aBuf, sizeof(aBuf), "'%s' has requested to swap positions with you. Type /swap to confirm the swap.", pSelf->Server()->ClientName(pResult->m_ClientID));
 
 		pSelf->SendChatTarget(TargetClientId, aBuf);
 		return;
@@ -766,6 +759,9 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 
 	pPlayer->m_ClientSwapID = -1;
 	pSwapPlayer->m_ClientSwapID = -1;
+
+	int TimePenalty = ((float)pSelf->Server()->TickSpeed()) * 60 * 5;
+	Teams.IncreaseTeamTime(Team, TimePenalty);
 }
 
 void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)

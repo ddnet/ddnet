@@ -831,6 +831,18 @@ void CGameTeams::ResetInvited(int Team)
 	m_Invited[Team] = 0;
 }
 
+void CGameTeams::IncreaseTeamTime(int Team, int Time)
+{
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
+		{
+			CCharacter *pChar = Character(i);
+			pChar->m_StartTime = pChar->m_StartTime - Time;
+		}
+	}
+}
+
 void CGameTeams::SetClientInvited(int Team, int ClientID, bool Invited)
 {
 	if(Team > TEAM_FLOCK && Team < TEAM_SUPER)

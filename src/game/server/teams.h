@@ -82,6 +82,7 @@ public:
 	void SendTeamsState(int ClientID);
 	void SetTeamLock(int Team, bool Lock);
 	void ResetInvited(int Team);
+	void IncreaseTeamTime(int Team, int time);
 	void SetClientInvited(int Team, int ClientID, bool Invited);
 
 	int m_LastChat[MAX_CLIENTS];
