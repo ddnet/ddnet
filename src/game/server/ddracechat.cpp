@@ -734,7 +734,6 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 
 	CPlayer *pSwapPlayer = pSelf->m_apPlayers[TargetClientId];	
 	
-
 	bool SwapPending = pSwapPlayer->m_ClientSwapID != pResult->m_ClientID;
 	if(SwapPending)
 	{
