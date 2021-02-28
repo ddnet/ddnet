@@ -177,10 +177,16 @@ static void logger_stdout_sync(const char *line, void *user)
 		char u16[4] = {0};
 
 		if(codepoint < 0)
+		{
+			free(wide);
 			return;
+		}
 
 		if(str_utf16le_encode(u16, codepoint) != 2)
+		{
+			free(wide);
 			return;
+		}
 
 		mem_copy(&wide[wlen], u16, 2);
 	}
@@ -188,6 +194,7 @@ static void logger_stdout_sync(const char *line, void *user)
 	console = GetStdHandle(STD_OUTPUT_HANDLE);
 	WriteConsoleW(console, wide, wlen, NULL, NULL);
 	WriteConsoleA(console, "\n", 1, NULL, NULL);
+	free(wide);
 }
 #endif
 
