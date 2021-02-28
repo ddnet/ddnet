@@ -188,6 +188,7 @@ static void logger_stdout_sync(const char *line, void *user)
 	console = GetStdHandle(STD_OUTPUT_HANDLE);
 	WriteConsoleW(console, wide, wlen, NULL, NULL);
 	WriteConsoleA(console, "\n", 1, NULL, NULL);
+	free(wide);
 }
 #endif
 
