@@ -674,6 +674,100 @@ void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	const char *pName = pResult->GetString(0);
+
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if(!pPlayer)
+		return;
+
+	if(pSelf->ProcessSpamProtection(pResult->m_ClientID))
+		return;
+
+	CGameTeams &Teams = ((CGameControllerDDRace *)pSelf->m_pController)->m_Teams;
+
+	int Team = Teams.m_Core.Team(pResult->m_ClientID);
+
+	if(Team < TEAM_FLOCK || (Team == TEAM_FLOCK && g_Config.m_SvTeam != 3) || Team >= TEAM_SUPER)
+	{
+		pSelf->Console()->Print(
+			IConsole::OUTPUT_LEVEL_STANDARD,
+			"print",
+			"Join a team to use swap feature, which means you can swap positions with each other.");
+		return;
+	}
+
+	int TargetClientId = -1;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(!str_comp(pName, pSelf->Server()->ClientName(i)))
+		{
+			TargetClientId = i;
+			break;
+		}
+	}
+
+	bool TargetNotFound = TargetClientId < 0;
+	if(TargetNotFound)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Player not found");
+		return;
+	}
+
+	bool TargetIsSelf = TargetClientId == pResult->m_ClientID;
+	if(TargetIsSelf)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Can't swap with yourself.");
+		return;
+	}
+
+	int TargetTeam = Teams.m_Core.Team(TargetClientId);
+
+	bool DifferentTeam = TargetTeam != Team;
+	if(DifferentTeam)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Player on a different team");
+		return;
+	}
+
+	CPlayer *pSwapPlayer = pSelf->m_apPlayers[TargetClientId];
+	if(!pSwapPlayer)
+	{ //Not sure what could cause this state.
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Swap failed, try again in a few seconds.");
+		return;
+	}
+
+	bool SwapPending = pSwapPlayer->m_ClientSwapID != pResult->m_ClientID;
+	if(SwapPending)
+	{
+		pPlayer->m_ClientSwapID = TargetClientId;
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Swap request sent. Player needs to confirm swap.");
+
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), "'%s' has requested to swap positions with you. Type /swap to confirm the swap.)", pSelf->Server()->ClientName(pResult->m_ClientID));
+
+		pSelf->SendChatTarget(TargetClientId, aBuf);
+		return;
+	}
+
+	CSaveTee PrimarySavedTee;
+	PrimarySavedTee.Save(pPlayer->GetCharacter());
+
+	CSaveTee SecondarySavedTee;
+	SecondarySavedTee.Save(pSwapPlayer->GetCharacter());
+
+	PrimarySavedTee.Load(pSwapPlayer->GetCharacter(), Team);
+	SecondarySavedTee.Load(pPlayer->GetCharacter(), Team);
+
+	pPlayer->m_ClientSwapID = -1;
+	pSwapPlayer->m_ClientSwapID = -1;
+}
+
 void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

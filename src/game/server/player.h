@@ -210,6 +210,7 @@ public:
 	bool m_NotEligibleForFinish;
 	int64 m_EligibleForFinishCheck;
 	bool m_VotedForPractice;
+	int m_ClientSwapID;
 };
 
 #endif
