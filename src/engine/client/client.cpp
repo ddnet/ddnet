@@ -4270,10 +4270,12 @@ int main(int argc, const char **argv) // ignore_convention
 		if(str_comp("-s", argv[i]) == 0 || str_comp("--silent", argv[i]) == 0) // ignore_convention
 		{
 			Silent = true;
+		}
+		else if(str_comp("-c", argv[i]) == 0 || str_comp("--console", argv[i]) == 0) // ignore_convention
+		{
 #if defined(CONF_FAMILY_WINDOWS)
-			FreeConsole();
+			AllocConsole();
 #endif
-			break;
 		}
 	}
 
@@ -4367,6 +4369,11 @@ int main(int argc, const char **argv) // ignore_convention
 		pConsole->ExecuteFile(CONFIG_FILE);
 	}
 
+#if defined(CONF_FAMILY_WINDOWS)
+	if(g_Config.m_ClShowConsole)
+		AllocConsole();
+#endif
+
 	// execute autoexec file
 	File = pStorage->OpenFile(AUTOEXEC_CLIENT_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
 	if(File)
@@ -4407,11 +4414,6 @@ int main(int argc, const char **argv) // ignore_convention
 	}
 
 	pClient->Engine()->InitLogfile();
-
-#if defined(CONF_FAMILY_WINDOWS)
-	if(!g_Config.m_ClShowConsole)
-		FreeConsole();
-#endif
 
 	// run the client
 	dbg_msg("client", "starting...");

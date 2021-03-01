@@ -1890,7 +1890,7 @@ if(CLIENT)
 
   # Target
   set(TARGET_CLIENT ${CLIENT_EXECUTABLE})
-  add_executable(${TARGET_CLIENT}
+  add_executable(${TARGET_CLIENT} WIN32
     ${CLIENT_SRC}
     ${CLIENT_ICON}
     ${CLIENT_MANIFEST}
