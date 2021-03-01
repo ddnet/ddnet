@@ -3739,8 +3739,14 @@ int CGameContext::ProcessSpamProtection(int ClientID)
 		return 0;
 	if(g_Config.m_SvSpamprotection && m_apPlayers[ClientID]->m_LastChat && m_apPlayers[ClientID]->m_LastChat + Server()->TickSpeed() * g_Config.m_SvChatDelay > Server()->Tick())
 		return 1;
+	else if(g_Config.m_SvDnsblChat && Server()->DnsblBlack(ClientID))
+	{
+		SendChatTarget(ClientID, "Players are not allowed to chat from VPNs at this time");
+		return 1;
+	}
 	else
 		m_apPlayers[ClientID]->m_LastChat = Server()->Tick();
+
 	NETADDR Addr;
 	Server()->GetClientAddr(ClientID, &Addr);
 	int Muted = 0;
