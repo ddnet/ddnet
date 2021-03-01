@@ -667,7 +667,17 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 	if(*p == 0)
 		return;
 
-	bool IgnoreLine = false;
+	auto &&FChatMsgCheckAndPrint = [=](CLine *pLine) {
+		if(pLine->m_ClientID < 0) // server or client message
+		{
+			if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
+				StoreSave(pLine->m_aText);
+		}
+
+		char aBuf[1024];
+		str_format(aBuf, sizeof(aBuf), "%s%s%s", pLine->m_aName, pLine->m_ClientID >= 0 ? ": " : "", pLine->m_aText);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, pLine->m_Team >= 2 ? "whisper" : (pLine->m_Team ? "teamchat" : "chat"), aBuf, pLine->m_Highlighted);
+	};
 
 	while(*p)
 	{
@@ -699,11 +709,9 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 			pCurrentLine->m_Time = time();
 			pCurrentLine->m_YOffset[0] = -1.f;
 			pCurrentLine->m_YOffset[1] = -1.f;
-			// Can't return here because we still want to log the message to console,
-			// even if we ignore it in chat. We will set the new line, fill it out
-			// totally, but then in the end revert back m_CurrentLine after writing
-			// the message to console.
-			IgnoreLine = true;
+
+			FChatMsgCheckAndPrint(pCurrentLine);
+			return;
 		}
 
 		m_CurrentLine = (m_CurrentLine + 1) % MAX_LINES;
@@ -748,13 +756,10 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 
 		pCurrentLine->m_Highlighted = Highlighted;
 
-		if(ClientID < 0) // server or client message
+		if(pCurrentLine->m_ClientID < 0) // server or client message
 		{
 			str_copy(pCurrentLine->m_aName, "*** ", sizeof(pCurrentLine->m_aName));
 			str_format(pCurrentLine->m_aText, sizeof(pCurrentLine->m_aText), "%s", pLine);
-
-			if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
-				StoreSave(pCurrentLine->m_aText);
 		}
 		else
 		{
@@ -815,15 +820,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 			}
 		}
 
-		char aBuf[1024];
-		str_format(aBuf, sizeof(aBuf), "%s%s%s", pCurrentLine->m_aName, ClientID >= 0 ? ": " : "", pCurrentLine->m_aText);
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, Team >= 2 ? "whisper" : (pCurrentLine->m_Team ? "teamchat" : "chat"), aBuf, Highlighted);
-	}
-
-	if(IgnoreLine)
-	{
-		m_CurrentLine = (m_CurrentLine + MAX_LINES - 1) % MAX_LINES;
-		return;
+		FChatMsgCheckAndPrint(pCurrentLine);
 	}
 
 	// play sound
