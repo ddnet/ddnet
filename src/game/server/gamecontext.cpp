@@ -3749,12 +3749,17 @@ int CGameContext::ProcessSpamProtection(int ClientID)
 
 	NETADDR Addr;
 	Server()->GetClientAddr(ClientID, &Addr);
-	int Muted = 0;
 
-	for(int i = 0; i < m_NumMutes && !Muted; i++)
+	int Muted = 0;
+	if(m_apPlayers[ClientID]->m_JoinTick > m_NonEmptySince + 10 * Server()->TickSpeed())
+		Muted = (m_apPlayers[ClientID]->m_JoinTick + Server()->TickSpeed() * g_Config.m_SvChatInitialDelay - Server()->Tick()) / Server()->TickSpeed();
+	if(Muted <= 0)
 	{
-		if(!net_addr_comp_noport(&Addr, &m_aMutes[i].m_Addr))
-			Muted = (m_aMutes[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
+		for(int i = 0; i < m_NumMutes && Muted <= 0; i++)
+		{
+			if(!net_addr_comp_noport(&Addr, &m_aMutes[i].m_Addr))
+				Muted = (m_aMutes[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
+		}
 	}
 
 	if(Muted > 0)
