@@ -741,7 +741,7 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Swap request sent. The player needs to confirm it.");
 
 		char aBuf[512];
-		str_format(aBuf, sizeof(aBuf), "'%s' has requested to swap positions with you. Type /swap %s to confirm the swap.", pSelf->Server()->ClientName(pResult->m_ClientID));
+		str_format(aBuf, sizeof(aBuf), "'%s' has requested to swap positions with you. Type /swap %s to confirm the swap.", pSelf->Server()->ClientName(pResult->m_ClientID), pSelf->Server()->ClientName(pResult->m_ClientID));
 
 		pSelf->SendChatTarget(TargetClientId, aBuf);
 		return;
