@@ -937,7 +937,7 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 			{
 				if(aMessage[0] == 0)
 					break;
-				GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aMessage, m_ClientID);
+				GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aMessage, -1);
 			}
 			break;
 		case CScorePlayerResult::BROADCAST:

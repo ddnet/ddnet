@@ -31,7 +31,7 @@ struct CScorePlayerResult : ISqlResult
 
 	enum
 	{
-		MAX_MESSAGES = 7,
+		MAX_MESSAGES = 8,
 	};
 
 	enum Variant
@@ -167,6 +167,7 @@ struct CSqlPlayerRequest : ISqlData
 	char m_RequestingPlayer[MAX_NAME_LENGTH];
 	// relevant for /top5 kind of requests
 	int m_Offset;
+	char m_Server[5];
 };
 
 struct CSqlRandomMapRequest : ISqlData
