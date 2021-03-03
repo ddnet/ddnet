@@ -1182,7 +1182,7 @@ Skin Database
 Skins directory
 == 
 
-45° aim
+Chat command
 == 
 
 Dummy

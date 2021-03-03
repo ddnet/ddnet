@@ -1262,9 +1262,6 @@ Smooth Dynamic Camera
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == Die Breite von Textur %s ist nicht durch %d teilbar, oder die Höhe nicht durch %d teilbar, was Visuelle Fehler verursachen könnte.
 
-45° aim
-== 45°-Zielen
-
 Dummy
 == Dummy
 
@@ -1288,6 +1285,9 @@ Entities Background color
 
 Regular Background Color
 == Normale Hintergrundfarbe
+
+Chat command
+== 
 
 Discord
 == 

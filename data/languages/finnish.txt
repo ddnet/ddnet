@@ -944,7 +944,7 @@ Show entities
 Show HUD
 == 
 
-45° aim
+Chat command
 == 
 
 UI mouse s.

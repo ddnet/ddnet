@@ -1237,7 +1237,7 @@ Smooth Dynamic Camera
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
-45° aim
+Chat command
 == 
 
 Dummy

@@ -1232,7 +1232,7 @@ Checking for existing player with your name
 Smooth Dynamic Camera
 == 
 
-45° aim
+Chat command
 == 
 
 Dummy
