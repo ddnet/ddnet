@@ -863,7 +863,6 @@ bool CScore::ShowRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 		str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
 			"%s is not ranked", pData->m_Name);
 	}
-
 	return false;
 }
 
@@ -959,7 +958,7 @@ bool CScore::ShowTeamRankThread(IDbConnection *pSqlServer, const ISqlData *pGame
 
 void CScore::ShowTop5(int ClientID, int Offset)
 {
-		if(RateLimitPlayer(ClientID))
+	if(RateLimitPlayer(ClientID))
 		return;
 	ExecPlayerThread(ShowTop5Thread, "show top5", ClientID, "", Offset);
 }
