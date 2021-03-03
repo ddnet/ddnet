@@ -937,12 +937,6 @@ Show HUD
 45° aim
 == 
 
-Deepfly on
-== 
-
-Deepfly off
-== 
-
 UI mouse s.
 == 
 

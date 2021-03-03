@@ -1281,12 +1281,6 @@ Converse
 45° aim
 == 
 
-Deepfly on
-== 
-
-Deepfly off
-== 
-
 Dummy
 == 
 

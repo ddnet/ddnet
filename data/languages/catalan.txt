@@ -1185,12 +1185,6 @@ Skins directory
 45° aim
 == 
 
-Deepfly on
-== 
-
-Deepfly off
-== 
-
 Dummy
 == 
 

@@ -1256,12 +1256,6 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 45° aim
 == 
 
-Deepfly on
-== 
-
-Deepfly off
-== 
-
 Dummy
 == 
 

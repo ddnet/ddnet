@@ -791,8 +791,6 @@ static CKeyInfo gs_aKeys[] =
 		{"Toggle dummy", "toggle cl_dummy 0 1", 0, 0},
 		{"Dummy copy", "toggle cl_dummy_copy_moves 0 1", 0, 0},
 		{"Hammerfly dummy", "toggle cl_dummy_hammer 0 1", 0, 0},
-		{"Deepfly on", "bind mouse1 \"+fire; +toggle cl_dummy_hammer 1 0\"", 0, 0},
-		{"Deepfly off", "bind mouse1 \"+fire\"", 0, 0},
 
 		{"Emoticon", "+emote", 0, 0},
 		{"Spectator mode", "+spectate", 0, 0},
@@ -819,7 +817,7 @@ static CKeyInfo gs_aKeys[] =
 	Localize("Spectator mode");Localize("Spectate next");Localize("Spectate previous");Localize("Console");
 	Localize("Remote console");Localize("Screenshot");Localize("Scoreboard");Localize("Statboard");
 	Localize("Lock team");Localize("Show entities");Localize("Show HUD");Localize("45° aim");
-	Localize("Chat command";Localize("Deepfly on");Localize("Deepfly off");
+	Localize("Chat command";
 */
 
 void CMenus::UiDoGetButtons(int Start, int Stop, CUIRect View, CUIRect ScopeView)
@@ -985,14 +983,14 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	// dummy settings
 	{
 		DummySettings.HSplitTop(10.0f, 0, &DummySettings);
-		DummySettings.HSplitTop(145.0f, &DummySettings, &MiscSettings);
+		DummySettings.HSplitTop(100.0f, &DummySettings, &MiscSettings);
 		RenderTools()->DrawUIRect(&DummySettings, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 10.0f);
 		DummySettings.VMargin(10.0f, &DummySettings);
 
 		TextRender()->Text(0, DummySettings.x, DummySettings.y + (14.0f + 5.0f + 10.0f - 14.0f * UI()->Scale()) / 2.f, 14.0f * UI()->Scale(), Localize("Dummy"), -1.0f);
 
 		DummySettings.HSplitTop(14.0f + 5.0f + 10.0f, 0, &DummySettings);
-		UiDoGetButtons(30, 35, DummySettings, MainView);
+		UiDoGetButtons(30, 33, DummySettings, MainView);
 	}
 
 	// misc settings
@@ -1005,7 +1003,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		TextRender()->Text(0, MiscSettings.x, MiscSettings.y + (14.0f + 5.0f + 10.0f - 14.0f * UI()->Scale()) / 2.f, 14.0f * UI()->Scale(), Localize("Miscellaneous"), -1.0f);
 
 		MiscSettings.HSplitTop(14.0f + 5.0f + 10.0f, 0, &MiscSettings);
-		UiDoGetButtons(35, 47, MiscSettings, MainView);
+		UiDoGetButtons(33, 45, MiscSettings, MainView);
 	}
 
 	UiDoListboxEnd(&s_ScrollValue, 0);

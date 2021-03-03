@@ -1265,12 +1265,6 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 45° aim
 == Mirar em 45º
 
-Deepfly on
-== Ativar deepfly
-
-Deepfly off
-== Desativar deepfly
-
 Dummy
 == Dummy
 
