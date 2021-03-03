@@ -839,9 +839,19 @@ bool CScore::ShowRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 		else
 		{
 			pResult->m_MessageKind = CScorePlayerResult::ALL;
-			str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
-				"%s Time: %s, better than %d%%, requested by %s",
-				pData->m_Name, aBuf, BetterThanPercent, pData->m_RequestingPlayer);
+
+			if (str_comp_nocase(pData->m_RequestingPlayer, pData->m_Name) == 0) 
+			{
+				str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
+					"%s Time: %s, better than %d%%",
+					pData->m_Name, aBuf, BetterThanPercent);
+			}
+			else
+			{
+				str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
+					"%s Time: %s, better than %d%%, requested by %s",
+					pData->m_Name, aBuf, BetterThanPercent, pData->m_RequestingPlayer);			
+			}
 
 			str_format(pResult->m_Data.m_aaMessages[1], sizeof(pResult->m_Data.m_aaMessages[1]),
 				"Global rank %d || Local rank %d",
@@ -949,7 +959,7 @@ bool CScore::ShowTeamRankThread(IDbConnection *pSqlServer, const ISqlData *pGame
 
 void CScore::ShowTop5(int ClientID, int Offset)
 {
-	if(RateLimitPlayer(ClientID))
+		if(RateLimitPlayer(ClientID))
 		return;
 	ExecPlayerThread(ShowTop5Thread, "show top5", ClientID, "", Offset);
 }
