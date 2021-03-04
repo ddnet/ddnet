@@ -36,10 +36,10 @@ class Dmgtools(Dmg):
 	def _dmg(self, *args):
 		self._check_call((self.config.dmg,) + args)
 
-	def _create_hfs(self, hfs, volume_name, size):
+	def _create_hfs(self, hfs_fd, hfs, volume_name, size):
 		if self.config.verbose >= 1:
 			print("TRUNCATING {} to {} bytes".format(hfs, size))
-		with open(hfs, 'wb') as f:
+		with os.fdopen(hfs_fd, 'wb') as f:
 			f.truncate(size)
 		self._mkfs_hfs('-v', volume_name, hfs)
 
@@ -55,8 +55,8 @@ class Dmgtools(Dmg):
 	def create(self, dmg, volume_name, directory, symlinks):
 		input_size = sum(os.stat(os.path.join(path, f)).st_size for path, dirs, files in os.walk(directory) for f in files)
 		output_size = max(input_size * 2, 1024**2)
-		hfs = tempfile.mkstemp(prefix=dmg + '.', suffix='.hfs')
-		self._create_hfs(hfs, volume_name, output_size)
+		hfs_fd, hfs = tempfile.mkstemp(prefix=dmg + '.', suffix='.hfs')
+		self._create_hfs(hfs_fd, hfs, volume_name, output_size)
 		self._add(hfs, directory)
 		for target, link_name in symlinks:
 			self._symlink(hfs, target, link_name)
