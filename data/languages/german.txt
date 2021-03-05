@@ -1294,3 +1294,9 @@ Entities Background color
 
 Regular Background Color
 == Normale Hintergrundfarbe
+
+Discord
+== 
+
+https://ddnet.tw/discord
+== 

@@ -1256,6 +1256,12 @@ Particles
 Assets directory
 == 材质目录
 
+https://ddnet.tw/discord
+== http://chat.teeworlds.cn/
+
+Discord
+== 开黑啦
+
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 

@@ -1314,5 +1314,11 @@ Entities Background color
 Regular Background Color
 == 
 
+Discord
+== 
+
+https://ddnet.tw/discord
+== 
+
 FPM
 == 

@@ -1186,6 +1186,12 @@ Particles
 Assets directory
 == 
 
+Discord
+== 
+
+https://ddnet.tw/discord
+== 
+
 Learn
 == 
 
