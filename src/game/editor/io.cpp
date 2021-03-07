@@ -270,7 +270,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 				Size += str_length(m_lSettings[i].m_aCommand) + 1;
 			}
 
-			char *pSettings = (char *)malloc(std::max(Size, 1));
+			char *pSettings = (char *)malloc(maximum(Size, 1));
 			char *pNext = pSettings;
 			for(int i = 0; i < m_lSettings.size(); i++)
 			{
@@ -536,7 +536,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 
 	// save points
 	int TotalSize = sizeof(CEnvPoint) * PointCount;
-	CEnvPoint *pPoints = (CEnvPoint *)calloc(std::max(PointCount, 1), sizeof(*pPoints));
+	CEnvPoint *pPoints = (CEnvPoint *)calloc(maximum(PointCount, 1), sizeof(*pPoints));
 	PointCount = 0;
 
 	for(int e = 0; e < m_lEnvelopes.size(); e++)
