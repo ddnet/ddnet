@@ -1278,13 +1278,7 @@ Markers:
 Converse
 == 
 
-45° aim
-== 
-
-Deepfly on
-== 
-
-Deepfly off
+Chat command
 == 
 
 Dummy

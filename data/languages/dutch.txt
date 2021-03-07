@@ -1194,13 +1194,7 @@ Skin Database
 Skins directory
 == 
 
-45° aim
-== 
-
-Deepfly on
-== 
-
-Deepfly off
+Chat command
 == 
 
 Dummy
