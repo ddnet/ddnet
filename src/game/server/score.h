@@ -292,7 +292,7 @@ class CScore
 	static bool MapInfoThread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 	static bool ShowRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 	static bool ShowTeamRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
-	static bool ShowTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
+	static bool ShowTopThread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 	static bool ShowTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 	static bool ShowPlayerTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 	static bool ShowTimesThread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
@@ -341,7 +341,7 @@ public:
 
 	void SaveTeamScore(int *pClientIDs, unsigned int Size, float Time, const char *pTimestamp);
 
-	void ShowTop5(int ClientID, int Offset = 1);
+	void ShowTop(int ClientID, int Offset = 1);
 	void ShowRank(int ClientID, const char *pName);
 
 	void ShowTeamTop5(int ClientID, int Offset = 1);

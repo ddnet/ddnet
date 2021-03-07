@@ -423,7 +423,7 @@ void CGameContext::ConTeamTop5(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
-void CGameContext::ConTop5(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConTop(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(!CheckClientID(pResult->m_ClientID))
@@ -431,15 +431,15 @@ void CGameContext::ConTop5(IConsole::IResult *pResult, void *pUserData)
 
 	if(g_Config.m_SvHideScore)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "top5",
-			"Showing the top 5 is not allowed on this server.");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "top",
+			"Showing the top is not allowed on this server.");
 		return;
 	}
 
 	if(pResult->NumArguments() > 0)
-		pSelf->Score()->ShowTop5(pResult->m_ClientID, pResult->GetInteger(0));
+		pSelf->Score()->ShowTop(pResult->m_ClientID, pResult->GetInteger(0));
 	else
-		pSelf->Score()->ShowTop5(pResult->m_ClientID);
+		pSelf->Score()->ShowTop(pResult->m_ClientID);
 }
 
 void CGameContext::ConTimes(IConsole::IResult *pResult, void *pUserData)
