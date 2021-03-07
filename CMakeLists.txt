@@ -1900,6 +1900,10 @@ if(CLIENT)
   )
   target_link_libraries(${TARGET_CLIENT} ${LIBS_CLIENT})
 
+  if(MSVC)
+    target_link_options(${TARGET_CLIENT} PRIVATE /ENTRY:mainCRTStartup)
+  endif()
+
   target_include_directories(${TARGET_CLIENT} PRIVATE
     ${CURL_INCLUDE_DIRS}
     ${FREETYPE_INCLUDE_DIRS}
