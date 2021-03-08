@@ -1219,7 +1219,7 @@ void CServer::SendRconLine(int ClientID, const char *pLine)
 	SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 
-void CServer::SendRconLineAuthed(const char *pLine, void *pUser, bool Highlighted)
+void CServer::SendRconLineAuthed(const char *pLine, void *pUser, ColorRGBA PrintColor)
 {
 	CServer *pThis = (CServer *)pUser;
 	static volatile int s_ReentryGuard = 0;
