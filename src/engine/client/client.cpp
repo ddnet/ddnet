@@ -77,6 +77,9 @@
 #undef main
 #endif
 
+static const ColorRGBA ClientNetworkPrintColor{0.7f, 1, 0.7f, 1.0f};
+static const ColorRGBA ClientNetworkErrPrintColor{1.0f, 0.25f, 0.25f, 1.0f};
+
 void CGraph::Init(float Min, float Max)
 {
 	m_Min = Min;
@@ -709,7 +712,7 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 		str_copy(m_aServerAddressStr, pAddress, sizeof(m_aServerAddressStr));
 
 	str_format(aBuf, sizeof(aBuf), "connecting to '%s'", m_aServerAddressStr);
-	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
+	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, ClientNetworkPrintColor);
 	bool is_websocket = false;
 	if(strncmp(m_aServerAddressStr, "ws://", 5) == 0)
 	{
@@ -764,7 +767,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "disconnecting. reason='%s'", pReason ? pReason : "unknown");
-	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
+	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, ClientNetworkPrintColor);
 
 	// stop demo playback and recorder
 	m_DemoPlayer.Stop();
@@ -2564,7 +2567,7 @@ void CClient::PumpNetwork()
 			Disconnect();
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "offline error='%s'", m_NetClient[CLIENT_MAIN].ErrorString());
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, ClientNetworkErrPrintColor);
 		}
 
 		if(State() != IClient::STATE_OFFLINE && State() < IClient::STATE_QUITTING && m_DummyConnected &&
@@ -2573,14 +2576,14 @@ void CClient::PumpNetwork()
 			DummyDisconnect(0);
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "offline dummy error='%s'", m_NetClient[CLIENT_DUMMY].ErrorString());
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, ClientNetworkErrPrintColor);
 		}
 
 		//
 		if(State() == IClient::STATE_CONNECTING && m_NetClient[CLIENT_MAIN].State() == NETSTATE_ONLINE)
 		{
 			// we switched to online
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", "connected, sending info");
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", "connected, sending info", ClientNetworkPrintColor);
 			SetState(IClient::STATE_LOADING);
 			SendInfo();
 		}
@@ -3119,7 +3122,7 @@ void CClient::Run()
 
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "version %s", GameClient()->NetVersion());
-	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
+	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, ColorRGBA{0.7f, 0.7f, 1, 1.0f});
 
 	// connect to the server if wanted
 	/*
