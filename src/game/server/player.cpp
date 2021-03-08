@@ -944,7 +944,7 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 				MessageClientId = -1; // Prevent multi-messages being flagged as spam.
 			}
 			break;
-		}		
+		}
 		case CScorePlayerResult::BROADCAST:
 			if(Result.m_Data.m_Broadcast[0] != 0)
 				GameServer()->SendBroadcast(Result.m_Data.m_Broadcast, -1);
