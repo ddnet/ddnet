@@ -1024,7 +1024,7 @@ bool CScore::ShowTopThread(IDbConnection *pSqlServer, const ISqlData *pGameData,
 	}
 	pSqlServer->BindString(1, pData->m_Map);
 	pSqlServer->BindString(2, aServerLike);
-	
+
 	str_format(pResult->m_Data.m_aaMessages[Line], sizeof(pResult->m_Data.m_aaMessages[Line]),
 		"-----------< %s Top 3 >-----------", pData->m_Server);
 	Line++;
