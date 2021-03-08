@@ -773,17 +773,17 @@ bool CScore::ShowRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 	// check sort method
 	char aBuf[600];
 	str_format(aBuf, sizeof(aBuf),
-	"SELECT Rank, Time, PercentRank "
-	"FROM ("
-	"  SELECT RANK() OVER w AS Rank, PERCENT_RANK() OVER w as PercentRank, Name, MIN(Time) AS Time "
-	"  FROM %s_race "
-	"  WHERE Map = ? "
-	"  AND Server LIKE ?"
-	"  GROUP BY Name "
-	"  WINDOW w AS (ORDER BY Time)"
-	") as a "
-	"WHERE Name = ?;",
-	pSqlServer->GetPrefix());
+		"SELECT Rank, Time, PercentRank "
+		"FROM ("
+		"  SELECT RANK() OVER w AS Rank, PERCENT_RANK() OVER w as PercentRank, Name, MIN(Time) AS Time "
+		"  FROM %s_race "
+		"  WHERE Map = ? "
+		"  AND Server LIKE ?"
+		"  GROUP BY Name "
+		"  WINDOW w AS (ORDER BY Time)"
+		") as a "
+		"WHERE Name = ?;",
+		pSqlServer->GetPrefix());
 
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
@@ -840,7 +840,7 @@ bool CScore::ShowRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 		{
 			pResult->m_MessageKind = CScorePlayerResult::ALL;
 
-			if (str_comp_nocase(pData->m_RequestingPlayer, pData->m_Name) == 0) 
+			if(str_comp_nocase(pData->m_RequestingPlayer, pData->m_Name) == 0)
 			{
 				str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
 					"%s Time: %s, better than %d%%",
@@ -850,7 +850,7 @@ bool CScore::ShowRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 			{
 				str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
 					"%s Time: %s, better than %d%%, requested by %s",
-					pData->m_Name, aBuf, BetterThanPercent, pData->m_RequestingPlayer);			
+					pData->m_Name, aBuf, BetterThanPercent, pData->m_RequestingPlayer);
 			}
 
 			str_format(pResult->m_Data.m_aaMessages[1], sizeof(pResult->m_Data.m_aaMessages[1]),
@@ -972,7 +972,7 @@ bool CScore::ShowTopThread(IDbConnection *pSqlServer, const ISqlData *pGameData,
 	const char *pOrder = pData->m_Offset >= 0 ? "ASC" : "DESC";
 	const char *pAny = "%";
 
-	// check sort method	
+	// check sort method
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
 		"SELECT Name, Time, Rank "
@@ -1025,7 +1025,7 @@ bool CScore::ShowTopThread(IDbConnection *pSqlServer, const ISqlData *pGameData,
 	pSqlServer->BindString(1, pData->m_Map);
 	pSqlServer->BindString(2, aServerLike);
 	
-	str_format(pResult->m_Data.m_aaMessages[Line], sizeof(pResult->m_Data.m_aaMessages[Line]), 
+	str_format(pResult->m_Data.m_aaMessages[Line], sizeof(pResult->m_Data.m_aaMessages[Line]),
 		"-----------< %s Top 3 >-----------", pData->m_Server);
 	Line++;
 
