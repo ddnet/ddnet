@@ -4,6 +4,8 @@
 #include <engine/config.h>
 #include <engine/shared/config.h>
 
+static const ColorRGBA gs_BindPrintColor{1.0f, 1.0f, 0.8f, 1.0f};
+
 bool CBinds::CBindsSpecial::OnInput(IInput::CEvent Event)
 {
 	// only handle F and composed F binds
@@ -68,7 +70,7 @@ void CBinds::Bind(int KeyID, const char *pStr, bool FreeOnly, int Modifier)
 		str_copy(m_aapKeyBindings[Modifier][KeyID], pStr, Size);
 		str_format(aBuf, sizeof(aBuf), "bound %s%s (%d) = %s", GetKeyBindModifiersName(Modifier), Input()->KeyName(KeyID), KeyID, m_aapKeyBindings[Modifier][KeyID]);
 	}
-	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
+	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf, gs_BindPrintColor);
 }
 
 int CBinds::GetModifierMask(IInput *i)
@@ -274,7 +276,7 @@ void CBinds::ConBind(IConsole::IResult *pResult, void *pUserData)
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "key %s not found", pBindStr);
-		pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
+		pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf, gs_BindPrintColor);
 		return;
 	}
 
@@ -294,7 +296,7 @@ void CBinds::ConDumpBinds(IConsole::IResult *pResult, void *pUserData)
 		if(!id)
 		{
 			str_format(aBuf, sizeof(aBuf), "key '%s' not found", pKeyName);
-			pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
+			pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf, gs_BindPrintColor);
 		}
 		else
 		{
@@ -303,7 +305,7 @@ void CBinds::ConDumpBinds(IConsole::IResult *pResult, void *pUserData)
 			else
 				str_format(aBuf, sizeof(aBuf), "%s (%d) = %s", pKeyName, id, pBinds->m_aapKeyBindings[Modifier][id]);
 
-			pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
+			pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf, gs_BindPrintColor);
 		}
 	}
 	else if(pResult->NumArguments() == 0)
@@ -317,7 +319,7 @@ void CBinds::ConDumpBinds(IConsole::IResult *pResult, void *pUserData)
 					continue;
 
 				str_format(aBuf, sizeof(aBuf), "%s%s (%d) = %s", GetKeyBindModifiersName(i), pBinds->Input()->KeyName(j), j, pBinds->m_aapKeyBindings[i][j]);
-				pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
+				pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf, gs_BindPrintColor);
 			}
 		}
 	}
@@ -334,7 +336,7 @@ void CBinds::ConUnbind(IConsole::IResult *pResult, void *pUserData)
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "key %s not found", pKeyName);
-		pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
+		pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf, gs_BindPrintColor);
 		return;
 	}
 
