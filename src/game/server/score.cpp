@@ -1000,7 +1000,7 @@ bool CScore::ShowTopThread(IDbConnection *pSqlServer, const ISqlData *pGameData,
 
 	// show top
 	int Line = 0;
-	str_copy(pResult->m_Data.m_aaMessages[Line], "-----------< Global Top >-----------", sizeof(pResult->m_Data.m_aaMessages[Line]));
+	str_copy(pResult->m_Data.m_aaMessages[Line], "------------ Global Top ------------", sizeof(pResult->m_Data.m_aaMessages[Line]));
 	Line++;
 
 	char aTime[32];
@@ -1044,7 +1044,7 @@ bool CScore::ShowTopThread(IDbConnection *pSqlServer, const ISqlData *pGameData,
 		pSqlServer->BindInt(3, 3);
 
 		str_format(pResult->m_Data.m_aaMessages[Line], sizeof(pResult->m_Data.m_aaMessages[Line]),
-			"-----------< %s Top >-----------", pData->m_Server);
+			"------------ %s Top ------------", pData->m_Server);
 		Line++;
 
 		// show top
@@ -1059,6 +1059,11 @@ bool CScore::ShowTopThread(IDbConnection *pSqlServer, const ISqlData *pGameData,
 				"%d. %s Time: %s", Rank, aName, aTime);
 			Line++;
 		}
+	}
+	else
+	{
+		str_copy(pResult->m_Data.m_aaMessages[Line], "---------------------------------------",
+			sizeof(pResult->m_Data.m_aaMessages[Line]));
 	}
 
 	if(!End)
