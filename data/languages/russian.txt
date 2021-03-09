@@ -1253,15 +1253,6 @@ Entities
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == Ширина текстуры %s не делится на %d или же его высота не делится на %d, что может повлиять на графику.
 
-45° aim
-== Прицел 45°
-
-Deepfly on
-== Вкл. Deepfly
-
-Deepfly off
-== Выкл. Deepfly
-
 Dummy
 == Дамми
 
@@ -1285,3 +1276,12 @@ Entities Background color
 
 Regular Background Color
 == Станд. фоновый цвет
+
+Chat command
+== 
+
+Discord
+== 
+
+https://ddnet.tw/discord
+== 
