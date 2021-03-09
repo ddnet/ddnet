@@ -16,7 +16,7 @@ private:
 	virtual void OnRender();
 	virtual void OnInit();
 
-	bool AuthChatAccount(int Dummy);
+	bool AuthChatAccount(int Dummy, int Offset);
 	void SavePassword(const char *pServer, const char *pPassword);
 
 	void CheckToken(const char *p, int Line, const char *pLine)
@@ -34,6 +34,7 @@ private:
 	char m_aaHostnames[MAX_PASSWORDS][MAX_HOSTNAME_LENGTH];
 	char m_aCurrentServerAddr[64];
 	int64 m_ChatDelay[NUM_DUMMIES];
+	int m_LoginOffset[NUM_DUMMIES];
 };
 
 #endif

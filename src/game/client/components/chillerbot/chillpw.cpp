@@ -7,6 +7,8 @@
 
 void CChillPw::OnMapLoad()
 {
+	m_LoginOffset[0] = 0;
+	m_LoginOffset[1] = 0;
 	m_ChatDelay[0] = time_get() + time_freq() * 2;
 	m_ChatDelay[1] = time_get() + time_freq() * 2;
 	str_copy(m_aCurrentServerAddr, g_Config.m_UiServerAddress, sizeof(m_aCurrentServerAddr));
@@ -23,7 +25,9 @@ void CChillPw::OnRender()
 		if(g_Config.m_ClDummy != i)
 			continue;
 
-		if(AuthChatAccount(i))
+		if(AuthChatAccount(i, m_LoginOffset[i]++))
+			m_ChatDelay[i] = time_get() + time_freq() * 2;
+		else
 			m_ChatDelay[i] = 0;
 	}
 }
@@ -78,13 +82,16 @@ void CChillPw::SavePassword(const char *pServer, const char *pPassword)
 	}
 }
 
-bool CChillPw::AuthChatAccount(int Dummy)
+bool CChillPw::AuthChatAccount(int Dummy, int Offset)
 {
+	int found = 0;
 	for(int i = 0; i < MAX_PASSWORDS; i++)
 	{
 		if(str_comp(m_aCurrentServerAddr, m_aaHostnames[i]))
 			continue;
 		if(Dummy != m_aDummy[i])
+			continue;
+		if(Offset > ++found)
 			continue;
 		Console()->ExecuteLine(m_aaPasswords[i]);
 		return true;
