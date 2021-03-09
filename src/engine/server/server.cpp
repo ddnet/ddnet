@@ -2685,6 +2685,11 @@ int CServer::Run()
 	m_UPnP.Shutdown();
 #endif
 
+	for(auto &Client : m_aClients)
+	{
+		free(Client.m_pPersistentData);
+	}
+
 	return ErrorShutdown();
 }
 
