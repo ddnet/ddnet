@@ -933,13 +933,21 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 			}
 			break;
 		case CScorePlayerResult::ALL:
+		{
+			bool PrimaryMessage = true;
 			for(auto &aMessage : Result.m_Data.m_aaMessages)
 			{
 				if(aMessage[0] == 0)
 					break;
-				GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aMessage, m_ClientID);
+
+				if(GameServer()->ProcessSpamProtection(m_ClientID) && PrimaryMessage)
+					break;
+
+				GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aMessage, -1);
+				PrimaryMessage = false;
 			}
 			break;
+		}
 		case CScorePlayerResult::BROADCAST:
 			if(Result.m_Data.m_Broadcast[0] != 0)
 				GameServer()->SendBroadcast(Result.m_Data.m_Broadcast, -1);
