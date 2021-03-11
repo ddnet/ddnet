@@ -11,6 +11,8 @@ static const unsigned char gs_aHeaderMarker[8] = {'T', 'W', 'G', 'H', 'O', 'S', 
 static const unsigned char gs_CurVersion = 6;
 static const int gs_NumTicksOffset = 93;
 
+static const ColorRGBA gs_GhostPrintColor{0.6f, 0.6f, 0.6f, 1.0f};
+
 CGhostRecorder::CGhostRecorder()
 {
 	m_File = 0;
@@ -31,7 +33,7 @@ int CGhostRecorder::Start(const char *pFilename, const char *pMap, SHA256_DIGEST
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "Unable to open '%s' for ghost recording", pFilename);
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ghost_recorder", aBuf);
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ghost_recorder", aBuf, gs_GhostPrintColor);
 		return -1;
 	}
 
@@ -50,7 +52,7 @@ int CGhostRecorder::Start(const char *pFilename, const char *pMap, SHA256_DIGEST
 
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "ghost recording to '%s'", pFilename);
-	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ghost_recorder", aBuf);
+	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ghost_recorder", aBuf, gs_GhostPrintColor);
 	return 0;
 }
 
@@ -135,7 +137,7 @@ int CGhostRecorder::Stop(int Ticks, int Time)
 	if(!m_File)
 		return -1;
 
-	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ghost_recorder", "Stopped ghost recording");
+	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ghost_recorder", "Stopped ghost recording", gs_GhostPrintColor);
 
 	FlushChunk();
 

@@ -3635,14 +3635,14 @@ void CGameContext::SendChatResponseAll(const char *pLine, void *pUser)
 	if(*pLine == '[')
 		do
 			pLine++;
-		while((pLine - 2 < pLineOrig || *(pLine - 2) != ':') && *pLine != 0); //remove the category (e.g. [Console]: No Such Command)
+		while((pLine - 2 < pLineOrig || *(pLine - 2) != ':') && *pLine != 0); // remove the category (e.g. [Console]: No Such Command)
 
 	pSelf->SendChat(-1, CHAT_ALL, pLine);
 
 	ReentryGuard--;
 }
 
-void CGameContext::SendChatResponse(const char *pLine, void *pUser, bool Highlighted)
+void CGameContext::SendChatResponse(const char *pLine, void *pUser, ColorRGBA PrintColor)
 {
 	CGameContext *pSelf = (CGameContext *)pUser;
 	int ClientID = pSelf->m_ChatResponseTargetID;

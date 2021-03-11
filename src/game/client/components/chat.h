@@ -25,7 +25,8 @@ class CChat : public CComponent
 		int64 m_Time;
 		float m_YOffset[2];
 		int m_ClientID;
-		int m_Team;
+		bool m_Team;
+		bool m_Whisper;
 		int m_NameColor;
 		char m_aName[64];
 		char m_aText[512];

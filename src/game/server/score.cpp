@@ -975,9 +975,9 @@ bool CScore::ShowTopThread(IDbConnection *pSqlServer, const ISqlData *pGameData,
 	// check sort method
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT Name, Time, Rank "
+		"SELECT Name, Time, Rank, Server "
 		"FROM ("
-		"  SELECT RANK() OVER w AS Rank, Name, MIN(Time) AS Time "
+		"  SELECT RANK() OVER w AS Rank, Name, MIN(Time) AS Time, Server "
 		"  FROM %s_race "
 		"  WHERE Map = ? "
 		"  AND Server LIKE ? "
@@ -985,7 +985,7 @@ bool CScore::ShowTopThread(IDbConnection *pSqlServer, const ISqlData *pGameData,
 		"  WINDOW w AS (ORDER BY Time)"
 		") as a "
 		"ORDER BY Rank %s "
-		"LIMIT %d, 3;",
+		"LIMIT %d, ?;",
 		pSqlServer->GetPrefix(),
 		pOrder,
 		LimitStart);
@@ -996,40 +996,17 @@ bool CScore::ShowTopThread(IDbConnection *pSqlServer, const ISqlData *pGameData,
 	}
 	pSqlServer->BindString(1, pData->m_Map);
 	pSqlServer->BindString(2, pAny);
+	pSqlServer->BindInt(3, 6);
 
 	// show top
-	str_copy(pResult->m_Data.m_aaMessages[0], "-----------< Global Top 3 >-----------", sizeof(pResult->m_Data.m_aaMessages[0]));
-
-	char aTime[32];
-	int Line = 1;
-	bool End = false;
-	while(!pSqlServer->Step(&End, pError, ErrorSize) && !End)
-	{
-		char aName[MAX_NAME_LENGTH];
-		pSqlServer->GetString(1, aName, sizeof(aName));
-		float Time = pSqlServer->GetFloat(2);
-		str_time_float(Time, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
-		int Rank = pSqlServer->GetInt(3);
-		str_format(pResult->m_Data.m_aaMessages[Line], sizeof(pResult->m_Data.m_aaMessages[Line]),
-			"%d. %s Time: %s", Rank, aName, aTime);
-		Line++;
-	}
-
-	char aServerLike[16];
-	str_format(aServerLike, sizeof(aServerLike), "%%%s%%", pData->m_Server);
-
-	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
-	{
-		return true;
-	}
-	pSqlServer->BindString(1, pData->m_Map);
-	pSqlServer->BindString(2, aServerLike);
-
-	str_format(pResult->m_Data.m_aaMessages[Line], sizeof(pResult->m_Data.m_aaMessages[Line]),
-		"-----------< %s Top 3 >-----------", pData->m_Server);
+	int Line = 0;
+	str_copy(pResult->m_Data.m_aaMessages[Line], "------------ Global Top ------------", sizeof(pResult->m_Data.m_aaMessages[Line]));
 	Line++;
 
-	// show top
+	char aTime[32];
+	bool End = false;
+	bool HasLocal = false;
+
 	while(!pSqlServer->Step(&End, pError, ErrorSize) && !End)
 	{
 		char aName[MAX_NAME_LENGTH];
@@ -1039,8 +1016,56 @@ bool CScore::ShowTopThread(IDbConnection *pSqlServer, const ISqlData *pGameData,
 		int Rank = pSqlServer->GetInt(3);
 		str_format(pResult->m_Data.m_aaMessages[Line], sizeof(pResult->m_Data.m_aaMessages[Line]),
 			"%d. %s Time: %s", Rank, aName, aTime);
+
+		char aRecordServer[6];
+		pSqlServer->GetString(4, aRecordServer, sizeof(aRecordServer));
+
+		HasLocal = HasLocal || str_comp(aRecordServer, pData->m_Server) == 0;
+
 		Line++;
+
+		if(!HasLocal && Line == 4)
+		{
+			break;
+		}
 	}
+
+	if(!HasLocal)
+	{
+		char aServerLike[16];
+		str_format(aServerLike, sizeof(aServerLike), "%%%s%%", pData->m_Server);
+
+		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		{
+			return true;
+		}
+		pSqlServer->BindString(1, pData->m_Map);
+		pSqlServer->BindString(2, aServerLike);
+		pSqlServer->BindInt(3, 3);
+
+		str_format(pResult->m_Data.m_aaMessages[Line], sizeof(pResult->m_Data.m_aaMessages[Line]),
+			"------------ %s Top ------------", pData->m_Server);
+		Line++;
+
+		// show top
+		while(!pSqlServer->Step(&End, pError, ErrorSize) && !End)
+		{
+			char aName[MAX_NAME_LENGTH];
+			pSqlServer->GetString(1, aName, sizeof(aName));
+			float Time = pSqlServer->GetFloat(2);
+			str_time_float(Time, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
+			int Rank = pSqlServer->GetInt(3);
+			str_format(pResult->m_Data.m_aaMessages[Line], sizeof(pResult->m_Data.m_aaMessages[Line]),
+				"%d. %s Time: %s", Rank, aName, aTime);
+			Line++;
+		}
+	}
+	else
+	{
+		str_copy(pResult->m_Data.m_aaMessages[Line], "---------------------------------------",
+			sizeof(pResult->m_Data.m_aaMessages[Line]));
+	}
+
 	if(!End)
 	{
 		return true;

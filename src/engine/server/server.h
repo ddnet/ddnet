@@ -319,7 +319,7 @@ public:
 	void SendMapData(int ClientID, int Chunk);
 	void SendConnectionReady(int ClientID);
 	void SendRconLine(int ClientID, const char *pLine);
-	static void SendRconLineAuthed(const char *pLine, void *pUser, bool Highlighted = false);
+	static void SendRconLineAuthed(const char *pLine, void *pUser, ColorRGBA PrintColor = {1, 1, 1, 1});
 
 	void SendRconCmdAdd(const IConsole::CCommandInfo *pCommandInfo, int ClientID);
 	void SendRconCmdRem(const IConsole::CCommandInfo *pCommandInfo, int ClientID);
