@@ -2203,6 +2203,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     netaddr.cpp
     packer.cpp
     prng.cpp
+    secure_random.cpp
     sorted_array.cpp
     str.cpp
     strip_path_and_extension.cpp

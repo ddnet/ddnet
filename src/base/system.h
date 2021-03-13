@@ -2193,6 +2193,16 @@ void secure_random_fill(void *bytes, unsigned length);
 */
 int secure_rand(void);
 
+/*
+	Function: secure_rand_below
+		Returns a random nonnegative integer below the given number,
+		with a uniform distribution.
+
+	Parameters:
+		below - Upper limit (exclusive) of integers to return.
+*/
+int secure_rand_below(int below);
+
 #ifdef __cplusplus
 }
 #endif

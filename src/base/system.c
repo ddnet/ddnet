@@ -3608,6 +3608,34 @@ int secure_rand(void)
 	return (int)(i % RAND_MAX);
 }
 
+// From https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2.
+static unsigned int find_next_power_of_two_minus_one(unsigned int n)
+{
+	n--;
+	n |= n >> 1;
+	n |= n >> 2;
+	n |= n >> 4;
+	n |= n >> 4;
+	n |= n >> 16;
+	return n;
+}
+
+int secure_rand_below(int below)
+{
+	unsigned int mask = find_next_power_of_two_minus_one(below);
+	dbg_assert(below > 0, "below must be positive");
+	while(1)
+	{
+		unsigned int n;
+		secure_random_fill(&n, sizeof(n));
+		n &= mask;
+		if((int)n < below)
+		{
+			return n;
+		}
+	}
+}
+
 #if defined(__cplusplus)
 }
 #endif

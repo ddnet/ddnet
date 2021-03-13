@@ -15,5 +15,10 @@ int main(int argc, char **argv)
 {
 	::testing::InitGoogleTest(&argc, argv);
 	net_init();
+	if(secure_random_init())
+	{
+		fprintf(stderr, "random init failed\n");
+		return 1;
+	}
 	return RUN_ALL_TESTS();
 }
