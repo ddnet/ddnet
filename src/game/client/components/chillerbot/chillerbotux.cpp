@@ -402,6 +402,7 @@ void CChillerBotUX::ConCampHackAbs(IConsole::IResult *pResult, void *pUserData)
 	if(!str_comp(pResult->GetString(0), "raw"))
 		Tile = 1;
 	g_Config.m_ClCampHack = 2;
+	pSelf->EnableComponent("camp hack");
 	// absolute all coords
 	if(pResult->NumArguments() > 1)
 	{
@@ -423,6 +424,7 @@ void CChillerBotUX::ConCampHack(IConsole::IResult *pResult, void *pUserData)
 	if(!str_comp(pResult->GetString(0), "raw"))
 		Tile = 1;
 	g_Config.m_ClCampHack = 2;
+	pSelf->EnableComponent("camp hack");
 	if(!pResult->NumArguments())
 	{
 		if(pSelf->GameClient()->m_Snap.m_pLocalCharacter)
