@@ -349,6 +349,7 @@ protected:
 	int m_CallvoteSelectedPlayer;
 	char m_aCallvoteReason[VOTE_REASON_LENGTH];
 	char m_aFilterString[25];
+	bool m_ControlPageOpening;
 
 	// demo
 	enum
