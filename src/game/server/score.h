@@ -31,7 +31,7 @@ struct CScorePlayerResult : ISqlResult
 
 	enum
 	{
-		MAX_MESSAGES = 8,
+		MAX_MESSAGES = 10,
 	};
 
 	enum Variant
