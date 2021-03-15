@@ -458,7 +458,12 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		// avatar
 		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[pInfo->m_ClientID].m_RenderInfo;
 		TeeInfo.m_Size *= TeeSizeMod;
-		RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), vec2(TeeOffset + TeeLength / 2, y + LineHeight / 2));
+		CAnimState *pIdleState = CAnimState::GetIdle();
+		vec2 OffsetToMid;
+		RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
+		vec2 TeeRenderPos(TeeOffset + TeeLength / 2, y + LineHeight / 2.0f + OffsetToMid.y);
+
+		RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
 
 		// name
 		TextRender()->SetCursor(&Cursor, NameOffset, y + (LineHeight - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);

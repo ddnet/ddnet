@@ -549,10 +549,14 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	MainView.HSplitTop(50.0f, &Label, &MainView);
 	Label.VSplitLeft(230.0f, &Label, 0);
-	RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1, 0), vec2(Label.x + 30.0f, Label.y + 28.0f));
+	CAnimState *pIdleState = CAnimState::GetIdle();
+	vec2 OffsetToMid;
+	RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &OwnSkinInfo, OffsetToMid);
+	vec2 TeeRenderPos(Label.x + 30.0f, Label.y + Label.h / 2.0f + OffsetToMid.y);
+	RenderTools()->RenderTee(pIdleState, &OwnSkinInfo, 0, vec2(1, 0), TeeRenderPos);
 	Label.VSplitLeft(70.0f, 0, &Label);
 	Label.HMargin(15.0f, &Label);
-	//UI()->DoLabelScaled(&Label, Skin, 14.0f, -1, 150.0f);
+	// UI()->DoLabelScaled(&Label, Skin, 14.0f, -1, 150.0f);
 	static float s_OffsetSkin = 0.0f;
 	static int s_ClearButton = 0;
 	if(DoClearableEditBox(Skin, &s_ClearButton, &Label, Skin, sizeof(g_Config.m_ClPlayerSkin), 14.0f, &s_OffsetSkin, false, CUI::CORNER_ALL, "default"))
@@ -653,8 +657,9 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			Info.m_ColorableRenderSkin = s->m_ColorableSkin;
 			Info.m_SkinMetrics = s->m_Metrics;
 
-			Item.m_Rect.HSplitTop(5.0f, 0, &Item.m_Rect); // some margin from the top
-			RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, 0, vec2(1.0f, 0.0f), vec2(Item.m_Rect.x + 30, Item.m_Rect.y + Item.m_Rect.h / 2));
+			RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &Info, OffsetToMid);
+			TeeRenderPos = vec2(Item.m_Rect.x + 30, Item.m_Rect.y + Item.m_Rect.h / 2 + OffsetToMid.y);
+			RenderTools()->RenderTee(pIdleState, &Info, 0, vec2(1.0f, 0.0f), TeeRenderPos);
 
 			Item.m_Rect.VSplitLeft(60.0f, 0, &Item.m_Rect);
 			str_format(aBuf, sizeof(aBuf), "%s", s->m_aName);
