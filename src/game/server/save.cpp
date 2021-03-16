@@ -53,7 +53,7 @@ void CSaveTee::Save(CCharacter *pChr)
 	m_Hit = pChr->m_Hit;
 	m_TuneZone = pChr->m_TuneZone;
 	m_TuneZoneOld = pChr->m_TuneZoneOld;
-	
+
 	if(pChr->m_StartTime)
 		m_Time = pChr->Server()->Tick() - pChr->m_StartTime;
 	else

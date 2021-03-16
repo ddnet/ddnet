@@ -678,7 +678,7 @@ void CGameTeams::RequestTeamSwap(CPlayer *Player, CPlayer *TargetPlayer, int Tea
 		return;
 
 	char aBuf[512];
-	if (Player->m_ClientSwapID == TargetPlayer->GetCID()) 
+	if(Player->m_ClientSwapID == TargetPlayer->GetCID())
 	{
 		str_format(aBuf, sizeof(aBuf),
 			"%s has already requested to swap with %s.",
@@ -693,7 +693,7 @@ void CGameTeams::RequestTeamSwap(CPlayer *Player, CPlayer *TargetPlayer, int Tea
 		Server()->ClientName(Player->GetCID()), Server()->ClientName(TargetPlayer->GetCID()), g_Config.m_SvSaveGamesDelay, Server()->ClientName(Player->GetCID()));
 
 	GameServer()->SendChatTeam(Team, aBuf);
-	
+
 	Player->m_ClientSwapID = TargetPlayer->GetCID();
 	m_LastSwap[Team] = Server()->Tick();
 }
@@ -727,7 +727,6 @@ void CGameTeams::SwapTeamCharacters(CPlayer *Player, CPlayer *TargetPlayer, int 
 
 		return;
 	}
-
 
 	CSaveTee PrimarySavedTee;
 	PrimarySavedTee.Save(Player->GetCharacter());

@@ -142,10 +142,10 @@ void CGameContext::ConSettings(IConsole::IResult *pResult, void *pUserData)
 		{
 			str_format(aBuf, sizeof(aBuf), "%s %s",
 				g_Config.m_SvTeam == 1 ?
-					"Teams are available on this server" :
-					(g_Config.m_SvTeam == 0 || g_Config.m_SvTeam == 3) ?
-					"Teams are not available on this server" :
-					"You have to be in a team to play on this server", /*g_Config.m_SvTeamStrict ? "and if you die in a team all of you die" : */
+                                        "Teams are available on this server" :
+				(g_Config.m_SvTeam == 0 || g_Config.m_SvTeam == 3) ?
+                                        "Teams are not available on this server" :
+                                        "You have to be in a team to play on this server", /*g_Config.m_SvTeamStrict ? "and if you die in a team all of you die" : */
 				"and all of your team will die if the team is locked");
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings", aBuf);
 		}
@@ -153,50 +153,50 @@ void CGameContext::ConSettings(IConsole::IResult *pResult, void *pUserData)
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings",
 				g_Config.m_SvTestingCommands ?
-					"Cheats are enabled on this server" :
-					"Cheats are disabled on this server");
+                                        "Cheats are enabled on this server" :
+                                        "Cheats are disabled on this server");
 		}
 		else if(str_comp(pArg, "collision") == 0)
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings",
 				ColTemp ?
-					"Players can collide on this server" :
-					"Players can't collide on this server");
+                                        "Players can collide on this server" :
+                                        "Players can't collide on this server");
 		}
 		else if(str_comp(pArg, "hooking") == 0)
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings",
 				HookTemp ?
-					"Players can hook each other on this server" :
-					"Players can't hook each other on this server");
+                                        "Players can hook each other on this server" :
+                                        "Players can't hook each other on this server");
 		}
 		else if(str_comp(pArg, "endlesshooking") == 0)
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings",
 				g_Config.m_SvEndlessDrag ?
-					"Players hook time is unlimited" :
-					"Players hook time is limited");
+                                        "Players hook time is unlimited" :
+                                        "Players hook time is limited");
 		}
 		else if(str_comp(pArg, "hitting") == 0)
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings",
 				g_Config.m_SvHit ?
-					"Players weapons affect others" :
-					"Players weapons has no affect on others");
+                                        "Players weapons affect others" :
+                                        "Players weapons has no affect on others");
 		}
 		else if(str_comp(pArg, "oldlaser") == 0)
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings",
 				g_Config.m_SvOldLaser ?
-					"Lasers can hit you if you shot them and they pull you towards the bounce origin (Like DDRace Beta)" :
-					"Lasers can't hit you if you shot them, and they pull others towards the shooter");
+                                        "Lasers can hit you if you shot them and they pull you towards the bounce origin (Like DDRace Beta)" :
+                                        "Lasers can't hit you if you shot them, and they pull others towards the shooter");
 		}
 		else if(str_comp(pArg, "me") == 0)
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings",
 				g_Config.m_SvSlashMe ?
-					"Players can use /me commands the famous IRC Command" :
-					"Players can't use the /me command");
+                                        "Players can use /me commands the famous IRC Command" :
+                                        "Players can't use the /me command");
 		}
 		else if(str_comp(pArg, "timeout") == 0)
 		{
@@ -207,8 +207,8 @@ void CGameContext::ConSettings(IConsole::IResult *pResult, void *pUserData)
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings",
 				g_Config.m_SvVoteKick ?
-					"Players can use Callvote menu tab to kick offenders" :
-					"Players can't use the Callvote menu tab to kick offenders");
+                                        "Players can use Callvote menu tab to kick offenders" :
+                                        "Players can't use the Callvote menu tab to kick offenders");
 			if(g_Config.m_SvVoteKick)
 			{
 				str_format(aBuf, sizeof(aBuf),
@@ -216,23 +216,23 @@ void CGameContext::ConSettings(IConsole::IResult *pResult, void *pUserData)
 
 				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings",
 					g_Config.m_SvVoteKickBantime ?
-						aBuf :
-						"Players are just kicked and not banned if they get voted off");
+                                                aBuf :
+                                                "Players are just kicked and not banned if they get voted off");
 			}
 		}
 		else if(str_comp(pArg, "pause") == 0)
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings",
 				g_Config.m_SvPauseable ?
-					"/spec will pause you and your tee will vanish" :
-					"/spec will pause you but your tee will not vanish");
+                                        "/spec will pause you and your tee will vanish" :
+                                        "/spec will pause you but your tee will not vanish");
 		}
 		else if(str_comp(pArg, "scores") == 0)
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings",
 				g_Config.m_SvHideScore ?
-					"Scores are private on this server" :
-					"Scores are public on this server");
+                                        "Scores are private on this server" :
+                                        "Scores are public on this server");
 		}
 		else
 		{
@@ -403,16 +403,16 @@ void CGameContext::ConTeamTop5(IConsole::IResult *pResult, void *pUserData)
 		else
 		{
 			const char *pRequestedName = (str_comp(pResult->GetString(0), "me") == 0) ?
-							     pSelf->Server()->ClientName(pResult->m_ClientID) :
-							     pResult->GetString(0);
+                                                             pSelf->Server()->ClientName(pResult->m_ClientID) :
+                                                             pResult->GetString(0);
 			pSelf->Score()->ShowTeamTop5(pResult->m_ClientID, pRequestedName, 0);
 		}
 	}
 	else if(pResult->NumArguments() == 2 && pResult->GetInteger(1) != 0)
 	{
 		const char *pRequestedName = (str_comp(pResult->GetString(0), "me") == 0) ?
-						     pSelf->Server()->ClientName(pResult->m_ClientID) :
-						     pResult->GetString(0);
+                                                     pSelf->Server()->ClientName(pResult->m_ClientID) :
+                                                     pResult->GetString(0);
 		pSelf->Score()->ShowTeamTop5(pResult->m_ClientID, pRequestedName, pResult->GetInteger(1));
 	}
 	else
@@ -461,16 +461,16 @@ void CGameContext::ConTimes(IConsole::IResult *pResult, void *pUserData)
 		else
 		{
 			const char *pRequestedName = (str_comp(pResult->GetString(0), "me") == 0) ?
-							     pSelf->Server()->ClientName(pResult->m_ClientID) :
-							     pResult->GetString(0);
+                                                             pSelf->Server()->ClientName(pResult->m_ClientID) :
+                                                             pResult->GetString(0);
 			pSelf->Score()->ShowTimes(pResult->m_ClientID, pRequestedName, pResult->GetInteger(1));
 		}
 	}
 	else if(pResult->NumArguments() == 2 && pResult->GetInteger(1) != 0)
 	{
 		const char *pRequestedName = (str_comp(pResult->GetString(0), "me") == 0) ?
-						     pSelf->Server()->ClientName(pResult->m_ClientID) :
-						     pResult->GetString(0);
+                                                     pSelf->Server()->ClientName(pResult->m_ClientID) :
+                                                     pResult->GetString(0);
 		pSelf->Score()->ShowTimes(pResult->m_ClientID, pRequestedName, pResult->GetInteger(1));
 	}
 	else
@@ -734,11 +734,11 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 	if(!Teams.IsStarted(Team))
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Need to have started the map to swap with a player.");
-		return;	
+		return;
 	}
 
 	CPlayer *pSwapPlayer = pSelf->m_apPlayers[TargetClientId];
-	
+
 	bool SwapPending = pSwapPlayer->m_ClientSwapID != pResult->m_ClientID;
 	if(SwapPending)
 	{
@@ -1034,8 +1034,8 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 			{
 				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",
 					g_Config.m_SvInvite ?
-						"This team is locked using /lock. Only members of the team can unlock it using /lock." :
-						"This team is locked using /lock. Only members of the team can invite you or unlock it using /lock.");
+                                                "This team is locked using /lock. Only members of the team can unlock it using /lock." :
+                                                "This team is locked using /lock. Only members of the team can invite you or unlock it using /lock.");
 			}
 			else if(Team > 0 && Team < MAX_CLIENTS && pController->m_Teams.Count(Team) >= g_Config.m_SvTeamMaxSize)
 			{
@@ -1130,8 +1130,8 @@ void CGameContext::ConSetEyeEmote(IConsole::IResult *pResult,
 			IConsole::OUTPUT_LEVEL_STANDARD,
 			"emote",
 			(pPlayer->m_EyeEmoteEnabled) ?
-				"You can now use the preset eye emotes." :
-				"You don't have any eye emotes, remember to bind some. (until you die)");
+                                "You can now use the preset eye emotes." :
+                                "You don't have any eye emotes, remember to bind some. (until you die)");
 		return;
 	}
 	else if(str_comp_nocase(pResult->GetString(0), "on") == 0)
@@ -1144,8 +1144,8 @@ void CGameContext::ConSetEyeEmote(IConsole::IResult *pResult,
 		IConsole::OUTPUT_LEVEL_STANDARD,
 		"emote",
 		(pPlayer->m_EyeEmoteEnabled) ?
-			"You can now use the preset eye emotes." :
-			"You don't have any eye emotes, remember to bind some. (until you die)");
+                        "You can now use the preset eye emotes." :
+                        "You don't have any eye emotes, remember to bind some. (until you die)");
 }
 
 void CGameContext::ConEyeEmote(IConsole::IResult *pResult, void *pUserData)
