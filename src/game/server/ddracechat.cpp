@@ -725,42 +725,28 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	int TargetTeam = Teams.m_Core.Team(TargetClientId);
-
 	if(TargetTeam != Team)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Player on a different team");
 		return;
 	}
 
-	CPlayer *pSwapPlayer = pSelf->m_apPlayers[TargetClientId];
+	if(!Teams.IsStarted(Team))
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Need to have started the map to swap with a player.");
+		return;	
+	}
 
+	CPlayer *pSwapPlayer = pSelf->m_apPlayers[TargetClientId];
+	
 	bool SwapPending = pSwapPlayer->m_ClientSwapID != pResult->m_ClientID;
 	if(SwapPending)
 	{
-		pPlayer->m_ClientSwapID = TargetClientId;
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Swap request sent. The player needs to confirm it.");
-
-		char aBuf[512];
-		str_format(aBuf, sizeof(aBuf), "'%s' has requested to swap positions with you. Type /swap %s to confirm the swap.", pSelf->Server()->ClientName(pResult->m_ClientID), pSelf->Server()->ClientName(pResult->m_ClientID));
-
-		pSelf->SendChatTarget(TargetClientId, aBuf);
+		Teams.RequestTeamSwap(pPlayer, pSwapPlayer, Team);
 		return;
 	}
 
-	CSaveTee PrimarySavedTee;
-	PrimarySavedTee.Save(pPlayer->GetCharacter());
-
-	CSaveTee SecondarySavedTee;
-	SecondarySavedTee.Save(pSwapPlayer->GetCharacter());
-
-	PrimarySavedTee.Load(pSwapPlayer->GetCharacter(), Team);
-	SecondarySavedTee.Load(pPlayer->GetCharacter(), Team);
-
-	pPlayer->m_ClientSwapID = -1;
-	pSwapPlayer->m_ClientSwapID = -1;
-
-	int TimePenalty = ((float)pSelf->Server()->TickSpeed()) * 60 * 5;
-	Teams.IncreaseTeamTime(Team, TimePenalty);
+	Teams.SwapTeamCharacters(pPlayer, pSwapPlayer, Team);
 }
 
 void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)

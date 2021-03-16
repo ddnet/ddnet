@@ -53,7 +53,7 @@ void CSaveTee::Save(CCharacter *pChr)
 	m_Hit = pChr->m_Hit;
 	m_TuneZone = pChr->m_TuneZone;
 	m_TuneZoneOld = pChr->m_TuneZoneOld;
-
+	
 	if(pChr->m_StartTime)
 		m_Time = pChr->Server()->Tick() - pChr->m_StartTime;
 	else
@@ -145,7 +145,7 @@ void CSaveTee::Load(CCharacter *pChr, int Team)
 	pChr->m_TuneZoneOld = m_TuneZoneOld;
 
 	if(m_Time)
-		pChr->m_StartTime = pChr->Server()->Tick() - m_Time;
+		pChr->m_StartTime = pChr->Server()->Tick() - m_Time - g_Config.m_SvSaveGamesPenalty * pChr->Server()->TickSpeed();
 
 	pChr->m_Pos = m_Pos;
 	pChr->m_PrevPos = m_PrevPos;
@@ -209,9 +209,6 @@ void CSaveTee::Load(CCharacter *pChr, int Team)
 
 char *CSaveTee::GetString(const CSaveTeam *pTeam)
 {
-	// Add time penalty of 60 seconds (only to the database)
-	int Time = m_Time + 60 * SERVER_TICK_SPEED;
-
 	int HookedPlayer = -1;
 	if(m_HookedPlayer != -1)
 	{
@@ -268,7 +265,7 @@ char *CSaveTee::GetString(const CSaveTeam *pTeam)
 		m_LastWeapon, m_QueuedWeapon,
 		// tee states
 		m_SuperJump, m_Jetpack, m_NinjaJetpack, m_FreezeTime, m_FreezeTick, m_DeepFreeze, m_EndlessHook,
-		m_DDRaceState, m_Hit, m_Collision, m_TuneZone, m_TuneZoneOld, m_Hook, Time,
+		m_DDRaceState, m_Hit, m_Collision, m_TuneZone, m_TuneZoneOld, m_Hook, m_Time,
 		(int)m_Pos.x, (int)m_Pos.y, (int)m_PrevPos.x, (int)m_PrevPos.y,
 		m_TeleCheckpoint, m_LastPenalty,
 		(int)m_CorePos.x, (int)m_CorePos.y, m_Vel.x, m_Vel.y,
