@@ -375,7 +375,7 @@ class NetObjects(NetVariable):
 		for v in self.object.variables:
 			sub_lines = v.emit_unpack(var_access="Obj.")
 			lines += ["\t" + l for l in sub_lines]
-			lines += ["\tpMsg->%s.push_back(Obj);" % self.name]
+		lines += ["\tpMsg->%s.push_back(Obj);" % self.name]
 		lines += ["}"]
 
 		return lines
