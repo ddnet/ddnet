@@ -300,44 +300,44 @@ class NetVariable:
 		return []
 	def emit_validate(self):
 		return []
-	def emit_pack(self):
+	def emit_pack(self, var_access=""):
 		return []
-	def emit_unpack(self):
+	def emit_unpack(self, var_access="pMsg->"):
 		return []
-	def emit_unpack_check(self):
+	def emit_unpack_check(self, var_access="pMsg->"):
 		return []
 
 class NetString(NetVariable):
 	def emit_declaration(self):
 		return ["const char *%s;"%self.name]
-	def emit_unpack(self):
-		return ["pMsg->%s = pUnpacker->GetString();" % self.name]
-	def emit_pack(self):
-		return ["pPacker->AddString(%s, -1);" % self.name]
+	def emit_unpack(self, var_access="pMsg->"):
+		return ["%s%s = pUnpacker->GetString();" % (var_access, self.name)]
+	def emit_pack(self, var_access=""):
+		return ["pPacker->AddString(%s%s, -1);" % (var_access, self.name)]
 
 class NetStringHalfStrict(NetVariable):
 	def emit_declaration(self):
 		return ["const char *%s;"%self.name]
-	def emit_unpack(self):
-		return ["pMsg->%s = pUnpacker->GetString(CUnpacker::SANITIZE_CC);" % self.name]
-	def emit_pack(self):
-		return ["pPacker->AddString(%s, -1);" % self.name]
+	def emit_unpack(self, var_access="pMsg->"):
+		return ["%s%s = pUnpacker->GetString(CUnpacker::SANITIZE_CC);" % (var_access, self.name)]
+	def emit_pack(self, var_access=""):
+		return ["pPacker->AddString(%s%s, -1);" % (var_access, self.name)]
 
 class NetStringStrict(NetVariable):
 	def emit_declaration(self):
 		return ["const char *%s;"%self.name]
-	def emit_unpack(self):
-		return ["pMsg->%s = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);" % self.name]
-	def emit_pack(self):
-		return ["pPacker->AddString(%s, -1);" % self.name]
+	def emit_unpack(self, var_access="pMsg->"):
+		return ["%s%s = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);" % (var_access, self.name)]
+	def emit_pack(self, var_access=""):
+		return ["pPacker->AddString(%s%s, -1);" % (var_access, self.name)]
 
 class NetIntAny(NetVariable):
 	def emit_declaration(self):
 		return ["int %s;"%self.name]
-	def emit_unpack(self):
-		return ["pMsg->%s = pUnpacker->GetInt();" % self.name]
-	def emit_pack(self):
-		return ["pPacker->AddInt(%s);" % self.name]
+	def emit_unpack(self, var_access="pMsg->"):
+		return ["%s%s = pUnpacker->GetInt();" % (var_access, self.name)]
+	def emit_pack(self, var_access=""):
+		return ["pPacker->AddInt(%s%s);" % (var_access, self.name)]
 
 class NetIntRange(NetIntAny):
 	def __init__(self, name, min_val, max_val):
@@ -346,8 +346,8 @@ class NetIntRange(NetIntAny):
 		self.max = str(max_val)
 	def emit_validate(self):
 		return ["pObj->%s = ClampInt(\"%s\", pObj->%s, %s, %s);"%(self.name, self.name, self.name, self.min, self.max)]
-	def emit_unpack_check(self):
-		return ["if(pMsg->%s < %s || pMsg->%s > %s) { m_pMsgFailedOn = \"%s\"; break; }" % (self.name, self.min, self.name, self.max, self.name)]
+	def emit_unpack_check(self, var_access="pMsg->"):
+		return ["if(%s%s < %s || %s%s > %s) { m_pMsgFailedOn = \"%s\"; break; }" % (var_access, self.name, self.min, var_access, self.name, self.max, self.name)]
 
 class NetBool(NetIntRange):
 	def __init__(self, name):
@@ -356,3 +356,33 @@ class NetBool(NetIntRange):
 class NetTick(NetIntAny):
 	def __init__(self, name):
 		NetIntAny.__init__(self,name)
+
+class NetObjects(NetVariable):
+	"""Represents an array of objects."""
+	def __init__(self, name, net_object):
+		super().__init__(name)
+		self.object = net_object
+
+	def emit_declaration(self):
+		name = self.name.replace("m_", "")
+		lines = ["std::vector<%s> %s;" % (self.object.struct_name, self.name)]
+		return lines
+	def emit_unpack(self):
+		name = self.name.replace("m_", "")
+		lines = ["int Length = pUnpacker->GetInt();"]
+		lines += ["for(int i = 0; i < Length; i++) {"]
+		lines += ["\t%s Obj;" % self.object.struct_name]
+		for v in self.object.variables:
+			sub_lines = v.emit_unpack(var_access="Obj.")
+			lines += ["\t" + l for l in sub_lines]
+			lines += ["\tpMsg->%s.push_back(Obj);" % self.name]
+		lines += ["}"]
+
+		return lines
+	def emit_pack(self):
+		lines = ["pPacker->AddInt(%s.size());" % self.name]
+		lines += ["for(%s obj: %s) {" % (self.object.struct_name, self.name)]
+		lines += ["\tif(obj.Pack(pPacker)) { return true; }"]
+		lines += ["}"]
+
+		return lines 

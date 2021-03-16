@@ -93,6 +93,7 @@ def main():
 		print("#define GAME_GENERATED_PROTOCOL_H")
 		print("#include <engine/shared/protocol.h>")
 		print("#include <engine/message.h>")
+		print("#include <vector>")
 		print(network.RawHeader)
 
 		for e in network.Enums:

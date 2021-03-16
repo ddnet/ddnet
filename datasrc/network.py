@@ -1,7 +1,7 @@
 # pylint: skip-file
 # See https://github.com/ddnet/ddnet/issues/3507
 
-from datatypes import Enum, Flags, NetBool, NetEvent, NetIntAny, NetIntRange, NetMessage, NetMessageEx, NetObject, NetObjectEx, NetString, NetStringHalfStrict, NetStringStrict, NetTick
+from datatypes import Enum, Flags, NetBool, NetEvent, NetIntAny, NetIntRange, NetMessage, NetMessageEx, NetObject, NetObjectEx, NetString, NetStringHalfStrict, NetStringStrict, NetTick, NetObjects
 
 Emotes = ["NORMAL", "PAIN", "HAPPY", "SURPRISE", "ANGRY", "BLINK"]
 PlayerFlags = ["PLAYING", "IN_MENU", "CHATTING", "SCOREBOARD", "AIM"]
@@ -89,6 +89,7 @@ Flags = [
 	Flags("EXPLAYERFLAG", ExPlayerFlags),
 	Flags("PROJECTILEFLAG", ProjectileFlags),
 ]
+
 
 Objects = [
 
@@ -301,6 +302,11 @@ Objects = [
 	]),
 ]
 
+PlayerTimeMessage = NetMessageEx("Sv_PlayerTime", "player-time@ddnet.tw", [
+		NetStringStrict("m_Name"),
+		NetIntAny("m_Score"),
+	])
+
 Messages = [
 
 	### Server messages
@@ -472,5 +478,11 @@ Messages = [
 	NetMessageEx("Sv_Record", "record@netmsg.ddnet.tw", [
 		NetIntAny("m_ServerTimeBest"),
 		NetIntAny("m_PlayerTimeBest"),
+	]),
+
+	PlayerTimeMessage,
+
+	NetMessageEx("Sv_PlayerRanks", "ranks@netmsg.ddnet.tw", [
+		NetObjects("m_Ranks", PlayerTimeMessage),
 	]),
 ]
