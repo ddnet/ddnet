@@ -41,6 +41,7 @@ void CGameTeams::ResetRoundState(int Team)
 		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
 		{
 			GameServer()->m_apPlayers[i]->m_VotedForPractice = false;
+			GameServer()->m_apPlayers[i]->m_ClientSwapID = -1;
 		}
 }
 
@@ -291,7 +292,7 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 	{
 		bool NoElseInOldTeam = Count(OldTeam) <= 1;
 		if(NoElseInOldTeam)
-		{ //4
+		{
 			m_TeamState[OldTeam] = TEAMSTATE_EMPTY;
 
 			// unlock team when last player leaves
@@ -315,7 +316,7 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 		if(!m_TeamLocked[Team])
 			ChangeTeamState(Team, TEAMSTATE_OPEN);
 
-		ResetSwitchers(Team); //3
+		ResetSwitchers(Team);
 	}
 }
 
