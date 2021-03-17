@@ -309,9 +309,12 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 		for(int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
 			if(GetPlayer(LoopClientID))
 				SendTeamsState(LoopClientID);
-		
+
 		if(GetPlayer(ClientID))
+		{
 			GetPlayer(ClientID)->m_VotedForPractice = false;
+			GetPlayer(ClientID)->m_ClientSwapID = -1;
+		}
 	}
 
 	if(Team != TEAM_SUPER && (m_TeamState[Team] == TEAMSTATE_EMPTY || m_TeamLocked[Team]))
@@ -721,7 +724,8 @@ void CGameTeams::SwapTeamCharacters(CPlayer *Player, CPlayer *TargetPlayer, int 
 		return;
 	}
 
-	if(Since > g_Config.m_SvSwapTimeout)
+	int TimeoutAfterDelay = g_Config.m_SvSaveGamesDelay + g_Config.m_SvSwapTimeout;
+	if(Since > TimeoutAfterDelay)
 	{
 		str_format(aBuf, sizeof(aBuf),
 			"Your swap request timed out %d seconds ago.",
