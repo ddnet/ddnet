@@ -1262,15 +1262,6 @@ Use old chat style
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == A largura da textura %s não é divisível por %d ou a altura não é divisível por %d, o que pode causar erros visuais.
 
-45° aim
-== Mirar em 45º
-
-Deepfly on
-== Ativar deepfly
-
-Deepfly off
-== Desativar deepfly
-
 Dummy
 == Dummy
 
@@ -1294,3 +1285,12 @@ Entities Background color
 
 Regular Background Color
 == Cor de fundo comum
+
+Chat command
+== 
+
+Discord
+== 
+
+https://ddnet.tw/discord
+== 

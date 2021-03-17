@@ -763,13 +763,7 @@ Show entities
 Show HUD
 == 
 
-45° aim
-== 
-
-Deepfly on
-== 
-
-Deepfly off
+Chat command
 == 
 
 UI mouse s.
@@ -1058,6 +1052,12 @@ Particles
 == 
 
 Assets directory
+== 
+
+Discord
+== 
+
+https://ddnet.tw/discord
 == 
 
 Learn

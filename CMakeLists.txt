@@ -1890,7 +1890,7 @@ if(CLIENT)
 
   # Target
   set(TARGET_CLIENT ${CLIENT_EXECUTABLE})
-  add_executable(${TARGET_CLIENT}
+  add_executable(${TARGET_CLIENT} WIN32
     ${CLIENT_SRC}
     ${CLIENT_ICON}
     ${CLIENT_MANIFEST}
@@ -1899,6 +1899,10 @@ if(CLIENT)
     $<TARGET_OBJECTS:game-shared>
   )
   target_link_libraries(${TARGET_CLIENT} ${LIBS_CLIENT})
+
+  if(MSVC)
+    target_link_options(${TARGET_CLIENT} PRIVATE /ENTRY:mainCRTStartup)
+  endif()
 
   target_include_directories(${TARGET_CLIENT} PRIVATE
     ${CURL_INCLUDE_DIRS}

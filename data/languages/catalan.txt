@@ -1182,13 +1182,7 @@ Skin Database
 Skins directory
 == 
 
-45° aim
-== 
-
-Deepfly on
-== 
-
-Deepfly off
+Chat command
 == 
 
 Dummy
@@ -1246,6 +1240,12 @@ Particles
 == 
 
 Assets directory
+== 
+
+Discord
+== 
+
+https://ddnet.tw/discord
 == 
 
 https://wiki.ddnet.tw/

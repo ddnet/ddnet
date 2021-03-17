@@ -227,7 +227,7 @@ void CServerBan::ConBanExt(IConsole::IResult *pResult, void *pUser)
 	CServerBan *pThis = static_cast<CServerBan *>(pUser);
 
 	const char *pStr = pResult->GetString(0);
-	int Minutes = pResult->NumArguments() > 1 ? clamp(pResult->GetInteger(1), 0, 44640) : 30;
+	int Minutes = pResult->NumArguments() > 1 ? clamp(pResult->GetInteger(1), 0, 525600) : 30;
 	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "No reason given";
 
 	if(str_isallnum(pStr))
@@ -1219,7 +1219,7 @@ void CServer::SendRconLine(int ClientID, const char *pLine)
 	SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 
-void CServer::SendRconLineAuthed(const char *pLine, void *pUser, bool Highlighted)
+void CServer::SendRconLineAuthed(const char *pLine, void *pUser, ColorRGBA PrintColor)
 {
 	CServer *pThis = (CServer *)pUser;
 	static volatile int s_ReentryGuard = 0;
@@ -1855,6 +1855,9 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 	ADD_INT(p, g_Config.m_Password[0] ? SERVER_FLAG_PASSWORD : 0);
 
 	int MaxClients = m_NetServer.MaxClients();
+	// How many clients the used serverinfo protocol supports, has to be tracked
+	// separately to make sure we don't subtract the reserved slots from it
+	int MaxClientsProtocol = MAX_CLIENTS;
 	if(Type == SERVERINFO_VANILLA || Type == SERVERINFO_INGAME)
 	{
 		if(ClientCount >= VANILLA_MAX_CLIENTS)
@@ -1864,16 +1867,15 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 			else
 				ClientCount = VANILLA_MAX_CLIENTS;
 		}
-		if(MaxClients > VANILLA_MAX_CLIENTS)
-			MaxClients = VANILLA_MAX_CLIENTS;
+		MaxClientsProtocol = VANILLA_MAX_CLIENTS;
 		if(PlayerCount > ClientCount)
 			PlayerCount = ClientCount;
 	}
 
 	ADD_INT(p, PlayerCount); // num players
-	ADD_INT(p, maximum(MaxClients - maximum(g_Config.m_SvSpectatorSlots, g_Config.m_SvReservedSlots), PlayerCount)); // max players
+	ADD_INT(p, minimum(MaxClientsProtocol, maximum(MaxClients - maximum(g_Config.m_SvSpectatorSlots, g_Config.m_SvReservedSlots), PlayerCount))); // max players
 	ADD_INT(p, ClientCount); // num clients
-	ADD_INT(p, maximum(MaxClients - g_Config.m_SvReservedSlots, ClientCount)); // max clients
+	ADD_INT(p, minimum(MaxClientsProtocol, maximum(MaxClients - g_Config.m_SvReservedSlots, ClientCount))); // max clients
 
 	if(Type == SERVERINFO_EXTENDED)
 		p.AddString("", 0); // extra info, reserved
@@ -2682,6 +2684,11 @@ int CServer::Run()
 #if defined(CONF_UPNP)
 	m_UPnP.Shutdown();
 #endif
+
+	for(auto &Client : m_aClients)
+	{
+		free(Client.m_pPersistentData);
+	}
 
 	return ErrorShutdown();
 }

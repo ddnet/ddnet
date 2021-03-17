@@ -337,7 +337,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 	}
 }
 
-void CGameConsole::CInstance::PrintLine(const char *pLine, bool Highlighted)
+void CGameConsole::CInstance::PrintLine(const char *pLine, ColorRGBA PrintColor)
 {
 	int Len = str_length(pLine);
 
@@ -346,7 +346,7 @@ void CGameConsole::CInstance::PrintLine(const char *pLine, bool Highlighted)
 
 	CBacklogEntry *pEntry = m_Backlog.Allocate(sizeof(CBacklogEntry) + Len);
 	pEntry->m_YOffset = -1.0f;
-	pEntry->m_Highlighted = Highlighted;
+	pEntry->m_PrintColor = PrintColor;
 	mem_copy(pEntry->m_aText, pLine, Len);
 	pEntry->m_aText[Len] = 0;
 }
@@ -639,8 +639,6 @@ void CGameConsole::OnRender()
 			}
 		}
 
-		ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor));
-
 		//	render log (actual page, wrap lines)
 		CInstance::CBacklogEntry *pEntry = pConsole->m_Backlog.Last();
 		float OffsetY = 0.0f;
@@ -650,10 +648,7 @@ void CGameConsole::OnRender()
 		{
 			while(pEntry)
 			{
-				if(pEntry->m_Highlighted)
-					TextRender()->TextColor(rgb);
-				else
-					TextRender()->TextColor(1, 1, 1, 1);
+				TextRender()->TextColor(pEntry->m_PrintColor);
 
 				// get y offset (calculate it if we haven't yet)
 				if(pEntry->m_YOffset < 0.0f)
@@ -826,9 +821,9 @@ void CGameConsole::ConDumpRemoteConsole(IConsole::IResult *pResult, void *pUserD
 	((CGameConsole *)pUserData)->Dump(CONSOLETYPE_REMOTE);
 }
 
-void CGameConsole::ClientConsolePrintCallback(const char *pStr, void *pUserData, bool Highlighted)
+void CGameConsole::ClientConsolePrintCallback(const char *pStr, void *pUserData, ColorRGBA PrintColor)
 {
-	((CGameConsole *)pUserData)->m_LocalConsole.PrintLine(pStr, Highlighted);
+	((CGameConsole *)pUserData)->m_LocalConsole.PrintLine(pStr, PrintColor);
 }
 
 void CGameConsole::ConConsolePageUp(IConsole::IResult *pResult, void *pUserData)

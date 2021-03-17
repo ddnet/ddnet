@@ -140,6 +140,7 @@ int CRequest::RunImpl(CURL *pHandle)
 	curl_easy_setopt(pHandle, CURLOPT_URL, m_aUrl);
 	curl_easy_setopt(pHandle, CURLOPT_NOSIGNAL, 1L);
 	curl_easy_setopt(pHandle, CURLOPT_USERAGENT, GAME_NAME " " GAME_RELEASE_VERSION " (" CONF_PLATFORM_STRING "; " CONF_ARCH_STRING ")");
+	curl_easy_setopt(pHandle, CURLOPT_ACCEPT_ENCODING, ""); // Use any compression algorithm supported by libcurl.
 
 	curl_easy_setopt(pHandle, CURLOPT_WRITEDATA, this);
 	curl_easy_setopt(pHandle, CURLOPT_WRITEFUNCTION, WriteCallback);
