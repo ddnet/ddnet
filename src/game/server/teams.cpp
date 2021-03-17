@@ -309,6 +309,9 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 		for(int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
 			if(GetPlayer(LoopClientID))
 				SendTeamsState(LoopClientID);
+		
+		if(GetPlayer(ClientID))
+			GetPlayer(ClientID)->m_VotedForPractice = false;
 	}
 
 	if(Team != TEAM_SUPER && (m_TeamState[Team] == TEAMSTATE_EMPTY || m_TeamLocked[Team]))
