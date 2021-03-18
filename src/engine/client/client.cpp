@@ -78,6 +78,9 @@
 #undef main
 #endif
 
+static const ColorRGBA ClientNetworkPrintColor{0.7f, 1, 0.7f, 1.0f};
+static const ColorRGBA ClientNetworkErrPrintColor{1.0f, 0.25f, 0.25f, 1.0f};
+
 void CGraph::Init(float Min, float Max)
 {
 	m_Min = Min;
@@ -724,7 +727,7 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 		str_copy(m_aServerAddressStr, pAddress, sizeof(m_aServerAddressStr));
 
 	str_format(aBuf, sizeof(aBuf), "connecting to '%s'", m_aServerAddressStr);
-	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
+	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, ClientNetworkPrintColor);
 	bool is_websocket = false;
 	if(strncmp(m_aServerAddressStr, "ws://", 5) == 0)
 	{
@@ -779,7 +782,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "disconnecting. reason='%s'", pReason ? pReason : "unknown");
-	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
+	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, ClientNetworkPrintColor);
 
 	// stop demo playback and recorder
 	m_DemoPlayer.Stop();
@@ -2579,7 +2582,7 @@ void CClient::PumpNetwork()
 			Disconnect();
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "offline error='%s'", m_NetClient[CLIENT_MAIN].ErrorString());
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, ClientNetworkErrPrintColor);
 		}
 
 		if(State() != IClient::STATE_OFFLINE && State() < IClient::STATE_QUITTING && m_DummyConnected &&
@@ -2588,14 +2591,14 @@ void CClient::PumpNetwork()
 			DummyDisconnect(0);
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "offline dummy error='%s'", m_NetClient[CLIENT_DUMMY].ErrorString());
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, ClientNetworkErrPrintColor);
 		}
 
 		//
 		if(State() == IClient::STATE_CONNECTING && m_NetClient[CLIENT_MAIN].State() == NETSTATE_ONLINE)
 		{
 			// we switched to online
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", "connected, sending info");
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", "connected, sending info", ClientNetworkPrintColor);
 			SetState(IClient::STATE_LOADING);
 			SendInfo();
 		}
@@ -3134,7 +3137,7 @@ void CClient::Run()
 
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "version %s", GameClient()->NetVersion());
-	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
+	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, ColorRGBA{0.7f, 0.7f, 1, 1.0f});
 
 	// connect to the server if wanted
 	/*
@@ -4101,11 +4104,20 @@ void CClient::LoadFont()
 
 		Kernel()->RequestInterface<IEngineTextRender>()->SetDefaultFont(pDefaultFont);
 	}
+
+	char aBuff[1024];
+
 	if(!pDefaultFont)
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load font. filename='%s'", pFontFile);
+	{
+		str_format(aBuff, sizeof(aBuff) / sizeof(aBuff[0]), "failed to load font. filename='%s'", pFontFile);
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", aBuff);
+	}
 
 	if(!LoadedFallbackFont)
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load the fallback font. filename='%s'", pFallbackFontFile);
+	{
+		str_format(aBuff, sizeof(aBuff) / sizeof(aBuff[0]), "failed to load the fallback font. filename='%s'", pFallbackFontFile);
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", aBuff);
+	}
 }
 
 void CClient::Notify(const char *pTitle, const char *pMessage)
@@ -4286,10 +4298,12 @@ int main(int argc, const char **argv) // ignore_convention
 		if(str_comp("-s", argv[i]) == 0 || str_comp("--silent", argv[i]) == 0) // ignore_convention
 		{
 			Silent = true;
+		}
+		else if(str_comp("-c", argv[i]) == 0 || str_comp("--console", argv[i]) == 0) // ignore_convention
+		{
 #if defined(CONF_FAMILY_WINDOWS)
-			FreeConsole();
+			AllocConsole();
 #endif
-			break;
 		}
 	}
 
@@ -4383,6 +4397,11 @@ int main(int argc, const char **argv) // ignore_convention
 		pConsole->ExecuteFile(CONFIG_FILE);
 	}
 
+#if defined(CONF_FAMILY_WINDOWS)
+	if(g_Config.m_ClShowConsole)
+		AllocConsole();
+#endif
+
 	// execute autoexec file
 	File = pStorage->OpenFile(AUTOEXEC_CLIENT_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
 	if(File)
@@ -4423,11 +4442,6 @@ int main(int argc, const char **argv) // ignore_convention
 	}
 
 	pClient->Engine()->InitLogfile();
-
-#if defined(CONF_FAMILY_WINDOWS)
-	if(!g_Config.m_ClShowConsole)
-		FreeConsole();
-#endif
 
 	// run the client
 	dbg_msg("client", "starting...");

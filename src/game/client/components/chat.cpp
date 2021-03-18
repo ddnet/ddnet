@@ -665,11 +665,44 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 	bool Highlighted = false;
 	char *p = const_cast<char *>(pLine);
 
+	bool IsTeamLine = Team == 1;
+	bool IsWhisperLine = Team >= 2;
+
 	// Only empty string left
 	if(*p == 0)
 		return;
 
-	bool IgnoreLine = false;
+	auto &&FChatMsgCheckAndPrint = [=](CLine *pLine) {
+		if(pLine->m_ClientID < 0) // server or client message
+		{
+			if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
+				StoreSave(pLine->m_aText);
+		}
+
+		char aBuf[1024];
+		str_format(aBuf, sizeof(aBuf), "%s%s%s", pLine->m_aName, pLine->m_ClientID >= 0 ? ": " : "", pLine->m_aText);
+
+		ColorRGBA ChatLogColor{1, 1, 1, 1};
+		if(pLine->m_Highlighted)
+		{
+			ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor));
+		}
+		else
+		{
+			if(pLine->m_Friend && g_Config.m_ClMessageFriend)
+				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendColor));
+			else if(pLine->m_Team)
+				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageTeamColor));
+			else if(pLine->m_ClientID == -1) // system
+				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageSystemColor));
+			else if(pLine->m_ClientID == -2) // client
+				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageClientColor));
+			else // regular message
+				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageColor));
+		}
+
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, pLine->m_Whisper ? "whisper" : (pLine->m_Team ? "teamchat" : "chat"), aBuf, ChatLogColor);
+	};
 
 	while(*p)
 	{
@@ -688,7 +721,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		CLine *pCurrentLine = &m_aLines[m_CurrentLine];
 
 		// If it's a client message, m_aText will have ": " prepended so we have to work around it.
-		if(pCurrentLine->m_Team == Team && pCurrentLine->m_ClientID == ClientID && str_comp(pCurrentLine->m_aText, pLine) == 0)
+		if(pCurrentLine->m_Team == IsTeamLine && pCurrentLine->m_Whisper == IsWhisperLine && pCurrentLine->m_ClientID == ClientID && str_comp(pCurrentLine->m_aText, pLine) == 0)
 		{
 			pCurrentLine->m_TimesRepeated++;
 			if(pCurrentLine->m_TextContainerIndex != -1)
@@ -701,11 +734,9 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 			pCurrentLine->m_Time = time();
 			pCurrentLine->m_YOffset[0] = -1.f;
 			pCurrentLine->m_YOffset[1] = -1.f;
-			// Can't return here because we still want to log the message to console,
-			// even if we ignore it in chat. We will set the new line, fill it out
-			// totally, but then in the end revert back m_CurrentLine after writing
-			// the message to console.
-			IgnoreLine = true;
+
+			FChatMsgCheckAndPrint(pCurrentLine);
+			return;
 		}
 
 		m_CurrentLine = (m_CurrentLine + 1) % MAX_LINES;
@@ -716,7 +747,8 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		pCurrentLine->m_YOffset[0] = -1.0f;
 		pCurrentLine->m_YOffset[1] = -1.0f;
 		pCurrentLine->m_ClientID = ClientID;
-		pCurrentLine->m_Team = Team;
+		pCurrentLine->m_Team = IsTeamLine;
+		pCurrentLine->m_Whisper = IsWhisperLine;
 		pCurrentLine->m_NameColor = -2;
 
 		if(pCurrentLine->m_TextContainerIndex != -1)
@@ -750,13 +782,10 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 
 		pCurrentLine->m_Highlighted = Highlighted;
 
-		if(ClientID < 0) // server or client message
+		if(pCurrentLine->m_ClientID < 0) // server or client message
 		{
 			str_copy(pCurrentLine->m_aName, "*** ", sizeof(pCurrentLine->m_aName));
 			str_format(pCurrentLine->m_aText, sizeof(pCurrentLine->m_aText), "%s", pLine);
-
-			if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
-				StoreSave(pCurrentLine->m_aText);
 		}
 		else
 		{
@@ -776,7 +805,6 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 				str_format(pCurrentLine->m_aName, sizeof(pCurrentLine->m_aName), "→ %s", m_pClient->m_aClients[ClientID].m_aName);
 				pCurrentLine->m_NameColor = TEAM_BLUE;
 				pCurrentLine->m_Highlighted = false;
-				pCurrentLine->m_Team = 0;
 				Highlighted = false;
 			}
 			else if(Team == 3) // whisper recv
@@ -784,7 +812,6 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 				str_format(pCurrentLine->m_aName, sizeof(pCurrentLine->m_aName), "← %s", m_pClient->m_aClients[ClientID].m_aName);
 				pCurrentLine->m_NameColor = TEAM_RED;
 				pCurrentLine->m_Highlighted = true;
-				pCurrentLine->m_Team = 0;
 				Highlighted = true;
 			}
 			else
@@ -817,15 +844,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 			}
 		}
 
-		char aBuf[1024];
-		str_format(aBuf, sizeof(aBuf), "%s: %s", pCurrentLine->m_aName, pCurrentLine->m_aText);
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, Team >= 2 ? "whisper" : (pCurrentLine->m_Team ? "teamchat" : "chat"), aBuf, Highlighted);
-	}
-
-	if(IgnoreLine)
-	{
-		m_CurrentLine = (m_CurrentLine + MAX_LINES - 1) % MAX_LINES;
-		return;
+		FChatMsgCheckAndPrint(pCurrentLine);
 	}
 
 	// play sound

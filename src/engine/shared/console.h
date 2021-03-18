@@ -218,7 +218,7 @@ public:
 	virtual int RegisterPrintCallback(int OutputLevel, FPrintCallback pfnPrintCallback, void *pUserData);
 	virtual void SetPrintOutputLevel(int Index, int OutputLevel);
 	virtual char *Format(char *pBuf, int Size, const char *pFrom, const char *pStr);
-	virtual void Print(int Level, const char *pFrom, const char *pStr, bool Highlighted = false);
+	virtual void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = {1, 1, 1, 1});
 	virtual void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser);
 
 	void SetAccessLevel(int AccessLevel) { m_AccessLevel = clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_USER)); }

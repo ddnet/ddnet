@@ -57,7 +57,7 @@ void CBroadcast::OnMessage(int MsgType, void *pRawMsg)
 					aBuf[ii] = '\0';
 					ii = 0;
 					if(aBuf[0])
-						m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aBuf, true);
+						m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aBuf, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
 				}
 				else
 				{
@@ -67,7 +67,7 @@ void CBroadcast::OnMessage(int MsgType, void *pRawMsg)
 			}
 			aBuf[ii] = '\0';
 			if(aBuf[0])
-				m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aBuf, true);
+				m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aBuf, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
 		}
 	}
 }
