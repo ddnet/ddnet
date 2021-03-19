@@ -41,6 +41,7 @@ class CChillerBotUX : public CComponent
 	void SelectCampArea(int Key);
 	void MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, float Zoom);
 	void RenderEnabledComponents();
+	void RenderSpeedHud();
 
 	virtual void OnRender();
 	virtual void OnConsoleInit();

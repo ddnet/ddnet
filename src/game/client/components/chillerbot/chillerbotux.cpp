@@ -33,6 +33,7 @@ void CChillerBotUX::OnRender()
 		str_format(aBuf, sizeof(aBuf), "(%d/%d)", m_AfkActivity, 200);
 		SetComponentNoteShort("afk", aBuf);
 	}
+	RenderSpeedHud();
 	RenderEnabledComponents();
 	FinishRenameTick();
 	m_ForceDir = 0;
@@ -43,6 +44,35 @@ void CChillerBotUX::OnRender()
 		m_pClient->m_pControls->m_InputDirectionLeft[g_Config.m_ClDummy] = 0;
 	}
 	m_LastForceDir = m_ForceDir;
+}
+
+void CChillerBotUX::RenderSpeedHud()
+{
+	if(!g_Config.m_ClShowSpeed || !m_pClient->m_Snap.m_pLocalCharacter || !m_pClient->m_Snap.m_pLocalPrevCharacter)
+		return;
+
+	float Width = 300 * Graphics()->ScreenAspect();
+	Graphics()->MapScreen(0, 0, Width, 300);
+	// float Velspeed = length(vec2(m_pClient->m_Snap.m_pLocalCharacter->m_VelX / 256.0f, m_pClient->m_Snap.m_pLocalCharacter->m_VelY / 256.0f)) * 50;
+
+	const char *paStrings[] = {"Vel X:", "Vel Y:"};
+	const int Num = sizeof(paStrings) / sizeof(char *);
+	const float LineHeight = 12.0f;
+	const float Fontsize = 15.0f;
+
+	float x = Width - 100.0f, y = 50.0f;
+	for(int i = 0; i < Num; ++i)
+		TextRender()->Text(0, x, y + i * LineHeight, Fontsize, paStrings[i], -1.0f);
+
+	x = Width - 10.0f;
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "%.0f", m_pClient->m_Snap.m_pLocalCharacter->m_VelX / 32.f);
+	float w = TextRender()->TextWidth(0, Fontsize, aBuf, -1, -1.0f);
+	TextRender()->Text(0, x - w, y, Fontsize, aBuf, -1.0f);
+	y += LineHeight;
+	str_format(aBuf, sizeof(aBuf), "%.0f", m_pClient->m_Snap.m_pLocalCharacter->m_VelY / 32.f);
+	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1, -1.0f);
+	TextRender()->Text(0, x - w, y, Fontsize, aBuf, -1.0f);
 }
 
 void CChillerBotUX::RenderEnabledComponents()
