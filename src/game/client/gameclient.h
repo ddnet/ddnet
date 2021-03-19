@@ -451,6 +451,7 @@ public:
 	CGameWorld m_PredictedWorld;
 	CGameWorld m_PrevPredictedWorld;
 
+	void DummyResetInput();
 	void Echo(const char *pString);
 	bool IsOtherTeam(int ClientID);
 	bool CanDisplayWarning();
