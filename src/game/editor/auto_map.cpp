@@ -397,25 +397,17 @@ void CAutoMapper::ProceedLocalized(CLayerTiles *pLayer, int ConfigID, int Seed, 
 	int UpdateToX = clamp(X + Width + 3 * pConf->m_EndX, 0, pLayer->m_Width);
 	int UpdateToY = clamp(Y + Height + 3 * pConf->m_EndY, 0, pLayer->m_Height);
 
-	CLayerTiles *pUpdateLayer;
-	if(UpdateFromX != 0 || UpdateFromY != 0 || UpdateToX != pLayer->m_Width || UpdateToY != pLayer->m_Width)
-	{ // Needs a layer to work on
-		pUpdateLayer = new CLayerTiles(UpdateToX - UpdateFromX, UpdateToY - UpdateFromY);
+	CLayerTiles *pUpdateLayer = new CLayerTiles(UpdateToX - UpdateFromX, UpdateToY - UpdateFromY);
 
-		for(int y = UpdateFromY; y < UpdateToY; y++)
-		{
-			for(int x = UpdateFromX; x < UpdateToX; x++)
-			{
-				CTile *in = &pLayer->m_pTiles[y * pLayer->m_Width + x];
-				CTile *out = &pUpdateLayer->m_pTiles[(y - UpdateFromY) * pUpdateLayer->m_Width + x - UpdateFromX];
-				out->m_Index = in->m_Index;
-				out->m_Flags = in->m_Flags;
-			}
-		}
-	}
-	else
+	for(int y = UpdateFromY; y < UpdateToY; y++)
 	{
-		pUpdateLayer = pLayer;
+		for(int x = UpdateFromX; x < UpdateToX; x++)
+		{
+			CTile *in = &pLayer->m_pTiles[y * pLayer->m_Width + x];
+			CTile *out = &pUpdateLayer->m_pTiles[(y - UpdateFromY) * pUpdateLayer->m_Width + x - UpdateFromX];
+			out->m_Index = in->m_Index;
+			out->m_Flags = in->m_Flags;
+		}
 	}
 
 	Proceed(pUpdateLayer, ConfigID, Seed, UpdateFromX, UpdateFromY);
@@ -431,8 +423,7 @@ void CAutoMapper::ProceedLocalized(CLayerTiles *pLayer, int ConfigID, int Seed, 
 		}
 	}
 
-	if(pUpdateLayer)
-		delete pUpdateLayer;
+	delete pUpdateLayer;
 }
 
 void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID, int Seed, int SeedOffsetX, int SeedOffsetY)
