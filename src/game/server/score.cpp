@@ -1868,7 +1868,7 @@ bool CScore::LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 	bool Found = false;
 	for(int i = 0; i < pResult->m_SavedTeam.GetMembersCount(); i++)
 	{
-		if(str_comp(pResult->m_SavedTeam.m_pSavedTees->GetName(), pData->m_RequestingPlayer) == 0)
+		if(str_comp(pResult->m_SavedTeam.m_pSavedTees[i].GetName(), pData->m_RequestingPlayer) == 0)
 		{
 			Found = true;
 			break;
