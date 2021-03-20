@@ -1884,6 +1884,8 @@ void CCharacter::HandleTiles(int Index)
 			return;
 		int TeleOut = m_Core.m_pWorld->RandomOr0((*m_pTeleOuts)[z - 1].size());
 		m_Core.m_Pos = (*m_pTeleOuts)[z - 1][TeleOut];
+		if(!m_DeepFreeze && Config()->m_SvTeleUnfreeze)
+			UnFreeze();
 		if(!g_Config.m_SvTeleportHoldHook)
 		{
 			m_Core.m_HookedPlayer = -1;
@@ -1902,6 +1904,8 @@ void CCharacter::HandleTiles(int Index)
 			return;
 		int TeleOut = m_Core.m_pWorld->RandomOr0((*m_pTeleOuts)[evilz - 1].size());
 		m_Core.m_Pos = (*m_pTeleOuts)[evilz - 1][TeleOut];
+		if(!m_DeepFreeze && Config()->m_SvTeleUnfreeze)
+			UnFreeze();
 		if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons)
 		{
 			m_Core.m_Vel = vec2(0, 0);
@@ -1933,6 +1937,8 @@ void CCharacter::HandleTiles(int Index)
 				int TeleOut = m_Core.m_pWorld->RandomOr0((*m_pTeleCheckOuts)[k].size());
 				m_Core.m_Pos = (*m_pTeleCheckOuts)[k][TeleOut];
 				m_Core.m_Vel = vec2(0, 0);
+				if(!m_DeepFreeze && Config()->m_SvTeleUnfreeze)
+					UnFreeze();
 
 				if(!g_Config.m_SvTeleportHoldHook)
 				{
@@ -1952,6 +1958,8 @@ void CCharacter::HandleTiles(int Index)
 		{
 			m_Core.m_Pos = SpawnPos;
 			m_Core.m_Vel = vec2(0, 0);
+			if(!m_DeepFreeze && Config()->m_SvTeleUnfreeze)
+				UnFreeze();
 
 			if(!g_Config.m_SvTeleportHoldHook)
 			{
@@ -1975,6 +1983,8 @@ void CCharacter::HandleTiles(int Index)
 			{
 				int TeleOut = m_Core.m_pWorld->RandomOr0((*m_pTeleCheckOuts)[k].size());
 				m_Core.m_Pos = (*m_pTeleCheckOuts)[k][TeleOut];
+				if(!m_DeepFreeze && Config()->m_SvTeleUnfreeze)
+					UnFreeze();
 
 				if(!g_Config.m_SvTeleportHoldHook)
 				{
@@ -1992,6 +2002,8 @@ void CCharacter::HandleTiles(int Index)
 		if(GameServer()->m_pController->CanSpawn(m_pPlayer->GetTeam(), &SpawnPos))
 		{
 			m_Core.m_Pos = SpawnPos;
+			if(!m_DeepFreeze && Config()->m_SvTeleUnfreeze)
+				UnFreeze();
 
 			if(!g_Config.m_SvTeleportHoldHook)
 			{
