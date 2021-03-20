@@ -94,8 +94,8 @@ public:
 	void SetCpActive(CPlayer *Player, int CpActive);
 	void KillSavedTeam(int ClientID, int Team);
 	void ResetSavedTeam(int ClientID, int Team);
-	void RequestTeamSwap(CPlayer *Player, CPlayer *TargetPlayer, int Team);
-	void SwapTeamCharacters(CPlayer *Player, CPlayer *TargetPlayer, int Team);
+	void RequestTeamSwap(CPlayer *pPlayer, CPlayer *pTargetPlayer, int Team);
+	void SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, int Team);
 	void ProcessSaveTeam();
 
 	bool TeeFinished(int ClientID)

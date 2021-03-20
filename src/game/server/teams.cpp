@@ -44,7 +44,7 @@ void CGameTeams::ResetRoundState(int Team)
 			GameServer()->m_apPlayers[i]->m_VotedForPractice = false;
 			GameServer()->m_apPlayers[i]->m_SwapTargetsClientID = -1;
 		}
-	}	
+	}
 }
 
 void CGameTeams::ResetSwitchers(int Team)
@@ -681,17 +681,17 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 	}
 }
 
-void CGameTeams::RequestTeamSwap(CPlayer *Player, CPlayer *TargetPlayer, int Team)
+void CGameTeams::RequestTeamSwap(CPlayer *pPlayer, CPlayer *pTargetPlayer, int Team)
 {
-	if(!Player || !TargetPlayer)
+	if(!pPlayer || !pTargetPlayer)
 		return;
 
 	char aBuf[512];
-	if(Player->m_SwapTargetsClientID == TargetPlayer->GetCID())
+	if(pPlayer->m_SwapTargetsClientID == pTargetPlayer->GetCID())
 	{
 		str_format(aBuf, sizeof(aBuf),
 			"%s has already requested to swap with %s.",
-			Server()->ClientName(Player->GetCID()), Server()->ClientName(TargetPlayer->GetCID()));
+			Server()->ClientName(pPlayer->GetCID()), Server()->ClientName(pTargetPlayer->GetCID()));
 
 		GameServer()->SendChatTeam(Team, aBuf);
 		return;
@@ -699,17 +699,17 @@ void CGameTeams::RequestTeamSwap(CPlayer *Player, CPlayer *TargetPlayer, int Tea
 
 	str_format(aBuf, sizeof(aBuf),
 		"%s has requested to swap with %s. Please wait %d then type /swap %s.",
-		Server()->ClientName(Player->GetCID()), Server()->ClientName(TargetPlayer->GetCID()), g_Config.m_SvSaveSwapGamesDelay, Server()->ClientName(Player->GetCID()));
+		Server()->ClientName(pPlayer->GetCID()), Server()->ClientName(pTargetPlayer->GetCID()), g_Config.m_SvSaveSwapGamesDelay, Server()->ClientName(pPlayer->GetCID()));
 
 	GameServer()->SendChatTeam(Team, aBuf);
 
-	Player->m_SwapTargetsClientID = TargetPlayer->GetCID();
+	pPlayer->m_SwapTargetsClientID = pTargetPlayer->GetCID();
 	m_LastSwap[Team] = Server()->Tick();
 }
 
-void CGameTeams::SwapTeamCharacters(CPlayer *Player, CPlayer *TargetPlayer, int Team)
+void CGameTeams::SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, int Team)
 {
-	if(!Player || !TargetPlayer)
+	if(!pPlayer || !pTargetPlayer)
 		return;
 
 	char aBuf[128];
@@ -735,27 +735,27 @@ void CGameTeams::SwapTeamCharacters(CPlayer *Player, CPlayer *TargetPlayer, int 
 
 		GameServer()->SendChatTeam(Team, aBuf);
 
-		Player->m_SwapTargetsClientID = -1;
-		TargetPlayer->m_SwapTargetsClientID = -1;
+		pPlayer->m_SwapTargetsClientID = -1;
+		pTargetPlayer->m_SwapTargetsClientID = -1;
 
 		return;
 	}
 
 	CSaveTee PrimarySavedTee;
-	PrimarySavedTee.Save(Player->GetCharacter());
+	PrimarySavedTee.Save(pPlayer->GetCharacter());
 
 	CSaveTee SecondarySavedTee;
-	SecondarySavedTee.Save(TargetPlayer->GetCharacter());
+	SecondarySavedTee.Save(pTargetPlayer->GetCharacter());
 
-	PrimarySavedTee.Load(TargetPlayer->GetCharacter(), Team);
-	SecondarySavedTee.Load(Player->GetCharacter(), Team);
+	PrimarySavedTee.Load(pTargetPlayer->GetCharacter(), Team);
+	SecondarySavedTee.Load(pPlayer->GetCharacter(), Team);
 
-	Player->m_SwapTargetsClientID = -1;
-	TargetPlayer->m_SwapTargetsClientID = -1;
+	pPlayer->m_SwapTargetsClientID = -1;
+	pTargetPlayer->m_SwapTargetsClientID = -1;
 
 	str_format(aBuf, sizeof(aBuf),
 		"%s has swapped with %s.",
-		Server()->ClientName(Player->GetCID()), Server()->ClientName(TargetPlayer->GetCID()));
+		Server()->ClientName(pPlayer->GetCID()), Server()->ClientName(pTargetPlayer->GetCID()));
 
 	GameServer()->SendChatTeam(Team, aBuf);
 }
