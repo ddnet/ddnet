@@ -727,7 +727,7 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 	int TargetTeam = Teams.m_Core.Team(TargetClientId);
 	if(TargetTeam != Team)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Player on a different team");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Player is on a different team");
 		return;
 	}
 
@@ -739,7 +739,7 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 
 	CPlayer *pSwapPlayer = pSelf->m_apPlayers[TargetClientId];
 
-	bool SwapPending = pSwapPlayer->m_ClientSwapID != pResult->m_ClientID;
+	bool SwapPending = pSwapPlayer->m_SwapTargetsClientID != pResult->m_ClientID;
 	if(SwapPending)
 	{
 		Teams.RequestTeamSwap(pPlayer, pSwapPlayer, Team);

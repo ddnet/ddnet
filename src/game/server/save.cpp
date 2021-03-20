@@ -55,7 +55,7 @@ void CSaveTee::Save(CCharacter *pChr)
 	m_TuneZoneOld = pChr->m_TuneZoneOld;
 
 	if(pChr->m_StartTime)
-		m_Time = pChr->Server()->Tick() - pChr->m_StartTime;
+		m_Time = pChr->Server()->Tick() - pChr->m_StartTime + g_Config.m_SvSaveSwapGamesPenalty * pChr->Server()->TickSpeed();
 	else
 		m_Time = 0;
 
@@ -145,7 +145,7 @@ void CSaveTee::Load(CCharacter *pChr, int Team)
 	pChr->m_TuneZoneOld = m_TuneZoneOld;
 
 	if(m_Time)
-		pChr->m_StartTime = pChr->Server()->Tick() - m_Time - g_Config.m_SvSaveGamesPenalty * pChr->Server()->TickSpeed();
+		pChr->m_StartTime = pChr->Server()->Tick() - m_Time;
 
 	pChr->m_Pos = m_Pos;
 	pChr->m_PrevPos = m_PrevPos;

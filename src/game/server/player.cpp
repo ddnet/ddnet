@@ -138,7 +138,7 @@ void CPlayer::Reset()
 	m_NotEligibleForFinish = false;
 	m_EligibleForFinishCheck = 0;
 	m_VotedForPractice = false;
-	m_ClientSwapID = -1;
+	m_SwapTargetsClientID = -1;
 }
 
 static int PlayerFlags_SevenToSix(int Flags)
