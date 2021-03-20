@@ -360,6 +360,8 @@ MACRO_CONFIG_INT(ClPredictFreeze, cl_predict_freeze, 1, 0, 2, CFGFLAG_CLIENT | C
 MACRO_CONFIG_INT(ClShowNinja, cl_show_ninja, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show ninja skin")
 MACRO_CONFIG_INT(ClShowHookCollOther, cl_show_hook_coll_other, 1, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show other players' hook collision line (2 to always show)")
 MACRO_CONFIG_INT(ClShowHookCollOwn, cl_show_hook_coll_own, 1, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show own players' hook collision line (2 to always show)")
+MACRO_CONFIG_INT(ClShowOwnHookRangeInd, cl_show_own_hook_range_ind, 0, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show a thin circle around your player that indicates your maximal hook length.")
+MACRO_CONFIG_INT(ClShowOtherHookRangeInd, cl_show_other_hook_range_ind, 0, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show a thin circle around all players that indicates their maximal hook length.")
 
 MACRO_CONFIG_INT(ClChatTeamColors, cl_chat_teamcolors, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show names in chat in team colors")
 MACRO_CONFIG_INT(ClChatReset, cl_chat_reset, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Reset chat when pressing escape")

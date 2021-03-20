@@ -2101,6 +2101,17 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	}
 
 	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_ClShowOwnHookRangeInd, Localize("Show a circle indicating your hook range"), g_Config.m_ClShowOwnHookRangeInd, &Button))
+	{
+		g_Config.m_ClShowOwnHookRangeInd ^= 1;
+	}
+	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_ClShowOtherHookRangeInd, Localize("Show a circle indicating others hook range"), g_Config.m_ClShowOtherHookRangeInd, &Button))
+	{
+		g_Config.m_ClShowOtherHookRangeInd ^= 1;
+	}
+
+	Left.HSplitTop(20.0f, &Button, &Left);
 	if(DoButton_CheckBox(&g_Config.m_ClShowDirection, Localize("Show other players' key presses"), g_Config.m_ClShowDirection, &Button))
 	{
 		g_Config.m_ClShowDirection ^= 1;

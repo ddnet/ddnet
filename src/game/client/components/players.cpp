@@ -273,6 +273,32 @@ void CPlayers::RenderPlayer(
 			vec2(-Player.m_Direction * 100 * length(Vel), -50));
 	}
 
+	// draw optional hook range indicator
+	{
+		bool RenderHookRangeInd = (Local ? g_Config.m_ClShowOwnHookRangeInd : g_Config.m_ClShowOtherHookRangeInd);
+		if(RenderHookRangeInd)
+		{
+			Graphics()->TextureClear();
+			Graphics()->LinesBegin();
+			Graphics()->SetColor(Local ? 255 : 0, Local ? 0 : 255, 255, Alpha);
+
+			IGraphics::CLineItem arr[1];
+			float d = (float)GameClient()->m_Tuning[g_Config.m_ClDummy].m_HookLength;
+			for(int nf = 0; nf < 50; nf++)
+			{
+				float aa = ((float)nf / 50.0 * 2 * pi);
+				float ab = ((float)(nf + 1) / 50.0 * 2 * pi);
+				int offxa = (sin(aa) * d);
+				int offya = (cos(aa) * d);
+				int offxb = (sin(ab) * d);
+				int offyb = (cos(ab) * d);
+				arr[0] = IGraphics::CLineItem((float)Position.x + offxa, (float)Position.y + offya, (float)Position.x + offxb, (float)Position.y + offyb);
+				Graphics()->LinesDraw(arr, 1);
+			}
+			Graphics()->LinesEnd();
+		}
+	}
+
 	// draw gun
 	{
 		bool AlwaysRenderHookColl = GameClient()->m_GameInfo.m_AllowHookColl && (Local ? g_Config.m_ClShowHookCollOwn : g_Config.m_ClShowHookCollOther) == 2;
