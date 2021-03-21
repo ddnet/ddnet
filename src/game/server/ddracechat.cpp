@@ -705,7 +705,7 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 	int TargetClientId = -1;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(!str_comp(pName, pSelf->Server()->ClientName(i)))
+		if(pSelf->m_apPlayers[i] && !str_comp(pName, pSelf->Server()->ClientName(i)))
 		{
 			TargetClientId = i;
 			break;
