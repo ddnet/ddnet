@@ -674,6 +674,81 @@ void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	const char *pName = pResult->GetString(0);
+
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if(!pPlayer)
+		return;
+
+	if(pSelf->ProcessSpamProtection(pResult->m_ClientID))
+		return;
+
+	CGameTeams &Teams = ((CGameControllerDDRace *)pSelf->m_pController)->m_Teams;
+
+	int Team = Teams.m_Core.Team(pResult->m_ClientID);
+
+	if(Team < TEAM_FLOCK || (Team == TEAM_FLOCK && g_Config.m_SvTeam != 3) || Team >= TEAM_SUPER)
+	{
+		pSelf->Console()->Print(
+			IConsole::OUTPUT_LEVEL_STANDARD,
+			"print",
+			"Join a team to use swap feature, which means you can swap positions with each other.");
+		return;
+	}
+
+	int TargetClientId = -1;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(pSelf->m_apPlayers[i] && !str_comp(pName, pSelf->Server()->ClientName(i)))
+		{
+			TargetClientId = i;
+			break;
+		}
+	}
+
+	if(TargetClientId < 0)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Player not found");
+		return;
+	}
+
+	if(TargetClientId == pResult->m_ClientID)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Can't swap with yourself");
+		return;
+	}
+
+	int TargetTeam = Teams.m_Core.Team(TargetClientId);
+	if(TargetTeam != Team)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Player is on a different team");
+		return;
+	}
+
+	if(!Teams.IsStarted(Team))
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Need to have started the map to swap with a player.");
+		return;
+	}
+
+	CPlayer *pSwapPlayer = pSelf->m_apPlayers[TargetClientId];
+
+	bool SwapPending = pSwapPlayer->m_SwapTargetsClientID != pResult->m_ClientID;
+	if(SwapPending)
+	{
+		Teams.RequestTeamSwap(pPlayer, pSwapPlayer, Team);
+		return;
+	}
+
+	Teams.SwapTeamCharacters(pPlayer, pSwapPlayer, Team);
+}
+
 void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

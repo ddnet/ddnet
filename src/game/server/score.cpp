@@ -1881,11 +1881,11 @@ bool CScore::LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 	}
 
 	int Since = pSqlServer->GetInt(2);
-	if(Since < g_Config.m_SvSaveGamesDelay)
+	if(Since < g_Config.m_SvSaveSwapGamesDelay)
 	{
 		str_format(pResult->m_aMessage, sizeof(pResult->m_aMessage),
 			"You have to wait %d seconds until you can load this savegame",
-			g_Config.m_SvSaveGamesDelay - Since);
+			g_Config.m_SvSaveSwapGamesDelay - Since);
 		return false;
 	}
 
