@@ -2336,7 +2336,6 @@ set(CPACK_SOURCE_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION
 set(CPACK_SOURCE_FILES
   CMakeLists.txt
   README.md
-  autoexec_server.cfg
   cmake/
   data/
   datasrc/
@@ -2380,7 +2379,6 @@ set(CPACK_DIRS data)
 set(CPACK_FILES
   license.txt
   storage.cfg
-  autoexec_server.cfg
   ${COPY_FILES}
 )
 if(TARGET_OS STREQUAL "windows")
