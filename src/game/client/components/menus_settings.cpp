@@ -442,6 +442,21 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	}
 }
 
+struct CUISkin
+{
+	const CSkin *m_pSkin;
+
+	CUISkin() :
+		m_pSkin(nullptr) {}
+	CUISkin(const CSkin *pSkin) :
+		m_pSkin(pSkin) {}
+
+	bool operator<(const CUISkin &Other) const { return str_comp_nocase(m_pSkin->m_aName, Other.m_pSkin->m_aName) < 0; }
+
+	bool operator<(const char *pOther) const { return str_comp_nocase(m_pSkin->m_aName, pOther) < 0; }
+	bool operator==(const char *pOther) const { return !str_comp_nocase(m_pSkin->m_aName, pOther); }
+};
+
 void CMenus::RenderSettingsTee(CUIRect MainView)
 {
 	CUIRect Button, Label, Button2, Dummy, DummyLabel, SkinList, QuickSearch, QuickSearchClearButton, SkinDB, SkinPrefix, SkinPrefixLabel, DirectoryButton, RefreshButton;
@@ -606,7 +621,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	// skin selector
 	MainView.HSplitTop(20.0f, 0, &MainView);
 	MainView.HSplitTop(230.0f, &SkinList, &MainView);
-	static sorted_array<const CSkin *> s_paSkinList;
+	static sorted_array<CUISkin> s_paSkinList;
 	static int s_SkinCount = 0;
 	static float s_ScrollValue = 0.0f;
 	if(s_InitSkinlist || m_pClient->m_pSkins->Num() != s_SkinCount)
@@ -631,7 +646,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			if(s == 0)
 				continue;
 
-			s_paSkinList.add_unsorted(s);
+			s_paSkinList.add(CUISkin(s));
 		}
 		s_InitSkinlist = false;
 		s_SkinCount = m_pClient->m_pSkins->Num();
@@ -641,12 +656,12 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	UiDoListboxStart(&s_InitSkinlist, &SkinList, 50.0f, Localize("Skins"), "", s_paSkinList.size(), 4, OldSelected, s_ScrollValue);
 	for(int i = 0; i < s_paSkinList.size(); ++i)
 	{
-		const CSkin *s = s_paSkinList[i];
+		const CSkin *s = s_paSkinList[i].m_pSkin;
 
 		if(str_comp(s->m_aName, Skin) == 0)
 			OldSelected = i;
 
-		CListboxItem Item = UiDoListboxNextItem(s_paSkinList[i], OldSelected == i);
+		CListboxItem Item = UiDoListboxNextItem(s_paSkinList[i].m_pSkin, OldSelected == i);
 		char aBuf[128];
 		if(Item.m_Visible)
 		{
@@ -680,7 +695,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 	if(OldSelected != NewSelected)
 	{
-		mem_copy(Skin, s_paSkinList[NewSelected]->m_aName, sizeof(g_Config.m_ClPlayerSkin));
+		mem_copy(Skin, s_paSkinList[NewSelected].m_pSkin->m_aName, sizeof(g_Config.m_ClPlayerSkin));
 		SetNeedSendInfo();
 	}
 
