@@ -330,15 +330,12 @@ int CServerBrowser::SortHash() const
 
 void SetFilteredPlayers(const CServerInfo &Item)
 {
-	if(g_Config.m_BrFilterSpectators)
-		Item.m_NumFilteredPlayers = Item.m_NumPlayers;
-	else
-		Item.m_NumFilteredPlayers = Item.m_NumClients;
+	Item.m_NumFilteredPlayers = g_Config.m_BrFilterSpectators ? Item.m_NumPlayers : Item.m_NumClients;
 	if(g_Config.m_BrFilterConnectingPlayers)
 	{
 		for(const auto &Client : Item.m_aClients)
 		{
-			if(str_comp(Client.m_aName, "(connecting)") == 0 && Client.m_aClan[0] == '\0' && Client.m_Country == -1 && Client.m_Score == 0)
+			if((!g_Config.m_BrFilterSpectators || Client.m_Player) && str_comp(Client.m_aName, "(connecting)") == 0 && Client.m_aClan[0] == '\0')
 				Item.m_NumFilteredPlayers--;
 		}
 	}
