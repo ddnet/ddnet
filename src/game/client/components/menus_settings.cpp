@@ -899,7 +899,9 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	static int s_SelectedControl = -1;
 	static float s_ScrollValue = 0;
 	int OldSelected = s_SelectedControl;
-	UiDoListboxStart(&s_ControlsList, &MainView, 500.0f, Localize("Controls"), "", 1, 1, s_SelectedControl, s_ScrollValue);
+	// Hacky values: Size of 10.0f per item for smoother scrolling, 72 elements
+	// fits the current size of controls settings
+	UiDoListboxStart(&s_ControlsList, &MainView, 10.0f, Localize("Controls"), "", 72, 1, s_SelectedControl, s_ScrollValue);
 
 	CUIRect MovementSettings, WeaponSettings, VotingSettings, ChatSettings, DummySettings, MiscSettings, ResetButton;
 	CListboxItem Item = UiDoListboxNextItem(&OldSelected, false, false, true);
