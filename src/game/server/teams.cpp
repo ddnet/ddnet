@@ -698,7 +698,7 @@ void CGameTeams::RequestTeamSwap(CPlayer *pPlayer, CPlayer *pTargetPlayer, int T
 	}
 
 	str_format(aBuf, sizeof(aBuf),
-		"%s has requested to swap with %s. Please wait %d then type /swap %s.",
+		"%s has requested to swap with %s. Please wait %d seconds then type /swap %s.",
 		Server()->ClientName(pPlayer->GetCID()), Server()->ClientName(pTargetPlayer->GetCID()), g_Config.m_SvSaveSwapGamesDelay, Server()->ClientName(pPlayer->GetCID()));
 
 	GameServer()->SendChatTeam(Team, aBuf);
