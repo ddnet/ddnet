@@ -6,7 +6,7 @@ if(NOT CMAKE_CROSSCOMPILING)
   pkg_check_modules(PC_SWSCALE libswscale)
   pkg_check_modules(PC_SWRESAMPLE libswresample)
   if(TARGET_OS STREQUAL "linux")
-    pkg_check_modules(PC_X264 libx264)
+    pkg_search_module(PC_X264 libx264 x264)
   endif()
 endif()
 
