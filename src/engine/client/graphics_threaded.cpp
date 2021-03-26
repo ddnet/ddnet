@@ -2388,6 +2388,19 @@ int CGraphics_Threaded::Init()
 		0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0xff};
 
 	m_InvalidTexture = LoadTextureRaw(4, 4, CImageInfo::FORMAT_RGBA, s_aNullTextureData, CImageInfo::FORMAT_RGBA, TEXLOAD_NORESAMPLE);
+
+	ColorRGBA GPUInfoPrintColor{0.6f, 0.5f, 1.0f, 1.0f};
+
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "GPU vendor: %s", GetVendorString());
+	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gfx", aBuf, GPUInfoPrintColor);
+
+	str_format(aBuf, sizeof(aBuf), "GPU renderer: %s", GetRendererString());
+	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gfx", aBuf, GPUInfoPrintColor);
+
+	str_format(aBuf, sizeof(aBuf), "GPU version: %s", GetVersionString());
+	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gfx", aBuf, GPUInfoPrintColor);
+
 	return 0;
 }
 
@@ -2589,6 +2602,21 @@ SWarning *CGraphics_Threaded::GetCurWarning()
 		SWarning *pCurWarning = &m_Warnings[0];
 		return pCurWarning;
 	}
+}
+
+const char *CGraphics_Threaded::GetVendorString()
+{
+	return m_pBackend->GetVendorString();
+}
+
+const char *CGraphics_Threaded::GetVersionString()
+{
+	return m_pBackend->GetVersionString();
+}
+
+const char *CGraphics_Threaded::GetRendererString()
+{
+	return m_pBackend->GetRendererString();
 }
 
 int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen)
