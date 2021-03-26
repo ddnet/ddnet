@@ -675,6 +675,10 @@ public:
 	virtual bool HasQuadContainerBuffering() { return false; }
 	virtual bool Has2DTextureArrays() { return false; }
 	virtual const char *GetErrorString() { return NULL; }
+
+	virtual const char *GetVendorString() = 0;
+	virtual const char *GetVersionString() = 0;
+	virtual const char *GetRendererString() = 0;
 };
 
 class CGraphics_Threaded : public IEngineGraphics
@@ -1150,6 +1154,10 @@ public:
 	bool IsTextBufferingEnabled() override { return m_OpenGLTextBufferingEnabled; }
 	bool IsQuadContainerBufferingEnabled() override { return m_OpenGLQuadContainerBufferingEnabled; }
 	bool HasTextureArrays() override { return m_OpenGLHasTextureArrays; }
+
+	const char *GetVendorString() override;
+	const char *GetVersionString() override;
+	const char *GetRendererString() override;
 };
 
 extern IGraphicsBackend *CreateGraphicsBackend();

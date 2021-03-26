@@ -3785,6 +3785,13 @@ void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 	// check what this context can do
 	const char *pVersionString = (const char *)glGetString(GL_VERSION);
 	dbg_msg("opengl", "Version string: %s", pVersionString);
+
+	const char *pRendererString = (const char *)glGetString(GL_RENDERER);
+
+	str_copy(pCommand->m_pVendorString, pVendorString, gs_GPUInfoStringSize);
+	str_copy(pCommand->m_pVersionString, pVersionString, gs_GPUInfoStringSize);
+	str_copy(pCommand->m_pRendererString, pRendererString, gs_GPUInfoStringSize);
+
 	// parse version string
 	ParseVersionString(pVersionString, pCommand->m_pCapabilities->m_ContextMajor, pCommand->m_pCapabilities->m_ContextMinor, pCommand->m_pCapabilities->m_ContextPatch);
 
@@ -4614,6 +4621,9 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	CmdSDL.m_GlewPatch = GlewPatch;
 	CmdSDL.m_pInitError = &InitError;
 	CmdSDL.m_pErrStringPtr = &pErrorStr;
+	CmdSDL.m_pVendorString = m_aVendorString;
+	CmdSDL.m_pVersionString = m_aVersionString;
+	CmdSDL.m_pRendererString = m_aRendererString;
 	CmdBuffer.AddCommand(CmdSDL);
 	RunBuffer(&CmdBuffer);
 	WaitForIdle();

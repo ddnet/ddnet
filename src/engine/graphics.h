@@ -276,6 +276,10 @@ public:
 	virtual bool IsQuadContainerBufferingEnabled() = 0;
 	virtual bool HasTextureArrays() = 0;
 
+	virtual const char *GetVendorString() = 0;
+	virtual const char *GetVersionString() = 0;
+	virtual const char *GetRendererString() = 0;
+
 	struct CLineItem
 	{
 		float m_X0, m_Y0, m_X1, m_Y1;
