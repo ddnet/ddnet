@@ -16,6 +16,9 @@ void CChillPw::OnMapLoad()
 
 void CChillPw::OnRender()
 {
+	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
+		return;
+
 	for(int i = 0; i < NUM_DUMMIES; i++)
 	{
 		if(!m_ChatDelay[i])
