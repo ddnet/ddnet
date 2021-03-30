@@ -521,8 +521,7 @@ public:
 
 	virtual void Minimize();
 	virtual void Maximize();
-	virtual bool Fullscreen(bool State);
-	virtual void SetWindowBordered(bool State); // on=true/off=false
+	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless);
 	virtual bool SetWindowScreen(int Index);
 	virtual int GetWindowScreen();
 	virtual int WindowActive();

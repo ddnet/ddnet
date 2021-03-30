@@ -466,12 +466,11 @@ public:
 	void HandleMapPath(const char *pPath);
 
 	// gfx
-	void SwitchWindowScreen(int Index);
-	void ToggleFullscreen();
-	void ToggleWindowBordered();
-	void ToggleWindowVSync();
-	void LoadFont();
-	void Notify(const char *pTitle, const char *pMessage);
+	virtual void SwitchWindowScreen(int Index);
+	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless);
+	virtual void ToggleWindowVSync();
+	virtual void LoadFont();
+	virtual void Notify(const char *pTitle, const char *pMessage);
 	void BenchmarkQuit(int Seconds, const char *pFilename);
 
 	// DDRace
