@@ -2210,12 +2210,8 @@ int CGraphics_Threaded::IssueInit()
 
 	if(g_Config.m_GfxBorderless)
 		Flags |= IGraphicsBackend::INITFLAG_BORDERLESS;
-	if(g_Config.m_GfxFullscreen == 1)
+	if(g_Config.m_GfxFullscreen)
 		Flags |= IGraphicsBackend::INITFLAG_FULLSCREEN;
-	else if(g_Config.m_GfxFullscreen == 2)
-		Flags |= IGraphicsBackend::INITFLAG_DESKTOP_FULLSCREEN;
-	else if(g_Config.m_GfxFullscreen == 3)
-		Flags |= IGraphicsBackend::INITFLAG_WINDOWED_FULLSCREEN;
 	if(g_Config.m_GfxVsync)
 		Flags |= IGraphicsBackend::INITFLAG_VSYNC;
 	if(g_Config.m_GfxHighdpi)
@@ -2436,9 +2432,14 @@ void CGraphics_Threaded::Maximize()
 	m_pBackend->Maximize();
 }
 
-void CGraphics_Threaded::SetWindowParams(int FullscreenMode, bool IsBorderless)
+bool CGraphics_Threaded::Fullscreen(bool State)
 {
-	m_pBackend->SetWindowParams(FullscreenMode, IsBorderless);
+	return m_pBackend->Fullscreen(State);
+}
+
+void CGraphics_Threaded::SetWindowBordered(bool State)
+{
+	m_pBackend->SetWindowBordered(State);
 }
 
 bool CGraphics_Threaded::SetWindowScreen(int Index)

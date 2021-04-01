@@ -196,7 +196,8 @@ public:
 	int ScreenHeight() const { return m_ScreenHeight; }
 	float ScreenAspect() const { return (float)ScreenWidth() / (float)ScreenHeight(); }
 
-	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless) = 0;
+	virtual bool Fullscreen(bool State) = 0;
+	virtual void SetWindowBordered(bool State) = 0;
 	virtual bool SetWindowScreen(int Index) = 0;
 	virtual bool SetVSync(bool State) = 0;
 	virtual int GetWindowScreen() = 0;

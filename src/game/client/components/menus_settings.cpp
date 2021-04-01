@@ -1029,43 +1029,6 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	UiDoListboxEnd(&s_ScrollValue, 0);
 }
 
-int CMenus::RenderDropDown(int &CurDropDownState, CUIRect *pRect, int CurSelection, const void **pIDs, const char **pStr, int PickNum, const void *pID, float &ScrollVal)
-{
-	if(CurDropDownState != 0)
-	{
-		CUIRect ListRect;
-		pRect->HSplitTop(24.0f * PickNum, &ListRect, pRect);
-		char aBuf[1024];
-		UiDoListboxStart(&pID, &ListRect, 24.0f, "", aBuf, PickNum, 1, CurSelection, ScrollVal);
-		for(int i = 0; i < PickNum; ++i)
-		{
-			CListboxItem Item = UiDoListboxNextItem(pIDs[i], CurSelection == i);
-			if(Item.m_Visible)
-			{
-				str_format(aBuf, sizeof(aBuf), "%s", pStr[i]);
-				UI()->DoLabelScaled(&Item.m_Rect, aBuf, 16.0f, 0);
-			}
-		}
-		bool ClickedItem = false;
-		int NewIndex = UiDoListboxEnd(&ScrollVal, NULL, &ClickedItem);
-		if(ClickedItem)
-		{
-			CurDropDownState = 0;
-			return NewIndex;
-		}
-		else
-			return CurSelection;
-	}
-	else
-	{
-		CUIRect Button;
-		pRect->HSplitTop(24.0f, &Button, pRect);
-		if(DoButton_MenuTab(&pID, CurSelection > -1 ? pStr[CurSelection] : "", 0, &Button, CUI::CORNER_ALL, NULL, NULL, NULL, NULL, 4.0f))
-			CurDropDownState = 1;
-		return CurSelection;
-	}
-}
-
 void CMenus::RenderSettingsGraphics(CUIRect MainView)
 {
 	CUIRect Button, Label;
@@ -1134,30 +1097,16 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	}
 
 	// switches
-	static float s_ScrollValueDrop = 0;
-	static const int s_NumWindowMode = 5;
-	static int s_aWindowModeIDs[s_NumWindowMode];
-	const void *aWindowModeIDs[s_NumWindowMode];
-	for(int i = 0; i < s_NumWindowMode; ++i)
-		aWindowModeIDs[i] = &s_aWindowModeIDs[i];
-	static int s_WindowModeDropDownState = 0;
-	const char *pWindowModes[] = {Localize("Windowed"), Localize("Windowed borderless"), Localize("Windowed fullscreen"), Localize("Desktop fullscreen"), Localize("Fullscreen")};
-
-	OldSelected = (g_Config.m_GfxFullscreen ? (g_Config.m_GfxFullscreen == 1 ? 4 : (g_Config.m_GfxFullscreen == 2 ? 3 : 2)) : (g_Config.m_GfxBorderless ? 1 : 0));
-
-	const int NewWindowMode = RenderDropDown(s_WindowModeDropDownState, &MainView, OldSelected, aWindowModeIDs, pWindowModes, s_NumWindowMode, &s_NumWindowMode, s_ScrollValueDrop);
-	if(OldSelected != NewWindowMode)
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_GfxBorderless, Localize("Borderless window"), g_Config.m_GfxBorderless, &Button))
 	{
-		if(NewWindowMode == 0)
-			Client()->SetWindowParams(0, false);
-		else if(NewWindowMode == 1)
-			Client()->SetWindowParams(0, true);
-		else if(NewWindowMode == 2)
-			Client()->SetWindowParams(3, true);
-		else if(NewWindowMode == 3)
-			Client()->SetWindowParams(2, false);
-		else if(NewWindowMode == 4)
-			Client()->SetWindowParams(1, false);
+		Client()->ToggleWindowBordered();
+	}
+
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_GfxFullscreen, Localize("Fullscreen"), g_Config.m_GfxFullscreen, &Button))
+	{
+		Client()->ToggleFullscreen();
 	}
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);

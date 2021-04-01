@@ -17,8 +17,6 @@
 #include <cmath>
 #include <stdlib.h>
 
-#include "SDL_hints.h"
-
 #if defined(SDL_VIDEO_DRIVER_X11)
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -4529,12 +4527,6 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		else
 			SdlFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 	}
-	else if(Flags & (IGraphicsBackend::INITFLAG_DESKTOP_FULLSCREEN | IGraphicsBackend::INITFLAG_WINDOWED_FULLSCREEN))
-	{
-		if(Flags & IGraphicsBackend::INITFLAG_WINDOWED_FULLSCREEN)
-			SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
-		SdlFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-	}
 
 	// set gl attributes
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -4773,37 +4765,18 @@ void CGraphicsBackend_SDL_OpenGL::Maximize()
 	// TODO: SDL
 }
 
-void CGraphicsBackend_SDL_OpenGL::SetWindowParams(int FullscreenMode, bool IsBorderless)
+bool CGraphicsBackend_SDL_OpenGL::Fullscreen(bool State)
 {
-	if(FullscreenMode > 0)
-	{
-		if(FullscreenMode == 1)
-		{
 #if defined(CONF_PLATFORM_MACOS) // Todo SDL: remove this when fixed (game freezes when losing focus in fullscreen)
-			SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+	return SDL_SetWindowFullscreen(m_pWindow, State ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) == 0;
 #else
-			SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN);
-			SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "1");
+	return SDL_SetWindowFullscreen(m_pWindow, State ? SDL_WINDOW_FULLSCREEN : 0) == 0;
 #endif
-		}
-		else if(FullscreenMode == 2)
-		{
-			SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
-			SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "1");
-		}
-		else if(FullscreenMode == 3)
-		{
-			SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
-			SDL_SetWindowBordered(m_pWindow, SDL_bool(false));
-			SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
-		}
-	}
-	else
-	{
-		SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
-		SDL_SetWindowFullscreen(m_pWindow, 0);
-		SDL_SetWindowBordered(m_pWindow, SDL_bool(!IsBorderless));
-	}
+}
+
+void CGraphicsBackend_SDL_OpenGL::SetWindowBordered(bool State)
+{
+	SDL_SetWindowBordered(m_pWindow, SDL_bool(State));
 }
 
 bool CGraphicsBackend_SDL_OpenGL::SetWindowScreen(int Index)

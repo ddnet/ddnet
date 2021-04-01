@@ -640,8 +640,6 @@ public:
 		INITFLAG_RESIZABLE = 1 << 2,
 		INITFLAG_BORDERLESS = 1 << 3,
 		INITFLAG_HIGHDPI = 1 << 4,
-		INITFLAG_DESKTOP_FULLSCREEN = 1 << 5,
-		INITFLAG_WINDOWED_FULLSCREEN = 1 << 6,
 	};
 
 	virtual ~IGraphicsBackend() {}
@@ -655,7 +653,8 @@ public:
 
 	virtual void Minimize() = 0;
 	virtual void Maximize() = 0;
-	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless) = 0;
+	virtual bool Fullscreen(bool State) = 0;
+	virtual void SetWindowBordered(bool State) = 0;
 	virtual bool SetWindowScreen(int Index) = 0;
 	virtual int GetWindowScreen() = 0;
 	virtual int WindowActive() = 0;
@@ -1117,7 +1116,8 @@ public:
 	int GetNumScreens() const override;
 	void Minimize() override;
 	void Maximize() override;
-	void SetWindowParams(int FullscreenMode, bool IsBorderless) override;
+	bool Fullscreen(bool State) override;
+	void SetWindowBordered(bool State) override;
 	bool SetWindowScreen(int Index) override;
 	void Resize(int w, int h, bool SetWindowSize = false) override;
 	void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser) override;
