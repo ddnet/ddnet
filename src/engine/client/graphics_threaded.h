@@ -641,7 +641,6 @@ public:
 		INITFLAG_BORDERLESS = 1 << 3,
 		INITFLAG_HIGHDPI = 1 << 4,
 		INITFLAG_DESKTOP_FULLSCREEN = 1 << 5,
-		INITFLAG_WINDOWED_FULLSCREEN = 1 << 6,
 	};
 
 	virtual ~IGraphicsBackend() {}

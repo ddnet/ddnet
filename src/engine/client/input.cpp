@@ -330,6 +330,8 @@ int CInput::Update()
 					Graphics()->Resize(Event.window.data1, Event.window.data2);
 					break;
 				case SDL_WINDOWEVENT_FOCUS_GAINED:
+					if(m_InputGrabbed)
+						MouseModeRelative();
 					m_MouseFocus = true;
 					IgnoreKeys = true;
 					// We should do this call to reset relative mouse position after alt+tab
@@ -338,6 +340,12 @@ int CInput::Update()
 				case SDL_WINDOWEVENT_FOCUS_LOST:
 					m_MouseFocus = false;
 					IgnoreKeys = true;
+					if(m_InputGrabbed)
+					{
+						MouseModeAbsolute();
+						// Remember that we had relative mouse
+						m_InputGrabbed = true;
+					}
 					break;
 #if defined(CONF_PLATFORM_MACOS) // Todo: remove this when fixed in SDL
 				case SDL_WINDOWEVENT_MAXIMIZED:

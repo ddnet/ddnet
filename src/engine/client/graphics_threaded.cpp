@@ -2214,8 +2214,6 @@ int CGraphics_Threaded::IssueInit()
 		Flags |= IGraphicsBackend::INITFLAG_FULLSCREEN;
 	else if(g_Config.m_GfxFullscreen == 2)
 		Flags |= IGraphicsBackend::INITFLAG_DESKTOP_FULLSCREEN;
-	else if(g_Config.m_GfxFullscreen == 3)
-		Flags |= IGraphicsBackend::INITFLAG_WINDOWED_FULLSCREEN;
 	if(g_Config.m_GfxVsync)
 		Flags |= IGraphicsBackend::INITFLAG_VSYNC;
 	if(g_Config.m_GfxHighdpi)
