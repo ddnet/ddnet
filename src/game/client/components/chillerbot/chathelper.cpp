@@ -111,6 +111,7 @@ bool CChatHelper::IsGreeting(const char *pMsg)
 		"haaaay",
 		"haaaaay",
 		"henlo",
+		"helo",
 		"hello",
 		"hallo",
 		"hellu",
