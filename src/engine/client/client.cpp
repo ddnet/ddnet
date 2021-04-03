@@ -4022,7 +4022,7 @@ void CClient::ConchainWindowScreen(IConsole::IResult *pResult, void *pUserData, 
 
 void CClient::SetWindowParams(int FullscreenMode, bool IsBorderless)
 {
-	g_Config.m_GfxFullscreen = clamp(FullscreenMode, 0, 3);
+	g_Config.m_GfxFullscreen = clamp(FullscreenMode, 0, 2);
 	g_Config.m_GfxBorderless = (int)IsBorderless;
 	Graphics()->SetWindowParams(FullscreenMode, IsBorderless);
 }

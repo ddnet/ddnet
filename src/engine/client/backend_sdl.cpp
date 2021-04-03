@@ -4529,10 +4529,8 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		else
 			SdlFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 	}
-	else if(Flags & (IGraphicsBackend::INITFLAG_DESKTOP_FULLSCREEN | IGraphicsBackend::INITFLAG_WINDOWED_FULLSCREEN))
+	else if(Flags & (IGraphicsBackend::INITFLAG_DESKTOP_FULLSCREEN))
 	{
-		if(Flags & IGraphicsBackend::INITFLAG_WINDOWED_FULLSCREEN)
-			SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
 		SdlFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 	}
 
@@ -4783,24 +4781,15 @@ void CGraphicsBackend_SDL_OpenGL::SetWindowParams(int FullscreenMode, bool IsBor
 			SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
 #else
 			SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN);
-			SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "1");
 #endif
 		}
 		else if(FullscreenMode == 2)
 		{
 			SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
-			SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "1");
-		}
-		else if(FullscreenMode == 3)
-		{
-			SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
-			SDL_SetWindowBordered(m_pWindow, SDL_bool(false));
-			SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
 		}
 	}
 	else
 	{
-		SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
 		SDL_SetWindowFullscreen(m_pWindow, 0);
 		SDL_SetWindowBordered(m_pWindow, SDL_bool(!IsBorderless));
 	}
