@@ -28,10 +28,11 @@ void CChillPw::OnRender()
 		if(g_Config.m_ClDummy != i)
 			continue;
 
-		if(AuthChatAccount(i, m_LoginOffset[i]++))
+		if(AuthChatAccount(i, m_LoginOffset[i] + 1))
 			m_ChatDelay[i] = time_get() + time_freq() * 2;
 		else
 			m_ChatDelay[i] = 0;
+		m_LoginOffset[i]++;
 	}
 }
 
