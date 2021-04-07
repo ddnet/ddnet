@@ -727,7 +727,7 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, in
 	}
 
 	int TimeoutAfterDelay = g_Config.m_SvSaveSwapGamesDelay + g_Config.m_SvSwapTimeout;
-	if(Since > TimeoutAfterDelay)
+	if(Since >= TimeoutAfterDelay)
 	{
 		str_format(aBuf, sizeof(aBuf),
 			"Your swap request timed out %d seconds ago. Use /swap again to re-initiate it.",
