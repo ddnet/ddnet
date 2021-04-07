@@ -4630,7 +4630,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	CmdSDL.m_pVendorString = m_aVendorString;
 	CmdSDL.m_pVersionString = m_aVersionString;
 	CmdSDL.m_pRendererString = m_aRendererString;
-	CmdBuffer.AddCommand(CmdSDL);
+	CmdBuffer.AddCommandUnsafe(CmdSDL);
 	RunBuffer(&CmdBuffer);
 	WaitForIdle();
 	CmdBuffer.Reset();
@@ -4642,7 +4642,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		CmdOpenGL.m_pStorage = pStorage;
 		CmdOpenGL.m_pCapabilities = &m_Capabilites;
 		CmdOpenGL.m_pInitError = &InitError;
-		CmdBuffer.AddCommand(CmdOpenGL);
+		CmdBuffer.AddCommandUnsafe(CmdOpenGL);
 		RunBuffer(&CmdBuffer);
 		WaitForIdle();
 		CmdBuffer.Reset();
@@ -4650,7 +4650,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		if(InitError == -2)
 		{
 			CCommandProcessorFragment_OpenGL::SCommand_Shutdown CmdGL;
-			CmdBuffer.AddCommand(CmdGL);
+			CmdBuffer.AddCommandUnsafe(CmdGL);
 			RunBuffer(&CmdBuffer);
 			WaitForIdle();
 			CmdBuffer.Reset();
@@ -4664,7 +4664,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	if(InitError != 0)
 	{
 		CCommandProcessorFragment_SDL::SCommand_Shutdown Cmd;
-		CmdBuffer.AddCommand(Cmd);
+		CmdBuffer.AddCommandUnsafe(Cmd);
 		RunBuffer(&CmdBuffer);
 		WaitForIdle();
 		CmdBuffer.Reset();
@@ -4717,7 +4717,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 
 			CmdSDL.m_Width = CurrentDisplayMode.w;
 			CmdSDL.m_Height = CurrentDisplayMode.h;
-			CmdBuffer.AddCommand(CmdSDL);
+			CmdBuffer.AddCommandUnsafe(CmdSDL);
 			RunBuffer(&CmdBuffer);
 			WaitForIdle();
 			CmdBuffer.Reset();
@@ -4733,13 +4733,13 @@ int CGraphicsBackend_SDL_OpenGL::Shutdown()
 	// issue a shutdown command
 	CCommandBuffer CmdBuffer(1024, 512);
 	CCommandProcessorFragment_OpenGL::SCommand_Shutdown CmdGL;
-	CmdBuffer.AddCommand(CmdGL);
+	CmdBuffer.AddCommandUnsafe(CmdGL);
 	RunBuffer(&CmdBuffer);
 	WaitForIdle();
 	CmdBuffer.Reset();
 
 	CCommandProcessorFragment_SDL::SCommand_Shutdown Cmd;
-	CmdBuffer.AddCommand(Cmd);
+	CmdBuffer.AddCommandUnsafe(Cmd);
 	RunBuffer(&CmdBuffer);
 	WaitForIdle();
 	CmdBuffer.Reset();
