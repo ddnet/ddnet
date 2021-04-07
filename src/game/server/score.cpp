@@ -718,7 +718,8 @@ bool CScore::SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGam
 			pSqlServer->BindString(2, pData->m_GameUuid);
 			pSqlServer->BindBlob(3, Teamrank.m_TeamID.m_aData, sizeof(Teamrank.m_TeamID.m_aData));
 			pSqlServer->Print();
-			if(pSqlServer->Step(&End, pError, ErrorSize))
+			int NumUpdated;
+			if(pSqlServer->ExecuteUpdate(&NumUpdated, pError, ErrorSize))
 			{
 				return true;
 			}
