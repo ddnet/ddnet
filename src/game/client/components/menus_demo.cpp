@@ -620,7 +620,18 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected,
 
 	CListboxItem Item = UiDoListboxNextRow();
 
-	if(Item.m_Visible && UI()->DoButtonLogic(pId, "", gs_ListBoxSelectedIndex == gs_ListBoxItemIndex, &Item.m_HitRect))
+	CUIRect HitRect = Item.m_HitRect;
+
+	if(HitRect.y < gs_ListBoxOriginalView.y)
+	{
+		float TmpDiff = gs_ListBoxOriginalView.y - HitRect.y;
+		HitRect.y = gs_ListBoxOriginalView.y;
+		HitRect.h -= TmpDiff;
+	}
+
+	HitRect.h = minimum(HitRect.h, (gs_ListBoxOriginalView.y + gs_ListBoxOriginalView.h) - HitRect.y);
+
+	if(Item.m_Visible && UI()->DoButtonLogic(pId, "", gs_ListBoxSelectedIndex == gs_ListBoxItemIndex, &HitRect))
 	{
 		gs_ListBoxClicked = true;
 		gs_ListBoxNewSelected = ThisItemIndex;
@@ -696,7 +707,7 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected,
 		r.Margin(1.5f, &r);
 		RenderTools()->DrawUIRect(&r, ColorRGBA(1, 1, 1, 0.5f), CUI::CORNER_ALL, 4.0f);
 	}
-	else if(UI()->MouseInside(&Item.m_Rect) && !NoHoverEffects)
+	else if(UI()->MouseInside(&HitRect) && !NoHoverEffects)
 	{
 		CUIRect r = Item.m_Rect;
 		r.Margin(1.5f, &r);
@@ -716,6 +727,14 @@ int CMenus::UiDoListboxEnd(float *pScrollValue, bool *pItemActivated, bool *pLis
 	if(pListBoxActive)
 		*pListBoxActive = gs_ListBoxClicked;
 	return gs_ListBoxNewSelected;
+}
+
+int CMenus::UiLogicGetCurrentClickedItem()
+{
+	if(gs_ListBoxClicked)
+		return gs_ListBoxNewSelected;
+	else
+		return -1;
 }
 
 int CMenus::DemolistFetchCallback(const char *pName, time_t Date, int IsDir, int StorageType, void *pUser)

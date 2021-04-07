@@ -220,6 +220,8 @@ class CMenus : public CComponent
 	CListboxItem UiDoListboxNextRow();
 	int UiDoListboxEnd(float *pScrollValue, bool *pItemActivated, bool *pListBoxActive = 0);
 
+	int UiLogicGetCurrentClickedItem();
+
 	//static void demolist_listdir_callback(const char *name, int is_dir, void *user);
 	//static void demolist_list_callback(const CUIRect *rect, int index, void *user);
 
