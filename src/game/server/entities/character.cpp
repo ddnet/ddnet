@@ -737,10 +737,20 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 	mem_copy(&m_LatestPrevInput, &m_LatestInput, sizeof(m_LatestInput));
 }
 
+void CCharacter::ResetHook()
+{
+	m_Core.m_HookedPlayer = -1;
+	m_Core.m_HookState = HOOK_RETRACTED;
+	m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
+	GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
+	m_Core.m_HookPos = m_Core.m_Pos;
+}
+
 void CCharacter::ResetInput()
 {
 	m_Input.m_Direction = 0;
 	//m_Input.m_Hook = 0;
+
 	// simulate releasing the fire button
 	if((m_Input.m_Fire & 1) != 0)
 		m_Input.m_Fire++;
@@ -1277,7 +1287,8 @@ void CCharacter::Snap(int SnappingClient)
 	if(m_Core.m_ActiveWeapon == WEAPON_NINJA)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_NINJA;
 
-	pDDNetCharacter->m_FreezeEnd = m_DeepFreeze ? -1 : m_FreezeTime == 0 ? 0 : Server()->Tick() + m_FreezeTime;
+	pDDNetCharacter->m_FreezeEnd = m_DeepFreeze ? -1 : m_FreezeTime == 0 ? 0 :
+                                                                               Server()->Tick() + m_FreezeTime;
 	pDDNetCharacter->m_Jumps = m_Core.m_Jumps;
 	pDDNetCharacter->m_TeleCheckpoint = m_TeleCheckpoint;
 	pDDNetCharacter->m_StrongWeakID = m_StrongWeakID;
@@ -1886,10 +1897,7 @@ void CCharacter::HandleTiles(int Index)
 		m_Core.m_Pos = (*m_pTeleOuts)[z - 1][TeleOut];
 		if(!g_Config.m_SvTeleportHoldHook)
 		{
-			m_Core.m_HookedPlayer = -1;
-			m_Core.m_HookState = HOOK_RETRACTED;
-			m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
-			m_Core.m_HookPos = m_Core.m_Pos;
+			ResetHook();
 		}
 		if(g_Config.m_SvTeleportLoseWeapons)
 			ResetPickups();
@@ -1908,11 +1916,7 @@ void CCharacter::HandleTiles(int Index)
 
 			if(!g_Config.m_SvTeleportHoldHook)
 			{
-				m_Core.m_HookedPlayer = -1;
-				m_Core.m_HookState = HOOK_RETRACTED;
-				m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
-				GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
-				m_Core.m_HookPos = m_Core.m_Pos;
+				ResetHook();
 			}
 			if(g_Config.m_SvTeleportLoseWeapons)
 			{
@@ -1936,11 +1940,7 @@ void CCharacter::HandleTiles(int Index)
 
 				if(!g_Config.m_SvTeleportHoldHook)
 				{
-					m_Core.m_HookedPlayer = -1;
-					m_Core.m_HookState = HOOK_RETRACTED;
-					m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
-					GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
-					m_Core.m_HookPos = m_Core.m_Pos;
+					ResetHook();
 				}
 
 				return;
@@ -1955,11 +1955,7 @@ void CCharacter::HandleTiles(int Index)
 
 			if(!g_Config.m_SvTeleportHoldHook)
 			{
-				m_Core.m_HookedPlayer = -1;
-				m_Core.m_HookState = HOOK_RETRACTED;
-				m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
-				GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
-				m_Core.m_HookPos = m_Core.m_Pos;
+				ResetHook();
 			}
 		}
 		return;
@@ -1978,10 +1974,7 @@ void CCharacter::HandleTiles(int Index)
 
 				if(!g_Config.m_SvTeleportHoldHook)
 				{
-					m_Core.m_HookedPlayer = -1;
-					m_Core.m_HookState = HOOK_RETRACTED;
-					m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
-					m_Core.m_HookPos = m_Core.m_Pos;
+					ResetHook();
 				}
 
 				return;
@@ -1995,10 +1988,7 @@ void CCharacter::HandleTiles(int Index)
 
 			if(!g_Config.m_SvTeleportHoldHook)
 			{
-				m_Core.m_HookedPlayer = -1;
-				m_Core.m_HookState = HOOK_RETRACTED;
-				m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
-				m_Core.m_HookPos = m_Core.m_Pos;
+				ResetHook();
 			}
 		}
 		return;
@@ -2275,9 +2265,7 @@ void CCharacter::Pause(bool Pause)
 
 		if(m_Core.m_HookedPlayer != -1) // Keeping hook would allow cheats
 		{
-			m_Core.m_HookedPlayer = -1;
-			m_Core.m_HookState = HOOK_RETRACTED;
-			m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
+			ResetHook();
 		}
 	}
 	else
