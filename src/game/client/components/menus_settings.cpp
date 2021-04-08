@@ -442,6 +442,21 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	}
 }
 
+struct CUISkin
+{
+	const CSkin *m_pSkin;
+
+	CUISkin() :
+		m_pSkin(nullptr) {}
+	CUISkin(const CSkin *pSkin) :
+		m_pSkin(pSkin) {}
+
+	bool operator<(const CUISkin &Other) const { return str_comp_nocase(m_pSkin->m_aName, Other.m_pSkin->m_aName) < 0; }
+
+	bool operator<(const char *pOther) const { return str_comp_nocase(m_pSkin->m_aName, pOther) < 0; }
+	bool operator==(const char *pOther) const { return !str_comp_nocase(m_pSkin->m_aName, pOther); }
+};
+
 void CMenus::RenderSettingsTee(CUIRect MainView)
 {
 	CUIRect Button, Label, Button2, Dummy, DummyLabel, SkinList, QuickSearch, QuickSearchClearButton, SkinDB, SkinPrefix, SkinPrefixLabel, DirectoryButton, RefreshButton;
@@ -606,7 +621,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	// skin selector
 	MainView.HSplitTop(20.0f, 0, &MainView);
 	MainView.HSplitTop(230.0f, &SkinList, &MainView);
-	static sorted_array<const CSkin *> s_paSkinList;
+	static sorted_array<CUISkin> s_paSkinList;
 	static int s_SkinCount = 0;
 	static float s_ScrollValue = 0.0f;
 	if(s_InitSkinlist || m_pClient->m_pSkins->Num() != s_SkinCount)
@@ -631,7 +646,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			if(s == 0)
 				continue;
 
-			s_paSkinList.add_unsorted(s);
+			s_paSkinList.add(CUISkin(s));
 		}
 		s_InitSkinlist = false;
 		s_SkinCount = m_pClient->m_pSkins->Num();
@@ -641,12 +656,12 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	UiDoListboxStart(&s_InitSkinlist, &SkinList, 50.0f, Localize("Skins"), "", s_paSkinList.size(), 4, OldSelected, s_ScrollValue);
 	for(int i = 0; i < s_paSkinList.size(); ++i)
 	{
-		const CSkin *s = s_paSkinList[i];
+		const CSkin *s = s_paSkinList[i].m_pSkin;
 
 		if(str_comp(s->m_aName, Skin) == 0)
 			OldSelected = i;
 
-		CListboxItem Item = UiDoListboxNextItem(s_paSkinList[i], OldSelected == i);
+		CListboxItem Item = UiDoListboxNextItem(s_paSkinList[i].m_pSkin, OldSelected == i);
 		char aBuf[128];
 		if(Item.m_Visible)
 		{
@@ -680,7 +695,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 	if(OldSelected != NewSelected)
 	{
-		mem_copy(Skin, s_paSkinList[NewSelected]->m_aName, sizeof(g_Config.m_ClPlayerSkin));
+		mem_copy(Skin, s_paSkinList[NewSelected].m_pSkin->m_aName, sizeof(g_Config.m_ClPlayerSkin));
 		SetNeedSendInfo();
 	}
 
@@ -884,7 +899,9 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	static int s_SelectedControl = -1;
 	static float s_ScrollValue = 0;
 	int OldSelected = s_SelectedControl;
-	UiDoListboxStart(&s_ControlsList, &MainView, 500.0f, Localize("Controls"), "", 1, 1, s_SelectedControl, s_ScrollValue);
+	// Hacky values: Size of 10.0f per item for smoother scrolling, 72 elements
+	// fits the current size of controls settings
+	UiDoListboxStart(&s_ControlsList, &MainView, 10.0f, Localize("Controls"), "", 72, 1, s_SelectedControl, s_ScrollValue);
 
 	CUIRect MovementSettings, WeaponSettings, VotingSettings, ChatSettings, DummySettings, MiscSettings, ResetButton;
 	CListboxItem Item = UiDoListboxNextItem(&OldSelected, false, false, true);
@@ -1012,6 +1029,43 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	UiDoListboxEnd(&s_ScrollValue, 0);
 }
 
+int CMenus::RenderDropDown(int &CurDropDownState, CUIRect *pRect, int CurSelection, const void **pIDs, const char **pStr, int PickNum, const void *pID, float &ScrollVal)
+{
+	if(CurDropDownState != 0)
+	{
+		CUIRect ListRect;
+		pRect->HSplitTop(24.0f * PickNum, &ListRect, pRect);
+		char aBuf[1024];
+		UiDoListboxStart(&pID, &ListRect, 24.0f, "", aBuf, PickNum, 1, CurSelection, ScrollVal);
+		for(int i = 0; i < PickNum; ++i)
+		{
+			CListboxItem Item = UiDoListboxNextItem(pIDs[i], CurSelection == i);
+			if(Item.m_Visible)
+			{
+				str_format(aBuf, sizeof(aBuf), "%s", pStr[i]);
+				UI()->DoLabelScaled(&Item.m_Rect, aBuf, 16.0f, 0);
+			}
+		}
+		bool ClickedItem = false;
+		int NewIndex = UiDoListboxEnd(&ScrollVal, NULL, &ClickedItem);
+		if(ClickedItem)
+		{
+			CurDropDownState = 0;
+			return NewIndex;
+		}
+		else
+			return CurSelection;
+	}
+	else
+	{
+		CUIRect Button;
+		pRect->HSplitTop(24.0f, &Button, pRect);
+		if(DoButton_MenuTab(&pID, CurSelection > -1 ? pStr[CurSelection] : "", 0, &Button, CUI::CORNER_ALL, NULL, NULL, NULL, NULL, 4.0f))
+			CurDropDownState = 1;
+		return CurSelection;
+	}
+}
+
 void CMenus::RenderSettingsGraphics(CUIRect MainView)
 {
 	CUIRect Button, Label;
@@ -1080,16 +1134,28 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	}
 
 	// switches
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxBorderless, Localize("Borderless window"), g_Config.m_GfxBorderless, &Button))
-	{
-		Client()->ToggleWindowBordered();
-	}
+	static float s_ScrollValueDrop = 0;
+	static const int s_NumWindowMode = 4;
+	static int s_aWindowModeIDs[s_NumWindowMode];
+	const void *aWindowModeIDs[s_NumWindowMode];
+	for(int i = 0; i < s_NumWindowMode; ++i)
+		aWindowModeIDs[i] = &s_aWindowModeIDs[i];
+	static int s_WindowModeDropDownState = 0;
+	const char *pWindowModes[] = {Localize("Windowed"), Localize("Windowed borderless"), Localize("Desktop fullscreen"), Localize("Fullscreen")};
 
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxFullscreen, Localize("Fullscreen"), g_Config.m_GfxFullscreen, &Button))
+	OldSelected = (g_Config.m_GfxFullscreen ? (g_Config.m_GfxFullscreen == 1 ? 3 : 2) : (g_Config.m_GfxBorderless ? 1 : 0));
+
+	const int NewWindowMode = RenderDropDown(s_WindowModeDropDownState, &MainView, OldSelected, aWindowModeIDs, pWindowModes, s_NumWindowMode, &s_NumWindowMode, s_ScrollValueDrop);
+	if(OldSelected != NewWindowMode)
 	{
-		Client()->ToggleFullscreen();
+		if(NewWindowMode == 0)
+			Client()->SetWindowParams(0, false);
+		else if(NewWindowMode == 1)
+			Client()->SetWindowParams(0, true);
+		else if(NewWindowMode == 2)
+			Client()->SetWindowParams(2, false);
+		else if(NewWindowMode == 3)
+			Client()->SetWindowParams(1, false);
 	}
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);

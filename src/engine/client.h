@@ -125,8 +125,7 @@ public:
 
 	// gfx
 	virtual void SwitchWindowScreen(int Index) = 0;
-	virtual void ToggleFullscreen() = 0;
-	virtual void ToggleWindowBordered() = 0;
+	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless) = 0;
 	virtual void ToggleWindowVSync() = 0;
 	virtual void LoadFont() = 0;
 	virtual void Notify(const char *pTitle, const char *pMessage) = 0;
@@ -257,6 +256,7 @@ public:
 	virtual const char *DDNetVersionStr() const = 0;
 
 	virtual void OnDummyDisconnect() = 0;
+	virtual void DummyResetInput() = 0;
 	virtual void Echo(const char *pString) = 0;
 	virtual bool CanDisplayWarning() = 0;
 	virtual bool IsDisplayingWarning() = 0;

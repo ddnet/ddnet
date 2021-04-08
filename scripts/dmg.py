@@ -4,6 +4,7 @@ import os
 import shlex
 import subprocess
 import tempfile
+import time
 
 ConfigDmgtools = namedtuple('Config', 'dmg hfsplus newfs_hfs verbose')
 ConfigHdiutil = namedtuple('Config', 'hdiutil verbose')
@@ -72,7 +73,16 @@ class Hdiutil(Dmg):
 	def create(self, dmg, volume_name, directory, symlinks):
 		if symlinks:
 			raise NotImplementedError("symlinks are not yet implemented")
-		self._hdiutil('create', '-volname', volume_name, '-srcdir', directory, dmg)
+		for i in range(5):
+			try:
+				self._hdiutil('create', '-volname', volume_name, '-srcdir', directory, dmg)
+			except subprocess.CalledProcessError as e:
+				if i == 4:
+					raise e
+				print("Retrying hdiutil create")
+				time.sleep(5)
+			else:
+				break
 
 def main():
 	p = argparse.ArgumentParser(description="Manipulate dmg archives")

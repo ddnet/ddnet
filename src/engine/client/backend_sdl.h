@@ -433,6 +433,10 @@ public:
 
 		int *m_pInitError;
 
+		char *m_pVendorString;
+		char *m_pVersionString;
+		char *m_pRendererString;
+
 		int m_RequestedMajor;
 		int m_RequestedMinor;
 		int m_RequestedPatch;
@@ -486,6 +490,8 @@ public:
 	virtual void RunBuffer(CCommandBuffer *pBuffer);
 };
 
+static constexpr size_t gs_GPUInfoStringSize = 256;
+
 // graphics backend implemented with SDL and OpenGL
 class CGraphicsBackend_SDL_OpenGL : public CGraphicsBackend_Threaded
 {
@@ -496,6 +502,10 @@ class CGraphicsBackend_SDL_OpenGL : public CGraphicsBackend_Threaded
 	int m_NumScreens;
 
 	SBackendCapabilites m_Capabilites;
+
+	char m_aVendorString[gs_GPUInfoStringSize] = {};
+	char m_aVersionString[gs_GPUInfoStringSize] = {};
+	char m_aRendererString[gs_GPUInfoStringSize] = {};
 
 	bool m_UseNewOpenGL;
 
@@ -511,8 +521,7 @@ public:
 
 	virtual void Minimize();
 	virtual void Maximize();
-	virtual bool Fullscreen(bool State);
-	virtual void SetWindowBordered(bool State); // on=true/off=false
+	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless);
 	virtual bool SetWindowScreen(int Index);
 	virtual int GetWindowScreen();
 	virtual int WindowActive();
@@ -535,6 +544,21 @@ public:
 			return m_aErrorString;
 
 		return NULL;
+	}
+
+	virtual const char *GetVendorString()
+	{
+		return m_aVendorString;
+	}
+
+	virtual const char *GetVersionString()
+	{
+		return m_aVersionString;
+	}
+
+	virtual const char *GetRendererString()
+	{
+		return m_aRendererString;
 	}
 };
 

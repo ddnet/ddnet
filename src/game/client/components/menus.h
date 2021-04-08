@@ -220,6 +220,8 @@ class CMenus : public CComponent
 	CListboxItem UiDoListboxNextRow();
 	int UiDoListboxEnd(float *pScrollValue, bool *pItemActivated, bool *pListBoxActive = 0);
 
+	int UiLogicGetCurrentClickedItem();
+
 	//static void demolist_listdir_callback(const char *name, int is_dir, void *user);
 	//static void demolist_list_callback(const CUIRect *rect, int index, void *user);
 
@@ -349,6 +351,7 @@ protected:
 	int m_CallvoteSelectedPlayer;
 	char m_aCallvoteReason[VOTE_REASON_LENGTH];
 	char m_aFilterString[25];
+	bool m_ControlPageOpening;
 
 	// demo
 	enum
@@ -688,6 +691,8 @@ private:
 	void RenderSettingsHUD(CUIRect MainView);
 	ColorHSLA RenderHSLColorPicker(const CUIRect *pRect, unsigned int *pColor, bool Alpha);
 	ColorHSLA RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alpha = false);
+
+	int RenderDropDown(int &CurDropDownState, CUIRect *pRect, int CurSelection, const void **pIDs, const char **pStr, int PickNum, const void *pID, float &ScrollVal);
 
 	CServerProcess m_ServerProcess;
 };

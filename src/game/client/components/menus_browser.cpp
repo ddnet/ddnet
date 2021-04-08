@@ -1066,14 +1066,14 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 
 		for(int i = 0; i < pSelectedServer->m_NumReceivedClients; i++)
 		{
-			CListboxItem Item = UiDoListboxNextItem(&i);
+			CListboxItem Item = UiDoListboxNextItem(&pSelectedServer->m_aClients[i]);
 
 			if(!Item.m_Visible)
 				continue;
 
 			CUIRect Name, Clan, Score, Flag;
 			Item.m_Rect.HSplitTop(25.0f, &Name, &Item.m_Rect);
-			if(UI()->DoButtonLogic(&pSelectedServer->m_aClients[i], "", 0, &Name))
+			if(UiLogicGetCurrentClickedItem() == i)
 			{
 				if(pSelectedServer->m_aClients[i].m_FriendState == IFriends::FRIEND_PLAYER)
 					m_pClient->Friends()->RemoveFriend(pSelectedServer->m_aClients[i].m_aName, pSelectedServer->m_aClients[i].m_aClan);

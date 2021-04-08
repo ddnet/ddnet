@@ -667,8 +667,11 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			static int s_ClearButton = 0;
 			static float Offset = 0.0f;
 			//static char aFilterString[25];
-			if(Input()->KeyPress(KEY_F) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)))
+			if(m_ControlPageOpening || (Input()->KeyPress(KEY_F) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))))
+			{
 				UI()->SetActiveItem(&m_aFilterString);
+				m_ControlPageOpening = false;
+			}
 			if(DoClearableEditBox(&m_aFilterString, &s_ClearButton, &QuickSearch, m_aFilterString, sizeof(m_aFilterString), 14.0f, &Offset, false, CUI::CORNER_ALL, Localize("Search")))
 			{
 				// TODO: Implement here

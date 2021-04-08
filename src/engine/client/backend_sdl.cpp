@@ -17,6 +17,8 @@
 #include <cmath>
 #include <stdlib.h>
 
+#include "SDL_hints.h"
+
 #if defined(SDL_VIDEO_DRIVER_X11)
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -3785,6 +3787,13 @@ void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 	// check what this context can do
 	const char *pVersionString = (const char *)glGetString(GL_VERSION);
 	dbg_msg("opengl", "Version string: %s", pVersionString);
+
+	const char *pRendererString = (const char *)glGetString(GL_RENDERER);
+
+	str_copy(pCommand->m_pVendorString, pVendorString, gs_GPUInfoStringSize);
+	str_copy(pCommand->m_pVersionString, pVersionString, gs_GPUInfoStringSize);
+	str_copy(pCommand->m_pRendererString, pRendererString, gs_GPUInfoStringSize);
+
 	// parse version string
 	ParseVersionString(pVersionString, pCommand->m_pCapabilities->m_ContextMajor, pCommand->m_pCapabilities->m_ContextMinor, pCommand->m_pCapabilities->m_ContextPatch);
 
@@ -4520,6 +4529,10 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		else
 			SdlFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 	}
+	else if(Flags & (IGraphicsBackend::INITFLAG_DESKTOP_FULLSCREEN))
+	{
+		SdlFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+	}
 
 	// set gl attributes
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -4614,7 +4627,10 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	CmdSDL.m_GlewPatch = GlewPatch;
 	CmdSDL.m_pInitError = &InitError;
 	CmdSDL.m_pErrStringPtr = &pErrorStr;
-	CmdBuffer.AddCommand(CmdSDL);
+	CmdSDL.m_pVendorString = m_aVendorString;
+	CmdSDL.m_pVersionString = m_aVersionString;
+	CmdSDL.m_pRendererString = m_aRendererString;
+	CmdBuffer.AddCommandUnsafe(CmdSDL);
 	RunBuffer(&CmdBuffer);
 	WaitForIdle();
 	CmdBuffer.Reset();
@@ -4626,7 +4642,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		CmdOpenGL.m_pStorage = pStorage;
 		CmdOpenGL.m_pCapabilities = &m_Capabilites;
 		CmdOpenGL.m_pInitError = &InitError;
-		CmdBuffer.AddCommand(CmdOpenGL);
+		CmdBuffer.AddCommandUnsafe(CmdOpenGL);
 		RunBuffer(&CmdBuffer);
 		WaitForIdle();
 		CmdBuffer.Reset();
@@ -4634,7 +4650,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		if(InitError == -2)
 		{
 			CCommandProcessorFragment_OpenGL::SCommand_Shutdown CmdGL;
-			CmdBuffer.AddCommand(CmdGL);
+			CmdBuffer.AddCommandUnsafe(CmdGL);
 			RunBuffer(&CmdBuffer);
 			WaitForIdle();
 			CmdBuffer.Reset();
@@ -4648,7 +4664,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	if(InitError != 0)
 	{
 		CCommandProcessorFragment_SDL::SCommand_Shutdown Cmd;
-		CmdBuffer.AddCommand(Cmd);
+		CmdBuffer.AddCommandUnsafe(Cmd);
 		RunBuffer(&CmdBuffer);
 		WaitForIdle();
 		CmdBuffer.Reset();
@@ -4701,7 +4717,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 
 			CmdSDL.m_Width = CurrentDisplayMode.w;
 			CmdSDL.m_Height = CurrentDisplayMode.h;
-			CmdBuffer.AddCommand(CmdSDL);
+			CmdBuffer.AddCommandUnsafe(CmdSDL);
 			RunBuffer(&CmdBuffer);
 			WaitForIdle();
 			CmdBuffer.Reset();
@@ -4717,13 +4733,13 @@ int CGraphicsBackend_SDL_OpenGL::Shutdown()
 	// issue a shutdown command
 	CCommandBuffer CmdBuffer(1024, 512);
 	CCommandProcessorFragment_OpenGL::SCommand_Shutdown CmdGL;
-	CmdBuffer.AddCommand(CmdGL);
+	CmdBuffer.AddCommandUnsafe(CmdGL);
 	RunBuffer(&CmdBuffer);
 	WaitForIdle();
 	CmdBuffer.Reset();
 
 	CCommandProcessorFragment_SDL::SCommand_Shutdown Cmd;
-	CmdBuffer.AddCommand(Cmd);
+	CmdBuffer.AddCommandUnsafe(Cmd);
 	RunBuffer(&CmdBuffer);
 	WaitForIdle();
 	CmdBuffer.Reset();
@@ -4755,18 +4771,28 @@ void CGraphicsBackend_SDL_OpenGL::Maximize()
 	// TODO: SDL
 }
 
-bool CGraphicsBackend_SDL_OpenGL::Fullscreen(bool State)
+void CGraphicsBackend_SDL_OpenGL::SetWindowParams(int FullscreenMode, bool IsBorderless)
 {
+	if(FullscreenMode > 0)
+	{
+		if(FullscreenMode == 1)
+		{
 #if defined(CONF_PLATFORM_MACOS) // Todo SDL: remove this when fixed (game freezes when losing focus in fullscreen)
-	return SDL_SetWindowFullscreen(m_pWindow, State ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) == 0;
+			SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
 #else
-	return SDL_SetWindowFullscreen(m_pWindow, State ? SDL_WINDOW_FULLSCREEN : 0) == 0;
+			SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN);
 #endif
-}
-
-void CGraphicsBackend_SDL_OpenGL::SetWindowBordered(bool State)
-{
-	SDL_SetWindowBordered(m_pWindow, SDL_bool(State));
+		}
+		else if(FullscreenMode == 2)
+		{
+			SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+		}
+	}
+	else
+	{
+		SDL_SetWindowFullscreen(m_pWindow, 0);
+		SDL_SetWindowBordered(m_pWindow, SDL_bool(!IsBorderless));
+	}
 }
 
 bool CGraphicsBackend_SDL_OpenGL::SetWindowScreen(int Index)

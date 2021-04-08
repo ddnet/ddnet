@@ -1253,7 +1253,10 @@ int CMenus::RenderMenubar(CUIRect r)
 		Box.VSplitLeft(4.0f, 0, &Box);
 		static int s_CallVoteButton = 0;
 		if(DoButton_MenuTab(&s_CallVoteButton, Localize("Call vote"), m_ActivePage == PAGE_CALLVOTE, &Button, CUI::CORNER_TR))
+		{
 			NewPage = PAGE_CALLVOTE;
+			m_ControlPageOpening = true;
+		}
 	}
 
 	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));

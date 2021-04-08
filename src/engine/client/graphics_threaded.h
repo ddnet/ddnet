@@ -581,7 +581,7 @@ public:
 	}
 
 	template<class T>
-	bool AddCommand(const T &Command)
+	bool AddCommandUnsafe(const T &Command)
 	{
 		// make sure that we don't do something stupid like ->AddCommand(&Cmd);
 		(void)static_cast<const SCommand *>(&Command);
@@ -640,6 +640,7 @@ public:
 		INITFLAG_RESIZABLE = 1 << 2,
 		INITFLAG_BORDERLESS = 1 << 3,
 		INITFLAG_HIGHDPI = 1 << 4,
+		INITFLAG_DESKTOP_FULLSCREEN = 1 << 5,
 	};
 
 	virtual ~IGraphicsBackend() {}
@@ -653,8 +654,7 @@ public:
 
 	virtual void Minimize() = 0;
 	virtual void Maximize() = 0;
-	virtual bool Fullscreen(bool State) = 0;
-	virtual void SetWindowBordered(bool State) = 0;
+	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless) = 0;
 	virtual bool SetWindowScreen(int Index) = 0;
 	virtual int GetWindowScreen() = 0;
 	virtual int WindowActive() = 0;
@@ -675,6 +675,10 @@ public:
 	virtual bool HasQuadContainerBuffering() { return false; }
 	virtual bool Has2DTextureArrays() { return false; }
 	virtual const char *GetErrorString() { return NULL; }
+
+	virtual const char *GetVendorString() = 0;
+	virtual const char *GetVersionString() = 0;
+	virtual const char *GetRendererString() = 0;
 };
 
 class CGraphics_Threaded : public IEngineGraphics
@@ -801,6 +805,26 @@ class CGraphics_Threaded : public IEngineGraphics
 			pVertices[i].m_Pos.x = x * c - y * s + rCenter.x;
 			pVertices[i].m_Pos.y = x * s + y * c + rCenter.y;
 		}
+	}
+
+	template<typename TName, typename TFunc>
+	bool AddCmd(TName &Cmd, TFunc &&FailFunc, const char *pFailStr)
+	{
+		if(!m_pCommandBuffer->AddCommandUnsafe(Cmd))
+		{
+			// kick command buffer and try again
+			KickCommandBuffer();
+
+			if(!FailFunc())
+				return false;
+
+			if(!m_pCommandBuffer->AddCommandUnsafe(Cmd))
+			{
+				dbg_msg("graphics", "%s", pFailStr);
+				return false;
+			}
+		}
+		return true;
 	}
 
 	void KickCommandBuffer();
@@ -1065,24 +1089,20 @@ public:
 		Command.m_PrimType = PrimType;
 		Command.m_PrimCount = PrimCount;
 
-		// check if we have enough free memory in the commandbuffer
-		if(!m_pCommandBuffer->AddCommand(Command))
+		if(
+			!AddCmd(
+				Command, [&] {
+					Command.m_pVertices = (decltype(Command.m_pVertices))m_pCommandBuffer->AllocData(VertSize * NumVerts);
+					if(Command.m_pVertices == NULL)
+					{
+						dbg_msg("graphics", "failed to allocate data for vertices");
+						return false;
+					}
+					return true;
+				},
+				"failed to allocate memory for render command"))
 		{
-			// kick command buffer and try again
-			KickCommandBuffer();
-
-			Command.m_pVertices = (decltype(Command.m_pVertices))m_pCommandBuffer->AllocData(VertSize * NumVerts);
-			if(Command.m_pVertices == NULL)
-			{
-				dbg_msg("graphics", "failed to allocate data for vertices");
-				return;
-			}
-
-			if(!m_pCommandBuffer->AddCommand(Command))
-			{
-				dbg_msg("graphics", "failed to allocate memory for render command");
-				return;
-			}
+			return;
 		}
 	}
 
@@ -1112,8 +1132,7 @@ public:
 	int GetNumScreens() const override;
 	void Minimize() override;
 	void Maximize() override;
-	bool Fullscreen(bool State) override;
-	void SetWindowBordered(bool State) override;
+	void SetWindowParams(int FullscreenMode, bool IsBorderless) override;
 	bool SetWindowScreen(int Index) override;
 	void Resize(int w, int h, bool SetWindowSize = false) override;
 	void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser) override;
@@ -1150,6 +1169,10 @@ public:
 	bool IsTextBufferingEnabled() override { return m_OpenGLTextBufferingEnabled; }
 	bool IsQuadContainerBufferingEnabled() override { return m_OpenGLQuadContainerBufferingEnabled; }
 	bool HasTextureArrays() override { return m_OpenGLHasTextureArrays; }
+
+	const char *GetVendorString() override;
+	const char *GetVersionString() override;
+	const char *GetRendererString() override;
 };
 
 extern IGraphicsBackend *CreateGraphicsBackend();

@@ -718,7 +718,8 @@ bool CScore::SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGam
 			pSqlServer->BindString(2, pData->m_GameUuid);
 			pSqlServer->BindBlob(3, Teamrank.m_TeamID.m_aData, sizeof(Teamrank.m_TeamID.m_aData));
 			pSqlServer->Print();
-			if(pSqlServer->Step(&End, pError, ErrorSize))
+			int NumUpdated;
+			if(pSqlServer->ExecuteUpdate(&NumUpdated, pError, ErrorSize))
 			{
 				return true;
 			}
@@ -843,18 +844,18 @@ bool CScore::ShowRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 			if(str_comp_nocase(pData->m_RequestingPlayer, pData->m_Name) == 0)
 			{
 				str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
-					"%s Time: %s, better than %d%%",
+					"%s - %s - better than %d%%",
 					pData->m_Name, aBuf, BetterThanPercent);
 			}
 			else
 			{
 				str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
-					"%s Time: %s, better than %d%%, requested by %s",
+					"%s - %s - better than %d%% - requested by %s",
 					pData->m_Name, aBuf, BetterThanPercent, pData->m_RequestingPlayer);
 			}
 
 			str_format(pResult->m_Data.m_aaMessages[1], sizeof(pResult->m_Data.m_aaMessages[1]),
-				"Global rank %d || %s %s",
+				"Global rank %d - %s %s",
 				Rank, pData->m_Server, aRegionalRank);
 		}
 	}
@@ -996,7 +997,7 @@ bool CScore::ShowTopThread(IDbConnection *pSqlServer, const ISqlData *pGameData,
 	}
 	pSqlServer->BindString(1, pData->m_Map);
 	pSqlServer->BindString(2, pAny);
-	pSqlServer->BindInt(3, 6);
+	pSqlServer->BindInt(3, 5);
 
 	// show top
 	int Line = 0;
@@ -1023,11 +1024,6 @@ bool CScore::ShowTopThread(IDbConnection *pSqlServer, const ISqlData *pGameData,
 		HasLocal = HasLocal || str_comp(aRecordServer, pData->m_Server) == 0;
 
 		Line++;
-
-		if(!HasLocal && Line == 4)
-		{
-			break;
-		}
 	}
 
 	if(!HasLocal)
@@ -1873,7 +1869,7 @@ bool CScore::LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 	bool Found = false;
 	for(int i = 0; i < pResult->m_SavedTeam.GetMembersCount(); i++)
 	{
-		if(str_comp(pResult->m_SavedTeam.m_pSavedTees->GetName(), pData->m_RequestingPlayer) == 0)
+		if(str_comp(pResult->m_SavedTeam.m_pSavedTees[i].GetName(), pData->m_RequestingPlayer) == 0)
 		{
 			Found = true;
 			break;
@@ -1886,11 +1882,11 @@ bool CScore::LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 	}
 
 	int Since = pSqlServer->GetInt(2);
-	if(Since < g_Config.m_SvSaveGamesDelay)
+	if(Since < g_Config.m_SvSaveSwapGamesDelay)
 	{
 		str_format(pResult->m_aMessage, sizeof(pResult->m_aMessage),
 			"You have to wait %d seconds until you can load this savegame",
-			g_Config.m_SvSaveGamesDelay - Since);
+			g_Config.m_SvSaveSwapGamesDelay - Since);
 		return false;
 	}
 

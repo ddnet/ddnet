@@ -29,7 +29,6 @@ public:
 	int m_InputDirectionLeft[NUM_DUMMIES];
 	int m_InputDirectionRight[NUM_DUMMIES];
 	int m_ShowHookColl[NUM_DUMMIES];
-	int m_ResetDummy[NUM_DUMMIES];
 	int m_LastDummy;
 	int m_OtherFire;
 

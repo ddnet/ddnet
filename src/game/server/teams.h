@@ -17,6 +17,7 @@ class CGameTeams
 	uint64 m_Invited[MAX_CLIENTS];
 	bool m_Practice[MAX_CLIENTS];
 	std::shared_ptr<CScoreSaveResult> m_pSaveTeamResult[MAX_CLIENTS];
+	uint64 m_LastSwap[MAX_CLIENTS];
 
 	class CGameContext *m_pGameContext;
 
@@ -73,10 +74,9 @@ public:
 
 	// need to be very careful using this method. SERIOUSLY...
 	void SetForceCharacterTeam(int ClientID, int Team);
-	void SetForceCharacterNewTeam(int ClientID, int Team);
-	void ForceLeaveTeam(int ClientID);
 
 	void Reset();
+	void ResetRoundState(int Team);
 	void ResetSwitchers(int Team);
 
 	void SendTeamsState(int ClientID);
@@ -94,6 +94,8 @@ public:
 	void SetCpActive(CPlayer *Player, int CpActive);
 	void KillSavedTeam(int ClientID, int Team);
 	void ResetSavedTeam(int ClientID, int Team);
+	void RequestTeamSwap(CPlayer *pPlayer, CPlayer *pTargetPlayer, int Team);
+	void SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, int Team);
 	void ProcessSaveTeam();
 
 	bool TeeFinished(int ClientID)
@@ -117,6 +119,11 @@ public:
 	bool IsInvited(int Team, int ClientID)
 	{
 		return m_Invited[Team] & 1LL << ClientID;
+	}
+
+	bool IsStarted(int Team)
+	{
+		return m_TeamState[Team] == CGameTeams::TEAMSTATE_STARTED;
 	}
 
 	void SetFinished(int ClientID, bool finished)
