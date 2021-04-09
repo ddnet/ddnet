@@ -135,7 +135,9 @@ bool CChatHelper::IsGreeting(const char *pMsg)
 		"yo",
 		"yoo",
 		"yooo",
+		"salut",
 		"sup",
+		"szia",
 		"selam"};
 	for(const auto &aGreeting : aGreetings)
 	{
