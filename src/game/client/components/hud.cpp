@@ -173,6 +173,8 @@ void CHud::RenderScoreHud()
 		float Whole = 300 * Graphics()->ScreenAspect();
 		float StartY = 229.0f;
 
+		const float ScoreSingleBoxHeight = 18.0f;
+
 		bool ForceScoreInfoInit = !m_aScoreInfo[0].m_Initialized || !m_aScoreInfo[1].m_Initialized;
 		m_aScoreInfo[0].m_Initialized = m_aScoreInfo[1].m_Initialized = true;
 
@@ -215,7 +217,7 @@ void CHud::RenderScoreHud()
 						Graphics()->SetColor(1.0f, 0.0f, 0.0f, 0.25f);
 					else
 						Graphics()->SetColor(0.0f, 0.0f, 1.0f, 0.25f);
-					m_aScoreInfo[t].m_RoundRectQuadContainerIndex = RenderTools()->CreateRoundRectQuadContainer(Whole - ScoreWidthMax - ImageSize - 2 * Split, StartY + t * 20, ScoreWidthMax + ImageSize + 2 * Split, 18.0f, 5.0f, CUI::CORNER_L);
+					m_aScoreInfo[t].m_RoundRectQuadContainerIndex = RenderTools()->CreateRoundRectQuadContainer(Whole - ScoreWidthMax - ImageSize - 2 * Split, StartY + t * 20, ScoreWidthMax + ImageSize + 2 * Split, ScoreSingleBoxHeight, 5.0f, CUI::CORNER_L);
 				}
 				Graphics()->TextureClear();
 				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -282,10 +284,15 @@ void CHud::RenderScoreHud()
 						}
 
 						// draw tee of the flag holder
-						CTeeRenderInfo Info = m_pClient->m_aClients[ID].m_RenderInfo;
-						Info.m_Size = 18.0f;
-						RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, EMOTE_NORMAL, vec2(1, 0),
-							vec2(Whole - ScoreWidthMax - Info.m_Size / 2 - Split, StartY + 1.0f + Info.m_Size / 2 + t * 20));
+						CTeeRenderInfo TeeInfo = m_pClient->m_aClients[ID].m_RenderInfo;
+						TeeInfo.m_Size = ScoreSingleBoxHeight;
+
+						CAnimState *pIdleState = CAnimState::GetIdle();
+						vec2 OffsetToMid;
+						RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
+						vec2 TeeRenderPos(Whole - ScoreWidthMax - TeeInfo.m_Size / 2 - Split, StartY + (t * 20) + ScoreSingleBoxHeight / 2.0f + OffsetToMid.y);
+
+						RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
 					}
 				}
 				StartY += 8.0f;
@@ -391,7 +398,7 @@ void CHud::RenderScoreHud()
 						Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.25f);
 					else
 						Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.25f);
-					m_aScoreInfo[t].m_RoundRectQuadContainerIndex = RenderTools()->CreateRoundRectQuadContainer(Whole - ScoreWidthMax - ImageSize - 2 * Split - PosSize, StartY + t * 20, ScoreWidthMax + ImageSize + 2 * Split + PosSize, 18.0f, 5.0f, CUI::CORNER_L);
+					m_aScoreInfo[t].m_RoundRectQuadContainerIndex = RenderTools()->CreateRoundRectQuadContainer(Whole - ScoreWidthMax - ImageSize - 2 * Split - PosSize, StartY + t * 20, ScoreWidthMax + ImageSize + 2 * Split + PosSize, ScoreSingleBoxHeight, 5.0f, CUI::CORNER_L);
 				}
 				Graphics()->TextureClear();
 				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -446,10 +453,15 @@ void CHud::RenderScoreHud()
 						}
 
 						// draw tee
-						CTeeRenderInfo Info = m_pClient->m_aClients[ID].m_RenderInfo;
-						Info.m_Size = 18.0f;
-						RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, EMOTE_NORMAL, vec2(1, 0),
-							vec2(Whole - ScoreWidthMax - Info.m_Size / 2 - Split, StartY + 1.0f + Info.m_Size / 2 + t * 20));
+						CTeeRenderInfo TeeInfo = m_pClient->m_aClients[ID].m_RenderInfo;
+						TeeInfo.m_Size = ScoreSingleBoxHeight;
+
+						CAnimState *pIdleState = CAnimState::GetIdle();
+						vec2 OffsetToMid;
+						RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
+						vec2 TeeRenderPos(Whole - ScoreWidthMax - TeeInfo.m_Size / 2 - Split, StartY + (t * 20) + ScoreSingleBoxHeight / 2.0f + OffsetToMid.y);
+
+						RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
 					}
 				}
 				else
