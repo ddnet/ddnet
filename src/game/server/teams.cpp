@@ -751,6 +751,7 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, in
 		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
 		{
 			GameServer()->m_apPlayers[i]->GetCharacter()->ResetHook();
+			GameServer()->m_World.ReleaseHooked(i);
 		}
 	}
 

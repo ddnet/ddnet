@@ -742,7 +742,6 @@ void CCharacter::ResetHook()
 	m_Core.m_HookedPlayer = -1;
 	m_Core.m_HookState = HOOK_RETRACTED;
 	m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
-	GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
 	m_Core.m_HookPos = m_Core.m_Pos;
 }
 
@@ -1915,6 +1914,7 @@ void CCharacter::HandleTiles(int Index)
 			if(!g_Config.m_SvTeleportHoldHook)
 			{
 				ResetHook();
+				GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
 			}
 			if(g_Config.m_SvTeleportLoseWeapons)
 			{
@@ -1939,6 +1939,7 @@ void CCharacter::HandleTiles(int Index)
 				if(!g_Config.m_SvTeleportHoldHook)
 				{
 					ResetHook();
+					GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
 				}
 
 				return;
@@ -1954,6 +1955,7 @@ void CCharacter::HandleTiles(int Index)
 			if(!g_Config.m_SvTeleportHoldHook)
 			{
 				ResetHook();
+				GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
 			}
 		}
 		return;
@@ -2264,6 +2266,7 @@ void CCharacter::Pause(bool Pause)
 		if(m_Core.m_HookedPlayer != -1) // Keeping hook would allow cheats
 		{
 			ResetHook();
+			GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
 		}
 	}
 	else
