@@ -221,7 +221,17 @@ void CKillMessages::OnRender()
 		}
 
 		if(m_aKillmsgs[r].m_VictimID >= 0)
-			RenderTools()->RenderTee(CAnimState::GetIdle(), &m_aKillmsgs[r].m_VictimRenderInfo, EMOTE_PAIN, vec2(-1, 0), vec2(x, y + 28));
+		{
+			CTeeRenderInfo TeeInfo = m_aKillmsgs[r].m_VictimRenderInfo;
+
+			CAnimState *pIdleState = CAnimState::GetIdle();
+			vec2 OffsetToMid;
+			RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
+			vec2 TeeRenderPos(x, y + 46.0f / 2.0f + OffsetToMid.y);
+
+			RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_PAIN, vec2(-1, 0), TeeRenderPos);
+		}
+
 		x -= 32.0f;
 
 		// render weapon
@@ -254,8 +264,19 @@ void CKillMessages::OnRender()
 
 			// render killer tee
 			x -= 24.0f;
+
 			if(m_aKillmsgs[r].m_KillerID >= 0)
-				RenderTools()->RenderTee(CAnimState::GetIdle(), &m_aKillmsgs[r].m_KillerRenderInfo, EMOTE_ANGRY, vec2(1, 0), vec2(x, y + 28));
+			{
+				CTeeRenderInfo TeeInfo = m_aKillmsgs[r].m_KillerRenderInfo;
+
+				CAnimState *pIdleState = CAnimState::GetIdle();
+				vec2 OffsetToMid;
+				RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
+				vec2 TeeRenderPos(x, y + 46.0f / 2.0f + OffsetToMid.y);
+
+				RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_ANGRY, vec2(1, 0), TeeRenderPos);
+			}
+
 			x -= 32.0f;
 
 			// render killer name
