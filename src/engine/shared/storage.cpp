@@ -31,6 +31,7 @@ private:
 
 	struct SCheckFileContext
 	{
+		char m_aSearchRoot[MAX_PATH_LENGTH];
 		char m_aCurrentDir[MAX_PATH_LENGTH];
 		CCheckJob *m_pSelf;
 	};
@@ -42,19 +43,23 @@ private:
 			return 0;
 
 		char aFullPath[MAX_PATH_LENGTH];
-		str_format(aFullPath, sizeof(aFullPath), "%s/%s", pContext->m_aCurrentDir, pName);
+		str_format(aFullPath, sizeof(aFullPath), "%s/%s/%s", pContext->m_aSearchRoot, pContext->m_aCurrentDir, pName);
+
+		char aRelPath[MAX_PATH_LENGTH];
+		str_format(aRelPath, sizeof(aRelPath), "%s%s%s", pContext->m_aCurrentDir, pContext->m_aCurrentDir[0] ? "/" : "", pName);
 
 		if(IsDir)
 		{
 			SCheckFileContext Context;
-			str_copy(Context.m_aCurrentDir, aFullPath, sizeof(Context.m_aCurrentDir));
+			str_copy(Context.m_aSearchRoot, pContext->m_aSearchRoot, sizeof(Context.m_aSearchRoot));
+			str_copy(Context.m_aCurrentDir, aRelPath, sizeof(Context.m_aCurrentDir));
 			Context.m_pSelf = pContext->m_pSelf;
 
 			fs_listdir(aFullPath, CheckFileCallback, DirType, &Context);
 			return 0;
 		}
 
-		int Index = GetCheckIndex(aFullPath);
+		int Index = GetCheckIndex(aRelPath);
 		if(Index < 0)
 		{
 			pContext->m_pSelf->m_pResult->m_ExtraFiles.emplace_back(aFullPath);
@@ -87,7 +92,8 @@ private:
 	void Run()
 	{
 		SCheckFileContext Context;
-		str_copy(Context.m_aCurrentDir, m_aDataDir, sizeof(Context.m_aCurrentDir));
+		str_copy(Context.m_aSearchRoot, m_aDataDir, sizeof(Context.m_aSearchRoot));
+		Context.m_aCurrentDir[0] = '\0';
 		Context.m_pSelf = this;
 
 		fs_listdir(m_aDataDir, CheckFileCallback, -1, &Context);
@@ -443,6 +449,13 @@ public:
 		}
 
 		return Result;
+	}
+
+	virtual int Store(const char *pFile)
+	{
+		dbg_msg("storage", "storing file %s", pFile);
+
+		return 0;
 	}
 
 	virtual void ListDirectoryInfo(int Type, const char *pPath, FS_LISTDIR_INFO_CALLBACK pfnCallback, void *pUser)

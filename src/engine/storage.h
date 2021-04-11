@@ -40,6 +40,7 @@ public:
 	virtual const std::vector<std::string> &DIExtraFiles() const = 0;
 	virtual std::vector<std::string> DIMissingFiles() = 0;
 	virtual std::vector<std::string> DIModifiedFiles() = 0;
+	virtual int Store(const char *pFile) = 0;
 
 	virtual void ListDirectory(int Type, const char *pPath, FS_LISTDIR_CALLBACK pfnCallback, void *pUser) = 0;
 	virtual void ListDirectoryInfo(int Type, const char *pPath, FS_LISTDIR_INFO_CALLBACK pfnCallback, void *pUser) = 0;

@@ -15,7 +15,7 @@ for p in Path("data/").rglob('*'):
                 break
             h.update(chunk)
     digeststr = '{' + ','.join(["0x{:02x}".format(k) for k in h.digest()]) + '}'
-    files += [(str(p), digeststr)]
+    files += [(str(p.relative_to("data/")), digeststr)]
 
 files.sort(key=lambda x: x[0])
 pathlen = len(max(files, key=lambda x: len(x[0]))[0])
