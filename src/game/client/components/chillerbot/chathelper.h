@@ -23,7 +23,6 @@ class CChatHelper : public CComponent
 	bool IsGreeting(const char *pMsg);
 	void DoGreet();
 	void SayFormat(const char *pMsg);
-	void Get128Name(const char *pMsg, char *pName);
 
 	void OnChatMessage(int ClientID, int Team, const char *pMsg);
 
@@ -36,6 +35,7 @@ class CChatHelper : public CComponent
 	static void ConSayFormat(IConsole::IResult *pResult, void *pUserData);
 
 public:
+	void Get128Name(const char *pMsg, char *pName);
 	const char *GetGreetName() { return m_aGreetName; }
 	const char *GetPingName() { return m_aLastPingName; }
 	const char *LastAfkPingMessage() { return m_aLastAfkPing; }

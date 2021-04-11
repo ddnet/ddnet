@@ -18,6 +18,10 @@ MACRO_CONFIG_STR(ClAutoReplyMsg, cl_auto_reply_msg, 32, "%n (chillerbot-ux auto 
 MACRO_CONFIG_INT(ClChillerbotHud, cl_chillerbot_hud, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show enabled chillerbot components in hud")
 MACRO_CONFIG_INT(ClShowSpeed, cl_show_speed, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show speed in hud")
 
+// remotecontrol
+MACRO_CONFIG_INT(ClRemoteControl, cl_remote_control, 0, 0, 1, CFGFLAG_CLIENT, "Execute whisper in local console")
+MACRO_CONFIG_STR(ClRemoteControlToken, cl_remote_control_token, 512, "spaces_do_not_work", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Remote control token (see cl_remote_control)")
+
 // client
 MACRO_CONFIG_INT(ClPredict, cl_predict, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Predict client movements")
 MACRO_CONFIG_INT(ClPredictDummy, cl_predict_dummy, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Predict dummy movements")

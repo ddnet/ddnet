@@ -1746,6 +1746,8 @@ if(CLIENT)
     components/chillerbot/chillpw.h
     components/chillerbot/playerpics.cpp
     components/chillerbot/playerpics.h
+    components/chillerbot/remotecontrol.cpp
+    components/chillerbot/remotecontrol.h
     components/chillerbot/version.h
     components/console.cpp
     components/console.h
