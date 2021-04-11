@@ -665,7 +665,7 @@ void CGameClient::OnRender()
 	// check data integrity
 	if(!m_DataIntegrityWarned)
 	{
-		if(Storage()->DIStatus() == IStorage::INTEGRITY_DIRTY && Client()->IsDDNetInfoFresh() && !str_comp(Client()->LatestVersion(), "0"))
+		if(Storage()->DIStatus() == IStorage::INTEGRITY_DIRTY && Client()->IsDDNetInfoFresh() /*&& !str_comp(Client()->LatestVersion(), "0")*/)
 		{
 			if(m_pMenus->CanDisplayWarning())
 			{

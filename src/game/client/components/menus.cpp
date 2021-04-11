@@ -2665,34 +2665,72 @@ int CMenus::Render()
 			{
 				CUIRect Line;
 				unsigned i = 0;
+				const float LineHeight = FontSize / 2;
+				unsigned MaxLines = (Extra.h - 5.0f) / (LineHeight + 2.0f);
 
-				Extra.HSplitTop(5.0f, 0, &Extra);
-				Line = Extra;
-				Line.h = FontSize / 2;
-				while(Line.y + Line.h <= Extra.y + Extra.h && i < m_PopupDIExtraFiles.size())
+				if(m_PopupDIExtraFiles.size())
 				{
-					UI()->DoLabel(&Line, m_PopupDIExtraFiles[i++].c_str(), FontSize / 2, 0, -1);
-					Line.y += Line.h + 2.0f;
+					static float s_ExtraScrollbarP = 0.0f;
+					CUIRect ExtraScrollbar;
+					if(m_PopupDIExtraFiles.size() > MaxLines)
+					{
+						Extra.VSplitRight(7.5f, &Extra, &ExtraScrollbar);
+						s_ExtraScrollbarP = DoScrollbarV(&s_ExtraScrollbarP, &ExtraScrollbar, s_ExtraScrollbarP);
+					}
+
+					Extra.HSplitTop(5.0f, 0, &Extra);
+					Line = Extra;
+					Line.h = FontSize / 2;
+
+					i = (m_PopupDIExtraFiles.size() - MaxLines) * s_ExtraScrollbarP;
+					while(Line.y + Line.h <= Extra.y + Extra.h && i < m_PopupDIExtraFiles.size())
+					{
+						UI()->DoLabel(&Line, m_PopupDIExtraFiles[i++].c_str(), FontSize / 2, 0, -1);
+						Line.y += Line.h + 2.0f;
+					}
 				}
 
-				Missing.HSplitTop(5.0f, 0, &Missing);
-				Line = Missing;
-				Line.h = FontSize / 2;
-				i = 0;
-				while(Line.y + Line.h <= Missing.y + Missing.h && i < m_PopupDIMissingFiles.size())
+
+				if(m_PopupDIMissingFiles.size())
 				{
-					UI()->DoLabel(&Line, m_PopupDIMissingFiles[i++].c_str(), FontSize / 2, 0, -1);
-					Line.y += Line.h + 2.0f;
+					static float s_MissingScrollbarP = 0.0f;
+					CUIRect MissingScrollbar;
+					if(m_PopupDIMissingFiles.size() > MaxLines)
+					{
+						Missing.VSplitRight(7.5f, &Missing, &MissingScrollbar);
+						s_MissingScrollbarP = DoScrollbarV(&s_MissingScrollbarP, &MissingScrollbar, s_MissingScrollbarP);
+					}
+
+					Missing.HSplitTop(5.0f, 0, &Missing);
+					Line = Missing;
+					Line.h = FontSize / 2;
+					i = (m_PopupDIMissingFiles.size() - MaxLines) * s_MissingScrollbarP;
+					while(Line.y + Line.h <= Missing.y + Missing.h && i < m_PopupDIMissingFiles.size())
+					{
+						UI()->DoLabel(&Line, m_PopupDIMissingFiles[i++].c_str(), FontSize / 2, 0, -1);
+						Line.y += Line.h + 2.0f;
+					}
 				}
 
-				Modified.HSplitTop(5.0f, 0, &Modified);
-				Line = Modified;
-				Line.h = FontSize / 2;
-				i = 0;
-				while(Line.y + Line.h <= Modified.y + Modified.h && i < m_PopupDIModifiedFiles.size())
+				if(m_PopupDIModifiedFiles.size())
 				{
-					UI()->DoLabel(&Line, m_PopupDIModifiedFiles[i++].c_str(), FontSize / 2, 0, -1);
-					Line.y += Line.h + 2.0f;
+					static float s_ModifiedScrollbarP = 0.0f;
+					CUIRect ModifiedScrollbar;
+					if(m_PopupDIModifiedFiles.size() > MaxLines)
+					{
+						Modified.VSplitRight(7.5f, &Modified, &ModifiedScrollbar);
+						s_ModifiedScrollbarP = DoScrollbarV(&s_ModifiedScrollbarP, &ModifiedScrollbar, s_ModifiedScrollbarP);
+					}
+
+					Modified.HSplitTop(5.0f, 0, &Modified);
+					Line = Modified;
+					Line.h = FontSize / 2;
+					i = (m_PopupDIModifiedFiles.size() - MaxLines) * s_ModifiedScrollbarP;
+					while(Line.y + Line.h <= Modified.y + Modified.h && i < m_PopupDIModifiedFiles.size())
+					{
+						UI()->DoLabel(&Line, m_PopupDIModifiedFiles[i++].c_str(), FontSize / 2, 0, -1);
+						Line.y += Line.h + 2.0f;
+					}
 				}
 			}
 
