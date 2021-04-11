@@ -2704,7 +2704,7 @@ int CMenus::Render()
 				Ignore.VMargin(20.0f, &Ignore);
 
 				static int s_FixButton = 0;
-				if(DoButton_Menu(&s_FixButton, Localize("Fix"), 0, &Fix))
+				if(DoButton_Menu(&s_FixButton, Localize("Restore Files"), 0, &Fix))
 					Client()->CleanUpInstallation();
 
 				static int s_IgnoreButton = 0;

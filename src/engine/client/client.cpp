@@ -331,6 +331,7 @@ CClient::CClient() :
 
 	str_format(m_aDDNetInfoTmp, sizeof(m_aDDNetInfoTmp), DDNET_INFO ".%d.tmp", pid());
 	m_pDDNetInfoTask = NULL;
+	m_DDNetInfoFresh = false;
 	m_aNews[0] = '\0';
 	m_aMapDownloadUrl[0] = '\0';
 	m_Points = -1;
@@ -2463,6 +2464,7 @@ bool CClient::IsDDNetInfoChanged()
 void CClient::FinishDDNetInfo()
 {
 	ResetDDNetInfo();
+	m_DDNetInfoFresh = true;
 	if(IsDDNetInfoChanged())
 	{
 		m_pStorage->RenameFile(m_aDDNetInfoTmp, DDNET_INFO, IStorage::TYPE_SAVE);
@@ -4561,14 +4563,16 @@ void CClient::CleanUpInstallation()
 
 	for(const auto &f : Modified)
 	{
+		std::string s = "data/";
 		Storage()->Store(f.c_str());
-		Jobs[f] = true;
+		Jobs[s.append(f)] = true;
 	}
 
 	for(const auto &f : Missing)
 	{
-		Jobs[f] = true;
+		std::string s = "data/";
+		Jobs[s.append(f)] = true;
 	}
 
-	//Updater()->PerformUpdate(Jobs, true);
+	Updater()->PerformUpdate(Jobs, true);
 }

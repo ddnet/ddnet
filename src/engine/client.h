@@ -211,6 +211,7 @@ public:
 	virtual void DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser) = 0;
 
 	virtual void RequestDDNetInfo() = 0;
+	virtual bool IsDDNetInfoFresh() = 0;
 	virtual bool EditorHasUnsavedData() const = 0;
 
 	virtual void GenerateTimeoutSeed() = 0;
