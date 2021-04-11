@@ -343,6 +343,7 @@ void CUpdater::CommitUpdate()
 
 	if(m_ClientUpdate)
 		Success &= ReplaceClient();
+	if(m_ServerUpdate)
 		Success &= ReplaceServer();
 	if(!Success)
 		m_State = FAIL;

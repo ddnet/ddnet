@@ -2690,7 +2690,6 @@ int CMenus::Render()
 					}
 				}
 
-
 				if(m_PopupDIMissingFiles.size())
 				{
 					static float s_MissingScrollbarP = 0.0f;
