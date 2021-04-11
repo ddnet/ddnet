@@ -1424,6 +1424,11 @@ void CMenus::OnInit()
 	Console()->Chain("add_friend", ConchainFriendlistUpdate, this);
 	Console()->Chain("remove_friend", ConchainFriendlistUpdate, this);
 
+	Console()->Chain("cl_assets_entities", ConchainAssetsEntities, this);
+	Console()->Chain("cl_asset_game", ConchainAssetGame, this);
+	Console()->Chain("cl_asset_emoticons", ConchainAssetEmoticons, this);
+	Console()->Chain("cl_asset_particles", ConchainAssetParticles, this);
+
 	m_TextureBlob = Graphics()->LoadTexture("blob.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 
 	// setup load amount
