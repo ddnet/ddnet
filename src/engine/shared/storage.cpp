@@ -62,7 +62,7 @@ private:
 		int Index = GetCheckIndex(aRelPath);
 		if(Index < 0)
 		{
-			pContext->m_pSelf->m_pResult->m_ExtraFiles.emplace_back(aFullPath);
+			pContext->m_pSelf->m_pResult->m_ExtraFiles.emplace_back(aRelPath);
 			return 0;
 		}
 
@@ -453,9 +453,17 @@ public:
 
 	virtual int Store(const char *pFile)
 	{
-		dbg_msg("storage", "storing file %s", pFile);
+		char aNewPath[MAX_PATH_LENGTH];
+		str_format(aNewPath, sizeof(aNewPath), "%s/%s", m_aaStoragePaths[TYPE_SAVE], pFile);
 
-		return 0;
+		char aOldPath[MAX_PATH_LENGTH];
+		str_format(aOldPath, sizeof(aOldPath), "%s/%s", m_aDatadir, pFile);
+		dbg_msg("storage", "storing file %s at %s", aOldPath, aNewPath);
+
+		if(fs_makedir_rec_for(aNewPath))
+			return 1;
+
+		return fs_rename(aOldPath, aNewPath);
 	}
 
 	virtual void ListDirectoryInfo(int Type, const char *pPath, FS_LISTDIR_INFO_CALLBACK pfnCallback, void *pUser)

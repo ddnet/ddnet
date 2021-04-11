@@ -4555,7 +4555,8 @@ void CClient::CleanUpInstallation()
 	std::map<std::string, bool> Jobs;
 	for(const auto &f : Extra)
 	{
-		Storage()->Store(f.c_str());
+		if(Storage()->Store(f.c_str()))
+			dbg_msg("dbg", "error");
 	}
 
 	for(const auto &f : Modified)
