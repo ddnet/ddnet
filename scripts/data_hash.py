@@ -33,13 +33,13 @@ struct SHashEntry {{
 	char m_aPath[{0}];
 	SHA256_DIGEST m_Hash;
 
-	bool operator<(const SHashEntry &Other) {{ return str_comp(m_aPath, Other.m_aPath); }}
-	bool operator<(const char *pOther) {{ return str_comp(m_aPath, pOther); }}
-	bool operator==(const char *pOther) {{ return !str_comp(m_aPath, pOther); }}
+	bool operator<(const SHashEntry &Other) const {{ return str_comp(m_aPath, Other.m_aPath); }}
+	bool operator<(const char *pOther) const {{ return str_comp(m_aPath, pOther); }}
+	bool operator==(const char *pOther) const {{ return !str_comp(m_aPath, pOther); }}
 }};
 
 const int DATA_FILE_COUNT = {1};
-SHashEntry g_aDataHashes[{1}] = {{\
+const SHashEntry g_aDataHashes[{1}] = {{\
 """.format(pathlen + 1, len(files)))
 
 for f in files:
@@ -47,9 +47,9 @@ for f in files:
 
 print("};\n")
 print("""\
-int GetCheckIndex(const char *pFilename)
+inline int GetCheckIndex(const char *pFilename)
 {{
-	auto all = plain_range_sorted<SHashEntry>(&g_aDataHashes[0], &g_aDataHashes[{}]);
+	auto all = plain_range_sorted<const SHashEntry>(&g_aDataHashes[0], &g_aDataHashes[{}]);
 	auto r = ::find_binary(all, pFilename);
 
 	if(r.empty())

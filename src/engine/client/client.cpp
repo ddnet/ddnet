@@ -4552,7 +4552,7 @@ void CClient::CleanUpInstallation()
 {
 	auto Missing = Storage()->DIMissingFiles();
 	auto Modified = Storage()->DIModifiedFiles();
-	auto &Extra = Storage()->DIExtraFiles();
+	const auto &Extra = Storage()->DIExtraFiles();
 
 	std::map<std::string, bool> Jobs;
 	for(const auto &f : Extra)
