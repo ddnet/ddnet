@@ -3035,6 +3035,21 @@ void CGameClient::ConchainMenuMap(IConsole::IResult *pResult, void *pUserData, I
 		pfnCallback(pResult, pCallbackUserData);
 }
 
+void CGameClient::DummyResetInput()
+{
+	if(!Client()->DummyConnected())
+		return;
+
+	if((m_DummyInput.m_Fire & 1) != 0)
+		m_DummyInput.m_Fire++;
+
+	m_pControls->ResetInput(!g_Config.m_ClDummy);
+	m_pControls->m_InputData[!g_Config.m_ClDummy].m_Hook = 0;
+	m_pControls->m_InputData[!g_Config.m_ClDummy].m_Fire = m_DummyInput.m_Fire;
+
+	m_DummyInput = m_pControls->m_InputData[!g_Config.m_ClDummy];
+}
+
 bool CGameClient::CanDisplayWarning()
 {
 	return m_pMenus->CanDisplayWarning();

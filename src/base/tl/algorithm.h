@@ -109,7 +109,7 @@ void sort_quick(R range)
 template<class R>
 void sort(R range)
 {
-	std::sort(&range.front(), &range.back() + 1);
+	std::stable_sort(&range.front(), &range.back() + 1);
 }
 
 template<class R>

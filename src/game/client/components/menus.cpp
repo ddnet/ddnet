@@ -1253,7 +1253,10 @@ int CMenus::RenderMenubar(CUIRect r)
 		Box.VSplitLeft(4.0f, 0, &Box);
 		static int s_CallVoteButton = 0;
 		if(DoButton_MenuTab(&s_CallVoteButton, Localize("Call vote"), m_ActivePage == PAGE_CALLVOTE, &Button, CUI::CORNER_TR))
+		{
 			NewPage = PAGE_CALLVOTE;
+			m_ControlPageOpening = true;
+		}
 	}
 
 	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
@@ -1432,6 +1435,11 @@ void CMenus::OnInit()
 	Console()->Chain("remove_favorite", ConchainServerbrowserUpdate, this);
 	Console()->Chain("add_friend", ConchainFriendlistUpdate, this);
 	Console()->Chain("remove_friend", ConchainFriendlistUpdate, this);
+
+	Console()->Chain("cl_assets_entities", ConchainAssetsEntities, this);
+	Console()->Chain("cl_asset_game", ConchainAssetGame, this);
+	Console()->Chain("cl_asset_emoticons", ConchainAssetEmoticons, this);
+	Console()->Chain("cl_asset_particles", ConchainAssetParticles, this);
 
 	m_TextureBlob = Graphics()->LoadTexture("blob.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 

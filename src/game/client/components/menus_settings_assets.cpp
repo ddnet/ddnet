@@ -249,18 +249,30 @@ void CMenus::ClearCustomItems(int CurTab)
 			}
 		}
 		m_EntitiesList.clear();
+
+		// reload current entities
+		m_pClient->m_pMapimages->ChangeEntitiesPath(g_Config.m_ClAssetsEntites);
 	}
 	else if(CurTab == 1)
 	{
 		ClearAssetList(m_GameList, Graphics());
+
+		// reload current game skin
+		GameClient()->LoadGameSkin(g_Config.m_ClAssetGame);
 	}
 	else if(CurTab == 2)
 	{
 		ClearAssetList(m_EmoticonList, Graphics());
+
+		// reload current emoticons skin
+		GameClient()->LoadEmoticonsSkin(g_Config.m_ClAssetEmoticons);
 	}
 	else if(CurTab == 3)
 	{
 		ClearAssetList(m_ParticlesList, Graphics());
+
+		// reload current particles skin
+		GameClient()->LoadParticlesSkin(g_Config.m_ClAssetParticles);
 	}
 	s_InitCustomList[CurTab] = true;
 }
@@ -547,4 +559,64 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 	}
 	TextRender()->SetRenderFlags(0);
 	TextRender()->SetCurFont(NULL);
+}
+
+void CMenus::ConchainAssetsEntities(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CMenus *pThis = (CMenus *)pUserData;
+	if(pResult->NumArguments() == 1)
+	{
+		const char *pArg = pResult->GetString(0);
+		if(str_comp(pArg, g_Config.m_ClAssetsEntites) != 0)
+		{
+			pThis->m_pClient->m_pMapimages->ChangeEntitiesPath(pArg);
+		}
+	}
+
+	pfnCallback(pResult, pCallbackUserData);
+}
+
+void CMenus::ConchainAssetGame(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CMenus *pThis = (CMenus *)pUserData;
+	if(pResult->NumArguments() == 1)
+	{
+		const char *pArg = pResult->GetString(0);
+		if(str_comp(pArg, g_Config.m_ClAssetGame) != 0)
+		{
+			pThis->GameClient()->LoadGameSkin(pArg);
+		}
+	}
+
+	pfnCallback(pResult, pCallbackUserData);
+}
+
+void CMenus::ConchainAssetParticles(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CMenus *pThis = (CMenus *)pUserData;
+	if(pResult->NumArguments() == 1)
+	{
+		const char *pArg = pResult->GetString(0);
+		if(str_comp(pArg, g_Config.m_ClAssetParticles) != 0)
+		{
+			pThis->GameClient()->LoadParticlesSkin(pArg);
+		}
+	}
+
+	pfnCallback(pResult, pCallbackUserData);
+}
+
+void CMenus::ConchainAssetEmoticons(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CMenus *pThis = (CMenus *)pUserData;
+	if(pResult->NumArguments() == 1)
+	{
+		const char *pArg = pResult->GetString(0);
+		if(str_comp(pArg, g_Config.m_ClAssetEmoticons) != 0)
+		{
+			pThis->GameClient()->LoadEmoticonsSkin(pArg);
+		}
+	}
+
+	pfnCallback(pResult, pCallbackUserData);
 }

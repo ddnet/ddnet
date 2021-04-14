@@ -3812,18 +3812,20 @@ int CEditor::PopupImage(CEditor *pEditor, CUIRect View, void *pContext)
 			pImg->m_External = 0;
 			return 1;
 		}
+		View.HSplitTop(5.0f, &Slot, &View);
+		View.HSplitTop(12.0f, &Slot, &View);
 	}
-	else
+	else if(IsVanillaImage(pImg->m_aName))
 	{
 		if(pEditor->DoButton_MenuItem(&s_ExternalButton, "Make external", 0, &Slot, 0, "Removes the image from the map file."))
 		{
 			pImg->m_External = 1;
 			return 1;
 		}
+		View.HSplitTop(5.0f, &Slot, &View);
+		View.HSplitTop(12.0f, &Slot, &View);
 	}
 
-	View.HSplitTop(5.0f, &Slot, &View);
-	View.HSplitTop(12.0f, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_ReplaceButton, "Replace", 0, &Slot, 0, "Replaces the image with a new one"))
 	{
 		pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_IMG, "Replace Image", "Replace", "mapres", "", ReplaceImage, pEditor);
@@ -4039,7 +4041,15 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect View)
 
 				static int s_PopupImageID = 0;
 				if(Result == 2)
-					UiInvokePopupMenu(&s_PopupImageID, 0, UI()->MouseX(), UI()->MouseY(), 120, 60, PopupImage);
+				{
+					CEditorImage *pImg = m_Map.m_lImages[m_SelectedImage];
+					int Height;
+					if(pImg->m_External || IsVanillaImage(pImg->m_aName))
+						Height = 60;
+					else
+						Height = 43;
+					UiInvokePopupMenu(&s_PopupImageID, 0, UI()->MouseX(), UI()->MouseY(), 120, Height, PopupImage);
+				}
 			}
 
 			ToolBox.HSplitTop(2.0f, 0, &ToolBox);

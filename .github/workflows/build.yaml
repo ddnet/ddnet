@@ -80,11 +80,11 @@ jobs:
         cd debug
         ${{ matrix.cmake-path }}cmake --version
         ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=Debug -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=. ..
-        ${{ matrix.cmake-path }}cmake --build . --config Debug ${{ matrix.build-args }} --target everything
+        ${{ matrix.cmake-path }}cmake --build . --config Debug --target everything ${{ matrix.build-args }}
     - name: Test debug
       run: |
         cd debug
-        ${{ matrix.cmake-path }}cmake --build . --config Debug ${{ matrix.build-args }} --target run_tests
+        ${{ matrix.cmake-path }}cmake --build . --config Debug --target run_tests ${{ matrix.build-args }}
         ./DDNet-Server shutdown
 
     - name: Build in release mode
@@ -93,11 +93,11 @@ jobs:
         mkdir release
         cd release
         ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=Release -Werror=dev -DDOWNLOAD_GTEST=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. ..
-        ${{ matrix.cmake-path }}cmake --build . --config Release ${{ matrix.build-args }} --target everything
+        ${{ matrix.cmake-path }}cmake --build . --config Release --target everything ${{ matrix.build-args }}
     - name: Test release
       run: |
         cd release
-        ${{ matrix.cmake-path }}cmake --build . --config Release ${{ matrix.build-args }} --target run_tests
+        ${{ matrix.cmake-path }}cmake --build . --config Release --target run_tests ${{ matrix.build-args }}
         ./DDNet-Server shutdown
 
     - name: Build in release mode with debug info and all features on
@@ -107,18 +107,18 @@ jobs:
         mkdir fancy
         cd fancy
         ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=RelWithDebInfo -DANTIBOT=ON -DMYSQL=ON -DWEBSOCKETS=ON ..
-        ${{ matrix.cmake-path }}cmake --build . --config RelWithDebInfo ${{ matrix.build-args }} --target everything
+        ${{ matrix.cmake-path }}cmake --build . --config RelWithDebInfo --target everything ${{ matrix.build-args }}
     - name: Test fancy
       if: matrix.fancy
       run: |
         cd release
-        ${{ matrix.cmake-path }}cmake --build . --config RelWithDebInfo ${{ matrix.build-args }} --target run_tests
+        ${{ matrix.cmake-path }}cmake --build . --config RelWithDebInfo --target run_tests ${{ matrix.build-args }}
         ./DDNet-Server shutdown
 
     - name: Package
       run: |
         cd release
-        ${{ matrix.cmake-path }}cmake --build . --config Release ${{ matrix.build-args }} --target package_default
+        ${{ matrix.cmake-path }}cmake --build . --config Release --target package_default ${{ matrix.build-args }}
         mkdir artifacts
         mv ${{ matrix.package-file }} artifacts
 
