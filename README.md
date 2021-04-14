@@ -7,7 +7,7 @@ Made for main client usage. Based on DDNet which is based on DDrace which is bas
 Features
 --------
 
-### password manager
+### Password manager
 
 Go to your teeworlds/chillerbot directory and create the file ``chillpw_secret.txt``
 
@@ -28,14 +28,46 @@ example:
 51.210.171.47:7303,1,say /login ChillerDragon2 password2
 ```
 
-### render pictures
+### Render pictures
 
 if ``cl_render_pic`` is set to ``1`` it renders images found in the ``playerpics/`` directory above the tees if their ingame name matches the image name.
 
-### rename on finish
+### Rename on finish
 
 if ``cl_finish_rename`` is set to ``1`` the client will automatically rename the player if a finish tile is near by.
 The name is changed to ``cl_finish_name``.
+
+
+### Chat bots
+
+    say_format s[format]
+
+Sends a message in chat supporting format strings.
+Use %n to respond to the last ping in chat. Use %g to respond to the last greeting in chat.
+
+    say_hi
+
+Responds to last greeting in chat.
+
+### Afk bots
+
+    afk ?i[minutes]?r[message]
+
+Set client to afk for x minutes (0=infinite). And respond with a custom message to pings while being afk.
+
+
+    camp
+
+Try to hold the current position by walking left and right when pulled out of the current position.
+Intended to avoid getting dragged into the next part when being afk in ddrace.
+
+### Remote control
+
+    cl_remote_control 1
+    cl_remote_control_token sample_password
+
+Execute whisper messages in local console when prefixed with the correct token.
+Example "/whisper user sample_password say hello". Can be used to mess around with friends or control clients running on other devices.
 
 Cloning
 -------
