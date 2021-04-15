@@ -2970,7 +2970,8 @@ void CClient::Update()
 
 	if(m_ReconnectTime > 0 && time_get() > m_ReconnectTime)
 	{
-		Connect(m_aServerAddressStr);
+		if(State() != STATE_ONLINE)
+			Connect(m_aServerAddressStr);
 		m_ReconnectTime = 0;
 	}
 }
