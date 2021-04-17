@@ -198,6 +198,8 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	std::shared_ptr<CGetFile> m_pDDNetInfoTask;
 	bool m_DDNetInfoFresh;
 
+	int m_CleanUpState;
+
 	// time
 	CSmoothTime m_GameTime[NUM_DUMMIES];
 	CSmoothTime m_PredictedTime;
@@ -504,7 +506,9 @@ public:
 
 	virtual SWarning *GetCurWarning();
 
+	static bool UpdateDoneCallback(void *pUser);
 	virtual void CleanUpInstallation(bool DiscardExtra, bool DiscardModified);
+	virtual int CleanUpState() { return m_CleanUpState; };
 };
 
 #endif

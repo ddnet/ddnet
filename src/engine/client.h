@@ -223,6 +223,14 @@ public:
 	virtual SWarning *GetCurWarning() = 0;
 
 	virtual void CleanUpInstallation(bool DiscardExtra, bool DiscardModified) = 0;
+
+	enum
+	{
+		CUSTATE_INITIAL = 0,
+		CUSTATE_FIXING,
+		CUSTATE_DONE,
+	};
+	virtual int CleanUpState() = 0;
 };
 
 class IGameClient : public IInterface

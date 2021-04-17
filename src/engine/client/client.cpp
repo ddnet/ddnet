@@ -367,6 +367,8 @@ CClient::CClient() :
 	m_FrameTimeAvg = 0.0001f;
 	m_BenchmarkFile = 0;
 	m_BenchmarkStopTime = 0;
+
+	m_CleanUpState = CUSTATE_INITIAL;
 }
 
 // ----- send functions -----
@@ -4547,11 +4549,21 @@ SWarning *CClient::GetCurWarning()
 	}
 }
 
+bool CClient::UpdateDoneCallback(void *pUser)
+{
+	CClient *pSelf = (CClient *)pUser;
+	pSelf->m_CleanUpState = CUSTATE_DONE;
+
+	return true;
+}
+
 void CClient::CleanUpInstallation(bool DiscardExtra, bool DiscardModified)
 {
 	auto Missing = Storage()->DIMissingFiles();
 	auto Modified = Storage()->DIModifiedFiles();
 	const auto &Extra = Storage()->DIExtraFiles();
+
+	m_CleanUpState = CUSTATE_FIXING;
 
 	std::map<std::string, bool> Jobs;
 	for(const auto &f : Extra)
@@ -4581,5 +4593,5 @@ void CClient::CleanUpInstallation(bool DiscardExtra, bool DiscardModified)
 		Jobs[s.append(f)] = true;
 	}
 
-	Updater()->PerformUpdate(Jobs, true);
+	Updater()->PerformUpdate(Jobs, UpdateDoneCallback, this);
 }

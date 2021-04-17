@@ -59,7 +59,8 @@ class CUpdater : public IUpdater
 	int64 m_DownloadStart;
 	std::atomic<int> m_TotalDownloaded;
 	std::atomic<unsigned> m_CompletedFetchJobs;
-	bool m_PreventRestart;
+	FUpdateCompleteCallback m_pfnCompletionCallback;
+	void *m_pCallbackUserData;
 
 	std::shared_ptr<CUpdaterFetchTask> m_ManifestJob;
 
@@ -81,7 +82,7 @@ public:
 	char *Speed(char *pBuf, int BufSize) const;
 
 	virtual void InitiateUpdate();
-	void PerformUpdate(const std::map<std::string, bool> &Jobs, bool PreventRestart = false);
+	void PerformUpdate(const std::map<std::string, bool> &Jobs, FUpdateCompleteCallback pfnCallback = NULL, void *pCallbackUserdata = NULL);
 	void Init();
 	virtual void Update();
 	void WinXpRestart();

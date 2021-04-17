@@ -6,6 +6,8 @@
 
 #include "kernel.h"
 
+typedef bool (*FUpdateCompleteCallback)(void *pUser);
+
 class IUpdater : public IInterface
 {
 	MACRO_INTERFACE("updater", 0)
@@ -23,7 +25,7 @@ public:
 
 	virtual void Update() = 0;
 	virtual void InitiateUpdate() = 0;
-	virtual void PerformUpdate(const std::map<std::string, bool> &Jobs, bool PreventRestart = false) = 0;
+	virtual void PerformUpdate(const std::map<std::string, bool> &Jobs, FUpdateCompleteCallback pfnCallback = NULL, void *pCallbackUserdata = NULL) = 0;
 
 	virtual int State() const = 0;
 	virtual float Progress() const = 0;

@@ -2792,7 +2792,7 @@ int CMenus::Render()
 				}
 			}
 
-			if(Updater()->State() == IUpdater::CLEAN)
+			if(Client()->CleanUpState() == IClient::CUSTATE_INITIAL && Updater()->State() == IUpdater::CLEAN)
 			{
 				CUIRect Fix, Ignore;
 				Buttons.VSplitMid(&Fix, &Ignore);
@@ -2807,7 +2807,7 @@ int CMenus::Render()
 				if(DoButton_Menu(&s_IgnoreButton, Localize("Ignore"), 0, &Ignore))
 					m_Popup = POPUP_NONE;
 			}
-			else if(Updater()->State() == IUpdater::DOWNLOADING)
+			else if(Client()->CleanUpState() == IClient::CUSTATE_FIXING && Updater()->State() == IUpdater::DOWNLOADING)
 			{
 				char aBuf[128];
 				CUIRect t = Buttons;
@@ -2817,20 +2817,23 @@ int CMenus::Render()
 				t.HMargin(2.0f, &Buttons);
 				UI()->DoLabel(&t, Updater()->Speed(aBuf, sizeof(aBuf)), t.h * ms_FontmodHeight, 0);
 			}
-			else if(Updater()->State() == IUpdater::FAIL)
+			else if(Client()->CleanUpState() == IClient::CUSTATE_DONE)
 			{
-				RenderTools()->DrawUIRect(&Buttons, ColorRGBA{1.0f, 0.8f, 0.8f, 0.5f}, CUI::CORNER_ALL, 5.0f);
-				Buttons.HMargin(2.0f, &Buttons);
-				UI()->DoLabel(&Buttons, Localize("Automated fixup failed"), Buttons.h * ms_FontmodHeight, 0);
-			}
-			else if(Updater()->State() == IUpdater::NEED_RESTART)
-			{
-				static int s_RestartButton = 0;
-				if(DoButton_Menu(&s_RestartButton, Localize("Restart"), 0, &Buttons, 0, CUI::CORNER_ALL, 5.0f, 0.0f,
-					   vec4(0.8f, 1.0f, 0.8f, 0.5f), vec4(0.8f, 1.0f, 0.8f, 0.75f)))
+				if(Updater()->State() == IUpdater::FAIL)
 				{
-					m_Popup = POPUP_NONE;
-					Client()->Restart();
+					RenderTools()->DrawUIRect(&Buttons, ColorRGBA{1.0f, 0.8f, 0.8f, 0.5f}, CUI::CORNER_ALL, 5.0f);
+					Buttons.HMargin(2.0f, &Buttons);
+					UI()->DoLabel(&Buttons, Localize("Automated fixup failed"), Buttons.h * ms_FontmodHeight, 0);
+				}
+				else
+				{
+					static int s_RestartButton = 0;
+					if(DoButton_Menu(&s_RestartButton, Localize("Restart"), 0, &Buttons, 0, CUI::CORNER_ALL, 5.0f, 0.0f,
+						   vec4(0.8f, 1.0f, 0.8f, 0.5f), vec4(0.8f, 1.0f, 0.8f, 0.75f)))
+					{
+						m_Popup = POPUP_NONE;
+						Client()->Restart();
+					}
 				}
 			}
 		}

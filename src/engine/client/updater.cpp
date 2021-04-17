@@ -77,7 +77,8 @@ CUpdater::CUpdater()
 	m_State = CLEAN;
 	m_DownloadStart = 0;
 	m_TotalDownloaded = 0;
-	m_PreventRestart = false;
+	m_pfnCompletionCallback = NULL;
+	m_pCallbackUserData = NULL;
 
 	str_format(m_aClientExecTmp, sizeof(m_aClientExecTmp), CLIENT_EXEC ".%d.tmp", pid());
 	str_format(m_aServerExecTmp, sizeof(m_aServerExecTmp), SERVER_EXEC ".%d.tmp", pid());
@@ -281,12 +282,13 @@ void CUpdater::InitiateUpdate()
 	m_ManifestJob = FetchFile("update.json");
 }
 
-void CUpdater::PerformUpdate(const std::map<std::string, bool> &Jobs, bool PreventRestart)
+void CUpdater::PerformUpdate(const std::map<std::string, bool> &Jobs, FUpdateCompleteCallback pfnCallback, void *pCallbackUserdata)
 {
-	m_PreventRestart = PreventRestart;
 	m_DownloadStart = time_get();
 	m_State = DOWNLOADING;
 	m_FileJobs = Jobs;
+	m_pfnCompletionCallback = pfnCallback;
+	m_pCallbackUserData = pCallbackUserdata;
 
 	for(const auto &FileJob : Jobs)
 	{
@@ -345,11 +347,19 @@ void CUpdater::CommitUpdate()
 		Success &= ReplaceClient();
 	if(m_ServerUpdate)
 		Success &= ReplaceServer();
+
 	if(!Success)
 		m_State = FAIL;
-	else if(m_pClient->State() == IClient::STATE_ONLINE || m_pClient->EditorHasUnsavedData() || m_PreventRestart)
+	else if(m_pClient->State() == IClient::STATE_ONLINE || m_pClient->EditorHasUnsavedData())
 		m_State = NEED_RESTART;
-	else
+
+	bool PreventRestart = false;
+	if(m_pfnCompletionCallback)
+		PreventRestart = m_pfnCompletionCallback(m_pCallbackUserData);
+
+	if(PreventRestart)
+		m_State = NEED_RESTART;
+	else if(Success && !PreventRestart)
 	{
 		if(!m_IsWinXP)
 			m_pClient->Restart();
