@@ -1,5 +1,10 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "serverbrowser.h"
+
+#include "serverbrowser_http.h"
+#include "serverbrowser_ping_cache.h"
+
 #include <algorithm>
 
 #include <base/hash_ctxt.h>
@@ -23,9 +28,6 @@
 
 #include <engine/external/json-parser/json.h>
 
-#include "serverbrowser.h"
-
-#include "serverbrowser_http.h"
 class SortWrap
 {
 	typedef bool (CServerBrowser::*SortFunc)(int, int) const;
@@ -83,6 +85,8 @@ CServerBrowser::~CServerBrowser()
 
 	delete m_pHttp;
 	m_pHttp = nullptr;
+	delete m_pPingCache;
+	m_pPingCache = nullptr;
 }
 
 void CServerBrowser::SetBaseInfo(class CNetClient *pClient, const char *pNetVersion)
@@ -92,10 +96,12 @@ void CServerBrowser::SetBaseInfo(class CNetClient *pClient, const char *pNetVers
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	m_pEngine = Kernel()->RequestInterface<IEngine>();
 	m_pFriends = Kernel()->RequestInterface<IFriends>();
+	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	IConfigManager *pConfigManager = Kernel()->RequestInterface<IConfigManager>();
 	if(pConfigManager)
 		pConfigManager->RegisterCallback(ConfigSaveCallback, this);
 	m_pHttp = CreateServerBrowserHttp(m_pEngine);
+	m_pPingCache = CreateServerBrowserPingCache(m_pConsole, m_pStorage);
 }
 
 const CServerInfo *CServerBrowser::SortedGet(int Index) const
@@ -1224,9 +1230,7 @@ int CServerBrowser::HasRank(const char *pMap)
 
 void CServerBrowser::LoadDDNetInfoJson()
 {
-	IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
-	IOHANDLE File = pStorage->OpenFile(DDNET_INFO, IOFLAG_READ, IStorage::TYPE_SAVE);
-
+	IOHANDLE File = m_pStorage->OpenFile(DDNET_INFO, IOFLAG_READ, IStorage::TYPE_SAVE);
 	if(!File)
 		return;
 

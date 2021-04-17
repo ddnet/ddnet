@@ -1734,6 +1734,8 @@ if(CLIENT)
     serverbrowser.h
     serverbrowser_http.cpp
     serverbrowser_http.h
+    serverbrowser_ping_cache.cpp
+    serverbrowser_ping_cache.h
     sound.cpp
     sound.h
     sqlite.cpp
@@ -2209,6 +2211,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     packer.cpp
     prng.cpp
     secure_random.cpp
+    serverbrowser.cpp
     serverinfo.cpp
     sorted_array.cpp
     str.cpp
@@ -2229,6 +2232,8 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     src/engine/client/serverbrowser.h
     src/engine/client/serverbrowser_http.cpp
     src/engine/client/serverbrowser_http.h
+    src/engine/client/serverbrowser_ping_cache.cpp
+    src/engine/client/serverbrowser_ping_cache.h
     src/engine/client/sqlite.cpp
     src/engine/server/name_ban.cpp
     src/engine/server/name_ban.h

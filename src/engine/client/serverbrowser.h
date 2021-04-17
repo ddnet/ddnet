@@ -12,6 +12,7 @@
 #include <engine/shared/memheap.h>
 
 class IServerBrowserHttp;
+class IServerBrowserPingCache;
 
 class CServerBrowser : public IServerBrowser
 {
@@ -140,10 +141,12 @@ private:
 	class IConsole *m_pConsole;
 	class IEngine *m_pEngine;
 	class IFriends *m_pFriends;
+	class IStorage *m_pStorage;
 	char m_aNetVersion[128];
 
 	bool m_RefreshingHttp = false;
 	IServerBrowserHttp *m_pHttp = nullptr;
+	IServerBrowserPingCache *m_pPingCache = nullptr;
 
 	CHeap m_ServerlistHeap;
 	CServerEntry **m_ppServerlist;

@@ -36,5 +36,6 @@ public:
 };
 
 extern IEngine *CreateEngine(const char *pAppname, bool Silent, int Jobs);
+extern IEngine *CreateTestEngine(const char *pAppname, int Jobs);
 
 #endif
