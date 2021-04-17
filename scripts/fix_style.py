@@ -26,11 +26,27 @@ def filter_cpp(filenames):
 	return [filename for filename in filenames
 		if any(filename.endswith(ext) for ext in ".c .cpp .h".split())]
 
+def find_clang_format(version):
+	for binary in (
+		"clang-format",
+		"clang-format-{}".format(version),
+		"/opt/clang-format-static/clang-format-{}".format(version)):
+		try:
+			out = subprocess.check_output([binary, "--version"])
+		except FileNotFoundError:
+			continue
+		if "clang-format version {}.".format(version) in out.decode("utf-8"):
+			return binary
+	print("Found no clang-format {}".format(version))
+	sys.exit(-1)
+
+clang_format_bin = find_clang_format(10)
+
 def reformat(filenames):
-	subprocess.check_call(["clang-format", "-i"] + filenames)
+	subprocess.check_call([clang_format_bin, "-i"] + filenames)
 
 def warn(filenames):
-	return subprocess.call(["clang-format", "-Werror", "--dry-run"] + filenames)
+	return subprocess.call([clang_format_bin, "-Werror", "--dry-run"] + filenames)
 
 def main():
 	p = argparse.ArgumentParser(description="Check and fix style of changed files")
