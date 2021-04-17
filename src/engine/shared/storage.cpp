@@ -6,6 +6,10 @@
 #include <engine/client/updater.h>
 #include <engine/storage.h>
 
+#ifdef CONF_PLATFORM_HAIKU
+#include <stdlib.h>
+#endif
+
 class CStorage : public IStorage
 {
 public:
@@ -193,6 +197,9 @@ public:
 
 		// 3) check for usable path in argv[0]
 		{
+#ifdef CONF_PLATFORM_HAIKU
+			pArgv0 = realpath(pArgv0, NULL);
+#endif
 			unsigned int Pos = ~0U;
 			for(unsigned i = 0; pArgv0[i]; i++)
 				if(pArgv0[i] == '/' || pArgv0[i] == '\\')
@@ -211,6 +218,9 @@ public:
 				}
 			}
 		}
+#ifdef CONF_PLATFORM_HAIKU
+		free((void *)pArgv0);
+#endif
 
 #if defined(CONF_FAMILY_UNIX)
 		// 4) check for all default locations
