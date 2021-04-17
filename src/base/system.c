@@ -2074,6 +2074,11 @@ int fs_storage_path(const char *appname, char *path, int max)
 	if(!home)
 		return -1;
 
+#if defined(CONF_PLATFORM_HAIKU)
+	str_format(path, max, "%s/config/settings/%s", home, appname);
+	return 0;
+#endif
+
 #if defined(CONF_PLATFORM_MACOS)
 	snprintf(path, max, "%s/Library/Application Support/%s", home, appname);
 #else
@@ -2113,6 +2118,11 @@ int fs_makedir(const char *path)
 		return 0;
 	return -1;
 #else
+#ifdef CONF_PLATFORM_HAIKU
+	struct stat st;
+	if(stat(path, &st) == 0)
+		return 0;
+#endif
 	if(mkdir(path, 0755) == 0)
 		return 0;
 	if(errno == EEXIST)
