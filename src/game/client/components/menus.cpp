@@ -2657,6 +2657,7 @@ int CMenus::Render()
 			Box.HSplitTop(Text.h * LCount + 5.0f, 0, &Box);
 			Box.HSplitBottom(20.0f, &Box, 0);
 			Box.HSplitBottom(24.0f, &Box, &Buttons);
+			Box.HSplitBottom(5.0f, &Box, 0);
 
 			Box.VSplitLeft(Box.w / 3, &Extra, &Box);
 			Box.VSplitMid(&Missing, &Modified);
@@ -2678,66 +2679,101 @@ int CMenus::Render()
 
 				if(m_PopupDIExtraFiles.size())
 				{
-					static float s_ExtraScrollbarP = 0.0f;
+					static int s_ExtraScrollStart = 0;
+					const float ItemSize = 1.0f / (m_PopupDIExtraFiles.size() - MaxLines - 1);
 					CUIRect ExtraScrollbar;
 					if(m_PopupDIExtraFiles.size() > MaxLines)
 					{
 						Extra.VSplitRight(7.5f, &Extra, &ExtraScrollbar);
-						s_ExtraScrollbarP = DoScrollbarV(&s_ExtraScrollbarP, &ExtraScrollbar, s_ExtraScrollbarP);
+						float p = DoScrollbarV(&s_ExtraScrollStart, &ExtraScrollbar, s_ExtraScrollStart * ItemSize);
+						s_ExtraScrollStart += (p - (s_ExtraScrollStart * ItemSize)) / ItemSize;
+						if(UI()->MouseInside(&Extra) || UI()->MouseInside(&ExtraScrollbar))
+						{
+							if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
+								s_ExtraScrollStart--;
+							else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
+								s_ExtraScrollStart++;
+						}
+						s_ExtraScrollStart = clamp(s_ExtraScrollStart, 0, (int)(m_PopupDIExtraFiles.size() - MaxLines - 1));
 					}
 
 					Extra.HSplitTop(5.0f, 0, &Extra);
 					Line = Extra;
 					Line.h = FontSize / 2;
-
-					i = (m_PopupDIExtraFiles.size() - MaxLines) * s_ExtraScrollbarP;
+					i = s_ExtraScrollStart;
+					UI()->ClipEnable(&Extra);
 					while(Line.y + Line.h <= Extra.y + Extra.h && i < m_PopupDIExtraFiles.size())
 					{
-						UI()->DoLabel(&Line, m_PopupDIExtraFiles[i++].c_str(), FontSize / 2, 0, -1);
+						UI()->DoLabel(&Line, m_PopupDIExtraFiles[i++].c_str(), FontSize / 2, 0);
 						Line.y += Line.h + 2.0f;
 					}
+					UI()->ClipDisable();
 				}
 
 				if(m_PopupDIMissingFiles.size())
 				{
-					static float s_MissingScrollbarP = 0.0f;
+					static int s_MissingScrollStart = 0;
+					const float ItemSize = 1.0f / (m_PopupDIMissingFiles.size() - MaxLines - 1);
 					CUIRect MissingScrollbar;
 					if(m_PopupDIMissingFiles.size() > MaxLines)
 					{
 						Missing.VSplitRight(7.5f, &Missing, &MissingScrollbar);
-						s_MissingScrollbarP = DoScrollbarV(&s_MissingScrollbarP, &MissingScrollbar, s_MissingScrollbarP);
+						float p = DoScrollbarV(&s_MissingScrollStart, &MissingScrollbar, s_MissingScrollStart * ItemSize);
+						s_MissingScrollStart += (p - (s_MissingScrollStart * ItemSize)) / ItemSize;
+						if(UI()->MouseInside(&Missing) || UI()->MouseInside(&MissingScrollbar))
+						{
+							if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
+								s_MissingScrollStart--;
+							else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
+								s_MissingScrollStart++;
+						}
+						s_MissingScrollStart = clamp(s_MissingScrollStart, 0, (int)(m_PopupDIMissingFiles.size() - MaxLines - 1));
 					}
 
 					Missing.HSplitTop(5.0f, 0, &Missing);
 					Line = Missing;
 					Line.h = FontSize / 2;
-					i = (m_PopupDIMissingFiles.size() - MaxLines) * s_MissingScrollbarP;
+					i = s_MissingScrollStart;
+					UI()->ClipEnable(&Missing);
 					while(Line.y + Line.h <= Missing.y + Missing.h && i < m_PopupDIMissingFiles.size())
 					{
-						UI()->DoLabel(&Line, m_PopupDIMissingFiles[i++].c_str(), FontSize / 2, 0, -1);
+						UI()->DoLabel(&Line, m_PopupDIMissingFiles[i++].c_str(), FontSize / 2, 0);
 						Line.y += Line.h + 2.0f;
 					}
+					UI()->ClipDisable();
 				}
 
 				if(m_PopupDIModifiedFiles.size())
 				{
-					static float s_ModifiedScrollbarP = 0.0f;
+					static int s_ModifiedScrollStart = 0;
+					const float ItemSize = 1.0f / (m_PopupDIModifiedFiles.size() - MaxLines - 1);
 					CUIRect ModifiedScrollbar;
 					if(m_PopupDIModifiedFiles.size() > MaxLines)
 					{
 						Modified.VSplitRight(7.5f, &Modified, &ModifiedScrollbar);
-						s_ModifiedScrollbarP = DoScrollbarV(&s_ModifiedScrollbarP, &ModifiedScrollbar, s_ModifiedScrollbarP);
+						float p = DoScrollbarV(&s_ModifiedScrollStart, &ModifiedScrollbar, s_ModifiedScrollStart * ItemSize);
+						s_ModifiedScrollStart += (p - (s_ModifiedScrollStart * ItemSize)) / ItemSize;
+						if(UI()->MouseInside(&Modified) || UI()->MouseInside(&ModifiedScrollbar))
+						{
+							if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
+								s_ModifiedScrollStart--;
+							else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
+								s_ModifiedScrollStart++;
+						}
+						s_ModifiedScrollStart = clamp(s_ModifiedScrollStart, 0, (int)(m_PopupDIModifiedFiles.size() - MaxLines - 1));
 					}
 
 					Modified.HSplitTop(5.0f, 0, &Modified);
 					Line = Modified;
 					Line.h = FontSize / 2;
-					i = (m_PopupDIModifiedFiles.size() - MaxLines) * s_ModifiedScrollbarP;
+					i = s_ModifiedScrollStart;
+					UI()->ClipEnable(&Modified);
 					while(Line.y + Line.h <= Modified.y + Modified.h && i < m_PopupDIModifiedFiles.size())
 					{
-						UI()->DoLabel(&Line, m_PopupDIModifiedFiles[i++].c_str(), FontSize / 2, 0, -1);
+						UI()->DoLabel(&Line, m_PopupDIModifiedFiles[i++].c_str(), FontSize / 2, 0);
 						Line.y += Line.h + 2.0f;
 					}
+					UI()->ClipDisable();
 				}
 			}
 
