@@ -62,6 +62,7 @@ private:
 		int Index = GetCheckIndex(aRelPath);
 		if(Index < 0)
 		{
+			dbg_msg("dbg", "extra rel=%s abs=%s root=%s cur=%s self=%p", aRelPath, aFullPath, pContext->m_aSearchRoot, pContext->m_aCurrentDir, pContext->m_pSelf);
 			pContext->m_pSelf->m_pResult->m_ExtraFiles.emplace_back(aRelPath);
 			return 0;
 		}
@@ -658,6 +659,17 @@ public:
 		bool Success = !fs_remove(aBuffer);
 		if(!Success)
 			dbg_msg("storage", "failed to remove binary: %s", aBuffer);
+		return Success;
+	}
+
+	virtual bool RemoveDataFile(const char *pFilename)
+	{
+		char aBuffer[MAX_PATH_LENGTH];
+		str_format(aBuffer, sizeof(aBuffer), "%s/%s", m_aDatadir, pFilename);
+
+		bool Success = !fs_remove(aBuffer);
+		if(!Success)
+			dbg_msg("storage", "failed to remove datafile: %s", aBuffer);
 		return Success;
 	}
 

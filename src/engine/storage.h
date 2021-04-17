@@ -55,6 +55,8 @@ public:
 	virtual bool RenameBinaryFile(const char *pOldFilename, const char *pNewFilename) = 0;
 	virtual const char *GetBinaryPath(const char *pFilename, char *pBuffer, unsigned BufferSize) = 0;
 
+	virtual bool RemoveDataFile(const char *pFilename) = 0;
+
 	static void StripPathAndExtension(const char *pFilename, char *pBuffer, int BufferSize);
 };
 

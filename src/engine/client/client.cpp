@@ -4358,7 +4358,6 @@ int main(int argc, const char **argv) // ignore_convention
 	}
 
 	pEngine->Init();
-	pStorage->DIStartCheck(pEngine);
 	pConfigManager->Init();
 	pConsole->Init();
 	pEngineMasterServer->Init();
@@ -4548,7 +4547,7 @@ SWarning *CClient::GetCurWarning()
 	}
 }
 
-void CClient::CleanUpInstallation()
+void CClient::CleanUpInstallation(bool DiscardExtra, bool DiscardModified)
 {
 	auto Missing = Storage()->DIMissingFiles();
 	auto Modified = Storage()->DIModifiedFiles();
@@ -4557,14 +4556,22 @@ void CClient::CleanUpInstallation()
 	std::map<std::string, bool> Jobs;
 	for(const auto &f : Extra)
 	{
-		if(Storage()->Store(f.c_str()))
-			dbg_msg("dbg", "error");
+		if(!DiscardExtra)
+		{
+			if(Storage()->Store(f.c_str()))
+				dbg_msg("dbg", "failed to store %s", f.c_str());
+		}
+		else
+		{
+			Storage()->RemoveDataFile(f.c_str());
+		}
 	}
 
 	for(const auto &f : Modified)
 	{
 		std::string s = "data/";
-		Storage()->Store(f.c_str());
+		if(!DiscardModified)
+			Storage()->Store(f.c_str());
 		Jobs[s.append(f)] = true;
 	}
 

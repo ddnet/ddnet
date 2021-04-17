@@ -2662,14 +2662,29 @@ int CMenus::Render()
 			Box.VSplitLeft(Box.w / 3, &Extra, &Box);
 			Box.VSplitMid(&Missing, &Modified);
 
-			CUIRect ExtraHeader, MissingHeader, ModifiedHeader;
-			Extra.HSplitTop(20.0f, &ExtraHeader, &Extra);
-			Missing.HSplitTop(20.0f, &MissingHeader, &Missing);
-			Modified.HSplitTop(20.0f, &ModifiedHeader, &Modified);
+			Extra.VSplitRight(5.0f, &Extra, 0);
+			Missing.VSplitRight(5.0f, &Missing, 0);
 
-			UI()->DoLabel(&ExtraHeader, Localize("Extra Files"), FontSize / 1.5f, 0, -1);
-			UI()->DoLabel(&MissingHeader, Localize("Missing Files"), FontSize / 1.5f, 0, -1);
-			UI()->DoLabel(&ModifiedHeader, Localize("Modified Files"), FontSize / 1.5f, 0, -1);
+			CUIRect ExtraHeader, MissingHeader, ModifiedHeader;
+			Extra.HSplitTop(22.0f, &ExtraHeader, &Extra);
+			Missing.HSplitTop(22.0f, &MissingHeader, &Missing);
+			Modified.HSplitTop(22.0f, &ModifiedHeader, &Modified);
+
+			UI()->DoLabel(&ExtraHeader, Localize("Extra Files"), FontSize / 1.5f, -1, -1);
+			UI()->DoLabel(&MissingHeader, Localize("Missing Files"), FontSize / 1.5f, -1, -1);
+			UI()->DoLabel(&ModifiedHeader, Localize("Modified Files"), FontSize / 1.5f, -1, -1);
+
+			CUIRect ExtraDiscard, ModifiedDiscard;
+			ExtraHeader.VSplitMid(0, &ExtraDiscard);
+			ModifiedHeader.VSplitMid(0, &ModifiedDiscard);
+
+			static int s_ExtraDiscard = 0;
+			if(DoButton_CheckBox(&s_ExtraDiscard, "Discard", s_ExtraDiscard, &ExtraDiscard) && Updater()->State() == IUpdater::CLEAN)
+				s_ExtraDiscard ^= 1;
+
+			static int s_ModifiedDiscard = 0;
+			if(DoButton_CheckBox(&s_ModifiedDiscard, "Discard", s_ModifiedDiscard, &ModifiedDiscard) && Updater()->State() == IUpdater::CLEAN)
+				s_ModifiedDiscard ^= 1;
 
 			{
 				CUIRect Line;
@@ -2704,7 +2719,7 @@ int CMenus::Render()
 					UI()->ClipEnable(&Extra);
 					while(Line.y + Line.h <= Extra.y + Extra.h && i < m_PopupDIExtraFiles.size())
 					{
-						UI()->DoLabel(&Line, m_PopupDIExtraFiles[i++].c_str(), FontSize / 2, 0);
+						UI()->DoLabel(&Line, m_PopupDIExtraFiles[i++].c_str(), FontSize / 2, -1);
 						Line.y += Line.h + 2.0f;
 					}
 					UI()->ClipDisable();
@@ -2737,7 +2752,7 @@ int CMenus::Render()
 					UI()->ClipEnable(&Missing);
 					while(Line.y + Line.h <= Missing.y + Missing.h && i < m_PopupDIMissingFiles.size())
 					{
-						UI()->DoLabel(&Line, m_PopupDIMissingFiles[i++].c_str(), FontSize / 2, 0);
+						UI()->DoLabel(&Line, m_PopupDIMissingFiles[i++].c_str(), FontSize / 2, -1);
 						Line.y += Line.h + 2.0f;
 					}
 					UI()->ClipDisable();
@@ -2770,7 +2785,7 @@ int CMenus::Render()
 					UI()->ClipEnable(&Modified);
 					while(Line.y + Line.h <= Modified.y + Modified.h && i < m_PopupDIModifiedFiles.size())
 					{
-						UI()->DoLabel(&Line, m_PopupDIModifiedFiles[i++].c_str(), FontSize / 2, 0);
+						UI()->DoLabel(&Line, m_PopupDIModifiedFiles[i++].c_str(), FontSize / 2, -1);
 						Line.y += Line.h + 2.0f;
 					}
 					UI()->ClipDisable();
@@ -2786,7 +2801,7 @@ int CMenus::Render()
 
 				static int s_FixButton = 0;
 				if(DoButton_Menu(&s_FixButton, Localize("Restore Files"), 0, &Fix))
-					Client()->CleanUpInstallation();
+					Client()->CleanUpInstallation(s_ExtraDiscard, s_ModifiedDiscard);
 
 				static int s_IgnoreButton = 0;
 				if(DoButton_Menu(&s_IgnoreButton, Localize("Ignore"), 0, &Ignore))

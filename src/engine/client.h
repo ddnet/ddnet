@@ -222,7 +222,7 @@ public:
 
 	virtual SWarning *GetCurWarning() = 0;
 
-	virtual void CleanUpInstallation() = 0;
+	virtual void CleanUpInstallation(bool DiscardExtra, bool DiscardModified) = 0;
 };
 
 class IGameClient : public IInterface

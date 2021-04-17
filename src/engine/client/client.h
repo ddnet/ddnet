@@ -504,7 +504,7 @@ public:
 
 	virtual SWarning *GetCurWarning();
 
-	virtual void CleanUpInstallation();
+	virtual void CleanUpInstallation(bool DiscardExtra, bool DiscardModified);
 };
 
 #endif
