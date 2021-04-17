@@ -2178,6 +2178,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     json.cpp
     mapbugs.cpp
     name_ban.cpp
+    netaddr.cpp
     packer.cpp
     prng.cpp
     str.cpp

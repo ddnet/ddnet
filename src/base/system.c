@@ -1287,6 +1287,10 @@ int net_addr_from_str(NETADDR *addr, const char *string)
 				if(parse_uint16(&addr->port, &str))
 					return -1;
 			}
+			else
+			{
+				addr->port = 0;
+			}
 		}
 		else
 			return -1;
