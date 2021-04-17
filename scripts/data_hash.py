@@ -33,8 +33,8 @@ struct SHashEntry {{
 	char m_aPath[{0}];
 	SHA256_DIGEST m_Hash;
 
-	bool operator<(const SHashEntry &Other) const {{ return str_comp(m_aPath, Other.m_aPath); }}
-	bool operator<(const char *pOther) const {{ return str_comp(m_aPath, pOther); }}
+	bool operator<(const SHashEntry &Other) const {{ return str_comp(m_aPath, Other.m_aPath) < 0; }}
+	bool operator<(const char *pOther) const {{ return str_comp(m_aPath, pOther) < 0; }}
 	bool operator==(const char *pOther) const {{ return !str_comp(m_aPath, pOther); }}
 }};
 
