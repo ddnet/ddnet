@@ -1847,6 +1847,7 @@ int CMenus::Render()
 		const char *pButtonText = "";
 		int ExtraAlign = 0;
 		bool FullSize = false;
+		float FontSize = 20.f;
 
 		ColorRGBA BgColor = ColorRGBA{0.0f, 0.0f, 0.0f, 0.5f};
 
@@ -1967,6 +1968,7 @@ int CMenus::Render()
 			pExtraText = aBuf;
 			pButtonText = Localize("Ok");
 			ExtraAlign = -1;
+			FontSize = 16.0f;
 			FullSize = true;
 		}
 		else if(m_Popup == POPUP_POINTS)
@@ -1998,8 +2000,8 @@ int CMenus::Render()
 		else if(m_Popup == POPUP_DATAINTEGRITY)
 		{
 			pTitle = "Data Integrity";
-			pExtraText = "Some text describing wtf this popup is about here";
 			FullSize = true;
+			ExtraAlign = -1;
 		}
 
 		CUIRect Box, Part;
@@ -2021,19 +2023,21 @@ int CMenus::Render()
 		else
 			UI()->DoLabelScaled(&Part, pTitle, 24.f, 0);
 		Box.HSplitTop(20.f / UI()->Scale(), &Part, &Box);
-		Box.HSplitTop(24.f / UI()->Scale(), &Part, &Box);
-		Part.VMargin(20.f / UI()->Scale(), &Part);
 
-		float FontSize = m_Popup == POPUP_FIRST_LAUNCH ? 16.0f : 20.f;
-
-		if(ExtraAlign == -1)
-			UI()->DoLabelScaled(&Part, pExtraText, FontSize, -1, (int)Part.w);
-		else
+		if(pExtraText[0])
 		{
-			if(TextRender()->TextWidth(0, FontSize, pExtraText, -1, -1.0f) > Part.w)
+			Box.HSplitTop(24.f / UI()->Scale(), &Part, &Box);
+			Part.VMargin(20.f / UI()->Scale(), &Part);
+
+			if(ExtraAlign == -1)
 				UI()->DoLabelScaled(&Part, pExtraText, FontSize, -1, (int)Part.w);
 			else
-				UI()->DoLabelScaled(&Part, pExtraText, FontSize, 0, -1);
+			{
+				if(TextRender()->TextWidth(0, FontSize, pExtraText, -1, -1.0f) > Part.w)
+					UI()->DoLabelScaled(&Part, pExtraText, FontSize, -1, (int)Part.w);
+				else
+					UI()->DoLabelScaled(&Part, pExtraText, FontSize, 0, -1);
+			}
 		}
 
 		if(m_Popup == POPUP_QUIT)
@@ -2644,9 +2648,13 @@ int CMenus::Render()
 		}
 		else if(m_Popup == POPUP_DATAINTEGRITY)
 		{
-			CUIRect Buttons, Extra, Missing, Modified;
+			CUIRect Text, Buttons, Extra, Missing, Modified;
 			Box.VMargin(20.0f, &Box);
-			Box.HSplitTop(10.0f, 0, &Box);
+			Box.VMargin(20.f / UI()->Scale(), &Text);
+			Text.h = 24.f / UI()->Scale();
+			int LCount = UI()->DoLabelScaled(&Text, Localize("Your data directory is modified. This configuration is not supported, \"Restore Files\" will move modified and extra files to config_directory and fetch missing files."), FontSize / 1.2f, -1, (int)Text.w);
+
+			Box.HSplitTop(Text.h * LCount + 5.0f, 0, &Box);
 			Box.HSplitBottom(20.0f, &Box, 0);
 			Box.HSplitBottom(24.0f, &Box, &Buttons);
 

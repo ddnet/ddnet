@@ -447,7 +447,7 @@ int CUI::DoButton(const void *id, const char *text, int checked, const CUIRect *
 	return ret;
 }*/
 
-void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically)
+int CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically)
 {
 	float AlignedSize = 0;
 	float MaxCharacterHeightInLine = 0;
@@ -459,21 +459,24 @@ void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, fl
 	}
 	if(Align == 0)
 	{
-		TextRender()->Text(0, r->x + (r->w - tw) / 2.f, AlignmentVert, Size, pText, MaxWidth);
+		return TextRender()->Text(0, r->x + (r->w - tw) / 2.f, AlignmentVert, Size, pText, MaxWidth);
 	}
 	else if(Align < 0)
 	{
-		TextRender()->Text(0, r->x, AlignmentVert, Size, pText, MaxWidth);
+		return TextRender()->Text(0, r->x, AlignmentVert, Size, pText, MaxWidth);
 	}
 	else if(Align > 0)
 	{
-		TextRender()->Text(0, r->x + r->w - tw, AlignmentVert, Size, pText, MaxWidth);
+		return TextRender()->Text(0, r->x + r->w - tw, AlignmentVert, Size, pText, MaxWidth);
 	}
+
+	// unreachable
+	return 0;
 }
 
-void CUI::DoLabelScaled(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically)
+int CUI::DoLabelScaled(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically)
 {
-	DoLabel(r, pText, Size * Scale(), Align, MaxWidth, AlignVertically);
+	return DoLabel(r, pText, Size * Scale(), Align, MaxWidth, AlignVertically);
 }
 
 void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically, bool StopAtEnd, int StrLen, CTextCursor *pReadCursor)
