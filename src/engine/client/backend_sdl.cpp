@@ -1115,7 +1115,8 @@ void CGraphicsBackend_SDL_OpenGL::SetWindowParams(int FullscreenMode, bool IsBor
 	{
 		if(FullscreenMode == 1)
 		{
-#if defined(CONF_PLATFORM_MACOS) || defined(CONF_PLATFORM_HAIKU) // Todo SDL: remove this when fixed (game freezes when losing focus in fullscreen)
+#if defined(CONF_PLATFORM_MACOS) || defined(CONF_PLATFORM_HAIKU)
+// Todo SDL: remove this when fixed (game freezes when losing focus in fullscreen)
 			SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
 #else
 			SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN);

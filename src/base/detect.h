@@ -179,7 +179,13 @@
 #define PLATFORM_SUFFIX ""
 #endif
 
-#define CONF_PLATFORM_STRING PLATFORM_STRING PLATFORM_SUFFIX
+#ifndef CONF_PLATFORM_STRING
+#define CONF_PLATFORM_STRING "unknown"
+#endif
+
+#ifndef PLATFORM_STRING
+#define PLATFORM_STRING "unknown"
+#endif
 
 #ifndef CONF_ARCH_STRING
 #define CONF_ARCH_STRING "unknown"
