@@ -1155,7 +1155,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 		GhostlistPopulate();
 	}
 
-	if(s_SelectedIndex >= m_lGhosts.size())
+	if(s_SelectedIndex == -1 || s_SelectedIndex >= m_lGhosts.size())
 		return;
 
 	CGhostItem *pGhost = &m_lGhosts[s_SelectedIndex];
