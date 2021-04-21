@@ -1639,6 +1639,21 @@ int fs_listdir_info(const char *dir, FS_LISTDIR_INFO_CALLBACK cb, int type, void
 int fs_makedir(const char *path);
 
 /*
+	Function: fs_removedir
+		Removes a directory
+
+	Parameters:
+		path - Directory to remove
+
+	Returns:
+		Returns 0 on success. Negative value on failure.
+
+	Remarks:
+		Cannot remove a non-empty directory.
+*/
+int fs_removedir(const char *path);
+
+/*
 	Function: fs_makedir_rec_for
 		Recursively create directories for a file
 
@@ -1724,6 +1739,7 @@ int fs_parent_dir(char *path);
 
 	Remarks:
 		- The strings are treated as zero-terminated strings.
+		- Returns an error if the path specifies a directory name.
 */
 int fs_remove(const char *filename);
 
