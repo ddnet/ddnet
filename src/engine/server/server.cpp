@@ -2361,6 +2361,7 @@ int CServer::Run()
 		int Size = GameServer()->PersistentClientDataSize();
 		for(auto &Client : m_aClients)
 		{
+			Client.m_HasPersistentData = false;
 			Client.m_pPersistentData = malloc(Size);
 		}
 	}
