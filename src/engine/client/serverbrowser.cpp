@@ -102,6 +102,69 @@ void CServerBrowser::SetBaseInfo(class CNetClient *pClient, const char *pNetVers
 		pConfigManager->RegisterCallback(ConfigSaveCallback, this);
 	m_pHttp = CreateServerBrowserHttp(m_pEngine);
 	m_pPingCache = CreateServerBrowserPingCache(m_pConsole, m_pStorage);
+
+	RegisterCommands();
+}
+
+void CServerBrowser::RegisterCommands()
+{
+	m_pConsole->Register("leak_ip_address_to_all_servers", "", CFGFLAG_CLIENT, Con_LeakIpAddress, this, "Leaks your IP address to all servers by pinging each of them, also acquiring the latency in the process");
+}
+
+void CServerBrowser::Con_LeakIpAddress(IConsole::IResult *pResult, void *pUserData)
+{
+	CServerBrowser *pThis = (CServerBrowser *)pUserData;
+
+	std::vector<int> aSortedServers;
+	// Sort servers by IP address, ignoring port.
+	class CAddrComparer
+	{
+	public:
+		CServerBrowser *m_pThis;
+		bool operator()(int i, int j)
+		{
+			NETADDR Addr1 = m_pThis->m_ppServerlist[i]->m_Addr;
+			NETADDR Addr2 = m_pThis->m_ppServerlist[j]->m_Addr;
+			Addr1.port = 0;
+			Addr2.port = 0;
+			return net_addr_comp(&Addr1, &Addr2) < 0;
+		}
+	};
+	for(int i = 0; i < pThis->m_NumServers; i++)
+	{
+		aSortedServers.push_back(i);
+	}
+	std::sort(aSortedServers.begin(), aSortedServers.end(), CAddrComparer{pThis});
+
+	// Group the servers into those with same IP address (but differing
+	// port).
+	NETADDR Addr;
+	int Start = -1;
+	for(int i = 0; i <= (int)aSortedServers.size(); i++)
+	{
+		NETADDR NextAddr;
+		if(i < (int)aSortedServers.size())
+		{
+			NextAddr = pThis->m_ppServerlist[aSortedServers[i]]->m_Addr;
+			NextAddr.port = 0;
+		}
+		bool New = Start == -1 || i == (int)aSortedServers.size() || net_addr_comp(&Addr, &NextAddr) != 0;
+		if(Start != -1 && New)
+		{
+			int Chosen = Start + secure_rand_below(i - Start);
+			CServerEntry *pChosen = pThis->m_ppServerlist[aSortedServers[Chosen]];
+			pChosen->m_RequestIgnoreInfo = true;
+			pThis->QueueRequest(pChosen);
+			char aAddr[NETADDR_MAXSTRSIZE];
+			net_addr_str(&pChosen->m_Addr, aAddr, sizeof(aAddr), true);
+			dbg_msg("serverbrowse/dbg", "queuing ping request for %s", aAddr);
+		}
+		if(i < (int)aSortedServers.size() && New)
+		{
+			Start = i;
+			Addr = NextAddr;
+		}
+	}
 }
 
 const CServerInfo *CServerBrowser::SortedGet(int Index) const
@@ -455,6 +518,22 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info)
 	pEntry->m_GotInfo = 1;
 }
 
+void CServerBrowser::SetLatency(NETADDR Addr, int Latency)
+{
+	Addr.port = 0;
+	for(CServerEntry *pEntry = m_aServerlistIp[Addr.ip[0]]; pEntry; pEntry = pEntry->m_pNextIp)
+	{
+		NETADDR Other = pEntry->m_Addr;
+		Other.port = 0;
+		if(net_addr_comp(&Addr, &Other) == 0)
+		{
+			pEntry->m_Info.m_Latency = Latency;
+			pEntry->m_Info.m_LatencyIsEstimated = false;
+		}
+	}
+	m_pPingCache->CachePing(Addr, Latency);
+}
+
 CServerBrowser::CServerEntry *CServerBrowser::Add(const NETADDR &Addr)
 {
 	int Hash = Addr.ip[0];
@@ -531,7 +610,6 @@ void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServer
 	{
 		if(m_ServerlistType != IServerBrowser::TYPE_INTERNET)
 			return;
-		m_LastPacketTick = 0;
 		if(!Find(Addr))
 		{
 			pEntry = Add(Addr);
@@ -580,8 +658,7 @@ void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServer
 		if(pEntry)
 		{
 			SetInfo(pEntry, *pInfo);
-			pEntry->m_Info.m_LatencyIsEstimated = true;
-			pEntry->m_Info.m_Latency = CServerInfo::EstimateLatency(CServerInfo::LOC_EUROPE, pEntry->m_Info.m_Location);
+			pEntry->m_RequestIgnoreInfo = true;
 		}
 	}
 	else if(Type == IServerBrowser::SET_TOKEN)
@@ -629,12 +706,27 @@ void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServer
 			}
 		}
 
-		SetInfo(pEntry, *pInfo);
+		if(!pEntry->m_RequestIgnoreInfo)
+		{
+			SetInfo(pEntry, *pInfo);
+		}
+
 		if(m_ServerlistType == IServerBrowser::TYPE_LAN)
 			pEntry->m_Info.m_Latency = minimum(static_cast<int>((time_get() - m_BroadcastTime) * 1000 / time_freq()), 999);
 		else if(pEntry->m_RequestTime > 0)
 		{
-			pEntry->m_Info.m_Latency = minimum(static_cast<int>((time_get() - pEntry->m_RequestTime) * 1000 / time_freq()), 999);
+			int Latency = minimum(static_cast<int>((time_get() - pEntry->m_RequestTime) * 1000 / time_freq()), 999);
+			if(!pEntry->m_RequestIgnoreInfo)
+			{
+				pEntry->m_Info.m_Latency = Latency;
+			}
+			else
+			{
+				char aAddr[NETADDR_MAXSTRSIZE];
+				net_addr_str(&Addr, aAddr, sizeof(aAddr), true);
+				dbg_msg("serverbrowse/dbg", "received ping response from %s", aAddr);
+				SetLatency(Addr, Latency);
+			}
 			pEntry->m_RequestTime = -1; // Request has been answered
 		}
 		RemoveRequest(pEntry);
@@ -695,6 +787,7 @@ void CServerBrowser::Refresh(int Type)
 	else if(Type == IServerBrowser::TYPE_FAVORITES || Type == IServerBrowser::TYPE_INTERNET || Type == IServerBrowser::TYPE_DDNET || Type == IServerBrowser::TYPE_KOG)
 	{
 		m_pHttp->Refresh();
+		m_pPingCache->Load();
 		m_RefreshingHttp = true;
 	}
 }
@@ -767,8 +860,30 @@ void CServerBrowser::RequestCurrentServer(const NETADDR &Addr) const
 	RequestImpl(Addr, 0);
 }
 
+void ServerBrowserFillEstimatedLatency(int OwnLocation, const IServerBrowserPingCache::CEntry *pEntries, int NumEntries, int *pIndex, NETADDR Addr, CServerInfo *pInfo)
+{
+	Addr.port = 0;
+	while(*pIndex < NumEntries && net_addr_comp(&pEntries[*pIndex].m_Addr, &Addr) < 0)
+	{
+		*pIndex += 1;
+	}
+	if(*pIndex >= NumEntries || net_addr_comp(&pEntries[*pIndex].m_Addr, &Addr) != 0)
+	{
+		pInfo->m_LatencyIsEstimated = true;
+		pInfo->m_Latency = CServerInfo::EstimateLatency(OwnLocation, pInfo->m_Location);
+		return;
+	}
+	pInfo->m_LatencyIsEstimated = false;
+	pInfo->m_Latency = pEntries[*pIndex].m_Ping;
+}
+
 void CServerBrowser::UpdateFromHttp()
 {
+	const IServerBrowserPingCache::CEntry *pPingEntries;
+	int NumPingEntries;
+	m_pPingCache->GetPingCache(&pPingEntries, &NumPingEntries);
+	int OwnLocation = CServerInfo::LOC_EUROPE;
+
 	int NumServers = m_pHttp->NumServers();
 	int NumLegacyServers = m_pHttp->NumLegacyServers();
 	if(m_ServerlistType != IServerBrowser::TYPE_INTERNET)
@@ -880,6 +995,7 @@ void CServerBrowser::UpdateFromHttp()
 
 		unsigned i = 0;
 		unsigned j = 0;
+		int p = 0;
 		while(i < aWantedAddresses.size() && j < aSortedServers.size())
 		{
 			int Cmp = net_addr_comp(&aWantedAddresses[i], &m_pHttp->ServerAddress(aSortedServers[j]));
@@ -898,6 +1014,7 @@ void CServerBrowser::UpdateFromHttp()
 			NETADDR Addr;
 			CServerInfo Info;
 			m_pHttp->Server(aSortedServers[j], &Addr, &Info);
+			ServerBrowserFillEstimatedLatency(OwnLocation, pPingEntries, NumPingEntries, &p, Addr, &Info);
 			Info.m_HasRank = HasRank(Info.m_aMap);
 			Set(Addr, IServerBrowser::SET_HTTPINFO, -1, &Info);
 			i++;
@@ -926,11 +1043,13 @@ void CServerBrowser::UpdateFromHttp()
 		}
 		return;
 	}
+	int p = 0;
 	for(int i = 0; i < NumServers; i++)
 	{
 		NETADDR Addr;
 		CServerInfo Info;
 		m_pHttp->Server(i, &Addr, &Info);
+		ServerBrowserFillEstimatedLatency(OwnLocation, pPingEntries, NumPingEntries, &p, Addr, &Info);
 		Info.m_HasRank = HasRank(Info.m_aMap);
 		Set(Addr, IServerBrowser::SET_HTTPINFO, -1, &Info);
 	}

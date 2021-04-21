@@ -5,6 +5,7 @@
 
 #include <engine/client/http.h>
 #include <engine/config.h>
+#include <engine/console.h>
 #include <engine/external/json-parser/json.h>
 #include <engine/masterserver.h>
 #include <engine/serverbrowser.h>
@@ -22,6 +23,7 @@ public:
 	public:
 		NETADDR m_Addr;
 		int64 m_RequestTime;
+		bool m_RequestIgnoreInfo;
 		int m_GotInfo;
 		bool m_Request64Legacy;
 		CServerInfo m_Info;
@@ -168,8 +170,6 @@ private:
 	//used instead of g_Config.br_max_requests to get more servers
 	int m_CurrentMaxRequests;
 
-	int m_LastPacketTick;
-
 	int m_NeedRefresh;
 
 	int m_NumSortedServers;
@@ -213,7 +213,11 @@ private:
 
 	void RequestImpl(const NETADDR &Addr, CServerEntry *pEntry) const;
 
+	void RegisterCommands();
+	static void Con_LeakIpAddress(IConsole::IResult *pResult, void *pUserData);
+
 	void SetInfo(CServerEntry *pEntry, const CServerInfo &Info);
+	void SetLatency(const NETADDR Addr, int Latency);
 
 	static void ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData);
 };
