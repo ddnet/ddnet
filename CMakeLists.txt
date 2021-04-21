@@ -1508,6 +1508,7 @@ set_src(ENGINE_INTERFACE GLOB src/engine
   server.h
   serverbrowser.h
   sound.h
+  sqlite.h
   steam.h
   storage.h
   textrender.h
@@ -1646,6 +1647,7 @@ set(DEPS ${DEP_JSON} ${DEP_MD5} ${ZLIB_DEP})
 # Libraries
 set(LIBS
   ${CRYPTO_LIBRARIES}
+  ${SQLite3_LIBRARIES}
   ${WEBSOCKETS_LIBRARIES}
   ${ZLIB_LIBRARIES}
   ${PLATFORM_LIBS}
@@ -1734,6 +1736,7 @@ if(CLIENT)
     serverbrowser_http.h
     sound.cpp
     sound.h
+    sqlite.cpp
     steam.cpp
     text.cpp
     updater.cpp
@@ -2080,7 +2083,6 @@ endif()
 set(LIBS_SERVER
   ${LIBS}
   ${MYSQL_LIBRARIES}
-  ${SQLite3_LIBRARIES}
   ${TARGET_ANTIBOT}
   ${MINIUPNPC_LIBRARIES}
   # Add pthreads (on non-Windows) at the end, so that other libraries can depend
@@ -2227,6 +2229,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     src/engine/client/serverbrowser.h
     src/engine/client/serverbrowser_http.cpp
     src/engine/client/serverbrowser_http.h
+    src/engine/client/sqlite.cpp
     src/engine/server/name_ban.cpp
     src/engine/server/name_ban.h
     src/game/server/teehistorian.cpp
