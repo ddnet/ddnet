@@ -1813,7 +1813,7 @@ void CGameClient::OnPredict()
 		{
 			m_LastNewPredictedTick[!Dummy] = Tick;
 			vec2 Pos = pDummyChar->Core()->m_Pos;
-			int Events = pLocalChar->Core()->m_TriggeredEvents;
+			int Events = pDummyChar->Core()->m_TriggeredEvents;
 			if(g_Config.m_ClPredict)
 				if(Events & COREEVENT_AIR_JUMP)
 					m_pEffects->AirJump(Pos);
