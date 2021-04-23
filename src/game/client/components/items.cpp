@@ -29,7 +29,7 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemID)
 	// get positions
 	float Curvature = 0;
 	float Speed = 0;
-	CTuningParams Tuning = pCurrent->m_TuneZone ? GameClient()->GetTunes(pCurrent->m_TuneZone) : m_pClient->m_Tuning[g_Config.m_ClDummy];
+	CTuningParams Tuning = GameClient()->GetTunes(pCurrent->m_TuneZone);
 	if(CurWeapon == WEAPON_GRENADE)
 	{
 		Curvature = Tuning.m_GrenadeCurvature;
@@ -236,6 +236,8 @@ void CItems::RenderLaser(const struct CNetObj_Laser *pCurrent, bool IsPredicted)
 	RGB = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClLaserInnerColor));
 	ColorRGBA InnerColor(RGB.r, RGB.g, RGB.b, 1.0f);
 
+	int TuneZone = GameClient()->m_GameWorld.m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(From)) : 0;
+
 	vec2 Dir;
 	if(Len > 0)
 	{
@@ -247,7 +249,7 @@ void CItems::RenderLaser(const struct CNetObj_Laser *pCurrent, bool IsPredicted)
 		else
 			Ticks = (float)(Client()->GameTick(g_Config.m_ClDummy) - pCurrent->m_StartTick) + Client()->IntraGameTick(g_Config.m_ClDummy);
 		float Ms = (Ticks / 50.0f) * 1000.0f;
-		float a = Ms / m_pClient->m_Tuning[g_Config.m_ClDummy].m_LaserBounceDelay;
+		float a = Ms / m_pClient->GetTunes(TuneZone).m_LaserBounceDelay;
 		a = clamp(a, 0.0f, 1.0f);
 		float Ia = 1 - a;
 
@@ -503,7 +505,7 @@ void CItems::ReconstructSmokeTrail(const CProjectileData *pCurrent, int DestroyT
 	// get positions
 	float Curvature = 0;
 	float Speed = 0;
-	CTuningParams Tuning = pCurrent->m_TuneZone ? GameClient()->GetTunes(pCurrent->m_TuneZone) : m_pClient->m_Tuning[g_Config.m_ClDummy];
+	CTuningParams Tuning = GameClient()->GetTunes(pCurrent->m_TuneZone);
 
 	if(pCurrent->m_Type == WEAPON_GRENADE)
 	{
