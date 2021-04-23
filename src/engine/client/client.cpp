@@ -1559,6 +1559,7 @@ static CServerCapabilities GetServerCapabilities(int Version, int Flags)
 	}
 	Result.m_ChatTimeoutCode = DDNet;
 	Result.m_AnyPlayerFlag = DDNet;
+	Result.m_PingEx = false;
 	if(Version >= 1)
 	{
 		Result.m_ChatTimeoutCode = Flags & SERVERCAPFLAG_CHATTIMEOUTCODE;
@@ -1566,6 +1567,10 @@ static CServerCapabilities GetServerCapabilities(int Version, int Flags)
 	if(Version >= 2)
 	{
 		Result.m_AnyPlayerFlag = Flags & SERVERCAPFLAG_ANYPLAYERFLAG;
+	}
+	if(Version >= 3)
+	{
+		Result.m_PingEx = Flags & SERVERCAPFLAG_PINGEX;
 	}
 	return Result;
 }
@@ -1763,6 +1768,17 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 		{
 			CMsgPacker Msg(NETMSG_PING_REPLY, true);
 			SendMsg(&Msg, 0);
+		}
+		else if(Msg == NETMSG_PINGEX)
+		{
+			CUuid *pID = (CUuid *)Unpacker.GetRaw(sizeof(*pID));
+			if(Unpacker.Error())
+			{
+				return;
+			}
+			CMsgPacker Msg(NETMSG_PONGEX, true);
+			Msg.AddRaw(pID, sizeof(*pID));
+			SendMsg(&Msg, MSGFLAG_FLUSH);
 		}
 		else if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_ADD)
 		{

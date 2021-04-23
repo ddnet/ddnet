@@ -80,6 +80,7 @@ class CServerCapabilities
 public:
 	bool m_ChatTimeoutCode;
 	bool m_AnyPlayerFlag;
+	bool m_PingEx;
 };
 
 class CClient : public IClient, public CDemoPlayer::IListener
