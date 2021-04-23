@@ -335,6 +335,11 @@ CClient::CClient() :
 	m_Points = -1;
 
 	m_CurrentServerInfoRequestTime = -1;
+	m_CurrentServerPingInfoType = -1;
+	m_CurrentServerPingBasicToken = -1;
+	m_CurrentServerPingToken = -1;
+	m_CurrentServerCurrentPingTime = -1;
+	m_CurrentServerNextPingTime = -1;
 
 	m_CurrentInput[0] = 0;
 	m_CurrentInput[1] = 0;
@@ -655,6 +660,7 @@ void CClient::EnterGame()
 	OnEnterGame();
 
 	ServerInfoRequest(); // fresh one for timeout protection
+	m_CurrentServerNextPingTime = time_get() + time_freq() / 2;
 	m_aTimeoutCodeSent[0] = false;
 	m_aTimeoutCodeSent[1] = false;
 }
@@ -782,6 +788,11 @@ void CClient::DisconnectWithReason(const char *pReason)
 	m_NetClient[CLIENT_MAIN].Disconnect(pReason);
 	SetState(IClient::STATE_OFFLINE);
 	m_pMap->Unload();
+	m_CurrentServerPingInfoType = -1;
+	m_CurrentServerPingBasicToken = -1;
+	m_CurrentServerPingToken = -1;
+	m_CurrentServerCurrentPingTime = -1;
+	m_CurrentServerNextPingTime = -1;
 
 	// disable all downloads
 	m_MapdownloadChunk = 0;
@@ -1458,14 +1469,6 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 		if(!DuplicatedPacket && (!pEntry || !pEntry->m_GotInfo || SavedType >= pEntry->m_Info.m_Type))
 		{
 			m_ServerBrowser.Set(*pFrom, IServerBrowser::SET_TOKEN, Token, &Info);
-			pEntry = m_ServerBrowser.Find(*pFrom);
-
-			if(SavedType == SERVERINFO_VANILLA && Is64Player(&Info) && pEntry)
-			{
-				pEntry->m_Request64Legacy = true;
-				// Force a quick update.
-				m_ServerBrowser.RequestImpl64(pEntry->m_Addr, pEntry);
-			}
 		}
 
 		// Player info is irrelevant for the client (while connected),
@@ -1483,6 +1486,30 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 				mem_copy(&m_CurrentServerInfo, &Info, sizeof(m_CurrentServerInfo));
 				m_CurrentServerInfo.m_NetAddr = m_ServerAddress;
 				m_CurrentServerInfoRequestTime = -1;
+			}
+
+			bool ValidPong = false;
+			if(m_CurrentServerCurrentPingTime >= 0 && SavedType >= m_CurrentServerPingInfoType)
+			{
+				if(RawType == SERVERINFO_VANILLA)
+				{
+					ValidPong = Token == m_CurrentServerPingBasicToken;
+				}
+				else if(RawType == SERVERINFO_EXTENDED)
+				{
+					ValidPong = Token == m_CurrentServerPingToken;
+				}
+			}
+			if(ValidPong)
+			{
+				int LatencyMs = (time_get() - m_CurrentServerCurrentPingTime) * 1000 / time_freq();
+				m_ServerBrowser.SetCurrentServerPing(m_ServerAddress, LatencyMs);
+				m_CurrentServerPingInfoType = SavedType;
+				m_CurrentServerCurrentPingTime = -1;
+
+				char aBuf[64];
+				str_format(aBuf, sizeof(aBuf), "got pong from current server, latency=%dms", LatencyMs);
+				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
 			}
 		}
 	}
@@ -2765,8 +2792,22 @@ void CClient::Update()
 				m_CurrentServerInfoRequestTime >= 0 &&
 				time_get() > m_CurrentServerInfoRequestTime)
 			{
-				m_ServerBrowser.RequestCurrentServer(m_ServerAddress);
+				m_ServerBrowser.RequestCurrentServer(m_ServerAddress, nullptr, nullptr);
 				m_CurrentServerInfoRequestTime = time_get() + time_freq() * 2;
+			}
+
+			// periodically ping server
+			if(State() == IClient::STATE_ONLINE &&
+				m_CurrentServerNextPingTime >= 0 &&
+				time_get() > m_CurrentServerNextPingTime)
+			{
+				int64 Now = time_get();
+				int64 Freq = time_freq();
+
+				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", "pinging current server");
+				m_ServerBrowser.RequestCurrentServer(m_ServerAddress, &m_CurrentServerPingBasicToken, &m_CurrentServerPingToken);
+				m_CurrentServerCurrentPingTime = Now;
+				m_CurrentServerNextPingTime = Now + 600 * Freq; // ping every 10 minutes
 			}
 		}
 

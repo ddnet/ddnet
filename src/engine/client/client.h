@@ -242,6 +242,12 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	class CServerInfo m_CurrentServerInfo;
 	int64 m_CurrentServerInfoRequestTime; // >= 0 should request, == -1 got info
 
+	int m_CurrentServerPingInfoType;
+	int m_CurrentServerPingBasicToken;
+	int m_CurrentServerPingToken;
+	int64 m_CurrentServerCurrentPingTime; // >= 0 request running
+	int64 m_CurrentServerNextPingTime; // >= 0 should request
+
 	// version info
 	struct CVersionInfo
 	{

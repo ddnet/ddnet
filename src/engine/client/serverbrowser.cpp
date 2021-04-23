@@ -706,15 +706,24 @@ void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServer
 			}
 		}
 
-		if(!pEntry->m_RequestIgnoreInfo)
+		if(m_ServerlistType == IServerBrowser::TYPE_LAN)
 		{
 			SetInfo(pEntry, *pInfo);
-		}
-
-		if(m_ServerlistType == IServerBrowser::TYPE_LAN)
 			pEntry->m_Info.m_Latency = minimum(static_cast<int>((time_get() - m_BroadcastTime) * 1000 / time_freq()), 999);
+			if(pInfo->m_Type == SERVERINFO_VANILLA && Is64Player(pInfo))
+			{
+				pEntry->m_Request64Legacy = true;
+				// Force a quick update.
+				RequestImpl64(pEntry->m_Addr, pEntry);
+			}
+		}
 		else if(pEntry->m_RequestTime > 0)
 		{
+			if(!pEntry->m_RequestIgnoreInfo)
+			{
+				SetInfo(pEntry, *pInfo);
+			}
+
 			int Latency = minimum(static_cast<int>((time_get() - pEntry->m_RequestTime) * 1000 / time_freq()), 999);
 			if(!pEntry->m_RequestIgnoreInfo)
 			{
@@ -728,6 +737,16 @@ void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServer
 				SetLatency(Addr, Latency);
 			}
 			pEntry->m_RequestTime = -1; // Request has been answered
+
+			if(!pEntry->m_RequestIgnoreInfo)
+			{
+				if(pInfo->m_Type == SERVERINFO_VANILLA && Is64Player(pInfo))
+				{
+					pEntry->m_Request64Legacy = true;
+					// Force a quick update.
+					RequestImpl64(pEntry->m_Addr, pEntry);
+				}
+			}
 		}
 		RemoveRequest(pEntry);
 	}
@@ -792,7 +811,7 @@ void CServerBrowser::Refresh(int Type)
 	}
 }
 
-void CServerBrowser::RequestImpl(const NETADDR &Addr, CServerEntry *pEntry) const
+void CServerBrowser::RequestImpl(const NETADDR &Addr, CServerEntry *pEntry, int *pBasicToken, int *pToken) const
 {
 	unsigned char Buffer[sizeof(SERVERBROWSE_GETINFO) + 1];
 	CNetChunk Packet;
@@ -807,6 +826,14 @@ void CServerBrowser::RequestImpl(const NETADDR &Addr, CServerEntry *pEntry) cons
 	}
 
 	int Token = GenerateToken(Addr);
+	if(pToken)
+	{
+		*pToken = Token;
+	}
+	if(pBasicToken)
+	{
+		*pBasicToken = GetBasicToken(Token);
+	}
 
 	mem_copy(Buffer, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
 	Buffer[sizeof(SERVERBROWSE_GETINFO)] = GetBasicToken(Token);
@@ -855,9 +882,14 @@ void CServerBrowser::RequestImpl64(const NETADDR &Addr, CServerEntry *pEntry) co
 		pEntry->m_RequestTime = time_get();
 }
 
-void CServerBrowser::RequestCurrentServer(const NETADDR &Addr) const
+void CServerBrowser::RequestCurrentServer(const NETADDR &Addr, int *pBasicToken, int *pToken) const
 {
-	RequestImpl(Addr, 0);
+	RequestImpl(Addr, nullptr, pBasicToken, pToken);
+}
+
+void CServerBrowser::SetCurrentServerPing(const NETADDR &Addr, int Ping)
+{
+	SetLatency(Addr, std::min(Ping, 999));
 }
 
 void ServerBrowserFillEstimatedLatency(int OwnLocation, const IServerBrowserPingCache::CEntry *pEntries, int NumEntries, int *pIndex, NETADDR Addr, CServerInfo *pInfo)
@@ -1097,7 +1129,7 @@ void CServerBrowser::Update(bool ForceResort)
 			if(pEntry->m_Request64Legacy)
 				RequestImpl64(pEntry->m_Addr, pEntry);
 			else
-				RequestImpl(pEntry->m_Addr, pEntry);
+				RequestImpl(pEntry->m_Addr, pEntry, nullptr, nullptr);
 		}
 
 		Count++;
