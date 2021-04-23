@@ -29,20 +29,21 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemID)
 	// get positions
 	float Curvature = 0;
 	float Speed = 0;
+	CTuningParams Tuning = pCurrent->m_TuneZone ? GameClient()->GetTunes(pCurrent->m_TuneZone) : m_pClient->m_Tuning[g_Config.m_ClDummy];
 	if(CurWeapon == WEAPON_GRENADE)
 	{
-		Curvature = m_pClient->m_Tuning[g_Config.m_ClDummy].m_GrenadeCurvature;
-		Speed = m_pClient->m_Tuning[g_Config.m_ClDummy].m_GrenadeSpeed;
+		Curvature = Tuning.m_GrenadeCurvature;
+		Speed = Tuning.m_GrenadeSpeed;
 	}
 	else if(CurWeapon == WEAPON_SHOTGUN)
 	{
-		Curvature = m_pClient->m_Tuning[g_Config.m_ClDummy].m_ShotgunCurvature;
-		Speed = m_pClient->m_Tuning[g_Config.m_ClDummy].m_ShotgunSpeed;
+		Curvature = Tuning.m_ShotgunCurvature;
+		Speed = Tuning.m_ShotgunSpeed;
 	}
 	else if(CurWeapon == WEAPON_GUN)
 	{
-		Curvature = m_pClient->m_Tuning[g_Config.m_ClDummy].m_GunCurvature;
-		Speed = m_pClient->m_Tuning[g_Config.m_ClDummy].m_GunSpeed;
+		Curvature = Tuning.m_GunCurvature;
+		Speed = Tuning.m_GunSpeed;
 	}
 
 	bool LocalPlayerInGame = false;
@@ -338,11 +339,11 @@ void CItems::OnRender()
 			CProjectileData Data;
 			if(Item.m_Type == NETOBJTYPE_PROJECTILE)
 			{
-				Data = ExtractProjectileInfo((const CNetObj_Projectile *)pData);
+				Data = ExtractProjectileInfo((const CNetObj_Projectile *)pData, &GameClient()->m_GameWorld);
 			}
 			else
 			{
-				Data = ExtractProjectileInfoDDNet((const CNetObj_DDNetProjectile *)pData);
+				Data = ExtractProjectileInfoDDNet((const CNetObj_DDNetProjectile *)pData, &GameClient()->m_GameWorld);
 			}
 			if(UsePredicted)
 			{
@@ -411,7 +412,7 @@ void CItems::OnRender()
 		}
 		else if(!UsePredicted)
 		{
-			CProjectileData Data = ExtractProjectileInfo(&m_aExtraProjectiles[i]);
+			CProjectileData Data = ExtractProjectileInfo(&m_aExtraProjectiles[i], &GameClient()->m_GameWorld);
 			RenderProjectile(&Data, 0);
 		}
 	}
@@ -502,20 +503,22 @@ void CItems::ReconstructSmokeTrail(const CProjectileData *pCurrent, int DestroyT
 	// get positions
 	float Curvature = 0;
 	float Speed = 0;
+	CTuningParams Tuning = pCurrent->m_TuneZone ? GameClient()->GetTunes(pCurrent->m_TuneZone) : m_pClient->m_Tuning[g_Config.m_ClDummy];
+
 	if(pCurrent->m_Type == WEAPON_GRENADE)
 	{
-		Curvature = m_pClient->m_Tuning[g_Config.m_ClDummy].m_GrenadeCurvature;
-		Speed = m_pClient->m_Tuning[g_Config.m_ClDummy].m_GrenadeSpeed;
+		Curvature = Tuning.m_GrenadeCurvature;
+		Speed = Tuning.m_GrenadeSpeed;
 	}
 	else if(pCurrent->m_Type == WEAPON_SHOTGUN)
 	{
-		Curvature = m_pClient->m_Tuning[g_Config.m_ClDummy].m_ShotgunCurvature;
-		Speed = m_pClient->m_Tuning[g_Config.m_ClDummy].m_ShotgunSpeed;
+		Curvature = Tuning.m_ShotgunCurvature;
+		Speed = Tuning.m_ShotgunSpeed;
 	}
 	else if(pCurrent->m_Type == WEAPON_GUN)
 	{
-		Curvature = m_pClient->m_Tuning[g_Config.m_ClDummy].m_GunCurvature;
-		Speed = m_pClient->m_Tuning[g_Config.m_ClDummy].m_GunSpeed;
+		Curvature = Tuning.m_GunCurvature;
+		Speed = Tuning.m_GunSpeed;
 	}
 
 	float Pt = ((float)(Client()->PredGameTick(g_Config.m_ClDummy) - pCurrent->m_StartTick) + Client()->PredIntraGameTick(g_Config.m_ClDummy)) / (float)SERVER_TICK_SPEED;

@@ -35,7 +35,7 @@ CProjectile::CProjectile(
 	m_Number = Number;
 	m_Freeze = Freeze;
 
-	m_TuneZone = GameWorld()->m_WorldConfig.m_PredictTiles ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
+	m_TuneZone = GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
 
 	GameWorld()->InsertEntity(this);
 }
@@ -172,7 +172,7 @@ CProjectile::CProjectile(CGameWorld *pGameWorld, int ID, CProjectileData *pProj)
 	}
 	m_Type = pProj->m_Type;
 	m_StartTick = pProj->m_StartTick;
-	m_TuneZone = GameWorld()->m_WorldConfig.m_PredictTiles ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
+	m_TuneZone = pProj->m_TuneZone;
 
 	int Lifetime = 20 * GameWorld()->GameTickSpeed();
 	m_SoundImpact = -1;
@@ -201,6 +201,7 @@ CProjectileData CProjectile::GetData() const
 	Result.m_Explosive = m_Explosive;
 	Result.m_Bouncing = m_Bouncing;
 	Result.m_Freeze = m_Freeze;
+	Result.m_TuneZone = m_TuneZone;
 	return Result;
 }
 

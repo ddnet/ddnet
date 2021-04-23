@@ -21,9 +21,11 @@ public:
 	bool m_Explosive;
 	int m_Bouncing;
 	bool m_Freeze;
+	// TuneZone is introduced locally
+	int m_TuneZone;
 };
 
-CProjectileData ExtractProjectileInfo(const CNetObj_Projectile *pProj);
-CProjectileData ExtractProjectileInfoDDNet(const CNetObj_DDNetProjectile *pProj);
+CProjectileData ExtractProjectileInfo(const CNetObj_Projectile *pProj, class CGameWorld *pGameWorld);
+CProjectileData ExtractProjectileInfoDDNet(const CNetObj_DDNetProjectile *pProj, class CGameWorld *pGameWorld);
 
 #endif // GAME_CLIENT_PROJECTILE_DATA_H

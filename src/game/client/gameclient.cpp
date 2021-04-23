@@ -2213,6 +2213,7 @@ void CGameClient::UpdatePrediction()
 	m_GameWorld.m_WorldConfig.m_IsFNG = m_GameInfo.m_PredictFNG;
 	m_GameWorld.m_WorldConfig.m_PredictDDRace = g_Config.m_ClPredictDDRace;
 	m_GameWorld.m_WorldConfig.m_PredictTiles = g_Config.m_ClPredictDDRace && m_GameInfo.m_PredictDDRaceTiles;
+	m_GameWorld.m_WorldConfig.m_UseTuneZones = m_GameInfo.m_PredictDDRaceTiles;
 	m_GameWorld.m_WorldConfig.m_PredictFreeze = g_Config.m_ClPredictFreeze;
 	m_GameWorld.m_WorldConfig.m_PredictWeapons = AntiPingWeapons();
 	if(m_Snap.m_pLocalCharacter->m_AmmoCount > 0 && m_Snap.m_pLocalCharacter->m_Weapon != WEAPON_NINJA)
@@ -2221,7 +2222,7 @@ void CGameClient::UpdatePrediction()
 
 	// update the tuning/tunezone at the local character position with the latest tunings received before the new snapshot
 	int TuneZone = Collision()->IsTune(Collision()->GetMapIndex(vec2(m_Snap.m_pLocalCharacter->m_X, m_Snap.m_pLocalCharacter->m_Y)));
-	if(!TuneZone || !m_GameWorld.m_WorldConfig.m_PredictTiles)
+	if(!TuneZone || !m_GameWorld.m_WorldConfig.m_UseTuneZones)
 		m_GameWorld.m_Tuning[g_Config.m_ClDummy] = m_Tuning[g_Config.m_ClDummy];
 	else
 		m_GameWorld.TuningList()[TuneZone] = m_GameWorld.m_Core.m_Tuning[g_Config.m_ClDummy] = m_Tuning[g_Config.m_ClDummy];
