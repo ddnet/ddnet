@@ -1757,6 +1757,8 @@ if(CLIENT)
     components/chillerbot/remotecontrol.cpp
     components/chillerbot/remotecontrol.h
     components/chillerbot/version.h
+    components/chillerbot/warlist.cpp
+    components/chillerbot/warlist.h
     components/console.cpp
     components/console.h
     components/controls.cpp

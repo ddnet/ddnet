@@ -13,6 +13,8 @@
 #include <game/client/components/countryflags.h>
 #include <game/client/gameclient.h>
 
+#include <game/client/components/chillerbot/warlist.h>
+
 #include "players.h"
 
 void CNamePlates::MapscreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup)
@@ -133,6 +135,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			else if(m_pClient->m_aClients[ClientID].m_Team == TEAM_BLUE)
 				TColor.Set(0.7f, 0.7f, 1.0f, a);
 		}
+		m_pClient->m_pWarList->SetNameplateColor(ClientID, &TColor);
 
 		TOutlineColor.m_A *= Alpha;
 		TColor.m_A *= Alpha;

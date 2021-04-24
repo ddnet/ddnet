@@ -440,6 +440,7 @@ public:
 
 	class CChillerBotUX *m_pChillerBotUX;
 	class CChatHelper *m_pChatHelper;
+	class CWarList *m_pWarList;
 
 	int IntersectCharacter(vec2 Pos0, vec2 Pos1, vec2 &NewPos, int ownID);
 
