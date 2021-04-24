@@ -338,6 +338,7 @@ CClient::CClient() :
 	m_CurrentServerPingInfoType = -1;
 	m_CurrentServerPingBasicToken = -1;
 	m_CurrentServerPingToken = -1;
+	mem_zero(&m_CurrentServerPingUuid, sizeof(m_CurrentServerPingUuid));
 	m_CurrentServerCurrentPingTime = -1;
 	m_CurrentServerNextPingTime = -1;
 
@@ -791,6 +792,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 	m_CurrentServerPingInfoType = -1;
 	m_CurrentServerPingBasicToken = -1;
 	m_CurrentServerPingToken = -1;
+	mem_zero(&m_CurrentServerPingUuid, sizeof(m_CurrentServerPingUuid));
 	m_CurrentServerCurrentPingTime = -1;
 	m_CurrentServerNextPingTime = -1;
 
@@ -1489,7 +1491,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 			}
 
 			bool ValidPong = false;
-			if(m_CurrentServerCurrentPingTime >= 0 && SavedType >= m_CurrentServerPingInfoType)
+			if(!m_ServerCapabilities.m_PingEx && m_CurrentServerCurrentPingTime >= 0 && SavedType >= m_CurrentServerPingInfoType)
 			{
 				if(RawType == SERVERINFO_VANILLA)
 				{
@@ -1779,6 +1781,24 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 			CMsgPacker Msg(NETMSG_PONGEX, true);
 			Msg.AddRaw(pID, sizeof(*pID));
 			SendMsg(&Msg, MSGFLAG_FLUSH);
+		}
+		else if(Msg == NETMSG_PONGEX)
+		{
+			CUuid *pID = (CUuid *)Unpacker.GetRaw(sizeof(*pID));
+			if(Unpacker.Error())
+			{
+				return;
+			}
+			if(m_ServerCapabilities.m_PingEx && m_CurrentServerCurrentPingTime >= 0 && *pID == m_CurrentServerPingUuid)
+			{
+				int LatencyMs = (time_get() - m_CurrentServerCurrentPingTime) * 1000 / time_freq();
+				m_ServerBrowser.SetCurrentServerPing(m_ServerAddress, LatencyMs);
+				m_CurrentServerCurrentPingTime = -1;
+
+				char aBuf[64];
+				str_format(aBuf, sizeof(aBuf), "got pong from current server, latency=%dms", LatencyMs);
+				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
+			}
 		}
 		else if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_ADD)
 		{
@@ -2820,8 +2840,21 @@ void CClient::Update()
 				int64 Now = time_get();
 				int64 Freq = time_freq();
 
-				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", "pinging current server");
-				m_ServerBrowser.RequestCurrentServer(m_ServerAddress, &m_CurrentServerPingBasicToken, &m_CurrentServerPingToken);
+				char aBuf[64];
+				str_format(aBuf, sizeof(aBuf), "pinging current server%s", !m_ServerCapabilities.m_PingEx ? ", using fallback via server info" : "");
+				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", aBuf);
+
+				m_CurrentServerPingUuid = RandomUuid();
+				if(!m_ServerCapabilities.m_PingEx)
+				{
+					m_ServerBrowser.RequestCurrentServer(m_ServerAddress, &m_CurrentServerPingBasicToken, &m_CurrentServerPingToken);
+				}
+				else
+				{
+					CMsgPacker Msg(NETMSG_PINGEX, true);
+					Msg.AddRaw(&m_CurrentServerPingUuid, sizeof(m_CurrentServerPingUuid));
+					SendMsg(&Msg, MSGFLAG_FLUSH);
+				}
 				m_CurrentServerCurrentPingTime = Now;
 				m_CurrentServerNextPingTime = Now + 600 * Freq; // ping every 10 minutes
 			}

@@ -246,6 +246,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_CurrentServerPingInfoType;
 	int m_CurrentServerPingBasicToken;
 	int m_CurrentServerPingToken;
+	CUuid m_CurrentServerPingUuid;
 	int64 m_CurrentServerCurrentPingTime; // >= 0 request running
 	int64 m_CurrentServerNextPingTime; // >= 0 should request
 
