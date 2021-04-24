@@ -23,6 +23,11 @@ public:
 		LOC_EUROPE,
 		LOC_NORTH_AMERICA,
 		LOC_SOUTH_AMERICA,
+		// Special case China because it has an exceptionally bad
+		// connection to the outside due to the Great Firewall of
+		// China:
+		// https://en.wikipedia.org/w/index.php?title=Great_Firewall&oldid=1019589632
+		LOC_CHINA,
 		NUM_LOCS,
 	};
 

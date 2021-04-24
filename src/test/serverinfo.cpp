@@ -21,6 +21,8 @@ TEST(ServerInfo, ParseLocation)
 	EXPECT_EQ(Result, CServerInfo::LOC_SOUTH_AMERICA);
 	EXPECT_FALSE(CServerInfo::ParseLocation(&Result, "as:e"));
 	EXPECT_EQ(Result, CServerInfo::LOC_ASIA);
+	EXPECT_FALSE(CServerInfo::ParseLocation(&Result, "as:cn"));
+	EXPECT_EQ(Result, CServerInfo::LOC_CHINA);
 	EXPECT_FALSE(CServerInfo::ParseLocation(&Result, "oc"));
 	EXPECT_EQ(Result, CServerInfo::LOC_AUSTRALIA);
 }

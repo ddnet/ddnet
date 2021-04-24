@@ -46,6 +46,7 @@ void FormatServerbrowserPing(char *pBuffer, int BufferLength, const CServerInfo 
 		"EUR", // LOC_EUROPE // Localize("EUR")
 		"NA", // LOC_NORTH_AMERICA // Localize("NA")
 		"SA", // LOC_SOUTH_AMERICA // Localize("SA")
+		"CHN", // LOC_CHINA // Localize("CHN")
 	};
 	dbg_assert(0 <= pInfo->m_Location && pInfo->m_Location < CServerInfo::NUM_LOCS, "location out of range");
 	str_format(pBuffer, BufferLength, "%s", Localize(LOCATION_NAMES[pInfo->m_Location]));

@@ -1559,7 +1559,7 @@ bool CServerInfo::ParseLocation(int *pResult, const char *pString)
 		return true;
 	}
 	// ISO continent code. Allow antarctica, but treat it as unknown.
-	static const char LOCATIONS[][3] = {
+	static const char LOCATIONS[][6] = {
 		"an", // LOC_UNKNOWN
 		"af", // LOC_AFRICA
 		"as", // LOC_ASIA
@@ -1567,10 +1567,11 @@ bool CServerInfo::ParseLocation(int *pResult, const char *pString)
 		"eu", // LOC_EUROPE
 		"na", // LOC_NORTH_AMERICA
 		"sa", // LOC_SOUTH_AMERICA
+		"as:cn", // LOC_CHINA
 	};
-	for(unsigned i = 0; i < sizeof(LOCATIONS) / sizeof(LOCATIONS[0]); i++)
+	for(int i = sizeof(LOCATIONS) / sizeof(LOCATIONS[0]) - 1; i >= 0; i--)
 	{
-		if(str_comp_num(pString, LOCATIONS[i], 2) == 0)
+		if(str_startswith(pString, LOCATIONS[i]))
 		{
 			*pResult = i;
 			return false;
