@@ -744,6 +744,7 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	else
 		str_copy(m_Password, pPassword, sizeof(m_Password));
 
+	m_CanReceiveServerCapabilities = true;
 	// Deregister Rcon commands from last connected server, might not have called
 	// DisconnectWithReason if the server was shut down
 	m_RconAuthed[0] = 0;
@@ -781,7 +782,6 @@ void CClient::DisconnectWithReason(const char *pReason)
 
 	//
 	m_RconAuthed[0] = 0;
-	m_CanReceiveServerCapabilities = true;
 	m_ServerSentCapabilities = false;
 	m_UseTempRconCommands = 0;
 	m_pConsole->DeregisterTempAll();
