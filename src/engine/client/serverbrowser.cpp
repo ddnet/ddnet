@@ -914,7 +914,20 @@ void CServerBrowser::UpdateFromHttp()
 	const IServerBrowserPingCache::CEntry *pPingEntries;
 	int NumPingEntries;
 	m_pPingCache->GetPingCache(&pPingEntries, &NumPingEntries);
-	int OwnLocation = CServerInfo::LOC_EUROPE;
+	int OwnLocation;
+	if(str_comp(g_Config.m_BrLocation, "auto") == 0)
+	{
+		OwnLocation = m_OwnLocation;
+	}
+	else
+	{
+		if(CServerInfo::ParseLocation(&OwnLocation, g_Config.m_BrLocation))
+		{
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "cannot parse br_location: '%s'", g_Config.m_BrLocation);
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "serverbrowse", aBuf);
+		}
+	}
 
 	int NumServers = m_pHttp->NumServers();
 	int NumLegacyServers = m_pHttp->NumLegacyServers();
@@ -1409,6 +1422,15 @@ void CServerBrowser::LoadDDNetInfoJson()
 	{
 		json_value_free(m_pDDNetInfo);
 		m_pDDNetInfo = 0;
+	}
+
+	m_OwnLocation = CServerInfo::LOC_UNKNOWN;
+	const json_value &Location = (*m_pDDNetInfo)["location"];
+	if(Location.type != json_string || CServerInfo::ParseLocation(&m_OwnLocation, Location))
+	{
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "cannot parse location from info.sjon: '%s'", (const char *)Location);
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "serverbrowse", aBuf);
 	}
 }
 

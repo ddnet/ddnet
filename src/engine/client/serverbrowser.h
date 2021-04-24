@@ -159,6 +159,7 @@ private:
 	int m_NumFavoriteServers;
 
 	CNetwork m_aNetworks[NUM_NETWORKS];
+	int m_OwnLocation = CServerInfo::LOC_UNKNOWN;
 
 	json_value *m_pDDNetInfo;
 
