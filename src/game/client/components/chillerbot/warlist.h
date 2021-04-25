@@ -27,6 +27,7 @@ class CWarList : public CComponent
 	bool IsWarlist(const char *pName);
 	bool IsTeamlist(const char *pName);
 
+
 	virtual void OnRender();
 	virtual void OnConsoleInit();
 	virtual void OnInit();

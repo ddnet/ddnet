@@ -18,6 +18,7 @@
 #include <game/client/gameclient.h>
 
 #include <game/client/components/chillerbot/chillerbotux.h>
+#include <game/client/components/chillerbot/chathelper.h>
 
 #include <game/client/components/console.h>
 #include <game/client/components/scoreboard.h>
@@ -324,7 +325,11 @@ bool CChat::OnInput(IInput::CEvent Event)
 			str_truncate(m_aCompletionBuffer, sizeof(m_aCompletionBuffer), m_Input.GetString() + m_PlaceholderOffset, m_PlaceholderLength);
 		}
 
-		if(m_aCompletionBuffer[0] == '/')
+		if(false && m_pClient->m_pChatHelper->OnAutocomplete(&m_Input, m_aCompletionBuffer, m_PlaceholderOffset, m_PlaceholderLength, &m_OldChatStringLength, &m_CompletionChosen, m_ReverseTAB))
+		{
+			m_InputUpdate = true;
+		}
+		else if(m_aCompletionBuffer[0] == '/')
 		{
 			CCommand *pCompletionCommand = 0;
 

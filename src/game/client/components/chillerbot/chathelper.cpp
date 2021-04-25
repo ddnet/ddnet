@@ -5,6 +5,18 @@
 
 #include "chathelper.h"
 
+CChatHelper::CChatHelper()
+{
+#define CHILLERBOT_CHAT_CMD(name, params, flags, callback, userdata, help) RegisterCommand(name, params, flags, help);
+#include "chatcommands.h"
+	m_Commands.sort_range();
+}
+
+void CChatHelper::RegisterCommand(const char *pName, const char *pParams, int flags, const char *pHelp)
+{
+	m_Commands.add_unsorted(CCommand{pName, pParams});
+}
+
 void CChatHelper::OnInit()
 {
 	m_pChillerBot = m_pClient->m_pChillerBotUX;
@@ -282,4 +294,71 @@ void CChatHelper::OnMessage(int MsgType, void *pRawMsg)
 		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
 		OnChatMessage(pMsg->m_ClientID, pMsg->m_Team, pMsg->m_pMessage);
 	}
+}
+
+bool CChatHelper::OnAutocomplete(CLineInput *pInput, const char *pCompletionBuffer, int PlaceholderOffset, int PlaceholderLength, int *pOldChatStringLength, int *pCompletionChosen, bool ReverseTAB)
+{
+	if(pCompletionBuffer[0] != '.')
+		return false;
+
+	CCommand *pCompletionCommand = 0;
+
+	const size_t NumCommands = m_Commands.size();
+
+	if(ReverseTAB)
+		*pCompletionChosen = (*pCompletionChosen - 1 + 2 * NumCommands) % (2 * NumCommands);
+	else
+		*pCompletionChosen = (*pCompletionChosen + 1) % (2 * NumCommands);
+
+	const char *pCommandStart = pCompletionBuffer + 1;
+	for(size_t i = 0; i < 2 * NumCommands; ++i)
+	{
+		int SearchType;
+		int Index;
+
+		if(ReverseTAB)
+		{
+			SearchType = ((*pCompletionChosen - i + 2 * NumCommands) % (2 * NumCommands)) / NumCommands;
+			Index = (*pCompletionChosen - i + NumCommands) % NumCommands;
+		}
+		else
+		{
+			SearchType = ((*pCompletionChosen + i) % (2 * NumCommands)) / NumCommands;
+			Index = (*pCompletionChosen + i) % NumCommands;
+		}
+
+		auto &Command = m_Commands[Index];
+
+		if(str_comp_nocase_num(Command.pName, pCommandStart, str_length(pCommandStart)) == 0)
+		{
+			pCompletionCommand = &Command;
+			*pCompletionChosen = Index + SearchType * NumCommands;
+			break;
+		}
+	}
+	if(!pCompletionCommand)
+		return false;
+
+	char aBuf[256];
+	// add part before the name
+	str_truncate(aBuf, sizeof(aBuf), pInput->GetString(), PlaceholderOffset);
+
+	// add the command
+	str_append(aBuf, ".", sizeof(aBuf));
+	str_append(aBuf, pCompletionCommand->pName, sizeof(aBuf));
+
+	// add separator
+	const char *pSeparator = pCompletionCommand->pParams[0] == '\0' ? "" : " ";
+	str_append(aBuf, pSeparator, sizeof(aBuf));
+	if(*pSeparator)
+		str_append(aBuf, pSeparator, sizeof(aBuf));
+
+	// add part after the name
+	str_append(aBuf, pInput->GetString() + PlaceholderOffset + PlaceholderLength, sizeof(aBuf));
+
+	PlaceholderLength = str_length(pSeparator) + str_length(pCompletionCommand->pName) + 1;
+	*pOldChatStringLength = pInput->GetLength();
+	pInput->Set(aBuf); // TODO: Use Add instead
+	pInput->SetCursorOffset(PlaceholderOffset + PlaceholderLength);
+	return true;
 }
