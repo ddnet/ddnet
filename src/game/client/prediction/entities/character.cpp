@@ -356,7 +356,10 @@ void CCharacter::FireWeapon()
 
 		// if we Hit anything, we have to wait for the reload
 		if(Hits)
-			m_ReloadTimer = GameWorld()->GameTickSpeed() / 3;
+		{
+			float FireDelay = GetTuning(m_TuneZone)->m_HammerHitFireDelay;
+			m_ReloadTimer = FireDelay * GameWorld()->GameTickSpeed() / 1000;
+		}
 	}
 	break;
 
