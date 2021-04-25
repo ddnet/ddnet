@@ -374,11 +374,11 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData)
 		CProjectileData Data;
 		if(ObjType == NETOBJTYPE_PROJECTILE)
 		{
-			Data = ExtractProjectileInfo((const CNetObj_Projectile *)pObjData);
+			Data = ExtractProjectileInfo((const CNetObj_Projectile *)pObjData, this);
 		}
 		else
 		{
-			Data = ExtractProjectileInfoDDNet((const CNetObj_DDNetProjectile *)pObjData);
+			Data = ExtractProjectileInfoDDNet((const CNetObj_DDNetProjectile *)pObjData, this);
 		}
 		CProjectile NetProj = CProjectile(this, ObjID, &Data);
 
@@ -586,11 +586,11 @@ CEntity *CGameWorld::FindMatch(int ObjID, int ObjType, const void *pObjData)
 		CProjectileData Data;
 		if(ObjType == NETOBJTYPE_PROJECTILE)
 		{
-			Data = ExtractProjectileInfo((const CNetObj_Projectile *)pObjData);
+			Data = ExtractProjectileInfo((const CNetObj_Projectile *)pObjData, this);
 		}
 		else
 		{
-			Data = ExtractProjectileInfoDDNet((const CNetObj_DDNetProjectile *)pObjData);
+			Data = ExtractProjectileInfoDDNet((const CNetObj_DDNetProjectile *)pObjData, this);
 		}
 		CProjectile *pEnt = (CProjectile *)GetEntity(ObjID, ENTTYPE_PROJECTILE);
 		if(pEnt && CProjectile(this, ObjID, &Data).Match(pEnt))

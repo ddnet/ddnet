@@ -74,6 +74,7 @@ public:
 		bool m_PredictWeapons;
 		bool m_PredictDDRace;
 		bool m_IsSolo;
+		bool m_UseTuneZones;
 	} m_WorldConfig;
 
 	bool m_IsValidCopy;
