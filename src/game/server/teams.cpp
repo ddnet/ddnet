@@ -873,7 +873,7 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 		return;
 	bool Locked = TeamLocked(Team) && Weapon != WEAPON_GAME;
 
-	if(g_Config.m_SvTeam == 3)
+	if(g_Config.m_SvTeam == 3 && Team != TEAM_SUPER)
 	{
 		ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
 		ResetRoundState(Team);
