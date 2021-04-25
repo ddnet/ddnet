@@ -17,8 +17,8 @@
 #include <game/client/animstate.h>
 #include <game/client/gameclient.h>
 
-#include <game/client/components/chillerbot/chillerbotux.h>
 #include <game/client/components/chillerbot/chathelper.h>
+#include <game/client/components/chillerbot/chillerbotux.h>
 
 #include <game/client/components/console.h>
 #include <game/client/components/scoreboard.h>
