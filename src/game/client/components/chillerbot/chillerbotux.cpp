@@ -12,6 +12,7 @@
 #include <game/client/components/chillerbot/version.h>
 #include <game/client/components/controls.h>
 #include <game/client/components/menus.h>
+#include <game/client/components/voting.h>
 #include <game/client/race.h>
 #include <game/client/render.h>
 #include <game/generated/protocol.h>
@@ -79,25 +80,29 @@ void CChillerBotUX::RenderEnabledComponents()
 {
 	if(m_pClient->m_pMenus->IsActive())
 		return;
+	if(m_pClient->m_pVoting->IsVoting())
+		return;
 	if(!g_Config.m_ClChillerbotHud)
 		return;
-	for(int i = 0; i < MAX_COMPONENTS_ENABLED; i++)
+	int offset = 0;
+	for(auto &m_aEnabledComponent : m_aEnabledComponents)
 	{
-		if(m_aEnabledComponents[i].m_aName[0] == '\0')
+		if(m_aEnabledComponent.m_aName[0] == '\0')
 			continue;
-		float TwName = TextRender()->TextWidth(0, 10.0f, m_aEnabledComponents[i].m_aName, -1, -1);
+		float TwName = TextRender()->TextWidth(0, 10.0f, m_aEnabledComponent.m_aName, -1, -1);
 		float TwNoteShort = 2.f;
-		if(m_aEnabledComponents[i].m_aNoteShort[0])
-			TwNoteShort += TextRender()->TextWidth(0, 10.0f, m_aEnabledComponents[i].m_aNoteShort, -1, -1);
+		if(m_aEnabledComponent.m_aNoteShort[0])
+			TwNoteShort += TextRender()->TextWidth(0, 10.0f, m_aEnabledComponent.m_aNoteShort, -1, -1);
 		Graphics()->BlendNormal();
 		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(0, 0, 0, 0.5f);
-		RenderTools()->DrawRoundRect(4.0f, 60.f + i * 15, TwName + TwNoteShort, 14.0f, 3.0f);
+		RenderTools()->DrawRoundRect(4.0f, 60.f + offset * 15, TwName + TwNoteShort, 14.0f, 3.0f);
 		Graphics()->QuadsEnd();
-		TextRender()->Text(0, 5.0f, 60.f + i * 15, 10.0f, m_aEnabledComponents[i].m_aName, -1);
-		TextRender()->Text(0, 5.0f + TwName + 2.f, 60.f + i * 15, 10.0f, m_aEnabledComponents[i].m_aNoteShort, -1);
-		TextRender()->Text(0, 5.0f, 60.f + i * 15 + 10, 4.0f, m_aEnabledComponents[i].m_aNoteLong, -1);
+		TextRender()->Text(0, 5.0f, 60.f + offset * 15, 10.0f, m_aEnabledComponent.m_aName, -1);
+		TextRender()->Text(0, 5.0f + TwName + 2.f, 60.f + offset * 15, 10.0f, m_aEnabledComponent.m_aNoteShort, -1);
+		TextRender()->Text(0, 5.0f, 60.f + offset * 15 + 10, 4.0f, m_aEnabledComponent.m_aNoteLong, -1);
+		offset++;
 	}
 }
 
