@@ -6,6 +6,8 @@
 #include <engine/shared/linereader.h>
 #include <engine/textrender.h>
 
+#include "chillerbotux.h"
+
 #include "warlist.h"
 
 void CWarList::OnInit()
@@ -82,6 +84,9 @@ bool CWarList::IsTeam(int ClientID)
 
 void CWarList::SetNameplateColor(int ClientID, STextRenderColor *pColor)
 {
+	if(!g_Config.m_ClWarList)
+		return;
+
 	if(IsWar(ClientID))
 	{
 		// TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f));
@@ -167,6 +172,17 @@ int CWarList::LoadTeamNames(const char *pFilename)
 
 void CWarList::OnConsoleInit()
 {
+	Console()->Chain("cl_war_list", ConchainWarList, this);
+}
+
+void CWarList::ConchainWarList(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CWarList *pSelf = (CWarList *)pUserData;
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->GetInteger(0))
+		pSelf->m_pClient->m_pChillerBotUX->EnableComponent("war list");
+	else
+		pSelf->m_pClient->m_pChillerBotUX->DisableComponent("war list");
 }
 
 void CWarList::OnRender()

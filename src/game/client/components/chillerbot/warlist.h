@@ -31,6 +31,8 @@ class CWarList : public CComponent
 	virtual void OnConsoleInit();
 	virtual void OnInit();
 
+	static void ConchainWarList(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+
 public:
 	bool IsWar(int ClientID);
 	bool IsTeam(int ClientID);

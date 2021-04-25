@@ -364,6 +364,10 @@ void CChillerBotUX::UpdateComponents()
 		EnableComponent("finish rename");
 	else
 		DisableComponent("finish rename");
+	if(g_Config.m_ClWarList)
+		EnableComponent("war list");
+	else
+		DisableComponent("war list");
 }
 
 void CChillerBotUX::OnConsoleInit()
@@ -376,7 +380,7 @@ void CChillerBotUX::OnConsoleInit()
 	Console()->Chain("cl_camp_hack", ConchainCampHack, this);
 	Console()->Chain("cl_chillerbot_hud", ConchainChillerbotHud, this);
 	Console()->Chain("cl_auto_reply", ConchainAutoReply, this);
-	Console()->Chain("cL_finish_rename", ConchainFinishRename, this);
+	Console()->Chain("cl_finish_rename", ConchainFinishRename, this);
 }
 
 void CChillerBotUX::ConchainCampHack(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)

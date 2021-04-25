@@ -2350,4 +2350,14 @@ void CMenus::RenderSettingsChillerbot(CUIRect MainView)
 			m_pClient->m_pChillerBotUX->UpdateComponents();
 		}
 	}
+	// war list
+	{
+		CUIRect Checkbox;
+		MainView.HSplitTop(20.0f, &Checkbox, &MainView);
+		if(DoButton_CheckBox(&g_Config.m_ClWarList, "war list", g_Config.m_ClWarList, &Checkbox))
+		{
+			g_Config.m_ClWarList ^= 1;
+			m_pClient->m_pChillerBotUX->UpdateComponents();
+		}
+	}
 }
