@@ -1686,10 +1686,10 @@ void CGameClient::OnNewSnapshot()
 	m_pGhost->OnNewSnapshot();
 	m_pRaceDemo->OnNewSnapshot();
 
-	// detect air jump for unpredicted players
+	// detect air jump for other players
 	for(int i = 0; i < MAX_CLIENTS; i++)
 		if(m_Snap.m_aCharacters[i].m_Active && (m_Snap.m_aCharacters[i].m_Cur.m_Jumped & 2) && !(m_Snap.m_aCharacters[i].m_Prev.m_Jumped & 2))
-			if(!Predict() || (!AntiPingPlayers() && i != m_Snap.m_LocalClientID))
+			if(!Predict() || (i != m_Snap.m_LocalClientID && (!AntiPingPlayers() || i != m_PredictedDummyID)))
 			{
 				vec2 Pos = mix(vec2(m_Snap.m_aCharacters[i].m_Prev.m_X, m_Snap.m_aCharacters[i].m_Prev.m_Y),
 					vec2(m_Snap.m_aCharacters[i].m_Cur.m_X, m_Snap.m_aCharacters[i].m_Cur.m_Y),
@@ -1833,6 +1833,17 @@ void CGameClient::OnPredict()
 				if(Events & COREEVENT_HOOK_HIT_NOHOOK)
 					m_pSounds->PlayAndRecord(CSounds::CHN_WORLD, SOUND_HOOK_NOATTACH, 1.0f, Pos);
 			}
+		}
+
+		// check if we want to trigger predicted airjump for dummy
+		if(AntiPingPlayers() && pDummyChar && Tick > m_LastNewPredictedTick[!Dummy])
+		{
+			m_LastNewPredictedTick[!Dummy] = Tick;
+			vec2 Pos = pDummyChar->Core()->m_Pos;
+			int Events = pDummyChar->Core()->m_TriggeredEvents;
+			if(g_Config.m_ClPredict)
+				if(Events & COREEVENT_AIR_JUMP)
+					m_pEffects->AirJump(Pos);
 		}
 	}
 

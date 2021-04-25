@@ -631,7 +631,11 @@ void sphore_destroy(SEMAPHORE *sem);
 /* if compiled with -pedantic-errors it will complain about long
 	not being a C90 thing.
 */
+#ifdef CONF_PLATFORM_HAIKU
+#include <SupportDefs.h>
+#else
 __extension__ typedef long long int64;
+#endif
 __extension__ typedef unsigned long long uint64;
 #else
 typedef long long int64;

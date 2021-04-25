@@ -60,6 +60,8 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   set(TARGET_OS "linux")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   set(TARGET_OS "mac")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Haiku")
+  set(TARGET_OS "haiku")
 endif()
 
 include(CheckCCompilerFlag)
@@ -155,7 +157,7 @@ if(CMAKE_GENERATOR STREQUAL "Ninja")
   add_c_compiler_flag_if_supported(OUR_FLAGS -fcolor-diagnostics)
 endif()
 
-if(NOT MSVC)
+if(NOT MSVC AND NOT HAIKU)
   if(CMAKE_VERSION VERSION_LESS 3.1 OR TARGET_OS STREQUAL "mac")
     check_cxx_compiler_flag(-std=gnu++11 FLAG_SUPPORTED_std_gnu__11)
     if(FLAG_SUPPORTED_std_gnu__11)
@@ -212,7 +214,7 @@ if(NOT MSVC)
   #add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN "-Wuseless-cast")
 endif()
 
-if(NOT MSVC)
+if(NOT MSVC AND NOT HAIKU)
   check_c_compiler_flag("-O2;-Wp,-Werror;-D_FORTIFY_SOURCE=2" DEFINE_FORTIFY_SOURCE) # Some distributions define _FORTIFY_SOURCE by themselves.
 endif()
 
@@ -543,6 +545,12 @@ elseif(TARGET_OS STREQUAL "mac")
   )
   set(PLATFORM_CLIENT_LIBS ${COCOA} ${OPENGL})
   set(PLATFORM_LIBS ${CARBON} ${SECURITY})
+elseif(TARGET_OS STREQUAL "haiku")
+    set(PLATFORM_CLIENT)
+    find_package(OpenGL)
+    set(PLATFORM_LIBS GL network)
+    set(PLATFORM_CLIENT_LIBS ${OPENGL_gl_LIBRARY})
+    set(PLATFORM_CLIENT_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR})
 else()
   find_package(Notify)
   find_package(OpenGL)
@@ -2200,6 +2208,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     json.cpp
     mapbugs.cpp
     name_ban.cpp
+    netaddr.cpp
     packer.cpp
     prng.cpp
     str.cpp
