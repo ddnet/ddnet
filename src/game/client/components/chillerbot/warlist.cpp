@@ -12,8 +12,17 @@
 
 void CWarList::OnInit()
 {
+	ReloadList();
+}
+
+void CWarList::ReloadList()
+{
+	m_vWarlist.clear();
+	m_vTeamlist.clear();
 	LoadWarList();
 	LoadTeamList();
+	for(auto &WarPlayer : m_aWarPlayers)
+		WarPlayer.m_aName[0] = '\0';
 }
 
 int CWarList::LoadWarDir(const char *pDirname, int IsDir, int DirType, void *pUser)
@@ -172,6 +181,8 @@ int CWarList::LoadTeamNames(const char *pFilename)
 
 void CWarList::OnConsoleInit()
 {
+	Console()->Register("warlist", "?s[command]?s[arg1]?s[arg2]", CFGFLAG_CLIENT, ConWarlist, this, "Activate afk mode (auto chat respond)");
+
 	Console()->Chain("cl_war_list", ConchainWarList, this);
 }
 
@@ -187,4 +198,24 @@ void CWarList::ConchainWarList(IConsole::IResult *pResult, void *pUserData, ICon
 
 void CWarList::OnRender()
 {
+}
+
+void CWarList::ConWarlist(IConsole::IResult *pResult, void *pUserData)
+{
+	CWarList *pSelf = (CWarList *)pUserData;
+	if(!str_comp(pResult->GetString(0), "reload"))
+	{
+		pSelf->ReloadList();
+	}
+	else if(!str_comp(pResult->GetString(0), "help"))
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", "warlist ?s[command]?s[arg1]?s[arg2]");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", "commands:");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", "  reload - loads the war list again from filesystem");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", "  help - shows this help");
+	}
+	else
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", "unkown warlist command try help");
+	}
 }

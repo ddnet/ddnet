@@ -22,6 +22,7 @@ class CWarList : public CComponent
 	static int LoadTeamDir(const char *pImgName, int IsDir, int DirType, void *pUser);
 	void LoadWarList();
 	void LoadTeamList();
+	void ReloadList();
 	int LoadWarNames(const char *pFilename);
 	int LoadTeamNames(const char *pFilename);
 	bool IsWarlist(const char *pName);
@@ -30,6 +31,8 @@ class CWarList : public CComponent
 	virtual void OnRender();
 	virtual void OnConsoleInit();
 	virtual void OnInit();
+
+	static void ConWarlist(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConchainWarList(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
