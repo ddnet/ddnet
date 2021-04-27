@@ -11,22 +11,28 @@ class CWarList : public CComponent
 	{
 		bool m_IsWar;
 		bool m_IsTeam;
+		bool m_IsTraitor;
 		char m_aName[MAX_NAME_LENGTH];
 	};
 
 	CWarPlayer m_aWarPlayers[MAX_CLIENTS];
 	std::vector<std::string> m_vWarlist;
 	std::vector<std::string> m_vTeamlist;
+	std::vector<std::string> m_vTraitorlist;
 
 	static int LoadWarDir(const char *pImgName, int IsDir, int DirType, void *pUser);
 	static int LoadTeamDir(const char *pImgName, int IsDir, int DirType, void *pUser);
+	static int LoadTraitorDir(const char *pImgName, int IsDir, int DirType, void *pUser);
 	void LoadWarList();
 	void LoadTeamList();
+	void LoadTraitorList();
 	void ReloadList();
 	int LoadWarNames(const char *pFilename);
 	int LoadTeamNames(const char *pFilename);
+	int LoadTraitorNames(const char *pFilename);
 	bool IsWarlist(const char *pName);
 	bool IsTeamlist(const char *pName);
+	bool IsTraitorlist(const char *pName);
 
 	virtual void OnRender();
 	virtual void OnConsoleInit();
@@ -39,6 +45,7 @@ class CWarList : public CComponent
 public:
 	bool IsWar(int ClientID);
 	bool IsTeam(int ClientID);
+	bool IsTraitor(int ClientID);
 	void SetNameplateColor(int ClientID, STextRenderColor *pColor);
 };
 

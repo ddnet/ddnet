@@ -19,8 +19,10 @@ void CWarList::ReloadList()
 {
 	m_vWarlist.clear();
 	m_vTeamlist.clear();
+	m_vTraitorlist.clear();
 	LoadWarList();
 	LoadTeamList();
+	LoadTraitorList();
 	for(auto &WarPlayer : m_aWarPlayers)
 		WarPlayer.m_aName[0] = '\0';
 }
@@ -45,6 +47,16 @@ int CWarList::LoadTeamDir(const char *pDirname, int IsDir, int DirType, void *pU
 	return pSelf->LoadTeamNames(aFilename);
 }
 
+int CWarList::LoadTraitorDir(const char *pDirname, int IsDir, int DirType, void *pUser)
+{
+	CWarList *pSelf = (CWarList *)pUser;
+	if(!IsDir || !str_comp(".", pDirname))
+		return 0;
+	char aFilename[1024];
+	str_format(aFilename, sizeof(aFilename), "chillerbot/warlist/traitor/%s/names.txt", pDirname);
+	return pSelf->LoadTraitorNames(aFilename);
+}
+
 void CWarList::LoadWarList()
 {
 	Storage()->ListDirectory(IStorage::TYPE_ALL, "chillerbot/warlist/war", LoadWarDir, this);
@@ -53,6 +65,11 @@ void CWarList::LoadWarList()
 void CWarList::LoadTeamList()
 {
 	Storage()->ListDirectory(IStorage::TYPE_ALL, "chillerbot/warlist/team", LoadTeamDir, this);
+}
+
+void CWarList::LoadTraitorList()
+{
+	Storage()->ListDirectory(IStorage::TYPE_ALL, "chillerbot/warlist/traitor", LoadTraitorDir, this);
 }
 
 bool CWarList::IsWarlist(const char *pName)
@@ -65,6 +82,11 @@ bool CWarList::IsTeamlist(const char *pName)
 	return (std::find(m_vTeamlist.begin(), m_vTeamlist.end(), std::string(pName)) != m_vTeamlist.end());
 }
 
+bool CWarList::IsTraitorlist(const char *pName)
+{
+	return (std::find(m_vTraitorlist.begin(), m_vTraitorlist.end(), std::string(pName)) != m_vTraitorlist.end());
+}
+
 bool CWarList::IsWar(int ClientID)
 {
 	const char *pName = m_pClient->m_aClients[ClientID].m_aName;
@@ -75,6 +97,7 @@ bool CWarList::IsWar(int ClientID)
 	str_copy(m_aWarPlayers[ClientID].m_aName, pName, sizeof(m_aWarPlayers[ClientID].m_aName));
 	m_aWarPlayers[ClientID].m_IsWar = IsWarlist(pName);
 	m_aWarPlayers[ClientID].m_IsTeam = IsTeamlist(pName);
+	m_aWarPlayers[ClientID].m_IsTraitor = IsTraitorlist(pName);
 	return false;
 }
 
@@ -88,6 +111,21 @@ bool CWarList::IsTeam(int ClientID)
 	str_copy(m_aWarPlayers[ClientID].m_aName, pName, sizeof(m_aWarPlayers[ClientID].m_aName));
 	m_aWarPlayers[ClientID].m_IsWar = IsWarlist(pName);
 	m_aWarPlayers[ClientID].m_IsTeam = IsTeamlist(pName);
+	m_aWarPlayers[ClientID].m_IsTraitor = IsTraitorlist(pName);
+	return false;
+}
+
+bool CWarList::IsTraitor(int ClientID)
+{
+	const char *pName = m_pClient->m_aClients[ClientID].m_aName;
+	if(!str_comp(pName, m_aWarPlayers[ClientID].m_aName))
+	{
+		return m_aWarPlayers[ClientID].m_IsTraitor;
+	}
+	str_copy(m_aWarPlayers[ClientID].m_aName, pName, sizeof(m_aWarPlayers[ClientID].m_aName));
+	m_aWarPlayers[ClientID].m_IsWar = IsWarlist(pName);
+	m_aWarPlayers[ClientID].m_IsTeam = IsTeamlist(pName);
+	m_aWarPlayers[ClientID].m_IsTraitor = IsTraitorlist(pName);
 	return false;
 }
 
@@ -105,6 +143,11 @@ void CWarList::SetNameplateColor(int ClientID, STextRenderColor *pColor)
 	{
 		// TextRender()->TextColor(ColorRGBA(2.0f, 7.0f, 2.0f));
 		pColor->Set(0.0f, 0.9f, 0.2f, 1.0f);
+	}
+	else if(IsTraitor(ClientID))
+	{
+		// TextRender()->TextColor(ColorRGBA(0.1f, 0.1f, 0.1f));
+		pColor->Set(0.1f, 0.1f, 0.1f, 1.0f);
 	}
 	else
 	{
@@ -173,6 +216,39 @@ int CWarList::LoadTeamNames(const char *pFilename)
 		if(!str_skip_whitespaces(pLine)[0])
 			continue;
 		m_vTeamlist.push_back(std::string(pLine));
+	}
+
+	io_close(File);
+	return 0;
+}
+
+int CWarList::LoadTraitorNames(const char *pFilename)
+{
+	if(!Storage())
+		return 1;
+
+	// exec the file
+	IOHANDLE File = Storage()->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_ALL);
+
+	char aBuf[128];
+	if(!File)
+	{
+		// str_format(aBuf, sizeof(aBuf), "failed to open war list file '%s'", pFilename);
+		// Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", aBuf);
+		return 0;
+	}
+	char *pLine;
+	CLineReader Reader;
+
+	str_format(aBuf, sizeof(aBuf), "loading traitor list file '%s'", pFilename);
+	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", aBuf);
+	Reader.Init(File);
+
+	while((pLine = Reader.Get()))
+	{
+		if(!str_skip_whitespaces(pLine)[0])
+			continue;
+		m_vTraitorlist.push_back(std::string(pLine));
 	}
 
 	io_close(File);
