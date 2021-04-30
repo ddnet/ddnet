@@ -99,11 +99,6 @@ void CGLSLProgram::SetUniform(int Loc, const int Value)
 	glUniform1i(Loc, Value);
 }
 
-void CGLSLProgram::SetUniform(int Loc, const unsigned int Value)
-{
-	glUniform1ui(Loc, Value);
-}
-
 void CGLSLProgram::SetUniform(int Loc, const float Value)
 {
 	glUniform1f(Loc, Value);

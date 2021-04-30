@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include <engine/client/backend_sdl.h>
+
 bool CGLSL::LoadShader(CGLSLCompiler *pCompiler, IStorage *pStorage, const char *pFile, int Type)
 {
 	if(m_IsLoaded)
@@ -14,10 +16,14 @@ bool CGLSL::LoadShader(CGLSLCompiler *pCompiler, IStorage *pStorage, const char 
 	std::vector<std::string> Lines;
 	if(f)
 	{
-		bool IsNewOpenGL = pCompiler->m_OpenGLVersionMajor >= 4 || (pCompiler->m_OpenGLVersionMajor == 3 && pCompiler->m_OpenGLVersionMinor == 3);
+		EBackendType BackendType = pCompiler->m_IsOpenGLES ? BACKEND_TYPE_OPENGL_ES : BACKEND_TYPE_OPENGL;
+		bool IsNewOpenGL = (BackendType == BACKEND_TYPE_OPENGL ? (pCompiler->m_OpenGLVersionMajor >= 4 || (pCompiler->m_OpenGLVersionMajor == 3 && pCompiler->m_OpenGLVersionMinor == 3)) : pCompiler->m_OpenGLVersionMajor >= 3);
+		std::string GLShaderStringPostfix = std::string(" core\r\n");
+		if(BackendType == BACKEND_TYPE_OPENGL_ES)
+			GLShaderStringPostfix = std::string(" es\r\n");
 		//add compiler specific values
 		if(IsNewOpenGL)
-			Lines.push_back(std::string("#version ") + std::string(std::to_string(pCompiler->m_OpenGLVersionMajor)) + std::string(std::to_string(pCompiler->m_OpenGLVersionMinor)) + std::string(std::to_string(pCompiler->m_OpenGLVersionPatch)) + std::string(" core\r\n"));
+			Lines.push_back(std::string("#version ") + std::string(std::to_string(pCompiler->m_OpenGLVersionMajor)) + std::string(std::to_string(pCompiler->m_OpenGLVersionMinor)) + std::string(std::to_string(pCompiler->m_OpenGLVersionPatch)) + GLShaderStringPostfix);
 		else
 		{
 			if(pCompiler->m_OpenGLVersionMajor == 3)
@@ -35,6 +41,21 @@ bool CGLSL::LoadShader(CGLSLCompiler *pCompiler, IStorage *pStorage, const char 
 					Lines.push_back(std::string("#version 110 \r\n"));
 				if(pCompiler->m_OpenGLVersionMinor == 1)
 					Lines.push_back(std::string("#version 120 \r\n"));
+			}
+		}
+
+		if(BackendType == BACKEND_TYPE_OPENGL_ES)
+		{
+			if(Type == GL_FRAGMENT_SHADER)
+			{
+				Lines.push_back("precision highp float; \r\n");
+				Lines.push_back("precision highp sampler2D; \r\n");
+				Lines.push_back("precision highp sampler3D; \r\n");
+				Lines.push_back("precision highp samplerCube; \r\n");
+				Lines.push_back("precision highp samplerCubeShadow; \r\n");
+				Lines.push_back("precision highp sampler2DShadow; \r\n");
+				Lines.push_back("precision highp sampler2DArray; \r\n");
+				Lines.push_back("precision highp sampler2DArrayShadow; \r\n");
 			}
 		}
 
@@ -129,11 +150,15 @@ CGLSL::~CGLSL()
 	DeleteShader();
 }
 
-CGLSLCompiler::CGLSLCompiler(int OpenGLVersionMajor, int OpenGLVersionMinor, int OpenGLVersionPatch)
+CGLSLCompiler::CGLSLCompiler(int OpenGLVersionMajor, int OpenGLVersionMinor, int OpenGLVersionPatch, bool IsOpenGLES, float TextureLODBias)
 {
 	m_OpenGLVersionMajor = OpenGLVersionMajor;
 	m_OpenGLVersionMinor = OpenGLVersionMinor;
 	m_OpenGLVersionPatch = OpenGLVersionPatch;
+
+	m_IsOpenGLES = IsOpenGLES;
+
+	m_TextureLODBias = TextureLODBias;
 
 	m_HasTextureArray = false;
 	m_TextureReplaceType = 0;
@@ -156,7 +181,8 @@ void CGLSLCompiler::ClearDefines()
 
 void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, int Type)
 {
-	bool IsNewOpenGL = m_OpenGLVersionMajor >= 4 || (m_OpenGLVersionMajor == 3 && m_OpenGLVersionMinor == 3);
+	EBackendType BackendType = m_IsOpenGLES ? BACKEND_TYPE_OPENGL_ES : BACKEND_TYPE_OPENGL;
+	bool IsNewOpenGL = (BackendType == BACKEND_TYPE_OPENGL ? (m_OpenGLVersionMajor >= 4 || (m_OpenGLVersionMajor == 3 && m_OpenGLVersionMinor == 3)) : m_OpenGLVersionMajor >= 3);
 	if(!IsNewOpenGL)
 	{
 		const char *pBuff = pReadLine;
@@ -274,6 +300,92 @@ void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, int Type
 	}
 	else
 	{
-		Line = pReadLine;
+		if(BackendType == BACKEND_TYPE_OPENGL_ES)
+		{
+			const char *pBuff = pReadLine;
+			char aTmpStr[1024];
+			size_t TmpStrSize = 0;
+			while(*pBuff)
+			{
+				while(*pBuff && str_isspace(*pBuff))
+				{
+					Line.append(1, *pBuff);
+					++pBuff;
+				}
+
+				while(*pBuff && !str_isspace(*pBuff) && *pBuff != '(' && *pBuff != '.')
+				{
+					aTmpStr[TmpStrSize++] = *pBuff;
+					++pBuff;
+				}
+
+				if(TmpStrSize > 0)
+				{
+					aTmpStr[TmpStrSize] = 0;
+					TmpStrSize = 0;
+
+					if(str_comp(aTmpStr, "noperspective") == 0)
+					{
+						Line.append("smooth");
+						Line.append(pBuff);
+						return;
+					}
+					// since GLES doesnt support texture LOD bias as global state, use the shader function instead(since GLES 3.0 uses shaders only anyway)
+					else if(str_comp(aTmpStr, "texture") == 0)
+					{
+						Line.append("texture");
+						// check opening and closing brackets to find the end
+						int CurBrackets = 1;
+						while(*pBuff && *pBuff != '(')
+						{
+							Line.append(1, *pBuff);
+
+							++pBuff;
+						}
+
+						if(*pBuff)
+						{
+							Line.append(1, *pBuff);
+							++pBuff;
+						}
+
+						while(*pBuff)
+						{
+							if(*pBuff == '(')
+								++CurBrackets;
+							if(*pBuff == ')')
+								--CurBrackets;
+
+							if(CurBrackets == 0)
+							{
+								// found end
+								Line.append(std::string(", ") + std::to_string(m_TextureLODBias) + ")");
+								++pBuff;
+								break;
+							}
+							else
+								Line.append(1, *pBuff);
+							++pBuff;
+						}
+
+						Line.append(pBuff);
+
+						return;
+					}
+					else
+					{
+						Line.append(aTmpStr);
+					}
+				}
+
+				if(*pBuff)
+				{
+					Line.append(1, *pBuff);
+					++pBuff;
+				}
+			}
+		}
+		else
+			Line = pReadLine;
 	}
 }

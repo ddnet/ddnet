@@ -1080,7 +1080,11 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	static int s_GfxColorDepth = g_Config.m_GfxColorDepth;
 	static int s_GfxVsync = g_Config.m_GfxVsync;
 	static int s_GfxFsaaSamples = g_Config.m_GfxFsaaSamples;
+#ifndef CONF_BACKEND_OPENGL_ES
 	static int s_GfxOpenGLVersion = (g_Config.m_GfxOpenGLMajor == 3 && g_Config.m_GfxOpenGLMinor == 3) || g_Config.m_GfxOpenGLMajor >= 4;
+#else
+	static int s_GfxOpenGLVersion = g_Config.m_GfxOpenGLMajor >= 3;
+#endif
 	static int s_GfxEnableTextureUnitOptimization = g_Config.m_GfxEnableTextureUnitOptimization;
 	static int s_GfxUsePreinitBuffer = g_Config.m_GfxUsePreinitBuffer;
 	static int s_GfxHighdpi = g_Config.m_GfxHighdpi;
@@ -1201,10 +1205,16 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		g_Config.m_GfxHighDetail ^= 1;
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
+#ifndef CONF_BACKEND_OPENGL_ES
 	bool IsNewOpenGL = (g_Config.m_GfxOpenGLMajor == 3 && g_Config.m_GfxOpenGLMinor == 3) || g_Config.m_GfxOpenGLMajor >= 4;
-	if(DoButton_CheckBox(&g_Config.m_GfxOpenGLMajor, Localize("Use OpenGL 3.3 (experimental)"), IsNewOpenGL, &Button))
+#else
+	bool IsNewOpenGL = g_Config.m_GfxOpenGLMajor >= 3;
+#endif
+
+	if(DoButton_CheckBox(&g_Config.m_GfxOpenGLMajor, Localize("Use modern OpenGL"), IsNewOpenGL, &Button))
 	{
 		CheckSettings = true;
+#ifndef CONF_BACKEND_OPENGL_ES
 		if(IsNewOpenGL)
 		{
 			g_Config.m_GfxOpenGLMajor = 3;
@@ -1219,6 +1229,22 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			g_Config.m_GfxOpenGLPatch = 0;
 			IsNewOpenGL = true;
 		}
+#else
+		if(IsNewOpenGL)
+		{
+			g_Config.m_GfxOpenGLMajor = 1;
+			g_Config.m_GfxOpenGLMinor = 0;
+			g_Config.m_GfxOpenGLPatch = 0;
+			IsNewOpenGL = false;
+		}
+		else
+		{
+			g_Config.m_GfxOpenGLMajor = 3;
+			g_Config.m_GfxOpenGLMinor = 0;
+			g_Config.m_GfxOpenGLPatch = 0;
+			IsNewOpenGL = true;
+		}
+#endif
 	}
 
 	if(IsNewOpenGL)

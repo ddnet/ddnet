@@ -1,7 +1,14 @@
 #ifndef ENGINE_CLIENT_OPENGL_SL_PROGRAM_H
 #define ENGINE_CLIENT_OPENGL_SL_PROGRAM_H
 
+#include <base/detect.h>
+
+#ifndef CONF_BACKEND_OPENGL_ES
 #include <GL/glew.h>
+#else
+#define GL_GLEXT_PROTOTYPES 1
+#include "SDL_opengles2.h"
+#endif
 
 class CGLSL;
 
@@ -25,7 +32,6 @@ public:
 	void SetUniformVec2(int Loc, int Count, const float *pValue);
 	void SetUniformVec4(int Loc, int Count, const float *pValue);
 	void SetUniform(int Loc, const int Value);
-	void SetUniform(int Loc, const unsigned int Value);
 	void SetUniform(int Loc, const bool Value);
 	void SetUniform(int Loc, const float Value);
 	void SetUniform(int Loc, int Count, const float *pValues);

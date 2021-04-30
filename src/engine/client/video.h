@@ -1,7 +1,9 @@
 #ifndef ENGINE_CLIENT_VIDEO_H
 #define ENGINE_CLIENT_VIDEO_H
 
-#if defined(__ANDROID__)
+#include <base/system.h>
+
+#if defined(CONF_BACKEND_OPENGL_ES)
 #define GL_GLEXT_PROTOTYPES
 #include <GL/glu.h>
 #include <GLES/gl.h>
@@ -25,8 +27,6 @@ extern "C" {
 #include <libswresample/swresample.h>
 #include <libswscale/swscale.h>
 };
-
-#include <base/system.h>
 
 #include <engine/shared/demo.h>
 #include <engine/shared/video.h>

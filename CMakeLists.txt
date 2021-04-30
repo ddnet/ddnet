@@ -1686,7 +1686,9 @@ if(CLIENT)
   add_library(${TARGET_STEAMAPI} ${STEAMAPI_KIND} ${STEAMAPI_SRC})
   list(APPEND TARGETS_OWN ${TARGET_STEAMAPI})
 
-  set_src(ENGINE_CLIENT GLOB src/engine/client
+  set_src(ENGINE_CLIENT GLOB_RECURSE src/engine/client
+    backend/backend_opengl.cpp
+    backend/backend_opengl3.cpp
     backend_sdl.cpp
     backend_sdl.h
     blocklist_driver.cpp

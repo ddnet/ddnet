@@ -2,7 +2,17 @@
 #define ENGINE_CLIENT_BACKEND_SDL_H
 
 #include "SDL.h"
-#include "SDL_opengl.h"
+
+#include <base/detect.h>
+
+#ifndef CONF_BACKEND_OPENGL_ES
+#include <GL/glew.h>
+#else
+#define GL_GLEXT_PROTOTYPES 1
+#include "SDL_opengles2.h"
+#include <GLES/gl.h>
+#include <GLES3/gl3.h>
+#endif
 
 #include "blocklist_driver.h"
 #include "graphics_threaded.h"
@@ -79,6 +89,12 @@ public:
 	bool RunCommand(const CCommandBuffer::SCommand *pBaseCommand);
 };
 
+enum EBackendType
+{
+	BACKEND_TYPE_OPENGL = 0,
+	BACKEND_TYPE_OPENGL_ES,
+};
+
 struct SBackendCapabilites
 {
 	bool m_TileBuffering;
@@ -150,6 +166,8 @@ protected:
 
 	int m_OpenGLTextureLodBIAS;
 
+	bool m_IsOpenGLES;
+
 public:
 	enum
 	{
@@ -165,6 +183,22 @@ public:
 		std::atomic<int> *m_pTextureMemoryUsage;
 		SBackendCapabilites *m_pCapabilities;
 		int *m_pInitError;
+
+		const char **m_pErrStringPtr;
+
+		char *m_pVendorString;
+		char *m_pVersionString;
+		char *m_pRendererString;
+
+		int m_RequestedMajor;
+		int m_RequestedMinor;
+		int m_RequestedPatch;
+
+		EBackendType m_RequestedBackend;
+
+		int m_GlewMajor;
+		int m_GlewMinor;
+		int m_GlewPatch;
 	};
 
 	struct SCommand_Shutdown : public CCommandBuffer::SCommand
@@ -175,6 +209,10 @@ public:
 
 protected:
 	bool IsTexturedState(const CCommandBuffer::SState &State);
+	static bool Texture2DTo3D(void *pImageBuffer, int ImageWidth, int ImageHeight, int ImageColorChannelCount, int SplitCountWidth, int SplitCountHeight, void *pTarget3DImageData, int &Target3DImageWidth, int &Target3DImageHeight);
+
+	void InitOpenGL(const SCommand_Init *pCommand);
+
 	void SetState(const CCommandBuffer::SState &State, bool Use2DArrayTexture = false);
 	virtual bool IsNewApi() { return false; }
 	void DestroyTexture(int Slot);
@@ -427,23 +465,6 @@ public:
 			SCommand(CMD_INIT) {}
 		SDL_Window *m_pWindow;
 		SDL_GLContext m_GLContext;
-		SBackendCapabilites *m_pCapabilities;
-
-		const char **m_pErrStringPtr;
-
-		int *m_pInitError;
-
-		char *m_pVendorString;
-		char *m_pVersionString;
-		char *m_pRendererString;
-
-		int m_RequestedMajor;
-		int m_RequestedMinor;
-		int m_RequestedPatch;
-
-		int m_GlewMajor;
-		int m_GlewMinor;
-		int m_GlewPatch;
 	};
 
 	struct SCommand_Update_Viewport : public CCommandBuffer::SCommand
@@ -484,8 +505,10 @@ class CCommandProcessor_SDL_OpenGL : public CGraphicsBackend_Threaded::ICommandP
 	CCommandProcessorFragment_SDL m_SDL;
 	CCommandProcessorFragment_General m_General;
 
+	EBackendType m_BackendType;
+
 public:
-	CCommandProcessor_SDL_OpenGL(int OpenGLMajor, int OpenGLMinor, int OpenGLPatch);
+	CCommandProcessor_SDL_OpenGL(EBackendType BackendType, int OpenGLMajor, int OpenGLMinor, int OpenGLPatch);
 	virtual ~CCommandProcessor_SDL_OpenGL();
 	virtual void RunBuffer(CCommandBuffer *pBuffer);
 };
@@ -510,6 +533,9 @@ class CGraphicsBackend_SDL_OpenGL : public CGraphicsBackend_Threaded
 	bool m_UseNewOpenGL;
 
 	char m_aErrorString[256];
+
+	static EBackendType DetectBackend();
+	static void ClampDriverVersion(EBackendType BackendType);
 
 public:
 	virtual int Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, class IStorage *pStorage);
@@ -560,6 +586,8 @@ public:
 	{
 		return m_aRendererString;
 	}
+
+	static bool IsModernAPI(EBackendType BackendType);
 };
 
 #endif // ENGINE_CLIENT_BACKEND_SDL_H

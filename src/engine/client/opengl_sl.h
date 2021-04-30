@@ -1,7 +1,15 @@
 #ifndef ENGINE_CLIENT_OPENGL_SL_H
 #define ENGINE_CLIENT_OPENGL_SL_H
 
+#include <base/detect.h>
+
+#ifndef CONF_BACKEND_OPENGL_ES
 #include <GL/glew.h>
+#else
+#define GL_GLEXT_PROTOTYPES 1
+#include "SDL_opengles2.h"
+#endif
+
 #include <string>
 #include <vector>
 
@@ -47,10 +55,14 @@ private:
 	int m_OpenGLVersionMinor;
 	int m_OpenGLVersionPatch;
 
+	bool m_IsOpenGLES;
+
+	float m_TextureLODBias;
+
 	bool m_HasTextureArray;
 	int m_TextureReplaceType; // @see EGLSLCompilerTextureReplaceType
 public:
-	CGLSLCompiler(int OpenGLVersionMajor, int OpenGLVersionMinor, int OpenGLVersionPatch);
+	CGLSLCompiler(int OpenGLVersionMajor, int OpenGLVersionMinor, int OpenGLVersionPatch, bool IsOpenGLES, float TextureLODBias);
 	void SetHasTextureArray(bool TextureArray) { m_HasTextureArray = TextureArray; }
 	void SetTextureReplaceType(int TextureReplaceType) { m_TextureReplaceType = TextureReplaceType; }
 
