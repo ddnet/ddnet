@@ -13,13 +13,24 @@ bool CBinds::CBindsSpecial::OnInput(IInput::CEvent Event)
 	{
 		int Mask = m_pBinds->GetModifierMask(Input());
 
+		// Look for a composed bind
 		bool ret = false;
-		for(int Mod = 0; Mod < MODIFIER_COMBINATION_COUNT; Mod++)
+		for(int Mod = 1; Mod < MODIFIER_COMBINATION_COUNT; Mod++)
 		{
-			if(Mask & (1 << Mod) && m_pBinds->m_aapKeyBindings[Mod][Event.m_Key])
+			if(Mask == Mod && m_pBinds->m_aapKeyBindings[Mod][Event.m_Key])
+			{
 				m_pBinds->GetConsole()->ExecuteLineStroked(Event.m_Flags & IInput::FLAG_PRESS, m_pBinds->m_aapKeyBindings[Mod][Event.m_Key]);
+				ret = true;
+			}
+		}
+
+		// Look for a non composed bind
+		if(!ret && m_pBinds->m_aapKeyBindings[0][Event.m_Key])
+		{
+			m_pBinds->GetConsole()->ExecuteLineStroked(Event.m_Flags & IInput::FLAG_PRESS, m_pBinds->m_aapKeyBindings[0][Event.m_Key]);
 			ret = true;
 		}
+
 		return ret;
 	}
 
