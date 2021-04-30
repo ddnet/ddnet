@@ -963,28 +963,28 @@ void CCommandProcessorFragment_OpenGL::Cmd_Screenshot(const CCommandBuffer::SCom
 	int h = aViewport[3];
 
 	// we allocate one more row to use when we are flipping the texture
-	unsigned char *pPixelData = (unsigned char *)malloc((size_t)w * (h + 1) * 3);
-	unsigned char *pTempRow = pPixelData + w * h * 3;
+	unsigned char *pPixelData = (unsigned char *)malloc((size_t)w * (h + 1) * 4);
+	unsigned char *pTempRow = pPixelData + w * h * 4;
 
 	// fetch the pixels
 	GLint Alignment;
 	glGetIntegerv(GL_PACK_ALIGNMENT, &Alignment);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-	glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, pPixelData);
+	glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, pPixelData);
 	glPixelStorei(GL_PACK_ALIGNMENT, Alignment);
 
 	// flip the pixel because opengl works from bottom left corner
 	for(int y = 0; y < h / 2; y++)
 	{
-		mem_copy(pTempRow, pPixelData + y * w * 3, w * 3);
-		mem_copy(pPixelData + y * w * 3, pPixelData + (h - y - 1) * w * 3, w * 3);
-		mem_copy(pPixelData + (h - y - 1) * w * 3, pTempRow, w * 3);
+		mem_copy(pTempRow, pPixelData + y * w * 4, w * 4);
+		mem_copy(pPixelData + y * w * 4, pPixelData + (h - y - 1) * w * 4, w * 4);
+		mem_copy(pPixelData + (h - y - 1) * w * 4, pTempRow, w * 4);
 	}
 
 	// fill in the information
 	pCommand->m_pImage->m_Width = w;
 	pCommand->m_pImage->m_Height = h;
-	pCommand->m_pImage->m_Format = CImageInfo::FORMAT_RGB;
+	pCommand->m_pImage->m_Format = CImageInfo::FORMAT_RGBA;
 	pCommand->m_pImage->m_pData = pPixelData;
 }
 

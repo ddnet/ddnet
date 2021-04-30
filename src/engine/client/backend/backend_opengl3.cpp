@@ -893,41 +893,6 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderTex3D(const CCommandBuffer::
 	};
 }
 
-void CCommandProcessorFragment_OpenGL3_3::Cmd_Screenshot(const CCommandBuffer::SCommand_Screenshot *pCommand)
-{
-	// fetch image data
-	GLint aViewport[4] = {0, 0, 0, 0};
-	glGetIntegerv(GL_VIEWPORT, aViewport);
-
-	int w = aViewport[2];
-	int h = aViewport[3];
-
-	// we allocate one more row to use when we are flipping the texture
-	unsigned char *pPixelData = (unsigned char *)malloc((size_t)w * (h + 1) * 3);
-	unsigned char *pTempRow = pPixelData + w * h * 3;
-
-	// fetch the pixels
-	GLint Alignment;
-	glGetIntegerv(GL_PACK_ALIGNMENT, &Alignment);
-	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-	glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, pPixelData);
-	glPixelStorei(GL_PACK_ALIGNMENT, Alignment);
-
-	// flip the pixel because opengl works from bottom left corner
-	for(int y = 0; y < h / 2; y++)
-	{
-		mem_copy(pTempRow, pPixelData + y * w * 3, w * 3);
-		mem_copy(pPixelData + y * w * 3, pPixelData + (h - y - 1) * w * 3, w * 3);
-		mem_copy(pPixelData + (h - y - 1) * w * 3, pTempRow, w * 3);
-	}
-
-	// fill in the information
-	pCommand->m_pImage->m_Width = w;
-	pCommand->m_pImage->m_Height = h;
-	pCommand->m_pImage->m_Format = CImageInfo::FORMAT_RGB;
-	pCommand->m_pImage->m_pData = pPixelData;
-}
-
 void CCommandProcessorFragment_OpenGL3_3::DestroyBufferContainer(int Index, bool DeleteBOs)
 {
 	SBufferContainer &BufferContainer = m_BufferContainers[Index];
