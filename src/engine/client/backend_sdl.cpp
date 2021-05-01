@@ -8,9 +8,6 @@
 
 #ifndef CONF_BACKEND_OPENGL_ES
 #include <GL/glew.h>
-#else
-#define GL_GLEXT_PROTOTYPES 1
-#include "SDL_opengles2.h"
 #endif
 
 #include <engine/storage.h>
@@ -166,11 +163,6 @@ void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 	SDL_GL_MakeCurrent(m_pWindow, m_GLContext);
 }
 
-void CCommandProcessorFragment_SDL::Cmd_Update_Viewport(const SCommand_Update_Viewport *pCommand)
-{
-	glViewport(pCommand->m_X, pCommand->m_Y, pCommand->m_Width, pCommand->m_Height);
-}
-
 void CCommandProcessorFragment_SDL::Cmd_Shutdown(const SCommand_Shutdown *pCommand)
 {
 	SDL_GL_MakeCurrent(NULL, NULL);
@@ -179,19 +171,11 @@ void CCommandProcessorFragment_SDL::Cmd_Shutdown(const SCommand_Shutdown *pComma
 void CCommandProcessorFragment_SDL::Cmd_Swap(const CCommandBuffer::SCommand_Swap *pCommand)
 {
 	SDL_GL_SwapWindow(m_pWindow);
-
-	if(pCommand->m_Finish)
-		glFinish();
 }
 
 void CCommandProcessorFragment_SDL::Cmd_VSync(const CCommandBuffer::SCommand_VSync *pCommand)
 {
 	*pCommand->m_pRetOk = SDL_GL_SetSwapInterval(pCommand->m_VSync) == 0;
-}
-
-void CCommandProcessorFragment_SDL::Cmd_Resize(const CCommandBuffer::SCommand_Resize *pCommand)
-{
-	glViewport(0, 0, pCommand->m_Width, pCommand->m_Height);
 }
 
 void CCommandProcessorFragment_SDL::Cmd_VideoModes(const CCommandBuffer::SCommand_VideoModes *pCommand)
@@ -240,11 +224,9 @@ bool CCommandProcessorFragment_SDL::RunCommand(const CCommandBuffer::SCommand *p
 	{
 	case CCommandBuffer::CMD_SWAP: Cmd_Swap(static_cast<const CCommandBuffer::SCommand_Swap *>(pBaseCommand)); break;
 	case CCommandBuffer::CMD_VSYNC: Cmd_VSync(static_cast<const CCommandBuffer::SCommand_VSync *>(pBaseCommand)); break;
-	case CCommandBuffer::CMD_RESIZE: Cmd_Resize(static_cast<const CCommandBuffer::SCommand_Resize *>(pBaseCommand)); break;
 	case CCommandBuffer::CMD_VIDEOMODES: Cmd_VideoModes(static_cast<const CCommandBuffer::SCommand_VideoModes *>(pBaseCommand)); break;
 	case CMD_INIT: Cmd_Init(static_cast<const SCommand_Init *>(pBaseCommand)); break;
 	case CMD_SHUTDOWN: Cmd_Shutdown(static_cast<const SCommand_Shutdown *>(pBaseCommand)); break;
-	case CMD_UPDATE_VIEWPORT: Cmd_Update_Viewport(static_cast<const SCommand_Update_Viewport *>(pBaseCommand)); break;
 	default: return false;
 	}
 
@@ -923,7 +905,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 			//TODO: current problem is, that the opengl driver knows about the scaled display,
 			//so the viewport cannot be adjusted for resolutions, that are higher than allowed by the display driver
 
-			CCommandProcessorFragment_SDL::SCommand_Update_Viewport CmdSDL;
+			CCommandBuffer::SCommand_Update_Viewport CmdSDL;
 			CmdSDL.m_X = 0;
 			CmdSDL.m_Y = 0;
 

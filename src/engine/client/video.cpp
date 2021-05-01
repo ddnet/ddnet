@@ -6,6 +6,12 @@
 
 #include "video.h"
 
+#ifndef CONF_BACKEND_OPENGL_ES
+#include <GL/glew.h>
+#else
+#include <GLES3/gl3.h>
+#endif
+
 // This code is mostly stolen from https://github.com/FFmpeg/FFmpeg/blob/master/doc/examples/muxing.c
 
 #define STREAM_PIX_FMT AV_PIX_FMT_YUV420P /* default pix_fmt */
@@ -95,7 +101,7 @@ void CVideo::Start()
 	m_pFormat = m_pFormatContext->oformat;
 
 	size_t NVals = FORMAT_NCHANNELS * m_Width * m_Height;
-	m_pPixels = (uint8_t *)malloc(NVals * sizeof(GLubyte));
+	m_pPixels = (uint8_t *)malloc(NVals * sizeof(TWGLubyte));
 	m_pRGB = (uint8_t *)malloc(NVals * sizeof(uint8_t));
 
 	/* Add the audio and video streams using the default format codecs

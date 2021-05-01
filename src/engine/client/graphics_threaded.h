@@ -119,12 +119,13 @@ public:
 
 		// swap
 		CMD_SWAP,
+		CMD_FINISH,
 
 		// misc
 		CMD_VSYNC,
 		CMD_SCREENSHOT,
 		CMD_VIDEOMODES,
-		CMD_RESIZE,
+		CMD_UPDATE_VIEWPORT,
 
 	};
 
@@ -504,8 +505,12 @@ public:
 	{
 		SCommand_Swap() :
 			SCommand(CMD_SWAP) {}
+	};
 
-		int m_Finish;
+	struct SCommand_Finish : public SCommand
+	{
+		SCommand_Finish() :
+			SCommand(CMD_FINISH) {}
 	};
 
 	struct SCommand_VSync : public SCommand
@@ -517,11 +522,13 @@ public:
 		bool *m_pRetOk;
 	};
 
-	struct SCommand_Resize : public SCommand
+	struct SCommand_Update_Viewport : public SCommand
 	{
-		SCommand_Resize() :
-			SCommand(CMD_RESIZE) {}
+		SCommand_Update_Viewport() :
+			SCommand(CMD_UPDATE_VIEWPORT) {}
 
+		int m_X;
+		int m_Y;
 		int m_Width;
 		int m_Height;
 	};

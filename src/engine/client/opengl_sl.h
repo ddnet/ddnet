@@ -3,12 +3,7 @@
 
 #include <base/detect.h>
 
-#ifndef CONF_BACKEND_OPENGL_ES
-#include <GL/glew.h>
-#else
-#define GL_GLEXT_PROTOTYPES 1
-#include "SDL_opengles2.h"
-#endif
+#include "graphics_defines.h"
 
 #include <string>
 #include <vector>
@@ -22,13 +17,13 @@ public:
 	void DeleteShader();
 
 	bool IsLoaded();
-	GLuint GetShaderID();
+	TWGLuint GetShaderID();
 
 	CGLSL();
 	virtual ~CGLSL();
 
 private:
-	GLuint m_ShaderID;
+	TWGLuint m_ShaderID;
 	int m_Type;
 	bool m_IsLoaded;
 };

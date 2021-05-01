@@ -2332,7 +2332,9 @@ void CGraphics_Threaded::Resize(int w, int h, bool SetWindowSize)
 	if(m_ScreenWidth > 21 * m_ScreenHeight / 9)
 		m_ScreenWidth = 21 * m_ScreenHeight / 9;
 
-	CCommandBuffer::SCommand_Resize Cmd;
+	CCommandBuffer::SCommand_Update_Viewport Cmd;
+	Cmd.m_X = 0;
+	Cmd.m_Y = 0;
 	Cmd.m_Width = m_ScreenWidth;
 	Cmd.m_Height = m_ScreenHeight;
 
@@ -2414,13 +2416,24 @@ void CGraphics_Threaded::Swap()
 		m_DoScreenshot = false;
 	}
 
-	// add swap command
-	CCommandBuffer::SCommand_Swap Cmd;
-	Cmd.m_Finish = g_Config.m_GfxFinish;
-	if(!AddCmd(
-		   Cmd, [] { return true; }, "failed to add swap command"))
 	{
-		return;
+		// add swap command
+		CCommandBuffer::SCommand_Swap Cmd;
+		if(!AddCmd(
+			   Cmd, [] { return true; }, "failed to add swap command"))
+		{
+			return;
+		}
+	}
+
+	if(g_Config.m_GfxFinish)
+	{
+		CCommandBuffer::SCommand_Finish Cmd;
+		if(!AddCmd(
+			   Cmd, [] { return true; }, "failed to add finish command"))
+		{
+			return;
+		}
 	}
 
 	// kick the command buffer

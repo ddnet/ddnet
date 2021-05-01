@@ -23,6 +23,16 @@
 #include <engine/shared/image_manipulation.h>
 
 // ------------ CCommandProcessorFragment_OpenGL
+void CCommandProcessorFragment_OpenGL::Cmd_Update_Viewport(const CCommandBuffer::SCommand_Update_Viewport *pCommand)
+{
+	glViewport(pCommand->m_X, pCommand->m_Y, pCommand->m_Width, pCommand->m_Height);
+}
+
+void CCommandProcessorFragment_OpenGL::Cmd_Finish(const CCommandBuffer::SCommand_Finish *pCommand)
+{
+	glFinish();
+}
+
 bool CCommandProcessorFragment_OpenGL::Texture2DTo3D(void *pImageBuffer, int ImageWidth, int ImageHeight, int ImageColorChannelCount, int SplitCountWidth, int SplitCountHeight, void *pTarget3DImageData, int &Target3DImageWidth, int &Target3DImageHeight)
 {
 	Target3DImageWidth = ImageWidth / SplitCountWidth;
@@ -1037,6 +1047,12 @@ bool CCommandProcessorFragment_OpenGL::RunCommand(const CCommandBuffer::SCommand
 		break;
 	case CCommandBuffer::CMD_SCREENSHOT:
 		Cmd_Screenshot(static_cast<const CCommandBuffer::SCommand_Screenshot *>(pBaseCommand));
+		break;
+	case CCommandBuffer::CMD_UPDATE_VIEWPORT:
+		Cmd_Update_Viewport(static_cast<const CCommandBuffer::SCommand_Update_Viewport *>(pBaseCommand));
+		break;
+	case CCommandBuffer::CMD_FINISH:
+		Cmd_Finish(static_cast<const CCommandBuffer::SCommand_Finish *>(pBaseCommand));
 		break;
 
 	case CCommandBuffer::CMD_CREATE_BUFFER_OBJECT: Cmd_CreateBufferObject(static_cast<const CCommandBuffer::SCommand_CreateBufferObject *>(pBaseCommand)); break;

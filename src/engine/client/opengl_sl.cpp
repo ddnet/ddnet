@@ -7,6 +7,12 @@
 
 #include <engine/client/backend_sdl.h>
 
+#ifndef CONF_BACKEND_OPENGL_ES
+#include <GL/glew.h>
+#else
+#include <GLES3/gl3.h>
+#endif
+
 bool CGLSL::LoadShader(CGLSLCompiler *pCompiler, IStorage *pStorage, const char *pFile, int Type)
 {
 	if(m_IsLoaded)
@@ -88,7 +94,7 @@ bool CGLSL::LoadShader(CGLSLCompiler *pCompiler, IStorage *pStorage, const char 
 			ShaderCode[i] = Lines[i].c_str();
 		}
 
-		GLuint shader = glCreateShader(Type);
+		TWGLuint shader = glCreateShader(Type);
 
 		glShaderSource(shader, Lines.size(), ShaderCode, NULL);
 		glCompileShader(shader);
@@ -102,7 +108,7 @@ bool CGLSL::LoadShader(CGLSLCompiler *pCompiler, IStorage *pStorage, const char 
 		{
 			char buff[3000];
 
-			GLint maxLength = 0;
+			TWGLint maxLength = 0;
 			glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
 
 			glGetShaderInfoLog(shader, maxLength, &maxLength, buff);
@@ -135,7 +141,7 @@ bool CGLSL::IsLoaded()
 	return m_IsLoaded;
 }
 
-GLuint CGLSL::GetShaderID()
+TWGLuint CGLSL::GetShaderID()
 {
 	return m_ShaderID;
 }

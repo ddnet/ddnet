@@ -3,12 +3,7 @@
 
 #include <base/detect.h>
 
-#ifndef CONF_BACKEND_OPENGL_ES
-#include <GL/glew.h>
-#else
-#define GL_GLEXT_PROTOTYPES 1
-#include "SDL_opengles2.h"
-#endif
+#include <engine/client/graphics_defines.h>
 
 class CGLSL;
 
@@ -22,10 +17,10 @@ public:
 
 	void LinkProgram();
 	void UseProgram();
-	GLuint GetProgramID();
+	TWGLuint GetProgramID();
 
 	void DetachShader(CGLSL *pShader);
-	void DetachShaderByID(GLuint ShaderID);
+	void DetachShaderByID(TWGLuint ShaderID);
 	void DetachAllShaders();
 
 	//Support various types
@@ -43,7 +38,7 @@ public:
 	virtual ~CGLSLProgram();
 
 protected:
-	GLuint m_ProgramID;
+	TWGLuint m_ProgramID;
 	bool m_IsLinked;
 };
 

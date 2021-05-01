@@ -3,12 +3,7 @@
 
 #include <base/system.h>
 
-#if defined(CONF_BACKEND_OPENGL_ES)
-#define GL_GLEXT_PROTOTYPES
-#include <GLES3/gl3.h>
-#define glOrtho glOrthof
-#else
-#include "SDL_opengl.h"
+#include "graphics_defines.h"
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -107,7 +102,7 @@ private:
 
 	bool m_HasAudio;
 
-	GLubyte *m_pPixels;
+	TWGLubyte *m_pPixels;
 
 	OutputStream m_VideoStream;
 	OutputStream m_AudioStream;

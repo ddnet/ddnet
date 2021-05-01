@@ -1702,6 +1702,7 @@ if(CLIENT)
     friends.h
     ghost.cpp
     ghost.h
+    graphics_defines.h
     graphics_threaded.cpp
     graphics_threaded.h
     http.cpp

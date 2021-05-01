@@ -5,13 +5,7 @@
 
 #include <base/detect.h>
 
-#ifndef CONF_BACKEND_OPENGL_ES
-#include <GL/glew.h>
-#else
-#define GL_GLEXT_PROTOTYPES 1
-#include "SDL_opengles2.h"
-#include <GLES3/gl3.h>
-#endif
+#include "graphics_defines.h"
 
 #ifdef CONF_BACKEND_OPENGL_ES3
 #define BACKEND_GL_MODERN_API 1
@@ -137,10 +131,10 @@ protected:
 		{
 		}
 
-		GLuint m_Tex;
-		GLuint m_Tex2DArray; //or 3D texture as fallback
-		GLuint m_Sampler;
-		GLuint m_Sampler2DArray; //or 3D texture as fallback
+		TWGLuint m_Tex;
+		TWGLuint m_Tex2DArray; //or 3D texture as fallback
+		TWGLuint m_Sampler;
+		TWGLuint m_Sampler2DArray; //or 3D texture as fallback
 		int m_LastWrapMode;
 
 		int m_MemSize;
@@ -154,11 +148,11 @@ protected:
 	std::vector<CTexture> m_Textures;
 	std::atomic<int> *m_pTextureMemoryUsage;
 
-	GLint m_MaxTexSize;
+	TWGLint m_MaxTexSize;
 
 	bool m_Has2DArrayTextures;
 	bool m_Has2DArrayTexturesAsExtension;
-	GLenum m_2DArrayTarget;
+	TWGLenum m_2DArrayTarget;
 	bool m_Has3DTextures;
 	bool m_HasMipMaps;
 	bool m_HasNPOTTextures;
@@ -234,6 +228,9 @@ protected:
 	virtual void Cmd_RenderTex3D(const CCommandBuffer::SCommand_RenderTex3D *pCommand) {}
 	virtual void Cmd_Screenshot(const CCommandBuffer::SCommand_Screenshot *pCommand);
 
+	virtual void Cmd_Update_Viewport(const CCommandBuffer::SCommand_Update_Viewport *pCommand);
+	virtual void Cmd_Finish(const CCommandBuffer::SCommand_Finish *pCommand);
+
 	virtual void Cmd_CreateBufferObject(const CCommandBuffer::SCommand_CreateBufferObject *pCommand) {}
 	virtual void Cmd_RecreateBufferObject(const CCommandBuffer::SCommand_RecreateBufferObject *pCommand) {}
 	virtual void Cmd_UpdateBufferObject(const CCommandBuffer::SCommand_UpdateBufferObject *pCommand) {}
@@ -275,13 +272,13 @@ class CCommandProcessorFragment_OpenGL2 : public CCommandProcessorFragment_OpenG
 
 	struct SBufferObject
 	{
-		SBufferObject(GLuint BufferObjectID) :
+		SBufferObject(TWGLuint BufferObjectID) :
 			m_BufferObjectID(BufferObjectID)
 		{
 			m_pData = NULL;
 			m_DataSize = 0;
 		}
-		GLuint m_BufferObjectID;
+		TWGLuint m_BufferObjectID;
 		void *m_pData;
 		size_t m_DataSize;
 	};
@@ -329,7 +326,7 @@ protected:
 
 	bool m_UseMultipleTextureUnits;
 
-	GLint m_MaxTextureUnits;
+	TWGLint m_MaxTextureUnits;
 
 	struct STextureBound
 	{
@@ -374,18 +371,18 @@ class CCommandProcessorFragment_OpenGL3_3 : public CCommandProcessorFragment_Ope
 	CGLSLPrimitiveExProgram *m_pPrimitiveExProgramTexturedRotationless;
 	CGLSLSpriteMultipleProgram *m_pSpriteProgramMultiple;
 
-	GLuint m_LastProgramID;
+	TWGLuint m_LastProgramID;
 
-	GLuint m_PrimitiveDrawVertexID[MAX_STREAM_BUFFER_COUNT];
-	GLuint m_PrimitiveDrawVertexIDTex3D;
-	GLuint m_PrimitiveDrawBufferID[MAX_STREAM_BUFFER_COUNT];
-	GLuint m_PrimitiveDrawBufferIDTex3D;
+	TWGLuint m_PrimitiveDrawVertexID[MAX_STREAM_BUFFER_COUNT];
+	TWGLuint m_PrimitiveDrawVertexIDTex3D;
+	TWGLuint m_PrimitiveDrawBufferID[MAX_STREAM_BUFFER_COUNT];
+	TWGLuint m_PrimitiveDrawBufferIDTex3D;
 
-	GLuint m_LastIndexBufferBound[MAX_STREAM_BUFFER_COUNT];
+	TWGLuint m_LastIndexBufferBound[MAX_STREAM_BUFFER_COUNT];
 
 	int m_LastStreamBuffer;
 
-	GLuint m_QuadDrawIndexBufferID;
+	TWGLuint m_QuadDrawIndexBufferID;
 	unsigned int m_CurrentIndicesInBuffer;
 
 	void DestroyBufferContainer(int Index, bool DeleteBOs = true);
@@ -396,13 +393,13 @@ class CCommandProcessorFragment_OpenGL3_3 : public CCommandProcessorFragment_Ope
 	{
 		SBufferContainer() :
 			m_VertArrayID(0), m_LastIndexBufferBound(0) {}
-		GLuint m_VertArrayID;
-		GLuint m_LastIndexBufferBound;
+		TWGLuint m_VertArrayID;
+		TWGLuint m_LastIndexBufferBound;
 		SBufferContainerInfo m_ContainerInfo;
 	};
 	std::vector<SBufferContainer> m_BufferContainers;
 
-	std::vector<GLuint> m_BufferObjectIndices;
+	std::vector<TWGLuint> m_BufferObjectIndices;
 
 	CCommandBuffer::SColorf m_ClearColor;
 
@@ -461,7 +458,6 @@ public:
 	enum
 	{
 		CMD_INIT = CCommandBuffer::CMDGROUP_PLATFORM_SDL,
-		CMD_UPDATE_VIEWPORT,
 		CMD_SHUTDOWN,
 	};
 
@@ -473,16 +469,6 @@ public:
 		SDL_GLContext m_GLContext;
 	};
 
-	struct SCommand_Update_Viewport : public CCommandBuffer::SCommand
-	{
-		SCommand_Update_Viewport() :
-			SCommand(CMD_UPDATE_VIEWPORT) {}
-		int m_X;
-		int m_Y;
-		int m_Width;
-		int m_Height;
-	};
-
 	struct SCommand_Shutdown : public CCommandBuffer::SCommand
 	{
 		SCommand_Shutdown() :
@@ -491,11 +477,9 @@ public:
 
 private:
 	void Cmd_Init(const SCommand_Init *pCommand);
-	void Cmd_Update_Viewport(const SCommand_Update_Viewport *pCommand);
 	void Cmd_Shutdown(const SCommand_Shutdown *pCommand);
 	void Cmd_Swap(const CCommandBuffer::SCommand_Swap *pCommand);
 	void Cmd_VSync(const CCommandBuffer::SCommand_VSync *pCommand);
-	void Cmd_Resize(const CCommandBuffer::SCommand_Resize *pCommand);
 	void Cmd_VideoModes(const CCommandBuffer::SCommand_VideoModes *pCommand);
 
 public:
