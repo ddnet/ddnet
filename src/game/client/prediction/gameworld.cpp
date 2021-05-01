@@ -289,7 +289,7 @@ void CGameWorld::ReleaseHooked(int ClientID)
 
 CTuningParams *CGameWorld::Tuning()
 {
-	return &m_Tuning[g_Config.m_ClDummy];
+	return &m_Core.m_Tuning[g_Config.m_ClDummy];
 }
 
 CEntity *CGameWorld::GetEntity(int ID, int EntType)
@@ -531,7 +531,6 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 	for(int i = 0; i < 2; i++)
 	{
 		m_Core.m_Tuning[i] = pFrom->m_Core.m_Tuning[i];
-		m_Tuning[i] = pFrom->m_Tuning[i];
 	}
 	m_pTuningList = pFrom->m_pTuningList;
 	m_Teams = pFrom->m_Teams;
