@@ -5,19 +5,10 @@
 
 #if defined(CONF_BACKEND_OPENGL_ES)
 #define GL_GLEXT_PROTOTYPES
-#include <GL/glu.h>
-#include <GLES/gl.h>
-#include <GLES/glext.h>
+#include <GLES3/gl3.h>
 #define glOrtho glOrthof
 #else
 #include "SDL_opengl.h"
-
-#if defined(CONF_PLATFORM_MACOS)
-#include "OpenGL/glu.h"
-#else
-#include "GL/glu.h"
-#endif
-#endif
 
 extern "C" {
 #include <libavcodec/avcodec.h>

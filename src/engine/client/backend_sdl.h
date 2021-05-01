@@ -10,8 +10,11 @@
 #else
 #define GL_GLEXT_PROTOTYPES 1
 #include "SDL_opengles2.h"
-#include <GLES/gl.h>
 #include <GLES3/gl3.h>
+#endif
+
+#ifdef CONF_BACKEND_OPENGL_ES3
+#define BACKEND_GL_MODERN_API 1
 #endif
 
 #include "blocklist_driver.h"
@@ -285,17 +288,20 @@ class CCommandProcessorFragment_OpenGL2 : public CCommandProcessorFragment_OpenG
 
 	std::vector<SBufferObject> m_BufferObjectIndices;
 
+#ifndef BACKEND_GL_MODERN_API
 	bool DoAnalyzeStep(size_t StepN, size_t CheckCount, size_t VerticesCount, uint8_t aFakeTexture[], size_t SingleImageSize);
 	bool IsTileMapAnalysisSucceeded();
 
 	void RenderBorderTileEmulation(SBufferContainer &BufferContainer, const CCommandBuffer::SState &State, const float *pColor, const char *pBuffOffset, unsigned int DrawNum, const float *pOffset, const float *pDir, int JumpIndex);
 	void RenderBorderTileLineEmulation(SBufferContainer &BufferContainer, const CCommandBuffer::SState &State, const float *pColor, const char *pBuffOffset, unsigned int IndexDrawNum, unsigned int DrawNum, const float *pOffset, const float *pDir);
+#endif
 
 	void UseProgram(CGLSLTWProgram *pProgram);
 
 protected:
 	void SetState(const CCommandBuffer::SState &State, CGLSLTWProgram *pProgram, bool Use2DArrayTextures = false);
 
+#ifndef BACKEND_GL_MODERN_API
 	void Cmd_Init(const SCommand_Init *pCommand) override;
 
 	void Cmd_RenderTex3D(const CCommandBuffer::SCommand_RenderTex3D *pCommand) override;
@@ -314,6 +320,7 @@ protected:
 	void Cmd_RenderTileLayer(const CCommandBuffer::SCommand_RenderTileLayer *pCommand) override;
 	void Cmd_RenderBorderTile(const CCommandBuffer::SCommand_RenderBorderTile *pCommand) override;
 	void Cmd_RenderBorderTileLine(const CCommandBuffer::SCommand_RenderBorderTileLine *pCommand) override;
+#endif
 
 	CGLSLTileProgram *m_pTileProgram;
 	CGLSLTileProgram *m_pTileProgramTextured;

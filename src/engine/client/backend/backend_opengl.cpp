@@ -7,12 +7,14 @@
 #else
 #define GL_GLEXT_PROTOTYPES 1
 #include "SDL_opengles2.h"
-#include <GLES/gl.h>
 #include <GLES3/gl3.h>
-#define glOrtho glOrthof
 #define GL_TEXTURE_2D_ARRAY_EXT GL_TEXTURE_2D_ARRAY
 // GLES doesnt support GL_QUADS, but the code is also never executed
 #define GL_QUADS GL_TRIANGLES
+#ifndef CONF_BACKEND_OPENGL_ES3
+#include <GLES/gl.h>
+#define glOrtho glOrthof
+#endif
 #endif
 
 #include <engine/client/opengl_sl.h>
@@ -84,6 +86,7 @@ bool CCommandProcessorFragment_OpenGL::IsTexturedState(const CCommandBuffer::SSt
 
 void CCommandProcessorFragment_OpenGL::SetState(const CCommandBuffer::SState &State, bool Use2DArrayTextures)
 {
+#ifndef BACKEND_GL_MODERN_API
 	// blend
 	switch(State.m_BlendMode)
 	{
@@ -184,6 +187,7 @@ void CCommandProcessorFragment_OpenGL::SetState(const CCommandBuffer::SState &St
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(State.m_ScreenTL.x, State.m_ScreenBR.x, State.m_ScreenBR.y, State.m_ScreenTL.y, -10.0f, 10.f);
+#endif
 }
 
 static void ParseVersionString(EBackendType BackendType, const char *pStr, int &VersionMajor, int &VersionMinor, int &VersionPatch)
@@ -304,9 +308,14 @@ void CCommandProcessorFragment_OpenGL::InitOpenGL(const SCommand_Init *pCommand)
 	glDisable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
 
+#ifndef BACKEND_GL_MODERN_API
 	if(!IsNewApi())
+	{
 		glAlphaFunc(GL_GREATER, 0);
-	glEnable(GL_ALPHA_TEST);
+		glEnable(GL_ALPHA_TEST);
+	}
+#endif
+
 	glDepthMask(0);
 
 #ifndef CONF_BACKEND_OPENGL_ES
@@ -685,6 +694,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Destroy(const CCommandBuffer:
 
 void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::SCommand_Texture_Create *pCommand)
 {
+#ifndef BACKEND_GL_MODERN_API
 	int Width = pCommand->m_Width;
 	int Height = pCommand->m_Height;
 	void *pTexData = pCommand->m_pData;
@@ -916,6 +926,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 	m_pTextureMemoryUsage->store(m_pTextureMemoryUsage->load(std::memory_order_relaxed) + m_Textures[pCommand->m_Slot].m_MemSize, std::memory_order_relaxed);
 
 	free(pTexData);
+#endif
 }
 
 void CCommandProcessorFragment_OpenGL::Cmd_Clear(const CCommandBuffer::SCommand_Clear *pCommand)
@@ -926,6 +937,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Clear(const CCommandBuffer::SCommand_
 
 void CCommandProcessorFragment_OpenGL::Cmd_Render(const CCommandBuffer::SCommand_Render *pCommand)
 {
+#ifndef BACKEND_GL_MODERN_API
 	SetState(pCommand->m_State);
 
 	glVertexPointer(2, GL_FLOAT, sizeof(CCommandBuffer::SVertex), (char *)pCommand->m_pVertices);
@@ -951,6 +963,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Render(const CCommandBuffer::SCommand
 	default:
 		dbg_msg("render", "unknown primtype %d\n", pCommand->m_PrimType);
 	};
+#endif
 }
 
 void CCommandProcessorFragment_OpenGL::Cmd_Screenshot(const CCommandBuffer::SCommand_Screenshot *pCommand)
@@ -1240,6 +1253,7 @@ void CCommandProcessorFragment_OpenGL2::SetState(const CCommandBuffer::SState &S
 	}
 }
 
+#ifndef BACKEND_GL_MODERN_API
 bool CCommandProcessorFragment_OpenGL2::DoAnalyzeStep(size_t StepN, size_t CheckCount, size_t VerticesCount, uint8_t aFakeTexture[], size_t SingleImageSize)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -2277,3 +2291,5 @@ void CCommandProcessorFragment_OpenGL2::Cmd_RenderTileLayer(const CCommandBuffer
 		glUseProgram(0);
 	}
 }
+
+#endif

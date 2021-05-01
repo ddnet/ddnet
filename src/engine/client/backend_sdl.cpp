@@ -591,6 +591,7 @@ void CGraphicsBackend_SDL_OpenGL::ClampDriverVersion(EBackendType BackendType)
 	}
 	else if(BackendType == BACKEND_TYPE_OPENGL_ES)
 	{
+#ifndef BACKEND_GL_MODERN_API
 		// Make sure GLES is set to 1.0 (which is equivalent to OpenGL 1.3), if its not set to >= 3.0(which is equivalent to OpenGL 3.3)
 		if(g_Config.m_GfxOpenGLMajor < 3)
 		{
@@ -601,6 +602,11 @@ void CGraphicsBackend_SDL_OpenGL::ClampDriverVersion(EBackendType BackendType)
 			// GLES also doesnt know GL_QUAD
 			g_Config.m_GfxQuadAsTriangle = 1;
 		}
+#else
+		g_Config.m_GfxOpenGLMajor = 3;
+		g_Config.m_GfxOpenGLMinor = 0;
+		g_Config.m_GfxOpenGLPatch = 0;
+#endif
 	}
 }
 
