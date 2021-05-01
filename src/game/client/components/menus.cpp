@@ -3176,6 +3176,13 @@ void CMenus::SetMenuPage(int NewPage)
 
 bool CMenus::HandleListInputs(const CUIRect &View, float &ScrollValue, const float ScrollAmount, int *pScrollOffset, const float ElemHeight, int &SelectedIndex, const int NumElems)
 {
+	if(NumElems == 0)
+	{
+		ScrollValue = 0;
+		SelectedIndex = 0;
+		return false;
+	}
+
 	int NewIndex = -1;
 	int Num = (int)(View.h / ElemHeight);
 	int ScrollNum = maximum(NumElems - Num, 0);
@@ -3193,7 +3200,7 @@ bool CMenus::HandleListInputs(const CUIRect &View, float &ScrollValue, const flo
 	}
 
 	ScrollValue = clamp(ScrollValue, 0.0f, 1.0f);
-	SelectedIndex = clamp(SelectedIndex, 0, NumElems);
+	SelectedIndex = clamp(SelectedIndex, 0, NumElems - 1);
 
 	for(int i = 0; i < m_NumInputEvents; i++)
 	{
