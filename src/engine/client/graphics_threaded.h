@@ -674,6 +674,9 @@ public:
 	virtual bool IsIdle() const = 0;
 	virtual void WaitForIdle() = 0;
 
+	virtual void GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch) {}
+	// checks if the current values of the config are a graphics modern API
+	virtual bool IsConfigModernAPI() { return false; }
 	virtual bool IsNewOpenGL() { return false; }
 	virtual bool HasTileBuffering() { return false; }
 	virtual bool HasQuadBuffering() { return false; }
@@ -1170,6 +1173,8 @@ public:
 
 	SWarning *GetCurWarning() override;
 
+	void GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch) override { m_pBackend->GetDriverVersion(DriverAgeType, Major, Minor, Patch); }
+	bool IsConfigModernAPI() override { return m_pBackend->IsConfigModernAPI(); }
 	bool IsTileBufferingEnabled() override { return m_OpenGLTileBufferingEnabled; }
 	bool IsQuadBufferingEnabled() override { return m_OpenGLQuadBufferingEnabled; }
 	bool IsTextBufferingEnabled() override { return m_OpenGLTextBufferingEnabled; }

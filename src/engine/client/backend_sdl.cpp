@@ -620,6 +620,52 @@ bool CGraphicsBackend_SDL_OpenGL::IsModernAPI(EBackendType BackendType)
 	return false;
 }
 
+void CGraphicsBackend_SDL_OpenGL::GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch)
+{
+	if(m_BackendType == BACKEND_TYPE_OPENGL)
+	{
+		if(DriverAgeType == GRAPHICS_DRIVER_AGE_TYPE_LEGACY)
+		{
+			Major = 1;
+			Minor = 4;
+			Patch = 0;
+		}
+		else if(DriverAgeType == GRAPHICS_DRIVER_AGE_TYPE_DEFAULT)
+		{
+			Major = 3;
+			Minor = 0;
+			Patch = 0;
+		}
+		else if(DriverAgeType == GRAPHICS_DRIVER_AGE_TYPE_MODERN)
+		{
+			Major = 3;
+			Minor = 3;
+			Patch = 0;
+		}
+	}
+	else if(m_BackendType == BACKEND_TYPE_OPENGL_ES)
+	{
+		if(DriverAgeType == GRAPHICS_DRIVER_AGE_TYPE_LEGACY)
+		{
+			Major = 1;
+			Minor = 0;
+			Patch = 0;
+		}
+		else if(DriverAgeType == GRAPHICS_DRIVER_AGE_TYPE_DEFAULT)
+		{
+			Major = 3;
+			Minor = 0;
+			Patch = 0;
+		}
+		else if(DriverAgeType == GRAPHICS_DRIVER_AGE_TYPE_MODERN)
+		{
+			Major = 3;
+			Minor = 0;
+			Patch = 0;
+		}
+	}
+}
+
 int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, IStorage *pStorage)
 {
 	// print sdl version
@@ -642,17 +688,17 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		}
 	}
 
-	EBackendType BackendType = DetectBackend();
+	m_BackendType = DetectBackend();
 
-	ClampDriverVersion(BackendType);
+	ClampDriverVersion(m_BackendType);
 
-	m_UseNewOpenGL = IsModernAPI(BackendType);
+	m_UseNewOpenGL = IsModernAPI(m_BackendType);
 
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, g_Config.m_GfxOpenGLMajor);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, g_Config.m_GfxOpenGLMinor);
 	dbg_msg("gfx", "Created OpenGL %zu.%zu context.", (size_t)g_Config.m_GfxOpenGLMajor, (size_t)g_Config.m_GfxOpenGLMinor);
 
-	if(BackendType == BACKEND_TYPE_OPENGL)
+	if(m_BackendType == BACKEND_TYPE_OPENGL)
 	{
 		if(g_Config.m_GfxOpenGLMajor == 3 && g_Config.m_GfxOpenGLMinor == 0)
 		{
@@ -663,7 +709,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 			SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 		}
 	}
-	else if(BackendType == BACKEND_TYPE_OPENGL_ES)
+	else if(m_BackendType == BACKEND_TYPE_OPENGL_ES)
 	{
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
 	}
@@ -787,7 +833,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	int GlewMinor = 0;
 	int GlewPatch = 0;
 
-	if(!BackendInitGlew(BackendType, GlewMajor, GlewMinor, GlewPatch))
+	if(!BackendInitGlew(m_BackendType, GlewMajor, GlewMinor, GlewPatch))
 	{
 		SDL_GL_DeleteContext(m_GLContext);
 		SDL_DestroyWindow(m_pWindow);
@@ -797,7 +843,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	int InitError = 0;
 	const char *pErrorStr = NULL;
 
-	InitError = IsVersionSupportedGlew(BackendType, g_Config.m_GfxOpenGLMajor, g_Config.m_GfxOpenGLMinor, g_Config.m_GfxOpenGLPatch, GlewMajor, GlewMinor, GlewPatch);
+	InitError = IsVersionSupportedGlew(m_BackendType, g_Config.m_GfxOpenGLMajor, g_Config.m_GfxOpenGLMinor, g_Config.m_GfxOpenGLPatch, GlewMajor, GlewMinor, GlewPatch);
 
 	SDL_GL_GetDrawableSize(m_pWindow, pCurrentWidth, pCurrentHeight);
 	SDL_GL_SetSwapInterval(Flags & IGraphicsBackend::INITFLAG_VSYNC ? 1 : 0);
@@ -817,7 +863,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	}
 
 	// start the command processor
-	m_pProcessor = new CCommandProcessor_SDL_OpenGL(BackendType, g_Config.m_GfxOpenGLMajor, g_Config.m_GfxOpenGLMinor, g_Config.m_GfxOpenGLPatch);
+	m_pProcessor = new CCommandProcessor_SDL_OpenGL(m_BackendType, g_Config.m_GfxOpenGLMajor, g_Config.m_GfxOpenGLMinor, g_Config.m_GfxOpenGLPatch);
 	StartProcessor(m_pProcessor);
 
 	mem_zero(m_aErrorString, sizeof(m_aErrorString) / sizeof(m_aErrorString[0]));
@@ -852,7 +898,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		CmdOpenGL.m_pVendorString = m_aVendorString;
 		CmdOpenGL.m_pVersionString = m_aVersionString;
 		CmdOpenGL.m_pRendererString = m_aRendererString;
-		CmdOpenGL.m_RequestedBackend = BackendType;
+		CmdOpenGL.m_RequestedBackend = m_BackendType;
 		CmdBuffer.AddCommandUnsafe(CmdOpenGL);
 
 		RunBuffer(&CmdBuffer);

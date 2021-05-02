@@ -226,6 +226,7 @@ class CGraphicsBackend_SDL_OpenGL : public CGraphicsBackend_Threaded
 	char m_aRendererString[gs_GPUInfoStringSize] = {};
 
 	bool m_UseNewOpenGL;
+	EBackendType m_BackendType;
 
 	char m_aErrorString[256];
 
@@ -252,6 +253,8 @@ public:
 	virtual void GetViewportSize(int &w, int &h);
 	virtual void NotifyWindow();
 
+	virtual void GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch);
+	virtual bool IsConfigModernAPI() { return IsModernAPI(m_BackendType); }
 	virtual bool IsNewOpenGL() { return m_UseNewOpenGL; }
 	virtual bool HasTileBuffering() { return m_Capabilites.m_TileBuffering; }
 	virtual bool HasQuadBuffering() { return m_Capabilites.m_QuadBuffering; }
