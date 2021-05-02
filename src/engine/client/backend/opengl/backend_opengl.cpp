@@ -1,12 +1,17 @@
-#include <engine/client/backend_sdl.h>
+#include "backend_opengl.h"
 
 #include <base/detect.h>
 
-#ifndef CONF_BACKEND_OPENGL_ES
+#include <engine/client/backend/opengl/opengl_sl.h>
+#include <engine/client/backend/opengl/opengl_sl_program.h>
+
+#include <engine/client/backend/glsl_shader_compiler.h>
+
+#include <engine/shared/image_manipulation.h>
+
+#ifndef BACKEND_AS_OPENGL_ES
 #include <GL/glew.h>
 #else
-#define GL_GLEXT_PROTOTYPES 1
-#include "SDL_opengles2.h"
 #include <GLES3/gl3.h>
 #define GL_TEXTURE_2D_ARRAY_EXT GL_TEXTURE_2D_ARRAY
 // GLES doesnt support GL_QUADS, but the code is also never executed
@@ -14,13 +19,10 @@
 #ifndef CONF_BACKEND_OPENGL_ES3
 #include <GLES/gl.h>
 #define glOrtho glOrthof
+#else
+#define BACKEND_GL_MODERN_API 1
 #endif
 #endif
-
-#include <engine/client/opengl_sl.h>
-#include <engine/client/opengl_sl_program.h>
-
-#include <engine/shared/image_manipulation.h>
 
 // ------------ CCommandProcessorFragment_OpenGL
 void CCommandProcessorFragment_OpenGL::Cmd_Update_Viewport(const CCommandBuffer::SCommand_Update_Viewport *pCommand)
@@ -257,7 +259,7 @@ static void ParseVersionString(EBackendType BackendType, const char *pStr, int &
 	}
 }
 
-#ifndef CONF_BACKEND_OPENGL_ES
+#ifndef BACKEND_AS_OPENGL_ES
 static const char *GetGLErrorName(GLenum Type)
 {
 	if(Type == GL_DEBUG_TYPE_ERROR)
@@ -328,7 +330,7 @@ void CCommandProcessorFragment_OpenGL::InitOpenGL(const SCommand_Init *pCommand)
 
 	glDepthMask(0);
 
-#ifndef CONF_BACKEND_OPENGL_ES
+#ifndef BACKEND_AS_OPENGL_ES
 	if(g_Config.m_DbgGfx)
 	{
 		if(GLEW_KHR_debug || GLEW_ARB_debug_output)
@@ -406,7 +408,7 @@ void CCommandProcessorFragment_OpenGL::InitOpenGL(const SCommand_Init *pCommand)
 
 	if(pCommand->m_RequestedBackend == BACKEND_TYPE_OPENGL)
 	{
-#ifndef CONF_BACKEND_OPENGL_ES
+#ifndef BACKEND_AS_OPENGL_ES
 		int MinorV = pCommand->m_pCapabilities->m_ContextMinor;
 		if(*pCommand->m_pInitError == 0)
 		{
@@ -802,7 +804,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
 
-#ifndef CONF_BACKEND_OPENGL_ES
+#ifndef BACKEND_AS_OPENGL_ES
 			if(m_OpenGLTextureLodBIAS != 0 && !m_IsOpenGLES)
 				glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, ((GLfloat)m_OpenGLTextureLodBIAS / 1000.0f));
 #endif
@@ -856,7 +858,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 			glTexParameteri(Target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glTexParameteri(Target, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
 
-#ifndef CONF_BACKEND_OPENGL_ES
+#ifndef BACKEND_AS_OPENGL_ES
 			if(m_OpenGLTextureLodBIAS != 0 && !m_IsOpenGLES)
 				glTexParameterf(Target, GL_TEXTURE_LOD_BIAS, ((GLfloat)m_OpenGLTextureLodBIAS / 1000.0f));
 #endif
@@ -867,7 +869,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 				glSamplerParameteri(m_Textures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 				glSamplerParameteri(m_Textures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
 
-#ifndef CONF_BACKEND_OPENGL_ES
+#ifndef BACKEND_AS_OPENGL_ES
 				if(m_OpenGLTextureLodBIAS != 0 && !m_IsOpenGLES)
 					glSamplerParameterf(m_Textures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_LOD_BIAS, ((GLfloat)m_OpenGLTextureLodBIAS / 1000.0f));
 #endif
@@ -960,7 +962,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Render(const CCommandBuffer::SCommand
 	switch(pCommand->m_PrimType)
 	{
 	case CCommandBuffer::PRIMTYPE_QUADS:
-#ifndef CONF_BACKEND_OPENGL_ES
+#ifndef BACKEND_AS_OPENGL_ES
 		glDrawArrays(GL_QUADS, 0, pCommand->m_PrimCount * 4);
 #endif
 		break;
@@ -1591,7 +1593,7 @@ void CCommandProcessorFragment_OpenGL2::Cmd_Init(const SCommand_Init *pCommand)
 	m_HasShaders = pCommand->m_pCapabilities->m_ShaderSupport;
 
 	bool HasAllFunc = true;
-#ifndef CONF_BACKEND_OPENGL_ES
+#ifndef BACKEND_AS_OPENGL_ES
 	if(m_HasShaders)
 	{
 		HasAllFunc &= (glUniformMatrix4x2fv != NULL) && (glGenBuffers != NULL);
@@ -2307,5 +2309,9 @@ void CCommandProcessorFragment_OpenGL2::Cmd_RenderTileLayer(const CCommandBuffer
 		glUseProgram(0);
 	}
 }
+
+#ifdef BACKEND_GL_MODERN_API
+#undef BACKEND_GL_MODERN_API
+#endif
 
 #endif

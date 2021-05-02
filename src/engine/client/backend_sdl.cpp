@@ -36,10 +36,16 @@
 #endif
 
 #include "backend_sdl.h"
-#include "graphics_threaded.h"
 
-#include "opengl_sl.h"
-#include "opengl_sl_program.h"
+#if !defined(CONF_BACKEND_OPENGL_ES)
+#include "backend/opengl/backend_opengl3.h"
+#endif
+
+#if defined(CONF_BACKEND_OPENGL_ES3) || defined(CONF_BACKEND_OPENGL_ES)
+#include "backend/opengles/backend_opengles3.h"
+#endif
+
+#include "graphics_threaded.h"
 
 #include <engine/shared/image_manipulation.h>
 
@@ -258,17 +264,20 @@ CCommandProcessor_SDL_OpenGL::CCommandProcessor_SDL_OpenGL(EBackendType BackendT
 
 	if(BackendType == BACKEND_TYPE_OPENGL_ES)
 	{
+#if defined(CONF_BACKEND_OPENGL_ES) || defined(CONF_BACKEND_OPENGL_ES3)
 		if(OpenGLMajor < 3)
 		{
-			m_pOpenGL = new CCommandProcessorFragment_OpenGL();
+			m_pOpenGL = new CCommandProcessorFragment_OpenGLES();
 		}
 		else
 		{
-			m_pOpenGL = new CCommandProcessorFragment_OpenGL3_3();
+			m_pOpenGL = new CCommandProcessorFragment_OpenGLES3();
 		}
+#endif
 	}
 	else if(BackendType == BACKEND_TYPE_OPENGL)
 	{
+#if !defined(CONF_BACKEND_OPENGL_ES)
 		if(OpenGLMajor < 2)
 		{
 			m_pOpenGL = new CCommandProcessorFragment_OpenGL();
@@ -285,6 +294,7 @@ CCommandProcessor_SDL_OpenGL::CCommandProcessor_SDL_OpenGL(EBackendType BackendT
 		{
 			m_pOpenGL = new CCommandProcessorFragment_OpenGL3_3();
 		}
+#endif
 	}
 }
 
@@ -539,7 +549,15 @@ static int IsVersionSupportedGlew(EBackendType BackendType, int VersionMajor, in
 EBackendType CGraphicsBackend_SDL_OpenGL::DetectBackend()
 {
 #ifndef CONF_BACKEND_OPENGL_ES
+#ifdef CONF_BACKEND_OPENGL_ES3
+	const char *pEnvDriver = getenv("DDNET_DRIVER");
+	if(pEnvDriver && str_comp(pEnvDriver, "GLES") == 0)
+		return BACKEND_TYPE_OPENGL_ES;
+	else
+		return BACKEND_TYPE_OPENGL;
+#else
 	return BACKEND_TYPE_OPENGL;
+#endif
 #else
 	return BACKEND_TYPE_OPENGL_ES;
 #endif
@@ -573,7 +591,7 @@ void CGraphicsBackend_SDL_OpenGL::ClampDriverVersion(EBackendType BackendType)
 	}
 	else if(BackendType == BACKEND_TYPE_OPENGL_ES)
 	{
-#ifndef BACKEND_GL_MODERN_API
+#if !defined(CONF_BACKEND_OPENGL_ES3)
 		// Make sure GLES is set to 1.0 (which is equivalent to OpenGL 1.3), if its not set to >= 3.0(which is equivalent to OpenGL 3.3)
 		if(g_Config.m_GfxOpenGLMajor < 3)
 		{
@@ -817,7 +835,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 
 	if(InitError == 0)
 	{
-		CCommandProcessorFragment_OpenGL::SCommand_Init CmdOpenGL;
+		CCommandProcessorFragment_OpenGLBase::SCommand_Init CmdOpenGL;
 		CmdOpenGL.m_pTextureMemoryUsage = &m_TextureMemoryUsage;
 		CmdOpenGL.m_pStorage = pStorage;
 		CmdOpenGL.m_pCapabilities = &m_Capabilites;
@@ -843,7 +861,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 
 		if(InitError == -2)
 		{
-			CCommandProcessorFragment_OpenGL::SCommand_Shutdown CmdGL;
+			CCommandProcessorFragment_OpenGLBase::SCommand_Shutdown CmdGL;
 			CmdBuffer.AddCommandUnsafe(CmdGL);
 			RunBuffer(&CmdBuffer);
 			WaitForIdle();
@@ -926,7 +944,7 @@ int CGraphicsBackend_SDL_OpenGL::Shutdown()
 {
 	// issue a shutdown command
 	CCommandBuffer CmdBuffer(1024, 512);
-	CCommandProcessorFragment_OpenGL::SCommand_Shutdown CmdGL;
+	CCommandProcessorFragment_OpenGLBase::SCommand_Shutdown CmdGL;
 	CmdBuffer.AddCommandUnsafe(CmdGL);
 	RunBuffer(&CmdBuffer);
 	WaitForIdle();

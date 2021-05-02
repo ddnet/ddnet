@@ -1,19 +1,19 @@
-#include <engine/client/backend_sdl.h>
+#include "backend_opengl3.h"
 
 #include <base/detect.h>
 
-#ifndef CONF_BACKEND_OPENGL_ES
+#ifndef BACKEND_AS_OPENGL_ES
 #include <GL/glew.h>
 #else
-#define GL_GLEXT_PROTOTYPES 1
-#include "SDL_opengles2.h"
 #include <GLES3/gl3.h>
 #endif
 
-#include <engine/client/opengl_sl.h>
-#include <engine/client/opengl_sl_program.h>
+#include <engine/client/backend/opengl/opengl_sl.h>
+#include <engine/client/backend/opengl/opengl_sl_program.h>
 
 #include <engine/shared/image_manipulation.h>
+
+#include <engine/client/backend/glsl_shader_compiler.h>
 
 // ------------ CCommandProcessorFragment_OpenGL3_3
 int CCommandProcessorFragment_OpenGL3_3::TexFormatToNewOpenGLFormat(int TexFormat)
@@ -687,7 +687,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 			glSamplerParameteri(m_Textures[pCommand->m_Slot].m_Sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glSamplerParameteri(m_Textures[pCommand->m_Slot].m_Sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
-#ifndef CONF_BACKEND_OPENGL_ES
+#ifndef BACKEND_AS_OPENGL_ES
 			if(m_OpenGLTextureLodBIAS != 0 && !m_IsOpenGLES)
 				glSamplerParameterf(m_Textures[pCommand->m_Slot].m_Sampler, GL_TEXTURE_LOD_BIAS, ((GLfloat)m_OpenGLTextureLodBIAS / 1000.0f));
 #endif
@@ -715,7 +715,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 			glSamplerParameteri(m_Textures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glSamplerParameteri(m_Textures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
 
-#ifndef CONF_BACKEND_OPENGL_ES
+#ifndef BACKEND_AS_OPENGL_ES
 			if(m_OpenGLTextureLodBIAS != 0 && !m_IsOpenGLES)
 				glSamplerParameterf(m_Textures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_LOD_BIAS, ((GLfloat)m_OpenGLTextureLodBIAS / 1000.0f));
 #endif

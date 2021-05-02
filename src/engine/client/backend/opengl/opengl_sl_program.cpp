@@ -2,7 +2,7 @@
 #include "opengl_sl.h"
 #include <base/system.h>
 
-#ifndef CONF_BACKEND_OPENGL_ES
+#ifndef BACKEND_AS_OPENGL_ES
 #include <GL/glew.h>
 #else
 #include <GLES3/gl3.h>
