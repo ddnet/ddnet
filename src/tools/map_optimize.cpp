@@ -148,7 +148,7 @@ int main(int argc, const char **argv)
 		Size = DataFile.GetItemSize(Index);
 
 		// filter ITEMTYPE_EX items, they will be automatically added again
-		if(Type == 0xffff)
+		if(Type == ITEMTYPE_EX)
 		{
 			continue;
 		}
