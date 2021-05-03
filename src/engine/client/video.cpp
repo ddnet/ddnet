@@ -17,6 +17,7 @@
 #define STREAM_PIX_FMT AV_PIX_FMT_YUV420P /* default pix_fmt */
 
 const size_t FORMAT_NCHANNELS = 3;
+const size_t FORMAT_GL_NCHANNELS = 4;
 LOCK g_WriteLock = 0;
 
 CVideo::CVideo(CGraphics_Threaded *pGraphics, IStorage *pStorage, IConsole *pConsole, int Width, int Height, const char *pName) :
@@ -101,7 +102,8 @@ void CVideo::Start()
 	m_pFormat = m_pFormatContext->oformat;
 
 	size_t NVals = FORMAT_NCHANNELS * m_Width * m_Height;
-	m_pPixels = (uint8_t *)malloc(NVals * sizeof(TWGLubyte));
+	size_t GLNVals = FORMAT_GL_NCHANNELS * m_Width * m_Height;
+	m_pPixels = (uint8_t *)malloc(GLNVals * sizeof(TWGLubyte));
 	m_pRGB = (uint8_t *)malloc(NVals * sizeof(uint8_t));
 
 	/* Add the audio and video streams using the default format codecs
@@ -376,13 +378,13 @@ void CVideo::ReadRGBFromGL()
 	GLint Alignment;
 	glGetIntegerv(GL_PACK_ALIGNMENT, &Alignment);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-	glReadPixels(0, 0, m_Width, m_Height, GL_RGB, GL_UNSIGNED_BYTE, m_pPixels);
+	glReadPixels(0, 0, m_Width, m_Height, GL_RGBA, GL_UNSIGNED_BYTE, m_pPixels);
 	glPixelStorei(GL_PACK_ALIGNMENT, Alignment);
 	for(int i = 0; i < m_Height; i++)
 	{
 		for(int j = 0; j < m_Width; j++)
 		{
-			size_t CurGL = FORMAT_NCHANNELS * (m_Width * (m_Height - i - 1) + j);
+			size_t CurGL = FORMAT_GL_NCHANNELS * (m_Width * (m_Height - i - 1) + j);
 			size_t CurRGB = FORMAT_NCHANNELS * (m_Width * i + j);
 			for(int k = 0; k < (int)FORMAT_NCHANNELS; k++)
 				m_pRGB[CurRGB + k] = m_pPixels[CurGL + k];
