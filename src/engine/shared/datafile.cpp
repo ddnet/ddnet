@@ -15,7 +15,6 @@ static const int DEBUG = 0;
 enum
 {
 	OFFSET_UUID_TYPE = 0x8000,
-	ITEMTYPE_EX = 0xffff,
 };
 
 struct CItemEx

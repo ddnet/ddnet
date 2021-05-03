@@ -10,6 +10,11 @@
 
 #include <zlib.h>
 
+enum
+{
+	ITEMTYPE_EX = 0xffff,
+};
+
 // raw datafile access
 class CDataFileReader
 {
