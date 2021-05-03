@@ -940,11 +940,11 @@ float CMenus::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 	return ReturnValue;
 }
 
-float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current)
+float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, bool ColorPickerSlider, ColorRGBA *pColorInner)
 {
 	CUIRect Handle;
 	static float OffsetX;
-	pRect->VSplitLeft(33, &Handle, 0);
+	pRect->VSplitLeft(ColorPickerSlider ? 8 : 33, &Handle, 0);
 
 	Handle.x += (pRect->w - Handle.w) * Current;
 
@@ -982,19 +982,35 @@ float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current)
 		UI()->SetHotItem(pID);
 
 	// render
-	CUIRect Rail;
-	pRect->HMargin(5.0f, &Rail);
-	RenderTools()->DrawUIRect(&Rail, ColorRGBA(1, 1, 1, 0.25f), 0, 0.0f);
+	if(!ColorPickerSlider)
+	{
+		CUIRect Rail;
+		pRect->HMargin(5.0f, &Rail);
+		RenderTools()->DrawUIRect(&Rail, ColorRGBA(1, 1, 1, 0.25f), 0, 0.0f);
 
-	CUIRect Slider = Handle;
-	Slider.h = Rail.y - Slider.y;
-	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_T, 2.5f);
-	Slider.y = Rail.y + Rail.h;
-	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_B, 2.5f);
+		CUIRect Slider = Handle;
+		Slider.h = Rail.y - Slider.y;
+		RenderTools()->DrawUIRect(&Slider, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_T, 2.5f);
+		Slider.y = Rail.y + Rail.h;
+		RenderTools()->DrawUIRect(&Slider, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_B, 2.5f);
 
-	Slider = Handle;
-	Slider.Margin(5.0f, &Slider);
-	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1, 1, 1, 0.25f * ButtonColorMul(pID)), CUI::CORNER_ALL, 2.5f);
+		Slider = Handle;
+		Slider.Margin(5.0f, &Slider);
+		RenderTools()->DrawUIRect(&Slider, ColorRGBA(1, 1, 1, 0.25f * ButtonColorMul(pID)), CUI::CORNER_ALL, 2.5f);
+	}
+	else
+	{
+		CUIRect Slider = Handle;
+		float MarginW = 4.0f;
+		float MarginH = 9.0f;
+		Slider.x -= MarginW / 2;
+		Slider.y -= MarginH / 2;
+		Slider.w += MarginW;
+		Slider.h += MarginH;
+		RenderTools()->DrawUIRect(&Slider, ColorRGBA{0.15f, 0.15f, 0.15f, 1.0f}, CUI::CORNER_ALL, 5.0f);
+		Slider.Margin(2, &Slider);
+		RenderTools()->DrawUIRect(&Slider, *pColorInner, CUI::CORNER_ALL, 3.0f);
+	}
 
 	return ReturnValue;
 }
