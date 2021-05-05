@@ -34,7 +34,7 @@ public:
 		if(pConnect[0])
 		{
 			NETADDR Connect;
-			if(net_addr_from_str(&Connect, pConnect) == 0)
+			if(net_host_lookup(pConnect, &Connect, NETTYPE_ALL) == 0)
 			{
 				m_ConnectAddr = Connect;
 				m_GotConnectAddr = true;
