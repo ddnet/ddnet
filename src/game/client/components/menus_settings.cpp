@@ -1108,8 +1108,8 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	{
 		const int Depth = s_aModes[i].m_Red + s_aModes[i].m_Green + s_aModes[i].m_Blue > 16 ? 24 : 16;
 		if(g_Config.m_GfxColorDepth == Depth &&
-			g_Config.m_GfxScreenWidth == s_aModes[i].m_Width &&
-			g_Config.m_GfxScreenHeight == s_aModes[i].m_Height)
+			g_Config.m_GfxScreenWidth == s_aModes[i].m_WindowWidth &&
+			g_Config.m_GfxScreenHeight == s_aModes[i].m_WindowHeight)
 		{
 			OldSelected = i;
 		}
@@ -1117,8 +1117,8 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		CListboxItem Item = UiDoListboxNextItem(&s_aModes[i], OldSelected == i);
 		if(Item.m_Visible)
 		{
-			int G = gcd(s_aModes[i].m_Width, s_aModes[i].m_Height);
-			str_format(aBuf, sizeof(aBuf), " %dx%d %d bit (%d:%d)", s_aModes[i].m_Width, s_aModes[i].m_Height, Depth, s_aModes[i].m_Width / G, s_aModes[i].m_Height / G);
+			int G = gcd(s_aModes[i].m_CanvasWidth, s_aModes[i].m_CanvasHeight);
+			str_format(aBuf, sizeof(aBuf), " %dx%d %d bit (%d:%d)", s_aModes[i].m_CanvasWidth, s_aModes[i].m_CanvasHeight, Depth, s_aModes[i].m_CanvasWidth / G, s_aModes[i].m_CanvasHeight / G);
 			UI()->DoLabelScaled(&Item.m_Rect, aBuf, 16.0f, -1);
 		}
 	}
@@ -1128,8 +1128,8 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	{
 		const int Depth = s_aModes[NewSelected].m_Red + s_aModes[NewSelected].m_Green + s_aModes[NewSelected].m_Blue > 16 ? 24 : 16;
 		g_Config.m_GfxColorDepth = Depth;
-		g_Config.m_GfxScreenWidth = s_aModes[NewSelected].m_Width;
-		g_Config.m_GfxScreenHeight = s_aModes[NewSelected].m_Height;
+		g_Config.m_GfxScreenWidth = s_aModes[NewSelected].m_WindowWidth;
+		g_Config.m_GfxScreenHeight = s_aModes[NewSelected].m_WindowHeight;
 		Graphics()->Resize(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight, true);
 	}
 

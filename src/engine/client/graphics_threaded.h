@@ -498,6 +498,9 @@ public:
 		CVideoMode *m_pModes; // processor will fill this in
 		int m_MaxModes; // maximum of modes the processor can write to the m_pModes
 		int *m_pNumModes; // processor will write to this pointer
+		int m_HiDPIScale;
+		int m_MaxWindowWidth;
+		int m_MaxWindowHeight;
 		int m_Screen;
 	};
 
