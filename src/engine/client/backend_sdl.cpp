@@ -210,15 +210,13 @@ void CCommandProcessorFragment_SDL::Cmd_VideoModes(const CCommandBuffer::SComman
 		if(AlreadyFound)
 			continue;
 
-		int WindowWidth = mode.w / pCommand->m_HiDPIScale;
-		int WindowHeight = mode.h / pCommand->m_HiDPIScale;
-		if(WindowWidth > pCommand->m_MaxWindowWidth || WindowHeight > pCommand->m_MaxWindowHeight)
+		if(mode.w > pCommand->m_MaxWindowWidth || mode.h > pCommand->m_MaxWindowHeight)
 			continue;
 
-		pCommand->m_pModes[numModes].m_CanvasWidth = mode.w;
-		pCommand->m_pModes[numModes].m_CanvasHeight = mode.h;
-		pCommand->m_pModes[numModes].m_WindowWidth = mode.w / pCommand->m_HiDPIScale;
-		pCommand->m_pModes[numModes].m_WindowHeight = mode.h / pCommand->m_HiDPIScale;
+		pCommand->m_pModes[numModes].m_CanvasWidth = mode.w * pCommand->m_HiDPIScale;
+		pCommand->m_pModes[numModes].m_CanvasHeight = mode.h * pCommand->m_HiDPIScale;
+		pCommand->m_pModes[numModes].m_WindowWidth = mode.w;
+		pCommand->m_pModes[numModes].m_WindowHeight = mode.h;
 		pCommand->m_pModes[numModes].m_Red = 8;
 		pCommand->m_pModes[numModes].m_Green = 8;
 		pCommand->m_pModes[numModes].m_Blue = 8;
