@@ -1,7 +1,18 @@
-#ifndef ENGINE_CLIENT_OPENGL_SL_PROGRAM_H
-#define ENGINE_CLIENT_OPENGL_SL_PROGRAM_H
+// This file can be included several times.
+#if(!defined(BACKEND_AS_OPENGL_ES) && !defined(ENGINE_CLIENT_BACKEND_OPENGL_OPENGL_SL_PROGRAM_H)) || \
+	(defined(BACKEND_AS_OPENGL_ES) && !defined(ENGINE_CLIENT_BACKEND_OPENGL_OPENGL_SL_PROGRAM_H_AS_ES))
 
-#include <GL/glew.h>
+#if !defined(BACKEND_AS_OPENGL_ES) && !defined(ENGINE_CLIENT_BACKEND_OPENGL_OPENGL_SL_PROGRAM_H)
+#define ENGINE_CLIENT_BACKEND_OPENGL_OPENGL_SL_PROGRAM_H
+#endif
+
+#if defined(BACKEND_AS_OPENGL_ES) && !defined(ENGINE_CLIENT_BACKEND_OPENGL_OPENGL_SL_PROGRAM_H_AS_ES)
+#define ENGINE_CLIENT_BACKEND_OPENGL_OPENGL_SL_PROGRAM_H_AS_ES
+#endif
+
+#include <base/detect.h>
+
+#include <engine/client/graphics_defines.h>
 
 class CGLSL;
 
@@ -15,17 +26,16 @@ public:
 
 	void LinkProgram();
 	void UseProgram();
-	GLuint GetProgramID();
+	TWGLuint GetProgramID();
 
 	void DetachShader(CGLSL *pShader);
-	void DetachShaderByID(GLuint ShaderID);
+	void DetachShaderByID(TWGLuint ShaderID);
 	void DetachAllShaders();
 
 	//Support various types
 	void SetUniformVec2(int Loc, int Count, const float *pValue);
 	void SetUniformVec4(int Loc, int Count, const float *pValue);
 	void SetUniform(int Loc, const int Value);
-	void SetUniform(int Loc, const unsigned int Value);
 	void SetUniform(int Loc, const bool Value);
 	void SetUniform(int Loc, const float Value);
 	void SetUniform(int Loc, int Count, const float *pValues);
@@ -37,7 +47,7 @@ public:
 	virtual ~CGLSLProgram();
 
 protected:
-	GLuint m_ProgramID;
+	TWGLuint m_ProgramID;
 	bool m_IsLinked;
 };
 
@@ -148,4 +158,4 @@ public:
 	int m_LocJumpIndex;
 };
 
-#endif // ENGINE_CLIENT_OPENGL_SL_PROGRAM_H
+#endif

@@ -2288,8 +2288,8 @@ void CGameClient::UpdatePrediction()
 	// if ddnetcharacter is available, ignore server-wide tunings for hook and collision
 	if(m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_HasExtendedData)
 	{
-		m_GameWorld.m_Tuning[g_Config.m_ClDummy].m_PlayerCollision = 1;
-		m_GameWorld.m_Tuning[g_Config.m_ClDummy].m_PlayerHooking = 1;
+		m_GameWorld.m_Core.m_Tuning[g_Config.m_ClDummy].m_PlayerCollision = 1;
+		m_GameWorld.m_Core.m_Tuning[g_Config.m_ClDummy].m_PlayerHooking = 1;
 	}
 
 	// restore characters from previously saved ones if they temporarily left the snapshot

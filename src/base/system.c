@@ -1089,6 +1089,73 @@ int net_addr_comp_noport(const NETADDR *a, const NETADDR *b)
 	return net_addr_comp(&ta, &tb);
 }
 
+void net_addr_str_v6(const unsigned short ip[8], int port, char *buffer, int buffer_size)
+{
+	int longest_seq_len = 0;
+	int longest_seq_start = -1;
+	int w = 0;
+	int i;
+	{
+		int seq_len = 0;
+		int seq_start = -1;
+		// Determine longest sequence of zeros.
+		for(i = 0; i < 8 + 1; i++)
+		{
+			if(seq_start != -1)
+			{
+				if(i == 8 || ip[i] != 0)
+				{
+					if(longest_seq_len < seq_len)
+					{
+						longest_seq_len = seq_len;
+						longest_seq_start = seq_start;
+					}
+					seq_len = 0;
+					seq_start = -1;
+				}
+				else
+				{
+					seq_len += 1;
+				}
+			}
+			else
+			{
+				if(i != 8 && ip[i] == 0)
+				{
+					seq_start = i;
+					seq_len = 1;
+				}
+			}
+		}
+	}
+	if(longest_seq_len <= 1)
+	{
+		longest_seq_len = 0;
+		longest_seq_start = -1;
+	}
+	w += str_format(buffer + w, buffer_size - w, "[");
+	for(i = 0; i < 8; i++)
+	{
+		if(longest_seq_start <= i && i < longest_seq_start + longest_seq_len)
+		{
+			if(i == longest_seq_start)
+			{
+				w += str_format(buffer + w, buffer_size - w, "::");
+			}
+		}
+		else
+		{
+			char *colon = i == 0 || i == longest_seq_start + longest_seq_len ? "" : ":";
+			w += str_format(buffer + w, buffer_size - w, "%s%x", colon, ip[i]);
+		}
+	}
+	w += str_format(buffer + w, buffer_size - w, "]");
+	if(port >= 0)
+	{
+		str_format(buffer + w, buffer_size - w, ":%d", port);
+	}
+}
+
 void net_addr_str(const NETADDR *addr, char *string, int max_length, int add_port)
 {
 	if(addr->type == NETTYPE_IPV4 || addr->type == NETTYPE_WEBSOCKET_IPV4)
@@ -1100,15 +1167,18 @@ void net_addr_str(const NETADDR *addr, char *string, int max_length, int add_por
 	}
 	else if(addr->type == NETTYPE_IPV6)
 	{
-		if(add_port != 0)
-			str_format(string, max_length, "[%x:%x:%x:%x:%x:%x:%x:%x]:%d",
-				(addr->ip[0] << 8) | addr->ip[1], (addr->ip[2] << 8) | addr->ip[3], (addr->ip[4] << 8) | addr->ip[5], (addr->ip[6] << 8) | addr->ip[7],
-				(addr->ip[8] << 8) | addr->ip[9], (addr->ip[10] << 8) | addr->ip[11], (addr->ip[12] << 8) | addr->ip[13], (addr->ip[14] << 8) | addr->ip[15],
-				addr->port);
-		else
-			str_format(string, max_length, "[%x:%x:%x:%x:%x:%x:%x:%x]",
-				(addr->ip[0] << 8) | addr->ip[1], (addr->ip[2] << 8) | addr->ip[3], (addr->ip[4] << 8) | addr->ip[5], (addr->ip[6] << 8) | addr->ip[7],
-				(addr->ip[8] << 8) | addr->ip[9], (addr->ip[10] << 8) | addr->ip[11], (addr->ip[12] << 8) | addr->ip[13], (addr->ip[14] << 8) | addr->ip[15]);
+		int port = -1;
+		unsigned short ip[8];
+		int i;
+		if(add_port)
+		{
+			port = addr->port;
+		}
+		for(i = 0; i < 8; i++)
+		{
+			ip[i] = (addr->ip[i * 2] << 8) | (addr->ip[i * 2 + 1]);
+		}
+		net_addr_str_v6(ip, port, string, max_length);
 	}
 	else
 		str_format(string, max_length, "unknown type %d", addr->type);

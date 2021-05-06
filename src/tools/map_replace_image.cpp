@@ -156,6 +156,13 @@ int main(int argc, const char **argv)
 		CMapItemImage NewImageItem;
 		pItem = g_DataReader.GetItem(Index, &Type, &ID);
 		Size = g_DataReader.GetItemSize(Index);
+
+		// filter ITEMTYPE_EX items, they will be automatically added again
+		if(Type == ITEMTYPE_EX)
+		{
+			continue;
+		}
+
 		pItem = ReplaceImageItem(pItem, Type, pImageName, pImageFile, &NewImageItem);
 		if(!pItem)
 			return -1;

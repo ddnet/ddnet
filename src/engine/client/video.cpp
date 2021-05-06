@@ -6,11 +6,18 @@
 
 #include "video.h"
 
+#ifndef CONF_BACKEND_OPENGL_ES
+#include <GL/glew.h>
+#else
+#include <GLES3/gl3.h>
+#endif
+
 // This code is mostly stolen from https://github.com/FFmpeg/FFmpeg/blob/master/doc/examples/muxing.c
 
 #define STREAM_PIX_FMT AV_PIX_FMT_YUV420P /* default pix_fmt */
 
 const size_t FORMAT_NCHANNELS = 3;
+const size_t FORMAT_GL_NCHANNELS = 4;
 LOCK g_WriteLock = 0;
 
 CVideo::CVideo(CGraphics_Threaded *pGraphics, IStorage *pStorage, IConsole *pConsole, int Width, int Height, const char *pName) :
@@ -95,7 +102,8 @@ void CVideo::Start()
 	m_pFormat = m_pFormatContext->oformat;
 
 	size_t NVals = FORMAT_NCHANNELS * m_Width * m_Height;
-	m_pPixels = (uint8_t *)malloc(NVals * sizeof(GLubyte));
+	size_t GLNVals = FORMAT_GL_NCHANNELS * m_Width * m_Height;
+	m_pPixels = (uint8_t *)malloc(GLNVals * sizeof(TWGLubyte));
 	m_pRGB = (uint8_t *)malloc(NVals * sizeof(uint8_t));
 
 	/* Add the audio and video streams using the default format codecs
@@ -370,13 +378,13 @@ void CVideo::ReadRGBFromGL()
 	GLint Alignment;
 	glGetIntegerv(GL_PACK_ALIGNMENT, &Alignment);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-	glReadPixels(0, 0, m_Width, m_Height, GL_RGB, GL_UNSIGNED_BYTE, m_pPixels);
+	glReadPixels(0, 0, m_Width, m_Height, GL_RGBA, GL_UNSIGNED_BYTE, m_pPixels);
 	glPixelStorei(GL_PACK_ALIGNMENT, Alignment);
 	for(int i = 0; i < m_Height; i++)
 	{
 		for(int j = 0; j < m_Width; j++)
 		{
-			size_t CurGL = FORMAT_NCHANNELS * (m_Width * (m_Height - i - 1) + j);
+			size_t CurGL = FORMAT_GL_NCHANNELS * (m_Width * (m_Height - i - 1) + j);
 			size_t CurRGB = FORMAT_NCHANNELS * (m_Width * i + j);
 			for(int k = 0; k < (int)FORMAT_NCHANNELS; k++)
 				m_pRGB[CurRGB + k] = m_pPixels[CurGL + k];
@@ -669,23 +677,27 @@ void CVideo::WriteFrame(OutputStream *pStream)
 {
 	int RetRecv = 0;
 
-	AVPacket Packet = {0};
+	AVPacket *pPacket = av_packet_alloc();
+	if(pPacket == nullptr)
+	{
+		dbg_msg("video_recorder", "Failed allocating packet");
+		return;
+	}
 
-	av_init_packet(&Packet);
-	Packet.data = 0;
-	Packet.size = 0;
+	pPacket->data = 0;
+	pPacket->size = 0;
 
 	avcodec_send_frame(pStream->pEnc, pStream->pFrame);
 	do
 	{
-		RetRecv = avcodec_receive_packet(pStream->pEnc, &Packet);
+		RetRecv = avcodec_receive_packet(pStream->pEnc, pPacket);
 		if(!RetRecv)
 		{
 			/* rescale output packet timestamp values from codec to stream timebase */
-			av_packet_rescale_ts(&Packet, pStream->pEnc->time_base, pStream->pSt->time_base);
-			Packet.stream_index = pStream->pSt->index;
+			av_packet_rescale_ts(pPacket, pStream->pEnc->time_base, pStream->pSt->time_base);
+			pPacket->stream_index = pStream->pSt->index;
 
-			if(int Ret = av_interleaved_write_frame(m_pFormatContext, &Packet))
+			if(int Ret = av_interleaved_write_frame(m_pFormatContext, pPacket))
 			{
 				char aBuf[AV_ERROR_MAX_STRING_SIZE];
 				av_strerror(Ret, aBuf, sizeof(aBuf));
@@ -700,6 +712,8 @@ void CVideo::WriteFrame(OutputStream *pStream)
 	{
 		dbg_msg("video_recorder", "Error encoding frame, error: %d", RetRecv);
 	}
+
+	av_packet_free(&pPacket);
 }
 
 void CVideo::FinishFrames(OutputStream *pStream)
@@ -707,24 +721,28 @@ void CVideo::FinishFrames(OutputStream *pStream)
 	dbg_msg("video_recorder", "------------");
 	int RetRecv = 0;
 
-	AVPacket Packet = {0};
+	AVPacket *pPacket = av_packet_alloc();
+	if(pPacket == nullptr)
+	{
+		dbg_msg("video_recorder", "Failed allocating packet");
+		return;
+	}
 
-	av_init_packet(&Packet);
-	Packet.data = 0;
-	Packet.size = 0;
+	pPacket->data = 0;
+	pPacket->size = 0;
 
 	avcodec_send_frame(pStream->pEnc, 0);
 	do
 	{
-		RetRecv = avcodec_receive_packet(pStream->pEnc, &Packet);
+		RetRecv = avcodec_receive_packet(pStream->pEnc, pPacket);
 		if(!RetRecv)
 		{
 			/* rescale output packet timestamp values from codec to stream timebase */
 			//if(pStream->pSt->codec->codec_type == AVMEDIA_TYPE_AUDIO)
-			av_packet_rescale_ts(&Packet, pStream->pEnc->time_base, pStream->pSt->time_base);
-			Packet.stream_index = pStream->pSt->index;
+			av_packet_rescale_ts(pPacket, pStream->pEnc->time_base, pStream->pSt->time_base);
+			pPacket->stream_index = pStream->pSt->index;
 
-			if(int Ret = av_interleaved_write_frame(m_pFormatContext, &Packet))
+			if(int Ret = av_interleaved_write_frame(m_pFormatContext, pPacket))
 			{
 				char aBuf[AV_ERROR_MAX_STRING_SIZE];
 				av_strerror(Ret, aBuf, sizeof(aBuf));
@@ -739,6 +757,8 @@ void CVideo::FinishFrames(OutputStream *pStream)
 	{
 		dbg_msg("video_recorder", "failed to finish recoding, error: %d", RetRecv);
 	}
+
+	av_packet_free(&pPacket);
 }
 
 void CVideo::CloseStream(OutputStream *pStream)

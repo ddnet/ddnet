@@ -24,14 +24,14 @@ void main()
 	vec4 VertPos = vec4(inVertex, 0.0, 1.0);
 	int XCount = gl_InstanceID - (int(gl_InstanceID/gJumpIndex) * gJumpIndex);
 	int YCount = (int(gl_InstanceID/gJumpIndex));
-	VertPos.x += gOffset.x + gDir.x * XCount;
-	VertPos.y += gOffset.y + gDir.y * YCount;
+	VertPos.x += gOffset.x + gDir.x * float(XCount);
+	VertPos.y += gOffset.y + gDir.y * float(YCount);
 		
 	gl_Position = vec4(gPos * VertPos, 0.0, 1.0);
 #elif defined(TW_TILE_BORDER_LINE)
 	vec4 VertPos = vec4(inVertex.x + gOffset.x, inVertex.y + gOffset.y, 0.0, 1.0);
-	VertPos.x += gDir.x * gl_InstanceID;
-	VertPos.y += gDir.y * gl_InstanceID;
+	VertPos.x += gDir.x * float(gl_InstanceID);
+	VertPos.y += gDir.y * float(gl_InstanceID);
 		
 	gl_Position = vec4(gPos * VertPos, 0.0, 1.0);
 #else
