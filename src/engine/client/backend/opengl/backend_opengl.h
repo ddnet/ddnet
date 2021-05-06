@@ -74,7 +74,7 @@ protected:
 	bool IsTexturedState(const CCommandBuffer::SState &State);
 	static bool Texture2DTo3D(void *pImageBuffer, int ImageWidth, int ImageHeight, int ImageColorChannelCount, int SplitCountWidth, int SplitCountHeight, void *pTarget3DImageData, int &Target3DImageWidth, int &Target3DImageHeight);
 
-	void InitOpenGL(const SCommand_Init *pCommand);
+	bool InitOpenGL(const SCommand_Init *pCommand);
 
 	void SetState(const CCommandBuffer::SState &State, bool Use2DArrayTexture = false);
 	virtual bool IsNewApi() { return false; }
@@ -84,7 +84,7 @@ protected:
 	static int TexFormatToImageColorChannelCount(int TexFormat);
 	static void *Resize(int Width, int Height, int NewWidth, int NewHeight, int Format, const unsigned char *pData);
 
-	virtual void Cmd_Init(const SCommand_Init *pCommand);
+	virtual bool Cmd_Init(const SCommand_Init *pCommand);
 	virtual void Cmd_Shutdown(const SCommand_Shutdown *pCommand) {}
 	virtual void Cmd_Texture_Update(const CCommandBuffer::SCommand_Texture_Update *pCommand);
 	virtual void Cmd_Texture_Destroy(const CCommandBuffer::SCommand_Texture_Destroy *pCommand);
@@ -165,7 +165,7 @@ protected:
 	void SetState(const CCommandBuffer::SState &State, CGLSLTWProgram *pProgram, bool Use2DArrayTextures = false);
 
 #ifndef BACKEND_GL_MODERN_API
-	void Cmd_Init(const SCommand_Init *pCommand) override;
+	bool Cmd_Init(const SCommand_Init *pCommand) override;
 
 	void Cmd_RenderTex3D(const CCommandBuffer::SCommand_RenderTex3D *pCommand) override;
 

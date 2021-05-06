@@ -310,48 +310,9 @@ GfxOpenGLMessageCallback(GLenum source,
 }
 #endif
 
-void CCommandProcessorFragment_OpenGL::InitOpenGL(const SCommand_Init *pCommand)
+bool CCommandProcessorFragment_OpenGL::InitOpenGL(const SCommand_Init *pCommand)
 {
 	m_IsOpenGLES = pCommand->m_RequestedBackend == BACKEND_TYPE_OPENGL_ES;
-
-	// set some default settings
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDisable(GL_CULL_FACE);
-	glDisable(GL_DEPTH_TEST);
-
-#ifndef BACKEND_GL_MODERN_API
-	if(!IsNewApi())
-	{
-		glAlphaFunc(GL_GREATER, 0);
-		glEnable(GL_ALPHA_TEST);
-	}
-#endif
-
-	glDepthMask(0);
-
-#ifndef BACKEND_AS_OPENGL_ES
-	if(g_Config.m_DbgGfx)
-	{
-		if(GLEW_KHR_debug || GLEW_ARB_debug_output)
-		{
-			// During init, enable debug output
-			if(GLEW_KHR_debug)
-			{
-				glEnable(GL_DEBUG_OUTPUT);
-				glDebugMessageCallback(GfxOpenGLMessageCallback, 0);
-			}
-			else if(GLEW_ARB_debug_output)
-			{
-				glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
-				glDebugMessageCallbackARB(GfxOpenGLMessageCallback, 0);
-			}
-			dbg_msg("gfx", "Enabled OpenGL debug mode");
-		}
-		else
-			dbg_msg("gfx", "Requested OpenGL debug mode, but the driver does not support the required extension");
-	}
-#endif
 
 	const char *pVendorString = (const char *)glGetString(GL_VENDOR);
 	dbg_msg("opengl", "Vendor string: %s", pVendorString);
@@ -583,11 +544,58 @@ void CCommandProcessorFragment_OpenGL::InitOpenGL(const SCommand_Init *pCommand)
 			pCommand->m_pCapabilities->m_NPOTTextures = true;
 		}
 	}
+
+	if(*pCommand->m_pInitError != -2)
+	{
+		// set some default settings
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glDisable(GL_CULL_FACE);
+		glDisable(GL_DEPTH_TEST);
+
+#ifndef BACKEND_GL_MODERN_API
+		if(!IsNewApi())
+		{
+			glAlphaFunc(GL_GREATER, 0);
+			glEnable(GL_ALPHA_TEST);
+		}
+#endif
+
+		glDepthMask(0);
+
+#ifndef BACKEND_AS_OPENGL_ES
+		if(g_Config.m_DbgGfx)
+		{
+			if(GLEW_KHR_debug || GLEW_ARB_debug_output)
+			{
+				// During init, enable debug output
+				if(GLEW_KHR_debug)
+				{
+					glEnable(GL_DEBUG_OUTPUT);
+					glDebugMessageCallback(GfxOpenGLMessageCallback, 0);
+				}
+				else if(GLEW_ARB_debug_output)
+				{
+					glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+					glDebugMessageCallbackARB(GfxOpenGLMessageCallback, 0);
+				}
+				dbg_msg("gfx", "Enabled OpenGL debug mode");
+			}
+			else
+				dbg_msg("gfx", "Requested OpenGL debug mode, but the driver does not support the required extension");
+		}
+#endif
+
+		return true;
+	}
+	else
+		return false;
 }
 
-void CCommandProcessorFragment_OpenGL::Cmd_Init(const SCommand_Init *pCommand)
+bool CCommandProcessorFragment_OpenGL::Cmd_Init(const SCommand_Init *pCommand)
 {
-	InitOpenGL(pCommand);
+	if(!InitOpenGL(pCommand))
+		return false;
 
 	m_pTextureMemoryUsage = pCommand->m_pTextureMemoryUsage;
 	m_pTextureMemoryUsage->store(0, std::memory_order_relaxed);
@@ -613,6 +621,8 @@ void CCommandProcessorFragment_OpenGL::Cmd_Init(const SCommand_Init *pCommand)
 
 	m_LastBlendMode = CCommandBuffer::BLEND_ALPHA;
 	m_LastClipEnable = false;
+
+	return true;
 }
 
 void CCommandProcessorFragment_OpenGL::Cmd_Texture_Update(const CCommandBuffer::SCommand_Texture_Update *pCommand)
@@ -1584,9 +1594,10 @@ bool CCommandProcessorFragment_OpenGL2::IsTileMapAnalysisSucceeded()
 	return NoError;
 }
 
-void CCommandProcessorFragment_OpenGL2::Cmd_Init(const SCommand_Init *pCommand)
+bool CCommandProcessorFragment_OpenGL2::Cmd_Init(const SCommand_Init *pCommand)
 {
-	CCommandProcessorFragment_OpenGL::Cmd_Init(pCommand);
+	if(!CCommandProcessorFragment_OpenGL::Cmd_Init(pCommand))
+		return false;
 
 	m_OpenGLTextureLodBIAS = g_Config.m_GfxOpenGLTextureLODBIAS;
 
@@ -1747,7 +1758,11 @@ void CCommandProcessorFragment_OpenGL2::Cmd_Init(const SCommand_Init *pCommand)
 		pCommand->m_pCapabilities->m_ContextMajor = 1;
 		pCommand->m_pCapabilities->m_ContextMinor = 5;
 		pCommand->m_pCapabilities->m_ContextPatch = 0;
+
+		return false;
 	}
+
+	return true;
 }
 
 void CCommandProcessorFragment_OpenGL2::Cmd_RenderTex3D(const CCommandBuffer::SCommand_RenderTex3D *pCommand)

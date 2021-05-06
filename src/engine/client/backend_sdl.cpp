@@ -902,23 +902,20 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		RunBuffer(&CmdBuffer);
 		WaitForIdle();
 		CmdBuffer.Reset();
+	}
 
-		if(InitError == -2)
+	if(InitError != 0)
+	{
+		if(InitError != -2)
 		{
+			// shutdown the context, as it might have been initialized
 			CCommandProcessorFragment_OpenGLBase::SCommand_Shutdown CmdGL;
 			CmdBuffer.AddCommandUnsafe(CmdGL);
 			RunBuffer(&CmdBuffer);
 			WaitForIdle();
 			CmdBuffer.Reset();
-
-			g_Config.m_GfxOpenGLMajor = m_Capabilites.m_ContextMajor;
-			g_Config.m_GfxOpenGLMinor = m_Capabilites.m_ContextMinor;
-			g_Config.m_GfxOpenGLPatch = m_Capabilites.m_ContextPatch;
 		}
-	}
 
-	if(InitError != 0)
-	{
 		CCommandProcessorFragment_SDL::SCommand_Shutdown Cmd;
 		CmdBuffer.AddCommandUnsafe(Cmd);
 		RunBuffer(&CmdBuffer);

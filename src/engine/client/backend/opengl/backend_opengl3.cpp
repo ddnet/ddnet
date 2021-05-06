@@ -67,9 +67,10 @@ void CCommandProcessorFragment_OpenGL3_3::InitPrimExProgram(CGLSLPrimitiveExProg
 	pProgram->SetUniformVec2(pProgram->m_LocCenter, 1, Center);
 }
 
-void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand)
+bool CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand)
 {
-	InitOpenGL(pCommand);
+	if(!InitOpenGL(pCommand))
+		return false;
 
 	m_OpenGLTextureLodBIAS = g_Config.m_GfxOpenGLTextureLODBIAS;
 
@@ -483,6 +484,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 
 	// fix the alignment to allow even 1byte changes, e.g. for alpha components
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	return true;
 }
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_Shutdown(const SCommand_Shutdown *pCommand)
