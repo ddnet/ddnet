@@ -886,14 +886,12 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		CmdOpenGL.m_pStorage = pStorage;
 		CmdOpenGL.m_pCapabilities = &m_Capabilites;
 		CmdOpenGL.m_pInitError = &InitError;
-		CmdOpenGL.m_pCapabilities = &m_Capabilites;
 		CmdOpenGL.m_RequestedMajor = g_Config.m_GfxOpenGLMajor;
 		CmdOpenGL.m_RequestedMinor = g_Config.m_GfxOpenGLMinor;
 		CmdOpenGL.m_RequestedPatch = g_Config.m_GfxOpenGLPatch;
 		CmdOpenGL.m_GlewMajor = GlewMajor;
 		CmdOpenGL.m_GlewMinor = GlewMinor;
 		CmdOpenGL.m_GlewPatch = GlewPatch;
-		CmdOpenGL.m_pInitError = &InitError;
 		CmdOpenGL.m_pErrStringPtr = &pErrorStr;
 		CmdOpenGL.m_pVendorString = m_aVendorString;
 		CmdOpenGL.m_pVersionString = m_aVersionString;
