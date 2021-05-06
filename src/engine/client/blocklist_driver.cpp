@@ -21,11 +21,21 @@ struct SVersion
 	}
 };
 
+enum EBackendDriverBlockListType
+{
+	BACKEND_DRIVER_BLOCKLIST_TYPE_VERSION = 0,
+	BACKEND_DRIVER_BLOCKLIST_TYPE_VENDOR,
+};
+
 /* TODO: generalize it more for other drivers / vendors */
 struct SBackEndDriverBlockList
 {
+	EBackendDriverBlockListType m_BlockListType;
+
 	SVersion m_VersionMin;
 	SVersion m_VersionMax;
+
+	const char *m_pVendorName;
 
 	// the OpenGL version, that is supported
 	int m_AllowedMajor;
@@ -33,12 +43,15 @@ struct SBackEndDriverBlockList
 	int m_AllowedPatch;
 
 	const char *m_pReason;
+
+	bool m_DisplayReason;
+	const char *m_pOSName;
 };
 
 static SBackEndDriverBlockList gs_aBlockList[] = {
-	{{26, 20, 100, 7800}, {27, 20, 100, 8853}, 2, 0, 0, "This Intel driver version can cause crashes, please update it to a newer version."}};
+	{BACKEND_DRIVER_BLOCKLIST_TYPE_VENDOR, {26, 20, 100, 7800}, {27, 20, 100, 8853}, "Intel", 2, 0, 0, "This Intel driver version can cause crashes, please update it to a newer version.", false, "windows"}};
 
-const char *ParseBlocklistDriverVersions(const char *pVendorStr, const char *pVersionStr, int &BlocklistMajor, int &BlocklistMinor, int &BlocklistPatch)
+const char *ParseBlocklistDriverVersions(const char *pVendorStr, const char *pVersionStr, int &BlocklistMajor, int &BlocklistMinor, int &BlocklistPatch, bool &RequiresWarning)
 {
 	if(str_find_nocase(pVendorStr, "Intel") == NULL)
 		return NULL;
@@ -64,12 +77,32 @@ const char *ParseBlocklistDriverVersions(const char *pVendorStr, const char *pVe
 
 	for(const auto &BlockListItem : gs_aBlockList)
 	{
-		if(BlockListItem.m_VersionMin <= Version && Version <= BlockListItem.m_VersionMax)
+		if(str_comp(BlockListItem.m_pOSName, CONF_FAMILY_STRING) == 0)
 		{
-			BlocklistMajor = BlockListItem.m_AllowedMajor;
-			BlocklistMinor = BlockListItem.m_AllowedMinor;
-			BlocklistPatch = BlockListItem.m_AllowedPatch;
-			return BlockListItem.m_pReason;
+			bool DriverBlocked = false;
+			if(BlockListItem.m_BlockListType == BACKEND_DRIVER_BLOCKLIST_TYPE_VENDOR)
+			{
+				if(str_find_nocase(pVendorStr, BlockListItem.m_pVendorName) != NULL)
+				{
+					DriverBlocked = true;
+				}
+			}
+			else if(BlockListItem.m_BlockListType == BACKEND_DRIVER_BLOCKLIST_TYPE_VERSION)
+			{
+				if(BlockListItem.m_VersionMin <= Version && Version <= BlockListItem.m_VersionMax)
+				{
+					DriverBlocked = true;
+				}
+			}
+
+			if(DriverBlocked)
+			{
+				RequiresWarning = BlockListItem.m_DisplayReason;
+				BlocklistMajor = BlockListItem.m_AllowedMajor;
+				BlocklistMinor = BlockListItem.m_AllowedMinor;
+				BlocklistPatch = BlockListItem.m_AllowedPatch;
+				return BlockListItem.m_pReason;
+			}
 		}
 	}
 
