@@ -1,0 +1,36 @@
+#ifndef ENGINE_CLIENT_BACKEND_OPENGLES_GLES_CLASS_DEFINES_H
+#define ENGINE_CLIENT_BACKEND_OPENGLES_GLES_CLASS_DEFINES_H
+#undef ENGINE_CLIENT_BACKEND_OPENGLES_GLES_CLASS_DEFINES_H
+#endif
+
+#ifdef GLES_CLASS_DEFINES_DO_DEFINE
+#define CCommandProcessorFragment_OpenGL3_3 CCommandProcessorFragment_OpenGLES3
+#define CCommandProcessorFragment_OpenGL3 CCommandProcessorFragment_OpenGLES3Wrapper
+#define CCommandProcessorFragment_OpenGL2 CCommandProcessorFragment_OpenGLES2
+#define CCommandProcessorFragment_OpenGL CCommandProcessorFragment_OpenGLES
+
+#define CGLSL CGLSL_ES
+#define CGLSLProgram CGLSL_ESProgram
+#define CGLSLTWProgram CGLSL_ESTWProgram
+#define CGLSLTextProgram CGLSL_ESTextProgram
+#define CGLSLPrimitiveProgram CGLSL_ESPrimitiveProgram
+#define CGLSLPrimitiveExProgram CGLSL_ESPrimitiveExProgram
+#define CGLSLSpriteMultipleProgram CGLSL_ESSpriteMultipleProgram
+#define CGLSLQuadProgram CGLSL_ESQuadProgram
+#define CGLSLTileProgram CGLSL_ESTileProgram
+#else
+#undef CCommandProcessorFragment_OpenGL3_3
+#undef CCommandProcessorFragment_OpenGL3
+#undef CCommandProcessorFragment_OpenGL2
+#undef CCommandProcessorFragment_OpenGL
+
+#undef CGLSL
+#undef CGLSLProgram
+#undef CGLSLTWProgram
+#undef CGLSLTextProgram
+#undef CGLSLPrimitiveProgram
+#undef CGLSLPrimitiveExProgram
+#undef CGLSLSpriteMultipleProgram
+#undef CGLSLQuadProgram
+#undef CGLSLTileProgram
+#endif

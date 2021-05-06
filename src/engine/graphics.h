@@ -147,6 +147,13 @@ struct GL_SVertexTex3DStream
 	GL_STexCoord3D m_Tex;
 };
 
+enum EGraphicsDriverAgeType
+{
+	GRAPHICS_DRIVER_AGE_TYPE_LEGACY = 0,
+	GRAPHICS_DRIVER_AGE_TYPE_DEFAULT,
+	GRAPHICS_DRIVER_AGE_TYPE_MODERN,
+};
+
 typedef void (*WINDOW_RESIZE_FUNC)(void *pUser);
 
 namespace client_data7 {
@@ -269,6 +276,8 @@ public:
 	virtual void UpdateBufferContainer(int ContainerIndex, struct SBufferContainerInfo *pContainerInfo) = 0;
 	virtual void IndicesNumRequiredNotify(unsigned int RequiredIndicesCount) = 0;
 
+	virtual void GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch) = 0;
+	virtual bool IsConfigModernAPI() = 0;
 	virtual bool IsTileBufferingEnabled() = 0;
 	virtual bool IsQuadBufferingEnabled() = 0;
 	virtual bool IsTextBufferingEnabled() = 0;

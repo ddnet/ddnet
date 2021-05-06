@@ -456,8 +456,6 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Heig
 	Cmd.m_Flags = 0;
 	if(Flags & IGraphics::TEXLOAD_NOMIPMAPS)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_NOMIPMAPS;
-	if(g_Config.m_GfxTextureCompressionOld && ((Flags & IGraphics::TEXLOAD_NO_COMPRESSION) == 0))
-		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_COMPRESSED;
 	if(g_Config.m_GfxTextureQualityOld || Flags & TEXLOAD_NORESAMPLE)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_QUALITY;
 	if((Flags & IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE) != 0)
@@ -682,7 +680,7 @@ void CGraphics_Threaded::ScreenshotDirect()
 		str_format(aBuf, sizeof(aBuf), "saved screenshot to '%s'", aWholePath);
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, ColorRGBA{1.0f, 0.6f, 0.3f, 1.0f});
 		png_open_file_write(&Png, aWholePath); // ignore_convention
-		png_set_data(&Png, Image.m_Width, Image.m_Height, 8, PNG_TRUECOLOR, (unsigned char *)Image.m_pData); // ignore_convention
+		png_set_data(&Png, Image.m_Width, Image.m_Height, 8, PNG_TRUECOLOR_ALPHA, (unsigned char *)Image.m_pData); // ignore_convention
 		png_close_file(&Png); // ignore_convention
 
 		free(Image.m_pData);
@@ -2334,7 +2332,9 @@ void CGraphics_Threaded::Resize(int w, int h, bool SetWindowSize)
 	if(m_ScreenWidth > 21 * m_ScreenHeight / 9)
 		m_ScreenWidth = 21 * m_ScreenHeight / 9;
 
-	CCommandBuffer::SCommand_Resize Cmd;
+	CCommandBuffer::SCommand_Update_Viewport Cmd;
+	Cmd.m_X = 0;
+	Cmd.m_Y = 0;
 	Cmd.m_Width = m_ScreenWidth;
 	Cmd.m_Height = m_ScreenHeight;
 
@@ -2416,13 +2416,24 @@ void CGraphics_Threaded::Swap()
 		m_DoScreenshot = false;
 	}
 
-	// add swap command
-	CCommandBuffer::SCommand_Swap Cmd;
-	Cmd.m_Finish = g_Config.m_GfxFinish;
-	if(!AddCmd(
-		   Cmd, [] { return true; }, "failed to add swap command"))
 	{
-		return;
+		// add swap command
+		CCommandBuffer::SCommand_Swap Cmd;
+		if(!AddCmd(
+			   Cmd, [] { return true; }, "failed to add swap command"))
+		{
+			return;
+		}
+	}
+
+	if(g_Config.m_GfxFinish)
+	{
+		CCommandBuffer::SCommand_Finish Cmd;
+		if(!AddCmd(
+			   Cmd, [] { return true; }, "failed to add finish command"))
+		{
+			return;
+		}
 	}
 
 	// kick the command buffer

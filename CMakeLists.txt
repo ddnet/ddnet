@@ -1686,7 +1686,24 @@ if(CLIENT)
   add_library(${TARGET_STEAMAPI} ${STEAMAPI_KIND} ${STEAMAPI_SRC})
   list(APPEND TARGETS_OWN ${TARGET_STEAMAPI})
 
-  set_src(ENGINE_CLIENT GLOB src/engine/client
+  set_src(ENGINE_CLIENT GLOB_RECURSE src/engine/client
+    backend/glsl_shader_compiler.cpp
+    backend/glsl_shader_compiler.h
+    backend/opengl/backend_opengl.cpp
+    backend/opengl/backend_opengl.h
+    backend/opengl/backend_opengl3.cpp
+    backend/opengl/backend_opengl3.h
+    backend/opengl/opengl_sl.cpp
+    backend/opengl/opengl_sl.h
+    backend/opengl/opengl_sl_program.cpp
+    backend/opengl/opengl_sl_program.h
+    backend/opengles/backend_opengles.cpp
+    backend/opengles/backend_opengles.h
+    backend/opengles/backend_opengles3.cpp
+    backend/opengles/backend_opengles3.h
+    backend/opengles/gles_class_defines.h
+    backend/opengles/opengles_sl.cpp
+    backend/opengles/opengles_sl_program.cpp
     backend_sdl.cpp
     backend_sdl.h
     blocklist_driver.cpp
@@ -1700,6 +1717,7 @@ if(CLIENT)
     friends.h
     ghost.cpp
     ghost.h
+    graphics_defines.h
     graphics_threaded.cpp
     graphics_threaded.h
     http.cpp
@@ -1709,10 +1727,6 @@ if(CLIENT)
     keynames.h
     notifications.cpp
     notifications.h
-    opengl_sl.cpp
-    opengl_sl.h
-    opengl_sl_program.cpp
-    opengl_sl_program.h
     serverbrowser.cpp
     serverbrowser.h
     sound.cpp

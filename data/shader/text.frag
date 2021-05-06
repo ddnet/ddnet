@@ -10,12 +10,12 @@ noperspective in vec4 outVertColor;
 out vec4 FragClr;
 void main()
 {
-	vec4 textColor = gVertColor * outVertColor * texture(gTextSampler, texCoord);
-	vec4 textOutlineTex = gVertOutlineColor * texture(gTextOutlineSampler, texCoord);
-	
+	vec4 textColor = gVertColor * outVertColor * vec4(1.0, 1.0, 1.0, texture(gTextSampler, texCoord).r);
+	vec4 textOutlineTex = gVertOutlineColor * vec4(1.0, 1.0, 1.0, texture(gTextOutlineSampler, texCoord).r);
+
 	// ratio between the two textures
 	float OutlineBlend = (1.0 - textColor.a);	
-	
+
 	// since the outline is always black, or even if it has decent colors, it can be just added to the actual color
 	// without loosing any or too much color
 	

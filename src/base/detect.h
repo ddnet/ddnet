@@ -51,6 +51,7 @@
 #define CONF_FAMILY_STRING "unix"
 #define CONF_PLATFORM_LINUX 1
 #define PLATFORM_STRING "linux"
+#define CONF_BACKEND_OPENGL_ES3 1
 #endif
 
 #if defined(__GNU__) || defined(__gnu__)

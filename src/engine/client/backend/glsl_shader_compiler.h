@@ -1,28 +1,13 @@
-#ifndef ENGINE_CLIENT_OPENGL_SL_H
-#define ENGINE_CLIENT_OPENGL_SL_H
+#ifndef ENGINE_CLIENT_BACKEND_GLSL_SHADER_COMPILER_H
+#define ENGINE_CLIENT_BACKEND_GLSL_SHADER_COMPILER_H
 
-#include <GL/glew.h>
 #include <string>
 #include <vector>
 
-class CGLSLCompiler;
-
-class CGLSL
+enum EGLSLShaderCompilerType
 {
-public:
-	bool LoadShader(CGLSLCompiler *pCompiler, class IStorage *pStorage, const char *pFile, int Type);
-	void DeleteShader();
-
-	bool IsLoaded();
-	GLuint GetShaderID();
-
-	CGLSL();
-	virtual ~CGLSL();
-
-private:
-	GLuint m_ShaderID;
-	int m_Type;
-	bool m_IsLoaded;
+	GLSL_SHADER_COMPILER_TYPE_VERTEX = 0,
+	GLSL_SHADER_COMPILER_TYPE_FRAGMENT,
 };
 
 class CGLSLCompiler
@@ -47,10 +32,14 @@ private:
 	int m_OpenGLVersionMinor;
 	int m_OpenGLVersionPatch;
 
+	bool m_IsOpenGLES;
+
+	float m_TextureLODBias;
+
 	bool m_HasTextureArray;
 	int m_TextureReplaceType; // @see EGLSLCompilerTextureReplaceType
 public:
-	CGLSLCompiler(int OpenGLVersionMajor, int OpenGLVersionMinor, int OpenGLVersionPatch);
+	CGLSLCompiler(int OpenGLVersionMajor, int OpenGLVersionMinor, int OpenGLVersionPatch, bool IsOpenGLES, float TextureLODBias);
 	void SetHasTextureArray(bool TextureArray) { m_HasTextureArray = TextureArray; }
 	void SetTextureReplaceType(int TextureReplaceType) { m_TextureReplaceType = TextureReplaceType; }
 
@@ -58,7 +47,7 @@ public:
 	void AddDefine(const char *pDefineName, const char *pDefineValue);
 	void ClearDefines();
 
-	void ParseLine(std::string &Line, const char *pReadLine, int Type);
+	void ParseLine(std::string &Line, const char *pReadLine, EGLSLShaderCompilerType Type);
 
 	enum EGLSLCompilerTextureReplaceType
 	{
@@ -68,4 +57,4 @@ public:
 	};
 };
 
-#endif // ENGINE_CLIENT_OPENGL_SL_H
+#endif

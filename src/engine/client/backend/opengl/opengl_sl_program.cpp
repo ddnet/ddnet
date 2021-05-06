@@ -2,6 +2,12 @@
 #include "opengl_sl.h"
 #include <base/system.h>
 
+#ifndef BACKEND_AS_OPENGL_ES
+#include <GL/glew.h>
+#else
+#include <GLES3/gl3.h>
+#endif
+
 void CGLSLProgram::CreateProgram()
 {
 	m_ProgramID = glCreateProgram();
@@ -33,7 +39,7 @@ void CGLSLProgram::DetachShader(CGLSL *pShader)
 	}
 }
 
-void CGLSLProgram::DetachShaderByID(GLuint ShaderID)
+void CGLSLProgram::DetachShaderByID(TWGLuint ShaderID)
 {
 	glDetachShader(m_ProgramID, ShaderID);
 }
@@ -60,7 +66,7 @@ void CGLSLProgram::LinkProgram()
 
 void CGLSLProgram::DetachAllShaders()
 {
-	GLuint aShaders[100];
+	TWGLuint aShaders[100];
 	GLsizei ReturnedCount = 0;
 	while(1)
 	{
@@ -99,11 +105,6 @@ void CGLSLProgram::SetUniform(int Loc, const int Value)
 	glUniform1i(Loc, Value);
 }
 
-void CGLSLProgram::SetUniform(int Loc, const unsigned int Value)
-{
-	glUniform1ui(Loc, Value);
-}
-
 void CGLSLProgram::SetUniform(int Loc, const float Value)
 {
 	glUniform1f(Loc, Value);
@@ -125,7 +126,7 @@ void CGLSLProgram::UseProgram()
 		glUseProgram(m_ProgramID);
 }
 
-GLuint CGLSLProgram::GetProgramID()
+TWGLuint CGLSLProgram::GetProgramID()
 {
 	return m_ProgramID;
 }
