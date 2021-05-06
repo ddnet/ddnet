@@ -17,6 +17,9 @@ void CWarList::OnInit()
 
 void CWarList::ReloadList()
 {
+	m_WarDirs = 0;
+	m_TeamDirs = 0;
+	m_TraitorDirs = 0;
 	m_vWarlist.clear();
 	m_vTeamlist.clear();
 	m_vTraitorlist.clear();
@@ -25,6 +28,11 @@ void CWarList::ReloadList()
 	LoadTraitorList();
 	for(auto &WarPlayer : m_aWarPlayers)
 		WarPlayer.m_aName[0] = '\0';
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "team: %d war: %d", m_TeamDirs, (m_WarDirs + m_TraitorDirs));
+	// TODO: fix on initial load
+	// 		 maybe https://github.com/chillerbot/chillerbot-ux/issues/22 is needed
+	m_pClient->m_pChillerBotUX->SetComponentNoteLong("war list", aBuf);
 }
 
 int CWarList::LoadWarDir(const char *pDirname, int IsDir, int DirType, void *pUser)
@@ -171,6 +179,7 @@ int CWarList::LoadWarNames(const char *pFilename)
 		// Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", aBuf);
 		return 0;
 	}
+	m_WarDirs++;
 	char *pLine;
 	CLineReader Reader;
 
@@ -204,6 +213,7 @@ int CWarList::LoadTeamNames(const char *pFilename)
 		// Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", aBuf);
 		return 0;
 	}
+	m_TeamDirs++;
 	char *pLine;
 	CLineReader Reader;
 
@@ -237,6 +247,7 @@ int CWarList::LoadTraitorNames(const char *pFilename)
 		// Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", aBuf);
 		return 0;
 	}
+	m_TraitorDirs++;
 	char *pLine;
 	CLineReader Reader;
 
@@ -267,7 +278,10 @@ void CWarList::ConchainWarList(IConsole::IResult *pResult, void *pUserData, ICon
 	CWarList *pSelf = (CWarList *)pUserData;
 	pfnCallback(pResult, pCallbackUserData);
 	if(pResult->GetInteger(0))
+	{
 		pSelf->m_pClient->m_pChillerBotUX->EnableComponent("war list");
+		pSelf->ReloadList();
+	}
 	else
 		pSelf->m_pClient->m_pChillerBotUX->DisableComponent("war list");
 }

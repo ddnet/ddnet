@@ -2290,6 +2290,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 }
 
 #include <game/client/components/chillerbot/chillerbotux.h>
+#include <game/client/components/chillerbot/warlist.h>
 
 void CMenus::RenderSettingsChillerbot(CUIRect MainView)
 {
@@ -2358,6 +2359,7 @@ void CMenus::RenderSettingsChillerbot(CUIRect MainView)
 		{
 			g_Config.m_ClWarList ^= 1;
 			m_pClient->m_pChillerBotUX->UpdateComponents();
+			m_pClient->m_pWarList->ReloadList();
 		}
 	}
 }

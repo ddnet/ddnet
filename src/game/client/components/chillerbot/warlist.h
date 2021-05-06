@@ -19,6 +19,9 @@ class CWarList : public CComponent
 	std::vector<std::string> m_vWarlist;
 	std::vector<std::string> m_vTeamlist;
 	std::vector<std::string> m_vTraitorlist;
+	int m_WarDirs;
+	int m_TeamDirs;
+	int m_TraitorDirs;
 
 	static int LoadWarDir(const char *pImgName, int IsDir, int DirType, void *pUser);
 	static int LoadTeamDir(const char *pImgName, int IsDir, int DirType, void *pUser);
@@ -26,7 +29,6 @@ class CWarList : public CComponent
 	void LoadWarList();
 	void LoadTeamList();
 	void LoadTraitorList();
-	void ReloadList();
 	int LoadWarNames(const char *pFilename);
 	int LoadTeamNames(const char *pFilename);
 	int LoadTraitorNames(const char *pFilename);
@@ -47,6 +49,7 @@ public:
 	bool IsTeam(int ClientID);
 	bool IsTraitor(int ClientID);
 	void SetNameplateColor(int ClientID, STextRenderColor *pColor);
+	void ReloadList();
 };
 
 #endif
