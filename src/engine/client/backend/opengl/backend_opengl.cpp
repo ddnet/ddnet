@@ -333,7 +333,8 @@ bool CCommandProcessorFragment_OpenGL::InitOpenGL(const SCommand_Init *pCommand)
 	*pCommand->m_pInitError = 0;
 
 	int BlocklistMajor = -1, BlocklistMinor = -1, BlocklistPatch = -1;
-	const char *pErrString = ParseBlocklistDriverVersions(pVendorString, pVersionString, BlocklistMajor, BlocklistMinor, BlocklistPatch);
+	bool RequiresWarning = false;
+	const char *pErrString = ParseBlocklistDriverVersions(pVendorString, pVersionString, BlocklistMajor, BlocklistMinor, BlocklistPatch, RequiresWarning);
 	//if the driver is buggy, and the requested GL version is the default, fallback
 	if(pErrString != NULL && pCommand->m_RequestedMajor == 3 && pCommand->m_RequestedMinor == 0 && pCommand->m_RequestedPatch == 0)
 	{
@@ -346,7 +347,8 @@ bool CCommandProcessorFragment_OpenGL::InitOpenGL(const SCommand_Init *pCommand)
 			pCommand->m_pCapabilities->m_ContextPatch = BlocklistPatch;
 
 			// set backend error string
-			*pCommand->m_pErrStringPtr = pErrString;
+			if(RequiresWarning)
+				*pCommand->m_pErrStringPtr = pErrString;
 			*pCommand->m_pInitError = -2;
 
 			g_Config.m_GfxDriverIsBlocked = 1;
