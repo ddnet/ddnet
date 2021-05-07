@@ -425,9 +425,6 @@ Show ingame HUD
 Show name plates
 == Laat naamplaat zien
 
-Show only supported
-== Laat alleen compatibele servers zien
-
 Skins
 == Skins
 

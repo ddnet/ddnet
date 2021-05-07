@@ -448,9 +448,6 @@ Show name plates
 Show only chat messages from friends
 == 只顯示好友訊息
 
-Show only supported
-== 只顯示支援的解析度
-
 Skins
 == 外觀
 

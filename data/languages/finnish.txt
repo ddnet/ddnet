@@ -414,9 +414,6 @@ Show ingame HUD
 Show name plates
 == Näytä nimikyltit
 
-Show only supported
-== Näytä vain tuetut
-
 Skins
 == Ulkonäkö
 

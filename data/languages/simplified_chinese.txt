@@ -454,9 +454,6 @@ Show name plates
 Show only chat messages from friends
 == 只显示好友消息
 
-Show only supported
-== 只显示支持的分辨率
-
 Skins
 == 皮肤
 

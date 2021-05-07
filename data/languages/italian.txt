@@ -418,9 +418,6 @@ Show ingame HUD
 Show name plates
 == Mostra nomi
 
-Show only supported
-== Mostra solo supportati
-
 Skins
 == Skin
 

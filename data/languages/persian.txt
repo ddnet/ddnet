@@ -784,9 +784,6 @@ Dummy
 Miscellaneous
 == 
 
-Show only supported
-== 
-
 Display Modes
 == 
 
