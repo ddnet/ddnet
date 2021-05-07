@@ -1166,8 +1166,8 @@ public:
 
 	int GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen) override;
 
-	virtual int GetDesktopScreenWidth() const { return m_DesktopScreenWidth; }
-	virtual int GetDesktopScreenHeight() const { return m_DesktopScreenHeight; }
+	virtual int GetDesktopScreenWidth() const { return g_Config.m_GfxScreenWidth; }
+	virtual int GetDesktopScreenHeight() const { return g_Config.m_GfxScreenHeight; }
 
 	// synchronization
 	void InsertSignal(CSemaphore *pSemaphore) override;

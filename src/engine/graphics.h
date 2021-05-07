@@ -167,8 +167,6 @@ class IGraphics : public IInterface
 protected:
 	int m_ScreenWidth;
 	int m_ScreenHeight;
-	int m_DesktopScreenWidth;
-	int m_DesktopScreenHeight;
 	float m_ScreenHiDPIScale;
 
 public:

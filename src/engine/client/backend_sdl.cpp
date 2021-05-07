@@ -190,12 +190,23 @@ void CCommandProcessorFragment_SDL::Cmd_VideoModes(const CCommandBuffer::SComman
 	int maxModes = SDL_GetNumDisplayModes(pCommand->m_Screen),
 	    numModes = 0;
 
-	for(int i = 0; i < maxModes; i++)
+	for(int i = -1; i < maxModes; i++)
 	{
-		if(SDL_GetDisplayMode(pCommand->m_Screen, i, &mode) < 0)
+		if(i == -1)
 		{
-			dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
-			continue;
+			if(SDL_GetDesktopDisplayMode(pCommand->m_Screen, &mode) < 0)
+			{
+				dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
+				continue;
+			}
+		}
+		else
+		{
+			if(SDL_GetDisplayMode(pCommand->m_Screen, i, &mode) < 0)
+			{
+				dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
+				continue;
+			}
 		}
 
 		bool AlreadyFound = false;
@@ -745,11 +756,14 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		dbg_msg("gfx", "unable to get desktop resolution: %s", SDL_GetError());
 		return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_SDL_SCREEN_RESOLUTION_REQUEST_FAILED;
 	}
+
+	bool IsDesktopChanged = *pDesktopWidth == 0 || *pDesktopHeight == 0 || *pDesktopWidth != DisplayMode.w || *pDesktopHeight != DisplayMode.h;
+
 	*pDesktopWidth = DisplayMode.w;
 	*pDesktopHeight = DisplayMode.h;
 
-	// use desktop resolution as default resolution
-	if(*pWidth == 0 || *pHeight == 0)
+	// use desktop resolution as default resolution, clamp resolution if users's display is smaller than we remembered
+	if(*pWidth == 0 || *pHeight == 0 || (IsDesktopChanged && (*pWidth > *pDesktopWidth || *pHeight > *pDesktopHeight)))
 	{
 		*pWidth = *pDesktopWidth;
 		*pHeight = *pDesktopHeight;

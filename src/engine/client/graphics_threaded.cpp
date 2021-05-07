@@ -2085,7 +2085,7 @@ int CGraphics_Threaded::IssueInit()
 	if(g_Config.m_GfxResizable)
 		Flags |= IGraphicsBackend::INITFLAG_RESIZABLE;
 
-	int r = m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, g_Config.m_GfxFsaaSamples, Flags, &m_DesktopScreenWidth, &m_DesktopScreenHeight, &m_ScreenWidth, &m_ScreenHeight, m_pStorage);
+	int r = m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, g_Config.m_GfxFsaaSamples, Flags, &g_Config.m_GfxDesktopWidth, &g_Config.m_GfxDesktopHeight, &m_ScreenWidth, &m_ScreenHeight, m_pStorage);
 	AddBackEndWarningIfExists();
 	m_IsNewOpenGL = m_pBackend->IsNewOpenGL();
 	m_OpenGLTileBufferingEnabled = m_IsNewOpenGL || m_pBackend->HasTileBuffering();
@@ -2537,8 +2537,8 @@ int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes, int Scre
 	Cmd.m_MaxModes = MaxModes;
 	Cmd.m_pNumModes = &NumModes;
 	Cmd.m_HiDPIScale = m_ScreenHiDPIScale;
-	Cmd.m_MaxWindowWidth = m_DesktopScreenWidth;
-	Cmd.m_MaxWindowHeight = m_DesktopScreenHeight;
+	Cmd.m_MaxWindowWidth = g_Config.m_GfxDesktopWidth;
+	Cmd.m_MaxWindowHeight = g_Config.m_GfxDesktopHeight;
 	Cmd.m_Screen = Screen;
 
 	if(!AddCmd(
