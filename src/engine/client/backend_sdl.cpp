@@ -1121,21 +1121,22 @@ void CGraphicsBackend_SDL_OpenGL::NotifyWindow()
 
 	FlashWindowEx(&desc);
 #elif defined(SDL_VIDEO_DRIVER_X11) && !defined(CONF_PLATFORM_MACOS)
-	Display *dpy = info.info.x11.display;
-	Window win = info.info.x11.window;
+	Display *pX11Dpy = info.info.x11.display;
+	Window X11Win = info.info.x11.window;
 
-	// Old hints
-	XWMHints *wmhints;
-	wmhints = XAllocWMHints();
-	wmhints->flags = XUrgencyHint;
-	XSetWMHints(dpy, win, wmhints);
-	XFree(wmhints);
+	static Atom s_DemandsAttention = XInternAtom(pX11Dpy, "_NET_WM_STATE_DEMANDS_ATTENTION", true);
+	static Atom s_WmState = XInternAtom(pX11Dpy, "_NET_WM_STATE", true);
 
-	// More modern way of notifying
-	static Atom demandsAttention = XInternAtom(dpy, "_NET_WM_STATE_DEMANDS_ATTENTION", true);
-	static Atom wmState = XInternAtom(dpy, "_NET_WM_STATE", true);
-	XChangeProperty(dpy, win, wmState, XA_ATOM, 32, PropModeReplace,
-		(unsigned char *)&demandsAttention, 1);
+	XEvent SndNtfyEvent = {ClientMessage};
+	SndNtfyEvent.xclient.window = X11Win;
+	SndNtfyEvent.xclient.message_type = s_WmState;
+	SndNtfyEvent.xclient.format = 32;
+	SndNtfyEvent.xclient.data.l[0] = 1; // _NET_WM_STATE_ADD
+	SndNtfyEvent.xclient.data.l[1] = s_DemandsAttention;
+	SndNtfyEvent.xclient.data.l[2] = 0;
+	SndNtfyEvent.xclient.data.l[3] = 1; // normal application
+	SndNtfyEvent.xclient.data.l[4] = 0;
+	XSendEvent(pX11Dpy, XDefaultRootWindow(pX11Dpy), False, SubstructureNotifyMask | SubstructureRedirectMask, &SndNtfyEvent);
 #endif
 }
 
