@@ -1089,14 +1089,6 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	MainView.VSplitLeft(350.0f, &MainView, &ModeList);
 	MainView.VSplitLeft(340.0f, &MainView, 0);
 
-	// draw allmodes switch
-	ModeList.HSplitTop(20, &Button, &ModeList);
-	if(DoButton_CheckBox(&g_Config.m_GfxDisplayAllModes, Localize("Show only supported"), g_Config.m_GfxDisplayAllModes ^ 1, &Button))
-	{
-		g_Config.m_GfxDisplayAllModes ^= 1;
-		s_NumNodes = Graphics()->GetVideoModes(s_aModes, MAX_RESOLUTIONS, g_Config.m_GfxScreen);
-	}
-
 	// display mode list
 	static float s_ScrollValue = 0;
 	int OldSelected = -1;
