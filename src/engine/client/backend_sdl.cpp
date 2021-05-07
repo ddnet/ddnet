@@ -886,14 +886,12 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		CmdOpenGL.m_pStorage = pStorage;
 		CmdOpenGL.m_pCapabilities = &m_Capabilites;
 		CmdOpenGL.m_pInitError = &InitError;
-		CmdOpenGL.m_pCapabilities = &m_Capabilites;
 		CmdOpenGL.m_RequestedMajor = g_Config.m_GfxOpenGLMajor;
 		CmdOpenGL.m_RequestedMinor = g_Config.m_GfxOpenGLMinor;
 		CmdOpenGL.m_RequestedPatch = g_Config.m_GfxOpenGLPatch;
 		CmdOpenGL.m_GlewMajor = GlewMajor;
 		CmdOpenGL.m_GlewMinor = GlewMinor;
 		CmdOpenGL.m_GlewPatch = GlewPatch;
-		CmdOpenGL.m_pInitError = &InitError;
 		CmdOpenGL.m_pErrStringPtr = &pErrorStr;
 		CmdOpenGL.m_pVendorString = m_aVendorString;
 		CmdOpenGL.m_pVersionString = m_aVersionString;
@@ -904,23 +902,20 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		RunBuffer(&CmdBuffer);
 		WaitForIdle();
 		CmdBuffer.Reset();
+	}
 
-		if(InitError == -2)
+	if(InitError != 0)
+	{
+		if(InitError != -2)
 		{
+			// shutdown the context, as it might have been initialized
 			CCommandProcessorFragment_OpenGLBase::SCommand_Shutdown CmdGL;
 			CmdBuffer.AddCommandUnsafe(CmdGL);
 			RunBuffer(&CmdBuffer);
 			WaitForIdle();
 			CmdBuffer.Reset();
-
-			g_Config.m_GfxOpenGLMajor = m_Capabilites.m_ContextMajor;
-			g_Config.m_GfxOpenGLMinor = m_Capabilites.m_ContextMinor;
-			g_Config.m_GfxOpenGLPatch = m_Capabilites.m_ContextPatch;
 		}
-	}
 
-	if(InitError != 0)
-	{
 		CCommandProcessorFragment_SDL::SCommand_Shutdown Cmd;
 		CmdBuffer.AddCommandUnsafe(Cmd);
 		RunBuffer(&CmdBuffer);
