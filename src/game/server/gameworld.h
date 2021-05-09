@@ -151,8 +151,6 @@ public:
 	void Tick();
 
 	// DDRace
-
-	std::list<class CCharacter *> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, class CEntity *pNotThis);
 	void ReleaseHooked(int ClientID);
 
 	/*
