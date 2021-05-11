@@ -689,6 +689,15 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 	if(pSelf->ProcessSpamProtection(pResult->m_ClientID))
 		return;
 
+	if(!g_Config.m_SvSwap)
+	{
+		pSelf->Console()->Print(
+			IConsole::OUTPUT_LEVEL_STANDARD,
+			"print",
+			"Swap is disabled on this server.");
+		return;
+	}
+
 	CGameTeams &Teams = ((CGameControllerDDRace *)pSelf->m_pController)->m_Teams;
 
 	int Team = Teams.m_Core.Team(pResult->m_ClientID);
