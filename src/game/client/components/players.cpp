@@ -26,6 +26,8 @@
 
 #include "players.h"
 
+#include <base/color.h>
+
 void CPlayers::RenderHand(CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float AngleOffset, vec2 PostRotOffset, float Alpha)
 {
 	vec2 HandPos = CenterPos + Dir;
@@ -293,7 +295,7 @@ void CPlayers::RenderPlayer(
 			vec2 FinishPos = InitPos + ExDirection * (m_pClient->m_Tuning[g_Config.m_ClDummy].m_HookLength - 42.0f);
 
 			Graphics()->LinesBegin();
-			ColorRGBA HookCollColor(1.0f, 0.0f, 0.0f);
+			ColorRGBA HookCollColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorNoColl));
 
 			float PhysSize = 28.0f;
 
@@ -321,13 +323,13 @@ void CPlayers::RenderPlayer(
 				{
 					if(Hit != TILE_NOHOOK)
 					{
-						HookCollColor = ColorRGBA(130.0f / 255.0f, 232.0f / 255.0f, 160.0f / 255.0f);
+						HookCollColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorHookableColl));
 					}
 				}
 
 				if(m_pClient->IntersectCharacter(OldPos, FinishPos, FinishPos, ClientID) != -1)
 				{
-					HookCollColor = ColorRGBA(1.0f, 1.0f, 0.0f);
+					HookCollColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorTeeColl));
 					break;
 				}
 
