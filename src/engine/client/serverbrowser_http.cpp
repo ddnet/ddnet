@@ -12,11 +12,13 @@
 class CChooseMaster
 {
 public:
+	typedef bool (*VALIDATOR)(json_value *pJson);
+
 	enum
 	{
 		MAX_URLS = 16,
 	};
-	CChooseMaster(IEngine *pEngine, const char **ppUrls, int NumUrls, int PreviousBestIndex);
+	CChooseMaster(IEngine *pEngine, VALIDATOR pfnValidator, const char **ppUrls, int NumUrls, int PreviousBestIndex);
 	virtual ~CChooseMaster() {}
 
 	const char *GetBestUrl() const;
@@ -29,6 +31,7 @@ private:
 	public:
 		std::atomic_int m_BestIndex{-1};
 		// Constant after construction.
+		VALIDATOR m_pfnValidator;
 		int m_NumUrls;
 		char m_aaUrls[MAX_URLS][256];
 	};
@@ -48,7 +51,7 @@ private:
 	std::shared_ptr<CData> m_pData;
 };
 
-CChooseMaster::CChooseMaster(IEngine *pEngine, const char **ppUrls, int NumUrls, int PreviousBestIndex) :
+CChooseMaster::CChooseMaster(IEngine *pEngine, VALIDATOR pfnValidator, const char **ppUrls, int NumUrls, int PreviousBestIndex) :
 	m_pEngine(pEngine),
 	m_PreviousBestIndex(PreviousBestIndex)
 {
@@ -57,6 +60,7 @@ CChooseMaster::CChooseMaster(IEngine *pEngine, const char **ppUrls, int NumUrls,
 	dbg_assert(PreviousBestIndex >= -1, "previous best index negative and not -1");
 	dbg_assert(PreviousBestIndex < NumUrls, "previous best index too high");
 	m_pData = std::make_shared<CData>();
+	m_pData->m_pfnValidator = pfnValidator;
 	m_pData->m_NumUrls = NumUrls;
 	for(int i = 0; i < m_pData->m_NumUrls; i++)
 	{
@@ -131,6 +135,17 @@ void CChooseMaster::CJob::Run()
 		{
 			continue;
 		}
+		json_value *pJson = Get.ResultJson();
+		if(!pJson)
+		{
+			continue;
+		}
+		bool ParseFailure = m_pData->m_pfnValidator(pJson);
+		json_value_free(pJson);
+		if(ParseFailure)
+		{
+			continue;
+		}
 		dbg_msg("serverbrowse_http", "found master, url='%s' time=%dms", pUrl, Time);
 		aTimeMs[i] = Time;
 	}
@@ -190,8 +205,6 @@ public:
 		return m_aLegacyServers[Index];
 	}
 
-	bool Parse(json_value *pJson);
-
 private:
 	class CEntry
 	{
@@ -199,6 +212,10 @@ private:
 		NETADDR m_Addr;
 		CServerInfo m_Info;
 	};
+
+	static bool Validate(json_value *pJson);
+	static bool Parse(json_value *pJson, std::vector<CEntry> *paServers, std::vector<NETADDR> *paLegacyServers);
+
 	IEngine *m_pEngine;
 	std::shared_ptr<CGet> m_pGetServers;
 	std::unique_ptr<CChooseMaster> m_pChooseMaster;
@@ -214,25 +231,28 @@ static const char *MASTERSERVER_URLS[] = {
 
 CServerBrowserHttp::CServerBrowserHttp(IEngine *pEngine) :
 	m_pEngine(pEngine),
-	m_pChooseMaster(new CChooseMaster(pEngine, MASTERSERVER_URLS, sizeof(MASTERSERVER_URLS) / sizeof(MASTERSERVER_URLS[0]), -1))
+	m_pChooseMaster(new CChooseMaster(pEngine, Validate, MASTERSERVER_URLS, sizeof(MASTERSERVER_URLS) / sizeof(MASTERSERVER_URLS[0]), -1))
 {
 	m_pChooseMaster->Refresh();
 }
 void CServerBrowserHttp::Update()
 {
-	if(m_pGetServers)
+	if(m_pGetServers && m_pGetServers->State() != HTTP_QUEUED && m_pGetServers->State() != HTTP_RUNNING)
 	{
-		json_value *pJson = m_pGetServers->ResultJson();
-		// TODO: Handle parsing error!
+		std::shared_ptr<CGet> pGetServers = nullptr;
+		std::swap(m_pGetServers, pGetServers);
+
+		json_value *pJson = pGetServers->ResultJson();
 		if(!pJson)
 		{
 			return;
 		}
-		if(Parse(pJson))
+		bool ParseFailure = Parse(pJson, &m_aServers, &m_aLegacyServers);
+		json_value_free(pJson);
+		if(ParseFailure)
 		{
-			// TODO: Handle error!
+			return;
 		}
-		m_pGetServers = NULL;
 	}
 }
 void CServerBrowserHttp::Refresh()
@@ -274,13 +294,18 @@ bool ServerbrowserParseUrl(NETADDR *pOut, const char *pUrl)
 	}
 	return false;
 }
-bool CServerBrowserHttp::Parse(json_value *pJson)
+bool CServerBrowserHttp::Validate(json_value *pJson)
+{
+	std::vector<CEntry> aServers;
+	std::vector<NETADDR> aLegacyServers;
+	return Parse(pJson, &aServers, &aLegacyServers);
+}
+bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CEntry> *paServers, std::vector<NETADDR> *paLegacyServers)
 {
 	std::vector<CEntry> aServers;
 	std::vector<NETADDR> aLegacyServers;
 
 	const json_value &Json = *pJson;
-	// TODO: Handle errors in a sane way. :(
 	const json_value &Servers = Json["servers"];
 	const json_value &LegacyServers = Json["servers_legacy"];
 	if(Servers.type != json_array || (LegacyServers.type != json_array && LegacyServers.type != json_none))
@@ -348,8 +373,8 @@ bool CServerBrowserHttp::Parse(json_value *pJson)
 			aLegacyServers.push_back(ParsedAddr);
 		}
 	}
-	m_aServers = aServers;
-	m_aLegacyServers = aLegacyServers;
+	*paServers = aServers;
+	*paLegacyServers = aLegacyServers;
 	return false;
 }
 IServerBrowserHttp *CreateServerBrowserHttp(IEngine *pEngine)
