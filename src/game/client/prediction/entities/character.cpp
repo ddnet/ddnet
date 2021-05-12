@@ -864,9 +864,11 @@ void CCharacter::HandleTiles(int Index)
 void CCharacter::HandleTuneLayer()
 {
 	int CurrentIndex = Collision()->GetMapIndex(m_Pos);
-	SetTuneZone(GameWorld()->m_WorldConfig.m_PredictTiles ? Collision()->IsTune(CurrentIndex) : 0);
+	SetTuneZone(GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(CurrentIndex) : 0);
 
-	m_Core.m_pWorld->m_Tuning[g_Config.m_ClDummy] = *GetTuning(m_TuneZone); // throw tunings (from specific zone if in a tunezone) into gamecore
+	if(m_IsLocal)
+		m_Core.m_pWorld->m_Tuning[g_Config.m_ClDummy] = *GetTuning(m_TuneZone); // throw tunings (from specific zone if in a tunezone) into gamecore if the character is local
+	m_Core.m_Tuning = *GetTuning(m_TuneZone);
 }
 
 void CCharacter::DDRaceTick()
@@ -1003,6 +1005,7 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_CHARACTER)
 {
 	m_ID = ID;
+	m_IsLocal = false;
 
 	m_LastWeapon = WEAPON_HAMMER;
 	m_QueuedWeapon = -1;
@@ -1072,6 +1075,7 @@ void CCharacter::ResetPrediction()
 void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal)
 {
 	m_Core.Read((CNetObj_CharacterCore *)pChar);
+	m_IsLocal = IsLocal;
 
 	if(pExtended)
 	{
@@ -1213,7 +1217,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 	m_LastSnapWeapon = pChar->m_Weapon;
 	m_Alive = true;
 
-	SetTuneZone(GameWorld()->m_WorldConfig.m_PredictTiles ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0);
+	SetTuneZone(GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0);
 
 	// set the current weapon
 	if(pChar->m_Weapon != WEAPON_NINJA)
