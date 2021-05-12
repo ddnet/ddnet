@@ -529,20 +529,6 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info)
 
 	std::sort(pEntry->m_Info.m_aClients, pEntry->m_Info.m_aClients + Info.m_NumReceivedClients, CPlayerScoreNameLess());
 
-	// all these are just for nice compatibility
-	if(pEntry->m_Info.m_aGameType[0] == '0' && pEntry->m_Info.m_aGameType[1] == 0)
-		str_copy(pEntry->m_Info.m_aGameType, "DM", sizeof(pEntry->m_Info.m_aGameType));
-	else if(pEntry->m_Info.m_aGameType[0] == '1' && pEntry->m_Info.m_aGameType[1] == 0)
-		str_copy(pEntry->m_Info.m_aGameType, "TDM", sizeof(pEntry->m_Info.m_aGameType));
-	else if(pEntry->m_Info.m_aGameType[0] == '2' && pEntry->m_Info.m_aGameType[1] == 0)
-		str_copy(pEntry->m_Info.m_aGameType, "CTF", sizeof(pEntry->m_Info.m_aGameType));
-
-	/*if(!request)
-	{
-		pEntry->m_Info.latency = (time_get()-pEntry->request_time)*1000/time_freq();
-		RemoveRequest(pEntry);
-	}*/
-
 	pEntry->m_GotInfo = 1;
 }
 
