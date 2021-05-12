@@ -6,6 +6,7 @@
 #include "serverbrowser_ping_cache.h"
 
 #include <algorithm>
+#include <limits.h>
 
 #include <base/hash_ctxt.h>
 #include <base/math.h>
@@ -500,6 +501,33 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info)
 	pEntry->m_Info.m_Official = Off;
 	pEntry->m_Info.m_NetAddr = pEntry->m_Addr;
 	net_addr_str(&pEntry->m_Info.m_NetAddr, pEntry->m_Info.m_aAddress, sizeof(pEntry->m_Info.m_aAddress), 1);
+
+	class CPlayerScoreNameLess
+	{
+	public:
+		bool operator()(const CServerInfo::CClient &p0, const CServerInfo::CClient &p1)
+		{
+			if(p0.m_Player && !p1.m_Player)
+				return true;
+			if(!p0.m_Player && p1.m_Player)
+				return false;
+
+			int Score0 = p0.m_Score;
+			int Score1 = p1.m_Score;
+			if(Score0 == -9999)
+				Score0 = INT_MIN;
+			if(Score1 == -9999)
+				Score1 = INT_MIN;
+
+			if(Score0 > Score1)
+				return true;
+			if(Score0 < Score1)
+				return false;
+			return str_comp_nocase(p0.m_aName, p1.m_aName) < 0;
+		}
+	};
+
+	std::sort(pEntry->m_Info.m_aClients, pEntry->m_Info.m_aClients + Info.m_NumReceivedClients, CPlayerScoreNameLess());
 
 	// all these are just for nice compatibility
 	if(pEntry->m_Info.m_aGameType[0] == '0' && pEntry->m_Info.m_aGameType[1] == 0)

@@ -1263,27 +1263,6 @@ const char *CClient::LoadMapSearch(const char *pMapName, SHA256_DIGEST *pWantedS
 	return pError;
 }
 
-bool CClient::PlayerScoreNameLess(const CServerInfo::CClient &p0, const CServerInfo::CClient &p1)
-{
-	if(p0.m_Player && !p1.m_Player)
-		return true;
-	if(!p0.m_Player && p1.m_Player)
-		return false;
-
-	int Score0 = p0.m_Score;
-	int Score1 = p1.m_Score;
-	if(Score0 == -9999)
-		Score0 = INT_MIN;
-	if(Score1 == -9999)
-		Score1 = INT_MIN;
-
-	if(Score0 > Score1)
-		return true;
-	if(Score0 < Score1)
-		return false;
-	return str_comp_nocase(p0.m_aName, p1.m_aName) < 0;
-}
-
 void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 {
 	// server info
@@ -1466,8 +1445,6 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 
 	if(!Up.Error() || IgnoreError)
 	{
-		std::sort(Info.m_aClients, Info.m_aClients + Info.m_NumReceivedClients, PlayerScoreNameLess);
-
 		if(!DuplicatedPacket && (!pEntry || !pEntry->m_GotInfo || SavedType >= pEntry->m_Info.m_Type))
 		{
 			m_ServerBrowser.Set(*pFrom, IServerBrowser::SET_TOKEN, Token, &Info);
