@@ -150,8 +150,11 @@ public:
 	virtual int NumSortedServers() const = 0;
 	virtual const CServerInfo *SortedGet(int Index) const = 0;
 
+	virtual bool GotInfo(const NETADDR &Addr) const = 0;
 	virtual bool IsFavorite(const NETADDR &Addr) const = 0;
+	virtual bool IsFavoritePingAllowed(const NETADDR &Addr) const = 0;
 	virtual void AddFavorite(const NETADDR &Addr) = 0;
+	virtual void FavoriteAllowPing(const NETADDR &Addr, bool AllowPing) = 0;
 	virtual void RemoveFavorite(const NETADDR &Addr) = 0;
 
 	virtual int NumCountries(int Network) = 0;

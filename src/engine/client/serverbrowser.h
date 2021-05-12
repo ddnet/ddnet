@@ -103,8 +103,11 @@ public:
 	int NumSortedServers() const { return m_NumSortedServers; }
 	const CServerInfo *SortedGet(int Index) const;
 
+	bool GotInfo(const NETADDR &Addr) const;
 	bool IsFavorite(const NETADDR &Addr) const;
+	bool IsFavoritePingAllowed(const NETADDR &Addr) const;
 	void AddFavorite(const NETADDR &Addr);
+	void FavoriteAllowPing(const NETADDR &Addr, bool AllowPing);
 	void RemoveFavorite(const NETADDR &Addr);
 
 	void LoadDDNetRanks();
@@ -156,6 +159,7 @@ private:
 	int *m_pSortedServerlist;
 
 	NETADDR m_aFavoriteServers[MAX_FAVORITES];
+	bool m_aFavoriteServersAllowPing[MAX_FAVORITES];
 	int m_NumFavoriteServers;
 
 	CNetwork m_aNetworks[NUM_NETWORKS];
@@ -189,6 +193,8 @@ private:
 	unsigned char m_aTokenSeed[16];
 
 	bool m_SortOnNextUpdate;
+
+	int FindFavorite(const NETADDR &Addr) const;
 
 	int GenerateToken(const NETADDR &Addr) const;
 	static int GetBasicToken(int Token);

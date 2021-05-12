@@ -552,7 +552,6 @@ CServerBrowser::CServerEntry *CServerBrowser::Add(const NETADDR &Addr)
 {
 	int Hash = Addr.ip[0];
 	CServerEntry *pEntry = 0;
-	int i;
 
 	// create new pEntry
 	pEntry = (CServerEntry *)m_ServerlistHeap.Allocate(sizeof(CServerEntry));
@@ -568,14 +567,7 @@ CServerBrowser::CServerEntry *CServerBrowser::Add(const NETADDR &Addr)
 	str_copy(pEntry->m_Info.m_aName, pEntry->m_Info.m_aAddress, sizeof(pEntry->m_Info.m_aName));
 
 	// check if it's a favorite
-	for(i = 0; i < m_NumFavoriteServers; i++)
-	{
-		if(net_addr_comp(&Addr, &m_aFavoriteServers[i]) == 0)
-		{
-			pEntry->m_Info.m_Favorite = true;
-			break;
-		}
-	}
+	pEntry->m_Info.m_Favorite = IsFavorite(Addr);
 
 	// check if it's an official server
 	for(auto &Network : m_aNetworks)
@@ -947,13 +939,20 @@ void CServerBrowser::UpdateFromHttp()
 	int NumLegacyServers = m_pHttp->NumLegacyServers();
 	if(m_ServerlistType != IServerBrowser::TYPE_INTERNET)
 	{
-		std::vector<NETADDR> aWantedAddresses;
+		class CWantedAddr
+		{
+		public:
+			NETADDR m_Addr;
+			bool m_FallbackToPing;
+			bool m_Got;
+		};
+		std::vector<CWantedAddr> aWantedAddresses;
 		int LegacySetType;
 		if(m_ServerlistType == IServerBrowser::TYPE_FAVORITES)
 		{
 			for(int i = 0; i < m_NumFavoriteServers; i++)
 			{
-				aWantedAddresses.push_back(m_aFavoriteServers[i]);
+				aWantedAddresses.push_back(CWantedAddr{m_aFavoriteServers[i], m_aFavoriteServersAllowPing[i], false});
 			}
 			LegacySetType = IServerBrowser::SET_FAV_ADD;
 		}
@@ -1006,7 +1005,7 @@ void CServerBrowser::UpdateFromHttp()
 
 					if(DDNetFiltered(pExcludeTypes, pCntr->m_aTypes[g]))
 						continue;
-					aWantedAddresses.push_back(pCntr->m_aServers[g]);
+					aWantedAddresses.push_back(CWantedAddr{pCntr->m_aServers[g], false, false});
 				}
 			}
 		}
@@ -1024,9 +1023,9 @@ void CServerBrowser::UpdateFromHttp()
 		class CWantedAddrComparer
 		{
 		public:
-			bool operator()(const NETADDR &a, const NETADDR &b)
+			bool operator()(const CWantedAddr &a, const CWantedAddr &b)
 			{
-				return net_addr_comp(&a, &b) < 0;
+				return net_addr_comp(&a.m_Addr, &b.m_Addr) < 0;
 			}
 		};
 		class CAddrComparer
@@ -1057,7 +1056,7 @@ void CServerBrowser::UpdateFromHttp()
 		int p = 0;
 		while(i < aWantedAddresses.size() && j < aSortedServers.size())
 		{
-			int Cmp = net_addr_comp(&aWantedAddresses[i], &m_pHttp->ServerAddress(aSortedServers[j]));
+			int Cmp = net_addr_comp(&aWantedAddresses[i].m_Addr, &m_pHttp->ServerAddress(aSortedServers[j]));
 			if(Cmp != 0)
 			{
 				if(Cmp < 0)
@@ -1070,6 +1069,7 @@ void CServerBrowser::UpdateFromHttp()
 				}
 				continue;
 			}
+			aWantedAddresses[i].m_Got = true;
 			NETADDR Addr;
 			CServerInfo Info;
 			m_pHttp->Server(aSortedServers[j], &Addr, &Info);
@@ -1083,7 +1083,7 @@ void CServerBrowser::UpdateFromHttp()
 		j = 0;
 		while(i < aWantedAddresses.size() && j < aSortedLegacyServers.size())
 		{
-			int Cmp = net_addr_comp(&aWantedAddresses[i], &m_pHttp->LegacyServer(aSortedLegacyServers[j]));
+			int Cmp = net_addr_comp(&aWantedAddresses[i].m_Addr, &m_pHttp->LegacyServer(aSortedLegacyServers[j]));
 			if(Cmp != 0)
 			{
 				if(Cmp < 0)
@@ -1096,9 +1096,28 @@ void CServerBrowser::UpdateFromHttp()
 				}
 				continue;
 			}
+			aWantedAddresses[i].m_Got = true;
 			Set(m_pHttp->LegacyServer(aSortedLegacyServers[j]), LegacySetType, -1, nullptr);
 			i++;
 			j++;
+		}
+		for(const CWantedAddr &Wanted : aWantedAddresses)
+		{
+			if(!Wanted.m_Got)
+			{
+				if(Wanted.m_FallbackToPing)
+				{
+					Set(Wanted.m_Addr, LegacySetType, -1, nullptr);
+				}
+				else
+				{
+					// Also add favorites we're not allowed to ping.
+					if(LegacySetType == IServerBrowser::SET_FAV_ADD && !Find(Wanted.m_Addr))
+					{
+						Add(Wanted.m_Addr);
+					}
+				}
+			}
 		}
 		return;
 	}
@@ -1201,16 +1220,33 @@ void CServerBrowser::Update(bool ForceResort)
 	}
 }
 
-bool CServerBrowser::IsFavorite(const NETADDR &Addr) const
+int CServerBrowser::FindFavorite(const NETADDR &Addr) const
 {
 	// search for the address
-	int i;
-	for(i = 0; i < m_NumFavoriteServers; i++)
+	for(int i = 0; i < m_NumFavoriteServers; i++)
 	{
 		if(net_addr_comp(&Addr, &m_aFavoriteServers[i]) == 0)
-			return true;
+			return i;
 	}
-	return false;
+	return -1;
+}
+
+bool CServerBrowser::GotInfo(const NETADDR &Addr) const
+{
+	CServerEntry *pEntry = ((CServerBrowser *)this)->Find(Addr);
+	return pEntry && pEntry->m_GotInfo;
+}
+
+bool CServerBrowser::IsFavorite(const NETADDR &Addr) const
+{
+	return FindFavorite(Addr) >= 0;
+}
+
+bool CServerBrowser::IsFavoritePingAllowed(const NETADDR &Addr) const
+{
+	int i = FindFavorite(Addr);
+	dbg_assert(i >= 0, "invalid favorite");
+	return i >= 0 && m_aFavoriteServersAllowPing[i];
 }
 
 void CServerBrowser::AddFavorite(const NETADDR &Addr)
@@ -1221,14 +1257,15 @@ void CServerBrowser::AddFavorite(const NETADDR &Addr)
 		return;
 
 	// make sure that we don't already have the server in our list
-	for(int i = 0; i < m_NumFavoriteServers; i++)
+	if(IsFavorite(Addr))
 	{
-		if(net_addr_comp(&Addr, &m_aFavoriteServers[i]) == 0)
-			return;
+		return;
 	}
 
 	// add the server to the list
-	m_aFavoriteServers[m_NumFavoriteServers++] = Addr;
+	m_aFavoriteServers[m_NumFavoriteServers] = Addr;
+	m_aFavoriteServersAllowPing[m_NumFavoriteServers] = false;
+	m_NumFavoriteServers++;
 	pEntry = Find(Addr);
 	if(pEntry)
 		pEntry->m_Info.m_Favorite = true;
@@ -1243,25 +1280,27 @@ void CServerBrowser::AddFavorite(const NETADDR &Addr)
 	}
 }
 
+void CServerBrowser::FavoriteAllowPing(const NETADDR &Addr, bool AllowPing)
+{
+	int i = FindFavorite(Addr);
+	dbg_assert(i >= 0, "invalid favorite");
+	m_aFavoriteServersAllowPing[i] = AllowPing;
+}
+
 void CServerBrowser::RemoveFavorite(const NETADDR &Addr)
 {
-	int i;
-	CServerEntry *pEntry;
-
-	for(i = 0; i < m_NumFavoriteServers; i++)
+	int i = FindFavorite(Addr);
+	if(i < 0)
 	{
-		if(net_addr_comp(&Addr, &m_aFavoriteServers[i]) == 0)
-		{
-			mem_move(&m_aFavoriteServers[i], &m_aFavoriteServers[i + 1], sizeof(NETADDR) * (m_NumFavoriteServers - (i + 1)));
-			m_NumFavoriteServers--;
-
-			pEntry = Find(Addr);
-			if(pEntry)
-				pEntry->m_Info.m_Favorite = false;
-
-			return;
-		}
+		return;
 	}
+	mem_move(&m_aFavoriteServers[i], &m_aFavoriteServers[i + 1], sizeof(NETADDR) * (m_NumFavoriteServers - (i + 1)));
+	mem_move(&m_aFavoriteServersAllowPing[i], &m_aFavoriteServersAllowPing[i + 1], sizeof(bool) * (m_NumFavoriteServers - (i + 1)));
+	m_NumFavoriteServers--;
+
+	CServerEntry *pEntry = Find(Addr);
+	if(pEntry)
+		pEntry->m_Info.m_Favorite = false;
 }
 
 void CServerBrowser::LoadDDNetServers()
@@ -1488,7 +1527,17 @@ void CServerBrowser::ConfigSaveCallback(IConfigManager *pConfigManager, void *pU
 	for(int i = 0; i < pSelf->m_NumFavoriteServers; i++)
 	{
 		net_addr_str(&pSelf->m_aFavoriteServers[i], aAddrStr, sizeof(aAddrStr), true);
-		str_format(aBuffer, sizeof(aBuffer), "add_favorite %s", aAddrStr);
+		if(!pSelf->m_aFavoriteServersAllowPing[i])
+		{
+			str_format(aBuffer, sizeof(aBuffer), "add_favorite %s", aAddrStr);
+		}
+		else
+		{
+			// Add quotes to the first parameter for backward
+			// compatibility with versions that took a `r` console
+			// parameter.
+			str_format(aBuffer, sizeof(aBuffer), "add_favorite \"%s\" allow_ping", aAddrStr);
+		}
 		pConfigManager->WriteLine(aBuffer);
 	}
 }

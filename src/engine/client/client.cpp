@@ -3637,8 +3637,18 @@ void CClient::Con_AddFavorite(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
 	NETADDR Addr;
-	if(net_addr_from_str(&Addr, pResult->GetString(0)) == 0)
-		pSelf->m_ServerBrowser.AddFavorite(Addr);
+	if(net_addr_from_str(&Addr, pResult->GetString(0)) != 0)
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "invalid address '%s'", pResult->GetString(0));
+		pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
+		return;
+	}
+	pSelf->m_ServerBrowser.AddFavorite(Addr);
+	if(pResult->NumArguments() > 1 && str_find(pResult->GetString(1), "allow_ping"))
+	{
+		pSelf->m_ServerBrowser.FavoriteAllowPing(Addr, true);
+	}
 }
 
 void CClient::Con_RemoveFavorite(IConsole::IResult *pResult, void *pUserData)
@@ -4184,7 +4194,7 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("record", "?r[file]", CFGFLAG_CLIENT, Con_Record, this, "Record to the file");
 	m_pConsole->Register("stoprecord", "", CFGFLAG_CLIENT, Con_StopRecord, this, "Stop recording");
 	m_pConsole->Register("add_demomarker", "", CFGFLAG_CLIENT, Con_AddDemoMarker, this, "Add demo timeline marker");
-	m_pConsole->Register("add_favorite", "r[host|ip]", CFGFLAG_CLIENT, Con_AddFavorite, this, "Add a server as a favorite");
+	m_pConsole->Register("add_favorite", "s[host|ip] ?s['allow_ping']", CFGFLAG_CLIENT, Con_AddFavorite, this, "Add a server as a favorite");
 	m_pConsole->Register("remove_favorite", "r[host|ip]", CFGFLAG_CLIENT, Con_RemoveFavorite, this, "Remove a server from favorites");
 	m_pConsole->Register("demo_slice_start", "", CFGFLAG_CLIENT, Con_DemoSliceBegin, this, "");
 	m_pConsole->Register("demo_slice_end", "", CFGFLAG_CLIENT, Con_DemoSliceEnd, this, "");

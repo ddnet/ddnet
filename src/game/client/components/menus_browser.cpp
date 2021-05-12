@@ -1038,14 +1038,34 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 		{
 			CUIRect Button;
 			ServerDetails.HSplitBottom(20.0f, &ServerDetails, &Button);
-			Button.VSplitLeft(5.0f, 0, &Button);
+			CUIRect ButtonAddFav;
+			CUIRect ButtonLeakIp;
+			Button.VSplitMid(&ButtonAddFav, &ButtonLeakIp);
+			ButtonAddFav.VSplitLeft(5.0f, 0, &ButtonAddFav);
 			static int s_AddFavButton = 0;
-			if(DoButton_CheckBox(&s_AddFavButton, Localize("Favorite"), pSelectedServer->m_Favorite, &Button))
+			static int s_LeakIpButton = 0;
+			if(DoButton_CheckBox(&s_AddFavButton, Localize("Favorite"), pSelectedServer->m_Favorite, &ButtonAddFav))
 			{
 				if(pSelectedServer->m_Favorite)
+				{
 					ServerBrowser()->RemoveFavorite(pSelectedServer->m_NetAddr);
+				}
 				else
+				{
 					ServerBrowser()->AddFavorite(pSelectedServer->m_NetAddr);
+					if(g_Config.m_UiPage == PAGE_LAN)
+					{
+						ServerBrowser()->FavoriteAllowPing(pSelectedServer->m_NetAddr, true);
+					}
+				}
+			}
+			if(pSelectedServer->m_Favorite)
+			{
+				bool IpLeak = ServerBrowser()->IsFavoritePingAllowed(pSelectedServer->m_NetAddr);
+				if(DoButton_CheckBox(&s_LeakIpButton, Localize("Leak IP"), IpLeak, &ButtonLeakIp))
+				{
+					ServerBrowser()->FavoriteAllowPing(pSelectedServer->m_NetAddr, !IpLeak);
+				}
 			}
 		}
 
