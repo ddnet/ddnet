@@ -48,7 +48,7 @@ private:
 
 	public:
 		CJob(std::shared_ptr<CData> pData) :
-			m_pData(pData) {}
+			m_pData(std::move(pData)) {}
 		virtual ~CJob() {}
 	};
 
@@ -114,7 +114,7 @@ void CChooseMaster::Refresh()
 void CChooseMaster::CJob::Run()
 {
 	// Check masters in a random order.
-	int aRandomized[MAX_URLS];
+	int aRandomized[MAX_URLS] = {0};
 	for(int i = 0; i < m_pData->m_NumUrls; i++)
 	{
 		aRandomized[i] = i;
@@ -436,7 +436,7 @@ static const char *DEFAULT_SERVERLIST_URLS[] = {
 IServerBrowserHttp *CreateServerBrowserHttp(IEngine *pEngine, IConsole *pConsole, IStorage *pStorage, const char *pPreviousBestUrl)
 {
 	char aaUrls[CChooseMaster::MAX_URLS][256];
-	const char *apUrls[CChooseMaster::MAX_URLS];
+	const char *apUrls[CChooseMaster::MAX_URLS] = {0};
 	const char **ppUrls = apUrls;
 	int NumUrls = 0;
 	IOHANDLE File = pStorage->OpenFile("serverlist_urls.cfg", IOFLAG_READ, IStorage::TYPE_ALL);

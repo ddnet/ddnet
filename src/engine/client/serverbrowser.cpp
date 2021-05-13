@@ -130,6 +130,7 @@ void CServerBrowser::Con_LeakIpAddress(IConsole::IResult *pResult, void *pUserDa
 			return net_addr_comp(&Addr1, &Addr2) < 0;
 		}
 	};
+	aSortedServers.reserve(pThis->m_NumServers);
 	for(int i = 0; i < pThis->m_NumServers; i++)
 	{
 		aSortedServers.push_back(i);
@@ -1010,10 +1011,12 @@ void CServerBrowser::UpdateFromHttp()
 		}
 		std::vector<int> aSortedServers;
 		std::vector<int> aSortedLegacyServers;
+		aSortedServers.reserve(NumServers);
 		for(int i = 0; i < NumServers; i++)
 		{
 			aSortedServers.push_back(i);
 		}
+		aSortedLegacyServers.reserve(NumLegacyServers);
 		for(int i = 0; i < NumLegacyServers; i++)
 		{
 			aSortedLegacyServers.push_back(i);
@@ -1489,12 +1492,15 @@ void CServerBrowser::LoadDDNetInfoJson()
 	}
 
 	m_OwnLocation = CServerInfo::LOC_UNKNOWN;
-	const json_value &Location = (*m_pDDNetInfo)["location"];
-	if(Location.type != json_string || CServerInfo::ParseLocation(&m_OwnLocation, Location))
+	if(m_pDDNetInfo)
 	{
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "cannot parse location from info.sjon: '%s'", (const char *)Location);
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "serverbrowse", aBuf);
+		const json_value &Location = (*m_pDDNetInfo)["location"];
+		if(Location.type != json_string || CServerInfo::ParseLocation(&m_OwnLocation, Location))
+		{
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "cannot parse location from info.sjon: '%s'", (const char *)Location);
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "serverbrowse", aBuf);
+		}
 	}
 }
 
