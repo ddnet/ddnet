@@ -101,7 +101,6 @@ void CServerBrowser::SetBaseInfo(class CNetClient *pClient, const char *pNetVers
 	IConfigManager *pConfigManager = Kernel()->RequestInterface<IConfigManager>();
 	if(pConfigManager)
 		pConfigManager->RegisterCallback(ConfigSaveCallback, this);
-	m_pHttp = CreateServerBrowserHttp(m_pEngine);
 	m_pPingCache = CreateServerBrowserPingCache(m_pConsole, m_pStorage);
 
 	RegisterCommands();
@@ -1142,6 +1141,18 @@ void CServerBrowser::Update(bool ForceResort)
 {
 	int64 Timeout = time_freq();
 	int64 Now = time_get();
+
+	if(!m_pHttp)
+	{
+		m_pHttp = CreateServerBrowserHttp(m_pEngine, m_pConsole, m_pStorage, g_Config.m_BrCachedBestServerinfoUrl);
+	}
+
+	const char *pHttpBestUrl;
+	if(!m_pHttp->GetBestUrl(&pHttpBestUrl) && pHttpBestUrl != m_pHttpPrevBestUrl)
+	{
+		str_copy(g_Config.m_BrCachedBestServerinfoUrl, pHttpBestUrl, sizeof(g_Config.m_BrCachedBestServerinfoUrl));
+		m_pHttpPrevBestUrl = pHttpBestUrl;
+	}
 
 	m_pHttp->Update();
 

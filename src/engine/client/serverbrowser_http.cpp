@@ -2,10 +2,13 @@
 
 #include "http.h"
 
+#include <engine/console.h>
 #include <engine/engine.h>
 #include <engine/external/json-parser/json.h>
 #include <engine/serverbrowser.h>
+#include <engine/shared/linereader.h>
 #include <engine/shared/serverinfo.h>
+#include <engine/storage.h>
 
 #include <memory>
 
@@ -21,11 +24,14 @@ public:
 	CChooseMaster(IEngine *pEngine, VALIDATOR pfnValidator, const char **ppUrls, int NumUrls, int PreviousBestIndex);
 	virtual ~CChooseMaster() {}
 
-	const char *GetBestUrl() const;
-	int GetBestIndex() const;
+	bool GetBestUrl(const char **pBestUrl) const;
+	void Reset();
+	bool IsRefreshing() const { return m_pJob && m_pJob->Status() != IJob::STATE_DONE; }
 	void Refresh();
 
 private:
+	int GetBestIndex() const;
+
 	class CData
 	{
 	public:
@@ -49,6 +55,7 @@ private:
 	IEngine *m_pEngine;
 	int m_PreviousBestIndex;
 	std::shared_ptr<CData> m_pData;
+	std::shared_ptr<CJob> m_pJob;
 };
 
 CChooseMaster::CChooseMaster(IEngine *pEngine, VALIDATOR pfnValidator, const char **ppUrls, int NumUrls, int PreviousBestIndex) :
@@ -66,10 +73,6 @@ CChooseMaster::CChooseMaster(IEngine *pEngine, VALIDATOR pfnValidator, const cha
 	{
 		str_copy(m_pData->m_aaUrls[i], ppUrls[i], sizeof(m_pData->m_aaUrls[i]));
 	}
-	if(m_PreviousBestIndex < 0)
-	{
-		m_PreviousBestIndex = secure_rand_below(NumUrls);
-	}
 }
 
 int CChooseMaster::GetBestIndex() const
@@ -85,14 +88,27 @@ int CChooseMaster::GetBestIndex() const
 	}
 }
 
-const char *CChooseMaster::GetBestUrl() const
+bool CChooseMaster::GetBestUrl(const char **ppBestUrl) const
 {
-	return m_pData->m_aaUrls[GetBestIndex()];
+	int Index = GetBestIndex();
+	if(Index < 0)
+	{
+		*ppBestUrl = nullptr;
+		return true;
+	}
+	*ppBestUrl = m_pData->m_aaUrls[Index];
+	return false;
+}
+
+void CChooseMaster::Reset()
+{
+	m_PreviousBestIndex = -1;
+	m_pData->m_BestIndex.store(-1);
 }
 
 void CChooseMaster::Refresh()
 {
-	m_pEngine->AddJob(std::make_shared<CJob>(m_pData));
+	m_pEngine->AddJob(m_pJob = std::make_shared<CJob>(m_pData));
 }
 
 void CChooseMaster::CJob::Run()
@@ -176,11 +192,12 @@ void CChooseMaster::CJob::Run()
 class CServerBrowserHttp : public IServerBrowserHttp
 {
 public:
-	CServerBrowserHttp(IEngine *pEngine);
+	CServerBrowserHttp(IEngine *pEngine, IConsole *pConsole, const char **ppUrls, int NumUrls, int PreviousBestIndex);
 	virtual ~CServerBrowserHttp() {}
 	void Update();
-	bool IsRefreshing() { return (bool)m_pGetServers; }
+	bool IsRefreshing() { return m_State != STATE_DONE; }
 	void Refresh();
+	bool GetBestUrl(const char **pBestUrl) const { return m_pChooseMaster->GetBestUrl(pBestUrl); }
 
 	int NumServers() const
 	{
@@ -206,6 +223,13 @@ public:
 	}
 
 private:
+	enum
+	{
+		STATE_DONE,
+		STATE_WANTREFRESH,
+		STATE_REFRESHING,
+	};
+
 	class CEntry
 	{
 	public:
@@ -217,6 +241,9 @@ private:
 	static bool Parse(json_value *pJson, std::vector<CEntry> *paServers, std::vector<NETADDR> *paLegacyServers);
 
 	IEngine *m_pEngine;
+	IConsole *m_pConsole;
+
+	int m_State = STATE_DONE;
 	std::shared_ptr<CGet> m_pGetServers;
 	std::unique_ptr<CChooseMaster> m_pChooseMaster;
 
@@ -224,40 +251,61 @@ private:
 	std::vector<NETADDR> m_aLegacyServers;
 };
 
-static const char *MASTERSERVER_URLS[] = {
-	"https://heinrich5991.de/teeworlds/temp/xyz.json",
-	"https://heinrich5991.de/teeworlds/temp/servers.json",
-};
-
-CServerBrowserHttp::CServerBrowserHttp(IEngine *pEngine) :
+CServerBrowserHttp::CServerBrowserHttp(IEngine *pEngine, IConsole *pConsole, const char **ppUrls, int NumUrls, int PreviousBestIndex) :
 	m_pEngine(pEngine),
-	m_pChooseMaster(new CChooseMaster(pEngine, Validate, MASTERSERVER_URLS, sizeof(MASTERSERVER_URLS) / sizeof(MASTERSERVER_URLS[0]), -1))
+	m_pConsole(pConsole),
+	m_pChooseMaster(new CChooseMaster(pEngine, Validate, ppUrls, NumUrls, PreviousBestIndex))
 {
 	m_pChooseMaster->Refresh();
 }
 void CServerBrowserHttp::Update()
 {
-	if(m_pGetServers && m_pGetServers->State() != HTTP_QUEUED && m_pGetServers->State() != HTTP_RUNNING)
+	if(m_State == STATE_WANTREFRESH)
 	{
-		std::shared_ptr<CGet> pGetServers = nullptr;
-		std::swap(m_pGetServers, pGetServers);
-
-		json_value *pJson = pGetServers->ResultJson();
-		if(!pJson)
+		const char *pBestUrl;
+		if(m_pChooseMaster->GetBestUrl(&pBestUrl))
+		{
+			if(!m_pChooseMaster->IsRefreshing())
+			{
+				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "serverbrowse_http", "no working serverlist URL found");
+				m_State = STATE_DONE;
+			}
+			return;
+		}
+		m_pEngine->AddJob(m_pGetServers = std::make_shared<CGet>(pBestUrl, CTimeout{0, 0, 0}));
+		m_State = STATE_REFRESHING;
+	}
+	else if(m_State == STATE_REFRESHING)
+	{
+		if(m_pGetServers->State() == HTTP_QUEUED || m_pGetServers->State() == HTTP_RUNNING)
 		{
 			return;
 		}
-		bool ParseFailure = Parse(pJson, &m_aServers, &m_aLegacyServers);
+		m_State = STATE_DONE;
+		std::shared_ptr<CGet> pGetServers = nullptr;
+		std::swap(m_pGetServers, pGetServers);
+
+		bool Success = true;
+		json_value *pJson = pGetServers->ResultJson();
+		Success = Success && pJson;
+		Success = Success && !Parse(pJson, &m_aServers, &m_aLegacyServers);
 		json_value_free(pJson);
-		if(ParseFailure)
+		if(!Success)
 		{
-			return;
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "serverbrowse_http", "failed getting serverlist, trying to find best URL");
+			m_pChooseMaster->Reset();
+			m_pChooseMaster->Refresh();
 		}
 	}
 }
 void CServerBrowserHttp::Refresh()
 {
-	m_pEngine->AddJob(m_pGetServers = std::make_shared<CGet>(m_pChooseMaster->GetBestUrl(), CTimeout{0, 0, 0}));
+	if(m_State == STATE_WANTREFRESH)
+	{
+		m_pChooseMaster->Refresh();
+	}
+	m_State = STATE_WANTREFRESH;
+	Update();
 }
 bool ServerbrowserParseUrl(NETADDR *pOut, const char *pUrl)
 {
@@ -333,7 +381,7 @@ bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CEntry> *paServers
 		}
 		if(CServerInfo2::FromJson(&ParsedInfo, &Info))
 		{
-			dbg_msg("dbg/serverbrowser", "skipped due to info, i=%d", i);
+			//dbg_msg("dbg/serverbrowser", "skipped due to info, i=%d", i);
 			// Only skip the current server on parsing
 			// failure; the server info is "user input" by
 			// the game server and can be set to arbitrary
@@ -353,7 +401,7 @@ bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CEntry> *paServers
 			NETADDR ParsedAddr;
 			if(ServerbrowserParseUrl(&ParsedAddr, Addresses[a]))
 			{
-				dbg_msg("dbg/serverbrowser", "unknown address, i=%d a=%d", i, a);
+				//dbg_msg("dbg/serverbrowser", "unknown address, i=%d a=%d", i, a);
 				// Skip unknown addresses.
 				continue;
 			}
@@ -377,7 +425,50 @@ bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CEntry> *paServers
 	*paLegacyServers = aLegacyServers;
 	return false;
 }
-IServerBrowserHttp *CreateServerBrowserHttp(IEngine *pEngine)
+
+static const char *DEFAULT_SERVERLIST_URLS[] = {
+	"https://master1.ddnet.tw/ddnet/15/servers.json",
+	"https://master2.ddnet.tw/ddnet/15/servers.json",
+	"https://master3.ddnet.tw/ddnet/15/servers.json",
+	"https://master4.ddnet.tw/ddnet/15/servers.json",
+};
+
+IServerBrowserHttp *CreateServerBrowserHttp(IEngine *pEngine, IConsole *pConsole, IStorage *pStorage, const char *pPreviousBestUrl)
 {
-	return new CServerBrowserHttp(pEngine);
+	char aaUrls[CChooseMaster::MAX_URLS][256];
+	const char *apUrls[CChooseMaster::MAX_URLS];
+	const char **ppUrls = apUrls;
+	int NumUrls = 0;
+	IOHANDLE File = pStorage->OpenFile("serverlist_urls.cfg", IOFLAG_READ, IStorage::TYPE_ALL);
+	if(File)
+	{
+		CLineReader Lines;
+		Lines.Init(File);
+		while(NumUrls < CChooseMaster::MAX_URLS)
+		{
+			const char *pLine = Lines.Get();
+			if(!pLine)
+			{
+				break;
+			}
+			str_copy(aaUrls[NumUrls], pLine, sizeof(aaUrls[NumUrls]));
+			apUrls[NumUrls] = aaUrls[NumUrls];
+			NumUrls += 1;
+		}
+	}
+	if(NumUrls == 0)
+	{
+		ppUrls = DEFAULT_SERVERLIST_URLS;
+		NumUrls = sizeof(DEFAULT_SERVERLIST_URLS) / sizeof(DEFAULT_SERVERLIST_URLS[0]);
+	}
+	int PreviousBestIndex = -1;
+	for(int i = 0; i < NumUrls; i++)
+	{
+		if(str_comp(ppUrls[i], pPreviousBestUrl) == 0)
+		{
+			PreviousBestIndex = i;
+			break;
+		}
+	}
+	return new CServerBrowserHttp(pEngine, pConsole, ppUrls, NumUrls, PreviousBestIndex);
 }
