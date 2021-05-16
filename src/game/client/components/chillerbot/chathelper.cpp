@@ -229,6 +229,8 @@ void CChatHelper::OnChatMessage(int ClientID, int Team, const char *pMsg)
 		Highlighted = true;
 	if(m_pClient->Client()->DummyConnected() && LineShouldHighlight(pMsg, m_pClient->m_aClients[m_pClient->m_LocalIDs[1]].m_aName))
 		Highlighted = true;
+	if(Team == 3) // whisper recv
+		Highlighted = true;
 	if(!Highlighted)
 		return;
 	char aName[64];
