@@ -271,7 +271,8 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		RenderThemeSelection(Left);
 
 		DirectoryButton.HSplitTop(5.0f, 0, &DirectoryButton);
-		if(DoButton_Menu(&DirectoryButton, Localize("Themes directory"), 0, &DirectoryButton))
+		static int s_ThemesButtonID = 0;
+		if(DoButton_Menu(&s_ThemesButtonID, Localize("Themes directory"), 0, &DirectoryButton))
 		{
 			char aBuf[MAX_PATH_LENGTH];
 			char aBufFull[MAX_PATH_LENGTH + 7];
@@ -583,7 +584,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	MainView.HSplitTop(20.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	Button.VSplitMid(&Button, &Button2);
-	if(DoButton_CheckBox(&ColorBody, Localize("Custom colors"), *UseCustomColor, &Button))
+	static int s_CustomColorID = 0;
+	if(DoButton_CheckBox(&s_CustomColorID, Localize("Custom colors"), *UseCustomColor, &Button))
 	{
 		*UseCustomColor = *UseCustomColor ? 0 : 1;
 		SetNeedSendInfo();
@@ -724,7 +726,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	SkinDB.VSplitLeft(150.0f, &SkinDB, &DirectoryButton);
 	SkinDB.HSplitTop(5.0f, 0, &SkinDB);
-	if(DoButton_Menu(&SkinDB, Localize("Skin Database"), 0, &SkinDB))
+	static int s_SkinDBDirID = 0;
+	if(DoButton_Menu(&s_SkinDBDirID, Localize("Skin Database"), 0, &SkinDB))
 	{
 		if(!open_link("https://ddnet.tw/skins/"))
 		{
@@ -736,7 +739,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	DirectoryButton.VSplitRight(175.0f, 0, &DirectoryButton);
 	DirectoryButton.VSplitRight(25.0f, &DirectoryButton, &RefreshButton);
 	DirectoryButton.VSplitRight(10.0f, &DirectoryButton, 0);
-	if(DoButton_Menu(&DirectoryButton, Localize("Skins directory"), 0, &DirectoryButton))
+	static int s_DirectoryButtonID = 0;
+	if(DoButton_Menu(&s_DirectoryButtonID, Localize("Skins directory"), 0, &DirectoryButton))
 	{
 		char aBuf[MAX_PATH_LENGTH];
 		char aBufFull[MAX_PATH_LENGTH + 7];
@@ -751,7 +755,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
-	if(DoButton_Menu(&RefreshButton, "\xEE\x97\x95", 0, &RefreshButton, NULL, 15, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f), 0))
+	static int s_SkinRefreshButtonID = 0;
+	if(DoButton_Menu(&s_SkinRefreshButtonID, "\xEE\x97\x95", 0, &RefreshButton, NULL, 15, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f), 0))
 	{
 		m_pClient->m_pSkins->Refresh();
 		s_InitSkinlist = true;
@@ -898,13 +903,13 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	static int s_ControlsList = 0;
 	static int s_SelectedControl = -1;
 	static float s_ScrollValue = 0;
-	int OldSelected = s_SelectedControl;
+	static int s_OldSelected = 0;
 	// Hacky values: Size of 10.0f per item for smoother scrolling, 72 elements
 	// fits the current size of controls settings
 	UiDoListboxStart(&s_ControlsList, &MainView, 10.0f, Localize("Controls"), "", 72, 1, s_SelectedControl, s_ScrollValue);
 
 	CUIRect MovementSettings, WeaponSettings, VotingSettings, ChatSettings, DummySettings, MiscSettings, ResetButton;
-	CListboxItem Item = UiDoListboxNextItem(&OldSelected, false, false, true);
+	CListboxItem Item = UiDoListboxNextItem(&s_OldSelected, false, false, true);
 	Item.m_Rect.HSplitTop(10.0f, 0, &Item.m_Rect);
 	Item.m_Rect.VSplitMid(&MovementSettings, &VotingSettings);
 
@@ -1060,7 +1065,7 @@ int CMenus::RenderDropDown(int &CurDropDownState, CUIRect *pRect, int CurSelecti
 	{
 		CUIRect Button;
 		pRect->HSplitTop(24.0f, &Button, pRect);
-		if(DoButton_MenuTab(&pID, CurSelection > -1 ? pStr[CurSelection] : "", 0, &Button, CUI::CORNER_ALL, NULL, NULL, NULL, NULL, 4.0f))
+		if(DoButton_MenuTab(pID, CurSelection > -1 ? pStr[CurSelection] : "", 0, &Button, CUI::CORNER_ALL, NULL, NULL, NULL, NULL, 4.0f))
 			CurDropDownState = 1;
 		return CurSelection;
 	}
@@ -2441,7 +2446,8 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 	Left.HSplitTop(20.0f, &Button, &Left);
 	bool ShowOwnTeam = g_Config.m_ClShowOthers == 2;
-	if(DoButton_CheckBox(&ShowOwnTeam, Localize("Show others (own team only)"), ShowOwnTeam, &Button))
+	static int s_ShowOwnTeamID = 0;
+	if(DoButton_CheckBox(&s_ShowOwnTeamID, Localize("Show others (own team only)"), ShowOwnTeam, &Button))
 	{
 		g_Config.m_ClShowOthers = g_Config.m_ClShowOthers != 2 ? 2 : 0;
 	}
@@ -2548,7 +2554,8 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 	Left.HSplitTop(20.0f, &Button, &Left);
 	bool UseCurrentMap = str_comp(g_Config.m_ClBackgroundEntities, CURRENT_MAP) == 0;
-	if(DoButton_CheckBox(&UseCurrentMap, Localize("Use current map as background"), UseCurrentMap, &Button))
+	static int s_UseCurrentMapID = 0;
+	if(DoButton_CheckBox(&s_UseCurrentMapID, Localize("Use current map as background"), UseCurrentMap, &Button))
 	{
 		if(UseCurrentMap)
 			g_Config.m_ClBackgroundEntities[0] = '\0';
