@@ -9,7 +9,7 @@
 #include <game/gamecore.h>
 #include <game/mapitems.h>
 
-#include <pnglite.h>
+#include <engine/shared/image_loader.h>
 /*
 	Usage: map_convert_07 <source map filepath> <dest map filepath>
 */
@@ -28,40 +28,41 @@ int g_aImageIDs[64];
 
 int LoadPNG(CImageInfo *pImg, const char *pFilename)
 {
-	unsigned char *pBuffer;
-	png_t Png;
-
-	int Error = png_open_file(&Png, pFilename);
-	if(Error != PNG_NO_ERROR)
+	IOHANDLE File = io_open(pFilename, IOFLAG_READ);
+	if(File)
 	{
-		dbg_msg("map_convert_07", "failed to open image file. filename='%s', pnglite: %s", pFilename, png_error_string(Error));
-		if(Error != PNG_FILE_ERROR)
-			png_close_file(&Png);
-		return 0;
-	}
+		io_seek(File, 0, IOSEEK_END);
+		unsigned int FileSize = io_tell(File);
+		io_seek(File, 0, IOSEEK_START);
+		TImageByteBuffer ByteBuffer;
+		SImageByteBuffer ImageByteBuffer(&ByteBuffer);
 
-	if(Png.depth != 8 || Png.color_type != PNG_TRUECOLOR_ALPHA || Png.width > (2 << 12) || Png.height > (2 << 12))
-	{
-		dbg_msg("map_convert_07", "invalid image format. filename='%s'", pFilename);
-		png_close_file(&Png);
-		return 0;
-	}
+		ByteBuffer.resize(FileSize);
+		io_read(File, &ByteBuffer.front(), FileSize);
 
-	pBuffer = (unsigned char *)malloc((size_t)Png.width * Png.height * Png.bpp);
-	Error = png_get_data(&Png, pBuffer);
-	if(Error != PNG_NO_ERROR)
-	{
-		dbg_msg("map_convert_07", "failed to read image. filename='%s', pnglite: %s", pFilename, png_error_string(Error));
-		free(pBuffer);
-		png_close_file(&Png);
-		return 0;
-	}
-	png_close_file(&Png);
+		io_close(File);
 
-	pImg->m_Width = Png.width;
-	pImg->m_Height = Png.height;
-	pImg->m_Format = CImageInfo::FORMAT_RGBA;
-	pImg->m_pData = pBuffer;
+		uint8_t *pImgBuffer = NULL;
+		EImageFormat ImageFormat;
+		if(LoadPNG(ImageByteBuffer, pFilename, pImg->m_Width, pImg->m_Height, pImgBuffer, ImageFormat))
+		{
+			pImg->m_pData = pImgBuffer;
+
+			if(ImageFormat == IMAGE_FORMAT_RGBA && pImg->m_Width <= (2 << 13) && pImg->m_Height <= (2 << 13))
+			{
+				pImg->m_Format = CImageInfo::FORMAT_RGBA;
+			}
+			else
+			{
+				dbg_msg("map_convert_07", "invalid image format. filename='%s'", pFilename);
+				return 0;
+			}
+		}
+		else
+			return 0;
+	}
+	else
+		return 0;
 	return 1;
 }
 
@@ -193,8 +194,6 @@ int main(int argc, const char **argv)
 		dbg_msg("map_convert_07", "failed to open destination map. filename='%s'", pDestFileName);
 		return -1;
 	}
-
-	png_init(0, 0);
 
 	g_NextDataItemID = g_DataReader.NumData();
 

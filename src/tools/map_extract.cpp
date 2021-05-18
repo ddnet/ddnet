@@ -4,7 +4,7 @@
 #include <engine/storage.h>
 #include <game/mapitems.h>
 
-#include <pnglite.h>
+#include <engine/shared/image_loader.h>
 
 bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 {
@@ -51,10 +51,16 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 		dbg_msg("map_extract", "writing image: %s (%dx%d)", aBuf, pItem->m_Width, pItem->m_Height);
 
 		// copy image data
-		png_t Png;
-		png_open_file_write(&Png, aBuf);
-		png_set_data(&Png, pItem->m_Width, pItem->m_Height, 8, PNG_TRUECOLOR_ALPHA, (unsigned char *)Map.GetData(pItem->m_ImageData));
-		png_close_file(&Png);
+		IOHANDLE File = io_open(aBuf, IOFLAG_WRITE);
+		if(File)
+		{
+			TImageByteBuffer ByteBuffer;
+			SImageByteBuffer ImageByteBuffer(&ByteBuffer);
+
+			if(SavePNG(IMAGE_FORMAT_RGBA, (const uint8_t *)Map.GetData(pItem->m_ImageData), ImageByteBuffer, pItem->m_Width, pItem->m_Height))
+				io_write(File, &ByteBuffer.front(), ByteBuffer.size());
+			io_close(File);
+		}
 	}
 
 	// load sounds
@@ -110,8 +116,6 @@ int main(int argc, char *argv[])
 		dbg_msg("usage", "directory '%s' does not exist", aDir);
 		return -1;
 	}
-
-	png_init(0, 0);
 
 	return Process(pStorage, aMap, aDir) ? 0 : 1;
 }

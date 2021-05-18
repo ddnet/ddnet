@@ -8,7 +8,7 @@
 #include <engine/storage.h>
 #include <game/mapitems.h>
 
-#include <pnglite.h>
+#include <engine/shared/image_loader.h>
 /*
 	Usage: map_replace_image <source map filepath> <dest map filepath> <current image name> <new image filepath>
 	Notes: map filepath must be relative to user default teeworlds folder
@@ -27,48 +27,44 @@ void *g_pNewData = 0;
 
 int LoadPNG(CImageInfo *pImg, const char *pFilename)
 {
-	unsigned char *pBuffer;
-	png_t Png;
-
-	int Error = png_open_file(&Png, pFilename);
-	if(Error != PNG_NO_ERROR)
+	IOHANDLE File = io_open(pFilename, IOFLAG_READ);
+	if(File)
 	{
-		dbg_msg("map_replace_image", "failed to open image file. filename='%s', pnglite: %s", pFilename, png_error_string(Error));
-		if(Error != PNG_FILE_ERROR)
-			png_close_file(&Png);
-		return 0;
-	}
+		io_seek(File, 0, IOSEEK_END);
+		unsigned int FileSize = io_tell(File);
+		io_seek(File, 0, IOSEEK_START);
+		TImageByteBuffer ByteBuffer;
+		SImageByteBuffer ImageByteBuffer(&ByteBuffer);
 
-	if(Png.depth != 8 || (Png.color_type != PNG_TRUECOLOR && Png.color_type != PNG_TRUECOLOR_ALPHA) || Png.width > (2 << 12) || Png.height > (2 << 12))
-	{
-		dbg_msg("map_replace_image", "invalid image format. filename='%s'", pFilename);
-		png_close_file(&Png);
-		return 0;
-	}
+		ByteBuffer.resize(FileSize);
+		io_read(File, &ByteBuffer.front(), FileSize);
 
-	pBuffer = (unsigned char *)malloc((size_t)Png.width * Png.height * Png.bpp);
-	Error = png_get_data(&Png, pBuffer);
-	if(Error != PNG_NO_ERROR)
-	{
-		dbg_msg("map_convert_07", "failed to read image. filename='%s', pnglite: %s", pFilename, png_error_string(Error));
-		free(pBuffer);
-		png_close_file(&Png);
-		return 0;
-	}
-	png_close_file(&Png);
+		io_close(File);
 
-	pImg->m_Width = Png.width;
-	pImg->m_Height = Png.height;
-	if(Png.color_type == PNG_TRUECOLOR)
-		pImg->m_Format = CImageInfo::FORMAT_RGB;
-	else if(Png.color_type == PNG_TRUECOLOR_ALPHA)
-		pImg->m_Format = CImageInfo::FORMAT_RGBA;
+		uint8_t *pImgBuffer = NULL;
+		EImageFormat ImageFormat;
+		if(LoadPNG(ImageByteBuffer, pFilename, pImg->m_Width, pImg->m_Height, pImgBuffer, ImageFormat))
+		{
+			if((ImageFormat == IMAGE_FORMAT_RGBA || ImageFormat == IMAGE_FORMAT_RGB) && pImg->m_Width <= (2 << 13) && pImg->m_Height <= (2 << 13))
+			{
+				pImg->m_pData = pImgBuffer;
+
+				if(ImageFormat == IMAGE_FORMAT_RGB) // ignore_convention
+					pImg->m_Format = CImageInfo::FORMAT_RGB;
+				else if(ImageFormat == IMAGE_FORMAT_RGBA) // ignore_convention
+					pImg->m_Format = CImageInfo::FORMAT_RGBA;
+				else
+				{
+					free(pImgBuffer);
+					return 0;
+				}
+			}
+		}
+		else
+			return 0;
+	}
 	else
-	{
-		free(pBuffer);
 		return 0;
-	}
-	pImg->m_pData = pBuffer;
 	return 1;
 }
 
@@ -147,8 +143,6 @@ int main(int argc, const char **argv)
 		dbg_msg("map_replace_image", "failed to open destination map. filename='%s'", pDestFileName);
 		return -1;
 	}
-
-	png_init(0, 0);
 
 	// add all items
 	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)

@@ -1,53 +1,74 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "engine/graphics.h"
 #include <base/math.h>
 #include <base/system.h>
+#include <engine/shared/image_loader.h>
 #include <engine/shared/image_manipulation.h>
-#include <pnglite.h>
 
 int DilateFile(const char *pFileName)
 {
-	png_t Png;
-
-	png_init(0, 0);
-	int Error = png_open_file(&Png, pFileName);
-	if(Error != PNG_NO_ERROR)
+	IOHANDLE File = io_open(pFileName, IOFLAG_READ);
+	if(File)
 	{
-		dbg_msg("dilate", "failed to open image file. filename='%s', pnglite: %s", pFileName, png_error_string(Error));
-		if(Error != PNG_FILE_ERROR)
-			png_close_file(&Png);
-		return 0;
-	}
+		io_seek(File, 0, IOSEEK_END);
+		unsigned int FileSize = io_tell(File);
+		io_seek(File, 0, IOSEEK_START);
+		TImageByteBuffer ByteBuffer;
+		SImageByteBuffer ImageByteBuffer(&ByteBuffer);
 
-	if(Png.color_type != PNG_TRUECOLOR_ALPHA)
+		ByteBuffer.resize(FileSize);
+		io_read(File, &ByteBuffer.front(), FileSize);
+
+		io_close(File);
+
+		CImageInfo Img;
+
+		uint8_t *pImgBuffer = NULL;
+		EImageFormat ImageFormat;
+		if(LoadPNG(ImageByteBuffer, pFileName, Img.m_Width, Img.m_Height, pImgBuffer, ImageFormat))
+		{
+			if(ImageFormat != IMAGE_FORMAT_RGBA)
+			{
+				free(pImgBuffer);
+				dbg_msg("dilate", "%s: not an RGBA image", pFileName);
+				return -1;
+			}
+
+			Img.m_pData = pImgBuffer;
+
+			unsigned char *pBuffer = (unsigned char *)Img.m_pData;
+
+			int w = Img.m_Width;
+			int h = Img.m_Height;
+
+			DilateImage(pBuffer, w, h, 4);
+
+			// save here
+			IOHANDLE SaveFile = io_open(pFileName, IOFLAG_WRITE);
+			if(SaveFile)
+			{
+				TImageByteBuffer ByteBuffer;
+				SImageByteBuffer ImageByteBuffer(&ByteBuffer);
+
+				if(SavePNG(IMAGE_FORMAT_RGBA, (const uint8_t *)pBuffer, ImageByteBuffer, w, h))
+					io_write(SaveFile, &ByteBuffer.front(), ByteBuffer.size());
+				io_close(SaveFile);
+
+				free(pBuffer);
+			}
+		}
+		else
+		{
+			dbg_msg("dilate", "failed unknown image format: %s", pFileName);
+			return -1;
+		}
+	}
+	else
 	{
-		dbg_msg("dilate", "%s: not an RGBA image", pFileName);
-		return 1;
+		dbg_msg("dilate", "failed to open image file. filename='%s'", pFileName);
+		return -1;
 	}
-
-	unsigned char *pBuffer = (unsigned char *)malloc((size_t)Png.width * Png.height * sizeof(unsigned char) * 4);
-
-	Error = png_get_data(&Png, pBuffer);
-	if(Error != PNG_NO_ERROR)
-	{
-		dbg_msg("map_convert_07", "failed to read image. filename='%s', pnglite: %s", pFileName, png_error_string(Error));
-		free(pBuffer);
-		png_close_file(&Png);
-		return 0;
-	}
-	png_close_file(&Png);
-
-	int w = Png.width;
-	int h = Png.height;
-
-	DilateImage(pBuffer, w, h, 4);
-
-	// save here
-	png_open_file_write(&Png, pFileName);
-	png_set_data(&Png, w, h, 8, PNG_TRUECOLOR_ALPHA, (unsigned char *)pBuffer);
-	png_close_file(&Png);
-
-	free(pBuffer);
 
 	return 0;
 }

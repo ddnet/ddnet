@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y mingw-w64 \
         libglew-dev \
         libogg-dev \
         libopus-dev \
-        libpnglite-dev \
+        libpng-dev \
         libwavpack-dev \
         libopusfile-dev \
         libsdl2-dev
