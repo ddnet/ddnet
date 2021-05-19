@@ -298,7 +298,7 @@ void CCharacterCore::Tick(bool UseInput)
 				m_HookState = HOOK_RETRACT_START;
 			}
 
-			if(GoingThroughTele && m_pTeleOuts && m_pTeleOuts->size() && (*m_pTeleOuts)[teleNr - 1].size())
+			if(GoingThroughTele && m_pWorld && m_pTeleOuts && m_pTeleOuts->size() && (*m_pTeleOuts)[teleNr - 1].size())
 			{
 				m_TriggeredEvents = 0;
 				m_HookedPlayer = -1;
@@ -318,7 +318,7 @@ void CCharacterCore::Tick(bool UseInput)
 
 	if(m_HookState == HOOK_GRABBED)
 	{
-		if(m_HookedPlayer != -1)
+		if(m_HookedPlayer != -1 && m_pWorld)
 		{
 			CCharacterCore *pCharCore = m_pWorld->m_apCharacters[m_HookedPlayer];
 			if(pCharCore && m_Id != -1 && m_pTeams->CanKeepHook(m_Id, pCharCore->m_Id))
@@ -361,7 +361,7 @@ void CCharacterCore::Tick(bool UseInput)
 
 		// release hook (max default hook time is 1.25 s)
 		m_HookTick++;
-		if(m_HookedPlayer != -1 && (m_HookTick > SERVER_TICK_SPEED + SERVER_TICK_SPEED / 5 || !m_pWorld->m_apCharacters[m_HookedPlayer]))
+		if(m_HookedPlayer != -1 && (m_HookTick > SERVER_TICK_SPEED + SERVER_TICK_SPEED / 5 || (m_pWorld && !m_pWorld->m_apCharacters[m_HookedPlayer])))
 		{
 			m_HookedPlayer = -1;
 			m_HookState = HOOK_RETRACTED;
