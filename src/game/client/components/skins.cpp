@@ -167,13 +167,15 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 
 	int BodyOutlineGridPixelsWidth = (Info.m_Width / g_pData->m_aSprites[SPRITE_TEE_BODY_OUTLINE].m_pSet->m_Gridx);
 	int BodyOutlineGridPixelsHeight = (Info.m_Height / g_pData->m_aSprites[SPRITE_TEE_BODY_OUTLINE].m_pSet->m_Gridy);
-	int BodyOutlineSize = g_pData->m_aSprites[SPRITE_TEE_BODY_OUTLINE].m_H * BodyOutlineGridPixelsHeight;
+	int BodyOutlineWidth = g_pData->m_aSprites[SPRITE_TEE_BODY_OUTLINE].m_W * BodyOutlineGridPixelsWidth;
+	int BodyOutlineHeight = g_pData->m_aSprites[SPRITE_TEE_BODY_OUTLINE].m_H * BodyOutlineGridPixelsHeight;
 
 	int BodyOutlineOffsetX = g_pData->m_aSprites[SPRITE_TEE_BODY_OUTLINE].m_X * BodyOutlineGridPixelsWidth;
 	int BodyOutlineOffsetY = g_pData->m_aSprites[SPRITE_TEE_BODY_OUTLINE].m_Y * BodyOutlineGridPixelsHeight;
 
-	int BodySize = g_pData->m_aSprites[SPRITE_TEE_BODY].m_H * (Info.m_Height / g_pData->m_aSprites[SPRITE_TEE_BODY].m_pSet->m_Gridy); // body size
-	if(BodySize > Info.m_Height)
+	int BodyWidth = g_pData->m_aSprites[SPRITE_TEE_BODY].m_W * (Info.m_Width / g_pData->m_aSprites[SPRITE_TEE_BODY].m_pSet->m_Gridx); // body width
+	int BodyHeight = g_pData->m_aSprites[SPRITE_TEE_BODY].m_H * (Info.m_Height / g_pData->m_aSprites[SPRITE_TEE_BODY].m_pSet->m_Gridy); // body height
+	if(BodyWidth > Info.m_Width || BodyHeight > Info.m_Height)
 		return 0;
 	unsigned char *d = (unsigned char *)Info.m_pData;
 	int Pitch = Info.m_Width * 4;
@@ -181,8 +183,8 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 	// dig out blood color
 	{
 		int aColors[3] = {0};
-		for(int y = 0; y < BodySize; y++)
-			for(int x = 0; x < BodySize; x++)
+		for(int y = 0; y < BodyHeight; y++)
+			for(int x = 0; x < BodyWidth; x++)
 			{
 				uint8_t AlphaValue = d[y * Pitch + x * 4 + 3];
 				if(AlphaValue > 128)
@@ -198,10 +200,10 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 			Skin.m_BloodColor = ColorRGBA(0, 0, 0, 1);
 	}
 
-	CheckMetrics(Skin.m_Metrics.m_Body, d, Pitch, 0, 0, BodySize, BodySize);
+	CheckMetrics(Skin.m_Metrics.m_Body, d, Pitch, 0, 0, BodyWidth, BodyHeight);
 
 	// body outline metrics
-	CheckMetrics(Skin.m_Metrics.m_Body, d, Pitch, BodyOutlineOffsetX, BodyOutlineOffsetY, BodyOutlineSize, BodyOutlineSize);
+	CheckMetrics(Skin.m_Metrics.m_Body, d, Pitch, BodyOutlineOffsetX, BodyOutlineOffsetY, BodyOutlineWidth, BodyOutlineHeight);
 
 	// get feet size
 	CheckMetrics(Skin.m_Metrics.m_Feet, d, Pitch, FeetOffsetX, FeetOffsetY, FeetWidth, FeetHeight);
@@ -226,8 +228,8 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 	int NewWeight = 192;
 
 	// find most common frequence
-	for(int y = 0; y < BodySize; y++)
-		for(int x = 0; x < BodySize; x++)
+	for(int y = 0; y < BodyHeight; y++)
+		for(int x = 0; x < BodyWidth; x++)
 		{
 			if(d[y * Pitch + x * 4 + 3] > 128)
 				Freq[d[y * Pitch + x * 4]]++;
@@ -242,8 +244,8 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 	// reorder
 	int InvOrgWeight = 255 - OrgWeight;
 	int InvNewWeight = 255 - NewWeight;
-	for(int y = 0; y < BodySize; y++)
-		for(int x = 0; x < BodySize; x++)
+	for(int y = 0; y < BodyHeight; y++)
+		for(int x = 0; x < BodyWidth; x++)
 		{
 			int v = d[y * Pitch + x * 4];
 			if(v <= OrgWeight && OrgWeight == 0)
