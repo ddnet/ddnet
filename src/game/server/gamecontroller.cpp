@@ -119,37 +119,47 @@ float IGameController::EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos)
 
 void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type)
 {
-	// get spawn point
-	for(int i = 0; i < m_aNumSpawnPoints[Type]; i++)
+	// j == 0: Find an empty slot, j == 1: Take any slot if no empty one found
+	for(int j = 0; j < 2 && !pEval->m_Got; j++)
 	{
-		// check if the position is occupado
-		CCharacter *aEnts[MAX_CLIENTS];
-		int Num = GameServer()->m_World.FindEntities(m_aaSpawnPoints[Type][i], 64, (CEntity **)aEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
-		vec2 Positions[5] = {vec2(0.0f, 0.0f), vec2(-32.0f, 0.0f), vec2(0.0f, -32.0f), vec2(32.0f, 0.0f), vec2(0.0f, 32.0f)}; // start, left, up, right, down
-		int Result = -1;
-		for(int Index = 0; Index < 5 && Result == -1; ++Index)
+		// get spawn point
+		for(int i = 0; i < m_aNumSpawnPoints[Type]; i++)
 		{
-			Result = Index;
-			if(!GameServer()->m_World.m_Core.m_Tuning[0].m_PlayerCollision)
-				break;
-			for(int c = 0; c < Num; ++c)
-				if(GameServer()->Collision()->CheckPoint(m_aaSpawnPoints[Type][i] + Positions[Index]) ||
-					distance(aEnts[c]->m_Pos, m_aaSpawnPoints[Type][i] + Positions[Index]) <= aEnts[c]->GetProximityRadius())
-				{
-					Result = -1;
-					break;
-				}
-		}
-		if(Result == -1)
-			continue; // try next spawn point
+			vec2 P = m_aaSpawnPoints[Type][i];
 
-		vec2 P = m_aaSpawnPoints[Type][i] + Positions[Result];
-		float S = EvaluateSpawnPos(pEval, P);
-		if(!pEval->m_Got || pEval->m_Score > S)
-		{
-			pEval->m_Got = true;
-			pEval->m_Score = S;
-			pEval->m_Pos = P;
+			if(j == 0)
+			{
+				// check if the position is occupado
+				CCharacter *aEnts[MAX_CLIENTS];
+				int Num = GameServer()->m_World.FindEntities(m_aaSpawnPoints[Type][i], 64, (CEntity **)aEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+				vec2 Positions[5] = {vec2(0.0f, 0.0f), vec2(-32.0f, 0.0f), vec2(0.0f, -32.0f), vec2(32.0f, 0.0f), vec2(0.0f, 32.0f)}; // start, left, up, right, down
+				int Result = -1;
+				for(int Index = 0; Index < 5 && Result == -1; ++Index)
+				{
+					Result = Index;
+					if(!GameServer()->m_World.m_Core.m_Tuning[0].m_PlayerCollision)
+						break;
+					for(int c = 0; c < Num; ++c)
+						if(GameServer()->Collision()->CheckPoint(m_aaSpawnPoints[Type][i] + Positions[Index]) ||
+							distance(aEnts[c]->m_Pos, m_aaSpawnPoints[Type][i] + Positions[Index]) <= aEnts[c]->GetProximityRadius())
+						{
+							Result = -1;
+							break;
+						}
+				}
+				if(Result == -1)
+					continue; // try next spawn point
+
+				P += Positions[Result];
+			}
+
+			float S = EvaluateSpawnPos(pEval, P);
+			if(!pEval->m_Got || (j == 0 && pEval->m_Score > S))
+			{
+				pEval->m_Got = true;
+				pEval->m_Score = S;
+				pEval->m_Pos = P;
+			}
 		}
 	}
 }
