@@ -403,9 +403,6 @@ Show ingame HUD
 Show name plates
 == 이름 표시
 
-Show only supported
-== 지원하는 해상도 표시
-
 Skins
 == 스킨
 

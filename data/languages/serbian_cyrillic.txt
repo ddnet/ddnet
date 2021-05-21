@@ -412,9 +412,6 @@ Show ingame HUD
 Show name plates
 == Прикажи плочице са именима
 
-Show only supported
-== Прикажи само подржане
-
 Skins
 == Теме
 

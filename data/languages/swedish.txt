@@ -416,9 +416,6 @@ Show ingame HUD
 Show name plates
 == Visa namnskyltar
 
-Show only supported
-== Visa endast upplösningar som stöds
-
 Skins
 == Utseende
 

@@ -416,9 +416,6 @@ Show ingame HUD
 Show name plates
 == Pokazuj nicki
 
-Show only supported
-== Pokazuj tylko wspierane
-
 Skins
 == Motywy
 

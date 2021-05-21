@@ -412,9 +412,6 @@ Show ingame HUD
 Show name plates
 == Zobrazovat jména hráčů
 
-Show only supported
-== Zobrazit pouze podporované
-
 Skins
 == Vzhledy
 

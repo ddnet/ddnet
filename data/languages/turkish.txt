@@ -415,9 +415,6 @@ Show ingame HUD
 Show name plates
 == Oyuncu isimlerini göster
 
-Show only supported
-== Desteklenmeyen çözünürlükleri gizle
-
 Skins
 == Skinler
 

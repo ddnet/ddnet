@@ -414,9 +414,6 @@ Show name plates
 Show only chat messages from friends
 == Rebre només missatges d'amics
 
-Show only supported
-== Veure únicament modes compatibles
-
 Skins
 == Skins
 

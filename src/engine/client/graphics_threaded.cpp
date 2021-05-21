@@ -2514,7 +2514,7 @@ const char *CGraphics_Threaded::GetRendererString()
 
 int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen)
 {
-	if(g_Config.m_GfxDisplayAllModes)
+	if(g_Config.m_GfxDisplayAllVideoModes)
 	{
 		int Count = sizeof(g_aFakeModes) / sizeof(CVideoMode);
 		mem_copy(pModes, g_aFakeModes, sizeof(g_aFakeModes));

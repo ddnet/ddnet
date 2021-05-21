@@ -413,9 +413,6 @@ Show ingame HUD
 Show name plates
 == Вылякансен ят кăтартма
 
-Show only supported
-== Ĕçлекен экран режимĕсем анчах
-
 Skins
 == Сăнсем
 

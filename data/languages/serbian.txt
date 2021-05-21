@@ -416,9 +416,6 @@ Show ingame HUD
 Show name plates
 == Prikaži imena igrača
 
-Show only supported
-== Prikaži samo podržane
-
 Skins
 == Skinovi
 

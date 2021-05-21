@@ -411,9 +411,6 @@ Show name plates
 Show only chat messages from friends
 == ﺀﺎﻗﺪﺻﻻﺍ ﻦﻣ ﻂﻘﻓ ﻞﺋﺎﺳﺮﻟﺍ ﺭﺎﻬﻇﺍ
 
-Show only supported
-== ﻂﻘﻓ ﻡﻮﻋﺪﻣ ﺽﺮﻋ
-
 Skins
 == ﺕﺎﻨﻜﺴﻟﺍ
 

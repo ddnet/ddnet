@@ -311,9 +311,6 @@ Show chat
 Show name plates
 == Показувати ніки гравців
 
-Show only supported
-== Тільки підтримувані режими
-
 Skins
 == Скіни
 

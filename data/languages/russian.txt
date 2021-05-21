@@ -421,9 +421,6 @@ Show ingame HUD
 Show name plates
 == Показывать имена игроков
 
-Show only supported
-== Показывать только поддерживаемые разрешения экрана
-
 Skins
 == Скины
 

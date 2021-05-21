@@ -419,9 +419,6 @@ Show name plates
 Show only chat messages from friends
 == Προβολή μηνυμάτων μόνο από φίλους
 
-Show only supported
-== Προβολή υποστηριζόμενων μόνο
-
 Skins
 == Στολές
 

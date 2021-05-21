@@ -436,9 +436,6 @@ Show name plates
 Show only chat messages from friends
 == Mostrar apenas mensagens de amigos
 
-Show only supported
-== Mostrar apenas modos suportados
-
 Skins
 == Skins
 
