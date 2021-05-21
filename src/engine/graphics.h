@@ -170,12 +170,8 @@ protected:
 	int m_DesktopScreenHeight;
 
 public:
-	/* Constants: Texture Loading Flags
-		TEXLOAD_NORESAMPLE - Prevents the texture from any resampling
-	*/
 	enum
 	{
-		TEXLOAD_NORESAMPLE = 1 << 0,
 		TEXLOAD_NOMIPMAPS = 1 << 1,
 		TEXLOAD_NO_COMPRESSION = 1 << 2,
 		TEXLOAD_TO_3D_TEXTURE = (1 << 3),

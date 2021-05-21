@@ -456,8 +456,6 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Heig
 	Cmd.m_Flags = 0;
 	if(Flags & IGraphics::TEXLOAD_NOMIPMAPS)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_NOMIPMAPS;
-	if(g_Config.m_GfxTextureQualityOld || Flags & TEXLOAD_NORESAMPLE)
-		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_QUALITY;
 	if((Flags & IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE) != 0)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE;
 	if((Flags & IGraphics::TEXLOAD_TO_3D_TEXTURE) != 0)
@@ -2253,7 +2251,7 @@ int CGraphics_Threaded::Init()
 		0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0xff,
 		0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0xff};
 
-	m_InvalidTexture = LoadTextureRaw(4, 4, CImageInfo::FORMAT_RGBA, s_aNullTextureData, CImageInfo::FORMAT_RGBA, TEXLOAD_NORESAMPLE);
+	m_InvalidTexture = LoadTextureRaw(4, 4, CImageInfo::FORMAT_RGBA, s_aNullTextureData, CImageInfo::FORMAT_RGBA, 0);
 
 	ColorRGBA GPUInfoPrintColor{0.6f, 0.5f, 1.0f, 1.0f};
 

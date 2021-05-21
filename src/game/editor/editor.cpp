@@ -4508,7 +4508,7 @@ void CEditor::RenderFileDialog()
 
 				if(Graphics()->LoadPNG(&m_FilePreviewImageInfo, aBuffer, IStorage::TYPE_ALL))
 				{
-					m_FilePreviewImage = Graphics()->LoadTextureRaw(m_FilePreviewImageInfo.m_Width, m_FilePreviewImageInfo.m_Height, m_FilePreviewImageInfo.m_Format, m_FilePreviewImageInfo.m_pData, m_FilePreviewImageInfo.m_Format, IGraphics::TEXLOAD_NORESAMPLE);
+					m_FilePreviewImage = Graphics()->LoadTextureRaw(m_FilePreviewImageInfo.m_Width, m_FilePreviewImageInfo.m_Height, m_FilePreviewImageInfo.m_Format, m_FilePreviewImageInfo.m_pData, m_FilePreviewImageInfo.m_Format, 0);
 					CImageInfo DummyInfo = m_FilePreviewImageInfo;
 					m_FilePreviewImageInfo.m_pData = NULL;
 					Graphics()->FreePNG(&DummyInfo);
@@ -4852,7 +4852,7 @@ void CEditor::RenderUndoList(CUIRect View)
 		{
 			char aBuffer[1024];
 			str_format(aBuffer, sizeof(aBuffer), "editor/undo_%i.png", m_lUndoSteps[HoveredIndex].m_FileNum);
-			m_lUndoSteps[HoveredIndex].m_PreviewImage = Graphics()->LoadTexture(aBuffer, IStorage::TYPE_SAVE, CImageInfo::FORMAT_RGB, IGraphics::TEXLOAD_NORESAMPLE);
+			m_lUndoSteps[HoveredIndex].m_PreviewImage = Graphics()->LoadTexture(aBuffer, IStorage::TYPE_SAVE, CImageInfo::FORMAT_RGB, 0);
 			m_lUndoSteps[HoveredIndex].m_PreviewImageIsLoaded = true;
 		}
 		if(m_lUndoSteps[HoveredIndex].m_PreviewImageIsLoaded)

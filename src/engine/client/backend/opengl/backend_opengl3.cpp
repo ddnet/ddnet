@@ -632,16 +632,6 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 			free(pTexData);
 			pTexData = pTmpData;
 		}
-		else if(pCommand->m_Format != CCommandBuffer::TEXFORMAT_ALPHA && (Width > 16 && Height > 16 && (pCommand->m_Flags & CCommandBuffer::TEXFLAG_QUALITY) == 0))
-		{
-			Width >>= 1;
-			Height >>= 1;
-			++RescaleCount;
-
-			void *pTmpData = Resize(pCommand->m_Width, pCommand->m_Height, Width, Height, pCommand->m_Format, static_cast<const unsigned char *>(pCommand->m_pData));
-			free(pTexData);
-			pTexData = pTmpData;
-		}
 	}
 	m_Textures[pCommand->m_Slot].m_Width = Width;
 	m_Textures[pCommand->m_Slot].m_Height = Height;
