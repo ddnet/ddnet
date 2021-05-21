@@ -771,13 +771,6 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 			} while(Width > m_MaxTexSize || Height > m_MaxTexSize);
 			NeedsResize = true;
 		}
-		else if(pCommand->m_Format != CCommandBuffer::TEXFORMAT_ALPHA && (Width > 16 && Height > 16 && (pCommand->m_Flags & CCommandBuffer::TEXFLAG_QUALITY) == 0))
-		{
-			Width >>= 1;
-			Height >>= 1;
-			++RescaleCount;
-			NeedsResize = true;
-		}
 
 		if(NeedsResize)
 		{
