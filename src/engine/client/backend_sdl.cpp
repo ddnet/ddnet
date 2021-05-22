@@ -190,18 +190,29 @@ void CCommandProcessorFragment_SDL::Cmd_VideoModes(const CCommandBuffer::SComman
 	int maxModes = SDL_GetNumDisplayModes(pCommand->m_Screen),
 	    numModes = 0;
 
-	for(int i = 0; i < maxModes; i++)
+	for(int i = -1; i < maxModes; i++)
 	{
-		if(SDL_GetDisplayMode(pCommand->m_Screen, i, &mode) < 0)
+		if(i == -1)
 		{
-			dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
-			continue;
+			if(SDL_GetDesktopDisplayMode(pCommand->m_Screen, &mode) < 0)
+			{
+				dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
+				continue;
+			}
+		}
+		else
+		{
+			if(SDL_GetDisplayMode(pCommand->m_Screen, i, &mode) < 0)
+			{
+				dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
+				continue;
+			}
 		}
 
 		bool AlreadyFound = false;
 		for(int j = 0; j < numModes; j++)
 		{
-			if(pCommand->m_pModes[j].m_Width == mode.w && pCommand->m_pModes[j].m_Height == mode.h)
+			if(pCommand->m_pModes[j].m_CanvasWidth == mode.w && pCommand->m_pModes[j].m_CanvasHeight == mode.h)
 			{
 				AlreadyFound = true;
 				break;
@@ -210,8 +221,13 @@ void CCommandProcessorFragment_SDL::Cmd_VideoModes(const CCommandBuffer::SComman
 		if(AlreadyFound)
 			continue;
 
-		pCommand->m_pModes[numModes].m_Width = mode.w;
-		pCommand->m_pModes[numModes].m_Height = mode.h;
+		if(mode.w > pCommand->m_MaxWindowWidth || mode.h > pCommand->m_MaxWindowHeight)
+			continue;
+
+		pCommand->m_pModes[numModes].m_CanvasWidth = mode.w * pCommand->m_HiDPIScale;
+		pCommand->m_pModes[numModes].m_CanvasHeight = mode.h * pCommand->m_HiDPIScale;
+		pCommand->m_pModes[numModes].m_WindowWidth = mode.w;
+		pCommand->m_pModes[numModes].m_WindowHeight = mode.h;
 		pCommand->m_pModes[numModes].m_Red = 8;
 		pCommand->m_pModes[numModes].m_Green = 8;
 		pCommand->m_pModes[numModes].m_Blue = 8;
@@ -740,11 +756,14 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		dbg_msg("gfx", "unable to get desktop resolution: %s", SDL_GetError());
 		return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_SDL_SCREEN_RESOLUTION_REQUEST_FAILED;
 	}
+
+	bool IsDesktopChanged = *pDesktopWidth == 0 || *pDesktopHeight == 0 || *pDesktopWidth != DisplayMode.w || *pDesktopHeight != DisplayMode.h;
+
 	*pDesktopWidth = DisplayMode.w;
 	*pDesktopHeight = DisplayMode.h;
 
-	// use desktop resolution as default resolution
-	if(*pWidth == 0 || *pHeight == 0)
+	// use desktop resolution as default resolution, clamp resolution if users's display is smaller than we remembered
+	if(*pWidth == 0 || *pHeight == 0 || (IsDesktopChanged && (*pWidth > *pDesktopWidth || *pHeight > *pDesktopHeight)))
 	{
 		*pWidth = *pDesktopWidth;
 		*pHeight = *pDesktopHeight;
@@ -845,7 +864,12 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 
 	InitError = IsVersionSupportedGlew(m_BackendType, g_Config.m_GfxOpenGLMajor, g_Config.m_GfxOpenGLMinor, g_Config.m_GfxOpenGLPatch, GlewMajor, GlewMinor, GlewPatch);
 
-	SDL_GL_GetDrawableSize(m_pWindow, pCurrentWidth, pCurrentHeight);
+	// SDL_GL_GetDrawableSize reports HiDPI resolution even with SDL_WINDOW_ALLOW_HIGHDPI not set, which is wrong
+	if(SdlFlags & SDL_WINDOW_ALLOW_HIGHDPI)
+		SDL_GL_GetDrawableSize(m_pWindow, pCurrentWidth, pCurrentHeight);
+	else
+		SDL_GetWindowSize(m_pWindow, pCurrentWidth, pCurrentHeight);
+
 	SDL_GL_SetSwapInterval(Flags & IGraphicsBackend::INITFLAG_VSYNC ? 1 : 0);
 	SDL_GL_MakeCurrent(NULL, NULL);
 
