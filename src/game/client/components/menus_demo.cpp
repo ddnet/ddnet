@@ -169,15 +169,18 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	if(m_pClient->m_pGameConsole->IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE && g_Config.m_ClDemoKeyboardShortcuts)
 	{
 		// increase/decrease speed
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) || Input()->KeyPress(KEY_UP))
+		if(!Input()->KeyIsPressed(KEY_LSHIFT) && !Input()->KeyIsPressed(KEY_RSHIFT))
 		{
-			DemoPlayer()->SetSpeedIndex(+1);
-			LastSpeedChange = time_get();
-		}
-		else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) || Input()->KeyPress(KEY_DOWN))
-		{
-			DemoPlayer()->SetSpeedIndex(-1);
-			LastSpeedChange = time_get();
+			if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) || Input()->KeyPress(KEY_UP))
+			{
+				DemoPlayer()->SetSpeedIndex(+1);
+				LastSpeedChange = time_get();
+			}
+			else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) || Input()->KeyPress(KEY_DOWN))
+			{
+				DemoPlayer()->SetSpeedIndex(-1);
+				LastSpeedChange = time_get();
+			}
 		}
 
 		// pause/unpause
