@@ -5995,8 +5995,14 @@ void CEditor::Render()
 			}
 		}
 
+		// ctrl+shift+alt+s to save as
+		if(Input()->KeyPress(KEY_S) && CtrlPressed && ShiftPressed && AltPressed)
+			InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveCopyMap, this);
+		// ctrl+shift+s to save as
+		else if(Input()->KeyPress(KEY_S) && CtrlPressed && ShiftPressed)
+			InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveMap, this);
 		// ctrl+s to save
-		if(Input()->KeyPress(KEY_S) && CtrlPressed)
+		else if(Input()->KeyPress(KEY_S) && CtrlPressed)
 		{
 			if(m_aFileName[0] && m_ValidSaveFilename)
 			{
@@ -6009,14 +6015,6 @@ void CEditor::Render()
 			else
 				InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveMap, this);
 		}
-
-		// ctrl+shift+s to save as
-		if(Input()->KeyPress(KEY_S) && CtrlPressed && ShiftPressed)
-			InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveMap, this);
-
-		// ctrl+shift+alt+s to save as
-		if(Input()->KeyPress(KEY_S) && CtrlPressed && ShiftPressed && AltPressed)
-			InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveCopyMap, this);
 	}
 
 	if(m_GuiActive)
