@@ -121,11 +121,6 @@ void CGameWorld::InsertEntity(CEntity *pEnt, bool Last)
 	}
 }
 
-void CGameWorld::DestroyEntity(CEntity *pEnt)
-{
-	pEnt->m_MarkedForDestroy = true;
-}
-
 void CGameWorld::RemoveEntity(CEntity *pEnt)
 {
 	// not in the list

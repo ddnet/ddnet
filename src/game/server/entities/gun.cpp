@@ -89,7 +89,7 @@ void CGun::Fire()
 
 void CGun::Reset()
 {
-	GameServer()->m_World.DestroyEntity(this);
+	m_MarkedForDestroy = true;
 }
 
 void CGun::Tick()

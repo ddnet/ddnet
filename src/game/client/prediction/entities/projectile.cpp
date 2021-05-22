@@ -123,10 +123,10 @@ void CProjectile::Tick()
 		}
 		else if(m_Type == WEAPON_GUN)
 		{
-			GameWorld()->DestroyEntity(this);
+			m_MarkedForDestroy = true;
 		}
 		else if(!m_Freeze)
-			GameWorld()->DestroyEntity(this);
+			m_MarkedForDestroy = true;
 	}
 	if(m_LifeSpan == -1)
 	{
@@ -140,7 +140,7 @@ void CProjectile::Tick()
 			GameWorld()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pOwnerChar ? -1 : pOwnerChar->Team()),
 				(m_Owner != -1) ? TeamMask : -1LL);
 		}
-		GameWorld()->DestroyEntity(this);
+		m_MarkedForDestroy = true;
 	}
 }
 
