@@ -50,7 +50,7 @@ CProjectile::CProjectile(
 void CProjectile::Reset()
 {
 	if(m_LifeSpan > -2)
-		GameServer()->m_World.DestroyEntity(this);
+		m_MarkedForDestroy = true;
 }
 
 vec2 CProjectile::GetPos(float Time)
@@ -144,7 +144,7 @@ void CProjectile::Tick()
 	}
 	else if(m_Owner >= 0 && (m_Type != WEAPON_GRENADE || g_Config.m_SvDestroyBulletsOnDeath))
 	{
-		GameServer()->m_World.DestroyEntity(this);
+		m_MarkedForDestroy = true;
 		return;
 	}
 
@@ -232,14 +232,14 @@ void CProjectile::Tick()
 		else if(m_Type == WEAPON_GUN)
 		{
 			GameServer()->CreateDamageInd(CurPos, -atan2(m_Direction.x, m_Direction.y), 10, (m_Owner != -1) ? TeamMask : -1LL);
-			GameServer()->m_World.DestroyEntity(this);
+			m_MarkedForDestroy = true;
 			return;
 		}
 		else
 		{
 			if(!m_Freeze)
 			{
-				GameServer()->m_World.DestroyEntity(this);
+				m_MarkedForDestroy = true;
 				return;
 			}
 		}
@@ -262,7 +262,7 @@ void CProjectile::Tick()
 			GameServer()->CreateSound(ColPos, m_SoundImpact,
 				(m_Owner != -1) ? TeamMask : -1LL);
 		}
-		GameServer()->m_World.DestroyEntity(this);
+		m_MarkedForDestroy = true;
 		return;
 	}
 

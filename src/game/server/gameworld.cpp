@@ -81,11 +81,6 @@ void CGameWorld::InsertEntity(CEntity *pEnt)
 	m_apFirstEntityTypes[pEnt->m_ObjType] = pEnt;
 }
 
-void CGameWorld::DestroyEntity(CEntity *pEnt)
-{
-	pEnt->m_MarkedForDestroy = true;
-}
-
 void CGameWorld::RemoveEntity(CEntity *pEnt)
 {
 	// not in the list

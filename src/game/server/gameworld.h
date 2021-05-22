@@ -123,15 +123,6 @@ public:
 	void RemoveEntity(CEntity *pEntity);
 
 	/*
-		Function: destroy_entity
-			Destroys an entity in the world.
-
-		Arguments:
-			entity - Entity to destroy
-	*/
-	void DestroyEntity(CEntity *pEntity);
-
-	/*
 		Function: snap
 			Calls snap on all the entities in the world to create
 			the snapshot.
