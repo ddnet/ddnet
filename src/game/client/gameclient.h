@@ -238,6 +238,10 @@ public:
 	};
 
 	CSnapState m_Snap;
+	int m_LocalTuneZone[2];
+	bool m_ReceivedTuning[2];
+	int m_ExpectingTuningForZone[2];
+	int m_ExpectingTuningSince[2];
 
 	// client data
 	struct CClientData

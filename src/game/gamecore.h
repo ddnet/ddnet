@@ -265,6 +265,7 @@ public:
 	bool m_HasTelegunLaser;
 	int m_FreezeEnd;
 	bool m_DeepFrozen;
+	CTuningParams m_Tuning;
 
 private:
 	CTeamsCore *m_pTeams;

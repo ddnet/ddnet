@@ -2009,9 +2009,9 @@ void CCharacter::HandleTuneLayer()
 	m_TuneZone = GameServer()->Collision()->IsTune(CurrentIndex);
 
 	if(m_TuneZone)
-		m_Core.m_pWorld->m_Tuning[g_Config.m_ClDummy] = GameServer()->TuningList()[m_TuneZone]; // throw tunings from specific zone into gamecore
+		m_Core.m_Tuning = GameServer()->TuningList()[m_TuneZone]; // throw tunings from specific zone into gamecore
 	else
-		m_Core.m_pWorld->m_Tuning[g_Config.m_ClDummy] = *GameServer()->Tuning();
+		m_Core.m_Tuning = *GameServer()->Tuning();
 
 	if(m_TuneZone != m_TuneZoneOld) // don't send tunigs all the time
 	{
