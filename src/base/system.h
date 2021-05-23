@@ -41,16 +41,12 @@ extern "C" {
 		msg - Message that should be printed if the test fails.
 
 	Remarks:
-		Does nothing in release version
+		Also works in release mode.
 
 	See Also:
 		<dbg_break>
 */
-#ifdef CONF_DEBUG
 #define dbg_assert(test, msg) dbg_assert_imp(__FILE__, __LINE__, test, msg)
-#else
-#define dbg_assert(test, msg)
-#endif
 void dbg_assert_imp(const char *filename, int line, int test, const char *msg);
 
 #ifdef __clang_analyzer__
@@ -70,17 +66,12 @@ void dbg_assert_imp(const char *filename, int line, int test, const char *msg);
 		Breaks into the debugger.
 
 	Remarks:
-		Does nothing in release version
+		Also works in release mode.
 
 	See Also:
 		<dbg_assert>
 */
-#ifdef CONF_DEBUG
-#define dbg_break() dbg_break_imp()
-#else
-#define dbg_break()
-#endif
-void dbg_break_imp(void);
+void dbg_break(void);
 
 /*
 	Function: dbg_msg
@@ -92,7 +83,7 @@ void dbg_break_imp(void);
 		fmt - A printf styled format string.
 
 	Remarks:
-		Also works in release version
+		Also works in release mode.
 
 	See Also:
 		<dbg_assert>
