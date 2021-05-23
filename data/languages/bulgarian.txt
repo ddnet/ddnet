@@ -413,9 +413,6 @@ Show ingame HUD
 Show name plates
 == Показвай лентите с имената
 
-Show only supported
-== Показвай само съвместимите
-
 Skins
 == Модели
 

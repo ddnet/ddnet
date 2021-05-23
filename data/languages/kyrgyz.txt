@@ -484,9 +484,6 @@ Show ingame HUD
 Show name plates
 == Оюнчулардын аттарын көрсөтүү
 
-Show only supported
-== Колдолгонду гана көрсөтүү
-
 Size:
 == Өлчөмү:
 

@@ -271,7 +271,8 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		RenderThemeSelection(Left);
 
 		DirectoryButton.HSplitTop(5.0f, 0, &DirectoryButton);
-		if(DoButton_Menu(&DirectoryButton, Localize("Themes directory"), 0, &DirectoryButton))
+		static int s_ThemesButtonID = 0;
+		if(DoButton_Menu(&s_ThemesButtonID, Localize("Themes directory"), 0, &DirectoryButton))
 		{
 			char aBuf[MAX_PATH_LENGTH];
 			char aBufFull[MAX_PATH_LENGTH + 7];
@@ -583,7 +584,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	MainView.HSplitTop(20.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	Button.VSplitMid(&Button, &Button2);
-	if(DoButton_CheckBox(&ColorBody, Localize("Custom colors"), *UseCustomColor, &Button))
+	static int s_CustomColorID = 0;
+	if(DoButton_CheckBox(&s_CustomColorID, Localize("Custom colors"), *UseCustomColor, &Button))
 	{
 		*UseCustomColor = *UseCustomColor ? 0 : 1;
 		SetNeedSendInfo();
@@ -724,7 +726,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	SkinDB.VSplitLeft(150.0f, &SkinDB, &DirectoryButton);
 	SkinDB.HSplitTop(5.0f, 0, &SkinDB);
-	if(DoButton_Menu(&SkinDB, Localize("Skin Database"), 0, &SkinDB))
+	static int s_SkinDBDirID = 0;
+	if(DoButton_Menu(&s_SkinDBDirID, Localize("Skin Database"), 0, &SkinDB))
 	{
 		if(!open_link("https://ddnet.tw/skins/"))
 		{
@@ -736,7 +739,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	DirectoryButton.VSplitRight(175.0f, 0, &DirectoryButton);
 	DirectoryButton.VSplitRight(25.0f, &DirectoryButton, &RefreshButton);
 	DirectoryButton.VSplitRight(10.0f, &DirectoryButton, 0);
-	if(DoButton_Menu(&DirectoryButton, Localize("Skins directory"), 0, &DirectoryButton))
+	static int s_DirectoryButtonID = 0;
+	if(DoButton_Menu(&s_DirectoryButtonID, Localize("Skins directory"), 0, &DirectoryButton))
 	{
 		char aBuf[MAX_PATH_LENGTH];
 		char aBufFull[MAX_PATH_LENGTH + 7];
@@ -751,7 +755,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
-	if(DoButton_Menu(&RefreshButton, "\xEE\x97\x95", 0, &RefreshButton, NULL, 15, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f), 0))
+	static int s_SkinRefreshButtonID = 0;
+	if(DoButton_Menu(&s_SkinRefreshButtonID, "\xEE\x97\x95", 0, &RefreshButton, NULL, 15, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f), 0))
 	{
 		m_pClient->m_pSkins->Refresh();
 		s_InitSkinlist = true;
@@ -898,13 +903,13 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	static int s_ControlsList = 0;
 	static int s_SelectedControl = -1;
 	static float s_ScrollValue = 0;
-	int OldSelected = s_SelectedControl;
+	static int s_OldSelected = 0;
 	// Hacky values: Size of 10.0f per item for smoother scrolling, 72 elements
 	// fits the current size of controls settings
 	UiDoListboxStart(&s_ControlsList, &MainView, 10.0f, Localize("Controls"), "", 72, 1, s_SelectedControl, s_ScrollValue);
 
 	CUIRect MovementSettings, WeaponSettings, VotingSettings, ChatSettings, DummySettings, MiscSettings, ResetButton;
-	CListboxItem Item = UiDoListboxNextItem(&OldSelected, false, false, true);
+	CListboxItem Item = UiDoListboxNextItem(&s_OldSelected, false, false, true);
 	Item.m_Rect.HSplitTop(10.0f, 0, &Item.m_Rect);
 	Item.m_Rect.VSplitMid(&MovementSettings, &VotingSettings);
 
@@ -1060,7 +1065,7 @@ int CMenus::RenderDropDown(int &CurDropDownState, CUIRect *pRect, int CurSelecti
 	{
 		CUIRect Button;
 		pRect->HSplitTop(24.0f, &Button, pRect);
-		if(DoButton_MenuTab(&pID, CurSelection > -1 ? pStr[CurSelection] : "", 0, &Button, CUI::CORNER_ALL, NULL, NULL, NULL, NULL, 4.0f))
+		if(DoButton_MenuTab(pID, CurSelection > -1 ? pStr[CurSelection] : "", 0, &Button, CUI::CORNER_ALL, NULL, NULL, NULL, NULL, 4.0f))
 			CurDropDownState = 1;
 		return CurSelection;
 	}
@@ -1089,14 +1094,6 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	MainView.VSplitLeft(350.0f, &MainView, &ModeList);
 	MainView.VSplitLeft(340.0f, &MainView, 0);
 
-	// draw allmodes switch
-	ModeList.HSplitTop(20, &Button, &ModeList);
-	if(DoButton_CheckBox(&g_Config.m_GfxDisplayAllModes, Localize("Show only supported"), g_Config.m_GfxDisplayAllModes ^ 1, &Button))
-	{
-		g_Config.m_GfxDisplayAllModes ^= 1;
-		s_NumNodes = Graphics()->GetVideoModes(s_aModes, MAX_RESOLUTIONS, g_Config.m_GfxScreen);
-	}
-
 	// display mode list
 	static float s_ScrollValue = 0;
 	int OldSelected = -1;
@@ -1108,8 +1105,8 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	{
 		const int Depth = s_aModes[i].m_Red + s_aModes[i].m_Green + s_aModes[i].m_Blue > 16 ? 24 : 16;
 		if(g_Config.m_GfxColorDepth == Depth &&
-			g_Config.m_GfxScreenWidth == s_aModes[i].m_Width &&
-			g_Config.m_GfxScreenHeight == s_aModes[i].m_Height)
+			g_Config.m_GfxScreenWidth == s_aModes[i].m_WindowWidth &&
+			g_Config.m_GfxScreenHeight == s_aModes[i].m_WindowHeight)
 		{
 			OldSelected = i;
 		}
@@ -1117,8 +1114,8 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		CListboxItem Item = UiDoListboxNextItem(&s_aModes[i], OldSelected == i);
 		if(Item.m_Visible)
 		{
-			int G = gcd(s_aModes[i].m_Width, s_aModes[i].m_Height);
-			str_format(aBuf, sizeof(aBuf), " %dx%d %d bit (%d:%d)", s_aModes[i].m_Width, s_aModes[i].m_Height, Depth, s_aModes[i].m_Width / G, s_aModes[i].m_Height / G);
+			int G = gcd(s_aModes[i].m_CanvasWidth, s_aModes[i].m_CanvasHeight);
+			str_format(aBuf, sizeof(aBuf), " %dx%d %d bit (%d:%d)", s_aModes[i].m_CanvasWidth, s_aModes[i].m_CanvasHeight, Depth, s_aModes[i].m_CanvasWidth / G, s_aModes[i].m_CanvasHeight / G);
 			UI()->DoLabelScaled(&Item.m_Rect, aBuf, 16.0f, -1);
 		}
 	}
@@ -1128,8 +1125,8 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	{
 		const int Depth = s_aModes[NewSelected].m_Red + s_aModes[NewSelected].m_Green + s_aModes[NewSelected].m_Blue > 16 ? 24 : 16;
 		g_Config.m_GfxColorDepth = Depth;
-		g_Config.m_GfxScreenWidth = s_aModes[NewSelected].m_Width;
-		g_Config.m_GfxScreenHeight = s_aModes[NewSelected].m_Height;
+		g_Config.m_GfxScreenWidth = s_aModes[NewSelected].m_WindowWidth;
+		g_Config.m_GfxScreenHeight = s_aModes[NewSelected].m_WindowHeight;
 		Graphics()->Resize(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight, true);
 	}
 
@@ -2024,7 +2021,7 @@ ColorHSLA CMenus::RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool
 			float LightVal = *paComponent[2];
 			if(ClampedLight)
 				LightVal = ColorHSLA::DARKEST_LGT + LightVal * (1.0f - ColorHSLA::DARKEST_LGT);
-			ColorInner = color_cast<ColorRGBA>(ColorHSLA{CurColorPureHSLA.r, *paComponent[1], LightVal, clamp(*paComponent[3], 0.3f, 1.0f)});
+			ColorInner = color_cast<ColorRGBA>(ColorHSLA{CurColorPureHSLA.r, *paComponent[1], LightVal, *paComponent[3]});
 		}
 
 		*paComponent[i] = DoScrollbarH(&((char *)pColor)[i], &Button, *paComponent[i], true, &ColorInner);
@@ -2083,6 +2080,27 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	Section.VSplitLeft(30.0f, 0, &Section);
 
 	DoLaserPreview(&Section, LaserOutlineColor, LaserInnerColor);
+
+	HUD.HSplitTop(25.0f, 0x0, &HUD);
+	HUD.HSplitTop(20.0f, &SectionTwo, &HUD);
+
+	UI()->DoLabelScaled(&SectionTwo, Localize("Hookline"), 20.0f, -1);
+
+	HUD.HSplitTop(5.0f, 0x0, &HUD);
+	HUD.HSplitTop(25.0f, &SectionTwo, &HUD);
+
+	static int HookCollNoCollResetID, HookCollHookableCollResetID, HookCollTeeCollResetID;
+	DoLine_ColorPicker(&HookCollNoCollResetID, 25.0f, 194.0f, 13.0f, 5.0f, &SectionTwo, Localize("No hit"), &g_Config.m_ClHookCollColorNoColl, ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f), false);
+
+	HUD.HSplitTop(5.0f, 0x0, &HUD);
+	HUD.HSplitTop(25.0f, &SectionTwo, &HUD);
+
+	DoLine_ColorPicker(&HookCollHookableCollResetID, 25.0f, 194.0f, 13.0f, 5.0f, &SectionTwo, Localize("Hookable"), &g_Config.m_ClHookCollColorHookableColl, ColorRGBA(130.0f / 255.0f, 232.0f / 255.0f, 160.0f / 255.0f, 1.0f), false);
+
+	HUD.HSplitTop(5.0f, 0x0, &HUD);
+	HUD.HSplitTop(25.0f, &SectionTwo, &HUD);
+
+	DoLine_ColorPicker(&HookCollTeeCollResetID, 25.0f, 194.0f, 13.0f, 5.0f, &SectionTwo, Localize("Tee"), &g_Config.m_ClHookCollColorTeeColl, ColorRGBA(1.0f, 1.0f, 0.0f, 1.0f), false);
 
 	// ***** Chat ***** //
 
@@ -2423,7 +2441,8 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 	Left.HSplitTop(20.0f, &Button, &Left);
 	bool ShowOwnTeam = g_Config.m_ClShowOthers == 2;
-	if(DoButton_CheckBox(&ShowOwnTeam, Localize("Show others (own team only)"), ShowOwnTeam, &Button))
+	static int s_ShowOwnTeamID = 0;
+	if(DoButton_CheckBox(&s_ShowOwnTeamID, Localize("Show others (own team only)"), ShowOwnTeam, &Button))
 	{
 		g_Config.m_ClShowOthers = g_Config.m_ClShowOthers != 2 ? 2 : 0;
 	}
@@ -2530,7 +2549,8 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 	Left.HSplitTop(20.0f, &Button, &Left);
 	bool UseCurrentMap = str_comp(g_Config.m_ClBackgroundEntities, CURRENT_MAP) == 0;
-	if(DoButton_CheckBox(&UseCurrentMap, Localize("Use current map as background"), UseCurrentMap, &Button))
+	static int s_UseCurrentMapID = 0;
+	if(DoButton_CheckBox(&s_UseCurrentMapID, Localize("Use current map as background"), UseCurrentMap, &Button))
 	{
 		if(UseCurrentMap)
 			g_Config.m_ClBackgroundEntities[0] = '\0';

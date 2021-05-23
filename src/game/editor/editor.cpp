@@ -1159,7 +1159,8 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		TB_Top.VSplitLeft(5.0f, 0, &TB_Top);
 
 		TB_Top.VSplitLeft(45.0f, &Button, &TB_Top);
-		if(DoButton_Editor(&Button, "Entities", 0, &Button, 0, "Choose game layer entities image for different gametypes"))
+		static int s_EntitiesButtonID = 0;
+		if(DoButton_Editor(&s_EntitiesButtonID, "Entities", 0, &Button, 0, "Choose game layer entities image for different gametypes"))
 		{
 			m_SelectEntitiesFiles.clear();
 			Storage()->ListDirectory(IStorage::TYPE_ALL, "editor/entities", EntitiesListdirCallback, this);
@@ -4508,7 +4509,7 @@ void CEditor::RenderFileDialog()
 
 				if(Graphics()->LoadPNG(&m_FilePreviewImageInfo, aBuffer, IStorage::TYPE_ALL))
 				{
-					m_FilePreviewImage = Graphics()->LoadTextureRaw(m_FilePreviewImageInfo.m_Width, m_FilePreviewImageInfo.m_Height, m_FilePreviewImageInfo.m_Format, m_FilePreviewImageInfo.m_pData, m_FilePreviewImageInfo.m_Format, IGraphics::TEXLOAD_NORESAMPLE);
+					m_FilePreviewImage = Graphics()->LoadTextureRaw(m_FilePreviewImageInfo.m_Width, m_FilePreviewImageInfo.m_Height, m_FilePreviewImageInfo.m_Format, m_FilePreviewImageInfo.m_pData, m_FilePreviewImageInfo.m_Format, 0);
 					CImageInfo DummyInfo = m_FilePreviewImageInfo;
 					m_FilePreviewImageInfo.m_pData = NULL;
 					Graphics()->FreePNG(&DummyInfo);
@@ -4852,7 +4853,7 @@ void CEditor::RenderUndoList(CUIRect View)
 		{
 			char aBuffer[1024];
 			str_format(aBuffer, sizeof(aBuffer), "editor/undo_%i.png", m_lUndoSteps[HoveredIndex].m_FileNum);
-			m_lUndoSteps[HoveredIndex].m_PreviewImage = Graphics()->LoadTexture(aBuffer, IStorage::TYPE_SAVE, CImageInfo::FORMAT_RGB, IGraphics::TEXLOAD_NORESAMPLE);
+			m_lUndoSteps[HoveredIndex].m_PreviewImage = Graphics()->LoadTexture(aBuffer, IStorage::TYPE_SAVE, CImageInfo::FORMAT_RGB, 0);
 			m_lUndoSteps[HoveredIndex].m_PreviewImageIsLoaded = true;
 		}
 		if(m_lUndoSteps[HoveredIndex].m_PreviewImageIsLoaded)
@@ -5995,8 +5996,14 @@ void CEditor::Render()
 			}
 		}
 
+		// ctrl+shift+alt+s to save as
+		if(Input()->KeyPress(KEY_S) && CtrlPressed && ShiftPressed && AltPressed)
+			InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveCopyMap, this);
+		// ctrl+shift+s to save as
+		else if(Input()->KeyPress(KEY_S) && CtrlPressed && ShiftPressed)
+			InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveMap, this);
 		// ctrl+s to save
-		if(Input()->KeyPress(KEY_S) && CtrlPressed)
+		else if(Input()->KeyPress(KEY_S) && CtrlPressed)
 		{
 			if(m_aFileName[0] && m_ValidSaveFilename)
 			{
@@ -6009,14 +6016,6 @@ void CEditor::Render()
 			else
 				InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveMap, this);
 		}
-
-		// ctrl+shift+s to save as
-		if(Input()->KeyPress(KEY_S) && CtrlPressed && ShiftPressed)
-			InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveMap, this);
-
-		// ctrl+shift+alt+s to save as
-		if(Input()->KeyPress(KEY_S) && CtrlPressed && ShiftPressed && AltPressed)
-			InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveCopyMap, this);
 	}
 
 	if(m_GuiActive)

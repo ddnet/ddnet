@@ -415,9 +415,6 @@ Show ingame HUD
 Show name plates
 == Vis navneskilt
 
-Show only supported
-== Vis kompatible
-
 Skins
 == Utseender
 

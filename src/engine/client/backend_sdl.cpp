@@ -190,18 +190,29 @@ void CCommandProcessorFragment_SDL::Cmd_VideoModes(const CCommandBuffer::SComman
 	int maxModes = SDL_GetNumDisplayModes(pCommand->m_Screen),
 	    numModes = 0;
 
-	for(int i = 0; i < maxModes; i++)
+	for(int i = -1; i < maxModes; i++)
 	{
-		if(SDL_GetDisplayMode(pCommand->m_Screen, i, &mode) < 0)
+		if(i == -1)
 		{
-			dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
-			continue;
+			if(SDL_GetDesktopDisplayMode(pCommand->m_Screen, &mode) < 0)
+			{
+				dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
+				continue;
+			}
+		}
+		else
+		{
+			if(SDL_GetDisplayMode(pCommand->m_Screen, i, &mode) < 0)
+			{
+				dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
+				continue;
+			}
 		}
 
 		bool AlreadyFound = false;
 		for(int j = 0; j < numModes; j++)
 		{
-			if(pCommand->m_pModes[j].m_Width == mode.w && pCommand->m_pModes[j].m_Height == mode.h)
+			if(pCommand->m_pModes[j].m_CanvasWidth == mode.w && pCommand->m_pModes[j].m_CanvasHeight == mode.h)
 			{
 				AlreadyFound = true;
 				break;
@@ -210,8 +221,13 @@ void CCommandProcessorFragment_SDL::Cmd_VideoModes(const CCommandBuffer::SComman
 		if(AlreadyFound)
 			continue;
 
-		pCommand->m_pModes[numModes].m_Width = mode.w;
-		pCommand->m_pModes[numModes].m_Height = mode.h;
+		if(mode.w > pCommand->m_MaxWindowWidth || mode.h > pCommand->m_MaxWindowHeight)
+			continue;
+
+		pCommand->m_pModes[numModes].m_CanvasWidth = mode.w * pCommand->m_HiDPIScale;
+		pCommand->m_pModes[numModes].m_CanvasHeight = mode.h * pCommand->m_HiDPIScale;
+		pCommand->m_pModes[numModes].m_WindowWidth = mode.w;
+		pCommand->m_pModes[numModes].m_WindowHeight = mode.h;
 		pCommand->m_pModes[numModes].m_Red = 8;
 		pCommand->m_pModes[numModes].m_Green = 8;
 		pCommand->m_pModes[numModes].m_Blue = 8;
@@ -740,11 +756,14 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		dbg_msg("gfx", "unable to get desktop resolution: %s", SDL_GetError());
 		return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_SDL_SCREEN_RESOLUTION_REQUEST_FAILED;
 	}
+
+	bool IsDesktopChanged = *pDesktopWidth == 0 || *pDesktopHeight == 0 || *pDesktopWidth != DisplayMode.w || *pDesktopHeight != DisplayMode.h;
+
 	*pDesktopWidth = DisplayMode.w;
 	*pDesktopHeight = DisplayMode.h;
 
-	// use desktop resolution as default resolution
-	if(*pWidth == 0 || *pHeight == 0)
+	// use desktop resolution as default resolution, clamp resolution if users's display is smaller than we remembered
+	if(*pWidth == 0 || *pHeight == 0 || (IsDesktopChanged && (*pWidth > *pDesktopWidth || *pHeight > *pDesktopHeight)))
 	{
 		*pWidth = *pDesktopWidth;
 		*pHeight = *pDesktopHeight;
@@ -845,7 +864,12 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 
 	InitError = IsVersionSupportedGlew(m_BackendType, g_Config.m_GfxOpenGLMajor, g_Config.m_GfxOpenGLMinor, g_Config.m_GfxOpenGLPatch, GlewMajor, GlewMinor, GlewPatch);
 
-	SDL_GL_GetDrawableSize(m_pWindow, pCurrentWidth, pCurrentHeight);
+	// SDL_GL_GetDrawableSize reports HiDPI resolution even with SDL_WINDOW_ALLOW_HIGHDPI not set, which is wrong
+	if(SdlFlags & SDL_WINDOW_ALLOW_HIGHDPI)
+		SDL_GL_GetDrawableSize(m_pWindow, pCurrentWidth, pCurrentHeight);
+	else
+		SDL_GetWindowSize(m_pWindow, pCurrentWidth, pCurrentHeight);
+
 	SDL_GL_SetSwapInterval(Flags & IGraphicsBackend::INITFLAG_VSYNC ? 1 : 0);
 	SDL_GL_MakeCurrent(NULL, NULL);
 
@@ -886,14 +910,12 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		CmdOpenGL.m_pStorage = pStorage;
 		CmdOpenGL.m_pCapabilities = &m_Capabilites;
 		CmdOpenGL.m_pInitError = &InitError;
-		CmdOpenGL.m_pCapabilities = &m_Capabilites;
 		CmdOpenGL.m_RequestedMajor = g_Config.m_GfxOpenGLMajor;
 		CmdOpenGL.m_RequestedMinor = g_Config.m_GfxOpenGLMinor;
 		CmdOpenGL.m_RequestedPatch = g_Config.m_GfxOpenGLPatch;
 		CmdOpenGL.m_GlewMajor = GlewMajor;
 		CmdOpenGL.m_GlewMinor = GlewMinor;
 		CmdOpenGL.m_GlewPatch = GlewPatch;
-		CmdOpenGL.m_pInitError = &InitError;
 		CmdOpenGL.m_pErrStringPtr = &pErrorStr;
 		CmdOpenGL.m_pVendorString = m_aVendorString;
 		CmdOpenGL.m_pVersionString = m_aVersionString;
@@ -904,23 +926,20 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		RunBuffer(&CmdBuffer);
 		WaitForIdle();
 		CmdBuffer.Reset();
+	}
 
-		if(InitError == -2)
+	if(InitError != 0)
+	{
+		if(InitError != -2)
 		{
+			// shutdown the context, as it might have been initialized
 			CCommandProcessorFragment_OpenGLBase::SCommand_Shutdown CmdGL;
 			CmdBuffer.AddCommandUnsafe(CmdGL);
 			RunBuffer(&CmdBuffer);
 			WaitForIdle();
 			CmdBuffer.Reset();
-
-			g_Config.m_GfxOpenGLMajor = m_Capabilites.m_ContextMajor;
-			g_Config.m_GfxOpenGLMinor = m_Capabilites.m_ContextMinor;
-			g_Config.m_GfxOpenGLPatch = m_Capabilites.m_ContextPatch;
 		}
-	}
 
-	if(InitError != 0)
-	{
 		CCommandProcessorFragment_SDL::SCommand_Shutdown Cmd;
 		CmdBuffer.AddCommandUnsafe(Cmd);
 		RunBuffer(&CmdBuffer);
@@ -1121,21 +1140,22 @@ void CGraphicsBackend_SDL_OpenGL::NotifyWindow()
 
 	FlashWindowEx(&desc);
 #elif defined(SDL_VIDEO_DRIVER_X11) && !defined(CONF_PLATFORM_MACOS)
-	Display *dpy = info.info.x11.display;
-	Window win = info.info.x11.window;
+	Display *pX11Dpy = info.info.x11.display;
+	Window X11Win = info.info.x11.window;
 
-	// Old hints
-	XWMHints *wmhints;
-	wmhints = XAllocWMHints();
-	wmhints->flags = XUrgencyHint;
-	XSetWMHints(dpy, win, wmhints);
-	XFree(wmhints);
+	static Atom s_DemandsAttention = XInternAtom(pX11Dpy, "_NET_WM_STATE_DEMANDS_ATTENTION", true);
+	static Atom s_WmState = XInternAtom(pX11Dpy, "_NET_WM_STATE", true);
 
-	// More modern way of notifying
-	static Atom demandsAttention = XInternAtom(dpy, "_NET_WM_STATE_DEMANDS_ATTENTION", true);
-	static Atom wmState = XInternAtom(dpy, "_NET_WM_STATE", true);
-	XChangeProperty(dpy, win, wmState, XA_ATOM, 32, PropModeReplace,
-		(unsigned char *)&demandsAttention, 1);
+	XEvent SndNtfyEvent = {ClientMessage};
+	SndNtfyEvent.xclient.window = X11Win;
+	SndNtfyEvent.xclient.message_type = s_WmState;
+	SndNtfyEvent.xclient.format = 32;
+	SndNtfyEvent.xclient.data.l[0] = 1; // _NET_WM_STATE_ADD
+	SndNtfyEvent.xclient.data.l[1] = s_DemandsAttention;
+	SndNtfyEvent.xclient.data.l[2] = 0;
+	SndNtfyEvent.xclient.data.l[3] = 1; // normal application
+	SndNtfyEvent.xclient.data.l[4] = 0;
+	XSendEvent(pX11Dpy, XDefaultRootWindow(pX11Dpy), False, SubstructureNotifyMask | SubstructureRedirectMask, &SndNtfyEvent);
 #endif
 }
 

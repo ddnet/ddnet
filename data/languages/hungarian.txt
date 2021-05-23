@@ -404,9 +404,6 @@ Show ingame HUD
 Show name plates
 == Név táblák mutatása
 
-Show only supported
-== Csak támogatott mutatása
-
 Skins
 == Skinek
 

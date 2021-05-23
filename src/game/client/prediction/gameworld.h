@@ -37,12 +37,9 @@ public:
 	class CCharacter *IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, class CCharacter *pNotThis = 0, int CollideWith = -1, class CCharacter *pThisOnly = 0);
 	void InsertEntity(CEntity *pEntity, bool Last = false);
 	void RemoveEntity(CEntity *pEntity);
-	void DestroyEntity(CEntity *pEntity);
 	void Tick();
 
 	// DDRace
-
-	std::list<class CCharacter *> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, class CEntity *pNotThis);
 	void ReleaseHooked(int ClientID);
 	std::list<class CCharacter *> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, class CEntity *pNotThis = 0);
 

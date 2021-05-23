@@ -93,7 +93,8 @@ public:
 class CVideoMode
 {
 public:
-	int m_Width, m_Height;
+	int m_CanvasWidth, m_CanvasHeight;
+	int m_WindowWidth, m_WindowHeight;
 	int m_Red, m_Green, m_Blue;
 };
 
@@ -166,16 +167,11 @@ class IGraphics : public IInterface
 protected:
 	int m_ScreenWidth;
 	int m_ScreenHeight;
-	int m_DesktopScreenWidth;
-	int m_DesktopScreenHeight;
+	float m_ScreenHiDPIScale;
 
 public:
-	/* Constants: Texture Loading Flags
-		TEXLOAD_NORESAMPLE - Prevents the texture from any resampling
-	*/
 	enum
 	{
-		TEXLOAD_NORESAMPLE = 1 << 0,
 		TEXLOAD_NOMIPMAPS = 1 << 1,
 		TEXLOAD_NO_COMPRESSION = 1 << 2,
 		TEXLOAD_TO_3D_TEXTURE = (1 << 3),
@@ -202,6 +198,9 @@ public:
 	int ScreenWidth() const { return m_ScreenWidth; }
 	int ScreenHeight() const { return m_ScreenHeight; }
 	float ScreenAspect() const { return (float)ScreenWidth() / (float)ScreenHeight(); }
+	float ScreenHiDPIScale() const { return m_ScreenHiDPIScale; }
+	int WindowWidth() const { return m_ScreenWidth / m_ScreenHiDPIScale; }
+	int WindowHeight() const { return m_ScreenHeight / m_ScreenHiDPIScale; }
 
 	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless) = 0;
 	virtual bool SetWindowScreen(int Index) = 0;

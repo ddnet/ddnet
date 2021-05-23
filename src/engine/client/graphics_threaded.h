@@ -137,7 +137,6 @@ public:
 		TEXFORMAT_ALPHA,
 
 		TEXFLAG_NOMIPMAPS = 1,
-		TEXFLAG_QUALITY = 4,
 		TEXFLAG_TO_3D_TEXTURE = (1 << 3),
 		TEXFLAG_TO_2D_ARRAY_TEXTURE = (1 << 4),
 		TEXFLAG_TO_3D_TEXTURE_SINGLE_LAYER = (1 << 5),
@@ -498,6 +497,9 @@ public:
 		CVideoMode *m_pModes; // processor will fill this in
 		int m_MaxModes; // maximum of modes the processor can write to the m_pModes
 		int *m_pNumModes; // processor will write to this pointer
+		int m_HiDPIScale;
+		int m_MaxWindowWidth;
+		int m_MaxWindowHeight;
 		int m_Screen;
 	};
 
@@ -1163,8 +1165,8 @@ public:
 
 	int GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen) override;
 
-	virtual int GetDesktopScreenWidth() const { return m_DesktopScreenWidth; }
-	virtual int GetDesktopScreenHeight() const { return m_DesktopScreenHeight; }
+	virtual int GetDesktopScreenWidth() const { return g_Config.m_GfxScreenWidth; }
+	virtual int GetDesktopScreenHeight() const { return g_Config.m_GfxScreenHeight; }
 
 	// synchronization
 	void InsertSignal(CSemaphore *pSemaphore) override;

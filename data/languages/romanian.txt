@@ -425,9 +425,6 @@ Show name plates
 Show only chat messages from friends
 == Arată doar chatul prietenilor
 
-Show only supported
-== Arată doar modurile suportate
-
 Skins
 == Costume
 

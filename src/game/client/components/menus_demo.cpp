@@ -169,15 +169,18 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	if(m_pClient->m_pGameConsole->IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE && g_Config.m_ClDemoKeyboardShortcuts)
 	{
 		// increase/decrease speed
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) || Input()->KeyPress(KEY_UP))
+		if(!Input()->KeyIsPressed(KEY_LSHIFT) && !Input()->KeyIsPressed(KEY_RSHIFT))
 		{
-			DemoPlayer()->SetSpeedIndex(+1);
-			LastSpeedChange = time_get();
-		}
-		else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) || Input()->KeyPress(KEY_DOWN))
-		{
-			DemoPlayer()->SetSpeedIndex(-1);
-			LastSpeedChange = time_get();
+			if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) || Input()->KeyPress(KEY_UP))
+			{
+				DemoPlayer()->SetSpeedIndex(+1);
+				LastSpeedChange = time_get();
+			}
+			else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) || Input()->KeyPress(KEY_DOWN))
+			{
+				DemoPlayer()->SetSpeedIndex(-1);
+				LastSpeedChange = time_get();
+			}
 		}
 
 		// pause/unpause
@@ -1251,7 +1254,8 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		}
 	}
 
-	if(DoButton_Menu(&DirectoryButton, Localize("Demos directory"), 0, &DirectoryButton))
+	static int s_DirectoryButtonID = 0;
+	if(DoButton_Menu(&s_DirectoryButtonID, Localize("Demos directory"), 0, &DirectoryButton))
 	{
 		char aBuf[MAX_PATH_LENGTH];
 		char aBufFull[MAX_PATH_LENGTH + 7];

@@ -40,7 +40,7 @@ bool CPlasma::HitCharacter()
 	if(m_Explosive)
 		GameServer()->CreateExplosion(m_Pos, -1, WEAPON_GRENADE, true,
 			m_ResponsibleTeam, Hit->Teams()->TeamMask(m_ResponsibleTeam));
-	GameServer()->m_World.DestroyEntity(this);
+	m_MarkedForDestroy = true;
 	return true;
 }
 
@@ -52,7 +52,7 @@ void CPlasma::Move()
 
 void CPlasma::Reset()
 {
-	GameServer()->m_World.DestroyEntity(this);
+	m_MarkedForDestroy = true;
 }
 
 void CPlasma::Tick()

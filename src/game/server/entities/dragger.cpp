@@ -135,7 +135,7 @@ void CDragger::Drag()
 
 void CDragger::Reset()
 {
-	GameServer()->m_World.DestroyEntity(this);
+	m_MarkedForDestroy = true;
 }
 
 void CDragger::Tick()

@@ -34,12 +34,11 @@ private:
 	*/
 	float m_ProximityRadius;
 
+protected:
 	/* State */
 	bool m_MarkedForDestroy;
 
 public: // TODO: Maybe make protected
-	/* State */
-
 	/*
 		Variable: m_Pos
 			Contains the current posititon of the entity.
@@ -67,10 +66,6 @@ public:
 	CEntity *TypePrev() { return m_pPrevTypeEntity; }
 	const vec2 &GetPos() const { return m_Pos; }
 	float GetProximityRadius() const { return m_ProximityRadius; }
-	bool IsMarkedForDestroy() const { return m_MarkedForDestroy; }
-
-	/* Setters */
-	void MarkForDestroy() { m_MarkedForDestroy = true; }
 
 	/* Other functions */
 

@@ -67,9 +67,10 @@ void CCommandProcessorFragment_OpenGL3_3::InitPrimExProgram(CGLSLPrimitiveExProg
 	pProgram->SetUniformVec2(pProgram->m_LocCenter, 1, Center);
 }
 
-void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand)
+bool CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand)
 {
-	InitOpenGL(pCommand);
+	if(!InitOpenGL(pCommand))
+		return false;
 
 	m_OpenGLTextureLodBIAS = g_Config.m_GfxOpenGLTextureLODBIAS;
 
@@ -483,6 +484,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 
 	// fix the alignment to allow even 1byte changes, e.g. for alpha components
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	return true;
 }
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_Shutdown(const SCommand_Shutdown *pCommand)
@@ -624,16 +627,6 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 				Height >>= 1;
 				++RescaleCount;
 			} while(Width > m_MaxTexSize || Height > m_MaxTexSize);
-
-			void *pTmpData = Resize(pCommand->m_Width, pCommand->m_Height, Width, Height, pCommand->m_Format, static_cast<const unsigned char *>(pCommand->m_pData));
-			free(pTexData);
-			pTexData = pTmpData;
-		}
-		else if(pCommand->m_Format != CCommandBuffer::TEXFORMAT_ALPHA && (Width > 16 && Height > 16 && (pCommand->m_Flags & CCommandBuffer::TEXFLAG_QUALITY) == 0))
-		{
-			Width >>= 1;
-			Height >>= 1;
-			++RescaleCount;
 
 			void *pTmpData = Resize(pCommand->m_Width, pCommand->m_Height, Width, Height, pCommand->m_Format, static_cast<const unsigned char *>(pCommand->m_pData));
 			free(pTexData);
