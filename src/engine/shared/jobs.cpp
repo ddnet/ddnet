@@ -75,9 +75,7 @@ void CJobPool::WorkerThread(void *pUser)
 		// do the job if we have one
 		if(pJob)
 		{
-			pJob->m_Status = IJob::STATE_RUNNING;
-			pJob->Run();
-			pJob->m_Status = IJob::STATE_DONE;
+			RunBlocking(pJob.get());
 		}
 	}
 }
@@ -103,4 +101,11 @@ void CJobPool::Add(std::shared_ptr<IJob> pJob)
 
 	lock_unlock(m_Lock);
 	sphore_signal(&m_Semaphore);
+}
+
+void CJobPool::RunBlocking(IJob *pJob)
+{
+	pJob->m_Status = IJob::STATE_RUNNING;
+	pJob->Run();
+	pJob->m_Status = IJob::STATE_DONE;
 }

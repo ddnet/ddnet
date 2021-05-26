@@ -23,6 +23,10 @@ protected:
 	{
 		m_Pool.Add(std::move(pJob));
 	}
+	void RunBlocking(IJob *pJob)
+	{
+		CJobPool::RunBlocking(pJob);
+	}
 };
 
 class CJob : public IJob
@@ -42,6 +46,15 @@ TEST_F(Jobs, Constructor)
 TEST_F(Jobs, Simple)
 {
 	Add(std::make_shared<CJob>([] {}));
+}
+
+TEST_F(Jobs, RunBlocking)
+{
+	int Result = 0;
+	CJob Job([&] { Result = 1; });
+	EXPECT_EQ(Result, 0);
+	RunBlocking(&Job);
+	EXPECT_EQ(Result, 1);
 }
 
 TEST_F(Jobs, Wait)

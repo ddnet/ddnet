@@ -66,6 +66,16 @@ public:
 	void Abort() { m_Abort = true; }
 };
 
+class CHead : public CRequest
+{
+	virtual size_t OnData(char *pData, size_t DataSize) { return DataSize; }
+	virtual bool AfterInit(void *pCurl);
+
+public:
+	CHead(const char *pUrl, CTimeout Timeout);
+	~CHead();
+};
+
 class CGet : public CRequest
 {
 	virtual size_t OnData(char *pData, size_t DataSize);

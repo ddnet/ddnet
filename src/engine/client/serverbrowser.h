@@ -3,12 +3,17 @@
 #ifndef ENGINE_CLIENT_SERVERBROWSER_H
 #define ENGINE_CLIENT_SERVERBROWSER_H
 
+#include <engine/client/http.h>
 #include <engine/config.h>
+#include <engine/console.h>
 #include <engine/external/json-parser/json.h>
 #include <engine/masterserver.h>
 #include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
 #include <engine/shared/memheap.h>
+
+class IServerBrowserHttp;
+class IServerBrowserPingCache;
 
 class CServerBrowser : public IServerBrowser
 {
@@ -18,6 +23,7 @@ public:
 	public:
 		NETADDR m_Addr;
 		int64 m_RequestTime;
+		bool m_RequestIgnoreInfo;
 		int m_GotInfo;
 		bool m_Request64Legacy;
 		CServerInfo m_Info;
@@ -79,7 +85,7 @@ public:
 	// interface functions
 	void Refresh(int Type);
 	bool IsRefreshing() const;
-	bool IsRefreshingMasters() const;
+	bool IsGettingServerlist() const;
 	int LoadingProgression() const;
 
 	int NumServers() const { return m_NumServers; }
@@ -97,8 +103,11 @@ public:
 	int NumSortedServers() const { return m_NumSortedServers; }
 	const CServerInfo *SortedGet(int Index) const;
 
+	bool GotInfo(const NETADDR &Addr) const;
 	bool IsFavorite(const NETADDR &Addr) const;
+	bool IsFavoritePingAllowed(const NETADDR &Addr) const;
 	void AddFavorite(const NETADDR &Addr);
+	void FavoriteAllowPing(const NETADDR &Addr, bool AllowPing);
 	void RemoveFavorite(const NETADDR &Addr);
 
 	void LoadDDNetRanks();
@@ -123,7 +132,8 @@ public:
 	//
 	void Update(bool ForceResort);
 	void Set(const NETADDR &Addr, int Type, int Token, const CServerInfo *pInfo);
-	void RequestCurrentServer(const NETADDR &Addr) const;
+	void RequestCurrentServer(const NETADDR &Addr, int *pBasicToken, int *pToken) const;
+	void SetCurrentServerPing(const NETADDR &Addr, int Ping);
 
 	void SetBaseInfo(class CNetClient *pClient, const char *pNetVersion);
 
@@ -134,19 +144,27 @@ public:
 
 private:
 	CNetClient *m_pNetClient;
-	IMasterServer *m_pMasterServer;
 	class IConsole *m_pConsole;
+	class IEngine *m_pEngine;
 	class IFriends *m_pFriends;
+	class IStorage *m_pStorage;
 	char m_aNetVersion[128];
+
+	bool m_RefreshingHttp = false;
+	IServerBrowserHttp *m_pHttp = nullptr;
+	IServerBrowserPingCache *m_pPingCache = nullptr;
+	const char *m_pHttpPrevBestUrl = nullptr;
 
 	CHeap m_ServerlistHeap;
 	CServerEntry **m_ppServerlist;
 	int *m_pSortedServerlist;
 
 	NETADDR m_aFavoriteServers[MAX_FAVORITES];
+	bool m_aFavoriteServersAllowPing[MAX_FAVORITES];
 	int m_NumFavoriteServers;
 
 	CNetwork m_aNetworks[NUM_NETWORKS];
+	int m_OwnLocation = CServerInfo::LOC_UNKNOWN;
 
 	json_value *m_pDDNetInfo;
 
@@ -155,12 +173,9 @@ private:
 	CServerEntry *m_pFirstReqServer; // request list
 	CServerEntry *m_pLastReqServer;
 	int m_NumRequests;
-	int m_MasterServerCount;
 
 	//used instead of g_Config.br_max_requests to get more servers
 	int m_CurrentMaxRequests;
-
-	int m_LastPacketTick;
 
 	int m_NeedRefresh;
 
@@ -180,6 +195,8 @@ private:
 
 	bool m_SortOnNextUpdate;
 
+	int FindFavorite(const NETADDR &Addr) const;
+
 	int GenerateToken(const NETADDR &Addr) const;
 	static int GetBasicToken(int Token);
 	static int GetExtraToken(int Token);
@@ -198,13 +215,18 @@ private:
 	void Sort();
 	int SortHash() const;
 
+	void UpdateFromHttp();
 	CServerEntry *Add(const NETADDR &Addr);
 
 	void RemoveRequest(CServerEntry *pEntry);
 
-	void RequestImpl(const NETADDR &Addr, CServerEntry *pEntry) const;
+	void RequestImpl(const NETADDR &Addr, CServerEntry *pEntry, int *pBasicToken, int *pToken) const;
+
+	void RegisterCommands();
+	static void Con_LeakIpAddress(IConsole::IResult *pResult, void *pUserData);
 
 	void SetInfo(CServerEntry *pEntry, const CServerInfo &Info);
+	void SetLatency(const NETADDR Addr, int Latency);
 
 	static void ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData);
 };

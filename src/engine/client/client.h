@@ -80,6 +80,7 @@ class CServerCapabilities
 public:
 	bool m_ChatTimeoutCode;
 	bool m_AnyPlayerFlag;
+	bool m_PingEx;
 };
 
 class CClient : public IClient, public CDemoPlayer::IListener
@@ -99,7 +100,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	IUpdater *m_pUpdater;
 	IDiscord *m_pDiscord;
 	ISteam *m_pSteam;
-	IEngineMasterServer *m_pMasterServer;
 
 	enum
 	{
@@ -243,6 +243,13 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	class CServerInfo m_CurrentServerInfo;
 	int64 m_CurrentServerInfoRequestTime; // >= 0 should request, == -1 got info
 
+	int m_CurrentServerPingInfoType;
+	int m_CurrentServerPingBasicToken;
+	int m_CurrentServerPingToken;
+	CUuid m_CurrentServerPingUuid;
+	int64 m_CurrentServerCurrentPingTime; // >= 0 request running
+	int64 m_CurrentServerNextPingTime; // >= 0 should request
+
 	// version info
 	struct CVersionInfo
 	{
@@ -276,7 +283,6 @@ public:
 	IEngineInput *Input() { return m_pInput; }
 	IEngineSound *Sound() { return m_pSound; }
 	IGameClient *GameClient() { return m_pGameClient; }
-	IEngineMasterServer *MasterServer() { return m_pMasterServer; }
 	IConfigManager *ConfigManager() { return m_pConfigManager; }
 	CConfig *Config() { return m_pConfig; }
 	IStorage *Storage() { return m_pStorage; }
@@ -360,8 +366,6 @@ public:
 
 	const char *LoadMap(const char *pName, const char *pFilename, SHA256_DIGEST *pWantedSha256, unsigned WantedCrc);
 	const char *LoadMapSearch(const char *pMapName, SHA256_DIGEST *pWantedSha256, int WantedCrc);
-
-	static bool PlayerScoreNameLess(const CServerInfo::CClient &p0, const CServerInfo::CClient &p1);
 
 	void ProcessConnlessPacket(CNetChunk *pPacket);
 	void ProcessServerInfo(int Type, NETADDR *pFrom, const void *pData, int DataSize);

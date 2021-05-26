@@ -1508,6 +1508,7 @@ set_src(ENGINE_INTERFACE GLOB src/engine
   server.h
   serverbrowser.h
   sound.h
+  sqlite.h
   steam.h
   storage.h
   textrender.h
@@ -1571,7 +1572,8 @@ set_src(ENGINE_SHARED GLOB src/engine/shared
   protocol_ex_msgs.h
   ringbuffer.cpp
   ringbuffer.h
-  serverbrowser.cpp
+  serverinfo.cpp
+  serverinfo.h
   snapshot.cpp
   snapshot.h
   storage.cpp
@@ -1645,6 +1647,7 @@ set(DEPS ${DEP_JSON} ${DEP_MD5} ${ZLIB_DEP})
 # Libraries
 set(LIBS
   ${CRYPTO_LIBRARIES}
+  ${SQLite3_LIBRARIES}
   ${WEBSOCKETS_LIBRARIES}
   ${ZLIB_LIBRARIES}
   ${PLATFORM_LIBS}
@@ -1729,8 +1732,13 @@ if(CLIENT)
     notifications.h
     serverbrowser.cpp
     serverbrowser.h
+    serverbrowser_http.cpp
+    serverbrowser_http.h
+    serverbrowser_ping_cache.cpp
+    serverbrowser_ping_cache.h
     sound.cpp
     sound.h
+    sqlite.cpp
     steam.cpp
     text.cpp
     updater.cpp
@@ -2079,7 +2087,6 @@ endif()
 set(LIBS_SERVER
   ${LIBS}
   ${MYSQL_LIBRARIES}
-  ${SQLite3_LIBRARIES}
   ${TARGET_ANTIBOT}
   ${MINIUPNPC_LIBRARIES}
   # Add pthreads (on non-Windows) at the end, so that other libraries can depend
@@ -2205,6 +2212,9 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     netaddr.cpp
     packer.cpp
     prng.cpp
+    secure_random.cpp
+    serverbrowser.cpp
+    serverinfo.cpp
     sorted_array.cpp
     str.cpp
     strip_path_and_extension.cpp
@@ -2218,6 +2228,15 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
   set(TESTS_EXTRA
     src/engine/client/blocklist_driver.cpp
     src/engine/client/blocklist_driver.h
+    src/engine/client/http.cpp
+    src/engine/client/http.h
+    src/engine/client/serverbrowser.cpp
+    src/engine/client/serverbrowser.h
+    src/engine/client/serverbrowser_http.cpp
+    src/engine/client/serverbrowser_http.h
+    src/engine/client/serverbrowser_ping_cache.cpp
+    src/engine/client/serverbrowser_ping_cache.h
+    src/engine/client/sqlite.cpp
     src/engine/server/name_ban.cpp
     src/engine/server/name_ban.h
     src/game/server/teehistorian.cpp
@@ -2232,8 +2251,8 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     $<TARGET_OBJECTS:game-shared>
     ${DEPS}
   )
-  target_link_libraries(${TARGET_TESTRUNNER} ${LIBS} ${GTEST_LIBRARIES})
-  target_include_directories(${TARGET_TESTRUNNER} PRIVATE ${GTEST_INCLUDE_DIRS})
+  target_link_libraries(${TARGET_TESTRUNNER} ${LIBS} ${CURL_LIBRARIES} ${GTEST_LIBRARIES})
+  target_include_directories(${TARGET_TESTRUNNER} PRIVATE ${CURL_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS})
 
   list(APPEND TARGETS_OWN ${TARGET_TESTRUNNER})
   list(APPEND TARGETS_LINK ${TARGET_TESTRUNNER})
