@@ -1840,6 +1840,8 @@ if(CLIENT)
     skin.h
     ui.cpp
     ui.h
+    ui_ex.cpp
+    ui_ex.h
   )
   set_src(GAME_EDITOR GLOB src/game/editor
     auto_map.cpp

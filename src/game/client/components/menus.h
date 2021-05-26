@@ -15,6 +15,7 @@
 
 #include <game/client/component.h>
 #include <game/client/ui.h>
+#include <game/client/ui_ex.h>
 #include <game/voting.h>
 
 struct CServerProcess
@@ -69,6 +70,8 @@ class CMenus : public CComponent
 	static bool ms_ValueSelectorTextMode;
 
 	char m_aLocalStringHelper[1024];
+
+	CUIEx m_UIEx;
 
 	float ButtonColorMulActive() { return 0.5f; }
 	float ButtonColorMulHot() { return 1.5f; }
