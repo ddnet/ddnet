@@ -11,6 +11,7 @@
 # 2020.8.19 TsFreddie
 # 2020.8.20 Dan_cao
 # 2020.11.12 TsFreddie
+# 2021.5.27 Momo
 ##### /authors #####
 
 ##### translated strings #####
@@ -758,13 +759,13 @@ Default zoom
 == 默认缩放
 
 AntiPing: predict other players
-== AntiPing：预测其他玩家
+== 延迟补偿：预测其他玩家
 
 AntiPing: predict weapons
-== AntiPing：预测武器
+== 延迟补偿：预测武器
 
 AntiPing: predict grenade paths
-== AntiPing：预测榴弹路径
+== 延迟补偿：预测榴弹路径
 
 Show other players' hook collision lines
 == 显示其他玩家的钩索辅助线
@@ -823,7 +824,7 @@ Ratio
 ##### Ratio的算法是击杀除以死亡次数 #####
 
 AntiPing
-== AntiPing
+== 延迟补偿
 
 Countries
 == 国家
@@ -1260,31 +1261,31 @@ Discord
 == 开黑啦
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
+== 材质 %s 的宽度无法被 %d 整除， 或者高度无法被 %d整除，这可能会导致视觉错误。
 
 Chat command
-== 
+== 聊天框指令（/）
 
 Dummy
-== 
+== 分身
 
 Show client IDs
-== 
+== 显示客户端ID
 
 Laser Outline Color
-== 
+== 激光边框颜色
 
 Laser Inner Color
-== 
+== 激光颜色
 
 Preview
-== 
+== 预览
 
 Background
-== 
+== 背景
 
 Entities Background color
-== 
+== 实体层颜色
 
 Regular Background Color
-== 
+== 背景层颜色
