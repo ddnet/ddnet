@@ -197,7 +197,7 @@ void CServerBrowserPingCache::GetPingCache(const CEntry **ppEntries, int *pNumEn
 		}
 		m_aNewEntries.clear();
 	}
-	*ppEntries = &m_aEntries[0];
+	*ppEntries = m_aEntries.data();
 	*pNumEntries = m_aEntries.size();
 }
 
