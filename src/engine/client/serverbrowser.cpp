@@ -1648,9 +1648,9 @@ int CServerInfo::EstimateLatency(int Loc1, int Loc2)
 	}
 	if(Loc1 != Loc2)
 	{
-		return 149;
+		return 199;
 	}
-	return 49;
+	return 99;
 }
 bool CServerInfo::ParseLocation(int *pResult, const char *pString)
 {
