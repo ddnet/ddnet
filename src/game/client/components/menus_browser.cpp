@@ -179,7 +179,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		CUIRect MsgBox = View;
 
 		if(ServerBrowser()->IsGettingServerlist())
-			UI()->DoLabelScaled(&MsgBox, Localize("Getting serverlist from masterserver"), 16.0f, 0);
+			UI()->DoLabelScaled(&MsgBox, Localize("Getting server list from master server"), 16.0f, 0);
 		else if(!ServerBrowser()->NumServers())
 			UI()->DoLabelScaled(&MsgBox, Localize("No servers found"), 16.0f, 0);
 		else if(ServerBrowser()->NumServers() && !NumServers)
@@ -627,13 +627,13 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
 			else if(g_Config.m_UiPage == PAGE_DDNET)
 			{
-				// start a new serverlist request
+				// start a new server list request
 				Client()->RequestDDNetInfo();
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
 			}
 			else if(g_Config.m_UiPage == PAGE_KOG)
 			{
-				// start a new serverlist request
+				// start a new server list request
 				Client()->RequestDDNetInfo();
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_KOG);
 			}
