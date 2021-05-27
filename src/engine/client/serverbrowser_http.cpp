@@ -439,7 +439,7 @@ IServerBrowserHttp *CreateServerBrowserHttp(IEngine *pEngine, IConsole *pConsole
 	const char *apUrls[CChooseMaster::MAX_URLS] = {0};
 	const char **ppUrls = apUrls;
 	int NumUrls = 0;
-	IOHANDLE File = pStorage->OpenFile("serverlist_urls.cfg", IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE File = pStorage->OpenFile("ddnet-serverlist-urls.cfg", IOFLAG_READ, IStorage::TYPE_ALL);
 	if(File)
 	{
 		CLineReader Lines;

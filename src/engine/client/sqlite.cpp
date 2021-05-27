@@ -30,7 +30,7 @@ CSqlite SqliteOpen(IConsole *pConsole, IStorage *pStorage, const char *pPath)
 	char aFullPath[MAX_PATH_LENGTH];
 	pStorage->GetCompletePath(IStorage::TYPE_SAVE, pPath, aFullPath, sizeof(aFullPath));
 	sqlite3 *pSqlite = nullptr;
-	bool ErrorOpening = SQLITE_HANDLE_ERROR(sqlite3_open(aFullPath, &pSqlite)) != SQLITE_OK;
+	const bool ErrorOpening = SQLITE_HANDLE_ERROR(sqlite3_open(aFullPath, &pSqlite)) != SQLITE_OK;
 	// Even on error, the database is initialized and needs to be freed.
 	// Except on allocation failure, but then it'll be nullptr which is
 	// also fine.
