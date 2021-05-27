@@ -2778,7 +2778,7 @@ void CGameContext::AddVote(const char *pDescription, const char *pCommand)
 	++m_NumVoteOptions;
 	int Len = str_length(pCommand);
 
-	pOption = (CVoteOptionServer *)m_pVoteOptionHeap->Allocate(sizeof(CVoteOptionServer) + Len);
+	pOption = (CVoteOptionServer *)m_pVoteOptionHeap->Allocate(sizeof(CVoteOptionServer) + Len, alignof(CVoteOptionServer));
 	pOption->m_pNext = 0;
 	pOption->m_pPrev = m_pVoteOptionLast;
 	if(pOption->m_pPrev)
