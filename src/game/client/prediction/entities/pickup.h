@@ -15,6 +15,7 @@ public:
 	CPickup(CGameWorld *pGameWorld, int ID, CNetObj_Pickup *pPickup);
 	void FillInfo(CNetObj_Pickup *pPickup);
 	bool Match(CPickup *pPickup);
+	bool InDDNetTile() { return m_IsCoreActive; }
 
 private:
 	int m_Type;
@@ -24,6 +25,7 @@ private:
 
 	void Move();
 	vec2 m_Core;
+	bool m_IsCoreActive;
 };
 
 #endif
