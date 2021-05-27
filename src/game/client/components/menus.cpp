@@ -2679,11 +2679,11 @@ int CMenus::Render()
 			ModifiedHeader.VSplitMid(0, &ModifiedDiscard);
 
 			static int s_ExtraDiscard = 0;
-			if(DoButton_CheckBox(&s_ExtraDiscard, "Discard", s_ExtraDiscard, &ExtraDiscard) && Updater()->State() == IUpdater::CLEAN)
+			if(DoButton_CheckBox(&s_ExtraDiscard, Localize("Discard"), s_ExtraDiscard, &ExtraDiscard) && Updater()->State() == IUpdater::CLEAN)
 				s_ExtraDiscard ^= 1;
 
 			static int s_ModifiedDiscard = 0;
-			if(DoButton_CheckBox(&s_ModifiedDiscard, "Discard", s_ModifiedDiscard, &ModifiedDiscard) && Updater()->State() == IUpdater::CLEAN)
+			if(DoButton_CheckBox(&s_ModifiedDiscard, Localize("Discard"), s_ModifiedDiscard, &ModifiedDiscard) && Updater()->State() == IUpdater::CLEAN)
 				s_ModifiedDiscard ^= 1;
 
 			{
