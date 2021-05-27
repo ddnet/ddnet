@@ -346,9 +346,6 @@ Red team wins!
 Refresh
 == Obnovit
 
-Refreshing master servers
-== Aktualizování hlavních serverů
-
 Remote console
 == Vzdálená konzola
 
@@ -885,17 +882,11 @@ Show HUD
 UI mouse s.
 == UI mouse s.
 
-Borderless window
-== Okno bez okrajů
-
 may cause delay
 == může způsobit zpoždění
 
 Screen
 == Obrazovka
-
-Use OpenGL 3.3 (experimental)
-== Použít OpenGL 3.3 (experimentální)
 
 Preinit VBO (iGPUs only)
 == Preinit VBO (pouze iGPU)
@@ -1247,10 +1238,49 @@ Update failed! Check log...
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+Getting server list from master server
+== 
+
+Leak IP
+== 
+
 Chat command
 == 
 
 Dummy
+== 
+
+Windowed
+== 
+
+Windowed borderless
+== 
+
+Desktop fullscreen
+== 
+
+Use modern OpenGL
 == 
 
 Show client IDs
@@ -1260,6 +1290,18 @@ Laser Outline Color
 == 
 
 Laser Inner Color
+== 
+
+Hookline
+== 
+
+No hit
+== 
+
+Hookable
+== 
+
+Tee
 == 
 
 Preview

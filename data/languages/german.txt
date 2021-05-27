@@ -364,9 +364,6 @@ Red team wins!
 Refresh
 == Aktualisieren
 
-Refreshing master servers
-== Aktualisiere Masterserver
-
 Remote console
 == Remote-Konsole
 
@@ -883,9 +880,6 @@ Spree
 Max CSVs
 == Maximale CSVs
 
-Borderless window
-== Randloses Fenster
-
 Best
 == Beste
 
@@ -924,9 +918,6 @@ UI mouse s.
 
 Indicate map finish
 == Kartensieg anzeigen
-
-Use OpenGL 3.3 (experimental)
-== OpenGL 3.3 benutzen (experimentell)
 
 File already exists, do you want to overwrite it?
 == Datei existiert bereits, willst du sie überschreiben?
@@ -1283,7 +1274,58 @@ Entities Background color
 Regular Background Color
 == Normale Hintergrundfarbe
 
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+Getting server list from master server
+== 
+
+Leak IP
+== 
+
 Chat command
+== 
+
+Windowed
+== 
+
+Windowed borderless
+== 
+
+Desktop fullscreen
+== 
+
+Use modern OpenGL
+== 
+
+Hookline
+== 
+
+No hit
+== 
+
+Hookable
+== 
+
+Tee
 == 
 
 Discord

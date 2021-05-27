@@ -350,9 +350,6 @@ Red team wins!
 Refresh
 == Uppdatera
 
-Refreshing master servers
-== Uppdaterar huvudservrar
-
 Remote console
 == Serverkonsol
 
@@ -835,9 +832,6 @@ Reset wanted weapon on death
 Search
 == Sök
 
-Borderless window
-== Gränslös fönster
-
 FPM
 == FPM
 
@@ -1084,9 +1078,6 @@ Show quads
 Show names in chat in team colors
 == Visa namn in chatten med lag färger
 
-Use OpenGL 3.3 (experimental)
-== Använd OpenGL 3.3 (experimentell)
-
 Update now
 == Updatera nu
 
@@ -1202,6 +1193,33 @@ Checking for existing player with your name
 Theme
 == 
 
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+Getting server list from master server
+== 
+
+Leak IP
+== 
+
 Demos directory
 == 
 
@@ -1223,6 +1241,18 @@ Chat command
 Dummy
 == 
 
+Windowed
+== 
+
+Windowed borderless
+== 
+
+Desktop fullscreen
+== 
+
+Use modern OpenGL
+== 
+
 Game sound volume
 == 
 
@@ -1242,6 +1272,18 @@ Laser Outline Color
 == 
 
 Laser Inner Color
+== 
+
+Hookline
+== 
+
+No hit
+== 
+
+Hookable
+== 
+
+Tee
 == 
 
 Use old chat style

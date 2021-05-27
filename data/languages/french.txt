@@ -361,9 +361,6 @@ Red team wins!
 Refresh
 == Rafraîchir
 
-Refreshing master servers
-== Rafraîchissement des serveurs maîtres
-
 Remote console
 == Console serveur
 
@@ -741,9 +738,6 @@ Personal best:
 Skin prefix
 == Préfixe de skin
 
-Use OpenGL 3.3 (experimental)
-== Utiliser OpenGL 3.3 (expérimental)
-
 Date
 == Date
 
@@ -845,9 +839,6 @@ Follow
 
 Converse
 == Converser
-
-Borderless window
-== Mode fenêtré sans bordure
 
 Hook collisions
 == Collision du grappin
@@ -1270,10 +1261,49 @@ Replay
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+Getting server list from master server
+== 
+
+Leak IP
+== 
+
 Chat command
 == 
 
 Dummy
+== 
+
+Windowed
+== 
+
+Windowed borderless
+== 
+
+Desktop fullscreen
+== 
+
+Use modern OpenGL
 == 
 
 Show client IDs
@@ -1283,6 +1313,18 @@ Laser Outline Color
 == 
 
 Laser Inner Color
+== 
+
+Hookline
+== 
+
+No hit
+== 
+
+Hookable
+== 
+
+Tee
 == 
 
 Preview
