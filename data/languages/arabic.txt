@@ -345,9 +345,6 @@ Red team wins!
 Refresh
 == ﺚﻳﺪﺤﺗ
 
-Refreshing master servers
-== ﺕﺍﺮﻓﺮﻴﺴﻟﺍ ﻞﻴﻤﺤﺗ ﺓﺩﺎﻋﺍ
-
 Remote console
 == ﻦﻣﺩﻻﺍ ﻞﺴﻧﻮﻛ
 
@@ -858,9 +855,6 @@ Spree
 Max CSVs
 == Max CSVs
 
-Borderless window
-== ﺩﻭﺪﺣ ﻼﺑ ﺓﺬﻓﺎﻧ
-
 Best
 == ﻞﻀﻓﺍ
 
@@ -899,9 +893,6 @@ UI mouse s.
 
 Indicate map finish
 == ﺔﻗﺎﻄﺒﻟﺍ ﺭﺎﺼﺘﻧﺍ ﺭﺎﻬﻇﺇ
-
-Use OpenGL 3.3 (experimental)
-== ( ﺔﻳﻮﻘﻟﺍ ﺓﺰﻬﺟﻼﻟ ) OpenGL 3.3 ﻡﺍﺪﺨﺘﺳﺍ
 
 File already exists, do you want to overwrite it?
 == ﻪﻗﻮﻓ ﺔﺑﺎﺘﻜﻟﺍ ﺪﻳﺮﺗ ﻞﻫ ، ﻞﻌﻔﻟﺎﺑ ﺩﻮﺟﻮﻣ ﻒﻠﻤﻟﺍ
@@ -1234,10 +1225,49 @@ Smooth Dynamic Camera
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+Getting server list from master server
+== 
+
+Leak IP
+== 
+
 Chat command
 == 
 
 Dummy
+== 
+
+Windowed
+== 
+
+Windowed borderless
+== 
+
+Desktop fullscreen
+== 
+
+Use modern OpenGL
 == 
 
 Sample rate
@@ -1250,6 +1280,18 @@ Laser Outline Color
 == 
 
 Laser Inner Color
+== 
+
+Hookline
+== 
+
+No hit
+== 
+
+Hookable
+== 
+
+Tee
 == 
 
 Preview

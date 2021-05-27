@@ -379,9 +379,6 @@ Red team wins!
 Refresh
 == 重新整理
 
-Refreshing master servers
-== 正在重新整理主伺服器
-
 Remote console
 == 遠端控制檯
 
@@ -567,9 +564,6 @@ Yes
 
 You must restart the game for all settings to take effect.
 == 你需要重啟遊戲來使某些設定生效。
-
-Borderless window
-== 無邊框視窗
 
 Demo
 == 回放
@@ -925,9 +919,6 @@ Activate
 Multiple texture units (disable for MacOS)
 == 多重紋理單元 (MacOS不可用)
 
-Use OpenGL 3.3 (experimental)
-== 使用 OpenGL 3.3 (實驗性)
-
 File already exists, do you want to overwrite it?
 == 檔案已存在，是否覆蓋？
 
@@ -1250,10 +1241,49 @@ Assets directory
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+Getting server list from master server
+== 
+
+Leak IP
+== 
+
 Chat command
 == 
 
 Dummy
+== 
+
+Windowed
+== 
+
+Windowed borderless
+== 
+
+Desktop fullscreen
+== 
+
+Use modern OpenGL
 == 
 
 Show client IDs
@@ -1263,6 +1293,18 @@ Laser Outline Color
 == 
 
 Laser Inner Color
+== 
+
+Hookline
+== 
+
+No hit
+== 
+
+Hookable
+== 
+
+Tee
 == 
 
 Preview

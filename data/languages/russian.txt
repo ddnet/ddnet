@@ -355,9 +355,6 @@ Red team wins!
 Refresh
 == Обновить
 
-Refreshing master servers
-== Обновление списка мастер-серверов
-
 Remote console
 == Консоль сервера
 
@@ -570,9 +567,6 @@ Enable highlighted chat sound
 
 Threaded sound loading
 == Фоновая загрузка музыки
-
-Borderless window
-== Без рамки
 
 Use DDRace Scoreboard
 == Использовать DDRace табло
@@ -985,9 +979,6 @@ may cause delay
 Screen
 == Экран
 
-Use OpenGL 3.3 (experimental)
-== Использовать OpenGL 3.3 (тестируется)
-
 Preinit VBO (iGPUs only)
 == Преинициал-ть VBO (только iGPU)
 
@@ -1282,3 +1273,54 @@ Discord
 
 https://ddnet.tw/discord
 == https://ddnet.tw/discord
+
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+Getting server list from master server
+== 
+
+Leak IP
+== 
+
+Windowed
+== 
+
+Windowed borderless
+== 
+
+Desktop fullscreen
+== 
+
+Use modern OpenGL
+== 
+
+Hookline
+== 
+
+No hit
+== 
+
+Hookable
+== 
+
+Tee
+== 
