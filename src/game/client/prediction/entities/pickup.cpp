@@ -77,7 +77,12 @@ void CPickup::Move()
 		int index = Collision()->IsMover(m_Pos.x, m_Pos.y, &Flags);
 		if(index)
 		{
+			m_IsCoreActive = true;
 			m_Core = Collision()->CpSpeed(index, Flags);
+		}
+		else
+		{
+			m_IsCoreActive = false;
 		}
 		m_Pos += m_Core;
 	}
@@ -91,6 +96,7 @@ CPickup::CPickup(CGameWorld *pGameWorld, int ID, CNetObj_Pickup *pPickup) :
 	m_Type = pPickup->m_Type;
 	m_Subtype = pPickup->m_Subtype;
 	m_Core = vec2(0.f, 0.f);
+	m_IsCoreActive = false;
 	m_ID = ID;
 	m_Layer = LAYER_GAME;
 	m_Number = 0;
