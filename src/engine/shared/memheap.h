@@ -2,6 +2,8 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef ENGINE_SHARED_MEMHEAP_H
 #define ENGINE_SHARED_MEMHEAP_H
+
+#include <cstddef>
 class CHeap
 {
 	struct CChunk
@@ -22,12 +24,12 @@ class CHeap
 
 	void Clear();
 	void NewChunk();
-	void *AllocateFromChunk(unsigned int Size);
+	void *AllocateFromChunk(unsigned int Size, unsigned Alignment);
 
 public:
 	CHeap();
 	~CHeap();
 	void Reset();
-	void *Allocate(unsigned Size);
+	void *Allocate(unsigned Size, unsigned Alignment = alignof(std::max_align_t));
 };
 #endif

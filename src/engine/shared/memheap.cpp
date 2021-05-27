@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "memheap.h"
 #include <base/system.h>
+#include <cstdint>
 
 // allocates a new chunk to be used
 void CHeap::NewChunk()
@@ -27,17 +28,20 @@ void CHeap::NewChunk()
 }
 
 //****************
-void *CHeap::AllocateFromChunk(unsigned int Size)
+void *CHeap::AllocateFromChunk(unsigned int Size, unsigned Alignment)
 {
 	char *pMem;
+	size_t Offset = reinterpret_cast<uintptr_t>(m_pCurrent->m_pCurrent) % Alignment;
+	if(Offset)
+		Offset = Alignment - Offset;
 
 	// check if we need can fit the allocation
-	if(m_pCurrent->m_pCurrent + Size > m_pCurrent->m_pEnd)
+	if(m_pCurrent->m_pCurrent + Offset + Size > m_pCurrent->m_pEnd)
 		return (void *)0x0;
 
 	// get memory and move the pointer forward
-	pMem = m_pCurrent->m_pCurrent;
-	m_pCurrent->m_pCurrent += Size;
+	pMem = m_pCurrent->m_pCurrent + Offset;
+	m_pCurrent->m_pCurrent += Offset + Size;
 	return pMem;
 }
 
@@ -76,19 +80,19 @@ void CHeap::Clear()
 }
 
 //
-void *CHeap::Allocate(unsigned Size)
+void *CHeap::Allocate(unsigned Size, unsigned Alignment)
 {
 	char *pMem;
 
 	// try to allocate from current chunk
-	pMem = (char *)AllocateFromChunk(Size);
+	pMem = (char *)AllocateFromChunk(Size, Alignment);
 	if(!pMem)
 	{
 		// allocate new chunk and add it to the heap
 		NewChunk();
 
 		// try to allocate again
-		pMem = (char *)AllocateFromChunk(Size);
+		pMem = (char *)AllocateFromChunk(Size, Alignment);
 	}
 
 	return pMem;
