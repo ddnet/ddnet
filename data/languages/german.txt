@@ -1274,62 +1274,62 @@ Entities Background color
 Regular Background Color
 == Normale Hintergrundfarbe
 
-AFR
-== 
-
-ASI
-== 
-
-AUS
-== 
-
-EUR
-== 
-
-NA
-== 
-
-SA
-== 
-
-CHN
-== 
-
-Getting server list from master server
-== 
-
-Leak IP
-== 
-
 Chat command
-== 
-
-Windowed
-== 
-
-Windowed borderless
-== 
-
-Desktop fullscreen
-== 
-
-Use modern OpenGL
-== 
-
-Hookline
-== 
-
-No hit
-== 
-
-Hookable
-== 
-
-Tee
-== 
+== Chat-Befehl
 
 Discord
-== 
+== Discord
 
 https://ddnet.tw/discord
-== 
+== https://ddnet.tw/discord
+
+AFR
+== AFR
+
+ASI
+== ASI
+
+AUS
+== AUS
+
+EUR
+== EUR
+
+NA
+== NA
+
+SA
+== SA
+
+CHN
+== CHN
+
+Getting server list from master server
+== Hole Serverliste vom Masterserver
+
+Leak IP
+== IP leaken
+
+Windowed
+== Fenster
+
+Windowed borderless
+== Fenster ohne Rand
+
+Desktop fullscreen
+== Desktop-Vollbild
+
+Use modern OpenGL
+== Modernes OpenGL benutzen
+
+Hookline
+== Hooklinie
+
+No hit
+== Kein Treffer
+
+Hookable
+== Hookbar
+
+Tee
+== Tee
