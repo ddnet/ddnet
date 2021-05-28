@@ -350,9 +350,6 @@ Red team wins!
 Refresh
 == Osvježi
 
-Refreshing master servers
-== Osvježavam glavne servere
-
 Remote console
 == Udaljena konzola
 
@@ -898,9 +895,6 @@ may cause delay
 Screen
 == Ekran
 
-Use OpenGL 3.3 (experimental)
-== Koristi OpenGL 3.3 (eksperimentalno)
-
 Preinit VBO (iGPUs only)
 == Inicijalizuj VBO (samo iGPU-ovi)
 
@@ -1114,6 +1108,30 @@ Speed
 Theme
 == 
 
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+Getting server list from master server
+== 
+
 %d of %d servers
 == 
 
@@ -1124,6 +1142,9 @@ Theme
 == 
 
 %d player
+== 
+
+Leak IP
 == 
 
 %.2f MiB
@@ -1162,7 +1183,16 @@ Chat command
 Dummy
 == 
 
-Borderless window
+Windowed
+== 
+
+Windowed borderless
+== 
+
+Desktop fullscreen
+== 
+
+Use modern OpenGL
 == 
 
 Game sound volume
@@ -1190,6 +1220,18 @@ Laser Outline Color
 == 
 
 Laser Inner Color
+== 
+
+Hookline
+== 
+
+No hit
+== 
+
+Hookable
+== 
+
+Tee
 == 
 
 Use old chat style

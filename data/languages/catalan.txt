@@ -345,9 +345,6 @@ Red team wins!
 Refresh
 == Actualitzar
 
-Refreshing master servers
-== Actualitzant servidors principals
-
 Remote console
 == Consola remota
 
@@ -521,9 +518,6 @@ Yes
 
 You must restart the game for all settings to take effect.
 == Has de reiniciar el joc perquè els canvis tinguin efecte.
-
-Borderless window
-== Pantalla sense finestra
 
 Demo
 == Repetició
@@ -906,9 +900,6 @@ Activate
 Multiple texture units (disable for MacOS)
 == Multiple texture units (disable for MacOS)
 
-Use OpenGL 3.3 (experimental)
-== Utilitzar OpenGL 3.3 (experimental)
-
 UI mouse s.
 == UI mouse s.
 
@@ -1146,6 +1137,30 @@ Speed
 Theme
 == 
 
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+Getting server list from master server
+== 
+
 %d of %d servers
 == 
 
@@ -1156,6 +1171,9 @@ Theme
 == 
 
 %d player
+== 
+
+Leak IP
 == 
 
 Demos directory
@@ -1185,6 +1203,18 @@ Chat command
 Dummy
 == 
 
+Windowed
+== 
+
+Windowed borderless
+== 
+
+Desktop fullscreen
+== 
+
+Use modern OpenGL
+== 
+
 Game sound volume
 == 
 
@@ -1204,6 +1234,18 @@ Laser Outline Color
 == 
 
 Laser Inner Color
+== 
+
+Hookline
+== 
+
+No hit
+== 
+
+Hookable
+== 
+
+Tee
 == 
 
 Use old chat style

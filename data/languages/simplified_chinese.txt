@@ -386,9 +386,6 @@ Red team wins!
 Refresh
 == 刷新
 
-Refreshing master servers
-== 正在刷新主服务器
-
 Remote console
 == 远程控制台
 
@@ -574,9 +571,6 @@ Yes
 
 You must restart the game for all settings to take effect.
 == 你需要重启游戏来使某些设置生效。
-
-Borderless window
-== 无边框窗口
 
 Demo
 == 回放
@@ -932,9 +926,6 @@ Activate
 Multiple texture units (disable for MacOS)
 == 多重纹理单元 (MacOS不可用)
 
-Use OpenGL 3.3 (experimental)
-== 使用 OpenGL 3.3 (实验性)
-
 File already exists, do you want to overwrite it?
 == 文件已存在，是否覆盖？
 
@@ -1289,3 +1280,54 @@ Entities Background color
 
 Regular Background Color
 == 背景层背景颜色
+
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+Getting server list from master server
+== 
+
+Leak IP
+== 
+
+Windowed
+== 
+
+Windowed borderless
+== 
+
+Desktop fullscreen
+== 
+
+Use modern OpenGL
+== 
+
+Hookline
+== 
+
+No hit
+== 
+
+Hookable
+== 
+
+Tee
+== 

@@ -338,9 +338,6 @@ Red team wins!
 Refresh
 == Újratöltés
 
-Refreshing master servers
-== Mester szerverek frissítése
-
 Remote console
 == Távoli konzol
 
@@ -813,9 +810,6 @@ Demofile: %s
 Max CSVs
 == Maximum CSV-k
 
-Borderless window
-== Ablak mód
-
 %.2f KiB
 == %.2f KiB
 
@@ -914,9 +908,6 @@ Activate
 
 Multiple texture units (disable for MacOS)
 == Több textúra egységek (kapcsolja ki MacOS esetén)
-
-Use OpenGL 3.3 (experimental)
-== OpenGL 3.3 használata (Haladó)
 
 UI mouse s.
 == UI egér sebesség
@@ -1243,10 +1234,49 @@ Replay
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+Getting server list from master server
+== 
+
+Leak IP
+== 
+
 Chat command
 == 
 
 Dummy
+== 
+
+Windowed
+== 
+
+Windowed borderless
+== 
+
+Desktop fullscreen
+== 
+
+Use modern OpenGL
 == 
 
 Show client IDs
@@ -1256,6 +1286,18 @@ Laser Outline Color
 == 
 
 Laser Inner Color
+== 
+
+Hookline
+== 
+
+No hit
+== 
+
+Hookable
+== 
+
+Tee
 == 
 
 Preview
