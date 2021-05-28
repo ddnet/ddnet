@@ -186,8 +186,8 @@ int CRequest::ProgressCallback(void *pUser, double DlTotal, double DlCurr, doubl
 	return pTask->m_Abort ? -1 : 0;
 }
 
-CHead::CHead(const char *pUrl, CTimeout Timeout) :
-	CRequest(pUrl, Timeout)
+CHead::CHead(const char *pUrl, CTimeout Timeout, bool LogProgress) :
+	CRequest(pUrl, Timeout, LogProgress)
 {
 }
 
@@ -202,8 +202,8 @@ bool CHead::AfterInit(void *pCurl)
 	return true;
 }
 
-CGet::CGet(const char *pUrl, CTimeout Timeout) :
-	CRequest(pUrl, Timeout),
+CGet::CGet(const char *pUrl, CTimeout Timeout, bool LogProgress) :
+	CRequest(pUrl, Timeout, LogProgress),
 	m_BufferSize(0),
 	m_BufferLength(0),
 	m_pBuffer(NULL)
