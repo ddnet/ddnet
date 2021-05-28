@@ -72,7 +72,7 @@ class CHead : public CRequest
 	virtual bool AfterInit(void *pCurl);
 
 public:
-	CHead(const char *pUrl, CTimeout Timeout);
+	CHead(const char *pUrl, CTimeout Timeout, bool LogProgress = true);
 	~CHead();
 };
 
@@ -85,7 +85,7 @@ class CGet : public CRequest
 	unsigned char *m_pBuffer;
 
 public:
-	CGet(const char *pUrl, CTimeout Timeout);
+	CGet(const char *pUrl, CTimeout Timeout, bool LogProgress = true);
 	~CGet();
 
 	size_t ResultSize() const
