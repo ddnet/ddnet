@@ -154,7 +154,7 @@ int CRequest::RunImpl(CURL *pHandle)
 	}
 
 	if(g_Config.m_DbgCurl || m_LogProgress)
-		dbg_msg("http", "http %s", m_aUrl);
+		dbg_msg("http", "fetching %s", m_aUrl);
 	m_State = HTTP_RUNNING;
 	int Ret = curl_easy_perform(pHandle);
 	if(Ret != CURLE_OK)
