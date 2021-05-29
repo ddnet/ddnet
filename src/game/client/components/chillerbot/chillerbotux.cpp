@@ -1,6 +1,7 @@
 // ChillerDragon 2020 - chillerbot ux
 
 #include <engine/config.h>
+#include <engine/client/notifications.h>
 #include <engine/console.h>
 #include <engine/graphics.h>
 #include <engine/keys.h>
@@ -37,6 +38,7 @@ void CChillerBotUX::OnRender()
 	RenderSpeedHud();
 	RenderEnabledComponents();
 	FinishRenameTick();
+	ChangeTileNotifyTick();
 	m_ForceDir = 0;
 	CampHackTick();
 	if(!m_ForceDir && m_LastForceDir)
@@ -45,6 +47,26 @@ void CChillerBotUX::OnRender()
 		m_pClient->m_pControls->m_InputDirectionLeft[g_Config.m_ClDummy] = 0;
 	}
 	m_LastForceDir = m_ForceDir;
+}
+
+void CChillerBotUX::ChangeTileNotifyTick()
+{
+	if(!g_Config.m_ClChangeTileNotification)
+		return;
+	static int LastTile = -1;
+	float X = m_pClient->m_Snap.m_aCharacters[m_pClient->m_LocalIDs[g_Config.m_ClDummy]].m_Cur.m_X;
+	float Y = m_pClient->m_Snap.m_aCharacters[m_pClient->m_LocalIDs[g_Config.m_ClDummy]].m_Cur.m_Y;
+	int CurrentTile = Collision()->GetTileIndex(Collision()->GetPureMapIndex(X, Y));
+	if(LastTile != CurrentTile && m_LastNotification + time_freq() * 10 < time_get())
+	{
+		if(!((IEngineGraphics *)Kernel()->RequestInterface<IEngineGraphics>())->WindowActive())
+		{
+			NotificationsNotify("chillerbot-ux", "current tile changed");
+			Graphics()->NotifyWindow();
+		}
+		m_LastNotification = time_get();
+	}
+	LastTile = CurrentTile;
 }
 
 void CChillerBotUX::RenderSpeedHud()

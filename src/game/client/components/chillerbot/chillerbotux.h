@@ -33,9 +33,11 @@ class CChillerBotUX : public CComponent
 	int m_CampClick;
 	int m_ForceDir;
 	int m_LastForceDir;
+	int64 m_LastNotification;
 
 	void OnChatMessage(int ClientID, int Team, const char *pMsg);
 	void GoAfk(int Minutes, const char *pMsg = 0);
+	void ChangeTileNotifyTick();
 	void FinishRenameTick();
 	void CampHackTick();
 	void SelectCampArea(int Key);

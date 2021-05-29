@@ -2695,4 +2695,13 @@ void CMenus::RenderSettingsChillerbot(CUIRect MainView)
 			m_pClient->m_pWarList->ReloadList();
 		}
 	}
+	// notify tile change
+	{
+		CUIRect Checkbox;
+		MainView.HSplitTop(20.0f, &Checkbox, &MainView);
+		if(DoButton_CheckBox(&g_Config.m_ClChangeTileNotification, "notify when tee leaves current tile type (while tabbed out)", g_Config.m_ClChangeTileNotification, &Checkbox))
+		{
+			g_Config.m_ClChangeTileNotification ^= 1;
+		}
+	}
 }
