@@ -475,6 +475,7 @@ public:
 	virtual void ToggleWindowVSync();
 	virtual void LoadFont();
 	virtual void Notify(const char *pTitle, const char *pMessage);
+	virtual void SendNotification(const char *pTitle, const char *pMessage);
 	void BenchmarkQuit(int Seconds, const char *pFilename);
 
 	// DDRace
