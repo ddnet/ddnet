@@ -33,7 +33,7 @@ Section: In depth
 
 Topic: Compression
 
-After a snapshot have been created, compression is applyed to reduce the bandwidth. There are several steps taken inorder to reduce the size of the size of the snapshot.
+After a snapshot has been created, compression is applied to reduce the bandwidth. There are several steps taken in order to reduce the size of the snapshot.
 
 - *Delta*. The server looks in a clients backlog of snapshots to find a previous acked snapshot. It then compares the two snapshots and creates a delta snapshot containing the changes from the previous acked snapshot to the new one.
 - *Variable Integers*. The delta snapshot which is only consisting of 32-bit integers is then encoded into variable integers similar to UTF-8. Each byte has a bit that tells the decoder that it needs one more byte to decode the 32-bit integer. The first byte also contains a bit for telling the sign of the integer.
