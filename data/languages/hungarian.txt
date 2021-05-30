@@ -306,7 +306,7 @@ Pistol
 
 [Demo browser]
 Play
-== Játék
+== Lejátszás
 
 Player
 == Játékos
@@ -402,7 +402,7 @@ Show name plates
 == Név táblák mutatása
 
 Skins
-== Skinek
+== Karakterek
 
 Sound
 == Hang
@@ -556,7 +556,7 @@ Record demo
 == Demó felvétele
 
 Your skin
-== Te skined
+== Te Karaktered
 
 Size:
 == Méret:
@@ -601,7 +601,7 @@ Type:
 == Típus:
 
 Dummy settings
-== Dummy beállításai
+== Másolat Beállításai
 
 AntiPing
 == Antiping
@@ -784,7 +784,7 @@ Suicides
 == Öngyilkosságok
 
 Player country:
-== Játékos országa
+== Játékos országa:
 
 Net
 == Net
@@ -922,7 +922,7 @@ Save
 == Mentés
 
 Vanilla skins only
-== Csak alap skinek
+== Csak vanilla skinek
 
 Date
 == Idő
@@ -937,7 +937,7 @@ Reload
 == újratöltés
 
 Hammerfly dummy
-== Dummy Kalapács
+== Másolat Kalapács
 
 Downloading %s:
 == Letöltés %s:
@@ -958,10 +958,10 @@ Video name:
 == Videó neve:
 
 Connect Dummy
-== Dummy Csatlakoztatása
+== Másolat Csatlakoztatása
 
 Disconnect Dummy
-== Dummy Lecsatlakoztatása
+== Másolat Lecsatlakoztatása
 
 Filter connecting players
 == Csatlakozók szűrése
@@ -970,7 +970,7 @@ Pause
 == Nézetváltás
 
 Toggle dummy
-== Dummy irányítása
+== Másolat irányítása
 
 Fetch Info
 == Minden infó
@@ -1039,7 +1039,7 @@ Destination file already exist
 == A kiválasztott helynél ez létezik
 
 Server best:
-== Legjobb szerver:
+== Szerver legjobb:
 
 Markers:
 == Jelölések
@@ -1054,10 +1054,10 @@ The maps contain freeze, which temporarily make a tee unable to move. You have t
 == A pályákon fagyasztó részeket találtok, melyek ideiglenesen blokkolják a játékos mozgását. Együtt kell dolgoznod a pályarészekkel az átjutáshoz.
 
 The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== A görgő megváltoztatja a fegyvereket. A kalapács (bal egérgomb) segítségével más Tee-ket megüthetsz és ütésekkel kiolvadhatnak a fagyásból.
+== A görgő megváltoztatja a fegyvereket. A kalapács (bal egérgomb) segítségével más Játékosokat megüthetsz és ütésekkel kiolvadhatnak a fagyásból.
 
 Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== A horoggal (jobb egérgomb) megkapaszkodhatsz néhány platformon és más Tee-ket is megragadhatsz vele.
+== A horoggal (jobb egérgomb) megkapaszkodhatsz néhány platformon és más Játékosokat is megragadhatsz vele.
 
 Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
 == A legfontosabb kulcs a sikerhez: Nincs oktatóprogram, így mindenki magától tanulja meg más játékosok által. (T gombbal tudsz Chattelni)
@@ -1141,25 +1141,25 @@ Demos directory
 == Demók Helye
 
 Smooth Dynamic Camera
-== Egyenletesen dinamikus kamera
+== Egyenletes dinamikus kamera
 
 Skip the main menu
-== főmenű kihagyása
+== Főmenű kihagyása
 
 Themes directory
 == Témák Helye
 
 Download skins
-== Skinek letöltése
+== Karakterek letöltése
 
 Skin prefix
 == Karakter prefix
 
 Skin Database
-== Több skin
+== Karakter Adatbázis
 
 Skins directory
-== Skinek Helye
+== Karakterek Helye
 
 Game sound volume
 == Játék Hangerő
@@ -1174,7 +1174,7 @@ Assets
 == Kinézet
 
 Use old chat style
-== régi chat stílus használata
+== Régi chat stílus használata
 
 Client message
 == Kliens Üzenet
@@ -1192,7 +1192,7 @@ Emoticons
 == Hangulatjelek
 
 Particles
-== effektek
+== Effektek
 
 Assets directory
 == Kinézet Helye
@@ -1217,7 +1217,7 @@ Editor
 
 [Start menu]
 Play
-== Játszás
+== Játék
 
 Manual
 == Manuális
@@ -1232,7 +1232,7 @@ Replay
 == Visszajátszás
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
+== A Struktúra Szélessége %s nem osztható %d al, vagy a magasság nem osztható %d al, ami vizuális hibákhoz vezethet.
 
 AFR
 == 
@@ -1256,61 +1256,61 @@ CHN
 == 
 
 Getting server list from master server
-== 
+== Szerver Lista Lekérése
 
 Leak IP
-== 
+== IP Mutatása
 
 Chat command
-== 
+== Chat Parancs
 
 Dummy
-== 
+== Másolat
 
 Windowed
-== 
+== Ablak
 
 Windowed borderless
-== 
+== Keretnélküli Ablak
 
 Desktop fullscreen
-== 
+== Asztalos Teljesképernyő
 
 Use modern OpenGL
-== 
+== Modern OpenGL Használata
 
 Show client IDs
-== 
+== Kliens ID-k Mutatása
 
 Laser Outline Color
-== 
+== Lézer Körvonal Szín
 
 Laser Inner Color
-== 
+== Lézer Belső Szín
 
 Hookline
-== 
+== Horogvonal
 
 No hit
-== 
+== Nincs Találat
 
 Hookable
-== 
+== Horgolható
 
 Tee
-== 
+== Játékos Találat
 
 Preview
-== 
+== Előnézet
 
 Background
-== 
+== Háttér
 
 Entities Background color
-== 
+== Entitás Háttér Szín
 
 Regular Background Color
-== 
+== Átlagos Háttér Szín
 
 Discord
 == 
