@@ -10,6 +10,7 @@
 #	FeaRZ		2020-07-07 12:09:00
 #	Ryozuki         2020-07-09 12:06:00
 # Headshot        2020-11-07 12:40:00
+# Headshot        2021-05-30 17:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1240,88 +1241,88 @@ Replay
 == Repetición
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
+== El ancho de la textura %s no es divisible por %d, o el alto no es divisible por %d, lo que puede causar errores visuales.
 
 AFR
-== 
+== AFR
 
 ASI
-== 
+== ASI
 
 AUS
-== 
+== AUS
 
 EUR
-== 
+== EUR
 
 NA
-== 
+== NA
 
 SA
-== 
+== SA
 
 CHN
-== 
+== CHN
 
 Getting server list from master server
-== 
+== Obteniendo lista de servidores del servidor maestro
 
 Leak IP
-== 
+== Filtrar tu IP
 
 Chat command
-== 
+== Comando de chat
 
 Dummy
-== 
+== Dummy
 
 Windowed
-== 
+== En ventana
 
 Windowed borderless
-== 
+== Ventana sin bordes
 
 Desktop fullscreen
-== 
+== Pantalla completa
 
 Use modern OpenGL
-== 
+== Usar OpenGL moderno
 
 Show client IDs
-== 
+== Mostrar IDs de clientes
 
 Laser Outline Color
-== 
+== Color de contorno del laser
 
 Laser Inner Color
-== 
+== Color interior del laser
 
 Hookline
-== 
+== Linea del gancho
 
 No hit
-== 
+== Sin golpes
 
 Hookable
-== 
+== Enganchable
 
 Tee
-== 
+== Tee
 
 Preview
-== 
+== Vista previa
 
 Background
-== 
+== Fondo
 
 Entities Background color
-== 
+== Color de fondo de entidades
 
 Regular Background Color
-== 
+== Color de fondo regular
 
 Discord
-== 
+== Discord
 
 https://ddnet.tw/discord
-== 
+== https://ddnet.tw/discord
