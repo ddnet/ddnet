@@ -8,16 +8,18 @@
 
 #include <limits>
 
-CUIEx::CUIEx(CUI *pUI, IKernel *pKernel, CRenderTools *pRenderTools)
+CUIEx::CUIEx(CUI *pUI, IKernel *pKernel, CRenderTools *pRenderTools, IInput::CEvent *pInputEventsArray, int *pInputEventCount)
 {
-	Init(pUI, pKernel, pRenderTools);
+	Init(pUI, pKernel, pRenderTools, pInputEventsArray, pInputEventCount);
 }
 
-void CUIEx::Init(CUI *pUI, IKernel *pKernel, CRenderTools *pRenderTools)
+void CUIEx::Init(CUI *pUI, IKernel *pKernel, CRenderTools *pRenderTools, IInput::CEvent *pInputEventsArray, int *pInputEventCount)
 {
 	m_pUI = pUI;
 	m_pKernel = pKernel;
 	m_pRenderTools = pRenderTools;
+	m_pInputEventsArray = pInputEventsArray;
+	m_pInputEventCount = pInputEventCount;
 
 	m_pInput = Kernel()->RequestInterface<IInput>();
 	m_pGraphics = Kernel()->RequestInterface<IGraphics>();
@@ -123,11 +125,11 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 			}
 		}
 
-		for(int i = 0; i < Input()->NumEvents(); i++)
+		for(int i = 0; i < *m_pInputEventCount; i++)
 		{
 			Len = str_length(pStr);
 			int NumChars = Len;
-			ReturnValue |= CLineInput::Manipulate(Input()->GetEvent(i), pStr, StrSize, StrSize, &Len, &s_AtIndex, &NumChars);
+			ReturnValue |= CLineInput::Manipulate(m_pInputEventsArray[i], pStr, StrSize, StrSize, &Len, &s_AtIndex, &NumChars);
 		}
 	}
 
@@ -214,7 +216,7 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 	DispCursorPos = minimum(DispCursorPos, str_length(pDisplayStr));
 
 	// check if the text has to be moved
-	if(UI()->LastActiveItem() == pID && !JustGotActive && (UpdateOffset || Input()->NumEvents()))
+	if(UI()->LastActiveItem() == pID && !JustGotActive && (UpdateOffset || *m_pInputEventCount))
 	{
 		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, DispCursorPos, std::numeric_limits<float>::max());
 		if(w - *Offset > Textbox.w)
@@ -257,10 +259,11 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(0, 0, 0, 0.3f);
-			IGraphics::CQuadItem CursorTBack(Textbox.x - (OnePixelWidth * 2.0f) / 2.0f, Textbox.y, OnePixelWidth * 2 * 2.0f, Textbox.h);
+			float PosToMid = (Textbox.h - FontSize) / 2.0f;
+			IGraphics::CQuadItem CursorTBack(Textbox.x - (OnePixelWidth * 2.0f) / 2.0f, Textbox.y + PosToMid, OnePixelWidth * 2 * 2.0f, FontSize);
 			Graphics()->QuadsDrawTL(&CursorTBack, 1);
 			Graphics()->SetColor(1, 1, 1, 1);
-			IGraphics::CQuadItem CursorT(Textbox.x, Textbox.y + OnePixelWidth * 1.5f, OnePixelWidth * 2.0f, Textbox.h - OnePixelWidth * 1.5f * 2);
+			IGraphics::CQuadItem CursorT(Textbox.x, Textbox.y + PosToMid + OnePixelWidth * 1.5f, OnePixelWidth * 2.0f, FontSize - OnePixelWidth * 1.5f * 2);
 			Graphics()->QuadsDrawTL(&CursorT, 1);
 			Graphics()->QuadsEnd();
 		}
