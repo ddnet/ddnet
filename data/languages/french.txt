@@ -17,6 +17,7 @@
 #	SunnyPistache & Pipou   2020-07-09 21:09:00
 #	SunnyPistache & Pipou   2020-10-03 09:29:00
 #	SunnyPistache & Pipou   2020-11-07 11:30:00
+#	Chairn					2021-05-31 20:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1096,7 +1097,7 @@ Reconnect in %d sec
 == Reconnecte dans %d sec
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== DDRaceNetwork est un jeu coopératif en ligne dont l'objectif est, pour vous ainsi que votre groupe de tees, d'atteindre la ligne d'arrivée d'une map. En tant que nouveau joueur, il est préférable que vous commenciez sur les serveurs Novice, qui sont constitués des cartes les plus simples. Prenez en compte le ping afin de choisir un serveur proche de chez vous.
+== DDRaceNetwork est un jeu coopératif en ligne dont l'objectif est, pour vous ainsi que votre groupe de tees, d'atteindre la ligne d'arrivée d'une carte. En tant que nouveau joueur, il est préférable que vous commenciez sur les serveurs Novice, qui sont constitués des cartes les plus simples. Prenez en compte le ping afin de choisir un serveur proche de chez vous.
 
 The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
 == Les maps contiennent du freeze (gèle), ce qui vous empêche temporairement de bouger. Vous devez travailler en équipe pour passer ces parties.
@@ -1132,7 +1133,7 @@ Use k key to kill (restart), q to pause and watch other players. See settings fo
 == Appuyez sur "k" pour mourir (recommencer) et "a" pour vous mettre en pause afin de regarder les autres joueurs. Allez dans les configurations pour voir davantage de raccourcis.
 
 Country / Region
-== Pays / Region
+== Pays / Région
 
 Speed
 == Vitesse
@@ -1192,7 +1193,7 @@ Emoticons
 == Émoticônes
 
 Particles
-== Particles
+== Particules
 
 Assets directory
 == Répertoire des assets
@@ -1259,88 +1260,88 @@ Replay
 == Replay
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
+== La largeure de la texture %s n'est pas divisible par %d, ou la hauteur n'est pas divisible par %d, ce qui peut causer des bugs visuels. 
 
 AFR
-== 
+== AFR
 
 ASI
-== 
+== ASI
 
 AUS
-== 
+== AUS
 
 EUR
-== 
+== EUR
 
 NA
-== 
+== AN
 
 SA
-== 
+== AS
 
 CHN
-== 
+== CHN
 
 Getting server list from master server
-== 
+== Obtenir la liste des serveurs depuis le serveur maître
 
 Leak IP
-== 
+== Fuiter l'IP
 
 Chat command
-== 
+== Commande de chat
 
 Dummy
-== 
+== Dummy
 
 Windowed
-== 
+== Fenêtré 
 
 Windowed borderless
-== 
+== Fenêtré sans bordure
 
 Desktop fullscreen
-== 
+== Plein écran
 
 Use modern OpenGL
-== 
+== Utiliser OpenGL moderne
 
 Show client IDs
-== 
+== Montrer les IDs
 
 Laser Outline Color
-== 
+== Couleur de la bordure du laser
 
 Laser Inner Color
-== 
+== Couleur du laser
 
 Hookline
-== 
+== Ligne de visée
 
 No hit
-== 
+== Pas de frappe
 
 Hookable
-== 
+== Accrochable
 
 Tee
-== 
+== Tee
 
 Preview
-== 
+== Prévisualisation
 
 Background
-== 
+== Fond
 
 Entities Background color
-== 
+== Couleur du fond en entités
 
 Regular Background Color
-== 
+== Couleur du fond 
 
 Discord
-== 
+== Discord
 
 https://ddnet.tw/discord
-== 
+== https://ddnet.tw/discord
