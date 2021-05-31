@@ -1188,7 +1188,7 @@ void CMenus::OnInit()
 	if(g_Config.m_ClSkipStartMenu)
 		m_ShowStart = false;
 
-	m_UIEx.Init(UI(), Kernel(), RenderTools());
+	m_UIEx.Init(UI(), Kernel(), RenderTools(), m_aInputEvents, &m_NumInputEvents);
 
 	m_RefreshButton.Init(UI());
 	m_ConnectButton.Init(UI());
