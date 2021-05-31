@@ -259,10 +259,11 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(0, 0, 0, 0.3f);
-			IGraphics::CQuadItem CursorTBack(Textbox.x - (OnePixelWidth * 2.0f) / 2.0f, Textbox.y, OnePixelWidth * 2 * 2.0f, Textbox.h);
+			float PosToMid = (Textbox.h - FontSize) / 2.0f;
+			IGraphics::CQuadItem CursorTBack(Textbox.x - (OnePixelWidth * 2.0f) / 2.0f, Textbox.y + PosToMid, OnePixelWidth * 2 * 2.0f, FontSize);
 			Graphics()->QuadsDrawTL(&CursorTBack, 1);
 			Graphics()->SetColor(1, 1, 1, 1);
-			IGraphics::CQuadItem CursorT(Textbox.x, Textbox.y + OnePixelWidth * 1.5f, OnePixelWidth * 2.0f, Textbox.h - OnePixelWidth * 1.5f * 2);
+			IGraphics::CQuadItem CursorT(Textbox.x, Textbox.y + PosToMid + OnePixelWidth * 1.5f, OnePixelWidth * 2.0f, FontSize - OnePixelWidth * 1.5f * 2);
 			Graphics()->QuadsDrawTL(&CursorT, 1);
 			Graphics()->QuadsEnd();
 		}
