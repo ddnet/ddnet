@@ -1287,7 +1287,7 @@ Getting server list from master server
 == Obtenir la liste des serveurs depuis le serveur maître
 
 Leak IP
-== 
+== Fuiter l'IP
 
 Chat command
 == Commande de chat
