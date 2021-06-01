@@ -18,6 +18,7 @@
 #	SunnyPistache & Pipou   2020-10-03 09:29:00
 #	SunnyPistache & Pipou   2020-11-07 11:30:00
 #	Chairn					2021-05-31 20:00:00
+#	T tee			2021-06-01 00:39:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -71,7 +72,7 @@ Automatically record demos
 == Enregistrer les démos automatiquement
 
 Automatically take game over screenshot
-== Prends une capture d'écran de fin de partie automatiquement
+== Prendre une capture d'écran de fin de partie automatiquement
 
 Blue team
 == Équipe bleue
@@ -647,7 +648,7 @@ Enable game sounds
 == Activer les sons du jeu
 
 DDNet Client needs to be restarted to complete update!
-== Le client DDNet a besoin d'être redémarré pour finir la MAJ!
+== Le client DDNet a besoin d'être redémarré pour finir la MAJ !
 
 Toggle dummy
 == Basculer vers le dummy
@@ -668,7 +669,7 @@ Fat skins (DDFat)
 == Skins enrobés (DDFat)
 
 Automatically take statboard screenshot
-== Prends une capture d'écran du tableau des stats automatiquement
+== Prendre une capture d'écran du tableau des stats automatiquement
 
 Clan plates size
 == Taille du clan
@@ -722,7 +723,7 @@ AntiPing: predict other players
 == AntiPing: prédit le déplacement des autres joueurs
 
 Are you sure that you want to disconnect your dummy?
-== Êtes vous sûr de vouloir déconnecter votre dummy?
+== Êtes vous sûr de vouloir déconnecter votre dummy ?
 
 Reload
 == Recharger
@@ -809,13 +810,13 @@ Dummy settings
 == Config. du dummy
 
 Are you sure that you want to disconnect?
-== Êtes-vous sûr de vouloir vous déconnecter?
+== Êtes-vous sûr de vouloir vous déconnecter ?
 
 Deactivate
 == Désactiver
 
 Update failed! Check log...
-== La mise à jour a échoué! Vérifier les logs...
+== La mise à jour a échoué ! Vérifier les logs...
 
 %.2f KiB
 == %.2f Kio
@@ -827,7 +828,7 @@ Threaded sound loading
 == Chargement de sons enfilés
 
 File already exists, do you want to overwrite it?
-== Ce fichier existe déjà, voulez-vous l'écraser?
+== Ce fichier existe déjà, voulez-vous l'écraser ?
 
 Grabs
 == Grappins
@@ -890,7 +891,7 @@ Demo
 == Démo
 
 Map sound volume
-== Volume des sons de la map
+== Volume des sons de la carte
 
 Time
 == Temps
@@ -1100,10 +1101,10 @@ DDraceNetwork is a cooperative online game where the goal is for you and your gr
 == DDRaceNetwork est un jeu coopératif en ligne dont l'objectif est, pour vous ainsi que votre groupe de tees, d'atteindre la ligne d'arrivée d'une carte. En tant que nouveau joueur, il est préférable que vous commenciez sur les serveurs Novice, qui sont constitués des cartes les plus simples. Prenez en compte le ping afin de choisir un serveur proche de chez vous.
 
 The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Les maps contiennent du freeze (gèle), ce qui vous empêche temporairement de bouger. Vous devez travailler en équipe pour passer ces parties.
+== Les cartes contiennent du freeze (gel), ce qui vous empêche temporairement de bouger. Vous devez travailler en équipe pour passer ces parties.
 
 The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== La molette de la souris permet de changer d'arme. Le marteau (clic gauche) peut être utilisé pour frapper les autres tees ce qui les unfreeze (dégivre).
+== La molette de la souris permet de changer d'arme. Le marteau (clic gauche) peut être utilisé pour frapper les autres tees ce qui les unfreeze (dégèle).
 
 Hook (right mouse) can be used to swing through the map and to hook other tees to you.
 == Le grappin (clic droit) peut être utilisé pour se balancer tout le long de la carte en attrappant les murs et peut aussi permettre d'attrapper les autres Tees.
@@ -1332,13 +1333,13 @@ Preview
 == Prévisualisation
 
 Background
-== Fond
+== Arrière-plan
 
 Entities Background color
-== Couleur du fond en entités
+== Couleur de l'arrière-plan des entités
 
 Regular Background Color
-== Couleur du fond 
+== Couleur de l'arrière-plan
 
 Discord
 == Discord
