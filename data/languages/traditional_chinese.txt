@@ -5,6 +5,7 @@
 # 2020.8.19 TsFreddie
 # 2020.8.20 Dan_cao
 # 2020.11.12 TsFreddie
+# 2021.6.1 TsFreddie
 ##### /authors #####
 
 ##### translated strings #####
@@ -184,7 +185,7 @@ Friends
 == 好友
 
 Fullscreen
-== 全螢幕
+== 獨占全螢幕
 
 Game
 == 遊戲
@@ -1221,7 +1222,7 @@ Assets
 == 材質
 
 Use old chat style
-== 舊版聊天框
+== 原始聊天框
 
 Use current map as background
 == 使用當前地圖作爲實體層背景地圖
@@ -1239,88 +1240,88 @@ Assets directory
 == 材質目錄
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
+== 紋理 %s 的寬度無法被 %d 整除，或者高度無法被 %d 整除，這可能會導致視覺錯誤。
 
 AFR
-== 
+== 非洲
 
 ASI
-== 
+== 亞洲
 
 AUS
-== 
+== 澳洲
 
 EUR
-== 
+== 歐洲
 
 NA
-== 
+== 北美
 
 SA
-== 
+== 南美
 
 CHN
-== 
+== 中國
 
 Getting server list from master server
-== 
+== 正在從主伺服器獲取伺服器列表
 
 Leak IP
-== 
+== 洩露IP
 
 Chat command
-== 
+== 聊天框指令
 
 Dummy
-== 
+== 分身
 
 Windowed
-== 
+== 視窗化
 
 Windowed borderless
-== 
+== 無邊框視窗
 
 Desktop fullscreen
-== 
+== 無邊框全螢幕
 
 Use modern OpenGL
-== 
+== 使用現代OpenGL
 
 Show client IDs
-== 
+== 顯示客戶端ID
 
 Laser Outline Color
-== 
+== 鐳射線邊框顏色
 
 Laser Inner Color
-== 
+== 鐳射線顏色
 
 Hookline
-== 
+== 鉤索輔助線
 
 No hit
-== 
+== 沒有擊中
 
 Hookable
-== 
+== 可鉤牆壁
 
 Tee
-== 
+== 其他玩家
 
 Preview
-== 
+== 預覽
 
 Background
-== 
+== 背景
 
 Entities Background color
-== 
+== 實體層背景顏色
 
 Regular Background Color
-== 
+== 背景層背景顏色
 
 Discord
-== 
+== Discord
 
 https://ddnet.tw/discord
-== 
+== https://ddnet.tw/discord
