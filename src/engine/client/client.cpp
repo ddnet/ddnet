@@ -3103,6 +3103,7 @@ void CClient::Run()
 	}
 
 	GameClient()->OnInit();
+	m_ServerBrowser.OnInit();
 
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "version %s", GameClient()->NetVersion());

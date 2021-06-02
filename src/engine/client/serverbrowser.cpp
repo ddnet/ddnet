@@ -106,6 +106,11 @@ void CServerBrowser::SetBaseInfo(class CNetClient *pClient, const char *pNetVers
 	RegisterCommands();
 }
 
+void CServerBrowser::OnInit()
+{
+	m_pHttp = CreateServerBrowserHttp(m_pEngine, m_pConsole, m_pStorage, g_Config.m_BrCachedBestServerinfoUrl);
+}
+
 void CServerBrowser::RegisterCommands()
 {
 	m_pConsole->Register("leak_ip_address_to_all_servers", "", CFGFLAG_CLIENT, Con_LeakIpAddress, this, "Leaks your IP address to all servers by pinging each of them, also acquiring the latency in the process");
@@ -1144,11 +1149,6 @@ void CServerBrowser::Update(bool ForceResort)
 {
 	int64 Timeout = time_freq();
 	int64 Now = time_get();
-
-	if(!m_pHttp)
-	{
-		m_pHttp = CreateServerBrowserHttp(m_pEngine, m_pConsole, m_pStorage, g_Config.m_BrCachedBestServerinfoUrl);
-	}
 
 	const char *pHttpBestUrl;
 	if(!m_pHttp->GetBestUrl(&pHttpBestUrl) && pHttpBestUrl != m_pHttpPrevBestUrl)
