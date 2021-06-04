@@ -357,7 +357,7 @@ Player options
 == 玩家選項
 
 Players
-== 玩家數
+== 玩家
 
 Please balance teams!
 == 隊伍人數不平衡！
@@ -860,7 +860,7 @@ Frags
 == 擊殺數
 
 Enable long pain sound (used when shooting in freeze)
-== 啟用長時間痛苦的聲音(在凍結時使用)
+== 啟用在凍結時的呼救聲
 
 %.2f MiB
 == %.2f MiB
@@ -869,7 +869,7 @@ Refresh Rate
 == 重新整理率
 
 New random timeout code
-== 新隨機超時程式碼
+== 隨機生成新的超時還原碼
 
 Suicides
 == 自殺數
@@ -957,7 +957,7 @@ Downloading %s:
 == 正在下載 %s:
 
 %d new mentions
-== %d 條新提示
+== %d 條新提及
 
 Toggle dummy
 == 切換分身
@@ -987,7 +987,7 @@ Zoom in
 == 視距放大
 
 1 new mention
-== 1 條新提示
+== 1 條新提及
 
 Update failed! Check log...
 == 更新失敗！請檢查日誌...
@@ -1017,7 +1017,7 @@ Dummy copy
 == 分身同步動作
 
 9+ new mentions
-== 9+ 條新提示
+== 9+ 條新提及
 
 Statboard
 == 統計板
