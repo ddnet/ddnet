@@ -346,7 +346,7 @@ Pistol
 
 [Demo browser]
 Play
-== 编辑器
+== 播放
 
 Play background music
 == 播放背景音乐
@@ -364,7 +364,7 @@ Player options
 == 玩家选项
 
 Players
-== 玩家数
+== 玩家
 
 Please balance teams!
 == 队伍人数不平衡！
@@ -867,7 +867,7 @@ Frags
 == 击杀数
 
 Enable long pain sound (used when shooting in freeze)
-== 启用长时间痛苦的声音(在冻结时使用)
+== 启用冻结呼救声
 
 %.2f MiB
 == %.2f MiB
@@ -964,7 +964,7 @@ Downloading %s:
 == 正在下载 %s:
 
 %d new mentions
-== %d 条新提示
+== %d 条新提及
 
 Toggle dummy
 == 切换分身
@@ -994,7 +994,7 @@ Zoom in
 == 视野放大
 
 1 new mention
-== 1 条新提示
+== 1 条新提及
 
 Update failed! Check log...
 == 更新失败！请检查日志...
@@ -1024,7 +1024,7 @@ Dummy copy
 == 分身同步动作
 
 9+ new mentions
-== 9+ 条新提示
+== 9+ 条新提及
 
 Statboard
 == 统计板
