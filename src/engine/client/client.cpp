@@ -4056,8 +4056,13 @@ void CClient::LoadFont()
 	static CFont *pDefaultFont = 0;
 	static bool LoadedFallbackFont = false;
 	char aFilename[512];
+	char aBuff[1024];
 	const char *pFontFile = "fonts/DejaVuSans.ttf";
-	const char *pFallbackFontFile = "fonts/SourceHanSansSC-Regular.otf";
+	const char *apFallbackFontFiles[] =
+		{
+			"fonts/GlowSansJCompressed-Book.otf",
+			"fonts/SourceHanSansSC-Regular.otf",
+		};
 	IOHANDLE File = Storage()->OpenFile(pFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
 	if(File)
 	{
@@ -4070,31 +4075,34 @@ void CClient::LoadFont()
 		if(pDefaultFont == NULL)
 			pDefaultFont = pTextRender->LoadFont(aFilename, pBuf, Size);
 
-		File = Storage()->OpenFile(pFallbackFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
-		if(File)
+		for(auto &pFallbackFontFile : apFallbackFontFiles)
 		{
-			size_t Size = io_length(File);
-			unsigned char *pBuf = (unsigned char *)malloc(Size);
-			io_read(File, pBuf, Size);
-			io_close(File);
-			IEngineTextRender *pTextRender = Kernel()->RequestInterface<IEngineTextRender>();
-			LoadedFallbackFont = pTextRender->LoadFallbackFont(pDefaultFont, aFilename, pBuf, Size);
+			bool FontLoaded = false;
+			File = Storage()->OpenFile(pFallbackFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
+			if(File)
+			{
+				size_t Size = io_length(File);
+				unsigned char *pBuf = (unsigned char *)malloc(Size);
+				io_read(File, pBuf, Size);
+				io_close(File);
+				IEngineTextRender *pTextRender = Kernel()->RequestInterface<IEngineTextRender>();
+				FontLoaded = pTextRender->LoadFallbackFont(pDefaultFont, aFilename, pBuf, Size);
+			}
+			LoadedFallbackFont |= FontLoaded;
+
+			if(!FontLoaded)
+			{
+				str_format(aBuff, sizeof(aBuff) / sizeof(aBuff[0]), "failed to load the fallback font. filename='%s'", pFallbackFontFile);
+				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", aBuff);
+			}
 		}
 
 		Kernel()->RequestInterface<IEngineTextRender>()->SetDefaultFont(pDefaultFont);
 	}
 
-	char aBuff[1024];
-
 	if(!pDefaultFont)
 	{
 		str_format(aBuff, sizeof(aBuff) / sizeof(aBuff[0]), "failed to load font. filename='%s'", pFontFile);
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", aBuff);
-	}
-
-	if(!LoadedFallbackFont)
-	{
-		str_format(aBuff, sizeof(aBuff) / sizeof(aBuff[0]), "failed to load the fallback font. filename='%s'", pFallbackFontFile);
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", aBuff);
 	}
 }
