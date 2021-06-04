@@ -1081,6 +1081,7 @@ set(EXPECTED_DATA
   emoticons.png
   file_icons.png
   fonts/DejaVuSans.ttf
+  fonts/GlowSansJCompressed-Book.otf
   fonts/Icons.ttf
   fonts/SourceHanSansSC-Regular.otf
   game.png
