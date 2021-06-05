@@ -3274,7 +3274,7 @@ void CClient::Run()
 				{
 					char aBuf[64];
 					str_format(aBuf, sizeof(aBuf), "Frametime %d us\n", (int)(m_RenderFrameTime * 1000000));
-					io_write(m_BenchmarkFile, aBuf, strlen(aBuf));
+					io_write(m_BenchmarkFile, aBuf, str_length(aBuf));
 					if(time_get() > m_BenchmarkStopTime)
 					{
 						io_close(m_BenchmarkFile);

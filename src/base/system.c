@@ -127,7 +127,7 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 
 	str_format(str, sizeof(str), "[%s][%s]: ", timestr, sys);
 
-	len = strlen(str);
+	len = str_length(str);
 	msg = (char *)str + len;
 
 	va_start(args, fmt);
@@ -155,7 +155,7 @@ static void logger_file(const char *line, void *user)
 {
 	ASYNCIO *logfile = (ASYNCIO *)user;
 	aio_lock(logfile);
-	aio_write_unlocked(logfile, line, strlen(line));
+	aio_write_unlocked(logfile, line, str_length(line));
 	aio_write_newline_unlocked(logfile);
 	aio_unlock(logfile);
 }
@@ -163,7 +163,7 @@ static void logger_file(const char *line, void *user)
 #if defined(CONF_FAMILY_WINDOWS)
 static void logger_stdout_sync(const char *line, void *user)
 {
-	size_t length = strlen(line);
+	size_t length = str_length(line);
 	wchar_t *wide = malloc(length * sizeof(*wide));
 	const char *p = line;
 	int wlen = 0;
@@ -2157,7 +2157,7 @@ int fs_storage_path(const char *appname, char *path, int max)
 	snprintf(path, max, "%s/Library/Application Support/%s", home, appname);
 #else
 	snprintf(path, max, "%s/.%s", home, appname);
-	for(i = strlen(home) + 2; path[i]; i++)
+	for(i = str_length(home) + 2; path[i]; i++)
 		path[i] = tolower((unsigned char)path[i]);
 #endif
 
@@ -2445,7 +2445,7 @@ int time_season(void)
 
 void str_append(char *dst, const char *src, int dst_size)
 {
-	int s = strlen(dst);
+	int s = str_length(dst);
 	int i = 0;
 	while(s < dst_size)
 	{
