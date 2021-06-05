@@ -28,4 +28,7 @@ UUID(NETMSG_MAP_DETAILS, "map-details@ddnet.tw")
 UUID(NETMSG_CAPABILITIES, "capabilities@ddnet.tw")
 UUID(NETMSG_CLIENTVER, "clientver@ddnet.tw")
 
+UUID(NETMSG_PINGEX, "ping@ddnet.tw")
+UUID(NETMSG_PONGEX, "pong@ddnet.tw")
+
 UUID(NETMSG_IAMCHILLERBOT_UX, "i-am-chillerbot-ux@chillerbot.github.io")

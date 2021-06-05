@@ -70,9 +70,6 @@ Blue team wins!
 Body
 == Corpo
 
-Borderless window
-== Janela S/ Bordas
-
 Call vote
 == Votação
 
@@ -361,9 +358,6 @@ Red team wins!
 
 Refresh
 == Atualizar
-
-Refreshing master servers
-== A Atualizar servidores
 
 Remote console
 == Remote console
@@ -932,6 +926,30 @@ transmits your player name to info2.ddnet.tw
 Theme
 == 
 
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+Getting server list from master server
+== 
+
 %d of %d servers
 == 
 
@@ -951,6 +969,9 @@ Indicate map finish
 == 
 
 Unfinished map
+== 
+
+Leak IP
 == 
 
 Markers:
@@ -1082,10 +1103,19 @@ UI mouse s.
 Dummy
 == 
 
+Windowed
+== 
+
+Windowed borderless
+== 
+
+Desktop fullscreen
+== 
+
 may cause delay
 == 
 
-Use OpenGL 3.3 (experimental)
+Use modern OpenGL
 == 
 
 Preinit VBO (iGPUs only)
@@ -1122,6 +1152,18 @@ Laser Outline Color
 == 
 
 Laser Inner Color
+== 
+
+Hookline
+== 
+
+No hit
+== 
+
+Hookable
+== 
+
+Tee
 == 
 
 Use old chat style

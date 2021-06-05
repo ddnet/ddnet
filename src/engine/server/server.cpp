@@ -1138,7 +1138,7 @@ void CServer::SendCapabilities(int ClientID)
 {
 	CMsgPacker Msg(NETMSG_CAPABILITIES, true);
 	Msg.AddInt(SERVERCAP_CURVERSION); // version
-	Msg.AddInt(SERVERCAPFLAG_DDNET | SERVERCAPFLAG_CHATTIMEOUTCODE | SERVERCAPFLAG_ANYPLAYERFLAG); // flags
+	Msg.AddInt(SERVERCAPFLAG_DDNET | SERVERCAPFLAG_CHATTIMEOUTCODE | SERVERCAPFLAG_ANYPLAYERFLAG | SERVERCAPFLAG_PINGEX); // flags
 	SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 
@@ -1698,6 +1698,17 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		{
 			CMsgPacker Msg(NETMSG_PING_REPLY, true);
 			SendMsg(&Msg, 0, ClientID);
+		}
+		else if(Msg == NETMSG_PINGEX)
+		{
+			CUuid *pID = (CUuid *)Unpacker.GetRaw(sizeof(*pID));
+			if(Unpacker.Error())
+			{
+				return;
+			}
+			CMsgPacker Msg(NETMSG_PONGEX, true);
+			Msg.AddRaw(pID, sizeof(*pID));
+			SendMsg(&Msg, MSGFLAG_FLUSH, ClientID);
 		}
 		else
 		{

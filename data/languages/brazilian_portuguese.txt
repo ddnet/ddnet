@@ -367,9 +367,6 @@ Red team wins!
 Refresh
 == Atualizar
 
-Refreshing master servers
-== Atualizando servidores mestres
-
 Remote console
 == Console remoto
 
@@ -543,9 +540,6 @@ Yes
 
 You must restart the game for all settings to take effect.
 == Você deve reiniciar o jogo para que todas as alterações tenham efeito.
-
-Borderless window
-== Janela sem borda
 
 Demo
 == Demo
@@ -928,9 +922,6 @@ Activate
 Multiple texture units (disable for MacOS)
 == Várias unidades de textura (desabilite para macOS)
 
-Use OpenGL 3.3 (experimental)
-== Usar OpenGL 3.3 (experimental)
-
 UI mouse s.
 == Sens. mouse de UI
 
@@ -1283,7 +1274,58 @@ Entities Background color
 Regular Background Color
 == Cor de fundo comum
 
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+Getting server list from master server
+== 
+
+Leak IP
+== 
+
 Chat command
+== 
+
+Windowed
+== 
+
+Windowed borderless
+== 
+
+Desktop fullscreen
+== 
+
+Use modern OpenGL
+== 
+
+Hookline
+== 
+
+No hit
+== 
+
+Hookable
+== 
+
+Tee
 == 
 
 Discord

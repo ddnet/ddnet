@@ -343,9 +343,6 @@ Red team wins!
 Refresh
 == Освежи
 
-Refreshing master servers
-== Освежам мастер сервере
-
 Remote console
 == Удаљена конзола
 
@@ -521,9 +518,6 @@ You must restart the game for all settings to take effect.
 == Морате поново покренути игру да би сва подешавања била примењена
 
 ##### needs translation #####
-
-Borderless window
-== Прозор без ивица
 
 Demo
 == Снимак
@@ -940,9 +934,6 @@ UI mouse s.
 may cause delay
 == може проузроковати кашњење
 
-Use OpenGL 3.3 (experimental)
-== Користи OpenGL 3.3 (експериментално)
-
 Preinit VBO (iGPUs only)
 == Preinit VBO (само у iGPUs)
 
@@ -1226,6 +1217,33 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 Checking for existing player with your name
 == 
 
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+Getting server list from master server
+== 
+
+Leak IP
+== 
+
 Smooth Dynamic Camera
 == 
 
@@ -1233,6 +1251,18 @@ Chat command
 == 
 
 Dummy
+== 
+
+Windowed
+== 
+
+Windowed borderless
+== 
+
+Desktop fullscreen
+== 
+
+Use modern OpenGL
 == 
 
 Game sound volume
@@ -1251,6 +1281,18 @@ Laser Outline Color
 == 
 
 Laser Inner Color
+== 
+
+Hookline
+== 
+
+No hit
+== 
+
+Hookable
+== 
+
+Tee
 == 
 
 Use old chat style

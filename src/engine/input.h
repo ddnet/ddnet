@@ -58,6 +58,9 @@ public:
 		return m_aInputEvents[Index];
 	}
 
+	CEvent *GetEventsRaw() { return m_aInputEvents; }
+	int *GetEventCountRaw() { return &m_NumEvents; }
+
 	// keys
 	virtual bool KeyIsPressed(int Key) const = 0;
 	virtual bool KeyPress(int Key, bool CheckCounter = false) const = 0;

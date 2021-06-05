@@ -154,7 +154,7 @@ int CRequest::RunImpl(CURL *pHandle)
 	}
 
 	if(g_Config.m_DbgCurl || m_LogProgress)
-		dbg_msg("http", "http %s", m_aUrl);
+		dbg_msg("http", "fetching %s", m_aUrl);
 	m_State = HTTP_RUNNING;
 	int Ret = curl_easy_perform(pHandle);
 	if(Ret != CURLE_OK)
@@ -186,8 +186,24 @@ int CRequest::ProgressCallback(void *pUser, double DlTotal, double DlCurr, doubl
 	return pTask->m_Abort ? -1 : 0;
 }
 
-CGet::CGet(const char *pUrl, CTimeout Timeout) :
-	CRequest(pUrl, Timeout),
+CHead::CHead(const char *pUrl, CTimeout Timeout, bool LogProgress) :
+	CRequest(pUrl, Timeout, LogProgress)
+{
+}
+
+CHead::~CHead()
+{
+}
+
+bool CHead::AfterInit(void *pCurl)
+{
+	CURL *pHandle = pCurl;
+	curl_easy_setopt(pHandle, CURLOPT_NOBODY, 1L);
+	return true;
+}
+
+CGet::CGet(const char *pUrl, CTimeout Timeout, bool LogProgress) :
+	CRequest(pUrl, Timeout, LogProgress),
 	m_BufferSize(0),
 	m_BufferLength(0),
 	m_pBuffer(NULL)

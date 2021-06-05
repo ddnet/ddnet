@@ -59,5 +59,6 @@ public:
 
 	void Init(int NumThreads);
 	void Add(std::shared_ptr<IJob> pJob);
+	static void RunBlocking(IJob *pJob);
 };
 #endif

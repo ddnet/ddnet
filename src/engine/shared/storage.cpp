@@ -596,7 +596,10 @@ void IStorage::StripPathAndExtension(const char *pFilename, char *pBuffer, int B
 	str_copy(pBuffer, pExtractedName, Length);
 }
 
-IStorage *CreateStorage(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments) { return CStorage::Create(pApplicationName, StorageType, NumArgs, ppArguments); }
+IStorage *CreateStorage(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments)
+{
+	return CStorage::Create(pApplicationName, StorageType, NumArgs, ppArguments);
+}
 
 IStorage *CreateLocalStorage()
 {
@@ -610,5 +613,15 @@ IStorage *CreateLocalStorage()
 		}
 		pStorage->AddPath("$CURRENTDIR");
 	}
+	return pStorage;
+}
+IStorage *CreateTempStorage(const char *pDirectory)
+{
+	CStorage *pStorage = new CStorage();
+	if(!pStorage)
+	{
+		return nullptr;
+	}
+	pStorage->AddPath(pDirectory);
 	return pStorage;
 }

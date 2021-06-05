@@ -269,9 +269,6 @@ Red team wins!
 Refresh
 == Оновити
 
-Refreshing master servers
-== Оновлення списку майстер-сервера
-
 Remote console
 == Консоль сервера
 
@@ -886,17 +883,11 @@ Show HUD
 UI mouse s.
 == Чутлив. миші в меню
 
-Borderless window
-== Безмежне вікно
-
 may cause delay
 == може спричинити затримку
 
 Screen
 == Екран
-
-Use OpenGL 3.3 (experimental)
-== OpenGL 3.3 (експериментально)
 
 Preinit VBO (iGPUs only)
 == Preinit VBO (iGPUs only)
@@ -1153,6 +1144,30 @@ Speed
 Theme
 == 
 
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+Getting server list from master server
+== 
+
 %d of %d servers
 == 
 
@@ -1163,6 +1178,9 @@ Theme
 == 
 
 %d player
+== 
+
+Leak IP
 == 
 
 Markers
@@ -1195,6 +1213,18 @@ Chat command
 Dummy
 == 
 
+Windowed
+== 
+
+Windowed borderless
+== 
+
+Desktop fullscreen
+== 
+
+Use modern OpenGL
+== 
+
 Game sound volume
 == 
 
@@ -1214,6 +1244,18 @@ Laser Outline Color
 == 
 
 Laser Inner Color
+== 
+
+Hookline
+== 
+
+No hit
+== 
+
+Hookable
+== 
+
+Tee
 == 
 
 Use old chat style

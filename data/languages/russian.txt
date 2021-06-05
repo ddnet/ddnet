@@ -61,7 +61,7 @@ Are you sure that you want to remove the player from your friends list?
 == Вы уверены, что хотите удалить игрока из друзей?
 
 Automatically record demos
-== Автоматически записывать демо
+== Записывать демо
 
 Automatically take game over screenshot
 == Делать снимок результатов игры
@@ -91,7 +91,7 @@ Client
 == Клиент
 
 Close
-== Выход
+== Закрыть
 
 Compatible version
 == Совместимая версия
@@ -127,7 +127,7 @@ Delete demo
 == Удалить демо
 
 Demo details
-== Детали демо
+== Сведения демо
 
 Demofile: %s
 == Демо: %s
@@ -160,7 +160,7 @@ Error
 == Ошибка
 
 Error loading demo
-== ошибка при загрузке демо
+== Ошибка при загрузке демо
 
 Favorite
 == Избранный
@@ -175,7 +175,7 @@ Filter
 == Фильтр
 
 Fire
-== Выстрел
+== Стрелять
 
 Folder
 == Папка
@@ -205,7 +205,7 @@ Game type
 == Тип игры
 
 Game types:
-== Тип игры:
+== Типы игры:
 
 General
 == Основные
@@ -229,7 +229,7 @@ Hook
 == Крюк
 
 Invalid Demo
-== Недопустимое демо
+== Нерабочее демо
 
 Join blue
 == За синих
@@ -241,7 +241,7 @@ Jump
 == Прыжок
 
 Kick player
-== Забанить игрока
+== Выгнать игрока
 
 Language
 == Язык
@@ -307,7 +307,7 @@ Password
 == Пароль
 
 Password incorrect
-== Пароль
+== Неверный пароль
 
 Ping
 == Пинг
@@ -320,7 +320,7 @@ Play
 == Просмотр
 
 Play background music
-== Играть фоновую музыку
+== Включить фоновую музыку
 
 Player
 == Игрок
@@ -354,9 +354,6 @@ Red team wins!
 
 Refresh
 == Обновить
-
-Refreshing master servers
-== Обновление списка мастер-серверов
 
 Remote console
 == Консоль сервера
@@ -392,10 +389,10 @@ Screenshot
 == Снимок
 
 Server address:
-== Адрес сервера
+== Адрес сервера:
 
 Server details
-== Детали сервера
+== Сведения сервера
 
 Server filter
 == Фильтр серверов
@@ -428,16 +425,16 @@ Sound
 == Звук
 
 Sound error
-== Звуковая ошибка
+== Ошибка звука
 
 Spectate
 == Наблюдать
 
 Spectate next
-== Наблюдать след.
+== Наблюдать за след.
 
 Spectate previous
-== Наблюдать пред.
+== Наблюдать за пред.
 
 Spectator mode
 == Наблюдатель
@@ -452,13 +449,13 @@ Strict gametype filter
 == Строгий фильтр р-мов
 
 Sudden Death
-== Быстрая смерть
+== Внезапная смерть
 
 Switch weapon on pickup
 == Переключать оружие при подборе
 
 Switch weapon when out of ammo
-== Переключать пустое оружие
+== Переключать оружие без патронов
 
 Reset wanted weapon on death
 == Сбрасывать выбор оружия при смерти
@@ -470,7 +467,7 @@ Show clan above name plates
 == Показывать клан
 
 Automatically take statboard screenshot
-== Автоматически делать скрин результатов
+== Делать снимок результатов
 
 Show console window
 == Показывать консоль
@@ -482,13 +479,13 @@ Team chat
 == Командный чат
 
 The audio device couldn't be initialised.
-== Аудио устройство не может быть инициализировано
+== Аудио устройство не может быть инициализировано.
 
 The server is running a non-standard tuning on a pure game type.
 == Сервер запущен с нестандартными настройками на стандартном типе игры.
 
 There's an unsaved map in the editor, you might want to save it before you quit the game.
-== Есть несохранённая карта в редакторе. Вы можете сохранить её перед тем, как выйти.
+== Вы не сохранили карту в редакторе. Можете сохранить её перед тем, как выйти.
 
 Time limit
 == Лимит времени
@@ -512,7 +509,7 @@ Use sounds
 == Использовать звуки
 
 Use team colors for name plates
-== Командные цвета для имен игроков
+== Использовать командные цвета имён
 
 V-Sync
 == V-Sync
@@ -571,9 +568,6 @@ Enable highlighted chat sound
 Threaded sound loading
 == Фоновая загрузка музыки
 
-Borderless window
-== Без рамки
-
 Use DDRace Scoreboard
 == Использовать DDRace табло
 
@@ -584,13 +578,13 @@ Show score
 == Показывать лидеров
 
 Show health + ammo
-== Показывать здоровье + патроны
+== Показывать здоровье и патроны
 
 Show names in chat in team colors
-== Выделять цветом сообщения игроков в командном чате
+== Выделять сообщения в командном чате
 
 Show votes window after voting
-== Не скрывать меню голосования после вашего выбора
+== Показывать голосование после выбора
 
 Reset
 == Сброс
@@ -674,7 +668,7 @@ Quit anyway?
 == Все равно выйти?
 
 Display Modes
-== Разрешение экрана
+== Разрешения экрана
 
 Version:
 == Версия:
@@ -698,7 +692,7 @@ LAN
 == LAN
 
 Name plates size
-== Размер
+== Размер имён
 
 Type:
 == Тип:
@@ -725,16 +719,16 @@ Show others
 == Показывать остальных
 
 Game paused
-== Игра приостановлена
+== Пауза
 
 Old mouse mode
-== Режим старой мышки
+== Режим старой мыши
 
 Team message
 == Сообщение от команды
 
 Automatically create statboard csv
-== Автоматически создавать statboard CSV
+== Записывать результаты в CSV
 
 Are you sure that you want to disconnect?
 == Вы уверены, что хотите отключиться?
@@ -785,10 +779,10 @@ Replay feature is disabled!
 == Функция повтора отключена!
 
 Server best:
-== Лучшее сервера:
+== Рекорд сервера:
 
 Personal best:
-== Ваше лучшее:
+== Ваш рекорд:
 
 Browser
 == Браузер
@@ -815,25 +809,25 @@ Welcome to DDNet
 == Добро пожаловать в DDNet
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== DDraceNetwork кооперативная онлайн-игра, где Вашей главной целью и целью вашей команды является достижением финиша карты. Как новенький, Вы должны начать свой путь на Novice серверах, на которых стоят лёгкие карты. Также учитывайте пинг и выбирайте ближайший к вам сервер.
+== DDraceNetwork - кооперативная онлайн-игра, где Вашей главной целью и целью вашей команды является достижение конца карты. Как новенький, Вы должны начать свой путь на Novice, на которых есть лёгкие карты. Также учитывайте пинг и выбирайте ближайший к вам сервер.
 
 The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Карта содержит фриз-тайлы, которые временно лишают вас возможности двигаться. Вы должны работать сообща, чтобы пройти такие уровни.
+== Карта содержит фриз, который временно лишает вас возможности двигаться. Вы должны работать сообща, чтобы пройти такие места.
 
 The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== Колесо мыши меняет оружие. Молотком (ЛКМ) можно ударить по другим и разбудить их от замерзания.
+== Колесо мыши меняет оружие. Молотком (ЛКМ) можно ударить по другим и расфризить их.
 
 Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== Крюк (ПКМ) используется для перемещения по карте, а также для притягивания игроков к вам.
+== Крюк (ПКМ) используется для перемещения по карте, а также для притягивания игроков к себе.
 
 Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== Самое главное, общение ключ к успеху: Здесь нет туториалов, собственно, ты будешь общаться (кнопка Т) с остальными игроками, чтобы обучиться базовым вещам и трюкам игры.
+== Самое главное, общение - ключ к успеху: здесь нет туториалов, поэтому тебе придется общаться (кнопка Т) с остальными игроками, чтобы обучиться базовым вещам и трюкам в игре.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Перед посещением сервера рекомендуем изменить настройки на Ваш вкус.
 
 Please enter your nickname below.
-== Пожалуйста, укажите ниже ваш псевдоним.
+== Пожалуйста, ниже укажите ваш псевдоним.
 
 Destination file already exist
 == Конечный файл уже существует
@@ -854,7 +848,7 @@ Filter connecting players
 == Только подключившиеся
 
 Indicate map finish
-== Показывать финиши карт
+== Выделять финишированные карты
 
 Unfinished map
 == Нефинишированная карта
@@ -890,7 +884,7 @@ Fetch Info
 == Показать
 
 Render
-== Начать рендер
+== Рендер
 
 Connect Dummy
 == Подключить дамми
@@ -908,7 +902,7 @@ Save
 == Сохранить
 
 Clan plates size
-== Размер панели клана
+== Размер клана
 
 Refresh Rate
 == Частота обн.
@@ -947,13 +941,13 @@ Show all
 == Показывать всех
 
 Toggle dyncam
-== Смен. дин. камеры
+== Смена дин. камеры
 
 Toggle dummy
 == Смена Tee
 
 Toggle ghost
-== Вкл./выкл. призрака
+== Переключить тень
 
 Dummy copy
 == Повт. движений
@@ -985,9 +979,6 @@ may cause delay
 Screen
 == Экран
 
-Use OpenGL 3.3 (experimental)
-== Использовать OpenGL 3.3 (тестируется)
-
 Preinit VBO (iGPUs only)
 == Преинициал-ть VBO (только iGPU)
 
@@ -1010,7 +1001,7 @@ Friend message
 == Сообщение от друга
 
 Save the best demo of each race
-== Сохранять лучшее демо каждой попытки
+== Сохранять лучшее демо каждой карты
 
 Default length: %d
 == Станд. длина: %d
@@ -1031,28 +1022,28 @@ Show text entities
 == Показывать текст
 
 Show others (own team only)
-== Всегда показывать вашу команду
+== Показывать только вашу команду
 
 Show quads
 == Показывать квады
 
 AntiPing
-== AntiPing
+== Антипинг
 
 AntiPing: predict other players
-== AntiPing: предсказывать других игроков
+== Предсказывать положение игроков
 
 AntiPing: predict weapons
-== AntiPing: предсказывать снаряды
+== Предсказывать оружия
 
 AntiPing: predict grenade paths
-== AntiPing: предсказывать пути гранат
+== Предсказывать траекторию гранат
 
 Show other players' key presses
-== Показывать нажатия других игроков
+== Показывать действия игроков
 
 Show tiles layers from BG map
-== Показывать слои с тайлами из фоновой карты
+== Показывать тайловые слои фона
 
 Try fast HTTP map download first
 == Быстро загружать карты по HTTP
@@ -1106,7 +1097,7 @@ Grabs
 == 9+ новых упоминаний
 
 Client message
-== Сообщение от клиента
+== Клиентское сообщение
 
 Warning
 == Предупреждение
@@ -1185,7 +1176,7 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 == Ваш псевдоним '%s' уже существует (%d поинтов). Вы уверены, что хотите использовать его?
 
 Checking for existing player with your name
-== Проверка существования игрока с таким же именем
+== Проверка на наличие игрока с таким же именем
 
 Theme
 == Тема
@@ -1209,7 +1200,7 @@ Game sound volume
 == Громкость игры
 
 Chat sound volume
-== Громкость звуков чата
+== Громкость чата
 
 Background music volume
 == Громкость фоновой музыки
@@ -1254,7 +1245,7 @@ Dummy
 == Дамми
 
 Show client IDs
-== Показывать ID игроков
+== Показывать ID
 
 Laser Outline Color
 == Цвет обводки лазера
@@ -1272,13 +1263,64 @@ Entities Background color
 == Цвет фона при наложении
 
 Regular Background Color
-== Станд. фоновый цвет
+== Стандартный цвет фона
 
 Chat command
-== 
+== Чат-команда
 
 Discord
-== 
+== Дискорд
 
 https://ddnet.tw/discord
+== https://ddnet.tw/discord
+
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+Getting server list from master server
+== 
+
+Leak IP
+== 
+
+Windowed
+== 
+
+Windowed borderless
+== 
+
+Desktop fullscreen
+== 
+
+Use modern OpenGL
+== 
+
+Hookline
+== 
+
+No hit
+== 
+
+Hookable
+== 
+
+Tee
 == 

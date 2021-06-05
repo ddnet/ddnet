@@ -17,6 +17,7 @@
 
 #include <game/client/render.h>
 #include <game/client/ui.h>
+#include <game/client/ui_ex.h>
 #include <game/mapitems.h>
 
 #include <engine/editor.h>
@@ -641,6 +642,7 @@ class CEditor : public IEditor
 	class IStorage *m_pStorage;
 	CRenderTools m_RenderTools;
 	CUI m_UI;
+	CUIEx m_UIEx;
 
 	CChillerEditor m_ChillerEditor;
 

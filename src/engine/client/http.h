@@ -66,6 +66,16 @@ public:
 	void Abort() { m_Abort = true; }
 };
 
+class CHead : public CRequest
+{
+	virtual size_t OnData(char *pData, size_t DataSize) { return DataSize; }
+	virtual bool AfterInit(void *pCurl);
+
+public:
+	CHead(const char *pUrl, CTimeout Timeout, bool LogProgress = true);
+	~CHead();
+};
+
 class CGet : public CRequest
 {
 	virtual size_t OnData(char *pData, size_t DataSize);
@@ -75,7 +85,7 @@ class CGet : public CRequest
 	unsigned char *m_pBuffer;
 
 public:
-	CGet(const char *pUrl, CTimeout Timeout);
+	CGet(const char *pUrl, CTimeout Timeout, bool LogProgress = true);
 	~CGet();
 
 	size_t ResultSize() const
