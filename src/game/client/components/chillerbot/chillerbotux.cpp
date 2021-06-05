@@ -1,7 +1,7 @@
 // ChillerDragon 2020 - chillerbot ux
 
-#include <engine/config.h>
 #include <engine/client/notifications.h>
+#include <engine/config.h>
 #include <engine/console.h>
 #include <engine/graphics.h>
 #include <engine/keys.h>
