@@ -304,7 +304,8 @@ void CServerBrowserHttp::Refresh()
 	{
 		m_pChooseMaster->Refresh();
 	}
-	m_State = STATE_WANTREFRESH;
+	if(m_State == STATE_DONE)
+		m_State = STATE_WANTREFRESH;
 	Update();
 }
 bool ServerbrowserParseUrl(NETADDR *pOut, const char *pUrl)
