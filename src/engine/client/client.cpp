@@ -4055,7 +4055,6 @@ void CClient::ToggleWindowVSync()
 void CClient::LoadFont()
 {
 	static CFont *pDefaultFont = 0;
-	static bool LoadedFallbackFont = false;
 	char aFilename[512];
 	char aBuff[1024];
 	const char *pFontFile = "fonts/DejaVuSans.ttf";
@@ -4089,7 +4088,6 @@ void CClient::LoadFont()
 				IEngineTextRender *pTextRender = Kernel()->RequestInterface<IEngineTextRender>();
 				FontLoaded = pTextRender->LoadFallbackFont(pDefaultFont, aFilename, pBuf, Size);
 			}
-			LoadedFallbackFont |= FontLoaded;
 
 			if(!FontLoaded)
 			{
