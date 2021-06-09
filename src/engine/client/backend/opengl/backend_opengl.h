@@ -134,7 +134,9 @@ class CCommandProcessorFragment_OpenGL2 : public CCommandProcessorFragment_OpenG
 	};
 	std::vector<SBufferContainer> m_BufferContainers;
 
+#ifndef BACKEND_AS_OPENGL_ES
 	GL_SVertexTex3D m_aStreamVertices[1024 * 4];
+#endif
 
 	struct SBufferObject
 	{
