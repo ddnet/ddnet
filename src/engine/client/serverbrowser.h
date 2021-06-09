@@ -132,7 +132,8 @@ public:
 	//
 	void Update(bool ForceResort);
 	void Set(const NETADDR &Addr, int Type, int Token, const CServerInfo *pInfo);
-	void RequestCurrentServer(const NETADDR &Addr, int *pBasicToken, int *pToken) const;
+	void RequestCurrentServer(const NETADDR &Addr) const;
+	void RequestCurrentServerWithRandomToken(const NETADDR &Addr, int *pBasicToken, int *pToken) const;
 	void SetCurrentServerPing(const NETADDR &Addr, int Ping);
 
 	void SetBaseInfo(class CNetClient *pClient, const char *pNetVersion);
@@ -221,7 +222,7 @@ private:
 
 	void RemoveRequest(CServerEntry *pEntry);
 
-	void RequestImpl(const NETADDR &Addr, CServerEntry *pEntry, int *pBasicToken, int *pToken) const;
+	void RequestImpl(const NETADDR &Addr, CServerEntry *pEntry, int *pBasicToken, int *pToken, bool RandomToken) const;
 
 	void RegisterCommands();
 	static void Con_LeakIpAddress(IConsole::IResult *pResult, void *pUserData);
