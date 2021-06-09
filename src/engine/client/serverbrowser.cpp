@@ -822,7 +822,7 @@ void CServerBrowser::Refresh(int Type)
 	}
 }
 
-void CServerBrowser::RequestImpl(const NETADDR &Addr, CServerEntry *pEntry, int *pBasicToken, int *pToken) const
+void CServerBrowser::RequestImpl(const NETADDR &Addr, CServerEntry *pEntry, int *pBasicToken, int *pToken, bool RandomToken) const
 {
 	unsigned char Buffer[sizeof(SERVERBROWSE_GETINFO) + 1];
 	CNetChunk Packet;
@@ -837,6 +837,15 @@ void CServerBrowser::RequestImpl(const NETADDR &Addr, CServerEntry *pEntry, int 
 	}
 
 	int Token = GenerateToken(Addr);
+	if(RandomToken)
+	{
+		int AvoidBasicToken = GetBasicToken(Token);
+		do
+		{
+			secure_random_fill(&Token, sizeof(Token));
+			Token &= 0xffffff;
+		} while(GetBasicToken(Token) == AvoidBasicToken);
+	}
 	if(pToken)
 	{
 		*pToken = Token;
@@ -893,9 +902,14 @@ void CServerBrowser::RequestImpl64(const NETADDR &Addr, CServerEntry *pEntry) co
 		pEntry->m_RequestTime = time_get();
 }
 
-void CServerBrowser::RequestCurrentServer(const NETADDR &Addr, int *pBasicToken, int *pToken) const
+void CServerBrowser::RequestCurrentServer(const NETADDR &Addr) const
 {
-	RequestImpl(Addr, nullptr, pBasicToken, pToken);
+	RequestImpl(Addr, nullptr, nullptr, nullptr, false);
+}
+
+void CServerBrowser::RequestCurrentServerWithRandomToken(const NETADDR &Addr, int *pBasicToken, int *pToken) const
+{
+	RequestImpl(Addr, nullptr, pBasicToken, pToken, true);
 }
 
 void CServerBrowser::SetCurrentServerPing(const NETADDR &Addr, int Ping)
@@ -1189,7 +1203,7 @@ void CServerBrowser::Update(bool ForceResort)
 			if(pEntry->m_Request64Legacy)
 				RequestImpl64(pEntry->m_Addr, pEntry);
 			else
-				RequestImpl(pEntry->m_Addr, pEntry, nullptr, nullptr);
+				RequestImpl(pEntry->m_Addr, pEntry, nullptr, nullptr, false);
 		}
 
 		Count++;
