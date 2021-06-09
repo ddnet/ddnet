@@ -2805,7 +2805,7 @@ void CClient::Update()
 				m_CurrentServerInfoRequestTime >= 0 &&
 				time_get() > m_CurrentServerInfoRequestTime)
 			{
-				m_ServerBrowser.RequestCurrentServer(m_ServerAddress, nullptr, nullptr);
+				m_ServerBrowser.RequestCurrentServer(m_ServerAddress);
 				m_CurrentServerInfoRequestTime = time_get() + time_freq() * 2;
 			}
 
@@ -2824,7 +2824,7 @@ void CClient::Update()
 				m_CurrentServerPingUuid = RandomUuid();
 				if(!m_ServerCapabilities.m_PingEx)
 				{
-					m_ServerBrowser.RequestCurrentServer(m_ServerAddress, &m_CurrentServerPingBasicToken, &m_CurrentServerPingToken);
+					m_ServerBrowser.RequestCurrentServerWithRandomToken(m_ServerAddress, &m_CurrentServerPingBasicToken, &m_CurrentServerPingToken);
 				}
 				else
 				{
