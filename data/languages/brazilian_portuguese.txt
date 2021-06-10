@@ -20,6 +20,7 @@
 # Rafael Fontenelle   2020-08-27 12:38:07
 # Rafael Fontenelle   2020-09-20 11:00:38
 # Rafael Fontenelle   2021-02-13 07:00:00
+# Rafael Fontenelle   2021-06-10 12:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1275,61 +1276,61 @@ Regular Background Color
 == Cor de fundo comum
 
 AFR
-== 
+== AFR
 
 ASI
-== 
+== ASI
 
 AUS
-== 
+== AUS
 
 EUR
-== 
+== EUR
 
 NA
-== 
+== NA
 
 SA
-== 
+== SA
 
 CHN
-== 
+== CHN
 
 Getting server list from master server
-== 
+== Obtendo lista de servidores do servidor mestre
 
 Leak IP
-== 
+== Vazar IP
 
 Chat command
-== 
+== Comando de chat
 
 Windowed
-== 
+== Janela
 
 Windowed borderless
-== 
+== Janela sem borda
 
 Desktop fullscreen
-== 
+== Tela cheia de desktop
 
 Use modern OpenGL
-== 
+== Usar OpenGL moderno
 
 Hookline
-== 
+== Linha do gancho
 
 No hit
-== 
+== Sem acerto
 
 Hookable
-== 
+== Enganchável
 
 Tee
-== 
+== Tee
 
 Discord
-== 
+== Discord
 
 https://ddnet.tw/discord
-== 
+== https://ddnet.tw/discord
