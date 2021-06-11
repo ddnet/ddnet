@@ -370,6 +370,7 @@ void CChillerBotUX::OnInit()
 		c.m_aNoteLong[0] = '\0';
 	}
 	UpdateComponents();
+	m_GotoSwitchOffset = 0;
 }
 
 void CChillerBotUX::UpdateComponents()
@@ -403,6 +404,7 @@ void CChillerBotUX::OnConsoleInit()
 	Console()->Register("camp", "?i[left]i[right]?s[tile|raw]", CFGFLAG_CLIENT, ConCampHack, this, "Activate camp mode relative to tee");
 	Console()->Register("camp_abs", "i[x1]i[y1]i[x2]i[y2]?s[tile|raw]", CFGFLAG_CLIENT, ConCampHackAbs, this, "Activate camp mode absolute in the map");
 	Console()->Register("uncamp", "", CFGFLAG_CLIENT, ConUnCampHack, this, "Same as cl_camp_hack 0 but resets walk input");
+	Console()->Register("goto_switch", "i[index]?i[offset]", CFGFLAG_CLIENT, ConGotoSwitch, this, "Pause switch found (at offset) with given index");
 
 	Console()->Chain("cl_camp_hack", ConchainCampHack, this);
 	Console()->Chain("cl_chillerbot_hud", ConchainChillerbotHud, this);
@@ -518,6 +520,54 @@ void CChillerBotUX::ConUnCampHack(IConsole::IResult *pResult, void *pUserData)
 	pSelf->DisableComponent("camp hack");
 	pSelf->m_pClient->m_pControls->m_InputDirectionRight[g_Config.m_ClDummy] = 0;
 	pSelf->m_pClient->m_pControls->m_InputDirectionLeft[g_Config.m_ClDummy] = 0;
+}
+
+void CChillerBotUX::ConGotoSwitch(IConsole::IResult *pResult, void *pUserData)
+{
+	CChillerBotUX *pSelf = (CChillerBotUX *)pUserData;
+	pSelf->GotoSwitch(pResult->GetInteger(0), pResult->NumArguments() > 1 ? pResult->GetInteger(1) : -1);
+}
+
+void CChillerBotUX::GotoSwitch(int Index, int Offset)
+{
+	int Match = -1;
+	int MatchX = -1;
+	int MatchY = -1;
+	for(int x = 0; x < Collision()->GetWidth(); x++)
+	{
+		for(int y = 0; y < Collision()->GetHeight(); y++)
+		{
+			int i = y * Collision()->GetWidth() + x;
+			if(Index == Collision()->GetSwitchNumber(i))
+			{
+				Match++;
+				if(Offset != -1)
+				{
+					if(Match == Offset)
+					{
+						MatchX = x;
+						MatchY = y;
+						m_GotoSwitchOffset = Match;
+						goto set_view;
+					}
+					continue;
+				}
+				MatchX = x;
+				MatchY = y;
+				if(Match == m_GotoSwitchOffset)
+					goto set_view;
+			}
+		}
+	}
+set_view:
+	if(MatchX == -1 || MatchY == -1)
+		return;
+	if(Match < m_GotoSwitchOffset)
+		m_GotoSwitchOffset = -1;
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "set_view %d %d", MatchX, MatchY);
+	Console()->ExecuteLine(aBuf);
+	m_GotoSwitchOffset++;
 }
 
 void CChillerBotUX::GoAfk(int Minutes, const char *pMsg)
