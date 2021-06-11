@@ -1007,8 +1007,8 @@ void CMenus::RenderGhost(CUIRect MainView)
 	static CColumn s_aCols[] = {
 		{-1, " ", 2.0f, {0}, {0}},
 		{COL_ACTIVE, " ", 30.0f, {0}, {0}},
-		{COL_NAME, "Name", 300.0f, {0}, {0}},
-		{COL_TIME, "Time", 200.0f, {0}, {0}},
+		{COL_NAME, "Name", 300.0f, {0}, {0}}, // Localize("Name")
+		{COL_TIME, "Time", 200.0f, {0}, {0}}, // Localize("Time")
 	};
 
 	int NumCols = sizeof(s_aCols) / sizeof(CColumn);
@@ -1024,7 +1024,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 
 	// do headers
 	for(int i = 0; i < NumCols; i++)
-		DoButton_GridHeader(s_aCols[i].m_Caption, s_aCols[i].m_Caption, 0, &s_aCols[i].m_Rect);
+		DoButton_GridHeader(s_aCols[i].m_Caption, Localize(s_aCols[i].m_Caption), 0, &s_aCols[i].m_Rect);
 
 	RenderTools()->DrawUIRect(&View, ColorRGBA(0, 0, 0, 0.15f), 0, 0);
 
