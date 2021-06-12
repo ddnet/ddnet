@@ -433,12 +433,14 @@ void CClient::SendChillerBotUX(bool Dummy)
 {
 	CMsgPacker Msg(NETMSG_IAMCHILLERBOT_UX, true);
 	Msg.AddInt(CHILLERBOT_VERSIONNR);
-	Msg.AddString(
-		"chillerbot-ux " CHILLERBOT_VERSION
-		" (DDNet " GAME_VERSION
-		", built on " CHILLERBOT_BUILD_DATE
-		")",
-		0);
+	char aBuf[2048];
+	str_format(aBuf, sizeof(aBuf),
+		"chillerbot-ux %s (DDNet %s, built on %s, git rev %s)",
+		CHILLERBOT_VERSION,
+		GAME_VERSION,
+		CHILLERBOT_BUILD_DATE,
+		GIT_SHORTREV_HASH);
+	Msg.AddString(aBuf, 0);
 	SendMsgY(&Msg, MSGFLAG_VITAL, Dummy);
 }
 
