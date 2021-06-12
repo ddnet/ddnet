@@ -38,6 +38,18 @@ if ``cl_finish_rename`` is set to ``1`` the client will automatically rename the
 The name is changed to ``cl_finish_name``.
 
 
+### Spectate switch and tele tiles
+
+In ddrace maps you can go to spectators or do /pause and then execute ``goto_switch i[number]`` to set your view to the first switcher with this number. Execute it again to view the next. Or provide a second argument to view a specific occurence at offset x. For example to find the 2nd switcher with the number 12 do:
+
+    goto_switch 12 2
+
+To iterate over all teleporters with number 3 (in, out, evil, weapons)
+
+    goto_tele 3
+    goto_tele 3
+    goto_tele 3
+
 ### Chat bots
 
     say_format s[format]
