@@ -34,6 +34,11 @@ class CChillerBotUX : public CComponent
 	int m_ForceDir;
 	int m_LastForceDir;
 	int m_GotoSwitchOffset;
+	int m_GotoSwitchLastX;
+	int m_GotoSwitchLastY;
+	int m_GotoTeleOffset;
+	int m_GotoTeleLastX;
+	int m_GotoTeleLastY;
 	int64 m_LastNotification;
 
 	void OnChatMessage(int ClientID, int Team, const char *pMsg);
@@ -45,7 +50,8 @@ class CChillerBotUX : public CComponent
 	void MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, float Zoom);
 	void RenderEnabledComponents();
 	void RenderSpeedHud();
-	void GotoSwitch(int Index, int Offset = -1);
+	void GotoSwitch(int Number, int Offset = -1);
+	void GotoTele(int Number, int Offset = -1);
 
 	virtual void OnRender();
 	virtual void OnConsoleInit();
@@ -58,6 +64,7 @@ class CChillerBotUX : public CComponent
 	static void ConCampHackAbs(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnCampHack(IConsole::IResult *pResult, void *pUserData);
 	static void ConGotoSwitch(IConsole::IResult *pResult, void *pUserData);
+	static void ConGotoTele(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConchainCampHack(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainChillerbotHud(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);

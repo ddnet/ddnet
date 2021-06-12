@@ -371,6 +371,11 @@ void CChillerBotUX::OnInit()
 	}
 	UpdateComponents();
 	m_GotoSwitchOffset = 0;
+	m_GotoSwitchLastX = -1;
+	m_GotoSwitchLastY = -1;
+	m_GotoTeleOffset = 0;
+	m_GotoTeleLastX = -1;
+	m_GotoTeleLastY = -1;
 }
 
 void CChillerBotUX::UpdateComponents()
@@ -404,7 +409,8 @@ void CChillerBotUX::OnConsoleInit()
 	Console()->Register("camp", "?i[left]i[right]?s[tile|raw]", CFGFLAG_CLIENT, ConCampHack, this, "Activate camp mode relative to tee");
 	Console()->Register("camp_abs", "i[x1]i[y1]i[x2]i[y2]?s[tile|raw]", CFGFLAG_CLIENT, ConCampHackAbs, this, "Activate camp mode absolute in the map");
 	Console()->Register("uncamp", "", CFGFLAG_CLIENT, ConUnCampHack, this, "Same as cl_camp_hack 0 but resets walk input");
-	Console()->Register("goto_switch", "i[index]?i[offset]", CFGFLAG_CLIENT, ConGotoSwitch, this, "Pause switch found (at offset) with given index");
+	Console()->Register("goto_switch", "i[number]?i[offset]", CFGFLAG_CLIENT, ConGotoSwitch, this, "Pause switch found (at offset) with given number");
+	Console()->Register("goto_tele", "i[number]?i[offset]", CFGFLAG_CLIENT, ConGotoTele, this, "Pause tele found (at offset) with given number");
 
 	Console()->Chain("cl_camp_hack", ConchainCampHack, this);
 	Console()->Chain("cl_chillerbot_hud", ConchainChillerbotHud, this);
@@ -528,7 +534,13 @@ void CChillerBotUX::ConGotoSwitch(IConsole::IResult *pResult, void *pUserData)
 	pSelf->GotoSwitch(pResult->GetInteger(0), pResult->NumArguments() > 1 ? pResult->GetInteger(1) : -1);
 }
 
-void CChillerBotUX::GotoSwitch(int Index, int Offset)
+void CChillerBotUX::ConGotoTele(IConsole::IResult *pResult, void *pUserData)
+{
+	CChillerBotUX *pSelf = (CChillerBotUX *)pUserData;
+	pSelf->GotoTele(pResult->GetInteger(0), pResult->NumArguments() > 1 ? pResult->GetInteger(1) : -1);
+}
+
+void CChillerBotUX::GotoSwitch(int Number, int Offset)
 {
 	int Match = -1;
 	int MatchX = -1;
@@ -538,7 +550,7 @@ void CChillerBotUX::GotoSwitch(int Index, int Offset)
 		for(int y = 0; y < Collision()->GetHeight(); y++)
 		{
 			int i = y * Collision()->GetWidth() + x;
-			if(Index == Collision()->GetSwitchNumber(i))
+			if(Number == Collision()->GetSwitchNumber(i))
 			{
 				Match++;
 				if(Offset != -1)
@@ -568,6 +580,71 @@ set_view:
 	str_format(aBuf, sizeof(aBuf), "set_view %d %d", MatchX, MatchY);
 	Console()->ExecuteLine(aBuf);
 	m_GotoSwitchOffset++;
+}
+
+void CChillerBotUX::GotoTele(int Number, int Offset)
+{
+	int Match = -1;
+	int MatchX = -1;
+	int MatchY = -1;
+	for(int x = 0; x < Collision()->GetWidth(); x++)
+	{
+		for(int y = 0; y < Collision()->GetHeight(); y++)
+		{
+			int i = y * Collision()->GetWidth() + x;
+			int Tele = Collision()->IsTeleport(i);
+			if(!Tele)
+				Tele = Collision()->IsEvilTeleport(i);
+			if(!Tele)
+				Tele = Collision()->IsCheckTeleport(i);
+			if(!Tele)
+				Tele = Collision()->IsCheckEvilTeleport(i);
+			if(!Tele)
+				Tele = Collision()->IsTeleportWeapon(i);
+			if(!Tele)
+				Tele = Collision()->IsTeleportHook(i);
+			if(!Tele)
+				Tele = Collision()->IsTCheckpoint(i);
+			if(Number == Tele)
+			{
+				Match++;
+				if(Offset != -1)
+				{
+					if(Match == Offset)
+					{
+						MatchX = x;
+						MatchY = y;
+						m_GotoTeleOffset = Match;
+						goto set_view;
+					}
+					continue;
+				}
+				MatchX = x;
+				MatchY = y;
+				if(m_GotoTeleLastX != -1 && m_GotoTeleLastY != -1)
+				{
+					if(distance(vec2(m_GotoTeleLastX, m_GotoTeleLastY), vec2(x, y)) < 10.0f)
+					{
+						m_GotoTeleOffset++;
+						continue;
+					}
+				}
+				m_GotoTeleLastX = x;
+				m_GotoTeleLastY = y;
+				if(Match == m_GotoTeleOffset)
+					goto set_view;
+			}
+		}
+	}
+set_view:
+	if(MatchX == -1 || MatchY == -1)
+		return;
+	if(Match < m_GotoTeleOffset)
+		m_GotoTeleOffset = -1;
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "set_view %d %d", MatchX, MatchY);
+	Console()->ExecuteLine(aBuf);
+	m_GotoTeleOffset++;
 }
 
 void CChillerBotUX::GoAfk(int Minutes, const char *pMsg)
