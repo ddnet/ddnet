@@ -48,6 +48,10 @@
 #include <windows.h>
 #endif
 
+#include <signal.h>
+
+volatile bool InterruptSignaled = false;
+
 CSnapIDPool::CSnapIDPool()
 {
 	Reset();
@@ -2714,6 +2718,11 @@ int CServer::Run()
 
 				PacketWaiting = x > 0 ? net_socket_read_wait(m_NetServer.Socket(), x) : true;
 			}
+			if(InterruptSignaled)
+			{
+				Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "interrupted");
+				break;
+			}
 		}
 	}
 	const char *pDisconnectReason = "Server shutdown";
@@ -3596,6 +3605,11 @@ void CServer::SnapSetStaticsize(int ItemType, int Size)
 
 static CServer *CreateServer() { return new CServer(); }
 
+void HandleSigInt(int Param)
+{
+	InterruptSignaled = true;
+}
+
 int main(int argc, const char **argv) // ignore_convention
 {
 	cmdline_fix(&argc, &argv);
@@ -3623,6 +3637,8 @@ int main(int argc, const char **argv) // ignore_convention
 		dbg_msg("mysql", "failed to initialize MySQL library");
 		return -1;
 	}
+
+	signal(SIGINT, HandleSigInt);
 
 	CServer *pServer = CreateServer();
 	IKernel *pKernel = IKernel::Create();
