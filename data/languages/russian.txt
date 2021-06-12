@@ -11,6 +11,7 @@
 #	gerdoe		2020-07-01 22:04:21
 #	gerdoe		2020-09-14 20:53:53
 #	gerdoe		2020-09-17 22:49:22
+#	Vy0x2		2021-06-08 15:48:25
 ##### /authors #####
 
 ##### translated strings #####
@@ -52,7 +53,7 @@ All
 == Все
 
 Are you sure that you want to delete the demo?
-== Вы уверены, что хотите удалить демо?
+== Вы уверены, что хотите удалить запись?
 
 Are you sure that you want to quit?
 == Вы действительно желаете выйти?
@@ -61,7 +62,7 @@ Are you sure that you want to remove the player from your friends list?
 == Вы уверены, что хотите удалить игрока из друзей?
 
 Automatically record demos
-== Записывать демо
+== Автоматическая запись
 
 Automatically take game over screenshot
 == Делать снимок результатов игры
@@ -124,16 +125,16 @@ Delete
 == Удалить
 
 Delete demo
-== Удалить демо
+== Удалить запись
 
 Demo details
-== Сведения демо
+== Сведения запись
 
 Demofile: %s
-== Демо: %s
+== Запись: %s
 
 Demos
-== Демо
+== Записи
 
 Disconnect
 == Отключиться
@@ -160,13 +161,13 @@ Error
 == Ошибка
 
 Error loading demo
-== Ошибка при загрузке демо
+== Ошибка при загрузке записи
 
 Favorite
-== Избранный
+== Фаворит
 
 Favorites
-== Избранные
+== Фавориты
 
 Feet
 == Ноги
@@ -229,7 +230,7 @@ Hook
 == Крюк
 
 Invalid Demo
-== Нерабочее демо
+== Нерабочая запись
 
 Join blue
 == За синих
@@ -247,7 +248,7 @@ Language
 == Язык
 
 MOTD
-== MOTD
+== Сообщение дня
 
 Map
 == Карта
@@ -368,7 +369,7 @@ Rename
 == Переименов.
 
 Rename demo
-== Переименовать демо
+== Переименовать запись
 
 Reset filter
 == Сбросить фильтры
@@ -377,10 +378,10 @@ Sample rate
 == Частота
 
 Score
-== Очки
+== Счёт
 
 Score limit
-== Лимит очков
+== Лимит Счёта
 
 Scoreboard
 == Табло
@@ -413,7 +414,7 @@ Show friends only
 == Только с друзьями
 
 Show ingame HUD
-== Показывать внутриигровой HUD
+== Показывать внутриигровой Интерфейс
 
 Show name plates
 == Показывать имена игроков
@@ -494,16 +495,16 @@ Time limit: %d min
 == Лимит времени: %d
 
 Try again
-== ОК
+== Попробуйт снова
 
 Type
 == Тип
 
 Unable to delete the demo
-== Невозможно удалить демо
+== Невозможно удалить запись
 
 Unable to rename the demo
-== Невозможно переименовать демо
+== Невозможно переименовать запись
 
 Use sounds
 == Использовать звуки
@@ -617,7 +618,7 @@ Internet
 == Интернет
 
 Max demos
-== Максимальное кол-во демо
+== Максимальные записи
 
 Join game
 == Играть
@@ -653,7 +654,7 @@ Hue
 == Оттен.
 
 Record demo
-== Записать демо
+== Сделать запись
 
 Your skin
 == Ваш скин
@@ -710,13 +711,13 @@ Show other players' hook collision lines
 == Показывать коллизии крюка других игроков
 
 DDNet Client needs to be restarted to complete update!
-== Перезапустите DDNet Client для завершения обновления!
+== Перезапустите DDNet клиента для завершения обновления!
 
 Please use a different name
 == Пожалуйста, используйте другое имя
 
 Show others
-== Показывать остальных
+== Показать другие
 
 Game paused
 == Пауза
@@ -749,7 +750,7 @@ New random timeout code
 == Новый тайм-аут код
 
 Loading DDNet Client
-== Загрузка DDNet Client
+== Загрузка DDNet клиента
 
 Normal message
 == Обычное сообщение
@@ -770,7 +771,7 @@ Highlighted message
 == Выделенное сообщение
 
 Demo
-== Демо
+== Запись
 
 Successfully saved the replay!
 == Повтор сохранен!
@@ -938,13 +939,13 @@ Default zoom
 == Ст. масштаб
 
 Show all
-== Показывать всех
+== Показать всех
 
 Toggle dyncam
 == Смена дин. камеры
 
 Toggle dummy
-== Смена Tee
+== Смена дамми
 
 Toggle ghost
 == Переключить тень
@@ -968,7 +969,7 @@ Show entities
 == Показать тайлы
 
 Show HUD
-== Показывать HUD
+== Показать Интерфейс
 
 UI mouse s.
 == Чувств. мыши в меню
@@ -992,7 +993,7 @@ Enable long pain sound (used when shooting in freeze)
 == Включить звук продолжительной боли (при стрельбе во фризе)
 
 HUD
-== HUD
+== Интерфейс
 
 DDNet
 == DDNet
@@ -1001,7 +1002,7 @@ Friend message
 == Сообщение от друга
 
 Save the best demo of each race
-== Сохранять лучшее демо каждой карты
+== Сохранять лучшую запись каждой карты
 
 Default length: %d
 == Станд. длина: %d
@@ -1182,7 +1183,7 @@ Theme
 == Тема
 
 Demos directory
-== Папка с демо
+== Папка с записью
 
 Smooth Dynamic Camera
 == Плавная дин. камера
@@ -1275,52 +1276,52 @@ https://ddnet.tw/discord
 == https://ddnet.tw/discord
 
 AFR
-== 
+== AFR
 
 ASI
-== 
+== ASI
 
 AUS
-== 
+== AUS
 
 EUR
-== 
+== EUR
 
 NA
-== 
+== NA
 
 SA
-== 
+== SA
 
 CHN
-== 
+== CHN
 
 Getting server list from master server
-== 
+== Получение списка серверов с главного сервера
 
 Leak IP
-== 
+== Передать IP
 
 Windowed
-== 
+== В окне
 
 Windowed borderless
-== 
+== В окне без границ
 
 Desktop fullscreen
-== 
+== Десктоп полноэкранный
 
 Use modern OpenGL
-== 
+== Используйте новый OpenGL
 
 Hookline
-== 
+== Линия крюка
 
 No hit
-== 
+== Нет удара
 
 Hookable
-== 
+== Можно крючком
 
 Tee
-== 
+== Tee

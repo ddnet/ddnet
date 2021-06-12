@@ -17,6 +17,8 @@
 #include <game/client/gameclient.h>
 #include <game/collision.h>
 
+#include <base/vmath.h>
+
 #include "controls.h"
 
 enum
@@ -572,9 +574,17 @@ void CControls::ClampMousePos()
 		float MinDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMinDistance : g_Config.m_ClMouseMinDistance;
 		float MouseMin = MinDistance;
 
-		if(length(m_MousePos[g_Config.m_ClDummy]) < MouseMin)
-			m_MousePos[g_Config.m_ClDummy] = normalize(m_MousePos[g_Config.m_ClDummy]) * MouseMin;
-		if(length(m_MousePos[g_Config.m_ClDummy]) > MouseMax)
-			m_MousePos[g_Config.m_ClDummy] = normalize(m_MousePos[g_Config.m_ClDummy]) * MouseMax;
+		float MDistance = length(m_MousePos[g_Config.m_ClDummy]);
+		if(MDistance < 0.001f)
+		{
+			m_MousePos[g_Config.m_ClDummy].x = 0.001f;
+			m_MousePos[g_Config.m_ClDummy].y = 0;
+			MDistance = 0.001f;
+		}
+		if(MDistance < MouseMin)
+			m_MousePos[g_Config.m_ClDummy] = normalize_pre_length(m_MousePos[g_Config.m_ClDummy], MDistance) * MouseMin;
+		MDistance = length(m_MousePos[g_Config.m_ClDummy]);
+		if(MDistance > MouseMax)
+			m_MousePos[g_Config.m_ClDummy] = normalize_pre_length(m_MousePos[g_Config.m_ClDummy], MDistance) * MouseMax;
 	}
 }

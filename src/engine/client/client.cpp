@@ -2822,7 +2822,7 @@ void CClient::Update()
 				m_CurrentServerInfoRequestTime >= 0 &&
 				time_get() > m_CurrentServerInfoRequestTime)
 			{
-				m_ServerBrowser.RequestCurrentServer(m_ServerAddress, nullptr, nullptr);
+				m_ServerBrowser.RequestCurrentServer(m_ServerAddress);
 				m_CurrentServerInfoRequestTime = time_get() + time_freq() * 2;
 			}
 
@@ -2841,7 +2841,7 @@ void CClient::Update()
 				m_CurrentServerPingUuid = RandomUuid();
 				if(!m_ServerCapabilities.m_PingEx)
 				{
-					m_ServerBrowser.RequestCurrentServer(m_ServerAddress, &m_CurrentServerPingBasicToken, &m_CurrentServerPingToken);
+					m_ServerBrowser.RequestCurrentServerWithRandomToken(m_ServerAddress, &m_CurrentServerPingBasicToken, &m_CurrentServerPingToken);
 				}
 				else
 				{
@@ -3292,7 +3292,7 @@ void CClient::Run()
 				{
 					char aBuf[64];
 					str_format(aBuf, sizeof(aBuf), "Frametime %d us\n", (int)(m_RenderFrameTime * 1000000));
-					io_write(m_BenchmarkFile, aBuf, strlen(aBuf));
+					io_write(m_BenchmarkFile, aBuf, str_length(aBuf));
 					if(time_get() > m_BenchmarkStopTime)
 					{
 						io_close(m_BenchmarkFile);
@@ -4073,7 +4073,6 @@ void CClient::ToggleWindowVSync()
 void CClient::LoadFont()
 {
 	static CFont *pDefaultFont = 0;
-	static bool LoadedFallbackFont = false;
 	char aFilename[512];
 	char aBuff[1024];
 	const char *pFontFile = "fonts/DejaVuSans.ttf";
@@ -4107,7 +4106,6 @@ void CClient::LoadFont()
 				IEngineTextRender *pTextRender = Kernel()->RequestInterface<IEngineTextRender>();
 				FontLoaded = pTextRender->LoadFallbackFont(pDefaultFont, aFilename, pBuf, Size);
 			}
-			LoadedFallbackFont |= FontLoaded;
 
 			if(!FontLoaded)
 			{
