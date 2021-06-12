@@ -592,19 +592,7 @@ void CChillerBotUX::GotoTele(int Number, int Offset)
 		for(int y = 0; y < Collision()->GetHeight(); y++)
 		{
 			int i = y * Collision()->GetWidth() + x;
-			int Tele = Collision()->IsTeleport(i);
-			if(!Tele)
-				Tele = Collision()->IsEvilTeleport(i);
-			if(!Tele)
-				Tele = Collision()->IsCheckTeleport(i);
-			if(!Tele)
-				Tele = Collision()->IsCheckEvilTeleport(i);
-			if(!Tele)
-				Tele = Collision()->IsTeleportWeapon(i);
-			if(!Tele)
-				Tele = Collision()->IsTeleportHook(i);
-			if(!Tele)
-				Tele = Collision()->IsTCheckpoint(i);
+			int Tele = Collision()->TeleLayer()[i].m_Number;
 			if(Number == Tele)
 			{
 				Match++;
