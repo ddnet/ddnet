@@ -610,7 +610,7 @@ Round
 == Ronda
 
 Lht.
-== Luminosidad
+== Lum.
 
 UI Color
 == Color de menú
