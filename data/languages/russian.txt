@@ -1301,7 +1301,7 @@ Getting server list from master server
 == Получение списка серверов от мастер-сервера
 
 Leak IP
-== Передать IP
+== Передавать IP
 
 Windowed
 == Оконный
