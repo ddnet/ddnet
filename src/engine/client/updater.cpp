@@ -157,7 +157,7 @@ bool CUpdater::MoveFile(const char *pFile)
 #endif
 
 #if !defined(CONF_PLATFORM_LINUX)
-	if(!str_comp_nocase(pFile + len - 4, ".so"))
+	if(!str_comp_nocase(pFile + len - 3, ".so"))
 		return Success;
 #endif
 
