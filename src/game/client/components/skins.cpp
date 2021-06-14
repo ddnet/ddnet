@@ -41,7 +41,7 @@ int CSkins::CGetPngFile::OnCompletion(int State)
 	return State;
 }
 
-CSkins::CGetPngFile::CGetPngFile(CSkins *pSkins, IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType, CTimeout Timeout, bool LogProgress) :
+CSkins::CGetPngFile::CGetPngFile(CSkins *pSkins, IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType, CTimeout Timeout, HTTPLOG LogProgress) :
 	CGetFile(pStorage, pUrl, pDest, StorageType, Timeout, LogProgress), m_pSkins(pSkins)
 {
 }
@@ -420,7 +420,7 @@ int CSkins::FindImpl(const char *pName)
 	char aUrl[256];
 	str_format(aUrl, sizeof(aUrl), "%s%s.png", g_Config.m_ClSkinDownloadUrl, pName);
 	str_format(Skin.m_aPath, sizeof(Skin.m_aPath), "downloadedskins/%s.%d.tmp", pName, pid());
-	Skin.m_pTask = std::make_shared<CGetPngFile>(this, Storage(), aUrl, Skin.m_aPath, IStorage::TYPE_SAVE, CTimeout{0, 0, 0}, false);
+	Skin.m_pTask = std::make_shared<CGetPngFile>(this, Storage(), aUrl, Skin.m_aPath, IStorage::TYPE_SAVE, CTimeout{0, 0, 0}, HTTPLOG::NONE);
 	m_pClient->Engine()->AddJob(Skin.m_pTask);
 	m_aDownloadSkins.add(Skin);
 	return -1;
