@@ -544,7 +544,7 @@ void CServerBrowser::SetLatency(NETADDR Addr, int Latency)
 	{
 		NETADDR Other = pEntry->m_Addr;
 		Other.port = 0;
-		if(net_addr_comp(&Addr, &Other) == 0)
+		if(net_addr_comp(&Addr, &Other) == 0 && pEntry->m_GotInfo)
 		{
 			pEntry->m_Info.m_Latency = Latency;
 			pEntry->m_Info.m_LatencyIsEstimated = false;
