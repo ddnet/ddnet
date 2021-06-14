@@ -17,6 +17,13 @@ enum
 	HTTP_ABORTED,
 };
 
+enum class HTTPLOG
+{
+	NONE,
+	FAILURE,
+	ALL,
+};
+
 struct CTimeout
 {
 	long ConnectTimeoutMs;
@@ -42,7 +49,7 @@ class CRequest : public IJob
 	double m_Size;
 	double m_Current;
 	int m_Progress;
-	bool m_LogProgress;
+	HTTPLOG m_LogProgress;
 
 	std::atomic<int> m_State;
 	std::atomic<bool> m_Abort;
@@ -57,7 +64,7 @@ protected:
 	virtual int OnCompletion(int State) { return State; }
 
 public:
-	CRequest(const char *pUrl, CTimeout Timeout, bool LogProgress = true);
+	CRequest(const char *pUrl, CTimeout Timeout, HTTPLOG LogProgress = HTTPLOG::ALL);
 
 	double Current() const { return m_Current; }
 	double Size() const { return m_Size; }
@@ -72,7 +79,7 @@ class CHead : public CRequest
 	virtual bool AfterInit(void *pCurl);
 
 public:
-	CHead(const char *pUrl, CTimeout Timeout, bool LogProgress = true);
+	CHead(const char *pUrl, CTimeout Timeout, HTTPLOG LogProgress = HTTPLOG::ALL);
 	~CHead();
 };
 
@@ -85,7 +92,7 @@ class CGet : public CRequest
 	unsigned char *m_pBuffer;
 
 public:
-	CGet(const char *pUrl, CTimeout Timeout, bool LogProgress = true);
+	CGet(const char *pUrl, CTimeout Timeout, HTTPLOG LogProgress = HTTPLOG::ALL);
 	~CGet();
 
 	size_t ResultSize() const
@@ -121,7 +128,7 @@ protected:
 	virtual int OnCompletion(int State);
 
 public:
-	CGetFile(IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType = -2, CTimeout Timeout = CTimeout{4000, 500, 5}, bool LogProgress = true);
+	CGetFile(IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType = -2, CTimeout Timeout = CTimeout{4000, 500, 5}, HTTPLOG LogProgress = HTTPLOG::ALL);
 
 	const char *Dest() const { return m_aDest; }
 };
