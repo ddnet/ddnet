@@ -143,10 +143,10 @@ void CChooseMaster::CJob::Run()
 		{
 			continue;
 		}
-		int64 StartTime = time_get();
+		int64 StartTime = time_get_microseconds();
 		CGet Get(pUrl, Timeout, HTTPLOG::FAILURE);
 		IEngine::RunJobBlocking(&Get);
-		int Time = (time_get() - StartTime) * 1000 / time_freq();
+		int Time = (time_get_microseconds() - StartTime) / 1000;
 		if(Get.State() != HTTP_DONE)
 		{
 			continue;
