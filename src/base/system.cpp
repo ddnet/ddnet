@@ -13,6 +13,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include <chrono>
+
 #if defined(CONF_WEBSOCKETS)
 #include <engine/shared/websockets.h>
 #endif
@@ -936,45 +938,13 @@ void set_new_tick(void)
 }
 
 /* -----  time ----- */
+static_assert(std::chrono::steady_clock::is_steady, "Compiler does not support steady clocks, it might be out of date.");
+static_assert(std::chrono::steady_clock::period::den / std::chrono::steady_clock::period::num >= 1000000, "Compiler has a bad timer precision and might be out of date.");
+static const std::chrono::time_point<std::chrono::steady_clock> tw_start_time = std::chrono::steady_clock::now();
+
 int64 time_get_impl(void)
 {
-	static int64 last = 0;
-	{
-#if defined(CONF_PLATFORM_MACOS)
-		static int got_timebase = 0;
-		mach_timebase_info_data_t timebase;
-		uint64 time;
-		uint64 q;
-		uint64 r;
-		if(!got_timebase)
-		{
-			mach_timebase_info(&timebase);
-		}
-		time = mach_absolute_time();
-		q = time / timebase.denom;
-		r = time % timebase.denom;
-		last = q * timebase.numer + r * timebase.numer / timebase.denom;
-		return last;
-#elif defined(CONF_FAMILY_UNIX)
-		struct timespec spec;
-		if(clock_gettime(CLOCK_MONOTONIC, &spec) != 0)
-		{
-			dbg_msg("clock", "gettime failed: %d", errno);
-			return 0;
-		}
-		last = (int64)spec.tv_sec * (int64)1000000 + (int64)spec.tv_nsec / 1000;
-		return last;
-#elif defined(CONF_FAMILY_WINDOWS)
-		int64 t;
-		QueryPerformanceCounter((PLARGE_INTEGER)&t);
-		if(t < last) /* for some reason, QPC can return values in the past */
-			return last;
-		last = t;
-		return t;
-#else
-#error not implemented
-#endif
-	}
+	return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - tw_start_time).count();
 }
 
 int64 time_get(void)
@@ -991,26 +961,12 @@ int64 time_get(void)
 
 int64 time_freq(void)
 {
-#if defined(CONF_PLATFORM_MACOS)
-	return 1000000000;
-#elif defined(CONF_FAMILY_UNIX)
 	return 1000000;
-#elif defined(CONF_FAMILY_WINDOWS)
-	int64 t;
-	QueryPerformanceFrequency((PLARGE_INTEGER)&t);
-	return t;
-#else
-#error not implemented
-#endif
 }
 
 int64 time_get_microseconds(void)
 {
-#if defined(CONF_FAMILY_WINDOWS)
-	return (time_get_impl() * (int64)1000000) / time_freq();
-#else
 	return time_get_impl() / (time_freq() / 1000 / 1000);
-#endif
 }
 
 /* -----  network ----- */
