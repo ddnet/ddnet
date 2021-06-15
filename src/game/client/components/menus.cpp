@@ -2622,8 +2622,6 @@ void CMenus::OnStateChange(int NewState, int OldState)
 	}
 }
 
-extern "C" void font_debug_render();
-
 void CMenus::OnRender()
 {
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)

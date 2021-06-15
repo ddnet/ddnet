@@ -14,7 +14,7 @@
 #include <sys/types.h>
 
 #if defined(CONF_WEBSOCKETS)
-#include "engine/shared/websockets.h"
+#include <engine/shared/websockets.h>
 #endif
 
 #if defined(CONF_FAMILY_UNIX)
@@ -68,9 +68,7 @@
 #include <sys/filio.h>
 #endif
 
-#if defined(__cplusplus)
 extern "C" {
-#endif
 
 IOHANDLE io_stdin()
 {
@@ -164,7 +162,7 @@ static void logger_file(const char *line, void *user)
 static void logger_stdout_sync(const char *line, void *user)
 {
 	size_t length = str_length(line);
-	wchar_t *wide = malloc(length * sizeof(*wide));
+	wchar_t *wide = (wchar_t *)malloc(length * sizeof(*wide));
 	const char *p = line;
 	int wlen = 0;
 	HANDLE console;
@@ -437,7 +435,7 @@ static void aio_handle_free_and_unlock(ASYNCIO *aio) RELEASE(aio->lock)
 
 static void aio_thread(void *user)
 {
-	ASYNCIO *aio = user;
+	ASYNCIO *aio = (ASYNCIO *)user;
 
 	lock_wait(aio->lock);
 	while(1)
@@ -497,7 +495,7 @@ static void aio_thread(void *user)
 
 ASYNCIO *aio_new(IOHANDLE io)
 {
-	ASYNCIO *aio = malloc(sizeof(*aio));
+	ASYNCIO *aio = (ASYNCIO *)malloc(sizeof(*aio));
 	if(!aio)
 	{
 		return 0;
@@ -507,7 +505,7 @@ ASYNCIO *aio_new(IOHANDLE io)
 	sphore_init(&aio->sphore);
 	aio->thread = 0;
 
-	aio->buffer = malloc(ASYNC_BUFSIZE);
+	aio->buffer = (unsigned char *)malloc(ASYNC_BUFSIZE);
 	if(!aio->buffer)
 	{
 		sphore_destroy(&aio->sphore);
@@ -591,7 +589,7 @@ void aio_write_unlocked(ASYNCIO *aio, const void *buffer, unsigned size)
 		unsigned int new_written = buffer_len(aio) + size + 1;
 		unsigned int next_size = next_buffer_size(aio->buffer_size, new_written);
 		unsigned int next_len = 0;
-		unsigned char *next_buffer = malloc(next_size);
+		unsigned char *next_buffer = (unsigned char *)malloc(next_size);
 
 		struct BUFFERS buffers;
 		buffer_ptrs(aio, &buffers);
@@ -696,7 +694,7 @@ static unsigned long __stdcall thread_run(void *user)
 #error not implemented
 #endif
 {
-	struct THREAD_RUN *data = user;
+	struct THREAD_RUN *data = (THREAD_RUN *)user;
 	void (*threadfunc)(void *) = data->threadfunc;
 	void *u = data->u;
 	free(data);
@@ -706,7 +704,7 @@ static unsigned long __stdcall thread_run(void *user)
 
 void *thread_init(void (*threadfunc)(void *), void *u, const char *name)
 {
-	struct THREAD_RUN *data = malloc(sizeof(*data));
+	struct THREAD_RUN *data = (THREAD_RUN *)malloc(sizeof(*data));
 	data->threadfunc = threadfunc;
 	data->u = u;
 #if defined(CONF_FAMILY_UNIX)
@@ -1145,7 +1143,7 @@ void net_addr_str_v6(const unsigned short ip[8], int port, char *buffer, int buf
 		}
 		else
 		{
-			char *colon = i == 0 || i == longest_seq_start + longest_seq_len ? "" : ":";
+			const char *colon = (i == 0 || i == longest_seq_start + longest_seq_len) ? "" : ":";
 			w += str_format(buffer + w, buffer_size - w, "%s%x", colon, ip[i]);
 		}
 	}
@@ -1731,14 +1729,14 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *buffer, int maxsize, MMSGS
 	{
 		socklen_t fromlen = sizeof(struct sockaddr_in);
 		bytes = recvfrom(sock.ipv4sock, (char *)buffer, maxsize, 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
-		*data = buffer;
+		*data = (unsigned char *)buffer;
 	}
 
 	if(bytes <= 0 && sock.ipv6sock >= 0)
 	{
 		socklen_t fromlen = sizeof(struct sockaddr_in6);
 		bytes = recvfrom(sock.ipv6sock, (char *)buffer, maxsize, 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
-		*data = buffer;
+		*data = (unsigned char *)buffer;
 	}
 #endif
 
@@ -1747,8 +1745,8 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *buffer, int maxsize, MMSGS
 	{
 		socklen_t fromlen = sizeof(struct sockaddr);
 		struct sockaddr_in *sockaddrbuf_in = (struct sockaddr_in *)&sockaddrbuf;
-		bytes = websocket_recv(sock.web_ipv4sock, buffer, maxsize, sockaddrbuf_in, fromlen);
-		*data = buffer;
+		bytes = websocket_recv(sock.web_ipv4sock, (unsigned char *)buffer, maxsize, sockaddrbuf_in, fromlen);
+		*data = (unsigned char *)buffer;
 		sockaddrbuf_in->sin_family = AF_WEBSOCKET_INET;
 	}
 #endif
@@ -2912,7 +2910,7 @@ static int byteval(const char *byte, unsigned char *dst)
 
 int str_hex_decode(void *dst, int dst_size, const char *src)
 {
-	unsigned char *cdst = dst;
+	unsigned char *cdst = (unsigned char *)dst;
 	int slen = str_length(src);
 	int len = slen / 2;
 	int i;
@@ -3602,7 +3600,7 @@ void secure_random_fill(void *bytes, unsigned length)
 		dbg_break();
 	}
 #if defined(CONF_FAMILY_WINDOWS)
-	if(!CryptGenRandom(secure_random_data.provider, length, bytes))
+	if(!CryptGenRandom(secure_random_data.provider, length, (unsigned char *)bytes))
 	{
 		dbg_msg("secure", "CryptGenRandom failed, last_error=%ld", GetLastError());
 		dbg_break();
@@ -3650,7 +3648,4 @@ int secure_rand_below(int below)
 		}
 	}
 }
-
-#if defined(__cplusplus)
 }
-#endif

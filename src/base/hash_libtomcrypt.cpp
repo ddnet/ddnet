@@ -126,7 +126,7 @@ static void sha_init(sha256_state *md)
 static void sha_process(sha256_state *md, const void *src, u32 inlen)
 {
 	const u32 block_size = 64;
-	const unsigned char *in = src;
+	const unsigned char *in = (const unsigned char *)src;
 
 	while(inlen > 0)
 	{
