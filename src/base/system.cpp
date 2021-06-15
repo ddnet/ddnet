@@ -106,7 +106,7 @@ void dbg_assert_imp(const char *filename, int line, int test, const char *msg)
 	}
 }
 
-void dbg_break_imp(void)
+void dbg_break_imp()
 {
 #ifdef __GNUC__
 	__builtin_trap();
@@ -214,7 +214,7 @@ static void logger_file_finish(void *user)
 	logger_stdout_finish(user);
 }
 
-static void dbg_logger_finish(void)
+static void dbg_logger_finish()
 {
 	int i;
 	for(i = 0; i < num_loggers; i++)
@@ -240,7 +240,7 @@ void dbg_logger(DBG_LOGGER logger, DBG_LOGGER_FINISH finish, void *user)
 	num_loggers++;
 }
 
-void dbg_logger_stdout(void)
+void dbg_logger_stdout()
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	dbg_logger(logger_stdout_sync, 0, 0);
@@ -249,7 +249,7 @@ void dbg_logger_stdout(void)
 #endif
 }
 
-void dbg_logger_debugger(void)
+void dbg_logger_debugger()
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	dbg_logger(logger_debugger, 0, 0);
@@ -743,7 +743,7 @@ void thread_wait(void *thread)
 #endif
 }
 
-void thread_yield(void)
+void thread_yield()
 {
 #if defined(CONF_FAMILY_UNIX)
 	int result = sched_yield();
@@ -799,7 +799,7 @@ typedef CRITICAL_SECTION LOCKINTERNAL;
 #error not implemented on this platform
 #endif
 
-LOCK lock_create(void)
+LOCK lock_create()
 {
 	LOCKINTERNAL *lock = (LOCKINTERNAL *)malloc(sizeof(*lock));
 #if defined(CONF_FAMILY_UNIX)
@@ -934,7 +934,7 @@ void sphore_destroy(SEMAPHORE *sem)
 
 static int new_tick = -1;
 
-void set_new_tick(void)
+void set_new_tick()
 {
 	new_tick = 1;
 }
@@ -944,12 +944,12 @@ static_assert(std::chrono::steady_clock::is_steady, "Compiler does not support s
 static_assert(std::chrono::steady_clock::period::den / std::chrono::steady_clock::period::num >= 1000000, "Compiler has a bad timer precision and might be out of date.");
 static const std::chrono::time_point<std::chrono::steady_clock> tw_start_time = std::chrono::steady_clock::now();
 
-int64_t time_get_impl(void)
+int64_t time_get_impl()
 {
 	return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - tw_start_time).count();
 }
 
-int64_t time_get(void)
+int64_t time_get()
 {
 	static int64_t last = 0;
 	if(new_tick == 0)
@@ -961,12 +961,12 @@ int64_t time_get(void)
 	return last;
 }
 
-int64_t time_freq(void)
+int64_t time_freq()
 {
 	return 1000000;
 }
 
-int64_t time_get_microseconds(void)
+int64_t time_get_microseconds()
 {
 	return time_get_impl() / (time_freq() / 1000 / 1000);
 }
@@ -1930,7 +1930,7 @@ int net_tcp_close(NETSOCKET sock)
 	return priv_net_close_all_sockets(sock);
 }
 
-int net_errno(void)
+int net_errno()
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	return WSAGetLastError();
@@ -1939,7 +1939,7 @@ int net_errno(void)
 #endif
 }
 
-int net_would_block(void)
+int net_would_block()
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	return net_errno() == WSAEWOULDBLOCK;
@@ -1948,7 +1948,7 @@ int net_would_block(void)
 #endif
 }
 
-int net_init(void)
+int net_init()
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	WSADATA wsaData;
@@ -1961,7 +1961,7 @@ int net_init(void)
 }
 
 #if defined(CONF_FAMILY_UNIX)
-UNIXSOCKET net_unix_create_unnamed(void)
+UNIXSOCKET net_unix_create_unnamed()
 {
 	return socket(AF_UNIX, SOCK_DGRAM, 0);
 }
@@ -2349,12 +2349,12 @@ int net_socket_read_wait(NETSOCKET sock, int time)
 	return 0;
 }
 
-int time_timestamp(void)
+int time_timestamp()
 {
 	return time(0);
 }
 
-int time_houroftheday(void)
+int time_houroftheday()
 {
 	time_t time_data;
 	struct tm *time_info;
@@ -2364,7 +2364,7 @@ int time_houroftheday(void)
 	return time_info->tm_hour;
 }
 
-int time_season(void)
+int time_season()
 {
 	time_t time_data;
 	struct tm *time_info;
@@ -3390,7 +3390,7 @@ const char *str_next_token(const char *str, const char *delim, char *buffer, int
 	return tok + len;
 }
 
-int pid(void)
+int pid()
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	return _getpid();
@@ -3456,7 +3456,7 @@ int open_link(const char *link)
 #endif
 }
 
-int os_is_winxp_or_lower(void)
+int os_is_winxp_or_lower()
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	static const DWORD WINXP_MAJOR = 5;
@@ -3484,7 +3484,7 @@ struct SECURE_RANDOM_DATA
 
 static struct SECURE_RANDOM_DATA secure_random_data = {0};
 
-int secure_random_init(void)
+int secure_random_init()
 {
 	if(secure_random_data.initialized)
 	{
@@ -3572,7 +3572,7 @@ void secure_random_fill(void *bytes, unsigned length)
 #endif
 }
 
-int secure_rand(void)
+int secure_rand()
 {
 	unsigned int i;
 	secure_random_fill(&i, sizeof(i));
