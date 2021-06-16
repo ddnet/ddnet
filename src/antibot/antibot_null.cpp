@@ -1,37 +1,43 @@
 #include "antibot_data.h"
 
+#ifdef _MSC_VER
+#define MSVS_DLL __declspec(dllexport)
+#else
+#define MSVS_DLL
+#endif
+
 static CAntibotData *g_pData;
 
 extern "C" {
 
-int AntibotAbiVersion()
+MSVS_DLL int AntibotAbiVersion()
 {
 	return ANTIBOT_ABI_VERSION;
 }
-void AntibotInit(CAntibotData *pData)
+MSVS_DLL void AntibotInit(CAntibotData *pData)
 {
 	g_pData = pData;
 	g_pData->m_pfnLog("null antibot initialized", g_pData->m_pUser);
 }
-void AntibotRoundStart(CAntibotRoundData *pRoundData){};
-void AntibotRoundEnd(void){};
-void AntibotUpdateData(void) {}
-void AntibotDestroy(void) { g_pData = 0; }
-void AntibotDump(void)
+MSVS_DLL void AntibotRoundStart(CAntibotRoundData *pRoundData){};
+MSVS_DLL void AntibotRoundEnd(void){};
+MSVS_DLL void AntibotUpdateData(void) {}
+MSVS_DLL void AntibotDestroy(void) { g_pData = 0; }
+MSVS_DLL void AntibotDump(void)
 {
 	g_pData->m_pfnLog("null antibot", g_pData->m_pUser);
 }
-void AntibotOnPlayerInit(int /*ClientID*/) {}
-void AntibotOnPlayerDestroy(int /*ClientID*/) {}
-void AntibotOnSpawn(int /*ClientID*/) {}
-void AntibotOnHammerFireReloading(int /*ClientID*/) {}
-void AntibotOnHammerFire(int /*ClientID*/) {}
-void AntibotOnHammerHit(int /*ClientID*/) {}
-void AntibotOnDirectInput(int /*ClientID*/) {}
-void AntibotOnCharacterTick(int /*ClientID*/) {}
-void AntibotOnHookAttach(int /*ClientID*/, bool /*Player*/) {}
-void AntibotOnEngineTick(void) {}
-void AntibotOnEngineClientJoin(int /*ClientID*/, bool /*Sixup*/) {}
-void AntibotOnEngineClientDrop(int /*ClientID*/, const char * /*pReason*/) {}
-void AntibotOnEngineClientMessage(int /*ClientID*/, const void * /*pData*/, int /*Size*/, int /*Flags*/) {}
+MSVS_DLL void AntibotOnPlayerInit(int /*ClientID*/) {}
+MSVS_DLL void AntibotOnPlayerDestroy(int /*ClientID*/) {}
+MSVS_DLL void AntibotOnSpawn(int /*ClientID*/) {}
+MSVS_DLL void AntibotOnHammerFireReloading(int /*ClientID*/) {}
+MSVS_DLL void AntibotOnHammerFire(int /*ClientID*/) {}
+MSVS_DLL void AntibotOnHammerHit(int /*ClientID*/) {}
+MSVS_DLL void AntibotOnDirectInput(int /*ClientID*/) {}
+MSVS_DLL void AntibotOnCharacterTick(int /*ClientID*/) {}
+MSVS_DLL void AntibotOnHookAttach(int /*ClientID*/, bool /*Player*/) {}
+MSVS_DLL void AntibotOnEngineTick(void) {}
+MSVS_DLL void AntibotOnEngineClientJoin(int /*ClientID*/, bool /*Sixup*/) {}
+MSVS_DLL void AntibotOnEngineClientDrop(int /*ClientID*/, const char * /*pReason*/) {}
+MSVS_DLL void AntibotOnEngineClientMessage(int /*ClientID*/, const void * /*pData*/, int /*Size*/, int /*Flags*/) {}
 }
