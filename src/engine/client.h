@@ -211,6 +211,7 @@ public:
 	virtual void DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser) = 0;
 
 	virtual void RequestDDNetInfo() = 0;
+	virtual bool IsDDNetInfoFresh() = 0;
 	virtual bool EditorHasUnsavedData() const = 0;
 
 	virtual void GenerateTimeoutSeed() = 0;
@@ -220,6 +221,16 @@ public:
 	virtual void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount) = 0;
 
 	virtual SWarning *GetCurWarning() = 0;
+
+	virtual void CleanUpInstallation(bool DiscardExtra, bool DiscardModified) = 0;
+
+	enum
+	{
+		CUSTATE_INITIAL = 0,
+		CUSTATE_FIXING,
+		CUSTATE_DONE,
+	};
+	virtual int CleanUpState() = 0;
 };
 
 class IGameClient : public IInterface

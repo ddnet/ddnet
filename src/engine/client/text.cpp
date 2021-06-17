@@ -786,7 +786,7 @@ public:
 		pCursor->m_Y = y;
 	}
 
-	virtual void Text(void *pFontSetV, float x, float y, float Size, const char *pText, float LineWidth)
+	virtual int Text(void *pFontSetV, float x, float y, float Size, const char *pText, float LineWidth)
 	{
 		CTextCursor Cursor;
 		SetCursor(&Cursor, x, y, Size, TEXTFLAG_RENDER);
@@ -796,6 +796,8 @@ public:
 			SetRenderFlags(OldRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
 		TextEx(&Cursor, pText, -1);
 		SetRenderFlags(OldRenderFlags);
+
+		return Cursor.m_LineCount;
 	}
 
 	virtual float TextWidth(void *pFontSetV, float Size, const char *pText, int StrLength, float LineWidth, float *pAlignedHeight = NULL, float *pMaxCharacterHeightInLine = NULL)

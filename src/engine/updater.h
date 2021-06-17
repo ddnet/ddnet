@@ -1,7 +1,12 @@
 #ifndef ENGINE_UPDATER_H
 #define ENGINE_UPDATER_H
 
+#include <map>
+#include <string>
+
 #include "kernel.h"
+
+typedef bool (*FUpdateCompleteCallback)(void *pUser);
 
 class IUpdater : public IInterface
 {
@@ -12,7 +17,6 @@ public:
 		CLEAN = 0,
 		GETTING_MANIFEST,
 		GOT_MANIFEST,
-		PARSING_UPDATE,
 		DOWNLOADING,
 		MOVE_FILES,
 		NEED_RESTART,
@@ -21,10 +25,11 @@ public:
 
 	virtual void Update() = 0;
 	virtual void InitiateUpdate() = 0;
+	virtual void PerformUpdate(const std::map<std::string, bool> &Jobs, FUpdateCompleteCallback pfnCallback = NULL, void *pCallbackUserdata = NULL) = 0;
 
-	virtual int GetCurrentState() = 0;
-	virtual void GetCurrentFile(char *pBuf, int BufSize) = 0;
-	virtual int GetCurrentPercent() = 0;
+	virtual int State() const = 0;
+	virtual float Progress() const = 0;
+	virtual char *Speed(char *pBuf, int BufSize) const = 0;
 };
 
 #endif

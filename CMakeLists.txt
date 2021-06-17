@@ -782,6 +782,7 @@ set(EXPECTED_DATA
   audio/wp_switch-01.wv
   audio/wp_switch-02.wv
   audio/wp_switch-03.wv
+  autoexec_server.cfg
   blob.png
   browse_icons.png
   censorlist.txt
@@ -1341,7 +1342,7 @@ set(EXPECTED_DATA
   wordlist.txt
 )
 
-set_glob(DATA GLOB_RECURSE "frag;json;map;otf;png;rules;ttf;txt;vert;wv" data ${EXPECTED_DATA})
+set_glob(DATA GLOB_RECURSE "frag;json;map;otf;png;rules;ttf;txt;vert;wv;cfg" data ${EXPECTED_DATA})
 
 ########################################################################
 # COPY DATA AND DLLS
@@ -1441,6 +1442,13 @@ generate_source("src/game/generated/protocol.cpp" "network_source")
 generate_source("src/game/generated/protocol.h" "network_header")
 generate_source("src/game/generated/server_data.cpp" "server_content_source")
 generate_source("src/game/generated/server_data.h" "server_content_header")
+
+add_custom_command(OUTPUT "src/game/generated/data_hash.h"
+  COMMAND ${PYTHON_EXECUTABLE} scripts/data_hash.py > ${PROJECT_BINARY_DIR}/src/game/generated/data_hash.h
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  DEPENDS
+    scripts/data_hash.py
+)
 
 generate_source7("src/game/generated/protocol7.cpp" "network_source")
 generate_source7("src/game/generated/protocol7.h" "network_header")
@@ -1620,7 +1628,8 @@ set_src(GAME_SHARED GLOB src/game
 )
 # A bit hacky, but these are needed to register all the UUIDs, even for stuff
 # that doesn't link game.
-set(ENGINE_UUID_SHARED
+set(ENGINE_SHARED_HACK
+  src/game/generated/data_hash.h
   src/game/generated/protocolglue.h
   src/game/generated/protocol7.cpp
   src/game/generated/protocol7.h
@@ -1635,8 +1644,9 @@ foreach(s ${GAME_SHARED})
     list(REMOVE_ITEM GAME_SHARED ${s})
   endif()
 endforeach()
-list(REMOVE_ITEM GAME_SHARED ${ENGINE_UUID_SHARED})
+list(REMOVE_ITEM GAME_SHARED ${ENGINE_SHARED_HACK})
 set(GAME_GENERATED_SHARED
+  src/game/generated/data_hash.h
   src/game/generated/git_revision.cpp
   src/game/generated/protocol.h
   src/game/generated/protocol7.h
@@ -1658,7 +1668,7 @@ set(LIBS
 )
 
 # Targets
-add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_UUID_SHARED} ${BASE})
+add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_SHARED_HACK} ${BASE})
 add_library(game-shared EXCLUDE_FROM_ALL OBJECT ${GAME_SHARED} ${GAME_GENERATED_SHARED})
 list(APPEND TARGETS_OWN engine-shared game-shared)
 

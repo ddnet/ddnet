@@ -132,9 +132,7 @@ void CGameClient::OnConsoleInit()
 	m_pEditor = Kernel()->RequestInterface<IEditor>();
 	m_pFriends = Kernel()->RequestInterface<IFriends>();
 	m_pFoes = Client()->Foes();
-#if defined(CONF_AUTOUPDATE)
 	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
-#endif
 
 	// setup pointers
 	m_pMenuBackground = &::gs_MenuBackground;
@@ -349,6 +347,7 @@ void CGameClient::OnInit()
 	m_DDRaceMsgSent[1] = false;
 	m_ShowOthers[0] = -1;
 	m_ShowOthers[1] = -1;
+	m_DataIntegrityWarned = false;
 
 	m_LastZoom = .0;
 	m_LastScreenAspect = .0;
@@ -669,6 +668,25 @@ void CGameClient::OnRender()
 		{
 			m_pMenus->PopupWarning(Localize("Warning"), pWarning->m_aWarningMsg, "Ok", 10000000);
 			pWarning->m_WasShown = true;
+		}
+	}
+
+	// check data integrity
+	if(!m_DataIntegrityWarned)
+	{
+		if(Storage()->DIStatus() == IStorage::INTEGRITY_DIRTY && Client()->IsDDNetInfoFresh() /*&& !str_comp(Client()->LatestVersion(), "0")*/)
+		{
+			if(m_pMenus->CanDisplayWarning())
+			{
+				m_pMenus->PopupDataIntegrity(Storage()->DIExtraFiles(), Storage()->DIMissingFiles(), Storage()->DIModifiedFiles());
+				dbg_msg("integrity", "integrity check failed, data directory dirty");
+				m_DataIntegrityWarned = true;
+			}
+		}
+		else if(Storage()->DIStatus() == IStorage::INTEGRITY_PURE)
+		{
+			dbg_msg("integrity", "integrity check passed");
+			m_DataIntegrityWarned = true;
 		}
 	}
 

@@ -330,6 +330,7 @@ CClient::CClient() :
 
 	str_format(m_aDDNetInfoTmp, sizeof(m_aDDNetInfoTmp), DDNET_INFO ".%d.tmp", pid());
 	m_pDDNetInfoTask = NULL;
+	m_DDNetInfoFresh = false;
 	m_aNews[0] = '\0';
 	m_aMapDownloadUrl[0] = '\0';
 	m_Points = -1;
@@ -371,6 +372,8 @@ CClient::CClient() :
 	m_FrameTimeAvg = 0.0001f;
 	m_BenchmarkFile = 0;
 	m_BenchmarkStopTime = 0;
+
+	m_CleanUpState = CUSTATE_INITIAL;
 }
 
 // ----- send functions -----
@@ -2426,6 +2429,7 @@ bool CClient::IsDDNetInfoChanged()
 void CClient::FinishDDNetInfo()
 {
 	ResetDDNetInfo();
+	m_DDNetInfoFresh = true;
 	if(IsDDNetInfoChanged())
 	{
 		m_pStorage->RenameFile(m_aDDNetInfoTmp, DDNET_INFO, IStorage::TYPE_SAVE);
@@ -2953,9 +2957,7 @@ void CClient::RegisterInterfaces()
 	Kernel()->RegisterInterface(static_cast<IGhostRecorder *>(&m_GhostRecorder), false);
 	Kernel()->RegisterInterface(static_cast<IGhostLoader *>(&m_GhostLoader), false);
 	Kernel()->RegisterInterface(static_cast<IServerBrowser *>(&m_ServerBrowser), false);
-#if defined(CONF_AUTOUPDATE)
 	Kernel()->RegisterInterface(static_cast<IUpdater *>(&m_Updater), false);
-#endif
 	Kernel()->RegisterInterface(static_cast<IFriends *>(&m_Friends), false);
 	Kernel()->ReregisterInterface(static_cast<IFriends *>(&m_Foes));
 }
@@ -2972,9 +2974,7 @@ void CClient::InitInterfaces()
 	m_pMap = Kernel()->RequestInterface<IEngineMap>();
 	m_pConfigManager = Kernel()->RequestInterface<IConfigManager>();
 	m_pConfig = m_pConfigManager->Values();
-#if defined(CONF_AUTOUPDATE)
 	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
-#endif
 	m_pDiscord = Kernel()->RequestInterface<IDiscord>();
 	m_pSteam = Kernel()->RequestInterface<ISteam>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
@@ -2985,9 +2985,7 @@ void CClient::InitInterfaces()
 
 	HttpInit(m_pStorage);
 
-#if defined(CONF_AUTOUPDATE)
 	m_Updater.Init();
-#endif
 
 	m_Friends.Init();
 	m_Foes.Init(true);
@@ -3216,9 +3214,8 @@ void CClient::Run()
 			else
 				SetState(IClient::STATE_QUITTING); // SDL_QUIT
 		}
-#if defined(CONF_AUTOUPDATE)
+
 		Updater()->Update();
-#endif
 
 		// update sound
 		Sound()->Update();
@@ -4424,6 +4421,9 @@ int main(int argc, const char **argv) // ignore_convention
 
 	pClient->Engine()->InitLogfile();
 
+	if(g_Config.m_ClCheckDataIntegrity)
+		pStorage->DIStartCheck(pEngine);
+
 	// run the client
 	dbg_msg("client", "starting...");
 	pClient->Run();
@@ -4541,4 +4541,51 @@ SWarning *CClient::GetCurWarning()
 	{
 		return &m_Warnings[0];
 	}
+}
+
+bool CClient::UpdateDoneCallback(void *pUser)
+{
+	CClient *pSelf = (CClient *)pUser;
+	pSelf->m_CleanUpState = CUSTATE_DONE;
+
+	return true;
+}
+
+void CClient::CleanUpInstallation(bool DiscardExtra, bool DiscardModified)
+{
+	auto Missing = Storage()->DIMissingFiles();
+	auto Modified = Storage()->DIModifiedFiles();
+	const auto &Extra = Storage()->DIExtraFiles();
+
+	m_CleanUpState = CUSTATE_FIXING;
+
+	std::map<std::string, bool> Jobs;
+	for(const auto &f : Extra)
+	{
+		if(!DiscardExtra)
+		{
+			if(Storage()->Store(f.c_str()))
+				dbg_msg("dbg", "failed to store %s", f.c_str());
+		}
+		else
+		{
+			Storage()->RemoveDataFile(f.c_str());
+		}
+	}
+
+	for(const auto &f : Modified)
+	{
+		std::string s = "data/";
+		if(!DiscardModified)
+			Storage()->Store(f.c_str());
+		Jobs[s.append(f)] = true;
+	}
+
+	for(const auto &f : Missing)
+	{
+		std::string s = "data/";
+		Jobs[s.append(f)] = true;
+	}
+
+	Updater()->PerformUpdate(Jobs, UpdateDoneCallback, this);
 }

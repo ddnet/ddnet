@@ -1,10 +1,112 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "linereader.h"
+#include <base/hash_ctxt.h>
 #include <base/math.h>
 #include <base/system.h>
 #include <engine/client/updater.h>
+#include <engine/engine.h>
 #include <engine/storage.h>
+#include <game/generated/data_hash.h>
+
+#include <bitset>
+#include <memory>
+#include <string>
+#include <tuple>
+#include <vector>
+
+class CCheckJob : public IJob
+{
+public:
+	struct SResult
+	{
+		std::vector<std::string> m_ExtraFiles;
+		std::bitset<DATA_FILE_COUNT> m_DataFilePure;
+		std::bitset<DATA_FILE_COUNT> m_DataFilePresent;
+	};
+
+private:
+	char m_aDataDir[MAX_PATH_LENGTH];
+	SResult *m_pResult;
+
+	struct SCheckFileContext
+	{
+		char m_aSearchRoot[MAX_PATH_LENGTH];
+		char m_aCurrentDir[MAX_PATH_LENGTH];
+		CCheckJob *m_pSelf;
+	};
+
+	static int CheckFileCallback(const char *pName, int IsDir, int DirType, void *pUser)
+	{
+		SCheckFileContext *pContext = static_cast<SCheckFileContext *>(pUser);
+		if(IsDir && (!str_comp(pName, ".") || !str_comp(pName, "..")))
+			return 0;
+
+		char aFullPath[MAX_PATH_LENGTH];
+		str_format(aFullPath, sizeof(aFullPath), "%s/%s/%s", pContext->m_aSearchRoot, pContext->m_aCurrentDir, pName);
+
+		char aRelPath[MAX_PATH_LENGTH];
+		str_format(aRelPath, sizeof(aRelPath), "%s%s%s", pContext->m_aCurrentDir, pContext->m_aCurrentDir[0] ? "/" : "", pName);
+
+		if(IsDir)
+		{
+			SCheckFileContext Context;
+			str_copy(Context.m_aSearchRoot, pContext->m_aSearchRoot, sizeof(Context.m_aSearchRoot));
+			str_copy(Context.m_aCurrentDir, aRelPath, sizeof(Context.m_aCurrentDir));
+			Context.m_pSelf = pContext->m_pSelf;
+
+			fs_listdir(aFullPath, CheckFileCallback, DirType, &Context);
+			return 0;
+		}
+
+		int Index = GetCheckIndex(aRelPath);
+		if(Index < 0)
+		{
+			dbg_msg("dbg", "extra rel=%s abs=%s root=%s cur=%s self=%p", aRelPath, aFullPath, pContext->m_aSearchRoot, pContext->m_aCurrentDir, pContext->m_pSelf);
+			pContext->m_pSelf->m_pResult->m_ExtraFiles.emplace_back(aRelPath);
+			return 0;
+		}
+
+		IOHANDLE f = io_open(aFullPath, IOFLAG_READ);
+		if(!f)
+			return 0;
+
+		pContext->m_pSelf->m_pResult->m_DataFilePresent[Index] = true;
+
+		SHA256_CTX ctx;
+		sha256_init(&ctx);
+
+		char aBuf[4096];
+		unsigned bytes = 0;
+		while((bytes = io_read(f, aBuf, sizeof(aBuf))) > 0)
+			sha256_update(&ctx, aBuf, bytes);
+
+		io_close(f);
+		SHA256_DIGEST Digest = sha256_finish(&ctx);
+		if(g_aDataHashes[Index].m_Hash != Digest)
+			return 0;
+
+		pContext->m_pSelf->m_pResult->m_DataFilePure[Index] = true;
+		return 0;
+	}
+
+	void Run()
+	{
+		SCheckFileContext Context;
+		str_copy(Context.m_aSearchRoot, m_aDataDir, sizeof(Context.m_aSearchRoot));
+		Context.m_aCurrentDir[0] = '\0';
+		Context.m_pSelf = this;
+
+		fs_listdir(m_aDataDir, CheckFileCallback, -1, &Context);
+	}
+
+public:
+	CCheckJob(const char *pDataDir, SResult *pResult) :
+		m_pResult(pResult)
+	{
+		str_copy(m_aDataDir, pDataDir, sizeof(m_aDataDir));
+	}
+};
 
 #ifdef CONF_PLATFORM_HAIKU
 #include <stdlib.h>
@@ -20,12 +122,16 @@ public:
 	char m_aCurrentdir[MAX_PATH_LENGTH];
 	char m_aBinarydir[MAX_PATH_LENGTH];
 
+	std::shared_ptr<CCheckJob> m_pCheckJob;
+	CCheckJob::SResult m_CheckResult;
+
 	CStorage()
 	{
 		mem_zero(m_aaStoragePaths, sizeof(m_aaStoragePaths));
 		m_NumPaths = 0;
 		m_aDatadir[0] = 0;
 		m_aUserdir[0] = 0;
+		m_pCheckJob = nullptr;
 	}
 
 	int Init(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments)
@@ -300,6 +406,77 @@ public:
 		// no binary directory found, use $PATH on Posix, $PWD on Windows
 	}
 
+	virtual bool DIStartCheck(IEngine *pEngine)
+	{
+		if(m_aDatadir[0])
+			m_pCheckJob = std::make_shared<CCheckJob>(m_aDatadir, &m_CheckResult);
+		else
+			return false;
+
+		dbg_msg("integrity", "starting check");
+		pEngine->AddJob(m_pCheckJob);
+
+		return true;
+	}
+
+	virtual int DIStatus() const
+	{
+		if(!m_pCheckJob)
+			return INTEGRITY_DISABLED;
+
+		if(m_pCheckJob->Status() != IJob::STATE_DONE)
+			return INTEGRITY_PENDING;
+
+		if(!m_CheckResult.m_ExtraFiles.size() && m_CheckResult.m_DataFilePure.all())
+			return INTEGRITY_PURE;
+
+		return INTEGRITY_DIRTY;
+	}
+
+	virtual const std::vector<std::string> &DIExtraFiles() const
+	{
+		return m_CheckResult.m_ExtraFiles;
+	}
+
+	virtual std::vector<std::string> DIMissingFiles()
+	{
+		std::vector<std::string> Result;
+		for(size_t i = 0; i < m_CheckResult.m_DataFilePresent.size(); i++)
+		{
+			if(!m_CheckResult.m_DataFilePresent[i])
+				Result.emplace_back(g_aDataHashes[i].m_aPath);
+		}
+
+		return Result;
+	}
+
+	virtual std::vector<std::string> DIModifiedFiles()
+	{
+		std::vector<std::string> Result;
+		for(size_t i = 0; i < m_CheckResult.m_DataFilePure.size(); i++)
+		{
+			if(m_CheckResult.m_DataFilePresent[i] && !m_CheckResult.m_DataFilePure[i])
+				Result.emplace_back(g_aDataHashes[i].m_aPath);
+		}
+
+		return Result;
+	}
+
+	virtual int Store(const char *pFile)
+	{
+		char aNewPath[MAX_PATH_LENGTH];
+		str_format(aNewPath, sizeof(aNewPath), "%s/%s", m_aaStoragePaths[TYPE_SAVE], pFile);
+
+		char aOldPath[MAX_PATH_LENGTH];
+		str_format(aOldPath, sizeof(aOldPath), "%s/%s", m_aDatadir, pFile);
+		dbg_msg("storage", "storing file %s at %s", aOldPath, aNewPath);
+
+		if(fs_makedir_rec_for(aNewPath))
+			return 1;
+
+		return fs_rename(aOldPath, aNewPath);
+	}
+
 	virtual void ListDirectoryInfo(int Type, const char *pPath, FS_LISTDIR_INFO_CALLBACK pfnCallback, void *pUser)
 	{
 		char aBuffer[MAX_PATH_LENGTH];
@@ -492,6 +669,17 @@ public:
 		bool Success = !fs_remove(aBuffer);
 		if(!Success)
 			dbg_msg("storage", "failed to remove binary: %s", aBuffer);
+		return Success;
+	}
+
+	virtual bool RemoveDataFile(const char *pFilename)
+	{
+		char aBuffer[MAX_PATH_LENGTH];
+		str_format(aBuffer, sizeof(aBuffer), "%s/%s", m_aDatadir, pFilename);
+
+		bool Success = !fs_remove(aBuffer);
+		if(!Success)
+			dbg_msg("storage", "failed to remove datafile: %s", aBuffer);
 		return Success;
 	}
 

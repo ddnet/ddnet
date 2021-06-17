@@ -4,6 +4,8 @@
 #define ENGINE_STORAGE_H
 
 #include "kernel.h"
+#include <string>
+#include <vector>
 
 enum
 {
@@ -24,7 +26,21 @@ public:
 		STORAGETYPE_BASIC = 0,
 		STORAGETYPE_SERVER,
 		STORAGETYPE_CLIENT,
+
+		INTEGRITY_DISABLED = 0,
+		INTEGRITY_PENDING,
+		INTEGRITY_DIRTY,
+		INTEGRITY_PURE
 	};
+
+	virtual bool DIStartCheck(class IEngine *pEngine) = 0;
+	virtual int DIStatus() const = 0;
+
+	// Only safe to call after you've verified that DIStatus() != INTEGRITY_PENDING
+	virtual const std::vector<std::string> &DIExtraFiles() const = 0;
+	virtual std::vector<std::string> DIMissingFiles() = 0;
+	virtual std::vector<std::string> DIModifiedFiles() = 0;
+	virtual int Store(const char *pFile) = 0;
 
 	virtual void ListDirectory(int Type, const char *pPath, FS_LISTDIR_CALLBACK pfnCallback, void *pUser) = 0;
 	virtual void ListDirectoryInfo(int Type, const char *pPath, FS_LISTDIR_INFO_CALLBACK pfnCallback, void *pUser) = 0;
@@ -38,6 +54,8 @@ public:
 	virtual bool RemoveBinaryFile(const char *pFilename) = 0;
 	virtual bool RenameBinaryFile(const char *pOldFilename, const char *pNewFilename) = 0;
 	virtual const char *GetBinaryPath(const char *pFilename, char *pBuffer, unsigned BufferSize) = 0;
+
+	virtual bool RemoveDataFile(const char *pFilename) = 0;
 
 	static void StripPathAndExtension(const char *pFilename, char *pBuffer, int BufferSize);
 };

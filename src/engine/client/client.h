@@ -196,6 +196,9 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	char m_aDDNetInfoTmp[64];
 	std::shared_ptr<CGetFile> m_pDDNetInfoTask;
+	bool m_DDNetInfoFresh;
+
+	int m_CleanUpState;
 
 	// time
 	CSmoothTime m_GameTime[NUM_DUMMIES];
@@ -381,6 +384,7 @@ public:
 	void FinishDDNetInfo();
 	void LoadDDNetInfo();
 
+	virtual bool IsDDNetInfoFresh() { return m_DDNetInfoFresh; }
 	virtual const char *MapDownloadName() const { return m_aMapdownloadName; }
 	virtual int MapDownloadAmount() const { return !m_pMapdownloadTask ? m_MapdownloadAmount : (int)m_pMapdownloadTask->Current(); }
 	virtual int MapDownloadTotalsize() const { return !m_pMapdownloadTask ? m_MapdownloadTotalsize : (int)m_pMapdownloadTask->Size(); }
@@ -505,6 +509,10 @@ public:
 	virtual void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount);
 
 	virtual SWarning *GetCurWarning();
+
+	static bool UpdateDoneCallback(void *pUser);
+	virtual void CleanUpInstallation(bool DiscardExtra, bool DiscardModified);
+	virtual int CleanUpState() { return m_CleanUpState; };
 };
 
 #endif

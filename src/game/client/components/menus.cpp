@@ -873,7 +873,7 @@ int CMenus::RenderMenubar(CUIRect r)
 		bool GotNewsOrUpdate = false;
 
 #if defined(CONF_AUTOUPDATE)
-		int State = Updater()->GetCurrentState();
+		int State = Updater()->State();
 		bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
 		if(State == IUpdater::CLEAN && NeedUpdate)
 		{
@@ -1245,6 +1245,20 @@ void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pBu
 	m_PopupWarningLastTime = time_get_microseconds();
 }
 
+void CMenus::PopupDataIntegrity(const std::vector<std::string> &Extra, const std::vector<std::string> &Missing, const std::vector<std::string> &Modified)
+{
+	// reset active item
+	UI()->SetActiveItem(0);
+
+	//TODO: Make this use rvalue references and std::move these
+	m_PopupDIExtraFiles = Extra;
+	m_PopupDIMissingFiles = Missing;
+	m_PopupDIModifiedFiles = Modified;
+
+	m_Popup = POPUP_DATAINTEGRITY;
+	SetActive(true);
+}
+
 bool CMenus::CanDisplayWarning()
 {
 	return m_Popup == POPUP_NONE;
@@ -1606,8 +1620,11 @@ int CMenus::Render()
 		const char *pExtraText = "";
 		const char *pButtonText = "";
 		int ExtraAlign = 0;
+		bool FullSize = false;
+		float FontSize = 20.f;
 
 		ColorRGBA BgColor = ColorRGBA{0.0f, 0.0f, 0.0f, 0.5f};
+
 		if(m_Popup == POPUP_MESSAGE)
 		{
 			pTitle = m_aMessageTopic;
@@ -1725,6 +1742,8 @@ int CMenus::Render()
 			pExtraText = aBuf;
 			pButtonText = Localize("Ok");
 			ExtraAlign = -1;
+			FontSize = 16.0f;
+			FullSize = true;
 		}
 		else if(m_Popup == POPUP_POINTS)
 		{
@@ -1752,10 +1771,16 @@ int CMenus::Render()
 			pButtonText = m_aMessageButton;
 			ExtraAlign = -1;
 		}
+		else if(m_Popup == POPUP_DATAINTEGRITY)
+		{
+			pTitle = "Data Integrity";
+			FullSize = true;
+			ExtraAlign = -1;
+		}
 
 		CUIRect Box, Part;
 		Box = Screen;
-		if(m_Popup != POPUP_FIRST_LAUNCH)
+		if(!FullSize)
 		{
 			Box.VMargin(150.0f / UI()->Scale(), &Box);
 			Box.HMargin(150.0f / UI()->Scale(), &Box);
@@ -1772,19 +1797,21 @@ int CMenus::Render()
 		else
 			UI()->DoLabelScaled(&Part, pTitle, 24.f, 0);
 		Box.HSplitTop(20.f / UI()->Scale(), &Part, &Box);
-		Box.HSplitTop(24.f / UI()->Scale(), &Part, &Box);
-		Part.VMargin(20.f / UI()->Scale(), &Part);
 
-		float FontSize = m_Popup == POPUP_FIRST_LAUNCH ? 16.0f : 20.f;
-
-		if(ExtraAlign == -1)
-			UI()->DoLabelScaled(&Part, pExtraText, FontSize, -1, (int)Part.w);
-		else
+		if(pExtraText[0])
 		{
-			if(TextRender()->TextWidth(0, FontSize, pExtraText, -1, -1.0f) > Part.w)
+			Box.HSplitTop(24.f / UI()->Scale(), &Part, &Box);
+			Part.VMargin(20.f / UI()->Scale(), &Part);
+
+			if(ExtraAlign == -1)
 				UI()->DoLabelScaled(&Part, pExtraText, FontSize, -1, (int)Part.w);
 			else
-				UI()->DoLabelScaled(&Part, pExtraText, FontSize, 0, -1);
+			{
+				if(TextRender()->TextWidth(0, FontSize, pExtraText, -1, -1.0f) > Part.w)
+					UI()->DoLabelScaled(&Part, pExtraText, FontSize, -1, (int)Part.w);
+				else
+					UI()->DoLabelScaled(&Part, pExtraText, FontSize, 0, -1);
+			}
 		}
 
 		if(m_Popup == POPUP_QUIT)
@@ -2391,6 +2418,197 @@ int CMenus::Render()
 			{
 				m_Popup = POPUP_NONE;
 				SetActive(false);
+			}
+		}
+		else if(m_Popup == POPUP_DATAINTEGRITY)
+		{
+			CUIRect Text, Buttons, Extra, Missing, Modified;
+			Box.VMargin(20.0f, &Box);
+			Box.VMargin(20.f / UI()->Scale(), &Text);
+			Text.h = 24.f / UI()->Scale();
+			int LCount = UI()->DoLabelScaled(&Text, Localize("Your data directory is modified. This configuration is not supported, \"Restore Files\" will move modified and extra files to config_directory and fetch missing files."), FontSize / 1.2f, -1, (int)Text.w);
+
+			Box.HSplitTop(Text.h * LCount + 5.0f, 0, &Box);
+			Box.HSplitBottom(20.0f, &Box, 0);
+			Box.HSplitBottom(24.0f, &Box, &Buttons);
+			Box.HSplitBottom(5.0f, &Box, 0);
+
+			Box.VSplitLeft(Box.w / 3, &Extra, &Box);
+			Box.VSplitMid(&Missing, &Modified);
+
+			Extra.VSplitRight(5.0f, &Extra, 0);
+			Missing.VSplitRight(5.0f, &Missing, 0);
+
+			CUIRect ExtraHeader, MissingHeader, ModifiedHeader;
+			Extra.HSplitTop(22.0f, &ExtraHeader, &Extra);
+			Missing.HSplitTop(22.0f, &MissingHeader, &Missing);
+			Modified.HSplitTop(22.0f, &ModifiedHeader, &Modified);
+
+			UI()->DoLabel(&ExtraHeader, Localize("Extra Files"), FontSize / 1.5f, -1, -1);
+			UI()->DoLabel(&MissingHeader, Localize("Missing Files"), FontSize / 1.5f, -1, -1);
+			UI()->DoLabel(&ModifiedHeader, Localize("Modified Files"), FontSize / 1.5f, -1, -1);
+
+			CUIRect ExtraDiscard, ModifiedDiscard;
+			ExtraHeader.VSplitMid(0, &ExtraDiscard);
+			ModifiedHeader.VSplitMid(0, &ModifiedDiscard);
+
+			static int s_ExtraDiscard = 0;
+			if(DoButton_CheckBox(&s_ExtraDiscard, Localize("Discard"), s_ExtraDiscard, &ExtraDiscard) && Updater()->State() == IUpdater::CLEAN)
+				s_ExtraDiscard ^= 1;
+
+			static int s_ModifiedDiscard = 0;
+			if(DoButton_CheckBox(&s_ModifiedDiscard, Localize("Discard"), s_ModifiedDiscard, &ModifiedDiscard) && Updater()->State() == IUpdater::CLEAN)
+				s_ModifiedDiscard ^= 1;
+
+			{
+				CUIRect Line;
+				unsigned i = 0;
+				const float LineHeight = FontSize / 2;
+				unsigned MaxLines = (Extra.h - 5.0f) / (LineHeight + 2.0f);
+
+				if(m_PopupDIExtraFiles.size())
+				{
+					static int s_ExtraScrollStart = 0;
+					const float ItemSize = 1.0f / (m_PopupDIExtraFiles.size() - MaxLines - 1);
+					CUIRect ExtraScrollbar;
+					if(m_PopupDIExtraFiles.size() > MaxLines)
+					{
+						Extra.VSplitRight(7.5f, &Extra, &ExtraScrollbar);
+						float p = DoScrollbarV(&s_ExtraScrollStart, &ExtraScrollbar, s_ExtraScrollStart * ItemSize);
+						s_ExtraScrollStart += (p - (s_ExtraScrollStart * ItemSize)) / ItemSize;
+						if(UI()->MouseInside(&Extra) || UI()->MouseInside(&ExtraScrollbar))
+						{
+							if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
+								s_ExtraScrollStart--;
+							else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
+								s_ExtraScrollStart++;
+						}
+						s_ExtraScrollStart = clamp(s_ExtraScrollStart, 0, (int)(m_PopupDIExtraFiles.size() - MaxLines - 1));
+					}
+
+					Extra.HSplitTop(5.0f, 0, &Extra);
+					Line = Extra;
+					Line.h = FontSize / 2;
+					i = s_ExtraScrollStart;
+					UI()->ClipEnable(&Extra);
+					while(Line.y + Line.h <= Extra.y + Extra.h && i < m_PopupDIExtraFiles.size())
+					{
+						UI()->DoLabel(&Line, m_PopupDIExtraFiles[i++].c_str(), FontSize / 2, -1);
+						Line.y += Line.h + 2.0f;
+					}
+					UI()->ClipDisable();
+				}
+
+				if(m_PopupDIMissingFiles.size())
+				{
+					static int s_MissingScrollStart = 0;
+					const float ItemSize = 1.0f / (m_PopupDIMissingFiles.size() - MaxLines - 1);
+					CUIRect MissingScrollbar;
+					if(m_PopupDIMissingFiles.size() > MaxLines)
+					{
+						Missing.VSplitRight(7.5f, &Missing, &MissingScrollbar);
+						float p = DoScrollbarV(&s_MissingScrollStart, &MissingScrollbar, s_MissingScrollStart * ItemSize);
+						s_MissingScrollStart += (p - (s_MissingScrollStart * ItemSize)) / ItemSize;
+						if(UI()->MouseInside(&Missing) || UI()->MouseInside(&MissingScrollbar))
+						{
+							if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
+								s_MissingScrollStart--;
+							else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
+								s_MissingScrollStart++;
+						}
+						s_MissingScrollStart = clamp(s_MissingScrollStart, 0, (int)(m_PopupDIMissingFiles.size() - MaxLines - 1));
+					}
+
+					Missing.HSplitTop(5.0f, 0, &Missing);
+					Line = Missing;
+					Line.h = FontSize / 2;
+					i = s_MissingScrollStart;
+					UI()->ClipEnable(&Missing);
+					while(Line.y + Line.h <= Missing.y + Missing.h && i < m_PopupDIMissingFiles.size())
+					{
+						UI()->DoLabel(&Line, m_PopupDIMissingFiles[i++].c_str(), FontSize / 2, -1);
+						Line.y += Line.h + 2.0f;
+					}
+					UI()->ClipDisable();
+				}
+
+				if(m_PopupDIModifiedFiles.size())
+				{
+					static int s_ModifiedScrollStart = 0;
+					const float ItemSize = 1.0f / (m_PopupDIModifiedFiles.size() - MaxLines - 1);
+					CUIRect ModifiedScrollbar;
+					if(m_PopupDIModifiedFiles.size() > MaxLines)
+					{
+						Modified.VSplitRight(7.5f, &Modified, &ModifiedScrollbar);
+						float p = DoScrollbarV(&s_ModifiedScrollStart, &ModifiedScrollbar, s_ModifiedScrollStart * ItemSize);
+						s_ModifiedScrollStart += (p - (s_ModifiedScrollStart * ItemSize)) / ItemSize;
+						if(UI()->MouseInside(&Modified) || UI()->MouseInside(&ModifiedScrollbar))
+						{
+							if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
+								s_ModifiedScrollStart--;
+							else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
+								s_ModifiedScrollStart++;
+						}
+						s_ModifiedScrollStart = clamp(s_ModifiedScrollStart, 0, (int)(m_PopupDIModifiedFiles.size() - MaxLines - 1));
+					}
+
+					Modified.HSplitTop(5.0f, 0, &Modified);
+					Line = Modified;
+					Line.h = FontSize / 2;
+					i = s_ModifiedScrollStart;
+					UI()->ClipEnable(&Modified);
+					while(Line.y + Line.h <= Modified.y + Modified.h && i < m_PopupDIModifiedFiles.size())
+					{
+						UI()->DoLabel(&Line, m_PopupDIModifiedFiles[i++].c_str(), FontSize / 2, -1);
+						Line.y += Line.h + 2.0f;
+					}
+					UI()->ClipDisable();
+				}
+			}
+
+			if(Client()->CleanUpState() == IClient::CUSTATE_INITIAL && Updater()->State() == IUpdater::CLEAN)
+			{
+				CUIRect Fix, Ignore;
+				Buttons.VSplitMid(&Fix, &Ignore);
+				Fix.VMargin(20.0f, &Fix);
+				Ignore.VMargin(20.0f, &Ignore);
+
+				static int s_FixButton = 0;
+				if(DoButton_Menu(&s_FixButton, Localize("Restore Files"), 0, &Fix))
+					Client()->CleanUpInstallation(s_ExtraDiscard, s_ModifiedDiscard);
+
+				static int s_IgnoreButton = 0;
+				if(DoButton_Menu(&s_IgnoreButton, Localize("Ignore"), 0, &Ignore))
+					m_Popup = POPUP_NONE;
+			}
+			else if(Client()->CleanUpState() == IClient::CUSTATE_FIXING && Updater()->State() == IUpdater::DOWNLOADING)
+			{
+				char aBuf[128];
+				CUIRect t = Buttons;
+				RenderTools()->DrawUIRect(&Buttons, ColorRGBA{1.0f, 1.0f, 1.0f, 0.25f}, CUI::CORNER_ALL, 5.0f);
+				Buttons.w *= clamp(Updater()->Progress(), 0.1f, 1.0f);
+				RenderTools()->DrawUIRect(&Buttons, ColorRGBA{1.0f, 1.0f, 1.0f, 0.5f}, CUI::CORNER_ALL, 5.0f);
+				t.HMargin(2.0f, &Buttons);
+				UI()->DoLabel(&t, Updater()->Speed(aBuf, sizeof(aBuf)), t.h * ms_FontmodHeight, 0);
+			}
+			else if(Client()->CleanUpState() == IClient::CUSTATE_DONE)
+			{
+				if(Updater()->State() == IUpdater::FAIL)
+				{
+					RenderTools()->DrawUIRect(&Buttons, ColorRGBA{1.0f, 0.8f, 0.8f, 0.5f}, CUI::CORNER_ALL, 5.0f);
+					Buttons.HMargin(2.0f, &Buttons);
+					UI()->DoLabel(&Buttons, Localize("Automated fixup failed"), Buttons.h * ms_FontmodHeight, 0);
+				}
+				else
+				{
+					static int s_RestartButton = 0;
+					if(DoButton_Menu(&s_RestartButton, Localize("Restart"), 0, &Buttons, 0, CUI::CORNER_ALL, 5.0f, 0.0f,
+						   vec4(0.8f, 1.0f, 0.8f, 0.5f), vec4(0.8f, 1.0f, 0.8f, 0.75f)))
+					{
+						m_Popup = POPUP_NONE;
+						Client()->Restart();
+					}
+				}
 			}
 		}
 		else
