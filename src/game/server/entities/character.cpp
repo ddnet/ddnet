@@ -2258,7 +2258,7 @@ void CCharacter::SetEndlessHook(bool Enable)
 		return;
 	}
 
-	GameServer()->SendChatTarget(GetPlayer()->GetCID(), Enable ? "Endless hook has been activated" : "Endless hook has been deactived");
+	GameServer()->SendChatTarget(GetPlayer()->GetCID(), Enable ? "Endless hook has been activated" : "Endless hook has been deactivated");
 	m_EndlessHook = Enable;
 	m_Core.m_EndlessHook = Enable;
 }
