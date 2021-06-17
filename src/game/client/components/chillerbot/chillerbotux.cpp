@@ -411,6 +411,7 @@ void CChillerBotUX::OnConsoleInit()
 	Console()->Register("uncamp", "", CFGFLAG_CLIENT, ConUnCampHack, this, "Same as cl_camp_hack 0 but resets walk input");
 	Console()->Register("goto_switch", "i[number]?i[offset]", CFGFLAG_CLIENT, ConGotoSwitch, this, "Pause switch found (at offset) with given number");
 	Console()->Register("goto_tele", "i[number]?i[offset]", CFGFLAG_CLIENT, ConGotoTele, this, "Pause tele found (at offset) with given number");
+	Console()->Register("load_map", "s[file]", CFGFLAG_CLIENT, ConLoadMap, this, "Load mapfile");
 
 	Console()->Chain("cl_camp_hack", ConchainCampHack, this);
 	Console()->Chain("cl_chillerbot_hud", ConchainChillerbotHud, this);
@@ -538,6 +539,12 @@ void CChillerBotUX::ConGotoTele(IConsole::IResult *pResult, void *pUserData)
 {
 	CChillerBotUX *pSelf = (CChillerBotUX *)pUserData;
 	pSelf->GotoTele(pResult->GetInteger(0), pResult->NumArguments() > 1 ? pResult->GetInteger(1) : -1);
+}
+
+void CChillerBotUX::ConLoadMap(IConsole::IResult *pResult, void *pUserData)
+{
+	CChillerBotUX *pSelf = (CChillerBotUX *)pUserData;
+	pSelf->m_pClient->Client()->ChillerBotLoadMap(pResult->GetString(0));
 }
 
 void CChillerBotUX::GotoSwitch(int Number, int Offset)

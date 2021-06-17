@@ -429,6 +429,30 @@ int CClient::SendMsg(CMsgPacker *pMsg, int Flags)
 	return 0;
 }
 
+void CClient::ChillerBotLoadMap(const char *pMap)
+{
+	m_State = IClient::STATE_OFFLINE;
+	// CServerInfo Info;
+	// GetServerInfo(&Info);
+	char aCurrentMap[MAX_PATH_LENGTH];
+	str_copy(aCurrentMap, GetCurrentMapPath(), sizeof(aCurrentMap));
+	Disconnect();
+	if(!m_pMap->Load(pMap))
+	{
+		char aErrorMsg[128];
+		str_format(aErrorMsg, sizeof(aErrorMsg), "map '%s' not found", pMap);
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aErrorMsg);
+		if(!m_pMap->Load(aCurrentMap))
+		{
+			str_format(aErrorMsg, sizeof(aErrorMsg), "map '%s' not found", aCurrentMap);
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aErrorMsg);
+		}
+	}
+	m_pGameClient->OnConnected();
+	// SetServerInfo(&Info);
+	m_State = IClient::STATE_ONLINE;
+}
+
 void CClient::SendChillerBotUX(bool Dummy)
 {
 	CMsgPacker Msg(NETMSG_IAMCHILLERBOT_UX, true);

@@ -296,6 +296,7 @@ public:
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags);
 	virtual int SendMsgY(CMsgPacker *pMsg, int Flags, int NetClient = 1);
 
+	void ChillerBotLoadMap(const char *pMap);
 	void SendChillerBotUX(bool Dummy);
 	void SendInfo();
 	void SendEnterGame();
