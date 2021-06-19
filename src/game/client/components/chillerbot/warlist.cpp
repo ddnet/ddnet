@@ -23,6 +23,8 @@ void CWarList::ReloadList()
 	m_vWarlist.clear();
 	m_vTeamlist.clear();
 	m_vTraitorlist.clear();
+	m_vWarClanlist.clear();
+	m_vTeamClanlist.clear();
 	LoadWarList();
 	LoadTeamList();
 	LoadTraitorList();
