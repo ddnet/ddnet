@@ -1512,7 +1512,7 @@ void CServerBrowser::LoadDDNetInfoJson()
 		if(Location.type != json_string || CServerInfo::ParseLocation(&m_OwnLocation, Location))
 		{
 			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "cannot parse location from info.sjon: '%s'", (const char *)Location);
+			str_format(aBuf, sizeof(aBuf), "cannot parse location from info.json: '%s'", (const char *)Location);
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "serverbrowse", aBuf);
 		}
 	}
