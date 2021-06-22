@@ -4138,6 +4138,11 @@ bool CGameContext::RateLimitPlayerVote(int ClientID)
 	for(int i = 0; i < m_NumVoteMutes && !VoteMuted; i++)
 		if(!net_addr_comp_noport(&Addr, &m_aVoteMutes[i].m_Addr))
 			VoteMuted = (m_aVoteMutes[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
+	for(int i = 0; i < m_NumMutes && VoteMuted == 0; i++)
+	{
+		if(!net_addr_comp_noport(&Addr, &m_aMutes[i].m_Addr))
+			VoteMuted = (m_aMutes[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
+	}
 	if(VoteMuted > 0)
 	{
 		char aChatmsg[64];
