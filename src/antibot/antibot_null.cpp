@@ -1,3 +1,5 @@
+#define ANTIBOTAPI DYNAMIC_EXPORT
+
 #include "antibot_data.h"
 
 static CAntibotData *g_pData;
