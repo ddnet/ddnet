@@ -2802,6 +2802,7 @@ void CEditor::DoMapEditor(CUIRect View)
 
 	Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
 	//UI()->ClipDisable();
+	m_FontTyper.DoMapEditor();
 }
 
 float CEditor::ScaleFontSize(char *pText, int TextSize, float FontSize, int Width)
@@ -6235,6 +6236,8 @@ void CEditor::Init()
 	m_LastUndoUpdateTime = time_get();
 
 	ms_PickerColor = ColorHSVA(1.0f, 0.0f, 0.0f);
+
+	m_FontTyper.Init(this);
 }
 
 void CEditor::PlaceBorderTiles()
