@@ -3733,7 +3733,7 @@ void CGameContext::SendRecord(int ClientID)
 	}
 }
 
-int CGameContext::ProcessSpamProtection(int ClientID)
+int CGameContext::ProcessSpamProtection(int ClientID, bool RespectChatInitialDelay)
 {
 	if(!m_apPlayers[ClientID])
 		return 0;
@@ -3751,7 +3751,7 @@ int CGameContext::ProcessSpamProtection(int ClientID)
 	Server()->GetClientAddr(ClientID, &Addr);
 
 	int Muted = 0;
-	if(m_apPlayers[ClientID]->m_JoinTick > m_NonEmptySince + 10 * Server()->TickSpeed())
+	if(m_apPlayers[ClientID]->m_JoinTick > m_NonEmptySince + 10 * Server()->TickSpeed() && RespectChatInitialDelay)
 		Muted = (m_apPlayers[ClientID]->m_JoinTick + Server()->TickSpeed() * g_Config.m_SvChatInitialDelay - Server()->Tick()) / Server()->TickSpeed();
 	if(Muted <= 0)
 	{
