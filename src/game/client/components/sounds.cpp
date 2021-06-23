@@ -149,7 +149,7 @@ void CSounds::OnRender()
 	// play sound from queue
 	if(m_QueuePos > 0)
 	{
-		int64 Now = time();
+		int64_t Now = time();
 		if(m_QueueWaitTime <= Now)
 		{
 			Play(m_aQueue[0].m_Channel, m_aQueue[0].m_SetId, 1.0f);

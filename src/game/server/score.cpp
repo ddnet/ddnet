@@ -138,7 +138,7 @@ bool CScore::RateLimitPlayer(int ClientID)
 	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientID];
 	if(pPlayer == 0)
 		return true;
-	if(pPlayer->m_LastSQLQuery + (int64)g_Config.m_SvSqlQueriesDelay * Server()->TickSpeed() >= Server()->Tick())
+	if(pPlayer->m_LastSQLQuery + (int64_t)g_Config.m_SvSqlQueriesDelay * Server()->TickSpeed() >= Server()->Tick())
 		return true;
 	pPlayer->m_LastSQLQuery = Server()->Tick();
 	return false;
@@ -166,7 +166,7 @@ CScore::CScore(CGameContext *pGameServer, CDbConnectionPool *pPool) :
 	((CGameControllerDDRace *)(pGameServer->m_pController))->m_pInitResult = InitResult;
 	str_copy(Tmp->m_Map, g_Config.m_SvMap, sizeof(Tmp->m_Map));
 
-	uint64 aSeed[2];
+	uint64_t aSeed[2];
 	secure_random_fill(aSeed, sizeof(aSeed));
 	m_Prng.Seed(aSeed);
 
@@ -471,7 +471,7 @@ bool CScore::MapInfoThread(IDbConnection *pSqlServer, const ISqlData *pGameData,
 		char aMedianString[60] = "\0";
 		if(Median > 0)
 		{
-			str_time((int64)Median * 100, TIME_HOURS, aBuf, sizeof(aBuf));
+			str_time((int64_t)Median * 100, TIME_HOURS, aBuf, sizeof(aBuf));
 			str_format(aMedianString, sizeof(aMedianString), " in %s median", aBuf);
 		}
 

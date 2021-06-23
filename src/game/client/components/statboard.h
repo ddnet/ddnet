@@ -8,7 +8,7 @@ class CStatboard : public CComponent
 private:
 	bool m_Active;
 	bool m_ScreenshotTaken;
-	int64 m_ScreenshotTime;
+	int64_t m_ScreenshotTime;
 	static void ConKeyStats(IConsole::IResult *pResult, void *pUserData);
 	void RenderGlobalStats();
 	void AutoStatScreenshot();

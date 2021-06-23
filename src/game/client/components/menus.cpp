@@ -249,9 +249,9 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 
 	if(pAnimator != NULL)
 	{
-		int64 Time = time_get_microseconds();
+		int64_t Time = time_get_microseconds();
 
-		if(pAnimator->m_Time + (int64)100000 < Time)
+		if(pAnimator->m_Time + (int64_t)100000 < Time)
 		{
 			pAnimator->m_Value = pAnimator->m_Active ? 1 : 0;
 			pAnimator->m_Time = Time;
@@ -1099,7 +1099,7 @@ void CMenus::RenderLoading()
 {
 	// TODO: not supported right now due to separate render thread
 
-	static int64 LastLoadRender = 0;
+	static int64_t LastLoadRender = 0;
 	float Percent = m_LoadCurrent++ / (float)m_LoadTotal;
 
 	// make sure that we don't render for each little thing we load
@@ -1228,7 +1228,7 @@ void CMenus::PopupMessage(const char *pTopic, const char *pBody, const char *pBu
 	m_Popup = POPUP_MESSAGE;
 }
 
-void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pButton, int64 Duration)
+void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pButton, int64_t Duration)
 {
 	dbg_msg(pTopic, "%s", pBody);
 
@@ -1915,7 +1915,7 @@ int CMenus::Render()
 
 			if(Client()->MapDownloadTotalsize() > 0)
 			{
-				int64 Now = time_get();
+				int64_t Now = time_get();
 				if(Now - m_DownloadLastCheckTime >= time_freq())
 				{
 					if(m_DownloadLastCheckSize > Client()->MapDownloadAmount())
@@ -2802,7 +2802,7 @@ void CMenus::RenderUpdating(const char *pCaption, int current, int total)
 {
 	// make sure that we don't render for each little thing we load
 	// because that will slow down loading if we have vsync
-	static int64 LastLoadRender = 0;
+	static int64_t LastLoadRender = 0;
 	if(time_get() - LastLoadRender < time_freq() / 60)
 		return;
 	LastLoadRender = time_get();

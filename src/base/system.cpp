@@ -15,6 +15,8 @@
 
 #include <chrono>
 
+#include <cinttypes>
+
 #if defined(CONF_WEBSOCKETS)
 #include <engine/shared/websockets.h>
 #endif
@@ -942,14 +944,14 @@ static_assert(std::chrono::steady_clock::is_steady, "Compiler does not support s
 static_assert(std::chrono::steady_clock::period::den / std::chrono::steady_clock::period::num >= 1000000, "Compiler has a bad timer precision and might be out of date.");
 static const std::chrono::time_point<std::chrono::steady_clock> tw_start_time = std::chrono::steady_clock::now();
 
-int64 time_get_impl(void)
+int64_t time_get_impl(void)
 {
 	return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - tw_start_time).count();
 }
 
-int64 time_get(void)
+int64_t time_get(void)
 {
-	static int64 last = 0;
+	static int64_t last = 0;
 	if(new_tick == 0)
 		return last;
 	if(new_tick != -1)
@@ -959,12 +961,12 @@ int64 time_get(void)
 	return last;
 }
 
-int64 time_freq(void)
+int64_t time_freq(void)
 {
 	return 1000000;
 }
 
-int64 time_get_microseconds(void)
+int64_t time_get_microseconds(void)
 {
 	return time_get_impl() / (time_freq() / 1000 / 1000);
 }
@@ -2908,7 +2910,7 @@ void str_timestamp(char *buffer, int buffer_size)
 #pragma GCC diagnostic pop
 #endif
 
-int str_time(int64 centisecs, int format, char *buffer, int buffer_size)
+int str_time(int64_t centisecs, int format, char *buffer, int buffer_size)
 {
 	const int sec = 100;
 	const int min = 60 * sec;
@@ -2927,24 +2929,24 @@ int str_time(int64 centisecs, int format, char *buffer, int buffer_size)
 	{
 	case TIME_DAYS:
 		if(centisecs >= day)
-			return str_format(buffer, buffer_size, "%lldd %02lld:%02lld:%02lld", centisecs / day,
+			return str_format(buffer, buffer_size, "%" PRId64 "d %02" PRId64 ":%02" PRId64 ":%02" PRId64, centisecs / day,
 				(centisecs % day) / hour, (centisecs % hour) / min, (centisecs % min) / sec);
 		// fall through
 	case TIME_HOURS:
 		if(centisecs >= hour)
-			return str_format(buffer, buffer_size, "%02lld:%02lld:%02lld", centisecs / hour,
+			return str_format(buffer, buffer_size, "%02" PRId64 ":%02" PRId64 ":%02" PRId64, centisecs / hour,
 				(centisecs % hour) / min, (centisecs % min) / sec);
 		// fall through
 	case TIME_MINS:
-		return str_format(buffer, buffer_size, "%02lld:%02lld", centisecs / min,
+		return str_format(buffer, buffer_size, "%02" PRId64 ":%02" PRId64, centisecs / min,
 			(centisecs % min) / sec);
 	case TIME_HOURS_CENTISECS:
 		if(centisecs >= hour)
-			return str_format(buffer, buffer_size, "%02lld:%02lld:%02lld.%02lld", centisecs / hour,
+			return str_format(buffer, buffer_size, "%02" PRId64 ":%02" PRId64 ":%02" PRId64 ".%02" PRId64, centisecs / hour,
 				(centisecs % hour) / min, (centisecs % min) / sec, centisecs % sec);
 		// fall through
 	case TIME_MINS_CENTISECS:
-		return str_format(buffer, buffer_size, "%02lld:%02lld.%02lld", centisecs / min,
+		return str_format(buffer, buffer_size, "%02" PRId64 ":%02" PRId64 ".%02" PRId64, centisecs / min,
 			(centisecs % min) / sec, centisecs % sec);
 	}
 

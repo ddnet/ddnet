@@ -86,7 +86,7 @@ void CSnapIDPool::RemoveFirstTimeout()
 
 int CSnapIDPool::NewID()
 {
-	int64 Now = time_get();
+	int64_t Now = time_get();
 
 	// process timed ids
 	while(m_FirstTimed != -1 && m_aIDs[m_FirstTimed].m_Timeout < Now)
@@ -498,7 +498,7 @@ void CServer::Ban(int ClientID, int Seconds, const char *pReason)
 	return m_CurrentGameTick;
 }*/
 
-int64 CServer::TickStartTime(int Tick)
+int64_t CServer::TickStartTime(int Tick)
 {
 	return m_GameStartTime + (time_freq() * Tick) / SERVER_TICK_SPEED;
 }
@@ -1344,8 +1344,8 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 	if(g_Config.m_SvNetlimit && Msg != NETMSG_REQUEST_MAP_DATA)
 	{
-		int64 Now = time_get();
-		int64 Diff = Now - m_aClients[ClientID].m_TrafficSince;
+		int64_t Now = time_get();
+		int64_t Diff = Now - m_aClients[ClientID].m_TrafficSince;
 		float Alpha = g_Config.m_SvNetlimitAlpha / 100.0f;
 		float Limit = (float)g_Config.m_SvNetlimit * 1024 / time_freq();
 
@@ -1508,7 +1508,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		else if(Msg == NETMSG_INPUT)
 		{
 			CClient::CInput *pInput;
-			int64 TagTime;
+			int64_t TagTime;
 
 			m_aClients[ClientID].m_LastAckedSnapshot = Unpacker.GetInt();
 			int IntendedTick = Unpacker.GetInt();
@@ -1746,7 +1746,7 @@ bool CServer::RateLimitServerInfoConnless()
 	if(g_Config.m_SvServerInfoPerSecond)
 	{
 		SendClients = m_ServerInfoNumRequests <= g_Config.m_SvServerInfoPerSecond;
-		const int64 Now = Tick();
+		const int64_t Now = Tick();
 
 		if(Now <= m_ServerInfoFirstRequest + TickSpeed())
 		{
@@ -2474,7 +2474,7 @@ int CServer::Run()
 
 			set_new_tick();
 
-			int64 t = time_get();
+			int64_t t = time_get();
 			int NewTicks = 0;
 
 			// load new map TODO: don't poll this
@@ -2662,7 +2662,7 @@ int CServer::Run()
 				m_ReloadedWhenEmpty = false;
 
 				set_new_tick();
-				int64 t = time_get();
+				int64_t t = time_get();
 				int x = (TickStartTime(m_CurrentGameTick + 1) - t) * 1000000 / time_freq() + 1;
 
 				PacketWaiting = x > 0 ? net_socket_read_wait(m_NetServer.Socket(), x) : true;

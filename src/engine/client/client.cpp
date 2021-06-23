@@ -170,7 +170,7 @@ void CGraph::Render(IGraphics *pGraphics, IGraphics::CTextureHandle FontTexture,
 	pGraphics->QuadsEnd();
 }
 
-void CSmoothTime::Init(int64 Target)
+void CSmoothTime::Init(int64_t Target)
 {
 	m_Snap = time_get();
 	m_Current = Target;
@@ -185,10 +185,10 @@ void CSmoothTime::SetAdjustSpeed(int Direction, float Value)
 	m_aAdjustSpeed[Direction] = Value;
 }
 
-int64 CSmoothTime::Get(int64 Now)
+int64_t CSmoothTime::Get(int64_t Now)
 {
-	int64 c = m_Current + (Now - m_Snap);
-	int64 t = m_Target + (Now - m_Snap);
+	int64_t c = m_Current + (Now - m_Snap);
+	int64_t t = m_Target + (Now - m_Snap);
 
 	// it's faster to adjust upward instead of downward
 	// we might need to adjust these abit
@@ -201,22 +201,22 @@ int64 CSmoothTime::Get(int64 Now)
 	if(a > 1.0f)
 		a = 1.0f;
 
-	int64 r = c + (int64)((t - c) * a);
+	int64_t r = c + (int64_t)((t - c) * a);
 
 	m_Graph.Add(a + 0.5f, 1, 1, 1);
 
 	return r;
 }
 
-void CSmoothTime::UpdateInt(int64 Target)
+void CSmoothTime::UpdateInt(int64_t Target)
 {
-	int64 Now = time_get();
+	int64_t Now = time_get();
 	m_Current = Get(Now);
 	m_Snap = Now;
 	m_Target = Target;
 }
 
-void CSmoothTime::Update(CGraph *pGraph, int64 Target, int TimeLeft, int AdjustDirection)
+void CSmoothTime::Update(CGraph *pGraph, int64_t Target, int TimeLeft, int AdjustDirection)
 {
 	int UpdateTimer = 1;
 
@@ -506,7 +506,7 @@ void CClient::DirectInput(int *pInput, int Size)
 
 void CClient::SendInput()
 {
-	int64 Now = time_get();
+	int64_t Now = time_get();
 
 	if(m_PredTick[g_Config.m_ClDummy] <= 0)
 		return;
@@ -1001,7 +1001,7 @@ void CClient::SnapSetStaticsize(int ItemType, int Size)
 void CClient::DebugRender()
 {
 	static NETSTATS Prev, Current;
-	static int64 LastSnap = 0;
+	static int64_t LastSnap = 0;
 	static float FrameTimeAvg = 0;
 	char aBuffer[512];
 
@@ -1158,7 +1158,7 @@ void CClient::Render()
 
 	if(State() == IClient::STATE_ONLINE && g_Config.m_ClAntiPingLimit)
 	{
-		int64 Now = time_get();
+		int64_t Now = time_get();
 		g_Config.m_ClAntiPing = (m_PredictedTime.Get(Now) - m_GameTime[g_Config.m_ClDummy].Get(Now)) * 1000 / (float)time_freq() > g_Config.m_ClAntiPingLimit;
 	}
 }
@@ -1398,7 +1398,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 	{
 		Up.GetString(); // extra info, reserved
 
-		uint64 Flag = (uint64)1 << PacketNo;
+		uint64_t Flag = (uint64_t)1 << PacketNo;
 		DuplicatedPacket = Info.m_ReceivedPackets & Flag;
 		Info.m_ReceivedPackets |= Flag;
 	}
@@ -1427,7 +1427,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 		{
 			if(SavedType == SERVERINFO_64_LEGACY)
 			{
-				uint64 Flag = (uint64)1 << i;
+				uint64_t Flag = (uint64_t)1 << i;
 				if(!(Info.m_ReceivedPackets & Flag))
 				{
 					Info.m_ReceivedPackets |= Flag;
@@ -1825,16 +1825,16 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 		{
 			int InputPredTick = Unpacker.GetInt();
 			int TimeLeft = Unpacker.GetInt();
-			int64 Now = time_get();
+			int64_t Now = time_get();
 
 			// adjust our prediction time
-			int64 Target = 0;
+			int64_t Target = 0;
 			for(int k = 0; k < 200; k++)
 			{
 				if(m_aInputs[g_Config.m_ClDummy][k].m_Tick == InputPredTick)
 				{
 					Target = m_aInputs[g_Config.m_ClDummy][k].m_PredictedTime + (Now - m_aInputs[g_Config.m_ClDummy][k].m_Time);
-					Target = Target - (int64)(((TimeLeft - PREDICTION_MARGIN) / 1000.0f) * time_freq());
+					Target = Target - (int64_t)(((TimeLeft - PREDICTION_MARGIN) / 1000.0f) * time_freq());
 					break;
 				}
 			}
@@ -2032,9 +2032,9 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 					// adjust game time
 					if(m_ReceivedSnapshots[g_Config.m_ClDummy] > 2)
 					{
-						int64 Now = m_GameTime[g_Config.m_ClDummy].Get(time_get());
-						int64 TickStart = GameTick * time_freq() / 50;
-						int64 TimeLeft = (TickStart - Now) * 1000 / time_freq();
+						int64_t Now = m_GameTime[g_Config.m_ClDummy].Get(time_get());
+						int64_t TickStart = GameTick * time_freq() / 50;
+						int64_t TimeLeft = (TickStart - Now) * 1000 / time_freq();
 						m_GameTime[g_Config.m_ClDummy].Update(&m_GametimeMarginGraph, (GameTick - 1) * time_freq() / 50, TimeLeft, 0);
 					}
 
@@ -2304,9 +2304,9 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 					// adjust game time
 					if(m_ReceivedSnapshots[!g_Config.m_ClDummy] > 2)
 					{
-						int64 Now = m_GameTime[!g_Config.m_ClDummy].Get(time_get());
-						int64 TickStart = GameTick * time_freq() / 50;
-						int64 TimeLeft = (TickStart - Now) * 1000 / time_freq();
+						int64_t Now = m_GameTime[!g_Config.m_ClDummy].Get(time_get());
+						int64_t TickStart = GameTick * time_freq() / 50;
+						int64_t TimeLeft = (TickStart - Now) * 1000 / time_freq();
 						m_GameTime[!g_Config.m_ClDummy].Update(&m_GametimeMarginGraph, (GameTick - 1) * time_freq() / 50, TimeLeft, 0);
 					}
 
@@ -2692,11 +2692,11 @@ void CClient::Update()
 		if(m_ReceivedSnapshots[!g_Config.m_ClDummy] >= 3)
 		{
 			// switch dummy snapshot
-			int64 Now = m_GameTime[!g_Config.m_ClDummy].Get(time_get());
+			int64_t Now = m_GameTime[!g_Config.m_ClDummy].Get(time_get());
 			while(1)
 			{
 				CSnapshotStorage::CHolder *pCur = m_aSnapshots[!g_Config.m_ClDummy][SNAP_CURRENT];
-				int64 TickStart = (pCur->m_Tick) * time_freq() / 50;
+				int64_t TickStart = (pCur->m_Tick) * time_freq() / 50;
 
 				if(TickStart < Now)
 				{
@@ -2722,9 +2722,9 @@ void CClient::Update()
 		{
 			// switch snapshot
 			int Repredict = 0;
-			int64 Freq = time_freq();
-			int64 Now = m_GameTime[g_Config.m_ClDummy].Get(time_get());
-			int64 PredNow = m_PredictedTime.Get(time_get());
+			int64_t Freq = time_freq();
+			int64_t Now = m_GameTime[g_Config.m_ClDummy].Get(time_get());
+			int64_t PredNow = m_PredictedTime.Get(time_get());
 
 			if(m_LastDummy != (bool)g_Config.m_ClDummy && m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] && m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV])
 			{
@@ -2736,7 +2736,7 @@ void CClient::Update()
 			while(1)
 			{
 				CSnapshotStorage::CHolder *pCur = m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT];
-				int64 TickStart = (pCur->m_Tick) * time_freq() / 50;
+				int64_t TickStart = (pCur->m_Tick) * time_freq() / 50;
 
 				if(TickStart < Now)
 				{
@@ -2765,8 +2765,8 @@ void CClient::Update()
 
 			if(m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] && m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV])
 			{
-				int64 CurtickStart = (m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_Tick) * time_freq() / 50;
-				int64 PrevtickStart = (m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick) * time_freq() / 50;
+				int64_t CurtickStart = (m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_Tick) * time_freq() / 50;
+				int64_t PrevtickStart = (m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick) * time_freq() / 50;
 				int PrevPredTick = (int)(PredNow * 50 / time_freq());
 				int NewPredTick = PrevPredTick + 1;
 
@@ -2814,8 +2814,8 @@ void CClient::Update()
 				m_CurrentServerNextPingTime >= 0 &&
 				time_get() > m_CurrentServerNextPingTime)
 			{
-				int64 Now = time_get();
-				int64 Freq = time_freq();
+				int64_t Now = time_get();
+				int64_t Freq = time_freq();
 
 				char aBuf[64];
 				str_format(aBuf, sizeof(aBuf), "pinging current server%s", !m_ServerCapabilities.m_PingEx ? ", using fallback via server info" : "");
@@ -2844,8 +2844,8 @@ void CClient::Update()
 #ifdef CONF_DEBUG
 	if(g_Config.m_DbgStress)
 	{
-		static int64 ActionTaken = 0;
-		int64 Now = time_get();
+		static int64_t ActionTaken = 0;
+		int64_t Now = time_get();
 		if(State() == IClient::STATE_OFFLINE)
 		{
 			if(Now > ActionTaken + time_freq() * 2)
@@ -3141,8 +3141,8 @@ void CClient::Run()
 	bool LastE = false;
 	bool LastG = false;
 
-	int64 LastTime = time_get_microseconds();
-	int64 LastRenderTime = time_get();
+	int64_t LastTime = time_get_microseconds();
+	int64_t LastRenderTime = time_get();
 
 	while(1)
 	{
@@ -3252,13 +3252,13 @@ void CClient::Run()
 				m_EditorActive = false;
 
 			Update();
-			int64 Now = time_get();
+			int64_t Now = time_get();
 
 			bool IsRenderActive = (g_Config.m_GfxBackgroundRender || m_pGraphics->WindowOpen());
 
 			if(IsRenderActive &&
 				(!g_Config.m_GfxAsyncRenderOld || m_pGraphics->IsIdle()) &&
-				(!g_Config.m_GfxRefreshRate || (time_freq() / (int64)g_Config.m_GfxRefreshRate) <= Now - LastRenderTime))
+				(!g_Config.m_GfxRefreshRate || (time_freq() / (int64_t)g_Config.m_GfxRefreshRate) <= Now - LastRenderTime))
 			{
 				m_RenderFrames++;
 
@@ -3286,7 +3286,7 @@ void CClient::Run()
 				m_FrameTimeAvg = m_FrameTimeAvg * 0.9f + m_RenderFrameTime * 0.1f;
 
 				// keep the overflow time - it's used to make sure the gfx refreshrate is reached
-				int64 AdditionalTime = g_Config.m_GfxRefreshRate ? ((Now - LastRenderTime) - (time_freq() / (int64)g_Config.m_GfxRefreshRate)) : 0;
+				int64_t AdditionalTime = g_Config.m_GfxRefreshRate ? ((Now - LastRenderTime) - (time_freq() / (int64_t)g_Config.m_GfxRefreshRate)) : 0;
 				// if the value is over a second time loose, reset the additional time (drop the frames, that are lost already)
 				if(AdditionalTime > time_freq())
 					AdditionalTime = time_freq();
@@ -3326,7 +3326,7 @@ void CClient::Run()
 			else if(!IsRenderActive)
 			{
 				// if the client does not render, it should reset its render time to a time where it would render the first frame, when it wakes up again
-				LastRenderTime = g_Config.m_GfxRefreshRate ? (Now - (time_freq() / (int64)g_Config.m_GfxRefreshRate)) : Now;
+				LastRenderTime = g_Config.m_GfxRefreshRate ? (Now - (time_freq() / (int64_t)g_Config.m_GfxRefreshRate)) : Now;
 			}
 
 			if(Input()->VideoRestartNeeded())
@@ -3369,8 +3369,8 @@ void CClient::Run()
 #endif
 
 		// beNice
-		int64 Now = time_get_microseconds();
-		int64 SleepTimeInMicroSeconds = 0;
+		int64_t Now = time_get_microseconds();
+		int64_t SleepTimeInMicroSeconds = 0;
 		bool Slept = false;
 		if(
 #ifdef CONF_DEBUG
@@ -3378,26 +3378,26 @@ void CClient::Run()
 #endif
 			(g_Config.m_ClRefreshRateInactive && !m_pGraphics->WindowActive()))
 		{
-			SleepTimeInMicroSeconds = ((int64)1000000 / (int64)g_Config.m_ClRefreshRateInactive) - (Now - LastTime);
-			if(SleepTimeInMicroSeconds / (int64)1000 > (int64)0)
+			SleepTimeInMicroSeconds = ((int64_t)1000000 / (int64_t)g_Config.m_ClRefreshRateInactive) - (Now - LastTime);
+			if(SleepTimeInMicroSeconds / (int64_t)1000 > (int64_t)0)
 				thread_sleep(SleepTimeInMicroSeconds);
 			Slept = true;
 		}
 		else if(g_Config.m_ClRefreshRate)
 		{
-			SleepTimeInMicroSeconds = ((int64)1000000 / (int64)g_Config.m_ClRefreshRate) - (Now - LastTime);
-			if(SleepTimeInMicroSeconds > (int64)0)
+			SleepTimeInMicroSeconds = ((int64_t)1000000 / (int64_t)g_Config.m_ClRefreshRate) - (Now - LastTime);
+			if(SleepTimeInMicroSeconds > (int64_t)0)
 				net_socket_read_wait(m_NetClient[CLIENT_MAIN].m_Socket, SleepTimeInMicroSeconds);
 			Slept = true;
 		}
 		if(Slept)
 		{
 			// if the diff gets too small it shouldn't get even smaller (drop the updates, that could not be handled)
-			if(SleepTimeInMicroSeconds < (int64)-1000000)
-				SleepTimeInMicroSeconds = (int64)-1000000;
+			if(SleepTimeInMicroSeconds < (int64_t)-1000000)
+				SleepTimeInMicroSeconds = (int64_t)-1000000;
 			// don't go higher than the game ticks speed, because the network is waking up the client with the server's snapshots anyway
-			else if(SleepTimeInMicroSeconds > (int64)1000000 / m_GameTickSpeed)
-				SleepTimeInMicroSeconds = (int64)1000000 / m_GameTickSpeed;
+			else if(SleepTimeInMicroSeconds > (int64_t)1000000 / m_GameTickSpeed)
+				SleepTimeInMicroSeconds = (int64_t)1000000 / m_GameTickSpeed;
 			// the time diff between the time that was used actually used and the time the thread should sleep/wait
 			// will be calculated in the sleep time of the next update tick by faking the time it should have slept/wait.
 			// so two cases (and the case it slept exactly the time it should):
@@ -4512,15 +4512,15 @@ void CClient::RequestDDNetInfo()
 
 int CClient::GetPredictionTime()
 {
-	int64 Now = time_get();
+	int64_t Now = time_get();
 	return (int)((m_PredictedTime.Get(Now) - m_GameTime[g_Config.m_ClDummy].Get(Now)) * 1000 / (float)time_freq());
 }
 
 void CClient::GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount)
 {
-	int64 GameTime = m_GameTime[g_Config.m_ClDummy].Get(time_get());
-	int64 PredTime = m_PredictedTime.Get(time_get());
-	int64 SmoothTime = clamp(GameTime + (int64)(MixAmount * (PredTime - GameTime)), GameTime, PredTime);
+	int64_t GameTime = m_GameTime[g_Config.m_ClDummy].Get(time_get());
+	int64_t PredTime = m_PredictedTime.Get(time_get());
+	int64_t SmoothTime = clamp(GameTime + (int64_t)(MixAmount * (PredTime - GameTime)), GameTime, PredTime);
 
 	*pSmoothTick = (int)(SmoothTime * 50 / time_freq()) + 1;
 	*pSmoothIntraTick = (SmoothTime - (*pSmoothTick - 1) * time_freq() / 50) / (float)(time_freq() / 50);

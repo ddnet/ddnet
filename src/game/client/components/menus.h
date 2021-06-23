@@ -290,7 +290,7 @@ protected:
 	vec2 m_MousePos;
 	bool m_MouseSlow;
 
-	int64 m_LastInput;
+	int64_t m_LastInput;
 
 	// images
 	struct CMenuImage
@@ -350,7 +350,7 @@ protected:
 	bool m_DeletePressed;
 
 	// for map download popup
-	int64 m_DownloadLastCheckTime;
+	int64_t m_DownloadLastCheckTime;
 	int m_DownloadLastCheckSize;
 	float m_DownloadSpeed;
 
@@ -649,10 +649,10 @@ public:
 	int GetCurPopup() { return m_Popup; }
 	bool CanDisplayWarning();
 
-	void PopupWarning(const char *pTopic, const char *pBody, const char *pButton, int64 Duration);
+	void PopupWarning(const char *pTopic, const char *pBody, const char *pButton, int64_t Duration);
 
-	int64 m_PopupWarningLastTime;
-	int64 m_PopupWarningDuration;
+	int64_t m_PopupWarningLastTime;
+	int64_t m_PopupWarningDuration;
 
 	int m_DemoPlayerState;
 	char m_aDemoPlayerPopupHint[256];

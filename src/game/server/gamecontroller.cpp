@@ -680,7 +680,7 @@ int IGameController::ClampTeam(int Team)
 	return 0;
 }
 
-int64 IGameController::GetMaskForPlayerWorldEvent(int Asker, int ExceptID)
+int64_t IGameController::GetMaskForPlayerWorldEvent(int Asker, int ExceptID)
 {
 	// Send all world events to everyone by default
 	return CmaskAllExceptOne(ExceptID);

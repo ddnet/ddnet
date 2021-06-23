@@ -246,7 +246,7 @@ void CControls::OnMessage(int Msg, void *pRawMsg)
 
 int CControls::SnapInput(int *pData)
 {
-	static int64 LastSendTime = 0;
+	static int64_t LastSendTime = 0;
 	bool Send = false;
 
 	// update player state
@@ -399,7 +399,7 @@ void CControls::OnRender()
 		GAMEPAD_DEAD_ZONE = 65536 / 8,
 	};
 
-	int64 CurTime = time_get();
+	int64_t CurTime = time_get();
 	bool FireWasPressed = false;
 
 	if(m_Joystick)

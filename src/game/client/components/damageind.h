@@ -7,7 +7,7 @@
 
 class CDamageInd : public CComponent
 {
-	int64 m_Lastupdate;
+	int64_t m_Lastupdate;
 	struct CItem
 	{
 		vec2 m_Pos;

@@ -90,7 +90,7 @@ public:
 
 	int Eval(float Time, float *pResult)
 	{
-		CRenderTools::RenderEvalEnvelope(m_lPoints.base_ptr(), m_lPoints.size(), m_Channels, (int64)((double)Time * 1000000.0), pResult);
+		CRenderTools::RenderEvalEnvelope(m_lPoints.base_ptr(), m_lPoints.size(), m_Channels, (int64_t)((double)Time * 1000000.0), pResult);
 		return m_Channels;
 	}
 
@@ -760,7 +760,7 @@ public:
 	virtual void UpdateMentions() { m_Mentions++; }
 	virtual void ResetMentions() { m_Mentions = 0; }
 
-	int64 m_LastUndoUpdateTime;
+	int64_t m_LastUndoUpdateTime;
 	bool m_UndoRunning;
 	void CreateUndoStep();
 	static void CreateUndoStepThread(void *pUser);
@@ -911,7 +911,7 @@ public:
 	bool m_ShowTileInfo;
 	bool m_ShowDetail;
 	bool m_Animate;
-	int64 m_AnimateStart;
+	int64_t m_AnimateStart;
 	float m_AnimateTime;
 	float m_AnimateSpeed;
 

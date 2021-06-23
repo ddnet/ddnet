@@ -295,7 +295,7 @@ void CGameClient::OnInit()
 
 	m_RenderTools.Init(Graphics(), UI(), this);
 
-	int64 Start = time_get();
+	int64_t Start = time_get();
 
 	if(GIT_SHORTREV_HASH)
 	{
@@ -379,7 +379,7 @@ void CGameClient::OnInit()
 		}
 	}
 
-	int64 End = time_get();
+	int64_t End = time_get();
 	str_format(aBuf, sizeof(aBuf), "initialisation finished after %.2fms", ((End - Start) * 1000) / (float)time_freq());
 	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "gameclient", aBuf);
 
@@ -1838,7 +1838,7 @@ void CGameClient::OnPredict()
 	{
 		int PredTime = clamp(Client()->GetPredictionTime(), 0, 800);
 		float SmoothPace = 4 - 1.5f * PredTime / 800.f; // smoothing pace (a lower value will make the smoothing quicker)
-		int64 Len = 1000 * PredTime * SmoothPace;
+		int64_t Len = 1000 * PredTime * SmoothPace;
 
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
@@ -1869,8 +1869,8 @@ void CGameClient::OnPredict()
 							MixAmount[j] = 1.f - powf(1.f - MixAmount[j], 1 / 1.2f);
 						}
 					}
-					int64 TimePassed = time_get() - m_aClients[i].m_SmoothStart[j];
-					if(in_range(TimePassed, (int64)0, Len - 1))
+					int64_t TimePassed = time_get() - m_aClients[i].m_SmoothStart[j];
+					if(in_range(TimePassed, (int64_t)0, Len - 1))
 						MixAmount[j] = minimum(MixAmount[j], (float)(TimePassed / (double)Len));
 				}
 				for(int j = 0; j < 2; j++)
@@ -1878,8 +1878,8 @@ void CGameClient::OnPredict()
 						MixAmount[j] = MixAmount[j ^ 1];
 				for(int j = 0; j < 2; j++)
 				{
-					int64 Remaining = minimum((1.f - MixAmount[j]) * Len, minimum(time_freq() * 0.700f, (1.f - MixAmount[j ^ 1]) * Len + time_freq() * 0.300f)); // don't smooth for longer than 700ms, or more than 300ms longer along one axis than the other axis
-					int64 Start = time_get() - (Len - Remaining);
+					int64_t Remaining = minimum((1.f - MixAmount[j]) * Len, minimum(time_freq() * 0.700f, (1.f - MixAmount[j ^ 1]) * Len + time_freq() * 0.300f)); // don't smooth for longer than 700ms, or more than 300ms longer along one axis than the other axis
+					int64_t Start = time_get() - (Len - Remaining);
 					if(!in_range(Start + Len, m_aClients[i].m_SmoothStart[j], m_aClients[i].m_SmoothStart[j] + Len))
 					{
 						m_aClients[i].m_SmoothStart[j] = Start;
@@ -2581,12 +2581,12 @@ void CGameClient::DetectStrongHook()
 vec2 CGameClient::GetSmoothPos(int ClientID)
 {
 	vec2 Pos = mix(m_aClients[ClientID].m_PrevPredicted.m_Pos, m_aClients[ClientID].m_Predicted.m_Pos, Client()->PredIntraGameTick(g_Config.m_ClDummy));
-	int64 Now = time_get();
+	int64_t Now = time_get();
 	for(int i = 0; i < 2; i++)
 	{
-		int64 Len = clamp(m_aClients[ClientID].m_SmoothLen[i], (int64)1, time_freq());
-		int64 TimePassed = Now - m_aClients[ClientID].m_SmoothStart[i];
-		if(in_range(TimePassed, (int64)0, Len - 1))
+		int64_t Len = clamp(m_aClients[ClientID].m_SmoothLen[i], (int64_t)1, time_freq());
+		int64_t TimePassed = Now - m_aClients[ClientID].m_SmoothStart[i];
+		if(in_range(TimePassed, (int64_t)0, Len - 1))
 		{
 			float MixAmount = 1.f - powf(1.f - TimePassed / (float)Len, 1.2f);
 			int SmoothTick;

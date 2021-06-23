@@ -22,7 +22,7 @@ public:
 	{
 	public:
 		NETADDR m_Addr;
-		int64 m_RequestTime;
+		int64_t m_RequestTime;
 		bool m_RequestIgnoreInfo;
 		int m_GotInfo;
 		bool m_Request64Legacy;
@@ -191,7 +191,7 @@ private:
 	char m_aFilterGametypeString[128];
 
 	int m_ServerlistType;
-	int64 m_BroadcastTime;
+	int64_t m_BroadcastTime;
 	int m_RequestNumber;
 	unsigned char m_aTokenSeed[16];
 

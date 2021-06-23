@@ -26,7 +26,7 @@ static unsigned int RotateRight32(unsigned int x, int Shift)
 	return (x >> Shift) | (x << (-Shift & 31));
 }
 
-void CPrng::Seed(uint64 aSeed[2])
+void CPrng::Seed(uint64_t aSeed[2])
 {
 	m_Seeded = true;
 	str_format(m_aDescription, sizeof(m_aDescription), "%s:%08x%08x:%08x%08x", NAME,
@@ -42,10 +42,10 @@ unsigned int CPrng::RandomBits()
 {
 	dbg_assert(m_Seeded, "prng needs to be seeded before it can generate random numbers");
 
-	uint64 x = m_State;
+	uint64_t x = m_State;
 	unsigned int Count = x >> 59;
 
-	static const uint64 MULTIPLIER = 6364136223846793005u;
+	static const uint64_t MULTIPLIER = 6364136223846793005u;
 	m_State = x * MULTIPLIER + m_Increment;
 	x ^= x >> 18;
 	return RotateRight32(x >> 27, Count);

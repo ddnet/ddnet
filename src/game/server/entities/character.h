@@ -229,8 +229,8 @@ public:
 	int m_MoveRestrictions;
 
 	vec2 m_Intersection;
-	int64 m_LastStartWarning;
-	int64 m_LastRescue;
+	int64_t m_LastStartWarning;
+	int64_t m_LastRescue;
 	bool m_LastRefillJumps;
 	bool m_LastPenalty;
 	bool m_LastBonus;
