@@ -6,6 +6,7 @@
 #include <engine/engine.h>
 #include <engine/external/json-parser/json.h>
 #include <engine/serverbrowser.h>
+#include <engine/shared/jobs.h>
 #include <engine/shared/linereader.h>
 #include <engine/shared/serverinfo.h>
 #include <engine/storage.h>
@@ -108,7 +109,8 @@ void CChooseMaster::Reset()
 
 void CChooseMaster::Refresh()
 {
-	m_pEngine->AddJob(m_pJob = std::make_shared<CJob>(m_pData));
+	if(m_pJob == nullptr || m_pJob->Status() == IJob::STATE_DONE)
+		m_pEngine->AddJob(m_pJob = std::make_shared<CJob>(m_pData));
 }
 
 void CChooseMaster::CJob::Run()
@@ -302,7 +304,7 @@ void CServerBrowserHttp::Update()
 }
 void CServerBrowserHttp::Refresh()
 {
-	if(m_State == STATE_WANTREFRESH)
+	if(m_State == STATE_WANTREFRESH || m_State == STATE_REFRESHING)
 	{
 		m_pChooseMaster->Refresh();
 	}
