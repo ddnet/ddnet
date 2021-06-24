@@ -29,7 +29,11 @@ ANTIBOTAPI void AntibotOnHookAttach(int ClientID, bool Player);
 ANTIBOTAPI void AntibotOnEngineTick(void);
 ANTIBOTAPI void AntibotOnEngineClientJoin(int ClientID, bool Sixup);
 ANTIBOTAPI void AntibotOnEngineClientDrop(int ClientID, const char *pReason);
-ANTIBOTAPI void AntibotOnEngineClientMessage(int ClientID, const void *pData, int Size, int Flags);
+// Returns true if the message shouldn't be processed by the server.
+ANTIBOTAPI bool AntibotOnEngineClientMessage(int ClientID, const void *pData, int Size, int Flags);
+ANTIBOTAPI bool AntibotOnEngineServerMessage(int ClientID, const void *pData, int Size, int Flags);
+// Returns true if the server should simulate receiving a client message.
+ANTIBOTAPI bool AntibotOnEngineSimulateClientMessage(int *pClientID, void *pBuffer, int BufferSize, int *pOutSize, int *pFlags);
 }
 
 #endif // ANTIBOT_ANTIBOT_INTERFACE_H
