@@ -487,7 +487,10 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		if(Input()->MouseDoubleClick() && DoubleClicked)
 		{
 			if(Client()->State() == IClient::STATE_ONLINE && Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
-				m_Popup = POPUP_DISCONNECT;
+			{
+				m_Popup = POPUP_SWITCH_SERVER;
+				str_copy(m_aNextServer, g_Config.m_UiServerAddress, sizeof(m_aNextServer));
+			}
 			else
 				Client()->Connect(g_Config.m_UiServerAddress);
 		}
@@ -647,7 +650,10 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			m_EnterPressed)
 		{
 			if(Client()->State() == IClient::STATE_ONLINE && Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
-				m_Popup = POPUP_DISCONNECT;
+			{
+				m_Popup = POPUP_SWITCH_SERVER;
+				str_copy(m_aNextServer, g_Config.m_UiServerAddress, sizeof(m_aNextServer));
+			}
 			else
 				Client()->Connect(g_Config.m_UiServerAddress);
 			m_EnterPressed = false;
