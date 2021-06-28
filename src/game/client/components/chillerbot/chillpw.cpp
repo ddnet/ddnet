@@ -56,15 +56,17 @@ void CChillPw::OnInit()
 	{
 		if(pLine[0] == '#' || pLine[0] == '\0')
 			continue;
-		const char *p = strtok(pLine, ",");
-		CheckToken(p, Line, pLine);
-		str_copy(m_aaHostnames[Line], p, sizeof(m_aaHostnames[Line]));
-		p = strtok(NULL, ",");
-		CheckToken(p, Line, pLine);
-		m_aDummy[Line] = atoi(p);
-		p = strtok(NULL, ",");
-		CheckToken(p, Line, pLine);
-		str_copy(m_aaPasswords[Line], p, sizeof(m_aaPasswords[Line]));
+		char *pRow1 = pLine;
+		CheckToken(pRow1, Line, pLine);
+		char *pRow2 = (char *)str_find((const char*)pRow1 + 1, ",");
+		CheckToken(pRow2, Line, pLine);
+		char *pRow3 = (char *)str_find((const char*)pRow2 + 1, ",");
+		CheckToken(pRow3, Line, pLine);
+		str_copy(m_aaPasswords[Line], pRow3 + 1, sizeof(m_aaPasswords[Line]));
+		pRow3[0] = '\0';
+		m_aDummy[Line] = atoi(pRow2 + 1);
+		pRow2[0] = '\0';
+		str_copy(m_aaHostnames[Line], pRow1, sizeof(m_aaHostnames[Line]));
 		Line++;
 	}
 	str_format(aBuf, sizeof(aBuf), "loaded %d passwords from '%s'", Line, PASSWORD_FILE);
