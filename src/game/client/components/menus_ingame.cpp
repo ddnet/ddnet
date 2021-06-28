@@ -532,7 +532,7 @@ bool CMenus::RenderServerControlServer(CUIRect MainView)
 
 	for(CVoteOptionClient *pOption = m_pClient->m_pVoting->m_pFirst; pOption; pOption = pOption->m_pNext)
 	{
-		if(m_aFilterString[0] != '\0' && !str_find_nocase(pOption->m_aDescription, m_aFilterString))
+		if(m_aFilterString[0] != '\0' && !str_utf8_find_nocase(pOption->m_aDescription, m_aFilterString))
 			continue;
 		TotalShown++;
 	}
@@ -543,7 +543,7 @@ bool CMenus::RenderServerControlServer(CUIRect MainView)
 	for(CVoteOptionClient *pOption = m_pClient->m_pVoting->m_pFirst; pOption; pOption = pOption->m_pNext)
 	{
 		i++;
-		if(m_aFilterString[0] != '\0' && !str_find_nocase(pOption->m_aDescription, m_aFilterString))
+		if(m_aFilterString[0] != '\0' && !str_utf8_find_nocase(pOption->m_aDescription, m_aFilterString))
 			continue;
 
 		CListboxItem Item = UiDoListboxNextItem(pOption);
@@ -577,7 +577,7 @@ bool CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 		if(Index == m_pClient->m_Snap.m_LocalClientID || (FilterSpectators && pInfoByName->m_Team == TEAM_SPECTATORS))
 			continue;
 
-		if(!str_find_nocase(m_pClient->m_aClients[Index].m_aName, m_aFilterString))
+		if(!str_utf8_find_nocase(m_pClient->m_aClients[Index].m_aName, m_aFilterString))
 			continue;
 
 		if(m_CallvoteSelectedPlayer == Index)
