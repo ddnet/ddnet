@@ -13,6 +13,8 @@
 #	gerdoe		2020-09-17 22:49:22
 #	Vy0x2		2021-06-08 15:48:25
 #	Anime.pdf	2021-06-13 13:08:50
+#	Vy0x2		2021-06-29 14:12:40
+#	gerdoe		2021-06-29 14:12:40
 ##### /authors #####
 
 ##### translated strings #####
@@ -54,7 +56,7 @@ All
 == Все
 
 Are you sure that you want to delete the demo?
-== Вы уверены, что хотите удалить демо?
+== Вы уверены, что хотите удалить запись?
 
 Are you sure that you want to quit?
 == Вы действительно желаете выйти?
@@ -63,7 +65,7 @@ Are you sure that you want to remove the player from your friends list?
 == Вы уверены, что хотите удалить игрока из друзей?
 
 Automatically record demos
-== Записывать демо
+== Автоматическая запись
 
 Automatically take game over screenshot
 == Делать снимок результатов игры
@@ -126,16 +128,16 @@ Delete
 == Удалить
 
 Delete demo
-== Удалить демо
+== Удалить запись
 
 Demo details
-== Сведения демо
+== Сведения запись
 
 Demofile: %s
-== Демо: %s
+== Запись: %s
 
 Demos
-== Демо
+== Записи
 
 Disconnect
 == Отключиться
@@ -162,13 +164,13 @@ Error
 == Ошибка
 
 Error loading demo
-== Ошибка при загрузке демо
+== Ошибка при загрузке записи
 
 Favorite
-== Избранный
+== Фаворит
 
 Favorites
-== Избранные
+== Фавориты
 
 Feet
 == Ноги
@@ -231,7 +233,7 @@ Hook
 == Крюк
 
 Invalid Demo
-== Нерабочее демо
+== Нерабочая запись
 
 Join blue
 == За синих
@@ -249,7 +251,7 @@ Language
 == Язык
 
 MOTD
-== MOTD
+== Сообщение дня
 
 Map
 == Карта
@@ -370,7 +372,7 @@ Rename
 == Переименов.
 
 Rename demo
-== Переименовать демо
+== Переименовать запись
 
 Reset filter
 == Сбросить фильтры
@@ -382,7 +384,7 @@ Score
 == Счёт
 
 Score limit
-== Лимит очков
+== Лимит Счёта
 
 Scoreboard
 == Табло
@@ -496,16 +498,16 @@ Time limit: %d min
 == Лимит времени: %d
 
 Try again
-== ОК
+== Попробуйтe снова
 
 Type
 == Тип
 
 Unable to delete the demo
-== Невозможно удалить демо
+== Невозможно удалить запись
 
 Unable to rename the demo
-== Невозможно переименовать демо
+== Невозможно переименовать запись
 
 Use sounds
 == Использовать звуки
@@ -577,7 +579,7 @@ Show kill messages
 == Показывать сообщения о смерти
 
 Show score
-== Показывать табло счета
+== Показывать счёта
 
 Show health + ammo
 == Показывать здоровье и патроны
@@ -619,7 +621,7 @@ Internet
 == Интернет
 
 Max demos
-== Максимальное кол-во демо
+== Максимальное кол-во записей
 
 Join game
 == Играть
@@ -655,7 +657,7 @@ Hue
 == Оттен.
 
 Record demo
-== Записать демо
+== Начать запись
 
 Your skin
 == Ваш скин
@@ -712,13 +714,13 @@ Show other players' hook collision lines
 == Показывать коллизии крюка других игроков
 
 DDNet Client needs to be restarted to complete update!
-== Перезапустите DDNet Client для завершения обновления!
+== Перезапустите DDNet клиент для завершения обновления!
 
 Please use a different name
 == Пожалуйста, используйте другое имя
 
 Show others
-== Показывать остальных
+== Показывать другие
 
 Game paused
 == Пауза
@@ -751,7 +753,7 @@ New random timeout code
 == Новый тайм-аут код
 
 Loading DDNet Client
-== Загрузка DDNet Client
+== Загрузка DDNet клиент
 
 Normal message
 == Обычное сообщение
@@ -772,7 +774,7 @@ Highlighted message
 == Выделенное сообщение
 
 Demo
-== Демо
+== Запись
 
 Successfully saved the replay!
 == Повтор сохранен!
@@ -1003,7 +1005,7 @@ Friend message
 == Сообщение от друга
 
 Save the best demo of each race
-== Сохранять лучшее демо каждой карты
+== Сохранять лучшую запись каждой карты
 
 Default length: %d
 == Станд. длина: %d
@@ -1184,7 +1186,7 @@ Theme
 == Тема
 
 Demos directory
-== Папка с демо
+== Папка с записью
 
 Smooth Dynamic Camera
 == Плавная дин. камера
@@ -1316,13 +1318,13 @@ Use modern OpenGL
 == Использовать новый OpenGL
 
 Hookline
-== 
+== Линия крюка
 
 No hit
-== 
+== Нет удара
 
 Hookable
-== 
+== Можно крючком
 
 Tee
 == Tee
