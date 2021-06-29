@@ -59,7 +59,8 @@ void CChillerBotUX::ChangeTileNotifyTick()
 	int CurrentTile = Collision()->GetTileIndex(Collision()->GetPureMapIndex(X, Y));
 	if(LastTile != CurrentTile && m_LastNotification + time_freq() * 10 < time_get())
 	{
-		if(!((IEngineGraphics *)Kernel()->RequestInterface<IEngineGraphics>())->WindowActive())
+		IEngineGraphics *pGraphics = ((IEngineGraphics *)Kernel()->RequestInterface<IEngineGraphics>());
+		if(pGraphics && !pGraphics->WindowActive() && Graphics())
 		{
 			NotificationsNotify("chillerbot-ux", "current tile changed");
 			Graphics()->NotifyWindow();
