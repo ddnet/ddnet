@@ -89,6 +89,8 @@ void CInput::MouseModeRelative()
 	m_InputGrabbed = 1;
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 	Graphics()->SetWindowGrab(true);
+	// Clear pending relative mouse motion
+	SDL_GetRelativeMouseState(0x0, 0x0);
 }
 
 int CInput::MouseDoubleClick()
@@ -334,8 +336,6 @@ int CInput::Update()
 						MouseModeRelative();
 					m_MouseFocus = true;
 					IgnoreKeys = true;
-					// We should do this call to reset relative mouse position after alt+tab
-					SDL_GetRelativeMouseState(0x0, 0x0);
 					break;
 				case SDL_WINDOWEVENT_FOCUS_LOST:
 					m_MouseFocus = false;
