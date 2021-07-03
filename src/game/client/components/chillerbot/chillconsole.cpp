@@ -489,7 +489,7 @@ void CChillConsole::OnRender()
 		ConsoleHeightScale = 0.5f;
 	else if(m_ConsoleState == CONSOLE_READ_ONLY)
 		ConsoleHeightScale = 0.3f;
-	else if (m_ConsoleState == CONSOLE_OPEN_2)
+	else if(m_ConsoleState == CONSOLE_OPEN_2)
 		ConsoleHeightScale = 1.0f;
 	else
 		ConsoleHeightScale = ConsoleScaleFunc(1.0f);

@@ -69,6 +69,7 @@
 #include "components/chillerbot/chillpw.h"
 #include "components/chillerbot/playerpics.h"
 #include "components/chillerbot/remotecontrol.h"
+#include "components/chillerbot/unix.h"
 #include "components/chillerbot/warlist.h"
 
 #include "components/ghost.h"
@@ -124,6 +125,7 @@ static CPlayerPics gs_PlayerPics;
 static CRemoteControl gs_RemoteControl;
 static CWarList gs_WarList;
 static CChillConsole gs_ChillConsole;
+static CUnix gs_Unix;
 
 CGameClient::CStack::CStack() { m_Num = 0; }
 void CGameClient::CStack::Add(class CComponent *pComponent) { m_paComponents[m_Num++] = pComponent; }
@@ -239,6 +241,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&gs_RemoteControl);
 	m_All.Add(m_pWarList);
 	m_All.Add(m_pChillConsole);
+	m_All.Add(&gs_Unix);
 
 	m_All.Add(m_pMenuBackground);
 

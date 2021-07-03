@@ -1,11 +1,11 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#ifndef GAME_CLIENT_COMPONENTS_CHILLCONSOLE_H
-#define GAME_CLIENT_COMPONENTS_CHILLCONSOLE_H
+#ifndef GAME_CLIENT_COMPONENTS_CHILLERBOT_CHILLCONSOLE_H
+#define GAME_CLIENT_COMPONENTS_CHILLERBOT_CHILLCONSOLE_H
 #include <engine/shared/ringbuffer.h>
 #include <game/client/component.h>
-#include <game/client/lineinput.h>
 #include <game/client/components/console.h>
+#include <game/client/lineinput.h>
 
 enum
 {
