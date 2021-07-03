@@ -444,19 +444,28 @@ void CChillConsole::PossibleCommandsRenderCallback(const char *pStr, void *pUser
 void CChillConsole::OnRender()
 {
 	CUIRect Screen = *UI()->Screen();
-	float ConsoleMaxHeight = Screen.h / 5.0f;
+	float ConsoleMaxHeight = Screen.h * 3 / 5.0f;
 	float ConsoleHeight;
 
 	float Progress = (TimeNow() - (m_StateChangeEnd - m_StateChangeDuration)) / m_StateChangeDuration;
 
 	if(Progress >= 1.0f)
 	{
-		if(m_ConsoleState == CONSOLE_CLOSING)
+		if(m_ConsoleState == CONSOLE_CLOSING_2)
 			m_ConsoleState = CONSOLE_CLOSED;
-		else if(m_ConsoleState == CONSOLE_OPENING)
-			m_ConsoleState = CONSOLE_OPEN;
+		else if(m_ConsoleState == CONSOLE_OPENING_2)
+			m_ConsoleState = CONSOLE_OPEN_2;
 
 		Progress = 1.0f;
+	}
+	if(Progress >= 0.5f)
+	{
+		if(m_ConsoleState == CONSOLE_CLOSING)
+			m_ConsoleState = CONSOLE_READ_ONLY;
+		if(m_ConsoleState == CONSOLE_OPENING)
+			m_ConsoleState = CONSOLE_OPEN;
+
+		Progress = 0.5f;
 	}
 
 	if(m_ConsoleState == CONSOLE_OPEN && g_Config.m_ClEditor)
@@ -465,21 +474,31 @@ void CChillConsole::OnRender()
 	if(m_ConsoleState == CONSOLE_CLOSED)
 		return;
 
-	// if(m_ConsoleState == CONSOLE_OPEN)
-	// 	Input()->MouseModeAbsolute();
+	if(m_ConsoleState == CONSOLE_OPEN || m_ConsoleState == CONSOLE_OPEN_2)
+		Input()->MouseModeAbsolute();
 
 	float ConsoleHeightScale;
 
 	if(m_ConsoleState == CONSOLE_OPENING)
-		ConsoleHeightScale = ConsoleScaleFunc(Progress);
+		ConsoleHeightScale = ConsoleScaleFunc(0.5f);
 	else if(m_ConsoleState == CONSOLE_CLOSING)
 		ConsoleHeightScale = ConsoleScaleFunc(1.0f - Progress);
-	else //if (console_state == CONSOLE_OPEN)
+	else if(m_ConsoleState == CONSOLE_CLOSING_2)
+		ConsoleHeightScale = ConsoleScaleFunc(0.5f - Progress);
+	else if(m_ConsoleState == CONSOLE_OPEN)
+		ConsoleHeightScale = 0.5f;
+	else if(m_ConsoleState == CONSOLE_READ_ONLY)
+		ConsoleHeightScale = 0.3f;
+	else if (m_ConsoleState == CONSOLE_OPEN_2)
+		ConsoleHeightScale = 1.0f;
+	else
 		ConsoleHeightScale = ConsoleScaleFunc(1.0f);
 
 	ConsoleHeight = ConsoleHeightScale * ConsoleMaxHeight;
 
 	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
+
+	float alpha = m_ConsoleState == CONSOLE_READ_ONLY ? 0.6f : 0.9f;
 
 	// do console shadow
 	Graphics()->TextureClear();
@@ -497,9 +516,9 @@ void CChillConsole::OnRender()
 	// do background
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CONSOLE_BG].m_Id);
 	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0.2f, 0.2f, 0.2f, 0.9f);
+	Graphics()->SetColor(0.2f, 0.2f, 0.2f, alpha);
 	if(m_ConsoleType == CONSOLETYPE_REMOTE)
-		Graphics()->SetColor(0.4f, 0.2f, 0.2f, 0.9f);
+		Graphics()->SetColor(0.4f, 0.2f, 0.2f, alpha);
 	Graphics()->QuadsSetSubset(0, -ConsoleHeight * 0.075f, Screen.w * 0.075f * 0.5f, 0);
 	QuadItem = IGraphics::CQuadItem(0, 0, Screen.w, ConsoleHeight);
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
@@ -520,7 +539,7 @@ void CChillConsole::OnRender()
 	// do the lower bar
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CONSOLE_BAR].m_Id);
 	Graphics()->QuadsBegin();
-	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.9f);
+	Graphics()->SetColor(1.0f, 1.0f, 1.0f, alpha);
 	Graphics()->QuadsSetSubset(0, 0.1f, Screen.w * 0.015f, 1 - 0.1f);
 	QuadItem = IGraphics::CQuadItem(0, ConsoleHeight - 10.0f, Screen.w, 10.0f);
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
@@ -715,7 +734,8 @@ bool CChillConsole::OnInput(IInput::CEvent Event)
 {
 	// accept input when opening, but not at first frame to discard the input that caused the console to open
 	if(m_ConsoleState != CONSOLE_OPEN && (m_ConsoleState != CONSOLE_OPENING || m_StateChangeEnd == TimeNow() + m_StateChangeDuration))
-		return false;
+		if(m_ConsoleState != CONSOLE_OPEN_2 && (m_ConsoleState != CONSOLE_OPENING_2 || m_StateChangeEnd == TimeNow() + m_StateChangeDuration))
+			return false;
 	if((Event.m_Key >= KEY_F1 && Event.m_Key <= KEY_F12) || (Event.m_Key >= KEY_F13 && Event.m_Key <= KEY_F24))
 		return false;
 
@@ -729,13 +749,13 @@ bool CChillConsole::OnInput(IInput::CEvent Event)
 
 void CChillConsole::Toggle(int Type)
 {
-	if(m_ConsoleType != Type && (m_ConsoleState == CONSOLE_OPEN || m_ConsoleState == CONSOLE_OPENING))
+	if(m_ConsoleType != Type && (m_ConsoleState == CONSOLE_OPEN || m_ConsoleState != CONSOLE_OPEN_2 || m_ConsoleState == CONSOLE_OPENING || m_ConsoleState != CONSOLE_OPENING_2))
 	{
 		// don't toggle console, just switch what console to use
 	}
 	else
 	{
-		if(m_ConsoleState == CONSOLE_CLOSED || m_ConsoleState == CONSOLE_OPEN)
+		if(m_ConsoleState == CONSOLE_CLOSED || m_ConsoleState == CONSOLE_OPEN || m_ConsoleState == CONSOLE_OPEN_2)
 		{
 			m_StateChangeEnd = TimeNow() + m_StateChangeDuration;
 		}
@@ -757,14 +777,21 @@ void CChillConsole::Toggle(int Type)
 
 			Input()->SetIMEState(true);
 		}
-		else
+		else if(m_ConsoleState == CONSOLE_OPEN)
 		{
+			m_ConsoleState = CONSOLE_OPENING_2;
+		}
+		else if(m_ConsoleState == CONSOLE_OPEN_2) // going in read only mode
+		{
+			m_ConsoleState = CONSOLE_CLOSING;
 			Input()->MouseModeRelative();
 			m_pClient->m_pMenus->UseMouseButtons(true);
 			m_pClient->OnRelease();
-			m_ConsoleState = CONSOLE_CLOSING;
-
 			Input()->SetIMEState(false);
+		}
+		else // fully close
+		{
+			m_ConsoleState = CONSOLE_CLOSING_2;
 		}
 	}
 

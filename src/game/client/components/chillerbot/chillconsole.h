@@ -7,6 +7,14 @@
 #include <game/client/lineinput.h>
 #include <game/client/components/console.h>
 
+enum
+{
+	CONSOLE_OPENING_2 = CONSOLE_CLOSING + 1,
+	CONSOLE_OPEN_2,
+	CONSOLE_READ_ONLY,
+	CONSOLE_CLOSING_2,
+};
+
 class CChillConsole : public CComponent
 {
 	class CInstance
