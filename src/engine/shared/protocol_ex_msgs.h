@@ -29,3 +29,6 @@ UUID(NETMSG_CAPABILITIES, "capabilities@ddnet.tw")
 UUID(NETMSG_CLIENTVER, "clientver@ddnet.tw")
 UUID(NETMSG_PINGEX, "ping@ddnet.tw")
 UUID(NETMSG_PONGEX, "pong@ddnet.tw")
+
+UUID(NETMSG_IAMALLTHEHAXX, "i-am-allthehaxx@allthehaxx.github.io")
+UUID(NETMSG_IAMCHILLERBOT, "i-am-chillerbot@chillerbot.github.io")

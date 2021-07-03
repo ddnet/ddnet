@@ -282,6 +282,7 @@ void CServer::CClient::Reset()
 	m_DDNetVersion = VERSION_NONE;
 	m_GotDDNetVersionPacket = false;
 	m_DDNetVersionSettled = false;
+	m_CustomClientStr[0] = '\0';
 }
 
 CServer::CServer() :
@@ -1388,6 +1389,31 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				m_aClients[ClientID].m_DDNetVersionSettled = true;
 				m_aClients[ClientID].m_GotDDNetVersionPacket = true;
 				m_aClients[ClientID].m_State = CClient::STATE_AUTH;
+			}
+		}
+		else if(Msg == NETMSG_IAMCHILLERBOT)
+		{
+			if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && (m_aClients[ClientID].m_State == CClient::STATE_PREAUTH || m_aClients[ClientID].m_State == CClient::STATE_AUTH))
+			{
+				int ChillerBotVersion = Unpacker.GetInt();
+				const char *pChillerBotType = Unpacker.GetString(CUnpacker::SANITIZE_CC);
+				if(Unpacker.Error() || !str_utf8_check(pChillerBotType))
+				{
+					return;
+				}
+				char aBuf[256];
+				str_format(aBuf, sizeof(aBuf), "chillerbot-%s (v%d)", pChillerBotType, ChillerBotVersion);
+				str_copy(m_aClients[ClientID].m_CustomClientStr, aBuf, sizeof(m_aClients[ClientID].m_CustomClientStr));
+			}
+		}
+		else if(Msg == NETMSG_IAMALLTHEHAXX)
+		{
+			if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && (m_aClients[ClientID].m_State == CClient::STATE_PREAUTH || m_aClients[ClientID].m_State == CClient::STATE_AUTH))
+			{
+				int AllTheHaxxVersion = Unpacker.GetInt();
+				char aBuf[256];
+				str_format(aBuf, sizeof(aBuf), "AllTheHaxx (v%d)", AllTheHaxxVersion);
+				str_copy(m_aClients[ClientID].m_CustomClientStr, aBuf, sizeof(m_aClients[ClientID].m_CustomClientStr));
 			}
 		}
 		else if(Msg == NETMSG_INFO)
@@ -2799,13 +2825,18 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 				str_format(aAuthStr, sizeof(aAuthStr), " key=%s %s", pThis->m_AuthManager.KeyIdent(pThis->m_aClients[i].m_AuthKey), pAuthStr);
 			}
 
+			char aCustomClientStr[128];
+			aCustomClientStr[0] = '\0';
+			if(pThis->m_aClients[i].m_CustomClientStr[0])
+				str_format(aCustomClientStr, sizeof(aCustomClientStr), " custom=%s", pThis->m_aClients[i].m_CustomClientStr);
+
 			const char *pClientPrefix = "";
 			if(pThis->m_aClients[i].m_Sixup)
 			{
 				pClientPrefix = "0.7:";
 			}
-			str_format(aBuf, sizeof(aBuf), "id=%d addr=<{%s}> name='%s' client=%s%d secure=%s flags=%d%s%s",
-				i, aAddrStr, pThis->m_aClients[i].m_aName, pClientPrefix, pThis->m_aClients[i].m_DDNetVersion,
+			str_format(aBuf, sizeof(aBuf), "id=%d addr=<{%s}> name='%s' client=%s%d%s secure=%s flags=%d%s%s",
+				i, aAddrStr, pThis->m_aClients[i].m_aName, pClientPrefix, pThis->m_aClients[i].m_DDNetVersion, aCustomClientStr,
 				pThis->m_NetServer.HasSecurityToken(i) ? "yes" : "no", pThis->m_aClients[i].m_Flags, aDnsblStr, aAuthStr);
 		}
 		else

@@ -191,6 +191,7 @@ public:
 		int m_DDNetVersion;
 		char m_aDDNetVersionStr[64];
 		CUuid m_ConnectionID;
+		char m_CustomClientStr[64];
 
 		// DNSBL
 		int m_DnsblState;
