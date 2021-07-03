@@ -631,12 +631,17 @@ void sphore_destroy(SEMAPHORE *sem);
 /* if compiled with -pedantic-errors it will complain about long
 	not being a C90 thing.
 */
+
+// Haiku ships with its own sets of built-in definitions for
+// both int64 and uint64. It isn't necessary for the game
+// to define either of these variables.
 #ifdef CONF_PLATFORM_HAIKU
 #include <SupportDefs.h>
 #else
 __extension__ typedef long long int64;
-#endif
 __extension__ typedef unsigned long long uint64;
+#endif
+
 #else
 typedef long long int64;
 typedef unsigned long long uint64;

@@ -102,7 +102,7 @@ void CChat::Reset()
 	m_CurrentLine = 0;
 	DisableMode();
 
-	for(long long &LastSoundPlayed : m_aLastSoundPlayed)
+	for(int64 &LastSoundPlayed : m_aLastSoundPlayed)
 		LastSoundPlayed = 0;
 }
 

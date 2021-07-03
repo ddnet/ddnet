@@ -5,6 +5,7 @@
 #if defined(CONF_PLATFORM_MACOS)
 // Code is in src/macos/notification.mm.
 #elif defined(CONF_FAMILY_UNIX)
+#ifndef CONF_PLATFORM_HAIKU
 #include <libnotify/notify.h>
 void NotificationsInit()
 {
@@ -32,4 +33,5 @@ void NotificationsNotify(const char *pTitle, const char *pMessage)
 	(void)pTitle;
 	(void)pMessage;
 }
+#endif
 #endif
