@@ -1000,11 +1000,13 @@ void CGameClient::OnLanguageChange()
 void CGameClient::OnRconType(bool UsernameReq)
 {
 	m_pGameConsole->RequireUsername(UsernameReq);
+	m_pChillConsole->RequireUsername(UsernameReq);
 }
 
 void CGameClient::OnRconLine(const char *pLine)
 {
 	m_pGameConsole->PrintLine(CGameConsole::CONSOLETYPE_REMOTE, pLine);
+	m_pChillConsole->PrintLine(CGameConsole::CONSOLETYPE_REMOTE, pLine);
 }
 
 void CGameClient::ProcessEvents()
