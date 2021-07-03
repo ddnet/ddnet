@@ -1772,6 +1772,8 @@ if(CLIENT)
     components/chillerbot/chatcommands.h
     components/chillerbot/chathelper.cpp
     components/chillerbot/chathelper.h
+    components/chillerbot/chillconsole.cpp
+    components/chillerbot/chillconsole.h
     components/chillerbot/chillerbotux.cpp
     components/chillerbot/chillerbotux.h
     components/chillerbot/chillpw.cpp
@@ -1780,6 +1782,8 @@ if(CLIENT)
     components/chillerbot/playerpics.h
     components/chillerbot/remotecontrol.cpp
     components/chillerbot/remotecontrol.h
+    components/chillerbot/unix.cpp
+    components/chillerbot/unix.h
     components/chillerbot/version.h
     components/chillerbot/warlist.cpp
     components/chillerbot/warlist.h

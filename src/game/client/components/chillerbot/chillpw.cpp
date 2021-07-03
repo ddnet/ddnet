@@ -58,9 +58,9 @@ void CChillPw::OnInit()
 			continue;
 		char *pRow1 = pLine;
 		CheckToken(pRow1, Line, pLine);
-		char *pRow2 = (char *)str_find((const char*)pRow1 + 1, ",");
+		char *pRow2 = (char *)str_find((const char *)pRow1 + 1, ",");
 		CheckToken(pRow2, Line, pLine);
-		char *pRow3 = (char *)str_find((const char*)pRow2 + 1, ",");
+		char *pRow3 = (char *)str_find((const char *)pRow2 + 1, ",");
 		CheckToken(pRow3, Line, pLine);
 		str_copy(m_aaPasswords[Line], pRow3 + 1, sizeof(m_aaPasswords[Line]));
 		pRow3[0] = '\0';

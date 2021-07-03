@@ -64,10 +64,12 @@
 #include "components/voting.h"
 
 #include "components/chillerbot/chathelper.h"
+#include "components/chillerbot/chillconsole.h"
 #include "components/chillerbot/chillerbotux.h"
 #include "components/chillerbot/chillpw.h"
 #include "components/chillerbot/playerpics.h"
 #include "components/chillerbot/remotecontrol.h"
+#include "components/chillerbot/unix.h"
 #include "components/chillerbot/warlist.h"
 
 #include "components/ghost.h"
@@ -122,6 +124,8 @@ static CChillPw gs_ChillPw;
 static CPlayerPics gs_PlayerPics;
 static CRemoteControl gs_RemoteControl;
 static CWarList gs_WarList;
+static CChillConsole gs_ChillConsole;
+static CUnix gs_Unix;
 
 CGameClient::CStack::CStack() { m_Num = 0; }
 void CGameClient::CStack::Add(class CComponent *pComponent) { m_paComponents[m_Num++] = pComponent; }
@@ -184,6 +188,7 @@ void CGameClient::OnConsoleInit()
 	m_pChillerBotUX = &::gs_ChillerBotUX;
 	m_pChatHelper = &::gs_ChatHelper;
 	m_pWarList = &::gs_WarList;
+	m_pChillConsole = &::gs_ChillConsole;
 
 	m_pMenus->SetMenuBackground(m_pMenuBackground);
 
@@ -235,10 +240,13 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&gs_ChillPw);
 	m_All.Add(&gs_RemoteControl);
 	m_All.Add(m_pWarList);
+	m_All.Add(m_pChillConsole);
+	m_All.Add(&gs_Unix);
 
 	m_All.Add(m_pMenuBackground);
 
 	m_Input.Add(m_pChillerBotUX);
+	m_Input.Add(m_pChillConsole);
 
 	// build the input stack
 	m_Input.Add(&m_pMenus->m_Binder); // this will take over all input when we want to bind a key
@@ -995,11 +1003,13 @@ void CGameClient::OnLanguageChange()
 void CGameClient::OnRconType(bool UsernameReq)
 {
 	m_pGameConsole->RequireUsername(UsernameReq);
+	m_pChillConsole->RequireUsername(UsernameReq);
 }
 
 void CGameClient::OnRconLine(const char *pLine)
 {
 	m_pGameConsole->PrintLine(CGameConsole::CONSOLETYPE_REMOTE, pLine);
+	m_pChillConsole->PrintLine(CGameConsole::CONSOLETYPE_REMOTE, pLine);
 }
 
 void CGameClient::ProcessEvents()
