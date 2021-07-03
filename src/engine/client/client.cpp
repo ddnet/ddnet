@@ -455,8 +455,9 @@ void CClient::ChillerBotLoadMap(const char *pMap)
 
 void CClient::SendChillerBotUX(bool Dummy)
 {
-	CMsgPacker Msg(NETMSG_IAMCHILLERBOT_UX, true);
+	CMsgPacker Msg(NETMSG_IAMCHILLERBOT, true);
 	Msg.AddInt(CHILLERBOT_VERSIONNR);
+	Msg.AddString("ux", 0);
 	char aBuf[2048];
 	str_format(aBuf, sizeof(aBuf),
 		"chillerbot-ux %s (DDNet %s, built on %s, git rev %s)",

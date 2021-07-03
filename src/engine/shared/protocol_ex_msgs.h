@@ -31,4 +31,4 @@ UUID(NETMSG_CLIENTVER, "clientver@ddnet.tw")
 UUID(NETMSG_PINGEX, "ping@ddnet.tw")
 UUID(NETMSG_PONGEX, "pong@ddnet.tw")
 
-UUID(NETMSG_IAMCHILLERBOT_UX, "i-am-chillerbot-ux@chillerbot.github.io")
+UUID(NETMSG_IAMCHILLERBOT, "i-am-chillerbot@chillerbot.github.io")
