@@ -123,8 +123,8 @@ void CPlayer::Reset()
 	m_ScoreQueryResult = nullptr;
 	m_ScoreFinishResult = nullptr;
 
-	int64 Now = Server()->Tick();
-	int64 TickSpeed = Server()->TickSpeed();
+	int64_t Now = Server()->Tick();
+	int64_t TickSpeed = Server()->TickSpeed();
 	// If the player joins within ten seconds of the server becoming
 	// non-empty, allow them to vote immediately. This allows players to
 	// vote after map changes or when they join an empty server.
@@ -807,7 +807,7 @@ void CPlayer::OverrideDefaultEmote(int Emote, int Tick)
 
 bool CPlayer::CanOverrideDefaultEmote() const
 {
-	return m_LastEyeEmote == 0 || m_LastEyeEmote + (int64)g_Config.m_SvEyeEmoteChangeDelay * Server()->TickSpeed() < Server()->Tick();
+	return m_LastEyeEmote == 0 || m_LastEyeEmote + (int64_t)g_Config.m_SvEyeEmoteChangeDelay * Server()->TickSpeed() < Server()->Tick();
 }
 
 void CPlayer::ProcessPause()
@@ -844,7 +844,7 @@ int CPlayer::Pause(int State, bool Force)
 		case PAUSE_NONE:
 			if(m_pCharacter->IsPaused()) // First condition might be unnecessary
 			{
-				if(!Force && m_LastPause && m_LastPause + (int64)g_Config.m_SvSpecFrequency * Server()->TickSpeed() > Server()->Tick())
+				if(!Force && m_LastPause && m_LastPause + (int64_t)g_Config.m_SvSpecFrequency * Server()->TickSpeed() > Server()->Tick())
 				{
 					GameServer()->SendChatTarget(m_ClientID, "Can't /spec that quickly.");
 					return m_Paused; // Do not update state. Do not collect $200

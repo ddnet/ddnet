@@ -108,7 +108,7 @@ struct SUIAnimator
 	bool m_ScaleLabel;
 	bool m_RepositionLabel;
 
-	int64 m_Time;
+	int64_t m_Time;
 	float m_Value;
 
 	float m_XOffset;
@@ -151,7 +151,7 @@ protected:
 	std::vector<SUIElementRect> m_UIRects;
 
 	// used for marquees or other user implemented things
-	int64 m_ElementTime;
+	int64_t m_ElementTime;
 
 public:
 	CUIElement() = default;

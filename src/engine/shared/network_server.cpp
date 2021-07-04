@@ -183,7 +183,7 @@ int CNetServer::NumClientsWithAddr(NETADDR Addr)
 
 bool CNetServer::Connlimit(NETADDR Addr)
 {
-	int64 Now = time_get();
+	int64_t Now = time_get();
 	int Oldest = 0;
 
 	for(int i = 0; i < NET_CONNLIMIT_IPS; ++i)
@@ -320,7 +320,7 @@ void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 	//TODO: remove
 	if(g_Config.m_Debug)
 	{
-		int64 Now = time_get();
+		int64_t Now = time_get();
 
 		if(Now - m_TimeNumConAttempts > time_freq())
 			// reset
@@ -347,7 +347,7 @@ void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 			{
 				// detect flooding
 				Flooding = m_VConnNum > g_Config.m_SvVanConnPerSecond;
-				const int64 Now = time_get();
+				const int64_t Now = time_get();
 
 				if(Now <= m_VConnFirst + time_freq())
 				{

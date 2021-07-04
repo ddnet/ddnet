@@ -27,7 +27,7 @@ typedef struct OutputStream
 	AVCodecContext *pEnc;
 
 	/* pts of the next frame that will be generated */
-	int64 NextPts;
+	int64_t NextPts;
 	int SamplesCount;
 
 	AVFrame *pFrame;
@@ -69,7 +69,7 @@ private:
 	bool OpenVideo();
 	bool OpenAudio();
 	AVFrame *AllocPicture(enum AVPixelFormat PixFmt, int Width, int Height);
-	AVFrame *AllocAudioFrame(enum AVSampleFormat SampleFmt, uint64 ChannelLayout, int SampleRate, int NbSamples);
+	AVFrame *AllocAudioFrame(enum AVSampleFormat SampleFmt, uint64_t ChannelLayout, int SampleRate, int NbSamples);
 
 	void WriteFrame(OutputStream *pStream) REQUIRES(g_WriteLock);
 	void FinishFrames(OutputStream *pStream);

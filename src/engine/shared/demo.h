@@ -66,8 +66,8 @@ public:
 
 		IDemoPlayer::CInfo m_Info;
 
-		int64 m_LastUpdate;
-		int64 m_CurrentTime;
+		int64_t m_LastUpdate;
+		int64_t m_CurrentTime;
 
 		int m_SeekablePoints;
 
@@ -113,10 +113,10 @@ private:
 	void ScanFile();
 	int NextFrame();
 
-	int64 time();
+	int64_t time();
 
-	int64 m_TickTime;
-	int64 m_Time;
+	int64_t m_TickTime;
+	int64_t m_Time;
 
 public:
 	CDemoPlayer(class CSnapshotDelta *pSnapshotDelta);

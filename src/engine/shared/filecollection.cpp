@@ -54,9 +54,9 @@ bool CFileCollection::IsFilenameValid(const char *pFilename)
 	return false;
 }
 
-int64 CFileCollection::ExtractTimestamp(const char *pTimestring)
+int64_t CFileCollection::ExtractTimestamp(const char *pTimestring)
 {
-	int64 Timestamp = pTimestring[0] - '0';
+	int64_t Timestamp = pTimestring[0] - '0';
 	Timestamp <<= 4;
 	Timestamp += pTimestring[1] - '0';
 	Timestamp <<= 4;
@@ -87,7 +87,7 @@ int64 CFileCollection::ExtractTimestamp(const char *pTimestring)
 	return Timestamp;
 }
 
-void CFileCollection::BuildTimestring(int64 Timestamp, char *pTimestring)
+void CFileCollection::BuildTimestring(int64_t Timestamp, char *pTimestring)
 {
 	pTimestring[19] = 0;
 	pTimestring[18] = (Timestamp & 0xF) + '0';
@@ -142,7 +142,7 @@ void CFileCollection::Init(IStorage *pStorage, const char *pPath, const char *pF
 	m_pStorage->ListDirectory(IStorage::TYPE_SAVE, m_aPath, FilelistCallback, this);
 }
 
-void CFileCollection::AddEntry(int64 Timestamp)
+void CFileCollection::AddEntry(int64_t Timestamp)
 {
 	if(m_NumTimestamps == 0)
 	{
@@ -157,7 +157,7 @@ void CFileCollection::AddEntry(int64 Timestamp)
 			// first entry
 			if(m_NumTimestamps <= m_MaxEntries)
 			{
-				mem_move(m_aTimestamps + 1, m_aTimestamps, m_NumTimestamps * sizeof(int64));
+				mem_move(m_aTimestamps + 1, m_aTimestamps, m_NumTimestamps * sizeof(int64_t));
 				m_aTimestamps[0] = Timestamp;
 				++m_NumTimestamps;
 			}
@@ -167,7 +167,7 @@ void CFileCollection::AddEntry(int64 Timestamp)
 			// last entry
 			if(m_NumTimestamps > m_MaxEntries)
 			{
-				mem_move(m_aTimestamps, m_aTimestamps + 1, (m_NumTimestamps - 1) * sizeof(int64));
+				mem_move(m_aTimestamps, m_aTimestamps + 1, (m_NumTimestamps - 1) * sizeof(int64_t));
 				m_aTimestamps[m_NumTimestamps - 1] = Timestamp;
 			}
 			else
@@ -188,12 +188,12 @@ void CFileCollection::AddEntry(int64 Timestamp)
 
 			if(m_NumTimestamps > m_MaxEntries)
 			{
-				mem_move(m_aTimestamps, m_aTimestamps + 1, (Right - 1) * sizeof(int64));
+				mem_move(m_aTimestamps, m_aTimestamps + 1, (Right - 1) * sizeof(int64_t));
 				m_aTimestamps[Right - 1] = Timestamp;
 			}
 			else
 			{
-				mem_move(m_aTimestamps + Right + 1, m_aTimestamps + Right, (m_NumTimestamps - Right) * sizeof(int64));
+				mem_move(m_aTimestamps + Right + 1, m_aTimestamps + Right, (m_NumTimestamps - Right) * sizeof(int64_t));
 				m_aTimestamps[Right] = Timestamp;
 				++m_NumTimestamps;
 			}
@@ -221,7 +221,7 @@ void CFileCollection::AddEntry(int64 Timestamp)
 	}
 }
 
-int64 CFileCollection::GetTimestamp(const char *pFilename)
+int64_t CFileCollection::GetTimestamp(const char *pFilename)
 {
 	if(m_aFileDesc[0] == '\0')
 	{
@@ -243,7 +243,7 @@ int CFileCollection::FilelistCallback(const char *pFilename, int IsDir, int Stor
 		return 0;
 
 	// extract the timestamp
-	int64 Timestamp = pThis->GetTimestamp(pFilename);
+	int64_t Timestamp = pThis->GetTimestamp(pFilename);
 
 	// add the entry
 	pThis->AddEntry(Timestamp);
@@ -260,7 +260,7 @@ int CFileCollection::RemoveCallback(const char *pFilename, int IsDir, int Storag
 		return 0;
 
 	// extract the timestamp
-	int64 Timestamp = pThis->GetTimestamp(pFilename);
+	int64_t Timestamp = pThis->GetTimestamp(pFilename);
 
 	if(Timestamp == pThis->m_Remove)
 	{

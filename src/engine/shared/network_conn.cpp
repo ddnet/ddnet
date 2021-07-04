@@ -230,7 +230,7 @@ void CNetConnection::DirectInit(NETADDR &Addr, SECURITY_TOKEN SecurityToken, SEC
 	m_PeerAddr = Addr;
 	mem_zero(m_aErrorString, sizeof(m_aErrorString));
 
-	int64 Now = time_get();
+	int64_t Now = time_get();
 	m_LastSendTime = Now;
 	m_LastRecvTime = Now;
 	m_LastUpdateTime = Now;
@@ -272,7 +272,7 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 	}
 	m_PeerAck = pPacket->m_Ack;
 
-	int64 Now = time_get();
+	int64_t Now = time_get();
 
 	// check if resend is requested
 	if(pPacket->m_Flags & NET_PACKETFLAG_RESEND)
@@ -391,7 +391,7 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 
 int CNetConnection::Update()
 {
-	int64 Now = time_get();
+	int64_t Now = time_get();
 
 	if(State() == NET_CONNSTATE_ERROR && m_TimeoutSituation && (Now - m_LastRecvTime) > time_freq() * g_Config.m_ConnTimeoutProtection)
 	{
@@ -465,7 +465,7 @@ int CNetConnection::Update()
 
 void CNetConnection::SetTimedOut(const NETADDR *pAddr, int Sequence, int Ack, SECURITY_TOKEN SecurityToken, CStaticRingBuffer<CNetChunkResend, NET_CONN_BUFFERSIZE> *pResendBuffer, bool Sixup)
 {
-	int64 Now = time_get();
+	int64_t Now = time_get();
 
 	m_Sequence = Sequence;
 	m_Ack = Ack;

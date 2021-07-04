@@ -1034,7 +1034,7 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 		{
 			int Team = pResult->GetInteger(0);
 
-			if(pPlayer->m_Last_Team + (int64)pSelf->Server()->TickSpeed() * g_Config.m_SvTeamChangeDelay > pSelf->Server()->Tick())
+			if(pPlayer->m_Last_Team + (int64_t)pSelf->Server()->TickSpeed() * g_Config.m_SvTeamChangeDelay > pSelf->Server()->Tick())
 			{
 				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",
 					"You can\'t change teams that fast!");
@@ -1346,7 +1346,7 @@ void CGameContext::ConSayTime(IConsole::IResult *pResult, void *pUserData)
 
 	char aBufTime[32];
 	char aBuf[64];
-	int64 Time = (int64)100 * (float)(pSelf->Server()->Tick() - pChr->m_StartTime) / ((float)pSelf->Server()->TickSpeed());
+	int64_t Time = (int64_t)100 * (float)(pSelf->Server()->Tick() - pChr->m_StartTime) / ((float)pSelf->Server()->TickSpeed());
 	str_time(Time, TIME_HOURS, aBufTime, sizeof(aBufTime));
 	str_format(aBuf, sizeof(aBuf), "%s current race time is %s", aBufName, aBufTime);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "time", aBuf);
@@ -1369,7 +1369,7 @@ void CGameContext::ConSayTimeAll(IConsole::IResult *pResult, void *pUserData)
 
 	char aBufTime[32];
 	char aBuf[64];
-	int64 Time = (int64)100 * (float)(pSelf->Server()->Tick() - pChr->m_StartTime) / ((float)pSelf->Server()->TickSpeed());
+	int64_t Time = (int64_t)100 * (float)(pSelf->Server()->Tick() - pChr->m_StartTime) / ((float)pSelf->Server()->TickSpeed());
 	const char *pName = pSelf->Server()->ClientName(pResult->m_ClientID);
 	str_time(Time, TIME_HOURS, aBufTime, sizeof(aBufTime));
 	str_format(aBuf, sizeof(aBuf), "%s\'s current race time is %s", pName, aBufTime);
@@ -1391,7 +1391,7 @@ void CGameContext::ConTime(IConsole::IResult *pResult, void *pUserData)
 
 	char aBufTime[32];
 	char aBuf[64];
-	int64 Time = (int64)100 * (float)(pSelf->Server()->Tick() - pChr->m_StartTime) / ((float)pSelf->Server()->TickSpeed());
+	int64_t Time = (int64_t)100 * (float)(pSelf->Server()->Tick() - pChr->m_StartTime) / ((float)pSelf->Server()->TickSpeed());
 	str_time(Time, TIME_HOURS, aBufTime, sizeof(aBufTime));
 	str_format(aBuf, sizeof(aBuf), "Your time is %s", aBufTime);
 	pSelf->SendBroadcast(aBuf, pResult->m_ClientID);

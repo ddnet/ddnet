@@ -10,7 +10,7 @@ struct CPacket
 	CPacket *m_pNext;
 
 	NETADDR m_SendTo;
-	int64 m_Timestamp;
+	int64_t m_Timestamp;
 	int m_ID;
 	int m_DataSize;
 	char m_aData[1];
@@ -185,7 +185,7 @@ void Run(unsigned short Port, NETADDR Dest)
 				int MsSpike = Ping.m_Spike;
 				int MsFlux = Ping.m_Flux;
 				int MsPing = Ping.m_Base;
-				m_CurrentLatency = ((time_freq() * MsPing) / 1000) + (int64)(((time_freq() * MsFlux) / 1000) * Flux); // 50ms
+				m_CurrentLatency = ((time_freq() * MsPing) / 1000) + (int64_t)(((time_freq() * MsFlux) / 1000) * Flux); // 50ms
 
 				if(MsSpike && (p->m_ID % 100) == 0)
 				{

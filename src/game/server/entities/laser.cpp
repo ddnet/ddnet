@@ -265,7 +265,7 @@ void CLaser::Snap(int SnappingClient)
 		return;
 
 	CCharacter *pOwnerChar = 0;
-	int64 TeamMask = -1LL;
+	int64_t TeamMask = -1LL;
 
 	if(m_Owner >= 0)
 		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);

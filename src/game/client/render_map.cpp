@@ -11,7 +11,7 @@
 #include <game/generated/client_data.h>
 #include <game/generated/protocol.h>
 
-void CRenderTools::RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Channels, int64 TimeMicros, float *pResult)
+void CRenderTools::RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Channels, int64_t TimeMicros, float *pResult)
 {
 	if(NumPoints == 0)
 	{
@@ -31,7 +31,7 @@ void CRenderTools::RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Cha
 		return;
 	}
 
-	int64 MaxPointTime = (int64)pPoints[NumPoints - 1].m_Time * 1000ll;
+	int64_t MaxPointTime = (int64_t)pPoints[NumPoints - 1].m_Time * 1000ll;
 	if(MaxPointTime > 0) // TODO: remove this check when implementing a IO check for maps(in this case broken envelopes)
 		TimeMicros = TimeMicros % MaxPointTime;
 	else

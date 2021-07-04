@@ -15,8 +15,8 @@ class CInput : public IEngineInput
 	int m_InputGrabbed;
 	char *m_pClipboardText;
 
-	int64 m_LastRelease;
-	int64 m_ReleaseDelta;
+	int64_t m_LastRelease;
+	int64_t m_ReleaseDelta;
 
 	bool m_MouseFocus;
 	int m_VideoRestartNeeded;

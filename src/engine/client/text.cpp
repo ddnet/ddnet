@@ -33,7 +33,7 @@ struct SFontSizeChar
 	float m_AdvanceX;
 
 	float m_aUVs[4];
-	int64 m_TouchTime;
+	int64_t m_TouchTime;
 	FT_UInt m_GlyphIndex;
 };
 
@@ -1744,7 +1744,7 @@ public:
 			Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 			Graphics()->RenderQuadContainer(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, 1, -1);
 
-			static int64 s_CursorRenderTime = time_get_microseconds();
+			static int64_t s_CursorRenderTime = time_get_microseconds();
 
 			if((time_get_microseconds() - s_CursorRenderTime) > 500000)
 				Graphics()->RenderQuadContainer(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, 0, 1);

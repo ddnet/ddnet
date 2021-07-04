@@ -46,7 +46,7 @@ int main(int argc, char **argv) // ignore_convention
 
 	g_NetOp.Send(&Packet);
 
-	int64 startTime = time_get();
+	int64_t startTime = time_get();
 
 	net_socket_read_wait(g_NetOp.m_Socket, 1000000);
 
@@ -64,7 +64,7 @@ int main(int argc, char **argv) // ignore_convention
 			if(Token != CurToken)
 				continue;
 
-			int64 endTime = time_get();
+			int64_t endTime = time_get();
 			printf("%g ms\n", (double)(endTime - startTime) / time_freq() * 1000);
 		}
 	}

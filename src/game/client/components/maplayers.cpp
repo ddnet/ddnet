@@ -84,10 +84,10 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 
 	CMapItemEnvelope *pItem = (CMapItemEnvelope *)pThis->m_pLayers->Map()->GetItem(Start + Env, 0, 0);
 
-	const int64 TickToMicroSeconds = (1000000ll / (int64)pThis->Client()->GameTickSpeed());
+	const int64_t TickToMicroSeconds = (1000000ll / (int64_t)pThis->Client()->GameTickSpeed());
 
-	static int64 s_Time = 0;
-	static int64 s_LastLocalTime = time_get_microseconds();
+	static int64_t s_Time = 0;
+	static int64_t s_LastLocalTime = time_get_microseconds();
 	if(pThis->Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		const IDemoPlayer::CInfo *pInfo = pThis->DemoPlayer()->BaseInfo();
@@ -104,24 +104,24 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 				// get the lerp of the current tick and prev
 				int MinTick = pThis->Client()->PrevGameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
 				int CurTick = pThis->Client()->GameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
-				s_Time = (int64)(mix<double>(
-							 0,
-							 (CurTick - MinTick),
-							 pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
-						 TickToMicroSeconds) +
+				s_Time = (int64_t)(mix<double>(
+							   0,
+							   (CurTick - MinTick),
+							   pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
+						   TickToMicroSeconds) +
 					 MinTick * TickToMicroSeconds;
 			}
 			else
 			{
 				int MinTick = pThis->m_LastLocalTick;
-				s_Time = (int64)(mix<double>(0,
-							 pThis->m_CurrentLocalTick - MinTick,
-							 pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
-						 TickToMicroSeconds) +
+				s_Time = (int64_t)(mix<double>(0,
+							   pThis->m_CurrentLocalTick - MinTick,
+							   pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
+						   TickToMicroSeconds) +
 					 MinTick * TickToMicroSeconds;
 			}
 		}
-		pThis->RenderTools()->RenderEvalEnvelope(pPoints + pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time + (int64)TimeOffsetMillis * 1000ll, pChannels);
+		pThis->RenderTools()->RenderEvalEnvelope(pPoints + pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time + (int64_t)TimeOffsetMillis * 1000ll, pChannels);
 	}
 	else
 	{
@@ -132,21 +132,21 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 				// get the lerp of the current tick and prev
 				int MinTick = pThis->Client()->PrevGameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
 				int CurTick = pThis->Client()->GameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
-				s_Time = (int64)(mix<double>(
-							 0,
-							 (CurTick - MinTick),
-							 pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
-						 TickToMicroSeconds) +
+				s_Time = (int64_t)(mix<double>(
+							   0,
+							   (CurTick - MinTick),
+							   pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
+						   TickToMicroSeconds) +
 					 MinTick * TickToMicroSeconds;
 			}
 		}
 		else
 		{
-			int64 CurTime = time_get_microseconds();
+			int64_t CurTime = time_get_microseconds();
 			s_Time += CurTime - s_LastLocalTime;
 			s_LastLocalTime = CurTime;
 		}
-		pThis->RenderTools()->RenderEvalEnvelope(pPoints + pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time + (int64)TimeOffsetMillis * 1000ll, pChannels);
+		pThis->RenderTools()->RenderEvalEnvelope(pPoints + pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time + (int64_t)TimeOffsetMillis * 1000ll, pChannels);
 	}
 }
 

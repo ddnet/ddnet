@@ -262,7 +262,7 @@ void CPlayers::RenderPlayer(
 	// do skidding
 	if(!InAir && WantOtherDir && length(Vel * 50) > 500.0f)
 	{
-		static int64 SkidSoundTime = 0;
+		static int64_t SkidSoundTime = 0;
 		if(time() - SkidSoundTime > time_freq() / 10)
 		{
 			if(g_Config.m_SndGame)

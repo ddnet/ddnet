@@ -86,7 +86,7 @@ void CProjectile::Tick()
 	if(m_LifeSpan > -1)
 		m_LifeSpan--;
 
-	int64 TeamMask = -1LL;
+	int64_t TeamMask = -1LL;
 	bool isWeaponCollide = false;
 	if(
 		pOwnerChar &&
@@ -135,7 +135,7 @@ void CProjectile::Tick()
 			if(m_Owner >= 0)
 				pOwnerChar = GameWorld()->GetCharacterByID(m_Owner);
 
-			int64 TeamMask = -1LL;
+			int64_t TeamMask = -1LL;
 
 			GameWorld()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pOwnerChar ? -1 : pOwnerChar->Team()),
 				(m_Owner != -1) ? TeamMask : -1LL);

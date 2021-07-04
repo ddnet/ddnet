@@ -20,7 +20,7 @@ protected:
 	char m_aMapName[MAX_MAP_LENGTH];
 
 	//to avoid spam when in menu
-	int64 m_LastLoad;
+	int64_t m_LastLoad;
 
 	//to avoid memory leak when switching to %current%
 	CBackgroundEngineMap *m_pBackgroundMap;

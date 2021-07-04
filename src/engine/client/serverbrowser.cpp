@@ -1161,8 +1161,8 @@ void CServerBrowser::UpdateFromHttp()
 
 void CServerBrowser::Update(bool ForceResort)
 {
-	int64 Timeout = time_freq();
-	int64 Now = time_get();
+	int64_t Timeout = time_freq();
+	int64_t Now = time_get();
 
 	const char *pHttpBestUrl;
 	if(!m_pHttp->GetBestUrl(&pHttpBestUrl) && pHttpBestUrl != m_pHttpPrevBestUrl)
