@@ -304,7 +304,7 @@ int InitSearchList(sorted_array<const TName *> &SearchList, sorted_array<TName> 
 		const TName *s = &AssetList[i];
 
 		// filter quick search
-		if(s_aFilterString[s_CurCustomTab][0] != '\0' && !str_find_nocase(s->m_aName, s_aFilterString[s_CurCustomTab]))
+		if(s_aFilterString[s_CurCustomTab][0] != '\0' && !str_utf8_find_nocase(s->m_aName, s_aFilterString[s_CurCustomTab]))
 			continue;
 
 		SearchList.add_unsorted(s);
@@ -378,7 +378,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 				const SCustomEntities *s = &m_EntitiesList[i];
 
 				// filter quick search
-				if(s_aFilterString[s_CurCustomTab][0] != '\0' && !str_find_nocase(s->m_aName, s_aFilterString[s_CurCustomTab]))
+				if(s_aFilterString[s_CurCustomTab][0] != '\0' && !str_utf8_find_nocase(s->m_aName, s_aFilterString[s_CurCustomTab]))
 					continue;
 
 				s_SearchEntitiesList.add_unsorted(s);

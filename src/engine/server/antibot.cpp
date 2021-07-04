@@ -156,7 +156,7 @@ void CAntibot::OnEngineClientDrop(int ClientID, const char *pReason)
 	Update();
 	AntibotOnEngineClientDrop(ClientID, pReason);
 }
-void CAntibot::OnEngineClientMessage(int ClientID, const void *pData, int Size, int Flags)
+bool CAntibot::OnEngineClientMessage(int ClientID, const void *pData, int Size, int Flags)
 {
 	Update();
 	int AntibotFlags = 0;
@@ -164,7 +164,31 @@ void CAntibot::OnEngineClientMessage(int ClientID, const void *pData, int Size, 
 	{
 		AntibotFlags |= ANTIBOT_MSGFLAG_NONVITAL;
 	}
-	AntibotOnEngineClientMessage(ClientID, pData, Size, Flags);
+	return AntibotOnEngineClientMessage(ClientID, pData, Size, Flags);
+}
+bool CAntibot::OnEngineServerMessage(int ClientID, const void *pData, int Size, int Flags)
+{
+	Update();
+	int AntibotFlags = 0;
+	if((Flags & MSGFLAG_VITAL) == 0)
+	{
+		AntibotFlags |= ANTIBOT_MSGFLAG_NONVITAL;
+	}
+	return AntibotOnEngineServerMessage(ClientID, pData, Size, Flags);
+}
+bool CAntibot::OnEngineSimulateClientMessage(int *pClientID, void *pBuffer, int BufferSize, int *pOutSize, int *pFlags)
+{
+	int AntibotFlags = 0;
+	bool Result = AntibotOnEngineSimulateClientMessage(pClientID, pBuffer, BufferSize, pOutSize, &AntibotFlags);
+	if(Result)
+	{
+		*pFlags = 0;
+		if((AntibotFlags & ANTIBOT_MSGFLAG_NONVITAL) == 0)
+		{
+			*pFlags |= MSGFLAG_VITAL;
+		}
+	}
+	return Result;
 }
 #else
 CAntibot::CAntibot() :
@@ -209,7 +233,9 @@ void CAntibot::OnHookAttach(int ClientID, bool Player) {}
 void CAntibot::OnEngineTick() {}
 void CAntibot::OnEngineClientJoin(int ClientID, bool Sixup) {}
 void CAntibot::OnEngineClientDrop(int ClientID, const char *pReason) {}
-void CAntibot::OnEngineClientMessage(int ClientID, const void *pData, int Size, int Flags) {}
+bool CAntibot::OnEngineClientMessage(int ClientID, const void *pData, int Size, int Flags) { return false; }
+bool CAntibot::OnEngineServerMessage(int ClientID, const void *pData, int Size, int Flags) { return false; }
+bool CAntibot::OnEngineSimulateClientMessage(int *pClientID, void *pBuffer, int BufferSize, int *pOutSize, int *pFlags) { return false; }
 #endif
 
 IEngineAntibot *CreateEngineAntibot()

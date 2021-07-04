@@ -552,7 +552,7 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 
 bool CChat::LineShouldHighlight(const char *pLine, const char *pName)
 {
-	const char *pHL = str_find_nocase(pLine, pName);
+	const char *pHL = str_utf8_find_nocase(pLine, pName);
 
 	if(pHL)
 	{

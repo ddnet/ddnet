@@ -290,6 +290,8 @@ protected:
 	vec2 m_MousePos;
 	bool m_MouseSlow;
 
+	char m_aNextServer[256];
+
 	int64_t m_LastInput;
 
 	// images
@@ -679,6 +681,7 @@ public:
 		POPUP_DISCONNECT,
 		POPUP_DISCONNECT_DUMMY,
 		POPUP_WARNING,
+		POPUP_SWITCH_SERVER,
 
 		// demo player states
 		DEMOPLAYER_NONE = 0,

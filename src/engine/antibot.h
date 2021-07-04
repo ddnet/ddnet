@@ -37,7 +37,9 @@ public:
 	virtual void OnEngineTick() = 0;
 	virtual void OnEngineClientJoin(int ClientID, bool Sixup) = 0;
 	virtual void OnEngineClientDrop(int ClientID, const char *pReason) = 0;
-	virtual void OnEngineClientMessage(int ClientID, const void *pData, int Size, int Flags) = 0;
+	virtual bool OnEngineClientMessage(int ClientID, const void *pData, int Size, int Flags) = 0;
+	virtual bool OnEngineServerMessage(int ClientID, const void *pData, int Size, int Flags) = 0;
+	virtual bool OnEngineSimulateClientMessage(int *pClientID, void *pBuffer, int BufferSize, int *pOutSize, int *pFlags) = 0;
 
 	virtual ~IEngineAntibot(){};
 };

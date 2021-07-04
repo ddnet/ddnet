@@ -778,6 +778,10 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
 					Packet.m_pData = pPack->Data();
 					Packet.m_DataSize = pPack->Size();
 					Packet.m_ClientID = i;
+					if(Antibot()->OnEngineServerMessage(i, Packet.m_pData, Packet.m_DataSize, Flags))
+					{
+						continue;
+					}
 					m_NetServer.Send(&Packet);
 				}
 			}
@@ -792,6 +796,11 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
 		Packet.m_ClientID = ClientID;
 		Packet.m_pData = Pack.Data();
 		Packet.m_DataSize = Pack.Size();
+
+		if(Antibot()->OnEngineServerMessage(ClientID, Packet.m_pData, Packet.m_DataSize, Flags))
+		{
+			return 0;
+		}
 
 		if(!(Flags & MSGFLAG_NORECORD))
 		{
@@ -1318,13 +1327,6 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 	CUnpacker Unpacker;
 	Unpacker.Reset(pPacket->m_pData, pPacket->m_DataSize);
 	CMsgPacker Packer(NETMSG_EX, true);
-
-	int GameFlags = 0;
-	if(pPacket->m_Flags & NET_CHUNKFLAG_VITAL)
-	{
-		GameFlags |= MSGFLAG_VITAL;
-	}
-	Antibot()->OnEngineClientMessage(ClientID, pPacket->m_pData, pPacket->m_DataSize, GameFlags);
 
 	// unpack msgid and system flag
 	int Msg;
@@ -2244,8 +2246,34 @@ void CServer::PumpNetwork(bool PacketWaiting)
 			}
 			else
 			{
+				int GameFlags = 0;
+				if(Packet.m_Flags & NET_CHUNKFLAG_VITAL)
+				{
+					GameFlags |= MSGFLAG_VITAL;
+				}
+				if(Antibot()->OnEngineClientMessage(Packet.m_ClientID, Packet.m_pData, Packet.m_DataSize, GameFlags))
+				{
+					continue;
+				}
+
 				ProcessClientPacket(&Packet);
 			}
+		}
+	}
+	{
+		unsigned char aBuffer[NET_MAX_PAYLOAD];
+		int Flags;
+		CNetChunk Packet;
+		mem_zero(&Packet, sizeof(Packet));
+		Packet.m_pData = aBuffer;
+		while(Antibot()->OnEngineSimulateClientMessage(&Packet.m_ClientID, aBuffer, sizeof(aBuffer), &Packet.m_DataSize, &Flags))
+		{
+			Packet.m_Flags = 0;
+			if(Flags & MSGFLAG_VITAL)
+			{
+				Packet.m_Flags |= NET_CHUNKFLAG_VITAL;
+			}
+			ProcessClientPacket(&Packet);
 		}
 	}
 

@@ -4267,7 +4267,7 @@ void CEditor::RenderFileDialog()
 	for(int i = 0; i < m_FileList.size(); i++)
 	{
 		m_FileList[i].m_IsVisible = false;
-		if(!m_aFileDialogSearchText[0] || str_find_nocase(m_FileList[i].m_aName, m_aFileDialogSearchText))
+		if(!m_aFileDialogSearchText[0] || str_utf8_find_nocase(m_FileList[i].m_aName, m_aFileDialogSearchText))
 		{
 			AddFileDialogEntry(i, &View);
 			m_FileList[i].m_IsVisible = true;

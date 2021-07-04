@@ -1656,7 +1656,7 @@ void CGameContext::CensorMessage(char *pCensoredMessage, const char *pMessage, i
 		char *pCurLoc = pCensoredMessage;
 		do
 		{
-			pCurLoc = (char *)str_find_nocase(pCurLoc, m_aCensorlist[i].cstr());
+			pCurLoc = (char *)str_utf8_find_nocase(pCurLoc, m_aCensorlist[i].cstr());
 			if(pCurLoc)
 			{
 				memset(pCurLoc, '*', str_length(m_aCensorlist[i].cstr()));
@@ -4020,7 +4020,7 @@ void CGameContext::List(int ClientID, const char *pFilter)
 		{
 			Total++;
 			const char *pName = Server()->ClientName(i);
-			if(str_find_nocase(pName, pFilter) == NULL)
+			if(str_utf8_find_nocase(pName, pFilter) == NULL)
 				continue;
 			if(Bufcnt + str_length(pName) + 4 > 256)
 			{

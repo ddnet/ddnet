@@ -358,7 +358,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				if(g_Config.m_BrFilterString[0] && (pItem->m_QuickSearchHit & IServerBrowser::QUICK_SERVERNAME))
 				{
 					// highlight the parts that matches
-					const char *pStr = str_find_nocase(pItem->m_aName, g_Config.m_BrFilterString);
+					const char *pStr = str_utf8_find_nocase(pItem->m_aName, g_Config.m_BrFilterString);
 					if(pStr)
 					{
 						UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColName + 0), &Button, pItem->m_aName, FontSize, -1, Button.w, 1, true, (int)(pStr - pItem->m_aName));
@@ -391,7 +391,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				if(g_Config.m_BrFilterString[0] && (pItem->m_QuickSearchHit & IServerBrowser::QUICK_MAPNAME))
 				{
 					// highlight the parts that matches
-					const char *pStr = str_find_nocase(pItem->m_aMap, g_Config.m_BrFilterString);
+					const char *pStr = str_utf8_find_nocase(pItem->m_aMap, g_Config.m_BrFilterString);
 					if(pStr)
 					{
 						UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColMap + 0), &Button, pItem->m_aMap, FontSize, -1, Button.w, 1, true, (int)(pStr - pItem->m_aMap));
@@ -487,7 +487,10 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		if(Input()->MouseDoubleClick() && DoubleClicked)
 		{
 			if(Client()->State() == IClient::STATE_ONLINE && Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
-				m_Popup = POPUP_DISCONNECT;
+			{
+				m_Popup = POPUP_SWITCH_SERVER;
+				str_copy(m_aNextServer, g_Config.m_UiServerAddress, sizeof(m_aNextServer));
+			}
 			else
 				Client()->Connect(g_Config.m_UiServerAddress);
 		}
@@ -647,7 +650,10 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			m_EnterPressed)
 		{
 			if(Client()->State() == IClient::STATE_ONLINE && Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
-				m_Popup = POPUP_DISCONNECT;
+			{
+				m_Popup = POPUP_SWITCH_SERVER;
+				str_copy(m_aNextServer, g_Config.m_UiServerAddress, sizeof(m_aNextServer));
+			}
 			else
 				Client()->Connect(g_Config.m_UiServerAddress);
 			m_EnterPressed = false;
@@ -1164,7 +1170,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			if(g_Config.m_BrFilterString[0])
 			{
 				// highlight the parts that matches
-				const char *s = str_find_nocase(pName, g_Config.m_BrFilterString);
+				const char *s = str_utf8_find_nocase(pName, g_Config.m_BrFilterString);
 				if(s)
 				{
 					TextRender()->TextEx(&Cursor, pName, (int)(s - pName));
@@ -1186,7 +1192,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			if(g_Config.m_BrFilterString[0])
 			{
 				// highlight the parts that matches
-				const char *s = str_find_nocase(pClan, g_Config.m_BrFilterString);
+				const char *s = str_utf8_find_nocase(pClan, g_Config.m_BrFilterString);
 				if(s)
 				{
 					TextRender()->TextEx(&Cursor, pClan, (int)(s - pClan));
