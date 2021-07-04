@@ -749,7 +749,7 @@ bool CChillConsole::OnInput(IInput::CEvent Event)
 
 void CChillConsole::Toggle(int Type)
 {
-	if(m_ConsoleType != Type && (m_ConsoleState == CONSOLE_OPEN || m_ConsoleState != CONSOLE_OPEN_2 || m_ConsoleState == CONSOLE_OPENING || m_ConsoleState != CONSOLE_OPENING_2))
+	if(m_ConsoleType != Type && (m_ConsoleState == CONSOLE_OPEN || m_ConsoleState == CONSOLE_OPEN_2 || m_ConsoleState == CONSOLE_OPENING || m_ConsoleState == CONSOLE_OPENING_2))
 	{
 		// don't toggle console, just switch what console to use
 	}
