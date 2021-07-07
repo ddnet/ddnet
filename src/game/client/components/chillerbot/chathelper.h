@@ -22,9 +22,9 @@ class CChatHelper : public CComponent
 
 	sorted_array<CCommand> m_Commands;
 
-	int64 m_NextGreetClear;
-	int64 m_NextMessageSend;
-	int64 m_NextPingMsgClear;
+	int64_t m_NextGreetClear;
+	int64_t m_NextMessageSend;
+	int64_t m_NextPingMsgClear;
 
 	char m_aGreetName[32];
 	char m_aLastPingName[32];

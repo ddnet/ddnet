@@ -33,7 +33,7 @@ void CChatHelper::OnInit()
 
 void CChatHelper::OnRender()
 {
-	int64 time_now = time_get();
+	int64_t time_now = time_get();
 	if(time_now % 10 == 0)
 	{
 		if(m_NextGreetClear < time_now)
@@ -256,16 +256,16 @@ void CChatHelper::OnChatMessage(int ClientID, int Team, const char *pMsg)
 		return;
 	str_copy(m_aLastPingMessage, pMsg, sizeof(m_aLastPingMessage));
 	m_NextPingMsgClear = time_get() + time_freq() * 60;
-	int64 AfkTill = m_pChillerBot->GetAfkTime();
+	int64_t AfkTill = m_pChillerBot->GetAfkTime();
 	if(AfkTill && m_pChillerBot->GetAfkActivity() < 25)
 	{
 		char aBuf[256];
 		char aNote[128];
 		str_format(aBuf, sizeof(aBuf), "%s: I am currently afk.", aName);
 		if(AfkTill > time_get() + time_freq() * 61)
-			str_format(aBuf, sizeof(aBuf), "%s: I am currently afk. Estimated return in %lld minutes.", aName, (AfkTill - time_get()) / time_freq() / 60);
+			str_format(aBuf, sizeof(aBuf), "%s: I am currently afk. Estimated return in %ld minutes.", aName, (AfkTill - time_get()) / time_freq() / 60);
 		else if(AfkTill > time_get() + time_freq() * 10)
-			str_format(aBuf, sizeof(aBuf), "%s: I am currently afk. Estimated return in %lld seconds.", aName, (AfkTill - time_get()) / time_freq());
+			str_format(aBuf, sizeof(aBuf), "%s: I am currently afk. Estimated return in %ld seconds.", aName, (AfkTill - time_get()) / time_freq());
 		if(m_pChillerBot->GetAfkMessage()[0])
 		{
 			str_format(aNote, sizeof(aNote), " (%s)", m_pChillerBot->GetAfkMessage());

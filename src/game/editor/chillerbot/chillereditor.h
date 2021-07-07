@@ -19,7 +19,7 @@ class CChillerEditor
 
 	bool m_DrawCursor;
 
-	int64 m_NextCursorBlink;
+	int64_t m_NextCursorBlink;
 
 	IGraphics::CTextureHandle m_CursorTextTexture;
 

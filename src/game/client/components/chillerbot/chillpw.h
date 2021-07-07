@@ -33,7 +33,7 @@ private:
 	char m_aaPasswords[MAX_PASSWORDS][MAX_PASSWORD_LENGTH];
 	char m_aaHostnames[MAX_PASSWORDS][MAX_HOSTNAME_LENGTH];
 	char m_aCurrentServerAddr[64];
-	int64 m_ChatDelay[NUM_DUMMIES];
+	int64_t m_ChatDelay[NUM_DUMMIES];
 	int m_LoginOffset[NUM_DUMMIES];
 };
 

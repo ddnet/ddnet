@@ -10,7 +10,7 @@ class CChillerBotUX : public CComponent
 {
 	class CChatHelper *m_pChatHelper;
 
-	int64 m_AfkTill;
+	int64_t m_AfkTill;
 
 	bool m_IsNearFinish;
 
@@ -39,7 +39,7 @@ class CChillerBotUX : public CComponent
 	int m_GotoTeleOffset;
 	int m_GotoTeleLastX;
 	int m_GotoTeleLastY;
-	int64 m_LastNotification;
+	int64_t m_LastNotification;
 
 	void OnChatMessage(int ClientID, int Team, const char *pMsg);
 	void GoAfk(int Minutes, const char *pMsg = 0);
@@ -76,7 +76,7 @@ public:
 	int m_IgnoreChatAfk;
 
 	void ReturnFromAfk(const char *pChatMessage = 0);
-	int64 GetAfkTime() { return m_AfkTill; }
+	int64_t GetAfkTime() { return m_AfkTill; }
 	const char *GetAfkMessage() { return m_aAfkMessage; }
 	int GetAfkActivity() { return m_AfkActivity; }
 
