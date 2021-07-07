@@ -137,16 +137,16 @@ void CChooseMaster::CJob::Run()
 	{
 		aTimeMs[i] = -1;
 		const char *pUrl = m_pData->m_aaUrls[aRandomized[i]];
-		CHead Head(pUrl, Timeout, false);
+		CHead Head(pUrl, Timeout, HTTPLOG::FAILURE);
 		IEngine::RunJobBlocking(&Head);
 		if(Head.State() != HTTP_DONE)
 		{
 			continue;
 		}
-		int64 StartTime = time_get();
-		CGet Get(pUrl, Timeout, false);
+		int64_t StartTime = time_get_microseconds();
+		CGet Get(pUrl, Timeout, HTTPLOG::FAILURE);
 		IEngine::RunJobBlocking(&Get);
-		int Time = (time_get() - StartTime) * 1000 / time_freq();
+		int Time = (time_get_microseconds() - StartTime) / 1000;
 		if(Get.State() != HTTP_DONE)
 		{
 			continue;

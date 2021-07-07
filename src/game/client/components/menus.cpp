@@ -249,9 +249,9 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 
 	if(pAnimator != NULL)
 	{
-		int64 Time = time_get_microseconds();
+		int64_t Time = time_get_microseconds();
 
-		if(pAnimator->m_Time + (int64)100000 < Time)
+		if(pAnimator->m_Time + (int64_t)100000 < Time)
 		{
 			pAnimator->m_Value = pAnimator->m_Active ? 1 : 0;
 			pAnimator->m_Time = Time;
@@ -1099,7 +1099,7 @@ void CMenus::RenderLoading()
 {
 	// TODO: not supported right now due to separate render thread
 
-	static int64 LastLoadRender = 0;
+	static int64_t LastLoadRender = 0;
 	float Percent = m_LoadCurrent++ / (float)m_LoadTotal;
 
 	// make sure that we don't render for each little thing we load
@@ -1240,7 +1240,7 @@ void CMenus::PopupMessage(const char *pTopic, const char *pBody, const char *pBu
 	m_Popup = POPUP_MESSAGE;
 }
 
-void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pButton, int64 Duration)
+void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pButton, int64_t Duration)
 {
 	dbg_msg(pTopic, "%s", pBody);
 
@@ -1764,6 +1764,12 @@ int CMenus::Render()
 			pButtonText = m_aMessageButton;
 			ExtraAlign = -1;
 		}
+		else if(m_Popup == POPUP_SWITCH_SERVER)
+		{
+			pTitle = Localize("Disconnect");
+			pExtraText = Localize("Are you sure that you want to disconnect and switch to a different server?");
+			ExtraAlign = -1;
+		}
 
 		CUIRect Box, Part;
 		Box = Screen;
@@ -1927,7 +1933,7 @@ int CMenus::Render()
 
 			if(Client()->MapDownloadTotalsize() > 0)
 			{
-				int64 Now = time_get();
+				int64_t Now = time_get();
 				if(Now - m_DownloadLastCheckTime >= time_freq())
 				{
 					if(m_DownloadLastCheckSize > Client()->MapDownloadAmount())
@@ -2405,6 +2411,29 @@ int CMenus::Render()
 				SetActive(false);
 			}
 		}
+		else if(m_Popup == POPUP_SWITCH_SERVER)
+		{
+			CUIRect Yes, No;
+			Box.HSplitBottom(20.f, &Box, &Part);
+			Box.HSplitBottom(24.f, &Box, &Part);
+
+			// buttons
+			Part.VMargin(80.0f, &Part);
+			Part.VSplitMid(&No, &Yes);
+			Yes.VMargin(20.0f, &Yes);
+			No.VMargin(20.0f, &No);
+
+			static int s_ButtonAbort = 0;
+			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || m_EscapePressed)
+			{
+				m_Popup = POPUP_NONE;
+				m_aNextServer[0] = '\0';
+			}
+
+			static int s_ButtonTryAgain = 0;
+			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
+				Client()->Connect(m_aNextServer);
+		}
 		else
 		{
 			Box.HSplitBottom(20.f, &Box, &Part);
@@ -2634,8 +2663,6 @@ void CMenus::OnStateChange(int NewState, int OldState)
 	}
 }
 
-extern "C" void font_debug_render();
-
 void CMenus::OnRender()
 {
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
@@ -2816,7 +2843,7 @@ void CMenus::RenderUpdating(const char *pCaption, int current, int total)
 {
 	// make sure that we don't render for each little thing we load
 	// because that will slow down loading if we have vsync
-	static int64 LastLoadRender = 0;
+	static int64_t LastLoadRender = 0;
 	if(time_get() - LastLoadRender < time_freq() / 60)
 		return;
 	LastLoadRender = time_get();

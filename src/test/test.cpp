@@ -4,6 +4,8 @@
 #include <base/system.h>
 #include <engine/storage.h>
 
+#include <algorithm>
+
 CTestInfo::CTestInfo()
 {
 	const ::testing::TestInfo *pTestInfo =

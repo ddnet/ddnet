@@ -14,10 +14,10 @@ class CGameTeams
 	int m_TeamState[MAX_CLIENTS];
 	bool m_TeeFinished[MAX_CLIENTS];
 	bool m_TeamLocked[MAX_CLIENTS];
-	uint64 m_Invited[MAX_CLIENTS];
+	uint64_t m_Invited[MAX_CLIENTS];
 	bool m_Practice[MAX_CLIENTS];
 	std::shared_ptr<CScoreSaveResult> m_pSaveTeamResult[MAX_CLIENTS];
-	uint64 m_LastSwap[MAX_CLIENTS];
+	uint64_t m_LastSwap[MAX_CLIENTS];
 
 	class CGameContext *m_pGameContext;
 
@@ -68,7 +68,7 @@ public:
 
 	void ChangeTeamState(int Team, int State);
 
-	int64 TeamMask(int Team, int ExceptID = -1, int Asker = -1);
+	int64_t TeamMask(int Team, int ExceptID = -1, int Asker = -1);
 
 	int Count(int Team) const;
 

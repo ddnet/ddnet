@@ -290,7 +290,7 @@ void CServerBrowser::Filter()
 			Filtered = 1;
 		else if(g_Config.m_BrFilterGametypeStrict && g_Config.m_BrFilterGametype[0] && str_comp_nocase(m_ppServerlist[i]->m_Info.m_aGameType, g_Config.m_BrFilterGametype))
 			Filtered = 1;
-		else if(!g_Config.m_BrFilterGametypeStrict && g_Config.m_BrFilterGametype[0] && !str_find_nocase(m_ppServerlist[i]->m_Info.m_aGameType, g_Config.m_BrFilterGametype))
+		else if(!g_Config.m_BrFilterGametypeStrict && g_Config.m_BrFilterGametype[0] && !str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aGameType, g_Config.m_BrFilterGametype))
 			Filtered = 1;
 		else if(g_Config.m_BrFilterUnfinishedMap && m_ppServerlist[i]->m_Info.m_HasRank == 1)
 			Filtered = 1;
@@ -317,7 +317,7 @@ void CServerBrowser::Filter()
 				m_ppServerlist[i]->m_Info.m_QuickSearchHit = 0;
 
 				// match against server name
-				if(str_find_nocase(m_ppServerlist[i]->m_Info.m_aName, g_Config.m_BrFilterString))
+				if(str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aName, g_Config.m_BrFilterString))
 				{
 					MatchFound = 1;
 					m_ppServerlist[i]->m_Info.m_QuickSearchHit |= IServerBrowser::QUICK_SERVERNAME;
@@ -326,8 +326,8 @@ void CServerBrowser::Filter()
 				// match against players
 				for(p = 0; p < minimum(m_ppServerlist[i]->m_Info.m_NumClients, (int)MAX_CLIENTS); p++)
 				{
-					if(str_find_nocase(m_ppServerlist[i]->m_Info.m_aClients[p].m_aName, g_Config.m_BrFilterString) ||
-						str_find_nocase(m_ppServerlist[i]->m_Info.m_aClients[p].m_aClan, g_Config.m_BrFilterString))
+					if(str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aClients[p].m_aName, g_Config.m_BrFilterString) ||
+						str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aClients[p].m_aClan, g_Config.m_BrFilterString))
 					{
 						MatchFound = 1;
 						m_ppServerlist[i]->m_Info.m_QuickSearchHit |= IServerBrowser::QUICK_PLAYER;
@@ -336,7 +336,7 @@ void CServerBrowser::Filter()
 				}
 
 				// match against map
-				if(str_find_nocase(m_ppServerlist[i]->m_Info.m_aMap, g_Config.m_BrFilterString))
+				if(str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aMap, g_Config.m_BrFilterString))
 				{
 					MatchFound = 1;
 					m_ppServerlist[i]->m_Info.m_QuickSearchHit |= IServerBrowser::QUICK_MAPNAME;
@@ -351,19 +351,19 @@ void CServerBrowser::Filter()
 				int MatchFound = 0;
 
 				// match against server name
-				if(str_find_nocase(m_ppServerlist[i]->m_Info.m_aName, g_Config.m_BrExcludeString))
+				if(str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aName, g_Config.m_BrExcludeString))
 				{
 					MatchFound = 1;
 				}
 
 				// match against map
-				if(str_find_nocase(m_ppServerlist[i]->m_Info.m_aMap, g_Config.m_BrExcludeString))
+				if(str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aMap, g_Config.m_BrExcludeString))
 				{
 					MatchFound = 1;
 				}
 
 				// match against gametype
-				if(str_find_nocase(m_ppServerlist[i]->m_Info.m_aGameType, g_Config.m_BrExcludeString))
+				if(str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aGameType, g_Config.m_BrExcludeString))
 				{
 					MatchFound = 1;
 				}
@@ -544,7 +544,7 @@ void CServerBrowser::SetLatency(NETADDR Addr, int Latency)
 	{
 		NETADDR Other = pEntry->m_Addr;
 		Other.port = 0;
-		if(net_addr_comp(&Addr, &Other) == 0)
+		if(net_addr_comp(&Addr, &Other) == 0 && pEntry->m_GotInfo)
 		{
 			pEntry->m_Info.m_Latency = Latency;
 			pEntry->m_Info.m_LatencyIsEstimated = false;
@@ -1161,8 +1161,8 @@ void CServerBrowser::UpdateFromHttp()
 
 void CServerBrowser::Update(bool ForceResort)
 {
-	int64 Timeout = time_freq();
-	int64 Now = time_get();
+	int64_t Timeout = time_freq();
+	int64_t Now = time_get();
 
 	const char *pHttpBestUrl;
 	if(!m_pHttp->GetBestUrl(&pHttpBestUrl) && pHttpBestUrl != m_pHttpPrevBestUrl)
@@ -1512,7 +1512,7 @@ void CServerBrowser::LoadDDNetInfoJson()
 		if(Location.type != json_string || CServerInfo::ParseLocation(&m_OwnLocation, Location))
 		{
 			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "cannot parse location from info.sjon: '%s'", (const char *)Location);
+			str_format(aBuf, sizeof(aBuf), "cannot parse location from info.json: '%s'", (const char *)Location);
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "serverbrowse", aBuf);
 		}
 	}

@@ -46,7 +46,7 @@ public:
 	int m_ServerIndex;
 
 	int m_Type;
-	uint64 m_ReceivedPackets;
+	uint64_t m_ReceivedPackets;
 	int m_NumReceivedClients;
 
 	NETADDR m_NetAddr;

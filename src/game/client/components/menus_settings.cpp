@@ -634,7 +634,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			const CSkin *s = m_pClient->m_pSkins->Get(i);
 
 			// filter quick search
-			if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_find_nocase(s->m_aName, g_Config.m_ClSkinFilterString))
+			if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_utf8_find_nocase(s->m_aName, g_Config.m_ClSkinFilterString))
 				continue;
 
 			// no special skins

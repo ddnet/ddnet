@@ -24,6 +24,10 @@ catalan
 == Català
 == 906
 
+chuvash
+== Чăвашла
+== 643
+
 czech
 == Česky
 == 203
@@ -47,6 +51,10 @@ french
 german
 == Deutsch
 == 276
+
+greek
+== Ελληνικά
+== 300
 
 hungarian
 == Magyar

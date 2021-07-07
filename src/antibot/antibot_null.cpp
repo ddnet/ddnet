@@ -1,3 +1,5 @@
+#define ANTIBOTAPI DYNAMIC_EXPORT
+
 #include "antibot_data.h"
 
 static CAntibotData *g_pData;
@@ -33,5 +35,7 @@ void AntibotOnHookAttach(int /*ClientID*/, bool /*Player*/) {}
 void AntibotOnEngineTick(void) {}
 void AntibotOnEngineClientJoin(int /*ClientID*/, bool /*Sixup*/) {}
 void AntibotOnEngineClientDrop(int /*ClientID*/, const char * /*pReason*/) {}
-void AntibotOnEngineClientMessage(int /*ClientID*/, const void * /*pData*/, int /*Size*/, int /*Flags*/) {}
+bool AntibotOnEngineClientMessage(int /*ClientID*/, const void * /*pData*/, int /*Size*/, int /*Flags*/) { return false; }
+bool AntibotOnEngineServerMessage(int /*ClientID*/, const void * /*pData*/, int /*Size*/, int /*Flags*/) { return false; }
+bool AntibotOnEngineSimulateClientMessage(int * /*pClientID*/, void * /*pBuffer*/, int /*BufferSize*/, int * /*pOutSize*/, int * /*pFlags*/) { return false; }
 }

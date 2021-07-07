@@ -1009,6 +1009,11 @@ void CCommandProcessorFragment_OpenGL::Cmd_Screenshot(const CCommandBuffer::SCom
 		mem_copy(pTempRow, pPixelData + y * w * 4, w * 4);
 		mem_copy(pPixelData + y * w * 4, pPixelData + (h - y - 1) * w * 4, w * 4);
 		mem_copy(pPixelData + (h - y - 1) * w * 4, pTempRow, w * 4);
+		for(int x = 0; x < w; x++)
+		{
+			pPixelData[y * w * 4 + x * 4 + 3] = 255;
+			pPixelData[(h - y - 1) * w * 4 + x * 4 + 3] = 255;
+		}
 	}
 
 	// fill in the information

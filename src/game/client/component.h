@@ -41,13 +41,13 @@ protected:
 #endif
 
 #if defined(CONF_VIDEORECORDER)
-	int64 time() const
+	int64_t time() const
 	{
 		return IVideo::Current() ? IVideo::Time() : time_get();
 	}
 	float LocalTime() const { return IVideo::Current() ? IVideo::LocalTime() : Client()->LocalTime(); }
 #else
-	int64 time() const
+	int64_t time() const
 	{
 		return time_get();
 	}

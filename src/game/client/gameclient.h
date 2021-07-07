@@ -305,8 +305,8 @@ public:
 		vec2 m_RenderPos;
 		bool m_IsPredicted;
 		bool m_IsPredictedLocal;
-		int64 m_SmoothStart[2];
-		int64 m_SmoothLen[2];
+		int64_t m_SmoothStart[2];
+		int64_t m_SmoothLen[2];
 		vec2 m_PredPos[200];
 		int m_PredTick[200];
 		bool m_SpecCharPresent;

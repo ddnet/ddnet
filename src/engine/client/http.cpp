@@ -86,7 +86,7 @@ void EscapeUrl(char *pBuf, int Size, const char *pStr)
 	curl_free(pEsc);
 }
 
-CRequest::CRequest(const char *pUrl, CTimeout Timeout, bool LogProgress) :
+CRequest::CRequest(const char *pUrl, CTimeout Timeout, HTTPLOG LogProgress) :
 	m_Timeout(Timeout),
 	m_Size(0),
 	m_Progress(0),
@@ -153,19 +153,19 @@ int CRequest::RunImpl(CURL *pHandle)
 		return HTTP_ERROR;
 	}
 
-	if(g_Config.m_DbgCurl || m_LogProgress)
+	if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::ALL)
 		dbg_msg("http", "fetching %s", m_aUrl);
 	m_State = HTTP_RUNNING;
 	int Ret = curl_easy_perform(pHandle);
 	if(Ret != CURLE_OK)
 	{
-		if(g_Config.m_DbgCurl || m_LogProgress)
-			dbg_msg("http", "task failed. libcurl error: %s", aErr);
+		if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::FAILURE)
+			dbg_msg("http", "%s failed. libcurl error: %s", m_aUrl, aErr);
 		return (Ret == CURLE_ABORTED_BY_CALLBACK) ? HTTP_ABORTED : HTTP_ERROR;
 	}
 	else
 	{
-		if(g_Config.m_DbgCurl || m_LogProgress)
+		if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::ALL)
 			dbg_msg("http", "task done %s", m_aUrl);
 		return HTTP_DONE;
 	}
@@ -186,7 +186,7 @@ int CRequest::ProgressCallback(void *pUser, double DlTotal, double DlCurr, doubl
 	return pTask->m_Abort ? -1 : 0;
 }
 
-CHead::CHead(const char *pUrl, CTimeout Timeout, bool LogProgress) :
+CHead::CHead(const char *pUrl, CTimeout Timeout, HTTPLOG LogProgress) :
 	CRequest(pUrl, Timeout, LogProgress)
 {
 }
@@ -202,7 +202,7 @@ bool CHead::AfterInit(void *pCurl)
 	return true;
 }
 
-CGet::CGet(const char *pUrl, CTimeout Timeout, bool LogProgress) :
+CGet::CGet(const char *pUrl, CTimeout Timeout, HTTPLOG LogProgress) :
 	CRequest(pUrl, Timeout, LogProgress),
 	m_BufferSize(0),
 	m_BufferLength(0),
@@ -275,7 +275,7 @@ size_t CGet::OnData(char *pData, size_t DataSize)
 	return DataSize;
 }
 
-CGetFile::CGetFile(IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType, CTimeout Timeout, bool LogProgress) :
+CGetFile::CGetFile(IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType, CTimeout Timeout, HTTPLOG LogProgress) :
 	CRequest(pUrl, Timeout, LogProgress),
 	m_pStorage(pStorage),
 	m_File(0),

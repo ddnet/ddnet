@@ -254,8 +254,8 @@ void CEffects::HammerHit(vec2 Pos)
 
 void CEffects::OnRender()
 {
-	static int64 LastUpdate100hz = 0;
-	static int64 LastUpdate50hz = 0;
+	static int64_t LastUpdate100hz = 0;
+	static int64_t LastUpdate50hz = 0;
 
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
