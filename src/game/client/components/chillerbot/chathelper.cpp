@@ -3,6 +3,8 @@
 #include <game/client/components/chat.h>
 #include <game/client/components/chillerbot/chillerbotux.h>
 
+#include <cinttypes>
+
 #include "chathelper.h"
 
 CChatHelper::CChatHelper()
@@ -263,9 +265,9 @@ void CChatHelper::OnChatMessage(int ClientID, int Team, const char *pMsg)
 		char aNote[128];
 		str_format(aBuf, sizeof(aBuf), "%s: I am currently afk.", aName);
 		if(AfkTill > time_get() + time_freq() * 61)
-			str_format(aBuf, sizeof(aBuf), "%s: I am currently afk. Estimated return in %ld minutes.", aName, (long)(AfkTill - time_get()) / time_freq() / 60);
+			str_format(aBuf, sizeof(aBuf), "%s: I am currently afk. Estimated return in %" PRId64 " minutes.", aName, (AfkTill - time_get()) / time_freq() / 60);
 		else if(AfkTill > time_get() + time_freq() * 10)
-			str_format(aBuf, sizeof(aBuf), "%s: I am currently afk. Estimated return in %ld seconds.", aName, (long)(AfkTill - time_get()) / time_freq());
+			str_format(aBuf, sizeof(aBuf), "%s: I am currently afk. Estimated return in %" PRId64 " seconds.", aName, (AfkTill - time_get()) / time_freq());
 		if(m_pChillerBot->GetAfkMessage()[0])
 		{
 			str_format(aNote, sizeof(aNote), " (%s)", m_pChillerBot->GetAfkMessage());
