@@ -1199,7 +1199,7 @@ Updating...
 == Päivitetään...
 
 DDNet Client updated!
-==DDNet-asiakas on päivitetty!
+== DDNet-asiakas on päivitetty!
 
 No updates available
 == Ei päivityksiä saatavilla
