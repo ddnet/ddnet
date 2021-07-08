@@ -1225,7 +1225,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		}
 
 		MainView.HSplitTop(20.0f, &Button, &MainView);
-		if(DoButton_CheckBox(&g_Config.m_GfxEnableTextureUnitOptimization, Localize("Multiple texture units (disable for MacOS)"), g_Config.m_GfxEnableTextureUnitOptimization, &Button))
+		if(DoButton_CheckBox(&g_Config.m_GfxEnableTextureUnitOptimization, Localize("Multiple texture units (disable for macOS)"), g_Config.m_GfxEnableTextureUnitOptimization, &Button))
 		{
 			CheckSettings = true;
 			g_Config.m_GfxEnableTextureUnitOptimization ^= 1;

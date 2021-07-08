@@ -955,7 +955,7 @@ Use OpenGL 3.3 (experimental)
 Preinit VBO (iGPUs only)
 == 
 
-Multiple texture units (disable for MacOS)
+Multiple texture units (disable for macOS)
 == 
 
 Use high DPI

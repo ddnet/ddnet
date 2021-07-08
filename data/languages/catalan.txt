@@ -897,8 +897,8 @@ Preinit VBO (iGPUs only)
 Activate
 == Activar
 
-Multiple texture units (disable for MacOS)
-== Multiple texture units (disable for MacOS)
+Multiple texture units (disable for macOS)
+== Multiple texture units (disable for macOS)
 
 UI mouse s.
 == UI mouse s.

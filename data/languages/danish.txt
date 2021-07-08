@@ -944,8 +944,8 @@ Screen
 Preinit VBO (iGPUs only)
 == Præinit VBO (iGPUs alene)
 
-Multiple texture units (disable for MacOS)
-== Flere teksturenheder (deaktiver for MacOS)
+Multiple texture units (disable for macOS)
+== Flere teksturenheder (deaktiver for macOS)
 
 Use high DPI
 == Brug højt DPI

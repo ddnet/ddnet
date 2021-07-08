@@ -937,8 +937,8 @@ may cause delay
 Preinit VBO (iGPUs only)
 == Preinit VBO (само у iGPUs)
 
-Multiple texture units (disable for MacOS)
-== Вишеструке текстурне јединице (угашено за MacOS)
+Multiple texture units (disable for macOS)
+== Вишеструке текстурне јединице (угашено за macOS)
 
 Use high DPI
 == Користи високи DPI

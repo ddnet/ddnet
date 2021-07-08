@@ -811,8 +811,8 @@ Destination file already exist
 Reload
 == Przeładuj
 
-Multiple texture units (disable for MacOS)
-== Jednostki z wieloma teksturami (wyłącz dla MacOS)
+Multiple texture units (disable for macOS)
+== Jednostki z wieloma teksturami (wyłącz dla macOS)
 
 Replay feature is disabled!
 == Funkcja odtwarzania jest wyłączona!

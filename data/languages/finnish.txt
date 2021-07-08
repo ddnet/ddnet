@@ -994,7 +994,7 @@ Use modern OpenGL
 Preinit VBO (iGPUs only)
 == Esialusta VBO (vain iGPUt)
 
-Multiple texture units (disable for MacOS)
+Multiple texture units (disable for macOS)
 == Monta tekstuuriyksikköä (älä käytä macOS:ällä)
 
 Use high DPI
