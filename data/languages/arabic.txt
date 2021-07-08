@@ -885,8 +885,8 @@ may cause delay
 Preinit VBO (iGPUs only)
 == Preinit-VBO (iGPUs ﻂﻘﻓ)
 
-Multiple texture units (disable for MacOS)
-== ﺮﺘﺴﻜﺗ ﻦﻣ ﺮﺜﻛﺍ ( ﺖﻨﻛ ﺍﺫﺍ ﺔﺋﺎﻔﻃﺍ MacOS )
+Multiple texture units (disable for macOS)
+== ﺮﺘﺴﻜﺗ ﻦﻣ ﺮﺜﻛﺍ ( ﺖﻨﻛ ﺍﺫﺍ ﺔﺋﺎﻔﻃﺍ macOS )
 
 UI mouse s.
 == ﻮﻴﻨﻣ ﺱﻭﺎﻤﻟﺍ ﺔﻴﺳﺎﺴﺣ

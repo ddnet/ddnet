@@ -994,7 +994,7 @@ Use modern OpenGL
 Preinit VBO (iGPUs only)
 == VBO を事前初期化（統合型グラフィックのみ）
 
-Multiple texture units (disable for MacOS)
+Multiple texture units (disable for macOS)
 == 多重テクスチャユニット（macOS 以外）
 
 Use high DPI

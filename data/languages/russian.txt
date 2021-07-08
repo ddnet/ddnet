@@ -984,8 +984,8 @@ Screen
 Preinit VBO (iGPUs only)
 == Преинициал-ть VBO (только iGPU)
 
-Multiple texture units (disable for MacOS)
-== Улучш. блоки текстур (откл. для MacOS)
+Multiple texture units (disable for macOS)
+== Улучш. блоки текстур (откл. для macOS)
 
 Use high DPI
 == Использовать высокую чувств.

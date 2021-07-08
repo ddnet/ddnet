@@ -910,7 +910,7 @@ may cause delay
 Preinit VBO (iGPUs only)
 == Preinit-VBO (nur für iGPUs)
 
-Multiple texture units (disable for MacOS)
+Multiple texture units (disable for macOS)
 == Mehrere Textureinheiten (nicht für Mac OS)
 
 UI mouse s.
