@@ -178,7 +178,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	{
 		CUIRect MsgBox = View;
 
-		if(ServerBrowser()->IsGettingServerlist())
+		if(!ServerBrowser()->NumServers() && ServerBrowser()->IsGettingServerlist())
 			UI()->DoLabelScaled(&MsgBox, Localize("Getting server list from master server"), 16.0f, 0);
 		else if(!ServerBrowser()->NumServers())
 			UI()->DoLabelScaled(&MsgBox, Localize("No servers found"), 16.0f, 0);
@@ -614,6 +614,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		auto Func = [this]() mutable -> const char * {
 			if(ServerBrowser()->IsRefreshing())
 				str_format(m_aLocalStringHelper, sizeof(m_aLocalStringHelper), "%s (%d%%)", Localize("Refresh"), ServerBrowser()->LoadingProgression());
+			else if(ServerBrowser()->IsGettingServerlist())
+				str_copy(m_aLocalStringHelper, Localize("(Fetching) Refresh"), sizeof(m_aLocalStringHelper));
 			else
 				str_copy(m_aLocalStringHelper, Localize("Refresh"), sizeof(m_aLocalStringHelper));
 

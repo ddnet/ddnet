@@ -176,7 +176,7 @@ private:
 	CServerEntry *m_pLastReqServer;
 	int m_NumRequests;
 
-	//used instead of g_Config.br_max_requests to get more servers
+	// used instead of g_Config.br_max_requests to get more servers
 	int m_CurrentMaxRequests;
 
 	int m_NeedRefresh;
@@ -192,7 +192,6 @@ private:
 
 	int m_ServerlistType;
 	int64_t m_BroadcastTime;
-	int m_RequestNumber;
 	unsigned char m_aTokenSeed[16];
 
 	bool m_SortOnNextUpdate;
@@ -216,6 +215,8 @@ private:
 	void Filter();
 	void Sort();
 	int SortHash() const;
+
+	void CleanUp();
 
 	void UpdateFromHttp();
 	CServerEntry *Add(const NETADDR &Addr);

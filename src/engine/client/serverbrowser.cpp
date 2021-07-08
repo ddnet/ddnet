@@ -66,7 +66,6 @@ CServerBrowser::CServerBrowser()
 	m_ServerlistType = 0;
 	m_BroadcastTime = 0;
 	secure_random_fill(m_aTokenSeed, sizeof(m_aTokenSeed));
-	m_RequestNumber = 0;
 
 	m_pDDNetInfo = 0;
 
@@ -767,22 +766,14 @@ void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServer
 
 void CServerBrowser::Refresh(int Type)
 {
-	// clear out everything
-	m_ServerlistHeap.Reset();
-	m_NumServers = 0;
-	m_NumSortedServers = 0;
-	mem_zero(m_aServerlistIp, sizeof(m_aServerlistIp));
-	m_pFirstReqServer = 0;
-	m_pLastReqServer = 0;
-	m_NumRequests = 0;
-	m_CurrentMaxRequests = g_Config.m_BrMaxRequests;
-	m_RequestNumber++;
-
+	bool ServerListTypeChanged = m_ServerlistType != Type;
 	m_ServerlistType = Type;
 	secure_random_fill(m_aTokenSeed, sizeof(m_aTokenSeed));
 
 	if(Type == IServerBrowser::TYPE_LAN)
 	{
+		CleanUp();
+
 		unsigned char Buffer[sizeof(SERVERBROWSE_GETINFO) + 1];
 		CNetChunk Packet;
 		int i;
@@ -819,6 +810,13 @@ void CServerBrowser::Refresh(int Type)
 		m_pHttp->Refresh();
 		m_pPingCache->Load();
 		m_RefreshingHttp = true;
+
+		if(ServerListTypeChanged && m_pHttp->NumServers() > 0)
+		{
+			CleanUp();
+			UpdateFromHttp();
+			Sort();
+		}
 	}
 }
 
@@ -1159,6 +1157,19 @@ void CServerBrowser::UpdateFromHttp()
 	}
 }
 
+void CServerBrowser::CleanUp()
+{
+	// clear out everything
+	m_ServerlistHeap.Reset();
+	m_NumServers = 0;
+	m_NumSortedServers = 0;
+	mem_zero(m_aServerlistIp, sizeof(m_aServerlistIp));
+	m_pFirstReqServer = 0;
+	m_pLastReqServer = 0;
+	m_NumRequests = 0;
+	m_CurrentMaxRequests = g_Config.m_BrMaxRequests;
+}
+
 void CServerBrowser::Update(bool ForceResort)
 {
 	int64_t Timeout = time_freq();
@@ -1176,10 +1187,11 @@ void CServerBrowser::Update(bool ForceResort)
 	if(m_ServerlistType != TYPE_LAN && m_RefreshingHttp && !m_pHttp->IsRefreshing())
 	{
 		m_RefreshingHttp = false;
+		CleanUp();
 		UpdateFromHttp();
 		// TODO: move this somewhere else
-		if(m_Sorthash != SortHash() || ForceResort)
-			Sort();
+		//if(m_Sorthash != SortHash() || ForceResort)
+		Sort();
 		return;
 	}
 
