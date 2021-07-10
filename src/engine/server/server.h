@@ -174,7 +174,6 @@ public:
 		int m_AuthTries;
 		int m_NextMapChunk;
 		int m_Flags;
-		bool m_ShowIps;
 
 		const IConsole::CCommandInfo *m_pRconCmdToSend;
 
@@ -383,7 +382,6 @@ public:
 	static void ConStopRecord(IConsole::IResult *pResult, void *pUser);
 	static void ConMapReload(IConsole::IResult *pResult, void *pUser);
 	static void ConLogout(IConsole::IResult *pResult, void *pUser);
-	static void ConShowIps(IConsole::IResult *pResult, void *pUser);
 
 	static void ConAuthAdd(IConsole::IResult *pResult, void *pUser);
 	static void ConAuthAddHashed(IConsole::IResult *pResult, void *pUser);
