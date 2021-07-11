@@ -86,8 +86,6 @@ CMenus::CMenus()
 	m_DeletePressed = false;
 	m_NumInputEvents = 0;
 
-	m_LastInput = time_get();
-
 	str_copy(m_aCurrentDemoFolder, "demos", sizeof(m_aCurrentDemoFolder));
 	m_aCallvoteReason[0] = 0;
 
@@ -2554,8 +2552,6 @@ void CMenus::OnReset()
 
 bool CMenus::OnMouseMove(float x, float y)
 {
-	m_LastInput = time_get();
-
 	if(!m_MenuActive)
 		return false;
 
@@ -2578,8 +2574,6 @@ bool CMenus::OnMouseMove(float x, float y)
 
 bool CMenus::OnInput(IInput::CEvent e)
 {
-	m_LastInput = time_get();
-
 	// special handle esc and enter for popup purposes
 	if(e.m_Flags & IInput::FLAG_PRESS)
 	{
