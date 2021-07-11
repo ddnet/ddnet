@@ -292,8 +292,6 @@ protected:
 
 	char m_aNextServer[256];
 
-	int64_t m_LastInput;
-
 	// images
 	struct CMenuImage
 	{
