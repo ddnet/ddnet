@@ -3429,9 +3429,7 @@ void CClient::Run()
 	m_pGraphics->Shutdown();
 
 	// shutdown SDL
-	{
-		SDL_Quit();
-	}
+	SDL_Quit();
 }
 
 bool CClient::CtrlShiftKey(int Key, bool &Last)
