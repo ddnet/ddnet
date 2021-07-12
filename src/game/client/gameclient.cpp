@@ -67,8 +67,6 @@
 #include "components/race_demo.h"
 #include <base/system.h>
 
-CGameClient g_GameClient;
-
 CGameClient::CStack::CStack() { m_Num = 0; }
 void CGameClient::CStack::Add(class CComponent *pComponent) { m_paComponents[m_Num++] = pComponent; }
 
@@ -562,28 +560,6 @@ void CGameClient::UpdatePositions()
 	}
 
 	UpdateRenderedCharacters();
-}
-
-static void Evolve(CNetObj_Character *pCharacter, int Tick)
-{
-	CWorldCore TempWorld;
-	CCharacterCore TempCore;
-	CTeamsCore TempTeams;
-	mem_zero(&TempCore, sizeof(TempCore));
-	mem_zero(&TempTeams, sizeof(TempTeams));
-	TempCore.Init(&TempWorld, g_GameClient.Collision(), &TempTeams);
-	TempCore.Read(pCharacter);
-	TempCore.m_ActiveWeapon = pCharacter->m_Weapon;
-
-	while(pCharacter->m_Tick < Tick)
-	{
-		pCharacter->m_Tick++;
-		TempCore.Tick(false);
-		TempCore.Move();
-		TempCore.Quantize();
-	}
-
-	TempCore.Write(pCharacter);
 }
 
 void CGameClient::OnRender()
@@ -1100,6 +1076,27 @@ void CGameClient::InvalidateSnapshot()
 
 void CGameClient::OnNewSnapshot()
 {
+	auto &&Evolve = [=](CNetObj_Character *pCharacter, int Tick) {
+		CWorldCore TempWorld;
+		CCharacterCore TempCore;
+		CTeamsCore TempTeams;
+		mem_zero(&TempCore, sizeof(TempCore));
+		mem_zero(&TempTeams, sizeof(TempTeams));
+		TempCore.Init(&TempWorld, Collision(), &TempTeams);
+		TempCore.Read(pCharacter);
+		TempCore.m_ActiveWeapon = pCharacter->m_Weapon;
+
+		while(pCharacter->m_Tick < Tick)
+		{
+			pCharacter->m_Tick++;
+			TempCore.Tick(false);
+			TempCore.Move();
+			TempCore.Quantize();
+		}
+
+		TempCore.Write(pCharacter);
+	};
+
 	InvalidateSnapshot();
 
 	m_NewTick = true;
@@ -1201,7 +1198,7 @@ void CGameClient::OnNewSnapshot()
 						pClient->m_SkinInfo.m_ColorFeet = ColorRGBA(1, 1, 1);
 					}
 
-					pClient->UpdateRenderInfo();
+					pClient->UpdateRenderInfo(IsTeamPlay());
 				}
 			}
 			else if(Item.m_Type == NETOBJTYPE_PLAYERINFO)
@@ -1886,12 +1883,12 @@ void CGameClient::CClientStats::Reset()
 	m_FlagCaptures = 0;
 }
 
-void CGameClient::CClientData::UpdateRenderInfo()
+void CGameClient::CClientData::UpdateRenderInfo(bool IsTeamPlay)
 {
 	m_RenderInfo = m_SkinInfo;
 
 	// force team colors
-	if(g_GameClient.m_Snap.m_pGameInfoObj && g_GameClient.m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)
+	if(IsTeamPlay)
 	{
 		m_RenderInfo.m_CustomColoredSkin = true;
 		const int TeamColors[2] = {65461, 10223541};
@@ -1956,7 +1953,7 @@ void CGameClient::CClientData::Reset()
 	m_SpecChar = vec2(0, 0);
 	m_SpecCharPresent = false;
 
-	UpdateRenderInfo();
+	UpdateRenderInfo(false);
 }
 
 void CGameClient::SendSwitchTeam(int Team)
@@ -2094,7 +2091,7 @@ void CGameClient::ConchainClTextEntitiesSize(IConsole::IResult *pResult, void *p
 
 IGameClient *CreateGameClient()
 {
-	return &g_GameClient;
+	return new CGameClient();
 }
 
 int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2 &NewPos2, int ownID)
@@ -2915,7 +2912,7 @@ void CGameClient::RefindSkins()
 			const CSkin *pSkin = m_Skins.Get(m_Skins.Find(Client.m_aSkinName));
 			Client.m_SkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 			Client.m_SkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-			Client.UpdateRenderInfo();
+			Client.UpdateRenderInfo(IsTeamPlay());
 		}
 	}
 	m_Ghost.RefindSkin();
