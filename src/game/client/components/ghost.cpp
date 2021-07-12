@@ -12,6 +12,8 @@
 #include "players.h"
 #include "skins.h"
 
+#include <game/client/gameclient.h>
+
 const char *CGhost::ms_pGhostDir = "ghosts";
 
 CGhost::CGhost() :

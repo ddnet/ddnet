@@ -8,6 +8,9 @@
 #include <game/client/components/mapimages.h>
 #include <game/client/components/maplayers.h>
 
+#include <game/client/gameclient.h>
+#include <game/layers.h>
+
 #include "background.h"
 
 CBackground::CBackground(int MapType, bool OnlineOnly) :

@@ -8,6 +8,8 @@
 #include <game/client/render.h>
 #include <game/generated/protocol.h>
 
+#include <game/client/gameclient.h>
+
 void CVoting::ConCallvote(IConsole::IResult *pResult, void *pUserData)
 {
 	CVoting *pSelf = (CVoting *)pUserData;

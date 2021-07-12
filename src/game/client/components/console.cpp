@@ -31,6 +31,8 @@
 #include <game/client/lineinput.h>
 #include <game/client/render.h>
 
+#include <game/client/gameclient.h>
+
 #include "console.h"
 
 CGameConsole::CInstance::CInstance(int Type)

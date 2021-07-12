@@ -69,46 +69,6 @@
 
 CGameClient g_GameClient;
 
-// instantiate all systems
-static CKillMessages gs_KillMessages;
-static CCamera gs_Camera;
-static CChat gs_Chat;
-static CMotd gs_Motd;
-static CBroadcast gs_Broadcast;
-static CGameConsole gs_GameConsole;
-static CBinds gs_Binds;
-static CParticles gs_Particles;
-static CMenus gs_Menus;
-static CSkins gs_Skins;
-static CCountryFlags gs_CountryFlags;
-static CFlow gs_Flow;
-static CHud gs_Hud;
-static CDebugHud gs_DebugHud;
-static CControls gs_Controls;
-static CEffects gs_Effects;
-static CScoreboard gs_Scoreboard;
-static CStatboard gs_Statboard;
-static CSounds gs_Sounds;
-static CEmoticon gs_Emoticon;
-static CDamageInd gsDamageInd;
-static CVoting gs_Voting;
-static CSpectator gs_Spectator;
-
-static CPlayers gs_Players;
-static CNamePlates gs_NamePlates;
-static CItems gs_Items;
-static CMapImages gs_MapImages;
-
-static CMapLayers gs_MapLayersBackGround(CMapLayers::TYPE_BACKGROUND);
-static CMapLayers gs_MapLayersForeGround(CMapLayers::TYPE_FOREGROUND);
-static CBackground gs_BackGround;
-static CMenuBackground gs_MenuBackground;
-
-static CMapSounds gs_MapSounds;
-
-static CRaceDemo gs_RaceDemo;
-static CGhost gs_Ghost;
-
 CGameClient::CStack::CStack() { m_Num = 0; }
 void CGameClient::CStack::Add(class CComponent *pComponent) { m_paComponents[m_Num++] = pComponent; }
 
@@ -137,39 +97,39 @@ void CGameClient::OnConsoleInit()
 #endif
 
 	// setup pointers
-	m_pMenuBackground = &::gs_MenuBackground;
-	m_pBinds = &::gs_Binds;
-	m_pGameConsole = &::gs_GameConsole;
-	m_pParticles = &::gs_Particles;
-	m_pMenus = &::gs_Menus;
-	m_pSkins = &::gs_Skins;
-	m_pCountryFlags = &::gs_CountryFlags;
-	m_pChat = &::gs_Chat;
-	m_pFlow = &::gs_Flow;
-	m_pCamera = &::gs_Camera;
-	m_pControls = &::gs_Controls;
-	m_pEffects = &::gs_Effects;
-	m_pSounds = &::gs_Sounds;
-	m_pMotd = &::gs_Motd;
-	m_pDamageind = &::gsDamageInd;
-	m_pMapimages = &::gs_MapImages;
-	m_pVoting = &::gs_Voting;
-	m_pScoreboard = &::gs_Scoreboard;
-	m_pStatboard = &::gs_Statboard;
-	m_pItems = &::gs_Items;
-	m_pMapLayersBackGround = &::gs_MapLayersBackGround;
-	m_pMapLayersForeGround = &::gs_MapLayersForeGround;
-	m_pBackGround = &::gs_BackGround;
+	m_pMenuBackground = &m_MenuBackground;
+	m_pBinds = &m_Binds;
+	m_pGameConsole = &m_GameConsole;
+	m_pParticles = &m_Particles;
+	m_pMenus = &m_Menus;
+	m_pSkins = &m_Skins;
+	m_pCountryFlags = &m_CountryFlags;
+	m_pChat = &m_Chat;
+	m_pFlow = &m_Flow;
+	m_pCamera = &m_Camera;
+	m_pControls = &m_Controls;
+	m_pEffects = &m_Effects;
+	m_pSounds = &m_Sounds;
+	m_pMotd = &m_Motd;
+	m_pDamageind = &m_DamageInd;
+	m_pMapimages = &m_MapImages;
+	m_pVoting = &m_Voting;
+	m_pScoreboard = &m_Scoreboard;
+	m_pStatboard = &m_Statboard;
+	m_pItems = &m_Items;
+	m_pMapLayersBackGround = &m_MapLayersBackGround;
+	m_pMapLayersForeGround = &m_MapLayersForeGround;
+	m_pBackGround = &m_BackGround;
 
-	m_pMapSounds = &::gs_MapSounds;
-	m_pPlayers = &::gs_Players;
+	m_pMapSounds = &m_MapSounds;
+	m_pPlayers = &m_Players;
 
-	m_pRaceDemo = &::gs_RaceDemo;
-	m_pGhost = &::gs_Ghost;
+	m_pRaceDemo = &m_RaceDemo;
+	m_pGhost = &m_Ghost;
 
 	m_pMenus->SetMenuBackground(m_pMenuBackground);
 
-	gs_NamePlates.SetPlayers(m_pPlayers);
+	m_NamePlates.SetPlayers(m_pPlayers);
 
 	// make a list of all the systems, make sure to add them in the correct render order
 	m_All.Add(m_pSkins);
@@ -186,26 +146,26 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(m_pRaceDemo);
 	m_All.Add(m_pMapSounds);
 
-	m_All.Add(&gs_BackGround); //render instead of gs_MapLayersBackGround when g_Config.m_ClOverlayEntities == 100
-	m_All.Add(&gs_MapLayersBackGround); // first to render
+	m_All.Add(&m_BackGround); //render instead of m_MapLayersBackGround when g_Config.m_ClOverlayEntities == 100
+	m_All.Add(&m_MapLayersBackGround); // first to render
 	m_All.Add(&m_pParticles->m_RenderTrail);
 	m_All.Add(m_pItems);
 	m_All.Add(m_pPlayers);
 	m_All.Add(m_pGhost);
-	m_All.Add(&gs_MapLayersForeGround);
+	m_All.Add(&m_MapLayersForeGround);
 	m_All.Add(&m_pParticles->m_RenderExplosions);
-	m_All.Add(&gs_NamePlates);
+	m_All.Add(&m_NamePlates);
 	m_All.Add(&m_pParticles->m_RenderGeneral);
 	m_All.Add(m_pDamageind);
-	m_All.Add(&gs_Hud);
-	m_All.Add(&gs_Spectator);
-	m_All.Add(&gs_Emoticon);
-	m_All.Add(&gs_KillMessages);
+	m_All.Add(&m_Hud);
+	m_All.Add(&m_Spectator);
+	m_All.Add(&m_Emoticon);
+	m_All.Add(&m_KillMessages);
 	m_All.Add(m_pChat);
-	m_All.Add(&gs_Broadcast);
-	m_All.Add(&gs_DebugHud);
-	m_All.Add(&gs_Scoreboard);
-	m_All.Add(&gs_Statboard);
+	m_All.Add(&m_Broadcast);
+	m_All.Add(&m_DebugHud);
+	m_All.Add(&m_Scoreboard);
+	m_All.Add(&m_Statboard);
 	m_All.Add(m_pMotd);
 	m_All.Add(m_pMenus);
 	m_All.Add(&m_pMenus->m_Binder);
@@ -220,8 +180,8 @@ void CGameClient::OnConsoleInit()
 	m_Input.Add(m_pChat); // chat has higher prio due to tha you can quit it by pressing esc
 	m_Input.Add(m_pMotd); // for pressing esc to remove it
 	m_Input.Add(m_pMenus);
-	m_Input.Add(&gs_Spectator);
-	m_Input.Add(&gs_Emoticon);
+	m_Input.Add(&m_Spectator);
+	m_Input.Add(&m_Emoticon);
 	m_Input.Add(m_pControls);
 	m_Input.Add(m_pBinds);
 
@@ -355,7 +315,7 @@ void CGameClient::OnInit()
 	m_LastDummyConnected = false;
 
 	// Set free binds to DDRace binds if it's active
-	gs_Binds.SetDDRaceBinds(true);
+	m_Binds.SetDDRaceBinds(true);
 
 	if(g_Config.m_ClTimeoutCode[0] == '\0' || str_comp(g_Config.m_ClTimeoutCode, "hGuEYnfxicsXGwFq") == 0)
 	{
@@ -2991,7 +2951,7 @@ void CGameClient::RefindSkins()
 	}
 	m_pGhost->RefindSkin();
 	m_pChat->RefindSkins();
-	gs_KillMessages.RefindSkins();
+	m_KillMessages.RefindSkins();
 }
 
 void CGameClient::LoadMapSettings()

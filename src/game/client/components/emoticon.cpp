@@ -13,6 +13,8 @@
 #include <game/client/ui.h>
 #include <game/gamecore.h> // get_angle
 
+#include <game/client/gameclient.h>
+
 CEmoticon::CEmoticon()
 {
 	OnReset();

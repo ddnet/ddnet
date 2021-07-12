@@ -19,6 +19,8 @@
 #include <game/localization.h>
 #include <game/version.h>
 
+#include <game/client/gameclient.h>
+
 #include "menus.h"
 
 static const int g_OffsetColFlagLock = 2;

@@ -17,6 +17,8 @@
 #include "camera.h"
 #include "spectator.h"
 
+#include <game/client/gameclient.h>
+
 bool CSpectator::CanChangeSpectator()
 {
 	// Don't change SpectatorID when not spectating

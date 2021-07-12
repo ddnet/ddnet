@@ -11,6 +11,10 @@
 #include <engine/shared/config.h>
 #include <engine/storage.h>
 
+#include <game/generated/client_data.h>
+
+#include <game/client/gameclient.h>
+
 #include "skins.h"
 
 static const char *VANILLA_SKINS[] = {"bluekitty", "bluestripe", "brownbear",

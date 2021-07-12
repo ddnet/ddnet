@@ -6,6 +6,10 @@
 #include <game/client/components/maplayers.h> // envelope
 #include <game/client/components/sounds.h>
 
+#include <game/client/gameclient.h>
+
+#include <game/layers.h>
+
 #include "mapsounds.h"
 
 CMapSounds::CMapSounds()

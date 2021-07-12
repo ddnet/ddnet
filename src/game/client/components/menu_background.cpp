@@ -10,6 +10,10 @@
 #include <game/client/components/mapimages.h>
 #include <game/client/components/maplayers.h>
 
+#include <game/layers.h>
+
+#include <game/client/render.h>
+
 #include "menu_background.h"
 
 CMenuBackground::CMenuBackground() :
