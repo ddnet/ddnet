@@ -32,12 +32,12 @@ CMapLayers::CMapLayers(int t, bool OnlineOnly)
 void CMapLayers::OnInit()
 {
 	m_pLayers = Layers();
-	m_pImages = m_pClient->m_pMapimages;
+	m_pImages = &m_pClient->m_MapImages;
 }
 
 CCamera *CMapLayers::GetCurCamera()
 {
-	return m_pClient->m_pCamera;
+	return &m_pClient->m_Camera;
 }
 
 void CMapLayers::EnvelopeUpdate()

@@ -477,34 +477,6 @@ public:
 	virtual void SendDummyInfo(bool Start);
 	void SendKill(int ClientID);
 
-	// pointers to all systems
-	class CMenuBackground *m_pMenuBackground;
-	class CGameConsole *m_pGameConsole;
-	class CBinds *m_pBinds;
-	class CParticles *m_pParticles;
-	class CMenus *m_pMenus;
-	class CSkins *m_pSkins;
-	class CCountryFlags *m_pCountryFlags;
-	class CFlow *m_pFlow;
-	class CChat *m_pChat;
-	class CDamageInd *m_pDamageind;
-	class CCamera *m_pCamera;
-	class CControls *m_pControls;
-	class CEffects *m_pEffects;
-	class CSounds *m_pSounds;
-	class CMotd *m_pMotd;
-	class CMapImages *m_pMapimages;
-	class CVoting *m_pVoting;
-	class CScoreboard *m_pScoreboard;
-	class CStatboard *m_pStatboard;
-	class CItems *m_pItems;
-	class CMapLayers *m_pMapLayersBackGround;
-	class CMapLayers *m_pMapLayersForeGround;
-	class CBackground *m_pBackGround;
-
-	class CMapSounds *m_pMapSounds;
-	class CPlayers *m_pPlayers;
-
 	// DDRace
 
 	int m_LocalIDs[NUM_DUMMIES];
@@ -513,8 +485,6 @@ public:
 	int m_DummyFire;
 	bool m_ReceivedDDNetPlayer;
 
-	class CRaceDemo *m_pRaceDemo;
-	class CGhost *m_pGhost;
 	class CTeamsCore m_Teams;
 
 	int IntersectCharacter(vec2 Pos0, vec2 Pos1, vec2 &NewPos, int ownID);

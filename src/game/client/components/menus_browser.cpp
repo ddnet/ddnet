@@ -193,7 +193,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 	s_ScrollValue = DoScrollbarV(&s_ScrollBar, &Scroll, s_ScrollValue);
 
-	if(Input()->KeyPress(KEY_TAB) && m_pClient->m_pGameConsole->IsClosed())
+	if(Input()->KeyPress(KEY_TAB) && m_pClient->m_GameConsole.IsClosed())
 	{
 		if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
 			g_Config.m_UiToolboxPage = (g_Config.m_UiToolboxPage + 3 - 1) % 3;
@@ -760,7 +760,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		Rect.w = Rect.h * 2;
 		Rect.x += (OldWidth - Rect.w) / 2.0f;
 		ColorRGBA Color(1.0f, 1.0f, 1.0f, g_Config.m_BrFilterCountry ? 1.0f : 0.5f);
-		m_pClient->m_pCountryFlags->Render(g_Config.m_BrFilterCountryIndex, &Color, Rect.x, Rect.y, Rect.w, Rect.h);
+		m_pClient->m_CountryFlags.Render(g_Config.m_BrFilterCountryIndex, &Color, Rect.x, Rect.y, Rect.w, Rect.h);
 
 		if(g_Config.m_BrFilterCountry && UI()->DoButtonLogic(&g_Config.m_BrFilterCountryIndex, "", 0, &Rect))
 			m_Popup = POPUP_COUNTRY;
@@ -975,7 +975,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 					}
 
 					ColorRGBA Color(1.0f, 1.0f, 1.0f, Active ? 1.0f : 0.2f);
-					m_pClient->m_pCountryFlags->Render(FlagID, &Color, Pos.x, Pos.y, FlagWidth, FlagHeight);
+					m_pClient->m_CountryFlags.Render(FlagID, &Color, Pos.x, Pos.y, FlagWidth, FlagHeight);
 				}
 			}
 		}
@@ -1211,7 +1211,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 
 			// flag
 			ColorRGBA FColor(1.0f, 1.0f, 1.0f, 0.5f);
-			m_pClient->m_pCountryFlags->Render(pSelectedServer->m_aClients[i].m_Country, &FColor, Flag.x, Flag.y, Flag.w, Flag.h);
+			m_pClient->m_CountryFlags.Render(pSelectedServer->m_aClients[i].m_Country, &FColor, Flag.x, Flag.y, Flag.w, Flag.h);
 		}
 
 		UiDoListboxEnd(&s_ScrollValue, 0);

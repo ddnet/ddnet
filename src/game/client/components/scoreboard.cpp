@@ -512,7 +512,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 		// country flag
 		ColorRGBA Color(1.0f, 1.0f, 1.0f, 0.5f);
-		m_pClient->m_pCountryFlags->Render(m_pClient->m_aClients[pInfo->m_ClientID].m_Country, &Color,
+		m_pClient->m_CountryFlags.Render(m_pClient->m_aClients[pInfo->m_ClientID].m_Country, &Color,
 			CountryOffset, y + (Spacing + TeeSizeMod * 5.0f) / 2.0f, CountryLength, LineHeight - Spacing - TeeSizeMod * 5.0f);
 
 		// ping
@@ -613,8 +613,8 @@ void CScoreboard::OnRender()
 		return;
 
 	// if the score board is active, then we should clear the motd message as well
-	if(m_pClient->m_pMotd->IsActive())
-		m_pClient->m_pMotd->Clear();
+	if(m_pClient->m_Motd.IsActive())
+		m_pClient->m_Motd.Clear();
 
 	float Width = 400 * 3.0f * Graphics()->ScreenAspect();
 	float Height = 400 * 3.0f;
@@ -695,7 +695,7 @@ void CScoreboard::OnRender()
 bool CScoreboard::Active()
 {
 	// if statboard is active don't show scoreboard
-	if(m_pClient->m_pStatboard->IsActive())
+	if(m_pClient->m_Statboard.IsActive())
 		return false;
 
 	if(m_Active)

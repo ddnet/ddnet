@@ -71,7 +71,7 @@ void CBackground::LoadBackground()
 		if(m_pMap->IsLoaded())
 		{
 			m_pLayers = GameClient()->Layers();
-			m_pImages = GameClient()->m_pMapimages;
+			m_pImages = &GameClient()->m_MapImages;
 			m_Loaded = true;
 		}
 	}
