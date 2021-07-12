@@ -162,8 +162,8 @@ void CStatboard::RenderGlobalStats()
 		return;
 
 	//clear motd if it is active
-	if(m_pClient->m_pMotd->IsActive())
-		m_pClient->m_pMotd->Clear();
+	if(m_pClient->m_Motd.IsActive())
+		m_pClient->m_Motd.Clear();
 
 	bool GameWithFlags = m_pClient->m_Snap.m_pGameInfoObj &&
 			     m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_FLAGS;

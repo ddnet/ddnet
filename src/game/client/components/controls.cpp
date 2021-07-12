@@ -250,9 +250,9 @@ int CControls::SnapInput(int *pData)
 	bool Send = false;
 
 	// update player state
-	if(m_pClient->m_pChat->IsActive())
+	if(m_pClient->m_Chat.IsActive())
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_CHATTING;
-	else if(m_pClient->m_pMenus->IsActive())
+	else if(m_pClient->m_Menus.IsActive())
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_IN_MENU;
 	else
 	{
@@ -264,13 +264,13 @@ int CControls::SnapInput(int *pData)
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_PLAYING;
 	}
 
-	if(m_pClient->m_pScoreboard->Active())
+	if(m_pClient->m_Scoreboard.Active())
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_SCOREBOARD;
 
 	if(m_InputData[g_Config.m_ClDummy].m_PlayerFlags != PLAYERFLAG_PLAYING)
 		m_JoystickTapTime = 0; // Do not launch hook on first tap
 
-	if(m_pClient->m_pControls->m_ShowHookColl[g_Config.m_ClDummy])
+	if(m_pClient->m_Controls.m_ShowHookColl[g_Config.m_ClDummy])
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_AIM;
 
 	if(m_LastData[g_Config.m_ClDummy].m_PlayerFlags != m_InputData[g_Config.m_ClDummy].m_PlayerFlags)
@@ -547,8 +547,8 @@ bool CControls::OnMouseMove(float x, float y)
 
 	if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID < 0)
 	{
-		x = x * m_pClient->m_pCamera->m_Zoom;
-		y = y * m_pClient->m_pCamera->m_Zoom;
+		x = x * m_pClient->m_Camera.m_Zoom;
+		y = y * m_pClient->m_Camera.m_Zoom;
 	}
 
 	m_MousePos[g_Config.m_ClDummy] += vec2(x, y); // TODO: ugly

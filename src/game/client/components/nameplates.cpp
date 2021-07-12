@@ -55,7 +55,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 	{
 		float a = 1;
 		if(g_Config.m_ClNameplatesAlways == 0)
-			a = clamp(1 - powf(distance(m_pClient->m_pControls->m_TargetPos[g_Config.m_ClDummy], Position) / 200.0f, 16.0f), 0.0f, 1.0f);
+			a = clamp(1 - powf(distance(m_pClient->m_Controls.m_TargetPos[g_Config.m_ClDummy], Position) / 200.0f, 16.0f), 0.0f, 1.0f);
 
 		const char *pName = m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aName;
 		if(str_comp(pName, m_aNamePlates[ClientID].m_aName) != 0 || FontSize != m_aNamePlates[ClientID].m_NameTextFontSize)
@@ -73,7 +73,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			// create nameplates at standard zoom
 			float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 			Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-			MapscreenToGroup(m_pClient->m_pCamera->m_Center.x, m_pClient->m_pCamera->m_Center.y, Layers()->GameGroup());
+			MapscreenToGroup(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y, Layers()->GameGroup());
 
 			m_aNamePlates[ClientID].m_NameTextWidth = TextRender()->TextWidth(0, FontSize, pName, -1, -1.0f);
 
@@ -99,7 +99,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 				// create nameplates at standard zoom
 				float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 				Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-				MapscreenToGroup(m_pClient->m_pCamera->m_Center.x, m_pClient->m_pCamera->m_Center.y, Layers()->GameGroup());
+				MapscreenToGroup(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y, Layers()->GameGroup());
 
 				m_aNamePlates[ClientID].m_ClanNameTextWidth = TextRender()->TextWidth(0, FontSizeClan, pClan, -1, -1.0f);
 

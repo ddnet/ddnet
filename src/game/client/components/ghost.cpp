@@ -12,6 +12,8 @@
 #include "players.h"
 #include "skins.h"
 
+#include <game/client/gameclient.h>
+
 const char *CGhost::ms_pGhostDir = "ghosts";
 
 CGhost::CGhost() :
@@ -341,8 +343,8 @@ void CGhost::OnRender()
 
 		Player.m_AttackTick += Client()->GameTick(g_Config.m_ClDummy) - GhostTick;
 
-		m_pClient->m_pPlayers->RenderHook(&Prev, &Player, &Ghost.m_RenderInfo, -2, IntraTick);
-		m_pClient->m_pPlayers->RenderPlayer(&Prev, &Player, &Ghost.m_RenderInfo, -2, IntraTick);
+		m_pClient->m_Players.RenderHook(&Prev, &Player, &Ghost.m_RenderInfo, -2, IntraTick);
+		m_pClient->m_Players.RenderPlayer(&Prev, &Player, &Ghost.m_RenderInfo, -2, IntraTick);
 	}
 }
 
@@ -352,8 +354,8 @@ void CGhost::InitRenderInfos(CGhostItem *pGhost)
 	IntsToStr(&pGhost->m_Skin.m_Skin0, 6, aSkinName);
 	CTeeRenderInfo *pRenderInfo = &pGhost->m_RenderInfo;
 
-	int SkinId = m_pClient->m_pSkins->Find(aSkinName);
-	const CSkin *pSkin = m_pClient->m_pSkins->Get(SkinId);
+	int SkinId = m_pClient->m_Skins.Find(aSkinName);
+	const CSkin *pSkin = m_pClient->m_Skins.Get(SkinId);
 	pRenderInfo->m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 	pRenderInfo->m_ColorableRenderSkin = pSkin->m_ColorableSkin;
 	pRenderInfo->m_BloodColor = pSkin->m_BloodColor;
@@ -393,7 +395,7 @@ void CGhost::StopRecord(int Time)
 	if(RecordingToFile)
 		GhostRecorder()->Stop(m_CurGhost.m_Path.Size(), Time);
 
-	CMenus::CGhostItem *pOwnGhost = m_pClient->m_pMenus->GetOwnGhost();
+	CMenus::CGhostItem *pOwnGhost = m_pClient->m_Menus.GetOwnGhost();
 	if(Time > 0 && (!pOwnGhost || Time < pOwnGhost->m_Time))
 	{
 		if(pOwnGhost && pOwnGhost->Active())
@@ -417,7 +419,7 @@ void CGhost::StopRecord(int Time)
 			Storage()->RenameFile(m_aTmpFilename, Item.m_aFilename, IStorage::TYPE_SAVE);
 
 		// add item to menu list
-		m_pClient->m_pMenus->UpdateOwnGhost(Item);
+		m_pClient->m_Menus.UpdateOwnGhost(Item);
 	}
 	else if(RecordingToFile) // no new record
 		Storage()->RemoveFile(m_aTmpFilename, IStorage::TYPE_SAVE);
@@ -620,7 +622,7 @@ void CGhost::OnMapLoad()
 {
 	OnReset();
 	UnloadAll();
-	m_pClient->m_pMenus->GhostlistPopulate();
+	m_pClient->m_Menus.GhostlistPopulate();
 	m_AllowRestart = false;
 }
 
@@ -639,8 +641,8 @@ void CGhost::RefindSkin()
 		{
 			CTeeRenderInfo *pRenderInfo = &Ghost.m_RenderInfo;
 
-			int SkinId = m_pClient->m_pSkins->Find(aSkinName);
-			const CSkin *pSkin = m_pClient->m_pSkins->Get(SkinId);
+			int SkinId = m_pClient->m_Skins.Find(aSkinName);
+			const CSkin *pSkin = m_pClient->m_Skins.Get(SkinId);
 			pRenderInfo->m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 			pRenderInfo->m_ColorableRenderSkin = pSkin->m_ColorableSkin;
 			pRenderInfo->m_SkinMetrics = pSkin->m_Metrics;
@@ -651,8 +653,8 @@ void CGhost::RefindSkin()
 	{
 		CTeeRenderInfo *pRenderInfo = &m_CurGhost.m_RenderInfo;
 
-		int SkinId = m_pClient->m_pSkins->Find(aSkinName);
-		const CSkin *pSkin = m_pClient->m_pSkins->Get(SkinId);
+		int SkinId = m_pClient->m_Skins.Find(aSkinName);
+		const CSkin *pSkin = m_pClient->m_Skins.Get(SkinId);
 		pRenderInfo->m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 		pRenderInfo->m_ColorableRenderSkin = pSkin->m_ColorableSkin;
 		pRenderInfo->m_SkinMetrics = pSkin->m_Metrics;

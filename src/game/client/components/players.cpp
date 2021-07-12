@@ -206,7 +206,7 @@ void CPlayers::RenderPlayer(
 	if(Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		// just use the direct input if it's the local player we are rendering
-		Angle = angle(m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy]);
+		Angle = angle(m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy]);
 	}
 	else
 	{
@@ -234,7 +234,7 @@ void CPlayers::RenderPlayer(
 
 	vec2 Vel = mix(vec2(Prev.m_VelX / 256.0f, Prev.m_VelY / 256.0f), vec2(Player.m_VelX / 256.0f, Player.m_VelY / 256.0f), IntraTick);
 
-	m_pClient->m_pFlow->Add(Position, Vel * 100.0f, 10.0f);
+	m_pClient->m_Flow.Add(Position, Vel * 100.0f, 10.0f);
 
 	RenderInfo.m_GotAirJump = Player.m_Jumped & 2 ? 0 : 1;
 
@@ -266,11 +266,11 @@ void CPlayers::RenderPlayer(
 		if(time() - SkidSoundTime > time_freq() / 10)
 		{
 			if(g_Config.m_SndGame)
-				m_pClient->m_pSounds->PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_SKID, 0.25f, Position);
+				m_pClient->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_SKID, 0.25f, Position);
 			SkidSoundTime = time();
 		}
 
-		m_pClient->m_pEffects->SkidTrail(
+		m_pClient->m_Effects.SkidTrail(
 			Position + vec2(-Player.m_Direction * 6, 12),
 			vec2(-Player.m_Direction * 100 * length(Vel), -50));
 	}
@@ -288,7 +288,7 @@ void CPlayers::RenderPlayer(
 			vec2 ExDirection = Direction;
 
 			if(Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
-				ExDirection = normalize(vec2(m_pClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_TargetX, m_pClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_TargetY));
+				ExDirection = normalize(vec2(m_pClient->m_Controls.m_InputData[g_Config.m_ClDummy].m_TargetX, m_pClient->m_Controls.m_InputData[g_Config.m_ClDummy].m_TargetY));
 
 			Graphics()->TextureClear();
 			vec2 InitPos = Position;
@@ -399,12 +399,12 @@ void CPlayers::RenderPlayer(
 			{
 				Graphics()->QuadsSetRotation(-pi / 2 - State.GetAttach()->m_Angle * pi * 2);
 				p.x -= g_pData->m_Weapons.m_aId[iw].m_Offsetx;
-				m_pClient->m_pEffects->PowerupShine(p + vec2(32, 0), vec2(32, 12));
+				m_pClient->m_Effects.PowerupShine(p + vec2(32, 0), vec2(32, 12));
 			}
 			else
 			{
 				Graphics()->QuadsSetRotation(-pi / 2 + State.GetAttach()->m_Angle * pi * 2);
-				m_pClient->m_pEffects->PowerupShine(p - vec2(32, 0), vec2(32, 12));
+				m_pClient->m_Effects.PowerupShine(p - vec2(32, 0), vec2(32, 12));
 			}
 			Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, p.x, p.y);
 
@@ -647,10 +647,10 @@ void CPlayers::OnRender()
 		if(m_pClient->m_Snap.m_aCharacters[i].m_Cur.m_Weapon == WEAPON_NINJA && g_Config.m_ClShowNinja)
 		{
 			// change the skin for the player to the ninja
-			int Skin = m_pClient->m_pSkins->Find("x_ninja");
+			int Skin = m_pClient->m_Skins.Find("x_ninja");
 			if(Skin != -1)
 			{
-				const CSkin *pSkin = m_pClient->m_pSkins->Get(Skin);
+				const CSkin *pSkin = m_pClient->m_Skins.Get(Skin);
 				m_aRenderInfo[i].m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 				m_aRenderInfo[i].m_ColorableRenderSkin = pSkin->m_ColorableSkin;
 				m_aRenderInfo[i].m_BloodColor = pSkin->m_BloodColor;
@@ -664,8 +664,8 @@ void CPlayers::OnRender()
 			}
 		}
 	}
-	int Skin = m_pClient->m_pSkins->Find("x_spec");
-	const CSkin *pSkin = m_pClient->m_pSkins->Get(Skin);
+	int Skin = m_pClient->m_Skins.Find("x_spec");
+	const CSkin *pSkin = m_pClient->m_Skins.Get(Skin);
 	m_RenderInfoSpec.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 	m_RenderInfoSpec.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
 	m_RenderInfoSpec.m_BloodColor = pSkin->m_BloodColor;

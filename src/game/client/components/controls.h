@@ -7,6 +7,8 @@
 #include <base/vmath.h>
 #include <game/client/component.h>
 
+#include <game/generated/protocol.h>
+
 class CControls : public CComponent
 {
 public:

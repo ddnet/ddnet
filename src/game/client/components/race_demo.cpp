@@ -11,6 +11,8 @@
 
 #include "race_demo.h"
 
+#include <game/client/gameclient.h>
+
 const char *CRaceDemo::ms_pRaceDemoDir = "demos/auto/race";
 
 struct CDemoItem

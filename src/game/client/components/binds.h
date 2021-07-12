@@ -5,6 +5,10 @@
 #include <engine/keys.h>
 #include <game/client/component.h>
 
+#include "console.h"
+
+class IConfigManager;
+
 class CBinds : public CComponent
 {
 	int GetKeyID(const char *pKeyName);

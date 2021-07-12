@@ -8,7 +8,11 @@
 #include <game/client/component.h>
 #include <game/mapitems.h>
 
+#include <game/layers.h>
+
 #include "mapimages.h"
+
+#include <game/client/gameclient.h>
 
 CMapImages::CMapImages() :
 	CMapImages(100)

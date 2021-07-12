@@ -7,8 +7,16 @@
 #include <engine/shared/video.h>
 #endif
 
-#include "gameclient.h"
+#include <base/color.h>
 #include <engine/input.h>
+
+#include <engine/client.h>
+#include <engine/console.h>
+#include <game/localization.h>
+
+#include <engine/config.h>
+
+class CGameClient;
 
 class CComponent
 {
@@ -18,26 +26,23 @@ protected:
 	CGameClient *m_pClient;
 
 	// perhaps propagte pointers for these as well
-	class IKernel *Kernel() const { return m_pClient->Kernel(); }
-	class IGraphics *Graphics() const { return m_pClient->Graphics(); }
-	class ITextRender *TextRender() const { return m_pClient->TextRender(); }
-	class IInput *Input() const { return m_pClient->Input(); }
-	class IStorage *Storage() const { return m_pClient->Storage(); }
-	class CUI *UI() const { return m_pClient->UI(); }
-	class ISound *Sound() const { return m_pClient->Sound(); }
-	class CRenderTools *RenderTools() const { return m_pClient->RenderTools(); }
-	class CConfig *Config() const { return m_pClient->Config(); }
-	class IConsole *Console() const { return m_pClient->Console(); }
-	class IDemoPlayer *DemoPlayer() const { return m_pClient->DemoPlayer(); }
-	class IDemoRecorder *DemoRecorder(int Recorder) const { return m_pClient->DemoRecorder(Recorder); }
-	class IServerBrowser *ServerBrowser() const { return m_pClient->ServerBrowser(); }
-	class CLayers *Layers() const { return m_pClient->Layers(); }
-	class CCollision *Collision() const { return m_pClient->Collision(); }
+	class IKernel *Kernel() const;
+	class IGraphics *Graphics() const;
+	class ITextRender *TextRender() const;
+	class IInput *Input() const;
+	class IStorage *Storage() const;
+	class CUI *UI() const;
+	class ISound *Sound() const;
+	class CRenderTools *RenderTools() const;
+	class CConfig *Config() const;
+	class IConsole *Console() const;
+	class IDemoPlayer *DemoPlayer() const;
+	class IDemoRecorder *DemoRecorder(int Recorder) const;
+	class IServerBrowser *ServerBrowser() const;
+	class CLayers *Layers() const;
+	class CCollision *Collision() const;
 #if defined(CONF_AUTOUPDATE)
-	class IUpdater *Updater() const
-	{
-		return m_pClient->Updater();
-	}
+	class IUpdater *Updater() const;
 #endif
 
 #if defined(CONF_VIDEORECORDER)
@@ -45,19 +50,18 @@ protected:
 	{
 		return IVideo::Current() ? IVideo::Time() : time_get();
 	}
-	float LocalTime() const { return IVideo::Current() ? IVideo::LocalTime() : Client()->LocalTime(); }
 #else
 	int64_t time() const
 	{
 		return time_get();
 	}
-	float LocalTime() const { return Client()->LocalTime(); }
 #endif
+	float LocalTime() const;
 
 public:
 	virtual ~CComponent() {}
 	class CGameClient *GameClient() const { return m_pClient; }
-	class IClient *Client() const { return m_pClient->Client(); }
+	class IClient *Client() const;
 
 	virtual void OnStateChange(int NewState, int OldState){};
 	virtual void OnConsoleInit(){};

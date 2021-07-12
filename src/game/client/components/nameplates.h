@@ -3,6 +3,11 @@
 #ifndef GAME_CLIENT_COMPONENTS_NAMEPLATES_H
 #define GAME_CLIENT_COMPONENTS_NAMEPLATES_H
 #include <game/client/component.h>
+
+struct CNetObj_Character;
+struct CNetObj_PlayerInfo;
+struct CMapItemGroup;
+
 struct SPlayerNamePlate
 {
 	SPlayerNamePlate()

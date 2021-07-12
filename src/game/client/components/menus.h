@@ -18,6 +18,8 @@
 #include <game/client/ui_ex.h>
 #include <game/voting.h>
 
+#include <game/client/render.h>
+
 struct CServerProcess
 {
 	PROCESS Process;

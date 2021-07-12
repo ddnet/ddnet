@@ -4344,7 +4344,7 @@ int main(int argc, const char **argv) // ignore_convention
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IMap *>(pEngineMap), false);
 
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateEditor(), false);
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateGameClient(), false);
+		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateGameClient());
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pStorage);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pDiscord);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pSteam);

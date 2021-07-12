@@ -251,7 +251,7 @@ void CMenus::ClearCustomItems(int CurTab)
 		m_EntitiesList.clear();
 
 		// reload current entities
-		m_pClient->m_pMapimages->ChangeEntitiesPath(g_Config.m_ClAssetsEntites);
+		m_pClient->m_MapImages.ChangeEntitiesPath(g_Config.m_ClAssetsEntites);
 	}
 	else if(CurTab == 1)
 	{
@@ -484,7 +484,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 			if(s_CurCustomTab == 0)
 			{
 				str_copy(g_Config.m_ClAssetsEntites, GetCustomItem(s_CurCustomTab, NewSelected)->m_aName, sizeof(g_Config.m_ClAssetsEntites));
-				m_pClient->m_pMapimages->ChangeEntitiesPath(GetCustomItem(s_CurCustomTab, NewSelected)->m_aName);
+				m_pClient->m_MapImages.ChangeEntitiesPath(GetCustomItem(s_CurCustomTab, NewSelected)->m_aName);
 			}
 			else if(s_CurCustomTab == 1)
 			{
@@ -573,7 +573,7 @@ void CMenus::ConchainAssetsEntities(IConsole::IResult *pResult, void *pUserData,
 		const char *pArg = pResult->GetString(0);
 		if(str_comp(pArg, g_Config.m_ClAssetsEntites) != 0)
 		{
-			pThis->m_pClient->m_pMapimages->ChangeEntitiesPath(pArg);
+			pThis->m_pClient->m_MapImages.ChangeEntitiesPath(pArg);
 		}
 	}
 

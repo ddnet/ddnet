@@ -166,7 +166,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	}
 
 	// handle keyboard shortcuts independent of active menu
-	if(m_pClient->m_pGameConsole->IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE && g_Config.m_ClDemoKeyboardShortcuts)
+	if(m_pClient->m_GameConsole.IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE && g_Config.m_ClDemoKeyboardShortcuts)
 	{
 		// increase/decrease speed
 		if(!Input()->KeyIsPressed(KEY_LSHIFT) && !Input()->KeyIsPressed(KEY_RSHIFT))
@@ -351,8 +351,8 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 						m_pClient->m_SuppressEvents = true;
 						DemoPlayer()->SeekPercent(Amount);
 						m_pClient->m_SuppressEvents = false;
-						m_pClient->m_pMapLayersBackGround->EnvelopeUpdate();
-						m_pClient->m_pMapLayersForeGround->EnvelopeUpdate();
+						m_pClient->m_MapLayersBackGround.EnvelopeUpdate();
+						m_pClient->m_MapLayersForeGround.EnvelopeUpdate();
 					}
 				}
 				else
@@ -363,8 +363,8 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 						m_pClient->m_SuppressEvents = true;
 						DemoPlayer()->SeekPercent(Amount);
 						m_pClient->m_SuppressEvents = false;
-						m_pClient->m_pMapLayersBackGround->EnvelopeUpdate();
-						m_pClient->m_pMapLayersForeGround->EnvelopeUpdate();
+						m_pClient->m_MapLayersBackGround.EnvelopeUpdate();
+						m_pClient->m_MapLayersForeGround.EnvelopeUpdate();
 					}
 				}
 			}
@@ -464,7 +464,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	// close button
 	ButtonBar.VSplitRight(ButtonbarHeight * 3, &ButtonBar, &Button);
 	static int s_ExitButton = 0;
-	if(DoButton_DemoPlayer(&s_ExitButton, Localize("Close"), 0, &Button) || (Input()->KeyPress(KEY_C) && m_pClient->m_pGameConsole->IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE))
+	if(DoButton_DemoPlayer(&s_ExitButton, Localize("Close"), 0, &Button) || (Input()->KeyPress(KEY_C) && m_pClient->m_GameConsole.IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE))
 	{
 		Client()->Disconnect();
 		DemolistOnUpdate(false);
@@ -1220,7 +1220,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	}
 
 	static int s_PlayButton = 0;
-	if(DoButton_Menu(&s_PlayButton, m_DemolistSelectedIsDir ? Localize("Open") : Localize("Play", "Demo browser"), 0, &PlayRect) || Activated || (Input()->KeyPress(KEY_P) && m_pClient->m_pGameConsole->IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE))
+	if(DoButton_Menu(&s_PlayButton, m_DemolistSelectedIsDir ? Localize("Open") : Localize("Play", "Demo browser"), 0, &PlayRect) || Activated || (Input()->KeyPress(KEY_P) && m_pClient->m_GameConsole.IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE))
 	{
 		if(m_DemolistSelectedIndex >= 0)
 		{
@@ -1271,7 +1271,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	if(!m_DemolistSelectedIsDir)
 	{
 		static int s_DeleteButton = 0;
-		if(DoButton_Menu(&s_DeleteButton, Localize("Delete"), 0, &DeleteRect) || m_DeletePressed || (Input()->KeyPress(KEY_D) && m_pClient->m_pGameConsole->IsClosed()))
+		if(DoButton_Menu(&s_DeleteButton, Localize("Delete"), 0, &DeleteRect) || m_DeletePressed || (Input()->KeyPress(KEY_D) && m_pClient->m_GameConsole.IsClosed()))
 		{
 			if(m_DemolistSelectedIndex >= 0)
 			{
@@ -1295,7 +1295,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 #if defined(CONF_VIDEORECORDER)
 		static int s_RenderButton = 0;
-		if(DoButton_Menu(&s_RenderButton, Localize("Render"), 0, &RenderRect) || (Input()->KeyPress(KEY_R) && m_pClient->m_pGameConsole->IsClosed()))
+		if(DoButton_Menu(&s_RenderButton, Localize("Render"), 0, &RenderRect) || (Input()->KeyPress(KEY_R) && m_pClient->m_GameConsole.IsClosed()))
 		{
 			if(m_DemolistSelectedIndex >= 0)
 			{

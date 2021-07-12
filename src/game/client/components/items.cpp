@@ -80,7 +80,7 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemID)
 	// don't check for validity of the projectile for the current weapon here, so particle effects are rendered for mod compability
 	if(CurWeapon == WEAPON_GRENADE)
 	{
-		m_pClient->m_pEffects->SmokeTrail(Pos, Vel * -1, Alpha);
+		m_pClient->m_Effects.SmokeTrail(Pos, Vel * -1, Alpha);
 		static float s_Time = 0.0f;
 		static float s_LastLocalTime = LocalTime();
 
@@ -101,7 +101,7 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemID)
 	}
 	else
 	{
-		m_pClient->m_pEffects->BulletTrail(Pos, Alpha);
+		m_pClient->m_Effects.BulletTrail(Pos, Alpha);
 
 		if(length(Vel) > 0.00001f)
 			Graphics()->QuadsSetRotation(angle(Vel));
@@ -160,7 +160,7 @@ void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCu
 		if(c[pCurrent->m_Type] == SPRITE_PICKUP_NINJA)
 		{
 			QuadOffset = 2 + 8 - 1; // ninja is the last weapon
-			m_pClient->m_pEffects->PowerupShine(Pos, vec2(96, 18));
+			m_pClient->m_Effects.PowerupShine(Pos, vec2(96, 18));
 			Pos.x -= 10.0f;
 		}
 	}
@@ -559,8 +559,8 @@ void CItems::ReconstructSmokeTrail(const CProjectileData *pCurrent, int DestroyT
 			TimePassed = minimum(TimePassed, (TimePassed - MinTrailSpan) / (Pt - MinTrailSpan) * (MinTrailSpan * 0.5f) + MinTrailSpan);
 		// add particle for this projectile
 		if(pCurrent->m_Type == WEAPON_GRENADE)
-			m_pClient->m_pEffects->SmokeTrail(Pos, Vel * -1, Alpha, TimePassed);
+			m_pClient->m_Effects.SmokeTrail(Pos, Vel * -1, Alpha, TimePassed);
 		else
-			m_pClient->m_pEffects->BulletTrail(Pos, Alpha, TimePassed);
+			m_pClient->m_Effects.BulletTrail(Pos, Alpha, TimePassed);
 	}
 }

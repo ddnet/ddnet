@@ -4,6 +4,8 @@
 #define GAME_CLIENT_COMPONENTS_KILLMESSAGES_H
 #include <game/client/component.h>
 
+#include <game/client/render.h>
+
 class CKillMessages : public CComponent
 {
 	int m_SpriteQuadContainerIndex;

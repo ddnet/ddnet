@@ -7,6 +7,8 @@
 
 #include <game/client/component.h>
 
+struct CSoundSource;
+
 class CMapSounds : public CComponent
 {
 	int m_aSounds[64];

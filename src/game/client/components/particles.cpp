@@ -9,6 +9,8 @@
 #include <game/gamecore.h>
 #include <game/generated/client_data.h>
 
+#include <game/client/gameclient.h>
+
 CParticles::CParticles()
 {
 	OnReset();
