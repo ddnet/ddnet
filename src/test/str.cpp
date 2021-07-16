@@ -221,6 +221,84 @@ TEST(Str, HexDecode)
 	EXPECT_STREQ(aOut, "ABCD");
 }
 
+void StrBase64Str(char *pBuffer, int BufferSize, const char *pString)
+{
+	str_base64(pBuffer, BufferSize, pString, str_length(pString));
+}
+
+TEST(Str, Base64)
+{
+	char aBuf[128];
+	str_base64(aBuf, sizeof(aBuf), "\0", 1);
+	EXPECT_STREQ(aBuf, "AA==");
+	str_base64(aBuf, sizeof(aBuf), "\0\0", 2);
+	EXPECT_STREQ(aBuf, "AAA=");
+	str_base64(aBuf, sizeof(aBuf), "\0\0\0", 3);
+	EXPECT_STREQ(aBuf, "AAAA");
+
+	StrBase64Str(aBuf, sizeof(aBuf), "");
+	EXPECT_STREQ(aBuf, "");
+
+	// https://en.wikipedia.org/w/index.php?title=Base64&oldid=1033503483#Output_padding
+	StrBase64Str(aBuf, sizeof(aBuf), "pleasure.");
+	EXPECT_STREQ(aBuf, "cGxlYXN1cmUu");
+	StrBase64Str(aBuf, sizeof(aBuf), "leasure.");
+	EXPECT_STREQ(aBuf, "bGVhc3VyZS4=");
+	StrBase64Str(aBuf, sizeof(aBuf), "easure.");
+	EXPECT_STREQ(aBuf, "ZWFzdXJlLg==");
+	StrBase64Str(aBuf, sizeof(aBuf), "asure.");
+	EXPECT_STREQ(aBuf, "YXN1cmUu");
+	StrBase64Str(aBuf, sizeof(aBuf), "sure.");
+	EXPECT_STREQ(aBuf, "c3VyZS4=");
+}
+
+TEST(Str, Base64Decode)
+{
+	char aOut[17];
+	str_copy(aOut, "XXXXXXXXXXXXXXXX", sizeof(aOut));
+	EXPECT_EQ(str_base64_decode(aOut, sizeof(aOut), ""), 0);
+	EXPECT_STREQ(aOut, "XXXXXXXXXXXXXXXX");
+
+	// https://en.wikipedia.org/w/index.php?title=Base64&oldid=1033503483#Output_padding
+	str_copy(aOut, "XXXXXXXXXXXXXXXX", sizeof(aOut));
+	EXPECT_EQ(str_base64_decode(aOut, sizeof(aOut), "cGxlYXN1cmUu"), 9);
+	EXPECT_STREQ(aOut, "pleasure.XXXXXXX");
+	str_copy(aOut, "XXXXXXXXXXXXXXXX", sizeof(aOut));
+	EXPECT_EQ(str_base64_decode(aOut, sizeof(aOut), "bGVhc3VyZS4="), 8);
+	EXPECT_STREQ(aOut, "leasure.XXXXXXXX");
+	str_copy(aOut, "XXXXXXXXXXXXXXXX", sizeof(aOut));
+	EXPECT_EQ(str_base64_decode(aOut, sizeof(aOut), "ZWFzdXJlLg=="), 7);
+	EXPECT_STREQ(aOut, "easure.XXXXXXXXX");
+	str_copy(aOut, "XXXXXXXXXXXXXXXX", sizeof(aOut));
+	EXPECT_EQ(str_base64_decode(aOut, sizeof(aOut), "YXN1cmUu"), 6);
+	EXPECT_STREQ(aOut, "asure.XXXXXXXXXX");
+	str_copy(aOut, "XXXXXXXXXXXXXXXX", sizeof(aOut));
+	EXPECT_EQ(str_base64_decode(aOut, sizeof(aOut), "c3VyZS4="), 5);
+	EXPECT_STREQ(aOut, "sure.XXXXXXXXXXX");
+	str_copy(aOut, "XXXXXXXXXXXXXXXX", sizeof(aOut));
+	EXPECT_EQ(str_base64_decode(aOut, sizeof(aOut), "////"), 3);
+	EXPECT_STREQ(aOut, "\xff\xff\xffXXXXXXXXXXXXX");
+}
+
+TEST(Str, Base64DecodeError)
+{
+	char aBuf[128];
+	// Wrong padding.
+	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "A"), 0);
+	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "AA"), 0);
+	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "AAA"), 0);
+	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "A==="), 0);
+	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "=AAA"), 0);
+	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "===="), 0);
+	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "AAA=AAAA"), 0);
+	// Invalid characters.
+	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "----"), 0);
+	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "AAAA "), 0);
+	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "AAA "), 0);
+	// Invalid padding values.
+	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "//=="), 0);
+}
+
 TEST(Str, Tokenize)
 {
 	char aTest[] = "GER,RUS,ZAF,BRA,CAN";

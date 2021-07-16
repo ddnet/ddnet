@@ -1592,6 +1592,41 @@ void str_hex(char *dst, int dst_size, const void *data, int data_size);
 		- The contents of the buffer is only valid on success
 */
 int str_hex_decode(void *dst, int dst_size, const char *src);
+
+/*
+	Function: str_base64
+		Takes a datablock and generates the base64 encoding of it.
+
+	Parameters:
+		dst - Buffer to fill with base64 data
+		dst_size - Size of the buffer
+		data - Data to turn into base64
+		data - Size of the data
+
+	Remarks:
+		- The destination buffer will be zero-terminated
+*/
+void str_base64(char *dst, int dst_size, const void *data, int data_size);
+
+/*
+	Function: str_base64_decode
+		Takes a base64 string without any whitespace and correct
+		padding and returns a byte array.
+
+	Parameters:
+		dst - Buffer for the byte array
+		dst_size - Size of the buffer
+		data - String to decode
+
+	Returns:
+		<0 - Error
+		>= 0 - Success, length of the resulting byte buffer
+
+	Remarks:
+		- The contents of the buffer is only valid on success
+*/
+int str_base64_decode(void *dst, int dst_size, const char *data);
+
 /*
 	Function: str_timestamp
 		Copies a time stamp in the format year-month-day_hour-minute-second to the string.
