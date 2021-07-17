@@ -3954,7 +3954,7 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect View)
 
 	// render image
 	int i = m_SelectedImage;
-	if(i < m_Map.m_lImages.size())
+	if(i != -1 && i < m_Map.m_lImages.size())
 	{
 		CUIRect r;
 		View.Margin(10.0f, &r);
