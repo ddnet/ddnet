@@ -328,6 +328,8 @@ int CEditor::DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect,
 
 int CEditor::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners)
 {
+	if(UI()->LastActiveItem() == pID)
+		m_EditBoxActive = 2;
 	return m_UIEx.DoEditBox(pID, pRect, pStr, StrSize, FontSize, Offset, Hidden, Corners);
 }
 
@@ -3342,7 +3344,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 		}
 	}
 
-	if(Input()->KeyPress(KEY_DOWN) && m_Dialog == DIALOG_NONE)
+	if(Input()->KeyPress(KEY_DOWN) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0)
 	{
 		if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
 		{
@@ -3373,7 +3375,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 			}
 		}
 	}
-	if(Input()->KeyPress(KEY_UP) && m_Dialog == DIALOG_NONE)
+	if(Input()->KeyPress(KEY_UP) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0)
 	{
 		if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
 		{
