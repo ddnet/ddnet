@@ -36,7 +36,6 @@ enum
 
 void CGameContext::Construct(int Resetting)
 {
-	m_Resetting = 0;
 	m_pServer = 0;
 
 	for(auto &pPlayer : m_apPlayers)
@@ -49,25 +48,34 @@ void CGameContext::Construct(int Resetting)
 	m_pVoteOptionLast = 0;
 	m_NumVoteOptions = 0;
 	m_LastMapVote = 0;
-	//m_LockTeams = 0;
 
 	m_SqlRandomMapResult = nullptr;
 
+	m_pScore = nullptr;
+	m_NumMutes = 0;
+	m_NumVoteMutes = 0;
+
 	if(Resetting == NO_RESET)
-	{
 		m_pVoteOptionHeap = new CHeap();
-		m_pScore = 0;
-		m_NumMutes = 0;
-		m_NumVoteMutes = 0;
-	}
+
 	m_ChatResponseTargetID = -1;
 	m_aDeleteTempfile[0] = 0;
 	m_TeeHistorianActive = false;
 }
 
-CGameContext::CGameContext(int Resetting)
+void CGameContext::Destruct(int Resetting)
 {
-	Construct(Resetting);
+	for(auto &pPlayer : m_apPlayers)
+		delete pPlayer;
+
+	if(Resetting == NO_RESET)
+		delete m_pVoteOptionHeap;
+
+	if(m_pScore)
+	{
+		delete m_pScore;
+		m_pScore = nullptr;
+	}
 }
 
 CGameContext::CGameContext()
@@ -77,13 +85,7 @@ CGameContext::CGameContext()
 
 CGameContext::~CGameContext()
 {
-	for(auto &pPlayer : m_apPlayers)
-		delete pPlayer;
-	if(!m_Resetting)
-		delete m_pVoteOptionHeap;
-
-	if(m_pScore)
-		delete m_pScore;
+	Destruct(NO_RESET);
 }
 
 void CGameContext::Clear()
@@ -94,10 +96,8 @@ void CGameContext::Clear()
 	int NumVoteOptions = m_NumVoteOptions;
 	CTuningParams Tuning = m_Tuning;
 
-	m_Resetting = true;
-	this->~CGameContext();
-	mem_zero(this, sizeof(*this));
-	new(this) CGameContext(RESET);
+	Destruct(RESET);
+	Construct(RESET);
 
 	m_pVoteOptionHeap = pVoteOptionHeap;
 	m_pVoteOptionFirst = pVoteOptionFirst;

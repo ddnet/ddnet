@@ -886,8 +886,8 @@ Normal message
 Show score
 == Visa poäng
 
-Multiple texture units (disable for MacOS)
-== Multiple texture units (avaktivera för MacOS)
+Multiple texture units (disable for macOS)
+== Multiple texture units (avaktivera för macOS)
 
 Refresh Rate
 == Uppdateringsfrekvens

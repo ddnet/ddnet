@@ -65,7 +65,7 @@ jobs:
       run: |
         sudo apt-get install libmariadbclient-dev libwebsockets-dev -y
 
-    - name: Prepare MacOS
+    - name: Prepare macOS
       if: contains(matrix.os, 'macOS')
       run: |
         brew update || true

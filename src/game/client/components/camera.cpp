@@ -183,7 +183,7 @@ void CCamera::OnConsoleInit()
 {
 	Console()->Register("zoom+", "", CFGFLAG_CLIENT, ConZoomPlus, this, "Zoom increase");
 	Console()->Register("zoom-", "", CFGFLAG_CLIENT, ConZoomMinus, this, "Zoom decrease");
-	Console()->Register("zoom", "", CFGFLAG_CLIENT, ConZoomReset, this, "Zoom reset");
+	Console()->Register("zoom", "?i", CFGFLAG_CLIENT, ConZoom, this, "Change zoom");
 	Console()->Register("set_view", "i[x]i[y]", CFGFLAG_CLIENT, ConSetView, this, "Set camera position to x and y in the map");
 }
 
@@ -209,9 +209,10 @@ void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData)
 		pSelf->ScaleZoom(1 / ZoomStep);
 	}
 }
-void CCamera::ConZoomReset(IConsole::IResult *pResult, void *pUserData)
+void CCamera::ConZoom(IConsole::IResult *pResult, void *pUserData)
 {
-	((CCamera *)pUserData)->ChangeZoom(pow(ZoomStep, g_Config.m_ClDefaultZoom - 10));
+	int TargetLevel = pResult->NumArguments() ? clamp(pResult->GetInteger(0), 0, 20) : g_Config.m_ClDefaultZoom;
+	((CCamera *)pUserData)->ChangeZoom(pow(ZoomStep, TargetLevel - 10));
 }
 void CCamera::ConSetView(IConsole::IResult *pResult, void *pUserData)
 {

@@ -906,8 +906,8 @@ Threaded sound loading
 Activate
 == Aktiválás
 
-Multiple texture units (disable for MacOS)
-== Több textúra egységek (kapcsolja ki MacOS esetén)
+Multiple texture units (disable for macOS)
+== Több textúra egységek (kapcsolja ki macOS esetén)
 
 UI mouse s.
 == UI egér sebesség
