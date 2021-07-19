@@ -36,6 +36,7 @@ protected:
 	int m_CurGameTick[NUM_DUMMIES];
 	float m_GameIntraTick[NUM_DUMMIES];
 	float m_GameTickTime[NUM_DUMMIES];
+	float m_GameIntraTickSincePrev[NUM_DUMMIES];
 
 	int m_PredTick[NUM_DUMMIES];
 	float m_PredIntraTick[NUM_DUMMIES];
@@ -90,6 +91,7 @@ public:
 	inline int PredGameTick(int Dummy) const { return m_PredTick[Dummy]; }
 	inline float IntraGameTick(int Dummy) const { return m_GameIntraTick[Dummy]; }
 	inline float PredIntraGameTick(int Dummy) const { return m_PredIntraTick[Dummy]; }
+	inline float IntraGameTickSincePrev(int Dummy) const { return m_GameIntraTickSincePrev[Dummy]; }
 	inline float GameTickTime(int Dummy) const { return m_GameTickTime[Dummy]; }
 	inline int GameTickSpeed() const { return m_GameTickSpeed; }
 
