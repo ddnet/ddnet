@@ -26,6 +26,7 @@ class CGameTeams
 	bool m_Practice[MAX_CLIENTS];
 	std::shared_ptr<CScoreSaveResult> m_pSaveTeamResult[MAX_CLIENTS];
 	uint64_t m_LastSwap[MAX_CLIENTS];
+	bool m_TeamSentStartWarning[MAX_CLIENTS];
 
 	class CGameContext *m_pGameContext;
 
@@ -72,6 +73,7 @@ public:
 	void OnCharacterFinish(int ClientID);
 	void OnCharacterSpawn(int ClientID);
 	void OnCharacterDeath(int ClientID, int Weapon);
+	void Tick();
 
 	// returns nullptr if successful, error string if failed
 	const char *SetCharacterTeam(int ClientID, int Team);

@@ -28,6 +28,7 @@ void CGameTeams::Reset()
 		m_Invited[i] = 0;
 		m_Practice[i] = false;
 		m_LastSwap[i] = 0;
+		m_TeamSentStartWarning[i] = false;
 	}
 }
 
@@ -123,6 +124,7 @@ void CGameTeams::OnCharacterStart(int ClientID)
 	if(m_TeamState[m_Core.Team(ClientID)] < TEAMSTATE_STARTED && !Waiting)
 	{
 		ChangeTeamState(m_Core.Team(ClientID), TEAMSTATE_STARTED);
+		m_TeamSentStartWarning[m_Core.Team(ClientID)] = false;
 
 		int NumPlayers = Count(m_Core.Team(ClientID));
 
@@ -195,6 +197,78 @@ void CGameTeams::OnCharacterFinish(int ClientID)
 			m_TeeFinished[ClientID] = true;
 		}
 		CheckTeamFinished(m_Core.Team(ClientID));
+	}
+}
+
+void CGameTeams::Tick()
+{
+	int Now = Server()->Tick();
+	int Frequency = Server()->TickSpeed() * 60;
+	int Remainder = Server()->TickSpeed() * 30;
+	uint64_t TeamHasWantedStartTime = 0;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		CCharacter *pChar = GameServer()->m_apPlayers[i] ? GameServer()->m_apPlayers[i]->GetCharacter() : nullptr;
+		int Team = m_Core.Team(i);
+		if(!pChar || m_TeamState[Team] != TEAMSTATE_STARTED || m_TeeStarted[i])
+		{
+			continue;
+		}
+		if((Now - pChar->m_StartTime) % Frequency == Remainder)
+		{
+			TeamHasWantedStartTime |= ((uint64_t)1) << m_Core.Team(i);
+		}
+	}
+	TeamHasWantedStartTime &= ~(uint64_t)1;
+	if(!TeamHasWantedStartTime)
+	{
+		return;
+	}
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(((TeamHasWantedStartTime >> i) & 1) == 0)
+		{
+			continue;
+		}
+		if(Count(i) <= 1)
+		{
+			continue;
+		}
+		int NumPlayersNotStarted = 0;
+		char aPlayerNames[256];
+		aPlayerNames[0] = 0;
+		for(int j = 0; j < MAX_CLIENTS; j++)
+		{
+			if(m_Core.Team(j) == i && !m_TeeStarted[j])
+			{
+				if(aPlayerNames[0])
+				{
+					str_append(aPlayerNames, ", ", sizeof(aPlayerNames));
+				}
+				str_append(aPlayerNames, Server()->ClientName(j), sizeof(aPlayerNames));
+				NumPlayersNotStarted += 1;
+				break;
+			}
+		}
+		if(!aPlayerNames[0])
+		{
+			continue;
+		}
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf),
+			"Your team has %d %s not started yet, they need "
+			"to touch the start before this team can finish: %s",
+			NumPlayersNotStarted,
+			NumPlayersNotStarted == 1 ? "player that has" : "players that have",
+			aPlayerNames);
+
+		for(int j = 0; j < MAX_CLIENTS; j++)
+		{
+			if(m_Core.Team(j) == i)
+			{
+				GameServer()->SendChatTarget(j, aBuf);
+			}
+		}
 	}
 }
 
