@@ -203,7 +203,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		}
 	}
 
-	if(g_Config.m_Debug || g_Config.m_ClNameplatesStrongWeak)
+	if(g_Config.m_Debug)
 	{
 		CCharacter *pCharacter = m_pClient->m_GameWorld.GetCharacterByID(pPlayerInfo->m_ClientID);
 		if(pCharacter)
@@ -212,18 +212,18 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			char aBuf[8];
 			str_format(aBuf, sizeof(aBuf), "⇢ %d", pCharacter->GetStrongWeakID());
 			float XOffset = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f) / 2.0f;
-			if(pCharacter->m_Weak)
+			if(pPlayerInfo->m_Local || !m_pClient->m_GameWorld.m_WorldConfig.m_IsDDRace)
+				TextRender()->TextColor(rgb);
+			else if(pCharacter->m_Weak)
 			{
-				ColorRGBA WeakStatusColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClNameplatesWeakColor));
+				ColorRGBA WeakStatusColor = color_cast<ColorRGBA>(ColorHSLA(6401973));
 				TextRender()->TextColor(WeakStatusColor);
 			}
 			else
 			{
-				ColorRGBA StrongStatusColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClNameplatesStrongColor));
+				ColorRGBA StrongStatusColor = color_cast<ColorRGBA>(ColorHSLA(41131));
 				TextRender()->TextColor(StrongStatusColor);
 			}
-			if(pPlayerInfo->m_Local)
-				TextRender()->TextColor(rgb);
 			TextRender()->Text(0, Position.x - XOffset, YOffset, FontSize, aBuf, -1.0f);
 		}
 	}

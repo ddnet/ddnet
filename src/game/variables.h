@@ -16,9 +16,6 @@ MACRO_CONFIG_INT(ClAntiPingSmooth, cl_antiping_smooth, 0, 0, 1, CFGFLAG_CLIENT |
 MACRO_CONFIG_INT(ClAntiPingGunfire, cl_antiping_gunfire, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Predict gunfire and show predicted weapon physics (with cl_antiping_grenade 1 and cl_antiping_weapons 1)")
 
 MACRO_CONFIG_INT(ClNameplates, cl_nameplates, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show name plates")
-MACRO_CONFIG_INT(ClNameplatesStrongWeak, cl_nameplates_strongweak, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show strong/weak hook to players")
-MACRO_CONFIG_COL(ClNameplatesStrongColor, cl_nameplates_strong_color, 65407, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Strong status color")
-MACRO_CONFIG_COL(ClNameplatesWeakColor, cl_nameplates_weak_color, 6401973, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Weak status color")
 MACRO_CONFIG_INT(ClAfkEmote, cl_afk_emote, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show zzz emote next to afk players")
 MACRO_CONFIG_INT(ClNameplatesAlways, cl_nameplates_always, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Always show name plates disregarding of distance")
 MACRO_CONFIG_INT(ClNameplatesTeamcolors, cl_nameplates_teamcolors, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Use team colors for name plates")
