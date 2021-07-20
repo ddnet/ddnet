@@ -37,6 +37,7 @@ private:
 	int m_NeededFaketuning;
 
 	// Teamstuff
+	int m_TeeStarted;
 	int m_TeeFinished;
 	int m_IsSolo;
 

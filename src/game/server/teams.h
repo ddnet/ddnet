@@ -109,6 +109,11 @@ public:
 	void SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, int Team);
 	void ProcessSaveTeam();
 
+	bool TeeStarted(int ClientID)
+	{
+		return m_TeeStarted[ClientID];
+	}
+
 	bool TeeFinished(int ClientID)
 	{
 		return m_TeeFinished[ClientID];
@@ -135,6 +140,11 @@ public:
 	bool IsStarted(int Team)
 	{
 		return m_TeamState[Team] == CGameTeams::TEAMSTATE_STARTED;
+	}
+
+	void SetStarted(int ClientID, bool Started)
+	{
+		m_TeeStarted[ClientID] = Started;
 	}
 
 	void SetFinished(int ClientID, bool Finished)
