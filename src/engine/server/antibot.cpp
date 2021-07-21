@@ -120,10 +120,10 @@ void CAntibot::OnHammerFire(int ClientID)
 	Update();
 	AntibotOnHammerFire(ClientID);
 }
-void CAntibot::OnHammerHit(int ClientID)
+void CAntibot::OnHammerHit(int ClientID, int TargetID)
 {
 	Update();
-	AntibotOnHammerHit(ClientID);
+	AntibotOnHammerHit(ClientID, TargetID);
 }
 void CAntibot::OnDirectInput(int ClientID)
 {
