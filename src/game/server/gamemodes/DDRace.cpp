@@ -163,6 +163,7 @@ void CGameControllerDDRace::Tick()
 {
 	IGameController::Tick();
 	m_Teams.ProcessSaveTeam();
+	m_Teams.Tick();
 
 	if(m_pInitResult != nullptr && m_pInitResult->m_Completed)
 	{

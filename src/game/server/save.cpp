@@ -26,6 +26,7 @@ void CSaveTee::Save(CCharacter *pChr)
 	m_Paused = abs(pChr->m_pPlayer->IsPaused());
 	m_NeededFaketuning = pChr->m_NeededFaketuning;
 
+	m_TeeStarted = pChr->Teams()->TeeStarted(m_ClientID);
 	m_TeeFinished = pChr->Teams()->TeeFinished(m_ClientID);
 	m_IsSolo = pChr->m_Solo;
 
@@ -116,6 +117,7 @@ void CSaveTee::Load(CCharacter *pChr, int Team)
 	pChr->m_NeededFaketuning = m_NeededFaketuning;
 
 	pChr->Teams()->SetForceCharacterTeam(pChr->m_pPlayer->GetCID(), Team);
+	pChr->Teams()->SetStarted(pChr->m_pPlayer->GetCID(), m_TeeStarted);
 	pChr->Teams()->SetFinished(pChr->m_pPlayer->GetCID(), m_TeeFinished);
 
 	for(int i = 0; i < NUM_WEAPONS; i++)
@@ -248,12 +250,13 @@ char *CSaveTee::GetString(const CSaveTeam *pTeam)
 		"%f\t%f\t%f\t%f\t%f\t"
 		"%f\t%f\t%f\t%f\t%f\t"
 		"%f\t%f\t%f\t%f\t%f\t"
-		"%d\t"
-		"%d\t%d\t%d\t"
-		"%s\t"
-		"%d\t%d\t"
-		"%d\t%d\t%d\t%d\t"
-		"%d",
+		"%d\t" // m_NotEligibleForFinish
+		"%d\t%d\t%d\t" // tele weapons
+		"%s\t" // m_aGameUuid
+		"%d\t%d" // m_HookedPlayer, m_NewHook
+		"%d\t%d\t%d\t%d\t" // input stuff
+		"%d\t" // m_ReloadTimer
+		"%d", // m_TeeStarted
 		m_aName, m_Alive, m_Paused, m_NeededFaketuning, m_TeeFinished, m_IsSolo,
 		// weapons
 		m_aWeapons[0].m_AmmoRegenStart, m_aWeapons[0].m_Ammo, m_aWeapons[0].m_Ammocost, m_aWeapons[0].m_Got,
@@ -284,7 +287,8 @@ char *CSaveTee::GetString(const CSaveTeam *pTeam)
 		m_aGameUuid,
 		HookedPlayer, m_NewHook,
 		m_InputDirection, m_InputJump, m_InputFire, m_InputHook,
-		m_ReloadTimer);
+		m_ReloadTimer,
+		m_TeeStarted);
 	return m_aString;
 }
 
@@ -317,12 +321,13 @@ int CSaveTee::FromString(const char *String)
 		"%f\t%f\t%f\t%f\t%f\t"
 		"%f\t%f\t%f\t%f\t%f\t"
 		"%f\t%f\t%f\t%f\t%f\t"
-		"%d\t"
-		"%d\t%d\t%d\t"
-		"%36s\t"
-		"%d\t%d"
-		"%d\t%d\t%d\t%d\t"
-		"%d",
+		"%d\t" // m_NotEligibleForFinish
+		"%d\t%d\t%d\t" // tele weapons
+		"%36s\t" // m_aGameUuid
+		"%d\t%d" // m_HookedPlayer, m_NewHook
+		"%d\t%d\t%d\t%d\t" // input stuff
+		"%d\t" // m_ReloadTimer
+		"%d", // m_TeeStarted
 		m_aName, &m_Alive, &m_Paused, &m_NeededFaketuning, &m_TeeFinished, &m_IsSolo,
 		// weapons
 		&m_aWeapons[0].m_AmmoRegenStart, &m_aWeapons[0].m_Ammo, &m_aWeapons[0].m_Ammocost, &m_aWeapons[0].m_Got,
@@ -353,7 +358,8 @@ int CSaveTee::FromString(const char *String)
 		m_aGameUuid,
 		&m_HookedPlayer, &m_NewHook,
 		&m_InputDirection, &m_InputJump, &m_InputFire, &m_InputHook,
-		&m_ReloadTimer);
+		&m_ReloadTimer,
+		&m_TeeStarted);
 	switch(Num) // Don't forget to update this when you save / load more / less.
 	{
 	case 96:
@@ -377,6 +383,9 @@ int CSaveTee::FromString(const char *String)
 		m_ReloadTimer = 0;
 		// fall through
 	case 108:
+		m_TeeStarted = true;
+		// fall through
+	case 109:
 		return 0;
 	default:
 		dbg_msg("load", "failed to load tee-string");

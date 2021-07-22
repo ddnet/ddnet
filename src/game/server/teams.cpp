@@ -20,6 +20,7 @@ void CGameTeams::Reset()
 	{
 		m_TeamState[i] = TEAMSTATE_EMPTY;
 		m_TeamLocked[i] = false;
+		m_TeeStarted[i] = false;
 		m_TeeFinished[i] = false;
 		m_LastChat[i] = 0;
 		m_pSaveTeamResult[i] = nullptr;
@@ -27,6 +28,7 @@ void CGameTeams::Reset()
 		m_Invited[i] = 0;
 		m_Practice[i] = false;
 		m_LastSwap[i] = 0;
+		m_TeamSentStartWarning[i] = false;
 	}
 }
 
@@ -71,6 +73,7 @@ void CGameTeams::OnCharacterStart(int ClientID)
 	if(g_Config.m_SvTeam != 3 &&
 		(m_Core.Team(ClientID) == TEAM_FLOCK || m_Core.Team(ClientID) == TEAM_SUPER))
 	{
+		m_TeeStarted[ClientID] = true;
 		pStartingChar->m_DDRaceState = DDRACE_STARTED;
 		pStartingChar->m_StartTime = Tick;
 		return;
@@ -113,9 +116,15 @@ void CGameTeams::OnCharacterStart(int ClientID)
 		}
 	}
 
+	if(!Waiting)
+	{
+		m_TeeStarted[ClientID] = true;
+	}
+
 	if(m_TeamState[m_Core.Team(ClientID)] < TEAMSTATE_STARTED && !Waiting)
 	{
 		ChangeTeamState(m_Core.Team(ClientID), TEAMSTATE_STARTED);
+		m_TeamSentStartWarning[m_Core.Team(ClientID)] = false;
 
 		int NumPlayers = Count(m_Core.Team(ClientID));
 
@@ -183,9 +192,83 @@ void CGameTeams::OnCharacterFinish(int ClientID)
 	}
 	else
 	{
-		m_TeeFinished[ClientID] = true;
-
+		if(m_TeeStarted[ClientID])
+		{
+			m_TeeFinished[ClientID] = true;
+		}
 		CheckTeamFinished(m_Core.Team(ClientID));
+	}
+}
+
+void CGameTeams::Tick()
+{
+	int Now = Server()->Tick();
+	int Frequency = Server()->TickSpeed() * 60;
+	int Remainder = Server()->TickSpeed() * 30;
+	uint64_t TeamHasWantedStartTime = 0;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		CCharacter *pChar = GameServer()->m_apPlayers[i] ? GameServer()->m_apPlayers[i]->GetCharacter() : nullptr;
+		int Team = m_Core.Team(i);
+		if(!pChar || m_TeamState[Team] != TEAMSTATE_STARTED || m_TeeStarted[i])
+		{
+			continue;
+		}
+		if((Now - pChar->m_StartTime) % Frequency == Remainder)
+		{
+			TeamHasWantedStartTime |= ((uint64_t)1) << m_Core.Team(i);
+		}
+	}
+	TeamHasWantedStartTime &= ~(uint64_t)1;
+	if(!TeamHasWantedStartTime)
+	{
+		return;
+	}
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(((TeamHasWantedStartTime >> i) & 1) == 0)
+		{
+			continue;
+		}
+		if(Count(i) <= 1)
+		{
+			continue;
+		}
+		int NumPlayersNotStarted = 0;
+		char aPlayerNames[256];
+		aPlayerNames[0] = 0;
+		for(int j = 0; j < MAX_CLIENTS; j++)
+		{
+			if(m_Core.Team(j) == i && !m_TeeStarted[j])
+			{
+				if(aPlayerNames[0])
+				{
+					str_append(aPlayerNames, ", ", sizeof(aPlayerNames));
+				}
+				str_append(aPlayerNames, Server()->ClientName(j), sizeof(aPlayerNames));
+				NumPlayersNotStarted += 1;
+				break;
+			}
+		}
+		if(!aPlayerNames[0])
+		{
+			continue;
+		}
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf),
+			"Your team has %d %s not started yet, they need "
+			"to touch the start before this team can finish: %s",
+			NumPlayersNotStarted,
+			NumPlayersNotStarted == 1 ? "player that has" : "players that have",
+			aPlayerNames);
+
+		for(int j = 0; j < MAX_CLIENTS; j++)
+		{
+			if(m_Core.Team(j) == i)
+			{
+				GameServer()->SendChatTarget(j, aBuf);
+			}
+		}
 	}
 }
 
@@ -203,6 +286,7 @@ void CGameTeams::CheckTeamFinished(int Team)
 				CPlayer *pPlayer = GetPlayer(i);
 				if(pPlayer && pPlayer->IsPlaying())
 				{
+					m_TeeStarted[i] = false;
 					m_TeeFinished[i] = false;
 
 					TeamPlayers[PlayersCount++] = pPlayer;
@@ -287,6 +371,7 @@ const char *CGameTeams::SetCharacterTeam(int ClientID, int Team)
 
 void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 {
+	m_TeeStarted[ClientID] = false;
 	m_TeeFinished[ClientID] = false;
 	int OldTeam = m_Core.Team(ClientID);
 
@@ -349,6 +434,10 @@ void CGameTeams::ChangeTeamState(int Team, int State)
 
 bool CGameTeams::TeamFinished(int Team)
 {
+	if(m_TeamState[Team] != TEAMSTATE_STARTED)
+	{
+		return false;
+	}
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 		if(m_Core.Team(i) == Team && !m_TeeFinished[i])
 			return false;
@@ -909,6 +998,21 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 	}
 	else
 	{
+		if(m_TeamState[m_Core.Team(ClientID)] == CGameTeams::TEAMSTATE_STARTED && !m_TeeStarted[ClientID])
+		{
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "This team cannot finish anymore because '%s' left the team before hitting the start", Server()->ClientName(ClientID));
+			for(int i = 0; i < MAX_CLIENTS; i++)
+			{
+				if(m_Core.Team(i) != Team || i == ClientID)
+				{
+					continue;
+				}
+				GameServer()->SendChatTarget(i, aBuf);
+			}
+
+			ChangeTeamState(Team, CGameTeams::TEAMSTATE_STARTED_UNFINISHABLE);
+		}
 		SetForceCharacterTeam(ClientID, TEAM_FLOCK);
 		CheckTeamFinished(Team);
 	}
