@@ -82,6 +82,8 @@ class CGameContext : public IGameServer
 	CMapBugs m_MapBugs;
 	CPrng m_Prng;
 
+	bool m_Resetting;
+
 	static void CommandCallback(int ClientID, int FlagMask, const char *pCmd, IConsole::IResult *pResult, void *pUser);
 	static void TeeHistorianWrite(const void *pData, int DataSize, void *pUser);
 
@@ -140,6 +142,7 @@ public:
 	bool TeeHistorianActive() const { return m_TeeHistorianActive; }
 
 	CGameContext();
+	CGameContext(int Reset);
 	~CGameContext();
 
 	void Clear();
