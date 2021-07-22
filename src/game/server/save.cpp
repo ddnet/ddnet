@@ -253,7 +253,7 @@ char *CSaveTee::GetString(const CSaveTeam *pTeam)
 		"%d\t" // m_NotEligibleForFinish
 		"%d\t%d\t%d\t" // tele weapons
 		"%s\t" // m_aGameUuid
-		"%d\t%d" // m_HookedPlayer, m_NewHook
+		"%d\t%d\t" // m_HookedPlayer, m_NewHook
 		"%d\t%d\t%d\t%d\t" // input stuff
 		"%d\t" // m_ReloadTimer
 		"%d", // m_TeeStarted
@@ -324,7 +324,7 @@ int CSaveTee::FromString(const char *String)
 		"%d\t" // m_NotEligibleForFinish
 		"%d\t%d\t%d\t" // tele weapons
 		"%36s\t" // m_aGameUuid
-		"%d\t%d" // m_HookedPlayer, m_NewHook
+		"%d\t%d\t" // m_HookedPlayer, m_NewHook
 		"%d\t%d\t%d\t%d\t" // input stuff
 		"%d\t" // m_ReloadTimer
 		"%d", // m_TeeStarted
