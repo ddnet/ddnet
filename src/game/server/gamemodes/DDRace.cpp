@@ -66,7 +66,7 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 	bool CanStart = false;
 	CanStart = CanStart || PlayerDDRaceState == DDRACE_NONE;
 	CanStart = CanStart || PlayerDDRaceState == DDRACE_FINISHED;
-	CanStart = CanStart || (PlayerDDRaceState == DDRACE_STARTED && GetPlayerTeam(ClientID) == TEAM_FLOCK && g_Config.m_SvTeam != 3);
+	CanStart = CanStart || (PlayerDDRaceState == DDRACE_STARTED && g_Config.m_SvTeam != 3);
 	// start
 	if(IsOnStartTile && CanStart)
 	{
