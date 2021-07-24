@@ -63,12 +63,8 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 
 	const int PlayerDDRaceState = pChr->m_DDRaceState;
 	bool IsOnStartTile = (m_TileIndex == TILE_START) || (m_TileFIndex == TILE_START) || FTile1 == TILE_START || FTile2 == TILE_START || FTile3 == TILE_START || FTile4 == TILE_START || Tile1 == TILE_START || Tile2 == TILE_START || Tile3 == TILE_START || Tile4 == TILE_START;
-	bool CanStart = false;
-	CanStart = CanStart || PlayerDDRaceState == DDRACE_NONE;
-	CanStart = CanStart || PlayerDDRaceState == DDRACE_FINISHED;
-	CanStart = CanStart || (PlayerDDRaceState == DDRACE_STARTED && g_Config.m_SvTeam != 3);
 	// start
-	if(IsOnStartTile && CanStart)
+	if(IsOnStartTile && PlayerDDRaceState != DDRACE_CHEAT)
 	{
 		if(m_Teams.GetSaving(GetPlayerTeam(ClientID)))
 		{
