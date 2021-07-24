@@ -68,6 +68,8 @@ void CGameTeams::OnCharacterStart(int ClientID)
 	CCharacter *pStartingChar = Character(ClientID);
 	if(!pStartingChar)
 		return;
+	if(g_Config.m_SvTeam == 3 && pStartingChar->m_DDRaceState == DDRACE_STARTED)
+		return;
 	if((g_Config.m_SvTeam == 3 || m_Core.Team(ClientID) != TEAM_FLOCK) && pStartingChar->m_DDRaceState == DDRACE_FINISHED)
 		return;
 	if(g_Config.m_SvTeam != 3 &&
