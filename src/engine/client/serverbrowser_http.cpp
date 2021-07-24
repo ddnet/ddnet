@@ -230,6 +230,7 @@ private:
 		STATE_DONE,
 		STATE_WANTREFRESH,
 		STATE_REFRESHING,
+		STATE_NO_MASTER,
 	};
 
 	class CEntry
@@ -270,7 +271,7 @@ void CServerBrowserHttp::Update()
 			if(!m_pChooseMaster->IsRefreshing())
 			{
 				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "serverbrowse_http", "no working serverlist URL found");
-				m_State = STATE_DONE;
+				m_State = STATE_NO_MASTER;
 			}
 			return;
 		}
@@ -304,8 +305,10 @@ void CServerBrowserHttp::Update()
 }
 void CServerBrowserHttp::Refresh()
 {
-	if(m_State == STATE_WANTREFRESH || m_State == STATE_REFRESHING)
+	if(m_State == STATE_WANTREFRESH || m_State == STATE_REFRESHING || m_State == STATE_NO_MASTER)
 	{
+		if(m_State == STATE_NO_MASTER)
+			m_State = STATE_WANTREFRESH;
 		m_pChooseMaster->Refresh();
 	}
 	if(m_State == STATE_DONE)
