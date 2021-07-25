@@ -1345,6 +1345,8 @@ int net_addr_from_str(NETADDR *addr, const char *string)
 			str++;
 			if(parse_uint16(&addr->port, &str))
 				return -1;
+			if(*str != '\0')
+				return -1;
 		}
 		else
 			return -1;
