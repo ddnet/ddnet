@@ -7,6 +7,8 @@
 #include <game/client/component.h>
 #include <game/client/lineinput.h>
 
+#include <game/client/skin.h>
+
 class CChat : public CComponent
 {
 	CLineInput m_Input;

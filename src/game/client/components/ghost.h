@@ -6,6 +6,10 @@
 #include <game/client/component.h>
 #include <game/client/components/menus.h>
 
+#include <game/client/render.h>
+
+struct CNetObj_Character;
+
 enum
 {
 	GHOSTDATA_TYPE_SKIN = 0,

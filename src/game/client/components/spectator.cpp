@@ -17,6 +17,8 @@
 #include "camera.h"
 #include "spectator.h"
 
+#include <game/client/gameclient.h>
+
 bool CSpectator::CanChangeSpectator()
 {
 	// Don't change SpectatorID when not spectating
@@ -123,7 +125,7 @@ void CSpectator::ConSpectateClosest(IConsole::IResult *pResult, void *pUserData)
 
 	int NewSpectatorID = -1;
 
-	vec2 CurPosition(pSelf->m_pClient->m_pCamera->m_Center);
+	vec2 CurPosition(pSelf->m_pClient->m_Camera.m_Center);
 	if(SpectatorID != SPEC_FREEVIEW)
 	{
 		const CNetObj_Character &CurCharacter = Snap.m_aCharacters[SpectatorID].m_Cur;
