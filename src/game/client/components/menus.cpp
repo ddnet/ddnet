@@ -3007,7 +3007,9 @@ bool CMenus::HandleListInputs(const CUIRect &View, float &ScrollValue, const flo
 	{
 		if(m_aInputEvents[i].m_Flags & IInput::FLAG_PRESS)
 		{
-			if(m_aInputEvents[i].m_Key == KEY_DOWN)
+			if(UI()->LastActiveItem() == &g_Config.m_UiServerAddress)
+				return false;
+			else if(m_aInputEvents[i].m_Key == KEY_DOWN)
 				NewIndex = minimum(SelectedIndex + 1, NumElems - 1);
 			else if(m_aInputEvents[i].m_Key == KEY_UP)
 				NewIndex = maximum(SelectedIndex - 1, 0);
