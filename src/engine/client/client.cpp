@@ -4380,7 +4380,14 @@ int main(int argc, const char **argv) // ignore_convention
 
 #if defined(CONF_FAMILY_WINDOWS)
 	if(g_Config.m_ClShowConsole)
+	{
 		AllocConsole();
+		HANDLE hInput;
+		DWORD prev_mode;
+		hInput = GetStdHandle(STD_INPUT_HANDLE);
+		GetConsoleMode(hInput, &prev_mode);
+		SetConsoleMode(hInput, prev_mode & ENABLE_EXTENDED_FLAGS);
+	}
 #endif
 
 	// execute autoexec file
