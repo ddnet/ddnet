@@ -42,23 +42,23 @@ void CEffects::AirJump(vec2 Pos)
 	p.m_Gravity = 500;
 	p.m_Friction = 0.7f;
 	p.m_FlowAffected = 0.0f;
-	m_pClient->m_pParticles->Add(CParticles::GROUP_GENERAL, &p);
+	m_pClient->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
 
 	p.m_Pos = Pos + vec2(6.0f, 16.0f);
-	m_pClient->m_pParticles->Add(CParticles::GROUP_GENERAL, &p);
+	m_pClient->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
 
 	if(g_Config.m_SndGame)
-		m_pClient->m_pSounds->PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_AIRJUMP, 1.0f, Pos);
+		m_pClient->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_AIRJUMP, 1.0f, Pos);
 }
 
 void CEffects::DamageIndicator(vec2 Pos, vec2 Dir)
 {
-	m_pClient->m_pDamageind->Create(Pos, Dir);
+	m_pClient->m_DamageInd.Create(Pos, Dir);
 }
 
 void CEffects::ResetDamageIndicator()
 {
-	m_pClient->m_pDamageind->Reset();
+	m_pClient->m_DamageInd.Reset();
 }
 
 void CEffects::PowerupShine(vec2 Pos, vec2 size)
@@ -79,7 +79,7 @@ void CEffects::PowerupShine(vec2 Pos, vec2 size)
 	p.m_Gravity = 500;
 	p.m_Friction = 0.9f;
 	p.m_FlowAffected = 0.0f;
-	m_pClient->m_pParticles->Add(CParticles::GROUP_GENERAL, &p);
+	m_pClient->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
 }
 
 void CEffects::SmokeTrail(vec2 Pos, vec2 Vel, float Alpha, float TimePassed)
@@ -98,7 +98,7 @@ void CEffects::SmokeTrail(vec2 Pos, vec2 Vel, float Alpha, float TimePassed)
 	p.m_Friction = 0.7f;
 	p.m_Gravity = frandom() * -500.0f;
 	p.m_Color.a *= Alpha;
-	m_pClient->m_pParticles->Add(CParticles::GROUP_PROJECTILE_TRAIL, &p, TimePassed);
+	m_pClient->m_Particles.Add(CParticles::GROUP_PROJECTILE_TRAIL, &p, TimePassed);
 }
 
 void CEffects::SkidTrail(vec2 Pos, vec2 Vel)
@@ -117,7 +117,7 @@ void CEffects::SkidTrail(vec2 Pos, vec2 Vel)
 	p.m_Friction = 0.7f;
 	p.m_Gravity = frandom() * -500.0f;
 	p.m_Color = ColorRGBA(0.75f, 0.75f, 0.75f, 1.0f);
-	m_pClient->m_pParticles->Add(CParticles::GROUP_GENERAL, &p);
+	m_pClient->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
 }
 
 void CEffects::BulletTrail(vec2 Pos, float Alpha, float TimePassed)
@@ -134,7 +134,7 @@ void CEffects::BulletTrail(vec2 Pos, float Alpha, float TimePassed)
 	p.m_EndSize = 0;
 	p.m_Friction = 0.7f;
 	p.m_Color.a *= Alpha;
-	m_pClient->m_pParticles->Add(CParticles::GROUP_PROJECTILE_TRAIL, &p, TimePassed);
+	m_pClient->m_Particles.Add(CParticles::GROUP_PROJECTILE_TRAIL, &p, TimePassed);
 }
 
 void CEffects::PlayerSpawn(vec2 Pos)
@@ -154,10 +154,10 @@ void CEffects::PlayerSpawn(vec2 Pos)
 		p.m_Gravity = frandom() * -400.0f;
 		p.m_Friction = 0.7f;
 		p.m_Color = ColorRGBA(0xb5 / 255.0f, 0x50 / 255.0f, 0xcb / 255.0f, 1.0f);
-		m_pClient->m_pParticles->Add(CParticles::GROUP_GENERAL, &p);
+		m_pClient->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
 	}
 	if(g_Config.m_SndGame)
-		m_pClient->m_pSounds->PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_SPAWN, 1.0f, Pos);
+		m_pClient->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_SPAWN, 1.0f, Pos);
 }
 
 void CEffects::PlayerDeath(vec2 Pos, int ClientID)
@@ -190,7 +190,7 @@ void CEffects::PlayerDeath(vec2 Pos, int ClientID)
 		p.m_Friction = 0.8f;
 		ColorRGBA c = BloodColor.v4() * (0.75f + frandom() * 0.25f);
 		p.m_Color = ColorRGBA(c.r, c.g, c.b, 0.75f);
-		m_pClient->m_pParticles->Add(CParticles::GROUP_GENERAL, &p);
+		m_pClient->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
 	}
 }
 
@@ -204,7 +204,7 @@ void CEffects::Explosion(vec2 Pos)
 				continue;
 
 			float a = 1 - (length(vec2(x, y)) / length(vec2(8, 8)));
-			m_pClient->m_pFlow->Add(Pos + vec2(x, y) * 16, normalize(vec2(x, y)) * 5000.0f * a, 10.0f);
+			m_pClient->m_Flow.Add(Pos + vec2(x, y) * 16, normalize(vec2(x, y)) * 5000.0f * a, 10.0f);
 		}
 
 	// add the explosion
@@ -216,7 +216,7 @@ void CEffects::Explosion(vec2 Pos)
 	p.m_StartSize = 150.0f;
 	p.m_EndSize = 0;
 	p.m_Rot = frandom() * pi * 2;
-	m_pClient->m_pParticles->Add(CParticles::GROUP_EXPLOSIONS, &p);
+	m_pClient->m_Particles.Add(CParticles::GROUP_EXPLOSIONS, &p);
 
 	// add the smoke
 	for(int i = 0; i < 24; i++)
@@ -232,7 +232,7 @@ void CEffects::Explosion(vec2 Pos)
 		p.m_Gravity = frandom() * -800.0f;
 		p.m_Friction = 0.4f;
 		p.m_Color = mix(vec4(0.75f, 0.75f, 0.75f, 1.0f), vec4(0.5f, 0.5f, 0.5f, 1.0f), frandom());
-		m_pClient->m_pParticles->Add(CParticles::GROUP_GENERAL, &p);
+		m_pClient->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
 	}
 }
 
@@ -247,9 +247,9 @@ void CEffects::HammerHit(vec2 Pos)
 	p.m_StartSize = 120.0f;
 	p.m_EndSize = 0;
 	p.m_Rot = frandom() * pi * 2;
-	m_pClient->m_pParticles->Add(CParticles::GROUP_EXPLOSIONS, &p);
+	m_pClient->m_Particles.Add(CParticles::GROUP_EXPLOSIONS, &p);
 	if(g_Config.m_SndGame)
-		m_pClient->m_pSounds->PlayAt(CSounds::CHN_WORLD, SOUND_HAMMER_HIT, 1.0f, Pos);
+		m_pClient->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_HAMMER_HIT, 1.0f, Pos);
 }
 
 void CEffects::OnRender()
@@ -278,7 +278,7 @@ void CEffects::OnRender()
 			m_Add50hz = false;
 
 		if(m_Add50hz)
-			m_pClient->m_pFlow->Update();
+			m_pClient->m_Flow.Update();
 
 		return;
 	}
@@ -300,5 +300,5 @@ void CEffects::OnRender()
 		m_Add50hz = false;
 
 	if(m_Add50hz)
-		m_pClient->m_pFlow->Update();
+		m_pClient->m_Flow.Update();
 }

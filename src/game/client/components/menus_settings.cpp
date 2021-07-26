@@ -407,11 +407,11 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	MainView.HSplitTop(20.0f, 0, &MainView);
 	static float s_ScrollValue = 0.0f;
 	int OldSelected = -1;
-	UiDoListboxStart(&s_ScrollValue, &MainView, 50.0f, Localize("Country / Region"), "", m_pClient->m_pCountryFlags->Num(), 6, OldSelected, s_ScrollValue);
+	UiDoListboxStart(&s_ScrollValue, &MainView, 50.0f, Localize("Country / Region"), "", m_pClient->m_CountryFlags.Num(), 6, OldSelected, s_ScrollValue);
 
-	for(int i = 0; i < m_pClient->m_pCountryFlags->Num(); ++i)
+	for(int i = 0; i < m_pClient->m_CountryFlags.Num(); ++i)
 	{
-		const CCountryFlags::CCountryFlag *pEntry = m_pClient->m_pCountryFlags->GetByIndex(i);
+		const CCountryFlags::CCountryFlag *pEntry = m_pClient->m_CountryFlags.GetByIndex(i);
 		if(pEntry->m_CountryCode == *pCountry)
 			OldSelected = i;
 
@@ -425,7 +425,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 			Item.m_Rect.w = Item.m_Rect.h * 2;
 			Item.m_Rect.x += (OldWidth - Item.m_Rect.w) / 2.0f;
 			ColorRGBA Color(1.0f, 1.0f, 1.0f, 1.0f);
-			m_pClient->m_pCountryFlags->Render(pEntry->m_CountryCode, &Color, Item.m_Rect.x, Item.m_Rect.y, Item.m_Rect.w, Item.m_Rect.h);
+			m_pClient->m_CountryFlags.Render(pEntry->m_CountryCode, &Color, Item.m_Rect.x, Item.m_Rect.y, Item.m_Rect.w, Item.m_Rect.h);
 			if(pEntry->m_Texture != -1)
 				UI()->DoLabel(&Label, pEntry->m_aCountryCodeString, 10.0f, 0);
 		}
@@ -438,7 +438,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 
 	if(OldSelected != NewSelected)
 	{
-		*pCountry = m_pClient->m_pCountryFlags->GetByIndex(NewSelected)->m_CountryCode;
+		*pCountry = m_pClient->m_CountryFlags.GetByIndex(NewSelected)->m_CountryCode;
 		SetNeedSendInfo();
 	}
 }
@@ -482,7 +482,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	// skin info
 	CTeeRenderInfo OwnSkinInfo;
-	const CSkin *pSkin = m_pClient->m_pSkins->Get(m_pClient->m_pSkins->Find(Skin));
+	const CSkin *pSkin = m_pClient->m_Skins.Get(m_pClient->m_Skins.Find(Skin));
 	OwnSkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 	OwnSkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
 	OwnSkinInfo.m_SkinMetrics = pSkin->m_Metrics;
@@ -626,12 +626,12 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	static sorted_array<CUISkin> s_paSkinList;
 	static int s_SkinCount = 0;
 	static float s_ScrollValue = 0.0f;
-	if(s_InitSkinlist || m_pClient->m_pSkins->Num() != s_SkinCount)
+	if(s_InitSkinlist || m_pClient->m_Skins.Num() != s_SkinCount)
 	{
 		s_paSkinList.clear();
-		for(int i = 0; i < m_pClient->m_pSkins->Num(); ++i)
+		for(int i = 0; i < m_pClient->m_Skins.Num(); ++i)
 		{
-			const CSkin *s = m_pClient->m_pSkins->Get(i);
+			const CSkin *s = m_pClient->m_Skins.Get(i);
 
 			// filter quick search
 			if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_utf8_find_nocase(s->m_aName, g_Config.m_ClSkinFilterString))
@@ -651,7 +651,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			s_paSkinList.add(CUISkin(s));
 		}
 		s_InitSkinlist = false;
-		s_SkinCount = m_pClient->m_pSkins->Num();
+		s_SkinCount = m_pClient->m_Skins.Num();
 	}
 
 	int OldSelected = -1;
@@ -758,7 +758,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	static int s_SkinRefreshButtonID = 0;
 	if(DoButton_Menu(&s_SkinRefreshButtonID, "\xEE\x97\x95", 0, &RefreshButton, NULL, 15, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f), 0))
 	{
-		m_pClient->m_pSkins->Refresh();
+		m_pClient->m_Skins.Refresh();
 		s_InitSkinlist = true;
 		if(Client()->State() >= IClient::STATE_ONLINE)
 		{
@@ -863,9 +863,9 @@ void CMenus::UiDoGetButtons(int Start, int Stop, CUIRect View, CUIRect ScopeView
 			if(NewId != OldId || NewModifier != OldModifier)
 			{
 				if(OldId != 0 || NewId == 0)
-					m_pClient->m_pBinds->Bind(OldId, "", false, OldModifier);
+					m_pClient->m_Binds.Bind(OldId, "", false, OldModifier);
 				if(NewId != 0)
-					m_pClient->m_pBinds->Bind(NewId, gs_aKeys[i].m_pCommand, false, NewModifier);
+					m_pClient->m_Binds.Bind(NewId, gs_aKeys[i].m_pCommand, false, NewModifier);
 			}
 		}
 
@@ -885,7 +885,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	{
 		for(int KeyId = 0; KeyId < KEY_LAST; KeyId++)
 		{
-			const char *pBind = m_pClient->m_pBinds->Get(KeyId, Mod);
+			const char *pBind = m_pClient->m_Binds.Get(KeyId, Mod);
 			if(!pBind[0])
 				continue;
 
@@ -976,7 +976,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		ResetButton.HSplitTop(20.0f, &ResetButton, 0);
 		static int s_DefaultButton = 0;
 		if(DoButton_Menu((void *)&s_DefaultButton, Localize("Reset to defaults"), 0, &ResetButton))
-			m_pClient->m_pBinds->SetDefaults();
+			m_pClient->m_Binds.SetDefaults();
 	}
 
 	// voting settings
@@ -1290,10 +1290,10 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		if(g_Config.m_SndEnable)
 		{
 			if(g_Config.m_SndMusic && Client()->State() == IClient::STATE_OFFLINE)
-				m_pClient->m_pSounds->Play(CSounds::CHN_MUSIC, SOUND_MENU, 1.0f);
+				m_pClient->m_Sounds.Play(CSounds::CHN_MUSIC, SOUND_MENU, 1.0f);
 		}
 		else
-			m_pClient->m_pSounds->Stop(SOUND_MENU);
+			m_pClient->m_Sounds.Stop(SOUND_MENU);
 		m_NeedRestartSound = g_Config.m_SndEnable && (!s_SndEnable || s_SndRate != g_Config.m_SndRate);
 	}
 
@@ -1307,9 +1307,9 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		if(Client()->State() == IClient::STATE_OFFLINE)
 		{
 			if(g_Config.m_SndMusic)
-				m_pClient->m_pSounds->Play(CSounds::CHN_MUSIC, SOUND_MENU, 1.0f);
+				m_pClient->m_Sounds.Play(CSounds::CHN_MUSIC, SOUND_MENU, 1.0f);
 			else
-				m_pClient->m_pSounds->Stop(SOUND_MENU);
+				m_pClient->m_Sounds.Stop(SOUND_MENU);
 		}
 	}
 
@@ -1526,7 +1526,7 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 			Rect.VMargin(6.0f, &Rect);
 			Rect.HMargin(3.0f, &Rect);
 			ColorRGBA Color(1.0f, 1.0f, 1.0f, 1.0f);
-			m_pClient->m_pCountryFlags->Render(r.front().m_CountryCode, &Color, Rect.x, Rect.y, Rect.w, Rect.h);
+			m_pClient->m_CountryFlags.Render(r.front().m_CountryCode, &Color, Rect.x, Rect.y, Rect.w, Rect.h);
 			Item.m_Rect.HSplitTop(2.0f, 0, &Item.m_Rect);
 			UI()->DoLabelScaled(&Item.m_Rect, r.front().m_Name, 16.0f, -1);
 		}
@@ -2102,7 +2102,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	// ***** Chat ***** //
 
 	if(DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatOld, Localize("Use old chat style"), &g_Config.m_ClChatOld, &Chat, LineMargin))
-		GameClient()->m_pChat->RebuildChat();
+		GameClient()->m_Chat.RebuildChat();
 
 	Chat.HSplitTop(30.0f, 0x0, &Chat);
 
@@ -2222,7 +2222,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 		// Load skins
 
-		int DefaultInd = GameClient()->m_pSkins->Find("default");
+		int DefaultInd = GameClient()->m_Skins.Find("default");
 
 		for(auto &i : RenderInfo)
 		{
@@ -2233,10 +2233,10 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		int ind = -1;
 		int i = 0;
 
-		RenderInfo[i++].m_OriginalRenderSkin = GameClient()->m_pSkins->Get(DefaultInd)->m_OriginalSkin;
-		RenderInfo[i++].m_OriginalRenderSkin = (ind = GameClient()->m_pSkins->Find("pinky")) != -1 ? GameClient()->m_pSkins->Get(ind)->m_OriginalSkin : RenderInfo[0].m_OriginalRenderSkin;
-		RenderInfo[i++].m_OriginalRenderSkin = (ind = GameClient()->m_pSkins->Find("cammostripes")) != -1 ? GameClient()->m_pSkins->Get(ind)->m_OriginalSkin : RenderInfo[0].m_OriginalRenderSkin;
-		RenderInfo[i++].m_OriginalRenderSkin = (ind = GameClient()->m_pSkins->Find("beast")) != -1 ? GameClient()->m_pSkins->Get(ind)->m_OriginalSkin : RenderInfo[0].m_OriginalRenderSkin;
+		RenderInfo[i++].m_OriginalRenderSkin = GameClient()->m_Skins.Get(DefaultInd)->m_OriginalSkin;
+		RenderInfo[i++].m_OriginalRenderSkin = (ind = GameClient()->m_Skins.Find("pinky")) != -1 ? GameClient()->m_Skins.Get(ind)->m_OriginalSkin : RenderInfo[0].m_OriginalRenderSkin;
+		RenderInfo[i++].m_OriginalRenderSkin = (ind = GameClient()->m_Skins.Find("cammostripes")) != -1 ? GameClient()->m_Skins.Get(ind)->m_OriginalSkin : RenderInfo[0].m_OriginalRenderSkin;
+		RenderInfo[i++].m_OriginalRenderSkin = (ind = GameClient()->m_Skins.Find("beast")) != -1 ? GameClient()->m_Skins.Get(ind)->m_OriginalSkin : RenderInfo[0].m_OriginalRenderSkin;
 	}
 
 	// System

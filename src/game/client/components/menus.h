@@ -18,6 +18,8 @@
 #include <game/client/ui_ex.h>
 #include <game/voting.h>
 
+#include <game/client/render.h>
+
 struct CServerProcess
 {
 	PROCESS Process;
@@ -291,8 +293,6 @@ protected:
 	bool m_MouseSlow;
 
 	char m_aNextServer[256];
-
-	int64_t m_LastInput;
 
 	// images
 	struct CMenuImage
