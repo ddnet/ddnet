@@ -74,8 +74,8 @@ struct DECOMP_SLICE
 """)
 	print("enum")
 	print("{")
-	print("\tNUM_DECOMP_LENGTHS={},".format(len(len_set)))
-	print("\tNUM_DECOMPS={},".format(len(decompositions)))
+	print("\tNUM_DECOMP_LENGTHS = {},".format(len(len_set)))
+	print("\tNUM_DECOMPS = {},".format(len(decompositions)))
 	print("};")
 	print()
 
