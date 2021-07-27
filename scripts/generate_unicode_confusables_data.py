@@ -26,6 +26,7 @@ def generate_decompositions():
 	ignore = category("C") | category("M") | category("Z")
 
 	con[0x006C] = [0x0069] # LATIN SMALL LETTER L -> LATIN SMALL LETTER I
+	con[0x00A1] = [0x0069] # INVERTED EXCLAMATION MARK -> LATIN SMALL LETTER I
 	con[0x2800] = [] # BRAILLE PATTERN BLANK
 	con[0xFFFC] = [] # OBJECT REPLACEMENT CHARACTER
 
@@ -74,8 +75,8 @@ struct DECOMP_SLICE
 """)
 	print("enum")
 	print("{")
-	print("\tNUM_DECOMP_LENGTHS={},".format(len(len_set)))
-	print("\tNUM_DECOMPS={},".format(len(decompositions)))
+	print("\tNUM_DECOMP_LENGTHS = {},".format(len(len_set)))
+	print("\tNUM_DECOMPS = {},".format(len(decompositions)))
 	print("};")
 	print()
 
