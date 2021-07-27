@@ -9,7 +9,7 @@ struct DECOMP_SLICE
 enum
 {
 	NUM_DECOMP_LENGTHS = 8,
-	NUM_DECOMPS = 9605,
+	NUM_DECOMPS = 9606,
 };
 
 static const uint8_t decomp_lengths[NUM_DECOMP_LENGTHS] = {
@@ -100,6 +100,7 @@ static const int32_t decomp_chars[NUM_DECOMPS] = {
 	0x9e,
 	0x9f,
 	0xa0,
+	0xa1,
 	0xa2,
 	0xa5,
 	0xad,
@@ -9708,6 +9709,7 @@ static const struct DECOMP_SLICE decomp_slices[NUM_DECOMPS] = {
 	{0, 0},
 	{0, 0},
 	{0, 0},
+	{855, 1},
 	{824, 1},
 	{789, 1},
 	{0, 0},
