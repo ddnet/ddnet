@@ -78,12 +78,12 @@ TEST(NetAddr, FromStrInvalid)
 {
 	NETADDR Addr;
 	EXPECT_TRUE(net_addr_from_str(&Addr, "127.0.0."));
-	//EXPECT_TRUE(net_addr_from_str(&Addr, "127.0.0.1a"));
+	EXPECT_TRUE(net_addr_from_str(&Addr, "127.0.0.1a"));
 	EXPECT_TRUE(net_addr_from_str(&Addr, "1.1"));
 	EXPECT_TRUE(net_addr_from_str(&Addr, "[::1"));
 	EXPECT_TRUE(net_addr_from_str(&Addr, "[::"));
 	EXPECT_TRUE(net_addr_from_str(&Addr, "127.0.0.1:"));
 	EXPECT_TRUE(net_addr_from_str(&Addr, "[::]:"));
-	//EXPECT_TRUE(net_addr_from_str(&Addr, "127.0.0.1:1a"));
+	EXPECT_TRUE(net_addr_from_str(&Addr, "127.0.0.1:1a"));
 	EXPECT_TRUE(net_addr_from_str(&Addr, "[::]:c"));
 }

@@ -1346,6 +1346,8 @@ int net_addr_from_str(NETADDR *addr, const char *string)
 			if(parse_uint16(&addr->port, &str))
 				return -1;
 		}
+		if(*str != '\0')
+			return -1;
 
 		addr->type = NETTYPE_IPV4;
 	}
