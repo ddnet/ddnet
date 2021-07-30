@@ -1,9 +1,8 @@
 #ifndef GAME_CLIENT_COMPONENTS_CHILLERBOT_CHILLERBOTUX_H
 #define GAME_CLIENT_COMPONENTS_CHILLERBOT_CHILLERBOTUX_H
 
-
-#include <game/mapitems.h>
 #include <game/client/component.h>
+#include <game/mapitems.h>
 
 #define MAX_COMPONENT_LEN 16
 #define MAX_COMPONENTS_ENABLED 8

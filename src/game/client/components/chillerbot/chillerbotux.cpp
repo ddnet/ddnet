@@ -14,9 +14,9 @@
 #include <game/client/components/controls.h>
 #include <game/client/components/menus.h>
 #include <game/client/components/voting.h>
+#include <game/client/gameclient.h>
 #include <game/client/race.h>
 #include <game/client/render.h>
-#include <game/client/gameclient.h>
 #include <game/generated/protocol.h>
 #include <game/version.h>
 
