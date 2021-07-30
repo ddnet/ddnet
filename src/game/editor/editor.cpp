@@ -3957,7 +3957,7 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect View)
 
 	// render image
 	int i = m_SelectedImage;
-	if(i < m_Map.m_lImages.size())
+	if(i != -1 && i < m_Map.m_lImages.size())
 	{
 		CUIRect r;
 		View.Margin(10.0f, &r);
@@ -6391,7 +6391,7 @@ void CEditor::LoadCurrentMap()
 	m_ValidSaveFilename = true;
 
 	CGameClient *pGameClient = (CGameClient *)Kernel()->RequestInterface<IGameClient>();
-	vec2 Center = pGameClient->m_pCamera->m_Center;
+	vec2 Center = pGameClient->m_Camera.m_Center;
 
 	m_WorldOffsetX = Center.x;
 	m_WorldOffsetY = Center.y;

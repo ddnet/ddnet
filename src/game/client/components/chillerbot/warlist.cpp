@@ -5,6 +5,7 @@
 #include <engine/config.h>
 #include <engine/shared/linereader.h>
 #include <engine/textrender.h>
+#include <game/client/gameclient.h>
 
 #include "chillerbotux.h"
 

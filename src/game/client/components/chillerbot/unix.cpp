@@ -1,3 +1,5 @@
+#include <game/client/gameclient.h>
+
 #include "unix.h"
 
 void CUnix::OnInit()

@@ -2,6 +2,7 @@
 
 #include <game/client/components/chat.h>
 #include <game/client/components/chillerbot/chillerbotux.h>
+#include <game/client/gameclient.h>
 
 #include <cinttypes>
 
@@ -52,7 +53,7 @@ void CChatHelper::OnRender()
 		{
 			if(m_aSendBuffer[0][0])
 			{
-				m_pClient->m_pChat->Say(0, m_aSendBuffer[0]);
+				m_pClient->m_Chat.Say(0, m_aSendBuffer[0]);
 				for(int i = 0; i < MAX_CHAT_BUFFER_LEN - 1; i++)
 					str_copy(m_aSendBuffer[i], m_aSendBuffer[i + 1], sizeof(m_aSendBuffer[i]));
 				m_aSendBuffer[MAX_CHAT_BUFFER_LEN - 1][0] = '\0';
@@ -196,7 +197,7 @@ void CChatHelper::SayFormat(const char *pMsg)
 		aBuf[buf_i++] = pMsg[i];
 	}
 	aBuf[minimum((unsigned long)sizeof(aBuf) - 1, buf_i)] = '\0';
-	m_pClient->m_pChat->Say(0, aBuf);
+	m_pClient->m_Chat.Say(0, aBuf);
 }
 
 void CChatHelper::DoGreet()
@@ -205,10 +206,10 @@ void CChatHelper::DoGreet()
 	{
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "hi %s", m_aGreetName);
-		m_pClient->m_pChat->Say(0, aBuf);
+		m_pClient->m_Chat.Say(0, aBuf);
 		return;
 	}
-	m_pClient->m_pChat->Say(0, "hi");
+	m_pClient->m_Chat.Say(0, "hi");
 }
 
 void CChatHelper::Get128Name(const char *pMsg, char *pName)

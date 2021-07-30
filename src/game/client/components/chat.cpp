@@ -860,7 +860,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		{
 			if(g_Config.m_SndServerMessage)
 			{
-				m_pClient->m_pSounds->Play(CSounds::CHN_GUI, SOUND_CHAT_SERVER, 0);
+				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_SERVER, 0);
 				m_aLastSoundPlayed[CHAT_SERVER] = Now;
 			}
 		}
@@ -878,7 +878,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 			Client()->Notify("DDNet Chat", aBuf);
 			if(g_Config.m_SndHighlight)
 			{
-				m_pClient->m_pSounds->Play(CSounds::CHN_GUI, SOUND_CHAT_HIGHLIGHT, 0);
+				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_HIGHLIGHT, 0);
 				m_aLastSoundPlayed[CHAT_HIGHLIGHT] = Now;
 			}
 
@@ -894,7 +894,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		{
 			if((g_Config.m_SndTeamChat || !m_aLines[m_CurrentLine].m_Team) && (g_Config.m_SndChat || m_aLines[m_CurrentLine].m_Team))
 			{
-				m_pClient->m_pSounds->Play(CSounds::CHN_GUI, SOUND_CHAT_CLIENT, 0);
+				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_CLIENT, 0);
 				m_aLastSoundPlayed[CHAT_CLIENT] = Now;
 			}
 		}
@@ -907,7 +907,7 @@ void CChat::RefindSkins()
 	{
 		if(Line.m_HasRenderTee)
 		{
-			const CSkin *pSkin = m_pClient->m_pSkins->Get(m_pClient->m_pSkins->Find(Line.m_aSkinName));
+			const CSkin *pSkin = m_pClient->m_Skins.Get(m_pClient->m_Skins.Find(Line.m_aSkinName));
 			if(Line.m_CustomColoredSkin)
 				Line.m_RenderSkin = pSkin->m_ColorableSkin;
 			else
@@ -926,7 +926,7 @@ void CChat::OnPrepareLines()
 
 	float ScreenRatio = Graphics()->ScreenAspect();
 
-	bool IsScoreBoardOpen = m_pClient->m_pScoreboard->Active() && (ScreenRatio > 1.7f); // only assume scoreboard when screen ratio is widescreen(something around 16:9)
+	bool IsScoreBoardOpen = m_pClient->m_Scoreboard.Active() && (ScreenRatio > 1.7f); // only assume scoreboard when screen ratio is widescreen(something around 16:9)
 
 	bool ForceRecreate = IsScoreBoardOpen != m_PrevScoreBoardShowed;
 	bool ShowLargeArea = m_Show || g_Config.m_ClShowChat == 2;
@@ -1246,7 +1246,7 @@ void CChat::OnRender()
 		Marker.m_X -= MarkerOffset;
 		TextRender()->TextEx(&Marker, "|", -1);
 		TextRender()->TextEx(&Cursor, m_Input.GetString(Editing) + m_Input.GetCursorOffset(Editing), -1);
-		if(m_pClient->m_pGameConsole->IsClosed())
+		if(m_pClient->m_GameConsole.IsClosed())
 			Input()->SetEditingPosition(Marker.m_X, Marker.m_Y + Marker.m_FontSize);
 	}
 
@@ -1262,7 +1262,7 @@ void CChat::OnRender()
 	OnPrepareLines();
 
 	float ScreenRatio = Graphics()->ScreenAspect();
-	bool IsScoreBoardOpen = m_pClient->m_pScoreboard->Active() && (ScreenRatio > 1.7f); // only assume scoreboard when screen ratio is widescreen(something around 16:9)
+	bool IsScoreBoardOpen = m_pClient->m_Scoreboard.Active() && (ScreenRatio > 1.7f); // only assume scoreboard when screen ratio is widescreen(something around 16:9)
 
 	int64_t Now = time();
 	float HeightLimit = IsScoreBoardOpen ? 180.0f : m_PrevShowChat ? 50.0f : 200.0f;

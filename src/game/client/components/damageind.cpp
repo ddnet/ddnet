@@ -9,6 +9,8 @@
 #include <game/client/render.h>
 #include <game/client/ui.h>
 
+#include <game/client/gameclient.h>
+
 CDamageInd::CDamageInd()
 {
 	m_Lastupdate = 0;

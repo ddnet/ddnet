@@ -16,6 +16,7 @@
 #include <game/client/components/voting.h>
 #include <game/client/race.h>
 #include <game/client/render.h>
+#include <game/client/gameclient.h>
 #include <game/generated/protocol.h>
 #include <game/version.h>
 
@@ -43,8 +44,8 @@ void CChillerBotUX::OnRender()
 	CampHackTick();
 	if(!m_ForceDir && m_LastForceDir)
 	{
-		m_pClient->m_pControls->m_InputDirectionRight[g_Config.m_ClDummy] = 0;
-		m_pClient->m_pControls->m_InputDirectionLeft[g_Config.m_ClDummy] = 0;
+		m_pClient->m_Controls.m_InputDirectionRight[g_Config.m_ClDummy] = 0;
+		m_pClient->m_Controls.m_InputDirectionLeft[g_Config.m_ClDummy] = 0;
 	}
 	m_LastForceDir = m_ForceDir;
 }
@@ -101,9 +102,9 @@ void CChillerBotUX::RenderSpeedHud()
 
 void CChillerBotUX::RenderEnabledComponents()
 {
-	if(m_pClient->m_pMenus->IsActive())
+	if(m_pClient->m_Menus.IsActive())
 		return;
-	if(m_pClient->m_pVoting->IsVoting())
+	if(m_pClient->m_Voting.IsVoting())
 		return;
 	if(!g_Config.m_ClChillerbotHud)
 		return;
@@ -217,7 +218,7 @@ void CChillerBotUX::CampHackTick()
 	{
 		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-		MapScreenToGroup(m_pClient->m_pCamera->m_Center.x, m_pClient->m_pCamera->m_Center.y, Layers()->GameGroup(), m_pClient->m_pCamera->m_Zoom);
+		MapScreenToGroup(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y, Layers()->GameGroup(), m_pClient->m_Camera.m_Zoom);
 		Graphics()->BlendNormal();
 		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
@@ -243,14 +244,14 @@ void CChillerBotUX::CampHackTick()
 		return;
 	if(m_CampHackX1 > GameClient()->m_Snap.m_pLocalCharacter->m_X)
 	{
-		m_pClient->m_pControls->m_InputDirectionRight[g_Config.m_ClDummy] = 1;
-		m_pClient->m_pControls->m_InputDirectionLeft[g_Config.m_ClDummy] = 0;
+		m_pClient->m_Controls.m_InputDirectionRight[g_Config.m_ClDummy] = 1;
+		m_pClient->m_Controls.m_InputDirectionLeft[g_Config.m_ClDummy] = 0;
 		m_ForceDir = 1;
 	}
 	else if(m_CampHackX2 < GameClient()->m_Snap.m_pLocalCharacter->m_X)
 	{
-		m_pClient->m_pControls->m_InputDirectionRight[g_Config.m_ClDummy] = 0;
-		m_pClient->m_pControls->m_InputDirectionLeft[g_Config.m_ClDummy] = 1;
+		m_pClient->m_Controls.m_InputDirectionRight[g_Config.m_ClDummy] = 0;
+		m_pClient->m_Controls.m_InputDirectionLeft[g_Config.m_ClDummy] = 1;
 		m_ForceDir = -1;
 	}
 }
@@ -290,7 +291,7 @@ void CChillerBotUX::SelectCampArea(int Key)
 		{
 			m_CampHackX1 = 0;
 			m_CampHackY1 = 0;
-			GameClient()->m_pChat->AddLine(-2, 0, "Unset camp[1]");
+			GameClient()->m_Chat.AddLine(-2, 0, "Unset camp[1]");
 			return;
 		}
 		vec2 CrackPos2 = vec2(m_CampHackX2, m_CampHackY2);
@@ -299,7 +300,7 @@ void CChillerBotUX::SelectCampArea(int Key)
 		{
 			m_CampHackX2 = 0;
 			m_CampHackY2 = 0;
-			GameClient()->m_pChat->AddLine(-2, 0, "Unset camp[2]");
+			GameClient()->m_Chat.AddLine(-2, 0, "Unset camp[2]");
 			return;
 		}
 		// SET OTHERWISE
@@ -318,7 +319,7 @@ void CChillerBotUX::SelectCampArea(int Key)
 			"Set camp[%d] %d",
 			m_CampClick == 2 ? 1 : 2,
 			GameClient()->m_Snap.m_pLocalCharacter->m_X / 32);
-		GameClient()->m_pChat->AddLine(-2, 0, aBuf);
+		GameClient()->m_Chat.AddLine(-2, 0, aBuf);
 	}
 	if(m_CampClick > 3)
 		m_CampClick = 0;
@@ -333,7 +334,7 @@ void CChillerBotUX::FinishRenameTick()
 	vec2 Pos = m_pClient->m_PredictedChar.m_Pos;
 	if(CRaceHelper::IsNearFinish(m_pClient, Pos))
 	{
-		if(Client()->State() == IClient::STATE_ONLINE && !m_pClient->m_pMenus->IsActive() && g_Config.m_ClEditor == 0)
+		if(Client()->State() == IClient::STATE_ONLINE && !m_pClient->m_Menus.IsActive() && g_Config.m_ClEditor == 0)
 		{
 			Graphics()->BlendNormal();
 			Graphics()->TextureClear();
@@ -526,8 +527,8 @@ void CChillerBotUX::ConUnCampHack(IConsole::IResult *pResult, void *pUserData)
 	CChillerBotUX *pSelf = (CChillerBotUX *)pUserData;
 	g_Config.m_ClCampHack = 0;
 	pSelf->DisableComponent("camp hack");
-	pSelf->m_pClient->m_pControls->m_InputDirectionRight[g_Config.m_ClDummy] = 0;
-	pSelf->m_pClient->m_pControls->m_InputDirectionLeft[g_Config.m_ClDummy] = 0;
+	pSelf->m_pClient->m_Controls.m_InputDirectionRight[g_Config.m_ClDummy] = 0;
+	pSelf->m_pClient->m_Controls.m_InputDirectionLeft[g_Config.m_ClDummy] = 0;
 }
 
 void CChillerBotUX::ConGotoSwitch(IConsole::IResult *pResult, void *pUserData)
@@ -676,7 +677,7 @@ void CChillerBotUX::ReturnFromAfk(const char *pChatMessage)
 	m_AfkActivity++;
 	if(m_AfkActivity < 200)
 		return;
-	m_pClient->m_pChat->AddLine(-2, 0, "[chillerbot-ux] welcome back :)");
+	m_pClient->m_Chat.AddLine(-2, 0, "[chillerbot-ux] welcome back :)");
 	m_AfkTill = 0;
 	DisableComponent("afk");
 }

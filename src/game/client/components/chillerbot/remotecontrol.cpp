@@ -3,6 +3,7 @@
 #include <game/client/components/chat.h>
 #include <game/client/components/chillerbot/chathelper.h>
 #include <game/client/components/chillerbot/chillerbotux.h>
+#include <game/client/gameclient.h>
 
 #include "remotecontrol.h"
 

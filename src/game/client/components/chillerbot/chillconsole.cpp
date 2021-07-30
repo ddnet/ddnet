@@ -31,6 +31,8 @@
 #include <game/client/lineinput.h>
 #include <game/client/render.h>
 
+#include <game/client/gameclient.h>
+
 #include "chillconsole.h"
 
 CChillConsole::CInstance::CInstance(int Type)
@@ -770,7 +772,7 @@ void CChillConsole::Toggle(int Type)
 		if(m_ConsoleState == CONSOLE_CLOSED || m_ConsoleState == CONSOLE_CLOSING)
 		{
 			/*Input()->MouseModeAbsolute();*/
-			m_pClient->m_pMenus->UseMouseButtons(false);
+			m_pClient->m_Menus.UseMouseButtons(false);
 			m_ConsoleState = CONSOLE_OPENING;
 			/*// reset controls
 			m_pClient->m_pControls->OnReset();*/
@@ -785,7 +787,7 @@ void CChillConsole::Toggle(int Type)
 		{
 			m_ConsoleState = CONSOLE_CLOSING;
 			Input()->MouseModeRelative();
-			m_pClient->m_pMenus->UseMouseButtons(true);
+			m_pClient->m_Menus.UseMouseButtons(true);
 			m_pClient->OnRelease();
 			Input()->SetIMEState(false);
 		}

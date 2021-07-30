@@ -36,12 +36,14 @@ enum
 
 void CGameContext::Construct(int Resetting)
 {
+	m_Resetting = false;
 	m_pServer = 0;
 
 	for(auto &pPlayer : m_apPlayers)
 		pPlayer = 0;
 
 	m_pController = 0;
+	m_aVoteCommand[0] = 0;
 	m_VoteType = VOTE_TYPE_UNKNOWN;
 	m_VoteCloseTime = 0;
 	m_pVoteOptionFirst = 0;
@@ -83,9 +85,14 @@ CGameContext::CGameContext()
 	Construct(NO_RESET);
 }
 
+CGameContext::CGameContext(int Reset)
+{
+	Construct(Reset);
+}
+
 CGameContext::~CGameContext()
 {
-	Destruct(NO_RESET);
+	Destruct(m_Resetting ? RESET : NO_RESET);
 }
 
 void CGameContext::Clear()
@@ -96,8 +103,9 @@ void CGameContext::Clear()
 	int NumVoteOptions = m_NumVoteOptions;
 	CTuningParams Tuning = m_Tuning;
 
-	Destruct(RESET);
-	Construct(RESET);
+	m_Resetting = true;
+	this->~CGameContext();
+	new(this) CGameContext(RESET);
 
 	m_pVoteOptionHeap = pVoteOptionHeap;
 	m_pVoteOptionFirst = pVoteOptionFirst;

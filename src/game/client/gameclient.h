@@ -20,6 +20,50 @@
 #include <game/client/prediction/entities/pickup.h>
 #include <game/client/prediction/gameworld.h>
 
+// components
+#include "components/background.h"
+#include "components/binds.h"
+#include "components/broadcast.h"
+#include "components/camera.h"
+#include "components/chat.h"
+#include "components/console.h"
+#include "components/controls.h"
+#include "components/countryflags.h"
+#include "components/damageind.h"
+#include "components/debughud.h"
+#include "components/effects.h"
+#include "components/emoticon.h"
+#include "components/flow.h"
+#include "components/ghost.h"
+#include "components/hud.h"
+#include "components/items.h"
+#include "components/killmessages.h"
+#include "components/mapimages.h"
+#include "components/maplayers.h"
+#include "components/mapsounds.h"
+#include "components/menu_background.h"
+#include "components/menus.h"
+#include "components/motd.h"
+#include "components/nameplates.h"
+#include "components/particles.h"
+#include "components/players.h"
+#include "components/race_demo.h"
+#include "components/scoreboard.h"
+#include "components/skins.h"
+#include "components/sounds.h"
+#include "components/spectator.h"
+#include "components/statboard.h"
+#include "components/voting.h"
+
+#include "components/chillerbot/chathelper.h"
+#include "components/chillerbot/chillconsole.h"
+#include "components/chillerbot/chillerbotux.h"
+#include "components/chillerbot/chillpw.h"
+#include "components/chillerbot/playerpics.h"
+#include "components/chillerbot/remotecontrol.h"
+#include "components/chillerbot/unix.h"
+#include "components/chillerbot/warlist.h"
+
 class CGameInfo
 {
 public:
@@ -59,6 +103,59 @@ public:
 
 class CGameClient : public IGameClient
 {
+public:
+	// all components
+	CKillMessages m_KillMessages;
+	CCamera m_Camera;
+	CChat m_Chat;
+	CMotd m_Motd;
+	CBroadcast m_Broadcast;
+	CGameConsole m_GameConsole;
+	CBinds m_Binds;
+	CParticles m_Particles;
+	CMenus m_Menus;
+	CSkins m_Skins;
+	CCountryFlags m_CountryFlags;
+	CFlow m_Flow;
+	CHud m_Hud;
+	CDebugHud m_DebugHud;
+	CControls m_Controls;
+	CEffects m_Effects;
+	CScoreboard m_Scoreboard;
+	CStatboard m_Statboard;
+	CSounds m_Sounds;
+	CEmoticon m_Emoticon;
+	CDamageInd m_DamageInd;
+	CVoting m_Voting;
+	CSpectator m_Spectator;
+
+	CPlayers m_Players;
+	CNamePlates m_NamePlates;
+	CItems m_Items;
+	CMapImages m_MapImages;
+
+	CMapLayers m_MapLayersBackGround = CMapLayers{CMapLayers::TYPE_BACKGROUND};
+	CMapLayers m_MapLayersForeGround = CMapLayers{CMapLayers::TYPE_FOREGROUND};
+	CBackground m_BackGround;
+	CMenuBackground m_MenuBackground;
+
+	CMapSounds m_MapSounds;
+
+	CRaceDemo m_RaceDemo;
+	CGhost m_Ghost;
+
+	// chillerbot-ux
+
+	CChillerBotUX m_ChillerBotUX;
+	CChatHelper m_ChatHelper;
+	CChillConsole m_ChillConsole;
+	CChillPw m_ChillPw;
+	CPlayerPics m_PlayerPics;
+	CRemoteControl m_RemoteControl;
+	CUnix m_Unix;
+	CWarList m_WarList;
+
+private:
 	class CStack
 	{
 	public:
@@ -296,7 +393,7 @@ public:
 		CNetObj_Character m_Snapped;
 		CNetObj_Character m_Evolved;
 
-		void UpdateRenderInfo();
+		void UpdateRenderInfo(bool IsTeamPlay);
 		void Reset();
 
 		// rendered characters
@@ -401,35 +498,6 @@ public:
 	virtual void SendDummyInfo(bool Start);
 	void SendKill(int ClientID);
 
-	// pointers to all systems
-	class CMenuBackground *m_pMenuBackground;
-	class CGameConsole *m_pGameConsole;
-	class CBinds *m_pBinds;
-	class CParticles *m_pParticles;
-	class CMenus *m_pMenus;
-	class CSkins *m_pSkins;
-	class CCountryFlags *m_pCountryFlags;
-	class CPlayerPics *m_pPlayerPics;
-	class CFlow *m_pFlow;
-	class CChat *m_pChat;
-	class CDamageInd *m_pDamageind;
-	class CCamera *m_pCamera;
-	class CControls *m_pControls;
-	class CEffects *m_pEffects;
-	class CSounds *m_pSounds;
-	class CMotd *m_pMotd;
-	class CMapImages *m_pMapimages;
-	class CVoting *m_pVoting;
-	class CScoreboard *m_pScoreboard;
-	class CStatboard *m_pStatboard;
-	class CItems *m_pItems;
-	class CMapLayers *m_pMapLayersBackGround;
-	class CMapLayers *m_pMapLayersForeGround;
-	class CBackground *m_pBackGround;
-
-	class CMapSounds *m_pMapSounds;
-	class CPlayers *m_pPlayers;
-
 	// DDRace
 
 	int m_LocalIDs[NUM_DUMMIES];
@@ -438,8 +506,6 @@ public:
 	int m_DummyFire;
 	bool m_ReceivedDDNetPlayer;
 
-	class CRaceDemo *m_pRaceDemo;
-	class CGhost *m_pGhost;
 	class CTeamsCore m_Teams;
 
 	class CChillerBotUX *m_pChillerBotUX;
@@ -450,6 +516,8 @@ public:
 	int IntersectCharacter(vec2 Pos0, vec2 Pos1, vec2 &NewPos, int ownID);
 
 	virtual int GetLastRaceTick();
+
+	bool IsTeamPlay() { return m_Snap.m_pGameInfoObj && m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS; }
 
 	bool AntiPingPlayers() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingPlayers && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK && (m_Tuning[g_Config.m_ClDummy].m_PlayerCollision || m_Tuning[g_Config.m_ClDummy].m_PlayerHooking); }
 	bool AntiPingGrenade() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingGrenade && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK; }

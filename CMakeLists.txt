@@ -1758,6 +1758,7 @@ if(CLIENT)
   set_src(GAME_CLIENT GLOB_RECURSE src/game/client
     animstate.cpp
     animstate.h
+    component.cpp
     component.h
     components/background.cpp
     components/background.h
