@@ -16,7 +16,7 @@ void CRemoteControl::OnChatMessage(int ClientID, int Team, const char *pMsg)
 	str_copy(aName, m_pClient->m_aClients[ClientID].m_aName, sizeof(aName));
 	if(ClientID == 63 && !str_comp_num(m_pClient->m_aClients[ClientID].m_aName, " ", 2))
 	{
-		m_pClient->m_pChatHelper->Get128Name(pMsg, aName);
+		m_pClient->m_ChatHelper.Get128Name(pMsg, aName);
 	}
 	// ignore own and dummys messages
 	if(!str_comp(aName, m_pClient->m_aClients[m_pClient->m_LocalIDs[0]].m_aName))
@@ -43,19 +43,19 @@ void CRemoteControl::OnChatMessage(int ClientID, int Team, const char *pMsg)
 	if(Num == 0)
 	{
 		str_format(aBuf, sizeof(aBuf), "Error: %s missing token (usage: '/whisper name token command')", aName);
-		m_pClient->m_pChatHelper->SayBuffer(aBuf);
+		m_pClient->m_ChatHelper.SayBuffer(aBuf);
 		return;
 	}
 	else if(Num == 1)
 	{
 		str_format(aBuf, sizeof(aBuf), "Error: %s missing command (usage: '/whisper name token command')", aName);
-		m_pClient->m_pChatHelper->SayBuffer(aBuf);
+		m_pClient->m_ChatHelper.SayBuffer(aBuf);
 		return;
 	}
 	if(str_comp(aMsg[1], g_Config.m_ClRemoteControlToken))
 	{
 		str_format(aBuf, sizeof(aBuf), "Error: %s failed to remote control (invalid token)", aName);
-		m_pClient->m_pChatHelper->SayBuffer(aBuf);
+		m_pClient->m_ChatHelper.SayBuffer(aBuf);
 		return;
 	}
 	m_pClient->Console()->ExecuteLine(aMsg[2]);

@@ -359,7 +359,7 @@ void CChillerBotUX::FinishRenameTick()
 
 void CChillerBotUX::OnInit()
 {
-	m_pChatHelper = m_pClient->m_pChatHelper;
+	m_pChatHelper = &m_pClient->m_ChatHelper;
 
 	m_AfkTill = 0;
 	m_AfkActivity = 0;

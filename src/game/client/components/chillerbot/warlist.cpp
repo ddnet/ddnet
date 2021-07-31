@@ -37,7 +37,7 @@ void CWarList::ReloadList()
 	str_format(aBuf, sizeof(aBuf), "team: %d war: %d", m_TeamDirs, (m_WarDirs + m_TraitorDirs));
 	// TODO: fix on initial load
 	// 		 maybe https://github.com/chillerbot/chillerbot-ux/issues/22 is needed
-	m_pClient->m_pChillerBotUX->SetComponentNoteLong("war list", aBuf);
+	m_pClient->m_ChillerBotUX.SetComponentNoteLong("war list", aBuf);
 }
 
 int CWarList::LoadWarDir(const char *pDirname, int IsDir, int DirType, void *pUser)
@@ -430,11 +430,11 @@ void CWarList::ConchainWarList(IConsole::IResult *pResult, void *pUserData, ICon
 	pfnCallback(pResult, pCallbackUserData);
 	if(pResult->GetInteger(0))
 	{
-		pSelf->m_pClient->m_pChillerBotUX->EnableComponent("war list");
+		pSelf->m_pClient->m_ChillerBotUX.EnableComponent("war list");
 		pSelf->ReloadList();
 	}
 	else
-		pSelf->m_pClient->m_pChillerBotUX->DisableComponent("war list");
+		pSelf->m_pClient->m_ChillerBotUX.DisableComponent("war list");
 }
 
 void CWarList::OnRender()

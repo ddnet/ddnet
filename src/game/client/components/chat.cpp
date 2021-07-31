@@ -325,7 +325,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 			str_truncate(m_aCompletionBuffer, sizeof(m_aCompletionBuffer), m_Input.GetString() + m_PlaceholderOffset, m_PlaceholderLength);
 		}
 
-		if(false && m_pClient->m_pChatHelper->OnAutocomplete(&m_Input, m_aCompletionBuffer, m_PlaceholderOffset, m_PlaceholderLength, &m_OldChatStringLength, &m_CompletionChosen, m_ReverseTAB))
+		if(false && m_pClient->m_ChatHelper.OnAutocomplete(&m_Input, m_aCompletionBuffer, m_PlaceholderOffset, m_PlaceholderLength, &m_OldChatStringLength, &m_CompletionChosen, m_ReverseTAB))
 		{
 			m_InputUpdate = true;
 		}
@@ -1346,7 +1346,7 @@ void CChat::Say(int Team, const char *pLine)
 	Msg.m_pMessage = pLine;
 	Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
 
-	m_pClient->m_pChillerBotUX->ReturnFromAfk(pLine);
+	m_pClient->m_ChillerBotUX.ReturnFromAfk(pLine);
 }
 
 void CChat::SayChat(const char *pLine)

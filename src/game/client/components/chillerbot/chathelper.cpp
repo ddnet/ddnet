@@ -22,7 +22,7 @@ void CChatHelper::RegisterCommand(const char *pName, const char *pParams, int fl
 
 void CChatHelper::OnInit()
 {
-	m_pChillerBot = m_pClient->m_pChillerBotUX;
+	m_pChillerBot = &m_pClient->m_ChillerBotUX;
 
 	m_aGreetName[0] = '\0';
 	m_NextGreetClear = 0;
@@ -66,7 +66,7 @@ void CChatHelper::OnRender()
 void CChatHelper::SayBuffer(const char *pMsg, bool StayAfk)
 {
 	if(StayAfk)
-		m_pClient->m_pChillerBotUX->m_IgnoreChatAfk++;
+		m_pClient->m_ChillerBotUX.m_IgnoreChatAfk++;
 	// append at end
 	for(auto &buf : m_aSendBuffer)
 	{

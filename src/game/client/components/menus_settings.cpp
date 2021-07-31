@@ -2648,7 +2648,7 @@ void CMenus::RenderSettingsChillerbot(CUIRect MainView)
 		if(DoButton_CheckBox(&g_Config.m_ClFinishRename, "Rename on finish", g_Config.m_ClFinishRename, &Checkbox))
 		{
 			g_Config.m_ClFinishRename ^= 1;
-			m_pClient->m_pChillerBotUX->UpdateComponents();
+			m_pClient->m_ChillerBotUX.UpdateComponents();
 		}
 	}
 
@@ -2668,7 +2668,7 @@ void CMenus::RenderSettingsChillerbot(CUIRect MainView)
 		if(DoButton_CheckBox(&g_Config.m_ClAutoReply, "Auto reply", g_Config.m_ClAutoReply, &Checkbox))
 		{
 			g_Config.m_ClAutoReply ^= 1;
-			m_pClient->m_pChillerBotUX->UpdateComponents();
+			m_pClient->m_ChillerBotUX.UpdateComponents();
 		}
 	}
 
@@ -2681,7 +2681,7 @@ void CMenus::RenderSettingsChillerbot(CUIRect MainView)
 		if(DoButton_CheckBox(&g_Config.m_ClChillerbotHud, "show component hud", g_Config.m_ClChillerbotHud, &Checkbox))
 		{
 			g_Config.m_ClChillerbotHud ^= 1;
-			m_pClient->m_pChillerBotUX->UpdateComponents();
+			m_pClient->m_ChillerBotUX.UpdateComponents();
 		}
 	}
 	// war list
@@ -2691,8 +2691,8 @@ void CMenus::RenderSettingsChillerbot(CUIRect MainView)
 		if(DoButton_CheckBox(&g_Config.m_ClWarList, "war list", g_Config.m_ClWarList, &Checkbox))
 		{
 			g_Config.m_ClWarList ^= 1;
-			m_pClient->m_pChillerBotUX->UpdateComponents();
-			m_pClient->m_pWarList->ReloadList();
+			m_pClient->m_ChillerBotUX.UpdateComponents();
+			m_pClient->m_WarList.ReloadList();
 		}
 	}
 	// notify tile change
