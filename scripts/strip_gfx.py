@@ -14,6 +14,7 @@ GFX_FILES = [
 def comment_gfx_file(filename, inplace):
 	new_file_buffer = ''
 	current_function = None
+	reached_body = False
 	with open(filename) as file:
 		for line in file:
 			# pre parser
@@ -26,21 +27,29 @@ def comment_gfx_file(filename, inplace):
 					new_file_buffer += "\treturn 0;\n"
 				current_function = None
 
-			if current_function and not line.startswith("{"):
+			if current_function and reached_body:
 				new_file_buffer += "//"
 				if line != "\n":
 					new_file_buffer += " "
 			new_file_buffer += line
 
 			# post parser
+			if current_function and not reached_body:
+				if line.startswith('{'):
+					reached_body = True
+			# TODO: refactor this using a list plus loop
 			if line.startswith('void CGraphics_Threaded::'):
 				current_function = 'void'
+				reached_body = False
 			elif line.startswith('bool CGraphics_Threaded::'):
 				current_function = 'bool'
+				reached_body = False
 			elif line.startswith('const char *CGraphics_Threaded::'):
 				current_function = 'const char *'
+				reached_body = False
 			elif line.startswith('int CGraphics_Threaded::'):
 				current_function = 'int'
+				reached_body = False
 	if inplace:
 		f = open(filename, 'w')
 		f.write(new_file_buffer)
