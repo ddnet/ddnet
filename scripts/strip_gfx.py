@@ -8,10 +8,16 @@ import argparse
 os.chdir(os.path.dirname(__file__) + "/..")
 
 GFX_FILES = [
-	['src/engine/client/graphics_threaded.cpp', 'CGraphics_Threaded']
+	['src/engine/client/graphics_threaded.cpp', ['CGraphics_Threaded']],
+	['src/engine/client/backend_sdl.cpp', [
+		'CGraphicsBackend_Threaded',
+		'CCommandProcessorFragment_General',
+		'CCommandProcessorFragment_SDL',
+		'CCommandProcessor_SDL_OpenGL',
+		'CGraphicsBackend_SDL_OpenGL']]
 ]
 
-def comment_gfx_file(filename, class_name, inplace):
+def comment_gfx_file(filename, class_names, inplace):
 	new_file_buffer = ''
 	current_function = None
 	reached_body = False
@@ -41,15 +47,16 @@ def comment_gfx_file(filename, class_name, inplace):
 			if current_function and not reached_body:
 				if line.startswith('{'):
 					reached_body = True
-			for func_type in ('void', 'bool', 'const char', 'int'):
-				if line.startswith(f"{func_type} {class_name}::"):
-					is_pointer = False
-					current_function = func_type
-					reached_body = False
-				elif line.startswith(f"{func_type} *{class_name}::"):
-					is_pointer = True
-					current_function = func_type
-					reached_body = False
+			for class_name in class_names:
+				for func_type in ('void', 'bool', 'const char', 'int'):
+					if line.startswith(f"{func_type} {class_name}::"):
+						is_pointer = False
+						current_function = func_type
+						reached_body = False
+					elif line.startswith(f"{func_type} *{class_name}::"):
+						is_pointer = True
+						current_function = func_type
+						reached_body = False
 	if inplace:
 		f = open(filename, 'w')
 		f.write(new_file_buffer)
