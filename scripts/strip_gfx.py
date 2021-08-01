@@ -8,23 +8,27 @@ import argparse
 os.chdir(os.path.dirname(__file__) + "/..")
 
 GFX_FILES = [
-	'src/engine/client/graphics_threaded.cpp'
+	['src/engine/client/graphics_threaded.cpp', 'CGraphics_Threaded']
 ]
 
-def comment_gfx_file(filename, inplace):
+def comment_gfx_file(filename, class_name, inplace):
 	new_file_buffer = ''
 	current_function = None
 	reached_body = False
+	is_pointer = False
 	with open(filename) as file:
 		for line in file:
 			# pre parser
 			if line.startswith('}') and current_function:
 				if current_function == 'bool':
 					new_file_buffer += "\treturn false;\n"
-				elif current_function == 'const char *':
+				elif current_function == 'const char':
 					new_file_buffer += "\treturn \"\";\n"
 				elif current_function == 'int':
-					new_file_buffer += "\treturn 0;\n"
+					if is_pointer:
+						new_file_buffer += "\tstatic int ret = 0;return &ret;\n"
+					else:
+						new_file_buffer += "\treturn 0;\n"
 				current_function = None
 
 			if current_function and reached_body:
@@ -37,19 +41,15 @@ def comment_gfx_file(filename, inplace):
 			if current_function and not reached_body:
 				if line.startswith('{'):
 					reached_body = True
-			# TODO: refactor this using a list plus loop
-			if line.startswith('void CGraphics_Threaded::'):
-				current_function = 'void'
-				reached_body = False
-			elif line.startswith('bool CGraphics_Threaded::'):
-				current_function = 'bool'
-				reached_body = False
-			elif line.startswith('const char *CGraphics_Threaded::'):
-				current_function = 'const char *'
-				reached_body = False
-			elif line.startswith('int CGraphics_Threaded::'):
-				current_function = 'int'
-				reached_body = False
+			for func_type in ('void', 'bool', 'const char', 'int'):
+				if line.startswith(f"{func_type} {class_name}::"):
+					is_pointer = False
+					current_function = func_type
+					reached_body = False
+				elif line.startswith(f"{func_type} *{class_name}::"):
+					is_pointer = True
+					current_function = func_type
+					reached_body = False
 	if inplace:
 		f = open(filename, 'w')
 		f.write(new_file_buffer)
@@ -63,7 +63,7 @@ def main():
 	p.add_argument('-i', '--inplace', action='store_true', help='Edit files in place instead of printing to stdout')
 	args = p.parse_args()
 	for file in GFX_FILES:
-		comment_gfx_file(file, inplace = args.inplace)
+		comment_gfx_file(file[0], file[1], inplace = args.inplace)
 
 
 if __name__ == '__main__':
