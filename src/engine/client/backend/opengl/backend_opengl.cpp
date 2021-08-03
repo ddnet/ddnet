@@ -190,7 +190,7 @@ void CCommandProcessorFragment_OpenGL::SetState(const CCommandBuffer::SState &St
 			}
 			else
 			{
-				dbg_msg("opengl", "Error: this call should not happen.");
+				dbg_msg("opengl", "ERROR: this call should not happen.");
 			}
 		}
 	}
