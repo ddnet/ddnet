@@ -102,12 +102,12 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 			if(pItem->m_Version < 2 || pItem->m_Synchronized)
 			{
 				// get the lerp of the current tick and prev
-				int MinTick = pThis->Client()->PrevGameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
-				int CurTick = pThis->Client()->GameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
+				int MinTick = pThis->Client()->PrevGameTick(pThis->Config()->m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
+				int CurTick = pThis->Client()->GameTick(pThis->Config()->m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
 				s_Time = (int64_t)(mix<double>(
 							   0,
 							   (CurTick - MinTick),
-							   pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
+							   pThis->Client()->IntraGameTick(pThis->Config()->m_ClDummy)) *
 						   TickToMicroSeconds) +
 					 MinTick * TickToMicroSeconds;
 			}
@@ -116,7 +116,7 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 				int MinTick = pThis->m_LastLocalTick;
 				s_Time = (int64_t)(mix<double>(0,
 							   pThis->m_CurrentLocalTick - MinTick,
-							   pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
+							   pThis->Client()->IntraGameTick(pThis->Config()->m_ClDummy)) *
 						   TickToMicroSeconds) +
 					 MinTick * TickToMicroSeconds;
 			}
@@ -130,12 +130,12 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 			if(pThis->m_pClient->m_Snap.m_pGameInfoObj) // && !(pThis->m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED))
 			{
 				// get the lerp of the current tick and prev
-				int MinTick = pThis->Client()->PrevGameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
-				int CurTick = pThis->Client()->GameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
+				int MinTick = pThis->Client()->PrevGameTick(pThis->Config()->m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
+				int CurTick = pThis->Client()->GameTick(pThis->Config()->m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
 				s_Time = (int64_t)(mix<double>(
 							   0,
 							   (CurTick - MinTick),
-							   pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
+							   pThis->Client()->IntraGameTick(pThis->Config()->m_ClDummy)) *
 						   TickToMicroSeconds) +
 					 MinTick * TickToMicroSeconds;
 			}
@@ -1380,7 +1380,7 @@ void CMapLayers::RenderQuadLayer(int LayerIndex, CMapItemLayerQuads *pQuadLayer,
 	if(Visuals.m_BufferContainerIndex == -1)
 		return; //no visuals were created
 
-	if(!Force && (!g_Config.m_ClShowQuads || g_Config.m_ClOverlayEntities == 100))
+	if(!Force && (!Config()->m_ClShowQuads || Config()->m_ClOverlayEntities == 100))
 		return;
 
 	CQuad *pQuads = (CQuad *)m_pLayers->Map()->GetDataSwapped(pQuadLayer->m_Data);
@@ -1563,7 +1563,7 @@ void CMapLayers::OnRender()
 			continue;
 		}
 
-		if((!g_Config.m_GfxNoclip || m_Type == TYPE_FULL_DESIGN) && pGroup->m_Version >= 2 && pGroup->m_UseClipping)
+		if((!Config()->m_GfxNoclip || m_Type == TYPE_FULL_DESIGN) && pGroup->m_Version >= 2 && pGroup->m_UseClipping)
 		{
 			// set clipping
 			float Points[4];
@@ -1585,7 +1585,7 @@ void CMapLayers::OnRender()
 				(int)((x1 - x0) * Graphics()->ScreenWidth()), (int)((y1 - y0) * Graphics()->ScreenHeight()));
 		}
 
-		if((!g_Config.m_ClZoomBackgroundLayers || m_Type == TYPE_FULL_DESIGN) && !pGroup->m_ParallaxX && !pGroup->m_ParallaxY)
+		if((!Config()->m_ClZoomBackgroundLayers || m_Type == TYPE_FULL_DESIGN) && !pGroup->m_ParallaxX && !pGroup->m_ParallaxY)
 		{
 			MapScreenToGroup(Center.x, Center.y, pGroup, 1.0f);
 		}
@@ -1635,7 +1635,7 @@ void CMapLayers::OnRender()
 
 				if(m_Type == TYPE_BACKGROUND_FORCE)
 				{
-					if(pLayer->m_Type == LAYERTYPE_TILES && !g_Config.m_ClBackgroundShowTilesLayers)
+					if(pLayer->m_Type == LAYERTYPE_TILES && !Config()->m_ClBackgroundShowTilesLayers)
 						continue;
 				}
 			}
@@ -1726,10 +1726,10 @@ void CMapLayers::OnRender()
 			}
 
 			// skip rendering if detail layers if not wanted, or is entity layer and we are a background map
-			if((pLayer->m_Flags & LAYERFLAG_DETAIL && (!g_Config.m_GfxHighDetail && !(m_Type == TYPE_FULL_DESIGN)) && !IsGameLayer) || (m_Type == TYPE_BACKGROUND_FORCE && IsEntityLayer) || (m_Type == TYPE_FULL_DESIGN && IsEntityLayer))
+			if((pLayer->m_Flags & LAYERFLAG_DETAIL && (!Config()->m_GfxHighDetail && !(m_Type == TYPE_FULL_DESIGN)) && !IsGameLayer) || (m_Type == TYPE_BACKGROUND_FORCE && IsEntityLayer) || (m_Type == TYPE_FULL_DESIGN && IsEntityLayer))
 				continue;
 
-			int EntityOverlayVal = g_Config.m_ClOverlayEntities;
+			int EntityOverlayVal = Config()->m_ClOverlayEntities;
 			if(m_Type == TYPE_FULL_DESIGN)
 				EntityOverlayVal = 0;
 
@@ -1810,7 +1810,7 @@ void CMapLayers::OnRender()
 					CQuad *pQuads = (CQuad *)m_pLayers->Map()->GetDataSwapped(pQLayer->m_Data);
 					if(m_Type == TYPE_BACKGROUND_FORCE || m_Type == TYPE_FULL_DESIGN)
 					{
-						if(g_Config.m_ClShowQuads || m_Type == TYPE_FULL_DESIGN)
+						if(Config()->m_ClShowQuads || m_Type == TYPE_FULL_DESIGN)
 						{
 							if(!Graphics()->IsQuadBufferingEnabled())
 							{
@@ -1891,7 +1891,7 @@ void CMapLayers::OnRender()
 					{
 						Graphics()->BlendNormal();
 						RenderTileLayer(TileLayerCounter - 3, &Color, pTMap, pGroup);
-						if(g_Config.m_ClTextEntities)
+						if(Config()->m_ClTextEntities)
 						{
 							Graphics()->TextureSet(m_pImages->GetOverlayBottom());
 							RenderTileLayer(TileLayerCounter - 2, &Color, pTMap, pGroup);
@@ -1924,7 +1924,7 @@ void CMapLayers::OnRender()
 					{
 						Graphics()->BlendNormal();
 						RenderTileLayer(TileLayerCounter - 2, &Color, pTMap, pGroup);
-						if(g_Config.m_ClTextEntities)
+						if(Config()->m_ClTextEntities)
 						{
 							Graphics()->TextureSet(m_pImages->GetOverlayCenter());
 							RenderTileLayer(TileLayerCounter - 1, &Color, pTMap, pGroup);
@@ -1960,7 +1960,7 @@ void CMapLayers::OnRender()
 						Graphics()->TextureSet(m_pImages->GetSpeedupArrow());
 						RenderTileLayer(TileLayerCounter - 3, &Color, pTMap, pGroup);
 						Graphics()->WrapNormal();
-						if(g_Config.m_ClTextEntities)
+						if(Config()->m_ClTextEntities)
 						{
 							Graphics()->TextureSet(m_pImages->GetOverlayBottom());
 							RenderTileLayer(TileLayerCounter - 2, &Color, pTMap, pGroup);
@@ -1997,11 +1997,11 @@ void CMapLayers::OnRender()
 				}
 			}
 		}
-		if(!g_Config.m_GfxNoclip || m_Type == TYPE_FULL_DESIGN)
+		if(!Config()->m_GfxNoclip || m_Type == TYPE_FULL_DESIGN)
 			Graphics()->ClipDisable();
 	}
 
-	if(!g_Config.m_GfxNoclip || m_Type == TYPE_FULL_DESIGN)
+	if(!Config()->m_GfxNoclip || m_Type == TYPE_FULL_DESIGN)
 		Graphics()->ClipDisable();
 
 	// reset the screen like it was before

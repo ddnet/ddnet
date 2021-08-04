@@ -49,7 +49,7 @@ void CMenus::RenderGame(CUIRect MainView)
 	static int s_DisconnectButton = 0;
 	if(DoButton_Menu(&s_DisconnectButton, Localize("Disconnect"), 0, &Button))
 	{
-		if(Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
+		if(Client()->GetCurrentRaceTime() / 60 >= Config()->m_ClConfirmDisconnectTime && Config()->m_ClConfirmDisconnectTime >= 0)
 		{
 			m_Popup = POPUP_DISCONNECT;
 		}
@@ -76,7 +76,7 @@ void CMenus::RenderGame(CUIRect MainView)
 		}
 		else
 		{
-			if(Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
+			if(Client()->GetCurrentRaceTime() / 60 >= Config()->m_ClConfirmDisconnectTime && Config()->m_ClConfirmDisconnectTime >= 0)
 			{
 				m_Popup = POPUP_DISCONNECT_DUMMY;
 			}
@@ -121,7 +121,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
 			if(!DummyConnecting && DoButton_Menu(&s_SpectateButton, Localize("Spectate"), 0, &Button))
 			{
-				if(g_Config.m_ClDummy == 0 || Client()->DummyConnected())
+				if(Config()->m_ClDummy == 0 || Client()->DummyConnected())
 				{
 					m_pClient->SendSwitchTeam(TEAM_SPECTATORS);
 					SetActive(false);
@@ -327,7 +327,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		Item.m_Rect.VSplitLeft(Width, &Button, &Item.m_Rect);
 		Button.VSplitLeft((Width - Button.h) / 4.0f, 0, &Button);
 		Button.VSplitLeft(Button.h, &Button, 0);
-		if(g_Config.m_ClShowChatFriends && !m_pClient->m_aClients[Index].m_Friend)
+		if(Config()->m_ClShowChatFriends && !m_pClient->m_aClients[Index].m_Friend)
 			DoButton_Toggle(&s_aPlayerIDs[Index][0], 1, &Button, false);
 		else if(DoButton_Toggle(&s_aPlayerIDs[Index][0], m_pClient->m_aClients[Index].m_ChatIgnore, &Button, true))
 			m_pClient->m_aClients[Index].m_ChatIgnore ^= 1;
@@ -337,7 +337,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		Item.m_Rect.VSplitLeft(Width, &Button, &Item.m_Rect);
 		Button.VSplitLeft((Width - Button.h) / 4.0f, 0, &Button);
 		Button.VSplitLeft(Button.h, &Button, 0);
-		if(g_Config.m_ClShowChatFriends && !m_pClient->m_aClients[Index].m_Friend)
+		if(Config()->m_ClShowChatFriends && !m_pClient->m_aClients[Index].m_Friend)
 			DoButton_Toggle(&s_aPlayerIDs[Index][1], 1, &Button, false);
 		else if(DoButton_Toggle(&s_aPlayerIDs[Index][1], m_pClient->m_aClients[Index].m_EmoticonIgnore, &Button, true))
 			m_pClient->m_aClients[Index].m_EmoticonIgnore ^= 1;
@@ -700,7 +700,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			if(s_ControlPage == 0)
 			{
 				m_pClient->m_Voting.CallvoteOption(m_CallvoteSelectedOption, m_aCallvoteReason);
-				if(g_Config.m_UiCloseWindowAfterChangingSetting)
+				if(Config()->m_UiCloseWindowAfterChangingSetting)
 					SetActive(false);
 			}
 			else if(s_ControlPage == 1)
@@ -822,7 +822,7 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 	CUIRect Box = MainView;
 	CUIRect Button;
 
-	int Page = g_Config.m_UiPage;
+	int Page = Config()->m_UiPage;
 	int NewPage = -1;
 
 	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);

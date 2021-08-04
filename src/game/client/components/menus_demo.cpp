@@ -166,7 +166,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	}
 
 	// handle keyboard shortcuts independent of active menu
-	if(m_pClient->m_GameConsole.IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE && g_Config.m_ClDemoKeyboardShortcuts)
+	if(m_pClient->m_GameConsole.IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE && Config()->m_ClDemoKeyboardShortcuts)
 	{
 		// increase/decrease speed
 		if(!Input()->KeyIsPressed(KEY_LSHIFT) && !Input()->KeyIsPressed(KEY_RSHIFT))
@@ -239,7 +239,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	TotalHeight = SeekBarHeight + ButtonbarHeight + NameBarHeight + Margins * 3;
 
 	// render speed info
-	if(g_Config.m_ClDemoShowSpeed && time_get() - LastSpeedChange < time_freq() * 1)
+	if(Config()->m_ClDemoShowSpeed && time_get() - LastSpeedChange < time_freq() * 1)
 	{
 		CUIRect Screen = *UI()->Screen();
 
@@ -298,9 +298,9 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 		// draw slice markers
 		// begin
-		if(g_Config.m_ClDemoSliceBegin != -1)
+		if(Config()->m_ClDemoSliceBegin != -1)
 		{
-			float Ratio = (g_Config.m_ClDemoSliceBegin - pInfo->m_FirstTick) / (float)TotalTicks;
+			float Ratio = (Config()->m_ClDemoSliceBegin - pInfo->m_FirstTick) / (float)TotalTicks;
 			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
@@ -310,9 +310,9 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		}
 
 		// end
-		if(g_Config.m_ClDemoSliceEnd != -1)
+		if(Config()->m_ClDemoSliceEnd != -1)
 		{
-			float Ratio = (g_Config.m_ClDemoSliceEnd - pInfo->m_FirstTick) / (float)TotalTicks;
+			float Ratio = (Config()->m_ClDemoSliceEnd - pInfo->m_FirstTick) / (float)TotalTicks;
 			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
@@ -474,10 +474,10 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitRight(Margins * 3, &ButtonBar, 0);
 	ButtonBar.VSplitRight(ButtonbarHeight, &ButtonBar, &Button);
 	static int s_KeyboardShortcutsButton = 0;
-	int Sprite = g_Config.m_ClDemoKeyboardShortcuts ? SPRITE_DEMOBUTTON_SHORTCUTS_ENABLED : SPRITE_DEMOBUTTON_SHORTCUTS_DISABLED;
+	int Sprite = Config()->m_ClDemoKeyboardShortcuts ? SPRITE_DEMOBUTTON_SHORTCUTS_ENABLED : SPRITE_DEMOBUTTON_SHORTCUTS_DISABLED;
 	if(DoButton_Sprite(&s_KeyboardShortcutsButton, IMAGE_DEMOBUTTONS2, Sprite, 0, &Button, CUI::CORNER_ALL))
 	{
-		g_Config.m_ClDemoKeyboardShortcuts ^= 1;
+		Config()->m_ClDemoKeyboardShortcuts ^= 1;
 	}
 
 	// demo name
@@ -777,7 +777,7 @@ void CMenus::DemolistPopulate()
 		m_DemolistStorageType = IStorage::TYPE_ALL;
 	Storage()->ListDirectoryInfo(m_DemolistStorageType, m_aCurrentDemoFolder, DemolistFetchCallback, this);
 
-	if(g_Config.m_BrDemoFetchInfo)
+	if(Config()->m_BrDemoFetchInfo)
 		FetchAllHeaders();
 
 	m_lDemos.sort_range();
@@ -786,7 +786,7 @@ void CMenus::DemolistPopulate()
 void CMenus::DemolistOnUpdate(bool Reset)
 {
 	if(Reset)
-		g_Config.m_UiDemoSelected[0] = '\0';
+		Config()->m_UiDemoSelected[0] = '\0';
 	else
 	{
 		bool Found = false;
@@ -796,7 +796,7 @@ void CMenus::DemolistOnUpdate(bool Reset)
 		{
 			SelectedIndex++;
 
-			if(str_comp(g_Config.m_UiDemoSelected, r.front().m_aName) == 0)
+			if(str_comp(Config()->m_UiDemoSelected, r.front().m_aName) == 0)
 			{
 				Found = true;
 				break;
@@ -1051,15 +1051,15 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	// do headers
 	for(int i = 0; i < NumCols; i++)
 	{
-		if(DoButton_GridHeader(s_aCols[i].m_Caption, Localize(s_aCols[i].m_Caption), g_Config.m_BrDemoSort == s_aCols[i].m_Sort, &s_aCols[i].m_Rect))
+		if(DoButton_GridHeader(s_aCols[i].m_Caption, Localize(s_aCols[i].m_Caption), Config()->m_BrDemoSort == s_aCols[i].m_Sort, &s_aCols[i].m_Rect))
 		{
 			if(s_aCols[i].m_Sort != -1)
 			{
-				if(g_Config.m_BrDemoSort == s_aCols[i].m_Sort)
-					g_Config.m_BrDemoSortOrder ^= 1;
+				if(Config()->m_BrDemoSort == s_aCols[i].m_Sort)
+					Config()->m_BrDemoSortOrder ^= 1;
 				else
-					g_Config.m_BrDemoSortOrder = 0;
-				g_Config.m_BrDemoSort = s_aCols[i].m_Sort;
+					Config()->m_BrDemoSortOrder = 0;
+				Config()->m_BrDemoSort = s_aCols[i].m_Sort;
 			}
 
 			// Don't rescan in order to keep fetched headers, just resort
@@ -1082,7 +1082,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	HandleListInputs(ListBox, s_ScrollValue, 3.0f, &m_ScrollOffset, s_aCols[0].m_Rect.h, m_DemolistSelectedIndex, m_lDemos.size());
 	if(PreviousIndex != m_DemolistSelectedIndex)
 	{
-		str_copy(g_Config.m_UiDemoSelected, m_lDemos[m_DemolistSelectedIndex].m_aName, sizeof(g_Config.m_UiDemoSelected));
+		str_copy(Config()->m_UiDemoSelected, m_lDemos[m_DemolistSelectedIndex].m_aName, sizeof(Config()->m_UiDemoSelected));
 		DemolistOnUpdate(false);
 	}
 
@@ -1137,7 +1137,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			if(UI()->DoButtonLogic(r.front().m_aName /* TODO: */, "", Selected, &SelectHitBox))
 			{
 				NewSelected = ItemIndex;
-				str_copy(g_Config.m_UiDemoSelected, r.front().m_aName, sizeof(g_Config.m_UiDemoSelected));
+				str_copy(Config()->m_UiDemoSelected, r.front().m_aName, sizeof(Config()->m_UiDemoSelected));
 				DemolistOnUpdate(false);
 				m_DoubleClickIndex = NewSelected;
 			}
@@ -1212,10 +1212,10 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		DemolistOnUpdate(false);
 	}
 
-	if(DoButton_CheckBox(&g_Config.m_BrDemoFetchInfo, Localize("Fetch Info"), g_Config.m_BrDemoFetchInfo, &FetchRect))
+	if(DoButton_CheckBox(&Config()->m_BrDemoFetchInfo, Localize("Fetch Info"), Config()->m_BrDemoFetchInfo, &FetchRect))
 	{
-		g_Config.m_BrDemoFetchInfo ^= 1;
-		if(g_Config.m_BrDemoFetchInfo)
+		Config()->m_BrDemoFetchInfo ^= 1;
+		if(Config()->m_BrDemoFetchInfo)
 			FetchAllHeaders();
 	}
 

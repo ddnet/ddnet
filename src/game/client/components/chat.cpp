@@ -137,7 +137,7 @@ void CChat::ConChat(IConsole::IResult *pResult, void *pUserData)
 	else
 		((CChat *)pUserData)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "expected all or team as mode");
 
-	if(pResult->GetString(1)[0] || g_Config.m_ClChatReset)
+	if(pResult->GetString(1)[0] || ((CChat *)pUserData)->Config()->m_ClChatReset)
 		((CChat *)pUserData)->m_Input.Set(pResult->GetString(1));
 }
 
@@ -274,7 +274,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 	{
 		DisableMode();
 		m_pClient->OnRelease();
-		if(g_Config.m_ClChatReset)
+		if(Config()->m_ClChatReset)
 			m_Input.Clear();
 	}
 	else if(Event.m_Flags & IInput::FLAG_PRESS && (Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER))
@@ -627,10 +627,10 @@ void CChat::StoreSave(const char *pText)
 void CChat::AddLine(int ClientID, int Team, const char *pLine)
 {
 	if(*pLine == 0 ||
-		(ClientID == -1 && !g_Config.m_ClShowChatSystem) ||
+		(ClientID == -1 && !Config()->m_ClShowChatSystem) ||
 		(ClientID >= 0 && (m_pClient->m_aClients[ClientID].m_aName[0] == '\0' || // unknown client
 					  m_pClient->m_aClients[ClientID].m_ChatIgnore ||
-					  (m_pClient->m_Snap.m_LocalClientID != ClientID && g_Config.m_ClShowChatFriends && !m_pClient->m_aClients[ClientID].m_Friend) ||
+					  (m_pClient->m_Snap.m_LocalClientID != ClientID && Config()->m_ClShowChatFriends && !m_pClient->m_aClients[ClientID].m_Friend) ||
 					  (m_pClient->m_Snap.m_LocalClientID != ClientID && m_pClient->m_aClients[ClientID].m_Foe))))
 		return;
 
@@ -683,20 +683,20 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		ColorRGBA ChatLogColor{1, 1, 1, 1};
 		if(pLine->m_Highlighted)
 		{
-			ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor));
+			ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(Config()->m_ClMessageHighlightColor));
 		}
 		else
 		{
-			if(pLine->m_Friend && g_Config.m_ClMessageFriend)
-				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendColor));
+			if(pLine->m_Friend && Config()->m_ClMessageFriend)
+				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(Config()->m_ClMessageFriendColor));
 			else if(pLine->m_Team)
-				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageTeamColor));
+				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(Config()->m_ClMessageTeamColor));
 			else if(pLine->m_ClientID == -1) // system
-				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageSystemColor));
+				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(Config()->m_ClMessageSystemColor));
 			else if(pLine->m_ClientID == -2) // client
-				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageClientColor));
+				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(Config()->m_ClMessageClientColor));
 			else // regular message
-				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageColor));
+				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(Config()->m_ClMessageColor));
 		}
 
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, pLine->m_Whisper ? "whisper" : (pLine->m_Team ? "teamchat" : "chat"), aBuf, ChatLogColor);
@@ -825,7 +825,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 
 		if(pCurrentLine->m_ClientID >= 0 && pCurrentLine->m_aName[0] != '\0')
 		{
-			if(!g_Config.m_ClChatOld)
+			if(!Config()->m_ClChatOld)
 			{
 				pCurrentLine->m_CustomColoredSkin = m_pClient->m_aClients[pCurrentLine->m_ClientID].m_RenderInfo.m_CustomColoredSkin;
 				if(pCurrentLine->m_CustomColoredSkin)
@@ -851,7 +851,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 	{
 		if(Now - m_aLastSoundPlayed[CHAT_SERVER] >= time_freq() * 3 / 10)
 		{
-			if(g_Config.m_SndServerMessage)
+			if(Config()->m_SndServerMessage)
 			{
 				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_SERVER, 0);
 				m_aLastSoundPlayed[CHAT_SERVER] = Now;
@@ -869,13 +869,13 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 			char aBuf[1024];
 			str_format(aBuf, sizeof(aBuf), "%s: %s", m_aLines[m_CurrentLine].m_aName, m_aLines[m_CurrentLine].m_aText);
 			Client()->Notify("DDNet Chat", aBuf);
-			if(g_Config.m_SndHighlight)
+			if(Config()->m_SndHighlight)
 			{
 				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_HIGHLIGHT, 0);
 				m_aLastSoundPlayed[CHAT_HIGHLIGHT] = Now;
 			}
 
-			if(g_Config.m_ClEditor)
+			if(Config()->m_ClEditor)
 			{
 				GameClient()->Editor()->UpdateMentions();
 			}
@@ -885,7 +885,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 	{
 		if(Now - m_aLastSoundPlayed[CHAT_CLIENT] >= time_freq() * 3 / 10)
 		{
-			if((g_Config.m_SndTeamChat || !m_aLines[m_CurrentLine].m_Team) && (g_Config.m_SndChat || m_aLines[m_CurrentLine].m_Team))
+			if((Config()->m_SndTeamChat || !m_aLines[m_CurrentLine].m_Team) && (Config()->m_SndChat || m_aLines[m_CurrentLine].m_Team))
 			{
 				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_CLIENT, 0);
 				m_aLastSoundPlayed[CHAT_CLIENT] = Now;
@@ -922,7 +922,7 @@ void CChat::OnPrepareLines()
 	bool IsScoreBoardOpen = m_pClient->m_Scoreboard.Active() && (ScreenRatio > 1.7f); // only assume scoreboard when screen ratio is widescreen(something around 16:9)
 
 	bool ForceRecreate = IsScoreBoardOpen != m_PrevScoreBoardShowed;
-	bool ShowLargeArea = m_Show || g_Config.m_ClShowChat == 2;
+	bool ShowLargeArea = m_Show || Config()->m_ClShowChat == 2;
 
 	ForceRecreate |= ShowLargeArea != m_PrevShowChat;
 
@@ -933,7 +933,7 @@ void CChat::OnPrepareLines()
 	float RealMsgPaddingY = MESSAGE_PADDING_Y;
 	float RealMsgPaddingTee = MESSAGE_TEE_SIZE + MESSAGE_TEE_PADDING_RIGHT;
 
-	if(g_Config.m_ClChatOld)
+	if(Config()->m_ClChatOld)
 	{
 		RealMsgPaddingX = 0;
 		RealMsgPaddingY = 0;
@@ -971,7 +971,7 @@ void CChat::OnPrepareLines()
 
 		char aName[64 + 12] = "";
 
-		if(g_Config.m_ClShowIDs && m_aLines[r].m_ClientID >= 0 && m_aLines[r].m_aName[0] != '\0')
+		if(Config()->m_ClShowIDs && m_aLines[r].m_ClientID >= 0 && m_aLines[r].m_aName[0] != '\0')
 		{
 			if(m_aLines[r].m_ClientID < 10)
 				str_format(aName, sizeof(aName), " %d: ", m_aLines[r].m_ClientID);
@@ -987,7 +987,7 @@ void CChat::OnPrepareLines()
 		else
 			str_format(aCount, sizeof(aCount), " [%d]", m_aLines[r].m_TimesRepeated + 1);
 
-		if(g_Config.m_ClChatOld)
+		if(Config()->m_ClChatOld)
 		{
 			m_aLines[r].m_HasRenderTee = false;
 		}
@@ -1002,7 +1002,7 @@ void CChat::OnPrepareLines()
 			{
 				Cursor.m_X += RealMsgPaddingTee;
 
-				if(m_aLines[r].m_Friend && g_Config.m_ClMessageFriend)
+				if(m_aLines[r].m_Friend && Config()->m_ClMessageFriend)
 				{
 					TextRender()->TextEx(&Cursor, "♥ ", -1);
 				}
@@ -1051,10 +1051,10 @@ void CChat::OnPrepareLines()
 		{
 			Cursor.m_X += RealMsgPaddingTee;
 
-			if(m_aLines[r].m_Friend && g_Config.m_ClMessageFriend)
+			if(m_aLines[r].m_Friend && Config()->m_ClMessageFriend)
 			{
 				const char *pHeartStr = "♥ ";
-				ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendColor));
+				ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(Config()->m_ClMessageFriendColor));
 				TextRender()->TextColor(rgb.WithAlpha(1.f));
 				if(m_aLines[r].m_TextContainerIndex == -1)
 					m_aLines[r].m_TextContainerIndex = TextRender()->CreateTextContainer(&Cursor, pHeartStr);
@@ -1067,15 +1067,15 @@ void CChat::OnPrepareLines()
 		ColorRGBA NameColor;
 		if(m_aLines[r].m_ClientID == -1) // system
 		{
-			NameColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageSystemColor));
+			NameColor = color_cast<ColorRGBA>(ColorHSLA(Config()->m_ClMessageSystemColor));
 		}
 		else if(m_aLines[r].m_ClientID == -2) // client
 		{
-			NameColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageClientColor));
+			NameColor = color_cast<ColorRGBA>(ColorHSLA(Config()->m_ClMessageClientColor));
 		}
 		else if(m_aLines[r].m_Team)
 		{
-			NameColor = CalculateNameColor(ColorHSLA(g_Config.m_ClMessageTeamColor));
+			NameColor = CalculateNameColor(ColorHSLA(Config()->m_ClMessageTeamColor));
 		}
 		else if(m_aLines[r].m_NameColor == TEAM_RED)
 			NameColor = ColorRGBA(1.0f, 0.5f, 0.5f, 1.f); // red
@@ -1083,7 +1083,7 @@ void CChat::OnPrepareLines()
 			NameColor = ColorRGBA(0.7f, 0.7f, 1.0f, 1.f); // blue
 		else if(m_aLines[r].m_NameColor == TEAM_SPECTATORS)
 			NameColor = ColorRGBA(0.75f, 0.5f, 0.75f, 1.f); // spectator
-		else if(m_aLines[r].m_ClientID >= 0 && g_Config.m_ClChatTeamColors && m_pClient->m_Teams.Team(m_aLines[r].m_ClientID))
+		else if(m_aLines[r].m_ClientID >= 0 && Config()->m_ClChatTeamColors && m_pClient->m_Teams.Team(m_aLines[r].m_ClientID))
 		{
 			NameColor = color_cast<ColorRGBA>(ColorHSLA(m_pClient->m_Teams.Team(m_aLines[r].m_ClientID) / 64.0f, 1.0f, 0.75f));
 		}
@@ -1118,15 +1118,15 @@ void CChat::OnPrepareLines()
 		// render line
 		ColorRGBA Color;
 		if(m_aLines[r].m_ClientID == -1) // system
-			Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageSystemColor));
+			Color = color_cast<ColorRGBA>(ColorHSLA(Config()->m_ClMessageSystemColor));
 		else if(m_aLines[r].m_ClientID == -2) // client
-			Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageClientColor));
+			Color = color_cast<ColorRGBA>(ColorHSLA(Config()->m_ClMessageClientColor));
 		else if(m_aLines[r].m_Highlighted) // highlighted
-			Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor));
+			Color = color_cast<ColorRGBA>(ColorHSLA(Config()->m_ClMessageHighlightColor));
 		else if(m_aLines[r].m_Team) // team message
-			Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageTeamColor));
+			Color = color_cast<ColorRGBA>(ColorHSLA(Config()->m_ClMessageTeamColor));
 		else // regular message
-			Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageColor));
+			Color = color_cast<ColorRGBA>(ColorHSLA(Config()->m_ClMessageColor));
 
 		TextRender()->TextColor(Color);
 
@@ -1142,7 +1142,7 @@ void CChat::OnPrepareLines()
 		else
 			TextRender()->AppendTextContainer(&AppendCursor, m_aLines[r].m_TextContainerIndex, m_aLines[r].m_aText);
 
-		if(!g_Config.m_ClChatOld && (m_aLines[r].m_aText[0] != '\0' || m_aLines[r].m_aName[0] != '\0'))
+		if(!Config()->m_ClChatOld && (m_aLines[r].m_aText[0] != '\0' || m_aLines[r].m_aName[0] != '\0'))
 		{
 			float Height = m_aLines[r].m_YOffset[OffsetType];
 			Graphics()->SetColor(1, 1, 1, 1);
@@ -1244,9 +1244,9 @@ void CChat::OnRender()
 	}
 
 #if defined(CONF_VIDEORECORDER)
-	if(!((g_Config.m_ClShowChat && !IVideo::Current()) || (g_Config.m_ClVideoShowChat && IVideo::Current())))
+	if(!((Config()->m_ClShowChat && !IVideo::Current()) || (Config()->m_ClVideoShowChat && IVideo::Current())))
 #else
-	if(!g_Config.m_ClShowChat)
+	if(!Config()->m_ClShowChat)
 #endif
 		return;
 
@@ -1264,7 +1264,7 @@ void CChat::OnRender()
 	float RealMsgPaddingX = MESSAGE_PADDING_X;
 	float RealMsgPaddingY = MESSAGE_PADDING_Y;
 
-	if(g_Config.m_ClChatOld)
+	if(Config()->m_ClChatOld)
 	{
 		RealMsgPaddingX = 0;
 		RealMsgPaddingY = 0;
@@ -1285,7 +1285,7 @@ void CChat::OnRender()
 		float Blend = Now > m_aLines[r].m_Time + 14 * time_freq() && !m_PrevShowChat ? 1.0f - (Now - m_aLines[r].m_Time - 14 * time_freq()) / (2.0f * time_freq()) : 1.0f;
 
 		// Draw backgrounds for messages in one batch
-		if(!g_Config.m_ClChatOld)
+		if(!Config()->m_ClChatOld)
 		{
 			Graphics()->TextureClear();
 			if(m_aLines[r].m_QuadContainerIndex != -1)
@@ -1297,7 +1297,7 @@ void CChat::OnRender()
 
 		if(m_aLines[r].m_TextContainerIndex != -1)
 		{
-			if(!g_Config.m_ClChatOld && m_aLines[r].m_HasRenderTee)
+			if(!Config()->m_ClChatOld && m_aLines[r].m_HasRenderTee)
 			{
 				CTeeRenderInfo RenderInfo;
 				RenderInfo.m_CustomColoredSkin = m_aLines[r].m_CustomColoredSkin;

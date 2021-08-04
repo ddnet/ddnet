@@ -35,7 +35,7 @@ void CSoundLoading::Run()
 
 int CSounds::GetSampleId(int SetId)
 {
-	if(!g_Config.m_SndEnable || !Sound()->IsSoundEnabled() || m_WaitForSoundJob || SetId < 0 || SetId >= g_pData->m_NumSounds)
+	if(!Config()->m_SndEnable || !Sound()->IsSoundEnabled() || m_WaitForSoundJob || SetId < 0 || SetId >= g_pData->m_NumSounds)
 		return -1;
 
 	CDataSoundset *pSet = &g_pData->m_aSounds[SetId];
@@ -58,10 +58,10 @@ int CSounds::GetSampleId(int SetId)
 void CSounds::OnInit()
 {
 	// setup sound channels
-	m_GuiSoundVolume = g_Config.m_SndChatSoundVolume / 100.0f;
-	m_GameSoundVolume = g_Config.m_SndGameSoundVolume / 100.0f;
-	m_MapSoundVolume = g_Config.m_SndMapSoundVolume / 100.0f;
-	m_BackgroundMusicVolume = g_Config.m_SndBackgroundMusicVolume / 100.0f;
+	m_GuiSoundVolume = Config()->m_SndChatSoundVolume / 100.0f;
+	m_GameSoundVolume = Config()->m_SndGameSoundVolume / 100.0f;
+	m_MapSoundVolume = Config()->m_SndMapSoundVolume / 100.0f;
+	m_BackgroundMusicVolume = Config()->m_SndBackgroundMusicVolume / 100.0f;
 
 	Sound()->SetChannel(CSounds::CHN_GUI, m_GuiSoundVolume, 0.0f);
 	Sound()->SetChannel(CSounds::CHN_MUSIC, m_BackgroundMusicVolume, 1.0f);
@@ -74,7 +74,7 @@ void CSounds::OnInit()
 	ClearQueue();
 
 	// load sounds
-	if(g_Config.m_ClThreadsoundloading)
+	if(Config()->m_ClThreadsoundloading)
 	{
 		m_pSoundJob = std::make_shared<CSoundLoading>(m_pClient, false);
 		m_pClient->Engine()->AddJob(m_pSoundJob);
@@ -117,14 +117,14 @@ void CSounds::OnRender()
 	Sound()->SetListenerPos(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y);
 
 	// update volume
-	float NewGuiSoundVol = g_Config.m_SndChatSoundVolume / 100.0f;
+	float NewGuiSoundVol = Config()->m_SndChatSoundVolume / 100.0f;
 	if(NewGuiSoundVol != m_GuiSoundVolume)
 	{
 		m_GuiSoundVolume = NewGuiSoundVol;
 		Sound()->SetChannel(CSounds::CHN_GUI, m_GuiSoundVolume, 1.0f);
 	}
 
-	float NewGameSoundVol = g_Config.m_SndGameSoundVolume / 100.0f;
+	float NewGameSoundVol = Config()->m_SndGameSoundVolume / 100.0f;
 	if(NewGameSoundVol != m_GameSoundVolume)
 	{
 		m_GameSoundVolume = NewGameSoundVol;
@@ -132,14 +132,14 @@ void CSounds::OnRender()
 		Sound()->SetChannel(CSounds::CHN_GLOBAL, m_GameSoundVolume, 1.0f);
 	}
 
-	float NewMapSoundVol = g_Config.m_SndMapSoundVolume / 100.0f;
+	float NewMapSoundVol = Config()->m_SndMapSoundVolume / 100.0f;
 	if(NewMapSoundVol != m_MapSoundVolume)
 	{
 		m_MapSoundVolume = NewMapSoundVol;
 		Sound()->SetChannel(CSounds::CHN_MAPSOUND, m_MapSoundVolume, 1.0f);
 	}
 
-	float NewBackgroundMusicVol = g_Config.m_SndBackgroundMusicVolume / 100.0f;
+	float NewBackgroundMusicVol = Config()->m_SndBackgroundMusicVolume / 100.0f;
 	if(NewBackgroundMusicVol != m_BackgroundMusicVolume)
 	{
 		m_BackgroundMusicVolume = NewBackgroundMusicVol;
@@ -172,7 +172,7 @@ void CSounds::Enqueue(int Channel, int SetId)
 	// add sound to the queue
 	if(m_QueuePos < QUEUE_SIZE)
 	{
-		if(Channel == CHN_MUSIC || !g_Config.m_ClEditor)
+		if(Channel == CHN_MUSIC || !Config()->m_ClEditor)
 		{
 			m_aQueue[m_QueuePos].m_Channel = Channel;
 			m_aQueue[m_QueuePos++].m_SetId = SetId;
@@ -191,7 +191,7 @@ void CSounds::PlayAndRecord(int Chn, int SetId, float Vol, vec2 Pos)
 
 void CSounds::Play(int Chn, int SetId, float Vol)
 {
-	if(Chn == CHN_MUSIC && !g_Config.m_SndMusic)
+	if(Chn == CHN_MUSIC && !Config()->m_SndMusic)
 		return;
 
 	int SampleId = GetSampleId(SetId);
@@ -207,7 +207,7 @@ void CSounds::Play(int Chn, int SetId, float Vol)
 
 void CSounds::PlayAt(int Chn, int SetId, float Vol, vec2 Pos)
 {
-	if(Chn == CHN_MUSIC && !g_Config.m_SndMusic)
+	if(Chn == CHN_MUSIC && !Config()->m_SndMusic)
 		return;
 
 	int SampleId = GetSampleId(SetId);
@@ -234,7 +234,7 @@ void CSounds::Stop(int SetId)
 
 ISound::CVoiceHandle CSounds::PlaySample(int Chn, int SampleId, float Vol, int Flags)
 {
-	if((Chn == CHN_MUSIC && !g_Config.m_SndMusic) || SampleId == -1)
+	if((Chn == CHN_MUSIC && !Config()->m_SndMusic) || SampleId == -1)
 		return ISound::CVoiceHandle();
 
 	if(Chn == CHN_MUSIC)
@@ -245,7 +245,7 @@ ISound::CVoiceHandle CSounds::PlaySample(int Chn, int SampleId, float Vol, int F
 
 ISound::CVoiceHandle CSounds::PlaySampleAt(int Chn, int SampleId, float Vol, vec2 Pos, int Flags)
 {
-	if((Chn == CHN_MUSIC && !g_Config.m_SndMusic) || SampleId == -1)
+	if((Chn == CHN_MUSIC && !Config()->m_SndMusic) || SampleId == -1)
 		return ISound::CVoiceHandle();
 
 	if(Chn == CHN_MUSIC)

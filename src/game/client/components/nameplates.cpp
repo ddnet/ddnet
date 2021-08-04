@@ -32,7 +32,7 @@ void CNamePlates::RenderNameplate(
 	if(ClientID >= 0 && ClientID < MAX_CLIENTS)
 		Position = m_pClient->m_aClients[ClientID].m_RenderPos;
 	else
-		Position = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pPlayerChar->m_X, pPlayerChar->m_Y), Client()->IntraGameTick(g_Config.m_ClDummy));
+		Position = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pPlayerChar->m_X, pPlayerChar->m_Y), Client()->IntraGameTick(Config()->m_ClDummy));
 
 	RenderNameplatePos(Position, pPlayerInfo, 1.0f);
 }
@@ -43,19 +43,19 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 
 	bool OtherTeam = m_pClient->IsOtherTeam(ClientID);
 
-	float FontSize = 18.0f + 20.0f * g_Config.m_ClNameplatesSize / 100.0f;
-	float FontSizeClan = 18.0f + 20.0f * g_Config.m_ClNameplatesClanSize / 100.0f;
+	float FontSize = 18.0f + 20.0f * Config()->m_ClNameplatesSize / 100.0f;
+	float FontSizeClan = 18.0f + 20.0f * Config()->m_ClNameplatesClanSize / 100.0f;
 
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
 	float YOffset = Position.y - 38;
 	ColorRGBA rgb = ColorRGBA(1.0f, 1.0f, 1.0f);
 
 	// render name plate
-	if(!pPlayerInfo->m_Local || g_Config.m_ClNameplatesOwn)
+	if(!pPlayerInfo->m_Local || Config()->m_ClNameplatesOwn)
 	{
 		float a = 1;
-		if(g_Config.m_ClNameplatesAlways == 0)
-			a = clamp(1 - powf(distance(m_pClient->m_Controls.m_TargetPos[g_Config.m_ClDummy], Position) / 200.0f, 16.0f), 0.0f, 1.0f);
+		if(Config()->m_ClNameplatesAlways == 0)
+			a = clamp(1 - powf(distance(m_pClient->m_Controls.m_TargetPos[Config()->m_ClDummy], Position) / 200.0f, 16.0f), 0.0f, 1.0f);
 
 		const char *pName = m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aName;
 		if(str_comp(pName, m_aNamePlates[ClientID].m_aName) != 0 || FontSize != m_aNamePlates[ClientID].m_NameTextFontSize)
@@ -81,7 +81,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 		}
 
-		if(g_Config.m_ClNameplatesClan)
+		if(Config()->m_ClNameplatesClan)
 		{
 			const char *pClan = m_pClient->m_aClients[ClientID].m_aClan;
 			if(str_comp(pClan, m_aNamePlates[ClientID].m_aClanName) != 0 || FontSizeClan != m_aNamePlates[ClientID].m_ClanNameTextFontSize)
@@ -109,7 +109,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		}
 
 		float tw = m_aNamePlates[ClientID].m_NameTextWidth;
-		if(g_Config.m_ClNameplatesTeamcolors && m_pClient->m_Teams.Team(ClientID))
+		if(Config()->m_ClNameplatesTeamcolors && m_pClient->m_Teams.Team(ClientID))
 			rgb = color_cast<ColorRGBA>(ColorHSLA(m_pClient->m_Teams.Team(ClientID) / 64.0f, 1.0f, 0.75f));
 
 		STextRenderColor TColor;
@@ -117,15 +117,15 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 
 		if(OtherTeam)
 		{
-			TOutlineColor.Set(0.0f, 0.0f, 0.0f, 0.2f * g_Config.m_ClShowOthersAlpha / 100.0f);
-			TColor.Set(rgb.r, rgb.g, rgb.b, g_Config.m_ClShowOthersAlpha / 100.0f);
+			TOutlineColor.Set(0.0f, 0.0f, 0.0f, 0.2f * Config()->m_ClShowOthersAlpha / 100.0f);
+			TColor.Set(rgb.r, rgb.g, rgb.b, Config()->m_ClShowOthersAlpha / 100.0f);
 		}
 		else
 		{
 			TOutlineColor.Set(0.0f, 0.0f, 0.0f, 0.5f * a);
 			TColor.Set(rgb.r, rgb.g, rgb.b, a);
 		}
-		if(g_Config.m_ClNameplatesTeamcolors && m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)
+		if(Config()->m_ClNameplatesTeamcolors && m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)
 		{
 			if(m_pClient->m_aClients[ClientID].m_Team == TEAM_RED)
 				TColor.Set(1.0f, 0.5f, 0.5f, a);
@@ -142,14 +142,14 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_NameTextContainerIndex, &TColor, &TOutlineColor, Position.x - tw / 2.0f, YOffset);
 		}
 
-		if(g_Config.m_ClNameplatesClan)
+		if(Config()->m_ClNameplatesClan)
 		{
 			YOffset -= FontSizeClan;
 			if(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex != -1)
 				TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex, &TColor, &TOutlineColor, Position.x - m_aNamePlates[ClientID].m_ClanNameTextWidth / 2.0f, YOffset);
 		}
 
-		if(g_Config.m_ClNameplatesFriendMark && m_pClient->m_aClients[ClientID].m_Friend)
+		if(Config()->m_ClNameplatesFriendMark && m_pClient->m_aClients[ClientID].m_Friend)
 		{
 			YOffset -= FontSize;
 			char aFriendMark[] = "♥";
@@ -158,7 +158,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			TextRender()->Text(0, Position.x - XOffSet, YOffset, FontSize, aFriendMark, -1.0f);
 		}
 
-		if(g_Config.m_Debug || g_Config.m_ClNameplatesIDs) // render client id when in debug as well
+		if(Config()->m_Debug || Config()->m_ClNameplatesIDs) // render client id when in debug as well
 		{
 			YOffset -= FontSize;
 			char aBuf[128];
@@ -168,15 +168,15 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			TextRender()->Text(0, Position.x - XOffset, YOffset, FontSize, aBuf, -1.0f);
 		}
 
-		if(g_Config.m_ClNameplatesHA) // render health and armor in nameplate
+		if(Config()->m_ClNameplatesHA) // render health and armor in nameplate
 		{
 			int Health = m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur.m_Health;
 			int Armor = m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur.m_Armor;
 
 			if(Health > 0 || Armor > 0)
 			{
-				float HFontSize = 5.0f + 20.0f * g_Config.m_ClNameplatesHASize / 100.0f;
-				float AFontSize = 6.0f + 24.0f * g_Config.m_ClNameplatesHASize / 100.0f;
+				float HFontSize = 5.0f + 20.0f * Config()->m_ClNameplatesHASize / 100.0f;
+				float AFontSize = 6.0f + 24.0f * Config()->m_ClNameplatesHASize / 100.0f;
 				char aHealth[40] = "\0";
 				char aArmor[40] = "\0";
 				for(int i = 0; i < Health; i++)
@@ -203,7 +203,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		}
 	}
 
-	if(g_Config.m_Debug)
+	if(Config()->m_Debug)
 	{
 		CCharacter *pCharacter = m_pClient->m_GameWorld.GetCharacterByID(pPlayerInfo->m_ClientID);
 		if(pCharacter)
@@ -225,7 +225,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 
 void CNamePlates::OnRender()
 {
-	if(!g_Config.m_ClNameplates)
+	if(!Config()->m_ClNameplates)
 		return;
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -239,7 +239,7 @@ void CNamePlates::OnRender()
 		if(m_pClient->m_aClients[i].m_SpecCharPresent)
 		{
 			bool OtherTeam = m_pClient->IsOtherTeam(i);
-			float Alpha = 0.4f * (OtherTeam ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f);
+			float Alpha = 0.4f * (OtherTeam ? Config()->m_ClShowOthersAlpha / 100.0f : 1.0f);
 			RenderNameplatePos(m_pClient->m_aClients[i].m_SpecChar, pInfo, Alpha);
 		}
 

@@ -77,20 +77,20 @@ void CMotd::OnMessage(int MsgType, void *pRawMsg)
 				m_aServerMotd[k] = pMsgStr[i];
 
 			// print the line to the console when receiving the newline character
-			if(g_Config.m_ClPrintMotd && m_aServerMotd[k] == '\n')
+			if(Config()->m_ClPrintMotd && m_aServerMotd[k] == '\n')
 			{
 				m_aServerMotd[k] = '\0';
-				m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "motd", pLast, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
+				m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "motd", pLast, color_cast<ColorRGBA>(ColorHSLA(Config()->m_ClMessageHighlightColor)));
 				m_aServerMotd[k] = '\n';
 				pLast = m_aServerMotd + k + 1;
 			}
 		}
 		m_aServerMotd[sizeof(m_aServerMotd) - 1] = '\0';
-		if(g_Config.m_ClPrintMotd && *pLast != '\0')
-			m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "motd", pLast, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
+		if(Config()->m_ClPrintMotd && *pLast != '\0')
+			m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "motd", pLast, color_cast<ColorRGBA>(ColorHSLA(Config()->m_ClMessageHighlightColor)));
 
-		if(m_aServerMotd[0] && g_Config.m_ClMotdTime)
-			m_ServerMotdTime = time() + time_freq() * g_Config.m_ClMotdTime;
+		if(m_aServerMotd[0] && Config()->m_ClMotdTime)
+			m_ServerMotdTime = time() + time_freq() * Config()->m_ClMotdTime;
 		else
 			m_ServerMotdTime = 0;
 	}

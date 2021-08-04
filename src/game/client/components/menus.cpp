@@ -879,7 +879,7 @@ int CMenus::RenderMenubar(CUIRect r)
 		}
 #endif
 
-		GotNewsOrUpdate |= (bool)g_Config.m_UiUnreadNews;
+		GotNewsOrUpdate |= (bool)Config()->m_UiUnreadNews;
 
 		ColorRGBA HomeButtonColorAlert(0, 1, 0, 0.25f);
 		ColorRGBA HomeButtonColorAlertHover(0, 1, 0, 0.5f);
@@ -1037,7 +1037,7 @@ int CMenus::RenderMenubar(CUIRect r)
 	ColorRGBA QuitColor(1, 0, 0, 0.5f);
 	if(DoButton_MenuTab(&s_QuitButton, "\xEE\x97\x8D", 0, &Button, CUI::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_QUIT], NULL, NULL, &QuitColor, 10.0f, 0))
 	{
-		if(m_pClient->Editor()->HasUnsavedData() || (Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmQuitTime && g_Config.m_ClConfirmQuitTime >= 0))
+		if(m_pClient->Editor()->HasUnsavedData() || (Client()->GetCurrentRaceTime() / 60 >= Config()->m_ClConfirmQuitTime && Config()->m_ClConfirmQuitTime >= 0))
 		{
 			m_Popup = POPUP_QUIT;
 		}
@@ -1059,7 +1059,7 @@ int CMenus::RenderMenubar(CUIRect r)
 	static int s_EditorButton = 0;
 	if(DoButton_MenuTab(&s_EditorButton, "\xEE\x8F\x89", 0, &Button, CUI::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_EDITOR], NULL, NULL, NULL, 10.0f, 0))
 	{
-		g_Config.m_ClEditor = 1;
+		Config()->m_ClEditor = 1;
 	}
 
 	if(Client()->State() == IClient::STATE_OFFLINE)
@@ -1075,8 +1075,8 @@ int CMenus::RenderMenubar(CUIRect r)
 		Box.VSplitRight(33.0f, &Box, &Button);
 		static int s_ServerButton = 0;
 
-		if(DoButton_MenuTab(&s_ServerButton, "\xEE\xA0\x8B", m_ActivePage == g_Config.m_UiPage, &Button, CUI::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_SERVER], NULL, NULL, NULL, 10.0f, 0))
-			NewPage = g_Config.m_UiPage;
+		if(DoButton_MenuTab(&s_ServerButton, "\xEE\xA0\x8B", m_ActivePage == Config()->m_UiPage, &Button, CUI::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_SERVER], NULL, NULL, NULL, 10.0f, 0))
+			NewPage = Config()->m_UiPage;
 	}
 
 	TextRender()->SetRenderFlags(0);
@@ -1108,7 +1108,7 @@ void CMenus::RenderLoading()
 	LastLoadRender = time_get();
 
 	// need up date this here to get correct
-	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_UiColor, true));
+	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(Config()->m_UiColor, true));
 
 	CUIRect Screen = *UI()->Screen();
 	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
@@ -1151,7 +1151,7 @@ void CMenus::RenderLoading()
 
 void CMenus::RenderNews(CUIRect MainView)
 {
-	g_Config.m_UiUnreadNews = false;
+	Config()->m_UiUnreadNews = false;
 
 	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
 
@@ -1181,9 +1181,9 @@ void CMenus::RenderNews(CUIRect MainView)
 
 void CMenus::OnInit()
 {
-	if(g_Config.m_ClShowWelcome)
+	if(Config()->m_ClShowWelcome)
 		m_Popup = POPUP_LANGUAGE;
-	if(g_Config.m_ClSkipStartMenu)
+	if(Config()->m_ClSkipStartMenu)
 		m_ShowStart = false;
 
 	m_UIEx.Init(UI(), Kernel(), RenderTools(), m_aInputEvents, &m_NumInputEvents);
@@ -1207,7 +1207,7 @@ void CMenus::OnInit()
 	const int NumMenuImages = 5;
 	m_LoadCurrent = 0;
 	m_LoadTotal = g_pData->m_NumImages + NumMenuImages;
-	if(!g_Config.m_ClThreadsoundloading)
+	if(!Config()->m_ClThreadsoundloading)
 		m_LoadTotal += g_pData->m_NumSounds;
 
 	// load menu images
@@ -1458,7 +1458,7 @@ int CMenus::Render()
 	static int s_Frame = 0;
 	if(s_Frame == 0)
 	{
-		m_MenuPage = g_Config.m_UiPage;
+		m_MenuPage = Config()->m_UiPage;
 		s_Frame++;
 	}
 	else if(s_Frame == 1)
@@ -1467,15 +1467,15 @@ int CMenus::Render()
 		s_Frame++;
 		m_DoubleClickIndex = -1;
 
-		if(g_Config.m_UiPage == PAGE_INTERNET)
+		if(Config()->m_UiPage == PAGE_INTERNET)
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
-		else if(g_Config.m_UiPage == PAGE_LAN)
+		else if(Config()->m_UiPage == PAGE_LAN)
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
-		else if(g_Config.m_UiPage == PAGE_FAVORITES)
+		else if(Config()->m_UiPage == PAGE_FAVORITES)
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
-		else if(g_Config.m_UiPage == PAGE_DDNET)
+		else if(Config()->m_UiPage == PAGE_DDNET)
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
-		else if(g_Config.m_UiPage == PAGE_KOG)
+		else if(Config()->m_UiPage == PAGE_KOG)
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_KOG);
 	}
 
@@ -1615,7 +1615,7 @@ int CMenus::Render()
 		else if(m_Popup == POPUP_CONNECTING)
 		{
 			pTitle = Localize("Connecting to");
-			pExtraText = g_Config.m_UiServerAddress; // TODO: query the client about the address
+			pExtraText = Config()->m_UiServerAddress; // TODO: query the client about the address
 			pButtonText = Localize("Abort");
 			if(Client()->MapDownloadTotalsize() > 0)
 			{
@@ -1887,7 +1887,7 @@ int CMenus::Render()
 			static int s_ButtonTryAgain = 0;
 			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Try again"), 0, &TryAgain) || m_EnterPressed)
 			{
-				Client()->Connect(g_Config.m_UiServerAddress, g_Config.m_Password);
+				Client()->Connect(Config()->m_UiServerAddress, Config()->m_Password);
 			}
 
 			Box.HSplitBottom(60.f, &Box, &Part);
@@ -1899,7 +1899,7 @@ int CMenus::Render()
 			TextBox.VSplitRight(60.0f, &TextBox, 0);
 			UI()->DoLabel(&Label, Localize("Password"), 18.0f, -1);
 			static float Offset = 0.0f;
-			DoEditBox(&g_Config.m_Password, &TextBox, g_Config.m_Password, sizeof(g_Config.m_Password), 12.0f, &Offset, true);
+			DoEditBox(&Config()->m_Password, &TextBox, Config()->m_Password, sizeof(Config()->m_Password), 12.0f, &Offset, true);
 		}
 		else if(m_Popup == POPUP_CONNECTING)
 		{
@@ -1998,7 +1998,7 @@ int CMenus::Render()
 
 			static int ActSelection = -2;
 			if(ActSelection == -2)
-				ActSelection = g_Config.m_BrFilterCountryIndex;
+				ActSelection = Config()->m_BrFilterCountryIndex;
 			static float s_ScrollValue = 0.0f;
 			int OldSelected = -1;
 			UiDoListboxStart(&s_ScrollValue, &Box, 50.0f, Localize("Country / Region"), "", m_pClient->m_CountryFlags.Num(), 6, OldSelected, s_ScrollValue);
@@ -2033,14 +2033,14 @@ int CMenus::Render()
 			static int s_Button = 0;
 			if(DoButton_Menu(&s_Button, Localize("Ok"), 0, &Part) || m_EnterPressed)
 			{
-				g_Config.m_BrFilterCountryIndex = ActSelection;
+				Config()->m_BrFilterCountryIndex = ActSelection;
 				Client()->ServerBrowserUpdate();
 				m_Popup = POPUP_NONE;
 			}
 
 			if(m_EscapePressed)
 			{
-				ActSelection = g_Config.m_BrFilterCountryIndex;
+				ActSelection = Config()->m_BrFilterCountryIndex;
 				m_Popup = POPUP_NONE;
 			}
 		}
@@ -2194,12 +2194,12 @@ int CMenus::Render()
 			float ButtonSize = 20.0f;
 			Part.VSplitLeft(113.0f, 0, &Part);
 			Part.VSplitLeft(ButtonSize, &Button, &Part);
-			if(DoButton_CheckBox(&g_Config.m_ClVideoShowChat, Localize("Show chat"), g_Config.m_ClVideoShowChat, &Button))
-				g_Config.m_ClVideoShowChat ^= 1;
+			if(DoButton_CheckBox(&Config()->m_ClVideoShowChat, Localize("Show chat"), Config()->m_ClVideoShowChat, &Button))
+				Config()->m_ClVideoShowChat ^= 1;
 			Part.VSplitLeft(112.0f, 0, &Part);
 			Part.VSplitLeft(ButtonSize, &Button, &Part);
-			if(DoButton_CheckBox(&g_Config.m_ClVideoSndEnable, Localize("Use sounds"), g_Config.m_ClVideoSndEnable, &Button))
-				g_Config.m_ClVideoSndEnable ^= 1;
+			if(DoButton_CheckBox(&Config()->m_ClVideoSndEnable, Localize("Use sounds"), Config()->m_ClVideoSndEnable, &Button))
+				Config()->m_ClVideoSndEnable ^= 1;
 
 			Box.HSplitBottom(20.f, &Box, &Part);
 			Part.VSplitLeft(60.0f, 0, &Part);
@@ -2238,8 +2238,8 @@ int CMenus::Render()
 
 			Part.VSplitLeft(107.0f, 0, &Part);
 			Part.VSplitLeft(ButtonSize, &Button, &Part);
-			if(DoButton_CheckBox(&g_Config.m_ClVideoShowhud, Localize("Show ingame HUD"), g_Config.m_ClVideoShowhud, &Button))
-				g_Config.m_ClVideoShowhud ^= 1;
+			if(DoButton_CheckBox(&Config()->m_ClVideoShowhud, Localize("Show ingame HUD"), Config()->m_ClVideoShowhud, &Button))
+				Config()->m_ClVideoShowhud ^= 1;
 
 			Box.HSplitBottom(20.f, &Box, &Part);
 #if defined(__ANDROID__)
@@ -2332,7 +2332,7 @@ int CMenus::Render()
 			if(DoButton_Menu(&s_EnterButton, Localize("Enter"), 0, &Part) || m_EnterPressed)
 			{
 				Client()->RequestDDNetInfo();
-				if(g_Config.m_BrIndicateFinished)
+				if(Config()->m_BrIndicateFinished)
 					m_Popup = POPUP_POINTS;
 				else
 				{
@@ -2349,8 +2349,8 @@ int CMenus::Render()
 				Localize("Show DDNet map finishes in server browser"),
 				Localize("transmits your player name to info2.ddnet.tw"));
 
-			if(DoButton_CheckBox(&g_Config.m_BrIndicateFinished, aBuf, g_Config.m_BrIndicateFinished, &Part))
-				g_Config.m_BrIndicateFinished ^= 1;
+			if(DoButton_CheckBox(&Config()->m_BrIndicateFinished, aBuf, Config()->m_BrIndicateFinished, &Part))
+				Config()->m_BrIndicateFinished ^= 1;
 
 			Box.HSplitBottom(20.f, &Box, &Part);
 			Box.HSplitBottom(24.f, &Box, &Part);
@@ -2361,7 +2361,7 @@ int CMenus::Render()
 			TextBox.VSplitRight(60.0f, &TextBox, 0);
 			UI()->DoLabel(&Label, Localize("Nickname"), 16.0f, -1);
 			static float Offset = 0.0f;
-			DoEditBox(&g_Config.m_PlayerName, &TextBox, g_Config.m_PlayerName, sizeof(g_Config.m_PlayerName), 12.0f, &Offset, false, CUI::CORNER_ALL, Client()->PlayerName());
+			DoEditBox(&Config()->m_PlayerName, &TextBox, Config()->m_PlayerName, sizeof(Config()->m_PlayerName), 12.0f, &Offset, false, CUI::CORNER_ALL, Client()->PlayerName());
 		}
 		else if(m_Popup == POPUP_POINTS)
 		{
@@ -2448,7 +2448,7 @@ void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
 	int SelectedTheme = -1;
 	for(int i = 0; i < (int)ThemesRef.size(); i++)
 	{
-		if(str_comp(ThemesRef[i].m_Name, g_Config.m_ClMenuMap) == 0)
+		if(str_comp(ThemesRef[i].m_Name, Config()->m_ClMenuMap) == 0)
 		{
 			SelectedTheme = i;
 			break;
@@ -2508,7 +2508,7 @@ void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
 
 	if(ItemActive && NewSelected != SelectedTheme)
 	{
-		str_format(g_Config.m_ClMenuMap, sizeof(g_Config.m_ClMenuMap), "%s", ThemesRef[NewSelected].m_Name.cstr());
+		str_format(Config()->m_ClMenuMap, sizeof(Config()->m_ClMenuMap), "%s", ThemesRef[NewSelected].m_Name.cstr());
 		m_pBackground->LoadMenuBackground(ThemesRef[NewSelected].m_HasDay, ThemesRef[NewSelected].m_HasNight);
 	}
 }
@@ -2619,8 +2619,8 @@ void CMenus::OnStateChange(int NewState, int OldState)
 			if(str_find(Client()->ErrorString(), "password"))
 			{
 				m_Popup = POPUP_PASSWORD;
-				UI()->SetHotItem(&g_Config.m_Password);
-				UI()->SetActiveItem(&g_Config.m_Password);
+				UI()->SetHotItem(&Config()->m_Password);
+				UI()->SetActiveItem(&Config()->m_Password);
 			}
 			else
 				m_Popup = POPUP_DISCONNECTED;
@@ -2674,7 +2674,7 @@ void CMenus::OnRender()
 	}
 
 	// update colors
-	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_UiColor, true));
+	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(Config()->m_UiColor, true));
 
 	ms_ColorTabbarInactiveOutgame = ColorRGBA(0, 0, 0, 0.25f);
 	ms_ColorTabbarActiveOutgame = ColorRGBA(0, 0, 0, 0.5f);
@@ -2729,7 +2729,7 @@ void CMenus::OnRender()
 	Graphics()->WrapNormal();
 
 	// render debug information
-	if(g_Config.m_Debug)
+	if(Config()->m_Debug)
 	{
 		CUIRect Screen = *UI()->Screen();
 		Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
@@ -2831,7 +2831,7 @@ void CMenus::RenderUpdating(const char *pCaption, int current, int total)
 	LastLoadRender = time_get();
 
 	// need up date this here to get correct
-	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_UiColor, true));
+	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(Config()->m_UiColor, true));
 
 	CUIRect Screen = *UI()->Screen();
 	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
@@ -2966,7 +2966,7 @@ void CMenus::SetMenuPage(int NewPage)
 {
 	m_MenuPage = NewPage;
 	if(NewPage >= PAGE_INTERNET && NewPage <= PAGE_KOG)
-		g_Config.m_UiPage = NewPage;
+		Config()->m_UiPage = NewPage;
 }
 
 bool CMenus::HandleListInputs(const CUIRect &View, float &ScrollValue, const float ScrollAmount, int *pScrollOffset, const float ElemHeight, int &SelectedIndex, const int NumElems)
@@ -3001,7 +3001,7 @@ bool CMenus::HandleListInputs(const CUIRect &View, float &ScrollValue, const flo
 	{
 		if(m_aInputEvents[i].m_Flags & IInput::FLAG_PRESS)
 		{
-			if(UI()->LastActiveItem() == &g_Config.m_UiServerAddress)
+			if(UI()->LastActiveItem() == &Config()->m_UiServerAddress)
 				return false;
 			else if(m_aInputEvents[i].m_Key == KEY_DOWN)
 				NewIndex = minimum(SelectedIndex + 1, NumElems - 1);

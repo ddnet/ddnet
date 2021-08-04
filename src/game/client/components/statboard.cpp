@@ -105,7 +105,7 @@ void CStatboard::OnMessage(int MsgType, void *pRawMsg)
 
 void CStatboard::OnRender()
 {
-	if((g_Config.m_ClAutoStatboardScreenshot || g_Config.m_ClAutoCSV) && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	if((Config()->m_ClAutoStatboardScreenshot || Config()->m_ClAutoCSV) && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		if(m_ScreenshotTime < 0 && m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER)
 			m_ScreenshotTime = time_get() + time_freq() * 3;
@@ -113,9 +113,9 @@ void CStatboard::OnRender()
 			m_Active = true;
 		if(!m_ScreenshotTaken && m_ScreenshotTime > -1 && m_ScreenshotTime + time_freq() / 5 < time_get())
 		{
-			if(g_Config.m_ClAutoStatboardScreenshot)
+			if(Config()->m_ClAutoStatboardScreenshot)
 				AutoStatScreenshot();
-			if(g_Config.m_ClAutoCSV)
+			if(Config()->m_ClAutoCSV)
 				AutoStatCSV();
 			m_ScreenshotTaken = true;
 		}
@@ -338,7 +338,7 @@ void CStatboard::RenderGlobalStats()
 		}
 		// FPM
 		{
-			float Fpm = pStats->GetFPM(Client()->GameTick(g_Config.m_ClDummy), Client()->GameTickSpeed());
+			float Fpm = pStats->GetFPM(Client()->GameTick(Config()->m_ClDummy), Client()->GameTickSpeed());
 			str_format(aBuf, sizeof(aBuf), "%.1f", Fpm);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f);
 			TextRender()->Text(0, x - tw + px, y + (LineHeight * 0.95f - FontSize) / 2.f, FontSize, aBuf, -1.0f);
@@ -522,7 +522,7 @@ void CStatboard::FormatStats()
 			pStats->m_Suicides, // Suicides
 			fdratio, // fdratio
 			pStats->m_Frags - pStats->m_Deaths, // Net
-			pStats->GetFPM(Client()->GameTick(g_Config.m_ClDummy), Client()->GameTickSpeed()), // FPM
+			pStats->GetFPM(Client()->GameTick(Config()->m_ClDummy), Client()->GameTickSpeed()), // FPM
 			pStats->m_CurrentSpree, // CurSpree
 			pStats->m_BestSpree, // BestSpree
 			aWeaponFD, // WeaponFD

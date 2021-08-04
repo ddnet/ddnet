@@ -251,28 +251,28 @@ void CMenus::ClearCustomItems(int CurTab)
 		m_EntitiesList.clear();
 
 		// reload current entities
-		m_pClient->m_MapImages.ChangeEntitiesPath(g_Config.m_ClAssetsEntites);
+		m_pClient->m_MapImages.ChangeEntitiesPath(Config()->m_ClAssetsEntites);
 	}
 	else if(CurTab == 1)
 	{
 		ClearAssetList(m_GameList, Graphics());
 
 		// reload current game skin
-		GameClient()->LoadGameSkin(g_Config.m_ClAssetGame);
+		GameClient()->LoadGameSkin(Config()->m_ClAssetGame);
 	}
 	else if(CurTab == 2)
 	{
 		ClearAssetList(m_EmoticonList, Graphics());
 
 		// reload current emoticons skin
-		GameClient()->LoadEmoticonsSkin(g_Config.m_ClAssetEmoticons);
+		GameClient()->LoadEmoticonsSkin(Config()->m_ClAssetEmoticons);
 	}
 	else if(CurTab == 3)
 	{
 		ClearAssetList(m_ParticlesList, Graphics());
 
 		// reload current particles skin
-		GameClient()->LoadParticlesSkin(g_Config.m_ClAssetParticles);
+		GameClient()->LoadParticlesSkin(Config()->m_ClAssetParticles);
 	}
 	s_InitCustomList[CurTab] = true;
 }
@@ -434,22 +434,22 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 
 		if(s_CurCustomTab == 0)
 		{
-			if(str_comp(s->m_aName, g_Config.m_ClAssetsEntites) == 0)
+			if(str_comp(s->m_aName, Config()->m_ClAssetsEntites) == 0)
 				OldSelected = i;
 		}
 		else if(s_CurCustomTab == 1)
 		{
-			if(str_comp(s->m_aName, g_Config.m_ClAssetGame) == 0)
+			if(str_comp(s->m_aName, Config()->m_ClAssetGame) == 0)
 				OldSelected = i;
 		}
 		else if(s_CurCustomTab == 2)
 		{
-			if(str_comp(s->m_aName, g_Config.m_ClAssetEmoticons) == 0)
+			if(str_comp(s->m_aName, Config()->m_ClAssetEmoticons) == 0)
 				OldSelected = i;
 		}
 		else if(s_CurCustomTab == 3)
 		{
-			if(str_comp(s->m_aName, g_Config.m_ClAssetParticles) == 0)
+			if(str_comp(s->m_aName, Config()->m_ClAssetParticles) == 0)
 				OldSelected = i;
 		}
 
@@ -483,23 +483,23 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 		{
 			if(s_CurCustomTab == 0)
 			{
-				str_copy(g_Config.m_ClAssetsEntites, GetCustomItem(s_CurCustomTab, NewSelected)->m_aName, sizeof(g_Config.m_ClAssetsEntites));
+				str_copy(Config()->m_ClAssetsEntites, GetCustomItem(s_CurCustomTab, NewSelected)->m_aName, sizeof(Config()->m_ClAssetsEntites));
 				m_pClient->m_MapImages.ChangeEntitiesPath(GetCustomItem(s_CurCustomTab, NewSelected)->m_aName);
 			}
 			else if(s_CurCustomTab == 1)
 			{
-				str_copy(g_Config.m_ClAssetGame, GetCustomItem(s_CurCustomTab, NewSelected)->m_aName, sizeof(g_Config.m_ClAssetGame));
-				GameClient()->LoadGameSkin(g_Config.m_ClAssetGame);
+				str_copy(Config()->m_ClAssetGame, GetCustomItem(s_CurCustomTab, NewSelected)->m_aName, sizeof(Config()->m_ClAssetGame));
+				GameClient()->LoadGameSkin(Config()->m_ClAssetGame);
 			}
 			else if(s_CurCustomTab == 2)
 			{
-				str_copy(g_Config.m_ClAssetEmoticons, GetCustomItem(s_CurCustomTab, NewSelected)->m_aName, sizeof(g_Config.m_ClAssetEmoticons));
-				GameClient()->LoadEmoticonsSkin(g_Config.m_ClAssetEmoticons);
+				str_copy(Config()->m_ClAssetEmoticons, GetCustomItem(s_CurCustomTab, NewSelected)->m_aName, sizeof(Config()->m_ClAssetEmoticons));
+				GameClient()->LoadEmoticonsSkin(Config()->m_ClAssetEmoticons);
 			}
 			else if(s_CurCustomTab == 3)
 			{
-				str_copy(g_Config.m_ClAssetParticles, GetCustomItem(s_CurCustomTab, NewSelected)->m_aName, sizeof(g_Config.m_ClAssetParticles));
-				GameClient()->LoadParticlesSkin(g_Config.m_ClAssetParticles);
+				str_copy(Config()->m_ClAssetParticles, GetCustomItem(s_CurCustomTab, NewSelected)->m_aName, sizeof(Config()->m_ClAssetParticles));
+				GameClient()->LoadParticlesSkin(Config()->m_ClAssetParticles);
 			}
 		}
 	}
@@ -571,7 +571,7 @@ void CMenus::ConchainAssetsEntities(IConsole::IResult *pResult, void *pUserData,
 	if(pResult->NumArguments() == 1)
 	{
 		const char *pArg = pResult->GetString(0);
-		if(str_comp(pArg, g_Config.m_ClAssetsEntites) != 0)
+		if(str_comp(pArg, pThis->Config()->m_ClAssetsEntites) != 0)
 		{
 			pThis->m_pClient->m_MapImages.ChangeEntitiesPath(pArg);
 		}
@@ -586,7 +586,7 @@ void CMenus::ConchainAssetGame(IConsole::IResult *pResult, void *pUserData, ICon
 	if(pResult->NumArguments() == 1)
 	{
 		const char *pArg = pResult->GetString(0);
-		if(str_comp(pArg, g_Config.m_ClAssetGame) != 0)
+		if(str_comp(pArg, pThis->Config()->m_ClAssetGame) != 0)
 		{
 			pThis->GameClient()->LoadGameSkin(pArg);
 		}
@@ -601,7 +601,7 @@ void CMenus::ConchainAssetParticles(IConsole::IResult *pResult, void *pUserData,
 	if(pResult->NumArguments() == 1)
 	{
 		const char *pArg = pResult->GetString(0);
-		if(str_comp(pArg, g_Config.m_ClAssetParticles) != 0)
+		if(str_comp(pArg, pThis->Config()->m_ClAssetParticles) != 0)
 		{
 			pThis->GameClient()->LoadParticlesSkin(pArg);
 		}
@@ -616,7 +616,7 @@ void CMenus::ConchainAssetEmoticons(IConsole::IResult *pResult, void *pUserData,
 	if(pResult->NumArguments() == 1)
 	{
 		const char *pArg = pResult->GetString(0);
-		if(str_comp(pArg, g_Config.m_ClAssetEmoticons) != 0)
+		if(str_comp(pArg, pThis->Config()->m_ClAssetEmoticons) != 0)
 		{
 			pThis->GameClient()->LoadEmoticonsSkin(pArg);
 		}

@@ -256,7 +256,7 @@ void CBinds::SetDefaults()
 	Bind(KEY_P, "say /pause");
 
 	// DDRace
-	g_Config.m_ClDDRaceBindsSet = 0;
+	Config()->m_ClDDRaceBindsSet = 0;
 	SetDDRaceBinds(false);
 }
 
@@ -465,7 +465,7 @@ void CBinds::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData)
 
 void CBinds::SetDDRaceBinds(bool FreeOnly)
 {
-	if(g_Config.m_ClDDRaceBindsSet < 1)
+	if(Config()->m_ClDDRaceBindsSet < 1)
 	{
 		Bind(KEY_KP_PLUS, "zoom+", FreeOnly);
 		Bind(KEY_KP_MINUS, "zoom-", FreeOnly);
@@ -496,5 +496,5 @@ void CBinds::SetDDRaceBinds(bool FreeOnly)
 		Bind(KEY_EQUALS, "spectate_next", FreeOnly);
 	}
 
-	g_Config.m_ClDDRaceBindsSet = 1;
+	Config()->m_ClDDRaceBindsSet = 1;
 }

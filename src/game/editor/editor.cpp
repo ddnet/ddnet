@@ -3438,7 +3438,7 @@ void CEditor::ReplaceImage(const char *pFileName, int StorageType, void *pUser)
 	IStorage::StripPathAndExtension(pFileName, pImg->m_aName, sizeof(pImg->m_aName));
 	pImg->m_External = IsVanillaImage(pImg->m_aName);
 
-	if(!pImg->m_External && g_Config.m_ClEditorDilate == 1 && pImg->m_Format == CImageInfo::FORMAT_RGBA)
+	if(!pImg->m_External && pEditor->Config()->m_ClEditorDilate == 1 && pImg->m_Format == CImageInfo::FORMAT_RGBA)
 	{
 		int ColorChannelCount = 0;
 		if(ImgInfo.m_Format == CImageInfo::FORMAT_RGBA)
@@ -3489,7 +3489,7 @@ void CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 	*pImg = ImgInfo;
 	pImg->m_External = IsVanillaImage(aBuf);
 
-	if(!pImg->m_External && g_Config.m_ClEditorDilate == 1 && pImg->m_Format == CImageInfo::FORMAT_RGBA)
+	if(!pImg->m_External && pEditor->Config()->m_ClEditorDilate == 1 && pImg->m_Format == CImageInfo::FORMAT_RGBA)
 	{
 		int ColorChannelCount = 0;
 		if(ImgInfo.m_Format == CImageInfo::FORMAT_RGBA)
@@ -4624,7 +4624,7 @@ void CEditor::RenderStatusbar(CUIRect View)
 		m_ShowServerSettingsEditor ^= 1;
 	}
 
-	if(g_Config.m_ClEditorUndo)
+	if(Config()->m_ClEditorUndo)
 	{
 		View.VSplitRight(5.0f, &View, &Button);
 		View.VSplitRight(60.0f, &View, &Button);
@@ -5570,7 +5570,7 @@ int CEditor::PopupMenuFile(CEditor *pEditor, CUIRect View, void *pContext)
 			pEditor->m_PopupEventActivated = true;
 		}
 		else
-			g_Config.m_ClEditor = 0;
+			pEditor->Config()->m_ClEditor = 0;
 		return 1;
 	}
 
@@ -5614,7 +5614,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 
 	static int s_CloseButton = 0;
 	if(DoButton_Editor(&s_CloseButton, "×", 0, &Close, 0, "Exits from the editor", 0) || (m_Dialog == DIALOG_NONE && !UiPopupOpen() && !m_PopupEventActivated && Input()->KeyPress(KEY_ESCAPE)))
-		g_Config.m_ClEditor = 0;
+		Config()->m_ClEditor = 0;
 }
 
 void CEditor::Render()
@@ -5933,7 +5933,7 @@ void CEditor::Render()
 		{
 			float OldLevel = m_ZoomLevel;
 			m_ZoomLevel = clamp(m_ZoomLevel + Zoom * 20, 10, 2000);
-			if(g_Config.m_EdZoomTarget)
+			if(Config()->m_EdZoomTarget)
 				ZoomMouseTarget((float)m_ZoomLevel / OldLevel);
 		}
 	}
@@ -5945,7 +5945,7 @@ void CEditor::Render()
 		RenderStatusbar(StatusBar);
 
 	//
-	if(g_Config.m_EdShowkeys)
+	if(Config()->m_EdShowkeys)
 	{
 		Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
 		CTextCursor Cursor;
@@ -6355,7 +6355,7 @@ void CEditor::UpdateAndRender()
 	if(Input()->KeyPress(KEY_F10))
 		m_ShowMousePointer = false;
 
-	if(g_Config.m_ClEditorUndo)
+	if(Config()->m_ClEditorUndo)
 	{
 		// Screenshot at most every 5 seconds, at least every 60
 		if((m_LastUndoUpdateTime + time_freq() * 60 < time_get() && m_Map.m_UndoModified) || (m_LastUndoUpdateTime + time_freq() * 5 < time_get() && m_Map.m_UndoModified >= 10))

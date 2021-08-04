@@ -120,7 +120,7 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 
 		Kill.m_Weapon = pMsg->m_Weapon;
 		Kill.m_ModeSpecial = pMsg->m_ModeSpecial;
-		Kill.m_Tick = Client()->GameTick(g_Config.m_ClDummy);
+		Kill.m_Tick = Client()->GameTick(Config()->m_ClDummy);
 
 		Kill.m_FlagCarrierBlue = m_pClient->m_Snap.m_pGameDataObj ? m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue : -1;
 
@@ -164,7 +164,7 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 
 void CKillMessages::OnRender()
 {
-	if(!g_Config.m_ClShowKillMessages)
+	if(!Config()->m_ClShowKillMessages)
 		return;
 
 	float Width = 400 * 3.0f * Graphics()->ScreenAspect();
@@ -174,12 +174,12 @@ void CKillMessages::OnRender()
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 
 	float StartX = Width * 1.5f - 10.0f;
-	float y = 30.0f + 100.0f * ((g_Config.m_ClShowfps ? 1 : 0) + g_Config.m_ClShowpred);
+	float y = 30.0f + 100.0f * ((Config()->m_ClShowfps ? 1 : 0) + Config()->m_ClShowpred);
 
 	for(int i = 1; i <= MAX_KILLMSGS; i++)
 	{
 		int r = (m_KillmsgCurrent + i) % MAX_KILLMSGS;
-		if(Client()->GameTick(g_Config.m_ClDummy) > m_aKillmsgs[r].m_Tick + 50 * 10)
+		if(Client()->GameTick(Config()->m_ClDummy) > m_aKillmsgs[r].m_Tick + 50 * 10)
 			continue;
 
 		float x = StartX;
@@ -189,7 +189,7 @@ void CKillMessages::OnRender()
 
 		// render victim name
 		x -= m_aKillmsgs[r].m_VitctimTextWidth;
-		if(m_aKillmsgs[r].m_VictimID >= 0 && g_Config.m_ClChatTeamColors && m_aKillmsgs[r].m_VictimDDTeam)
+		if(m_aKillmsgs[r].m_VictimID >= 0 && Config()->m_ClChatTeamColors && m_aKillmsgs[r].m_VictimDDTeam)
 		{
 			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(m_aKillmsgs[r].m_VictimDDTeam / 64.0f, 1.0f, 0.75f));
 			TColor.Set(rgb.r, rgb.g, rgb.b, 1.0f);
@@ -295,7 +295,7 @@ void CKillMessages::RefindSkins()
 	for(int i = 0; i < MAX_KILLMSGS; i++)
 	{
 		int r = i % MAX_KILLMSGS;
-		if(Client()->GameTick(g_Config.m_ClDummy) > m_aKillmsgs[r].m_Tick + 50 * 10)
+		if(Client()->GameTick(Config()->m_ClDummy) > m_aKillmsgs[r].m_Tick + 50 * 10)
 			continue;
 
 		if(m_aKillmsgs[r].m_KillerID >= 0)

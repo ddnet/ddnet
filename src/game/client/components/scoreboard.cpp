@@ -130,11 +130,11 @@ void CScoreboard::RenderSpectators(float x, float y, float w)
 
 		if(m_pClient->m_aClients[pInfo->m_ClientID].m_AuthLevel)
 		{
-			ColorRGBA Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClAuthedPlayerColor));
+			ColorRGBA Color = color_cast<ColorRGBA>(ColorHSLA(Config()->m_ClAuthedPlayerColor));
 			TextRender()->TextColor(Color);
 		}
 
-		if(g_Config.m_ClShowIDs)
+		if(Config()->m_ClShowIDs)
 		{
 			char aBuffer[5];
 			int size = str_format(aBuffer, sizeof(aBuffer), "%d: ", pInfo->m_ClientID);
@@ -239,7 +239,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		}
 	}
 
-	if(m_pClient->m_GameInfo.m_TimeScore && g_Config.m_ClDDRaceScoreBoard)
+	if(m_pClient->m_GameInfo.m_TimeScore && Config()->m_ClDDRaceScoreBoard)
 	{
 		if(m_ServerRecord > 0)
 			str_time_float(m_ServerRecord, TIME_HOURS, aBuf, sizeof(aBuf));
@@ -308,7 +308,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	x += 10.0f;
 	y += 50.0f;
 	float HeadlineFontsize = 22.0f;
-	const char *pScore = (m_pClient->m_GameInfo.m_TimeScore && g_Config.m_ClDDRaceScoreBoard) ? Localize("Time") : Localize("Score");
+	const char *pScore = (m_pClient->m_GameInfo.m_TimeScore && Config()->m_ClDDRaceScoreBoard) ? Localize("Time") : Localize("Score");
 	tw = TextRender()->TextWidth(0, HeadlineFontsize, pScore, -1, -1.0f);
 	TextRender()->Text(0, ScoreOffset + ScoreLength - tw, y + (HeadlineFontsize * 2.f - HeadlineFontsize) / 2.f, HeadlineFontsize, pScore, -1.0f);
 
@@ -423,7 +423,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		}
 
 		// score
-		if(m_pClient->m_GameInfo.m_TimeScore && g_Config.m_ClDDRaceScoreBoard)
+		if(m_pClient->m_GameInfo.m_TimeScore && Config()->m_ClDDRaceScoreBoard)
 		{
 			if(pInfo->m_Score == -9999)
 				aBuf[0] = 0;
@@ -469,11 +469,11 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		TextRender()->SetCursor(&Cursor, NameOffset, y + (LineHeight - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 		if(m_pClient->m_aClients[pInfo->m_ClientID].m_AuthLevel)
 		{
-			ColorRGBA Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClAuthedPlayerColor));
+			ColorRGBA Color = color_cast<ColorRGBA>(ColorHSLA(Config()->m_ClAuthedPlayerColor));
 			TextRender()->TextColor(Color);
 		}
 
-		if(g_Config.m_ClShowIDs)
+		if(Config()->m_ClShowIDs)
 		{
 			char aId[64] = "";
 			if(pInfo->m_ClientID < 10)
@@ -495,9 +495,9 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 		// clan
 		if(str_comp(m_pClient->m_aClients[pInfo->m_ClientID].m_aClan,
-			   m_pClient->m_aClients[GameClient()->m_LocalIDs[g_Config.m_ClDummy]].m_aClan) == 0)
+			   m_pClient->m_aClients[GameClient()->m_LocalIDs[Config()->m_ClDummy]].m_aClan) == 0)
 		{
-			ColorRGBA Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClSameClanColor));
+			ColorRGBA Color = color_cast<ColorRGBA>(ColorHSLA(Config()->m_ClSameClanColor));
 			TextRender()->TextColor(Color);
 		}
 		else
@@ -516,7 +516,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			CountryOffset, y + (Spacing + TeeSizeMod * 5.0f) / 2.0f, CountryLength, LineHeight - Spacing - TeeSizeMod * 5.0f);
 
 		// ping
-		if(g_Config.m_ClEnablePingColor)
+		if(Config()->m_ClEnablePingColor)
 		{
 			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA((300.0f - clamp(pInfo->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f));
 			TextRender()->TextColor(rgb);
@@ -704,7 +704,7 @@ bool CScoreboard::Active()
 	if(m_pClient->m_Snap.m_pLocalInfo && m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_SPECTATORS)
 	{
 		// we are not a spectator, check if we are dead
-		if(!m_pClient->m_Snap.m_pLocalCharacter && g_Config.m_ClScoreboardOnDeath)
+		if(!m_pClient->m_Snap.m_pLocalCharacter && Config()->m_ClScoreboardOnDeath)
 			return true;
 	}
 

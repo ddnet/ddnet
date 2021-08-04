@@ -49,7 +49,7 @@ void CMenuBackground::OnInit()
 
 	m_pImages->m_pClient = GameClient();
 	Kernel()->RegisterInterface<CMenuMap>((CMenuMap *)m_pBackgroundMap);
-	if(g_Config.m_ClMenuMap[0] != '\0')
+	if(Config()->m_ClMenuMap[0] != '\0')
 		LoadMenuBackground();
 
 	m_Camera.m_pClient = GameClient();
@@ -185,11 +185,11 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 
 	bool NeedImageLoading = false;
 
-	str_copy(m_aMapName, g_Config.m_ClMenuMap, sizeof(m_aMapName));
+	str_copy(m_aMapName, Config()->m_ClMenuMap, sizeof(m_aMapName));
 
-	if(g_Config.m_ClMenuMap[0] != '\0')
+	if(Config()->m_ClMenuMap[0] != '\0')
 	{
-		const char *pMenuMap = g_Config.m_ClMenuMap;
+		const char *pMenuMap = Config()->m_ClMenuMap;
 		if(str_comp(pMenuMap, "auto") == 0)
 		{
 			switch(time_season())
@@ -319,12 +319,12 @@ bool CMenuBackground::Render()
 	static vec2 Dir = vec2(1.0f, 0.0f);
 
 	float DistToCenter = distance(m_Camera.m_Center, m_RotationCenter);
-	if(!m_ChangedPosition && absolute(DistToCenter - (float)g_Config.m_ClRotationRadius) <= 0.5f)
+	if(!m_ChangedPosition && absolute(DistToCenter - (float)Config()->m_ClRotationRadius) <= 0.5f)
 	{
 		// do little rotation
-		float RotPerTick = 360.0f / (float)g_Config.m_ClRotationSpeed * clamp(Client()->RenderFrameTime(), 0.0f, 0.1f);
+		float RotPerTick = 360.0f / (float)Config()->m_ClRotationSpeed * clamp(Client()->RenderFrameTime(), 0.0f, 0.1f);
 		Dir = rotate(Dir, RotPerTick);
-		m_Camera.m_Center = m_RotationCenter + Dir * (float)g_Config.m_ClRotationRadius;
+		m_Camera.m_Center = m_RotationCenter + Dir * (float)Config()->m_ClRotationRadius;
 	}
 	else
 	{
@@ -334,7 +334,7 @@ bool CMenuBackground::Render()
 			DirToCenter = normalize(m_AnimationStartPos - m_RotationCenter);
 		else
 			DirToCenter = vec2(1, 0);
-		vec2 TargetPos = m_RotationCenter + DirToCenter * (float)g_Config.m_ClRotationRadius;
+		vec2 TargetPos = m_RotationCenter + DirToCenter * (float)Config()->m_ClRotationRadius;
 		float Distance = distance(m_AnimationStartPos, TargetPos);
 		if(Distance > 0.001f)
 			Dir = normalize(m_AnimationStartPos - TargetPos);
@@ -342,7 +342,7 @@ bool CMenuBackground::Render()
 			Dir = vec2(1, 0);
 
 		// move time
-		m_MoveTime += clamp(Client()->RenderFrameTime(), 0.0f, 0.1f) * g_Config.m_ClCameraSpeed / 10.0f;
+		m_MoveTime += clamp(Client()->RenderFrameTime(), 0.0f, 0.1f) * Config()->m_ClCameraSpeed / 10.0f;
 		float XVal = 1 - m_MoveTime;
 		XVal = pow(XVal, 7.0f);
 

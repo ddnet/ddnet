@@ -74,7 +74,7 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 		CountryFlag.m_Texture = Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
 		Graphics()->FreePNG(&Info);
 
-		if(g_Config.m_Debug)
+		if(Config()->m_Debug)
 		{
 			str_format(aBuf, sizeof(aBuf), "loaded country flag '%s'", aOrigin);
 			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "countryflags", aBuf);

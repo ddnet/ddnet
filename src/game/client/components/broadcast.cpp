@@ -20,12 +20,12 @@ void CBroadcast::OnReset()
 
 void CBroadcast::OnRender()
 {
-	if(m_pClient->m_Scoreboard.Active() || m_pClient->m_Motd.IsActive() || !g_Config.m_ClShowBroadcasts)
+	if(m_pClient->m_Scoreboard.Active() || m_pClient->m_Motd.IsActive() || !Config()->m_ClShowBroadcasts)
 		return;
 
 	Graphics()->MapScreen(0, 0, 300 * Graphics()->ScreenAspect(), 300);
 
-	if(Client()->GameTick(g_Config.m_ClDummy) < m_BroadcastTick)
+	if(Client()->GameTick(Config()->m_ClDummy) < m_BroadcastTick)
 	{
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, m_BroadcastRenderOffset, 40.0f, 12.0f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
@@ -45,8 +45,8 @@ void CBroadcast::OnMessage(int MsgType, void *pRawMsg)
 		Cursor.m_LineWidth = 300 * Graphics()->ScreenAspect();
 		TextRender()->TextEx(&Cursor, m_aBroadcastText, -1);
 		m_BroadcastRenderOffset = 150 * Graphics()->ScreenAspect() - Cursor.m_X / 2;
-		m_BroadcastTick = Client()->GameTick(g_Config.m_ClDummy) + Client()->GameTickSpeed() * 10;
-		if(g_Config.m_ClPrintBroadcasts)
+		m_BroadcastTick = Client()->GameTick(Config()->m_ClDummy) + Client()->GameTickSpeed() * 10;
+		if(Config()->m_ClPrintBroadcasts)
 		{
 			char aBuf[1024];
 			int i, ii;
@@ -57,7 +57,7 @@ void CBroadcast::OnMessage(int MsgType, void *pRawMsg)
 					aBuf[ii] = '\0';
 					ii = 0;
 					if(aBuf[0])
-						m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aBuf, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
+						m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aBuf, color_cast<ColorRGBA>(ColorHSLA(Config()->m_ClMessageHighlightColor)));
 				}
 				else
 				{
@@ -67,7 +67,7 @@ void CBroadcast::OnMessage(int MsgType, void *pRawMsg)
 			}
 			aBuf[ii] = '\0';
 			if(aBuf[0])
-				m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aBuf, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
+				m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aBuf, color_cast<ColorRGBA>(ColorHSLA(Config()->m_ClMessageHighlightColor)));
 		}
 	}
 }

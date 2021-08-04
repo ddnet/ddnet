@@ -279,7 +279,7 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 
 	// set skin data
 	str_copy(Skin.m_aName, pName, sizeof(Skin.m_aName));
-	if(g_Config.m_Debug)
+	if(Config()->m_Debug)
 	{
 		str_format(aBuf, sizeof(aBuf), "load skin %s", Skin.m_aName);
 		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
@@ -294,7 +294,7 @@ void CSkins::OnInit()
 {
 	m_EventSkinPrefix[0] = '\0';
 
-	if(g_Config.m_Events)
+	if(Config()->m_Events)
 	{
 		time_t rawtime;
 		struct tm *timeinfo;
@@ -366,8 +366,8 @@ const CSkin *CSkins::Get(int Index)
 
 int CSkins::Find(const char *pName)
 {
-	const char *pSkinPrefix = m_EventSkinPrefix[0] ? m_EventSkinPrefix : g_Config.m_ClSkinPrefix;
-	if(g_Config.m_ClVanillaSkinsOnly && !IsVanillaSkin(pName))
+	const char *pSkinPrefix = m_EventSkinPrefix[0] ? m_EventSkinPrefix : Config()->m_ClSkinPrefix;
+	if(Config()->m_ClVanillaSkinsOnly && !IsVanillaSkin(pName))
 	{
 		return -1;
 	}
@@ -394,7 +394,7 @@ int CSkins::FindImpl(const char *pName)
 	if(str_comp(pName, "default") == 0)
 		return -1;
 
-	if(!g_Config.m_ClDownloadSkins)
+	if(!Config()->m_ClDownloadSkins)
 		return -1;
 
 	if(str_find(pName, "/") != 0)
@@ -422,7 +422,7 @@ int CSkins::FindImpl(const char *pName)
 	str_copy(Skin.m_aName, pName, sizeof(Skin.m_aName));
 
 	char aUrl[256];
-	str_format(aUrl, sizeof(aUrl), "%s%s.png", g_Config.m_ClSkinDownloadUrl, pName);
+	str_format(aUrl, sizeof(aUrl), "%s%s.png", Config()->m_ClSkinDownloadUrl, pName);
 	str_format(Skin.m_aPath, sizeof(Skin.m_aPath), "downloadedskins/%s.%d.tmp", pName, pid());
 	Skin.m_pTask = std::make_shared<CGetPngFile>(this, Storage(), aUrl, Skin.m_aPath, IStorage::TYPE_SAVE, CTimeout{0, 0, 0}, HTTPLOG::NONE);
 	m_pClient->Engine()->AddJob(Skin.m_pTask);

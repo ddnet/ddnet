@@ -136,7 +136,7 @@ void CEmoticon::OnRender()
 	}
 	Graphics()->WrapNormal();
 
-	if(GameClient()->m_GameInfo.m_AllowEyeWheel && g_Config.m_ClEyeWheel)
+	if(GameClient()->m_GameInfo.m_AllowEyeWheel && Config()->m_ClEyeWheel)
 	{
 		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
@@ -144,7 +144,7 @@ void CEmoticon::OnRender()
 		DrawCircle(Screen.w / 2, Screen.h / 2, 100.0f, 64);
 		Graphics()->QuadsEnd();
 
-		CTeeRenderInfo *pTeeInfo = &m_pClient->m_aClients[m_pClient->m_LocalIDs[g_Config.m_ClDummy]].m_RenderInfo;
+		CTeeRenderInfo *pTeeInfo = &m_pClient->m_aClients[m_pClient->m_LocalIDs[Config()->m_ClDummy]].m_RenderInfo;
 
 		for(int i = 0; i < NUM_EMOTES; i++)
 		{
@@ -187,11 +187,11 @@ void CEmoticon::Emote(int Emoticon)
 	Msg.m_Emoticon = Emoticon;
 	Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
 
-	if(g_Config.m_ClDummyCopyMoves)
+	if(Config()->m_ClDummyCopyMoves)
 	{
 		CMsgPacker Msg(NETMSGTYPE_CL_EMOTICON, false);
 		Msg.AddInt(Emoticon);
-		Client()->SendMsgY(&Msg, MSGFLAG_VITAL, !g_Config.m_ClDummy);
+		Client()->SendMsgY(&Msg, MSGFLAG_VITAL, !Config()->m_ClDummy);
 	}
 }
 
@@ -201,22 +201,22 @@ void CEmoticon::EyeEmote(int Emote)
 	switch(Emote)
 	{
 	case EMOTE_NORMAL:
-		str_format(aBuf, sizeof(aBuf), "/emote normal %d", g_Config.m_ClEyeDuration);
+		str_format(aBuf, sizeof(aBuf), "/emote normal %d", Config()->m_ClEyeDuration);
 		break;
 	case EMOTE_PAIN:
-		str_format(aBuf, sizeof(aBuf), "/emote pain %d", g_Config.m_ClEyeDuration);
+		str_format(aBuf, sizeof(aBuf), "/emote pain %d", Config()->m_ClEyeDuration);
 		break;
 	case EMOTE_HAPPY:
-		str_format(aBuf, sizeof(aBuf), "/emote happy %d", g_Config.m_ClEyeDuration);
+		str_format(aBuf, sizeof(aBuf), "/emote happy %d", Config()->m_ClEyeDuration);
 		break;
 	case EMOTE_SURPRISE:
-		str_format(aBuf, sizeof(aBuf), "/emote surprise %d", g_Config.m_ClEyeDuration);
+		str_format(aBuf, sizeof(aBuf), "/emote surprise %d", Config()->m_ClEyeDuration);
 		break;
 	case EMOTE_ANGRY:
-		str_format(aBuf, sizeof(aBuf), "/emote angry %d", g_Config.m_ClEyeDuration);
+		str_format(aBuf, sizeof(aBuf), "/emote angry %d", Config()->m_ClEyeDuration);
 		break;
 	case EMOTE_BLINK:
-		str_format(aBuf, sizeof(aBuf), "/emote blink %d", g_Config.m_ClEyeDuration);
+		str_format(aBuf, sizeof(aBuf), "/emote blink %d", Config()->m_ClEyeDuration);
 		break;
 	}
 	GameClient()->m_Chat.Say(0, aBuf);
