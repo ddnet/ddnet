@@ -1640,7 +1640,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 	{
 		TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 		UI()->DoLabelScaled(&RestartWarning, Localize("DDNet Client needs to be restarted to complete update!"), 14.0f, -1);
-		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+		TextRender()->TextColor(CUI::ms_DefaultTextColor);
 	}
 	else if(m_NeedRestartGeneral || m_NeedRestartSkins || m_NeedRestartGraphics || m_NeedRestartSound || m_NeedRestartDDNet)
 		UI()->DoLabelScaled(&RestartWarning, Localize("You must restart the game for all settings to take effect."), 14.0f, -1);
@@ -2309,7 +2309,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	TextRender()->TextEx(&Cursor, "*** Echo command executed", -1);
 	TextRender()->SetCursorPosition(&Cursor, X, Y);
 
-	TextRender()->TextColor(1, 1, 1, 1);
+	TextRender()->TextColor(CUI::ms_DefaultTextColor);
 }
 
 void CMenus::RenderSettingsDDNet(CUIRect MainView)
@@ -2614,7 +2614,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 			}
 		}
 		UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
-		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+		TextRender()->TextColor(CUI::ms_DefaultTextColor);
 	}
 #endif
 }

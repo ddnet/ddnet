@@ -475,7 +475,7 @@ void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
 				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
 				UI()->TextRender()->Text(0, mx * Scale - 3.f, (my + ToCenterOffset) * Scale, Size * Scale, aBuf, -1.0f);
-				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+				UI()->TextRender()->TextColor(CUI::ms_DefaultTextColor);
 			}
 		}
 
@@ -537,13 +537,13 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 					str_format(aBuf, sizeof(aBuf), "%d", Force);
 					UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
 					UI()->TextRender()->Text(0, mx * Scale, (my + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf, -1.0f);
-					UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+					UI()->TextRender()->TextColor(CUI::ms_DefaultTextColor);
 					if(MaxSpeed)
 					{
 						str_format(aBuf, sizeof(aBuf), "%d", MaxSpeed);
 						UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
 						UI()->TextRender()->Text(0, mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf, -1.0f);
-						UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+						UI()->TextRender()->TextColor(CUI::ms_DefaultTextColor);
 					}
 				}
 			}
@@ -594,7 +594,7 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
 				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
 				UI()->TextRender()->Text(0, mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf, -1.0f);
-				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+				UI()->TextRender()->TextColor(CUI::ms_DefaultTextColor);
 			}
 
 			unsigned char Delay = pSwitch[c].m_Delay;
@@ -604,7 +604,7 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 				str_format(aBuf, sizeof(aBuf), "%d", Delay);
 				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
 				UI()->TextRender()->Text(0, mx * Scale, (my + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf, -1.0f);
-				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+				UI()->TextRender()->TextColor(CUI::ms_DefaultTextColor);
 			}
 		}
 
@@ -653,7 +653,7 @@ void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
 				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
 				UI()->TextRender()->Text(0, mx * Scale + 11.f, my * Scale + 6.f, Size * Scale / 1.5f - 5.f, aBuf, -1.0f); // numbers shouldn't be too big and in the center of the tile
-				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+				UI()->TextRender()->TextColor(CUI::ms_DefaultTextColor);
 			}
 		}
 

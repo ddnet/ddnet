@@ -1154,7 +1154,7 @@ void CChat::OnPrepareLines()
 			TextRender()->UploadTextContainer(m_aLines[r].m_TextContainerIndex);
 	}
 
-	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+	TextRender()->TextColor(CUI::ms_DefaultTextColor);
 }
 
 void CChat::OnRender()

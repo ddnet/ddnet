@@ -25,6 +25,9 @@ CUIElement::SUIElementRect::SUIElementRect() :
  UI
 *********************************************************/
 
+const vec4 CUI::ms_DefaultTextColor(1.0f, 1.0f, 1.0f, 1.0f);
+const vec4 CUI::ms_TransparentTextColor(1.0f, 1.0f, 1.0f, 0.5f);
+
 CUI::CUI()
 {
 	m_pHotItem = 0;

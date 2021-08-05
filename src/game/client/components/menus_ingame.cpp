@@ -1134,7 +1134,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 			}
 		}
 
-		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+		TextRender()->TextColor(CUI::ms_DefaultTextColor);
 	}
 
 	UI()->ClipDisable();

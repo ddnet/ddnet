@@ -676,7 +676,7 @@ void CGameConsole::OnRender()
 				pEntry = pConsole->m_Backlog.Prev(pEntry);
 
 				// reset color
-				TextRender()->TextColor(1, 1, 1, 1);
+				TextRender()->TextColor(CUI::ms_DefaultTextColor);
 			}
 
 			//	actual backlog page number is too high, render last available page (current checked one, render top down)
@@ -698,7 +698,7 @@ void CGameConsole::OnRender()
 
 		// render page
 		char aBuf[128];
-		TextRender()->TextColor(1, 1, 1, 1);
+		TextRender()->TextColor(CUI::ms_DefaultTextColor);
 		str_format(aBuf, sizeof(aBuf), Localize("-Page %d-"), pConsole->m_BacklogActPage + 1);
 		TextRender()->Text(0, 10.0f, FontSize / 2.f, FontSize, aBuf, -1.0f);
 

@@ -366,7 +366,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 						UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColName + 0), &Button, pItem->m_aName, FontSize, -1, Button.w, 1, true, (int)(pStr - pItem->m_aName));
 						TextRender()->TextColor(0.4f, 0.4f, 1.0f, 1);
 						UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColName + 1), &Button, pStr, FontSize, -1, Button.w, 1, true, (int)str_length(g_Config.m_BrFilterString), &pItem->m_pUIElement->Get(g_OffsetColName + 0)->m_Cursor);
-						TextRender()->TextColor(1, 1, 1, 1);
+						TextRender()->TextColor(CUI::ms_DefaultTextColor);
 						UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColName + 2), &Button, pStr + str_length(g_Config.m_BrFilterString), FontSize, -1, Button.w, 1, true, -1, &pItem->m_pUIElement->Get(g_OffsetColName + 1)->m_Cursor);
 					}
 					else
@@ -399,7 +399,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 						UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColMap + 0), &Button, pItem->m_aMap, FontSize, -1, Button.w, 1, true, (int)(pStr - pItem->m_aMap));
 						TextRender()->TextColor(0.4f, 0.4f, 1.0f, 1);
 						UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColMap + 1), &Button, pStr, FontSize, -1, Button.w, 1, true, (int)str_length(g_Config.m_BrFilterString), &pItem->m_pUIElement->Get(g_OffsetColMap + 0)->m_Cursor);
-						TextRender()->TextColor(1, 1, 1, 1);
+						TextRender()->TextColor(CUI::ms_DefaultTextColor);
 						UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColMap + 2), &Button, pStr + str_length(g_Config.m_BrFilterString), FontSize, -1, Button.w, 1, true, -1, &pItem->m_pUIElement->Get(g_OffsetColMap + 1)->m_Cursor);
 					}
 					else
@@ -424,7 +424,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 					TextRender()->TextColor(0.4f, 0.4f, 1.0f, 1);
 				float FontSize = 12.0f * UI()->Scale();
 				UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColPlayers), &Button, aTemp, FontSize, 1, -1, 1, false);
-				TextRender()->TextColor(1, 1, 1, 1);
+				TextRender()->TextColor(CUI::ms_DefaultTextColor);
 			}
 			else if(ID == COL_PING)
 			{
@@ -437,7 +437,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 				float FontSize = 12.0f * UI()->Scale();
 				UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColPing), &Button, aTemp, FontSize, 1, -1, 1, false);
-				TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+				TextRender()->TextColor(CUI::ms_DefaultTextColor);
 			}
 			else if(ID == COL_VERSION)
 			{
@@ -471,7 +471,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 					ColorRGBA rgb = color_cast<ColorRGBA>(hsl);
 					TextRender()->TextColor(rgb);
 					UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColGameType), &Button, pItem->m_aGameType, FontSize, -1, Button.w, 1, true);
-					TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+					TextRender()->TextColor(CUI::ms_DefaultTextColor);
 				}
 				else
 					UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColGameType), &Button, pItem->m_aGameType, FontSize, -1, Button.w, 1, true);
@@ -900,7 +900,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 
 					TextRender()->TextColor(1.0f, 1.0f, 1.0f, Active ? 1.0f : 0.2f);
 					UI()->DoLabelScaled(&Rect, pName, FontSize, 0);
-					TextRender()->TextColor(1.0, 1.0, 1.0, 1.0f);
+					TextRender()->TextColor(CUI::ms_DefaultTextColor);
 				}
 			}
 		}
@@ -1178,7 +1178,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 					TextRender()->TextEx(&Cursor, pName, (int)(s - pName));
 					TextRender()->TextColor(0.4f, 0.4f, 1.0f, 1.0f);
 					TextRender()->TextEx(&Cursor, s, str_length(g_Config.m_BrFilterString));
-					TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+					TextRender()->TextColor(CUI::ms_DefaultTextColor);
 					TextRender()->TextEx(&Cursor, s + str_length(g_Config.m_BrFilterString), -1);
 				}
 				else
@@ -1200,7 +1200,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 					TextRender()->TextEx(&Cursor, pClan, (int)(s - pClan));
 					TextRender()->TextColor(0.4f, 0.4f, 1.0f, 1.0f);
 					TextRender()->TextEx(&Cursor, s, str_length(g_Config.m_BrFilterString));
-					TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+					TextRender()->TextColor(CUI::ms_DefaultTextColor);
 					TextRender()->TextEx(&Cursor, s + str_length(g_Config.m_BrFilterString), -1);
 				}
 				else

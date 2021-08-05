@@ -242,7 +242,7 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 
 	UI()->DoLabel(&Textbox, pDisplayStr, FontSize, -1);
 
-	TextRender()->TextColor(1, 1, 1, 1);
+	TextRender()->TextColor(CUI::ms_DefaultTextColor);
 
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);

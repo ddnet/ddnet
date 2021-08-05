@@ -196,6 +196,9 @@ class CUI
 	std::vector<CUIElement *> m_UIElements;
 
 public:
+	static const vec4 ms_DefaultTextColor;
+	static const vec4 ms_TransparentTextColor;
+
 	// TODO: Refactor: Fill this in
 	void SetGraphics(class IGraphics *pGraphics, class ITextRender *pTextRender)
 	{

@@ -144,7 +144,7 @@ void CDebugHud::RenderTuning()
 	}
 	Graphics()->LinesDraw(Array, 100);
 	Graphics()->LinesEnd();
-	TextRender()->TextColor(1, 1, 1, 1);
+	TextRender()->TextColor(CUI::ms_DefaultTextColor);
 }
 
 void CDebugHud::RenderHint()
@@ -154,7 +154,7 @@ void CDebugHud::RenderHint()
 
 	float Width = 300 * Graphics()->ScreenAspect();
 	Graphics()->MapScreen(0, 0, Width, 300);
-	TextRender()->TextColor(1, 1, 1, 1);
+	TextRender()->TextColor(CUI::ms_DefaultTextColor);
 	TextRender()->Text(0x0, 5, 290, 5, Localize("Debug mode enabled. Press Ctrl+Shift+D to disable debug mode."), -1.0f);
 }
 

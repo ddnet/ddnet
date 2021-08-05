@@ -1012,7 +1012,7 @@ int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEdito
 
 		pEditor->TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f));
 		pEditor->UI()->DoLabel(&Warning, "Editing multiple layers", 9.0f, -1, Warning.w);
-		pEditor->TextRender()->TextColor(ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
+		pEditor->TextRender()->TextColor(ColorRGBA(CUI::ms_DefaultTextColor));
 		pToolbox->HSplitTop(2.0f, 0, pToolbox);
 	}
 

@@ -141,7 +141,7 @@ void CScoreboard::RenderSpectators(float x, float y, float w)
 			TextRender()->TextEx(&Cursor, aBuffer, size);
 		}
 		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[pInfo->m_ClientID].m_aName, -1);
-		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+		TextRender()->TextColor(CUI::ms_DefaultTextColor);
 
 		Multiple = true;
 	}
@@ -501,14 +501,14 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			TextRender()->TextColor(Color);
 		}
 		else
-			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+			TextRender()->TextColor(CUI::ms_DefaultTextColor);
 
 		tw = minimum(TextRender()->TextWidth(nullptr, FontSize, m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, -1, -1.0f), ClanLength);
 		TextRender()->SetCursor(&Cursor, ClanOffset + (ClanLength - tw) / 2, y + (LineHeight - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = ClanLength;
 		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, -1);
 
-		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+		TextRender()->TextColor(CUI::ms_DefaultTextColor);
 
 		// country flag
 		ColorRGBA Color(1.0f, 1.0f, 1.0f, 0.5f);
@@ -527,7 +527,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		Cursor.m_LineWidth = PingLength;
 		TextRender()->TextEx(&Cursor, aBuf, -1);
 
-		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+		TextRender()->TextColor(CUI::ms_DefaultTextColor);
 
 		y += LineHeight + Spacing;
 		if(lower32 || upper32)

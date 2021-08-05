@@ -5766,7 +5766,7 @@ void CEditor::Render()
 
 		TextRender()->TextColor(1.0f, 0.0f, 0.0f, 1.0f);
 		TextRender()->Text(0, 5.0f, 27.0f, 10.0f, aBuf, -1.0f);
-		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+		TextRender()->TextColor(CUI::ms_DefaultTextColor);
 	}
 
 	// do the toolbar

@@ -136,7 +136,7 @@ void CHud::RenderGameTimer()
 			TextRender()->TextColor(1.0f, 0.25f, 0.25f, Alpha);
 		}
 		TextRender()->Text(0, Half - w / 2, 2, FontSize, aBuf, -1.0f);
-		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+		TextRender()->TextColor(CUI::ms_DefaultTextColor);
 	}
 }
 
@@ -598,7 +598,7 @@ void CHud::RenderTeambalanceWarning()
 			else
 				TextRender()->TextColor(0.7f, 0.7f, 0.2f, 1.0f);
 			TextRender()->Text(0x0, 5, 50, 6, pText, -1.0f);
-			TextRender()->TextColor(1, 1, 1, 1);
+			TextRender()->TextColor(CUI::ms_DefaultTextColor);
 		}
 	}
 }
@@ -615,7 +615,7 @@ void CHud::RenderVoting()
 	RenderTools()->DrawRoundRect(-10, 60 - 2, 100 + 10 + 4 + 5, 46, 5.0f);
 	Graphics()->QuadsEnd();
 
-	TextRender()->TextColor(1, 1, 1, 1);
+	TextRender()->TextColor(CUI::ms_DefaultTextColor);
 
 	CTextCursor Cursor;
 	char aBuf[512];
@@ -956,7 +956,7 @@ void CHud::RenderDDRaceEffects()
 				TextRender()->TextColor(1, 1, 1, a); // white
 			TextRender()->Text(0, 150 * Graphics()->ScreenAspect() - TextRender()->TextWidth(0, 10, aBuf, -1, -1.0f) / 2, 20, 10, aBuf, -1.0f);
 
-			TextRender()->TextColor(1, 1, 1, 1);
+			TextRender()->TextColor(CUI::ms_DefaultTextColor);
 		}
 	}
 }
