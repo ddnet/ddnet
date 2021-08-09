@@ -223,6 +223,12 @@ void CGameTeams::Tick()
 			TeamHasWantedStartTime |= ((uint64_t)1) << m_Core.Team(i);
 		}
 	}
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		int Team = m_Core.Team(i);
+		if(Server()->GetNetErrorString(i)[0] && Team != 0)
+			ChangeTeamLeader(i, Team);
+	}
 	TeamHasWantedStartTime &= ~(uint64_t)1;
 	if(!TeamHasWantedStartTime)
 	{
@@ -391,22 +397,7 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 			ResetRoundState(OldTeam);
 			// do not reset SaveTeamResult, because it should be logged into teehistorian even if the team leaves
 		}
-		if(m_TeamLeader[ClientID])
-		{
-			m_TeamLeader[ClientID] = false;
-			for(int i = 0; i < MAX_CLIENTS; i++)
-			{
-				if(m_Core.Team(i) == OldTeam && i != ClientID && OldTeam != 0)
-				{
-					m_TeamLeader[i] = true;
-					char aBuf[512];
-					str_format(aBuf, sizeof(aBuf), "Team leader %s has left this team, now the team leader is %s",
-						GameServer()->Server()->ClientName(ClientID), GameServer()->Server()->ClientName(i));
-					GameServer()->SendChat(-1, OldTeam, aBuf);
-					break;
-				}
-			}
-		}
+		ChangeTeamLeader(ClientID, OldTeam);
 	}
 	if(Count(Team) == 0)
 	{
@@ -1089,6 +1080,26 @@ void CGameTeams::ResetSavedTeam(int ClientID, int Team)
 			if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
 			{
 				SetForceCharacterTeam(i, TEAM_FLOCK);
+			}
+		}
+	}
+}
+
+void CGameTeams::ChangeTeamLeader(int ClientID, int Team)
+{
+	if(m_TeamLeader[ClientID])
+	{
+		m_TeamLeader[ClientID] = false;
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(m_Core.Team(i) == Team && i != ClientID && Team != 0)
+			{
+				m_TeamLeader[i] = true;
+				char aBuf[512];
+				str_format(aBuf, sizeof(aBuf), "Team leader %s has left/timeout this team, now the team leader is %s",
+					GameServer()->Server()->ClientName(ClientID), GameServer()->Server()->ClientName(i));
+				GameServer()->SendChat(-1, Team, aBuf);
+				break;
 			}
 		}
 	}

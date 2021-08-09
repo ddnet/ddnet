@@ -111,6 +111,7 @@ public:
 	void RequestTeamSwap(CPlayer *pPlayer, CPlayer *pTargetPlayer, int Team);
 	void SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, int Team);
 	void ProcessSaveTeam();
+	void ChangeTeamLeader(int ClientID, int Team);
 
 	bool TeamLeader(int ClientID)
 	{
