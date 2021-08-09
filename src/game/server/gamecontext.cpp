@@ -2348,7 +2348,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		}
 		else if(MsgID == NETMSGTYPE_CL_KILL && !m_World.m_Paused)
 		{
-			if(m_VoteCloseTime && m_VoteCreator == ClientID && GetDDRaceTeam(ClientID) && (IsKickVote() || IsSpecVote()))
+			int Team = GetDDRaceTeam(ClientID);
+			if(m_VoteCloseTime && m_VoteCreator == ClientID && Team && (IsKickVote() || IsSpecVote()))
 			{
 				SendChatTarget(ClientID, "You are running a vote please try again after the vote is done!");
 				return;
@@ -2361,7 +2362,13 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			CCharacter *pChr = pPlayer->GetCharacter();
 			if(!pChr)
 				return;
-
+			//Check team leader
+			CGameControllerDDRace *pController = (CGameControllerDDRace *)m_pController;
+			if(Team && !pController->m_Teams.TeamLeader(ClientID) && pController->m_Teams.IsStarted(Team) && pController->m_Teams.TeamLocked(Team))
+			{
+				SendChatTarget(ClientID, "You can't kill the team because you're not the leader. If you want kill unlock team");
+				return;
+			}
 			//Kill Protection
 			int CurrTime = (Server()->Tick() - pChr->m_StartTime) / Server()->TickSpeed();
 			if(g_Config.m_SvKillProtection != 0 && CurrTime >= (60 * g_Config.m_SvKillProtection) && pChr->m_DDRaceState == DDRACE_STARTED)

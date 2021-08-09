@@ -22,6 +22,7 @@ class CGameTeams
 	bool m_TeeStarted[MAX_CLIENTS];
 	bool m_TeeFinished[MAX_CLIENTS];
 	bool m_TeamLocked[MAX_CLIENTS];
+	bool m_TeamLeader[MAX_CLIENTS];
 	uint64_t m_Invited[MAX_CLIENTS];
 	bool m_Practice[MAX_CLIENTS];
 	std::shared_ptr<CScoreSaveResult> m_pSaveTeamResult[MAX_CLIENTS];
@@ -111,6 +112,11 @@ public:
 	void SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, int Team);
 	void ProcessSaveTeam();
 
+	bool TeamLeader(int ClientID)
+	{
+		return m_TeamLeader[ClientID];
+	}
+
 	bool TeeStarted(int ClientID)
 	{
 		return m_TeeStarted[ClientID];
@@ -142,6 +148,11 @@ public:
 	bool IsStarted(int Team)
 	{
 		return m_TeamState[Team] == CGameTeams::TEAMSTATE_STARTED;
+	}
+
+	void SetTeamLeader(int ClientID)
+	{
+		m_TeamLeader[ClientID] = true;
 	}
 
 	void SetStarted(int ClientID, bool Started)
