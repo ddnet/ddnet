@@ -59,6 +59,7 @@ TEST(Str, Utf8CompConfusables)
 	EXPECT_TRUE(str_utf8_comp_confusable("abc", "abc") == 0);
 	EXPECT_TRUE(str_utf8_comp_confusable("rn", "m") == 0);
 	EXPECT_TRUE(str_utf8_comp_confusable("l", "ӏ") == 0); // CYRILLIC SMALL LETTER PALOCHKA
+	EXPECT_TRUE(str_utf8_comp_confusable("i", "¡") == 0); // INVERTED EXCLAMATION MARK
 	EXPECT_FALSE(str_utf8_comp_confusable("o", "x") == 0);
 	EXPECT_TRUE(str_utf8_comp_confusable("aceiou", "ąçęįǫų") == 0);
 }
