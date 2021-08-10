@@ -23,6 +23,7 @@ class CGameTeams
 	bool m_TeeFinished[MAX_CLIENTS];
 	bool m_TeamLocked[MAX_CLIENTS];
 	bool m_TeamLeader[MAX_CLIENTS];
+	bool m_TeamHasLeader[MAX_CLIENTS];
 	uint64_t m_Invited[MAX_CLIENTS];
 	bool m_Practice[MAX_CLIENTS];
 	std::shared_ptr<CScoreSaveResult> m_pSaveTeamResult[MAX_CLIENTS];
@@ -113,6 +114,14 @@ public:
 	void ProcessSaveTeam();
 	void ChangeTeamLeader(int ClientID, int Team);
 
+	bool TeamHasLeader(int Team)
+	{
+		if(Team >= TEAM_SUPER)
+			return false;
+
+		return m_TeamHasLeader[Team];
+	}
+
 	bool TeamLeader(int ClientID)
 	{
 		return m_TeamLeader[ClientID];
@@ -151,9 +160,17 @@ public:
 		return m_TeamState[Team] == CGameTeams::TEAMSTATE_STARTED;
 	}
 
-	void SetTeamLeader(int ClientID)
+	void SetTeamLeader(int ClientID, int Team)
 	{
 		m_TeamLeader[ClientID] = true;
+		m_TeamHasLeader[Team] = true;
+	}
+
+	void SetNewTeamLeader(int NewClientID, int OldClientID, int Team)
+	{
+		m_TeamLeader[NewClientID] = true;
+		m_TeamLeader[OldClientID] = false;
+		m_TeamHasLeader[Team] = true;
 	}
 
 	void SetStarted(int ClientID, bool Started)

@@ -401,6 +401,9 @@ private:
 	static void ConFreezeHammer(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnFreezeHammer(IConsole::IResult *pResult, void *pUserData);
 
+	static void ConSetTeamLeader(IConsole::IResult *pResult, void *pUserData);
+	static void ConTransferTeamLeader(IConsole::IResult *pResult, void *pUserData);
+
 	enum
 	{
 		MAX_MUTES = 32,

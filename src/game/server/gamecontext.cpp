@@ -2363,11 +2363,14 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if(!pChr)
 				return;
 			//Check team leader
-			CGameControllerDDRace *pController = (CGameControllerDDRace *)m_pController;
-			if(Team && !pController->m_Teams.TeamLeader(ClientID) && pController->m_Teams.IsStarted(Team) && pController->m_Teams.TeamLocked(Team))
+			CGameTeams &Teams = ((CGameControllerDDRace *)m_pController)->m_Teams;
+			if(Teams.TeamHasLeader(Team) && Team)
 			{
-				SendChatTarget(ClientID, "You can't kill the team because you're not the leader. If you want kill unlock team");
-				return;
+				if(!Teams.TeamLeader(ClientID) && Teams.IsStarted(Team) && Teams.TeamLocked(Team))
+				{
+					SendChatTarget(ClientID, "You can't kill the team because you're not the leader. If you want kill unlock team");
+					return;
+				}
 			}
 			//Kill Protection
 			int CurrTime = (Server()->Tick() - pChr->m_StartTime) / Server()->TickSpeed();

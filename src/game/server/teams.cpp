@@ -20,6 +20,7 @@ void CGameTeams::Reset()
 	{
 		m_TeamState[i] = TEAMSTATE_EMPTY;
 		m_TeamLeader[i] = false;
+		m_TeamHasLeader[i] = false;
 		m_TeamLocked[i] = false;
 		m_TeeStarted[i] = false;
 		m_TeeFinished[i] = false;
@@ -46,7 +47,6 @@ void CGameTeams::ResetRoundState(int Team)
 		{
 			GameServer()->m_apPlayers[i]->m_VotedForPractice = false;
 			GameServer()->m_apPlayers[i]->m_SwapTargetsClientID = -1;
-			m_TeamLeader[i] = false;
 		}
 	}
 }
@@ -398,10 +398,6 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 			// do not reset SaveTeamResult, because it should be logged into teehistorian even if the team leaves
 		}
 		ChangeTeamLeader(ClientID, OldTeam);
-	}
-	if(Count(Team) == 0)
-	{
-		m_TeamLeader[ClientID] = true;
 	}
 	m_Core.Team(ClientID, Team);
 
@@ -1090,13 +1086,14 @@ void CGameTeams::ChangeTeamLeader(int ClientID, int Team)
 	if(m_TeamLeader[ClientID])
 	{
 		m_TeamLeader[ClientID] = false;
+		m_TeamHasLeader[Team] = false;
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
 			if(m_Core.Team(i) == Team && i != ClientID && Team != 0)
 			{
-				m_TeamLeader[i] = true;
+				SetTeamLeader(i, Team);
 				char aBuf[512];
-				str_format(aBuf, sizeof(aBuf), "Team leader %s has left/timeout this team, now the team leader is %s",
+				str_format(aBuf, sizeof(aBuf), "Team leader '%s' has left/timeout this team, now the team leader is '%s'.",
 					GameServer()->Server()->ClientName(ClientID), GameServer()->Server()->ClientName(i));
 				GameServer()->SendChat(-1, Team, aBuf);
 				break;
