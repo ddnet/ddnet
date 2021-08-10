@@ -1564,7 +1564,6 @@ void CGameContext::ConSetTeamLeader(IConsole::IResult *pResult, void *pUserData)
 			pSelf->SendChatTarget(pResult->m_ClientID, "There is already a leader in your team.");
 		}
 	}
-
 }
 
 void CGameContext::ConTransferTeamLeader(IConsole::IResult *pResult, void *pUserData)
