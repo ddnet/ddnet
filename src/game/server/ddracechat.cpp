@@ -1034,6 +1034,9 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 		{
 			int Team = pResult->GetInteger(0);
 
+			if(Team < 0 || Team >= MAX_CLIENTS )
+				Team = pController->m_Teams.GetFirstEmptyTeam();
+
 			if(pPlayer->m_Last_Team + (int64_t)pSelf->Server()->TickSpeed() * g_Config.m_SvTeamChangeDelay > pSelf->Server()->Tick())
 			{
 				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",

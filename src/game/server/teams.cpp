@@ -1072,3 +1072,11 @@ void CGameTeams::ResetSavedTeam(int ClientID, int Team)
 		}
 	}
 }
+
+int CGameTeams::GetFirstEmptyTeam()
+{
+	for(int i = 1; i < MAX_CLIENTS; i++)
+		if(m_TeamState[i] == TEAMSTATE_EMPTY)
+			return i;
+	return -1;
+}
