@@ -212,7 +212,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			char aBuf[8];
 			str_format(aBuf, sizeof(aBuf), "⇢ %d", pCharacter->GetStrongWeakID());
 			float XOffset = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f) / 2.0f;
-			if(pPlayerInfo->m_Local || !m_pClient->m_GameWorld.m_WorldConfig.m_IsDDRace)
+			if(pPlayerInfo->m_Local)
 				TextRender()->TextColor(rgb);
 			else if(pCharacter->m_Weak)
 			{
