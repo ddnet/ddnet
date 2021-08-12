@@ -203,14 +203,14 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		}
 	}
 
-	if(g_Config.m_Debug)
+	if(g_Config.m_Debug || g_Config.m_ClNameplatesStrong)
 	{
 		CCharacter *pCharacter = m_pClient->m_GameWorld.GetCharacterByID(pPlayerInfo->m_ClientID);
 		if(pCharacter)
 		{
 			YOffset -= FontSize;
-			char aBuf[8];
-			str_format(aBuf, sizeof(aBuf), "⇢ %d", pCharacter->GetStrongWeakID());
+			char aBuf[12];
+			str_format(aBuf, sizeof(aBuf), "→ %d", pCharacter->GetStrongWeakID());
 			float XOffset = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f) / 2.0f;
 			if(pPlayerInfo->m_Local)
 				TextRender()->TextColor(rgb);
@@ -223,6 +223,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			{
 				ColorRGBA StrongStatusColor = color_cast<ColorRGBA>(ColorHSLA(41131));
 				TextRender()->TextColor(StrongStatusColor);
+				str_format(aBuf, sizeof(aBuf), "⇢ %d", pCharacter->GetStrongWeakID());
 			}
 			TextRender()->Text(0, Position.x - XOffset, YOffset, FontSize, aBuf, -1.0f);
 		}
