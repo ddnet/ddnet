@@ -323,7 +323,10 @@ void CChatHelper::AddChatFilter(const char *pFilter)
 	for(auto &aChatFilter : m_aaChatFilter)
 	{
 		if(aChatFilter[0] == '\0')
+		{
 			str_copy(aChatFilter, pFilter, sizeof(aChatFilter));
+			return;
+		}
 	}
 }
 
