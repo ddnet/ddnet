@@ -39,6 +39,7 @@ class CChatHelper : public CComponent
 	void DoGreet();
 	void SayFormat(const char *pMsg);
 	void AddChatFilter(const char *pFilter);
+	void ListChatFilter();
 
 	void OnChatMessage(int ClientID, int Team, const char *pMsg);
 

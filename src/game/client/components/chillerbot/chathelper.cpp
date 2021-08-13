@@ -10,6 +10,7 @@
 
 CChatHelper::CChatHelper()
 {
+	mem_zero(m_aaChatFilter, sizeof(m_aaChatFilter));
 #define CHILLERBOT_CHAT_CMD(name, params, flags, callback, userdata, help) RegisterCommand(name, params, flags, help);
 #include "chatcommands.h"
 	m_Commands.sort_range();
@@ -32,7 +33,6 @@ void CChatHelper::OnInit()
 	m_aLastPingMessage[0] = '\0';
 	m_aLastPingName[0] = '\0';
 	mem_zero(m_aSendBuffer, sizeof(m_aSendBuffer));
-	mem_zero(m_aaChatFilter, sizeof(m_aaChatFilter));
 }
 
 void CChatHelper::OnRender()
@@ -87,7 +87,7 @@ void CChatHelper::OnConsoleInit()
 	Console()->Register("say_hi", "", CFGFLAG_CLIENT, ConSayHi, this, "Respond to the last greeting in chat");
 	Console()->Register("say_format", "s[message]", CFGFLAG_CLIENT, ConSayFormat, this, "send message replacing %n with last ping name");
 	Console()->Register("chat_filter_add", "s[text]", CFGFLAG_CLIENT, ConAddChatFilter, this, "Add string to chat filter. All messages containing that string will be ignored.");
-	Console()->Register("chat_filter_list", "", CFGFLAG_CLIENT, ConListChatFilter, this, "");
+	Console()->Register("chat_filter_list", "", CFGFLAG_CLIENT, ConListChatFilter, this, "list all active filters");
 	Console()->Register("chat_filter_delete", "i[index]", CFGFLAG_CLIENT, ConDeleteChatFilter, this, "");
 }
 
@@ -108,6 +108,7 @@ void CChatHelper::ConAddChatFilter(IConsole::IResult *pResult, void *pUserData)
 
 void CChatHelper::ConListChatFilter(IConsole::IResult *pResult, void *pUserData)
 {
+	((CChatHelper *)pUserData)->ListChatFilter();
 }
 
 void CChatHelper::ConDeleteChatFilter(IConsole::IResult *pResult, void *pUserData)
@@ -315,6 +316,18 @@ void CChatHelper::OnMessage(int MsgType, void *pRawMsg)
 	{
 		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
 		OnChatMessage(pMsg->m_ClientID, pMsg->m_Team, pMsg->m_pMessage);
+	}
+}
+
+void CChatHelper::ListChatFilter()
+{
+	for(int i = 0; i < MAX_CHAT_FILTERS; i++)
+	{
+		if(m_aaChatFilter[i][0] == '\0')
+			continue;
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "%d. '%s'", i, m_aaChatFilter[i]);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	}
 }
 
