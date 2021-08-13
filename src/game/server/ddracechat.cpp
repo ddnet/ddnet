@@ -1563,7 +1563,7 @@ void CGameContext::ConSetTeamLeader(IConsole::IResult *pResult, void *pUserData)
 		else
 		{
 			pSelf->SendChatTarget(pResult->m_ClientID, "You can't become a leader without being found in a team.");
-		}		
+		}
 	}
 }
 
