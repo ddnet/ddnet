@@ -209,23 +209,40 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		if(pCharacter)
 		{
 			YOffset -= FontSize;
-			char aBuf[12];
-			str_format(aBuf, sizeof(aBuf), "→ %d", pCharacter->GetStrongWeakID());
-			float XOffset = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f) / 2.0f;
 			if(pPlayerInfo->m_Local)
 				TextRender()->TextColor(rgb);
-			else if(pCharacter->m_Weak)
-			{
-				ColorRGBA WeakStatusColor = color_cast<ColorRGBA>(ColorHSLA(6401973));
-				TextRender()->TextColor(WeakStatusColor);
-			}
 			else
 			{
-				ColorRGBA StrongStatusColor = color_cast<ColorRGBA>(ColorHSLA(41131));
-				TextRender()->TextColor(StrongStatusColor);
-				str_format(aBuf, sizeof(aBuf), "⇢ %d", pCharacter->GetStrongWeakID());
+				Graphics()->TextureClear();
+				if(pCharacter->m_Weak)
+				{
+					Graphics()->TextureSet(g_pData->m_aImages[IMAGE_STRONGWEAK].m_Id);
+					Graphics()->QuadsBegin();
+					Graphics()->SetColor(color_cast<ColorRGBA>(ColorHSLA(6401973)));
+					RenderTools()->SelectSprite(SPRITE_HOOK_STRONG);
+					ColorRGBA WeakStatusColor = color_cast<ColorRGBA>(ColorHSLA(6401973));
+					TextRender()->TextColor(WeakStatusColor);
+				}
+				else
+				{
+					Graphics()->TextureSet(g_pData->m_aImages[IMAGE_STRONGWEAK].m_Id);
+					Graphics()->QuadsBegin();
+					Graphics()->SetColor(color_cast<ColorRGBA>(ColorHSLA(41131)));
+					RenderTools()->SelectSprite(SPRITE_HOOK_WEAK);
+					ColorRGBA StrongStatusColor = color_cast<ColorRGBA>(ColorHSLA(41131));
+					TextRender()->TextColor(StrongStatusColor);
+				}
+				RenderTools()->DrawSprite(Position.x, YOffset + 15, 40.0f);
+				Graphics()->QuadsEnd();
+				YOffset -= FontSize;
 			}
-			TextRender()->Text(0, Position.x - XOffset, YOffset, FontSize, aBuf, -1.0f);
+			if(g_Config.m_Debug || g_Config.m_ClNameplatesStrong == 2)
+			{
+				char aBuf[12];
+				str_format(aBuf, sizeof(aBuf), "%d", pCharacter->GetStrongWeakID());
+				float XOffset = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f) / 2.0f;
+				TextRender()->Text(0, Position.x - XOffset, YOffset, FontSize, aBuf, -1.0f);
+			}
 		}
 	}
 
