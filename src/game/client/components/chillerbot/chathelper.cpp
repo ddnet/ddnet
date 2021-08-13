@@ -32,6 +32,7 @@ void CChatHelper::OnInit()
 	m_aLastPingMessage[0] = '\0';
 	m_aLastPingName[0] = '\0';
 	mem_zero(m_aSendBuffer, sizeof(m_aSendBuffer));
+	mem_zero(m_aaChatFilter, sizeof(m_aaChatFilter));
 }
 
 void CChatHelper::OnRender()
@@ -85,6 +86,9 @@ void CChatHelper::OnConsoleInit()
 {
 	Console()->Register("say_hi", "", CFGFLAG_CLIENT, ConSayHi, this, "Respond to the last greeting in chat");
 	Console()->Register("say_format", "s[message]", CFGFLAG_CLIENT, ConSayFormat, this, "send message replacing %n with last ping name");
+	Console()->Register("chat_filter_add", "s[text]", CFGFLAG_CLIENT, ConAddChatFilter, this, "Add string to chat filter. All messages containing that string will be ignored.");
+	Console()->Register("chat_filter_list", "", CFGFLAG_CLIENT, ConListChatFilter, this, "");
+	Console()->Register("chat_filter_delete", "i[index]", CFGFLAG_CLIENT, ConDeleteChatFilter, this, "");
 }
 
 void CChatHelper::ConSayHi(IConsole::IResult *pResult, void *pUserData)
@@ -95,6 +99,19 @@ void CChatHelper::ConSayHi(IConsole::IResult *pResult, void *pUserData)
 void CChatHelper::ConSayFormat(IConsole::IResult *pResult, void *pUserData)
 {
 	((CChatHelper *)pUserData)->SayFormat(pResult->GetString(0));
+}
+
+void CChatHelper::ConAddChatFilter(IConsole::IResult *pResult, void *pUserData)
+{
+	((CChatHelper *)pUserData)->AddChatFilter(pResult->GetString(0));
+}
+
+void CChatHelper::ConListChatFilter(IConsole::IResult *pResult, void *pUserData)
+{
+}
+
+void CChatHelper::ConDeleteChatFilter(IConsole::IResult *pResult, void *pUserData)
+{
 }
 
 bool CChatHelper::LineShouldHighlight(const char *pLine, const char *pName)
@@ -299,6 +316,27 @@ void CChatHelper::OnMessage(int MsgType, void *pRawMsg)
 		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
 		OnChatMessage(pMsg->m_ClientID, pMsg->m_Team, pMsg->m_pMessage);
 	}
+}
+
+void CChatHelper::AddChatFilter(const char *pFilter)
+{
+	for(auto &aChatFilter : m_aaChatFilter)
+	{
+		if(aChatFilter[0] == '\0')
+			str_copy(aChatFilter, pFilter, sizeof(aChatFilter));
+	}
+}
+
+bool CChatHelper::FilterChat(int ClientID, int Team, const char *pLine)
+{
+	for(auto &aChatFilter : m_aaChatFilter)
+	{
+		if(aChatFilter[0] == '\0')
+			continue;
+		if(str_find(pLine, aChatFilter))
+			return true;
+	}
+	return false;
 }
 
 bool CChatHelper::OnAutocomplete(CLineInput *pInput, const char *pCompletionBuffer, int PlaceholderOffset, int PlaceholderLength, int *pOldChatStringLength, int *pCompletionChosen, bool ReverseTAB)

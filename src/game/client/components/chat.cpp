@@ -553,7 +553,8 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 	if(MsgType == NETMSGTYPE_SV_CHAT)
 	{
 		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
-		AddLine(pMsg->m_ClientID, pMsg->m_Team, pMsg->m_pMessage);
+		if(!m_pClient->m_ChatHelper.FilterChat(pMsg->m_ClientID, pMsg->m_Team, pMsg->m_pMessage))
+			AddLine(pMsg->m_ClientID, pMsg->m_Team, pMsg->m_pMessage);
 	}
 }
 

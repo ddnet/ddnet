@@ -5,7 +5,8 @@
 #include <game/client/lineinput.h>
 
 #define MAX_CHAT_BUFFER_LEN 8
-
+#define MAX_CHAT_FILTERS 8
+#define MAX_CHAT_FILTER_LEN 128
 class CChatHelper : public CComponent
 {
 	class CChillerBotUX *m_pChillerBot;
@@ -31,11 +32,13 @@ class CChatHelper : public CComponent
 	char m_aLastAfkPing[2048];
 	char m_aLastPingMessage[2048];
 	char m_aSendBuffer[MAX_CHAT_BUFFER_LEN][2048];
+	char m_aaChatFilter[MAX_CHAT_FILTERS][MAX_CHAT_FILTER_LEN];
 
 	bool LineShouldHighlight(const char *pLine, const char *pName);
 	bool IsGreeting(const char *pMsg);
 	void DoGreet();
 	void SayFormat(const char *pMsg);
+	void AddChatFilter(const char *pFilter);
 
 	void OnChatMessage(int ClientID, int Team, const char *pMsg);
 
@@ -46,6 +49,9 @@ class CChatHelper : public CComponent
 
 	static void ConSayHi(IConsole::IResult *pResult, void *pUserData);
 	static void ConSayFormat(IConsole::IResult *pResult, void *pUserData);
+	static void ConAddChatFilter(IConsole::IResult *pResult, void *pUserData);
+	static void ConListChatFilter(IConsole::IResult *pResult, void *pUserData);
+	static void ConDeleteChatFilter(IConsole::IResult *pResult, void *pUserData);
 
 public:
 	CChatHelper();
@@ -63,6 +69,7 @@ public:
 			StayAfk - Do not deactivate afk mode.
 	*/
 	void SayBuffer(const char *pMsg, bool StayAfk = false);
+	bool FilterChat(int ClientID, int Team, const char *pLine);
 	bool OnAutocomplete(CLineInput *pInput, const char *pCompletionBuffer, int PlaceholderOffset, int PlaceholderLength, int *pOldChatStringLength, int *pCompletionChosen, bool ReverseTAB);
 };
 
