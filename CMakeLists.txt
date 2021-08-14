@@ -1555,7 +1555,6 @@ set_src(ENGINE_SHARED GLOB src/engine/shared
   masterserver.cpp
   memheap.cpp
   memheap.h
-  message.h
   netban.cpp
   netban.h
   network.cpp
