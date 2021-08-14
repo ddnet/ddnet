@@ -224,7 +224,7 @@ void CGameTeams::Tick()
 		}
 	}
 
-	//Team leader who have expired the waiting time or who are disconnected, pass the lead
+	//Team leader who have expired the waiting time, transfer the leader
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		int Team = m_Core.Team(i);
@@ -400,6 +400,7 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 			ResetRoundState(OldTeam);
 			// do not reset SaveTeamResult, because it should be logged into teehistorian even if the team leaves
 		}
+		//The team leader who left the team or disconnected transfer the leader
 		ChangeTeamLeader(ClientID, OldTeam);
 	}
 	m_Core.Team(ClientID, Team);
