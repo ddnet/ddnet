@@ -543,6 +543,7 @@ void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 {
 	// Collision
 	m_Solo = pObjDDNet->m_Flags & CHARACTERFLAG_SOLO;
+	m_Jetpack = pObjDDNet->m_Flags & CHARACTERFLAG_JETPACK;
 	m_NoCollision = pObjDDNet->m_Flags & CHARACTERFLAG_NO_COLLISION;
 	m_NoHammerHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_HAMMER_HIT;
 	m_NoGrenadeHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_GRENADE_HIT;
