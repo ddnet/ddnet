@@ -238,7 +238,7 @@ image_guiicons = Image("guiicons", "gui_icons.png")
 image_arrow = Image("arrow", "arrow.png")
 image_demobuttons2 = Image("demobuttons2", "demo_buttons2.png")
 image_audio_source = Image("audio_source", "editor/audio_source.png")
-image_strongweak = Image("strongweak", "strongweak.png")
+image_strongweak = Image("strongweak", "strong_weak.png")
 
 container.images.Add(image_null)
 container.images.Add(image_game)
