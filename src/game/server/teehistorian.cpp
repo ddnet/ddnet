@@ -8,6 +8,7 @@
 static const char TEEHISTORIAN_NAME[] = "teehistorian@ddnet.tw";
 static const CUuid TEEHISTORIAN_UUID = CalculateUuid(TEEHISTORIAN_NAME);
 static const char TEEHISTORIAN_VERSION[] = "2";
+static const char TEEHISTORIAN_VERSION_MINOR[] = "2";
 
 #define UUID(id, name) static const CUuid UUID_##id = CalculateUuid(name);
 #include <engine/shared/teehistorian_ex_chunks.h>
@@ -86,9 +87,26 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 
 #define E(buf, str) EscapeJson(buf, sizeof(buf), str)
 
-	str_format(aJson, sizeof(aJson), "{\"comment\":\"%s\",\"version\":\"%s\",\"game_uuid\":\"%s\",\"server_version\":\"%s\",\"start_time\":\"%s\",\"server_name\":\"%s\",\"server_port\":\"%d\",\"game_type\":\"%s\",\"map_name\":\"%s\",\"map_size\":\"%d\",\"map_sha256\":\"%s\",\"map_crc\":\"%08x\",\"prng_description\":\"%s\",\"config\":{",
+	str_format(aJson, sizeof(aJson),
+		"{"
+		"\"comment\":\"%s\","
+		"\"version\":\"%s\","
+		"\"minor_version\":\"%s\","
+		"\"game_uuid\":\"%s\","
+		"\"server_version\":\"%s\","
+		"\"start_time\":\"%s\","
+		"\"server_name\":\"%s\","
+		"\"server_port\":\"%d\","
+		"\"game_type\":\"%s\","
+		"\"map_name\":\"%s\","
+		"\"map_size\":\"%d\","
+		"\"map_sha256\":\"%s\","
+		"\"map_crc\":\"%08x\","
+		"\"prng_description\":\"%s\","
+		"\"config\":{",
 		E(aCommentBuffer, TEEHISTORIAN_NAME),
 		TEEHISTORIAN_VERSION,
+		TEEHISTORIAN_VERSION_MINOR,
 		aGameUuid,
 		E(aServerVersionBuffer, pGameInfo->m_pServerVersion),
 		E(aStartTimeBuffer, aStartTime),
