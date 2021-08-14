@@ -552,3 +552,23 @@ TEST_F(TeeHistorian, TeamChange)
 	Finish();
 	Expect(EXPECTED, sizeof(EXPECTED));
 }
+
+TEST_F(TeeHistorian, TeamPractice)
+{
+	const unsigned char EXPECTED[] = {
+		// EX uuid=5792834e-81d1-34c9-a29b-b5ff25dac3bc datalen=2
+		0x4a,
+		0x57, 0x92, 0x83, 0x4e, 0x81, 0xd1, 0x34, 0xc9,
+		0xa2, 0x9b, 0xb5, 0xff, 0x25, 0xda, 0xc3, 0xbc,
+		0x02,
+		// team=23
+		0x17,
+		// practice=1
+		0x01,
+		// FINISH
+		0x40};
+
+	m_TH.RecordTeamPractice(23, 1);
+	Finish();
+	Expect(EXPECTED, sizeof(EXPECTED));
+}

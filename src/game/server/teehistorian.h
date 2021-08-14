@@ -58,6 +58,7 @@ public:
 	void RecordPlayer(int ClientID, const CNetObj_CharacterCore *pChar);
 	void RecordDeadPlayer(int ClientID);
 	void RecordPlayerTeam(int ClientID, int Team);
+	void RecordTeamPractice(int Team, bool Practice);
 	void EndPlayers();
 
 	void BeginInputs();
@@ -125,6 +126,7 @@ private:
 	int m_PrevMaxClientID;
 	int m_MaxClientID;
 	int m_aPrevPlayerTeam[MAX_CLIENTS];
+	bool m_aPrevTeamPractice[MAX_CLIENTS];
 	CPlayer m_aPrevPlayers[MAX_CLIENTS];
 };
 

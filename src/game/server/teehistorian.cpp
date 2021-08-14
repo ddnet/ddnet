@@ -52,6 +52,10 @@ void CTeeHistorian::Reset(const CGameInfo *pGameInfo, WRITE_CALLBACK pfnWriteCal
 	{
 		PrevPlayerTeam = 0;
 	}
+	for(auto &PrevTeamPractice : m_aPrevTeamPractice)
+	{
+		PrevTeamPractice = false;
+	}
 
 	// `m_PrevMaxClientID` is initialized in `BeginPlayers`
 	for(auto &PrevPlayer : m_aPrevPlayers)
@@ -335,6 +339,28 @@ void CTeeHistorian::RecordPlayerTeam(int ClientID, int Team)
 		}
 
 		WriteExtra(UUID_TEEHISTORIAN_TEAM_CHANGE, Buffer.Data(), Buffer.Size());
+	}
+}
+
+void CTeeHistorian::RecordTeamPractice(int Team, bool Practice)
+{
+	if(m_aPrevTeamPractice[Team] != Practice)
+	{
+		m_aPrevTeamPractice[Team] = Practice;
+
+		EnsureTickWritten();
+
+		CPacker Buffer;
+		Buffer.Reset();
+		Buffer.AddInt(Team);
+		Buffer.AddInt(Practice);
+
+		if(m_Debug)
+		{
+			dbg_msg("teehistorian", "team_rescue team=%d practice=%d", Team, Practice);
+		}
+
+		WriteExtra(UUID_TEEHISTORIAN_TEAM_PRACTICE, Buffer.Data(), Buffer.Size());
 	}
 }
 

@@ -1078,6 +1078,10 @@ void CGameContext::OnTick()
 				m_TeeHistorian.RecordPlayerTeam(i, pController->m_Teams.m_Core.Team(i));
 			}
 		}
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			m_TeeHistorian.RecordTeamPractice(i, pController->m_Teams.IsPractice(i));
+		}
 		m_TeeHistorian.EndPlayers();
 		m_TeeHistorian.BeginInputs();
 	}
