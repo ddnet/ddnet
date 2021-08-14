@@ -1542,28 +1542,25 @@ void CGameContext::ConSetTeamLeader(IConsole::IResult *pResult, void *pUserData)
 	CGameTeams &Teams = ((CGameControllerDDRace *)pSelf->m_pController)->m_Teams;
 	int Team = Teams.m_Core.Team(pResult->m_ClientID);
 
+	if(Team <= 0 || Team >= MAX_CLIENTS)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You have to be in a team before becoming/transfer the team leader.");
+		return;
+	}
+
 	if(pResult->NumArguments() > 0)
 		ConTransferTeamLeader(pResult, pUserData);
 	else
 	{
-		if(Team > 0 && Team < MAX_CLIENTS)
+		if(!Teams.TeamHasLeader(Team))
 		{
-			if(!Teams.TeamHasLeader(Team))
-			{
-				Teams.SetTeamLeader(pResult->m_ClientID, Team);
-				char aBuf[512];
-				str_format(aBuf, sizeof(aBuf), "'%s' is now the team leader.", pSelf->Server()->ClientName(pResult->m_ClientID));
-				pSelf->SendChat(-1, Team, aBuf);
-			}
-			else
-			{
-				pSelf->SendChatTarget(pResult->m_ClientID, "There is already a leader in your team.");
-			}
+			Teams.SetTeamLeader(pResult->m_ClientID, Team);
+			char aBuf[512];
+			str_format(aBuf, sizeof(aBuf), "'%s' is now the team leader.", pSelf->Server()->ClientName(pResult->m_ClientID));
+			pSelf->SendChat(-1, Team, aBuf);
 		}
 		else
-		{
-			pSelf->SendChatTarget(pResult->m_ClientID, "You can't become a leader without being found in a team.");
-		}
+			pSelf->SendChatTarget(pResult->m_ClientID, "There is already a leader in your team.");
 	}
 }
 
@@ -1575,47 +1572,45 @@ void CGameContext::ConTransferTeamLeader(IConsole::IResult *pResult, void *pUser
 	CGameTeams &Teams = ((CGameControllerDDRace *)pSelf->m_pController)->m_Teams;
 	int Team = Teams.m_Core.Team(pResult->m_ClientID);
 
-	if(Team > 0 && Team < MAX_CLIENTS)
+	if(!Teams.TeamHasLeader(Team))
 	{
-		if(!Teams.TeamHasLeader(Team))
-		{
-			pSelf->SendChatTarget(pResult->m_ClientID, "The team does not have a leader, use /leader.");
-			return;
-		}
-		else if(!Teams.TeamLeader(pResult->m_ClientID))
-		{
-			pSelf->SendChatTarget(pResult->m_ClientID, "You can't transfer a leader because you're not a leader.");
-			return;
-		}
-
-		int Target = -1;
-		for(int i = 0; i < MAX_CLIENTS; i++)
-		{
-			if(!str_comp(pName, pSelf->Server()->ClientName(i)))
-			{
-				Target = i;
-				break;
-			}
-		}
-
-		if(Target < 0)
-		{
-			pSelf->SendChatTarget(pResult->m_ClientID, "Player not found.");
-			return;
-		}
-		else if(Target == pResult->m_ClientID)
-		{
-			pSelf->SendChatTarget(pResult->m_ClientID, "You can't transfer the leader on to yourself.");
-			return;
-		}
-
-		char aBuf[512];
-		str_format(aBuf, sizeof aBuf, "'%s' transfer the leader to '%s'.", pSelf->Server()->ClientName(pResult->m_ClientID), pSelf->Server()->ClientName(Target));
-		pSelf->SendChat(-1, Team, aBuf);
-		Teams.SetNewTeamLeader(Target, pResult->m_ClientID, Team);
+		pSelf->SendChatTarget(pResult->m_ClientID, "The team does not have a leader, use /leader.");
+		return;
 	}
-	else
+	else if(!Teams.TeamLeader(pResult->m_ClientID))
 	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "You can't transfer a leader without being found in a team.");
+		pSelf->SendChatTarget(pResult->m_ClientID, "You can't do this because you are not the team leader.");
+		return;
 	}
+
+	int Target = -1;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(!str_comp(pName, pSelf->Server()->ClientName(i)))
+		{
+			Target = i;
+			break;
+		}
+	}
+
+	if(Target < 0)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "Player not found.");
+		return;
+	}
+	else if(Target == pResult->m_ClientID)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You are already the team leader.");
+		return;
+	}
+	else if(Team != Teams.m_Core.Team(Target))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "This player is not in your team.");
+		return;
+	}
+
+	char aBuf[512];
+	str_format(aBuf, sizeof aBuf, "'%s' has transfered the team leader position to '%s'.", pSelf->Server()->ClientName(pResult->m_ClientID), pSelf->Server()->ClientName(Target));
+	pSelf->SendChat(-1, Team, aBuf);
+	Teams.SetNewTeamLeader(Target, pResult->m_ClientID, Team);
 }

@@ -2368,7 +2368,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			{
 				if(!Teams.TeamLeader(ClientID) && Teams.IsStarted(Team) && Teams.TeamLocked(Team))
 				{
-					SendChatTarget(ClientID, "You can't kill the team because you're not the leader. If you want kill unlock team");
+					SendChatTarget(ClientID, "You can't kill the team because you're not the leader. If you want to kill unlock team");
 					return;
 				}
 			}

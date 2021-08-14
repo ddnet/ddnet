@@ -223,12 +223,15 @@ void CGameTeams::Tick()
 			TeamHasWantedStartTime |= ((uint64_t)1) << m_Core.Team(i);
 		}
 	}
+
+	//Team leader who have expired the waiting time or who are disconnected, pass the lead
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		int Team = m_Core.Team(i);
 		if(Server()->GetNetErrorString(i)[0] && Team != 0)
 			ChangeTeamLeader(i, Team);
 	}
+
 	TeamHasWantedStartTime &= ~(uint64_t)1;
 	if(!TeamHasWantedStartTime)
 	{
@@ -1093,7 +1096,7 @@ void CGameTeams::ChangeTeamLeader(int ClientID, int Team)
 			{
 				SetTeamLeader(i, Team);
 				char aBuf[512];
-				str_format(aBuf, sizeof(aBuf), "Team leader '%s' has left/timeout this team, now the team leader is '%s'.",
+				str_format(aBuf, sizeof(aBuf), "The team leader '%s' has left or got timeouted, the new team leader is '%s'.",
 					GameServer()->Server()->ClientName(ClientID), GameServer()->Server()->ClientName(i));
 				GameServer()->SendChat(-1, Team, aBuf);
 				break;
