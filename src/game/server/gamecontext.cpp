@@ -1070,6 +1070,14 @@ void CGameContext::OnTick()
 				m_TeeHistorian.RecordDeadPlayer(i);
 			}
 		}
+		auto pController = ((CGameControllerDDRace *)m_pController);
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(m_apPlayers[i] != nullptr)
+			{
+				m_TeeHistorian.RecordPlayerTeam(i, pController->m_Teams.m_Core.Team(i));
+			}
+		}
 		m_TeeHistorian.EndPlayers();
 		m_TeeHistorian.BeginInputs();
 	}

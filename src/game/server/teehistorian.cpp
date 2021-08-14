@@ -48,6 +48,11 @@ void CTeeHistorian::Reset(const CGameInfo *pGameInfo, WRITE_CALLBACK pfnWriteCal
 	// Tick 0 is implicit at the start, game starts as tick 1.
 	m_TickWritten = true;
 	m_MaxClientID = MAX_CLIENTS;
+	for(auto &PrevPlayerTeam : m_aPrevPlayerTeam)
+	{
+		PrevPlayerTeam = 0;
+	}
+
 	// `m_PrevMaxClientID` is initialized in `BeginPlayers`
 	for(auto &PrevPlayer : m_aPrevPlayers)
 	{
@@ -309,6 +314,28 @@ void CTeeHistorian::RecordDeadPlayer(int ClientID)
 		Write(Buffer.Data(), Buffer.Size());
 	}
 	pPrev->m_Alive = false;
+}
+
+void CTeeHistorian::RecordPlayerTeam(int ClientID, int Team)
+{
+	if(m_aPrevPlayerTeam[ClientID] != Team)
+	{
+		m_aPrevPlayerTeam[ClientID] = Team;
+
+		EnsureTickWritten();
+
+		CPacker Buffer;
+		Buffer.Reset();
+		Buffer.AddInt(ClientID);
+		Buffer.AddInt(Team);
+
+		if(m_Debug)
+		{
+			dbg_msg("teehistorian", "team_change cid=%d team=%d", ClientID, Team);
+		}
+
+		WriteExtra(UUID_TEEHISTORIAN_TEAM_CHANGE, Buffer.Data(), Buffer.Size());
+	}
 }
 
 void CTeeHistorian::Write(const void *pData, int DataSize)
