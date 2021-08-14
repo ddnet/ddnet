@@ -1,15 +1,14 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-/*
-#include "flag.h"
+#include "character.h"
 #include <game/server/gamecontext.h>
 
-CFlag::CFlag(CGameWorld *pGameWorld, int Team)
-: CEntity(pGameWorld, CGameWorld::ENTTYPE_FLAG)
+#include "flag.h"
+CFlag::CFlag(CGameWorld *pGameWorld, int Team) :
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_FLAG)
 {
 	m_Team = Team;
-	m_ProximityRadius = ms_PhysSize;
-	m_pCarryingCharacter = NULL;
+	m_pCarrier = NULL;
 	m_GrabTick = 0;
 
 	Reset();
@@ -17,11 +16,35 @@ CFlag::CFlag(CGameWorld *pGameWorld, int Team)
 
 void CFlag::Reset()
 {
-	m_pCarryingCharacter = NULL;
+	m_pCarrier = NULL;
 	m_AtStand = 1;
 	m_Pos = m_StandPos;
-	m_Vel = vec2(0,0);
+	m_Vel = vec2(0, 0);
 	m_GrabTick = 0;
+}
+
+void CFlag::Grab(CCharacter *pChar)
+{
+	m_pCarrier = pChar;
+	if(m_AtStand)
+		m_GrabTick = Server()->Tick();
+	m_AtStand = false;
+}
+
+void CFlag::Drop()
+{
+	m_pCarrier = 0;
+	m_Vel = vec2(0, 0);
+	m_DropTick = Server()->Tick();
+}
+
+void CFlag::TickDefered()
+{
+	if(m_pCarrier)
+	{
+		// update flag position
+		m_Pos = m_pCarrier->GetPos();
+	}
 }
 
 void CFlag::TickPaused()
@@ -44,4 +67,3 @@ void CFlag::Snap(int SnappingClient)
 	pFlag->m_Y = (int)m_Pos.y;
 	pFlag->m_Team = m_Team;
 }
-*/

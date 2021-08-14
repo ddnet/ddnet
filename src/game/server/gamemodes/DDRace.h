@@ -11,6 +11,10 @@
 struct CScoreInitResult;
 class CGameControllerDDRace : public IGameController
 {
+	// gctf
+	class CFlag *m_apFlags[2];
+	bool m_IsGrounded;
+
 public:
 	CGameControllerDDRace(class CGameContext *pGameServer);
 	~CGameControllerDDRace();
@@ -39,5 +43,12 @@ public:
 	std::map<int, std::vector<vec2>> m_TeleCheckOuts;
 
 	std::shared_ptr<CScoreInitResult> m_pInitResult;
+
+	// gctf
+
+	virtual void Snap(int SnappingClient);
+	virtual int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon);
+	virtual bool OnEntity(int Index, vec2 Pos);
+	void FlagTick();
 };
 #endif // GAME_SERVER_GAMEMODES_DDRACE_H
