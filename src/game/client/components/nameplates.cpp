@@ -203,7 +203,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		}
 	}
 
-	if((g_Config.m_Debug || g_Config.m_ClNameplatesStrong) && m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientID].m_HasExtendedData)
+	if((g_Config.m_Debug || g_Config.m_ClNameplatesStrong) && m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_HasExtendedData)
 	{
 		CCharacter *pCharacter = m_pClient->m_GameWorld.GetCharacterByID(pPlayerInfo->m_ClientID);
 		if(pCharacter)
