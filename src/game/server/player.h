@@ -100,11 +100,6 @@ public:
 	int m_LastActionTick;
 	int m_TeamChangeTick;
 	bool m_SentSemicolonTip;
-	struct
-	{
-		int m_TargetX;
-		int m_TargetY;
-	} m_LatestActivity;
 
 	// network latency calculations
 	struct
@@ -182,19 +177,16 @@ public:
 
 	bool m_Moderating;
 
-	bool AfkTimer(int new_target_x, int new_target_y); //returns true if kicked
+	bool AfkTimer(CNetObj_PlayerInput *NewTarget); //returns true if kicked
 	void UpdatePlaytime();
 	void AfkVoteTimer(CNetObj_PlayerInput *NewTarget);
 	int64_t m_LastPlaytime;
 	int64_t m_LastEyeEmote;
 	int64_t m_LastBroadcast;
 	bool m_LastBroadcastImportance;
-	int m_LastTarget_x;
-	int m_LastTarget_y;
 	CNetObj_PlayerInput *m_pLastTarget;
-	int m_Sent1stAfkWarning; // afk timer's 1st warning after 50% of sv_max_afk_time
-	int m_Sent2ndAfkWarning; // afk timer's 2nd warning after 90% of sv_max_afk_time
-	char m_pAfkMsg[160];
+	bool m_Sent1stAfkWarning; // afk timer's 1st warning after 50% of sv_max_afk_time
+	bool m_Sent2ndAfkWarning; // afk timer's 2nd warning after 90% of sv_max_afk_time
 	bool m_EyeEmoteEnabled;
 	int m_TimerType;
 

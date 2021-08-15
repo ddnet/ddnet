@@ -55,9 +55,8 @@ void CPlayer::Reset()
 
 	m_LastCommandPos = 0;
 	m_LastPlaytime = 0;
-	m_LastEyeEmote = 0;
-	m_Sent1stAfkWarning = 0;
-	m_Sent2ndAfkWarning = 0;
+	m_Sent1stAfkWarning = false;
+	m_Sent2ndAfkWarning = false;
 	m_ChatScore = 0;
 	m_Moderating = false;
 	m_EyeEmoteEnabled = true;
@@ -72,7 +71,7 @@ void CPlayer::Reset()
 	m_LastSetSpectatorMode = 0;
 	m_TimeoutCode[0] = '\0';
 	delete m_pLastTarget;
-	m_pLastTarget = nullptr;
+	m_pLastTarget = new CNetObj_PlayerInput({0});
 	m_TuneZone = 0;
 	m_TuneZoneOld = m_TuneZone;
 	m_Halloween = false;
@@ -520,7 +519,7 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 	if(NewInput->m_PlayerFlags)
 		Server()->SetClientFlags(m_ClientID, NewInput->m_PlayerFlags);
 
-	if(AfkTimer(NewInput->m_TargetX, NewInput->m_TargetY))
+	if(AfkTimer(NewInput))
 		return; // we must return if kicked, as player struct is already deleted
 	AfkVoteTimer(NewInput);
 
@@ -550,12 +549,10 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 		m_Spawning = true;
 
 	// check for activity
-	if(NewInput->m_Direction || m_LatestActivity.m_TargetX != NewInput->m_TargetX ||
-		m_LatestActivity.m_TargetY != NewInput->m_TargetY || NewInput->m_Jump ||
-		NewInput->m_Fire & 1 || NewInput->m_Hook)
+	if(mem_comp(NewInput, m_pLastTarget, sizeof(CNetObj_PlayerInput)))
 	{
-		m_LatestActivity.m_TargetX = NewInput->m_TargetX;
-		m_LatestActivity.m_TargetY = NewInput->m_TargetY;
+		mem_copy(m_pLastTarget, NewInput, sizeof(CNetObj_PlayerInput));
+		UpdatePlaytime();
 		m_LastActionTick = Server()->Tick();
 	}
 }
@@ -702,7 +699,7 @@ void CPlayer::TryRespawn()
 		m_pCharacter->SetSolo(true);
 }
 
-bool CPlayer::AfkTimer(int NewTargetX, int NewTargetY)
+bool CPlayer::AfkTimer(CNetObj_PlayerInput *NewTarget)
 {
 	/*
 		afk timer (x, y = mouse coordinates)
@@ -718,36 +715,36 @@ bool CPlayer::AfkTimer(int NewTargetX, int NewTargetY)
 	if(g_Config.m_SvMaxAfkTime == 0)
 		return false; // 0 = disabled
 
-	if(NewTargetX != m_LastTarget_x || NewTargetY != m_LastTarget_y)
+	if(NewTarget->m_TargetX != m_pLastTarget->m_TargetX || NewTarget->m_TargetY != m_pLastTarget->m_TargetY)
 	{
 		UpdatePlaytime();
-		m_LastTarget_x = NewTargetX;
-		m_LastTarget_y = NewTargetY;
-		m_Sent1stAfkWarning = 0; // afk timer's 1st warning after 50% of sv_max_afk_time
-		m_Sent2ndAfkWarning = 0;
+		// we shouldn't update m_pLastTarget here
+		m_Sent1stAfkWarning = false; // afk timer's 1st warning after 50% of sv_max_afk_time
+		m_Sent2ndAfkWarning = false;
 	}
 	else
 	{
 		if(!m_Paused)
 		{
+			char AfkMsg[160];
 			// not playing, check how long
-			if(m_Sent1stAfkWarning == 0 && m_LastPlaytime < time_get() - time_freq() * (int)(g_Config.m_SvMaxAfkTime * 0.5))
+			if(!m_Sent1stAfkWarning && m_LastPlaytime < time_get() - time_freq() * (int)(g_Config.m_SvMaxAfkTime * 0.5))
 			{
-				str_format(m_pAfkMsg, sizeof(m_pAfkMsg),
+				str_format(AfkMsg, sizeof(AfkMsg),
 					"You have been afk for %d seconds now. Please note that you get kicked after not playing for %d seconds.",
 					(int)(g_Config.m_SvMaxAfkTime * 0.5),
 					g_Config.m_SvMaxAfkTime);
-				m_pGameServer->SendChatTarget(m_ClientID, m_pAfkMsg);
-				m_Sent1stAfkWarning = 1;
+				m_pGameServer->SendChatTarget(m_ClientID, AfkMsg);
+				m_Sent1stAfkWarning = true;
 			}
-			else if(m_Sent2ndAfkWarning == 0 && m_LastPlaytime < time_get() - time_freq() * (int)(g_Config.m_SvMaxAfkTime * 0.9))
+			else if(!m_Sent2ndAfkWarning && m_LastPlaytime < time_get() - time_freq() * (int)(g_Config.m_SvMaxAfkTime * 0.9))
 			{
-				str_format(m_pAfkMsg, sizeof(m_pAfkMsg),
+				str_format(AfkMsg, sizeof(AfkMsg),
 					"You have been afk for %d seconds now. Please note that you get kicked after not playing for %d seconds.",
 					(int)(g_Config.m_SvMaxAfkTime * 0.9),
 					g_Config.m_SvMaxAfkTime);
-				m_pGameServer->SendChatTarget(m_ClientID, m_pAfkMsg);
-				m_Sent2ndAfkWarning = 1;
+				m_pGameServer->SendChatTarget(m_ClientID, AfkMsg);
+				m_Sent2ndAfkWarning = true;
 			}
 			else if(m_LastPlaytime < time_get() - time_freq() * g_Config.m_SvMaxAfkTime)
 			{
@@ -769,19 +766,7 @@ void CPlayer::AfkVoteTimer(CNetObj_PlayerInput *NewTarget)
 	if(g_Config.m_SvMaxAfkVoteTime == 0)
 		return;
 
-	if(!m_pLastTarget)
-	{
-		m_pLastTarget = new CNetObj_PlayerInput(*NewTarget);
-		m_LastPlaytime = 0;
-		m_Afk = true;
-		return;
-	}
-	else if(mem_comp(NewTarget, m_pLastTarget, sizeof(CNetObj_PlayerInput)) != 0)
-	{
-		UpdatePlaytime();
-		mem_copy(m_pLastTarget, NewTarget, sizeof(CNetObj_PlayerInput));
-	}
-	else if(m_LastPlaytime < time_get() - time_freq() * g_Config.m_SvMaxAfkVoteTime)
+	if(m_LastPlaytime < time_get() - time_freq() * g_Config.m_SvMaxAfkVoteTime)
 	{
 		m_Afk = true;
 		return;
