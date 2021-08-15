@@ -50,6 +50,7 @@ void CScorePlayerResult::SetVariant(Variant v)
 		break;
 	case PLAYER_INFO:
 		m_Data.m_Info.m_Score = -9999;
+		m_Data.m_Info.m_Score = 0; // gctf
 		m_Data.m_Info.m_Birthday = 0;
 		m_Data.m_Info.m_HasFinishScore = false;
 		m_Data.m_Info.m_Time = 0;

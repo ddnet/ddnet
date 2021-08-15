@@ -115,6 +115,7 @@ void CPlayer::Reset()
 
 	m_LastPause = 0;
 	m_Score = -9999;
+	m_Score = 0; // gctf
 	m_HasFinishScore = false;
 
 	// Variable initialized:
