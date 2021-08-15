@@ -2484,7 +2484,7 @@ void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
 		Item.m_Rect.VSplitLeft(Item.m_Rect.h * 2.0f, &Icon, &Item.m_Rect);
 
 		// draw icon if it exists
-		if(Theme.m_IconTexture != -1)
+		if(Theme.m_IconTexture.IsValid())
 		{
 			Icon.VMargin(6.0f, &Icon);
 			Icon.HMargin(3.0f, &Icon);

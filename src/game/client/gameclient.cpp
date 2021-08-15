@@ -1318,6 +1318,7 @@ void CGameClient::OnNewSnapshot()
 					CClientData *pClient = &m_aClients[Item.m_ID];
 					// Collision
 					pClient->m_Solo = pCharacterData->m_Flags & CHARACTERFLAG_SOLO;
+					pClient->m_Jetpack = pCharacterData->m_Flags & CHARACTERFLAG_JETPACK;
 					pClient->m_NoCollision = pCharacterData->m_Flags & CHARACTERFLAG_NO_COLLISION;
 					pClient->m_NoHammerHit = pCharacterData->m_Flags & CHARACTERFLAG_NO_HAMMER_HIT;
 					pClient->m_NoGrenadeHit = pCharacterData->m_Flags & CHARACTERFLAG_NO_GRENADE_HIT;

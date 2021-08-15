@@ -24,7 +24,7 @@ void CMenus::LoadEntities(SCustomEntities *pEntitiesItem, void *pUser)
 				pEntitiesItem->m_aImages[i].m_Texture = pThis->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, ImgInfo.m_Format, 0);
 				pThis->Graphics()->FreePNG(&ImgInfo);
 
-				if(pEntitiesItem->m_RenderTexture == -1)
+				if(!pEntitiesItem->m_RenderTexture.IsValid())
 					pEntitiesItem->m_RenderTexture = pEntitiesItem->m_aImages[i].m_Texture;
 			}
 		}
@@ -40,7 +40,7 @@ void CMenus::LoadEntities(SCustomEntities *pEntitiesItem, void *pUser)
 				pEntitiesItem->m_aImages[i].m_Texture = pThis->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, ImgInfo.m_Format, 0);
 				pThis->Graphics()->FreePNG(&ImgInfo);
 
-				if(pEntitiesItem->m_RenderTexture == -1)
+				if(!pEntitiesItem->m_RenderTexture.IsValid())
 					pEntitiesItem->m_RenderTexture = pEntitiesItem->m_aImages[i].m_Texture;
 			}
 			else
@@ -52,7 +52,7 @@ void CMenus::LoadEntities(SCustomEntities *pEntitiesItem, void *pUser)
 					pEntitiesItem->m_aImages[i].m_Texture = pThis->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, ImgInfo.m_Format, 0);
 					pThis->Graphics()->FreePNG(&ImgInfo);
 
-					if(pEntitiesItem->m_RenderTexture == -1)
+					if(!pEntitiesItem->m_RenderTexture.IsValid())
 						pEntitiesItem->m_RenderTexture = pEntitiesItem->m_aImages[i].m_Texture;
 				}
 			}
@@ -228,7 +228,7 @@ void ClearAssetList(sorted_array<TName> &List, IGraphics *pGraphics)
 {
 	for(int i = 0; i < List.size(); ++i)
 	{
-		if(List[i].m_RenderTexture != -1)
+		if(List[i].m_RenderTexture.IsValid())
 			pGraphics->UnloadTexture(List[i].m_RenderTexture);
 		List[i].m_RenderTexture = IGraphics::CTextureHandle();
 	}
@@ -243,7 +243,7 @@ void CMenus::ClearCustomItems(int CurTab)
 		{
 			for(auto &Image : m_EntitiesList[i].m_aImages)
 			{
-				if(Image.m_Texture != -1)
+				if(Image.m_Texture.IsValid())
 					Graphics()->UnloadTexture(Image.m_Texture);
 				Image.m_Texture = IGraphics::CTextureHandle();
 			}
@@ -462,7 +462,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 			ItemRect.HSplitTop(15, &ItemRect, &TextureRect);
 			TextureRect.HSplitTop(10, NULL, &TextureRect);
 			UI()->DoLabelScaled(&ItemRect, s->m_aName, ItemRect.h - 2, 0);
-			if(s->m_RenderTexture != -1)
+			if(s->m_RenderTexture.IsValid())
 			{
 				Graphics()->WrapClamp();
 				Graphics()->TextureSet(s->m_RenderTexture);
