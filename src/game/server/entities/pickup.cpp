@@ -54,7 +54,7 @@ void CPickup::Tick()
 	for(int i = 0; i < Num; ++i)
 	{
 		CCharacter *pChr = apEnts[i];
-		
+
 		if(pChr && pChr->IsAlive())
 		{
 			if(m_Layer == LAYER_SWITCH && m_Number > 0 && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pChr->Team()])
