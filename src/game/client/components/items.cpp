@@ -109,7 +109,7 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemID)
 			Graphics()->QuadsSetRotation(0);
 	}
 
-	if(GameClient()->m_GameSkin.m_SpriteWeaponProjectiles[CurWeapon] != -1)
+	if(GameClient()->m_GameSkin.m_SpriteWeaponProjectiles[CurWeapon].IsValid())
 	{
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteWeaponProjectiles[CurWeapon]);
 		Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
