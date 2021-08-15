@@ -43,7 +43,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_EmoteStop = -1;
 	m_LastAction = -1;
 	m_LastNoAmmoSound = -1;
-	m_LastWeapon = WEAPON_HAMMER;
+	m_LastWeapon = WEAPON_GRENADE;
 	m_QueuedWeapon = -1;
 	m_LastRefillJumps = false;
 	m_LastPenalty = false;
@@ -64,7 +64,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 
 	m_Core.Reset();
 	m_Core.Init(&GameServer()->m_World.m_Core, GameServer()->Collision());
-	m_Core.m_ActiveWeapon = WEAPON_GUN;
+	m_Core.m_ActiveWeapon = WEAPON_GRENADE;
 	m_Core.m_Pos = m_Pos;
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()] = &m_Core;
 
@@ -1047,6 +1047,10 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 		}
 		GameServer()->CreateSound(GameServer()->m_apPlayers[From]->m_ViewPos, SOUND_HIT, Mask);
 	}
+	*/
+
+	// no self damage
+	m_Health = From == m_pPlayer->GetCID() ? m_Health : 0;
 
 	// check for death
 	if(m_Health <= 0)
@@ -1067,6 +1071,7 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 		return false;
 	}
 
+	/*
 	if (Dmg > 2)
 		GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_LONG);
 	else
