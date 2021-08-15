@@ -115,7 +115,7 @@ void CPlayerPics::Render(const char *pName, const vec4 *pColor, float x, float y
 	if(!pFlag)
 		return;
 
-	if(pFlag->m_Texture != -1)
+	if(pFlag->m_Texture.IsValid())
 	{
 		Graphics()->TextureSet(pFlag->m_Texture);
 		Graphics()->QuadsBegin();
