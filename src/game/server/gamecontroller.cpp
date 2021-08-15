@@ -675,9 +675,11 @@ bool IGameController::CanJoinTeam(int Team, int NotThisID)
 
 int IGameController::ClampTeam(int Team)
 {
-	if(Team < 0)
+	if(Team < TEAM_RED)
 		return TEAM_SPECTATORS;
-	return 0;
+	if(IsTeamplay())
+		return Team&1;
+	return TEAM_RED;
 }
 
 int64_t IGameController::GetMaskForPlayerWorldEvent(int Asker, int ExceptID)
