@@ -320,7 +320,7 @@ void CGameControllerDDRace::FlagTick()
 				if(distance(F->GetPos(), m_apFlags[fi ^ 1]->GetPos()) < CFlag::ms_PhysSize + CCharacter::ms_PhysSize)
 				{
 					// CAPTURE! \o/
-					m_aTeamscore[fi^1] += 100;
+					m_aTeamscore[fi ^ 1] += 100;
 					F->GetCarrier()->GetPlayer()->m_Score += 5;
 					// float Diff = Server()->Tick() - F->GetGrabTick();
 
@@ -373,7 +373,7 @@ void CGameControllerDDRace::FlagTick()
 				{
 					// take the flag
 					if(F->IsAtStand())
-						m_aTeamscore[fi^1]++;
+						m_aTeamscore[fi ^ 1]++;
 
 					F->Grab(apCloseCCharacters[i]);
 
@@ -447,11 +447,11 @@ bool CGameControllerDDRace::DoWincheckMatch()
 {
 	// check score win condition
 	if((m_GameInfo.m_ScoreLimit > 0 && (m_aTeamscore[TEAM_RED] >= m_GameInfo.m_ScoreLimit || m_aTeamscore[TEAM_BLUE] >= m_GameInfo.m_ScoreLimit)) ||
-		(m_GameInfo.m_TimeLimit > 0 && (Server()->Tick()-m_GameStartTick) >= m_GameInfo.m_TimeLimit*Server()->TickSpeed()*60))
+		(m_GameInfo.m_TimeLimit > 0 && (Server()->Tick() - m_GameStartTick) >= m_GameInfo.m_TimeLimit * Server()->TickSpeed() * 60))
 	{
 		if(m_SuddenDeath)
 		{
-			if(m_aTeamscore[TEAM_RED]/100 != m_aTeamscore[TEAM_BLUE]/100)
+			if(m_aTeamscore[TEAM_RED] / 100 != m_aTeamscore[TEAM_BLUE] / 100)
 			{
 				EndMatch();
 				return true;

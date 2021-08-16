@@ -1062,10 +1062,10 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 		Die(From, Weapon);
 
 		// set attacker's face to happy (taunt!)
-		if (From >= 0 && From != m_pPlayer->GetCID() && GameServer()->m_apPlayers[From])
+		if(From >= 0 && From != m_pPlayer->GetCID() && GameServer()->m_apPlayers[From])
 		{
 			CCharacter *pChr = GameServer()->m_apPlayers[From]->GetCharacter();
-			if (pChr)
+			if(pChr)
 			{
 				pChr->m_EmoteType = EMOTE_HAPPY;
 				pChr->m_EmoteStop = Server()->Tick() + Server()->TickSpeed();

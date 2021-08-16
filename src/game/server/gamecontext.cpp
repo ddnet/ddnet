@@ -1203,8 +1203,8 @@ void CGameContext::OnClientEnter(int ClientID)
 			Msg.m_GameFlags = protocol7::GAMEFLAG_TEAMS | protocol7::GAMEFLAG_FLAGS; // gctf
 			Msg.m_MatchCurrent = 1;
 			Msg.m_MatchNum = 0;
-			Msg.m_ScoreLimit = 0;
-			Msg.m_TimeLimit = 0;
+			Msg.m_ScoreLimit = Config()->m_SvScorelimit; // gctf
+			Msg.m_TimeLimit = Config()->m_SvTimelimit; // gctf
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientID);
 		}
 

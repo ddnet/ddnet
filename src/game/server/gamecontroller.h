@@ -120,7 +120,7 @@ public:
 	void ChangeMap(const char *pToMap);
 
 	bool IsFriendlyFire(int ClientID1, int ClientID2);
-	bool IsTeamplay() const { return m_GameFlags&GAMEFLAG_TEAMS; }
+	bool IsTeamplay() const { return m_GameFlags & GAMEFLAG_TEAMS; }
 
 	bool IsForceBalanced();
 
@@ -156,9 +156,28 @@ public:
 private:
 	int m_aTeamSize[protocol7::NUM_TEAMS];
 
-	virtual bool DoWincheckMatch();		// returns true when the match is over
+	// game
+	enum EGameState
+	{
+		// internal game states
+		IGS_WARMUP_GAME, // warmup started by game because there're not enough players (infinite)
+		IGS_WARMUP_USER, // warmup started by user action via rcon or new match (infinite or timer)
+
+		IGS_START_COUNTDOWN, // start countown to unpause the game or start match/round (tick timer)
+
+		IGS_GAME_PAUSED, // game paused (infinite or tick timer)
+		IGS_GAME_RUNNING, // game running (infinite)
+
+		IGS_END_MATCH, // match is over (tick timer)
+		IGS_END_ROUND, // round is over (tick timer)
+	};
+	EGameState m_GameState;
+	int m_GameStateTimer;
+
+	virtual bool DoWincheckMatch(); // returns true when the match is over
 	virtual void DoWincheckRound() {}
 	bool HasEnoughPlayers() const { return (IsTeamplay() && m_aTeamSize[TEAM_RED] > 0 && m_aTeamSize[TEAM_BLUE] > 0) || (!IsTeamplay() && m_aTeamSize[TEAM_RED] > 1); }
+	void SetGameState(EGameState GameState, int Timer = 0);
 	void StartMatch();
 
 protected:
@@ -172,9 +191,16 @@ protected:
 	int m_GameStartTick;
 	int m_aTeamscore[protocol7::NUM_TEAMS];
 
-	void EndMatch() { /* SetGameState(IGS_END_MATCH, TIMER_END); */ }
+	// void EndMatch() { SetGameState(IGS_END_MATCH, TIMER_END); }
+	void EndMatch();
 
 public:
+	enum
+	{
+		TIMER_INFINITE = -1,
+		TIMER_END = 10,
+	};
+
 	int GetStartTeam();
 };
 
