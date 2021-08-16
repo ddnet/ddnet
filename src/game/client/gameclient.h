@@ -370,6 +370,9 @@ public:
 		bool m_Paused;
 		bool m_Spec;
 
+		// Editor allows 256 switches for now.
+		bool m_SwitchStates[256];
+
 		CNetObj_Character m_Snapped;
 		CNetObj_Character m_Evolved;
 
