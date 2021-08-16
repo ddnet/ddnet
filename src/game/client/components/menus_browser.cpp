@@ -870,25 +870,44 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 					Rect.h = TypesHeight;
 
 					int Button = UI()->DoButtonLogic(&s_aTypeButtons[TypeIndex], "", 0, &Rect);
-					if(Button == 1)
+					if(Button == 1 || Button == 2)
 					{
-						// left click to toggle flag filter
-						if(Active)
-							ServerBrowser()->DDNetFilterAdd(pFilterExcludeTypes, pName);
-						else
-							ServerBrowser()->DDNetFilterRem(pFilterExcludeTypes, pName);
-
-						ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
-					}
-					else if(Button == 2)
-					{
-						// right click to exclusively activate one
-						pFilterExcludeTypes[0] = '\0';
-						for(int j = 0; j < MaxTypes; ++j)
+						// left/right click to toggle filter
+						if(pFilterExcludeTypes[0] == '\0')
 						{
-							if(j != TypeIndex)
-								ServerBrowser()->DDNetFilterAdd(pFilterExcludeTypes, ServerBrowser()->GetType(Network, j));
+							// when all are active, only activate one
+							for(int j = 0; j < MaxTypes; ++j)
+							{
+								if(j != TypeIndex)
+									ServerBrowser()->DDNetFilterAdd(pFilterExcludeTypes, ServerBrowser()->GetType(Network, j));
+							}
 						}
+						else
+						{
+							bool AllFilteredExceptUs = true;
+							for(int j = 0; j < MaxTypes; ++j)
+							{
+								if(j != TypeIndex && !ServerBrowser()->DDNetFiltered(pFilterExcludeTypes, ServerBrowser()->GetType(Network, j)))
+								{
+									AllFilteredExceptUs = false;
+									break;
+								}
+							}
+							// when last one is removed, reset (re-enable all)
+							if(AllFilteredExceptUs)
+							{
+								pFilterExcludeTypes[0] = '\0';
+							}
+							else if(Active)
+							{
+								ServerBrowser()->DDNetFilterAdd(pFilterExcludeTypes, pName);
+							}
+							else
+							{
+								ServerBrowser()->DDNetFilterRem(pFilterExcludeTypes, pName);
+							}
+						}
+
 						ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
 					}
 					else if(Button == 3)
@@ -946,25 +965,44 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 					Rect.h = FlagHeight;
 
 					int Button = UI()->DoButtonLogic(&s_aFlagButtons[CountryIndex], "", 0, &Rect);
-					if(Button == 1)
+					if(Button == 1 || Button == 2)
 					{
-						// left click to toggle flag filter
-						if(Active)
-							ServerBrowser()->DDNetFilterAdd(pFilterExcludeCountries, pName);
-						else
-							ServerBrowser()->DDNetFilterRem(pFilterExcludeCountries, pName);
-
-						ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
-					}
-					else if(Button == 2)
-					{
-						// right click to exclusively activate one
-						pFilterExcludeCountries[0] = '\0';
-						for(int j = 0; j < MaxFlags; ++j)
+						// left/right click to toggle filter
+						if(pFilterExcludeCountries[0] == '\0')
 						{
-							if(j != CountryIndex)
-								ServerBrowser()->DDNetFilterAdd(pFilterExcludeCountries, ServerBrowser()->GetCountryName(Network, j));
+							// when all are active, only activate one
+							for(int j = 0; j < MaxFlags; ++j)
+							{
+								if(j != CountryIndex)
+									ServerBrowser()->DDNetFilterAdd(pFilterExcludeCountries, ServerBrowser()->GetCountryName(Network, j));
+							}
 						}
+						else
+						{
+							bool AllFilteredExceptUs = true;
+							for(int j = 0; j < MaxFlags; ++j)
+							{
+								if(j != CountryIndex && !ServerBrowser()->DDNetFiltered(pFilterExcludeCountries, ServerBrowser()->GetCountryName(Network, j)))
+								{
+									AllFilteredExceptUs = false;
+									break;
+								}
+							}
+							// when last one is removed, reset (re-enable all)
+							if(AllFilteredExceptUs)
+							{
+								pFilterExcludeCountries[0] = '\0';
+							}
+							else if(Active)
+							{
+								ServerBrowser()->DDNetFilterAdd(pFilterExcludeCountries, pName);
+							}
+							else
+							{
+								ServerBrowser()->DDNetFilterRem(pFilterExcludeCountries, pName);
+							}
+						}
+
 						ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
 					}
 					else if(Button == 3)

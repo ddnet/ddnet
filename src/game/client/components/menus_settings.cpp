@@ -426,7 +426,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 			Item.m_Rect.x += (OldWidth - Item.m_Rect.w) / 2.0f;
 			ColorRGBA Color(1.0f, 1.0f, 1.0f, 1.0f);
 			m_pClient->m_CountryFlags.Render(pEntry->m_CountryCode, &Color, Item.m_Rect.x, Item.m_Rect.y, Item.m_Rect.w, Item.m_Rect.h);
-			if(pEntry->m_Texture != -1)
+			if(pEntry->m_Texture.IsValid())
 				UI()->DoLabel(&Label, pEntry->m_aCountryCodeString, 10.0f, 0);
 		}
 	}

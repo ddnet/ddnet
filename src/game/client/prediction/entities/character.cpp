@@ -1132,12 +1132,16 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		{
 			m_LastJetpackStrength = Tuning()->m_JetpackStrength;
 			m_Jetpack = true;
+			m_Core.m_Jetpack = true;
 			m_aWeapons[WEAPON_GUN].m_Got = true;
 			m_aWeapons[WEAPON_GUN].m_Ammo = -1;
 			m_NinjaJetpack = pChar->m_Weapon == WEAPON_NINJA;
 		}
 		else if(pChar->m_Weapon != WEAPON_NINJA)
+		{
 			m_Jetpack = false;
+			m_Core.m_Jetpack = false;
+		}
 
 		// number of jumps
 		if(GameWorld()->m_WorldConfig.m_PredictTiles)
