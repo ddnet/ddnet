@@ -179,9 +179,25 @@ bool IGameController::CanSpawn(int Team, vec2 *pOutPos)
 	if(Team == TEAM_SPECTATORS)
 		return false;
 
-	EvaluateSpawnType(&Eval, 0);
-	EvaluateSpawnType(&Eval, 1);
-	EvaluateSpawnType(&Eval, 2);
+	if(IsTeamplay()) // gctf
+	{
+		Eval.m_FriendlyTeam = Team;
+
+		// first try own team spawn, then normal spawn and then enemy
+		EvaluateSpawnType(&Eval, 1+(Team&1));
+		if(!Eval.m_Got)
+		{
+			EvaluateSpawnType(&Eval, 0);
+			if(!Eval.m_Got)
+				EvaluateSpawnType(&Eval, 1+((Team+1)&1));
+		}
+	}
+	else
+	{
+		EvaluateSpawnType(&Eval, 0);
+		EvaluateSpawnType(&Eval, 1);
+		EvaluateSpawnType(&Eval, 2);
+	}
 
 	*pOutPos = Eval.m_Pos;
 	return Eval.m_Got;
@@ -833,4 +849,30 @@ void IGameController::StartMatch()
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "start match type='%s' teamplay='%d'", m_pGameType, m_GameFlags&GAMEFLAG_TEAMS);
 	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
+}
+
+int IGameController::GetStartTeam()
+{
+	if(Config()->m_SvTournamentMode)
+		return TEAM_SPECTATORS;
+
+	// determine new team
+	int Team = TEAM_RED;
+	if(IsTeamplay())
+	{
+		if(!Config()->m_DbgStress)	// this will force the auto balancer to work overtime aswell
+			Team = m_aTeamSize[TEAM_RED] > m_aTeamSize[TEAM_BLUE] ? TEAM_BLUE : TEAM_RED;
+	}
+
+	// check if there're enough player slots left
+	// TODO: add SvPlayerSlots in upstream
+	// if(m_aTeamSize[TEAM_RED]+m_aTeamSize[TEAM_BLUE] < Config()->m_SvPlayerSlots)
+	{
+		++m_aTeamSize[Team];
+		// m_UnbalancedTick = TBALANCE_CHECK;
+		// if(m_GameState == IGS_WARMUP_GAME && HasEnoughPlayers())
+		// 	SetGameState(IGS_WARMUP_GAME, 0);
+		return Team;
+	}
+	return TEAM_SPECTATORS;
 }

@@ -173,6 +173,9 @@ protected:
 	int m_aTeamscore[protocol7::NUM_TEAMS];
 
 	void EndMatch() { /* SetGameState(IGS_END_MATCH, TIMER_END); */ }
+
+public:
+	int GetStartTeam();
 };
 
 #endif
