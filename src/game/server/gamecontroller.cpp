@@ -523,8 +523,12 @@ void IGameController::ChangeMap(const char *pToMap)
 void IGameController::OnReset()
 {
 	for(auto &pPlayer : GameServer()->m_apPlayers)
-		if(pPlayer)
-			pPlayer->Respawn();
+	{
+		if(!pPlayer)
+			continue;
+		pPlayer->Respawn();
+		pPlayer->m_Score = 0;
+	}
 }
 
 int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)
