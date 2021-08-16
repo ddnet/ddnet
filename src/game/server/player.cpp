@@ -342,7 +342,8 @@ void CPlayer::Snap(int SnappingClient)
 
 	int SnappingClientVersion = SnappingClient >= 0 ? GameServer()->GetClientVersion(SnappingClient) : CLIENT_VERSIONNR;
 	int Latency = SnappingClient == -1 ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aActLatency[m_ClientID];
-	int Score = abs(m_Score) * -1;
+	// int Score = abs(m_Score) * -1;
+	int Score = m_Score; // gctf
 
 	// send 0 if times of others are not shown
 	if(SnappingClient != m_ClientID && g_Config.m_SvHideScore)
@@ -376,7 +377,8 @@ void CPlayer::Snap(int SnappingClient)
 			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_ADMIN;
 
 		// Times are in milliseconds for 0.7
-		pPlayerInfo->m_Score = Score == -9999 ? -1 : -Score * 1000;
+		// pPlayerInfo->m_Score = Score == -9999 ? -1 : -Score * 1000;
+		pPlayerInfo->m_Score = Score; // gctf
 		pPlayerInfo->m_Latency = Latency;
 	}
 

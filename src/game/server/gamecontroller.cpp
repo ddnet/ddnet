@@ -515,6 +515,31 @@ void IGameController::OnReset()
 
 int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)
 {
+	// gctf
+	// do scoreing
+	if(!pKiller || Weapon == WEAPON_GAME)
+		return 0;
+	if(pKiller == pVictim->GetPlayer())
+		pVictim->GetPlayer()->m_Score--; // suicide or world
+	else
+	{
+		if(IsTeamplay() && pVictim->GetPlayer()->GetTeam() == pKiller->GetTeam())
+			pKiller->m_Score--; // teamkill
+		else
+			pKiller->m_Score++; // normal kill
+	}
+	// if(Weapon == WEAPON_SELF)
+	// 	pVictim->GetPlayer()->m_RespawnTick = Server()->Tick()+Server()->TickSpeed()*3.0f;
+
+
+	// update spectator modes for dead players in survival
+	// if(m_GameFlags&GAMEFLAG_SURVIVAL)
+	// {
+	// 	for(int i = 0; i < MAX_CLIENTS; ++i)
+	// 		if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_DeadSpecMode)
+	// 			GameServer()->m_apPlayers[i]->UpdateDeadSpecMode();
+	// }
+
 	return 0;
 }
 
@@ -875,4 +900,22 @@ int IGameController::GetStartTeam()
 		return Team;
 	}
 	return TEAM_SPECTATORS;
+}
+
+bool IGameController::IsFriendlyFire(int ClientID1, int ClientID2)
+{
+	if(ClientID1 == ClientID2)
+		return false;
+
+	if(IsTeamplay())
+	{
+		if(!GameServer()->m_apPlayers[ClientID1] || !GameServer()->m_apPlayers[ClientID2])
+			return false;
+
+		// if(!Config()->m_SvTeamdamage && GameServer()->m_apPlayers[ClientID1]->GetTeam() == GameServer()->m_apPlayers[ClientID2]->GetTeam())
+		if(true && GameServer()->m_apPlayers[ClientID1]->GetTeam() == GameServer()->m_apPlayers[ClientID2]->GetTeam())
+			return true;
+	}
+
+	return false;
 }

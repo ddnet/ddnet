@@ -2230,6 +2230,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				// reload scores
 				Score()->PlayerData(ClientID)->Reset();
 				m_apPlayers[ClientID]->m_Score = -9999;
+				m_apPlayers[ClientID]->m_Score = 0; // gctf
 				Score()->LoadPlayerData(ClientID);
 
 				SixupNeedsUpdate = true;
