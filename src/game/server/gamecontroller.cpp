@@ -43,6 +43,13 @@ IGameController::IGameController(class CGameContext *pGameServer)
 	m_aNumSpawnPoints[2] = 0;
 
 	m_CurrentRecord = 0;
+
+	// gctf
+	m_aTeamSize[TEAM_RED] = 0;
+	m_aTeamSize[TEAM_BLUE] = 0;
+	m_GameStartTick = Server()->Tick();
+	m_aTeamscore[TEAM_RED] = 0;
+	m_aTeamscore[TEAM_BLUE] = 0;
 }
 
 IGameController::~IGameController()
@@ -428,6 +435,12 @@ void IGameController::OnPlayerDisconnect(class CPlayer *pPlayer, const char *pRe
 		str_format(aBuf, sizeof(aBuf), "leave player='%d:%s'", ClientID, Server()->ClientName(ClientID));
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
 	}
+
+	// gctf
+	if(pPlayer->GetTeam() != TEAM_SPECTATORS)
+	{
+		--m_aTeamSize[pPlayer->GetTeam()];
+	}
 }
 
 void IGameController::EndRound()
@@ -443,6 +456,9 @@ void IGameController::EndRound()
 void IGameController::ResetGame()
 {
 	GameServer()->m_World.m_ResetRequested = true;
+
+	// gctf
+	m_GameStartTick = Server()->Tick();
 }
 
 const char *IGameController::GetTeamName(int Team)
@@ -631,6 +647,17 @@ void IGameController::Snap(int SnappingClient)
 		pRaceData->m_BestTime = round_to_int(m_CurrentRecord * 1000);
 		pRaceData->m_Precision = 0;
 		pRaceData->m_RaceFlags = protocol7::RACEFLAG_HIDE_KILLMSG | protocol7::RACEFLAG_KEEP_WANTED_WEAPON;
+
+		// gctf
+		if(IsTeamplay())
+		{
+			protocol7::CNetObj_GameDataTeam *pGameDataTeam = static_cast<protocol7::CNetObj_GameDataTeam *>(Server()->SnapNewItem(-protocol7::NETOBJTYPE_GAMEDATATEAM, 0, sizeof(protocol7::CNetObj_GameDataTeam)));
+			if(!pGameDataTeam)
+				return;
+
+			pGameDataTeam->m_TeamscoreRed = m_aTeamscore[TEAM_RED];
+			pGameDataTeam->m_TeamscoreBlue = m_aTeamscore[TEAM_BLUE];
+		}
 	}
 }
 
@@ -698,6 +725,7 @@ void IGameController::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
 	if(Team == pPlayer->GetTeam())
 		return;
 
+	int OldTeam = pPlayer->GetTeam(); // gctf
 	pPlayer->SetTeam(Team);
 	int ClientID = pPlayer->GetCID();
 
@@ -713,4 +741,96 @@ void IGameController::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
 	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
 	// OnPlayerInfoChange(pPlayer);
+
+	// gctf
+
+	// update effected game settings
+	if(OldTeam != TEAM_SPECTATORS)
+	{
+		--m_aTeamSize[OldTeam];
+		// m_UnbalancedTick = TBALANCE_CHECK;
+	}
+	if(Team != TEAM_SPECTATORS)
+	{
+		++m_aTeamSize[Team];
+		// m_UnbalancedTick = TBALANCE_CHECK;
+		// if(m_GameState == IGS_WARMUP_GAME && HasEnoughPlayers())
+		// 	SetGameState(IGS_WARMUP_GAME, 0);
+		// pPlayer->m_IsReadyToPlay = !IsPlayerReadyMode();
+		// if(m_GameFlags&GAMEFLAG_SURVIVAL)
+		// 	pPlayer->m_RespawnDisabled = GetStartRespawnState();
+	}
+}
+
+// gctf
+
+bool IGameController::DoWincheckMatch()
+{
+	if(IsTeamplay())
+	{
+		// check score win condition
+		if((m_GameInfo.m_ScoreLimit > 0 && (m_aTeamscore[TEAM_RED] >= m_GameInfo.m_ScoreLimit || m_aTeamscore[TEAM_BLUE] >= m_GameInfo.m_ScoreLimit)) ||
+			(m_GameInfo.m_TimeLimit > 0 && (Server()->Tick()-m_GameStartTick) >= m_GameInfo.m_TimeLimit*Server()->TickSpeed()*60))
+		{
+			if(m_aTeamscore[TEAM_RED] != m_aTeamscore[TEAM_BLUE] || m_GameFlags&protocol7::GAMEFLAG_SURVIVAL)
+			{
+				EndMatch();
+				return true;
+			}
+			else
+				m_SuddenDeath = 1;
+		}
+	}
+	else
+	{
+		// gather some stats
+		int Topscore = 0;
+		int TopscoreCount = 0;
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(GameServer()->m_apPlayers[i])
+			{
+				if(GameServer()->m_apPlayers[i]->m_Score > Topscore)
+				{
+					Topscore = GameServer()->m_apPlayers[i]->m_Score;
+					TopscoreCount = 1;
+				}
+				else if(GameServer()->m_apPlayers[i]->m_Score == Topscore)
+					TopscoreCount++;
+			}
+		}
+
+		// check score win condition
+		if((m_GameInfo.m_ScoreLimit > 0 && Topscore >= m_GameInfo.m_ScoreLimit) ||
+			(m_GameInfo.m_TimeLimit > 0 && (Server()->Tick()-m_GameStartTick) >= m_GameInfo.m_TimeLimit*Server()->TickSpeed()*60))
+		{
+			if(TopscoreCount == 1)
+			{
+				EndMatch();
+				return true;
+			}
+			else
+				m_SuddenDeath = 1;
+		}
+	}
+	return false;
+}
+
+void IGameController::StartMatch()
+{
+	ResetGame();
+
+	m_RoundCount = 0;
+	m_aTeamscore[TEAM_RED] = 0;
+	m_aTeamscore[TEAM_BLUE] = 0;
+
+	// start countdown if there're enough players, otherwise do warmup till there're
+	// if(HasEnoughPlayers())
+	// 	SetGameState(IGS_START_COUNTDOWN);
+	// else
+	// 	SetGameState(IGS_WARMUP_GAME, TIMER_INFINITE);
+
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "start match type='%s' teamplay='%d'", m_pGameType, m_GameFlags&GAMEFLAG_TEAMS);
+	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 }

@@ -6,6 +6,8 @@
 #include <base/vmath.h>
 #include <engine/map.h>
 
+#include <game/generated/protocol7.h>
+
 /*
 	Class: Game Controller
 		Controls the main game logic. Keeping track of team and player score,
@@ -148,6 +150,29 @@ public:
 	// DDRace
 
 	float m_CurrentRecord;
+
+	// gctf
+
+private:
+	int m_aTeamSize[protocol7::NUM_TEAMS];
+
+	virtual bool DoWincheckMatch();		// returns true when the match is over
+	virtual void DoWincheckRound() {}
+	bool HasEnoughPlayers() const { return (IsTeamplay() && m_aTeamSize[TEAM_RED] > 0 && m_aTeamSize[TEAM_BLUE] > 0) || (!IsTeamplay() && m_aTeamSize[TEAM_RED] > 1); }
+	void StartMatch();
+
+protected:
+	struct CGameInfo
+	{
+		int m_MatchCurrent;
+		int m_MatchNum;
+		int m_ScoreLimit;
+		int m_TimeLimit;
+	} m_GameInfo;
+	int m_GameStartTick;
+	int m_aTeamscore[protocol7::NUM_TEAMS];
+
+	void EndMatch() { /* SetGameState(IGS_END_MATCH, TIMER_END); */ }
 };
 
 #endif

@@ -14,6 +14,7 @@ class CGameControllerDDRace : public IGameController
 	// gctf
 	class CFlag *m_apFlags[2];
 	bool m_IsGrounded;
+	virtual bool DoWincheckMatch();
 
 public:
 	CGameControllerDDRace(class CGameContext *pGameServer);
