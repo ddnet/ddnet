@@ -1246,10 +1246,12 @@ void CCharacter::Snap(int SnappingClient)
 
 	SnapCharacter(SnappingClient, ID);
 
-	CNetObj_SwitchState *pSwitchState = static_cast<CNetObj_SwitchState *>(Server()->SnapNewItem(NETOBJTYPE_SWITCHSTATE, ID, sizeof(CNetObj_SwitchState)));
-
-	if(pSwitchState)
+	if(GameServer()->Collision()->m_pSwitchers)
 	{
+		CNetObj_SwitchState *pSwitchState = static_cast<CNetObj_SwitchState *>(Server()->SnapNewItem(NETOBJTYPE_SWITCHSTATE, ID, sizeof(CNetObj_SwitchState)));
+		if(!pSwitchState)
+			return;
+
 		pSwitchState->m_NumSwitchers = GameServer()->Collision()->m_NumSwitchers;
 
 		if(pSwitchState->m_NumSwitchers > 256)
