@@ -2356,3 +2356,8 @@ void CCharacter::Rescue()
 		m_pPlayer->Pause(CPlayer::PAUSE_NONE, true);
 	}
 }
+
+int64_t CCharacter::TeamMask()
+{
+	return Teams()->TeamMask(Team(), -1, GetPlayer()->GetCID());
+}
