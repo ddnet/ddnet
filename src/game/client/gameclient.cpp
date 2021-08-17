@@ -2337,14 +2337,7 @@ void CGameClient::UpdatePrediction()
 				ID = -1;
 			for(int i = 0; i < MAX_CLIENTS; i++)
 				if(CCharacter *pChar = m_GameWorld.GetCharacterByID(i))
-				{
-					int CurCharStrongWeakID = pChar->GetStrongWeakID();
-					if(pLocalChar->GetStrongWeakID() > CurCharStrongWeakID)
-						pChar->m_Weak = true;
-					else
-						pChar->m_Weak = false;
-					aIDs[CurCharStrongWeakID] = i;
-				}
+					aIDs[pChar->GetStrongWeakID()] = i;
 			for(int ID : aIDs)
 				if(ID >= 0)
 					m_CharOrder.GiveStrong(ID);

@@ -147,8 +147,6 @@ public:
 	CCharacter() { m_Alive = false; }
 	void SetTuneZone(int Zone);
 
-	bool m_Weak;
-
 private:
 	// weapon info
 	int m_aHitObjects[10];

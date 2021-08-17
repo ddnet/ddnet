@@ -203,45 +203,49 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		}
 	}
 
-	if((g_Config.m_Debug || g_Config.m_ClNameplatesStrong) && m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_HasExtendedData)
+	if(g_Config.m_Debug || g_Config.m_ClNameplatesStrong)
 	{
-		CCharacter *pCharacter = m_pClient->m_GameWorld.GetCharacterByID(pPlayerInfo->m_ClientID);
-		if(pCharacter)
+		if(m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_HasExtendedData && m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientID].m_HasExtendedData)
 		{
-			YOffset -= FontSize;
-			if(pPlayerInfo->m_Local)
-				TextRender()->TextColor(rgb);
-			else
+			CCharacter *pLocalChar = m_pClient->m_GameWorld.GetCharacterByID(m_pClient->m_Snap.m_LocalClientID);
+			CCharacter *pCharacter = m_pClient->m_GameWorld.GetCharacterByID(pPlayerInfo->m_ClientID);
+			if(pCharacter && pLocalChar)
 			{
-				Graphics()->TextureClear();
-				if(pCharacter->m_Weak)
-				{
-					Graphics()->TextureSet(g_pData->m_aImages[IMAGE_STRONGWEAK].m_Id);
-					Graphics()->QuadsBegin();
-					Graphics()->SetColor(color_cast<ColorRGBA>(ColorHSLA(6401973)));
-					RenderTools()->SelectSprite(SPRITE_HOOK_STRONG);
-					ColorRGBA WeakStatusColor = color_cast<ColorRGBA>(ColorHSLA(6401973));
-					TextRender()->TextColor(WeakStatusColor);
-				}
+				YOffset -= FontSize;
+				if(pPlayerInfo->m_Local)
+					TextRender()->TextColor(rgb);
 				else
 				{
-					Graphics()->TextureSet(g_pData->m_aImages[IMAGE_STRONGWEAK].m_Id);
-					Graphics()->QuadsBegin();
-					Graphics()->SetColor(color_cast<ColorRGBA>(ColorHSLA(41131)));
-					RenderTools()->SelectSprite(SPRITE_HOOK_WEAK);
-					ColorRGBA StrongStatusColor = color_cast<ColorRGBA>(ColorHSLA(41131));
-					TextRender()->TextColor(StrongStatusColor);
+					Graphics()->TextureClear();
+					if(pLocalChar->GetStrongWeakID() > pCharacter->GetStrongWeakID())
+					{
+						Graphics()->TextureSet(g_pData->m_aImages[IMAGE_STRONGWEAK].m_Id);
+						Graphics()->QuadsBegin();
+						Graphics()->SetColor(color_cast<ColorRGBA>(ColorHSLA(6401973)));
+						RenderTools()->SelectSprite(SPRITE_HOOK_STRONG);
+						ColorRGBA WeakStatusColor = color_cast<ColorRGBA>(ColorHSLA(6401973));
+						TextRender()->TextColor(WeakStatusColor);
+					}
+					else
+					{
+						Graphics()->TextureSet(g_pData->m_aImages[IMAGE_STRONGWEAK].m_Id);
+						Graphics()->QuadsBegin();
+						Graphics()->SetColor(color_cast<ColorRGBA>(ColorHSLA(41131)));
+						RenderTools()->SelectSprite(SPRITE_HOOK_WEAK);
+						ColorRGBA StrongStatusColor = color_cast<ColorRGBA>(ColorHSLA(41131));
+						TextRender()->TextColor(StrongStatusColor);
+					}
+					RenderTools()->DrawSprite(Position.x, YOffset + 15, 40.0f);
+					Graphics()->QuadsEnd();
+					YOffset -= FontSize;
 				}
-				RenderTools()->DrawSprite(Position.x, YOffset + 15, 40.0f);
-				Graphics()->QuadsEnd();
-				YOffset -= FontSize;
-			}
-			if(g_Config.m_Debug || g_Config.m_ClNameplatesStrong == 2)
-			{
-				char aBuf[12];
-				str_format(aBuf, sizeof(aBuf), "%d", pCharacter->GetStrongWeakID());
-				float XOffset = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f) / 2.0f;
-				TextRender()->Text(0, Position.x - XOffset, YOffset, FontSize, aBuf, -1.0f);
+				if(g_Config.m_Debug || g_Config.m_ClNameplatesStrong == 2)
+				{
+					char aBuf[12];
+					str_format(aBuf, sizeof(aBuf), "%d", pCharacter->GetStrongWeakID());
+					float XOffset = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f) / 2.0f;
+					TextRender()->Text(0, Position.x - XOffset, YOffset, FontSize, aBuf, -1.0f);
+				}
 			}
 		}
 	}
