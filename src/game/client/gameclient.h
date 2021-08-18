@@ -311,6 +311,8 @@ public:
 			vec2 m_Position;
 		};
 
+		bool m_HasSwitchState;
+
 		CCharacterInfo m_aCharacters[MAX_CLIENTS];
 	};
 
