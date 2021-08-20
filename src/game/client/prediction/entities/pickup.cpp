@@ -7,6 +7,10 @@
 void CPickup::Tick()
 {
 	Move();
+
+	if(!PredictActive())
+		return;
+
 	// Check if a player intersected us
 	CCharacter *apEnts[MAX_CLIENTS];
 	int Num = GameWorld()->FindEntities(m_Pos, 20.0f, (CEntity **)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
@@ -78,10 +82,6 @@ void CPickup::Move()
 			m_IsCoreActive = true;
 			m_Core = Collision()->CpSpeed(index, Flags);
 		}
-		else
-		{
-			m_IsCoreActive = false;
-		}
 		m_Pos += m_Core;
 	}
 }
@@ -98,6 +98,7 @@ CPickup::CPickup(CGameWorld *pGameWorld, int ID, CNetObj_Pickup *pPickup) :
 	m_ID = ID;
 	m_Layer = LAYER_GAME;
 	m_Number = 0;
+	m_FirstSnapTick = pGameWorld->GameTick();
 }
 
 void CPickup::FillInfo(CNetObj_Pickup *pPickup)

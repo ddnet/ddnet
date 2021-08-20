@@ -15,7 +15,10 @@ public:
 	CPickup(CGameWorld *pGameWorld, int ID, CNetObj_Pickup *pPickup);
 	void FillInfo(CNetObj_Pickup *pPickup);
 	bool Match(CPickup *pPickup);
-	bool InDDNetTile() { return m_IsCoreActive; }
+	bool PredictMoving() { return m_IsCoreActive && PredictActive(); }
+
+	// only predict pickups that have been seen for at least one second, to avoid predicting disabled switch layer
+	bool PredictActive() { return GameWorld()->GameTick() - m_FirstSnapTick > 50; }
 
 private:
 	int m_Type;
@@ -26,6 +29,7 @@ private:
 	void Move();
 	vec2 m_Core;
 	bool m_IsCoreActive;
+	int m_FirstSnapTick;
 };
 
 #endif

@@ -320,7 +320,7 @@ void CItems::OnRender()
 		}
 		for(auto *pPickup = (CPickup *)GameClient()->m_PredictedWorld.FindFirst(CGameWorld::ENTTYPE_PICKUP); pPickup; pPickup = (CPickup *)pPickup->NextEntity())
 		{
-			if(pPickup->InDDNetTile())
+			if(pPickup->PredictMoving())
 			{
 				if(auto *pPrev = (CPickup *)GameClient()->m_PrevPredictedWorld.GetEntity(pPickup->ID(), CGameWorld::ENTTYPE_PICKUP))
 				{
@@ -374,7 +374,7 @@ void CItems::OnRender()
 			if(UsePredicted)
 			{
 				auto *pPickup = (CPickup *)GameClient()->m_GameWorld.FindMatch(Item.m_ID, Item.m_Type, pData);
-				if(pPickup && pPickup->InDDNetTile())
+				if(pPickup && pPickup->PredictMoving())
 					continue;
 			}
 			const void *pPrev = Client()->SnapFindItem(IClient::SNAP_PREV, Item.m_Type, Item.m_ID);
