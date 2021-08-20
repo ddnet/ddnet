@@ -1197,38 +1197,43 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_GfxHighDetail, Localize("High Detail"), g_Config.m_GfxHighDetail, &Button))
 		g_Config.m_GfxHighDetail ^= 1;
 
-	MainView.HSplitTop(20.0f, &Button, &MainView);
 	bool IsNewOpenGL = Graphics()->IsConfigModernAPI();
 
-	if(DoButton_CheckBox(&g_Config.m_GfxOpenGLMajor, Localize("Use modern OpenGL"), IsNewOpenGL, &Button))
+	// only promote modern GL in menu settings if the driver isn't on the blocklist already
+	if(g_Config.m_GfxDriverIsBlocked == 0)
 	{
-		CheckSettings = true;
+		MainView.HSplitTop(20.0f, &Button, &MainView);
+
+		if(DoButton_CheckBox(&g_Config.m_GfxOpenGLMajor, Localize("Use modern OpenGL"), IsNewOpenGL, &Button))
+		{
+			CheckSettings = true;
+			if(IsNewOpenGL)
+			{
+				Graphics()->GetDriverVersion(GRAPHICS_DRIVER_AGE_TYPE_DEFAULT, g_Config.m_GfxOpenGLMajor, g_Config.m_GfxOpenGLMinor, g_Config.m_GfxOpenGLPatch);
+				IsNewOpenGL = false;
+			}
+			else
+			{
+				Graphics()->GetDriverVersion(GRAPHICS_DRIVER_AGE_TYPE_MODERN, g_Config.m_GfxOpenGLMajor, g_Config.m_GfxOpenGLMinor, g_Config.m_GfxOpenGLPatch);
+				IsNewOpenGL = true;
+			}
+		}
+
 		if(IsNewOpenGL)
 		{
-			Graphics()->GetDriverVersion(GRAPHICS_DRIVER_AGE_TYPE_DEFAULT, g_Config.m_GfxOpenGLMajor, g_Config.m_GfxOpenGLMinor, g_Config.m_GfxOpenGLPatch);
-			IsNewOpenGL = false;
-		}
-		else
-		{
-			Graphics()->GetDriverVersion(GRAPHICS_DRIVER_AGE_TYPE_MODERN, g_Config.m_GfxOpenGLMajor, g_Config.m_GfxOpenGLMinor, g_Config.m_GfxOpenGLPatch);
-			IsNewOpenGL = true;
-		}
-	}
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			if(DoButton_CheckBox(&g_Config.m_GfxUsePreinitBuffer, Localize("Preinit VBO (iGPUs only)"), g_Config.m_GfxUsePreinitBuffer, &Button))
+			{
+				CheckSettings = true;
+				g_Config.m_GfxUsePreinitBuffer ^= 1;
+			}
 
-	if(IsNewOpenGL)
-	{
-		MainView.HSplitTop(20.0f, &Button, &MainView);
-		if(DoButton_CheckBox(&g_Config.m_GfxUsePreinitBuffer, Localize("Preinit VBO (iGPUs only)"), g_Config.m_GfxUsePreinitBuffer, &Button))
-		{
-			CheckSettings = true;
-			g_Config.m_GfxUsePreinitBuffer ^= 1;
-		}
-
-		MainView.HSplitTop(20.0f, &Button, &MainView);
-		if(DoButton_CheckBox(&g_Config.m_GfxEnableTextureUnitOptimization, Localize("Multiple texture units (disable for macOS)"), g_Config.m_GfxEnableTextureUnitOptimization, &Button))
-		{
-			CheckSettings = true;
-			g_Config.m_GfxEnableTextureUnitOptimization ^= 1;
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			if(DoButton_CheckBox(&g_Config.m_GfxEnableTextureUnitOptimization, Localize("Multiple texture units (disable for macOS)"), g_Config.m_GfxEnableTextureUnitOptimization, &Button))
+			{
+				CheckSettings = true;
+				g_Config.m_GfxEnableTextureUnitOptimization ^= 1;
+			}
 		}
 	}
 

@@ -1400,6 +1400,8 @@ void CGameClient::OnNewSnapshot()
 				m_Snap.m_paFlags[Item.m_ID % 2] = (const CNetObj_Flag *)pData;
 			else if(Item.m_Type == NETOBJTYPE_SWITCHSTATE)
 			{
+				m_Snap.m_HasSwitchState = true;
+
 				const CNetObj_SwitchState *pSwitchStateData = (const CNetObj_SwitchState *)pData;
 				CClientData *pClient = &m_aClients[Item.m_ID];
 
@@ -2197,6 +2199,32 @@ void CGameClient::UpdatePrediction()
 	if(m_Snap.m_pLocalCharacter->m_AmmoCount > 0 && m_Snap.m_pLocalCharacter->m_Weapon != WEAPON_NINJA)
 		m_GameWorld.m_WorldConfig.m_InfiniteAmmo = false;
 	m_GameWorld.m_WorldConfig.m_IsSolo = !m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_HasExtendedData && !m_Tuning[g_Config.m_ClDummy].m_PlayerCollision && !m_Tuning[g_Config.m_ClDummy].m_PlayerHooking;
+
+	// update switch state
+	if(Collision()->m_pSwitchers)
+	{
+		const int NumSwitchers = minimum(255, Collision()->m_NumSwitchers);
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			int Team = m_Teams.Team(i);
+			if(!m_Snap.m_aCharacters[i].m_Active || !in_range(Team, 0, MAX_CLIENTS - 1))
+				continue;
+			for(int Number = 1; Number <= NumSwitchers; Number++)
+			{
+				if(m_Snap.m_HasSwitchState && m_aClients[i].m_SwitchStates[Number])
+				{
+					Collision()->m_pSwitchers[Number].m_Status[Team] = true;
+					Collision()->m_pSwitchers[Number].m_Type[Team] = TILE_SWITCHOPEN;
+				}
+				else
+				{
+					Collision()->m_pSwitchers[Number].m_Status[Team] = false;
+					Collision()->m_pSwitchers[Number].m_Type[Team] = TILE_SWITCHCLOSE;
+				}
+				Collision()->m_pSwitchers[Number].m_EndTick[Team] = 0;
+			}
+		}
+	}
 
 	// update the tuning/tunezone at the local character position with the latest tunings received before the new snapshot
 	vec2 LocalCharPos = vec2(m_Snap.m_pLocalCharacter->m_X, m_Snap.m_pLocalCharacter->m_Y);
