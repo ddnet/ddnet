@@ -1462,6 +1462,7 @@ add_custom_command(OUTPUT "src/game/generated/wordlist.h"
 
 # Sources
 set_src(BASE GLOB_RECURSE src/base
+  base64.h
   color.h
   detect.h
   dynamic.h
@@ -1751,6 +1752,8 @@ if(CLIENT)
     animstate.h
     component.cpp
     component.h
+    components/auth.cpp
+    components/auth.h
     components/background.cpp
     components/background.h
     components/binds.cpp

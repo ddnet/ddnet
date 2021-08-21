@@ -112,6 +112,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&m_Particles); // doesn't render anything, just updates all the particles
 	m_All.Add(&m_RaceDemo);
 	m_All.Add(&m_MapSounds);
+	m_All.Add(&m_Auth);
 
 	m_All.Add(&m_BackGround); //render instead of m_MapLayersBackGround when g_Config.m_ClOverlayEntities == 100
 	m_All.Add(&m_MapLayersBackGround); // first to render

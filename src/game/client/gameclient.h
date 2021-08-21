@@ -21,6 +21,7 @@
 #include <game/client/prediction/gameworld.h>
 
 // components
+#include "components/auth.h"
 #include "components/background.h"
 #include "components/binds.h"
 #include "components/broadcast.h"
@@ -96,6 +97,7 @@ class CGameClient : public IGameClient
 {
 public:
 	// all components
+	CAuth m_Auth;
 	CKillMessages m_KillMessages;
 	CCamera m_Camera;
 	CChat m_Chat;
