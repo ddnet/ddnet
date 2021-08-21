@@ -40,8 +40,8 @@ jobs:
       run: |
         if grep -Eqr '(msg|Print).*\(.*"[Ee]rror:' src/;
         then
-          echo "[!] Expect log erros to be in this format 'ERROR: error message'"
-          echo "[!] Found these non uppercased log errors:"
+          echo "Expected log errors to be in this format 'ERROR: error message'"
+          echo "Found these non uppercased log errors:"
           grep -Er '(msg|Print).*\(.*"[Ee]rror:' src/
           exit 1
         fi
