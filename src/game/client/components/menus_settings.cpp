@@ -1080,33 +1080,56 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	static const int MAX_RESOLUTIONS = 256;
 	static CVideoMode s_aModes[MAX_RESOLUTIONS];
 	static int s_NumNodes = Graphics()->GetVideoModes(s_aModes, MAX_RESOLUTIONS, g_Config.m_GfxScreen);
-	static int s_GfxScreenWidth = g_Config.m_GfxScreenWidth;
-	static int s_GfxScreenHeight = g_Config.m_GfxScreenHeight;
-	static int s_GfxColorDepth = g_Config.m_GfxColorDepth;
-	static int s_GfxVsync = g_Config.m_GfxVsync;
 	static int s_GfxFsaaSamples = g_Config.m_GfxFsaaSamples;
 	static int s_GfxOpenGLVersion = Graphics()->IsConfigModernAPI();
 	static int s_GfxEnableTextureUnitOptimization = g_Config.m_GfxEnableTextureUnitOptimization;
 	static int s_GfxUsePreinitBuffer = g_Config.m_GfxUsePreinitBuffer;
 	static int s_GfxHighdpi = g_Config.m_GfxHighdpi;
+	static int s_InitDisplayAllVideoModes = g_Config.m_GfxDisplayAllVideoModes;
 
-	CUIRect ModeList;
+	static bool s_WasInit = false;
+	static bool s_ModesReload = false;
+	if(!s_WasInit)
+	{
+		s_WasInit = true;
+
+		Graphics()->AddWindowResizeListener([&](void *pUser) {
+			s_ModesReload = true;
+		},
+			this);
+	}
+
+	if(s_ModesReload || g_Config.m_GfxDisplayAllVideoModes != s_InitDisplayAllVideoModes)
+	{
+		s_NumNodes = Graphics()->GetVideoModes(s_aModes, MAX_RESOLUTIONS, g_Config.m_GfxScreen);
+		s_ModesReload = false;
+		s_InitDisplayAllVideoModes = g_Config.m_GfxDisplayAllVideoModes;
+	}
+
+	CUIRect ModeList, ModeLabel;
 	MainView.VSplitLeft(350.0f, &MainView, &ModeList);
+	ModeList.HSplitTop(24.0f, &ModeLabel, &ModeList);
 	MainView.VSplitLeft(340.0f, &MainView, 0);
 
 	// display mode list
 	static float s_ScrollValue = 0;
+	static const float sc_RowHeightResList = 22.0f;
+	static const float sc_FontSizeResListHeader = 12.0f;
+	static const float sc_FontSizeResList = 10.0f;
 	int OldSelected = -1;
-	int G = gcd(s_GfxScreenWidth, s_GfxScreenHeight);
-	str_format(aBuf, sizeof(aBuf), "%s: %dx%d %d bit (%d:%d)", Localize("Current"), s_GfxScreenWidth, s_GfxScreenHeight, s_GfxColorDepth, s_GfxScreenWidth / G, s_GfxScreenHeight / G);
-	UiDoListboxStart(&s_NumNodes, &ModeList, 24.0f, Localize("Display Modes"), aBuf, s_NumNodes, 1, OldSelected, s_ScrollValue);
+	int G = gcd(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight);
+	str_format(aBuf, sizeof(aBuf), "%s: %dx%d @%dhz %d bit (%d:%d)", Localize("Current"), int(g_Config.m_GfxScreenWidth * Graphics()->ScreenHiDPIScale()), int(g_Config.m_GfxScreenHeight * Graphics()->ScreenHiDPIScale()), g_Config.m_GfxScreenRefreshRate, g_Config.m_GfxColorDepth, g_Config.m_GfxScreenWidth / G, g_Config.m_GfxScreenHeight / G);
+
+	UI()->DoLabelScaled(&ModeLabel, aBuf, sc_FontSizeResListHeader, 0);
+	UiDoListboxStart(&s_NumNodes, &ModeList, sc_RowHeightResList, Localize("Display Modes"), aBuf, s_NumNodes - 1, 1, OldSelected, s_ScrollValue);
 
 	for(int i = 0; i < s_NumNodes; ++i)
 	{
 		const int Depth = s_aModes[i].m_Red + s_aModes[i].m_Green + s_aModes[i].m_Blue > 16 ? 24 : 16;
 		if(g_Config.m_GfxColorDepth == Depth &&
 			g_Config.m_GfxScreenWidth == s_aModes[i].m_WindowWidth &&
-			g_Config.m_GfxScreenHeight == s_aModes[i].m_WindowHeight)
+			g_Config.m_GfxScreenHeight == s_aModes[i].m_WindowHeight &&
+			g_Config.m_GfxScreenRefreshRate == s_aModes[i].m_RefreshRate)
 		{
 			OldSelected = i;
 		}
@@ -1115,8 +1138,8 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		if(Item.m_Visible)
 		{
 			int G = gcd(s_aModes[i].m_CanvasWidth, s_aModes[i].m_CanvasHeight);
-			str_format(aBuf, sizeof(aBuf), " %dx%d %d bit (%d:%d)", s_aModes[i].m_CanvasWidth, s_aModes[i].m_CanvasHeight, Depth, s_aModes[i].m_CanvasWidth / G, s_aModes[i].m_CanvasHeight / G);
-			UI()->DoLabelScaled(&Item.m_Rect, aBuf, 16.0f, -1);
+			str_format(aBuf, sizeof(aBuf), " %dx%d @%dhz %d bit (%d:%d)", s_aModes[i].m_CanvasWidth, s_aModes[i].m_CanvasHeight, s_aModes[i].m_RefreshRate, Depth, s_aModes[i].m_CanvasWidth / G, s_aModes[i].m_CanvasHeight / G);
+			UI()->DoLabelScaled(&Item.m_Rect, aBuf, sc_FontSizeResList, -1);
 		}
 	}
 
@@ -1127,7 +1150,8 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		g_Config.m_GfxColorDepth = Depth;
 		g_Config.m_GfxScreenWidth = s_aModes[NewSelected].m_WindowWidth;
 		g_Config.m_GfxScreenHeight = s_aModes[NewSelected].m_WindowHeight;
-		Graphics()->Resize(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight, true);
+		g_Config.m_GfxScreenRefreshRate = s_aModes[NewSelected].m_RefreshRate;
+		Graphics()->Resize(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight, g_Config.m_GfxScreenRefreshRate, true);
 	}
 
 	// switches
@@ -1247,11 +1271,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	// check if the new settings require a restart
 	if(CheckSettings)
 	{
-		if(s_GfxScreenWidth == g_Config.m_GfxScreenWidth &&
-			s_GfxScreenHeight == g_Config.m_GfxScreenHeight &&
-			s_GfxColorDepth == g_Config.m_GfxColorDepth &&
-			s_GfxVsync == g_Config.m_GfxVsync &&
-			s_GfxFsaaSamples == g_Config.m_GfxFsaaSamples &&
+		if(s_GfxFsaaSamples == g_Config.m_GfxFsaaSamples &&
 			s_GfxOpenGLVersion == (int)IsNewOpenGL &&
 			s_GfxUsePreinitBuffer == g_Config.m_GfxUsePreinitBuffer &&
 			s_GfxEnableTextureUnitOptimization == g_Config.m_GfxEnableTextureUnitOptimization &&

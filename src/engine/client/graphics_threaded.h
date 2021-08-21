@@ -124,7 +124,6 @@ public:
 		// misc
 		CMD_VSYNC,
 		CMD_SCREENSHOT,
-		CMD_VIDEOMODES,
 		CMD_UPDATE_VIEWPORT,
 
 	};
@@ -489,20 +488,6 @@ public:
 		CImageInfo *m_pImage; // processor will fill this out, the one who adds this command must free the data as well
 	};
 
-	struct SCommand_VideoModes : public SCommand
-	{
-		SCommand_VideoModes() :
-			SCommand(CMD_VIDEOMODES) {}
-
-		CVideoMode *m_pModes; // processor will fill this in
-		int m_MaxModes; // maximum of modes the processor can write to the m_pModes
-		int *m_pNumModes; // processor will write to this pointer
-		int m_HiDPIScale;
-		int m_MaxWindowWidth;
-		int m_MaxWindowHeight;
-		int m_Screen;
-	};
-
 	struct SCommand_Swap : public SCommand
 	{
 		SCommand_Swap() :
@@ -653,10 +638,13 @@ public:
 
 	virtual ~IGraphicsBackend() {}
 
-	virtual int Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, class IStorage *pStorage) = 0;
+	virtual int Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int *pRefreshRate, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, class IStorage *pStorage) = 0;
 	virtual int Shutdown() = 0;
 
 	virtual int MemoryUsage() const = 0;
+
+	virtual void GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen) = 0;
+	virtual void GetCurrentVideoMode(CVideoMode &CurMode, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen) = 0;
 
 	virtual int GetNumScreens() const = 0;
 
@@ -668,7 +656,7 @@ public:
 	virtual int WindowActive() = 0;
 	virtual int WindowOpen() = 0;
 	virtual void SetWindowGrab(bool Grab) = 0;
-	virtual void ResizeWindow(int w, int h) = 0;
+	virtual void ResizeWindow(int w, int h, int RefreshRate) = 0;
 	virtual void GetViewportSize(int &w, int &h) = 0;
 	virtual void NotifyWindow() = 0;
 
@@ -788,7 +776,7 @@ class CGraphics_Threaded : public IEngineGraphics
 	struct SWindowResizeListener
 	{
 		SWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser) :
-			m_pFunc(pFunc), m_pUser(pUser) {}
+			m_pFunc(std::move(pFunc)), m_pUser(pUser) {}
 		WINDOW_RESIZE_FUNC m_pFunc;
 		void *m_pUser;
 	};
@@ -1145,7 +1133,7 @@ public:
 	void Maximize() override;
 	void SetWindowParams(int FullscreenMode, bool IsBorderless) override;
 	bool SetWindowScreen(int Index) override;
-	void Resize(int w, int h, bool SetWindowSize = false) override;
+	void Resize(int w, int h, int RefreshRate, bool SetWindowSize = false, bool ForceResizeEvent = false) override;
 	void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser) override;
 	int GetWindowScreen() override;
 
@@ -1165,8 +1153,8 @@ public:
 
 	int GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen) override;
 
-	virtual int GetDesktopScreenWidth() const { return g_Config.m_GfxScreenWidth; }
-	virtual int GetDesktopScreenHeight() const { return g_Config.m_GfxScreenHeight; }
+	virtual int GetDesktopScreenWidth() const { return g_Config.m_GfxDesktopWidth; }
+	virtual int GetDesktopScreenHeight() const { return g_Config.m_GfxDesktopHeight; }
 
 	// synchronization
 	void InsertSignal(CSemaphore *pSemaphore) override;

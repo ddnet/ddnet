@@ -33,31 +33,31 @@
 #include "graphics_threaded.h"
 
 static CVideoMode g_aFakeModes[] = {
-	{8192, 4320, 8192, 4320, 8, 8, 8}, {7680, 4320, 7680, 4320, 8, 8, 8}, {5120, 2880, 5120, 2880, 8, 8, 8},
-	{4096, 2160, 4096, 2160, 8, 8, 8}, {3840, 2160, 3840, 2160, 8, 8, 8}, {2560, 1440, 2560, 1440, 8, 8, 8},
-	{2048, 1536, 2048, 1536, 8, 8, 8}, {1920, 2400, 1920, 2400, 8, 8, 8}, {1920, 1440, 1920, 1440, 8, 8, 8},
-	{1920, 1200, 1920, 1200, 8, 8, 8}, {1920, 1080, 1920, 1080, 8, 8, 8}, {1856, 1392, 1856, 1392, 8, 8, 8},
-	{1800, 1440, 1800, 1440, 8, 8, 8}, {1792, 1344, 1792, 1344, 8, 8, 8}, {1680, 1050, 1680, 1050, 8, 8, 8},
-	{1600, 1200, 1600, 1200, 8, 8, 8}, {1600, 1000, 1600, 1000, 8, 8, 8}, {1440, 1050, 1440, 1050, 8, 8, 8},
-	{1440, 900, 1440, 900, 8, 8, 8}, {1400, 1050, 1400, 1050, 8, 8, 8}, {1368, 768, 1368, 768, 8, 8, 8},
-	{1280, 1024, 1280, 1024, 8, 8, 8}, {1280, 960, 1280, 960, 8, 8, 8}, {1280, 800, 1280, 800, 8, 8, 8},
-	{1280, 768, 1280, 768, 8, 8, 8}, {1152, 864, 1152, 864, 8, 8, 8}, {1024, 768, 1024, 768, 8, 8, 8},
-	{1024, 600, 1024, 600, 8, 8, 8}, {800, 600, 800, 600, 8, 8, 8}, {768, 576, 768, 576, 8, 8, 8},
-	{720, 400, 720, 400, 8, 8, 8}, {640, 480, 640, 480, 8, 8, 8}, {400, 300, 400, 300, 8, 8, 8},
-	{320, 240, 320, 240, 8, 8, 8},
+	{8192, 4320, 8192, 4320, 0, 8, 8, 8, 0}, {7680, 4320, 7680, 4320, 0, 8, 8, 8, 0}, {5120, 2880, 5120, 2880, 0, 8, 8, 8, 0},
+	{4096, 2160, 4096, 2160, 0, 8, 8, 8, 0}, {3840, 2160, 3840, 2160, 0, 8, 8, 8, 0}, {2560, 1440, 2560, 1440, 0, 8, 8, 8, 0},
+	{2048, 1536, 2048, 1536, 0, 8, 8, 8, 0}, {1920, 2400, 1920, 2400, 0, 8, 8, 8, 0}, {1920, 1440, 1920, 1440, 0, 8, 8, 8, 0},
+	{1920, 1200, 1920, 1200, 0, 8, 8, 8, 0}, {1920, 1080, 1920, 1080, 0, 8, 8, 8, 0}, {1856, 1392, 1856, 1392, 0, 8, 8, 8, 0},
+	{1800, 1440, 1800, 1440, 0, 8, 8, 8, 0}, {1792, 1344, 1792, 1344, 0, 8, 8, 8, 0}, {1680, 1050, 1680, 1050, 0, 8, 8, 8, 0},
+	{1600, 1200, 1600, 1200, 0, 8, 8, 8, 0}, {1600, 1000, 1600, 1000, 0, 8, 8, 8, 0}, {1440, 1050, 1440, 1050, 0, 8, 8, 8, 0},
+	{1440, 900, 1440, 900, 0, 8, 8, 8, 0}, {1400, 1050, 1400, 1050, 0, 8, 8, 8, 0}, {1368, 768, 1368, 768, 0, 8, 8, 8, 0},
+	{1280, 1024, 1280, 1024, 0, 8, 8, 8, 0}, {1280, 960, 1280, 960, 0, 8, 8, 8, 0}, {1280, 800, 1280, 800, 0, 8, 8, 8, 0},
+	{1280, 768, 1280, 768, 0, 8, 8, 8, 0}, {1152, 864, 1152, 864, 0, 8, 8, 8, 0}, {1024, 768, 1024, 768, 0, 8, 8, 8, 0},
+	{1024, 600, 1024, 600, 0, 8, 8, 8, 0}, {800, 600, 800, 600, 0, 8, 8, 8, 0}, {768, 576, 768, 576, 0, 8, 8, 8, 0},
+	{720, 400, 720, 400, 0, 8, 8, 8, 0}, {640, 480, 640, 480, 0, 8, 8, 8, 0}, {400, 300, 400, 300, 0, 8, 8, 8, 0},
+	{320, 240, 320, 240, 0, 8, 8, 8, 0},
 
-	{8192, 4320, 8192, 4320, 5, 6, 5}, {7680, 4320, 7680, 4320, 5, 6, 5}, {5120, 2880, 5120, 2880, 5, 6, 5},
-	{4096, 2160, 4096, 2160, 5, 6, 5}, {3840, 2160, 3840, 2160, 5, 6, 5}, {2560, 1440, 2560, 1440, 5, 6, 5},
-	{2048, 1536, 2048, 1536, 5, 6, 5}, {1920, 2400, 1920, 2400, 5, 6, 5}, {1920, 1440, 1920, 1440, 5, 6, 5},
-	{1920, 1200, 1920, 1200, 5, 6, 5}, {1920, 1080, 1920, 1080, 5, 6, 5}, {1856, 1392, 1856, 1392, 5, 6, 5},
-	{1800, 1440, 1800, 1440, 5, 6, 5}, {1792, 1344, 1792, 1344, 5, 6, 5}, {1680, 1050, 1680, 1050, 5, 6, 5},
-	{1600, 1200, 1600, 1200, 5, 6, 5}, {1600, 1000, 1600, 1000, 5, 6, 5}, {1440, 1050, 1440, 1050, 5, 6, 5},
-	{1440, 900, 1440, 900, 5, 6, 5}, {1400, 1050, 1400, 1050, 5, 6, 5}, {1368, 768, 1368, 768, 5, 6, 5},
-	{1280, 1024, 1280, 1024, 5, 6, 5}, {1280, 960, 1280, 960, 5, 6, 5}, {1280, 800, 1280, 800, 5, 6, 5},
-	{1280, 768, 1280, 768, 5, 6, 5}, {1152, 864, 1152, 864, 5, 6, 5}, {1024, 768, 1024, 768, 5, 6, 5},
-	{1024, 600, 1024, 600, 5, 6, 5}, {800, 600, 800, 600, 5, 6, 5}, {768, 576, 768, 576, 5, 6, 5},
-	{720, 400, 720, 400, 5, 6, 5}, {640, 480, 640, 480, 5, 6, 5}, {400, 300, 400, 300, 5, 6, 5},
-	{320, 240, 320, 240, 5, 6, 5}};
+	{8192, 4320, 8192, 4320, 0, 5, 6, 5, 0}, {7680, 4320, 7680, 4320, 0, 5, 6, 5, 0}, {5120, 2880, 5120, 2880, 0, 5, 6, 5, 0},
+	{4096, 2160, 4096, 2160, 0, 5, 6, 5, 0}, {3840, 2160, 3840, 2160, 0, 5, 6, 5, 0}, {2560, 1440, 2560, 1440, 0, 5, 6, 5, 0},
+	{2048, 1536, 2048, 1536, 0, 5, 6, 5, 0}, {1920, 2400, 1920, 2400, 0, 5, 6, 5, 0}, {1920, 1440, 1920, 1440, 0, 5, 6, 5, 0},
+	{1920, 1200, 1920, 1200, 0, 5, 6, 5, 0}, {1920, 1080, 1920, 1080, 0, 5, 6, 5, 0}, {1856, 1392, 1856, 1392, 0, 5, 6, 5, 0},
+	{1800, 1440, 1800, 1440, 0, 5, 6, 5, 0}, {1792, 1344, 1792, 1344, 0, 5, 6, 5, 0}, {1680, 1050, 1680, 1050, 0, 5, 6, 5, 0},
+	{1600, 1200, 1600, 1200, 0, 5, 6, 5, 0}, {1600, 1000, 1600, 1000, 0, 5, 6, 5, 0}, {1440, 1050, 1440, 1050, 0, 5, 6, 5, 0},
+	{1440, 900, 1440, 900, 0, 5, 6, 5, 0}, {1400, 1050, 1400, 1050, 0, 5, 6, 5, 0}, {1368, 768, 1368, 768, 0, 5, 6, 5, 0},
+	{1280, 1024, 1280, 1024, 0, 5, 6, 5, 0}, {1280, 960, 1280, 960, 0, 5, 6, 5, 0}, {1280, 800, 1280, 800, 0, 5, 6, 5, 0},
+	{1280, 768, 1280, 768, 0, 5, 6, 5, 0}, {1152, 864, 1152, 864, 0, 5, 6, 5, 0}, {1024, 768, 1024, 768, 0, 5, 6, 5, 0},
+	{1024, 600, 1024, 600, 0, 5, 6, 5, 0}, {800, 600, 800, 600, 0, 5, 6, 5, 0}, {768, 576, 768, 576, 0, 5, 6, 5, 0},
+	{720, 400, 720, 400, 0, 5, 6, 5, 0}, {640, 480, 640, 480, 0, 5, 6, 5, 0}, {400, 300, 400, 300, 0, 5, 6, 5, 0},
+	{320, 240, 320, 240, 0, 5, 6, 5, 0}};
 
 void CGraphics_Threaded::FlushVertices(bool KeepVertices)
 {
@@ -146,6 +146,7 @@ CGraphics_Threaded::CGraphics_Threaded()
 
 	m_ScreenWidth = -1;
 	m_ScreenHeight = -1;
+	m_ScreenRefreshRate = -1;
 
 	m_Rotation = 0;
 	m_Drawing = 0;
@@ -2083,7 +2084,7 @@ int CGraphics_Threaded::IssueInit()
 	if(g_Config.m_GfxResizable)
 		Flags |= IGraphicsBackend::INITFLAG_RESIZABLE;
 
-	int r = m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, g_Config.m_GfxFsaaSamples, Flags, &g_Config.m_GfxDesktopWidth, &g_Config.m_GfxDesktopHeight, &m_ScreenWidth, &m_ScreenHeight, m_pStorage);
+	int r = m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, &g_Config.m_GfxScreenRefreshRate, g_Config.m_GfxFsaaSamples, Flags, &g_Config.m_GfxDesktopWidth, &g_Config.m_GfxDesktopHeight, &m_ScreenWidth, &m_ScreenHeight, m_pStorage);
 	AddBackEndWarningIfExists();
 	m_IsNewOpenGL = m_pBackend->IsNewOpenGL();
 	m_OpenGLTileBufferingEnabled = m_IsNewOpenGL || m_pBackend->HasTileBuffering();
@@ -2092,6 +2093,7 @@ int CGraphics_Threaded::IssueInit()
 	m_OpenGLTextBufferingEnabled = m_IsNewOpenGL || (m_OpenGLQuadContainerBufferingEnabled && m_pBackend->HasTextBuffering());
 	m_OpenGLHasTextureArrays = m_IsNewOpenGL || m_pBackend->Has2DTextureArrays();
 	m_ScreenHiDPIScale = m_ScreenWidth / (float)g_Config.m_GfxScreenWidth;
+	m_ScreenRefreshRate = g_Config.m_GfxScreenRefreshRate;
 	return r;
 }
 
@@ -2244,6 +2246,7 @@ int CGraphics_Threaded::Init()
 	{
 		FakeMode.m_WindowWidth = FakeMode.m_CanvasWidth / m_ScreenHiDPIScale;
 		FakeMode.m_WindowHeight = FakeMode.m_CanvasHeight / m_ScreenHiDPIScale;
+		FakeMode.m_RefreshRate = g_Config.m_GfxScreenRefreshRate;
 	}
 
 	// create command buffers
@@ -2306,6 +2309,9 @@ void CGraphics_Threaded::Maximize()
 void CGraphics_Threaded::SetWindowParams(int FullscreenMode, bool IsBorderless)
 {
 	m_pBackend->SetWindowParams(FullscreenMode, IsBorderless);
+	CVideoMode CurMode;
+	m_pBackend->GetCurrentVideoMode(CurMode, m_ScreenHiDPIScale, g_Config.m_GfxDesktopWidth, g_Config.m_GfxDesktopHeight, g_Config.m_GfxScreen);
+	Resize(CurMode.m_WindowWidth, CurMode.m_WindowHeight, CurMode.m_RefreshRate, false, true);
 }
 
 bool CGraphics_Threaded::SetWindowScreen(int Index)
@@ -2313,18 +2319,18 @@ bool CGraphics_Threaded::SetWindowScreen(int Index)
 	return m_pBackend->SetWindowScreen(Index);
 }
 
-void CGraphics_Threaded::Resize(int w, int h, bool SetWindowSize)
+void CGraphics_Threaded::Resize(int w, int h, int RefreshRate, bool SetWindowSize, bool ForceResizeEvent)
 {
 #if defined(CONF_VIDEORECORDER)
 	if(IVideo::Current() && IVideo::Current()->IsRecording())
 		return;
 #endif
 
-	if(WindowWidth() == w && WindowHeight() == h)
+	if(!ForceResizeEvent && WindowWidth() == w && WindowHeight() == h && (RefreshRate != -1 && RefreshRate == m_ScreenRefreshRate))
 		return;
 
 	if(SetWindowSize)
-		m_pBackend->ResizeWindow(w, h);
+		m_pBackend->ResizeWindow(w, h, RefreshRate);
 
 	m_pBackend->GetViewportSize(m_ScreenWidth, m_ScreenHeight);
 
@@ -2333,6 +2339,12 @@ void CGraphics_Threaded::Resize(int w, int h, bool SetWindowSize)
 		m_ScreenHeight = 4 * m_ScreenWidth / 5;
 	if(m_ScreenWidth > 21 * m_ScreenHeight / 9)
 		m_ScreenWidth = 21 * m_ScreenHeight / 9;
+
+	m_ScreenRefreshRate = RefreshRate == -1 ? m_ScreenRefreshRate : RefreshRate;
+
+	g_Config.m_GfxScreenWidth = w;
+	g_Config.m_GfxScreenHeight = h;
+	g_Config.m_GfxScreenRefreshRate = m_ScreenRefreshRate;
 
 	CCommandBuffer::SCommand_Update_Viewport Cmd;
 	Cmd.m_X = 0;
@@ -2530,24 +2542,8 @@ int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes, int Scre
 	mem_zero(&Image, sizeof(Image));
 
 	int NumModes = 0;
-	CCommandBuffer::SCommand_VideoModes Cmd;
-	Cmd.m_pModes = pModes;
-	Cmd.m_MaxModes = MaxModes;
-	Cmd.m_pNumModes = &NumModes;
-	Cmd.m_HiDPIScale = m_ScreenHiDPIScale;
-	Cmd.m_MaxWindowWidth = g_Config.m_GfxDesktopWidth;
-	Cmd.m_MaxWindowHeight = g_Config.m_GfxDesktopHeight;
-	Cmd.m_Screen = Screen;
+	m_pBackend->GetVideoModes(pModes, MaxModes, &NumModes, m_ScreenHiDPIScale, g_Config.m_GfxDesktopWidth, g_Config.m_GfxDesktopHeight, Screen);
 
-	if(!AddCmd(
-		   Cmd, [] { return true; }, "failed to add video mode command"))
-	{
-		return 0;
-	}
-
-	// kick the buffer and wait for the result and return it
-	KickCommandBuffer();
-	WaitForIdle();
 	return NumModes;
 }
 

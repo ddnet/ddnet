@@ -329,7 +329,7 @@ int CInput::Update()
 				switch(Event.window.event)
 				{
 				case SDL_WINDOWEVENT_RESIZED:
-					Graphics()->Resize(Event.window.data1, Event.window.data2);
+					Graphics()->Resize(Event.window.data1, Event.window.data2, -1);
 					break;
 				case SDL_WINDOWEVENT_FOCUS_GAINED:
 					if(m_InputGrabbed)

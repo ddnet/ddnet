@@ -13,6 +13,7 @@
 #include <base/tl/threading.h>
 
 #include <atomic>
+#include <vector>
 
 #if defined(CONF_PLATFORM_MACOS)
 #include <objc/objc-runtime.h>
@@ -140,7 +141,6 @@ private:
 	void Cmd_Shutdown(const SCommand_Shutdown *pCommand);
 	void Cmd_Swap(const CCommandBuffer::SCommand_Swap *pCommand);
 	void Cmd_VSync(const CCommandBuffer::SCommand_VSync *pCommand);
-	void Cmd_VideoModes(const CCommandBuffer::SCommand_VideoModes *pCommand);
 
 public:
 	CCommandProcessorFragment_SDL();
@@ -213,7 +213,7 @@ static constexpr size_t gs_GPUInfoStringSize = 256;
 // graphics backend implemented with SDL and OpenGL
 class CGraphicsBackend_SDL_OpenGL : public CGraphicsBackend_Threaded
 {
-	SDL_Window *m_pWindow;
+	SDL_Window *m_pWindow = NULL;
 	SDL_GLContext m_GLContext;
 	ICommandProcessor *m_pProcessor;
 	std::atomic<int> m_TextureMemoryUsage;
@@ -234,12 +234,15 @@ class CGraphicsBackend_SDL_OpenGL : public CGraphicsBackend_Threaded
 	static void ClampDriverVersion(EBackendType BackendType);
 
 public:
-	virtual int Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, class IStorage *pStorage);
+	virtual int Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int *pRefreshRate, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, class IStorage *pStorage);
 	virtual int Shutdown();
 
 	virtual int MemoryUsage() const;
 
 	virtual int GetNumScreens() const { return m_NumScreens; }
+
+	virtual void GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen);
+	virtual void GetCurrentVideoMode(CVideoMode &CurMode, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen);
 
 	virtual void Minimize();
 	virtual void Maximize();
@@ -249,7 +252,7 @@ public:
 	virtual int WindowActive();
 	virtual int WindowOpen();
 	virtual void SetWindowGrab(bool Grab);
-	virtual void ResizeWindow(int w, int h);
+	virtual void ResizeWindow(int w, int h, int RefreshRate);
 	virtual void GetViewportSize(int &w, int &h);
 	virtual void NotifyWindow();
 
