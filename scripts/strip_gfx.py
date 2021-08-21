@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-# strip_gfx.py by ChillerDragon
-# comments out graphic code to turn any src base into a headless client
+"""
+comments out graphic code to turn any src base into a headless client
+"""
 
 import os
 import argparse
@@ -15,16 +16,24 @@ GFX_FILES = [
 		'CCommandProcessorFragment_General',
 		'CCommandProcessorFragment_SDL',
 		'CCommandProcessor_SDL_OpenGL',
-		'CGraphicsBackend_SDL_OpenGL']]
+		'CGraphicsBackend_SDL_OpenGL']],
+	['src/engine/client/textrender.cpp', [
+		'CGlyphMap::CAtlas',
+		'CGlyphMap',
+		'CTextRender']]
 ]
 
 GFX_IN_CLASS = [
 	['src/engine/client/text.cpp', 'CTextRender']
 ]
 
+# pylint: disable=too-many-branches
+# pylint: disable=too-many-statements
 def comment_gfx_file(filename, class_names, inplace):
+	"""Comment out all function bodys of given cpp file expecting function in class"""
 	new_file_buffer = ''
 	current_function = None
+	function_name = ''
 	reached_body = False
 	is_pointer = False
 	with open(filename) as file:
@@ -45,6 +54,19 @@ def comment_gfx_file(filename, class_names, inplace):
 						new_file_buffer += '\treturn NULL;\n'
 					else:
 						new_file_buffer += '\treturn;\n'
+				elif current_function == 'vec2':
+					new_file_buffer += '\treturn vec2(0, 0);\n'
+				elif current_function == 'ivec2':
+					new_file_buffer += '\treturn ivec2(0, 0);\n'
+				elif current_function == 'ivec3':
+					new_file_buffer += '\treturn ivec3(0, 0, 0);\n'
+				elif current_function == 'constructor':
+					if function_name == 'CGraphics_Threaded':
+						with open(filename) as file_handle:
+							if 'm_DesktopScreenWidth' in file_handle.read():
+								new_file_buffer += "\tm_DesktopScreenWidth = 1920;m_DesktopScreenHeight = 1080;\n"
+				elif current_function == 'CWordWidthHint':
+					new_file_buffer += '\tCWordWidthHint Hint;return Hint;\n'
 				elif current_function == 'IGraphics::CTextureHandle':
 					new_file_buffer += '\treturn CreateTextureHandle(0);\n'
 				else:
@@ -65,24 +87,47 @@ def comment_gfx_file(filename, class_names, inplace):
 				if line.startswith('{'):
 					reached_body = True
 			for class_name in class_names:
-				for func_type in ('void', 'bool', 'const char', 'int', 'IGraphics::CTextureHandle'):
-					if line.startswith(f"{func_type} {class_name}::"):
+				for func_type in (
+					'void',
+					'bool',
+					'const char',
+					'int',
+					'vec2',
+					'ivec2',
+					'ivec3',
+					'IGraphics::CTextureHandle',
+					'CWordWidthHint'):
+					if line.startswith(f'{class_name}::{class_name}('):
+						function_name = class_name
+						is_pointer = False
+						current_function = 'constructor'
+						reached_body = False
+						continue
+					match = re.match(f'^{func_type} {class_name}::([a-zA-Z_][a-zA-Z0-9_]*)\\(', line)
+					if match:
+						function_name = match[1]
 						is_pointer = False
 						current_function = func_type
 						reached_body = False
-					elif line.startswith(f"{func_type} *{class_name}::"):
+						continue
+					match = re.match(f'^{func_type} *{class_name}::([a-zA-Z_][a-zA-Z0-9_]*)\\(', line)
+					if match:
+						function_name = match[1]
 						is_pointer = True
 						current_function = func_type
 						reached_body = False
 	if inplace:
-		f = open(filename, 'w')
-		f.write(new_file_buffer)
-		f.close()
+		with open(filename, 'w') as out_file:
+			out_file.write(new_file_buffer)
+			out_file.close()
 	else:
 		print(new_file_buffer)
 	return current_function is None
 
+# pylint: disable=too-many-branches
+# pylint: disable=too-many-statements
 def comment_gfx_in_class(filename, class_names, inplace):
+	"""Comment out all function bodys of given cpp file"""
 	new_file_buffer = ''
 	current_function = None
 	reached_body = False
@@ -141,21 +186,29 @@ def comment_gfx_in_class(filename, class_names, inplace):
 					current_function = func_type
 					reached_body = False
 	if inplace:
-		f = open(filename, 'w')
-		f.write(new_file_buffer)
-		f.close()
+		with open(filename, 'w') as out_file:
+			out_file.write(new_file_buffer)
+			out_file.close()
 	else:
 		print(new_file_buffer)
 	return current_function is None
 
 def main():
-	p = argparse.ArgumentParser(description='Comment out the graphic code to get a headless client')
-	p.add_argument('-i', '--inplace', action='store_true', help='Edit files in place instead of printing to stdout')
-	args = p.parse_args()
+	"""main method"""
+	parser = argparse.ArgumentParser(
+		description='Comment out the graphic code to get a headless client')
+	parser.add_argument(
+		'-i',
+		'--inplace',
+		action='store_true',
+		help='Edit files in place instead of printing to stdout')
+	args = parser.parse_args()
 	for file in GFX_FILES:
-		comment_gfx_file(file[0], file[1], inplace = args.inplace)
+		if os.path.exists(file[0]):
+			comment_gfx_file(file[0], file[1], inplace = args.inplace)
 	for file in GFX_IN_CLASS:
-		comment_gfx_in_class(file[0], file[1], inplace = args.inplace)
+		if os.path.exists(file[0]):
+			comment_gfx_in_class(file[0], file[1], inplace = args.inplace)
 
 
 if __name__ == '__main__':
