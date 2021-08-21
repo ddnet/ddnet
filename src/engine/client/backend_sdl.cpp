@@ -1114,7 +1114,17 @@ void CGraphicsBackend_SDL_OpenGL::SetWindowGrab(bool Grab)
 
 void CGraphicsBackend_SDL_OpenGL::ResizeWindow(int w, int h)
 {
-	SDL_SetWindowSize(m_pWindow, w, h);
+	if(SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN)
+	{
+		SDL_DisplayMode displaymode = {};
+		displaymode.w = w;
+		displaymode.h = h;
+		SDL_SetWindowDisplayMode(m_pWindow, &displaymode);
+	}
+	else
+	{
+		SDL_SetWindowSize(m_pWindow, w, h);
+	}
 }
 
 void CGraphicsBackend_SDL_OpenGL::GetViewportSize(int &w, int &h)
