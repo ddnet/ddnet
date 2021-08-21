@@ -2,6 +2,7 @@
 #define ENGINE_SHARED_SERVERINFO_H
 
 #include "protocol.h"
+#include <engine/map.h>
 
 typedef struct _json_value json_value;
 class CServerInfo;
@@ -27,7 +28,7 @@ public:
 	bool m_Passworded;
 	char m_aGameType[16];
 	char m_aName[64];
-	char m_aMapName[32];
+	char m_aMapName[MAX_MAP_LENGTH];
 	char m_aVersion[32];
 
 	bool operator==(const CServerInfo2 &Other) const;

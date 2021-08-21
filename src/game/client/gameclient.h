@@ -331,6 +331,8 @@ public:
 			vec2 m_Position;
 		};
 
+		bool m_HasSwitchState;
+
 		CCharacterInfo m_aCharacters[MAX_CLIENTS];
 	};
 
@@ -389,6 +391,9 @@ public:
 		bool m_Afk;
 		bool m_Paused;
 		bool m_Spec;
+
+		// Editor allows 256 switches for now.
+		bool m_SwitchStates[256];
 
 		CNetObj_Character m_Snapped;
 		CNetObj_Character m_Evolved;

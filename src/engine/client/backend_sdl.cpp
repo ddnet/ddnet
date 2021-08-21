@@ -347,6 +347,8 @@ static bool BackendInitGlew(EBackendType BackendType, int &GlewMajor, int &GlewM
 			GlewPatch = 0;
 			return true;
 		}
+// Don't allow GL 3.3, if the driver doesn't support atleast OpenGL 4.5
+#ifndef CONF_PLATFORM_WINDOWS
 		if(GLEW_VERSION_4_4)
 		{
 			GlewMajor = 4;
@@ -389,6 +391,7 @@ static bool BackendInitGlew(EBackendType BackendType, int &GlewMajor, int &GlewM
 			GlewPatch = 0;
 			return true;
 		}
+#endif
 		if(GLEW_VERSION_3_0)
 		{
 			GlewMajor = 3;

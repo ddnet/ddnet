@@ -1423,6 +1423,35 @@ void CGameClient::OnNewSnapshot()
 			}
 			else if(Item.m_Type == NETOBJTYPE_FLAG)
 				m_Snap.m_paFlags[Item.m_ID % 2] = (const CNetObj_Flag *)pData;
+			else if(Item.m_Type == NETOBJTYPE_SWITCHSTATE)
+			{
+				m_Snap.m_HasSwitchState = true;
+
+				const CNetObj_SwitchState *pSwitchStateData = (const CNetObj_SwitchState *)pData;
+				CClientData *pClient = &m_aClients[Item.m_ID];
+
+				mem_zero(pClient->m_SwitchStates, sizeof(pClient->m_SwitchStates));
+
+				for(int i = 0; i < pSwitchStateData->m_NumSwitchers + 1; i++)
+				{
+					if(i < 32)
+						pClient->m_SwitchStates[i] = pSwitchStateData->m_Status1 & (1 << i);
+					else if(i < 64)
+						pClient->m_SwitchStates[i] = pSwitchStateData->m_Status2 & (1 << (i - 32));
+					else if(i < 96)
+						pClient->m_SwitchStates[i] = pSwitchStateData->m_Status3 & (1 << (i - 64));
+					else if(i < 128)
+						pClient->m_SwitchStates[i] = pSwitchStateData->m_Status4 & (1 << (i - 96));
+					else if(i < 160)
+						pClient->m_SwitchStates[i] = pSwitchStateData->m_Status5 & (1 << (i - 128));
+					else if(i < 192)
+						pClient->m_SwitchStates[i] = pSwitchStateData->m_Status6 & (1 << (i - 160));
+					else if(i < 224)
+						pClient->m_SwitchStates[i] = pSwitchStateData->m_Status7 & (1 << (i - 192));
+					else if(i < 256)
+						pClient->m_SwitchStates[i] = pSwitchStateData->m_Status8 & (1 << (i - 224));
+				}
+			}
 		}
 	}
 
@@ -1979,6 +2008,8 @@ void CGameClient::CClientData::Reset()
 	m_SpecChar = vec2(0, 0);
 	m_SpecCharPresent = false;
 
+	mem_zero(m_SwitchStates, sizeof(m_SwitchStates));
+
 	UpdateRenderInfo(false);
 }
 
@@ -2209,6 +2240,32 @@ void CGameClient::UpdatePrediction()
 	if(m_Snap.m_pLocalCharacter->m_AmmoCount > 0 && m_Snap.m_pLocalCharacter->m_Weapon != WEAPON_NINJA)
 		m_GameWorld.m_WorldConfig.m_InfiniteAmmo = false;
 	m_GameWorld.m_WorldConfig.m_IsSolo = !m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_HasExtendedData && !m_Tuning[g_Config.m_ClDummy].m_PlayerCollision && !m_Tuning[g_Config.m_ClDummy].m_PlayerHooking;
+
+	// update switch state
+	if(Collision()->m_pSwitchers)
+	{
+		const int NumSwitchers = minimum(255, Collision()->m_NumSwitchers);
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			int Team = m_Teams.Team(i);
+			if(!m_Snap.m_aCharacters[i].m_Active || !in_range(Team, 0, MAX_CLIENTS - 1))
+				continue;
+			for(int Number = 1; Number <= NumSwitchers; Number++)
+			{
+				if(m_Snap.m_HasSwitchState && m_aClients[i].m_SwitchStates[Number])
+				{
+					Collision()->m_pSwitchers[Number].m_Status[Team] = true;
+					Collision()->m_pSwitchers[Number].m_Type[Team] = TILE_SWITCHOPEN;
+				}
+				else
+				{
+					Collision()->m_pSwitchers[Number].m_Status[Team] = false;
+					Collision()->m_pSwitchers[Number].m_Type[Team] = TILE_SWITCHCLOSE;
+				}
+				Collision()->m_pSwitchers[Number].m_EndTick[Team] = 0;
+			}
+		}
+	}
 
 	// update the tuning/tunezone at the local character position with the latest tunings received before the new snapshot
 	vec2 LocalCharPos = vec2(m_Snap.m_pLocalCharacter->m_X, m_Snap.m_pLocalCharacter->m_Y);
