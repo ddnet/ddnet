@@ -1462,7 +1462,6 @@ add_custom_command(OUTPUT "src/game/generated/wordlist.h"
 
 # Sources
 set_src(BASE GLOB_RECURSE src/base
-  base64.h
   color.h
   detect.h
   dynamic.h

@@ -1,4 +1,3 @@
-#include <base/base64.h>
 #include <game/client/gameclient.h>
 #include <openssl/crypto.h>
 #include <openssl/err.h>
@@ -82,18 +81,6 @@ void CAuth::OnInit()
 		m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", aBuf, ClientAuthPrintColor);
 
 		EVP_PKEY_free(pKey);
-
-		// Do a test sign
-		const unsigned char aContent[] = "hello world";
-		unsigned char *pSignature = NULL;
-		size_t SignatureLen = 0;
-
-		if(SignContent(aContent, sizeof(aContent), &pSignature, &SignatureLen))
-		{
-			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "Sign success: %s", pSignature);
-			m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", aBuf, ClientAuthPrintColor);
-		}
 	}
 	else
 	{
@@ -151,7 +138,7 @@ void CAuth::OnInit()
 		}
 
 		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "lengt is: %zu", m_PublicKeyLen);
+		str_format(aBuf, sizeof(aBuf), "pubkey length is: %zu", m_PublicKeyLen);
 		m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", aBuf, ClientAuthPrintColor);
 
 		if(m_pPublicKeyBuffer)
@@ -168,6 +155,12 @@ void CAuth::OnInit()
 		}
 
 		EVP_PKEY_free(pKey);
+	}
+
+	// If set, initialization went correctly
+	if(m_pPublicKeyBuffer)
+	{
+		RegisterAccount("mail@mail.com", 14);
 	}
 }
 
@@ -220,7 +213,7 @@ bool CAuth::SignContent(const unsigned char *pContent, size_t ContentLen, unsign
 		return false;
 	}
 
-	*ppSignature = (unsigned char *)OPENSSL_malloc(sizeof(unsigned char) * *pSignatureLen);
+	*ppSignature = (unsigned char *)OPENSSL_zalloc(*pSignatureLen);
 
 	if(!EVP_DigestSign(pMdCtx, *ppSignature, pSignatureLen, pContent, ContentLen))
 	{
@@ -240,4 +233,32 @@ void CAuth::FreeSignature(unsigned char **ppSignature)
 {
 	if(ppSignature && *ppSignature)
 		OPENSSL_free(*ppSignature);
+}
+
+bool CAuth::RegisterAccount(const char *pEmail, size_t EmailLength)
+{
+	unsigned char *pSignature = NULL;
+	size_t SignatureLen = 0;
+
+	if(!SignContent((const unsigned char *)pEmail, sizeof(EmailLength), &pSignature, &SignatureLen))
+		return false;
+
+	char aEncodedSignature[256];
+	mem_zero(aEncodedSignature, sizeof(aEncodedSignature));
+
+	// base64 encoding
+	EVP_EncodeBlock((unsigned char *)aEncodedSignature, pSignature, SignatureLen);
+
+	char aEncodedPubKey[64];
+	mem_zero(aEncodedPubKey, sizeof(aEncodedPubKey));
+	EVP_EncodeBlock((unsigned char *)aEncodedPubKey, m_pPublicKeyBuffer, m_PublicKeyLen);
+
+	char aPayload[2048];
+
+	str_format(aPayload, sizeof(aPayload), "{\"email\": \"%s\", \"email_signature\":\"%s\", \"public_key\":\"%s\"}", pEmail, aEncodedSignature, aEncodedPubKey);
+	m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", aPayload, ClientAuthPrintColor);
+
+	FreeSignature(&pSignature);
+
+	return true;
 }
