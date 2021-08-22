@@ -84,14 +84,14 @@ void CAuth::OnInit()
 		EVP_PKEY_free(pKey);
 
 		// Do a test sign
-		const char *pContent = "hello world";
-		unsigned char **ppSignature = (unsigned char **)malloc(sizeof(unsigned char *));
+		const unsigned char aContent[] = "hello world";
+		unsigned char *pSignature = NULL;
 		size_t SignatureLen = 0;
 
-		if(SignContent((const unsigned char *)pContent, str_length(pContent), ppSignature, &SignatureLen))
+		if(SignContent(aContent, sizeof(aContent), &pSignature, &SignatureLen))
 		{
 			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "Sign success: %s", *ppSignature);
+			str_format(aBuf, sizeof(aBuf), "Sign success: %s", pSignature);
 			m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", aBuf, ClientAuthPrintColor);
 		}
 	}
@@ -202,6 +202,12 @@ bool CAuth::SignContent(const unsigned char *pContent, size_t ContentLen, unsign
 	if(!pMdCtx)
 	{
 		m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ERROR: Could not create EVP_MD_CTX", ClientAuthPrintColor);
+		PrintOpenSSLError();
+	}
+
+	if(!EVP_DigestSignInit(pMdCtx, NULL, NULL, NULL, pKey))
+	{
+		m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ERROR: Could not initialize Digest", ClientAuthPrintColor);
 		PrintOpenSSLError();
 	}
 
