@@ -159,7 +159,8 @@ void CAuth::OnInit()
 	// If set, initialization went correctly
 	if(m_pPublicKeyBuffer)
 	{
-		RegisterAccount("mail@mail.com", 14);
+		const char *pEmail = "mail@mail.com";
+		RegisterAccount(pEmail, str_length(pEmail));
 	}
 }
 
@@ -234,12 +235,12 @@ void CAuth::FreeSignature(unsigned char **ppSignature)
 		OPENSSL_free(*ppSignature);
 }
 
-bool CAuth::RegisterAccount(const char *pEmail, size_t EmailLength)
+bool CAuth::RegisterAccount(const char *pEmail, size_t EmailStrLength)
 {
 	unsigned char *pSignature = NULL;
 	size_t SignatureLen = 0;
 
-	if(!SignContent((const unsigned char *)pEmail, sizeof(EmailLength), &pSignature, &SignatureLen))
+	if(!SignContent((const unsigned char *)pEmail, EmailStrLength, &pSignature, &SignatureLen))
 		return false;
 
 	char aEncodedSignature[256];
@@ -256,6 +257,19 @@ bool CAuth::RegisterAccount(const char *pEmail, size_t EmailLength)
 
 	str_format(aPayload, sizeof(aPayload), "{\"email\": \"%s\", \"email_signature\":\"%s\", \"public_key\":\"%s\"}", pEmail, aEncodedSignature, aEncodedPubKey);
 	m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", aPayload, ClientAuthPrintColor);
+
+	CTimeout Timeout{10000, 8000, 10};
+	CPostJson PostJson("http://127.0.0.1:3000/account/register", Timeout, aPayload);
+	IEngine::RunJobBlocking(&PostJson);
+
+	if(PostJson.State() != HTTP_DONE)
+	{
+		m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ERROR: Could not register", ClientAuthPrintColor);
+	}
+	else
+	{
+		m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ERROR: Registered succesfully", ClientAuthPrintColor);
+	}
 
 	FreeSignature(&pSignature);
 

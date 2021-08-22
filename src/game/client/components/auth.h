@@ -14,7 +14,7 @@ public:
 	virtual void OnInit();
 
 	// Register an account using the given email and the automatically generated keypair
-	bool RegisterAccount(const char *pEmail, size_t EmailLength);
+	bool RegisterAccount(const char *pEmail, size_t EmailStrLength);
 
 	// Caller should remember to free ppSignature using FreeSignature.
 	bool SignContent(const unsigned char *pContent, size_t ContentLen, unsigned char **ppSignature, size_t *pSignatureLen);
