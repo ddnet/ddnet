@@ -69,7 +69,7 @@ jobs:
       if: contains(matrix.os, 'macOS')
       run: |
         brew update || true
-        brew install pkg-config sdl2
+        brew install pkg-config sdl2 openssl
         brew upgrade freetype
         sudo rm -rf /Library/Developer/CommandLineTools
 
