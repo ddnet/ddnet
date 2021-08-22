@@ -1,5 +1,4 @@
 #include <game/client/gameclient.h>
-#include <openssl/crypto.h>
 #include <openssl/err.h>
 #include <openssl/evp.h>
 #include <openssl/ossl_typ.h>
