@@ -301,7 +301,11 @@ static bool BackendInitGlew(EBackendType BackendType, int &GlewMajor, int &GlewM
 #ifndef CONF_BACKEND_OPENGL_ES
 		//support graphic cards that are pretty old(and linux)
 		glewExperimental = GL_TRUE;
+#ifdef CONF_GLEW_HAS_CONTEXT_INIT
+		if(GLEW_OK != glewContextInit())
+#else
 		if(GLEW_OK != glewInit())
+#endif
 			return false;
 
 #ifdef GLEW_VERSION_4_6

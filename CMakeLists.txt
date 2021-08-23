@@ -2025,6 +2025,10 @@ if(CLIENT)
 	  target_compile_definitions(${TARGET_CLIENT} PRIVATE CONF_WAVPACK_CLOSE_FILE)
   endif()
 
+  if(GLEW_BUNDLED)
+	  target_compile_definitions(${TARGET_CLIENT} PRIVATE CONF_GLEW_HAS_CONTEXT_INIT)
+  endif()
+
   list(APPEND TARGETS_OWN ${TARGET_CLIENT})
   list(APPEND TARGETS_LINK ${TARGET_CLIENT})
 endif()
