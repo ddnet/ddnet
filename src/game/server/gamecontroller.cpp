@@ -628,6 +628,49 @@ void IGameController::Snap(int SnappingClient)
 		pRaceData->m_Precision = 0;
 		pRaceData->m_RaceFlags = protocol7::RACEFLAG_HIDE_KILLMSG | protocol7::RACEFLAG_KEEP_WANTED_WEAPON;
 	}
+
+	if(GameServer()->Collision()->m_pSwitchers)
+	{
+		// update all teams
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			CNetObj_SwitchState *pSwitchState = static_cast<CNetObj_SwitchState *>(Server()->SnapNewItem(NETOBJTYPE_SWITCHSTATE, i, sizeof(CNetObj_SwitchState)));
+			if(!pSwitchState)
+				return;
+
+			pSwitchState->m_NumSwitchers = clamp(GameServer()->Collision()->m_NumSwitchers, 0, 255);
+			pSwitchState->m_Status1 = 0;
+			pSwitchState->m_Status2 = 0;
+			pSwitchState->m_Status3 = 0;
+			pSwitchState->m_Status4 = 0;
+			pSwitchState->m_Status5 = 0;
+			pSwitchState->m_Status6 = 0;
+			pSwitchState->m_Status7 = 0;
+			pSwitchState->m_Status8 = 0;
+
+			for(int j = 0; j < pSwitchState->m_NumSwitchers + 1; j++)
+			{
+				int Status = (int)GameServer()->Collision()->m_pSwitchers[j].m_Status[i];
+
+				if(j < 32)
+					pSwitchState->m_Status1 |= Status << j;
+				else if(j < 64)
+					pSwitchState->m_Status2 |= Status << (j - 32);
+				else if(j < 96)
+					pSwitchState->m_Status3 |= Status << (j - 64);
+				else if(j < 128)
+					pSwitchState->m_Status4 |= Status << (j - 96);
+				else if(j < 160)
+					pSwitchState->m_Status5 |= Status << (j - 128);
+				else if(j < 192)
+					pSwitchState->m_Status6 |= Status << (j - 160);
+				else if(j < 224)
+					pSwitchState->m_Status7 |= Status << (j - 192);
+				else if(j < 256)
+					pSwitchState->m_Status8 |= Status << (j - 224);
+			}
+		}
+	}
 }
 
 int IGameController::GetAutoTeam(int NotThisID)
