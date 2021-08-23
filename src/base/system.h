@@ -2130,16 +2130,6 @@ PROCESS shell_execute(const char *file);
 int kill_process(PROCESS process);
 
 /*
-	Function: os_is_winxp_or_lower
-		Checks whether the program runs on Windows XP or lower.
-
-	Returns:
-		1 - Windows XP or lower.
-		0 - Higher Windows version, Linux, macOS, etc.
-*/
-int os_is_winxp_or_lower();
-
-/*
 	Function: generate_password
 		Generates a null-terminated password of length `2 *
 		random_length`.
