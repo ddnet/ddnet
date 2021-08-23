@@ -4501,11 +4501,7 @@ bool CClient::RaceRecord_IsRecording()
 void CClient::RequestDDNetInfo()
 {
 	char aUrl[256];
-	static bool s_IsWinXP = os_is_winxp_or_lower();
-	if(s_IsWinXP)
-		str_copy(aUrl, "http://info2.ddnet.tw/info", sizeof(aUrl));
-	else
-		str_copy(aUrl, "https://info2.ddnet.tw/info", sizeof(aUrl));
+	str_copy(aUrl, "https://info2.ddnet.tw/info", sizeof(aUrl));
 
 	if(g_Config.m_BrIndicateFinished)
 	{

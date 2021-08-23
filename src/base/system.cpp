@@ -3458,22 +3458,6 @@ int open_link(const char *link)
 #endif
 }
 
-int os_is_winxp_or_lower()
-{
-#if defined(CONF_FAMILY_WINDOWS)
-	static const DWORD WINXP_MAJOR = 5;
-	static const DWORD WINXP_MINOR = 1;
-	OSVERSIONINFO ver;
-	mem_zero(&ver, sizeof(OSVERSIONINFO));
-	ver.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-	GetVersionEx(&ver);
-	return ver.dwMajorVersion < WINXP_MAJOR ||
-	       (ver.dwMajorVersion == WINXP_MAJOR && ver.dwMinorVersion <= WINXP_MINOR);
-#else
-	return 0;
-#endif
-}
-
 struct SECURE_RANDOM_DATA
 {
 	int initialized;

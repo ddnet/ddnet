@@ -102,7 +102,6 @@ void CUpdater::Init()
 	m_pClient = Kernel()->RequestInterface<IClient>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pEngine = Kernel()->RequestInterface<IEngine>();
-	m_IsWinXP = os_is_winxp_or_lower();
 }
 
 CUpdater::~CUpdater()
@@ -204,13 +203,10 @@ bool CUpdater::ReplaceClient()
 	char aPath[512];
 
 	// Replace running executable by renaming twice...
-	if(!m_IsWinXP)
-	{
-		m_pStorage->RemoveBinaryFile(CLIENT_EXEC ".old");
-		Success &= m_pStorage->RenameBinaryFile(PLAT_CLIENT_EXEC, CLIENT_EXEC ".old");
-		str_format(aPath, sizeof(aPath), "update/%s", m_aClientExecTmp);
-		Success &= m_pStorage->RenameBinaryFile(aPath, PLAT_CLIENT_EXEC);
-	}
+	m_pStorage->RemoveBinaryFile(CLIENT_EXEC ".old");
+	Success &= m_pStorage->RenameBinaryFile(PLAT_CLIENT_EXEC, CLIENT_EXEC ".old");
+	str_format(aPath, sizeof(aPath), "update/%s", m_aClientExecTmp);
+	Success &= m_pStorage->RenameBinaryFile(aPath, PLAT_CLIENT_EXEC);
 #if !defined(CONF_FAMILY_WINDOWS)
 	m_pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aPath, sizeof aPath);
 	char aBuf[512];
@@ -387,23 +383,6 @@ void CUpdater::CommitUpdate()
 		m_State = NEED_RESTART;
 	else
 	{
-		if(!m_IsWinXP)
-			m_pClient->Restart();
-		else
-			WinXpRestart();
+		m_pClient->Restart();
 	}
-}
-
-void CUpdater::WinXpRestart()
-{
-	char aBuf[512];
-	IOHANDLE bhFile = io_open(m_pStorage->GetBinaryPath("du.bat", aBuf, sizeof aBuf), IOFLAG_WRITE);
-	if(!bhFile)
-		return;
-	char bBuf[512];
-	str_format(bBuf, sizeof(bBuf), ":_R\r\ndel \"" PLAT_CLIENT_EXEC "\"\r\nif exist \"" PLAT_CLIENT_EXEC "\" goto _R\r\n:_T\r\nmove /y \"update\\%s\" \"" PLAT_CLIENT_EXEC "\"\r\nif not exist \"" PLAT_CLIENT_EXEC "\" goto _T\r\nstart " PLAT_CLIENT_EXEC "\r\ndel \"du.bat\"\r\n", m_aClientExecTmp);
-	io_write(bhFile, bBuf, str_length(bBuf));
-	io_close(bhFile);
-	shell_execute(aBuf);
-	m_pClient->Quit();
 }
