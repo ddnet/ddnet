@@ -629,46 +629,43 @@ void IGameController::Snap(int SnappingClient)
 		pRaceData->m_RaceFlags = protocol7::RACEFLAG_HIDE_KILLMSG | protocol7::RACEFLAG_KEEP_WANTED_WEAPON;
 	}
 
-	if(GameServer()->Collision()->m_pSwitchers)
+	if(GameServer()->Collision()->m_pSwitchers && pPlayer && pPlayer->GetCharacter())
 	{
-		// update all teams
-		for(int i = 0; i < MAX_CLIENTS; i++)
+		int Team = pPlayer->GetCharacter()->Team();
+		CNetObj_SwitchState *pSwitchState = static_cast<CNetObj_SwitchState *>(Server()->SnapNewItem(NETOBJTYPE_SWITCHSTATE, Team, sizeof(CNetObj_SwitchState)));
+		if(!pSwitchState)
+			return;
+
+		pSwitchState->m_NumSwitchers = clamp(GameServer()->Collision()->m_NumSwitchers, 0, 255);
+		pSwitchState->m_Status1 = 0;
+		pSwitchState->m_Status2 = 0;
+		pSwitchState->m_Status3 = 0;
+		pSwitchState->m_Status4 = 0;
+		pSwitchState->m_Status5 = 0;
+		pSwitchState->m_Status6 = 0;
+		pSwitchState->m_Status7 = 0;
+		pSwitchState->m_Status8 = 0;
+
+		for(int i = 0; i < pSwitchState->m_NumSwitchers + 1; i++)
 		{
-			CNetObj_SwitchState *pSwitchState = static_cast<CNetObj_SwitchState *>(Server()->SnapNewItem(NETOBJTYPE_SWITCHSTATE, i, sizeof(CNetObj_SwitchState)));
-			if(!pSwitchState)
-				return;
+			int Status = (int)GameServer()->Collision()->m_pSwitchers[i].m_Status[Team];
 
-			pSwitchState->m_NumSwitchers = clamp(GameServer()->Collision()->m_NumSwitchers, 0, 255);
-			pSwitchState->m_Status1 = 0;
-			pSwitchState->m_Status2 = 0;
-			pSwitchState->m_Status3 = 0;
-			pSwitchState->m_Status4 = 0;
-			pSwitchState->m_Status5 = 0;
-			pSwitchState->m_Status6 = 0;
-			pSwitchState->m_Status7 = 0;
-			pSwitchState->m_Status8 = 0;
-
-			for(int j = 0; j < pSwitchState->m_NumSwitchers + 1; j++)
-			{
-				int Status = (int)GameServer()->Collision()->m_pSwitchers[j].m_Status[i];
-
-				if(j < 32)
-					pSwitchState->m_Status1 |= Status << j;
-				else if(j < 64)
-					pSwitchState->m_Status2 |= Status << (j - 32);
-				else if(j < 96)
-					pSwitchState->m_Status3 |= Status << (j - 64);
-				else if(j < 128)
-					pSwitchState->m_Status4 |= Status << (j - 96);
-				else if(j < 160)
-					pSwitchState->m_Status5 |= Status << (j - 128);
-				else if(j < 192)
-					pSwitchState->m_Status6 |= Status << (j - 160);
-				else if(j < 224)
-					pSwitchState->m_Status7 |= Status << (j - 192);
-				else if(j < 256)
-					pSwitchState->m_Status8 |= Status << (j - 224);
-			}
+			if(i < 32)
+				pSwitchState->m_Status1 |= Status << i;
+			else if(i < 64)
+				pSwitchState->m_Status2 |= Status << (i - 32);
+			else if(i < 96)
+				pSwitchState->m_Status3 |= Status << (i - 64);
+			else if(i < 128)
+				pSwitchState->m_Status4 |= Status << (i - 96);
+			else if(i < 160)
+				pSwitchState->m_Status5 |= Status << (i - 128);
+			else if(i < 192)
+				pSwitchState->m_Status6 |= Status << (i - 160);
+			else if(i < 224)
+				pSwitchState->m_Status7 |= Status << (i - 192);
+			else if(i < 256)
+				pSwitchState->m_Status8 |= Status << (i - 224);
 		}
 	}
 }
