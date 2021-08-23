@@ -1761,6 +1761,23 @@ int fs_remove(const char *filename);
 int fs_rename(const char *oldname, const char *newname);
 
 /*
+	Function: fs_file_time
+		Gets the creation and the last modification date of a file.
+
+	Parameters:
+		name - The filename.
+		created - Pointer to time_t
+		modified - Pointer to time_t
+
+	Returns:
+		0 on success non-zero on failure
+
+	Remarks:
+		- Returned time is in seconds since UNIX Epoch
+*/
+int fs_file_time(const char *name, time_t *created, time_t *modified);
+
+/*
 	Group: Undocumented
 */
 

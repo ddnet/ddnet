@@ -2347,6 +2347,34 @@ int fs_rename(const char *oldname, const char *newname)
 	return 0;
 }
 
+int fs_file_time(const char *name, time_t *created, time_t *modified)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	WIN32_FIND_DATAW finddata;
+	HANDLE handle;
+	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
+
+	MultiByteToWideChar(CP_UTF8, 0, name, IO_MAX_PATH_LENGTH, wBuffer, IO_MAX_PATH_LENGTH);
+	handle = FindFirstFileW(wBuffer, &finddata);
+	if(handle == INVALID_HANDLE_VALUE)
+		return 1;
+
+	*created = filetime_to_unixtime(&finddata.ftCreationTime);
+	*modified = filetime_to_unixtime(&finddata.ftLastWriteTime);
+#elif defined(CONF_FAMILY_UNIX)
+	struct stat sb;
+	if(stat(name, &sb))
+		return 1;
+
+	*created = sb.st_ctime;
+	*modified = sb.st_mtime;
+#else
+	#error not implemented
+#endif
+
+	return 0;
+}
+
 void swap_endian(void *data, unsigned elem_size, unsigned num)
 {
 	char *src = (char *)data;
