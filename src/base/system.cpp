@@ -62,9 +62,9 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <process.h>
+#include <share.h>
 #include <shellapi.h>
 #include <wincrypt.h>
-#include <share.h>
 #else
 #error NOT IMPLEMENTED
 #endif
@@ -295,14 +295,14 @@ IOHANDLE io_open(const char *filename, int flags)
 		char buffer[IO_MAX_PATH_LENGTH];
 
 		int length = str_length(filename);
-		if(!filename || !length || filename[length-1] == '\\')
+		if(!filename || !length || filename[length - 1] == '\\')
 			return 0x0;
 		MultiByteToWideChar(CP_UTF8, 0, filename, IO_MAX_PATH_LENGTH, wBuffer, IO_MAX_PATH_LENGTH);
 		handle = FindFirstFileW(wBuffer, &finddata);
 		if(handle == INVALID_HANDLE_VALUE)
 			return 0x0;
 		WideCharToMultiByte(CP_UTF8, 0, finddata.cFileName, -1, buffer, IO_MAX_PATH_LENGTH, NULL, NULL);
-		if(str_comp(filename+length-str_length(buffer), buffer) != 0)
+		if(str_comp(filename + length - str_length(buffer), buffer) != 0)
 		{
 			FindClose(handle);
 			return 0x0;
@@ -2026,7 +2026,7 @@ void net_unix_close(UNIXSOCKET sock)
 }
 #endif
 
-#if defined (CONF_FAMILY_WINDOWS)
+#if defined(CONF_FAMILY_WINDOWS)
 static inline time_t filetime_to_unixtime(LPFILETIME filetime)
 {
 	time_t t;
@@ -2066,11 +2066,10 @@ void fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user)
 	do
 	{
 		WideCharToMultiByte(CP_UTF8, 0, finddata.cFileName, -1, buffer2, IO_MAX_PATH_LENGTH, NULL, NULL);
-		str_copy(buffer+length, buffer2, (int)sizeof(buffer)-length);
+		str_copy(buffer + length, buffer2, (int)sizeof(buffer) - length);
 		if(cb(buffer2, fs_is_dir(buffer), type, user))
 			break;
-	}
-	while(FindNextFileW(handle, &finddata));
+	} while(FindNextFileW(handle, &finddata));
 
 	FindClose(handle);
 #else
@@ -2087,7 +2086,7 @@ void fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user)
 
 	while((entry = readdir(d)) != NULL)
 	{
-		str_copy(buffer+length, entry->d_name, (int)sizeof(buffer)-length);
+		str_copy(buffer + length, entry->d_name, (int)sizeof(buffer) - length);
 		if(cb(entry->d_name, fs_is_dir(buffer), type, user))
 			break;
 	}
@@ -2121,7 +2120,7 @@ void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int t
 	do
 	{
 		WideCharToMultiByte(CP_UTF8, 0, finddata.cFileName, -1, buffer2, IO_MAX_PATH_LENGTH, NULL, NULL);
-		str_copy(buffer+length, buffer2, (int)sizeof(buffer)-length);
+		str_copy(buffer + length, buffer2, (int)sizeof(buffer) - length);
 
 		CFsFileInfo info;
 		info.m_pName = buffer2;
@@ -2130,8 +2129,7 @@ void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int t
 
 		if(cb(&info, fs_is_dir(buffer), type, user))
 			break;
-	}
-	while(FindNextFileW(handle, &finddata));
+	} while(FindNextFileW(handle, &finddata));
 
 	FindClose(handle);
 #else
@@ -2151,7 +2149,7 @@ void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int t
 	{
 		CFsFileInfo info;
 
-		str_copy(buffer+length, entry->d_name, (int)sizeof(buffer)-length);
+		str_copy(buffer + length, entry->d_name, (int)sizeof(buffer) - length);
 		fs_file_time(buffer, &created, &modified);
 
 		info.m_pName = entry->d_name;
@@ -2369,7 +2367,7 @@ int fs_file_time(const char *name, time_t *created, time_t *modified)
 	*created = sb.st_ctime;
 	*modified = sb.st_mtime;
 #else
-	#error not implemented
+#error not implemented
 #endif
 
 	return 0;
