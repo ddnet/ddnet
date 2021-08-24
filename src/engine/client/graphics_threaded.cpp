@@ -2376,6 +2376,30 @@ int CGraphics_Threaded::GetWindowScreen()
 	return m_pBackend->GetWindowScreen();
 }
 
+void CGraphics_Threaded::WindowDestroyNtf(uint32_t WindowID)
+{
+	CCommandBuffer::SCommand_WindowDestroyNtf Cmd;
+	Cmd.m_WindowID = WindowID;
+
+	if(!AddCmd(
+		   Cmd, [] { return true; }, "failed to add window destroy notify command"))
+	{
+		return;
+	}
+}
+
+void CGraphics_Threaded::WindowCreateNtf(uint32_t WindowID)
+{
+	CCommandBuffer::SCommand_WindowCreateNtf Cmd;
+	Cmd.m_WindowID = WindowID;
+
+	if(!AddCmd(
+		   Cmd, [] { return true; }, "failed to add window create notify command"))
+	{
+		return;
+	}
+}
+
 int CGraphics_Threaded::WindowActive()
 {
 	return m_pBackend->WindowActive();

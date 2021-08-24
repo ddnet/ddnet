@@ -14,7 +14,7 @@
 
 #include "backend_opengl.h"
 
-#define MAX_STREAM_BUFFER_COUNT 30
+#define MAX_STREAM_BUFFER_COUNT 10
 
 // takes care of opengl 3.3+ related rendering
 class CCommandProcessorFragment_OpenGL3_3 : public CCommandProcessorFragment_OpenGL3

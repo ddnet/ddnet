@@ -141,6 +141,8 @@ private:
 	void Cmd_Shutdown(const SCommand_Shutdown *pCommand);
 	void Cmd_Swap(const CCommandBuffer::SCommand_Swap *pCommand);
 	void Cmd_VSync(const CCommandBuffer::SCommand_VSync *pCommand);
+	void Cmd_WindowCreateNtf(const CCommandBuffer::SCommand_WindowCreateNtf *pCommand);
+	void Cmd_WindowDestroyNtf(const CCommandBuffer::SCommand_WindowDestroyNtf *pCommand);
 
 public:
 	CCommandProcessorFragment_SDL();

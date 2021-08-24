@@ -2,6 +2,8 @@
 
 #include <base/detect.h>
 
+#if defined(BACKEND_AS_OPENGL_ES) || !defined(CONF_BACKEND_OPENGL_ES)
+
 #ifndef BACKEND_AS_OPENGL_ES
 #include <GL/glew.h>
 #else
@@ -1569,3 +1571,5 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadContainerAsSpriteMultipl
 		DrawCount -= RSPCount;
 	}
 }
+
+#endif
