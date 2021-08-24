@@ -629,9 +629,9 @@ void IGameController::Snap(int SnappingClient)
 		pRaceData->m_RaceFlags = protocol7::RACEFLAG_HIDE_KILLMSG | protocol7::RACEFLAG_KEEP_WANTED_WEAPON;
 	}
 
-	if(GameServer()->Collision()->m_pSwitchers && pPlayer && pPlayer->GetCharacter())
+	if(GameServer()->Collision()->m_pSwitchers)
 	{
-		int Team = pPlayer->GetCharacter()->Team();
+		int Team = pPlayer && pPlayer->GetCharacter() ? pPlayer->GetCharacter()->Team() : 0;
 		CNetObj_SwitchState *pSwitchState = static_cast<CNetObj_SwitchState *>(Server()->SnapNewItem(NETOBJTYPE_SWITCHSTATE, Team, sizeof(CNetObj_SwitchState)));
 		if(!pSwitchState)
 			return;
