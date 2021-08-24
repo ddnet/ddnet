@@ -344,7 +344,8 @@ int CInput::Update()
 				// shortcuts
 				switch(Event.window.event)
 				{
-				case SDL_WINDOWEVENT_RESIZED:
+				// listen to size changes, this includes our manual changes and the ones by the window manager
+				case SDL_WINDOWEVENT_SIZE_CHANGED:
 					Graphics()->Resize(Event.window.data1, Event.window.data2, -1);
 					break;
 				case SDL_WINDOWEVENT_FOCUS_GAINED:

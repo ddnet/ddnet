@@ -2329,41 +2329,47 @@ void CGraphics_Threaded::Resize(int w, int h, int RefreshRate, bool SetWindowSiz
 	if(!ForceResizeEvent && WindowWidth() == w && WindowHeight() == h && (RefreshRate != -1 && RefreshRate == m_ScreenRefreshRate))
 		return;
 
+	// if the size is changed manually, only set the window resize, a window size changed event is triggered anyway
 	if(SetWindowSize)
-		m_pBackend->ResizeWindow(w, h, RefreshRate);
-
-	m_pBackend->GetViewportSize(m_ScreenWidth, m_ScreenHeight);
-
-	// adjust the viewport to only allow certain aspect ratios
-	if(m_ScreenHeight > 4 * m_ScreenWidth / 5)
-		m_ScreenHeight = 4 * m_ScreenWidth / 5;
-	if(m_ScreenWidth > 21 * m_ScreenHeight / 9)
-		m_ScreenWidth = 21 * m_ScreenHeight / 9;
-
-	m_ScreenRefreshRate = RefreshRate == -1 ? m_ScreenRefreshRate : RefreshRate;
-
-	g_Config.m_GfxScreenWidth = w;
-	g_Config.m_GfxScreenHeight = h;
-	g_Config.m_GfxScreenRefreshRate = m_ScreenRefreshRate;
-
-	CCommandBuffer::SCommand_Update_Viewport Cmd;
-	Cmd.m_X = 0;
-	Cmd.m_Y = 0;
-	Cmd.m_Width = m_ScreenWidth;
-	Cmd.m_Height = m_ScreenHeight;
-
-	if(!AddCmd(
-		   Cmd, [] { return true; }, "failed to add resize command"))
 	{
-		return;
+		m_pBackend->ResizeWindow(w, h, RefreshRate);
 	}
+	else
+	{
+		// if the size change event is triggered, set all parameters and change the viewport
+		m_pBackend->GetViewportSize(m_ScreenWidth, m_ScreenHeight);
 
-	// kick the command buffer
-	KickCommandBuffer();
-	WaitForIdle();
+		// adjust the viewport to only allow certain aspect ratios
+		if(m_ScreenHeight > 4 * m_ScreenWidth / 5)
+			m_ScreenHeight = 4 * m_ScreenWidth / 5;
+		if(m_ScreenWidth > 21 * m_ScreenHeight / 9)
+			m_ScreenWidth = 21 * m_ScreenHeight / 9;
 
-	for(auto &ResizeListener : m_ResizeListeners)
-		ResizeListener.m_pFunc(ResizeListener.m_pUser);
+		m_ScreenRefreshRate = RefreshRate == -1 ? m_ScreenRefreshRate : RefreshRate;
+
+		g_Config.m_GfxScreenWidth = w;
+		g_Config.m_GfxScreenHeight = h;
+		g_Config.m_GfxScreenRefreshRate = m_ScreenRefreshRate;
+
+		CCommandBuffer::SCommand_Update_Viewport Cmd;
+		Cmd.m_X = 0;
+		Cmd.m_Y = 0;
+		Cmd.m_Width = m_ScreenWidth;
+		Cmd.m_Height = m_ScreenHeight;
+
+		if(!AddCmd(
+			   Cmd, [] { return true; }, "failed to add resize command"))
+		{
+			return;
+		}
+
+		// kick the command buffer
+		KickCommandBuffer();
+		WaitForIdle();
+
+		for(auto &ResizeListener : m_ResizeListeners)
+			ResizeListener.m_pFunc(ResizeListener.m_pUser);
+	}
 }
 
 void CGraphics_Threaded::AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser)
