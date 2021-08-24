@@ -1,4 +1,9 @@
 #include "opengl_sl.h"
+
+#include <base/detect.h>
+
+#if defined(BACKEND_AS_OPENGL_ES) || !defined(CONF_BACKEND_OPENGL_ES)
+
 #include <engine/shared/linereader.h>
 #include <engine/storage.h>
 #include <stdio.h>
@@ -157,3 +162,5 @@ CGLSL::~CGLSL()
 {
 	DeleteShader();
 }
+
+#endif

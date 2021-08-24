@@ -188,6 +188,26 @@ void CCommandProcessorFragment_SDL::Cmd_VSync(const CCommandBuffer::SCommand_VSy
 	*pCommand->m_pRetOk = SDL_GL_SetSwapInterval(pCommand->m_VSync) == 0;
 }
 
+void CCommandProcessorFragment_SDL::Cmd_WindowCreateNtf(const CCommandBuffer::SCommand_WindowCreateNtf *pCommand)
+{
+	m_pWindow = SDL_GetWindowFromID(pCommand->m_WindowID);
+	// Android destroys windows when they are not visible, so we get the new one and work with that
+	// The graphic context does not need to be recreated, just unbound see @see SCommand_WindowDestroyNtf
+#ifdef CONF_PLATFORM_ANDROID
+	SDL_GL_MakeCurrent(m_pWindow, m_GLContext);
+	dbg_msg("gfx", "render surface created.");
+#endif
+}
+
+void CCommandProcessorFragment_SDL::Cmd_WindowDestroyNtf(const CCommandBuffer::SCommand_WindowDestroyNtf *pCommand)
+{
+	// Unbind the graphic context from the window, so it does not get destroyed
+#ifdef CONF_PLATFORM_ANDROID
+	dbg_msg("gfx", "render surface destroyed.");
+	SDL_GL_MakeCurrent(NULL, NULL);
+#endif
+}
+
 CCommandProcessorFragment_SDL::CCommandProcessorFragment_SDL()
 {
 }
@@ -196,6 +216,8 @@ bool CCommandProcessorFragment_SDL::RunCommand(const CCommandBuffer::SCommand *p
 {
 	switch(pBaseCommand->m_Cmd)
 	{
+	case CCommandBuffer::CMD_WINDOW_CREATE_NTF: Cmd_WindowCreateNtf(static_cast<const CCommandBuffer::SCommand_WindowCreateNtf *>(pBaseCommand)); break;
+	case CCommandBuffer::CMD_WINDOW_DESTROY_NTF: Cmd_WindowDestroyNtf(static_cast<const CCommandBuffer::SCommand_WindowDestroyNtf *>(pBaseCommand)); break;
 	case CCommandBuffer::CMD_SWAP: Cmd_Swap(static_cast<const CCommandBuffer::SCommand_Swap *>(pBaseCommand)); break;
 	case CCommandBuffer::CMD_VSYNC: Cmd_VSync(static_cast<const CCommandBuffer::SCommand_VSync *>(pBaseCommand)); break;
 	case CMD_INIT: Cmd_Init(static_cast<const SCommand_Init *>(pBaseCommand)); break;

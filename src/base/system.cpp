@@ -50,6 +50,10 @@
 #include <mach/mach_time.h>
 #endif
 
+#ifdef CONF_PLATFORM_ANDROID
+#include <android/log.h>
+#endif
+
 #elif defined(CONF_FAMILY_WINDOWS)
 #define WIN32_LEAN_AND_MEAN
 #undef _WIN32_WINNT
@@ -135,9 +139,12 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 	va_start(args, fmt);
 #if defined(CONF_FAMILY_WINDOWS)
 	_vsnprintf(msg, sizeof(str) - len, fmt, args);
+#elif defined(CONF_PLATFORM_ANDROID)
+	__android_log_vprint(ANDROID_LOG_DEBUG, sys, fmt, args);
 #else
 	vsnprintf(msg, sizeof(str) - len, fmt, args);
 #endif
+
 	va_end(args);
 
 	for(i = 0; i < num_loggers; i++)
@@ -2098,6 +2105,9 @@ int fs_storage_path(const char *appname, char *path, int max)
 		return -1;
 	_snprintf(path, max, "%s/%s", home, appname);
 	return 0;
+#elif defined(CONF_PLATFORM_ANDROID)
+	// just use the data directory
+	return -1;
 #else
 	char *home = getenv("HOME");
 #if !defined(CONF_PLATFORM_MACOS)
