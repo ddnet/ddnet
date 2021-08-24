@@ -109,16 +109,19 @@ void CSaveTee::Save(CCharacter *pChr)
 	FormatUuid(pChr->GameServer()->GameUuid(), m_aGameUuid, sizeof(m_aGameUuid));
 }
 
-void CSaveTee::Load(CCharacter *pChr, int Team)
+void CSaveTee::Load(CCharacter *pChr, int Team, bool IsSwap)
 {
 	pChr->m_pPlayer->Pause(m_Paused, true);
 
 	pChr->m_Alive = m_Alive;
 	pChr->m_NeededFaketuning = m_NeededFaketuning;
 
-	pChr->Teams()->SetForceCharacterTeam(pChr->m_pPlayer->GetCID(), Team);
-	pChr->Teams()->SetStarted(pChr->m_pPlayer->GetCID(), m_TeeStarted);
-	pChr->Teams()->SetFinished(pChr->m_pPlayer->GetCID(), m_TeeFinished);
+	if(!IsSwap)
+	{
+		pChr->Teams()->SetForceCharacterTeam(pChr->m_pPlayer->GetCID(), Team);
+		pChr->Teams()->SetStarted(pChr->m_pPlayer->GetCID(), m_TeeStarted);
+		pChr->Teams()->SetFinished(pChr->m_pPlayer->GetCID(), m_TeeFinished);
+	}
 
 	for(int i = 0; i < NUM_WEAPONS; i++)
 	{
