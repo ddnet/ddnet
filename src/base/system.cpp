@@ -9,7 +9,9 @@
 #include <time.h>
 
 #include "system.h"
-
+#if !defined(CONF_PLATFORM_MACOS)
+#include <base/color.h>
+#endif
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -93,7 +95,12 @@ typedef struct
 } DBG_LOGGER_DATA;
 
 static DBG_LOGGER_DATA loggers[16];
+static int has_stdout_logger = 0;
 static int num_loggers = 0;
+
+#ifndef CONF_FAMILY_WINDOWS
+static DBG_LOGGER_DATA stdout_nonewline_logger;
+#endif
 
 static NETSTATS network_stats = {0};
 
@@ -166,6 +173,14 @@ static void logger_file(const char *line, void *user)
 	aio_lock(logfile);
 	aio_write_unlocked(logfile, line, str_length(line));
 	aio_write_newline_unlocked(logfile);
+	aio_unlock(logfile);
+}
+
+static void logger_file_no_newline(const char *line, void *user)
+{
+	ASYNCIO *logfile = (ASYNCIO *)user;
+	aio_lock(logfile);
+	aio_write_unlocked(logfile, line, str_length(line));
 	aio_unlock(logfile);
 }
 
@@ -252,8 +267,13 @@ void dbg_logger_stdout()
 #if defined(CONF_FAMILY_WINDOWS)
 	dbg_logger(logger_stdout_sync, 0, 0);
 #else
-	dbg_logger(logger_file, logger_stdout_finish, aio_new(io_stdout()));
+	ASYNCIO *logger_obj = aio_new(io_stdout());
+	dbg_logger(logger_file, logger_stdout_finish, logger_obj);
+	dbg_logger(logger_file_no_newline, 0, logger_obj);
+	stdout_nonewline_logger = loggers[num_loggers - 1];
+	--num_loggers;
 #endif
+	has_stdout_logger = 1;
 }
 
 void dbg_logger_debugger()
@@ -3601,5 +3621,71 @@ int secure_rand_below(int below)
 			return n;
 		}
 	}
+}
+
+#if defined(CONF_FAMILY_WINDOWS)
+static int color_hsv_to_windows_console_color(const ColorHSVA *hsv)
+{
+	int h = hsv->h * 255.0f;
+	int s = hsv->s * 255.0f;
+	int v = hsv->v * 255.0f;
+	if(s >= 0 && s <= 10)
+	{
+		if(v <= 150)
+			return 8;
+		return 15;
+	}
+	else if(h >= 0 && h < 15)
+		return 12;
+	else if(h >= 15 && h < 30)
+		return 6;
+	else if(h >= 30 && h < 60)
+		return 14;
+	else if(h >= 60 && h < 110)
+		return 10;
+	else if(h >= 110 && h < 140)
+		return 11;
+	else if(h >= 140 && h < 170)
+		return 9;
+	else if(h >= 170 && h < 195)
+		return 5;
+	else if(h >= 195 && h < 240)
+		return 13;
+	else if(h >= 240)
+		return 12;
+	else
+		return 15;
+}
+#endif
+
+void set_console_msg_color(const void *rgbvoid)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	const ColorRGBA *rgb = (const ColorRGBA *)rgbvoid;
+	int color = 15;
+	if(rgb)
+	{
+		ColorHSVA hsv = color_cast<ColorHSVA>(*rgb);
+		color = color_hsv_to_windows_console_color(&hsv);
+	}
+	HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(console, color);
+#elif CONF_PLATFORM_LINUX
+	const ColorRGBA *rgb = (const ColorRGBA *)rgbvoid;
+	// set true color terminal escape codes refering
+	// https://en.wikipedia.org/wiki/ANSI_escape_code#24-bit
+	int esc_seq = 0x1B;
+	char buff[32];
+	if(rgb == NULL)
+		// reset foreground color
+		str_format(buff, sizeof(buff), "%c[39m", esc_seq);
+	else
+		// set rgb foreground color
+		// if not used by a true color terminal it is still converted refering
+		// https://wiki.archlinux.org/title/Color_output_in_console#True_color_support
+		str_format(buff, sizeof(buff), "%c[38;2;%d;%d;%dm", esc_seq, (int)uint8_t(rgb->r * 255.0f), (int)uint8_t(rgb->g * 255.0f), (int)uint8_t(rgb->b * 255.0f));
+	if(has_stdout_logger)
+		stdout_nonewline_logger.logger(buff, stdout_nonewline_logger.user);
+#endif
 }
 }
