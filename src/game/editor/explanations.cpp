@@ -461,7 +461,6 @@ const char *CEditor::Explain(int ExplanationID, int Tile, int Layer) //TODO: Add
 		}
 		if(Tile >= TILE_CHECKPOINT_FIRST && Tile <= TILE_CHECKPOINT_LAST && (Layer == LAYER_GAME || Layer == LAYER_FRONT))
 			return "TIME CHECKPOINT: Compares your current race time with your record to show you whether you are running faster or slower.";
-		return "";
 	}
 	else if(ExplanationID == EXPLANATION_FNG)
 	{
@@ -506,6 +505,6 @@ const char *CEditor::Explain(int ExplanationID, int Tile, int Layer) //TODO: Add
 					return "PURPLE SPIKE: Kills the tee and gives points to the killer. (Amount of points given is set inside the server)";
 				break;
 		}
-		return "";
 	}
+	return "";
 }
