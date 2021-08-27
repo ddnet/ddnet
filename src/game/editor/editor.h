@@ -1060,7 +1060,7 @@ public:
 	void AddFileDialogEntry(int Index, CUIRect *pView);
 	void SelectGameLayer();
 	void SortImages();
-	
+
 	//Tile Numbers For Explanations - TODO: Add/Improve tiles and explanations
 	enum
 	{

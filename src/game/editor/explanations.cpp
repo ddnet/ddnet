@@ -466,44 +466,44 @@ const char *CEditor::Explain(int ExplanationID, int Tile, int Layer) //TODO: Add
 	{
 		switch(Tile)
 		{
-			case TILE_FNG_AIR:
-				return "EMPTY: Can be used as an eraser.";
-			case TILE_FNG_HOOKABLE:
-				if(Layer == LAYER_GAME)
-					return "HOOKABLE: It's possible to hook and collide with it.";
-				break;
-			case TILE_FNG_DEATH:
-				if(Layer == LAYER_GAME)
-					return "DEATH: Kills the tee.";
-				break;
-			case TILE_FNG_UNHOOKABLE:
-				if(Layer == LAYER_GAME)
-					return "UNHOOKABLE: It's not possible to hook it, but can collide with it.";
-				break;
-			case TILE_FNG_SPIKE_GOLD:
-				if(Layer == LAYER_GAME)
-					return "GOLDEN SPIKE: Kills the tee and gives points to the killer. (Amount of points given is set inside the server)";
-				break;
-			case TILE_FNG_SPIKE_NORMAL:
-				if(Layer == LAYER_GAME)
-					return "NORMAL SPIKE: Kills the tee and gives points to the killer. (Amount of points given is set inside the server)";
-				break;
-			case TILE_FNG_SPIKE_RED:
-				if(Layer == LAYER_GAME)
-					return "RED SPIKE: Red team spikes. Gives negative points when killer is in blue team (Amount of points given is set inside the server)";
-				break;
-			case TILE_FNG_SPIKE_BLUE:
-				if(Layer == LAYER_GAME)
-					return "BLUE SPIKE: Blue team spikes. Gives negative points when killer is in red team (Amount of points given is set inside the server)";
-				break;
-			case TILE_FNG_SPIKE_GREEN:
-				if(Layer == LAYER_GAME)
-					return "GREEN SPIKE: Kills the tee and gives points to the killer. (Amount of points given is set inside the server)";
-				break;
-			case TILE_FNG_SPIKE_PURPLE:
-				if(Layer == LAYER_GAME)
-					return "PURPLE SPIKE: Kills the tee and gives points to the killer. (Amount of points given is set inside the server)";
-				break;
+		case TILE_FNG_AIR:
+			return "EMPTY: Can be used as an eraser.";
+		case TILE_FNG_HOOKABLE:
+			if(Layer == LAYER_GAME)
+				return "HOOKABLE: It's possible to hook and collide with it.";
+			break;
+		case TILE_FNG_DEATH:
+			if(Layer == LAYER_GAME)
+				return "DEATH: Kills the tee.";
+			break;
+		case TILE_FNG_UNHOOKABLE:
+			if(Layer == LAYER_GAME)
+				return "UNHOOKABLE: It's not possible to hook it, but can collide with it.";
+			break;
+		case TILE_FNG_SPIKE_GOLD:
+			if(Layer == LAYER_GAME)
+				return "GOLDEN SPIKE: Kills the tee and gives points to the killer. (Amount of points given is set inside the server)";
+			break;
+		case TILE_FNG_SPIKE_NORMAL:
+			if(Layer == LAYER_GAME)
+				return "NORMAL SPIKE: Kills the tee and gives points to the killer. (Amount of points given is set inside the server)";
+			break;
+		case TILE_FNG_SPIKE_RED:
+			if(Layer == LAYER_GAME)
+				return "RED SPIKE: Red team spikes. Gives negative points when killer is in blue team (Amount of points given is set inside the server)";
+			break;
+		case TILE_FNG_SPIKE_BLUE:
+			if(Layer == LAYER_GAME)
+				return "BLUE SPIKE: Blue team spikes. Gives negative points when killer is in red team (Amount of points given is set inside the server)";
+			break;
+		case TILE_FNG_SPIKE_GREEN:
+			if(Layer == LAYER_GAME)
+				return "GREEN SPIKE: Kills the tee and gives points to the killer. (Amount of points given is set inside the server)";
+			break;
+		case TILE_FNG_SPIKE_PURPLE:
+			if(Layer == LAYER_GAME)
+				return "PURPLE SPIKE: Kills the tee and gives points to the killer. (Amount of points given is set inside the server)";
+			break;
 		}
 	}
 	return "";
