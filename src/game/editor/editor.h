@@ -1060,7 +1060,34 @@ public:
 	void AddFileDialogEntry(int Index, CUIRect *pView);
 	void SelectGameLayer();
 	void SortImages();
-	static const char *Explain(int Tile, int Layer);
+	
+	//Tile Numbers For Explanations - TODO: Add/Improve tiles and explanations
+	enum
+	{
+		TILE_FNG_AIR,
+		TILE_FNG_HOOKABLE,
+		TILE_FNG_DEATH,
+		TILE_FNG_UNHOOKABLE,
+
+		TILE_FNG_SPIKE_GOLD = 7,
+		TILE_FNG_SPIKE_NORMAL,
+		TILE_FNG_SPIKE_RED,
+		TILE_FNG_SPIKE_BLUE,
+
+		TILE_FNG_SPIKE_GREEN = 14,
+		TILE_FNG_SPIKE_PURPLE
+	};
+
+	//Explanations
+	enum
+	{
+		EXPLANATION_DDNET,
+		EXPLANATION_FNG,
+		EXPLANATION_RACE,
+		EXPLANATION_VANILLA,
+		EXPLANATION_BLOCKWORLDS
+	};
+	static const char *Explain(int ExplanationID, int Tile, int Layer);
 
 	int GetLineDistance() const;
 	void ZoomMouseTarget(float ZoomFactor);

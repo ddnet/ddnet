@@ -2392,7 +2392,12 @@ void CEditor::DoMapEditor(CUIRect View)
 					Layer = LAYER_TUNE;
 			}
 			if(m_ShowPicker && Layer != NUM_LAYERS)
-				m_pTooltip = Explain((int)wx / 32 + (int)wy / 32 * 16, Layer);
+			{
+				if(m_SelectEntitiesImage == "DDNet")
+					m_pTooltip = Explain(EXPLANATION_DDNET, (int)wx / 32 + (int)wy / 32 * 16, Layer);
+				else if(m_SelectEntitiesImage == "FNG")
+					m_pTooltip = Explain(EXPLANATION_FNG, (int)wx / 32 + (int)wy / 32 * 16, Layer);
+			}
 			else if(m_Brush.IsEmpty())
 				m_pTooltip = "Use left mouse button to drag and create a brush. Hold shift to select multiple quads.";
 			else
