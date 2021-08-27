@@ -504,7 +504,73 @@ const char *CEditor::Explain(int ExplanationID, int Tile, int Layer) //TODO: Add
 			if(Layer == LAYER_GAME)
 				return "PURPLE SPIKE: Kills the tee and gives points to the killer. (Amount of points given is set inside the server)";
 			break;
-		}
+		case TILE_FNG_CREDITS1:
+		case TILE_FNG_CREDITS2:
+		case TILE_FNG_CREDITS3:
+		case TILE_FNG_CREDITS4:
+		case TILE_FNG_CREDITS5:
+		case TILE_FNG_CREDITS6:
+		case TILE_FNG_CREDITS7:
+		case TILE_FNG_CREDITS8:
+			if(Layer == LAYER_GAME)
+				return "CREDITS: Who designed the entities.";
+			break;
+		case TILE_FNG_ENTITIES_OFF1:
+		case TILE_FNG_ENTITIES_OFF2:
+			if(Layer == LAYER_GAME)
+				return "ENTITIES OFF SIGN: Informs people playing with entities about important marks, tips, information or text on the map.";
+			break;
+		case TILE_FNG_SPAWN:
+			if(Layer == LAYER_GAME)
+				return "SPAWN: Here tees will appear after joining the game or dying.";
+			break;
+		case TILE_FNG_SPAWN_RED:
+			if(Layer == LAYER_GAME)
+				return "SPAWN: Red team members spawn here.";
+			break;
+		case TILE_FNG_SPAWN_BLUE:
+			if(Layer == LAYER_GAME)
+				return "SPAWN: Blue team members spawn here.";
+			break;
+		case TILE_FNG_FLAG_RED:
+			if(Layer == LAYER_GAME)
+				return "FLAG: Not used in FNG. Place where red team flag is.";
+			break;
+		case TILE_FNG_FLAG_BLUE:
+			if(Layer == LAYER_GAME)
+				return "FLAG: Not used in FNG. Place where blue team flag is.";
+			break;
+		case TILE_FNG_SHIELD:
+			if(Layer == LAYER_GAME)
+				return "SHIELD: Does nothing in FNG.";
+			break;
+		case TILE_FNG_HEART:
+			if(Layer == LAYER_GAME)
+				return "HEART: Does nothing in FNG.";
+			break;
+		case TILE_FNG_SHOTGUN:
+			if(Layer == LAYER_GAME)
+				return "SHOTGUN: Not used in FNG. Gives you shotgun with 10 charges.";
+			break;
+		case TILE_FNG_GRENADE:
+			if(Layer == LAYER_GAME)
+				return "GRENADE: Gives you grenade weapon with 10 charges. Not really useful in FNG.";
+			break;
+		case TILE_FNG_NINJA:
+			if(Layer == LAYER_GAME)
+				return "NINJA: Does nothing in FNG.";
+			break;
+		case TILE_FNG_LASER:
+			if(Layer == LAYER_GAME)
+				return "LASER: Gives you laser weapon with 10 charges. Not really useful in FNG.";
+			break;
+		case TILE_FNG_SPIKE_OLD1:
+		case TILE_FNG_SPIKE_OLD2:
+		case TILE_FNG_SPIKE_OLD3:
+			if(Layer == LAYER_GAME)
+				return "SPIKE: Old FNG spikes. Deprecated.";
+			break;
+    	}
 	}
 	return "";
 }
