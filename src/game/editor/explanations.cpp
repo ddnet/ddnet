@@ -466,17 +466,17 @@ const char *CEditor::Explain(int ExplanationID, int Tile, int Layer) //TODO: Add
 	{
 		switch(Tile)
 		{
-		case TILE_FNG_AIR:
+		case TILE_PUB_AIR:
 			return "EMPTY: Can be used as an eraser.";
-		case TILE_FNG_HOOKABLE:
+		case TILE_PUB_HOOKABLE:
 			if(Layer == LAYER_GAME)
 				return "HOOKABLE: It's possible to hook and collide with it.";
 			break;
-		case TILE_FNG_DEATH:
+		case TILE_PUB_DEATH:
 			if(Layer == LAYER_GAME)
 				return "DEATH: Kills the tee.";
 			break;
-		case TILE_FNG_UNHOOKABLE:
+		case TILE_PUB_UNHOOKABLE:
 			if(Layer == LAYER_GAME)
 				return "UNHOOKABLE: It's not possible to hook it, but can collide with it.";
 			break;
@@ -496,6 +496,14 @@ const char *CEditor::Explain(int ExplanationID, int Tile, int Layer) //TODO: Add
 			if(Layer == LAYER_GAME)
 				return "BLUE SPIKE: Blue team spikes. Gives negative points when killer is in red team (Amount of points given is set inside the server)";
 			break;
+		case TILE_FNG_SCORE_RED:
+			if(Layer == LAYER_GAME)
+				return "SCORE: Old tile used for showing red team score using laser text. No longer usable in FNG2";
+			break;
+		case TILE_FNG_SCORE_BLUE:
+			if(Layer == LAYER_GAME)
+				return "SCORE: Old tile used for showing blue team score using laser text. No longer usable in FNG2";
+			break;
 		case TILE_FNG_SPIKE_GREEN:
 			if(Layer == LAYER_GAME)
 				return "GREEN SPIKE: Kills the tee and gives points to the killer. (Amount of points given is set inside the server)";
@@ -503,22 +511,6 @@ const char *CEditor::Explain(int ExplanationID, int Tile, int Layer) //TODO: Add
 		case TILE_FNG_SPIKE_PURPLE:
 			if(Layer == LAYER_GAME)
 				return "PURPLE SPIKE: Kills the tee and gives points to the killer. (Amount of points given is set inside the server)";
-			break;
-		case TILE_FNG_CREDITS1:
-		case TILE_FNG_CREDITS2:
-		case TILE_FNG_CREDITS3:
-		case TILE_FNG_CREDITS4:
-		case TILE_FNG_CREDITS5:
-		case TILE_FNG_CREDITS6:
-		case TILE_FNG_CREDITS7:
-		case TILE_FNG_CREDITS8:
-			if(Layer == LAYER_GAME)
-				return "CREDITS: Who designed the entities.";
-			break;
-		case TILE_FNG_ENTITIES_OFF1:
-		case TILE_FNG_ENTITIES_OFF2:
-			if(Layer == LAYER_GAME)
-				return "ENTITIES OFF SIGN: Informs people playing with entities about important marks, tips, information or text on the map.";
 			break;
 		case TILE_FNG_SPAWN:
 			if(Layer == LAYER_GAME)
@@ -571,6 +563,78 @@ const char *CEditor::Explain(int ExplanationID, int Tile, int Layer) //TODO: Add
 				return "SPIKE: Old FNG spikes. Deprecated.";
 			break;
 		}
+		if((Tile >= TILE_PUB_CREDITS1 && Tile <= TILE_PUB_CREDITS8) && Layer == LAYER_GAME)
+			return "CREDITS: Who designed the entities.";
+		else if((Tile == TILE_PUB_ENTITIES_OFF1 || Tile == TILE_PUB_ENTITIES_OFF2) && Layer == LAYER_GAME)
+			return "ENTITIES OFF SIGN: Informs people playing with entities about important marks, tips, information or text on the map.";
+	}
+	else if(ExplanationID == EXPLANATION_VANILLA)
+	{
+		switch(Tile)
+		{
+		case TILE_PUB_AIR:
+			return "EMPTY: Can be used as an eraser.";
+		case TILE_PUB_HOOKABLE:
+			if(Layer == LAYER_GAME)
+				return "HOOKABLE: It's possible to hook and collide with it.";
+			break;
+		case TILE_PUB_DEATH:
+			if(Layer == LAYER_GAME)
+				return "DEATH: Kills the tee.";
+			break;
+		case TILE_PUB_UNHOOKABLE:
+			if(Layer == LAYER_GAME)
+				return "UNHOOKABLE: It's not possible to hook it, but can collide with it.";
+			break;
+		case TILE_VANILLA_SPAWN:
+			if(Layer == LAYER_GAME)
+				return "SPAWN: Here tees will appear after joining the game or dying.";
+			break;
+		case TILE_VANILLA_SPAWN_RED:
+			if(Layer == LAYER_GAME)
+				return "SPAWN: Red team members spawn here.";
+			break;
+		case TILE_VANILLA_SPAWN_BLUE:
+			if(Layer == LAYER_GAME)
+				return "SPAWN: Blue team members spawn here.";
+			break;
+		case TILE_VANILLA_FLAG_RED:
+			if(Layer == LAYER_GAME)
+				return "FLAG: Place where red team flag is.";
+			break;
+		case TILE_VANILLA_FLAG_BLUE:
+			if(Layer == LAYER_GAME)
+				return "FLAG: Place where blue team flag is.";
+			break;
+		case TILE_VANILLA_SHIELD:
+			if(Layer == LAYER_GAME)
+				return "SHIELD: Gives player +1 shield.";
+			break;
+		case TILE_VANILLA_HEART:
+			if(Layer == LAYER_GAME)
+				return "HEART: Gives player +1 health";
+			break;
+		case TILE_VANILLA_SHOTGUN:
+			if(Layer == LAYER_GAME)
+				return "SHOTGUN: Gives you shotgun weapon with 10 charges.";
+			break;
+		case TILE_VANILLA_GRENADE:
+			if(Layer == LAYER_GAME)
+				return "GRENADE: Gives you grenade weapon with 10 charges.";
+			break;
+		case TILE_VANILLA_NINJA:
+			if(Layer == LAYER_GAME)
+				return "NINJA: Gives you ninja for a period of time.";
+			break;
+		case TILE_VANILLA_LASER:
+			if(Layer == LAYER_GAME)
+				return "LASER: Gives you laser weapon with 10 charges.";
+			break;
+		}
+		if((Tile >= TILE_PUB_CREDITS1 && Tile <= TILE_PUB_CREDITS8) && Layer == LAYER_GAME)
+			return "CREDITS: Who designed the entities.";
+		else if((Tile == TILE_PUB_ENTITIES_OFF1 || Tile == TILE_PUB_ENTITIES_OFF2) && Layer == LAYER_GAME)
+			return "ENTITIES OFF SIGN: Informs people playing with entities about important marks, tips, information or text on the map.";
 	}
 	return "";
 }
