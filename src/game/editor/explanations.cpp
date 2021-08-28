@@ -570,7 +570,7 @@ const char *CEditor::Explain(int ExplanationID, int Tile, int Layer) //TODO: Add
 			if(Layer == LAYER_GAME)
 				return "SPIKE: Old FNG spikes. Deprecated.";
 			break;
-    	}
+		}
 	}
 	return "";
 }
