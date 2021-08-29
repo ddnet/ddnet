@@ -1289,6 +1289,24 @@ void CCharacter::Snap(int SnappingClient)
 		}
 	}
 
+	bool ShowSpec = IsPaused();
+
+	if(SnappingClient >= 0)
+	{
+		CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
+		ShowSpec = ShowSpec && (GameServer()->GetDDRaceTeam(m_pPlayer->GetCID()) == GameServer()->GetDDRaceTeam(SnappingClient) || pSnapPlayer->m_ShowOthers == 1 || (pSnapPlayer->GetTeam() == TEAM_SPECTATORS || pSnapPlayer->IsPaused()));
+	}
+
+	if(ShowSpec)
+	{
+		CNetObj_SpecChar *pSpecChar = static_cast<CNetObj_SpecChar *>(Server()->SnapNewItem(NETOBJTYPE_SPECCHAR, ID, sizeof(CNetObj_SpecChar)));
+		if(!pSpecChar)
+			return;
+
+		pSpecChar->m_X = Core()->m_Pos.x;
+		pSpecChar->m_Y = Core()->m_Pos.y;
+	}
+
 	CNetObj_DDNetCharacter *pDDNetCharacter = static_cast<CNetObj_DDNetCharacter *>(Server()->SnapNewItem(NETOBJTYPE_DDNETCHARACTER, ID, sizeof(CNetObj_DDNetCharacter)));
 	if(!pDDNetCharacter)
 		return;

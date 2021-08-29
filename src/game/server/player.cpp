@@ -424,24 +424,6 @@ void CPlayer::Snap(int SnappingClient)
 			return;
 		pRaceInfo->m_RaceStartTick = m_pCharacter->m_StartTime;
 	}
-
-	bool ShowSpec = m_pCharacter && m_pCharacter->IsPaused();
-
-	if(SnappingClient >= 0)
-	{
-		CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
-		ShowSpec = ShowSpec && (GameServer()->GetDDRaceTeam(id) == GameServer()->GetDDRaceTeam(SnappingClient) || pSnapPlayer->m_ShowOthers == 1 || (pSnapPlayer->GetTeam() == TEAM_SPECTATORS || pSnapPlayer->IsPaused()));
-	}
-
-	if(ShowSpec)
-	{
-		CNetObj_SpecChar *pSpecChar = static_cast<CNetObj_SpecChar *>(Server()->SnapNewItem(NETOBJTYPE_SPECCHAR, id, sizeof(CNetObj_SpecChar)));
-		if(!pSpecChar)
-			return;
-
-		pSpecChar->m_X = m_pCharacter->Core()->m_Pos.x;
-		pSpecChar->m_Y = m_pCharacter->Core()->m_Pos.y;
-	}
 }
 
 void CPlayer::FakeSnap()

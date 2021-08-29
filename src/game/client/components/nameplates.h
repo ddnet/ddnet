@@ -43,7 +43,7 @@ class CNamePlates : public CComponent
 		const CNetObj_Character *pPrevChar,
 		const CNetObj_Character *pPlayerChar,
 		const CNetObj_PlayerInfo *pPlayerInfo);
-	void RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pPlayerInfo, float Alpha);
+	void RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pPlayerInfo, float Alpha, bool ForceAlpha = false);
 
 	SPlayerNamePlate m_aNamePlates[MAX_CLIENTS];
 	class CPlayers *m_pPlayers;
