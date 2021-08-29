@@ -54,6 +54,22 @@ else()
   set(TARGET_BITS "64")
 endif()
 
+
+if("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "arm" OR "${CMAKE_SYSTEM_PROCESSOR}" MATCHES "aarch64")
+  if(TARGET_BITS STREQUAL "32")
+    set(TARGET_CPU_ARCHITECTURE "arm")
+  else()
+    set(TARGET_CPU_ARCHITECTURE "arm64")
+  endif()
+else()
+  if(TARGET_BITS STREQUAL "32")
+    set(TARGET_CPU_ARCHITECTURE "x86")
+  else()
+    set(TARGET_CPU_ARCHITECTURE "x86_64")
+  endif()
+endif()
+
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
   set(TARGET_OS "windows")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -62,6 +78,8 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   set(TARGET_OS "mac")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Haiku")
   set(TARGET_OS "haiku")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Android")
+  set(TARGET_OS "android")
 endif()
 
 include(CheckCCompilerFlag)
@@ -89,6 +107,8 @@ option(VIDEORECORDER "Enable video recording support via FFmpeg" OFF)
 option(UPNP "Enable UPnP support" OFF)
 option(ANTIBOT "Enable support for a dynamic anticheat library" OFF)
 option(CLIENT "Compile client" ON)
+option(SERVER "Compile server" ON)
+option(TOOLS "Compile tools" ON)
 option(DOWNLOAD_GTEST "Download and compile GTest" ${AUTO_DEPENDENCIES_DEFAULT})
 option(STEAM "Build the Steam release version" OFF)
 option(DISCORD "Enable Discord rich presence support" OFF)
@@ -307,7 +327,11 @@ function(set_extra_dirs_lib VARIABLE NAME)
     set(TYPE PATHS)
   endif()
   if(TARGET_BITS AND TARGET_OS)
-    set(DIR "ddnet-libs/${NAME}/${TARGET_OS}/lib${TARGET_BITS}")
+    if(TARGET_CPU_ARCHITECTURE STREQUAL "arm" OR TARGET_CPU_ARCHITECTURE STREQUAL "arm64")
+      set(DIR "ddnet-libs/${NAME}/${TARGET_OS}/lib${TARGET_CPU_ARCHITECTURE}")
+    else()
+      set(DIR "ddnet-libs/${NAME}/${TARGET_OS}/lib${TARGET_BITS}")
+    endif()
     set("${TYPE}_${VARIABLE}_LIBDIR" "${DIR}" PARENT_SCOPE)
     set("EXTRA_${VARIABLE}_LIBDIR" "${DIR}" PARENT_SCOPE)
   endif()
@@ -323,7 +347,12 @@ function(set_extra_dirs_include VARIABLE NAME LIBRARY)
 endfunction()
 
 if(CMAKE_CROSSCOMPILING)
-  set(CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH NO_CMAKE_SYSTEM_PATH)
+  if(TARGET_OS STREQUAL "android")
+    # be more aggressive with android toolchain
+    set(CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH NO_CMAKE_SYSTEM_PATH NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
+  else()
+    set(CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH NO_CMAKE_SYSTEM_PATH)
+  endif()
 else()
   set(CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH)
 endif()
@@ -346,6 +375,9 @@ if(NOT CMAKE_CROSSCOMPILING)
   # quietly.
   find_package(PkgConfig)
 endif()
+if(TARGET_OS STREQUAL "android")
+  find_package(Android)
+endif()
 find_package(ZLIB)
 find_package(Crypto)
 find_package(Curl)
@@ -356,7 +388,9 @@ find_package(Freetype)
 if(DOWNLOAD_GTEST)
   find_package(Git)
 endif()
-find_package(GLEW)
+if(NOT(TARGET_OS STREQUAL "android"))
+  find_package(GLEW)
+endif()
 find_package(GTest)
 if(UPNP)
   find_package(Miniupnpc)
@@ -517,6 +551,9 @@ endif()
 if(CLIENT AND NOT(SDL2_FOUND))
   message(SEND_ERROR "You must install SDL2 to compile the DDNet client")
 endif()
+if(TARGET_OS STREQUAL "android" AND CLIENT AND NOT(CRYPTO_FOUND))
+  message(SEND_ERROR "You must install OpenSSL to compile the DDNet client")
+endif()
 if(NOT(GTEST_FOUND))
   if(DOWNLOAD_GTEST)
     if(GIT_FOUND)
@@ -551,6 +588,13 @@ elseif(TARGET_OS STREQUAL "haiku")
     set(PLATFORM_LIBS GL network)
     set(PLATFORM_CLIENT_LIBS ${OPENGL_gl_LIBRARY})
     set(PLATFORM_CLIENT_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR})
+elseif(TARGET_OS STREQUAL "android")
+    set(PLATFORM_CLIENT
+      src/android/android_main.cpp
+    )
+    set(PLATFORM_LIBS ${TW_ANDROID_LIBS})
+    set(PLATFORM_CLIENT_LIBS ${PLATFORM_LIBS})
+    set(PLATFORM_CLIENT_INCLUDE_DIRS)
 else()
   find_package(Notify)
   find_package(OpenGL)
@@ -570,7 +614,7 @@ endif()
 ########################################################################
 
 if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
-  set(DDNET_GTEST_VERSION release-1.10.0) # 703bd9caab50b139428cea1aaff9974ebee5742e
+  set(DDNET_GTEST_VERSION 5c8ca58edfb304b2dd5e6061f83387470826dd87) # master as of 2021-04-07
   configure_file(cmake/Download_GTest_CMakeLists.txt.in googletest-download/CMakeLists.txt)
   execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
     RESULT_VARIABLE result
@@ -588,15 +632,6 @@ if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
       message(WARNING "Build step for googletest failed: ${result}")
       set(DOWNLOAD_GTEST OFF)
     else()
-      file(GLOB_RECURSE DDNET_GTEST_CMAKELISTS ${CMAKE_BINARY_DIR}/googletest-src/CMakeLists.txt)
-      foreach(file ${DDNET_GTEST_CMAKELISTS})
-        file(READ ${file} CONTENTS)
-        string(REPLACE "cmake_minimum_required(VERSION 2.6.4)" "cmake_minimum_required(VERSION 2.8.12...3.19.1)" CONTENTS "${CONTENTS}")
-        string(REPLACE "cmake_minimum_required(VERSION 2.6.4)" "cmake_minimum_required(VERSION 2.8.12...3.19.1)" CONTENTS "${CONTENTS}")
-        string(REPLACE "cmake_minimum_required(VERSION 2.8.8)" "cmake_minimum_required(VERSION 2.8.12...3.19.1)" CONTENTS "${CONTENTS}")
-        file(WRITE ${file} "${CONTENTS}")
-      endforeach()
-
       # Prevent overriding the parent project's compiler/linker settings on Windows
       set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
@@ -1321,6 +1356,7 @@ set(EXPECTED_DATA
   skins/whis.png
   skins/x_ninja.png
   skins/x_spec.png
+  strong_weak.png
   themes/auto.png
   themes/autumn.png
   themes/autumn_day.map
@@ -1555,7 +1591,6 @@ set_src(ENGINE_SHARED GLOB src/engine/shared
   masterserver.cpp
   memheap.cpp
   memheap.h
-  message.h
   netban.cpp
   netban.h
   network.cpp
@@ -1924,14 +1959,26 @@ if(CLIENT)
 
   # Target
   set(TARGET_CLIENT ${CLIENT_EXECUTABLE})
-  add_executable(${TARGET_CLIENT} WIN32
-    ${CLIENT_SRC}
-    ${CLIENT_ICON}
-    ${CLIENT_MANIFEST}
-    ${DEPS_CLIENT}
-    $<TARGET_OBJECTS:engine-shared>
-    $<TARGET_OBJECTS:game-shared>
-  )
+
+  if(TARGET_OS STREQUAL "android")
+    add_library(${TARGET_CLIENT} SHARED
+      ${CLIENT_SRC}
+      ${CLIENT_ICON}
+      ${CLIENT_MANIFEST}
+      ${DEPS_CLIENT}
+      $<TARGET_OBJECTS:engine-shared>
+      $<TARGET_OBJECTS:game-shared>
+    )
+  else()
+    add_executable(${TARGET_CLIENT} WIN32
+      ${CLIENT_SRC}
+      ${CLIENT_ICON}
+      ${CLIENT_MANIFEST}
+      ${DEPS_CLIENT}
+      $<TARGET_OBJECTS:engine-shared>
+      $<TARGET_OBJECTS:game-shared>
+    )
+  endif()
   target_link_libraries(${TARGET_CLIENT} ${LIBS_CLIENT})
 
   if(MSVC)
@@ -1979,6 +2026,10 @@ if(CLIENT)
 	  target_compile_definitions(${TARGET_CLIENT} PRIVATE CONF_WAVPACK_CLOSE_FILE)
   endif()
 
+  if(GLEW_BUNDLED)
+	  target_compile_definitions(${TARGET_CLIENT} PRIVATE CONF_GLEW_HAS_CONTEXT_INIT)
+  endif()
+
   list(APPEND TARGETS_OWN ${TARGET_CLIENT})
   list(APPEND TARGETS_LINK ${TARGET_CLIENT})
 endif()
@@ -1988,208 +2039,212 @@ endif()
 # SERVER
 ########################################################################
 
-# Sources
-set_src(ANTIBOT_SRC GLOB src/antibot
-  antibot_data.h
-  antibot_interface.h
-  antibot_null.cpp
-)
+if(SERVER)
+  # Sources
+  set_src(ANTIBOT_SRC GLOB src/antibot
+    antibot_data.h
+    antibot_interface.h
+    antibot_null.cpp
+  )
 
-set_src(ENGINE_SERVER GLOB_RECURSE src/engine/server
-  antibot.cpp
-  antibot.h
-  authmanager.cpp
-  authmanager.h
-  databases/connection.cpp
-  databases/connection.h
-  databases/connection_pool.cpp
-  databases/connection_pool.h
-  databases/mysql.cpp
-  databases/sqlite.cpp
-  name_ban.cpp
-  name_ban.h
-  register.cpp
-  register.h
-  server.cpp
-  server.h
-  sql_string_helpers.cpp
-  sql_string_helpers.h
-  upnp.cpp
-  upnp.h
-)
-set_src(GAME_SERVER GLOB_RECURSE src/game/server
-  alloc.h
-  ddracechat.cpp
-  ddracecommands.cpp
-  entities/character.cpp
-  entities/character.h
-  entities/door.cpp
-  entities/door.h
-  entities/dragger.cpp
-  entities/dragger.h
-  entities/flag.cpp
-  entities/flag.h
-  entities/gun.cpp
-  entities/gun.h
-  entities/laser.cpp
-  entities/laser.h
-  entities/light.cpp
-  entities/light.h
-  entities/pickup.cpp
-  entities/pickup.h
-  entities/plasma.cpp
-  entities/plasma.h
-  entities/projectile.cpp
-  entities/projectile.h
-  entity.cpp
-  entity.h
-  eventhandler.cpp
-  eventhandler.h
-  gamecontext.cpp
-  gamecontext.h
-  gamecontroller.cpp
-  gamecontroller.h
-  gamemodes/DDRace.cpp
-  gamemodes/DDRace.h
-  gameworld.cpp
-  gameworld.h
-  player.cpp
-  player.h
-  save.cpp
-  save.h
-  score.cpp
-  score.h
-  teams.cpp
-  teams.h
-  teehistorian.cpp
-  teehistorian.h
-  teeinfo.cpp
-  teeinfo.h
-)
-set(GAME_GENERATED_SERVER
-  "src/game/generated/server_data.cpp"
-  "src/game/generated/server_data.h"
-  "src/game/generated/wordlist.h"
-)
-set(SERVER_SRC ${ENGINE_SERVER} ${GAME_SERVER} ${GAME_GENERATED_SERVER})
-if(TARGET_OS STREQUAL "windows")
-  set(SERVER_ICON "other/icons/DDNet-Server.rc")
-else()
-  set(SERVER_ICON)
-endif()
+  set_src(ENGINE_SERVER GLOB_RECURSE src/engine/server
+    antibot.cpp
+    antibot.h
+    authmanager.cpp
+    authmanager.h
+    databases/connection.cpp
+    databases/connection.h
+    databases/connection_pool.cpp
+    databases/connection_pool.h
+    databases/mysql.cpp
+    databases/sqlite.cpp
+    name_ban.cpp
+    name_ban.h
+    register.cpp
+    register.h
+    server.cpp
+    server.h
+    sql_string_helpers.cpp
+    sql_string_helpers.h
+    upnp.cpp
+    upnp.h
+  )
+  set_src(GAME_SERVER GLOB_RECURSE src/game/server
+    alloc.h
+    ddracechat.cpp
+    ddracecommands.cpp
+    entities/character.cpp
+    entities/character.h
+    entities/door.cpp
+    entities/door.h
+    entities/dragger.cpp
+    entities/dragger.h
+    entities/flag.cpp
+    entities/flag.h
+    entities/gun.cpp
+    entities/gun.h
+    entities/laser.cpp
+    entities/laser.h
+    entities/light.cpp
+    entities/light.h
+    entities/pickup.cpp
+    entities/pickup.h
+    entities/plasma.cpp
+    entities/plasma.h
+    entities/projectile.cpp
+    entities/projectile.h
+    entity.cpp
+    entity.h
+    eventhandler.cpp
+    eventhandler.h
+    gamecontext.cpp
+    gamecontext.h
+    gamecontroller.cpp
+    gamecontroller.h
+    gamemodes/DDRace.cpp
+    gamemodes/DDRace.h
+    gameworld.cpp
+    gameworld.h
+    player.cpp
+    player.h
+    save.cpp
+    save.h
+    score.cpp
+    score.h
+    teams.cpp
+    teams.h
+    teehistorian.cpp
+    teehistorian.h
+    teeinfo.cpp
+    teeinfo.h
+  )
+  set(GAME_GENERATED_SERVER
+    "src/game/generated/server_data.cpp"
+    "src/game/generated/server_data.h"
+    "src/game/generated/wordlist.h"
+  )
+  set(SERVER_SRC ${ENGINE_SERVER} ${GAME_SERVER} ${GAME_GENERATED_SERVER})
+  if(TARGET_OS STREQUAL "windows")
+    set(SERVER_ICON "other/icons/DDNet-Server.rc")
+  else()
+    set(SERVER_ICON)
+  endif()
 
-# Antibot
-if(ANTIBOT)
-  set(TARGET_ANTIBOT antibot)
-  add_library(${TARGET_ANTIBOT} SHARED ${ANTIBOT_SRC})
-  list(APPEND TARGETS_OWN ${TARGET_ANTIBOT})
-endif()
+  # Antibot
+  if(ANTIBOT)
+    set(TARGET_ANTIBOT antibot)
+    add_library(${TARGET_ANTIBOT} SHARED ${ANTIBOT_SRC})
+    list(APPEND TARGETS_OWN ${TARGET_ANTIBOT})
+  endif()
 
-# Libraries
-set(LIBS_SERVER
-  ${LIBS}
-  ${MYSQL_LIBRARIES}
-  ${TARGET_ANTIBOT}
-  ${MINIUPNPC_LIBRARIES}
-  # Add pthreads (on non-Windows) at the end, so that other libraries can depend
-  # on it.
-  ${CMAKE_THREAD_LIBS_INIT}
-)
+  # Libraries
+  set(LIBS_SERVER
+    ${LIBS}
+    ${MYSQL_LIBRARIES}
+    ${TARGET_ANTIBOT}
+    ${MINIUPNPC_LIBRARIES}
+    # Add pthreads (on non-Windows) at the end, so that other libraries can depend
+    # on it.
+    ${CMAKE_THREAD_LIBS_INIT}
+  )
 
-# Target
-set(TARGET_SERVER ${SERVER_EXECUTABLE})
-add_executable(${TARGET_SERVER}
-  ${DEPS}
-  ${SERVER_SRC}
-  ${SERVER_ICON}
-  $<TARGET_OBJECTS:engine-shared>
-  $<TARGET_OBJECTS:game-shared>
-)
-target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER})
-list(APPEND TARGETS_OWN ${TARGET_SERVER})
-list(APPEND TARGETS_LINK ${TARGET_SERVER})
+  # Target
+  set(TARGET_SERVER ${SERVER_EXECUTABLE})
+  add_executable(${TARGET_SERVER}
+    ${DEPS}
+    ${SERVER_SRC}
+    ${SERVER_ICON}
+    $<TARGET_OBJECTS:engine-shared>
+    $<TARGET_OBJECTS:game-shared>
+  )
+  target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER})
+  list(APPEND TARGETS_OWN ${TARGET_SERVER})
+  list(APPEND TARGETS_LINK ${TARGET_SERVER})
 
-if(TARGET_OS AND TARGET_OS STREQUAL "mac")
-  set(SERVER_LAUNCHER_SRC src/macoslaunch/server.mm)
-  set(TARGET_SERVER_LAUNCHER ${TARGET_SERVER}-Launcher)
-  add_executable(${TARGET_SERVER_LAUNCHER} ${SERVER_LAUNCHER_SRC})
-  target_link_libraries(${TARGET_SERVER_LAUNCHER} ${COCOA})
-  list(APPEND TARGETS_OWN ${TARGET_SERVER_LAUNCHER})
-  list(APPEND TARGETS_LINK ${TARGET_SERVER_LAUNCHER})
+  if(TARGET_OS AND TARGET_OS STREQUAL "mac")
+    set(SERVER_LAUNCHER_SRC src/macoslaunch/server.mm)
+    set(TARGET_SERVER_LAUNCHER ${TARGET_SERVER}-Launcher)
+    add_executable(${TARGET_SERVER_LAUNCHER} ${SERVER_LAUNCHER_SRC})
+    target_link_libraries(${TARGET_SERVER_LAUNCHER} ${COCOA})
+    list(APPEND TARGETS_OWN ${TARGET_SERVER_LAUNCHER})
+    list(APPEND TARGETS_LINK ${TARGET_SERVER_LAUNCHER})
+  endif()
 endif()
 
 ########################################################################
 # VARIOUS TARGETS
 ########################################################################
 
-set_src(MASTERSRV_SRC GLOB src/mastersrv mastersrv.cpp mastersrv.h)
-set_src(TWPING_SRC GLOB src/twping twping.cpp)
+if(TOOLS)
+  set_src(MASTERSRV_SRC GLOB src/mastersrv mastersrv.cpp mastersrv.h)
+  set_src(TWPING_SRC GLOB src/twping twping.cpp)
 
-set(TARGET_MASTERSRV mastersrv)
-set(TARGET_TWPING twping)
+  set(TARGET_MASTERSRV mastersrv)
+  set(TARGET_TWPING twping)
 
-add_executable(${TARGET_MASTERSRV} EXCLUDE_FROM_ALL ${MASTERSRV_SRC} $<TARGET_OBJECTS:engine-shared> ${DEPS})
-add_executable(${TARGET_TWPING} EXCLUDE_FROM_ALL ${TWPING_SRC} $<TARGET_OBJECTS:engine-shared> ${DEPS})
+  add_executable(${TARGET_MASTERSRV} EXCLUDE_FROM_ALL ${MASTERSRV_SRC} $<TARGET_OBJECTS:engine-shared> ${DEPS})
+  add_executable(${TARGET_TWPING} EXCLUDE_FROM_ALL ${TWPING_SRC} $<TARGET_OBJECTS:engine-shared> ${DEPS})
 
-target_link_libraries(${TARGET_MASTERSRV} ${LIBS})
-target_link_libraries(${TARGET_TWPING} ${LIBS})
+  target_link_libraries(${TARGET_MASTERSRV} ${LIBS})
+  target_link_libraries(${TARGET_TWPING} ${LIBS})
 
-list(APPEND TARGETS_OWN ${TARGET_MASTERSRV} ${TARGET_TWPING})
-list(APPEND TARGETS_LINK ${TARGET_MASTERSRV} ${TARGET_TWPING})
+  list(APPEND TARGETS_OWN ${TARGET_MASTERSRV} ${TARGET_TWPING})
+  list(APPEND TARGETS_LINK ${TARGET_MASTERSRV} ${TARGET_TWPING})
 
-set(TARGETS_TOOLS)
-set_src(TOOLS GLOB src/tools
-  config_common.h
-  config_retrieve.cpp
-  config_store.cpp
-  crapnet.cpp
-  dilate.cpp
-  dummy_map.cpp
-  fake_server.cpp
-  map_convert_07.cpp
-  map_diff.cpp
-  map_extract.cpp
-  map_optimize.cpp
-  map_replace_image.cpp
-  map_resave.cpp
-  packetgen.cpp
-  unicode_confusables.cpp
-  uuid.cpp
-)
-foreach(ABS_T ${TOOLS})
-  file(RELATIVE_PATH T "${PROJECT_SOURCE_DIR}/src/tools/" ${ABS_T})
-  if(T MATCHES "\\.cpp$")
-    string(REGEX REPLACE "\\.cpp$" "" TOOL "${T}")
-    set(TOOL_DEPS ${DEPS})
-    set(TOOL_LIBS ${LIBS})
-    if(TOOL MATCHES "^(dilate|map_convert_07|map_optimize|map_extract|map_replace_image)$")
-      list(APPEND TOOL_DEPS ${PNGLITE_DEP})
-      list(APPEND TOOL_LIBS ${PNGLITE_LIBRARIES})
-      list(APPEND TOOL_INCLUDE_DIRS ${PNGLITE_INCLUDE_DIRS})
+  set(TARGETS_TOOLS)
+  set_src(TOOLS GLOB src/tools
+    config_common.h
+    config_retrieve.cpp
+    config_store.cpp
+    crapnet.cpp
+    dilate.cpp
+    dummy_map.cpp
+    fake_server.cpp
+    map_convert_07.cpp
+    map_diff.cpp
+    map_extract.cpp
+    map_optimize.cpp
+    map_replace_image.cpp
+    map_resave.cpp
+    packetgen.cpp
+    unicode_confusables.cpp
+    uuid.cpp
+  )
+  foreach(ABS_T ${TOOLS})
+    file(RELATIVE_PATH T "${PROJECT_SOURCE_DIR}/src/tools/" ${ABS_T})
+    if(T MATCHES "\\.cpp$")
+      string(REGEX REPLACE "\\.cpp$" "" TOOL "${T}")
+      set(TOOL_DEPS ${DEPS})
+      set(TOOL_LIBS ${LIBS})
+      if(TOOL MATCHES "^(dilate|map_convert_07|map_optimize|map_extract|map_replace_image)$")
+        list(APPEND TOOL_DEPS ${PNGLITE_DEP})
+        list(APPEND TOOL_LIBS ${PNGLITE_LIBRARIES})
+        list(APPEND TOOL_INCLUDE_DIRS ${PNGLITE_INCLUDE_DIRS})
+      endif()
+      if(TOOL MATCHES "^config_")
+        list(APPEND EXTRA_TOOL_SRC "src/tools/config_common.h")
+      endif()
+      set(EXCLUDE_FROM_ALL)
+      if(DEV)
+        set(EXCLUDE_FROM_ALL EXCLUDE_FROM_ALL)
+      endif()
+      add_executable(${TOOL} ${EXCLUDE_FROM_ALL}
+        ${TOOL_DEPS}
+        src/tools/${TOOL}.cpp
+        ${EXTRA_TOOL_SRC}
+        $<TARGET_OBJECTS:engine-shared>
+      )
+      target_include_directories(${TOOL} PRIVATE ${TOOL_INCLUDE_DIRS})
+      target_link_libraries(${TOOL} ${TOOL_LIBS})
+      list(APPEND TARGETS_TOOLS ${TOOL})
     endif()
-    if(TOOL MATCHES "^config_")
-      list(APPEND EXTRA_TOOL_SRC "src/tools/config_common.h")
-    endif()
-    set(EXCLUDE_FROM_ALL)
-    if(DEV)
-      set(EXCLUDE_FROM_ALL EXCLUDE_FROM_ALL)
-    endif()
-    add_executable(${TOOL} ${EXCLUDE_FROM_ALL}
-      ${TOOL_DEPS}
-      src/tools/${TOOL}.cpp
-      ${EXTRA_TOOL_SRC}
-      $<TARGET_OBJECTS:engine-shared>
-    )
-    target_include_directories(${TOOL} PRIVATE ${TOOL_INCLUDE_DIRS})
-    target_link_libraries(${TOOL} ${TOOL_LIBS})
-    list(APPEND TARGETS_TOOLS ${TOOL})
-  endif()
-endforeach()
+  endforeach()
 
-list(APPEND TARGETS_OWN ${TARGETS_TOOLS})
-list(APPEND TARGETS_LINK ${TARGETS_TOOLS})
+  list(APPEND TARGETS_OWN ${TARGETS_TOOLS})
+  list(APPEND TARGETS_LINK ${TARGETS_TOOLS})
 
-add_custom_target(tools DEPENDS ${TARGETS_TOOLS})
+  add_custom_target(tools DEPENDS ${TARGETS_TOOLS})
+endif()
 add_custom_target(everything DEPENDS ${TARGETS_OWN})
 
 ########################################################################
@@ -2409,15 +2464,23 @@ endforeach()
 
 set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME ${PROJECT_NAME})
 
+if(TOOLS)
+  set(TARGET_TOOLS
+    config_retrieve
+    config_store
+    dilate
+    map_convert_07
+    map_diff
+    map_extract
+  )
+else()
+  set(TARGET_TOOLS)
+endif()
+
 set(CPACK_TARGETS
   ${TARGET_CLIENT}
   ${TARGET_SERVER}
-  config_retrieve
-  config_store
-  dilate
-  map_convert_07
-  map_diff
-  map_extract
+  ${TARGET_TOOLS}
 )
 if(STEAMAPI_KIND STREQUAL SHARED)
   list(APPEND CPACK_TARGETS ${TARGET_STEAMAPI})

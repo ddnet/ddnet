@@ -111,6 +111,8 @@ public:
 	void SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, int Team);
 	void ProcessSaveTeam();
 
+	int GetFirstEmptyTeam() const;
+
 	bool TeeStarted(int ClientID)
 	{
 		return m_TeeStarted[ClientID];

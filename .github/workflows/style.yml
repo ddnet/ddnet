@@ -36,6 +36,15 @@ jobs:
       run: scripts/check_dilate.sh release data
     - name: Shellcheck
       run: find . -type f -name '*.sh' -print0 | xargs -0 shellcheck
+    - name: Check log error case
+      run: |
+        if grep -Eqr '(msg|Print).*\(.*"[Ee]rror:' src/;
+        then
+          echo "Expected log errors to be in this format 'ERROR: error message'"
+          echo "Found these non uppercased log errors:"
+          grep -Er '(msg|Print).*\(.*"[Ee]rror:' src/
+          exit 1
+        fi
     - name: Pylint
       run: |
         pylint --version

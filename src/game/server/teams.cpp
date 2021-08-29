@@ -852,8 +852,8 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, in
 	CSaveTee SecondarySavedTee;
 	SecondarySavedTee.Save(pTargetPlayer->GetCharacter());
 
-	PrimarySavedTee.Load(pTargetPlayer->GetCharacter(), Team);
-	SecondarySavedTee.Load(pPlayer->GetCharacter(), Team);
+	PrimarySavedTee.Load(pTargetPlayer->GetCharacter(), Team, true);
+	SecondarySavedTee.Load(pPlayer->GetCharacter(), Team, true);
 
 	str_format(aBuf, sizeof(aBuf),
 		"%s has swapped with %s.",
@@ -1071,4 +1071,12 @@ void CGameTeams::ResetSavedTeam(int ClientID, int Team)
 			}
 		}
 	}
+}
+
+int CGameTeams::GetFirstEmptyTeam() const
+{
+	for(int i = 1; i < MAX_CLIENTS; i++)
+		if(m_TeamState[i] == TEAMSTATE_EMPTY)
+			return i;
+	return -1;
 }

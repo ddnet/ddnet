@@ -914,7 +914,7 @@ void CServerBrowser::RequestCurrentServerWithRandomToken(const NETADDR &Addr, in
 
 void CServerBrowser::SetCurrentServerPing(const NETADDR &Addr, int Ping)
 {
-	SetLatency(Addr, std::min(Ping, 999));
+	SetLatency(Addr, minimum(Ping, 999));
 }
 
 void ServerBrowserFillEstimatedLatency(int OwnLocation, const IServerBrowserPingCache::CEntry *pEntries, int NumEntries, int *pIndex, NETADDR Addr, CServerInfo *pInfo)

@@ -3374,6 +3374,9 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 
 	//game.world.insert_entity(game.Controller);
 
+	if(GIT_SHORTREV_HASH)
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "git-revision", GIT_SHORTREV_HASH);
+
 #ifdef CONF_DEBUG
 	if(g_Config.m_DbgDummies)
 	{

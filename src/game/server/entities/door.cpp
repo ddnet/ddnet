@@ -23,11 +23,6 @@ CDoor::CDoor(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,
 	GameWorld()->InsertEntity(this);
 }
 
-void CDoor::Open(int Tick, bool ActivatedTeam[])
-{
-	m_EvalTick = Server()->Tick();
-}
-
 void CDoor::ResetCollision()
 {
 	for(int i = 0; i < m_Length - 1; i++)
@@ -42,22 +37,6 @@ void CDoor::ResetCollision()
 				m_Pos.y + (m_Direction.y * i), TILE_STOPA, 0 /*Flags*/,
 				m_Number);
 	}
-}
-
-void CDoor::Open(int Team)
-{
-}
-
-void CDoor::Close(int Team)
-{
-}
-
-void CDoor::Reset()
-{
-}
-
-void CDoor::Tick()
-{
 }
 
 void CDoor::Snap(int SnappingClient)

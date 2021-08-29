@@ -211,7 +211,7 @@ void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData)
 }
 void CCamera::ConZoom(IConsole::IResult *pResult, void *pUserData)
 {
-	int TargetLevel = pResult->NumArguments() ? clamp(pResult->GetInteger(0), 0, 20) : g_Config.m_ClDefaultZoom;
+	float TargetLevel = pResult->NumArguments() ? clamp<float>(pResult->GetFloat(0), 0, 20) : g_Config.m_ClDefaultZoom;
 	((CCamera *)pUserData)->ChangeZoom(pow(ZoomStep, TargetLevel - 10));
 }
 void CCamera::ConSetView(IConsole::IResult *pResult, void *pUserData)

@@ -12,6 +12,9 @@ class CInput : public IEngineInput
 {
 	IEngineGraphics *m_pGraphics;
 
+	int m_LastX;
+	int m_LastY;
+
 	int m_InputGrabbed;
 	char *m_pClipboardText;
 

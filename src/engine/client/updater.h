@@ -40,8 +40,6 @@ class CUpdater : public IUpdater
 	class IStorage *m_pStorage;
 	class IEngine *m_pEngine;
 
-	bool m_IsWinXP;
-
 	LOCK m_Lock;
 
 	int m_State;
@@ -80,7 +78,6 @@ public:
 	virtual void InitiateUpdate();
 	void Init();
 	virtual void Update();
-	void WinXpRestart();
 };
 
 #endif
