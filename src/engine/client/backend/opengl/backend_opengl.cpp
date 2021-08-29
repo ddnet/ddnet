@@ -2,6 +2,8 @@
 
 #include <base/detect.h>
 
+#if defined(BACKEND_AS_OPENGL_ES) || !defined(CONF_BACKEND_OPENGL_ES)
+
 #include <engine/client/backend/opengl/opengl_sl.h>
 #include <engine/client/backend/opengl/opengl_sl_program.h>
 
@@ -190,7 +192,7 @@ void CCommandProcessorFragment_OpenGL::SetState(const CCommandBuffer::SState &St
 			}
 			else
 			{
-				dbg_msg("opengl", "Error: this call should not happen.");
+				dbg_msg("opengl", "ERROR: this call should not happen.");
 			}
 		}
 	}
@@ -2329,6 +2331,8 @@ void CCommandProcessorFragment_OpenGL2::Cmd_RenderTileLayer(const CCommandBuffer
 
 #ifdef BACKEND_GL_MODERN_API
 #undef BACKEND_GL_MODERN_API
+#endif
+
 #endif
 
 #endif

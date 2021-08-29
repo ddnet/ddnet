@@ -2130,16 +2130,6 @@ PROCESS shell_execute(const char *file);
 int kill_process(PROCESS process);
 
 /*
-	Function: os_is_winxp_or_lower
-		Checks whether the program runs on Windows XP or lower.
-
-	Returns:
-		1 - Windows XP or lower.
-		0 - Higher Windows version, Linux, macOS, etc.
-*/
-int os_is_winxp_or_lower();
-
-/*
 	Function: generate_password
 		Generates a null-terminated password of length `2 *
 		random_length`.
@@ -2203,6 +2193,14 @@ int secure_rand();
 		below - Upper limit (exclusive) of integers to return.
 */
 int secure_rand_below(int below);
+
+/*
+	Function: set_console_msg_color
+		Sets the console color.
+	Parameters:
+		rgb - If NULL it will reset the console color to default, else it will transform the rgb color to a console color
+*/
+void set_console_msg_color(const void *rgbvoid);
 
 #if defined(__cplusplus)
 }

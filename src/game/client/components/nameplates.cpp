@@ -203,17 +203,53 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		}
 	}
 
-	if(g_Config.m_Debug)
+	if(g_Config.m_Debug || g_Config.m_ClNameplatesStrong)
 	{
-		CCharacter *pCharacter = m_pClient->m_GameWorld.GetCharacterByID(pPlayerInfo->m_ClientID);
-		if(pCharacter)
+		if(m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_HasExtendedData && m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientID].m_HasExtendedData)
 		{
-			YOffset -= FontSize;
-			char aBuf[8];
-			str_format(aBuf, sizeof(aBuf), "⇢ %d", pCharacter->GetStrongWeakID());
-			float XOffset = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f) / 2.0f;
-			TextRender()->TextColor(rgb);
-			TextRender()->Text(0, Position.x - XOffset, YOffset, FontSize, aBuf, -1.0f);
+			CCharacter *pLocalChar = m_pClient->m_GameWorld.GetCharacterByID(m_pClient->m_Snap.m_LocalClientID);
+			CCharacter *pCharacter = m_pClient->m_GameWorld.GetCharacterByID(pPlayerInfo->m_ClientID);
+			if(pCharacter && pLocalChar)
+			{
+				if(pPlayerInfo->m_Local)
+					TextRender()->TextColor(rgb);
+				else
+				{
+					float ScaleX, ScaleY;
+					const float StrongWeakImgSize = 40.0f;
+					Graphics()->TextureClear();
+					Graphics()->TextureSet(g_pData->m_aImages[IMAGE_STRONGWEAK].m_Id);
+					Graphics()->QuadsBegin();
+					ColorRGBA StrongWeakStatusColor;
+					int StrongWeakSpriteID;
+					if(pLocalChar->GetStrongWeakID() > pCharacter->GetStrongWeakID())
+					{
+						StrongWeakStatusColor = color_cast<ColorRGBA>(ColorHSLA(6401973));
+						StrongWeakSpriteID = SPRITE_HOOK_STRONG;
+					}
+					else
+					{
+						StrongWeakStatusColor = color_cast<ColorRGBA>(ColorHSLA(41131));
+						StrongWeakSpriteID = SPRITE_HOOK_WEAK;
+					}
+					Graphics()->SetColor(StrongWeakStatusColor);
+					RenderTools()->SelectSprite(StrongWeakSpriteID);
+					RenderTools()->GetSpriteScale(StrongWeakSpriteID, ScaleX, ScaleY);
+					TextRender()->TextColor(StrongWeakStatusColor);
+
+					YOffset -= StrongWeakImgSize * ScaleY;
+					RenderTools()->DrawSprite(Position.x, YOffset + (StrongWeakImgSize / 2.0f) * ScaleY, StrongWeakImgSize);
+					Graphics()->QuadsEnd();
+				}
+				if(g_Config.m_Debug || g_Config.m_ClNameplatesStrong == 2)
+				{
+					YOffset -= FontSize;
+					char aBuf[12];
+					str_format(aBuf, sizeof(aBuf), "%d", pCharacter->GetStrongWeakID());
+					float XOffset = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f) / 2.0f;
+					TextRender()->Text(0, Position.x - XOffset, YOffset, FontSize, aBuf, -1.0f);
+				}
+			}
 		}
 	}
 

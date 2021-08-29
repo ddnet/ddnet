@@ -2,8 +2,8 @@
 #ifndef BASE_COLOR_H
 #define BASE_COLOR_H
 
-#include "math.h"
-#include "vmath.h"
+#include <base/math.h>
+#include <base/vmath.h>
 
 /*
 	Title: Color handling

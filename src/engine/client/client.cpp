@@ -76,6 +76,10 @@
 #undef main
 #endif
 
+// for android
+#include "SDL_rwops.h"
+#include "base/hash.h"
+
 static const ColorRGBA ClientNetworkPrintColor{0.7f, 1, 0.7f, 1.0f};
 static const ColorRGBA ClientNetworkErrPrintColor{1.0f, 0.25f, 0.25f, 1.0f};
 
@@ -3031,7 +3035,9 @@ void CClient::Run()
 			return;
 		}
 
+#ifndef CONF_PLATFORM_ANDROID
 		atexit(SDL_Quit); // ignore_convention
+#endif
 	}
 
 	// init graphics
@@ -3693,7 +3699,7 @@ void CClient::Con_SaveReplay(IConsole::IResult *pResult, void *pUserData)
 	{
 		int Length = pResult->GetInteger(0);
 		if(Length <= 0)
-			pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Error: length must be greater than 0 second.");
+			pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "ERROR: length must be greater than 0 second.");
 		else
 			pSelf->SaveReplay(Length);
 	}
@@ -3711,9 +3717,9 @@ void CClient::SaveReplay(const int Length)
 	}
 
 	if(!DemoRecorder(RECORDER_REPLAYS)->IsRecording())
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Error: demorecorder isn't recording. Try to rejoin to fix that.");
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "ERROR: demorecorder isn't recording. Try to rejoin to fix that.");
 	else if(DemoRecorder(RECORDER_REPLAYS)->Length() < 1)
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Error: demorecorder isn't recording for at least 1 second.");
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "ERROR: demorecorder isn't recording for at least 1 second.");
 	else
 	{
 		// First we stop the recorder to slice correctly the demo after
@@ -4275,6 +4281,11 @@ void CClient::HandleMapPath(const char *pPath)
 
 #if defined(CONF_PLATFORM_MACOS)
 extern "C" int TWMain(int argc, const char **argv) // ignore_convention
+#elif defined(CONF_PLATFORM_ANDROID)
+extern "C" __attribute__((visibility("default"))) int SDL_main(int argc, char *argv[]);
+extern "C" void InitAndroid();
+
+int SDL_main(int argc, char *argv[])
 #else
 int main(int argc, const char **argv) // ignore_convention
 #endif
@@ -4296,6 +4307,10 @@ int main(int argc, const char **argv) // ignore_convention
 		}
 	}
 
+#if defined(CONF_PLATFORM_ANDROID)
+	InitAndroid();
+#endif
+
 	if(secure_random_init() != 0)
 	{
 		RandInitFailed = true;
@@ -4311,7 +4326,7 @@ int main(int argc, const char **argv) // ignore_convention
 	// create the components
 	IEngine *pEngine = CreateEngine("DDNet", Silent, 2);
 	IConsole *pConsole = CreateConsole(CFGFLAG_CLIENT);
-	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_CLIENT, argc, argv); // ignore_convention
+	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_CLIENT, argc, (const char **)argv); // ignore_convention
 	IConfigManager *pConfigManager = CreateConfigManager();
 	IEngineSound *pEngineSound = CreateEngineSound();
 	IEngineInput *pEngineInput = CreateEngineInput();
@@ -4423,7 +4438,7 @@ int main(int argc, const char **argv) // ignore_convention
 	else if(argc == 2 && str_endswith(argv[1], ".map"))
 		pClient->HandleMapPath(argv[1]);
 	else if(argc > 1) // ignore_convention
-		pConsole->ParseArguments(argc - 1, &argv[1]); // ignore_convention
+		pConsole->ParseArguments(argc - 1, (const char **)&argv[1]); // ignore_convention
 
 	if(pSteam->GetConnectAddress())
 	{
@@ -4451,6 +4466,12 @@ int main(int argc, const char **argv) // ignore_convention
 	}
 
 	delete pKernel;
+
+#ifdef CONF_PLATFORM_ANDROID
+	// properly close this native thread, so globals are destructed
+	std::exit(0);
+#endif
+
 	return 0;
 }
 
@@ -4501,11 +4522,7 @@ bool CClient::RaceRecord_IsRecording()
 void CClient::RequestDDNetInfo()
 {
 	char aUrl[256];
-	static bool s_IsWinXP = os_is_winxp_or_lower();
-	if(s_IsWinXP)
-		str_copy(aUrl, "http://info2.ddnet.tw/info", sizeof(aUrl));
-	else
-		str_copy(aUrl, "https://info2.ddnet.tw/info", sizeof(aUrl));
+	str_copy(aUrl, "https://info2.ddnet.tw/info", sizeof(aUrl));
 
 	if(g_Config.m_BrIndicateFinished)
 	{

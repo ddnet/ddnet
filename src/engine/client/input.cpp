@@ -52,6 +52,9 @@ CInput::CInput()
 	m_NumTextInputInstances = 0;
 	m_EditingTextLen = -1;
 	m_aEditingText[0] = 0;
+
+	m_LastX = 0;
+	m_LastY = 0;
 }
 
 void CInput::Init()
@@ -71,7 +74,18 @@ void CInput::MouseRelative(float *x, float *y)
 	int nx = 0, ny = 0;
 	float Sens = g_Config.m_InpMousesens / 100.0f;
 
+#if defined(CONF_PLATFORM_ANDROID) // No relative mouse on Android
+	SDL_GetMouseState(&nx, &ny);
+	int XTmp = nx - m_LastX;
+	int YTmp = ny - m_LastY;
+	m_LastX = nx;
+	m_LastY = ny;
+	nx = XTmp;
+	ny = YTmp;
+	Sens = 1;
+#else
 	SDL_GetRelativeMouseState(&nx, &ny);
+#endif
 
 	*x = nx * Sens;
 	*y = ny * Sens;
@@ -87,7 +101,9 @@ void CInput::MouseModeAbsolute()
 void CInput::MouseModeRelative()
 {
 	m_InputGrabbed = 1;
+#if !defined(CONF_PLATFORM_ANDROID) // No relative mouse on Android
 	SDL_SetRelativeMouseMode(SDL_TRUE);
+#endif
 	Graphics()->SetWindowGrab(true);
 	// Clear pending relative mouse motion
 	SDL_GetRelativeMouseState(0x0, 0x0);
@@ -328,8 +344,9 @@ int CInput::Update()
 				// shortcuts
 				switch(Event.window.event)
 				{
-				case SDL_WINDOWEVENT_RESIZED:
-					Graphics()->Resize(Event.window.data1, Event.window.data2);
+				// listen to size changes, this includes our manual changes and the ones by the window manager
+				case SDL_WINDOWEVENT_SIZE_CHANGED:
+					Graphics()->Resize(Event.window.data1, Event.window.data2, -1);
 					break;
 				case SDL_WINDOWEVENT_FOCUS_GAINED:
 					if(m_InputGrabbed)
@@ -347,12 +364,18 @@ int CInput::Update()
 						m_InputGrabbed = true;
 					}
 					break;
-#if defined(CONF_PLATFORM_MACOS) // Todo: remove this when fixed in SDL
+				case SDL_WINDOWEVENT_MINIMIZED:
+					Graphics()->WindowDestroyNtf(Event.window.windowID);
+					break;
 				case SDL_WINDOWEVENT_MAXIMIZED:
+#if defined(CONF_PLATFORM_MACOS) // Todo: remove this when fixed in SDL
 					MouseModeAbsolute();
 					MouseModeRelative();
-					break;
 #endif
+					// fallthrough
+				case SDL_WINDOWEVENT_RESTORED:
+					Graphics()->WindowCreateNtf(Event.window.windowID);
+					break;
 				}
 				break;
 
