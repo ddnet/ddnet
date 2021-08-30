@@ -55,8 +55,7 @@ void CPlayer::Reset()
 
 	m_LastCommandPos = 0;
 	m_LastPlaytime = 0;
-	m_Sent1stAfkWarning = false;
-	m_Sent2ndAfkWarning = false;
+	mem_zero(m_SentAfkWarning, sizeof(m_SentAfkWarning));
 	m_ChatScore = 0;
 	m_Moderating = false;
 	m_EyeEmoteEnabled = true;
@@ -699,7 +698,7 @@ void CPlayer::TryRespawn()
 		m_pCharacter->SetSolo(true);
 }
 
-bool CPlayer::AfkTimer(CNetObj_PlayerInput *NewTarget)
+bool CPlayer::AfkTimer(CNetObj_PlayerInput *pNewTarget)
 {
 	/*
 		afk timer (x, y = mouse coordinates)
@@ -715,41 +714,37 @@ bool CPlayer::AfkTimer(CNetObj_PlayerInput *NewTarget)
 	if(g_Config.m_SvMaxAfkTime == 0)
 		return false; // 0 = disabled
 
-	if(NewTarget->m_TargetX != m_pLastTarget->m_TargetX || NewTarget->m_TargetY != m_pLastTarget->m_TargetY)
+	if(pNewTarget->m_TargetX != m_pLastTarget->m_TargetX || pNewTarget->m_TargetY != m_pLastTarget->m_TargetY)
 	{
 		UpdatePlaytime();
 		// we shouldn't update m_pLastTarget here
-		m_Sent1stAfkWarning = false; // afk timer's 1st warning after 50% of sv_max_afk_time
-		m_Sent2ndAfkWarning = false;
+		mem_zero(m_SentAfkWarning, sizeof(m_SentAfkWarning)); // resetting warnings
 	}
 	else
 	{
 		if(!m_Paused)
 		{
-			char AfkMsg[160];
-			// not playing, check how long
-			if(!m_Sent1stAfkWarning && m_LastPlaytime < time_get() - time_freq() * (int)(g_Config.m_SvMaxAfkTime * 0.5))
-			{
-				str_format(AfkMsg, sizeof(AfkMsg),
-					"You have been afk for %d seconds now. Please note that you get kicked after not playing for %d seconds.",
-					(int)(g_Config.m_SvMaxAfkTime * 0.5),
-					g_Config.m_SvMaxAfkTime);
-				m_pGameServer->SendChatTarget(m_ClientID, AfkMsg);
-				m_Sent1stAfkWarning = true;
-			}
-			else if(!m_Sent2ndAfkWarning && m_LastPlaytime < time_get() - time_freq() * (int)(g_Config.m_SvMaxAfkTime * 0.9))
-			{
-				str_format(AfkMsg, sizeof(AfkMsg),
-					"You have been afk for %d seconds now. Please note that you get kicked after not playing for %d seconds.",
-					(int)(g_Config.m_SvMaxAfkTime * 0.9),
-					g_Config.m_SvMaxAfkTime);
-				m_pGameServer->SendChatTarget(m_ClientID, AfkMsg);
-				m_Sent2ndAfkWarning = true;
-			}
-			else if(m_LastPlaytime < time_get() - time_freq() * g_Config.m_SvMaxAfkTime)
+			// kick if player stays afk too long
+			if(m_LastPlaytime < time_get() - time_freq() * g_Config.m_SvMaxAfkTime)
 			{
 				m_pGameServer->Server()->Kick(m_ClientID, "Away from keyboard");
 				return true;
+			}
+			// not playing, check how long
+			for(int i = 0; i < 2; i++)
+			{
+				int AfkTime = (int)(g_Config.m_SvMaxAfkTime * (i == 0 ? 0.5 : 0.9));
+				if(!m_SentAfkWarning[i] && m_LastPlaytime < time_get() - time_freq() * AfkTime)
+				{
+					char aAfkMsg[160];
+					str_format(aAfkMsg, sizeof(aAfkMsg),
+						"You have been afk for %d seconds now. Please note that you get kicked after not playing for %d seconds.",
+						AfkTime,
+						g_Config.m_SvMaxAfkTime);
+					m_pGameServer->SendChatTarget(m_ClientID, aAfkMsg);
+					m_SentAfkWarning[i] = true;
+					break;
+				}
 			}
 		}
 	}

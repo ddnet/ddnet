@@ -177,16 +177,22 @@ public:
 
 	bool m_Moderating;
 
-	bool AfkTimer(CNetObj_PlayerInput *NewTarget); //returns true if kicked
+	bool AfkTimer(CNetObj_PlayerInput *pNewTarget); // returns true if kicked
 	void UpdatePlaytime();
-	void AfkVoteTimer(CNetObj_PlayerInput *NewTarget);
+	void AfkVoteTimer(CNetObj_PlayerInput *pNewTarget);
 	int64_t m_LastPlaytime;
 	int64_t m_LastEyeEmote;
 	int64_t m_LastBroadcast;
 	bool m_LastBroadcastImportance;
+
 	CNetObj_PlayerInput *m_pLastTarget;
-	bool m_Sent1stAfkWarning; // afk timer's 1st warning after 50% of sv_max_afk_time
-	bool m_Sent2ndAfkWarning; // afk timer's 2nd warning after 90% of sv_max_afk_time
+	/* 
+		afk timer's 1st warning after 50% of sv_max_afk_time
+		2nd warning after 90%
+		kick after reaching 100% of sv_max_afk_time
+	*/
+	bool m_SentAfkWarning[2]; 
+
 	bool m_EyeEmoteEnabled;
 	int m_TimerType;
 
