@@ -300,6 +300,17 @@ void CProjectile::Snap(int SnappingClient)
 {
 	float Ct = (Server()->Tick() - m_StartTick) / (float)Server()->TickSpeed();
 
+	if(m_LifeSpan == -2)
+	{
+		CNetObj_EntityEx *pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
+		if(!pEntData)
+			return;
+
+		pEntData->m_SwitchNumber = m_Number;
+		pEntData->m_Layer = m_Layer;
+		pEntData->m_EntityClass = ENTITYCLASS_PROJECTILE;
+	}
+
 	if(NetworkClipped(SnappingClient, GetPos(Ct)))
 		return;
 
