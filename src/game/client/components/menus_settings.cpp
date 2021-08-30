@@ -2524,15 +2524,16 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	}
 
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClShowDirection, Localize("Show other players' key presses"), g_Config.m_ClShowDirection, &Button))
+	if(DoButton_CheckBox(&g_Config.m_ClShowDirection, Localize("Show other players' key presses"), g_Config.m_ClShowDirection >= 1, &Button))
 	{
-		g_Config.m_ClShowDirection ^= 1;
+		g_Config.m_ClShowDirection = g_Config.m_ClShowDirection >= 1 ? 0 : 1;
 	}
 
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClShowLocalDirection, Localize("Show local player's key presses"), g_Config.m_ClShowLocalDirection, &Button))
+	static int s_ShowLocalPlayer = 0;
+	if(DoButton_CheckBox(&s_ShowLocalPlayer, Localize("Show local player's key presses"), g_Config.m_ClShowDirection == 2, &Button))
 	{
-		g_Config.m_ClShowLocalDirection ^= 1;
+		g_Config.m_ClShowDirection = g_Config.m_ClShowDirection != 2 ? 2 : 1;
 	}
 
 	Left.HSplitTop(20.0f, &Button, &Left);
