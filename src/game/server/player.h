@@ -191,7 +191,7 @@ public:
 		2nd warning after 90%
 		kick after reaching 100% of sv_max_afk_time
 	*/
-	bool m_SentAfkWarning[2]; 
+	bool m_SentAfkWarning[2];
 
 	bool m_EyeEmoteEnabled;
 	int m_TimerType;
