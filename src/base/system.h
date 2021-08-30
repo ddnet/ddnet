@@ -170,12 +170,13 @@ enum
 {
 	IOFLAG_READ = 1,
 	IOFLAG_WRITE = 2,
-	IOFLAG_RANDOM = 4,
-	IOFLAG_APPEND = 8,
+	IOFLAG_APPEND = 4,
 
 	IOSEEK_START = 0,
 	IOSEEK_CUR = 1,
-	IOSEEK_END = 2
+	IOSEEK_END = 2,
+
+	IO_MAX_PATH_LENGTH = 512,
 };
 
 typedef struct IOINTERNAL *IOHANDLE;
@@ -186,7 +187,7 @@ typedef struct IOINTERNAL *IOHANDLE;
 
 	Parameters:
 		filename - File to open.
-		flags - A set of flags. IOFLAG_READ, IOFLAG_WRITE, IOFLAG_RANDOM, IOFLAG_APPEND.
+		flags - A set of flags. IOFLAG_READ, IOFLAG_WRITE, IOFLAG_APPEND.
 
 	Returns:
 		Returns a handle to the file on success and 0 on failure.
@@ -1598,14 +1599,29 @@ void str_escape(char **dst, const char *src, const char *end);
 		cb - Callback function to call for each entry
 		type - Type of the directory
 		user - Pointer to give to the callback
-
-	Returns:
-		Always returns 0.
 */
 typedef int (*FS_LISTDIR_CALLBACK)(const char *name, int is_dir, int dir_type, void *user);
-typedef int (*FS_LISTDIR_INFO_CALLBACK)(const char *name, time_t date, int is_dir, int dir_type, void *user);
-int fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user);
-int fs_listdir_info(const char *dir, FS_LISTDIR_INFO_CALLBACK cb, int type, void *user);
+void fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user);
+
+typedef struct
+{
+	const char *m_pName;
+	time_t m_TimeCreated; // seconds since UNIX Epoch
+	time_t m_TimeModified; // seconds since UNIX Epoch
+} CFsFileInfo;
+
+/*
+	Function: fs_listdir_fileinfo
+		Lists the files in a directory and gets additional file information
+
+	Parameters:
+		dir - Directory to list
+		cb - Callback function to call for each entry
+		type - Type of the directory
+		user - Pointer to give to the callback
+*/
+typedef int (*FS_LISTDIR_CALLBACK_FILEINFO)(const CFsFileInfo *info, int is_dir, int dir_type, void *user);
+void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int type, void *user);
 
 /*
 	Function: fs_makedir
@@ -1743,6 +1759,23 @@ int fs_remove(const char *filename);
 		- The strings are treated as zero-terminated strings.
 */
 int fs_rename(const char *oldname, const char *newname);
+
+/*
+	Function: fs_file_time
+		Gets the creation and the last modification date of a file.
+
+	Parameters:
+		name - The filename.
+		created - Pointer to time_t
+		modified - Pointer to time_t
+
+	Returns:
+		0 on success non-zero on failure
+
+	Remarks:
+		- Returned time is in seconds since UNIX Epoch
+*/
+int fs_file_time(const char *name, time_t *created, time_t *modified);
 
 /*
 	Group: Undocumented
