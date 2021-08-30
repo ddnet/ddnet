@@ -2530,6 +2530,12 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	}
 
 	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_ClShowLocalDirection, Localize("Show local player's key presses"), g_Config.m_ClShowLocalDirection, &Button))
+	{
+		g_Config.m_ClShowLocalDirection ^= 1;
+	}
+
+	Left.HSplitTop(20.0f, &Button, &Left);
 	if(DoButton_CheckBox(&g_Config.m_InpMouseOld, Localize("Old mouse mode"), g_Config.m_InpMouseOld, &Button))
 	{
 		g_Config.m_InpMouseOld ^= 1;
