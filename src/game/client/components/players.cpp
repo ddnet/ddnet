@@ -545,10 +545,10 @@ void CPlayers::RenderPlayer(
 #if defined(CONF_VIDEORECORDER)
 	if(((!IVideo::Current() && (g_Config.m_ClShowDirection || g_Config.m_ClShowLocalDirection)) || (IVideo::Current() && g_Config.m_ClVideoShowDirection)) && ClientID >= 0 || DemoPlayer()->IsPlaying())
 #else
-	if((g_Config.m_ClShowDirection || g_Config.m_ClShowLocalDirection) && ClientID >= 0 || DemoPlayer()->IsPlaying())
+	if((g_Config.m_ClShowDirection || g_Config.m_ClShowLocalDirection) && (ClientID >= 0) || DemoPlayer()->IsPlaying())
 #endif
 	{
-		if((Local && g_Config.m_ClShowLocalDirection) || !Local && g_Config.m_ClShowDirection)
+		if((Local && g_Config.m_ClShowLocalDirection) || (!Local && g_Config.m_ClShowDirection))
 		{
 			if(Player.m_Direction == -1)
 			{
