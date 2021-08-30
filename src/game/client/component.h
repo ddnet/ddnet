@@ -192,14 +192,14 @@ public:
 	 */
 	virtual void OnMessage(int Msg, void *pRawMsg) {}
 	/**
-	 * Called on mouse movement
+	 * Called on mouse movement, where the x and y values are deltas.
 	 *
-	 * @param x The x coordinates of the mouse.
-	 * @param y The y coordinates of the mouse.
+	 * @param x The amount of change in the x coordinate since the last call.
+	 * @param y The amount of change in the y coordinate since the last call.
 	 */
 	virtual bool OnMouseMove(float x, float y) { return false; }
 	/**
-	 * Called on a input event
+	 * Called on a input event.
 	 * @param e The input event.
 	 */
 	virtual bool OnInput(IInput::CEvent e) { return false; }
