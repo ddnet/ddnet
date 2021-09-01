@@ -2211,6 +2211,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     mapbugs.cpp
     name_ban.cpp
     netaddr.cpp
+    open_link.cpp
     packer.cpp
     prng.cpp
     secure_random.cpp
