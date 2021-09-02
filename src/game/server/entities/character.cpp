@@ -1215,6 +1215,27 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 	}
 }
 
+bool CCharacter::CanSnapCharacter(int SnappingClient)
+{
+	if(SnappingClient < 0)
+		return true;
+
+	CCharacter *pSnapChar = GameServer()->GetPlayerChar(SnappingClient);
+	CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
+
+	if(pSnapPlayer->GetTeam() == TEAM_SPECTATORS || pSnapPlayer->IsPaused())
+	{
+		if(pSnapPlayer->m_SpectatorID != -1 && !CanCollide(pSnapPlayer->m_SpectatorID) && (pSnapPlayer->m_ShowOthers == 0 || (pSnapPlayer->m_ShowOthers == 2 && !SameTeam(pSnapPlayer->m_SpectatorID))))
+			return false;
+		else if(pSnapPlayer->m_SpectatorID == -1 && !CanCollide(SnappingClient) && pSnapPlayer->m_SpecTeam)
+			return false;
+	}
+	else if(pSnapChar && !pSnapChar->m_Super && !CanCollide(SnappingClient) && (pSnapPlayer->m_ShowOthers == 0 || (pSnapPlayer->m_ShowOthers == 2 && !SameTeam(SnappingClient))))
+		return false;
+
+	return true;
+}
+
 void CCharacter::Snap(int SnappingClient)
 {
 	int ID = m_pPlayer->GetCID();
@@ -1222,26 +1243,7 @@ void CCharacter::Snap(int SnappingClient)
 	if(SnappingClient > -1 && !Server()->Translate(ID, SnappingClient))
 		return;
 
-	if(NetworkClipped(SnappingClient))
-		return;
-
-	if(SnappingClient > -1)
-	{
-		CCharacter *pSnapChar = GameServer()->GetPlayerChar(SnappingClient);
-		CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
-
-		if(pSnapPlayer->GetTeam() == TEAM_SPECTATORS || pSnapPlayer->IsPaused())
-		{
-			if(pSnapPlayer->m_SpectatorID != -1 && !CanCollide(pSnapPlayer->m_SpectatorID) && (pSnapPlayer->m_ShowOthers == 0 || (pSnapPlayer->m_ShowOthers == 2 && !SameTeam(pSnapPlayer->m_SpectatorID))))
-				return;
-			else if(pSnapPlayer->m_SpectatorID == -1 && !CanCollide(SnappingClient) && pSnapPlayer->m_SpecTeam)
-				return;
-		}
-		else if(pSnapChar && !pSnapChar->m_Super && !CanCollide(SnappingClient) && (pSnapPlayer->m_ShowOthers == 0 || (pSnapPlayer->m_ShowOthers == 2 && !SameTeam(SnappingClient))))
-			return;
-	}
-
-	if(m_Paused)
+	if(NetworkClipped(SnappingClient) || !CanSnapCharacter(SnappingClient))
 		return;
 
 	SnapCharacter(SnappingClient, ID);
@@ -1287,24 +1289,6 @@ void CCharacter::Snap(int SnappingClient)
 			else if(i < 256)
 				pSwitchState->m_Status8 |= Status << (i - 224);
 		}
-	}
-
-	bool ShowSpec = IsPaused();
-
-	if(SnappingClient >= 0)
-	{
-		CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
-		ShowSpec = ShowSpec && (GameServer()->GetDDRaceTeam(m_pPlayer->GetCID()) == GameServer()->GetDDRaceTeam(SnappingClient) || pSnapPlayer->m_ShowOthers == 1 || (pSnapPlayer->GetTeam() == TEAM_SPECTATORS || pSnapPlayer->IsPaused()));
-	}
-
-	if(ShowSpec)
-	{
-		CNetObj_SpecChar *pSpecChar = static_cast<CNetObj_SpecChar *>(Server()->SnapNewItem(NETOBJTYPE_SPECCHAR, ID, sizeof(CNetObj_SpecChar)));
-		if(!pSpecChar)
-			return;
-
-		pSpecChar->m_X = Core()->m_Pos.x;
-		pSpecChar->m_Y = Core()->m_Pos.y;
 	}
 
 	CNetObj_DDNetCharacter *pDDNetCharacter = static_cast<CNetObj_DDNetCharacter *>(Server()->SnapNewItem(NETOBJTYPE_DDNETCHARACTER, ID, sizeof(CNetObj_DDNetCharacter)));
