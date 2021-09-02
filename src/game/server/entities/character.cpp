@@ -1238,6 +1238,9 @@ bool CCharacter::CanSnapCharacter(int SnappingClient)
 
 void CCharacter::Snap(int SnappingClient)
 {
+	if (m_Paused)
+		return;
+
 	int ID = m_pPlayer->GetCID();
 
 	if(SnappingClient > -1 && !Server()->Translate(ID, SnappingClient))
