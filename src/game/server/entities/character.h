@@ -41,6 +41,8 @@ public:
 	virtual void TickPaused();
 	virtual void Snap(int SnappingClient);
 
+	bool CanSnapCharacter(int SnappingClient);
+
 	bool IsGrounded();
 
 	void SetWeapon(int W);
