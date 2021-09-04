@@ -543,7 +543,7 @@ void CPlayers::RenderPlayer(
 	Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
 	Graphics()->QuadsSetRotation(0);
 #if defined(CONF_VIDEORECORDER)
-	if(((!IVideo::Current() && (g_Config.m_ClShowDirection >= 1)) || (IVideo::Current() && g_Config.m_ClVideoShowDirection)) && ClientID >= 0 || DemoPlayer()->IsPlaying())
+	if((((!IVideo::Current() && (g_Config.m_ClShowDirection >= 1)) || (IVideo::Current() && g_Config.m_ClVideoShowDirection)) && ClientID >= 0) || DemoPlayer()->IsPlaying())
 #else
 	if((g_Config.m_ClShowDirection >= 1 && ClientID >= 0) || DemoPlayer()->IsPlaying())
 #endif
