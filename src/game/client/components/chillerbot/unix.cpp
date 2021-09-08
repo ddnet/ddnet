@@ -25,5 +25,6 @@ int CUnix::listDirCallback(const char *pName, time_t Date, int IsDir, int Storag
 
 void CUnix::ls()
 {
-	Storage()->ListDirectoryInfo(IStorage::TYPE_ALL, ".", listDirCallback, this);
+	// TODO: broke in merge with upstream
+	// Storage()->ListDirectoryInfo(IStorage::TYPE_ALL, ".", listDirCallback, this);
 }

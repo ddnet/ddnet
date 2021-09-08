@@ -442,7 +442,7 @@ protected:
 
 	void DemolistOnUpdate(bool Reset);
 	//void DemolistPopulate();
-	static int DemolistFetchCallback(const char *pName, time_t Date, int IsDir, int StorageType, void *pUser);
+	static int DemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser);
 
 	// friends
 	struct CFriendItem

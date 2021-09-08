@@ -2353,7 +2353,7 @@ void CGameClient::UpdatePrediction()
 		pDummyChar = m_GameWorld.GetCharacterByID(m_PredictedDummyID);
 
 	// update strong and weak hook
-	if(pLocalChar && AntiPingPlayers())
+	if(pLocalChar && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK && (m_Tuning[g_Config.m_ClDummy].m_PlayerCollision || m_Tuning[g_Config.m_ClDummy].m_PlayerHooking))
 	{
 		if(m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_HasExtendedData)
 		{

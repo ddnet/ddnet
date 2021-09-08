@@ -10,6 +10,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include <functional>
+
 #include <vector>
 #define GRAPHICS_TYPE_UNSIGNED_BYTE 0x1401
 #define GRAPHICS_TYPE_UNSIGNED_SHORT 0x1403
@@ -95,7 +97,9 @@ class CVideoMode
 public:
 	int m_CanvasWidth, m_CanvasHeight;
 	int m_WindowWidth, m_WindowHeight;
+	int m_RefreshRate;
 	int m_Red, m_Green, m_Blue;
+	uint32_t m_Format;
 };
 
 struct GL_SPoint
@@ -155,7 +159,7 @@ enum EGraphicsDriverAgeType
 	GRAPHICS_DRIVER_AGE_TYPE_MODERN,
 };
 
-typedef void (*WINDOW_RESIZE_FUNC)(void *pUser);
+typedef std::function<void(void *)> WINDOW_RESIZE_FUNC;
 
 namespace client_data7 {
 struct CDataSprite; // NOLINT(bugprone-forward-declaration-namespace)
@@ -167,6 +171,7 @@ class IGraphics : public IInterface
 protected:
 	int m_ScreenWidth;
 	int m_ScreenHeight;
+	int m_ScreenRefreshRate;
 	float m_ScreenHiDPIScale;
 
 public:
@@ -207,8 +212,11 @@ public:
 	virtual bool SetWindowScreen(int Index) = 0;
 	virtual bool SetVSync(bool State) = 0;
 	virtual int GetWindowScreen() = 0;
-	virtual void Resize(int w, int h, bool SetWindowSize = false) = 0;
+	virtual void Resize(int w, int h, int RefreshRate, bool SetWindowSize = false, bool ForceResizeEvent = false) = 0;
 	virtual void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser) = 0;
+
+	virtual void WindowDestroyNtf(uint32_t WindowID) = 0;
+	virtual void WindowCreateNtf(uint32_t WindowID) = 0;
 
 	virtual void Clear(float r, float g, float b) = 0;
 

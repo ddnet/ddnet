@@ -40,6 +40,8 @@ testrunner\[1\]_include.cmake
 chillerbot-ux
 chillerbot-ux-Server
 chillerbot-ux-Server-Launcher
+DDNet
+!DDNet/
 DDNet-Server
 DDNet-Server-Launcher
 libsteam_api.a
