@@ -106,6 +106,7 @@ option(INFORM_UPDATE "Inform about available updates" ON)
 option(VIDEORECORDER "Enable video recording support via FFmpeg" OFF)
 option(UPNP "Enable UPnP support" OFF)
 option(ANTIBOT "Enable support for a dynamic anticheat library" OFF)
+option(HEADLESS_CLIENT "Build the client without graphics" OFF)
 option(CLIENT "Compile client" ON)
 option(SERVER "Compile server" ON)
 option(TOOLS "Compile tools" ON)
@@ -1759,6 +1760,7 @@ if(CLIENT)
     graphics_defines.h
     graphics_threaded.cpp
     graphics_threaded.h
+    graphics_threaded_null.h
     http.cpp
     http.h
     input.cpp
@@ -2792,6 +2794,9 @@ foreach(target ${TARGETS_OWN})
   endif()
   if(ANTIBOT)
     target_compile_definitions(${target} PRIVATE CONF_ANTIBOT)
+  endif()
+  if(HEADLESS_CLIENT)
+    target_compile_definitions(${target} PRIVATE CONF_HEADLESS_CLIENT)
   endif()
   if(MYSQL)
     target_compile_definitions(${target} PRIVATE CONF_SQL)
