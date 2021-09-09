@@ -9,32 +9,14 @@
 
 class CGraphics_ThreadedNull : public IEngineGraphics
 {
-	void *AllocCommandBufferData(unsigned AllocSize);
-
-	void AddVertices(int Count);
-	void AddVertices(int Count, CCommandBuffer::SVertex *pVertices);
-	void AddVertices(int Count, CCommandBuffer::SVertexTex3DStream *pVertices);
-
-	template<typename TName>
-	void Rotate(const CCommandBuffer::SPoint &rCenter, TName *pPoints, int NumPoints)
-	{
-	}
-
-	template<typename TName, typename TFunc>
-	bool AddCmd(TName &Cmd, TFunc &&FailFunc, const char *pFailStr)
-	{
-		return false;
-	}
-
-	void KickCommandBuffer();
-
-	void AddBackEndWarningIfExists();
-
-	int IssueInit();
-	int InitWindow();
-
 public:
-	CGraphics_ThreadedNull(){};
+	CGraphics_ThreadedNull()
+	{
+		m_ScreenWidth = 800;
+		m_ScreenHeight = 600;
+		m_ScreenRefreshRate = 24;
+		m_ScreenHiDPIScale = 1.0f;
+	};
 
 	void ClipEnable(int x, int y, int w, int h) override{};
 	void ClipDisable() override{};
@@ -49,7 +31,13 @@ public:
 	int MemoryUsage() const override { return 0; };
 
 	void MapScreen(float TopLeftX, float TopLeftY, float BottomRightX, float BottomRightY) override{};
-	void GetScreen(float *pTopLeftX, float *pTopLeftY, float *pBottomRightX, float *pBottomRightY) override{};
+	void GetScreen(float *pTopLeftX, float *pTopLeftY, float *pBottomRightX, float *pBottomRightY) override
+	{
+		*pTopLeftX = 0;
+		*pTopLeftY = 0;
+		*pBottomRightX = 800;
+		*pBottomRightY = 600;
+	};
 
 	void LinesBegin() override{};
 	void LinesEnd() override{};
@@ -77,8 +65,6 @@ public:
 	void CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSourceBuffer, int FullWidth, int FullHeight, int ColorChannelCount, int SubOffsetX, int SubOffsetY, int SubCopyWidth, int SubCopyHeight) override{};
 	void CopyTextureFromTextureBufferSub(uint8_t *pDestBuffer, int DestWidth, int DestHeight, uint8_t *pSourceBuffer, int SrcWidth, int SrcHeight, int ColorChannelCount, int SrcSubOffsetX, int SrcSubOffsetY, int SrcSubCopyWidth, int SrcSubCopyHeight) override{};
 
-	void ScreenshotDirect(){};
-
 	void TextureSet(CTextureHandle TextureID) override{};
 
 	void Clear(float r, float g, float b) override{};
@@ -95,11 +81,6 @@ public:
 	void QuadsDrawCurrentVertices(bool KeepVertices = true) override{};
 	void QuadsSetRotation(float Angle) override{};
 
-	template<typename TName>
-	void SetColor(TName *pVertex, int ColorIndex)
-	{
-	}
-
 	void SetColorVertex(const CColorVertex *pArray, int Num) override{};
 	void SetColor(float r, float g, float b, float a) override{};
 	void SetColor(ColorRGBA rgb) override{};
@@ -115,11 +96,6 @@ public:
 		float x2, float y2, float x3, float y3, int Index = -1) override{};
 
 	void QuadsDraw(CQuadItem *pArray, int Num) override{};
-
-	template<typename TName>
-	void QuadsDrawTLImpl(TName *pVertices, const CQuadItem *pArray, int Num)
-	{
-	}
 
 	void QuadsDrawTL(const CQuadItem *pArray, int Num) override{};
 
@@ -139,11 +115,6 @@ public:
 	void RenderQuadContainerEx(int ContainerIndex, int QuadOffset, int QuadDrawNum, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f) override{};
 	void RenderQuadContainerAsSprite(int ContainerIndex, int QuadOffset, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f) override{};
 	void RenderQuadContainerAsSpriteMultiple(int ContainerIndex, int QuadOffset, int DrawCount, SRenderSpriteInfo *pRenderInfo) override{};
-
-	template<typename TName>
-	void FlushVerticesImpl(bool KeepVertices, int &PrimType, int &PrimCount, int &NumVerts, TName &Command, size_t VertSize)
-	{
-	}
 
 	void FlushVertices(bool KeepVertices = false) override{};
 	void FlushTextVertices(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor) override{};
