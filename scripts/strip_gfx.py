@@ -41,14 +41,20 @@ def comment_gfx_file(filename, class_names, inplace):
 			# pre parser
 			if line.startswith('}') and current_function:
 				if current_function == 'bool':
-					new_file_buffer += "\treturn false;\n"
+					if function_name == 'IsIdle':
+						new_file_buffer += "\treturn true;\n"
+					else:
+						new_file_buffer += "\treturn false;\n"
 				elif current_function == 'const char':
 					new_file_buffer += "\treturn \"\";\n"
 				elif current_function == 'int':
-					if is_pointer:
-						new_file_buffer += "\tstatic int ret = 0;return &ret;\n"
+					if function_name == 'WindowOpen':
+						new_file_buffer += "\treturn 1;\n"
 					else:
-						new_file_buffer += "\treturn 0;\n"
+						if is_pointer:
+							new_file_buffer += "\tstatic int ret = 0;return &ret;\n"
+						else:
+							new_file_buffer += "\treturn 0;\n"
 				elif current_function == 'void':
 					if is_pointer:
 						new_file_buffer += '\treturn NULL;\n'
