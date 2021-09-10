@@ -223,13 +223,7 @@ void CGameTeams::Tick()
 				continue;
 			}
 			KillTeam(i, -1);
-			for(int j = 0; j < MAX_CLIENTS; j++)
-			{
-				if(m_Core.Team(j) == i)
-				{
-					GameServer()->SendChatTarget(j, "Your team was killed because it couldn't finish anymore and hasn't entered /practice mode");
-				}
-			}
+			GameServer()->SendChatTeam(i, "Your team was killed because it couldn't finish anymore and hasn't entered /practice mode");
 		}
 	}
 
@@ -291,14 +285,7 @@ void CGameTeams::Tick()
 			NumPlayersNotStarted,
 			NumPlayersNotStarted == 1 ? "player that has" : "players that have",
 			aPlayerNames);
-
-		for(int j = 0; j < MAX_CLIENTS; j++)
-		{
-			if(m_Core.Team(j) == i)
-			{
-				GameServer()->SendChatTarget(j, aBuf);
-			}
-		}
+		GameServer()->SendChatTeam(i, aBuf);
 	}
 }
 
@@ -340,14 +327,7 @@ void CGameTeams::CheckTeamFinished(int Team)
 				str_format(aBuf, sizeof(aBuf),
 					"Your team would've finished in: %d minute(s) %5.2f second(s). Since you had practice mode enabled your rank doesn't count.",
 					(int)Time / 60, Time - ((int)Time / 60 * 60));
-
-				for(int i = 0; i < MAX_CLIENTS; i++)
-				{
-					if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
-					{
-						GameServer()->SendChatTarget(i, aBuf);
-					}
-				}
+				GameServer()->SendChatTeam(Team, aBuf);
 
 				for(unsigned int i = 0; i < PlayersCount; ++i)
 				{
@@ -1029,13 +1009,7 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 			KillTeam(Team, Weapon == WEAPON_SELF ? ClientID : -1);
 			if(Count(Team) > 1)
 			{
-				for(int i = 0; i < MAX_CLIENTS; i++)
-				{
-					if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
-					{
-						GameServer()->SendChatTarget(i, aBuf);
-					}
-				}
+				GameServer()->SendChatTeam(Team, aBuf);
 			}
 		}
 	}
@@ -1045,14 +1019,7 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 		{
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf), "This team cannot finish anymore because '%s' left the team before hitting the start, enter /practice mode to avoid being killed in 60 seconds", Server()->ClientName(ClientID));
-			for(int i = 0; i < MAX_CLIENTS; i++)
-			{
-				if(m_Core.Team(i) != Team || i == ClientID)
-				{
-					continue;
-				}
-				GameServer()->SendChatTarget(i, aBuf);
-			}
+			GameServer()->SendChatTeam(Team, aBuf);
 
 			m_TeamUnfinishableKillTick[Team] = Server()->Tick() + 60 * Server()->TickSpeed();
 			ChangeTeamState(Team, CGameTeams::TEAMSTATE_STARTED_UNFINISHABLE);
