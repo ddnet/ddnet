@@ -53,6 +53,7 @@ class CChillerBotUX : public CComponent
 	void RenderSpeedHud();
 	void GotoSwitch(int Number, int Offset = -1);
 	void GotoTele(int Number, int Offset = -1);
+	void DumpPlayers(const char *pSearch = 0);
 
 	virtual void OnRender();
 	virtual void OnConsoleInit();
@@ -67,6 +68,7 @@ class CChillerBotUX : public CComponent
 	static void ConGotoSwitch(IConsole::IResult *pResult, void *pUserData);
 	static void ConGotoTele(IConsole::IResult *pResult, void *pUserData);
 	static void ConLoadMap(IConsole::IResult *pResult, void *pUserData);
+	static void ConDumpPlayers(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConchainCampHack(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainChillerbotHud(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);

@@ -414,11 +414,17 @@ void CChillerBotUX::OnConsoleInit()
 	Console()->Register("goto_switch", "i[number]?i[offset]", CFGFLAG_CLIENT, ConGotoSwitch, this, "Pause switch found (at offset) with given number");
 	Console()->Register("goto_tele", "i[number]?i[offset]", CFGFLAG_CLIENT, ConGotoTele, this, "Pause tele found (at offset) with given number");
 	Console()->Register("load_map", "s[file]", CFGFLAG_CLIENT, ConLoadMap, this, "Load mapfile");
+	Console()->Register("dump_players", "?s[search]", CFGFLAG_CLIENT, ConDumpPlayers, this, "Prints players to console");
 
 	Console()->Chain("cl_camp_hack", ConchainCampHack, this);
 	Console()->Chain("cl_chillerbot_hud", ConchainChillerbotHud, this);
 	Console()->Chain("cl_auto_reply", ConchainAutoReply, this);
 	Console()->Chain("cl_finish_rename", ConchainFinishRename, this);
+}
+void CChillerBotUX::ConDumpPlayers(IConsole::IResult *pResult, void *pUserData)
+{
+	CChillerBotUX *pSelf = (CChillerBotUX *)pUserData;
+	pSelf->DumpPlayers(pResult->GetString(0));
 }
 
 void CChillerBotUX::ConchainCampHack(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
@@ -487,6 +493,101 @@ void CChillerBotUX::ConCampHackAbs(IConsole::IResult *pResult, void *pUserData)
 		}
 		return;
 	}
+}
+
+void CChillerBotUX::DumpPlayers(const char *pSearch)
+{
+	char aBuf[128];
+	char aLine[512];
+	int OldDDTeam = -1;
+	dbg_msg("dump_players", "+------+--+----------------+----------------+---+");
+	dbg_msg("dump_players", "|score |id|name            |clan            |lat|team");
+	dbg_msg("dump_players", "+------+--+----------------+----------------+---+");
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByDDTeamScore[i];
+		if(!pInfo)
+			continue;
+
+		bool IsMatch = !(pSearch && pSearch[0] != 0);
+		aLine[0] = '\0';
+		// score
+		if(m_pClient->m_GameInfo.m_TimeScore && g_Config.m_ClDDRaceScoreBoard)
+		{
+			if(pInfo->m_Score == -9999)
+				aBuf[0] = 0;
+			else
+				str_time((int64_t)abs(pInfo->m_Score) * 100, TIME_HOURS, aBuf, sizeof(aBuf));
+		}
+		else
+			str_format(aBuf, sizeof(aBuf), "|%6d|", clamp(pInfo->m_Score, -999, 99999));
+		str_append(aLine, aBuf, sizeof(aLine));
+
+		// id | name
+		if(pSearch && pSearch[0] != 0)
+			if(str_find_nocase(m_pClient->m_aClients[pInfo->m_ClientID].m_aName, pSearch))
+				IsMatch = true;
+		str_format(aBuf, sizeof(aBuf), "%2d|%16s|", pInfo->m_ClientID, m_pClient->m_aClients[pInfo->m_ClientID].m_aName);
+		str_append(aLine, aBuf, sizeof(aLine));
+
+		// clan
+		if(pSearch && pSearch[0] != 0)
+			if(str_find_nocase(m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, pSearch))
+				IsMatch = true;
+		str_format(aBuf, sizeof(aBuf), "%16s|", m_pClient->m_aClients[pInfo->m_ClientID].m_aClan);
+		str_append(aLine, aBuf, sizeof(aLine));
+
+		// ping
+		str_format(aBuf, sizeof(aBuf), "%3d|", clamp(pInfo->m_Latency, 0, 999));
+		str_append(aLine, aBuf, sizeof(aLine));
+
+		// team
+		int DDTeam = m_pClient->m_Teams.Team(pInfo->m_ClientID);
+		int NextDDTeam = 0;
+
+		for(int j = i + 1; j < MAX_CLIENTS; j++)
+		{
+			const CNetObj_PlayerInfo *pInfo2 = m_pClient->m_Snap.m_paInfoByDDTeamScore[j];
+
+			if(!pInfo2)
+				continue;
+
+			NextDDTeam = m_pClient->m_Teams.Team(pInfo2->m_ClientID);
+			break;
+		}
+
+		if(OldDDTeam == -1)
+		{
+			for(int j = i - 1; j >= 0; j--)
+			{
+				const CNetObj_PlayerInfo *pInfo2 = m_pClient->m_Snap.m_paInfoByDDTeamScore[j];
+
+				if(!pInfo2)
+					continue;
+
+				OldDDTeam = m_pClient->m_Teams.Team(pInfo2->m_ClientID);
+				break;
+			}
+		}
+
+		if(DDTeam != TEAM_FLOCK)
+		{
+			if(NextDDTeam != DDTeam)
+			{
+				char aBuf[64];
+				if(m_pClient->m_Snap.m_aTeamSize[0] > 8)
+					str_format(aBuf, sizeof(aBuf), "%d", DDTeam);
+				else
+					str_format(aBuf, sizeof(aBuf), "Team %d", DDTeam);
+				str_append(aLine, aBuf, sizeof(aLine));
+			}
+		}
+
+		OldDDTeam = DDTeam;
+		if(IsMatch)
+			dbg_msg("dump_players", "%s", aLine);
+	}
+	dbg_msg("dump_players", "+------+--+----------------+----------------+---+");
 }
 
 void CChillerBotUX::ConCampHack(IConsole::IResult *pResult, void *pUserData)
