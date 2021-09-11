@@ -19,6 +19,11 @@ void CChillPw::OnRender()
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		return;
 
+	if(Client()->DummyConnecting())
+	{
+		m_LoginOffset[1] = 0;
+		m_ChatDelay[1] = time_get() + time_freq() * 2;
+	}
 	for(int i = 0; i < NUM_DUMMIES; i++)
 	{
 		if(!m_ChatDelay[i])
