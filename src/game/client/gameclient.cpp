@@ -1621,7 +1621,7 @@ void CGameClient::OnNewSnapshot()
 	}
 
 	float ZoomToSend = m_Camera.m_Zoom;
-	if(m_Camera.m_ZoomSmoothingTarget != .0)
+	if(m_Camera.m_Zooming)
 	{
 		if(m_Camera.m_ZoomSmoothingTarget > m_Camera.m_Zoom) // Zooming out
 			ZoomToSend = m_Camera.m_ZoomSmoothingTarget;
