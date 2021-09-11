@@ -505,11 +505,12 @@ void CChillerBotUX::ConCampHackAbs(IConsole::IResult *pResult, void *pUserData)
 void CChillerBotUX::DumpPlayers(const char *pSearch)
 {
 	char aBuf[128];
+	char aTime[128];
 	char aLine[512];
 	int OldDDTeam = -1;
-	dbg_msg("dump_players", "+------+--+----------------+----------------+---+");
-	dbg_msg("dump_players", "|score |id|name            |clan            |lat|team");
-	dbg_msg("dump_players", "+------+--+----------------+----------------+---+");
+	dbg_msg("dump_players", "+----------+--+----------------+----------------+---+-------+");
+	dbg_msg("dump_players", "|score     |id|name            |clan            |lat|team   |");
+	dbg_msg("dump_players", "+----------+--+----------------+----------------+---+-------+");
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByDDTeamScore[i];
@@ -522,12 +523,15 @@ void CChillerBotUX::DumpPlayers(const char *pSearch)
 		if(m_pClient->m_GameInfo.m_TimeScore && g_Config.m_ClDDRaceScoreBoard)
 		{
 			if(pInfo->m_Score == -9999)
-				aBuf[0] = 0;
+				str_format(aBuf, sizeof(aBuf), "|%10s|", " ");
 			else
-				str_time((int64_t)abs(pInfo->m_Score) * 100, TIME_HOURS, aBuf, sizeof(aBuf));
+			{
+				str_time((int64_t)abs(pInfo->m_Score) * 100, TIME_HOURS, aTime, sizeof(aTime));
+				str_format(aBuf, sizeof(aBuf), "|%10s|", aTime);
+			}
 		}
 		else
-			str_format(aBuf, sizeof(aBuf), "|%6d|", clamp(pInfo->m_Score, -999, 99999));
+			str_format(aBuf, sizeof(aBuf), "|%10d|", clamp(pInfo->m_Score, -999, 99999));
 		str_append(aLine, aBuf, sizeof(aLine));
 
 		// id | name
@@ -583,18 +587,24 @@ void CChillerBotUX::DumpPlayers(const char *pSearch)
 			{
 				char aBuf[64];
 				if(m_pClient->m_Snap.m_aTeamSize[0] > 8)
-					str_format(aBuf, sizeof(aBuf), "%d", DDTeam);
+					str_format(aBuf, sizeof(aBuf), "%7d|", DDTeam);
 				else
-					str_format(aBuf, sizeof(aBuf), "Team %d", DDTeam);
-				str_append(aLine, aBuf, sizeof(aLine));
+					str_format(aBuf, sizeof(aBuf), "Team %2d|", DDTeam);
 			}
+			else
+				str_format(aBuf, sizeof(aBuf), "%7s|", " ");
+			str_append(aLine, aBuf, sizeof(aLine));
+			if(OldDDTeam != DDTeam)
+				dbg_msg("dump_players", "+----------+--+----------------+----------------+---+-------/");
+			if(NextDDTeam != DDTeam)
+				dbg_msg("dump_players", "+----------+--+----------------+----------------+---+-------\\");
 		}
 
 		OldDDTeam = DDTeam;
 		if(IsMatch)
 			dbg_msg("dump_players", "%s", aLine);
 	}
-	dbg_msg("dump_players", "+------+--+----------------+----------------+---+");
+	dbg_msg("dump_players", "+----------+--+----------------+----------------+---+-------+");
 }
 
 void CChillerBotUX::ConCampHack(IConsole::IResult *pResult, void *pUserData)
