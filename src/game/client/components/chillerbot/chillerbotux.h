@@ -69,6 +69,7 @@ class CChillerBotUX : public CComponent
 	static void ConGotoTele(IConsole::IResult *pResult, void *pUserData);
 	static void ConLoadMap(IConsole::IResult *pResult, void *pUserData);
 	static void ConDumpPlayers(IConsole::IResult *pResult, void *pUserData);
+	static void ConForceQuit(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConchainCampHack(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainChillerbotHud(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);

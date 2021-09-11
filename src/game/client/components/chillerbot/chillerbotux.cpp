@@ -415,12 +415,19 @@ void CChillerBotUX::OnConsoleInit()
 	Console()->Register("goto_tele", "i[number]?i[offset]", CFGFLAG_CLIENT, ConGotoTele, this, "Pause tele found (at offset) with given number");
 	Console()->Register("load_map", "s[file]", CFGFLAG_CLIENT, ConLoadMap, this, "Load mapfile");
 	Console()->Register("dump_players", "?s[search]", CFGFLAG_CLIENT, ConDumpPlayers, this, "Prints players to console");
+	Console()->Register("force_quit", "", CFGFLAG_CLIENT, ConForceQuit, this, "Forces a dirty client quit all data will be lost");
 
 	Console()->Chain("cl_camp_hack", ConchainCampHack, this);
 	Console()->Chain("cl_chillerbot_hud", ConchainChillerbotHud, this);
 	Console()->Chain("cl_auto_reply", ConchainAutoReply, this);
 	Console()->Chain("cl_finish_rename", ConchainFinishRename, this);
 }
+
+void CChillerBotUX::ConForceQuit(IConsole::IResult *pResult, void *pUserData)
+{
+	exit(0);
+}
+
 void CChillerBotUX::ConDumpPlayers(IConsole::IResult *pResult, void *pUserData)
 {
 	CChillerBotUX *pSelf = (CChillerBotUX *)pUserData;
