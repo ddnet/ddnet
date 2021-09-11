@@ -10,7 +10,7 @@ class CUnix : public CComponent
 
 	void ls();
 
-	static int listDirCallback(const char *pName, time_t Date, int IsDir, int StorageType, void *pUser);
+	static int listDirCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser);
 
 	static void ConLs(IConsole::IResult *pResult, void *pUserData);
 };
