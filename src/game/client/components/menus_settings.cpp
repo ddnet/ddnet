@@ -2736,4 +2736,15 @@ void CMenus::RenderSettingsChillerbot(CUIRect MainView)
 			g_Config.m_ClChangeTileNotification ^= 1;
 		}
 	}
+	// show last killer
+	{
+		CUIRect Checkbox;
+		MainView.HSplitTop(20.0f, &Checkbox, &MainView);
+		if(DoButton_CheckBox(&g_Config.m_ClShowLastKiller, "Show last killer", g_Config.m_ClShowLastKiller, &Checkbox))
+		{
+			g_Config.m_ClShowLastKiller ^= 1;
+			g_Config.m_ClChillerbotHud = 1;
+			m_pClient->m_ChillerBotUX.UpdateComponents();
+		}
+	}
 }

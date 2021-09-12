@@ -1,5 +1,6 @@
 // ChillerDragon 2020 - chillerbot ux
 
+#include "engine/shared/protocol.h"
 #include <engine/client/notifications.h>
 #include <engine/config.h>
 #include <engine/console.h>
@@ -17,6 +18,7 @@
 #include <game/client/gameclient.h>
 #include <game/client/race.h>
 #include <game/client/render.h>
+#include <game/generated/client_data.h>
 #include <game/generated/protocol.h>
 #include <game/version.h>
 
@@ -378,6 +380,10 @@ void CChillerBotUX::OnInit()
 	m_GotoTeleOffset = 0;
 	m_GotoTeleLastX = -1;
 	m_GotoTeleLastY = -1;
+	m_aLastKiller[0][0] = '\0';
+	m_aLastKiller[1][0] = '\0';
+	m_aLastKillerTime[0][0] = '\0';
+	m_aLastKillerTime[1][0] = '\0';
 }
 
 void CChillerBotUX::UpdateComponents()
@@ -403,6 +409,10 @@ void CChillerBotUX::UpdateComponents()
 		EnableComponent("war list");
 	else
 		DisableComponent("war list");
+	if(g_Config.m_ClShowLastKiller)
+		EnableComponent("last killer");
+	else
+		DisableComponent("last killer");
 }
 
 void CChillerBotUX::OnConsoleInit()
@@ -421,6 +431,7 @@ void CChillerBotUX::OnConsoleInit()
 	Console()->Chain("cl_chillerbot_hud", ConchainChillerbotHud, this);
 	Console()->Chain("cl_auto_reply", ConchainAutoReply, this);
 	Console()->Chain("cl_finish_rename", ConchainFinishRename, this);
+	Console()->Chain("cl_show_last_killer", ConchainShowLastKiller, this);
 }
 
 void CChillerBotUX::ConForceQuit(IConsole::IResult *pResult, void *pUserData)
@@ -473,6 +484,16 @@ void CChillerBotUX::ConchainFinishRename(IConsole::IResult *pResult, void *pUser
 		pSelf->EnableComponent("finish rename");
 	else
 		pSelf->DisableComponent("finish rename");
+}
+
+void CChillerBotUX::ConchainShowLastKiller(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CChillerBotUX *pSelf = (CChillerBotUX *)pUserData;
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->GetInteger(0))
+		pSelf->EnableComponent("last killer");
+	else
+		pSelf->DisableComponent("last killer");
 }
 
 void CChillerBotUX::ConAfk(IConsole::IResult *pResult, void *pUserData)
@@ -762,6 +783,67 @@ set_view:
 	m_GotoTeleOffset++;
 }
 
+void CChillerBotUX::OnMessage(int MsgType, void *pRawMsg)
+{
+	if(MsgType == NETMSGTYPE_SV_KILLMSG)
+	{
+		CNetMsg_Sv_KillMsg *pMsg = (CNetMsg_Sv_KillMsg *)pRawMsg;
+
+		// unpack messages
+		CKillMsg Kill;
+		Kill.m_aVictimName[0] = '\0';
+		Kill.m_aKillerName[0] = '\0';
+
+		Kill.m_VictimID = pMsg->m_Victim;
+		if(Kill.m_VictimID >= 0 && Kill.m_VictimID < MAX_CLIENTS)
+		{
+			Kill.m_VictimTeam = m_pClient->m_aClients[Kill.m_VictimID].m_Team;
+			Kill.m_VictimDDTeam = m_pClient->m_Teams.Team(Kill.m_VictimID);
+			str_copy(Kill.m_aVictimName, m_pClient->m_aClients[Kill.m_VictimID].m_aName, sizeof(Kill.m_aVictimName));
+			Kill.m_VictimRenderInfo = m_pClient->m_aClients[Kill.m_VictimID].m_RenderInfo;
+		}
+
+		Kill.m_KillerID = pMsg->m_Killer;
+		if(Kill.m_KillerID >= 0 && Kill.m_KillerID < MAX_CLIENTS)
+		{
+			Kill.m_KillerTeam = m_pClient->m_aClients[Kill.m_KillerID].m_Team;
+			str_copy(Kill.m_aKillerName, m_pClient->m_aClients[Kill.m_KillerID].m_aName, sizeof(Kill.m_aKillerName));
+			Kill.m_KillerRenderInfo = m_pClient->m_aClients[Kill.m_KillerID].m_RenderInfo;
+		}
+
+		Kill.m_Weapon = pMsg->m_Weapon;
+		Kill.m_ModeSpecial = pMsg->m_ModeSpecial;
+		Kill.m_Tick = Client()->GameTick(g_Config.m_ClDummy);
+
+		Kill.m_FlagCarrierBlue = m_pClient->m_Snap.m_pGameDataObj ? m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue : -1;
+
+		bool KillMsgValid = (Kill.m_VictimRenderInfo.m_CustomColoredSkin && Kill.m_VictimRenderInfo.m_ColorableRenderSkin.m_Body.IsValid()) || (!Kill.m_VictimRenderInfo.m_CustomColoredSkin && Kill.m_VictimRenderInfo.m_OriginalRenderSkin.m_Body.IsValid());
+		// if killer != victim, killer must be valid too
+		KillMsgValid &= Kill.m_KillerID == Kill.m_VictimID || ((Kill.m_KillerRenderInfo.m_CustomColoredSkin && Kill.m_KillerRenderInfo.m_ColorableRenderSkin.m_Body.IsValid()) || (!Kill.m_KillerRenderInfo.m_CustomColoredSkin && Kill.m_KillerRenderInfo.m_OriginalRenderSkin.m_Body.IsValid()));
+		if(KillMsgValid && Kill.m_KillerID != Kill.m_VictimID)
+		{
+			for(int i = 0; i < 2; i++)
+			{
+				if(m_pClient->m_LocalIDs[i] != Kill.m_VictimID)
+					continue;
+
+				str_copy(m_aLastKiller[i], Kill.m_aKillerName, sizeof(m_aLastKiller[i]));
+				char aBuf[512];
+				str_timestamp_format(m_aLastKillerTime[i], sizeof(m_aLastKillerTime[i]), "%H:%M");
+				str_format(
+					aBuf,
+					sizeof(aBuf),
+					"[%s]main: %s [%s]dummy: %s",
+					m_aLastKillerTime[0],
+					m_aLastKiller[0],
+					m_aLastKillerTime[1],
+					m_aLastKiller[1]);
+				SetComponentNoteLong("last killer", aBuf);
+			}
+		}
+	}
+}
+
 void CChillerBotUX::GoAfk(int Minutes, const char *pMsg)
 {
 	if(pMsg)
@@ -779,6 +861,8 @@ void CChillerBotUX::GoAfk(int Minutes, const char *pMsg)
 	m_AfkActivity = 0;
 	m_pChatHelper->ClearLastAfkPingMessage();
 	EnableComponent("afk");
+	EnableComponent("last killer");
+	g_Config.m_ClShowLastKiller = 1;
 }
 
 void CChillerBotUX::ReturnFromAfk(const char *pChatMessage)

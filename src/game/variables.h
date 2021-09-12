@@ -18,6 +18,7 @@ MACRO_CONFIG_STR(ClAutoReplyMsg, cl_auto_reply_msg, 32, "%n (chillerbot-ux auto 
 MACRO_CONFIG_INT(ClChillerbotHud, cl_chillerbot_hud, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show enabled chillerbot components in hud")
 MACRO_CONFIG_INT(ClShowSpeed, cl_show_speed, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show speed in hud")
 MACRO_CONFIG_INT(ClChangeTileNotification, cl_change_tile_notification, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Notify when leaving current tile type")
+MACRO_CONFIG_INT(ClShowLastKiller, cl_show_last_killer, 1, 0, 1, CFGFLAG_CLIENT, "Show last killer in hud requires cl_chillerbot_hud 1")
 
 // warlist
 MACRO_CONFIG_INT(ClWarList, cl_war_list, 1, 0, 1, CFGFLAG_CLIENT, "Display nameplate color based on chillerbot/warlist directory")

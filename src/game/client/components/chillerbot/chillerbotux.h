@@ -2,6 +2,7 @@
 #define GAME_CLIENT_COMPONENTS_CHILLERBOT_CHILLERBOTUX_H
 
 #include <game/client/component.h>
+#include <game/client/render.h>
 #include <game/mapitems.h>
 
 #define MAX_COMPONENT_LEN 16
@@ -17,6 +18,8 @@ class CChillerBotUX : public CComponent
 
 	char m_aAfkMessage[32];
 	char m_aLastAfkPing[2048];
+	char m_aLastKiller[2][32];
+	char m_aLastKillerTime[2][32];
 
 	struct CUiComponent
 	{
@@ -25,6 +28,26 @@ class CChillerBotUX : public CComponent
 		char m_aNoteLong[2048];
 	};
 	CUiComponent m_aEnabledComponents[MAX_COMPONENTS_ENABLED];
+
+	struct CKillMsg
+	{
+		int m_Weapon;
+
+		int m_VictimID;
+		int m_VictimTeam;
+		int m_VictimDDTeam;
+		char m_aVictimName[64];
+		CTeeRenderInfo m_VictimRenderInfo;
+
+		int m_KillerID;
+		int m_KillerTeam;
+		char m_aKillerName[64];
+		CTeeRenderInfo m_KillerRenderInfo;
+
+		int m_ModeSpecial; // for CTF, if the guy is carrying a flag for example
+		int m_Tick;
+		int m_FlagCarrierBlue;
+	};
 
 	int m_AfkActivity;
 	int m_CampHackX1;
@@ -56,6 +79,7 @@ class CChillerBotUX : public CComponent
 	void DumpPlayers(const char *pSearch = 0);
 
 	virtual void OnRender();
+	virtual void OnMessage(int MsgType, void *pRawMsg);
 	virtual void OnConsoleInit();
 	virtual void OnInit();
 	virtual bool OnMouseMove(float x, float y);
@@ -75,6 +99,7 @@ class CChillerBotUX : public CComponent
 	static void ConchainChillerbotHud(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainAutoReply(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainFinishRename(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainShowLastKiller(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 public:
 	int m_IgnoreChatAfk;
