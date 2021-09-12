@@ -84,6 +84,16 @@ class CGameConsole : public CComponent
 	float m_StateChangeEnd;
 	float m_StateChangeDuration;
 
+	bool m_MouseIsPress = false;
+	int m_MousePressX = 0;
+	int m_MousePressY = 0;
+	int m_MouseCurX = 0;
+	int m_MouseCurY = 0;
+	int m_CurSelStart = 0;
+	int m_CurSelEnd = 0;
+	bool m_HasSelection = false;
+	int m_NewLineCounter = 0;
+
 	void Toggle(int Type);
 	void Dump(int Type);
 
