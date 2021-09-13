@@ -264,23 +264,23 @@ void CGraphics_Threaded::LinesDraw(const CLineItem *pArray, int Num)
 	AddVertices(2 * Num);
 }
 
-int CGraphics_Threaded::UnloadTexture(CTextureHandle *Index)
+int CGraphics_Threaded::UnloadTexture(CTextureHandle *pIndex)
 {
-	if(Index->Id() == m_InvalidTexture.Id())
+	if(pIndex->Id() == m_InvalidTexture.Id())
 		return 0;
 
-	if(!Index->IsValid())
+	if(!pIndex->IsValid())
 		return 0;
 
 	CCommandBuffer::SCommand_Texture_Destroy Cmd;
-	Cmd.m_Slot = Index->Id();
+	Cmd.m_Slot = pIndex->Id();
 	AddCmd(
 		Cmd, [] { return true; }, "failed to unload texture.");
 
-	m_TextureIndices[Index->Id()] = m_FirstFreeTexture;
-	m_FirstFreeTexture = Index->Id();
+	m_TextureIndices[pIndex->Id()] = m_FirstFreeTexture;
+	m_FirstFreeTexture = pIndex->Id();
 
-	Index->Invalidate();
+	pIndex->Invalidate();
 	return 0;
 }
 

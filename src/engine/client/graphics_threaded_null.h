@@ -43,7 +43,7 @@ public:
 	void LinesEnd() override{};
 	void LinesDraw(const CLineItem *pArray, int Num) override{};
 
-	int UnloadTexture(IGraphics::CTextureHandle *Index) override { return 0; };
+	int UnloadTexture(IGraphics::CTextureHandle *pIndex) override { return 0; };
 	int UnloadTextureNew(CTextureHandle &TextureHandle) override { return 0; };
 	IGraphics::CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName = NULL) override { return CreateTextureHandle(0); };
 	int LoadTextureRawSub(IGraphics::CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData) override { return 0; };
