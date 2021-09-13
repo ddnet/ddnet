@@ -24,7 +24,7 @@ void CRenderTools::Init(IGraphics *pGraphics, CUI *pUI, CGameClient *pGameClient
 	m_pGraphics = pGraphics;
 	m_pUI = pUI;
 	m_pGameClient = (CGameClient *)pGameClient;
-	m_TeeQuadContainerIndex = Graphics()->CreateQuadContainer();
+	m_TeeQuadContainerIndex = Graphics()->CreateQuadContainer(false);
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
@@ -47,6 +47,7 @@ void CRenderTools::Init(IGraphics *pGraphics, CUI *pUI, CGameClient *pGameClient
 	QuadContainerAddSprite(m_TeeQuadContainerIndex, -32.f, -16.f, 64.f, 32.f);
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	QuadContainerAddSprite(m_TeeQuadContainerIndex, -32.f, -16.f, 64.f, 32.f);
+	Graphics()->QuadContainerUpload(m_TeeQuadContainerIndex);
 }
 
 void CRenderTools::SelectSprite(CDataSprite *pSpr, int Flags, int sx, int sy)
@@ -369,7 +370,7 @@ void CRenderTools::DrawRoundRectExt4(float x, float y, float w, float h, vec4 Co
 
 int CRenderTools::CreateRoundRectQuadContainer(float x, float y, float w, float h, float r, int Corners)
 {
-	int ContainerIndex = Graphics()->CreateQuadContainer();
+	int ContainerIndex = Graphics()->CreateQuadContainer(false);
 
 	IGraphics::CFreeformItem ArrayF[32];
 	int NumItems = 0;
@@ -414,7 +415,9 @@ int CRenderTools::CreateRoundRectQuadContainer(float x, float y, float w, float 
 				x + w - r + Ca3 * r, y + h - r + Sa3 * r,
 				x + w - r + Ca2 * r, y + h - r + Sa2 * r);
 	}
-	Graphics()->QuadContainerAddQuads(ContainerIndex, ArrayF, NumItems);
+
+	if(NumItems > 0)
+		Graphics()->QuadContainerAddQuads(ContainerIndex, ArrayF, NumItems);
 
 	IGraphics::CQuadItem ArrayQ[9];
 	NumItems = 0;
@@ -433,7 +436,11 @@ int CRenderTools::CreateRoundRectQuadContainer(float x, float y, float w, float 
 	if(!(Corners & 8))
 		ArrayQ[NumItems++] = IGraphics::CQuadItem(x + w, y + h, -r, -r); // BR
 
-	Graphics()->QuadContainerAddQuads(ContainerIndex, ArrayQ, NumItems);
+	if(NumItems > 0)
+		Graphics()->QuadContainerAddQuads(ContainerIndex, ArrayQ, NumItems);
+
+	Graphics()->QuadContainerUpload(ContainerIndex);
+	Graphics()->QuadContainerChangeAutomaticUpload(ContainerIndex, true);
 
 	return ContainerIndex;
 }

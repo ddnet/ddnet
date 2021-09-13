@@ -82,6 +82,11 @@ struct STextRenderColor
 		return m_R != Other.m_R || m_G != Other.m_G || m_B != Other.m_B || m_A != Other.m_A;
 	}
 
+	operator ColorRGBA()
+	{
+		return ColorRGBA(m_R, m_G, m_B, m_A);
+	}
+
 	float m_R, m_G, m_B, m_A;
 };
 

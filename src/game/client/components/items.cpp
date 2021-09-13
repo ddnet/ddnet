@@ -435,7 +435,7 @@ void CItems::OnInit()
 	Graphics()->QuadsSetRotation(0);
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 
-	m_ItemsQuadContainerIndex = Graphics()->CreateQuadContainer();
+	m_ItemsQuadContainerIndex = Graphics()->CreateQuadContainer(false);
 
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, -21.f, -42.f, 42.f, 84.f);
@@ -487,6 +487,8 @@ void CItems::OnInit()
 	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 24.f);
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 24.f);
+
+	Graphics()->QuadContainerUpload(m_ItemsQuadContainerIndex);
 }
 
 void CItems::AddExtraProjectile(CNetObj_Projectile *pProj)
