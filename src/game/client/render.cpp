@@ -19,26 +19,6 @@
 static float gs_SpriteWScale;
 static float gs_SpriteHScale;
 
-/*
-static void layershot_begin()
-{
-	if(!config.cl_layershot)
-		return;
-
-	Graphics()->Clear(0,0,0);
-}
-
-static void layershot_end()
-{
-	if(!config.cl_layershot)
-		return;
-
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "screenshots/layers_%04d.png", config.cl_layershot);
-	gfx_screenshot_direct(aBuf);
-	config.cl_layershot++;
-}*/
-
 void CRenderTools::Init(IGraphics *pGraphics, CUI *pUI, CGameClient *pGameClient)
 {
 	m_pGraphics = pGraphics;
