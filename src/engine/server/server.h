@@ -241,7 +241,7 @@ public:
 		SIXUP,
 	};
 
-	char m_aCurrentMap[MAX_PATH_LENGTH];
+	char m_aCurrentMap[IO_MAX_PATH_LENGTH];
 	SHA256_DIGEST m_aCurrentMapSha256[2];
 	unsigned m_aCurrentMapCrc[2];
 	unsigned char *m_apCurrentMapData[2];

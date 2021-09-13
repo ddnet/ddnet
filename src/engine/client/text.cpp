@@ -109,13 +109,13 @@ public:
 	}
 
 	void *m_pBuf;
-	char m_aFilename[512];
+	char m_aFilename[IO_MAX_PATH_LENGTH];
 	FT_Face m_FtFace;
 
 	struct SFontFallBack
 	{
 		void *m_pBuf;
-		char m_aFilename[512];
+		char m_aFilename[IO_MAX_PATH_LENGTH];
 		FT_Face m_FtFace;
 	};
 
@@ -658,7 +658,7 @@ public:
 		pAttr->m_VertBufferBindingIndex = -1;
 
 		IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
-		char aFilename[512];
+		char aFilename[IO_MAX_PATH_LENGTH];
 		const char *pFontFile = "fonts/Icons.ttf";
 		IOHANDLE File = pStorage->OpenFile(pFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
 		if(File)

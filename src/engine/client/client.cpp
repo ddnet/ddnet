@@ -1263,7 +1263,7 @@ const char *CClient::LoadMapSearch(const char *pMapName, SHA256_DIGEST *pWantedS
 		return pError;
 
 	// search for the map within subfolders
-	char aFilename[128];
+	char aFilename[IO_MAX_PATH_LENGTH];
 	str_format(aFilename, sizeof(aFilename), "%s.map", pMapName);
 	if(Storage()->FindFile(aFilename, "maps", IStorage::TYPE_ALL, aBuf, sizeof(aBuf)))
 		pError = LoadMap(pMapName, aBuf, pWantedSha256, WantedCrc);
@@ -1666,10 +1666,10 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 				}
 				else
 				{
-					char aFilename[256];
+					char aFilename[IO_MAX_PATH_LENGTH];
 					FormatMapDownloadFilename(pMap, pMapSha256, MapCrc, false, aFilename, sizeof(aFilename));
 
-					char aTempFilename[256];
+					char aTempFilename[IO_MAX_PATH_LENGTH];
 					FormatMapDownloadFilename(pMap, pMapSha256, MapCrc, true, aTempFilename, sizeof(aTempFilename));
 
 					str_format(m_aMapdownloadFilename, sizeof(m_aMapdownloadFilename), "downloadedmaps/%s", aTempFilename);
@@ -2350,9 +2350,9 @@ void CClient::FinishMapDownload()
 	m_MapdownloadTotalsize = -1;
 	SHA256_DIGEST *pSha256 = m_MapdownloadSha256Present ? &m_MapdownloadSha256 : 0;
 
-	char aTmp[MAX_PATH_LENGTH];
-	char aMapFileTemp[MAX_PATH_LENGTH];
-	char aMapFile[MAX_PATH_LENGTH];
+	char aTmp[IO_MAX_PATH_LENGTH];
+	char aMapFileTemp[IO_MAX_PATH_LENGTH];
+	char aMapFile[IO_MAX_PATH_LENGTH];
 	FormatMapDownloadFilename(m_aMapdownloadName, pSha256, m_MapdownloadCrc, true, aTmp, sizeof(aTmp));
 	str_format(aMapFileTemp, sizeof(aMapFileTemp), "downloadedmaps/%s", aTmp);
 	FormatMapDownloadFilename(m_aMapdownloadName, pSha256, m_MapdownloadCrc, false, aTmp, sizeof(aTmp));
@@ -3724,7 +3724,7 @@ void CClient::SaveReplay(const int Length)
 	{
 		// First we stop the recorder to slice correctly the demo after
 		DemoRecorder_Stop(RECORDER_REPLAYS);
-		char aFilename[MAX_PATH_LENGTH];
+		char aFilename[IO_MAX_PATH_LENGTH];
 
 		char aDate[64];
 		str_timestamp(aDate, sizeof(aDate));
@@ -3875,7 +3875,7 @@ void CClient::DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int 
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demorec/record", "client is not online");
 	else
 	{
-		char aFilename[128];
+		char aFilename[IO_MAX_PATH_LENGTH];
 		if(WithTimestamp)
 		{
 			char aDate[20];
@@ -3977,7 +3977,7 @@ void CClient::Con_BenchmarkQuit(IConsole::IResult *pResult, void *pUserData)
 
 void CClient::BenchmarkQuit(int Seconds, const char *pFilename)
 {
-	char aBuf[MAX_PATH_LENGTH];
+	char aBuf[IO_MAX_PATH_LENGTH];
 	m_BenchmarkFile = Storage()->OpenFile(pFilename, IOFLAG_WRITE, IStorage::TYPE_ABSOLUTE, aBuf, sizeof(aBuf));
 	m_BenchmarkStopTime = time_get() + time_freq() * Seconds;
 }
@@ -4063,7 +4063,7 @@ void CClient::ToggleWindowVSync()
 void CClient::LoadFont()
 {
 	static CFont *pDefaultFont = 0;
-	char aFilename[512];
+	char aFilename[IO_MAX_PATH_LENGTH];
 	char aBuff[1024];
 	const char *pFontFile = "fonts/DejaVuSans.ttf";
 	const char *apFallbackFontFiles[] =

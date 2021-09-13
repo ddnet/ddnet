@@ -127,7 +127,7 @@ protected:
 
 		if(m_Buffer.Error() || m_Buffer.Size() != OutputSize || mem_comp(m_Buffer.Data(), pOutput, OutputSize) != 0)
 		{
-			char aFilename[64];
+			char aFilename[IO_MAX_PATH_LENGTH];
 			IOHANDLE File;
 
 			str_format(aFilename, sizeof(aFilename), "%sGot.teehistorian", pTestName);

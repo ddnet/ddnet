@@ -2701,7 +2701,7 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 		m_GameSkinLoaded = false;
 	}
 
-	char aPath[MAX_PATH_LENGTH];
+	char aPath[IO_MAX_PATH_LENGTH];
 	bool IsDefault = false;
 	if(str_comp(pPath, "default") == 0)
 	{
@@ -2854,7 +2854,7 @@ void CGameClient::LoadEmoticonsSkin(const char *pPath, bool AsDir)
 		m_EmoticonsSkinLoaded = false;
 	}
 
-	char aPath[MAX_PATH_LENGTH];
+	char aPath[IO_MAX_PATH_LENGTH];
 	bool IsDefault = false;
 	if(str_comp(pPath, "default") == 0)
 	{
@@ -2908,7 +2908,7 @@ void CGameClient::LoadParticlesSkin(const char *pPath, bool AsDir)
 		m_ParticlesSkinLoaded = false;
 	}
 
-	char aPath[MAX_PATH_LENGTH];
+	char aPath[IO_MAX_PATH_LENGTH];
 	bool IsDefault = false;
 	if(str_comp(pPath, "default") == 0)
 	{
