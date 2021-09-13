@@ -2,7 +2,6 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "serverbrowser.h"
 
-#include "engine/serverbrowser.h"
 #include "serverbrowser_http.h"
 #include "serverbrowser_ping_cache.h"
 
@@ -24,6 +23,7 @@
 #include <engine/console.h>
 #include <engine/engine.h>
 #include <engine/friends.h>
+#include <engine/serverbrowser.h>
 #include <engine/storage.h>
 
 #include <mastersrv/mastersrv.h>
