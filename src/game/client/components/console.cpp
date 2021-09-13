@@ -776,7 +776,7 @@ void CGameConsole::Toggle(int Type)
 void CGameConsole::Dump(int Type)
 {
 	CInstance *pConsole = Type == CONSOLETYPE_REMOTE ? &m_RemoteConsole : &m_LocalConsole;
-	char aFilename[128];
+	char aFilename[IO_MAX_PATH_LENGTH];
 	char aDate[20];
 
 	str_timestamp(aDate, sizeof(aDate));

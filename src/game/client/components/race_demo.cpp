@@ -222,7 +222,7 @@ bool CRaceDemo::CheckDemo(int Time) const
 			return false;
 
 		// delete old demo
-		char aFilename[512];
+		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "%s/%s.demo", ms_pRaceDemoDir, Demo.m_aName);
 		Storage()->RemoveFile(aFilename, IStorage::TYPE_SAVE);
 	}

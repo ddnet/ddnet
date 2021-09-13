@@ -8,7 +8,7 @@
 class CFifo
 {
 	IConsole *m_pConsole;
-	char m_aFilename[MAX_PATH_LENGTH];
+	char m_aFilename[IO_MAX_PATH_LENGTH];
 	int m_Flag;
 	int m_File;
 

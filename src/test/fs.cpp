@@ -16,7 +16,7 @@ TEST(Filesystem, CreateCloseDelete)
 TEST(Filesystem, CreateDeleteDirectory)
 {
 	CTestInfo Info;
-	char aFilename[128];
+	char aFilename[IO_MAX_PATH_LENGTH];
 	str_format(aFilename, sizeof(aFilename), "%s/test.txt", Info.m_aFilename);
 
 	EXPECT_FALSE(fs_makedir(Info.m_aFilename));

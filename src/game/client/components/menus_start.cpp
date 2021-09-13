@@ -115,7 +115,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		}
 		else
 		{
-			char aBuf[MAX_PATH_LENGTH];
+			char aBuf[IO_MAX_PATH_LENGTH];
 			Storage()->GetBinaryPath(PLAT_SERVER_EXEC, aBuf, sizeof(aBuf));
 			IOHANDLE File = io_open(aBuf, IOFLAG_READ);
 			if(File)

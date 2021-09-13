@@ -97,7 +97,7 @@ private:
 	class IConsole *m_pConsole;
 	IOHANDLE m_File;
 	long m_MapOffset;
-	char m_aFilename[256];
+	char m_aFilename[IO_MAX_PATH_LENGTH];
 	CKeyFrame *m_pKeyFrames;
 	CMapInfo m_MapInfo;
 	int m_SpeedIndex;

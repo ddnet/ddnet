@@ -374,7 +374,7 @@ protected:
 
 	struct CDemoItem
 	{
-		char m_aFilename[128];
+		char m_aFilename[IO_MAX_PATH_LENGTH];
 		char m_aName[128];
 		bool m_IsDir;
 		int m_StorageType;
@@ -624,7 +624,7 @@ public:
 	// Ghost
 	struct CGhostItem
 	{
-		char m_aFilename[256];
+		char m_aFilename[IO_MAX_PATH_LENGTH];
 		char m_aPlayer[MAX_NAME_LENGTH];
 
 		int m_Time;
