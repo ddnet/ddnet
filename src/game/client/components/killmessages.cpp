@@ -43,7 +43,7 @@ void CKillMessages::OnReset()
 void CKillMessages::OnInit()
 {
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
-	m_SpriteQuadContainerIndex = Graphics()->CreateQuadContainer();
+	m_SpriteQuadContainerIndex = Graphics()->CreateQuadContainer(false);
 
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	RenderTools()->QuadContainerAddSprite(m_SpriteQuadContainerIndex, 0.f, 0.f, 28.f, 56.f);
@@ -62,6 +62,7 @@ void CKillMessages::OnInit()
 		RenderTools()->GetSpriteScale(g_pData->m_Weapons.m_aId[i].m_pSpriteBody, ScaleX, ScaleY);
 		RenderTools()->QuadContainerAddSprite(m_SpriteQuadContainerIndex, 96.f * ScaleX, 96.f * ScaleY);
 	}
+	Graphics()->QuadContainerUpload(m_SpriteQuadContainerIndex);
 }
 
 void CKillMessages::CreateKillmessageNamesIfNotCreated(CKillMsg &Kill)

@@ -82,6 +82,7 @@ void CHud::OnReset()
 void CHud::OnInit()
 {
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+	m_HudQuadContainerIndex = Graphics()->CreateQuadContainer(false);
 	PrepareHealthAmoQuads();
 
 	// all cursors
@@ -98,6 +99,7 @@ void CHud::OnInit()
 	RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 8.f, 16.f);
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 8.f, 16.f);
+	Graphics()->QuadContainerUpload(m_HudQuadContainerIndex);
 }
 
 void CHud::RenderGameTimer()
@@ -670,8 +672,6 @@ void CHud::RenderCursor()
 
 void CHud::PrepareHealthAmoQuads()
 {
-	m_HudQuadContainerIndex = Graphics()->CreateQuadContainer();
-
 	float x = 5;
 	float y = 5;
 	IGraphics::CQuadItem Array[10];

@@ -1188,8 +1188,8 @@ void CMenus::OnInit()
 
 	m_UIEx.Init(UI(), Kernel(), RenderTools(), m_aInputEvents, &m_NumInputEvents);
 
-	m_RefreshButton.Init(UI());
-	m_ConnectButton.Init(UI());
+	m_RefreshButton.Init(UI(), -1);
+	m_ConnectButton.Init(UI(), -1);
 
 	Console()->Chain("add_favorite", ConchainServerbrowserUpdate, this);
 	Console()->Chain("remove_favorite", ConchainServerbrowserUpdate, this);

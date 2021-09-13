@@ -770,11 +770,13 @@ class CGraphics_Threaded : public IEngineGraphics
 
 	struct SQuadContainer
 	{
-		SQuadContainer()
+		SQuadContainer(bool AutomicUpload = true)
 		{
 			m_Quads.clear();
 			m_QuadBufferObjectIndex = m_QuadBufferContainerIndex = -1;
 			m_FreeIndex = -1;
+
+			m_AutomicUpload = AutomicUpload;
 		}
 
 		struct SQuad
@@ -788,6 +790,8 @@ class CGraphics_Threaded : public IEngineGraphics
 		int m_QuadBufferContainerIndex;
 
 		int m_FreeIndex;
+
+		bool m_AutomicUpload;
 	};
 	std::vector<SQuadContainer> m_QuadContainers;
 	int m_FirstFreeQuadContainer;
@@ -1038,14 +1042,25 @@ public:
 	void QuadsDrawFreeform(const CFreeformItem *pArray, int Num) override;
 	void QuadsText(float x, float y, float Size, const char *pText) override;
 
-	int CreateQuadContainer() override;
+	const GL_STexCoord *GetCurTextureCoordinates() override
+	{
+		return m_aTexture;
+	}
+
+	const GL_SColor *GetCurColor() override
+	{
+		return m_aColor;
+	}
+
+	int CreateQuadContainer(bool AutomaticUpload = true) override;
+	void QuadContainerChangeAutomaticUpload(int ContainerIndex, bool AutomaticUpload) override;
 	void QuadContainerUpload(int ContainerIndex) override;
 	void QuadContainerAddQuads(int ContainerIndex, CQuadItem *pArray, int Num) override;
 	void QuadContainerAddQuads(int ContainerIndex, CFreeformItem *pArray, int Num) override;
 	void QuadContainerReset(int ContainerIndex) override;
 	void DeleteQuadContainer(int ContainerIndex) override;
 	void RenderQuadContainer(int ContainerIndex, int QuadDrawNum) override;
-	void RenderQuadContainer(int ContainerIndex, int QuadOffset, int QuadDrawNum) override;
+	void RenderQuadContainer(int ContainerIndex, int QuadOffset, int QuadDrawNum, bool ChangeWrapMode = true) override;
 	void RenderQuadContainerEx(int ContainerIndex, int QuadOffset, int QuadDrawNum, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f) override;
 	void RenderQuadContainerAsSprite(int ContainerIndex, int QuadOffset, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f) override;
 	void RenderQuadContainerAsSpriteMultiple(int ContainerIndex, int QuadOffset, int DrawCount, SRenderSpriteInfo *pRenderInfo) override;
