@@ -68,7 +68,7 @@ void CPlayer::Reset()
 	m_Afk = true;
 	m_LastWhisperTo = -1;
 	m_LastSetSpectatorMode = 0;
-	m_TimeoutCode[0] = '\0';
+	m_aTimeoutCode[0] = '\0';
 	delete m_pLastTarget;
 	m_pLastTarget = new CNetObj_PlayerInput({0});
 	m_TuneZone = 0;
@@ -932,8 +932,8 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 			break;
 		}
 		case CScorePlayerResult::BROADCAST:
-			if(Result.m_Data.m_Broadcast[0] != 0)
-				GameServer()->SendBroadcast(Result.m_Data.m_Broadcast, -1);
+			if(Result.m_Data.m_aBroadcast[0] != 0)
+				GameServer()->SendBroadcast(Result.m_Data.m_aBroadcast, -1);
 			break;
 		case CScorePlayerResult::MAP_VOTE:
 			GameServer()->m_VoteType = CGameContext::VOTE_TYPE_OPTION;
@@ -942,13 +942,13 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 			char aCmd[256];
 			str_format(aCmd, sizeof(aCmd),
 				"sv_reset_file types/%s/flexreset.cfg; change_map \"%s\"",
-				Result.m_Data.m_MapVote.m_Server, Result.m_Data.m_MapVote.m_Map);
+				Result.m_Data.m_MapVote.m_aServer, Result.m_Data.m_MapVote.m_aMap);
 
 			char aChatmsg[512];
 			str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s' (%s)",
-				Server()->ClientName(m_ClientID), Result.m_Data.m_MapVote.m_Map, "/map");
+				Server()->ClientName(m_ClientID), Result.m_Data.m_MapVote.m_aMap, "/map");
 
-			GameServer()->CallVote(m_ClientID, Result.m_Data.m_MapVote.m_Map, aCmd, "/map", aChatmsg);
+			GameServer()->CallVote(m_ClientID, Result.m_Data.m_MapVote.m_aMap, aCmd, "/map", aChatmsg);
 			break;
 		case CScorePlayerResult::PLAYER_INFO:
 			GameServer()->Score()->PlayerData(m_ClientID)->Set(Result.m_Data.m_Info.m_Time, Result.m_Data.m_Info.m_CpTime);

@@ -33,9 +33,9 @@ static void layershot_end()
 	if(!config.cl_layershot)
 		return;
 
-	char buf[256];
-	str_format(buf, sizeof(buf), "screenshots/layers_%04d.png", config.cl_layershot);
-	gfx_screenshot_direct(buf);
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "screenshots/layers_%04d.png", config.cl_layershot);
+	gfx_screenshot_direct(aBuf);
 	config.cl_layershot++;
 }*/
 
