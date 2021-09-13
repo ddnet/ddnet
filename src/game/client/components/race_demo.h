@@ -25,7 +25,7 @@ class CRaceDemo : public CComponent
 	int m_RecordStopTick;
 	int m_Time;
 
-	static int RaceDemolistFetchCallback(const char *pName, time_t Date, int IsDir, int StorageType, void *pUser);
+	static int RaceDemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser);
 
 	void GetPath(char *pBuf, int Size, int Time = -1) const;
 

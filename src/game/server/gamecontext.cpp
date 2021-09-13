@@ -1053,8 +1053,8 @@ void CGameContext::OnTick()
 		{
 			if(PlayerExists(m_SqlRandomMapResult->m_ClientID) && m_SqlRandomMapResult->m_aMessage[0] != '\0')
 				SendChatTarget(m_SqlRandomMapResult->m_ClientID, m_SqlRandomMapResult->m_aMessage);
-			if(m_SqlRandomMapResult->m_Map[0] != '\0')
-				str_copy(g_Config.m_SvMap, m_SqlRandomMapResult->m_Map, sizeof(g_Config.m_SvMap));
+			if(m_SqlRandomMapResult->m_aMap[0] != '\0')
+				str_copy(g_Config.m_SvMap, m_SqlRandomMapResult->m_aMap, sizeof(g_Config.m_SvMap));
 			else
 				m_LastMapVote = 0;
 		}
@@ -2958,7 +2958,7 @@ void CGameContext::ConClearVotes(IConsole::IResult *pResult, void *pUserData)
 
 struct CMapNameItem
 {
-	char m_aName[MAX_PATH_LENGTH - 4];
+	char m_aName[IO_MAX_PATH_LENGTH - 4];
 
 	bool operator<(const CMapNameItem &Other) const { return str_comp_nocase(m_aName, Other.m_aName) < 0; }
 };
@@ -2975,8 +2975,8 @@ void CGameContext::ConAddMapVotes(IConsole::IResult *pResult, void *pUserData)
 		char aDescription[64];
 		str_format(aDescription, sizeof(aDescription), "Map: %s", MapList[i].m_aName);
 
-		char aCommand[MAX_PATH_LENGTH * 2 + 10];
-		char aMapEscaped[MAX_PATH_LENGTH * 2];
+		char aCommand[IO_MAX_PATH_LENGTH * 2 + 10];
+		char aMapEscaped[IO_MAX_PATH_LENGTH * 2];
 		char *pDst = aMapEscaped;
 		str_escape(&pDst, MapList[i].m_aName, aMapEscaped + sizeof(aMapEscaped));
 		str_format(aCommand, sizeof(aCommand), "change_map \"%s\"", aMapEscaped);
@@ -3206,7 +3206,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		char aGameUuid[UUID_MAXSTRSIZE];
 		FormatUuid(m_GameUuid, aGameUuid, sizeof(aGameUuid));
 
-		char aFilename[64];
+		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "teehistorian/%s.teehistorian", aGameUuid);
 
 		IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
@@ -3370,6 +3370,9 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	}
 
 	//game.world.insert_entity(game.Controller);
+
+	if(GIT_SHORTREV_HASH)
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "git-revision", GIT_SHORTREV_HASH);
 
 #ifdef CONF_DEBUG
 	if(g_Config.m_DbgDummies)

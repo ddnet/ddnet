@@ -184,23 +184,23 @@ bool CChat::OnInput(IInput::CEvent Event)
 		{
 			// if the text has more than one line, we send all lines except the last one
 			// the last one is set as in the text field
-			char Line[256];
+			char aLine[256];
 			int i, Begin = 0;
 			for(i = 0; i < str_length(Text); i++)
 			{
 				if(Text[i] == '\n')
 				{
-					int max = minimum(i - Begin + 1, (int)sizeof(Line));
-					str_utf8_copy(Line, Text + Begin, max);
+					int max = minimum(i - Begin + 1, (int)sizeof(aLine));
+					str_utf8_copy(aLine, Text + Begin, max);
 					Begin = i + 1;
-					SayChat(Line);
+					SayChat(aLine);
 					while(Text[i] == '\n')
 						i++;
 				}
 			}
-			int max = minimum(i - Begin + 1, (int)sizeof(Line));
-			str_utf8_copy(Line, Text + Begin, max);
-			m_Input.Add(Line);
+			int max = minimum(i - Begin + 1, (int)sizeof(aLine));
+			str_utf8_copy(aLine, Text + Begin, max);
+			m_Input.Add(aLine);
 		}
 	}
 
@@ -885,7 +885,14 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 	{
 		if(Now - m_aLastSoundPlayed[CHAT_CLIENT] >= time_freq() * 3 / 10)
 		{
-			if((g_Config.m_SndTeamChat || !m_aLines[m_CurrentLine].m_Team) && (g_Config.m_SndChat || m_aLines[m_CurrentLine].m_Team))
+			bool PlaySound = m_aLines[m_CurrentLine].m_Team ? g_Config.m_SndChat : g_Config.m_SndTeamChat;
+#if defined(CONF_VIDEORECORDER)
+			if(IVideo::Current())
+			{
+				PlaySound &= g_Config.m_ClVideoShowChat;
+			}
+#endif
+			if(PlaySound)
 			{
 				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_CLIENT, 0);
 				m_aLastSoundPlayed[CHAT_CLIENT] = Now;

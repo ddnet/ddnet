@@ -558,7 +558,7 @@ void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
 	if(!pPlayer)
 		return;
 
-	const char *pTimeout = pResult->NumArguments() > 0 ? pResult->GetString(0) : pPlayer->m_TimeoutCode;
+	const char *pTimeout = pResult->NumArguments() > 0 ? pResult->GetString(0) : pPlayer->m_aTimeoutCode;
 
 	if(!pSelf->Server()->IsSixup(pResult->m_ClientID))
 	{
@@ -568,7 +568,7 @@ void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
 				continue;
 			if(!pSelf->m_apPlayers[i])
 				continue;
-			if(str_comp(pSelf->m_apPlayers[i]->m_TimeoutCode, pTimeout))
+			if(str_comp(pSelf->m_apPlayers[i]->m_aTimeoutCode, pTimeout))
 				continue;
 			if(pSelf->Server()->SetTimedOut(i, pResult->m_ClientID))
 			{
@@ -587,7 +587,7 @@ void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	pSelf->Server()->SetTimeoutProtected(pResult->m_ClientID);
-	str_copy(pPlayer->m_TimeoutCode, pResult->GetString(0), sizeof(pPlayer->m_TimeoutCode));
+	str_copy(pPlayer->m_aTimeoutCode, pResult->GetString(0), sizeof(pPlayer->m_aTimeoutCode));
 }
 
 void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
@@ -1034,6 +1034,9 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 		{
 			int Team = pResult->GetInteger(0);
 
+			if(Team < 0 || Team >= MAX_CLIENTS)
+				Team = pController->m_Teams.GetFirstEmptyTeam();
+
 			if(pPlayer->m_Last_Team + (int64_t)pSelf->Server()->TickSpeed() * g_Config.m_SvTeamChangeDelay > pSelf->Server()->Tick())
 			{
 				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",
@@ -1179,7 +1182,7 @@ void CGameContext::ConEyeEmote(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
 			"emote",
-			"Emote commands are: /emote surprise /emote blink /emote close /emote angry /emote happy /emote pain");
+			"Emote commands are: /emote surprise /emote blink /emote close /emote angry /emote happy /emote pain /emote normal");
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
 			"emote",

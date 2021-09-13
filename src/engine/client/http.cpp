@@ -148,6 +148,10 @@ int CRequest::RunImpl(CURL *pHandle)
 	curl_easy_setopt(pHandle, CURLOPT_PROGRESSDATA, this);
 	curl_easy_setopt(pHandle, CURLOPT_PROGRESSFUNCTION, ProgressCallback);
 
+#ifdef CONF_PLATFORM_ANDROID
+	curl_easy_setopt(pHandle, CURLOPT_CAINFO, "data/cacert.pem");
+#endif
+
 	if(!AfterInit(pHandle))
 	{
 		return HTTP_ERROR;

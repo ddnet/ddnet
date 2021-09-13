@@ -41,6 +41,8 @@ public:
 	virtual void TickPaused();
 	virtual void Snap(int SnappingClient);
 
+	bool CanSnapCharacter(int SnappingClient);
+
 	bool IsGrounded();
 
 	void SetWeapon(int W);
@@ -80,6 +82,7 @@ public:
 	bool IsAlive() const { return m_Alive; }
 	bool IsPaused() const { return m_Paused; }
 	class CPlayer *GetPlayer() { return m_pPlayer; }
+	int64_t TeamMask();
 
 private:
 	// player controlling this character

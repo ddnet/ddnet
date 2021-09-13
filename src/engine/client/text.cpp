@@ -109,13 +109,13 @@ public:
 	}
 
 	void *m_pBuf;
-	char m_aFilename[512];
+	char m_aFilename[IO_MAX_PATH_LENGTH];
 	FT_Face m_FtFace;
 
 	struct SFontFallBack
 	{
 		void *m_pBuf;
-		char m_aFilename[512];
+		char m_aFilename[IO_MAX_PATH_LENGTH];
 		FT_Face m_FtFace;
 	};
 
@@ -658,7 +658,7 @@ public:
 		pAttr->m_VertBufferBindingIndex = -1;
 
 		IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
-		char aFilename[512];
+		char aFilename[IO_MAX_PATH_LENGTH];
 		const char *pFontFile = "fonts/Icons.ttf";
 		IOHANDLE File = pStorage->OpenFile(pFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
 		if(File)
@@ -1098,7 +1098,7 @@ public:
 			if(Graphics()->IsTextBufferingEnabled())
 			{
 				float OutlineColor[4] = {m_OutlineColor.r, m_OutlineColor.g, m_OutlineColor.b, m_OutlineColor.a * m_Color.a};
-				Graphics()->TextQuadsEnd(pFont->m_CurTextureDimensions[0], pFont->m_aTextures[0], pFont->m_aTextures[1], OutlineColor);
+				Graphics()->TextQuadsEnd(pFont->m_CurTextureDimensions[0], pFont->m_aTextures[0].Id(), pFont->m_aTextures[1].Id(), OutlineColor);
 			}
 			else
 			{
@@ -1756,7 +1756,7 @@ public:
 		{
 			Graphics()->TextureClear();
 			// render buffered text
-			Graphics()->RenderText(TextContainer.m_StringInfo.m_QuadBufferContainerIndex, TextContainer.m_StringInfo.m_QuadNum, pFont->m_CurTextureDimensions[0], pFont->m_aTextures[0], pFont->m_aTextures[1], (float *)pTextColor, (float *)pTextOutlineColor);
+			Graphics()->RenderText(TextContainer.m_StringInfo.m_QuadBufferContainerIndex, TextContainer.m_StringInfo.m_QuadNum, pFont->m_CurTextureDimensions[0], pFont->m_aTextures[0].Id(), pFont->m_aTextures[1].Id(), (float *)pTextColor, (float *)pTextOutlineColor);
 		}
 		else
 		{

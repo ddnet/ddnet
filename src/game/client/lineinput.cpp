@@ -10,7 +10,7 @@ CLineInput::CLineInput()
 
 void CLineInput::Clear()
 {
-	mem_zero(m_Str, sizeof(m_Str));
+	mem_zero(m_aStr, sizeof(m_aStr));
 	m_Len = 0;
 	m_CursorPos = 0;
 	m_NumChars = 0;
@@ -18,8 +18,8 @@ void CLineInput::Clear()
 
 void CLineInput::Set(const char *pString)
 {
-	str_copy(m_Str, pString, sizeof(m_Str));
-	m_Len = str_length(m_Str);
+	str_copy(m_aStr, pString, sizeof(m_aStr));
+	m_Len = str_length(m_aStr);
 	m_CursorPos = m_Len;
 	m_NumChars = 0;
 	int Offset = 0;
@@ -32,7 +32,7 @@ void CLineInput::Set(const char *pString)
 
 void CLineInput::Editing(const char *pString, int Cursor)
 {
-	str_copy(m_DisplayStr, m_Str, sizeof(m_DisplayStr));
+	str_copy(m_DisplayStr, m_aStr, sizeof(m_DisplayStr));
 	char aEditingText[IInput::INPUT_TEXT_SIZE + 2];
 	str_format(aEditingText, sizeof(aEditingText), "[%s]", pString);
 	int NewTextLen = str_length(aEditingText);
@@ -48,10 +48,10 @@ void CLineInput::Editing(const char *pString, int Cursor)
 
 void CLineInput::Add(const char *pString)
 {
-	if((int)sizeof(m_Str) - m_Len <= str_length(pString))
+	if((int)sizeof(m_aStr) - m_Len <= str_length(pString))
 		return;
-	str_copy(m_Str + m_Len, pString, sizeof(m_Str) - m_Len);
-	m_Len = str_length(m_Str);
+	str_copy(m_aStr + m_Len, pString, sizeof(m_aStr) - m_Len);
+	m_Len = str_length(m_aStr);
 	m_CursorPos = m_Len;
 }
 
@@ -140,7 +140,7 @@ bool CLineInput::Manipulate(IInput::CEvent Event, char *pStr, int StrMaxSize, in
 void CLineInput::DeleteUntilCursor()
 {
 	char aBuf[MAX_SIZE];
-	str_copy(aBuf, &m_Str[m_CursorPos], sizeof(aBuf));
+	str_copy(aBuf, &m_aStr[m_CursorPos], sizeof(aBuf));
 	Set(aBuf);
 	SetCursorOffset(0);
 }
@@ -148,12 +148,12 @@ void CLineInput::DeleteUntilCursor()
 void CLineInput::DeleteFromCursor()
 {
 	char aBuf[MAX_SIZE];
-	str_copy(aBuf, m_Str, sizeof(aBuf));
+	str_copy(aBuf, m_aStr, sizeof(aBuf));
 	aBuf[m_CursorPos] = '\0';
 	Set(aBuf);
 }
 
 void CLineInput::ProcessInput(IInput::CEvent e)
 {
-	Manipulate(e, m_Str, MAX_SIZE, MAX_CHARS, &m_Len, &m_CursorPos, &m_NumChars);
+	Manipulate(e, m_aStr, MAX_SIZE, MAX_CHARS, &m_Len, &m_CursorPos, &m_NumChars);
 }

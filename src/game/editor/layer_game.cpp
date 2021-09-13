@@ -28,7 +28,7 @@ CTile CLayerGame::GetTile(int x, int y)
 
 void CLayerGame::SetTile(int x, int y, CTile tile)
 {
-	if(tile.m_Index == TILE_THROUGH_CUT)
+	if(tile.m_Index == TILE_THROUGH_CUT && m_pEditor->m_SelectEntitiesImage == "DDNet")
 	{
 		if(!m_pEditor->m_Map.m_pFrontLayer)
 		{
@@ -43,7 +43,7 @@ void CLayerGame::SetTile(int x, int y, CTile tile)
 	}
 	else
 	{
-		if(m_pEditor->m_Map.m_pFrontLayer && m_pEditor->m_Map.m_pFrontLayer->GetTile(x, y).m_Index == TILE_THROUGH_CUT)
+		if(m_pEditor->m_SelectEntitiesImage == "DDNet" && m_pEditor->m_Map.m_pFrontLayer && m_pEditor->m_Map.m_pFrontLayer->GetTile(x, y).m_Index == TILE_THROUGH_CUT)
 		{
 			CTile air = {TILE_AIR};
 			m_pEditor->m_Map.m_pFrontLayer->CLayerTiles::SetTile(x, y, air); // NOLINT(bugprone-parent-virtual-call)

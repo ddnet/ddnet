@@ -2,6 +2,10 @@
 #include "opengl_sl.h"
 #include <base/system.h>
 
+#include <base/detect.h>
+
+#if defined(BACKEND_AS_OPENGL_ES) || !defined(CONF_BACKEND_OPENGL_ES)
+
 #ifndef BACKEND_AS_OPENGL_ES
 #include <GL/glew.h>
 #else
@@ -140,3 +144,5 @@ CGLSLProgram::~CGLSLProgram()
 {
 	DeleteProgram();
 }
+
+#endif
