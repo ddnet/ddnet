@@ -279,6 +279,8 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	IOHANDLE m_BenchmarkFile;
 	int64_t m_BenchmarkStopTime;
 
+	void UpdateDemoIntraTimers();
+
 public:
 	IEngine *Engine() { return m_pEngine; }
 	IEngineGraphics *Graphics() { return m_pGraphics; }

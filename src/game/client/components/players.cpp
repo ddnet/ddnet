@@ -605,10 +605,10 @@ void CPlayers::RenderPlayer(
 		Graphics()->QuadsSetRotation(0);
 	}
 
-	if(g_Config.m_ClShowEmotes && !m_pClient->m_aClients[ClientID].m_EmoticonIgnore && m_pClient->m_aClients[ClientID].m_EmoticonStart != -1 && m_pClient->m_aClients[ClientID].m_EmoticonStart <= Client()->GameTick(g_Config.m_ClDummy) && m_pClient->m_aClients[ClientID].m_EmoticonStart + 2 * Client()->GameTickSpeed() > Client()->GameTick(g_Config.m_ClDummy))
+	if(g_Config.m_ClShowEmotes && !m_pClient->m_aClients[ClientID].m_EmoticonIgnore && m_pClient->m_aClients[ClientID].m_EmoticonStart != -1 && m_pClient->m_aClients[ClientID].m_EmoticonStart <= (double)Client()->GameTick(g_Config.m_ClDummy) + Client()->IntraGameTickSincePrev(g_Config.m_ClDummy) && m_pClient->m_aClients[ClientID].m_EmoticonStart + 2 * Client()->GameTickSpeed() > ((double)Client()->GameTick(g_Config.m_ClDummy) + Client()->IntraGameTickSincePrev(g_Config.m_ClDummy)))
 	{
-		int SinceStart = Client()->GameTick(g_Config.m_ClDummy) - m_pClient->m_aClients[ClientID].m_EmoticonStart;
-		int FromEnd = m_pClient->m_aClients[ClientID].m_EmoticonStart + 2 * Client()->GameTickSpeed() - Client()->GameTick(g_Config.m_ClDummy);
+		float SinceStart = (float)((double)Client()->GameTick(g_Config.m_ClDummy) + Client()->IntraGameTickSincePrev(g_Config.m_ClDummy)) - m_pClient->m_aClients[ClientID].m_EmoticonStart;
+		float FromEnd = m_pClient->m_aClients[ClientID].m_EmoticonStart + 2 * Client()->GameTickSpeed() - ((double)Client()->GameTick(g_Config.m_ClDummy) + Client()->IntraGameTickSincePrev(g_Config.m_ClDummy));
 
 		float a = 1;
 

@@ -266,7 +266,7 @@ void CSmoothTime::Update(CGraph *pGraph, int64_t Target, int TimeLeft, int Adjus
 }
 
 CClient::CClient() :
-	m_DemoPlayer(&m_SnapshotDelta)
+	m_DemoPlayer(&m_SnapshotDelta, [&]() { UpdateDemoIntraTimers(); })
 {
 	for(auto &DemoRecorder : m_DemoRecorder)
 		DemoRecorder = CDemoRecorder(&m_SnapshotDelta);
@@ -2654,6 +2654,17 @@ void DemoPlayer()->SetPause(int paused)
 		demorec_playback_unpause();
 }*/
 
+void CClient::UpdateDemoIntraTimers()
+{
+	// update timers
+	const CDemoPlayer::CPlaybackInfo *pInfo = m_DemoPlayer.Info();
+	m_CurGameTick[g_Config.m_ClDummy] = pInfo->m_Info.m_CurrentTick;
+	m_PrevGameTick[g_Config.m_ClDummy] = pInfo->m_PreviousTick;
+	m_GameIntraTick[g_Config.m_ClDummy] = pInfo->m_IntraTick;
+	m_GameTickTime[g_Config.m_ClDummy] = pInfo->m_TickTime;
+	m_GameIntraTickSincePrev[g_Config.m_ClDummy] = pInfo->m_IntraTickSincePrev;
+};
+
 void CClient::Update()
 {
 	if(State() == IClient::STATE_DEMOPLAYBACK)
@@ -2779,6 +2790,7 @@ void CClient::Update()
 
 				m_GameIntraTick[g_Config.m_ClDummy] = (Now - PrevtickStart) / (float)(CurtickStart - PrevtickStart);
 				m_GameTickTime[g_Config.m_ClDummy] = (Now - PrevtickStart) / (float)Freq; //(float)SERVER_TICK_SPEED);
+				m_GameIntraTickSincePrev[g_Config.m_ClDummy] = (Now - PrevtickStart) / (float)(Freq / SERVER_TICK_SPEED);
 
 				CurtickStart = NewPredTick * time_freq() / 50;
 				PrevtickStart = PrevPredTick * time_freq() / 50;
