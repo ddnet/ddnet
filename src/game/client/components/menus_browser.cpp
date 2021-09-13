@@ -233,23 +233,11 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		CUIRect Row;
 		CUIRect SelectHitBox;
 
+		const int UIRectCount = 2 + (COL_VERSION + 1) * 3;
 		//initialize
 		if(pItem->m_pUIElement == NULL)
 		{
-			pItem->m_pUIElement = UI()->GetNewUIElement();
-		}
-
-		const int UIRectCount = 2 + (COL_VERSION + 1) * 3;
-
-		if(pItem->m_pUIElement->Size() != UIRectCount)
-		{
-			UI()->ResetUIElement(*pItem->m_pUIElement);
-
-			for(int UIElIndex = 0; UIElIndex < UIRectCount; ++UIElIndex)
-			{
-				CUIElement::SUIElementRect AddRect;
-				pItem->m_pUIElement->Add(AddRect);
-			}
+			pItem->m_pUIElement = UI()->GetNewUIElement(UIRectCount);
 		}
 
 		int Selected = str_comp(pItem->m_aAddress, g_Config.m_UiServerAddress) == 0; //selected_index==ItemIndex;
