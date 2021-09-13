@@ -575,9 +575,9 @@ char *CSaveTeam::GetString()
 
 int CSaveTeam::FromString(const char *String)
 {
-	char TeamStats[MAX_CLIENTS];
-	char Switcher[64];
-	char SaveTee[1024];
+	char aTeamStats[MAX_CLIENTS];
+	char aSwitcher[64];
+	char aSaveTee[1024];
 
 	char *CopyPos;
 	unsigned int Pos = 0;
@@ -603,10 +603,10 @@ int CSaveTeam::FromString(const char *String)
 		return 1;
 	}
 
-	if(StrSize < sizeof(TeamStats))
+	if(StrSize < sizeof(aTeamStats))
 	{
-		str_copy(TeamStats, CopyPos, StrSize);
-		int Num = sscanf(TeamStats, "%d\t%d\t%d\t%d\t%d", &m_TeamState, &m_MembersCount, &m_NumSwitchers, &m_TeamLocked, &m_Practice);
+		str_copy(aTeamStats, CopyPos, StrSize);
+		int Num = sscanf(aTeamStats, "%d\t%d\t%d\t%d\t%d", &m_TeamState, &m_MembersCount, &m_NumSwitchers, &m_TeamLocked, &m_Practice);
 		switch(Num) // Don't forget to update this when you save / load more / less.
 		{
 		case 4:
@@ -654,10 +654,10 @@ int CSaveTeam::FromString(const char *String)
 			return 1;
 		}
 
-		if(StrSize < sizeof(SaveTee))
+		if(StrSize < sizeof(aSaveTee))
 		{
-			str_copy(SaveTee, CopyPos, StrSize);
-			int Num = m_pSavedTees[n].FromString(SaveTee);
+			str_copy(aSaveTee, CopyPos, StrSize);
+			int Num = m_pSavedTees[n].FromString(aSaveTee);
 			if(Num)
 			{
 				dbg_msg("load", "failed to load tee");
@@ -700,10 +700,10 @@ int CSaveTeam::FromString(const char *String)
 			return 1;
 		}
 
-		if(StrSize < sizeof(Switcher))
+		if(StrSize < sizeof(aSwitcher))
 		{
-			str_copy(Switcher, CopyPos, StrSize);
-			int Num = sscanf(Switcher, "%d\t%d\t%d", &(m_pSwitchers[n].m_Status), &(m_pSwitchers[n].m_EndTime), &(m_pSwitchers[n].m_Type));
+			str_copy(aSwitcher, CopyPos, StrSize);
+			int Num = sscanf(aSwitcher, "%d\t%d\t%d", &(m_pSwitchers[n].m_Status), &(m_pSwitchers[n].m_EndTime), &(m_pSwitchers[n].m_Type));
 			if(Num != 3)
 			{
 				dbg_msg("load", "failed to load switcher");
