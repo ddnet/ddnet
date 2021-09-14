@@ -40,6 +40,7 @@ class CGameConsole : public CComponent
 		CGameConsole *m_pGameConsole;
 
 		char m_aCompletionBuffer[128];
+		bool m_CompletionUsed;
 		int m_CompletionChosen;
 		int m_CompletionFlagmask;
 		float m_CompletionRenderOffset;
