@@ -209,7 +209,7 @@ void CGameTeams::Tick()
 {
 	int Now = Server()->Tick();
 
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(int i = TEAM_FLOCK; i < TEAM_SUPER; i++)
 	{
 		if(m_TeamUnfinishableKillTick[i] == -1 || m_TeamState[i] != TEAMSTATE_STARTED_UNFINISHABLE)
 		{
@@ -230,7 +230,7 @@ void CGameTeams::Tick()
 	int Frequency = Server()->TickSpeed() * 60;
 	int Remainder = Server()->TickSpeed() * 30;
 	uint64_t TeamHasWantedStartTime = 0;
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(int i = TEAM_FLOCK; i < TEAM_SUPER; i++)
 	{
 		CCharacter *pChar = GameServer()->m_apPlayers[i] ? GameServer()->m_apPlayers[i]->GetCharacter() : nullptr;
 		int Team = m_Core.Team(i);
@@ -248,7 +248,7 @@ void CGameTeams::Tick()
 	{
 		return;
 	}
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(int i = TEAM_FLOCK; i < TEAM_SUPER; i++)
 	{
 		if(((TeamHasWantedStartTime >> i) & 1) == 0)
 		{
