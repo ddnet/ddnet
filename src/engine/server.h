@@ -301,6 +301,8 @@ public:
 
 	// DDRace
 
+	virtual void OnPreTickTeehistorian() = 0;
+
 	virtual void OnSetAuthed(int ClientID, int Level) = 0;
 	virtual bool PlayerExists(int ClientID) const = 0;
 
