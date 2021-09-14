@@ -1716,8 +1716,9 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		{
 			if(g_Config.m_Debug)
 			{
-				char aBuf[512];
-				str_hex(aBuf, sizeof(aBuf), pPacket->m_pData, minimum(pPacket->m_DataSize, 32));
+				constexpr int MaxDumpedDataSize = 32;
+				char aBuf[MaxDumpedDataSize * 3 + 1];
+				str_hex(aBuf, sizeof(aBuf), pPacket->m_pData, minimum(pPacket->m_DataSize, MaxDumpedDataSize));
 
 				char aBufMsg[256];
 				str_format(aBufMsg, sizeof(aBufMsg), "strange message ClientID=%d msg=%d data_size=%d", ClientID, Msg, pPacket->m_DataSize);
