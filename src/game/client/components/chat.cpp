@@ -92,6 +92,7 @@ void CChat::Reset()
 	m_Show = false;
 	m_InputUpdate = false;
 	m_ChatStringOffset = 0;
+	m_CompletionUsed = false;
 	m_CompletionChosen = -1;
 	m_aCompletionBuffer[0] = 0;
 	m_PlaceholderOffset = 0;
@@ -309,7 +310,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 	if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_TAB)
 	{
 		// fill the completion buffer
-		if(m_CompletionChosen < 0)
+		if(!m_CompletionUsed)
 		{
 			const char *pCursor = m_Input.GetString() + m_Input.GetCursorOffset();
 			for(int Count = 0; Count < m_Input.GetCursorOffset() && *(pCursor - 1) != ' '; --pCursor, ++Count)
@@ -328,10 +329,13 @@ bool CChat::OnInput(IInput::CEvent Event)
 
 			const size_t NumCommands = m_Commands.size();
 
-			if(m_ReverseTAB)
-				m_CompletionChosen = (m_CompletionChosen - 1 + 2 * NumCommands) % (2 * NumCommands);
-			else
-				m_CompletionChosen = (m_CompletionChosen + 1) % (2 * NumCommands);
+			if(m_ReverseTAB && m_CompletionUsed)
+				m_CompletionChosen--;
+			else if(!m_ReverseTAB)
+				m_CompletionChosen++;
+			m_CompletionChosen = (m_CompletionChosen + 2 * NumCommands) % (2 * NumCommands);
+
+			m_CompletionUsed = true;
 
 			const char *pCommandStart = m_aCompletionBuffer + 1;
 			for(size_t i = 0; i < 2 * NumCommands; ++i)
@@ -392,10 +396,13 @@ bool CChat::OnInput(IInput::CEvent Event)
 			// find next possible name
 			const char *pCompletionString = 0;
 
-			if(m_ReverseTAB)
-				m_CompletionChosen = (m_CompletionChosen - 1 + 2 * MAX_CLIENTS) % (2 * MAX_CLIENTS);
-			else
-				m_CompletionChosen = (m_CompletionChosen + 1) % (2 * MAX_CLIENTS);
+			if(m_ReverseTAB && m_CompletionUsed)
+				m_CompletionChosen--;
+			else if(!m_ReverseTAB)
+				m_CompletionChosen++;
+			m_CompletionChosen = (m_CompletionChosen + 2 * MAX_CLIENTS) % (2 * MAX_CLIENTS);
+
+			m_CompletionUsed = true;
 
 			for(int i = 0; i < 2 * MAX_CLIENTS; ++i)
 			{
@@ -470,8 +477,13 @@ bool CChat::OnInput(IInput::CEvent Event)
 	{
 		// reset name completion process
 		if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key != KEY_TAB)
+		{
 			if(Event.m_Key != KEY_LSHIFT)
+			{
 				m_CompletionChosen = -1;
+				m_CompletionUsed = false;
+			}
+		}
 
 		m_OldChatStringLength = m_Input.GetLength();
 		m_Input.ProcessInput(Event);
@@ -529,6 +541,7 @@ void CChat::EnableMode(int Team)
 		Input()->SetIMEState(true);
 		Input()->Clear();
 		m_CompletionChosen = -1;
+		m_CompletionUsed = false;
 	}
 }
 
