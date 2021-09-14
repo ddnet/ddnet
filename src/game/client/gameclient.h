@@ -334,7 +334,8 @@ public:
 		int m_SkinColor;
 		int m_Team;
 		int m_Emoticon;
-		double m_EmoticonStart;
+		float m_EmoticonStartFraction;
+		int m_EmoticonStartTick;
 		bool m_Solo;
 		bool m_Jetpack;
 		bool m_NoCollision;
