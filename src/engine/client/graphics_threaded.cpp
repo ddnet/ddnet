@@ -284,13 +284,6 @@ int CGraphics_Threaded::UnloadTexture(CTextureHandle *pIndex)
 	return 0;
 }
 
-int CGraphics_Threaded::UnloadTextureNew(CTextureHandle &TextureHandle)
-{
-	int Ret = UnloadTexture(&TextureHandle);
-	TextureHandle = IGraphics::CTextureHandle();
-	return Ret;
-}
-
 static int ImageFormatToTexFormat(int Format)
 {
 	if(Format == CImageInfo::FORMAT_RGB)
