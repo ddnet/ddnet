@@ -2203,6 +2203,10 @@ void CGameClient::UpdatePrediction()
 	m_GameWorld.m_WorldConfig.m_PredictFreeze = g_Config.m_ClPredictFreeze;
 	m_GameWorld.m_WorldConfig.m_PredictWeapons = AntiPingWeapons();
 
+	// always update default tune zone, even without character
+	if(!m_GameWorld.m_WorldConfig.m_UseTuneZones)
+		m_GameWorld.TuningList()[0] = m_Tuning[g_Config.m_ClDummy];
+
 	if(!m_Snap.m_pLocalCharacter)
 	{
 		if(CCharacter *pLocalChar = m_GameWorld.GetCharacterByID(m_Snap.m_LocalClientID))
@@ -2266,10 +2270,6 @@ void CGameClient::UpdatePrediction()
 			m_ExpectingTuningSince[g_Config.m_ClDummy] = 0;
 			m_ReceivedTuning[g_Config.m_ClDummy] = false;
 		}
-	}
-	else
-	{
-		m_GameWorld.TuningList()[0] = m_Tuning[g_Config.m_ClDummy];
 	}
 
 	// if ddnetcharacter is available, ignore server-wide tunings for hook and collision
