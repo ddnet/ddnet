@@ -1018,8 +1018,9 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 		if(m_TeamState[m_Core.Team(ClientID)] == CGameTeams::TEAMSTATE_STARTED && !m_TeeStarted[ClientID])
 		{
 			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "This team cannot finish anymore because '%s' left the team before hitting the start, enter /practice mode to avoid being killed in 60 seconds", Server()->ClientName(ClientID));
+			str_format(aBuf, sizeof(aBuf), "This team cannot finish anymore because '%s' left the team before hitting the start", Server()->ClientName(ClientID));
 			GameServer()->SendChatTeam(Team, aBuf);
+			GameServer()->SendChatTeam(Team, "Enter /practice mode to avoid being killed in 60 seconds");
 
 			m_TeamUnfinishableKillTick[Team] = Server()->Tick() + 60 * Server()->TickSpeed();
 			ChangeTeamState(Team, CGameTeams::TEAMSTATE_STARTED_UNFINISHABLE);
