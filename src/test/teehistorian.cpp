@@ -89,7 +89,7 @@ protected:
 	void Expect(const unsigned char *pOutput, int OutputSize)
 	{
 		static CUuid TEEHISTORIAN_UUID = CalculateUuid("teehistorian@ddnet.tw");
-		static const char PREFIX1[] = "{\"comment\":\"teehistorian@ddnet.tw\",\"version\":\"2\",\"minor_version\":\"2\",\"game_uuid\":\"a1eb7182-796e-3b3e-941d-38ca71b2a4a8\",\"server_version\":\"DDNet test\",\"start_time\":\"";
+		static const char PREFIX1[] = "{\"comment\":\"teehistorian@ddnet.tw\",\"version\":\"2\",\"version_minor\":\"2\",\"game_uuid\":\"a1eb7182-796e-3b3e-941d-38ca71b2a4a8\",\"server_version\":\"DDNet test\",\"start_time\":\"";
 		static const char PREFIX2[] = "\",\"server_name\":\"server name\",\"server_port\":\"8303\",\"game_type\":\"game type\",\"map_name\":\"Kobra 3 Solo\",\"map_size\":\"903514\",\"map_sha256\":\"0123456789012345678901234567890123456789012345678901234567890123\",\"map_crc\":\"eceaf25c\",\"prng_description\":\"test-prng:02468ace\",\"config\":{},\"tuning\":{},\"uuids\":[";
 		static const char PREFIX3[] = "]}";
 
@@ -533,13 +533,13 @@ TEST_F(TeeHistorian, LoadFailed)
 	Expect(EXPECTED, sizeof(EXPECTED));
 }
 
-TEST_F(TeeHistorian, TeamChange)
+TEST_F(TeeHistorian, PlayerTeam)
 {
 	const unsigned char EXPECTED[] = {
-		// EX uuid=39707241-b64d-3201-b4d8-b6ec24b2b6c9 datalen=2
+		// EX uuid=a111c04e-1ea8-38e0-90b1-d7f993ca0da9 datalen=2
 		0x4a,
-		0x39, 0x70, 0x72, 0x41, 0xb6, 0x4d, 0x32, 0x01,
-		0xb4, 0xd8, 0xb6, 0xec, 0x24, 0xb2, 0xb6, 0xc9,
+		0xa1, 0x11, 0xc0, 0x4e, 0x1e, 0xa8, 0x38, 0xe0,
+		0x90, 0xb1, 0xd7, 0xf9, 0x93, 0xca, 0x0d, 0xa9,
 		0x02,
 		// player_id=33
 		0x21,

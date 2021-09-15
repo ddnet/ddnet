@@ -48,20 +48,17 @@ void CTeeHistorian::Reset(const CGameInfo *pGameInfo, WRITE_CALLBACK pfnWriteCal
 	// Tick 0 is implicit at the start, game starts as tick 1.
 	m_TickWritten = true;
 	m_MaxClientID = MAX_CLIENTS;
-	for(auto &PrevPlayerTeam : m_aPrevPlayerTeam)
-	{
-		PrevPlayerTeam = 0;
-	}
-	for(auto &PrevTeamPractice : m_aPrevTeamPractice)
-	{
-		PrevTeamPractice = false;
-	}
 
 	// `m_PrevMaxClientID` is initialized in `BeginPlayers`
 	for(auto &PrevPlayer : m_aPrevPlayers)
 	{
 		PrevPlayer.m_Alive = false;
 		PrevPlayer.m_InputExists = false;
+		PrevPlayer.m_Team = 0;
+	}
+	for(auto &PrevTeam : m_aPrevTeams)
+	{
+		PrevTeam.m_Practice = false;
 	}
 	m_pfnWriteCallback = pfnWriteCallback;
 	m_pWriteCallbackUserdata = pUser;
@@ -100,7 +97,7 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 		"{"
 		"\"comment\":\"%s\","
 		"\"version\":\"%s\","
-		"\"minor_version\":\"%s\","
+		"\"version_minor\":\"%s\","
 		"\"game_uuid\":\"%s\","
 		"\"server_version\":\"%s\","
 		"\"start_time\":\"%s\","
@@ -322,9 +319,9 @@ void CTeeHistorian::RecordDeadPlayer(int ClientID)
 
 void CTeeHistorian::RecordPlayerTeam(int ClientID, int Team)
 {
-	if(m_aPrevPlayerTeam[ClientID] != Team)
+	if(m_aPrevPlayers[ClientID].m_Team != Team)
 	{
-		m_aPrevPlayerTeam[ClientID] = Team;
+		m_aPrevPlayers[ClientID].m_Team = Team;
 
 		EnsureTickWritten();
 
@@ -338,15 +335,15 @@ void CTeeHistorian::RecordPlayerTeam(int ClientID, int Team)
 			dbg_msg("teehistorian", "team_change cid=%d team=%d", ClientID, Team);
 		}
 
-		WriteExtra(UUID_TEEHISTORIAN_TEAM_CHANGE, Buffer.Data(), Buffer.Size());
+		WriteExtra(UUID_TEEHISTORIAN_PLAYER_TEAM, Buffer.Data(), Buffer.Size());
 	}
 }
 
 void CTeeHistorian::RecordTeamPractice(int Team, bool Practice)
 {
-	if(m_aPrevTeamPractice[Team] != Practice)
+	if(m_aPrevTeams[Team].m_Practice != Practice)
 	{
-		m_aPrevTeamPractice[Team] = Practice;
+		m_aPrevTeams[Team].m_Practice = Practice;
 
 		EnsureTickWritten();
 

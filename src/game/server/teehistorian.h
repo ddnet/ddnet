@@ -113,6 +113,14 @@ private:
 
 		CNetObj_PlayerInput m_Input;
 		bool m_InputExists;
+
+		// DDNet team
+		int m_Team;
+	};
+
+	struct CTeam
+	{
+		bool m_Practice;
 	};
 
 	WRITE_CALLBACK m_pfnWriteCallback;
@@ -125,9 +133,8 @@ private:
 	int m_Tick;
 	int m_PrevMaxClientID;
 	int m_MaxClientID;
-	int m_aPrevPlayerTeam[MAX_CLIENTS];
-	bool m_aPrevTeamPractice[MAX_CLIENTS];
 	CPlayer m_aPrevPlayers[MAX_CLIENTS];
+	CTeam m_aPrevTeams[MAX_CLIENTS];
 };
 
 #endif // GAME_SERVER_TEEHISTORIAN_H
