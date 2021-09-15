@@ -739,7 +739,8 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)
 
 		// apply
 		m_aClients[pMsg->m_ClientID].m_Emoticon = pMsg->m_Emoticon;
-		m_aClients[pMsg->m_ClientID].m_EmoticonStart = (double)Client()->GameTick(g_Config.m_ClDummy) + Client()->IntraGameTickSincePrev(g_Config.m_ClDummy);
+		m_aClients[pMsg->m_ClientID].m_EmoticonStartTick = Client()->GameTick(g_Config.m_ClDummy);
+		m_aClients[pMsg->m_ClientID].m_EmoticonStartFraction = Client()->IntraGameTickSincePrev(g_Config.m_ClDummy);
 	}
 	else if(MsgId == NETMSGTYPE_SV_SOUNDGLOBAL)
 	{
@@ -1954,7 +1955,8 @@ void CGameClient::CClientData::Reset()
 	m_Team = 0;
 	m_Angle = 0;
 	m_Emoticon = 0;
-	m_EmoticonStart = -1;
+	m_EmoticonStartTick = -1;
+	m_EmoticonStartFraction = 0;
 	m_Active = false;
 	m_ChatIgnore = false;
 	m_EmoticonIgnore = false;

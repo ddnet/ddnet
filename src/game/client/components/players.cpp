@@ -605,36 +605,39 @@ void CPlayers::RenderPlayer(
 		Graphics()->QuadsSetRotation(0);
 	}
 
-	if(g_Config.m_ClShowEmotes && !m_pClient->m_aClients[ClientID].m_EmoticonIgnore && m_pClient->m_aClients[ClientID].m_EmoticonStart != -1 && m_pClient->m_aClients[ClientID].m_EmoticonStart <= (double)Client()->GameTick(g_Config.m_ClDummy) + Client()->IntraGameTickSincePrev(g_Config.m_ClDummy) && m_pClient->m_aClients[ClientID].m_EmoticonStart + 2 * Client()->GameTickSpeed() > ((double)Client()->GameTick(g_Config.m_ClDummy) + Client()->IntraGameTickSincePrev(g_Config.m_ClDummy)))
+	if(g_Config.m_ClShowEmotes && !m_pClient->m_aClients[ClientID].m_EmoticonIgnore && m_pClient->m_aClients[ClientID].m_EmoticonStartTick != -1)
 	{
-		float SinceStart = (float)((double)Client()->GameTick(g_Config.m_ClDummy) + Client()->IntraGameTickSincePrev(g_Config.m_ClDummy)) - m_pClient->m_aClients[ClientID].m_EmoticonStart;
-		float FromEnd = m_pClient->m_aClients[ClientID].m_EmoticonStart + 2 * Client()->GameTickSpeed() - ((double)Client()->GameTick(g_Config.m_ClDummy) + Client()->IntraGameTickSincePrev(g_Config.m_ClDummy));
+		float SinceStart = (Client()->GameTick(g_Config.m_ClDummy) - m_pClient->m_aClients[ClientID].m_EmoticonStartTick) + (Client()->IntraGameTickSincePrev(g_Config.m_ClDummy) - m_pClient->m_aClients[ClientID].m_EmoticonStartFraction);
+		float FromEnd = (2 * Client()->GameTickSpeed()) - SinceStart;
 
-		float a = 1;
+		if(0 <= SinceStart && FromEnd > 0)
+		{
+			float a = 1;
 
-		if(FromEnd < Client()->GameTickSpeed() / 5)
-			a = FromEnd / (Client()->GameTickSpeed() / 5.0f);
+			if(FromEnd < Client()->GameTickSpeed() / 5)
+				a = FromEnd / (Client()->GameTickSpeed() / 5.0f);
 
-		float h = 1;
-		if(SinceStart < Client()->GameTickSpeed() / 10)
-			h = SinceStart / (Client()->GameTickSpeed() / 10.0f);
+			float h = 1;
+			if(SinceStart < Client()->GameTickSpeed() / 10)
+				h = SinceStart / (Client()->GameTickSpeed() / 10.0f);
 
-		float Wiggle = 0;
-		if(SinceStart < Client()->GameTickSpeed() / 5)
-			Wiggle = SinceStart / (Client()->GameTickSpeed() / 5.0f);
+			float Wiggle = 0;
+			if(SinceStart < Client()->GameTickSpeed() / 5)
+				Wiggle = SinceStart / (Client()->GameTickSpeed() / 5.0f);
 
-		float WiggleAngle = sinf(5 * Wiggle);
+			float WiggleAngle = sinf(5 * Wiggle);
 
-		Graphics()->QuadsSetRotation(pi / 6 * WiggleAngle);
+			Graphics()->QuadsSetRotation(pi / 6 * WiggleAngle);
 
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, a * Alpha);
-		// client_datas::emoticon is an offset from the first emoticon
-		int QuadOffset = QuadOffsetToEmoticon + m_pClient->m_aClients[ClientID].m_Emoticon;
-		Graphics()->TextureSet(GameClient()->m_EmoticonsSkin.m_SpriteEmoticons[m_pClient->m_aClients[ClientID].m_Emoticon]);
-		Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, Position.x, Position.y - 23.f - 32.f * h, 1.f, (64.f * h) / 64.f);
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, a * Alpha);
+			// client_datas::emoticon is an offset from the first emoticon
+			int QuadOffset = QuadOffsetToEmoticon + m_pClient->m_aClients[ClientID].m_Emoticon;
+			Graphics()->TextureSet(GameClient()->m_EmoticonsSkin.m_SpriteEmoticons[m_pClient->m_aClients[ClientID].m_Emoticon]);
+			Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, Position.x, Position.y - 23.f - 32.f * h, 1.f, (64.f * h) / 64.f);
 
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-		Graphics()->QuadsSetRotation(0);
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+			Graphics()->QuadsSetRotation(0);
+		}
 	}
 }
 
