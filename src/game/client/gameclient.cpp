@@ -2194,7 +2194,14 @@ ColorRGBA CalculateNameColor(ColorHSLA TextColorHSL)
 
 void CGameClient::UpdatePrediction()
 {
+	m_GameWorld.m_WorldConfig.m_IsVanilla = m_GameInfo.m_PredictVanilla;
+	m_GameWorld.m_WorldConfig.m_IsDDRace = m_GameInfo.m_PredictDDRace;
+	m_GameWorld.m_WorldConfig.m_IsFNG = m_GameInfo.m_PredictFNG;
+	m_GameWorld.m_WorldConfig.m_PredictDDRace = g_Config.m_ClPredictDDRace;
+	m_GameWorld.m_WorldConfig.m_PredictTiles = g_Config.m_ClPredictDDRace && m_GameInfo.m_PredictDDRaceTiles;
 	m_GameWorld.m_WorldConfig.m_UseTuneZones = m_GameInfo.m_PredictDDRaceTiles;
+	m_GameWorld.m_WorldConfig.m_PredictFreeze = g_Config.m_ClPredictFreeze;
+	m_GameWorld.m_WorldConfig.m_PredictWeapons = AntiPingWeapons();
 
 	if(!m_Snap.m_pLocalCharacter)
 	{
@@ -2203,13 +2210,6 @@ void CGameClient::UpdatePrediction()
 		return;
 	}
 
-	m_GameWorld.m_WorldConfig.m_IsVanilla = m_GameInfo.m_PredictVanilla;
-	m_GameWorld.m_WorldConfig.m_IsDDRace = m_GameInfo.m_PredictDDRace;
-	m_GameWorld.m_WorldConfig.m_IsFNG = m_GameInfo.m_PredictFNG;
-	m_GameWorld.m_WorldConfig.m_PredictDDRace = g_Config.m_ClPredictDDRace;
-	m_GameWorld.m_WorldConfig.m_PredictTiles = g_Config.m_ClPredictDDRace && m_GameInfo.m_PredictDDRaceTiles;
-	m_GameWorld.m_WorldConfig.m_PredictFreeze = g_Config.m_ClPredictFreeze;
-	m_GameWorld.m_WorldConfig.m_PredictWeapons = AntiPingWeapons();
 	if(m_Snap.m_pLocalCharacter->m_AmmoCount > 0 && m_Snap.m_pLocalCharacter->m_Weapon != WEAPON_NINJA)
 		m_GameWorld.m_WorldConfig.m_InfiniteAmmo = false;
 	m_GameWorld.m_WorldConfig.m_IsSolo = !m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_HasExtendedData && !m_Tuning[g_Config.m_ClDummy].m_PlayerCollision && !m_Tuning[g_Config.m_ClDummy].m_PlayerHooking;
