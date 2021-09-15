@@ -35,6 +35,16 @@ enum
 
 class CFont;
 
+enum ETextCursorSelectionMode
+{
+	// ignore any kind of selection
+	TEXT_CURSOR_SELECTION_MODE_NONE = 0,
+	// calculates the selection based on the mouse press and release cursor position
+	TEXT_CURSOR_SELECTION_MODE_CALCULATE,
+	// sets the selection based on the character start and end count(these values have to be decoded character offsets)
+	TEXT_CURSOR_SELECTION_MODE_SET,
+};
+
 class CTextCursor
 {
 public:
@@ -55,6 +65,19 @@ public:
 	CFont *m_pFont;
 	float m_FontSize;
 	float m_AlignedFontSize;
+
+	ETextCursorSelectionMode m_CalculateSelectionMode;
+
+	// these coordinates are repsected if selection mode is set to calculate @see ETextCursorSelectionMode
+	int m_PressMouseX;
+	int m_PressMouseY;
+	int m_ReleaseMouseX;
+	int m_ReleaseMouseY;
+
+	// note m_SelectionStart can be bigger than m_SelectionEnd, depending on how the mouse cursor was dragged
+	// also note, that these are the character offsets decoded
+	int m_SelectionStart;
+	int m_SelectionEnd;
 };
 
 struct STextRenderColor
@@ -111,6 +134,7 @@ public:
 
 	ColorRGBA DefaultTextColor() { return ColorRGBA(1, 1, 1, 1); }
 	ColorRGBA DefaultTextOutlineColor() { return ColorRGBA(0, 0, 0, 0.3f); }
+	ColorRGBA DefaultSelectionColor() { return ColorRGBA(0, 0, 1.0f, 1.0f); }
 
 	//
 	virtual void TextEx(CTextCursor *pCursor, const char *pText, int Length) = 0;
@@ -119,7 +143,6 @@ public:
 	// just deletes and creates text container
 	virtual void RecreateTextContainer(CTextCursor *pCursor, int TextContainerIndex, const char *pText, int Length = -1) = 0;
 	virtual void RecreateTextContainerSoft(CTextCursor *pCursor, int TextContainerIndex, const char *pText, int Length = -1) = 0;
-	virtual void SetTextContainerSelection(int TextContainerIndex, const char *pText, int CursorPos, int SelectionStart, int SelectionEnd) = 0;
 	virtual void DeleteTextContainer(int TextContainerIndex) = 0;
 
 	virtual void UploadTextContainer(int TextContainerIndex) = 0;
@@ -131,17 +154,22 @@ public:
 	virtual int AdjustFontSize(const char *pText, int TextLength, int MaxSize, int MaxWidth) = 0;
 	virtual int CalculateTextWidth(const char *pText, int TextLength, int FontWidth, int FontHeight) = 0;
 
+	virtual bool SelectionToUTF8OffSets(const char *pText, int SelStart, int SelEnd, int &OffUTF8Start, int &OffUTF8End) = 0;
+
 	// old foolish interface
 	virtual void TextColor(float r, float g, float b, float a) = 0;
 	virtual void TextColor(ColorRGBA rgb) = 0;
 	virtual void TextOutlineColor(float r, float g, float b, float a) = 0;
 	virtual void TextOutlineColor(ColorRGBA rgb) = 0;
+	virtual void TextSelectionColor(float r, float g, float b, float a) = 0;
+	virtual void TextSelectionColor(ColorRGBA rgb) = 0;
 	virtual void Text(void *pFontSetV, float x, float y, float Size, const char *pText, float LineWidth) = 0;
 	virtual float TextWidth(void *pFontSetV, float Size, const char *pText, int StrLength, float LineWidth, float *pAlignedHeight = NULL, float *pMaxCharacterHeightInLine = NULL) = 0;
 	virtual int TextLineCount(void *pFontSetV, float Size, const char *pText, float LineWidth) = 0;
 
 	virtual ColorRGBA GetTextColor() = 0;
 	virtual ColorRGBA GetTextOutlineColor() = 0;
+	virtual ColorRGBA GetTextSelectionColor() = 0;
 
 	virtual void OnWindowResize() = 0;
 

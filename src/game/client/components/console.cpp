@@ -33,6 +33,8 @@
 
 #include <game/client/gameclient.h>
 
+#include <base/math.h>
+
 #include "console.h"
 
 CGameConsole::CInstance::CInstance(int Type)
@@ -277,9 +279,11 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 		else if(Event.m_Key == KEY_PAGEUP)
 		{
 			++m_BacklogActPage;
+			m_pGameConsole->m_HasSelection = false;
 		}
 		else if(Event.m_Key == KEY_PAGEDOWN)
 		{
+			m_pGameConsole->m_HasSelection = false;
 			--m_BacklogActPage;
 			if(m_BacklogActPage < 0)
 				m_BacklogActPage = 0;
@@ -289,10 +293,12 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 		else if(Event.m_Key == KEY_HOME && m_Input.GetString()[0] == '\0')
 		{
 			m_BacklogActPage = INT_MAX;
+			m_pGameConsole->m_HasSelection = false;
 		}
 		else if(Event.m_Key == KEY_END && m_Input.GetString()[0] == '\0')
 		{
 			m_BacklogActPage = 0;
+			m_pGameConsole->m_HasSelection = false;
 		}
 		else if(Event.m_Key == KEY_LSHIFT)
 		{
@@ -355,6 +361,8 @@ void CGameConsole::CInstance::PrintLine(const char *pLine, ColorRGBA PrintColor)
 	pEntry->m_PrintColor = PrintColor;
 	mem_copy(pEntry->m_aText, pLine, Len);
 	pEntry->m_aText[Len] = 0;
+	if(m_pGameConsole->m_ConsoleType == m_Type)
+		m_pGameConsole->m_NewLineCounter++;
 }
 
 CGameConsole::CGameConsole() :
@@ -650,6 +658,11 @@ void CGameConsole::OnRender()
 		float OffsetY = 0.0f;
 		float LineOffset = 1.0f;
 
+		bool WantsSelectionCopy = false;
+		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_C))
+			WantsSelectionCopy = true;
+		std::string SelectionString;
+
 		for(int Page = 0; Page <= pConsole->m_BacklogActPage; ++Page, OffsetY = 0.0f)
 		{
 			while(pEntry)
@@ -662,7 +675,7 @@ void CGameConsole::OnRender()
 					TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, FontSize, 0);
 					Cursor.m_LineWidth = Screen.w - 10;
 					TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
-					pEntry->m_YOffset = Cursor.m_Y + Cursor.m_FontSize + LineOffset;
+					pEntry->m_YOffset = Cursor.m_Y + Cursor.m_AlignedFontSize + LineOffset;
 				}
 				OffsetY += pEntry->m_YOffset;
 
@@ -670,17 +683,74 @@ void CGameConsole::OnRender()
 				if(y - OffsetY <= RowHeight)
 					break;
 
+				if(!m_MouseIsPress && Input()->NativeMousePressed(1))
+				{
+					m_MouseIsPress = true;
+					Input()->NativeMousePos(&m_MousePressX, &m_MousePressY);
+					m_MousePressX = (m_MousePressX / (float)Graphics()->ScreenWidth()) * Screen.w;
+					m_MousePressY = (m_MousePressY / (float)Graphics()->ScreenHeight()) * Screen.h;
+				}
+				if(m_MouseIsPress)
+				{
+					Input()->NativeMousePos(&m_MouseCurX, &m_MouseCurY);
+					m_MouseCurX = (m_MouseCurX / (float)Graphics()->ScreenWidth()) * Screen.w;
+					m_MouseCurY = (m_MouseCurY / (float)Graphics()->ScreenHeight()) * Screen.h;
+				}
+				if(m_MouseIsPress && !Input()->NativeMousePressed(1))
+				{
+					m_MouseIsPress = false;
+				}
+
 				//	just render output from actual backlog page (render bottom up)
 				if(Page == pConsole->m_BacklogActPage)
 				{
+					if(m_NewLineCounter > 0 && (m_HasSelection || m_MouseIsPress))
+					{
+						m_MousePressY -= OffsetY;
+						if(!m_MouseIsPress)
+							m_MouseCurY -= OffsetY;
+					}
 					TextRender()->SetCursor(&Cursor, 0.0f, y - OffsetY, FontSize, TEXTFLAG_RENDER);
 					Cursor.m_LineWidth = Screen.w - 10.0f;
+					Cursor.m_CalculateSelectionMode = (m_MouseIsPress || (m_CurSelStart != m_CurSelEnd) || m_HasSelection) ? TEXT_CURSOR_SELECTION_MODE_CALCULATE : TEXT_CURSOR_SELECTION_MODE_NONE;
+					Cursor.m_PressMouseX = m_MousePressX;
+					Cursor.m_PressMouseY = m_MousePressY;
+					Cursor.m_ReleaseMouseX = m_MouseCurX;
+					Cursor.m_ReleaseMouseY = m_MouseCurY;
 					TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
+					if(Cursor.m_CalculateSelectionMode == TEXT_CURSOR_SELECTION_MODE_CALCULATE)
+					{
+						m_CurSelStart = minimum(Cursor.m_SelectionStart, Cursor.m_SelectionEnd);
+						m_CurSelEnd = maximum(Cursor.m_SelectionStart, Cursor.m_SelectionEnd);
+					}
+					if(m_CurSelStart != m_CurSelEnd)
+					{
+						if(WantsSelectionCopy)
+						{
+							bool HasNewLine = false;
+							if(!SelectionString.empty())
+								HasNewLine = true;
+							int OffUTF8Start = 0;
+							int OffUTF8End = 0;
+							if(TextRender()->SelectionToUTF8OffSets(pEntry->m_aText, m_CurSelStart, m_CurSelEnd, OffUTF8Start, OffUTF8End))
+							{
+								SelectionString.insert(0, (std::string(&pEntry->m_aText[OffUTF8Start], OffUTF8End - OffUTF8Start) + (HasNewLine ? "\n" : "")));
+							}
+						}
+						m_HasSelection = true;
+					}
 				}
 				pEntry = pConsole->m_Backlog.Prev(pEntry);
 
 				// reset color
 				TextRender()->TextColor(1, 1, 1, 1);
+				if(m_NewLineCounter > 0)
+					--m_NewLineCounter;
+			}
+
+			if(WantsSelectionCopy && !SelectionString.empty())
+			{
+				Input()->SetClipboardText(SelectionString.c_str());
 			}
 
 			//	actual backlog page number is too high, render last available page (current checked one, render top down)
@@ -773,7 +843,8 @@ void CGameConsole::Toggle(int Type)
 			Input()->SetIMEState(false);
 		}
 	}
-
+	if(m_ConsoleType != Type)
+		m_HasSelection = false;
 	m_ConsoleType = Type;
 }
 
