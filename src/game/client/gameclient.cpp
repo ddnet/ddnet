@@ -453,6 +453,7 @@ void CGameClient::OnConnected()
 
 	m_GameWorld.Clear();
 	m_GameWorld.m_WorldConfig.m_InfiniteAmmo = true;
+	mem_zero(&m_GameInfo, sizeof(m_GameInfo));
 	m_PredictedDummyID = -1;
 	for(auto &LastWorldCharacter : m_aLastWorldCharacters)
 		LastWorldCharacter.m_Alive = false;
