@@ -2038,6 +2038,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 #if defined(CONF_VIDEORECORDER)
 						IVideo::SetLocalStartTime(m_LocalStartTime);
 #endif
+						GameClient()->OnNewSnapshot();
 						SetState(IClient::STATE_ONLINE);
 						DemoRecorder_HandleAutoStart();
 					}
