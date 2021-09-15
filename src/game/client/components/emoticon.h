@@ -19,6 +19,8 @@ class CEmoticon : public CComponent
 	static void ConKeyEmoticon(IConsole::IResult *pResult, void *pUserData);
 	static void ConEmote(IConsole::IResult *pResult, void *pUserData);
 
+	EComponentMouseMovementBlockMode OnMouseWrongStateImpl();
+
 public:
 	CEmoticon();
 
@@ -26,7 +28,11 @@ public:
 	virtual void OnConsoleInit();
 	virtual void OnRender();
 	virtual void OnRelease();
-	virtual bool OnMouseMove(float x, float y);
+
+	virtual EComponentMouseMovementBlockMode OnMouseInWindowPos(int X, int Y);
+	virtual EComponentMouseMovementBlockMode OnMouseAbsoluteInWindowPos(int X, int Y);
+	virtual EComponentMouseMovementBlockMode OnMouseInWindowRelativeMove(int X, int Y);
+	virtual EComponentMouseMovementBlockMode OnMouseRelativeMove(float x, float y);
 
 	void Emote(int Emote);
 	void EyeEmote(int EyeEmote);

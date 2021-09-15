@@ -162,6 +162,8 @@ public:
 	void SetWindowGrab(bool Grab) override{};
 	void NotifyWindow() override{};
 
+	void WarpMouse(int MouseX, int MouseY) override {}
+
 	int Init() override { return 0; };
 	void Shutdown() override{};
 

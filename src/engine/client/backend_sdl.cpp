@@ -895,9 +895,6 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *pScreen, int *pWid
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
 	}
 
-	if(g_Config.m_InpMouseOld)
-		SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "1");
-
 	m_pWindow = SDL_CreateWindow(
 		pName,
 		SDL_WINDOWPOS_CENTERED_DISPLAY(*pScreen),
@@ -1215,6 +1212,11 @@ void CGraphicsBackend_SDL_OpenGL::NotifyWindow()
 		return;
 	}
 #endif
+}
+
+void CGraphicsBackend_SDL_OpenGL::WarpMouse(int MouseX, int MouseY)
+{
+	SDL_WarpMouseInWindow(m_pWindow, MouseX, MouseY);
 }
 
 IGraphicsBackend *CreateGraphicsBackend() { return new CGraphicsBackend_SDL_OpenGL; }

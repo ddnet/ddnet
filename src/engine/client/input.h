@@ -12,10 +12,6 @@ class CInput : public IEngineInput
 {
 	IEngineGraphics *m_pGraphics;
 
-	int m_LastX;
-	int m_LastY;
-
-	int m_InputGrabbed;
 	char *m_pClipboardText;
 
 	int64_t m_LastRelease;
@@ -39,9 +35,14 @@ class CInput : public IEngineInput
 	int m_EditingTextLen;
 	int m_EditingCursor;
 
+	int m_DesktopX = 0;
+	int m_DesktopY = 0;
+
 	bool KeyState(int Key) const;
 
 	IEngineGraphics *Graphics() { return m_pGraphics; }
+
+	void MouseModeInGameRelativeImpl();
 
 public:
 	CInput();
@@ -51,11 +52,19 @@ public:
 	bool KeyIsPressed(int Key) const { return KeyState(Key); }
 	bool KeyPress(int Key, bool CheckCounter) const { return CheckCounter ? (m_aInputCount[Key] == m_InputCounter) : m_aInputCount[Key]; }
 
-	virtual void MouseRelative(float *x, float *y);
-	virtual void MouseModeAbsolute();
-	virtual void MouseModeRelative();
 	virtual void NativeMousePos(int *x, int *y) const;
 	virtual bool NativeMousePressed(int index);
+	virtual bool MouseRelative(float *x, float *y);
+	virtual bool MouseDesktopRelative(int *x, int *y);
+	virtual bool MouseAbsolute(int *x, int *y);
+
+	// return true if the mode was changed
+	virtual void MouseModeChange(EInputMouseMode OldState, EInputMouseMode NewState);
+	virtual bool MouseModeAbsolute();
+	virtual bool MouseModeRelative();
+	virtual bool MouseModeInGame(int *pDesiredX = NULL, int *pDesiredY = NULL);
+	virtual bool MouseModeInGameRelative();
+
 	virtual int MouseDoubleClick();
 	virtual const char *GetClipboardText();
 	virtual void SetClipboardText(const char *Text);
