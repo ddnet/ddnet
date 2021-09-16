@@ -403,7 +403,19 @@ void CDemoRecorder::AddDemoMarker()
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", "Added timeline marker", gs_DemoPrintColor);
 }
 
+CDemoPlayer::CDemoPlayer(class CSnapshotDelta *pSnapshotDelta, TUpdateIntraTimesFunc &&UpdateIntraTimesFunc)
+{
+	Construct(pSnapshotDelta);
+
+	m_UpdateIntraTimesFunc = UpdateIntraTimesFunc;
+}
+
 CDemoPlayer::CDemoPlayer(class CSnapshotDelta *pSnapshotDelta)
+{
+	Construct(pSnapshotDelta);
+}
+
+void CDemoPlayer::Construct(class CSnapshotDelta *pSnapshotDelta)
 {
 	m_File = 0;
 	m_pKeyFrames = 0;
@@ -552,6 +564,15 @@ void CDemoPlayer::DoTick()
 	m_Info.m_PreviousTick = m_Info.m_Info.m_CurrentTick;
 	m_Info.m_Info.m_CurrentTick = m_Info.m_NextTick;
 	ChunkTick = m_Info.m_Info.m_CurrentTick;
+
+	int64_t Freq = time_freq();
+	int64_t CurtickStart = (m_Info.m_Info.m_CurrentTick) * Freq / SERVER_TICK_SPEED;
+	int64_t PrevtickStart = (m_Info.m_PreviousTick) * Freq / SERVER_TICK_SPEED;
+	m_Info.m_IntraTick = (m_Info.m_CurrentTime - PrevtickStart) / (float)(CurtickStart - PrevtickStart);
+	m_Info.m_IntraTickSincePrev = (m_Info.m_CurrentTime - PrevtickStart) / (float)(Freq / SERVER_TICK_SPEED);
+	m_Info.m_TickTime = (m_Info.m_CurrentTime - PrevtickStart) / (float)Freq;
+	if(m_UpdateIntraTimesFunc)
+		m_UpdateIntraTimesFunc();
 
 	while(1)
 	{
@@ -1005,7 +1026,10 @@ int CDemoPlayer::Update(bool RealTime)
 			int64_t CurtickStart = (m_Info.m_Info.m_CurrentTick) * Freq / SERVER_TICK_SPEED;
 			int64_t PrevtickStart = (m_Info.m_PreviousTick) * Freq / SERVER_TICK_SPEED;
 			m_Info.m_IntraTick = (m_Info.m_CurrentTime - PrevtickStart) / (float)(CurtickStart - PrevtickStart);
+			m_Info.m_IntraTickSincePrev = (m_Info.m_CurrentTime - PrevtickStart) / (float)(Freq / SERVER_TICK_SPEED);
 			m_Info.m_TickTime = (m_Info.m_CurrentTime - PrevtickStart) / (float)Freq;
+			if(m_UpdateIntraTimesFunc)
+				m_UpdateIntraTimesFunc();
 		}
 
 		if(m_Info.m_Info.m_CurrentTick == m_Info.m_PreviousTick ||
@@ -1019,10 +1043,8 @@ int CDemoPlayer::Update(bool RealTime)
 				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", aBuf);
 			}
 		}
-
 		m_Time += m_TickTime;
 	}
-
 	return 0;
 }
 

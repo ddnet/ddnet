@@ -588,7 +588,7 @@ public:
 	int m_Front;
 	int m_Switch;
 	int m_Tune;
-	char m_aFileName[512];
+	char m_aFileName[IO_MAX_PATH_LENGTH];
 };
 
 class CLayerQuads : public CLayer
@@ -820,8 +820,8 @@ public:
 
 	bool m_BrushColorEnabled;
 
-	char m_aFileName[512];
-	char m_aFileSaveName[512];
+	char m_aFileName[IO_MAX_PATH_LENGTH];
+	char m_aFileSaveName[IO_MAX_PATH_LENGTH];
 	bool m_ValidSaveFilename;
 
 	enum
@@ -861,9 +861,9 @@ public:
 	const char *m_pFileDialogButtonText;
 	void (*m_pfnFileDialogFunc)(const char *pFileName, int StorageType, void *pUser);
 	void *m_pFileDialogUser;
-	char m_aFileDialogFileName[MAX_PATH_LENGTH];
-	char m_aFileDialogCurrentFolder[MAX_PATH_LENGTH];
-	char m_aFileDialogCurrentLink[MAX_PATH_LENGTH];
+	char m_aFileDialogFileName[IO_MAX_PATH_LENGTH];
+	char m_aFileDialogCurrentFolder[IO_MAX_PATH_LENGTH];
+	char m_aFileDialogCurrentLink[IO_MAX_PATH_LENGTH];
 	char m_aFileDialogSearchText[64];
 	char m_aFileDialogPrevSearchText[64];
 	char *m_pFileDialogPath;
@@ -880,7 +880,7 @@ public:
 
 	struct CFilelistItem
 	{
-		char m_aFilename[128];
+		char m_aFilename[IO_MAX_PATH_LENGTH];
 		char m_aName[128];
 		bool m_IsDir;
 		bool m_IsLink;

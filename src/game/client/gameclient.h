@@ -331,8 +331,6 @@ public:
 			vec2 m_Position;
 		};
 
-		bool m_HasSwitchState;
-
 		CCharacterInfo m_aCharacters[MAX_CLIENTS];
 	};
 
@@ -356,7 +354,8 @@ public:
 		int m_SkinColor;
 		int m_Team;
 		int m_Emoticon;
-		int m_EmoticonStart;
+		float m_EmoticonStartFraction;
+		int m_EmoticonStartTick;
 		bool m_Solo;
 		bool m_Jetpack;
 		bool m_NoCollision;

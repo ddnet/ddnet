@@ -104,14 +104,20 @@ public:
 	void QuadsDrawFreeform(const CFreeformItem *pArray, int Num) override{};
 	void QuadsText(float x, float y, float Size, const char *pText) override{};
 
-	int CreateQuadContainer() override { return 0; };
+	GL_STexCoord m_aTexCoords[4];
+	GL_SColor m_aColors[4];
+	const GL_STexCoord *GetCurTextureCoordinates() override { return m_aTexCoords; }
+	const GL_SColor *GetCurColor() override { return m_aColors; }
+
+	int CreateQuadContainer(bool AutomaticUpload = true) override { return -1; }
+	void QuadContainerChangeAutomaticUpload(int ContainerIndex, bool AutomaticUpload) override {}
 	void QuadContainerUpload(int ContainerIndex) override{};
 	void QuadContainerAddQuads(int ContainerIndex, CQuadItem *pArray, int Num) override{};
 	void QuadContainerAddQuads(int ContainerIndex, CFreeformItem *pArray, int Num) override{};
 	void QuadContainerReset(int ContainerIndex) override{};
 	void DeleteQuadContainer(int ContainerIndex) override{};
 	void RenderQuadContainer(int ContainerIndex, int QuadDrawNum) override{};
-	void RenderQuadContainer(int ContainerIndex, int QuadOffset, int QuadDrawNum) override{};
+	void RenderQuadContainer(int ContainerIndex, int QuadOffset, int QuadDrawNum, bool ChangeWrapMode = true) override{};
 	void RenderQuadContainerEx(int ContainerIndex, int QuadOffset, int QuadDrawNum, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f) override{};
 	void RenderQuadContainerAsSprite(int ContainerIndex, int QuadOffset, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f) override{};
 	void RenderQuadContainerAsSpriteMultiple(int ContainerIndex, int QuadOffset, int DrawCount, SRenderSpriteInfo *pRenderInfo) override{};

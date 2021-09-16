@@ -27,7 +27,7 @@ int SqliteHandleError(IConsole *pConsole, int Error, sqlite3 *pSqlite, const cha
 
 CSqlite SqliteOpen(IConsole *pConsole, IStorage *pStorage, const char *pPath)
 {
-	char aFullPath[MAX_PATH_LENGTH];
+	char aFullPath[IO_MAX_PATH_LENGTH];
 	pStorage->GetCompletePath(IStorage::TYPE_SAVE, pPath, aFullPath, sizeof(aFullPath));
 	sqlite3 *pSqlite = nullptr;
 	const bool ErrorOpening = SQLITE_HANDLE_ERROR(sqlite3_open(aFullPath, &pSqlite)) != SQLITE_OK;

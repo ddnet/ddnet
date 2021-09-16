@@ -166,8 +166,8 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	// pinging
 	int64_t m_PingStartTime;
 
-	char m_aCurrentMap[MAX_PATH_LENGTH];
-	char m_aCurrentMapPath[MAX_PATH_LENGTH];
+	char m_aCurrentMap[IO_MAX_PATH_LENGTH];
+	char m_aCurrentMapPath[IO_MAX_PATH_LENGTH];
 
 	char m_aTimeoutCodes[NUM_DUMMIES][32];
 	bool m_aTimeoutCodeSent[NUM_DUMMIES];
@@ -175,14 +175,15 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	//
 	char m_aCmdConnect[256];
-	char m_aCmdPlayDemo[MAX_PATH_LENGTH];
-	char m_aCmdEditMap[MAX_PATH_LENGTH];
+	char m_aCmdPlayDemo[IO_MAX_PATH_LENGTH];
+	char m_aCmdEditMap[IO_MAX_PATH_LENGTH];
 
 	// map download
 	std::shared_ptr<CGetFile> m_pMapdownloadTask;
 	char m_aMapdownloadFilename[256];
+	char m_aMapdownloadFilenameTemp[256];
 	char m_aMapdownloadName[256];
-	IOHANDLE m_MapdownloadFile;
+	IOHANDLE m_MapdownloadFileTemp;
 	int m_MapdownloadChunk;
 	int m_MapdownloadCrc;
 	int m_MapdownloadAmount;
@@ -277,6 +278,8 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	IOHANDLE m_BenchmarkFile;
 	int64_t m_BenchmarkStopTime;
+
+	void UpdateDemoIntraTimers();
 
 public:
 	IEngine *Engine() { return m_pEngine; }

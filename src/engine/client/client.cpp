@@ -267,7 +267,7 @@ void CSmoothTime::Update(CGraph *pGraph, int64_t Target, int TimeLeft, int Adjus
 }
 
 CClient::CClient() :
-	m_DemoPlayer(&m_SnapshotDelta)
+	m_DemoPlayer(&m_SnapshotDelta, [&]() { UpdateDemoIntraTimers(); })
 {
 	for(auto &DemoRecorder : m_DemoRecorder)
 		DemoRecorder = CDemoRecorder(&m_SnapshotDelta);
@@ -318,9 +318,10 @@ CClient::CClient() :
 
 	// map download
 	m_aMapdownloadFilename[0] = 0;
+	m_aMapdownloadFilenameTemp[0] = 0;
 	m_aMapdownloadName[0] = 0;
 	m_pMapdownloadTask = NULL;
-	m_MapdownloadFile = 0;
+	m_MapdownloadFileTemp = 0;
 	m_MapdownloadChunk = 0;
 	m_MapdownloadSha256Present = false;
 	m_MapdownloadSha256 = SHA256_ZEROED;
@@ -502,9 +503,12 @@ void CClient::SendReady()
 
 void CClient::SendMapRequest()
 {
-	if(m_MapdownloadFile)
-		io_close(m_MapdownloadFile);
-	m_MapdownloadFile = Storage()->OpenFile(m_aMapdownloadFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	if(m_MapdownloadFileTemp)
+	{
+		io_close(m_MapdownloadFileTemp);
+		Storage()->RemoveFile(m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE);
+	}
+	m_MapdownloadFileTemp = Storage()->OpenFile(m_aMapdownloadFilenameTemp, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	CMsgPacker Msg(NETMSG_REQUEST_MAP_DATA, true);
 	Msg.AddInt(m_MapdownloadChunk);
 	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH);
@@ -848,9 +852,12 @@ void CClient::DisconnectWithReason(const char *pReason)
 	m_MapdownloadChunk = 0;
 	if(m_pMapdownloadTask)
 		m_pMapdownloadTask->Abort();
-	if(m_MapdownloadFile)
-		io_close(m_MapdownloadFile);
-	m_MapdownloadFile = 0;
+	if(m_MapdownloadFileTemp)
+	{
+		io_close(m_MapdownloadFileTemp);
+		Storage()->RemoveFile(m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE);
+	}
+	m_MapdownloadFileTemp = 0;
 	m_MapdownloadSha256Present = false;
 	m_MapdownloadSha256 = SHA256_ZEROED;
 	m_MapdownloadCrc = 0;
@@ -1263,24 +1270,43 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, SHA256_DI
 	return 0;
 }
 
+static void FormatMapDownloadFilename(const char *pName, const SHA256_DIGEST *pSha256, int Crc, bool Temp, char *pBuffer, int BufferSize)
+{
+	char aSuffix[32];
+	if(Temp)
+	{
+		str_format(aSuffix, sizeof(aSuffix), ".%d.tmp", pid());
+	}
+	else
+	{
+		str_copy(aSuffix, ".map", sizeof(aSuffix));
+	}
+
+	if(pSha256)
+	{
+		char aSha256[SHA256_MAXSTRSIZE];
+		sha256_str(*pSha256, aSha256, sizeof(aSha256));
+		str_format(pBuffer, BufferSize, "downloadedmaps/%s_%s%s", pName, aSha256, aSuffix);
+	}
+	else
+	{
+		str_format(pBuffer, BufferSize, "downloadedmaps/%s_%08x%s", pName, Crc, aSuffix);
+	}
+}
+
 const char *CClient::LoadMapSearch(const char *pMapName, SHA256_DIGEST *pWantedSha256, int WantedCrc)
 {
 	const char *pError = 0;
 	char aBuf[512];
-	char aWanted[256];
-	char aWantedSha256[SHA256_MAXSTRSIZE];
-
+	char aWanted[SHA256_MAXSTRSIZE + 16];
+	aWanted[0] = 0;
 	if(pWantedSha256)
 	{
+		char aWantedSha256[SHA256_MAXSTRSIZE];
 		sha256_str(*pWantedSha256, aWantedSha256, sizeof(aWantedSha256));
-		str_format(aWanted, sizeof(aWanted), "sha256=%s", aWantedSha256);
+		str_format(aWanted, sizeof(aWanted), "sha256=%s ", aWantedSha256);
 	}
-	else
-	{
-		str_format(aWanted, sizeof(aWanted), "crc=%08x", WantedCrc);
-	}
-
-	str_format(aBuf, sizeof(aBuf), "loading map, map=%s wanted %s", pMapName, aWanted);
+	str_format(aBuf, sizeof(aBuf), "loading map, map=%s wanted %scrc=%08x", pMapName, aWanted, WantedCrc);
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", aBuf);
 	SetState(IClient::STATE_LOADING);
 
@@ -1291,23 +1317,22 @@ const char *CClient::LoadMapSearch(const char *pMapName, SHA256_DIGEST *pWantedS
 		return pError;
 
 	// try the downloaded maps
-	if(pWantedSha256)
-	{
-		str_format(aBuf, sizeof(aBuf), "downloadedmaps/%s_%s.map", pMapName, aWantedSha256);
-	}
-	else
-	{
-		str_format(aBuf, sizeof(aBuf), "downloadedmaps/%s_%08x.map", pMapName, WantedCrc);
-		pError = LoadMap(pMapName, aBuf, pWantedSha256, WantedCrc);
-		if(!pError)
-			return pError;
-	}
+	FormatMapDownloadFilename(pMapName, pWantedSha256, WantedCrc, false, aBuf, sizeof(aBuf));
 	pError = LoadMap(pMapName, aBuf, pWantedSha256, WantedCrc);
 	if(!pError)
 		return pError;
 
+	// backward compatibility with old names
+	if(pWantedSha256)
+	{
+		FormatMapDownloadFilename(pMapName, 0, WantedCrc, false, aBuf, sizeof(aBuf));
+		pError = LoadMap(pMapName, aBuf, pWantedSha256, WantedCrc);
+		if(!pError)
+			return pError;
+	}
+
 	// search for the map within subfolders
-	char aFilename[128];
+	char aFilename[IO_MAX_PATH_LENGTH];
 	str_format(aFilename, sizeof(aFilename), "%s.map", pMapName);
 	if(Storage()->FindFile(aFilename, "maps", IStorage::TYPE_ALL, aBuf, sizeof(aBuf)))
 		pError = LoadMap(pMapName, aBuf, pWantedSha256, WantedCrc);
@@ -1558,28 +1583,6 @@ bool CClient::ShouldSendChatTimeoutCodeHeuristic()
 	return IsDDNet(&m_CurrentServerInfo);
 }
 
-static void FormatMapDownloadFilename(const char *pName, SHA256_DIGEST *pSha256, int Crc, bool Temp, char *pBuffer, int BufferSize)
-{
-	char aHash[SHA256_MAXSTRSIZE];
-	if(pSha256)
-	{
-		sha256_str(*pSha256, aHash, sizeof(aHash));
-	}
-	else
-	{
-		str_format(aHash, sizeof(aHash), "%08x", Crc);
-	}
-
-	if(Temp)
-	{
-		str_format(pBuffer, BufferSize, "%s_%s.map.%d.tmp", pName, aHash, pid());
-	}
-	else
-	{
-		str_format(pBuffer, BufferSize, "%s_%s.map", pName, aHash);
-	}
-}
-
 static CServerCapabilities GetServerCapabilities(int Version, int Flags)
 {
 	CServerCapabilities Result;
@@ -1710,16 +1713,18 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 				}
 				else
 				{
-					char aFilename[256];
-					FormatMapDownloadFilename(pMap, pMapSha256, MapCrc, false, aFilename, sizeof(aFilename));
+					if(m_MapdownloadFileTemp)
+					{
+						io_close(m_MapdownloadFileTemp);
+						Storage()->RemoveFile(m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE);
+					}
 
-					char aTempFilename[256];
-					FormatMapDownloadFilename(pMap, pMapSha256, MapCrc, true, aTempFilename, sizeof(aTempFilename));
-
-					str_format(m_aMapdownloadFilename, sizeof(m_aMapdownloadFilename), "downloadedmaps/%s", aTempFilename);
+					// start map download
+					FormatMapDownloadFilename(pMap, pMapSha256, MapCrc, false, m_aMapdownloadFilename, sizeof(m_aMapdownloadFilename));
+					FormatMapDownloadFilename(pMap, pMapSha256, MapCrc, true, m_aMapdownloadFilenameTemp, sizeof(m_aMapdownloadFilenameTemp));
 
 					char aBuf[256];
-					str_format(aBuf, sizeof(aBuf), "starting to download map to '%s'", m_aMapdownloadFilename);
+					str_format(aBuf, sizeof(aBuf), "starting to download map to '%s'", m_aMapdownloadFilenameTemp);
 					m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", aBuf);
 
 					m_MapdownloadChunk = 0;
@@ -1737,11 +1742,11 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 					{
 						char aUrl[256];
 						char aEscaped[256];
-						EscapeUrl(aEscaped, sizeof(aEscaped), aFilename);
+						EscapeUrl(aEscaped, sizeof(aEscaped), m_aMapdownloadFilename + 15); // cut off downloadedmaps/
 						bool UseConfigUrl = str_comp(g_Config.m_ClMapDownloadUrl, "https://maps2.ddnet.tw") != 0 || m_aMapDownloadUrl[0] == '\0';
 						str_format(aUrl, sizeof(aUrl), "%s/%s", UseConfigUrl ? g_Config.m_ClMapDownloadUrl : m_aMapDownloadUrl, aEscaped);
 
-						m_pMapdownloadTask = std::make_shared<CGetFile>(Storage(), aUrl, m_aMapdownloadFilename, IStorage::TYPE_SAVE, CTimeout{g_Config.m_ClMapDownloadConnectTimeoutMs, g_Config.m_ClMapDownloadLowSpeedLimit, g_Config.m_ClMapDownloadLowSpeedTime});
+						m_pMapdownloadTask = std::make_shared<CGetFile>(Storage(), aUrl, m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE, CTimeout{g_Config.m_ClMapDownloadConnectTimeoutMs, g_Config.m_ClMapDownloadLowSpeedLimit, g_Config.m_ClMapDownloadLowSpeedTime});
 						Engine()->AddJob(m_pMapdownloadTask);
 					}
 					else
@@ -1758,19 +1763,19 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 			const unsigned char *pData = Unpacker.GetRaw(Size);
 
 			// check for errors
-			if(Unpacker.Error() || Size <= 0 || MapCRC != m_MapdownloadCrc || Chunk != m_MapdownloadChunk || !m_MapdownloadFile)
+			if(Unpacker.Error() || Size <= 0 || MapCRC != m_MapdownloadCrc || Chunk != m_MapdownloadChunk || !m_MapdownloadFileTemp)
 				return;
 
-			io_write(m_MapdownloadFile, pData, Size);
+			io_write(m_MapdownloadFileTemp, pData, Size);
 
 			m_MapdownloadAmount += Size;
 
 			if(Last)
 			{
-				if(m_MapdownloadFile)
+				if(m_MapdownloadFileTemp)
 				{
-					io_close(m_MapdownloadFile);
-					m_MapdownloadFile = 0;
+					io_close(m_MapdownloadFileTemp);
+					m_MapdownloadFileTemp = 0;
 				}
 				FinishMapDownload();
 			}
@@ -2077,6 +2082,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 #if defined(CONF_VIDEORECORDER)
 						IVideo::SetLocalStartTime(m_LocalStartTime);
 #endif
+						GameClient()->OnNewSnapshot();
 						SetState(IClient::STATE_ONLINE);
 						DemoRecorder_HandleAutoStart();
 					}
@@ -2381,7 +2387,7 @@ void CClient::ResetMapDownload()
 		m_pMapdownloadTask->Abort();
 		m_pMapdownloadTask = NULL;
 	}
-	m_MapdownloadFile = 0;
+	m_MapdownloadFileTemp = 0;
 	m_MapdownloadAmount = 0;
 }
 
@@ -2394,18 +2400,11 @@ void CClient::FinishMapDownload()
 	m_MapdownloadTotalsize = -1;
 	SHA256_DIGEST *pSha256 = m_MapdownloadSha256Present ? &m_MapdownloadSha256 : 0;
 
-	char aTmp[MAX_PATH_LENGTH];
-	char aMapFileTemp[MAX_PATH_LENGTH];
-	char aMapFile[MAX_PATH_LENGTH];
-	FormatMapDownloadFilename(m_aMapdownloadName, pSha256, m_MapdownloadCrc, true, aTmp, sizeof(aTmp));
-	str_format(aMapFileTemp, sizeof(aMapFileTemp), "downloadedmaps/%s", aTmp);
-	FormatMapDownloadFilename(m_aMapdownloadName, pSha256, m_MapdownloadCrc, false, aTmp, sizeof(aTmp));
-	str_format(aMapFile, sizeof(aMapFileTemp), "downloadedmaps/%s", aTmp);
-
-	Storage()->RenameFile(aMapFileTemp, aMapFile, IStorage::TYPE_SAVE);
+	Storage()->RemoveFile(m_aMapdownloadFilename, IStorage::TYPE_SAVE);
+	Storage()->RenameFile(m_aMapdownloadFilenameTemp, m_aMapdownloadFilename, IStorage::TYPE_SAVE);
 
 	// load map
-	pError = LoadMap(m_aMapdownloadName, aMapFile, pSha256, m_MapdownloadCrc);
+	pError = LoadMap(m_aMapdownloadName, m_aMapdownloadFilename, pSha256, m_MapdownloadCrc);
 	if(!pError)
 	{
 		ResetMapDownload();
@@ -2420,10 +2419,11 @@ void CClient::FinishMapDownload()
 	}
 	else
 	{
-		if(m_MapdownloadFile)
+		if(m_MapdownloadFileTemp)
 		{
-			io_close(m_MapdownloadFile);
-			m_MapdownloadFile = 0;
+			io_close(m_MapdownloadFileTemp);
+			m_MapdownloadFileTemp = 0;
+			Storage()->RemoveFile(m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE);
 		}
 		ResetMapDownload();
 		DisconnectWithReason(pError);
@@ -2699,6 +2699,17 @@ void DemoPlayer()->SetPause(int paused)
 		demorec_playback_unpause();
 }*/
 
+void CClient::UpdateDemoIntraTimers()
+{
+	// update timers
+	const CDemoPlayer::CPlaybackInfo *pInfo = m_DemoPlayer.Info();
+	m_CurGameTick[g_Config.m_ClDummy] = pInfo->m_Info.m_CurrentTick;
+	m_PrevGameTick[g_Config.m_ClDummy] = pInfo->m_PreviousTick;
+	m_GameIntraTick[g_Config.m_ClDummy] = pInfo->m_IntraTick;
+	m_GameTickTime[g_Config.m_ClDummy] = pInfo->m_TickTime;
+	m_GameIntraTickSincePrev[g_Config.m_ClDummy] = pInfo->m_IntraTickSincePrev;
+};
+
 void CClient::Update()
 {
 	if(State() == IClient::STATE_DEMOPLAYBACK)
@@ -2824,6 +2835,7 @@ void CClient::Update()
 
 				m_GameIntraTick[g_Config.m_ClDummy] = (Now - PrevtickStart) / (float)(CurtickStart - PrevtickStart);
 				m_GameTickTime[g_Config.m_ClDummy] = (Now - PrevtickStart) / (float)Freq; //(float)SERVER_TICK_SPEED);
+				m_GameIntraTickSincePrev[g_Config.m_ClDummy] = (Now - PrevtickStart) / (float)(Freq / SERVER_TICK_SPEED);
 
 				CurtickStart = NewPredTick * time_freq() / 50;
 				PrevtickStart = PrevPredTick * time_freq() / 50;
@@ -3769,7 +3781,7 @@ void CClient::SaveReplay(const int Length)
 	{
 		// First we stop the recorder to slice correctly the demo after
 		DemoRecorder_Stop(RECORDER_REPLAYS);
-		char aFilename[MAX_PATH_LENGTH];
+		char aFilename[IO_MAX_PATH_LENGTH];
 
 		char aDate[64];
 		str_timestamp(aDate, sizeof(aDate));
@@ -3920,7 +3932,7 @@ void CClient::DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int 
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demorec/record", "client is not online");
 	else
 	{
-		char aFilename[128];
+		char aFilename[IO_MAX_PATH_LENGTH];
 		if(WithTimestamp)
 		{
 			char aDate[20];
@@ -4022,7 +4034,7 @@ void CClient::Con_BenchmarkQuit(IConsole::IResult *pResult, void *pUserData)
 
 void CClient::BenchmarkQuit(int Seconds, const char *pFilename)
 {
-	char aBuf[MAX_PATH_LENGTH];
+	char aBuf[IO_MAX_PATH_LENGTH];
 	m_BenchmarkFile = Storage()->OpenFile(pFilename, IOFLAG_WRITE, IStorage::TYPE_ABSOLUTE, aBuf, sizeof(aBuf));
 	m_BenchmarkStopTime = time_get() + time_freq() * Seconds;
 }
@@ -4108,7 +4120,7 @@ void CClient::ToggleWindowVSync()
 void CClient::LoadFont()
 {
 	static CFont *pDefaultFont = 0;
-	char aFilename[512];
+	char aFilename[IO_MAX_PATH_LENGTH];
 	char aBuff[1024];
 	const char *pFontFile = "fonts/DejaVuSans.ttf";
 	const char *apFallbackFontFiles[] =

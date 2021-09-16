@@ -155,7 +155,7 @@ public:
 
 	bool m_DND;
 	int64_t m_FirstVoteTick;
-	char m_TimeoutCode[64];
+	char m_aTimeoutCode[64];
 
 	void ProcessPause();
 	int Pause(int State, bool Force);

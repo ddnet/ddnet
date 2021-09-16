@@ -899,7 +899,7 @@ int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType
 	if(IsDir || !str_endswith(pName, ".gho") || !str_startswith(pName, pMap))
 		return 0;
 
-	char aFilename[256];
+	char aFilename[IO_MAX_PATH_LENGTH];
 	str_format(aFilename, sizeof(aFilename), "%s/%s", pSelf->m_pClient->m_Ghost.GetGhostDir(), pName);
 
 	CGhostInfo Info;

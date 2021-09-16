@@ -7,8 +7,11 @@
 
 #include <engine/demo.h>
 #include <engine/shared/protocol.h>
+#include <functional>
 
 #include "snapshot.h"
+
+typedef std::function<void()> TUpdateIntraTimesFunc;
 
 class CDemoRecorder : public IDemoRecorder
 {
@@ -75,11 +78,14 @@ public:
 		int m_PreviousTick;
 
 		float m_IntraTick;
+		float m_IntraTickSincePrev;
 		float m_TickTime;
 	};
 
 private:
 	IListener *m_pListener;
+
+	TUpdateIntraTimesFunc m_UpdateIntraTimesFunc;
 
 	// Playback
 	struct CKeyFrame
@@ -97,7 +103,7 @@ private:
 	class IConsole *m_pConsole;
 	IOHANDLE m_File;
 	long m_MapOffset;
-	char m_aFilename[256];
+	char m_aFilename[IO_MAX_PATH_LENGTH];
 	CKeyFrame *m_pKeyFrames;
 	CMapInfo m_MapInfo;
 	int m_SpeedIndex;
@@ -120,6 +126,9 @@ private:
 
 public:
 	CDemoPlayer(class CSnapshotDelta *pSnapshotDelta);
+	CDemoPlayer(class CSnapshotDelta *pSnapshotDelta, TUpdateIntraTimesFunc &&UpdateIntraTimesFunc);
+
+	void Construct(class CSnapshotDelta *pSnapshotDelta);
 
 	void SetListener(IListener *pListener);
 

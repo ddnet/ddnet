@@ -473,6 +473,7 @@ void CGameClient::OnConnected()
 
 	m_GameWorld.Clear();
 	m_GameWorld.m_WorldConfig.m_InfiniteAmmo = true;
+	mem_zero(&m_GameInfo, sizeof(m_GameInfo));
 	m_PredictedDummyID = -1;
 	for(auto &LastWorldCharacter : m_aLastWorldCharacters)
 		LastWorldCharacter.m_Alive = false;
@@ -759,7 +760,8 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)
 
 		// apply
 		m_aClients[pMsg->m_ClientID].m_Emoticon = pMsg->m_Emoticon;
-		m_aClients[pMsg->m_ClientID].m_EmoticonStart = Client()->GameTick(g_Config.m_ClDummy);
+		m_aClients[pMsg->m_ClientID].m_EmoticonStartTick = Client()->GameTick(g_Config.m_ClDummy);
+		m_aClients[pMsg->m_ClientID].m_EmoticonStartFraction = Client()->IntraGameTickSincePrev(g_Config.m_ClDummy);
 	}
 	else if(MsgId == NETMSGTYPE_SV_SOUNDGLOBAL)
 	{
@@ -1425,31 +1427,42 @@ void CGameClient::OnNewSnapshot()
 				m_Snap.m_paFlags[Item.m_ID % 2] = (const CNetObj_Flag *)pData;
 			else if(Item.m_Type == NETOBJTYPE_SWITCHSTATE)
 			{
-				m_Snap.m_HasSwitchState = true;
-
 				const CNetObj_SwitchState *pSwitchStateData = (const CNetObj_SwitchState *)pData;
-				CClientData *pClient = &m_aClients[Item.m_ID];
+				int Team = Item.m_ID;
 
-				mem_zero(pClient->m_SwitchStates, sizeof(pClient->m_SwitchStates));
+				int NumSwitchers = clamp(pSwitchStateData->m_NumSwitchers, 0, 255);
+				if(!Collision()->m_pSwitchers || NumSwitchers != Collision()->m_NumSwitchers)
+				{
+					delete Collision()->m_pSwitchers;
+					Collision()->m_pSwitchers = new CCollision::SSwitchers[NumSwitchers + 1];
+					Collision()->m_NumSwitchers = NumSwitchers;
+				}
 
-				for(int i = 0; i < pSwitchStateData->m_NumSwitchers + 1; i++)
+				for(int i = 0; i < NumSwitchers + 1; i++)
 				{
 					if(i < 32)
-						pClient->m_SwitchStates[i] = pSwitchStateData->m_Status1 & (1 << i);
+						Collision()->m_pSwitchers[i].m_Status[Team] = pSwitchStateData->m_Status1 & (1 << i);
 					else if(i < 64)
-						pClient->m_SwitchStates[i] = pSwitchStateData->m_Status2 & (1 << (i - 32));
+						Collision()->m_pSwitchers[i].m_Status[Team] = pSwitchStateData->m_Status2 & (1 << (i - 32));
 					else if(i < 96)
-						pClient->m_SwitchStates[i] = pSwitchStateData->m_Status3 & (1 << (i - 64));
+						Collision()->m_pSwitchers[i].m_Status[Team] = pSwitchStateData->m_Status3 & (1 << (i - 64));
 					else if(i < 128)
-						pClient->m_SwitchStates[i] = pSwitchStateData->m_Status4 & (1 << (i - 96));
+						Collision()->m_pSwitchers[i].m_Status[Team] = pSwitchStateData->m_Status4 & (1 << (i - 96));
 					else if(i < 160)
-						pClient->m_SwitchStates[i] = pSwitchStateData->m_Status5 & (1 << (i - 128));
+						Collision()->m_pSwitchers[i].m_Status[Team] = pSwitchStateData->m_Status5 & (1 << (i - 128));
 					else if(i < 192)
-						pClient->m_SwitchStates[i] = pSwitchStateData->m_Status6 & (1 << (i - 160));
+						Collision()->m_pSwitchers[i].m_Status[Team] = pSwitchStateData->m_Status6 & (1 << (i - 160));
 					else if(i < 224)
-						pClient->m_SwitchStates[i] = pSwitchStateData->m_Status7 & (1 << (i - 192));
+						Collision()->m_pSwitchers[i].m_Status[Team] = pSwitchStateData->m_Status7 & (1 << (i - 192));
 					else if(i < 256)
-						pClient->m_SwitchStates[i] = pSwitchStateData->m_Status8 & (1 << (i - 224));
+						Collision()->m_pSwitchers[i].m_Status[Team] = pSwitchStateData->m_Status8 & (1 << (i - 224));
+
+					// update
+					if(Collision()->m_pSwitchers[i].m_Status[Team])
+						Collision()->m_pSwitchers[i].m_Type[Team] = TILE_SWITCHOPEN;
+					else
+						Collision()->m_pSwitchers[i].m_Type[Team] = TILE_SWITCHCLOSE;
+					Collision()->m_pSwitchers[i].m_EndTick[Team] = 0;
 				}
 			}
 		}
@@ -1968,7 +1981,8 @@ void CGameClient::CClientData::Reset()
 	m_Team = 0;
 	m_Angle = 0;
 	m_Emoticon = 0;
-	m_EmoticonStart = -1;
+	m_EmoticonStartTick = -1;
+	m_EmoticonStartFraction = 0;
 	m_Active = false;
 	m_ChatIgnore = false;
 	m_EmoticonIgnore = false;
@@ -2221,7 +2235,14 @@ ColorRGBA CalculateNameColor(ColorHSLA TextColorHSL)
 
 void CGameClient::UpdatePrediction()
 {
+	m_GameWorld.m_WorldConfig.m_IsVanilla = m_GameInfo.m_PredictVanilla;
+	m_GameWorld.m_WorldConfig.m_IsDDRace = m_GameInfo.m_PredictDDRace;
+	m_GameWorld.m_WorldConfig.m_IsFNG = m_GameInfo.m_PredictFNG;
+	m_GameWorld.m_WorldConfig.m_PredictDDRace = g_Config.m_ClPredictDDRace;
+	m_GameWorld.m_WorldConfig.m_PredictTiles = g_Config.m_ClPredictDDRace && m_GameInfo.m_PredictDDRaceTiles;
 	m_GameWorld.m_WorldConfig.m_UseTuneZones = m_GameInfo.m_PredictDDRaceTiles;
+	m_GameWorld.m_WorldConfig.m_PredictFreeze = g_Config.m_ClPredictFreeze;
+	m_GameWorld.m_WorldConfig.m_PredictWeapons = AntiPingWeapons();
 
 	if(!m_Snap.m_pLocalCharacter)
 	{
@@ -2230,42 +2251,9 @@ void CGameClient::UpdatePrediction()
 		return;
 	}
 
-	m_GameWorld.m_WorldConfig.m_IsVanilla = m_GameInfo.m_PredictVanilla;
-	m_GameWorld.m_WorldConfig.m_IsDDRace = m_GameInfo.m_PredictDDRace;
-	m_GameWorld.m_WorldConfig.m_IsFNG = m_GameInfo.m_PredictFNG;
-	m_GameWorld.m_WorldConfig.m_PredictDDRace = g_Config.m_ClPredictDDRace;
-	m_GameWorld.m_WorldConfig.m_PredictTiles = g_Config.m_ClPredictDDRace && m_GameInfo.m_PredictDDRaceTiles;
-	m_GameWorld.m_WorldConfig.m_PredictFreeze = g_Config.m_ClPredictFreeze;
-	m_GameWorld.m_WorldConfig.m_PredictWeapons = AntiPingWeapons();
 	if(m_Snap.m_pLocalCharacter->m_AmmoCount > 0 && m_Snap.m_pLocalCharacter->m_Weapon != WEAPON_NINJA)
 		m_GameWorld.m_WorldConfig.m_InfiniteAmmo = false;
 	m_GameWorld.m_WorldConfig.m_IsSolo = !m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_HasExtendedData && !m_Tuning[g_Config.m_ClDummy].m_PlayerCollision && !m_Tuning[g_Config.m_ClDummy].m_PlayerHooking;
-
-	// update switch state
-	if(Collision()->m_pSwitchers)
-	{
-		const int NumSwitchers = minimum(255, Collision()->m_NumSwitchers);
-		for(int i = 0; i < MAX_CLIENTS; i++)
-		{
-			int Team = m_Teams.Team(i);
-			if(!m_Snap.m_aCharacters[i].m_Active || !in_range(Team, 0, MAX_CLIENTS - 1))
-				continue;
-			for(int Number = 1; Number <= NumSwitchers; Number++)
-			{
-				if(m_Snap.m_HasSwitchState && m_aClients[i].m_SwitchStates[Number])
-				{
-					Collision()->m_pSwitchers[Number].m_Status[Team] = true;
-					Collision()->m_pSwitchers[Number].m_Type[Team] = TILE_SWITCHOPEN;
-				}
-				else
-				{
-					Collision()->m_pSwitchers[Number].m_Status[Team] = false;
-					Collision()->m_pSwitchers[Number].m_Type[Team] = TILE_SWITCHCLOSE;
-				}
-				Collision()->m_pSwitchers[Number].m_EndTick[Team] = 0;
-			}
-		}
-	}
 
 	// update the tuning/tunezone at the local character position with the latest tunings received before the new snapshot
 	vec2 LocalCharPos = vec2(m_Snap.m_pLocalCharacter->m_X, m_Snap.m_pLocalCharacter->m_Y);
@@ -2742,7 +2730,7 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 		m_GameSkinLoaded = false;
 	}
 
-	char aPath[MAX_PATH_LENGTH];
+	char aPath[IO_MAX_PATH_LENGTH];
 	bool IsDefault = false;
 	if(str_comp(pPath, "default") == 0)
 	{
@@ -2895,7 +2883,7 @@ void CGameClient::LoadEmoticonsSkin(const char *pPath, bool AsDir)
 		m_EmoticonsSkinLoaded = false;
 	}
 
-	char aPath[MAX_PATH_LENGTH];
+	char aPath[IO_MAX_PATH_LENGTH];
 	bool IsDefault = false;
 	if(str_comp(pPath, "default") == 0)
 	{
@@ -2949,7 +2937,7 @@ void CGameClient::LoadParticlesSkin(const char *pPath, bool AsDir)
 		m_ParticlesSkinLoaded = false;
 	}
 
-	char aPath[MAX_PATH_LENGTH];
+	char aPath[IO_MAX_PATH_LENGTH];
 	bool IsDefault = false;
 	if(str_comp(pPath, "default") == 0)
 	{

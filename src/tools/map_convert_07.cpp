@@ -151,7 +151,7 @@ int main(int argc, const char **argv)
 	const char *pSourceFileName = argv[1];
 
 	const char *pDestFileName;
-	char aDestFileName[MAX_PATH_LENGTH];
+	char aDestFileName[IO_MAX_PATH_LENGTH];
 
 	if(argc == 3)
 	{
@@ -159,7 +159,7 @@ int main(int argc, const char **argv)
 	}
 	else
 	{
-		char aBuf[MAX_PATH_LENGTH];
+		char aBuf[IO_MAX_PATH_LENGTH];
 		IStorage::StripPathAndExtension(pSourceFileName, aBuf, sizeof(aBuf));
 		str_format(aDestFileName, sizeof(aDestFileName), "data/maps7/%s.map", aBuf);
 		pDestFileName = aDestFileName;

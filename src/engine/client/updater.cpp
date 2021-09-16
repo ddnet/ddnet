@@ -200,7 +200,7 @@ bool CUpdater::ReplaceClient()
 {
 	dbg_msg("updater", "replacing " PLAT_CLIENT_EXEC);
 	bool Success = true;
-	char aPath[512];
+	char aPath[IO_MAX_PATH_LENGTH];
 
 	// Replace running executable by renaming twice...
 	m_pStorage->RemoveBinaryFile(CLIENT_EXEC ".old");
@@ -224,7 +224,7 @@ bool CUpdater::ReplaceServer()
 {
 	dbg_msg("updater", "replacing " PLAT_SERVER_EXEC);
 	bool Success = true;
-	char aPath[512];
+	char aPath[IO_MAX_PATH_LENGTH];
 
 	//Replace running executable by renaming twice...
 	m_pStorage->RemoveBinaryFile(SERVER_EXEC ".old");
@@ -246,7 +246,7 @@ bool CUpdater::ReplaceServer()
 
 void CUpdater::ParseUpdate()
 {
-	char aPath[512];
+	char aPath[IO_MAX_PATH_LENGTH];
 	IOHANDLE File = m_pStorage->OpenFile(m_pStorage->GetBinaryPath("update/update.json", aPath, sizeof aPath), IOFLAG_READ, IStorage::TYPE_ABSOLUTE);
 	if(!File)
 		return;

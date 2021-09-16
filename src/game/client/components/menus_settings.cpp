@@ -274,8 +274,8 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		static int s_ThemesButtonID = 0;
 		if(DoButton_Menu(&s_ThemesButtonID, Localize("Themes directory"), 0, &DirectoryButton))
 		{
-			char aBuf[MAX_PATH_LENGTH];
-			char aBufFull[MAX_PATH_LENGTH + 7];
+			char aBuf[IO_MAX_PATH_LENGTH];
+			char aBufFull[IO_MAX_PATH_LENGTH + 7];
 			Storage()->GetCompletePath(IStorage::TYPE_SAVE, "themes", aBuf, sizeof(aBuf));
 			Storage()->CreateFolder("themes", IStorage::TYPE_SAVE);
 			str_format(aBufFull, sizeof(aBufFull), "file://%s", aBuf);
@@ -742,8 +742,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	static int s_DirectoryButtonID = 0;
 	if(DoButton_Menu(&s_DirectoryButtonID, Localize("Skins directory"), 0, &DirectoryButton))
 	{
-		char aBuf[MAX_PATH_LENGTH];
-		char aBufFull[MAX_PATH_LENGTH + 7];
+		char aBuf[IO_MAX_PATH_LENGTH];
+		char aBufFull[IO_MAX_PATH_LENGTH + 7];
 		Storage()->GetCompletePath(IStorage::TYPE_SAVE, "skins", aBuf, sizeof(aBuf));
 		Storage()->CreateFolder("skins", IStorage::TYPE_SAVE);
 		str_format(aBufFull, sizeof(aBufFull), "file://%s", aBuf);
@@ -1510,7 +1510,7 @@ void LoadLanguageIndexfile(IStorage *pStorage, IConsole *pConsole, sorted_array<
 			continue;
 		}
 
-		char aFileName[128];
+		char aFileName[IO_MAX_PATH_LENGTH];
 		str_format(aFileName, sizeof(aFileName), "languages/%s.txt", aOrigin);
 		pLanguages->add(CLanguage(aReplacement, aFileName, str_toint(pLine + 3)));
 	}
