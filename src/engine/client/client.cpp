@@ -439,7 +439,7 @@ void CClient::ChillerBotLoadMap(const char *pMap)
 	m_State = IClient::STATE_OFFLINE;
 	// CServerInfo Info;
 	// GetServerInfo(&Info);
-	char aCurrentMap[MAX_PATH_LENGTH];
+	char aCurrentMap[IO_MAX_PATH_LENGTH];
 	str_copy(aCurrentMap, GetCurrentMapPath(), sizeof(aCurrentMap));
 	Disconnect();
 	if(!m_pMap->Load(pMap))
