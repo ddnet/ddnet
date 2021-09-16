@@ -24,6 +24,7 @@ class CWarList : public CComponent
 	std::vector<std::string> m_vTraitorlist;
 	std::vector<std::string> m_vWarClanlist;
 	std::vector<std::string> m_vTeamClanlist;
+	std::vector<std::string> m_vWarClanPrefixlist;
 	int m_WarDirs;
 	int m_TeamDirs;
 	int m_TraitorDirs;
@@ -36,11 +37,13 @@ class CWarList : public CComponent
 	void LoadTraitorList();
 	void LoadWarClanList();
 	void LoadTeamClanList();
+	void LoadWarClanPrefixList();
 	int LoadWarNames(const char *pFilename);
 	int LoadTeamNames(const char *pFilename);
 	int LoadTraitorNames(const char *pFilename);
 	int LoadWarClanNames(const char *pFilename);
 	int LoadTeamClanNames(const char *pFilename);
+	int LoadWarClanPrefixNames(const char *pFilename);
 	bool IsWarlist(const char *pName);
 	bool IsTeamlist(const char *pName);
 	bool IsTraitorlist(const char *pName);

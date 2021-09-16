@@ -31,6 +31,7 @@ void CWarList::ReloadList()
 	LoadTraitorList();
 	LoadWarClanList();
 	LoadTeamClanList();
+	LoadWarClanPrefixList();
 	for(auto &WarPlayer : m_aWarPlayers)
 		WarPlayer.m_aName[0] = '\0';
 	char aBuf[128];
@@ -95,8 +96,16 @@ void CWarList::LoadTeamClanList()
 	LoadTeamClanNames("chillerbot/warlist/teamlist_clans.txt");
 }
 
+void CWarList::LoadWarClanPrefixList()
+{
+	LoadWarClanPrefixNames("chillerbot/warlist/warlist_clans_prefix.txt");
+}
+
 bool CWarList::IsWarlist(const char *pName)
 {
+	for(auto &WarClanPrefix : m_vWarClanPrefixlist)
+		if(str_startswith(pName, WarClanPrefix.c_str()))
+			return true;
 	return (std::find(m_vWarlist.begin(), m_vWarlist.end(), std::string(pName)) != m_vWarlist.end());
 }
 
@@ -411,6 +420,39 @@ int CWarList::LoadTeamClanNames(const char *pFilename)
 		if(!str_skip_whitespaces(pLine)[0])
 			continue;
 		m_vTeamClanlist.push_back(std::string(pLine));
+	}
+
+	io_close(File);
+	return 0;
+}
+
+int CWarList::LoadWarClanPrefixNames(const char *pFilename)
+{
+	if(!Storage())
+		return 1;
+
+	// exec the file
+	IOHANDLE File = Storage()->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_ALL);
+
+	char aBuf[128];
+	if(!File)
+	{
+		// str_format(aBuf, sizeof(aBuf), "failed to open war clan prefix list file '%s'", pFilename);
+		// Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", aBuf);
+		return 0;
+	}
+	char *pLine;
+	CLineReader Reader;
+
+	str_format(aBuf, sizeof(aBuf), "loading war clan prefix list file '%s'", pFilename);
+	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", aBuf);
+	Reader.Init(File);
+
+	while((pLine = Reader.Get()))
+	{
+		if(!str_skip_whitespaces(pLine)[0])
+			continue;
+		m_vWarClanPrefixlist.push_back(std::string(pLine));
 	}
 
 	io_close(File);
