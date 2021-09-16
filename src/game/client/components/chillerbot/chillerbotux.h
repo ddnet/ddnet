@@ -65,6 +65,11 @@ class CChillerBotUX : public CComponent
 	int m_GotoTeleLastY;
 	int64_t m_LastNotification;
 
+	// broadcasts
+	char m_aBroadcastText[1024];
+	int m_BroadcastTick;
+	bool m_IsLeftSidedBroadcast;
+
 	void OnChatMessage(int ClientID, int Team, const char *pMsg);
 	void GoAfk(int Minutes, const char *pMsg = 0);
 	void ChangeTileNotifyTick();

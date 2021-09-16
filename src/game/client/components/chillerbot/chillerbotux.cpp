@@ -111,6 +111,8 @@ void CChillerBotUX::RenderEnabledComponents()
 	if(!g_Config.m_ClChillerbotHud)
 		return;
 	int offset = 0;
+	if(m_IsLeftSidedBroadcast && Client()->GameTick(g_Config.m_ClDummy) < m_BroadcastTick)
+		offset = 2;
 	for(auto &m_aEnabledComponent : m_aEnabledComponents)
 	{
 		if(m_aEnabledComponent.m_aName[0] == '\0')
@@ -384,6 +386,8 @@ void CChillerBotUX::OnInit()
 	m_aLastKiller[1][0] = '\0';
 	m_aLastKillerTime[0][0] = '\0';
 	m_aLastKillerTime[1][0] = '\0';
+	m_BroadcastTick = 0;
+	m_IsLeftSidedBroadcast = false;
 }
 
 void CChillerBotUX::UpdateComponents()
@@ -841,6 +845,13 @@ void CChillerBotUX::OnMessage(int MsgType, void *pRawMsg)
 				SetComponentNoteLong("last killer", aBuf);
 			}
 		}
+	}
+	else if(MsgType == NETMSGTYPE_SV_BROADCAST)
+	{
+		CNetMsg_Sv_Broadcast *pMsg = (CNetMsg_Sv_Broadcast *)pRawMsg;
+		str_copy(m_aBroadcastText, pMsg->m_pMessage, sizeof(m_aBroadcastText));
+		m_BroadcastTick = Client()->GameTick(g_Config.m_ClDummy) + Client()->GameTickSpeed() * 10;
+		m_IsLeftSidedBroadcast = str_find(m_aBroadcastText, "                                ") != NULL;
 	}
 }
 
