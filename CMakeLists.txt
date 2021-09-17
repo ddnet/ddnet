@@ -1366,6 +1366,8 @@ set(EXPECTED_DATA
   skins/x_ninja.png
   skins/x_spec.png
   strong_weak.png
+  themes/amogus.map
+  themes/amogus.png
   themes/auto.png
   themes/autumn.png
   themes/autumn_day.map
