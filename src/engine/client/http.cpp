@@ -1,5 +1,6 @@
 #include "http.h"
 
+#include <base/math.h>
 #include <base/system.h>
 #include <engine/engine.h>
 #include <engine/external/json-parser/json.h>
@@ -220,6 +221,20 @@ CGet::~CGet()
 	m_BufferLength = 0;
 	free(m_pBuffer);
 	m_pBuffer = NULL;
+}
+
+void CGet::ResultStr(char *pBuffer, size_t Size) const
+{
+	pBuffer = NULL;
+	if(State() != HTTP_DONE)
+		return;
+	if(!m_BufferSize)
+		return;
+	for(size_t i = 0; i < m_BufferLength; i++)
+		if((char *)(m_pBuffer + i) == NULL)
+			return;
+	mem_copy(pBuffer, (char *)m_pBuffer, Size);
+	pBuffer[minimum(Size, m_BufferLength)] = '\0';
 }
 
 unsigned char *CGet::Result() const

@@ -106,6 +106,7 @@ public:
 			return m_BufferSize;
 		}
 	}
+	void ResultStr(char *pBuffer, size_t Size) const;
 	unsigned char *Result() const;
 	unsigned char *TakeResult();
 	json_value *ResultJson() const;
