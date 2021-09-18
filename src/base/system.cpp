@@ -1755,14 +1755,22 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *buffer, int maxsize, MMSGS
 	if(bytes == 0 && sock.ipv4sock >= 0)
 	{
 		socklen_t fromlen = sizeof(struct sockaddr_in);
+#ifdef __MINGW32__
+		bytes = recvfrom(sock.ipv4sock, (char *)buffer, maxsize, 0, (struct sockaddr *)&sockaddrbuf, (int*)&fromlen);
+#else
 		bytes = recvfrom(sock.ipv4sock, (char *)buffer, maxsize, 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
+#endif
 		*data = (unsigned char *)buffer;
 	}
 
 	if(bytes <= 0 && sock.ipv6sock >= 0)
 	{
 		socklen_t fromlen = sizeof(struct sockaddr_in6);
+#ifdef __MINGW32__
+		bytes = recvfrom(sock.ipv6sock, (char *)buffer, maxsize, 0, (struct sockaddr *)&sockaddrbuf, (int*)&fromlen);
+#else
 		bytes = recvfrom(sock.ipv6sock, (char *)buffer, maxsize, 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
+#endif
 		*data = (unsigned char *)buffer;
 	}
 #endif
@@ -1910,7 +1918,11 @@ int net_tcp_accept(NETSOCKET sock, NETSOCKET *new_sock, NETADDR *a)
 		struct sockaddr_in addr;
 		sockaddr_len = sizeof(addr);
 
+#ifdef __MINGW32__
+		s = accept(sock.ipv4sock, (struct sockaddr *)&addr, (int*)&sockaddr_len);
+#else
 		s = accept(sock.ipv4sock, (struct sockaddr *)&addr, &sockaddr_len);
+#endif
 
 		if(s != -1)
 		{
@@ -1926,7 +1938,11 @@ int net_tcp_accept(NETSOCKET sock, NETSOCKET *new_sock, NETADDR *a)
 		struct sockaddr_in6 addr;
 		sockaddr_len = sizeof(addr);
 
+#ifdef __MINGW32__
+		s = accept(sock.ipv6sock, (struct sockaddr *)&addr, (int*)&sockaddr_len);
+#else
 		s = accept(sock.ipv6sock, (struct sockaddr *)&addr, &sockaddr_len);
+#endif
 
 		if(s != -1)
 		{
