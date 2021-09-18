@@ -770,13 +770,13 @@ class CGraphics_Threaded : public IEngineGraphics
 
 	struct SQuadContainer
 	{
-		SQuadContainer(bool AutomicUpload = true)
+		SQuadContainer(bool AutomaticUpload = true)
 		{
 			m_Quads.clear();
 			m_QuadBufferObjectIndex = m_QuadBufferContainerIndex = -1;
 			m_FreeIndex = -1;
 
-			m_AutomicUpload = AutomicUpload;
+			m_AutomaticUpload = AutomaticUpload;
 		}
 
 		struct SQuad
@@ -791,7 +791,7 @@ class CGraphics_Threaded : public IEngineGraphics
 
 		int m_FreeIndex;
 
-		bool m_AutomicUpload;
+		bool m_AutomaticUpload;
 	};
 	std::vector<SQuadContainer> m_QuadContainers;
 	int m_FirstFreeQuadContainer;

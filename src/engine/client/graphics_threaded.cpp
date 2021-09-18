@@ -1272,7 +1272,7 @@ int CGraphics_Threaded::CreateQuadContainer(bool AutomaticUpload)
 void CGraphics_Threaded::QuadContainerChangeAutomaticUpload(int ContainerIndex, bool AutomaticUpload)
 {
 	SQuadContainer &Container = m_QuadContainers[ContainerIndex];
-	Container.m_AutomicUpload = AutomaticUpload;
+	Container.m_AutomaticUpload = AutomaticUpload;
 }
 
 void CGraphics_Threaded::QuadContainerUpload(int ContainerIndex)
@@ -1371,7 +1371,7 @@ void CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CQuadItem *pA
 		}
 	}
 
-	if(Container.m_AutomicUpload)
+	if(Container.m_AutomaticUpload)
 		QuadContainerUpload(ContainerIndex);
 }
 
@@ -1408,7 +1408,7 @@ void CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CFreeformItem
 		SetColor(&Quad.m_aVertices[3], 2);
 	}
 
-	if(Container.m_AutomicUpload)
+	if(Container.m_AutomaticUpload)
 		QuadContainerUpload(ContainerIndex);
 }
 
