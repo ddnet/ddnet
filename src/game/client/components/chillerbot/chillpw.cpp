@@ -43,12 +43,12 @@ void CChillPw::OnRender()
 
 void CChillPw::OnInit()
 {
-	IOHANDLE File = Storage()->OpenFile(PASSWORD_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE File = Storage()->OpenFile(g_Config.m_ClPasswordFile, IOFLAG_READ, IStorage::TYPE_ALL);
 	char aBuf[128];
 	int Line = 0;
 	if(!File)
 	{
-		str_format(aBuf, sizeof(aBuf), "failed to open '%s'", PASSWORD_FILE);
+		str_format(aBuf, sizeof(aBuf), "failed to open '%s'", g_Config.m_ClPasswordFile);
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", aBuf);
 		return;
 	}
@@ -74,7 +74,7 @@ void CChillPw::OnInit()
 		str_copy(m_aaHostnames[Line], pRow1, sizeof(m_aaHostnames[Line]));
 		Line++;
 	}
-	str_format(aBuf, sizeof(aBuf), "loaded %d passwords from '%s'", Line, PASSWORD_FILE);
+	str_format(aBuf, sizeof(aBuf), "loaded %d passwords from '%s'", Line, g_Config.m_ClPasswordFile);
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", aBuf);
 
 	io_close(File);
@@ -82,7 +82,7 @@ void CChillPw::OnInit()
 
 void CChillPw::SavePassword(const char *pServer, const char *pPassword)
 {
-	IOHANDLE File = Storage()->OpenFile(PASSWORD_FILE, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	IOHANDLE File = Storage()->OpenFile(g_Config.m_ClPasswordFile, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	if(File)
 	{
 		io_write(File, pServer, str_length(pServer));
