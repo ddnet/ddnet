@@ -302,11 +302,20 @@ void CItems::OnRender()
 	if(Client()->State() < IClient::STATE_ONLINE)
 		return;
 
+	int Ticks = Client()->GameTick(g_Config.m_ClDummy) % Client()->GameTickSpeed();
+	bool BlinkingSwitchPickup = (Ticks % 22) < 4;
+	bool BlinkingSwitchProj = (Ticks % 20) < 2;
+	bool BlinkingSwitchProjEx = (Ticks % 6) < 2;
+	int OwnTeam = m_pClient->OwnTeam();
+
 	bool UsePredicted = GameClient()->Predict() && GameClient()->AntiPingGunfire();
 	if(UsePredicted)
 	{
 		for(auto *pProj = (CProjectile *)GameClient()->m_PredictedWorld.FindFirst(CGameWorld::ENTTYPE_PROJECTILE); pProj; pProj = (CProjectile *)pProj->NextEntity())
 		{
+			if(pProj->m_Number > 0 && !Collision()->m_pSwitchers[pProj->m_Number].m_Status[OwnTeam] && (pProj->m_Explosive ? BlinkingSwitchProjEx : BlinkingSwitchProj))
+				continue;
+
 			CProjectileData Data = pProj->GetData();
 			RenderProjectile(&Data, pProj->ID());
 		}
@@ -320,6 +329,9 @@ void CItems::OnRender()
 		}
 		for(auto *pPickup = (CPickup *)GameClient()->m_PredictedWorld.FindFirst(CGameWorld::ENTTYPE_PICKUP); pPickup; pPickup = (CPickup *)pPickup->NextEntity())
 		{
+			if(pPickup->m_Layer == LAYER_SWITCH && pPickup->m_Number > 0 && !Collision()->m_pSwitchers[pPickup->m_Number].m_Status[OwnTeam] && BlinkingSwitchPickup)
+				continue;
+
 			if(pPickup->InDDNetTile())
 			{
 				if(auto *pPrev = (CPickup *)GameClient()->m_PrevPredictedWorld.GetEntity(pPickup->ID(), CGameWorld::ENTTYPE_PICKUP))
@@ -338,6 +350,7 @@ void CItems::OnRender()
 	{
 		IClient::CSnapItem Item;
 		const void *pData = Client()->SnapGetItem(IClient::SNAP_CURRENT, i, &Item);
+		CNetObj_EntityEx *pEntEx = (CNetObj_EntityEx *)Client()->SnapFindItem(IClient::SNAP_CURRENT, NETOBJTYPE_ENTITYEX, Item.m_ID);
 
 		if(Item.m_Type == NETOBJTYPE_PROJECTILE || Item.m_Type == NETOBJTYPE_DDNETPROJECTILE)
 		{
@@ -367,6 +380,8 @@ void CItems::OnRender()
 						continue;
 				}
 			}
+			if(pEntEx && pEntEx->m_SwitchNumber > 0 && !Collision()->m_pSwitchers[pEntEx->m_SwitchNumber].m_Status[OwnTeam] && (Data.m_Explosive ? BlinkingSwitchProjEx : BlinkingSwitchProj))
+				continue;
 			RenderProjectile(&Data, Item.m_ID);
 		}
 		else if(Item.m_Type == NETOBJTYPE_PICKUP)
@@ -377,6 +392,8 @@ void CItems::OnRender()
 				if(pPickup && pPickup->InDDNetTile())
 					continue;
 			}
+			if(pEntEx && pEntEx->m_SwitchNumber > 0 && !Collision()->m_pSwitchers[pEntEx->m_SwitchNumber].m_Status[OwnTeam] && BlinkingSwitchPickup)
+				continue;
 			const void *pPrev = Client()->SnapFindItem(IClient::SNAP_PREV, Item.m_Type, Item.m_ID);
 			if(pPrev)
 				RenderPickup((const CNetObj_Pickup *)pPrev, (const CNetObj_Pickup *)pData);

@@ -2392,7 +2392,8 @@ void CGameClient::UpdatePrediction()
 	{
 		IClient::CSnapItem Item;
 		const void *pData = Client()->SnapGetItem(IClient::SNAP_CURRENT, Index, &Item);
-		m_GameWorld.NetObjAdd(Item.m_ID, Item.m_Type, pData);
+		const CNetObj_EntityEx *pDataEx = static_cast<CNetObj_EntityEx *>(Client()->SnapFindItem(IClient::SNAP_CURRENT, NETOBJTYPE_ENTITYEX, Item.m_ID));
+		m_GameWorld.NetObjAdd(Item.m_ID, Item.m_Type, pData, pDataEx);
 	}
 	m_GameWorld.NetObjEnd(m_Snap.m_LocalClientID);
 
@@ -2587,6 +2588,18 @@ bool CGameClient::IsOtherTeam(int ClientID)
 		return true;
 
 	return m_Teams.Team(ClientID) != m_Teams.Team(m_Snap.m_LocalClientID);
+}
+
+int CGameClient::OwnTeam()
+{
+	if(m_Snap.m_LocalClientID < 0)
+		return 0;
+	else if(m_aClients[m_Snap.m_LocalClientID].m_Team == TEAM_SPECTATORS && m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
+		return 0;
+	else if(m_Snap.m_SpecInfo.m_Active && m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
+		return m_Teams.Team(m_Snap.m_SpecInfo.m_SpectatorID);
+
+	return m_Teams.Team(m_Snap.m_LocalClientID);
 }
 
 void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)

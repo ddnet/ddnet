@@ -314,10 +314,14 @@ void CProjectile::Snap(int SnappingClient)
 	if(NetworkClipped(SnappingClient, GetPos(Ct)))
 		return;
 
-	CCharacter *pSnapChar = GameServer()->GetPlayerChar(SnappingClient);
-	int Tick = (Server()->Tick() % Server()->TickSpeed()) % ((m_Explosive) ? 6 : 20);
-	if(pSnapChar && pSnapChar->IsAlive() && (m_Layer == LAYER_SWITCH && m_Number > 0 && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pSnapChar->Team()] && (!Tick)))
-		return;
+	int SnappingClientVersion = SnappingClient >= 0 ? GameServer()->GetClientVersion(SnappingClient) : CLIENT_VERSIONNR;
+	if(SnappingClientVersion < VERSION_DDNET_SWITCH)
+	{
+		CCharacter *pSnapChar = GameServer()->GetPlayerChar(SnappingClient);
+		int Tick = (Server()->Tick() % Server()->TickSpeed()) % ((m_Explosive) ? 6 : 20);
+		if(pSnapChar && pSnapChar->IsAlive() && (m_Layer == LAYER_SWITCH && m_Number > 0 && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pSnapChar->Team()] && (!Tick)))
+			return;
+	}
 
 	CCharacter *pOwnerChar = 0;
 	int64_t TeamMask = -1LL;
@@ -330,8 +334,6 @@ void CProjectile::Snap(int SnappingClient)
 
 	if(m_Owner != -1 && !CmaskIsSet(TeamMask, SnappingClient))
 		return;
-
-	int SnappingClientVersion = SnappingClient >= 0 ? GameServer()->GetClientVersion(SnappingClient) : CLIENT_VERSIONNR;
 
 	CNetObj_DDNetProjectile DDNetProjectile;
 	if(SnappingClientVersion >= VERSION_DDNET_ANTIPING_PROJECTILE && FillExtraInfo(&DDNetProjectile))
