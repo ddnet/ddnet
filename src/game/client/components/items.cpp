@@ -304,6 +304,7 @@ void CItems::OnRender()
 
 	int Ticks = Client()->GameTick(g_Config.m_ClDummy) % Client()->GameTickSpeed();
 	bool BlinkingSwitchPickup = (Ticks % 22) < 4;
+	bool BlinkingSwitchDoor = (Ticks % 22) < 4;
 	bool BlinkingSwitchProj = (Ticks % 20) < 2;
 	bool BlinkingSwitchProjEx = (Ticks % 6) < 2;
 	int OwnTeam = m_pClient->OwnTeam();
@@ -406,7 +407,19 @@ void CItems::OnRender()
 				if(pLaser && pLaser->GetOwner() >= 0 && GameClient()->m_aClients[pLaser->GetOwner()].m_IsPredictedLocal)
 					continue;
 			}
-			RenderLaser((const CNetObj_Laser *)pData);
+			CNetObj_Laser Laser = *((const CNetObj_Laser *)pData);
+			if(pEntEx && pEntEx->m_EntityClass == ENTITYCLASS_DOOR)
+			{
+				if(pEntEx->m_SwitchNumber > 0 && !Collision()->m_pSwitchers[pEntEx->m_SwitchNumber].m_Status[OwnTeam])
+				{
+					if(BlinkingSwitchDoor)
+						continue;
+					Laser.m_FromX = Laser.m_X;
+					Laser.m_FromY = Laser.m_Y;
+				}
+				Laser.m_StartTick = Client()->GameTick(g_Config.m_ClDummy);
+			}
+			RenderLaser(&Laser);
 		}
 	}
 

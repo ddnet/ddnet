@@ -36,7 +36,7 @@ Emoticons = ["OOP", "EXCLAMATION", "HEARTS", "DROP", "DOTDOT", "MUSIC", "SORRY",
 
 Powerups = ["HEALTH", "ARMOR", "WEAPON", "NINJA"]
 Authed = ["NO", "HELPER", "MOD", "ADMIN"]
-EntityClasses = ["PICKUP", "PROJECTILE"]
+EntityClasses = ["PICKUP", "PROJECTILE", "DOOR"]
 
 RawHeader = '''
 

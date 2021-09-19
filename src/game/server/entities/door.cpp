@@ -4,6 +4,7 @@
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/DDRace.h>
 #include <game/server/player.h>
+#include <game/version.h>
 
 #include "character.h"
 #include "door.h"
@@ -41,6 +42,14 @@ void CDoor::ResetCollision()
 
 void CDoor::Snap(int SnappingClient)
 {
+	CNetObj_EntityEx *pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
+	if(!pEntData)
+		return;
+
+	pEntData->m_SwitchNumber = m_Number;
+	pEntData->m_Layer = m_Layer;
+	pEntData->m_EntityClass = ENTITYCLASS_DOOR;
+
 	if(NetworkClipped(SnappingClient, m_Pos) && NetworkClipped(SnappingClient, m_To))
 		return;
 
@@ -59,29 +68,37 @@ void CDoor::Snap(int SnappingClient)
 	if(SnappingClient > -1 && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1 || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) && GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
 		Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
 
-	if(Char == 0)
-		return;
+	int SnappingClientVersion = SnappingClient >= 0 ? GameServer()->GetClientVersion(SnappingClient) : CLIENT_VERSIONNR;
 
-	if(Char->Team() == TEAM_SUPER)
+	if(SnappingClientVersion >= VERSION_DDNET_SWITCH)
 	{
-		pObj->m_FromX = (int)m_Pos.x;
-		pObj->m_FromY = (int)m_Pos.y;
+		pObj->m_FromX = (int)m_To.x;
+		pObj->m_FromY = (int)m_To.y;
+		pObj->m_StartTick = 0;
 	}
-	else
+	else if(Char)
 	{
-		if(Char->IsAlive() && GameServer()->Collision()->m_NumSwitchers > 0 && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()] && (!Tick))
-			return;
-
-		if(Char->IsAlive() && GameServer()->Collision()->m_NumSwitchers > 0 && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()])
-		{
-			pObj->m_FromX = (int)m_To.x;
-			pObj->m_FromY = (int)m_To.y;
-		}
-		else
+		if(Char->Team() == TEAM_SUPER)
 		{
 			pObj->m_FromX = (int)m_Pos.x;
 			pObj->m_FromY = (int)m_Pos.y;
 		}
+		else
+		{
+			if(Char->IsAlive() && GameServer()->Collision()->m_NumSwitchers > 0 && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()] && (!Tick))
+				return;
+
+			if(Char->IsAlive() && GameServer()->Collision()->m_NumSwitchers > 0 && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()])
+			{
+				pObj->m_FromX = (int)m_To.x;
+				pObj->m_FromY = (int)m_To.y;
+			}
+			else
+			{
+				pObj->m_FromX = (int)m_Pos.x;
+				pObj->m_FromY = (int)m_Pos.y;
+			}
+			pObj->m_StartTick = Server()->Tick();
+		}
 	}
-	pObj->m_StartTick = Server()->Tick();
 }
