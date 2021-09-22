@@ -493,7 +493,7 @@ void CGameConsole::OnRender()
 
 	ConsoleHeight = ConsoleHeightScale * ConsoleMaxHeight;
 
-	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
+	UI()->MapScreen();
 
 	// do console shadow
 	Graphics()->TextureClear();
