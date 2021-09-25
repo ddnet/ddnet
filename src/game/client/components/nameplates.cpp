@@ -34,7 +34,9 @@ void CNamePlates::RenderNameplate(
 	else
 		Position = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pPlayerChar->m_X, pPlayerChar->m_Y), Client()->IntraGameTick(g_Config.m_ClDummy));
 
-	RenderNameplatePos(Position, pPlayerInfo, 1.0f);
+	float emphasis = m_pClient->m_aClients[ClientID].m_Foe ? 0.5f : 1.0f; // de-emphasize nameplate if player is foe
+
+	RenderNameplatePos(Position, pPlayerInfo, emphasis);
 }
 
 void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pPlayerInfo, float Alpha, bool ForceAlpha)
