@@ -1733,17 +1733,15 @@ ColorHSLA CMenus::RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool
 	Graphics()->TextureClear();
 	{
 		const float SizeBorder = 5.0f;
-		ColorRGBA SetColorRGBA{0.15f, 0.15f, 0.15f, 1};
-		Graphics()->SetColor(SetColorRGBA);
+		Graphics()->SetColor(ColorRGBA(0.15f, 0.15f, 0.15f, 1));
 		int TmpCont = RenderTools()->CreateRoundRectQuadContainer(Preview.x - SizeBorder / 2.0f, Preview.y - SizeBorder / 2.0f, Preview.w + SizeBorder, Preview.h + SizeBorder, 4.0f + SizeBorder / 2.0f, CUI::CORNER_ALL);
 		Graphics()->RenderQuadContainer(TmpCont, -1);
 		Graphics()->DeleteQuadContainer(TmpCont);
 	}
-	ColorHSLA RenderColorHSLA{Color.r, Color.g, Color.b, Color.a};
+	ColorHSLA RenderColorHSLA(Color.r, Color.g, Color.b, Color.a);
 	if(ClampedLight)
 		RenderColorHSLA = RenderColorHSLA.UnclampLighting();
-	ColorRGBA SetColorRGBA = color_cast<ColorRGBA>(RenderColorHSLA);
-	Graphics()->SetColor(SetColorRGBA);
+	Graphics()->SetColor(color_cast<ColorRGBA>(RenderColorHSLA));
 	int TmpCont = RenderTools()->CreateRoundRectQuadContainer(Preview.x, Preview.y, Preview.w, Preview.h, 4.0f, CUI::CORNER_ALL);
 	Graphics()->RenderQuadContainer(TmpCont, -1);
 	Graphics()->DeleteQuadContainer(TmpCont);
@@ -2007,15 +2005,15 @@ ColorHSLA CMenus::RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool
 		Button.VSplitLeft(10.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 
-		RenderTools()->DrawUIRect(&Button, ColorRGBA{0.15f, 0.15f, 0.15f, 1.0f}, CUI::CORNER_ALL, 1.0f);
+		RenderTools()->DrawUIRect(&Button, ColorRGBA(0.15f, 0.15f, 0.15f, 1.0f), CUI::CORNER_ALL, 1.0f);
 
 		Button.Margin(2.0f, &Button);
 		str_format(aBuf, sizeof(aBuf), "%s: %03d", aLabels[i], (int)(*paComponent[i] * 255));
 		UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
 
-		ColorHSLA CurColorPureHSLA{RenderColorHSLA.r, 1, 0.5f, 1};
+		ColorHSLA CurColorPureHSLA(RenderColorHSLA.r, 1, 0.5f, 1);
 		ColorRGBA CurColorPure = color_cast<ColorRGBA>(CurColorPureHSLA);
-		ColorRGBA ColorInner{1, 1, 1, 0.25f};
+		ColorRGBA ColorInner(1, 1, 1, 0.25f);
 
 		if(i == 0)
 		{
@@ -2025,25 +2023,25 @@ ColorHSLA CMenus::RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool
 		else if(i == 1)
 		{
 			RenderHSLSatRect(&Button, CurColorPure);
-			ColorInner = color_cast<ColorRGBA>(ColorHSLA{CurColorPureHSLA.r, *paComponent[1], CurColorPureHSLA.b, 1});
+			ColorInner = color_cast<ColorRGBA>(ColorHSLA(CurColorPureHSLA.r, *paComponent[1], CurColorPureHSLA.b, 1));
 		}
 		else if(i == 2)
 		{
-			ColorRGBA CurColorSat = color_cast<ColorRGBA>(ColorHSLA{CurColorPureHSLA.r, *paComponent[1], 0.5f, 1});
+			ColorRGBA CurColorSat = color_cast<ColorRGBA>(ColorHSLA(CurColorPureHSLA.r, *paComponent[1], 0.5f, 1));
 			RenderHSLLightRect(&Button, CurColorSat);
 			float LightVal = *paComponent[2];
 			if(ClampedLight)
 				LightVal = ColorHSLA::DARKEST_LGT + LightVal * (1.0f - ColorHSLA::DARKEST_LGT);
-			ColorInner = color_cast<ColorRGBA>(ColorHSLA{CurColorPureHSLA.r, *paComponent[1], LightVal, 1});
+			ColorInner = color_cast<ColorRGBA>(ColorHSLA(CurColorPureHSLA.r, *paComponent[1], LightVal, 1));
 		}
 		else if(i == 3)
 		{
-			ColorRGBA CurColorFull = color_cast<ColorRGBA>(ColorHSLA{CurColorPureHSLA.r, *paComponent[1], *paComponent[2], 1});
+			ColorRGBA CurColorFull = color_cast<ColorRGBA>(ColorHSLA(CurColorPureHSLA.r, *paComponent[1], *paComponent[2], 1));
 			RenderHSLAlphaRect(&Button, CurColorFull);
 			float LightVal = *paComponent[2];
 			if(ClampedLight)
 				LightVal = ColorHSLA::DARKEST_LGT + LightVal * (1.0f - ColorHSLA::DARKEST_LGT);
-			ColorInner = color_cast<ColorRGBA>(ColorHSLA{CurColorPureHSLA.r, *paComponent[1], LightVal, *paComponent[3]});
+			ColorInner = color_cast<ColorRGBA>(ColorHSLA(CurColorPureHSLA.r, *paComponent[1], LightVal, *paComponent[3]));
 		}
 
 		*paComponent[i] = DoScrollbarH(&((char *)pColor)[i], &Button, *paComponent[i], true, &ColorInner);

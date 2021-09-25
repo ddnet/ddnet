@@ -761,7 +761,7 @@ float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current,
 		Slider.y -= MarginH / 2;
 		Slider.w += MarginW;
 		Slider.h += MarginH;
-		RenderTools()->DrawUIRect(&Slider, ColorRGBA{0.15f, 0.15f, 0.15f, 1.0f}, CUI::CORNER_ALL, 5.0f);
+		RenderTools()->DrawUIRect(&Slider, ColorRGBA(0.15f, 0.15f, 0.15f, 1.0f), CUI::CORNER_ALL, 5.0f);
 		Slider.Margin(2, &Slider);
 		RenderTools()->DrawUIRect(&Slider, *pColorInner, CUI::CORNER_ALL, 3.0f);
 	}
@@ -1605,7 +1605,7 @@ int CMenus::Render()
 		const char *pButtonText = "";
 		int ExtraAlign = 0;
 
-		ColorRGBA BgColor = ColorRGBA{0.0f, 0.0f, 0.0f, 0.5f};
+		ColorRGBA BgColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f);
 		if(m_Popup == POPUP_MESSAGE)
 		{
 			pTitle = m_aMessageTopic;
@@ -1744,7 +1744,7 @@ int CMenus::Render()
 		}
 		else if(m_Popup == POPUP_WARNING)
 		{
-			BgColor = ColorRGBA{0.5f, 0.0f, 0.0f, 0.7f};
+			BgColor = ColorRGBA(0.5f, 0.0f, 0.0f, 0.7f);
 			pTitle = m_aMessageTopic;
 			pExtraText = m_aMessageBody;
 			pButtonText = m_aMessageButton;
