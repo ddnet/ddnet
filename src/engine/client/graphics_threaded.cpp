@@ -678,7 +678,7 @@ void CGraphics_Threaded::ScreenshotDirect()
 		// save png
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "saved screenshot to '%s'", aWholePath);
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, ColorRGBA{1.0f, 0.6f, 0.3f, 1.0f});
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, ColorRGBA(1.0f, 0.6f, 0.3f, 1.0f));
 		png_open_file_write(&Png, aWholePath); // ignore_convention
 		png_set_data(&Png, Image.m_Width, Image.m_Height, 8, PNG_TRUECOLOR_ALPHA, (unsigned char *)Image.m_pData); // ignore_convention
 		png_close_file(&Png); // ignore_convention
