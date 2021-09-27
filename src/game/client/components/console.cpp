@@ -117,7 +117,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 	if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL)) // jump to spaces and special ASCII characters
 	{
 		int SearchDirection = 0;
-		if(m_pGameConsole->Input()->KeyPress(KEY_LEFT))
+		if(m_pGameConsole->Input()->KeyPress(KEY_LEFT) || m_pGameConsole->Input()->KeyPress(KEY_BACKSPACE))
 			SearchDirection = -1;
 		else if(m_pGameConsole->Input()->KeyPress(KEY_RIGHT) || m_pGameConsole->Input()->KeyPress(KEY_DELETE))
 			SearchDirection = 1;
@@ -139,6 +139,20 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 					if(SearchDirection < 0)
 						FoundAt++;
 					break;
+				}
+			}
+
+			if(m_pGameConsole->Input()->KeyPress(KEY_BACKSPACE))
+			{
+				if(m_Input.GetCursorOffset() != 0)
+				{
+					char aText[512];
+					str_copy(aText, m_Input.GetString(), FoundAt + 1);
+
+					if(m_Input.GetCursorOffset() != str_length(m_Input.GetString()))
+						str_append(aText, m_Input.GetString() + m_Input.GetCursorOffset(), str_length(m_Input.GetString()));
+
+					m_Input.Set(aText);
 				}
 			}
 
