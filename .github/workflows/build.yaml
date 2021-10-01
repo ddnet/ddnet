@@ -112,7 +112,7 @@ jobs:
       run: |
         cd headless
         ./DDNet-Server &
-        ./DDNet "cl_download_skins 0;connect localhost:8303;quit"
+        ./chillerbot-ux "cl_download_skins 0;connect localhost:8303;quit"
 
     - name: Build in release mode with debug info and all features on
       if: matrix.fancy
