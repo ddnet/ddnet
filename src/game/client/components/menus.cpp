@@ -761,7 +761,7 @@ float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current,
 		Slider.y -= MarginH / 2;
 		Slider.w += MarginW;
 		Slider.h += MarginH;
-		RenderTools()->DrawUIRect(&Slider, ColorRGBA{0.15f, 0.15f, 0.15f, 1.0f}, CUI::CORNER_ALL, 5.0f);
+		RenderTools()->DrawUIRect(&Slider, ColorRGBA(0.15f, 0.15f, 0.15f, 1.0f), CUI::CORNER_ALL, 5.0f);
 		Slider.Margin(2, &Slider);
 		RenderTools()->DrawUIRect(&Slider, *pColorInner, CUI::CORNER_ALL, 3.0f);
 	}
@@ -1111,7 +1111,7 @@ void CMenus::RenderLoading()
 	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_UiColor, true));
 
 	CUIRect Screen = *UI()->Screen();
-	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
+	UI()->MapScreen();
 
 	if(!m_pBackground->Render())
 	{
@@ -1463,7 +1463,7 @@ int CMenus::Render()
 		return 0;
 
 	CUIRect Screen = *UI()->Screen();
-	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
+	UI()->MapScreen();
 
 	m_MouseSlow = false;
 
@@ -1617,7 +1617,7 @@ int CMenus::Render()
 		const char *pButtonText = "";
 		int ExtraAlign = 0;
 
-		ColorRGBA BgColor = ColorRGBA{0.0f, 0.0f, 0.0f, 0.5f};
+		ColorRGBA BgColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f);
 		if(m_Popup == POPUP_MESSAGE)
 		{
 			pTitle = m_aMessageTopic;
@@ -1756,7 +1756,7 @@ int CMenus::Render()
 		}
 		else if(m_Popup == POPUP_WARNING)
 		{
-			BgColor = ColorRGBA{0.5f, 0.0f, 0.0f, 0.7f};
+			BgColor = ColorRGBA(0.5f, 0.0f, 0.0f, 0.7f);
 			pTitle = m_aMessageTopic;
 			pExtraText = m_aMessageBody;
 			pButtonText = m_aMessageButton;
@@ -2664,9 +2664,8 @@ void CMenus::OnRender()
 
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
-		CUIRect Screen = *UI()->Screen();
-		Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
-		RenderDemoPlayer(Screen);
+		UI()->MapScreen();
+		RenderDemoPlayer(*UI()->Screen());
 	}
 
 	if(Client()->State() == IClient::STATE_ONLINE && m_pClient->m_ServerMode == m_pClient->SERVERMODE_PUREMOD)
@@ -2743,8 +2742,7 @@ void CMenus::OnRender()
 	// render debug information
 	if(g_Config.m_Debug)
 	{
-		CUIRect Screen = *UI()->Screen();
-		Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
+		UI()->MapScreen();
 
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "%p %p %p", UI()->HotItem(), UI()->ActiveItem(), UI()->LastActiveItem());
@@ -2805,10 +2803,7 @@ void CMenus::RenderBackground()
 	Graphics()->QuadsEnd();
 
 	// restore screen
-	{
-		CUIRect Screen = *UI()->Screen();
-		Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
-	}
+	UI()->MapScreen();
 }
 
 bool CMenus::CheckHotKey(int Key) const
@@ -2846,7 +2841,7 @@ void CMenus::RenderUpdating(const char *pCaption, int current, int total)
 	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_UiColor, true));
 
 	CUIRect Screen = *UI()->Screen();
-	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
+	UI()->MapScreen();
 
 	RenderBackground();
 

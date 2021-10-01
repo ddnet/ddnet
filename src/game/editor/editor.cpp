@@ -2497,7 +2497,7 @@ void CEditor::DoMapEditor(CUIRect View)
 						//editor.map.groups[selected_group]->mapscreen();
 						for(int k = 0; k < NumEditLayers; k++)
 							pEditLayers[k]->BrushSelecting(r);
-						Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
+						UI()->MapScreen();
 					}
 				}
 				else if(s_Operation == OP_BRUSH_PAINT)
@@ -2517,7 +2517,7 @@ void CEditor::DoMapEditor(CUIRect View)
 						//editor.map.groups[selected_group]->mapscreen();
 						for(int k = 0; k < NumEditLayers; k++)
 							pEditLayers[k]->BrushSelecting(r);
-						Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
+						UI()->MapScreen();
 					}
 				}
 			}
@@ -2640,7 +2640,7 @@ void CEditor::DoMapEditor(CUIRect View)
 					}
 				}
 
-				Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
+				UI()->MapScreen();
 			}
 		}
 
@@ -2809,7 +2809,7 @@ void CEditor::DoMapEditor(CUIRect View)
 		m_ShowEnvelopePreview = 0;
 	}
 
-	Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
+	UI()->MapScreen();
 	//UI()->ClipDisable();
 	m_ChillerEditor.DoMapEditor();
 }
@@ -4183,7 +4183,7 @@ void CEditor::AddFileDialogEntry(int Index, CUIRect *pView)
 void CEditor::RenderFileDialog()
 {
 	// GUI coordsys
-	Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
+	UI()->MapScreen();
 	CUIRect View = *UI()->Screen();
 	CUIRect Preview;
 	float Width = View.w, Height = View.h;
@@ -5630,7 +5630,7 @@ void CEditor::Render()
 	// basic start
 	Graphics()->Clear(1.0f, 0.0f, 1.0f);
 	CUIRect View = *UI()->Screen();
-	Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
+	UI()->MapScreen();
 
 	float Width = View.w;
 	float Height = View.h;
@@ -5889,7 +5889,7 @@ void CEditor::Render()
 			RenderSounds(ToolBox, View);
 	}
 
-	Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
+	UI()->MapScreen();
 
 	if(m_GuiActive)
 	{
@@ -5955,7 +5955,7 @@ void CEditor::Render()
 	//
 	if(g_Config.m_EdShowkeys)
 	{
-		Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
+		UI()->MapScreen();
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, View.x + 10, View.y + View.h - 24 - 10, 24.0f, TEXTFLAG_RENDER);
 

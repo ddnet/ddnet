@@ -1437,16 +1437,19 @@ public:
 
 	virtual void UploadTextContainer(int TextContainerIndex)
 	{
-		STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
-		size_t DataSize = TextContainer.m_StringInfo.m_CharacterQuads.size() * sizeof(STextCharQuad);
-		void *pUploadData = &TextContainer.m_StringInfo.m_CharacterQuads[0];
-		TextContainer.m_StringInfo.m_QuadBufferObjectIndex = Graphics()->CreateBufferObject(DataSize, pUploadData);
+		if(Graphics()->IsTextBufferingEnabled())
+		{
+			STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
+			size_t DataSize = TextContainer.m_StringInfo.m_CharacterQuads.size() * sizeof(STextCharQuad);
+			void *pUploadData = &TextContainer.m_StringInfo.m_CharacterQuads[0];
+			TextContainer.m_StringInfo.m_QuadBufferObjectIndex = Graphics()->CreateBufferObject(DataSize, pUploadData);
 
-		for(auto &Attribute : m_DefaultTextContainerInfo.m_Attributes)
-			Attribute.m_VertBufferBindingIndex = TextContainer.m_StringInfo.m_QuadBufferObjectIndex;
+			for(auto &Attribute : m_DefaultTextContainerInfo.m_Attributes)
+				Attribute.m_VertBufferBindingIndex = TextContainer.m_StringInfo.m_QuadBufferObjectIndex;
 
-		TextContainer.m_StringInfo.m_QuadBufferContainerIndex = Graphics()->CreateBufferContainer(&m_DefaultTextContainerInfo);
-		Graphics()->IndicesNumRequiredNotify(TextContainer.m_StringInfo.m_QuadNum * 6);
+			TextContainer.m_StringInfo.m_QuadBufferContainerIndex = Graphics()->CreateBufferContainer(&m_DefaultTextContainerInfo);
+			Graphics()->IndicesNumRequiredNotify(TextContainer.m_StringInfo.m_QuadNum * 6);
+		}
 	}
 
 	virtual void RenderTextContainer(int TextContainerIndex, STextRenderColor *pTextColor, STextRenderColor *pTextOutlineColor)

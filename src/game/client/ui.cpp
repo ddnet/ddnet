@@ -163,6 +163,12 @@ CUIRect *CUI::Screen()
 	return &m_Screen;
 }
 
+void CUI::MapScreen()
+{
+	const CUIRect *pScreen = Screen();
+	Graphics()->MapScreen(pScreen->x, pScreen->y, pScreen->w, pScreen->h);
+}
+
 float CUI::PixelSize()
 {
 	return Screen()->w / Graphics()->ScreenWidth();

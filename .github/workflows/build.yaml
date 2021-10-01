@@ -100,6 +100,20 @@ jobs:
         ${{ matrix.cmake-path }}cmake --build . --config Release --target run_tests ${{ matrix.build-args }}
         ./DDNet-Server shutdown
 
+    - name: Build headless client
+      env: ${{ matrix.env }}
+      run: |
+        mkdir headless
+        cd headless
+        ${{ matrix.cmake-path }}cmake --version
+        ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DHEADLESS_CLIENT=ON -DCMAKE_BUILD_TYPE=Debug -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=. ..
+        ${{ matrix.cmake-path }}cmake --build . --config Debug  ${{ matrix.build-args }}
+    - name: Test headless client
+      run: |
+        cd headless
+        ./DDNet-Server &
+        ./DDNet "cl_download_skins 0;connect localhost:8303;quit"
+
     - name: Build in release mode with debug info and all features on
       if: matrix.fancy
       env: ${{ matrix.env }}
