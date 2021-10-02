@@ -2108,12 +2108,10 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		MainView.HSplitTop(10.0f, 0x0, &MainView);
 
 		static int KillMessageNormalColorID;
-
-		ColorHSLA KillMessageNormalColor = DoLine_ColorPicker(&KillMessageNormalColorID, 25.0f, 250.0f, 13.0f, 5.0f, &MainView, Localize("Kill Message Normal Color"), &g_Config.m_ClKillMessageNormalColor, ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f), false);
+		DoLine_ColorPicker(&KillMessageNormalColorID, 25.0f, 250.0f, 13.0f, 5.0f, &MainView, Localize("Kill Message Normal Color"), &g_Config.m_ClKillMessageNormalColor, ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f), false);
 
 		static int KillMessageHighlightColorID;
-
-		ColorHSLA KillMessageHighlightColor = DoLine_ColorPicker(&KillMessageHighlightColorID, 25.0f, 250.0f, 13.0f, 5.0f, &MainView, Localize("Kill Message Highlight Color"), &g_Config.m_ClKillMessageHighlightColor, ColorRGBA(1.0f, 0.5f, 0.5f), false);
+		DoLine_ColorPicker(&KillMessageHighlightColorID, 25.0f, 250.0f, 13.0f, 5.0f, &MainView, Localize("Kill Message Highlight Color"), &g_Config.m_ClKillMessageHighlightColor, ColorRGBA(1.0f, 0.5f, 0.5f), false);
 
 		// ***** Laser ***** //
 
