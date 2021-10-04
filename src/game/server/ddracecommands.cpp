@@ -608,12 +608,12 @@ void CGameContext::ConUnmute(IConsole::IResult *pResult, void *pUserData)
 	if(Victim < 0 || Victim >= pSelf->m_NumMutes)
 		return;
 
-	pSelf->m_NumMutes--;
-	pSelf->m_aMutes[Victim] = pSelf->m_aMutes[pSelf->m_NumMutes];
-
 	net_addr_str(&pSelf->m_aMutes[Victim].m_Addr, aIpBuf, sizeof(aIpBuf), false);
 	str_format(aBuf, sizeof(aBuf), "Unmuted %s", aIpBuf);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes", aBuf);
+
+	pSelf->m_NumMutes--;
+	pSelf->m_aMutes[Victim] = pSelf->m_aMutes[pSelf->m_NumMutes];
 }
 
 // list mutes
