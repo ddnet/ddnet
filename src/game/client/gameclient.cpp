@@ -132,6 +132,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&m_MapLayersForeGround);
 	m_All.Add(&m_Particles.m_RenderExplosions);
 	m_All.Add(&m_NamePlates);
+	m_All.Add(&m_PlayerPics); // chillerbot-ux
 	m_All.Add(&m_Particles.m_RenderGeneral);
 	m_All.Add(&m_DamageInd);
 	m_All.Add(&m_Hud);
