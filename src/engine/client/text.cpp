@@ -176,6 +176,9 @@ struct STextContainer
 
 	int m_RenderFlags;
 
+	bool m_HasCursor;
+	bool m_HasSelection;
+
 	void Reset()
 	{
 		m_pFont = NULL;
@@ -193,6 +196,9 @@ struct STextContainer
 		m_UnscaledFontSize = 0.f;
 
 		m_RenderFlags = 0;
+
+		m_HasCursor = false;
+		m_HasSelection = false;
 	}
 };
 
@@ -211,6 +217,8 @@ class CTextRender : public IEngineTextRender
 
 	std::vector<CFont *> m_Fonts;
 	CFont *m_pCurFont;
+
+	int64_t m_CursorRenderTime;
 
 	int GetFreeTextContainerIndex()
 	{
@@ -614,10 +622,8 @@ public:
 		m_pDefaultFont = 0;
 		m_FTLibrary = 0;
 
-		// GL_LUMINANCE can be good for debugging
-		//m_FontTextureFormat = GL_ALPHA;
-
 		m_RenderFlags = 0;
+		m_CursorRenderTime = time_get_microseconds();
 	}
 
 	virtual ~CTextRender()
@@ -809,6 +815,9 @@ public:
 		pCursor->m_ReleaseMouseY = 0;
 		pCursor->m_SelectionStart = 0;
 		pCursor->m_SelectionEnd = 0;
+
+		pCursor->m_CursorMode = TEXT_CURSOR_CURSOR_MODE_NONE;
+		pCursor->m_CursorCharacter = -1;
 	}
 
 	virtual void MoveCursor(CTextCursor *pCursor, float x, float y)
@@ -969,7 +978,7 @@ public:
 
 		AppendTextContainer(pCursor, ContainerIndex, pText, Length);
 
-		if(TextContainer.m_StringInfo.m_CharacterQuads.size() == 0 && IsRendered)
+		if(TextContainer.m_StringInfo.m_CharacterQuads.size() == 0 && TextContainer.m_StringInfo.m_SelectionQuadContainerIndex == -1 && IsRendered)
 		{
 			FreeTextContainer(ContainerIndex);
 			return -1;
@@ -977,7 +986,7 @@ public:
 		else
 		{
 			TextContainer.m_StringInfo.m_QuadNum = TextContainer.m_StringInfo.m_CharacterQuads.size();
-			if(Graphics()->IsTextBufferingEnabled() && IsRendered)
+			if(Graphics()->IsTextBufferingEnabled() && IsRendered && !TextContainer.m_StringInfo.m_CharacterQuads.empty())
 			{
 				if((TextContainer.m_RenderFlags & TEXT_RENDER_FLAG_NO_AUTOMATIC_QUAD_UPLOAD) == 0)
 				{
@@ -1064,6 +1073,13 @@ public:
 
 		bool IsRendered = (pCursor->m_Flags & TEXTFLAG_RENDER) != 0;
 
+		IGraphics::CQuadItem CursorQuads[2];
+		bool HasCursor = false;
+
+		float CursorInnerWidth = (((ScreenX1 - ScreenX0) / Graphics()->ScreenWidth())) * 2;
+		float CursorOuterWidth = CursorInnerWidth * 2;
+		float CursorOuterInnerDiff = (CursorOuterWidth - CursorInnerWidth) / 2;
+
 		std::vector<IGraphics::CQuadItem> SelectionQuads;
 		bool SelectionStarted = false;
 		bool SelectionUsedPress = false;
@@ -1071,15 +1087,22 @@ public:
 		int SelectionStartChar = -1;
 		int SelectionEndChar = -1;
 
+		auto &&CheckInsideChar = [&](bool CheckOuter, int CursorX, int CursorY, float LastCharX, float LastCharWidth, float CharX, float CharWidth, float CharY) -> bool {
+			if((LastCharX - LastCharWidth / 2 <= CursorX &&
+				   CharX + CharWidth / 2 > CursorX &&
+				   CharY - Size <= CursorY &&
+				   CharY > CursorY) ||
+				(CheckOuter &&
+					CharY - Size > CursorY))
+			{
+				return true;
+			}
+			return false;
+		};
 		auto &&CheckSelectionStart = [&](bool CheckOuter, int CursorX, int CursorY, int &SelectionChar, bool &SelectionUsedCase, float LastCharX, float LastCharWidth, float CharX, float CharWidth, float CharY) {
 			if(!SelectionStarted && !SelectionUsedCase)
 			{
-				if((LastCharX - LastCharWidth / 2 <= CursorX &&
-					   CharX + CharWidth / 2 > CursorX &&
-					   CharY - Size <= CursorY &&
-					   CharY > CursorY) ||
-					(CheckOuter &&
-						CharY - Size > CursorY))
+				if(CheckInsideChar(CheckOuter, CursorX, CursorY, LastCharX, LastCharWidth, CharX, CharWidth, CharY))
 				{
 					SelectionChar = CharacterCounter;
 					SelectionStarted = !SelectionStarted;
@@ -1087,14 +1110,21 @@ public:
 				}
 			}
 		};
+		auto &&CheckOutsideChar = [&](bool CheckOuter, int CursorX, int CursorY, float CharX, float CharWidth, float CharY) -> bool {
+			if((CharX + CharWidth / 2 > CursorX &&
+				   CharY - Size <= CursorY &&
+				   CharY > CursorY) ||
+				(CheckOuter &&
+					CharY <= CursorY))
+			{
+				return true;
+			}
+			return false;
+		};
 		auto &&CheckSelectionEnd = [&](bool CheckOuter, int CursorX, int CursorY, int &SelectionChar, bool &SelectionUsedCase, float CharX, float CharWidth, float CharY) {
 			if(SelectionStarted && !SelectionUsedCase)
 			{
-				if((CharX + CharWidth / 2 > CursorX &&
-					   CharY - Size <= CursorY &&
-					   CharY > CursorY) ||
-					(CheckOuter &&
-						CharY <= CursorY))
+				if(CheckOutsideChar(CheckOuter, CursorX, CursorY, CharX, CharWidth, CharY))
 				{
 					SelectionChar = CharacterCounter;
 					SelectionStarted = !SelectionStarted;
@@ -1123,13 +1153,17 @@ public:
 			++LineCount;
 		};
 
-		if(pCursor->m_CalculateSelectionMode != TEXT_CURSOR_SELECTION_MODE_NONE)
+		if(pCursor->m_CalculateSelectionMode != TEXT_CURSOR_SELECTION_MODE_NONE || pCursor->m_CursorMode != TEXT_CURSOR_CURSOR_MODE_NONE)
 		{
 			if(IsRendered)
 			{
 				if(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex != -1)
 					Graphics()->QuadContainerReset(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex);
 			}
+
+			// if in calculate mode, also calculate the cursor
+			if(pCursor->m_CursorMode == TEXT_CURSOR_CURSOR_MODE_CALCULATE)
+				pCursor->m_CursorCharacter = -1;
 		}
 
 		while(pCurrent < pEnd && (pCursor->m_MaxLines < 1 || LineCount <= pCursor->m_MaxLines))
@@ -1141,6 +1175,7 @@ public:
 				int Wlen = minimum(WordLength((char *)pCurrent), (int)(pEnd - pCurrent));
 				CTextCursor Compare = *pCursor;
 				Compare.m_CalculateSelectionMode = TEXT_CURSOR_SELECTION_MODE_NONE;
+				Compare.m_CursorMode = TEXT_CURSOR_CURSOR_MODE_NONE;
 				Compare.m_X = DrawX;
 				Compare.m_Y = DrawY;
 				Compare.m_Flags &= ~TEXTFLAG_RENDER;
@@ -1152,6 +1187,7 @@ public:
 					// word can't be fitted in one line, cut it
 					CTextCursor Cutter = *pCursor;
 					Cutter.m_CalculateSelectionMode = TEXT_CURSOR_SELECTION_MODE_NONE;
+					Cutter.m_CursorMode = TEXT_CURSOR_CURSOR_MODE_NONE;
 					Cutter.m_GlyphCount = 0;
 					Cutter.m_CharCount = 0;
 					Cutter.m_X = DrawX;
@@ -1284,12 +1320,20 @@ public:
 					float SelWidth = (CharX + maximum(Advance, CharWidth - OutLineRealDiff / 2)) - (LastSelX + LastSelWidth);
 					float SelX = (LastSelX + LastSelWidth);
 
+					if(pCursor->m_CursorMode == TEXT_CURSOR_CURSOR_MODE_CALCULATE)
+					{
+						if(pCursor->m_CursorCharacter == -1 && CheckInsideChar(CharacterCounter == 0, pCursor->m_ReleaseMouseX, pCursor->m_ReleaseMouseY, CharacterCounter == 0 ? std::numeric_limits<float>::lowest() : LastCharX, LastCharWidth, CharX, CharWidth, TmpY))
+						{
+							pCursor->m_CursorCharacter = CharacterCounter;
+						}
+					}
+
 					if(pCursor->m_CalculateSelectionMode == TEXT_CURSOR_SELECTION_MODE_CALCULATE)
 					{
 						if(CharacterCounter == 0)
 						{
-							CheckSelectionStart(true, pCursor->m_PressMouseX, pCursor->m_PressMouseY, SelectionStartChar, SelectionUsedPress, LastCharX, LastCharWidth, CharX, CharWidth, TmpY);
-							CheckSelectionStart(true, pCursor->m_ReleaseMouseX, pCursor->m_ReleaseMouseY, SelectionEndChar, SelectionUsedRelease, LastCharX, LastCharWidth, CharX, CharWidth, TmpY);
+							CheckSelectionStart(true, pCursor->m_PressMouseX, pCursor->m_PressMouseY, SelectionStartChar, SelectionUsedPress, std::numeric_limits<float>::lowest(), 0, CharX, CharWidth, TmpY);
+							CheckSelectionStart(true, pCursor->m_ReleaseMouseX, pCursor->m_ReleaseMouseY, SelectionEndChar, SelectionUsedRelease, std::numeric_limits<float>::lowest(), 0, CharX, CharWidth, TmpY);
 						}
 
 						// if selection didn't start and the mouse pos is atleast on 50% of the right side of the character start
@@ -1303,12 +1347,24 @@ public:
 						if((int)CharacterCounter == pCursor->m_SelectionStart)
 						{
 							SelectionStarted = !SelectionStarted;
+							SelectionStartChar = CharacterCounter;
 							SelectionUsedPress = true;
 						}
 						if((int)CharacterCounter == pCursor->m_SelectionEnd)
 						{
 							SelectionStarted = !SelectionStarted;
+							SelectionEndChar = CharacterCounter;
 							SelectionUsedRelease = true;
+						}
+					}
+
+					if(pCursor->m_CursorMode != TEXT_CURSOR_CURSOR_MODE_NONE)
+					{
+						if((int)CharacterCounter == pCursor->m_CursorCharacter)
+						{
+							HasCursor = true;
+							CursorQuads[0] = IGraphics::CQuadItem(SelX - CursorOuterInnerDiff, DrawY, CursorOuterWidth, Size);
+							CursorQuads[1] = IGraphics::CQuadItem(SelX, DrawY + CursorOuterInnerDiff, CursorInnerWidth, Size - CursorOuterInnerDiff * 2);
 						}
 					}
 
@@ -1377,25 +1433,52 @@ public:
 		}
 		else if(pCursor->m_CalculateSelectionMode == TEXT_CURSOR_SELECTION_MODE_SET)
 		{
+			if((int)CharacterCounter == pCursor->m_SelectionStart)
+			{
+				SelectionStarted = !SelectionStarted;
+				SelectionStartChar = CharacterCounter;
+				SelectionUsedPress = true;
+			}
 			if((int)CharacterCounter == pCursor->m_SelectionEnd)
 			{
 				SelectionStarted = !SelectionStarted;
+				SelectionEndChar = CharacterCounter;
 				SelectionUsedRelease = true;
 			}
 		}
 
-		if(!SelectionQuads.empty() && SelectionUsedPress && SelectionUsedRelease)
+		if(pCursor->m_CursorMode != TEXT_CURSOR_CURSOR_MODE_NONE)
+		{
+			if(pCursor->m_CursorMode == TEXT_CURSOR_CURSOR_MODE_CALCULATE && pCursor->m_CursorCharacter == -1 && CheckOutsideChar(true, pCursor->m_ReleaseMouseX, pCursor->m_ReleaseMouseY, std::numeric_limits<float>::max(), 0, DrawY + Size))
+			{
+				pCursor->m_CursorCharacter = CharacterCounter;
+			}
+
+			if((int)CharacterCounter == pCursor->m_CursorCharacter)
+			{
+				HasCursor = true;
+				CursorQuads[0] = IGraphics::CQuadItem((LastSelX + LastSelWidth) - CursorOuterInnerDiff, DrawY, CursorOuterWidth, Size);
+				CursorQuads[1] = IGraphics::CQuadItem((LastSelX + LastSelWidth), DrawY + CursorOuterInnerDiff, CursorInnerWidth, Size - CursorOuterInnerDiff * 2);
+			}
+		}
+
+		bool HasSelection = !SelectionQuads.empty() && SelectionUsedPress && SelectionUsedRelease;
+		if((HasSelection || HasCursor) && IsRendered)
 		{
 			Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
-			if(SelectionQuads.size() > 0)
-			{
-				if(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex == -1)
-					TextContainer.m_StringInfo.m_SelectionQuadContainerIndex = Graphics()->CreateQuadContainer();
+			if(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex == -1)
+				TextContainer.m_StringInfo.m_SelectionQuadContainerIndex = Graphics()->CreateQuadContainer(false);
+			if(HasCursor)
+				Graphics()->QuadContainerAddQuads(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, CursorQuads, 2);
+			if(HasSelection)
 				Graphics()->QuadContainerAddQuads(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, &SelectionQuads[0], (int)SelectionQuads.size());
+			Graphics()->QuadContainerUpload(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex);
 
-				pCursor->m_SelectionStart = SelectionStartChar;
-				pCursor->m_SelectionEnd = SelectionEndChar;
-			}
+			TextContainer.m_HasCursor = HasCursor;
+			TextContainer.m_HasSelection = HasSelection;
+
+			pCursor->m_SelectionStart = SelectionStartChar;
+			pCursor->m_SelectionEnd = SelectionEndChar;
 		}
 
 		// even if no text is drawn the cursor position will be adjusted
@@ -1407,7 +1490,8 @@ public:
 	}
 
 	// just deletes and creates text container
-	virtual void RecreateTextContainer(CTextCursor *pCursor, int TextContainerIndex, const char *pText, int Length = -1)
+	virtual void
+	RecreateTextContainer(CTextCursor *pCursor, int TextContainerIndex, const char *pText, int Length = -1)
 	{
 		DeleteTextContainer(TextContainerIndex);
 		CreateTextContainer(pCursor, pText, Length);
@@ -1459,70 +1543,89 @@ public:
 
 		if(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex != -1)
 		{
-			Graphics()->TextureClear();
-			Graphics()->SetColor(m_SelectionColor);
-			Graphics()->RenderQuadContainerEx(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, 0, -1, 0, 0);
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-
-			/*static int64_t s_CursorRenderTime = time_get_microseconds();
-
-			if((time_get_microseconds() - s_CursorRenderTime) > 500000)
-				Graphics()->RenderQuadContainer(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, 0, 1);
-			if((time_get_microseconds() - s_CursorRenderTime) > 1000000)
-				s_CursorRenderTime = time_get_microseconds();*/
-		}
-
-		if(Graphics()->IsTextBufferingEnabled())
-		{
-			Graphics()->TextureClear();
-			// render buffered text
-			Graphics()->RenderText(TextContainer.m_StringInfo.m_QuadBufferContainerIndex, TextContainer.m_StringInfo.m_QuadNum, pFont->m_CurTextureDimensions[0], pFont->m_aTextures[0].Id(), pFont->m_aTextures[1].Id(), (float *)pTextColor, (float *)pTextOutlineColor);
-		}
-		else
-		{
-			// render tiles
-			float UVScale = 1.0f / pFont->m_CurTextureDimensions[0];
-
-			Graphics()->FlushVertices();
-			Graphics()->TextureSet(pFont->m_aTextures[1]);
-
-			Graphics()->QuadsBegin();
-
-			for(size_t i = 0; i < TextContainer.m_StringInfo.m_QuadNum; ++i)
+			if(TextContainer.m_HasSelection)
 			{
-				STextCharQuad &TextCharQuad = TextContainer.m_StringInfo.m_CharacterQuads[i];
-
-				Graphics()->SetColor(TextCharQuad.m_Vertices[0].m_Color.m_R / 255.f * pTextOutlineColor->m_R, TextCharQuad.m_Vertices[0].m_Color.m_G / 255.f * pTextOutlineColor->m_G, TextCharQuad.m_Vertices[0].m_Color.m_B / 255.f * pTextOutlineColor->m_B, TextCharQuad.m_Vertices[0].m_Color.m_A / 255.f * pTextOutlineColor->m_A);
-
-				Graphics()->QuadsSetSubset(TextCharQuad.m_Vertices[0].m_U * UVScale, TextCharQuad.m_Vertices[0].m_V * UVScale, TextCharQuad.m_Vertices[2].m_U * UVScale, TextCharQuad.m_Vertices[2].m_V * UVScale);
-				IGraphics::CQuadItem QuadItem(TextCharQuad.m_Vertices[0].m_X, TextCharQuad.m_Vertices[0].m_Y, TextCharQuad.m_Vertices[1].m_X - TextCharQuad.m_Vertices[0].m_X, TextCharQuad.m_Vertices[2].m_Y - TextCharQuad.m_Vertices[0].m_Y);
-				Graphics()->QuadsDrawTL(&QuadItem, 1);
+				Graphics()->TextureClear();
+				Graphics()->SetColor(m_SelectionColor);
+				Graphics()->RenderQuadContainerEx(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, TextContainer.m_HasCursor ? 2 : 0, -1, 0, 0);
+				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
+		}
 
-			if(pTextColor->m_A != 0)
+		if(TextContainer.m_StringInfo.m_QuadNum > 0)
+		{
+			if(Graphics()->IsTextBufferingEnabled())
 			{
-				Graphics()->QuadsEndKeepVertices();
+				Graphics()->TextureClear();
+				// render buffered text
+				Graphics()->RenderText(TextContainer.m_StringInfo.m_QuadBufferContainerIndex, TextContainer.m_StringInfo.m_QuadNum, pFont->m_CurTextureDimensions[0], pFont->m_aTextures[0].Id(), pFont->m_aTextures[1].Id(), (float *)pTextColor, (float *)pTextOutlineColor);
+			}
+			else
+			{
+				// render tiles
+				float UVScale = 1.0f / pFont->m_CurTextureDimensions[0];
 
-				Graphics()->TextureSet(pFont->m_aTextures[0]);
+				Graphics()->FlushVertices();
+				Graphics()->TextureSet(pFont->m_aTextures[1]);
+
+				Graphics()->QuadsBegin();
 
 				for(size_t i = 0; i < TextContainer.m_StringInfo.m_QuadNum; ++i)
 				{
 					STextCharQuad &TextCharQuad = TextContainer.m_StringInfo.m_CharacterQuads[i];
-					unsigned char CR = (unsigned char)((float)(TextCharQuad.m_Vertices[0].m_Color.m_R) * pTextColor->m_R);
-					unsigned char CG = (unsigned char)((float)(TextCharQuad.m_Vertices[0].m_Color.m_G) * pTextColor->m_G);
-					unsigned char CB = (unsigned char)((float)(TextCharQuad.m_Vertices[0].m_Color.m_B) * pTextColor->m_B);
-					unsigned char CA = (unsigned char)((float)(TextCharQuad.m_Vertices[0].m_Color.m_A) * pTextColor->m_A);
-					Graphics()->ChangeColorOfQuadVertices((int)i, CR, CG, CB, CA);
+
+					Graphics()->SetColor(TextCharQuad.m_Vertices[0].m_Color.m_R / 255.f * pTextOutlineColor->m_R, TextCharQuad.m_Vertices[0].m_Color.m_G / 255.f * pTextOutlineColor->m_G, TextCharQuad.m_Vertices[0].m_Color.m_B / 255.f * pTextOutlineColor->m_B, TextCharQuad.m_Vertices[0].m_Color.m_A / 255.f * pTextOutlineColor->m_A);
+
+					Graphics()->QuadsSetSubset(TextCharQuad.m_Vertices[0].m_U * UVScale, TextCharQuad.m_Vertices[0].m_V * UVScale, TextCharQuad.m_Vertices[2].m_U * UVScale, TextCharQuad.m_Vertices[2].m_V * UVScale);
+					IGraphics::CQuadItem QuadItem(TextCharQuad.m_Vertices[0].m_X, TextCharQuad.m_Vertices[0].m_Y, TextCharQuad.m_Vertices[1].m_X - TextCharQuad.m_Vertices[0].m_X, TextCharQuad.m_Vertices[2].m_Y - TextCharQuad.m_Vertices[0].m_Y);
+					Graphics()->QuadsDrawTL(&QuadItem, 1);
 				}
 
-				// render non outlined
-				Graphics()->QuadsDrawCurrentVertices(false);
-			}
-			else
-				Graphics()->QuadsEnd();
+				if(pTextColor->m_A != 0)
+				{
+					Graphics()->QuadsEndKeepVertices();
 
-			// reset
-			Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+					Graphics()->TextureSet(pFont->m_aTextures[0]);
+
+					for(size_t i = 0; i < TextContainer.m_StringInfo.m_QuadNum; ++i)
+					{
+						STextCharQuad &TextCharQuad = TextContainer.m_StringInfo.m_CharacterQuads[i];
+						unsigned char CR = (unsigned char)((float)(TextCharQuad.m_Vertices[0].m_Color.m_R) * pTextColor->m_R);
+						unsigned char CG = (unsigned char)((float)(TextCharQuad.m_Vertices[0].m_Color.m_G) * pTextColor->m_G);
+						unsigned char CB = (unsigned char)((float)(TextCharQuad.m_Vertices[0].m_Color.m_B) * pTextColor->m_B);
+						unsigned char CA = (unsigned char)((float)(TextCharQuad.m_Vertices[0].m_Color.m_A) * pTextColor->m_A);
+						Graphics()->ChangeColorOfQuadVertices((int)i, CR, CG, CB, CA);
+					}
+
+					// render non outlined
+					Graphics()->QuadsDrawCurrentVertices(false);
+				}
+				else
+					Graphics()->QuadsEnd();
+
+				// reset
+				Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+			}
+		}
+
+		if(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex != -1)
+		{
+			if(TextContainer.m_HasCursor)
+			{
+				int64_t CurTime = time_get_microseconds();
+
+				Graphics()->TextureClear();
+				if((CurTime - m_CursorRenderTime) > 500000)
+				{
+					Graphics()->SetColor(*pTextOutlineColor);
+					Graphics()->RenderQuadContainerEx(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, 0, 1, 0, 0);
+					Graphics()->SetColor(*pTextColor);
+					Graphics()->RenderQuadContainerEx(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, 1, 1, 0, 0);
+				}
+				if((CurTime - m_CursorRenderTime) > 1000000)
+					m_CursorRenderTime = time_get_microseconds();
+				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+			}
 		}
 	}
 
@@ -1733,6 +1836,69 @@ public:
 			OffUTF8End = (int)((std::intptr_t)(pIt - pText));
 
 		return OffUTF8Start != -1 && OffUTF8End != -1;
+	}
+
+	virtual bool UTF8OffToDecodedOff(const char *pText, int UTF8Off, int &DecodedOff)
+	{
+		const char *pIt = pText;
+
+		DecodedOff = -1;
+
+		int CharCount = 0;
+		while(*pIt)
+		{
+			if((int)(intptr_t)(pIt - pText) == UTF8Off)
+			{
+				DecodedOff = CharCount;
+				return true;
+			}
+
+			const char *pTmp = pIt;
+			int Character = str_utf8_decode(&pTmp);
+			if(Character == -1)
+				return false;
+
+			pIt = pTmp;
+			++CharCount;
+		}
+
+		if((int)(std::intptr_t)(pIt - pText) == UTF8Off)
+		{
+			DecodedOff = CharCount;
+			return true;
+		}
+
+		return false;
+	}
+
+	virtual bool DecodedOffToUTF8Off(const char *pText, int DecodedOff, int &UTF8Off)
+	{
+		const char *pIt = pText;
+
+		UTF8Off = -1;
+
+		int CharCount = 0;
+		while(*pIt)
+		{
+			const char *pTmp = pIt;
+			int Character = str_utf8_decode(&pTmp);
+			if(Character == -1)
+				return false;
+
+			if(CharCount == DecodedOff)
+			{
+				UTF8Off = (int)((std::intptr_t)(pIt - pText));
+				return true;
+			}
+
+			pIt = pTmp;
+			++CharCount;
+		}
+
+		if(CharCount == DecodedOff)
+			UTF8Off = (int)((std::intptr_t)(pIt - pText));
+
+		return UTF8Off != -1;
 	}
 
 	virtual void OnWindowResize()

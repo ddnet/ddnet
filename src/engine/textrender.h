@@ -45,6 +45,16 @@ enum ETextCursorSelectionMode
 	TEXT_CURSOR_SELECTION_MODE_SET,
 };
 
+enum ETextCursorCursorMode
+{
+	// ignore any kind of cursor
+	TEXT_CURSOR_CURSOR_MODE_NONE = 0,
+	// calculates the cursor based on the mouse release cursor position
+	TEXT_CURSOR_CURSOR_MODE_CALCULATE,
+	// sets the cursor based on the current character (this value has to be decoded character offset)
+	TEXT_CURSOR_CURSOR_MODE_SET,
+};
+
 class CTextCursor
 {
 public:
@@ -71,6 +81,7 @@ public:
 	// these coordinates are repsected if selection mode is set to calculate @see ETextCursorSelectionMode
 	int m_PressMouseX;
 	int m_PressMouseY;
+	// these coordinates are repsected if selection/cursor mode is set to calculate @see ETextCursorSelectionMode / @see ETextCursorCursorMode
 	int m_ReleaseMouseX;
 	int m_ReleaseMouseY;
 
@@ -78,6 +89,10 @@ public:
 	// also note, that these are the character offsets decoded
 	int m_SelectionStart;
 	int m_SelectionEnd;
+
+	ETextCursorCursorMode m_CursorMode;
+	// note this is the decoded character offset
+	int m_CursorCharacter;
 };
 
 struct STextRenderColor
@@ -155,6 +170,8 @@ public:
 	virtual int CalculateTextWidth(const char *pText, int TextLength, int FontWidth, int FontHeight) = 0;
 
 	virtual bool SelectionToUTF8OffSets(const char *pText, int SelStart, int SelEnd, int &OffUTF8Start, int &OffUTF8End) = 0;
+	virtual bool UTF8OffToDecodedOff(const char *pText, int UTF8Off, int &DecodedOff) = 0;
+	virtual bool DecodedOffToUTF8Off(const char *pText, int DecodedOff, int &UTF8Off) = 0;
 
 	// old foolish interface
 	virtual void TextColor(float r, float g, float b, float a) = 0;

@@ -555,7 +555,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 		static int s_ClearButton = 0;
 		static float Offset = 0.0f;
-		if(Input()->KeyPress(KEY_X) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)))
+		if(Input()->KeyPress(KEY_X) && (Input()->KeyPress(KEY_LSHIFT) || Input()->KeyPress(KEY_RSHIFT)) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)))
 			UI()->SetActiveItem(&g_Config.m_BrExcludeString);
 		if(DoClearableEditBox(&g_Config.m_BrExcludeString, &s_ClearButton, &QuickExclude, g_Config.m_BrExcludeString, sizeof(g_Config.m_BrExcludeString), 12.0f, &Offset, false, CUI::CORNER_ALL))
 			Client()->ServerBrowserUpdate();
