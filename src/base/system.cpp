@@ -2366,7 +2366,11 @@ int fs_remove(const char *filename)
 int fs_rename(const char *oldname, const char *newname)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	if(MoveFileEx(oldname, newname, MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED) == 0)
+	WCHAR wOldname[IO_MAX_PATH_LENGTH];
+	WCHAR wNewname[IO_MAX_PATH_LENGTH];
+	MultiByteToWideChar(CP_UTF8, 0, oldname, IO_MAX_PATH_LENGTH, wOldname, IO_MAX_PATH_LENGTH);
+	MultiByteToWideChar(CP_UTF8, 0, newname, IO_MAX_PATH_LENGTH, wNewname, IO_MAX_PATH_LENGTH);
+	if(MoveFileExW(wOldname, wNewname, MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED) == 0)
 		return 1;
 #else
 	if(rename(oldname, newname) != 0)
