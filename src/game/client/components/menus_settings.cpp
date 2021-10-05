@@ -2101,9 +2101,6 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		MainView.HSplitTop(30.0f, &Section, &MainView);
 		UI()->DoLabelScaled(&Section, Localize("Kill Messages"), 20.0f, -1);
 		MainView.VSplitLeft(5.0f, 0x0, &MainView);
-		MainView.HSplitTop(5.0f, 0x0, &MainView);
-
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClKillMessageHighlightSelf, Localize("Highlight self in kill messages"), &g_Config.m_ClKillMessageHighlightSelf, &MainView, LineMargin);
 
 		MainView.HSplitTop(10.0f, 0x0, &MainView);
 
