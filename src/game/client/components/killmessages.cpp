@@ -77,7 +77,10 @@ void CKillMessages::CreateKillmessageNamesIfNotCreated(CKillMsg &Kill)
 		Cursor.m_LineWidth = -1;
 
 		unsigned color = g_Config.m_ClKillMessageNormalColor;
-		if(g_Config.m_ClKillMessageHighlightSelf && Kill.m_VictimID == m_pClient->m_Snap.m_pLocalInfo->m_ClientID)
+		if(
+			g_Config.m_ClKillMessageHighlightSelf &&
+			m_pClient->m_Snap.m_pLocalInfo &&
+			Kill.m_VictimID == m_pClient->m_Snap.m_pLocalInfo->m_ClientID)
 		{
 			color = g_Config.m_ClKillMessageHighlightColor;
 		}
@@ -95,7 +98,10 @@ void CKillMessages::CreateKillmessageNamesIfNotCreated(CKillMsg &Kill)
 		Cursor.m_LineWidth = -1;
 
 		unsigned color = g_Config.m_ClKillMessageNormalColor;
-		if(g_Config.m_ClKillMessageHighlightSelf && Kill.m_KillerID == m_pClient->m_Snap.m_pLocalInfo->m_ClientID)
+		if(
+			g_Config.m_ClKillMessageHighlightSelf &&
+			m_pClient->m_Snap.m_pLocalInfo &&
+			Kill.m_KillerID == m_pClient->m_Snap.m_pLocalInfo->m_ClientID)
 		{
 			color = g_Config.m_ClKillMessageHighlightColor;
 		}
