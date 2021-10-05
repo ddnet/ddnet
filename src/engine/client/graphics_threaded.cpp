@@ -2080,7 +2080,7 @@ void CGraphics_Threaded::IndicesNumRequiredNotify(unsigned int RequiredIndicesCo
 
 int CGraphics_Threaded::IssueInit()
 {
-	int Flags = 0;
+	int Flags = IGraphicsBackend::INITFLAG_RESIZABLE;
 
 	if(g_Config.m_GfxBorderless)
 		Flags |= IGraphicsBackend::INITFLAG_BORDERLESS;
@@ -2092,8 +2092,6 @@ int CGraphics_Threaded::IssueInit()
 		Flags |= IGraphicsBackend::INITFLAG_VSYNC;
 	if(g_Config.m_GfxHighdpi)
 		Flags |= IGraphicsBackend::INITFLAG_HIGHDPI;
-	if(g_Config.m_GfxResizable)
-		Flags |= IGraphicsBackend::INITFLAG_RESIZABLE;
 
 	int r = m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, &g_Config.m_GfxScreenRefreshRate, g_Config.m_GfxFsaaSamples, Flags, &g_Config.m_GfxDesktopWidth, &g_Config.m_GfxDesktopHeight, &m_ScreenWidth, &m_ScreenHeight, m_pStorage);
 	AddBackEndWarningIfExists();
