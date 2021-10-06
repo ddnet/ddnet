@@ -24,11 +24,6 @@
 #include "SDL_pixels.h"
 #include "SDL_video.h"
 
-#if defined(SDL_VIDEO_DRIVER_X11)
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#endif
-
 #include <engine/shared/config.h>
 
 #include <base/tl/threading.h>
@@ -1213,41 +1208,12 @@ void CGraphicsBackend_SDL_OpenGL::GetViewportSize(int &w, int &h)
 
 void CGraphicsBackend_SDL_OpenGL::NotifyWindow()
 {
-	// get window handle
-	SDL_SysWMinfo info;
-	SDL_VERSION(&info.version);
-	if(!SDL_GetWindowWMInfo(m_pWindow, &info))
+#if SDL_MAJOR_VERSION > 2 || (SDL_MAJOR_VERSION == 2 && SDL_PATCHLEVEL >= 16)
+	if(SDL_FlashWindow(m_pWindow, SDL_FlashOperation::SDL_FLASH_BRIEFLY) != 0)
 	{
-		dbg_msg("gfx", "unable to obtain window handle");
+		// fails if SDL hasn't implemented it
 		return;
 	}
-
-#if defined(CONF_FAMILY_WINDOWS)
-	FLASHWINFO desc;
-	desc.cbSize = sizeof(desc);
-	desc.hwnd = info.info.win.window;
-	desc.dwFlags = FLASHW_TRAY;
-	desc.uCount = 3; // flash 3 times
-	desc.dwTimeout = 0;
-
-	FlashWindowEx(&desc);
-#elif defined(SDL_VIDEO_DRIVER_X11) && !defined(CONF_PLATFORM_MACOS)
-	Display *pX11Dpy = info.info.x11.display;
-	Window X11Win = info.info.x11.window;
-
-	static Atom s_DemandsAttention = XInternAtom(pX11Dpy, "_NET_WM_STATE_DEMANDS_ATTENTION", true);
-	static Atom s_WmState = XInternAtom(pX11Dpy, "_NET_WM_STATE", true);
-
-	XEvent SndNtfyEvent = {ClientMessage};
-	SndNtfyEvent.xclient.window = X11Win;
-	SndNtfyEvent.xclient.message_type = s_WmState;
-	SndNtfyEvent.xclient.format = 32;
-	SndNtfyEvent.xclient.data.l[0] = 1; // _NET_WM_STATE_ADD
-	SndNtfyEvent.xclient.data.l[1] = s_DemandsAttention;
-	SndNtfyEvent.xclient.data.l[2] = 0;
-	SndNtfyEvent.xclient.data.l[3] = 1; // normal application
-	SndNtfyEvent.xclient.data.l[4] = 0;
-	XSendEvent(pX11Dpy, XDefaultRootWindow(pX11Dpy), False, SubstructureNotifyMask | SubstructureRedirectMask, &SndNtfyEvent);
 #endif
 }
 
