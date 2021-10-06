@@ -332,7 +332,7 @@ void CTeeHistorian::RecordPlayerTeam(int ClientID, int Team)
 
 		if(m_Debug)
 		{
-			dbg_msg("teehistorian", "team_change cid=%d team=%d", ClientID, Team);
+			dbg_msg("teehistorian", "player_team cid=%d team=%d", ClientID, Team);
 		}
 
 		WriteExtra(UUID_TEEHISTORIAN_PLAYER_TEAM, Buffer.Data(), Buffer.Size());
@@ -354,7 +354,7 @@ void CTeeHistorian::RecordTeamPractice(int Team, bool Practice)
 
 		if(m_Debug)
 		{
-			dbg_msg("teehistorian", "team_rescue team=%d practice=%d", Team, Practice);
+			dbg_msg("teehistorian", "team_practice team=%d practice=%d", Team, Practice);
 		}
 
 		WriteExtra(UUID_TEEHISTORIAN_TEAM_PRACTICE, Buffer.Data(), Buffer.Size());
