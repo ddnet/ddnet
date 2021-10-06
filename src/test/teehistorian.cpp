@@ -548,6 +548,7 @@ TEST_F(TeeHistorian, PlayerTeam)
 		// FINISH
 		0x40};
 
+	m_TH.RecordPlayerTeam(3, 0);
 	m_TH.RecordPlayerTeam(33, 54);
 	Finish();
 	Expect(EXPECTED, sizeof(EXPECTED));
@@ -568,6 +569,7 @@ TEST_F(TeeHistorian, TeamPractice)
 		// FINISH
 		0x40};
 
+	m_TH.RecordTeamPractice(16, 0);
 	m_TH.RecordTeamPractice(23, 1);
 	Finish();
 	Expect(EXPECTED, sizeof(EXPECTED));
