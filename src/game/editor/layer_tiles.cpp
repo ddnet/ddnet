@@ -914,7 +914,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		m_Image = NewVal;
 		if(NewVal == -1)
 		{
-			m_Texture = IGraphics::CTextureHandle();
+			m_Texture.Invalidate();
 			m_Image = -1;
 		}
 		else

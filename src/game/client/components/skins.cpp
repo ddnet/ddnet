@@ -314,23 +314,23 @@ void CSkins::Refresh()
 {
 	for(int i = 0; i < m_aSkins.size(); ++i)
 	{
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_OriginalSkin.m_Body);
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_OriginalSkin.m_BodyOutline);
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_OriginalSkin.m_Feet);
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_OriginalSkin.m_FeetOutline);
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_OriginalSkin.m_Hands);
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_OriginalSkin.m_HandsOutline);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_OriginalSkin.m_Body);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_OriginalSkin.m_BodyOutline);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_OriginalSkin.m_Feet);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_OriginalSkin.m_FeetOutline);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_OriginalSkin.m_Hands);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_OriginalSkin.m_HandsOutline);
 		for(auto &Eye : m_aSkins[i].m_OriginalSkin.m_Eyes)
-			Graphics()->UnloadTextureNew(Eye);
+			Graphics()->UnloadTexture(&Eye);
 
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_ColorableSkin.m_Body);
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_ColorableSkin.m_BodyOutline);
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_ColorableSkin.m_Feet);
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_ColorableSkin.m_FeetOutline);
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_ColorableSkin.m_Hands);
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_ColorableSkin.m_HandsOutline);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_ColorableSkin.m_Body);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_ColorableSkin.m_BodyOutline);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_ColorableSkin.m_Feet);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_ColorableSkin.m_FeetOutline);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_ColorableSkin.m_Hands);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_ColorableSkin.m_HandsOutline);
 		for(auto &Eye : m_aSkins[i].m_ColorableSkin.m_Eyes)
-			Graphics()->UnloadTextureNew(Eye);
+			Graphics()->UnloadTexture(&Eye);
 	}
 
 	m_aSkins.clear();
