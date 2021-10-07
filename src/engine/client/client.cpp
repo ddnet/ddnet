@@ -3309,9 +3309,9 @@ void CClient::Run()
 
 				// keep the overflow time - it's used to make sure the gfx refreshrate is reached
 				int64_t AdditionalTime = g_Config.m_GfxRefreshRate ? ((Now - LastRenderTime) - (time_freq() / (int64_t)g_Config.m_GfxRefreshRate)) : 0;
-				// if the value is over a second time loose, reset the additional time (drop the frames, that are lost already)
-				if(AdditionalTime > time_freq())
-					AdditionalTime = time_freq();
+				// if the value is over the frametime of a 60 fps frame, reset the additional time (drop the frames, that are lost already)
+				if(AdditionalTime > (time_freq() / 60))
+					AdditionalTime = (time_freq() / 60);
 				LastRenderTime = Now - AdditionalTime;
 				m_LastRenderTime = Now;
 
@@ -3415,11 +3415,11 @@ void CClient::Run()
 		if(Slept)
 		{
 			// if the diff gets too small it shouldn't get even smaller (drop the updates, that could not be handled)
-			if(SleepTimeInMicroSeconds < (int64_t)-1000000)
-				SleepTimeInMicroSeconds = (int64_t)-1000000;
-			// don't go higher than the game ticks speed, because the network is waking up the client with the server's snapshots anyway
-			else if(SleepTimeInMicroSeconds > (int64_t)1000000 / m_GameTickSpeed)
-				SleepTimeInMicroSeconds = (int64_t)1000000 / m_GameTickSpeed;
+			if(SleepTimeInMicroSeconds < (int64_t)-16666)
+				SleepTimeInMicroSeconds = (int64_t)-16666;
+			// don't go higher than the frametime of a 60 fps frame
+			else if(SleepTimeInMicroSeconds > (int64_t)16666)
+				SleepTimeInMicroSeconds = (int64_t)16666;
 			// the time diff between the time that was used actually used and the time the thread should sleep/wait
 			// will be calculated in the sleep time of the next update tick by faking the time it should have slept/wait.
 			// so two cases (and the case it slept exactly the time it should):
