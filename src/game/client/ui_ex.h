@@ -25,8 +25,8 @@ class CUIEx
 	IInput::CEvent *m_pInputEventsArray;
 	int *m_pInputEventCount;
 
-	bool m_MouseIsPress;
-	bool m_HasSelection;
+	bool m_MouseIsPress = false;
+	bool m_HasSelection = false;
 
 	int m_MousePressX = 0;
 	int m_MousePressY = 0;
