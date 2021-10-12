@@ -264,29 +264,24 @@ void CGraphics_Threaded::LinesDraw(const CLineItem *pArray, int Num)
 	AddVertices(2 * Num);
 }
 
-int CGraphics_Threaded::UnloadTexture(CTextureHandle Index)
+int CGraphics_Threaded::UnloadTexture(CTextureHandle *pIndex)
 {
-	if(Index.Id() == m_InvalidTexture.Id())
+	if(pIndex->Id() == m_InvalidTexture.Id())
 		return 0;
 
-	if(!Index.IsValid())
+	if(!pIndex->IsValid())
 		return 0;
 
 	CCommandBuffer::SCommand_Texture_Destroy Cmd;
-	Cmd.m_Slot = Index.Id();
+	Cmd.m_Slot = pIndex->Id();
 	AddCmd(
 		Cmd, [] { return true; }, "failed to unload texture.");
 
-	m_TextureIndices[Index.Id()] = m_FirstFreeTexture;
-	m_FirstFreeTexture = Index.Id();
-	return 0;
-}
+	m_TextureIndices[pIndex->Id()] = m_FirstFreeTexture;
+	m_FirstFreeTexture = pIndex->Id();
 
-int CGraphics_Threaded::UnloadTextureNew(CTextureHandle &TextureHandle)
-{
-	int Ret = UnloadTexture(TextureHandle);
-	TextureHandle = IGraphics::CTextureHandle();
-	return Ret;
+	pIndex->Invalidate();
+	return 0;
 }
 
 static int ImageFormatToTexFormat(int Format)
@@ -2080,7 +2075,7 @@ void CGraphics_Threaded::IndicesNumRequiredNotify(unsigned int RequiredIndicesCo
 
 int CGraphics_Threaded::IssueInit()
 {
-	int Flags = 0;
+	int Flags = IGraphicsBackend::INITFLAG_RESIZABLE;
 
 	if(g_Config.m_GfxBorderless)
 		Flags |= IGraphicsBackend::INITFLAG_BORDERLESS;
@@ -2092,8 +2087,6 @@ int CGraphics_Threaded::IssueInit()
 		Flags |= IGraphicsBackend::INITFLAG_VSYNC;
 	if(g_Config.m_GfxHighdpi)
 		Flags |= IGraphicsBackend::INITFLAG_HIGHDPI;
-	if(g_Config.m_GfxResizable)
-		Flags |= IGraphicsBackend::INITFLAG_RESIZABLE;
 
 	int r = m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, &g_Config.m_GfxScreenRefreshRate, g_Config.m_GfxFsaaSamples, Flags, &g_Config.m_GfxDesktopWidth, &g_Config.m_GfxDesktopHeight, &m_ScreenWidth, &m_ScreenHeight, m_pStorage);
 	AddBackEndWarningIfExists();

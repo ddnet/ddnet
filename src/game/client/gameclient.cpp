@@ -2639,31 +2639,31 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 {
 	if(m_GameSkinLoaded)
 	{
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteHealthFull);
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteHealthEmpty);
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteArmorFull);
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteArmorEmpty);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteHealthFull);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteHealthEmpty);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteArmorFull);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteArmorEmpty);
 
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponHammerCursor);
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponGunCursor);
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponShotgunCursor);
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponGrenadeCursor);
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponNinjaCursor);
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponLaserCursor);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponHammerCursor);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponGunCursor);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponShotgunCursor);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponGrenadeCursor);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponNinjaCursor);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponLaserCursor);
 
 		for(auto &SpriteWeaponCursor : m_GameSkin.m_SpriteWeaponCursors)
 		{
 			SpriteWeaponCursor = IGraphics::CTextureHandle();
 		}
 
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteHookChain);
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteHookHead);
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponHammer);
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponGun);
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponShotgun);
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponGrenade);
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponNinja);
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponLaser);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteHookChain);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteHookHead);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponHammer);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponGun);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponShotgun);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponGrenade);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponNinja);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponLaser);
 
 		for(auto &SpriteWeapon : m_GameSkin.m_SpriteWeapons)
 		{
@@ -2672,20 +2672,20 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 
 		for(auto &SpriteParticle : m_GameSkin.m_SpriteParticles)
 		{
-			Graphics()->UnloadTextureNew(SpriteParticle);
+			Graphics()->UnloadTexture(&SpriteParticle);
 		}
 
 		for(auto &SpriteStar : m_GameSkin.m_SpriteStars)
 		{
-			Graphics()->UnloadTextureNew(SpriteStar);
+			Graphics()->UnloadTexture(&SpriteStar);
 		}
 
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponGunProjectile);
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponShotgunProjectile);
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponGrenadeProjectile);
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponHammerProjectile);
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponNinjaProjectile);
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponLaserProjectile);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponGunProjectile);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponShotgunProjectile);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponGrenadeProjectile);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponHammerProjectile);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponNinjaProjectile);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponLaserProjectile);
 
 		for(auto &SpriteWeaponProjectile : m_GameSkin.m_SpriteWeaponProjectiles)
 		{
@@ -2694,9 +2694,9 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 
 		for(int i = 0; i < 3; ++i)
 		{
-			Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponGunMuzzles[i]);
-			Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponShotgunMuzzles[i]);
-			Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteWeaponNinjaMuzzles[i]);
+			Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponGunMuzzles[i]);
+			Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponShotgunMuzzles[i]);
+			Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponNinjaMuzzles[i]);
 
 			for(auto &SpriteWeaponsMuzzle : m_GameSkin.m_SpriteWeaponsMuzzles)
 			{
@@ -2704,29 +2704,29 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 			}
 		}
 
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpritePickupHealth);
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpritePickupArmor);
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpritePickupGrenade);
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpritePickupShotgun);
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpritePickupLaser);
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpritePickupNinja);
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpritePickupGun);
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpritePickupHammer);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpritePickupHealth);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpritePickupArmor);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpritePickupGrenade);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpritePickupShotgun);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpritePickupLaser);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpritePickupNinja);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpritePickupGun);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpritePickupHammer);
 
 		for(auto &SpritePickupWeapon : m_GameSkin.m_SpritePickupWeapons)
 		{
 			SpritePickupWeapon = IGraphics::CTextureHandle();
 		}
 
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteFlagBlue);
-		Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteFlagRed);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteFlagBlue);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteFlagRed);
 
 		if(m_GameSkin.IsSixup())
 		{
-			Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteNinjaBarFullLeft);
-			Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteNinjaBarFull);
-			Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteNinjaBarEmpty);
-			Graphics()->UnloadTextureNew(m_GameSkin.m_SpriteNinjaBarEmptyRight);
+			Graphics()->UnloadTexture(&m_GameSkin.m_SpriteNinjaBarFullLeft);
+			Graphics()->UnloadTexture(&m_GameSkin.m_SpriteNinjaBarFull);
+			Graphics()->UnloadTexture(&m_GameSkin.m_SpriteNinjaBarEmpty);
+			Graphics()->UnloadTexture(&m_GameSkin.m_SpriteNinjaBarEmptyRight);
 		}
 
 		m_GameSkinLoaded = false;
@@ -2880,7 +2880,7 @@ void CGameClient::LoadEmoticonsSkin(const char *pPath, bool AsDir)
 	if(m_EmoticonsSkinLoaded)
 	{
 		for(auto &SpriteEmoticon : m_EmoticonsSkin.m_SpriteEmoticons)
-			Graphics()->UnloadTextureNew(SpriteEmoticon);
+			Graphics()->UnloadTexture(&SpriteEmoticon);
 
 		m_EmoticonsSkinLoaded = false;
 	}
@@ -2923,15 +2923,15 @@ void CGameClient::LoadParticlesSkin(const char *pPath, bool AsDir)
 {
 	if(m_ParticlesSkinLoaded)
 	{
-		Graphics()->UnloadTextureNew(m_ParticlesSkin.m_SpriteParticleSlice);
-		Graphics()->UnloadTextureNew(m_ParticlesSkin.m_SpriteParticleBall);
+		Graphics()->UnloadTexture(&m_ParticlesSkin.m_SpriteParticleSlice);
+		Graphics()->UnloadTexture(&m_ParticlesSkin.m_SpriteParticleBall);
 		for(auto &SpriteParticleSplat : m_ParticlesSkin.m_SpriteParticleSplat)
-			Graphics()->UnloadTextureNew(SpriteParticleSplat);
-		Graphics()->UnloadTextureNew(m_ParticlesSkin.m_SpriteParticleSmoke);
-		Graphics()->UnloadTextureNew(m_ParticlesSkin.m_SpriteParticleShell);
-		Graphics()->UnloadTextureNew(m_ParticlesSkin.m_SpriteParticleExpl);
-		Graphics()->UnloadTextureNew(m_ParticlesSkin.m_SpriteParticleAirJump);
-		Graphics()->UnloadTextureNew(m_ParticlesSkin.m_SpriteParticleHit);
+			Graphics()->UnloadTexture(&SpriteParticleSplat);
+		Graphics()->UnloadTexture(&m_ParticlesSkin.m_SpriteParticleSmoke);
+		Graphics()->UnloadTexture(&m_ParticlesSkin.m_SpriteParticleShell);
+		Graphics()->UnloadTexture(&m_ParticlesSkin.m_SpriteParticleExpl);
+		Graphics()->UnloadTexture(&m_ParticlesSkin.m_SpriteParticleAirJump);
+		Graphics()->UnloadTexture(&m_ParticlesSkin.m_SpriteParticleHit);
 
 		for(auto &SpriteParticle : m_ParticlesSkin.m_SpriteParticles)
 			SpriteParticle = IGraphics::CTextureHandle();

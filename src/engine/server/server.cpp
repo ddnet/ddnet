@@ -2596,6 +2596,8 @@ int CServer::Run()
 
 			while(t > TickStartTime(m_CurrentGameTick + 1))
 			{
+				GameServer()->OnPreTickTeehistorian();
+
 				for(int c = 0; c < MAX_CLIENTS; c++)
 					if(m_aClients[c].m_State == CClient::STATE_INGAME)
 						for(auto &Input : m_aClients[c].m_aInputs)

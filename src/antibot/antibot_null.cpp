@@ -1,6 +1,6 @@
 #define ANTIBOTAPI DYNAMIC_EXPORT
 
-#include "antibot_data.h"
+#include "antibot_interface.h"
 
 static CAntibotData *g_pData;
 

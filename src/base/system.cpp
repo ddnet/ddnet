@@ -2271,7 +2271,9 @@ int fs_makedir(const char *path)
 int fs_removedir(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	if(_rmdir(path) == 0)
+	WCHAR wPath[IO_MAX_PATH_LENGTH];
+	MultiByteToWideChar(CP_UTF8, 0, path, IO_MAX_PATH_LENGTH, wPath, IO_MAX_PATH_LENGTH);
+	if(RemoveDirectoryW(wPath) != 0)
 		return 0;
 	return -1;
 #else
@@ -2357,7 +2359,9 @@ int fs_parent_dir(char *path)
 int fs_remove(const char *filename)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	return _unlink(filename) != 0;
+	WCHAR wFilename[IO_MAX_PATH_LENGTH];
+	MultiByteToWideChar(CP_UTF8, 0, filename, IO_MAX_PATH_LENGTH, wFilename, IO_MAX_PATH_LENGTH);
+	return DeleteFileW(wFilename) == 0;
 #else
 	return unlink(filename) != 0;
 #endif
@@ -2366,7 +2370,11 @@ int fs_remove(const char *filename)
 int fs_rename(const char *oldname, const char *newname)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	if(MoveFileEx(oldname, newname, MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED) == 0)
+	WCHAR wOldname[IO_MAX_PATH_LENGTH];
+	WCHAR wNewname[IO_MAX_PATH_LENGTH];
+	MultiByteToWideChar(CP_UTF8, 0, oldname, IO_MAX_PATH_LENGTH, wOldname, IO_MAX_PATH_LENGTH);
+	MultiByteToWideChar(CP_UTF8, 0, newname, IO_MAX_PATH_LENGTH, wNewname, IO_MAX_PATH_LENGTH);
+	if(MoveFileExW(wOldname, wNewname, MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED) == 0)
 		return 1;
 #else
 	if(rename(oldname, newname) != 0)

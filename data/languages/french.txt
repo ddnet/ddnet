@@ -1311,6 +1311,18 @@ Use modern OpenGL
 Show client IDs
 == Montrer les IDs
 
+Kill Messages
+== Messages d'élimination
+
+Highlight self in kill messages
+== Afficher son propre nom en surbrillance dans les messages d'élimination
+
+Kill Message Normal Color
+== Couleur normale des messages d'élimination
+
+Kill Message Highlight Color
+== Couleur de surbrillance des messages d'élimination
+
 Laser Outline Color
 == Couleur de la bordure du laser
 

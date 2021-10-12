@@ -229,7 +229,7 @@ void ClearAssetList(sorted_array<TName> &List, IGraphics *pGraphics)
 	for(int i = 0; i < List.size(); ++i)
 	{
 		if(List[i].m_RenderTexture.IsValid())
-			pGraphics->UnloadTexture(List[i].m_RenderTexture);
+			pGraphics->UnloadTexture(&(List[i].m_RenderTexture));
 		List[i].m_RenderTexture = IGraphics::CTextureHandle();
 	}
 	List.clear();
@@ -244,7 +244,7 @@ void CMenus::ClearCustomItems(int CurTab)
 			for(auto &Image : m_EntitiesList[i].m_aImages)
 			{
 				if(Image.m_Texture.IsValid())
-					Graphics()->UnloadTexture(Image.m_Texture);
+					Graphics()->UnloadTexture(&Image.m_Texture);
 				Image.m_Texture = IGraphics::CTextureHandle();
 			}
 		}

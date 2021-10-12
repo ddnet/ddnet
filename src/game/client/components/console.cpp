@@ -4,6 +4,7 @@
 #include <base/tl/sorted_array.h>
 
 #include <limits.h>
+#include <limits>
 #include <math.h>
 
 #include <game/generated/client_data.h>
@@ -571,7 +572,8 @@ void CGameConsole::OnRender()
 		Info.m_Offset = pConsole->m_CompletionRenderOffset;
 		Info.m_Width = Screen.w;
 		Info.m_pCurrentCmd = pConsole->m_aCompletionBuffer;
-		TextRender()->SetCursor(&Info.m_Cursor, x + Info.m_Offset, y + RowHeight + 2.0f, FontSize, TEXTFLAG_RENDER);
+		TextRender()->SetCursor(&Info.m_Cursor, x + Info.m_Offset, y + RowHeight + 2.0f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
+		Info.m_Cursor.m_LineWidth = std::numeric_limits<float>::max();
 
 		// render prompt
 		CTextCursor Cursor;
@@ -636,9 +638,7 @@ void CGameConsole::OnRender()
 		Cursor.m_LineWidth = Screen.w - 10.0f - x;
 
 		TextRender()->TextEx(&Cursor, aInputString, pConsole->m_Input.GetCursorOffset(Editing));
-		static float MarkerOffset = TextRender()->TextWidth(0, FontSize, "|", -1, -1.0f) / 3;
 		CTextCursor Marker = Cursor;
-		Marker.m_X -= MarkerOffset;
 		Marker.m_LineWidth = -1;
 		TextRender()->TextEx(&Marker, "|", -1);
 		TextRender()->TextEx(&Cursor, aInputString + pConsole->m_Input.GetCursorOffset(Editing), -1);

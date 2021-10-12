@@ -430,7 +430,7 @@ int CUI::DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *
 	return 1;
 }
 
-float CUI::DoTextLabel(float x, float y, float w, float h, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically, bool StopAtEnd)
+float CUI::DoTextLabel(float x, float y, float w, float h, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically, bool StopAtEnd, class CTextCursor *pSelCursor)
 {
 	float AlignedSize = 0;
 	float MaxCharacterHeightInLine = 0;
@@ -460,15 +460,33 @@ float CUI::DoTextLabel(float x, float y, float w, float h, const char *pText, fl
 	CTextCursor Cursor;
 	TextRender()->SetCursor(&Cursor, AlignmentHori, AlignmentVert, Size, Flags);
 	Cursor.m_LineWidth = (float)MaxWidth;
+	if(pSelCursor)
+	{
+		Cursor.m_CursorMode = pSelCursor->m_CursorMode;
+		Cursor.m_CursorCharacter = pSelCursor->m_CursorCharacter;
+		Cursor.m_CalculateSelectionMode = pSelCursor->m_CalculateSelectionMode;
+		Cursor.m_PressMouseX = pSelCursor->m_PressMouseX;
+		Cursor.m_PressMouseY = pSelCursor->m_PressMouseY;
+		Cursor.m_ReleaseMouseX = pSelCursor->m_ReleaseMouseX;
+		Cursor.m_ReleaseMouseY = pSelCursor->m_ReleaseMouseY;
+
+		Cursor.m_SelectionStart = pSelCursor->m_SelectionStart;
+		Cursor.m_SelectionEnd = pSelCursor->m_SelectionEnd;
+	}
 
 	TextRender()->TextEx(&Cursor, pText, -1);
+
+	if(pSelCursor)
+	{
+		*pSelCursor = Cursor;
+	}
 
 	return tw;
 }
 
-void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically)
+void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically, CTextCursor *pSelCursor)
 {
-	DoTextLabel(r->x, r->y, r->w, r->h, pText, Size, Align, MaxWidth, AlignVertically);
+	DoTextLabel(r->x, r->y, r->w, r->h, pText, Size, Align, MaxWidth, AlignVertically, false, pSelCursor);
 }
 
 void CUI::DoLabelScaled(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically)

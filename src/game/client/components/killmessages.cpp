@@ -76,6 +76,13 @@ void CKillMessages::CreateKillmessageNamesIfNotCreated(CKillMsg &Kill)
 		TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = -1;
 
+		unsigned Color = g_Config.m_ClKillMessageNormalColor;
+		if(Kill.m_VictimID == m_pClient->m_Snap.m_LocalClientID)
+		{
+			Color = g_Config.m_ClKillMessageHighlightColor;
+		}
+		TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(Color)));
+
 		Kill.m_VictimTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, Kill.m_aVictimName);
 	}
 
@@ -86,6 +93,13 @@ void CKillMessages::CreateKillmessageNamesIfNotCreated(CKillMsg &Kill)
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = -1;
+
+		unsigned Color = g_Config.m_ClKillMessageNormalColor;
+		if(Kill.m_KillerID == m_pClient->m_Snap.m_LocalClientID)
+		{
+			Color = g_Config.m_ClKillMessageHighlightColor;
+		}
+		TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(Color)));
 
 		Kill.m_KillerTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, Kill.m_aKillerName);
 	}

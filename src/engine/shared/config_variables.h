@@ -113,7 +113,6 @@ MACRO_CONFIG_INT(GfxFullscreen, gfx_fullscreen, 0, 0, 2, CFGFLAG_SAVE | CFGFLAG_
 MACRO_CONFIG_INT(GfxHighdpi, gfx_highdpi, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Enable high-dpi")
 MACRO_CONFIG_INT(GfxColorDepth, gfx_color_depth, 24, 16, 24, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Colors bits for framebuffer (fullscreen only)")
 MACRO_CONFIG_INT(GfxVsync, gfx_vsync, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Vertical sync (may cause delay)")
-MACRO_CONFIG_INT(GfxResizable, gfx_resizable, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Enables window resizing")
 MACRO_CONFIG_INT(GfxDisplayAllVideoModes, gfx_display_all_video_modes, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Show all video modes")
 MACRO_CONFIG_INT(GfxHighDetail, gfx_high_detail, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "High detail")
 MACRO_CONFIG_INT(GfxFsaaSamples, gfx_fsaa_samples, 0, 0, 16, CFGFLAG_SAVE | CFGFLAG_CLIENT, "FSAA Samples")
@@ -186,7 +185,7 @@ MACRO_CONFIG_STR(DbgStressServer, dbg_stress_server, 32, "localhost", CFGFLAG_CL
 // DDRace
 MACRO_CONFIG_STR(SvWelcome, sv_welcome, 64, "", CFGFLAG_SERVER, "Message that will be displayed to players who join the server")
 MACRO_CONFIG_INT(SvReservedSlots, sv_reserved_slots, 0, 0, MAX_CLIENTS, CFGFLAG_SERVER, "The number of slots that are reserved for special players")
-MACRO_CONFIG_STR(SvReservedSlotsPass, sv_reserved_slots_pass, 32, "", CFGFLAG_SERVER, "The password that is required to use a reserved slot")
+MACRO_CONFIG_STR(SvReservedSlotsPass, sv_reserved_slots_pass, 32, "", CFGFLAG_SERVER | CFGFLAG_NONTEEHISTORIC, "The password that is required to use a reserved slot")
 MACRO_CONFIG_INT(SvHit, sv_hit, 1, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Whether players can hammer/grenade/laser each other or not")
 MACRO_CONFIG_INT(SvEndlessDrag, sv_endless_drag, 0, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Turns endless hooking on/off")
 MACRO_CONFIG_INT(SvTestingCommands, sv_test_cmds, 0, 0, 1, CFGFLAG_SERVER, "Turns testing commands aka cheats on/off (setting only works in initial config)")
@@ -277,6 +276,8 @@ MACRO_CONFIG_COL(ClMessageTeamColor, cl_message_team_color, 5636050, CFGFLAG_CLI
 MACRO_CONFIG_COL(ClMessageColor, cl_message_color, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message color")
 MACRO_CONFIG_COL(ClLaserInnerColor, cl_laser_inner_color, 11206591, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Laser inner color")
 MACRO_CONFIG_COL(ClLaserOutlineColor, cl_laser_outline_color, 11176233, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Laser outline color")
+MACRO_CONFIG_COL(ClKillMessageNormalColor, cl_kill_message_normal_color, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLALPHA, "Kill message normal color")
+MACRO_CONFIG_COL(ClKillMessageHighlightColor, cl_kill_message_highlight_color, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLALPHA, "Kill message highlight color")
 
 MACRO_CONFIG_INT(ClMessageFriend, cl_message_friend, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Enable coloring and the heart for friends")
 MACRO_CONFIG_COL(ClMessageFriendColor, cl_message_friend_color, 65425, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Friend message color")

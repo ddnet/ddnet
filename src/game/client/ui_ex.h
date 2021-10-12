@@ -25,6 +25,18 @@ class CUIEx
 	IInput::CEvent *m_pInputEventsArray;
 	int *m_pInputEventCount;
 
+	bool m_MouseIsPress = false;
+	bool m_HasSelection = false;
+
+	int m_MousePressX = 0;
+	int m_MousePressY = 0;
+	int m_MouseCurX = 0;
+	int m_MouseCurY = 0;
+	int m_CurSelStart = 0;
+	int m_CurSelEnd = 0;
+
+	int m_CurCursor = 0;
+
 protected:
 	CUI *UI() { return m_pUI; }
 	IInput *Input() { return m_pInput; }
