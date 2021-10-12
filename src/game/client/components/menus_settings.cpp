@@ -2745,4 +2745,11 @@ void CMenus::RenderSettingsChillerbot(CUIRect MainView)
 			m_pClient->m_ChillerBotUX.UpdateComponents();
 		}
 	}
+	// render laser head
+	{
+		CUIRect Checkbox;
+		MainView.HSplitTop(20.0f, &Checkbox, &MainView);
+		if(DoButton_CheckBox(&g_Config.m_ClRenderLaserHead, "Render laser heads (bobbles)", g_Config.m_ClRenderLaserHead, &Checkbox))
+			g_Config.m_ClRenderLaserHead ^= 1;
+	}
 }

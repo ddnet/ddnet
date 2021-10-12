@@ -284,6 +284,7 @@ void CItems::RenderLaser(const struct CNetObj_Laser *pCurrent, bool IsPredicted)
 	}
 
 	// render head
+	if(g_Config.m_ClRenderLaserHead)
 	{
 		int CurParticle = (Client()->GameTick(g_Config.m_ClDummy) % 3);
 		int QuadOffset = 2 + 8 + NUM_WEAPONS * 2 + CurParticle;

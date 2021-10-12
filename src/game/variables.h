@@ -19,6 +19,7 @@ MACRO_CONFIG_INT(ClChillerbotHud, cl_chillerbot_hud, 1, 0, 1, CFGFLAG_CLIENT | C
 MACRO_CONFIG_INT(ClShowSpeed, cl_show_speed, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show speed in hud")
 MACRO_CONFIG_INT(ClChangeTileNotification, cl_change_tile_notification, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Notify when leaving current tile type")
 MACRO_CONFIG_INT(ClShowLastKiller, cl_show_last_killer, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show last killer in hud requires cl_chillerbot_hud 1")
+MACRO_CONFIG_INT(ClRenderLaserHead, cl_render_laser_head, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Render laser bubbles")
 MACRO_CONFIG_STR(ClPasswordFile, cl_password_file, 512, "chillerbot/chillpw_secret.txt", CFGFLAG_CLIENT | CFGFLAG_SAVE, "File to load passwords for autologin")
 
 // warlist
