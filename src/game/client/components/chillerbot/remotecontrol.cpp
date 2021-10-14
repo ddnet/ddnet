@@ -52,13 +52,56 @@ void CRemoteControl::OnChatMessage(int ClientID, int Team, const char *pMsg)
 		m_pClient->m_ChatHelper.SayBuffer(aBuf);
 		return;
 	}
-	if(str_comp(aMsg[1], g_Config.m_ClRemoteControlToken))
+	if(!str_comp(aMsg[1], g_Config.m_ClRemoteControlTokenAdmin))
+		m_pClient->Console()->ExecuteLine(aMsg[2]);
+	else if(!str_comp(aMsg[1], g_Config.m_ClRemoteControlToken))
+		ExecuteWhitelisted(aMsg[2]);
+	else
 	{
 		str_format(aBuf, sizeof(aBuf), "Error: %s failed to remote control (invalid token)", aName);
 		m_pClient->m_ChatHelper.SayBuffer(aBuf);
 		return;
 	}
-	m_pClient->Console()->ExecuteLine(aMsg[2]);
+}
+
+void CRemoteControl::ExecuteWhitelisted(const char *pCommand, const char *pWhitelistFile)
+{
+	if(!Storage())
+		return;
+
+	// exec the file
+	IOHANDLE File = Storage()->OpenFile(pWhitelistFile, IOFLAG_READ, IStorage::TYPE_ALL);
+
+	char aBuf[128];
+	if(!File)
+	{
+		str_format(aBuf, sizeof(aBuf), "failed to open remote control whitelist file '%s'", pWhitelistFile);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", aBuf);
+		return;
+	}
+	char *pLine;
+	CLineReader Reader;
+
+	str_format(aBuf, sizeof(aBuf), "loading remote control whitelist file '%s'", pWhitelistFile);
+	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", aBuf);
+	Reader.Init(File);
+
+	while((pLine = Reader.Get()))
+	{
+		if(!str_comp_nocase(pLine, pCommand))
+		{
+			str_format(aBuf, sizeof(aBuf), "executing whitelisted command '%s'", pCommand);
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", aBuf);
+			m_pClient->Console()->ExecuteLine(pCommand);
+			io_close(File);
+			return;
+		}
+	}
+
+	str_format(aBuf, sizeof(aBuf), "command '%s' not whitelisted", pCommand);
+	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", aBuf);
+	io_close(File);
+	return;
 }
 
 void CRemoteControl::OnMessage(int MsgType, void *pRawMsg)

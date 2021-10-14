@@ -5,6 +5,8 @@
 
 class CRemoteControl : public CComponent
 {
+	void ExecuteWhitelisted(const char *pCommand, const char *pWhitelistFile = "chillerbot/rc_commands.txt");
+
 	void OnChatMessage(int ClientID, int Team, const char *pMsg);
 
 	virtual void OnMessage(int MsgType, void *pRawMsg);

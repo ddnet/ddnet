@@ -28,6 +28,7 @@ MACRO_CONFIG_INT(ClWarList, cl_war_list, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE,
 // remotecontrol
 MACRO_CONFIG_INT(ClRemoteControl, cl_remote_control, 0, 0, 1, CFGFLAG_CLIENT, "Execute whisper in local console")
 MACRO_CONFIG_STR(ClRemoteControlToken, cl_remote_control_token, 512, "spaces_do_not_work", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Remote control token (see cl_remote_control)")
+MACRO_CONFIG_STR(ClRemoteControlTokenAdmin, cl_remote_control_token_admin, 512, "spaces_do_not_work_", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Remote control admin token (see cl_remote_control)")
 
 // client
 MACRO_CONFIG_INT(ClPredict, cl_predict, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Predict client movements")
