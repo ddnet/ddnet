@@ -234,7 +234,7 @@ void CChatHelper::Get128Name(const char *pMsg, char *pName)
 {
 	for(int i = 0; pMsg[i] && i < 17; i++)
 	{
-		if(pMsg[i] == ':')
+		if(pMsg[i] == ':' && pMsg[i + 1] == ' ')
 		{
 			str_copy(pName, pMsg, i + 1);
 			return;
