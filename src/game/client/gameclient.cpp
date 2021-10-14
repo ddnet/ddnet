@@ -2598,8 +2598,14 @@ int CGameClient::OwnTeam()
 		return 0;
 	else if(m_Snap.m_SpecInfo.m_Active && m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
 		return m_Teams.Team(m_Snap.m_SpecInfo.m_SpectatorID);
-
 	return m_Teams.Team(m_Snap.m_LocalClientID);
+}
+
+bool CGameClient::IsLocalCharSuper()
+{
+	if(m_Snap.m_LocalClientID < 0)
+		return 0;
+	return m_aClients[m_Snap.m_LocalClientID].m_Super;
 }
 
 void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
