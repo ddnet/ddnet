@@ -1,5 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <atomic>
 #include <base/math.h>
 #include <base/system.h>
 
@@ -74,7 +75,7 @@ static int m_CenterX = 0;
 static int m_CenterY = 0;
 
 static int m_MixingRate = 48000;
-static volatile int m_SoundVolume = 100;
+static std::atomic<int> m_SoundVolume { 100 };
 
 static int m_NextVoice GUARDED_BY(m_SoundLock) = 0;
 static int *m_pMixBuffer = 0; // buffer only used by the thread callback function

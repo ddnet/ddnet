@@ -65,7 +65,7 @@ protected:
 private:
 	ICommandProcessor *m_pProcessor;
 	CCommandBuffer *volatile m_pBuffer;
-	volatile bool m_Shutdown;
+	std::atomic_bool m_Shutdown;
 	CSemaphore m_Activity;
 	CSemaphore m_BufferDone;
 	void *m_pThread;
