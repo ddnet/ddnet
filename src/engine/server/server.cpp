@@ -50,7 +50,7 @@
 
 #include <signal.h>
 
-volatile bool InterruptSignaled = false;
+volatile sig_atomic_t InterruptSignaled = 0;
 
 CSnapIDPool::CSnapIDPool()
 {
@@ -3608,9 +3608,9 @@ static CServer *CreateServer() { return new CServer(); }
 void HandleSigInt(int Param)
 {
 	if(InterruptSignaled)
-		exit(1);
+		_Exit(1); // exit is not async-signal-safe and must not be called from a signal handler
 	else
-		InterruptSignaled = true;
+		InterruptSignaled = 1;
 }
 
 int main(int argc, const char **argv) // ignore_convention
