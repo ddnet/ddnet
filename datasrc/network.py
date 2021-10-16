@@ -36,6 +36,7 @@ Emoticons = ["OOP", "EXCLAMATION", "HEARTS", "DROP", "DOTDOT", "MUSIC", "SORRY",
 
 Powerups = ["HEALTH", "ARMOR", "WEAPON", "NINJA"]
 Authed = ["NO", "HELPER", "MOD", "ADMIN"]
+EntityClasses = ["PROJECTILE", "DOOR", "DRAGGER_WEAK", "DRAGGER_NORMAL", "DRAGGER_STRONG", "GUN_NORMAL", "GUN_EXPLOSIVE", "GUN_FREEZE", "GUN_UNFREEZE", "LIGHT", "PICKUP"]
 
 RawHeader = '''
 
@@ -77,6 +78,7 @@ Enums = [
 	Enum("POWERUP", Powerups),
 	Enum("EMOTICON", Emoticons),
 	Enum("AUTHED", Authed),
+	Enum("ENTITYCLASS", EntityClasses),
 ]
 
 Flags = [
@@ -312,6 +314,13 @@ Objects = [
 		NetIntAny("m_Status6"),
 		NetIntAny("m_Status7"),
 		NetIntAny("m_Status8"),
+	]),
+
+	# Switch info for map items
+	NetObjectEx("EntityEx", "entity-ex@netobj.ddnet.tw", [
+		NetIntAny("m_SwitchNumber"),
+		NetIntAny("m_Layer"),
+		NetIntAny("m_EntityClass"),
 	]),
 ]
 

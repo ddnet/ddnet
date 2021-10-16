@@ -642,6 +642,8 @@ class CEditor : public IEditor
 	CUI m_UI;
 	CUIEx m_UIEx;
 
+	void SetLockMouse(bool SetVal);
+
 public:
 	class IInput *Input() { return m_pInput; };
 	class IClient *Client() { return m_pClient; };
@@ -907,6 +909,9 @@ public:
 	float m_MouseDeltaY;
 	float m_MouseDeltaWx;
 	float m_MouseDeltaWy;
+
+	int m_LastX = 0;
+	int m_LastY = 0;
 
 	bool m_ShowTileInfo;
 	bool m_ShowDetail;

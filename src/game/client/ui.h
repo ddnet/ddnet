@@ -257,7 +257,6 @@ public:
 	const void *LastActiveItem() const { return m_pLastActiveItem; }
 
 	int MouseInside(const CUIRect *pRect) const;
-	void ConvertMouseMove(float *x, float *y) const;
 
 	CUIRect *Screen();
 	void MapScreen();

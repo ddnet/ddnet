@@ -362,7 +362,7 @@ void CGameWorld::NetCharAdd(int ObjID, CNetObj_Character *pCharObj, CNetObj_DDNe
 		pChar->m_GameTeam = GameTeam;
 }
 
-void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData)
+void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const CNetObj_EntityEx *pDataEx)
 {
 	if((ObjType == NETOBJTYPE_PROJECTILE || ObjType == NETOBJTYPE_DDNETPROJECTILE) && m_WorldConfig.m_PredictWeapons)
 	{
@@ -375,7 +375,7 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData)
 		{
 			Data = ExtractProjectileInfoDDNet((const CNetObj_DDNetProjectile *)pObjData, this);
 		}
-		CProjectile NetProj = CProjectile(this, ObjID, &Data);
+		CProjectile NetProj = CProjectile(this, ObjID, &Data, pDataEx);
 
 		if(NetProj.m_Type != WEAPON_SHOTGUN && fabs(length(NetProj.m_Direction) - 1.f) > 0.02f) // workaround to skip grenades on ball mod
 			return;
@@ -429,7 +429,7 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData)
 	}
 	else if(ObjType == NETOBJTYPE_PICKUP && m_WorldConfig.m_PredictWeapons)
 	{
-		CPickup NetPickup = CPickup(this, ObjID, (CNetObj_Pickup *)pObjData);
+		CPickup NetPickup = CPickup(this, ObjID, (CNetObj_Pickup *)pObjData, pDataEx);
 		if(CPickup *pPickup = (CPickup *)GetEntity(ObjID, ENTTYPE_PICKUP))
 		{
 			if(NetPickup.Match(pPickup))

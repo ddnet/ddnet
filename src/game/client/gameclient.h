@@ -512,6 +512,8 @@ public:
 	void DummyResetInput();
 	void Echo(const char *pString);
 	bool IsOtherTeam(int ClientID);
+	int OwnTeam();
+	bool IsLocalCharSuper();
 	bool CanDisplayWarning();
 	bool IsDisplayingWarning();
 

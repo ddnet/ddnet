@@ -8,6 +8,9 @@
 
 #include "chat.h"
 #include "emoticon.h"
+
+#include <game/client/component.h>
+
 #include <game/client/animstate.h>
 #include <game/client/render.h>
 #include <game/client/ui.h>
@@ -51,14 +54,39 @@ void CEmoticon::OnRelease()
 	m_Active = false;
 }
 
-bool CEmoticon::OnMouseMove(float x, float y)
+EComponentMouseMovementBlockMode CEmoticon::OnMouseWrongStateImpl()
 {
 	if(!m_Active)
-		return false;
+		return COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_DONT_BLOCK;
+	return COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK_AND_CHANGE_TO_INGAME_RELATIVE;
+}
 
-	UI()->ConvertMouseMove(&x, &y);
-	m_SelectorMouse += vec2(x, y);
-	return true;
+EComponentMouseMovementBlockMode CEmoticon::OnMouseInWindowPos(int X, int Y)
+{
+	return OnMouseWrongStateImpl();
+}
+
+EComponentMouseMovementBlockMode CEmoticon::OnMouseAbsoluteInWindowPos(int X, int Y)
+{
+	return OnMouseWrongStateImpl();
+}
+
+EComponentMouseMovementBlockMode CEmoticon::OnMouseInWindowRelativeMove(int X, int Y)
+{
+	if(!m_Active)
+		return COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_DONT_BLOCK;
+
+	CUIRect *pScreen = UI()->Screen();
+	float TmpX = (X / (float)Graphics()->WindowWidth()) * pScreen->w;
+	float TmpY = (Y / (float)Graphics()->WindowHeight()) * pScreen->h;
+	m_SelectorMouse += vec2(TmpX, TmpY);
+
+	return COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK;
+}
+
+EComponentMouseMovementBlockMode CEmoticon::OnMouseRelativeMove(float x, float y)
+{
+	return OnMouseWrongStateImpl();
 }
 
 void CEmoticon::DrawCircle(float x, float y, float r, int Segments)
