@@ -1206,7 +1206,7 @@ void CGraphicsBackend_SDL_OpenGL::GetViewportSize(int &w, int &h)
 void CGraphicsBackend_SDL_OpenGL::NotifyWindow()
 {
 #if SDL_MAJOR_VERSION > 2 || (SDL_MAJOR_VERSION == 2 && SDL_PATCHLEVEL >= 16)
-	if(SDL_FlashWindow(m_pWindow, SDL_FlashOperation::SDL_FLASH_BRIEFLY) != 0)
+	if(SDL_FlashWindow(m_pWindow, SDL_FlashOperation::SDL_FLASH_UNTIL_FOCUSED) != 0)
 	{
 		// fails if SDL hasn't implemented it
 		return;
