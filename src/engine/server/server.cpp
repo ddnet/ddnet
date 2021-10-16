@@ -1231,7 +1231,7 @@ void CServer::SendRconLine(int ClientID, const char *pLine)
 void CServer::SendRconLineAuthed(const char *pLine, void *pUser, ColorRGBA PrintColor)
 {
 	CServer *pThis = (CServer *)pUser;
-	static volatile int s_ReentryGuard = 0;
+	static int s_ReentryGuard = 0;
 	int i;
 
 	if(s_ReentryGuard)
