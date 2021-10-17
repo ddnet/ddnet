@@ -117,7 +117,7 @@ bool CInput::MouseAbsolute(int *x, int *y)
 
 void CInput::MouseModeChange(EInputMouseMode OldState, EInputMouseMode NewState)
 {
-	if(g_Config.m_InpMouseOld && (NewState == EInputMouseMode::INPUT_MOUSE_MODE_RELATIVE))
+	if(g_Config.m_InpMouseOld)
 		SDL_SetHintWithPriority(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "1", SDL_HINT_OVERRIDE);
 	else
 		SDL_SetHintWithPriority(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "0", SDL_HINT_OVERRIDE);
@@ -146,14 +146,6 @@ bool CInput::MouseModeRelative()
 	{
 		EInputMouseMode OldMode = GetMouseMode();
 		MouseModeChange(OldMode, INPUT_MOUSE_MODE_RELATIVE);
-		// turn off relative mouse to trigger the SDL hints
-// TODO: remove this once SDL fixes mouse grabbing in macos @see MouseModeInGame
-#ifdef CONF_PLATFORM_MACOS
-		if(OldMode != INPUT_MOUSE_MODE_ABSOLUTE)
-#else
-		if(OldMode == INPUT_MOUSE_MODE_INGAME_RELATIVE)
-#endif
-			SDL_SetRelativeMouseMode(SDL_FALSE);
 		SetMouseMode(INPUT_MOUSE_MODE_RELATIVE);
 		SDL_SetRelativeMouseMode(SDL_TRUE);
 		Graphics()->SetWindowGrab(true);
@@ -168,7 +160,6 @@ bool CInput::MouseModeRelative()
 
 void CInput::MouseModeInGameRelativeImpl()
 {
-	SDL_SetHintWithPriority(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "1", SDL_HINT_OVERRIDE);
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 	Graphics()->SetWindowGrab(true);
 	SDL_GetRelativeMouseState(0x0, 0x0);
@@ -184,9 +175,6 @@ bool CInput::MouseModeInGame(int *pDesiredX, int *pDesiredY)
 
 // TODO: remove this once SDL fixes mouse grabbing in macos (https://github.com/libsdl-org/SDL/commit/2fdbae22cb2f75643447c34d2dab7f15305e3567)
 #ifdef CONF_PLATFORM_MACOS
-		// turn off relative mouse to trigger the SDL hints
-		if(OldMode == INPUT_MOUSE_MODE_RELATIVE)
-			SDL_SetRelativeMouseMode(SDL_FALSE);
 		MouseModeInGameRelativeImpl();
 #else
 		SDL_SetRelativeMouseMode(SDL_FALSE);
@@ -213,9 +201,6 @@ bool CInput::MouseModeInGameRelative()
 	{
 		EInputMouseMode OldMode = GetMouseMode();
 		MouseModeChange(OldMode, INPUT_MOUSE_MODE_INGAME_RELATIVE);
-		// turn off relative mouse to trigger the SDL hints
-		if(OldMode == INPUT_MOUSE_MODE_RELATIVE)
-			SDL_SetRelativeMouseMode(SDL_FALSE);
 		SetMouseMode(INPUT_MOUSE_MODE_INGAME_RELATIVE);
 
 		MouseModeInGameRelativeImpl();
