@@ -765,6 +765,9 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 
 void CGameContext::OnPreTickTeehistorian()
 {
+	if(!m_TeeHistorianActive)
+		return;
+
 	auto *pController = ((CGameControllerDDRace *)m_pController);
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
