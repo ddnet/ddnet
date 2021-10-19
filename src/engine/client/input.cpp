@@ -484,6 +484,11 @@ int CInput::Update()
 					if(GetMouseMode() != INPUT_MOUSE_MODE_ABSOLUTE)
 					{
 						SDL_ShowCursor(SDL_FALSE);
+						if(SDL_GetRelativeMouseMode())
+						{
+							// Clear pending relative mouse motion
+							SDL_GetRelativeMouseState(0x0, 0x0);
+						}
 					}
 					m_MouseFocus = true;
 					IgnoreKeys = true;
