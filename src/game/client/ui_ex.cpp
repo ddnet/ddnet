@@ -51,7 +51,7 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 			const char *pText = Input()->GetClipboardText();
 			if(pText)
 			{
-				int OffsetL = minimum(str_length(pStr), m_CurCursor);
+				int OffsetL = clamp(m_CurCursor, 0, str_length(pStr));
 				int OffsetR = OffsetL;
 
 				if(m_HasSelection)
