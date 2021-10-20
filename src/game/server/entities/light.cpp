@@ -102,6 +102,9 @@ void CLight::Tick()
 
 void CLight::Snap(int SnappingClient)
 {
+	if(NetworkClipped(SnappingClient, m_Pos) && NetworkClipped(SnappingClient, m_To))
+		return;
+
 	CNetObj_EntityEx *pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
 	if(!pEntData)
 		return;
@@ -109,9 +112,6 @@ void CLight::Snap(int SnappingClient)
 	pEntData->m_SwitchNumber = m_Number;
 	pEntData->m_Layer = m_Layer;
 	pEntData->m_EntityClass = ENTITYCLASS_LIGHT;
-
-	if(NetworkClipped(SnappingClient, m_Pos) && NetworkClipped(SnappingClient, m_To))
-		return;
 
 	CCharacter *Char = GameServer()->GetPlayerChar(SnappingClient);
 

@@ -112,6 +112,9 @@ void CGun::Tick()
 
 void CGun::Snap(int SnappingClient)
 {
+	if(NetworkClipped(SnappingClient))
+		return;
+
 	CNetObj_EntityEx *pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
 	if(!pEntData)
 		return;
@@ -127,9 +130,6 @@ void CGun::Snap(int SnappingClient)
 		pEntData->m_EntityClass = ENTITYCLASS_GUN_FREEZE;
 	else
 		pEntData->m_EntityClass = ENTITYCLASS_GUN_UNFREEZE;
-
-	if(NetworkClipped(SnappingClient))
-		return;
 
 	CCharacter *Char = GameServer()->GetPlayerChar(SnappingClient);
 
