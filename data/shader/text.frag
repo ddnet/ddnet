@@ -30,5 +30,8 @@ void main()
 	float RealAlpha = (textOutlineFrag.a + textColor.a);
 	
 	// simply add the color we will loose through blending
-	FragClr = vec4(finalFragColor / RealAlpha, RealAlpha);
+	if(RealAlpha > 0.0)
+		FragClr = vec4(finalFragColor / RealAlpha, RealAlpha);
+	else
+		FragClr = vec4(0.0, 0.0, 0.0, 0.0);
 }
