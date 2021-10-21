@@ -1,2 +1,5 @@
 other/*/include/* linguist-vendored
 src/engine/external/* linguist-vendored
+
+README.md merge=ours
+
