@@ -24,6 +24,10 @@
 #include <base/math.h>
 #include <base/vmath.h>
 
+#include <engine/input.h>
+
+#include <game/client/component.h>
+
 #include "race.h"
 #include "render.h"
 #include <game/localization.h>
@@ -347,13 +351,54 @@ void CGameClient::OnUpdate()
 {
 	// handle mouse movement
 	float x = 0.0f, y = 0.0f;
-	Input()->MouseRelative(&x, &y);
-	if(x != 0.0f || y != 0.0f)
+	int PosX = 0, PosY = 0;
+	bool GotInput = false;
+	if(Input()->GetMouseMode() == INPUT_MOUSE_MODE_RELATIVE)
+	{
+		GotInput = Input()->MouseRelative(&x, &y);
+	}
+	else if(Input()->GetMouseMode() == INPUT_MOUSE_MODE_INGAME_RELATIVE)
+	{
+		GotInput = Input()->MouseDesktopRelative(&PosX, &PosY);
+	}
+	else
+	{
+		GotInput = Input()->MouseAbsolute(&PosX, &PosY);
+	}
+	if(GotInput)
 	{
 		for(int h = 0; h < m_Input.m_Num; h++)
 		{
-			if(m_Input.m_paComponents[h]->OnMouseMove(x, y))
+			EComponentMouseMovementBlockMode CompBreak = COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_DONT_BLOCK;
+			if(Input()->GetMouseMode() == INPUT_MOUSE_MODE_RELATIVE)
+				CompBreak = m_Input.m_paComponents[h]->OnMouseRelativeMove(x, y);
+			else if(Input()->GetMouseMode() == INPUT_MOUSE_MODE_INGAME_RELATIVE)
+				CompBreak = m_Input.m_paComponents[h]->OnMouseInWindowRelativeMove(PosX, PosY);
+			else if(Input()->GetMouseMode() == INPUT_MOUSE_MODE_INGAME)
+				CompBreak = m_Input.m_paComponents[h]->OnMouseInWindowPos(PosX, PosY);
+			else if(Input()->GetMouseMode() == INPUT_MOUSE_MODE_ABSOLUTE)
+				CompBreak = m_Input.m_paComponents[h]->OnMouseAbsoluteInWindowPos(PosX, PosY);
+			if(CompBreak != COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_DONT_BLOCK)
+			{
+				switch(CompBreak)
+				{
+				case COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK_AND_CHANGE_TO_INGAME:
+					Input()->MouseModeInGame();
+					break;
+				case COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK_AND_CHANGE_TO_INGAME_RELATIVE:
+					Input()->MouseModeInGameRelative();
+					break;
+				case COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK_AND_CHANGE_TO_RELATIVE:
+					Input()->MouseModeRelative();
+					break;
+				case COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK_AND_CHANGE_TO_ABSOLUTE:
+					Input()->MouseModeAbsolute();
+					break;
+				default:
+					break;
+				}
 				break;
+			}
 		}
 	}
 
@@ -2438,7 +2483,8 @@ void CGameClient::UpdatePrediction()
 	{
 		IClient::CSnapItem Item;
 		const void *pData = Client()->SnapGetItem(IClient::SNAP_CURRENT, Index, &Item);
-		m_GameWorld.NetObjAdd(Item.m_ID, Item.m_Type, pData);
+		const CNetObj_EntityEx *pDataEx = static_cast<CNetObj_EntityEx *>(Client()->SnapFindItem(IClient::SNAP_CURRENT, NETOBJTYPE_ENTITYEX, Item.m_ID));
+		m_GameWorld.NetObjAdd(Item.m_ID, Item.m_Type, pData, pDataEx);
 	}
 	m_GameWorld.NetObjEnd(m_Snap.m_LocalClientID);
 
@@ -2633,6 +2679,24 @@ bool CGameClient::IsOtherTeam(int ClientID)
 		return true;
 
 	return m_Teams.Team(ClientID) != m_Teams.Team(m_Snap.m_LocalClientID);
+}
+
+int CGameClient::OwnTeam()
+{
+	if(m_Snap.m_LocalClientID < 0)
+		return 0;
+	else if(m_aClients[m_Snap.m_LocalClientID].m_Team == TEAM_SPECTATORS && m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
+		return 0;
+	else if(m_Snap.m_SpecInfo.m_Active && m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
+		return m_Teams.Team(m_Snap.m_SpecInfo.m_SpectatorID);
+	return m_Teams.Team(m_Snap.m_LocalClientID);
+}
+
+bool CGameClient::IsLocalCharSuper()
+{
+	if(m_Snap.m_LocalClientID < 0)
+		return 0;
+	return m_aClients[m_Snap.m_LocalClientID].m_Super;
 }
 
 void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)

@@ -65,7 +65,7 @@ protected:
 private:
 	ICommandProcessor *m_pProcessor;
 	CCommandBuffer *volatile m_pBuffer;
-	volatile bool m_Shutdown;
+	std::atomic_bool m_Shutdown;
 	CSemaphore m_Activity;
 	CSemaphore m_BufferDone;
 	void *m_pThread;
@@ -257,6 +257,7 @@ public:
 	virtual void ResizeWindow(int w, int h, int RefreshRate);
 	virtual void GetViewportSize(int &w, int &h);
 	virtual void NotifyWindow();
+	virtual void WarpMouse(int MouseX, int MouseY);
 
 	virtual void GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch);
 	virtual bool IsConfigModernAPI() { return IsModernAPI(m_BackendType); }

@@ -123,7 +123,7 @@ void dbg_break_imp()
 #ifdef __GNUC__
 	__builtin_trap();
 #else
-	*((volatile unsigned *)0) = 0x0;
+	abort();
 #endif
 }
 

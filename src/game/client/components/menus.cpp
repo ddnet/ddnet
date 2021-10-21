@@ -37,6 +37,8 @@
 #include <game/localization.h>
 #include <mastersrv/mastersrv.h>
 
+#include <game/client/component.h>
+
 #include "controls.h"
 #include "countryflags.h"
 #include "menus.h"
@@ -654,7 +656,7 @@ float CMenus::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 			UI()->SetActiveItem(0);
 
 		if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
-			m_MouseSlow = true;
+			SetMouseSlow(true);
 
 		float Min = pRect->y;
 		float Max = pRect->h - Handle.h;
@@ -712,7 +714,7 @@ float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current,
 			UI()->SetActiveItem(0);
 
 		if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
-			m_MouseSlow = true;
+			SetMouseSlow(true);
 
 		float Min = pRect->x;
 		float Max = pRect->w - Handle.w;
@@ -1465,7 +1467,8 @@ int CMenus::Render()
 	CUIRect Screen = *UI()->Screen();
 	UI()->MapScreen();
 
-	m_MouseSlow = false;
+	if((!Input()->KeyIsPressed(KEY_LSHIFT) && !Input()->KeyIsPressed(KEY_RSHIFT)) || UI()->ActiveItem() == nullptr)
+		SetMouseSlow(false);
 
 	static int s_Frame = 0;
 	if(s_Frame == 0)
@@ -2562,26 +2565,59 @@ void CMenus::OnReset()
 {
 }
 
-bool CMenus::OnMouseMove(float x, float y)
+EComponentMouseMovementBlockMode CMenus::OnMouseInWindowPos(int X, int Y)
 {
 	if(!m_MenuActive)
-		return false;
+		return COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_DONT_BLOCK;
 
-	UI()->ConvertMouseMove(&x, &y);
 	if(m_MouseSlow)
+		return COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK_AND_CHANGE_TO_INGAME_RELATIVE;
+	else
 	{
-		m_MousePos.x += x * 0.05f;
-		m_MousePos.y += y * 0.05f;
+		m_MousePos.x = clamp<float>(X, 0.f, (float)Graphics()->WindowWidth());
+		m_MousePos.y = clamp<float>(Y, 0.f, (float)Graphics()->WindowHeight());
+	}
+	return COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK;
+}
+
+EComponentMouseMovementBlockMode CMenus::OnMouseAbsoluteInWindowPos(int X, int Y)
+{
+	if(!m_MenuActive)
+		return COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_DONT_BLOCK;
+
+	if(!m_MouseSlow)
+		return COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK_AND_CHANGE_TO_INGAME;
+	else
+		return COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK_AND_CHANGE_TO_INGAME_RELATIVE;
+}
+
+EComponentMouseMovementBlockMode CMenus::OnMouseInWindowRelativeMove(int X, int Y)
+{
+	if(!m_MenuActive)
+		return COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_DONT_BLOCK;
+
+	if(!m_MouseSlow)
+	{
+		return COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK_AND_CHANGE_TO_INGAME;
 	}
 	else
 	{
-		m_MousePos.x += x;
-		m_MousePos.y += y;
+		m_MousePos.x = clamp<float>(m_MousePos.x + X * 0.05f, 0.f, (float)Graphics()->WindowWidth());
+		m_MousePos.y = clamp<float>(m_MousePos.y + Y * 0.05f, 0.f, (float)Graphics()->WindowHeight());
 	}
-	m_MousePos.x = clamp(m_MousePos.x, 0.f, (float)Graphics()->ScreenWidth());
-	m_MousePos.y = clamp(m_MousePos.y, 0.f, (float)Graphics()->ScreenHeight());
 
-	return true;
+	return COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK;
+}
+
+EComponentMouseMovementBlockMode CMenus::OnMouseRelativeMove(float x, float y)
+{
+	if(!m_MenuActive)
+		return COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_DONT_BLOCK;
+
+	if(!m_MouseSlow)
+		return COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK_AND_CHANGE_TO_INGAME;
+	else
+		return COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK_AND_CHANGE_TO_INGAME_RELATIVE;
 }
 
 bool CMenus::OnInput(IInput::CEvent e)
@@ -2657,6 +2693,24 @@ void CMenus::OnStateChange(int NewState, int OldState)
 	}
 }
 
+void CMenus::SetMouseSlow(bool SetVal)
+{
+	if(m_MouseSlow != SetVal)
+	{
+		m_MouseSlow = SetVal;
+		if(SetVal)
+		{
+			Input()->MouseModeInGameRelative();
+		}
+		else
+		{
+			int CursorX = (int)m_MousePos.x;
+			int CursorY = (int)m_MousePos.y;
+			Input()->MouseModeInGame(&CursorX, &CursorY);
+		}
+	}
+}
+
 void CMenus::OnRender()
 {
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
@@ -2710,8 +2764,8 @@ void CMenus::OnRender()
 
 	// update the ui
 	CUIRect *pScreen = UI()->Screen();
-	float mx = (m_MousePos.x / (float)Graphics()->ScreenWidth()) * pScreen->w;
-	float my = (m_MousePos.y / (float)Graphics()->ScreenHeight()) * pScreen->h;
+	float mx = (m_MousePos.x / (float)Graphics()->WindowWidth()) * pScreen->w;
+	float my = (m_MousePos.y / (float)Graphics()->WindowHeight()) * pScreen->h;
 
 	int Buttons = 0;
 	if(m_UseMouseButtons)

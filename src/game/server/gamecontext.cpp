@@ -765,6 +765,9 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 
 void CGameContext::OnPreTickTeehistorian()
 {
+	if(!m_TeeHistorianActive)
+		return;
+
 	auto *pController = ((CGameControllerDDRace *)m_pController);
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -3654,7 +3657,7 @@ void CGameContext::SendChatResponseAll(const char *pLine, void *pUser)
 {
 	CGameContext *pSelf = (CGameContext *)pUser;
 
-	static volatile int ReentryGuard = 0;
+	static int ReentryGuard = 0;
 	const char *pLineOrig = pLine;
 
 	if(ReentryGuard)
@@ -3681,7 +3684,7 @@ void CGameContext::SendChatResponse(const char *pLine, void *pUser, ColorRGBA Pr
 
 	const char *pLineOrig = pLine;
 
-	static volatile int ReentryGuard = 0;
+	static int ReentryGuard = 0;
 
 	if(ReentryGuard)
 		return;

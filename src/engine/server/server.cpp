@@ -227,8 +227,8 @@ void CServerBan::ConBanExt(IConsole::IResult *pResult, void *pUser)
 	CServerBan *pThis = static_cast<CServerBan *>(pUser);
 
 	const char *pStr = pResult->GetString(0);
-	int Minutes = pResult->NumArguments() > 1 ? clamp(pResult->GetInteger(1), 0, 525600) : 30;
-	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "No reason given";
+	int Minutes = pResult->NumArguments() > 1 ? clamp(pResult->GetInteger(1), 0, 525600) : 10;
+	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "Follow the server rules. Type /rules into the chat.";
 
 	if(str_isallnum(pStr))
 	{
@@ -1231,7 +1231,7 @@ void CServer::SendRconLine(int ClientID, const char *pLine)
 void CServer::SendRconLineAuthed(const char *pLine, void *pUser, ColorRGBA PrintColor)
 {
 	CServer *pThis = (CServer *)pUser;
-	static volatile int s_ReentryGuard = 0;
+	static int s_ReentryGuard = 0;
 	int i;
 
 	if(s_ReentryGuard)
@@ -3667,7 +3667,12 @@ const char *CServer::GetAnnouncementLine(char const *pFileName)
 		if(str_length(pLine))
 			if(pLine[0] != '#')
 				Lines.push_back(pLine);
-	if(Lines.size() == 1)
+
+	if(Lines.empty())
+	{
+		return 0;
+	}
+	else if(Lines.size() == 1)
 	{
 		m_AnnouncementLastLine = 0;
 	}
@@ -3680,8 +3685,9 @@ const char *CServer::GetAnnouncementLine(char const *pFileName)
 	{
 		unsigned Rand;
 		do
+		{
 			Rand = rand() % Lines.size();
-		while(Rand == m_AnnouncementLastLine);
+		} while(Rand == m_AnnouncementLastLine);
 
 		m_AnnouncementLastLine = Rand;
 	}

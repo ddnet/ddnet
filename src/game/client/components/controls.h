@@ -11,6 +11,8 @@
 
 class CControls : public CComponent
 {
+	EComponentMouseMovementBlockMode OnMouseWrongStateImpl();
+
 public:
 	vec2 m_MousePos[NUM_DUMMIES];
 	vec2 m_TargetPos[NUM_DUMMIES];
@@ -40,7 +42,12 @@ public:
 	virtual void OnRelease();
 	virtual void OnRender();
 	virtual void OnMessage(int MsgType, void *pRawMsg);
-	virtual bool OnMouseMove(float x, float y);
+
+	virtual EComponentMouseMovementBlockMode OnMouseInWindowPos(int X, int Y);
+	virtual EComponentMouseMovementBlockMode OnMouseAbsoluteInWindowPos(int X, int Y);
+	virtual EComponentMouseMovementBlockMode OnMouseInWindowRelativeMove(int X, int Y);
+	virtual EComponentMouseMovementBlockMode OnMouseRelativeMove(float RelX, float RelY);
+
 	virtual void OnConsoleInit();
 	virtual void OnPlayerDeath();
 

@@ -303,11 +303,25 @@ void CItems::OnRender()
 	if(Client()->State() < IClient::STATE_ONLINE)
 		return;
 
+	bool IsSuper = m_pClient->IsLocalCharSuper();
+	int Ticks = Client()->GameTick(g_Config.m_ClDummy) % Client()->GameTickSpeed();
+	bool BlinkingPickup = (Ticks % 22) < 4;
+	bool BlinkingGun = (Ticks % 22) < 4;
+	bool BlinkingDragger = (Ticks % 22) < 4;
+	bool BlinkingProj = (Ticks % 20) < 2;
+	bool BlinkingProjEx = (Ticks % 6) < 2;
+	bool BlinkingLight = (Ticks % 6) < 2;
+	int OwnTeam = m_pClient->OwnTeam();
+	int DraggerStartTick = maximum((Client()->GameTick(g_Config.m_ClDummy) / 7) * 7, Client()->GameTick(g_Config.m_ClDummy) - 4);
+
 	bool UsePredicted = GameClient()->Predict() && GameClient()->AntiPingGunfire();
 	if(UsePredicted)
 	{
 		for(auto *pProj = (CProjectile *)GameClient()->m_PredictedWorld.FindFirst(CGameWorld::ENTTYPE_PROJECTILE); pProj; pProj = (CProjectile *)pProj->NextEntity())
 		{
+			if(!IsSuper && pProj->m_Number > 0 && !Collision()->m_pSwitchers[pProj->m_Number].m_Status[OwnTeam] && (pProj->m_Explosive ? BlinkingProjEx : BlinkingProj))
+				continue;
+
 			CProjectileData Data = pProj->GetData();
 			RenderProjectile(&Data, pProj->ID());
 		}
@@ -321,6 +335,9 @@ void CItems::OnRender()
 		}
 		for(auto *pPickup = (CPickup *)GameClient()->m_PredictedWorld.FindFirst(CGameWorld::ENTTYPE_PICKUP); pPickup; pPickup = (CPickup *)pPickup->NextEntity())
 		{
+			if(!IsSuper && pPickup->m_Layer == LAYER_SWITCH && pPickup->m_Number > 0 && !Collision()->m_pSwitchers[pPickup->m_Number].m_Status[OwnTeam] && BlinkingPickup)
+				continue;
+
 			if(pPickup->InDDNetTile())
 			{
 				if(auto *pPrev = (CPickup *)GameClient()->m_PrevPredictedWorld.GetEntity(pPickup->ID(), CGameWorld::ENTTYPE_PICKUP))
@@ -339,6 +356,11 @@ void CItems::OnRender()
 	{
 		IClient::CSnapItem Item;
 		const void *pData = Client()->SnapGetItem(IClient::SNAP_CURRENT, i, &Item);
+		CNetObj_EntityEx *pEntEx = (CNetObj_EntityEx *)Client()->SnapFindItem(IClient::SNAP_CURRENT, NETOBJTYPE_ENTITYEX, Item.m_ID);
+
+		bool Inactive = false;
+		if(pEntEx)
+			Inactive = !IsSuper && pEntEx->m_SwitchNumber > 0 && !Collision()->m_pSwitchers[pEntEx->m_SwitchNumber].m_Status[OwnTeam];
 
 		if(Item.m_Type == NETOBJTYPE_PROJECTILE || Item.m_Type == NETOBJTYPE_DDNETPROJECTILE)
 		{
@@ -368,10 +390,14 @@ void CItems::OnRender()
 						continue;
 				}
 			}
+			if(Inactive && (Data.m_Explosive ? BlinkingProjEx : BlinkingProj))
+				continue;
 			RenderProjectile(&Data, Item.m_ID);
 		}
 		else if(Item.m_Type == NETOBJTYPE_PICKUP)
 		{
+			if(Inactive && BlinkingPickup)
+				continue;
 			if(UsePredicted)
 			{
 				auto *pPickup = (CPickup *)GameClient()->m_GameWorld.FindMatch(Item.m_ID, Item.m_Type, pData);
@@ -390,7 +416,31 @@ void CItems::OnRender()
 				if(pLaser && pLaser->GetOwner() >= 0 && GameClient()->m_aClients[pLaser->GetOwner()].m_IsPredictedLocal)
 					continue;
 			}
-			RenderLaser((const CNetObj_Laser *)pData);
+			CNetObj_Laser Laser = *((const CNetObj_Laser *)pData);
+
+			if(pEntEx)
+			{
+				if(pEntEx->m_EntityClass == ENTITYCLASS_LIGHT && Inactive && BlinkingLight)
+					continue;
+				if(pEntEx->m_EntityClass >= ENTITYCLASS_GUN_NORMAL && pEntEx->m_EntityClass <= ENTITYCLASS_GUN_UNFREEZE && Inactive && BlinkingGun)
+					continue;
+				if(pEntEx->m_EntityClass >= ENTITYCLASS_DRAGGER_WEAK && pEntEx->m_EntityClass <= ENTITYCLASS_DRAGGER_STRONG)
+				{
+					if(Inactive && BlinkingDragger)
+						continue;
+					Laser.m_StartTick = DraggerStartTick;
+				}
+				if(pEntEx->m_EntityClass == ENTITYCLASS_DOOR)
+				{
+					if(Inactive || IsSuper)
+					{
+						Laser.m_FromX = Laser.m_X;
+						Laser.m_FromY = Laser.m_Y;
+					}
+					Laser.m_StartTick = Client()->GameTick(g_Config.m_ClDummy);
+				}
+			}
+			RenderLaser(&Laser);
 		}
 	}
 

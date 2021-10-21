@@ -138,7 +138,6 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	if(DoButton_Menu(&s_MapEditorButton, Localize("Editor"), 0, &Button, g_Config.m_ClShowStartMenuImages ? "editor" : 0, CUI::CORNER_ALL, Rounding, 0.5f, vec4(0.0f, 0.0f, 0.0f, 0.5f), m_pClient->Editor()->HasUnsavedData() ? vec4(0.0f, 1.0f, 0.0f, 0.25f) : vec4(0.0f, 0.0f, 0.0f, 0.25f)) || (!EditorHotkeyWasPressed && Client()->LocalTime() - EditorHotKeyChecktime < 0.1f && CheckHotKey(KEY_E)))
 	{
 		g_Config.m_ClEditor = 1;
-		Input()->MouseModeRelative();
 		EditorHotkeyWasPressed = true;
 	}
 	if(!Input()->KeyIsPressed(KEY_E))

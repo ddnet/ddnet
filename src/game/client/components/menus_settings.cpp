@@ -935,19 +935,6 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			MovementSettings.HSplitTop(20.0f, 0, &MovementSettings);
 		}
 
-		{
-			CUIRect Button, Label;
-			MovementSettings.HSplitTop(20.0f, &Button, &MovementSettings);
-			Button.VSplitLeft(160.0f, &Label, &Button);
-			str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("UI mouse s."), g_Config.m_UiMousesens);
-			UI()->DoLabel(&Label, aBuf, 14.0f * UI()->Scale(), -1);
-			Button.HMargin(2.0f, &Button);
-			int NewValue = (int)(DoScrollbarH(&g_Config.m_UiMousesens, &Button, (minimum(g_Config.m_UiMousesens, 500) - 1) / 500.0f) * 500.0f) + 1;
-			if(g_Config.m_UiMousesens < 500 || NewValue < 500)
-				g_Config.m_UiMousesens = minimum(NewValue, 500);
-			MovementSettings.HSplitTop(20.0f, 0, &MovementSettings);
-		}
-
 		UiDoGetButtons(0, 15, MovementSettings, MainView);
 	}
 
@@ -2381,9 +2368,6 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 {
 	CUIRect Button, Left, Right, LeftLeft, Demo, Gameplay, Miscellaneous, Label, Background;
 
-	bool CheckSettings = false;
-	static int s_InpMouseOld = g_Config.m_InpMouseOld;
-
 	MainView.HSplitTop(100.0f, &Demo, &MainView);
 
 	Demo.HSplitTop(30.0f, &Label, &Demo);
@@ -2580,11 +2564,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_InpMouseOld, Localize("Old mouse mode"), g_Config.m_InpMouseOld, &Button))
 	{
 		g_Config.m_InpMouseOld ^= 1;
-		CheckSettings = true;
 	}
-
-	if(CheckSettings)
-		m_NeedRestartDDNet = s_InpMouseOld != g_Config.m_InpMouseOld;
 
 	Left.HSplitTop(5.0f, &Button, &Left);
 	Right.HSplitTop(25.0f, &Button, &Right);

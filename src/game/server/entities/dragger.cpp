@@ -8,6 +8,7 @@
 #include <game/server/gamemodes/DDRace.h>
 #include <game/server/player.h>
 #include <game/server/teams.h>
+#include <game/version.h>
 
 #include "character.h"
 
@@ -164,6 +165,16 @@ void CDragger::Snap(int SnappingClient)
 	if(((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.GetTeamState(m_CaughtTeam) == CGameTeams::TEAMSTATE_EMPTY)
 		return;
 
+	CNetObj_EntityEx *pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
+	if(!pEntData)
+		return;
+
+	pEntData->m_SwitchNumber = m_Number;
+	pEntData->m_Layer = m_Layer;
+	pEntData->m_EntityClass = clamp(ENTITYCLASS_DRAGGER_WEAK + round_to_int(m_Strength) - 1, (int)ENTITYCLASS_DRAGGER_WEAK, (int)ENTITYCLASS_DRAGGER_STRONG);
+
+	int SnappingClientVersion = SnappingClient >= 0 ? GameServer()->GetClientVersion(SnappingClient) : CLIENT_VERSIONNR;
+
 	CCharacter *Target = m_Target;
 
 	for(int &SoloID : m_SoloIDs)
@@ -200,9 +211,13 @@ void CDragger::Snap(int SnappingClient)
 		if(SnappingClient > -1 && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1 || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) && GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
 			Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
 
-		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
-		if(Char && Char->IsAlive() && (m_Layer == LAYER_SWITCH && m_Number && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()] && (!Tick)))
-			continue;
+		if(i != -1 || SnappingClientVersion < VERSION_DDNET_SWITCH)
+		{
+			int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
+			if(Char && Char->IsAlive() && (m_Layer == LAYER_SWITCH && m_Number && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()] && (!Tick)))
+				continue;
+		}
+
 		if(Char && Char->IsAlive())
 		{
 			if(Char->Team() != m_CaughtTeam)
@@ -250,12 +265,19 @@ void CDragger::Snap(int SnappingClient)
 			obj->m_FromY = (int)m_Pos.y;
 		}
 
-		int StartTick = m_EvalTick;
-		if(StartTick < Server()->Tick() - 4)
-			StartTick = Server()->Tick() - 4;
-		else if(StartTick > Server()->Tick())
-			StartTick = Server()->Tick();
-		obj->m_StartTick = StartTick;
+		if(i != -1 || SnappingClientVersion < VERSION_DDNET_SWITCH)
+		{
+			int StartTick = m_EvalTick;
+			if(StartTick < Server()->Tick() - 4)
+				StartTick = Server()->Tick() - 4;
+			else if(StartTick > Server()->Tick())
+				StartTick = Server()->Tick();
+			obj->m_StartTick = StartTick;
+		}
+		else
+		{
+			obj->m_StartTick = 0;
+		}
 	}
 }
 

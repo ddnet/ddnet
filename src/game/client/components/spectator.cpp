@@ -14,6 +14,8 @@
 #include <game/client/animstate.h>
 #include <game/client/render.h>
 
+#include <game/client/component.h>
+
 #include "camera.h"
 #include "spectator.h"
 
@@ -153,7 +155,6 @@ void CSpectator::ConSpectateClosest(IConsole::IResult *pResult, void *pUserData)
 CSpectator::CSpectator()
 {
 	OnReset();
-	m_OldMouseX = m_OldMouseY = 0.0f;
 }
 
 void CSpectator::OnConsoleInit()
@@ -165,14 +166,41 @@ void CSpectator::OnConsoleInit()
 	Console()->Register("spectate_closest", "", CFGFLAG_CLIENT, ConSpectateClosest, this, "Spectate the closest player");
 }
 
-bool CSpectator::OnMouseMove(float x, float y)
+EComponentMouseMovementBlockMode CSpectator::OnMouseWrongStateImpl()
 {
 	if(!m_Active)
-		return false;
+		return COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_DONT_BLOCK;
 
-	UI()->ConvertMouseMove(&x, &y);
-	m_SelectorMouse += vec2(x, y);
-	return true;
+	return COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK_AND_CHANGE_TO_INGAME_RELATIVE;
+}
+
+EComponentMouseMovementBlockMode CSpectator::OnMouseInWindowPos(int X, int Y)
+{
+	return OnMouseWrongStateImpl();
+}
+
+EComponentMouseMovementBlockMode CSpectator::OnMouseAbsoluteInWindowPos(int X, int Y)
+{
+	return OnMouseWrongStateImpl();
+}
+
+EComponentMouseMovementBlockMode CSpectator::OnMouseInWindowRelativeMove(int X, int Y)
+{
+	if(!m_Active)
+		return COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_DONT_BLOCK;
+
+	float Width = 400 * 3.0f * Graphics()->ScreenAspect();
+	float Height = 400 * 3.0f;
+
+	float TmpX = (X / (float)Graphics()->WindowWidth()) * Width;
+	float TmpY = (Y / (float)Graphics()->WindowHeight()) * Height;
+	m_SelectorMouse += vec2(TmpX, TmpY);
+	return COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK;
+}
+
+EComponentMouseMovementBlockMode CSpectator::OnMouseRelativeMove(float x, float y)
+{
+	return OnMouseWrongStateImpl();
 }
 
 void CSpectator::OnRelease()

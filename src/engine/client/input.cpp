@@ -8,6 +8,9 @@
 #include <engine/keys.h>
 #include <engine/shared/config.h>
 
+#include "SDL_mouse.h"
+#include "SDL_video.h"
+
 #include "input.h"
 
 //print >>f, "int inp_key_code(const char *key_name) { int i; if (!strcmp(key_name, \"-?-\")) return -1; else for (i = 0; i < 512; i++) if (!strcmp(key_strings[i], key_name)) return i; return -1; }"
@@ -38,7 +41,6 @@ CInput::CInput()
 	mem_zero(m_aInputState, sizeof(m_aInputState));
 
 	m_InputCounter = 1;
-	m_InputGrabbed = 0;
 
 	m_LastRelease = 0;
 	m_ReleaseDelta = -1;
@@ -52,9 +54,6 @@ CInput::CInput()
 	m_NumTextInputInstances = 0;
 	m_EditingTextLen = -1;
 	m_aEditingText[0] = 0;
-
-	m_LastX = 0;
-	m_LastY = 0;
 }
 
 void CInput::Init()
@@ -66,10 +65,10 @@ void CInput::Init()
 	MouseModeRelative();
 }
 
-void CInput::MouseRelative(float *x, float *y)
+bool CInput::MouseRelative(float *x, float *y)
 {
-	if(!m_MouseFocus || !m_InputGrabbed)
-		return;
+	if(!m_MouseFocus || GetMouseMode() != INPUT_MOUSE_MODE_RELATIVE)
+		return false;
 
 	int nx = 0, ny = 0;
 	float Sens = g_Config.m_InpMousesens / 100.0f;
@@ -89,24 +88,127 @@ void CInput::MouseRelative(float *x, float *y)
 
 	*x = nx * Sens;
 	*y = ny * Sens;
+
+	return true;
 }
 
-void CInput::MouseModeAbsolute()
+bool CInput::MouseDesktopRelative(int *x, int *y)
 {
-	m_InputGrabbed = 0;
-	SDL_SetRelativeMouseMode(SDL_FALSE);
-	Graphics()->SetWindowGrab(false);
+	if(!m_MouseFocus || GetMouseMode() != INPUT_MOUSE_MODE_INGAME_RELATIVE)
+		return false;
+
+	SDL_GetRelativeMouseState(x, y);
+
+	return true;
 }
 
-void CInput::MouseModeRelative()
+bool CInput::MouseAbsolute(int *x, int *y)
 {
-	m_InputGrabbed = 1;
-#if !defined(CONF_PLATFORM_ANDROID) // No relative mouse on Android
+	if(!m_MouseFocus || (GetMouseMode() != INPUT_MOUSE_MODE_INGAME && GetMouseMode() != INPUT_MOUSE_MODE_ABSOLUTE))
+		return false;
+
+	SDL_GetMouseState(x, y);
+
+	m_DesktopX = *x;
+	m_DesktopY = *y;
+
+	return true;
+}
+
+void CInput::MouseModeChange(EInputMouseMode OldState, EInputMouseMode NewState)
+{
+	if(g_Config.m_InpMouseOld)
+		SDL_SetHintWithPriority(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "1", SDL_HINT_OVERRIDE);
+	else
+		SDL_SetHintWithPriority(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "0", SDL_HINT_OVERRIDE);
+}
+
+bool CInput::MouseModeAbsolute()
+{
+	if(GetMouseMode() != INPUT_MOUSE_MODE_ABSOLUTE)
+	{
+		MouseModeChange(GetMouseMode(), INPUT_MOUSE_MODE_ABSOLUTE);
+		SetMouseMode(INPUT_MOUSE_MODE_ABSOLUTE);
+		SDL_SetRelativeMouseMode(SDL_FALSE);
+		Graphics()->SetWindowGrab(false);
+
+		SDL_ShowCursor(true);
+
+		return true;
+	}
+
+	return false;
+}
+
+bool CInput::MouseModeRelative()
+{
+	if(GetMouseMode() != INPUT_MOUSE_MODE_RELATIVE)
+	{
+		EInputMouseMode OldMode = GetMouseMode();
+		MouseModeChange(OldMode, INPUT_MOUSE_MODE_RELATIVE);
+		SetMouseMode(INPUT_MOUSE_MODE_RELATIVE);
+		SDL_SetRelativeMouseMode(SDL_TRUE);
+		Graphics()->SetWindowGrab(true);
+		// Clear pending relative mouse motion
+		SDL_GetRelativeMouseState(0x0, 0x0);
+
+		return true;
+	}
+
+	return false;
+}
+
+void CInput::MouseModeInGameRelativeImpl()
+{
 	SDL_SetRelativeMouseMode(SDL_TRUE);
-#endif
 	Graphics()->SetWindowGrab(true);
-	// Clear pending relative mouse motion
 	SDL_GetRelativeMouseState(0x0, 0x0);
+}
+
+bool CInput::MouseModeInGame(int *pDesiredX, int *pDesiredY)
+{
+	if(GetMouseMode() != INPUT_MOUSE_MODE_INGAME)
+	{
+		EInputMouseMode OldMode = GetMouseMode();
+		MouseModeChange(OldMode, INPUT_MOUSE_MODE_INGAME);
+		SetMouseMode(INPUT_MOUSE_MODE_INGAME);
+
+// TODO: remove this once SDL fixes mouse grabbing in macos (https://github.com/libsdl-org/SDL/commit/2fdbae22cb2f75643447c34d2dab7f15305e3567)
+#ifdef CONF_PLATFORM_MACOS
+		MouseModeInGameRelativeImpl();
+#else
+		SDL_SetRelativeMouseMode(SDL_FALSE);
+		Graphics()->SetWindowGrab(true);
+		SDL_ShowCursor(false);
+#endif
+
+		if(OldMode == INPUT_MOUSE_MODE_RELATIVE || OldMode == INPUT_MOUSE_MODE_INGAME_RELATIVE)
+		{
+			int WarpX = pDesiredX ? *pDesiredX : m_DesktopX;
+			int WarpY = pDesiredY ? *pDesiredY : m_DesktopY;
+			Graphics()->WarpMouse(WarpX, WarpY);
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
+bool CInput::MouseModeInGameRelative()
+{
+	if(GetMouseMode() != INPUT_MOUSE_MODE_INGAME_RELATIVE)
+	{
+		EInputMouseMode OldMode = GetMouseMode();
+		MouseModeChange(OldMode, INPUT_MOUSE_MODE_INGAME_RELATIVE);
+		SetMouseMode(INPUT_MOUSE_MODE_INGAME_RELATIVE);
+
+		MouseModeInGameRelativeImpl();
+
+		return true;
+	}
+
+	return false;
 }
 
 void CInput::NativeMousePos(int *x, int *y) const
@@ -364,29 +466,30 @@ int CInput::Update()
 					Graphics()->Resize(Event.window.data1, Event.window.data2, -1);
 					break;
 				case SDL_WINDOWEVENT_FOCUS_GAINED:
-					if(m_InputGrabbed)
-						MouseModeRelative();
+					if(GetMouseMode() != INPUT_MOUSE_MODE_ABSOLUTE)
+					{
+						SDL_ShowCursor(SDL_FALSE);
+						if(SDL_GetRelativeMouseMode())
+						{
+							// Clear pending relative mouse motion
+							SDL_GetRelativeMouseState(0x0, 0x0);
+						}
+					}
 					m_MouseFocus = true;
 					IgnoreKeys = true;
 					break;
 				case SDL_WINDOWEVENT_FOCUS_LOST:
 					m_MouseFocus = false;
 					IgnoreKeys = true;
-					if(m_InputGrabbed)
+					if(GetMouseMode() != INPUT_MOUSE_MODE_ABSOLUTE)
 					{
-						MouseModeAbsolute();
-						// Remember that we had relative mouse
-						m_InputGrabbed = true;
+						SDL_ShowCursor(SDL_TRUE);
 					}
 					break;
 				case SDL_WINDOWEVENT_MINIMIZED:
 					Graphics()->WindowDestroyNtf(Event.window.windowID);
 					break;
 				case SDL_WINDOWEVENT_MAXIMIZED:
-#if defined(CONF_PLATFORM_MACOS) // Todo: remove this when fixed in SDL
-					MouseModeAbsolute();
-					MouseModeRelative();
-#endif
 					// fallthrough
 				case SDL_WINDOWEVENT_RESTORED:
 					Graphics()->WindowCreateNtf(Event.window.windowID);

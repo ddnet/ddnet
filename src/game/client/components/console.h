@@ -109,6 +109,8 @@ class CGameConsole : public CComponent
 	static void ConConsolePageDown(IConsole::IResult *pResult, void *pUserData);
 	static void ConchainConsoleOutputLevelUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
+	EComponentMouseMovementBlockMode OnConsoleMouseFeedback() { return m_ConsoleState == CONSOLE_OPEN ? COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK : COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_DONT_BLOCK; }
+
 public:
 	enum
 	{
@@ -129,5 +131,10 @@ public:
 	virtual bool OnInput(IInput::CEvent Events);
 
 	bool IsClosed() { return m_ConsoleState == CONSOLE_CLOSED; }
+
+	virtual EComponentMouseMovementBlockMode OnMouseInWindowPos(int X, int Y) { return OnConsoleMouseFeedback(); }
+	virtual EComponentMouseMovementBlockMode OnMouseAbsoluteInWindowPos(int X, int Y) { return OnConsoleMouseFeedback(); }
+	virtual EComponentMouseMovementBlockMode OnMouseInWindowRelativeMove(int X, int Y) { return OnConsoleMouseFeedback(); }
+	virtual EComponentMouseMovementBlockMode OnMouseRelativeMove(float RelX, float RelY) { return OnConsoleMouseFeedback(); }
 };
 #endif

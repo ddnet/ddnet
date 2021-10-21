@@ -410,6 +410,8 @@ public:
 	virtual void SetWindowGrab(bool Grab) = 0;
 	virtual void NotifyWindow() = 0;
 
+	virtual void WarpMouse(int MouseX, int MouseY) = 0;
+
 	virtual SWarning *GetCurWarning() = 0;
 
 protected:
