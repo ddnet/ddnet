@@ -350,12 +350,11 @@ void CItems::OnRender()
 		}
 	}
 
-	int Num = Client()->SnapNumItems(IClient::SNAP_CURRENT);
-	for(int i = 0; i < Num; i++)
+	for(const CSnapEntities &Ent : m_pClient->SnapEntities())
 	{
-		IClient::CSnapItem Item;
-		const void *pData = Client()->SnapGetItem(IClient::SNAP_CURRENT, i, &Item);
-		CNetObj_EntityEx *pEntEx = (CNetObj_EntityEx *)Client()->SnapFindItem(IClient::SNAP_CURRENT, NETOBJTYPE_ENTITYEX, Item.m_ID);
+		const IClient::CSnapItem Item = Ent.m_Item;
+		const void *pData = Ent.m_pData;
+		const CNetObj_EntityEx *pEntEx = Ent.m_pDataEx;
 
 		bool Inactive = false;
 		if(pEntEx)
@@ -442,6 +441,8 @@ void CItems::OnRender()
 			RenderLaser(&Laser);
 		}
 	}
+
+	int Num = Client()->SnapNumItems(IClient::SNAP_CURRENT);
 
 	// render flag
 	for(int i = 0; i < Num; i++)
