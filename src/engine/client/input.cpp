@@ -365,7 +365,12 @@ int CInput::Update()
 					break;
 				case SDL_WINDOWEVENT_FOCUS_GAINED:
 					if(m_InputGrabbed)
-						MouseModeRelative();
+					{
+						// Enable this in case SDL 2.0.16 has major bugs or 2.0.18 still doesn't fix tabbing out with relative mouse
+						// MouseModeRelative();
+						// Clear pending relative mouse motion
+						SDL_GetRelativeMouseState(0x0, 0x0);
+					}
 					m_MouseFocus = true;
 					IgnoreKeys = true;
 					break;
@@ -374,7 +379,8 @@ int CInput::Update()
 					IgnoreKeys = true;
 					if(m_InputGrabbed)
 					{
-						MouseModeAbsolute();
+						// Enable this in case SDL 2.0.16 has major bugs or 2.0.18 still doesn't fix tabbing out with relative mouse
+						// MouseModeAbsolute();
 						// Remember that we had relative mouse
 						m_InputGrabbed = true;
 					}

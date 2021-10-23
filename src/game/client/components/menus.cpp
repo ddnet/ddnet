@@ -2566,8 +2566,8 @@ bool CMenus::OnMouseMove(float x, float y)
 		m_MousePos.x += x;
 		m_MousePos.y += y;
 	}
-	m_MousePos.x = clamp(m_MousePos.x, 0.f, (float)Graphics()->ScreenWidth());
-	m_MousePos.y = clamp(m_MousePos.y, 0.f, (float)Graphics()->ScreenHeight());
+	m_MousePos.x = clamp(m_MousePos.x, 0.f, (float)Graphics()->WindowWidth());
+	m_MousePos.y = clamp(m_MousePos.y, 0.f, (float)Graphics()->WindowHeight());
 
 	return true;
 }
@@ -2698,8 +2698,8 @@ void CMenus::OnRender()
 
 	// update the ui
 	CUIRect *pScreen = UI()->Screen();
-	float mx = (m_MousePos.x / (float)Graphics()->ScreenWidth()) * pScreen->w;
-	float my = (m_MousePos.y / (float)Graphics()->ScreenHeight()) * pScreen->h;
+	float mx = (m_MousePos.x / (float)Graphics()->WindowWidth()) * pScreen->w;
+	float my = (m_MousePos.y / (float)Graphics()->WindowHeight()) * pScreen->h;
 
 	int Buttons = 0;
 	if(m_UseMouseButtons)

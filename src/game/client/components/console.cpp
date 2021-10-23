@@ -701,14 +701,14 @@ void CGameConsole::OnRender()
 				{
 					m_MouseIsPress = true;
 					Input()->NativeMousePos(&m_MousePressX, &m_MousePressY);
-					m_MousePressX = (m_MousePressX / (float)Graphics()->ScreenWidth()) * Screen.w;
-					m_MousePressY = (m_MousePressY / (float)Graphics()->ScreenHeight()) * Screen.h;
+					m_MousePressX = (m_MousePressX / (float)Graphics()->WindowWidth()) * Screen.w;
+					m_MousePressY = (m_MousePressY / (float)Graphics()->WindowHeight()) * Screen.h;
 				}
 				if(m_MouseIsPress)
 				{
 					Input()->NativeMousePos(&m_MouseCurX, &m_MouseCurY);
-					m_MouseCurX = (m_MouseCurX / (float)Graphics()->ScreenWidth()) * Screen.w;
-					m_MouseCurY = (m_MouseCurY / (float)Graphics()->ScreenHeight()) * Screen.h;
+					m_MouseCurX = (m_MouseCurX / (float)Graphics()->WindowWidth()) * Screen.w;
+					m_MouseCurY = (m_MouseCurY / (float)Graphics()->WindowHeight()) * Screen.h;
 				}
 				if(m_MouseIsPress && !Input()->NativeMousePressed(1))
 				{

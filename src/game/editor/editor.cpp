@@ -6309,22 +6309,18 @@ void CEditor::UpdateAndRender()
 		Input()->MouseRelative(&rx, &ry);
 		UI()->ConvertMouseMove(&rx, &ry);
 
-		// TODO: Why do we have to halve this?
-		rx /= 2;
-		ry /= 2;
-
 		m_MouseDeltaX = rx;
 		m_MouseDeltaY = ry;
 
 		if(!m_LockMouse)
 		{
-			s_MouseX = clamp(s_MouseX + rx, 0.0f, UI()->Screen()->w);
-			s_MouseY = clamp(s_MouseY + ry, 0.0f, UI()->Screen()->h);
+			s_MouseX = clamp<float>(s_MouseX + rx, 0.0f, Graphics()->WindowWidth());
+			s_MouseY = clamp<float>(s_MouseY + ry, 0.0f, Graphics()->WindowHeight());
 		}
 
 		// update the ui
-		mx = s_MouseX;
-		my = s_MouseY;
+		mx = UI()->Screen()->w * ((float)s_MouseX / Graphics()->WindowWidth());
+		my = UI()->Screen()->h * ((float)s_MouseY / Graphics()->WindowHeight());
 		Mwx = 0;
 		Mwy = 0;
 
@@ -6338,10 +6334,11 @@ void CEditor::UpdateAndRender()
 			float WorldWidth = aPoints[2] - aPoints[0];
 			float WorldHeight = aPoints[3] - aPoints[1];
 
-			Mwx = aPoints[0] + WorldWidth * (s_MouseX / UI()->Screen()->w);
-			Mwy = aPoints[1] + WorldHeight * (s_MouseY / UI()->Screen()->h);
-			m_MouseDeltaWx = m_MouseDeltaX * (WorldWidth / UI()->Screen()->w);
-			m_MouseDeltaWy = m_MouseDeltaY * (WorldHeight / UI()->Screen()->h);
+			Mwx = aPoints[0] + WorldWidth * ((float)s_MouseX / Graphics()->WindowWidth());
+			Mwy = aPoints[1] + WorldHeight * ((float)s_MouseY / Graphics()->WindowHeight());
+
+			m_MouseDeltaWx = m_MouseDeltaX * (WorldWidth / Graphics()->ScreenWidth());
+			m_MouseDeltaWy = m_MouseDeltaY * (WorldHeight / Graphics()->ScreenHeight());
 		}
 
 		int Buttons = 0;
