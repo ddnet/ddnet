@@ -289,8 +289,6 @@ protected:
 	vec2 m_MousePos;
 	bool m_MouseSlow;
 
-	void SetMouseSlow(bool SetVal);
-
 	char m_aNextServer[256];
 
 	// images
@@ -553,10 +551,7 @@ public:
 	virtual void OnReset();
 	virtual void OnRender();
 	virtual bool OnInput(IInput::CEvent Event);
-	virtual EComponentMouseMovementBlockMode OnMouseInWindowPos(int X, int Y);
-	virtual EComponentMouseMovementBlockMode OnMouseAbsoluteInWindowPos(int X, int Y);
-	virtual EComponentMouseMovementBlockMode OnMouseInWindowRelativeMove(int X, int Y);
-	virtual EComponentMouseMovementBlockMode OnMouseRelativeMove(float x, float y);
+	virtual bool OnMouseMove(float x, float y);
 
 	enum
 	{

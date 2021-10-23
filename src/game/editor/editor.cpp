@@ -634,7 +634,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 	{
 		if(!UI()->MouseButton(0))
 		{
-			SetLockMouse(false);
+			m_LockMouse = false;
 			UI()->SetActiveItem(0);
 			s_TextMode = false;
 		}
@@ -656,14 +656,14 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 				Current = clamp(str_toint_base(s_aNumStr, 16), Min, Max);
 			else
 				Current = clamp(str_toint(s_aNumStr), Min, Max);
-			SetLockMouse(false);
+			m_LockMouse = false;
 			UI()->SetActiveItem(0);
 			s_TextMode = false;
 		}
 
 		if(Input()->KeyIsPressed(KEY_ESCAPE))
 		{
-			SetLockMouse(false);
+			m_LockMouse = false;
 			UI()->SetActiveItem(0);
 			s_TextMode = false;
 		}
@@ -700,7 +700,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 		{
 			if(UI()->MouseButton(0))
 			{
-				SetLockMouse(true);
+				m_LockMouse = true;
 				s_Value = 0;
 				UI()->SetActiveItem(pID);
 			}
@@ -1378,7 +1378,7 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 
 					static int s_SourcePopupID = 0;
 					UiInvokePopupMenu(&s_SourcePopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 200, PopupSource);
-					SetLockMouse(false);
+					m_LockMouse = false;
 				}
 				s_Operation = OP_NONE;
 				UI()->SetActiveItem(0);
@@ -1393,7 +1393,7 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 					m_Map.m_UndoModified++;
 				}
 
-				SetLockMouse(false);
+				m_LockMouse = false;
 				s_Operation = OP_NONE;
 				UI()->SetActiveItem(0);
 			}
@@ -1583,7 +1583,7 @@ void CEditor::DoQuad(CQuad *q, int Index)
 
 					static int s_QuadPopupID = 0;
 					UiInvokePopupMenu(&s_QuadPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 180, PopupQuad);
-					SetLockMouse(false);
+					m_LockMouse = false;
 				}
 				s_Operation = OP_NONE;
 				UI()->SetActiveItem(0);
@@ -1596,7 +1596,7 @@ void CEditor::DoQuad(CQuad *q, int Index)
 				if(m_lSelectedLayers.size() == 1)
 				{
 					m_Map.m_UndoModified++;
-					SetLockMouse(false);
+					m_LockMouse = false;
 					m_Map.m_Modified = true;
 					DeleteSelectedQuads();
 				}
@@ -1613,7 +1613,7 @@ void CEditor::DoQuad(CQuad *q, int Index)
 					m_Map.m_UndoModified++;
 				}
 
-				SetLockMouse(false);
+				m_LockMouse = false;
 				s_Operation = OP_NONE;
 				UI()->SetActiveItem(0);
 			}
@@ -1638,7 +1638,7 @@ void CEditor::DoQuad(CQuad *q, int Index)
 			}
 			else if(Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))
 			{
-				SetLockMouse(true);
+				m_LockMouse = true;
 				s_Operation = OP_ROTATE;
 				s_RotateAngle = 0;
 
@@ -1852,7 +1852,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 				if(s_Operation == OP_MOVEPOINT || s_Operation == OP_MOVEUV)
 					m_Map.m_UndoModified++;
 
-				SetLockMouse(false);
+				m_LockMouse = false;
 				UI()->SetActiveItem(0);
 			}
 		}
@@ -1873,7 +1873,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 			if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
 			{
 				s_Operation = OP_MOVEUV;
-				SetLockMouse(true);
+				m_LockMouse = true;
 			}
 			else
 				s_Operation = OP_MOVEPOINT;
@@ -2101,7 +2101,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 
 		if(!UI()->MouseButton(0))
 		{
-			SetLockMouse(false);
+			m_LockMouse = false;
 			s_Operation = OP_NONE;
 			UI()->SetActiveItem(0);
 		}
@@ -2119,7 +2119,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 		{
 			if(Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))
 			{
-				SetLockMouse(true);
+				m_LockMouse = true;
 				s_Operation = OP_ROTATE;
 
 				SelectQuad(QIndex);
@@ -6201,18 +6201,6 @@ void CEditorMap::CreateDefault(IGraphics::CTextureHandle EntitiesTexture)
 	m_pTuneLayer = 0x0;
 }
 
-void CEditor::SetLockMouse(bool SetVal)
-{
-	if(m_LockMouse != SetVal)
-	{
-		m_LockMouse = SetVal;
-		if(SetVal)
-			Input()->MouseModeInGameRelative();
-		else
-			Input()->MouseModeInGame();
-	}
-}
-
 void CEditor::Init()
 {
 	m_pInput = Kernel()->RequestInterface<IInput>();
@@ -6309,49 +6297,36 @@ void CEditor::CreateUndoStepThread(void *pUser)
 
 void CEditor::UpdateAndRender()
 {
+	static float s_MouseX = 0.0f;
+	static float s_MouseY = 0.0f;
+
 	if(m_Animate)
 		m_AnimateTime = (time_get() - m_AnimateStart) / (float)time_freq();
 	else
 		m_AnimateTime = 0;
 	ms_pUiGotContext = 0;
 
-	float mx = 0, my = 0, Mwx = 0, Mwy = 0;
-	int rx = 0, ry = 0;
-	if(m_LockMouse)
+	// handle mouse movement
+	float mx, my, Mwx, Mwy;
+	float rx = 0, ry = 0;
 	{
-		// use relative mouse movement when locked
-		Input()->MouseModeInGameRelative();
-		int TmpDeltaX = 0;
-		int TmpDeltaY = 0;
-		Input()->MouseDesktopRelative(&TmpDeltaX, &TmpDeltaY);
-		m_MouseDeltaX = TmpDeltaX;
-		m_MouseDeltaY = TmpDeltaY;
-		rx = m_LastX;
-		ry = m_LastY;
-	}
-	else
-	{
-		// use desktop mouse movement when not locked
-		Input()->MouseModeInGame();
-		bool GotInput = Input()->MouseAbsolute(&rx, &ry);
-		if(!GotInput)
+		Input()->MouseRelative(&rx, &ry);
+		UI()->ConvertMouseMove(&rx, &ry);
+
+		m_MouseDeltaX = rx;
+		m_MouseDeltaY = ry;
+
+		if(!m_LockMouse)
 		{
-			rx = m_LastX;
-			ry = m_LastY;
+			s_MouseX = clamp<float>(s_MouseX + rx, 0.0f, Graphics()->WindowWidth());
+			s_MouseY = clamp<float>(s_MouseY + ry, 0.0f, Graphics()->WindowHeight());
 		}
 
-		m_MouseDeltaX = rx - m_LastX;
-		m_MouseDeltaY = ry - m_LastY;
-
-		m_LastX = rx;
-		m_LastY = ry;
-	}
-
-	// handle mouse movement
-	{
 		// update the ui
-		mx = UI()->Screen()->w * ((float)rx / Graphics()->WindowWidth());
-		my = UI()->Screen()->h * ((float)ry / Graphics()->WindowHeight());
+		mx = UI()->Screen()->w * ((float)s_MouseX / Graphics()->WindowWidth());
+		my = UI()->Screen()->h * ((float)s_MouseY / Graphics()->WindowHeight());
+		Mwx = 0;
+		Mwy = 0;
 
 		// fix correct world x and y
 		CLayerGroup *g = GetSelectedGroup();
@@ -6363,8 +6338,8 @@ void CEditor::UpdateAndRender()
 			float WorldWidth = aPoints[2] - aPoints[0];
 			float WorldHeight = aPoints[3] - aPoints[1];
 
-			Mwx = aPoints[0] + WorldWidth * ((float)rx / Graphics()->WindowWidth());
-			Mwy = aPoints[1] + WorldHeight * ((float)ry / Graphics()->WindowHeight());
+			Mwx = aPoints[0] + WorldWidth * ((float)s_MouseX / Graphics()->WindowWidth());
+			Mwy = aPoints[1] + WorldHeight * ((float)s_MouseY / Graphics()->WindowHeight());
 
 			m_MouseDeltaWx = m_MouseDeltaX * (WorldWidth / Graphics()->ScreenWidth());
 			m_MouseDeltaWy = m_MouseDeltaY * (WorldHeight / Graphics()->ScreenHeight());

@@ -534,50 +534,27 @@ void CControls::OnRender()
 		m_TargetPos[g_Config.m_ClDummy] = m_MousePos[g_Config.m_ClDummy];
 }
 
-EComponentMouseMovementBlockMode CControls::OnMouseWrongStateImpl()
+bool CControls::OnMouseMove(float x, float y)
 {
 	if((m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED))
-		return COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_DONT_BLOCK;
-
-	return COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK_AND_CHANGE_TO_RELATIVE;
-}
-
-EComponentMouseMovementBlockMode CControls::OnMouseInWindowPos(int X, int Y)
-{
-	return OnMouseWrongStateImpl();
-}
-
-EComponentMouseMovementBlockMode CControls::OnMouseAbsoluteInWindowPos(int X, int Y)
-{
-	return OnMouseWrongStateImpl();
-}
-
-EComponentMouseMovementBlockMode CControls::OnMouseInWindowRelativeMove(int X, int Y)
-{
-	return OnMouseWrongStateImpl();
-}
-
-EComponentMouseMovementBlockMode CControls::OnMouseRelativeMove(float RelX, float RelY)
-{
-	if((m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED))
-		return COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_DONT_BLOCK;
+		return false;
 
 	if(g_Config.m_ClDyncam && g_Config.m_ClDyncamMousesens)
 	{
-		RelX = RelX * g_Config.m_ClDyncamMousesens / g_Config.m_InpMousesens;
-		RelY = RelY * g_Config.m_ClDyncamMousesens / g_Config.m_InpMousesens;
+		x = x * g_Config.m_ClDyncamMousesens / g_Config.m_InpMousesens;
+		y = y * g_Config.m_ClDyncamMousesens / g_Config.m_InpMousesens;
 	}
 
 	if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID < 0)
 	{
-		RelX = RelX * m_pClient->m_Camera.m_Zoom;
-		RelY = RelY * m_pClient->m_Camera.m_Zoom;
+		x = x * m_pClient->m_Camera.m_Zoom;
+		y = y * m_pClient->m_Camera.m_Zoom;
 	}
 
-	m_MousePos[g_Config.m_ClDummy] += vec2(RelX, RelY); // TODO: ugly
+	m_MousePos[g_Config.m_ClDummy] += vec2(x, y); // TODO: ugly
 	ClampMousePos();
 
-	return COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK;
+	return true;
 }
 
 void CControls::ClampMousePos()

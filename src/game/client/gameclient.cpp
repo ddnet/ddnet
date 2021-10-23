@@ -24,10 +24,6 @@
 #include <base/math.h>
 #include <base/vmath.h>
 
-#include <engine/input.h>
-
-#include <game/client/component.h>
-
 #include "race.h"
 #include "render.h"
 #include <game/localization.h>
@@ -351,54 +347,13 @@ void CGameClient::OnUpdate()
 {
 	// handle mouse movement
 	float x = 0.0f, y = 0.0f;
-	int PosX = 0, PosY = 0;
-	bool GotInput = false;
-	if(Input()->GetMouseMode() == INPUT_MOUSE_MODE_RELATIVE)
-	{
-		GotInput = Input()->MouseRelative(&x, &y);
-	}
-	else if(Input()->GetMouseMode() == INPUT_MOUSE_MODE_INGAME_RELATIVE)
-	{
-		GotInput = Input()->MouseDesktopRelative(&PosX, &PosY);
-	}
-	else
-	{
-		GotInput = Input()->MouseAbsolute(&PosX, &PosY);
-	}
-	if(GotInput)
+	Input()->MouseRelative(&x, &y);
+	if(x != 0.0f || y != 0.0f)
 	{
 		for(int h = 0; h < m_Input.m_Num; h++)
 		{
-			EComponentMouseMovementBlockMode CompBreak = COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_DONT_BLOCK;
-			if(Input()->GetMouseMode() == INPUT_MOUSE_MODE_RELATIVE)
-				CompBreak = m_Input.m_paComponents[h]->OnMouseRelativeMove(x, y);
-			else if(Input()->GetMouseMode() == INPUT_MOUSE_MODE_INGAME_RELATIVE)
-				CompBreak = m_Input.m_paComponents[h]->OnMouseInWindowRelativeMove(PosX, PosY);
-			else if(Input()->GetMouseMode() == INPUT_MOUSE_MODE_INGAME)
-				CompBreak = m_Input.m_paComponents[h]->OnMouseInWindowPos(PosX, PosY);
-			else if(Input()->GetMouseMode() == INPUT_MOUSE_MODE_ABSOLUTE)
-				CompBreak = m_Input.m_paComponents[h]->OnMouseAbsoluteInWindowPos(PosX, PosY);
-			if(CompBreak != COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_DONT_BLOCK)
-			{
-				switch(CompBreak)
-				{
-				case COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK_AND_CHANGE_TO_INGAME:
-					Input()->MouseModeInGame();
-					break;
-				case COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK_AND_CHANGE_TO_INGAME_RELATIVE:
-					Input()->MouseModeInGameRelative();
-					break;
-				case COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK_AND_CHANGE_TO_RELATIVE:
-					Input()->MouseModeRelative();
-					break;
-				case COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK_AND_CHANGE_TO_ABSOLUTE:
-					Input()->MouseModeAbsolute();
-					break;
-				default:
-					break;
-				}
+			if(m_Input.m_paComponents[h]->OnMouseMove(x, y))
 				break;
-			}
 		}
 	}
 
@@ -1727,6 +1682,8 @@ void CGameClient::OnNewSnapshot()
 	PrevLocalID = m_Snap.m_LocalClientID;
 	m_IsDummySwapping = 0;
 
+	SnapCollectEntities(); // creates a collection that associates EntityEx snap items with the entities they belong to
+
 	// update prediction data
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		UpdatePrediction();
@@ -2468,7 +2425,6 @@ void CGameClient::UpdatePrediction()
 	m_GameWorld.m_Teams = m_Teams;
 
 	m_GameWorld.NetObjBegin();
-	int Num = Client()->SnapNumItems(IClient::SNAP_CURRENT);
 	for(int i = 0; i < MAX_CLIENTS; i++)
 		if(m_Snap.m_aCharacters[i].m_Active)
 		{
@@ -2479,13 +2435,9 @@ void CGameClient::UpdatePrediction()
 				GameTeam, IsLocal);
 		}
 
-	for(int Index = 0; Index < Num; Index++)
-	{
-		IClient::CSnapItem Item;
-		const void *pData = Client()->SnapGetItem(IClient::SNAP_CURRENT, Index, &Item);
-		const CNetObj_EntityEx *pDataEx = static_cast<CNetObj_EntityEx *>(Client()->SnapFindItem(IClient::SNAP_CURRENT, NETOBJTYPE_ENTITYEX, Item.m_ID));
-		m_GameWorld.NetObjAdd(Item.m_ID, Item.m_Type, pData, pDataEx);
-	}
+	for(const CSnapEntities &EntData : SnapEntities())
+		m_GameWorld.NetObjAdd(EntData.m_Item.m_ID, EntData.m_Item.m_Type, EntData.m_pData, EntData.m_pDataEx);
+
 	m_GameWorld.NetObjEnd(m_Snap.m_LocalClientID);
 
 	// save the characters that are currently active
@@ -3168,4 +3120,44 @@ bool CGameClient::CanDisplayWarning()
 bool CGameClient::IsDisplayingWarning()
 {
 	return m_Menus.GetCurPopup() == CMenus::POPUP_WARNING;
+}
+
+void CGameClient::SnapCollectEntities()
+{
+	int NumSnapItems = Client()->SnapNumItems(IClient::SNAP_CURRENT);
+
+	std::vector<CSnapEntities> aItemData;
+	for(int Index = 0; Index < NumSnapItems; Index++)
+	{
+		IClient::CSnapItem Item;
+		const void *pData = Client()->SnapGetItem(IClient::SNAP_CURRENT, Index, &Item);
+		if(Item.m_Type == NETOBJTYPE_ENTITYEX || Item.m_Type == NETOBJTYPE_PROJECTILE || Item.m_Type == NETOBJTYPE_PICKUP || Item.m_Type == NETOBJTYPE_LASER || Item.m_Type == NETOBJTYPE_DDNETPROJECTILE)
+			aItemData.push_back({Item, pData, 0});
+	}
+
+	// sort by id, with non-extended items before extended items of the same id
+	std::sort(aItemData.begin(), aItemData.end(), [](const CSnapEntities &lhs, const CSnapEntities &rhs) {
+		if(lhs.m_Item.m_ID == rhs.m_Item.m_ID)
+			return lhs.m_Item.m_Type != NETOBJTYPE_ENTITYEX;
+		return lhs.m_Item.m_ID < rhs.m_Item.m_ID;
+	});
+
+	// merge extended items with items they belong to
+	m_aSnapEntities.clear();
+	for(size_t Index = 0; Index < aItemData.size(); Index++)
+	{
+		if(aItemData[Index].m_Item.m_Type == NETOBJTYPE_ENTITYEX)
+			continue;
+
+		const IClient::CSnapItem Item = aItemData[Index].m_Item;
+		const void *pData = (const void *)aItemData[Index].m_pData;
+		const CNetObj_EntityEx *pDataEx = 0;
+
+		if(Index + 1 < aItemData.size() && aItemData[Index + 1].m_Item.m_ID == Item.m_ID && aItemData[Index + 1].m_Item.m_Type == NETOBJTYPE_ENTITYEX)
+		{
+			pDataEx = (const CNetObj_EntityEx *)aItemData[Index + 1].m_pData;
+			Index++;
+		}
+		m_aSnapEntities.push_back({Item, pData, pDataEx});
+	}
 }

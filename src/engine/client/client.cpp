@@ -3299,6 +3299,7 @@ void CClient::Run()
 		if(CtrlShiftKey(KEY_E, LastE))
 		{
 			g_Config.m_ClEditor = g_Config.m_ClEditor ^ 1;
+			Input()->MouseModeRelative();
 			Input()->SetIMEState(true);
 		}
 
@@ -3308,6 +3309,7 @@ void CClient::Run()
 			{
 				if(!m_EditorActive)
 				{
+					Input()->MouseModeRelative();
 					GameClient()->OnActivateEditor();
 					m_pEditor->ResetMentions();
 					m_EditorActive = true;

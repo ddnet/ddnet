@@ -101,6 +101,14 @@ public:
 	bool m_AllowXSkins;
 };
 
+class CSnapEntities
+{
+public:
+	IClient::CSnapItem m_Item;
+	const void *m_pData;
+	const CNetObj_EntityEx *m_pDataEx;
+};
+
 class CGameClient : public IGameClient
 {
 public:
@@ -652,7 +660,12 @@ public:
 	SClientEmoticonsSkin m_EmoticonsSkin;
 	bool m_EmoticonsSkinLoaded;
 
+	const std::vector<CSnapEntities> &SnapEntities() { return m_aSnapEntities; }
+
 private:
+	std::vector<CSnapEntities> m_aSnapEntities;
+	void SnapCollectEntities();
+
 	bool m_DDRaceMsgSent[NUM_DUMMIES];
 	int m_ShowOthers[NUM_DUMMIES];
 
