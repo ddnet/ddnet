@@ -24,10 +24,6 @@
 #include <base/math.h>
 #include <base/vmath.h>
 
-#include <engine/input.h>
-
-#include <game/client/component.h>
-
 #include "race.h"
 #include "render.h"
 #include <game/localization.h>
@@ -330,54 +326,13 @@ void CGameClient::OnUpdate()
 {
 	// handle mouse movement
 	float x = 0.0f, y = 0.0f;
-	int PosX = 0, PosY = 0;
-	bool GotInput = false;
-	if(Input()->GetMouseMode() == INPUT_MOUSE_MODE_RELATIVE)
-	{
-		GotInput = Input()->MouseRelative(&x, &y);
-	}
-	else if(Input()->GetMouseMode() == INPUT_MOUSE_MODE_INGAME_RELATIVE)
-	{
-		GotInput = Input()->MouseDesktopRelative(&PosX, &PosY);
-	}
-	else
-	{
-		GotInput = Input()->MouseAbsolute(&PosX, &PosY);
-	}
-	if(GotInput)
+	Input()->MouseRelative(&x, &y);
+	if(x != 0.0f || y != 0.0f)
 	{
 		for(int h = 0; h < m_Input.m_Num; h++)
 		{
-			EComponentMouseMovementBlockMode CompBreak = COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_DONT_BLOCK;
-			if(Input()->GetMouseMode() == INPUT_MOUSE_MODE_RELATIVE)
-				CompBreak = m_Input.m_paComponents[h]->OnMouseRelativeMove(x, y);
-			else if(Input()->GetMouseMode() == INPUT_MOUSE_MODE_INGAME_RELATIVE)
-				CompBreak = m_Input.m_paComponents[h]->OnMouseInWindowRelativeMove(PosX, PosY);
-			else if(Input()->GetMouseMode() == INPUT_MOUSE_MODE_INGAME)
-				CompBreak = m_Input.m_paComponents[h]->OnMouseInWindowPos(PosX, PosY);
-			else if(Input()->GetMouseMode() == INPUT_MOUSE_MODE_ABSOLUTE)
-				CompBreak = m_Input.m_paComponents[h]->OnMouseAbsoluteInWindowPos(PosX, PosY);
-			if(CompBreak != COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_DONT_BLOCK)
-			{
-				switch(CompBreak)
-				{
-				case COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK_AND_CHANGE_TO_INGAME:
-					Input()->MouseModeInGame();
-					break;
-				case COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK_AND_CHANGE_TO_INGAME_RELATIVE:
-					Input()->MouseModeInGameRelative();
-					break;
-				case COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK_AND_CHANGE_TO_RELATIVE:
-					Input()->MouseModeRelative();
-					break;
-				case COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK_AND_CHANGE_TO_ABSOLUTE:
-					Input()->MouseModeAbsolute();
-					break;
-				default:
-					break;
-				}
+			if(m_Input.m_paComponents[h]->OnMouseMove(x, y))
 				break;
-			}
 		}
 	}
 
