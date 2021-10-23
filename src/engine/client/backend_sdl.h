@@ -257,7 +257,6 @@ public:
 	virtual void ResizeWindow(int w, int h, int RefreshRate);
 	virtual void GetViewportSize(int &w, int &h);
 	virtual void NotifyWindow();
-	virtual void WarpMouse(int MouseX, int MouseY);
 
 	virtual void GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch);
 	virtual bool IsConfigModernAPI() { return IsModernAPI(m_BackendType); }

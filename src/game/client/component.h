@@ -18,16 +18,6 @@
 
 class CGameClient;
 
-enum EComponentMouseMovementBlockMode
-{
-	COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_DONT_BLOCK = 0,
-	COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK,
-	COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK_AND_CHANGE_TO_INGAME,
-	COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK_AND_CHANGE_TO_INGAME_RELATIVE,
-	COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK_AND_CHANGE_TO_RELATIVE,
-	COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_BLOCK_AND_CHANGE_TO_ABSOLUTE,
-};
-
 /**
 * This class is inherited by all the client components.
 *
@@ -202,38 +192,12 @@ public:
 	 */
 	virtual void OnMessage(int Msg, void *pRawMsg) {}
 	/**
-	 * Called on mouse movement, where the x and y values are the desktop cursor coordinates relative to the window rect.
-	 *
-	 * @param x The x relative coordinate of the desktop cursor inside the window rect.
-	 * @param y The y relative coordinate of the desktop cursor inside the window rect.
-	 * @return Returns how to block the mouse for components that are called after the current component. Can also be used to change the mouse mode to a desired mode.
-	 */
-	virtual EComponentMouseMovementBlockMode OnMouseInWindowPos(int X, int Y) { return COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_DONT_BLOCK; }
-	/**
-	 * Called on absolute mouse movement, where the x and y values are the desktop cursor coordinates relative to the window rect.
-	 * It's similar to @see OnMouseInWindowPos, but does not grab the mouse inside the window and also shows the desktop cursor
-	 *
-	 * @param x The x relative coordinate of the desktop cursor inside the window rect.
-	 * @param y The y relative coordinate of the desktop cursor inside the window rect.
-	 * @return Returns how to block the mouse for components that are called after the current component. Can also be used to change the mouse mode to a desired mode.
-	 */
-	virtual EComponentMouseMovementBlockMode OnMouseAbsoluteInWindowPos(int X, int Y) { return COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_DONT_BLOCK; }
-	/**
-	 * Called on relative mouse movement, where the x and y values are deltas of the desktop cursor.
+	 * Called on mouse movement, where the x and y values are deltas.
 	 *
 	 * @param x The amount of change in the x coordinate since the last call.
 	 * @param y The amount of change in the y coordinate since the last call.
-	 * @return Returns how to block the mouse for components that are called after the current component. Can also be used to change the mouse mode to a desired mode.
 	 */
-	virtual EComponentMouseMovementBlockMode OnMouseInWindowRelativeMove(int X, int Y) { return COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_DONT_BLOCK; }
-	/**
-	 * Called on relative mouse movement, where the x and y values are deltas.
-	 *
-	 * @param x The amount of change in the x coordinate since the last call.
-	 * @param y The amount of change in the y coordinate since the last call.
-	 * @return Returns how to block the mouse for components that are called after the current component. Can also be used to change the mouse mode to a desired mode.
-	 */
-	virtual EComponentMouseMovementBlockMode OnMouseRelativeMove(float x, float y) { return COMPONENT_MOUSE_MOVEMENT_BLOCK_MODE_DONT_BLOCK; }
+	virtual bool OnMouseMove(float x, float y) { return false; }
 	/**
 	 * Called on a input event.
 	 * @param e The input event.
