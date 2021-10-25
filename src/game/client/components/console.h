@@ -94,6 +94,8 @@ class CGameConsole : public CComponent
 	bool m_HasSelection = false;
 	int m_NewLineCounter = 0;
 
+	int m_LastInputLineCount = 0;
+
 	void Toggle(int Type);
 	void Dump(int Type);
 
