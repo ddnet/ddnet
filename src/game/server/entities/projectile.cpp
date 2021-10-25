@@ -300,6 +300,9 @@ void CProjectile::Snap(int SnappingClient)
 {
 	float Ct = (Server()->Tick() - m_StartTick) / (float)Server()->TickSpeed();
 
+	if(NetworkClipped(SnappingClient, GetPos(Ct)))
+		return;
+
 	if(m_LifeSpan == -2)
 	{
 		CNetObj_EntityEx *pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
@@ -310,9 +313,6 @@ void CProjectile::Snap(int SnappingClient)
 		pEntData->m_Layer = m_Layer;
 		pEntData->m_EntityClass = ENTITYCLASS_PROJECTILE;
 	}
-
-	if(NetworkClipped(SnappingClient, GetPos(Ct)))
-		return;
 
 	int SnappingClientVersion = SnappingClient >= 0 ? GameServer()->GetClientVersion(SnappingClient) : CLIENT_VERSIONNR;
 	if(SnappingClientVersion < VERSION_DDNET_SWITCH)
