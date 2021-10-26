@@ -1332,3 +1332,21 @@ Hookable
 
 Tee
 == 其他玩家
+
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Refreshing...
+== 
+
+Kill Messages
+== 
+
+Kill Message Normal Color
+== 
+
+Kill Message Highlight Color
+== 
+
+Show local player's key presses
+== 

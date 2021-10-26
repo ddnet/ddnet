@@ -721,6 +721,9 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 Checking for existing player with your name
 == 
 
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
 Country / Region
 == 
 
@@ -782,6 +785,9 @@ Exclude
 == 
 
 %d player
+== 
+
+Refreshing...
 == 
 
 Filter connecting players
@@ -851,6 +857,9 @@ Kill
 == 
 
 Pause
+== 
+
+Time
 == 
 
 Reload
@@ -1069,10 +1078,19 @@ Show health + ammo
 Show names in chat in team colors
 == 
 
+Show votes window after voting
+== 
+
 Show kill messages
 == 
 
-Show votes window after voting
+Kill Messages
+== 
+
+Kill Message Normal Color
+== 
+
+Kill Message Highlight Color
 == 
 
 Laser Outline Color
@@ -1169,6 +1187,9 @@ Show other players' hook collision lines
 == 
 
 Show other players' key presses
+== 
+
+Show local player's key presses
 == 
 
 Old mouse mode
@@ -1269,9 +1290,6 @@ Update failed! Check log...
 == 
 
 Restart
-== 
-
-Time
 == 
 
 Manual
