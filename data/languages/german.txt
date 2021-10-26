@@ -1338,16 +1338,16 @@ Are you sure that you want to disconnect and switch to a different server?
 == Bist du sicher, dass du die Verbindung trennen und zu einem anderen Server wechseln möchtest?
 
 Refreshing...
-== 
+== Aktualisieren...
 
 Kill Messages
-== 
+== Kill-Nachrichten
 
 Kill Message Normal Color
-== 
+== Kill-Nachrichten Normale Farbe
 
 Kill Message Highlight Color
-== 
+== Kill-Nachrichten Hervorgehobene Farbe
 
 Show local player's key presses
-== 
+== Tastendrücke des eigenen Spielers anzeigen
