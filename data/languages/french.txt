@@ -1314,9 +1314,6 @@ Show client IDs
 Kill Messages
 == Messages d'élimination
 
-Highlight self in kill messages
-== Afficher son propre nom en surbrillance dans les messages d'élimination
-
 Kill Message Normal Color
 == Couleur normale des messages d'élimination
 
@@ -1358,3 +1355,12 @@ Discord
 
 https://ddnet.tw/discord
 == https://ddnet.tw/discord
+
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Refreshing...
+== 
+
+Show local player's key presses
+== 

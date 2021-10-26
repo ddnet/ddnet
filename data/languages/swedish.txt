@@ -1190,6 +1190,9 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 Checking for existing player with your name
 == 
 
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
 Theme
 == 
 
@@ -1215,6 +1218,9 @@ CHN
 == 
 
 Getting server list from master server
+== 
+
+Refreshing...
 == 
 
 Leak IP
@@ -1268,6 +1274,15 @@ Assets
 Show client IDs
 == 
 
+Kill Messages
+== 
+
+Kill Message Normal Color
+== 
+
+Kill Message Highlight Color
+== 
+
 Laser Outline Color
 == 
 
@@ -1290,6 +1305,9 @@ Use old chat style
 == 
 
 Preview
+== 
+
+Show local player's key presses
 == 
 
 Background
