@@ -1335,13 +1335,13 @@ Refreshing...
 == Refrescando...
 
 Kill Messages
-== Mensajes de muerte
+== Mensajes de Muerte
 
 Kill Message Normal Color
-== Color Normal de Mensajes de muerte
+== Color Normal de Mensajes de Muerte
 
 Kill Message Highlight Color
-== Color Destac. de Mensajes de muerte
+== Color Destac. de Mensajes de Muerte
 
 Show local player's key presses
-== Mostrar las teclas del jugador local
+== Mostrar las pulsaciones de teclas del jugador local
