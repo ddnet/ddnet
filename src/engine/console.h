@@ -7,6 +7,8 @@
 #include <base/color.h>
 #include <engine/storage.h>
 
+static const ColorRGBA gs_ConsoleDefaultColor(1, 1, 1, 1);
+
 class IConsole : public IInterface
 {
 	MACRO_INTERFACE("console", 0)
@@ -103,7 +105,7 @@ public:
 	virtual int RegisterPrintCallback(int OutputLevel, FPrintCallback pfnPrintCallback, void *pUserData) = 0;
 	virtual void SetPrintOutputLevel(int Index, int OutputLevel) = 0;
 	virtual char *Format(char *pBuf, int Size, const char *pFrom, const char *pStr) = 0;
-	virtual void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = {1, 1, 1, 1}) = 0;
+	virtual void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = gs_ConsoleDefaultColor) = 0;
 	virtual void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser) = 0;
 
 	virtual void SetAccessLevel(int AccessLevel) = 0;

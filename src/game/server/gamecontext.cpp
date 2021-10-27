@@ -3617,6 +3617,8 @@ void CGameContext::OnSnap(int ClientID)
 		Server()->SendMsg(&Msg, MSGFLAG_RECORD | MSGFLAG_NOSEND, ClientID);
 	}
 
+	m_pController->Snap(ClientID);
+
 	for(auto &pPlayer : m_apPlayers)
 	{
 		if(pPlayer)
@@ -3627,7 +3629,6 @@ void CGameContext::OnSnap(int ClientID)
 		m_apPlayers[ClientID]->FakeSnap();
 
 	m_World.Snap(ClientID);
-	m_pController->Snap(ClientID);
 	m_Events.Snap(ClientID);
 }
 void CGameContext::OnPreSnap() {}

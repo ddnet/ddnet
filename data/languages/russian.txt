@@ -1315,6 +1315,24 @@ Desktop fullscreen
 Use modern OpenGL
 == Использовать новый OpenGL
 
+Tee
+== Tee
+
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Refreshing...
+== 
+
+Kill Messages
+== 
+
+Kill Message Normal Color
+== 
+
+Kill Message Highlight Color
+== 
+
 Hookline
 == 
 
@@ -1324,5 +1342,5 @@ No hit
 Hookable
 == 
 
-Tee
-== Tee
+Show local player's key presses
+== 

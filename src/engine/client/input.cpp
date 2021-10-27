@@ -302,12 +302,12 @@ int CInput::Update()
 				// Sum if you want to ignore multiple modifiers.
 				if(!(Event.key.keysym.mod & g_Config.m_InpIgnoredModifiers))
 				{
-					Scancode = Event.key.keysym.scancode;
+					Scancode = g_Config.m_InpTranslatedKeys ? SDL_GetScancodeFromKey(Event.key.keysym.sym) : Event.key.keysym.scancode;
 				}
 				break;
 			case SDL_KEYUP:
 				Action = IInput::FLAG_RELEASE;
-				Scancode = Event.key.keysym.scancode;
+				Scancode = g_Config.m_InpTranslatedKeys ? SDL_GetScancodeFromKey(Event.key.keysym.sym) : Event.key.keysym.scancode;
 				break;
 
 			// handle mouse buttons

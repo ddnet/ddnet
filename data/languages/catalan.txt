@@ -1105,37 +1105,40 @@ Replay
 == Repetició
 
 Saving ddnet-settings.cfg failed
-== 
+== Ha fallat el guardat del fitxer ddnet-settings.cfg
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
+== La mida de la textura %s no es divisible per %d, o l'altura no es divisible per %d, el qual pot resultar en errors visuals.
 
 Warning
-== 
+== Advertència 
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== 
+== Mode de depuració activat. Utilitza Ctrl+Shift+D per desactivar-lo.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 
+== Utilitza la tecla k per morir (reiniciar). Veure la configuració per més key binds.
 
 Existing Player
-== 
+== Jugador Existent
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== 
+== El teu sobrenom '%s' ja esta en ús (té %d punts). Vols continuar utilitzant-lo?
 
 Checking for existing player with your name
-== 
+== Comprovant si existeix un jugador amb el teu nom
+
+Are you sure that you want to disconnect and switch to a different server?
+== Estàs segur que et vols desconnectar i entrar a un servidor diferent?
 
 Country / Region
-== 
+== País / Regió
 
 Speed
-== 
+== Velocitat
 
 Theme
-== 
+== Tema
 
 AFR
 == 
@@ -1159,155 +1162,170 @@ CHN
 == 
 
 Getting server list from master server
-== 
+== Obtenint la llista de servidors
 
 %d of %d servers
-== 
+== %d de %d servidors
 
 %d of %d server
-== 
+== %d de %d servidor
 
 %d players
-== 
+== %d jugadors
 
 %d player
-== 
+== %d jugador
+
+Refreshing...
+== Actualitzant...
 
 Leak IP
-== 
+== Fer la teva ip pública
 
 Demos directory
-== 
+== Directori de demos
 
 Smooth Dynamic Camera
-== 
+== Camera dinàmica suau
 
 Skip the main menu
-== 
+== Saltar el menu principal
 
 Themes directory
-== 
+== Directori de temes
 
 Download skins
-== 
+== Descargar skins
 
 Skin Database
-== 
+== Base de dades de skins
 
 Skins directory
-== 
+== Directori de skins
 
 Chat command
-== 
+== Comanda de xat
 
 Dummy
-== 
+== Dummy
 
 Windowed
-== 
+== Finestra
 
 Windowed borderless
-== 
+== Finestra sense vores
 
 Desktop fullscreen
-== 
+== Pantalla completa d'escriptori
 
 Use modern OpenGL
-== 
+== Utilitzar OpenGL modern
 
 Game sound volume
-== 
+== Volum del so del joc
 
 Chat sound volume
-== 
+== Volum del so de xat
 
 Background music volume
-== 
+== Volum de música de fons
 
 Assets
-== 
+== Arxius
 
 Show client IDs
-== 
+== Veure les IDs del clients
+
+Kill Messages
+== Missatges al matar
+
+Kill Message Normal Color
+== Color del missatge normal al matar
+
+Kill Message Highlight Color
+== Color del missatge ressaltat al matar
 
 Laser Outline Color
-== 
+== Color exterior del làser
 
 Laser Inner Color
-== 
+== Color de l'interior del làser
 
 Hookline
-== 
+== Línia del ganxo
 
 No hit
-== 
+== Cap cop
 
 Hookable
-== 
+== Enganxable
 
 Tee
-== 
+== Tee
 
 Use old chat style
-== 
+== Utilitzar l'estil antic del xat
 
 Client message
-== 
+== Missatge del client
 
 Preview
-== 
+== Vista prèvia 
+
+Show local player's key presses
+== Mostrar les tecles premudes del jugador local
 
 Background
-== 
+== Fons
 
 Entities Background color
-== 
+== Color de fons de les entitats
 
 Use current map as background
-== 
+== Utilitzar el mapa actual com a fons
 
 Regular Background Color
-== 
+== Color de fons regular
 
 Entities
-== 
+== Entitats
 
 Emoticons
-== 
+== Emoticons
 
 Particles
-== 
+== Partícules
 
 Assets directory
-== 
+== Directori d'arxius del joc
 
 Discord
-== 
+== Discord
 
 https://ddnet.tw/discord
-== 
+== https://ddnet.tw/discord
 
 https://wiki.ddnet.tw/
-== 
+== https://wiki.ddnet.tw/
 
 Website
-== 
+== Página Web
 
 Settings
-== 
+== Configuració
 
 Stop server
-== 
+== Apagar servidor
 
 Run server
-== 
+== Engegar servidor
 
 Server executable not found, can't run server
-== 
+== L'executable del servidor no s'ha trobat, no es pot engegar el servidor
 
 Editor
-== 
+== Editor
 
 [Start menu]
 Play
-== 
+== Jugar 

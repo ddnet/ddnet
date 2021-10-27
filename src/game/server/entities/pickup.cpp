@@ -152,8 +152,8 @@ void CPickup::TickPaused()
 
 void CPickup::Snap(int SnappingClient)
 {
-	/*if(m_SpawnTick != -1 || NetworkClipped(SnappingClient))
-		return;*/
+	if(NetworkClipped(SnappingClient))
+		return;
 
 	CCharacter *Char = GameServer()->GetPlayerChar(SnappingClient);
 

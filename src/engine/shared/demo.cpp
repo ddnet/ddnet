@@ -28,7 +28,7 @@ static const unsigned char s_VersionTickCompression = 5; // demo files with this
 static const int s_LengthOffset = 152;
 static const int s_NumMarkersOffset = 176;
 
-static const ColorRGBA gs_DemoPrintColor{0.7f, 0.7f, 0.7f, 1.0f};
+static const ColorRGBA gs_DemoPrintColor{0.75f, 0.7f, 0.7f, 1.0f};
 
 CDemoRecorder::CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool NoMapData)
 {

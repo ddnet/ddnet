@@ -1234,27 +1234,6 @@ Replay
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == A Struktúra Szélessége %s nem osztható %d al, vagy a magasság nem osztható %d al, ami vizuális hibákhoz vezethet.
 
-AFR
-== 
-
-ASI
-== 
-
-AUS
-== 
-
-EUR
-== 
-
-NA
-== 
-
-SA
-== 
-
-CHN
-== 
-
 Getting server list from master server
 == Szerver Lista Lekérése
 
@@ -1311,6 +1290,45 @@ Entities Background color
 
 Regular Background Color
 == Átlagos Háttér Szín
+
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+Refreshing...
+== 
+
+Kill Messages
+== 
+
+Kill Message Normal Color
+== 
+
+Kill Message Highlight Color
+== 
+
+Show local player's key presses
+== 
 
 Discord
 == 

@@ -319,7 +319,7 @@ void CItems::OnRender()
 	{
 		for(auto *pProj = (CProjectile *)GameClient()->m_PredictedWorld.FindFirst(CGameWorld::ENTTYPE_PROJECTILE); pProj; pProj = (CProjectile *)pProj->NextEntity())
 		{
-			if(!IsSuper && pProj->m_Number > 0 && !Collision()->m_pSwitchers[pProj->m_Number].m_Status[OwnTeam] && (pProj->m_Explosive ? BlinkingProjEx : BlinkingProj))
+			if(!IsSuper && pProj->m_Number > 0 && pProj->m_Number < Collision()->m_NumSwitchers + 1 && !Collision()->m_pSwitchers[pProj->m_Number].m_Status[OwnTeam] && (pProj->m_Explosive ? BlinkingProjEx : BlinkingProj))
 				continue;
 
 			CProjectileData Data = pProj->GetData();
@@ -335,7 +335,7 @@ void CItems::OnRender()
 		}
 		for(auto *pPickup = (CPickup *)GameClient()->m_PredictedWorld.FindFirst(CGameWorld::ENTTYPE_PICKUP); pPickup; pPickup = (CPickup *)pPickup->NextEntity())
 		{
-			if(!IsSuper && pPickup->m_Layer == LAYER_SWITCH && pPickup->m_Number > 0 && !Collision()->m_pSwitchers[pPickup->m_Number].m_Status[OwnTeam] && BlinkingPickup)
+			if(!IsSuper && pPickup->m_Layer == LAYER_SWITCH && pPickup->m_Number > 0 && pPickup->m_Number < Collision()->m_NumSwitchers + 1 && !Collision()->m_pSwitchers[pPickup->m_Number].m_Status[OwnTeam] && BlinkingPickup)
 				continue;
 
 			if(pPickup->InDDNetTile())
@@ -359,7 +359,7 @@ void CItems::OnRender()
 
 		bool Inactive = false;
 		if(pEntEx)
-			Inactive = !IsSuper && pEntEx->m_SwitchNumber > 0 && !Collision()->m_pSwitchers[pEntEx->m_SwitchNumber].m_Status[OwnTeam];
+			Inactive = !IsSuper && pEntEx->m_SwitchNumber > 0 && pEntEx->m_SwitchNumber < Collision()->m_NumSwitchers + 1 && !Collision()->m_pSwitchers[pEntEx->m_SwitchNumber].m_Status[OwnTeam];
 
 		if(Item.m_Type == NETOBJTYPE_PROJECTILE || Item.m_Type == NETOBJTYPE_DDNETPROJECTILE)
 		{

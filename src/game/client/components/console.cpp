@@ -633,9 +633,17 @@ void CGameConsole::OnRender()
 		TextRender()->TextEx(&Cursor, aInputString + pConsole->m_Input.GetCursorOffset(Editing), -1);
 		int Lines = Cursor.m_LineCount;
 
-		y -= (Lines - 1) * FontSize;
+		int InputExtraLineCount = Lines - 1;
+		y -= InputExtraLineCount * FontSize;
 		TextRender()->SetCursor(&Cursor, x, y, FontSize, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = Screen.w - 10.0f - x;
+
+		if(m_LastInputLineCount != InputExtraLineCount)
+		{
+			m_HasSelection = false;
+			m_MouseIsPress = false;
+			m_LastInputLineCount = InputExtraLineCount;
+		}
 
 		TextRender()->TextEx(&Cursor, aInputString, pConsole->m_Input.GetCursorOffset(Editing));
 		CTextCursor Marker = Cursor;
@@ -677,6 +685,25 @@ void CGameConsole::OnRender()
 			WantsSelectionCopy = true;
 		std::string SelectionString;
 
+		// check if mouse is pressed
+		if(!m_MouseIsPress && Input()->NativeMousePressed(1))
+		{
+			m_MouseIsPress = true;
+			Input()->NativeMousePos(&m_MousePressX, &m_MousePressY);
+			m_MousePressX = (m_MousePressX / (float)Graphics()->WindowWidth()) * Screen.w;
+			m_MousePressY = (m_MousePressY / (float)Graphics()->WindowHeight()) * Screen.h;
+		}
+		if(m_MouseIsPress)
+		{
+			Input()->NativeMousePos(&m_MouseCurX, &m_MouseCurY);
+			m_MouseCurX = (m_MouseCurX / (float)Graphics()->WindowWidth()) * Screen.w;
+			m_MouseCurY = (m_MouseCurY / (float)Graphics()->WindowHeight()) * Screen.h;
+		}
+		if(m_MouseIsPress && !Input()->NativeMousePressed(1))
+		{
+			m_MouseIsPress = false;
+		}
+
 		for(int Page = 0; Page <= pConsole->m_BacklogActPage; ++Page, OffsetY = 0.0f)
 		{
 			while(pEntry)
@@ -693,37 +720,21 @@ void CGameConsole::OnRender()
 				}
 				OffsetY += pEntry->m_YOffset;
 
-				//	next page when lines reach the top
+				if((m_HasSelection || m_MouseIsPress) && m_NewLineCounter > 0)
+				{
+					float MouseExtraOff = pEntry->m_YOffset;
+					m_MousePressY -= MouseExtraOff;
+					if(!m_MouseIsPress)
+						m_MouseCurY -= MouseExtraOff;
+				}
+
+				// next page when lines reach the top
 				if(y - OffsetY <= RowHeight)
 					break;
 
-				if(!m_MouseIsPress && Input()->NativeMousePressed(1))
-				{
-					m_MouseIsPress = true;
-					Input()->NativeMousePos(&m_MousePressX, &m_MousePressY);
-					m_MousePressX = (m_MousePressX / (float)Graphics()->WindowWidth()) * Screen.w;
-					m_MousePressY = (m_MousePressY / (float)Graphics()->WindowHeight()) * Screen.h;
-				}
-				if(m_MouseIsPress)
-				{
-					Input()->NativeMousePos(&m_MouseCurX, &m_MouseCurY);
-					m_MouseCurX = (m_MouseCurX / (float)Graphics()->WindowWidth()) * Screen.w;
-					m_MouseCurY = (m_MouseCurY / (float)Graphics()->WindowHeight()) * Screen.h;
-				}
-				if(m_MouseIsPress && !Input()->NativeMousePressed(1))
-				{
-					m_MouseIsPress = false;
-				}
-
-				//	just render output from actual backlog page (render bottom up)
+				// just render output from actual backlog page (render bottom up)
 				if(Page == pConsole->m_BacklogActPage)
 				{
-					if(m_NewLineCounter > 0 && (m_HasSelection || m_MouseIsPress))
-					{
-						m_MousePressY -= OffsetY;
-						if(!m_MouseIsPress)
-							m_MouseCurY -= OffsetY;
-					}
 					TextRender()->SetCursor(&Cursor, 0.0f, y - OffsetY, FontSize, TEXTFLAG_RENDER);
 					Cursor.m_LineWidth = Screen.w - 10.0f;
 					Cursor.m_CalculateSelectionMode = (m_MouseIsPress || (m_CurSelStart != m_CurSelEnd) || m_HasSelection) ? TEXT_CURSOR_SELECTION_MODE_CALCULATE : TEXT_CURSOR_SELECTION_MODE_NONE;
