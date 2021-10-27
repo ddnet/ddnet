@@ -54,44 +54,26 @@ int putenv(const char *);
 }
 #endif
 
-/*
-	sync_barrier - creates a full hardware fence
-*/
-#if defined(__GNUC__)
-inline void sync_barrier()
-{
-	__sync_synchronize();
-}
-#elif defined(_MSC_VER)
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-inline void sync_barrier()
-{
-	MemoryBarrier();
-}
-#else
-#error missing atomic implementation for this compiler
-#endif
-
 // ------------ CGraphicsBackend_Threaded
 
-void CGraphicsBackend_Threaded::ThreadFunc(void *pUser)
+void CGraphicsBackend_Threaded::ThreadFunc()
 {
-	CGraphicsBackend_Threaded *pThis = (CGraphicsBackend_Threaded *)pUser;
-
-	while(!pThis->m_Shutdown)
+	std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
+	// notify, that the thread started
+	m_BufferDoneCond.notify_all();
+	while(!m_Shutdown)
 	{
-		pThis->m_Activity.Wait();
-		if(pThis->m_pBuffer)
+		m_BufferSwapCond.wait(Lock);
+		if(m_pBuffer)
 		{
 #ifdef CONF_PLATFORM_MACOS
 			CAutoreleasePool AutoreleasePool;
 #endif
-			pThis->m_pProcessor->RunBuffer(pThis->m_pBuffer);
+			m_pProcessor->RunBuffer(m_pBuffer);
 
-			sync_barrier();
-			pThis->m_pBuffer = 0x0;
-			pThis->m_BufferDone.Signal();
+			m_pBuffer = nullptr;
+			m_BufferInProcess.store(false, std::memory_order_relaxed);
+			m_BufferDoneCond.notify_all();
 		}
 #if defined(CONF_VIDEORECORDER)
 		if(IVideo::Current())
@@ -102,43 +84,50 @@ void CGraphicsBackend_Threaded::ThreadFunc(void *pUser)
 
 CGraphicsBackend_Threaded::CGraphicsBackend_Threaded()
 {
-	m_pBuffer = 0x0;
-	m_pProcessor = 0x0;
-	m_pThread = 0x0;
+	m_pBuffer = nullptr;
+	m_pProcessor = nullptr;
+	m_BufferInProcess.store(false, std::memory_order_relaxed);
 }
 
 void CGraphicsBackend_Threaded::StartProcessor(ICommandProcessor *pProcessor)
 {
 	m_Shutdown = false;
 	m_pProcessor = pProcessor;
-	m_pThread = thread_init(ThreadFunc, this, "CGraphicsBackend_Threaded");
-	m_BufferDone.Signal();
+	std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
+	m_Thread = std::thread([&]() { ThreadFunc(); });
+	// wait for the thread to start
+	m_BufferDoneCond.wait(Lock);
 }
 
 void CGraphicsBackend_Threaded::StopProcessor()
 {
 	m_Shutdown = true;
-	m_Activity.Signal();
-	if(m_pThread)
-		thread_wait(m_pThread);
+	{
+		std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
+		m_BufferSwapCond.notify_all();
+	}
+	m_Thread.join();
 }
 
 void CGraphicsBackend_Threaded::RunBuffer(CCommandBuffer *pBuffer)
 {
 	WaitForIdle();
 	m_pBuffer = pBuffer;
-	m_Activity.Signal();
+	std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
+	m_BufferInProcess.store(true, std::memory_order_relaxed);
+	m_BufferSwapCond.notify_all();
 }
 
 bool CGraphicsBackend_Threaded::IsIdle() const
 {
-	return m_pBuffer == 0x0;
+	return !m_BufferInProcess.load(std::memory_order_relaxed);
 }
 
 void CGraphicsBackend_Threaded::WaitForIdle()
 {
-	while(m_pBuffer != 0x0)
-		m_BufferDone.Wait();
+	std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
+	if(m_pBuffer != nullptr)
+		m_BufferDoneCond.wait(Lock);
 }
 
 // ------------ CCommandProcessorFragment_General
