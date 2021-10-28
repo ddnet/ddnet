@@ -560,7 +560,7 @@ FSAA samples
 == Muestras FSAA
 
 Sound volume
-== Volumen de sonido
+== Volumen del sonido
 
 Created:
 == Creado:
@@ -941,7 +941,7 @@ Threaded sound loading
 == Carga de sonido en un hilo
 
 Map sound volume
-== Volumen de sonido del mapa
+== Vol. del sonido del mapa
 
 HUD
 == Apariencia
@@ -1172,13 +1172,13 @@ Skins directory
 == Directorio de skins
 
 Game sound volume
-== Volumen de sonido del juego
+== Vol. del sonido del juego
 
 Chat sound volume
-== Volumen del chat
+== Vol. del sonido del chat
 
 Background music volume
-== Volumen de música de fondo
+== Vol. de la música de fondo
 
 Assets
 == Recursos
