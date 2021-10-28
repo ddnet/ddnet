@@ -599,8 +599,9 @@ elseif(TARGET_OS STREQUAL "android")
 else()
   find_package(Notify)
   find_package(OpenGL)
-  set(PLATFORM_CLIENT_LIBS ${OPENGL_gl_LIBRARY} ${NOTIFY_LIBRARIES})
-  set(PLATFORM_CLIENT_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR} ${NOTIFY_INCLUDE_DIRS})
+  find_package(Curses)
+  set(PLATFORM_CLIENT_LIBS ${OPENGL_gl_LIBRARY} ${NOTIFY_LIBRARIES} ${CURSES_LIBRARIES})
+  set(PLATFORM_CLIENT_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR} ${NOTIFY_INCLUDE_DIRS} ${CURSES_INCLUDE_DIRS})
   set(PLATFORM_CLIENT)
   if(TARGET_OS STREQUAL "linux")
     set(PLATFORM_LIBS rt) # clock_gettime for glibc < 2.17
@@ -1821,6 +1822,9 @@ if(CLIENT)
     components/chillerbot/playerpics.h
     components/chillerbot/remotecontrol.cpp
     components/chillerbot/remotecontrol.h
+    components/chillerbot/terminalui.cpp
+    components/chillerbot/terminalui.h
+    components/chillerbot/terminalui_keys.h
     components/chillerbot/unix.cpp
     components/chillerbot/unix.h
     components/chillerbot/version.h
