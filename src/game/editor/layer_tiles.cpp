@@ -225,7 +225,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 				pGrabbed->m_pTiles[y * pGrabbed->m_Width + x] = GetTile(r.x + x, r.y + y);
 
 		// copy the tele data
-		if(!m_pEditor->Input()->KeyIsPressed(KEY_SPACE))
+		if(!m_pEditor->Input()->KeyIsPressed(KEY::SPACE))
 			for(int y = 0; y < r.h; y++)
 				for(int x = 0; x < r.w; x++)
 				{
@@ -263,7 +263,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 				pGrabbed->m_pTiles[y * pGrabbed->m_Width + x] = GetTile(r.x + x, r.y + y);
 
 		// copy the speedup data
-		if(!m_pEditor->Input()->KeyIsPressed(KEY_SPACE))
+		if(!m_pEditor->Input()->KeyIsPressed(KEY::SPACE))
 			for(int y = 0; y < r.h; y++)
 				for(int x = 0; x < r.w; x++)
 				{
@@ -301,7 +301,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 				pGrabbed->m_pTiles[y * pGrabbed->m_Width + x] = GetTile(r.x + x, r.y + y);
 
 		// copy the switch data
-		if(!m_pEditor->Input()->KeyIsPressed(KEY_SPACE))
+		if(!m_pEditor->Input()->KeyIsPressed(KEY::SPACE))
 			for(int y = 0; y < r.h; y++)
 				for(int x = 0; x < r.w; x++)
 				{
@@ -352,7 +352,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 				pGrabbed->m_pTiles[y * pGrabbed->m_Width + x] = GetTile(r.x + x, r.y + y);
 
 		// copy the tiles
-		if(!m_pEditor->Input()->KeyIsPressed(KEY_SPACE))
+		if(!m_pEditor->Input()->KeyIsPressed(KEY::SPACE))
 			for(int y = 0; y < r.h; y++)
 				for(int x = 0; x < r.w; x++)
 				{

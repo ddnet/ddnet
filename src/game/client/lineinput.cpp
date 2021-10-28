@@ -104,7 +104,7 @@ int32_t CLineInput::Manipulate(IInput::CEvent Event, char *pStr, int StrMaxSize,
 	if(Event.m_Flags & IInput::FLAG_PRESS)
 	{
 		int Key = Event.m_Key;
-		if(Key == KEY_BACKSPACE)
+		if(Key == KEY::BACKSPACE)
 		{
 			if((ModifyFlags & LINE_INPUT_MODIFY_DONT_DELETE) == 0 && CursorPos > 0)
 			{
@@ -118,7 +118,7 @@ int32_t CLineInput::Manipulate(IInput::CEvent Event, char *pStr, int StrMaxSize,
 			}
 			Changes |= ELineInputChanges::LINE_INPUT_CHANGE_CHARACTERS_DELETE;
 		}
-		else if(Key == KEY_DELETE)
+		else if(Key == KEY::DELETE)
 		{
 			if((ModifyFlags & LINE_INPUT_MODIFY_DONT_DELETE) == 0 && CursorPos < Len)
 			{
@@ -131,9 +131,9 @@ int32_t CLineInput::Manipulate(IInput::CEvent Event, char *pStr, int StrMaxSize,
 			}
 			Changes |= ELineInputChanges::LINE_INPUT_CHANGE_CHARACTERS_DELETE;
 		}
-		else if(Key == KEY_LEFT)
+		else if(Key == KEY::LEFT)
 		{
-			if(ModifierKey == KEY_LCTRL)
+			if(ModifierKey == KEY::LCTRL)
 			{
 				bool MovedCursor = false;
 				int OldCursorPos = CursorPos;
@@ -158,9 +158,9 @@ int32_t CLineInput::Manipulate(IInput::CEvent Event, char *pStr, int StrMaxSize,
 				Changes |= ELineInputChanges::LINE_INPUT_CHANGE_CURSOR;
 			}
 		}
-		else if(Key == KEY_RIGHT)
+		else if(Key == KEY::RIGHT)
 		{
-			if(ModifierKey == KEY_LCTRL)
+			if(ModifierKey == KEY::LCTRL)
 			{
 				bool WasNonWordChar = IsNotAWordChar(pStr[CursorPos]);
 				while((!WasNonWordChar && !IsNotAWordChar(pStr[CursorPos])) || (WasNonWordChar && IsNotAWordChar(pStr[CursorPos])))
@@ -178,12 +178,12 @@ int32_t CLineInput::Manipulate(IInput::CEvent Event, char *pStr, int StrMaxSize,
 				Changes |= ELineInputChanges::LINE_INPUT_CHANGE_CURSOR;
 			}
 		}
-		else if(Key == KEY_HOME)
+		else if(Key == KEY::HOME)
 		{
 			CursorPos = 0;
 			Changes |= ELineInputChanges::LINE_INPUT_CHANGE_WARP_CURSOR;
 		}
-		else if(Key == KEY_END)
+		else if(Key == KEY::END)
 		{
 			CursorPos = Len;
 			Changes |= ELineInputChanges::LINE_INPUT_CHANGE_WARP_CURSOR;

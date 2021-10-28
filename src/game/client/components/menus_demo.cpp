@@ -169,14 +169,14 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	if(m_pClient->m_GameConsole.IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE && g_Config.m_ClDemoKeyboardShortcuts)
 	{
 		// increase/decrease speed
-		if(!Input()->KeyIsPressed(KEY_LSHIFT) && !Input()->KeyIsPressed(KEY_RSHIFT))
+		if(!Input()->KeyIsPressed(KEY::LSHIFT) && !Input()->KeyIsPressed(KEY::RSHIFT))
 		{
-			if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) || Input()->KeyPress(KEY_UP))
+			if(Input()->KeyPress(KEY::MOUSE_WHEEL_UP) || Input()->KeyPress(KEY::UP))
 			{
 				DemoPlayer()->SetSpeedIndex(+1);
 				LastSpeedChange = time_get();
 			}
-			else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) || Input()->KeyPress(KEY_DOWN))
+			else if(Input()->KeyPress(KEY::MOUSE_WHEEL_DOWN) || Input()->KeyPress(KEY::DOWN))
 			{
 				DemoPlayer()->SetSpeedIndex(-1);
 				LastSpeedChange = time_get();
@@ -184,7 +184,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		}
 
 		// pause/unpause
-		if(Input()->KeyPress(KEY_SPACE) || Input()->KeyPress(KEY_RETURN) || Input()->KeyPress(KEY_K))
+		if(Input()->KeyPress(KEY::SPACE) || Input()->KeyPress(KEY::RETURN) || Input()->KeyPress(KEY::K))
 		{
 			if(pInfo->m_Paused)
 			{
@@ -197,25 +197,25 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		}
 
 		// seek backward/forward 10/5 seconds
-		if(Input()->KeyPress(KEY_J))
+		if(Input()->KeyPress(KEY::J))
 		{
 			DemoPlayer()->SeekTime(-10.0f);
 		}
-		else if(Input()->KeyPress(KEY_L))
+		else if(Input()->KeyPress(KEY::L))
 		{
 			DemoPlayer()->SeekTime(10.0f);
 		}
-		else if(Input()->KeyPress(KEY_LEFT))
+		else if(Input()->KeyPress(KEY::LEFT))
 		{
 			DemoPlayer()->SeekTime(-5.0f);
 		}
-		else if(Input()->KeyPress(KEY_RIGHT))
+		else if(Input()->KeyPress(KEY::RIGHT))
 		{
 			DemoPlayer()->SeekTime(5.0f);
 		}
 
 		// seek to 0-90%
-		const int SeekPercentKeys[] = {KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9};
+		const int SeekPercentKeys[] = {KEY::ZERO, KEY::ONE, KEY::TWO, KEY::THREE, KEY::FOUR, KEY::FIVE, KEY::SIX, KEY::SEVEN, KEY::EIGHT, KEY::NINE};
 		for(unsigned i = 0; i < sizeof(SeekPercentKeys) / sizeof(SeekPercentKeys[0]); i++)
 		{
 			if(Input()->KeyPress(SeekPercentKeys[i]))
@@ -226,11 +226,11 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		}
 
 		// seek to the beginning/end
-		if(Input()->KeyPress(KEY_HOME))
+		if(Input()->KeyPress(KEY::HOME))
 		{
 			DemoPlayer()->SeekPercent(0.0f);
 		}
-		else if(Input()->KeyPress(KEY_END))
+		else if(Input()->KeyPress(KEY::END))
 		{
 			DemoPlayer()->SeekPercent(1.0f);
 		}
@@ -341,7 +341,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 				static float PrevAmount = 0.0f;
 				float Amount = (UI()->MouseX() - SeekBar.x) / SeekBar.w;
 
-				if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+				if(Input()->KeyIsPressed(KEY::LSHIFT) || Input()->KeyIsPressed(KEY::RSHIFT))
 				{
 					Amount = PrevAmount + (Amount - PrevAmount) * 0.05f;
 
@@ -464,7 +464,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	// close button
 	ButtonBar.VSplitRight(ButtonbarHeight * 3, &ButtonBar, &Button);
 	static int s_ExitButton = 0;
-	if(DoButton_DemoPlayer(&s_ExitButton, Localize("Close"), 0, &Button) || (Input()->KeyPress(KEY_C) && m_pClient->m_GameConsole.IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE))
+	if(DoButton_DemoPlayer(&s_ExitButton, Localize("Close"), 0, &Button) || (Input()->KeyPress(KEY::C) && m_pClient->m_GameConsole.IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE))
 	{
 		Client()->Disconnect();
 		DemolistOnUpdate(false);
@@ -554,9 +554,9 @@ void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHe
 	}
 	else
 	{
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) && UI()->MouseInside(&View))
+		if(Input()->KeyPress(KEY::MOUSE_WHEEL_UP) && UI()->MouseInside(&View))
 			gs_ListBoxScrollValue -= Num == 1 ? 0.1f : 3.0f / Num;
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) && UI()->MouseInside(&View))
+		if(Input()->KeyPress(KEY::MOUSE_WHEEL_DOWN) && UI()->MouseInside(&View))
 			gs_ListBoxScrollValue += Num == 1 ? 0.1f : 3.0f / Num;
 	}
 
@@ -659,17 +659,17 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected,
 					int NewIndex = -1;
 					if(m_aInputEvents[i].m_Flags & IInput::FLAG_PRESS)
 					{
-						if(m_aInputEvents[i].m_Key == KEY_DOWN)
+						if(m_aInputEvents[i].m_Key == KEY::DOWN)
 							NewIndex = gs_ListBoxNewSelected + 1;
-						else if(m_aInputEvents[i].m_Key == KEY_UP)
+						else if(m_aInputEvents[i].m_Key == KEY::UP)
 							NewIndex = gs_ListBoxNewSelected - 1;
-						else if(m_aInputEvents[i].m_Key == KEY_PAGEUP)
+						else if(m_aInputEvents[i].m_Key == KEY::PAGEUP)
 							NewIndex = maximum(gs_ListBoxNewSelected - 20, 0);
-						else if(m_aInputEvents[i].m_Key == KEY_PAGEDOWN)
+						else if(m_aInputEvents[i].m_Key == KEY::PAGEDOWN)
 							NewIndex = minimum(gs_ListBoxNewSelected + 20, gs_ListBoxNumItems - 1);
-						else if(m_aInputEvents[i].m_Key == KEY_HOME)
+						else if(m_aInputEvents[i].m_Key == KEY::HOME)
 							NewIndex = 0;
-						else if(m_aInputEvents[i].m_Key == KEY_END)
+						else if(m_aInputEvents[i].m_Key == KEY::END)
 							NewIndex = gs_ListBoxNumItems - 1;
 					}
 					if(NewIndex > -1 && NewIndex < gs_ListBoxNumItems)
@@ -1206,7 +1206,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	}
 
 	static int s_RefreshButton = 0;
-	if(DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &RefreshRect) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))))
+	if(DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &RefreshRect) || Input()->KeyPress(KEY::F5) || (Input()->KeyPress(KEY::R) && (Input()->KeyIsPressed(KEY::LCTRL) || Input()->KeyIsPressed(KEY::RCTRL))))
 	{
 		DemolistPopulate();
 		DemolistOnUpdate(false);
@@ -1220,7 +1220,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	}
 
 	static int s_PlayButton = 0;
-	if(DoButton_Menu(&s_PlayButton, m_DemolistSelectedIsDir ? Localize("Open") : Localize("Play", "Demo browser"), 0, &PlayRect) || Activated || (Input()->KeyPress(KEY_P) && m_pClient->m_GameConsole.IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE))
+	if(DoButton_Menu(&s_PlayButton, m_DemolistSelectedIsDir ? Localize("Open") : Localize("Play", "Demo browser"), 0, &PlayRect) || Activated || (Input()->KeyPress(KEY::P) && m_pClient->m_GameConsole.IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE))
 	{
 		if(m_DemolistSelectedIndex >= 0)
 		{
@@ -1271,7 +1271,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	if(!m_DemolistSelectedIsDir)
 	{
 		static int s_DeleteButton = 0;
-		if(DoButton_Menu(&s_DeleteButton, Localize("Delete"), 0, &DeleteRect) || m_DeletePressed || (Input()->KeyPress(KEY_D) && m_pClient->m_GameConsole.IsClosed()))
+		if(DoButton_Menu(&s_DeleteButton, Localize("Delete"), 0, &DeleteRect) || m_DeletePressed || (Input()->KeyPress(KEY::D) && m_pClient->m_GameConsole.IsClosed()))
 		{
 			if(m_DemolistSelectedIndex >= 0)
 			{
@@ -1295,7 +1295,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 #if defined(CONF_VIDEORECORDER)
 		static int s_RenderButton = 0;
-		if(DoButton_Menu(&s_RenderButton, Localize("Render"), 0, &RenderRect) || (Input()->KeyPress(KEY_R) && m_pClient->m_GameConsole.IsClosed()))
+		if(DoButton_Menu(&s_RenderButton, Localize("Render"), 0, &RenderRect) || (Input()->KeyPress(KEY::R) && m_pClient->m_GameConsole.IsClosed()))
 		{
 			if(m_DemolistSelectedIndex >= 0)
 			{

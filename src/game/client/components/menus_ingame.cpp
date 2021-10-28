@@ -681,7 +681,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			static int s_ClearButton = 0;
 			static float Offset = 0.0f;
 			//static char aFilterString[25];
-			if(m_ControlPageOpening || (Input()->KeyPress(KEY_F) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))))
+			if(m_ControlPageOpening || (Input()->KeyPress(KEY::F) && (Input()->KeyIsPressed(KEY::LCTRL) || Input()->KeyIsPressed(KEY::RCTRL))))
 			{
 				UI()->SetActiveItem(&m_aFilterString);
 				m_ControlPageOpening = false;
@@ -734,7 +734,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		float w = TextRender()->TextWidth(0, 14.0f, pLabel, -1, -1.0f);
 		Reason.VSplitLeft(w + 10.0f, 0, &Reason);
 		static float s_Offset = 0.0f;
-		if(Input()->KeyPress(KEY_R) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)))
+		if(Input()->KeyPress(KEY::R) && (Input()->KeyIsPressed(KEY::LCTRL) || Input()->KeyIsPressed(KEY::RCTRL)))
 			UI()->SetActiveItem(&m_aCallvoteReason);
 		DoEditBox(&m_aCallvoteReason, &Reason, m_aCallvoteReason, sizeof(m_aCallvoteReason), 14.0f, &s_Offset, false, CUI::CORNER_ALL);
 
@@ -1149,7 +1149,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 	Status.VSplitLeft(120.0f, &Button, &Status);
 
 	static int s_ReloadButton = 0;
-	if(DoButton_Menu(&s_ReloadButton, Localize("Reload"), 0, &Button) || Input()->KeyPress(KEY_F5))
+	if(DoButton_Menu(&s_ReloadButton, Localize("Reload"), 0, &Button) || Input()->KeyPress(KEY::F5))
 	{
 		m_pClient->m_Ghost.UnloadAll();
 		GhostlistPopulate();

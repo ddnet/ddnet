@@ -64,6 +64,6 @@ public:
 	void SetDDRaceBinds(bool FreeOnly);
 
 private:
-	char *m_aapKeyBindings[MODIFIER_COMBINATION_COUNT][KEY_LAST];
+	char *m_aapKeyBindings[MODIFIER_COMBINATION_COUNT][KEY::LAST];
 };
 #endif

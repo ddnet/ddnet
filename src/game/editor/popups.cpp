@@ -90,7 +90,7 @@ void CEditor::UiDoPopupMenu()
 			m_PopupEventWasActivated = false;
 		}
 
-		if(Input()->KeyPress(KEY_ESCAPE))
+		if(Input()->KeyPress(KEY::ESCAPE))
 		{
 			m_LockMouse = false;
 			UI()->SetActiveItem(0);
@@ -1225,9 +1225,9 @@ int CEditor::PopupSelectImage(CEditor *pEditor, CUIRect View, void *pContext)
 			int ScrollNum = (int)((ImagesHeight - ButtonBar.h) / 14.0f) + 1;
 			if(ScrollNum > 0)
 			{
-				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
+				if(pEditor->Input()->KeyPress(KEY::MOUSE_WHEEL_UP))
 					s_ScrollValue = clamp(s_ScrollValue - 1.0f / ScrollNum, 0.0f, 1.0f);
-				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
+				if(pEditor->Input()->KeyPress(KEY::MOUSE_WHEEL_DOWN))
 					s_ScrollValue = clamp(s_ScrollValue + 1.0f / ScrollNum, 0.0f, 1.0f);
 			}
 		}
@@ -1335,9 +1335,9 @@ int CEditor::PopupSelectSound(CEditor *pEditor, CUIRect View, void *pContext)
 			int ScrollNum = (int)((SoundsHeight - ButtonBar.h) / 14.0f) + 1;
 			if(ScrollNum > 0)
 			{
-				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
+				if(pEditor->Input()->KeyPress(KEY::MOUSE_WHEEL_UP))
 					s_ScrollValue = clamp(s_ScrollValue - 1.0f / ScrollNum, 0.0f, 1.0f);
-				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
+				if(pEditor->Input()->KeyPress(KEY::MOUSE_WHEEL_DOWN))
 					s_ScrollValue = clamp(s_ScrollValue + 1.0f / ScrollNum, 0.0f, 1.0f);
 			}
 		}
@@ -1469,9 +1469,9 @@ int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pCon
 			int ScrollNum = (int)((ListHeight / ButtonHeight) + 1);
 			if(ScrollNum > 0)
 			{
-				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
+				if(pEditor->Input()->KeyPress(KEY::MOUSE_WHEEL_UP))
 					s_ScrollValue = clamp(s_ScrollValue - 1.0f / ScrollNum, 0.0f, 1.0f);
-				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
+				if(pEditor->Input()->KeyPress(KEY::MOUSE_WHEEL_DOWN))
 					s_ScrollValue = clamp(s_ScrollValue + 1.0f / ScrollNum, 0.0f, 1.0f);
 			}
 		}
@@ -1550,7 +1550,7 @@ int CEditor::PopupTele(CEditor *pEditor, CUIRect View, void *pContext)
 	// find empty number button
 	{
 		static int s_EmptySlotPid = 0;
-		if(pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot") || pEditor->Input()->KeyPress(KEY_F))
+		if(pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot") || pEditor->Input()->KeyPress(KEY::F))
 		{
 			int number = -1;
 			for(int i = 1; i <= 255; i++)
@@ -1653,7 +1653,7 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext)
 	// find empty number button
 	{
 		static int s_EmptySlotPid = 0;
-		if(pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot") || pEditor->Input()->KeyPress(KEY_F))
+		if(pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot") || pEditor->Input()->KeyPress(KEY::F))
 		{
 			int number = -1;
 			for(int i = 1; i <= 255; i++)

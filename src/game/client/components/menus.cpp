@@ -523,7 +523,7 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 
 		UI()->SetActiveItem(&s_NumberBoxID);
 
-		if(Input()->KeyIsPressed(KEY_RETURN) || Input()->KeyIsPressed(KEY_KP_ENTER) ||
+		if(Input()->KeyIsPressed(KEY::RETURN) || Input()->KeyIsPressed(KEY::KP_ENTER) ||
 			((UI()->MouseButtonClicked(1) || UI()->MouseButtonClicked(0)) && !Inside))
 		{
 			if(IsHex)
@@ -535,7 +535,7 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 			ms_ValueSelectorTextMode = false;
 		}
 
-		if(Input()->KeyIsPressed(KEY_ESCAPE))
+		if(Input()->KeyIsPressed(KEY::ESCAPE))
 		{
 			//m_LockMouse = false;
 			UI()->SetActiveItem(0);
@@ -552,7 +552,7 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 				{
 					float delta = UI()->MouseDeltaX();
 
-					if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+					if(Input()->KeyIsPressed(KEY::LSHIFT) || Input()->KeyIsPressed(KEY::RSHIFT))
 						s_Value += delta * 0.05f;
 					else
 						s_Value += delta;
@@ -653,7 +653,7 @@ float CMenus::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 		if(!UI()->MouseButton(0))
 			UI()->SetActiveItem(0);
 
-		if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+		if(Input()->KeyIsPressed(KEY::LSHIFT) || Input()->KeyIsPressed(KEY::RSHIFT))
 			m_MouseSlow = true;
 
 		float Min = pRect->y;
@@ -711,7 +711,7 @@ float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current,
 		if(!UI()->MouseButton(0))
 			UI()->SetActiveItem(0);
 
-		if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+		if(Input()->KeyIsPressed(KEY::LSHIFT) || Input()->KeyIsPressed(KEY::RSHIFT))
 			m_MouseSlow = true;
 
 		float Min = pRect->x;
@@ -787,7 +787,7 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int Modifier, 
 		if(m_Binder.m_GotKey)
 		{
 			// abort with escape key
-			if(m_Binder.m_Key.m_Key != KEY_ESCAPE)
+			if(m_Binder.m_Key.m_Key != KEY::ESCAPE)
 			{
 				NewKey = m_Binder.m_Key.m_Key;
 				*NewModifier = m_Binder.m_Modifier;
@@ -2577,7 +2577,7 @@ bool CMenus::OnInput(IInput::CEvent e)
 	// special handle esc and enter for popup purposes
 	if(e.m_Flags & IInput::FLAG_PRESS)
 	{
-		if(e.m_Key == KEY_ESCAPE)
+		if(e.m_Key == KEY::ESCAPE)
 		{
 			m_EscapePressed = true;
 			if(m_Popup == POPUP_NONE)
@@ -2591,9 +2591,9 @@ bool CMenus::OnInput(IInput::CEvent e)
 		if(e.m_Flags & IInput::FLAG_PRESS)
 		{
 			// special for popups
-			if(e.m_Key == KEY_RETURN || e.m_Key == KEY_KP_ENTER)
+			if(e.m_Key == KEY::RETURN || e.m_Key == KEY::KP_ENTER)
 				m_EnterPressed = true;
-			else if(e.m_Key == KEY_DELETE)
+			else if(e.m_Key == KEY::DELETE)
 				m_DeletePressed = true;
 		}
 
@@ -2704,11 +2704,11 @@ void CMenus::OnRender()
 	int Buttons = 0;
 	if(m_UseMouseButtons)
 	{
-		if(Input()->KeyIsPressed(KEY_MOUSE_1))
+		if(Input()->KeyIsPressed(KEY::MOUSE_1))
 			Buttons |= 1;
-		if(Input()->KeyIsPressed(KEY_MOUSE_2))
+		if(Input()->KeyIsPressed(KEY::MOUSE_2))
 			Buttons |= 2;
-		if(Input()->KeyIsPressed(KEY_MOUSE_3))
+		if(Input()->KeyIsPressed(KEY::MOUSE_3))
 			Buttons |= 4;
 	}
 
@@ -2797,7 +2797,7 @@ void CMenus::RenderBackground()
 bool CMenus::CheckHotKey(int Key) const
 {
 	return m_Popup == POPUP_NONE &&
-	       !Input()->KeyIsPressed(KEY_LSHIFT) && !Input()->KeyIsPressed(KEY_RSHIFT) && !Input()->KeyIsPressed(KEY_LCTRL) && !Input()->KeyIsPressed(KEY_RCTRL) && !Input()->KeyIsPressed(KEY_LALT) && // no modifier
+	       !Input()->KeyIsPressed(KEY::LSHIFT) && !Input()->KeyIsPressed(KEY::RSHIFT) && !Input()->KeyIsPressed(KEY::LCTRL) && !Input()->KeyIsPressed(KEY::RCTRL) && !Input()->KeyIsPressed(KEY::LALT) && // no modifier
 	       Input()->KeyIsPressed(Key) && m_pClient->m_GameConsole.IsClosed();
 }
 
@@ -2983,9 +2983,9 @@ bool CMenus::HandleListInputs(const CUIRect &View, float &ScrollValue, const flo
 			ScrollValue = (float)(*pScrollOffset) / ScrollNum;
 			*pScrollOffset = -1;
 		}
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) && UI()->MouseInside(&View))
+		if(Input()->KeyPress(KEY::MOUSE_WHEEL_UP) && UI()->MouseInside(&View))
 			ScrollValue -= 3.0f / ScrollNum;
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) && UI()->MouseInside(&View))
+		if(Input()->KeyPress(KEY::MOUSE_WHEEL_DOWN) && UI()->MouseInside(&View))
 			ScrollValue += 3.0f / ScrollNum;
 	}
 
@@ -2998,17 +2998,17 @@ bool CMenus::HandleListInputs(const CUIRect &View, float &ScrollValue, const flo
 		{
 			if(UI()->LastActiveItem() == &g_Config.m_UiServerAddress)
 				return false;
-			else if(m_aInputEvents[i].m_Key == KEY_DOWN)
+			else if(m_aInputEvents[i].m_Key == KEY::DOWN)
 				NewIndex = minimum(SelectedIndex + 1, NumElems - 1);
-			else if(m_aInputEvents[i].m_Key == KEY_UP)
+			else if(m_aInputEvents[i].m_Key == KEY::UP)
 				NewIndex = maximum(SelectedIndex - 1, 0);
-			else if(m_aInputEvents[i].m_Key == KEY_PAGEUP)
+			else if(m_aInputEvents[i].m_Key == KEY::PAGEUP)
 				NewIndex = maximum(SelectedIndex - 25, 0);
-			else if(m_aInputEvents[i].m_Key == KEY_PAGEDOWN)
+			else if(m_aInputEvents[i].m_Key == KEY::PAGEDOWN)
 				NewIndex = minimum(SelectedIndex + 25, NumElems - 1);
-			else if(m_aInputEvents[i].m_Key == KEY_HOME)
+			else if(m_aInputEvents[i].m_Key == KEY::HOME)
 				NewIndex = 0;
-			else if(m_aInputEvents[i].m_Key == KEY_END)
+			else if(m_aInputEvents[i].m_Key == KEY::END)
 				NewIndex = NumElems - 1;
 		}
 		if(NewIndex > -1 && NewIndex < NumElems)

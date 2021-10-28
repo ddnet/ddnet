@@ -193,9 +193,9 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 	s_ScrollValue = DoScrollbarV(&s_ScrollBar, &Scroll, s_ScrollValue);
 
-	if(Input()->KeyPress(KEY_TAB) && m_pClient->m_GameConsole.IsClosed())
+	if(Input()->KeyPress(KEY::TAB) && m_pClient->m_GameConsole.IsClosed())
 	{
-		if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+		if(Input()->KeyIsPressed(KEY::LSHIFT) || Input()->KeyIsPressed(KEY::RSHIFT))
 			g_Config.m_UiToolboxPage = (g_Config.m_UiToolboxPage + 3 - 1) % 3;
 		else
 			g_Config.m_UiToolboxPage = (g_Config.m_UiToolboxPage + 3 + 1) % 3;
@@ -530,7 +530,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
 
 		static float Offset = 0.0f;
-		if(Input()->KeyPress(KEY_F) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)))
+		if(Input()->KeyPress(KEY::F) && (Input()->KeyIsPressed(KEY::LCTRL) || Input()->KeyIsPressed(KEY::RCTRL)))
 			UI()->SetActiveItem(&g_Config.m_BrFilterString);
 		static int s_ClearButton = 0;
 		if(DoClearableEditBox(&g_Config.m_BrFilterString, &s_ClearButton, &QuickSearch, g_Config.m_BrFilterString, sizeof(g_Config.m_BrFilterString), 12.0f, &Offset, false, CUI::CORNER_ALL))
@@ -555,7 +555,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 		static int s_ClearButton = 0;
 		static float Offset = 0.0f;
-		if(Input()->KeyPress(KEY_X) && (Input()->KeyPress(KEY_LSHIFT) || Input()->KeyPress(KEY_RSHIFT)) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)))
+		if(Input()->KeyPress(KEY::X) && (Input()->KeyPress(KEY::LSHIFT) || Input()->KeyPress(KEY::RSHIFT)) && (Input()->KeyIsPressed(KEY::LCTRL) || Input()->KeyIsPressed(KEY::RCTRL)))
 			UI()->SetActiveItem(&g_Config.m_BrExcludeString);
 		if(DoClearableEditBox(&g_Config.m_BrExcludeString, &s_ClearButton, &QuickExclude, g_Config.m_BrExcludeString, sizeof(g_Config.m_BrExcludeString), 12.0f, &Offset, false, CUI::CORNER_ALL))
 			Client()->ServerBrowserUpdate();
@@ -612,7 +612,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			return m_aLocalStringHelper;
 		};
 
-		if(DoButtonMenu(m_RefreshButton, &s_RefreshButton, Func, 0, &ButtonRefresh, true, false, CUI::CORNER_ALL) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))))
+		if(DoButtonMenu(m_RefreshButton, &s_RefreshButton, Func, 0, &ButtonRefresh, true, false, CUI::CORNER_ALL) || Input()->KeyPress(KEY::F5) || (Input()->KeyPress(KEY::R) && (Input()->KeyIsPressed(KEY::LCTRL) || Input()->KeyIsPressed(KEY::RCTRL))))
 		{
 			if(g_Config.m_UiPage == PAGE_INTERNET)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);

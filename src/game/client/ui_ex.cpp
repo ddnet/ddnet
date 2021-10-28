@@ -43,10 +43,10 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 	{
 		m_CurCursor = minimum(str_length(pStr), m_CurCursor);
 
-		bool IsShiftPressed = Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT);
-		bool IsCtrlPressed = Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL);
+		bool IsShiftPressed = Input()->KeyIsPressed(KEY::LSHIFT) || Input()->KeyIsPressed(KEY::RSHIFT);
+		bool IsCtrlPressed = Input()->KeyIsPressed(KEY::LCTRL) || Input()->KeyIsPressed(KEY::RCTRL);
 
-		if(!IsShiftPressed && IsCtrlPressed && Input()->KeyPress(KEY_V))
+		if(!IsShiftPressed && IsCtrlPressed && Input()->KeyPress(KEY::V))
 		{
 			const char *pText = Input()->GetClipboardText();
 			if(pText)
@@ -103,7 +103,7 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 			}
 		}
 
-		if(!IsShiftPressed && IsCtrlPressed && (Input()->KeyPress(KEY_C) || Input()->KeyPress(KEY_X)))
+		if(!IsShiftPressed && IsCtrlPressed && (Input()->KeyPress(KEY::C) || Input()->KeyPress(KEY::X)))
 		{
 			if(m_HasSelection)
 			{
@@ -115,7 +115,7 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 				{
 					std::string NewStr(&pStr[UTF8SelLeft], UTF8SelRight - UTF8SelLeft);
 					Input()->SetClipboardText(NewStr.c_str());
-					if(Input()->KeyPress(KEY_X))
+					if(Input()->KeyPress(KEY::X))
 					{
 						NewStr = std::string(pStr, UTF8SelLeft) + std::string(pStr + UTF8SelRight);
 						str_copy(pStr, NewStr.c_str(), StrSize);
@@ -131,7 +131,7 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 				Input()->SetClipboardText(pStr);
 		}
 
-		if(!IsShiftPressed && IsCtrlPressed && Input()->KeyPress(KEY_A))
+		if(!IsShiftPressed && IsCtrlPressed && Input()->KeyPress(KEY::A))
 		{
 			m_CurSelStart = 0;
 			int StrLen = str_length(pStr);
@@ -140,7 +140,7 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 			m_CurCursor = StrLen;
 		}
 
-		if(!IsShiftPressed && IsCtrlPressed && Input()->KeyPress(KEY_U))
+		if(!IsShiftPressed && IsCtrlPressed && Input()->KeyPress(KEY::U))
 		{
 			pStr[0] = '\0';
 			m_CurCursor = 0;
@@ -153,7 +153,7 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 			int LastCursor = m_CurCursor;
 			int Len = str_length(pStr);
 			int NumChars = Len;
-			ManipulateChanges = CLineInput::Manipulate(m_pInputEventsArray[i], pStr, StrSize, StrSize, &Len, &m_CurCursor, &NumChars, m_HasSelection ? CLineInput::LINE_INPUT_MODIFY_DONT_DELETE : 0, IsCtrlPressed ? KEY_LCTRL : 0);
+			ManipulateChanges = CLineInput::Manipulate(m_pInputEventsArray[i], pStr, StrSize, StrSize, &Len, &m_CurCursor, &NumChars, m_HasSelection ? CLineInput::LINE_INPUT_MODIFY_DONT_DELETE : 0, IsCtrlPressed ? KEY::LCTRL : 0);
 			ReturnValue |= (ManipulateChanges & (CLineInput::LINE_INPUT_CHANGE_STRING | CLineInput::LINE_INPUT_CHANGE_CHARACTERS_DELETE)) != 0;
 
 			// if cursor changed, reset selection

@@ -159,7 +159,7 @@ void CInput::Clear()
 
 bool CInput::KeyState(int Key) const
 {
-	if(Key < 0 || Key >= KEY_LAST)
+	if(Key < 0 || Key >= KEY::LAST)
 		return false;
 	return m_aInputState[Key];
 }
@@ -168,8 +168,8 @@ void CInput::NextFrame()
 {
 	int i;
 	const Uint8 *pState = SDL_GetKeyboardState(&i);
-	if(i >= KEY_LAST)
-		i = KEY_LAST - 1;
+	if(i >= KEY::LAST)
+		i = KEY::LAST - 1;
 	mem_copy(m_aInputState, pState, i);
 	if(m_EditingTextLen == 0)
 		m_EditingTextLen = -1;
@@ -237,23 +237,23 @@ int CInput::Update()
 	// these states must always be updated manually because they are not in the GetKeyState from SDL
 	int i = SDL_GetMouseState(NULL, NULL);
 	if(i & SDL_BUTTON(1))
-		m_aInputState[KEY_MOUSE_1] = 1; // 1 is left
+		m_aInputState[KEY::MOUSE_1] = 1; // 1 is left
 	if(i & SDL_BUTTON(3))
-		m_aInputState[KEY_MOUSE_2] = 1; // 3 is right
+		m_aInputState[KEY::MOUSE_2] = 1; // 3 is right
 	if(i & SDL_BUTTON(2))
-		m_aInputState[KEY_MOUSE_3] = 1; // 2 is middle
+		m_aInputState[KEY::MOUSE_3] = 1; // 2 is middle
 	if(i & SDL_BUTTON(4))
-		m_aInputState[KEY_MOUSE_4] = 1;
+		m_aInputState[KEY::MOUSE_4] = 1;
 	if(i & SDL_BUTTON(5))
-		m_aInputState[KEY_MOUSE_5] = 1;
+		m_aInputState[KEY::MOUSE_5] = 1;
 	if(i & SDL_BUTTON(6))
-		m_aInputState[KEY_MOUSE_6] = 1;
+		m_aInputState[KEY::MOUSE_6] = 1;
 	if(i & SDL_BUTTON(7))
-		m_aInputState[KEY_MOUSE_7] = 1;
+		m_aInputState[KEY::MOUSE_7] = 1;
 	if(i & SDL_BUTTON(8))
-		m_aInputState[KEY_MOUSE_8] = 1;
+		m_aInputState[KEY::MOUSE_8] = 1;
 	if(i & SDL_BUTTON(9))
-		m_aInputState[KEY_MOUSE_9] = 1;
+		m_aInputState[KEY::MOUSE_9] = 1;
 
 	{
 		SDL_Event Event;
@@ -323,34 +323,34 @@ int CInput::Update()
 				// fall through
 			case SDL_MOUSEBUTTONDOWN:
 				if(Event.button.button == SDL_BUTTON_LEFT)
-					Scancode = KEY_MOUSE_1; // ignore_convention
+					Scancode = KEY::MOUSE_1; // ignore_convention
 				if(Event.button.button == SDL_BUTTON_RIGHT)
-					Scancode = KEY_MOUSE_2; // ignore_convention
+					Scancode = KEY::MOUSE_2; // ignore_convention
 				if(Event.button.button == SDL_BUTTON_MIDDLE)
-					Scancode = KEY_MOUSE_3; // ignore_convention
+					Scancode = KEY::MOUSE_3; // ignore_convention
 				if(Event.button.button == SDL_BUTTON_X1)
-					Scancode = KEY_MOUSE_4; // ignore_convention
+					Scancode = KEY::MOUSE_4; // ignore_convention
 				if(Event.button.button == SDL_BUTTON_X2)
-					Scancode = KEY_MOUSE_5; // ignore_convention
+					Scancode = KEY::MOUSE_5; // ignore_convention
 				if(Event.button.button == 6)
-					Scancode = KEY_MOUSE_6; // ignore_convention
+					Scancode = KEY::MOUSE_6; // ignore_convention
 				if(Event.button.button == 7)
-					Scancode = KEY_MOUSE_7; // ignore_convention
+					Scancode = KEY::MOUSE_7; // ignore_convention
 				if(Event.button.button == 8)
-					Scancode = KEY_MOUSE_8; // ignore_convention
+					Scancode = KEY::MOUSE_8; // ignore_convention
 				if(Event.button.button == 9)
-					Scancode = KEY_MOUSE_9; // ignore_convention
+					Scancode = KEY::MOUSE_9; // ignore_convention
 				break;
 
 			case SDL_MOUSEWHEEL:
 				if(Event.wheel.y > 0)
-					Scancode = KEY_MOUSE_WHEEL_UP; // ignore_convention
+					Scancode = KEY::MOUSE_WHEEL_UP; // ignore_convention
 				if(Event.wheel.y < 0)
-					Scancode = KEY_MOUSE_WHEEL_DOWN; // ignore_convention
+					Scancode = KEY::MOUSE_WHEEL_DOWN; // ignore_convention
 				if(Event.wheel.x > 0)
-					Scancode = KEY_MOUSE_WHEEL_LEFT; // ignore_convention
+					Scancode = KEY::MOUSE_WHEEL_LEFT; // ignore_convention
 				if(Event.wheel.x < 0)
-					Scancode = KEY_MOUSE_WHEEL_RIGHT; // ignore_convention
+					Scancode = KEY::MOUSE_WHEEL_RIGHT; // ignore_convention
 				Action |= IInput::FLAG_RELEASE;
 				break;
 
@@ -405,7 +405,7 @@ int CInput::Update()
 				return 1;
 			}
 
-			if(Scancode > KEY_FIRST && Scancode < g_MaxKeys && !IgnoreKeys && (!SDL_IsTextInputActive() || m_EditingTextLen == -1))
+			if(Scancode > KEY::FIRST && Scancode < g_MaxKeys && !IgnoreKeys && (!SDL_IsTextInputActive() || m_EditingTextLen == -1))
 			{
 				if(Action & IInput::FLAG_PRESS)
 				{

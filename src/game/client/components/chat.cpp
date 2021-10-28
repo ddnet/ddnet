@@ -178,7 +178,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 	if(m_Mode == MODE_NONE)
 		return false;
 
-	if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_V))
+	if(Input()->KeyIsPressed(KEY::LCTRL) && Input()->KeyPress(KEY::V))
 	{
 		const char *Text = Input()->GetClipboardText();
 		if(Text)
@@ -205,17 +205,17 @@ bool CChat::OnInput(IInput::CEvent Event)
 		}
 	}
 
-	if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_C))
+	if(Input()->KeyIsPressed(KEY::LCTRL) && Input()->KeyPress(KEY::C))
 	{
 		Input()->SetClipboardText(m_Input.GetString());
 	}
 
-	if(Input()->KeyIsPressed(KEY_LCTRL)) // jump to spaces and special ASCII characters
+	if(Input()->KeyIsPressed(KEY::LCTRL)) // jump to spaces and special ASCII characters
 	{
 		int SearchDirection = 0;
-		if(Input()->KeyPress(KEY_LEFT) || Input()->KeyPress(KEY_BACKSPACE))
+		if(Input()->KeyPress(KEY::LEFT) || Input()->KeyPress(KEY::BACKSPACE))
 			SearchDirection = -1;
-		else if(Input()->KeyPress(KEY_RIGHT) || Input()->KeyPress(KEY_DELETE))
+		else if(Input()->KeyPress(KEY::RIGHT) || Input()->KeyPress(KEY::DELETE))
 			SearchDirection = 1;
 
 		if(SearchDirection != 0)
@@ -238,7 +238,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 				}
 			}
 
-			if(Input()->KeyPress(KEY_BACKSPACE))
+			if(Input()->KeyPress(KEY::BACKSPACE))
 			{
 				if(m_Input.GetCursorOffset() != 0)
 				{
@@ -251,7 +251,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 					m_Input.Set(aText);
 				}
 			}
-			else if(Input()->KeyPress(KEY_DELETE))
+			else if(Input()->KeyPress(KEY::DELETE))
 			{
 				if(m_Input.GetCursorOffset() != m_Input.GetLength())
 				{
@@ -271,14 +271,14 @@ bool CChat::OnInput(IInput::CEvent Event)
 		}
 	}
 
-	if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_ESCAPE)
+	if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY::ESCAPE)
 	{
 		DisableMode();
 		m_pClient->OnRelease();
 		if(g_Config.m_ClChatReset)
 			m_Input.Clear();
 	}
-	else if(Event.m_Flags & IInput::FLAG_PRESS && (Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER))
+	else if(Event.m_Flags & IInput::FLAG_PRESS && (Event.m_Key == KEY::RETURN || Event.m_Key == KEY::KP_ENTER))
 	{
 		if(m_Input.GetString()[0])
 		{
@@ -307,7 +307,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 		m_pClient->OnRelease();
 		m_Input.Clear();
 	}
-	if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_TAB)
+	if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY::TAB)
 	{
 		// fill the completion buffer
 		if(!m_CompletionUsed)
@@ -476,9 +476,9 @@ bool CChat::OnInput(IInput::CEvent Event)
 	else
 	{
 		// reset name completion process
-		if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key != KEY_TAB)
+		if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key != KEY::TAB)
 		{
-			if(Event.m_Key != KEY_LSHIFT)
+			if(Event.m_Key != KEY::LSHIFT)
 			{
 				m_CompletionChosen = -1;
 				m_CompletionUsed = false;
@@ -489,15 +489,15 @@ bool CChat::OnInput(IInput::CEvent Event)
 		m_Input.ProcessInput(Event);
 		m_InputUpdate = true;
 	}
-	if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_LSHIFT)
+	if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY::LSHIFT)
 	{
 		m_ReverseTAB = true;
 	}
-	else if(Event.m_Flags & IInput::FLAG_RELEASE && Event.m_Key == KEY_LSHIFT)
+	else if(Event.m_Flags & IInput::FLAG_RELEASE && Event.m_Key == KEY::LSHIFT)
 	{
 		m_ReverseTAB = false;
 	}
-	if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_UP)
+	if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY::UP)
 	{
 		if(m_pHistoryEntry)
 		{
@@ -512,7 +512,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 		if(m_pHistoryEntry)
 			m_Input.Set(m_pHistoryEntry->m_aText);
 	}
-	else if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_DOWN)
+	else if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY::DOWN)
 	{
 		if(m_pHistoryEntry)
 			m_pHistoryEntry = m_History.Next(m_pHistoryEntry);

@@ -9,7 +9,7 @@ static const ColorRGBA gs_BindPrintColor{1.0f, 1.0f, 0.8f, 1.0f};
 bool CBinds::CBindsSpecial::OnInput(IInput::CEvent Event)
 {
 	// only handle F and composed F binds
-	if((Event.m_Key >= KEY_F1 && Event.m_Key <= KEY_F12) || (Event.m_Key >= KEY_F13 && Event.m_Key <= KEY_F24))
+	if((Event.m_Key >= KEY::F1 && Event.m_Key <= KEY::F12) || (Event.m_Key >= KEY::F13 && Event.m_Key <= KEY::F24))
 	{
 		int Mask = m_pBinds->GetModifierMask(Input());
 
@@ -45,7 +45,7 @@ CBinds::CBinds()
 
 CBinds::~CBinds()
 {
-	for(int i = 0; i < KEY_LAST; i++)
+	for(int i = 0; i < KEY::LAST; i++)
 		for(auto &apKeyBinding : m_aapKeyBindings)
 			if(apKeyBinding[i])
 				free(apKeyBinding[i]);
@@ -53,7 +53,7 @@ CBinds::~CBinds()
 
 void CBinds::Bind(int KeyID, const char *pStr, bool FreeOnly, int Modifier)
 {
-	if(KeyID < 0 || KeyID >= KEY_LAST)
+	if(KeyID < 0 || KeyID >= KEY::LAST)
 		return;
 
 	if(FreeOnly && Get(KeyID, Modifier)[0])
@@ -87,11 +87,11 @@ void CBinds::Bind(int KeyID, const char *pStr, bool FreeOnly, int Modifier)
 int CBinds::GetModifierMask(IInput *i)
 {
 	int Mask = 0;
-	Mask |= i->KeyIsPressed(KEY_LSHIFT) << CBinds::MODIFIER_SHIFT;
-	Mask |= i->KeyIsPressed(KEY_RSHIFT) << CBinds::MODIFIER_SHIFT;
-	Mask |= i->KeyIsPressed(KEY_LCTRL) << CBinds::MODIFIER_CTRL;
-	Mask |= i->KeyIsPressed(KEY_RCTRL) << CBinds::MODIFIER_CTRL;
-	Mask |= i->KeyIsPressed(KEY_LALT) << CBinds::MODIFIER_ALT;
+	Mask |= i->KeyIsPressed(KEY::LSHIFT) << CBinds::MODIFIER_SHIFT;
+	Mask |= i->KeyIsPressed(KEY::RSHIFT) << CBinds::MODIFIER_SHIFT;
+	Mask |= i->KeyIsPressed(KEY::LCTRL) << CBinds::MODIFIER_CTRL;
+	Mask |= i->KeyIsPressed(KEY::RCTRL) << CBinds::MODIFIER_CTRL;
+	Mask |= i->KeyIsPressed(KEY::LALT) << CBinds::MODIFIER_ALT;
 	if(!Mask)
 		return 1 << CBinds::MODIFIER_NONE;
 
@@ -102,13 +102,13 @@ int CBinds::GetModifierMaskOfKey(int Key)
 {
 	switch(Key)
 	{
-	case KEY_LSHIFT:
-	case KEY_RSHIFT:
+	case KEY::LSHIFT:
+	case KEY::RSHIFT:
 		return 1 << CBinds::MODIFIER_SHIFT;
-	case KEY_LCTRL:
-	case KEY_RCTRL:
+	case KEY::LCTRL:
+	case KEY::RCTRL:
 		return 1 << CBinds::MODIFIER_CTRL;
-	case KEY_LALT:
+	case KEY::LALT:
 		return 1 << CBinds::MODIFIER_ALT;
 	default:
 		return 0;
@@ -120,11 +120,11 @@ bool CBinds::ModifierMatchesKey(int Modifier, int Key)
 	switch(Modifier)
 	{
 	case MODIFIER_SHIFT:
-		return Key == KEY_LSHIFT || Key == KEY_RSHIFT;
+		return Key == KEY::LSHIFT || Key == KEY::RSHIFT;
 	case MODIFIER_CTRL:
-		return Key == KEY_LCTRL || Key == KEY_RCTRL;
+		return Key == KEY::LCTRL || Key == KEY::RCTRL;
 	case MODIFIER_ALT:
-		return Key == KEY_LALT;
+		return Key == KEY::LALT;
 	case MODIFIER_NONE:
 	default:
 		return false;
@@ -134,7 +134,7 @@ bool CBinds::ModifierMatchesKey(int Modifier, int Key)
 bool CBinds::OnInput(IInput::CEvent e)
 {
 	// don't handle invalid events
-	if(e.m_Key <= 0 || e.m_Key >= KEY_LAST)
+	if(e.m_Key <= 0 || e.m_Key >= KEY::LAST)
 		return false;
 
 	int Mask = GetModifierMask(Input());
@@ -184,7 +184,7 @@ void CBinds::UnbindAll()
 
 const char *CBinds::Get(int KeyID, int Modifier)
 {
-	if(KeyID > 0 && KeyID < KEY_LAST && m_aapKeyBindings[Modifier][KeyID])
+	if(KeyID > 0 && KeyID < KEY::LAST && m_aapKeyBindings[Modifier][KeyID])
 		return m_aapKeyBindings[Modifier][KeyID];
 	return "";
 }
@@ -194,7 +194,7 @@ void CBinds::GetKey(const char *pBindStr, char *aBuf, unsigned BufSize)
 	aBuf[0] = 0;
 	for(int Mod = 0; Mod < MODIFIER_COMBINATION_COUNT; Mod++)
 	{
-		for(int KeyId = 0; KeyId < KEY_LAST; KeyId++)
+		for(int KeyId = 0; KeyId < KEY::LAST; KeyId++)
 		{
 			const char *pBind = Get(KeyId, Mod);
 			if(!pBind[0])
@@ -216,44 +216,44 @@ void CBinds::SetDefaults()
 {
 	// set default key bindings
 	UnbindAll();
-	Bind(KEY_F1, "toggle_local_console");
-	Bind(KEY_F2, "toggle_remote_console");
-	Bind(KEY_TAB, "+scoreboard");
-	Bind(KEY_EQUALS, "+statboard");
-	Bind(KEY_F10, "screenshot");
+	Bind(KEY::F1, "toggle_local_console");
+	Bind(KEY::F2, "toggle_remote_console");
+	Bind(KEY::TAB, "+scoreboard");
+	Bind(KEY::EQUALS, "+statboard");
+	Bind(KEY::F10, "screenshot");
 
-	Bind(KEY_A, "+left");
-	Bind(KEY_D, "+right");
+	Bind(KEY::A, "+left");
+	Bind(KEY::D, "+right");
 
-	Bind(KEY_SPACE, "+jump");
-	Bind(KEY_MOUSE_1, "+fire");
-	Bind(KEY_MOUSE_2, "+hook");
-	Bind(KEY_LSHIFT, "+emote");
-	Bind(KEY_RETURN, "+show_chat; chat all");
-	Bind(KEY_RIGHT, "spectate_next");
-	Bind(KEY_LEFT, "spectate_previous");
-	Bind(KEY_RSHIFT, "+spectate");
+	Bind(KEY::SPACE, "+jump");
+	Bind(KEY::MOUSE_1, "+fire");
+	Bind(KEY::MOUSE_2, "+hook");
+	Bind(KEY::LSHIFT, "+emote");
+	Bind(KEY::RETURN, "+show_chat; chat all");
+	Bind(KEY::RIGHT, "spectate_next");
+	Bind(KEY::LEFT, "spectate_previous");
+	Bind(KEY::RSHIFT, "+spectate");
 
-	Bind(KEY_1, "+weapon1");
-	Bind(KEY_2, "+weapon2");
-	Bind(KEY_3, "+weapon3");
-	Bind(KEY_4, "+weapon4");
-	Bind(KEY_5, "+weapon5");
+	Bind(KEY::ONE, "+weapon1");
+	Bind(KEY::TWO, "+weapon2");
+	Bind(KEY::THREE, "+weapon3");
+	Bind(KEY::FOUR, "+weapon4");
+	Bind(KEY::FIVE, "+weapon5");
 
-	Bind(KEY_MOUSE_WHEEL_UP, "+prevweapon");
-	Bind(KEY_MOUSE_WHEEL_DOWN, "+nextweapon");
+	Bind(KEY::MOUSE_WHEEL_UP, "+prevweapon");
+	Bind(KEY::MOUSE_WHEEL_DOWN, "+nextweapon");
 
-	Bind(KEY_T, "+show_chat; chat all");
-	Bind(KEY_Y, "+show_chat; chat team");
-	Bind(KEY_U, "+show_chat");
-	Bind(KEY_I, "+show_chat; chat all /c ");
+	Bind(KEY::T, "+show_chat; chat all");
+	Bind(KEY::Y, "+show_chat; chat team");
+	Bind(KEY::U, "+show_chat");
+	Bind(KEY::I, "+show_chat; chat all /c ");
 
-	Bind(KEY_F3, "vote yes");
-	Bind(KEY_F4, "vote no");
+	Bind(KEY::F3, "vote yes");
+	Bind(KEY::F4, "vote no");
 
-	Bind(KEY_K, "kill");
-	Bind(KEY_Q, "say /pause");
-	Bind(KEY_P, "say /pause");
+	Bind(KEY::K, "kill");
+	Bind(KEY::Q, "say /pause");
+	Bind(KEY::P, "say /pause");
 
 	// DDRace
 	g_Config.m_ClDDRaceBindsSet = 0;
@@ -324,7 +324,7 @@ void CBinds::ConDumpBinds(IConsole::IResult *pResult, void *pUserData)
 		char aBuf[1024];
 		for(int i = 0; i < MODIFIER_COMBINATION_COUNT; i++)
 		{
-			for(int j = 0; j < KEY_LAST; j++)
+			for(int j = 0; j < KEY::LAST; j++)
 			{
 				if(!pBinds->m_aapKeyBindings[i][j])
 					continue;
@@ -366,12 +366,12 @@ int CBinds::GetKeyID(const char *pKeyName)
 	if(pKeyName[0] == '&')
 	{
 		int i = str_toint(pKeyName + 1);
-		if(i > 0 && i < KEY_LAST)
+		if(i > 0 && i < KEY::LAST)
 			return i; // numeric
 	}
 
 	// search for key
-	for(int i = 0; i < KEY_LAST; i++)
+	for(int i = 0; i < KEY::LAST; i++)
 	{
 		if(str_comp(pKeyName, Input()->KeyName(i)) == 0)
 			return i;
@@ -445,7 +445,7 @@ void CBinds::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData)
 	pConfigManager->WriteLine("unbindall");
 	for(int i = 0; i < MODIFIER_COMBINATION_COUNT; i++)
 	{
-		for(int j = 0; j < KEY_LAST; j++)
+		for(int j = 0; j < KEY::LAST; j++)
 		{
 			if(!pSelf->m_aapKeyBindings[i][j])
 				continue;
@@ -467,33 +467,33 @@ void CBinds::SetDDRaceBinds(bool FreeOnly)
 {
 	if(g_Config.m_ClDDRaceBindsSet < 1)
 	{
-		Bind(KEY_KP_PLUS, "zoom+", FreeOnly);
-		Bind(KEY_KP_MINUS, "zoom-", FreeOnly);
-		Bind(KEY_KP_MULTIPLY, "zoom", FreeOnly);
-		Bind(KEY_PAUSE, "say /pause", FreeOnly);
-		Bind(KEY_UP, "+jump", FreeOnly);
-		Bind(KEY_LEFT, "+left", FreeOnly);
-		Bind(KEY_RIGHT, "+right", FreeOnly);
-		Bind(KEY_LEFTBRACKET, "+prevweapon", FreeOnly);
-		Bind(KEY_RIGHTBRACKET, "+nextweapon", FreeOnly);
-		Bind(KEY_C, "say /rank", FreeOnly);
-		Bind(KEY_V, "say /info", FreeOnly);
-		Bind(KEY_B, "say /top5", FreeOnly);
-		Bind(KEY_S, "+showhookcoll", FreeOnly);
-		Bind(KEY_X, "toggle cl_dummy 0 1", FreeOnly);
-		Bind(KEY_H, "toggle cl_dummy_hammer 0 1", FreeOnly);
-		Bind(KEY_SLASH, "+show_chat; chat all /", FreeOnly);
-		Bind(KEY_PAGEDOWN, "toggle cl_show_quads 0 1", FreeOnly);
-		Bind(KEY_PAGEUP, "toggle cl_overlay_entities 0 100", FreeOnly);
-		Bind(KEY_KP_0, "say /emote normal 999999", FreeOnly);
-		Bind(KEY_KP_1, "say /emote happy 999999", FreeOnly);
-		Bind(KEY_KP_2, "say /emote angry 999999", FreeOnly);
-		Bind(KEY_KP_3, "say /emote pain 999999", FreeOnly);
-		Bind(KEY_KP_4, "say /emote surprise 999999", FreeOnly);
-		Bind(KEY_KP_5, "say /emote blink 999999", FreeOnly);
-		Bind(KEY_MOUSE_3, "+spectate", FreeOnly);
-		Bind(KEY_MINUS, "spectate_previous", FreeOnly);
-		Bind(KEY_EQUALS, "spectate_next", FreeOnly);
+		Bind(KEY::KP_PLUS, "zoom+", FreeOnly);
+		Bind(KEY::KP_MINUS, "zoom-", FreeOnly);
+		Bind(KEY::KP_MULTIPLY, "zoom", FreeOnly);
+		Bind(KEY::PAUSE, "say /pause", FreeOnly);
+		Bind(KEY::UP, "+jump", FreeOnly);
+		Bind(KEY::LEFT, "+left", FreeOnly);
+		Bind(KEY::RIGHT, "+right", FreeOnly);
+		Bind(KEY::LEFTBRACKET, "+prevweapon", FreeOnly);
+		Bind(KEY::RIGHTBRACKET, "+nextweapon", FreeOnly);
+		Bind(KEY::C, "say /rank", FreeOnly);
+		Bind(KEY::V, "say /info", FreeOnly);
+		Bind(KEY::B, "say /top5", FreeOnly);
+		Bind(KEY::S, "+showhookcoll", FreeOnly);
+		Bind(KEY::X, "toggle cl_dummy 0 1", FreeOnly);
+		Bind(KEY::H, "toggle cl_dummy_hammer 0 1", FreeOnly);
+		Bind(KEY::SLASH, "+show_chat; chat all /", FreeOnly);
+		Bind(KEY::PAGEDOWN, "toggle cl_show_quads 0 1", FreeOnly);
+		Bind(KEY::PAGEUP, "toggle cl_overlay_entities 0 100", FreeOnly);
+		Bind(KEY::KP_0, "say /emote normal 999999", FreeOnly);
+		Bind(KEY::KP_1, "say /emote happy 999999", FreeOnly);
+		Bind(KEY::KP_2, "say /emote angry 999999", FreeOnly);
+		Bind(KEY::KP_3, "say /emote pain 999999", FreeOnly);
+		Bind(KEY::KP_4, "say /emote surprise 999999", FreeOnly);
+		Bind(KEY::KP_5, "say /emote blink 999999", FreeOnly);
+		Bind(KEY::MOUSE_3, "+spectate", FreeOnly);
+		Bind(KEY::MINUS, "spectate_previous", FreeOnly);
+		Bind(KEY::EQUALS, "spectate_next", FreeOnly);
 	}
 
 	g_Config.m_ClDDRaceBindsSet = 1;

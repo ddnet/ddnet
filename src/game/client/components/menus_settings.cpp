@@ -45,7 +45,7 @@ bool CMenusKeyBinder::OnInput(IInput::CEvent Event)
 {
 	if(m_TakeKey)
 	{
-		int TriggeringEvent = (Event.m_Key == KEY_MOUSE_1) ? IInput::FLAG_PRESS : IInput::FLAG_RELEASE;
+		int TriggeringEvent = (Event.m_Key == KEY::MOUSE_1) ? IInput::FLAG_PRESS : IInput::FLAG_RELEASE;
 		if(Event.m_Flags & TriggeringEvent)
 		{
 			m_Key = Event;
@@ -716,7 +716,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		QuickSearch.VSplitLeft(QuickSearch.w - 15.0f, &QuickSearch, &QuickSearchClearButton);
 		static int s_ClearButton = 0;
 		static float Offset = 0.0f;
-		if(Input()->KeyPress(KEY_F) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)))
+		if(Input()->KeyPress(KEY::F) && (Input()->KeyIsPressed(KEY::LCTRL) || Input()->KeyIsPressed(KEY::RCTRL)))
 			UI()->SetActiveItem(&g_Config.m_ClSkinFilterString);
 		if(DoClearableEditBox(&g_Config.m_ClSkinFilterString, &s_ClearButton, &QuickSearch, g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString), 14.0f, &Offset, false, CUI::CORNER_ALL, Localize("Search")))
 			s_InitSkinlist = true;
@@ -881,7 +881,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 
 	for(int Mod = 0; Mod < CBinds::MODIFIER_COUNT; Mod++)
 	{
-		for(int KeyId = 0; KeyId < KEY_LAST; KeyId++)
+		for(int KeyId = 0; KeyId < KEY::LAST; KeyId++)
 		{
 			const char *pBind = m_pClient->m_Binds.Get(KeyId, Mod);
 			if(!pBind[0])

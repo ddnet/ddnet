@@ -3245,13 +3245,13 @@ void CClient::Run()
 		// update sound
 		Sound()->Update();
 
-		if(CtrlShiftKey(KEY_D, LastD))
+		if(CtrlShiftKey(KEY::D, LastD))
 			g_Config.m_Debug ^= 1;
 
-		if(CtrlShiftKey(KEY_G, LastG))
+		if(CtrlShiftKey(KEY::G, LastG))
 			g_Config.m_DbgGraphs ^= 1;
 
-		if(CtrlShiftKey(KEY_E, LastE))
+		if(CtrlShiftKey(KEY::E, LastE))
 		{
 			g_Config.m_ClEditor = g_Config.m_ClEditor ^ 1;
 			Input()->MouseModeRelative();
@@ -3456,7 +3456,7 @@ void CClient::Run()
 
 bool CClient::CtrlShiftKey(int Key, bool &Last)
 {
-	if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyIsPressed(KEY_LSHIFT) && !Last && Input()->KeyIsPressed(Key))
+	if(Input()->KeyIsPressed(KEY::LCTRL) && Input()->KeyIsPressed(KEY::LSHIFT) && !Last && Input()->KeyIsPressed(Key))
 	{
 		Last = true;
 		return true;

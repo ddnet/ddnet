@@ -98,7 +98,7 @@ void CMotd::OnMessage(int MsgType, void *pRawMsg)
 
 bool CMotd::OnInput(IInput::CEvent Event)
 {
-	if(IsActive() && Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_ESCAPE)
+	if(IsActive() && Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY::ESCAPE)
 	{
 		Clear();
 		return true;
