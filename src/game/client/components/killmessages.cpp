@@ -103,6 +103,7 @@ void CKillMessages::CreateKillmessageNamesIfNotCreated(CKillMsg &Kill)
 
 		Kill.m_KillerTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, Kill.m_aKillerName);
 	}
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
 }
 
 void CKillMessages::OnMessage(int MsgType, void *pRawMsg)

@@ -2370,7 +2370,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		TextRender()->TextEx(&Cursor, "*** Echo command executed", -1);
 		TextRender()->SetCursorPosition(&Cursor, X, Y);
 
-		TextRender()->TextColor(1, 1, 1, 1);
+		TextRender()->TextColor(TextRender()->DefaultTextColor());
 	}
 }
 
