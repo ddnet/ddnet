@@ -227,7 +227,7 @@ Has people playing
 == Hay gente jugando
 
 High Detail
-== Mas detalles (HD)
+== Más detalles (HD)
 
 Hook
 == Gancho
@@ -260,7 +260,7 @@ Maximum ping:
 == Ping máximo:
 
 Mouse sens.
-== Sensibilidad ratón
+== Sensib. del ratón
 
 Move left
 == Mover a la izquierda
@@ -560,7 +560,7 @@ FSAA samples
 == Muestras FSAA
 
 Sound volume
-== Volúmen de sonido
+== Volumen de sonido
 
 Created:
 == Creado:
@@ -683,7 +683,7 @@ DDraceNetwork is a cooperative online game where the goal is for you and your gr
 == DDraceNetwork es un juego cooperativo en línea donde el objetivo es que tú y vuestro grupo de tees lleguen a la meta del mapa. Como recién llegado, deberías comenzar en los servidores Novice, que alojan los mapas más fáciles. Considera el ping para elegir un servidor cercano.
 
 The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Los mapas contienen freeze, lo que hace que a un tee no pueda moverse temporalmente. Tendrán que trabajar juntos para superar estas partes.
+== Los mapas contienen freeze, lo que hace que un tee no pueda moverse temporalmente. Tendrán que trabajar juntos para superar estas partes.
 
 The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
 == La rueda del ratón cambia las armas. El martillo (ratón izquierdo) se puede usar para golpear otros tees y despertarlos del freeze.
@@ -941,7 +941,7 @@ Threaded sound loading
 == Carga de sonido en un hilo
 
 Map sound volume
-== Volúmen de sonido del mapa
+== Volumen de sonido del mapa
 
 HUD
 == Apariencia
@@ -1082,13 +1082,13 @@ Suicides
 == Suicidios
 
 Ratio
-== Proporción
+== K/D
 
 Net
-== Net
+== Ventaja
 
 FPM
-== MPR
+== APM
 
 Spree
 == Racha
@@ -1172,13 +1172,13 @@ Skins directory
 == Directorio de skins
 
 Game sound volume
-== Volúmen de sonido del juego
+== Volumen de sonido del juego
 
 Chat sound volume
-== Volúmen del chat
+== Volumen del chat
 
 Background music volume
-== Volúmen de música de fondo
+== Volumen de música de fondo
 
 Assets
 == Recursos
@@ -1284,7 +1284,7 @@ Windowed borderless
 == Ventana sin bordes
 
 Desktop fullscreen
-== Pantalla completa
+== Pantalla de escritorio
 
 Use modern OpenGL
 == Usar OpenGL moderno
@@ -1299,7 +1299,7 @@ Laser Inner Color
 == Color interior del láser
 
 Hookline
-== Linea del gancho
+== Línea del gancho
 
 No hit
 == Sin golpes
