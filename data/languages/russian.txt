@@ -1319,28 +1319,28 @@ Tee
 == Tee
 
 Are you sure that you want to disconnect and switch to a different server?
-== 
+== Вы уверены, что хотите отключиться и перейти на другой сервер?
 
 Refreshing...
-== 
+== Обновление...
 
 Kill Messages
-== 
+== Сообщения об убийстве
 
 Kill Message Normal Color
-== 
+== Цвет сообщения об убийстве
 
 Kill Message Highlight Color
-== 
+== Цвет подсветки сообщения об убийстве
 
 Hookline
-== 
+== Линия крюка
 
 No hit
-== 
+== Не зацепляемая
 
 Hookable
-== 
+== Зацепляемая
 
 Show local player's key presses
-== 
+== Показать нажатия клавиш локального игрока
