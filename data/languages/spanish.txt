@@ -1284,7 +1284,7 @@ Windowed borderless
 == Ventana sin bordes
 
 Desktop fullscreen
-== Pantalla de escritorio
+== Pantalla completa de escritorio
 
 Use modern OpenGL
 == Usar OpenGL moderno
