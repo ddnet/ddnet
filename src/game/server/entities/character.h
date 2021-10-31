@@ -166,10 +166,10 @@ private:
 	float m_Time;
 	int m_LastBroadcast;
 	void DDRaceInit();
-	void HandleSkippableTiles(int Index);
+	bool HandleSkippableTiles(int Index);
 	void SetRescue();
 	void DDRaceTick();
-	void DDRacePostCoreTick();
+	bool DDRacePostCoreTick();
 	void HandleBroadcast();
 	void HandleTuneLayer();
 	void SendZoneMsgs();

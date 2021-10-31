@@ -800,7 +800,11 @@ void CCharacter::Tick()
 	// handle Weapons
 	HandleWeapons();
 
-	DDRacePostCoreTick();
+	if(DDRacePostCoreTick())
+	{
+		// Got killed, this object doesn't exist anymore.
+		return;
+	}
 
 	if(m_Core.m_TriggeredEvents & COREEVENT_HOOK_ATTACH_PLAYER)
 	{
@@ -1365,7 +1369,7 @@ void CCharacter::HandleBroadcast()
 	}
 }
 
-void CCharacter::HandleSkippableTiles(int Index)
+bool CCharacter::HandleSkippableTiles(int Index)
 {
 	// handle death-tiles and leaving gamelayer
 	if((GameServer()->Collision()->GetCollisionAt(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH ||
@@ -1379,17 +1383,17 @@ void CCharacter::HandleSkippableTiles(int Index)
 		!m_Super && !(Team() && Teams()->TeeFinished(m_pPlayer->GetCID())))
 	{
 		Die(m_pPlayer->GetCID(), WEAPON_WORLD);
-		return;
+		return true;
 	}
 
 	if(GameLayerClipped(m_Pos))
 	{
 		Die(m_pPlayer->GetCID(), WEAPON_WORLD);
-		return;
+		return true;
 	}
 
 	if(Index < 0)
-		return;
+		return false;
 
 	// handle speedup tiles
 	if(GameServer()->Collision()->IsSpeedup(Index))
@@ -1449,6 +1453,8 @@ void CCharacter::HandleSkippableTiles(int Index)
 			m_Core.m_Vel = ClampVel(m_MoveRestrictions, TempVel);
 		}
 	}
+
+	return false;
 }
 
 bool CCharacter::IsSwitchActiveCb(int Number, void *pUser)
@@ -2116,7 +2122,7 @@ void CCharacter::DDRaceTick()
 	m_Core.m_Id = GetPlayer()->GetCID();
 }
 
-void CCharacter::DDRacePostCoreTick()
+bool CCharacter::DDRacePostCoreTick()
 {
 	m_Time = (float)(Server()->Tick() - m_StartTime) / ((float)Server()->TickSpeed());
 
@@ -2139,9 +2145,11 @@ void CCharacter::DDRacePostCoreTick()
 		m_Core.m_Jumped = 1;
 
 	int CurrentIndex = GameServer()->Collision()->GetMapIndex(m_Pos);
-	HandleSkippableTiles(CurrentIndex);
-	if(!m_Alive)
-		return;
+	if(HandleSkippableTiles(CurrentIndex))
+	{
+		// Got killed, this object doesn't exist anymore.
+		return true;
+	}
 
 	// handle Anti-Skip tiles
 	std::list<int> Indices = GameServer()->Collision()->GetMapIndices(m_PrevPos, m_Pos);
@@ -2150,15 +2158,11 @@ void CCharacter::DDRacePostCoreTick()
 		for(int &Index : Indices)
 		{
 			HandleTiles(Index);
-			if(!m_Alive)
-				return;
 		}
 	}
 	else
 	{
 		HandleTiles(CurrentIndex);
-		if(!m_Alive)
-			return;
 	}
 
 	// teleport gun
@@ -2175,6 +2179,7 @@ void CCharacter::DDRacePostCoreTick()
 	}
 
 	HandleBroadcast();
+	return false;
 }
 
 bool CCharacter::Freeze(int Seconds)
