@@ -30,6 +30,27 @@ public: \
 \
 private:
 
+#if defined(__has_feature)
+#if __has_feature(address_sanitizer)
+#define MACRO_ALLOC_POOL_ID_IMPL(POOLTYPE, PoolSize) \
+	void *POOLTYPE::operator new(size_t Size, int id) \
+	{ \
+		void *p = malloc(Size); \
+		mem_zero(p, Size); \
+		return p; \
+	} \
+	void POOLTYPE::operator delete(void *p, int id) \
+	{ \
+		free(p); \
+	} \
+	void POOLTYPE::operator delete(void *p) /* NOLINT(misc-new-delete-overloads) */ \
+	{ \
+		free(p); \
+	}
+#endif
+#endif
+
+#ifndef MACRO_ALLOC_POOL_ID_IMPL
 #define MACRO_ALLOC_POOL_ID_IMPL(POOLTYPE, PoolSize) \
 	static char ms_PoolData##POOLTYPE[PoolSize][sizeof(POOLTYPE)] = {{0}}; \
 	static int ms_PoolUsed##POOLTYPE[PoolSize] = {0}; \
@@ -58,5 +79,6 @@ private:
 		ms_PoolUsed##POOLTYPE[id] = 0; \
 		mem_zero(ms_PoolData##POOLTYPE[id], sizeof(POOLTYPE)); \
 	}
+#endif
 
 #endif
