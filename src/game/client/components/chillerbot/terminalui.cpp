@@ -7,6 +7,8 @@
 
 #if defined(CONF_PLATFORM_LINUX)
 
+CGameClient *g_pClient;
+
 // mvwprintw(WINDOW, y, x, const char*),
 
 void CTerminalUI::DrawBorders(WINDOW *screen, int x, int y, int w, int h)
@@ -226,6 +228,7 @@ void CTerminalUI::RenderScoreboard(int Team, WINDOW *pWin)
 
 void CTerminalUI::OnInit()
 {
+	g_pClient = m_pClient;
 	mem_zero(m_aLastPressedKey, sizeof(m_aLastPressedKey));
 	AimX = 20;
 	AimY = 0;
@@ -364,6 +367,86 @@ int CTerminalUI::GetInput()
 	InputDraw();
 	return 0;
 }
+
+void CTerminalUI::ChillerLogPush(const char *pStr)
+{
+	// first empty slot
+	int x, y;
+	getmaxyx(m_pLogWindow, y, x);
+	int Max = CHILLER_LOGGER_HEIGHT > y ? y : CHILLER_LOGGER_HEIGHT;
+	int Top = CHILLER_LOGGER_HEIGHT-2;
+	int Bottom = CHILLER_LOGGER_HEIGHT-Max;
+	str_format(m_aInfoStr, sizeof(m_aInfoStr), "shifitng max=%d CHILLER_LOGGER_HEIGHT=%d y=%d top=%d bottom=%d                                            ",
+		Max, CHILLER_LOGGER_HEIGHT, y, Top, Bottom
+	);
+	m_NeedLogDraw = true;
+	for(int i = Top; i > Bottom; i--)
+	{
+		if(m_aaChillerLogger[i][0] == '\0')
+		{
+			str_copy(m_aaChillerLogger[i], pStr, sizeof(m_aaChillerLogger[i]));
+			// str_format(m_aInfoStr, sizeof(m_aInfoStr), "shifitng max=%d CHILLER_LOGGER_HEIGHT=%d y=%d i=%d", Max, CHILLER_LOGGER_HEIGHT, y, i);
+			return;
+		}
+	}
+	str_format(m_aInfoStr, sizeof(m_aInfoStr), "shifitng max=%d CHILLER_LOGGER_HEIGHT=%d y=%d FULLL!!! top=%d bottom=%d                          ",
+		Max, CHILLER_LOGGER_HEIGHT, y, Top, Bottom
+	);
+	// no free slot found -> shift all
+	for(int i = Top; i > 0; i--)
+	{
+		str_copy(m_aaChillerLogger[i], m_aaChillerLogger[i-1], sizeof(m_aaChillerLogger[i]));
+	}
+	// insert newest on the bottom
+	str_copy(m_aaChillerLogger[Bottom+1], pStr, sizeof(m_aaChillerLogger[Bottom+1]));
+	wclear(m_pLogWindow);
+	DrawBorders(m_pLogWindow);
+}
+
+// ChillerDragon: no fucking idea why on macOS vdbg needs it but dbg doesn't
+//				  yes this is a format vuln but only caused if used wrong same as in dbg_msg
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+#endif
+void CTerminalUI::ChillerLog(const char *sys, const char *fmt, ...)
+{
+	// if(!g_Config.m_ClNcurses)
+	// {
+	// 	va_list args;
+	// 	va_start(args, fmt);
+	// 	vdbg_msg(sys, fmt, args);
+	// 	va_end(args);
+	// 	return;
+	// }
+
+	va_list args;
+	char str[1024*4];
+	char *msg;
+	int len;
+
+	char timestr[80];
+	str_timestamp_format(timestr, sizeof(timestr), FORMAT_SPACE);
+
+	str_format(str, sizeof(str), "[%s][%s]: ", timestr, sys);
+
+	len = strlen(str);
+	msg = (char *)str + len;
+
+	va_start(args, fmt);
+#if defined(CONF_FAMILY_WINDOWS) && !defined(__GNUC__)
+	_vsprintf_p(msg, sizeof(str)-len, fmt, args);
+#else
+	vsnprintf(msg, sizeof(str)-len, fmt, args);
+#endif
+	va_end(args);
+
+	// printf("%s\n", str);
+	ChillerLogPush(str);
+}
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 {

@@ -9,7 +9,7 @@
 #undef KEY_C
 #undef KEY_D
 #undef KEY_E
-#undef KEY_F
+// #undef KEY_F
 #undef KEY_G
 #undef KEY_H
 #undef KEY_I

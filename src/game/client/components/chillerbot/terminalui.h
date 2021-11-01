@@ -1,13 +1,16 @@
+
 #ifndef GAME_CLIENT_COMPONENTS_CHILLERBOT_TERMINALUI_H
 #define GAME_CLIENT_COMPONENTS_CHILLERBOT_TERMINALUI_H
 
+#include <game/client/component.h>
+
 #if defined(CONF_PLATFORM_LINUX)
-#include "terminalui_keys.h" /* undefines conflicting ncurses key codes */
 #include <ncurses.h>
 #include <unistd.h>
+#include "terminalui_keys.h" /* undefines conflicting ncurses key codes */
 #endif
 
-#include <game/client/component.h>
+extern CGameClient *g_pClient;
 
 class CTerminalUI : public CComponent
 {
@@ -85,6 +88,8 @@ class CTerminalUI : public CComponent
 	virtual void OnShutdown();
 	bool RconAuthed() { return false; } // TODO:
 	int GetInput();
+	void ChillerLogPush(const char *pStr);
+	void ChillerLogDrawBorders();
 	void LogDrawBorders();
 	void LogDraw();
 	void InfoDraw();
@@ -109,6 +114,7 @@ class CTerminalUI : public CComponent
 
 public:
 	int OnKeyPress(int Key, WINDOW *pWin);
+	void ChillerLog(const char *sys, const char *fmt, ...);
 #endif
 };
 
