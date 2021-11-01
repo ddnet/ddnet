@@ -183,9 +183,9 @@ size_t CRequest::WriteCallback(char *pData, size_t Size, size_t Number, void *pU
 int CRequest::ProgressCallback(void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr)
 {
 	CGetFile *pTask = (CGetFile *)pUser;
-	pTask->m_Current = DlCurr;
-	pTask->m_Size = DlTotal;
-	pTask->m_Progress = (100 * DlCurr) / (DlTotal ? DlTotal : 1);
+	pTask->m_Current.store(DlCurr, std::memory_order_relaxed);
+	pTask->m_Size.store(DlTotal, std::memory_order_relaxed);
+	pTask->m_Progress.store((100 * DlCurr) / (DlTotal ? DlTotal : 1), std::memory_order_relaxed);
 	pTask->OnProgress();
 	return pTask->m_Abort ? -1 : 0;
 }
