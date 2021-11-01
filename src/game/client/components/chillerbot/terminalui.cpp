@@ -159,6 +159,7 @@ void CTerminalUI::OnRender()
 {
 	if(!m_pClient->m_Snap.m_pLocalCharacter)
 		return;
+	GetInput();
 
 	// float X = m_pClient->m_Snap.m_pLocalCharacter->m_X;
 	// float Y = m_pClient->m_Snap.m_pLocalCharacter->m_Y;
@@ -193,6 +194,8 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 		m_ScoreboardActive = !m_ScoreboardActive;
 	else if(Key == 'k')
 		m_pClient->SendKill(g_Config.m_ClDummy);
+	else if(Key == 't')
+		m_pClient->m_ChatHelper.SayBuffer("hello");
 	else if(KeyInHistory('a', 5) || Key == 'a')
 		/* m_pClient->m_Controls.SetCursesDir(-1); */ return 0;
 	else if(KeyInHistory('d', 5) || Key == 'd')
