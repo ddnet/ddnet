@@ -61,6 +61,7 @@
 #include "components/chillerbot/chillpw.h"
 #include "components/chillerbot/playerpics.h"
 #include "components/chillerbot/remotecontrol.h"
+#include "components/chillerbot/terminalui.h"
 #include "components/chillerbot/unix.h"
 #include "components/chillerbot/warlist.h"
 
@@ -162,6 +163,7 @@ public:
 	CRemoteControl m_RemoteControl;
 	CUnix m_Unix;
 	CWarList m_WarList;
+	CTerminalUI m_TerminalUI;
 
 private:
 	class CStack

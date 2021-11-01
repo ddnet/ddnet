@@ -69,6 +69,7 @@
 #include "components/chillerbot/chillpw.h"
 #include "components/chillerbot/playerpics.h"
 #include "components/chillerbot/remotecontrol.h"
+#include "components/chillerbot/terminalui.h"
 #include "components/chillerbot/unix.h"
 #include "components/chillerbot/warlist.h"
 
@@ -154,6 +155,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&m_ChillPw);
 	m_All.Add(&m_RemoteControl);
 	m_All.Add(&m_WarList);
+	m_All.Add(&m_TerminalUI);
 	m_All.Add(&m_ChillConsole);
 	m_All.Add(&m_Unix);
 

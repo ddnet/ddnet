@@ -1,12 +1,11 @@
 // ChillerDragon 2020 - chillerbot
 
-#include <ncurses.h>
-#include "terminalui_keys.h" /* undefines conflicting ncurses key codes */
-
 #include <game/client/gameclient.h>
 #include <game/client/components/controls.h>
 
 #include "terminalui.h"
+
+#if defined(CONF_PLATFORM_LINUX)
 
 // mvwprintw(WINDOW, y, x, const char*),
 
@@ -98,6 +97,28 @@ void CTerminalUI::OnInit()
 	mem_zero(m_aLastPressedKey, sizeof(m_aLastPressedKey));
 	AimX = 20;
 	AimY = 0;
+	if(g_Config.m_ClNcurses)
+	{
+		initscr();
+		noecho();
+		curs_set(FALSE);
+
+		// set up initial windows
+		// getmaxyx(stdscr, parent_y, parent_x);
+
+		// m_pLogWindow = newwin(parent_y - NC_INFO_SIZE*2, parent_x, 0, 0);
+		// m_pInfoWin = newwin(NC_INFO_SIZE, parent_x, parent_y - NC_INFO_SIZE*2, 0);
+		// m_pInputWin = newwin(NC_INFO_SIZE, parent_x, parent_y - NC_INFO_SIZE, 0);
+
+		// draw_borders(m_pLogWindow);
+		// draw_borders(m_pInfoWin);
+		// draw_borders(m_pInputWin);
+	}
+}
+
+void CTerminalUI::OnShutdown()
+{
+    endwin();
 }
 
 void CTerminalUI::OnRender()
@@ -105,16 +126,25 @@ void CTerminalUI::OnRender()
     if (!m_pClient->m_Snap.m_pLocalCharacter)
         return;
 
-    float X = m_pClient->m_Snap.m_pLocalCharacter->m_X;
-    float Y = m_pClient->m_Snap.m_pLocalCharacter->m_Y;
-    char aBuf[128];
+    // float X = m_pClient->m_Snap.m_pLocalCharacter->m_X;
+    // float Y = m_pClient->m_Snap.m_pLocalCharacter->m_Y;
+    // char aBuf[128];
     // str_format(aBuf, sizeof(aBuf),
     //     "%.2f %.2f goto(%f/%f) scoreboard=%d",
     //     X / 32, Y / 32, m_pClient->m_Controls.GetGotoXY().x, m_pClient->m_Controls.GetGotoXY().y,
     //     m_ScoreboardActive
     // );
-    #pragma message "TODO info set str"
     // Client()->ChillerInfoSetStr2(aBuf);
+}
+
+void CTerminalUI::GetInput()
+{
+	nodelay(stdscr, TRUE);
+	keypad(stdscr, TRUE);
+	cbreak();
+	noecho();
+	int c = getch();
+    OnKeyPress(c, NULL);
 }
 
 int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
@@ -128,7 +158,7 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
     if (Key == 9) // tab
         m_ScoreboardActive = !m_ScoreboardActive;
     else if (Key == 'k')
-        /* m_pClient->SendKill(); */ return 0;
+        m_pClient->SendKill(g_Config.m_ClDummy);
     else if (KeyInHistory('a', 5) || Key == 'a')
         /* m_pClient->m_Controls.SetCursesDir(-1); */ return 0;
     else if (KeyInHistory('d', 5) || Key == 'd')
@@ -149,9 +179,11 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
     if(m_ScoreboardActive)
         RenderScoreboard(0, pWin);
 
-    if(Key == EOF || Key == ERR)
+    if(Key == EOF)
         return 0;
 
     // Client()->ChillerLog("termUI", "got key d=%d c=%c", Key, Key);
     return 0;
 }
+
+#endif

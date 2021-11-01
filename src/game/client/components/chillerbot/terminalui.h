@@ -1,10 +1,16 @@
 #ifndef GAME_CLIENT_COMPONENTS_CHILLERBOT_TERMINALUI_H
 #define GAME_CLIENT_COMPONENTS_CHILLERBOT_TERMINALUI_H
 
+#if defined(CONF_PLATFORM_LINUX)
+#include <ncurses.h>
+#include "terminalui_keys.h" /* undefines conflicting ncurses key codes */
+#endif
+
 #include <game/client/component.h>
 
 class CTerminalUI : public CComponent
 {
+#if defined(CONF_PLATFORM_LINUX)
     enum {
 		KEY_HISTORY_LEN = 20
     };
@@ -40,12 +46,15 @@ class CTerminalUI : public CComponent
 
     virtual void OnInit();
     virtual void OnRender();
+	virtual void OnShutdown();
+	void GetInput();
     int AimX;
     int AimY;
 	bool m_ScoreboardActive;
 
 public:
     int OnKeyPress(int Key, WINDOW *pWin);
+#endif
 };
 
 #endif
