@@ -3,6 +3,8 @@
 #include <game/client/components/controls.h>
 #include <game/client/gameclient.h>
 
+#include <base/terminalui.h>
+
 #include "terminalui.h"
 
 #if defined(CONF_PLATFORM_LINUX)
@@ -36,53 +38,25 @@ void CTerminalUI::DrawBorders(WINDOW *screen, int x, int y, int w, int h)
 
 void CTerminalUI::DrawBorders(WINDOW *screen)
 {
-	int x, y, i;
-
-	getmaxyx(screen, y, x);
-
-	// 4 corners
-	mvwprintw(screen, 0, 0, "+");
-	mvwprintw(screen, y - 1, 0, "+");
-	mvwprintw(screen, 0, x - 1, "+");
-	mvwprintw(screen, y - 1, x - 1, "+");
-
-	// sides
-	for(i = 1; i < (y - 1); i++)
-	{
-		mvwprintw(screen, i, 0, "|");
-		mvwprintw(screen, i, x - 1, "|");
-	}
-
-	// top and bottom
-	for(i = 1; i < (x - 1); i++)
-	{
-		mvwprintw(screen, 0, i, "-");
-		mvwprintw(screen, y - 1, i, "-");
-	}
-	// if(m_aSrvBroadcast[0] != '\0' && screen == m_pLogWindow)
-	// {
-	// 	char aBuf[1024*4];
-	// 	str_format(aBuf, sizeof(aBuf), "-[ %s ]", m_aSrvBroadcast);
-	// 	aBuf[x-2] = '\0';
-	// 	mvwprintw(screen, 0, 1, aBuf);
-	// }
+	draw_borders(screen);
 }
 
-void CTerminalUI::LogDrawBorders()
+void CTerminalUI::DrawAllBorders()
 {
+	// TODO: call in broadcast.cpp
 	if(!g_Config.m_ClNcurses)
 		return;
-	DrawBorders(m_pLogWindow);
-	DrawBorders(m_pInfoWin);
-	DrawBorders(m_pInputWin);
+	DrawBorders(g_pLogWindow);
+	DrawBorders(g_pInfoWin);
+	DrawBorders(g_pInputWin);
 }
 
 void CTerminalUI::LogDraw()
 {
-	if(!m_NeedLogDraw)
+	if(!g_NeedLogDraw)
 		return;
 	int x, y;
-	getmaxyx(m_pLogWindow, y, x);
+	getmaxyx(g_pLogWindow, y, x);
 	int Max = CHILLER_LOGGER_HEIGHT > y ? y : CHILLER_LOGGER_HEIGHT;
 	int Top = CHILLER_LOGGER_HEIGHT-2;
 	int Bottom = CHILLER_LOGGER_HEIGHT-Max;
@@ -94,17 +68,17 @@ void CTerminalUI::LogDraw()
 		char aBuf[1024*4+16];
 		str_format(aBuf, sizeof(aBuf), "%2d|%2d|%s", line++, i, m_aaChillerLogger[i]);
 		aBuf[x-2] = '\0'; // prevent line wrapping and cut on screen border
-		mvwprintw(m_pLogWindow, CHILLER_LOGGER_HEIGHT-i-1, 1, aBuf);
+		mvwprintw(g_pLogWindow, CHILLER_LOGGER_HEIGHT-i-1, 1, aBuf);
 	}
 }
 
 void CTerminalUI::InfoDraw()
 {
-	int x = getmaxx(m_pInfoWin);
+	int x = getmaxx(g_pInfoWin);
 	char aBuf[1024*4+16];
-	str_format(aBuf, sizeof(aBuf), "%s | %s | %s", GetInputMode(), m_aInfoStr, m_aInfoStr2);
+	str_format(aBuf, sizeof(aBuf), "%s | %s | %s", GetInputMode(), g_aInfoStr, g_aInfoStr2);
 	aBuf[x-2] = '\0'; // prevent line wrapping and cut on screen border
-	mvwprintw(m_pInfoWin, 1, 1, aBuf);
+	mvwprintw(g_pInfoWin, 1, 1, aBuf);
 }
 
 void CTerminalUI::InputDraw()
@@ -113,15 +87,15 @@ void CTerminalUI::InputDraw()
 	if (m_InputMode == INPUT_REMOTE_CONSOLE && !RconAuthed())
 	{
 		int i;
-		for(i = 0; i < 512 && m_aInputStr[i] != '\0'; i++)
+		for(i = 0; i < 512 && g_aInputStr[i] != '\0'; i++)
 			aBuf[i] = '*';
 		aBuf[i] = '\0';
 	}
 	else
-		str_copy(aBuf, m_aInputStr, sizeof(aBuf));
-	int x = getmaxx(m_pInfoWin);
+		str_copy(aBuf, g_aInputStr, sizeof(aBuf));
+	int x = getmaxx(g_pInfoWin);
 	aBuf[x-2] = '\0'; // prevent line wrapping and cut on screen border
-	mvwprintw(m_pInputWin, 1, 1, aBuf);
+	mvwprintw(g_pInputWin, 1, 1, aBuf);
 }
 
 int CTerminalUI::CursesTick()
@@ -129,26 +103,26 @@ int CTerminalUI::CursesTick()
 	if(!g_Config.m_ClNcurses)
 		return 0;
 
-	getmaxyx(stdscr, m_NewY, m_NewX);
+	getmaxyx(stdscr, g_NewY, g_NewX);
 
-	if (m_NewY != m_ParentY || m_NewX != m_ParentX) {
-		m_ParentX = m_NewX;
-		m_ParentY = m_NewY;
+	if (g_NewY != g_ParentY || g_NewX != g_ParentX) {
+		g_ParentX = g_NewX;
+		g_ParentY = g_NewY;
 
-		wresize(m_pLogWindow, m_NewY - NC_INFO_SIZE*2, m_NewX);
-		wresize(m_pInfoWin, NC_INFO_SIZE, m_NewX);
-		wresize(m_pInputWin, NC_INFO_SIZE, m_NewX);
-		mvwin(m_pInfoWin, m_NewY - NC_INFO_SIZE*2, 0);
-		mvwin(m_pInputWin, m_NewY - NC_INFO_SIZE, 0);
+		wresize(g_pLogWindow, g_NewY - NC_INFO_SIZE*2, g_NewX);
+		wresize(g_pInfoWin, NC_INFO_SIZE, g_NewX);
+		wresize(g_pInputWin, NC_INFO_SIZE, g_NewX);
+		mvwin(g_pInfoWin, g_NewY - NC_INFO_SIZE*2, 0);
+		mvwin(g_pInputWin, g_NewY - NC_INFO_SIZE, 0);
 
 		wclear(stdscr);
-		wclear(m_pLogWindow);
-		wclear(m_pInfoWin);
-		wclear(m_pInputWin);
+		wclear(g_pLogWindow);
+		wclear(g_pInfoWin);
+		wclear(g_pInputWin);
 
-		DrawBorders(m_pLogWindow);
-		DrawBorders(m_pInfoWin);
-		DrawBorders(m_pInputWin);
+		DrawBorders(g_pLogWindow);
+		DrawBorders(g_pInfoWin);
+		DrawBorders(g_pInputWin);
 	}
 
 	// draw to our windows
@@ -158,11 +132,11 @@ int CTerminalUI::CursesTick()
 	int input = GetInput(); // calls InputDraw()
 
 	// refresh each window
-	if(m_NeedLogDraw)
-		wrefresh(m_pLogWindow);
-	wrefresh(m_pInfoWin);
-	wrefresh(m_pInputWin);
-	m_NeedLogDraw = false;
+	if(g_NeedLogDraw)
+		wrefresh(g_pLogWindow);
+	wrefresh(g_pInfoWin);
+	wrefresh(g_pInputWin);
+	g_NeedLogDraw = false;
 	return input == -1;
 }
 
@@ -242,15 +216,15 @@ void CTerminalUI::OnInit()
 		curs_set(FALSE);
 
 		// set up initial windows
-		getmaxyx(stdscr, m_ParentY, m_ParentX);
+		getmaxyx(stdscr, g_ParentY, g_ParentX);
 
-		m_pLogWindow = newwin(m_ParentY - NC_INFO_SIZE*2, m_ParentX, 0, 0);
-		m_pInfoWin = newwin(NC_INFO_SIZE, m_ParentX, m_ParentY - NC_INFO_SIZE*2, 0);
-		m_pInputWin = newwin(NC_INFO_SIZE, m_ParentX, m_ParentY - NC_INFO_SIZE, 0);
+		g_pLogWindow = newwin(g_ParentY - NC_INFO_SIZE*2, g_ParentX, 0, 0);
+		g_pInfoWin = newwin(NC_INFO_SIZE, g_ParentX, g_ParentY - NC_INFO_SIZE*2, 0);
+		g_pInputWin = newwin(NC_INFO_SIZE, g_ParentX, g_ParentY - NC_INFO_SIZE, 0);
 
-		DrawBorders(m_pLogWindow);
-		DrawBorders(m_pInfoWin);
-		DrawBorders(m_pInputWin);
+		DrawBorders(g_pLogWindow);
+		DrawBorders(g_pInfoWin);
+		DrawBorders(g_pInputWin);
 	}
 }
 
@@ -298,7 +272,7 @@ int CTerminalUI::GetInput()
 		else
 		{
 			InputDraw();
-			OnKeyPress(c, m_pLogWindow);
+			OnKeyPress(c, g_pLogWindow);
 		}
 	}
 	else if (
@@ -312,37 +286,37 @@ int CTerminalUI::GetInput()
 		else if (c == EOF || c == 10) // return
 		{
 			if(m_InputMode == INPUT_LOCAL_CONSOLE)
-				m_pClient->Console()->ExecuteLine(m_aInputStr);
+				m_pClient->Console()->ExecuteLine(g_aInputStr);
 			else if (m_InputMode == INPUT_REMOTE_CONSOLE)
 			{
 				if(m_pClient->Client()->RconAuthed())
-					m_pClient->Client()->Rcon(m_aInputStr);
+					m_pClient->Client()->Rcon(g_aInputStr);
 				else
-					m_pClient->Client()->RconAuth("", m_aInputStr);
+					m_pClient->Client()->RconAuth("", g_aInputStr);
 			}
 			else if (m_InputMode == INPUT_CHAT)
-				m_pClient->m_Chat.Say(0, m_aInputStr);
+				m_pClient->m_Chat.Say(0, g_aInputStr);
 			else if (m_InputMode == INPUT_CHAT_TEAM)
-				m_pClient->m_Chat.Say(1, m_aInputStr);
-			m_aInputStr[0] = '\0';
-			wclear(m_pInputWin);
-			DrawBorders(m_pInputWin);
+				m_pClient->m_Chat.Say(1, g_aInputStr);
+			g_aInputStr[0] = '\0';
+			wclear(g_pInputWin);
+			DrawBorders(g_pInputWin);
 			if(m_InputMode != INPUT_LOCAL_CONSOLE && m_InputMode != INPUT_REMOTE_CONSOLE)
 				m_InputMode = INPUT_NORMAL;
 			return 0;
 		}
 		else if (c == KEY_F(1)) // f1 hard toggle local console
 		{
-			m_aInputStr[0] = '\0';
-			wclear(m_pInputWin);
-			DrawBorders(m_pInputWin);
+			g_aInputStr[0] = '\0';
+			wclear(g_pInputWin);
+			DrawBorders(g_pInputWin);
 			m_InputMode = m_InputMode == INPUT_LOCAL_CONSOLE ? INPUT_NORMAL : INPUT_LOCAL_CONSOLE;
 		}
 		else if (c == KEY_F(2)) // f2 hard toggle local console
 		{
-			m_aInputStr[0] = '\0';
-			wclear(m_pInputWin);
-			DrawBorders(m_pInputWin);
+			g_aInputStr[0] = '\0';
+			wclear(g_pInputWin);
+			DrawBorders(g_pInputWin);
 			m_InputMode = m_InputMode == INPUT_REMOTE_CONSOLE ? INPUT_NORMAL : INPUT_REMOTE_CONSOLE;
 		}
 		else if (c == 27) // ESC
@@ -353,100 +327,20 @@ int CTerminalUI::GetInput()
 		}
 		else if (c == KEY_BACKSPACE || c == 127) // delete
 		{
-			str_truncate(m_aInputStr, sizeof(m_aInputStr), m_aInputStr, str_length(m_aInputStr) - 1);
-			wclear(m_pInputWin);
+			str_truncate(g_aInputStr, sizeof(g_aInputStr), g_aInputStr, str_length(g_aInputStr) - 1);
+			wclear(g_pInputWin);
 			InputDraw();
-			DrawBorders(m_pInputWin);
+			DrawBorders(g_pInputWin);
 			return 0;
 		}
 		char aKey[8];
 		str_format(aKey, sizeof(aKey), "%c", c);
-		str_append(m_aInputStr, aKey, sizeof(m_aInputStr));
+		str_append(g_aInputStr, aKey, sizeof(g_aInputStr));
 		// ChillerLog("yeee", "got key d=%d c=%c", c, c);
 	}
 	InputDraw();
 	return 0;
 }
-
-void CTerminalUI::ChillerLogPush(const char *pStr)
-{
-	// first empty slot
-	int x, y;
-	getmaxyx(m_pLogWindow, y, x);
-	int Max = CHILLER_LOGGER_HEIGHT > y ? y : CHILLER_LOGGER_HEIGHT;
-	int Top = CHILLER_LOGGER_HEIGHT-2;
-	int Bottom = CHILLER_LOGGER_HEIGHT-Max;
-	str_format(m_aInfoStr, sizeof(m_aInfoStr), "shifitng max=%d CHILLER_LOGGER_HEIGHT=%d y=%d top=%d bottom=%d                                            ",
-		Max, CHILLER_LOGGER_HEIGHT, y, Top, Bottom
-	);
-	m_NeedLogDraw = true;
-	for(int i = Top; i > Bottom; i--)
-	{
-		if(m_aaChillerLogger[i][0] == '\0')
-		{
-			str_copy(m_aaChillerLogger[i], pStr, sizeof(m_aaChillerLogger[i]));
-			// str_format(m_aInfoStr, sizeof(m_aInfoStr), "shifitng max=%d CHILLER_LOGGER_HEIGHT=%d y=%d i=%d", Max, CHILLER_LOGGER_HEIGHT, y, i);
-			return;
-		}
-	}
-	str_format(m_aInfoStr, sizeof(m_aInfoStr), "shifitng max=%d CHILLER_LOGGER_HEIGHT=%d y=%d FULLL!!! top=%d bottom=%d                          ",
-		Max, CHILLER_LOGGER_HEIGHT, y, Top, Bottom
-	);
-	// no free slot found -> shift all
-	for(int i = Top; i > 0; i--)
-	{
-		str_copy(m_aaChillerLogger[i], m_aaChillerLogger[i-1], sizeof(m_aaChillerLogger[i]));
-	}
-	// insert newest on the bottom
-	str_copy(m_aaChillerLogger[Bottom+1], pStr, sizeof(m_aaChillerLogger[Bottom+1]));
-	wclear(m_pLogWindow);
-	DrawBorders(m_pLogWindow);
-}
-
-// ChillerDragon: no fucking idea why on macOS vdbg needs it but dbg doesn't
-//				  yes this is a format vuln but only caused if used wrong same as in dbg_msg
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
-#endif
-void CTerminalUI::ChillerLog(const char *sys, const char *fmt, ...)
-{
-	// if(!g_Config.m_ClNcurses)
-	// {
-	// 	va_list args;
-	// 	va_start(args, fmt);
-	// 	vdbg_msg(sys, fmt, args);
-	// 	va_end(args);
-	// 	return;
-	// }
-
-	va_list args;
-	char str[1024*4];
-	char *msg;
-	int len;
-
-	char timestr[80];
-	str_timestamp_format(timestr, sizeof(timestr), FORMAT_SPACE);
-
-	str_format(str, sizeof(str), "[%s][%s]: ", timestr, sys);
-
-	len = strlen(str);
-	msg = (char *)str + len;
-
-	va_start(args, fmt);
-#if defined(CONF_FAMILY_WINDOWS) && !defined(__GNUC__)
-	_vsprintf_p(msg, sizeof(str)-len, fmt, args);
-#else
-	vsnprintf(msg, sizeof(str)-len, fmt, args);
-#endif
-	va_end(args);
-
-	// printf("%s\n", str);
-	ChillerLogPush(str);
-}
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
 
 int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 {

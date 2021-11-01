@@ -51,9 +51,6 @@ class CTerminalUI : public CComponent
 	};
 
 	enum {
-		CHILLER_LOGGER_WIDTH = 1024*4,
-		CHILLER_LOGGER_HEIGHT = 64,
-
 		INPUT_OFF = 0,
 		INPUT_NORMAL,
 		INPUT_LOCAL_CONSOLE,
@@ -88,9 +85,7 @@ class CTerminalUI : public CComponent
 	virtual void OnShutdown();
 	bool RconAuthed() { return false; } // TODO:
 	int GetInput();
-	void ChillerLogPush(const char *pStr);
-	void ChillerLogDrawBorders();
-	void LogDrawBorders();
+	void DrawAllBorders();
 	void LogDraw();
 	void InfoDraw();
 	void InputDraw();
@@ -98,23 +93,10 @@ class CTerminalUI : public CComponent
 	int AimX;
 	int AimY;
 	bool m_ScoreboardActive;
-	int m_ParentX;
-	int m_ParentY;
-	int m_NewX;
-	int m_NewY;
-	char m_aInfoStr[1024];
-	char m_aInfoStr2[1024];
-	char m_aInputStr[1024];
 	int m_InputMode;
-	bool m_NeedLogDraw;
-	char m_aaChillerLogger[CHILLER_LOGGER_HEIGHT][CHILLER_LOGGER_WIDTH];
-	WINDOW *m_pLogWindow;
-	WINDOW *m_pInfoWin;
-	WINDOW *m_pInputWin;
 
 public:
 	int OnKeyPress(int Key, WINDOW *pWin);
-	void ChillerLog(const char *sys, const char *fmt, ...);
 #endif
 };
 

@@ -1521,6 +1521,8 @@ set_src(BASE GLOB_RECURSE src/base
   math.h
   system.cpp
   system.h
+  terminalui.cpp
+  terminalui.h
   tl/algorithm.h
   tl/allocator.h
   tl/array.h
@@ -1698,6 +1700,7 @@ set(LIBS
   ${WEBSOCKETS_LIBRARIES}
   ${ZLIB_LIBRARIES}
   ${PLATFORM_LIBS}
+  ${CURSES_LIBRARIES}
   # Add pthreads (on non-Windows) at the end, so that other libraries can depend
   # on it.
   ${CMAKE_THREAD_LIBS_INIT}
