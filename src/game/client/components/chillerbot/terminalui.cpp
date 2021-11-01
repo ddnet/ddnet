@@ -66,6 +66,104 @@ void CTerminalUI::DrawBorders(WINDOW *screen)
 	// }
 }
 
+void CTerminalUI::LogDrawBorders()
+{
+	if(!g_Config.m_ClNcurses)
+		return;
+	DrawBorders(m_pLogWindow);
+	DrawBorders(m_pInfoWin);
+	DrawBorders(m_pInputWin);
+}
+
+void CTerminalUI::LogDraw()
+{
+	if(!m_NeedLogDraw)
+		return;
+	int x, y;
+	getmaxyx(m_pLogWindow, y, x);
+	int Max = CHILLER_LOGGER_HEIGHT > y ? y : CHILLER_LOGGER_HEIGHT;
+	int Top = CHILLER_LOGGER_HEIGHT-2;
+	int Bottom = CHILLER_LOGGER_HEIGHT-Max;
+	int line = 0;
+	for(int i = Top; i > Bottom; i--)
+	{
+		if(m_aaChillerLogger[i][0] == '\0')
+			continue; // TODO: break
+		char aBuf[1024*4+16];
+		str_format(aBuf, sizeof(aBuf), "%2d|%2d|%s", line++, i, m_aaChillerLogger[i]);
+		aBuf[x-2] = '\0'; // prevent line wrapping and cut on screen border
+		mvwprintw(m_pLogWindow, CHILLER_LOGGER_HEIGHT-i-1, 1, aBuf);
+	}
+}
+
+void CTerminalUI::InfoDraw()
+{
+	int x = getmaxx(m_pInfoWin);
+	char aBuf[1024*4+16];
+	str_format(aBuf, sizeof(aBuf), "%s | %s | %s", GetInputMode(), m_aInfoStr, m_aInfoStr2);
+	aBuf[x-2] = '\0'; // prevent line wrapping and cut on screen border
+	mvwprintw(m_pInfoWin, 1, 1, aBuf);
+}
+
+void CTerminalUI::InputDraw()
+{
+	char aBuf[512];
+	if (m_InputMode == INPUT_REMOTE_CONSOLE && !RconAuthed())
+	{
+		int i;
+		for(i = 0; i < 512 && m_aInputStr[i] != '\0'; i++)
+			aBuf[i] = '*';
+		aBuf[i] = '\0';
+	}
+	else
+		str_copy(aBuf, m_aInputStr, sizeof(aBuf));
+	int x = getmaxx(m_pInfoWin);
+	aBuf[x-2] = '\0'; // prevent line wrapping and cut on screen border
+	mvwprintw(m_pInputWin, 1, 1, aBuf);
+}
+
+int CTerminalUI::CursesTick()
+{
+	if(!g_Config.m_ClNcurses)
+		return 0;
+
+	getmaxyx(stdscr, m_NewY, m_NewX);
+
+	if (m_NewY != m_ParentY || m_NewX != m_ParentX) {
+		m_ParentX = m_NewX;
+		m_ParentY = m_NewY;
+
+		wresize(m_pLogWindow, m_NewY - NC_INFO_SIZE*2, m_NewX);
+		wresize(m_pInfoWin, NC_INFO_SIZE, m_NewX);
+		wresize(m_pInputWin, NC_INFO_SIZE, m_NewX);
+		mvwin(m_pInfoWin, m_NewY - NC_INFO_SIZE*2, 0);
+		mvwin(m_pInputWin, m_NewY - NC_INFO_SIZE, 0);
+
+		wclear(stdscr);
+		wclear(m_pLogWindow);
+		wclear(m_pInfoWin);
+		wclear(m_pInputWin);
+
+		DrawBorders(m_pLogWindow);
+		DrawBorders(m_pInfoWin);
+		DrawBorders(m_pInputWin);
+	}
+
+	// draw to our windows
+	LogDraw();
+	InfoDraw();
+
+	int input = GetInput(); // calls InputDraw()
+
+	// refresh each window
+	if(m_NeedLogDraw)
+		wrefresh(m_pLogWindow);
+	wrefresh(m_pInfoWin);
+	wrefresh(m_pInputWin);
+	m_NeedLogDraw = false;
+	return input == -1;
+}
+
 void CTerminalUI::RenderScoreboard(int Team, WINDOW *pWin)
 {
 	// TODO:
@@ -131,6 +229,9 @@ void CTerminalUI::OnInit()
 	mem_zero(m_aLastPressedKey, sizeof(m_aLastPressedKey));
 	AimX = 20;
 	AimY = 0;
+	for (int i = 0; i < CHILLER_LOGGER_HEIGHT; i++)
+		m_aaChillerLogger[i][0] = '\0';
+	m_InputMode = INPUT_NORMAL;
 	if(g_Config.m_ClNcurses)
 	{
 		initscr();
@@ -138,15 +239,15 @@ void CTerminalUI::OnInit()
 		curs_set(FALSE);
 
 		// set up initial windows
-		// getmaxyx(stdscr, parent_y, parent_x);
+		getmaxyx(stdscr, m_ParentY, m_ParentX);
 
-		// m_pLogWindow = newwin(parent_y - NC_INFO_SIZE*2, parent_x, 0, 0);
-		// m_pInfoWin = newwin(NC_INFO_SIZE, parent_x, parent_y - NC_INFO_SIZE*2, 0);
-		// m_pInputWin = newwin(NC_INFO_SIZE, parent_x, parent_y - NC_INFO_SIZE, 0);
+		m_pLogWindow = newwin(m_ParentY - NC_INFO_SIZE*2, m_ParentX, 0, 0);
+		m_pInfoWin = newwin(NC_INFO_SIZE, m_ParentX, m_ParentY - NC_INFO_SIZE*2, 0);
+		m_pInputWin = newwin(NC_INFO_SIZE, m_ParentX, m_ParentY - NC_INFO_SIZE, 0);
 
-		// draw_borders(m_pLogWindow);
-		// draw_borders(m_pInfoWin);
-		// draw_borders(m_pInputWin);
+		DrawBorders(m_pLogWindow);
+		DrawBorders(m_pInfoWin);
+		DrawBorders(m_pInputWin);
 	}
 }
 
@@ -159,7 +260,7 @@ void CTerminalUI::OnRender()
 {
 	if(!m_pClient->m_Snap.m_pLocalCharacter)
 		return;
-	GetInput();
+	CursesTick();
 
 	// float X = m_pClient->m_Snap.m_pLocalCharacter->m_X;
 	// float Y = m_pClient->m_Snap.m_pLocalCharacter->m_Y;
@@ -172,14 +273,96 @@ void CTerminalUI::OnRender()
 	// Client()->ChillerInfoSetStr2(aBuf);
 }
 
-void CTerminalUI::GetInput()
+int CTerminalUI::GetInput()
 {
 	nodelay(stdscr, TRUE);
 	keypad(stdscr, TRUE);
 	cbreak();
 	noecho();
 	int c = getch();
-	OnKeyPress(c, NULL);
+	if (m_InputMode == INPUT_NORMAL)
+	{
+		if(c == 'q')
+			return -1;
+		else if (c == KEY_F(1))
+			m_InputMode = INPUT_LOCAL_CONSOLE;
+		else if (c == KEY_F(2))
+			m_InputMode = INPUT_REMOTE_CONSOLE;
+		else if (c == 't')
+			m_InputMode = INPUT_CHAT;
+		else if (c == 'z')
+			m_InputMode = INPUT_CHAT_TEAM;
+		else
+		{
+			InputDraw();
+			OnKeyPress(c, m_pLogWindow);
+		}
+	}
+	else if (
+		m_InputMode == INPUT_LOCAL_CONSOLE ||
+		m_InputMode == INPUT_REMOTE_CONSOLE ||
+		m_InputMode == INPUT_CHAT ||
+		m_InputMode == INPUT_CHAT_TEAM)
+	{
+		if(c == ERR) // nonblocking empty read
+			return 0;
+		else if (c == EOF || c == 10) // return
+		{
+			if(m_InputMode == INPUT_LOCAL_CONSOLE)
+				m_pClient->Console()->ExecuteLine(m_aInputStr);
+			else if (m_InputMode == INPUT_REMOTE_CONSOLE)
+			{
+				if(m_pClient->Client()->RconAuthed())
+					m_pClient->Client()->Rcon(m_aInputStr);
+				else
+					m_pClient->Client()->RconAuth("", m_aInputStr);
+			}
+			else if (m_InputMode == INPUT_CHAT)
+				m_pClient->m_Chat.Say(0, m_aInputStr);
+			else if (m_InputMode == INPUT_CHAT_TEAM)
+				m_pClient->m_Chat.Say(1, m_aInputStr);
+			m_aInputStr[0] = '\0';
+			wclear(m_pInputWin);
+			DrawBorders(m_pInputWin);
+			if(m_InputMode != INPUT_LOCAL_CONSOLE && m_InputMode != INPUT_REMOTE_CONSOLE)
+				m_InputMode = INPUT_NORMAL;
+			return 0;
+		}
+		else if (c == KEY_F(1)) // f1 hard toggle local console
+		{
+			m_aInputStr[0] = '\0';
+			wclear(m_pInputWin);
+			DrawBorders(m_pInputWin);
+			m_InputMode = m_InputMode == INPUT_LOCAL_CONSOLE ? INPUT_NORMAL : INPUT_LOCAL_CONSOLE;
+		}
+		else if (c == KEY_F(2)) // f2 hard toggle local console
+		{
+			m_aInputStr[0] = '\0';
+			wclear(m_pInputWin);
+			DrawBorders(m_pInputWin);
+			m_InputMode = m_InputMode == INPUT_REMOTE_CONSOLE ? INPUT_NORMAL : INPUT_REMOTE_CONSOLE;
+		}
+		else if (c == 27) // ESC
+		{
+			// esc detection is buggy idk some event sequence what ever
+			m_InputMode = INPUT_NORMAL;
+			return 0;
+		}
+		else if (c == KEY_BACKSPACE || c == 127) // delete
+		{
+			str_truncate(m_aInputStr, sizeof(m_aInputStr), m_aInputStr, str_length(m_aInputStr) - 1);
+			wclear(m_pInputWin);
+			InputDraw();
+			DrawBorders(m_pInputWin);
+			return 0;
+		}
+		char aKey[8];
+		str_format(aKey, sizeof(aKey), "%c", c);
+		str_append(m_aInputStr, aKey, sizeof(m_aInputStr));
+		// ChillerLog("yeee", "got key d=%d c=%c", c, c);
+	}
+	InputDraw();
+	return 0;
 }
 
 int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
@@ -194,8 +377,6 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 		m_ScoreboardActive = !m_ScoreboardActive;
 	else if(Key == 'k')
 		m_pClient->SendKill(g_Config.m_ClDummy);
-	else if(Key == 't')
-		m_pClient->m_ChatHelper.SayBuffer("hello");
 	else if(KeyInHistory('a', 5) || Key == 'a')
 		/* m_pClient->m_Controls.SetCursesDir(-1); */ return 0;
 	else if(KeyInHistory('d', 5) || Key == 'd')
