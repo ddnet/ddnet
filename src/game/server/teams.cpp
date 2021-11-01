@@ -442,17 +442,20 @@ void CGameTeams::ChangeTeamState(int Team, int State)
 	m_TeamState[Team] = State;
 }
 
-void CGameTeams::KillTeam(int Team, int NewStrongID)
+void CGameTeams::KillTeam(int Team, int NewStrongID, int ExceptID)
 {
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
 		{
 			GameServer()->m_apPlayers[i]->m_VotedForPractice = false;
-			GameServer()->m_apPlayers[i]->KillCharacter(WEAPON_SELF);
-			if(NewStrongID != -1 && i != NewStrongID)
+			if(i != ExceptID)
 			{
-				GameServer()->m_apPlayers[i]->Respawn(true); // spawn the rest of team with weak hook on the killer
+				GameServer()->m_apPlayers[i]->KillCharacter(WEAPON_SELF);
+				if(NewStrongID != -1 && i != NewStrongID)
+				{
+					GameServer()->m_apPlayers[i]->Respawn(true); // spawn the rest of team with weak hook on the killer
+				}
 			}
 		}
 	}
@@ -1006,7 +1009,7 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 
 			m_Practice[Team] = false;
 
-			KillTeam(Team, Weapon == WEAPON_SELF ? ClientID : -1);
+			KillTeam(Team, Weapon == WEAPON_SELF ? ClientID : -1, ClientID);
 			if(Count(Team) > 1)
 			{
 				GameServer()->SendChatTeam(Team, aBuf);
