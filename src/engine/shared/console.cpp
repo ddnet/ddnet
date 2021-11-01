@@ -14,8 +14,6 @@
 #include "console.h"
 #include "linereader.h"
 
-// #include <base/terminalui.h>
-
 // todo: rework this
 
 const char *CConsole::CResult::GetString(unsigned Index)
@@ -323,7 +321,6 @@ void CConsole::Print(int Level, const char *pFrom, const char *pStr, ColorRGBA P
 	else
 		set_console_msg_color(&PrintColor);
 	dbg_msg(pFrom, "%s", pStr);
-	// curses_logf("%s", pStr);
 	set_console_msg_color(NULL);
 	char aBuf[1024];
 	Format(aBuf, sizeof(aBuf), pFrom, pStr);

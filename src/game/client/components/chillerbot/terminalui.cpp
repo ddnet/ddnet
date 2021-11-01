@@ -7,7 +7,7 @@
 
 #include "terminalui.h"
 
-#if defined(CONF_PLATFORM_LINUX)
+#if defined(CONF_CURSES_CLIENT)
 
 CGameClient *g_pClient;
 
@@ -53,38 +53,22 @@ void CTerminalUI::DrawAllBorders()
 
 void CTerminalUI::LogDraw()
 {
-	if(!g_NeedLogDraw)
-		return;
-	int x, y;
-	getmaxyx(g_pLogWindow, y, x);
-	int Max = CHILLER_LOGGER_HEIGHT > y ? y : CHILLER_LOGGER_HEIGHT;
-	int Top = CHILLER_LOGGER_HEIGHT-2;
-	int Bottom = CHILLER_LOGGER_HEIGHT-Max;
-	int line = 0;
-	for(int i = Top; i > Bottom; i--)
-	{
-		if(m_aaChillerLogger[i][0] == '\0')
-			continue; // TODO: break
-		char aBuf[1024*4+16];
-		str_format(aBuf, sizeof(aBuf), "%2d|%2d|%s", line++, i, m_aaChillerLogger[i]);
-		aBuf[x-2] = '\0'; // prevent line wrapping and cut on screen border
-		mvwprintw(g_pLogWindow, CHILLER_LOGGER_HEIGHT-i-1, 1, aBuf);
-	}
+	log_draw();
 }
 
 void CTerminalUI::InfoDraw()
 {
 	int x = getmaxx(g_pInfoWin);
-	char aBuf[1024*4+16];
+	char aBuf[1024 * 4 + 16];
 	str_format(aBuf, sizeof(aBuf), "%s | %s | %s", GetInputMode(), g_aInfoStr, g_aInfoStr2);
-	aBuf[x-2] = '\0'; // prevent line wrapping and cut on screen border
+	aBuf[x - 2] = '\0'; // prevent line wrapping and cut on screen border
 	mvwprintw(g_pInfoWin, 1, 1, aBuf);
 }
 
 void CTerminalUI::InputDraw()
 {
 	char aBuf[512];
-	if (m_InputMode == INPUT_REMOTE_CONSOLE && !RconAuthed())
+	if(m_InputMode == INPUT_REMOTE_CONSOLE && !RconAuthed())
 	{
 		int i;
 		for(i = 0; i < 512 && g_aInputStr[i] != '\0'; i++)
@@ -94,7 +78,7 @@ void CTerminalUI::InputDraw()
 	else
 		str_copy(aBuf, g_aInputStr, sizeof(aBuf));
 	int x = getmaxx(g_pInfoWin);
-	aBuf[x-2] = '\0'; // prevent line wrapping and cut on screen border
+	aBuf[x - 2] = '\0'; // prevent line wrapping and cut on screen border
 	mvwprintw(g_pInputWin, 1, 1, aBuf);
 }
 
@@ -105,14 +89,15 @@ int CTerminalUI::CursesTick()
 
 	getmaxyx(stdscr, g_NewY, g_NewX);
 
-	if (g_NewY != g_ParentY || g_NewX != g_ParentX) {
+	if(g_NewY != g_ParentY || g_NewX != g_ParentX)
+	{
 		g_ParentX = g_NewX;
 		g_ParentY = g_NewY;
 
-		wresize(g_pLogWindow, g_NewY - NC_INFO_SIZE*2, g_NewX);
+		wresize(g_pLogWindow, g_NewY - NC_INFO_SIZE * 2, g_NewX);
 		wresize(g_pInfoWin, NC_INFO_SIZE, g_NewX);
 		wresize(g_pInputWin, NC_INFO_SIZE, g_NewX);
-		mvwin(g_pInfoWin, g_NewY - NC_INFO_SIZE*2, 0);
+		mvwin(g_pInfoWin, g_NewY - NC_INFO_SIZE * 2, 0);
 		mvwin(g_pInputWin, g_NewY - NC_INFO_SIZE, 0);
 
 		wclear(stdscr);
@@ -132,11 +117,7 @@ int CTerminalUI::CursesTick()
 	int input = GetInput(); // calls InputDraw()
 
 	// refresh each window
-	if(g_NeedLogDraw)
-		wrefresh(g_pLogWindow);
-	wrefresh(g_pInfoWin);
-	wrefresh(g_pInputWin);
-	g_NeedLogDraw = false;
+	curses_refresh_windows();
 	return input == -1;
 }
 
@@ -206,8 +187,7 @@ void CTerminalUI::OnInit()
 	mem_zero(m_aLastPressedKey, sizeof(m_aLastPressedKey));
 	AimX = 20;
 	AimY = 0;
-	for (int i = 0; i < CHILLER_LOGGER_HEIGHT; i++)
-		m_aaChillerLogger[i][0] = '\0';
+	curses_init();
 	m_InputMode = INPUT_NORMAL;
 	if(g_Config.m_ClNcurses)
 	{
@@ -218,8 +198,8 @@ void CTerminalUI::OnInit()
 		// set up initial windows
 		getmaxyx(stdscr, g_ParentY, g_ParentX);
 
-		g_pLogWindow = newwin(g_ParentY - NC_INFO_SIZE*2, g_ParentX, 0, 0);
-		g_pInfoWin = newwin(NC_INFO_SIZE, g_ParentX, g_ParentY - NC_INFO_SIZE*2, 0);
+		g_pLogWindow = newwin(g_ParentY - NC_INFO_SIZE * 2, g_ParentX, 0, 0);
+		g_pInfoWin = newwin(NC_INFO_SIZE, g_ParentX, g_ParentY - NC_INFO_SIZE * 2, 0);
 		g_pInputWin = newwin(NC_INFO_SIZE, g_ParentX, g_ParentY - NC_INFO_SIZE, 0);
 
 		DrawBorders(g_pLogWindow);
@@ -257,17 +237,17 @@ int CTerminalUI::GetInput()
 	cbreak();
 	noecho();
 	int c = getch();
-	if (m_InputMode == INPUT_NORMAL)
+	if(m_InputMode == INPUT_NORMAL)
 	{
 		if(c == 'q')
 			return -1;
-		else if (c == KEY_F(1))
+		else if(c == KEY_F(1))
 			m_InputMode = INPUT_LOCAL_CONSOLE;
-		else if (c == KEY_F(2))
+		else if(c == KEY_F(2))
 			m_InputMode = INPUT_REMOTE_CONSOLE;
-		else if (c == 't')
+		else if(c == 't')
 			m_InputMode = INPUT_CHAT;
-		else if (c == 'z')
+		else if(c == 'z')
 			m_InputMode = INPUT_CHAT_TEAM;
 		else
 		{
@@ -275,7 +255,7 @@ int CTerminalUI::GetInput()
 			OnKeyPress(c, g_pLogWindow);
 		}
 	}
-	else if (
+	else if(
 		m_InputMode == INPUT_LOCAL_CONSOLE ||
 		m_InputMode == INPUT_REMOTE_CONSOLE ||
 		m_InputMode == INPUT_CHAT ||
@@ -283,20 +263,20 @@ int CTerminalUI::GetInput()
 	{
 		if(c == ERR) // nonblocking empty read
 			return 0;
-		else if (c == EOF || c == 10) // return
+		else if(c == EOF || c == 10) // return
 		{
 			if(m_InputMode == INPUT_LOCAL_CONSOLE)
 				m_pClient->Console()->ExecuteLine(g_aInputStr);
-			else if (m_InputMode == INPUT_REMOTE_CONSOLE)
+			else if(m_InputMode == INPUT_REMOTE_CONSOLE)
 			{
 				if(m_pClient->Client()->RconAuthed())
 					m_pClient->Client()->Rcon(g_aInputStr);
 				else
 					m_pClient->Client()->RconAuth("", g_aInputStr);
 			}
-			else if (m_InputMode == INPUT_CHAT)
+			else if(m_InputMode == INPUT_CHAT)
 				m_pClient->m_Chat.Say(0, g_aInputStr);
-			else if (m_InputMode == INPUT_CHAT_TEAM)
+			else if(m_InputMode == INPUT_CHAT_TEAM)
 				m_pClient->m_Chat.Say(1, g_aInputStr);
 			g_aInputStr[0] = '\0';
 			wclear(g_pInputWin);
@@ -305,27 +285,27 @@ int CTerminalUI::GetInput()
 				m_InputMode = INPUT_NORMAL;
 			return 0;
 		}
-		else if (c == KEY_F(1)) // f1 hard toggle local console
+		else if(c == KEY_F(1)) // f1 hard toggle local console
 		{
 			g_aInputStr[0] = '\0';
 			wclear(g_pInputWin);
 			DrawBorders(g_pInputWin);
 			m_InputMode = m_InputMode == INPUT_LOCAL_CONSOLE ? INPUT_NORMAL : INPUT_LOCAL_CONSOLE;
 		}
-		else if (c == KEY_F(2)) // f2 hard toggle local console
+		else if(c == KEY_F(2)) // f2 hard toggle local console
 		{
 			g_aInputStr[0] = '\0';
 			wclear(g_pInputWin);
 			DrawBorders(g_pInputWin);
 			m_InputMode = m_InputMode == INPUT_REMOTE_CONSOLE ? INPUT_NORMAL : INPUT_REMOTE_CONSOLE;
 		}
-		else if (c == 27) // ESC
+		else if(c == 27) // ESC
 		{
 			// esc detection is buggy idk some event sequence what ever
 			m_InputMode = INPUT_NORMAL;
 			return 0;
 		}
-		else if (c == KEY_BACKSPACE || c == 127) // delete
+		else if(c == KEY_BACKSPACE || c == 127) // delete
 		{
 			str_truncate(g_aInputStr, sizeof(g_aInputStr), g_aInputStr, str_length(g_aInputStr) - 1);
 			wclear(g_pInputWin);

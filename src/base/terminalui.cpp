@@ -1,10 +1,11 @@
-#include "terminalui.h"
+#if defined(CONF_CURSES_CLIENT)
 
 #include "ncurses.h"
+#include <base/system.h>
 
-#if defined(CONF_PLATFORM_LINUX)
+#include "terminalui.h"
 
-char m_aaChillerLogger[CHILLER_LOGGER_HEIGHT][CHILLER_LOGGER_WIDTH];
+static char gs_aaChillerLogger[CHILLER_LOGGER_HEIGHT][CHILLER_LOGGER_WIDTH];
 
 WINDOW *g_pLogWindow;
 WINDOW *g_pInfoWin;
@@ -17,7 +18,47 @@ int g_NewY;
 char g_aInfoStr[1024];
 char g_aInfoStr2[1024];
 char g_aInputStr[1024];
-bool g_NeedLogDraw;
+bool gs_NeedLogDraw;
+
+void curses_init()
+{
+	for(int i = 0; i < CHILLER_LOGGER_HEIGHT; i++)
+		gs_aaChillerLogger[i][0] = '\0';
+}
+
+void curses_refresh_windows()
+{
+	if(gs_NeedLogDraw)
+	{
+		wrefresh(g_pLogWindow);
+		wclear(g_pLogWindow);
+		draw_borders(g_pLogWindow);
+	}
+	wrefresh(g_pInfoWin);
+	wrefresh(g_pInputWin);
+	gs_NeedLogDraw = false;
+}
+
+void log_draw()
+{
+	if(!gs_NeedLogDraw)
+		return;
+	int x, y;
+	getmaxyx(g_pLogWindow, y, x);
+	int Max = CHILLER_LOGGER_HEIGHT > y ? y : CHILLER_LOGGER_HEIGHT;
+	int Top = CHILLER_LOGGER_HEIGHT - 2;
+	int Bottom = CHILLER_LOGGER_HEIGHT - Max;
+	int line = 0;
+	for(int i = Top; i > Bottom; i--)
+	{
+		if(gs_aaChillerLogger[i][0] == '\0')
+			continue; // TODO: break
+		char aBuf[1024 * 4 + 16];
+		str_format(aBuf, sizeof(aBuf), "%2d|%2d|%s", line++, i, gs_aaChillerLogger[i]);
+		aBuf[x - 2] = '\0'; // prevent line wrapping and cut on screen border
+		mvwprintw(g_pLogWindow, CHILLER_LOGGER_HEIGHT - i - 1, 1, aBuf);
+	}
+}
 
 void draw_borders(WINDOW *screen)
 {
@@ -59,33 +100,31 @@ void curses_log_push(const char *pStr)
 	int x, y;
 	getmaxyx(g_pLogWindow, y, x);
 	int Max = CHILLER_LOGGER_HEIGHT > y ? y : CHILLER_LOGGER_HEIGHT;
-	int Top = CHILLER_LOGGER_HEIGHT-2;
-	int Bottom = CHILLER_LOGGER_HEIGHT-Max;
-	str_format(g_aInfoStr, sizeof(g_aInfoStr), "shifitng max=%d CHILLER_LOGGER_HEIGHT=%d y=%d top=%d bottom=%d                                            ",
-		Max, CHILLER_LOGGER_HEIGHT, y, Top, Bottom
-	);
-	g_NeedLogDraw = true;
+	int Top = CHILLER_LOGGER_HEIGHT - 2;
+	int Bottom = CHILLER_LOGGER_HEIGHT - Max;
+	// str_format(g_aInfoStr, sizeof(g_aInfoStr), "shifitng max=%d CHILLER_LOGGER_HEIGHT=%d y=%d top=%d bottom=%d                                            ",
+	// 	Max, CHILLER_LOGGER_HEIGHT, y, Top, Bottom
+	// );
+	gs_NeedLogDraw = true;
 	for(int i = Top; i > Bottom; i--)
 	{
-		if(m_aaChillerLogger[i][0] == '\0')
+		if(gs_aaChillerLogger[i][0] == '\0')
 		{
-			str_copy(m_aaChillerLogger[i], pStr, sizeof(m_aaChillerLogger[i]));
+			str_copy(gs_aaChillerLogger[i], pStr, sizeof(gs_aaChillerLogger[i]));
 			// str_format(g_aInfoStr, sizeof(g_aInfoStr), "shifitng max=%d CHILLER_LOGGER_HEIGHT=%d y=%d i=%d", Max, CHILLER_LOGGER_HEIGHT, y, i);
 			return;
 		}
 	}
-	str_format(g_aInfoStr, sizeof(g_aInfoStr), "shifitng max=%d CHILLER_LOGGER_HEIGHT=%d y=%d FULLL!!! top=%d bottom=%d                          ",
-		Max, CHILLER_LOGGER_HEIGHT, y, Top, Bottom
-	);
+	// str_format(g_aInfoStr, sizeof(g_aInfoStr), "shifitng max=%d CHILLER_LOGGER_HEIGHT=%d y=%d FULLL!!! top=%d bottom=%d                          ",
+	// 	Max, CHILLER_LOGGER_HEIGHT, y, Top, Bottom
+	// );
 	// no free slot found -> shift all
 	for(int i = Top; i > 0; i--)
 	{
-		str_copy(m_aaChillerLogger[i], m_aaChillerLogger[i-1], sizeof(m_aaChillerLogger[i]));
+		str_copy(gs_aaChillerLogger[i], gs_aaChillerLogger[i - 1], sizeof(gs_aaChillerLogger[i]));
 	}
 	// insert newest on the bottom
-	str_copy(m_aaChillerLogger[Bottom+1], pStr, sizeof(m_aaChillerLogger[Bottom+1]));
-	wclear(g_pLogWindow);
-	draw_borders(g_pLogWindow);
+	str_copy(gs_aaChillerLogger[Bottom + 1], pStr, sizeof(gs_aaChillerLogger[Bottom + 1]));
 }
 
 // ChillerDragon: no fucking idea why on macOS vdbg needs it but dbg doesn't
@@ -96,17 +135,8 @@ void curses_log_push(const char *pStr)
 #endif
 void curses_logf(const char *sys, const char *fmt, ...)
 {
-	// if(!g_Config.m_ClNcurses)
-	// {
-	// 	va_list args;
-	// 	va_start(args, fmt);
-	// 	vdbg_msg(sys, fmt, args);
-	// 	va_end(args);
-	// 	return;
-	// }
-
 	va_list args;
-	char str[1024*4];
+	char str[1024 * 4];
 	char *msg;
 	int len;
 
@@ -120,9 +150,9 @@ void curses_logf(const char *sys, const char *fmt, ...)
 
 	va_start(args, fmt);
 #if defined(CONF_FAMILY_WINDOWS) && !defined(__GNUC__)
-	_vsprintf_p(msg, sizeof(str)-len, fmt, args);
+	_vsprintf_p(msg, sizeof(str) - len, fmt, args);
 #else
-	vsnprintf(msg, sizeof(str)-len, fmt, args);
+	vsnprintf(msg, sizeof(str) - len, fmt, args);
 #endif
 	va_end(args);
 

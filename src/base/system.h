@@ -2235,6 +2235,11 @@ int secure_rand_below(int below);
 */
 void set_console_msg_color(const void *rgbvoid);
 
+#if defined(CONF_CURSES_CLIENT)
+void curses_logf(const char *sys, const char *fmt, ...);
+#define dbg_msg(sys, fmt, ...) curses_logf(sys, fmt, ##__VA_ARGS__)
+#endif
+
 #if defined(__cplusplus)
 }
 #endif

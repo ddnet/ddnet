@@ -127,8 +127,14 @@ void dbg_break_imp()
 #endif
 }
 
+#undef dbg_msg
 void dbg_msg(const char *sys, const char *fmt, ...)
 {
+#if defined(CONF_CURSES_CLIENT)
+	puts("DBG_MSG SHOULD NOT BE CALLED");
+	dbg_break_imp();
+#endif
+
 	va_list args;
 	char *msg;
 	int len;
@@ -158,6 +164,9 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 	for(i = 0; i < num_loggers; i++)
 		loggers[i].logger(str, loggers[i].user);
 }
+#if defined(CONF_CURSES_CLIENT)
+#define dbg_msg(sys, fmt, ...) curses_logf(sys, fmt, ##__VA_ARGS__)
+#endif
 
 #if defined(CONF_FAMILY_WINDOWS)
 static void logger_debugger(const char *line, void *user)

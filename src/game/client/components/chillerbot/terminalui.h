@@ -4,17 +4,17 @@
 
 #include <game/client/component.h>
 
-#if defined(CONF_PLATFORM_LINUX)
+#if defined(CONF_CURSES_CLIENT)
+#include "terminalui_keys.h" /* undefines conflicting ncurses key codes */
 #include <ncurses.h>
 #include <unistd.h>
-#include "terminalui_keys.h" /* undefines conflicting ncurses key codes */
 #endif
 
 extern CGameClient *g_pClient;
 
 class CTerminalUI : public CComponent
 {
-#if defined(CONF_PLATFORM_LINUX)
+#if defined(CONF_CURSES_CLIENT)
 	enum
 	{
 		KEY_HISTORY_LEN = 20
@@ -50,7 +50,8 @@ class CTerminalUI : public CComponent
 		m_aLastPressedKey[KEY_HISTORY_LEN - 1] = Key;
 	};
 
-	enum {
+	enum
+	{
 		INPUT_OFF = 0,
 		INPUT_NORMAL,
 		INPUT_LOCAL_CONSOLE,
@@ -60,8 +61,9 @@ class CTerminalUI : public CComponent
 
 		NC_INFO_SIZE = 3,
 	};
-	const char *GetInputMode() {
-		switch (m_InputMode)
+	const char *GetInputMode()
+	{
+		switch(m_InputMode)
 		{
 		case INPUT_OFF:
 			return "OFF";

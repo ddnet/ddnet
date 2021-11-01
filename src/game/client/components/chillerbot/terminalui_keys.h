@@ -1,6 +1,4 @@
-#ifndef GAME_CLIENT_COMPONENTS_CHILLERBOT_TERMINALUI_KEYS__H
-#define GAME_CLIENT_COMPONENTS_CHILLERBOT_TERMINALUI_KEYS__H
-#undef GAME_CLIENT_COMPONENTS_CHILLERBOT_TERMINALUI_KEYS__H // will be included multiple times
+// This file can be included several times.
 
 #undef KEY_FIRST
 #undef KEY_UNKNOWN
@@ -258,5 +256,3 @@
 #undef KEY_MOUSE_WHEEL_LEFT
 #undef KEY_MOUSE_WHEEL_RIGHT
 #undef KEY_LAST
-
-#endif
