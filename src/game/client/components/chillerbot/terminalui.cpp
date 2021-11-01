@@ -1,7 +1,7 @@
 // ChillerDragon 2020 - chillerbot
 
-#include <game/client/gameclient.h>
 #include <game/client/components/controls.h>
+#include <game/client/gameclient.h>
 
 #include "terminalui.h"
 
@@ -13,9 +13,9 @@ void CTerminalUI::DrawBorders(WINDOW *screen, int x, int y, int w, int h)
 {
 	// 4 corners
 	mvwprintw(screen, y, x, "+");
-	mvwprintw(screen, y+h-1, x, "+");
-    mvwprintw(screen, y, x+w-1, "+");
-	mvwprintw(screen, y+h-1, x+w-1, "+");
+	mvwprintw(screen, y + h - 1, x, "+");
+	mvwprintw(screen, y, x + w - 1, "+");
+	mvwprintw(screen, y + h - 1, x + w - 1, "+");
 
 	// sides
 	// for(int i = 1; i < ((y + h) - 1); i++)
@@ -27,15 +27,49 @@ void CTerminalUI::DrawBorders(WINDOW *screen, int x, int y, int w, int h)
 	// top and bottom
 	for(int i = 1; i < (w - 1); i++)
 	{
-		mvwprintw(screen, y, x+i, "-");
-		mvwprintw(screen, (y + h) - 1, x+i, "-");
+		mvwprintw(screen, y, x + i, "-");
+		mvwprintw(screen, (y + h) - 1, x + i, "-");
 	}
+}
+
+void CTerminalUI::DrawBorders(WINDOW *screen)
+{
+	int x, y, i;
+
+	getmaxyx(screen, y, x);
+
+	// 4 corners
+	mvwprintw(screen, 0, 0, "+");
+	mvwprintw(screen, y - 1, 0, "+");
+	mvwprintw(screen, 0, x - 1, "+");
+	mvwprintw(screen, y - 1, x - 1, "+");
+
+	// sides
+	for(i = 1; i < (y - 1); i++)
+	{
+		mvwprintw(screen, i, 0, "|");
+		mvwprintw(screen, i, x - 1, "|");
+	}
+
+	// top and bottom
+	for(i = 1; i < (x - 1); i++)
+	{
+		mvwprintw(screen, 0, i, "-");
+		mvwprintw(screen, y - 1, i, "-");
+	}
+	// if(m_aSrvBroadcast[0] != '\0' && screen == m_pLogWindow)
+	// {
+	// 	char aBuf[1024*4];
+	// 	str_format(aBuf, sizeof(aBuf), "-[ %s ]", m_aSrvBroadcast);
+	// 	aBuf[x-2] = '\0';
+	// 	mvwprintw(screen, 0, 1, aBuf);
+	// }
 }
 
 void CTerminalUI::RenderScoreboard(int Team, WINDOW *pWin)
 {
-    // TODO:
-    /*
+	// TODO:
+	/*
 	int RenderScoreIDs[MAX_CLIENTS];
 	int NumRenderScoreIDs = 0;
 	for(int i = 0; i < MAX_CLIENTS; ++i)
@@ -118,23 +152,23 @@ void CTerminalUI::OnInit()
 
 void CTerminalUI::OnShutdown()
 {
-    endwin();
+	endwin();
 }
 
 void CTerminalUI::OnRender()
 {
-    if (!m_pClient->m_Snap.m_pLocalCharacter)
-        return;
+	if(!m_pClient->m_Snap.m_pLocalCharacter)
+		return;
 
-    // float X = m_pClient->m_Snap.m_pLocalCharacter->m_X;
-    // float Y = m_pClient->m_Snap.m_pLocalCharacter->m_Y;
-    // char aBuf[128];
-    // str_format(aBuf, sizeof(aBuf),
-    //     "%.2f %.2f goto(%f/%f) scoreboard=%d",
-    //     X / 32, Y / 32, m_pClient->m_Controls.GetGotoXY().x, m_pClient->m_Controls.GetGotoXY().y,
-    //     m_ScoreboardActive
-    // );
-    // Client()->ChillerInfoSetStr2(aBuf);
+	// float X = m_pClient->m_Snap.m_pLocalCharacter->m_X;
+	// float Y = m_pClient->m_Snap.m_pLocalCharacter->m_Y;
+	// char aBuf[128];
+	// str_format(aBuf, sizeof(aBuf),
+	//     "%.2f %.2f goto(%f/%f) scoreboard=%d",
+	//     X / 32, Y / 32, m_pClient->m_Controls.GetGotoXY().x, m_pClient->m_Controls.GetGotoXY().y,
+	//     m_ScoreboardActive
+	// );
+	// Client()->ChillerInfoSetStr2(aBuf);
 }
 
 void CTerminalUI::GetInput()
@@ -144,46 +178,46 @@ void CTerminalUI::GetInput()
 	cbreak();
 	noecho();
 	int c = getch();
-    OnKeyPress(c, NULL);
+	OnKeyPress(c, NULL);
 }
 
 int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 {
-    // m_pClient->m_Controls.SetCursesDir(-2);
-    // m_pClient->m_Controls.SetCursesJump(-2);
-    // m_pClient->m_Controls.SetCursesHook(-2);
-    // m_pClient->m_Controls.SetCursesTargetX(AimX);
-    // m_pClient->m_Controls.SetCursesTargetY(AimY);
-    TrackKey(Key);
-    if (Key == 9) // tab
-        m_ScoreboardActive = !m_ScoreboardActive;
-    else if (Key == 'k')
-        m_pClient->SendKill(g_Config.m_ClDummy);
-    else if (KeyInHistory('a', 5) || Key == 'a')
-        /* m_pClient->m_Controls.SetCursesDir(-1); */ return 0;
-    else if (KeyInHistory('d', 5) || Key == 'd')
-        /* m_pClient->m_Controls.SetCursesDir(1); */ return 0;
-    else if (KeyInHistory(' ', 3) || Key == ' ')
-        /* m_pClient->m_Controls.SetCursesJump(1); */ return 0;
-    else if (KeyInHistory('h', 10) || Key == 'h')
-        /* m_pClient->m_Controls.SetCursesHook(1); */ return 0;
-    else if (Key == KEY_LEFT)
-        AimX = maximum(AimX - 10, -20);
-    else if (Key == KEY_RIGHT)
-        AimX = minimum(AimX + 10, 20);
-    else if (Key == KEY_UP)
-        AimY = maximum(AimY - 10, -20);
-    else if (Key == KEY_DOWN)
-        AimY = minimum(AimY + 10, 20);
+	// m_pClient->m_Controls.SetCursesDir(-2);
+	// m_pClient->m_Controls.SetCursesJump(-2);
+	// m_pClient->m_Controls.SetCursesHook(-2);
+	// m_pClient->m_Controls.SetCursesTargetX(AimX);
+	// m_pClient->m_Controls.SetCursesTargetY(AimY);
+	TrackKey(Key);
+	if(Key == 9) // tab
+		m_ScoreboardActive = !m_ScoreboardActive;
+	else if(Key == 'k')
+		m_pClient->SendKill(g_Config.m_ClDummy);
+	else if(KeyInHistory('a', 5) || Key == 'a')
+		/* m_pClient->m_Controls.SetCursesDir(-1); */ return 0;
+	else if(KeyInHistory('d', 5) || Key == 'd')
+		/* m_pClient->m_Controls.SetCursesDir(1); */ return 0;
+	else if(KeyInHistory(' ', 3) || Key == ' ')
+		/* m_pClient->m_Controls.SetCursesJump(1); */ return 0;
+	else if(KeyInHistory('h', 10) || Key == 'h')
+		/* m_pClient->m_Controls.SetCursesHook(1); */ return 0;
+	else if(Key == KEY_LEFT)
+		AimX = maximum(AimX - 10, -20);
+	else if(Key == KEY_RIGHT)
+		AimX = minimum(AimX + 10, 20);
+	else if(Key == KEY_UP)
+		AimY = maximum(AimY - 10, -20);
+	else if(Key == KEY_DOWN)
+		AimY = minimum(AimY + 10, 20);
 
-    if(m_ScoreboardActive)
-        RenderScoreboard(0, pWin);
+	if(m_ScoreboardActive)
+		RenderScoreboard(0, pWin);
 
-    if(Key == EOF)
-        return 0;
+	if(Key == EOF)
+		return 0;
 
-    // Client()->ChillerLog("termUI", "got key d=%d c=%c", Key, Key);
-    return 0;
+	// Client()->ChillerLog("termUI", "got key d=%d c=%c", Key, Key);
+	return 0;
 }
 
 #endif
