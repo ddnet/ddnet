@@ -1477,8 +1477,16 @@ public:
 			TextContainer.m_HasCursor = HasCursor;
 			TextContainer.m_HasSelection = HasSelection;
 
-			pCursor->m_SelectionStart = SelectionStartChar;
-			pCursor->m_SelectionEnd = SelectionEndChar;
+			if(HasSelection)
+			{
+				pCursor->m_SelectionStart = SelectionStartChar;
+				pCursor->m_SelectionEnd = SelectionEndChar;
+			}
+			else
+			{
+				pCursor->m_SelectionStart = -1;
+				pCursor->m_SelectionEnd = -1;
+			}
 		}
 
 		// even if no text is drawn the cursor position will be adjusted
