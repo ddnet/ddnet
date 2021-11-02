@@ -6,6 +6,7 @@
 #include <new>
 
 #include <base/system.h>
+#include <sanitizer/asan_interface.h>
 
 #define MACRO_ALLOC_HEAP() \
 public: \
@@ -30,35 +31,21 @@ public: \
 \
 private:
 
-#if defined(__has_feature)
-#if __has_feature(address_sanitizer)
-#define MACRO_ALLOC_POOL_ID_IMPL(POOLTYPE, PoolSize) \
-	void *POOLTYPE::operator new(size_t Size, int id) \
-	{ \
-		void *p = malloc(Size); \
-		mem_zero(p, Size); \
-		return p; \
-	} \
-	void POOLTYPE::operator delete(void *p, int id) \
-	{ \
-		free(p); \
-	} \
-	void POOLTYPE::operator delete(void *p) /* NOLINT(misc-new-delete-overloads) */ \
-	{ \
-		free(p); \
-	}
-#endif
-#endif
-
-#ifndef MACRO_ALLOC_POOL_ID_IMPL
 #define MACRO_ALLOC_POOL_ID_IMPL(POOLTYPE, PoolSize) \
 	static char ms_PoolData##POOLTYPE[PoolSize][sizeof(POOLTYPE)] = {{0}}; \
 	static int ms_PoolUsed##POOLTYPE[PoolSize] = {0}; \
+	static bool ms_PoolPoisoned##POOLTYPE = false; \
 	void *POOLTYPE::operator new(size_t Size, int id) \
 	{ \
 		dbg_assert(sizeof(POOLTYPE) == Size, "size error"); \
 		dbg_assert(!ms_PoolUsed##POOLTYPE[id], "already used"); \
 		/*dbg_msg("pool", "++ %s %d", #POOLTYPE, id);*/ \
+		if(!ms_PoolPoisoned##POOLTYPE) \
+		{ \
+			ASAN_POISON_MEMORY_REGION(ms_PoolData##POOLTYPE, sizeof(POOLTYPE) * PoolSize); \
+			ms_PoolPoisoned##POOLTYPE = true; \
+		} \
+		ASAN_UNPOISON_MEMORY_REGION(ms_PoolData##POOLTYPE[id], sizeof(POOLTYPE)); \
 		ms_PoolUsed##POOLTYPE[id] = 1; \
 		mem_zero(ms_PoolData##POOLTYPE[id], Size); \
 		return ms_PoolData##POOLTYPE[id]; \
@@ -70,6 +57,7 @@ private:
 		/*dbg_msg("pool", "-- %s %d", #POOLTYPE, id);*/ \
 		ms_PoolUsed##POOLTYPE[id] = 0; \
 		mem_zero(ms_PoolData##POOLTYPE[id], sizeof(POOLTYPE)); \
+		ASAN_POISON_MEMORY_REGION(ms_PoolData##POOLTYPE[id], sizeof(POOLTYPE)); \
 	} \
 	void POOLTYPE::operator delete(void *p) /* NOLINT(misc-new-delete-overloads) */ \
 	{ \
@@ -78,7 +66,7 @@ private:
 		/*dbg_msg("pool", "-- %s %d", #POOLTYPE, id);*/ \
 		ms_PoolUsed##POOLTYPE[id] = 0; \
 		mem_zero(ms_PoolData##POOLTYPE[id], sizeof(POOLTYPE)); \
+		ASAN_POISON_MEMORY_REGION(ms_PoolData##POOLTYPE[id], sizeof(POOLTYPE)); \
 	}
-#endif
 
 #endif
