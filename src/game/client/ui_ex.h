@@ -34,6 +34,7 @@ class CUIEx
 	int m_MouseCurY = 0;
 	int m_CurSelStart = 0;
 	int m_CurSelEnd = 0;
+	void *m_pSelItem = nullptr;
 
 	int m_CurCursor = 0;
 
