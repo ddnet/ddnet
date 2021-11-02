@@ -6,7 +6,19 @@
 #include <new>
 
 #include <base/system.h>
+#if defined(__has_feature)
+#if __has_feature(address_sanitizer)
+#define ASAN
 #include <sanitizer/asan_interface.h>
+#endif
+#endif
+
+#ifndef ASAN
+#define ASAN_POISON_MEMORY_REGION(addr, size) \
+	((void)(addr), (void)(size))
+#define ASAN_UNPOISON_MEMORY_REGION(addr, size) \
+	((void)(addr), (void)(size))
+#endif
 
 #define MACRO_ALLOC_HEAP() \
 public: \
@@ -31,20 +43,27 @@ public: \
 \
 private:
 
+#ifdef ASAN
+#define POOL_POISON_CHECK(POOLTYPE, PoolSize) \
+	static bool s_Poisoned = false; \
+	if(!s_Poisoned) \
+	{ \
+		ASAN_POISON_MEMORY_REGION(ms_PoolData##POOLTYPE, sizeof(POOLTYPE) * PoolSize); \
+		s_Poisoned = true; \
+	}
+#else
+#define POOL_POISON_CHECK(POOLTYPE, PoolSize)
+#endif
+
 #define MACRO_ALLOC_POOL_ID_IMPL(POOLTYPE, PoolSize) \
 	static char ms_PoolData##POOLTYPE[PoolSize][sizeof(POOLTYPE)] = {{0}}; \
 	static int ms_PoolUsed##POOLTYPE[PoolSize] = {0}; \
-	static bool ms_PoolPoisoned##POOLTYPE = false; \
 	void *POOLTYPE::operator new(size_t Size, int id) \
 	{ \
 		dbg_assert(sizeof(POOLTYPE) == Size, "size error"); \
 		dbg_assert(!ms_PoolUsed##POOLTYPE[id], "already used"); \
 		/*dbg_msg("pool", "++ %s %d", #POOLTYPE, id);*/ \
-		if(!ms_PoolPoisoned##POOLTYPE) \
-		{ \
-			ASAN_POISON_MEMORY_REGION(ms_PoolData##POOLTYPE, sizeof(POOLTYPE) * PoolSize); \
-			ms_PoolPoisoned##POOLTYPE = true; \
-		} \
+		POOL_POISON_CHECK(POOLTYPE, PoolSize); \
 		ASAN_UNPOISON_MEMORY_REGION(ms_PoolData##POOLTYPE[id], sizeof(POOLTYPE)); \
 		ms_PoolUsed##POOLTYPE[id] = 1; \
 		mem_zero(ms_PoolData##POOLTYPE[id], Size); \
