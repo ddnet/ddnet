@@ -106,7 +106,7 @@ void CGun::Tick()
 		}
 		m_Pos += m_Core;
 	}
-	if(g_Config.m_SvPlasmaPerSec == 0 || m_LastFire + Server()->TickSpeed() / g_Config.m_SvPlasmaPerSec <= Server()->Tick())
+	if(g_Config.m_SvPlasmaPerSec > 0 && m_LastFire + Server()->TickSpeed() / g_Config.m_SvPlasmaPerSec <= Server()->Tick())
 		Fire();
 }
 
