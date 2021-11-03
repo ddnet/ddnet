@@ -39,8 +39,18 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 
 	FontSize *= UI()->Scale();
 
+	auto &&SetHasSelection = [&](bool HasSelection) {
+		m_HasSelection = HasSelection;
+		m_pSelItem = m_HasSelection ? pID : nullptr;
+	};
+
 	if(UI()->LastActiveItem() == pID)
 	{
+		if(m_HasSelection && m_pSelItem != pID)
+		{
+			SetHasSelection(false);
+		}
+
 		m_CurCursor = minimum(str_length(pStr), m_CurCursor);
 
 		bool IsShiftPressed = Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT);
@@ -64,7 +74,7 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 					{
 						OffsetL = UTF8SelLeft;
 						OffsetR = UTF8SelRight;
-						m_HasSelection = false;
+						SetHasSelection(false);
 					}
 				}
 
@@ -119,7 +129,7 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 					{
 						NewStr = std::string(pStr, UTF8SelLeft) + std::string(pStr + UTF8SelRight);
 						str_copy(pStr, NewStr.c_str(), StrSize);
-						m_HasSelection = false;
+						SetHasSelection(false);
 						if(m_CurCursor > UTF8SelLeft)
 							m_CurCursor = maximum(0, m_CurCursor - (UTF8SelRight - UTF8SelLeft));
 						else
@@ -136,7 +146,7 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 			m_CurSelStart = 0;
 			int StrLen = str_length(pStr);
 			TextRender()->UTF8OffToDecodedOff(pStr, StrLen, m_CurSelEnd);
-			m_HasSelection = true;
+			SetHasSelection(true);
 			m_CurCursor = StrLen;
 		}
 
@@ -183,7 +193,7 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 					{
 						OffsetL = UTF8SelLeft;
 						OffsetR = UTF8SelRight;
-						m_HasSelection = false;
+						SetHasSelection(false);
 					}
 
 					std::string NewStr(pStr, OffsetL);
@@ -220,9 +230,9 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 						}
 					}
 					if(m_CurSelStart == m_CurSelEnd)
-						m_HasSelection = false;
+						SetHasSelection(false);
 					else
-						m_HasSelection = true;
+						SetHasSelection(true);
 				}
 				else
 				{
@@ -243,7 +253,7 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 								TextRender()->DecodedOffToUTF8Off(pStr, m_CurSelStart, m_CurCursor);
 						}
 					}
-					m_HasSelection = false;
+					SetHasSelection(false);
 				}
 			}
 		}
@@ -402,7 +412,7 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 		{
 			m_CurSelStart = SelCursor.m_SelectionStart;
 			m_CurSelEnd = SelCursor.m_SelectionEnd;
-			m_HasSelection = m_CurSelStart != m_CurSelEnd;
+			SetHasSelection(m_CurSelStart != m_CurSelEnd);
 		}
 		if(SelCursor.m_CursorMode == TEXT_CURSOR_CURSOR_MODE_CALCULATE)
 		{

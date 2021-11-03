@@ -55,7 +55,7 @@ const unsigned char *CVariableInt::Unpack(const unsigned char *pSrc, int *pInOut
 		if(!(*pSrc & 0x80))
 			break;
 		pSrc++;
-		*pInOut |= (*pSrc & (0x7F)) << (6 + 7 + 7 + 7);
+		*pInOut |= (*pSrc & (0x1F)) << (6 + 7 + 7 + 7);
 	} while(0);
 
 	pSrc++;

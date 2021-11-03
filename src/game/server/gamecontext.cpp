@@ -2423,6 +2423,11 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 		// set start infos
 		Server()->SetClientName(ClientID, pMsg->m_pName);
+		// trying to set client name can delete the player object, check if it still exists
+		if(!m_apPlayers[ClientID])
+		{
+			return;
+		}
 		Server()->SetClientClan(ClientID, pMsg->m_pClan);
 		Server()->SetClientCountry(ClientID, pMsg->m_Country);
 		str_copy(pPlayer->m_TeeInfos.m_SkinName, pMsg->m_pSkin, sizeof(pPlayer->m_TeeInfos.m_SkinName));
