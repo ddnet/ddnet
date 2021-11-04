@@ -310,7 +310,6 @@ void mem_zero(void *block, unsigned size)
 
 IOHANDLE io_open(const char *filename, int flags)
 {
-	dbg_assert(flags == IOFLAG_READ || flags == IOFLAG_WRITE || flags == IOFLAG_APPEND, "flags must be read, write or append");
 	if(flags == IOFLAG_READ)
 		return (IOHANDLE)fopen(filename, "rb");
 	if(flags == IOFLAG_WRITE)
