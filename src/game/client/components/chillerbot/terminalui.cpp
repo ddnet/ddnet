@@ -215,10 +215,9 @@ void CTerminalUI::OnRender()
 	float X = m_pClient->m_Snap.m_pLocalCharacter->m_X;
 	float Y = m_pClient->m_Snap.m_pLocalCharacter->m_Y;
 	str_format(g_aInfoStr2, sizeof(g_aInfoStr2),
-	    "%.2f %.2f scoreboard=%d",
-	    X / 32, Y / 32,
-	    m_ScoreboardActive
-	);
+		"%.2f %.2f scoreboard=%d",
+		X / 32, Y / 32,
+		m_ScoreboardActive);
 }
 
 int CTerminalUI::GetInput()
