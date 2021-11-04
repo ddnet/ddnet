@@ -42,13 +42,13 @@ public: \
 private:
 
 #if __has_feature(address_sanitizer)
-#define GET_SIZE(POOLTYPE) ((sizeof(POOLTYPE) + 7) & ~7)
+#define MACRO_ALLOC_GET_SIZE(POOLTYPE) ((sizeof(POOLTYPE) + 7) & ~7)
 #else
-#define GET_SIZE(POOLTYPE) (sizeof(POOLTYPE))
+#define MACRO_ALLOC_GET_SIZE(POOLTYPE) (sizeof(POOLTYPE))
 #endif
 
 #define MACRO_ALLOC_POOL_ID_IMPL(POOLTYPE, PoolSize) \
-	static char ms_PoolData##POOLTYPE[PoolSize][GET_SIZE(POOLTYPE)] = {{0}}; \
+	static char ms_PoolData##POOLTYPE[PoolSize][MACRO_ALLOC_GET_SIZE(POOLTYPE)] = {{0}}; \
 	static int ms_PoolUsed##POOLTYPE[PoolSize] = {0}; \
 	[[maybe_unused]] static int ms_PoolDummy##POOLTYPE = (ASAN_POISON_MEMORY_REGION(ms_PoolData##POOLTYPE, sizeof(ms_PoolData##POOLTYPE)), 0); \
 	void *POOLTYPE::operator new(size_t Size, int id) \
