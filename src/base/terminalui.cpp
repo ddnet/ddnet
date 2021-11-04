@@ -46,17 +46,18 @@ void log_draw()
 	int x, y;
 	getmaxyx(g_pLogWindow, y, x);
 	int Max = CHILLER_LOGGER_HEIGHT > y ? y : CHILLER_LOGGER_HEIGHT;
+	Max -= 3;
 	int Top = CHILLER_LOGGER_HEIGHT - 2;
-	int Bottom = CHILLER_LOGGER_HEIGHT - Max;
 	int line = 0;
-	for(int i = Top; i > Bottom; i--)
+	for(int k = Max, i = Max; i >= 0; i--)
 	{
 		if(gs_aaChillerLogger[i][0] == '\0')
-			continue; // TODO: break
+			continue;
 		char aBuf[1024 * 4 + 16];
-		str_format(aBuf, sizeof(aBuf), "%2d|%2d|%s", line++, i, gs_aaChillerLogger[i]);
-		aBuf[x - 2] = '\0'; // prevent line wrapping and cut on screen border
-		mvwprintw(g_pLogWindow, CHILLER_LOGGER_HEIGHT - i - 1, 1, aBuf);
+		// str_format(aBuf, sizeof(aBuf), "%2d|%2d|%s", line++, k, gs_aaChillerLogger[i]);
+		// aBuf[x - 2] = '\0'; // prevent line wrapping and cut on screen border
+		str_copy(aBuf, gs_aaChillerLogger[i], x - 2);
+		mvwprintw(g_pLogWindow, Max - k-- + 1, 1, aBuf);
 	}
 }
 
@@ -102,33 +103,19 @@ void curses_log_push(const char *pStr)
 		puts(pStr);
 		return;
 	}
-	// first empty slot
 	int x, y;
 	getmaxyx(g_pLogWindow, y, x);
 	int Max = CHILLER_LOGGER_HEIGHT > y ? y : CHILLER_LOGGER_HEIGHT;
 	int Top = CHILLER_LOGGER_HEIGHT - 2;
 	int Bottom = CHILLER_LOGGER_HEIGHT - Max;
-	str_format(g_aInfoStr, sizeof(g_aInfoStr), "shifitng max=%d CHILLER_LOGGER_HEIGHT=%d y=%d top=%d bottom=%d                                            ",
+	str_format(g_aInfoStr, sizeof(g_aInfoStr), "max=%d CHILLER_LOGGER_HEIGHT=%d y=%d top=%d bottom=%d                                            ",
 		Max, CHILLER_LOGGER_HEIGHT, y, Top, Bottom);
 	gs_NeedLogDraw = true;
-	for(int i = Top; i > Bottom; i--)
-	{
-		if(gs_aaChillerLogger[i][0] == '\0')
-		{
-			str_copy(gs_aaChillerLogger[i], pStr, sizeof(gs_aaChillerLogger[i]));
-			// str_format(g_aInfoStr, sizeof(g_aInfoStr), "shifitng max=%d CHILLER_LOGGER_HEIGHT=%d y=%d i=%d", Max, CHILLER_LOGGER_HEIGHT, y, i);
-			return;
-		}
-	}
-	str_format(g_aInfoStr, sizeof(g_aInfoStr), "shifitng max=%d CHILLER_LOGGER_HEIGHT=%d y=%d FULLL!!! top=%d bottom=%d                          ",
-		Max, CHILLER_LOGGER_HEIGHT, y, Top, Bottom);
-	// no free slot found -> shift all
-	for(int i = Top; i > 0; i--)
-	{
+	// shift all
+	for(int i = CHILLER_LOGGER_HEIGHT - 1; i > 0; i--)
 		str_copy(gs_aaChillerLogger[i], gs_aaChillerLogger[i - 1], sizeof(gs_aaChillerLogger[i]));
-	}
 	// insert newest on the bottom
-	str_copy(gs_aaChillerLogger[Bottom + 1], pStr, sizeof(gs_aaChillerLogger[Bottom + 1]));
+	str_copy(gs_aaChillerLogger[0], pStr, sizeof(gs_aaChillerLogger[0]));
 }
 
 // ChillerDragon: no fucking idea why on macOS vdbg needs it but dbg doesn't
