@@ -502,7 +502,7 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTexture(const char *pFilename,
 
 int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType)
 {
-	char aCompleteFilename[IO_MAX_PATH_LENGTH];
+	char aCompleteFilename[512];
 	unsigned char *pBuffer;
 	png_t Png; // ignore_convention
 

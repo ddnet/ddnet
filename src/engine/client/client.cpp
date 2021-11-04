@@ -1288,7 +1288,7 @@ const char *CClient::LoadMapSearch(const char *pMapName, SHA256_DIGEST *pWantedS
 	}
 
 	// search for the map within subfolders
-	char aFilename[IO_MAX_PATH_LENGTH];
+	char aFilename[128];
 	str_format(aFilename, sizeof(aFilename), "%s.map", pMapName);
 	if(Storage()->FindFile(aFilename, "maps", IStorage::TYPE_ALL, aBuf, sizeof(aBuf)))
 		pError = LoadMap(pMapName, aBuf, pWantedSha256, WantedCrc);
@@ -3736,7 +3736,7 @@ void CClient::SaveReplay(const int Length)
 	{
 		// First we stop the recorder to slice correctly the demo after
 		DemoRecorder_Stop(RECORDER_REPLAYS);
-		char aFilename[IO_MAX_PATH_LENGTH];
+		char aFilename[MAX_PATH_LENGTH];
 
 		char aDate[64];
 		str_timestamp(aDate, sizeof(aDate));
@@ -3887,7 +3887,7 @@ void CClient::DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int 
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demorec/record", "client is not online");
 	else
 	{
-		char aFilename[IO_MAX_PATH_LENGTH];
+		char aFilename[128];
 		if(WithTimestamp)
 		{
 			char aDate[20];
@@ -3989,7 +3989,7 @@ void CClient::Con_BenchmarkQuit(IConsole::IResult *pResult, void *pUserData)
 
 void CClient::BenchmarkQuit(int Seconds, const char *pFilename)
 {
-	char aBuf[IO_MAX_PATH_LENGTH];
+	char aBuf[MAX_PATH_LENGTH];
 	m_BenchmarkFile = Storage()->OpenFile(pFilename, IOFLAG_WRITE, IStorage::TYPE_ABSOLUTE, aBuf, sizeof(aBuf));
 	m_BenchmarkStopTime = time_get() + time_freq() * Seconds;
 }
@@ -4075,7 +4075,7 @@ void CClient::ToggleWindowVSync()
 void CClient::LoadFont()
 {
 	static CFont *pDefaultFont = 0;
-	char aFilename[IO_MAX_PATH_LENGTH];
+	char aFilename[512];
 	char aBuff[1024];
 	const char *pFontFile = "fonts/DejaVuSans.ttf";
 	const char *apFallbackFontFiles[] =

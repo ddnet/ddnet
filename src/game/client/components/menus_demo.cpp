@@ -122,7 +122,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 				if(!str_endswith(m_aCurrentDemoFile, ".demo"))
 					str_append(m_aCurrentDemoFile, ".demo", sizeof(m_aCurrentDemoFile));
 
-				char aPath[IO_MAX_PATH_LENGTH];
+				char aPath[512];
 				str_format(aPath, sizeof(aPath), "%s/%s", m_aCurrentDemoFolder, m_aCurrentDemoFile);
 
 				IOHANDLE DemoFile = Storage()->OpenFile(aPath, IOFLAG_READ, IStorage::TYPE_SAVE);
@@ -1257,8 +1257,8 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	static int s_DirectoryButtonID = 0;
 	if(DoButton_Menu(&s_DirectoryButtonID, Localize("Demos directory"), 0, &DirectoryButton))
 	{
-		char aBuf[IO_MAX_PATH_LENGTH];
-		char aBufFull[IO_MAX_PATH_LENGTH + 7];
+		char aBuf[MAX_PATH_LENGTH];
+		char aBufFull[MAX_PATH_LENGTH + 7];
 		Storage()->GetCompletePath(IStorage::TYPE_SAVE, "demos", aBuf, sizeof(aBuf));
 		Storage()->CreateFolder("demos", IStorage::TYPE_SAVE);
 		str_format(aBufFull, sizeof(aBufFull), "file://%s", aBuf);

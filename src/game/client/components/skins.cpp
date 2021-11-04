@@ -70,7 +70,7 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 			return 0;
 	}
 
-	char aBuf[IO_MAX_PATH_LENGTH];
+	char aBuf[MAX_PATH_LENGTH];
 	str_format(aBuf, sizeof(aBuf), "skins/%s", pName);
 	return pSelf->LoadSkin(aNameWithoutPng, aBuf, DirType);
 }
@@ -405,7 +405,7 @@ int CSkins::FindImpl(const char *pName)
 	{
 		if(d.front().m_pTask && d.front().m_pTask->State() == HTTP_DONE)
 		{
-			char aPath[IO_MAX_PATH_LENGTH];
+			char aPath[MAX_PATH_LENGTH];
 			str_format(aPath, sizeof(aPath), "downloadedskins/%s.png", d.front().m_aName);
 			Storage()->RenameFile(d.front().m_aPath, aPath, IStorage::TYPE_SAVE);
 			LoadSkin(d.front().m_aName, d.front().m_pTask->m_Info);

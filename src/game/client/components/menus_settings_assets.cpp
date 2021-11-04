@@ -11,7 +11,7 @@ void CMenus::LoadEntities(SCustomEntities *pEntitiesItem, void *pUser)
 {
 	CMenus *pThis = (CMenus *)pUser;
 
-	char aBuff[IO_MAX_PATH_LENGTH];
+	char aBuff[MAX_PATH_LENGTH];
 
 	if(str_comp(pEntitiesItem->m_aName, "default") == 0)
 	{
@@ -81,7 +81,7 @@ int CMenus::EntitiesScan(const char *pName, int IsDir, int DirType, void *pUser)
 	{
 		if(str_endswith(pName, ".png"))
 		{
-			char aName[IO_MAX_PATH_LENGTH];
+			char aName[MAX_PATH_LENGTH];
 			str_truncate(aName, sizeof(aName), pName, str_length(pName) - 4);
 			// default is reserved
 			if(str_comp(aName, "default") == 0)
@@ -100,7 +100,7 @@ int CMenus::EntitiesScan(const char *pName, int IsDir, int DirType, void *pUser)
 template<typename TName>
 static void LoadAsset(TName *pAssetItem, const char *pAssetName, IGraphics *pGraphics, void *pUser)
 {
-	char aBuff[IO_MAX_PATH_LENGTH];
+	char aBuff[MAX_PATH_LENGTH];
 
 	if(str_comp(pAssetItem->m_aName, "default") == 0)
 	{
@@ -155,7 +155,7 @@ static int AssetScan(const char *pName, int IsDir, int DirType, sorted_array<TNa
 	{
 		if(str_endswith(pName, ".png"))
 		{
-			char aName[IO_MAX_PATH_LENGTH];
+			char aName[MAX_PATH_LENGTH];
 			str_truncate(aName, sizeof(aName), pName, str_length(pName) - 4);
 			// default is reserved
 			if(str_comp(aName, "default") == 0)
@@ -534,8 +534,8 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 	static int s_AssetsDirID = 0;
 	if(DoButton_Menu(&s_AssetsDirID, Localize("Assets directory"), 0, &DirectoryButton))
 	{
-		char aBuf[IO_MAX_PATH_LENGTH];
-		char aBufFull[IO_MAX_PATH_LENGTH + 7];
+		char aBuf[MAX_PATH_LENGTH];
+		char aBufFull[MAX_PATH_LENGTH + 7];
 		if(s_CurCustomTab == 0)
 			str_copy(aBufFull, "assets/entities", sizeof(aBufFull));
 		else if(s_CurCustomTab == 1)

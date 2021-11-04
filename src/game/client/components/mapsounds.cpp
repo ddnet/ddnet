@@ -35,7 +35,7 @@ void CMapSounds::OnMapLoad()
 		CMapItemSound *pSound = (CMapItemSound *)pMap->GetItem(Start + i, 0, 0);
 		if(pSound->m_External)
 		{
-			char aBuf[IO_MAX_PATH_LENGTH];
+			char aBuf[MAX_PATH_LENGTH];
 			char *pName = (char *)pMap->GetData(pSound->m_SoundName);
 			str_format(aBuf, sizeof(aBuf), "mapres/%s.opus", pName);
 			m_aSounds[i] = Sound()->LoadOpus(aBuf);

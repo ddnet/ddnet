@@ -148,7 +148,7 @@ int CMenuBackground::ThemeIconScan(const char *pName, int IsDir, int DirType, vo
 	{
 		if(str_comp(Theme.m_Name, aThemeName) == 0 || (!Theme.m_Name[0] && str_comp(aThemeName, "none") == 0))
 		{
-			char aBuf[IO_MAX_PATH_LENGTH];
+			char aBuf[MAX_PATH_LENGTH];
 			str_format(aBuf, sizeof(aBuf), "themes/%s", pName);
 			CImageInfo Info;
 			if(!pSelf->Graphics()->LoadPNG(&Info, aBuf, DirType))

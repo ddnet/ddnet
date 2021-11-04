@@ -399,7 +399,7 @@ void CStatboard::AutoStatCSV()
 {
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
-		char aDate[20], aFilename[IO_MAX_PATH_LENGTH];
+		char aDate[20], aFilename[128];
 		str_timestamp(aDate, sizeof(aDate));
 		str_format(aFilename, sizeof(aFilename), "screenshots/auto/stats_%s.csv", aDate);
 		IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_ALL);

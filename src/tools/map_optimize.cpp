@@ -83,7 +83,7 @@ int main(int argc, const char **argv)
 	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC, argc, argv);
 	int Index, ID = 0, Type = 0, Size;
 	void *pPtr;
-	char aFileName[IO_MAX_PATH_LENGTH];
+	char aFileName[1024];
 	CDataFileReader DataFile;
 	CDataFileWriter df;
 
@@ -103,7 +103,7 @@ int main(int argc, const char **argv)
 	else
 	{
 		fs_makedir("out");
-		char aBuff[IO_MAX_PATH_LENGTH];
+		char aBuff[MAX_PATH_LENGTH];
 		pStorage->StripPathAndExtension(argv[1], aBuff, sizeof(aBuff));
 		str_format(aFileName, sizeof(aFileName), "out/%s.map", aBuff);
 	}
@@ -303,7 +303,7 @@ int main(int argc, const char **argv)
 				// Please read the comments inside the functions to understand it
 				GetImageSHA256(pImgBuff, ImgSize, Width, Height, aSHA256Str);
 
-				char aNewName[IO_MAX_PATH_LENGTH];
+				char aNewName[MAX_PATH_LENGTH];
 				int StrLen = str_format(aNewName, sizeof(aNewName) / sizeof(aNewName[0]), "%s_cut_%s", pImgName, aSHA256Str);
 
 				DeletePtr = true;
