@@ -90,7 +90,7 @@ void CDragger::Move()
 	}
 
 	if(m_TargetID < 0)
-		m_TargetID = Id != -1 ? TempEnts[Id]->GetPlayer()->GetCID() : 0;
+		m_TargetID = Id != -1 ? TempEnts[Id]->GetPlayer()->GetCID() : -1;
 
 	if(m_TargetID >= 0)
 	{
