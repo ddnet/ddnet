@@ -2346,8 +2346,6 @@ void CGraphics_Threaded::Resize(int w, int h, int RefreshRate, bool SetWindowSiz
 		// adjust the viewport to only allow certain aspect ratios
 		if(m_ScreenHeight > 4 * m_ScreenWidth / 5)
 			m_ScreenHeight = 4 * m_ScreenWidth / 5;
-		if(m_ScreenWidth > 21 * m_ScreenHeight / 9)
-			m_ScreenWidth = 21 * m_ScreenHeight / 9;
 
 		m_ScreenRefreshRate = RefreshRate == -1 ? m_ScreenRefreshRate : RefreshRate;
 
