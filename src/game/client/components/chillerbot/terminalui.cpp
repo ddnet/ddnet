@@ -207,19 +207,17 @@ void CTerminalUI::OnShutdown()
 
 void CTerminalUI::OnRender()
 {
-	if(!m_pClient->m_Snap.m_pLocalCharacter)
-		return;
 	CursesTick();
 
-	// float X = m_pClient->m_Snap.m_pLocalCharacter->m_X;
-	// float Y = m_pClient->m_Snap.m_pLocalCharacter->m_Y;
-	// char aBuf[128];
-	// str_format(aBuf, sizeof(aBuf),
-	//     "%.2f %.2f goto(%f/%f) scoreboard=%d",
-	//     X / 32, Y / 32, m_pClient->m_Controls.GetGotoXY().x, m_pClient->m_Controls.GetGotoXY().y,
-	//     m_ScoreboardActive
-	// );
-	// Client()->ChillerInfoSetStr2(aBuf);
+	if(!m_pClient->m_Snap.m_pLocalCharacter)
+		return;
+	float X = m_pClient->m_Snap.m_pLocalCharacter->m_X;
+	float Y = m_pClient->m_Snap.m_pLocalCharacter->m_Y;
+	str_format(g_aInfoStr2, sizeof(g_aInfoStr2),
+	    "%.2f %.2f scoreboard=%d",
+	    X / 32, Y / 32,
+	    m_ScoreboardActive
+	);
 }
 
 int CTerminalUI::GetInput()
@@ -308,7 +306,7 @@ int CTerminalUI::GetInput()
 		char aKey[8];
 		str_format(aKey, sizeof(aKey), "%c", c);
 		str_append(g_aInputStr, aKey, sizeof(g_aInputStr));
-		// ChillerLog("yeee", "got key d=%d c=%c", c, c);
+		// dbg_msg("yeee", "got key d=%d c=%c", c, c);
 	}
 	InputDraw();
 	return 0;
@@ -349,7 +347,7 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 	if(Key == EOF)
 		return 0;
 
-	// Client()->ChillerLog("termUI", "got key d=%d c=%c", Key, Key);
+	// dbg_msg("termUI", "got key d=%d c=%c", Key, Key);
 	return 0;
 }
 

@@ -108,9 +108,9 @@ void curses_log_push(const char *pStr)
 	int Max = CHILLER_LOGGER_HEIGHT > y ? y : CHILLER_LOGGER_HEIGHT;
 	int Top = CHILLER_LOGGER_HEIGHT - 2;
 	int Bottom = CHILLER_LOGGER_HEIGHT - Max;
-	// str_format(g_aInfoStr, sizeof(g_aInfoStr), "shifitng max=%d CHILLER_LOGGER_HEIGHT=%d y=%d top=%d bottom=%d                                            ",
-	// 	Max, CHILLER_LOGGER_HEIGHT, y, Top, Bottom
-	// );
+	str_format(g_aInfoStr, sizeof(g_aInfoStr), "shifitng max=%d CHILLER_LOGGER_HEIGHT=%d y=%d top=%d bottom=%d                                            ",
+		Max, CHILLER_LOGGER_HEIGHT, y, Top, Bottom
+	);
 	gs_NeedLogDraw = true;
 	for(int i = Top; i > Bottom; i--)
 	{
@@ -121,9 +121,9 @@ void curses_log_push(const char *pStr)
 			return;
 		}
 	}
-	// str_format(g_aInfoStr, sizeof(g_aInfoStr), "shifitng max=%d CHILLER_LOGGER_HEIGHT=%d y=%d FULLL!!! top=%d bottom=%d                          ",
-	// 	Max, CHILLER_LOGGER_HEIGHT, y, Top, Bottom
-	// );
+	str_format(g_aInfoStr, sizeof(g_aInfoStr), "shifitng max=%d CHILLER_LOGGER_HEIGHT=%d y=%d FULLL!!! top=%d bottom=%d                          ",
+		Max, CHILLER_LOGGER_HEIGHT, y, Top, Bottom
+	);
 	// no free slot found -> shift all
 	for(int i = Top; i > 0; i--)
 	{
