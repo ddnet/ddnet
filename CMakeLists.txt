@@ -2232,7 +2232,6 @@ if(TOOLS)
 
   set(TARGETS_TOOLS)
   set_src(TOOLS GLOB src/tools
-    chillpw.cpp
     config_common.h
     config_retrieve.cpp
     config_store.cpp
