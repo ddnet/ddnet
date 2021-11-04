@@ -2195,10 +2195,12 @@ void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int t
 int fs_storage_path(const char *appname, char *path, int max)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	char *home = getenv("APPDATA");
+	WCHAR *home = _wgetenv(L"APPDATA");
 	if(!home)
 		return -1;
-	_snprintf(path, max, "%s/%s", home, appname);
+	char buffer[IO_MAX_PATH_LENGTH];
+	WideCharToMultiByte(CP_UTF8, 0, home, -1, buffer, IO_MAX_PATH_LENGTH, NULL, NULL);
+	_snprintf(path, max, "%s/%s", buffer, appname);
 	return 0;
 #elif defined(CONF_PLATFORM_ANDROID)
 	// just use the data directory
@@ -2249,7 +2251,9 @@ int fs_makedir_rec_for(const char *path)
 int fs_makedir(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	if(_mkdir(path) == 0)
+	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
+	MultiByteToWideChar(CP_UTF8, 0, path, -1, wBuffer, IO_MAX_PATH_LENGTH);
+	if(_wmkdir(wBuffer) == 0)
 		return 0;
 	if(errno == EEXIST)
 		return 0;
