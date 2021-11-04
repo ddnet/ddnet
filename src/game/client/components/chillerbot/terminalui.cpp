@@ -103,6 +103,7 @@ int CTerminalUI::CursesTick()
 		DrawBorders(g_pLogWindow);
 		DrawBorders(g_pInfoWin);
 		DrawBorders(g_pInputWin);
+		gs_NeedLogDraw = true;
 	}
 
 	// draw to our windows

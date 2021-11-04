@@ -21,6 +21,7 @@ extern int g_NewY;
 extern char g_aInfoStr[1024];
 extern char g_aInfoStr2[1024];
 extern char g_aInputStr[1024];
+extern bool gs_NeedLogDraw;
 
 void curses_init();
 void log_draw();
