@@ -44,8 +44,6 @@ void CTerminalUI::DrawBorders(WINDOW *screen)
 void CTerminalUI::DrawAllBorders()
 {
 	// TODO: call in broadcast.cpp
-	if(!g_Config.m_ClNcurses)
-		return;
 	DrawBorders(g_pLogWindow);
 	DrawBorders(g_pInfoWin);
 	DrawBorders(g_pInputWin);
@@ -84,9 +82,6 @@ void CTerminalUI::InputDraw()
 
 int CTerminalUI::CursesTick()
 {
-	if(!g_Config.m_ClNcurses)
-		return 0;
-
 	getmaxyx(stdscr, g_NewY, g_NewX);
 
 	if(g_NewY != g_ParentY || g_NewX != g_ParentX)
@@ -189,23 +184,20 @@ void CTerminalUI::OnInit()
 	AimY = 0;
 	curses_init();
 	m_InputMode = INPUT_NORMAL;
-	if(g_Config.m_ClNcurses)
-	{
-		initscr();
-		noecho();
-		curs_set(FALSE);
+	initscr();
+	noecho();
+	curs_set(FALSE);
 
-		// set up initial windows
-		getmaxyx(stdscr, g_ParentY, g_ParentX);
+	// set up initial windows
+	getmaxyx(stdscr, g_ParentY, g_ParentX);
 
-		g_pLogWindow = newwin(g_ParentY - NC_INFO_SIZE * 2, g_ParentX, 0, 0);
-		g_pInfoWin = newwin(NC_INFO_SIZE, g_ParentX, g_ParentY - NC_INFO_SIZE * 2, 0);
-		g_pInputWin = newwin(NC_INFO_SIZE, g_ParentX, g_ParentY - NC_INFO_SIZE, 0);
+	g_pLogWindow = newwin(g_ParentY - NC_INFO_SIZE * 2, g_ParentX, 0, 0);
+	g_pInfoWin = newwin(NC_INFO_SIZE, g_ParentX, g_ParentY - NC_INFO_SIZE * 2, 0);
+	g_pInputWin = newwin(NC_INFO_SIZE, g_ParentX, g_ParentY - NC_INFO_SIZE, 0);
 
-		DrawBorders(g_pLogWindow);
-		DrawBorders(g_pInfoWin);
-		DrawBorders(g_pInputWin);
-	}
+	DrawBorders(g_pLogWindow);
+	DrawBorders(g_pInfoWin);
+	DrawBorders(g_pInputWin);
 }
 
 void CTerminalUI::OnShutdown()

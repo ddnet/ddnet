@@ -7,11 +7,8 @@
 
 #include "ncurses.h"
 
-enum
-{
-	CHILLER_LOGGER_WIDTH = 1024 * 4,
-	CHILLER_LOGGER_HEIGHT = 64,
-};
+#define CHILLER_LOGGER_WIDTH 1024 * 4
+#define CHILLER_LOGGER_HEIGHT 64
 
 extern WINDOW *g_pLogWindow;
 extern WINDOW *g_pInfoWin;

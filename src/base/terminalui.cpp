@@ -7,9 +7,9 @@
 
 static char gs_aaChillerLogger[CHILLER_LOGGER_HEIGHT][CHILLER_LOGGER_WIDTH];
 
-WINDOW *g_pLogWindow;
-WINDOW *g_pInfoWin;
-WINDOW *g_pInputWin;
+WINDOW *g_pLogWindow = NULL;
+WINDOW *g_pInfoWin = NULL;
+WINDOW *g_pInputWin = NULL;
 
 int g_ParentX;
 int g_ParentY;
@@ -96,6 +96,12 @@ void draw_borders(WINDOW *screen)
 
 void curses_log_push(const char *pStr)
 {
+	// if ncurses is not intialized yet (terminalui.OnInit()) just print to stdout
+	if(!g_pLogWindow)
+	{
+		puts(pStr);
+		return;
+	}
 	// first empty slot
 	int x, y;
 	getmaxyx(g_pLogWindow, y, x);
