@@ -2334,7 +2334,7 @@ int fs_file_time(const char *name, time_t *created, time_t *modified)
 	*created = sb.st_ctime;
 	*modified = sb.st_mtime;
 #else
-	#error not implemented
+#error not implemented
 #endif
 
 	return 0;
