@@ -71,6 +71,7 @@ generated
 
 # IDE project files
 .cproject
+.cmake
 .idea
 .project
 .settings
