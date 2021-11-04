@@ -990,7 +990,9 @@ void *CClient::SnapFindItem(int SnapID, int Type, int ID) const
 	for(i = 0; i < m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pSnap->NumItems(); i++)
 	{
 		CSnapshotItem *pItem = m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItem(i);
-		if(m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItemType(i) == Type && pItem->ID() == ID)
+		if(Type >= OFFSET_UUID && pItem->Type() >= CSnapshot::OFFSET_UUID_TYPE && m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItemType(i) == Type && pItem->ID() == ID)
+			return (void *)pItem->Data();
+		else if(Type < OFFSET_UUID && pItem->Type() < CSnapshot::OFFSET_UUID_TYPE && pItem->Type() == Type && pItem->ID() == ID)
 			return (void *)pItem->Data();
 	}
 	return 0x0;
