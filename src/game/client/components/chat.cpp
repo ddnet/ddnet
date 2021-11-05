@@ -898,7 +898,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 	{
 		if(Now - m_aLastSoundPlayed[CHAT_CLIENT] >= time_freq() * 3 / 10)
 		{
-			bool PlaySound = m_aLines[m_CurrentLine].m_Team ? g_Config.m_SndChat : g_Config.m_SndTeamChat;
+			bool PlaySound = m_aLines[m_CurrentLine].m_Team ? g_Config.m_SndTeamChat : g_Config.m_SndChat;
 #if defined(CONF_VIDEORECORDER)
 			if(IVideo::Current())
 			{
