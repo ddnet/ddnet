@@ -2343,10 +2343,6 @@ void CGraphics_Threaded::Resize(int w, int h, int RefreshRate, bool SetWindowSiz
 		// if the size change event is triggered, set all parameters and change the viewport
 		m_pBackend->GetViewportSize(m_ScreenWidth, m_ScreenHeight);
 
-		// adjust the viewport to only allow certain aspect ratios
-		if(m_ScreenHeight > 4 * m_ScreenWidth / 5)
-			m_ScreenHeight = 4 * m_ScreenWidth / 5;
-
 		m_ScreenRefreshRate = RefreshRate == -1 ? m_ScreenRefreshRate : RefreshRate;
 
 		g_Config.m_GfxScreenWidth = w;

@@ -186,6 +186,7 @@ class CUI
 	float m_MouseWorldX, m_MouseWorldY; // in world space
 	unsigned m_MouseButtons;
 	unsigned m_LastMouseButtons;
+	float m_Aspect;
 
 	CUIRect m_Screen;
 	class IGraphics *m_pGraphics;

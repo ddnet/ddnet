@@ -151,11 +151,13 @@ void CUI::ConvertMouseMove(float *x, float *y) const
 
 CUIRect *CUI::Screen()
 {
-	float Aspect = Graphics()->ScreenAspect();
+	m_Aspect = Graphics()->ScreenAspect();
+	if (m_Aspect < 5.0/4.0)
+		m_Aspect = 5.0/4.0;
 	float w, h;
 
 	h = 600;
-	w = Aspect * h;
+	w = m_Aspect * h;
 
 	m_Screen.w = w;
 	m_Screen.h = h;
@@ -166,7 +168,7 @@ CUIRect *CUI::Screen()
 void CUI::MapScreen()
 {
 	const CUIRect *pScreen = Screen();
-	Graphics()->MapScreen(pScreen->x, pScreen->y, pScreen->w, pScreen->h);
+	Graphics()->MapScreen(pScreen->x, pScreen->y, pScreen->w, pScreen->h * (m_Aspect / Graphics()->ScreenAspect()));
 }
 
 float CUI::PixelSize()
