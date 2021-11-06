@@ -312,9 +312,11 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 		UpdateOffset = true;
 	}
 
+	bool IsEmptyText = false;
 	if(pDisplayStr[0] == '\0')
 	{
 		pDisplayStr = pEmptyText;
+		IsEmptyText = true;
 		TextRender()->TextColor(1, 1, 1, 0.75f);
 	}
 
@@ -382,7 +384,7 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 		m_MouseCurX = UI()->MouseX();
 		m_MouseCurY = UI()->MouseY();
 	}
-	HasMouseSel = m_MouseIsPress;
+	HasMouseSel = m_MouseIsPress && !IsEmptyText;
 	if(m_MouseIsPress && UI()->MouseButtonReleased(0))
 	{
 		m_MouseIsPress = false;
