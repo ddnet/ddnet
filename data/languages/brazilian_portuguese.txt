@@ -1334,3 +1334,21 @@ Discord
 
 https://ddnet.tw/discord
 == https://ddnet.tw/discord
+
+Are you sure that you want to disconnect and switch to a different server?
+== Tem certeza que deseja desconectar e trocar pata um servidor diferente?
+
+Refreshing...
+== Atualizando...
+
+Kill Messages
+== Mensagens de kill
+
+Kill Message Normal Color
+== Cor normal de mensagem de kill
+
+Kill Message Highlight Color
+== Cor de realce de mensagem de kill
+
+Show local player's key presses
+== Mostrar pressionamento de teclas de jogadores locais

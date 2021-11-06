@@ -180,7 +180,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	{
 		CUIRect MsgBox = View;
 
-		if(ServerBrowser()->IsGettingServerlist())
+		if(!ServerBrowser()->NumServers() && ServerBrowser()->IsGettingServerlist())
 			UI()->DoLabelScaled(&MsgBox, Localize("Getting server list from master server"), 16.0f, 0);
 		else if(!ServerBrowser()->NumServers())
 			UI()->DoLabelScaled(&MsgBox, Localize("No servers found"), 16.0f, 0);
@@ -233,23 +233,11 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		CUIRect Row;
 		CUIRect SelectHitBox;
 
+		const int UIRectCount = 2 + (COL_VERSION + 1) * 3;
 		//initialize
 		if(pItem->m_pUIElement == NULL)
 		{
-			pItem->m_pUIElement = UI()->GetNewUIElement();
-		}
-
-		const int UIRectCount = 2 + (COL_VERSION + 1) * 3;
-
-		if(pItem->m_pUIElement->Size() != UIRectCount)
-		{
-			UI()->ResetUIElement(*pItem->m_pUIElement);
-
-			for(int UIElIndex = 0; UIElIndex < UIRectCount; ++UIElIndex)
-			{
-				CUIElement::SUIElementRect AddRect;
-				pItem->m_pUIElement->Add(AddRect);
-			}
+			pItem->m_pUIElement = UI()->GetNewUIElement(UIRectCount);
 		}
 
 		int Selected = str_comp(pItem->m_aAddress, g_Config.m_UiServerAddress) == 0; //selected_index==ItemIndex;
@@ -567,7 +555,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 		static int s_ClearButton = 0;
 		static float Offset = 0.0f;
-		if(Input()->KeyPress(KEY_X) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)))
+		if(Input()->KeyPress(KEY_X) && (Input()->KeyPress(KEY_LSHIFT) || Input()->KeyPress(KEY_RSHIFT)) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)))
 			UI()->SetActiveItem(&g_Config.m_BrExcludeString);
 		if(DoClearableEditBox(&g_Config.m_BrExcludeString, &s_ClearButton, &QuickExclude, g_Config.m_BrExcludeString, sizeof(g_Config.m_BrExcludeString), 12.0f, &Offset, false, CUI::CORNER_ALL))
 			Client()->ServerBrowserUpdate();
@@ -616,6 +604,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		auto Func = [this]() mutable -> const char * {
 			if(ServerBrowser()->IsRefreshing())
 				str_format(m_aLocalStringHelper, sizeof(m_aLocalStringHelper), "%s (%d%%)", Localize("Refresh"), ServerBrowser()->LoadingProgression());
+			else if(ServerBrowser()->IsGettingServerlist())
+				str_copy(m_aLocalStringHelper, Localize("Refreshing..."), sizeof(m_aLocalStringHelper));
 			else
 				str_copy(m_aLocalStringHelper, Localize("Refresh"), sizeof(m_aLocalStringHelper));
 

@@ -227,8 +227,8 @@ void CServerBan::ConBanExt(IConsole::IResult *pResult, void *pUser)
 	CServerBan *pThis = static_cast<CServerBan *>(pUser);
 
 	const char *pStr = pResult->GetString(0);
-	int Minutes = pResult->NumArguments() > 1 ? clamp(pResult->GetInteger(1), 0, 525600) : 30;
-	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "No reason given";
+	int Minutes = pResult->NumArguments() > 1 ? clamp(pResult->GetInteger(1), 0, 525600) : 10;
+	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "Follow the server rules. Type /rules into the chat.";
 
 	if(str_isallnum(pStr))
 	{
@@ -1231,7 +1231,7 @@ void CServer::SendRconLine(int ClientID, const char *pLine)
 void CServer::SendRconLineAuthed(const char *pLine, void *pUser, ColorRGBA PrintColor)
 {
 	CServer *pThis = (CServer *)pUser;
-	static volatile int s_ReentryGuard = 0;
+	static int s_ReentryGuard = 0;
 	int i;
 
 	if(s_ReentryGuard)
@@ -1716,16 +1716,9 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		{
 			if(g_Config.m_Debug)
 			{
-				char aHex[] = "0123456789ABCDEF";
-				char aBuf[512];
-
-				for(int b = 0; b < pPacket->m_DataSize && b < 32; b++)
-				{
-					aBuf[b * 3] = aHex[((const unsigned char *)pPacket->m_pData)[b] >> 4];
-					aBuf[b * 3 + 1] = aHex[((const unsigned char *)pPacket->m_pData)[b] & 0xf];
-					aBuf[b * 3 + 2] = ' ';
-					aBuf[b * 3 + 3] = 0;
-				}
+				constexpr int MaxDumpedDataSize = 32;
+				char aBuf[MaxDumpedDataSize * 3 + 1];
+				str_hex(aBuf, sizeof(aBuf), pPacket->m_pData, minimum(pPacket->m_DataSize, MaxDumpedDataSize));
 
 				char aBufMsg[256];
 				str_format(aBufMsg, sizeof(aBufMsg), "strange message ClientID=%d msg=%d data_size=%d", ClientID, Msg, pPacket->m_DataSize);
@@ -2603,6 +2596,8 @@ int CServer::Run()
 
 			while(t > TickStartTime(m_CurrentGameTick + 1))
 			{
+				GameServer()->OnPreTickTeehistorian();
+
 				for(int c = 0; c < MAX_CLIENTS; c++)
 					if(m_aClients[c].m_State == CClient::STATE_INGAME)
 						for(auto &Input : m_aClients[c].m_aInputs)
@@ -3095,7 +3090,7 @@ void CServer::DemoRecorder_HandleAutoStart()
 	if(g_Config.m_SvAutoDemoRecord)
 	{
 		m_aDemoRecorder[MAX_CLIENTS].Stop();
-		char aFilename[128];
+		char aFilename[IO_MAX_PATH_LENGTH];
 		char aDate[20];
 		str_timestamp(aDate, sizeof(aDate));
 		str_format(aFilename, sizeof(aFilename), "demos/%s_%s.demo", "auto/autorecord", aDate);
@@ -3121,8 +3116,8 @@ void CServer::SaveDemo(int ClientID, float Time)
 		m_aDemoRecorder[ClientID].Stop();
 
 		// rename the demo
-		char aOldFilename[256];
-		char aNewFilename[256];
+		char aOldFilename[IO_MAX_PATH_LENGTH];
+		char aNewFilename[IO_MAX_PATH_LENGTH];
 		str_format(aOldFilename, sizeof(aOldFilename), "demos/%s_%d_%d_tmp.demo", m_aCurrentMap, m_NetServer.Address().port, ClientID);
 		str_format(aNewFilename, sizeof(aNewFilename), "demos/%s_%s_%5.2f.demo", m_aCurrentMap, m_aClients[ClientID].m_aName, Time);
 		Storage()->RenameFile(aOldFilename, aNewFilename, IStorage::TYPE_SAVE);
@@ -3133,7 +3128,7 @@ void CServer::StartRecord(int ClientID)
 {
 	if(g_Config.m_SvPlayerDemoRecord)
 	{
-		char aFilename[128];
+		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "demos/%s_%d_%d_tmp.demo", m_aCurrentMap, m_NetServer.Address().port, ClientID);
 		m_aDemoRecorder[ClientID].Start(Storage(), Console(), aFilename, GameServer()->NetVersion(), m_aCurrentMap, &m_aCurrentMapSha256[SIX], m_aCurrentMapCrc[SIX], "server", m_aCurrentMapSize[SIX], m_apCurrentMapData[SIX]);
 	}
@@ -3145,7 +3140,7 @@ void CServer::StopRecord(int ClientID)
 	{
 		m_aDemoRecorder[ClientID].Stop();
 
-		char aFilename[128];
+		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "demos/%s_%d_%d_tmp.demo", m_aCurrentMap, m_NetServer.Address().port, ClientID);
 		Storage()->RemoveFile(aFilename, IStorage::TYPE_SAVE);
 	}
@@ -3159,7 +3154,7 @@ bool CServer::IsRecording(int ClientID)
 void CServer::ConRecord(IConsole::IResult *pResult, void *pUser)
 {
 	CServer *pServer = (CServer *)pUser;
-	char aFilename[128];
+	char aFilename[IO_MAX_PATH_LENGTH];
 
 	if(pResult->NumArguments())
 		str_format(aFilename, sizeof(aFilename), "demos/%s.demo", pResult->GetString(0));
@@ -3672,7 +3667,12 @@ const char *CServer::GetAnnouncementLine(char const *pFileName)
 		if(str_length(pLine))
 			if(pLine[0] != '#')
 				Lines.push_back(pLine);
-	if(Lines.size() == 1)
+
+	if(Lines.empty())
+	{
+		return 0;
+	}
+	else if(Lines.size() == 1)
 	{
 		m_AnnouncementLastLine = 0;
 	}
@@ -3685,8 +3685,9 @@ const char *CServer::GetAnnouncementLine(char const *pFileName)
 	{
 		unsigned Rand;
 		do
+		{
 			Rand = rand() % Lines.size();
-		while(Rand == m_AnnouncementLastLine);
+		} while(Rand == m_AnnouncementLastLine);
 
 		m_AnnouncementLastLine = Rand;
 	}

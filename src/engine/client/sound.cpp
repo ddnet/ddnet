@@ -1,5 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <atomic>
 #include <base/math.h>
 #include <base/system.h>
 
@@ -7,6 +8,7 @@
 #include <engine/storage.h>
 
 #include <engine/shared/config.h>
+#include <mutex>
 
 #include "SDL.h"
 
@@ -68,15 +70,15 @@ static CSample m_aSamples[NUM_SAMPLES] = {{0}};
 static CVoice m_aVoices[NUM_VOICES] = {{0}};
 static CChannel m_aChannels[NUM_CHANNELS] = {{255, 0}};
 
-static LOCK m_SoundLock = 0;
+static std::mutex m_SoundLock;
 
-static int m_CenterX = 0;
-static int m_CenterY = 0;
+static std::atomic<int> m_CenterX{0};
+static std::atomic<int> m_CenterY{0};
 
 static int m_MixingRate = 48000;
-static volatile int m_SoundVolume = 100;
+static std::atomic<int> m_SoundVolume{100};
 
-static int m_NextVoice GUARDED_BY(m_SoundLock) = 0;
+static int m_NextVoice = 0;
 static int *m_pMixBuffer = 0; // buffer only used by the thread callback function
 static unsigned m_MaxFrames = 0;
 
@@ -111,7 +113,7 @@ static void Mix(short *pFinalOut, unsigned Frames)
 	Frames = minimum(Frames, m_MaxFrames);
 
 	// acquire lock while we are mixing
-	lock_wait(m_SoundLock);
+	m_SoundLock.lock();
 
 	MasterVol = m_SoundVolume;
 
@@ -143,8 +145,8 @@ static void Mix(short *pFinalOut, unsigned Frames)
 			if(Voice.m_Flags & ISound::FLAG_POS && Voice.m_pChannel->m_Pan)
 			{
 				// TODO: we should respect the channel panning value
-				int dx = Voice.m_X - m_CenterX;
-				int dy = Voice.m_Y - m_CenterY;
+				int dx = Voice.m_X - m_CenterX.load(std::memory_order_relaxed);
+				int dy = Voice.m_Y - m_CenterY.load(std::memory_order_relaxed);
 				//
 				int p = IntAbs(dx);
 				float FalloffX = 0.0f;
@@ -254,7 +256,7 @@ static void Mix(short *pFinalOut, unsigned Frames)
 	}
 
 	// release the lock
-	lock_unlock(m_SoundLock);
+	m_SoundLock.unlock();
 
 	{
 		// clamp accumulated values
@@ -297,8 +299,6 @@ int CSound::Init()
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
 	SDL_AudioSpec Format, FormatOut;
-
-	m_SoundLock = lock_create();
 
 	if(!g_Config.m_SndEnable)
 		return 0;
@@ -350,9 +350,8 @@ int CSound::Update()
 
 	if(WantedVolume != m_SoundVolume)
 	{
-		lock_wait(m_SoundLock);
+		std::unique_lock<std::mutex> Lock(m_SoundLock);
 		m_SoundVolume = WantedVolume;
-		lock_unlock(m_SoundLock);
 	}
 	//#if defined(CONF_VIDEORECORDER)
 	//	if(IVideo::Current() && g_Config.m_ClVideoSndEnable)
@@ -370,7 +369,6 @@ int CSound::Shutdown()
 
 	SDL_CloseAudioDevice(m_Device);
 	SDL_QuitSubSystem(SDL_INIT_AUDIO);
-	lock_destroy(m_SoundLock);
 	free(m_pMixBuffer);
 	m_pMixBuffer = 0;
 	return 0;
@@ -760,8 +758,8 @@ float CSound::GetSampleDuration(int SampleID)
 
 void CSound::SetListenerPos(float x, float y)
 {
-	m_CenterX = (int)x;
-	m_CenterY = (int)y;
+	m_CenterX.store((int)x, std::memory_order_relaxed);
+	m_CenterY.store((int)y, std::memory_order_relaxed);
 }
 
 void CSound::SetVoiceVolume(CVoiceHandle Voice, float Volume)
@@ -771,6 +769,7 @@ void CSound::SetVoiceVolume(CVoiceHandle Voice, float Volume)
 
 	int VoiceID = Voice.Id();
 
+	std::unique_lock<std::mutex> Lock(m_SoundLock);
 	if(m_aVoices[VoiceID].m_Age != Voice.Age())
 		return;
 
@@ -785,6 +784,7 @@ void CSound::SetVoiceFalloff(CVoiceHandle Voice, float Falloff)
 
 	int VoiceID = Voice.Id();
 
+	std::unique_lock<std::mutex> Lock(m_SoundLock);
 	if(m_aVoices[VoiceID].m_Age != Voice.Age())
 		return;
 
@@ -799,6 +799,7 @@ void CSound::SetVoiceLocation(CVoiceHandle Voice, float x, float y)
 
 	int VoiceID = Voice.Id();
 
+	std::unique_lock<std::mutex> Lock(m_SoundLock);
 	if(m_aVoices[VoiceID].m_Age != Voice.Age())
 		return;
 
@@ -813,10 +814,10 @@ void CSound::SetVoiceTimeOffset(CVoiceHandle Voice, float offset)
 
 	int VoiceID = Voice.Id();
 
+	std::unique_lock<std::mutex> Lock(m_SoundLock);
 	if(m_aVoices[VoiceID].m_Age != Voice.Age())
 		return;
 
-	lock_wait(m_SoundLock);
 	{
 		if(m_aVoices[VoiceID].m_pSample)
 		{
@@ -840,7 +841,6 @@ void CSound::SetVoiceTimeOffset(CVoiceHandle Voice, float offset)
 			}
 		}
 	}
-	lock_unlock(m_SoundLock);
 }
 
 void CSound::SetVoiceCircle(CVoiceHandle Voice, float Radius)
@@ -850,6 +850,7 @@ void CSound::SetVoiceCircle(CVoiceHandle Voice, float Radius)
 
 	int VoiceID = Voice.Id();
 
+	std::unique_lock<std::mutex> Lock(m_SoundLock);
 	if(m_aVoices[VoiceID].m_Age != Voice.Age())
 		return;
 
@@ -864,6 +865,7 @@ void CSound::SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height)
 
 	int VoiceID = Voice.Id();
 
+	std::unique_lock<std::mutex> Lock(m_SoundLock);
 	if(m_aVoices[VoiceID].m_Age != Voice.Age())
 		return;
 
@@ -884,7 +886,7 @@ ISound::CVoiceHandle CSound::Play(int ChannelID, int SampleID, int Flags, float 
 	int Age = -1;
 	int i;
 
-	lock_wait(m_SoundLock);
+	m_SoundLock.lock();
 
 	// search for voice
 	for(i = 0; i < NUM_VOICES; i++)
@@ -917,7 +919,7 @@ ISound::CVoiceHandle CSound::Play(int ChannelID, int SampleID, int Flags, float 
 		Age = m_aVoices[VoiceID].m_Age;
 	}
 
-	lock_unlock(m_SoundLock);
+	m_SoundLock.unlock();
 	return CreateVoiceHandle(VoiceID, Age);
 }
 
@@ -934,7 +936,7 @@ ISound::CVoiceHandle CSound::Play(int ChannelID, int SampleID, int Flags)
 void CSound::Stop(int SampleID)
 {
 	// TODO: a nice fade out
-	lock_wait(m_SoundLock);
+	std::unique_lock<std::mutex> Lock(m_SoundLock);
 	CSample *pSample = &m_aSamples[SampleID];
 	for(auto &Voice : m_aVoices)
 	{
@@ -947,13 +949,12 @@ void CSound::Stop(int SampleID)
 			Voice.m_pSample = 0;
 		}
 	}
-	lock_unlock(m_SoundLock);
 }
 
 void CSound::StopAll()
 {
 	// TODO: a nice fade out
-	lock_wait(m_SoundLock);
+	std::unique_lock<std::mutex> Lock(m_SoundLock);
 	for(auto &Voice : m_aVoices)
 	{
 		if(Voice.m_pSample)
@@ -965,7 +966,6 @@ void CSound::StopAll()
 		}
 		Voice.m_pSample = 0;
 	}
-	lock_unlock(m_SoundLock);
 }
 
 void CSound::StopVoice(CVoiceHandle Voice)
@@ -975,15 +975,14 @@ void CSound::StopVoice(CVoiceHandle Voice)
 
 	int VoiceID = Voice.Id();
 
+	std::unique_lock<std::mutex> Lock(m_SoundLock);
 	if(m_aVoices[VoiceID].m_Age != Voice.Age())
 		return;
 
-	lock_wait(m_SoundLock);
 	{
 		m_aVoices[VoiceID].m_pSample = 0;
 		m_aVoices[VoiceID].m_Age++;
 	}
-	lock_unlock(m_SoundLock);
 }
 
 IEngineSound *CreateEngineSound() { return new CSound; }

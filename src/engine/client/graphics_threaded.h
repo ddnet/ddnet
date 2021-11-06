@@ -770,11 +770,13 @@ class CGraphics_Threaded : public IEngineGraphics
 
 	struct SQuadContainer
 	{
-		SQuadContainer()
+		SQuadContainer(bool AutomaticUpload = true)
 		{
 			m_Quads.clear();
 			m_QuadBufferObjectIndex = m_QuadBufferContainerIndex = -1;
 			m_FreeIndex = -1;
+
+			m_AutomaticUpload = AutomaticUpload;
 		}
 
 		struct SQuad
@@ -788,6 +790,8 @@ class CGraphics_Threaded : public IEngineGraphics
 		int m_QuadBufferContainerIndex;
 
 		int m_FreeIndex;
+
+		bool m_AutomaticUpload;
 	};
 	std::vector<SQuadContainer> m_QuadContainers;
 	int m_FirstFreeQuadContainer;
@@ -874,8 +878,7 @@ public:
 	void LinesEnd() override;
 	void LinesDraw(const CLineItem *pArray, int Num) override;
 
-	int UnloadTexture(IGraphics::CTextureHandle Index) override;
-	int UnloadTextureNew(CTextureHandle &TextureHandle) override;
+	int UnloadTexture(IGraphics::CTextureHandle *pIndex) override;
 	IGraphics::CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName = NULL) override;
 	int LoadTextureRawSub(IGraphics::CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData) override;
 
@@ -1038,14 +1041,25 @@ public:
 	void QuadsDrawFreeform(const CFreeformItem *pArray, int Num) override;
 	void QuadsText(float x, float y, float Size, const char *pText) override;
 
-	int CreateQuadContainer() override;
+	const GL_STexCoord *GetCurTextureCoordinates() override
+	{
+		return m_aTexture;
+	}
+
+	const GL_SColor *GetCurColor() override
+	{
+		return m_aColor;
+	}
+
+	int CreateQuadContainer(bool AutomaticUpload = true) override;
+	void QuadContainerChangeAutomaticUpload(int ContainerIndex, bool AutomaticUpload) override;
 	void QuadContainerUpload(int ContainerIndex) override;
 	void QuadContainerAddQuads(int ContainerIndex, CQuadItem *pArray, int Num) override;
 	void QuadContainerAddQuads(int ContainerIndex, CFreeformItem *pArray, int Num) override;
 	void QuadContainerReset(int ContainerIndex) override;
 	void DeleteQuadContainer(int ContainerIndex) override;
 	void RenderQuadContainer(int ContainerIndex, int QuadDrawNum) override;
-	void RenderQuadContainer(int ContainerIndex, int QuadOffset, int QuadDrawNum) override;
+	void RenderQuadContainer(int ContainerIndex, int QuadOffset, int QuadDrawNum, bool ChangeWrapMode = true) override;
 	void RenderQuadContainerEx(int ContainerIndex, int QuadOffset, int QuadDrawNum, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f) override;
 	void RenderQuadContainerAsSprite(int ContainerIndex, int QuadOffset, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f) override;
 	void RenderQuadContainerAsSpriteMultiple(int ContainerIndex, int QuadOffset, int DrawCount, SRenderSpriteInfo *pRenderInfo) override;

@@ -29,7 +29,7 @@ class CTestInfoPath
 {
 public:
 	bool m_IsDirectory;
-	char m_aData[MAX_PATH_LENGTH];
+	char m_aData[IO_MAX_PATH_LENGTH];
 
 	bool operator<(const CTestInfoPath &Other) const
 	{
@@ -44,7 +44,7 @@ public:
 class CTestCollectData
 {
 public:
-	char m_aCurrentDir[MAX_PATH_LENGTH];
+	char m_aCurrentDir[IO_MAX_PATH_LENGTH];
 	std::vector<CTestInfoPath> *m_paEntries;
 };
 

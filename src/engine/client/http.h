@@ -1,6 +1,7 @@
 #ifndef ENGINE_CLIENT_HTTP_H
 #define ENGINE_CLIENT_HTTP_H
 
+#include <atomic>
 #include <engine/kernel.h>
 #include <engine/shared/jobs.h>
 #include <engine/storage.h>
@@ -46,9 +47,9 @@ class CRequest : public IJob
 
 	CTimeout m_Timeout;
 
-	double m_Size;
-	double m_Current;
-	int m_Progress;
+	std::atomic<double> m_Size;
+	std::atomic<double> m_Current;
+	std::atomic<int> m_Progress;
 	HTTPLOG m_LogProgress;
 
 	std::atomic<int> m_State;
@@ -66,9 +67,9 @@ protected:
 public:
 	CRequest(const char *pUrl, CTimeout Timeout, HTTPLOG LogProgress = HTTPLOG::ALL);
 
-	double Current() const { return m_Current; }
-	double Size() const { return m_Size; }
-	int Progress() const { return m_Progress; }
+	double Current() const { return m_Current.load(std::memory_order_relaxed); }
+	double Size() const { return m_Size.load(std::memory_order_relaxed); }
+	int Progress() const { return m_Progress.load(std::memory_order_relaxed); }
 	int State() const { return m_State; }
 	void Abort() { m_Abort = true; }
 };
@@ -118,11 +119,11 @@ class CGetFile : public CRequest
 
 	IStorage *m_pStorage;
 
-	char m_aDestFull[MAX_PATH_LENGTH];
+	char m_aDestFull[IO_MAX_PATH_LENGTH];
 	IOHANDLE m_File;
 
 protected:
-	char m_aDest[MAX_PATH_LENGTH];
+	char m_aDest[IO_MAX_PATH_LENGTH];
 	int m_StorageType;
 
 	virtual int OnCompletion(int State);

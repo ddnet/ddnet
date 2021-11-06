@@ -27,9 +27,21 @@ class CGameTeams
 	std::shared_ptr<CScoreSaveResult> m_pSaveTeamResult[MAX_CLIENTS];
 	uint64_t m_LastSwap[MAX_CLIENTS];
 	bool m_TeamSentStartWarning[MAX_CLIENTS];
+	// `m_TeamUnfinishableKillTick` is -1 by default and gets set when a
+	// team becomes unfinishable. If the team hasn't entered practice mode
+	// by that time, it'll get killed to prevent people not understanding
+	// the message from playing for a long time in an unfinishable team.
+	int m_TeamUnfinishableKillTick[MAX_CLIENTS];
 
 	class CGameContext *m_pGameContext;
 
+	/**
+	* Kill the whole team.
+	* @param Team The team id to kill
+	* @param NewStrongID The player with that id will get strong hook on everyone else, -1 will set the normal spawning order
+	* @param ExceptID The player that should not get killed
+	*/
+	void KillTeam(int Team, int NewStrongID, int ExceptID = -1);
 	bool TeamFinished(int Team);
 	void OnTeamFinish(CPlayer **Players, unsigned int Size, float Time, const char *pTimestamp);
 	void OnFinish(CPlayer *Player, float Time, const char *pTimestamp);

@@ -130,12 +130,12 @@ class CMenus : public CComponent
 		Text.HMargin(pRect->h >= 20.0f ? 2.0f : 1.0f, &Text);
 		Text.HMargin((Text.h * FontFactor) / 2.0f, &Text);
 
-		if(UIElement.Size() != 3 || HintRequiresStringCheck || HintCanChangePositionOrSize)
+		if(!UIElement.AreRectsInit() || HintRequiresStringCheck || HintCanChangePositionOrSize || UIElement.Get(0)->m_UITextContainer == -1)
 		{
-			bool NeedsRecalc = UIElement.Size() != 3;
+			bool NeedsRecalc = !UIElement.AreRectsInit() || UIElement.Get(0)->m_UITextContainer == -1;
 			if(HintCanChangePositionOrSize)
 			{
-				if(UIElement.Size() == 3)
+				if(UIElement.AreRectsInit())
 				{
 					if(UIElement.Get(0)->m_X != pRect->x || UIElement.Get(0)->m_Y != pRect->y || UIElement.Get(0)->m_Width != pRect->w || UIElement.Get(0)->m_Y != pRect->h)
 					{
@@ -146,7 +146,7 @@ class CMenus : public CComponent
 			const char *pText = NULL;
 			if(HintRequiresStringCheck)
 			{
-				if(UIElement.Size() == 3)
+				if(UIElement.AreRectsInit())
 				{
 					pText = GetTextLambda();
 					if(str_comp(UIElement.Get(0)->m_Text.c_str(), pText) != 0)
@@ -157,10 +157,11 @@ class CMenus : public CComponent
 			}
 			if(NeedsRecalc)
 			{
-				if(UIElement.Size() > 0)
+				if(!UIElement.AreRectsInit())
 				{
-					UI()->ResetUIElement(UIElement);
+					UIElement.InitRects(3);
 				}
+				UI()->ResetUIElement(UIElement);
 
 				vec4 RealColor = Color;
 				for(int i = 0; i < 3; ++i)
@@ -174,14 +175,13 @@ class CMenus : public CComponent
 						Color.a *= ButtonColorMulDefault();
 					Graphics()->SetColor(Color);
 
-					CUIElement::SUIElementRect NewRect;
+					CUIElement::SUIElementRect &NewRect = *UIElement.Get(i);
 					NewRect.m_UIRectQuadContainer = RenderTools()->CreateRoundRectQuadContainer(pRect->x, pRect->y, pRect->w, pRect->h, r, Corners);
 
 					NewRect.m_X = pRect->x;
 					NewRect.m_Y = pRect->y;
 					NewRect.m_Width = pRect->w;
 					NewRect.m_Height = pRect->h;
-
 					if(i == 0)
 					{
 						if(pText == NULL)
@@ -189,12 +189,10 @@ class CMenus : public CComponent
 						NewRect.m_Text = pText;
 						UI()->DoLabel(NewRect, &Text, pText, Text.h * ms_FontmodHeight, 0, -1, AlignVertically);
 					}
-					UIElement.Add(NewRect);
 				}
 				Graphics()->SetColor(1, 1, 1, 1);
 			}
 		}
-
 		// render
 		size_t Index = 2;
 		if(UI()->ActiveItem() == pID)
@@ -207,7 +205,6 @@ class CMenus : public CComponent
 		STextRenderColor ColorTextOutline(TextRender()->DefaultTextOutlineColor());
 		if(UIElement.Get(0)->m_UITextContainer != -1)
 			TextRender()->RenderTextContainer(UIElement.Get(0)->m_UITextContainer, &ColorText, &ColorTextOutline);
-
 		return UI()->DoButtonLogic(pID, Checked, pRect);
 	}
 
@@ -374,7 +371,7 @@ protected:
 
 	struct CDemoItem
 	{
-		char m_aFilename[128];
+		char m_aFilename[IO_MAX_PATH_LENGTH];
 		char m_aName[128];
 		bool m_IsDir;
 		int m_StorageType;
@@ -442,7 +439,7 @@ protected:
 
 	void DemolistOnUpdate(bool Reset);
 	//void DemolistPopulate();
-	static int DemolistFetchCallback(const char *pName, time_t Date, int IsDir, int StorageType, void *pUser);
+	static int DemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser);
 
 	// friends
 	struct CFriendItem
@@ -624,7 +621,7 @@ public:
 	// Ghost
 	struct CGhostItem
 	{
-		char m_aFilename[256];
+		char m_aFilename[IO_MAX_PATH_LENGTH];
 		char m_aPlayer[MAX_NAME_LENGTH];
 
 		int m_Time;

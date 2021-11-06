@@ -70,7 +70,7 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 			return 0;
 	}
 
-	char aBuf[MAX_PATH_LENGTH];
+	char aBuf[IO_MAX_PATH_LENGTH];
 	str_format(aBuf, sizeof(aBuf), "skins/%s", pName);
 	return pSelf->LoadSkin(aNameWithoutPng, aBuf, DirType);
 }
@@ -314,23 +314,23 @@ void CSkins::Refresh()
 {
 	for(int i = 0; i < m_aSkins.size(); ++i)
 	{
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_OriginalSkin.m_Body);
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_OriginalSkin.m_BodyOutline);
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_OriginalSkin.m_Feet);
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_OriginalSkin.m_FeetOutline);
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_OriginalSkin.m_Hands);
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_OriginalSkin.m_HandsOutline);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_OriginalSkin.m_Body);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_OriginalSkin.m_BodyOutline);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_OriginalSkin.m_Feet);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_OriginalSkin.m_FeetOutline);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_OriginalSkin.m_Hands);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_OriginalSkin.m_HandsOutline);
 		for(auto &Eye : m_aSkins[i].m_OriginalSkin.m_Eyes)
-			Graphics()->UnloadTextureNew(Eye);
+			Graphics()->UnloadTexture(&Eye);
 
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_ColorableSkin.m_Body);
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_ColorableSkin.m_BodyOutline);
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_ColorableSkin.m_Feet);
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_ColorableSkin.m_FeetOutline);
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_ColorableSkin.m_Hands);
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_ColorableSkin.m_HandsOutline);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_ColorableSkin.m_Body);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_ColorableSkin.m_BodyOutline);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_ColorableSkin.m_Feet);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_ColorableSkin.m_FeetOutline);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_ColorableSkin.m_Hands);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_ColorableSkin.m_HandsOutline);
 		for(auto &Eye : m_aSkins[i].m_ColorableSkin.m_Eyes)
-			Graphics()->UnloadTextureNew(Eye);
+			Graphics()->UnloadTexture(&Eye);
 	}
 
 	m_aSkins.clear();
@@ -405,7 +405,7 @@ int CSkins::FindImpl(const char *pName)
 	{
 		if(d.front().m_pTask && d.front().m_pTask->State() == HTTP_DONE)
 		{
-			char aPath[MAX_PATH_LENGTH];
+			char aPath[IO_MAX_PATH_LENGTH];
 			str_format(aPath, sizeof(aPath), "downloadedskins/%s.png", d.front().m_aName);
 			Storage()->RenameFile(d.front().m_aPath, aPath, IStorage::TYPE_SAVE);
 			LoadSkin(d.front().m_aName, d.front().m_pTask->m_Info);

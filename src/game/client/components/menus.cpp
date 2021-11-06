@@ -761,7 +761,7 @@ float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current,
 		Slider.y -= MarginH / 2;
 		Slider.w += MarginW;
 		Slider.h += MarginH;
-		RenderTools()->DrawUIRect(&Slider, ColorRGBA{0.15f, 0.15f, 0.15f, 1.0f}, CUI::CORNER_ALL, 5.0f);
+		RenderTools()->DrawUIRect(&Slider, ColorRGBA(0.15f, 0.15f, 0.15f, 1.0f), CUI::CORNER_ALL, 5.0f);
 		Slider.Margin(2, &Slider);
 		RenderTools()->DrawUIRect(&Slider, *pColorInner, CUI::CORNER_ALL, 3.0f);
 	}
@@ -1111,7 +1111,7 @@ void CMenus::RenderLoading()
 	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_UiColor, true));
 
 	CUIRect Screen = *UI()->Screen();
-	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
+	UI()->MapScreen();
 
 	if(!m_pBackground->Render())
 	{
@@ -1188,8 +1188,8 @@ void CMenus::OnInit()
 
 	m_UIEx.Init(UI(), Kernel(), RenderTools(), m_aInputEvents, &m_NumInputEvents);
 
-	m_RefreshButton.Init(UI());
-	m_ConnectButton.Init(UI());
+	m_RefreshButton.Init(UI(), -1);
+	m_ConnectButton.Init(UI(), -1);
 
 	Console()->Chain("add_favorite", ConchainServerbrowserUpdate, this);
 	Console()->Chain("remove_favorite", ConchainServerbrowserUpdate, this);
@@ -1451,7 +1451,7 @@ int CMenus::Render()
 		return 0;
 
 	CUIRect Screen = *UI()->Screen();
-	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
+	UI()->MapScreen();
 
 	m_MouseSlow = false;
 
@@ -1605,7 +1605,7 @@ int CMenus::Render()
 		const char *pButtonText = "";
 		int ExtraAlign = 0;
 
-		ColorRGBA BgColor = ColorRGBA{0.0f, 0.0f, 0.0f, 0.5f};
+		ColorRGBA BgColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f);
 		if(m_Popup == POPUP_MESSAGE)
 		{
 			pTitle = m_aMessageTopic;
@@ -1744,7 +1744,7 @@ int CMenus::Render()
 		}
 		else if(m_Popup == POPUP_WARNING)
 		{
-			BgColor = ColorRGBA{0.5f, 0.0f, 0.0f, 0.7f};
+			BgColor = ColorRGBA(0.5f, 0.0f, 0.0f, 0.7f);
 			pTitle = m_aMessageTopic;
 			pExtraText = m_aMessageBody;
 			pButtonText = m_aMessageButton;
@@ -2566,8 +2566,8 @@ bool CMenus::OnMouseMove(float x, float y)
 		m_MousePos.x += x;
 		m_MousePos.y += y;
 	}
-	m_MousePos.x = clamp(m_MousePos.x, 0.f, (float)Graphics()->ScreenWidth());
-	m_MousePos.y = clamp(m_MousePos.y, 0.f, (float)Graphics()->ScreenHeight());
+	m_MousePos.x = clamp(m_MousePos.x, 0.f, (float)Graphics()->WindowWidth());
+	m_MousePos.y = clamp(m_MousePos.y, 0.f, (float)Graphics()->WindowHeight());
 
 	return true;
 }
@@ -2652,9 +2652,8 @@ void CMenus::OnRender()
 
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
-		CUIRect Screen = *UI()->Screen();
-		Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
-		RenderDemoPlayer(Screen);
+		UI()->MapScreen();
+		RenderDemoPlayer(*UI()->Screen());
 	}
 
 	if(Client()->State() == IClient::STATE_ONLINE && m_pClient->m_ServerMode == m_pClient->SERVERMODE_PUREMOD)
@@ -2699,8 +2698,8 @@ void CMenus::OnRender()
 
 	// update the ui
 	CUIRect *pScreen = UI()->Screen();
-	float mx = (m_MousePos.x / (float)Graphics()->ScreenWidth()) * pScreen->w;
-	float my = (m_MousePos.y / (float)Graphics()->ScreenHeight()) * pScreen->h;
+	float mx = (m_MousePos.x / (float)Graphics()->WindowWidth()) * pScreen->w;
+	float my = (m_MousePos.y / (float)Graphics()->WindowHeight()) * pScreen->h;
 
 	int Buttons = 0;
 	if(m_UseMouseButtons)
@@ -2731,8 +2730,7 @@ void CMenus::OnRender()
 	// render debug information
 	if(g_Config.m_Debug)
 	{
-		CUIRect Screen = *UI()->Screen();
-		Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
+		UI()->MapScreen();
 
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "%p %p %p", UI()->HotItem(), UI()->ActiveItem(), UI()->LastActiveItem());
@@ -2793,10 +2791,7 @@ void CMenus::RenderBackground()
 	Graphics()->QuadsEnd();
 
 	// restore screen
-	{
-		CUIRect Screen = *UI()->Screen();
-		Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
-	}
+	UI()->MapScreen();
 }
 
 bool CMenus::CheckHotKey(int Key) const
@@ -2834,7 +2829,7 @@ void CMenus::RenderUpdating(const char *pCaption, int current, int total)
 	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_UiColor, true));
 
 	CUIRect Screen = *UI()->Screen();
-	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
+	UI()->MapScreen();
 
 	RenderBackground();
 
@@ -2877,7 +2872,7 @@ int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser
 	if(IsDir || !str_endswith(pName, ".png"))
 		return 0;
 
-	char aBuf[MAX_PATH_LENGTH];
+	char aBuf[IO_MAX_PATH_LENGTH];
 	str_format(aBuf, sizeof(aBuf), "menuimages/%s", pName);
 	CImageInfo Info;
 	if(!pSelf->Graphics()->LoadPNG(&Info, aBuf, DirType))

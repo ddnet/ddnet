@@ -199,6 +199,7 @@ public:
 
 		bool IsValid() const { return Id() >= 0; }
 		int Id() const { return m_Id; }
+		void Invalidate() { m_Id = -1; }
 	};
 
 	int ScreenWidth() const { return m_ScreenWidth; }
@@ -245,8 +246,7 @@ public:
 	// destination width must be equal to the subwidth of the source
 	virtual void CopyTextureFromTextureBufferSub(uint8_t *pDestBuffer, int DestWidth, int DestHeight, uint8_t *pSourceBuffer, int SrcWidth, int SrcHeight, int ColorChannelCount, int SrcSubOffsetX, int SrcSubOffsetY, int SrcSubCopyWidth, int SrcSubCopyHeight) = 0;
 
-	virtual int UnloadTexture(CTextureHandle Index) = 0;
-	virtual int UnloadTextureNew(CTextureHandle &TextureHandle) = 0;
+	virtual int UnloadTexture(CTextureHandle *pIndex) = 0;
 	virtual CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName = NULL) = 0;
 	virtual int LoadTextureRawSub(CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData) = 0;
 	virtual CTextureHandle LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags) = 0;
@@ -321,6 +321,14 @@ public:
 	virtual void QuadsSetSubset(float TopLeftU, float TopLeftV, float BottomRightU, float BottomRightV) = 0;
 	virtual void QuadsSetSubsetFree(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3, int Index = -1) = 0;
 
+	struct CFreeformItem
+	{
+		float m_X0, m_Y0, m_X1, m_Y1, m_X2, m_Y2, m_X3, m_Y3;
+		CFreeformItem() {}
+		CFreeformItem(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3) :
+			m_X0(x0), m_Y0(y0), m_X1(x1), m_Y1(y1), m_X2(x2), m_Y2(y2), m_X3(x3), m_Y3(y3) {}
+	};
+
 	struct CQuadItem
 	{
 		float m_X, m_Y, m_Width, m_Height;
@@ -334,28 +342,29 @@ public:
 			m_Width = w;
 			m_Height = h;
 		}
+
+		CFreeformItem ToFreeForm() const
+		{
+			return CFreeformItem(m_X, m_Y, m_X + m_Width, m_Y, m_X, m_Y + m_Height, m_X + m_Width, m_Y + m_Height);
+		}
 	};
 	virtual void QuadsDraw(CQuadItem *pArray, int Num) = 0;
 	virtual void QuadsDrawTL(const CQuadItem *pArray, int Num) = 0;
 
 	virtual void QuadsTex3DDrawTL(const CQuadItem *pArray, int Num) = 0;
 
-	struct CFreeformItem
-	{
-		float m_X0, m_Y0, m_X1, m_Y1, m_X2, m_Y2, m_X3, m_Y3;
-		CFreeformItem() {}
-		CFreeformItem(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3) :
-			m_X0(x0), m_Y0(y0), m_X1(x1), m_Y1(y1), m_X2(x2), m_Y2(y2), m_X3(x3), m_Y3(y3) {}
-	};
+	virtual const GL_STexCoord *GetCurTextureCoordinates() = 0;
+	virtual const GL_SColor *GetCurColor() = 0;
 
-	virtual int CreateQuadContainer() = 0;
+	virtual int CreateQuadContainer(bool AutomaticUpload = true) = 0;
+	virtual void QuadContainerChangeAutomaticUpload(int ContainerIndex, bool AutomaticUpload) = 0;
 	virtual void QuadContainerUpload(int ContainerIndex) = 0;
 	virtual void QuadContainerAddQuads(int ContainerIndex, CQuadItem *pArray, int Num) = 0;
 	virtual void QuadContainerAddQuads(int ContainerIndex, CFreeformItem *pArray, int Num) = 0;
 	virtual void QuadContainerReset(int ContainerIndex) = 0;
 	virtual void DeleteQuadContainer(int ContainerIndex) = 0;
 	virtual void RenderQuadContainer(int ContainerIndex, int QuadDrawNum) = 0;
-	virtual void RenderQuadContainer(int ContainerIndex, int QuadOffset, int QuadDrawNum) = 0;
+	virtual void RenderQuadContainer(int ContainerIndex, int QuadOffset, int QuadDrawNum, bool ChangeWrapMode = true) = 0;
 	virtual void RenderQuadContainerEx(int ContainerIndex, int QuadOffset, int QuadDrawNum, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f) = 0;
 	virtual void RenderQuadContainerAsSprite(int ContainerIndex, int QuadOffset, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f) = 0;
 

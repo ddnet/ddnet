@@ -763,6 +763,25 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 
+void CGameContext::OnPreTickTeehistorian()
+{
+	if(!m_TeeHistorianActive)
+		return;
+
+	auto *pController = ((CGameControllerDDRace *)m_pController);
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(m_apPlayers[i] != nullptr)
+			m_TeeHistorian.RecordPlayerTeam(i, pController->m_Teams.m_Core.Team(i));
+		else
+			m_TeeHistorian.RecordPlayerTeam(i, 0);
+	}
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		m_TeeHistorian.RecordTeamPractice(i, pController->m_Teams.IsPractice(i));
+	}
+}
+
 void CGameContext::OnTick()
 {
 	// check tuning
@@ -792,25 +811,6 @@ void CGameContext::OnTick()
 
 	//if(world.paused) // make sure that the game object always updates
 	m_pController->Tick();
-
-	if(m_TeeHistorianActive)
-	{
-		for(int i = 0; i < MAX_CLIENTS; i++)
-		{
-			if(m_apPlayers[i] && m_apPlayers[i]->GetCharacter())
-			{
-				CNetObj_CharacterCore Char;
-				m_apPlayers[i]->GetCharacter()->GetCore().Write(&Char);
-				m_TeeHistorian.RecordPlayer(i, &Char);
-			}
-			else
-			{
-				m_TeeHistorian.RecordDeadPlayer(i);
-			}
-		}
-		m_TeeHistorian.EndPlayers();
-		m_TeeHistorian.BeginInputs();
-	}
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -1053,8 +1053,8 @@ void CGameContext::OnTick()
 		{
 			if(PlayerExists(m_SqlRandomMapResult->m_ClientID) && m_SqlRandomMapResult->m_aMessage[0] != '\0')
 				SendChatTarget(m_SqlRandomMapResult->m_ClientID, m_SqlRandomMapResult->m_aMessage);
-			if(m_SqlRandomMapResult->m_Map[0] != '\0')
-				str_copy(g_Config.m_SvMap, m_SqlRandomMapResult->m_Map, sizeof(g_Config.m_SvMap));
+			if(m_SqlRandomMapResult->m_aMap[0] != '\0')
+				str_copy(g_Config.m_SvMap, m_SqlRandomMapResult->m_aMap, sizeof(g_Config.m_SvMap));
 			else
 				m_LastMapVote = 0;
 		}
@@ -1072,6 +1072,27 @@ void CGameContext::OnTick()
 		}
 	}
 #endif
+
+	// Record player position at the end of the tick
+	if(m_TeeHistorianActive)
+	{
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(m_apPlayers[i] && m_apPlayers[i]->GetCharacter())
+			{
+				CNetObj_CharacterCore Char;
+				m_apPlayers[i]->GetCharacter()->GetCore().Write(&Char);
+				m_TeeHistorian.RecordPlayer(i, &Char);
+			}
+			else
+			{
+				m_TeeHistorian.RecordDeadPlayer(i);
+			}
+		}
+		m_TeeHistorian.EndPlayers();
+		m_TeeHistorian.BeginInputs();
+	}
+	// Warning: do not put code in this function directly above or below this comment
 }
 
 // Server hooks
@@ -2404,6 +2425,11 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 		// set start infos
 		Server()->SetClientName(ClientID, pMsg->m_pName);
+		// trying to set client name can delete the player object, check if it still exists
+		if(!m_apPlayers[ClientID])
+		{
+			return;
+		}
 		Server()->SetClientClan(ClientID, pMsg->m_pClan);
 		Server()->SetClientCountry(ClientID, pMsg->m_Country);
 		str_copy(pPlayer->m_TeeInfos.m_SkinName, pMsg->m_pSkin, sizeof(pPlayer->m_TeeInfos.m_SkinName));
@@ -2960,7 +2986,7 @@ void CGameContext::ConClearVotes(IConsole::IResult *pResult, void *pUserData)
 
 struct CMapNameItem
 {
-	char m_aName[MAX_PATH_LENGTH - 4];
+	char m_aName[IO_MAX_PATH_LENGTH - 4];
 
 	bool operator<(const CMapNameItem &Other) const { return str_comp_nocase(m_aName, Other.m_aName) < 0; }
 };
@@ -2977,8 +3003,8 @@ void CGameContext::ConAddMapVotes(IConsole::IResult *pResult, void *pUserData)
 		char aDescription[64];
 		str_format(aDescription, sizeof(aDescription), "Map: %s", MapList[i].m_aName);
 
-		char aCommand[MAX_PATH_LENGTH * 2 + 10];
-		char aMapEscaped[MAX_PATH_LENGTH * 2];
+		char aCommand[IO_MAX_PATH_LENGTH * 2 + 10];
+		char aMapEscaped[IO_MAX_PATH_LENGTH * 2];
 		char *pDst = aMapEscaped;
 		str_escape(&pDst, MapList[i].m_aName, aMapEscaped + sizeof(aMapEscaped));
 		str_format(aCommand, sizeof(aCommand), "change_map \"%s\"", aMapEscaped);
@@ -3208,7 +3234,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		char aGameUuid[UUID_MAXSTRSIZE];
 		FormatUuid(m_GameUuid, aGameUuid, sizeof(aGameUuid));
 
-		char aFilename[64];
+		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "teehistorian/%s.teehistorian", aGameUuid);
 
 		IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
@@ -3599,9 +3625,7 @@ void CGameContext::OnSnap(int ClientID)
 		Server()->SendMsg(&Msg, MSGFLAG_RECORD | MSGFLAG_NOSEND, ClientID);
 	}
 
-	m_World.Snap(ClientID);
 	m_pController->Snap(ClientID);
-	m_Events.Snap(ClientID);
 
 	for(auto &pPlayer : m_apPlayers)
 	{
@@ -3611,6 +3635,9 @@ void CGameContext::OnSnap(int ClientID)
 
 	if(ClientID > -1)
 		m_apPlayers[ClientID]->FakeSnap();
+
+	m_World.Snap(ClientID);
+	m_Events.Snap(ClientID);
 }
 void CGameContext::OnPreSnap() {}
 void CGameContext::OnPostSnap()
@@ -3639,7 +3666,7 @@ void CGameContext::SendChatResponseAll(const char *pLine, void *pUser)
 {
 	CGameContext *pSelf = (CGameContext *)pUser;
 
-	static volatile int ReentryGuard = 0;
+	static int ReentryGuard = 0;
 	const char *pLineOrig = pLine;
 
 	if(ReentryGuard)
@@ -3666,7 +3693,7 @@ void CGameContext::SendChatResponse(const char *pLine, void *pUser, ColorRGBA Pr
 
 	const char *pLineOrig = pLine;
 
-	static volatile int ReentryGuard = 0;
+	static int ReentryGuard = 0;
 
 	if(ReentryGuard)
 		return;

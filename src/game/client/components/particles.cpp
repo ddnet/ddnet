@@ -165,13 +165,14 @@ void CParticles::OnInit()
 	Graphics()->QuadsSetRotation(0);
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 
-	m_ParticleQuadContainerIndex = Graphics()->CreateQuadContainer();
+	m_ParticleQuadContainerIndex = Graphics()->CreateQuadContainer(false);
 
 	for(int i = 0; i <= (SPRITE_PART9 - SPRITE_PART_SLICE); ++i)
 	{
 		Graphics()->QuadsSetSubset(0, 0, 1, 1);
 		RenderTools()->QuadContainerAddSprite(m_ParticleQuadContainerIndex, 1.f);
 	}
+	Graphics()->QuadContainerUpload(m_ParticleQuadContainerIndex);
 }
 
 bool CParticles::ParticleIsVisibleOnScreen(const vec2 &CurPos, float CurSize)

@@ -103,7 +103,7 @@ void CEmoticon::OnRender()
 
 	CUIRect Screen = *UI()->Screen();
 
-	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
+	UI()->MapScreen();
 
 	Graphics()->BlendNormal();
 

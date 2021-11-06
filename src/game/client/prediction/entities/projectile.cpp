@@ -105,8 +105,14 @@ void CProjectile::Tick()
 			GameWorld()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()),
 				(m_Owner != -1) ? TeamMask : -1LL);
 		}
-		else if(pTargetChr && m_Freeze)
-			pTargetChr->Freeze();
+		else if(m_Freeze)
+		{
+			CCharacter *apEnts[MAX_CLIENTS];
+			int Num = GameWorld()->FindEntities(CurPos, 1.0f, (CEntity **)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+			for(int i = 0; i < Num; ++i)
+				if(apEnts[i] && (m_Layer != LAYER_SWITCH || (m_Layer == LAYER_SWITCH && m_Number > 0 && m_Number < Collision()->m_NumSwitchers + 1 && GameWorld()->Collision()->m_pSwitchers[m_Number].m_Status[apEnts[i]->Team()])))
+					apEnts[i]->Freeze();
+		}
 		if(Collide && m_Bouncing != 0)
 		{
 			m_StartTick = GameWorld()->GameTick();
@@ -151,7 +157,7 @@ void CProjectile::SetBouncing(int Value)
 	m_Bouncing = Value;
 }
 
-CProjectile::CProjectile(CGameWorld *pGameWorld, int ID, CProjectileData *pProj) :
+CProjectile::CProjectile(CGameWorld *pGameWorld, int ID, CProjectileData *pProj, const CNetObj_EntityEx *pEntEx) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
 {
 	m_Pos = pProj->m_StartPos;
@@ -189,6 +195,12 @@ CProjectile::CProjectile(CGameWorld *pGameWorld, int ID, CProjectileData *pProj)
 	m_ID = ID;
 	m_Layer = LAYER_GAME;
 	m_Number = 0;
+
+	if(pEntEx)
+	{
+		m_Layer = LAYER_SWITCH;
+		m_Number = pEntEx->m_SwitchNumber;
+	}
 }
 
 CProjectileData CProjectile::GetData() const

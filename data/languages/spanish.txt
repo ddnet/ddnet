@@ -11,6 +11,7 @@
 #	Ryozuki         2020-07-09 12:06:00
 # Headshot        2020-11-07 12:40:00
 # Headshot        2021-05-30 17:00:00
+# Deëivid!        2021-10-27 00:49:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -82,7 +83,7 @@ Change settings
 == Cambiar configuración
 
 Chat
-== Conversación
+== Chat
 
 Clan
 == Clan
@@ -226,7 +227,7 @@ Has people playing
 == Hay gente jugando
 
 High Detail
-== Mas detalles (HD)
+== Más detalles (HD)
 
 Hook
 == Gancho
@@ -235,10 +236,10 @@ Invalid Demo
 == Demo inválida
 
 Join blue
-== Unirse a azul
+== Unirse al azul
 
 Join red
-== Unirse a rojo
+== Unirse al rojo
 
 Jump
 == Saltar
@@ -259,7 +260,7 @@ Maximum ping:
 == Ping máximo:
 
 Mouse sens.
-== Sensibilidad ratón
+== Sensib. del ratón
 
 Move left
 == Mover a la izquierda
@@ -422,7 +423,7 @@ Show name plates
 == Mostrar apodos
 
 Show only chat messages from friends
-== Recibir mensages solo de amigos
+== Recibir mensajes solo de amigos
 
 Skins
 == Skins
@@ -452,7 +453,7 @@ Stop record
 == Detener grabación
 
 Strict gametype filter
-== Tipo de juego del filtro
+== Filtro de tipo de juego estricto
 
 Sudden Death
 == Muerte súbita
@@ -467,7 +468,7 @@ Team chat
 == En equipo
 
 The audio device couldn't be initialised.
-== El dispositivo de audio no puede ser inicializado.
+== El dispositivo de audio no pudo ser inicializado.
 
 The server is running a non-standard tuning on a pure game type.
 == El servidor está ejecutando una configuración no estándar en un tipo de juego puro.
@@ -559,7 +560,7 @@ FSAA samples
 == Muestras FSAA
 
 Sound volume
-== Volumen de sonido
+== Volumen del sonido
 
 Created:
 == Creado:
@@ -595,7 +596,7 @@ Size:
 == Tamaño:
 
 Reset to defaults
-== Resetar por defecto
+== Resetear por defecto
 
 Quit anyway?
 == ¿Salir de todos modos?
@@ -619,7 +620,7 @@ Crc:
 == Crc:
 
 Alpha
-== Alpha
+== Transp.
 
 LAN
 == LAN
@@ -682,13 +683,13 @@ DDraceNetwork is a cooperative online game where the goal is for you and your gr
 == DDraceNetwork es un juego cooperativo en línea donde el objetivo es que tú y vuestro grupo de tees lleguen a la meta del mapa. Como recién llegado, deberías comenzar en los servidores Novice, que alojan los mapas más fáciles. Considera el ping para elegir un servidor cercano.
 
 The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Los mapas contienen freeze, lo que hace que a un tee no pueda moverse temporalmente. Tendrán que trabajar juntos para superar estas partes.
+== Los mapas contienen freeze, lo que hace que un tee no pueda moverse temporalmente. Tendrán que trabajar juntos para superar estas partes.
 
 The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
 == La rueda del ratón cambia las armas. El martillo (ratón izquierdo) se puede usar para golpear otros tees y despertarlos del freeze.
 
 Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== El gancho (mouse derecho) se puede usar para desplazarse por el mapa y enganchar a  otros tees hacia ti.
+== El gancho (mouse derecho) se puede usar para desplazarse por el mapa y enganchar a otros tees hacia ti.
 
 Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
 == Lo más importante es que la comunicación es clave: no hay un tutorial, por lo que tendrás que chatear (tecla t) con otros jugadores para aprender los conceptos básicos y las técnicas del juego.
@@ -781,7 +782,7 @@ Date
 == Fecha
 
 Fetch Info
-== Obtener información
+== Obtener info.
 
 Render
 == Renderizar
@@ -832,7 +833,7 @@ Max CSVs
 == CSV máx
 
 Dummy settings
-== Configuración del Dummy
+== Config. del Dummy
 
 Vanilla skins only
 == Solo skins Vanilla
@@ -859,7 +860,7 @@ Zoom out
 == Alejar
 
 Default zoom
-== Zoom predeterminado
+== Zoom predeterm.
 
 Show others
 == Mostrar otros
@@ -868,7 +869,7 @@ Show all
 == Mostrar todo
 
 Toggle dyncam
-== Alternar cámara dinámica
+== Alt. cámara dinámica
 
 Toggle dummy
 == Alternar dummy
@@ -898,7 +899,7 @@ Show HUD
 == Mostrar HUD
 
 UI mouse s.
-== UI mouse s.
+== Sens. del ratón en menú
 
 may cause delay
 == puede causar retraso
@@ -922,7 +923,7 @@ Enable gun sound
 == Habilitar sonido de pistola
 
 Enable long pain sound (used when shooting in freeze)
-== Habilitar el sonido de dolor prolongado (se usa al disparar al estar congelado)
+== Habilitar el sonido de dolor prolongado (se usa al disparar estando congelado)
 
 Enable server message sound
 == Habilitar el sonido para mensajes del servidor
@@ -940,7 +941,7 @@ Threaded sound loading
 == Carga de sonido en un hilo
 
 Map sound volume
-== Volumen de sonido del mapa
+== Vol. del sonido del mapa
 
 HUD
 == Apariencia
@@ -961,7 +962,7 @@ Show health + ammo
 == Mostrar salud + munición
 
 Show names in chat in team colors
-== Mostrar nombres en el chat en colores del equipo
+== Mostrar nombres con colores de equipo en el chat
 
 Show kill messages
 == Mostrar mensajes de muerte
@@ -1027,13 +1028,13 @@ AntiPing
 == AntiPing
 
 AntiPing: predict other players
-== AntiPing: predice otros jugadores
+== AntiPing: predecir otros jugadores
 
 AntiPing: predict weapons
-== AntiPing: predice armas
+== AntiPing: predecir armas
 
 AntiPing: predict grenade paths
-== AntiPing: predice recorrido de granadas
+== AntiPing: predecir recorrido de granadas
 
 Show other players' hook collision lines
 == Mostrar las líneas de colisión de gancho de otros jugadores
@@ -1045,10 +1046,10 @@ Old mouse mode
 == Modo de mouse viejo
 
 Show tiles layers from BG map
-== Mostrar capas de tiles del mapa BG
+== Mostrar capas de tiles del mapa de fondo
 
 Try fast HTTP map download first
-== Prueba primero la descarga rápida del mapa HTTP
+== Intentar primero la descarga rápida de HTTP para mapas
 
 DDNet %s is available:
 == DDNet %s está disponible:
@@ -1060,7 +1061,7 @@ No updates available
 == No hay actualizaciones disponibles
 
 Check now
-== Revisar ahora
+== Chequear
 
 New random timeout code
 == Nuevo código de timeout aleatorio
@@ -1072,7 +1073,7 @@ Follow
 == Seguir
 
 Frags
-== Muertes del enemigo
+== Asesinatos
 
 Deaths
 == Muertes
@@ -1081,13 +1082,13 @@ Suicides
 == Suicidios
 
 Ratio
-== Proporción
+== K/D
 
 Net
-== Net
+== Ventaja
 
 FPM
-== Modo de página rápida
+== APM
 
 Spree
 == Racha
@@ -1096,7 +1097,7 @@ Best
 == Mejor
 
 Grabs
-== Agarrar
+== Banderas
 
 1 new mention
 == 1 nueva mención
@@ -1171,13 +1172,13 @@ Skins directory
 == Directorio de skins
 
 Game sound volume
-== Volúmen de sonido del juego
+== Vol. del sonido del juego
 
 Chat sound volume
-== Volúmen del chat
+== Vol. del sonido del chat
 
 Background music volume
-== Volúmen de música de fondo
+== Vol. de la música de fondo
 
 Assets
 == Recursos
@@ -1283,7 +1284,7 @@ Windowed borderless
 == Ventana sin bordes
 
 Desktop fullscreen
-== Pantalla completa
+== Pantalla completa de escritorio
 
 Use modern OpenGL
 == Usar OpenGL moderno
@@ -1292,13 +1293,13 @@ Show client IDs
 == Mostrar IDs de clientes
 
 Laser Outline Color
-== Color de contorno del laser
+== Color de contorno del láser
 
 Laser Inner Color
-== Color interior del laser
+== Color interior del láser
 
 Hookline
-== Linea del gancho
+== Línea del gancho
 
 No hit
 == Sin golpes
@@ -1326,3 +1327,21 @@ Discord
 
 https://ddnet.tw/discord
 == https://ddnet.tw/discord
+
+Are you sure that you want to disconnect and switch to a different server?
+== ¿Seguro que quieres desconectarte y cambiar de servidor?
+
+Refreshing...
+== Actualizando...
+
+Kill Messages
+== Mensajes de Muerte
+
+Kill Message Normal Color
+== Color Normal de Mensajes de Muerte
+
+Kill Message Highlight Color
+== Color Destac. de Mensajes de Muerte
+
+Show local player's key presses
+== Mostrar las teclas presionadas por el jugador local

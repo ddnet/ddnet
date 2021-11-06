@@ -50,8 +50,7 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 	// unload all textures
 	for(int i = 0; i < m_Count; i++)
 	{
-		Graphics()->UnloadTexture(m_aTextures[i]);
-		m_aTextures[i] = IGraphics::CTextureHandle();
+		Graphics()->UnloadTexture(&(m_aTextures[i]));
 		m_aTextureUsedByTileOrQuadLayerFlag[i] = 0;
 	}
 	m_Count = 0;
@@ -100,10 +99,10 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 		CMapItemImage *pImg = (CMapItemImage *)pMap->GetItem(Start + i, 0, 0);
 		if(pImg->m_External)
 		{
-			char Buf[256];
+			char aPath[IO_MAX_PATH_LENGTH];
 			char *pName = (char *)pMap->GetData(pImg->m_ImageName);
-			str_format(Buf, sizeof(Buf), "mapres/%s.png", pName);
-			m_aTextures[i] = Graphics()->LoadTexture(Buf, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, LoadFlag);
+			str_format(aPath, sizeof(aPath), "mapres/%s.png", pName);
+			m_aTextures[i] = Graphics()->LoadTexture(aPath, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, LoadFlag);
 		}
 		else
 		{
@@ -388,7 +387,7 @@ void CMapImages::ChangeEntitiesPath(const char *pPath)
 			for(int n = 0; n < MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT; ++n)
 			{
 				if(m_EntitiesTextures[i][n].IsValid())
-					Graphics()->UnloadTexture(m_EntitiesTextures[i][n]);
+					Graphics()->UnloadTexture(&(m_EntitiesTextures[i][n]));
 				m_EntitiesTextures[i][n] = IGraphics::CTextureHandle();
 			}
 
@@ -407,9 +406,9 @@ void CMapImages::SetTextureScale(int Scale)
 	if(Graphics() && m_OverlayCenterTexture.IsValid()) // check if component was initialized
 	{
 		// reinitialize component
-		Graphics()->UnloadTexture(m_OverlayBottomTexture);
-		Graphics()->UnloadTexture(m_OverlayTopTexture);
-		Graphics()->UnloadTexture(m_OverlayCenterTexture);
+		Graphics()->UnloadTexture(&m_OverlayBottomTexture);
+		Graphics()->UnloadTexture(&m_OverlayTopTexture);
+		Graphics()->UnloadTexture(&m_OverlayCenterTexture);
 
 		m_OverlayBottomTexture = IGraphics::CTextureHandle();
 		m_OverlayTopTexture = IGraphics::CTextureHandle();

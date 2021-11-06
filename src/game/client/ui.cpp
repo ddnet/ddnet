@@ -8,17 +8,34 @@
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
 
-void CUIElement::Init(CUI *pUI)
+void CUIElement::Init(CUI *pUI, int RequestedRectCount)
 {
 	pUI->AddUIElement(this);
+	if(RequestedRectCount > 0)
+		m_UIRects.resize(RequestedRectCount);
 }
 
-CUIElement::SUIElementRect::SUIElementRect() :
-	m_UIRectQuadContainer(-1), m_UITextContainer(-1), m_X(-1), m_Y(-1), m_Width(-1), m_Height(-1)
+void CUIElement::InitRects(int RequestedRectCount)
 {
+	dbg_assert(m_UIRects.size() == 0, "UI rects can only be initialized once, create another ui element instead.");
+	m_UIRects.resize(RequestedRectCount);
+}
+
+CUIElement::SUIElementRect::SUIElementRect() { Reset(); }
+
+void CUIElement::SUIElementRect::Reset()
+{
+	m_UIRectQuadContainer = -1;
+	m_UITextContainer = -1;
+	m_X = -1;
+	m_Y = -1;
+	m_Width = -1;
+	m_Height = -1;
+	m_Text.clear();
 	mem_zero(&m_Cursor, sizeof(m_Cursor));
-	mem_zero(&m_TextColor, sizeof(m_TextColor));
-	mem_zero(&m_TextOutlineColor, sizeof(m_TextOutlineColor));
+	m_TextColor.Set(-1, -1, -1, -1);
+	m_TextOutlineColor.Set(-1, -1, -1, -1);
+	m_QuadColor = ColorRGBA(-1, -1, -1, -1);
 }
 
 /********************************************************
@@ -54,9 +71,9 @@ CUI::~CUI()
 	m_OwnUIElements.clear();
 }
 
-CUIElement *CUI::GetNewUIElement()
+CUIElement *CUI::GetNewUIElement(int RequestedRectCount)
 {
-	CUIElement *pNewEl = new CUIElement(this);
+	CUIElement *pNewEl = new CUIElement(this, RequestedRectCount);
 
 	m_OwnUIElements.push_back(pNewEl);
 
@@ -78,9 +95,9 @@ void CUI::ResetUIElement(CUIElement &UIElement)
 		if(Rect.m_UITextContainer != -1)
 			TextRender()->DeleteTextContainer(Rect.m_UITextContainer);
 		Rect.m_UITextContainer = -1;
-	}
 
-	UIElement.Clear();
+		Rect.Reset();
+	}
 }
 
 void CUI::OnElementsReset()
@@ -144,6 +161,12 @@ CUIRect *CUI::Screen()
 	m_Screen.h = h;
 
 	return &m_Screen;
+}
+
+void CUI::MapScreen()
+{
+	const CUIRect *pScreen = Screen();
+	Graphics()->MapScreen(pScreen->x, pScreen->y, pScreen->w, pScreen->h);
 }
 
 float CUI::PixelSize()
@@ -407,68 +430,63 @@ int CUI::DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *
 	return 1;
 }
 
-/*
-int CUI::DoButton(const void *id, const char *text, int checked, const CUIRect *r, ui_draw_button_func draw_func, const void *extra)
-{
-	// logic
-	int ret = 0;
-	int inside = ui_MouseInside(r);
-	static int button_used = 0;
-
-	if(ui_ActiveItem() == id)
-	{
-		if(!ui_MouseButton(button_used))
-		{
-			if(inside && checked >= 0)
-				ret = 1+button_used;
-			ui_SetActiveItem(0);
-		}
-	}
-	else if(ui_HotItem() == id)
-	{
-		if(ui_MouseButton(0))
-		{
-			ui_SetActiveItem(id);
-			button_used = 0;
-		}
-
-		if(ui_MouseButton(1))
-		{
-			ui_SetActiveItem(id);
-			button_used = 1;
-		}
-	}
-
-	if(inside)
-		ui_SetHotItem(id);
-
-	if(draw_func)
-		draw_func(id, text, checked, r, extra);
-	return ret;
-}*/
-
-void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically)
+float CUI::DoTextLabel(float x, float y, float w, float h, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically, bool StopAtEnd, class CTextCursor *pSelCursor)
 {
 	float AlignedSize = 0;
 	float MaxCharacterHeightInLine = 0;
 	float tw = TextRender()->TextWidth(0, Size, pText, -1, MaxWidth, &AlignedSize, &MaxCharacterHeightInLine);
-	float AlignmentVert = r->y + (r->h - AlignedSize) / 2.f;
+
+	int Flags = TEXTFLAG_RENDER | (StopAtEnd ? TEXTFLAG_STOP_AT_END : 0);
+
+	float AlignmentVert = y + (h - AlignedSize) / 2.f;
+	float AlignmentHori = 0;
 	if(AlignVertically == 0)
 	{
-		AlignmentVert = r->y + (r->h - AlignedSize) / 2.f - (AlignedSize - MaxCharacterHeightInLine) / 2.f;
+		AlignmentVert = y + (h - AlignedSize) / 2.f - (AlignedSize - MaxCharacterHeightInLine) / 2.f;
 	}
 	if(Align == 0)
 	{
-		TextRender()->Text(0, r->x + (r->w - tw) / 2.f, AlignmentVert, Size, pText, MaxWidth);
+		AlignmentHori = x + (w - tw) / 2.f;
 	}
 	else if(Align < 0)
 	{
-		TextRender()->Text(0, r->x, AlignmentVert, Size, pText, MaxWidth);
+		AlignmentHori = x;
 	}
 	else if(Align > 0)
 	{
-		TextRender()->Text(0, r->x + r->w - tw, AlignmentVert, Size, pText, MaxWidth);
+		AlignmentHori = x + w - tw;
 	}
+
+	CTextCursor Cursor;
+	TextRender()->SetCursor(&Cursor, AlignmentHori, AlignmentVert, Size, Flags);
+	Cursor.m_LineWidth = (float)MaxWidth;
+	if(pSelCursor)
+	{
+		Cursor.m_CursorMode = pSelCursor->m_CursorMode;
+		Cursor.m_CursorCharacter = pSelCursor->m_CursorCharacter;
+		Cursor.m_CalculateSelectionMode = pSelCursor->m_CalculateSelectionMode;
+		Cursor.m_PressMouseX = pSelCursor->m_PressMouseX;
+		Cursor.m_PressMouseY = pSelCursor->m_PressMouseY;
+		Cursor.m_ReleaseMouseX = pSelCursor->m_ReleaseMouseX;
+		Cursor.m_ReleaseMouseY = pSelCursor->m_ReleaseMouseY;
+
+		Cursor.m_SelectionStart = pSelCursor->m_SelectionStart;
+		Cursor.m_SelectionEnd = pSelCursor->m_SelectionEnd;
+	}
+
+	TextRender()->TextEx(&Cursor, pText, -1);
+
+	if(pSelCursor)
+	{
+		*pSelCursor = Cursor;
+	}
+
+	return tw;
+}
+
+void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically, CTextCursor *pSelCursor)
+{
+	DoTextLabel(r->x, r->y, r->w, r->h, pText, Size, Align, MaxWidth, AlignVertically, false, pSelCursor);
 }
 
 void CUI::DoLabelScaled(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically)
@@ -515,17 +533,21 @@ void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, cons
 	}
 	Cursor.m_LineWidth = MaxWidth;
 
-	RectEl.m_UITextContainer = TextRender()->CreateTextContainer(&Cursor, pText, StrLen);
-	RectEl.m_Cursor = Cursor;
 	RectEl.m_TextColor = TextRender()->GetTextColor();
 	RectEl.m_TextOutlineColor = TextRender()->GetTextOutlineColor();
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
+	TextRender()->TextOutlineColor(TextRender()->DefaultTextOutlineColor());
+	RectEl.m_UITextContainer = TextRender()->CreateTextContainer(&Cursor, pText, StrLen);
+	TextRender()->TextColor(RectEl.m_TextColor);
+	TextRender()->TextOutlineColor(RectEl.m_TextOutlineColor);
+	RectEl.m_Cursor = Cursor;
 }
 
-void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically, bool StopAtEnd, int StrLen, CTextCursor *pReadCursor)
+void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, float x, float y, float w, float h, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically, bool StopAtEnd, int StrLen, CTextCursor *pReadCursor)
 {
 	bool NeedsRecreate = false;
 	bool ColorChanged = RectEl.m_TextColor != TextRender()->GetTextColor() || RectEl.m_TextOutlineColor != TextRender()->GetTextOutlineColor();
-	if(RectEl.m_UITextContainer == -1 || RectEl.m_X != pRect->x || RectEl.m_Y != pRect->y || RectEl.m_Width != pRect->w || RectEl.m_Height != pRect->h || ColorChanged)
+	if(RectEl.m_UITextContainer == -1 || RectEl.m_X != x || RectEl.m_Y != y || RectEl.m_Width != w || RectEl.m_Height != h || ColorChanged)
 	{
 		NeedsRecreate = true;
 	}
@@ -542,17 +564,16 @@ void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRe
 				NeedsRecreate = true;
 		}
 	}
-
 	if(NeedsRecreate)
 	{
 		if(RectEl.m_UITextContainer != -1)
 			TextRender()->DeleteTextContainer(RectEl.m_UITextContainer);
 		RectEl.m_UITextContainer = -1;
 
-		RectEl.m_X = pRect->x;
-		RectEl.m_Y = pRect->y;
-		RectEl.m_Width = pRect->w;
-		RectEl.m_Height = pRect->h;
+		RectEl.m_X = x;
+		RectEl.m_Y = y;
+		RectEl.m_Width = w;
+		RectEl.m_Height = h;
 
 		if(StrLen > 0)
 			RectEl.m_Text = std::string(pText, StrLen);
@@ -561,11 +582,21 @@ void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRe
 		else
 			RectEl.m_Text.clear();
 
-		DoLabel(RectEl, pRect, pText, Size, Align, MaxWidth, AlignVertically, StopAtEnd, StrLen, pReadCursor);
+		CUIRect TmpRect;
+		TmpRect.x = x;
+		TmpRect.y = y;
+		TmpRect.w = w;
+		TmpRect.h = h;
+		DoLabel(RectEl, &TmpRect, pText, Size, Align, MaxWidth, AlignVertically, StopAtEnd, StrLen, pReadCursor);
 	}
 
-	STextRenderColor ColorText(TextRender()->DefaultTextColor());
-	STextRenderColor ColorTextOutline(TextRender()->DefaultTextOutlineColor());
+	STextRenderColor ColorText(RectEl.m_TextColor);
+	STextRenderColor ColorTextOutline(RectEl.m_TextOutlineColor);
 	if(RectEl.m_UITextContainer != -1)
 		TextRender()->RenderTextContainer(RectEl.m_UITextContainer, &ColorText, &ColorTextOutline);
+}
+
+void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically, bool StopAtEnd, int StrLen, CTextCursor *pReadCursor)
+{
+	DoLabelStreamed(RectEl, pRect->x, pRect->y, pRect->w, pRect->h, pText, Size, Align, MaxWidth, AlignVertically, StopAtEnd, StrLen, pReadCursor);
 }

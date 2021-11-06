@@ -92,6 +92,14 @@ public:
 	bool m_AllowXSkins;
 };
 
+class CSnapEntities
+{
+public:
+	IClient::CSnapItem m_Item;
+	const void *m_pData;
+	const CNetObj_EntityEx *m_pDataEx;
+};
+
 class CGameClient : public IGameClient
 {
 public:
@@ -311,8 +319,6 @@ public:
 			vec2 m_Position;
 		};
 
-		bool m_HasSwitchState;
-
 		CCharacterInfo m_aCharacters[MAX_CLIENTS];
 	};
 
@@ -336,7 +342,8 @@ public:
 		int m_SkinColor;
 		int m_Team;
 		int m_Emoticon;
-		int m_EmoticonStart;
+		float m_EmoticonStartFraction;
+		int m_EmoticonStartTick;
 		bool m_Solo;
 		bool m_Jetpack;
 		bool m_NoCollision;
@@ -513,6 +520,8 @@ public:
 	void DummyResetInput();
 	void Echo(const char *pString);
 	bool IsOtherTeam(int ClientID);
+	int OwnTeam();
+	bool IsLocalCharSuper();
 	bool CanDisplayWarning();
 	bool IsDisplayingWarning();
 
@@ -630,7 +639,12 @@ public:
 	SClientEmoticonsSkin m_EmoticonsSkin;
 	bool m_EmoticonsSkinLoaded;
 
+	const std::vector<CSnapEntities> &SnapEntities() { return m_aSnapEntities; }
+
 private:
+	std::vector<CSnapEntities> m_aSnapEntities;
+	void SnapCollectEntities();
+
 	bool m_DDRaceMsgSent[NUM_DUMMIES];
 	int m_ShowOthers[NUM_DUMMIES];
 

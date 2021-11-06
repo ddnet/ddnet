@@ -122,7 +122,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 				if(!str_endswith(m_aCurrentDemoFile, ".demo"))
 					str_append(m_aCurrentDemoFile, ".demo", sizeof(m_aCurrentDemoFile));
 
-				char aPath[512];
+				char aPath[IO_MAX_PATH_LENGTH];
 				str_format(aPath, sizeof(aPath), "%s/%s", m_aCurrentDemoFolder, m_aCurrentDemoFile);
 
 				IOHANDLE DemoFile = Storage()->OpenFile(aPath, IOFLAG_READ, IStorage::TYPE_SAVE);
@@ -740,28 +740,28 @@ int CMenus::UiLogicGetCurrentClickedItem()
 		return -1;
 }
 
-int CMenus::DemolistFetchCallback(const char *pName, time_t Date, int IsDir, int StorageType, void *pUser)
+int CMenus::DemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser)
 {
 	CMenus *pSelf = (CMenus *)pUser;
-	if(str_comp(pName, ".") == 0 || (str_comp(pName, "..") == 0 && str_comp(pSelf->m_aCurrentDemoFolder, "demos") == 0) || (!IsDir && !str_endswith(pName, ".demo")))
+	if(str_comp(pInfo->m_pName, ".") == 0 || (str_comp(pInfo->m_pName, "..") == 0 && str_comp(pSelf->m_aCurrentDemoFolder, "demos") == 0) || (!IsDir && !str_endswith(pInfo->m_pName, ".demo")))
 	{
 		return 0;
 	}
 
 	CDemoItem Item;
-	str_copy(Item.m_aFilename, pName, sizeof(Item.m_aFilename));
+	str_copy(Item.m_aFilename, pInfo->m_pName, sizeof(Item.m_aFilename));
 	if(IsDir)
 	{
-		str_format(Item.m_aName, sizeof(Item.m_aName), "%s/", pName);
+		str_format(Item.m_aName, sizeof(Item.m_aName), "%s/", pInfo->m_pName);
 		Item.m_InfosLoaded = false;
 		Item.m_Valid = false;
 		Item.m_Date = 0;
 	}
 	else
 	{
-		str_truncate(Item.m_aName, sizeof(Item.m_aName), pName, str_length(pName) - 5);
+		str_truncate(Item.m_aName, sizeof(Item.m_aName), pInfo->m_pName, str_length(pInfo->m_pName) - 5);
 		Item.m_InfosLoaded = false;
-		Item.m_Date = Date;
+		Item.m_Date = pInfo->m_TimeModified;
 	}
 	Item.m_IsDir = IsDir != 0;
 	Item.m_StorageType = StorageType;
@@ -1257,8 +1257,8 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	static int s_DirectoryButtonID = 0;
 	if(DoButton_Menu(&s_DirectoryButtonID, Localize("Demos directory"), 0, &DirectoryButton))
 	{
-		char aBuf[MAX_PATH_LENGTH];
-		char aBufFull[MAX_PATH_LENGTH + 7];
+		char aBuf[IO_MAX_PATH_LENGTH];
+		char aBufFull[IO_MAX_PATH_LENGTH + 7];
 		Storage()->GetCompletePath(IStorage::TYPE_SAVE, "demos", aBuf, sizeof(aBuf));
 		Storage()->CreateFolder("demos", IStorage::TYPE_SAVE);
 		str_format(aBufFull, sizeof(aBufFull), "file://%s", aBuf);

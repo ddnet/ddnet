@@ -37,7 +37,7 @@ void CNamePlates::RenderNameplate(
 	RenderNameplatePos(Position, pPlayerInfo, 1.0f);
 }
 
-void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pPlayerInfo, float Alpha)
+void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pPlayerInfo, float Alpha, bool ForceAlpha)
 {
 	int ClientID = pPlayerInfo->m_ClientID;
 
@@ -115,7 +115,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		STextRenderColor TColor;
 		STextRenderColor TOutlineColor;
 
-		if(OtherTeam)
+		if(OtherTeam && !ForceAlpha)
 		{
 			TOutlineColor.Set(0.0f, 0.0f, 0.0f, 0.2f * g_Config.m_ClShowOthersAlpha / 100.0f);
 			TColor.Set(rgb.r, rgb.g, rgb.b, g_Config.m_ClShowOthersAlpha / 100.0f);
@@ -274,9 +274,7 @@ void CNamePlates::OnRender()
 
 		if(m_pClient->m_aClients[i].m_SpecCharPresent)
 		{
-			bool OtherTeam = m_pClient->IsOtherTeam(i);
-			float Alpha = 0.4f * (OtherTeam ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f);
-			RenderNameplatePos(m_pClient->m_aClients[i].m_SpecChar, pInfo, Alpha);
+			RenderNameplatePos(m_pClient->m_aClients[i].m_SpecChar, pInfo, 0.4f, true);
 		}
 
 		// only render active characters

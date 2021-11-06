@@ -109,6 +109,21 @@ void CInput::MouseModeRelative()
 	SDL_GetRelativeMouseState(0x0, 0x0);
 }
 
+void CInput::NativeMousePos(int *x, int *y) const
+{
+	int nx = 0, ny = 0;
+	SDL_GetMouseState(&nx, &ny);
+
+	*x = nx;
+	*y = ny;
+}
+
+bool CInput::NativeMousePressed(int index)
+{
+	int i = SDL_GetMouseState(NULL, NULL);
+	return (i & SDL_BUTTON(index)) != 0;
+}
+
 int CInput::MouseDoubleClick()
 {
 	if(m_ReleaseDelta >= 0 && m_ReleaseDelta < (time_freq() / 3))
@@ -287,12 +302,12 @@ int CInput::Update()
 				// Sum if you want to ignore multiple modifiers.
 				if(!(Event.key.keysym.mod & g_Config.m_InpIgnoredModifiers))
 				{
-					Scancode = Event.key.keysym.scancode;
+					Scancode = g_Config.m_InpTranslatedKeys ? SDL_GetScancodeFromKey(Event.key.keysym.sym) : Event.key.keysym.scancode;
 				}
 				break;
 			case SDL_KEYUP:
 				Action = IInput::FLAG_RELEASE;
-				Scancode = Event.key.keysym.scancode;
+				Scancode = g_Config.m_InpTranslatedKeys ? SDL_GetScancodeFromKey(Event.key.keysym.sym) : Event.key.keysym.scancode;
 				break;
 
 			// handle mouse buttons
@@ -350,7 +365,12 @@ int CInput::Update()
 					break;
 				case SDL_WINDOWEVENT_FOCUS_GAINED:
 					if(m_InputGrabbed)
-						MouseModeRelative();
+					{
+						// Enable this in case SDL 2.0.16 has major bugs or 2.0.18 still doesn't fix tabbing out with relative mouse
+						// MouseModeRelative();
+						// Clear pending relative mouse motion
+						SDL_GetRelativeMouseState(0x0, 0x0);
+					}
 					m_MouseFocus = true;
 					IgnoreKeys = true;
 					break;
@@ -359,7 +379,8 @@ int CInput::Update()
 					IgnoreKeys = true;
 					if(m_InputGrabbed)
 					{
-						MouseModeAbsolute();
+						// Enable this in case SDL 2.0.16 has major bugs or 2.0.18 still doesn't fix tabbing out with relative mouse
+						// MouseModeAbsolute();
 						// Remember that we had relative mouse
 						m_InputGrabbed = true;
 					}

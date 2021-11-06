@@ -47,7 +47,7 @@ class CMapImages : public CComponent
 	int m_aTextureUsedByTileOrQuadLayerFlag[64]; // 0: nothing, 1(as flag): tile layer, 2(as flag): quad layer
 	int m_Count;
 
-	char m_aEntitiesPath[MAX_PATH_LENGTH];
+	char m_aEntitiesPath[IO_MAX_PATH_LENGTH];
 
 	bool HasFrontLayer(EMapImageModType ModType);
 	bool HasSpeedupLayer(EMapImageModType ModType);

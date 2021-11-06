@@ -6,6 +6,7 @@
 #include <game/mapitems.h>
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
+#include <game/version.h>
 
 #include "character.h"
 
@@ -104,15 +105,26 @@ void CLight::Snap(int SnappingClient)
 	if(NetworkClipped(SnappingClient, m_Pos) && NetworkClipped(SnappingClient, m_To))
 		return;
 
+	CNetObj_EntityEx *pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
+	if(!pEntData)
+		return;
+
+	pEntData->m_SwitchNumber = m_Number;
+	pEntData->m_Layer = m_Layer;
+	pEntData->m_EntityClass = ENTITYCLASS_LIGHT;
+
 	CCharacter *Char = GameServer()->GetPlayerChar(SnappingClient);
 
 	if(SnappingClient > -1 && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1 || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) && GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
 		Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
 
-	int Tick = (Server()->Tick() % Server()->TickSpeed()) % 6;
-
-	if(Char && Char->IsAlive() && m_Layer == LAYER_SWITCH && m_Number > 0 && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()] && (Tick))
-		return;
+	int SnappingClientVersion = SnappingClient >= 0 ? GameServer()->GetClientVersion(SnappingClient) : CLIENT_VERSIONNR;
+	if(SnappingClientVersion < VERSION_DDNET_SWITCH)
+	{
+		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 6;
+		if(Char && Char->IsAlive() && m_Layer == LAYER_SWITCH && m_Number > 0 && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()] && Tick)
+			return;
+	}
 
 	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
 		NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));

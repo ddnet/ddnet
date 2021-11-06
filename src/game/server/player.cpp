@@ -56,9 +56,7 @@ void CPlayer::Reset()
 
 	m_LastCommandPos = 0;
 	m_LastPlaytime = 0;
-	m_LastEyeEmote = 0;
-	m_Sent1stAfkWarning = 0;
-	m_Sent2ndAfkWarning = 0;
+	mem_zero(m_SentAfkWarning, sizeof(m_SentAfkWarning));
 	m_ChatScore = 0;
 	m_Moderating = false;
 	m_EyeEmoteEnabled = true;
@@ -71,9 +69,9 @@ void CPlayer::Reset()
 	m_Afk = true;
 	m_LastWhisperTo = -1;
 	m_LastSetSpectatorMode = 0;
-	m_TimeoutCode[0] = '\0';
+	m_aTimeoutCode[0] = '\0';
 	delete m_pLastTarget;
-	m_pLastTarget = nullptr;
+	m_pLastTarget = new CNetObj_PlayerInput({0});
 	m_TuneZone = 0;
 	m_TuneZoneOld = m_TuneZone;
 	m_Halloween = false;
@@ -429,12 +427,12 @@ void CPlayer::Snap(int SnappingClient)
 		pRaceInfo->m_RaceStartTick = m_pCharacter->m_StartTime;
 	}
 
-	bool ShowSpec = m_pCharacter && m_pCharacter->IsPaused();
+	bool ShowSpec = m_pCharacter && m_pCharacter->IsPaused() && m_pCharacter->CanSnapCharacter(SnappingClient);
 
 	if(SnappingClient >= 0)
 	{
 		CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
-		ShowSpec = ShowSpec && (GameServer()->GetDDRaceTeam(id) == GameServer()->GetDDRaceTeam(SnappingClient) || pSnapPlayer->m_ShowOthers == 1 || (pSnapPlayer->GetTeam() == TEAM_SPECTATORS || pSnapPlayer->IsPaused()));
+		ShowSpec = ShowSpec && (GameServer()->GetDDRaceTeam(m_ClientID) == GameServer()->GetDDRaceTeam(SnappingClient) || pSnapPlayer->m_ShowOthers == 1 || (pSnapPlayer->GetTeam() == TEAM_SPECTATORS || pSnapPlayer->IsPaused()));
 	}
 
 	if(ShowSpec)
@@ -524,7 +522,7 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 	if(NewInput->m_PlayerFlags)
 		Server()->SetClientFlags(m_ClientID, NewInput->m_PlayerFlags);
 
-	if(AfkTimer(NewInput->m_TargetX, NewInput->m_TargetY))
+	if(AfkTimer(NewInput))
 		return; // we must return if kicked, as player struct is already deleted
 	AfkVoteTimer(NewInput);
 
@@ -554,12 +552,10 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 		m_Spawning = true;
 
 	// check for activity
-	if(NewInput->m_Direction || m_LatestActivity.m_TargetX != NewInput->m_TargetX ||
-		m_LatestActivity.m_TargetY != NewInput->m_TargetY || NewInput->m_Jump ||
-		NewInput->m_Fire & 1 || NewInput->m_Hook)
+	if(mem_comp(NewInput, m_pLastTarget, sizeof(CNetObj_PlayerInput)))
 	{
-		m_LatestActivity.m_TargetX = NewInput->m_TargetX;
-		m_LatestActivity.m_TargetY = NewInput->m_TargetY;
+		mem_copy(m_pLastTarget, NewInput, sizeof(CNetObj_PlayerInput));
+		UpdatePlaytime();
 		m_LastActionTick = Server()->Tick();
 	}
 }
@@ -706,7 +702,7 @@ void CPlayer::TryRespawn()
 		m_pCharacter->SetSolo(true);
 }
 
-bool CPlayer::AfkTimer(int NewTargetX, int NewTargetY)
+bool CPlayer::AfkTimer(CNetObj_PlayerInput *pNewTarget)
 {
 	/*
 		afk timer (x, y = mouse coordinates)
@@ -722,41 +718,37 @@ bool CPlayer::AfkTimer(int NewTargetX, int NewTargetY)
 	if(g_Config.m_SvMaxAfkTime == 0)
 		return false; // 0 = disabled
 
-	if(NewTargetX != m_LastTarget_x || NewTargetY != m_LastTarget_y)
+	if(pNewTarget->m_TargetX != m_pLastTarget->m_TargetX || pNewTarget->m_TargetY != m_pLastTarget->m_TargetY)
 	{
 		UpdatePlaytime();
-		m_LastTarget_x = NewTargetX;
-		m_LastTarget_y = NewTargetY;
-		m_Sent1stAfkWarning = 0; // afk timer's 1st warning after 50% of sv_max_afk_time
-		m_Sent2ndAfkWarning = 0;
+		// we shouldn't update m_pLastTarget here
+		mem_zero(m_SentAfkWarning, sizeof(m_SentAfkWarning)); // resetting warnings
 	}
 	else
 	{
 		if(!m_Paused)
 		{
-			// not playing, check how long
-			if(m_Sent1stAfkWarning == 0 && m_LastPlaytime < time_get() - time_freq() * (int)(g_Config.m_SvMaxAfkTime * 0.5))
-			{
-				str_format(m_pAfkMsg, sizeof(m_pAfkMsg),
-					"You have been afk for %d seconds now. Please note that you get kicked after not playing for %d seconds.",
-					(int)(g_Config.m_SvMaxAfkTime * 0.5),
-					g_Config.m_SvMaxAfkTime);
-				m_pGameServer->SendChatTarget(m_ClientID, m_pAfkMsg);
-				m_Sent1stAfkWarning = 1;
-			}
-			else if(m_Sent2ndAfkWarning == 0 && m_LastPlaytime < time_get() - time_freq() * (int)(g_Config.m_SvMaxAfkTime * 0.9))
-			{
-				str_format(m_pAfkMsg, sizeof(m_pAfkMsg),
-					"You have been afk for %d seconds now. Please note that you get kicked after not playing for %d seconds.",
-					(int)(g_Config.m_SvMaxAfkTime * 0.9),
-					g_Config.m_SvMaxAfkTime);
-				m_pGameServer->SendChatTarget(m_ClientID, m_pAfkMsg);
-				m_Sent2ndAfkWarning = 1;
-			}
-			else if(m_LastPlaytime < time_get() - time_freq() * g_Config.m_SvMaxAfkTime)
+			// kick if player stays afk too long
+			if(m_LastPlaytime < time_get() - time_freq() * g_Config.m_SvMaxAfkTime)
 			{
 				m_pGameServer->Server()->Kick(m_ClientID, "Away from keyboard");
 				return true;
+			}
+			// not playing, check how long
+			for(int i = 0; i < 2; i++)
+			{
+				int AfkTime = (int)(g_Config.m_SvMaxAfkTime * (i == 0 ? 0.5 : 0.9));
+				if(!m_SentAfkWarning[i] && m_LastPlaytime < time_get() - time_freq() * AfkTime)
+				{
+					char aAfkMsg[160];
+					str_format(aAfkMsg, sizeof(aAfkMsg),
+						"You have been afk for %d seconds now. Please note that you get kicked after not playing for %d seconds.",
+						AfkTime,
+						g_Config.m_SvMaxAfkTime);
+					m_pGameServer->SendChatTarget(m_ClientID, aAfkMsg);
+					m_SentAfkWarning[i] = true;
+					break;
+				}
 			}
 		}
 	}
@@ -773,19 +765,7 @@ void CPlayer::AfkVoteTimer(CNetObj_PlayerInput *NewTarget)
 	if(g_Config.m_SvMaxAfkVoteTime == 0)
 		return;
 
-	if(!m_pLastTarget)
-	{
-		m_pLastTarget = new CNetObj_PlayerInput(*NewTarget);
-		m_LastPlaytime = 0;
-		m_Afk = true;
-		return;
-	}
-	else if(mem_comp(NewTarget, m_pLastTarget, sizeof(CNetObj_PlayerInput)) != 0)
-	{
-		UpdatePlaytime();
-		mem_copy(m_pLastTarget, NewTarget, sizeof(CNetObj_PlayerInput));
-	}
-	else if(m_LastPlaytime < time_get() - time_freq() * g_Config.m_SvMaxAfkVoteTime)
+	if(m_LastPlaytime < time_get() - time_freq() * g_Config.m_SvMaxAfkVoteTime)
 	{
 		m_Afk = true;
 		return;
@@ -956,8 +936,8 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 			break;
 		}
 		case CScorePlayerResult::BROADCAST:
-			if(Result.m_Data.m_Broadcast[0] != 0)
-				GameServer()->SendBroadcast(Result.m_Data.m_Broadcast, -1);
+			if(Result.m_Data.m_aBroadcast[0] != 0)
+				GameServer()->SendBroadcast(Result.m_Data.m_aBroadcast, -1);
 			break;
 		case CScorePlayerResult::MAP_VOTE:
 			GameServer()->m_VoteType = CGameContext::VOTE_TYPE_OPTION;
@@ -966,13 +946,13 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 			char aCmd[256];
 			str_format(aCmd, sizeof(aCmd),
 				"sv_reset_file types/%s/flexreset.cfg; change_map \"%s\"",
-				Result.m_Data.m_MapVote.m_Server, Result.m_Data.m_MapVote.m_Map);
+				Result.m_Data.m_MapVote.m_aServer, Result.m_Data.m_MapVote.m_aMap);
 
 			char aChatmsg[512];
 			str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s' (%s)",
-				Server()->ClientName(m_ClientID), Result.m_Data.m_MapVote.m_Map, "/map");
+				Server()->ClientName(m_ClientID), Result.m_Data.m_MapVote.m_aMap, "/map");
 
-			GameServer()->CallVote(m_ClientID, Result.m_Data.m_MapVote.m_Map, aCmd, "/map", aChatmsg);
+			GameServer()->CallVote(m_ClientID, Result.m_Data.m_MapVote.m_aMap, aCmd, "/map", aChatmsg);
 			break;
 		case CScorePlayerResult::PLAYER_INFO:
 			GameServer()->Score()->PlayerData(m_ClientID)->Set(Result.m_Data.m_Info.m_Time, Result.m_Data.m_Info.m_CpTime);

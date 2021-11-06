@@ -68,6 +68,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <process.h>
+#include <share.h>
 #include <shellapi.h>
 #include <wincrypt.h>
 #else
@@ -122,7 +123,7 @@ void dbg_break_imp()
 #ifdef __GNUC__
 	__builtin_trap();
 #else
-	*((volatile unsigned *)0) = 0x0;
+	abort();
 #endif
 }
 
@@ -310,6 +311,44 @@ void mem_zero(void *block, unsigned size)
 
 IOHANDLE io_open(const char *filename, int flags)
 {
+	dbg_assert(flags == IOFLAG_READ || flags == IOFLAG_WRITE || flags == IOFLAG_APPEND, "flags must be read, write or append");
+#if defined(CONF_FAMILY_WINDOWS)
+	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
+	if(flags == IOFLAG_READ)
+	{
+		// check for filename case sensitive
+		WIN32_FIND_DATAW finddata;
+		HANDLE handle;
+		char buffer[IO_MAX_PATH_LENGTH];
+
+		int length = str_length(filename);
+		if(!filename || !length || filename[length - 1] == '\\')
+			return 0x0;
+		MultiByteToWideChar(CP_UTF8, 0, filename, IO_MAX_PATH_LENGTH, wBuffer, IO_MAX_PATH_LENGTH);
+		handle = FindFirstFileW(wBuffer, &finddata);
+		if(handle == INVALID_HANDLE_VALUE)
+			return 0x0;
+		WideCharToMultiByte(CP_UTF8, 0, finddata.cFileName, -1, buffer, IO_MAX_PATH_LENGTH, NULL, NULL);
+		if(str_comp(filename + length - str_length(buffer), buffer) != 0)
+		{
+			FindClose(handle);
+			return 0x0;
+		}
+		FindClose(handle);
+		return (IOHANDLE)_wfsopen(wBuffer, L"rb", _SH_DENYNO);
+	}
+	if(flags == IOFLAG_WRITE)
+	{
+		MultiByteToWideChar(CP_UTF8, 0, filename, IO_MAX_PATH_LENGTH, wBuffer, IO_MAX_PATH_LENGTH);
+		return (IOHANDLE)_wfsopen(wBuffer, L"wb", _SH_DENYNO);
+	}
+	if(flags == IOFLAG_APPEND)
+	{
+		MultiByteToWideChar(CP_UTF8, 0, filename, IO_MAX_PATH_LENGTH, wBuffer, IO_MAX_PATH_LENGTH);
+		return (IOHANDLE)_wfsopen(wBuffer, L"ab", _SH_DENYNO);
+	}
+	return 0x0;
+#else
 	if(flags == IOFLAG_READ)
 		return (IOHANDLE)fopen(filename, "rb");
 	if(flags == IOFLAG_WRITE)
@@ -317,6 +356,7 @@ IOHANDLE io_open(const char *filename, int flags)
 	if(flags == IOFLAG_APPEND)
 		return (IOHANDLE)fopen(filename, "ab");
 	return 0x0;
+#endif
 }
 
 unsigned io_read(IOHANDLE io, void *buffer, unsigned size)
@@ -2013,71 +2053,38 @@ void net_unix_close(UNIXSOCKET sock)
 }
 #endif
 
-int fs_listdir_info(const char *dir, FS_LISTDIR_INFO_CALLBACK cb, int type, void *user)
-{
 #if defined(CONF_FAMILY_WINDOWS)
-	WIN32_FIND_DATA finddata;
-	HANDLE handle;
-	char buffer[1024 * 2];
-	int length;
-	str_format(buffer, sizeof(buffer), "%s/*", dir);
+static inline time_t filetime_to_unixtime(LPFILETIME filetime)
+{
+	time_t t;
+	ULARGE_INTEGER li;
+	li.LowPart = filetime->dwLowDateTime;
+	li.HighPart = filetime->dwHighDateTime;
 
-	handle = FindFirstFileA(buffer, &finddata);
+	li.QuadPart /= 10000000; // 100ns to 1s
+	li.QuadPart -= 11644473600LL; // Windows epoch is in the past
 
-	if(handle == INVALID_HANDLE_VALUE)
-		return 0;
-
-	str_format(buffer, sizeof(buffer), "%s/", dir);
-	length = str_length(buffer);
-
-	/* add all the entries */
-	do
-	{
-		str_copy(buffer + length, finddata.cFileName, (int)sizeof(buffer) - length);
-		if(cb(finddata.cFileName, fs_getmtime(buffer), fs_is_dir(buffer), type, user))
-			break;
-	} while(FindNextFileA(handle, &finddata));
-
-	FindClose(handle);
-	return 0;
-#else
-	struct dirent *entry;
-	char buffer[1024 * 2];
-	int length;
-	DIR *d = opendir(dir);
-
-	if(!d)
-		return 0;
-
-	str_format(buffer, sizeof(buffer), "%s/", dir);
-	length = str_length(buffer);
-
-	while((entry = readdir(d)) != NULL)
-	{
-		str_copy(buffer + length, entry->d_name, (int)sizeof(buffer) - length);
-		if(cb(entry->d_name, fs_getmtime(buffer), fs_is_dir(buffer), type, user))
-			break;
-	}
-
-	/* close the directory and return */
-	closedir(d);
-	return 0;
-#endif
+	t = li.QuadPart;
+	return t == li.QuadPart ? t : (time_t)-1;
 }
+#endif
 
-int fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user)
+void fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WIN32_FIND_DATA finddata;
+	WIN32_FIND_DATAW finddata;
 	HANDLE handle;
-	char buffer[1024 * 2];
+	char buffer[IO_MAX_PATH_LENGTH];
+	char buffer2[IO_MAX_PATH_LENGTH];
+	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
 	int length;
+
 	str_format(buffer, sizeof(buffer), "%s/*", dir);
+	MultiByteToWideChar(CP_UTF8, 0, buffer, IO_MAX_PATH_LENGTH, wBuffer, IO_MAX_PATH_LENGTH);
 
-	handle = FindFirstFileA(buffer, &finddata);
-
+	handle = FindFirstFileW(wBuffer, &finddata);
 	if(handle == INVALID_HANDLE_VALUE)
-		return 0;
+		return;
 
 	str_format(buffer, sizeof(buffer), "%s/", dir);
 	length = str_length(buffer);
@@ -2085,21 +2092,21 @@ int fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user)
 	/* add all the entries */
 	do
 	{
-		str_copy(buffer + length, finddata.cFileName, (int)sizeof(buffer) - length);
-		if(cb(finddata.cFileName, fs_is_dir(buffer), type, user))
+		WideCharToMultiByte(CP_UTF8, 0, finddata.cFileName, -1, buffer2, IO_MAX_PATH_LENGTH, NULL, NULL);
+		str_copy(buffer + length, buffer2, (int)sizeof(buffer) - length);
+		if(cb(buffer2, fs_is_dir(buffer), type, user))
 			break;
-	} while(FindNextFileA(handle, &finddata));
+	} while(FindNextFileW(handle, &finddata));
 
 	FindClose(handle);
-	return 0;
 #else
 	struct dirent *entry;
-	char buffer[1024 * 2];
+	char buffer[IO_MAX_PATH_LENGTH];
 	int length;
 	DIR *d = opendir(dir);
 
 	if(!d)
-		return 0;
+		return;
 
 	str_format(buffer, sizeof(buffer), "%s/", dir);
 	length = str_length(buffer);
@@ -2113,17 +2120,87 @@ int fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user)
 
 	/* close the directory and return */
 	closedir(d);
-	return 0;
+#endif
+}
+
+void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int type, void *user)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	WIN32_FIND_DATAW finddata;
+	HANDLE handle;
+	char buffer[IO_MAX_PATH_LENGTH];
+	char buffer2[IO_MAX_PATH_LENGTH];
+	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
+	int length;
+
+	str_format(buffer, sizeof(buffer), "%s/*", dir);
+	MultiByteToWideChar(CP_UTF8, 0, buffer, IO_MAX_PATH_LENGTH, wBuffer, IO_MAX_PATH_LENGTH);
+
+	handle = FindFirstFileW(wBuffer, &finddata);
+	if(handle == INVALID_HANDLE_VALUE)
+		return;
+
+	str_format(buffer, sizeof(buffer), "%s/", dir);
+	length = str_length(buffer);
+
+	/* add all the entries */
+	do
+	{
+		WideCharToMultiByte(CP_UTF8, 0, finddata.cFileName, -1, buffer2, IO_MAX_PATH_LENGTH, NULL, NULL);
+		str_copy(buffer + length, buffer2, (int)sizeof(buffer) - length);
+
+		CFsFileInfo info;
+		info.m_pName = buffer2;
+		info.m_TimeCreated = filetime_to_unixtime(&finddata.ftCreationTime);
+		info.m_TimeModified = filetime_to_unixtime(&finddata.ftLastWriteTime);
+
+		if(cb(&info, fs_is_dir(buffer), type, user))
+			break;
+	} while(FindNextFileW(handle, &finddata));
+
+	FindClose(handle);
+#else
+	struct dirent *entry;
+	time_t created = -1, modified = -1;
+	char buffer[IO_MAX_PATH_LENGTH];
+	int length;
+	DIR *d = opendir(dir);
+
+	if(!d)
+		return;
+
+	str_format(buffer, sizeof(buffer), "%s/", dir);
+	length = str_length(buffer);
+
+	while((entry = readdir(d)) != NULL)
+	{
+		CFsFileInfo info;
+
+		str_copy(buffer + length, entry->d_name, (int)sizeof(buffer) - length);
+		fs_file_time(buffer, &created, &modified);
+
+		info.m_pName = entry->d_name;
+		info.m_TimeCreated = created;
+		info.m_TimeModified = modified;
+
+		if(cb(&info, fs_is_dir(buffer), type, user))
+			break;
+	}
+
+	/* close the directory and return */
+	closedir(d);
 #endif
 }
 
 int fs_storage_path(const char *appname, char *path, int max)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	char *home = getenv("APPDATA");
+	WCHAR *home = _wgetenv(L"APPDATA");
 	if(!home)
 		return -1;
-	_snprintf(path, max, "%s/%s", home, appname);
+	char buffer[IO_MAX_PATH_LENGTH];
+	WideCharToMultiByte(CP_UTF8, 0, home, -1, buffer, IO_MAX_PATH_LENGTH, NULL, NULL);
+	_snprintf(path, max, "%s/%s", buffer, appname);
 	return 0;
 #elif defined(CONF_PLATFORM_ANDROID)
 	// just use the data directory
@@ -2174,7 +2251,9 @@ int fs_makedir_rec_for(const char *path)
 int fs_makedir(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	if(_mkdir(path) == 0)
+	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
+	MultiByteToWideChar(CP_UTF8, 0, path, -1, wBuffer, IO_MAX_PATH_LENGTH);
+	if(_wmkdir(wBuffer) == 0)
 		return 0;
 	if(errno == EEXIST)
 		return 0;
@@ -2196,7 +2275,9 @@ int fs_makedir(const char *path)
 int fs_removedir(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	if(_rmdir(path) == 0)
+	WCHAR wPath[IO_MAX_PATH_LENGTH];
+	MultiByteToWideChar(CP_UTF8, 0, path, IO_MAX_PATH_LENGTH, wPath, IO_MAX_PATH_LENGTH);
+	if(RemoveDirectoryW(wPath) != 0)
 		return 0;
 	return -1;
 #else
@@ -2210,25 +2291,22 @@ int fs_is_dir(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	/* TODO: do this smarter */
-	WIN32_FIND_DATA finddata;
+	WIN32_FIND_DATAW finddata;
 	HANDLE handle;
-	char buffer[1024 * 2];
+	char buffer[IO_MAX_PATH_LENGTH];
+	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
 	str_format(buffer, sizeof(buffer), "%s/*", path);
+	MultiByteToWideChar(CP_UTF8, 0, buffer, IO_MAX_PATH_LENGTH, wBuffer, IO_MAX_PATH_LENGTH);
 
-	if((handle = FindFirstFileA(buffer, &finddata)) == INVALID_HANDLE_VALUE)
+	if((handle = FindFirstFileW(wBuffer, &finddata)) == INVALID_HANDLE_VALUE)
 		return 0;
-
 	FindClose(handle);
 	return 1;
 #else
 	struct stat sb;
 	if(stat(path, &sb) == -1)
 		return 0;
-
-	if(S_ISDIR(sb.st_mode))
-		return 1;
-	else
-		return 0;
+	return S_ISDIR(sb.st_mode) ? 1 : 0;
 #endif
 }
 
@@ -2245,10 +2323,19 @@ int fs_chdir(const char *path)
 {
 	if(fs_is_dir(path))
 	{
+#if defined(CONF_FAMILY_WINDOWS)
+		WCHAR wBuffer[IO_MAX_PATH_LENGTH];
+		MultiByteToWideChar(CP_UTF8, 0, path, -1, wBuffer, IO_MAX_PATH_LENGTH);
+		if(_wchdir(wBuffer))
+			return 1;
+		else
+			return 0;
+#else
 		if(chdir(path))
 			return 1;
 		else
 			return 0;
+#endif
 	}
 	else
 		return 1;
@@ -2259,7 +2346,11 @@ char *fs_getcwd(char *buffer, int buffer_size)
 	if(buffer == 0)
 		return 0;
 #if defined(CONF_FAMILY_WINDOWS)
-	return _getcwd(buffer, buffer_size);
+	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
+	if(_wgetcwd(wBuffer, buffer_size) == 0)
+		return 0;
+	WideCharToMultiByte(CP_UTF8, 0, wBuffer, IO_MAX_PATH_LENGTH, buffer, buffer_size, NULL, NULL);
+	return buffer;
 #else
 	return getcwd(buffer, buffer_size);
 #endif
@@ -2285,7 +2376,9 @@ int fs_parent_dir(char *path)
 int fs_remove(const char *filename)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	return _unlink(filename) != 0;
+	WCHAR wFilename[IO_MAX_PATH_LENGTH];
+	MultiByteToWideChar(CP_UTF8, 0, filename, IO_MAX_PATH_LENGTH, wFilename, IO_MAX_PATH_LENGTH);
+	return DeleteFileW(wFilename) == 0;
 #else
 	return unlink(filename) != 0;
 #endif
@@ -2294,12 +2387,44 @@ int fs_remove(const char *filename)
 int fs_rename(const char *oldname, const char *newname)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	if(MoveFileEx(oldname, newname, MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED) == 0)
+	WCHAR wOldname[IO_MAX_PATH_LENGTH];
+	WCHAR wNewname[IO_MAX_PATH_LENGTH];
+	MultiByteToWideChar(CP_UTF8, 0, oldname, IO_MAX_PATH_LENGTH, wOldname, IO_MAX_PATH_LENGTH);
+	MultiByteToWideChar(CP_UTF8, 0, newname, IO_MAX_PATH_LENGTH, wNewname, IO_MAX_PATH_LENGTH);
+	if(MoveFileExW(wOldname, wNewname, MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED) == 0)
 		return 1;
 #else
 	if(rename(oldname, newname) != 0)
 		return 1;
 #endif
+	return 0;
+}
+
+int fs_file_time(const char *name, time_t *created, time_t *modified)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	WIN32_FIND_DATAW finddata;
+	HANDLE handle;
+	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
+
+	MultiByteToWideChar(CP_UTF8, 0, name, IO_MAX_PATH_LENGTH, wBuffer, IO_MAX_PATH_LENGTH);
+	handle = FindFirstFileW(wBuffer, &finddata);
+	if(handle == INVALID_HANDLE_VALUE)
+		return 1;
+
+	*created = filetime_to_unixtime(&finddata.ftCreationTime);
+	*modified = filetime_to_unixtime(&finddata.ftLastWriteTime);
+#elif defined(CONF_FAMILY_UNIX)
+	struct stat sb;
+	if(stat(name, &sb))
+		return 1;
+
+	*created = sb.st_ctime;
+	*modified = sb.st_mtime;
+#else
+#error not implemented
+#endif
+
 	return 0;
 }
 

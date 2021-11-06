@@ -116,13 +116,6 @@ public:
 	class CLayers *Layers() { return m_pLayers; }
 	int m_NumSwitchers;
 
-private:
-	class CTeleTile *m_pTele;
-	class CSpeedupTile *m_pSpeedup;
-	class CTile *m_pFront;
-	class CSwitchTile *m_pSwitch;
-	class CTuneTile *m_pTune;
-	class CDoorTile *m_pDoor;
 	struct SSwitchers
 	{
 		bool m_Status[MAX_CLIENTS];
@@ -130,9 +123,15 @@ private:
 		int m_EndTick[MAX_CLIENTS];
 		int m_Type[MAX_CLIENTS];
 	};
-
-public:
 	SSwitchers *m_pSwitchers;
+
+private:
+	class CTeleTile *m_pTele;
+	class CSpeedupTile *m_pSpeedup;
+	class CTile *m_pFront;
+	class CSwitchTile *m_pSwitch;
+	class CTuneTile *m_pTune;
+	class CDoorTile *m_pDoor;
 };
 
 void ThroughOffset(vec2 Pos0, vec2 Pos1, int *Ox, int *Oy);

@@ -273,6 +273,7 @@ public:
 	virtual const char *NetVersion() const;
 
 	// DDRace
+	void OnPreTickTeehistorian();
 	bool OnClientDDNetVersionKnown(int ClientID);
 	virtual void FillAntibot(CAntibotRoundData *pData);
 	int ProcessSpamProtection(int ClientID, bool RespectChatInitialDelay = true);

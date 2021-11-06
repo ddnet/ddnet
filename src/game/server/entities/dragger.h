@@ -12,7 +12,7 @@ class CDragger : public CEntity
 	int m_EvalTick;
 	void Move();
 	void Drag();
-	CCharacter *m_Target;
+	int m_TargetID;
 	bool m_NW;
 	int m_CaughtTeam;
 

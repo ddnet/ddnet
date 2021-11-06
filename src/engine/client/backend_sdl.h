@@ -13,6 +13,9 @@
 #include <base/tl/threading.h>
 
 #include <atomic>
+#include <condition_variable>
+#include <mutex>
+#include <thread>
 #include <vector>
 
 #if defined(CONF_PLATFORM_MACOS)
@@ -64,13 +67,15 @@ protected:
 
 private:
 	ICommandProcessor *m_pProcessor;
-	CCommandBuffer *volatile m_pBuffer;
-	volatile bool m_Shutdown;
-	CSemaphore m_Activity;
-	CSemaphore m_BufferDone;
-	void *m_pThread;
+	std::mutex m_BufferSwapMutex;
+	std::condition_variable m_BufferSwapCond;
+	std::condition_variable m_BufferDoneCond;
+	CCommandBuffer *m_pBuffer;
+	std::atomic_bool m_Shutdown;
+	std::atomic_bool m_BufferInProcess;
+	std::thread m_Thread;
 
-	static void ThreadFunc(void *pUser);
+	void ThreadFunc();
 };
 
 // takes care of implementation independent operations

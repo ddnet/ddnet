@@ -11,7 +11,7 @@ static const unsigned char gs_aHeaderMarker[8] = {'T', 'W', 'G', 'H', 'O', 'S', 
 static const unsigned char gs_CurVersion = 6;
 static const int gs_NumTicksOffset = 93;
 
-static const ColorRGBA gs_GhostPrintColor{0.6f, 0.6f, 0.6f, 1.0f};
+static const ColorRGBA gs_GhostPrintColor{0.65f, 0.6f, 0.6f, 1.0f};
 
 CGhostRecorder::CGhostRecorder()
 {

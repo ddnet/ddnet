@@ -82,6 +82,7 @@ void CHud::OnReset()
 void CHud::OnInit()
 {
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+	m_HudQuadContainerIndex = Graphics()->CreateQuadContainer(false);
 	PrepareHealthAmoQuads();
 
 	// all cursors
@@ -98,6 +99,7 @@ void CHud::OnInit()
 	RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 8.f, 16.f);
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 8.f, 16.f);
+	Graphics()->QuadContainerUpload(m_HudQuadContainerIndex);
 }
 
 void CHud::RenderGameTimer()
@@ -502,18 +504,18 @@ void CHud::RenderWarmupTimer()
 	// render warmup timer
 	if(m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer > 0 && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_RACETIME))
 	{
-		char Buf[256];
+		char aBuf[256];
 		float FontSize = 20.0f;
 		float w = TextRender()->TextWidth(0, FontSize, Localize("Warmup"), -1, -1.0f);
 		TextRender()->Text(0, 150 * Graphics()->ScreenAspect() + -w / 2, 50, FontSize, Localize("Warmup"), -1.0f);
 
 		int Seconds = m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer / SERVER_TICK_SPEED;
 		if(Seconds < 5)
-			str_format(Buf, sizeof(Buf), "%d.%d", Seconds, (m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer * 10 / SERVER_TICK_SPEED) % 10);
+			str_format(aBuf, sizeof(aBuf), "%d.%d", Seconds, (m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer * 10 / SERVER_TICK_SPEED) % 10);
 		else
-			str_format(Buf, sizeof(Buf), "%d", Seconds);
-		w = TextRender()->TextWidth(0, FontSize, Buf, -1, -1.0f);
-		TextRender()->Text(0, 150 * Graphics()->ScreenAspect() + -w / 2, 75, FontSize, Buf, -1.0f);
+			str_format(aBuf, sizeof(aBuf), "%d", Seconds);
+		w = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f);
+		TextRender()->Text(0, 150 * Graphics()->ScreenAspect() + -w / 2, 75, FontSize, aBuf, -1.0f);
 	}
 }
 
@@ -531,9 +533,9 @@ void CHud::RenderTextInfo()
 	{
 		// calculate avg. fps
 		m_FrameTimeAvg = m_FrameTimeAvg * 0.9f + Client()->RenderFrameTime() * 0.1f;
-		char Buf[64];
+		char aBuf[64];
 		int FrameTime = (int)(1.0f / m_FrameTimeAvg + 0.5f);
-		str_format(Buf, sizeof(Buf), "%d", FrameTime);
+		str_format(aBuf, sizeof(aBuf), "%d", FrameTime);
 
 		static float s_TextWidth0 = TextRender()->TextWidth(0, 12.f, "0", -1, -1.0f);
 		static float s_TextWidth00 = TextRender()->TextWidth(0, 12.f, "00", -1, -1.0f);
@@ -552,7 +554,7 @@ void CHud::RenderTextInfo()
 		Cursor.m_LineWidth = -1;
 		if(m_FPSTextContainerIndex == -1)
 			m_FPSTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, "0");
-		TextRender()->RecreateTextContainerSoft(&Cursor, m_FPSTextContainerIndex, Buf);
+		TextRender()->RecreateTextContainerSoft(&Cursor, m_FPSTextContainerIndex, aBuf);
 		STextRenderColor TColor;
 		TColor.m_R = 1.f;
 		TColor.m_G = 1.f;
@@ -670,8 +672,6 @@ void CHud::RenderCursor()
 
 void CHud::PrepareHealthAmoQuads()
 {
-	m_HudQuadContainerIndex = Graphics()->CreateQuadContainer();
-
 	float x = 5;
 	float y = 5;
 	IGraphics::CQuadItem Array[10];

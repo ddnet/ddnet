@@ -10,7 +10,7 @@ CLineInput::CLineInput()
 
 void CLineInput::Clear()
 {
-	mem_zero(m_Str, sizeof(m_Str));
+	mem_zero(m_aStr, sizeof(m_aStr));
 	m_Len = 0;
 	m_CursorPos = 0;
 	m_NumChars = 0;
@@ -18,8 +18,8 @@ void CLineInput::Clear()
 
 void CLineInput::Set(const char *pString)
 {
-	str_copy(m_Str, pString, sizeof(m_Str));
-	m_Len = str_length(m_Str);
+	str_copy(m_aStr, pString, sizeof(m_aStr));
+	m_Len = str_length(m_aStr);
 	m_CursorPos = m_Len;
 	m_NumChars = 0;
 	int Offset = 0;
@@ -32,7 +32,7 @@ void CLineInput::Set(const char *pString)
 
 void CLineInput::Editing(const char *pString, int Cursor)
 {
-	str_copy(m_DisplayStr, m_Str, sizeof(m_DisplayStr));
+	str_copy(m_DisplayStr, m_aStr, sizeof(m_DisplayStr));
 	char aEditingText[IInput::INPUT_TEXT_SIZE + 2];
 	str_format(aEditingText, sizeof(aEditingText), "[%s]", pString);
 	int NewTextLen = str_length(aEditingText);
@@ -48,19 +48,24 @@ void CLineInput::Editing(const char *pString, int Cursor)
 
 void CLineInput::Add(const char *pString)
 {
-	if((int)sizeof(m_Str) - m_Len <= str_length(pString))
+	if((int)sizeof(m_aStr) - m_Len <= str_length(pString))
 		return;
-	str_copy(m_Str + m_Len, pString, sizeof(m_Str) - m_Len);
-	m_Len = str_length(m_Str);
+	str_copy(m_aStr + m_Len, pString, sizeof(m_aStr) - m_Len);
+	m_Len = str_length(m_aStr);
 	m_CursorPos = m_Len;
 }
 
-bool CLineInput::Manipulate(IInput::CEvent Event, char *pStr, int StrMaxSize, int StrMaxChars, int *pStrLenPtr, int *pCursorPosPtr, int *pNumCharsPtr)
+static bool IsNotAWordChar(signed char c)
+{
+	return (c > 0 && c < '0') || (c > '9' && c < 'A') || (c > 'Z' && c < 'a') || (c > 'z'); // all non chars in ascii -- random
+}
+
+int32_t CLineInput::Manipulate(IInput::CEvent Event, char *pStr, int StrMaxSize, int StrMaxChars, int *pStrLenPtr, int *pCursorPosPtr, int *pNumCharsPtr, int32_t ModifyFlags, int ModifierKey)
 {
 	int NumChars = *pNumCharsPtr;
 	int CursorPos = *pCursorPosPtr;
 	int Len = *pStrLenPtr;
-	bool Changes = false;
+	int32_t Changes = 0;
 
 	if(CursorPos > Len)
 		CursorPos = Len;
@@ -91,7 +96,7 @@ bool CLineInput::Manipulate(IInput::CEvent Event, char *pStr, int StrMaxSize, in
 				CursorPos += CharSize;
 				Len += CharSize;
 				NumChars += CharCount;
-				Changes = true;
+				Changes |= ELineInputChanges::LINE_INPUT_CHANGE_STRING;
 			}
 		}
 	}
@@ -99,35 +104,90 @@ bool CLineInput::Manipulate(IInput::CEvent Event, char *pStr, int StrMaxSize, in
 	if(Event.m_Flags & IInput::FLAG_PRESS)
 	{
 		int Key = Event.m_Key;
-		if(Key == KEY_BACKSPACE && CursorPos > 0)
+		if(Key == KEY_BACKSPACE)
 		{
-			int NewCursorPos = str_utf8_rewind(pStr, CursorPos);
-			int CharSize = CursorPos - NewCursorPos;
-			mem_move(pStr + NewCursorPos, pStr + CursorPos, Len - NewCursorPos - CharSize + 1); // +1 == null term
-			CursorPos = NewCursorPos;
-			Len -= CharSize;
-			if(CharSize > 0)
-				--NumChars;
-			Changes = true;
+			if((ModifyFlags & LINE_INPUT_MODIFY_DONT_DELETE) == 0 && CursorPos > 0)
+			{
+				int NewCursorPos = str_utf8_rewind(pStr, CursorPos);
+				int CharSize = CursorPos - NewCursorPos;
+				mem_move(pStr + NewCursorPos, pStr + CursorPos, Len - NewCursorPos - CharSize + 1); // +1 == null term
+				CursorPos = NewCursorPos;
+				Len -= CharSize;
+				if(CharSize > 0)
+					--NumChars;
+			}
+			Changes |= ELineInputChanges::LINE_INPUT_CHANGE_CHARACTERS_DELETE;
 		}
-		else if(Key == KEY_DELETE && CursorPos < Len)
+		else if(Key == KEY_DELETE)
 		{
-			int p = str_utf8_forward(pStr, CursorPos);
-			int CharSize = p - CursorPos;
-			mem_move(pStr + CursorPos, pStr + CursorPos + CharSize, Len - CursorPos - CharSize + 1); // +1 == null term
-			Len -= CharSize;
-			if(CharSize > 0)
-				--NumChars;
-			Changes = true;
+			if((ModifyFlags & LINE_INPUT_MODIFY_DONT_DELETE) == 0 && CursorPos < Len)
+			{
+				int p = str_utf8_forward(pStr, CursorPos);
+				int CharSize = p - CursorPos;
+				mem_move(pStr + CursorPos, pStr + CursorPos + CharSize, Len - CursorPos - CharSize + 1); // +1 == null term
+				Len -= CharSize;
+				if(CharSize > 0)
+					--NumChars;
+			}
+			Changes |= ELineInputChanges::LINE_INPUT_CHANGE_CHARACTERS_DELETE;
 		}
-		else if(Key == KEY_LEFT && CursorPos > 0)
-			CursorPos = str_utf8_rewind(pStr, CursorPos);
-		else if(Key == KEY_RIGHT && CursorPos < Len)
-			CursorPos = str_utf8_forward(pStr, CursorPos);
+		else if(Key == KEY_LEFT)
+		{
+			if(ModifierKey == KEY_LCTRL)
+			{
+				bool MovedCursor = false;
+				int OldCursorPos = CursorPos;
+				CursorPos = str_utf8_rewind(pStr, CursorPos);
+				if(OldCursorPos != CursorPos)
+					MovedCursor = true;
+				bool WasNonWordChar = IsNotAWordChar(pStr[CursorPos]);
+				while((!WasNonWordChar && !IsNotAWordChar(pStr[CursorPos])) || (WasNonWordChar && IsNotAWordChar(pStr[CursorPos])))
+				{
+					CursorPos = str_utf8_rewind(pStr, CursorPos);
+					if(CursorPos == 0)
+						break;
+				}
+				if(MovedCursor && ((!WasNonWordChar && IsNotAWordChar(pStr[CursorPos])) || (WasNonWordChar && !IsNotAWordChar(pStr[CursorPos]))))
+					CursorPos = str_utf8_forward(pStr, CursorPos);
+				Changes |= ELineInputChanges::LINE_INPUT_CHANGE_WARP_CURSOR;
+			}
+			else
+			{
+				if(CursorPos > 0)
+					CursorPos = str_utf8_rewind(pStr, CursorPos);
+				Changes |= ELineInputChanges::LINE_INPUT_CHANGE_CURSOR;
+			}
+		}
+		else if(Key == KEY_RIGHT)
+		{
+			if(ModifierKey == KEY_LCTRL)
+			{
+				bool WasNonWordChar = IsNotAWordChar(pStr[CursorPos]);
+				while((!WasNonWordChar && !IsNotAWordChar(pStr[CursorPos])) || (WasNonWordChar && IsNotAWordChar(pStr[CursorPos])))
+				{
+					CursorPos = str_utf8_forward(pStr, CursorPos);
+					if(CursorPos >= Len)
+						break;
+				}
+				Changes |= ELineInputChanges::LINE_INPUT_CHANGE_WARP_CURSOR;
+			}
+			else
+			{
+				if(CursorPos < Len)
+					CursorPos = str_utf8_forward(pStr, CursorPos);
+				Changes |= ELineInputChanges::LINE_INPUT_CHANGE_CURSOR;
+			}
+		}
 		else if(Key == KEY_HOME)
+		{
 			CursorPos = 0;
+			Changes |= ELineInputChanges::LINE_INPUT_CHANGE_WARP_CURSOR;
+		}
 		else if(Key == KEY_END)
+		{
 			CursorPos = Len;
+			Changes |= ELineInputChanges::LINE_INPUT_CHANGE_WARP_CURSOR;
+		}
 	}
 
 	*pNumCharsPtr = NumChars;
@@ -140,7 +200,7 @@ bool CLineInput::Manipulate(IInput::CEvent Event, char *pStr, int StrMaxSize, in
 void CLineInput::DeleteUntilCursor()
 {
 	char aBuf[MAX_SIZE];
-	str_copy(aBuf, &m_Str[m_CursorPos], sizeof(aBuf));
+	str_copy(aBuf, &m_aStr[m_CursorPos], sizeof(aBuf));
 	Set(aBuf);
 	SetCursorOffset(0);
 }
@@ -148,12 +208,12 @@ void CLineInput::DeleteUntilCursor()
 void CLineInput::DeleteFromCursor()
 {
 	char aBuf[MAX_SIZE];
-	str_copy(aBuf, m_Str, sizeof(aBuf));
+	str_copy(aBuf, m_aStr, sizeof(aBuf));
 	aBuf[m_CursorPos] = '\0';
 	Set(aBuf);
 }
 
 void CLineInput::ProcessInput(IInput::CEvent e)
 {
-	Manipulate(e, m_Str, MAX_SIZE, MAX_CHARS, &m_Len, &m_CursorPos, &m_NumChars);
+	Manipulate(e, m_aStr, MAX_SIZE, MAX_CHARS, &m_Len, &m_CursorPos, &m_NumChars, 0, 0);
 }

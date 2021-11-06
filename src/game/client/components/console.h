@@ -40,6 +40,7 @@ class CGameConsole : public CComponent
 		CGameConsole *m_pGameConsole;
 
 		char m_aCompletionBuffer[128];
+		bool m_CompletionUsed;
 		int m_CompletionChosen;
 		int m_CompletionFlagmask;
 		float m_CompletionRenderOffset;
@@ -82,6 +83,18 @@ class CGameConsole : public CComponent
 	int m_ConsoleState;
 	float m_StateChangeEnd;
 	float m_StateChangeDuration;
+
+	bool m_MouseIsPress = false;
+	int m_MousePressX = 0;
+	int m_MousePressY = 0;
+	int m_MouseCurX = 0;
+	int m_MouseCurY = 0;
+	int m_CurSelStart = 0;
+	int m_CurSelEnd = 0;
+	bool m_HasSelection = false;
+	int m_NewLineCounter = 0;
+
+	int m_LastInputLineCount = 0;
 
 	void Toggle(int Type);
 	void Dump(int Type);

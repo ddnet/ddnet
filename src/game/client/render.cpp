@@ -19,32 +19,12 @@
 static float gs_SpriteWScale;
 static float gs_SpriteHScale;
 
-/*
-static void layershot_begin()
-{
-	if(!config.cl_layershot)
-		return;
-
-	Graphics()->Clear(0,0,0);
-}
-
-static void layershot_end()
-{
-	if(!config.cl_layershot)
-		return;
-
-	char buf[256];
-	str_format(buf, sizeof(buf), "screenshots/layers_%04d.png", config.cl_layershot);
-	gfx_screenshot_direct(buf);
-	config.cl_layershot++;
-}*/
-
 void CRenderTools::Init(IGraphics *pGraphics, CUI *pUI, CGameClient *pGameClient)
 {
 	m_pGraphics = pGraphics;
 	m_pUI = pUI;
 	m_pGameClient = (CGameClient *)pGameClient;
-	m_TeeQuadContainerIndex = Graphics()->CreateQuadContainer();
+	m_TeeQuadContainerIndex = Graphics()->CreateQuadContainer(false);
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
@@ -67,6 +47,7 @@ void CRenderTools::Init(IGraphics *pGraphics, CUI *pUI, CGameClient *pGameClient
 	QuadContainerAddSprite(m_TeeQuadContainerIndex, -32.f, -16.f, 64.f, 32.f);
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	QuadContainerAddSprite(m_TeeQuadContainerIndex, -32.f, -16.f, 64.f, 32.f);
+	Graphics()->QuadContainerUpload(m_TeeQuadContainerIndex);
 }
 
 void CRenderTools::SelectSprite(CDataSprite *pSpr, int Flags, int sx, int sy)
@@ -389,7 +370,7 @@ void CRenderTools::DrawRoundRectExt4(float x, float y, float w, float h, vec4 Co
 
 int CRenderTools::CreateRoundRectQuadContainer(float x, float y, float w, float h, float r, int Corners)
 {
-	int ContainerIndex = Graphics()->CreateQuadContainer();
+	int ContainerIndex = Graphics()->CreateQuadContainer(false);
 
 	IGraphics::CFreeformItem ArrayF[32];
 	int NumItems = 0;
@@ -434,7 +415,9 @@ int CRenderTools::CreateRoundRectQuadContainer(float x, float y, float w, float 
 				x + w - r + Ca3 * r, y + h - r + Sa3 * r,
 				x + w - r + Ca2 * r, y + h - r + Sa2 * r);
 	}
-	Graphics()->QuadContainerAddQuads(ContainerIndex, ArrayF, NumItems);
+
+	if(NumItems > 0)
+		Graphics()->QuadContainerAddQuads(ContainerIndex, ArrayF, NumItems);
 
 	IGraphics::CQuadItem ArrayQ[9];
 	NumItems = 0;
@@ -453,7 +436,11 @@ int CRenderTools::CreateRoundRectQuadContainer(float x, float y, float w, float 
 	if(!(Corners & 8))
 		ArrayQ[NumItems++] = IGraphics::CQuadItem(x + w, y + h, -r, -r); // BR
 
-	Graphics()->QuadContainerAddQuads(ContainerIndex, ArrayQ, NumItems);
+	if(NumItems > 0)
+		Graphics()->QuadContainerAddQuads(ContainerIndex, ArrayQ, NumItems);
+
+	Graphics()->QuadContainerUpload(ContainerIndex);
+	Graphics()->QuadContainerChangeAutomaticUpload(ContainerIndex, true);
 
 	return ContainerIndex;
 }
@@ -461,7 +448,7 @@ int CRenderTools::CreateRoundRectQuadContainer(float x, float y, float w, float 
 void CRenderTools::DrawUIElRect(CUIElement::SUIElementRect &ElUIRect, const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding)
 {
 	bool NeedsRecreate = false;
-	if(ElUIRect.m_UIRectQuadContainer == -1 || ElUIRect.m_X != pRect->x || ElUIRect.m_Y != pRect->y || ElUIRect.m_Width != pRect->w || ElUIRect.m_Height != pRect->h)
+	if(ElUIRect.m_UIRectQuadContainer == -1 || ElUIRect.m_X != pRect->x || ElUIRect.m_Y != pRect->y || ElUIRect.m_Width != pRect->w || ElUIRect.m_Height != pRect->h || mem_comp(&ElUIRect.m_QuadColor, &Color, sizeof(Color)) != 0)
 	{
 		if(ElUIRect.m_UIRectQuadContainer != -1)
 			Graphics()->DeleteQuadContainer(ElUIRect.m_UIRectQuadContainer);
@@ -473,6 +460,7 @@ void CRenderTools::DrawUIElRect(CUIElement::SUIElementRect &ElUIRect, const CUIR
 		ElUIRect.m_Y = pRect->y;
 		ElUIRect.m_Width = pRect->w;
 		ElUIRect.m_Height = pRect->h;
+		ElUIRect.m_QuadColor = Color;
 
 		Graphics()->SetColor(Color);
 		ElUIRect.m_UIRectQuadContainer = CreateRoundRectQuadContainer(pRect->x, pRect->y, pRect->w, pRect->h, Rounding, Corners);

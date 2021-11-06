@@ -49,7 +49,7 @@ public:
 
 private:
 	// copy of config vars
-	char m_aFilename[512];
+	char m_aFilename[IO_MAX_PATH_LENGTH];
 	bool m_Setup;
 
 	sqlite3 *m_pDb;
