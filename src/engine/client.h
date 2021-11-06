@@ -10,6 +10,7 @@
 #include <engine/friends.h>
 
 struct SWarning;
+class CGameInfo;
 
 enum
 {
@@ -262,6 +263,7 @@ public:
 	virtual void Echo(const char *pString) = 0;
 	virtual bool CanDisplayWarning() = 0;
 	virtual bool IsDisplayingWarning() = 0;
+	virtual CGameInfo *GameInfo() = 0;
 };
 
 void SnapshotRemoveExtraProjectileInfo(unsigned char *pData);

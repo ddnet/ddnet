@@ -64,7 +64,11 @@ void CMenus::RenderGame(CUIRect MainView)
 
 	bool DummyConnecting = Client()->DummyConnecting();
 	static int s_DummyButton = 0;
-	if(DummyConnecting)
+	if(!GameClient()->m_GameInfo.m_AllowDummy && !Client()->DummyConnected())
+	{
+		DoButton_Menu(&s_DummyButton, Localize("Connect Dummy"), 1, &Button, 0, 15, 5.0f, 0.0f, vec4(1.0f, 0.5f, 0.5f, 0.75f), vec4(1, 0.5f, 0.5f, 0.5f));
+	}
+	else if(DummyConnecting)
 	{
 		DoButton_Menu(&s_DummyButton, Localize("Connecting dummy"), 1, &Button);
 	}

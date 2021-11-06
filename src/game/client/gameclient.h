@@ -67,6 +67,7 @@ public:
 	bool m_AllowEyeWheel;
 	bool m_AllowHookColl;
 	bool m_AllowZoom;
+	bool m_AllowDummy;
 
 	bool m_BugDDRaceGhost;
 	bool m_BugDDRaceInput;
@@ -502,6 +503,7 @@ public:
 	int IntersectCharacter(vec2 Pos0, vec2 Pos1, vec2 &NewPos, int ownID);
 
 	virtual int GetLastRaceTick();
+	virtual CGameInfo *GameInfo() { return &m_GameInfo; }
 
 	bool IsTeamPlay() { return m_Snap.m_pGameInfoObj && m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS; }
 

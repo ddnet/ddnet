@@ -1022,6 +1022,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	Info.m_DontMaskEntities = !DDNet;
 	Info.m_AllowXSkins = false;
 	Info.m_EntitiesFDDrace = FDDrace;
+	Info.m_AllowDummy = true;
 
 	if(Version >= 0)
 	{
@@ -1066,6 +1067,10 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	if(Version >= 6)
 	{
 		Info.m_EntitiesFDDrace = Flags2 & GAMEINFOFLAG2_ENTITIES_FDDRACE;
+	}
+	if(Version >= 7)
+	{
+		Info.m_AllowDummy = Flags2 & GAMEINFOFLAG2_ALLOW_DUMMY;
 	}
 	return Info;
 }
