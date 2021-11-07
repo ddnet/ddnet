@@ -981,21 +981,10 @@ void CClient::SnapInvalidateItem(int SnapID, int Index)
 
 void *CClient::SnapFindItem(int SnapID, int Type, int ID) const
 {
-	// TODO: linear search. should be fixed.
-	int i;
-
 	if(!m_aSnapshots[g_Config.m_ClDummy][SnapID])
 		return 0x0;
 
-	for(i = 0; i < m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pSnap->NumItems(); i++)
-	{
-		CSnapshotItem *pItem = m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItem(i);
-		if(Type >= OFFSET_UUID && pItem->Type() >= CSnapshot::OFFSET_UUID_TYPE && m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItemType(i) == Type && pItem->ID() == ID)
-			return (void *)pItem->Data();
-		else if(Type < OFFSET_UUID && pItem->Type() < CSnapshot::OFFSET_UUID_TYPE && pItem->Type() == Type && pItem->ID() == ID)
-			return (void *)pItem->Data();
-	}
-	return 0x0;
+	return m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->FindItem(Type, ID);
 }
 
 int CClient::SnapNumItems(int SnapID) const
