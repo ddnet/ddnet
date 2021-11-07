@@ -30,6 +30,11 @@ CDragger::CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW,
 	{
 		SoloID = -1;
 	}
+
+	for(int &SoloEntID : m_SoloEntIDs)
+	{
+		SoloEntID = -1;
+	}
 }
 
 void CDragger::Move()
@@ -43,27 +48,32 @@ void CDragger::Move()
 		}
 	}
 
-	mem_zero(m_SoloEnts, sizeof(m_SoloEnts));
 	CCharacter *TempEnts[MAX_CLIENTS];
+	mem_zero(TempEnts, sizeof(TempEnts));
+
+	for(int &SoloEntID : m_SoloEntIDs)
+	{
+		SoloEntID = -1;
+	}
 
 	int Num = GameServer()->m_World.FindEntities(m_Pos, g_Config.m_SvDraggerRange,
-		(CEntity **)m_SoloEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
-	mem_copy(TempEnts, m_SoloEnts, sizeof(TempEnts));
+		(CEntity **)TempEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 
 	int Id = -1;
 	int MinLen = 0;
 	CCharacter *Temp;
 	for(int i = 0; i < Num; i++)
 	{
-		Temp = m_SoloEnts[i];
+		Temp = TempEnts[i];
+		m_SoloEntIDs[i] = Temp->GetPlayer()->GetCID();
 		if(Temp->Team() != m_CaughtTeam)
 		{
-			m_SoloEnts[i] = 0;
+			m_SoloEntIDs[i] = -1;
 			continue;
 		}
 		if(m_Layer == LAYER_SWITCH && m_Number && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Temp->Team()])
 		{
-			m_SoloEnts[i] = 0;
+			m_SoloEntIDs[i] = -1;
 			continue;
 		}
 		int Res =
@@ -81,11 +91,11 @@ void CDragger::Move()
 			}
 
 			if(!Temp->Teams()->m_Core.GetSolo(Temp->GetPlayer()->GetCID()))
-				m_SoloEnts[i] = 0;
+				m_SoloEntIDs[i] = -1;
 		}
 		else
 		{
-			m_SoloEnts[i] = 0;
+			m_SoloEntIDs[i] = -1;
 		}
 	}
 
@@ -95,10 +105,10 @@ void CDragger::Move()
 	if(m_TargetID >= 0)
 	{
 		const CCharacter *pTarget = GameServer()->GetPlayerChar(m_TargetID);
-		for(auto &SoloEnt : m_SoloEnts)
+		for(auto &SoloEntID : m_SoloEntIDs)
 		{
-			if(SoloEnt == pTarget)
-				SoloEnt = 0;
+			if(GameServer()->GetPlayerChar(SoloEntID) == pTarget)
+				SoloEntID = -1;
 		}
 	}
 }
@@ -113,7 +123,7 @@ void CDragger::Drag()
 	for(int i = -1; i < MAX_CLIENTS; i++)
 	{
 		if(i >= 0)
-			pTarget = m_SoloEnts[i];
+			pTarget = GameServer()->GetPlayerChar(m_SoloEntIDs[i]);
 
 		if(!pTarget)
 			continue;
@@ -131,7 +141,7 @@ void CDragger::Drag()
 			if(i == -1)
 				m_TargetID = -1;
 			else
-				m_SoloEnts[i] = 0;
+				m_SoloEntIDs[i] = -1;
 		}
 		else if(length(m_Pos - pTarget->m_Pos) > 28)
 		{
@@ -191,7 +201,7 @@ void CDragger::Snap(int SnappingClient)
 	{
 		if(i >= 0)
 		{
-			pTarget = m_SoloEnts[i];
+			pTarget = GameServer()->GetPlayerChar(m_SoloEntIDs[i]);
 
 			if(!pTarget)
 				continue;

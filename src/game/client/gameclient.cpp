@@ -1437,7 +1437,7 @@ void CGameClient::OnNewSnapshot()
 				int NumSwitchers = clamp(pSwitchStateData->m_NumSwitchers, 0, 255);
 				if(!Collision()->m_pSwitchers || NumSwitchers != Collision()->m_NumSwitchers)
 				{
-					delete Collision()->m_pSwitchers;
+					delete[] Collision()->m_pSwitchers;
 					Collision()->m_pSwitchers = new CCollision::SSwitchers[NumSwitchers + 1];
 					Collision()->m_NumSwitchers = NumSwitchers;
 				}

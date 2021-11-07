@@ -503,45 +503,41 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTexture(const char *pFilename,
 int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType)
 {
 	char aCompleteFilename[IO_MAX_PATH_LENGTH];
-	unsigned char *pBuffer;
-	png_t Png; // ignore_convention
 
 	// open file for reading
 	IOHANDLE File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, StorageType, aCompleteFilename, sizeof(aCompleteFilename));
-	if(File)
-		io_close(File);
-	else
+	if(!File)
 	{
 		dbg_msg("game/png", "failed to open file. filename='%s'", pFilename);
 		return 0;
 	}
 
-	int Error = png_open_file(&Png, aCompleteFilename); // ignore_convention
+	png_t Png; // ignore_convention
+	int Error = png_open_read(&Png, 0, File); // ignore_convention
 	if(Error != PNG_NO_ERROR)
 	{
 		dbg_msg("game/png", "failed to open file. filename='%s', pnglite: %s", aCompleteFilename, png_error_string(Error));
-		if(Error != PNG_FILE_ERROR)
-			png_close_file(&Png); // ignore_convention
+		io_close(File);
 		return 0;
 	}
 
 	if(Png.depth != 8 || (Png.color_type != PNG_TRUECOLOR && Png.color_type != PNG_TRUECOLOR_ALPHA)) // ignore_convention
 	{
 		dbg_msg("game/png", "invalid format. filename='%s'", aCompleteFilename);
-		png_close_file(&Png); // ignore_convention
+		io_close(File);
 		return 0;
 	}
 
-	pBuffer = (unsigned char *)malloc((size_t)Png.width * Png.height * Png.bpp); // ignore_convention
+	unsigned char *pBuffer = (unsigned char *)malloc((size_t)Png.width * Png.height * Png.bpp); // ignore_convention
 	Error = png_get_data(&Png, pBuffer); // ignore_convention
 	if(Error != PNG_NO_ERROR)
 	{
 		dbg_msg("game/png", "failed to read image. filename='%s', pnglite: %s", aCompleteFilename, png_error_string(Error));
 		free(pBuffer);
-		png_close_file(&Png); // ignore_convention
+		io_close(File);
 		return 0;
 	}
-	png_close_file(&Png); // ignore_convention
+	io_close(File);
 
 	pImg->m_Width = Png.width; // ignore_convention
 	pImg->m_Height = Png.height; // ignore_convention
@@ -667,16 +663,20 @@ void CGraphics_Threaded::ScreenshotDirect()
 		png_t Png; // ignore_convention
 
 		IOHANDLE File = m_pStorage->OpenFile(m_aScreenshotName, IOFLAG_WRITE, IStorage::TYPE_SAVE, aWholePath, sizeof(aWholePath));
-		if(File)
-			io_close(File);
-
-		// save png
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "saved screenshot to '%s'", aWholePath);
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, ColorRGBA(1.0f, 0.6f, 0.3f, 1.0f));
-		png_open_file_write(&Png, aWholePath); // ignore_convention
-		png_set_data(&Png, Image.m_Width, Image.m_Height, 8, PNG_TRUECOLOR_ALPHA, (unsigned char *)Image.m_pData); // ignore_convention
-		png_close_file(&Png); // ignore_convention
+		if(!File)
+		{
+			dbg_msg("game/screenshot", "failed to open file. filename='%s'", aWholePath);
+		}
+		else
+		{
+			// save png
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "saved screenshot to '%s'", aWholePath);
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, ColorRGBA(1.0f, 0.6f, 0.3f, 1.0f));
+			png_open_write(&Png, 0, File); // ignore_convention
+			png_set_data(&Png, Image.m_Width, Image.m_Height, 8, PNG_TRUECOLOR_ALPHA, (unsigned char *)Image.m_pData); // ignore_convention
+			io_close(File); // ignore_convention
+		}
 
 		free(Image.m_pData);
 	}
@@ -2346,8 +2346,6 @@ void CGraphics_Threaded::Resize(int w, int h, int RefreshRate, bool SetWindowSiz
 		// adjust the viewport to only allow certain aspect ratios
 		if(m_ScreenHeight > 4 * m_ScreenWidth / 5)
 			m_ScreenHeight = 4 * m_ScreenWidth / 5;
-		if(m_ScreenWidth > 21 * m_ScreenHeight / 9)
-			m_ScreenWidth = 21 * m_ScreenHeight / 9;
 
 		m_ScreenRefreshRate = RefreshRate == -1 ? m_ScreenRefreshRate : RefreshRate;
 
