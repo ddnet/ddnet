@@ -59,6 +59,44 @@ int CSnapshot::GetItemIndex(int Key) const
 	return -1;
 }
 
+void *CSnapshot::FindItem(int Type, int ID) const
+{
+	int InternalType = Type;
+	if(Type >= OFFSET_UUID)
+	{
+		CUuid TypeUuid = g_UuidManager.GetUuid(Type);
+		int aTypeUuidItem[sizeof(CUuid) / 4];
+		for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
+		{
+			aTypeUuidItem[i] =
+				(TypeUuid.m_aData[i * 4 + 0] << 24) |
+				(TypeUuid.m_aData[i * 4 + 1] << 16) |
+				(TypeUuid.m_aData[i * 4 + 2] << 8) |
+				(TypeUuid.m_aData[i * 4 + 3]);
+		}
+		bool Found = false;
+		for(int i = 0; i < m_NumItems; i++)
+		{
+			CSnapshotItem *pItem = GetItem(i);
+			if(pItem->Type() == 0 && pItem->ID() >= OFFSET_UUID_TYPE) // NETOBJTYPE_EX
+			{
+				if(mem_comp(pItem->Data(), aTypeUuidItem, sizeof(CUuid)) == 0)
+				{
+					InternalType = pItem->ID();
+					Found = true;
+					break;
+				}
+			}
+		}
+		if(!Found)
+		{
+			return nullptr;
+		}
+	}
+	int Index = GetItemIndex((InternalType << 16) | ID);
+	return Index < 0 ? nullptr : GetItem(Index)->Data();
+}
+
 unsigned CSnapshot::Crc()
 {
 	unsigned int Crc = 0;
