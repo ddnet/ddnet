@@ -165,22 +165,22 @@ static int PlayerFlags_SixToSeven(int Flags)
 
 void CPlayer::Tick()
 {
-#ifdef CONF_DEBUG
-	if(!g_Config.m_DbgDummies || m_ClientID < MAX_CLIENTS - g_Config.m_DbgDummies)
-#endif
-		if(m_ScoreQueryResult != nullptr && m_ScoreQueryResult->m_Completed)
-		{
-			ProcessScoreResult(*m_ScoreQueryResult);
-			m_ScoreQueryResult = nullptr;
-		}
+	if(m_ScoreQueryResult != nullptr && m_ScoreQueryResult->m_Completed)
+	{
+		ProcessScoreResult(*m_ScoreQueryResult);
+		m_ScoreQueryResult = nullptr;
+	}
 	if(m_ScoreFinishResult != nullptr && m_ScoreFinishResult->m_Completed)
 	{
 		ProcessScoreResult(*m_ScoreFinishResult);
 		m_ScoreFinishResult = nullptr;
 	}
 
-	if(!Server()->ClientIngame(m_ClientID))
-		return;
+#ifdef CONF_DEBUG
+	if(!g_Config.m_DbgDummies || m_ClientID < MAX_CLIENTS - g_Config.m_DbgDummies)
+#endif
+		if(!Server()->ClientIngame(m_ClientID))
+			return;
 
 	if(m_ChatScore > 0)
 		m_ChatScore--;
