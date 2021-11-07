@@ -176,11 +176,15 @@ void CPlayer::Tick()
 		m_ScoreFinishResult = nullptr;
 	}
 
+	bool ClientIngame = Server()->ClientIngame(m_ClientID);
 #ifdef CONF_DEBUG
-	if(!g_Config.m_DbgDummies || m_ClientID < MAX_CLIENTS - g_Config.m_DbgDummies)
+	if(g_Config.m_DbgDummies && m_ClientID >= MAX_CLIENTS - g_Config.m_DbgDummies)
+	{
+		ClientIngame = true;
+	}
 #endif
-		if(!Server()->ClientIngame(m_ClientID))
-			return;
+	if(!ClientIngame)
+		return;
 
 	if(m_ChatScore > 0)
 		m_ChatScore--;
