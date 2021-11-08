@@ -41,6 +41,7 @@ public:
 	virtual bool IsNull(int Col);
 	virtual float GetFloat(int Col);
 	virtual int GetInt(int Col);
+	virtual int64_t GetInt64(int Col);
 	virtual void GetString(int Col, char *pBuffer, int BufferSize);
 	// passing a negative buffer size is undefined behavior
 	virtual int GetBlob(int Col, unsigned char *pBuffer, int BufferSize);
@@ -272,6 +273,11 @@ float CSqliteConnection::GetFloat(int Col)
 int CSqliteConnection::GetInt(int Col)
 {
 	return sqlite3_column_int(m_pStmt, Col - 1);
+}
+
+int64_t CSqliteConnection::GetInt64(int Col)
+{
+	return sqlite3_column_int64(m_pStmt, Col - 1);
 }
 
 void CSqliteConnection::GetString(int Col, char *pBuffer, int BufferSize)

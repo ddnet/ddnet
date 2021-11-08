@@ -91,6 +91,7 @@ public:
 	virtual bool IsNull(int Col);
 	virtual float GetFloat(int Col);
 	virtual int GetInt(int Col);
+	virtual int64_t GetInt64(int Col);
 	virtual void GetString(int Col, char *pBuffer, int BufferSize);
 	virtual int GetBlob(int Col, unsigned char *pBuffer, int BufferSize);
 
@@ -542,6 +543,34 @@ int CMysqlConnection::GetInt(int Col)
 		StoreErrorStmt("fetch_column:int");
 		dbg_msg("mysql", "error fetching column %s", m_aErrorDetail);
 		dbg_assert(0, "error in GetInt");
+	}
+	if(IsNull)
+	{
+		dbg_assert(0, "error getting int: NULL");
+	}
+	return Value;
+}
+
+int64_t CMysqlConnection::GetInt64(int Col)
+{
+	Col -= 1;
+
+	MYSQL_BIND Bind;
+	int64_t Value;
+	my_bool IsNull;
+	mem_zero(&Bind, sizeof(Bind));
+	Bind.buffer_type = MYSQL_TYPE_LONGLONG;
+	Bind.buffer = &Value;
+	Bind.buffer_length = sizeof(Value);
+	Bind.length = nullptr;
+	Bind.is_null = &IsNull;
+	Bind.is_unsigned = false;
+	Bind.error = nullptr;
+	if(mysql_stmt_fetch_column(m_pStmt.get(), &Bind, Col, 0))
+	{
+		StoreErrorStmt("fetch_column:int64");
+		dbg_msg("mysql", "error fetching column %s", m_aErrorDetail);
+		dbg_assert(0, "error in GetInt64");
 	}
 	if(IsNull)
 	{
