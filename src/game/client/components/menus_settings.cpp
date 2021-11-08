@@ -2121,17 +2121,17 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		MainView.HSplitTop(5.0f, 0x0, &MainView);
 
 		MainView.HSplitTop(50.0f, &Section, &MainView);
-		Section.VSplitLeft(300.0f, &Section, 0x0);
+		Section.VSplitLeft(260.0f, &Section, 0x0);
 		MainView.HSplitTop(25.0f, &SectionTwo, &MainView);
 
 		static int LasterOutResetID, LaserInResetID;
 
-		ColorHSLA LaserOutlineColor = DoLine_ColorPicker(&LasterOutResetID, 25.0f, 235.0f, 13.0f, 5.0f, &SectionTwo, Localize("Laser Outline Color"), &g_Config.m_ClLaserOutlineColor, ColorRGBA(0.074402f, 0.074402f, 0.247166f, 1.0f), false);
+		ColorHSLA LaserOutlineColor = DoLine_ColorPicker(&LasterOutResetID, 25.0f, 180.0f, 13.0f, 5.0f, &SectionTwo, Localize("Laser Outline Color"), &g_Config.m_ClLaserOutlineColor, ColorRGBA(0.074402f, 0.074402f, 0.247166f, 1.0f), false);
 
 		MainView.HSplitTop(5.0f, 0x0, &MainView);
 		MainView.HSplitTop(25.0f, &SectionTwo, &MainView);
 
-		ColorHSLA LaserInnerColor = DoLine_ColorPicker(&LaserInResetID, 25.0f, 235.0f, 13.0f, 5.0f, &SectionTwo, Localize("Laser Inner Color"), &g_Config.m_ClLaserInnerColor, ColorRGBA(0.498039f, 0.498039f, 1.0f, 1.0f), false);
+		ColorHSLA LaserInnerColor = DoLine_ColorPicker(&LaserInResetID, 25.0f, 180.0f, 13.0f, 5.0f, &SectionTwo, Localize("Laser Inner Color"), &g_Config.m_ClLaserInnerColor, ColorRGBA(0.498039f, 0.498039f, 1.0f, 1.0f), false);
 
 		Section.VSplitLeft(30.0f, 0, &Section);
 
@@ -2146,17 +2146,17 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		MainView.HSplitTop(25.0f, &SectionTwo, &MainView);
 
 		static int HookCollNoCollResetID, HookCollHookableCollResetID, HookCollTeeCollResetID;
-		DoLine_ColorPicker(&HookCollNoCollResetID, 25.0f, 235.0f, 13.0f, 5.0f, &SectionTwo, Localize("No hit"), &g_Config.m_ClHookCollColorNoColl, ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f), false);
+		DoLine_ColorPicker(&HookCollNoCollResetID, 25.0f, 180.0f, 13.0f, 5.0f, &SectionTwo, Localize("No hit"), &g_Config.m_ClHookCollColorNoColl, ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f), false);
 
 		MainView.HSplitTop(5.0f, 0x0, &MainView);
 		MainView.HSplitTop(25.0f, &SectionTwo, &MainView);
 
-		DoLine_ColorPicker(&HookCollHookableCollResetID, 25.0f, 235.0f, 13.0f, 5.0f, &SectionTwo, Localize("Hookable"), &g_Config.m_ClHookCollColorHookableColl, ColorRGBA(130.0f / 255.0f, 232.0f / 255.0f, 160.0f / 255.0f, 1.0f), false);
+		DoLine_ColorPicker(&HookCollHookableCollResetID, 25.0f, 180.0f, 13.0f, 5.0f, &SectionTwo, Localize("Hookable"), &g_Config.m_ClHookCollColorHookableColl, ColorRGBA(130.0f / 255.0f, 232.0f / 255.0f, 160.0f / 255.0f, 1.0f), false);
 
 		MainView.HSplitTop(5.0f, 0x0, &MainView);
 		MainView.HSplitTop(25.0f, &SectionTwo, &MainView);
 
-		DoLine_ColorPicker(&HookCollTeeCollResetID, 25.0f, 235.0f, 13.0f, 5.0f, &SectionTwo, Localize("Tee"), &g_Config.m_ClHookCollColorTeeColl, ColorRGBA(1.0f, 1.0f, 0.0f, 1.0f), false);
+		DoLine_ColorPicker(&HookCollTeeCollResetID, 25.0f, 180.0f, 13.0f, 5.0f, &SectionTwo, Localize("Tee"), &g_Config.m_ClHookCollColorTeeColl, ColorRGBA(1.0f, 1.0f, 0.0f, 1.0f), false);
 	}
 	else if(s_CurTab == 1)
 	{ // ***** CHAT TAB ***** //
