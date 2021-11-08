@@ -86,6 +86,8 @@ public:
 
 	virtual void Print() {}
 	virtual bool Step(bool *pEnd, char *pError, int ErrorSize);
+	virtual int GetColumnCount();
+	virtual int GetID(const char *pCol);
 	virtual bool ExecuteUpdate(int *pNumUpdated, char *pError, int ErrorSize);
 
 	virtual bool IsNull(int Col);
@@ -101,6 +103,11 @@ private:
 	{
 	public:
 		void operator()(MYSQL_STMT *pStmt) const;
+	};
+	class CResDeleter
+	{
+	public:
+		void operator()(MYSQL_RES *pRes) const;
 	};
 
 	char m_aErrorDetail[128];
@@ -120,6 +127,7 @@ private:
 	bool m_NewQuery = false;
 	bool m_HaveConnection = false;
 	MYSQL m_Mysql;
+	std::unique_ptr<MYSQL_RES, CResDeleter> m_pRes = nullptr;
 	std::unique_ptr<MYSQL_STMT, CStmtDeleter> m_pStmt = nullptr;
 	std::vector<MYSQL_BIND> m_aStmtParameters;
 	std::vector<UParameterExtra> m_aStmtParameterExtras;
@@ -138,6 +146,11 @@ private:
 void CMysqlConnection::CStmtDeleter::operator()(MYSQL_STMT *pStmt) const
 {
 	mysql_stmt_close(pStmt);
+}
+
+void CMysqlConnection::CResDeleter::operator()(MYSQL_RES *pRes) const
+{
+	mysql_free_result(pRes);
 }
 
 CMysqlConnection::CMysqlConnection(
@@ -194,6 +207,7 @@ bool CMysqlConnection::PrepareAndExecuteStatement(const char *pStmt)
 		StoreErrorStmt("execute");
 		return true;
 	}
+	m_pRes = std::unique_ptr<MYSQL_RES, CResDeleter>(mysql_stmt_result_metadata(m_pStmt.get()));
 	return false;
 }
 
@@ -433,6 +447,7 @@ bool CMysqlConnection::Step(bool *pEnd, char *pError, int ErrorSize)
 			str_copy(pError, m_aErrorDetail, ErrorSize);
 			return true;
 		}
+		m_pRes = std::unique_ptr<MYSQL_RES, CResDeleter>(mysql_stmt_result_metadata(m_pStmt.get()));
 	}
 	int Result = mysql_stmt_fetch(m_pStmt.get());
 	if(Result == 1)
@@ -445,6 +460,23 @@ bool CMysqlConnection::Step(bool *pEnd, char *pError, int ErrorSize)
 	// `Result` is now either `MYSQL_DATA_TRUNCATED` (which we ignore, we
 	// fetch our columns in a different way) or `0` aka success.
 	return false;
+}
+
+int CMysqlConnection::GetColumnCount()
+{
+	return mysql_stmt_field_count(m_pStmt.get());
+}
+
+int CMysqlConnection::GetID(const char *pCol)
+{
+	unsigned int NumFields = mysql_num_fields(m_pRes.get());
+	MYSQL_FIELD *pFields = mysql_fetch_fields(m_pRes.get());
+	for(unsigned int i = 0; i < NumFields; i++)
+	{
+		if(str_comp(pFields[i].name, pCol) == 0)
+			return i + 1;
+	}
+	return -1;
 }
 
 bool CMysqlConnection::ExecuteUpdate(int *pNumUpdated, char *pError, int ErrorSize)

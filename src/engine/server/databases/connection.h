@@ -69,6 +69,15 @@ public:
 	// returns true on failure
 	virtual bool ExecuteUpdate(int *pNumUpdated, char *pError, int ErrorSize) = 0;
 
+	virtual int GetColumnCount() = 0;
+	virtual int GetID(const char *pCol) = 0;
+
+	virtual bool IsNull(const char *pCol) { return IsNull(GetID(pCol)); };
+	virtual float GetFloat(const char *pCol) { return GetFloat(GetID(pCol)); };
+	virtual int GetInt(const char *pCol) { return GetInt(GetID(pCol)); };
+	virtual void GetString(const char *pCol, char *pBuffer, int BufferSize) { GetString(GetID(pCol), pBuffer, BufferSize); };
+	virtual void GetBlob(const char *pCol, unsigned char *pBuffer, int BufferSize) { GetBlob(GetID(pCol), pBuffer, BufferSize); };
+
 	virtual bool IsNull(int Col) = 0;
 	virtual float GetFloat(int Col) = 0;
 	virtual int GetInt(int Col) = 0;

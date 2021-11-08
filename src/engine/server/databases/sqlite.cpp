@@ -38,6 +38,9 @@ public:
 	virtual bool Step(bool *pEnd, char *pError, int ErrorSize);
 	virtual bool ExecuteUpdate(int *pNumUpdated, char *pError, int ErrorSize);
 
+	virtual int GetColumnCount();
+	virtual int GetID(const char *pCol);
+
 	virtual bool IsNull(int Col);
 	virtual float GetFloat(int Col);
 	virtual int GetInt(int Col);
@@ -259,9 +262,24 @@ bool CSqliteConnection::ExecuteUpdate(int *pNumUpdated, char *pError, int ErrorS
 	return false;
 }
 
+int CSqliteConnection::GetColumnCount()
+{
+	return sqlite3_column_count(m_pStmt);
+}
+
 bool CSqliteConnection::IsNull(int Col)
 {
 	return sqlite3_column_type(m_pStmt, Col - 1) == SQLITE_NULL;
+}
+
+int CSqliteConnection::GetID(const char *pCol)
+{
+	for(int i = 0; i < GetColumnCount(); i++)
+	{
+		if(str_comp(sqlite3_column_name(m_pStmt, i), pCol) == 0)
+			return i + 1;
+	}
+	return -1;
 }
 
 float CSqliteConnection::GetFloat(int Col)

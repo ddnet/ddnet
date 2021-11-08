@@ -267,7 +267,7 @@ bool CScore::LoadPlayerDataThread(IDbConnection *pSqlServer, const ISqlData *pGa
 	if(!End)
 	{
 		// get the best time
-		float Time = pSqlServer->GetFloat(1);
+		float Time = pSqlServer->GetFloat("Time");
 		pResult->m_Data.m_Info.m_Time = Time;
 		pResult->m_Data.m_Info.m_Score = -Time;
 		pResult->m_Data.m_Info.m_HasFinishScore = true;
