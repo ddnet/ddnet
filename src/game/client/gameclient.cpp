@@ -277,6 +277,8 @@ void CGameClient::OnInit()
 	m_DDRaceMsgSent[1] = false;
 	m_ShowOthers[0] = -1;
 	m_ShowOthers[1] = -1;
+	m_SwitchStateTeam[0] = -1;
+	m_SwitchStateTeam[1] = -1;
 
 	m_LastZoom = .0;
 	m_LastScreenAspect = .0;
@@ -1146,6 +1148,8 @@ void CGameClient::OnNewSnapshot()
 #endif
 
 	bool FoundGameInfoEx = false;
+	bool GotSwitchStateTeam = false;
+	m_SwitchStateTeam[g_Config.m_ClDummy] = -1;
 
 	for(auto &Client : m_aClients)
 	{
@@ -1440,6 +1444,12 @@ void CGameClient::OnNewSnapshot()
 						Collision()->m_pSwitchers[i].m_Type[Team] = TILE_SWITCHCLOSE;
 					Collision()->m_pSwitchers[i].m_EndTick[Team] = 0;
 				}
+
+				if(!GotSwitchStateTeam)
+					m_SwitchStateTeam[g_Config.m_ClDummy] = Team;
+				else
+					m_SwitchStateTeam[g_Config.m_ClDummy] = -1;
+				GotSwitchStateTeam = true;
 			}
 		}
 	}
@@ -2591,11 +2601,11 @@ bool CGameClient::IsOtherTeam(int ClientID)
 	return m_Teams.Team(ClientID) != m_Teams.Team(m_Snap.m_LocalClientID);
 }
 
-int CGameClient::OwnTeam()
+int CGameClient::SwitchStateTeam()
 {
-	if(m_Snap.m_LocalClientID < 0)
-		return 0;
-	else if(m_aClients[m_Snap.m_LocalClientID].m_Team == TEAM_SPECTATORS && m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
+	if(m_SwitchStateTeam[g_Config.m_ClDummy] >= 0)
+		return m_SwitchStateTeam[g_Config.m_ClDummy];
+	else if(m_Snap.m_LocalClientID < 0)
 		return 0;
 	else if(m_Snap.m_SpecInfo.m_Active && m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
 		return m_Teams.Team(m_Snap.m_SpecInfo.m_SpectatorID);
