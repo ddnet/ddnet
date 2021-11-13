@@ -16,6 +16,7 @@ IServer *CPlayer::Server() const { return m_pGameServer->Server(); }
 CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 {
 	m_pGameServer = pGameServer;
+	m_RespawnTick = Server()->Tick(); // gctf
 	m_ClientID = ClientID;
 	bool AsSpec = false; // TODO: add this as arg like in vanilla
 	m_Team = AsSpec ? TEAM_SPECTATORS : GameServer()->m_pController->GetStartTeam();
@@ -254,11 +255,12 @@ void CPlayer::Tick()
 				m_pCharacter = 0;
 			}
 		}
-		else if(m_Spawning && !m_WeakHookSpawn)
+		else if(m_Spawning && !m_WeakHookSpawn && m_RespawnTick <= Server()->Tick())
 			TryRespawn();
 	}
 	else
 	{
+		++m_RespawnTick;
 		++m_DieTick;
 		++m_PreviousDieTick;
 		++m_JoinTick;
@@ -630,6 +632,9 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 	Msg.m_Silent = !DoChatMsg;
 	Msg.m_CooldownTick = m_LastSetTeam + Server()->TickSpeed() * g_Config.m_SvTeamChangeDelay;
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, -1);
+
+	// we got to wait 0.5 secs before respawning
+	m_RespawnTick = Server()->Tick() + Server()->TickSpeed() / 2;
 
 	if(Team == TEAM_SPECTATORS)
 	{

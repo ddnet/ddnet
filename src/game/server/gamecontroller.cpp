@@ -527,6 +527,7 @@ void IGameController::OnReset()
 		if(!pPlayer)
 			continue;
 		pPlayer->Respawn();
+		pPlayer->m_RespawnTick = Server()->Tick() + Server()->TickSpeed() / 2;
 		pPlayer->m_Score = 0;
 	}
 }
@@ -546,8 +547,8 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 		else
 			pKiller->m_Score++; // normal kill
 	}
-	// if(Weapon == WEAPON_SELF)
-	// 	pVictim->GetPlayer()->m_RespawnTick = Server()->Tick()+Server()->TickSpeed()*3.0f;
+	if(Weapon == WEAPON_SELF)
+		pVictim->GetPlayer()->m_RespawnTick = Server()->Tick()+Server()->TickSpeed()*3.0f;
 
 	// update spectator modes for dead players in survival
 	// if(m_GameFlags&GAMEFLAG_SURVIVAL)
