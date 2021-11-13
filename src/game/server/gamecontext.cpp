@@ -4206,12 +4206,39 @@ bool CGameContext::RateLimitPlayerMapVote(int ClientID)
 
 // gctf
 
+void CGameContext::SendGameMsg(int GameMsgID, int ClientID)
+{
+	CMsgPacker Msg(protocol7::NETMSGTYPE_SV_GAMEMSG, false, true);
+	Msg.AddInt(GameMsgID);
+	if(ClientID != -1)
+		Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
+	for(int i = 0; i < MAX_CLIENTS; i++)
+		if(Server()->IsSixup(i))
+			Server()->SendMsg(&Msg, MSGFLAG_VITAL, i);
+}
+
+void CGameContext::SendGameMsg(int GameMsgID, int ParaI1, int ClientID)
+{
+	CMsgPacker Msg(protocol7::NETMSGTYPE_SV_GAMEMSG, false, true);
+	Msg.AddInt(GameMsgID);
+	Msg.AddInt(ParaI1);
+	if(ClientID != -1)
+		Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
+	for(int i = 0; i < MAX_CLIENTS; i++)
+		if(Server()->IsSixup(i))
+			Server()->SendMsg(&Msg, MSGFLAG_VITAL, i);
+}
+
 void CGameContext::SendGameMsg(int GameMsgID, int ParaI1, int ParaI2, int ParaI3, int ClientID)
 {
-	CMsgPacker Msg(protocol7::NETMSGTYPE_SV_GAMEMSG);
+	CMsgPacker Msg(protocol7::NETMSGTYPE_SV_GAMEMSG, false, true);
 	Msg.AddInt(GameMsgID);
 	Msg.AddInt(ParaI1);
 	Msg.AddInt(ParaI2);
 	Msg.AddInt(ParaI3);
-	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
+	if(ClientID != -1)
+		Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
+	for(int i = 0; i < MAX_CLIENTS; i++)
+		if(Server()->IsSixup(i))
+			Server()->SendMsg(&Msg, MSGFLAG_VITAL, i);
 }

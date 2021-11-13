@@ -258,6 +258,7 @@ int CGameControllerDDRace::OnCharacterDeath(class CCharacter *pVictim, class CPl
 		if(F && F->GetCarrier() == pVictim)
 		{
 			GameServer()->CreateSoundGlobal(SOUND_CTF_DROP);
+			GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_DROP, -1);
 			/*pVictim->GetPlayer()->m_Rainbow = false;
 			pVictim->GetPlayer()->m_TeeInfos.m_ColorBody = pVictim->GetPlayer()->m_ColorBodyOld;
 			pVictim->GetPlayer()->m_TeeInfos.m_ColorFeet = pVictim->GetPlayer()->m_ColorFeetOld;*/
@@ -292,6 +293,15 @@ bool CGameControllerDDRace::OnEntity(int Index, vec2 Pos, int Layer, int Flags, 
 	m_apFlags[Team] = F;
 	GameServer()->m_World.InsertEntity(F);
 	return true;
+}
+
+void CGameControllerDDRace::OnFlagReturn(CFlag *pFlag)
+{
+	IGameController::OnFlagReturn(pFlag);
+
+	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", "flag_return");
+	GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_RETURN, -1);
+	GameServer()->CreateSoundGlobal(SOUND_CTF_RETURN);
 }
 
 void CGameControllerDDRace::FlagTick()
@@ -361,7 +371,8 @@ void CGameControllerDDRace::FlagTick()
 							Server()->ClientName(pChr->GetPlayer()->GetCID()),
 							pChr->GetPlayer()->GetTeam());
 						GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
-						// GameServer()->SendGameMsg(GAMEMSG_CTF_RETURN, -1);
+						GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_RETURN, -1);
+						GameServer()->CreateSoundGlobal(SOUND_CTF_RETURN);
 						F->Reset();
 					}
 				}
@@ -381,7 +392,7 @@ void CGameControllerDDRace::FlagTick()
 						Server()->ClientName(F->GetCarrier()->GetPlayer()->GetCID()),
 						F->GetCarrier()->GetPlayer()->GetTeam());
 					GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
-					// GameServer()->SendGameMsg(GAMEMSG_CTF_GRAB, fi, -1);
+					GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_GRAB, fi, -1);
 					break;
 				}
 			}

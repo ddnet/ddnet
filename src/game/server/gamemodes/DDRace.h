@@ -13,7 +13,6 @@ class CGameControllerDDRace : public IGameController
 {
 	// gctf
 	class CFlag *m_apFlags[2];
-	bool m_IsGrounded;
 	virtual bool DoWincheckMatch() override;
 
 public:
@@ -49,6 +48,7 @@ public:
 
 	virtual void Snap(int SnappingClient) override;
 	virtual int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
+	virtual void OnFlagReturn(class CFlag *pFlag) override;
 	bool OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Number) override;
 	void FlagTick();
 };

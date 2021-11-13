@@ -202,6 +202,7 @@ public:
 
 	int GetStartTeam();
 	virtual bool DoWincheckMatch(); // returns true when the match is over
+	virtual void OnFlagReturn(class CFlag *pFlag);
 };
 
 #endif

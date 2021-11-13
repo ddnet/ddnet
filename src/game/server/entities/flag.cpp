@@ -56,7 +56,7 @@ void CFlag::TickDefered()
 			GameLayerClipped(m_Pos))
 		{
 			Reset();
-			// GameServer()->m_pController->OnFlagReturn(this);
+			GameServer()->m_pController->OnFlagReturn(this);
 		}
 
 		if(!m_AtStand)
@@ -64,7 +64,7 @@ void CFlag::TickDefered()
 			if(Server()->Tick() > m_DropTick + Server()->TickSpeed() * 30)
 			{
 				Reset();
-				// GameServer()->m_pController->OnFlagReturn(this);
+				GameServer()->m_pController->OnFlagReturn(this);
 			}
 			else
 			{

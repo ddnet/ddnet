@@ -1143,3 +1143,7 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 		}
 	}
 }
+
+void IGameController::OnFlagReturn(CFlag *pFlag)
+{
+}
