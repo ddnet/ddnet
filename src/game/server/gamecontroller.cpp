@@ -548,7 +548,7 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 			pKiller->m_Score++; // normal kill
 	}
 	if(Weapon == WEAPON_SELF)
-		pVictim->GetPlayer()->m_RespawnTick = Server()->Tick()+Server()->TickSpeed()*3.0f;
+		pVictim->GetPlayer()->m_RespawnTick = Server()->Tick() + Server()->TickSpeed() * 3.0f;
 
 	// update spectator modes for dead players in survival
 	// if(m_GameFlags&GAMEFLAG_SURVIVAL)
@@ -966,7 +966,7 @@ int IGameController::GetStartTeam()
 
 	// check if there're enough player slots left
 	// TODO: add SvPlayerSlots in upstream
-	// if(m_aTeamSize[TEAM_RED]+m_aTeamSize[TEAM_BLUE] < Config()->m_SvPlayerSlots)
+	if(m_aTeamSize[TEAM_RED] + m_aTeamSize[TEAM_BLUE] < Server()->MaxClients() - g_Config.m_SvSpectatorSlots)
 	{
 		++m_aTeamSize[Team];
 		// m_UnbalancedTick = TBALANCE_CHECK;
