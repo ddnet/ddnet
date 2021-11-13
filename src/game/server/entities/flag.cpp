@@ -16,6 +16,8 @@ CFlag::CFlag(CGameWorld *pGameWorld, int Team) :
 
 void CFlag::Reset()
 {
+	GameServer()->CreateSoundGlobal(SOUND_CTF_RETURN);
+
 	m_pCarrier = NULL;
 	m_AtStand = 1;
 	m_Pos = m_StandPos;
@@ -29,6 +31,7 @@ void CFlag::Grab(CCharacter *pChar)
 	if(m_AtStand)
 		m_GrabTick = Server()->Tick();
 	m_AtStand = false;
+	GameServer()->CreateSoundGlobal(m_Team == TEAM_RED ? SOUND_CTF_GRAB_EN : SOUND_CTF_GRAB_PL);
 }
 
 void CFlag::Drop()

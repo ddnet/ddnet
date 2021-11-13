@@ -227,6 +227,8 @@ public:
 
 	void List(int ClientID, const char *filter);
 
+	void SendGameMsg(int GameMsgID, int ParaI1, int ParaI2, int ParaI3, int ClientID); // gctf
+
 	//
 	void CheckPureTuning();
 	void SendTuningParams(int ClientID, int Zone = 0);

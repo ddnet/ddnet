@@ -318,18 +318,18 @@ void CGameControllerDDRace::FlagTick()
 					// CAPTURE! \o/
 					m_aTeamscore[fi ^ 1] += 100;
 					F->GetCarrier()->GetPlayer()->m_Score += 5;
-					// float Diff = Server()->Tick() - F->GetGrabTick();
+					float Diff = Server()->Tick() - F->GetGrabTick();
 
-					// char aBuf[64];
-					// str_format(aBuf, sizeof(aBuf), "flag_capture player='%d:%s' team=%d time=%.2f",
-					// 	F->GetCarrier()->GetPlayer()->GetCID(),
-					// 	Server()->ClientName(F->GetCarrier()->GetPlayer()->GetCID()),
-					// 	F->GetCarrier()->GetPlayer()->GetTeam(),
-					// 	Diff / (float)Server()->TickSpeed()
-					// );
-					// GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
+					char aBuf[64];
+					str_format(aBuf, sizeof(aBuf), "flag_capture player='%d:%s' team=%d time=%.2f",
+						F->GetCarrier()->GetPlayer()->GetCID(),
+						Server()->ClientName(F->GetCarrier()->GetPlayer()->GetCID()),
+						F->GetCarrier()->GetPlayer()->GetTeam(),
+						Diff / (float)Server()->TickSpeed());
+					GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
-					// GameServer()->SendGameMsg(GAMEMSG_CTF_CAPTURE, fi, F->GetCarrier()->GetPlayer()->GetCID(), Diff, -1);
+					GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_CAPTURE, fi, F->GetCarrier()->GetPlayer()->GetCID(), Diff, -1);
+					GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
 					for(int i = 0; i < 2; i++)
 						m_apFlags[i]->Reset();
 					// do a win check(capture could trigger win condition)

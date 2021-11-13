@@ -4203,3 +4203,15 @@ bool CGameContext::RateLimitPlayerMapVote(int ClientID)
 	}
 	return false;
 }
+
+// gctf
+
+void CGameContext::SendGameMsg(int GameMsgID, int ParaI1, int ParaI2, int ParaI3, int ClientID)
+{
+	CMsgPacker Msg(protocol7::NETMSGTYPE_SV_GAMEMSG);
+	Msg.AddInt(GameMsgID);
+	Msg.AddInt(ParaI1);
+	Msg.AddInt(ParaI2);
+	Msg.AddInt(ParaI3);
+	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
+}
