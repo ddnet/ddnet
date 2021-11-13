@@ -14,7 +14,7 @@ class CGameControllerDDRace : public IGameController
 	// gctf
 	class CFlag *m_apFlags[2];
 	bool m_IsGrounded;
-	virtual bool DoWincheckMatch();
+	virtual bool DoWincheckMatch() override;
 
 public:
 	CGameControllerDDRace(class CGameContext *pGameServer);
@@ -47,9 +47,9 @@ public:
 
 	// gctf
 
-	virtual void Snap(int SnappingClient);
-	virtual int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon);
-	virtual bool OnEntity(int Index, vec2 Pos);
+	virtual void Snap(int SnappingClient) override;
+	virtual int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
+	bool OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Number) override;
 	void FlagTick();
 };
 #endif // GAME_SERVER_GAMEMODES_DDRACE_H

@@ -174,7 +174,6 @@ private:
 	EGameState m_GameState;
 	int m_GameStateTimer;
 
-	virtual bool DoWincheckMatch(); // returns true when the match is over
 	virtual void DoWincheckRound() {}
 	bool HasEnoughPlayers() const { return (IsTeamplay() && m_aTeamSize[TEAM_RED] > 0 && m_aTeamSize[TEAM_BLUE] > 0) || (!IsTeamplay() && m_aTeamSize[TEAM_RED] > 1); }
 	void SetGameState(EGameState GameState, int Timer = 0);
@@ -202,6 +201,7 @@ public:
 	};
 
 	int GetStartTeam();
+	virtual bool DoWincheckMatch(); // returns true when the match is over
 };
 
 #endif

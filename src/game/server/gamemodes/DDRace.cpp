@@ -274,10 +274,9 @@ int CGameControllerDDRace::OnCharacterDeath(class CCharacter *pVictim, class CPl
 	return HadFlag;
 }
 
-bool CGameControllerDDRace::OnEntity(int Index, vec2 Pos)
+bool CGameControllerDDRace::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Number)
 {
-	//if(IGameController::OnEntityOld(Index, Pos))
-	//	return true;
+	IGameController::OnEntity(Index, Pos, Layer, Flags, Number);
 
 	int Team = -1;
 	if(Index == ENTITY_FLAGSTAND_RED)
@@ -442,6 +441,8 @@ void CGameControllerDDRace::Snap(int SnappingClient)
 
 bool CGameControllerDDRace::DoWincheckMatch()
 {
+	IGameController::DoWincheckMatch();
+
 	// check score win condition
 	if((m_GameInfo.m_ScoreLimit > 0 && (m_aTeamscore[TEAM_RED] >= m_GameInfo.m_ScoreLimit || m_aTeamscore[TEAM_BLUE] >= m_GameInfo.m_ScoreLimit)) ||
 		(m_GameInfo.m_TimeLimit > 0 && (Server()->Tick() - m_GameStartTick) >= m_GameInfo.m_TimeLimit * Server()->TickSpeed() * 60))
