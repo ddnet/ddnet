@@ -430,7 +430,6 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, in
 	}
 	else
 	{
-		CTeamsCore *Teams = &((CGameControllerDDRace *)m_pController)->m_Teams.m_Core;
 		CNetMsg_Sv_Chat Msg;
 		Msg.m_Team = 1;
 		Msg.m_ClientID = ChatterClientID;
@@ -454,7 +453,7 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, in
 				}
 				else
 				{
-					if(Teams->Team(i) == Team && m_apPlayers[i]->GetTeam() != CHAT_SPEC)
+					if(m_apPlayers[i]->GetTeam() == Team && m_apPlayers[i]->GetTeam() != CHAT_SPEC)
 					{
 						Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, i);
 					}
@@ -1768,9 +1767,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			pPlayer->UpdatePlaytime();
 
-			int GameTeam = ((CGameControllerDDRace *)m_pController)->m_Teams.m_Core.Team(pPlayer->GetCID());
 			if(Team)
-				Team = ((pPlayer->GetTeam() == -1) ? CHAT_SPEC : GameTeam);
+				Team = ((pPlayer->GetTeam() == -1) ? CHAT_SPEC : pPlayer->GetTeam());
 			else
 				Team = CHAT_ALL;
 
