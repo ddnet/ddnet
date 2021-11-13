@@ -1514,10 +1514,6 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 				m_ServerBrowser.SetCurrentServerPing(m_ServerAddress, LatencyMs);
 				m_CurrentServerPingInfoType = SavedType;
 				m_CurrentServerCurrentPingTime = -1;
-
-				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf), "got pong from current server, latency=%dms", LatencyMs);
-				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
 			}
 		}
 	}
@@ -1780,10 +1776,6 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 				int LatencyMs = (time_get() - m_CurrentServerCurrentPingTime) * 1000 / time_freq();
 				m_ServerBrowser.SetCurrentServerPing(m_ServerAddress, LatencyMs);
 				m_CurrentServerCurrentPingTime = -1;
-
-				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf), "got pong from current server, latency=%dms", LatencyMs);
-				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
 			}
 		}
 		else if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_ADD)
