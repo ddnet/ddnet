@@ -903,18 +903,18 @@ bool IGameController::DoWincheckMatch()
 		int Topscore = 0;
 		int TopscoreCount = 0;
 		for(int i = 0; i < MAX_CLIENTS; i++)
-		{
-			if(GameServer()->m_apPlayers[i])
+			for(auto &pPlayer : GameServer()->m_apPlayers)
 			{
-				if(GameServer()->m_apPlayers[i]->m_Score > Topscore)
+				if(!pPlayer)
+					continue;
+				if(pPlayer->m_Score > Topscore)
 				{
-					Topscore = GameServer()->m_apPlayers[i]->m_Score;
+					Topscore = pPlayer->m_Score;
 					TopscoreCount = 1;
 				}
-				else if(GameServer()->m_apPlayers[i]->m_Score == Topscore)
+				else if(pPlayer->m_Score == Topscore)
 					TopscoreCount++;
 			}
-		}
 
 		// check score win condition
 		if((m_GameInfo.m_ScoreLimit > 0 && Topscore >= m_GameInfo.m_ScoreLimit) ||

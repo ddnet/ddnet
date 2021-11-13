@@ -250,9 +250,8 @@ int CGameControllerDDRace::OnCharacterDeath(class CCharacter *pVictim, class CPl
 	int HadFlag = 0;
 
 	// drop flags
-	for(int i = 0; i < 2; i++)
+	for(auto &F : m_apFlags)
 	{
-		CFlag *F = m_apFlags[i];
 		if(F && pKiller && pKiller->GetCharacter() && F->GetCarrier() == pKiller->GetCharacter())
 			HadFlag |= 2;
 		if(F && F->GetCarrier() == pVictim)
@@ -341,7 +340,8 @@ void CGameControllerDDRace::FlagTick()
 					GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_CAPTURE, fi, F->GetCarrier()->GetPlayer()->GetCID(), Diff, -1);
 					GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
 					for(int i = 0; i < 2; i++)
-						m_apFlags[i]->Reset();
+						for(auto &pFlag : m_apFlags)
+							pFlag->Reset();
 					// do a win check(capture could trigger win condition)
 					if(DoWincheckMatch())
 						return;
