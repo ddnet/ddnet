@@ -46,6 +46,7 @@ public:
 	int GetItemSize(int Index) const;
 	int GetItemIndex(int Key) const;
 	int GetItemType(int Index) const;
+	void *FindItem(int Type, int ID) const;
 
 	unsigned Crc();
 	void DebugDump();

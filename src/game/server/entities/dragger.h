@@ -16,7 +16,7 @@ class CDragger : public CEntity
 	bool m_NW;
 	int m_CaughtTeam;
 
-	CCharacter *m_SoloEnts[MAX_CLIENTS];
+	int m_SoloEntIDs[MAX_CLIENTS];
 	int m_SoloIDs[MAX_CLIENTS];
 
 public:

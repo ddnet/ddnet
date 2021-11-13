@@ -80,6 +80,11 @@
 #include "SDL_rwops.h"
 #include "base/hash.h"
 
+// for msvc
+#ifndef PRIu64
+#define PRIu64 "I64u"
+#endif
+
 static const ColorRGBA ClientNetworkPrintColor{0.7f, 1, 0.7f, 1.0f};
 static const ColorRGBA ClientNetworkErrPrintColor{1.0f, 0.25f, 0.25f, 1.0f};
 
@@ -981,19 +986,10 @@ void CClient::SnapInvalidateItem(int SnapID, int Index)
 
 void *CClient::SnapFindItem(int SnapID, int Type, int ID) const
 {
-	// TODO: linear search. should be fixed.
-	int i;
-
 	if(!m_aSnapshots[g_Config.m_ClDummy][SnapID])
 		return 0x0;
 
-	for(i = 0; i < m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pSnap->NumItems(); i++)
-	{
-		CSnapshotItem *pItem = m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItem(i);
-		if(m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItemType(i) == Type && pItem->ID() == ID)
-			return (void *)pItem->Data();
-	}
-	return 0x0;
+	return m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->FindItem(Type, ID);
 }
 
 int CClient::SnapNumItems(int SnapID) const
@@ -1045,18 +1041,18 @@ void CClient::DebugRender()
 	Graphics()->QuadsText(2, 2, 16, aBuffer);
 
 	{
-		int SendPackets = (Current.sent_packets - Prev.sent_packets);
-		int SendBytes = (Current.sent_bytes - Prev.sent_bytes);
-		int SendTotal = SendBytes + SendPackets * 42;
-		int RecvPackets = (Current.recv_packets - Prev.recv_packets);
-		int RecvBytes = (Current.recv_bytes - Prev.recv_bytes);
-		int RecvTotal = RecvBytes + RecvPackets * 42;
+		uint64_t SendPackets = (Current.sent_packets - Prev.sent_packets);
+		uint64_t SendBytes = (Current.sent_bytes - Prev.sent_bytes);
+		uint64_t SendTotal = SendBytes + SendPackets * 42;
+		uint64_t RecvPackets = (Current.recv_packets - Prev.recv_packets);
+		uint64_t RecvBytes = (Current.recv_bytes - Prev.recv_bytes);
+		uint64_t RecvTotal = RecvBytes + RecvPackets * 42;
 
 		if(!SendPackets)
 			SendPackets++;
 		if(!RecvPackets)
 			RecvPackets++;
-		str_format(aBuffer, sizeof(aBuffer), "send: %3d %5d+%4d=%5d (%3d kbps) avg: %5d\nrecv: %3d %5d+%4d=%5d (%3d kbps) avg: %5d",
+		str_format(aBuffer, sizeof(aBuffer), "send: %3" PRIu64 " %5" PRIu64 "+%4" PRIu64 "=%5" PRIu64 " (%3" PRIu64 " kbps) avg: %5" PRIu64 "\nrecv: %3" PRIu64 " %5" PRIu64 "+%4" PRIu64 "=%5" PRIu64 " (%3" PRIu64 " kbps) avg: %5" PRIu64,
 			SendPackets, SendBytes, SendPackets * 42, SendTotal, (SendTotal * 8) / 1024, SendBytes / SendPackets,
 			RecvPackets, RecvBytes, RecvPackets * 42, RecvTotal, (RecvTotal * 8) / 1024, RecvBytes / RecvPackets);
 		Graphics()->QuadsText(2, 14, 16, aBuffer);

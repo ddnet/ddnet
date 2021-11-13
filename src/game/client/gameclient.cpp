@@ -277,6 +277,8 @@ void CGameClient::OnInit()
 	m_DDRaceMsgSent[1] = false;
 	m_ShowOthers[0] = -1;
 	m_ShowOthers[1] = -1;
+	m_SwitchStateTeam[0] = -1;
+	m_SwitchStateTeam[1] = -1;
 
 	m_LastZoom = .0;
 	m_LastScreenAspect = .0;
@@ -1146,6 +1148,8 @@ void CGameClient::OnNewSnapshot()
 #endif
 
 	bool FoundGameInfoEx = false;
+	bool GotSwitchStateTeam = false;
+	m_SwitchStateTeam[g_Config.m_ClDummy] = -1;
 
 	for(auto &Client : m_aClients)
 	{
@@ -1409,7 +1413,7 @@ void CGameClient::OnNewSnapshot()
 				int NumSwitchers = clamp(pSwitchStateData->m_NumSwitchers, 0, 255);
 				if(!Collision()->m_pSwitchers || NumSwitchers != Collision()->m_NumSwitchers)
 				{
-					delete Collision()->m_pSwitchers;
+					delete[] Collision()->m_pSwitchers;
 					Collision()->m_pSwitchers = new CCollision::SSwitchers[NumSwitchers + 1];
 					Collision()->m_NumSwitchers = NumSwitchers;
 				}
@@ -1440,6 +1444,12 @@ void CGameClient::OnNewSnapshot()
 						Collision()->m_pSwitchers[i].m_Type[Team] = TILE_SWITCHCLOSE;
 					Collision()->m_pSwitchers[i].m_EndTick[Team] = 0;
 				}
+
+				if(!GotSwitchStateTeam)
+					m_SwitchStateTeam[g_Config.m_ClDummy] = Team;
+				else
+					m_SwitchStateTeam[g_Config.m_ClDummy] = -1;
+				GotSwitchStateTeam = true;
 			}
 		}
 	}
@@ -2591,11 +2601,11 @@ bool CGameClient::IsOtherTeam(int ClientID)
 	return m_Teams.Team(ClientID) != m_Teams.Team(m_Snap.m_LocalClientID);
 }
 
-int CGameClient::OwnTeam()
+int CGameClient::SwitchStateTeam()
 {
-	if(m_Snap.m_LocalClientID < 0)
-		return 0;
-	else if(m_aClients[m_Snap.m_LocalClientID].m_Team == TEAM_SPECTATORS && m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
+	if(m_SwitchStateTeam[g_Config.m_ClDummy] >= 0)
+		return m_SwitchStateTeam[g_Config.m_ClDummy];
+	else if(m_Snap.m_LocalClientID < 0)
 		return 0;
 	else if(m_Snap.m_SpecInfo.m_Active && m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
 		return m_Teams.Team(m_Snap.m_SpecInfo.m_SpectatorID);
@@ -3085,37 +3095,43 @@ void CGameClient::SnapCollectEntities()
 	int NumSnapItems = Client()->SnapNumItems(IClient::SNAP_CURRENT);
 
 	std::vector<CSnapEntities> aItemData;
+	std::vector<CSnapEntities> aItemEx;
+
 	for(int Index = 0; Index < NumSnapItems; Index++)
 	{
 		IClient::CSnapItem Item;
 		const void *pData = Client()->SnapGetItem(IClient::SNAP_CURRENT, Index, &Item);
-		if(Item.m_Type == NETOBJTYPE_ENTITYEX || Item.m_Type == NETOBJTYPE_PROJECTILE || Item.m_Type == NETOBJTYPE_PICKUP || Item.m_Type == NETOBJTYPE_LASER || Item.m_Type == NETOBJTYPE_DDNETPROJECTILE)
+		if(Item.m_Type == NETOBJTYPE_ENTITYEX)
+			aItemEx.push_back({Item, pData, 0});
+		else if(Item.m_Type == NETOBJTYPE_PICKUP || Item.m_Type == NETOBJTYPE_LASER || Item.m_Type == NETOBJTYPE_PROJECTILE || Item.m_Type == NETOBJTYPE_DDNETPROJECTILE)
 			aItemData.push_back({Item, pData, 0});
 	}
 
-	// sort by id, with non-extended items before extended items of the same id
-	std::sort(aItemData.begin(), aItemData.end(), [](const CSnapEntities &lhs, const CSnapEntities &rhs) {
-		if(lhs.m_Item.m_ID == rhs.m_Item.m_ID)
-			return lhs.m_Item.m_Type != NETOBJTYPE_ENTITYEX;
-		return lhs.m_Item.m_ID < rhs.m_Item.m_ID;
-	});
+	// sort by id
+	class CEntComparer
+	{
+	public:
+		bool operator()(const CSnapEntities &lhs, const CSnapEntities &rhs) const
+		{
+			return lhs.m_Item.m_ID < rhs.m_Item.m_ID;
+		}
+	};
+
+	std::sort(aItemData.begin(), aItemData.end(), CEntComparer());
+	std::sort(aItemEx.begin(), aItemEx.end(), CEntComparer());
 
 	// merge extended items with items they belong to
 	m_aSnapEntities.clear();
-	for(size_t Index = 0; Index < aItemData.size(); Index++)
+
+	size_t IndexEx = 0;
+	for(const CSnapEntities &Ent : aItemData)
 	{
-		if(aItemData[Index].m_Item.m_Type == NETOBJTYPE_ENTITYEX)
-			continue;
-
-		const IClient::CSnapItem Item = aItemData[Index].m_Item;
-		const void *pData = (const void *)aItemData[Index].m_pData;
 		const CNetObj_EntityEx *pDataEx = 0;
+		while(IndexEx < aItemEx.size() && aItemEx[IndexEx].m_Item.m_ID < Ent.m_Item.m_ID)
+			IndexEx++;
+		if(IndexEx < aItemEx.size() && aItemEx[IndexEx].m_Item.m_ID == Ent.m_Item.m_ID)
+			pDataEx = (const CNetObj_EntityEx *)aItemEx[IndexEx].m_pData;
 
-		if(Index + 1 < aItemData.size() && aItemData[Index + 1].m_Item.m_ID == Item.m_ID && aItemData[Index + 1].m_Item.m_Type == NETOBJTYPE_ENTITYEX)
-		{
-			pDataEx = (const CNetObj_EntityEx *)aItemData[Index + 1].m_pData;
-			Index++;
-		}
-		m_aSnapEntities.push_back({Item, pData, pDataEx});
+		m_aSnapEntities.push_back({Ent.m_Item, Ent.m_pData, pDataEx});
 	}
 }

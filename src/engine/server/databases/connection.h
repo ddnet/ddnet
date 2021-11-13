@@ -72,6 +72,7 @@ public:
 	virtual bool IsNull(int Col) = 0;
 	virtual float GetFloat(int Col) = 0;
 	virtual int GetInt(int Col) = 0;
+	virtual int64_t GetInt64(int Col) = 0;
 	// ensures that the string is null terminated
 	virtual void GetString(int Col, char *pBuffer, int BufferSize) = 0;
 	// returns number of bytes read into the buffer
