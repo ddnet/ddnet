@@ -841,10 +841,10 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	return 0;
 }
 
-bool CDemoPlayer::ExtractMap(class IStorage *pStorage)
+unsigned char *CDemoPlayer::GetMapData(class IStorage *pStorage)
 {
 	if(!m_MapInfo.m_Size)
-		return false;
+		return 0;
 
 	long CurSeek = io_tell(m_File);
 
@@ -853,6 +853,14 @@ bool CDemoPlayer::ExtractMap(class IStorage *pStorage)
 	unsigned char *pMapData = (unsigned char *)malloc(m_MapInfo.m_Size);
 	io_read(m_File, pMapData, m_MapInfo.m_Size);
 	io_seek(m_File, CurSeek, IOSEEK_START);
+	return pMapData;
+}
+
+bool CDemoPlayer::ExtractMap(class IStorage *pStorage)
+{
+	unsigned char *pMapData = GetMapData(pStorage);
+	if(!pMapData)
+		return false;
 
 	// handle sha256
 	SHA256_DIGEST Sha256 = SHA256_ZEROED;
@@ -1170,7 +1178,11 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 			Sha256 = pMapInfo->m_Sha256;
 	}
 
-	if(m_pDemoRecorder->Start(m_pStorage, m_pConsole, pDst, m_pNetVersion, pMapInfo->m_aName, &Sha256, pMapInfo->m_Crc, "client", pMapInfo->m_Size, NULL, NULL, pfnFilter, pUser) == -1)
+	unsigned char *pMapData = m_pDemoPlayer->GetMapData(m_pStorage);
+	const int Result = m_pDemoRecorder->Start(m_pStorage, m_pConsole, pDst, m_pNetVersion, pMapInfo->m_aName, &Sha256, pMapInfo->m_Crc, "client", pMapInfo->m_Size, pMapData, NULL, pfnFilter, pUser) == -1;
+	if(pMapData)
+		free(pMapData);
+	if(Result != 0)
 		return;
 
 	m_pDemoPlayer->Play();
