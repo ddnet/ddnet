@@ -133,6 +133,7 @@ public:
 	void SetListener(IListener *pListener);
 
 	int Load(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, int StorageType);
+	unsigned char *GetMapData(class IStorage *pStorage);
 	bool ExtractMap(class IStorage *pStorage);
 	int Play();
 	void Pause();
