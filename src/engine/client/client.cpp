@@ -3767,7 +3767,6 @@ void CClient::DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void 
 
 const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 {
-	int Crc;
 	const char *pError;
 
 	IOHANDLE File = Storage()->OpenFile(pFilename, IOFLAG_READ, StorageType);
@@ -3786,7 +3785,7 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 		return "error loading demo";
 
 	// load map
-	Crc = m_DemoPlayer.GetMapInfo()->m_Crc;
+	int Crc = m_DemoPlayer.GetMapInfo()->m_Crc;
 	SHA256_DIGEST Sha = m_DemoPlayer.GetMapInfo()->m_Sha256;
 	pError = LoadMapSearch(m_DemoPlayer.Info()->m_Header.m_aMapName, Sha != SHA256_ZEROED ? &Sha : nullptr, Crc);
 	if(pError)

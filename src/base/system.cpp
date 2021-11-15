@@ -3521,6 +3521,32 @@ const char *str_next_token(const char *str, const char *delim, char *buffer, int
 	return tok + len;
 }
 
+int bytes_be_to_int(const unsigned char *bytes)
+{
+	return ((bytes[0] & 0xff) << 24) | ((bytes[1] & 0xff) << 16) | ((bytes[2] & 0xff) << 8) | (bytes[3] & 0xff);
+}
+
+void int_to_bytes_be(unsigned char *bytes, int value)
+{
+	bytes[0] = (value >> 24) & 0xff;
+	bytes[1] = (value >> 16) & 0xff;
+	bytes[2] = (value >> 8) & 0xff;
+	bytes[3] = value & 0xff;
+}
+
+unsigned bytes_be_to_uint(const unsigned char *bytes)
+{
+	return ((bytes[0] & 0xffu) << 24u) | ((bytes[1] & 0xffu) << 16u) | ((bytes[2] & 0xffu) << 8u) | (bytes[3] & 0xffu);
+}
+
+void uint_to_bytes_be(unsigned char *bytes, unsigned value)
+{
+	bytes[0] = (value >> 24u) & 0xffu;
+	bytes[1] = (value >> 16u) & 0xffu;
+	bytes[2] = (value >> 8u) & 0xffu;
+	bytes[3] = value & 0xffu;
+}
+
 int pid()
 {
 #if defined(CONF_FAMILY_WINDOWS)
