@@ -45,14 +45,6 @@ void CDoor::Snap(int SnappingClient)
 	if(NetworkClipped(SnappingClient, m_Pos) && NetworkClipped(SnappingClient, m_To))
 		return;
 
-	CNetObj_EntityEx *pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
-	if(!pEntData)
-		return;
-
-	pEntData->m_SwitchNumber = m_Number;
-	pEntData->m_Layer = m_Layer;
-	pEntData->m_EntityClass = ENTITYCLASS_DOOR;
-
 	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
 		NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
 
@@ -64,8 +56,16 @@ void CDoor::Snap(int SnappingClient)
 
 	int SnappingClientVersion = SnappingClient >= 0 ? GameServer()->GetClientVersion(SnappingClient) : CLIENT_VERSIONNR;
 
+	CNetObj_EntityEx *pEntData = 0;
 	if(SnappingClientVersion >= VERSION_DDNET_SWITCH)
+		pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
+
+	if(pEntData)
 	{
+		pEntData->m_SwitchNumber = m_Number;
+		pEntData->m_Layer = m_Layer;
+		pEntData->m_EntityClass = ENTITYCLASS_DOOR;
+
 		pObj->m_FromX = (int)m_To.x;
 		pObj->m_FromY = (int)m_To.y;
 		pObj->m_StartTick = 0;

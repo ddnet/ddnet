@@ -312,6 +312,7 @@ void CItems::OnRender()
 	bool BlinkingLight = (Ticks % 6) < 2;
 	int SwitcherTeam = m_pClient->SwitchStateTeam();
 	int DraggerStartTick = maximum((Client()->GameTick(g_Config.m_ClDummy) / 7) * 7, Client()->GameTick(g_Config.m_ClDummy) - 4);
+	int GunStartTick = (Client()->GameTick(g_Config.m_ClDummy) / 7) * 7;
 
 	bool UsePredicted = GameClient()->Predict() && GameClient()->AntiPingGunfire();
 	if(UsePredicted)
@@ -418,10 +419,18 @@ void CItems::OnRender()
 
 			if(pEntEx)
 			{
-				if(pEntEx->m_EntityClass == ENTITYCLASS_LIGHT && Inactive && BlinkingLight)
-					continue;
-				if(pEntEx->m_EntityClass >= ENTITYCLASS_GUN_NORMAL && pEntEx->m_EntityClass <= ENTITYCLASS_GUN_UNFREEZE && Inactive && BlinkingGun)
-					continue;
+				if(pEntEx->m_EntityClass == ENTITYCLASS_LIGHT)
+				{
+					if(Inactive && BlinkingLight)
+						continue;
+					Laser.m_StartTick = DraggerStartTick;
+				}
+				if(pEntEx->m_EntityClass >= ENTITYCLASS_GUN_NORMAL && pEntEx->m_EntityClass <= ENTITYCLASS_GUN_UNFREEZE)
+				{
+					if(Inactive && BlinkingGun)
+						continue;
+					Laser.m_StartTick = GunStartTick;
+				}
 				if(pEntEx->m_EntityClass >= ENTITYCLASS_DRAGGER_WEAK && pEntEx->m_EntityClass <= ENTITYCLASS_DRAGGER_STRONG)
 				{
 					if(Inactive && BlinkingDragger)
