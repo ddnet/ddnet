@@ -80,8 +80,8 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 	{
 		return true;
 	}
-	pOut->m_MaxClients = MaxClients;
-	pOut->m_MaxPlayers = MaxPlayers;
+	pOut->m_MaxClients = json_int_get(&MaxClients);
+	pOut->m_MaxPlayers = json_int_get(&MaxPlayers);
 	pOut->m_Passworded = Passworded;
 	str_copy(pOut->m_aGameType, GameType, sizeof(pOut->m_aGameType));
 	str_copy(pOut->m_aName, Name, sizeof(pOut->m_aName));
@@ -113,8 +113,8 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 			CClient *pClient = &pOut->m_aClients[i];
 			str_copy(pClient->m_aName, Name, sizeof(pClient->m_aName));
 			str_copy(pClient->m_aClan, Clan, sizeof(pClient->m_aClan));
-			pClient->m_Country = Country;
-			pClient->m_Score = Score;
+			pClient->m_Country = json_int_get(&Country);
+			pClient->m_Score = json_int_get(&Score);
 			pClient->m_IsPlayer = IsPlayer;
 		}
 
