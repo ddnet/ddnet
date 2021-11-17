@@ -1380,7 +1380,7 @@ void CMapLayers::RenderQuadLayer(int LayerIndex, CMapItemLayerQuads *pQuadLayer,
 	if(Visuals.m_BufferContainerIndex == -1)
 		return; //no visuals were created
 
-	if(!Force && (!g_Config.m_ClShowQuads || g_Config.m_ClOverlayEntities == 100))
+	if(!Force && (!g_Config.m_ClShowQuads || (GameClient()->m_GameInfo.m_AllowEntities && g_Config.m_ClOverlayEntities == 100)))
 		return;
 
 	CQuad *pQuads = (CQuad *)m_pLayers->Map()->GetDataSwapped(pQuadLayer->m_Data);
@@ -1730,7 +1730,8 @@ void CMapLayers::OnRender()
 				continue;
 
 			int EntityOverlayVal = g_Config.m_ClOverlayEntities;
-			if(m_Type == TYPE_FULL_DESIGN)
+			bool AllowEntities = GameClient()->m_GameInfo.m_AllowEntities;
+			if(m_Type == TYPE_FULL_DESIGN || !AllowEntities)
 				EntityOverlayVal = 0;
 
 			if((Render && EntityOverlayVal < 100 && !IsGameLayer && !IsFrontLayer && !IsSwitchLayer && !IsTeleLayer && !IsSpeedupLayer && !IsTuneLayer) || (EntityOverlayVal && IsGameLayer) || (m_Type == TYPE_BACKGROUND_FORCE))
@@ -1832,7 +1833,7 @@ void CMapLayers::OnRender()
 							//Graphics()->BlendNone();
 							//RenderTools()->RenderQuads(pQuads, pQLayer->m_NumQuads, LAYERRENDERFLAG_OPAQUE, EnvelopeEval, this);
 							Graphics()->BlendNormal();
-							RenderTools()->RenderQuads(pQuads, pQLayer->m_NumQuads, LAYERRENDERFLAG_TRANSPARENT, EnvelopeEval, this);
+							RenderTools()->RenderQuads(pQuads, pQLayer->m_NumQuads, LAYERRENDERFLAG_TRANSPARENT, EnvelopeEval, this, EntityOverlayVal);
 						}
 						else
 						{
