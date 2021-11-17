@@ -4,23 +4,12 @@
 #define GAME_SERVER_ENTITIES_CHARACTER_H
 
 #include <engine/antibot.h>
-#include <game/generated/protocol.h>
-#include <game/generated/server_data.h>
 #include <game/server/entity.h>
 #include <game/server/save.h>
-
-#include <game/gamecore.h>
 
 class CAntibot;
 class CGameTeams;
 struct CAntibotCharacterData;
-
-enum
-{
-	WEAPON_GAME = -3, // team switching etc
-	WEAPON_SELF = -2, // console kill command
-	WEAPON_WORLD = -1, // death tiles etc
-};
 
 enum
 {
@@ -51,8 +40,8 @@ public:
 	virtual void TickDefered();
 	virtual void TickPaused();
 	virtual void Snap(int SnappingClient);
-	virtual int NetworkClipped(int SnappingClient);
-	virtual int NetworkClipped(int SnappingClient, vec2 CheckPos);
+
+	bool CanSnapCharacter(int SnappingClient);
 
 	bool IsGrounded();
 
@@ -67,6 +56,7 @@ public:
 
 	void OnPredictedInput(CNetObj_PlayerInput *pNewInput);
 	void OnDirectInput(CNetObj_PlayerInput *pNewInput);
+	void ResetHook();
 	void ResetInput();
 	void FireWeapon();
 
@@ -82,6 +72,7 @@ public:
 	void GiveWeapon(int Weapon, bool Remove = false);
 	void GiveNinja();
 	void RemoveNinja();
+	void SetEndlessHook(bool Enable);
 
 	void SetEmote(int Emote, int Tick);
 
@@ -91,6 +82,7 @@ public:
 	bool IsAlive() const { return m_Alive; }
 	bool IsPaused() const { return m_Paused; }
 	class CPlayer *GetPlayer() { return m_pPlayer; }
+	int64_t TeamMask();
 
 private:
 	// player controlling this character
@@ -156,6 +148,10 @@ private:
 
 	// the player core for the physics
 	CCharacterCore m_Core;
+	CGameTeams *m_pTeams = nullptr;
+
+	std::map<int, std::vector<vec2>> *m_pTeleOuts = nullptr;
+	std::map<int, std::vector<vec2>> *m_pTeleCheckOuts = nullptr;
 
 	// info for dead reckoning
 	int m_ReckoningTick; // tick that we are performing dead reckoning From
@@ -184,13 +180,17 @@ private:
 	bool m_Solo;
 
 public:
-	CGameTeams *Teams();
+	CGameTeams *Teams() { return m_pTeams; }
+	void SetTeams(CGameTeams *pTeams);
+	void SetTeleports(std::map<int, std::vector<vec2>> *pTeleOuts, std::map<int, std::vector<vec2>> *pTeleCheckOuts);
+
 	void FillAntibot(CAntibotCharacterData *pData);
 	void Pause(bool Pause);
 	bool Freeze(int Time);
 	bool Freeze();
 	bool UnFreeze();
 	void GiveAllWeapons();
+	void ResetPickups();
 	int m_DDRaceState;
 	int Team();
 	bool CanCollide(int ClientID);
@@ -232,8 +232,8 @@ public:
 	int m_MoveRestrictions;
 
 	vec2 m_Intersection;
-	int64 m_LastStartWarning;
-	int64 m_LastRescue;
+	int64_t m_LastStartWarning;
+	int64_t m_LastRescue;
 	bool m_LastRefillJumps;
 	bool m_LastPenalty;
 	bool m_LastBonus;
@@ -261,11 +261,11 @@ public:
 	int GetWeaponAmmo(int Type) { return m_aWeapons[Type].m_Ammo; };
 	void SetWeaponAmmo(int Type, int Value) { m_aWeapons[Type].m_Ammo = Value; };
 	bool IsAlive() { return m_Alive; };
-	void SetEmoteType(int EmoteType) { m_EmoteType = EmoteType; };
-	void SetEmoteStop(int EmoteStop) { m_EmoteStop = EmoteStop; };
 	void SetNinjaActivationDir(vec2 ActivationDir) { m_Ninja.m_ActivationDir = ActivationDir; };
 	void SetNinjaActivationTick(int ActivationTick) { m_Ninja.m_ActivationTick = ActivationTick; };
 	void SetNinjaCurrentMoveTime(int CurrentMoveTime) { m_Ninja.m_CurrentMoveTime = CurrentMoveTime; };
+
+	int GetLastAction() const { return m_LastAction; }
 
 	bool HasTelegunGun() { return m_Core.m_HasTelegunGun; };
 	bool HasTelegunGrenade() { return m_Core.m_HasTelegunGrenade; };

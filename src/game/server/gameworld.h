@@ -36,12 +36,14 @@ private:
 	CEntity *m_apFirstEntityTypes[NUM_ENTTYPES];
 
 	class CGameContext *m_pGameServer;
+	class CConfig *m_pConfig;
 	class IServer *m_pServer;
 
 	void UpdatePlayerMaps();
 
 public:
 	class CGameContext *GameServer() { return m_pGameServer; }
+	class CConfig *Config() { return m_pConfig; }
 	class IServer *Server() { return m_pServer; }
 
 	bool m_ResetRequested;
@@ -121,15 +123,6 @@ public:
 	void RemoveEntity(CEntity *pEntity);
 
 	/*
-		Function: destroy_entity
-			Destroys an entity in the world.
-
-		Arguments:
-			entity - Entity to destroy
-	*/
-	void DestroyEntity(CEntity *pEntity);
-
-	/*
 		Function: snap
 			Calls snap on all the entities in the world to create
 			the snapshot.
@@ -149,8 +142,6 @@ public:
 	void Tick();
 
 	// DDRace
-
-	std::list<class CCharacter *> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, class CEntity *pNotThis);
 	void ReleaseHooked(int ClientID);
 
 	/*

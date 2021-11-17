@@ -52,7 +52,7 @@ static const unsigned int PCG32_GLOBAL_DEMO[] = {
 
 TEST(Prng, EqualsPcg32GlobalDemo)
 {
-	uint64 aSeed[2] = {42, 54};
+	uint64_t aSeed[2] = {42, 54};
 
 	CPrng Prng;
 	Prng.Seed(aSeed);
@@ -67,9 +67,9 @@ TEST(Prng, Description)
 	CPrng Prng;
 	EXPECT_STREQ(Prng.Description(), "pcg-xsh-rr:unseeded");
 
-	uint64 aSeed0[2] = {0xfedbca9876543210, 0x0123456789abcdef};
-	uint64 aSeed1[2] = {0x0123456789abcdef, 0xfedcba9876543210};
-	uint64 aSeed2[2] = {0x0000000000000000, 0x0000000000000000};
+	uint64_t aSeed0[2] = {0xfedbca9876543210, 0x0123456789abcdef};
+	uint64_t aSeed1[2] = {0x0123456789abcdef, 0xfedcba9876543210};
+	uint64_t aSeed2[2] = {0x0000000000000000, 0x0000000000000000};
 
 	Prng.Seed(aSeed0);
 	EXPECT_STREQ(Prng.Description(), "pcg-xsh-rr:fedbca9876543210:0123456789abcdef");

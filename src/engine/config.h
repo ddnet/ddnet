@@ -5,21 +5,22 @@
 
 #include "kernel.h"
 
-class IConfig : public IInterface
+class IConfigManager : public IInterface
 {
 	MACRO_INTERFACE("config", 0)
 public:
-	typedef void (*SAVECALLBACKFUNC)(IConfig *pConfig, void *pUserData);
+	typedef void (*SAVECALLBACKFUNC)(IConfigManager *pConfig, void *pUserData);
 
 	virtual void Init() = 0;
 	virtual void Reset() = 0;
 	virtual bool Save() = 0;
+	virtual class CConfig *Values() = 0;
 
 	virtual void RegisterCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData) = 0;
 
 	virtual void WriteLine(const char *pLine) = 0;
 };
 
-extern IConfig *CreateConfig();
+extern IConfigManager *CreateConfigManager();
 
 #endif

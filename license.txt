@@ -1,6 +1,6 @@
 Teeworlds Copyright (C) 2007-2014 Magnus Auvinen
 DDRace    Copyright (C) 2010-2011 Shereef Marzouk
-DDNet     Copyright (C) 2013-2020 Dennis Felsing
+DDNet     Copyright (C) 2013-2021 Dennis Felsing
 
 This software is provided 'as-is', without any express or implied
 warranty.  In no event will the authors be held liable for any damages
@@ -21,7 +21,8 @@ freely, subject to the following restrictions:
 ------------------------------------------------------------------------
 
 All content under 'data' except the assets, font, language & skin files,
-(which have their own licenses):
+(which have their own licenses) are released under
+CC-BY-SA 3.0 (http://creativecommons.org/licenses/by-sa/3.0/).
 Apache 2.0 for the 'Icon.tff' file:
 Copyright Google
 

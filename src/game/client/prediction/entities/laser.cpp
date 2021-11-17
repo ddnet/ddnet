@@ -20,7 +20,7 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	m_TelePos = vec2(0, 0);
 	m_WasTele = false;
 	m_Type = Type;
-	m_TuneZone = GameWorld()->m_WorldConfig.m_PredictTiles ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
+	m_TuneZone = GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
 	GameWorld()->InsertEntity(this);
 	DoBounce();
 }
@@ -67,7 +67,7 @@ void CLaser::DoBounce()
 
 	if(m_Energy < 0)
 	{
-		GameWorld()->DestroyEntity(this);
+		m_MarkedForDestroy = true;
 		return;
 	}
 	m_PrevPos = m_Pos;
@@ -158,7 +158,7 @@ CLaser::CLaser(CGameWorld *pGameWorld, int ID, CNetObj_Laser *pLaser) :
 	m_From.x = pLaser->m_FromX;
 	m_From.y = pLaser->m_FromY;
 	m_EvalTick = pLaser->m_StartTick;
-	m_TuneZone = GameWorld()->m_WorldConfig.m_PredictTiles ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
+	m_TuneZone = GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
 	m_Owner = -2;
 	m_Energy = GetTuning(m_TuneZone)->m_LaserReach;
 	if(pGameWorld->m_WorldConfig.m_IsFNG && m_Energy < 10.f)

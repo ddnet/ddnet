@@ -10,6 +10,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include <functional>
+
 #include <vector>
 #define GRAPHICS_TYPE_UNSIGNED_BYTE 0x1401
 #define GRAPHICS_TYPE_UNSIGNED_SHORT 0x1403
@@ -93,8 +95,11 @@ public:
 class CVideoMode
 {
 public:
-	int m_Width, m_Height;
+	int m_CanvasWidth, m_CanvasHeight;
+	int m_WindowWidth, m_WindowHeight;
+	int m_RefreshRate;
 	int m_Red, m_Green, m_Blue;
+	uint32_t m_Format;
 };
 
 struct GL_SPoint
@@ -147,7 +152,14 @@ struct GL_SVertexTex3DStream
 	GL_STexCoord3D m_Tex;
 };
 
-typedef void (*WINDOW_RESIZE_FUNC)(void *pUser);
+enum EGraphicsDriverAgeType
+{
+	GRAPHICS_DRIVER_AGE_TYPE_LEGACY = 0,
+	GRAPHICS_DRIVER_AGE_TYPE_DEFAULT,
+	GRAPHICS_DRIVER_AGE_TYPE_MODERN,
+};
+
+typedef std::function<void(void *)> WINDOW_RESIZE_FUNC;
 
 namespace client_data7 {
 struct CDataSprite; // NOLINT(bugprone-forward-declaration-namespace)
@@ -159,16 +171,12 @@ class IGraphics : public IInterface
 protected:
 	int m_ScreenWidth;
 	int m_ScreenHeight;
-	int m_DesktopScreenWidth;
-	int m_DesktopScreenHeight;
+	int m_ScreenRefreshRate;
+	float m_ScreenHiDPIScale;
 
 public:
-	/* Constants: Texture Loading Flags
-		TEXLOAD_NORESAMPLE - Prevents the texture from any resampling
-	*/
 	enum
 	{
-		TEXLOAD_NORESAMPLE = 1 << 0,
 		TEXLOAD_NOMIPMAPS = 1 << 1,
 		TEXLOAD_NO_COMPRESSION = 1 << 2,
 		TEXLOAD_TO_3D_TEXTURE = (1 << 3),
@@ -189,20 +197,27 @@ public:
 		{
 		}
 
-		operator int() const { return m_Id; }
+		bool IsValid() const { return Id() >= 0; }
+		int Id() const { return m_Id; }
+		void Invalidate() { m_Id = -1; }
 	};
 
 	int ScreenWidth() const { return m_ScreenWidth; }
 	int ScreenHeight() const { return m_ScreenHeight; }
 	float ScreenAspect() const { return (float)ScreenWidth() / (float)ScreenHeight(); }
+	float ScreenHiDPIScale() const { return m_ScreenHiDPIScale; }
+	int WindowWidth() const { return m_ScreenWidth / m_ScreenHiDPIScale; }
+	int WindowHeight() const { return m_ScreenHeight / m_ScreenHiDPIScale; }
 
-	virtual bool Fullscreen(bool State) = 0;
-	virtual void SetWindowBordered(bool State) = 0;
+	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless) = 0;
 	virtual bool SetWindowScreen(int Index) = 0;
 	virtual bool SetVSync(bool State) = 0;
 	virtual int GetWindowScreen() = 0;
-	virtual void Resize(int w, int h, bool SetWindowSize = false) = 0;
+	virtual void Resize(int w, int h, int RefreshRate, bool SetWindowSize = false, bool ForceResizeEvent = false) = 0;
 	virtual void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser) = 0;
+
+	virtual void WindowDestroyNtf(uint32_t WindowID) = 0;
+	virtual void WindowCreateNtf(uint32_t WindowID) = 0;
 
 	virtual void Clear(float r, float g, float b) = 0;
 
@@ -231,8 +246,7 @@ public:
 	// destination width must be equal to the subwidth of the source
 	virtual void CopyTextureFromTextureBufferSub(uint8_t *pDestBuffer, int DestWidth, int DestHeight, uint8_t *pSourceBuffer, int SrcWidth, int SrcHeight, int ColorChannelCount, int SrcSubOffsetX, int SrcSubOffsetY, int SrcSubCopyWidth, int SrcSubCopyHeight) = 0;
 
-	virtual int UnloadTexture(CTextureHandle Index) = 0;
-	virtual int UnloadTextureNew(CTextureHandle &TextureHandle) = 0;
+	virtual int UnloadTexture(CTextureHandle *pIndex) = 0;
 	virtual CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName = NULL) = 0;
 	virtual int LoadTextureRawSub(CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData) = 0;
 	virtual CTextureHandle LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags) = 0;
@@ -253,7 +267,7 @@ public:
 	virtual void RenderTileLayer(int BufferContainerIndex, float *pColor, char **pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffet) = 0;
 	virtual void RenderBorderTiles(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, int JumpIndex, unsigned int DrawNum) = 0;
 	virtual void RenderBorderTileLines(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, unsigned int IndexDrawNum, unsigned int RedrawNum) = 0;
-	virtual void RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, int QuadNum) = 0;
+	virtual void RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, int QuadNum, int QuadOffset) = 0;
 	virtual void RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, float *pTextColor, float *pTextoutlineColor) = 0;
 
 	// opengl 3.3 functions
@@ -270,11 +284,17 @@ public:
 	virtual void UpdateBufferContainer(int ContainerIndex, struct SBufferContainerInfo *pContainerInfo) = 0;
 	virtual void IndicesNumRequiredNotify(unsigned int RequiredIndicesCount) = 0;
 
+	virtual void GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch) = 0;
+	virtual bool IsConfigModernAPI() = 0;
 	virtual bool IsTileBufferingEnabled() = 0;
 	virtual bool IsQuadBufferingEnabled() = 0;
 	virtual bool IsTextBufferingEnabled() = 0;
 	virtual bool IsQuadContainerBufferingEnabled() = 0;
 	virtual bool HasTextureArrays() = 0;
+
+	virtual const char *GetVendorString() = 0;
+	virtual const char *GetVersionString() = 0;
+	virtual const char *GetRendererString() = 0;
 
 	struct CLineItem
 	{
@@ -301,6 +321,14 @@ public:
 	virtual void QuadsSetSubset(float TopLeftU, float TopLeftV, float BottomRightU, float BottomRightV) = 0;
 	virtual void QuadsSetSubsetFree(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3, int Index = -1) = 0;
 
+	struct CFreeformItem
+	{
+		float m_X0, m_Y0, m_X1, m_Y1, m_X2, m_Y2, m_X3, m_Y3;
+		CFreeformItem() {}
+		CFreeformItem(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3) :
+			m_X0(x0), m_Y0(y0), m_X1(x1), m_Y1(y1), m_X2(x2), m_Y2(y2), m_X3(x3), m_Y3(y3) {}
+	};
+
 	struct CQuadItem
 	{
 		float m_X, m_Y, m_Width, m_Height;
@@ -314,28 +342,29 @@ public:
 			m_Width = w;
 			m_Height = h;
 		}
+
+		CFreeformItem ToFreeForm() const
+		{
+			return CFreeformItem(m_X, m_Y, m_X + m_Width, m_Y, m_X, m_Y + m_Height, m_X + m_Width, m_Y + m_Height);
+		}
 	};
 	virtual void QuadsDraw(CQuadItem *pArray, int Num) = 0;
 	virtual void QuadsDrawTL(const CQuadItem *pArray, int Num) = 0;
 
 	virtual void QuadsTex3DDrawTL(const CQuadItem *pArray, int Num) = 0;
 
-	struct CFreeformItem
-	{
-		float m_X0, m_Y0, m_X1, m_Y1, m_X2, m_Y2, m_X3, m_Y3;
-		CFreeformItem() {}
-		CFreeformItem(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3) :
-			m_X0(x0), m_Y0(y0), m_X1(x1), m_Y1(y1), m_X2(x2), m_Y2(y2), m_X3(x3), m_Y3(y3) {}
-	};
+	virtual const GL_STexCoord *GetCurTextureCoordinates() = 0;
+	virtual const GL_SColor *GetCurColor() = 0;
 
-	virtual int CreateQuadContainer() = 0;
+	virtual int CreateQuadContainer(bool AutomaticUpload = true) = 0;
+	virtual void QuadContainerChangeAutomaticUpload(int ContainerIndex, bool AutomaticUpload) = 0;
 	virtual void QuadContainerUpload(int ContainerIndex) = 0;
 	virtual void QuadContainerAddQuads(int ContainerIndex, CQuadItem *pArray, int Num) = 0;
 	virtual void QuadContainerAddQuads(int ContainerIndex, CFreeformItem *pArray, int Num) = 0;
 	virtual void QuadContainerReset(int ContainerIndex) = 0;
 	virtual void DeleteQuadContainer(int ContainerIndex) = 0;
 	virtual void RenderQuadContainer(int ContainerIndex, int QuadDrawNum) = 0;
-	virtual void RenderQuadContainer(int ContainerIndex, int QuadOffset, int QuadDrawNum) = 0;
+	virtual void RenderQuadContainer(int ContainerIndex, int QuadOffset, int QuadDrawNum, bool ChangeWrapMode = true) = 0;
 	virtual void RenderQuadContainerEx(int ContainerIndex, int QuadOffset, int QuadDrawNum, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f) = 0;
 	virtual void RenderQuadContainerAsSprite(int ContainerIndex, int QuadOffset, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f) = 0;
 
@@ -375,7 +404,7 @@ public:
 
 	// synchronization
 	virtual void InsertSignal(class CSemaphore *pSemaphore) = 0;
-	virtual bool IsIdle() = 0;
+	virtual bool IsIdle() const = 0;
 	virtual void WaitForIdle() = 0;
 
 	virtual void SetWindowGrab(bool Grab) = 0;

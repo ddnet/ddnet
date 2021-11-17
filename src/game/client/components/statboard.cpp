@@ -156,14 +156,14 @@ void CStatboard::RenderGlobalStats()
 		}
 	}
 
-	// Dirty hack. Do not show scoreboard if there are more than 16 players
-	// remove as soon as support of more than 16 players is required
-	if(NumPlayers > 16)
+	// Dirty hack. Do not show scoreboard if there are more than 32 players
+	// remove as soon as support of more than 32 players is required
+	if(NumPlayers > 32)
 		return;
 
 	//clear motd if it is active
-	if(m_pClient->m_pMotd->IsActive())
-		m_pClient->m_pMotd->Clear();
+	if(m_pClient->m_Motd.IsActive())
+		m_pClient->m_Motd.Clear();
 
 	bool GameWithFlags = m_pClient->m_Snap.m_pGameInfoObj &&
 			     m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_FLAGS;
@@ -248,14 +248,20 @@ void CStatboard::RenderGlobalStats()
 	float FontSize = 24.0f;
 	float LineHeight = 50.0f;
 	float TeeSizemod = 0.8f;
-	float TeeOffset = 0.0f;
+	float ContentLineOffset = LineHeight * 0.05f;
 
-	if(NumPlayers > 14)
+	if(NumPlayers > 16)
+	{
+		FontSize = 20.0f;
+		LineHeight = 22.0f;
+		TeeSizemod = 0.34f;
+		ContentLineOffset = 0;
+	}
+	else if(NumPlayers > 14)
 	{
 		FontSize = 24.0f;
 		LineHeight = 40.0f;
 		TeeSizemod = 0.7f;
-		TeeOffset = -5.0f;
 	}
 
 	for(int j = 0; j < NumPlayers; j++)
@@ -269,13 +275,19 @@ void CStatboard::RenderGlobalStats()
 			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(1, 1, 1, 0.25f);
-			RenderTools()->DrawRoundRect(x, y, StatboardContentWidth - 20, LineHeight * 0.95f, 17.0f);
+			RenderTools()->DrawRoundRect(x - 10, y + ContentLineOffset / 2, StatboardContentWidth, LineHeight - ContentLineOffset, 0);
 			Graphics()->QuadsEnd();
 		}
 
 		CTeeRenderInfo Teeinfo = m_pClient->m_aClients[pInfo->m_ClientID].m_RenderInfo;
 		Teeinfo.m_Size *= TeeSizemod;
-		RenderTools()->RenderTee(CAnimState::GetIdle(), &Teeinfo, EMOTE_NORMAL, vec2(1, 0), vec2(x + 28, y + 28 + TeeOffset));
+
+		CAnimState *pIdleState = CAnimState::GetIdle();
+		vec2 OffsetToMid;
+		RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &Teeinfo, OffsetToMid);
+		vec2 TeeRenderPos(x + Teeinfo.m_Size / 2, y + LineHeight / 2.0f + OffsetToMid.y);
+
+		RenderTools()->RenderTee(pIdleState, &Teeinfo, EMOTE_NORMAL, vec2(1, 0), TeeRenderPos);
 
 		char aBuf[128];
 		CTextCursor Cursor;
@@ -387,7 +399,7 @@ void CStatboard::AutoStatCSV()
 {
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
-		char aDate[20], aFilename[128];
+		char aDate[20], aFilename[IO_MAX_PATH_LENGTH];
 		str_timestamp(aDate, sizeof(aDate));
 		str_format(aFilename, sizeof(aFilename), "screenshots/auto/stats_%s.csv", aDate);
 		IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_ALL);

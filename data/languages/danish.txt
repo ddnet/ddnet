@@ -348,9 +348,6 @@ Red team wins!
 Refresh
 == Opdater
 
-Refreshing master servers
-== Opdaterer masterservere
-
 Remote console
 == Serverkonsol
 
@@ -413,9 +410,6 @@ Show ingame HUD
 
 Show name plates
 == Vis navneskilte
-
-Show only supported
-== Vis kun understøttede
 
 Skins
 == Udseende
@@ -631,9 +625,6 @@ Saving ddnet-settings.cfg failed
 
 Replay feature is disabled!
 == Afspilningsfunktionen er deaktiveret!
-
-The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== Bredden eller højden af tekstur%s kan ikke deles med 16, hvilket kan forårsage visuelle fejl.
 
 Warning
 == Advarsel
@@ -944,23 +935,17 @@ Show HUD
 UI mouse s.
 == UI mus s.
 
-Borderless window
-== Kantløs vindue
-
 may cause delay
 == kan forårsage forsinkelse
 
 Screen
 == Skærm
 
-Use OpenGL 3.3 (experimental)
-== Brug OpenGL 3.3 (eksperimentel)
-
 Preinit VBO (iGPUs only)
 == Præinit VBO (iGPUs alene)
 
-Multiple texture units (disable for MacOS)
-== Flere teksturenheder (deaktiver for MacOS)
+Multiple texture units (disable for macOS)
+== Flere teksturenheder (deaktiver for macOS)
 
 Use high DPI
 == Brug højt DPI
@@ -1016,9 +1001,6 @@ DDNet Client needs to be restarted to complete update!
 Use DDRace Scoreboard
 == Brug DDRace resultattavle
 
-Show client IDs in Scoreboard
-== Vis klient-id'er på resultattavlen
-
 Show score
 == Vis score
 
@@ -1049,53 +1031,17 @@ Reset
 Highlighted message
 == Fremhævet besked
 
-Spectator
-== Tilskuer
-
-Look out!
-== Pas på!
-
 Team message
 == Team besked
-
-We will win
-== Vi vil vinde
 
 Friend message
 == Ven besked
 
-Highlight
-== Fremhæve
-
-Friend
-== Ven
-
-Hi o/
-== Hej o/
-
 Normal message
 == Normal besked
 
-Hello and welcome
-== Hej og velkommen
-
 Client message
 == Klient besked
-
-Inner color
-== Indre farve
-
-Outline color
-== Ydre farve
-
-Wait before try for
-== Vent inden du prøver
-
-second
-== sekund
-
-seconds
-== sekunder
 
 Save the best demo of each race
 == Gem den bedste demo af hvert løb
@@ -1150,12 +1096,6 @@ Show other players' key presses
 
 Old mouse mode
 == Gammel musetilstand
-
-Background (regular)
-== Baggrund (almindelig)
-
-Background (entities)
-== Baggrund (entities)
 
 Use current map as background
 == Brug det aktuelle kort som baggrund
@@ -1292,3 +1232,108 @@ Grabs
 
 9+ new mentions
 == 9+ ny nævner
+
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 
+
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+Getting server list from master server
+== 
+
+Refreshing...
+== 
+
+Leak IP
+== 
+
+Chat command
+== 
+
+Dummy
+== 
+
+Windowed
+== 
+
+Windowed borderless
+== 
+
+Desktop fullscreen
+== 
+
+Use modern OpenGL
+== 
+
+Show client IDs
+== 
+
+Kill Messages
+== 
+
+Kill Message Normal Color
+== 
+
+Kill Message Highlight Color
+== 
+
+Laser Outline Color
+== 
+
+Laser Inner Color
+== 
+
+Hookline
+== 
+
+No hit
+== 
+
+Hookable
+== 
+
+Tee
+== 
+
+Preview
+== 
+
+Show local player's key presses
+== 
+
+Background
+== 
+
+Entities Background color
+== 
+
+Regular Background Color
+== 
+
+Discord
+== 
+
+https://ddnet.tw/discord
+== 

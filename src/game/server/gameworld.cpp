@@ -2,8 +2,10 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
 #include "gameworld.h"
+#include "entities/character.h"
 #include "entity.h"
 #include "gamecontext.h"
+#include "player.h"
 #include <algorithm>
 #include <engine/shared/config.h>
 #include <utility>
@@ -14,6 +16,7 @@
 CGameWorld::CGameWorld()
 {
 	m_pGameServer = 0x0;
+	m_pConfig = 0x0;
 	m_pServer = 0x0;
 
 	m_Paused = false;
@@ -33,6 +36,7 @@ CGameWorld::~CGameWorld()
 void CGameWorld::SetGameServer(CGameContext *pGameServer)
 {
 	m_pGameServer = pGameServer;
+	m_pConfig = m_pGameServer->Config();
 	m_pServer = m_pGameServer->Server();
 }
 
@@ -77,11 +81,6 @@ void CGameWorld::InsertEntity(CEntity *pEnt)
 	m_apFirstEntityTypes[pEnt->m_ObjType] = pEnt;
 }
 
-void CGameWorld::DestroyEntity(CEntity *pEnt)
-{
-	pEnt->m_MarkedForDestroy = true;
-}
-
 void CGameWorld::RemoveEntity(CEntity *pEnt)
 {
 	// not in the list
@@ -107,13 +106,25 @@ void CGameWorld::RemoveEntity(CEntity *pEnt)
 //
 void CGameWorld::Snap(int SnappingClient)
 {
-	for(auto *pEnt : m_apFirstEntityTypes)
-		for(; pEnt;)
+	for(CEntity *pEnt = m_apFirstEntityTypes[ENTTYPE_CHARACTER]; pEnt;)
+	{
+		m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
+		pEnt->Snap(SnappingClient);
+		pEnt = m_pNextTraverseEntity;
+	}
+
+	for(int i = 0; i < NUM_ENTTYPES; i++)
+	{
+		if(i == ENTTYPE_CHARACTER)
+			continue;
+
+		for(CEntity *pEnt = m_apFirstEntityTypes[i]; pEnt;)
 		{
 			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 			pEnt->Snap(SnappingClient);
 			pEnt = m_pNextTraverseEntity;
 		}
+	}
 }
 
 void CGameWorld::Reset()
@@ -128,7 +139,7 @@ void CGameWorld::Reset()
 		}
 	RemoveEntities();
 
-	GameServer()->m_pController->PostReset();
+	GameServer()->m_pController->OnReset();
 	RemoveEntities();
 
 	m_ResetRequested = false;

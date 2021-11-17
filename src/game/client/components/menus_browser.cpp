@@ -19,6 +19,8 @@
 #include <game/localization.h>
 #include <game/version.h>
 
+#include <game/client/gameclient.h>
+
 #include "menus.h"
 
 static const int g_OffsetColFlagLock = 2;
@@ -30,6 +32,27 @@ static const int g_OffsetColMap = g_OffsetColGameType + 3;
 static const int g_OffsetColPlayers = g_OffsetColMap + 3;
 static const int g_OffsetColPing = g_OffsetColPlayers + 3;
 static const int g_OffsetColVersion = g_OffsetColPing + 3;
+
+void FormatServerbrowserPing(char *pBuffer, int BufferLength, const CServerInfo *pInfo)
+{
+	if(!pInfo->m_LatencyIsEstimated)
+	{
+		str_format(pBuffer, BufferLength, "%d", pInfo->m_Latency);
+		return;
+	}
+	static const char *LOCATION_NAMES[CServerInfo::NUM_LOCS] = {
+		"", // LOC_UNKNOWN
+		"AFR", // LOC_AFRICA // Localize("AFR")
+		"ASI", // LOC_ASIA // Localize("ASI")
+		"AUS", // LOC_AUSTRALIA // Localize("AUS")
+		"EUR", // LOC_EUROPE // Localize("EUR")
+		"NA", // LOC_NORTH_AMERICA // Localize("NA")
+		"SA", // LOC_SOUTH_AMERICA // Localize("SA")
+		"CHN", // LOC_CHINA // Localize("CHN")
+	};
+	dbg_assert(0 <= pInfo->m_Location && pInfo->m_Location < CServerInfo::NUM_LOCS, "location out of range");
+	str_format(pBuffer, BufferLength, "%s", Localize(LOCATION_NAMES[pInfo->m_Location]));
+}
 
 void CMenus::RenderServerbrowserServerList(CUIRect View)
 {
@@ -148,7 +171,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	RenderTools()->DrawUIRect(&View, ColorRGBA(0, 0, 0, 0.15f), 0, 0);
 
 	CUIRect Scroll;
-	View.VSplitRight(15, &View, &Scroll);
+	View.VSplitRight(10, &View, &Scroll);
 
 	int NumServers = ServerBrowser()->NumSortedServers();
 
@@ -157,8 +180,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	{
 		CUIRect MsgBox = View;
 
-		if(m_ActivePage == PAGE_INTERNET && ServerBrowser()->IsRefreshingMasters())
-			UI()->DoLabelScaled(&MsgBox, Localize("Refreshing master servers"), 16.0f, 0);
+		if(!ServerBrowser()->NumServers() && ServerBrowser()->IsGettingServerlist())
+			UI()->DoLabelScaled(&MsgBox, Localize("Getting server list from master server"), 16.0f, 0);
 		else if(!ServerBrowser()->NumServers())
 			UI()->DoLabelScaled(&MsgBox, Localize("No servers found"), 16.0f, 0);
 		else if(ServerBrowser()->NumServers() && !NumServers)
@@ -168,10 +191,9 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	static int s_ScrollBar = 0;
 	static float s_ScrollValue = 0;
 
-	Scroll.HMargin(5.0f, &Scroll);
 	s_ScrollValue = DoScrollbarV(&s_ScrollBar, &Scroll, s_ScrollValue);
 
-	if(Input()->KeyPress(KEY_TAB) && m_pClient->m_pGameConsole->IsClosed())
+	if(Input()->KeyPress(KEY_TAB) && m_pClient->m_GameConsole.IsClosed())
 	{
 		if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
 			g_Config.m_UiToolboxPage = (g_Config.m_UiToolboxPage + 3 - 1) % 3;
@@ -211,23 +233,11 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		CUIRect Row;
 		CUIRect SelectHitBox;
 
+		const int UIRectCount = 2 + (COL_VERSION + 1) * 3;
 		//initialize
 		if(pItem->m_pUIElement == NULL)
 		{
-			pItem->m_pUIElement = UI()->GetNewUIElement();
-		}
-
-		const int UIRectCount = 2 + (COL_VERSION + 1) * 3;
-
-		if(pItem->m_pUIElement->Size() != UIRectCount)
-		{
-			UI()->ResetUIElement(*pItem->m_pUIElement);
-
-			for(int UIElIndex = 0; UIElIndex < UIRectCount; ++UIElIndex)
-			{
-				CUIElement::SUIElementRect AddRect;
-				pItem->m_pUIElement->Add(AddRect);
-			}
+			pItem->m_pUIElement = UI()->GetNewUIElement(UIRectCount);
 		}
 
 		int Selected = str_comp(pItem->m_aAddress, g_Config.m_UiServerAddress) == 0; //selected_index==ItemIndex;
@@ -338,7 +348,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				if(g_Config.m_BrFilterString[0] && (pItem->m_QuickSearchHit & IServerBrowser::QUICK_SERVERNAME))
 				{
 					// highlight the parts that matches
-					const char *pStr = str_find_nocase(pItem->m_aName, g_Config.m_BrFilterString);
+					const char *pStr = str_utf8_find_nocase(pItem->m_aName, g_Config.m_BrFilterString);
 					if(pStr)
 					{
 						UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColName + 0), &Button, pItem->m_aName, FontSize, -1, Button.w, 1, true, (int)(pStr - pItem->m_aName));
@@ -371,7 +381,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				if(g_Config.m_BrFilterString[0] && (pItem->m_QuickSearchHit & IServerBrowser::QUICK_MAPNAME))
 				{
 					// highlight the parts that matches
-					const char *pStr = str_find_nocase(pItem->m_aMap, g_Config.m_BrFilterString);
+					const char *pStr = str_utf8_find_nocase(pItem->m_aMap, g_Config.m_BrFilterString);
 					if(pStr)
 					{
 						UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColMap + 0), &Button, pItem->m_aMap, FontSize, -1, Button.w, 1, true, (int)(pStr - pItem->m_aMap));
@@ -406,7 +416,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			}
 			else if(ID == COL_PING)
 			{
-				str_format(aTemp, sizeof(aTemp), "%i", pItem->m_Latency);
+				FormatServerbrowserPing(aTemp, sizeof(aTemp), pItem);
 				if(g_Config.m_UiColorizePing)
 				{
 					ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA((300.0f - clamp(pItem->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f));
@@ -467,7 +477,10 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		if(Input()->MouseDoubleClick() && DoubleClicked)
 		{
 			if(Client()->State() == IClient::STATE_ONLINE && Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
-				m_Popup = POPUP_DISCONNECT;
+			{
+				m_Popup = POPUP_SWITCH_SERVER;
+				str_copy(m_aNextServer, g_Config.m_UiServerAddress, sizeof(m_aNextServer));
+			}
 			else
 				Client()->Connect(g_Config.m_UiServerAddress);
 		}
@@ -542,7 +555,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 		static int s_ClearButton = 0;
 		static float Offset = 0.0f;
-		if(Input()->KeyPress(KEY_X) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)))
+		if(Input()->KeyPress(KEY_X) && (Input()->KeyPress(KEY_LSHIFT) || Input()->KeyPress(KEY_RSHIFT)) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)))
 			UI()->SetActiveItem(&g_Config.m_BrExcludeString);
 		if(DoClearableEditBox(&g_Config.m_BrExcludeString, &s_ClearButton, &QuickExclude, g_Config.m_BrExcludeString, sizeof(g_Config.m_BrExcludeString), 12.0f, &Offset, false, CUI::CORNER_ALL))
 			Client()->ServerBrowserUpdate();
@@ -551,7 +564,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	// render status
 	char aBufSvr[128];
 	char aBufPyr[128];
-	if(ServerBrowser()->NumSortedServers() != 1)
+	if(ServerBrowser()->NumServers() != 1)
 		str_format(aBufSvr, sizeof(aBufSvr), Localize("%d of %d servers"), ServerBrowser()->NumSortedServers(), ServerBrowser()->NumServers());
 	else
 		str_format(aBufSvr, sizeof(aBufSvr), Localize("%d of %d server"), ServerBrowser()->NumSortedServers(), ServerBrowser()->NumServers());
@@ -591,6 +604,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		auto Func = [this]() mutable -> const char * {
 			if(ServerBrowser()->IsRefreshing())
 				str_format(m_aLocalStringHelper, sizeof(m_aLocalStringHelper), "%s (%d%%)", Localize("Refresh"), ServerBrowser()->LoadingProgression());
+			else if(ServerBrowser()->IsGettingServerlist())
+				str_copy(m_aLocalStringHelper, Localize("Refreshing..."), sizeof(m_aLocalStringHelper));
 			else
 				str_copy(m_aLocalStringHelper, Localize("Refresh"), sizeof(m_aLocalStringHelper));
 
@@ -607,13 +622,13 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
 			else if(g_Config.m_UiPage == PAGE_DDNET)
 			{
-				// start a new serverlist request
+				// start a new server list request
 				Client()->RequestDDNetInfo();
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
 			}
 			else if(g_Config.m_UiPage == PAGE_KOG)
 			{
-				// start a new serverlist request
+				// start a new server list request
 				Client()->RequestDDNetInfo();
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_KOG);
 			}
@@ -627,7 +642,10 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			m_EnterPressed)
 		{
 			if(Client()->State() == IClient::STATE_ONLINE && Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
-				m_Popup = POPUP_DISCONNECT;
+			{
+				m_Popup = POPUP_SWITCH_SERVER;
+				str_copy(m_aNextServer, g_Config.m_UiServerAddress, sizeof(m_aNextServer));
+			}
 			else
 				Client()->Connect(g_Config.m_UiServerAddress);
 			m_EnterPressed = false;
@@ -732,7 +750,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		Rect.w = Rect.h * 2;
 		Rect.x += (OldWidth - Rect.w) / 2.0f;
 		ColorRGBA Color(1.0f, 1.0f, 1.0f, g_Config.m_BrFilterCountry ? 1.0f : 0.5f);
-		m_pClient->m_pCountryFlags->Render(g_Config.m_BrFilterCountryIndex, &Color, Rect.x, Rect.y, Rect.w, Rect.h);
+		m_pClient->m_CountryFlags.Render(g_Config.m_BrFilterCountryIndex, &Color, Rect.x, Rect.y, Rect.w, Rect.h);
 
 		if(g_Config.m_BrFilterCountry && UI()->DoButtonLogic(&g_Config.m_BrFilterCountryIndex, "", 0, &Rect))
 			m_Popup = POPUP_COUNTRY;
@@ -842,25 +860,44 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 					Rect.h = TypesHeight;
 
 					int Button = UI()->DoButtonLogic(&s_aTypeButtons[TypeIndex], "", 0, &Rect);
-					if(Button == 1)
+					if(Button == 1 || Button == 2)
 					{
-						// left click to toggle flag filter
-						if(Active)
-							ServerBrowser()->DDNetFilterAdd(pFilterExcludeTypes, pName);
-						else
-							ServerBrowser()->DDNetFilterRem(pFilterExcludeTypes, pName);
-
-						ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
-					}
-					else if(Button == 2)
-					{
-						// right click to exclusively activate one
-						pFilterExcludeTypes[0] = '\0';
-						for(int j = 0; j < MaxTypes; ++j)
+						// left/right click to toggle filter
+						if(pFilterExcludeTypes[0] == '\0')
 						{
-							if(j != TypeIndex)
-								ServerBrowser()->DDNetFilterAdd(pFilterExcludeTypes, ServerBrowser()->GetType(Network, j));
+							// when all are active, only activate one
+							for(int j = 0; j < MaxTypes; ++j)
+							{
+								if(j != TypeIndex)
+									ServerBrowser()->DDNetFilterAdd(pFilterExcludeTypes, ServerBrowser()->GetType(Network, j));
+							}
 						}
+						else
+						{
+							bool AllFilteredExceptUs = true;
+							for(int j = 0; j < MaxTypes; ++j)
+							{
+								if(j != TypeIndex && !ServerBrowser()->DDNetFiltered(pFilterExcludeTypes, ServerBrowser()->GetType(Network, j)))
+								{
+									AllFilteredExceptUs = false;
+									break;
+								}
+							}
+							// when last one is removed, reset (re-enable all)
+							if(AllFilteredExceptUs)
+							{
+								pFilterExcludeTypes[0] = '\0';
+							}
+							else if(Active)
+							{
+								ServerBrowser()->DDNetFilterAdd(pFilterExcludeTypes, pName);
+							}
+							else
+							{
+								ServerBrowser()->DDNetFilterRem(pFilterExcludeTypes, pName);
+							}
+						}
+
 						ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
 					}
 					else if(Button == 3)
@@ -918,25 +955,44 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 					Rect.h = FlagHeight;
 
 					int Button = UI()->DoButtonLogic(&s_aFlagButtons[CountryIndex], "", 0, &Rect);
-					if(Button == 1)
+					if(Button == 1 || Button == 2)
 					{
-						// left click to toggle flag filter
-						if(Active)
-							ServerBrowser()->DDNetFilterAdd(pFilterExcludeCountries, pName);
-						else
-							ServerBrowser()->DDNetFilterRem(pFilterExcludeCountries, pName);
-
-						ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
-					}
-					else if(Button == 2)
-					{
-						// right click to exclusively activate one
-						pFilterExcludeCountries[0] = '\0';
-						for(int j = 0; j < MaxFlags; ++j)
+						// left/right click to toggle filter
+						if(pFilterExcludeCountries[0] == '\0')
 						{
-							if(j != CountryIndex)
-								ServerBrowser()->DDNetFilterAdd(pFilterExcludeCountries, ServerBrowser()->GetCountryName(Network, j));
+							// when all are active, only activate one
+							for(int j = 0; j < MaxFlags; ++j)
+							{
+								if(j != CountryIndex)
+									ServerBrowser()->DDNetFilterAdd(pFilterExcludeCountries, ServerBrowser()->GetCountryName(Network, j));
+							}
 						}
+						else
+						{
+							bool AllFilteredExceptUs = true;
+							for(int j = 0; j < MaxFlags; ++j)
+							{
+								if(j != CountryIndex && !ServerBrowser()->DDNetFiltered(pFilterExcludeCountries, ServerBrowser()->GetCountryName(Network, j)))
+								{
+									AllFilteredExceptUs = false;
+									break;
+								}
+							}
+							// when last one is removed, reset (re-enable all)
+							if(AllFilteredExceptUs)
+							{
+								pFilterExcludeCountries[0] = '\0';
+							}
+							else if(Active)
+							{
+								ServerBrowser()->DDNetFilterAdd(pFilterExcludeCountries, pName);
+							}
+							else
+							{
+								ServerBrowser()->DDNetFilterRem(pFilterExcludeCountries, pName);
+							}
+						}
+
 						ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
 					}
 					else if(Button == 3)
@@ -947,7 +1003,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 					}
 
 					ColorRGBA Color(1.0f, 1.0f, 1.0f, Active ? 1.0f : 0.2f);
-					m_pClient->m_pCountryFlags->Render(FlagID, &Color, Pos.x, Pos.y, FlagWidth, FlagHeight);
+					m_pClient->m_CountryFlags.Render(FlagID, &Color, Pos.x, Pos.y, FlagWidth, FlagHeight);
 				}
 			}
 		}
@@ -974,7 +1030,10 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		g_Config.m_BrFilterCompatversion = 0;
 		g_Config.m_BrFilterExcludeCountries[0] = 0;
 		g_Config.m_BrFilterExcludeTypes[0] = 0;
-		Client()->ServerBrowserUpdate();
+		if(g_Config.m_UiPage == PAGE_DDNET || g_Config.m_UiPage == PAGE_KOG)
+			ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
+		else
+			Client()->ServerBrowserUpdate();
 	}
 }
 
@@ -1015,14 +1074,34 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 		{
 			CUIRect Button;
 			ServerDetails.HSplitBottom(20.0f, &ServerDetails, &Button);
-			Button.VSplitLeft(5.0f, 0, &Button);
+			CUIRect ButtonAddFav;
+			CUIRect ButtonLeakIp;
+			Button.VSplitMid(&ButtonAddFav, &ButtonLeakIp);
+			ButtonAddFav.VSplitLeft(5.0f, 0, &ButtonAddFav);
 			static int s_AddFavButton = 0;
-			if(DoButton_CheckBox(&s_AddFavButton, Localize("Favorite"), pSelectedServer->m_Favorite, &Button))
+			static int s_LeakIpButton = 0;
+			if(DoButton_CheckBox(&s_AddFavButton, Localize("Favorite"), pSelectedServer->m_Favorite, &ButtonAddFav))
 			{
 				if(pSelectedServer->m_Favorite)
+				{
 					ServerBrowser()->RemoveFavorite(pSelectedServer->m_NetAddr);
+				}
 				else
+				{
 					ServerBrowser()->AddFavorite(pSelectedServer->m_NetAddr);
+					if(g_Config.m_UiPage == PAGE_LAN)
+					{
+						ServerBrowser()->FavoriteAllowPing(pSelectedServer->m_NetAddr, true);
+					}
+				}
+			}
+			if(pSelectedServer->m_Favorite)
+			{
+				bool IpLeak = ServerBrowser()->IsFavoritePingAllowed(pSelectedServer->m_NetAddr);
+				if(DoButton_CheckBox(&s_LeakIpButton, Localize("Leak IP"), IpLeak, &ButtonLeakIp))
+				{
+					ServerBrowser()->FavoriteAllowPing(pSelectedServer->m_NetAddr, !IpLeak);
+				}
 			}
 		}
 
@@ -1032,7 +1111,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 		for(auto &Label : s_aLabels)
 		{
 			LeftColumn.HSplitTop(15.0f, &Row, &LeftColumn);
-			UI()->DoLabelScaled(&Row, Label, FontSize, -1);
+			UI()->DoLabelScaled(&Row, Localize(Label), FontSize, -1);
 		}
 
 		RightColumn.HSplitTop(15.0f, &Row, &RightColumn);
@@ -1046,7 +1125,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 		TextRender()->TextEx(&Cursor, pSelectedServer->m_aGameType, -1);
 
 		char aTemp[16];
-		str_format(aTemp, sizeof(aTemp), "%d", pSelectedServer->m_Latency);
+		FormatServerbrowserPing(aTemp, sizeof(aTemp), pSelectedServer);
 		RightColumn.HSplitTop(15.0f, &Row, &RightColumn);
 		TextRender()->SetCursor(&Cursor, Row.x, Row.y + (15.f - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = Row.w;
@@ -1064,14 +1143,14 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 
 		for(int i = 0; i < pSelectedServer->m_NumReceivedClients; i++)
 		{
-			CListboxItem Item = UiDoListboxNextItem(&i);
+			CListboxItem Item = UiDoListboxNextItem(&pSelectedServer->m_aClients[i]);
 
 			if(!Item.m_Visible)
 				continue;
 
 			CUIRect Name, Clan, Score, Flag;
 			Item.m_Rect.HSplitTop(25.0f, &Name, &Item.m_Rect);
-			if(UI()->DoButtonLogic(&pSelectedServer->m_aClients[i], "", 0, &Name))
+			if(UiLogicGetCurrentClickedItem() == i)
 			{
 				if(pSelectedServer->m_aClients[i].m_FriendState == IFriends::FRIEND_PLAYER)
 					m_pClient->Friends()->RemoveFriend(pSelectedServer->m_aClients[i].m_aName, pSelectedServer->m_aClients[i].m_aClan);
@@ -1101,7 +1180,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 				if(pSelectedServer->m_aClients[i].m_Score == -9999 || pSelectedServer->m_aClients[i].m_Score == 0)
 					aTemp[0] = 0;
 				else
-					str_time((int64)abs(pSelectedServer->m_aClients[i].m_Score) * 100, TIME_HOURS, aTemp, sizeof(aTemp));
+					str_time((int64_t)abs(pSelectedServer->m_aClients[i].m_Score) * 100, TIME_HOURS, aTemp, sizeof(aTemp));
 			}
 			else
 				str_format(aTemp, sizeof(aTemp), "%d", pSelectedServer->m_aClients[i].m_Score);
@@ -1121,7 +1200,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			if(g_Config.m_BrFilterString[0])
 			{
 				// highlight the parts that matches
-				const char *s = str_find_nocase(pName, g_Config.m_BrFilterString);
+				const char *s = str_utf8_find_nocase(pName, g_Config.m_BrFilterString);
 				if(s)
 				{
 					TextRender()->TextEx(&Cursor, pName, (int)(s - pName));
@@ -1143,7 +1222,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			if(g_Config.m_BrFilterString[0])
 			{
 				// highlight the parts that matches
-				const char *s = str_find_nocase(pClan, g_Config.m_BrFilterString);
+				const char *s = str_utf8_find_nocase(pClan, g_Config.m_BrFilterString);
 				if(s)
 				{
 					TextRender()->TextEx(&Cursor, pClan, (int)(s - pClan));
@@ -1160,7 +1239,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 
 			// flag
 			ColorRGBA FColor(1.0f, 1.0f, 1.0f, 0.5f);
-			m_pClient->m_pCountryFlags->Render(pSelectedServer->m_aClients[i].m_Country, &FColor, Flag.x, Flag.y, Flag.w, Flag.h);
+			m_pClient->m_CountryFlags.Render(pSelectedServer->m_aClients[i].m_Country, &FColor, Flag.x, Flag.y, Flag.w, Flag.h);
 		}
 
 		UiDoListboxEnd(&s_ScrollValue, 0);

@@ -269,9 +269,6 @@ Red team wins!
 Refresh
 == Оновити
 
-Refreshing master servers
-== Оновлення списку майстер-сервера
-
 Remote console
 == Консоль сервера
 
@@ -310,9 +307,6 @@ Show chat
 
 Show name plates
 == Показувати ніки гравців
-
-Show only supported
-== Тільки підтримувані режими
 
 Skins
 == Скіни
@@ -635,7 +629,7 @@ Add Friend
 == Додати друга
 
 DDNet %s is out!
-== Вийшов DDnet %s!
+== Вийшов DDNet %s!
 
 Downloading %s:
 == Завантаження %s:
@@ -889,23 +883,17 @@ Show HUD
 UI mouse s.
 == Чутлив. миші в меню
 
-Borderless window
-== Безмежне вікно
-
 may cause delay
 == може спричинити затримку
 
 Screen
 == Екран
 
-Use OpenGL 3.3 (experimental)
-== OpenGL 3.3 (експериментально)
-
 Preinit VBO (iGPUs only)
 == Preinit VBO (iGPUs only)
 
-Multiple texture units (disable for MacOS)
-== Декілька текстурних одиниць (вимкнути для MacOS)
+Multiple texture units (disable for macOS)
+== Декілька текстурних одиниць (вимкнути для macOS)
 
 Use high DPI
 == Використовувати високий DPI
@@ -952,9 +940,6 @@ DDNet Client needs to be restarted to complete update!
 Use DDRace Scoreboard
 == Використовувати DDRace табло
 
-Show client IDs in Scoreboard
-== Показувати ID клієнтів в табло
-
 Show score
 == Показувати лідерів
 
@@ -982,50 +967,17 @@ Reset
 Highlighted message
 == Виділене повідомлення
 
-Spectator
-== Спостерігач
-
-Look out!
-== Стережися!
-
 Team message
 == Повідомлення команди
-
-We will win
-== Ми переможемо
 
 Friend message
 == Повідомлення від друга
 
-Friend
-== Друг
-
-Hi o/
-== Привіт o/
-
 Normal message
 == Звичайне повідомлення
 
-Hello and welcome
-== Привіт і ласкаво просимо
-
 Client message
 == Повідомлення від клієнта
-
-Inner color
-== Внутрішній колір
-
-Outline color
-== колір контуру
-
-Wait before try for
-== Зачекайте перш ніж повторити
-
-second
-== секнуда
-
-seconds
-== секунд
 
 Save the best demo of each race
 == Зберігати краще демо кожної спроби
@@ -1080,12 +1032,6 @@ Show other players' key presses
 
 Old mouse mode
 == Режим старої мишки
-
-Background (regular)
-== Фон (звичайний)
-
-Background (entities)
-== Задній фон
 
 Show tiles layers from BG map
 == Показувати шари з тайлами з фонової карти
@@ -1168,7 +1114,7 @@ Replay
 Saving ddnet-settings.cfg failed
 == 
 
-The width or height of texture %s is not divisible by 16, which might cause visual bugs.
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
 Warning
@@ -1189,6 +1135,9 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 Checking for existing player with your name
 == 
 
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
 Country / Region
 == 
 
@@ -1196,6 +1145,30 @@ Speed
 == 
 
 Theme
+== 
+
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+Getting server list from master server
 == 
 
 %d of %d servers
@@ -1208,6 +1181,12 @@ Theme
 == 
 
 %d player
+== 
+
+Refreshing...
+== 
+
+Leak IP
 == 
 
 Markers
@@ -1234,6 +1213,24 @@ Skin Database
 Skins directory
 == 
 
+Chat command
+== 
+
+Dummy
+== 
+
+Windowed
+== 
+
+Windowed borderless
+== 
+
+Desktop fullscreen
+== 
+
+Use modern OpenGL
+== 
+
 Game sound volume
 == 
 
@@ -1246,13 +1243,55 @@ Background music volume
 Assets
 == 
 
+Show client IDs
+== 
+
+Kill Messages
+== 
+
+Kill Message Normal Color
+== 
+
+Kill Message Highlight Color
+== 
+
+Laser Outline Color
+== 
+
+Laser Inner Color
+== 
+
+Hookline
+== 
+
+No hit
+== 
+
+Hookable
+== 
+
+Tee
+== 
+
 Use old chat style
 == 
 
-Highlight
+Preview
+== 
+
+Show local player's key presses
+== 
+
+Background
+== 
+
+Entities Background color
 == 
 
 Use current map as background
+== 
+
+Regular Background Color
 == 
 
 Entities
@@ -1265,6 +1304,12 @@ Particles
 == 
 
 Assets directory
+== 
+
+Discord
+== 
+
+https://ddnet.tw/discord
 == 
 
 https://wiki.ddnet.tw/

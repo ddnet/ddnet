@@ -54,8 +54,8 @@ class CCommandBuffer
 		}
 
 		unsigned char *DataPtr() { return m_pData; }
-		unsigned DataSize() { return m_Size; }
-		unsigned DataUsed() { return m_Used; }
+		unsigned DataSize() const { return m_Size; }
+		unsigned DataUsed() const { return m_Used; }
 	};
 
 public:
@@ -119,13 +119,16 @@ public:
 
 		// swap
 		CMD_SWAP,
+		CMD_FINISH,
 
 		// misc
 		CMD_VSYNC,
 		CMD_SCREENSHOT,
-		CMD_VIDEOMODES,
-		CMD_RESIZE,
+		CMD_UPDATE_VIEWPORT,
 
+		// in Android a window that minimizes gets destroyed
+		CMD_WINDOW_CREATE_NTF,
+		CMD_WINDOW_DESTROY_NTF,
 	};
 
 	enum
@@ -136,8 +139,6 @@ public:
 		TEXFORMAT_ALPHA,
 
 		TEXFLAG_NOMIPMAPS = 1,
-		TEXFLAG_COMPRESSED = 2,
-		TEXFLAG_QUALITY = 4,
 		TEXFLAG_TO_3D_TEXTURE = (1 << 3),
 		TEXFLAG_TO_2D_ARRAY_TEXTURE = (1 << 4),
 		TEXFLAG_TO_3D_TEXTURE_SINGLE_LAYER = (1 << 5),
@@ -398,6 +399,7 @@ public:
 		int m_BufferContainerIndex;
 		SQuadRenderInfo *m_pQuadInfo;
 		int m_QuadNum;
+		int m_QuadOffset;
 	};
 
 	struct SCommand_RenderText : public SCommand
@@ -489,23 +491,16 @@ public:
 		CImageInfo *m_pImage; // processor will fill this out, the one who adds this command must free the data as well
 	};
 
-	struct SCommand_VideoModes : public SCommand
-	{
-		SCommand_VideoModes() :
-			SCommand(CMD_VIDEOMODES) {}
-
-		CVideoMode *m_pModes; // processor will fill this in
-		int m_MaxModes; // maximum of modes the processor can write to the m_pModes
-		int *m_pNumModes; // processor will write to this pointer
-		int m_Screen;
-	};
-
 	struct SCommand_Swap : public SCommand
 	{
 		SCommand_Swap() :
 			SCommand(CMD_SWAP) {}
+	};
 
-		int m_Finish;
+	struct SCommand_Finish : public SCommand
+	{
+		SCommand_Finish() :
+			SCommand(CMD_FINISH) {}
 	};
 
 	struct SCommand_VSync : public SCommand
@@ -517,11 +512,13 @@ public:
 		bool *m_pRetOk;
 	};
 
-	struct SCommand_Resize : public SCommand
+	struct SCommand_Update_Viewport : public SCommand
 	{
-		SCommand_Resize() :
-			SCommand(CMD_RESIZE) {}
+		SCommand_Update_Viewport() :
+			SCommand(CMD_UPDATE_VIEWPORT) {}
 
+		int m_X;
+		int m_Y;
 		int m_Width;
 		int m_Height;
 	};
@@ -568,6 +565,22 @@ public:
 		int m_Slot;
 	};
 
+	struct SCommand_WindowCreateNtf : public CCommandBuffer::SCommand
+	{
+		SCommand_WindowCreateNtf() :
+			SCommand(CMD_WINDOW_CREATE_NTF) {}
+
+		uint32_t m_WindowID;
+	};
+
+	struct SCommand_WindowDestroyNtf : public CCommandBuffer::SCommand
+	{
+		SCommand_WindowDestroyNtf() :
+			SCommand(CMD_WINDOW_DESTROY_NTF) {}
+
+		uint32_t m_WindowID;
+	};
+
 	//
 	CCommandBuffer(unsigned CmdBufferSize, unsigned DataBufferSize) :
 		m_CmdBuffer(CmdBufferSize), m_DataBuffer(DataBufferSize), m_pCmdBufferHead(nullptr), m_pCmdBufferTail(nullptr)
@@ -580,7 +593,7 @@ public:
 	}
 
 	template<class T>
-	bool AddCommand(const T &Command)
+	bool AddCommandUnsafe(const T &Command)
 	{
 		// make sure that we don't do something stupid like ->AddCommand(&Cmd);
 		(void)static_cast<const SCommand *>(&Command);
@@ -639,27 +652,30 @@ public:
 		INITFLAG_RESIZABLE = 1 << 2,
 		INITFLAG_BORDERLESS = 1 << 3,
 		INITFLAG_HIGHDPI = 1 << 4,
+		INITFLAG_DESKTOP_FULLSCREEN = 1 << 5,
 	};
 
 	virtual ~IGraphicsBackend() {}
 
-	virtual int Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, class IStorage *pStorage) = 0;
+	virtual int Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int *pRefreshRate, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, class IStorage *pStorage) = 0;
 	virtual int Shutdown() = 0;
 
 	virtual int MemoryUsage() const = 0;
+
+	virtual void GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen) = 0;
+	virtual void GetCurrentVideoMode(CVideoMode &CurMode, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen) = 0;
 
 	virtual int GetNumScreens() const = 0;
 
 	virtual void Minimize() = 0;
 	virtual void Maximize() = 0;
-	virtual bool Fullscreen(bool State) = 0;
-	virtual void SetWindowBordered(bool State) = 0;
+	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless) = 0;
 	virtual bool SetWindowScreen(int Index) = 0;
 	virtual int GetWindowScreen() = 0;
 	virtual int WindowActive() = 0;
 	virtual int WindowOpen() = 0;
 	virtual void SetWindowGrab(bool Grab) = 0;
-	virtual void ResizeWindow(int w, int h) = 0;
+	virtual void ResizeWindow(int w, int h, int RefreshRate) = 0;
 	virtual void GetViewportSize(int &w, int &h) = 0;
 	virtual void NotifyWindow() = 0;
 
@@ -667,6 +683,9 @@ public:
 	virtual bool IsIdle() const = 0;
 	virtual void WaitForIdle() = 0;
 
+	virtual void GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch) {}
+	// checks if the current values of the config are a graphics modern API
+	virtual bool IsConfigModernAPI() { return false; }
 	virtual bool IsNewOpenGL() { return false; }
 	virtual bool HasTileBuffering() { return false; }
 	virtual bool HasQuadBuffering() { return false; }
@@ -674,6 +693,10 @@ public:
 	virtual bool HasQuadContainerBuffering() { return false; }
 	virtual bool Has2DTextureArrays() { return false; }
 	virtual const char *GetErrorString() { return NULL; }
+
+	virtual const char *GetVendorString() = 0;
+	virtual const char *GetVersionString() = 0;
+	virtual const char *GetRendererString() = 0;
 };
 
 class CGraphics_Threaded : public IEngineGraphics
@@ -747,11 +770,13 @@ class CGraphics_Threaded : public IEngineGraphics
 
 	struct SQuadContainer
 	{
-		SQuadContainer()
+		SQuadContainer(bool AutomaticUpload = true)
 		{
 			m_Quads.clear();
 			m_QuadBufferObjectIndex = m_QuadBufferContainerIndex = -1;
 			m_FreeIndex = -1;
+
+			m_AutomaticUpload = AutomaticUpload;
 		}
 
 		struct SQuad
@@ -765,6 +790,8 @@ class CGraphics_Threaded : public IEngineGraphics
 		int m_QuadBufferContainerIndex;
 
 		int m_FreeIndex;
+
+		bool m_AutomaticUpload;
 	};
 	std::vector<SQuadContainer> m_QuadContainers;
 	int m_FirstFreeQuadContainer;
@@ -772,7 +799,7 @@ class CGraphics_Threaded : public IEngineGraphics
 	struct SWindowResizeListener
 	{
 		SWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser) :
-			m_pFunc(pFunc), m_pUser(pUser) {}
+			m_pFunc(std::move(pFunc)), m_pUser(pUser) {}
 		WINDOW_RESIZE_FUNC m_pFunc;
 		void *m_pUser;
 	};
@@ -800,6 +827,26 @@ class CGraphics_Threaded : public IEngineGraphics
 			pVertices[i].m_Pos.x = x * c - y * s + rCenter.x;
 			pVertices[i].m_Pos.y = x * s + y * c + rCenter.y;
 		}
+	}
+
+	template<typename TName, typename TFunc>
+	bool AddCmd(TName &Cmd, TFunc &&FailFunc, const char *pFailStr)
+	{
+		if(!m_pCommandBuffer->AddCommandUnsafe(Cmd))
+		{
+			// kick command buffer and try again
+			KickCommandBuffer();
+
+			if(!FailFunc())
+				return false;
+
+			if(!m_pCommandBuffer->AddCommandUnsafe(Cmd))
+			{
+				dbg_msg("graphics", "%s", pFailStr);
+				return false;
+			}
+		}
+		return true;
 	}
 
 	void KickCommandBuffer();
@@ -831,8 +878,7 @@ public:
 	void LinesEnd() override;
 	void LinesDraw(const CLineItem *pArray, int Num) override;
 
-	int UnloadTexture(IGraphics::CTextureHandle Index) override;
-	int UnloadTextureNew(CTextureHandle &TextureHandle) override;
+	int UnloadTexture(IGraphics::CTextureHandle *pIndex) override;
 	IGraphics::CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName = NULL) override;
 	int LoadTextureRawSub(IGraphics::CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData) override;
 
@@ -995,14 +1041,25 @@ public:
 	void QuadsDrawFreeform(const CFreeformItem *pArray, int Num) override;
 	void QuadsText(float x, float y, float Size, const char *pText) override;
 
-	int CreateQuadContainer() override;
+	const GL_STexCoord *GetCurTextureCoordinates() override
+	{
+		return m_aTexture;
+	}
+
+	const GL_SColor *GetCurColor() override
+	{
+		return m_aColor;
+	}
+
+	int CreateQuadContainer(bool AutomaticUpload = true) override;
+	void QuadContainerChangeAutomaticUpload(int ContainerIndex, bool AutomaticUpload) override;
 	void QuadContainerUpload(int ContainerIndex) override;
 	void QuadContainerAddQuads(int ContainerIndex, CQuadItem *pArray, int Num) override;
 	void QuadContainerAddQuads(int ContainerIndex, CFreeformItem *pArray, int Num) override;
 	void QuadContainerReset(int ContainerIndex) override;
 	void DeleteQuadContainer(int ContainerIndex) override;
 	void RenderQuadContainer(int ContainerIndex, int QuadDrawNum) override;
-	void RenderQuadContainer(int ContainerIndex, int QuadOffset, int QuadDrawNum) override;
+	void RenderQuadContainer(int ContainerIndex, int QuadOffset, int QuadDrawNum, bool ChangeWrapMode = true) override;
 	void RenderQuadContainerEx(int ContainerIndex, int QuadOffset, int QuadDrawNum, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f) override;
 	void RenderQuadContainerAsSprite(int ContainerIndex, int QuadOffset, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f) override;
 	void RenderQuadContainerAsSpriteMultiple(int ContainerIndex, int QuadOffset, int DrawCount, SRenderSpriteInfo *pRenderInfo) override;
@@ -1064,24 +1121,20 @@ public:
 		Command.m_PrimType = PrimType;
 		Command.m_PrimCount = PrimCount;
 
-		// check if we have enough free memory in the commandbuffer
-		if(!m_pCommandBuffer->AddCommand(Command))
+		if(
+			!AddCmd(
+				Command, [&] {
+					Command.m_pVertices = (decltype(Command.m_pVertices))m_pCommandBuffer->AllocData(VertSize * NumVerts);
+					if(Command.m_pVertices == NULL)
+					{
+						dbg_msg("graphics", "failed to allocate data for vertices");
+						return false;
+					}
+					return true;
+				},
+				"failed to allocate memory for render command"))
 		{
-			// kick command buffer and try again
-			KickCommandBuffer();
-
-			Command.m_pVertices = (decltype(Command.m_pVertices))m_pCommandBuffer->AllocData(VertSize * NumVerts);
-			if(Command.m_pVertices == NULL)
-			{
-				dbg_msg("graphics", "failed to allocate data for vertices");
-				return;
-			}
-
-			if(!m_pCommandBuffer->AddCommand(Command))
-			{
-				dbg_msg("graphics", "failed to allocate memory for render command");
-				return;
-			}
+			return;
 		}
 	}
 
@@ -1092,7 +1145,7 @@ public:
 	void RenderTileLayer(int BufferContainerIndex, float *pColor, char **pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffet) override;
 	void RenderBorderTiles(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, int JumpIndex, unsigned int DrawNum) override;
 	void RenderBorderTileLines(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, unsigned int IndexDrawNum, unsigned int RedrawNum) override;
-	void RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, int QuadNum) override;
+	void RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, int QuadNum, int QuadOffset) override;
 	void RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, float *pTextColor, float *pTextoutlineColor) override;
 
 	// opengl 3.3 functions
@@ -1111,12 +1164,14 @@ public:
 	int GetNumScreens() const override;
 	void Minimize() override;
 	void Maximize() override;
-	bool Fullscreen(bool State) override;
-	void SetWindowBordered(bool State) override;
+	void SetWindowParams(int FullscreenMode, bool IsBorderless) override;
 	bool SetWindowScreen(int Index) override;
-	void Resize(int w, int h, bool SetWindowSize = false) override;
+	void Resize(int w, int h, int RefreshRate, bool SetWindowSize = false, bool ForceResizeEvent = false) override;
 	void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser) override;
 	int GetWindowScreen() override;
+
+	void WindowDestroyNtf(uint32_t WindowID) override;
+	void WindowCreateNtf(uint32_t WindowID) override;
 
 	int WindowActive() override;
 	int WindowOpen() override;
@@ -1134,21 +1189,27 @@ public:
 
 	int GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen) override;
 
-	virtual int GetDesktopScreenWidth() { return m_DesktopScreenWidth; }
-	virtual int GetDesktopScreenHeight() { return m_DesktopScreenHeight; }
+	virtual int GetDesktopScreenWidth() const { return g_Config.m_GfxDesktopWidth; }
+	virtual int GetDesktopScreenHeight() const { return g_Config.m_GfxDesktopHeight; }
 
 	// synchronization
 	void InsertSignal(CSemaphore *pSemaphore) override;
-	bool IsIdle() override;
+	bool IsIdle() const override;
 	void WaitForIdle() override;
 
 	SWarning *GetCurWarning() override;
 
+	void GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch) override { m_pBackend->GetDriverVersion(DriverAgeType, Major, Minor, Patch); }
+	bool IsConfigModernAPI() override { return m_pBackend->IsConfigModernAPI(); }
 	bool IsTileBufferingEnabled() override { return m_OpenGLTileBufferingEnabled; }
 	bool IsQuadBufferingEnabled() override { return m_OpenGLQuadBufferingEnabled; }
 	bool IsTextBufferingEnabled() override { return m_OpenGLTextBufferingEnabled; }
 	bool IsQuadContainerBufferingEnabled() override { return m_OpenGLQuadContainerBufferingEnabled; }
 	bool HasTextureArrays() override { return m_OpenGLHasTextureArrays; }
+
+	const char *GetVendorString() override;
+	const char *GetVersionString() override;
+	const char *GetRendererString() override;
 };
 
 extern IGraphicsBackend *CreateGraphicsBackend();

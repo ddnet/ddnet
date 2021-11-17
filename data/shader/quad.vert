@@ -9,6 +9,8 @@ uniform mat4x2 gPos;
 uniform vec2 gOffsets[TW_MAX_QUADS];
 uniform float gRotations[TW_MAX_QUADS];
 
+uniform int gQuadOffset;
+
 noperspective out vec4 QuadColor;
 flat out int QuadIndex;
 #ifdef TW_QUAD_TEXTURED
@@ -19,7 +21,7 @@ void main()
 {
 	vec2 FinalPos = vec2(inVertex.xy);
 	
-	int TmpQuadIndex = int(gl_VertexID / 4);
+	int TmpQuadIndex = int(gl_VertexID / 4) - gQuadOffset;
 
 	if(gRotations[TmpQuadIndex] != 0.0)
 	{

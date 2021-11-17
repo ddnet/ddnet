@@ -49,7 +49,7 @@ private:
 
 public:
 	void SetBouncing(int Value);
-	void FillExtraInfo(CNetObj_Projectile *pProj);
+	bool FillExtraInfo(CNetObj_DDNetProjectile *pProj);
 };
 
 #endif

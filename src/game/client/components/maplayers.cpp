@@ -32,12 +32,12 @@ CMapLayers::CMapLayers(int t, bool OnlineOnly)
 void CMapLayers::OnInit()
 {
 	m_pLayers = Layers();
-	m_pImages = m_pClient->m_pMapimages;
+	m_pImages = &m_pClient->m_MapImages;
 }
 
 CCamera *CMapLayers::GetCurCamera()
 {
-	return m_pClient->m_pCamera;
+	return &m_pClient->m_Camera;
 }
 
 void CMapLayers::EnvelopeUpdate()
@@ -84,10 +84,10 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 
 	CMapItemEnvelope *pItem = (CMapItemEnvelope *)pThis->m_pLayers->Map()->GetItem(Start + Env, 0, 0);
 
-	const int64 TickToMicroSeconds = (1000000ll / (int64)pThis->Client()->GameTickSpeed());
+	const int64_t TickToMicroSeconds = (1000000ll / (int64_t)pThis->Client()->GameTickSpeed());
 
-	static int64 s_Time = 0;
-	static int64 s_LastLocalTime = time_get_microseconds();
+	static int64_t s_Time = 0;
+	static int64_t s_LastLocalTime = time_get_microseconds();
 	if(pThis->Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		const IDemoPlayer::CInfo *pInfo = pThis->DemoPlayer()->BaseInfo();
@@ -102,25 +102,26 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 			if(pItem->m_Version < 2 || pItem->m_Synchronized)
 			{
 				// get the lerp of the current tick and prev
-				int MinTick = pThis->Client()->PrevGameTick(g_Config.m_ClDummy);
-				s_Time = (int64)(mix<double>(
-							 0,
-							 (pThis->Client()->GameTick(g_Config.m_ClDummy) - MinTick),
-							 pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
-						 TickToMicroSeconds) +
+				int MinTick = pThis->Client()->PrevGameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
+				int CurTick = pThis->Client()->GameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
+				s_Time = (int64_t)(mix<double>(
+							   0,
+							   (CurTick - MinTick),
+							   pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
+						   TickToMicroSeconds) +
 					 MinTick * TickToMicroSeconds;
 			}
 			else
 			{
 				int MinTick = pThis->m_LastLocalTick;
-				s_Time = (int64)(mix<double>(0,
-							 pThis->m_CurrentLocalTick - MinTick,
-							 pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
-						 TickToMicroSeconds) +
+				s_Time = (int64_t)(mix<double>(0,
+							   pThis->m_CurrentLocalTick - MinTick,
+							   pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
+						   TickToMicroSeconds) +
 					 MinTick * TickToMicroSeconds;
 			}
 		}
-		pThis->RenderTools()->RenderEvalEnvelope(pPoints + pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time + (int64)TimeOffsetMillis * 1000ll, pChannels);
+		pThis->RenderTools()->RenderEvalEnvelope(pPoints + pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time + (int64_t)TimeOffsetMillis * 1000ll, pChannels);
 	}
 	else
 	{
@@ -129,22 +130,23 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 			if(pThis->m_pClient->m_Snap.m_pGameInfoObj) // && !(pThis->m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED))
 			{
 				// get the lerp of the current tick and prev
-				int MinTick = pThis->Client()->PrevGameTick(g_Config.m_ClDummy);
-				s_Time = (int64)(mix<double>(
-							 0,
-							 (pThis->Client()->GameTick(g_Config.m_ClDummy) - MinTick),
-							 pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
-						 TickToMicroSeconds) +
+				int MinTick = pThis->Client()->PrevGameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
+				int CurTick = pThis->Client()->GameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
+				s_Time = (int64_t)(mix<double>(
+							   0,
+							   (CurTick - MinTick),
+							   pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
+						   TickToMicroSeconds) +
 					 MinTick * TickToMicroSeconds;
 			}
 		}
 		else
 		{
-			int64 CurTime = time_get_microseconds();
+			int64_t CurTime = time_get_microseconds();
 			s_Time += CurTime - s_LastLocalTime;
 			s_LastLocalTime = CurTime;
 		}
-		pThis->RenderTools()->RenderEvalEnvelope(pPoints + pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time + (int64)TimeOffsetMillis * 1000ll, pChannels);
+		pThis->RenderTools()->RenderEvalEnvelope(pPoints + pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time + (int64_t)TimeOffsetMillis * 1000ll, pChannels);
 	}
 }
 
@@ -1386,6 +1388,8 @@ void CMapLayers::RenderQuadLayer(int LayerIndex, CMapItemLayerQuads *pQuadLayer,
 	static std::vector<SQuadRenderInfo> s_QuadRenderInfo;
 
 	s_QuadRenderInfo.resize(pQuadLayer->m_NumQuads);
+	size_t QuadsRenderCount = 0;
+	size_t CurQuadOffset = 0;
 	for(int i = 0; i < pQuadLayer->m_NumQuads; ++i)
 	{
 		CQuad *q = &pQuads[i];
@@ -1410,13 +1414,24 @@ void CMapLayers::RenderQuadLayer(int LayerIndex, CMapItemLayerQuads *pQuadLayer,
 			Rot = aChannels[2] / 180.0f * pi;
 		}
 
-		SQuadRenderInfo &QInfo = s_QuadRenderInfo[i];
-		mem_copy(QInfo.m_aColor, aColor, sizeof(aColor));
-		QInfo.m_aOffsets[0] = OffsetX;
-		QInfo.m_aOffsets[1] = OffsetY;
-		QInfo.m_Rotation = Rot;
+		if(aColor[3] > 0)
+		{
+			SQuadRenderInfo &QInfo = s_QuadRenderInfo[QuadsRenderCount++];
+			mem_copy(QInfo.m_aColor, aColor, sizeof(aColor));
+			QInfo.m_aOffsets[0] = OffsetX;
+			QInfo.m_aOffsets[1] = OffsetY;
+			QInfo.m_Rotation = Rot;
+		}
+		else
+		{
+			// render quads of the current offset directly(cancel batching)
+			Graphics()->RenderQuadLayer(Visuals.m_BufferContainerIndex, &s_QuadRenderInfo[0], QuadsRenderCount, CurQuadOffset);
+			QuadsRenderCount = 0;
+			// since this quad is ignored, the offset is the next quad
+			CurQuadOffset = i + 1;
+		}
 	}
-	Graphics()->RenderQuadLayer(Visuals.m_BufferContainerIndex, &s_QuadRenderInfo[0], pQuadLayer->m_NumQuads);
+	Graphics()->RenderQuadLayer(Visuals.m_BufferContainerIndex, &s_QuadRenderInfo[0], QuadsRenderCount, CurQuadOffset);
 }
 
 void CMapLayers::LayersOfGroupCount(CMapItemGroup *pGroup, int &TileLayerCount, int &QuadLayerCount, bool &PassedGameLayer)
@@ -1641,7 +1656,7 @@ void CMapLayers::OnRender()
 				CTile *pTiles = (CTile *)m_pLayers->Map()->GetData(pTMap->m_Data);
 				CServerInfo CurrentServerInfo;
 				Client()->GetServerInfo(&CurrentServerInfo);
-				char aFilename[256];
+				char aFilename[IO_MAX_PATH_LENGTH];
 				str_format(aFilename, sizeof(aFilename), "dumps/tilelayer_dump_%s-%d-%d-%dx%d.txt", CurrentServerInfo.m_aMap, g, l, pTMap->m_Width, pTMap->m_Height);
 				IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 				if(File)

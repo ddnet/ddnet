@@ -9,7 +9,7 @@
 
 #include <time.h>
 
-struct CConfiguration;
+class CConfig;
 class CTuningParams;
 class CUuidManager;
 
@@ -34,7 +34,7 @@ public:
 		SHA256_DIGEST m_MapSha256;
 		int m_MapCrc;
 
-		CConfiguration *m_pConfig;
+		CConfig *m_pConfig;
 		CTuningParams *m_pTuning;
 		CUuidManager *m_pUuids;
 	};
@@ -57,6 +57,8 @@ public:
 	void BeginPlayers();
 	void RecordPlayer(int ClientID, const CNetObj_CharacterCore *pChar);
 	void RecordDeadPlayer(int ClientID);
+	void RecordPlayerTeam(int ClientID, int Team);
+	void RecordTeamPractice(int Team, bool Practice);
 	void EndPlayers();
 
 	void BeginInputs();
@@ -111,6 +113,14 @@ private:
 
 		CNetObj_PlayerInput m_Input;
 		bool m_InputExists;
+
+		// DDNet team
+		int m_Team;
+	};
+
+	struct CTeam
+	{
+		bool m_Practice;
 	};
 
 	WRITE_CALLBACK m_pfnWriteCallback;
@@ -124,6 +134,7 @@ private:
 	int m_PrevMaxClientID;
 	int m_MaxClientID;
 	CPlayer m_aPrevPlayers[MAX_CLIENTS];
+	CTeam m_aPrevTeams[MAX_CLIENTS];
 };
 
 #endif // GAME_SERVER_TEEHISTORIAN_H

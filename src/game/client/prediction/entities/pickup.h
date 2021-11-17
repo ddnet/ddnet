@@ -12,9 +12,10 @@ class CPickup : public CEntity
 public:
 	virtual void Tick();
 
-	CPickup(CGameWorld *pGameWorld, int ID, CNetObj_Pickup *pPickup);
+	CPickup(CGameWorld *pGameWorld, int ID, CNetObj_Pickup *pPickup, const CNetObj_EntityEx *pEntEx = 0);
 	void FillInfo(CNetObj_Pickup *pPickup);
 	bool Match(CPickup *pPickup);
+	bool InDDNetTile() { return m_IsCoreActive; }
 
 private:
 	int m_Type;
@@ -24,6 +25,7 @@ private:
 
 	void Move();
 	vec2 m_Core;
+	bool m_IsCoreActive;
 };
 
 #endif

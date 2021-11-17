@@ -43,7 +43,7 @@ void CKillMessages::OnReset()
 void CKillMessages::OnInit()
 {
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
-	m_SpriteQuadContainerIndex = Graphics()->CreateQuadContainer();
+	m_SpriteQuadContainerIndex = Graphics()->CreateQuadContainer(false);
 
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	RenderTools()->QuadContainerAddSprite(m_SpriteQuadContainerIndex, 0.f, 0.f, 28.f, 56.f);
@@ -62,6 +62,7 @@ void CKillMessages::OnInit()
 		RenderTools()->GetSpriteScale(g_pData->m_Weapons.m_aId[i].m_pSpriteBody, ScaleX, ScaleY);
 		RenderTools()->QuadContainerAddSprite(m_SpriteQuadContainerIndex, 96.f * ScaleX, 96.f * ScaleY);
 	}
+	Graphics()->QuadContainerUpload(m_SpriteQuadContainerIndex);
 }
 
 void CKillMessages::CreateKillmessageNamesIfNotCreated(CKillMsg &Kill)
@@ -75,6 +76,13 @@ void CKillMessages::CreateKillmessageNamesIfNotCreated(CKillMsg &Kill)
 		TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = -1;
 
+		unsigned Color = g_Config.m_ClKillMessageNormalColor;
+		if(Kill.m_VictimID == m_pClient->m_Snap.m_LocalClientID)
+		{
+			Color = g_Config.m_ClKillMessageHighlightColor;
+		}
+		TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(Color)));
+
 		Kill.m_VictimTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, Kill.m_aVictimName);
 	}
 
@@ -86,8 +94,16 @@ void CKillMessages::CreateKillmessageNamesIfNotCreated(CKillMsg &Kill)
 		TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = -1;
 
+		unsigned Color = g_Config.m_ClKillMessageNormalColor;
+		if(Kill.m_KillerID == m_pClient->m_Snap.m_LocalClientID)
+		{
+			Color = g_Config.m_ClKillMessageHighlightColor;
+		}
+		TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(Color)));
+
 		Kill.m_KillerTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, Kill.m_aKillerName);
 	}
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
 }
 
 void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
@@ -135,9 +151,9 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 
 		CreateKillmessageNamesIfNotCreated(Kill);
 
-		bool KillMsgValid = (Kill.m_VictimRenderInfo.m_CustomColoredSkin && Kill.m_VictimRenderInfo.m_ColorableRenderSkin.m_Body != -1) || (!Kill.m_VictimRenderInfo.m_CustomColoredSkin && Kill.m_VictimRenderInfo.m_OriginalRenderSkin.m_Body != -1);
+		bool KillMsgValid = (Kill.m_VictimRenderInfo.m_CustomColoredSkin && Kill.m_VictimRenderInfo.m_ColorableRenderSkin.m_Body.IsValid()) || (!Kill.m_VictimRenderInfo.m_CustomColoredSkin && Kill.m_VictimRenderInfo.m_OriginalRenderSkin.m_Body.IsValid());
 		// if killer != victim, killer must be valid too
-		KillMsgValid &= Kill.m_KillerID == Kill.m_VictimID || ((Kill.m_KillerRenderInfo.m_CustomColoredSkin && Kill.m_KillerRenderInfo.m_ColorableRenderSkin.m_Body != -1) || (!Kill.m_KillerRenderInfo.m_CustomColoredSkin && Kill.m_KillerRenderInfo.m_OriginalRenderSkin.m_Body != -1));
+		KillMsgValid &= Kill.m_KillerID == Kill.m_VictimID || ((Kill.m_KillerRenderInfo.m_CustomColoredSkin && Kill.m_KillerRenderInfo.m_ColorableRenderSkin.m_Body.IsValid()) || (!Kill.m_KillerRenderInfo.m_CustomColoredSkin && Kill.m_KillerRenderInfo.m_OriginalRenderSkin.m_Body.IsValid()));
 		if(KillMsgValid)
 		{
 			// add the message
@@ -221,7 +237,17 @@ void CKillMessages::OnRender()
 		}
 
 		if(m_aKillmsgs[r].m_VictimID >= 0)
-			RenderTools()->RenderTee(CAnimState::GetIdle(), &m_aKillmsgs[r].m_VictimRenderInfo, EMOTE_PAIN, vec2(-1, 0), vec2(x, y + 28));
+		{
+			CTeeRenderInfo TeeInfo = m_aKillmsgs[r].m_VictimRenderInfo;
+
+			CAnimState *pIdleState = CAnimState::GetIdle();
+			vec2 OffsetToMid;
+			RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
+			vec2 TeeRenderPos(x, y + 46.0f / 2.0f + OffsetToMid.y);
+
+			RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_PAIN, vec2(-1, 0), TeeRenderPos);
+		}
+
 		x -= 32.0f;
 
 		// render weapon
@@ -254,8 +280,19 @@ void CKillMessages::OnRender()
 
 			// render killer tee
 			x -= 24.0f;
+
 			if(m_aKillmsgs[r].m_KillerID >= 0)
-				RenderTools()->RenderTee(CAnimState::GetIdle(), &m_aKillmsgs[r].m_KillerRenderInfo, EMOTE_ANGRY, vec2(1, 0), vec2(x, y + 28));
+			{
+				CTeeRenderInfo TeeInfo = m_aKillmsgs[r].m_KillerRenderInfo;
+
+				CAnimState *pIdleState = CAnimState::GetIdle();
+				vec2 OffsetToMid;
+				RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
+				vec2 TeeRenderPos(x, y + 46.0f / 2.0f + OffsetToMid.y);
+
+				RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_ANGRY, vec2(1, 0), TeeRenderPos);
+			}
+
 			x -= 32.0f;
 
 			// render killer name

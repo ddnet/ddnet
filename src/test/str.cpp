@@ -59,6 +59,7 @@ TEST(Str, Utf8CompConfusables)
 	EXPECT_TRUE(str_utf8_comp_confusable("abc", "abc") == 0);
 	EXPECT_TRUE(str_utf8_comp_confusable("rn", "m") == 0);
 	EXPECT_TRUE(str_utf8_comp_confusable("l", "ӏ") == 0); // CYRILLIC SMALL LETTER PALOCHKA
+	EXPECT_TRUE(str_utf8_comp_confusable("i", "¡") == 0); // INVERTED EXCLAMATION MARK
 	EXPECT_FALSE(str_utf8_comp_confusable("o", "x") == 0);
 	EXPECT_TRUE(str_utf8_comp_confusable("aceiou", "ąçęįǫų") == 0);
 }
@@ -217,6 +218,8 @@ TEST(Str, StrCopyNum)
 	EXPECT_STREQ(aBuf, "Foobar");
 	str_utf8_truncate(aBuf, sizeof(aBuf), foo, 7);
 	EXPECT_STREQ(aBuf, "Foobaré");
+	str_utf8_truncate(aBuf, sizeof(aBuf), foo, 0);
+	EXPECT_STREQ(aBuf, "");
 
 	char aBuf2[8];
 	str_utf8_truncate(aBuf2, sizeof(aBuf2), foo, 7);
@@ -309,4 +312,7 @@ TEST(Str, StrTimeFloat)
 	char aBuf[64];
 	EXPECT_EQ(str_time_float(123456.78, TIME_DAYS, aBuf, sizeof(aBuf)), 11);
 	EXPECT_STREQ(aBuf, "1d 10:17:36");
+
+	EXPECT_EQ(str_time_float(12.16, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf)), 8);
+	EXPECT_STREQ(aBuf, "00:12.16");
 }

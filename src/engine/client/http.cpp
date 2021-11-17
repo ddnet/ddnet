@@ -7,6 +7,10 @@
 #include <engine/storage.h>
 #include <game/version.h>
 
+#if !defined(CONF_FAMILY_WINDOWS)
+#include <signal.h>
+#endif
+
 #define WIN32_LEAN_AND_MEAN
 #include "curl/curl.h"
 #include "curl/easy.h"
@@ -24,7 +28,7 @@ static int GetLockIndex(int Data)
 	return Data;
 }
 
-static void CurlLock(CURL *pHandle, curl_lock_data Data, curl_lock_access Access, void *pUser)
+static void CurlLock(CURL *pHandle, curl_lock_data Data, curl_lock_access Access, void *pUser) ACQUIRE(gs_aLocks[GetLockIndex(Data)])
 {
 	(void)pHandle;
 	(void)Access;
@@ -32,7 +36,7 @@ static void CurlLock(CURL *pHandle, curl_lock_data Data, curl_lock_access Access
 	lock_wait(gs_aLocks[GetLockIndex(Data)]);
 }
 
-static void CurlUnlock(CURL *pHandle, curl_lock_data Data, void *pUser)
+static void CurlUnlock(CURL *pHandle, curl_lock_data Data, void *pUser) RELEASE(gs_aLocks[GetLockIndex(Data)])
 {
 	(void)pHandle;
 	(void)pUser;
@@ -65,6 +69,13 @@ bool HttpInit(IStorage *pStorage)
 	curl_share_setopt(gs_Share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
 	curl_share_setopt(gs_Share, CURLSHOPT_LOCKFUNC, CurlLock);
 	curl_share_setopt(gs_Share, CURLSHOPT_UNLOCKFUNC, CurlUnlock);
+
+#if !defined(CONF_FAMILY_WINDOWS)
+	// As a multithreaded application we have to tell curl to not install signal
+	// handlers and instead ignore SIGPIPE from OpenSSL ourselves.
+	signal(SIGPIPE, SIG_IGN);
+#endif
+
 	return false;
 }
 
@@ -75,7 +86,7 @@ void EscapeUrl(char *pBuf, int Size, const char *pStr)
 	curl_free(pEsc);
 }
 
-CRequest::CRequest(const char *pUrl, CTimeout Timeout, bool LogProgress) :
+CRequest::CRequest(const char *pUrl, CTimeout Timeout, HTTPLOG LogProgress) :
 	m_Timeout(Timeout),
 	m_Size(0),
 	m_Progress(0),
@@ -129,6 +140,7 @@ int CRequest::RunImpl(CURL *pHandle)
 	curl_easy_setopt(pHandle, CURLOPT_URL, m_aUrl);
 	curl_easy_setopt(pHandle, CURLOPT_NOSIGNAL, 1L);
 	curl_easy_setopt(pHandle, CURLOPT_USERAGENT, GAME_NAME " " GAME_RELEASE_VERSION " (" CONF_PLATFORM_STRING "; " CONF_ARCH_STRING ")");
+	curl_easy_setopt(pHandle, CURLOPT_ACCEPT_ENCODING, ""); // Use any compression algorithm supported by libcurl.
 
 	curl_easy_setopt(pHandle, CURLOPT_WRITEDATA, this);
 	curl_easy_setopt(pHandle, CURLOPT_WRITEFUNCTION, WriteCallback);
@@ -136,24 +148,28 @@ int CRequest::RunImpl(CURL *pHandle)
 	curl_easy_setopt(pHandle, CURLOPT_PROGRESSDATA, this);
 	curl_easy_setopt(pHandle, CURLOPT_PROGRESSFUNCTION, ProgressCallback);
 
+#ifdef CONF_PLATFORM_ANDROID
+	curl_easy_setopt(pHandle, CURLOPT_CAINFO, "data/cacert.pem");
+#endif
+
 	if(!AfterInit(pHandle))
 	{
 		return HTTP_ERROR;
 	}
 
-	if(g_Config.m_DbgCurl || m_LogProgress)
-		dbg_msg("http", "http %s", m_aUrl);
+	if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::ALL)
+		dbg_msg("http", "fetching %s", m_aUrl);
 	m_State = HTTP_RUNNING;
 	int Ret = curl_easy_perform(pHandle);
 	if(Ret != CURLE_OK)
 	{
-		if(g_Config.m_DbgCurl || m_LogProgress)
-			dbg_msg("http", "task failed. libcurl error: %s", aErr);
+		if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::FAILURE)
+			dbg_msg("http", "%s failed. libcurl error: %s", m_aUrl, aErr);
 		return (Ret == CURLE_ABORTED_BY_CALLBACK) ? HTTP_ABORTED : HTTP_ERROR;
 	}
 	else
 	{
-		if(g_Config.m_DbgCurl || m_LogProgress)
+		if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::ALL)
 			dbg_msg("http", "task done %s", m_aUrl);
 		return HTTP_DONE;
 	}
@@ -167,15 +183,31 @@ size_t CRequest::WriteCallback(char *pData, size_t Size, size_t Number, void *pU
 int CRequest::ProgressCallback(void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr)
 {
 	CGetFile *pTask = (CGetFile *)pUser;
-	pTask->m_Current = DlCurr;
-	pTask->m_Size = DlTotal;
-	pTask->m_Progress = (100 * DlCurr) / (DlTotal ? DlTotal : 1);
+	pTask->m_Current.store(DlCurr, std::memory_order_relaxed);
+	pTask->m_Size.store(DlTotal, std::memory_order_relaxed);
+	pTask->m_Progress.store((100 * DlCurr) / (DlTotal ? DlTotal : 1), std::memory_order_relaxed);
 	pTask->OnProgress();
 	return pTask->m_Abort ? -1 : 0;
 }
 
-CGet::CGet(const char *pUrl, CTimeout Timeout) :
-	CRequest(pUrl, Timeout),
+CHead::CHead(const char *pUrl, CTimeout Timeout, HTTPLOG LogProgress) :
+	CRequest(pUrl, Timeout, LogProgress)
+{
+}
+
+CHead::~CHead()
+{
+}
+
+bool CHead::AfterInit(void *pCurl)
+{
+	CURL *pHandle = pCurl;
+	curl_easy_setopt(pHandle, CURLOPT_NOBODY, 1L);
+	return true;
+}
+
+CGet::CGet(const char *pUrl, CTimeout Timeout, HTTPLOG LogProgress) :
+	CRequest(pUrl, Timeout, LogProgress),
 	m_BufferSize(0),
 	m_BufferLength(0),
 	m_pBuffer(NULL)
@@ -247,7 +279,7 @@ size_t CGet::OnData(char *pData, size_t DataSize)
 	return DataSize;
 }
 
-CGetFile::CGetFile(IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType, CTimeout Timeout, bool LogProgress) :
+CGetFile::CGetFile(IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType, CTimeout Timeout, HTTPLOG LogProgress) :
 	CRequest(pUrl, Timeout, LogProgress),
 	m_pStorage(pStorage),
 	m_File(0),

@@ -61,32 +61,9 @@ public:
 	}
 	bool Set(int Index, float Value);
 	bool Set(const char *pName, float Value);
-	bool Get(int Index, float *pValue);
-	bool Get(const char *pName, float *pValue);
+	bool Get(int Index, float *pValue) const;
+	bool Get(const char *pName, float *pValue) const;
 };
-
-inline vec2 GetDirection(int Angle)
-{
-	float a = Angle / 256.0f;
-	return vec2(cosf(a), sinf(a));
-}
-
-inline vec2 GetDir(float Angle)
-{
-	return vec2(cosf(Angle), sinf(Angle));
-}
-
-inline float GetAngle(vec2 Dir)
-{
-	if(Dir.x == 0 && Dir.y == 0)
-		return 0.0f;
-	else if(Dir.x == 0)
-		return Dir.y < 0 ? -pi / 2 : pi / 2;
-	float a = atanf(Dir.y / Dir.x);
-	if(Dir.x < 0)
-		a = a + pi;
-	return a;
-}
 
 inline void StrToInts(int *pInts, int Num, const char *pStr)
 {
@@ -249,8 +226,7 @@ public:
 
 	int m_TriggeredEvents;
 
-	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams);
-	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams, std::map<int, std::vector<vec2>> *pTeleOuts);
+	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams = nullptr, std::map<int, std::vector<vec2>> *pTeleOuts = nullptr);
 	void Reset();
 	void Tick(bool UseInput);
 	void Move();
@@ -269,7 +245,9 @@ public:
 	int m_Colliding;
 	bool m_LeftWall;
 
-	// DDnet Character
+	// DDNet Character
+	void SetTeamsCore(CTeamsCore *pTeams);
+	void SetTeleOuts(std::map<int, std::vector<vec2>> *pTeleOuts);
 	void ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet);
 	bool m_Solo;
 	bool m_Jetpack;
@@ -287,6 +265,7 @@ public:
 	bool m_HasTelegunLaser;
 	int m_FreezeEnd;
 	bool m_DeepFrozen;
+	CTuningParams m_Tuning;
 
 private:
 	CTeamsCore *m_pTeams;

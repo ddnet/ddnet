@@ -7,6 +7,8 @@
 #include <game/client/component.h>
 #include <game/client/lineinput.h>
 
+#include <game/client/skin.h>
+
 class CChat : public CComponent
 {
 	CLineInput m_Input;
@@ -22,10 +24,11 @@ class CChat : public CComponent
 
 	struct CLine
 	{
-		int64 m_Time;
+		int64_t m_Time;
 		float m_YOffset[2];
 		int m_ClientID;
-		int m_Team;
+		bool m_Team;
+		bool m_Whisper;
 		int m_NameColor;
 		char m_aName[64];
 		char m_aText[512];
@@ -72,6 +75,7 @@ class CChat : public CComponent
 	bool m_InputUpdate;
 	int m_ChatStringOffset;
 	int m_OldChatStringLength;
+	bool m_CompletionUsed;
 	int m_CompletionChosen;
 	char m_aCompletionBuffer[256];
 	int m_PlaceholderOffset;
@@ -98,8 +102,8 @@ class CChat : public CComponent
 	CHistoryEntry *m_pHistoryEntry;
 	CStaticRingBuffer<CHistoryEntry, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_History;
 	int m_PendingChatCounter;
-	int64 m_LastChatSend;
-	int64 m_aLastSoundPlayed[CHAT_NUM];
+	int64_t m_LastChatSend;
+	int64_t m_aLastSoundPlayed[CHAT_NUM];
 
 	static void ConSay(IConsole::IResult *pResult, void *pUserData);
 	static void ConSayTeam(IConsole::IResult *pResult, void *pUserData);
@@ -107,8 +111,7 @@ class CChat : public CComponent
 	static void ConShowChat(IConsole::IResult *pResult, void *pUserData);
 	static void ConEcho(IConsole::IResult *pResult, void *pUserData);
 
-	static void ConchainChatTee(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
-	static void ConchainChatBackground(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainChatOld(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	bool LineShouldHighlight(const char *pLine, const char *pName);
 	void StoreSave(const char *pText);

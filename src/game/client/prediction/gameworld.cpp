@@ -9,6 +9,7 @@
 #include "entity.h"
 #include <algorithm>
 #include <engine/shared/config.h>
+#include <game/client/projectile_data.h>
 #include <utility>
 
 //////////////////////////////////////////////////
@@ -118,11 +119,6 @@ void CGameWorld::InsertEntity(CEntity *pEnt, bool Last)
 		}
 		pChar->SetCoreWorld(this);
 	}
-}
-
-void CGameWorld::DestroyEntity(CEntity *pEnt)
-{
-	pEnt->m_MarkedForDestroy = true;
 }
 
 void CGameWorld::RemoveEntity(CEntity *pEnt)
@@ -288,7 +284,7 @@ void CGameWorld::ReleaseHooked(int ClientID)
 
 CTuningParams *CGameWorld::Tuning()
 {
-	return &m_Tuning[g_Config.m_ClDummy];
+	return &m_Core.m_Tuning[g_Config.m_ClDummy];
 }
 
 CEntity *CGameWorld::GetEntity(int ID, int EntType)
@@ -299,7 +295,7 @@ CEntity *CGameWorld::GetEntity(int ID, int EntType)
 	return 0;
 }
 
-void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int64 Mask)
+void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int64_t Mask)
 {
 	if(Owner < 0 && m_WorldConfig.m_IsSolo && !(Weapon == WEAPON_SHOTGUN && m_WorldConfig.m_IsDDRace))
 		return;
@@ -366,11 +362,20 @@ void CGameWorld::NetCharAdd(int ObjID, CNetObj_Character *pCharObj, CNetObj_DDNe
 		pChar->m_GameTeam = GameTeam;
 }
 
-void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData)
+void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const CNetObj_EntityEx *pDataEx)
 {
-	if(ObjType == NETOBJTYPE_PROJECTILE && m_WorldConfig.m_PredictWeapons)
+	if((ObjType == NETOBJTYPE_PROJECTILE || ObjType == NETOBJTYPE_DDNETPROJECTILE) && m_WorldConfig.m_PredictWeapons)
 	{
-		CProjectile NetProj = CProjectile(this, ObjID, (CNetObj_Projectile *)pObjData);
+		CProjectileData Data;
+		if(ObjType == NETOBJTYPE_PROJECTILE)
+		{
+			Data = ExtractProjectileInfo((const CNetObj_Projectile *)pObjData, this);
+		}
+		else
+		{
+			Data = ExtractProjectileInfoDDNet((const CNetObj_DDNetProjectile *)pObjData, this);
+		}
+		CProjectile NetProj = CProjectile(this, ObjID, &Data, pDataEx);
 
 		if(NetProj.m_Type != WEAPON_SHOTGUN && fabs(length(NetProj.m_Direction) - 1.f) > 0.02f) // workaround to skip grenades on ball mod
 			return;
@@ -385,7 +390,7 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData)
 				return;
 			}
 		}
-		if(!UseExtraInfo((CNetObj_Projectile *)pObjData))
+		if(!Data.m_ExtraInfo)
 		{
 			// try to match the newly received (unrecognized) projectile with a locally fired one
 			for(CProjectile *pProj = (CProjectile *)FindFirst(CGameWorld::ENTTYPE_PROJECTILE); pProj; pProj = (CProjectile *)pProj->TypeNext())
@@ -424,7 +429,7 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData)
 	}
 	else if(ObjType == NETOBJTYPE_PICKUP && m_WorldConfig.m_PredictWeapons)
 	{
-		CPickup NetPickup = CPickup(this, ObjID, (CNetObj_Pickup *)pObjData);
+		CPickup NetPickup = CPickup(this, ObjID, (CNetObj_Pickup *)pObjData, pDataEx);
 		if(CPickup *pPickup = (CPickup *)GetEntity(ObjID, ENTTYPE_PICKUP))
 		{
 			if(NetPickup.Match(pPickup))
@@ -485,14 +490,6 @@ void CGameWorld::NetObjEnd(int LocalID)
 						pHookedChar->m_KeepHooked = true;
 						pHookedChar->m_MarkedForDestroy = false;
 					}
-	// keep entities that are out of view for a short while, for some entity types
-	if(CCharacter *pLocal = GetCharacterByID(LocalID))
-		for(int i : {ENTTYPE_CHARACTER, ENTTYPE_PROJECTILE, ENTTYPE_LASER})
-			for(CEntity *pEnt = FindFirst(i); pEnt; pEnt = pEnt->TypeNext())
-				if(pEnt->m_MarkedForDestroy)
-					if(pEnt->m_SnapTicks < 2 * SERVER_TICK_SPEED || (i != ENTTYPE_CHARACTER && pEnt->m_SnapTicks < 5 * SERVER_TICK_SPEED))
-						if(pEnt->NetworkClipped(pLocal->m_Core.m_Pos))
-							pEnt->m_MarkedForDestroy = false;
 	RemoveEntities();
 
 	// Update character IDs and pointers
@@ -529,7 +526,6 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 	for(int i = 0; i < 2; i++)
 	{
 		m_Core.m_Tuning[i] = pFrom->m_Core.m_Tuning[i];
-		m_Tuning[i] = pFrom->m_Tuning[i];
 	}
 	m_pTuningList = pFrom->m_pTuningList;
 	m_Teams = pFrom->m_Teams;
@@ -578,7 +574,25 @@ CEntity *CGameWorld::FindMatch(int ObjID, int ObjType, const void *pObjData)
 	switch(ObjType)
 	{
 	case NETOBJTYPE_CHARACTER: FindType(ENTTYPE_CHARACTER, CCharacter, CNetObj_Character);
-	case NETOBJTYPE_PROJECTILE: FindType(ENTTYPE_PROJECTILE, CProjectile, CNetObj_Projectile);
+	case NETOBJTYPE_PROJECTILE:
+	case NETOBJTYPE_DDNETPROJECTILE:
+	{
+		CProjectileData Data;
+		if(ObjType == NETOBJTYPE_PROJECTILE)
+		{
+			Data = ExtractProjectileInfo((const CNetObj_Projectile *)pObjData, this);
+		}
+		else
+		{
+			Data = ExtractProjectileInfoDDNet((const CNetObj_DDNetProjectile *)pObjData, this);
+		}
+		CProjectile *pEnt = (CProjectile *)GetEntity(ObjID, ENTTYPE_PROJECTILE);
+		if(pEnt && CProjectile(this, ObjID, &Data).Match(pEnt))
+		{
+			return pEnt;
+		}
+		return 0;
+	}
 	case NETOBJTYPE_LASER: FindType(ENTTYPE_LASER, CLaser, CNetObj_Laser);
 	case NETOBJTYPE_PICKUP: FindType(ENTTYPE_PICKUP, CPickup, CNetObj_Pickup);
 	}

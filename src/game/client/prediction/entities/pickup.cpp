@@ -17,7 +17,7 @@ void CPickup::Tick()
 		{
 			if(GameWorld()->m_WorldConfig.m_IsVanilla && distance(m_Pos, pChr->m_Pos) >= 20.0f * 2) // pickup distance is shorter on vanilla due to using ClosestEntity
 				continue;
-			if(m_Layer == LAYER_SWITCH && !Collision()->m_pSwitchers[m_Number].m_Status[pChr->Team()])
+			if(m_Layer == LAYER_SWITCH && m_Number > 0 && m_Number < Collision()->m_NumSwitchers + 1 && !GameWorld()->Collision()->m_pSwitchers[m_Number].m_Status[pChr->Team()])
 				continue;
 			bool sound = false;
 			// player picked us up, is someone was hooking us, let them go
@@ -77,13 +77,14 @@ void CPickup::Move()
 		int index = Collision()->IsMover(m_Pos.x, m_Pos.y, &Flags);
 		if(index)
 		{
+			m_IsCoreActive = true;
 			m_Core = Collision()->CpSpeed(index, Flags);
 		}
 		m_Pos += m_Core;
 	}
 }
 
-CPickup::CPickup(CGameWorld *pGameWorld, int ID, CNetObj_Pickup *pPickup) :
+CPickup::CPickup(CGameWorld *pGameWorld, int ID, CNetObj_Pickup *pPickup, const CNetObj_EntityEx *pEntEx) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP)
 {
 	m_Pos.x = pPickup->m_X;
@@ -91,9 +92,16 @@ CPickup::CPickup(CGameWorld *pGameWorld, int ID, CNetObj_Pickup *pPickup) :
 	m_Type = pPickup->m_Type;
 	m_Subtype = pPickup->m_Subtype;
 	m_Core = vec2(0.f, 0.f);
+	m_IsCoreActive = false;
 	m_ID = ID;
 	m_Layer = LAYER_GAME;
 	m_Number = 0;
+
+	if(pEntEx)
+	{
+		m_Layer = pEntEx->m_Layer;
+		m_Number = pEntEx->m_SwitchNumber;
+	}
 }
 
 void CPickup::FillInfo(CNetObj_Pickup *pPickup)

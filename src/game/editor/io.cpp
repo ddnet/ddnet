@@ -270,8 +270,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 				Size += str_length(m_lSettings[i].m_aCommand) + 1;
 			}
 
-			// Checked that m_lSettings.size() is not 0, thus Size is > 0 as ell
-			char *pSettings = (char *)malloc(Size); // NOLINT(clang-analyzer-optin.portability.UnixAPI)
+			char *pSettings = (char *)malloc(maximum(Size, 1));
 			char *pNext = pSettings;
 			for(int i = 0; i < m_lSettings.size(); i++)
 			{
@@ -535,23 +534,20 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 		PointCount += Item.m_NumPoints;
 	}
 
-	if(PointCount > 0)
+	// save points
+	int TotalSize = sizeof(CEnvPoint) * PointCount;
+	CEnvPoint *pPoints = (CEnvPoint *)calloc(maximum(PointCount, 1), sizeof(*pPoints));
+	PointCount = 0;
+
+	for(int e = 0; e < m_lEnvelopes.size(); e++)
 	{
-		// save points
-		int TotalSize = sizeof(CEnvPoint) * PointCount;
-		CEnvPoint *pPoints = (CEnvPoint *)calloc(PointCount, sizeof(*pPoints));
-		PointCount = 0;
-
-		for(int e = 0; e < m_lEnvelopes.size(); e++)
-		{
-			int Count = m_lEnvelopes[e]->m_lPoints.size();
-			mem_copy(&pPoints[PointCount], m_lEnvelopes[e]->m_lPoints.base_ptr(), sizeof(CEnvPoint) * Count);
-			PointCount += Count;
-		}
-
-		df.AddItem(MAPITEMTYPE_ENVPOINTS, 0, TotalSize, pPoints);
-		free(pPoints);
+		int Count = m_lEnvelopes[e]->m_lPoints.size();
+		mem_copy(&pPoints[PointCount], m_lEnvelopes[e]->m_lPoints.base_ptr(), sizeof(CEnvPoint) * Count);
+		PointCount += Count;
 	}
+
+	df.AddItem(MAPITEMTYPE_ENVPOINTS, 0, TotalSize, pPoints);
+	free(pPoints);
 
 	// finish the data file
 	df.Finish();
@@ -971,7 +967,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 									TILE_HIT_DISABLE,
 									TILE_JUMP,
 									TILE_ADD_TIME,
-									TILE_SUBSTRACT_TIME,
+									TILE_SUBTRACT_TIME,
 									TILE_ALLOW_TELE_GUN,
 									TILE_ALLOW_BLUE_TELE_GUN};
 								CSwitchTile *pLayerSwitchTiles = ((CLayerSwitch *)pTiles)->m_pSwitchTile;

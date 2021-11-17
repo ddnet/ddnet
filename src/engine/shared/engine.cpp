@@ -44,7 +44,7 @@ public:
 		{
 			char aBuf[32];
 			str_timestamp(aBuf, sizeof(aBuf));
-			char aFilenameSent[128], aFilenameRecv[128];
+			char aFilenameSent[IO_MAX_PATH_LENGTH], aFilenameRecv[IO_MAX_PATH_LENGTH];
 			str_format(aFilenameSent, sizeof(aFilenameSent), "dumps/network_sent_%s.txt", aBuf);
 			str_format(aFilenameRecv, sizeof(aFilenameRecv), "dumps/network_recv_%s.txt", aBuf);
 			CNetBase::OpenLog(pEngine->m_pStorage->OpenFile(aFilenameSent, IOFLAG_WRITE, IStorage::TYPE_SAVE),
@@ -53,25 +53,28 @@ public:
 		}
 	}
 
-	CEngine(const char *pAppname, bool Silent, int Jobs)
+	CEngine(bool Test, const char *pAppname, bool Silent, int Jobs)
 	{
-		if(!Silent)
-			dbg_logger_stdout();
-		dbg_logger_debugger();
+		if(!Test)
+		{
+			if(!Silent)
+				dbg_logger_stdout();
+			dbg_logger_debugger();
 
-		//
-		dbg_msg("engine", "running on %s-%s-%s", CONF_FAMILY_STRING, CONF_PLATFORM_STRING, CONF_ARCH_STRING);
+			//
+			dbg_msg("engine", "running on %s-%s-%s", CONF_FAMILY_STRING, CONF_PLATFORM_STRING, CONF_ARCH_STRING);
 #ifdef CONF_ARCH_ENDIAN_LITTLE
-		dbg_msg("engine", "arch is little endian");
+			dbg_msg("engine", "arch is little endian");
 #elif defined(CONF_ARCH_ENDIAN_BIG)
-		dbg_msg("engine", "arch is big endian");
+			dbg_msg("engine", "arch is big endian");
 #else
-		dbg_msg("engine", "unknown endian");
+			dbg_msg("engine", "unknown endian");
 #endif
 
-		// init the network
-		net_init();
-		CNetBase::Init();
+			// init the network
+			net_init();
+			CNetBase::Init();
+		}
 
 		m_JobPool.Init(Jobs);
 
@@ -104,4 +107,10 @@ public:
 	}
 };
 
-IEngine *CreateEngine(const char *pAppname, bool Silent, int Jobs) { return new CEngine(pAppname, Silent, Jobs); }
+void IEngine::RunJobBlocking(IJob *pJob)
+{
+	CJobPool::RunBlocking(pJob);
+}
+
+IEngine *CreateEngine(const char *pAppname, bool Silent, int Jobs) { return new CEngine(false, pAppname, Silent, Jobs); }
+IEngine *CreateTestEngine(const char *pAppname, int Jobs) { return new CEngine(true, pAppname, true, Jobs); }

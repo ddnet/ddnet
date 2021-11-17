@@ -7,6 +7,9 @@
 #include <game/server/teams.h>
 #include <game/version.h>
 
+#include "entities/character.h"
+#include "player.h"
+
 bool CheckClientID(int ClientID);
 
 void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
@@ -36,7 +39,9 @@ void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
 		"trafilaw, Zwelf, Patiga, Konsti, ElXreno, MikiGamer,");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
-		"Fireball, Banana090, axblk, yangfl & others.");
+		"Fireball, Banana090, axblk, yangfl, nobody-mb, Kaffeine,");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
+		"Zodiac & others.");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
 		"Based on DDRace by the DDRace developers,");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
@@ -420,7 +425,7 @@ void CGameContext::ConTeamTop5(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
-void CGameContext::ConTop5(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConTop(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(!CheckClientID(pResult->m_ClientID))
@@ -428,15 +433,15 @@ void CGameContext::ConTop5(IConsole::IResult *pResult, void *pUserData)
 
 	if(g_Config.m_SvHideScore)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "top5",
-			"Showing the top 5 is not allowed on this server.");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "top",
+			"Showing the top is not allowed on this server.");
 		return;
 	}
 
 	if(pResult->NumArguments() > 0)
-		pSelf->Score()->ShowTop5(pResult->m_ClientID, pResult->GetInteger(0));
+		pSelf->Score()->ShowTop(pResult->m_ClientID, pResult->GetInteger(0));
 	else
-		pSelf->Score()->ShowTop5(pResult->m_ClientID);
+		pSelf->Score()->ShowTop(pResult->m_ClientID);
 }
 
 void CGameContext::ConTimes(IConsole::IResult *pResult, void *pUserData)
@@ -555,7 +560,7 @@ void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
 	if(!pPlayer)
 		return;
 
-	const char *pTimeout = pResult->NumArguments() > 0 ? pResult->GetString(0) : pPlayer->m_TimeoutCode;
+	const char *pTimeout = pResult->NumArguments() > 0 ? pResult->GetString(0) : pPlayer->m_aTimeoutCode;
 
 	if(!pSelf->Server()->IsSixup(pResult->m_ClientID))
 	{
@@ -565,7 +570,7 @@ void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
 				continue;
 			if(!pSelf->m_apPlayers[i])
 				continue;
-			if(str_comp(pSelf->m_apPlayers[i]->m_TimeoutCode, pTimeout))
+			if(str_comp(pSelf->m_apPlayers[i]->m_aTimeoutCode, pTimeout))
 				continue;
 			if(pSelf->Server()->SetTimedOut(i, pResult->m_ClientID))
 			{
@@ -584,7 +589,7 @@ void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	pSelf->Server()->SetTimeoutProtected(pResult->m_ClientID);
-	str_copy(pPlayer->m_TimeoutCode, pResult->GetString(0), sizeof(pPlayer->m_TimeoutCode));
+	str_copy(pPlayer->m_aTimeoutCode, pResult->GetString(0), sizeof(pPlayer->m_aTimeoutCode));
 }
 
 void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
@@ -597,7 +602,7 @@ void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
 	if(!pPlayer)
 		return;
 
-	if(pSelf->ProcessSpamProtection(pResult->m_ClientID))
+	if(pSelf->ProcessSpamProtection(pResult->m_ClientID, false))
 		return;
 
 	if(!g_Config.m_SvPractice)
@@ -656,19 +661,97 @@ void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
 
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "'%s' voted to %s /practice mode for your team, which means you can use /r, but you can't earn a rank. Type /practice to vote (%d/%d required votes)", pSelf->Server()->ClientName(pResult->m_ClientID), VotedForPractice ? "enable" : "disable", NumCurrentVotes, NumRequiredVotes);
-
-	for(int i = 0; i < MAX_CLIENTS; i++)
-		if(Teams.m_Core.Team(i) == Team)
-			pSelf->SendChatTarget(i, aBuf);
+	pSelf->SendChatTeam(Team, aBuf);
 
 	if(NumCurrentVotes >= NumRequiredVotes)
 	{
 		Teams.EnablePractice(Team);
-
-		for(int i = 0; i < MAX_CLIENTS; i++)
-			if(Teams.m_Core.Team(i) == Team)
-				pSelf->SendChatTarget(i, "Practice mode enabled for your team, happy practicing!");
+		pSelf->SendChatTeam(Team, "Practice mode enabled for your team, happy practicing!");
 	}
+}
+
+void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	const char *pName = pResult->GetString(0);
+
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if(!pPlayer)
+		return;
+
+	if(pSelf->ProcessSpamProtection(pResult->m_ClientID))
+		return;
+
+	if(!g_Config.m_SvSwap)
+	{
+		pSelf->Console()->Print(
+			IConsole::OUTPUT_LEVEL_STANDARD,
+			"print",
+			"Swap is disabled on this server.");
+		return;
+	}
+
+	CGameTeams &Teams = ((CGameControllerDDRace *)pSelf->m_pController)->m_Teams;
+
+	int Team = Teams.m_Core.Team(pResult->m_ClientID);
+
+	if(Team < TEAM_FLOCK || (Team == TEAM_FLOCK && g_Config.m_SvTeam != 3) || Team >= TEAM_SUPER)
+	{
+		pSelf->Console()->Print(
+			IConsole::OUTPUT_LEVEL_STANDARD,
+			"print",
+			"Join a team to use swap feature, which means you can swap positions with each other.");
+		return;
+	}
+
+	int TargetClientId = -1;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(pSelf->m_apPlayers[i] && !str_comp(pName, pSelf->Server()->ClientName(i)))
+		{
+			TargetClientId = i;
+			break;
+		}
+	}
+
+	if(TargetClientId < 0)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Player not found");
+		return;
+	}
+
+	if(TargetClientId == pResult->m_ClientID)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Can't swap with yourself");
+		return;
+	}
+
+	int TargetTeam = Teams.m_Core.Team(TargetClientId);
+	if(TargetTeam != Team)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Player is on a different team");
+		return;
+	}
+
+	if(!Teams.IsStarted(Team))
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Need to have started the map to swap with a player.");
+		return;
+	}
+
+	CPlayer *pSwapPlayer = pSelf->m_apPlayers[TargetClientId];
+
+	bool SwapPending = pSwapPlayer->m_SwapTargetsClientID != pResult->m_ClientID;
+	if(SwapPending)
+	{
+		Teams.RequestTeamSwap(pPlayer, pSwapPlayer, Team);
+		return;
+	}
+
+	Teams.SwapTeamCharacters(pPlayer, pSwapPlayer, Team);
 }
 
 void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
@@ -779,7 +862,7 @@ void CGameContext::ConLockTeam(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	if(pSelf->ProcessSpamProtection(pResult->m_ClientID))
+	if(pSelf->ProcessSpamProtection(pResult->m_ClientID, false))
 		return;
 
 	char aBuf[512];
@@ -791,11 +874,8 @@ void CGameContext::ConLockTeam(IConsole::IResult *pResult, void *pUserData)
 	{
 		((CGameControllerDDRace *)pSelf->m_pController)->m_Teams.SetTeamLock(Team, true);
 
-		str_format(aBuf, sizeof(aBuf), "'%s' locked your team. After the race started killing will kill everyone in your team.", pSelf->Server()->ClientName(pResult->m_ClientID));
-
-		for(int i = 0; i < MAX_CLIENTS; i++)
-			if(((CGameControllerDDRace *)pSelf->m_pController)->m_Teams.m_Core.Team(i) == Team)
-				pSelf->SendChatTarget(i, aBuf);
+		str_format(aBuf, sizeof(aBuf), "'%s' locked your team. After the race starts, killing will kill everyone in your team.", pSelf->Server()->ClientName(pResult->m_ClientID));
+		pSelf->SendChatTeam(Team, aBuf);
 	}
 }
 
@@ -817,7 +897,7 @@ void CGameContext::ConUnlockTeam(IConsole::IResult *pResult, void *pUserData)
 	if(Team <= TEAM_FLOCK || Team >= TEAM_SUPER)
 		return;
 
-	if(pSelf->ProcessSpamProtection(pResult->m_ClientID))
+	if(pSelf->ProcessSpamProtection(pResult->m_ClientID, false))
 		return;
 
 	pSelf->UnlockTeam(pResult->m_ClientID, Team);
@@ -829,10 +909,7 @@ void CGameContext::UnlockTeam(int ClientID, int Team)
 
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "'%s' unlocked your team.", Server()->ClientName(ClientID));
-
-	for(int i = 0; i < MAX_CLIENTS; i++)
-		if(((CGameControllerDDRace *)m_pController)->m_Teams.m_Core.Team(i) == Team)
-			SendChatTarget(i, aBuf);
+	SendChatTeam(Team, aBuf);
 }
 
 void CGameContext::ConInviteTeam(IConsole::IResult *pResult, void *pUserData)
@@ -893,10 +970,7 @@ void CGameContext::ConInviteTeam(IConsole::IResult *pResult, void *pUserData)
 		pSelf->SendChatTarget(Target, aBuf);
 
 		str_format(aBuf, sizeof aBuf, "'%s' invited '%s' to your team.", pSelf->Server()->ClientName(pResult->m_ClientID), pSelf->Server()->ClientName(Target));
-		;
-		for(int i = 0; i < MAX_CLIENTS; i++)
-			if(((CGameControllerDDRace *)pSelf->m_pController)->m_Teams.m_Core.Team(i) == Team)
-				pSelf->SendChatTarget(i, aBuf);
+		pSelf->SendChatTeam(Team, aBuf);
 	}
 	else
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "invite", "Can't invite players to this team");
@@ -947,13 +1021,10 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 		{
 			int Team = pResult->GetInteger(0);
 
-			if(Team == pController->m_Teams.m_Core.Team(pResult->m_ClientID))
-			{
-				char aBuf[32];
-				str_format(aBuf, sizeof(aBuf), "You are in team %d already", Team);
-				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join", aBuf);
-			}
-			else if(pPlayer->m_Last_Team + (int64_t)pSelf->Server()->TickSpeed() * g_Config.m_SvTeamChangeDelay > pSelf->Server()->Tick())
+			if(Team < 0 || Team >= MAX_CLIENTS)
+				Team = pController->m_Teams.GetFirstEmptyTeam();
+
+			if(pPlayer->m_Last_Team + (int64_t)pSelf->Server()->TickSpeed() * g_Config.m_SvTeamChangeDelay > pSelf->Server()->Tick())
 			{
 				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",
 					"You can\'t change teams that fast!");
@@ -971,7 +1042,11 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 				str_format(aBuf, sizeof(aBuf), "This team already has the maximum allowed size of %d players", g_Config.m_SvTeamMaxSize);
 				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join", aBuf);
 			}
-			else if(pController->m_Teams.SetCharacterTeam(pPlayer->GetCID(), Team))
+			else if(const char *pError = pController->m_Teams.SetCharacterTeam(pPlayer->GetCID(), Team))
+			{
+				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join", pError);
+			}
+			else
 			{
 				char aBuf[512];
 				str_format(aBuf, sizeof(aBuf), "%s joined team %d",
@@ -982,11 +1057,6 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 
 				if(pController->m_Teams.IsPractice(Team))
 					pSelf->SendChatTarget(pPlayer->GetCID(), "Practice mode enabled for your team, happy practicing!");
-			}
-			else
-			{
-				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",
-					"You cannot join this team at this time");
 			}
 		}
 	}
@@ -1058,21 +1128,21 @@ void CGameContext::ConSetEyeEmote(IConsole::IResult *pResult,
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
 			"emote",
-			(pPlayer->m_EyeEmote) ?
+			(pPlayer->m_EyeEmoteEnabled) ?
 				"You can now use the preset eye emotes." :
 				"You don't have any eye emotes, remember to bind some. (until you die)");
 		return;
 	}
 	else if(str_comp_nocase(pResult->GetString(0), "on") == 0)
-		pPlayer->m_EyeEmote = true;
+		pPlayer->m_EyeEmoteEnabled = true;
 	else if(str_comp_nocase(pResult->GetString(0), "off") == 0)
-		pPlayer->m_EyeEmote = false;
+		pPlayer->m_EyeEmoteEnabled = false;
 	else if(str_comp_nocase(pResult->GetString(0), "toggle") == 0)
-		pPlayer->m_EyeEmote = !pPlayer->m_EyeEmote;
+		pPlayer->m_EyeEmoteEnabled = !pPlayer->m_EyeEmoteEnabled;
 	pSelf->Console()->Print(
 		IConsole::OUTPUT_LEVEL_STANDARD,
 		"emote",
-		(pPlayer->m_EyeEmote) ?
+		(pPlayer->m_EyeEmoteEnabled) ?
 			"You can now use the preset eye emotes." :
 			"You don't have any eye emotes, remember to bind some. (until you die)");
 }
@@ -1099,7 +1169,7 @@ void CGameContext::ConEyeEmote(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
 			"emote",
-			"Emote commands are: /emote surprise /emote blink /emote close /emote angry /emote happy /emote pain");
+			"Emote commands are: /emote surprise /emote blink /emote close /emote angry /emote happy /emote pain /emote normal");
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
 			"emote",
@@ -1107,33 +1177,36 @@ void CGameContext::ConEyeEmote(IConsole::IResult *pResult, void *pUserData)
 	}
 	else
 	{
-		if(pPlayer->m_LastEyeEmote + (int64_t)g_Config.m_SvEyeEmoteChangeDelay * pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
+		if(!pPlayer->CanOverrideDefaultEmote())
 			return;
 
+		int EmoteType = 0;
 		if(!str_comp(pResult->GetString(0), "angry"))
-			pPlayer->m_DefEmote = EMOTE_ANGRY;
+			EmoteType = EMOTE_ANGRY;
 		else if(!str_comp(pResult->GetString(0), "blink"))
-			pPlayer->m_DefEmote = EMOTE_BLINK;
+			EmoteType = EMOTE_BLINK;
 		else if(!str_comp(pResult->GetString(0), "close"))
-			pPlayer->m_DefEmote = EMOTE_BLINK;
+			EmoteType = EMOTE_BLINK;
 		else if(!str_comp(pResult->GetString(0), "happy"))
-			pPlayer->m_DefEmote = EMOTE_HAPPY;
+			EmoteType = EMOTE_HAPPY;
 		else if(!str_comp(pResult->GetString(0), "pain"))
-			pPlayer->m_DefEmote = EMOTE_PAIN;
+			EmoteType = EMOTE_PAIN;
 		else if(!str_comp(pResult->GetString(0), "surprise"))
-			pPlayer->m_DefEmote = EMOTE_SURPRISE;
+			EmoteType = EMOTE_SURPRISE;
 		else if(!str_comp(pResult->GetString(0), "normal"))
-			pPlayer->m_DefEmote = EMOTE_NORMAL;
+			EmoteType = EMOTE_NORMAL;
 		else
+		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD,
 				"emote", "Unknown emote... Say /emote");
+			return;
+		}
 
 		int Duration = 1;
 		if(pResult->NumArguments() > 1)
 			Duration = clamp(pResult->GetInteger(1), 1, 86400);
 
-		pPlayer->m_DefEmoteReset = pSelf->Server()->Tick() + Duration * pSelf->Server()->TickSpeed();
-		pPlayer->m_LastEyeEmote = pSelf->Server()->Tick();
+		pPlayer->OverrideDefaultEmote(EmoteType, pSelf->Server()->Tick() + Duration * pSelf->Server()->TickSpeed());
 	}
 }
 
@@ -1263,7 +1336,7 @@ void CGameContext::ConSayTime(IConsole::IResult *pResult, void *pUserData)
 
 	char aBufTime[32];
 	char aBuf[64];
-	int64 Time = (int64)100 * (float)(pSelf->Server()->Tick() - pChr->m_StartTime) / ((float)pSelf->Server()->TickSpeed());
+	int64_t Time = (int64_t)100 * (float)(pSelf->Server()->Tick() - pChr->m_StartTime) / ((float)pSelf->Server()->TickSpeed());
 	str_time(Time, TIME_HOURS, aBufTime, sizeof(aBufTime));
 	str_format(aBuf, sizeof(aBuf), "%s current race time is %s", aBufName, aBufTime);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "time", aBuf);
@@ -1286,7 +1359,7 @@ void CGameContext::ConSayTimeAll(IConsole::IResult *pResult, void *pUserData)
 
 	char aBufTime[32];
 	char aBuf[64];
-	int64 Time = (int64)100 * (float)(pSelf->Server()->Tick() - pChr->m_StartTime) / ((float)pSelf->Server()->TickSpeed());
+	int64_t Time = (int64_t)100 * (float)(pSelf->Server()->Tick() - pChr->m_StartTime) / ((float)pSelf->Server()->TickSpeed());
 	const char *pName = pSelf->Server()->ClientName(pResult->m_ClientID);
 	str_time(Time, TIME_HOURS, aBufTime, sizeof(aBufTime));
 	str_format(aBuf, sizeof(aBuf), "%s\'s current race time is %s", pName, aBufTime);
@@ -1308,7 +1381,7 @@ void CGameContext::ConTime(IConsole::IResult *pResult, void *pUserData)
 
 	char aBufTime[32];
 	char aBuf[64];
-	int64 Time = (int64)100 * (float)(pSelf->Server()->Tick() - pChr->m_StartTime) / ((float)pSelf->Server()->TickSpeed());
+	int64_t Time = (int64_t)100 * (float)(pSelf->Server()->Tick() - pChr->m_StartTime) / ((float)pSelf->Server()->TickSpeed());
 	str_time(Time, TIME_HOURS, aBufTime, sizeof(aBufTime));
 	str_format(aBuf, sizeof(aBuf), "Your time is %s", aBufTime);
 	pSelf->SendBroadcast(aBuf, pResult->m_ClientID);

@@ -13,6 +13,10 @@
 #include <game/editor/editor.h>
 #include <game/version.h>
 
+#include <game/generated/client_data.h>
+
+#include <game/client/gameclient.h>
+
 #include "menus.h"
 
 void CMenus::RenderStartMenu(CUIRect MainView)
@@ -37,9 +41,9 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 
 	ExtMenu.HSplitBottom(20.0f, &ExtMenu, &Button);
 	static int s_DiscordButton;
-	if(DoButton_Menu(&s_DiscordButton, "Discord", 0, &Button, 0, CUI::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
+	if(DoButton_Menu(&s_DiscordButton, Localize("Discord"), 0, &Button, 0, CUI::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
 	{
-		if(!open_link("https://ddnet.tw/discord"))
+		if(!open_link(Localize("https://ddnet.tw/discord")))
 		{
 			dbg_msg("menus", "couldn't open link");
 		}
@@ -111,7 +115,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		}
 		else
 		{
-			char aBuf[MAX_PATH_LENGTH];
+			char aBuf[IO_MAX_PATH_LENGTH];
 			Storage()->GetBinaryPath(PLAT_SERVER_EXEC, aBuf, sizeof(aBuf));
 			IOHANDLE File = io_open(aBuf, IOFLAG_READ);
 			if(File)

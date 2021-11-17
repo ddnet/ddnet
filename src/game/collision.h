@@ -33,17 +33,17 @@ public:
 	~CCollision();
 	void Init(class CLayers *pLayers);
 	void FillAntibot(CAntibotMapData *pMapData);
-	bool CheckPoint(float x, float y) { return IsSolid(round_to_int(x), round_to_int(y)); }
-	bool CheckPoint(vec2 Pos) { return CheckPoint(Pos.x, Pos.y); }
-	int GetCollisionAt(float x, float y) { return GetTile(round_to_int(x), round_to_int(y)); }
-	int GetWidth() { return m_Width; };
-	int GetHeight() { return m_Height; };
-	int IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision);
-	int IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr);
-	int IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr);
-	void MovePoint(vec2 *pInoutPos, vec2 *pInoutVel, float Elasticity, int *pBounces);
-	void MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elasticity);
-	bool TestBox(vec2 Pos, vec2 Size);
+	bool CheckPoint(float x, float y) const { return IsSolid(round_to_int(x), round_to_int(y)); }
+	bool CheckPoint(vec2 Pos) const { return CheckPoint(Pos.x, Pos.y); }
+	int GetCollisionAt(float x, float y) const { return GetTile(round_to_int(x), round_to_int(y)); }
+	int GetWidth() const { return m_Width; }
+	int GetHeight() const { return m_Height; }
+	int IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision) const;
+	int IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr) const;
+	int IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr) const;
+	void MovePoint(vec2 *pInoutPos, vec2 *pInoutVel, float Elasticity, int *pBounces) const;
+	void MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elasticity) const;
+	bool TestBox(vec2 Pos, vec2 Size) const;
 
 	// DDRace
 
@@ -51,16 +51,16 @@ public:
 	void SetCollisionAt(float x, float y, int id);
 	void SetDTile(float x, float y, bool State);
 	void SetDCollisionAt(float x, float y, int Type, int Flags, int Number);
-	int GetDTileIndex(int Index);
-	int GetDTileFlags(int Index);
-	int GetDTileNumber(int Index);
-	int GetFCollisionAt(float x, float y) { return GetFTile(round_to_int(x), round_to_int(y)); }
-	int IntersectNoLaser(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision);
-	int IntersectNoLaserNW(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision);
-	int IntersectAir(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision);
-	int GetIndex(int x, int y);
-	int GetIndex(vec2 PrevPos, vec2 Pos);
-	int GetFIndex(int x, int y);
+	int GetDTileIndex(int Index) const;
+	int GetDTileFlags(int Index) const;
+	int GetDTileNumber(int Index) const;
+	int GetFCollisionAt(float x, float y) const { return GetFTile(round_to_int(x), round_to_int(y)); }
+	int IntersectNoLaser(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision) const;
+	int IntersectNoLaserNW(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision) const;
+	int IntersectAir(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision) const;
+	int GetIndex(int x, int y) const;
+	int GetIndex(vec2 PrevPos, vec2 Pos) const;
+	int GetFIndex(int x, int y) const;
 
 	int GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance = 18.0f, int OverrideCenterTileIndex = -1);
 	int GetMoveRestrictions(vec2 Pos, float Distance = 18.0f)
@@ -68,53 +68,62 @@ public:
 		return GetMoveRestrictions(0, 0, Pos, Distance);
 	}
 
-	int GetTile(int x, int y);
-	int GetFTile(int x, int y);
-	int Entity(int x, int y, int Layer);
-	int GetPureMapIndex(float x, float y);
-	int GetPureMapIndex(vec2 Pos) { return GetPureMapIndex(Pos.x, Pos.y); }
-	std::list<int> GetMapIndices(vec2 PrevPos, vec2 Pos, unsigned MaxIndices = 0);
-	int GetMapIndex(vec2 Pos);
-	bool TileExists(int Index);
-	bool TileExistsNext(int Index);
-	vec2 GetPos(int Index);
-	int GetTileIndex(int Index);
-	int GetFTileIndex(int Index);
-	int GetTileFlags(int Index);
-	int GetFTileFlags(int Index);
-	int IsTeleport(int Index);
-	int IsEvilTeleport(int Index);
-	int IsCheckTeleport(int Index);
-	int IsCheckEvilTeleport(int Index);
-	int IsTeleportWeapon(int Index);
-	int IsTeleportHook(int Index);
-	int IsTCheckpoint(int Index);
-	int IsSpeedup(int Index);
-	int IsTune(int Index);
-	void GetSpeedup(int Index, vec2 *Dir, int *Force, int *MaxSpeed);
-	int IsSwitch(int Index);
-	int GetSwitchNumber(int Index);
-	int GetSwitchDelay(int Index);
+	int GetTile(int x, int y) const;
+	int GetFTile(int x, int y) const;
+	int Entity(int x, int y, int Layer) const;
+	int GetPureMapIndex(float x, float y) const;
+	int GetPureMapIndex(vec2 Pos) const { return GetPureMapIndex(Pos.x, Pos.y); }
+	std::list<int> GetMapIndices(vec2 PrevPos, vec2 Pos, unsigned MaxIndices = 0) const;
+	int GetMapIndex(vec2 Pos) const;
+	bool TileExists(int Index) const;
+	bool TileExistsNext(int Index) const;
+	vec2 GetPos(int Index) const;
+	int GetTileIndex(int Index) const;
+	int GetFTileIndex(int Index) const;
+	int GetTileFlags(int Index) const;
+	int GetFTileFlags(int Index) const;
+	int IsTeleport(int Index) const;
+	int IsEvilTeleport(int Index) const;
+	int IsCheckTeleport(int Index) const;
+	int IsCheckEvilTeleport(int Index) const;
+	int IsTeleportWeapon(int Index) const;
+	int IsTeleportHook(int Index) const;
+	int IsTCheckpoint(int Index) const;
+	int IsSpeedup(int Index) const;
+	int IsTune(int Index) const;
+	void GetSpeedup(int Index, vec2 *Dir, int *Force, int *MaxSpeed) const;
+	int IsSwitch(int Index) const;
+	int GetSwitchNumber(int Index) const;
+	int GetSwitchDelay(int Index) const;
 
-	int IsSolid(int x, int y);
-	bool IsThrough(int x, int y, int xoff, int yoff, vec2 pos0, vec2 pos1);
-	bool IsHookBlocker(int x, int y, vec2 pos0, vec2 pos1);
-	int IsWallJump(int Index);
-	int IsNoLaser(int x, int y);
-	int IsFNoLaser(int x, int y);
+	int IsSolid(int x, int y) const;
+	bool IsThrough(int x, int y, int xoff, int yoff, vec2 pos0, vec2 pos1) const;
+	bool IsHookBlocker(int x, int y, vec2 pos0, vec2 pos1) const;
+	int IsWallJump(int Index) const;
+	int IsNoLaser(int x, int y) const;
+	int IsFNoLaser(int x, int y) const;
 
-	int IsCheckpoint(int Index);
-	int IsFCheckpoint(int Index);
+	int IsCheckpoint(int Index) const;
+	int IsFCheckpoint(int Index) const;
 
-	int IsMover(int x, int y, int *pFlags);
+	int IsMover(int x, int y, int *pFlags) const;
 
-	vec2 CpSpeed(int index, int Flags = 0);
+	vec2 CpSpeed(int index, int Flags = 0) const;
 
 	class CTeleTile *TeleLayer() { return m_pTele; }
 	class CSwitchTile *SwitchLayer() { return m_pSwitch; }
 	class CTuneTile *TuneLayer() { return m_pTune; }
 	class CLayers *Layers() { return m_pLayers; }
 	int m_NumSwitchers;
+
+	struct SSwitchers
+	{
+		bool m_Status[MAX_CLIENTS];
+		bool m_Initial;
+		int m_EndTick[MAX_CLIENTS];
+		int m_Type[MAX_CLIENTS];
+	};
+	SSwitchers *m_pSwitchers;
 
 private:
 	class CTeleTile *m_pTele;
@@ -123,16 +132,6 @@ private:
 	class CSwitchTile *m_pSwitch;
 	class CTuneTile *m_pTune;
 	class CDoorTile *m_pDoor;
-	struct SSwitchers
-	{
-		bool m_Status[MAX_CLIENTS];
-		bool m_Initial;
-		int m_EndTick[MAX_CLIENTS];
-		int m_Type[MAX_CLIENTS];
-	};
-
-public:
-	SSwitchers *m_pSwitchers;
 };
 
 void ThroughOffset(vec2 Pos0, vec2 Pos1, int *Ox, int *Oy);

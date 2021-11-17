@@ -12,6 +12,8 @@
 
 #include "countryflags.h"
 
+#include <game/client/render.h>
+
 void CCountryFlags::LoadCountryflagsIndexfile()
 {
 	IOHANDLE File = Storage()->OpenFile("countryflags/index.txt", IOFLAG_READ, IStorage::TYPE_ALL);
@@ -58,28 +60,21 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 		// load the graphic file
 		char aBuf[128];
 		CImageInfo Info;
-		bool LoadCountryFlags = g_Config.m_ClLoadCountryFlags;
-		if(LoadCountryFlags)
+		str_format(aBuf, sizeof(aBuf), "countryflags/%s.png", aOrigin);
+		if(!Graphics()->LoadPNG(&Info, aBuf, IStorage::TYPE_ALL))
 		{
-			str_format(aBuf, sizeof(aBuf), "countryflags/%s.png", aOrigin);
-			if(!Graphics()->LoadPNG(&Info, aBuf, IStorage::TYPE_ALL))
-			{
-				char aMsg[128];
-				str_format(aMsg, sizeof(aMsg), "failed to load '%s'", aBuf);
-				Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "countryflags", aMsg);
-				continue;
-			}
+			char aMsg[128];
+			str_format(aMsg, sizeof(aMsg), "failed to load '%s'", aBuf);
+			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "countryflags", aMsg);
+			continue;
 		}
 
 		// add entry
 		CCountryFlag CountryFlag;
 		CountryFlag.m_CountryCode = CountryCode;
 		str_copy(CountryFlag.m_aCountryCodeString, aOrigin, sizeof(CountryFlag.m_aCountryCodeString));
-		if(LoadCountryFlags)
-		{
-			CountryFlag.m_Texture = Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
-			Graphics()->FreePNG(&Info);
-		}
+		CountryFlag.m_Texture = Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
+		Graphics()->FreePNG(&Info);
 
 		if(g_Config.m_Debug)
 		{
@@ -123,6 +118,12 @@ void CCountryFlags::OnInit()
 		mem_zero(DummyEntry.m_aCountryCodeString, sizeof(DummyEntry.m_aCountryCodeString));
 		m_aCountryFlags.add(DummyEntry);
 	}
+
+	m_FlagsQuadContainerIndex = Graphics()->CreateQuadContainer(false);
+	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
+	RenderTools()->QuadContainerAddSprite(m_FlagsQuadContainerIndex, 0, 0, 1, 1);
+	Graphics()->QuadContainerUpload(m_FlagsQuadContainerIndex);
 }
 
 int CCountryFlags::Num() const
@@ -143,20 +144,10 @@ const CCountryFlags::CCountryFlag *CCountryFlags::GetByIndex(int Index) const
 void CCountryFlags::Render(int CountryCode, const ColorRGBA *pColor, float x, float y, float w, float h)
 {
 	const CCountryFlag *pFlag = GetByCountryCode(CountryCode);
-	if(pFlag->m_Texture != -1)
+	if(pFlag->m_Texture.IsValid())
 	{
 		Graphics()->TextureSet(pFlag->m_Texture);
-		Graphics()->QuadsBegin();
-		Graphics()->SetColor(pColor->r, pColor->g, pColor->b, pColor->a);
-		IGraphics::CQuadItem QuadItem(x, y, w, h);
-		Graphics()->QuadsDrawTL(&QuadItem, 1);
-		Graphics()->QuadsEnd();
-	}
-	else
-	{
-		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, x, y, 10.0f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
-		Cursor.m_LineWidth = w;
-		TextRender()->TextEx(&Cursor, pFlag->m_aCountryCodeString, -1);
+		Graphics()->SetColor(*pColor);
+		Graphics()->RenderQuadContainerEx(m_FlagsQuadContainerIndex, 0, -1, x, y, w, h);
 	}
 }

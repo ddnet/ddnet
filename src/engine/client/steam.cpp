@@ -22,7 +22,7 @@ public:
 		m_pSteamFriends = SteamAPI_SteamFriends_v017();
 
 		ReadLaunchCommandLine();
-		str_copy(m_aPlayerName, SteamAPI_ISteamFriends_GetPersonaName(m_pSteamFriends), sizeof(m_aPlayerName));
+		str_utf8_copy(m_aPlayerName, SteamAPI_ISteamFriends_GetPersonaName(m_pSteamFriends), sizeof(m_aPlayerName));
 	}
 	~CSteam()
 	{
@@ -34,7 +34,7 @@ public:
 		if(pConnect[0])
 		{
 			NETADDR Connect;
-			if(net_addr_from_str(&Connect, pConnect) == 0)
+			if(net_host_lookup(pConnect, &Connect, NETTYPE_ALL) == 0)
 			{
 				m_ConnectAddr = Connect;
 				m_GotConnectAddr = true;

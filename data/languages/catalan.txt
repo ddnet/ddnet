@@ -345,9 +345,6 @@ Red team wins!
 Refresh
 == Actualitzar
 
-Refreshing master servers
-== Actualitzant servidors principals
-
 Remote console
 == Consola remota
 
@@ -413,9 +410,6 @@ Show name plates
 
 Show only chat messages from friends
 == Rebre només missatges d'amics
-
-Show only supported
-== Veure únicament modes compatibles
 
 Skins
 == Skins
@@ -524,9 +518,6 @@ Yes
 
 You must restart the game for all settings to take effect.
 == Has de reiniciar el joc perquè els canvis tinguin efecte.
-
-Borderless window
-== Pantalla sense finestra
 
 Demo
 == Repetició
@@ -657,9 +648,6 @@ Reconnect in %d sec
 Grabs
 == Agafa
 
-Background (entities)
-== Fons (entitats)
-
 Show kill messages
 == Mostrar missatges de mort
 
@@ -675,17 +663,11 @@ No updates available
 Enable server message sound
 == Activa el so del missatge del servidor
 
-second
-== segon
-
 Show votes window after voting
 == Mostrar la finestra de votacions després de votar
 
 HUD
 == HUD
-
-Look out!
-== Estigues atent!
 
 Select a name
 == Selecciona un nom
@@ -696,12 +678,6 @@ Enable team chat sound
 Show other players' hook collision lines
 == Mostra les línies de col·lisió d'altres jugadors
 
-We will win
-== Nosaltres guanyarem
-
-Hi o/
-== Hola o/
-
 Deaths
 == Morts
 
@@ -711,14 +687,8 @@ Enable game sounds
 DDNet Client needs to be restarted to complete update!
 == El client DDNet necessita reiniciar-se per completar l'actualització!
 
-Spectator
-== Espectador
-
 Please use a different name
 == Si us plau, fes servir un nom diferent
-
-Wait before try for
-== Espereu abans de provar-ho
 
 Show console window
 == Mostra la finestra de la consola
@@ -776,9 +746,6 @@ Threaded sound loading
 
 Check now
 == Comprova ara
-
-Background (regular)
-== Fons (regular)
 
 Reset wanted weapon on death
 == Reiniciar l'arma desitjada al morir
@@ -843,14 +810,8 @@ Show score
 Spree
 == Spree
 
-Show client IDs in Scoreboard
-== Mostrar les IDs dels clients a la taula d'estadístiques
-
 Max CSVs
 == CSVs màxims
-
-seconds
-== segons
 
 %.2f KiB
 == %.2f KiB
@@ -894,32 +855,20 @@ Exclude
 Enable highlighted chat sound
 == Activar el so del xat destacat
 
-Hello and welcome
-== Hola i benvingut
-
 AntiPing: predict weapons
 == AntiPing: predir armes
 
 DDNet Client updated!
 == El client DDNet s'ha actualitzat!
 
-Outline color
-== Color del contorn
-
 Highlighted message
 == Missatge destacat
-
-Friend
-== Amic
 
 Switch weapon when out of ammo
 == Canviar d'arma en quedar-se sense munició
 
 AntiPing: predict grenade paths
 == AntiPing: predir el camí de la granada
-
-Inner color
-== Color interior
 
 Friend message
 == Missatge d'amics
@@ -948,11 +897,8 @@ Preinit VBO (iGPUs only)
 Activate
 == Activar
 
-Multiple texture units (disable for MacOS)
-== Multiple texture units (disable for MacOS)
-
-Use OpenGL 3.3 (experimental)
-== Utilitzar OpenGL 3.3 (experimental)
+Multiple texture units (disable for macOS)
+== Multiple texture units (disable for macOS)
 
 UI mouse s.
 == UI mouse s.
@@ -1159,128 +1105,227 @@ Replay
 == Repetició
 
 Saving ddnet-settings.cfg failed
-== 
+== Ha fallat el guardat del fitxer ddnet-settings.cfg
 
-The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== 
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== La mida de la textura %s no es divisible per %d, o l'altura no es divisible per %d, el qual pot resultar en errors visuals.
 
 Warning
-== 
+== Advertència 
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== 
+== Mode de depuració activat. Utilitza Ctrl+Shift+D per desactivar-lo.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 
+== Utilitza la tecla k per morir (reiniciar). Veure la configuració per més key binds.
 
 Existing Player
-== 
+== Jugador Existent
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== 
+== El teu sobrenom '%s' ja esta en ús (té %d punts). Vols continuar utilitzant-lo?
 
 Checking for existing player with your name
-== 
+== Comprovant si existeix un jugador amb el teu nom
+
+Are you sure that you want to disconnect and switch to a different server?
+== Estàs segur que et vols desconnectar i entrar a un servidor diferent?
 
 Country / Region
-== 
+== País / Regió
 
 Speed
-== 
+== Velocitat
 
 Theme
+== Tema
+
+AFR
 == 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+Getting server list from master server
+== Obtenint la llista de servidors
 
 %d of %d servers
-== 
+== %d de %d servidors
 
 %d of %d server
-== 
+== %d de %d servidor
 
 %d players
-== 
+== %d jugadors
 
 %d player
-== 
+== %d jugador
+
+Refreshing...
+== Actualitzant...
+
+Leak IP
+== Fer la teva ip pública
 
 Demos directory
-== 
+== Directori de demos
 
 Smooth Dynamic Camera
-== 
+== Camera dinàmica suau
 
 Skip the main menu
-== 
+== Saltar el menu principal
 
 Themes directory
-== 
+== Directori de temes
 
 Download skins
-== 
+== Descargar skins
 
 Skin Database
-== 
+== Base de dades de skins
 
 Skins directory
-== 
+== Directori de skins
+
+Chat command
+== Comanda de xat
+
+Dummy
+== Dummy
+
+Windowed
+== Finestra
+
+Windowed borderless
+== Finestra sense vores
+
+Desktop fullscreen
+== Pantalla completa d'escriptori
+
+Use modern OpenGL
+== Utilitzar OpenGL modern
 
 Game sound volume
-== 
+== Volum del so del joc
 
 Chat sound volume
-== 
+== Volum del so de xat
 
 Background music volume
-== 
+== Volum de música de fons
 
 Assets
-== 
+== Arxius
+
+Show client IDs
+== Veure les IDs del clients
+
+Kill Messages
+== Missatges al matar
+
+Kill Message Normal Color
+== Color del missatge normal al matar
+
+Kill Message Highlight Color
+== Color del missatge ressaltat al matar
+
+Laser Outline Color
+== Color exterior del làser
+
+Laser Inner Color
+== Color de l'interior del làser
+
+Hookline
+== Línia del ganxo
+
+No hit
+== Cap cop
+
+Hookable
+== Enganxable
+
+Tee
+== Tee
 
 Use old chat style
-== 
-
-Highlight
-== 
+== Utilitzar l'estil antic del xat
 
 Client message
-== 
+== Missatge del client
+
+Preview
+== Vista prèvia 
+
+Show local player's key presses
+== Mostrar les tecles premudes del jugador local
+
+Background
+== Fons
+
+Entities Background color
+== Color de fons de les entitats
 
 Use current map as background
-== 
+== Utilitzar el mapa actual com a fons
+
+Regular Background Color
+== Color de fons regular
 
 Entities
-== 
+== Entitats
 
 Emoticons
-== 
+== Emoticons
 
 Particles
-== 
+== Partícules
 
 Assets directory
-== 
+== Directori d'arxius del joc
+
+Discord
+== Discord
+
+https://ddnet.tw/discord
+== https://ddnet.tw/discord
 
 https://wiki.ddnet.tw/
-== 
+== https://wiki.ddnet.tw/
 
 Website
-== 
+== Página Web
 
 Settings
-== 
+== Configuració
 
 Stop server
-== 
+== Apagar servidor
 
 Run server
-== 
+== Engegar servidor
 
 Server executable not found, can't run server
-== 
+== L'executable del servidor no s'ha trobat, no es pot engegar el servidor
 
 Editor
-== 
+== Editor
 
 [Start menu]
 Play
-== 
+== Jugar 

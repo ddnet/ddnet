@@ -7,8 +7,11 @@
 
 #include <engine/demo.h>
 #include <engine/shared/protocol.h>
+#include <functional>
 
 #include "snapshot.h"
+
+typedef std::function<void()> TUpdateIntraTimesFunc;
 
 class CDemoRecorder : public IDemoRecorder
 {
@@ -35,7 +38,7 @@ public:
 	CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool NoMapData = false);
 	CDemoRecorder() {}
 
-	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, SHA256_DIGEST *pSha256, unsigned MapCrc, const char *pType, unsigned int MapSize, unsigned char *pMapData, IOHANDLE MapFile = 0, DEMOFUNC_FILTER pfnFilter = 0, void *pUser = 0);
+	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, SHA256_DIGEST *pSha256, unsigned MapCrc, const char *pType, unsigned MapSize, unsigned char *pMapData, IOHANDLE MapFile = 0, DEMOFUNC_FILTER pfnFilter = 0, void *pUser = 0);
 	int Stop();
 	void AddDemoMarker();
 
@@ -66,8 +69,8 @@ public:
 
 		IDemoPlayer::CInfo m_Info;
 
-		int64 m_LastUpdate;
-		int64 m_CurrentTime;
+		int64_t m_LastUpdate;
+		int64_t m_CurrentTime;
 
 		int m_SeekablePoints;
 
@@ -75,11 +78,14 @@ public:
 		int m_PreviousTick;
 
 		float m_IntraTick;
+		float m_IntraTickSincePrev;
 		float m_TickTime;
 	};
 
 private:
 	IListener *m_pListener;
+
+	TUpdateIntraTimesFunc m_UpdateIntraTimesFunc;
 
 	// Playback
 	struct CKeyFrame
@@ -97,7 +103,7 @@ private:
 	class IConsole *m_pConsole;
 	IOHANDLE m_File;
 	long m_MapOffset;
-	char m_aFilename[256];
+	char m_aFilename[IO_MAX_PATH_LENGTH];
 	CKeyFrame *m_pKeyFrames;
 	CMapInfo m_MapInfo;
 	int m_SpeedIndex;
@@ -113,17 +119,21 @@ private:
 	void ScanFile();
 	int NextFrame();
 
-	int64 time();
+	int64_t time();
 
-	int64 m_TickTime;
-	int64 m_Time;
+	int64_t m_TickTime;
+	int64_t m_Time;
 
 public:
 	CDemoPlayer(class CSnapshotDelta *pSnapshotDelta);
+	CDemoPlayer(class CSnapshotDelta *pSnapshotDelta, TUpdateIntraTimesFunc &&UpdateIntraTimesFunc);
+
+	void Construct(class CSnapshotDelta *pSnapshotDelta);
 
 	void SetListener(IListener *pListener);
 
 	int Load(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, int StorageType);
+	unsigned char *GetMapData(class IStorage *pStorage);
 	bool ExtractMap(class IStorage *pStorage);
 	int Play();
 	void Pause();

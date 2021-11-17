@@ -11,15 +11,26 @@
 
 #define DDNET_INFO "ddnet-info.json"
 
-/*
-	Structure: CServerInfo
-*/
 class CServerInfo
 {
 public:
-	/*
-		Structure: CInfoClient
-	*/
+	enum
+	{
+		LOC_UNKNOWN = 0,
+		LOC_AFRICA,
+		LOC_ASIA,
+		LOC_AUSTRALIA,
+		LOC_EUROPE,
+		LOC_NORTH_AMERICA,
+		LOC_SOUTH_AMERICA,
+		// Special case China because it has an exceptionally bad
+		// connection to the outside due to the Great Firewall of
+		// China:
+		// https://en.wikipedia.org/w/index.php?title=Great_Firewall&oldid=1019589632
+		LOC_CHINA,
+		NUM_LOCS,
+	};
+
 	class CClient
 	{
 	public:
@@ -32,11 +43,10 @@ public:
 		int m_FriendState;
 	};
 
-	int m_SortedIndex;
 	int m_ServerIndex;
 
 	int m_Type;
-	uint64 m_ReceivedPackets;
+	uint64_t m_ReceivedPackets;
 	int m_NumReceivedClients;
 
 	NETADDR m_NetAddr;
@@ -51,6 +61,8 @@ public:
 	int m_Flags;
 	bool m_Favorite;
 	bool m_Official;
+	int m_Location;
+	bool m_LatencyIsEstimated;
 	int m_Latency; // in ms
 	int m_HasRank;
 	char m_aGameType[16];
@@ -64,6 +76,9 @@ public:
 	mutable int m_NumFilteredPlayers;
 
 	mutable CUIElement *m_pUIElement;
+
+	static int EstimateLatency(int Loc1, int Loc2);
+	static bool ParseLocation(int *pResult, const char *pString);
 };
 
 bool IsVanilla(const CServerInfo *pInfo);
@@ -115,6 +130,7 @@ public:
 		SET_DDNET_ADD,
 		SET_KOG_ADD,
 		SET_TOKEN,
+		SET_HTTPINFO,
 
 		NETWORK_DDNET = 0,
 		NETWORK_KOG = 1,
@@ -122,8 +138,8 @@ public:
 	};
 
 	virtual void Refresh(int Type) = 0;
+	virtual bool IsGettingServerlist() const = 0;
 	virtual bool IsRefreshing() const = 0;
-	virtual bool IsRefreshingMasters() const = 0;
 	virtual int LoadingProgression() const = 0;
 
 	virtual int NumServers() const = 0;
@@ -134,8 +150,11 @@ public:
 	virtual int NumSortedServers() const = 0;
 	virtual const CServerInfo *SortedGet(int Index) const = 0;
 
+	virtual bool GotInfo(const NETADDR &Addr) const = 0;
 	virtual bool IsFavorite(const NETADDR &Addr) const = 0;
+	virtual bool IsFavoritePingAllowed(const NETADDR &Addr) const = 0;
 	virtual void AddFavorite(const NETADDR &Addr) = 0;
+	virtual void FavoriteAllowPing(const NETADDR &Addr, bool AllowPing) = 0;
 	virtual void RemoveFavorite(const NETADDR &Addr) = 0;
 
 	virtual int NumCountries(int Network) = 0;

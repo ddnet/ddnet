@@ -13,9 +13,9 @@ public:
 	int m_TypeAndID;
 
 	int *Data() { return (int *)(this + 1); }
-	int Type() { return m_TypeAndID >> 16; }
-	int ID() { return m_TypeAndID & 0xffff; }
-	int Key() { return m_TypeAndID; }
+	int Type() const { return m_TypeAndID >> 16; }
+	int ID() const { return m_TypeAndID & 0xffff; }
+	int Key() const { return m_TypeAndID; }
 };
 
 class CSnapshot
@@ -42,10 +42,11 @@ public:
 		m_NumItems = 0;
 	}
 	int NumItems() const { return m_NumItems; }
-	CSnapshotItem *GetItem(int Index);
-	int GetItemSize(int Index);
-	int GetItemIndex(int Key);
-	int GetItemType(int Index);
+	CSnapshotItem *GetItem(int Index) const;
+	int GetItemSize(int Index) const;
+	int GetItemIndex(int Key) const;
+	int GetItemType(int Index) const;
+	void *FindItem(int Type, int ID) const;
 
 	unsigned Crc();
 	void DebugDump();
@@ -102,7 +103,7 @@ public:
 		CHolder *m_pPrev;
 		CHolder *m_pNext;
 
-		int64 m_Tagtime;
+		int64_t m_Tagtime;
 		int m_Tick;
 
 		int m_SnapSize;
@@ -118,8 +119,8 @@ public:
 	void Init();
 	void PurgeAll();
 	void PurgeUntil(int Tick);
-	void Add(int Tick, int64 Tagtime, int DataSize, void *pData, int CreateAlt);
-	int Get(int Tick, int64 *pTagtime, CSnapshot **ppData, CSnapshot **ppAltData);
+	void Add(int Tick, int64_t Tagtime, int DataSize, void *pData, int CreateAlt);
+	int Get(int Tick, int64_t *pTagtime, CSnapshot **ppData, CSnapshot **ppAltData);
 };
 
 class CSnapshotBuilder

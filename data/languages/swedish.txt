@@ -350,9 +350,6 @@ Red team wins!
 Refresh
 == Uppdatera
 
-Refreshing master servers
-== Uppdaterar huvudservrar
-
 Remote console
 == Serverkonsol
 
@@ -415,9 +412,6 @@ Show ingame HUD
 
 Show name plates
 == Visa namnskyltar
-
-Show only supported
-== Visa endast upplösningar som stöds
 
 Skins
 == Utseende
@@ -643,9 +637,6 @@ Select a name
 Enable long pain sound (used when shooting in freeze)
 == Aktivera ett långt ont ljud (använt vid sjutning i freeze)
 
-We will win
-== Vi kommer att vinna
-
 Default zoom
 == Standard zoom
 
@@ -708,9 +699,6 @@ Browser
 
 Default length: %d
 == Standard längd: %d
-
-Hello and welcome
-== Hej och välkommen
 
 Switch weapon when out of ammo
 == Byt vapen vid slut av ammunition
@@ -820,9 +808,6 @@ Time
 Filter connecting players
 == Filtrera spelare som ansluter
 
-Friend
-== Vän
-
 Enable game sounds
 == Aktivera spel ljud
 
@@ -831,9 +816,6 @@ Max CSVs
 
 Zoom in
 == Zooma in
-
-Hi o/
-== Hej o/
 
 Update failed! Check log...
 == Updatering misslyckades! Kolla logg...
@@ -844,17 +826,11 @@ Update failed! Check log...
 Check now
 == Kolla nu
 
-second
-== sekund
-
 Reset wanted weapon on death
 == Återställ önskade vapen vid död
 
 Search
 == Sök
-
-Borderless window
-== Gränslös fönster
 
 FPM
 == FPM
@@ -886,9 +862,6 @@ Show ghost
 1 new mention
 == 1 ny nämning
 
-Wait before try for
-== Vänta innan försök för
-
 Are you sure that you want to disconnect your dummy?
 == Är du säker att du vill koppla ifrån din dummy?
 
@@ -913,8 +886,8 @@ Normal message
 Show score
 == Visa poäng
 
-Multiple texture units (disable for MacOS)
-== Multiple texture units (avaktivera för MacOS)
+Multiple texture units (disable for macOS)
+== Multiple texture units (avaktivera för macOS)
 
 Refresh Rate
 == Uppdateringsfrekvens
@@ -934,9 +907,6 @@ Follow
 Restart
 == Starta om
 
-Background (regular)
-== Bakgrund (vanlig)
-
 Hammerfly dummy
 == Hammerfly dummy
 
@@ -949,14 +919,8 @@ Enable team chat sound
 Disconnect Dummy
 == Koppla ifrån dummy
 
-Background (entities)
-== Bakgrund (entities)
-
 Replace video
 == Ersätt video
-
-Look out!
-== Se upp!
 
 Server best:
 == Serverens bästa:
@@ -972,12 +936,6 @@ Fat skins (DDFat)
 
 Net
 == Nät
-
-seconds
-== sekunder
-
-Spectator
-== Åskådare
 
 Demo
 == Demo
@@ -1036,9 +994,6 @@ Preinit VBO (iGPUs only)
 Clan plates size
 == Klanskylt storlek
 
-Outline color
-== Kontur färg
-
 Size
 == Storlek
 
@@ -1072,9 +1027,6 @@ Please use a different name
 Destination file already exist
 == Destinations fil finns redan
 
-Show client IDs in Scoreboard
-== Visa klient IDen i poänglista
-
 Game paused
 == Spel pausad
 
@@ -1086,9 +1038,6 @@ Automatically create statboard csv
 
 Old mouse mode
 == Gammal mus metod
-
-Inner color
-== Innre färg
 
 Enable regular chat sound
 == Aktivera vanligt chatt ljud
@@ -1129,9 +1078,6 @@ Show quads
 Show names in chat in team colors
 == Visa namn in chatten med lag färger
 
-Use OpenGL 3.3 (experimental)
-== Använd OpenGL 3.3 (experimentell)
-
 Update now
 == Updatera nu
 
@@ -1155,9 +1101,6 @@ Connect Dummy
 
 Show others (own team only)
 == Visa andra (eget lag endast)
-
-The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== Bredden eller höjden av texturen %s är ej delbar med 16, och kan därav skapa visuella buggar.
 
 Warning
 == Varning
@@ -1232,6 +1175,9 @@ Replay
 Saving ddnet-settings.cfg failed
 == 
 
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 
+
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 
 
@@ -1244,7 +1190,40 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 Checking for existing player with your name
 == 
 
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
 Theme
+== 
+
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+Getting server list from master server
+== 
+
+Refreshing...
+== 
+
+Leak IP
 == 
 
 Demos directory
@@ -1262,6 +1241,24 @@ Skin Database
 Skins directory
 == 
 
+Chat command
+== 
+
+Dummy
+== 
+
+Windowed
+== 
+
+Windowed borderless
+== 
+
+Desktop fullscreen
+== 
+
+Use modern OpenGL
+== 
+
 Game sound volume
 == 
 
@@ -1274,13 +1271,55 @@ Background music volume
 Assets
 == 
 
+Show client IDs
+== 
+
+Kill Messages
+== 
+
+Kill Message Normal Color
+== 
+
+Kill Message Highlight Color
+== 
+
+Laser Outline Color
+== 
+
+Laser Inner Color
+== 
+
+Hookline
+== 
+
+No hit
+== 
+
+Hookable
+== 
+
+Tee
+== 
+
 Use old chat style
 == 
 
-Highlight
+Preview
+== 
+
+Show local player's key presses
+== 
+
+Background
+== 
+
+Entities Background color
 == 
 
 Use current map as background
+== 
+
+Regular Background Color
 == 
 
 Entities
@@ -1293,4 +1332,10 @@ Particles
 == 
 
 Assets directory
+== 
+
+Discord
+== 
+
+https://ddnet.tw/discord
 == 

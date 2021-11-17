@@ -52,6 +52,9 @@ CInput::CInput()
 	m_NumTextInputInstances = 0;
 	m_EditingTextLen = -1;
 	m_aEditingText[0] = 0;
+
+	m_LastX = 0;
+	m_LastY = 0;
 }
 
 void CInput::Init()
@@ -71,7 +74,18 @@ void CInput::MouseRelative(float *x, float *y)
 	int nx = 0, ny = 0;
 	float Sens = g_Config.m_InpMousesens / 100.0f;
 
+#if defined(CONF_PLATFORM_ANDROID) // No relative mouse on Android
+	SDL_GetMouseState(&nx, &ny);
+	int XTmp = nx - m_LastX;
+	int YTmp = ny - m_LastY;
+	m_LastX = nx;
+	m_LastY = ny;
+	nx = XTmp;
+	ny = YTmp;
+	Sens = 1;
+#else
 	SDL_GetRelativeMouseState(&nx, &ny);
+#endif
 
 	*x = nx * Sens;
 	*y = ny * Sens;
@@ -87,10 +101,27 @@ void CInput::MouseModeAbsolute()
 void CInput::MouseModeRelative()
 {
 	m_InputGrabbed = 1;
+#if !defined(CONF_PLATFORM_ANDROID) // No relative mouse on Android
 	SDL_SetRelativeMouseMode(SDL_TRUE);
+#endif
 	Graphics()->SetWindowGrab(true);
-	// We should do this call to reset relative mouse position after alt+tab
+	// Clear pending relative mouse motion
 	SDL_GetRelativeMouseState(0x0, 0x0);
+}
+
+void CInput::NativeMousePos(int *x, int *y) const
+{
+	int nx = 0, ny = 0;
+	SDL_GetMouseState(&nx, &ny);
+
+	*x = nx;
+	*y = ny;
+}
+
+bool CInput::NativeMousePressed(int index)
+{
+	int i = SDL_GetMouseState(NULL, NULL);
+	return (i & SDL_BUTTON(index)) != 0;
 }
 
 int CInput::MouseDoubleClick()
@@ -271,12 +302,12 @@ int CInput::Update()
 				// Sum if you want to ignore multiple modifiers.
 				if(!(Event.key.keysym.mod & g_Config.m_InpIgnoredModifiers))
 				{
-					Scancode = Event.key.keysym.scancode;
+					Scancode = g_Config.m_InpTranslatedKeys ? SDL_GetScancodeFromKey(Event.key.keysym.sym) : Event.key.keysym.scancode;
 				}
 				break;
 			case SDL_KEYUP:
 				Action = IInput::FLAG_RELEASE;
-				Scancode = Event.key.keysym.scancode;
+				Scancode = g_Config.m_InpTranslatedKeys ? SDL_GetScancodeFromKey(Event.key.keysym.sym) : Event.key.keysym.scancode;
 				break;
 
 			// handle mouse buttons
@@ -328,12 +359,18 @@ int CInput::Update()
 				// shortcuts
 				switch(Event.window.event)
 				{
-				case SDL_WINDOWEVENT_RESIZED:
-					Graphics()->Resize(Event.window.data1, Event.window.data2);
+				// listen to size changes, this includes our manual changes and the ones by the window manager
+				case SDL_WINDOWEVENT_SIZE_CHANGED:
+					Graphics()->Resize(Event.window.data1, Event.window.data2, -1);
 					break;
 				case SDL_WINDOWEVENT_FOCUS_GAINED:
 					if(m_InputGrabbed)
-						MouseModeRelative();
+					{
+						// Enable this in case SDL 2.0.16 has major bugs or 2.0.18 still doesn't fix tabbing out with relative mouse
+						// MouseModeRelative();
+						// Clear pending relative mouse motion
+						SDL_GetRelativeMouseState(0x0, 0x0);
+					}
 					m_MouseFocus = true;
 					IgnoreKeys = true;
 					break;
@@ -342,17 +379,24 @@ int CInput::Update()
 					IgnoreKeys = true;
 					if(m_InputGrabbed)
 					{
-						MouseModeAbsolute();
+						// Enable this in case SDL 2.0.16 has major bugs or 2.0.18 still doesn't fix tabbing out with relative mouse
+						// MouseModeAbsolute();
 						// Remember that we had relative mouse
 						m_InputGrabbed = true;
 					}
 					break;
-#if defined(CONF_PLATFORM_MACOSX) // Todo: remove this when fixed in SDL
+				case SDL_WINDOWEVENT_MINIMIZED:
+					Graphics()->WindowDestroyNtf(Event.window.windowID);
+					break;
 				case SDL_WINDOWEVENT_MAXIMIZED:
+#if defined(CONF_PLATFORM_MACOS) // Todo: remove this when fixed in SDL
 					MouseModeAbsolute();
 					MouseModeRelative();
-					break;
 #endif
+					// fallthrough
+				case SDL_WINDOWEVENT_RESTORED:
+					Graphics()->WindowCreateNtf(Event.window.windowID);
+					break;
 				}
 				break;
 

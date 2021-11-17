@@ -15,7 +15,10 @@
 
 #include <game/client/component.h>
 #include <game/client/ui.h>
+#include <game/client/ui_ex.h>
 #include <game/voting.h>
+
+#include <game/client/render.h>
 
 struct CServerProcess
 {
@@ -70,6 +73,8 @@ class CMenus : public CComponent
 
 	char m_aLocalStringHelper[1024];
 
+	CUIEx m_UIEx;
+
 	float ButtonColorMulActive() { return 0.5f; }
 	float ButtonColorMulHot() { return 1.5f; }
 	float ButtonColorMulDefault() { return 1.0f; }
@@ -108,7 +113,7 @@ class CMenus : public CComponent
 	//static int ui_do_edit_box(void *id, const CUIRect *rect, char *str, unsigned str_size, float font_size, bool hidden=false);
 
 	float DoScrollbarV(const void *pID, const CUIRect *pRect, float Current);
-	float DoScrollbarH(const void *pID, const CUIRect *pRect, float Current);
+	float DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, bool ColorPickerSlider = false, ColorRGBA *pColorInner = NULL);
 	void DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 	int DoKeyReader(void *pID, const CUIRect *pRect, int Key, int Modifier, int *NewModifier);
 
@@ -125,12 +130,12 @@ class CMenus : public CComponent
 		Text.HMargin(pRect->h >= 20.0f ? 2.0f : 1.0f, &Text);
 		Text.HMargin((Text.h * FontFactor) / 2.0f, &Text);
 
-		if(UIElement.Size() != 3 || HintRequiresStringCheck || HintCanChangePositionOrSize)
+		if(!UIElement.AreRectsInit() || HintRequiresStringCheck || HintCanChangePositionOrSize || UIElement.Get(0)->m_UITextContainer == -1)
 		{
-			bool NeedsRecalc = UIElement.Size() != 3;
+			bool NeedsRecalc = !UIElement.AreRectsInit() || UIElement.Get(0)->m_UITextContainer == -1;
 			if(HintCanChangePositionOrSize)
 			{
-				if(UIElement.Size() == 3)
+				if(UIElement.AreRectsInit())
 				{
 					if(UIElement.Get(0)->m_X != pRect->x || UIElement.Get(0)->m_Y != pRect->y || UIElement.Get(0)->m_Width != pRect->w || UIElement.Get(0)->m_Y != pRect->h)
 					{
@@ -141,7 +146,7 @@ class CMenus : public CComponent
 			const char *pText = NULL;
 			if(HintRequiresStringCheck)
 			{
-				if(UIElement.Size() == 3)
+				if(UIElement.AreRectsInit())
 				{
 					pText = GetTextLambda();
 					if(str_comp(UIElement.Get(0)->m_Text.c_str(), pText) != 0)
@@ -152,10 +157,11 @@ class CMenus : public CComponent
 			}
 			if(NeedsRecalc)
 			{
-				if(UIElement.Size() > 0)
+				if(!UIElement.AreRectsInit())
 				{
-					UI()->ResetUIElement(UIElement);
+					UIElement.InitRects(3);
 				}
+				UI()->ResetUIElement(UIElement);
 
 				vec4 RealColor = Color;
 				for(int i = 0; i < 3; ++i)
@@ -169,14 +175,13 @@ class CMenus : public CComponent
 						Color.a *= ButtonColorMulDefault();
 					Graphics()->SetColor(Color);
 
-					CUIElement::SUIElementRect NewRect;
+					CUIElement::SUIElementRect &NewRect = *UIElement.Get(i);
 					NewRect.m_UIRectQuadContainer = RenderTools()->CreateRoundRectQuadContainer(pRect->x, pRect->y, pRect->w, pRect->h, r, Corners);
 
 					NewRect.m_X = pRect->x;
 					NewRect.m_Y = pRect->y;
 					NewRect.m_Width = pRect->w;
 					NewRect.m_Height = pRect->h;
-
 					if(i == 0)
 					{
 						if(pText == NULL)
@@ -184,12 +189,10 @@ class CMenus : public CComponent
 						NewRect.m_Text = pText;
 						UI()->DoLabel(NewRect, &Text, pText, Text.h * ms_FontmodHeight, 0, -1, AlignVertically);
 					}
-					UIElement.Add(NewRect);
 				}
 				Graphics()->SetColor(1, 1, 1, 1);
 			}
 		}
-
 		// render
 		size_t Index = 2;
 		if(UI()->ActiveItem() == pID)
@@ -202,7 +205,6 @@ class CMenus : public CComponent
 		STextRenderColor ColorTextOutline(TextRender()->DefaultTextOutlineColor());
 		if(UIElement.Get(0)->m_UITextContainer != -1)
 			TextRender()->RenderTextContainer(UIElement.Get(0)->m_UITextContainer, &ColorText, &ColorTextOutline);
-
 		return UI()->DoButtonLogic(pID, Checked, pRect);
 	}
 
@@ -219,6 +221,8 @@ class CMenus : public CComponent
 	CListboxItem UiDoListboxNextItem(const void *pID, bool Selected = false, bool KeyEvents = true, bool NoHoverEffects = false);
 	CListboxItem UiDoListboxNextRow();
 	int UiDoListboxEnd(float *pScrollValue, bool *pItemActivated, bool *pListBoxActive = 0);
+
+	int UiLogicGetCurrentClickedItem();
 
 	//static void demolist_listdir_callback(const char *name, int is_dir, void *user);
 	//static void demolist_list_callback(const CUIRect *rect, int index, void *user);
@@ -268,6 +272,11 @@ protected:
 	static int EmoticonsScan(const char *pName, int IsDir, int DirType, void *pUser);
 	static int ParticlesScan(const char *pName, int IsDir, int DirType, void *pUser);
 
+	static void ConchainAssetsEntities(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainAssetGame(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainAssetParticles(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainAssetEmoticons(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+
 	void ClearCustomItems(int CurTab);
 
 	int m_MenuPage;
@@ -280,7 +289,7 @@ protected:
 	vec2 m_MousePos;
 	bool m_MouseSlow;
 
-	int64 m_LastInput;
+	char m_aNextServer[256];
 
 	// images
 	struct CMenuImage
@@ -340,7 +349,7 @@ protected:
 	bool m_DeletePressed;
 
 	// for map download popup
-	int64 m_DownloadLastCheckTime;
+	int64_t m_DownloadLastCheckTime;
 	int m_DownloadLastCheckSize;
 	float m_DownloadSpeed;
 
@@ -349,6 +358,7 @@ protected:
 	int m_CallvoteSelectedPlayer;
 	char m_aCallvoteReason[VOTE_REASON_LENGTH];
 	char m_aFilterString[25];
+	bool m_ControlPageOpening;
 
 	// demo
 	enum
@@ -361,7 +371,7 @@ protected:
 
 	struct CDemoItem
 	{
-		char m_aFilename[128];
+		char m_aFilename[IO_MAX_PATH_LENGTH];
 		char m_aName[128];
 		bool m_IsDir;
 		int m_StorageType;
@@ -375,14 +385,17 @@ protected:
 
 		int NumMarkers() const
 		{
-			return ((m_TimelineMarkers.m_aNumTimelineMarkers[0] << 24) & 0xFF000000) | ((m_TimelineMarkers.m_aNumTimelineMarkers[1] << 16) & 0xFF0000) |
-			       ((m_TimelineMarkers.m_aNumTimelineMarkers[2] << 8) & 0xFF00) | (m_TimelineMarkers.m_aNumTimelineMarkers[3] & 0xFF);
+			return bytes_be_to_int(m_TimelineMarkers.m_aNumTimelineMarkers);
 		}
 
 		int Length() const
 		{
-			return ((m_Info.m_aLength[0] << 24) & 0xFF000000) | ((m_Info.m_aLength[1] << 16) & 0xFF0000) |
-			       ((m_Info.m_aLength[2] << 8) & 0xFF00) | (m_Info.m_aLength[3] & 0xFF);
+			return bytes_be_to_int(m_Info.m_aLength);
+		}
+
+		unsigned Size() const
+		{
+			return bytes_be_to_uint(m_Info.m_aMapSize);
 		}
 
 		bool operator<(const CDemoItem &Other) const
@@ -429,7 +442,7 @@ protected:
 
 	void DemolistOnUpdate(bool Reset);
 	//void DemolistPopulate();
-	static int DemolistFetchCallback(const char *pName, time_t Date, int IsDir, int StorageType, void *pUser);
+	static int DemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser);
 
 	// friends
 	struct CFriendItem
@@ -611,7 +624,7 @@ public:
 	// Ghost
 	struct CGhostItem
 	{
-		char m_aFilename[256];
+		char m_aFilename[IO_MAX_PATH_LENGTH];
 		char m_aPlayer[MAX_NAME_LENGTH];
 
 		int m_Time;
@@ -638,10 +651,10 @@ public:
 	int GetCurPopup() { return m_Popup; }
 	bool CanDisplayWarning();
 
-	void PopupWarning(const char *pTopic, const char *pBody, const char *pButton, int64 Duration);
+	void PopupWarning(const char *pTopic, const char *pBody, const char *pButton, int64_t Duration);
 
-	int64 m_PopupWarningLastTime;
-	int64 m_PopupWarningDuration;
+	int64_t m_PopupWarningLastTime;
+	int64_t m_PopupWarningDuration;
 
 	int m_DemoPlayerState;
 	char m_aDemoPlayerPopupHint[256];
@@ -668,6 +681,7 @@ public:
 		POPUP_DISCONNECT,
 		POPUP_DISCONNECT_DUMMY,
 		POPUP_WARNING,
+		POPUP_SWITCH_SERVER,
 
 		// demo player states
 		DEMOPLAYER_NONE = 0,
@@ -687,7 +701,9 @@ private:
 	void RenderSettingsDDNet(CUIRect MainView);
 	void RenderSettingsHUD(CUIRect MainView);
 	ColorHSLA RenderHSLColorPicker(const CUIRect *pRect, unsigned int *pColor, bool Alpha);
-	ColorHSLA RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alpha = false);
+	ColorHSLA RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alpha = false, bool ClampedLight = false);
+
+	int RenderDropDown(int &CurDropDownState, CUIRect *pRect, int CurSelection, const void **pIDs, const char **pStr, int PickNum, const void *pID, float &ScrollVal);
 
 	CServerProcess m_ServerProcess;
 };

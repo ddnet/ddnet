@@ -23,20 +23,21 @@ class CRegister
 		NETADDR m_Addr;
 		int m_Count;
 		int m_Valid;
-		int64 m_LastSend;
+		int64_t m_LastSend;
 		SECURITY_TOKEN m_Token;
 	};
 
 	class CNetServer *m_pNetServer;
 	class IEngineMasterServer *m_pMasterServer;
+	class CConfig *m_pConfig;
 	class IConsole *m_pConsole;
 
 	bool m_Sixup;
 	const char *m_pName;
-	int64 m_LastTokenRequest;
+	int64_t m_LastTokenRequest;
 
 	int m_RegisterState;
-	int64 m_RegisterStateStart;
+	int64_t m_RegisterStateStart;
 	int m_RegisterFirst;
 	int m_RegisterCount;
 
@@ -51,7 +52,7 @@ class CRegister
 
 public:
 	CRegister(bool Sixup);
-	void Init(class CNetServer *pNetServer, class IEngineMasterServer *pMasterServer, class IConsole *pConsole);
+	void Init(class CNetServer *pNetServer, class IEngineMasterServer *pMasterServer, class CConfig *pConfig, class IConsole *pConsole);
 	void RegisterUpdate(int Nettype);
 	int RegisterProcessPacket(struct CNetChunk *pPacket, SECURITY_TOKEN ResponseToken = 0);
 	void FeedToken(NETADDR Addr, SECURITY_TOKEN ResponseToken);

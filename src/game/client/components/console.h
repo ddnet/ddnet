@@ -6,6 +6,8 @@
 #include <game/client/component.h>
 #include <game/client/lineinput.h>
 
+#include <engine/console.h>
+
 enum
 {
 	CONSOLE_CLOSED,
@@ -22,10 +24,10 @@ class CGameConsole : public CComponent
 		struct CBacklogEntry
 		{
 			float m_YOffset;
-			bool m_Highlighted;
+			ColorRGBA m_PrintColor;
 			char m_aText[1];
 		};
-		CStaticRingBuffer<CBacklogEntry, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_Backlog;
+		CStaticRingBuffer<CBacklogEntry, 1024 * 1024, CRingBufferBase::FLAG_RECYCLE> m_Backlog;
 		CStaticRingBuffer<char, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_History;
 		char *m_pHistoryEntry;
 
@@ -38,6 +40,7 @@ class CGameConsole : public CComponent
 		CGameConsole *m_pGameConsole;
 
 		char m_aCompletionBuffer[128];
+		bool m_CompletionUsed;
 		int m_CompletionChosen;
 		int m_CompletionFlagmask;
 		float m_CompletionRenderOffset;
@@ -61,7 +64,7 @@ class CGameConsole : public CComponent
 		void ExecuteLine(const char *pLine);
 
 		void OnInput(IInput::CEvent Event);
-		void PrintLine(const char *pLine, bool Highlighted = false);
+		void PrintLine(const char *pLine, ColorRGBA PrintColor = {1, 1, 1, 1});
 
 		const char *GetString() const { return m_Input.GetString(); }
 		static void PossibleCommandsCompleteCallback(const char *pStr, void *pUser);
@@ -81,11 +84,23 @@ class CGameConsole : public CComponent
 	float m_StateChangeEnd;
 	float m_StateChangeDuration;
 
+	bool m_MouseIsPress = false;
+	int m_MousePressX = 0;
+	int m_MousePressY = 0;
+	int m_MouseCurX = 0;
+	int m_MouseCurY = 0;
+	int m_CurSelStart = 0;
+	int m_CurSelEnd = 0;
+	bool m_HasSelection = false;
+	int m_NewLineCounter = 0;
+
+	int m_LastInputLineCount = 0;
+
 	void Toggle(int Type);
 	void Dump(int Type);
 
 	static void PossibleCommandsRenderCallback(const char *pStr, void *pUser);
-	static void ClientConsolePrintCallback(const char *pStr, void *pUserData, bool Highlighted);
+	static void ClientConsolePrintCallback(const char *pStr, void *pUserData, ColorRGBA PrintColor = {1, 1, 1, 1});
 	static void ConToggleLocalConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConToggleRemoteConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConClearLocalConsole(IConsole::IResult *pResult, void *pUserData);

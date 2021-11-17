@@ -5,6 +5,10 @@
 #include <game/generated/protocol.h>
 #include <game/mapitems.h>
 #include <game/server/gamecontext.h>
+#include <game/server/player.h>
+#include <game/version.h>
+
+#include "character.h"
 
 CLight::CLight(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,
 	int Layer, int Number) :
@@ -29,7 +33,7 @@ bool CLight::HitCharacter()
 		return false;
 	for(auto *Char : HitCharacters)
 	{
-		if(m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()])
+		if(m_Layer == LAYER_SWITCH && m_Number > 0 && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()])
 			continue;
 		Char->Freeze();
 	}
@@ -73,7 +77,7 @@ void CLight::Step()
 
 void CLight::Reset()
 {
-	GameServer()->m_World.DestroyEntity(this);
+	m_MarkedForDestroy = true;
 }
 
 void CLight::Tick()
@@ -101,18 +105,32 @@ void CLight::Snap(int SnappingClient)
 	if(NetworkClipped(SnappingClient, m_Pos) && NetworkClipped(SnappingClient, m_To))
 		return;
 
+	int SnappingClientVersion = SnappingClient >= 0 ? GameServer()->GetClientVersion(SnappingClient) : CLIENT_VERSIONNR;
+
+	CNetObj_EntityEx *pEntData = 0;
+	if(SnappingClientVersion >= VERSION_DDNET_SWITCH && (m_Layer == LAYER_SWITCH || length(m_Core) > 0))
+		pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
+
 	CCharacter *Char = GameServer()->GetPlayerChar(SnappingClient);
 
 	if(SnappingClient > -1 && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1 || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) && GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
 		Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
 
-	int Tick = (Server()->Tick() % Server()->TickSpeed()) % 6;
-
-	if(Char && Char->IsAlive() && m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()] && (Tick))
-		return;
+	if(pEntData)
+	{
+		pEntData->m_SwitchNumber = m_Number;
+		pEntData->m_Layer = m_Layer;
+		pEntData->m_EntityClass = ENTITYCLASS_LIGHT;
+	}
+	else
+	{
+		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 6;
+		if(Char && Char->IsAlive() && m_Layer == LAYER_SWITCH && m_Number > 0 && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()] && Tick)
+			return;
+	}
 
 	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
-		NETOBJTYPE_LASER, m_ID, sizeof(CNetObj_Laser)));
+		NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
 
 	if(!pObj)
 		return;
@@ -141,10 +159,17 @@ void CLight::Snap(int SnappingClient)
 		pObj->m_FromY = (int)m_Pos.y;
 	}
 
-	int StartTick = m_EvalTick;
-	if(StartTick < Server()->Tick() - 4)
-		StartTick = Server()->Tick() - 4;
-	else if(StartTick > Server()->Tick())
-		StartTick = Server()->Tick();
-	pObj->m_StartTick = StartTick;
+	if(pEntData)
+	{
+		pObj->m_StartTick = 0;
+	}
+	else
+	{
+		int StartTick = m_EvalTick;
+		if(StartTick < Server()->Tick() - 4)
+			StartTick = Server()->Tick() - 4;
+		else if(StartTick > Server()->Tick())
+			StartTick = Server()->Tick();
+		pObj->m_StartTick = StartTick;
+	}
 }

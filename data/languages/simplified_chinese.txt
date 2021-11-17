@@ -11,6 +11,8 @@
 # 2020.8.19 TsFreddie
 # 2020.8.20 Dan_cao
 # 2020.11.12 TsFreddie
+# 2021.5.27 Momo
+# 2021.6.1 TsFreddie
 ##### /authors #####
 
 ##### translated strings #####
@@ -190,7 +192,7 @@ Friends
 == 好友
 
 Fullscreen
-== 全屏幕
+== 独占全屏
 
 Game
 == 游戏
@@ -344,7 +346,7 @@ Pistol
 
 [Demo browser]
 Play
-== 编辑器
+== 播放
 
 Play background music
 == 播放背景音乐
@@ -362,7 +364,7 @@ Player options
 == 玩家选项
 
 Players
-== 玩家数
+== 玩家
 
 Please balance teams!
 == 队伍人数不平衡！
@@ -384,9 +386,6 @@ Red team wins!
 
 Refresh
 == 刷新
-
-Refreshing master servers
-== 正在刷新主服务器
 
 Remote console
 == 远程控制台
@@ -453,9 +452,6 @@ Show name plates
 
 Show only chat messages from friends
 == 只显示好友消息
-
-Show only supported
-== 只显示支持的分辨率
 
 Skins
 == 皮肤
@@ -577,9 +573,6 @@ Yes
 You must restart the game for all settings to take effect.
 == 你需要重启游戏来使某些设置生效。
 
-Borderless window
-== 无边框窗口
-
 Demo
 == 回放
 
@@ -700,9 +693,6 @@ Type:
 Use DDRace Scoreboard
 == 使用 DDRace 计分板
 
-Show client IDs in Scoreboard
-== 在计分板上显示客户端ID
-
 Show score
 == 显示比分
 
@@ -727,29 +717,14 @@ System message
 Highlighted message
 == 被提及消息
 
-Look out!
-== 小心!
-
 Team message
 == 队伍消息
-
-We will win
-== 我们赢定了
 
 Normal message
 == 普通消息
 
-Hello and welcome
-== 你好,欢迎
-
 Friend message
 == 好友消息
-
-Inner color
-== 内部颜色
-
-Outline color
-== 外部颜色
 
 Save the best demo of each race
 == 保存竞速模式最高记录的回放
@@ -779,25 +754,19 @@ Default zoom
 == 默认缩放
 
 AntiPing: predict other players
-== AntiPing：预测其他玩家
+== 延迟补偿：预测其他玩家
 
 AntiPing: predict weapons
-== AntiPing：预测武器
+== 延迟补偿：预测武器
 
 AntiPing: predict grenade paths
-== AntiPing：预测榴弹路径
+== 延迟补偿：预测榴弹路径
 
 Show other players' hook collision lines
 == 显示其他玩家的钩索辅助线
 
 Show other players' key presses
 == 显示其他玩家的按键
-
-Background (regular)
-== 背景(常规模式)
-
-Background (entities)
-== 背景(实体层模式)
 
 Show tiles layers from BG map
 == 显示实体层背景地图的图块层
@@ -806,7 +775,7 @@ Try fast HTTP map download first
 == 优先尝试用HTTP快速下载地图
 
 DDNet %s is available:
-== DDnet %s 现已可用：
+== DDNet %s 现已可用：
 
 Update now
 == 现在更新
@@ -832,9 +801,6 @@ Browser
 Connecting dummy
 == 正在连接分身
 
-Spectator
-== 旁观者
-
 Search
 == 搜索
 
@@ -853,7 +819,7 @@ Ratio
 ##### Ratio的算法是击杀除以死亡次数 #####
 
 AntiPing
-== AntiPing
+== 延迟补偿
 
 Countries
 == 国家
@@ -867,23 +833,14 @@ Grabs
 DDNet
 == DDNet
 
-second
-== 秒
-
 Select a name
 == 另存为
-
-Hi o/
-== 你好
 
 Deaths
 == 死亡数
 
 Please use a different name
 == 请换一个不同的文件名
-
-Wait before try for
-== 请等待
 
 Restart
 == 重新开始
@@ -910,7 +867,7 @@ Frags
 == 击杀数
 
 Enable long pain sound (used when shooting in freeze)
-== 启用长时间痛苦的声音(在冻结时使用)
+== 启用冻结呼救声
 
 %.2f MiB
 == %.2f MiB
@@ -940,9 +897,6 @@ Spree
 Max CSVs
 == 最大csv文件数
 
-seconds
-== 秒
-
 %.2f KiB
 == %.2f KiB
 
@@ -951,9 +905,6 @@ Best
 
 Exclude
 == 排除
-
-Friend
-== 好友
 
 may cause delay
 == 可能会产生延迟
@@ -973,11 +924,8 @@ Preinit VBO (iGPUs only)
 Activate
 == 启用
 
-Multiple texture units (disable for MacOS)
-== 多重纹理单元 (MacOS不可用)
-
-Use OpenGL 3.3 (experimental)
-== 使用 OpenGL 3.3 (实验性)
+Multiple texture units (disable for macOS)
+== 多重纹理单元 (macOS不可用)
 
 File already exists, do you want to overwrite it?
 == 文件已存在，是否覆盖？
@@ -1016,7 +964,7 @@ Downloading %s:
 == 正在下载 %s:
 
 %d new mentions
-== %d 条新提示
+== %d 条新提及
 
 Toggle dummy
 == 切换分身
@@ -1046,7 +994,7 @@ Zoom in
 == 视野放大
 
 1 new mention
-== 1 条新提示
+== 1 条新提及
 
 Update failed! Check log...
 == 更新失败！请检查日志...
@@ -1076,7 +1024,7 @@ Dummy copy
 == 分身同步动作
 
 9+ new mentions
-== 9+ 条新提示
+== 9+ 条新提及
 
 Statboard
 == 统计板
@@ -1176,9 +1124,6 @@ Country / Region
 
 https://wiki.ddnet.tw/
 == https://docs.qq.com/doc/DWGFrV0xPRmVWVkla
-
-The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== 材质 %s 的宽和高无法被16整除，这可能会导致画面异常。
 
 Warning
 == 警告
@@ -1286,9 +1231,6 @@ Assets
 Use old chat style
 == 旧版聊天框
 
-Highlight
-== 高亮
-
 Use current map as background
 == 使用当前地图作为实体层背景地图
 
@@ -1303,3 +1245,108 @@ Particles
 
 Assets directory
 == 材质目录
+
+https://ddnet.tw/discord
+== http://chat.teeworlds.cn/
+
+Discord
+== 开黑啦
+
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 材质 %s 的宽度无法被 %d 整除，或者高度无法被 %d 整除，这可能会导致视觉错误。
+
+Chat command
+== 聊天框指令（/）
+
+Dummy
+== 分身
+
+Show client IDs
+== 显示客户端ID
+
+Laser Outline Color
+== 激光边框颜色
+
+Laser Inner Color
+== 激光颜色
+
+Preview
+== 预览
+
+Background
+== 背景
+
+Entities Background color
+== 实体层背景颜色
+
+Regular Background Color
+== 背景层背景颜色
+
+AFR
+== 非洲
+
+ASI
+== 亚洲
+
+AUS
+== 澳洲
+
+EUR
+== 欧洲
+
+NA
+== 北美
+
+SA
+== 南美
+
+CHN
+== 中国
+
+Getting server list from master server
+== 正在从主服务器获取服务器列表
+
+Leak IP
+== 暴露IP
+
+Windowed
+== 窗口化
+
+Windowed borderless
+== 无边框窗口
+
+Desktop fullscreen
+== 无边框全屏
+
+Use modern OpenGL
+== 使用现代OpenGL
+
+Hookline
+== 钩索辅助线
+
+No hit
+== 未命中
+
+Hookable
+== 可钩墙壁
+
+Tee
+== 其他玩家
+
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Refreshing...
+== 
+
+Kill Messages
+== 
+
+Kill Message Normal Color
+== 
+
+Kill Message Highlight Color
+== 
+
+Show local player's key presses
+== 

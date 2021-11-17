@@ -313,16 +313,22 @@ char *CConsole::Format(char *pBuf, int Size, const char *pFrom, const char *pStr
 	return pBuf;
 }
 
-void CConsole::Print(int Level, const char *pFrom, const char *pStr, bool Highlighted)
+void CConsole::Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor)
 {
+	// if the color is pure white, use default terminal color
+	if(mem_comp(&PrintColor, &gs_ConsoleDefaultColor, sizeof(ColorRGBA)) == 0)
+		set_console_msg_color(NULL);
+	else
+		set_console_msg_color(&PrintColor);
 	dbg_msg(pFrom, "%s", pStr);
+	set_console_msg_color(NULL);
 	char aBuf[1024];
 	Format(aBuf, sizeof(aBuf), pFrom, pStr);
 	for(int i = 0; i < m_NumPrintCB; ++i)
 	{
 		if(Level <= m_aPrintCB[i].m_OutputLevel && m_aPrintCB[i].m_pfnPrintCallback)
 		{
-			m_aPrintCB[i].m_pfnPrintCallback(aBuf, m_aPrintCB[i].m_pPrintCallbackUserdata, Highlighted);
+			m_aPrintCB[i].m_pfnPrintCallback(aBuf, m_aPrintCB[i].m_pPrintCallbackUserdata, PrintColor);
 		}
 	}
 }
@@ -571,8 +577,6 @@ void CConsole::ExecuteFile(const char *pFilename, int ClientID, bool LogFailure,
 		if(str_comp(pFilename, pCur->m_pFilename) == 0)
 			return;
 
-	if(!m_pStorage)
-		m_pStorage = Kernel()->RequestInterface<IStorage>();
 	if(!m_pStorage)
 		return;
 
@@ -951,6 +955,31 @@ CConsole::CConsole(int FlagMask)
 	Register("access_status", "i[accesslevel]", CFGFLAG_SERVER, ConCommandStatus, this, "List all commands which are accessible for admin = 0, moderator = 1, helper = 2, all = 3");
 	Register("cmdlist", "", CFGFLAG_SERVER | CFGFLAG_CHAT, ConUserCommandStatus, this, "List all commands which are accessible for users");
 
+	// DDRace
+
+	m_Cheated = false;
+}
+
+CConsole::~CConsole()
+{
+	CCommand *pCommand = m_pFirstCommand;
+	while(pCommand)
+	{
+		CCommand *pNext = pCommand->m_pNext;
+		if(pCommand->m_pfnCallback == Con_Chain)
+			delete static_cast<CChain *>(pCommand->m_pUserData);
+		// Temp commands are on m_TempCommands heap, so don't delete them
+		if(!pCommand->m_Temp)
+			delete pCommand;
+		pCommand = pNext;
+	}
+}
+
+void CConsole::Init()
+{
+	m_pConfig = Kernel()->RequestInterface<IConfigManager>()->Values();
+	m_pStorage = Kernel()->RequestInterface<IStorage>();
+
 // TODO: this should disappear
 #define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
 	{ \
@@ -977,25 +1006,6 @@ CConsole::CConsole(int FlagMask)
 #undef MACRO_CONFIG_INT
 #undef MACRO_CONFIG_COL
 #undef MACRO_CONFIG_STR
-
-	// DDRace
-
-	m_Cheated = false;
-}
-
-CConsole::~CConsole()
-{
-	CCommand *pCommand = m_pFirstCommand;
-	while(pCommand)
-	{
-		CCommand *pNext = pCommand->m_pNext;
-		if(pCommand->m_pfnCallback == Con_Chain)
-			delete static_cast<CChain *>(pCommand->m_pUserData);
-		// Temp commands are on m_TempCommands heap, so don't delete them
-		if(!pCommand->m_Temp)
-			delete pCommand;
-		pCommand = pNext;
-	}
 }
 
 void CConsole::ParseArguments(int NumArgs, const char **ppArguments)

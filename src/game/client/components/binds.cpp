@@ -4,6 +4,8 @@
 #include <engine/config.h>
 #include <engine/shared/config.h>
 
+static const ColorRGBA gs_BindPrintColor{1.0f, 1.0f, 0.8f, 1.0f};
+
 bool CBinds::CBindsSpecial::OnInput(IInput::CEvent Event)
 {
 	// only handle F and composed F binds
@@ -11,13 +13,24 @@ bool CBinds::CBindsSpecial::OnInput(IInput::CEvent Event)
 	{
 		int Mask = m_pBinds->GetModifierMask(Input());
 
+		// Look for a composed bind
 		bool ret = false;
-		for(int Mod = 0; Mod < MODIFIER_COMBINATION_COUNT; Mod++)
+		for(int Mod = 1; Mod < MODIFIER_COMBINATION_COUNT; Mod++)
 		{
-			if(Mask & (1 << Mod) && m_pBinds->m_aapKeyBindings[Mod][Event.m_Key])
+			if(Mask == Mod && m_pBinds->m_aapKeyBindings[Mod][Event.m_Key])
+			{
 				m_pBinds->GetConsole()->ExecuteLineStroked(Event.m_Flags & IInput::FLAG_PRESS, m_pBinds->m_aapKeyBindings[Mod][Event.m_Key]);
+				ret = true;
+			}
+		}
+
+		// Look for a non composed bind
+		if(!ret && m_pBinds->m_aapKeyBindings[0][Event.m_Key])
+		{
+			m_pBinds->GetConsole()->ExecuteLineStroked(Event.m_Flags & IInput::FLAG_PRESS, m_pBinds->m_aapKeyBindings[0][Event.m_Key]);
 			ret = true;
 		}
+
 		return ret;
 	}
 
@@ -68,7 +81,7 @@ void CBinds::Bind(int KeyID, const char *pStr, bool FreeOnly, int Modifier)
 		str_copy(m_aapKeyBindings[Modifier][KeyID], pStr, Size);
 		str_format(aBuf, sizeof(aBuf), "bound %s%s (%d) = %s", GetKeyBindModifiersName(Modifier), Input()->KeyName(KeyID), KeyID, m_aapKeyBindings[Modifier][KeyID]);
 	}
-	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
+	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf, gs_BindPrintColor);
 }
 
 int CBinds::GetModifierMask(IInput *i)
@@ -250,9 +263,9 @@ void CBinds::SetDefaults()
 void CBinds::OnConsoleInit()
 {
 	// bindings
-	IConfig *pConfig = Kernel()->RequestInterface<IConfig>();
-	if(pConfig)
-		pConfig->RegisterCallback(ConfigSaveCallback, this);
+	IConfigManager *pConfigManager = Kernel()->RequestInterface<IConfigManager>();
+	if(pConfigManager)
+		pConfigManager->RegisterCallback(ConfigSaveCallback, this);
 
 	Console()->Register("bind", "s[key] r[command]", CFGFLAG_CLIENT, ConBind, this, "Bind key to execute the command");
 	Console()->Register("dump_binds", "?s[key]", CFGFLAG_CLIENT, ConDumpBinds, this, "Print command executed by this keybindind or all binds");
@@ -274,7 +287,7 @@ void CBinds::ConBind(IConsole::IResult *pResult, void *pUserData)
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "key %s not found", pBindStr);
-		pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
+		pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf, gs_BindPrintColor);
 		return;
 	}
 
@@ -294,7 +307,7 @@ void CBinds::ConDumpBinds(IConsole::IResult *pResult, void *pUserData)
 		if(!id)
 		{
 			str_format(aBuf, sizeof(aBuf), "key '%s' not found", pKeyName);
-			pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
+			pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf, gs_BindPrintColor);
 		}
 		else
 		{
@@ -303,7 +316,7 @@ void CBinds::ConDumpBinds(IConsole::IResult *pResult, void *pUserData)
 			else
 				str_format(aBuf, sizeof(aBuf), "%s (%d) = %s", pKeyName, id, pBinds->m_aapKeyBindings[Modifier][id]);
 
-			pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
+			pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf, gs_BindPrintColor);
 		}
 	}
 	else if(pResult->NumArguments() == 0)
@@ -317,7 +330,7 @@ void CBinds::ConDumpBinds(IConsole::IResult *pResult, void *pUserData)
 					continue;
 
 				str_format(aBuf, sizeof(aBuf), "%s%s (%d) = %s", GetKeyBindModifiersName(i), pBinds->Input()->KeyName(j), j, pBinds->m_aapKeyBindings[i][j]);
-				pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
+				pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf, gs_BindPrintColor);
 			}
 		}
 	}
@@ -334,7 +347,7 @@ void CBinds::ConUnbind(IConsole::IResult *pResult, void *pUserData)
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "key %s not found", pKeyName);
-		pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
+		pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf, gs_BindPrintColor);
 		return;
 	}
 
@@ -423,13 +436,13 @@ const char *CBinds::GetKeyBindModifiersName(int Modifier)
 	return aModifier;
 }
 
-void CBinds::ConfigSaveCallback(IConfig *pConfig, void *pUserData)
+void CBinds::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData)
 {
 	CBinds *pSelf = (CBinds *)pUserData;
 
 	char aBuffer[256];
 	char *pEnd = aBuffer + sizeof(aBuffer);
-	pConfig->WriteLine("unbindall");
+	pConfigManager->WriteLine("unbindall");
 	for(int i = 0; i < MODIFIER_COMBINATION_COUNT; i++)
 	{
 		for(int j = 0; j < KEY_LAST; j++)
@@ -443,7 +456,7 @@ void CBinds::ConfigSaveCallback(IConfig *pConfig, void *pUserData)
 			str_escape(&pDst, pSelf->m_aapKeyBindings[i][j], pEnd);
 			str_append(aBuffer, "\"", sizeof(aBuffer));
 
-			pConfig->WriteLine(aBuffer);
+			pConfigManager->WriteLine(aBuffer);
 		}
 	}
 }
@@ -466,11 +479,10 @@ void CBinds::SetDDRaceBinds(bool FreeOnly)
 		Bind(KEY_C, "say /rank", FreeOnly);
 		Bind(KEY_V, "say /info", FreeOnly);
 		Bind(KEY_B, "say /top5", FreeOnly);
-		Bind(KEY_X, "emote 14", FreeOnly);
-		Bind(KEY_H, "emote 2", FreeOnly);
-		Bind(KEY_M, "emote 5", FreeOnly);
 		Bind(KEY_S, "+showhookcoll", FreeOnly);
 		Bind(KEY_X, "toggle cl_dummy 0 1", FreeOnly);
+		Bind(KEY_H, "toggle cl_dummy_hammer 0 1", FreeOnly);
+		Bind(KEY_SLASH, "+show_chat; chat all /", FreeOnly);
 		Bind(KEY_PAGEDOWN, "toggle cl_show_quads 0 1", FreeOnly);
 		Bind(KEY_PAGEUP, "toggle cl_overlay_entities 0 100", FreeOnly);
 		Bind(KEY_KP_0, "say /emote normal 999999", FreeOnly);

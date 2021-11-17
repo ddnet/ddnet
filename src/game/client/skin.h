@@ -118,15 +118,6 @@ struct CSkin
 		SSkinMetricVariable m_Body;
 		SSkinMetricVariable m_Feet;
 
-		int m_FeetWidth;
-		int m_FeetHeight;
-		int m_FeetOffsetX;
-		int m_FeetOffsetY;
-
-		// these can be used to normalize the metrics
-		int m_FeetMaxWidth;
-		int m_FeetMaxHeight;
-
 		void Reset()
 		{
 			m_Body.Reset();
@@ -140,10 +131,10 @@ struct CSkin
 	};
 	SSkinMetrics m_Metrics;
 
-	bool operator<(const CSkin &Other) const { return str_comp_nocase(m_aName, Other.m_aName) < 0; }
+	bool operator<(const CSkin &Other) const { return str_comp(m_aName, Other.m_aName) < 0; }
 
-	bool operator<(const char *pOther) const { return str_comp_nocase(m_aName, pOther) < 0; }
-	bool operator==(const char *pOther) const { return !str_comp_nocase(m_aName, pOther); }
+	bool operator<(const char *pOther) const { return str_comp(m_aName, pOther) < 0; }
+	bool operator==(const char *pOther) const { return !str_comp(m_aName, pOther); }
 };
 
 #endif

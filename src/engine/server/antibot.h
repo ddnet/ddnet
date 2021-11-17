@@ -33,7 +33,9 @@ public:
 	virtual void OnEngineTick();
 	virtual void OnEngineClientJoin(int ClientID, bool Sixup);
 	virtual void OnEngineClientDrop(int ClientID, const char *pReason);
-	virtual void OnEngineClientMessage(int ClientID, const void *pData, int Size, int Flags);
+	virtual bool OnEngineClientMessage(int ClientID, const void *pData, int Size, int Flags);
+	virtual bool OnEngineServerMessage(int ClientID, const void *pData, int Size, int Flags);
+	virtual bool OnEngineSimulateClientMessage(int *pClientID, void *pBuffer, int BufferSize, int *pOutSize, int *pFlags);
 
 	// Game
 	virtual void RoundStart(class IGameServer *pGameServer);

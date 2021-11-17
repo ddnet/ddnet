@@ -15,7 +15,6 @@ static const int DEBUG = 0;
 enum
 {
 	OFFSET_UUID_TYPE = 0x8000,
-	ITEMTYPE_EX = 0xffff,
 };
 
 struct CItemEx
@@ -26,13 +25,7 @@ struct CItemEx
 	{
 		CItemEx Result;
 		for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
-		{
-			Result.m_aUuid[i] =
-				(Uuid.m_aData[i * 4 + 0] << 24) |
-				(Uuid.m_aData[i * 4 + 1] << 16) |
-				(Uuid.m_aData[i * 4 + 2] << 8) |
-				(Uuid.m_aData[i * 4 + 3]);
-		}
+			Result.m_aUuid[i] = bytes_be_to_int(&Uuid.m_aData[i * 4]);
 		return Result;
 	}
 
@@ -40,12 +33,7 @@ struct CItemEx
 	{
 		CUuid Result;
 		for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
-		{
-			Result.m_aData[i * 4 + 0] = m_aUuid[i] >> 24;
-			Result.m_aData[i * 4 + 1] = m_aUuid[i] >> 16;
-			Result.m_aData[i * 4 + 2] = m_aUuid[i] >> 8;
-			Result.m_aData[i * 4 + 3] = m_aUuid[i];
-		}
+			int_to_bytes_be(&Result.m_aData[i * 4], m_aUuid[i]);
 		return Result;
 	}
 };
@@ -278,7 +266,7 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 	return true;
 }
 
-int CDataFileReader::NumData()
+int CDataFileReader::NumData() const
 {
 	if(!m_pDataFile)
 	{
@@ -395,7 +383,7 @@ void CDataFileReader::UnloadData(int Index)
 	m_pDataFile->m_ppDataPtrs[Index] = 0x0;
 }
 
-int CDataFileReader::GetItemSize(int Index)
+int CDataFileReader::GetItemSize(int Index) const
 {
 	if(!m_pDataFile)
 		return 0;
@@ -519,7 +507,7 @@ void *CDataFileReader::FindItem(int Type, int ID)
 	return GetItem(Index, 0, 0);
 }
 
-int CDataFileReader::NumItems()
+int CDataFileReader::NumItems() const
 {
 	if(!m_pDataFile)
 		return 0;
@@ -542,7 +530,7 @@ bool CDataFileReader::Close()
 	return true;
 }
 
-SHA256_DIGEST CDataFileReader::Sha256()
+SHA256_DIGEST CDataFileReader::Sha256() const
 {
 	if(!m_pDataFile)
 	{
@@ -556,14 +544,14 @@ SHA256_DIGEST CDataFileReader::Sha256()
 	return m_pDataFile->m_Sha256;
 }
 
-unsigned CDataFileReader::Crc()
+unsigned CDataFileReader::Crc() const
 {
 	if(!m_pDataFile)
 		return 0xFFFFFFFF;
 	return m_pDataFile->m_Crc;
 }
 
-int CDataFileReader::MapSize()
+int CDataFileReader::MapSize() const
 {
 	if(!m_pDataFile)
 		return 0;

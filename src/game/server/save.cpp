@@ -3,7 +3,9 @@
 #include <cstdio>
 #include <new>
 
+#include "entities/character.h"
 #include "gamemodes/DDRace.h"
+#include "player.h"
 #include "teams.h"
 #include <engine/shared/config.h>
 
@@ -15,15 +17,16 @@ CSaveTee::~CSaveTee()
 {
 }
 
-void CSaveTee::save(CCharacter *pChr)
+void CSaveTee::Save(CCharacter *pChr)
 {
 	m_ClientID = pChr->m_pPlayer->GetCID();
-	str_copy(m_aName, pChr->m_pPlayer->Server()->ClientName(m_ClientID), sizeof(m_aName));
+	str_copy(m_aName, pChr->Server()->ClientName(m_ClientID), sizeof(m_aName));
 
 	m_Alive = pChr->m_Alive;
 	m_Paused = abs(pChr->m_pPlayer->IsPaused());
 	m_NeededFaketuning = pChr->m_NeededFaketuning;
 
+	m_TeeStarted = pChr->Teams()->TeeStarted(m_ClientID);
 	m_TeeFinished = pChr->Teams()->TeeFinished(m_ClientID);
 	m_IsSolo = pChr->m_Solo;
 
@@ -53,7 +56,7 @@ void CSaveTee::save(CCharacter *pChr)
 	m_TuneZoneOld = pChr->m_TuneZoneOld;
 
 	if(pChr->m_StartTime)
-		m_Time = pChr->Server()->Tick() - pChr->m_StartTime;
+		m_Time = pChr->Server()->Tick() - pChr->m_StartTime + g_Config.m_SvSaveSwapGamesPenalty * pChr->Server()->TickSpeed();
 	else
 		m_Time = 0;
 
@@ -106,15 +109,19 @@ void CSaveTee::save(CCharacter *pChr)
 	FormatUuid(pChr->GameServer()->GameUuid(), m_aGameUuid, sizeof(m_aGameUuid));
 }
 
-void CSaveTee::load(CCharacter *pChr, int Team)
+void CSaveTee::Load(CCharacter *pChr, int Team, bool IsSwap)
 {
 	pChr->m_pPlayer->Pause(m_Paused, true);
 
 	pChr->m_Alive = m_Alive;
 	pChr->m_NeededFaketuning = m_NeededFaketuning;
 
-	pChr->Teams()->SetForceCharacterTeam(pChr->m_pPlayer->GetCID(), Team);
-	pChr->Teams()->SetFinished(pChr->m_pPlayer->GetCID(), m_TeeFinished);
+	if(!IsSwap)
+	{
+		pChr->Teams()->SetForceCharacterTeam(pChr->m_pPlayer->GetCID(), Team);
+		pChr->Teams()->SetStarted(pChr->m_pPlayer->GetCID(), m_TeeStarted);
+		pChr->Teams()->SetFinished(pChr->m_pPlayer->GetCID(), m_TeeFinished);
+	}
 
 	for(int i = 0; i < NUM_WEAPONS; i++)
 	{
@@ -207,9 +214,6 @@ void CSaveTee::load(CCharacter *pChr, int Team)
 
 char *CSaveTee::GetString(const CSaveTeam *pTeam)
 {
-	// Add time penalty of 60 seconds (only to the database)
-	int Time = m_Time + 60 * SERVER_TICK_SPEED;
-
 	int HookedPlayer = -1;
 	if(m_HookedPlayer != -1)
 	{
@@ -249,12 +253,13 @@ char *CSaveTee::GetString(const CSaveTeam *pTeam)
 		"%f\t%f\t%f\t%f\t%f\t"
 		"%f\t%f\t%f\t%f\t%f\t"
 		"%f\t%f\t%f\t%f\t%f\t"
-		"%d\t"
-		"%d\t%d\t%d\t"
-		"%s\t"
-		"%d\t%d\t"
-		"%d\t%d\t%d\t%d\t"
-		"%d",
+		"%d\t" // m_NotEligibleForFinish
+		"%d\t%d\t%d\t" // tele weapons
+		"%s\t" // m_aGameUuid
+		"%d\t%d\t" // m_HookedPlayer, m_NewHook
+		"%d\t%d\t%d\t%d\t" // input stuff
+		"%d\t" // m_ReloadTimer
+		"%d", // m_TeeStarted
 		m_aName, m_Alive, m_Paused, m_NeededFaketuning, m_TeeFinished, m_IsSolo,
 		// weapons
 		m_aWeapons[0].m_AmmoRegenStart, m_aWeapons[0].m_Ammo, m_aWeapons[0].m_Ammocost, m_aWeapons[0].m_Got,
@@ -266,7 +271,7 @@ char *CSaveTee::GetString(const CSaveTeam *pTeam)
 		m_LastWeapon, m_QueuedWeapon,
 		// tee states
 		m_SuperJump, m_Jetpack, m_NinjaJetpack, m_FreezeTime, m_FreezeTick, m_DeepFreeze, m_EndlessHook,
-		m_DDRaceState, m_Hit, m_Collision, m_TuneZone, m_TuneZoneOld, m_Hook, Time,
+		m_DDRaceState, m_Hit, m_Collision, m_TuneZone, m_TuneZoneOld, m_Hook, m_Time,
 		(int)m_Pos.x, (int)m_Pos.y, (int)m_PrevPos.x, (int)m_PrevPos.y,
 		m_TeleCheckpoint, m_LastPenalty,
 		(int)m_CorePos.x, (int)m_CorePos.y, m_Vel.x, m_Vel.y,
@@ -285,7 +290,8 @@ char *CSaveTee::GetString(const CSaveTeam *pTeam)
 		m_aGameUuid,
 		HookedPlayer, m_NewHook,
 		m_InputDirection, m_InputJump, m_InputFire, m_InputHook,
-		m_ReloadTimer);
+		m_ReloadTimer,
+		m_TeeStarted);
 	return m_aString;
 }
 
@@ -318,12 +324,13 @@ int CSaveTee::FromString(const char *String)
 		"%f\t%f\t%f\t%f\t%f\t"
 		"%f\t%f\t%f\t%f\t%f\t"
 		"%f\t%f\t%f\t%f\t%f\t"
-		"%d\t"
-		"%d\t%d\t%d\t"
-		"%36s\t"
-		"%d\t%d"
-		"%d\t%d\t%d\t%d\t"
-		"%d",
+		"%d\t" // m_NotEligibleForFinish
+		"%d\t%d\t%d\t" // tele weapons
+		"%36s\t" // m_aGameUuid
+		"%d\t%d\t" // m_HookedPlayer, m_NewHook
+		"%d\t%d\t%d\t%d\t" // input stuff
+		"%d\t" // m_ReloadTimer
+		"%d", // m_TeeStarted
 		m_aName, &m_Alive, &m_Paused, &m_NeededFaketuning, &m_TeeFinished, &m_IsSolo,
 		// weapons
 		&m_aWeapons[0].m_AmmoRegenStart, &m_aWeapons[0].m_Ammo, &m_aWeapons[0].m_Ammocost, &m_aWeapons[0].m_Got,
@@ -354,7 +361,8 @@ int CSaveTee::FromString(const char *String)
 		m_aGameUuid,
 		&m_HookedPlayer, &m_NewHook,
 		&m_InputDirection, &m_InputJump, &m_InputFire, &m_InputHook,
-		&m_ReloadTimer);
+		&m_ReloadTimer,
+		&m_TeeStarted);
 	switch(Num) // Don't forget to update this when you save / load more / less.
 	{
 	case 96:
@@ -364,6 +372,7 @@ int CSaveTee::FromString(const char *String)
 		m_HasTelegunGrenade = 0;
 		m_HasTelegunLaser = 0;
 		m_HasTelegunGun = 0;
+		FormatUuid(CalculateUuid("game-uuid-nonexistent@ddnet.tw"), m_aGameUuid, sizeof(m_aGameUuid));
 		// fall through
 	case 101:
 		m_HookedPlayer = -1;
@@ -377,6 +386,9 @@ int CSaveTee::FromString(const char *String)
 		m_ReloadTimer = 0;
 		// fall through
 	case 108:
+		m_TeeStarted = true;
+		// fall through
+	case 109:
 		return 0;
 	default:
 		dbg_msg("load", "failed to load tee-string");
@@ -390,6 +402,11 @@ void CSaveTee::LoadHookedPlayer(const CSaveTeam *pTeam)
 	if(m_HookedPlayer == -1)
 		return;
 	m_HookedPlayer = pTeam->m_pSavedTees[m_HookedPlayer].GetClientID();
+}
+
+bool CSaveTee::IsHooking() const
+{
+	return m_HookState == HOOK_GRABBED || m_HookState == HOOK_FLYING;
 }
 
 CSaveTeam::CSaveTeam(IGameController *Controller)
@@ -407,7 +424,7 @@ CSaveTeam::~CSaveTeam()
 		delete[] m_pSavedTees;
 }
 
-int CSaveTeam::save(int Team)
+int CSaveTeam::Save(int Team)
 {
 	if(g_Config.m_SvTeam == 3 || (Team > 0 && Team < MAX_CLIENTS))
 	{
@@ -439,7 +456,7 @@ int CSaveTeam::save(int Team)
 				continue;
 			if(m_MembersCount == j)
 				return 3;
-			m_pSavedTees[j].save(p);
+			m_pSavedTees[j].Save(p);
 			j++;
 		}
 		if(m_MembersCount != j)
@@ -490,7 +507,7 @@ bool CSaveTeam::HandleSaveError(int Result, int ClientID, CGameContext *pGameCon
 	return true;
 }
 
-void CSaveTeam::load(int Team, bool KeepCurrentWeakStrong)
+void CSaveTeam::Load(int Team, bool KeepCurrentWeakStrong)
 {
 	CGameTeams *pTeams = &(((CGameControllerDDRace *)m_pController)->m_Teams);
 
@@ -505,7 +522,7 @@ void CSaveTeam::load(int Team, bool KeepCurrentWeakStrong)
 		if(m_pController->GameServer()->m_apPlayers[ClientID] && pTeams->m_Core.Team(ClientID) == Team)
 		{
 			CCharacter *pChr = MatchCharacter(m_pSavedTees[i].GetClientID(), i, KeepCurrentWeakStrong);
-			m_pSavedTees[i].load(pChr, Team);
+			m_pSavedTees[i].Load(pChr, Team);
 		}
 	}
 
@@ -558,9 +575,9 @@ char *CSaveTeam::GetString()
 
 int CSaveTeam::FromString(const char *String)
 {
-	char TeamStats[MAX_CLIENTS];
-	char Switcher[64];
-	char SaveTee[1024];
+	char aTeamStats[MAX_CLIENTS];
+	char aSwitcher[64];
+	char aSaveTee[1024];
 
 	char *CopyPos;
 	unsigned int Pos = 0;
@@ -586,10 +603,10 @@ int CSaveTeam::FromString(const char *String)
 		return 1;
 	}
 
-	if(StrSize < sizeof(TeamStats))
+	if(StrSize < sizeof(aTeamStats))
 	{
-		str_copy(TeamStats, CopyPos, StrSize);
-		int Num = sscanf(TeamStats, "%d\t%d\t%d\t%d\t%d", &m_TeamState, &m_MembersCount, &m_NumSwitchers, &m_TeamLocked, &m_Practice);
+		str_copy(aTeamStats, CopyPos, StrSize);
+		int Num = sscanf(aTeamStats, "%d\t%d\t%d\t%d\t%d", &m_TeamState, &m_MembersCount, &m_NumSwitchers, &m_TeamLocked, &m_Practice);
 		switch(Num) // Don't forget to update this when you save / load more / less.
 		{
 		case 4:
@@ -637,10 +654,10 @@ int CSaveTeam::FromString(const char *String)
 			return 1;
 		}
 
-		if(StrSize < sizeof(SaveTee))
+		if(StrSize < sizeof(aSaveTee))
 		{
-			str_copy(SaveTee, CopyPos, StrSize);
-			int Num = m_pSavedTees[n].FromString(SaveTee);
+			str_copy(aSaveTee, CopyPos, StrSize);
+			int Num = m_pSavedTees[n].FromString(aSaveTee);
 			if(Num)
 			{
 				dbg_msg("load", "failed to load tee");
@@ -683,10 +700,10 @@ int CSaveTeam::FromString(const char *String)
 			return 1;
 		}
 
-		if(StrSize < sizeof(Switcher))
+		if(StrSize < sizeof(aSwitcher))
 		{
-			str_copy(Switcher, CopyPos, StrSize);
-			int Num = sscanf(Switcher, "%d\t%d\t%d", &(m_pSwitchers[n].m_Status), &(m_pSwitchers[n].m_EndTime), &(m_pSwitchers[n].m_Type));
+			str_copy(aSwitcher, CopyPos, StrSize);
+			int Num = sscanf(aSwitcher, "%d\t%d\t%d", &(m_pSwitchers[n].m_Status), &(m_pSwitchers[n].m_EndTime), &(m_pSwitchers[n].m_Type));
 			if(Num != 3)
 			{
 				dbg_msg("load", "failed to load switcher");

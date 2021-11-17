@@ -5,23 +5,29 @@
 #include <engine/shared/image_manipulation.h>
 #include <pnglite.h>
 
-int DilateFile(const char *pFileName)
+int DilateFile(const char *pFilename)
 {
 	png_t Png;
 
 	png_init(0, 0);
-	int Error = png_open_file(&Png, pFileName);
+
+	IOHANDLE File = io_open(pFilename, IOFLAG_READ);
+	if(!File)
+	{
+		dbg_msg("dilate", "failed to open file. filename='%s'", pFilename);
+		return 0;
+	}
+	int Error = png_open_read(&Png, 0, File);
 	if(Error != PNG_NO_ERROR)
 	{
-		dbg_msg("dilate", "failed to open image file. filename='%s', pnglite: %s", pFileName, png_error_string(Error));
-		if(Error != PNG_FILE_ERROR)
-			png_close_file(&Png);
+		dbg_msg("dilate", "failed to open image file. filename='%s', pnglite: %s", pFilename, png_error_string(Error));
+		io_close(File);
 		return 0;
 	}
 
 	if(Png.color_type != PNG_TRUECOLOR_ALPHA)
 	{
-		dbg_msg("dilate", "%s: not an RGBA image", pFileName);
+		dbg_msg("dilate", "%s: not an RGBA image", pFilename);
 		return 1;
 	}
 
@@ -30,12 +36,12 @@ int DilateFile(const char *pFileName)
 	Error = png_get_data(&Png, pBuffer);
 	if(Error != PNG_NO_ERROR)
 	{
-		dbg_msg("map_convert_07", "failed to read image. filename='%s', pnglite: %s", pFileName, png_error_string(Error));
+		dbg_msg("map_convert_07", "failed to read image. filename='%s', pnglite: %s", pFilename, png_error_string(Error));
 		free(pBuffer);
-		png_close_file(&Png);
+		io_close(File);
 		return 0;
 	}
-	png_close_file(&Png);
+	io_close(File);
 
 	int w = Png.width;
 	int h = Png.height;
@@ -43,9 +49,22 @@ int DilateFile(const char *pFileName)
 	DilateImage(pBuffer, w, h, 4);
 
 	// save here
-	png_open_file_write(&Png, pFileName);
+	File = io_open(pFilename, IOFLAG_WRITE);
+	if(!File)
+	{
+		dbg_msg("dilate", "failed to open file. filename='%s'", pFilename);
+		free(pBuffer);
+		return 0;
+	}
+	Error = png_open_write(&Png, 0, File);
+	if(Error != PNG_NO_ERROR)
+	{
+		dbg_msg("dilate", "failed to open image file. filename='%s', pnglite: %s", pFilename, png_error_string(Error));
+		io_close(File);
+		return 0;
+	}
 	png_set_data(&Png, w, h, 8, PNG_TRUECOLOR_ALPHA, (unsigned char *)pBuffer);
-	png_close_file(&Png);
+	io_close(File);
 
 	free(pBuffer);
 

@@ -11,7 +11,7 @@ void CMenus::LoadEntities(SCustomEntities *pEntitiesItem, void *pUser)
 {
 	CMenus *pThis = (CMenus *)pUser;
 
-	char aBuff[MAX_PATH_LENGTH];
+	char aBuff[IO_MAX_PATH_LENGTH];
 
 	if(str_comp(pEntitiesItem->m_aName, "default") == 0)
 	{
@@ -24,7 +24,7 @@ void CMenus::LoadEntities(SCustomEntities *pEntitiesItem, void *pUser)
 				pEntitiesItem->m_aImages[i].m_Texture = pThis->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, ImgInfo.m_Format, 0);
 				pThis->Graphics()->FreePNG(&ImgInfo);
 
-				if(pEntitiesItem->m_RenderTexture == -1)
+				if(!pEntitiesItem->m_RenderTexture.IsValid())
 					pEntitiesItem->m_RenderTexture = pEntitiesItem->m_aImages[i].m_Texture;
 			}
 		}
@@ -40,7 +40,7 @@ void CMenus::LoadEntities(SCustomEntities *pEntitiesItem, void *pUser)
 				pEntitiesItem->m_aImages[i].m_Texture = pThis->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, ImgInfo.m_Format, 0);
 				pThis->Graphics()->FreePNG(&ImgInfo);
 
-				if(pEntitiesItem->m_RenderTexture == -1)
+				if(!pEntitiesItem->m_RenderTexture.IsValid())
 					pEntitiesItem->m_RenderTexture = pEntitiesItem->m_aImages[i].m_Texture;
 			}
 			else
@@ -52,7 +52,7 @@ void CMenus::LoadEntities(SCustomEntities *pEntitiesItem, void *pUser)
 					pEntitiesItem->m_aImages[i].m_Texture = pThis->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, ImgInfo.m_Format, 0);
 					pThis->Graphics()->FreePNG(&ImgInfo);
 
-					if(pEntitiesItem->m_RenderTexture == -1)
+					if(!pEntitiesItem->m_RenderTexture.IsValid())
 						pEntitiesItem->m_RenderTexture = pEntitiesItem->m_aImages[i].m_Texture;
 				}
 			}
@@ -81,7 +81,7 @@ int CMenus::EntitiesScan(const char *pName, int IsDir, int DirType, void *pUser)
 	{
 		if(str_endswith(pName, ".png"))
 		{
-			char aName[MAX_PATH_LENGTH];
+			char aName[IO_MAX_PATH_LENGTH];
 			str_truncate(aName, sizeof(aName), pName, str_length(pName) - 4);
 			// default is reserved
 			if(str_comp(aName, "default") == 0)
@@ -100,7 +100,7 @@ int CMenus::EntitiesScan(const char *pName, int IsDir, int DirType, void *pUser)
 template<typename TName>
 static void LoadAsset(TName *pAssetItem, const char *pAssetName, IGraphics *pGraphics, void *pUser)
 {
-	char aBuff[MAX_PATH_LENGTH];
+	char aBuff[IO_MAX_PATH_LENGTH];
 
 	if(str_comp(pAssetItem->m_aName, "default") == 0)
 	{
@@ -155,7 +155,7 @@ static int AssetScan(const char *pName, int IsDir, int DirType, sorted_array<TNa
 	{
 		if(str_endswith(pName, ".png"))
 		{
-			char aName[MAX_PATH_LENGTH];
+			char aName[IO_MAX_PATH_LENGTH];
 			str_truncate(aName, sizeof(aName), pName, str_length(pName) - 4);
 			// default is reserved
 			if(str_comp(aName, "default") == 0)
@@ -228,8 +228,8 @@ void ClearAssetList(sorted_array<TName> &List, IGraphics *pGraphics)
 {
 	for(int i = 0; i < List.size(); ++i)
 	{
-		if(List[i].m_RenderTexture != -1)
-			pGraphics->UnloadTexture(List[i].m_RenderTexture);
+		if(List[i].m_RenderTexture.IsValid())
+			pGraphics->UnloadTexture(&(List[i].m_RenderTexture));
 		List[i].m_RenderTexture = IGraphics::CTextureHandle();
 	}
 	List.clear();
@@ -243,24 +243,36 @@ void CMenus::ClearCustomItems(int CurTab)
 		{
 			for(auto &Image : m_EntitiesList[i].m_aImages)
 			{
-				if(Image.m_Texture != -1)
-					Graphics()->UnloadTexture(Image.m_Texture);
+				if(Image.m_Texture.IsValid())
+					Graphics()->UnloadTexture(&Image.m_Texture);
 				Image.m_Texture = IGraphics::CTextureHandle();
 			}
 		}
 		m_EntitiesList.clear();
+
+		// reload current entities
+		m_pClient->m_MapImages.ChangeEntitiesPath(g_Config.m_ClAssetsEntites);
 	}
 	else if(CurTab == 1)
 	{
 		ClearAssetList(m_GameList, Graphics());
+
+		// reload current game skin
+		GameClient()->LoadGameSkin(g_Config.m_ClAssetGame);
 	}
 	else if(CurTab == 2)
 	{
 		ClearAssetList(m_EmoticonList, Graphics());
+
+		// reload current emoticons skin
+		GameClient()->LoadEmoticonsSkin(g_Config.m_ClAssetEmoticons);
 	}
 	else if(CurTab == 3)
 	{
 		ClearAssetList(m_ParticlesList, Graphics());
+
+		// reload current particles skin
+		GameClient()->LoadParticlesSkin(g_Config.m_ClAssetParticles);
 	}
 	s_InitCustomList[CurTab] = true;
 }
@@ -292,7 +304,7 @@ int InitSearchList(sorted_array<const TName *> &SearchList, sorted_array<TName> 
 		const TName *s = &AssetList[i];
 
 		// filter quick search
-		if(s_aFilterString[s_CurCustomTab][0] != '\0' && !str_find_nocase(s->m_aName, s_aFilterString[s_CurCustomTab]))
+		if(s_aFilterString[s_CurCustomTab][0] != '\0' && !str_utf8_find_nocase(s->m_aName, s_aFilterString[s_CurCustomTab]))
 			continue;
 
 		SearchList.add_unsorted(s);
@@ -310,13 +322,15 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 	Page2Tab.VSplitLeft(TabsW / 4, &Page2Tab, &Page3Tab);
 	Page3Tab.VSplitLeft(TabsW / 4, &Page3Tab, &Page4Tab);
 
-	if(DoButton_MenuTab((void *)&Page1Tab, Localize("Entities"), s_CurCustomTab == 0, &Page1Tab, 5, NULL, NULL, NULL, NULL, 4))
+	static int s_aPageTabs[4] = {};
+
+	if(DoButton_MenuTab((void *)&s_aPageTabs[0], Localize("Entities"), s_CurCustomTab == 0, &Page1Tab, 5, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = 0;
-	if(DoButton_MenuTab((void *)&Page2Tab, Localize("Game"), s_CurCustomTab == 1, &Page2Tab, 0, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((void *)&s_aPageTabs[1], Localize("Game"), s_CurCustomTab == 1, &Page2Tab, 0, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = 1;
-	if(DoButton_MenuTab((void *)&Page3Tab, Localize("Emoticons"), s_CurCustomTab == 2, &Page3Tab, 0, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((void *)&s_aPageTabs[2], Localize("Emoticons"), s_CurCustomTab == 2, &Page3Tab, 0, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = 2;
-	if(DoButton_MenuTab((void *)&Page4Tab, Localize("Particles"), s_CurCustomTab == 3, &Page4Tab, 10, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((void *)&s_aPageTabs[3], Localize("Particles"), s_CurCustomTab == 3, &Page4Tab, 10, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = 3;
 
 	if(s_CurCustomTab == 0)
@@ -364,7 +378,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 				const SCustomEntities *s = &m_EntitiesList[i];
 
 				// filter quick search
-				if(s_aFilterString[s_CurCustomTab][0] != '\0' && !str_find_nocase(s->m_aName, s_aFilterString[s_CurCustomTab]))
+				if(s_aFilterString[s_CurCustomTab][0] != '\0' && !str_utf8_find_nocase(s->m_aName, s_aFilterString[s_CurCustomTab]))
 					continue;
 
 				s_SearchEntitiesList.add_unsorted(s);
@@ -448,7 +462,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 			ItemRect.HSplitTop(15, &ItemRect, &TextureRect);
 			TextureRect.HSplitTop(10, NULL, &TextureRect);
 			UI()->DoLabelScaled(&ItemRect, s->m_aName, ItemRect.h - 2, 0);
-			if(s->m_RenderTexture != -1)
+			if(s->m_RenderTexture.IsValid())
 			{
 				Graphics()->WrapClamp();
 				Graphics()->TextureSet(s->m_RenderTexture);
@@ -470,7 +484,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 			if(s_CurCustomTab == 0)
 			{
 				str_copy(g_Config.m_ClAssetsEntites, GetCustomItem(s_CurCustomTab, NewSelected)->m_aName, sizeof(g_Config.m_ClAssetsEntites));
-				m_pClient->m_pMapimages->ChangeEntitiesPath(GetCustomItem(s_CurCustomTab, NewSelected)->m_aName);
+				m_pClient->m_MapImages.ChangeEntitiesPath(GetCustomItem(s_CurCustomTab, NewSelected)->m_aName);
 			}
 			else if(s_CurCustomTab == 1)
 			{
@@ -517,10 +531,11 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 	DirectoryButton.VSplitRight(175.0f, 0, &DirectoryButton);
 	DirectoryButton.VSplitRight(25.0f, &DirectoryButton, &ReloadButton);
 	DirectoryButton.VSplitRight(10.0f, &DirectoryButton, 0);
-	if(DoButton_Menu(&DirectoryButton, Localize("Assets directory"), 0, &DirectoryButton))
+	static int s_AssetsDirID = 0;
+	if(DoButton_Menu(&s_AssetsDirID, Localize("Assets directory"), 0, &DirectoryButton))
 	{
-		char aBuf[MAX_PATH_LENGTH];
-		char aBufFull[MAX_PATH_LENGTH + 7];
+		char aBuf[IO_MAX_PATH_LENGTH];
+		char aBufFull[IO_MAX_PATH_LENGTH + 7];
 		if(s_CurCustomTab == 0)
 			str_copy(aBufFull, "assets/entities", sizeof(aBufFull));
 		else if(s_CurCustomTab == 1)
@@ -541,10 +556,71 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 
 	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
-	if(DoButton_Menu(&ReloadButton, "\xEE\x97\x95", 0, &ReloadButton, NULL, 15, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f), 0))
+	static int s_AssetsReloadBtnID = 0;
+	if(DoButton_Menu(&s_AssetsReloadBtnID, "\xEE\x97\x95", 0, &ReloadButton, NULL, 15, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f), 0))
 	{
 		ClearCustomItems(s_CurCustomTab);
 	}
 	TextRender()->SetRenderFlags(0);
 	TextRender()->SetCurFont(NULL);
+}
+
+void CMenus::ConchainAssetsEntities(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CMenus *pThis = (CMenus *)pUserData;
+	if(pResult->NumArguments() == 1)
+	{
+		const char *pArg = pResult->GetString(0);
+		if(str_comp(pArg, g_Config.m_ClAssetsEntites) != 0)
+		{
+			pThis->m_pClient->m_MapImages.ChangeEntitiesPath(pArg);
+		}
+	}
+
+	pfnCallback(pResult, pCallbackUserData);
+}
+
+void CMenus::ConchainAssetGame(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CMenus *pThis = (CMenus *)pUserData;
+	if(pResult->NumArguments() == 1)
+	{
+		const char *pArg = pResult->GetString(0);
+		if(str_comp(pArg, g_Config.m_ClAssetGame) != 0)
+		{
+			pThis->GameClient()->LoadGameSkin(pArg);
+		}
+	}
+
+	pfnCallback(pResult, pCallbackUserData);
+}
+
+void CMenus::ConchainAssetParticles(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CMenus *pThis = (CMenus *)pUserData;
+	if(pResult->NumArguments() == 1)
+	{
+		const char *pArg = pResult->GetString(0);
+		if(str_comp(pArg, g_Config.m_ClAssetParticles) != 0)
+		{
+			pThis->GameClient()->LoadParticlesSkin(pArg);
+		}
+	}
+
+	pfnCallback(pResult, pCallbackUserData);
+}
+
+void CMenus::ConchainAssetEmoticons(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CMenus *pThis = (CMenus *)pUserData;
+	if(pResult->NumArguments() == 1)
+	{
+		const char *pArg = pResult->GetString(0);
+		if(str_comp(pArg, g_Config.m_ClAssetEmoticons) != 0)
+		{
+			pThis->GameClient()->LoadEmoticonsSkin(pArg);
+		}
+	}
+
+	pfnCallback(pResult, pCallbackUserData);
 }

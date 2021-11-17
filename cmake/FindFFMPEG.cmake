@@ -6,7 +6,7 @@ if(NOT CMAKE_CROSSCOMPILING)
   pkg_check_modules(PC_SWSCALE libswscale)
   pkg_check_modules(PC_SWRESAMPLE libswresample)
   if(TARGET_OS STREQUAL "linux")
-    pkg_check_modules(PC_X264 libx264)
+    pkg_search_module(PC_X264 libx264 x264)
   endif()
 endif()
 
@@ -122,8 +122,8 @@ mark_as_advanced(
 )
 
 set(FFMPEG_LIBRARIES
+  ${AVFORMAT_LIBRARY} # has to come before avcodec
   ${AVCODEC_LIBRARY}
-  ${AVFORMAT_LIBRARY}
   ${AVUTIL_LIBRARY}
   ${SWSCALE_LIBRARY}
   ${SWRESAMPLE_LIBRARY}

@@ -9,19 +9,19 @@
 
 // CSnapshot
 
-CSnapshotItem *CSnapshot::GetItem(int Index)
+CSnapshotItem *CSnapshot::GetItem(int Index) const
 {
 	return (CSnapshotItem *)(DataStart() + Offsets()[Index]);
 }
 
-int CSnapshot::GetItemSize(int Index)
+int CSnapshot::GetItemSize(int Index) const
 {
 	if(Index == m_NumItems - 1)
 		return (m_DataSize - Offsets()[Index]) - sizeof(CSnapshotItem);
 	return (Offsets()[Index + 1] - Offsets()[Index]) - sizeof(CSnapshotItem);
 }
 
-int CSnapshot::GetItemType(int Index)
+int CSnapshot::GetItemType(int Index) const
 {
 	int InternalType = GetItem(Index)->Type();
 	if(InternalType < OFFSET_UUID_TYPE)
@@ -38,17 +38,12 @@ int CSnapshot::GetItemType(int Index)
 	CSnapshotItem *pTypeItem = GetItem(TypeItemIndex);
 	CUuid Uuid;
 	for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
-	{
-		Uuid.m_aData[i * 4 + 0] = pTypeItem->Data()[i] >> 24;
-		Uuid.m_aData[i * 4 + 1] = pTypeItem->Data()[i] >> 16;
-		Uuid.m_aData[i * 4 + 2] = pTypeItem->Data()[i] >> 8;
-		Uuid.m_aData[i * 4 + 3] = pTypeItem->Data()[i];
-	}
+		int_to_bytes_be(&Uuid.m_aData[i * 4], pTypeItem->Data()[i]);
 
 	return g_UuidManager.LookupUuid(Uuid);
 }
 
-int CSnapshot::GetItemIndex(int Key)
+int CSnapshot::GetItemIndex(int Key) const
 {
 	// TODO: OPT: this should not be a linear search. very bad
 	for(int i = 0; i < m_NumItems; i++)
@@ -57,6 +52,39 @@ int CSnapshot::GetItemIndex(int Key)
 			return i;
 	}
 	return -1;
+}
+
+void *CSnapshot::FindItem(int Type, int ID) const
+{
+	int InternalType = Type;
+	if(Type >= OFFSET_UUID)
+	{
+		CUuid TypeUuid = g_UuidManager.GetUuid(Type);
+		int aTypeUuidItem[sizeof(CUuid) / 4];
+		for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
+			aTypeUuidItem[i] = bytes_be_to_int(&TypeUuid.m_aData[i * 4]);
+
+		bool Found = false;
+		for(int i = 0; i < m_NumItems; i++)
+		{
+			CSnapshotItem *pItem = GetItem(i);
+			if(pItem->Type() == 0 && pItem->ID() >= OFFSET_UUID_TYPE) // NETOBJTYPE_EX
+			{
+				if(mem_comp(pItem->Data(), aTypeUuidItem, sizeof(CUuid)) == 0)
+				{
+					InternalType = pItem->ID();
+					Found = true;
+					break;
+				}
+			}
+		}
+		if(!Found)
+		{
+			return nullptr;
+		}
+	}
+	int Index = GetItemIndex((InternalType << 16) | ID);
+	return Index < 0 ? nullptr : GetItem(Index)->Data();
 }
 
 unsigned CSnapshot::Crc()
@@ -209,7 +237,6 @@ int CSnapshotDelta::CreateDelta(CSnapshot *pFrom, CSnapshot *pTo, void *pDstData
 	CSnapshotItem *pCurItem;
 	CSnapshotItem *pPastItem;
 	int Count = 0;
-	int SizeCount = 0;
 
 	pDelta->m_NumDeletedItems = 0;
 	pDelta->m_NumUpdateItems = 0;
@@ -279,7 +306,6 @@ int CSnapshotDelta::CreateDelta(CSnapshot *pFrom, CSnapshot *pTo, void *pDstData
 				*pData++ = ItemSize / 4;
 
 			mem_copy(pData, pCurItem->Data(), ItemSize);
-			SizeCount += ItemSize;
 			pData += ItemSize / 4;
 			pDelta->m_NumUpdateItems++;
 			Count++;
@@ -358,10 +384,12 @@ int CSnapshotDelta::UnpackDelta(CSnapshot *pFrom, CSnapshot *pTo, void *pSrcData
 
 		if(Keep)
 		{
+			void *pObj = Builder.NewItem(pFromItem->Type(), pFromItem->ID(), ItemSize);
+			if(!pObj)
+				return -4;
+
 			// keep it
-			mem_copy(
-				Builder.NewItem(pFromItem->Type(), pFromItem->ID(), ItemSize),
-				pFromItem->Data(), ItemSize);
+			mem_copy(pObj, pFromItem->Data(), ItemSize);
 		}
 	}
 
@@ -397,7 +425,8 @@ int CSnapshotDelta::UnpackDelta(CSnapshot *pFrom, CSnapshot *pTo, void *pSrcData
 		if(!pNewData)
 			pNewData = (int *)Builder.NewItem(Key >> 16, Key & 0xffff, ItemSize);
 
-		//if(range_check(pEnd, pNewData, ItemSize)) return -4;
+		if(!pNewData)
+			return -4;
 
 		FromIndex = pFrom->GetItemIndex(Key);
 		if(FromIndex != -1)
@@ -472,7 +501,7 @@ void CSnapshotStorage::PurgeUntil(int Tick)
 	m_pLast = 0;
 }
 
-void CSnapshotStorage::Add(int Tick, int64 Tagtime, int DataSize, void *pData, int CreateAlt)
+void CSnapshotStorage::Add(int Tick, int64_t Tagtime, int DataSize, void *pData, int CreateAlt)
 {
 	// allocate memory for holder + snapshot_data
 	int TotalSize = sizeof(CHolder) + DataSize;
@@ -507,7 +536,7 @@ void CSnapshotStorage::Add(int Tick, int64 Tagtime, int DataSize, void *pData, i
 	m_pLast = pHolder;
 }
 
-int CSnapshotStorage::Get(int Tick, int64 *pTagtime, CSnapshot **ppData, CSnapshot **ppAltData)
+int CSnapshotStorage::Get(int Tick, int64_t *pTagtime, CSnapshot **ppData, CSnapshot **ppAltData)
 {
 	CHolder *pHolder = m_pFirst;
 
@@ -588,13 +617,10 @@ void CSnapshotBuilder::AddExtendedItemType(int Index)
 	int TypeID = m_aExtendedItemTypes[Index];
 	CUuid Uuid = g_UuidManager.GetUuid(TypeID);
 	int *pUuidItem = (int *)NewItem(0, GetTypeFromIndex(Index), sizeof(Uuid)); // NETOBJTYPE_EX
-	for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
+	if(pUuidItem)
 	{
-		pUuidItem[i] =
-			(Uuid.m_aData[i * 4 + 0] << 24) |
-			(Uuid.m_aData[i * 4 + 1] << 16) |
-			(Uuid.m_aData[i * 4 + 2] << 8) |
-			(Uuid.m_aData[i * 4 + 3]);
+		for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
+			pUuidItem[i] = bytes_be_to_int(&Uuid.m_aData[i * 4]);
 	}
 }
 

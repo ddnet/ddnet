@@ -38,9 +38,9 @@ void CFriends::Init(bool Foes)
 {
 	m_Foes = Foes;
 
-	IConfig *pConfig = Kernel()->RequestInterface<IConfig>();
-	if(pConfig)
-		pConfig->RegisterCallback(ConfigSaveCallback, this);
+	IConfigManager *pConfigManager = Kernel()->RequestInterface<IConfigManager>();
+	if(pConfigManager)
+		pConfigManager->RegisterCallback(ConfigSaveCallback, this);
 
 	IConsole *pConsole = Kernel()->RequestInterface<IConsole>();
 	if(pConsole)
@@ -153,12 +153,13 @@ void CFriends::Friends()
 		for(int i = 0; i < m_NumFriends; ++i)
 		{
 			str_format(aBuf, sizeof(aBuf), "Name: %s, Clan: %s", m_aFriends[i].m_aName, m_aFriends[i].m_aClan);
-			pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, m_Foes ? "foes" : "friends", aBuf, true);
+
+			pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, m_Foes ? "foes" : "friends", aBuf, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
 		}
 	}
 }
 
-void CFriends::ConfigSaveCallback(IConfig *pConfig, void *pUserData)
+void CFriends::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData)
 {
 	CFriends *pSelf = (CFriends *)pUserData;
 	char aBuf[128];
@@ -175,6 +176,6 @@ void CFriends::ConfigSaveCallback(IConfig *pConfig, void *pUserData)
 		str_escape(&pDst, pSelf->m_aFriends[i].m_aClan, pEnd);
 		str_append(aBuf, "\"", sizeof(aBuf));
 
-		pConfig->WriteLine(aBuf);
+		pConfigManager->WriteLine(aBuf);
 	}
 }

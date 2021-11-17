@@ -5,7 +5,10 @@
 #include <game/generated/protocol.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/DDRace.h>
+#include <game/server/player.h>
 #include <game/server/teams.h>
+
+#include "character.h"
 
 const float PLASMA_ACCEL = 1.1f;
 
@@ -37,7 +40,7 @@ bool CPlasma::HitCharacter()
 	if(m_Explosive)
 		GameServer()->CreateExplosion(m_Pos, -1, WEAPON_GRENADE, true,
 			m_ResponsibleTeam, Hit->Teams()->TeamMask(m_ResponsibleTeam));
-	GameServer()->m_World.DestroyEntity(this);
+	m_MarkedForDestroy = true;
 	return true;
 }
 
@@ -49,7 +52,7 @@ void CPlasma::Move()
 
 void CPlasma::Reset()
 {
-	GameServer()->m_World.DestroyEntity(this);
+	m_MarkedForDestroy = true;
 }
 
 void CPlasma::Tick()
@@ -88,7 +91,7 @@ void CPlasma::Snap(int SnappingClient)
 	CPlayer *SnapPlayer = SnappingClient > -1 ? GameServer()->m_apPlayers[SnappingClient] : 0;
 	int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
 
-	if(SnapChar && SnapChar->IsAlive() && (m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[SnapChar->Team()]) && (!Tick))
+	if(SnapChar && SnapChar->IsAlive() && (m_Layer == LAYER_SWITCH && m_Number > 0 && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[SnapChar->Team()]) && (!Tick))
 		return;
 
 	if(SnapPlayer && (SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->IsPaused()) && SnapPlayer->m_SpectatorID != -1 && GameServer()->GetPlayerChar(SnapPlayer->m_SpectatorID) && GameServer()->GetPlayerChar(SnapPlayer->m_SpectatorID)->Team() != m_ResponsibleTeam && SnapPlayer->m_ShowOthers != 1)
@@ -101,7 +104,7 @@ void CPlasma::Snap(int SnappingClient)
 		return;
 
 	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
-		NETOBJTYPE_LASER, m_ID, sizeof(CNetObj_Laser)));
+		NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
 
 	if(!pObj)
 		return;

@@ -70,9 +70,6 @@ Blue team wins!
 Body
 == Corpo
 
-Borderless window
-== Janela S/ Bordas
-
 Call vote
 == Votação
 
@@ -362,9 +359,6 @@ Red team wins!
 Refresh
 == Atualizar
 
-Refreshing master servers
-== A Atualizar servidores
-
 Remote console
 == Remote console
 
@@ -436,9 +430,6 @@ Show name plates
 
 Show only chat messages from friends
 == Mostrar apenas mensagens dos amigos no chat
-
-Show only supported
-== Mostrar apenas suportado
 
 Skins
 == Skins
@@ -653,9 +644,6 @@ Map sound volume
 Countries
 == Países
 
-Background (entities)
-== Plano de fundo (entidades)
-
 Show kill messages
 == Mostrar mensagens de morte
 
@@ -671,17 +659,11 @@ No updates available
 Enable server message sound
 == Ativar o som de mensagem do servidor
 
-second
-== segundo
-
 Show votes window after voting
 == Mostrar janela de voto depois de votar
 
 HUD
 == HUD
-
-Look out!
-== Cuidado!
 
 Show names in chat in team colors
 == Mostrar nomes no chat com cores da equipa
@@ -692,12 +674,6 @@ Select a name
 Enable team chat sound
 == Ativar o som do chat de equipa
 
-We will win
-== Nós vamos ganhar
-
-Hi o/
-== Olá o/
-
 Deaths
 == Mortes
 
@@ -706,9 +682,6 @@ Enable game sounds
 
 DDNet Client needs to be restarted to complete update!
 == O cliente DDNet precisa de ser reiniciado para completar a atualização!
-
-Spectator
-== Espectador
 
 Please use a different name
 == Por favor usa um nome diferente
@@ -764,9 +737,6 @@ Remove chat
 Check now
 == Verifica agora
 
-Background (regular)
-== Plano de fundo (regular)
-
 AntiPing: predict other players
 == Antiping: prever os outros jogadores
 
@@ -803,14 +773,8 @@ Default zoom
 Show score
 == Mostrar pontuação
 
-Show client IDs in Scoreboard
-== Mostrar os IDs do cliente na tabela de pontuação
-
 Max CSVs
 == CSVs máximos
-
-seconds
-== segundos
 
 Use DDRace Scoreboard
 == Usa a tabela de pontuações de DDRace
@@ -848,9 +812,6 @@ Exclude
 Enable highlighted chat sound
 == Ativar o som do chat em destaque
 
-Hello and welcome
-== Olá e bem-vindo
-
 AntiPing: predict weapons
 == AntiPing: prever as armas
 
@@ -860,17 +821,11 @@ DDNet Client updated!
 Highlighted message
 == Mensagem em destaque
 
-Friend
-== Amigo
-
 Switch weapon when out of ammo
 == Mudar de arma quando ficar sem munição
 
 AntiPing: predict grenade paths
 == Antiping: prever os caminhos da granada
-
-Inner color
-== Cor interior
 
 Successfully saved the replay!
 == 
@@ -881,7 +836,7 @@ Saving ddnet-settings.cfg failed
 Replay feature is disabled!
 == 
 
-The width or height of texture %s is not divisible by 16, which might cause visual bugs.
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
 Warning
@@ -950,6 +905,9 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 Checking for existing player with your name
 == 
 
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
 Country / Region
 == 
 
@@ -971,6 +929,30 @@ transmits your player name to info2.ddnet.tw
 Theme
 == 
 
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+Getting server list from master server
+== 
+
 %d of %d servers
 == 
 
@@ -983,6 +965,9 @@ Theme
 %d player
 == 
 
+Refreshing...
+== 
+
 Filter connecting players
 == 
 
@@ -990,6 +975,9 @@ Indicate map finish
 == 
 
 Unfinished map
+== 
+
+Leak IP
 == 
 
 Markers:
@@ -1026,6 +1014,9 @@ Kill
 == 
 
 Pause
+== 
+
+Time
 == 
 
 Reload
@@ -1112,19 +1103,34 @@ Show entities
 Show HUD
 == 
 
+Chat command
+== 
+
 UI mouse s.
+== 
+
+Dummy
+== 
+
+Windowed
+== 
+
+Windowed borderless
+== 
+
+Desktop fullscreen
 == 
 
 may cause delay
 == 
 
-Use OpenGL 3.3 (experimental)
+Use modern OpenGL
 == 
 
 Preinit VBO (iGPUs only)
 == 
 
-Multiple texture units (disable for MacOS)
+Multiple texture units (disable for macOS)
 == 
 
 Use high DPI
@@ -1148,22 +1154,46 @@ Background music volume
 Assets
 == 
 
+Show client IDs
+== 
+
+Kill Messages
+== 
+
+Kill Message Normal Color
+== 
+
+Kill Message Highlight Color
+== 
+
+Laser Outline Color
+== 
+
+Laser Inner Color
+== 
+
+Hookline
+== 
+
+No hit
+== 
+
+Hookable
+== 
+
+Tee
+== 
+
 Use old chat style
 == 
 
 Friend message
 == 
 
-Highlight
-== 
-
 Client message
 == 
 
-Outline color
-== 
-
-Wait before try for
+Preview
 == 
 
 Default length: %d
@@ -1193,10 +1223,22 @@ Show other players' hook collision lines
 Show other players' key presses
 == 
 
+Show local player's key presses
+== 
+
+Background
+== 
+
+Entities Background color
+== 
+
 Use current map as background
 == 
 
 Show tiles layers from BG map
+== 
+
+Regular Background Color
 == 
 
 Try fast HTTP map download first
@@ -1212,6 +1254,12 @@ Particles
 == 
 
 Assets directory
+== 
+
+Discord
+== 
+
+https://ddnet.tw/discord
 == 
 
 Learn
@@ -1249,9 +1297,6 @@ Downloading %s:
 == 
 
 Update failed! Check log...
-== 
-
-Time
 == 
 
 Manual

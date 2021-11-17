@@ -12,7 +12,7 @@ class TeeHistorian : public ::testing::Test
 {
 protected:
 	CTeeHistorian m_TH;
-	CConfiguration m_Config;
+	CConfig m_Config;
 	CTuningParams m_Tuning;
 	CUuidManager m_UuidManager;
 	CTeeHistorian::CGameInfo m_GameInfo;
@@ -89,7 +89,7 @@ protected:
 	void Expect(const unsigned char *pOutput, int OutputSize)
 	{
 		static CUuid TEEHISTORIAN_UUID = CalculateUuid("teehistorian@ddnet.tw");
-		static const char PREFIX1[] = "{\"comment\":\"teehistorian@ddnet.tw\",\"version\":\"2\",\"game_uuid\":\"a1eb7182-796e-3b3e-941d-38ca71b2a4a8\",\"server_version\":\"DDNet test\",\"start_time\":\"";
+		static const char PREFIX1[] = "{\"comment\":\"teehistorian@ddnet.tw\",\"version\":\"2\",\"version_minor\":\"2\",\"game_uuid\":\"a1eb7182-796e-3b3e-941d-38ca71b2a4a8\",\"server_version\":\"DDNet test\",\"start_time\":\"";
 		static const char PREFIX2[] = "\",\"server_name\":\"server name\",\"server_port\":\"8303\",\"game_type\":\"game type\",\"map_name\":\"Kobra 3 Solo\",\"map_size\":\"903514\",\"map_sha256\":\"0123456789012345678901234567890123456789012345678901234567890123\",\"map_crc\":\"eceaf25c\",\"prng_description\":\"test-prng:02468ace\",\"config\":{},\"tuning\":{},\"uuids\":[";
 		static const char PREFIX3[] = "]}";
 
@@ -127,7 +127,7 @@ protected:
 
 		if(m_Buffer.Error() || m_Buffer.Size() != OutputSize || mem_comp(m_Buffer.Data(), pOutput, OutputSize) != 0)
 		{
-			char aFilename[64];
+			char aFilename[IO_MAX_PATH_LENGTH];
 			IOHANDLE File;
 
 			str_format(aFilename, sizeof(aFilename), "%sGot.teehistorian", pTestName);
@@ -529,6 +529,92 @@ TEST_F(TeeHistorian, LoadFailed)
 		0x40};
 
 	m_TH.RecordTeamLoadFailure(12);
+	Finish();
+	Expect(EXPECTED, sizeof(EXPECTED));
+}
+
+TEST_F(TeeHistorian, PlayerTeam)
+{
+	const unsigned char EXPECTED[] = {
+		// TICK_SKIP dt=0
+		0x41, 0x00,
+		// EX uuid=a111c04e-1ea8-38e0-90b1-d7f993ca0da9 datalen=2
+		0x4a,
+		0xa1, 0x11, 0xc0, 0x4e, 0x1e, 0xa8, 0x38, 0xe0,
+		0x90, 0xb1, 0xd7, 0xf9, 0x93, 0xca, 0x0d, 0xa9,
+		0x02,
+		// (PLAYER_TEAM) cid=33 team=54
+		0x21, 0x36,
+		// TICK_SKIP dt=0
+		0x41, 0x00,
+		// EX uuid=a111c04e-1ea8-38e0-90b1-d7f993ca0da9 datalen=2
+		0x4a,
+		0xa1, 0x11, 0xc0, 0x4e, 0x1e, 0xa8, 0x38, 0xe0,
+		0x90, 0xb1, 0xd7, 0xf9, 0x93, 0xca, 0x0d, 0xa9,
+		0x02,
+		// (PLAYER_TEAM) cid=3 team=12
+		0x03, 0x0c,
+		// EX uuid=a111c04e-1ea8-38e0-90b1-d7f993ca0da9 datalen=2
+		0x4a,
+		0xa1, 0x11, 0xc0, 0x4e, 0x1e, 0xa8, 0x38, 0xe0,
+		0x90, 0xb1, 0xd7, 0xf9, 0x93, 0xca, 0x0d, 0xa9,
+		0x02,
+		// (PLAYER_TEAM) cid=33 team=0
+		0x21, 0x00,
+		// FINISH
+		0x40};
+
+	Tick(1);
+	m_TH.RecordPlayerTeam(3, 0);
+	m_TH.RecordPlayerTeam(33, 54);
+	m_TH.RecordPlayerTeam(45, 0);
+	Tick(2);
+	m_TH.RecordPlayerTeam(3, 12);
+	m_TH.RecordPlayerTeam(33, 0);
+	m_TH.RecordPlayerTeam(45, 0);
+	Finish();
+	Expect(EXPECTED, sizeof(EXPECTED));
+}
+
+TEST_F(TeeHistorian, TeamPractice)
+{
+	const unsigned char EXPECTED[] = {
+		// TICK_SKIP dt=0
+		0x41, 0x00,
+		// EX uuid=5792834e-81d1-34c9-a29b-b5ff25dac3bc datalen=2
+		0x4a,
+		0x57, 0x92, 0x83, 0x4e, 0x81, 0xd1, 0x34, 0xc9,
+		0xa2, 0x9b, 0xb5, 0xff, 0x25, 0xda, 0xc3, 0xbc,
+		0x02,
+		// (TEAM_PRACTICE) team=23 practice=1
+		0x17, 0x01,
+		// TICK_SKIP dt=0
+		0x41, 0x00,
+		// EX uuid=5792834e-81d1-34c9-a29b-b5ff25dac3bc datalen=2
+		0x4a,
+		0x57, 0x92, 0x83, 0x4e, 0x81, 0xd1, 0x34, 0xc9,
+		0xa2, 0x9b, 0xb5, 0xff, 0x25, 0xda, 0xc3, 0xbc,
+		0x02,
+		// (TEAM_PRACTICE) team=1 practice=1
+		0x01, 0x01,
+		// EX uuid=5792834e-81d1-34c9-a29b-b5ff25dac3bc datalen=2
+		0x4a,
+		0x57, 0x92, 0x83, 0x4e, 0x81, 0xd1, 0x34, 0xc9,
+		0xa2, 0x9b, 0xb5, 0xff, 0x25, 0xda, 0xc3, 0xbc,
+		0x02,
+		// (TEAM_PRACTICE) team=23 practice=0
+		0x17, 0x00,
+		// FINISH
+		0x40};
+
+	Tick(1);
+	m_TH.RecordTeamPractice(1, 0);
+	m_TH.RecordTeamPractice(16, 0);
+	m_TH.RecordTeamPractice(23, 1);
+	Tick(2);
+	m_TH.RecordTeamPractice(1, 1);
+	m_TH.RecordTeamPractice(16, 0);
+	m_TH.RecordTeamPractice(23, 0);
 	Finish();
 	Expect(EXPECTED, sizeof(EXPECTED));
 }

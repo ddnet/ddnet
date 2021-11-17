@@ -86,8 +86,6 @@ CMenus::CMenus()
 	m_DeletePressed = false;
 	m_NumInputEvents = 0;
 
-	m_LastInput = time_get();
-
 	str_copy(m_aCurrentDemoFolder, "demos", sizeof(m_aCurrentDemoFolder));
 	m_aCallvoteReason[0] = 0;
 
@@ -249,9 +247,9 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 
 	if(pAnimator != NULL)
 	{
-		int64 Time = time_get_microseconds();
+		int64_t Time = time_get_microseconds();
 
-		if(pAnimator->m_Time + (int64)100000 < Time)
+		if(pAnimator->m_Time + (int64_t)100000 < Time)
 		{
 			pAnimator->m_Value = pAnimator->m_Active ? 1 : 0;
 			pAnimator->m_Time = Time;
@@ -610,251 +608,7 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 
 int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners, const char *pEmptyText)
 {
-	int Inside = UI()->MouseInside(pRect);
-	bool ReturnValue = false;
-	bool UpdateOffset = false;
-	static int s_AtIndex = 0;
-	static bool s_DoScroll = false;
-	static float s_ScrollStart = 0.0f;
-
-	FontSize *= UI()->Scale();
-
-	if(UI()->LastActiveItem() == pID)
-	{
-		int Len = str_length(pStr);
-		if(Len == 0)
-			s_AtIndex = 0;
-
-		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_V))
-		{
-			const char *Text = Input()->GetClipboardText();
-			if(Text)
-			{
-				int Offset = str_length(pStr);
-				int CharsLeft = StrSize - Offset - 1;
-				char *pCur = pStr + Offset;
-				str_utf8_copy(pCur, Text, CharsLeft);
-				for(int i = 0; i < CharsLeft; i++)
-				{
-					if(pCur[i] == 0)
-						break;
-					else if(pCur[i] == '\r')
-						pCur[i] = ' ';
-					else if(pCur[i] == '\n')
-						pCur[i] = ' ';
-				}
-				s_AtIndex = str_length(pStr);
-				ReturnValue = true;
-			}
-		}
-
-		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_C))
-		{
-			Input()->SetClipboardText(pStr);
-		}
-
-		/* TODO: Doesn't work, SetClipboardText doesn't retain the string quickly enough?
-		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_X))
-		{
-			Input()->SetClipboardText(pStr);
-			pStr[0] = '\0';
-			s_AtIndex = 0;
-			ReturnValue = true;
-		}
-		*/
-
-		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_U))
-		{
-			pStr[0] = '\0';
-			s_AtIndex = 0;
-			ReturnValue = true;
-		}
-
-		if(Inside && UI()->MouseButton(0))
-		{
-			s_DoScroll = true;
-			s_ScrollStart = UI()->MouseX();
-			int MxRel = (int)(UI()->MouseX() - pRect->x);
-
-			for(int i = 1; i <= Len; i++)
-			{
-				if(TextRender()->TextWidth(0, FontSize, pStr, i, std::numeric_limits<float>::max()) - *Offset > MxRel)
-				{
-					s_AtIndex = i - 1;
-					break;
-				}
-
-				if(i == Len)
-					s_AtIndex = Len;
-			}
-		}
-		else if(!UI()->MouseButton(0))
-			s_DoScroll = false;
-		else if(s_DoScroll)
-		{
-			// do scrolling
-			if(UI()->MouseX() < pRect->x && s_ScrollStart - UI()->MouseX() > 10.0f)
-			{
-				s_AtIndex = maximum(0, s_AtIndex - 1);
-				s_ScrollStart = UI()->MouseX();
-				UpdateOffset = true;
-			}
-			else if(UI()->MouseX() > pRect->x + pRect->w && UI()->MouseX() - s_ScrollStart > 10.0f)
-			{
-				s_AtIndex = minimum(Len, s_AtIndex + 1);
-				s_ScrollStart = UI()->MouseX();
-				UpdateOffset = true;
-			}
-		}
-
-		for(int i = 0; i < m_NumInputEvents; i++)
-		{
-			Len = str_length(pStr);
-			int NumChars = Len;
-			ReturnValue |= CLineInput::Manipulate(m_aInputEvents[i], pStr, StrSize, StrSize, &Len, &s_AtIndex, &NumChars);
-		}
-	}
-
-	bool JustGotActive = false;
-
-	if(UI()->ActiveItem() == pID)
-	{
-		if(!UI()->MouseButton(0))
-		{
-			s_AtIndex = minimum(s_AtIndex, str_length(pStr));
-			s_DoScroll = false;
-			UI()->SetActiveItem(0);
-		}
-	}
-	else if(UI()->HotItem() == pID)
-	{
-		if(UI()->MouseButton(0))
-		{
-			if(UI()->LastActiveItem() != pID)
-				JustGotActive = true;
-			UI()->SetActiveItem(pID);
-		}
-	}
-
-	if(Inside)
-	{
-		UI()->SetHotItem(pID);
-	}
-
-	CUIRect Textbox = *pRect;
-	RenderTools()->DrawUIRect(&Textbox, ColorRGBA(1, 1, 1, 0.5f), Corners, 3.0f);
-	Textbox.VMargin(2.0f, &Textbox);
-	Textbox.HMargin(2.0f, &Textbox);
-
-	const char *pDisplayStr = pStr;
-	char aStars[128];
-
-	if(Hidden)
-	{
-		unsigned s = str_length(pDisplayStr);
-		if(s >= sizeof(aStars))
-			s = sizeof(aStars) - 1;
-		for(unsigned int i = 0; i < s; ++i)
-			aStars[i] = '*';
-		aStars[s] = 0;
-		pDisplayStr = aStars;
-	}
-
-	char aDispEditingText[128 + IInput::INPUT_TEXT_SIZE + 2] = {0};
-	int DispCursorPos = s_AtIndex;
-	if(UI()->LastActiveItem() == pID && Input()->GetIMEEditingTextLength() > -1)
-	{
-		int EditingTextCursor = Input()->GetEditingCursor();
-		str_copy(aDispEditingText, pDisplayStr, sizeof(aDispEditingText));
-		char aEditingText[IInput::INPUT_TEXT_SIZE + 2];
-		if(Hidden)
-		{
-			// Do not show editing text in password field
-			str_copy(aEditingText, "[*]", sizeof(aEditingText));
-			EditingTextCursor = 1;
-		}
-		else
-		{
-			str_format(aEditingText, sizeof(aEditingText), "[%s]", Input()->GetIMEEditingText());
-		}
-		int NewTextLen = str_length(aEditingText);
-		int CharsLeft = (int)sizeof(aDispEditingText) - str_length(aDispEditingText) - 1;
-		int FillCharLen = minimum(NewTextLen, CharsLeft);
-		for(int i = str_length(aDispEditingText) - 1; i >= s_AtIndex; i--)
-			aDispEditingText[i + FillCharLen] = aDispEditingText[i];
-		for(int i = 0; i < FillCharLen; i++)
-			aDispEditingText[s_AtIndex + i] = aEditingText[i];
-		DispCursorPos = s_AtIndex + EditingTextCursor + 1;
-		pDisplayStr = aDispEditingText;
-		UpdateOffset = true;
-	}
-
-	if(pDisplayStr[0] == '\0')
-	{
-		pDisplayStr = pEmptyText;
-		TextRender()->TextColor(1, 1, 1, 0.75f);
-	}
-
-	DispCursorPos = minimum(DispCursorPos, str_length(pDisplayStr));
-
-	// check if the text has to be moved
-	if(UI()->LastActiveItem() == pID && !JustGotActive && (UpdateOffset || m_NumInputEvents))
-	{
-		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, DispCursorPos, std::numeric_limits<float>::max());
-		if(w - *Offset > Textbox.w)
-		{
-			// move to the left
-			float wt = TextRender()->TextWidth(0, FontSize, pDisplayStr, -1, std::numeric_limits<float>::max());
-			do
-			{
-				*Offset += minimum(wt - *Offset - Textbox.w, Textbox.w / 3);
-			} while(w - *Offset > Textbox.w + 0.0001f);
-		}
-		else if(w - *Offset < 0.0f)
-		{
-			// move to the right
-			do
-			{
-				*Offset = maximum(0.0f, *Offset - Textbox.w / 3);
-			} while(w - *Offset < -0.0001f);
-		}
-	}
-	UI()->ClipEnable(pRect);
-	Textbox.x -= *Offset;
-
-	UI()->DoLabel(&Textbox, pDisplayStr, FontSize, -1);
-
-	TextRender()->TextColor(1, 1, 1, 1);
-
-	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-	float OnePixelWidth = ((ScreenX1 - ScreenX0) / Graphics()->ScreenWidth());
-
-	// render the cursor
-	if(UI()->LastActiveItem() == pID && !JustGotActive)
-	{
-		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, DispCursorPos, std::numeric_limits<float>::max());
-		Textbox.x += w;
-
-		if((2 * time_get() / time_freq()) % 2)
-		{
-			Graphics()->TextureClear();
-			Graphics()->QuadsBegin();
-			Graphics()->SetColor(0, 0, 0, 0.3f);
-			IGraphics::CQuadItem CursorTBack(Textbox.x - (OnePixelWidth * 2.0f) / 2.0f, Textbox.y, OnePixelWidth * 2 * 2.0f, Textbox.h);
-			Graphics()->QuadsDrawTL(&CursorTBack, 1);
-			Graphics()->SetColor(1, 1, 1, 1);
-			IGraphics::CQuadItem CursorT(Textbox.x, Textbox.y + OnePixelWidth * 1.5f, OnePixelWidth * 2.0f, Textbox.h - OnePixelWidth * 1.5f * 2);
-			Graphics()->QuadsDrawTL(&CursorT, 1);
-			Graphics()->QuadsEnd();
-		}
-
-		Input()->SetEditingPosition(Textbox.x, Textbox.y + FontSize);
-	}
-
-	UI()->ClipDisable();
-
-	return ReturnValue;
+	return m_UIEx.DoEditBox(pID, pRect, pStr, StrSize, FontSize, Offset, Hidden, Corners, pEmptyText);
 }
 
 int CMenus::DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners, const char *pEmptyText)
@@ -887,7 +641,8 @@ float CMenus::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 	static float OffsetY;
 	pRect->HSplitTop(33, &Handle, 0);
 
-	Handle.y += (pRect->h - Handle.h) * Current;
+	Current = clamp(Current, 0.0f, 1.0f);
+	Handle.y = pRect->y + (pRect->h - Handle.h) * Current;
 
 	// logic
 	float ReturnValue = Current;
@@ -923,11 +678,7 @@ float CMenus::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 		UI()->SetHotItem(pID);
 
 	// render
-	RenderTools()->DrawUIRect(pRect, ColorRGBA(0, 0, 0, 0.25f), CUI::CORNER_ALL, 2.5f);
-
-	CUIRect Slider = Handle;
-	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 2.5f);
-	Slider.Margin(2, &Slider);
+	RenderTools()->DrawUIRect(pRect, ColorRGBA(0, 0, 0, 0.25f), CUI::CORNER_ALL, 5.0f);
 
 	float ColorSlider = 0;
 
@@ -938,16 +689,16 @@ float CMenus::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 	else
 		ColorSlider = 0.75f;
 
-	RenderTools()->DrawUIRect(&Slider, ColorRGBA(ColorSlider, ColorSlider, ColorSlider, 0.75f), CUI::CORNER_ALL, 2.5f);
+	RenderTools()->DrawUIRect(&Handle, ColorRGBA(ColorSlider, ColorSlider, ColorSlider, 0.75f), CUI::CORNER_ALL, 5.0f);
 
 	return ReturnValue;
 }
 
-float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current)
+float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, bool ColorPickerSlider, ColorRGBA *pColorInner)
 {
 	CUIRect Handle;
 	static float OffsetX;
-	pRect->VSplitLeft(33, &Handle, 0);
+	pRect->VSplitLeft(ColorPickerSlider ? 8 : 33, &Handle, 0);
 
 	Handle.x += (pRect->w - Handle.w) * Current;
 
@@ -985,19 +736,35 @@ float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current)
 		UI()->SetHotItem(pID);
 
 	// render
-	CUIRect Rail;
-	pRect->HMargin(5.0f, &Rail);
-	RenderTools()->DrawUIRect(&Rail, ColorRGBA(1, 1, 1, 0.25f), 0, 0.0f);
+	if(!ColorPickerSlider)
+	{
+		CUIRect Rail;
+		pRect->HMargin(5.0f, &Rail);
+		RenderTools()->DrawUIRect(&Rail, ColorRGBA(1, 1, 1, 0.25f), 0, 0.0f);
 
-	CUIRect Slider = Handle;
-	Slider.h = Rail.y - Slider.y;
-	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_T, 2.5f);
-	Slider.y = Rail.y + Rail.h;
-	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_B, 2.5f);
+		CUIRect Slider = Handle;
+		Slider.h = Rail.y - Slider.y;
+		RenderTools()->DrawUIRect(&Slider, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_T, 2.5f);
+		Slider.y = Rail.y + Rail.h;
+		RenderTools()->DrawUIRect(&Slider, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_B, 2.5f);
 
-	Slider = Handle;
-	Slider.Margin(5.0f, &Slider);
-	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1, 1, 1, 0.25f * ButtonColorMul(pID)), CUI::CORNER_ALL, 2.5f);
+		Slider = Handle;
+		Slider.Margin(5.0f, &Slider);
+		RenderTools()->DrawUIRect(&Slider, ColorRGBA(1, 1, 1, 0.25f * ButtonColorMul(pID)), CUI::CORNER_ALL, 2.5f);
+	}
+	else
+	{
+		CUIRect Slider = Handle;
+		float MarginW = 4.0f;
+		float MarginH = 9.0f;
+		Slider.x -= MarginW / 2;
+		Slider.y -= MarginH / 2;
+		Slider.w += MarginW;
+		Slider.h += MarginH;
+		RenderTools()->DrawUIRect(&Slider, ColorRGBA(0.15f, 0.15f, 0.15f, 1.0f), CUI::CORNER_ALL, 5.0f);
+		Slider.Margin(2, &Slider);
+		RenderTools()->DrawUIRect(&Slider, *pColorInner, CUI::CORNER_ALL, 3.0f);
+	}
 
 	return ReturnValue;
 }
@@ -1256,7 +1023,10 @@ int CMenus::RenderMenubar(CUIRect r)
 		Box.VSplitLeft(4.0f, 0, &Box);
 		static int s_CallVoteButton = 0;
 		if(DoButton_MenuTab(&s_CallVoteButton, Localize("Call vote"), m_ActivePage == PAGE_CALLVOTE, &Button, CUI::CORNER_TR))
+		{
 			NewPage = PAGE_CALLVOTE;
+			m_ControlPageOpening = true;
+		}
 	}
 
 	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
@@ -1327,7 +1097,7 @@ void CMenus::RenderLoading()
 {
 	// TODO: not supported right now due to separate render thread
 
-	static int64 LastLoadRender = 0;
+	static int64_t LastLoadRender = 0;
 	float Percent = m_LoadCurrent++ / (float)m_LoadTotal;
 
 	// make sure that we don't render for each little thing we load
@@ -1341,7 +1111,7 @@ void CMenus::RenderLoading()
 	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_UiColor, true));
 
 	CUIRect Screen = *UI()->Screen();
-	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
+	UI()->MapScreen();
 
 	if(!m_pBackground->Render())
 	{
@@ -1416,13 +1186,20 @@ void CMenus::OnInit()
 	if(g_Config.m_ClSkipStartMenu)
 		m_ShowStart = false;
 
-	m_RefreshButton.Init(UI());
-	m_ConnectButton.Init(UI());
+	m_UIEx.Init(UI(), Kernel(), RenderTools(), m_aInputEvents, &m_NumInputEvents);
+
+	m_RefreshButton.Init(UI(), -1);
+	m_ConnectButton.Init(UI(), -1);
 
 	Console()->Chain("add_favorite", ConchainServerbrowserUpdate, this);
 	Console()->Chain("remove_favorite", ConchainServerbrowserUpdate, this);
 	Console()->Chain("add_friend", ConchainFriendlistUpdate, this);
 	Console()->Chain("remove_friend", ConchainFriendlistUpdate, this);
+
+	Console()->Chain("cl_assets_entities", ConchainAssetsEntities, this);
+	Console()->Chain("cl_asset_game", ConchainAssetGame, this);
+	Console()->Chain("cl_asset_emoticons", ConchainAssetEmoticons, this);
+	Console()->Chain("cl_asset_particles", ConchainAssetParticles, this);
 
 	m_TextureBlob = Graphics()->LoadTexture("blob.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 
@@ -1449,7 +1226,7 @@ void CMenus::PopupMessage(const char *pTopic, const char *pBody, const char *pBu
 	m_Popup = POPUP_MESSAGE;
 }
 
-void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pButton, int64 Duration)
+void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pButton, int64_t Duration)
 {
 	dbg_msg(pTopic, "%s", pBody);
 
@@ -1473,6 +1250,13 @@ bool CMenus::CanDisplayWarning()
 
 void CMenus::RenderColorPicker()
 {
+	if(m_EscapePressed)
+	{
+		ms_ColorPicker.m_Active = false;
+		ms_ValueSelectorTextMode = false;
+		UI()->SetActiveItem(0);
+	}
+
 	if(!ms_ColorPicker.m_Active)
 		return;
 
@@ -1667,7 +1451,7 @@ int CMenus::Render()
 		return 0;
 
 	CUIRect Screen = *UI()->Screen();
-	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
+	UI()->MapScreen();
 
 	m_MouseSlow = false;
 
@@ -1679,7 +1463,7 @@ int CMenus::Render()
 	}
 	else if(s_Frame == 1)
 	{
-		m_pClient->m_pSounds->Enqueue(CSounds::CHN_MUSIC, SOUND_MENU);
+		m_pClient->m_Sounds.Enqueue(CSounds::CHN_MUSIC, SOUND_MENU);
 		s_Frame++;
 		m_DoubleClickIndex = -1;
 
@@ -1821,7 +1605,7 @@ int CMenus::Render()
 		const char *pButtonText = "";
 		int ExtraAlign = 0;
 
-		ColorRGBA BgColor = ColorRGBA{0.0f, 0.0f, 0.0f, 0.5f};
+		ColorRGBA BgColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f);
 		if(m_Popup == POPUP_MESSAGE)
 		{
 			pTitle = m_aMessageTopic;
@@ -1960,10 +1744,16 @@ int CMenus::Render()
 		}
 		else if(m_Popup == POPUP_WARNING)
 		{
-			BgColor = ColorRGBA{0.5f, 0.0f, 0.0f, 0.7f};
+			BgColor = ColorRGBA(0.5f, 0.0f, 0.0f, 0.7f);
 			pTitle = m_aMessageTopic;
 			pExtraText = m_aMessageBody;
 			pButtonText = m_aMessageButton;
+			ExtraAlign = -1;
+		}
+		else if(m_Popup == POPUP_SWITCH_SERVER)
+		{
+			pTitle = Localize("Disconnect");
+			pExtraText = Localize("Are you sure that you want to disconnect and switch to a different server?");
 			ExtraAlign = -1;
 		}
 
@@ -2129,7 +1919,7 @@ int CMenus::Render()
 
 			if(Client()->MapDownloadTotalsize() > 0)
 			{
-				int64 Now = time_get();
+				int64_t Now = time_get();
 				if(Now - m_DownloadLastCheckTime >= time_freq())
 				{
 					if(m_DownloadLastCheckSize > Client()->MapDownloadAmount())
@@ -2211,11 +2001,11 @@ int CMenus::Render()
 				ActSelection = g_Config.m_BrFilterCountryIndex;
 			static float s_ScrollValue = 0.0f;
 			int OldSelected = -1;
-			UiDoListboxStart(&s_ScrollValue, &Box, 50.0f, Localize("Country / Region"), "", m_pClient->m_pCountryFlags->Num(), 6, OldSelected, s_ScrollValue);
+			UiDoListboxStart(&s_ScrollValue, &Box, 50.0f, Localize("Country / Region"), "", m_pClient->m_CountryFlags.Num(), 6, OldSelected, s_ScrollValue);
 
-			for(int i = 0; i < m_pClient->m_pCountryFlags->Num(); ++i)
+			for(int i = 0; i < m_pClient->m_CountryFlags.Num(); ++i)
 			{
-				const CCountryFlags::CCountryFlag *pEntry = m_pClient->m_pCountryFlags->GetByIndex(i);
+				const CCountryFlags::CCountryFlag *pEntry = m_pClient->m_CountryFlags.GetByIndex(i);
 				if(pEntry->m_CountryCode == ActSelection)
 					OldSelected = i;
 
@@ -2229,14 +2019,14 @@ int CMenus::Render()
 					Item.m_Rect.w = Item.m_Rect.h * 2;
 					Item.m_Rect.x += (OldWidth - Item.m_Rect.w) / 2.0f;
 					ColorRGBA Color(1.0f, 1.0f, 1.0f, 1.0f);
-					m_pClient->m_pCountryFlags->Render(pEntry->m_CountryCode, &Color, Item.m_Rect.x, Item.m_Rect.y, Item.m_Rect.w, Item.m_Rect.h);
+					m_pClient->m_CountryFlags.Render(pEntry->m_CountryCode, &Color, Item.m_Rect.x, Item.m_Rect.y, Item.m_Rect.w, Item.m_Rect.h);
 					UI()->DoLabel(&Label, pEntry->m_aCountryCodeString, 10.0f, 0);
 				}
 			}
 
 			const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 			if(OldSelected != NewSelected)
-				ActSelection = m_pClient->m_pCountryFlags->GetByIndex(NewSelected)->m_CountryCode;
+				ActSelection = m_pClient->m_CountryFlags.GetByIndex(NewSelected)->m_CountryCode;
 
 			Part.VMargin(120.0f, &Part);
 
@@ -2607,6 +2397,29 @@ int CMenus::Render()
 				SetActive(false);
 			}
 		}
+		else if(m_Popup == POPUP_SWITCH_SERVER)
+		{
+			CUIRect Yes, No;
+			Box.HSplitBottom(20.f, &Box, &Part);
+			Box.HSplitBottom(24.f, &Box, &Part);
+
+			// buttons
+			Part.VMargin(80.0f, &Part);
+			Part.VSplitMid(&No, &Yes);
+			Yes.VMargin(20.0f, &Yes);
+			No.VMargin(20.0f, &No);
+
+			static int s_ButtonAbort = 0;
+			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || m_EscapePressed)
+			{
+				m_Popup = POPUP_NONE;
+				m_aNextServer[0] = '\0';
+			}
+
+			static int s_ButtonTryAgain = 0;
+			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
+				Client()->Connect(m_aNextServer);
+		}
 		else
 		{
 			Box.HSplitBottom(20.f, &Box, &Part);
@@ -2659,7 +2472,7 @@ void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
 		Item.m_Rect.VSplitLeft(Item.m_Rect.h * 2.0f, &Icon, &Item.m_Rect);
 
 		// draw icon if it exists
-		if(Theme.m_IconTexture != -1)
+		if(Theme.m_IconTexture.IsValid())
 		{
 			Icon.VMargin(6.0f, &Icon);
 			Icon.HMargin(3.0f, &Icon);
@@ -2739,8 +2552,6 @@ void CMenus::OnReset()
 
 bool CMenus::OnMouseMove(float x, float y)
 {
-	m_LastInput = time_get();
-
 	if(!m_MenuActive)
 		return false;
 
@@ -2755,16 +2566,14 @@ bool CMenus::OnMouseMove(float x, float y)
 		m_MousePos.x += x;
 		m_MousePos.y += y;
 	}
-	m_MousePos.x = clamp(m_MousePos.x, 0.f, (float)Graphics()->ScreenWidth());
-	m_MousePos.y = clamp(m_MousePos.y, 0.f, (float)Graphics()->ScreenHeight());
+	m_MousePos.x = clamp(m_MousePos.x, 0.f, (float)Graphics()->WindowWidth());
+	m_MousePos.y = clamp(m_MousePos.y, 0.f, (float)Graphics()->WindowHeight());
 
 	return true;
 }
 
 bool CMenus::OnInput(IInput::CEvent e)
 {
-	m_LastInput = time_get();
-
 	// special handle esc and enter for popup purposes
 	if(e.m_Flags & IInput::FLAG_PRESS)
 	{
@@ -2803,7 +2612,7 @@ void CMenus::OnStateChange(int NewState, int OldState)
 	if(NewState == IClient::STATE_OFFLINE)
 	{
 		if(OldState >= IClient::STATE_ONLINE && NewState < IClient::STATE_QUITTING)
-			m_pClient->m_pSounds->Play(CSounds::CHN_MUSIC, SOUND_MENU, 1.0f);
+			m_pClient->m_Sounds.Play(CSounds::CHN_MUSIC, SOUND_MENU, 1.0f);
 		m_Popup = POPUP_NONE;
 		if(Client()->ErrorString() && Client()->ErrorString()[0] != 0)
 		{
@@ -2836,8 +2645,6 @@ void CMenus::OnStateChange(int NewState, int OldState)
 	}
 }
 
-extern "C" void font_debug_render();
-
 void CMenus::OnRender()
 {
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
@@ -2845,9 +2652,8 @@ void CMenus::OnRender()
 
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
-		CUIRect Screen = *UI()->Screen();
-		Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
-		RenderDemoPlayer(Screen);
+		UI()->MapScreen();
+		RenderDemoPlayer(*UI()->Screen());
 	}
 
 	if(Client()->State() == IClient::STATE_ONLINE && m_pClient->m_ServerMode == m_pClient->SERVERMODE_PUREMOD)
@@ -2892,8 +2698,8 @@ void CMenus::OnRender()
 
 	// update the ui
 	CUIRect *pScreen = UI()->Screen();
-	float mx = (m_MousePos.x / (float)Graphics()->ScreenWidth()) * pScreen->w;
-	float my = (m_MousePos.y / (float)Graphics()->ScreenHeight()) * pScreen->h;
+	float mx = (m_MousePos.x / (float)Graphics()->WindowWidth()) * pScreen->w;
+	float my = (m_MousePos.y / (float)Graphics()->WindowHeight()) * pScreen->h;
 
 	int Buttons = 0;
 	if(m_UseMouseButtons)
@@ -2924,8 +2730,7 @@ void CMenus::OnRender()
 	// render debug information
 	if(g_Config.m_Debug)
 	{
-		CUIRect Screen = *UI()->Screen();
-		Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
+		UI()->MapScreen();
 
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "%p %p %p", UI()->HotItem(), UI()->ActiveItem(), UI()->LastActiveItem());
@@ -2986,17 +2791,14 @@ void CMenus::RenderBackground()
 	Graphics()->QuadsEnd();
 
 	// restore screen
-	{
-		CUIRect Screen = *UI()->Screen();
-		Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
-	}
+	UI()->MapScreen();
 }
 
 bool CMenus::CheckHotKey(int Key) const
 {
 	return m_Popup == POPUP_NONE &&
 	       !Input()->KeyIsPressed(KEY_LSHIFT) && !Input()->KeyIsPressed(KEY_RSHIFT) && !Input()->KeyIsPressed(KEY_LCTRL) && !Input()->KeyIsPressed(KEY_RCTRL) && !Input()->KeyIsPressed(KEY_LALT) && // no modifier
-	       Input()->KeyIsPressed(Key) && m_pClient->m_pGameConsole->IsClosed();
+	       Input()->KeyIsPressed(Key) && m_pClient->m_GameConsole.IsClosed();
 }
 
 int CMenus::DoButton_CheckBox_DontCare(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
@@ -3018,7 +2820,7 @@ void CMenus::RenderUpdating(const char *pCaption, int current, int total)
 {
 	// make sure that we don't render for each little thing we load
 	// because that will slow down loading if we have vsync
-	static int64 LastLoadRender = 0;
+	static int64_t LastLoadRender = 0;
 	if(time_get() - LastLoadRender < time_freq() / 60)
 		return;
 	LastLoadRender = time_get();
@@ -3027,7 +2829,7 @@ void CMenus::RenderUpdating(const char *pCaption, int current, int total)
 	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_UiColor, true));
 
 	CUIRect Screen = *UI()->Screen();
-	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
+	UI()->MapScreen();
 
 	RenderBackground();
 
@@ -3070,7 +2872,7 @@ int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser
 	if(IsDir || !str_endswith(pName, ".png"))
 		return 0;
 
-	char aBuf[MAX_PATH_LENGTH];
+	char aBuf[IO_MAX_PATH_LENGTH];
 	str_format(aBuf, sizeof(aBuf), "menuimages/%s", pName);
 	CImageInfo Info;
 	if(!pSelf->Graphics()->LoadPNG(&Info, aBuf, DirType))
@@ -3164,9 +2966,16 @@ void CMenus::SetMenuPage(int NewPage)
 
 bool CMenus::HandleListInputs(const CUIRect &View, float &ScrollValue, const float ScrollAmount, int *pScrollOffset, const float ElemHeight, int &SelectedIndex, const int NumElems)
 {
+	if(NumElems == 0)
+	{
+		ScrollValue = 0;
+		SelectedIndex = 0;
+		return false;
+	}
+
 	int NewIndex = -1;
-	int Num = (int)(View.h / ElemHeight) + 1;
-	int ScrollNum = maximum(NumElems - Num + 1, 0);
+	int Num = (int)(View.h / ElemHeight);
+	int ScrollNum = maximum(NumElems - Num, 0);
 	if(ScrollNum > 0)
 	{
 		if(pScrollOffset && *pScrollOffset >= 0)
@@ -3181,13 +2990,15 @@ bool CMenus::HandleListInputs(const CUIRect &View, float &ScrollValue, const flo
 	}
 
 	ScrollValue = clamp(ScrollValue, 0.0f, 1.0f);
-	SelectedIndex = clamp(SelectedIndex, 0, NumElems);
+	SelectedIndex = clamp(SelectedIndex, 0, NumElems - 1);
 
 	for(int i = 0; i < m_NumInputEvents; i++)
 	{
 		if(m_aInputEvents[i].m_Flags & IInput::FLAG_PRESS)
 		{
-			if(m_aInputEvents[i].m_Key == KEY_DOWN)
+			if(UI()->LastActiveItem() == &g_Config.m_UiServerAddress)
+				return false;
+			else if(m_aInputEvents[i].m_Key == KEY_DOWN)
 				NewIndex = minimum(SelectedIndex + 1, NumElems - 1);
 			else if(m_aInputEvents[i].m_Key == KEY_UP)
 				NewIndex = maximum(SelectedIndex - 1, 0);

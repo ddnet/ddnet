@@ -7,6 +7,8 @@
 #include <base/vmath.h>
 #include <game/client/component.h>
 
+#include <game/generated/protocol.h>
+
 class CControls : public CComponent
 {
 public:
@@ -17,7 +19,7 @@ public:
 	SDL_Joystick *m_Joystick;
 	bool m_JoystickFirePressed;
 	bool m_JoystickRunPressed;
-	int64 m_JoystickTapTime;
+	int64_t m_JoystickTapTime;
 
 	SDL_Joystick *m_Gamepad;
 	bool m_UsingGamepad;
@@ -29,7 +31,6 @@ public:
 	int m_InputDirectionLeft[NUM_DUMMIES];
 	int m_InputDirectionRight[NUM_DUMMIES];
 	int m_ShowHookColl[NUM_DUMMIES];
-	int m_ResetDummy[NUM_DUMMIES];
 	int m_LastDummy;
 	int m_OtherFire;
 

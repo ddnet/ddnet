@@ -10,11 +10,14 @@
 #include <engine/shared/config.h>
 
 #include <game/client/component.h>
+#include <game/client/components/camera.h>
 #include <game/client/components/chat.h>
 #include <game/client/components/menus.h>
 #include <game/client/components/scoreboard.h>
 #include <game/client/gameclient.h>
 #include <game/collision.h>
+
+#include <base/vmath.h>
 
 #include "controls.h"
 
@@ -197,10 +200,6 @@ void CControls::OnConsoleInit()
 		static CInputState s_State = {this, &m_ShowHookColl[0], &m_ShowHookColl[1]};
 		Console()->Register("+showhookcoll", "", CFGFLAG_CLIENT, ConKeyInputState, (void *)&s_State, "Show Hook Collision");
 	}
-	{
-		static CInputState s_State = {this, &m_ResetDummy[0], &m_ResetDummy[1]};
-		Console()->Register("+resetdummy", "", CFGFLAG_CLIENT, ConKeyInputState, (void *)&s_State, "Reset Dummy");
-	}
 
 	{
 		static CInputSet s_Set = {this, &m_InputData[0].m_WantedWeapon, &m_InputData[1].m_WantedWeapon, 1};
@@ -247,13 +246,13 @@ void CControls::OnMessage(int Msg, void *pRawMsg)
 
 int CControls::SnapInput(int *pData)
 {
-	static int64 LastSendTime = 0;
+	static int64_t LastSendTime = 0;
 	bool Send = false;
 
 	// update player state
-	if(m_pClient->m_pChat->IsActive())
+	if(m_pClient->m_Chat.IsActive())
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_CHATTING;
-	else if(m_pClient->m_pMenus->IsActive())
+	else if(m_pClient->m_Menus.IsActive())
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_IN_MENU;
 	else
 	{
@@ -265,13 +264,13 @@ int CControls::SnapInput(int *pData)
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_PLAYING;
 	}
 
-	if(m_pClient->m_pScoreboard->Active())
+	if(m_pClient->m_Scoreboard.Active())
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_SCOREBOARD;
 
 	if(m_InputData[g_Config.m_ClDummy].m_PlayerFlags != PLAYERFLAG_PLAYING)
 		m_JoystickTapTime = 0; // Do not launch hook on first tap
 
-	if(m_pClient->m_pControls->m_ShowHookColl[g_Config.m_ClDummy])
+	if(m_pClient->m_Controls.m_ShowHookColl[g_Config.m_ClDummy])
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_AIM;
 
 	if(m_LastData[g_Config.m_ClDummy].m_PlayerFlags != m_InputData[g_Config.m_ClDummy].m_PlayerFlags)
@@ -340,19 +339,6 @@ int CControls::SnapInput(int *pData)
 			pDummyInput->m_Hook = g_Config.m_ClDummyHook;
 		}
 
-		if(m_ResetDummy[g_Config.m_ClDummy])
-		{
-			ResetInput(!g_Config.m_ClDummy);
-			m_InputData[!g_Config.m_ClDummy].m_Hook = 0;
-
-			CNetObj_PlayerInput *pDummyInput = &m_pClient->m_DummyInput;
-			pDummyInput->m_Hook = m_InputData[!g_Config.m_ClDummy].m_Hook;
-			pDummyInput->m_Jump = m_InputData[!g_Config.m_ClDummy].m_Jump;
-			pDummyInput->m_Direction = m_InputData[!g_Config.m_ClDummy].m_Jump;
-
-			pDummyInput->m_Fire = m_InputData[!g_Config.m_ClDummy].m_Fire;
-		}
-
 		// stress testing
 #ifdef CONF_DEBUG
 		if(g_Config.m_DbgStress)
@@ -413,7 +399,7 @@ void CControls::OnRender()
 		GAMEPAD_DEAD_ZONE = 65536 / 8,
 	};
 
-	int64 CurTime = time_get();
+	int64_t CurTime = time_get();
 	bool FireWasPressed = false;
 
 	if(m_Joystick)
@@ -558,6 +544,13 @@ bool CControls::OnMouseMove(float x, float y)
 		x = x * g_Config.m_ClDyncamMousesens / g_Config.m_InpMousesens;
 		y = y * g_Config.m_ClDyncamMousesens / g_Config.m_InpMousesens;
 	}
+
+	if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID < 0)
+	{
+		x = x * m_pClient->m_Camera.m_Zoom;
+		y = y * m_pClient->m_Camera.m_Zoom;
+	}
+
 	m_MousePos[g_Config.m_ClDummy] += vec2(x, y); // TODO: ugly
 	ClampMousePos();
 
@@ -581,9 +574,17 @@ void CControls::ClampMousePos()
 		float MinDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMinDistance : g_Config.m_ClMouseMinDistance;
 		float MouseMin = MinDistance;
 
-		if(length(m_MousePos[g_Config.m_ClDummy]) < MouseMin)
-			m_MousePos[g_Config.m_ClDummy] = normalize(m_MousePos[g_Config.m_ClDummy]) * MouseMin;
-		if(length(m_MousePos[g_Config.m_ClDummy]) > MouseMax)
-			m_MousePos[g_Config.m_ClDummy] = normalize(m_MousePos[g_Config.m_ClDummy]) * MouseMax;
+		float MDistance = length(m_MousePos[g_Config.m_ClDummy]);
+		if(MDistance < 0.001f)
+		{
+			m_MousePos[g_Config.m_ClDummy].x = 0.001f;
+			m_MousePos[g_Config.m_ClDummy].y = 0;
+			MDistance = 0.001f;
+		}
+		if(MDistance < MouseMin)
+			m_MousePos[g_Config.m_ClDummy] = normalize_pre_length(m_MousePos[g_Config.m_ClDummy], MDistance) * MouseMin;
+		MDistance = length(m_MousePos[g_Config.m_ClDummy]);
+		if(MDistance > MouseMax)
+			m_MousePos[g_Config.m_ClDummy] = normalize_pre_length(m_MousePos[g_Config.m_ClDummy], MDistance) * MouseMax;
 	}
 }

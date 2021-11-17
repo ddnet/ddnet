@@ -58,6 +58,9 @@ public:
 		return m_aInputEvents[Index];
 	}
 
+	CEvent *GetEventsRaw() { return m_aInputEvents; }
+	int *GetEventCountRaw() { return &m_NumEvents; }
+
 	// keys
 	virtual bool KeyIsPressed(int Key) const = 0;
 	virtual bool KeyPress(int Key, bool CheckCounter = false) const = 0;
@@ -65,6 +68,8 @@ public:
 	virtual void Clear() = 0;
 
 	//
+	virtual void NativeMousePos(int *mx, int *my) const = 0;
+	virtual bool NativeMousePressed(int index) = 0;
 	virtual void MouseModeRelative() = 0;
 	virtual void MouseModeAbsolute() = 0;
 	virtual int MouseDoubleClick() = 0;

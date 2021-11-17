@@ -29,7 +29,7 @@ void CSoundLoading::Run()
 		}
 
 		if(m_Render)
-			m_pGameClient->m_pMenus->RenderLoading();
+			m_pGameClient->m_Menus.RenderLoading();
 	}
 }
 
@@ -114,7 +114,7 @@ void CSounds::OnRender()
 	}
 
 	// set listener pos
-	Sound()->SetListenerPos(m_pClient->m_pCamera->m_Center.x, m_pClient->m_pCamera->m_Center.y);
+	Sound()->SetListenerPos(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y);
 
 	// update volume
 	float NewGuiSoundVol = g_Config.m_SndChatSoundVolume / 100.0f;
@@ -149,7 +149,7 @@ void CSounds::OnRender()
 	// play sound from queue
 	if(m_QueuePos > 0)
 	{
-		int64 Now = time();
+		int64_t Now = time();
 		if(m_QueueWaitTime <= Now)
 		{
 			Play(m_aQueue[0].m_Channel, m_aQueue[0].m_SetId, 1.0f);

@@ -5,6 +5,7 @@
 # 2020.8.19 TsFreddie
 # 2020.8.20 Dan_cao
 # 2020.11.12 TsFreddie
+# 2021.6.1 TsFreddie
 ##### /authors #####
 
 ##### translated strings #####
@@ -184,7 +185,7 @@ Friends
 == 好友
 
 Fullscreen
-== 全螢幕
+== 獨占全螢幕
 
 Game
 == 遊戲
@@ -356,7 +357,7 @@ Player options
 == 玩家選項
 
 Players
-== 玩家數
+== 玩家
 
 Please balance teams!
 == 隊伍人數不平衡！
@@ -378,9 +379,6 @@ Red team wins!
 
 Refresh
 == 重新整理
-
-Refreshing master servers
-== 正在重新整理主伺服器
 
 Remote console
 == 遠端控制檯
@@ -447,9 +445,6 @@ Show name plates
 
 Show only chat messages from friends
 == 只顯示好友訊息
-
-Show only supported
-== 只顯示支援的解析度
 
 Skins
 == 外觀
@@ -571,9 +566,6 @@ Yes
 You must restart the game for all settings to take effect.
 == 你需要重啟遊戲來使某些設定生效。
 
-Borderless window
-== 無邊框視窗
-
 Demo
 == 回放
 
@@ -694,9 +686,6 @@ Type:
 Use DDRace Scoreboard
 == 使用 DDRace 計分板
 
-Show client IDs in Scoreboard
-== 在計分板上顯示客戶端ID
-
 Show score
 == 顯示比分
 
@@ -721,29 +710,14 @@ System message
 Highlighted message
 == 被提及訊息
 
-Look out!
-== 小心!
-
 Team message
 == 隊伍訊息
-
-We will win
-== 我們贏定了
 
 Normal message
 == 普通訊息
 
-Hello and welcome
-== 你好,歡迎
-
 Friend message
 == 好友訊息
-
-Inner color
-== 內部顏色
-
-Outline color
-== 外部顏色
 
 Save the best demo of each race
 == 儲存競速模式最高記錄的回放
@@ -787,12 +761,6 @@ Show other players' hook collision lines
 Show other players' key presses
 == 顯示其他玩家的按鍵
 
-Background (regular)
-== 背景(常規)
-
-Background (entities)
-== 背景(實體)
-
 Show tiles layers from BG map
 == 顯示實體層背景地圖的圖塊層
 
@@ -800,7 +768,7 @@ Try fast HTTP map download first
 == 優先嚐試用HTTP高速下載地圖
 
 DDNet %s is available:
-== DDnet %s 現已可用：
+== DDNet %s 現已可用：
 
 Update now
 == 現在更新
@@ -825,9 +793,6 @@ Browser
 
 Connecting dummy
 == 正在連線分身
-
-Spectator
-== 旁觀者
 
 Search
 == 搜尋
@@ -861,23 +826,14 @@ Grabs
 DDNet
 == DDNet
 
-second
-== 秒
-
 Select a name
 == 另存為
-
-Hi o/
-== 你好
 
 Deaths
 == 死亡數
 
 Please use a different name
 == 請換一個不同的檔名
-
-Wait before try for
-== 請等待
 
 Restart
 == 重新開始
@@ -904,7 +860,7 @@ Frags
 == 擊殺數
 
 Enable long pain sound (used when shooting in freeze)
-== 啟用長時間痛苦的聲音(在凍結時使用)
+== 啟用在凍結時的呼救聲
 
 %.2f MiB
 == %.2f MiB
@@ -913,7 +869,7 @@ Refresh Rate
 == 重新整理率
 
 New random timeout code
-== 新隨機超時程式碼
+== 隨機生成新的超時還原碼
 
 Suicides
 == 自殺數
@@ -934,9 +890,6 @@ Spree
 Max CSVs
 == 最大csv檔案數
 
-seconds
-== 秒
-
 %.2f KiB
 == %.2f KiB
 
@@ -945,9 +898,6 @@ Best
 
 Exclude
 == 排除
-
-Friend
-== 好友
 
 may cause delay
 == 可能會產生延遲
@@ -967,11 +917,8 @@ Preinit VBO (iGPUs only)
 Activate
 == 啟用
 
-Multiple texture units (disable for MacOS)
-== 多重紋理單元 (MacOS不可用)
-
-Use OpenGL 3.3 (experimental)
-== 使用 OpenGL 3.3 (實驗性)
+Multiple texture units (disable for macOS)
+== 多重紋理單元 (macOS不可用)
 
 File already exists, do you want to overwrite it?
 == 檔案已存在，是否覆蓋？
@@ -1010,7 +957,7 @@ Downloading %s:
 == 正在下載 %s:
 
 %d new mentions
-== %d 條新提示
+== %d 條新提及
 
 Toggle dummy
 == 切換分身
@@ -1040,7 +987,7 @@ Zoom in
 == 視距放大
 
 1 new mention
-== 1 條新提示
+== 1 條新提及
 
 Update failed! Check log...
 == 更新失敗！請檢查日誌...
@@ -1070,7 +1017,7 @@ Dummy copy
 == 分身同步動作
 
 9+ new mentions
-== 9+ 條新提示
+== 9+ 條新提及
 
 Statboard
 == 統計板
@@ -1170,9 +1117,6 @@ Country / Region
 
 https://wiki.ddnet.tw/
 == https://docs.qq.com/doc/DWGFrV0xPRmVWVkla
-
-The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== 材質 %s 的寬和高無法被16整除，這可能會導致畫面異常。
 
 Warning
 == 警告
@@ -1278,10 +1222,7 @@ Assets
 == 材質
 
 Use old chat style
-== 舊版聊天框
-
-Highlight
-== 高亮
+== 原始聊天框
 
 Use current map as background
 == 使用當前地圖作爲實體層背景地圖
@@ -1297,3 +1238,108 @@ Particles
 
 Assets directory
 == 材質目錄
+
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 紋理 %s 的寬度無法被 %d 整除，或者高度無法被 %d 整除，這可能會導致視覺錯誤。
+
+AFR
+== 非洲
+
+ASI
+== 亞洲
+
+AUS
+== 澳洲
+
+EUR
+== 歐洲
+
+NA
+== 北美
+
+SA
+== 南美
+
+CHN
+== 中國
+
+Getting server list from master server
+== 正在從主伺服器獲取伺服器列表
+
+Leak IP
+== 洩露IP
+
+Chat command
+== 聊天框指令
+
+Dummy
+== 分身
+
+Windowed
+== 視窗化
+
+Windowed borderless
+== 無邊框視窗
+
+Desktop fullscreen
+== 無邊框全螢幕
+
+Use modern OpenGL
+== 使用現代OpenGL
+
+Show client IDs
+== 顯示客戶端ID
+
+Laser Outline Color
+== 鐳射線邊框顏色
+
+Laser Inner Color
+== 鐳射線顏色
+
+Hookline
+== 鉤索輔助線
+
+No hit
+== 沒有擊中
+
+Hookable
+== 可鉤牆壁
+
+Tee
+== 其他玩家
+
+Preview
+== 預覽
+
+Background
+== 背景
+
+Entities Background color
+== 實體層背景顏色
+
+Regular Background Color
+== 背景層背景顏色
+
+Discord
+== Discord
+
+https://ddnet.tw/discord
+== https://ddnet.tw/discord
+
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Refreshing...
+== 
+
+Kill Messages
+== 
+
+Kill Message Normal Color
+== 
+
+Kill Message Highlight Color
+== 
+
+Show local player's key presses
+== 

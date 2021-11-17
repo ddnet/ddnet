@@ -318,7 +318,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == ENTITY_LASER_SHORT + ENTITY_OFFSET ||
 						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_JUMP ||
 						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_ADD_TIME ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_SUBSTRACT_TIME ||
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_SUBTRACT_TIME ||
 						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_ALLOW_TELE_GUN ||
 						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_ALLOW_BLUE_TELE_GUN)
 					{
@@ -914,7 +914,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		m_Image = NewVal;
 		if(NewVal == -1)
 		{
-			m_Texture = IGraphics::CTextureHandle();
+			m_Texture.Invalidate();
 			m_Image = -1;
 		}
 		else
@@ -1083,7 +1083,7 @@ int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEdito
 void CLayerTiles::FlagModified(int x, int y, int w, int h)
 {
 	m_pEditor->m_Map.m_Modified = true;
-	if(m_Seed != 0 && m_AutoMapperConfig != -1 && m_AutoAutoMap)
+	if(m_Seed != 0 && m_AutoMapperConfig != -1 && m_AutoAutoMap && m_Image >= 0)
 	{
 		m_pEditor->m_Map.m_lImages[m_Image]->m_AutoMapper.ProceedLocalized(this, m_AutoMapperConfig, m_Seed, x, y, w, h);
 	}
@@ -1190,7 +1190,7 @@ bool CLayerTele::IsEmpty(CLayerTiles *pLayer)
 {
 	for(int y = 0; y < pLayer->m_Height; y++)
 		for(int x = 0; x < pLayer->m_Width; x++)
-			if(IsValidTeleTile(pLayer->GetTile(x, y).m_Index))
+			if(m_pEditor->m_AllowPlaceUnusedTiles || IsValidTeleTile(pLayer->GetTile(x, y).m_Index))
 				return false;
 
 	return true;
@@ -1221,7 +1221,7 @@ void CLayerTele::BrushDraw(CLayer *pBrush, float wx, float wy)
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			if(IsValidTeleTile(l->m_pTiles[y * l->m_Width + x].m_Index))
+			if((m_pEditor->m_AllowPlaceUnusedTiles || IsValidTeleTile(l->m_pTiles[y * l->m_Width + x].m_Index)) && l->m_pTiles[y * l->m_Width + x].m_Index != TILE_AIR)
 			{
 				if(m_pEditor->m_TeleNumber != l->m_TeleNum)
 				{
@@ -1348,7 +1348,7 @@ void CLayerTele::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			if(Empty || !IsValidTeleTile((pLt->m_pTiles[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)]).m_Index))
+			if(Empty || (!m_pEditor->m_AllowPlaceUnusedTiles && !IsValidTeleTile((pLt->m_pTiles[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)]).m_Index)))
 			{
 				m_pTiles[fy * m_Width + fx].m_Index = 0;
 				m_pTeleTile[fy * m_Width + fx].m_Type = 0;
@@ -1478,7 +1478,7 @@ bool CLayerSpeedup::IsEmpty(CLayerTiles *pLayer)
 {
 	for(int y = 0; y < pLayer->m_Height; y++)
 		for(int x = 0; x < pLayer->m_Width; x++)
-			if(IsValidSpeedupTile(pLayer->GetTile(x, y).m_Index))
+			if(m_pEditor->m_AllowPlaceUnusedTiles || IsValidSpeedupTile(pLayer->GetTile(x, y).m_Index))
 				return false;
 
 	return true;
@@ -1513,7 +1513,7 @@ void CLayerSpeedup::BrushDraw(CLayer *pBrush, float wx, float wy)
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			if(IsValidSpeedupTile(l->m_pTiles[y * l->m_Width + x].m_Index))
+			if((m_pEditor->m_AllowPlaceUnusedTiles || IsValidSpeedupTile(l->m_pTiles[y * l->m_Width + x].m_Index)) && l->m_pTiles[y * l->m_Width + x].m_Index != TILE_AIR)
 			{
 				if(m_pEditor->m_SpeedupAngle != l->m_SpeedupAngle || m_pEditor->m_SpeedupForce != l->m_SpeedupForce || m_pEditor->m_SpeedupMaxSpeed != l->m_SpeedupMaxSpeed)
 				{
@@ -1653,7 +1653,7 @@ void CLayerSpeedup::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			if(Empty || !IsValidSpeedupTile((pLt->m_pTiles[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)]).m_Index)) // no speed up tile chosen: reset
+			if(Empty || (!m_pEditor->m_AllowPlaceUnusedTiles && !IsValidSpeedupTile((pLt->m_pTiles[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)]).m_Index))) // no speed up tile chosen: reset
 			{
 				m_pTiles[fy * m_Width + fx].m_Index = 0;
 				m_pSpeedupTile[fy * m_Width + fx].m_Force = 0;
@@ -1822,7 +1822,7 @@ bool CLayerSwitch::IsEmpty(CLayerTiles *pLayer)
 {
 	for(int y = 0; y < pLayer->m_Height; y++)
 		for(int x = 0; x < pLayer->m_Width; x++)
-			if(IsValidSwitchTile(pLayer->GetTile(x, y).m_Index))
+			if(m_pEditor->m_AllowPlaceUnusedTiles || IsValidSwitchTile(pLayer->GetTile(x, y).m_Index))
 				return false;
 
 	return true;
@@ -1856,7 +1856,7 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			if(IsValidSwitchTile(l->m_pTiles[y * l->m_Width + x].m_Index))
+			if((m_pEditor->m_AllowPlaceUnusedTiles || IsValidSwitchTile(l->m_pTiles[y * l->m_Width + x].m_Index)) && l->m_pTiles[y * l->m_Width + x].m_Index != TILE_AIR)
 			{
 				if(m_pEditor->m_SwitchNum != l->m_SwitchNumber || m_pEditor->m_SwitchDelay != l->m_SwitchDelay)
 				{
@@ -2000,7 +2000,7 @@ void CLayerSwitch::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			if(Empty || !IsValidSwitchTile((pLt->m_pTiles[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)]).m_Index))
+			if(Empty || (!m_pEditor->m_AllowPlaceUnusedTiles && !IsValidSwitchTile((pLt->m_pTiles[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)]).m_Index)))
 			{
 				m_pTiles[fy * m_Width + fx].m_Index = 0;
 				m_pSwitchTile[fy * m_Width + fx].m_Type = 0;
@@ -2138,7 +2138,7 @@ bool CLayerTune::IsEmpty(CLayerTiles *pLayer)
 {
 	for(int y = 0; y < pLayer->m_Height; y++)
 		for(int x = 0; x < pLayer->m_Width; x++)
-			if(IsValidTuneTile(pLayer->GetTile(x, y).m_Index))
+			if(m_pEditor->m_AllowPlaceUnusedTiles || IsValidTuneTile(pLayer->GetTile(x, y).m_Index))
 				return false;
 
 	return true;
@@ -2171,7 +2171,7 @@ void CLayerTune::BrushDraw(CLayer *pBrush, float wx, float wy)
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			if(IsValidTuneTile(l->m_pTiles[y * l->m_Width + x].m_Index))
+			if((m_pEditor->m_AllowPlaceUnusedTiles || IsValidTuneTile(l->m_pTiles[y * l->m_Width + x].m_Index)) && l->m_pTiles[y * l->m_Width + x].m_Index != TILE_AIR)
 			{
 				if(m_pEditor->m_TuningNum != l->m_TuningNumber)
 				{
@@ -2296,7 +2296,7 @@ void CLayerTune::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			if(Empty || !IsValidTuneTile((pLt->m_pTiles[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)]).m_Index)) // \o/ this fixes editor bug; TODO: use IsUsedInThisLayer here
+			if(Empty || (!m_pEditor->m_AllowPlaceUnusedTiles && !IsValidTuneTile((pLt->m_pTiles[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)]).m_Index))) // \o/ this fixes editor bug; TODO: use IsUsedInThisLayer here
 			{
 				m_pTiles[fy * m_Width + fx].m_Index = 0;
 				m_pTuneTile[fy * m_Width + fx].m_Type = 0;

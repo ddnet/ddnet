@@ -9,6 +9,8 @@
 #include <game/gamecore.h>
 #include <game/generated/client_data.h>
 
+#include <game/client/gameclient.h>
+
 CParticles::CParticles()
 {
 	OnReset();
@@ -103,7 +105,7 @@ void CParticles::Update(float TimePassed)
 
 			// move the point
 			vec2 Vel = m_aParticles[i].m_Vel * TimePassed;
-			Collision()->MovePoint(&m_aParticles[i].m_Pos, &Vel, 0.1f + 0.9f * frandom(), NULL);
+			Collision()->MovePoint(&m_aParticles[i].m_Pos, &Vel, 0.1f + 0.9f * random_float(), NULL);
 			m_aParticles[i].m_Vel = Vel * (1.0f / TimePassed);
 
 			m_aParticles[i].m_Life += TimePassed;
@@ -140,8 +142,8 @@ void CParticles::OnRender()
 		return;
 
 	set_new_tick();
-	static int64 LastTime = 0;
-	int64 t = time();
+	static int64_t LastTime = 0;
+	int64_t t = time();
 
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
@@ -163,13 +165,29 @@ void CParticles::OnInit()
 	Graphics()->QuadsSetRotation(0);
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 
-	m_ParticleQuadContainerIndex = Graphics()->CreateQuadContainer();
+	m_ParticleQuadContainerIndex = Graphics()->CreateQuadContainer(false);
 
 	for(int i = 0; i <= (SPRITE_PART9 - SPRITE_PART_SLICE); ++i)
 	{
 		Graphics()->QuadsSetSubset(0, 0, 1, 1);
 		RenderTools()->QuadContainerAddSprite(m_ParticleQuadContainerIndex, 1.f);
 	}
+	Graphics()->QuadContainerUpload(m_ParticleQuadContainerIndex);
+}
+
+bool CParticles::ParticleIsVisibleOnScreen(const vec2 &CurPos, float CurSize)
+{
+	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+
+	// for simplicity assume the worst case rotation, that increases the bounding box around the particle by its diagonal
+	const float SqrtOf2 = sqrtf(2);
+	CurSize = SqrtOf2 * CurSize;
+
+	// always uses the mid of the particle
+	float SizeHalf = CurSize / 2;
+
+	return CurPos.x + SizeHalf >= ScreenX0 && CurPos.x - SizeHalf <= ScreenX1 && CurPos.y + SizeHalf >= ScreenY0 && CurPos.y - SizeHalf <= ScreenY1;
 }
 
 void CParticles::RenderGroup(int Group)
@@ -210,32 +228,36 @@ void CParticles::RenderGroup(int Group)
 			vec2 p = m_aParticles[i].m_Pos;
 			float Size = mix(m_aParticles[i].m_StartSize, m_aParticles[i].m_EndSize, a);
 
-			if(LastColor[0] != m_aParticles[i].m_Color.r || LastColor[1] != m_aParticles[i].m_Color.g || LastColor[2] != m_aParticles[i].m_Color.b || LastColor[3] != m_aParticles[i].m_Color.a || LastQuadOffset != QuadOffset)
+			// the current position, respecting the size, is inside the viewport, render it, else ignore
+			if(ParticleIsVisibleOnScreen(p, Size))
 			{
-				Graphics()->TextureSet(GameClient()->m_ParticlesSkin.m_SpriteParticles[LastQuadOffset - SPRITE_PART_SLICE]);
-				Graphics()->RenderQuadContainerAsSpriteMultiple(m_ParticleQuadContainerIndex, LastQuadOffset, CurParticleRenderCount, s_aParticleRenderInfo);
-				CurParticleRenderCount = 0;
-				LastQuadOffset = QuadOffset;
+				if(LastColor[0] != m_aParticles[i].m_Color.r || LastColor[1] != m_aParticles[i].m_Color.g || LastColor[2] != m_aParticles[i].m_Color.b || LastColor[3] != m_aParticles[i].m_Color.a || LastQuadOffset != QuadOffset)
+				{
+					Graphics()->TextureSet(GameClient()->m_ParticlesSkin.m_SpriteParticles[LastQuadOffset - SPRITE_PART_SLICE]);
+					Graphics()->RenderQuadContainerAsSpriteMultiple(m_ParticleQuadContainerIndex, LastQuadOffset, CurParticleRenderCount, s_aParticleRenderInfo);
+					CurParticleRenderCount = 0;
+					LastQuadOffset = QuadOffset;
 
-				Graphics()->SetColor(
-					m_aParticles[i].m_Color.r,
-					m_aParticles[i].m_Color.g,
-					m_aParticles[i].m_Color.b,
-					m_aParticles[i].m_Color.a);
+					Graphics()->SetColor(
+						m_aParticles[i].m_Color.r,
+						m_aParticles[i].m_Color.g,
+						m_aParticles[i].m_Color.b,
+						m_aParticles[i].m_Color.a);
 
-				LastColor[0] = m_aParticles[i].m_Color.r;
-				LastColor[1] = m_aParticles[i].m_Color.g;
-				LastColor[2] = m_aParticles[i].m_Color.b;
-				LastColor[3] = m_aParticles[i].m_Color.a;
+					LastColor[0] = m_aParticles[i].m_Color.r;
+					LastColor[1] = m_aParticles[i].m_Color.g;
+					LastColor[2] = m_aParticles[i].m_Color.b;
+					LastColor[3] = m_aParticles[i].m_Color.a;
+				}
+
+				s_aParticleRenderInfo[CurParticleRenderCount].m_Pos[0] = p.x;
+				s_aParticleRenderInfo[CurParticleRenderCount].m_Pos[1] = p.y;
+
+				s_aParticleRenderInfo[CurParticleRenderCount].m_Scale = Size;
+				s_aParticleRenderInfo[CurParticleRenderCount].m_Rotation = m_aParticles[i].m_Rot;
+
+				++CurParticleRenderCount;
 			}
-
-			s_aParticleRenderInfo[CurParticleRenderCount].m_Pos[0] = p.x;
-			s_aParticleRenderInfo[CurParticleRenderCount].m_Pos[1] = p.y;
-
-			s_aParticleRenderInfo[CurParticleRenderCount].m_Scale = Size;
-			s_aParticleRenderInfo[CurParticleRenderCount].m_Rotation = m_aParticles[i].m_Rot;
-
-			++CurParticleRenderCount;
 
 			i = m_aParticles[i].m_NextPart;
 		}
@@ -252,25 +274,30 @@ void CParticles::RenderGroup(int Group)
 
 		while(i != -1)
 		{
-			Graphics()->TextureSet(GameClient()->m_ParticlesSkin.m_SpriteParticles[m_aParticles[i].m_Spr - SPRITE_PART_SLICE]);
-			Graphics()->QuadsBegin();
 			float a = m_aParticles[i].m_Life / m_aParticles[i].m_LifeSpan;
 			vec2 p = m_aParticles[i].m_Pos;
 			float Size = mix(m_aParticles[i].m_StartSize, m_aParticles[i].m_EndSize, a);
 
-			Graphics()->QuadsSetRotation(m_aParticles[i].m_Rot);
+			// the current position, respecting the size, is inside the viewport, render it, else ignore
+			if(ParticleIsVisibleOnScreen(p, Size))
+			{
+				Graphics()->TextureSet(GameClient()->m_ParticlesSkin.m_SpriteParticles[m_aParticles[i].m_Spr - SPRITE_PART_SLICE]);
+				Graphics()->QuadsBegin();
 
-			Graphics()->SetColor(
-				m_aParticles[i].m_Color.r,
-				m_aParticles[i].m_Color.g,
-				m_aParticles[i].m_Color.b,
-				m_aParticles[i].m_Color.a); // pow(a, 0.75f) *
+				Graphics()->QuadsSetRotation(m_aParticles[i].m_Rot);
 
-			IGraphics::CQuadItem QuadItem(p.x, p.y, Size, Size);
-			Graphics()->QuadsDraw(&QuadItem, 1);
+				Graphics()->SetColor(
+					m_aParticles[i].m_Color.r,
+					m_aParticles[i].m_Color.g,
+					m_aParticles[i].m_Color.b,
+					m_aParticles[i].m_Color.a); // pow(a, 0.75f) *
+
+				IGraphics::CQuadItem QuadItem(p.x, p.y, Size, Size);
+				Graphics()->QuadsDraw(&QuadItem, 1);
+				Graphics()->QuadsEnd();
+			}
 
 			i = m_aParticles[i].m_NextPart;
-			Graphics()->QuadsEnd();
 		}
 		Graphics()->WrapNormal();
 		Graphics()->BlendNormal();

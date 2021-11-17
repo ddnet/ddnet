@@ -80,7 +80,7 @@ int CAuthManager::RemoveKey(int Slot)
 	return m_aKeys.size();
 }
 
-int CAuthManager::FindKey(const char *pIdent)
+int CAuthManager::FindKey(const char *pIdent) const
 {
 	for(int i = 0; i < m_aKeys.size(); i++)
 		if(!str_comp(m_aKeys[i].m_aIdent, pIdent))
@@ -89,28 +89,28 @@ int CAuthManager::FindKey(const char *pIdent)
 	return -1;
 }
 
-bool CAuthManager::CheckKey(int Slot, const char *pPw)
+bool CAuthManager::CheckKey(int Slot, const char *pPw) const
 {
 	if(Slot < 0 || Slot >= m_aKeys.size())
 		return false;
 	return m_aKeys[Slot].m_Pw == HashPassword(pPw, m_aKeys[Slot].m_aSalt);
 }
 
-int CAuthManager::DefaultKey(int AuthLevel)
+int CAuthManager::DefaultKey(int AuthLevel) const
 {
 	if(AuthLevel < 0 || AuthLevel > AUTHED_ADMIN)
 		return 0;
 	return m_aDefault[AUTHED_ADMIN - AuthLevel];
 }
 
-int CAuthManager::KeyLevel(int Slot)
+int CAuthManager::KeyLevel(int Slot) const
 {
 	if(Slot < 0 || Slot >= m_aKeys.size())
 		return false;
 	return m_aKeys[Slot].m_Level;
 }
 
-const char *CAuthManager::KeyIdent(int Slot)
+const char *CAuthManager::KeyIdent(int Slot) const
 {
 	if(Slot < 0 || Slot >= m_aKeys.size())
 		return NULL;
@@ -157,12 +157,12 @@ void CAuthManager::AddDefaultKey(int Level, const char *pPw)
 	m_aDefault[Index] = AddKey(IDENTS[Index], pPw, Level);
 }
 
-bool CAuthManager::IsGenerated()
+bool CAuthManager::IsGenerated() const
 {
 	return m_Generated;
 }
 
-int CAuthManager::NumNonDefaultKeys()
+int CAuthManager::NumNonDefaultKeys() const
 {
 	int DefaultCount = (m_aDefault[0] >= 0) + (m_aDefault[1] >= 0) + (m_aDefault[2] >= 0);
 	return m_aKeys.size() - DefaultCount;

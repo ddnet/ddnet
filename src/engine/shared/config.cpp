@@ -5,49 +5,29 @@
 #include <engine/shared/protocol.h>
 #include <engine/storage.h>
 
-CConfiguration g_Config;
+CConfig g_Config;
 
-class CConfig : public IConfig
+void EscapeParam(char *pDst, const char *pSrc, int Size)
 {
-	IStorage *m_pStorage;
-	IOHANDLE m_ConfigFile;
-	bool m_Failed;
+	str_escape(&pDst, pSrc, pDst + Size);
+}
 
-	struct CCallback
-	{
-		SAVECALLBACKFUNC m_pfnFunc;
-		void *m_pUserData;
-	};
+CConfigManager::CConfigManager()
+{
+	m_pStorage = 0;
+	m_ConfigFile = 0;
+	m_NumCallbacks = 0;
+	m_Failed = false;
+}
 
-	enum
-	{
-		MAX_CALLBACKS = 16
-	};
+void CConfigManager::Init()
+{
+	m_pStorage = Kernel()->RequestInterface<IStorage>();
+	Reset();
+}
 
-	CCallback m_aCallbacks[MAX_CALLBACKS];
-	int m_NumCallbacks;
-
-	void EscapeParam(char *pDst, const char *pSrc, int Size)
-	{
-		str_escape(&pDst, pSrc, pDst + Size);
-	}
-
-public:
-	CConfig()
-	{
-		m_ConfigFile = 0;
-		m_NumCallbacks = 0;
-		m_Failed = false;
-	}
-
-	virtual void Init()
-	{
-		m_pStorage = Kernel()->RequestInterface<IStorage>();
-		Reset();
-	}
-
-	virtual void Reset()
-	{
+void CConfigManager::Reset()
+{
 #define MACRO_CONFIG_INT(Name, ScriptName, def, min, max, flags, desc) g_Config.m_##Name = def;
 #define MACRO_CONFIG_COL(Name, ScriptName, def, flags, desc) MACRO_CONFIG_INT(Name, ScriptName, def, 0, 0, flags, desc)
 #define MACRO_CONFIG_STR(Name, ScriptName, len, def, flags, desc) str_copy(g_Config.m_##Name, def, len);
@@ -57,28 +37,28 @@ public:
 #undef MACRO_CONFIG_INT
 #undef MACRO_CONFIG_COL
 #undef MACRO_CONFIG_STR
+}
+
+bool CConfigManager::Save()
+{
+	if(!m_pStorage || !g_Config.m_ClSaveSettings)
+		return true;
+
+	char aConfigFileTmp[64];
+	str_format(aConfigFileTmp, sizeof(aConfigFileTmp), CONFIG_FILE ".%d.tmp", pid());
+
+	m_ConfigFile = m_pStorage->OpenFile(aConfigFileTmp, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+
+	if(!m_ConfigFile)
+	{
+		dbg_msg("config", "ERROR: opening %s failed", aConfigFileTmp);
+		return false;
 	}
 
-	virtual bool Save()
-	{
-		if(!m_pStorage || !g_Config.m_ClSaveSettings)
-			return true;
+	m_Failed = false;
 
-		char aConfigFileTmp[64];
-		str_format(aConfigFileTmp, sizeof(aConfigFileTmp), CONFIG_FILE ".%d.tmp", pid());
-
-		m_ConfigFile = m_pStorage->OpenFile(aConfigFileTmp, IOFLAG_WRITE, IStorage::TYPE_SAVE);
-
-		if(!m_ConfigFile)
-		{
-			dbg_msg("config", "ERROR: opening %s failed", aConfigFileTmp);
-			return false;
-		}
-
-		m_Failed = false;
-
-		char aLineBuf[1024 * 2];
-		char aEscapeBuf[1024 * 2];
+	char aLineBuf[1024 * 2];
+	char aEscapeBuf[1024 * 2];
 
 #define MACRO_CONFIG_INT(Name, ScriptName, def, min, max, flags, desc) \
 	if((flags)&CFGFLAG_SAVE && g_Config.m_##Name != def) \
@@ -106,48 +86,47 @@ public:
 #undef MACRO_CONFIG_COL
 #undef MACRO_CONFIG_STR
 
-		for(int i = 0; i < m_NumCallbacks; i++)
-			m_aCallbacks[i].m_pfnFunc(this, m_aCallbacks[i].m_pUserData);
+	for(int i = 0; i < m_NumCallbacks; i++)
+		m_aCallbacks[i].m_pfnFunc(this, m_aCallbacks[i].m_pUserData);
 
-		if(io_close(m_ConfigFile) != 0)
-			m_Failed = true;
+	if(io_close(m_ConfigFile) != 0)
+		m_Failed = true;
 
-		m_ConfigFile = 0;
+	m_ConfigFile = 0;
 
-		if(m_Failed)
-		{
-			dbg_msg("config", "ERROR: writing to %s failed", aConfigFileTmp);
-			return false;
-		}
-
-		if(!m_pStorage->RenameFile(aConfigFileTmp, CONFIG_FILE, IStorage::TYPE_SAVE))
-		{
-			dbg_msg("config", "ERROR: renaming %s to " CONFIG_FILE " failed", aConfigFileTmp);
-			return false;
-		}
-
-		return true;
+	if(m_Failed)
+	{
+		dbg_msg("config", "ERROR: writing to %s failed", aConfigFileTmp);
+		return false;
 	}
 
-	virtual void RegisterCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData)
+	if(!m_pStorage->RenameFile(aConfigFileTmp, CONFIG_FILE, IStorage::TYPE_SAVE))
 	{
-		dbg_assert(m_NumCallbacks < MAX_CALLBACKS, "too many config callbacks");
-		m_aCallbacks[m_NumCallbacks].m_pfnFunc = pfnFunc;
-		m_aCallbacks[m_NumCallbacks].m_pUserData = pUserData;
-		m_NumCallbacks++;
+		dbg_msg("config", "ERROR: renaming %s to " CONFIG_FILE " failed", aConfigFileTmp);
+		return false;
 	}
 
-	virtual void WriteLine(const char *pLine)
-	{
-		if(!m_ConfigFile ||
-			io_write(m_ConfigFile, pLine, str_length(pLine)) != static_cast<unsigned>(str_length(pLine)) ||
+	return true;
+}
+
+void CConfigManager::RegisterCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData)
+{
+	dbg_assert(m_NumCallbacks < MAX_CALLBACKS, "too many config callbacks");
+	m_aCallbacks[m_NumCallbacks].m_pfnFunc = pfnFunc;
+	m_aCallbacks[m_NumCallbacks].m_pUserData = pUserData;
+	m_NumCallbacks++;
+}
+
+void CConfigManager::WriteLine(const char *pLine)
+{
+	if(!m_ConfigFile ||
+		io_write(m_ConfigFile, pLine, str_length(pLine)) != static_cast<unsigned>(str_length(pLine)) ||
 #if defined(CONF_FAMILY_WINDOWS)
-			io_write_newline(m_ConfigFile) != 2)
+		io_write_newline(m_ConfigFile) != 2)
 #else
-			io_write_newline(m_ConfigFile) != 1)
+		io_write_newline(m_ConfigFile) != 1)
 #endif
-			m_Failed = true;
-	}
-};
+		m_Failed = true;
+}
 
-IConfig *CreateConfig() { return new CConfig; }
+IConfigManager *CreateConfigManager() { return new CConfigManager; }

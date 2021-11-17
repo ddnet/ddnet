@@ -346,9 +346,6 @@ Red team wins!
 Refresh
 == Obnovit
 
-Refreshing master servers
-== Aktualizování hlavních serverů
-
 Remote console
 == Vzdálená konzola
 
@@ -411,9 +408,6 @@ Show ingame HUD
 
 Show name plates
 == Zobrazovat jména hráčů
-
-Show only supported
-== Zobrazit pouze podporované
 
 Skins
 == Vzhledy
@@ -888,23 +882,17 @@ Show HUD
 UI mouse s.
 == UI mouse s.
 
-Borderless window
-== Okno bez okrajů
-
 may cause delay
 == může způsobit zpoždění
 
 Screen
 == Obrazovka
 
-Use OpenGL 3.3 (experimental)
-== Použít OpenGL 3.3 (experimentální)
-
 Preinit VBO (iGPUs only)
 == Preinit VBO (pouze iGPU)
 
-Multiple texture units (disable for MacOS)
-== Více texturových jednotek (deaktivovat pro MacOS)
+Multiple texture units (disable for macOS)
+== Více texturových jednotek (deaktivovat pro macOS)
 
 Use high DPI
 == Použít vysoké DPI
@@ -948,9 +936,6 @@ DDNet Client needs to be restarted to complete update!
 Use DDRace Scoreboard
 == Použijte hodnotící tabuli DDRace
 
-Show client IDs in Scoreboard
-== Zobrazit ID klienta ve výsledkové tabulce
-
 Show score
 == Zobrazit skóre
 
@@ -978,47 +963,14 @@ Reset
 Highlighted message
 == Zvýrazněná zpráva
 
-Spectator
-== Divák
-
-Look out!
-== Pozor!
-
 Team message
 == Týmová zpráva
-
-We will win
-== Vyhrajeme
 
 Friend message
 == Zpráva od přítele
 
-Friend
-== Přítel
-
-Hi o/
-== Ahoj o/
-
 Normal message
 == Normální zpráva
-
-Hello and welcome
-== Ahoj a vítejte
-
-Inner color
-== Vnitřní barva
-
-Outline color
-== Barva obrysu
-
-Wait before try for
-== Počkejte, než to zkusíte
-
-second
-== sekunda
-
-seconds
-== sekundy
 
 Save the best demo of each race
 == Uložte si nejlepší demo každého závodu
@@ -1073,12 +1025,6 @@ Show other players' key presses
 
 Old mouse mode
 == Starý režim myši
-
-Background (regular)
-== Pozadí (běžné)
-
-Background (entities)
-== Pozadí (entity)
 
 Show tiles layers from BG map
 == Zobrazit vrstvy dlaždic z mapy BG
@@ -1157,9 +1103,6 @@ Grabs
 
 Saving ddnet-settings.cfg failed
 == Uložení souboru ddnet-settings.cfg se nezdařilo
-
-The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== Šířka nebo výška textury %s není dělitelná 16, což může způsobit vizuální chyby.
 
 Warning
 == Varování
@@ -1246,9 +1189,6 @@ Assets
 Use old chat style
 == Použijte starý styl chatu
 
-Highlight
-== Zvýraznit
-
 Client message
 == Zpráva klienta
 
@@ -1294,3 +1234,108 @@ Play
 
 Update failed! Check log...
 == Aktualizace selhala! Zkontrolujte log...
+
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 
+
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+Getting server list from master server
+== 
+
+Refreshing...
+== 
+
+Leak IP
+== 
+
+Chat command
+== 
+
+Dummy
+== 
+
+Windowed
+== 
+
+Windowed borderless
+== 
+
+Desktop fullscreen
+== 
+
+Use modern OpenGL
+== 
+
+Show client IDs
+== 
+
+Kill Messages
+== 
+
+Kill Message Normal Color
+== 
+
+Kill Message Highlight Color
+== 
+
+Laser Outline Color
+== 
+
+Laser Inner Color
+== 
+
+Hookline
+== 
+
+No hit
+== 
+
+Hookable
+== 
+
+Tee
+== 
+
+Preview
+== 
+
+Show local player's key presses
+== 
+
+Background
+== 
+
+Entities Background color
+== 
+
+Regular Background Color
+== 
+
+Discord
+== 
+
+https://ddnet.tw/discord
+== 

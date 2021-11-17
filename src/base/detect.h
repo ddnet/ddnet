@@ -46,11 +46,21 @@
 #define PLATFORM_STRING "openbsd"
 #endif
 
-#if defined(__LINUX__) || defined(__linux__)
+#if(defined(__LINUX__) || defined(__linux__)) && !defined(__ANDROID__)
 #define CONF_FAMILY_UNIX 1
 #define CONF_FAMILY_STRING "unix"
 #define CONF_PLATFORM_LINUX 1
 #define PLATFORM_STRING "linux"
+#define CONF_BACKEND_OPENGL_ES3 1
+#endif
+
+#if defined(__ANDROID__)
+#define CONF_FAMILY_UNIX 1
+#define CONF_FAMILY_STRING "unix"
+#define CONF_PLATFORM_ANDROID 1
+#define PLATFORM_STRING "android"
+#define CONF_BACKEND_OPENGL_ES 1
+#define CONF_BACKEND_OPENGL_ES3 1
 #endif
 
 #if defined(__GNU__) || defined(__gnu__)
@@ -63,8 +73,8 @@
 #if defined(MACOSX) || defined(__APPLE__) || defined(__DARWIN__)
 #define CONF_FAMILY_UNIX 1
 #define CONF_FAMILY_STRING "unix"
-#define CONF_PLATFORM_MACOSX 1
-#define PLATFORM_STRING "macosx"
+#define CONF_PLATFORM_MACOS 1
+#define PLATFORM_STRING "macos"
 #endif
 
 #if defined(__sun)
@@ -80,6 +90,13 @@
 #define CONF_FAMILY_STRING "beos"
 #define CONF_PLATFORM_BEOS 1
 #define PLATFORM_STRING "beos"
+#endif
+
+#if defined(__HAIKU__)
+#define CONF_FAMILY_UNIX 1
+#define CONF_FAMILY_STRING "unix"
+#define CONF_PLATFORM_HAIKU 1
+#define PLATFORM_STRING "haiku"
 #endif
 
 /* use gcc endianness definitions when available */

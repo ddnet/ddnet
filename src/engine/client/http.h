@@ -1,6 +1,7 @@
 #ifndef ENGINE_CLIENT_HTTP_H
 #define ENGINE_CLIENT_HTTP_H
 
+#include <atomic>
 #include <engine/kernel.h>
 #include <engine/shared/jobs.h>
 #include <engine/storage.h>
@@ -15,6 +16,13 @@ enum
 	HTTP_RUNNING,
 	HTTP_DONE,
 	HTTP_ABORTED,
+};
+
+enum class HTTPLOG
+{
+	NONE,
+	FAILURE,
+	ALL,
 };
 
 struct CTimeout
@@ -39,10 +47,10 @@ class CRequest : public IJob
 
 	CTimeout m_Timeout;
 
-	double m_Size;
-	double m_Current;
-	int m_Progress;
-	bool m_LogProgress;
+	std::atomic<double> m_Size;
+	std::atomic<double> m_Current;
+	std::atomic<int> m_Progress;
+	HTTPLOG m_LogProgress;
 
 	std::atomic<int> m_State;
 	std::atomic<bool> m_Abort;
@@ -57,13 +65,23 @@ protected:
 	virtual int OnCompletion(int State) { return State; }
 
 public:
-	CRequest(const char *pUrl, CTimeout Timeout, bool LogProgress = true);
+	CRequest(const char *pUrl, CTimeout Timeout, HTTPLOG LogProgress = HTTPLOG::ALL);
 
-	double Current() const { return m_Current; }
-	double Size() const { return m_Size; }
-	int Progress() const { return m_Progress; }
+	double Current() const { return m_Current.load(std::memory_order_relaxed); }
+	double Size() const { return m_Size.load(std::memory_order_relaxed); }
+	int Progress() const { return m_Progress.load(std::memory_order_relaxed); }
 	int State() const { return m_State; }
 	void Abort() { m_Abort = true; }
+};
+
+class CHead : public CRequest
+{
+	virtual size_t OnData(char *pData, size_t DataSize) { return DataSize; }
+	virtual bool AfterInit(void *pCurl);
+
+public:
+	CHead(const char *pUrl, CTimeout Timeout, HTTPLOG LogProgress = HTTPLOG::ALL);
+	~CHead();
 };
 
 class CGet : public CRequest
@@ -75,7 +93,7 @@ class CGet : public CRequest
 	unsigned char *m_pBuffer;
 
 public:
-	CGet(const char *pUrl, CTimeout Timeout);
+	CGet(const char *pUrl, CTimeout Timeout, HTTPLOG LogProgress = HTTPLOG::ALL);
 	~CGet();
 
 	size_t ResultSize() const
@@ -101,17 +119,17 @@ class CGetFile : public CRequest
 
 	IStorage *m_pStorage;
 
-	char m_aDestFull[MAX_PATH_LENGTH];
+	char m_aDestFull[IO_MAX_PATH_LENGTH];
 	IOHANDLE m_File;
 
 protected:
-	char m_aDest[MAX_PATH_LENGTH];
+	char m_aDest[IO_MAX_PATH_LENGTH];
 	int m_StorageType;
 
 	virtual int OnCompletion(int State);
 
 public:
-	CGetFile(IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType = -2, CTimeout Timeout = CTimeout{4000, 500, 5}, bool LogProgress = true);
+	CGetFile(IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType = -2, CTimeout Timeout = CTimeout{4000, 500, 5}, HTTPLOG LogProgress = HTTPLOG::ALL);
 
 	const char *Dest() const { return m_aDest; }
 };

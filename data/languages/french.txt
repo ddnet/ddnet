@@ -17,6 +17,8 @@
 #	SunnyPistache & Pipou   2020-07-09 21:09:00
 #	SunnyPistache & Pipou   2020-10-03 09:29:00
 #	SunnyPistache & Pipou   2020-11-07 11:30:00
+#	Chairn					2021-05-31 20:00:00
+#	T tee			2021-06-01 00:39:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -70,7 +72,7 @@ Automatically record demos
 == Enregistrer les démos automatiquement
 
 Automatically take game over screenshot
-== Prends une capture d'écran de fin de partie automatiquement
+== Prendre une capture d'écran de fin de partie automatiquement
 
 Blue team
 == Équipe bleue
@@ -361,9 +363,6 @@ Red team wins!
 Refresh
 == Rafraîchir
 
-Refreshing master servers
-== Rafraîchissement des serveurs maîtres
-
 Remote console
 == Console serveur
 
@@ -426,9 +425,6 @@ Show ingame HUD
 
 Show name plates
 == Afficher les pseudonymes
-
-Show only supported
-== N'afficher que les résolutions supportées
 
 Skins
 == Skins
@@ -652,16 +648,13 @@ Enable game sounds
 == Activer les sons du jeu
 
 DDNet Client needs to be restarted to complete update!
-== Le client DDNet a besoin d'être redémarré pour finir la MAJ!
+== Le client DDNet a besoin d'être redémarré pour finir la MAJ !
 
 Toggle dummy
 == Basculer vers le dummy
 
 Reset wanted weapon on death
 == Réinitialiser l'arme choisie après être mort
-
-Inner color
-== Couleur intérieur
 
 No updates available
 == Pas de mise à jour disponible
@@ -676,7 +669,7 @@ Fat skins (DDFat)
 == Skins enrobés (DDFat)
 
 Automatically take statboard screenshot
-== Prends une capture d'écran du tableau des stats automatiquement
+== Prendre une capture d'écran du tableau des stats automatiquement
 
 Clan plates size
 == Taille du clan
@@ -726,14 +719,11 @@ Show ghost
 Friend message
 == Message d'ami
 
-We will win
-== On va gagner
-
 AntiPing: predict other players
 == AntiPing: prédit le déplacement des autres joueurs
 
 Are you sure that you want to disconnect your dummy?
-== Êtes vous sûr de vouloir déconnecter votre dummy?
+== Êtes vous sûr de vouloir déconnecter votre dummy ?
 
 Reload
 == Recharger
@@ -749,9 +739,6 @@ Personal best:
 
 Skin prefix
 == Préfixe de skin
-
-Use OpenGL 3.3 (experimental)
-== Utiliser OpenGL 3.3 (expérimental)
 
 Date
 == Date
@@ -777,9 +764,6 @@ Welcome to DDNet
 Max CSVs
 == CSV maximum
 
-Spectator
-== Spectateur
-
 Statboard
 == Tableau des stats
 
@@ -788,12 +772,6 @@ Show text entities
 
 Connecting dummy
 == Connection du dummy
-
-Hello and welcome
-== Bonjour et bienvenue
-
-second
-== seconde
 
 Render demo
 == Convertir une démo
@@ -832,19 +810,16 @@ Dummy settings
 == Config. du dummy
 
 Are you sure that you want to disconnect?
-== Êtes-vous sûr de vouloir vous déconnecter?
+== Êtes-vous sûr de vouloir vous déconnecter ?
 
 Deactivate
 == Désactiver
 
 Update failed! Check log...
-== La mise à jour a échoué! Vérifier les logs...
+== La mise à jour a échoué ! Vérifier les logs...
 
 %.2f KiB
 == %.2f Kio
-
-Background (regular)
-== Arrière-plan (défaut)
 
 Reset
 == Défaut
@@ -853,7 +828,7 @@ Threaded sound loading
 == Chargement de sons enfilés
 
 File already exists, do you want to overwrite it?
-== Ce fichier existe déjà, voulez-vous l'écraser?
+== Ce fichier existe déjà, voulez-vous l'écraser ?
 
 Grabs
 == Grappins
@@ -861,17 +836,11 @@ Grabs
 Update now
 == Mettre à jour
 
-Wait before try for
-== Avant votre prochain essai, veuillez attendre
-
 Follow
 == Suivre
 
 Converse
 == Converser
-
-Borderless window
-== Mode fenêtré sans bordure
 
 Hook collisions
 == Collision du grappin
@@ -900,8 +869,8 @@ Remove chat
 Markers:
 == Marqueurs :
 
-Multiple texture units (disable for MacOS)
-== Unités de texture multiple (désactivé pour MacOS)
+Multiple texture units (disable for macOS)
+== Unités de texture multiple (désactivé pour macOS)
 
 Pause
 == Pause
@@ -912,20 +881,8 @@ Deaths
 Length
 == Durée
 
-Outline color
-== Couleur du contour
-
 Normal message
 == Message normal
-
-Show client IDs in Scoreboard
-== Afficher les IDs des clients dans le tableau des scores
-
-seconds
-== secondes
-
-Friend
-== Ami
 
 Dummy copy
 == Copiage du dummy
@@ -934,7 +891,7 @@ Demo
 == Démo
 
 Map sound volume
-== Volume des sons de la map
+== Volume des sons de la carte
 
 Time
 == Temps
@@ -1005,9 +962,6 @@ Show others
 %.2f MiB
 == %.2f Mio
 
-Hi o/
-== Salut o/
-
 Unfinished map
 == Carte non terminée
 
@@ -1037,9 +991,6 @@ Zoom in
 
 Ghost
 == Fantôme
-
-Look out!
-== Attention!
 
 Show console window
 == Afficher la fenêtre de la console
@@ -1073,9 +1024,6 @@ Replace video
 
 Show tiles layers from BG map
 == Utiliser les tuiles de la carte de fond
-
-Background (entities)
-== Arrière-plan (entités)
 
 Show votes window after voting
 == Afficher la fenêtre de vote après avoir voté
@@ -1150,13 +1098,13 @@ Reconnect in %d sec
 == Reconnecte dans %d sec
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== DDRaceNetwork est un jeu coopératif en ligne dont l'objectif est, pour vous ainsi que votre groupe de tees, d'atteindre la ligne d'arrivée d'une map. En tant que nouveau joueur, il est préférable que vous commenciez sur les serveurs Novice, qui sont constitués des cartes les plus simples. Prenez en compte le ping afin de choisir un serveur proche de chez vous.
+== DDRaceNetwork est un jeu coopératif en ligne dont l'objectif est, pour vous ainsi que votre groupe de tees, d'atteindre la ligne d'arrivée d'une carte. En tant que nouveau joueur, il est préférable que vous commenciez sur les serveurs Novice, qui sont constitués des cartes les plus simples. Prenez en compte le ping afin de choisir un serveur proche de chez vous.
 
 The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Les maps contiennent du freeze (gèle), ce qui vous empêche temporairement de bouger. Vous devez travailler en équipe pour passer ces parties.
+== Les cartes contiennent du freeze (gel), ce qui vous empêche temporairement de bouger. Vous devez travailler en équipe pour passer ces parties.
 
 The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== La molette de la souris permet de changer d'arme. Le marteau (clic gauche) peut être utilisé pour frapper les autres tees ce qui les unfreeze (dégivre).
+== La molette de la souris permet de changer d'arme. Le marteau (clic gauche) peut être utilisé pour frapper les autres tees ce qui les unfreeze (dégèle).
 
 Hook (right mouse) can be used to swing through the map and to hook other tees to you.
 == Le grappin (clic droit) peut être utilisé pour se balancer tout le long de la carte en attrappant les murs et peut aussi permettre d'attrapper les autres Tees.
@@ -1179,9 +1127,6 @@ transmits your player name to info2.ddnet.tw
 Saving ddnet-settings.cfg failed
 == L'enregistrement de ddnet-settings.cfg a échoué
 
-The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== La largeur ou la hauteur de la texture %s n'est pas divisible par 16, ce qui pourrait causer des bugs visuels
-
 Warning
 == Alerte
 
@@ -1189,7 +1134,7 @@ Use k key to kill (restart), q to pause and watch other players. See settings fo
 == Appuyez sur "k" pour mourir (recommencer) et "a" pour vous mettre en pause afin de regarder les autres joueurs. Allez dans les configurations pour voir davantage de raccourcis.
 
 Country / Region
-== Pays / Region
+== Pays / Région
 
 Speed
 == Vitesse
@@ -1249,7 +1194,7 @@ Emoticons
 == Émoticônes
 
 Particles
-== Particles
+== Particules
 
 Assets directory
 == Répertoire des assets
@@ -1303,9 +1248,6 @@ Chat sound volume
 Use old chat style
 == Utiliser l'ancien chat
 
-Highlight
-== Surbrillance
-
 Manual
 == Manuel
 
@@ -1317,3 +1259,108 @@ Auto
 
 Replay
 == Replay
+
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== La largeure de la texture %s n'est pas divisible par %d, ou la hauteur n'est pas divisible par %d, ce qui peut causer des bugs visuels. 
+
+AFR
+== AFR
+
+ASI
+== ASI
+
+AUS
+== AUS
+
+EUR
+== EUR
+
+NA
+== AN
+
+SA
+== AS
+
+CHN
+== CHN
+
+Getting server list from master server
+== Obtenir la liste des serveurs depuis le serveur maître
+
+Leak IP
+== Fuiter l'IP
+
+Chat command
+== Commande de chat
+
+Dummy
+== Dummy
+
+Windowed
+== Fenêtré 
+
+Windowed borderless
+== Fenêtré sans bordure
+
+Desktop fullscreen
+== Plein écran
+
+Use modern OpenGL
+== Utiliser OpenGL moderne
+
+Show client IDs
+== Montrer les IDs
+
+Kill Messages
+== Messages d'élimination
+
+Kill Message Normal Color
+== Couleur normale des messages d'élimination
+
+Kill Message Highlight Color
+== Couleur de surbrillance des messages d'élimination
+
+Laser Outline Color
+== Couleur de la bordure du laser
+
+Laser Inner Color
+== Couleur du laser
+
+Hookline
+== Ligne de visée
+
+No hit
+== Pas de frappe
+
+Hookable
+== Accrochable
+
+Tee
+== Tee
+
+Preview
+== Prévisualisation
+
+Background
+== Arrière-plan
+
+Entities Background color
+== Couleur de l'arrière-plan des entités
+
+Regular Background Color
+== Couleur de l'arrière-plan
+
+Discord
+== Discord
+
+https://ddnet.tw/discord
+== https://ddnet.tw/discord
+
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Refreshing...
+== 
+
+Show local player's key presses
+== 

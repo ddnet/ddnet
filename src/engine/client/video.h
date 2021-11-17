@@ -1,21 +1,9 @@
 #ifndef ENGINE_CLIENT_VIDEO_H
 #define ENGINE_CLIENT_VIDEO_H
 
-#if defined(__ANDROID__)
-#define GL_GLEXT_PROTOTYPES
-#include <GL/glu.h>
-#include <GLES/gl.h>
-#include <GLES/glext.h>
-#define glOrtho glOrthof
-#else
-#include "SDL_opengl.h"
+#include <base/system.h>
 
-#if defined(CONF_PLATFORM_MACOSX)
-#include "OpenGL/glu.h"
-#else
-#include "GL/glu.h"
-#endif
-#endif
+#include "graphics_defines.h"
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -26,11 +14,11 @@ extern "C" {
 #include <libswscale/swscale.h>
 };
 
-#include <base/system.h>
-
 #include <engine/shared/demo.h>
 #include <engine/shared/video.h>
 #define ALEN 2048
+
+extern LOCK g_WriteLock;
 
 // a wrapper around a single output AVStream
 typedef struct OutputStream
@@ -39,7 +27,7 @@ typedef struct OutputStream
 	AVCodecContext *pEnc;
 
 	/* pts of the next frame that will be generated */
-	int64 NextPts;
+	int64_t NextPts;
 	int SamplesCount;
 
 	AVFrame *pFrame;
@@ -81,9 +69,9 @@ private:
 	bool OpenVideo();
 	bool OpenAudio();
 	AVFrame *AllocPicture(enum AVPixelFormat PixFmt, int Width, int Height);
-	AVFrame *AllocAudioFrame(enum AVSampleFormat SampleFmt, uint64 ChannelLayout, int SampleRate, int NbSamples);
+	AVFrame *AllocAudioFrame(enum AVSampleFormat SampleFmt, uint64_t ChannelLayout, int SampleRate, int NbSamples);
 
-	void WriteFrame(OutputStream *pStream);
+	void WriteFrame(OutputStream *pStream) REQUIRES(g_WriteLock);
 	void FinishFrames(OutputStream *pStream);
 	void CloseStream(OutputStream *pStream);
 
@@ -114,7 +102,7 @@ private:
 
 	bool m_HasAudio;
 
-	GLubyte *m_pPixels;
+	TWGLubyte *m_pPixels;
 
 	OutputStream m_VideoStream;
 	OutputStream m_AudioStream;

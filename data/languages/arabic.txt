@@ -1,0 +1,1334 @@
+############ authors ###################
+# Created By : Relax / .Yukki
+# Created By : Reko / vMarshu
+########################################
+
+##### translated strings #####
+
+%ds left
+== ﺖﻀﻣ %ds
+
+%i minute left
+== ﺖﻀﻣ ﺔﻘﻴﻗﺩ %i
+
+%i minutes left
+== ﺖﻀﻣ ﻖﺋﺎﻗﺩ %i
+
+%i second left
+== ﺖﻀﻣ ﺔﻴﻧﺎﺛ %i
+
+%i seconds left
+== ﺖﻀﻣ ﻦﻧﺍﻮﺛ %i
+
+%s wins!
+== !ﺯﺎﻓ %s 
+
+-Page %d-
+== -ﺔﺤﻔﺻ &d-
+
+Abort
+== ﻁﺎﺒﺣﺇ
+
+Add
+== ﺔﻓﺎﺿﺍ
+
+Add Friend
+== ﻖﻳﺪﺻ ﺔﻓﺎﺿﺍ
+
+Address
+== ﻥﺍﻮﻨﻋ
+
+All
+== ﻞﻜﻟﺍ
+
+Are you sure that you want to delete the demo?
+== ﻮﻳﺪﻴﻔﻟﺍ ﻑﺬﺤﻟ ﺪﻛﺎﺘﻣ ﺖﻧﺍ ﻞﻫ
+
+Are you sure that you want to quit?
+== ﻪﺒﻌﻠﻟﺍ ﻕﻼﻏﻻ ﺪﻛﺎﺘﻣ ﺖﻧﺍ ﻞﻫ
+
+Are you sure that you want to remove the player from your friends list?
+== ﺀﺎﻗﺪﺻﻻﺍ ﺔﻤﺋﺎﻗ ﻦﻣ ﺐﻋﻼﻟﺍ ﺍﺬﻫ ﻪﻟﺍﺯﻻ ﺪﻛﺎﺘﻣ ﺖﻧﺍ ﻞﻫ
+
+Automatically record demos
+== ﻲﺋﺎﻘﻠﺗ ﻮﻳﺪﻴﻓ ﻞﻴﺠﺴﺗ
+
+Blue team
+== ﻕﺭﺯﻻﺍ ﻖﻳﺮﻔﻟﺍ
+
+Blue team wins!
+== !ﺯﺎﻓ ﻕﺭﺯﻻﺍ ﻖﻳﺮﻔﻟﺍ
+
+Body
+== ﻢﺴﺠﻟﺍ
+
+Call vote
+== ﺖﻳﻮﺼﺗ
+
+Change settings
+== ﺕﺍﺩﺍﺪﻋﻻﺍ ﺮﻴﻴﻐﺗ
+
+Chat
+== ﺔﺷﺩﺭﺩ
+
+Clan
+== ﻥﻼﻛ
+
+Client
+== ﺖﻨﻳﻼﻛ
+
+Close
+== ﻕﻼﻏﺍ
+
+Compatible version
+== ﻲﻟﺎﺤﻟﺍ ﺭﺍﺪﺻﻻﺍ
+
+Connect
+== ﻝﺎﺼﺗﺍ
+
+Connecting to
+== ﻰﻟﺍ ﻝﺎﺼﺗﺍ
+
+Connection Problems...
+== ﻝﺎﺼﺗﻻﺍ ﻲﻓ ﻞﻛﺎﺸﻣ...
+
+Console
+== ﻞﺴﻧﻮﻜﻟﺍ
+
+Controls
+== ﻢﻜﺤﺘﻟﺍ
+
+Count players only
+== ﻂﻘﻓ ﻦﻴﺒﻋﻼﻟﺍ ﺪﻋ
+
+Current
+== ﻲﻟﺎﺤﻟﺍ
+
+Custom colors
+== ﺔﺼﺼﺨﻣ ﻥﺍﻮﻟﺍ
+
+Delete
+== ﻑﺬﺣ
+
+Delete demo
+== ﻮﻳﺪﻴﻔﻟﺍ ﻑﺬﺣ
+
+Demo details
+== :ﻮﻳﺪﻴﻔﻟﺍ ﻞﻴﺻﺎﻔﺗ
+
+Demofile: %s
+== %s :ﻮﻳﺪﻴﻔﻟﺍ ﻒﻠﻣ
+
+Demos
+== ﺕﺎﻫﻮﻳﺪﻴﻔﻟﺍ
+
+Disconnect
+== ﺝﻭﺮﺧ
+
+Disconnected
+== ﺮﻓﺮﻴﺴﻟﺍ ﻦﻣ ﺝﺮﺧ
+
+Downloading map
+== ﺏﺎﻤﻟﺍ ﻞﻴﻤﺤﺗ
+
+Draw!
+== !ﻝﺩﺎﻌﺗ
+
+Dynamic Camera
+== ﺍﺮﻴﻣﺎﻛ ﻚﻴﻣﺎﻨﻳﺩ
+
+Emoticon
+== ﺕﻮﻤﻳﺍ
+
+Enter
+== ﺀﺍﺪﺑﺍ
+
+Error
+== ﺀﺎﻄﺧ
+
+Error loading demo
+== ﻮﻳﺪﻴﻓﻟﺍ ﻞﻴﻤﺤﺗ ﻞﺸﻓ
+
+Favorite
+== ﻞﻀﻔﻤﻟﺍ
+
+Favorites
+== ﺔﻠﻀﻔﻤﻟﺍ
+
+Feet
+== ﺔﻣﺰﺟ
+
+Filter
+== ﺔﻴﻔﺼﺗ
+
+Fire
+== ﺭﺎﻧ
+
+Folder
+== ﻒﻠﻣ
+
+Force vote
+== ﺖﻳﻮﺼﺘﻟﺍ ﺽﺮﻓ
+
+Free-View
+== ﺮﺤﻟﺍ ﺮﻈﻨﻤﻟﺍ
+
+Friends
+== ﺀﺎﻗﺪﺻﻻﺍ
+
+Fullscreen
+== ﻞﻣﺎﻜﻟﺍ ﺔﺷﺎﺸﻟﺍ ﻊﺿﻭ
+
+Game
+== ﺔﺒﻌﻠﻟﺍ
+
+Game info
+== ﺔﺒﻌﻠﻟﺍ ﺕﺎﻣﻮﻠﻌﻣ
+
+Game over
+== ﺔﺒﻌﻠﻟﺍ ﺖﻬﺘﻧﺍ
+
+Game paused
+== ﺔﺒﻌﻠﻟﺍ ﺖﻔﻗﻮﺗ
+
+Game type
+== ﺔﺒﻌﻠﻟﺍ ﺭﻮﻃ
+
+Game types:
+== ﺔﺒﻌﻠﻟﺍ ﺭﺍﻮﻃﺍ:
+
+General
+== ﻡﺎﻋ
+
+Graphics
+== ﺲﻜﻴﻓﺍﺮﺟ
+
+Grenade
+== ﺔﻠﺒﻨﻗ
+
+Hammer
+== ﺔﻗﺮﻄﻣ
+
+Has people playing
+== ﺹﺎﺨﺷﺍ ﻪﺑ ﺪﺟﻮﻳ
+
+High Detail
+== ﺔﻴﻟﺎﻋ ﻞﻴﺻﺎﻔﺗ
+
+Hook
+== ﺐﺤﺳ
+
+Invalid Demo
+== ﺢﻟﺎﺻ ﺮﻴﻏ ﻮﻳﺪﻴﻓ
+
+Join blue
+== ﻕﺭﺯﻻﺍ ﻰﻟﺍ ﻡﺎﻤﻀﻧﻻﺍ
+
+Join red
+== ﺮﻤﺣﻻﺍ ﻰﻟﺍ ﻡﺎﻤﻀﻧﻻﺍ
+
+Jump
+== ﺰﻔﻗ
+
+Kick player
+== ﺐﻋﻻ ﺩﺮﻃ
+
+Language
+== ﺔﻐﻠﻟﺍ
+
+MOTD
+== ﻡﻮﻴﻟﺍ ﺔﻟﺎﺳﺭ
+
+Map
+== ﺏﺎﻤﻟﺍ
+
+Maximum ping:
+== ﻖﻨﺒﻠﻟ ﻰﺼﻗﻻﺍ ﺪﺤﻟﺍ:
+
+Mouse sens.
+== ﺱﻭﺎﻤﻟﺍ ﺔﻴﺳﺎﺴﺣ
+
+Move left
+== ﺭﺎﺴﻳ ﻙﺮﺤﺘﻟﺍ
+
+Move player to spectators
+== ﺪﻫﺎﺸﻳ ﺐﻋﻻ ﻞﻌﺟ
+
+Move right
+== ﻦﻴﻤﻳ ﻙﺮﺤﺘﻟﺍ
+
+Movement
+== ﻙﺮﺤﺘﻟﺍ
+
+Mute when not active
+== ﺔﺒﻌﻠﻟﺍ ﻞﻳﺪﺒﺘﻟﺍ ﺎﻣﺪﻨﻋ ، ﺕﻮﺼﻟﺍ ﻢﺘﻛ
+
+Name
+== ﻢﺳﻻﺍ
+
+Next weapon
+== ﻲﻟﺎﺘﻟﺍ ﻡﻼﺴﻟﺍ
+
+Nickname
+== ﻢﺳﻻﺍ
+
+No
+== ﻻ
+
+No password
+== ﺮﺳ ﺔﻤﻠﻛ ﺪﺟﻮﻳ ﻻ
+
+No servers found
+== ﺕﺍﺮﻓﺮﻴﺳ ﺪﺟﻮﻳ ﻻ
+
+No servers match your filter criteria
+== ﻚﺑ ﺔﺻﺎﺨﻟﺍ ﺔﻴﻔﺼﺘﻟﺍ ﺮﻴﻳﺎﻌﻣ ﻖﺑﺎﻄﺗ ﺮﻓﺮﻴﺳ ﺪﺟﻮﺗ ﻻ
+
+Ok
+== ﻙﻭﺍ
+
+Open
+== ﺢﺘﻓ
+
+Parent Folder
+== ﻞﺻﻷﺍ ﺪﻠﺠﻤﻟﺍ
+
+Password
+== ﺭﻭﺮﻤﻟﺍ ﺔﻤﻠﻛ
+
+Password incorrect
+== ﺔﺌﻃﺎﺧ ﺭﻭﺮﻤﻟﺍ ﺔﻤﻠﻛ
+
+Ping
+== ﻖﻨﺑ
+
+Pistol
+== ﺱﺪﺴﻣ
+
+[Demo browser]
+Play
+== ﻞﻴﻐﺸﺗ
+
+Play background music
+== ﺔﻴﻔﻠﺨﻟﺍ ﺕﻮﺻ ﻞﻴﻌﻔﺗ
+
+Player
+== ﺐﻋﻻ
+
+Player country:
+== ﺐﻋﻼﻟﺍ ﺪﻠﺑ:
+
+Player options
+== ﺐﻋﻼﻟﺍ ﺕﺍﺩﺍﺪﻋﺍ
+
+Players
+== ﻦﻴﺒﻋﻻ
+
+Please balance teams!
+== !ﻕﺮﻔﻟﺍ ﺔﻧﺯﺍﻮﻣ ﺀﺎﺟﺮﻟﺍ
+
+Prev. weapon
+== ﻖﺑﺎﺴﻟﺍ ﺡﻼﺴﻟﺍ
+
+Quit
+== ﺝﻭﺮﺧ
+
+Reason:
+== :ﺐﺒﺴﻟﺍ
+
+Red team
+== ﺮﻤﺣﻻﺍ ﻖﻳﺮﻔﻟﺍ
+
+Red team wins!
+== !ﺮﺼﺘﻧﺍ ﺮﻤﺣﻻﺍ ﻖﻳﺮﻔﻟﺍ
+
+Refresh
+== ﺚﻳﺪﺤﺗ
+
+Remote console
+== ﻦﻣﺩﻻﺍ ﻞﺴﻧﻮﻛ
+
+Remove
+== ﻑﺬﺣ
+
+Remove friend
+== ﻖﻳﺪﺻ ﻑﺬﺣ
+
+Rename
+== ﺔﻴﻤﺴﺗ ﺓﺩﺎﻋﺍ
+
+Rename demo
+== ﻮﻳﺪﻴﻓﻟﺍ ﺔﻴﻤﺴﺗ ﺓﺩﺎﻋﺍ
+
+Reset filter
+== ﺔﻴﻔﺼﺘﻟﺍ ﺓﺩﺎﻋﺍ
+
+Score
+== ﻁﺎﻘﻨﻟﺍ
+
+Score limit
+== ﻁﺎﻘﻨﻟﺍ ﺩﻭﺪﺣ
+
+Scoreboard
+== ﻁﺎﻘﻨﻟﺍ ﺔﻤﺋﺎﻗ
+
+Screenshot
+== ﺔﺷﺎﺸﻟﺍ ﺔﻄﻘﻟ
+
+Server address:
+== ﺮﻓﺮﻴﺴﻟﺍ ﻥﺍﻮﻨﻋ:
+
+Server details
+== ﺮﻓﺮﻴﺴﻟﺍ ﻞﻴﺻﺎﻔﺗ
+
+Server filter
+== ﺮﻓﺮﻴﺴﻟﺍ ﺔﻴﻔﺼﺗ
+
+Server info
+== ﺮﻓﺮﻴﺴﻟﺍ ﺕﺎﻣﻮﻠﻌﻣ
+
+Server not full
+== ﺊﻠﺘﻤﻣ ﺲﻴﻟ ﺮﻓﺮﻴﺴﻟﺍ
+
+Shotgun
+== ﻦﻘﺘﺷ
+
+Show chat
+== ﺕﺎﺸﻟﺍ ﺭﺎﻬﻇﺍ
+
+Show friends only
+== ﻂﻘﻓ ﺀﺎﻗﺪﺻﻻﺍ ﺭﺎﻬﻇﺍ
+
+Show ingame HUD
+== ﺔﺒﻌﻠﻟﺍ ﺮﻬﻈﻣ ﺭﺎﻬﻇﺍ
+
+Show name plates
+== ﻲﻣﺎﺳﻻﺍ ﺭﺎﻬﻇﺍ
+
+Show only chat messages from friends
+== ﺀﺎﻗﺪﺻﻻﺍ ﻦﻣ ﻂﻘﻓ ﻞﺋﺎﺳﺮﻟﺍ ﺭﺎﻬﻇﺍ
+
+Skins
+== ﺕﺎﻨﻜﺴﻟﺍ
+
+Sound
+== ﺕﻮﺼﻟﺍ
+
+Sound error
+== ﺕﻮﺼﻟﺎﺑ ﺎﻄﺧ
+
+Spectate
+== ﺓﺪﻫﺎﺸﻤﻟﺍ ﻊﺿﻭ
+
+Spectate next
+== ﻲﻟﺎﺘﻟﺍ ﺓﺪﻫﺎﺸﻣ
+
+Spectate previous
+== ﻖﺑﺎﺴﻟﺍ ﺓﺪﻫﺎﺸﻣ
+
+Spectator mode
+== ﺓﺪﻫﺎﺸﻤﻟﺍ ﻊﺿﻭ
+
+Spectators
+== ﻥﻭﺪﻫﺎﺸﻤﻟﺍ
+
+Stop record
+== ﺮﻳﻮﺼﺘﻟﺍ ﻑﺎﻘﻳﺍ
+
+Strict gametype filter
+== ﻂﺒﻀﻟﺎﺑ ﺔﺒﻌﻠﻟﺍ ﻉﻮﻧ
+
+Sudden Death
+== ﺊﺟﺎﻔﻤﻟﺍ ﺕﻮﻤﻟﺍ
+
+Switch weapon on pickup
+== ﻁﺎﻘﺘﻟﻻﺍ ﺪﻨﻋ ﺡﻼﺴﻟﺍ ﻞﻳﺪﺒﺗ
+
+Team
+== ﻖﻳﺮﻔﻟﺍ
+
+Team chat
+== ﻖﻳﺮﻔﻟﺍ ﺕﺎﺷ
+
+The audio device couldn't be initialised.
+== .ﺕﻮﺼﻟﺍ ﺯﺎﻬﺟ ﺔﺌﻴﻬﺗ ﺭﺬﻌﺗ
+
+The server is running a non-standard tuning on a pure game type.
+== .ﺺﻟﺎﺧ ﺔﺒﻌﻟ ﻉﻮﻧ ﻰﻠﻋ ﻲﺳﺎﻴﻗ ﺮﻴﻏ ﻂﺒﺿ ﻞﻴﻐﺸﺘﺑ ﺮﻓﺮﻴﺳ ﻡﻮﻘﻳ
+
+There's an unsaved map in the editor, you might want to save it before you quit the game.
+== .ﺔﺒﻌﻠﻟﺍ ﺀﺎﻬﻧﺇ ﻞﺒﻗ ﺎﻬﻈﻔﺣ ﻲﻓ ﺐﻏﺮﺗ ﺪﻗ ، ﺭﺮﺤﻤﻟﺍ ﻲﻓ ﺔﻇﻮﻔﺤﻣ ﺮﻴﻏ ﺏﺎﻣ ﻙﺎﻨﻫ
+
+Time limit
+== ﺖﻗﻮﻟﺍ ﺩﻭﺪﺣ
+
+Time limit: %d min
+== ﺖﻗﻮﻟﺍ ﺩﻭﺪﺣ: %d min
+
+Try again
+== ﺍﺩﺪﺠﻣ ﻝﻭﺎﺣ
+
+Type
+== ﺭﻮﻃ
+
+Unable to delete the demo
+== ﻮﻳﺪﻴﻓﻟﺍ ﻑﺬﺤﺑ ﻞﺸﻓ
+
+Unable to rename the demo
+== ﻮﻳﺪﻴﻓﻟﺍ ﺔﻴﻤﺴﺗ ﺓﺩﺎﻋﺎﺑ ﻞﺸﻓ
+
+Use sounds
+== ﺕﺍﻮﺻﻻﺍ ﻡﺍﺪﺨﺘﺳﺍ
+
+Use team colors for name plates
+== ﻢﺳﻼﻟ ﻖﻳﺮﻔﻟﺍ ﻥﺍﻮﻟﺃ ﻡﺪﺨﺘﺳﺍ
+
+V-Sync
+== V-Sync
+
+Version
+== ﺭﺍﺪﺻﻻﺍ
+
+Vote command:
+== ﺖﻳﻮﺼﺘﻟﺍ ﺭﺯ:
+
+Vote description:
+== ﺖﻳﻮﺼﺘﻟﺍ ﻒﺻﻭ:
+
+Vote no
+== ﻻ ﺖﻳﻮﺼﺗ
+
+Vote yes
+== ﻢﻌﻧ ﺖﻳﻮﺼﺗ
+
+Voting
+== ﺕﻮﺼﻳ
+
+Warmup
+== ﺔﻴﻤﺤﺗ
+
+Weapon
+== ﺡﻼﺳ
+
+Yes
+== ﻢﻌﻧ
+
+You must restart the game for all settings to take effect.
+== .ﻝﻮﻌﻔﻤﻟﺍ ﺔﻳﺭﺎﺳ ﺕﺍﺩﺍﺪﻋﻹﺍ ﻊﻴﻤﺟ ﺢﺒﺼﺗ ﻰﺘﺣ ﺔﺒﻌﻠﻟﺍ ﻞﻴﻐﺸﺗ ﺓﺩﺎﻋﺇ ﺐﺠﻳ
+
+New name:
+== ﺪﻳﺪﺟ ﻢﺳﺍ:
+
+Sat.
+== ﺔﻴﻓﺎﻔﺷ
+
+Miscellaneous
+== ﻉﻮﻨﺘﻣ
+
+Internet
+== ﺖﻧﺮﺘﻧﻻﺍ
+
+Max demos
+== ﺕﺎﻫﻮﻳﺪﻴﻔﻠﻟ ﻰﺼﻗﻻﺍ ﺪﺤﻟﺍ
+
+News
+== ﺭﺎﺒﺧﻻﺍ
+
+Join game
+== ﺔﺒﻌﻠﻟﺍ ﻰﻟﺍ ﻉﻮﺟﺭ
+
+FSAA samples
+== Anti-Aliasing
+
+Sound volume
+== ﺕﻮﺼﻟﺍ ﻢﺠﺣ
+
+Created:
+== ﺊﺸﻧﺍ:
+
+Max Screenshots
+== ﺭﻮﺼﻠﻟ ﻰﺼﻗﻻﺍ ﺪﺤﻟﺍ
+
+Length:
+== :ﻝﻮﻄﻟﺍ
+
+Netversion:
+== :ﻲﻓﺎﺼﻟﺍ ﺭﺍﺪﺻﻹﺍ
+
+Map:
+== ﺏﺎﻤﻟﺍ:
+
+Info
+== ﺕﺎﻣﻮﻠﻌﻣ
+
+Hue
+== ﻥﻮﻟ
+
+Record demo
+== ﻮﻳﺪﻴﻓ ﺮﻳﻮﺼﺗ
+
+Your skin
+== ﻚﻨﻜﺳ
+
+Size:
+== ﻢﺠﺤﻟﺍ
+
+Reset to defaults
+== ﺀﻲﺷ ﻞﻛ ﺓﺩﺎﻋﺍ
+
+Quit anyway?
+== ﻝﺎﺣ ﻞﻛ ﻰﻠﻋ ﺝﻭﺮﺨﻟﺍ
+
+Display Modes
+== ﺽﺮﻌﻟﺍ ﻉﺎﺿﻭﺃ
+
+Version:
+== :ﺭﺍﺪﺻﻻﺍ
+
+Round
+== ﺔﻟﻮﺟ
+
+Lht.
+== ﺢﻴﺘﻔﺗ
+
+UI Color
+== ﻥﺍﻮﻟﻻﺍ ﺔﻤﺋﺎﻗ
+
+Crc:
+== Crc:
+
+Alpha
+== ﺔﻴﻓﺎﻔﺷ
+
+LAN
+== LAN
+
+Name plates size
+== ﻲﻣﺎﺳﻻﺍ ﻢﺠﺣ
+
+Type:
+== ﺔﺑﺎﺘﻛ:
+
+Ratio
+== ﺔﺒﺴﻧ
+
+Dummy settings
+== ﺔﻴﻣﺪﻟﺍ ﺕﺍﺩﺍﺪﻋﺍ
+
+AntiPing
+== AntiPing
+
+Show quads
+== Quads ﺭﺎﻬﻇﺍ
+
+Map sound volume
+== ﺏﺎﻤﻟﺍ ﺕﻮﺻ
+
+Countries
+== ﻥﺍﺪﻠﺒﻟﺍ
+
+Types
+== ﻉﺍﻮﻧﺃ
+
+Show kill messages
+== ﻞﺘﻘﻟﺍ ﻞﺋﺎﺳﺭ ﺭﺎﻬﻇﺍ
+
+Show ghost
+== ﺢﺒﺸﻟﺍ ﺭﺎﻬﻇﺍ
+
+No updates available
+== ﺕﺎﺜﻳﺪﺤﺗ ﺪﺟﻮﻳﻻ
+
+Update now
+== ﻥﻻﺍ ﺚﻳﺪﺤﺘﻟﺍ
+
+Enable server message sound
+== ﺮﻓﺮﻴﺴﻟﺍ ﺔﺷﺩﺭﺩ ﺕﻮﺻ ﻞﻴﻌﻔﺗ
+
+Show votes window after voting
+== ﺖﻳﻮﺼﺘﻟﺍ ﺪﻌﺑ ﺕﺎﺘﻳﻮﺼﺘﻟﺍ ﺔﻤﺋﺎﻗ ﺭﺎﻬﻇﺍ
+
+HUD
+== ﺔﺒﻌﻠﻟﺍ ﺮﻬﻈﻣ
+
+Show names in chat in team colors
+== ﻖﻳﺮﻔﻟﺍ ﻥﺍﻮﻟﺄﺑ ﺔﺷﺩﺭﺪﻟﺍ ﻲﻓ ﺀﺎﻤﺳﻷﺍ ﺭﺎﻬﻇﺇ
+
+Enable team chat sound
+== ﻖﻳﺮﻔﻟﺍ ﺔﺷﺩﺭﺩ ﺕﻮﺻ ﻞﻴﻌﻔﺗ
+
+Show other players' hook collision lines
+== ﻦﻳﺮﺧﻵﺍ ﻦﻴﺒﻋﻼﻟﺍ ﺐﺤﺳ ﻡﺍﺪﻄﺻﺍ ﻁﻮﻄﺧ ﺮﻬﻇﺃ
+
+Deaths
+== ﺕﺍﻮﻣﻻﺍ
+
+Enable game sounds
+== ﺔﺒﻌﻟﻻﺍ ﺕﻮﺻ ﻞﻴﻌﻔﺗ
+
+DDNet Client needs to be restarted to complete update!
+== DDNet-Client !ﺚﻳﺪﺤﺘﻟﺍ ﻝﺎﻤﻛﻻ ﻞﻴﻐﺸﺘﻟﺍ ﺓﺩﺎﻋﻻ ﺝﺎﺘﺤﺗ
+
+Show others
+== ﻦﻳﺮﺧﻻﺍ ﺭﺎﻬﻇﺍ
+
+Restart
+== ﻞﻴﻐﺸﺘﻟﺍ ﺓﺩﺎﻋﺍ
+
+Browser
+== ﺢﻔﺼﺘﻤﻟﺍ
+
+Enable gun sound
+== ﺔﺤﻠﺳﻻﺍ ﺕﻮﺻ ﻞﻴﻌﻔﺗ
+
+Show health + ammo
+== ﺓﺮﻴﺧﺬﻟﺍ + ﺔﺤﺼﻟﺍ ﺭﺎﻬﻇﺇ
+
+Team message
+== ﻖﻳﺮﻔﻟﺍ ﺔﻟﺎﺳﺭ
+
+Save the best demo of each race
+== ﻕﺎﺒﺳ ﻞﻜﻟ ﻲﺒﻳﺮﺠﺗ ﺽﺮﻋ ﻞﻀﻓﺃ ﻆﻔﺣﺍ
+
+Are you sure that you want to disconnect?
+== ﺝﻭﺮﺨﻟﺍ ﺪﻳﺮﺗ ﻚﻧﺎﺑ ﺪﻛﺂﺘﻣ ﺖﻧﺍ ﻞﻫ
+
+Ghost
+== ﺢﺒﺸﻟﺍ
+
+Check now
+== ﻥﻻﺍ ﺪﻛﺄﺗ
+
+DDNet Client updated!
+== DDNet-Client تحدثت!
+
+AntiPing: predict other players
+== AntiPing: ﻦﻳﺮﺧﻵﺍ ﻦﻴﺒﻋﻼﻟ ﻖﺒﺴﻣ ﺏﺎﺴﺣ
+
+Show other players' key presses
+== ﻦﻳﺮﺧﻻﺍ ﻦﻴﺒﻋﻼﻟﺍ ﺎﻬﻄﻐﻀﺑ ﻡﺎﻗ ﻲﺘﻟﺍ ﺢﻴﺗﺎﻔﻤﻟﺍ ﺭﺎﻬﻇﺍ
+
+System message
+== ﻡﺎﻈﻨﻟﺍ ﻞﺋﺎﺳﺭ
+
+Updating...
+== ...ﺚﻳﺪﺤﺘﻟﺍ ﺭﺎﺟ
+
+Overlay entities
+== ﻥﺍﺭﺪﺠﻟﺍ-ﺐﻛﺍﺮﺗ
+
+Messages
+== ﻞﺋﺎﺳﺮﻟﺍ
+
+%.2f MiB
+== %.2f MiB
+
+Use DDRace Scoreboard
+== ﻝﺎﻤﻌﺘﺳﺃ DDRace ﺩﺭﻮﺑ ﺭﻮﻜﺳ
+
+Loading DDNet Client
+== ﻞﻴﻤﺤﺘﻟﺍ ﺭﺎﺟ DDNet Client
+
+Default zoom
+== ﻲﻌﻴﺒﻄﻟﺍ ﺮﻴﺒﻜﺘﻟﺍ
+
+Show score
+== ﻁﺎﻘﻨﻟﺍ ﺭﺎﻬﻇﺍ
+
+%.2f KiB
+== %.2f KiB
+
+Try fast HTTP map download first
+== ﻝﻭﺍ ﺏﺎﻤﻟﺍ ﻞﻴﻤﺤﺘﻟ ﻉﺮﺳﺍ HTTP ﻡﺪﺨﺘﺳﺍ ﺏﺮﺟ
+
+Enable regular chat sound
+== ﺔﻳﺩﺎﻌﻟﺍ ﺔﺷﺩﺭﺩ ﺕﻮﺻ ﻞﻴﻌﻔﺗ
+
+DDNet
+== ﺖﻴﻧﺩﺩ
+
+Normal message
+== ﺔﻴﻌﻴﺒﻄﻟﺍ ﻞﺋﺎﺳﺮﻟﺍ
+
+AntiPing: predict grenade paths
+== AntiPing: ﺔﻳﻭﺪﻴﻟﺍ ﻞﺑﺎﻨﻘﻟﺍ ﺕﺍﺭﺎﺴﻣ ﻊﻗﻮﺗ
+
+Search
+== ﺚﺤﺑ
+
+Connecting dummy
+== ﺔﻴﻣﺪﻟﺍ ﻝﺎﺼﺗﺍ
+
+Show clan above name plates
+== ﻢﻬﻴﻣﺎﺳﺍ ﻕﻮﻓ ﻥﻼﻜﻟﺍ ﺭﺎﻬﻇﺍ
+
+Save ghost
+== ﺢﺒﺸﻟﺍ ﻆﻔﺣ
+
+Enable highlighted chat sound
+== ﻪﻴﺒﻨﺘﻟﺍ ﺕﻮﺻ ﻞﻴﻌﻔﺗ
+
+AntiPing: predict weapons
+== AntiPing: ﺔﺤﻠﺳﻷﺍ ﺮﻴﻀﺤﺗ
+
+Highlighted message
+== ﻪﻴﺒﻨﺘﻟﺍ ﻞﺋﺎﺳﺭ
+
+Reset wanted weapon on death
+== ﺕﻮﻤﻟﺍ ﺪﻨﻋ ﺏﻮﻠﻄﻣ ﺡﻼﺳ ﻦﻴﻴﻌﺗ ﺓﺩﺎﻋﺇ
+
+Switch weapon when out of ammo
+== ﺓﺮﻴﺧﺬﻟﺍ ﺫﺎﻔﻧ ﺪﻨﻋ ﺡﻼﺴﻟﺍ ﺮﻴﻴﻐﺗ
+
+Grabs
+== ﺕﺎﻜﺴﻣ
+
+Select a name
+== ﻢﺳﺍ ﺭﺎﻴﺘﺧﺍ
+
+Automatically take game over screenshot
+== ﺔﺷﺎﺸﻟﺍ ﺔﻄﻘﻟ ﻰﻠﻋ ﺍًﻴﺋﺎﻘﻠﺗ ﺔﺒﻌﻠﻟﺍ ﺬﺧﺃ
+
+Please use a different name
+== ﺮﺧﺃ ﻢﺳﺍ ﺭﺎﻴﺘﺧﺎﺑ ﻢﻗ ﺀﺎﺟﺭ
+
+Show console window
+== ﻢﻜﺤﺘﻟﺍ ﺓﺪﺣﻭ ﺓﺬﻓﺎﻧ ﺽﺮﻋ
+
+Gameplay
+== ﺐﻌﻠﻟﺍ
+
+Laser
+== ﺭﺰﻴﻟ
+
+Old mouse mode
+== ﻢﻳﺪﻘﻟﺍ ﺱﻭﺎﻤﻟﺍ ﻊﺿﻭ
+
+Follow
+== ﻊﺒﺗﺃ
+
+Reset
+== ﻦﻴﻴﻌﺗ ﺓﺩﺎﻋﺇ
+
+Automatically create statboard csv
+== statboard ﻞﻤﻋ ﻲﺋﺎﻘﻠﺗ 
+
+Show tiles layers from BG map
+== ﺔﻴﻔﻠﺨﻟﺍ ﺏﺎﻤﻠﻟ ﺐﻧﺎﺠﺘﻟﺍ ﺕﺎﻘﺒﻃ ﺭﺎﻬﻇﺇ
+
+Remove chat
+== ﺕﺎﺸﻟﺍ ﻑﺬﺣ
+
+Threaded sound loading
+== ﺔﻳﺍﺪﺒﻟﺍ ﺕﻮﺼ
+
+Frags
+== ﻞﺑﺎﻨﻗ
+
+Automatically take statboard screenshot
+== ﺍﻴﺋﺎﻘﻠﺗ ﺞﺋﺎﺘﻨﻟﺍ ﺔﺣﻮﻠﻟ ﺔﺷﺎﺷ ﺔﻄﻘﻟ ﺬﺧﺍ
+
+Enable long pain sound (used when shooting in freeze)
+== ( ﺰﻳﺮﻔﺘﻳ ﺎﻣﺪﻨﻋ ﻡﺪﺨﺘﺴﻳ ) ﻢﻟﻵﺍ ﺕﻮﺻ
+
+Vanilla skins only
+== ﻂﻘﻓ ﺔﻴﺳﺎﺳﻻﺍ ﺕﺎﻨﻜﺴﻟﺍ
+
+Refresh Rate
+== ﻢﻳﺮﻔﻟﺍ ﻝﺪﻌﻣ
+
+New random timeout code
+== ﺪﻳﺪﺟ ﻲﺋﺍﻮﺸﻋ ﺔﻠﻬﻣ ﺩﻮﻛ
+
+Suicides
+== ﺭﺎﺤﺘﻧﻻﺍ
+
+Net
+== ﺔﻜﺒﺸﻟﺍ
+
+FPM
+== فبم
+
+Spree
+== ﺡﺮﻣ
+
+Max CSVs
+== Max CSVs
+
+Best
+== ﻞﻀﻓﺍ
+
+Screen
+== ﺔﺷﺎﺷ
+
+Exclude
+== ﺩﺎﻌﺒﺘﺳﺍ
+
+Demo
+== ﺕﺎﻫﻮﻳﺪﻴﻔﻟﺍ
+
+Fat skins (DDFat)
+== ﺔﻨﻴﻤﺳ ﺕﺎﻨﻜﺳ
+
+Show DDNet map finishes in server browser
+== ﺭﺎﻬﻇﺍ DDNet ﺕﺍﺮﻓﺮﻴﺴﻟﺍ ﺢﻔﺼﺘﻣ ﻲﻓ ﺔﻴﻬﺘﻨﻤﻟﺍ ﺕﺎﺑﺎﻤﻟﺍ
+
+Unfinished map
+== ﺔﻴﻬﺘﻨﻣ ﺮﻴﻐﻟﺍ ﺕﺎﺑﺎﻤﻟﺍ
+
+Welcome to DDNet
+== ﻲﻓ ﻚﺑ ﺎﺒﺣﺮﻣ DDNet
+
+may cause delay
+== ﺮﻴﺧﺄﺗ ﺐﺒﺴﻳ
+
+Preinit VBO (iGPUs only)
+== Preinit-VBO (iGPUs ﻂﻘﻓ)
+
+Multiple texture units (disable for macOS)
+== ﺮﺘﺴﻜﺗ ﻦﻣ ﺮﺜﻛﺍ ( ﺖﻨﻛ ﺍﺫﺍ ﺔﺋﺎﻔﻃﺍ macOS )
+
+UI mouse s.
+== ﻮﻴﻨﻣ ﺱﻭﺎﻤﻟﺍ ﺔﻴﺳﺎﺴﺣ
+
+Indicate map finish
+== ﺔﻗﺎﻄﺒﻟﺍ ﺭﺎﺼﺘﻧﺍ ﺭﺎﻬﻇﺇ
+
+File already exists, do you want to overwrite it?
+== ﻪﻗﻮﻓ ﺔﺑﺎﺘﻜﻟﺍ ﺪﻳﺮﺗ ﻞﻫ ، ﻞﻌﻔﻟﺎﺑ ﺩﻮﺟﻮﻣ ﻒﻠﻤﻟﺍ
+
+Clan plates size
+== ﻥﻼﻜﻟﺍ ﻞﻜﺷ ﻢﺠﺣ
+
+Friend message
+== ﻖﻳﺪﺻ ﺔﻟﺎﺳﺭ
+
+Date
+== ﺦﻳﺭﺎﺗ
+
+Skin prefix
+== ﻦﻜﺴﻟﺍ ﺲﻜﻓﺮﺑ
+
+Show HUD
+== ﻞﻜﺸﻟﺍ ﺭﺎﻬﻇﺍ
+
+Reload
+== ﻞﻴﻤﺤﺘﻟﺍ ﺓﺩﺎﻋﺍ
+
+9+ new mentions
+== 9+ ﺓﺪﻳﺪﺟ ﺕﺍﺭﺎﻌﺷﺍ
+
+Lock team
+== ﻖﻳﺮﻔﻟﺍ ﻞﻔﻗ
+
+Zoom out
+== ﺮﻴﻐﺼﺗ
+
+Are you sure that you want to disconnect your dummy?
+== ﻚﺘﻴﻣﺩ ﺝﺍﺮﺧﺍ ﺪﻳﺮﺗ ﻚﻧﺍ ﻦﻣ ﺪﻛﺎﺘﻣ ﺖﻧﺍ ﻞﻫ
+
+Activate
+== ﻞﻴﻌﻔﺗ
+
+Time
+== ﺖﻗﻮﻟﺍ
+
+Successfully saved the replay!
+== !ﺡﺎﺠﻨﺑ ﺓﺩﺎﻋﻻﺍ ﻩﺬﻫ ﻆﻔﺣ ﻢﺗ
+
+Length
+== ﻝﻮﻄﻟﺍ
+
+Show text entities
+== Entities-Text ﺭﺎﻬﻇﺍ
+
+Hook collisions
+== ﺐﺤﺴﻟﺍ ﺭﺰﻴﻟ ﺭﺎﻬﻇﺍ
+
+Fetch Info
+== ﺕﺎﻣﻮﻠﻌﻤﻟﺍ ﺭﺎﻀﺣﺍ
+
+DDNet %s is out!
+== DDNet %s ﺪﻳﺪﺟ ﺭﺍﺪﺻﺍ!
+
+Save
+== ﻆﻔﺣ
+
+%d new mentions
+== %d ﺓﺪﻳﺪﺟ ﺕﺍﺭﺎﻌﺷﺍ
+
+Show all
+== ﻞﻜﻟﺍ ﺭﺎﻬﻇﺍ
+
+1 new mention
+== 1 ﺪﻳﺪﺟ ﺭﺎﻌﺷﺍ
+
+Dummy copy
+== ﺔﻴﻣﺪﻟﺍ ﺦﺴﻧ
+
+Downloading %s:
+== ﻞﻴﻤﺤﺗ %s:
+
+Show entities
+== ﻥﺍﺭﺪﺠﻟﺍ ﺭﺎﻬﻇﺍ
+
+Zoom in
+== ﺮﻴﺒﻜﺗ
+
+Disconnect Dummy
+== ﺔﻴﻣﺪﻟﺍ ﺝﺍﺮﺧﺍ
+
+Update failed! Check log...
+== ...ﺕﺎﻗﻮﻠﻟﺍ ﻦﻣ ﺪﻛﺎﺗ !ﻞﺸﻓ ﺚﻳﺪﺤﺘﻟﺍ
+
+Markers
+== ﺕﺎﻣﻼﻌﻟﺍ
+
+Enable replays
+== ﺓﺩﺎﻋﻻﺍ ﻦﻴﻜﻤﺗ
+
+Toggle dummy
+== ﺔﻴﻣﺪﻠﻟ ﻞﻳﺪﺒﺗ
+
+Markers:
+== ﺕﺎﻣﻼﻌﻟﺍ:
+
+Converse
+== ﺔﺛﺩﺎﺤﻣ
+
+Filter connecting players
+== ﻦﻴﻠﺼﺘﻤﻟﺍ ﻦﻴﺒﻋﻼﻟﺍ ﺔﻴﻔﺼﺗ
+
+Size
+== ﻢﺠﺣ
+
+Deactivate
+== ﻞﻴﻄﻌﺗ
+
+Replay feature is disabled!
+== !ﺔﻔﻗﻮﻣ ﻞﻴﻐﺸﺘﻟﺍ ﺓﺩﺎﻋﺍ ﺓﺰﻴﻣ
+
+Replace video
+== ﻮﻳﺪﻴﻔﻟﺍ ﻝﺍﺪﺒﺘﺳﺍ
+
+DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
+== DDraceNetwork ، ﻦﻴﺋﺪﺘﺒﻤﻟﺍ ﺕﺍﺮﻓﺮﻴﺳ ﻰﻠﻋ ﺃﺪﺒﺗ ﻥﺃ ﺐﺠﻳ ، ﺍًﺪﻳﺪﺟ ﺍًﻣﺩﺎﻗ ﻚﺘﻔﺼﺑ .ﺏﺎﻤﻟﺍ ﻰﻠﻋ ﺔﻳﺎﻬﻨﻟﺍ ﻂﺧ ﻰﻟﺇ ﺕﻼﻤﺤﻤﻟﺍ ﻦﻣ ﻚﺘﻋﻮﻤﺠﻣﻭ ﺖﻧﺃ ﻚﻟﻮﺻﻭ ﻮﻫ ﻑﺪﻬﻟﺍ ﻥﻮﻜﻳ ﺚﻴﺣ ﺖﻧﺮﺘﻧﻹﺍ ﺮﺒﻋ ﺔﻴﻧﻭﺎﻌﺗ ﺔﺒﻌﻟ ﻲﻫ
+
+Default length: %d
+== ﻲﺿﺍﺮﺘﻓﻻﺍ ﻝﻮﻄﻟﺍ: %d
+
+Pause
+== ﺔﺒﻗﺍﺮﻣ
+
+transmits your player name to info2.ddnet.tw
+== ﻰﻟﺇ ﻚﺑ ﺹﺎﺨﻟﺍ ﺐﻋﻼﻟﺍ ﻢﺳﺍ ﻞﻘﻨﻳ info2.ddnet.tw
+
+The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
+== .ﺰﻳﺮﻔﻟﺍ ﻦﻣ ﺎﻬﻇﺎﻘﻳﺇﻭ ﻯﺮﺧﻷﺍ ﺕﻼﻤﺤﻤﻟﺍ ﺏﺮﻀﻟ (ﺮﺴﻳﻷﺍ ﺱﻭﺎﻤﻟﺍ) ﺔﻗﺮﻄﻤﻟﺍ ﻡﺍﺪﺨﺘﺳﺍ ﻦﻜﻤﻳ .ﺔﺤﻠﺳﻷﺍ ﺮﻴﻐﺗ ﺱﻭﺎﻤﻟﺍ ﺔﻠﺠﻋ
+
+Server best:
+== :ﺮﻓﺮﻴﺳ ﻞﻀﻓﺍ
+
+Destination file already exist
+== ﻞﻌﻔﻟﺎﺑ ﺩﻮﺟﻮﻣ ﺏﻮﻠﻄﻤﻟﺍ ﻒﻠﻤﻟﺍ
+
+Render demo
+== ﻮﻳﺪﻴﻓﻟﺍ ﻞﻴﻤﺤﺗ
+
+Hammerfly dummy
+== ﺔﻗﺮﻄﻤﻟﺎﺑ ﻥﺍﺮﻴﻃ-ﺔﻴﻣﺪﻟﺍ
+
+Connect Dummy
+== ﺔﻴﻣﺪﻟﺍ ﻝﺎﺧﺩﺍ
+
+Toggle ghost
+== ﺢﺒﺸﻟﺍ ﻊﺿﻭ
+
+Statboard
+== ﺩﺭﻮﺑ ﺕﺎﺘﺳ
+
+Reconnect in %d sec
+== %d ﻲﻓ ﻝﻮﺧﺪﻟﺍ ﺓﺩﺎﻋﺍ
+
+Personal best:
+== :ﺔﻴﺼﺨﺷ ﻞﻀﻓﺃ
+
+Kill
+== ﻞﺘﻗ
+
+Please enter your nickname below.
+== ﻚﺑ ﺹﺎﺨﻟﺍ ﻢﺳﺍ ﻝﺎﺧﺩﺇ ﺀﺎﺟﺮﻟﺍ
+
+The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
+== .ﺀﺍﺰﺟﻷﺍ ﻩﺬﻫ ﺯﻭﺎﺠﺘﻟ ﺍًﻌﻣ ﻞﻤﻌﻟﺍ ﻚﻴﻠﻋ .ﺍًﺘﻗﺆﻣ ﻙﺮﺤﺘﻟﺍ ﻰﻠﻋ ﺓﺭﺩﺎﻗ ﺮﻴﻏ ﻕﻼﻄﻧﻹﺍ ﺔﻄﻘﻧ ﻞﻌﺠﻳ ﺎﻤﻣ ، ﻩﺰﻳﺮﻓ ﻰﻠﻋ ﺕﺎﺑﺎﻣ ﻱﻮﺘﺤﺗ
+
+Render
+== ﻞﻌﺟ
+
+Hook (right mouse) can be used to swing through the map and to hook other tees to you.
+== ﻚﻴﻟﺍ ﺹﺎﺨﺷﻻﺍ ﺐﺤﺳﻭ ﺏﺎﻤﻟﺎﺑ ﻙﺮﺤﺘﻠﻟ ﻡﺪﺨﺘﺴﻳ )ﻦﻴﻤﻳ ﻚﻠﻛ( ﺐﺤﺴﻠﻟ
+
+It's recommended that you check the settings to adjust them to your liking before joining a server.
+== .ﺮﻓﺮﻴﺴﻟﺍ ﻰﻟﺇ ﻡﺎﻤﻀﻧﻻﺍ ﻞﺒﻗ ﻚﺘﺒﻏﺭ ﺐﺴﺣ ﺎﻬﻄﺒﻀﻟ ﺕﺍﺩﺍﺪﻋﻹﺍ ﻦﻣ ﻖﻘﺤﺘﻟﺎﺑ ﻰﺻﻮﻳ
+
+Use high DPI
+== ﻲﻟﺎﻋ IPD ﻡﺍﺪﺨﺘﺳﺍ
+
+Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
+== .ﺔﺒﻌﻠﻟﺍ ﻞﻴﺣﻭ ﺕﺎﻴﺳﺎﺳﺃ ﻢﻠﻌﺘﻟ ﻦﻳﺮﺧﺁ ﻦﻴﺒﻋﻻ ﻊﻣ  (ﺭﺯ t) ﺔﺷﺩﺭﺪﻟﺍ ﻚﻴﻠﻋ ﻦﻴﻌﺘﻴﺳ ﺍﺬﻟ ، ﻲﻤﻴﻠﻌﺗ ﺞﻣﺎﻧﺮﺑ ﺪﺟﻮﻳ ﻻ :ﺭﺯ ﻮﻫ ﻞﺻﺍﻮﺘﻟﺍ ، ﻚﻟﺫ ﻦﻣ ﻢﻫﻷﺍ
+
+Learn
+== ﻢﻠﻌﺗ
+
+Video name:
+== :ﻮﻳﺪﻴﻓﻟﺍ ﻢﺳﺍ
+
+Toggle dyncam
+== ﺔﻴﻜﻴﻣﺎﻨﻳﺪﻟﺍ ﺍﺮﻴﻣﺎﻛ
+
+Show others (own team only)
+== ﻂﻘﻓ ﻢﻴﺘﻠﻟ ﻦﻳﺮﺧﻻﺍ ﺭﺎﻬﻇﺍ
+
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== .ﻯﺮﺧﻷﺍ ﺭﺍﺭﺯﻻﺍ ﻂﺑﺍﻭﺭ ﺕﺍﺩﺍﺪﻋﺇ ﻊﺟﺍﺭ .ﻦﻳﺮﺧﻻﺍ ﻦﻴﺒﻋﻻﺍ ﺓﺪﻫﺎﺸﻣ ﻭ ﻒﻗﻮﻠﻟ q ,(ﺓﺩﺎﻋﺍ) ﻞﺘﻘﻠﻟ k ﺭﺯ ﻡﺪﺨﺘﺳﺍ
+
+Client message
+== ﺔﻟﺎﺳﺭ
+
+Country / Region
+== ﺪﻠﺒﻟﺍ
+
+Skip the main menu
+== ﺔﻤﺋﺎﻘﻟﺍ ﻲﻄﺨﺗ
+
+Settings
+== ﺕﺍﺩﺍﺪﻋﻻﺍ
+
+Run server
+== ﺮﻓﺮﻴﺳ ﻞﻴﻐﺸﺗ
+
+Stop server
+== ﺮﻓﺮﻴﺴﻟﺍ ﻑﺎﻘﻳﺍ
+
+Editor
+== ﻞﻳﺪﻌﺗ
+
+Download skins
+== ﺕﺎﻨﻜﺴﻟﺍ ﻞﻴﻤﺤﺗ
+
+Warning
+== ﺮﻳﺬﺤﺗ
+
+Speed
+== ﺔﻋﺮﺳ
+
+Website
+== ﻊﻗﻮﻣ
+
+Server executable not found, can't run server
+== ﺮﻓﺮﻴﺴﻟﺍ ﻞﻴﻐﺸﺗ ﻦﻜﻤﻳ ﻻﻭ ،ﺬﻴﻔﻨﺘﻠﻟ ﻞﺑﺎﻗ ﺮﻓﺮﻴﺳ ﻰﻠﻋ ﺭﻮﺜﻌﻟﺍ ﻢﺘﻳ ﻢﻟ
+
+[Start menu]
+Play
+== ﺐﻌﻟ
+
+%d of %d servers
+== %d ﻦﻣ ﺮﻓﺮﻴﺳ %d
+
+%d of %d server
+== %d ﻦﻣ ﺮﻓﺮﻴﺳ %d
+
+%d players
+== %d ﻦﻴﺒﻋﻻ
+
+%d player
+== %d ﺐﻋﻻ
+
+Theme
+== ﺕﺎﻤﻴﺜﻟﺍ
+
+Demos directory
+== ﺮﻳﻮﺼﺘﻟﺍ ﻒﻠﻣ ﺢﺘﻓ
+
+Themes directory
+== ﺕﺎﻤﻴﺜﻟﺍ ﻒﻠﻣ ﺢﺘﻓ
+
+Skin Database
+== ﺕﺎﻨﻜﺴﻟﺍ ﺔﺒﺘﻜﻣ
+
+Skins directory
+== ﺕﺎﻨﻜﺴﻟﺍ ﻒﻠﻣ ﺢﺘﻓ
+
+Background music volume
+== ﺔﻴﻔﻠﺨﻟﺍ ﺕﻮﺻ
+
+Assets
+== ﻝﺎﻜﺷﻻﺍ
+
+Entities
+== ﻥﺍﺭﺪﺠﻟﺍ
+
+Emoticons
+== ﺕﺎﺗﻮﻤﻳﻻﺍ
+
+Particles
+== ﺰﻠﻜﺗﺭﺎﺒﻟﺍ
+
+Assets directory
+== ﻝﺎﻜﺷﻻﺍ ﻒﻠﻣ ﺢﺘﻓ
+
+https://wiki.ddnet.tw/
+== https://wiki.ddnet.tw/
+
+Saving ddnet-settings.cfg failed
+== ﻆﻔﺤﻟﺍ ﻞﺸﻓ ddnet-settings.cfg
+
+Use current map as background
+== ﺔﻴﻔﻠﺨﻛ ﻲﻟﺎﺤﻟﺍ ﺏﺎﻤﻟﺍ ﻡﺍﺪﺨﺘﺳﺍ
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== ﺔﻓﺎﻘﻳﻻ Ctrl+Shift+D ﻂﻐﺿﺍ .ﻝﺎﻐﺷ ﻖﻴﻗﺪﺘﻟﺍ ﻊﺿﻭ
+
+Existing Player
+== ﺩﻮﺟﻮﻣ ﺐﻋﻼﻟﺍ
+
+Your nickname '%s' is already used (%d points). Do you still want to use it?
+== ﻪﻣﺍﺪﺨﺘﺳﺍ ﺪﻳﺮﺗ ﺖﻟﺯﺎﻣ ﻞﻫ '%s' ﻞﻤﻌﺘﺴﻣ ﻚﻤﺳﺍ
+
+Checking for existing player with your name
+== ﻚﻤﺳﺎﺑ ﺐﻋﻻ ﺩﻮﺟﻭ ﻦﻣ ﻖﻘﺤﺘﻟﺍ
+
+Game sound volume
+== ﺔﺒﻌﻠﻟﺍ ﺕﻮﺻ
+
+Chat sound volume
+== ﺔﺷﺩﺭﺪﻟﺍ ﺕﻮﺻ
+
+Use old chat style
+== ﻢﻳﺪﻘﻟﺍ ﺔﺛﺩﺎﺤﻤﻟﺍ ﻞﻜﺷ ﻡﺍﺪﺨﺘﺳﺍ
+
+Manual
+== ﻱﻭﺪﻳ
+
+Race
+== ﻕﺎﺒﺳ
+
+Auto
+== ﻲﺋﺎﻘﻠﺗ
+
+Replay
+== ﻞﻴﻐﺸﺘﻟﺍ ﺓﺩﺎﻋﺍ
+
+Smooth Dynamic Camera
+== ﺔﻤﻋﺎﻧ ﺍﺮﻴﻣﺎﻛ ﻚﻴﻣﺎﻨﻳﺩ
+
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 
+
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+Getting server list from master server
+== 
+
+Refreshing...
+== 
+
+Leak IP
+== 
+
+Chat command
+== 
+
+Dummy
+== 
+
+Windowed
+== 
+
+Windowed borderless
+== 
+
+Desktop fullscreen
+== 
+
+Use modern OpenGL
+== 
+
+Sample rate
+== 
+
+Show client IDs
+== 
+
+Kill Messages
+== 
+
+Kill Message Normal Color
+== 
+
+Kill Message Highlight Color
+== 
+
+Laser Outline Color
+== 
+
+Laser Inner Color
+== 
+
+Hookline
+== 
+
+No hit
+== 
+
+Hookable
+== 
+
+Tee
+== 
+
+Preview
+== 
+
+Show local player's key presses
+== 
+
+Background
+== 
+
+Entities Background color
+== 
+
+Regular Background Color
+== 
+
+DDNet %s is available:
+== 
+
+Discord
+== 
+
+https://ddnet.tw/discord
+== 

@@ -24,6 +24,7 @@ enum EMapImageModType
 	MAP_IMAGE_MOD_TYPE_BLOCKWORLDS,
 	MAP_IMAGE_MOD_TYPE_FNG,
 	MAP_IMAGE_MOD_TYPE_VANILLA,
+	MAP_IMAGE_MOD_TYPE_FDDRACE,
 
 	MAP_IMAGE_MOD_TYPE_COUNT,
 };
@@ -34,7 +35,8 @@ static const char *const gs_aModEntitiesNames[] = {
 	"race",
 	"blockworlds",
 	"fng",
-	"vanilla"};
+	"vanilla",
+	"f-ddrace"};
 
 class CMapImages : public CComponent
 {
@@ -45,7 +47,7 @@ class CMapImages : public CComponent
 	int m_aTextureUsedByTileOrQuadLayerFlag[64]; // 0: nothing, 1(as flag): tile layer, 2(as flag): quad layer
 	int m_Count;
 
-	char m_aEntitiesPath[MAX_PATH_LENGTH];
+	char m_aEntitiesPath[IO_MAX_PATH_LENGTH];
 
 	bool HasFrontLayer(EMapImageModType ModType);
 	bool HasSpeedupLayer(EMapImageModType ModType);

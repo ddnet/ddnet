@@ -46,6 +46,7 @@ class CConsole : public IConsole
 	};
 
 	CExecFile *m_pFirstExec;
+	class CConfig *m_pConfig;
 	class IStorage *m_pStorage;
 	int m_AccessLevel;
 
@@ -196,6 +197,7 @@ public:
 	CConsole(int FlagMask);
 	~CConsole();
 
+	virtual void Init();
 	virtual const CCommandInfo *FirstCommandInfo(int AccessLevel, int FlagMask) const;
 	virtual const CCommandInfo *GetCommandInfo(const char *pName, int FlagMask, bool Temp);
 	virtual void PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback, void *pUser);
@@ -216,7 +218,7 @@ public:
 	virtual int RegisterPrintCallback(int OutputLevel, FPrintCallback pfnPrintCallback, void *pUserData);
 	virtual void SetPrintOutputLevel(int Index, int OutputLevel);
 	virtual char *Format(char *pBuf, int Size, const char *pFrom, const char *pStr);
-	virtual void Print(int Level, const char *pFrom, const char *pStr, bool Highlighted = false);
+	virtual void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = gs_ConsoleDefaultColor);
 	virtual void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser);
 
 	void SetAccessLevel(int AccessLevel) { m_AccessLevel = clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_USER)); }

@@ -4,8 +4,11 @@
 
 #include "voting.h"
 #include <base/vmath.h>
+#include <game/client/components/sounds.h>
 #include <game/client/render.h>
 #include <game/generated/protocol.h>
+
+#include <game/client/gameclient.h>
 
 void CVoting::ConCallvote(IConsole::IResult *pResult, void *pUserData)
 {
@@ -188,15 +191,21 @@ void CVoting::OnMessage(int MsgType, void *pRawMsg)
 	if(MsgType == NETMSGTYPE_SV_VOTESET)
 	{
 		CNetMsg_Sv_VoteSet *pMsg = (CNetMsg_Sv_VoteSet *)pRawMsg;
+		OnReset();
 		if(pMsg->m_Timeout)
 		{
-			OnReset();
 			str_copy(m_aDescription, pMsg->m_pDescription, sizeof(m_aDescription));
 			str_copy(m_aReason, pMsg->m_pReason, sizeof(m_aReason));
 			m_Closetime = time() + time_freq() * pMsg->m_Timeout;
+
+			if(Client()->RconAuthed())
+			{
+				char aBuf[512];
+				str_format(aBuf, sizeof(aBuf), "%s (%s)", m_aDescription, m_aReason);
+				Client()->Notify("DDNet Vote", aBuf);
+				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_HIGHLIGHT, 0);
+			}
 		}
-		else
-			OnReset();
 	}
 	else if(MsgType == NETMSGTYPE_SV_VOTESTATUS)
 	{
@@ -300,9 +309,9 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 
 			if(Text)
 			{
-				char Buf[256];
-				str_format(Buf, sizeof(Buf), "%d", m_Yes);
-				UI()->DoLabel(&YesArea, Buf, Bars.h * 0.75f, 0);
+				char aBuf[256];
+				str_format(aBuf, sizeof(aBuf), "%d", m_Yes);
+				UI()->DoLabel(&YesArea, aBuf, Bars.h * 0.75f, 0);
 			}
 
 			PassArea.x += YesArea.w;
@@ -318,9 +327,9 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 
 			if(Text)
 			{
-				char Buf[256];
-				str_format(Buf, sizeof(Buf), "%d", m_No);
-				UI()->DoLabel(&NoArea, Buf, Bars.h * 0.75f, 0);
+				char aBuf[256];
+				str_format(aBuf, sizeof(aBuf), "%d", m_No);
+				UI()->DoLabel(&NoArea, aBuf, Bars.h * 0.75f, 0);
 			}
 
 			PassArea.w -= NoArea.w;
@@ -328,9 +337,9 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 
 		if(Text && m_Pass)
 		{
-			char Buf[256];
-			str_format(Buf, sizeof(Buf), "%d", m_Pass);
-			UI()->DoLabel(&PassArea, Buf, Bars.h * 0.75f, 0);
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "%d", m_Pass);
+			UI()->DoLabel(&PassArea, aBuf, Bars.h * 0.75f, 0);
 		}
 	}
 }

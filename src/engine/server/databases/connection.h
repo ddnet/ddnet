@@ -21,7 +21,7 @@ public:
 	virtual IDbConnection *Copy() = 0;
 
 	// returns the database prefix
-	const char *GetPrefix() { return m_aPrefix; }
+	const char *GetPrefix() const { return m_aPrefix; }
 	virtual const char *BinaryCollate() const = 0;
 	// can be inserted into queries to convert a timestamp variable to the unix timestamp
 	virtual void ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize) = 0;
@@ -35,24 +35,20 @@ public:
 	virtual const char *InsertIgnore() const = 0;
 	// ORDER BY RANDOM()/RAND()
 	virtual const char *Random() const = 0;
+	// Get Median Map Time from l.Map
+	virtual const char *MedianMapTime(char *pBuffer, int BufferSize) const = 0;
 
-	enum Status
-	{
-		IN_USE,
-		SUCCESS,
-		FAILURE,
-	};
 	// tries to allocate the connection from the pool established
-	virtual Status Connect() = 0;
+	//
+	// returns true on failure
+	virtual bool Connect(char *pError, int ErrorSize) = 0;
 	// has to be called to return the connection back to the pool
 	virtual void Disconnect() = 0;
 
-	// get exclusive read/write access to the database
-	virtual void Lock(const char *pTable) = 0;
-	virtual void Unlock() = 0;
-
 	// ? for Placeholders, connection has to be established, can overwrite previous prepared statements
-	virtual void PrepareStatement(const char *pStmt) = 0;
+	//
+	// returns true on failure
+	virtual bool PrepareStatement(const char *pStmt, char *pError, int ErrorSize) = 0;
 
 	// PrepareStatement has to be called beforehand,
 	virtual void BindString(int Idx, const char *pString) = 0;
@@ -62,20 +58,28 @@ public:
 
 	// Print expanded sql statement
 	virtual void Print() = 0;
+
 	// executes the query and returns if a result row exists and selects it
 	// when called multiple times the next row is selected
-	virtual bool Step() = 0;
+	//
+	// returns true on failure
+	virtual bool Step(bool *pEnd, char *pError, int ErrorSize) = 0;
+	// executes the query and returns the number of rows affected by the update/insert/delete
+	//
+	// returns true on failure
+	virtual bool ExecuteUpdate(int *pNumUpdated, char *pError, int ErrorSize) = 0;
 
-	virtual bool IsNull(int Col) const = 0;
-	virtual float GetFloat(int Col) const = 0;
-	virtual int GetInt(int Col) const = 0;
+	virtual bool IsNull(int Col) = 0;
+	virtual float GetFloat(int Col) = 0;
+	virtual int GetInt(int Col) = 0;
+	virtual int64_t GetInt64(int Col) = 0;
 	// ensures that the string is null terminated
-	virtual void GetString(int Col, char *pBuffer, int BufferSize) const = 0;
+	virtual void GetString(int Col, char *pBuffer, int BufferSize) = 0;
 	// returns number of bytes read into the buffer
-	virtual int GetBlob(int Col, unsigned char *pBuffer, int BufferSize) const = 0;
+	virtual int GetBlob(int Col, unsigned char *pBuffer, int BufferSize) = 0;
 
 	// SQL statements, that can't be abstracted, has side effects to the result
-	virtual void AddPoints(const char *pPlayer, int Points) = 0;
+	virtual bool AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize) = 0;
 
 private:
 	char m_aPrefix[64];
@@ -87,5 +91,19 @@ protected:
 	void FormatCreateSaves(char *aBuf, unsigned int BufferSize);
 	void FormatCreatePoints(char *aBuf, unsigned int BufferSize);
 };
+
+int MysqlInit();
+void MysqlUninit();
+
+IDbConnection *CreateSqliteConnection(const char *pFilename, bool Setup);
+// Returns nullptr if MySQL support is not compiled in.
+IDbConnection *CreateMysqlConnection(
+	const char *pDatabase,
+	const char *pPrefix,
+	const char *pUser,
+	const char *pPass,
+	const char *pIp,
+	int Port,
+	bool Setup);
 
 #endif // ENGINE_SERVER_DATABASES_CONNECTION_H

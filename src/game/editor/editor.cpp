@@ -92,7 +92,7 @@ enum
 
 CEditorImage::~CEditorImage()
 {
-	m_pEditor->Graphics()->UnloadTexture(m_Texture);
+	m_pEditor->Graphics()->UnloadTexture(&m_Texture);
 	if(m_pData)
 	{
 		free(m_pData);
@@ -223,7 +223,7 @@ void CLayerGroup::DeleteLayer(int Index)
 	m_pMap->m_UndoModified++;
 }
 
-void CLayerGroup::GetSize(float *w, float *h)
+void CLayerGroup::GetSize(float *w, float *h) const
 {
 	*w = 0;
 	*h = 0;
@@ -326,171 +326,11 @@ int CEditor::DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect,
 	return ReturnValue;
 }
 
-// copied from gc_menu.cpp, should be more generalized
-//extern int ui_do_edit_box(void *id, const CUIRect *rect, char *str, int str_size, float font_size, bool hidden=false);
 int CEditor::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners)
 {
-	int Inside = UI()->MouseInside(pRect);
-	bool ReturnValue = false;
-	bool UpdateOffset = false;
-	static int s_AtIndex = 0;
-	static bool s_DoScroll = false;
-	static float s_ScrollStart = 0.0f;
-
-	FontSize *= UI()->Scale();
-
 	if(UI()->LastActiveItem() == pID)
-	{
 		m_EditBoxActive = 2;
-		int Len = str_length(pStr);
-		if(Len == 0)
-			s_AtIndex = 0;
-
-		if(Inside && UI()->MouseButton(0))
-		{
-			s_DoScroll = true;
-			s_ScrollStart = UI()->MouseX();
-			int MxRel = (int)(UI()->MouseX() - pRect->x);
-
-			for(int i = 1; i <= Len; i++)
-			{
-				if(TextRender()->TextWidth(0, FontSize, pStr, i, std::numeric_limits<float>::max()) - *Offset > MxRel)
-				{
-					s_AtIndex = i - 1;
-					break;
-				}
-
-				if(i == Len)
-					s_AtIndex = Len;
-			}
-		}
-		else if(!UI()->MouseButton(0))
-			s_DoScroll = false;
-		else if(s_DoScroll)
-		{
-			// do scrolling
-			if(UI()->MouseX() < pRect->x && s_ScrollStart - UI()->MouseX() > 10.0f)
-			{
-				s_AtIndex = maximum(0, s_AtIndex - 1);
-				s_ScrollStart = UI()->MouseX();
-				UpdateOffset = true;
-			}
-			else if(UI()->MouseX() > pRect->x + pRect->w && UI()->MouseX() - s_ScrollStart > 10.0f)
-			{
-				s_AtIndex = minimum(Len, s_AtIndex + 1);
-				s_ScrollStart = UI()->MouseX();
-				UpdateOffset = true;
-			}
-		}
-
-		for(int i = 0; i < Input()->NumEvents(); i++)
-		{
-			Len = str_length(pStr);
-			int NumChars = Len;
-			ReturnValue |= CLineInput::Manipulate(Input()->GetEvent(i), pStr, StrSize, StrSize, &Len, &s_AtIndex, &NumChars);
-		}
-
-		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_V))
-		{
-			const char *pClipboardText = Input()->GetClipboardText();
-			if(pClipboardText)
-			{
-				str_append(pStr, pClipboardText, StrSize);
-				str_sanitize_cc(pStr);
-				s_AtIndex = str_length(pStr);
-				ReturnValue = true;
-			}
-		}
-
-		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_C) && pStr[0] != '\0')
-		{
-			Input()->SetClipboardText(pStr);
-		}
-	}
-
-	bool JustGotActive = false;
-
-	if(UI()->ActiveItem() == pID)
-	{
-		if(!UI()->MouseButton(0))
-		{
-			s_AtIndex = minimum(s_AtIndex, str_length(pStr));
-			s_DoScroll = false;
-			UI()->SetActiveItem(0);
-		}
-	}
-	else if(UI()->HotItem() == pID)
-	{
-		if(UI()->MouseButton(0))
-		{
-			if(UI()->LastActiveItem() != pID)
-				JustGotActive = true;
-			UI()->SetActiveItem(pID);
-		}
-	}
-
-	if(Inside)
-		UI()->SetHotItem(pID);
-
-	CUIRect Textbox = *pRect;
-	RenderTools()->DrawUIRect(&Textbox, ColorRGBA(1, 1, 1, 0.5f), Corners, 3.0f);
-	Textbox.VMargin(2.0f, &Textbox);
-
-	const char *pDisplayStr = pStr;
-	char aStars[128];
-
-	if(Hidden)
-	{
-		unsigned s = str_length(pStr);
-		if(s >= sizeof(aStars))
-			s = sizeof(aStars) - 1;
-		for(unsigned int i = 0; i < s; ++i)
-			aStars[i] = '*';
-		aStars[s] = 0;
-		pDisplayStr = aStars;
-	}
-
-	// check if the text has to be moved
-	if(UI()->LastActiveItem() == pID && !JustGotActive && (UpdateOffset || Input()->NumEvents()))
-	{
-		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex, std::numeric_limits<float>::max());
-		if(w - *Offset > Textbox.w)
-		{
-			// move to the left
-			float wt = TextRender()->TextWidth(0, FontSize, pDisplayStr, -1, std::numeric_limits<float>::max());
-			do
-			{
-				*Offset += minimum(wt - *Offset - Textbox.w, Textbox.w / 3);
-			} while(w - *Offset > Textbox.w + 0.0001f);
-		}
-		else if(w - *Offset < 0.0f)
-		{
-			// move to the right
-			do
-			{
-				*Offset = maximum(0.0f, *Offset - Textbox.w / 3);
-			} while(w - *Offset < -0.0001f);
-		}
-	}
-	UI()->ClipEnable(pRect);
-	Textbox.x -= *Offset;
-
-	UI()->DoLabel(&Textbox, pDisplayStr, FontSize, -1, std::numeric_limits<float>::max());
-
-	// render the cursor
-	if(UI()->LastActiveItem() == pID && !JustGotActive)
-	{
-		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex, std::numeric_limits<float>::max());
-		Textbox = *pRect;
-		Textbox.VSplitLeft(2.0f, 0, &Textbox);
-		Textbox.x += (w - *Offset - TextRender()->TextWidth(0, FontSize, "|", -1, std::numeric_limits<float>::max()) / 2);
-
-		if((2 * time_get() / time_freq()) % 2) // make it blink
-			UI()->DoLabel(&Textbox, "|", FontSize, -1, std::numeric_limits<float>::max());
-	}
-	UI()->ClipDisable();
-
-	return ReturnValue;
+	return m_UIEx.DoEditBox(pID, pRect, pStr, StrSize, FontSize, Offset, Hidden, Corners);
 }
 
 float CEditor::ButtonColorMul(const void *pID)
@@ -775,7 +615,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 {
 	// logic
 	static float s_Value;
-	static char s_NumStr[64];
+	static char s_aNumStr[64];
 	static bool s_TextMode = false;
 	static void *s_LastTextpID = pID;
 	int Inside = UI()->MouseInside(pRect);
@@ -785,9 +625,9 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 		s_LastTextpID = pID;
 		s_TextMode = true;
 		if(IsHex)
-			str_format(s_NumStr, sizeof(s_NumStr), "%06X", Current);
+			str_format(s_aNumStr, sizeof(s_aNumStr), "%06X", Current);
 		else
-			str_format(s_NumStr, sizeof(s_NumStr), "%d", Current);
+			str_format(s_aNumStr, sizeof(s_aNumStr), "%d", Current);
 	}
 
 	if(UI()->ActiveItem() == pID)
@@ -805,7 +645,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 		m_pTooltip = "Type your number";
 
 		static float s_NumberBoxID = 0;
-		DoEditBox(&s_NumberBoxID, pRect, s_NumStr, sizeof(s_NumStr), 10.0f, &s_NumberBoxID, false, Corners);
+		DoEditBox(&s_NumberBoxID, pRect, s_aNumStr, sizeof(s_aNumStr), 10.0f, &s_NumberBoxID, false, Corners);
 
 		UI()->SetActiveItem(&s_NumberBoxID);
 
@@ -813,9 +653,9 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 			((UI()->MouseButton(1) || UI()->MouseButton(0)) && !Inside))
 		{
 			if(IsHex)
-				Current = clamp(str_toint_base(s_NumStr, 16), Min, Max);
+				Current = clamp(str_toint_base(s_aNumStr, 16), Min, Max);
 			else
-				Current = clamp(str_toint(s_NumStr), Min, Max);
+				Current = clamp(str_toint(s_aNumStr), Min, Max);
 			m_LockMouse = false;
 			UI()->SetActiveItem(0);
 			s_TextMode = false;
@@ -888,14 +728,14 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 	return Current;
 }
 
-CLayerGroup *CEditor::GetSelectedGroup()
+CLayerGroup *CEditor::GetSelectedGroup() const
 {
 	if(m_SelectedGroup >= 0 && m_SelectedGroup < m_Map.m_lGroups.size())
 		return m_Map.m_lGroups[m_SelectedGroup];
 	return 0x0;
 }
 
-CLayer *CEditor::GetSelectedLayer(int Index)
+CLayer *CEditor::GetSelectedLayer(int Index) const
 {
 	CLayerGroup *pGroup = GetSelectedGroup();
 	if(!pGroup)
@@ -911,7 +751,7 @@ CLayer *CEditor::GetSelectedLayer(int Index)
 	return 0x0;
 }
 
-CLayer *CEditor::GetSelectedLayerType(int Index, int Type)
+CLayer *CEditor::GetSelectedLayerType(int Index, int Type) const
 {
 	CLayer *p = GetSelectedLayer(Index);
 	if(p && p->m_Type == Type)
@@ -973,7 +813,7 @@ void CEditor::DeleteSelectedQuads()
 	}
 }
 
-bool CEditor::IsQuadSelected(int Index)
+bool CEditor::IsQuadSelected(int Index) const
 {
 	for(int i = 0; i < m_lSelectedQuads.size(); ++i)
 		if(m_lSelectedQuads[i] == Index)
@@ -981,7 +821,7 @@ bool CEditor::IsQuadSelected(int Index)
 	return false;
 }
 
-int CEditor::FindSelectedQuadIndex(int Index)
+int CEditor::FindSelectedQuadIndex(int Index) const
 {
 	for(int i = 0; i < m_lSelectedQuads.size(); ++i)
 		if(m_lSelectedQuads[i] == Index)
@@ -1069,6 +909,7 @@ static int EntitiesListdirCallback(const char *pName, int IsDir, int StorageType
 void CEditor::DoToolbar(CUIRect ToolBar)
 {
 	bool CtrlPressed = Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL);
+	bool ShiftPressed = Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT);
 
 	CUIRect TB_Top, TB_Bottom;
 	CUIRect Button;
@@ -1158,7 +999,8 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		TB_Top.VSplitLeft(5.0f, 0, &TB_Top);
 
 		TB_Top.VSplitLeft(45.0f, &Button, &TB_Top);
-		if(DoButton_Editor(&Button, "Entities", 0, &Button, 0, "Choose game layer entities image for different gametypes"))
+		static int s_EntitiesButtonID = 0;
+		if(DoButton_Editor(&s_EntitiesButtonID, "Entities", 0, &Button, 0, "Choose game layer entities image for different gametypes"))
 		{
 			m_SelectEntitiesFiles.clear();
 			Storage()->ListDirectory(IStorage::TYPE_ALL, "editor/entities", EntitiesListdirCallback, this);
@@ -1449,7 +1291,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			TB_Bottom.VSplitLeft(65.0f, &Button, &TB_Bottom);
 			static int s_BrushDrawModeButton = 0;
 			if(DoButton_Editor(&s_BrushDrawModeButton, "Destructive", m_BrushDrawDestructive, &Button, 0, "[ctrl+d] Toggle brush draw mode") ||
-				(Input()->KeyPress(KEY_D) && CtrlPressed))
+				(Input()->KeyPress(KEY_D) && CtrlPressed && !ShiftPressed))
 				m_BrushDrawDestructive = !m_BrushDrawDestructive;
 			TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
 		}
@@ -1496,7 +1338,7 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 
 	if(UI()->ActiveItem() == pID)
 	{
-		if(m_MouseDeltaWx * m_MouseDeltaWx + m_MouseDeltaWy * m_MouseDeltaWy > 0.05f)
+		if(m_MouseDeltaWx * m_MouseDeltaWx + m_MouseDeltaWy * m_MouseDeltaWy > 0.0f)
 		{
 			if(s_Operation == OP_MOVE)
 			{
@@ -1635,7 +1477,7 @@ void CEditor::DoQuad(CQuad *q, int Index)
 
 	if(UI()->ActiveItem() == pID)
 	{
-		if(m_MouseDeltaWx * m_MouseDeltaWx + m_MouseDeltaWy * m_MouseDeltaWy > 0.05f)
+		if(m_MouseDeltaWx * m_MouseDeltaWx + m_MouseDeltaWy * m_MouseDeltaWy > 0.0f)
 		{
 			// check if we only should move pivot
 			if(s_Operation == OP_MOVE_PIVOT)
@@ -1901,7 +1743,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 	{
 		if(!s_Moved)
 		{
-			if(m_MouseDeltaWx * m_MouseDeltaWx + m_MouseDeltaWy * m_MouseDeltaWy > 0.05f)
+			if(m_MouseDeltaWx * m_MouseDeltaWx + m_MouseDeltaWy * m_MouseDeltaWy > 0.0f)
 				s_Moved = true;
 		}
 
@@ -2550,7 +2392,14 @@ void CEditor::DoMapEditor(CUIRect View)
 					Layer = LAYER_TUNE;
 			}
 			if(m_ShowPicker && Layer != NUM_LAYERS)
-				m_pTooltip = Explain((int)wx / 32 + (int)wy / 32 * 16, Layer);
+			{
+				if(m_SelectEntitiesImage == "DDNet")
+					m_pTooltip = Explain(EXPLANATION_DDNET, (int)wx / 32 + (int)wy / 32 * 16, Layer);
+				else if(m_SelectEntitiesImage == "FNG")
+					m_pTooltip = Explain(EXPLANATION_FNG, (int)wx / 32 + (int)wy / 32 * 16, Layer);
+				else if(m_SelectEntitiesImage == "Vanilla")
+					m_pTooltip = Explain(EXPLANATION_VANILLA, (int)wx / 32 + (int)wy / 32 * 16, Layer);
+			}
 			else if(m_Brush.IsEmpty())
 				m_pTooltip = "Use left mouse button to drag and create a brush. Hold shift to select multiple quads.";
 			else
@@ -2648,7 +2497,7 @@ void CEditor::DoMapEditor(CUIRect View)
 						//editor.map.groups[selected_group]->mapscreen();
 						for(int k = 0; k < NumEditLayers; k++)
 							pEditLayers[k]->BrushSelecting(r);
-						Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
+						UI()->MapScreen();
 					}
 				}
 				else if(s_Operation == OP_BRUSH_PAINT)
@@ -2668,7 +2517,7 @@ void CEditor::DoMapEditor(CUIRect View)
 						//editor.map.groups[selected_group]->mapscreen();
 						for(int k = 0; k < NumEditLayers; k++)
 							pEditLayers[k]->BrushSelecting(r);
-						Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
+						UI()->MapScreen();
 					}
 				}
 			}
@@ -2791,7 +2640,7 @@ void CEditor::DoMapEditor(CUIRect View)
 					}
 				}
 
-				Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
+				UI()->MapScreen();
 			}
 		}
 
@@ -2818,6 +2667,19 @@ void CEditor::DoMapEditor(CUIRect View)
 				s_Operation = OP_NONE;
 				UI()->SetActiveItem(0);
 			}
+		}
+		if(!Input()->KeyIsPressed(KEY_LSHIFT) && !Input()->KeyIsPressed(KEY_RSHIFT) &&
+			!Input()->KeyIsPressed(KEY_LCTRL) && !Input()->KeyIsPressed(KEY_RCTRL))
+		{
+			float PanSpeed = 64.0f;
+			if(Input()->KeyPress(KEY_A))
+				m_WorldOffsetX -= PanSpeed * m_WorldZoom;
+			else if(Input()->KeyPress(KEY_D))
+				m_WorldOffsetX += PanSpeed * m_WorldZoom;
+			if(Input()->KeyPress(KEY_W))
+				m_WorldOffsetY -= PanSpeed * m_WorldZoom;
+			else if(Input()->KeyPress(KEY_S))
+				m_WorldOffsetY += PanSpeed * m_WorldZoom;
 		}
 	}
 	else if(UI()->ActiveItem() == s_pEditorID)
@@ -2960,7 +2822,7 @@ void CEditor::DoMapEditor(CUIRect View)
 		m_ShowEnvelopePreview = 0;
 	}
 
-	Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
+	UI()->MapScreen();
 	//UI()->ClipDisable();
 }
 
@@ -2975,7 +2837,7 @@ float CEditor::ScaleFontSize(char *pText, int TextSize, float FontSize, int Widt
 		else
 		{
 			pText[str_length(pText) - 4] = '\0';
-			str_append(pText, "...", TextSize);
+			str_append(pText, "…", TextSize);
 		}
 	}
 	return FontSize;
@@ -3502,7 +3364,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 		}
 	}
 
-	if(Input()->KeyPress(KEY_DOWN) && m_Dialog == DIALOG_NONE)
+	if(Input()->KeyPress(KEY_DOWN) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0)
 	{
 		if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
 		{
@@ -3533,7 +3395,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 			}
 		}
 	}
-	if(Input()->KeyPress(KEY_UP) && m_Dialog == DIALOG_NONE)
+	if(Input()->KeyPress(KEY_UP) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0)
 	{
 		if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
 		{
@@ -3586,7 +3448,7 @@ void CEditor::ReplaceImage(const char *pFileName, int StorageType, void *pUser)
 		return;
 
 	CEditorImage *pImg = pEditor->m_Map.m_lImages[pEditor->m_SelectedImage];
-	pEditor->Graphics()->UnloadTexture(pImg->m_Texture);
+	pEditor->Graphics()->UnloadTexture(&(pImg->m_Texture));
 	if(pImg->m_pData)
 	{
 		free(pImg->m_pData);
@@ -3810,18 +3672,20 @@ int CEditor::PopupImage(CEditor *pEditor, CUIRect View, void *pContext)
 			pImg->m_External = 0;
 			return 1;
 		}
+		View.HSplitTop(5.0f, &Slot, &View);
+		View.HSplitTop(12.0f, &Slot, &View);
 	}
-	else
+	else if(IsVanillaImage(pImg->m_aName))
 	{
 		if(pEditor->DoButton_MenuItem(&s_ExternalButton, "Make external", 0, &Slot, 0, "Removes the image from the map file."))
 		{
 			pImg->m_External = 1;
 			return 1;
 		}
+		View.HSplitTop(5.0f, &Slot, &View);
+		View.HSplitTop(12.0f, &Slot, &View);
 	}
 
-	View.HSplitTop(5.0f, &Slot, &View);
-	View.HSplitTop(12.0f, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_ReplaceButton, "Replace", 0, &Slot, 0, "Replaces the image with a new one"))
 	{
 		pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_IMG, "Replace Image", "Replace", "mapres", "", ReplaceImage, pEditor);
@@ -4037,7 +3901,15 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect View)
 
 				static int s_PopupImageID = 0;
 				if(Result == 2)
-					UiInvokePopupMenu(&s_PopupImageID, 0, UI()->MouseX(), UI()->MouseY(), 120, 60, PopupImage);
+				{
+					CEditorImage *pImg = m_Map.m_lImages[m_SelectedImage];
+					int Height;
+					if(pImg->m_External || IsVanillaImage(pImg->m_aName))
+						Height = 60;
+					else
+						Height = 43;
+					UiInvokePopupMenu(&s_PopupImageID, 0, UI()->MouseX(), UI()->MouseY(), 120, Height, PopupImage);
+				}
 			}
 
 			ToolBox.HSplitTop(2.0f, 0, &ToolBox);
@@ -4104,7 +3976,7 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect View)
 
 	// render image
 	int i = m_SelectedImage;
-	if(i < m_Map.m_lImages.size())
+	if(i != -1 && i < m_Map.m_lImages.size())
 	{
 		CUIRect r;
 		View.Margin(10.0f, &r);
@@ -4323,7 +4195,7 @@ void CEditor::AddFileDialogEntry(int Index, CUIRect *pView)
 void CEditor::RenderFileDialog()
 {
 	// GUI coordsys
-	Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
+	UI()->MapScreen();
 	CUIRect View = *UI()->Screen();
 	CUIRect Preview;
 	float Width = View.w, Height = View.h;
@@ -4417,7 +4289,7 @@ void CEditor::RenderFileDialog()
 	for(int i = 0; i < m_FileList.size(); i++)
 	{
 		m_FileList[i].m_IsVisible = false;
-		if(!m_aFileDialogSearchText[0] || str_find_nocase(m_FileList[i].m_aName, m_aFileDialogSearchText))
+		if(!m_aFileDialogSearchText[0] || str_utf8_find_nocase(m_FileList[i].m_aName, m_aFileDialogSearchText))
 		{
 			AddFileDialogEntry(i, &View);
 			m_FileList[i].m_IsVisible = true;
@@ -4496,7 +4368,7 @@ void CEditor::RenderFileDialog()
 
 				if(Graphics()->LoadPNG(&m_FilePreviewImageInfo, aBuffer, IStorage::TYPE_ALL))
 				{
-					m_FilePreviewImage = Graphics()->LoadTextureRaw(m_FilePreviewImageInfo.m_Width, m_FilePreviewImageInfo.m_Height, m_FilePreviewImageInfo.m_Format, m_FilePreviewImageInfo.m_pData, m_FilePreviewImageInfo.m_Format, IGraphics::TEXLOAD_NORESAMPLE);
+					m_FilePreviewImage = Graphics()->LoadTextureRaw(m_FilePreviewImageInfo.m_Width, m_FilePreviewImageInfo.m_Height, m_FilePreviewImageInfo.m_Format, m_FilePreviewImageInfo.m_pData, m_FilePreviewImageInfo.m_Format, 0);
 					CImageInfo DummyInfo = m_FilePreviewImageInfo;
 					m_FilePreviewImageInfo.m_pData = NULL;
 					Graphics()->FreePNG(&DummyInfo);
@@ -4584,9 +4456,9 @@ void CEditor::RenderFileDialog()
 				}
 				else
 				{
-					char aTemp[MAX_PATH_LENGTH];
+					char aTemp[IO_MAX_PATH_LENGTH];
 					str_copy(aTemp, m_pFileDialogPath, sizeof(aTemp));
-					str_format(m_pFileDialogPath, MAX_PATH_LENGTH, "%s/%s", aTemp, m_FileList[m_FilesSelectedIndex].m_aFilename);
+					str_format(m_pFileDialogPath, IO_MAX_PATH_LENGTH, "%s/%s", aTemp, m_FileList[m_FilesSelectedIndex].m_aFilename);
 				}
 			}
 			FilelistPopulate(!str_comp(m_pFileDialogPath, "maps") || !str_comp(m_pFileDialogPath, "mapres") ? m_FileDialogStorageType :
@@ -4840,7 +4712,7 @@ void CEditor::RenderUndoList(CUIRect View)
 		{
 			char aBuffer[1024];
 			str_format(aBuffer, sizeof(aBuffer), "editor/undo_%i.png", m_lUndoSteps[HoveredIndex].m_FileNum);
-			m_lUndoSteps[HoveredIndex].m_PreviewImage = Graphics()->LoadTexture(aBuffer, IStorage::TYPE_SAVE, CImageInfo::FORMAT_RGB, IGraphics::TEXLOAD_NORESAMPLE);
+			m_lUndoSteps[HoveredIndex].m_PreviewImage = Graphics()->LoadTexture(aBuffer, IStorage::TYPE_SAVE, CImageInfo::FORMAT_RGB, 0);
 			m_lUndoSteps[HoveredIndex].m_PreviewImageIsLoaded = true;
 		}
 		if(m_lUndoSteps[HoveredIndex].m_PreviewImageIsLoaded)
@@ -4855,7 +4727,7 @@ void CEditor::RenderUndoList(CUIRect View)
 	}
 }
 
-bool CEditor::IsEnvelopeUsed(int EnvelopeIndex)
+bool CEditor::IsEnvelopeUsed(int EnvelopeIndex) const
 {
 	for(int i = 0; i < m_Map.m_lGroups.size(); i++)
 	{
@@ -5770,7 +5642,7 @@ void CEditor::Render()
 	// basic start
 	Graphics()->Clear(1.0f, 0.0f, 1.0f);
 	CUIRect View = *UI()->Screen();
-	Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
+	UI()->MapScreen();
 
 	float Width = View.w;
 	float Height = View.h;
@@ -5983,8 +5855,14 @@ void CEditor::Render()
 			}
 		}
 
+		// ctrl+shift+alt+s to save as
+		if(Input()->KeyPress(KEY_S) && CtrlPressed && ShiftPressed && AltPressed)
+			InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveCopyMap, this);
+		// ctrl+shift+s to save as
+		else if(Input()->KeyPress(KEY_S) && CtrlPressed && ShiftPressed)
+			InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveMap, this);
 		// ctrl+s to save
-		if(Input()->KeyPress(KEY_S) && CtrlPressed)
+		else if(Input()->KeyPress(KEY_S) && CtrlPressed)
 		{
 			if(m_aFileName[0] && m_ValidSaveFilename)
 			{
@@ -5997,14 +5875,6 @@ void CEditor::Render()
 			else
 				InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveMap, this);
 		}
-
-		// ctrl+shift+s to save as
-		if(Input()->KeyPress(KEY_S) && CtrlPressed && ShiftPressed)
-			InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveMap, this);
-
-		// ctrl+shift+alt+s to save as
-		if(Input()->KeyPress(KEY_S) && CtrlPressed && ShiftPressed && AltPressed)
-			InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveCopyMap, this);
 	}
 
 	if(m_GuiActive)
@@ -6031,7 +5901,7 @@ void CEditor::Render()
 			RenderSounds(ToolBox, View);
 	}
 
-	Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
+	UI()->MapScreen();
 
 	if(m_GuiActive)
 	{
@@ -6082,13 +5952,14 @@ void CEditor::Render()
 		if(Zoom != 0)
 		{
 			float OldLevel = m_ZoomLevel;
-			m_ZoomLevel = clamp(m_ZoomLevel + Zoom * 20, 10, 2000);
+			m_ZoomLevel = maximum(m_ZoomLevel + Zoom * 20, 10);
+			if(g_Config.m_ClLimitMaxZoomLevel)
+				m_ZoomLevel = minimum(m_ZoomLevel, 2000);
 			if(g_Config.m_EdZoomTarget)
 				ZoomMouseTarget((float)m_ZoomLevel / OldLevel);
 		}
 	}
 
-	m_ZoomLevel = clamp(m_ZoomLevel, 10, 2000);
 	m_WorldZoom = m_ZoomLevel / 100.0f;
 
 	if(m_GuiActive)
@@ -6097,7 +5968,7 @@ void CEditor::Render()
 	//
 	if(g_Config.m_EdShowkeys)
 	{
-		Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
+		UI()->MapScreen();
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, View.x + 10, View.y + View.h - 24 - 10, 24.0f, TEXTFLAG_RENDER);
 
@@ -6196,7 +6067,7 @@ void CEditor::Reset(bool CreateDefault)
 	m_LastUndoUpdateTime = time_get();
 }
 
-int CEditor::GetLineDistance()
+int CEditor::GetLineDistance() const
 {
 	int LineDistance = 512;
 
@@ -6346,6 +6217,7 @@ void CEditor::Init()
 {
 	m_pInput = Kernel()->RequestInterface<IInput>();
 	m_pClient = Kernel()->RequestInterface<IClient>();
+	m_pConfig = Kernel()->RequestInterface<IConfigManager>()->Values();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	m_pGraphics = Kernel()->RequestInterface<IGraphics>();
 	m_pTextRender = Kernel()->RequestInterface<ITextRender>();
@@ -6355,6 +6227,8 @@ void CEditor::Init()
 	m_RenderTools.Init(m_pGraphics, &m_UI, pGameClient);
 	m_UI.SetGraphics(m_pGraphics, m_pTextRender);
 	m_Map.m_pEditor = this;
+
+	m_UIEx.Init(UI(), Kernel(), RenderTools(), Input()->GetEventsRaw(), Input()->GetEventCountRaw());
 
 	m_CheckerTexture = Graphics()->LoadTexture("editor/checker.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 	m_BackgroundTexture = Graphics()->LoadTexture("editor/background.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
@@ -6444,27 +6318,23 @@ void CEditor::UpdateAndRender()
 
 	// handle mouse movement
 	float mx, my, Mwx, Mwy;
-	float rx, ry;
+	float rx = 0, ry = 0;
 	{
 		Input()->MouseRelative(&rx, &ry);
 		UI()->ConvertMouseMove(&rx, &ry);
-
-		// TODO: Why do we have to halve this?
-		rx /= 2;
-		ry /= 2;
 
 		m_MouseDeltaX = rx;
 		m_MouseDeltaY = ry;
 
 		if(!m_LockMouse)
 		{
-			s_MouseX = clamp(s_MouseX + rx, 0.0f, UI()->Screen()->w);
-			s_MouseY = clamp(s_MouseY + ry, 0.0f, UI()->Screen()->h);
+			s_MouseX = clamp<float>(s_MouseX + rx, 0.0f, Graphics()->WindowWidth());
+			s_MouseY = clamp<float>(s_MouseY + ry, 0.0f, Graphics()->WindowHeight());
 		}
 
 		// update the ui
-		mx = s_MouseX;
-		my = s_MouseY;
+		mx = UI()->Screen()->w * ((float)s_MouseX / Graphics()->WindowWidth());
+		my = UI()->Screen()->h * ((float)s_MouseY / Graphics()->WindowHeight());
 		Mwx = 0;
 		Mwy = 0;
 
@@ -6478,10 +6348,11 @@ void CEditor::UpdateAndRender()
 			float WorldWidth = aPoints[2] - aPoints[0];
 			float WorldHeight = aPoints[3] - aPoints[1];
 
-			Mwx = aPoints[0] + WorldWidth * (s_MouseX / UI()->Screen()->w);
-			Mwy = aPoints[1] + WorldHeight * (s_MouseY / UI()->Screen()->h);
-			m_MouseDeltaWx = m_MouseDeltaX * (WorldWidth / UI()->Screen()->w);
-			m_MouseDeltaWy = m_MouseDeltaY * (WorldHeight / UI()->Screen()->h);
+			Mwx = aPoints[0] + WorldWidth * ((float)s_MouseX / Graphics()->WindowWidth());
+			Mwy = aPoints[1] + WorldHeight * ((float)s_MouseY / Graphics()->WindowHeight());
+
+			m_MouseDeltaWx = m_MouseDeltaX * (WorldWidth / Graphics()->ScreenWidth());
+			m_MouseDeltaWy = m_MouseDeltaY * (WorldHeight / Graphics()->ScreenHeight());
 		}
 
 		int Buttons = 0;
@@ -6534,7 +6405,7 @@ void CEditor::LoadCurrentMap()
 	m_ValidSaveFilename = true;
 
 	CGameClient *pGameClient = (CGameClient *)Kernel()->RequestInterface<IGameClient>();
-	vec2 Center = pGameClient->m_pCamera->m_Center;
+	vec2 Center = pGameClient->m_Camera.m_Center;
 
 	m_WorldOffsetX = Center.x;
 	m_WorldOffsetY = Center.y;

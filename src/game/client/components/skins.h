@@ -20,14 +20,14 @@ public:
 		virtual int OnCompletion(int State);
 
 	public:
-		CGetPngFile(CSkins *pSkins, IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType = -2, CTimeout Timeout = CTimeout{4000, 500, 5}, bool LogProgress = true);
+		CGetPngFile(CSkins *pSkins, IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType = -2, CTimeout Timeout = CTimeout{4000, 500, 5}, HTTPLOG LogProgress = HTTPLOG::ALL);
 		CImageInfo m_Info;
 	};
 
 	struct CDownloadSkin
 	{
 		std::shared_ptr<CSkins::CGetPngFile> m_pTask;
-		char m_aPath[MAX_PATH_LENGTH];
+		char m_aPath[IO_MAX_PATH_LENGTH];
 		char m_aName[24];
 
 		bool operator<(const CDownloadSkin &Other) const { return str_comp(m_aName, Other.m_aName) < 0; }

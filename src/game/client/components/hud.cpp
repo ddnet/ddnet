@@ -82,6 +82,7 @@ void CHud::OnReset()
 void CHud::OnInit()
 {
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+	m_HudQuadContainerIndex = Graphics()->CreateQuadContainer(false);
 	PrepareHealthAmoQuads();
 
 	// all cursors
@@ -98,6 +99,7 @@ void CHud::OnInit()
 	RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 8.f, 16.f);
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 8.f, 16.f);
+	Graphics()->QuadContainerUpload(m_HudQuadContainerIndex);
 }
 
 void CHud::RenderGameTimer()
@@ -173,6 +175,8 @@ void CHud::RenderScoreHud()
 		float Whole = 300 * Graphics()->ScreenAspect();
 		float StartY = 229.0f;
 
+		const float ScoreSingleBoxHeight = 18.0f;
+
 		bool ForceScoreInfoInit = !m_aScoreInfo[0].m_Initialized || !m_aScoreInfo[1].m_Initialized;
 		m_aScoreInfo[0].m_Initialized = m_aScoreInfo[1].m_Initialized = true;
 
@@ -215,7 +219,7 @@ void CHud::RenderScoreHud()
 						Graphics()->SetColor(1.0f, 0.0f, 0.0f, 0.25f);
 					else
 						Graphics()->SetColor(0.0f, 0.0f, 1.0f, 0.25f);
-					m_aScoreInfo[t].m_RoundRectQuadContainerIndex = RenderTools()->CreateRoundRectQuadContainer(Whole - ScoreWidthMax - ImageSize - 2 * Split, StartY + t * 20, ScoreWidthMax + ImageSize + 2 * Split, 18.0f, 5.0f, CUI::CORNER_L);
+					m_aScoreInfo[t].m_RoundRectQuadContainerIndex = RenderTools()->CreateRoundRectQuadContainer(Whole - ScoreWidthMax - ImageSize - 2 * Split, StartY + t * 20, ScoreWidthMax + ImageSize + 2 * Split, ScoreSingleBoxHeight, 5.0f, CUI::CORNER_L);
 				}
 				Graphics()->TextureClear();
 				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -282,10 +286,15 @@ void CHud::RenderScoreHud()
 						}
 
 						// draw tee of the flag holder
-						CTeeRenderInfo Info = m_pClient->m_aClients[ID].m_RenderInfo;
-						Info.m_Size = 18.0f;
-						RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, EMOTE_NORMAL, vec2(1, 0),
-							vec2(Whole - ScoreWidthMax - Info.m_Size / 2 - Split, StartY + 1.0f + Info.m_Size / 2 + t * 20));
+						CTeeRenderInfo TeeInfo = m_pClient->m_aClients[ID].m_RenderInfo;
+						TeeInfo.m_Size = ScoreSingleBoxHeight;
+
+						CAnimState *pIdleState = CAnimState::GetIdle();
+						vec2 OffsetToMid;
+						RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
+						vec2 TeeRenderPos(Whole - ScoreWidthMax - TeeInfo.m_Size / 2 - Split, StartY + (t * 20) + ScoreSingleBoxHeight / 2.0f + OffsetToMid.y);
+
+						RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
 					}
 				}
 				StartY += 8.0f;
@@ -330,7 +339,7 @@ void CHud::RenderScoreHud()
 					if(m_pClient->m_GameInfo.m_TimeScore && g_Config.m_ClDDRaceScoreBoard)
 					{
 						if(apPlayerInfo[t]->m_Score != -9999)
-							str_time((int64)abs(apPlayerInfo[t]->m_Score) * 100, TIME_HOURS, aScore[t], sizeof(aScore[t]));
+							str_time((int64_t)abs(apPlayerInfo[t]->m_Score) * 100, TIME_HOURS, aScore[t], sizeof(aScore[t]));
 						else
 							aScore[t][0] = 0;
 					}
@@ -391,7 +400,7 @@ void CHud::RenderScoreHud()
 						Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.25f);
 					else
 						Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.25f);
-					m_aScoreInfo[t].m_RoundRectQuadContainerIndex = RenderTools()->CreateRoundRectQuadContainer(Whole - ScoreWidthMax - ImageSize - 2 * Split - PosSize, StartY + t * 20, ScoreWidthMax + ImageSize + 2 * Split + PosSize, 18.0f, 5.0f, CUI::CORNER_L);
+					m_aScoreInfo[t].m_RoundRectQuadContainerIndex = RenderTools()->CreateRoundRectQuadContainer(Whole - ScoreWidthMax - ImageSize - 2 * Split - PosSize, StartY + t * 20, ScoreWidthMax + ImageSize + 2 * Split + PosSize, ScoreSingleBoxHeight, 5.0f, CUI::CORNER_L);
 				}
 				Graphics()->TextureClear();
 				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -446,10 +455,15 @@ void CHud::RenderScoreHud()
 						}
 
 						// draw tee
-						CTeeRenderInfo Info = m_pClient->m_aClients[ID].m_RenderInfo;
-						Info.m_Size = 18.0f;
-						RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, EMOTE_NORMAL, vec2(1, 0),
-							vec2(Whole - ScoreWidthMax - Info.m_Size / 2 - Split, StartY + 1.0f + Info.m_Size / 2 + t * 20));
+						CTeeRenderInfo TeeInfo = m_pClient->m_aClients[ID].m_RenderInfo;
+						TeeInfo.m_Size = ScoreSingleBoxHeight;
+
+						CAnimState *pIdleState = CAnimState::GetIdle();
+						vec2 OffsetToMid;
+						RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
+						vec2 TeeRenderPos(Whole - ScoreWidthMax - TeeInfo.m_Size / 2 - Split, StartY + (t * 20) + ScoreSingleBoxHeight / 2.0f + OffsetToMid.y);
+
+						RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
 					}
 				}
 				else
@@ -490,18 +504,18 @@ void CHud::RenderWarmupTimer()
 	// render warmup timer
 	if(m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer > 0 && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_RACETIME))
 	{
-		char Buf[256];
+		char aBuf[256];
 		float FontSize = 20.0f;
 		float w = TextRender()->TextWidth(0, FontSize, Localize("Warmup"), -1, -1.0f);
 		TextRender()->Text(0, 150 * Graphics()->ScreenAspect() + -w / 2, 50, FontSize, Localize("Warmup"), -1.0f);
 
 		int Seconds = m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer / SERVER_TICK_SPEED;
 		if(Seconds < 5)
-			str_format(Buf, sizeof(Buf), "%d.%d", Seconds, (m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer * 10 / SERVER_TICK_SPEED) % 10);
+			str_format(aBuf, sizeof(aBuf), "%d.%d", Seconds, (m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer * 10 / SERVER_TICK_SPEED) % 10);
 		else
-			str_format(Buf, sizeof(Buf), "%d", Seconds);
-		w = TextRender()->TextWidth(0, FontSize, Buf, -1, -1.0f);
-		TextRender()->Text(0, 150 * Graphics()->ScreenAspect() + -w / 2, 75, FontSize, Buf, -1.0f);
+			str_format(aBuf, sizeof(aBuf), "%d", Seconds);
+		w = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f);
+		TextRender()->Text(0, 150 * Graphics()->ScreenAspect() + -w / 2, 75, FontSize, aBuf, -1.0f);
 	}
 }
 
@@ -519,9 +533,9 @@ void CHud::RenderTextInfo()
 	{
 		// calculate avg. fps
 		m_FrameTimeAvg = m_FrameTimeAvg * 0.9f + Client()->RenderFrameTime() * 0.1f;
-		char Buf[64];
+		char aBuf[64];
 		int FrameTime = (int)(1.0f / m_FrameTimeAvg + 0.5f);
-		str_format(Buf, sizeof(Buf), "%d", FrameTime);
+		str_format(aBuf, sizeof(aBuf), "%d", FrameTime);
 
 		static float s_TextWidth0 = TextRender()->TextWidth(0, 12.f, "0", -1, -1.0f);
 		static float s_TextWidth00 = TextRender()->TextWidth(0, 12.f, "00", -1, -1.0f);
@@ -540,7 +554,7 @@ void CHud::RenderTextInfo()
 		Cursor.m_LineWidth = -1;
 		if(m_FPSTextContainerIndex == -1)
 			m_FPSTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, "0");
-		TextRender()->RecreateTextContainerSoft(&Cursor, m_FPSTextContainerIndex, Buf);
+		TextRender()->RecreateTextContainerSoft(&Cursor, m_FPSTextContainerIndex, aBuf);
 		STextRenderColor TColor;
 		TColor.m_R = 1.f;
 		TColor.m_G = 1.f;
@@ -593,7 +607,7 @@ void CHud::RenderTeambalanceWarning()
 
 void CHud::RenderVoting()
 {
-	if((!g_Config.m_ClShowVotesAfterVoting && !m_pClient->m_pScoreboard->Active() && m_pClient->m_pVoting->TakenChoice()) || !m_pClient->m_pVoting->IsVoting() || Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	if((!g_Config.m_ClShowVotesAfterVoting && !m_pClient->m_Scoreboard.Active() && m_pClient->m_Voting.TakenChoice()) || !m_pClient->m_Voting.IsVoting() || Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		return;
 
 	Graphics()->TextureClear();
@@ -607,7 +621,7 @@ void CHud::RenderVoting()
 
 	CTextCursor Cursor;
 	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), Localize("%ds left"), m_pClient->m_pVoting->SecondsLeft());
+	str_format(aBuf, sizeof(aBuf), Localize("%ds left"), m_pClient->m_Voting.SecondsLeft());
 	float tw = TextRender()->TextWidth(0x0, 6, aBuf, -1, -1.0f);
 	TextRender()->SetCursor(&Cursor, 5.0f + 100.0f - tw, 60.0f, 6.0f, TEXTFLAG_RENDER);
 	TextRender()->TextEx(&Cursor, aBuf, -1);
@@ -615,26 +629,26 @@ void CHud::RenderVoting()
 	TextRender()->SetCursor(&Cursor, 5.0f, 60.0f, 6.0f, TEXTFLAG_RENDER);
 	Cursor.m_LineWidth = 100.0f - tw;
 	Cursor.m_MaxLines = 3;
-	TextRender()->TextEx(&Cursor, m_pClient->m_pVoting->VoteDescription(), -1);
+	TextRender()->TextEx(&Cursor, m_pClient->m_Voting.VoteDescription(), -1);
 
 	// reason
-	str_format(aBuf, sizeof(aBuf), "%s %s", Localize("Reason:"), m_pClient->m_pVoting->VoteReason());
+	str_format(aBuf, sizeof(aBuf), "%s %s", Localize("Reason:"), m_pClient->m_Voting.VoteReason());
 	TextRender()->SetCursor(&Cursor, 5.0f, 79.0f, 6.0f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 	Cursor.m_LineWidth = 100.0f;
 	TextRender()->TextEx(&Cursor, aBuf, -1);
 
 	CUIRect Base = {5, 88, 100, 4};
-	m_pClient->m_pVoting->RenderBars(Base, false);
+	m_pClient->m_Voting.RenderBars(Base, false);
 
 	char aKey[64];
-	m_pClient->m_pBinds->GetKey("vote yes", aKey, sizeof(aKey));
+	m_pClient->m_Binds.GetKey("vote yes", aKey, sizeof(aKey));
 
 	str_format(aBuf, sizeof(aBuf), "%s - %s", aKey, Localize("Vote yes"));
 	Base.y += Base.h;
 	Base.h = 11.f;
 	UI()->DoLabel(&Base, aBuf, 6.0f, -1);
 
-	m_pClient->m_pBinds->GetKey("vote no", aKey, sizeof(aKey));
+	m_pClient->m_Binds.GetKey("vote no", aKey, sizeof(aKey));
 	str_format(aBuf, sizeof(aBuf), "%s - %s", Localize("Vote no"), aKey);
 	UI()->DoLabel(&Base, aBuf, 6.0f, 1);
 }
@@ -644,7 +658,7 @@ void CHud::RenderCursor()
 	if(!m_pClient->m_Snap.m_pLocalCharacter || Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		return;
 
-	MapscreenToGroup(m_pClient->m_pCamera->m_Center.x, m_pClient->m_pCamera->m_Center.y, Layers()->GameGroup());
+	MapscreenToGroup(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y, Layers()->GameGroup());
 
 	int CurWeapon = m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS;
 
@@ -653,13 +667,11 @@ void CHud::RenderCursor()
 	// render cursor
 	int QuadOffset = NUM_WEAPONS * 10 * 2 + 40 * 2 + (CurWeapon);
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
-	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, QuadOffset, m_pClient->m_pControls->m_TargetPos[g_Config.m_ClDummy].x, m_pClient->m_pControls->m_TargetPos[g_Config.m_ClDummy].y);
+	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, QuadOffset, m_pClient->m_Controls.m_TargetPos[g_Config.m_ClDummy].x, m_pClient->m_Controls.m_TargetPos[g_Config.m_ClDummy].y);
 }
 
 void CHud::PrepareHealthAmoQuads()
 {
-	m_HudQuadContainerIndex = Graphics()->CreateQuadContainer();
-
 	float x = 5;
 	float y = 5;
 	IGraphics::CQuadItem Array[10];
@@ -746,7 +758,7 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 	int CurWeapon = pCharacter->m_Weapon % NUM_WEAPONS;
 	int QuadOffset = (CurWeapon * 2) * 10 + QuadOffsetSixup;
 
-	if(GameClient()->m_GameSkin.m_SpriteWeaponProjectiles[CurWeapon] != -1)
+	if(GameClient()->m_GameSkin.m_SpriteWeaponProjectiles[CurWeapon].IsValid())
 	{
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteWeaponProjectiles[CurWeapon]);
 
@@ -793,7 +805,7 @@ void CHud::RenderSpectatorHud()
 
 void CHud::RenderLocalTime(float x)
 {
-	if(!g_Config.m_ClShowLocalTimeAlways && !m_pClient->m_pScoreboard->Active())
+	if(!g_Config.m_ClShowLocalTimeAlways && !m_pClient->m_Scoreboard.Active())
 		return;
 
 	//draw the box
@@ -859,7 +871,7 @@ void CHud::OnRender()
 
 void CHud::OnMessage(int MsgType, void *pRawMsg)
 {
-	if(MsgType == NETMSGTYPE_SV_DDRACETIME)
+	if(MsgType == NETMSGTYPE_SV_DDRACETIME || MsgType == NETMSGTYPE_SV_DDRACETIMELEGACY)
 	{
 		m_DDRaceTimeReceived = true;
 
@@ -877,21 +889,12 @@ void CHud::OnMessage(int MsgType, void *pRawMsg)
 			m_CheckpointTick = Client()->GameTick(g_Config.m_ClDummy);
 		}
 	}
-	else if(MsgType == NETMSGTYPE_SV_KILLMSG)
-	{
-		CNetMsg_Sv_KillMsg *pMsg = (CNetMsg_Sv_KillMsg *)pRawMsg;
-		if(pMsg->m_Victim == m_pClient->m_Snap.m_LocalClientID)
-		{
-			m_CheckpointTick = 0;
-			m_DDRaceTime = 0;
-		}
-	}
-	else if(MsgType == NETMSGTYPE_SV_RECORD)
+	else if(MsgType == NETMSGTYPE_SV_RECORD || MsgType == NETMSGTYPE_SV_RECORDLEGACY)
 	{
 		CNetMsg_Sv_Record *pMsg = (CNetMsg_Sv_Record *)pRawMsg;
 
 		// NETMSGTYPE_SV_RACETIME on old race servers
-		if(GameClient()->m_GameInfo.m_DDRaceRecordMessage)
+		if(MsgType == NETMSGTYPE_SV_RECORDLEGACY && GameClient()->m_GameInfo.m_DDRaceRecordMessage)
 		{
 			m_DDRaceTimeReceived = true;
 
@@ -905,7 +908,7 @@ void CHud::OnMessage(int MsgType, void *pRawMsg)
 				m_CheckpointTick = Client()->GameTick(g_Config.m_ClDummy);
 			}
 		}
-		else if(GameClient()->m_GameInfo.m_RaceRecordMessage)
+		else if(MsgType == NETMSGTYPE_SV_RECORD || GameClient()->m_GameInfo.m_RaceRecordMessage)
 		{
 			m_ServerRecord = (float)pMsg->m_ServerTimeBest / 100;
 			m_PlayerRecord[g_Config.m_ClDummy] = (float)pMsg->m_PlayerTimeBest / 100;

@@ -364,9 +364,6 @@ Red team wins!
 Refresh
 == Aktualisieren
 
-Refreshing master servers
-== Aktualisiere Masterserver
-
 Remote console
 == Remote-Konsole
 
@@ -432,9 +429,6 @@ Show name plates
 
 Show only chat messages from friends
 == Nur Nachrichten von Freunden zeigen
-
-Show only supported
-== Nur Unterstützte anzeigen
 
 Skins
 == Skins
@@ -658,12 +652,6 @@ Countries
 Types
 == Typen
 
-Inner color
-== Innere Farbe
-
-Background (entities)
-== Hintergrund (Entities)
-
 Show kill messages
 == Kill-Nachrichten anzeigen
 
@@ -679,17 +667,11 @@ Update now
 Enable server message sound
 == Ton für Server-Nachrichten aktivieren
 
-second
-== Sekunde
-
 Show votes window after voting
 == Abstimmungsfenster nach Abstimmung zeigen
 
 HUD
 == Aussehen
-
-Look out!
-== Pass auf!
 
 Show names in chat in team colors
 == Namen im Chat in Teamfarben anzeigen
@@ -700,9 +682,6 @@ Enable team chat sound
 Show other players' hook collision lines
 == Hakenkollisionen von anderen Spielern anzeigen
 
-We will win
-== Wir werden gewinnen
-
 Deaths
 == Tode
 
@@ -711,9 +690,6 @@ Enable game sounds
 
 DDNet Client needs to be restarted to complete update!
 == Der DDNet-Client muss neu gestartet werden, um das Update abzuschließen!
-
-Spectator
-== Zuschauer
 
 Show others
 == Andere zeigen
@@ -736,9 +712,6 @@ Team message
 Save the best demo of each race
 == Beste Aufnahme von jedem Rennen speichern
 
-Outline color
-== Äußere Farbe
-
 Are you sure that you want to disconnect?
 == Bist du sicher, dass du die Verbindung trennen möchtest?
 
@@ -750,9 +723,6 @@ Check now
 
 DDNet Client updated!
 == Der DDNet-Client wurde aktualisiert!
-
-Background (regular)
-== Hintergrund (Normal)
 
 AntiPing: predict other players
 == AntiPing: Andere Spieler vorberechnen
@@ -790,12 +760,6 @@ Default zoom
 Show score
 == Punktestand anzeigen
 
-Show client IDs in Scoreboard
-== Client-IDs in der Punktetafel anzeigen
-
-seconds
-== Sekunden
-
 %.2f KiB
 == %.2f KiB
 
@@ -832,9 +796,6 @@ Enable highlighted chat sound
 AntiPing: predict weapons
 == AntiPing: Waffen vorberechnen
 
-Hello and welcome
-== Hallo und willkommen
-
 Highlighted message
 == Hervorgehobene Nachricht
 
@@ -850,17 +811,11 @@ Grabs
 Select a name
 == Namen wählen
 
-Hi o/
-== Hallo o/
-
 Automatically take game over screenshot
 == Automatisch Bildschirmfoto am Spielende aufnehmen
 
 Please use a different name
 == Bitte anderen Namen wählen
-
-Wait before try for
-== Vor dem Versuch warten für
 
 Show console window
 == Konsolenfenster zeigen
@@ -925,9 +880,6 @@ Spree
 Max CSVs
 == Maximale CSVs
 
-Borderless window
-== Randloses Fenster
-
 Best
 == Beste
 
@@ -936,9 +888,6 @@ Screen
 
 Exclude
 == Ausschließen
-
-Friend
-== Freund
 
 Demo
 == Aufnahme
@@ -961,7 +910,7 @@ may cause delay
 Preinit VBO (iGPUs only)
 == Preinit-VBO (nur für iGPUs)
 
-Multiple texture units (disable for MacOS)
+Multiple texture units (disable for macOS)
 == Mehrere Textureinheiten (nicht für Mac OS)
 
 UI mouse s.
@@ -969,9 +918,6 @@ UI mouse s.
 
 Indicate map finish
 == Kartensieg anzeigen
-
-Use OpenGL 3.3 (experimental)
-== OpenGL 3.3 benutzen (experimentell)
 
 File already exists, do you want to overwrite it?
 == Datei existiert bereits, willst du sie überschreiben?
@@ -1177,9 +1123,6 @@ Client message
 Country / Region
 == Land / Region
 
-The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== Die Breite oder Höhe von Textur %s ist nicht durch 16 teilbar, was visuelle Bugs verursachen kann.
-
 Skip the main menu
 == Hauptmenü überspringen
 
@@ -1289,9 +1232,6 @@ Chat sound volume
 Use old chat style
 == Alten Chat-Stil nutzen
 
-Highlight
-== Hervorheben
-
 Manual
 == Manuell
 
@@ -1306,3 +1246,108 @@ Replay
 
 Smooth Dynamic Camera
 == Weiche Dynamische Kamera
+
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== Die Breite von Textur %s ist nicht durch %d teilbar, oder die Höhe nicht durch %d teilbar, was Visuelle Fehler verursachen könnte.
+
+Dummy
+== Dummy
+
+Show client IDs
+== Zeige Client-IDs
+
+Laser Outline Color
+== Laser-Konturfarbe
+
+Laser Inner Color
+== Laser-Innenfarbe
+
+Preview
+== Vorschau
+
+Background
+== Hintergrund
+
+Entities Background color
+== Entities-Hintergrundfarbe
+
+Regular Background Color
+== Normale Hintergrundfarbe
+
+Chat command
+== Chat-Befehl
+
+Discord
+== Discord
+
+https://ddnet.tw/discord
+== https://ddnet.tw/discord
+
+AFR
+== AFR
+
+ASI
+== ASI
+
+AUS
+== AUS
+
+EUR
+== EUR
+
+NA
+== NA
+
+SA
+== SA
+
+CHN
+== CHN
+
+Getting server list from master server
+== Hole Serverliste vom Masterserver
+
+Leak IP
+== IP leaken
+
+Windowed
+== Fenster
+
+Windowed borderless
+== Fenster ohne Rand
+
+Desktop fullscreen
+== Desktop-Vollbild
+
+Use modern OpenGL
+== Modernes OpenGL benutzen
+
+Hookline
+== Hooklinie
+
+No hit
+== Kein Treffer
+
+Hookable
+== Hookbar
+
+Tee
+== Tee
+
+Are you sure that you want to disconnect and switch to a different server?
+== Bist du sicher, dass du die Verbindung trennen und zu einem anderen Server wechseln möchtest?
+
+Refreshing...
+== Aktualisieren...
+
+Kill Messages
+== Kill-Nachrichten
+
+Kill Message Normal Color
+== Kill-Nachrichten Normale Farbe
+
+Kill Message Highlight Color
+== Kill-Nachrichten Hervorgehobene Farbe
+
+Show local player's key presses
+== Tastendrücke des eigenen Spielers anzeigen

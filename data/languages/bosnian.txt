@@ -350,9 +350,6 @@ Red team wins!
 Refresh
 == Osvježi
 
-Refreshing master servers
-== Osvježavam glavne servere
-
 Remote console
 == Udaljena konzola
 
@@ -415,9 +412,6 @@ Show ingame HUD
 
 Show name plates
 == Prikaži imena igrača
-
-Show only supported
-== Prikaži samo podržane
 
 Skins
 == Skinovi
@@ -901,14 +895,11 @@ may cause delay
 Screen
 == Ekran
 
-Use OpenGL 3.3 (experimental)
-== Koristi OpenGL 3.3 (eksperimentalno)
-
 Preinit VBO (iGPUs only)
 == Inicijalizuj VBO (samo iGPU-ovi)
 
-Multiple texture units (disable for MacOS)
-== Više tekturnih jedinica (isljučeno za MacOS)
+Multiple texture units (disable for macOS)
+== Više tekturnih jedinica (isljučeno za macOS)
 
 Use high DPI
 == Koristi visoki DPI
@@ -946,9 +937,6 @@ DDNet Client needs to be restarted to complete update!
 Use DDRace Scoreboard
 == Koristi DDRace tablicu bodova
 
-Show client IDs in Scoreboard
-== Prikaži ID-eve klijenta na tablici bodova
-
 Show score
 == Prikaži bodove
 
@@ -976,50 +964,17 @@ Reset
 Highlighted message
 == Označene poruke
 
-Spectator
-== Posmatrač
-
-Look out!
-== Pazi!
-
 Team message
 == Timske poruke
-
-We will win
-== Mi ćemo pobijediti
 
 Friend message
 == Poruka prijatelja
 
-Friend
-== Prijatelj
-
-Hi o/
-== Ćao o/
-
 Normal message
 == Normalna poruka
 
-Hello and welcome
-== Ćao i dobrodošao
-
 Client message
 == Poruka klijenta
-
-Inner color
-== Unutrašnja boja
-
-Outline color
-== Vanjska boja
-
-Wait before try for
-== Pričekaj prije nego pokušaš
-
-second
-== sekunda
-
-seconds
-== sekunde
 
 Save the best demo of each race
 == Sačuvaj najbolji demo-snimak svake trke
@@ -1068,12 +1023,6 @@ Show other players' key presses
 
 Old mouse mode
 == Stari način miša
-
-Background (regular)
-== Pozadina (regularno)
-
-Background (entities)
-== Pozadina (entities)
 
 Show tiles layers from BG map
 == Prikaži slojeve od pozadinske mape
@@ -1129,13 +1078,13 @@ Best
 9+ new mentions
 == 9+ novih označenja
 
-The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== Širina ili visina teksture %s nije djeljiva sa 16, zbog toga mogu nastati vizuelne greške.
-
 Country / Region
 == Zemlja / Regija
 
 Saving ddnet-settings.cfg failed
+== 
+
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
 Warning
@@ -1153,10 +1102,37 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 Checking for existing player with your name
 == 
 
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
 Speed
 == 
 
 Theme
+== 
+
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+Getting server list from master server
 == 
 
 %d of %d servers
@@ -1169,6 +1145,12 @@ Theme
 == 
 
 %d player
+== 
+
+Refreshing...
+== 
+
+Leak IP
 == 
 
 %.2f MiB
@@ -1201,7 +1183,22 @@ Skin Database
 Skins directory
 == 
 
-Borderless window
+Chat command
+== 
+
+Dummy
+== 
+
+Windowed
+== 
+
+Windowed borderless
+== 
+
+Desktop fullscreen
+== 
+
+Use modern OpenGL
 == 
 
 Game sound volume
@@ -1222,10 +1219,40 @@ DDNet
 Assets
 == 
 
+Show client IDs
+== 
+
+Kill Messages
+== 
+
+Kill Message Normal Color
+== 
+
+Kill Message Highlight Color
+== 
+
+Laser Outline Color
+== 
+
+Laser Inner Color
+== 
+
+Hookline
+== 
+
+No hit
+== 
+
+Hookable
+== 
+
+Tee
+== 
+
 Use old chat style
 == 
 
-Highlight
+Preview
 == 
 
 Overlay entities
@@ -1234,7 +1261,19 @@ Overlay entities
 AntiPing
 == 
 
+Show local player's key presses
+== 
+
+Background
+== 
+
+Entities Background color
+== 
+
 Use current map as background
+== 
+
+Regular Background Color
 == 
 
 Entities
@@ -1247,6 +1286,12 @@ Particles
 == 
 
 Assets directory
+== 
+
+Discord
+== 
+
+https://ddnet.tw/discord
 == 
 
 https://wiki.ddnet.tw/

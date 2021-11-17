@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest, ubuntu-16.04]
+        os: [ubuntu-latest, macOS-latest, windows-latest, ubuntu-18.04]
         include:
         - os: ubuntu-latest
           cmake-args: -G "Unix Makefiles"
@@ -24,7 +24,7 @@ jobs:
           env:
             CFLAGS: -Wdeclaration-after-statement -Werror
             CXXFLAGS: -Werror
-        - os: ubuntu-16.04
+        - os: ubuntu-18.04
           cmake-path: /usr/bin/
           cmake-args: -G "Unix Makefiles"
           package-file: DDNet-*-linux_x86_64.tar.xz
@@ -63,9 +63,9 @@ jobs:
     - name: Prepare Linux (fancy)
       if: contains(matrix.os, 'ubuntu') && matrix.fancy
       run: |
-        sudo apt-get install libboost-dev libmariadbclient-dev libmysqlcppconn-dev libwebsockets-dev -y
+        sudo apt-get install libmariadbclient-dev libwebsockets-dev -y
 
-    - name: Prepare MacOS
+    - name: Prepare macOS
       if: contains(matrix.os, 'macOS')
       run: |
         brew update || true
@@ -80,11 +80,11 @@ jobs:
         cd debug
         ${{ matrix.cmake-path }}cmake --version
         ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=Debug -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=. ..
-        ${{ matrix.cmake-path }}cmake --build . --config Debug ${{ matrix.build-args }} --target everything
+        ${{ matrix.cmake-path }}cmake --build . --config Debug --target everything ${{ matrix.build-args }}
     - name: Test debug
       run: |
         cd debug
-        ${{ matrix.cmake-path }}cmake --build . --config Debug ${{ matrix.build-args }} --target run_tests
+        ${{ matrix.cmake-path }}cmake --build . --config Debug --target run_tests ${{ matrix.build-args }}
         ./DDNet-Server shutdown
 
     - name: Build in release mode
@@ -93,12 +93,26 @@ jobs:
         mkdir release
         cd release
         ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=Release -Werror=dev -DDOWNLOAD_GTEST=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. ..
-        ${{ matrix.cmake-path }}cmake --build . --config Release ${{ matrix.build-args }} --target everything
+        ${{ matrix.cmake-path }}cmake --build . --config Release --target everything ${{ matrix.build-args }}
     - name: Test release
       run: |
         cd release
-        ${{ matrix.cmake-path }}cmake --build . --config Release ${{ matrix.build-args }} --target run_tests
+        ${{ matrix.cmake-path }}cmake --build . --config Release --target run_tests ${{ matrix.build-args }}
         ./DDNet-Server shutdown
+
+    - name: Build headless client
+      env: ${{ matrix.env }}
+      run: |
+        mkdir headless
+        cd headless
+        ${{ matrix.cmake-path }}cmake --version
+        ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DHEADLESS_CLIENT=ON -DCMAKE_BUILD_TYPE=Debug -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=. ..
+        ${{ matrix.cmake-path }}cmake --build . --config Debug  ${{ matrix.build-args }}
+    - name: Test headless client
+      run: |
+        cd headless
+        ./DDNet-Server &
+        ./DDNet "cl_download_skins 0;connect localhost:8303;quit"
 
     - name: Build in release mode with debug info and all features on
       if: matrix.fancy
@@ -107,18 +121,18 @@ jobs:
         mkdir fancy
         cd fancy
         ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=RelWithDebInfo -DANTIBOT=ON -DMYSQL=ON -DWEBSOCKETS=ON ..
-        ${{ matrix.cmake-path }}cmake --build . --config RelWithDebInfo ${{ matrix.build-args }} --target everything
+        ${{ matrix.cmake-path }}cmake --build . --config RelWithDebInfo --target everything ${{ matrix.build-args }}
     - name: Test fancy
       if: matrix.fancy
       run: |
         cd release
-        ${{ matrix.cmake-path }}cmake --build . --config RelWithDebInfo ${{ matrix.build-args }} --target run_tests
+        ${{ matrix.cmake-path }}cmake --build . --config RelWithDebInfo --target run_tests ${{ matrix.build-args }}
         ./DDNet-Server shutdown
 
     - name: Package
       run: |
         cd release
-        ${{ matrix.cmake-path }}cmake --build . --config Release ${{ matrix.build-args }} --target package_default
+        ${{ matrix.cmake-path }}cmake --build . --config Release --target package_default ${{ matrix.build-args }}
         mkdir artifacts
         mv ${{ matrix.package-file }} artifacts
 

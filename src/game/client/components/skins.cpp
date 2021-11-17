@@ -11,6 +11,10 @@
 #include <engine/shared/config.h>
 #include <engine/storage.h>
 
+#include <game/generated/client_data.h>
+
+#include <game/client/gameclient.h>
+
 #include "skins.h"
 
 static const char *VANILLA_SKINS[] = {"bluekitty", "bluestripe", "brownbear",
@@ -41,7 +45,7 @@ int CSkins::CGetPngFile::OnCompletion(int State)
 	return State;
 }
 
-CSkins::CGetPngFile::CGetPngFile(CSkins *pSkins, IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType, CTimeout Timeout, bool LogProgress) :
+CSkins::CGetPngFile::CGetPngFile(CSkins *pSkins, IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType, CTimeout Timeout, HTTPLOG LogProgress) :
 	CGetFile(pStorage, pUrl, pDest, StorageType, Timeout, LogProgress), m_pSkins(pSkins)
 {
 }
@@ -66,7 +70,7 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 			return 0;
 	}
 
-	char aBuf[MAX_PATH_LENGTH];
+	char aBuf[IO_MAX_PATH_LENGTH];
 	str_format(aBuf, sizeof(aBuf), "skins/%s", pName);
 	return pSelf->LoadSkin(aNameWithoutPng, aBuf, DirType);
 }
@@ -167,13 +171,15 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 
 	int BodyOutlineGridPixelsWidth = (Info.m_Width / g_pData->m_aSprites[SPRITE_TEE_BODY_OUTLINE].m_pSet->m_Gridx);
 	int BodyOutlineGridPixelsHeight = (Info.m_Height / g_pData->m_aSprites[SPRITE_TEE_BODY_OUTLINE].m_pSet->m_Gridy);
-	int BodyOutlineSize = g_pData->m_aSprites[SPRITE_TEE_BODY_OUTLINE].m_H * BodyOutlineGridPixelsHeight;
+	int BodyOutlineWidth = g_pData->m_aSprites[SPRITE_TEE_BODY_OUTLINE].m_W * BodyOutlineGridPixelsWidth;
+	int BodyOutlineHeight = g_pData->m_aSprites[SPRITE_TEE_BODY_OUTLINE].m_H * BodyOutlineGridPixelsHeight;
 
 	int BodyOutlineOffsetX = g_pData->m_aSprites[SPRITE_TEE_BODY_OUTLINE].m_X * BodyOutlineGridPixelsWidth;
 	int BodyOutlineOffsetY = g_pData->m_aSprites[SPRITE_TEE_BODY_OUTLINE].m_Y * BodyOutlineGridPixelsHeight;
 
-	int BodySize = g_pData->m_aSprites[SPRITE_TEE_BODY].m_H * (Info.m_Height / g_pData->m_aSprites[SPRITE_TEE_BODY].m_pSet->m_Gridy); // body size
-	if(BodySize > Info.m_Height)
+	int BodyWidth = g_pData->m_aSprites[SPRITE_TEE_BODY].m_W * (Info.m_Width / g_pData->m_aSprites[SPRITE_TEE_BODY].m_pSet->m_Gridx); // body width
+	int BodyHeight = g_pData->m_aSprites[SPRITE_TEE_BODY].m_H * (Info.m_Height / g_pData->m_aSprites[SPRITE_TEE_BODY].m_pSet->m_Gridy); // body height
+	if(BodyWidth > Info.m_Width || BodyHeight > Info.m_Height)
 		return 0;
 	unsigned char *d = (unsigned char *)Info.m_pData;
 	int Pitch = Info.m_Width * 4;
@@ -181,8 +187,8 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 	// dig out blood color
 	{
 		int aColors[3] = {0};
-		for(int y = 0; y < BodySize; y++)
-			for(int x = 0; x < BodySize; x++)
+		for(int y = 0; y < BodyHeight; y++)
+			for(int x = 0; x < BodyWidth; x++)
 			{
 				uint8_t AlphaValue = d[y * Pitch + x * 4 + 3];
 				if(AlphaValue > 128)
@@ -198,10 +204,10 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 			Skin.m_BloodColor = ColorRGBA(0, 0, 0, 1);
 	}
 
-	CheckMetrics(Skin.m_Metrics.m_Body, d, Pitch, 0, 0, BodySize, BodySize);
+	CheckMetrics(Skin.m_Metrics.m_Body, d, Pitch, 0, 0, BodyWidth, BodyHeight);
 
 	// body outline metrics
-	CheckMetrics(Skin.m_Metrics.m_Body, d, Pitch, BodyOutlineOffsetX, BodyOutlineOffsetY, BodyOutlineSize, BodyOutlineSize);
+	CheckMetrics(Skin.m_Metrics.m_Body, d, Pitch, BodyOutlineOffsetX, BodyOutlineOffsetY, BodyOutlineWidth, BodyOutlineHeight);
 
 	// get feet size
 	CheckMetrics(Skin.m_Metrics.m_Feet, d, Pitch, FeetOffsetX, FeetOffsetY, FeetWidth, FeetHeight);
@@ -226,8 +232,8 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 	int NewWeight = 192;
 
 	// find most common frequence
-	for(int y = 0; y < BodySize; y++)
-		for(int x = 0; x < BodySize; x++)
+	for(int y = 0; y < BodyHeight; y++)
+		for(int x = 0; x < BodyWidth; x++)
 		{
 			if(d[y * Pitch + x * 4 + 3] > 128)
 				Freq[d[y * Pitch + x * 4]]++;
@@ -242,8 +248,8 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 	// reorder
 	int InvOrgWeight = 255 - OrgWeight;
 	int InvNewWeight = 255 - NewWeight;
-	for(int y = 0; y < BodySize; y++)
-		for(int x = 0; x < BodySize; x++)
+	for(int y = 0; y < BodyHeight; y++)
+		for(int x = 0; x < BodyWidth; x++)
 		{
 			int v = d[y * Pitch + x * 4];
 			if(v <= OrgWeight && OrgWeight == 0)
@@ -308,23 +314,23 @@ void CSkins::Refresh()
 {
 	for(int i = 0; i < m_aSkins.size(); ++i)
 	{
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_OriginalSkin.m_Body);
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_OriginalSkin.m_BodyOutline);
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_OriginalSkin.m_Feet);
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_OriginalSkin.m_FeetOutline);
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_OriginalSkin.m_Hands);
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_OriginalSkin.m_HandsOutline);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_OriginalSkin.m_Body);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_OriginalSkin.m_BodyOutline);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_OriginalSkin.m_Feet);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_OriginalSkin.m_FeetOutline);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_OriginalSkin.m_Hands);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_OriginalSkin.m_HandsOutline);
 		for(auto &Eye : m_aSkins[i].m_OriginalSkin.m_Eyes)
-			Graphics()->UnloadTextureNew(Eye);
+			Graphics()->UnloadTexture(&Eye);
 
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_ColorableSkin.m_Body);
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_ColorableSkin.m_BodyOutline);
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_ColorableSkin.m_Feet);
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_ColorableSkin.m_FeetOutline);
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_ColorableSkin.m_Hands);
-		Graphics()->UnloadTextureNew(m_aSkins[i].m_ColorableSkin.m_HandsOutline);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_ColorableSkin.m_Body);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_ColorableSkin.m_BodyOutline);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_ColorableSkin.m_Feet);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_ColorableSkin.m_FeetOutline);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_ColorableSkin.m_Hands);
+		Graphics()->UnloadTexture(&m_aSkins[i].m_ColorableSkin.m_HandsOutline);
 		for(auto &Eye : m_aSkins[i].m_ColorableSkin.m_Eyes)
-			Graphics()->UnloadTextureNew(Eye);
+			Graphics()->UnloadTexture(&Eye);
 	}
 
 	m_aSkins.clear();
@@ -399,7 +405,7 @@ int CSkins::FindImpl(const char *pName)
 	{
 		if(d.front().m_pTask && d.front().m_pTask->State() == HTTP_DONE)
 		{
-			char aPath[MAX_PATH_LENGTH];
+			char aPath[IO_MAX_PATH_LENGTH];
 			str_format(aPath, sizeof(aPath), "downloadedskins/%s.png", d.front().m_aName);
 			Storage()->RenameFile(d.front().m_aPath, aPath, IStorage::TYPE_SAVE);
 			LoadSkin(d.front().m_aName, d.front().m_pTask->m_Info);
@@ -416,9 +422,11 @@ int CSkins::FindImpl(const char *pName)
 	str_copy(Skin.m_aName, pName, sizeof(Skin.m_aName));
 
 	char aUrl[256];
-	str_format(aUrl, sizeof(aUrl), "%s%s.png", g_Config.m_ClSkinDownloadUrl, pName);
+	char aEscapedName[256];
+	EscapeUrl(aEscapedName, sizeof(aEscapedName), pName);
+	str_format(aUrl, sizeof(aUrl), "%s%s.png", g_Config.m_ClSkinDownloadUrl, aEscapedName);
 	str_format(Skin.m_aPath, sizeof(Skin.m_aPath), "downloadedskins/%s.%d.tmp", pName, pid());
-	Skin.m_pTask = std::make_shared<CGetPngFile>(this, Storage(), aUrl, Skin.m_aPath, IStorage::TYPE_SAVE, CTimeout{0, 0, 0}, false);
+	Skin.m_pTask = std::make_shared<CGetPngFile>(this, Storage(), aUrl, Skin.m_aPath, IStorage::TYPE_SAVE, CTimeout{0, 0, 0}, HTTPLOG::NONE);
 	m_pClient->Engine()->AddJob(Skin.m_pTask);
 	m_aDownloadSkins.add(Skin);
 	return -1;

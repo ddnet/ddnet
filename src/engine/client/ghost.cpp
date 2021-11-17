@@ -11,6 +11,8 @@ static const unsigned char gs_aHeaderMarker[8] = {'T', 'W', 'G', 'H', 'O', 'S', 
 static const unsigned char gs_CurVersion = 6;
 static const int gs_NumTicksOffset = 93;
 
+static const ColorRGBA gs_GhostPrintColor{0.65f, 0.6f, 0.6f, 1.0f};
+
 CGhostRecorder::CGhostRecorder()
 {
 	m_File = 0;
@@ -31,7 +33,7 @@ int CGhostRecorder::Start(const char *pFilename, const char *pMap, SHA256_DIGEST
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "Unable to open '%s' for ghost recording", pFilename);
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ghost_recorder", aBuf);
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ghost_recorder", aBuf, gs_GhostPrintColor);
 		return -1;
 	}
 
@@ -50,7 +52,7 @@ int CGhostRecorder::Start(const char *pFilename, const char *pMap, SHA256_DIGEST
 
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "ghost recording to '%s'", pFilename);
-	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ghost_recorder", aBuf);
+	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ghost_recorder", aBuf, gs_GhostPrintColor);
 	return 0;
 }
 
@@ -135,27 +137,20 @@ int CGhostRecorder::Stop(int Ticks, int Time)
 	if(!m_File)
 		return -1;
 
-	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ghost_recorder", "Stopped ghost recording");
+	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ghost_recorder", "Stopped ghost recording", gs_GhostPrintColor);
 
 	FlushChunk();
 
-	unsigned char aNumTicks[4];
-	unsigned char aTime[4];
-
-	aNumTicks[0] = (Ticks >> 24) & 0xff;
-	aNumTicks[1] = (Ticks >> 16) & 0xff;
-	aNumTicks[2] = (Ticks >> 8) & 0xff;
-	aNumTicks[3] = (Ticks)&0xff;
-
-	aTime[0] = (Time >> 24) & 0xff;
-	aTime[1] = (Time >> 16) & 0xff;
-	aTime[2] = (Time >> 8) & 0xff;
-	aTime[3] = (Time)&0xff;
-
 	// write down num shots and time
 	io_seek(m_File, gs_NumTicksOffset, IOSEEK_START);
-	io_write(m_File, &aNumTicks, sizeof(aNumTicks));
-	io_write(m_File, &aTime, sizeof(aTime));
+
+	unsigned char aNumTicks[4];
+	int_to_bytes_be(aNumTicks, Ticks);
+	io_write(m_File, aNumTicks, sizeof(aNumTicks));
+
+	unsigned char aTime[4];
+	int_to_bytes_be(aTime, Time);
+	io_write(m_File, aTime, sizeof(aTime));
 
 	io_close(m_File);
 	m_File = 0;
@@ -244,7 +239,7 @@ int CGhostLoader::Load(const char *pFilename, const char *pMap, SHA256_DIGEST Ma
 	else
 	{
 		io_skip(m_File, -(int)sizeof(SHA256_DIGEST));
-		unsigned GhostMapCrc = (m_Header.m_aZeroes[0] << 24) | (m_Header.m_aZeroes[1] << 16) | (m_Header.m_aZeroes[2] << 8) | (m_Header.m_aZeroes[3]);
+		unsigned GhostMapCrc = bytes_be_to_uint(m_Header.m_aZeroes);
 		if(str_comp(m_Header.m_aMap, pMap) != 0 || GhostMapCrc != MapCrc)
 		{
 			char aBuf[256];
@@ -394,7 +389,7 @@ bool CGhostLoader::GetGhostInfo(const char *pFilename, CGhostInfo *pInfo, const 
 	}
 	else
 	{
-		unsigned GhostMapCrc = (Header.m_aZeroes[0] << 24) | (Header.m_aZeroes[1] << 16) | (Header.m_aZeroes[2] << 8) | (Header.m_aZeroes[3]);
+		unsigned GhostMapCrc = bytes_be_to_uint(Header.m_aZeroes);
 		if(GhostMapCrc != MapCrc)
 		{
 			return false;

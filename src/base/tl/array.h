@@ -280,7 +280,7 @@ public:
 		Function: memusage
 			Returns how much memory this dynamic array is using
 	*/
-	int memusage()
+	int memusage() const
 	{
 		return sizeof(array) + sizeof(T) * list_size;
 	}
@@ -303,7 +303,7 @@ public:
 		Function: all
 			Returns a range that contains the whole array.
 	*/
-	range all() { return range(list, list + num_elements); }
+	range all() const { return range(list, list + num_elements); }
 
 protected:
 	void incsize()

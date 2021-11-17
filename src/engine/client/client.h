@@ -14,6 +14,7 @@
 #include <engine/client/http.h>
 #include <engine/client/serverbrowser.h>
 #include <engine/client/updater.h>
+#include <engine/discord.h>
 #include <engine/editor.h>
 #include <engine/engine.h>
 #include <engine/graphics.h>
@@ -40,6 +41,7 @@ public:
 	};
 
 	float m_Min, m_Max;
+	float m_MinRange, m_MaxRange;
 	float m_aValues[MAX_VALUES];
 	float m_aColors[MAX_VALUES][3];
 	int m_Index;
@@ -55,9 +57,9 @@ public:
 
 class CSmoothTime
 {
-	int64 m_Snap;
-	int64 m_Current;
-	int64 m_Target;
+	int64_t m_Snap;
+	int64_t m_Current;
+	int64_t m_Target;
 
 	CGraph m_Graph;
 
@@ -65,19 +67,21 @@ class CSmoothTime
 
 	float m_aAdjustSpeed[2]; // 0 = down, 1 = up
 public:
-	void Init(int64 Target);
+	void Init(int64_t Target);
 	void SetAdjustSpeed(int Direction, float Value);
 
-	int64 Get(int64 Now);
+	int64_t Get(int64_t Now);
 
-	void UpdateInt(int64 Target);
-	void Update(CGraph *pGraph, int64 Target, int TimeLeft, int AdjustDirection);
+	void UpdateInt(int64_t Target);
+	void Update(CGraph *pGraph, int64_t Target, int TimeLeft, int AdjustDirection);
 };
 
 class CServerCapabilities
 {
 public:
 	bool m_ChatTimeoutCode;
+	bool m_AnyPlayerFlag;
+	bool m_PingEx;
 };
 
 class CClient : public IClient, public CDemoPlayer::IListener
@@ -90,11 +94,13 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	IEngineSound *m_pSound;
 	IGameClient *m_pGameClient;
 	IEngineMap *m_pMap;
+	IConfigManager *m_pConfigManager;
+	CConfig *m_pConfig;
 	IConsole *m_pConsole;
 	IStorage *m_pStorage;
 	IUpdater *m_pUpdater;
+	IDiscord *m_pDiscord;
 	ISteam *m_pSteam;
-	IEngineMasterServer *m_pMasterServer;
 
 	enum
 	{
@@ -126,12 +132,12 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	CUuid m_ConnectionID;
 
 	unsigned m_SnapshotParts[NUM_DUMMIES];
-	int64 m_LocalStartTime;
+	int64_t m_LocalStartTime;
 
 	IGraphics::CTextureHandle m_DebugFont;
 	int m_DebugSoundIndex = 0;
 
-	int64 m_LastRenderTime;
+	int64_t m_LastRenderTime;
 	float m_RenderFrameTimeLow;
 	float m_RenderFrameTimeHigh;
 	int m_RenderFrames;
@@ -158,10 +164,10 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aVersionStr[10];
 
 	// pinging
-	int64 m_PingStartTime;
+	int64_t m_PingStartTime;
 
-	char m_aCurrentMap[MAX_PATH_LENGTH];
-	char m_aCurrentMapPath[MAX_PATH_LENGTH];
+	char m_aCurrentMap[IO_MAX_PATH_LENGTH];
+	char m_aCurrentMapPath[IO_MAX_PATH_LENGTH];
 
 	char m_aTimeoutCodes[NUM_DUMMIES][32];
 	bool m_aTimeoutCodeSent[NUM_DUMMIES];
@@ -169,14 +175,15 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	//
 	char m_aCmdConnect[256];
-	char m_aCmdPlayDemo[MAX_PATH_LENGTH];
-	char m_aCmdEditMap[MAX_PATH_LENGTH];
+	char m_aCmdPlayDemo[IO_MAX_PATH_LENGTH];
+	char m_aCmdEditMap[IO_MAX_PATH_LENGTH];
 
 	// map download
 	std::shared_ptr<CGetFile> m_pMapdownloadTask;
 	char m_aMapdownloadFilename[256];
+	char m_aMapdownloadFilenameTemp[256];
 	char m_aMapdownloadName[256];
-	IOHANDLE m_MapdownloadFile;
+	IOHANDLE m_MapdownloadFileTemp;
 	int m_MapdownloadChunk;
 	int m_MapdownloadCrc;
 	int m_MapdownloadAmount;
@@ -192,8 +199,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aDDNetInfoTmp[64];
 	std::shared_ptr<CGetFile> m_pDDNetInfoTask;
 
-	char m_aDummyNameBuf[16];
-
 	// time
 	CSmoothTime m_GameTime[NUM_DUMMIES];
 	CSmoothTime m_PredictedTime;
@@ -203,8 +208,8 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	{
 		int m_aData[MAX_INPUT_SIZE]; // the input data
 		int m_Tick; // the tick that the input is for
-		int64 m_PredictedTime; // prediction latency when we sent this input
-		int64 m_Time;
+		int64_t m_PredictedTime; // prediction latency when we sent this input
+		int64_t m_Time;
 	} m_aInputs[NUM_DUMMIES][200];
 
 	int m_CurrentInput[NUM_DUMMIES];
@@ -238,7 +243,14 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	bool ShouldSendChatTimeoutCodeHeuristic();
 
 	class CServerInfo m_CurrentServerInfo;
-	int64 m_CurrentServerInfoRequestTime; // >= 0 should request, == -1 got info
+	int64_t m_CurrentServerInfoRequestTime; // >= 0 should request, == -1 got info
+
+	int m_CurrentServerPingInfoType;
+	int m_CurrentServerPingBasicToken;
+	int m_CurrentServerPingToken;
+	CUuid m_CurrentServerPingUuid;
+	int64_t m_CurrentServerCurrentPingTime; // >= 0 request running
+	int64_t m_CurrentServerNextPingTime; // >= 0 should request
 
 	// version info
 	struct CVersionInfo
@@ -254,7 +266,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 		class CHostLookup m_VersionServeraddr;
 	} m_VersionInfo;
 
-	volatile int m_GfxState;
 	static void GraphicsThreadProxy(void *pThis) { ((CClient *)pThis)->GraphicsThread(); }
 	void GraphicsThread();
 
@@ -265,7 +276,9 @@ class CClient : public IClient, public CDemoPlayer::IListener
 #endif
 
 	IOHANDLE m_BenchmarkFile;
-	int64 m_BenchmarkStopTime;
+	int64_t m_BenchmarkStopTime;
+
+	void UpdateDemoIntraTimers();
 
 public:
 	IEngine *Engine() { return m_pEngine; }
@@ -273,9 +286,11 @@ public:
 	IEngineInput *Input() { return m_pInput; }
 	IEngineSound *Sound() { return m_pSound; }
 	IGameClient *GameClient() { return m_pGameClient; }
-	IEngineMasterServer *MasterServer() { return m_pMasterServer; }
+	IConfigManager *ConfigManager() { return m_pConfigManager; }
+	CConfig *Config() { return m_pConfig; }
 	IStorage *Storage() { return m_pStorage; }
 	IUpdater *Updater() { return m_pUpdater; }
+	IDiscord *Discord() { return m_pDiscord; }
 	ISteam *Steam() { return m_pSteam; }
 
 	CClient();
@@ -289,25 +304,25 @@ public:
 	void SendReady();
 	void SendMapRequest();
 
-	virtual bool RconAuthed() { return m_RconAuthed[g_Config.m_ClDummy] != 0; }
-	virtual bool UseTempRconCommands() { return m_UseTempRconCommands != 0; }
+	virtual bool RconAuthed() const { return m_RconAuthed[g_Config.m_ClDummy] != 0; }
+	virtual bool UseTempRconCommands() const { return m_UseTempRconCommands != 0; }
 	void RconAuth(const char *pName, const char *pPassword);
 	virtual void Rcon(const char *pCmd);
 
-	virtual bool ConnectionProblems();
+	virtual bool ConnectionProblems() const;
 
-	virtual bool SoundInitFailed() { return m_SoundInitFailed; }
+	virtual bool SoundInitFailed() const { return m_SoundInitFailed; }
 
-	virtual IGraphics::CTextureHandle GetDebugFont() { return m_DebugFont; }
+	virtual IGraphics::CTextureHandle GetDebugFont() const { return m_DebugFont; }
 
 	void DirectInput(int *pInput, int Size);
 	void SendInput();
 
 	// TODO: OPT: do this a lot smarter!
-	virtual int *GetInput(int Tick, int IsDummy);
-	virtual int *GetDirectInput(int Tick, int IsDummy);
+	virtual int *GetInput(int Tick, int IsDummy) const;
+	virtual int *GetDirectInput(int Tick, int IsDummy) const;
 
-	const char *LatestVersion();
+	const char *LatestVersion() const;
 
 	// ------ state handling -----
 	void SetState(int s);
@@ -327,7 +342,7 @@ public:
 	int m_DummyConnected;
 	int m_LastDummyConnectTime;
 
-	virtual void GetServerInfo(CServerInfo *pServerInfo);
+	virtual void GetServerInfo(CServerInfo *pServerInfo) const;
 	void ServerInfoRequest();
 
 	int LoadData();
@@ -335,11 +350,11 @@ public:
 	// ---
 
 	int GetPredictionTime();
-	void *SnapGetItem(int SnapID, int Index, CSnapItem *pItem);
-	int SnapItemSize(int SnapID, int Index);
+	void *SnapGetItem(int SnapID, int Index, CSnapItem *pItem) const;
+	int SnapItemSize(int SnapID, int Index) const;
 	void SnapInvalidateItem(int SnapID, int Index);
-	void *SnapFindItem(int SnapID, int Type, int ID);
-	int SnapNumItems(int SnapID);
+	void *SnapFindItem(int SnapID, int Type, int ID) const;
+	int SnapNumItems(int SnapID) const;
 	void SnapSetStaticsize(int ItemType, int Size);
 
 	void Render();
@@ -348,14 +363,12 @@ public:
 	virtual void Restart();
 	virtual void Quit();
 
-	virtual const char *PlayerName();
-	virtual const char *DummyName();
-	virtual const char *ErrorString();
+	virtual const char *PlayerName() const;
+	virtual const char *DummyName() const;
+	virtual const char *ErrorString() const;
 
 	const char *LoadMap(const char *pName, const char *pFilename, SHA256_DIGEST *pWantedSha256, unsigned WantedCrc);
 	const char *LoadMapSearch(const char *pMapName, SHA256_DIGEST *pWantedSha256, int WantedCrc);
-
-	static bool PlayerScoreNameLess(const CServerInfo::CClient &p0, const CServerInfo::CClient &p1);
 
 	void ProcessConnlessPacket(CNetChunk *pPacket);
 	void ProcessServerInfo(int Type, NETADDR *pFrom, const void *pData, int DataSize);
@@ -371,9 +384,9 @@ public:
 	void FinishDDNetInfo();
 	void LoadDDNetInfo();
 
-	virtual const char *MapDownloadName() { return m_aMapdownloadName; }
-	virtual int MapDownloadAmount() { return !m_pMapdownloadTask ? m_MapdownloadAmount : (int)m_pMapdownloadTask->Current(); }
-	virtual int MapDownloadTotalsize() { return !m_pMapdownloadTask ? m_MapdownloadTotalsize : (int)m_pMapdownloadTask->Size(); }
+	virtual const char *MapDownloadName() const { return m_aMapdownloadName; }
+	virtual int MapDownloadAmount() const { return !m_pMapdownloadTask ? m_MapdownloadAmount : (int)m_pMapdownloadTask->Current(); }
+	virtual int MapDownloadTotalsize() const { return !m_pMapdownloadTask ? m_MapdownloadTotalsize : (int)m_pMapdownloadTask->Size(); }
 
 	void PumpNetwork();
 
@@ -394,6 +407,7 @@ public:
 
 	static void Con_DummyConnect(IConsole::IResult *pResult, void *pUserData);
 	static void Con_DummyDisconnect(IConsole::IResult *pResult, void *pUserData);
+	static void Con_DummyResetInput(IConsole::IResult *pResult, void *pUserData);
 
 	static void Con_Quit(IConsole::IResult *pResult, void *pUserData);
 	static void Con_DemoPlay(IConsole::IResult *pResult, void *pUserData);
@@ -459,12 +473,11 @@ public:
 	void HandleMapPath(const char *pPath);
 
 	// gfx
-	void SwitchWindowScreen(int Index);
-	void ToggleFullscreen();
-	void ToggleWindowBordered();
-	void ToggleWindowVSync();
-	void LoadFont();
-	void Notify(const char *pTitle, const char *pMessage);
+	virtual void SwitchWindowScreen(int Index);
+	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless);
+	virtual void ToggleWindowVSync();
+	virtual void LoadFont();
+	virtual void Notify(const char *pTitle, const char *pMessage);
 	void BenchmarkQuit(int Seconds, const char *pFilename);
 
 	// DDRace
@@ -474,10 +487,10 @@ public:
 
 	virtual int GetCurrentRaceTime();
 
-	virtual const char *GetCurrentMap();
-	virtual const char *GetCurrentMapPath();
-	virtual SHA256_DIGEST GetCurrentMapSha256();
-	virtual unsigned GetCurrentMapCrc();
+	virtual const char *GetCurrentMap() const;
+	virtual const char *GetCurrentMapPath() const;
+	virtual SHA256_DIGEST GetCurrentMapSha256() const;
+	virtual unsigned GetCurrentMapCrc() const;
 
 	virtual void RaceRecord_Start(const char *pFilename);
 	virtual void RaceRecord_Stop();
@@ -488,7 +501,7 @@ public:
 	virtual void DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser);
 	virtual void SaveReplay(const int Length);
 
-	virtual bool EditorHasUnsavedData() { return m_pEditor->HasUnsavedData(); }
+	virtual bool EditorHasUnsavedData() const { return m_pEditor->HasUnsavedData(); }
 
 	virtual IFriends *Foes() { return &m_Foes; }
 

@@ -8,7 +8,11 @@
 #include <game/client/component.h>
 #include <game/mapitems.h>
 
+#include <game/layers.h>
+
 #include "mapimages.h"
+
+#include <game/client/gameclient.h>
 
 CMapImages::CMapImages() :
 	CMapImages(100)
@@ -46,8 +50,7 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 	// unload all textures
 	for(int i = 0; i < m_Count; i++)
 	{
-		Graphics()->UnloadTexture(m_aTextures[i]);
-		m_aTextures[i] = IGraphics::CTextureHandle();
+		Graphics()->UnloadTexture(&(m_aTextures[i]));
 		m_aTextureUsedByTileOrQuadLayerFlag[i] = 0;
 	}
 	m_Count = 0;
@@ -96,10 +99,10 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 		CMapItemImage *pImg = (CMapItemImage *)pMap->GetItem(Start + i, 0, 0);
 		if(pImg->m_External)
 		{
-			char Buf[256];
+			char aPath[IO_MAX_PATH_LENGTH];
 			char *pName = (char *)pMap->GetData(pImg->m_ImageName);
-			str_format(Buf, sizeof(Buf), "mapres/%s.png", pName);
-			m_aTextures[i] = Graphics()->LoadTexture(Buf, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, LoadFlag);
+			str_format(aPath, sizeof(aPath), "mapres/%s.png", pName);
+			m_aTextures[i] = Graphics()->LoadTexture(aPath, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, LoadFlag);
 		}
 		else
 		{
@@ -155,7 +158,9 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 	EMapImageModType EntitiesModType = MAP_IMAGE_MOD_TYPE_DDNET;
 	bool EntitesAreMasked = !GameClient()->m_GameInfo.m_DontMaskEntities;
 
-	if(GameClient()->m_GameInfo.m_EntitiesDDNet)
+	if(GameClient()->m_GameInfo.m_EntitiesFDDrace)
+		EntitiesModType = MAP_IMAGE_MOD_TYPE_FDDRACE;
+	else if(GameClient()->m_GameInfo.m_EntitiesDDNet)
 		EntitiesModType = MAP_IMAGE_MOD_TYPE_DDNET;
 	else if(GameClient()->m_GameInfo.m_EntitiesDDRace)
 		EntitiesModType = MAP_IMAGE_MOD_TYPE_DDRACE;
@@ -245,7 +250,7 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 				else if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_TUNE && !GameTypeHasTuneLayer)
 					BuildThisLayer = false;
 
-				dbg_assert(m_EntitiesTextures[(EntitiesModType * 2) + (int)EntitesAreMasked][n] == -1, "entities texture already loaded when it should not be");
+				dbg_assert(!m_EntitiesTextures[(EntitiesModType * 2) + (int)EntitesAreMasked][n].IsValid(), "entities texture already loaded when it should not be");
 
 				if(BuildThisLayer)
 				{
@@ -318,7 +323,7 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 				}
 				else
 				{
-					if(m_TransparentTexture == -1)
+					if(!m_TransparentTexture.IsValid())
 					{
 						// set everything transparent
 						mem_zero(pBuildImgData, BuildImageSize);
@@ -381,8 +386,8 @@ void CMapImages::ChangeEntitiesPath(const char *pPath)
 		{
 			for(int n = 0; n < MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT; ++n)
 			{
-				if(m_EntitiesTextures[i][n] != -1)
-					Graphics()->UnloadTexture(m_EntitiesTextures[i][n]);
+				if(m_EntitiesTextures[i][n].IsValid())
+					Graphics()->UnloadTexture(&(m_EntitiesTextures[i][n]));
 				m_EntitiesTextures[i][n] = IGraphics::CTextureHandle();
 			}
 
@@ -398,12 +403,12 @@ void CMapImages::SetTextureScale(int Scale)
 
 	m_TextureScale = Scale;
 
-	if(Graphics() && m_OverlayCenterTexture != -1) // check if component was initialized
+	if(Graphics() && m_OverlayCenterTexture.IsValid()) // check if component was initialized
 	{
 		// reinitialize component
-		Graphics()->UnloadTexture(m_OverlayBottomTexture);
-		Graphics()->UnloadTexture(m_OverlayTopTexture);
-		Graphics()->UnloadTexture(m_OverlayCenterTexture);
+		Graphics()->UnloadTexture(&m_OverlayBottomTexture);
+		Graphics()->UnloadTexture(&m_OverlayTopTexture);
+		Graphics()->UnloadTexture(&m_OverlayCenterTexture);
 
 		m_OverlayBottomTexture = IGraphics::CTextureHandle();
 		m_OverlayTopTexture = IGraphics::CTextureHandle();
@@ -470,17 +475,17 @@ void CMapImages::InitOverlayTextures()
 	TextureSize = clamp(TextureSize, 2, 64);
 	int TextureToVerticalCenterOffset = (64 - TextureSize) / 2; // should be used to move texture to the center of 64 pixels area
 
-	if(m_OverlayBottomTexture == -1)
+	if(!m_OverlayBottomTexture.IsValid())
 	{
 		m_OverlayBottomTexture = UploadEntityLayerText(TextureSize / 2, 64, 32 + TextureToVerticalCenterOffset / 2);
 	}
 
-	if(m_OverlayTopTexture == -1)
+	if(!m_OverlayTopTexture.IsValid())
 	{
 		m_OverlayTopTexture = UploadEntityLayerText(TextureSize / 2, 64, TextureToVerticalCenterOffset / 2);
 	}
 
-	if(m_OverlayCenterTexture == -1)
+	if(!m_OverlayCenterTexture.IsValid())
 	{
 		m_OverlayCenterTexture = UploadEntityLayerText(TextureSize, 64, TextureToVerticalCenterOffset);
 	}

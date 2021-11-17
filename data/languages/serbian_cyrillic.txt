@@ -343,9 +343,6 @@ Red team wins!
 Refresh
 == Освежи
 
-Refreshing master servers
-== Освежам мастер сервере
-
 Remote console
 == Удаљена конзола
 
@@ -411,9 +408,6 @@ Show ingame HUD
 
 Show name plates
 == Прикажи плочице са именима
-
-Show only supported
-== Прикажи само подржане
 
 Skins
 == Теме
@@ -524,9 +518,6 @@ You must restart the game for all settings to take effect.
 == Морате поново покренути игру да би сва подешавања била примењена
 
 ##### needs translation #####
-
-Borderless window
-== Прозор без ивица
 
 Demo
 == Снимак
@@ -656,9 +647,6 @@ Successfully saved the replay!
 
 Replay feature is disabled!
 == Функција понављања је онемогућена!
-
-The width or height of texture %s is not divisible by 16, which might cause visual bugs.
-== Ширина и висина текстуре %s није дељива са 16, што може проузроковати визуелне проблеме.
 
 Warning
 == Упозорење
@@ -946,14 +934,11 @@ UI mouse s.
 may cause delay
 == може проузроковати кашњење
 
-Use OpenGL 3.3 (experimental)
-== Користи OpenGL 3.3 (експериментално)
-
 Preinit VBO (iGPUs only)
 == Preinit VBO (само у iGPUs)
 
-Multiple texture units (disable for MacOS)
-== Вишеструке текстурне јединице (угашено за MacOS)
+Multiple texture units (disable for macOS)
+== Вишеструке текстурне јединице (угашено за macOS)
 
 Use high DPI
 == Користи високи DPI
@@ -1000,9 +985,6 @@ DDNet Client needs to be restarted to complete update!
 Use DDRace Scoreboard
 == Користи DDRace табелу резултата
 
-Show client IDs in Scoreboard
-== Прикажи клијент идиове у табели резултата
-
 Show score
 == Прикажи бодове
 
@@ -1027,50 +1009,17 @@ System message
 Highlighted message
 == Истакнута порука
 
-Spectator
-== Разгледач
-
-Look out!
-== Пази!
-
 Team message
 == Тимска порука
-
-We will win
-== Победићемо
 
 Friend message
 == Порука пријатеља
 
-Friend
-== Пријатељ
-
-Hi o/
-== Здраво
-
 Normal message
 == Класична порука
 
-Hello and welcome
-== Здраво и добро дошли
-
 Client message
 == Порука клијента
-
-Inner color
-== Унутрашња боја
-
-Outline color
-== Спољашња боја
-
-Wait before try for
-== Сачекајте пре него што покушате
-
-second
-== Секунда
-
-seconds
-== Секунде
 
 Save the best demo of each race
 == Сачувајте најбољи снимак сваке трке
@@ -1122,12 +1071,6 @@ Show other players' key presses
 
 Old mouse mode
 == Стари мод миша
-
-Background (regular)
-== Позадина (редовно)
-
-Background (entities)
-== Позадина (entities)
 
 Show tiles layers from BG map
 == Прикажи слојеве плочица са BG мапе
@@ -1259,6 +1202,9 @@ Replay
 Saving ddnet-settings.cfg failed
 == 
 
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 
+
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 
 
@@ -1271,7 +1217,58 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 Checking for existing player with your name
 == 
 
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+Getting server list from master server
+== 
+
+Refreshing...
+== 
+
+Leak IP
+== 
+
 Smooth Dynamic Camera
+== 
+
+Chat command
+== 
+
+Dummy
+== 
+
+Windowed
+== 
+
+Windowed borderless
+== 
+
+Desktop fullscreen
+== 
+
+Use modern OpenGL
 == 
 
 Game sound volume
@@ -1283,11 +1280,59 @@ Chat sound volume
 Background music volume
 == 
 
+Show client IDs
+== 
+
+Kill Messages
+== 
+
+Kill Message Normal Color
+== 
+
+Kill Message Highlight Color
+== 
+
+Laser Outline Color
+== 
+
+Laser Inner Color
+== 
+
+Hookline
+== 
+
+No hit
+== 
+
+Hookable
+== 
+
+Tee
+== 
+
 Use old chat style
 == 
 
-Highlight
+Preview
+== 
+
+Show local player's key presses
+== 
+
+Background
+== 
+
+Entities Background color
 == 
 
 Use current map as background
+== 
+
+Regular Background Color
+== 
+
+Discord
+== 
+
+https://ddnet.tw/discord
 == 

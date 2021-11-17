@@ -28,35 +28,39 @@ int g_aImageIDs[64];
 
 int LoadPNG(CImageInfo *pImg, const char *pFilename)
 {
-	unsigned char *pBuffer;
-	png_t Png;
+	IOHANDLE File = io_open(pFilename, IOFLAG_READ);
+	if(!File)
+	{
+		dbg_msg("map_convert_07", "failed to open file. filename='%s'", pFilename);
+		return 0;
+	}
 
-	int Error = png_open_file(&Png, pFilename);
+	png_t Png;
+	int Error = png_open_read(&Png, 0, File);
 	if(Error != PNG_NO_ERROR)
 	{
 		dbg_msg("map_convert_07", "failed to open image file. filename='%s', pnglite: %s", pFilename, png_error_string(Error));
-		if(Error != PNG_FILE_ERROR)
-			png_close_file(&Png);
+		io_close(File);
 		return 0;
 	}
 
 	if(Png.depth != 8 || Png.color_type != PNG_TRUECOLOR_ALPHA || Png.width > (2 << 12) || Png.height > (2 << 12))
 	{
 		dbg_msg("map_convert_07", "invalid image format. filename='%s'", pFilename);
-		png_close_file(&Png);
+		io_close(File);
 		return 0;
 	}
 
-	pBuffer = (unsigned char *)malloc((size_t)Png.width * Png.height * Png.bpp);
+	unsigned char *pBuffer = (unsigned char *)malloc((size_t)Png.width * Png.height * Png.bpp);
 	Error = png_get_data(&Png, pBuffer);
 	if(Error != PNG_NO_ERROR)
 	{
 		dbg_msg("map_convert_07", "failed to read image. filename='%s', pnglite: %s", pFilename, png_error_string(Error));
 		free(pBuffer);
-		png_close_file(&Png);
+		io_close(File);
 		return 0;
 	}
-	png_close_file(&Png);
+	io_close(File);
 
 	pImg->m_Width = Png.width;
 	pImg->m_Height = Png.height;
@@ -151,7 +155,7 @@ int main(int argc, const char **argv)
 	const char *pSourceFileName = argv[1];
 
 	const char *pDestFileName;
-	char aDestFileName[MAX_PATH_LENGTH];
+	char aDestFileName[IO_MAX_PATH_LENGTH];
 
 	if(argc == 3)
 	{
@@ -159,7 +163,7 @@ int main(int argc, const char **argv)
 	}
 	else
 	{
-		char aBuf[MAX_PATH_LENGTH];
+		char aBuf[IO_MAX_PATH_LENGTH];
 		IStorage::StripPathAndExtension(pSourceFileName, aBuf, sizeof(aBuf));
 		str_format(aDestFileName, sizeof(aDestFileName), "data/maps7/%s.map", aBuf);
 		pDestFileName = aDestFileName;
@@ -217,6 +221,12 @@ int main(int argc, const char **argv)
 		CMapItemImage NewImageItem;
 		pItem = g_DataReader.GetItem(Index, &Type, &ID);
 		Size = g_DataReader.GetItemSize(Index);
+
+		// filter ITEMTYPE_EX items, they will be automatically added again
+		if(Type == ITEMTYPE_EX)
+		{
+			continue;
+		}
 
 		Success &= CheckImageDimensions(pItem, Type, pSourceFileName);
 

@@ -1,7 +1,9 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 #include "gamecontext.h"
 #include <engine/shared/config.h>
+#include <game/server/entities/character.h>
 #include <game/server/gamemodes/DDRace.h>
+#include <game/server/player.h>
 #include <game/server/save.h>
 #include <game/server/teams.h>
 #include <game/version.h>
@@ -92,6 +94,30 @@ void CGameContext::ConNinja(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_NINJA, false);
+}
+
+void CGameContext::ConEndlessHook(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+	if(pChr)
+	{
+		pChr->SetEndlessHook(true);
+	}
+}
+
+void CGameContext::ConUnEndlessHook(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+	if(pChr)
+	{
+		pChr->SetEndlessHook(false);
+	}
 }
 
 void CGameContext::ConSuper(IConsole::IResult *pResult, void *pUserData)
@@ -582,12 +608,12 @@ void CGameContext::ConUnmute(IConsole::IResult *pResult, void *pUserData)
 	if(Victim < 0 || Victim >= pSelf->m_NumMutes)
 		return;
 
-	pSelf->m_NumMutes--;
-	pSelf->m_aMutes[Victim] = pSelf->m_aMutes[pSelf->m_NumMutes];
-
 	net_addr_str(&pSelf->m_aMutes[Victim].m_Addr, aIpBuf, sizeof(aIpBuf), false);
 	str_format(aBuf, sizeof(aBuf), "Unmuted %s", aIpBuf);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes", aBuf);
+
+	pSelf->m_NumMutes--;
+	pSelf->m_aMutes[Victim] = pSelf->m_aMutes[pSelf->m_NumMutes];
 }
 
 // list mutes
@@ -730,7 +756,7 @@ void CGameContext::ConDrySave(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	CSaveTeam SavedTeam(pSelf->m_pController);
-	int Result = SavedTeam.save(pPlayer->GetTeam());
+	int Result = SavedTeam.Save(pPlayer->GetTeam());
 	if(CSaveTeam::HandleSaveError(Result, pResult->m_ClientID, pSelf))
 		return;
 

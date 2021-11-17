@@ -64,6 +64,7 @@ public:
 	bool IsAlive() { return m_Alive; }
 
 	bool m_Alive;
+	bool m_IsLocal;
 
 	CTeamsCore *TeamsCore();
 	bool Freeze(int Time);
@@ -196,6 +197,8 @@ private:
 	void DDRaceTick();
 	void DDRacePostCoreTick();
 	void HandleTuneLayer();
+
+	CTuningParams *CharacterTuning();
 
 	int m_StrongWeakID;
 

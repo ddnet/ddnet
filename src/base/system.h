@@ -15,6 +15,7 @@
 #endif
 
 #include <stddef.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <time.h>
 
@@ -27,7 +28,7 @@
 #include <sys/socket.h>
 #endif
 
-#ifdef __cplusplus
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -80,7 +81,7 @@ void dbg_assert_imp(const char *filename, int line, int test, const char *msg);
 #else
 #define dbg_break()
 #endif
-void dbg_break_imp(void);
+void dbg_break_imp();
 
 /*
 	Function: dbg_msg
@@ -169,12 +170,13 @@ enum
 {
 	IOFLAG_READ = 1,
 	IOFLAG_WRITE = 2,
-	IOFLAG_RANDOM = 4,
-	IOFLAG_APPEND = 8,
+	IOFLAG_APPEND = 4,
 
 	IOSEEK_START = 0,
 	IOSEEK_CUR = 1,
-	IOSEEK_END = 2
+	IOSEEK_END = 2,
+
+	IO_MAX_PATH_LENGTH = 512,
 };
 
 typedef struct IOINTERNAL *IOHANDLE;
@@ -185,7 +187,7 @@ typedef struct IOINTERNAL *IOHANDLE;
 
 	Parameters:
 		filename - File to open.
-		flags - A set of flags. IOFLAG_READ, IOFLAG_WRITE, IOFLAG_RANDOM, IOFLAG_APPEND.
+		flags - A set of flags. IOFLAG_READ, IOFLAG_WRITE, IOFLAG_APPEND.
 
 	Returns:
 		Returns a handle to the file on success and 0 on failure.
@@ -325,19 +327,19 @@ int io_error(IOHANDLE io);
 	Function: io_stdin
 		Returns an <IOHANDLE> to the standard input.
 */
-IOHANDLE io_stdin(void);
+IOHANDLE io_stdin();
 
 /*
 	Function: io_stdout
 		Returns an <IOHANDLE> to the standard output.
 */
-IOHANDLE io_stdout(void);
+IOHANDLE io_stdout();
 
 /*
 	Function: io_stderr
 		Returns an <IOHANDLE> to the standard error.
 */
-IOHANDLE io_stderr(void);
+IOHANDLE io_stderr();
 
 typedef struct ASYNCIO ASYNCIO;
 
@@ -503,7 +505,7 @@ void thread_wait(void *thread);
 	Function: thread_yield
 		Yield the current threads execution slice.
 */
-void thread_yield(void);
+void thread_yield();
 
 /*
 	Function: thread_detach
@@ -530,20 +532,88 @@ void thread_detach(void *thread);
 */
 void *thread_init_and_detach(void (*threadfunc)(void *), void *user, const char *name);
 
-/* Group: Locks */
-typedef void *LOCK;
+// Enable thread safety attributes only with clang.
+// The attributes can be safely erased when compiling with other compilers.
+#if defined(__clang__) && (!defined(SWIG))
+#define THREAD_ANNOTATION_ATTRIBUTE__(x) __attribute__((x))
+#else
+#define THREAD_ANNOTATION_ATTRIBUTE__(x) // no-op
+#endif
 
-LOCK lock_create(void);
+#define CAPABILITY(x) \
+	THREAD_ANNOTATION_ATTRIBUTE__(capability(x))
+
+#define SCOPED_CAPABILITY \
+	THREAD_ANNOTATION_ATTRIBUTE__(scoped_lockable)
+
+#define GUARDED_BY(x) \
+	THREAD_ANNOTATION_ATTRIBUTE__(guarded_by(x))
+
+#define PT_GUARDED_BY(x) \
+	THREAD_ANNOTATION_ATTRIBUTE__(pt_guarded_by(x))
+
+#define ACQUIRED_BEFORE(...) \
+	THREAD_ANNOTATION_ATTRIBUTE__(acquired_before(__VA_ARGS__))
+
+#define ACQUIRED_AFTER(...) \
+	THREAD_ANNOTATION_ATTRIBUTE__(acquired_after(__VA_ARGS__))
+
+#define REQUIRES(...) \
+	THREAD_ANNOTATION_ATTRIBUTE__(requires_capability(__VA_ARGS__))
+
+#define REQUIRES_SHARED(...) \
+	THREAD_ANNOTATION_ATTRIBUTE__(requires_shared_capability(__VA_ARGS__))
+
+#define ACQUIRE(...) \
+	THREAD_ANNOTATION_ATTRIBUTE__(acquire_capability(__VA_ARGS__))
+
+#define ACQUIRE_SHARED(...) \
+	THREAD_ANNOTATION_ATTRIBUTE__(acquire_shared_capability(__VA_ARGS__))
+
+#define RELEASE(...) \
+	THREAD_ANNOTATION_ATTRIBUTE__(release_capability(__VA_ARGS__))
+
+#define RELEASE_SHARED(...) \
+	THREAD_ANNOTATION_ATTRIBUTE__(release_shared_capability(__VA_ARGS__))
+
+#define RELEASE_GENERIC(...) \
+	THREAD_ANNOTATION_ATTRIBUTE__(release_generic_capability(__VA_ARGS__))
+
+#define TRY_ACQUIRE(...) \
+	THREAD_ANNOTATION_ATTRIBUTE__(try_acquire_capability(__VA_ARGS__))
+
+#define TRY_ACQUIRE_SHARED(...) \
+	THREAD_ANNOTATION_ATTRIBUTE__(try_acquire_shared_capability(__VA_ARGS__))
+
+#define EXCLUDES(...) \
+	THREAD_ANNOTATION_ATTRIBUTE__(locks_excluded(__VA_ARGS__))
+
+#define ASSERT_CAPABILITY(x) \
+	THREAD_ANNOTATION_ATTRIBUTE__(assert_capability(x))
+
+#define ASSERT_SHARED_CAPABILITY(x) \
+	THREAD_ANNOTATION_ATTRIBUTE__(assert_shared_capability(x))
+
+#define RETURN_CAPABILITY(x) \
+	THREAD_ANNOTATION_ATTRIBUTE__(lock_returned(x))
+
+#define NO_THREAD_SAFETY_ANALYSIS \
+	THREAD_ANNOTATION_ATTRIBUTE__(no_thread_safety_analysis)
+
+/* Group: Locks */
+typedef CAPABILITY("mutex") void *LOCK;
+
+LOCK lock_create();
 void lock_destroy(LOCK lock);
 
-int lock_trylock(LOCK lock);
-void lock_wait(LOCK lock);
-void lock_unlock(LOCK lock);
+int lock_trylock(LOCK lock) TRY_ACQUIRE(1, lock);
+void lock_wait(LOCK lock) ACQUIRE(lock);
+void lock_unlock(LOCK lock) RELEASE(lock);
 
 /* Group: Semaphores */
 #if defined(CONF_FAMILY_WINDOWS)
 typedef void *SEMAPHORE;
-#elif defined(CONF_PLATFORM_MACOSX)
+#elif defined(CONF_PLATFORM_MACOS)
 #include <semaphore.h>
 typedef sem_t *SEMAPHORE;
 #elif defined(CONF_FAMILY_UNIX)
@@ -558,19 +628,7 @@ void sphore_wait(SEMAPHORE *sem);
 void sphore_signal(SEMAPHORE *sem);
 void sphore_destroy(SEMAPHORE *sem);
 
-/* Group: Timer */
-#ifdef __GNUC__
-/* if compiled with -pedantic-errors it will complain about long
-	not being a C90 thing.
-*/
-__extension__ typedef long long int64;
-__extension__ typedef unsigned long long uint64;
-#else
-typedef long long int64;
-typedef unsigned long long uint64;
-#endif
-
-void set_new_tick(void);
+void set_new_tick();
 
 /*
 	Function: time_get_impl
@@ -582,7 +640,7 @@ void set_new_tick(void);
 	Remarks:
 		To know how fast the timer is ticking, see <time_freq>.
 */
-int64 time_get_impl(void);
+int64_t time_get_impl();
 
 /*
 	Function: time_get
@@ -595,7 +653,7 @@ int64 time_get_impl(void);
 		To know how fast the timer is ticking, see <time_freq>.
 		Uses <time_get_impl> to fetch the sample.
 */
-int64 time_get(void);
+int64_t time_get();
 
 /*
 	Function: time_freq
@@ -604,7 +662,7 @@ int64 time_get(void);
 	Returns:
 		Returns the frequency of the high resolution timer.
 */
-int64 time_freq(void);
+int64_t time_freq();
 
 /*
 	Function: time_timestamp
@@ -613,7 +671,7 @@ int64 time_freq(void);
 	Returns:
 		The time as a UNIX timestamp
 */
-int time_timestamp(void);
+int time_timestamp();
 
 /*
 	Function: time_houroftheday
@@ -622,14 +680,15 @@ int time_timestamp(void);
 	Returns:
 		The current hour of the day
 */
-int time_houroftheday(void);
+int time_houroftheday();
 
 enum
 {
 	SEASON_SPRING = 0,
 	SEASON_SUMMER,
 	SEASON_AUTUMN,
-	SEASON_WINTER
+	SEASON_WINTER,
+	SEASON_NEWYEAR
 };
 
 /*
@@ -639,7 +698,7 @@ enum
 	Returns:
 		one of the SEASON_* enum literals
 */
-int time_season(void);
+int time_season();
 
 /*
 Function: time_get_microseconds
@@ -648,7 +707,7 @@ Fetches a sample from a high resolution timer and converts it in microseconds.
 Returns:
 Current value of the timer in microseconds.
 */
-int64 time_get_microseconds(void);
+int64_t time_get_microseconds();
 
 /* Group: Network General */
 typedef struct
@@ -693,7 +752,7 @@ typedef struct sockaddr_un UNIXSOCKETADDR;
 		You must call this function before using any other network
 		functions.
 */
-int net_init(void);
+int net_init();
 
 /*
 	Function: net_host_lookup
@@ -949,7 +1008,7 @@ int net_tcp_close(NETSOCKET sock);
 	Returns:
 		On success it returns a handle to the socket. On failure it returns -1.
 */
-UNIXSOCKET net_unix_create_unnamed(void);
+UNIXSOCKET net_unix_create_unnamed();
 
 /*
 	Function: net_unix_send
@@ -1514,7 +1573,7 @@ enum
 		- Guarantees that buffer string will contain zero-termination, assuming
 		  buffer_size > 0.
 */
-int str_time(int64 centisecs, int format, char *buffer, int buffer_size);
+int str_time(int64_t centisecs, int format, char *buffer, int buffer_size);
 int str_time_float(float secs, int format, char *buffer, int buffer_size);
 
 /*
@@ -1540,14 +1599,29 @@ void str_escape(char **dst, const char *src, const char *end);
 		cb - Callback function to call for each entry
 		type - Type of the directory
 		user - Pointer to give to the callback
-
-	Returns:
-		Always returns 0.
 */
 typedef int (*FS_LISTDIR_CALLBACK)(const char *name, int is_dir, int dir_type, void *user);
-typedef int (*FS_LISTDIR_INFO_CALLBACK)(const char *name, time_t date, int is_dir, int dir_type, void *user);
-int fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user);
-int fs_listdir_info(const char *dir, FS_LISTDIR_INFO_CALLBACK cb, int type, void *user);
+void fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user);
+
+typedef struct
+{
+	const char *m_pName;
+	time_t m_TimeCreated; // seconds since UNIX Epoch
+	time_t m_TimeModified; // seconds since UNIX Epoch
+} CFsFileInfo;
+
+/*
+	Function: fs_listdir_fileinfo
+		Lists the files in a directory and gets additional file information
+
+	Parameters:
+		dir - Directory to list
+		cb - Callback function to call for each entry
+		type - Type of the directory
+		user - Pointer to give to the callback
+*/
+typedef int (*FS_LISTDIR_CALLBACK_FILEINFO)(const CFsFileInfo *info, int is_dir, int dir_type, void *user);
+void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int type, void *user);
 
 /*
 	Function: fs_makedir
@@ -1564,6 +1638,21 @@ int fs_listdir_info(const char *dir, FS_LISTDIR_INFO_CALLBACK cb, int type, void
 		in a failure if b or a does not exist.
 */
 int fs_makedir(const char *path);
+
+/*
+	Function: fs_removedir
+		Removes a directory
+
+	Parameters:
+		path - Directory to remove
+
+	Returns:
+		Returns 0 on success. Negative value on failure.
+
+	Remarks:
+		Cannot remove a non-empty directory.
+*/
+int fs_removedir(const char *path);
 
 /*
 	Function: fs_makedir_rec_for
@@ -1586,7 +1675,7 @@ int fs_makedir_rec_for(const char *path);
 
 	Remarks:
 		- Returns ~/.appname on UNIX based systems
-		- Returns ~/Library/Applications Support/appname on Mac OS X
+		- Returns ~/Library/Applications Support/appname on macOS
 		- Returns %APPDATA%/Appname on Windows based systems
 */
 int fs_storage_path(const char *appname, char *path, int max);
@@ -1651,6 +1740,7 @@ int fs_parent_dir(char *path);
 
 	Remarks:
 		- The strings are treated as zero-terminated strings.
+		- Returns an error if the path specifies a directory name.
 */
 int fs_remove(const char *filename);
 
@@ -1669,6 +1759,23 @@ int fs_remove(const char *filename);
 		- The strings are treated as zero-terminated strings.
 */
 int fs_rename(const char *oldname, const char *newname);
+
+/*
+	Function: fs_file_time
+		Gets the creation and the last modification date of a file.
+
+	Parameters:
+		name - The filename.
+		created - Pointer to time_t
+		modified - Pointer to time_t
+
+	Returns:
+		0 on success non-zero on failure
+
+	Remarks:
+		- Returned time is in seconds since UNIX Epoch
+*/
+int fs_file_time(const char *name, time_t *created, time_t *modified);
 
 /*
 	Group: Undocumented
@@ -1700,14 +1807,14 @@ int net_set_blocking(NETSOCKET sock);
 
 	DOCTODO: serp
 */
-int net_errno(void);
+int net_errno();
 
 /*
 	Function: net_would_block
 
 	DOCTODO: serp
 */
-int net_would_block(void);
+int net_would_block();
 
 int net_socket_read_wait(NETSOCKET sock, int time);
 
@@ -1732,16 +1839,16 @@ typedef void (*DBG_LOGGER)(const char *line, void *user);
 typedef void (*DBG_LOGGER_FINISH)(void *user);
 void dbg_logger(DBG_LOGGER logger, DBG_LOGGER_FINISH finish, void *user);
 
-void dbg_logger_stdout(void);
-void dbg_logger_debugger(void);
+void dbg_logger_stdout();
+void dbg_logger_debugger();
 void dbg_logger_file(const char *filename);
 
 typedef struct
 {
-	int sent_packets;
-	int sent_bytes;
-	int recv_packets;
-	int recv_bytes;
+	uint64_t sent_packets;
+	uint64_t sent_bytes;
+	uint64_t recv_packets;
+	uint64_t recv_bytes;
 } NETSTATS;
 
 void net_stats(NETSTATS *stats);
@@ -2019,13 +2126,59 @@ const char *str_next_token(const char *str, const char *delim, char *buffer, int
 int str_in_list(const char *list, const char *delim, const char *needle);
 
 /*
+	Function: bytes_be_to_int
+		Packs 4 big endian bytes into an int
+
+	Returns:
+		The packed int
+
+	Remarks:
+		- Assumes the passed array is 4 bytes
+		- Assumes int is 4 bytes
+*/
+int bytes_be_to_int(const unsigned char *bytes);
+
+/*
+	Function: int_to_bytes_be
+		Packs an int into 4 big endian bytes
+
+	Remarks:
+		- Assumes the passed array is 4 bytes
+		- Assumes int is 4 bytes
+*/
+void int_to_bytes_be(unsigned char *bytes, int value);
+
+/*
+	Function: bytes_be_to_uint
+		Packs 4 big endian bytes into an unsigned
+
+	Returns:
+		The packed unsigned
+
+	Remarks:
+		- Assumes the passed array is 4 bytes
+		- Assumes unsigned is 4 bytes
+*/
+unsigned bytes_be_to_uint(const unsigned char *bytes);
+
+/*
+	Function: uint_to_bytes_be
+		Packs an unsigned into 4 big endian bytes
+
+	Remarks:
+		- Assumes the passed array is 4 bytes
+		- Assumes unsigned is 4 bytes
+*/
+void uint_to_bytes_be(unsigned char *bytes, unsigned value);
+
+/*
 	Function: pid
 		Returns the pid of the current process.
 	
 	Returns:
 		pid of the current process
 */
-int pid(void);
+int pid();
 
 #if defined(CONF_FAMILY_WINDOWS)
 typedef void *PROCESS;
@@ -2056,16 +2209,6 @@ PROCESS shell_execute(const char *file);
 int kill_process(PROCESS process);
 
 /*
-	Function: os_is_winxp_or_lower
-		Checks whether the program runs on Windows XP or lower.
-
-	Returns:
-		1 - Windows XP or lower.
-		0 - Higher Windows version, Linux, macOS, etc.
-*/
-int os_is_winxp_or_lower(void);
-
-/*
 	Function: generate_password
 		Generates a null-terminated password of length `2 *
 		random_length`.
@@ -2087,7 +2230,7 @@ void generate_password(char *buffer, unsigned length, unsigned short *random, un
 		0 - Initialization succeeded.
 		1 - Initialization failed.
 */
-int secure_random_init(void);
+int secure_random_init();
 
 /*
 	Function: secure_random_password
@@ -2118,9 +2261,27 @@ void secure_random_fill(void *bytes, unsigned length);
 	Function: secure_rand
 		Returns random int (replacement for rand()).
 */
-int secure_rand(void);
+int secure_rand();
 
-#ifdef __cplusplus
+/*
+	Function: secure_rand_below
+		Returns a random nonnegative integer below the given number,
+		with a uniform distribution.
+
+	Parameters:
+		below - Upper limit (exclusive) of integers to return.
+*/
+int secure_rand_below(int below);
+
+/*
+	Function: set_console_msg_color
+		Sets the console color.
+	Parameters:
+		rgb - If NULL it will reset the console color to default, else it will transform the rgb color to a console color
+*/
+void set_console_msg_color(const void *rgbvoid);
+
+#if defined(__cplusplus)
 }
 #endif
 

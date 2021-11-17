@@ -1,6 +1,7 @@
 #include "score.h"
 #include "entities/character.h"
 #include "gamemodes/DDRace.h"
+#include "player.h"
 #include "save.h"
 
 #include <base/system.h>
@@ -18,6 +19,12 @@
 #include <fstream>
 #include <random>
 
+// "6b407e81-8b77-3e04-a207-8da17f37d000"
+// "save-no-save-id@ddnet.tw"
+static const CUuid UUID_NO_SAVE_ID =
+	{{0x6b, 0x40, 0x7e, 0x81, 0x8b, 0x77, 0x3e, 0x04,
+		0xa2, 0x07, 0x8d, 0xa1, 0x7f, 0x37, 0xd0, 0x00}};
+
 CScorePlayerResult::CScorePlayerResult()
 {
 	SetVariant(Variant::DIRECT);
@@ -34,12 +41,12 @@ void CScorePlayerResult::SetVariant(Variant v)
 			aMessage[0] = 0;
 		break;
 	case BROADCAST:
-		m_Data.m_Broadcast[0] = 0;
+		m_Data.m_aBroadcast[0] = 0;
 		break;
 	case MAP_VOTE:
-		m_Data.m_MapVote.m_Map[0] = '\0';
-		m_Data.m_MapVote.m_Reason[0] = '\0';
-		m_Data.m_MapVote.m_Server[0] = '\0';
+		m_Data.m_MapVote.m_aMap[0] = '\0';
+		m_Data.m_MapVote.m_aReason[0] = '\0';
+		m_Data.m_MapVote.m_aServer[0] = '\0';
 		break;
 	case PLAYER_INFO:
 		m_Data.m_Info.m_Score = -9999;
@@ -59,20 +66,29 @@ CTeamrank::CTeamrank() :
 	mem_zero(&m_TeamID.m_aData, sizeof(m_TeamID));
 }
 
-bool CTeamrank::NextSqlResult(IDbConnection *pSqlServer)
+bool CTeamrank::NextSqlResult(IDbConnection *pSqlServer, bool *pEnd, char *pError, int ErrorSize)
 {
 	pSqlServer->GetBlob(1, m_TeamID.m_aData, sizeof(m_TeamID.m_aData));
 	pSqlServer->GetString(2, m_aaNames[0], sizeof(m_aaNames[0]));
 	m_NumNames = 1;
-	while(pSqlServer->Step())
+	bool End = false;
+	while(!pSqlServer->Step(&End, pError, ErrorSize) && !End)
 	{
 		CUuid TeamID;
 		pSqlServer->GetBlob(1, TeamID.m_aData, sizeof(TeamID.m_aData));
 		if(m_TeamID != TeamID)
-			return true;
+		{
+			*pEnd = false;
+			return false;
+		}
 		pSqlServer->GetString(2, m_aaNames[m_NumNames], sizeof(m_aaNames[m_NumNames]));
 		m_NumNames++;
 	}
+	if(!End)
+	{
+		return true;
+	}
+	*pEnd = true;
 	return false;
 }
 
@@ -98,7 +114,7 @@ std::shared_ptr<CScorePlayerResult> CScore::NewSqlPlayerResult(int ClientID)
 }
 
 void CScore::ExecPlayerThread(
-	bool (*pFuncPtr)(IDbConnection *, const ISqlData *),
+	bool (*pFuncPtr)(IDbConnection *, const ISqlData *, char *pError, int ErrorSize),
 	const char *pThreadName,
 	int ClientID,
 	const char *pName,
@@ -108,9 +124,10 @@ void CScore::ExecPlayerThread(
 	if(pResult == nullptr)
 		return;
 	auto Tmp = std::unique_ptr<CSqlPlayerRequest>(new CSqlPlayerRequest(pResult));
-	str_copy(Tmp->m_Name, pName, sizeof(Tmp->m_Name));
-	str_copy(Tmp->m_Map, g_Config.m_SvMap, sizeof(Tmp->m_Map));
-	str_copy(Tmp->m_RequestingPlayer, Server()->ClientName(ClientID), sizeof(Tmp->m_RequestingPlayer));
+	str_copy(Tmp->m_aName, pName, sizeof(Tmp->m_aName));
+	str_copy(Tmp->m_aMap, g_Config.m_SvMap, sizeof(Tmp->m_aMap));
+	str_copy(Tmp->m_aServer, g_Config.m_SvSqlServerName, sizeof(Tmp->m_aServer));
+	str_copy(Tmp->m_aRequestingPlayer, Server()->ClientName(ClientID), sizeof(Tmp->m_aRequestingPlayer));
 	Tmp->m_Offset = Offset;
 
 	m_pPool->Execute(pFuncPtr, std::move(Tmp), pThreadName);
@@ -147,9 +164,9 @@ CScore::CScore(CGameContext *pGameServer, CDbConnectionPool *pPool) :
 	auto InitResult = std::make_shared<CScoreInitResult>();
 	auto Tmp = std::unique_ptr<CSqlInitData>(new CSqlInitData(InitResult));
 	((CGameControllerDDRace *)(pGameServer->m_pController))->m_pInitResult = InitResult;
-	str_copy(Tmp->m_Map, g_Config.m_SvMap, sizeof(Tmp->m_Map));
+	str_copy(Tmp->m_aMap, g_Config.m_SvMap, sizeof(Tmp->m_aMap));
 
-	uint64 aSeed[2];
+	uint64_t aSeed[2];
 	secure_random_fill(aSeed, sizeof(aSeed));
 	m_Prng.Seed(aSeed);
 
@@ -161,10 +178,10 @@ CScore::CScore(CGameContext *pGameServer, CDbConnectionPool *pPool) :
 		char *pLine;
 		while((pLine = LineReader.Get()))
 		{
-			char Word[32] = {0};
-			sscanf(pLine, "%*s %31s", Word);
-			Word[31] = 0;
-			m_aWordlist.push_back(Word);
+			char aWord[32] = {0};
+			sscanf(pLine, "%*s %31s", aWord);
+			aWord[31] = 0;
+			m_aWordlist.push_back(aWord);
 		}
 	}
 	else
@@ -183,7 +200,7 @@ CScore::CScore(CGameContext *pGameServer, CDbConnectionPool *pPool) :
 	m_pPool->Execute(Init, std::move(Tmp), "load best time");
 }
 
-bool CScore::Init(IDbConnection *pSqlServer, const ISqlData *pGameData)
+bool CScore::Init(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
 	const CSqlInitData *pData = dynamic_cast<const CSqlInitData *>(pGameData);
 	CScoreInitResult *pResult = dynamic_cast<CScoreInitResult *>(pGameData->m_pResult.get());
@@ -193,13 +210,23 @@ bool CScore::Init(IDbConnection *pSqlServer, const ISqlData *pGameData)
 	str_format(aBuf, sizeof(aBuf),
 		"SELECT Time FROM %s_race WHERE Map=? ORDER BY `Time` ASC LIMIT 1;",
 		pSqlServer->GetPrefix());
-	pSqlServer->PrepareStatement(aBuf);
-	pSqlServer->BindString(1, pData->m_Map);
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return true;
+	}
+	pSqlServer->BindString(1, pData->m_aMap);
 
-	if(pSqlServer->Step())
+	bool End;
+	if(pSqlServer->Step(&End, pError, ErrorSize))
+	{
+		return true;
+	}
+	if(!End)
+	{
 		pResult->m_CurrentRecord = pSqlServer->GetFloat(1);
+	}
 
-	return true;
+	return false;
 }
 
 void CScore::LoadPlayerData(int ClientID)
@@ -208,7 +235,7 @@ void CScore::LoadPlayerData(int ClientID)
 }
 
 // update stuff
-bool CScore::LoadPlayerDataThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
+bool CScore::LoadPlayerDataThread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	CScorePlayerResult *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
@@ -225,11 +252,19 @@ bool CScore::LoadPlayerDataThread(IDbConnection *pSqlServer, const ISqlData *pGa
 		"ORDER BY Time ASC "
 		"LIMIT 1;",
 		pSqlServer->GetPrefix());
-	pSqlServer->PrepareStatement(aBuf);
-	pSqlServer->BindString(1, pData->m_Map);
-	pSqlServer->BindString(2, pData->m_RequestingPlayer);
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return true;
+	}
+	pSqlServer->BindString(1, pData->m_aMap);
+	pSqlServer->BindString(2, pData->m_aRequestingPlayer);
 
-	if(pSqlServer->Step())
+	bool End;
+	if(pSqlServer->Step(&End, pError, ErrorSize))
+	{
+		return true;
+	}
+	if(!End)
 	{
 		// get the best time
 		float Time = pSqlServer->GetFloat(1);
@@ -252,10 +287,17 @@ bool CScore::LoadPlayerDataThread(IDbConnection *pSqlServer, const ISqlData *pGa
 		"FROM %s_race "
 		"WHERE Name = ?",
 		pSqlServer->GetPrefix());
-	pSqlServer->PrepareStatement(aBuf);
-	pSqlServer->BindString(1, pData->m_RequestingPlayer);
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return true;
+	}
+	pSqlServer->BindString(1, pData->m_aRequestingPlayer);
 
-	if(pSqlServer->Step() && !pSqlServer->IsNull(2))
+	if(pSqlServer->Step(&End, pError, ErrorSize))
+	{
+		return true;
+	}
+	if(!End && !pSqlServer->IsNull(2))
 	{
 		char aCurrent[TIMESTAMP_STR_LENGTH];
 		pSqlServer->GetString(1, aCurrent, sizeof(aCurrent));
@@ -266,7 +308,7 @@ bool CScore::LoadPlayerDataThread(IDbConnection *pSqlServer, const ISqlData *pGa
 		if(sscanf(aCurrent, "%d-%d-%d", &CurrentYear, &CurrentMonth, &CurrentDay) == 3 && sscanf(aStamp, "%d-%d-%d", &StampYear, &StampMonth, &StampDay) == 3 && CurrentMonth == StampMonth && CurrentDay == StampDay)
 			pResult->m_Data.m_Info.m_Birthday = CurrentYear - StampYear;
 	}
-	return true;
+	return false;
 }
 
 void CScore::MapVote(int ClientID, const char *MapName)
@@ -276,18 +318,18 @@ void CScore::MapVote(int ClientID, const char *MapName)
 	ExecPlayerThread(MapVoteThread, "map vote", ClientID, MapName, 0);
 }
 
-bool CScore::MapVoteThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
+bool CScore::MapVoteThread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	CScorePlayerResult *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 	auto *paMessages = pResult->m_Data.m_aaMessages;
 
 	char aFuzzyMap[128];
-	str_copy(aFuzzyMap, pData->m_Name, sizeof(aFuzzyMap));
+	str_copy(aFuzzyMap, pData->m_aName, sizeof(aFuzzyMap));
 	sqlstr::FuzzyString(aFuzzyMap, sizeof(aFuzzyMap));
 
 	char aMapPrefix[128];
-	str_copy(aMapPrefix, pData->m_Name, sizeof(aMapPrefix));
+	str_copy(aMapPrefix, pData->m_aName, sizeof(aMapPrefix));
 	str_append(aMapPrefix, "%", sizeof(aMapPrefix));
 
 	char aBuf[768];
@@ -301,20 +343,28 @@ bool CScore::MapVoteThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 		"  LENGTH(Map), Map "
 		"LIMIT 1;",
 		pSqlServer->GetPrefix(), pSqlServer->CollateNocase());
-	pSqlServer->PrepareStatement(aBuf);
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return true;
+	}
 	pSqlServer->BindString(1, aFuzzyMap);
-	pSqlServer->BindString(2, pData->m_Name);
+	pSqlServer->BindString(2, pData->m_aName);
 	pSqlServer->BindString(3, aMapPrefix);
 
-	if(pSqlServer->Step())
+	bool End;
+	if(pSqlServer->Step(&End, pError, ErrorSize))
+	{
+		return true;
+	}
+	if(!End)
 	{
 		pResult->SetVariant(CScorePlayerResult::MAP_VOTE);
 		auto *MapVote = &pResult->m_Data.m_MapVote;
-		pSqlServer->GetString(1, MapVote->m_Map, sizeof(MapVote->m_Map));
-		pSqlServer->GetString(2, MapVote->m_Server, sizeof(MapVote->m_Server));
-		str_copy(MapVote->m_Reason, "/map", sizeof(MapVote->m_Reason));
+		pSqlServer->GetString(1, MapVote->m_aMap, sizeof(MapVote->m_aMap));
+		pSqlServer->GetString(2, MapVote->m_aServer, sizeof(MapVote->m_aServer));
+		str_copy(MapVote->m_aReason, "/map", sizeof(MapVote->m_aReason));
 
-		for(char *p = MapVote->m_Server; *p; p++) // lower case server
+		for(char *p = MapVote->m_aServer; *p; p++) // lower case server
 			*p = tolower(*p);
 	}
 	else
@@ -324,9 +374,9 @@ bool CScore::MapVoteThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 			"No map like \"%s\" found. "
 			"Try adding a '%%' at the start if you don't know the first character. "
 			"Example: /map %%castle for \"Out of Castle\"",
-			pData->m_Name);
+			pData->m_aName);
 	}
-	return true;
+	return false;
 }
 
 void CScore::MapInfo(int ClientID, const char *MapName)
@@ -336,17 +386,17 @@ void CScore::MapInfo(int ClientID, const char *MapName)
 	ExecPlayerThread(MapInfoThread, "map info", ClientID, MapName, 0);
 }
 
-bool CScore::MapInfoThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
+bool CScore::MapInfoThread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	CScorePlayerResult *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 
 	char aFuzzyMap[128];
-	str_copy(aFuzzyMap, pData->m_Name, sizeof(aFuzzyMap));
+	str_copy(aFuzzyMap, pData->m_aName, sizeof(aFuzzyMap));
 	sqlstr::FuzzyString(aFuzzyMap, sizeof(aFuzzyMap));
 
 	char aMapPrefix[128];
-	str_copy(aMapPrefix, pData->m_Name, sizeof(aMapPrefix));
+	str_copy(aMapPrefix, pData->m_aName, sizeof(aMapPrefix));
 	str_append(aMapPrefix, "%", sizeof(aMapPrefix));
 
 	char aCurrentTimestamp[512];
@@ -354,12 +404,13 @@ bool CScore::MapInfoThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 	char aTimestamp[512];
 	pSqlServer->ToUnixTimestamp("l.Timestamp", aTimestamp, sizeof(aTimestamp));
 
-	char aBuf[1024];
+	char aMedianMapTime[2048];
+	char aBuf[4096];
 	str_format(aBuf, sizeof(aBuf),
 		"SELECT l.Map, l.Server, Mapper, Points, Stars, "
 		"  (SELECT COUNT(Name) FROM %s_race WHERE Map = l.Map) AS Finishes, "
 		"  (SELECT COUNT(DISTINCT Name) FROM %s_race WHERE Map = l.Map) AS Finishers, "
-		"  (SELECT ROUND(AVG(Time)) FROM %s_race WHERE Map = l.Map) AS Average, "
+		"  (%s) AS Median, "
 		"  %s AS Stamp, "
 		"  %s-%s AS Ago, "
 		"  (SELECT MIN(Time) FROM %s_race WHERE Map = l.Map AND Name = ?) AS OwnTime "
@@ -373,17 +424,26 @@ bool CScore::MapInfoThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 		"    Map "
 		"  LIMIT 1"
 		") as l;",
-		pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->GetPrefix(),
+		pSqlServer->GetPrefix(), pSqlServer->GetPrefix(),
+		pSqlServer->MedianMapTime(aMedianMapTime, sizeof(aMedianMapTime)),
 		aTimestamp, aCurrentTimestamp, aTimestamp,
 		pSqlServer->GetPrefix(), pSqlServer->GetPrefix(),
 		pSqlServer->CollateNocase());
-	pSqlServer->PrepareStatement(aBuf);
-	pSqlServer->BindString(1, pData->m_RequestingPlayer);
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return true;
+	}
+	pSqlServer->BindString(1, pData->m_aRequestingPlayer);
 	pSqlServer->BindString(2, aFuzzyMap);
-	pSqlServer->BindString(3, pData->m_Name);
+	pSqlServer->BindString(3, pData->m_aName);
 	pSqlServer->BindString(4, aMapPrefix);
 
-	if(pSqlServer->Step())
+	bool End;
+	if(pSqlServer->Step(&End, pError, ErrorSize))
+	{
+		return true;
+	}
+	if(!End)
 	{
 		char aMap[MAX_MAP_LENGTH];
 		pSqlServer->GetString(1, aMap, sizeof(aMap));
@@ -395,10 +455,10 @@ bool CScore::MapInfoThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 		int Stars = pSqlServer->GetInt(5);
 		int Finishes = pSqlServer->GetInt(6);
 		int Finishers = pSqlServer->GetInt(7);
-		int Average = pSqlServer->GetInt(8);
+		float Median = !pSqlServer->IsNull(8) ? pSqlServer->GetInt(8) : -1.0f;
 		int Stamp = pSqlServer->GetInt(9);
 		int Ago = pSqlServer->GetInt(10);
-		float OwnTime = pSqlServer->GetFloat(11);
+		float OwnTime = !pSqlServer->IsNull(11) ? pSqlServer->GetFloat(11) : -1.0f;
 
 		char aAgoString[40] = "\0";
 		char aReleasedString[60] = "\0";
@@ -408,11 +468,11 @@ bool CScore::MapInfoThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 			str_format(aReleasedString, sizeof(aReleasedString), ", released %s ago", aAgoString);
 		}
 
-		char aAverageString[60] = "\0";
-		if(Average > 0)
+		char aMedianString[60] = "\0";
+		if(Median > 0)
 		{
-			str_time((int64)Average * 100, TIME_HOURS, aBuf, sizeof(aBuf));
-			str_format(aAverageString, sizeof(aAverageString), " in %s average", aBuf);
+			str_time((int64_t)Median * 100, TIME_HOURS, aBuf, sizeof(aBuf));
+			str_format(aMedianString, sizeof(aMedianString), " in %s median", aBuf);
 		}
 
 		char aStars[20];
@@ -442,14 +502,14 @@ bool CScore::MapInfoThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
 			aReleasedString,
 			Finishes, Finishes == 1 ? "finish" : "finishes",
 			Finishers, Finishers == 1 ? "tee" : "tees",
-			aAverageString, aOwnFinishesString);
+			aMedianString, aOwnFinishesString);
 	}
 	else
 	{
 		str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
-			"No map like \"%s\" found.", pData->m_Name);
+			"No map like \"%s\" found.", pData->m_aName);
 	}
-	return true;
+	return false;
 }
 
 void CScore::SaveScore(int ClientID, float Time, const char *pTimestamp, float CpTime[NUM_CHECKPOINTS], bool NotEligible)
@@ -463,10 +523,10 @@ void CScore::SaveScore(int ClientID, float Time, const char *pTimestamp, float C
 		dbg_msg("sql", "WARNING: previous save score result didn't complete, overwriting it now");
 	pCurPlayer->m_ScoreFinishResult = std::make_shared<CScorePlayerResult>();
 	auto Tmp = std::unique_ptr<CSqlScoreData>(new CSqlScoreData(pCurPlayer->m_ScoreFinishResult));
-	str_copy(Tmp->m_Map, g_Config.m_SvMap, sizeof(Tmp->m_Map));
-	FormatUuid(GameServer()->GameUuid(), Tmp->m_GameUuid, sizeof(Tmp->m_GameUuid));
+	str_copy(Tmp->m_aMap, g_Config.m_SvMap, sizeof(Tmp->m_aMap));
+	FormatUuid(GameServer()->GameUuid(), Tmp->m_aGameUuid, sizeof(Tmp->m_aGameUuid));
 	Tmp->m_ClientID = ClientID;
-	str_copy(Tmp->m_Name, Server()->ClientName(ClientID), sizeof(Tmp->m_Name));
+	str_copy(Tmp->m_aName, Server()->ClientName(ClientID), sizeof(Tmp->m_aName));
 	Tmp->m_Time = Time;
 	str_copy(Tmp->m_aTimestamp, pTimestamp, sizeof(Tmp->m_aTimestamp));
 	for(int i = 0; i < NUM_CHECKPOINTS; i++)
@@ -475,7 +535,7 @@ void CScore::SaveScore(int ClientID, float Time, const char *pTimestamp, float C
 	m_pPool->ExecuteWrite(SaveScoreThread, std::move(Tmp), "save score");
 }
 
-bool CScore::SaveScoreThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure)
+bool CScore::SaveScoreThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure, char *pError, int ErrorSize)
 {
 	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
 	CScorePlayerResult *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
@@ -486,22 +546,40 @@ bool CScore::SaveScoreThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 	str_format(aBuf, sizeof(aBuf),
 		"SELECT COUNT(*) AS NumFinished FROM %s_race WHERE Map=? AND Name=? ORDER BY time ASC LIMIT 1;",
 		pSqlServer->GetPrefix());
-	pSqlServer->PrepareStatement(aBuf);
-	pSqlServer->BindString(1, pData->m_Map);
-	pSqlServer->BindString(2, pData->m_Name);
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return true;
+	}
+	pSqlServer->BindString(1, pData->m_aMap);
+	pSqlServer->BindString(2, pData->m_aName);
 
-	pSqlServer->Step();
+	bool End;
+	if(pSqlServer->Step(&End, pError, ErrorSize))
+	{
+		return true;
+	}
 	int NumFinished = pSqlServer->GetInt(1);
 	if(NumFinished == 0)
 	{
 		str_format(aBuf, sizeof(aBuf), "SELECT Points FROM %s_maps WHERE Map=?", pSqlServer->GetPrefix());
-		pSqlServer->PrepareStatement(aBuf);
-		pSqlServer->BindString(1, pData->m_Map);
+		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		{
+			return true;
+		}
+		pSqlServer->BindString(1, pData->m_aMap);
 
-		if(pSqlServer->Step())
+		bool End;
+		if(pSqlServer->Step(&End, pError, ErrorSize))
+		{
+			return true;
+		}
+		if(!End)
 		{
 			int Points = pSqlServer->GetInt(1);
-			pSqlServer->AddPoints(pData->m_Name, Points);
+			if(pSqlServer->AddPoints(pData->m_aName, Points, pError, ErrorSize))
+			{
+				return true;
+			}
 			str_format(paMessages[0], sizeof(paMessages[0]),
 				"You earned %d point%s for finishing this map!",
 				Points, Points == 1 ? "" : "s");
@@ -531,15 +609,22 @@ bool CScore::SaveScoreThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		pData->m_aCpCurrent[18], pData->m_aCpCurrent[19], pData->m_aCpCurrent[20],
 		pData->m_aCpCurrent[21], pData->m_aCpCurrent[22], pData->m_aCpCurrent[23],
 		pData->m_aCpCurrent[24]);
-	pSqlServer->PrepareStatement(aBuf);
-	pSqlServer->BindString(1, pData->m_Map);
-	pSqlServer->BindString(2, pData->m_Name);
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return true;
+	}
+	pSqlServer->BindString(1, pData->m_aMap);
+	pSqlServer->BindString(2, pData->m_aName);
 	pSqlServer->BindString(3, pData->m_aTimestamp);
 	pSqlServer->BindString(4, g_Config.m_SvSqlServerName);
-	pSqlServer->BindString(5, pData->m_GameUuid);
+	pSqlServer->BindString(5, pData->m_aGameUuid);
 	pSqlServer->Print();
-	pSqlServer->Step();
-	return true;
+	int NumInserted;
+	if(pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize))
+	{
+		return true;
+	}
+	return false;
 }
 
 void CScore::SaveTeamScore(int *aClientIDs, unsigned int Size, float Time, const char *pTimestamp)
@@ -554,17 +639,17 @@ void CScore::SaveTeamScore(int *aClientIDs, unsigned int Size, float Time, const
 	}
 	auto Tmp = std::unique_ptr<CSqlTeamScoreData>(new CSqlTeamScoreData());
 	for(unsigned int i = 0; i < Size; i++)
-		str_copy(Tmp->m_aNames[i], Server()->ClientName(aClientIDs[i]), sizeof(Tmp->m_aNames[i]));
+		str_copy(Tmp->m_aaNames[i], Server()->ClientName(aClientIDs[i]), sizeof(Tmp->m_aaNames[i]));
 	Tmp->m_Size = Size;
 	Tmp->m_Time = Time;
 	str_copy(Tmp->m_aTimestamp, pTimestamp, sizeof(Tmp->m_aTimestamp));
-	FormatUuid(GameServer()->GameUuid(), Tmp->m_GameUuid, sizeof(Tmp->m_GameUuid));
-	str_copy(Tmp->m_Map, g_Config.m_SvMap, sizeof(Tmp->m_Map));
+	FormatUuid(GameServer()->GameUuid(), Tmp->m_aGameUuid, sizeof(Tmp->m_aGameUuid));
+	str_copy(Tmp->m_aMap, g_Config.m_SvMap, sizeof(Tmp->m_aMap));
 
 	m_pPool->ExecuteWrite(SaveTeamScoreThread, std::move(Tmp), "save team score");
 }
 
-bool CScore::SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure)
+bool CScore::SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure, char *pError, int ErrorSize)
 {
 	const CSqlTeamScoreData *pData = dynamic_cast<const CSqlTeamScoreData *>(pGameData);
 
@@ -573,7 +658,7 @@ bool CScore::SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGam
 	// get the names sorted in a tab separated string
 	std::vector<std::string> aNames;
 	for(unsigned int i = 0; i < pData->m_Size; i++)
-		aNames.push_back(pData->m_aNames[i]);
+		aNames.push_back(pData->m_aaNames[i]);
 
 	std::sort(aNames.begin(), aNames.end());
 	str_format(aBuf, sizeof(aBuf),
@@ -585,20 +670,31 @@ bool CScore::SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGam
 		") as l INNER JOIN %s_teamrace AS r ON l.ID = r.ID "
 		"ORDER BY l.ID, Name COLLATE %s;",
 		pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->BinaryCollate());
-	pSqlServer->PrepareStatement(aBuf);
-	pSqlServer->BindString(1, pData->m_Map);
-	pSqlServer->BindString(2, pData->m_aNames[0]);
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return true;
+	}
+	pSqlServer->BindString(1, pData->m_aMap);
+	pSqlServer->BindString(2, pData->m_aaNames[0]);
 
 	bool FoundTeam = false;
 	float Time;
 	CTeamrank Teamrank;
-	if(pSqlServer->Step())
+	bool End;
+	if(pSqlServer->Step(&End, pError, ErrorSize))
 	{
-		bool SearchTeam = true;
-		while(SearchTeam)
+		return true;
+	}
+	if(!End)
+	{
+		bool SearchTeamEnd = false;
+		while(!SearchTeamEnd)
 		{
 			Time = pSqlServer->GetFloat(3);
-			SearchTeam = Teamrank.NextSqlResult(pSqlServer);
+			if(Teamrank.NextSqlResult(pSqlServer, &SearchTeamEnd, pError, ErrorSize))
+			{
+				return true;
+			}
 			if(Teamrank.SamePlayers(&aNames))
 			{
 				FoundTeam = true;
@@ -614,12 +710,19 @@ bool CScore::SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGam
 			str_format(aBuf, sizeof(aBuf),
 				"UPDATE %s_teamrace SET Time=%.2f, Timestamp=?, DDNet7=false, GameID=? WHERE ID = ?;",
 				pSqlServer->GetPrefix(), pData->m_Time);
-			pSqlServer->PrepareStatement(aBuf);
+			if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+			{
+				return true;
+			}
 			pSqlServer->BindString(1, pData->m_aTimestamp);
-			pSqlServer->BindString(2, pData->m_GameUuid);
+			pSqlServer->BindString(2, pData->m_aGameUuid);
 			pSqlServer->BindBlob(3, Teamrank.m_TeamID.m_aData, sizeof(Teamrank.m_TeamID.m_aData));
 			pSqlServer->Print();
-			pSqlServer->Step();
+			int NumUpdated;
+			if(pSqlServer->ExecuteUpdate(&NumUpdated, pError, ErrorSize))
+			{
+				return true;
+			}
 		}
 	}
 	else
@@ -633,17 +736,24 @@ bool CScore::SaveTeamScoreThread(IDbConnection *pSqlServer, const ISqlData *pGam
 				"VALUES (?, ?, %s, %.2f, ?, ?, false);",
 				pSqlServer->InsertIgnore(), pSqlServer->GetPrefix(),
 				pSqlServer->InsertTimestampAsUtc(), pData->m_Time);
-			pSqlServer->PrepareStatement(aBuf);
-			pSqlServer->BindString(1, pData->m_Map);
-			pSqlServer->BindString(2, pData->m_aNames[i]);
+			if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+			{
+				return true;
+			}
+			pSqlServer->BindString(1, pData->m_aMap);
+			pSqlServer->BindString(2, pData->m_aaNames[i]);
 			pSqlServer->BindString(3, pData->m_aTimestamp);
 			pSqlServer->BindBlob(4, GameID.m_aData, sizeof(GameID.m_aData));
-			pSqlServer->BindString(5, pData->m_GameUuid);
+			pSqlServer->BindString(5, pData->m_aGameUuid);
 			pSqlServer->Print();
-			pSqlServer->Step();
+			int NumInserted;
+			if(pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize))
+			{
+				return true;
+			}
 		}
 	}
-	return true;
+	return false;
 }
 
 void CScore::ShowRank(int ClientID, const char *pName)
@@ -653,55 +763,108 @@ void CScore::ShowRank(int ClientID, const char *pName)
 	ExecPlayerThread(ShowRankThread, "show rank", ClientID, pName, 0);
 }
 
-bool CScore::ShowRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
+bool CScore::ShowRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	CScorePlayerResult *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 
+	char aServerLike[16];
+	str_format(aServerLike, sizeof(aServerLike), "%%%s%%", pData->m_aServer);
+
 	// check sort method
 	char aBuf[600];
-
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT Rank, Name, Time "
+		"SELECT Rank, Time, PercentRank "
 		"FROM ("
-		"  SELECT RANK() OVER w AS Rank, Name, MIN(Time) AS Time "
+		"  SELECT RANK() OVER w AS Rank, PERCENT_RANK() OVER w as PercentRank, Name, MIN(Time) AS Time "
 		"  FROM %s_race "
 		"  WHERE Map = ? "
+		"  AND Server LIKE ?"
 		"  GROUP BY Name "
 		"  WINDOW w AS (ORDER BY Time)"
 		") as a "
 		"WHERE Name = ?;",
 		pSqlServer->GetPrefix());
-	pSqlServer->PrepareStatement(aBuf);
-	pSqlServer->BindString(1, pData->m_Map);
-	pSqlServer->BindString(2, pData->m_Name);
 
-	if(pSqlServer->Step())
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return true;
+	}
+	pSqlServer->BindString(1, pData->m_aMap);
+	pSqlServer->BindString(2, aServerLike);
+	pSqlServer->BindString(3, pData->m_aName);
+
+	bool End;
+	if(pSqlServer->Step(&End, pError, ErrorSize))
+	{
+		return true;
+	}
+
+	char aRegionalRank[16];
+	if(End)
+	{
+		str_copy(aRegionalRank, "unranked", sizeof(aRegionalRank));
+	}
+	else
+	{
+		str_format(aRegionalRank, sizeof(aRegionalRank), "rank %d", pSqlServer->GetInt(1));
+	}
+
+	const char *pAny = "%";
+
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return true;
+	}
+	pSqlServer->BindString(1, pData->m_aMap);
+	pSqlServer->BindString(2, pAny);
+	pSqlServer->BindString(3, pData->m_aName);
+
+	if(pSqlServer->Step(&End, pError, ErrorSize))
+	{
+		return true;
+	}
+
+	if(!End)
 	{
 		int Rank = pSqlServer->GetInt(1);
-		float Time = pSqlServer->GetFloat(3);
+		float Time = pSqlServer->GetFloat(2);
+		// CEIL and FLOOR are not supported in SQLite
+		int BetterThanPercent = std::floor(100.0 - 100.0 * pSqlServer->GetFloat(3));
 		str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
 		if(g_Config.m_SvHideScore)
 		{
 			str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
-				"Your time: %s", aBuf);
+				"Your time: %s, better than %d%%", aBuf, BetterThanPercent);
 		}
 		else
 		{
-			char aName[MAX_NAME_LENGTH];
-			pSqlServer->GetString(2, aName, sizeof(aName));
 			pResult->m_MessageKind = CScorePlayerResult::ALL;
-			str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
-				"%d. %s Time: %s, requested by %s",
-				Rank, aName, aBuf, pData->m_RequestingPlayer);
+
+			if(str_comp_nocase(pData->m_aRequestingPlayer, pData->m_aName) == 0)
+			{
+				str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
+					"%s - %s - better than %d%%",
+					pData->m_aName, aBuf, BetterThanPercent);
+			}
+			else
+			{
+				str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
+					"%s - %s - better than %d%% - requested by %s",
+					pData->m_aName, aBuf, BetterThanPercent, pData->m_aRequestingPlayer);
+			}
+
+			str_format(pResult->m_Data.m_aaMessages[1], sizeof(pResult->m_Data.m_aaMessages[1]),
+				"Global rank %d - %s %s",
+				Rank, pData->m_aServer, aRegionalRank);
 		}
 	}
 	else
 	{
 		str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
-			"%s is not ranked", pData->m_Name);
+			"%s is not ranked", pData->m_aName);
 	}
-	return true;
+	return false;
 }
 
 void CScore::ShowTeamRank(int ClientID, const char *pName)
@@ -711,7 +874,7 @@ void CScore::ShowTeamRank(int ClientID, const char *pName)
 	ExecPlayerThread(ShowTeamRankThread, "show team rank", ClientID, pName, 0);
 }
 
-bool CScore::ShowTeamRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
+bool CScore::ShowTeamRankThread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	CScorePlayerResult *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
@@ -720,9 +883,9 @@ bool CScore::ShowTeamRankThread(IDbConnection *pSqlServer, const ISqlData *pGame
 	char aBuf[2400];
 
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT l.ID, Name, Time, Rank "
+		"SELECT l.ID, Name, Time, Rank, PercentRank "
 		"FROM (" // teamrank score board
-		"  SELECT RANK() OVER w AS Rank, ID "
+		"  SELECT RANK() OVER w AS Rank, PERCENT_RANK() OVER w AS PercentRank, ID "
 		"  FROM %s_teamrace "
 		"  WHERE Map = ? "
 		"  GROUP BY ID "
@@ -736,18 +899,31 @@ bool CScore::ShowTeamRankThread(IDbConnection *pSqlServer, const ISqlData *pGame
 		") AS l ON TeamRank.ID = l.ID "
 		"INNER JOIN %s_teamrace AS r ON l.ID = r.ID ",
 		pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
-	pSqlServer->PrepareStatement(aBuf);
-	pSqlServer->BindString(1, pData->m_Map);
-	pSqlServer->BindString(2, pData->m_Map);
-	pSqlServer->BindString(3, pData->m_Name);
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return true;
+	}
+	pSqlServer->BindString(1, pData->m_aMap);
+	pSqlServer->BindString(2, pData->m_aMap);
+	pSqlServer->BindString(3, pData->m_aName);
 
-	if(pSqlServer->Step())
+	bool End;
+	if(pSqlServer->Step(&End, pError, ErrorSize))
+	{
+		return true;
+	}
+	if(!End)
 	{
 		float Time = pSqlServer->GetFloat(3);
 		str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
 		int Rank = pSqlServer->GetInt(4);
+		// CEIL and FLOOR are not supported in SQLite
+		int BetterThanPercent = std::floor(100.0 - 100.0 * pSqlServer->GetFloat(5));
 		CTeamrank Teamrank;
-		Teamrank.NextSqlResult(pSqlServer);
+		if(Teamrank.NextSqlResult(pSqlServer, &End, pError, ErrorSize))
+		{
+			return true;
+		}
 
 		char aFormattedNames[512] = "";
 		for(unsigned int Name = 0; Name < Teamrank.m_NumNames; Name++)
@@ -763,76 +939,135 @@ bool CScore::ShowTeamRankThread(IDbConnection *pSqlServer, const ISqlData *pGame
 		if(g_Config.m_SvHideScore)
 		{
 			str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
-				"Your team time: %s", aBuf);
+				"Your team time: %s, better than %d%%", aBuf, BetterThanPercent);
 		}
 		else
 		{
 			pResult->m_MessageKind = CScorePlayerResult::ALL;
 			str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
-				"%d. %s Team time: %s, requested by %s",
-				Rank, aFormattedNames, aBuf, pData->m_RequestingPlayer);
+				"%d. %s Team time: %s, better than %d%%, requested by %s",
+				Rank, aFormattedNames, aBuf, BetterThanPercent, pData->m_aRequestingPlayer);
 		}
 	}
 	else
 	{
 		str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
-			"%s has no team ranks", pData->m_Name);
+			"%s has no team ranks", pData->m_aName);
 	}
-	return true;
+	return false;
 }
 
-void CScore::ShowTop5(int ClientID, int Offset)
+void CScore::ShowTop(int ClientID, int Offset)
 {
 	if(RateLimitPlayer(ClientID))
 		return;
-	ExecPlayerThread(ShowTop5Thread, "show top5", ClientID, "", Offset);
+	ExecPlayerThread(ShowTopThread, "show top5", ClientID, "", Offset);
 }
 
-bool CScore::ShowTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData)
+bool CScore::ShowTopThread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	CScorePlayerResult *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 
 	int LimitStart = maximum(abs(pData->m_Offset) - 1, 0);
 	const char *pOrder = pData->m_Offset >= 0 ? "ASC" : "DESC";
+	const char *pAny = "%";
 
 	// check sort method
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT Name, Time, Rank "
+		"SELECT Name, Time, Rank, Server "
 		"FROM ("
-		"  SELECT RANK() OVER w AS Rank, Name, MIN(Time) AS Time "
+		"  SELECT RANK() OVER w AS Rank, Name, MIN(Time) AS Time, Server "
 		"  FROM %s_race "
 		"  WHERE Map = ? "
+		"  AND Server LIKE ? "
 		"  GROUP BY Name "
 		"  WINDOW w AS (ORDER BY Time)"
 		") as a "
 		"ORDER BY Rank %s "
-		"LIMIT %d, 5;",
+		"LIMIT %d, ?;",
 		pSqlServer->GetPrefix(),
 		pOrder,
 		LimitStart);
-	pSqlServer->PrepareStatement(aBuf);
-	pSqlServer->BindString(1, pData->m_Map);
 
-	// show top5
-	str_copy(pResult->m_Data.m_aaMessages[0], "----------- Top 5 -----------", sizeof(pResult->m_Data.m_aaMessages[0]));
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return true;
+	}
+	pSqlServer->BindString(1, pData->m_aMap);
+	pSqlServer->BindString(2, pAny);
+	pSqlServer->BindInt(3, 5);
 
-	int Line = 1;
-	while(pSqlServer->Step())
+	// show top
+	int Line = 0;
+	str_copy(pResult->m_Data.m_aaMessages[Line], "------------ Global Top ------------", sizeof(pResult->m_Data.m_aaMessages[Line]));
+	Line++;
+
+	char aTime[32];
+	bool End = false;
+	bool HasLocal = false;
+
+	while(!pSqlServer->Step(&End, pError, ErrorSize) && !End)
 	{
 		char aName[MAX_NAME_LENGTH];
 		pSqlServer->GetString(1, aName, sizeof(aName));
 		float Time = pSqlServer->GetFloat(2);
-		str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
+		str_time_float(Time, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
 		int Rank = pSqlServer->GetInt(3);
 		str_format(pResult->m_Data.m_aaMessages[Line], sizeof(pResult->m_Data.m_aaMessages[Line]),
-			"%d. %s Time: %s", Rank, aName, aBuf);
+			"%d. %s Time: %s", Rank, aName, aTime);
+
+		char aRecordServer[6];
+		pSqlServer->GetString(4, aRecordServer, sizeof(aRecordServer));
+
+		HasLocal = HasLocal || str_comp(aRecordServer, pData->m_aServer) == 0;
+
 		Line++;
 	}
-	str_copy(pResult->m_Data.m_aaMessages[Line], "-------------------------------", sizeof(pResult->m_Data.m_aaMessages[Line]));
 
-	return true;
+	if(!HasLocal)
+	{
+		char aServerLike[16];
+		str_format(aServerLike, sizeof(aServerLike), "%%%s%%", pData->m_aServer);
+
+		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		{
+			return true;
+		}
+		pSqlServer->BindString(1, pData->m_aMap);
+		pSqlServer->BindString(2, aServerLike);
+		pSqlServer->BindInt(3, 3);
+
+		str_format(pResult->m_Data.m_aaMessages[Line], sizeof(pResult->m_Data.m_aaMessages[Line]),
+			"------------ %s Top ------------", pData->m_aServer);
+		Line++;
+
+		// show top
+		while(!pSqlServer->Step(&End, pError, ErrorSize) && !End)
+		{
+			char aName[MAX_NAME_LENGTH];
+			pSqlServer->GetString(1, aName, sizeof(aName));
+			float Time = pSqlServer->GetFloat(2);
+			str_time_float(Time, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
+			int Rank = pSqlServer->GetInt(3);
+			str_format(pResult->m_Data.m_aaMessages[Line], sizeof(pResult->m_Data.m_aaMessages[Line]),
+				"%d. %s Time: %s", Rank, aName, aTime);
+			Line++;
+		}
+	}
+	else
+	{
+		str_copy(pResult->m_Data.m_aaMessages[Line], "---------------------------------------",
+			sizeof(pResult->m_Data.m_aaMessages[Line]));
+	}
+
+	if(!End)
+	{
+		return true;
+	}
+
+	return false;
 }
 
 void CScore::ShowTeamTop5(int ClientID, int Offset)
@@ -842,7 +1077,7 @@ void CScore::ShowTeamTop5(int ClientID, int Offset)
 	ExecPlayerThread(ShowTeamTop5Thread, "show team top5", ClientID, "", Offset);
 }
 
-bool CScore::ShowTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData)
+bool CScore::ShowTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	CScorePlayerResult *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
@@ -871,14 +1106,22 @@ bool CScore::ShowTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGame
 		"INNER JOIN %s_teamrace as r ON l2.ID = r.ID "
 		"ORDER BY Rank %s, r.ID, Name ASC;",
 		pSqlServer->GetPrefix(), pOrder, LimitStart, pSqlServer->GetPrefix(), pOrder);
-	pSqlServer->PrepareStatement(aBuf);
-	pSqlServer->BindString(1, pData->m_Map);
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return true;
+	}
+	pSqlServer->BindString(1, pData->m_aMap);
 
 	// show teamtop5
 	int Line = 0;
 	str_copy(paMessages[Line++], "------- Team Top 5 -------", sizeof(paMessages[Line]));
 
-	if(pSqlServer->Step())
+	bool End;
+	if(pSqlServer->Step(&End, pError, ErrorSize))
+	{
+		return true;
+	}
+	if(!End)
 	{
 		for(Line = 1; Line < 6; Line++) // print
 		{
@@ -898,9 +1141,12 @@ bool CScore::ShowTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGame
 					str_append(aNames, ", ", sizeof(aNames));
 				else if(i == TeamSize - 2)
 					str_append(aNames, " & ", sizeof(aNames));
-				if(!pSqlServer->Step())
+				if(pSqlServer->Step(&Last, pError, ErrorSize))
 				{
-					Last = true;
+					return true;
+				}
+				if(Last)
+				{
 					break;
 				}
 			}
@@ -915,7 +1161,7 @@ bool CScore::ShowTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGame
 	}
 
 	str_copy(paMessages[Line], "-------------------------------", sizeof(paMessages[Line]));
-	return true;
+	return false;
 }
 
 void CScore::ShowTeamTop5(int ClientID, const char *pName, int Offset)
@@ -925,7 +1171,7 @@ void CScore::ShowTeamTop5(int ClientID, const char *pName, int Offset)
 	ExecPlayerThread(ShowPlayerTeamTop5Thread, "show team top5 player", ClientID, pName, Offset);
 }
 
-bool CScore::ShowPlayerTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData)
+bool CScore::ShowPlayerTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	CScorePlayerResult *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
@@ -955,12 +1201,20 @@ bool CScore::ShowPlayerTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData 
 		"INNER JOIN %s_teamrace AS r ON l.ID = r.ID "
 		"ORDER BY Time %s, l.ID ",
 		pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pOrder, LimitStart, pSqlServer->GetPrefix(), pOrder);
-	pSqlServer->PrepareStatement(aBuf);
-	pSqlServer->BindString(1, pData->m_Map);
-	pSqlServer->BindString(2, pData->m_Map);
-	pSqlServer->BindString(3, pData->m_Name);
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return true;
+	}
+	pSqlServer->BindString(1, pData->m_aMap);
+	pSqlServer->BindString(2, pData->m_aMap);
+	pSqlServer->BindString(3, pData->m_aName);
 
-	if(pSqlServer->Step())
+	bool End;
+	if(pSqlServer->Step(&End, pError, ErrorSize))
+	{
+		return true;
+	}
+	if(!End)
 	{
 		// show teamtop5
 		int Line = 0;
@@ -972,7 +1226,11 @@ bool CScore::ShowPlayerTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData 
 			str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
 			int Rank = pSqlServer->GetInt(4);
 			CTeamrank Teamrank;
-			bool Last = !Teamrank.NextSqlResult(pSqlServer);
+			bool Last;
+			if(Teamrank.NextSqlResult(pSqlServer, &Last, pError, ErrorSize))
+			{
+				return true;
+			}
 
 			char aFormattedNames[512] = "";
 			for(unsigned int Name = 0; Name < Teamrank.m_NumNames; Name++)
@@ -998,11 +1256,11 @@ bool CScore::ShowPlayerTeamTop5Thread(IDbConnection *pSqlServer, const ISqlData 
 	else
 	{
 		if(pData->m_Offset == 0)
-			str_format(paMessages[0], sizeof(paMessages[0]), "%s has no team ranks", pData->m_Name);
+			str_format(paMessages[0], sizeof(paMessages[0]), "%s has no team ranks", pData->m_aName);
 		else
-			str_format(paMessages[0], sizeof(paMessages[0]), "%s has no team ranks in the specified range", pData->m_Name);
+			str_format(paMessages[0], sizeof(paMessages[0]), "%s has no team ranks in the specified range", pData->m_aName);
 	}
-	return true;
+	return false;
 }
 
 void CScore::ShowTimes(int ClientID, int Offset)
@@ -1019,7 +1277,7 @@ void CScore::ShowTimes(int ClientID, const char *pName, int Offset)
 	ExecPlayerThread(ShowTimesThread, "show times", ClientID, pName, Offset);
 }
 
-bool CScore::ShowTimesThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
+bool CScore::ShowTimesThread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	CScorePlayerResult *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
@@ -1033,41 +1291,52 @@ bool CScore::ShowTimesThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 	char aTimestamp[512];
 	pSqlServer->ToUnixTimestamp("Timestamp", aTimestamp, sizeof(aTimestamp));
 	char aBuf[512];
-	if(pData->m_Name[0] != '\0') // last 5 times of a player
+	if(pData->m_aName[0] != '\0') // last 5 times of a player
 	{
 		str_format(aBuf, sizeof(aBuf),
-			"SELECT Time, (%s-%s) as Ago, %s as Stamp "
+			"SELECT Time, (%s-%s) as Ago, %s as Stamp, Server "
 			"FROM %s_race "
 			"WHERE Map = ? AND Name = ? "
 			"ORDER BY Timestamp %s "
 			"LIMIT ?, 5;",
 			aCurrentTimestamp, aTimestamp, aTimestamp,
 			pSqlServer->GetPrefix(), pOrder);
-		pSqlServer->PrepareStatement(aBuf);
-		pSqlServer->BindString(1, pData->m_Map);
-		pSqlServer->BindString(2, pData->m_Name);
+		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		{
+			return true;
+		}
+		pSqlServer->BindString(1, pData->m_aMap);
+		pSqlServer->BindString(2, pData->m_aName);
 		pSqlServer->BindInt(3, LimitStart);
 	}
 	else // last 5 times of server
 	{
 		str_format(aBuf, sizeof(aBuf),
-			"SELECT Time, (%s-%s) as Ago, %s as Stamp, Name "
+			"SELECT Time, (%s-%s) as Ago, %s as Stamp, Server, Name "
 			"FROM %s_race "
 			"WHERE Map = ? "
 			"ORDER BY Timestamp %s "
 			"LIMIT ?, 5;",
 			aCurrentTimestamp, aTimestamp, aTimestamp,
 			pSqlServer->GetPrefix(), pOrder);
-		pSqlServer->PrepareStatement(aBuf);
-		pSqlServer->BindString(1, pData->m_Map);
+		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		{
+			return true;
+		}
+		pSqlServer->BindString(1, pData->m_aMap);
 		pSqlServer->BindInt(2, LimitStart);
 	}
 
 	// show top5
-	if(!pSqlServer->Step())
+	bool End;
+	if(pSqlServer->Step(&End, pError, ErrorSize))
+	{
+		return true;
+	}
+	if(End)
 	{
 		str_copy(paMessages[0], "There are no times in the specified range", sizeof(paMessages[0]));
-		return true;
+		return false;
 	}
 
 	str_copy(paMessages[0], "------------- Last Times -------------", sizeof(paMessages[0]));
@@ -1079,39 +1348,48 @@ bool CScore::ShowTimesThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
 		int Ago = pSqlServer->GetInt(2);
 		int Stamp = pSqlServer->GetInt(3);
+		char aServer[5];
+		pSqlServer->GetString(4, aServer, sizeof(aServer));
+		char aServerFormatted[8] = "\0";
+		if(str_comp(aServer, "UNK") != 0)
+			str_format(aServerFormatted, sizeof(aServerFormatted), "[%s] ", aServer);
 
 		char aAgoString[40] = "\0";
 		sqlstr::AgoTimeToString(Ago, aAgoString, sizeof(aAgoString));
 
-		if(pData->m_Name[0] != '\0') // last 5 times of a player
+		if(pData->m_aName[0] != '\0') // last 5 times of a player
 		{
 			if(Stamp == 0) // stamp is 00:00:00 cause it's an old entry from old times where there where no stamps yet
 				str_format(paMessages[Line], sizeof(paMessages[Line]),
-					"%s, don't know how long ago", aBuf);
+					"%s%s, don't know how long ago", aServerFormatted, aBuf);
 			else
 				str_format(paMessages[Line], sizeof(paMessages[Line]),
-					"%s ago, %s", aAgoString, aBuf);
+					"%s%s ago, %s", aServerFormatted, aAgoString, aBuf);
 		}
 		else // last 5 times of the server
 		{
 			char aName[MAX_NAME_LENGTH];
-			pSqlServer->GetString(4, aName, sizeof(aName));
+			pSqlServer->GetString(5, aName, sizeof(aName));
 			if(Stamp == 0) // stamp is 00:00:00 cause it's an old entry from old times where there where no stamps yet
 			{
 				str_format(paMessages[Line], sizeof(paMessages[Line]),
-					"%s, %s, don't know when", aName, aBuf);
+					"%s%s, %s, don't know when", aServerFormatted, aName, aBuf);
 			}
 			else
 			{
 				str_format(paMessages[Line], sizeof(paMessages[Line]),
-					"%s, %s ago, %s", aName, aAgoString, aBuf);
+					"%s%s, %s ago, %s", aServerFormatted, aName, aAgoString, aBuf);
 			}
 		}
 		Line++;
-	} while(pSqlServer->Step());
+	} while(!pSqlServer->Step(&End, pError, ErrorSize) && !End);
+	if(!End)
+	{
+		return true;
+	}
 	str_copy(paMessages[Line], "----------------------------------------------------", sizeof(paMessages[Line]));
 
-	return true;
+	return false;
 }
 
 void CScore::ShowPoints(int ClientID, const char *pName)
@@ -1121,7 +1399,7 @@ void CScore::ShowPoints(int ClientID, const char *pName)
 	ExecPlayerThread(ShowPointsThread, "show points", ClientID, pName, 0);
 }
 
-bool CScore::ShowPointsThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
+bool CScore::ShowPointsThread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	CScorePlayerResult *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
@@ -1135,11 +1413,19 @@ bool CScore::ShowPointsThread(IDbConnection *pSqlServer, const ISqlData *pGameDa
 		")) as Rank, Points, Name "
 		"FROM %s_points WHERE Name = ?;",
 		pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
-	pSqlServer->PrepareStatement(aBuf);
-	pSqlServer->BindString(1, pData->m_Name);
-	pSqlServer->BindString(2, pData->m_Name);
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return true;
+	}
+	pSqlServer->BindString(1, pData->m_aName);
+	pSqlServer->BindString(2, pData->m_aName);
 
-	if(pSqlServer->Step())
+	bool End;
+	if(pSqlServer->Step(&End, pError, ErrorSize))
+	{
+		return true;
+	}
+	if(!End)
 	{
 		int Rank = pSqlServer->GetInt(1);
 		int Count = pSqlServer->GetInt(2);
@@ -1148,14 +1434,14 @@ bool CScore::ShowPointsThread(IDbConnection *pSqlServer, const ISqlData *pGameDa
 		pResult->m_MessageKind = CScorePlayerResult::ALL;
 		str_format(paMessages[0], sizeof(paMessages[0]),
 			"%d. %s Points: %d, requested by %s",
-			Rank, aName, Count, pData->m_RequestingPlayer);
+			Rank, aName, Count, pData->m_aRequestingPlayer);
 	}
 	else
 	{
 		str_format(paMessages[0], sizeof(paMessages[0]),
-			"%s has not collected any points so far", pData->m_Name);
+			"%s has not collected any points so far", pData->m_aName);
 	}
-	return true;
+	return false;
 }
 
 void CScore::ShowTopPoints(int ClientID, int Offset)
@@ -1165,34 +1451,37 @@ void CScore::ShowTopPoints(int ClientID, int Offset)
 	ExecPlayerThread(ShowTopPointsThread, "show top points", ClientID, "", Offset);
 }
 
-bool CScore::ShowTopPointsThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
+bool CScore::ShowTopPointsThread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	CScorePlayerResult *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 	auto *paMessages = pResult->m_Data.m_aaMessages;
 
-	int LimitStart = maximum(abs(pData->m_Offset) - 1, 0);
-	const char *pOrder = pData->m_Offset >= 0 ? "ASC" : "DESC";
+	int LimitStart = maximum(pData->m_Offset - 1, 0);
 
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT Rank, Points, Name "
+		"SELECT RANK() OVER (ORDER BY a.Points DESC) as Rank, Points, Name "
 		"FROM ("
-		"  SELECT RANK() OVER w AS Rank, Points, Name "
+		"  SELECT Points, Name "
 		"  FROM %s_points "
-		"  WINDOW w as (ORDER BY Points DESC)"
+		"  ORDER BY Points DESC LIMIT ?"
 		") as a "
-		"ORDER BY Rank %s "
 		"LIMIT ?, 5;",
-		pSqlServer->GetPrefix(), pOrder);
-	pSqlServer->PrepareStatement(aBuf);
-	pSqlServer->BindInt(1, LimitStart);
+		pSqlServer->GetPrefix());
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return true;
+	}
+	pSqlServer->BindInt(1, LimitStart + 5);
+	pSqlServer->BindInt(2, LimitStart);
 
 	// show top points
 	str_copy(paMessages[0], "-------- Top Points --------", sizeof(paMessages[0]));
 
+	bool End = false;
 	int Line = 1;
-	while(pSqlServer->Step())
+	while(!pSqlServer->Step(&End, pError, ErrorSize) && !End)
 	{
 		int Rank = pSqlServer->GetInt(1);
 		int Points = pSqlServer->GetInt(2);
@@ -1202,9 +1491,13 @@ bool CScore::ShowTopPointsThread(IDbConnection *pSqlServer, const ISqlData *pGam
 			"%d. %s Points: %d", Rank, aName, Points);
 		Line++;
 	}
+	if(!End)
+	{
+		return true;
+	}
 	str_copy(paMessages[Line], "-------------------------------", sizeof(paMessages[Line]));
 
-	return true;
+	return false;
 }
 
 void CScore::RandomMap(int ClientID, int Stars)
@@ -1214,14 +1507,14 @@ void CScore::RandomMap(int ClientID, int Stars)
 
 	auto Tmp = std::unique_ptr<CSqlRandomMapRequest>(new CSqlRandomMapRequest(pResult));
 	Tmp->m_Stars = Stars;
-	str_copy(Tmp->m_CurrentMap, g_Config.m_SvMap, sizeof(Tmp->m_CurrentMap));
-	str_copy(Tmp->m_ServerType, g_Config.m_SvServerType, sizeof(Tmp->m_ServerType));
-	str_copy(Tmp->m_RequestingPlayer, GameServer()->Server()->ClientName(ClientID), sizeof(Tmp->m_RequestingPlayer));
+	str_copy(Tmp->m_aCurrentMap, g_Config.m_SvMap, sizeof(Tmp->m_aCurrentMap));
+	str_copy(Tmp->m_aServerType, g_Config.m_SvServerType, sizeof(Tmp->m_aServerType));
+	str_copy(Tmp->m_aRequestingPlayer, GameServer()->Server()->ClientName(ClientID), sizeof(Tmp->m_aRequestingPlayer));
 
 	m_pPool->Execute(RandomMapThread, std::move(Tmp), "random map");
 }
 
-bool CScore::RandomMapThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
+bool CScore::RandomMapThread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
 	const CSqlRandomMapRequest *pData = dynamic_cast<const CSqlRandomMapRequest *>(pGameData);
 	CScoreRandomMapResult *pResult = dynamic_cast<CScoreRandomMapResult *>(pGameData->m_pResult.get());
@@ -1234,7 +1527,10 @@ bool CScore::RandomMapThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 			"WHERE Server = ? AND Map != ? AND Stars = ? "
 			"ORDER BY %s LIMIT 1;",
 			pSqlServer->GetPrefix(), pSqlServer->Random());
-		pSqlServer->PrepareStatement(aBuf);
+		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		{
+			return true;
+		}
 		pSqlServer->BindInt(3, pData->m_Stars);
 	}
 	else
@@ -1244,20 +1540,28 @@ bool CScore::RandomMapThread(IDbConnection *pSqlServer, const ISqlData *pGameDat
 			"WHERE Server = ? AND Map != ? "
 			"ORDER BY %s LIMIT 1;",
 			pSqlServer->GetPrefix(), pSqlServer->Random());
-		pSqlServer->PrepareStatement(aBuf);
+		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		{
+			return true;
+		}
 	}
-	pSqlServer->BindString(1, pData->m_ServerType);
-	pSqlServer->BindString(2, pData->m_CurrentMap);
+	pSqlServer->BindString(1, pData->m_aServerType);
+	pSqlServer->BindString(2, pData->m_aCurrentMap);
 
-	if(pSqlServer->Step())
+	bool End;
+	if(pSqlServer->Step(&End, pError, ErrorSize))
 	{
-		pSqlServer->GetString(1, pResult->m_Map, sizeof(pResult->m_Map));
+		return true;
+	}
+	if(!End)
+	{
+		pSqlServer->GetString(1, pResult->m_aMap, sizeof(pResult->m_aMap));
 	}
 	else
 	{
 		str_copy(pResult->m_aMessage, "No maps found on this server!", sizeof(pResult->m_aMessage));
 	}
-	return true;
+	return false;
 }
 
 void CScore::RandomUnfinishedMap(int ClientID, int Stars)
@@ -1267,14 +1571,14 @@ void CScore::RandomUnfinishedMap(int ClientID, int Stars)
 
 	auto Tmp = std::unique_ptr<CSqlRandomMapRequest>(new CSqlRandomMapRequest(pResult));
 	Tmp->m_Stars = Stars;
-	str_copy(Tmp->m_CurrentMap, g_Config.m_SvMap, sizeof(Tmp->m_CurrentMap));
-	str_copy(Tmp->m_ServerType, g_Config.m_SvServerType, sizeof(Tmp->m_ServerType));
-	str_copy(Tmp->m_RequestingPlayer, GameServer()->Server()->ClientName(ClientID), sizeof(Tmp->m_RequestingPlayer));
+	str_copy(Tmp->m_aCurrentMap, g_Config.m_SvMap, sizeof(Tmp->m_aCurrentMap));
+	str_copy(Tmp->m_aServerType, g_Config.m_SvServerType, sizeof(Tmp->m_aServerType));
+	str_copy(Tmp->m_aRequestingPlayer, GameServer()->Server()->ClientName(ClientID), sizeof(Tmp->m_aRequestingPlayer));
 
 	m_pPool->Execute(RandomUnfinishedMapThread, std::move(Tmp), "random unfinished map");
 }
 
-bool CScore::RandomUnfinishedMapThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
+bool CScore::RandomUnfinishedMapThread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
 	const CSqlRandomMapRequest *pData = dynamic_cast<const CSqlRandomMapRequest *>(pGameData);
 	CScoreRandomMapResult *pResult = dynamic_cast<CScoreRandomMapResult *>(pGameData->m_pResult.get());
@@ -1292,11 +1596,14 @@ bool CScore::RandomUnfinishedMapThread(IDbConnection *pSqlServer, const ISqlData
 			") ORDER BY %s "
 			"LIMIT 1;",
 			pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->Random());
-		pSqlServer->PrepareStatement(aBuf);
-		pSqlServer->BindString(1, pData->m_ServerType);
-		pSqlServer->BindString(2, pData->m_CurrentMap);
+		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		{
+			return true;
+		}
+		pSqlServer->BindString(1, pData->m_aServerType);
+		pSqlServer->BindString(2, pData->m_aCurrentMap);
 		pSqlServer->BindInt(3, pData->m_Stars);
-		pSqlServer->BindString(4, pData->m_RequestingPlayer);
+		pSqlServer->BindString(4, pData->m_aRequestingPlayer);
 	}
 	else
 	{
@@ -1310,21 +1617,29 @@ bool CScore::RandomUnfinishedMapThread(IDbConnection *pSqlServer, const ISqlData
 			") ORDER BY %s "
 			"LIMIT 1;",
 			pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->Random());
-		pSqlServer->PrepareStatement(aBuf);
-		pSqlServer->BindString(1, pData->m_ServerType);
-		pSqlServer->BindString(2, pData->m_CurrentMap);
-		pSqlServer->BindString(3, pData->m_RequestingPlayer);
+		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		{
+			return true;
+		}
+		pSqlServer->BindString(1, pData->m_aServerType);
+		pSqlServer->BindString(2, pData->m_aCurrentMap);
+		pSqlServer->BindString(3, pData->m_aRequestingPlayer);
 	}
 
-	if(pSqlServer->Step())
+	bool End;
+	if(pSqlServer->Step(&End, pError, ErrorSize))
 	{
-		pSqlServer->GetString(1, pResult->m_Map, sizeof(pResult->m_Map));
+		return true;
+	}
+	if(!End)
+	{
+		pSqlServer->GetString(1, pResult->m_aMap, sizeof(pResult->m_aMap));
 	}
 	else
 	{
 		str_copy(pResult->m_aMessage, "You have no more unfinished maps on this server!", sizeof(pResult->m_aMessage));
 	}
-	return true;
+	return false;
 }
 
 void CScore::SaveTeam(int ClientID, const char *Code, const char *Server)
@@ -1338,16 +1653,16 @@ void CScore::SaveTeam(int ClientID, const char *Code, const char *Server)
 
 	auto SaveResult = std::make_shared<CScoreSaveResult>(ClientID, pController);
 	SaveResult->m_SaveID = RandomUuid();
-	int Result = SaveResult->m_SavedTeam.save(Team);
+	int Result = SaveResult->m_SavedTeam.Save(Team);
 	if(CSaveTeam::HandleSaveError(Result, ClientID, GameServer()))
 		return;
 	pController->m_Teams.SetSaving(Team, SaveResult);
 
 	auto Tmp = std::unique_ptr<CSqlTeamSave>(new CSqlTeamSave(SaveResult));
-	str_copy(Tmp->m_Code, Code, sizeof(Tmp->m_Code));
-	str_copy(Tmp->m_Map, g_Config.m_SvMap, sizeof(Tmp->m_Map));
-	str_copy(Tmp->m_Server, Server, sizeof(Tmp->m_Server));
-	str_copy(Tmp->m_ClientName, this->Server()->ClientName(ClientID), sizeof(Tmp->m_ClientName));
+	str_copy(Tmp->m_aCode, Code, sizeof(Tmp->m_aCode));
+	str_copy(Tmp->m_aMap, g_Config.m_SvMap, sizeof(Tmp->m_aMap));
+	str_copy(Tmp->m_aServer, Server, sizeof(Tmp->m_aServer));
+	str_copy(Tmp->m_aClientName, this->Server()->ClientName(ClientID), sizeof(Tmp->m_aClientName));
 	Tmp->m_aGeneratedCode[0] = '\0';
 	GeneratePassphrase(Tmp->m_aGeneratedCode, sizeof(Tmp->m_aGeneratedCode));
 
@@ -1355,7 +1670,7 @@ void CScore::SaveTeam(int ClientID, const char *Code, const char *Server)
 	m_pPool->ExecuteWrite(SaveTeamThread, std::move(Tmp), "save team");
 }
 
-bool CScore::SaveTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure)
+bool CScore::SaveTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure, char *pError, int ErrorSize)
 {
 	const CSqlTeamSave *pData = dynamic_cast<const CSqlTeamSave *>(pGameData);
 	CScoreSaveResult *pResult = dynamic_cast<CScoreSaveResult *>(pGameData->m_pResult.get());
@@ -1366,97 +1681,91 @@ bool CScore::SaveTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 	char *pSaveState = pResult->m_SavedTeam.GetString();
 	char aBuf[65536];
 
-	char aTable[512];
-	str_format(aTable, sizeof(aTable), "%s_saves WRITE", pSqlServer->GetPrefix());
-	pSqlServer->Lock(aTable);
+	dbg_msg("score/dbg", "code=%s failure=%d", pData->m_aCode, (int)Failure);
+	bool UseGeneratedCode = pData->m_aCode[0] == '\0' || Failure;
 
-	char Code[128] = {0};
-	str_format(aBuf, sizeof(aBuf), "SELECT Savegame FROM %s_saves WHERE Code = ? AND Map = ?", pSqlServer->GetPrefix());
-	pSqlServer->PrepareStatement(aBuf);
-	bool UseCode = false;
-	if(pData->m_Code[0] != '\0' && !Failure)
+	bool Retry = false;
+	// two tries, first use the user provided code, then the autogenerated
+	do
 	{
-		pSqlServer->BindString(1, pData->m_Code);
-		pSqlServer->BindString(2, pData->m_Map);
-		// only allow saving when save code does not already exist
-		if(!pSqlServer->Step())
-		{
-			UseCode = true;
-			str_copy(Code, pData->m_Code, sizeof(Code));
-		}
-	}
-	if(!UseCode)
-	{
-		// use random generated passphrase if save code exists or no save code given
-		pSqlServer->BindString(1, pData->m_aGeneratedCode);
-		pSqlServer->BindString(2, pData->m_Map);
-		if(!pSqlServer->Step())
-		{
-			UseCode = true;
-			str_copy(Code, pData->m_aGeneratedCode, sizeof(Code));
-		}
-	}
+		Retry = false;
+		char aCode[128] = {0};
+		if(UseGeneratedCode)
+			str_copy(aCode, pData->m_aGeneratedCode, sizeof(aCode));
+		else
+			str_copy(aCode, pData->m_aCode, sizeof(aCode));
 
-	if(UseCode)
-	{
 		str_format(aBuf, sizeof(aBuf),
 			"%s INTO %s_saves(Savegame, Map, Code, Timestamp, Server, SaveID, DDNet7) "
 			"VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, false)",
 			pSqlServer->InsertIgnore(), pSqlServer->GetPrefix());
-		pSqlServer->PrepareStatement(aBuf);
+		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		{
+			return true;
+		}
 		pSqlServer->BindString(1, pSaveState);
-		pSqlServer->BindString(2, pData->m_Map);
-		pSqlServer->BindString(3, Code);
-		pSqlServer->BindString(4, pData->m_Server);
+		pSqlServer->BindString(2, pData->m_aMap);
+		pSqlServer->BindString(3, aCode);
+		pSqlServer->BindString(4, pData->m_aServer);
 		pSqlServer->BindString(5, aSaveID);
 		pSqlServer->Print();
-		pSqlServer->Step();
-
-		if(!Failure)
+		int NumInserted;
+		if(pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize))
 		{
-			if(str_comp(pData->m_Server, g_Config.m_SvSqlServerName) == 0)
+			return true;
+		}
+		if(NumInserted == 1)
+		{
+			if(!Failure)
 			{
-				str_format(pResult->m_aMessage, sizeof(pResult->m_aMessage),
-					"Team successfully saved by %s. Use '/load %s' to continue",
-					pData->m_ClientName, Code);
+				if(str_comp(pData->m_aServer, g_Config.m_SvSqlServerName) == 0)
+				{
+					str_format(pResult->m_aMessage, sizeof(pResult->m_aMessage),
+						"Team successfully saved by %s. Use '/load %s' to continue",
+						pData->m_aClientName, aCode);
+				}
+				else
+				{
+					str_format(pResult->m_aMessage, sizeof(pResult->m_aMessage),
+						"Team successfully saved by %s. Use '/load %s' on %s to continue",
+						pData->m_aClientName, aCode, pData->m_aServer);
+				}
 			}
 			else
 			{
-				str_format(pResult->m_aMessage, sizeof(pResult->m_aMessage),
-					"Team successfully saved by %s. Use '/load %s' on %s to continue",
-					pData->m_ClientName, Code, pData->m_Server);
+				str_copy(pResult->m_aBroadcast,
+					"Database connection failed, teamsave written to a file instead. Admins will add it manually in a few days.",
+					sizeof(pResult->m_aBroadcast));
+				if(str_comp(pData->m_aServer, g_Config.m_SvSqlServerName) == 0)
+				{
+					str_format(pResult->m_aMessage, sizeof(pResult->m_aMessage),
+						"Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue",
+						pData->m_aClientName, aCode);
+				}
+				else
+				{
+					str_format(pResult->m_aMessage, sizeof(pResult->m_aMessage),
+						"Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue",
+						pData->m_aClientName, aCode, pData->m_aServer);
+				}
 			}
-		}
-		else
-		{
-			str_copy(pResult->m_aBroadcast,
-				"Database connection failed, teamsave written to a file instead. Admins will add it manually in a few days.",
-				sizeof(pResult->m_aBroadcast));
-			if(str_comp(pData->m_Server, g_Config.m_SvSqlServerName) == 0)
-			{
-				str_format(pResult->m_aMessage, sizeof(pResult->m_aMessage),
-					"Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue",
-					pData->m_ClientName, Code);
-			}
-			else
-			{
-				str_format(pResult->m_aMessage, sizeof(pResult->m_aMessage),
-					"Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue",
-					pData->m_ClientName, Code, pData->m_Server);
-			}
-		}
 
-		pResult->m_Status = CScoreSaveResult::SAVE_SUCCESS;
-	}
-	else
+			pResult->m_Status = CScoreSaveResult::SAVE_SUCCESS;
+		}
+		else if(!UseGeneratedCode)
+		{
+			UseGeneratedCode = true;
+			Retry = true;
+		}
+	} while(Retry);
+
+	if(pResult->m_Status != CScoreSaveResult::SAVE_SUCCESS)
 	{
 		dbg_msg("sql", "ERROR: This save-code already exists");
 		pResult->m_Status = CScoreSaveResult::SAVE_FAILED;
 		str_copy(pResult->m_aMessage, "This save-code already exists", sizeof(pResult->m_aMessage));
 	}
-
-	pSqlServer->Unlock();
-	return true;
+	return false;
 }
 
 void CScore::LoadTeam(const char *Code, int ClientID)
@@ -1481,10 +1790,10 @@ void CScore::LoadTeam(const char *Code, int ClientID)
 	SaveResult->m_Status = CScoreSaveResult::LOAD_FAILED;
 	pController->m_Teams.SetSaving(Team, SaveResult);
 	auto Tmp = std::unique_ptr<CSqlTeamLoad>(new CSqlTeamLoad(SaveResult));
-	str_copy(Tmp->m_Code, Code, sizeof(Tmp->m_Code));
-	str_copy(Tmp->m_Map, g_Config.m_SvMap, sizeof(Tmp->m_Map));
+	str_copy(Tmp->m_aCode, Code, sizeof(Tmp->m_aCode));
+	str_copy(Tmp->m_aMap, g_Config.m_SvMap, sizeof(Tmp->m_aMap));
 	Tmp->m_ClientID = ClientID;
-	str_copy(Tmp->m_RequestingPlayer, Server()->ClientName(ClientID), sizeof(Tmp->m_RequestingPlayer));
+	str_copy(Tmp->m_aRequestingPlayer, Server()->ClientName(ClientID), sizeof(Tmp->m_aRequestingPlayer));
 	Tmp->m_NumPlayer = 0;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -1499,102 +1808,128 @@ void CScore::LoadTeam(const char *Code, int ClientID)
 	m_pPool->ExecuteWrite(LoadTeamThread, std::move(Tmp), "load team");
 }
 
-bool CScore::LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure)
+bool CScore::LoadTeamThread(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure, char *pError, int ErrorSize)
 {
 	const CSqlTeamLoad *pData = dynamic_cast<const CSqlTeamLoad *>(pGameData);
 	CScoreSaveResult *pResult = dynamic_cast<CScoreSaveResult *>(pGameData->m_pResult.get());
 	pResult->m_Status = CScoreSaveResult::LOAD_FAILED;
 
-	char aTable[512];
-	str_format(aTable, sizeof(aTable), "%s_saves WRITE", pSqlServer->GetPrefix());
-	pSqlServer->Lock(aTable);
+	char aCurrentTimestamp[512];
+	pSqlServer->ToUnixTimestamp("CURRENT_TIMESTAMP", aCurrentTimestamp, sizeof(aCurrentTimestamp));
+	char aTimestamp[512];
+	pSqlServer->ToUnixTimestamp("Timestamp", aTimestamp, sizeof(aTimestamp));
 
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf),
+		"SELECT Savegame, %s-%s AS Ago, SaveID "
+		"FROM %s_saves "
+		"where Code = ? AND Map = ? AND DDNet7 = false;",
+		aCurrentTimestamp, aTimestamp,
+		pSqlServer->GetPrefix());
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
-		char aSaveLike[128] = "";
-		str_append(aSaveLike, "%\n", sizeof(aSaveLike));
-		sqlstr::EscapeLike(aSaveLike + str_length(aSaveLike),
-			pData->m_RequestingPlayer,
-			sizeof(aSaveLike) - str_length(aSaveLike));
-		str_append(aSaveLike, "\t%", sizeof(aSaveLike));
-
-		char aCurrentTimestamp[512];
-		pSqlServer->ToUnixTimestamp("CURRENT_TIMESTAMP", aCurrentTimestamp, sizeof(aCurrentTimestamp));
-		char aTimestamp[512];
-		pSqlServer->ToUnixTimestamp("Timestamp", aTimestamp, sizeof(aTimestamp));
-
-		char aBuf[512];
-		str_format(aBuf, sizeof(aBuf),
-			"SELECT Savegame, %s-%s AS Ago, SaveID "
-			"FROM %s_saves "
-			"where Code = ? AND Map = ? AND DDNet7 = false AND Savegame LIKE ?;",
-			aCurrentTimestamp, aTimestamp,
-			pSqlServer->GetPrefix());
-		pSqlServer->PrepareStatement(aBuf);
-		pSqlServer->BindString(1, pData->m_Code);
-		pSqlServer->BindString(2, pData->m_Map);
-		pSqlServer->BindString(3, aSaveLike);
-
-		if(!pSqlServer->Step())
-		{
-			str_copy(pResult->m_aMessage, "No such savegame for this map", sizeof(pResult->m_aMessage));
-			goto end;
-		}
-
-		int Since = pSqlServer->GetInt(2);
-		if(Since < g_Config.m_SvSaveGamesDelay)
-		{
-			str_format(pResult->m_aMessage, sizeof(pResult->m_aMessage),
-				"You have to wait %d seconds until you can load this savegame",
-				g_Config.m_SvSaveGamesDelay - Since);
-			goto end;
-		}
-
-		char aSaveID[UUID_MAXSTRSIZE];
-		memset(pResult->m_SaveID.m_aData, 0, sizeof(pResult->m_SaveID.m_aData));
-		if(!pSqlServer->IsNull(3))
-		{
-			pSqlServer->GetString(3, aSaveID, sizeof(aSaveID));
-			if(str_length(aSaveID) + 1 != UUID_MAXSTRSIZE)
-			{
-				str_copy(pResult->m_aMessage, "Unable to load savegame: SaveID corrupted", sizeof(pResult->m_aMessage));
-				goto end;
-			}
-			ParseUuid(&pResult->m_SaveID, aSaveID);
-		}
-
-		char aSaveString[65536];
-		pSqlServer->GetString(1, aSaveString, sizeof(aSaveString));
-		int Num = pResult->m_SavedTeam.FromString(aSaveString);
-
-		if(Num != 0)
-		{
-			str_copy(pResult->m_aMessage, "Unable to load savegame: data corrupted", sizeof(pResult->m_aMessage));
-			goto end;
-		}
-
-		bool CanLoad = pResult->m_SavedTeam.MatchPlayers(
-			pData->m_aClientNames, pData->m_aClientID, pData->m_NumPlayer,
-			pResult->m_aMessage, sizeof(pResult->m_aMessage));
-
-		if(!CanLoad)
-			goto end;
-
-		str_format(aBuf, sizeof(aBuf),
-			"DELETE FROM  %s_saves "
-			"WHERE Code = ? AND Map = ?;",
-			pSqlServer->GetPrefix());
-		pSqlServer->PrepareStatement(aBuf);
-		pSqlServer->BindString(1, pData->m_Code);
-		pSqlServer->BindString(2, pData->m_Map);
-		pSqlServer->Print();
-		pSqlServer->Step();
-
-		pResult->m_Status = CScoreSaveResult::LOAD_SUCCESS;
-		str_copy(pResult->m_aMessage, "Loading successfully done", sizeof(pResult->m_aMessage));
+		return true;
 	}
-end:
-	pSqlServer->Unlock();
-	return true;
+	pSqlServer->BindString(1, pData->m_aCode);
+	pSqlServer->BindString(2, pData->m_aMap);
+
+	bool End;
+	if(pSqlServer->Step(&End, pError, ErrorSize))
+	{
+		return true;
+	}
+	if(End)
+	{
+		str_copy(pResult->m_aMessage, "No such savegame for this map", sizeof(pResult->m_aMessage));
+		return false;
+	}
+
+	pResult->m_SaveID = UUID_NO_SAVE_ID;
+	if(!pSqlServer->IsNull(3))
+	{
+		char aSaveID[UUID_MAXSTRSIZE];
+		pSqlServer->GetString(3, aSaveID, sizeof(aSaveID));
+		if(ParseUuid(&pResult->m_SaveID, aSaveID) || pResult->m_SaveID == UUID_NO_SAVE_ID)
+		{
+			str_copy(pResult->m_aMessage, "Unable to load savegame: SaveID corrupted", sizeof(pResult->m_aMessage));
+			return false;
+		}
+	}
+
+	char aSaveString[65536];
+	pSqlServer->GetString(1, aSaveString, sizeof(aSaveString));
+	int Num = pResult->m_SavedTeam.FromString(aSaveString);
+
+	if(Num != 0)
+	{
+		str_copy(pResult->m_aMessage, "Unable to load savegame: data corrupted", sizeof(pResult->m_aMessage));
+		return false;
+	}
+
+	bool Found = false;
+	for(int i = 0; i < pResult->m_SavedTeam.GetMembersCount(); i++)
+	{
+		if(str_comp(pResult->m_SavedTeam.m_pSavedTees[i].GetName(), pData->m_aRequestingPlayer) == 0)
+		{
+			Found = true;
+			break;
+		}
+	}
+	if(!Found)
+	{
+		str_copy(pResult->m_aMessage, "You don't belong to this team", sizeof(pResult->m_aMessage));
+		return false;
+	}
+
+	int Since = pSqlServer->GetInt(2);
+	if(Since < g_Config.m_SvSaveSwapGamesDelay)
+	{
+		str_format(pResult->m_aMessage, sizeof(pResult->m_aMessage),
+			"You have to wait %d seconds until you can load this savegame",
+			g_Config.m_SvSaveSwapGamesDelay - Since);
+		return false;
+	}
+
+	bool CanLoad = pResult->m_SavedTeam.MatchPlayers(
+		pData->m_aClientNames, pData->m_aClientID, pData->m_NumPlayer,
+		pResult->m_aMessage, sizeof(pResult->m_aMessage));
+
+	if(!CanLoad)
+		return false;
+
+	str_format(aBuf, sizeof(aBuf),
+		"DELETE FROM %s_saves "
+		"WHERE Code = ? AND Map = ? AND SaveID %s;",
+		pSqlServer->GetPrefix(),
+		pResult->m_SaveID != UUID_NO_SAVE_ID ? "= ?" : "IS NULL");
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return true;
+	}
+	pSqlServer->BindString(1, pData->m_aCode);
+	pSqlServer->BindString(2, pData->m_aMap);
+	char aUuid[UUID_MAXSTRSIZE];
+	if(pResult->m_SaveID != UUID_NO_SAVE_ID)
+	{
+		FormatUuid(pResult->m_SaveID, aUuid, sizeof(aUuid));
+		pSqlServer->BindString(3, aUuid);
+	}
+	pSqlServer->Print();
+	int NumDeleted;
+	if(pSqlServer->ExecuteUpdate(&NumDeleted, pError, ErrorSize))
+	{
+		return true;
+	}
+
+	if(NumDeleted != 1)
+	{
+		str_copy(pResult->m_aMessage, "Unable to load savegame: loaded on a different server", sizeof(pResult->m_aMessage));
+		return false;
+	}
+
+	pResult->m_Status = CScoreSaveResult::LOAD_SUCCESS;
+	str_copy(pResult->m_aMessage, "Loading successfully done", sizeof(pResult->m_aMessage));
+	return false;
 }
 
 void CScore::GetSaves(int ClientID)
@@ -1604,7 +1939,7 @@ void CScore::GetSaves(int ClientID)
 	ExecPlayerThread(GetSavesThread, "get saves", ClientID, "", 0);
 }
 
-bool CScore::GetSavesThread(IDbConnection *pSqlServer, const ISqlData *pGameData)
+bool CScore::GetSavesThread(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
 	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	CScorePlayerResult *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
@@ -1613,7 +1948,7 @@ bool CScore::GetSavesThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 	char aSaveLike[128] = "";
 	str_append(aSaveLike, "%\n", sizeof(aSaveLike));
 	sqlstr::EscapeLike(aSaveLike + str_length(aSaveLike),
-		pData->m_RequestingPlayer,
+		pData->m_aRequestingPlayer,
 		sizeof(aSaveLike) - str_length(aSaveLike));
 	str_append(aSaveLike, "\t%", sizeof(aSaveLike));
 
@@ -1629,11 +1964,19 @@ bool CScore::GetSavesThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 		"WHERE Map = ? AND Savegame LIKE ?;",
 		aCurrentTimestamp, aMaxTimestamp,
 		pSqlServer->GetPrefix());
-	pSqlServer->PrepareStatement(aBuf);
-	pSqlServer->BindString(1, pData->m_Map);
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return true;
+	}
+	pSqlServer->BindString(1, pData->m_aMap);
 	pSqlServer->BindString(2, aSaveLike);
 
-	if(pSqlServer->Step())
+	bool End;
+	if(pSqlServer->Step(&End, pError, ErrorSize))
+	{
+		return true;
+	}
+	if(!End)
 	{
 		int NumSaves = pSqlServer->GetInt(1);
 		int Ago = pSqlServer->GetInt(2);
@@ -1647,9 +1990,9 @@ bool CScore::GetSavesThread(IDbConnection *pSqlServer, const ISqlData *pGameData
 
 		str_format(paMessages[0], sizeof(paMessages[0]),
 			"%s has %d save%s on %s%s",
-			pData->m_RequestingPlayer,
+			pData->m_aRequestingPlayer,
 			NumSaves, NumSaves == 1 ? "" : "s",
-			pData->m_Map, aLastSavedString);
+			pData->m_aMap, aLastSavedString);
 	}
-	return true;
+	return false;
 }
