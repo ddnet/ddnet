@@ -869,7 +869,7 @@ void CClient::DummyConnect()
 	if(m_NetClient[CLIENT_MAIN].State() != NET_CONNSTATE_ONLINE && m_NetClient[CLIENT_MAIN].State() != NET_CONNSTATE_PENDING)
 		return;
 
-	if(m_DummyConnected)
+	if(m_DummyConnected || !DummyAllowed())
 		return;
 
 	m_LastDummyConnectTime = GameTick(g_Config.m_ClDummy);
@@ -898,6 +898,11 @@ void CClient::DummyDisconnect(const char *pReason)
 	m_ReceivedSnapshots[1] = 0;
 	m_DummyConnected = false;
 	GameClient()->OnDummyDisconnect();
+}
+
+bool CClient::DummyAllowed()
+{
+	return m_ServerCapabilities.m_AllowDummy;
 }
 
 int CClient::GetCurrentRaceTime()
@@ -1546,6 +1551,7 @@ static CServerCapabilities GetServerCapabilities(int Version, int Flags)
 	Result.m_ChatTimeoutCode = DDNet;
 	Result.m_AnyPlayerFlag = DDNet;
 	Result.m_PingEx = false;
+	Result.m_AllowDummy = true;
 	if(Version >= 1)
 	{
 		Result.m_ChatTimeoutCode = Flags & SERVERCAPFLAG_CHATTIMEOUTCODE;
@@ -1557,6 +1563,10 @@ static CServerCapabilities GetServerCapabilities(int Version, int Flags)
 	if(Version >= 3)
 	{
 		Result.m_PingEx = Flags & SERVERCAPFLAG_PINGEX;
+	}
+	if(Version >= 4)
+	{
+		Result.m_AllowDummy = Flags & SERVERCAPFLAG_ALLOWDUMMY;
 	}
 	return Result;
 }
