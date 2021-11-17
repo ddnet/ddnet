@@ -1730,8 +1730,7 @@ void CMapLayers::OnRender()
 				continue;
 
 			int EntityOverlayVal = g_Config.m_ClOverlayEntities;
-			bool AllowEntities = GameClient()->m_GameInfo.m_AllowEntities;
-			if(m_Type == TYPE_FULL_DESIGN || !AllowEntities)
+			if(m_Type == TYPE_FULL_DESIGN || !GameClient()->m_GameInfo.m_AllowEntities)
 				EntityOverlayVal = 0;
 
 			if((Render && EntityOverlayVal < 100 && !IsGameLayer && !IsFrontLayer && !IsSwitchLayer && !IsTeleLayer && !IsSpeedupLayer && !IsTuneLayer) || (EntityOverlayVal && IsGameLayer) || (m_Type == TYPE_BACKGROUND_FORCE))
