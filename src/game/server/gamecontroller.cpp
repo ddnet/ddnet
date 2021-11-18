@@ -979,6 +979,18 @@ int IGameController::GetStartTeam()
 	return TEAM_SPECTATORS;
 }
 
+void IGameController::CheckGameInfo()
+{
+	// bool GameInfoChanged = (m_GameInfo.m_MatchCurrent != m_MatchCount + 1) ||
+	// 	(m_GameInfo.m_ScoreLimit != Config()->m_SvScorelimit) || (m_GameInfo.m_TimeLimit != Config()->m_SvTimelimit);
+	m_GameInfo.m_MatchCurrent = 0;
+	m_GameInfo.m_MatchNum = 0;
+	m_GameInfo.m_ScoreLimit = g_Config.m_SvScorelimit;
+	m_GameInfo.m_TimeLimit = g_Config.m_SvTimelimit;
+	// if(GameInfoChanged)
+	// 	UpdateGameInfo(-1);
+}
+
 bool IGameController::IsFriendlyFire(int ClientID1, int ClientID2)
 {
 	if(ClientID1 == ClientID2)

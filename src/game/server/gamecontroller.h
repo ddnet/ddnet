@@ -119,6 +119,7 @@ public:
 	void EndRound();
 	void ChangeMap(const char *pToMap);
 
+	void CheckGameInfo();
 	bool IsFriendlyFire(int ClientID1, int ClientID2);
 	bool IsTeamplay() const { return m_GameFlags & GAMEFLAG_TEAMS; }
 
