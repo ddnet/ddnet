@@ -314,39 +314,13 @@ IOHANDLE io_open(const char *filename, int flags)
 	dbg_assert(flags == IOFLAG_READ || flags == IOFLAG_WRITE || flags == IOFLAG_APPEND, "flags must be read, write or append");
 #if defined(CONF_FAMILY_WINDOWS)
 	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
+	MultiByteToWideChar(CP_UTF8, 0, filename, IO_MAX_PATH_LENGTH, wBuffer, IO_MAX_PATH_LENGTH);
 	if(flags == IOFLAG_READ)
-	{
-		// check for filename case sensitive
-		WIN32_FIND_DATAW finddata;
-		HANDLE handle;
-		char buffer[IO_MAX_PATH_LENGTH];
-
-		int length = str_length(filename);
-		if(!filename || !length || filename[length - 1] == '\\')
-			return 0x0;
-		MultiByteToWideChar(CP_UTF8, 0, filename, IO_MAX_PATH_LENGTH, wBuffer, IO_MAX_PATH_LENGTH);
-		handle = FindFirstFileW(wBuffer, &finddata);
-		if(handle == INVALID_HANDLE_VALUE)
-			return 0x0;
-		WideCharToMultiByte(CP_UTF8, 0, finddata.cFileName, -1, buffer, IO_MAX_PATH_LENGTH, NULL, NULL);
-		if(str_comp(filename + length - str_length(buffer), buffer) != 0)
-		{
-			FindClose(handle);
-			return 0x0;
-		}
-		FindClose(handle);
 		return (IOHANDLE)_wfsopen(wBuffer, L"rb", _SH_DENYNO);
-	}
 	if(flags == IOFLAG_WRITE)
-	{
-		MultiByteToWideChar(CP_UTF8, 0, filename, IO_MAX_PATH_LENGTH, wBuffer, IO_MAX_PATH_LENGTH);
 		return (IOHANDLE)_wfsopen(wBuffer, L"wb", _SH_DENYNO);
-	}
 	if(flags == IOFLAG_APPEND)
-	{
-		MultiByteToWideChar(CP_UTF8, 0, filename, IO_MAX_PATH_LENGTH, wBuffer, IO_MAX_PATH_LENGTH);
 		return (IOHANDLE)_wfsopen(wBuffer, L"ab", _SH_DENYNO);
-	}
 	return 0x0;
 #else
 	if(flags == IOFLAG_READ)
@@ -3545,6 +3519,32 @@ const char *str_next_token(const char *str, const char *delim, char *buffer, int
 	buffer[len] = '\0';
 
 	return tok + len;
+}
+
+int bytes_be_to_int(const unsigned char *bytes)
+{
+	return ((bytes[0] & 0xff) << 24) | ((bytes[1] & 0xff) << 16) | ((bytes[2] & 0xff) << 8) | (bytes[3] & 0xff);
+}
+
+void int_to_bytes_be(unsigned char *bytes, int value)
+{
+	bytes[0] = (value >> 24) & 0xff;
+	bytes[1] = (value >> 16) & 0xff;
+	bytes[2] = (value >> 8) & 0xff;
+	bytes[3] = value & 0xff;
+}
+
+unsigned bytes_be_to_uint(const unsigned char *bytes)
+{
+	return ((bytes[0] & 0xffu) << 24u) | ((bytes[1] & 0xffu) << 16u) | ((bytes[2] & 0xffu) << 8u) | (bytes[3] & 0xffu);
+}
+
+void uint_to_bytes_be(unsigned char *bytes, unsigned value)
+{
+	bytes[0] = (value >> 24u) & 0xffu;
+	bytes[1] = (value >> 16u) & 0xffu;
+	bytes[2] = (value >> 8u) & 0xffu;
+	bytes[3] = value & 0xffu;
 }
 
 int pid()

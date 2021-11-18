@@ -25,13 +25,7 @@ struct CItemEx
 	{
 		CItemEx Result;
 		for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
-		{
-			Result.m_aUuid[i] =
-				(Uuid.m_aData[i * 4 + 0] << 24) |
-				(Uuid.m_aData[i * 4 + 1] << 16) |
-				(Uuid.m_aData[i * 4 + 2] << 8) |
-				(Uuid.m_aData[i * 4 + 3]);
-		}
+			Result.m_aUuid[i] = bytes_be_to_int(&Uuid.m_aData[i * 4]);
 		return Result;
 	}
 
@@ -39,12 +33,7 @@ struct CItemEx
 	{
 		CUuid Result;
 		for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
-		{
-			Result.m_aData[i * 4 + 0] = m_aUuid[i] >> 24;
-			Result.m_aData[i * 4 + 1] = m_aUuid[i] >> 16;
-			Result.m_aData[i * 4 + 2] = m_aUuid[i] >> 8;
-			Result.m_aData[i * 4 + 3] = m_aUuid[i];
-		}
+			int_to_bytes_be(&Result.m_aData[i * 4], m_aUuid[i]);
 		return Result;
 	}
 };

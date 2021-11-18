@@ -115,22 +115,6 @@ void CGun::Snap(int SnappingClient)
 	if(NetworkClipped(SnappingClient))
 		return;
 
-	CNetObj_EntityEx *pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
-	if(!pEntData)
-		return;
-
-	pEntData->m_SwitchNumber = m_Number;
-	pEntData->m_Layer = m_Layer;
-
-	if(m_Explosive && !m_Freeze)
-		pEntData->m_EntityClass = ENTITYCLASS_GUN_NORMAL;
-	else if(m_Explosive && m_Freeze)
-		pEntData->m_EntityClass = ENTITYCLASS_GUN_EXPLOSIVE;
-	else if(!m_Explosive && m_Freeze)
-		pEntData->m_EntityClass = ENTITYCLASS_GUN_FREEZE;
-	else
-		pEntData->m_EntityClass = ENTITYCLASS_GUN_UNFREEZE;
-
 	CCharacter *Char = GameServer()->GetPlayerChar(SnappingClient);
 
 	if(SnappingClient > -1 && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1 || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) &&
@@ -138,7 +122,26 @@ void CGun::Snap(int SnappingClient)
 		Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
 
 	int SnappingClientVersion = SnappingClient >= 0 ? GameServer()->GetClientVersion(SnappingClient) : CLIENT_VERSIONNR;
-	if(SnappingClientVersion < VERSION_DDNET_SWITCH)
+
+	CNetObj_EntityEx *pEntData = 0;
+	if(SnappingClientVersion >= VERSION_DDNET_SWITCH)
+		pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
+
+	if(pEntData)
+	{
+		pEntData->m_SwitchNumber = m_Number;
+		pEntData->m_Layer = m_Layer;
+
+		if(m_Explosive && !m_Freeze)
+			pEntData->m_EntityClass = ENTITYCLASS_GUN_NORMAL;
+		else if(m_Explosive && m_Freeze)
+			pEntData->m_EntityClass = ENTITYCLASS_GUN_EXPLOSIVE;
+		else if(!m_Explosive && m_Freeze)
+			pEntData->m_EntityClass = ENTITYCLASS_GUN_FREEZE;
+		else
+			pEntData->m_EntityClass = ENTITYCLASS_GUN_UNFREEZE;
+	}
+	else
 	{
 		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
 		if(Char && Char->IsAlive() && (m_Layer == LAYER_SWITCH && m_Number > 0 && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()]) && (!Tick))
@@ -154,5 +157,9 @@ void CGun::Snap(int SnappingClient)
 	pObj->m_Y = (int)m_Pos.y;
 	pObj->m_FromX = (int)m_Pos.x;
 	pObj->m_FromY = (int)m_Pos.y;
-	pObj->m_StartTick = m_EvalTick;
+
+	if(pEntData)
+		pObj->m_StartTick = 0;
+	else
+		pObj->m_StartTick = m_EvalTick;
 }

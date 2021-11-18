@@ -184,6 +184,18 @@ void CDragger::Snap(int SnappingClient)
 
 	int SnappingClientVersion = SnappingClient >= 0 ? GameServer()->GetClientVersion(SnappingClient) : CLIENT_VERSIONNR;
 
+	CNetObj_EntityEx *pEntData = 0;
+	if(SnappingClientVersion >= VERSION_DDNET_SWITCH)
+	{
+		pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
+		if(pEntData)
+		{
+			pEntData->m_SwitchNumber = m_Number;
+			pEntData->m_Layer = m_Layer;
+			pEntData->m_EntityClass = clamp(ENTITYCLASS_DRAGGER_WEAK + round_to_int(m_Strength) - 1, (int)ENTITYCLASS_DRAGGER_WEAK, (int)ENTITYCLASS_DRAGGER_STRONG);
+		}
+	}
+
 	CCharacter *pTarget = m_TargetID < 0 ? 0 : GameServer()->GetPlayerChar(m_TargetID);
 
 	for(int &SoloID : m_SoloIDs)
@@ -248,14 +260,6 @@ void CDragger::Snap(int SnappingClient)
 		{
 			obj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
 				NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
-
-			CNetObj_EntityEx *pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
-			if(!pEntData)
-				return;
-
-			pEntData->m_SwitchNumber = m_Number;
-			pEntData->m_Layer = m_Layer;
-			pEntData->m_EntityClass = clamp(ENTITYCLASS_DRAGGER_WEAK + round_to_int(m_Strength) - 1, (int)ENTITYCLASS_DRAGGER_WEAK, (int)ENTITYCLASS_DRAGGER_STRONG);
 		}
 		else
 		{
@@ -280,7 +284,11 @@ void CDragger::Snap(int SnappingClient)
 			obj->m_FromY = (int)m_Pos.y;
 		}
 
-		if(i != -1 || SnappingClientVersion < VERSION_DDNET_SWITCH)
+		if(pEntData && i == -1)
+		{
+			obj->m_StartTick = 0;
+		}
+		else
 		{
 			int StartTick = m_EvalTick;
 			if(StartTick < Server()->Tick() - 4)
@@ -288,10 +296,6 @@ void CDragger::Snap(int SnappingClient)
 			else if(StartTick > Server()->Tick())
 				StartTick = Server()->Tick();
 			obj->m_StartTick = StartTick;
-		}
-		else
-		{
-			obj->m_StartTick = 0;
 		}
 	}
 }
