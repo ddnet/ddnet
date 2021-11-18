@@ -206,4 +206,9 @@ MACRO_CONFIG_INT(SvScorelimit, sv_scorelimit, 600, 0, 1000, CFGFLAG_SAVE | CFGFL
 MACRO_CONFIG_INT(SvTimelimit, sv_timelimit, 0, 0, 1000, CFGFLAG_SAVE | CFGFLAG_SERVER, "Time limit in minutes (0 disables)")
 MACRO_CONFIG_STR(SvGametype, sv_gametype, 32, "gctf", CFGFLAG_SAVE | CFGFLAG_SERVER, "Game type (gctf, ictf)")
 
+MACRO_CONFIG_INT(SvGrenadeAmmoRegen, sv_grenade_ammo_regen, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_SERVER, "Activate or deactivate grenade ammo regeneration in general")
+MACRO_CONFIG_INT(SvGrenadeAmmoRegenTime, sv_grenade_ammo_regen_time, 128, 1, 2000, CFGFLAG_SAVE|CFGFLAG_SERVER, "Grenade ammo regeneration time in miliseconds")
+MACRO_CONFIG_INT(SvGrenadeAmmoRegenNum, sv_grenade_ammo_regen_num, 6, 1, 10, CFGFLAG_SAVE|CFGFLAG_SERVER, "Maximum number of grenades if ammo regeneration on")
+MACRO_CONFIG_INT(SvGrenadeAmmoRegenSpeedNade, sv_grenade_ammo_regen_speed, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_SERVER, "Give grenades back that push own player")
+
 #endif
