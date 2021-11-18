@@ -25,6 +25,10 @@ public:
 	vec2 GetPos(float Time);
 	void FillInfo(CNetObj_Projectile *pProj);
 
+	// gctf
+	bool IsAffected(int ClientID) const;
+	void SetAffected(int ClientID, bool Affected);
+
 	virtual void Reset();
 	virtual void Tick();
 	virtual void TickPaused();
@@ -46,6 +50,9 @@ private:
 	int m_Bouncing;
 	bool m_Freeze;
 	int m_TuneZone;
+
+	// gctf
+	int64_t m_AffectedCharacters;
 
 public:
 	void SetBouncing(int Value);

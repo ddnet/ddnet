@@ -549,7 +549,7 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 	if(m_pCharacter && m_Paused)
 		m_pCharacter->ResetInput();
 
-	if(!m_pCharacter && m_Team != TEAM_SPECTATORS && (NewInput->m_Fire&1))
+	if(!m_pCharacter && m_Team != TEAM_SPECTATORS && (NewInput->m_Fire & 1))
 		Respawn();
 
 	// check for activity

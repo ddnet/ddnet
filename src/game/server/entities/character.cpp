@@ -669,12 +669,12 @@ void CCharacter::HandleWeapons()
 	if(AmmoRegenTime && m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo >= 0)
 	{
 		// If equipped and not active, regen ammo?
-		if (m_ReloadTimer <= 0)
+		if(m_ReloadTimer <= 0)
 		{
-			if (m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart < 0)
+			if(m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart < 0)
 				m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart = Server()->Tick();
 
-			if ((Server()->Tick() - m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart) >= AmmoRegenTime * Server()->TickSpeed() / 1000)
+			if((Server()->Tick() - m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart) >= AmmoRegenTime * Server()->TickSpeed() / 1000)
 			{
 				// Add some ammo
 				m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo = minimum(m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo + 1, MaxAmmo);

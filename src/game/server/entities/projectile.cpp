@@ -44,6 +44,31 @@ CProjectile::CProjectile(
 
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 
+	m_AffectedCharacters = CmaskAll();
+
+	if(m_Type == WEAPON_GRENADE)
+	{
+		m_AffectedCharacters = 0;
+
+		if(Owner >= 0 && Owner <= MAX_CLIENTS)
+		{
+			for(int i = 0; i < MAX_CLIENTS; ++i)
+			{
+				if(GameServer()->m_apPlayers[i])
+				{
+					CPlayer *pPlayer = GameServer()->m_apPlayers[i];
+					if(pPlayer->GetTeam() != TEAM_SPECTATORS &&
+						pPlayer->GetCharacter() &&
+						pPlayer->GetCharacter()->IsAlive() &&
+						!NetworkClipped(Owner, pPlayer->GetCharacter()->GetPos()))
+					{
+						SetAffected(i, true);
+					}
+				}
+			}
+		}
+	}
+
 	GameWorld()->InsertEntity(this);
 }
 
@@ -160,7 +185,7 @@ void CProjectile::Tick()
 			for(int i = 0; i < Number; i++)
 			{
 				GameServer()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()),
-					(m_Owner != -1) ? TeamMask : -1LL);
+					(m_Owner != -1) ? TeamMask : -1LL, m_AffectedCharacters);
 				GameServer()->CreateSound(ColPos, m_SoundImpact,
 					(m_Owner != -1) ? TeamMask : -1LL);
 			}
@@ -258,7 +283,7 @@ void CProjectile::Tick()
 			}
 
 			GameServer()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pOwnerChar ? -1 : pOwnerChar->Team()),
-				(m_Owner != -1) ? TeamMask : -1LL);
+				(m_Owner != -1) ? TeamMask : -1LL, m_AffectedCharacters);
 			GameServer()->CreateSound(ColPos, m_SoundImpact,
 				(m_Owner != -1) ? TeamMask : -1LL);
 		}
@@ -395,4 +420,37 @@ bool CProjectile::FillExtraInfo(CNetObj_DDNetProjectile *pProj)
 	pProj->m_StartTick = m_StartTick;
 	pProj->m_Type = m_Type;
 	return true;
+}
+
+// gctf
+
+bool CProjectile::IsAffected(int ClientID) const
+{
+	if(!g_Config.m_SvSprayprotection)
+	{
+		return true;
+	}
+	if(ClientID < 0 || ClientID > MAX_CLIENTS)
+	{
+		return true;
+	}
+	else
+	{
+		return CmaskIsSet(m_AffectedCharacters, ClientID);
+	}
+}
+
+void CProjectile::SetAffected(int ClientID, bool Affected)
+{
+	if(ClientID >= 0 && ClientID < MAX_CLIENTS)
+	{
+		if(Affected)
+		{
+			m_AffectedCharacters |= CmaskOne(ClientID);
+		}
+		else
+		{
+			m_AffectedCharacters &= CmaskAllExceptOne(ClientID);
+		}
+	}
 }

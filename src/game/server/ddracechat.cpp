@@ -24,7 +24,6 @@ void CGameContext::ConCreditsGctf(IConsole::IResult *pResult, void *pUserData)
 		"Thanks to AssassinTee and Cuube");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
 		"based on ddnet see /credits_ddnet");
-
 }
 
 void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)

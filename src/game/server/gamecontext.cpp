@@ -213,7 +213,7 @@ void CGameContext::CreateHammerHit(vec2 Pos, int64_t Mask)
 	}
 }
 
-void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int64_t Mask)
+void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int64_t Mask, int64_t SprayMask)
 {
 	// create the event
 	CNetEvent_Explosion *pEvent = (CNetEvent_Explosion *)m_Events.Create(NETEVENTTYPE_EXPLOSION, sizeof(CNetEvent_Explosion), Mask);
@@ -263,7 +263,8 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 				TeamMask = CmaskUnset(TeamMask, PlayerTeam);
 			}
 
-			apEnts[i]->TakeDamage(ForceDir * Dmg * 2, (int)Dmg, Owner, Weapon);
+			if(CmaskIsSet(SprayMask, apEnts[i]->GetPlayer()->GetCID()))
+				apEnts[i]->TakeDamage(ForceDir * Dmg * 2, (int)Dmg, Owner, Weapon);
 		}
 	}
 }
