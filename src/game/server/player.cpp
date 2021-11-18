@@ -20,6 +20,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 	m_ClientID = ClientID;
 	m_Team = GameServer()->m_pController->GetStartTeam();
 	m_NumInputs = 0;
+	m_Spawning = false;
 	Reset();
 	GameServer()->Antibot()->OnPlayerInit(m_ClientID);
 }
@@ -235,10 +236,8 @@ void CPlayer::Tick()
 
 	if(!GameServer()->m_World.m_Paused)
 	{
-		int EarliestRespawnTick = m_PreviousDieTick + Server()->TickSpeed() * 3;
-		int RespawnTick = maximum(m_DieTick, EarliestRespawnTick) + 2;
-		if(!m_pCharacter && RespawnTick <= Server()->Tick())
-			m_Spawning = true;
+		if(!m_pCharacter && m_DieTick + Server()->TickSpeed() * 3 <= Server()->Tick())
+			Respawn();
 
 		if(m_pCharacter)
 		{
@@ -314,9 +313,6 @@ void CPlayer::PostPostTick()
 #endif
 		if(!Server()->ClientIngame(m_ClientID))
 			return;
-
-	if(!GameServer()->m_World.m_Paused && !m_pCharacter && m_Spawning && m_WeakHookSpawn)
-		TryRespawn();
 }
 
 void CPlayer::Snap(int SnappingClient)
@@ -553,8 +549,8 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 	if(m_pCharacter && m_Paused)
 		m_pCharacter->ResetInput();
 
-	if(!m_pCharacter && m_Team != TEAM_SPECTATORS && (NewInput->m_Fire & 1))
-		m_Spawning = true;
+	if(!m_pCharacter && m_Team != TEAM_SPECTATORS && (NewInput->m_Fire&1))
+		Respawn();
 
 	// check for activity
 	if(mem_comp(NewInput, m_pLastTarget, sizeof(CNetObj_PlayerInput)))

@@ -952,6 +952,7 @@ void CCharacter::Die(int Killer, int Weapon)
 	if(Server()->IsRecording(m_pPlayer->GetCID()))
 		Server()->StopRecord(m_pPlayer->GetCID());
 
+	m_pPlayer->m_RespawnTick = Server()->Tick() + Server()->TickSpeed() / 2;
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, GameServer()->m_apPlayers[Killer], Weapon);
 
 	char aBuf[256];
@@ -977,7 +978,6 @@ void CCharacter::Die(int Killer, int Weapon)
 
 	m_Alive = false;
 	m_Solo = false;
-	m_pPlayer->m_RespawnTick = Server()->Tick() + Server()->TickSpeed() / 2;
 
 	GameServer()->m_World.RemoveEntity(this);
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()] = 0;
