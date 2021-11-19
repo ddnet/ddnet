@@ -182,6 +182,17 @@ void CDragger::Snap(int SnappingClient)
 	if(((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.GetTeamState(m_CaughtTeam) == CGameTeams::TEAMSTATE_EMPTY)
 		return;
 
+	if(NetworkClipped(SnappingClient, m_Pos))
+		return;
+
+	CCharacter *pChar = GameServer()->GetPlayerChar(SnappingClient);
+
+	if(SnappingClient > -1 && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1 || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) && GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
+		pChar = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
+
+	if(pChar && pChar->Team() != m_CaughtTeam)
+		return;
+
 	int SnappingClientVersion = SnappingClient >= 0 ? GameServer()->GetClientVersion(SnappingClient) : CLIENT_VERSIONNR;
 
 	CNetObj_EntityEx *pEntData = 0;
@@ -219,37 +230,21 @@ void CDragger::Snap(int SnappingClient)
 				continue;
 		}
 
-		if(NetworkClipped(SnappingClient, m_Pos))
-			continue;
-
 		if(pTarget && NetworkClipped(SnappingClient, pTarget->m_Pos))
 			continue;
-
-		CCharacter *Char = GameServer()->GetPlayerChar(SnappingClient);
-
-		if(SnappingClient > -1 && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1 || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) && GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
-			Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
 
 		if(i != -1 || SnappingClientVersion < VERSION_DDNET_SWITCH)
 		{
 			int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
-			if(Char && m_Layer == LAYER_SWITCH && m_Number && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()] && (!Tick))
+			if(pChar && m_Layer == LAYER_SWITCH && m_Number && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pChar->Team()] && (!Tick))
 				continue;
 		}
 
-		if(Char)
-		{
-			if(Char->Team() != m_CaughtTeam)
-				continue;
-		}
-		else
-		{
-			// send to spectators only active draggers and some inactive from team 0
-			if(!(pTarget || m_CaughtTeam == 0))
-				continue;
-		}
+		// send to spectators only active draggers and some inactive from team 0
+		if(!pChar && !pTarget && m_CaughtTeam != 0)
+			continue;
 
-		if(Char && pTarget && pTarget->GetPlayer()->GetCID() != Char->GetPlayer()->GetCID() && ((Char->GetPlayer()->m_ShowOthers == 0 && (Char->Teams()->m_Core.GetSolo(SnappingClient) || Char->Teams()->m_Core.GetSolo(pTarget->GetPlayer()->GetCID()))) || (Char->GetPlayer()->m_ShowOthers == 2 && !pTarget->SameTeam(SnappingClient))))
+		if(pChar && pTarget && pTarget->GetPlayer()->GetCID() != pChar->GetPlayer()->GetCID() && ((pChar->GetPlayer()->m_ShowOthers == 0 && (pChar->Teams()->m_Core.GetSolo(SnappingClient) || pChar->Teams()->m_Core.GetSolo(pTarget->GetPlayer()->GetCID()))) || (pChar->GetPlayer()->m_ShowOthers == 2 && !pTarget->SameTeam(SnappingClient))))
 		{
 			continue;
 		}
