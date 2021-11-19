@@ -3,6 +3,7 @@
 #	Feca
 #modified by:
 #	Boti.
+#	Cellegen
 ##### /authors #####
 
 ##### translated strings #####
@@ -44,7 +45,7 @@ All
 == Mindenki
 
 Are you sure that you want to delete the demo?
-== Biztos, hogy le akarod törölni a demót?
+== Biztos, hogy ki akarod törölni a demót?
 
 Are you sure that you want to quit?
 == Biztos, hogy ki akarsz lépni?
@@ -92,7 +93,7 @@ Connect
 == Csatlakozás
 
 Connecting to
-== Csatlakozás..
+== Csatlakozás...
 
 Connection Problems...
 == Csatlakozási problémák...
@@ -131,7 +132,7 @@ Disconnected
 == Lekapcsolódott
 
 Downloading map
-== Pálya letöltése..
+== Pálya letöltése...
 
 Draw!
 == Döntetlen!
@@ -173,7 +174,7 @@ Force vote
 == Szavazás kényszerítése
 
 Free-View
-== Szabad-nézet
+== Szabad nézet
 
 Friends
 == Barátok
@@ -281,7 +282,7 @@ No servers found
 == Nem talált szervereket
 
 No servers match your filter criteria
-== Nincs szerver a szűrőfeltételeidhez
+== Nincs szerver ezzel a szűrőfeltétellel
 
 Ok
 == Oké
@@ -441,7 +442,7 @@ The server is running a non-standard tuning on a pure game type.
 == A szerver egy nem szabványos hangolást futtat a tiszta játék típuson.
 
 There's an unsaved map in the editor, you might want to save it before you quit the game.
-== Van egy mentett térkép a szerkesztőben, talán elakartad menteni, mielőtt kilépsz a játékból.
+== Van egy mentett térkép a szerkesztőben, talán elakarod menteni, mielőtt kilépnél a játékból.
 
 Time limit
 == Időhatár
@@ -506,12 +507,8 @@ New name:
 Sat.
 == telítettség
 
-
-
 Internet
 == Internet
-
-
 
 Max demos
 == Maximum Demók
@@ -757,7 +754,7 @@ System message
 == Rendszer üzenet
 
 Enable long pain sound (used when shooting in freeze)
-== Hosszú fájdalom hang lejátszása (mikor a játékos lő,ha lefagyott)
+== Hosszú fájdalom hang lejátszása (mikor a játékos lő, ha lefagyott)
 
 DDNet %s is available:
 == DDNet %s verzió elérhető
@@ -1292,49 +1289,49 @@ Regular Background Color
 == Átlagos Háttér Szín
 
 Are you sure that you want to disconnect and switch to a different server?
-== 
+== Biztos, hogy kilépsz és váltasz egy másik szerverre?
 
 AFR
-== 
+== AFRIKA
 
 ASI
-== 
+== ÁZSIA
 
 AUS
-== 
+== AUSZTRIA
 
 EUR
-== 
+== EURÓPA
 
 NA
-== 
+== ÉSZAK-A
 
 SA
-== 
+== DÉL-A
 
 CHN
-== 
+== KíNA
 
 Refreshing...
-== 
+== Frissítés...
 
 Kill Messages
-== 
+== Halálüzenetek
 
 Kill Message Normal Color
-== 
+== Halálüzenetek alap színe
 
 Kill Message Highlight Color
-== 
+== Halálüzenetek kiemelt színe
 
 Show local player's key presses
-== 
+== Saját mozgásod nyilakkal mutatása
 
 Discord
-== 
+== Discord
 
 https://ddnet.tw/discord
-== 
+== https://ddnet.tw/discord
 
 https://wiki.ddnet.tw/
-== 
+== https://wiki.ddnet.tw/
