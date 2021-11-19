@@ -32,6 +32,7 @@ public:
 	virtual void BindString(int Idx, const char *pString);
 	virtual void BindBlob(int Idx, unsigned char *pBlob, int Size);
 	virtual void BindInt(int Idx, int Value);
+	virtual void BindInt64(int Idx, int64_t Value);
 	virtual void BindFloat(int Idx, float Value);
 
 	virtual void Print();
@@ -193,6 +194,13 @@ void CSqliteConnection::BindBlob(int Idx, unsigned char *pBlob, int Size)
 void CSqliteConnection::BindInt(int Idx, int Value)
 {
 	int Result = sqlite3_bind_int(m_pStmt, Idx, Value);
+	AssertNoError(Result);
+	m_Done = false;
+}
+
+void CSqliteConnection::BindInt64(int Idx, int64_t Value)
+{
+	int Result = sqlite3_bind_int64(m_pStmt, Idx, Value);
 	AssertNoError(Result);
 	m_Done = false;
 }

@@ -82,6 +82,7 @@ public:
 	virtual void BindString(int Idx, const char *pString);
 	virtual void BindBlob(int Idx, unsigned char *pBlob, int Size);
 	virtual void BindInt(int Idx, int Value);
+	virtual void BindInt64(int Idx, int64_t Value);
 	virtual void BindFloat(int Idx, float Value);
 
 	virtual void Print() {}
@@ -392,6 +393,23 @@ void CMysqlConnection::BindInt(int Idx, int Value)
 	m_aStmtParameterExtras[Idx].i = Value;
 	MYSQL_BIND *pParam = &m_aStmtParameters[Idx];
 	pParam->buffer_type = MYSQL_TYPE_LONG;
+	pParam->buffer = &m_aStmtParameterExtras[Idx].i;
+	pParam->buffer_length = sizeof(m_aStmtParameterExtras[Idx].i);
+	pParam->length = nullptr;
+	pParam->is_null = nullptr;
+	pParam->is_unsigned = false;
+	pParam->error = nullptr;
+}
+
+void CMysqlConnection::BindInt64(int Idx, int64_t Value)
+{
+	m_NewQuery = true;
+	Idx -= 1;
+	dbg_assert(0 <= Idx && Idx < (int)m_aStmtParameters.size(), "index out of bounds");
+
+	m_aStmtParameterExtras[Idx].i = Value;
+	MYSQL_BIND *pParam = &m_aStmtParameters[Idx];
+	pParam->buffer_type = MYSQL_TYPE_LONGLONG;
 	pParam->buffer = &m_aStmtParameterExtras[Idx].i;
 	pParam->buffer_length = sizeof(m_aStmtParameterExtras[Idx].i);
 	pParam->length = nullptr;
