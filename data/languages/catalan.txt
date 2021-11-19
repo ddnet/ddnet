@@ -1140,27 +1140,6 @@ Speed
 Theme
 == Tema
 
-AFR
-== 
-
-ASI
-== 
-
-AUS
-== 
-
-EUR
-== 
-
-NA
-== 
-
-SA
-== 
-
-CHN
-== 
-
 Getting server list from master server
 == Obtenint la llista de servidors
 
@@ -1329,3 +1308,24 @@ Editor
 [Start menu]
 Play
 == Jugar 
+
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
