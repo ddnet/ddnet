@@ -188,6 +188,7 @@ protected:
 		int m_ScoreLimit;
 		int m_TimeLimit;
 	} m_GameInfo;
+	void UpdateGameInfo(int ClientID);
 	int m_GameStartTick;
 	int m_aTeamscore[protocol7::NUM_TEAMS];
 

@@ -981,14 +981,13 @@ int IGameController::GetStartTeam()
 
 void IGameController::CheckGameInfo()
 {
-	// bool GameInfoChanged = (m_GameInfo.m_MatchCurrent != m_MatchCount + 1) ||
-	// 	(m_GameInfo.m_ScoreLimit != Config()->m_SvScorelimit) || (m_GameInfo.m_TimeLimit != Config()->m_SvTimelimit);
+	bool GameInfoChanged = (m_GameInfo.m_ScoreLimit != g_Config.m_SvScorelimit) || (m_GameInfo.m_TimeLimit != g_Config.m_SvTimelimit);
 	m_GameInfo.m_MatchCurrent = 0;
 	m_GameInfo.m_MatchNum = 0;
 	m_GameInfo.m_ScoreLimit = g_Config.m_SvScorelimit;
 	m_GameInfo.m_TimeLimit = g_Config.m_SvTimelimit;
-	// if(GameInfoChanged)
-	// 	UpdateGameInfo(-1);
+	if(GameInfoChanged)
+		UpdateGameInfo(-1);
 }
 
 bool IGameController::IsFriendlyFire(int ClientID1, int ClientID2)
@@ -1007,6 +1006,29 @@ bool IGameController::IsFriendlyFire(int ClientID1, int ClientID2)
 	}
 
 	return false;
+}
+
+void IGameController::UpdateGameInfo(int ClientID)
+{
+	// gctf
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(ClientID != -1)
+			if(ClientID != i)
+				continue;
+
+		if(Server()->IsSixup(i))
+		{
+			protocol7::CNetMsg_Sv_GameInfo Msg;
+			Msg.m_GameFlags = protocol7::GAMEFLAG_RACE;
+			Msg.m_GameFlags = protocol7::GAMEFLAG_TEAMS | protocol7::GAMEFLAG_FLAGS;
+			Msg.m_MatchCurrent = 1;
+			Msg.m_MatchNum = 0;
+			Msg.m_ScoreLimit = Config()->m_SvScorelimit;
+			Msg.m_TimeLimit = Config()->m_SvTimelimit;
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, i);
+		}
+	}
 }
 
 void IGameController::SetGameState(EGameState GameState, int Timer)
