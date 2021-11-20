@@ -160,11 +160,13 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 }
 
 #if defined(CONF_FAMILY_WINDOWS)
-static void logger_debugger(const char *line, void *user)
+static void logger_win_debugger(const char *line, void *user)
 {
 	(void)user;
-	OutputDebugString(line);
-	OutputDebugString("\n");
+	WCHAR wBuffer[512];
+	MultiByteToWideChar(CP_UTF8, 0, line, -1, wBuffer, sizeof(wBuffer));
+	OutputDebugStringW(wBuffer);
+	OutputDebugStringW(L"\n");
 }
 #endif
 
@@ -280,7 +282,7 @@ void dbg_logger_stdout()
 void dbg_logger_debugger()
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	dbg_logger(logger_debugger, 0, 0);
+	dbg_logger(logger_win_debugger, 0, 0);
 #endif
 }
 
@@ -1334,7 +1336,7 @@ int net_addr_from_str(NETADDR *addr, const char *string)
 			int size;
 			sa6.sin6_family = AF_INET6;
 			size = (int)sizeof(sa6);
-			if(WSAStringToAddress(buf, AF_INET6, NULL, (struct sockaddr *)&sa6, &size) != 0)
+			if(WSAStringToAddressA(buf, AF_INET6, NULL, (struct sockaddr *)&sa6, &size) != 0)
 				return -1;
 		}
 #else
@@ -1447,7 +1449,7 @@ static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, i
 #if defined(CONF_FAMILY_WINDOWS)
 		char buf[128];
 		int error = WSAGetLastError();
-		if(FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, 0, error, 0, buf, sizeof(buf), 0) == 0)
+		if(FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, 0, error, 0, buf, sizeof(buf), 0) == 0)
 			buf[0] = 0;
 		dbg_msg("net", "failed to create socket with domain %d and type %d (%d '%s')", domain, type, error, buf);
 #else
@@ -1484,7 +1486,7 @@ static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, i
 #if defined(CONF_FAMILY_WINDOWS)
 		char buf[128];
 		int error = WSAGetLastError();
-		if(FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, 0, error, 0, buf, sizeof(buf), 0) == 0)
+		if(FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, 0, error, 0, buf, sizeof(buf), 0) == 0)
 			buf[0] = 0;
 		dbg_msg("net", "failed to bind socket with domain %d and type %d (%d '%s')", domain, type, error, buf);
 #else
@@ -3559,14 +3561,16 @@ int pid()
 PROCESS shell_execute(const char *file)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	SHELLEXECUTEINFOA info;
-	mem_zero(&info, sizeof(SHELLEXECUTEINFOA));
-	info.cbSize = sizeof(SHELLEXECUTEINFOA);
-	info.lpVerb = "open";
-	info.lpFile = file;
+	WCHAR wBuffer[512];
+	MultiByteToWideChar(CP_UTF8, 0, file, -1, wBuffer, sizeof(wBuffer));
+	SHELLEXECUTEINFOW info;
+	mem_zero(&info, sizeof(SHELLEXECUTEINFOW));
+	info.cbSize = sizeof(SHELLEXECUTEINFOW);
+	info.lpVerb = L"open";
+	info.lpFile = wBuffer;
 	info.nShow = SW_SHOWMINNOACTIVE;
 	info.fMask = SEE_MASK_NOCLOSEPROCESS;
-	ShellExecuteEx(&info);
+	ShellExecuteExW(&info);
 	return info.hProcess;
 #elif defined(CONF_FAMILY_UNIX)
 	char *argv[2];
