@@ -3604,14 +3604,16 @@ int kill_process(PROCESS process)
 
 int open_link(const char *link)
 {
-	char aBuf[512];
 #if defined(CONF_FAMILY_WINDOWS)
-	str_format(aBuf, sizeof(aBuf), "start %s", link);
-	return (uintptr_t)ShellExecuteA(NULL, "open", link, NULL, NULL, SW_SHOWDEFAULT) > 32;
+	WCHAR wBuffer[512];
+	MultiByteToWideChar(CP_UTF8, 0, link, -1, wBuffer, sizeof(wBuffer));
+	return (uintptr_t)ShellExecuteW(NULL, L"open", wBuffer, NULL, NULL, SW_SHOWDEFAULT) > 32;
 #elif defined(CONF_PLATFORM_LINUX)
+	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "xdg-open %s >/dev/null 2>&1 &", link);
 	return system(aBuf) == 0;
 #elif defined(CONF_FAMILY_UNIX)
+	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "open %s &", link);
 	return system(aBuf) == 0;
 #endif
