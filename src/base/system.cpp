@@ -3542,6 +3542,62 @@ int pid()
 #endif
 }
 
+static int s_CmdLineArgNum = 0;
+#if defined(CONF_FAMILY_WINDOWS)
+static WCHAR **s_wCmdLineArgs = NULL;
+#endif
+static char **s_CmdLineArgs = 0;
+
+void cmdline_init(int argc, char **argv)
+{
+	dbg_assert(s_CmdLineArgNum == 0, "cmdline_init may only be called once");
+	dbg_assert(argc > 0, "at least one command-line argument required");
+#if defined(CONF_FAMILY_WINDOWS)
+	s_wCmdLineArgs = CommandLineToArgvW(GetCommandLineW(), &s_CmdLineArgNum);
+	if(s_wCmdLineArgs != NULL)
+	{
+		return;
+	}
+	// CommandLineToArgvW failed, fall back to normal arguments without Unicode support
+#endif
+	s_CmdLineArgNum = argc;
+	s_CmdLineArgs = argv;
+}
+
+int cmdline_arg_num()
+{
+	dbg_assert(s_CmdLineArgNum > 0, "cmdline_init was not called");
+	return s_CmdLineArgNum;
+}
+
+void cmdline_arg_get(int index, char *argument, int length)
+{
+	dbg_assert(s_CmdLineArgNum > 0, "cmdline_init was not called");
+	dbg_assert(index >= 0 && index < s_CmdLineArgNum, "argument index out of range");
+#if defined(CONF_FAMILY_WINDOWS)
+	if(s_wCmdLineArgs != NULL)
+	{
+		WideCharToMultiByte(CP_UTF8, 0, s_wCmdLineArgs[index], -1, argument, length, NULL, NULL);
+		return;
+	}
+#endif
+	str_copy(argument, s_CmdLineArgs[index], length);
+}
+
+void cmdline_free()
+{
+	dbg_assert(s_CmdLineArgNum > 0, "cmdline_init was not called");
+#if defined(CONF_FAMILY_WINDOWS)
+	if(s_wCmdLineArgs != NULL)
+	{
+		LocalFree(s_wCmdLineArgs);
+		s_wCmdLineArgs = NULL;
+	}
+#endif
+	s_CmdLineArgNum = 0;
+	s_CmdLineArgs = 0;
+}
+
 PROCESS shell_execute(const char *file)
 {
 #if defined(CONF_FAMILY_WINDOWS)

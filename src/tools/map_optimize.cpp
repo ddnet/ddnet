@@ -76,47 +76,50 @@ void GetImageSHA256(uint8_t *pImgBuff, int ImgSize, int Width, int Height, char 
 	free(pNewImgBuff);
 }
 
-int main(int argc, const char **argv)
+int main(int argc, char **argv)
 {
 	dbg_logger_stdout();
+	cmdline_init(argc, argv);
 
-	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC, argc, argv);
-	int Index, ID = 0, Type = 0, Size;
-	void *pPtr;
-	char aFileName[IO_MAX_PATH_LENGTH];
-	CDataFileReader DataFile;
-	CDataFileWriter df;
+	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC);
 
-	if(!pStorage || argc <= 1 || argc > 3)
+	if(!pStorage || cmdline_arg_num() <= 1 || cmdline_arg_num() > 3)
 	{
 		dbg_msg("map_optimize", "Invalid parameters or other unknown error.");
 		dbg_msg("map_optimize", "Usage: map_optimize <source map filepath> [<dest map filepath>]");
 		return -1;
 	}
 
-	if(argc == 3)
-	{
-		str_format(aFileName, sizeof(aFileName), "out/%s", argv[2]);
+	char aSourcePath[IO_MAX_PATH_LENGTH];
+	cmdline_arg_get(1, aSourcePath, sizeof(aSourcePath));
 
+	char aFileName[IO_MAX_PATH_LENGTH];
+	if(cmdline_arg_num() == 3)
+	{
+		char aBuff[IO_MAX_PATH_LENGTH];
+		cmdline_arg_get(2, aBuff, sizeof(aBuff));
+		str_format(aFileName, sizeof(aFileName), "out/%s", aBuff);
 		fs_makedir_rec_for(aFileName);
 	}
 	else
 	{
 		fs_makedir("out");
 		char aBuff[IO_MAX_PATH_LENGTH];
-		pStorage->StripPathAndExtension(argv[1], aBuff, sizeof(aBuff));
+		pStorage->StripPathAndExtension(aSourcePath, aBuff, sizeof(aBuff));
 		str_format(aFileName, sizeof(aFileName), "out/%s.map", aBuff);
 	}
 
-	if(!DataFile.Open(pStorage, argv[1], IStorage::TYPE_ABSOLUTE))
+	CDataFileReader Reader;
+	if(!Reader.Open(pStorage, aSourcePath, IStorage::TYPE_ABSOLUTE))
 	{
-		dbg_msg("map_optimize", "Failed to open source file.");
+		dbg_msg("map_optimize", "Failed to open source file '%s'.", aSourcePath);
 		return -1;
 	}
 
-	if(!df.Open(pStorage, aFileName, IStorage::TYPE_ABSOLUTE))
+	CDataFileWriter Writer;
+	if(!Writer.Open(pStorage, aFileName, IStorage::TYPE_ABSOLUTE))
 	{
-		dbg_msg("map_optimize", "Failed to open target file.");
+		dbg_msg("map_optimize", "Failed to open target file '%s'.", aFileName);
 		return -1;
 	}
 
@@ -141,11 +144,12 @@ int main(int argc, const char **argv)
 	std::vector<SMapOptimizeItem> DataFindHelper;
 
 	// add all items
-	int i = 0;
-	for(int Index = 0; Index < DataFile.NumItems(); Index++)
+	int ImageIndex = 0;
+	for(int Index = 0; Index < Reader.NumItems(); Index++)
 	{
-		pPtr = DataFile.GetItem(Index, &Type, &ID);
-		Size = DataFile.GetItemSize(Index);
+		int ID = 0, Type = 0;
+		void *pPtr = Reader.GetItem(Index, &Type, &ID);
+		int Size = Reader.GetItemSize(Index);
 
 		// filter ITEMTYPE_EX items, they will be automatically added again
 		if(Type == ITEMTYPE_EX)
@@ -164,8 +168,8 @@ int main(int argc, const char **argv)
 					aImageFlags[pTLayer->m_Image] |= 1;
 					// check tiles that are used in this image
 					int DataIndex = pTLayer->m_Data;
-					unsigned int Size = DataFile.GetDataSize(DataIndex);
-					void *pTiles = DataFile.GetData(DataIndex);
+					unsigned int Size = Reader.GetDataSize(DataIndex);
+					void *pTiles = Reader.GetData(DataIndex);
 					unsigned int TileSize = sizeof(CTile);
 
 					if(Size >= pTLayer->m_Width * pTLayer->m_Height * TileSize)
@@ -202,25 +206,25 @@ int main(int argc, const char **argv)
 			{
 				SMapOptimizeItem Item;
 				Item.m_pImage = pImg;
-				Item.m_Index = i;
+				Item.m_Index = ImageIndex;
 				Item.m_Data = pImg->m_ImageData;
 				Item.m_Text = pImg->m_ImageName;
 				DataFindHelper.push_back(Item);
 			}
 
 			// found an image
-			++i;
+			++ImageIndex;
 		}
 
-		df.AddItem(Type, ID, Size, pPtr);
+		Writer.AddItem(Type, ID, Size, pPtr);
 	}
 
 	// add all data
-	for(Index = 0; Index < DataFile.NumData(); Index++)
+	for(int Index = 0; Index < Reader.NumData(); Index++)
 	{
 		bool DeletePtr = false;
-		pPtr = DataFile.GetData(Index);
-		Size = DataFile.GetDataSize(Index);
+		void *pPtr = Reader.GetData(Index);
+		int Size = Reader.GetDataSize(Index);
 		std::vector<SMapOptimizeItem>::iterator it = std::find_if(DataFindHelper.begin(), DataFindHelper.end(), [Index](const SMapOptimizeItem &Other) -> bool { return Other.m_Data == Index || Other.m_Text == Index; });
 		if(it != DataFindHelper.end())
 		{
@@ -295,8 +299,8 @@ int main(int argc, const char **argv)
 			else if(it->m_Text == Index)
 			{
 				char *pImgName = (char *)pPtr;
-				uint8_t *pImgBuff = (uint8_t *)DataFile.GetData(it->m_Data);
-				int ImgSize = DataFile.GetDataSize(it->m_Data);
+				uint8_t *pImgBuff = (uint8_t *)Reader.GetData(it->m_Data);
+				int ImgSize = Reader.GetDataSize(it->m_Data);
 
 				char aSHA256Str[SHA256_MAXSTRSIZE];
 				// This is the important function, that calculates the SHA256 in a special way
@@ -315,14 +319,15 @@ int main(int argc, const char **argv)
 			}
 		}
 
-		df.AddData(Size, pPtr, Z_BEST_COMPRESSION);
+		Writer.AddData(Size, pPtr, Z_BEST_COMPRESSION);
 
 		if(DeletePtr)
 			free(pPtr);
 	}
 
-	DataFile.Close();
-	df.Finish();
+	Reader.Close();
+	Writer.Finish();
 
+	cmdline_free();
 	return 0;
 }

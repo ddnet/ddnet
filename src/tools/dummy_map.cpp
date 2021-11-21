@@ -71,10 +71,12 @@ void CreateEmptyMap(IStorage *pStorage)
 	Writer.Finish();
 }
 
-int main(int argc, const char **argv)
+int main(int argc, char **argv)
 {
 	dbg_logger_stdout();
-	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_SERVER, argc, argv);
+	cmdline_init(argc, argv);
+	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_SERVER);
 	CreateEmptyMap(pStorage);
+	cmdline_free();
 	return 0;
 }

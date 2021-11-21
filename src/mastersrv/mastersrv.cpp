@@ -318,20 +318,20 @@ void ReloadBans()
 	m_pConsole->ExecuteFile("master.cfg", -1, true);
 }
 
-int main(int argc, const char **argv) // ignore_convention
+int main(int argc, char **argv)
 {
+	dbg_logger_stdout();
+	cmdline_init(argc, argv);
+	net_init();
+
 	int64_t LastBuild = 0, LastBanReload = 0;
 	ServerType Type = SERVERTYPE_INVALID;
-	NETADDR BindAddr;
-
-	dbg_logger_stdout();
-	net_init();
 
 	mem_copy(m_CountData.m_Header, SERVERBROWSE_COUNT, sizeof(SERVERBROWSE_COUNT));
 	mem_copy(m_CountDataLegacy.m_Header, SERVERBROWSE_COUNT_LEGACY, sizeof(SERVERBROWSE_COUNT_LEGACY));
 
 	IKernel *pKernel = IKernel::Create();
-	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC, argc, argv);
+	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC);
 	IConfigManager *pConfigManager = CreateConfigManager();
 	m_pConsole = CreateConsole(CFGFLAG_MASTER);
 
@@ -345,9 +345,9 @@ int main(int argc, const char **argv) // ignore_convention
 	pConfigManager->Init();
 	m_pConsole->Init();
 	m_NetBan.Init(m_pConsole, pStorage);
-	if(argc > 1) // ignore_convention
-		m_pConsole->ParseArguments(argc - 1, &argv[1]); // ignore_convention
+	m_pConsole->ParseCommandLineArguments();
 
+	NETADDR BindAddr;
 	if(g_Config.m_Bindaddr[0] && net_host_lookup(g_Config.m_Bindaddr, &BindAddr, NETTYPE_ALL) == 0)
 	{
 		// got bindaddr
@@ -539,5 +539,6 @@ int main(int argc, const char **argv) // ignore_convention
 		thread_sleep(1000);
 	}
 
+	cmdline_free();
 	return 0;
 }

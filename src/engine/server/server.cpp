@@ -3536,13 +3536,17 @@ void CServer::SnapSetStaticsize(int ItemType, int Size)
 
 static CServer *CreateServer() { return new CServer(); }
 
-int main(int argc, const char **argv) // ignore_convention
+int main(int argc, char **argv)
 {
+	cmdline_init(argc, argv);
+
 	bool Silent = false;
 
-	for(int i = 1; i < argc; i++) // ignore_convention
+	for(int i = 1; i < cmdline_arg_num(); i++)
 	{
-		if(str_comp("-s", argv[i]) == 0 || str_comp("--silent", argv[i]) == 0) // ignore_convention
+		char aArgument[32];
+		cmdline_arg_get(i, aArgument, sizeof(aArgument));
+		if(str_comp("-s", aArgument) == 0 || str_comp("--silent", aArgument) == 0)
 		{
 			Silent = true;
 #if defined(CONF_FAMILY_WINDOWS)
@@ -3572,7 +3576,7 @@ int main(int argc, const char **argv) // ignore_convention
 	IGameServer *pGameServer = CreateGameServer();
 	IConsole *pConsole = CreateConsole(CFGFLAG_SERVER | CFGFLAG_ECON);
 	IEngineMasterServer *pEngineMasterServer = CreateEngineMasterServer();
-	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_SERVER, argc, argv); // ignore_convention
+	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_SERVER);
 	IConfigManager *pConfigManager = CreateConfigManager();
 	IEngineAntibot *pEngineAntibot = CreateEngineAntibot();
 
@@ -3623,8 +3627,7 @@ int main(int argc, const char **argv) // ignore_convention
 	}
 
 	// parse the command line arguments
-	if(argc > 1) // ignore_convention
-		pConsole->ParseArguments(argc - 1, &argv[1]); // ignore_convention
+	pConsole->ParseCommandLineArguments();
 
 	pConsole->Register("sv_test_cmds", "", CFGFLAG_SERVER, CServer::ConTestingCommands, pConsole, "Turns testing commands aka cheats on/off (setting only works in initial config)");
 	pConsole->Register("sv_rescue", "", CFGFLAG_SERVER, CServer::ConRescue, pConsole, "Allow /rescue command so players can teleport themselves out of freeze (setting only works in initial config)");
@@ -3639,6 +3642,7 @@ int main(int argc, const char **argv) // ignore_convention
 
 	// free
 	delete pKernel;
+	cmdline_free();
 
 	return Ret;
 }

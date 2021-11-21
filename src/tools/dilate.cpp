@@ -71,16 +71,26 @@ int DilateFile(const char *pFilename)
 	return 0;
 }
 
-int main(int argc, const char **argv)
+int main(int argc, char **argv)
 {
 	dbg_logger_stdout();
-	if(argc == 1)
+	cmdline_init(argc, argv);
+
+	if(cmdline_arg_num() == 1)
 	{
-		dbg_msg("usage", "%s FILE1 [ FILE2... ]", argv[0]);
+		char aExecutablePath[IO_MAX_PATH_LENGTH];
+		cmdline_arg_get(0, aExecutablePath, sizeof(aExecutablePath));
+		dbg_msg("usage", "%s FILE1 [ FILE2... ]", aExecutablePath);
 		return -1;
 	}
 
-	for(int i = 1; i < argc; i++)
-		DilateFile(argv[i]);
+	for(int i = 1; i < cmdline_arg_num(); i++)
+	{
+		char aPath[IO_MAX_PATH_LENGTH];
+		cmdline_arg_get(i, aPath, sizeof(aPath));
+		DilateFile(aPath);
+	}
+
+	cmdline_free();
 	return 0;
 }

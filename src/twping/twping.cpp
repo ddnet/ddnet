@@ -7,7 +7,7 @@
 
 static CNetClient g_NetOp; // main
 
-int main(int argc, char **argv) // ignore_convention
+int main(int argc, char **argv)
 {
 	NETADDR BindAddr;
 	mem_zero(&BindAddr, sizeof(BindAddr));

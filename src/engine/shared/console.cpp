@@ -1008,18 +1008,24 @@ void CConsole::Init()
 #undef MACRO_CONFIG_STR
 }
 
-void CConsole::ParseArguments(int NumArgs, const char **ppArguments)
+void CConsole::ParseCommandLineArguments()
 {
-	for(int i = 0; i < NumArgs; i++)
+	for(int i = 1; i < cmdline_arg_num(); i++)
 	{
+		char aArgument[256];
+		cmdline_arg_get(i, aArgument, sizeof(aArgument));
 		// check for scripts to execute
-		if(ppArguments[i][0] == '-' && ppArguments[i][1] == 'f' && ppArguments[i][2] == 0)
+		if(str_comp("-f", aArgument) == 0)
 		{
-			if(NumArgs - i > 1)
-				ExecuteFile(ppArguments[i + 1], -1, true, IStorage::TYPE_ABSOLUTE);
+			if(cmdline_arg_num() - i > 1)
+			{
+				char aFileName[IO_MAX_PATH_LENGTH];
+				cmdline_arg_get(i + 1, aFileName, sizeof(aFileName));
+				ExecuteFile(aFileName, -1, true, IStorage::TYPE_ABSOLUTE);
+			}
 			i++;
 		}
-		else if(!str_comp("-s", ppArguments[i]) || !str_comp("--silent", ppArguments[i]))
+		else if(!str_comp("-s", aArgument) || !str_comp("--silent", aArgument))
 		{
 			// skip silent param
 			continue;
@@ -1027,7 +1033,7 @@ void CConsole::ParseArguments(int NumArgs, const char **ppArguments)
 		else
 		{
 			// search arguments for overrides
-			ExecuteLine(ppArguments[i]);
+			ExecuteLine(aArgument);
 		}
 	}
 }

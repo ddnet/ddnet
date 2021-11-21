@@ -2174,6 +2174,43 @@ void uint_to_bytes_be(unsigned char *bytes, unsigned value);
 */
 int pid();
 
+/*
+	Function: cmdline_init
+		Initializes the command-line arguments so they are
+		available with cmdline_arg_num and cmdline_arg_get.
+
+	Parameters:
+		argc - The argc parameter that was passed to the main function.
+		argv - The argv parameter that was passed to the main function.
+*/
+void cmdline_init(int argc, char **argv);
+
+/*
+	Function: cmdline_arg_num
+		Gets the total number of command-line arguments.
+
+	Returns:
+		The number of command-line arguments. Always at least 1.
+*/
+int cmdline_arg_num();
+
+/*
+	Function: cmdline_arg_get
+		Gets a command-line argument as a utf8 string.
+
+	Parameters:
+		index - The index of the argument to retrieve.
+		argument - Pointer to a buffer that shall receive the string.
+		length - The size of the buffer.
+*/
+void cmdline_arg_get(int index, char *argument, int length);
+
+/*
+	Function: cmdline_free
+		Frees memory that was allocated by cmdline_init.
+*/
+void cmdline_free();
+
 #if defined(CONF_FAMILY_WINDOWS)
 typedef void *PROCESS;
 #else
