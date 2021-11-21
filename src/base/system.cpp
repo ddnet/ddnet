@@ -2180,16 +2180,13 @@ int fs_storage_path(const char *appname, char *path, int max)
 		return -1;
 	char buffer[IO_MAX_PATH_LENGTH];
 	WideCharToMultiByte(CP_UTF8, 0, home, -1, buffer, sizeof(buffer), NULL, NULL);
-	_snprintf(path, max, "%s/%s", buffer, appname);
+	str_format(path, max, "%s/%s", buffer, appname);
 	return 0;
 #elif defined(CONF_PLATFORM_ANDROID)
 	// just use the data directory
 	return -1;
 #else
 	char *home = getenv("HOME");
-#if !defined(CONF_PLATFORM_MACOS)
-	int i;
-#endif
 	if(!home)
 		return -1;
 
@@ -2199,10 +2196,10 @@ int fs_storage_path(const char *appname, char *path, int max)
 #endif
 
 #if defined(CONF_PLATFORM_MACOS)
-	snprintf(path, max, "%s/Library/Application Support/%s", home, appname);
+	str_format(path, max, "%s/Library/Application Support/%s", home, appname);
 #else
-	snprintf(path, max, "%s/.%s", home, appname);
-	for(i = str_length(home) + 2; path[i]; i++)
+	str_format(path, max, "%s/.%s", home, appname);
+	for(int i = str_length(home) + 2; path[i]; i++)
 		path[i] = tolower((unsigned char)path[i]);
 #endif
 
