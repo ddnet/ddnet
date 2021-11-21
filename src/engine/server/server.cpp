@@ -3538,6 +3538,7 @@ static CServer *CreateServer() { return new CServer(); }
 
 int main(int argc, const char **argv) // ignore_convention
 {
+	cmdline_fix(&argc, &argv);
 	bool Silent = false;
 
 	for(int i = 1; i < argc; i++) // ignore_convention
@@ -3640,6 +3641,7 @@ int main(int argc, const char **argv) // ignore_convention
 	// free
 	delete pKernel;
 
+	cmdline_free(argc, argv);
 	return Ret;
 }
 

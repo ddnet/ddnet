@@ -6,7 +6,7 @@
 
 #include <pnglite.h>
 
-bool Process(IStorage *pStorage, char **pMapNames)
+bool Process(IStorage *pStorage, const char **pMapNames)
 {
 	CDataFileReader Maps[2];
 
@@ -98,20 +98,20 @@ bool Process(IStorage *pStorage, char **pMapNames)
 	return true;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
+	cmdline_fix(&argc, &argv);
 	dbg_logger_stdout();
 	dbg_logger_file("map_diff.txt");
 
 	IStorage *pStorage = CreateLocalStorage();
 
-	if(argc == 3)
-	{
-		return Process(pStorage, &argv[1]) ? 0 : 1;
-	}
-	else
+	if(argc != 3)
 	{
 		dbg_msg("usage", "%s map1 map2", argv[0]);
 		return -1;
 	}
+	int Result = Process(pStorage, &argv[1]) ? 0 : 1;
+	cmdline_free(argc, argv);
+	return Result;
 }

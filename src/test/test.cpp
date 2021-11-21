@@ -106,14 +106,17 @@ void CTestInfo::DeleteTestStorageFilesOnSuccess()
 	}
 }
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
-	::testing::InitGoogleTest(&argc, argv);
+	cmdline_fix(&argc, &argv);
+	::testing::InitGoogleTest(&argc, const_cast<char **>(argv));
 	net_init();
 	if(secure_random_init())
 	{
 		fprintf(stderr, "random init failed\n");
 		return 1;
 	}
-	return RUN_ALL_TESTS();
+	int Result = RUN_ALL_TESTS();
+	cmdline_free(argc, argv);
+	return Result;
 }

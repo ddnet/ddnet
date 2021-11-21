@@ -135,6 +135,7 @@ void *ReplaceImageItem(void *pItem, int Type, CMapItemImage *pNewImgItem)
 
 int main(int argc, const char **argv)
 {
+	cmdline_fix(&argc, &argv);
 	dbg_logger_stdout();
 
 	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC, argc, argv);
@@ -253,5 +254,6 @@ int main(int argc, const char **argv)
 
 	g_DataReader.Close();
 	g_DataWriter.Finish();
+	cmdline_free(argc, argv);
 	return Success ? 0 : -1;
 }
