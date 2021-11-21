@@ -1119,6 +1119,10 @@ void CGameClient::OnNewSnapshot()
 		TempCore.Read(pCharacter);
 		TempCore.m_ActiveWeapon = pCharacter->m_Weapon;
 
+		// anti F-DDrace crash code
+		int TickDiff = Tick - pCharacter->m_Tick;
+		if(TickDiff > 120)
+			Tick = 120;
 		while(pCharacter->m_Tick < Tick)
 		{
 			pCharacter->m_Tick++;
