@@ -82,6 +82,7 @@ public:
 	bool m_ChatTimeoutCode;
 	bool m_AnyPlayerFlag;
 	bool m_PingEx;
+	bool m_AllowDummy;
 };
 
 class CClient : public IClient, public CDemoPlayer::IListener
@@ -341,6 +342,7 @@ public:
 	virtual void DummyConnect();
 	virtual bool DummyConnected();
 	virtual bool DummyConnecting();
+	virtual bool DummyAllowed();
 	int m_DummyConnected;
 	int m_LastDummyConnectTime;
 

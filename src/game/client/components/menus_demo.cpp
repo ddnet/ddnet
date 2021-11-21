@@ -945,12 +945,11 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 		Left.VSplitLeft(150.0f, &Left, &Right);
 		UI()->DoLabelScaled(&Left, Localize("Size:"), 14.0f, -1);
-		unsigned Size = (m_lDemos[m_DemolistSelectedIndex].m_Info.m_aMapSize[0] << 24) | (m_lDemos[m_DemolistSelectedIndex].m_Info.m_aMapSize[1] << 16) |
-				(m_lDemos[m_DemolistSelectedIndex].m_Info.m_aMapSize[2] << 8) | (m_lDemos[m_DemolistSelectedIndex].m_Info.m_aMapSize[3]);
-		if(Size > 1024 * 1024)
-			str_format(aBuf, sizeof(aBuf), Localize("%.2f MiB"), float(Size) / (1024 * 1024));
+		const float Size = m_lDemos[m_DemolistSelectedIndex].Size() / 1024.0f;
+		if(Size > 1024)
+			str_format(aBuf, sizeof(aBuf), Localize("%.2f MiB"), Size / 1024.0f);
 		else
-			str_format(aBuf, sizeof(aBuf), Localize("%.2f KiB"), float(Size) / 1024);
+			str_format(aBuf, sizeof(aBuf), Localize("%.2f KiB"), Size);
 		UI()->DoLabelScaled(&Right, aBuf, 14.0f, -1);
 		Labels.HSplitTop(5.0f, 0, &Labels);
 		Labels.HSplitTop(20.0f, &Left, &Labels);

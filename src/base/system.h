@@ -1690,12 +1690,6 @@ int fs_storage_path(const char *appname, char *path, int max);
 int fs_is_dir(const char *path);
 
 /*
-	Function: fs_getmtime
-		Gets the modification time of a file
-*/
-time_t fs_getmtime(const char *path);
-
-/*
 	Function: fs_chdir
 		Changes current working directory
 
@@ -2124,6 +2118,52 @@ const char *str_next_token(const char *str, const char *delim, char *buffer, int
 		0 - Item isn't in list.
 */
 int str_in_list(const char *list, const char *delim, const char *needle);
+
+/*
+	Function: bytes_be_to_int
+		Packs 4 big endian bytes into an int
+
+	Returns:
+		The packed int
+
+	Remarks:
+		- Assumes the passed array is 4 bytes
+		- Assumes int is 4 bytes
+*/
+int bytes_be_to_int(const unsigned char *bytes);
+
+/*
+	Function: int_to_bytes_be
+		Packs an int into 4 big endian bytes
+
+	Remarks:
+		- Assumes the passed array is 4 bytes
+		- Assumes int is 4 bytes
+*/
+void int_to_bytes_be(unsigned char *bytes, int value);
+
+/*
+	Function: bytes_be_to_uint
+		Packs 4 big endian bytes into an unsigned
+
+	Returns:
+		The packed unsigned
+
+	Remarks:
+		- Assumes the passed array is 4 bytes
+		- Assumes unsigned is 4 bytes
+*/
+unsigned bytes_be_to_uint(const unsigned char *bytes);
+
+/*
+	Function: uint_to_bytes_be
+		Packs an unsigned into 4 big endian bytes
+
+	Remarks:
+		- Assumes the passed array is 4 bytes
+		- Assumes unsigned is 4 bytes
+*/
+void uint_to_bytes_be(unsigned char *bytes, unsigned value);
 
 /*
 	Function: pid

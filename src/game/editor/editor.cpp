@@ -2668,6 +2668,20 @@ void CEditor::DoMapEditor(CUIRect View)
 				UI()->SetActiveItem(0);
 			}
 		}
+		if(!Input()->KeyIsPressed(KEY_LSHIFT) && !Input()->KeyIsPressed(KEY_RSHIFT) &&
+			!Input()->KeyIsPressed(KEY_LCTRL) && !Input()->KeyIsPressed(KEY_RCTRL) &&
+			m_Dialog == DIALOG_NONE && m_EditBoxActive == 0)
+		{
+			float PanSpeed = 64.0f;
+			if(Input()->KeyPress(KEY_A))
+				m_WorldOffsetX -= PanSpeed * m_WorldZoom;
+			else if(Input()->KeyPress(KEY_D))
+				m_WorldOffsetX += PanSpeed * m_WorldZoom;
+			if(Input()->KeyPress(KEY_W))
+				m_WorldOffsetY -= PanSpeed * m_WorldZoom;
+			else if(Input()->KeyPress(KEY_S))
+				m_WorldOffsetY += PanSpeed * m_WorldZoom;
+		}
 	}
 	else if(UI()->ActiveItem() == s_pEditorID)
 	{

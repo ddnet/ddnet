@@ -311,15 +311,16 @@ void CItems::OnRender()
 	bool BlinkingProj = (Ticks % 20) < 2;
 	bool BlinkingProjEx = (Ticks % 6) < 2;
 	bool BlinkingLight = (Ticks % 6) < 2;
-	int OwnTeam = m_pClient->OwnTeam();
+	int SwitcherTeam = m_pClient->SwitchStateTeam();
 	int DraggerStartTick = maximum((Client()->GameTick(g_Config.m_ClDummy) / 7) * 7, Client()->GameTick(g_Config.m_ClDummy) - 4);
+	int GunStartTick = (Client()->GameTick(g_Config.m_ClDummy) / 7) * 7;
 
 	bool UsePredicted = GameClient()->Predict() && GameClient()->AntiPingGunfire();
 	if(UsePredicted)
 	{
 		for(auto *pProj = (CProjectile *)GameClient()->m_PredictedWorld.FindFirst(CGameWorld::ENTTYPE_PROJECTILE); pProj; pProj = (CProjectile *)pProj->NextEntity())
 		{
-			if(!IsSuper && pProj->m_Number > 0 && pProj->m_Number < Collision()->m_NumSwitchers + 1 && !Collision()->m_pSwitchers[pProj->m_Number].m_Status[OwnTeam] && (pProj->m_Explosive ? BlinkingProjEx : BlinkingProj))
+			if(!IsSuper && pProj->m_Number > 0 && pProj->m_Number < Collision()->m_NumSwitchers + 1 && !Collision()->m_pSwitchers[pProj->m_Number].m_Status[SwitcherTeam] && (pProj->m_Explosive ? BlinkingProjEx : BlinkingProj))
 				continue;
 
 			CProjectileData Data = pProj->GetData();
@@ -335,7 +336,7 @@ void CItems::OnRender()
 		}
 		for(auto *pPickup = (CPickup *)GameClient()->m_PredictedWorld.FindFirst(CGameWorld::ENTTYPE_PICKUP); pPickup; pPickup = (CPickup *)pPickup->NextEntity())
 		{
-			if(!IsSuper && pPickup->m_Layer == LAYER_SWITCH && pPickup->m_Number > 0 && pPickup->m_Number < Collision()->m_NumSwitchers + 1 && !Collision()->m_pSwitchers[pPickup->m_Number].m_Status[OwnTeam] && BlinkingPickup)
+			if(!IsSuper && pPickup->m_Layer == LAYER_SWITCH && pPickup->m_Number > 0 && pPickup->m_Number < Collision()->m_NumSwitchers + 1 && !Collision()->m_pSwitchers[pPickup->m_Number].m_Status[SwitcherTeam] && BlinkingPickup)
 				continue;
 
 			if(pPickup->InDDNetTile())
@@ -359,7 +360,7 @@ void CItems::OnRender()
 
 		bool Inactive = false;
 		if(pEntEx)
-			Inactive = !IsSuper && pEntEx->m_SwitchNumber > 0 && pEntEx->m_SwitchNumber < Collision()->m_NumSwitchers + 1 && !Collision()->m_pSwitchers[pEntEx->m_SwitchNumber].m_Status[OwnTeam];
+			Inactive = !IsSuper && pEntEx->m_SwitchNumber > 0 && pEntEx->m_SwitchNumber < Collision()->m_NumSwitchers + 1 && !Collision()->m_pSwitchers[pEntEx->m_SwitchNumber].m_Status[SwitcherTeam];
 
 		if(Item.m_Type == NETOBJTYPE_PROJECTILE || Item.m_Type == NETOBJTYPE_DDNETPROJECTILE)
 		{
@@ -419,10 +420,18 @@ void CItems::OnRender()
 
 			if(pEntEx)
 			{
-				if(pEntEx->m_EntityClass == ENTITYCLASS_LIGHT && Inactive && BlinkingLight)
-					continue;
-				if(pEntEx->m_EntityClass >= ENTITYCLASS_GUN_NORMAL && pEntEx->m_EntityClass <= ENTITYCLASS_GUN_UNFREEZE && Inactive && BlinkingGun)
-					continue;
+				if(pEntEx->m_EntityClass == ENTITYCLASS_LIGHT)
+				{
+					if(Inactive && BlinkingLight)
+						continue;
+					Laser.m_StartTick = DraggerStartTick;
+				}
+				if(pEntEx->m_EntityClass >= ENTITYCLASS_GUN_NORMAL && pEntEx->m_EntityClass <= ENTITYCLASS_GUN_UNFREEZE)
+				{
+					if(Inactive && BlinkingGun)
+						continue;
+					Laser.m_StartTick = GunStartTick;
+				}
 				if(pEntEx->m_EntityClass >= ENTITYCLASS_DRAGGER_WEAK && pEntEx->m_EntityClass <= ENTITYCLASS_DRAGGER_STRONG)
 				{
 					if(Inactive && BlinkingDragger)

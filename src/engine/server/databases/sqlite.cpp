@@ -32,6 +32,7 @@ public:
 	virtual void BindString(int Idx, const char *pString);
 	virtual void BindBlob(int Idx, unsigned char *pBlob, int Size);
 	virtual void BindInt(int Idx, int Value);
+	virtual void BindInt64(int Idx, int64_t Value);
 	virtual void BindFloat(int Idx, float Value);
 
 	virtual void Print();
@@ -41,6 +42,7 @@ public:
 	virtual bool IsNull(int Col);
 	virtual float GetFloat(int Col);
 	virtual int GetInt(int Col);
+	virtual int64_t GetInt64(int Col);
 	virtual void GetString(int Col, char *pBuffer, int BufferSize);
 	// passing a negative buffer size is undefined behavior
 	virtual int GetBlob(int Col, unsigned char *pBuffer, int BufferSize);
@@ -196,6 +198,13 @@ void CSqliteConnection::BindInt(int Idx, int Value)
 	m_Done = false;
 }
 
+void CSqliteConnection::BindInt64(int Idx, int64_t Value)
+{
+	int Result = sqlite3_bind_int64(m_pStmt, Idx, Value);
+	AssertNoError(Result);
+	m_Done = false;
+}
+
 void CSqliteConnection::BindFloat(int Idx, float Value)
 {
 	int Result = sqlite3_bind_double(m_pStmt, Idx, (double)Value);
@@ -272,6 +281,11 @@ float CSqliteConnection::GetFloat(int Col)
 int CSqliteConnection::GetInt(int Col)
 {
 	return sqlite3_column_int(m_pStmt, Col - 1);
+}
+
+int64_t CSqliteConnection::GetInt64(int Col)
+{
+	return sqlite3_column_int64(m_pStmt, Col - 1);
 }
 
 void CSqliteConnection::GetString(int Col, char *pBuffer, int BufferSize)

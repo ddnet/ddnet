@@ -82,6 +82,7 @@ public:
 	virtual void BindString(int Idx, const char *pString);
 	virtual void BindBlob(int Idx, unsigned char *pBlob, int Size);
 	virtual void BindInt(int Idx, int Value);
+	virtual void BindInt64(int Idx, int64_t Value);
 	virtual void BindFloat(int Idx, float Value);
 
 	virtual void Print() {}
@@ -91,6 +92,7 @@ public:
 	virtual bool IsNull(int Col);
 	virtual float GetFloat(int Col);
 	virtual int GetInt(int Col);
+	virtual int64_t GetInt64(int Col);
 	virtual void GetString(int Col, char *pBuffer, int BufferSize);
 	virtual int GetBlob(int Col, unsigned char *pBuffer, int BufferSize);
 
@@ -399,6 +401,23 @@ void CMysqlConnection::BindInt(int Idx, int Value)
 	pParam->error = nullptr;
 }
 
+void CMysqlConnection::BindInt64(int Idx, int64_t Value)
+{
+	m_NewQuery = true;
+	Idx -= 1;
+	dbg_assert(0 <= Idx && Idx < (int)m_aStmtParameters.size(), "index out of bounds");
+
+	m_aStmtParameterExtras[Idx].i = Value;
+	MYSQL_BIND *pParam = &m_aStmtParameters[Idx];
+	pParam->buffer_type = MYSQL_TYPE_LONGLONG;
+	pParam->buffer = &m_aStmtParameterExtras[Idx].i;
+	pParam->buffer_length = sizeof(m_aStmtParameterExtras[Idx].i);
+	pParam->length = nullptr;
+	pParam->is_null = nullptr;
+	pParam->is_unsigned = false;
+	pParam->error = nullptr;
+}
+
 void CMysqlConnection::BindFloat(int Idx, float Value)
 {
 	m_NewQuery = true;
@@ -542,6 +561,34 @@ int CMysqlConnection::GetInt(int Col)
 		StoreErrorStmt("fetch_column:int");
 		dbg_msg("mysql", "error fetching column %s", m_aErrorDetail);
 		dbg_assert(0, "error in GetInt");
+	}
+	if(IsNull)
+	{
+		dbg_assert(0, "error getting int: NULL");
+	}
+	return Value;
+}
+
+int64_t CMysqlConnection::GetInt64(int Col)
+{
+	Col -= 1;
+
+	MYSQL_BIND Bind;
+	int64_t Value;
+	my_bool IsNull;
+	mem_zero(&Bind, sizeof(Bind));
+	Bind.buffer_type = MYSQL_TYPE_LONGLONG;
+	Bind.buffer = &Value;
+	Bind.buffer_length = sizeof(Value);
+	Bind.length = nullptr;
+	Bind.is_null = &IsNull;
+	Bind.is_unsigned = false;
+	Bind.error = nullptr;
+	if(mysql_stmt_fetch_column(m_pStmt.get(), &Bind, Col, 0))
+	{
+		StoreErrorStmt("fetch_column:int64");
+		dbg_msg("mysql", "error fetching column %s", m_aErrorDetail);
+		dbg_assert(0, "error in GetInt64");
 	}
 	if(IsNull)
 	{

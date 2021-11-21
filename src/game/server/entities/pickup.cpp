@@ -160,16 +160,19 @@ void CPickup::Snap(int SnappingClient)
 	if(SnappingClient > -1 && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1 || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) && GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
 		Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
 
-	CNetObj_EntityEx *pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
-	if(!pEntData)
-		return;
-
-	pEntData->m_SwitchNumber = m_Number;
-	pEntData->m_Layer = m_Layer;
-	pEntData->m_EntityClass = ENTITYCLASS_PICKUP;
-
 	int SnappingClientVersion = SnappingClient >= 0 ? GameServer()->GetClientVersion(SnappingClient) : CLIENT_VERSIONNR;
-	if(SnappingClientVersion < VERSION_DDNET_SWITCH)
+
+	CNetObj_EntityEx *pEntData = 0;
+	if(SnappingClientVersion >= VERSION_DDNET_SWITCH && (m_Layer == LAYER_SWITCH || length(m_Core) > 0))
+		pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
+
+	if(pEntData)
+	{
+		pEntData->m_SwitchNumber = m_Number;
+		pEntData->m_Layer = m_Layer;
+		pEntData->m_EntityClass = ENTITYCLASS_PICKUP;
+	}
+	else
 	{
 		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
 		if(Char && Char->IsAlive() && m_Layer == LAYER_SWITCH && m_Number > 0 && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()] && !Tick)

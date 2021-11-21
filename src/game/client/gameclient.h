@@ -543,7 +543,7 @@ public:
 	void DummyResetInput();
 	void Echo(const char *pString);
 	bool IsOtherTeam(int ClientID);
-	int OwnTeam();
+	int SwitchStateTeam();
 	bool IsLocalCharSuper();
 	bool CanDisplayWarning();
 	bool IsDisplayingWarning();
@@ -680,6 +680,7 @@ private:
 	int m_IsDummySwapping;
 	CCharOrder m_CharOrder;
 	class CCharacter m_aLastWorldCharacters[MAX_CLIENTS];
+	int m_SwitchStateTeam[NUM_DUMMIES];
 
 	enum
 	{
