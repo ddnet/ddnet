@@ -9,11 +9,22 @@ class CWarList : public CComponent
 {
 	struct CWarPlayer
 	{
+		CWarPlayer()
+		{
+			m_IsWar = false;
+			m_IsTeam = false;
+			m_IsTraitor = false;
+			m_IsWarClan = false;
+			m_IsWarClanmate = false;
+			m_aName[0] = '\0';
+			m_aClan[0] = '\0';
+		}
 		bool m_IsWar;
 		bool m_IsTeam;
 		bool m_IsTraitor;
 		bool m_IsWarClan;
 		bool m_IsTeamClan;
+		bool m_IsWarClanmate;
 		char m_aName[MAX_NAME_LENGTH];
 		char m_aClan[MAX_CLAN_LENGTH];
 	};
@@ -75,6 +86,7 @@ public:
 	bool IsTraitorlist(const char *pName);
 	bool IsWarClanlist(const char *pClan);
 	bool IsTeamClanlist(const char *pClan);
+	bool IsWarClanmate(const char *pClan);
 
 	// cached use during render
 	bool IsWar(int ClientID);
@@ -82,6 +94,7 @@ public:
 	bool IsTraitor(int ClientID);
 	bool IsWarClan(int ClientID);
 	bool IsTeamClan(int ClientID);
+	bool IsWarClanmate(int ClientID);
 	void SetNameplateColor(int ClientID, STextRenderColor *pColor);
 	void ReloadList();
 };

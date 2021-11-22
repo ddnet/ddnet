@@ -151,6 +151,21 @@ bool CWarList::IsTeamClanlist(const char *pClan)
 	return (std::find(m_vTeamClanlist.begin(), m_vTeamClanlist.end(), std::string(pClan)) != m_vTeamClanlist.end());
 }
 
+bool CWarList::IsWarClanmate(const char *pClan)
+{
+	for(auto &WarPlayer : m_aWarPlayers)
+	{
+		if(WarPlayer.m_aClan[0] == '\0')
+			continue;
+		if(!WarPlayer.m_IsWar && !WarPlayer.m_IsTraitor)
+			continue;
+
+		if(!str_comp(pClan, WarPlayer.m_aClan))
+			return true;
+	}
+	return false;
+}
+
 void CWarList::GetWarReason(const char *pName, char *pReason, int ReasonSize)
 {
 	if(!pReason)
@@ -215,6 +230,7 @@ bool CWarList::IsWar(int ClientID)
 	m_aWarPlayers[ClientID].m_IsTraitor = IsTraitorlist(pName);
 	m_aWarPlayers[ClientID].m_IsWarClan = IsWarClanlist(pClan);
 	m_aWarPlayers[ClientID].m_IsTeamClan = IsTeamClanlist(pClan);
+	m_aWarPlayers[ClientID].m_IsWarClanmate = IsWarClanmate(pClan);
 	return false;
 }
 
@@ -233,6 +249,7 @@ bool CWarList::IsTeam(int ClientID)
 	m_aWarPlayers[ClientID].m_IsTraitor = IsTraitorlist(pName);
 	m_aWarPlayers[ClientID].m_IsWarClan = IsWarClanlist(pClan);
 	m_aWarPlayers[ClientID].m_IsTeamClan = IsTeamClanlist(pClan);
+	m_aWarPlayers[ClientID].m_IsWarClanmate = IsWarClanmate(pClan);
 	return false;
 }
 
@@ -251,6 +268,7 @@ bool CWarList::IsTraitor(int ClientID)
 	m_aWarPlayers[ClientID].m_IsTraitor = IsTraitorlist(pName);
 	m_aWarPlayers[ClientID].m_IsWarClan = IsWarClanlist(pClan);
 	m_aWarPlayers[ClientID].m_IsTeamClan = IsTeamClanlist(pClan);
+	m_aWarPlayers[ClientID].m_IsWarClanmate = IsWarClanmate(pClan);
 	return false;
 }
 
@@ -271,6 +289,7 @@ bool CWarList::IsWarClan(int ClientID)
 	m_aWarPlayers[ClientID].m_IsTraitor = IsTraitorlist(pName);
 	m_aWarPlayers[ClientID].m_IsWarClan = IsWarClanlist(pClan);
 	m_aWarPlayers[ClientID].m_IsTeamClan = IsTeamClanlist(pClan);
+	m_aWarPlayers[ClientID].m_IsWarClanmate = IsWarClanmate(pClan);
 	return false;
 }
 
@@ -291,6 +310,28 @@ bool CWarList::IsTeamClan(int ClientID)
 	m_aWarPlayers[ClientID].m_IsTraitor = IsTraitorlist(pName);
 	m_aWarPlayers[ClientID].m_IsWarClan = IsWarClanlist(pClan);
 	m_aWarPlayers[ClientID].m_IsTeamClan = IsTeamClanlist(pClan);
+	m_aWarPlayers[ClientID].m_IsWarClanmate = IsWarClanmate(pClan);
+	return false;
+}
+
+bool CWarList::IsWarClanmate(int ClientID)
+{
+	const char *pName = m_pClient->m_aClients[ClientID].m_aName;
+	const char *pClan = m_pClient->m_aClients[ClientID].m_aClan;
+	if(!pClan[0])
+		return false;
+	if(!str_comp(pClan, m_aWarPlayers[ClientID].m_aClan))
+	{
+		return m_aWarPlayers[ClientID].m_IsWarClanmate;
+	}
+	str_copy(m_aWarPlayers[ClientID].m_aName, pName, sizeof(m_aWarPlayers[ClientID].m_aName));
+	str_copy(m_aWarPlayers[ClientID].m_aClan, pClan, sizeof(m_aWarPlayers[ClientID].m_aClan));
+	m_aWarPlayers[ClientID].m_IsWar = IsWarlist(pName);
+	m_aWarPlayers[ClientID].m_IsTeam = IsTeamlist(pName);
+	m_aWarPlayers[ClientID].m_IsTraitor = IsTraitorlist(pName);
+	m_aWarPlayers[ClientID].m_IsWarClan = IsWarClanlist(pClan);
+	m_aWarPlayers[ClientID].m_IsTeamClan = IsTeamClanlist(pClan);
+	m_aWarPlayers[ClientID].m_IsWarClanmate = IsWarClanmate(pClan);
 	return false;
 }
 
@@ -321,6 +362,10 @@ void CWarList::SetNameplateColor(int ClientID, STextRenderColor *pColor)
 	else if(IsTeamClan(ClientID))
 	{
 		pColor->Set(0.0f, 0.9f, 0.2f, 1.0f);
+	}
+	else if(IsWarClanmate(ClientID))
+	{
+		pColor->Set(7.0f, 0.5f, 0.2f, 1.0f);
 	}
 	else
 	{
