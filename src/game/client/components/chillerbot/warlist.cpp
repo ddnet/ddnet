@@ -613,7 +613,7 @@ void CWarList::OnRender()
 
 	if(time_get() > m_NextReload)
 	{
-		m_NextReload = time_get() + time_freq();
+		m_NextReload = time_get() + time_freq() * 10;
 		ReloadList();
 	}
 }
