@@ -19,12 +19,24 @@ class CWarList : public CComponent
 	};
 
 	CWarPlayer m_aWarPlayers[MAX_CLIENTS];
-	std::vector<std::string> m_vWarlist;
+	/*
+		m_vWarlist
+
+		pair<PlayerName, FilePath>
+	*/
+	std::vector<std::pair<std::string, std::string>> m_vWarlist;
 	std::vector<std::string> m_vTeamlist;
-	std::vector<std::string> m_vTraitorlist;
+	/*
+		m_vTraitorlist
+
+		pair<PlayerName, FilePath>
+	*/
+	std::vector<std::pair<std::string, std::string>> m_vTraitorlist;
 	std::vector<std::string> m_vWarClanlist;
 	std::vector<std::string> m_vTeamClanlist;
 	std::vector<std::string> m_vWarClanPrefixlist;
+	void GetWarlistPathByName(const char *pName, int Size, char *pPath);
+	void GetTraitorlistPathByName(const char *pName, int Size, char *pPath);
 	int m_WarDirs;
 	int m_TeamDirs;
 	int m_TraitorDirs;
@@ -38,7 +50,7 @@ class CWarList : public CComponent
 	void LoadWarClanList();
 	void LoadTeamClanList();
 	void LoadWarClanPrefixList();
-	int LoadWarNames(const char *pFilename);
+	int LoadWarNames(const char *pDir);
 	int LoadTeamNames(const char *pFilename);
 	int LoadTraitorNames(const char *pFilename);
 	int LoadWarClanNames(const char *pFilename);

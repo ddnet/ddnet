@@ -41,13 +41,29 @@ void CWarList::ReloadList()
 	m_pClient->m_ChillerBotUX.SetComponentNoteLong("war list", aBuf);
 }
 
+void CWarList::GetWarlistPathByName(const char *pName, int Size, char *pPath)
+{
+	pPath[0] = '\0';
+	for(auto &Entry : m_vWarlist)
+		if(std::string(pName) == Entry.first)
+			str_copy(pPath, Entry.second.c_str(), Size);
+}
+
+void CWarList::GetTraitorlistPathByName(const char *pName, int Size, char *pPath)
+{
+	pPath[0] = '\0';
+	for(auto &Entry : m_vTraitorlist)
+		if(std::string(pName) == Entry.first)
+			str_copy(pPath, Entry.second.c_str(), Size);
+}
+
 int CWarList::LoadWarDir(const char *pDirname, int IsDir, int DirType, void *pUser)
 {
 	CWarList *pSelf = (CWarList *)pUser;
 	if(!IsDir || !str_comp(".", pDirname))
 		return 0;
 	char aFilename[1024];
-	str_format(aFilename, sizeof(aFilename), "chillerbot/warlist/war/%s/names.txt", pDirname);
+	str_format(aFilename, sizeof(aFilename), "chillerbot/warlist/war/%s", pDirname);
 	return pSelf->LoadWarNames(aFilename);
 }
 
@@ -67,7 +83,7 @@ int CWarList::LoadTraitorDir(const char *pDirname, int IsDir, int DirType, void 
 	if(!IsDir || !str_comp(".", pDirname))
 		return 0;
 	char aFilename[1024];
-	str_format(aFilename, sizeof(aFilename), "chillerbot/warlist/traitor/%s/names.txt", pDirname);
+	str_format(aFilename, sizeof(aFilename), "chillerbot/warlist/traitor/%s", pDirname);
 	return pSelf->LoadTraitorNames(aFilename);
 }
 
@@ -106,7 +122,10 @@ bool CWarList::IsWarlist(const char *pName)
 	for(auto &WarClanPrefix : m_vWarClanPrefixlist)
 		if(str_startswith(pName, WarClanPrefix.c_str()))
 			return true;
-	return (std::find(m_vWarlist.begin(), m_vWarlist.end(), std::string(pName)) != m_vWarlist.end());
+	for(auto &Entry : m_vWarlist)
+		if(std::string(pName) == Entry.first)
+			return true;
+	return false;
 }
 
 bool CWarList::IsTeamlist(const char *pName)
@@ -116,7 +135,10 @@ bool CWarList::IsTeamlist(const char *pName)
 
 bool CWarList::IsTraitorlist(const char *pName)
 {
-	return (std::find(m_vTraitorlist.begin(), m_vTraitorlist.end(), std::string(pName)) != m_vTraitorlist.end());
+	for(auto &Entry : m_vTraitorlist)
+		if(std::string(pName) == Entry.first)
+			return true;
+	return false;
 }
 
 bool CWarList::IsWarClanlist(const char *pClan)
@@ -138,12 +160,23 @@ void CWarList::GetWarReason(const char *pName, char *pReason, int ReasonSize)
 		return;
 
 	char aFilenames[2][128];
-	str_format(aFilenames[0], sizeof(aFilenames[0]), "chillerbot/warlist/war/%s/reason.txt", pName);
-	str_format(aFilenames[1], sizeof(aFilenames[1]), "chillerbot/warlist/traitor/%s/reason.txt", pName);
+	char aBuf[182];
+	GetWarlistPathByName(pName, sizeof(aBuf), aBuf);
+	if(aBuf[0])
+		str_format(aFilenames[0], sizeof(aFilenames[0]), "%s/reason.txt", aBuf);
+	else
+		aFilenames[0][0] = '\0';
+	GetTraitorlistPathByName(pName, sizeof(aBuf), aBuf);
+	if(aBuf[0])
+		str_format(aFilenames[1], sizeof(aFilenames[1]), "%s/reason.txt", aBuf);
+	else
+		aFilenames[1][0] = '\0';
 
 	for(auto &pFilename : aFilenames)
 	{
-		// exec the file
+		if(!pFilename[0])
+			continue;
+
 		IOHANDLE File = Storage()->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_ALL);
 
 		if(!File)
@@ -296,18 +329,19 @@ void CWarList::SetNameplateColor(int ClientID, STextRenderColor *pColor)
 	}
 }
 
-int CWarList::LoadWarNames(const char *pFilename)
+int CWarList::LoadWarNames(const char *pDir)
 {
 	if(!Storage())
 		return 1;
 
-	// exec the file
-	IOHANDLE File = Storage()->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_ALL);
+	char aFilename[IO_MAX_PATH_LENGTH];
+	str_format(aFilename, sizeof(aFilename), "%s/names.txt", pDir);
+	IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_READ, IStorage::TYPE_ALL);
 
 	char aBuf[128];
 	if(!File)
 	{
-		// str_format(aBuf, sizeof(aBuf), "failed to open war list file '%s'", pFilename);
+		// str_format(aBuf, sizeof(aBuf), "failed to open war list file '%s'", aFilename);
 		// Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", aBuf);
 		return 0;
 	}
@@ -315,7 +349,7 @@ int CWarList::LoadWarNames(const char *pFilename)
 	char *pLine;
 	CLineReader Reader;
 
-	str_format(aBuf, sizeof(aBuf), "loading war list file '%s'", pFilename);
+	str_format(aBuf, sizeof(aBuf), "loading war list file '%s'", aFilename);
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", aBuf);
 	Reader.Init(File);
 
@@ -323,7 +357,10 @@ int CWarList::LoadWarNames(const char *pFilename)
 	{
 		if(!str_skip_whitespaces(pLine)[0])
 			continue;
-		m_vWarlist.push_back(std::string(pLine));
+		std::pair<std::string, std::string> Entry;
+		Entry.first = std::string(pLine);
+		Entry.second = std::string(pDir);
+		m_vWarlist.push_back(Entry);
 	}
 
 	io_close(File);
@@ -364,18 +401,19 @@ int CWarList::LoadTeamNames(const char *pFilename)
 	return 0;
 }
 
-int CWarList::LoadTraitorNames(const char *pFilename)
+int CWarList::LoadTraitorNames(const char *pDir)
 {
 	if(!Storage())
 		return 1;
 
-	// exec the file
-	IOHANDLE File = Storage()->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_ALL);
+	char aFilename[IO_MAX_PATH_LENGTH];
+	str_format(aFilename, sizeof(aFilename), "%s/names.txt", pDir);
+	IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_READ, IStorage::TYPE_ALL);
 
 	char aBuf[128];
 	if(!File)
 	{
-		// str_format(aBuf, sizeof(aBuf), "failed to open war list file '%s'", pFilename);
+		// str_format(aBuf, sizeof(aBuf), "failed to open war list file '%s'", aFilename);
 		// Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", aBuf);
 		return 0;
 	}
@@ -383,7 +421,7 @@ int CWarList::LoadTraitorNames(const char *pFilename)
 	char *pLine;
 	CLineReader Reader;
 
-	str_format(aBuf, sizeof(aBuf), "loading traitor list file '%s'", pFilename);
+	str_format(aBuf, sizeof(aBuf), "loading traitor list file '%s'", aFilename);
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", aBuf);
 	Reader.Init(File);
 
@@ -391,7 +429,10 @@ int CWarList::LoadTraitorNames(const char *pFilename)
 	{
 		if(!str_skip_whitespaces(pLine)[0])
 			continue;
-		m_vTraitorlist.push_back(std::string(pLine));
+		std::pair<std::string, std::string> Entry;
+		Entry.first = std::string(pLine);
+		Entry.second = std::string(pDir);
+		m_vTraitorlist.push_back(Entry);
 	}
 
 	io_close(File);
