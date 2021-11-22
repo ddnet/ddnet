@@ -13,7 +13,10 @@
 
 void CWarList::OnInit()
 {
+	m_Verbose = true;
 	ReloadList();
+	m_Verbose = false;
+	m_NextReload = time_get() + time_freq();
 }
 
 void CWarList::ReloadList()
@@ -387,7 +390,7 @@ int CWarList::LoadWarNames(const char *pDir)
 	if(!File)
 	{
 		// str_format(aBuf, sizeof(aBuf), "failed to open war list file '%s'", aFilename);
-		// Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", aBuf);
+		// Print(aBuf);
 		return 0;
 	}
 	m_WarDirs++;
@@ -395,7 +398,7 @@ int CWarList::LoadWarNames(const char *pDir)
 	CLineReader Reader;
 
 	str_format(aBuf, sizeof(aBuf), "loading war list file '%s'", aFilename);
-	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", aBuf);
+	Print(aBuf);
 	Reader.Init(File);
 
 	while((pLine = Reader.Get()))
@@ -424,7 +427,7 @@ int CWarList::LoadTeamNames(const char *pFilename)
 	if(!File)
 	{
 		// str_format(aBuf, sizeof(aBuf), "failed to open war list file '%s'", pFilename);
-		// Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", aBuf);
+		// Print(aBuf);
 		return 0;
 	}
 	m_TeamDirs++;
@@ -432,7 +435,7 @@ int CWarList::LoadTeamNames(const char *pFilename)
 	CLineReader Reader;
 
 	str_format(aBuf, sizeof(aBuf), "loading team list file '%s'", pFilename);
-	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", aBuf);
+	Print(aBuf);
 	Reader.Init(File);
 
 	while((pLine = Reader.Get()))
@@ -459,7 +462,7 @@ int CWarList::LoadTraitorNames(const char *pDir)
 	if(!File)
 	{
 		// str_format(aBuf, sizeof(aBuf), "failed to open war list file '%s'", aFilename);
-		// Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", aBuf);
+		// Print(aBuf);
 		return 0;
 	}
 	m_TraitorDirs++;
@@ -467,7 +470,7 @@ int CWarList::LoadTraitorNames(const char *pDir)
 	CLineReader Reader;
 
 	str_format(aBuf, sizeof(aBuf), "loading traitor list file '%s'", aFilename);
-	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", aBuf);
+	Print(aBuf);
 	Reader.Init(File);
 
 	while((pLine = Reader.Get()))
@@ -496,14 +499,14 @@ int CWarList::LoadWarClanNames(const char *pFilename)
 	if(!File)
 	{
 		// str_format(aBuf, sizeof(aBuf), "failed to open war clans list file '%s'", pFilename);
-		// Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", aBuf);
+		// Print(aBuf);
 		return 0;
 	}
 	char *pLine;
 	CLineReader Reader;
 
 	str_format(aBuf, sizeof(aBuf), "loading war clans list file '%s'", pFilename);
-	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", aBuf);
+	Print(aBuf);
 	Reader.Init(File);
 
 	while((pLine = Reader.Get()))
@@ -529,14 +532,14 @@ int CWarList::LoadTeamClanNames(const char *pFilename)
 	if(!File)
 	{
 		// str_format(aBuf, sizeof(aBuf), "failed to open team clans list file '%s'", pFilename);
-		// Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", aBuf);
+		// Print(aBuf);
 		return 0;
 	}
 	char *pLine;
 	CLineReader Reader;
 
 	str_format(aBuf, sizeof(aBuf), "loading team clans list file '%s'", pFilename);
-	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", aBuf);
+	Print(aBuf);
 	Reader.Init(File);
 
 	while((pLine = Reader.Get()))
@@ -562,14 +565,14 @@ int CWarList::LoadWarClanPrefixNames(const char *pFilename)
 	if(!File)
 	{
 		// str_format(aBuf, sizeof(aBuf), "failed to open war clan prefix list file '%s'", pFilename);
-		// Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", aBuf);
+		// Print(aBuf);
 		return 0;
 	}
 	char *pLine;
 	CLineReader Reader;
 
 	str_format(aBuf, sizeof(aBuf), "loading war clan prefix list file '%s'", pFilename);
-	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", aBuf);
+	Print(aBuf);
 	Reader.Init(File);
 
 	while((pLine = Reader.Get()))
@@ -605,6 +608,14 @@ void CWarList::ConchainWarList(IConsole::IResult *pResult, void *pUserData, ICon
 
 void CWarList::OnRender()
 {
+	if(!g_Config.m_ClWarList)
+		return;
+
+	if(time_get() > m_NextReload)
+	{
+		m_NextReload = time_get() + time_freq();
+		ReloadList();
+	}
 }
 
 void CWarList::ConWarlist(IConsole::IResult *pResult, void *pUserData)
@@ -612,7 +623,9 @@ void CWarList::ConWarlist(IConsole::IResult *pResult, void *pUserData)
 	CWarList *pSelf = (CWarList *)pUserData;
 	if(!str_comp(pResult->GetString(0), "reload"))
 	{
+		pSelf->m_Verbose = true;
 		pSelf->ReloadList();
+		pSelf->m_Verbose = false;
 	}
 	else if(!str_comp(pResult->GetString(0), "help"))
 	{
@@ -625,4 +638,12 @@ void CWarList::ConWarlist(IConsole::IResult *pResult, void *pUserData)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", "unkown warlist command try help");
 	}
+}
+
+void CWarList::Print(const char *pMsg)
+{
+	if(!m_Verbose)
+		return;
+
+	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", pMsg);
 }

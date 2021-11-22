@@ -76,6 +76,10 @@ class CWarList : public CComponent
 
 	static void ConchainWarList(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
+	void Print(const char *pMsg);
+	bool m_Verbose;
+	int64_t m_NextReload;
+
 public:
 	void GetWarReason(const char *pName, char *pReason, int ReasonSize);
 
