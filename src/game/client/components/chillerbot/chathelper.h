@@ -29,6 +29,7 @@ class CChatHelper : public CComponent
 
 	char m_aGreetName[32];
 	char m_aLastPingName[32];
+	char m_aLastPingClan[32];
 	char m_aLastAfkPing[2048];
 	char m_aLastPingMessage[2048];
 	char m_aSendBuffer[MAX_CHAT_BUFFER_LEN][2048];
@@ -36,7 +37,9 @@ class CChatHelper : public CComponent
 
 	bool LineShouldHighlight(const char *pLine, const char *pName);
 	bool IsGreeting(const char *pMsg);
+	bool IsQuestionWhy(const char *pMsg);
 	void DoGreet();
+	void ReplyToLastPing();
 	void SayFormat(const char *pMsg);
 	void AddChatFilter(const char *pFilter);
 	void ListChatFilter();
@@ -48,6 +51,7 @@ class CChatHelper : public CComponent
 	virtual void OnConsoleInit();
 	virtual void OnInit();
 
+	static void ConReplyToLastPing(IConsole::IResult *pResult, void *pUserData);
 	static void ConSayHi(IConsole::IResult *pResult, void *pUserData);
 	static void ConSayFormat(IConsole::IResult *pResult, void *pUserData);
 	static void ConAddChatFilter(IConsole::IResult *pResult, void *pUserData);

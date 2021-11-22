@@ -129,6 +129,44 @@ bool CWarList::IsTeamClanlist(const char *pClan)
 	return (std::find(m_vTeamClanlist.begin(), m_vTeamClanlist.end(), std::string(pClan)) != m_vTeamClanlist.end());
 }
 
+void CWarList::GetWarReason(const char *pName, char *pReason, int ReasonSize)
+{
+	if(!pReason)
+		return;
+	pReason[0] = '\0';
+	if(!Storage())
+		return;
+
+	char aFilenames[2][128];
+	str_format(aFilenames[0], sizeof(aFilenames[0]), "chillerbot/warlist/war/%s/reason.txt", pName);
+	str_format(aFilenames[1], sizeof(aFilenames[1]), "chillerbot/warlist/traitor/%s/reason.txt", pName);
+
+	for(auto &pFilename : aFilenames)
+	{
+		// exec the file
+		IOHANDLE File = Storage()->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_ALL);
+
+		if(!File)
+			continue;
+
+		char *pLine;
+		CLineReader Reader;
+		Reader.Init(File);
+		// read one line only
+		pLine = Reader.Get();
+		if(pLine)
+			str_copy(pReason, pLine, ReasonSize);
+
+		io_close(File);
+		break;
+	}
+}
+
+bool CWarList::IsWar(const char *pName, const char *pClan)
+{
+	return IsWarlist(pName) || IsTraitorlist(pName) || IsWarClanlist(pClan);
+}
+
 bool CWarList::IsWar(int ClientID)
 {
 	const char *pName = m_pClient->m_aClients[ClientID].m_aName;

@@ -84,11 +84,17 @@ void CChatHelper::SayBuffer(const char *pMsg, bool StayAfk)
 
 void CChatHelper::OnConsoleInit()
 {
+	Console()->Register("reply_to_last_ping", "", CFGFLAG_CLIENT, ConReplyToLastPing, this, "Respond to the last ping in chat");
 	Console()->Register("say_hi", "", CFGFLAG_CLIENT, ConSayHi, this, "Respond to the last greeting in chat");
 	Console()->Register("say_format", "s[message]", CFGFLAG_CLIENT, ConSayFormat, this, "send message replacing %n with last ping name");
 	Console()->Register("chat_filter_add", "s[text]", CFGFLAG_CLIENT, ConAddChatFilter, this, "Add string to chat filter. All messages containing that string will be ignored.");
 	Console()->Register("chat_filter_list", "", CFGFLAG_CLIENT, ConListChatFilter, this, "list all active filters");
 	Console()->Register("chat_filter_delete", "i[index]", CFGFLAG_CLIENT, ConDeleteChatFilter, this, "");
+}
+
+void CChatHelper::ConReplyToLastPing(IConsole::IResult *pResult, void *pUserData)
+{
+	((CChatHelper *)pUserData)->ReplyToLastPing();
 }
 
 void CChatHelper::ConSayHi(IConsole::IResult *pResult, void *pUserData)
@@ -188,6 +194,34 @@ bool CChatHelper::IsGreeting(const char *pMsg)
 	return false;
 }
 
+bool CChatHelper::IsQuestionWhy(const char *pMsg)
+{
+	const char aWhys[][128] = {
+		"warum",
+		"whyy",
+		"whyyy",
+		"whyyyy",
+		"w hyyyy",
+		"whhy",
+		"whhyy",
+		"whhyyy",
+		"wtf?",
+		"why"};
+	for(const auto &pWhy : aWhys)
+	{
+		const char *pHL = str_find_nocase(pMsg, pWhy);
+		while(pHL)
+		{
+			int Length = str_length(pWhy);
+
+			if((pMsg == pHL || pHL[-1] == ' ') && (pHL[Length] == 0 || pHL[Length] == ' ' || pHL[Length] == '.' || pHL[Length] == '!' || pHL[Length] == ',' || pHL[Length] == '?' || pHL[Length] == pHL[Length - 1]))
+				return true;
+			pHL = str_find_nocase(pHL + 1, pWhy);
+		}
+	}
+	return false;
+}
+
 void CChatHelper::SayFormat(const char *pMsg)
 {
 	char aBuf[1028] = {0};
@@ -216,6 +250,65 @@ void CChatHelper::SayFormat(const char *pMsg)
 	}
 	aBuf[minimum((unsigned long)sizeof(aBuf) - 1, buf_i)] = '\0';
 	m_pClient->m_Chat.Say(0, aBuf);
+}
+
+void CChatHelper::ReplyToLastPing()
+{
+	if(m_aLastPingName[0] == '\0')
+		return;
+	if(m_aLastPingMessage[0] == '\0')
+		return;
+
+	char aBuf[128];
+	int MsgLen = str_length(m_aLastPingMessage);
+	int NameLen = 0;
+	const char *pName = m_pClient->m_aClients[m_pClient->m_LocalIDs[0]].m_aName;
+	const char *pDummyName = m_pClient->m_aClients[m_pClient->m_LocalIDs[1]].m_aName;
+
+	if(LineShouldHighlight(m_aLastPingMessage, pName))
+		NameLen = str_length(pName);
+	else if(m_pClient->Client()->DummyConnected() && LineShouldHighlight(m_aLastPingMessage, pDummyName))
+		NameLen = str_length(pDummyName);
+
+	// ping without further context
+	if(MsgLen < NameLen + 2)
+	{
+		str_format(aBuf, sizeof(aBuf), "%s ?", m_aLastPingName);
+		m_pClient->m_Chat.Say(0, aBuf);
+		m_aLastPingMessage[0] = '\0';
+		return;
+	}
+	// greetings
+	if(IsGreeting(m_aLastPingMessage))
+	{
+		str_format(aBuf, sizeof(aBuf), "hi %s", m_aLastPingName);
+		m_pClient->m_Chat.Say(0, aBuf);
+		m_aLastPingMessage[0] = '\0';
+		return;
+	}
+	// why?
+	if(IsQuestionWhy(m_aLastPingMessage) || (str_find(m_aLastPingMessage, "?") && MsgLen < NameLen + 4))
+	{
+		char aWarReason[128];
+		if(m_pClient->m_WarList.IsWarlist(m_aLastPingName) || m_pClient->m_WarList.IsTraitorlist(m_aLastPingName))
+		{
+			m_pClient->m_WarList.GetWarReason(m_aLastPingName, aWarReason, sizeof(aWarReason));
+			if(aWarReason[0])
+				str_format(aBuf, sizeof(aBuf), "%s has war because: %s", m_aLastPingName, aWarReason);
+			else
+				str_format(aBuf, sizeof(aBuf), "%s you are on my warlist.", m_aLastPingName);
+			m_pClient->m_Chat.Say(0, aBuf);
+			m_aLastPingMessage[0] = '\0';
+			return;
+		}
+		else if(m_pClient->m_WarList.IsWarClanlist(m_aLastPingClan))
+		{
+			str_format(aBuf, sizeof(aBuf), "%s your clan is on my warlist.", m_aLastPingName);
+			m_pClient->m_Chat.Say(0, aBuf);
+			m_aLastPingMessage[0] = '\0';
+			return;
+		}
+	}
 }
 
 void CChatHelper::DoGreet()
@@ -267,6 +360,7 @@ void CChatHelper::OnChatMessage(int ClientID, int Team, const char *pMsg)
 	if(Client()->DummyConnected() && !str_comp(aName, m_pClient->m_aClients[m_pClient->m_LocalIDs[1]].m_aName))
 		return;
 	str_copy(m_aLastPingName, aName, sizeof(m_aLastPingName));
+	str_copy(m_aLastPingClan, m_pClient->m_aClients[ClientID].m_aClan, sizeof(m_aLastPingClan));
 	if(IsGreeting(pMsg))
 	{
 		str_copy(m_aGreetName, aName, sizeof(m_aGreetName));

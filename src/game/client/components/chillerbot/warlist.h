@@ -44,11 +44,6 @@ class CWarList : public CComponent
 	int LoadWarClanNames(const char *pFilename);
 	int LoadTeamClanNames(const char *pFilename);
 	int LoadWarClanPrefixNames(const char *pFilename);
-	bool IsWarlist(const char *pName);
-	bool IsTeamlist(const char *pName);
-	bool IsTraitorlist(const char *pName);
-	bool IsWarClanlist(const char *pClan);
-	bool IsTeamClanlist(const char *pClan);
 
 	virtual void OnRender();
 	virtual void OnConsoleInit();
@@ -59,6 +54,17 @@ class CWarList : public CComponent
 	static void ConchainWarList(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 public:
+	void GetWarReason(const char *pName, char *pReason, int ReasonSize);
+
+	// non cached used when its about the name and there is no up to date id
+	bool IsWar(const char *pName, const char *pClan);
+	bool IsWarlist(const char *pName);
+	bool IsTeamlist(const char *pName);
+	bool IsTraitorlist(const char *pName);
+	bool IsWarClanlist(const char *pClan);
+	bool IsTeamClanlist(const char *pClan);
+
+	// cached use during render
 	bool IsWar(int ClientID);
 	bool IsTeam(int ClientID);
 	bool IsTraitor(int ClientID);
