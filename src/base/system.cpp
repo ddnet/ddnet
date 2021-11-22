@@ -3542,60 +3542,47 @@ int pid()
 #endif
 }
 
-static int s_CmdLineArgNum = 0;
-#if defined(CONF_FAMILY_WINDOWS)
-static WCHAR **s_wCmdLineArgs = NULL;
-#endif
-static char **s_CmdLineArgs = 0;
-
-void cmdline_init(int argc, char **argv)
+void cmdline_fix(int *argc, const char ***argv)
 {
-	dbg_assert(s_CmdLineArgNum == 0, "cmdline_init may only be called once");
-	dbg_assert(argc > 0, "at least one command-line argument required");
 #if defined(CONF_FAMILY_WINDOWS)
-	s_wCmdLineArgs = CommandLineToArgvW(GetCommandLineW(), &s_CmdLineArgNum);
-	if(s_wCmdLineArgs != NULL)
+	int wide_argc = 0;
+	WCHAR **wide_argv = CommandLineToArgvW(GetCommandLineW(), &wide_argc);
+
+	int total_size = 0;
+
+	for(int i = 0; i < wide_argc; i++)
 	{
-		return;
+		int size = WideCharToMultiByte(CP_UTF8, 0, wide_argv[i], -1, NULL, 0, NULL, NULL);
+		dbg_assert(size != 0, "WideCharToMultiByte failure");
+		total_size += size;
 	}
-	// CommandLineToArgvW failed, fall back to normal arguments without Unicode support
+
+	char **new_argv = (char **)malloc((wide_argc + 1) * sizeof(*new_argv));
+	new_argv[0] = (char *)malloc(total_size);
+	mem_zero(new_argv[0], total_size);
+
+	int remaining_size = total_size;
+	for(int i = 0; i < wide_argc; i++)
+	{
+		int size = WideCharToMultiByte(CP_UTF8, 0, wide_argv[i], -1, new_argv[i], remaining_size, NULL, NULL);
+		dbg_assert(size != 0, "WideCharToMultiByte failure");
+
+		remaining_size -= size;
+		wide_argv[i + 1] = wide_argv[i] + size;
+	}
+
+	wide_argv[wide_argc] = 0;
+	*argc = wide_argc;
+	*argv = (const char **)new_argv;
 #endif
-	s_CmdLineArgNum = argc;
-	s_CmdLineArgs = argv;
 }
 
-int cmdline_arg_num()
+void cmdline_free(int argc, const char **argv)
 {
-	dbg_assert(s_CmdLineArgNum > 0, "cmdline_init was not called");
-	return s_CmdLineArgNum;
-}
-
-void cmdline_arg_get(int index, char *argument, int length)
-{
-	dbg_assert(s_CmdLineArgNum > 0, "cmdline_init was not called");
-	dbg_assert(index >= 0 && index < s_CmdLineArgNum, "argument index out of range");
 #if defined(CONF_FAMILY_WINDOWS)
-	if(s_wCmdLineArgs != NULL)
-	{
-		WideCharToMultiByte(CP_UTF8, 0, s_wCmdLineArgs[index], -1, argument, length, NULL, NULL);
-		return;
-	}
+	free((void *)*argv);
+	free(argv);
 #endif
-	str_copy(argument, s_CmdLineArgs[index], length);
-}
-
-void cmdline_free()
-{
-	dbg_assert(s_CmdLineArgNum > 0, "cmdline_init was not called");
-#if defined(CONF_FAMILY_WINDOWS)
-	if(s_wCmdLineArgs != NULL)
-	{
-		LocalFree(s_wCmdLineArgs);
-		s_wCmdLineArgs = NULL;
-	}
-#endif
-	s_CmdLineArgNum = 0;
-	s_CmdLineArgs = 0;
 }
 
 PROCESS shell_execute(const char *file)

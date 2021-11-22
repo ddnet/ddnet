@@ -2175,41 +2175,30 @@ void uint_to_bytes_be(unsigned char *bytes, unsigned value);
 int pid();
 
 /*
-	Function: cmdline_init
-		Initializes the command-line arguments so they are
-		available with cmdline_arg_num and cmdline_arg_get.
+	Function: cmdline_fix
+		Fixes the command line arguments to be encoded in UTF-8 on all
+		systems.
 
 	Parameters:
-		argc - The argc parameter that was passed to the main function.
-		argv - The argv parameter that was passed to the main function.
+		argc - A pointer to the argc parameter that was passed to the main function.
+		argv - A pointer to the argv parameter that was passed to the main function.
+
+	Remarks:
+		- You need to call cmdline_free once you're no longer using the
+		results.
 */
-void cmdline_init(int argc, char **argv);
-
-/*
-	Function: cmdline_arg_num
-		Gets the total number of command-line arguments.
-
-	Returns:
-		The number of command-line arguments. Always at least 1.
-*/
-int cmdline_arg_num();
-
-/*
-	Function: cmdline_arg_get
-		Gets a command-line argument as a utf8 string.
-
-	Parameters:
-		index - The index of the argument to retrieve.
-		argument - Pointer to a buffer that shall receive the string.
-		length - The size of the buffer.
-*/
-void cmdline_arg_get(int index, char *argument, int length);
+void cmdline_fix(int *argc, const char ***argv);
 
 /*
 	Function: cmdline_free
-		Frees memory that was allocated by cmdline_init.
+		Frees memory that was allocated by cmdline_fix.
+
+	Parameters:
+		argc - The argc obtained from cmdline_fix.
+		argv - The argv obtained from cmdline_fix.
+
 */
-void cmdline_free();
+void cmdline_free(int argc, const char **argv);
 
 #if defined(CONF_FAMILY_WINDOWS)
 typedef void *PROCESS;

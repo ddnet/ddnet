@@ -31,9 +31,11 @@ void Run(NETADDR Dest)
 	}
 }
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
+	cmdline_fix(&argc, &argv);
 	NETADDR Dest = {NETTYPE_IPV4, {127, 0, 0, 1}, 8303};
 	Run(Dest);
+	cmdline_free(argc, argv);
 	return 0;
 }

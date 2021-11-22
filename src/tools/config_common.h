@@ -44,40 +44,27 @@ static int ListdirCallback(const char *pItemName, int IsDir, int StorageType, vo
 	return 0;
 }
 
-int main(int argc, char **argv) // NOLINT(misc-definitions-in-headers)
+int main(int argc, const char **argv) // NOLINT(misc-definitions-in-headers)
 {
+	cmdline_fix(&argc, &argv);
 	dbg_logger_stdout();
-	cmdline_init(argc, argv);
-
 	IStorage *pStorage = CreateLocalStorage();
-	if(cmdline_arg_num() == 1)
+	if(argc == 1)
 	{
-		char aExecutablePath[IO_MAX_PATH_LENGTH];
-		cmdline_arg_get(0, aExecutablePath, sizeof(aExecutablePath));
-		dbg_msg("usage", "%s FILE1 [ FILE2... ]", aExecutablePath);
-		dbg_msg("usage", "%s DIRECTORY", aExecutablePath);
+		dbg_msg("usage", "%s FILE1 [ FILE2... ]", argv[0]);
+		dbg_msg("usage", "%s DIRECTORY", argv[0]);
 		return -1;
 	}
-	else if(cmdline_arg_num() == 2)
+	else if(argc == 2 && fs_is_dir(argv[1]))
 	{
-		char aPath[IO_MAX_PATH_LENGTH];
-		cmdline_arg_get(1, aPath, sizeof(aPath));
-		if(fs_is_dir(aPath))
-		{
-			ListDirectoryContext Context = {
-				aPath,
-				pStorage};
-			pStorage->ListDirectory(IStorage::TYPE_ALL, aPath, ListdirCallback, &Context);
-		}
+		ListDirectoryContext Context = {argv[1], pStorage};
+		pStorage->ListDirectory(IStorage::TYPE_ALL, argv[1], ListdirCallback, &Context);
 	}
 
-	for(int i = 1; i < cmdline_arg_num(); i++)
+	for(int i = 1; i < argc; i++)
 	{
-		char aPath[IO_MAX_PATH_LENGTH];
-		cmdline_arg_get(i, aPath, sizeof(aPath));
-		ProcessItem(aPath, pStorage);
+		ProcessItem(argv[i], pStorage);
 	}
-
-	cmdline_free();
+	cmdline_free(argc, argv);
 	return 0;
 }

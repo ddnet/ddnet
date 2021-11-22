@@ -41,7 +41,7 @@ public:
 	static void StripPathAndExtension(const char *pFilename, char *pBuffer, int BufferSize);
 };
 
-extern IStorage *CreateStorage(const char *pApplicationName, int StorageType);
+extern IStorage *CreateStorage(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments);
 extern IStorage *CreateLocalStorage();
 extern IStorage *CreateTempStorage(const char *pDirectory);
 

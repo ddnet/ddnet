@@ -46,7 +46,7 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 		if(pItem->m_External)
 			continue;
 
-		char aBuf[IO_MAX_PATH_LENGTH];
+		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "%s/%s.png", pPathSave, pName);
 		dbg_msg("map_extract", "writing image: %s (%dx%d)", aBuf, pItem->m_Width, pItem->m_Height);
 
@@ -81,7 +81,7 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 		if(pItem->m_External)
 			continue;
 
-		char aBuf[IO_MAX_PATH_LENGTH];
+		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "%s/%s.opus", pPathSave, pName);
 		dbg_msg("map_extract", "writing sound: %s (%d B)", aBuf, pItem->m_SoundDataSize);
 
@@ -93,31 +93,29 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 	return Map.Close();
 }
 
-int main(int argc, char **argv)
+int main(int argc, const char *argv[])
 {
+	cmdline_fix(&argc, &argv);
 	dbg_logger_stdout();
-	cmdline_init(argc, argv);
+
+	char aMap[512];
+	char aDir[512];
 
 	IStorage *pStorage = CreateLocalStorage();
 
-	char aMap[IO_MAX_PATH_LENGTH];
-	char aDir[IO_MAX_PATH_LENGTH];
-
-	if(cmdline_arg_num() == 2)
+	if(argc == 2)
 	{
-		cmdline_arg_get(1, aMap, sizeof(aMap));
-		str_copy(aDir, ".", sizeof(aDir));
+		str_copy(aMap, argv[1], sizeof(aMap));
+		str_copy(aDir, ".", sizeof(aMap));
 	}
-	else if(cmdline_arg_num() == 3)
+	else if(argc == 3)
 	{
-		cmdline_arg_get(1, aMap, sizeof(aMap));
-		cmdline_arg_get(2, aDir, sizeof(aDir));
+		str_copy(aMap, argv[1], sizeof(aMap));
+		str_copy(aDir, argv[2], sizeof(aDir));
 	}
 	else
 	{
-		char aExecutablePath[IO_MAX_PATH_LENGTH];
-		cmdline_arg_get(0, aExecutablePath, sizeof(aExecutablePath));
-		dbg_msg("usage", "%s map [directory]", aExecutablePath);
+		dbg_msg("usage", "%s map [directory]", argv[0]);
 		return -1;
 	}
 
@@ -130,7 +128,6 @@ int main(int argc, char **argv)
 	png_init(0, 0);
 
 	int Result = Process(pStorage, aMap, aDir) ? 0 : 1;
-
-	cmdline_free();
+	cmdline_free(argc, argv);
 	return Result;
 }

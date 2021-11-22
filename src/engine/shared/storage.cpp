@@ -28,25 +28,23 @@ public:
 		m_aUserdir[0] = 0;
 	}
 
-	int Init(const char *pApplicationName, int StorageType)
+	int Init(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments)
 	{
 		// get userdir
 		fs_storage_path(pApplicationName, m_aUserdir, sizeof(m_aUserdir));
 
 		// get datadir
-		char aExecutablePath[IO_MAX_PATH_LENGTH];
-		cmdline_arg_get(0, aExecutablePath, sizeof(aExecutablePath));
-		FindDatadir(aExecutablePath);
+		FindDatadir(ppArguments[0]);
 
 		// get binarydir
-		FindBinarydir(aExecutablePath);
+		FindBinarydir(ppArguments[0]);
 
 		// get currentdir
 		if(!fs_getcwd(m_aCurrentdir, sizeof(m_aCurrentdir)))
 			m_aCurrentdir[0] = 0;
 
 		// load paths from storage.cfg
-		LoadPaths(aExecutablePath);
+		LoadPaths(ppArguments[0]);
 
 		if(!m_NumPaths)
 		{
@@ -91,21 +89,21 @@ public:
 		return m_NumPaths ? 0 : 1;
 	}
 
-	void LoadPaths(const char *pExecutablePath)
+	void LoadPaths(const char *pArgv0)
 	{
 		// check current directory
 		IOHANDLE File = io_open("storage.cfg", IOFLAG_READ);
 		if(!File)
 		{
-			// check usable path in executable path
+			// check usable path in argv[0]
 			unsigned int Pos = ~0U;
-			for(unsigned i = 0; pExecutablePath[i]; i++)
-				if(pExecutablePath[i] == '/' || pExecutablePath[i] == '\\')
+			for(unsigned i = 0; pArgv0[i]; i++)
+				if(pArgv0[i] == '/' || pArgv0[i] == '\\')
 					Pos = i;
 			if(Pos < IO_MAX_PATH_LENGTH)
 			{
 				char aBuffer[IO_MAX_PATH_LENGTH];
-				str_copy(aBuffer, pExecutablePath, Pos + 1);
+				str_copy(aBuffer, pArgv0, Pos + 1);
 				str_append(aBuffer, "/storage.cfg", sizeof(aBuffer));
 				File = io_open(aBuffer, IOFLAG_READ);
 			}
@@ -179,7 +177,7 @@ public:
 		}
 	}
 
-	void FindDatadir(const char *pExecutablePath)
+	void FindDatadir(const char *pArgv0)
 	{
 		// 1) use data-dir in PWD if present
 		if(fs_is_dir("data/mapres"))
@@ -197,21 +195,21 @@ public:
 		}
 #endif
 
-		// 3) check for usable path in executable path
+		// 3) check for usable path in argv[0]
 		{
 #ifdef CONF_PLATFORM_HAIKU
-			pExecutablePath = realpath(pExecutablePath, NULL);
+			pArgv0 = realpath(pArgv0, NULL);
 #endif
 			unsigned int Pos = ~0U;
-			for(unsigned i = 0; pExecutablePath[i]; i++)
-				if(pExecutablePath[i] == '/' || pExecutablePath[i] == '\\')
+			for(unsigned i = 0; pArgv0[i]; i++)
+				if(pArgv0[i] == '/' || pArgv0[i] == '\\')
 					Pos = i;
 
 			if(Pos < IO_MAX_PATH_LENGTH)
 			{
 				char aBuf[IO_MAX_PATH_LENGTH];
 				char aDir[IO_MAX_PATH_LENGTH];
-				str_copy(aDir, pExecutablePath, Pos + 1);
+				str_copy(aDir, pArgv0, Pos + 1);
 				str_format(aBuf, sizeof(aBuf), "%s/data/mapres", aDir);
 				if(fs_is_dir(aBuf))
 				{
@@ -221,7 +219,7 @@ public:
 			}
 		}
 #ifdef CONF_PLATFORM_HAIKU
-		free((void *)pExecutablePath);
+		free((void *)pArgv0);
 #endif
 
 #if defined(CONF_FAMILY_UNIX)
@@ -254,24 +252,24 @@ public:
 		dbg_msg("storage", "warning: no data directory found");
 	}
 
-	void FindBinarydir(const char *pExecutablePath)
+	void FindBinarydir(const char *pArgv0)
 	{
 #if defined(BINARY_DIR)
 		str_copy(m_aBinarydir, BINARY_DIR, sizeof(m_aBinarydir));
 		return;
 #endif
 
-		// check for usable path in executable path
+		// check for usable path in argv[0]
 		{
 			unsigned int Pos = ~0U;
-			for(unsigned i = 0; pExecutablePath[i]; i++)
-				if(pExecutablePath[i] == '/' || pExecutablePath[i] == '\\')
+			for(unsigned i = 0; pArgv0[i]; i++)
+				if(pArgv0[i] == '/' || pArgv0[i] == '\\')
 					Pos = i;
 
 			if(Pos < IO_MAX_PATH_LENGTH)
 			{
 				char aBuf[IO_MAX_PATH_LENGTH];
-				str_copy(m_aBinarydir, pExecutablePath, Pos + 1);
+				str_copy(m_aBinarydir, pArgv0, Pos + 1);
 				str_format(aBuf, sizeof(aBuf), "%s/" PLAT_SERVER_EXEC, m_aBinarydir);
 				IOHANDLE File = io_open(aBuf, IOFLAG_READ);
 				if(File)
@@ -561,10 +559,10 @@ public:
 		return pBuffer;
 	}
 
-	static IStorage *Create(const char *pApplicationName, int StorageType)
+	static IStorage *Create(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments)
 	{
 		CStorage *p = new CStorage();
-		if(p && p->Init(pApplicationName, StorageType))
+		if(p && p->Init(pApplicationName, StorageType, NumArgs, ppArguments))
 		{
 			dbg_msg("storage", "initialisation failed");
 			delete p;
@@ -596,9 +594,9 @@ void IStorage::StripPathAndExtension(const char *pFilename, char *pBuffer, int B
 	str_copy(pBuffer, pExtractedName, Length);
 }
 
-IStorage *CreateStorage(const char *pApplicationName, int StorageType)
+IStorage *CreateStorage(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments)
 {
-	return CStorage::Create(pApplicationName, StorageType);
+	return CStorage::Create(pApplicationName, StorageType, NumArgs, ppArguments);
 }
 
 IStorage *CreateLocalStorage()

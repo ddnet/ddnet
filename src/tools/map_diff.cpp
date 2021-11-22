@@ -6,12 +6,9 @@
 
 #include <pnglite.h>
 
-bool Process(IStorage *pStorage, char *pMapName1, char *pMapName2)
+bool Process(IStorage *pStorage, const char **pMapNames)
 {
 	CDataFileReader Maps[2];
-	char *pMapNames[] = {
-		pMapName1,
-		pMapName2};
 
 	for(int i = 0; i < 2; ++i)
 	{
@@ -101,27 +98,20 @@ bool Process(IStorage *pStorage, char *pMapName1, char *pMapName2)
 	return true;
 }
 
-int main(int argc, char **argv)
+int main(int argc, const char *argv[])
 {
+	cmdline_fix(&argc, &argv);
 	dbg_logger_stdout();
 	dbg_logger_file("map_diff.txt");
-	cmdline_init(argc, argv);
 
 	IStorage *pStorage = CreateLocalStorage();
 
-	if(cmdline_arg_num() == 3)
+	if(argc != 3)
 	{
-		char aMap1[IO_MAX_PATH_LENGTH];
-		cmdline_arg_get(1, aMap1, sizeof(aMap1));
-		char aMap2[IO_MAX_PATH_LENGTH];
-		cmdline_arg_get(2, aMap2, sizeof(aMap2));
-		return Process(pStorage, aMap1, aMap2) ? 0 : 1;
-	}
-	else
-	{
-		char aExecutablePath[IO_MAX_PATH_LENGTH];
-		cmdline_arg_get(0, aExecutablePath, sizeof(aExecutablePath));
-		dbg_msg("usage", "%s map1 map2", aExecutablePath);
+		dbg_msg("usage", "%s map1 map2", argv[0]);
 		return -1;
 	}
+	int Result = Process(pStorage, &argv[1]) ? 0 : 1;
+	cmdline_free(argc, argv);
+	return Result;
 }

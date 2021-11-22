@@ -108,14 +108,14 @@ void *ReplaceImageItem(void *pItem, int Type, const char *pImgName, const char *
 	return (void *)pNewImgItem;
 }
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
+	cmdline_fix(&argc, &argv);
 	dbg_logger_stdout();
-	cmdline_init(argc, argv);
 
-	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC);
+	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC, argc, argv);
 
-	if(cmdline_arg_num() != 5)
+	if(argc != 5)
 	{
 		dbg_msg("map_replace_image", "Invalid arguments");
 		dbg_msg("map_replace_image", "Usage: map_replace_image <source map filepath> <dest map filepath> <current image name> <new image filepath>");
@@ -130,24 +130,26 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	char aSourceFileName[IO_MAX_PATH_LENGTH];
-	cmdline_arg_get(1, aSourceFileName, sizeof(aSourceFileName));
-	char aDestFileName[IO_MAX_PATH_LENGTH];
-	cmdline_arg_get(2, aDestFileName, sizeof(aDestFileName));
-	char aImageName[IO_MAX_PATH_LENGTH];
-	cmdline_arg_get(3, aImageName, sizeof(aImageName));
-	char aImageFile[IO_MAX_PATH_LENGTH];
-	cmdline_arg_get(4, aImageFile, sizeof(aImageFile));
+	const char *pSourceFileName = argv[1];
+	const char *pDestFileName = argv[2];
+	const char *pImageName = argv[3];
+	const char *pImageFile = argv[4];
 
-	if(!g_DataReader.Open(pStorage, aSourceFileName, IStorage::TYPE_ALL))
+	int ID = 0;
+	int Type = 0;
+	int Size = 0;
+	void *pItem = 0;
+	void *pData = 0;
+
+	if(!g_DataReader.Open(pStorage, pSourceFileName, IStorage::TYPE_ALL))
 	{
-		dbg_msg("map_replace_image", "failed to open source map. filename='%s'", aSourceFileName);
+		dbg_msg("map_replace_image", "failed to open source map. filename='%s'", pSourceFileName);
 		return -1;
 	}
 
-	if(!g_DataWriter.Open(pStorage, aDestFileName))
+	if(!g_DataWriter.Open(pStorage, pDestFileName))
 	{
-		dbg_msg("map_replace_image", "failed to open destination map. filename='%s'", aDestFileName);
+		dbg_msg("map_replace_image", "failed to open destination map. filename='%s'", pDestFileName);
 		return -1;
 	}
 
@@ -157,9 +159,8 @@ int main(int argc, char **argv)
 	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)
 	{
 		CMapItemImage NewImageItem;
-		int Type, ID;
-		void *pItem = g_DataReader.GetItem(Index, &Type, &ID);
-		int Size = g_DataReader.GetItemSize(Index);
+		pItem = g_DataReader.GetItem(Index, &Type, &ID);
+		Size = g_DataReader.GetItemSize(Index);
 
 		// filter ITEMTYPE_EX items, they will be automatically added again
 		if(Type == ITEMTYPE_EX)
@@ -167,7 +168,7 @@ int main(int argc, char **argv)
 			continue;
 		}
 
-		pItem = ReplaceImageItem(pItem, Type, aImageName, aImageFile, &NewImageItem);
+		pItem = ReplaceImageItem(pItem, Type, pImageName, pImageFile, &NewImageItem);
 		if(!pItem)
 			return -1;
 		g_DataWriter.AddItem(Type, ID, Size, pItem);
@@ -175,15 +176,13 @@ int main(int argc, char **argv)
 
 	if(g_NewDataID == -1)
 	{
-		dbg_msg("map_replace_image", "image '%s' not found on source map '%s'.", aImageName, aSourceFileName);
+		dbg_msg("map_replace_image", "image '%s' not found on source map '%s'.", pImageName, pSourceFileName);
 		return -1;
 	}
 
 	// add all data
 	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)
 	{
-		void *pData;
-		int Size;
 		if(Index == g_NewDataID)
 		{
 			pData = g_pNewData;
@@ -206,7 +205,7 @@ int main(int argc, char **argv)
 	g_DataReader.Close();
 	g_DataWriter.Finish();
 
-	dbg_msg("map_replace_image", "image '%s' replaced", aImageName);
-	cmdline_free();
+	dbg_msg("map_replace_image", "image '%s' replaced", pImageName);
+	cmdline_free(argc, argv);
 	return 0;
 }

@@ -1,9 +1,9 @@
 #import <Cocoa/Cocoa.h>
 #include <base/system.h>
 
-extern int TWMain(int argc, char **argv);
+extern int TWMain(int argc, const char **argv);
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
 	BOOL FinderLaunch = argc >= 2 && !str_comp_num(argv[1], "-psn", 4);
 
@@ -15,7 +15,7 @@ int main(int argc, char **argv)
 
 	if(FinderLaunch)
 	{
-		char *paArgv[2] = { argv[0], NULL };
+		const char *paArgv[2] = { argv[0], NULL };
 		return TWMain(1, paArgv);
 	}
 	else

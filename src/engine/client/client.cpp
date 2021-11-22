@@ -4297,28 +4297,27 @@ void CClient::HandleMapPath(const char *pPath)
 */
 
 #if defined(CONF_PLATFORM_MACOS)
-extern "C" int TWMain(int argc, char **argv)
+extern "C" int TWMain(int argc, const char **argv) // ignore_convention
 #elif defined(CONF_PLATFORM_ANDROID)
-extern "C" __attribute__((visibility("default"))) int SDL_main(int argc, char *argv[]);
+extern "C" __attribute__((visibility("default"))) int SDL_main(int argc, const char *argv[]);
 extern "C" void InitAndroid();
 
-int SDL_main(int argc, char *argv[])
+int SDL_main(int argc, const char *argv[])
 #else
-int main(int argc, char **argv)
+int main(int argc, const char **argv) // ignore_convention
 #endif
 {
-	cmdline_init(argc, argv);
-
+	cmdline_fix(&argc, &argv);
 	bool Silent = false;
-	for(int i = 1; i < cmdline_arg_num(); i++)
+	bool RandInitFailed = false;
+
+	for(int i = 1; i < argc; i++) // ignore_convention
 	{
-		char aArgument[32];
-		cmdline_arg_get(i, aArgument, sizeof(aArgument));
-		if(str_comp("-s", aArgument) == 0 || str_comp("--silent", aArgument) == 0)
+		if(str_comp("-s", argv[i]) == 0 || str_comp("--silent", argv[i]) == 0) // ignore_convention
 		{
 			Silent = true;
 		}
-		else if(str_comp("-c", aArgument) == 0 || str_comp("--console", aArgument) == 0)
+		else if(str_comp("-c", argv[i]) == 0 || str_comp("--console", argv[i]) == 0) // ignore_convention
 		{
 #if defined(CONF_FAMILY_WINDOWS)
 			AllocConsole();
@@ -4330,7 +4329,10 @@ int main(int argc, char **argv)
 	InitAndroid();
 #endif
 
-	const bool RandInitFailed = secure_random_init() != 0;
+	if(secure_random_init() != 0)
+	{
+		RandInitFailed = true;
+	}
 
 	NotificationsInit();
 
@@ -4342,7 +4344,7 @@ int main(int argc, char **argv)
 	// create the components
 	IEngine *pEngine = CreateEngine("DDNet", Silent, 2);
 	IConsole *pConsole = CreateConsole(CFGFLAG_CLIENT);
-	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_CLIENT);
+	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_CLIENT, argc, (const char **)argv); // ignore_convention
 	IConfigManager *pConfigManager = CreateConfigManager();
 	IEngineSound *pEngineSound = CreateEngineSound();
 	IEngineInput *pEngineInput = CreateEngineInput();
@@ -4447,22 +4449,14 @@ int main(int argc, char **argv)
 	g_Config.m_ClConfigVersion = 1;
 
 	// parse the command line arguments
-	bool ArgumentsNotHandled = false;
-	if(cmdline_arg_num() == 2)
-	{
-		char aArgument[IO_MAX_PATH_LENGTH];
-		cmdline_arg_get(1, aArgument, sizeof(aArgument));
-		if(cmdline_arg_num() == 2 && str_startswith(aArgument, CONNECTLINK))
-			pClient->HandleConnectLink(aArgument);
-		else if(cmdline_arg_num() == 2 && str_endswith(aArgument, ".demo"))
-			pClient->HandleDemoPath(aArgument);
-		else if(cmdline_arg_num() == 2 && str_endswith(aArgument, ".map"))
-			pClient->HandleMapPath(aArgument);
-		else
-			ArgumentsNotHandled = true;
-	}
-	if(cmdline_arg_num() > 1 && ArgumentsNotHandled)
-		pConsole->ParseCommandLineArguments();
+	if(argc == 2 && str_startswith(argv[1], CONNECTLINK))
+		pClient->HandleConnectLink(argv[1]);
+	else if(argc == 2 && str_endswith(argv[1], ".demo"))
+		pClient->HandleDemoPath(argv[1]);
+	else if(argc == 2 && str_endswith(argv[1], ".map"))
+		pClient->HandleMapPath(argv[1]);
+	else if(argc > 1) // ignore_convention
+		pConsole->ParseArguments(argc - 1, (const char **)&argv[1]); // ignore_convention
 
 	if(pSteam->GetConnectAddress())
 	{
@@ -4490,8 +4484,8 @@ int main(int argc, char **argv)
 	}
 
 	delete pKernel;
-	cmdline_free();
 
+	cmdline_free(argc, argv);
 #ifdef CONF_PLATFORM_ANDROID
 	// properly close this native thread, so globals are destructed
 	std::exit(0);

@@ -133,14 +133,14 @@ void *ReplaceImageItem(void *pItem, int Type, CMapItemImage *pNewImgItem)
 	return (void *)pNewImgItem;
 }
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
+	cmdline_fix(&argc, &argv);
 	dbg_logger_stdout();
-	cmdline_init(argc, argv);
 
-	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC);
+	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC, argc, argv);
 
-	if(cmdline_arg_num() < 2 || cmdline_arg_num() > 3)
+	if(argc < 2 || argc > 3)
 	{
 		dbg_msg("map_convert_07", "Invalid arguments");
 		dbg_msg("map_convert_07", "Usage: map_convert_07 <source map filepath> [<dest map filepath>]");
@@ -153,20 +153,21 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	char aSourceFileName[IO_MAX_PATH_LENGTH];
-	cmdline_arg_get(1, aSourceFileName, sizeof(aSourceFileName));
+	const char *pSourceFileName = argv[1];
 
+	const char *pDestFileName;
 	char aDestFileName[IO_MAX_PATH_LENGTH];
-	if(cmdline_arg_num() == 3)
+
+	if(argc == 3)
 	{
-		cmdline_arg_get(2, aDestFileName, sizeof(aDestFileName));
+		pDestFileName = argv[2];
 	}
 	else
 	{
 		char aBuf[IO_MAX_PATH_LENGTH];
-		IStorage::StripPathAndExtension(aSourceFileName, aBuf, sizeof(aBuf));
+		IStorage::StripPathAndExtension(pSourceFileName, aBuf, sizeof(aBuf));
 		str_format(aDestFileName, sizeof(aDestFileName), "data/maps7/%s.map", aBuf);
-
+		pDestFileName = aDestFileName;
 		if(fs_makedir("data") != 0)
 		{
 			dbg_msg("map_convert_07", "failed to create data directory");
@@ -180,15 +181,21 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if(!g_DataReader.Open(pStorage, aSourceFileName, IStorage::TYPE_ABSOLUTE))
+	int ID = 0;
+	int Type = 0;
+	int Size = 0;
+	void *pItem = 0;
+	void *pData = 0;
+
+	if(!g_DataReader.Open(pStorage, pSourceFileName, IStorage::TYPE_ABSOLUTE))
 	{
-		dbg_msg("map_convert_07", "failed to open source map. filename='%s'", aSourceFileName);
+		dbg_msg("map_convert_07", "failed to open source map. filename='%s'", pSourceFileName);
 		return -1;
 	}
 
-	if(!g_DataWriter.Open(pStorage, aDestFileName, IStorage::TYPE_ABSOLUTE))
+	if(!g_DataWriter.Open(pStorage, pDestFileName, IStorage::TYPE_ABSOLUTE))
 	{
-		dbg_msg("map_convert_07", "failed to open destination map. filename='%s'", aDestFileName);
+		dbg_msg("map_convert_07", "failed to open destination map. filename='%s'", pDestFileName);
 		return -1;
 	}
 
@@ -196,31 +203,25 @@ int main(int argc, char **argv)
 
 	g_NextDataItemID = g_DataReader.NumData();
 
-	int ImageIndex = 0;
+	int i = 0;
 	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)
 	{
-		int Type, ID;
 		g_DataReader.GetItem(Index, &Type, &ID);
 		if(Type == MAPITEMTYPE_IMAGE)
-		{
-			g_aImageIDs[ImageIndex] = Index;
-			++ImageIndex;
-		}
+			g_aImageIDs[i++] = Index;
 	}
 
 	bool Success = true;
 
-	const int MaxClientTextures = 64;
-	if(ImageIndex > MaxClientTextures)
-		dbg_msg("map_convert_07", "%s: Uses more textures than the client maximum of %d (%d).", aSourceFileName, MaxClientTextures, ImageIndex);
+	if(i > 64)
+		dbg_msg("map_convert_07", "%s: Uses more textures than the client maximum of 64.", pSourceFileName);
 
 	// add all items
 	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)
 	{
 		CMapItemImage NewImageItem;
-		int Type, ID;
-		void *pItem = g_DataReader.GetItem(Index, &Type, &ID);
-		int Size = g_DataReader.GetItemSize(Index);
+		pItem = g_DataReader.GetItem(Index, &Type, &ID);
+		Size = g_DataReader.GetItemSize(Index);
 
 		// filter ITEMTYPE_EX items, they will be automatically added again
 		if(Type == ITEMTYPE_EX)
@@ -228,7 +229,7 @@ int main(int argc, char **argv)
 			continue;
 		}
 
-		Success &= CheckImageDimensions(pItem, Type, aSourceFileName);
+		Success &= CheckImageDimensions(pItem, Type, pSourceFileName);
 
 		pItem = ReplaceImageItem(pItem, Type, &NewImageItem);
 		if(!pItem)
@@ -239,21 +240,20 @@ int main(int argc, char **argv)
 	// add all data
 	for(int Index = 0; Index < g_DataReader.NumData(); Index++)
 	{
-		void *pData = g_DataReader.GetData(Index);
-		int Size = g_DataReader.GetDataSize(Index);
+		pData = g_DataReader.GetData(Index);
+		Size = g_DataReader.GetDataSize(Index);
 		g_DataWriter.AddData(Size, pData);
 	}
 
 	for(int Index = 0; Index < g_Index; Index++)
 	{
-		void *pData = g_pNewData[Index];
-		int Size = g_NewDataSize[Index];
+		pData = g_pNewData[Index];
+		Size = g_NewDataSize[Index];
 		g_DataWriter.AddData(Size, pData);
 	}
 
 	g_DataReader.Close();
 	g_DataWriter.Finish();
-
-	cmdline_free();
+	cmdline_free(argc, argv);
 	return Success ? 0 : -1;
 }
