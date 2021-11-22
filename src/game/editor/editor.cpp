@@ -4248,6 +4248,9 @@ void CEditor::RenderFileDialog()
 					str_copy(&m_aFileDialogFileName[i], &m_aFileDialogFileName[i + 1], (int)(sizeof(m_aFileDialogFileName)) - i);
 			m_FilesSelectedIndex = -1;
 		}
+
+		if(m_FileDialogOpening)
+			UI()->SetActiveItem(&s_FileBoxID);
 	}
 	else
 	{
