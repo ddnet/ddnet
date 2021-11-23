@@ -4,8 +4,6 @@
 #include <game/gamecore.h>
 #include <game/mapitems.h>
 
-#include <pnglite.h>
-
 bool Process(IStorage *pStorage, char **pMapNames)
 {
 	CDataFileReader Maps[2];
