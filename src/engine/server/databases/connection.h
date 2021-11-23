@@ -54,6 +54,7 @@ public:
 	virtual void BindString(int Idx, const char *pString) = 0;
 	virtual void BindBlob(int Idx, unsigned char *pBlob, int Size) = 0;
 	virtual void BindInt(int Idx, int Value) = 0;
+	virtual void BindInt64(int Idx, int64_t Value) = 0;
 	virtual void BindFloat(int Idx, float Value) = 0;
 
 	// Print expanded sql statement
