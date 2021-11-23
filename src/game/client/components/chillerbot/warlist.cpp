@@ -611,9 +611,9 @@ void CWarList::OnRender()
 	if(!g_Config.m_ClWarList)
 		return;
 
-	if(time_get() > m_NextReload)
+	if(g_Config.m_ClWarListAutoReload && time_get() > m_NextReload)
 	{
-		m_NextReload = time_get() + time_freq() * 10;
+		m_NextReload = time_get() + time_freq() * g_Config.m_ClWarListAutoReload;
 		ReloadList();
 	}
 }
