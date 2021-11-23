@@ -1067,6 +1067,7 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 
 	if(From == m_pPlayer->GetCID())
 	{
+		Dmg = 0;
 		//Give back ammo on grenade self push//Only if not infinite ammo and activated
 		if(Weapon == WEAPON_GRENADE && g_Config.m_SvGrenadeAmmoRegen && g_Config.m_SvGrenadeAmmoRegenSpeedNade)
 		{
