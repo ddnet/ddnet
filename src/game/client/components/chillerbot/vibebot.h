@@ -26,8 +26,14 @@ private:
 	int m_Mode[NUM_DUMMIES];
 	int m_MoveID;
 
-	void VibeHappy();
-	void VibeSleepy();
+	enum
+	{
+		E_MUSIC = 5,
+		E_SLEEPY = 12,
+		E_HAPPY = 14,
+	};
+
+	void VibeEmote(int Emoticon);
 
 public:
 	CVibeBot();
@@ -50,6 +56,7 @@ public:
 	{
 		VB_OFF,
 		VB_HAPPY,
+		VB_MUSIC,
 		VB_SLEEPY,
 	};
 

@@ -84,7 +84,7 @@ void CVibeBot::UpdateComponents()
 
 void CVibeBot::OnConsoleInit()
 {
-	Console()->Register("vibe", "s[sleepy|happy]?i[dummy]", CFGFLAG_CLIENT, ConVibe, this, "Set vibebot mode ('vibebots' for list)");
+	Console()->Register("vibe", "s[sleepy|happy|music]?i[dummy]", CFGFLAG_CLIENT, ConVibe, this, "Set vibebot mode ('vibebots' for list)");
 	Console()->Register("vibes", "", CFGFLAG_CLIENT, ConVibes, this, "Shows all vibebots (set via vibebot <name>)");
 	Console()->Register("unvibe", "", CFGFLAG_CLIENT, ConUnVibe, this, "Turn off vibebot");
 }
@@ -97,6 +97,8 @@ void CVibeBot::ConVibe(IConsole::IResult *pResult, void *pUserData)
 		Mode = VB_HAPPY;
 	else if(!str_comp(pResult->GetString(0), "sleepy"))
 		Mode = VB_SLEEPY;
+	else if(!str_comp(pResult->GetString(0), "music"))
+		Mode = VB_MUSIC;
 	else if(str_comp(pResult->GetString(0), "off"))
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "vibebot", "unkown mode use 'vibes' to list all modes.");
@@ -118,29 +120,16 @@ void CVibeBot::ConVibes(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "vibebot", "--- vibebot ---");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "vibebot", "off: off");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "vibebot", "happy: happy emote and casual eye move");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "vibebot", "music: music emote and casual eye move");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "vibebot", "sleepy: zzZ emote and casual eye move");
 }
 
-void CVibeBot::VibeHappy()
+void CVibeBot::VibeEmote(int Emoticon)
 {
 	if(time_get() > m_NextEmote[MoveID()])
 	{
 		m_NextEmote[MoveID()] = time_get() + time_freq() * (rand() % 10) + 5;
-		Emote(14);
-	}
-	if(time_get() > m_NextAim[MoveID()])
-	{
-		m_NextAim[MoveID()] = time_get() + time_freq() * (rand() % 5) + 5;
-		Aim(rand() % 200 - 100, rand() % 200 - 100);
-	}
-}
-
-void CVibeBot::VibeSleepy()
-{
-	if(time_get() > m_NextEmote[MoveID()])
-	{
-		m_NextEmote[MoveID()] = time_get() + time_freq() * (rand() % 10) + 5;
-		Emote(12);
+		Emote(Emoticon);
 	}
 	if(time_get() > m_NextAim[MoveID()])
 	{
@@ -206,8 +195,10 @@ void CVibeBot::OnRender()
 		m_InputData[MoveID()] = m_pClient->m_Controls.m_InputData[MoveID()];
 		AimTick();
 		if(m_Mode[Dummy] == VB_HAPPY)
-			VibeHappy();
+			VibeEmote(E_HAPPY);
 		else if(m_Mode[Dummy] == VB_SLEEPY)
-			VibeSleepy();
+			VibeEmote(E_SLEEPY);
+		else if(m_Mode[Dummy] == VB_MUSIC)
+			VibeEmote(E_MUSIC);
 	}
 }
