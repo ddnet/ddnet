@@ -337,6 +337,27 @@ void CGameControllerDDRace::FlagTick()
 						Diff / (float)Server()->TickSpeed());
 					GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
+					float CaptureTime = Diff / (float)Server()->TickSpeed();
+					if(CaptureTime <= 60)
+						str_format(aBuf,
+							sizeof(aBuf),
+							"The %s flag was captured by '%s' (%d.%s%d seconds)", fi ? "blue" : "red",
+							Server()->ClientName(F->GetCarrier()->GetPlayer()->GetCID()), (int)CaptureTime % 60, ((int)(CaptureTime * 100) % 100) < 10 ? "0" : "", (int)(CaptureTime * 100) % 100);
+					else
+						str_format(
+							aBuf,
+							sizeof(aBuf),
+							"The %s flag was captured by '%s'", fi ? "blue" : "red",
+							Server()->ClientName(F->GetCarrier()->GetPlayer()->GetCID()));
+					for(auto &pPlayer : GameServer()->m_apPlayers)
+					{
+						if(!pPlayer)
+							continue;
+						if(Server()->IsSixup(pPlayer->GetCID()))
+							continue;
+
+						GameServer()->SendChatTarget(pPlayer->GetCID(), aBuf);
+					}
 					GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_CAPTURE, fi, F->GetCarrier()->GetPlayer()->GetCID(), Diff, -1);
 					GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
 					for(int i = 0; i < 2; i++)
