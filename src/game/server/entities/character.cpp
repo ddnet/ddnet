@@ -1071,7 +1071,7 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 		//Give back ammo on grenade self push//Only if not infinite ammo and activated
 		if(Weapon == WEAPON_GRENADE && g_Config.m_SvGrenadeAmmoRegen && g_Config.m_SvGrenadeAmmoRegenSpeedNade)
 		{
-			SetWeaponAmmo(WEAPON_GRENADE, maximum(m_aWeapons[WEAPON_GRENADE].m_Ammo + 1, g_Config.m_SvGrenadeAmmoRegenNum));
+			SetWeaponAmmo(WEAPON_GRENADE, minimum(m_aWeapons[WEAPON_GRENADE].m_Ammo + 1, g_Config.m_SvGrenadeAmmoRegenNum));
 		}
 	}
 
