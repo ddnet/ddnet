@@ -1832,6 +1832,8 @@ if(CLIENT)
     components/chillerbot/unix.cpp
     components/chillerbot/unix.h
     components/chillerbot/version.h
+    components/chillerbot/vibebot.cpp
+    components/chillerbot/vibebot.h
     components/chillerbot/warlist.cpp
     components/chillerbot/warlist.h
     components/console.cpp

@@ -63,6 +63,7 @@
 #include "components/chillerbot/remotecontrol.h"
 #include "components/chillerbot/terminalui.h"
 #include "components/chillerbot/unix.h"
+#include "components/chillerbot/vibebot.h"
 #include "components/chillerbot/warlist.h"
 
 class CGameInfo
@@ -163,6 +164,7 @@ public:
 	CRemoteControl m_RemoteControl;
 	CUnix m_Unix;
 	CWarList m_WarList;
+	CVibeBot m_VibeBot;
 	CTerminalUI m_TerminalUI;
 
 private:

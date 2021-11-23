@@ -71,6 +71,7 @@
 #include "components/chillerbot/remotecontrol.h"
 #include "components/chillerbot/terminalui.h"
 #include "components/chillerbot/unix.h"
+#include "components/chillerbot/vibebot.h"
 #include "components/chillerbot/warlist.h"
 
 #include "components/ghost.h"
@@ -155,6 +156,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&m_ChillPw);
 	m_All.Add(&m_RemoteControl);
 	m_All.Add(&m_WarList);
+	m_All.Add(&m_VibeBot);
 	m_All.Add(&m_TerminalUI);
 	m_All.Add(&m_ChillConsole);
 	m_All.Add(&m_Unix);
@@ -392,6 +394,12 @@ void CGameClient::OnDummySwap()
 
 int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 {
+	int CurrentTee = g_Config.m_ClDummy ? !Dummy : Dummy;
+	if(m_VibeBot.m_SendData[CurrentTee])
+	{
+		mem_copy(pData, &m_VibeBot.m_InputData[CurrentTee], sizeof(m_VibeBot.m_InputData[CurrentTee]));
+		return sizeof(m_VibeBot.m_InputData[CurrentTee]);
+	}
 	if(!Dummy)
 	{
 		return m_Controls.SnapInput(pData);
