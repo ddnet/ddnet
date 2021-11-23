@@ -675,8 +675,8 @@ void CClient::EnterGame()
 
 	ServerInfoRequest(); // fresh one for timeout protection
 	m_CurrentServerNextPingTime = time_get() + time_freq() / 2;
-	m_aTimeoutCodeSent[0] = false;
-	m_aTimeoutCodeSent[1] = false;
+	m_CodeRunAfterJoin[0] = false;
+	m_CodeRunAfterJoin[1] = false;
 }
 
 void GenerateTimeoutCode(char *pBuffer, unsigned Size, char *pSeed, const NETADDR &Addr, bool Dummy)
@@ -2058,20 +2058,27 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 						m_GameTime[g_Config.m_ClDummy].Update(&m_GametimeMarginGraph, (GameTick - 1) * time_freq() / 50, TimeLeft, 0);
 					}
 
-					if(m_ReceivedSnapshots[g_Config.m_ClDummy] > 50 && !m_aTimeoutCodeSent[g_Config.m_ClDummy])
+					if(m_ReceivedSnapshots[g_Config.m_ClDummy] > 50 && !m_CodeRunAfterJoin[g_Config.m_ClDummy])
 					{
 						if(m_ServerCapabilities.m_ChatTimeoutCode || ShouldSendChatTimeoutCodeHeuristic())
 						{
-							m_aTimeoutCodeSent[g_Config.m_ClDummy] = true;
 							CNetMsg_Cl_Say Msg;
 							Msg.m_Team = 0;
 							char aBuf[256];
-							str_format(aBuf, sizeof(aBuf), "/timeout %s", m_aTimeoutCodes[g_Config.m_ClDummy]);
+							if(g_Config.m_ClRunOnJoin[0])
+							{
+								str_format(aBuf, sizeof(aBuf), "/mc;timeout %s;%s", m_aTimeoutCodes[g_Config.m_ClDummy], g_Config.m_ClRunOnJoin);
+							}
+							else
+							{
+								str_format(aBuf, sizeof(aBuf), "/timeout %s", m_aTimeoutCodes[g_Config.m_ClDummy]);
+							}
 							Msg.m_pMessage = aBuf;
 							CMsgPacker Packer(Msg.MsgID(), false);
 							Msg.Pack(&Packer);
 							SendMsgY(&Packer, MSGFLAG_VITAL, g_Config.m_ClDummy);
 						}
+						m_CodeRunAfterJoin[g_Config.m_ClDummy] = true;
 					}
 
 					// ack snapshot

@@ -2596,13 +2596,13 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	Left.VSplitRight(10.0f, &Left, 0x0);
 	Right.VSplitLeft(10.0f, 0x0, &Right);
 	Left.HSplitTop(25.0f, 0x0, &Left);
-	CUIRect TempLabel;
+	CUIRect TempLabel, TempLabel2;
 	Left.HSplitTop(25.0f, &TempLabel, &Left);
 	Left.HSplitTop(5.0f, 0x0, &Left);
 
 	UI()->DoLabelScaled(&TempLabel, Localize("Background"), 20.0f, -1);
 
-	Right.HSplitTop(25.0f, 0x0, &Right);
+	Right.HSplitTop(45.0f, 0x0, &Right);
 	Right.HSplitTop(25.0f, &TempLabel, &Right);
 	Right.HSplitTop(5.0f, 0x0, &Miscellaneous);
 
@@ -2650,12 +2650,20 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	{
 		Client()->GenerateTimeoutSeed();
 	}
+
+	static float s_RunOnJoin = 0.0f;
+	Right.VSplitLeft(5.0f, 0, &Right);
+	Right.HSplitTop(5.0f, 0, &Right);
+	Right.HSplitTop(20.0f, &Right, 0);
+	Right.VSplitLeft(100.0f, &Label, &TempLabel2);
+	UI()->DoLabelScaled(&Label, Localize("Run on join"), 14.0f, -1);
+	UIEx()->DoEditBox(g_Config.m_ClRunOnJoin, &TempLabel2, g_Config.m_ClRunOnJoin, sizeof(g_Config.m_ClRunOnJoin), 14.0f, &s_RunOnJoin);
 	// Updater
 #if defined(CONF_AUTOUPDATE)
 	{
 		MainView.VSplitMid(&Left, &Right);
 		Left.w += 20.0f;
-		Left.HSplitBottom(25.0f, 0x0, &Label);
+		Left.HSplitBottom(20.0f, 0x0, &Label);
 		bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
 		char aBuf[256];
 		int State = Updater()->GetCurrentState();
