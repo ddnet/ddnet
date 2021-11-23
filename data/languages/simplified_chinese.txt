@@ -2,17 +2,18 @@
 #originally created by:
 #	MK124
 #modified by:
-# 2016.2.5 CarolVlCznYu
-# 2017.7.31 MC_TYH
-# 2018.10.7 Yangfl
-# 2019.12.16 Eki
-# 2020.6.25 Night_L
-# 2020.8.14 Night_L
-# 2020.8.19 TsFreddie
-# 2020.8.20 Dan_cao
-# 2020.11.12 TsFreddie
-# 2021.5.27 Momo
-# 2021.6.1 TsFreddie
+# 2016-02-05 CarolVlCznYu
+# 2017-07-31 MC_TYH
+# 2018-10-07 Yangfl
+# 2019-12-16 Eki
+# 2020-06-25 Night_L
+# 2020-08-14 Night_L
+# 2020-08-19 TsFreddie
+# 2020-08-20 Dan_cao
+# 2020-11-12 TsFreddie
+# 2021-05-27 Momo
+# 2021-06-01 TsFreddie
+# 2021-11-19 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -1334,19 +1335,19 @@ Tee
 == 其他玩家
 
 Are you sure that you want to disconnect and switch to a different server?
-== 
+== 您确定要断开此服务器并尝试加入其他服务器吗？
 
 Refreshing...
-== 
+== 正在刷新...
 
 Kill Messages
-== 
+== 击杀消息
 
 Kill Message Normal Color
-== 
+== 其他玩家击杀消息颜色
 
 Kill Message Highlight Color
-== 
+== 玩家击杀消息颜色
 
 Show local player's key presses
-== 
+== 显示周围玩家的按键输入
