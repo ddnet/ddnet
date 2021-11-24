@@ -3454,6 +3454,23 @@ void str_utf8_copy(char *dst, const char *src, int dst_size)
 	str_utf8_truncate(dst, dst_size, src, dst_size);
 }
 
+void str_utf8_stats(const char *str, int max_size, int max_count, int *size, int *count)
+{
+	*size = 0;
+	*count = 0;
+	while(str[*size] && *size < max_size && *count < max_count)
+	{
+		int new_size = str_utf8_forward(str, *size);
+		if(new_size != *size)
+		{
+			if(new_size >= max_size || *count >= max_count)
+				break;
+			*size = new_size;
+			++(*count);
+		}
+	}
+}
+
 unsigned str_quickhash(const char *str)
 {
 	unsigned hash = 5381;
