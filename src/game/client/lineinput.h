@@ -52,6 +52,7 @@ public:
 	void ProcessInput(IInput::CEvent e);
 	void Editing(const char *pString, int Cursor);
 	void Set(const char *pString);
+	void SetRange(const char *pString, int Begin, int End);
 	void Add(const char *pString);
 	const char *GetString(bool Editing = false) const { return Editing ? m_DisplayStr : m_aStr; }
 	int GetLength(bool Editing = false) const { return Editing ? m_FakeLen : m_Len; }
