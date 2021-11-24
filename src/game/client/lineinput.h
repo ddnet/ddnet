@@ -40,13 +40,6 @@ public:
 	};
 	static int32_t Manipulate(IInput::CEvent e, char *pStr, int StrMaxSize, int StrMaxChars, int *pStrLenPtr, int *pCursorPosPtr, int *pNumCharsPtr, int32_t ModifyFlags, int ModifierKey);
 
-	class CCallback
-	{
-	public:
-		virtual ~CCallback() {}
-		virtual bool Event(IInput::CEvent e) = 0;
-	};
-
 	CLineInput();
 	void Clear();
 	void ProcessInput(IInput::CEvent e);
