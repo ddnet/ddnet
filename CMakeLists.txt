@@ -2112,6 +2112,8 @@ if(SERVER)
     save.h
     score.cpp
     score.h
+    scoreworker.cpp
+    scoreworker.h
     teams.cpp
     teams.h
     teehistorian.cpp
@@ -2271,6 +2273,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     netaddr.cpp
     packer.cpp
     prng.cpp
+    score.cpp
     secure_random.cpp
     serverbrowser.cpp
     serverinfo.cpp
@@ -2296,10 +2299,17 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     src/engine/client/serverbrowser_ping_cache.cpp
     src/engine/client/serverbrowser_ping_cache.h
     src/engine/client/sqlite.cpp
+    src/engine/server/databases/connection.cpp
+    src/engine/server/databases/connection.h
+    src/engine/server/databases/sqlite.cpp
     src/engine/server/name_ban.cpp
     src/engine/server/name_ban.h
+    src/engine/server/sql_string_helpers.cpp
+    src/engine/server/sql_string_helpers.h
     src/game/server/teehistorian.cpp
     src/game/server/teehistorian.h
+    src/game/server/scoreworker.cpp
+    src/game/server/scoreworker.h
   )
 
   set(TARGET_TESTRUNNER testrunner)
