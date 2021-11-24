@@ -10,10 +10,7 @@ CLineInput::CLineInput()
 
 void CLineInput::Clear()
 {
-	mem_zero(m_aStr, sizeof(m_aStr));
-	m_Len = 0;
-	m_CursorPos = 0;
-	m_NumChars = 0;
+	Set("");
 }
 
 void CLineInput::Set(const char *pString)
