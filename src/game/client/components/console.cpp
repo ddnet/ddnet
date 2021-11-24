@@ -200,7 +200,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 			}
 			int max = minimum(i - Begin + 1, (int)sizeof(aLine));
 			str_copy(aLine, Text + Begin, max);
-			m_Input.Add(aLine);
+			m_Input.Append(aLine);
 		}
 	}
 	else if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_C))
