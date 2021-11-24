@@ -65,15 +65,7 @@ int32_t CLineInput::Manipulate(IInput::CEvent Event, char *pStr, int StrMaxSize,
 		// gather string stats
 		int CharCount = 0;
 		int CharSize = 0;
-		while(Event.m_aText[CharSize])
-		{
-			int NewCharSize = str_utf8_forward(Event.m_aText, CharSize);
-			if(NewCharSize != CharSize)
-			{
-				++CharCount;
-				CharSize = NewCharSize;
-			}
-		}
+		str_utf8_stats(Event.m_aText, MAX_SIZE, MAX_CHARS, &CharSize, &CharCount);
 
 		// add new string
 		if(CharCount)
