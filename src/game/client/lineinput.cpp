@@ -19,15 +19,8 @@ void CLineInput::Clear()
 void CLineInput::Set(const char *pString)
 {
 	str_copy(m_aStr, pString, sizeof(m_aStr));
-	m_Len = str_length(m_aStr);
+	str_utf8_stats(m_aStr, MAX_SIZE, MAX_CHARS, &m_Len, &m_NumChars);
 	m_CursorPos = m_Len;
-	m_NumChars = 0;
-	int Offset = 0;
-	while(pString[Offset])
-	{
-		Offset = str_utf8_forward(pString, Offset);
-		++m_NumChars;
-	}
 }
 
 void CLineInput::Editing(const char *pString, int Cursor)
