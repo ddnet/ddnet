@@ -995,7 +995,7 @@ int CEditor::PopupNewFolder(CEditor *pEditor, CUIRect View, void *pContext)
 		ButtonBar.VSplitLeft(30.0f, 0, &ButtonBar);
 		ButtonBar.VSplitLeft(110.0f, &Label, &ButtonBar);
 		static int s_CreateButton = 0;
-		if(pEditor->DoButton_Editor(&s_CreateButton, "Create", 0, &Label, 0, 0))
+		if(pEditor->DoButton_Editor(&s_CreateButton, "Create", 0, &Label, 0, 0) || pEditor->Input()->KeyPress(KEY_RETURN) || pEditor->Input()->KeyPress(KEY_KP_ENTER))
 		{
 			// create the folder
 			if(*pEditor->m_FileDialogNewFolderName)
