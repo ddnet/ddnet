@@ -282,8 +282,6 @@ void CServerBrowser::Filter()
 			Filtered = 1;
 		else if(g_Config.m_BrFilterPw && m_ppServerlist[i]->m_Info.m_Flags & SERVER_FLAG_PASSWORD)
 			Filtered = 1;
-		else if(g_Config.m_BrFilterPing && g_Config.m_BrFilterPing < m_ppServerlist[i]->m_Info.m_Latency)
-			Filtered = 1;
 		else if(g_Config.m_BrFilterCompatversion && str_comp_num(m_ppServerlist[i]->m_Info.m_aVersion, m_aNetVersion, 3) != 0)
 			Filtered = 1;
 		else if(g_Config.m_BrFilterServerAddress[0] && !str_find_nocase(m_ppServerlist[i]->m_Info.m_aAddress, g_Config.m_BrFilterServerAddress))
