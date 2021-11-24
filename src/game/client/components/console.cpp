@@ -217,11 +217,11 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 	}
 	else if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_U))
 	{
-		m_Input.DeleteUntilCursor();
+		m_Input.SetRange("", 0, m_Input.GetCursorOffset());
 	}
 	else if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_K))
 	{
-		m_Input.DeleteFromCursor();
+		m_Input.SetRange("", m_Input.GetCursorOffset(), m_Input.GetLength());
 	}
 
 	if(Event.m_Flags & IInput::FLAG_PRESS)

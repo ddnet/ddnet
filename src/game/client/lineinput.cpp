@@ -218,22 +218,6 @@ int32_t CLineInput::Manipulate(IInput::CEvent Event, char *pStr, int StrMaxSize,
 	return Changes;
 }
 
-void CLineInput::DeleteUntilCursor()
-{
-	char aBuf[MAX_SIZE];
-	str_copy(aBuf, &m_aStr[m_CursorPos], sizeof(aBuf));
-	Set(aBuf);
-	SetCursorOffset(0);
-}
-
-void CLineInput::DeleteFromCursor()
-{
-	char aBuf[MAX_SIZE];
-	str_copy(aBuf, m_aStr, sizeof(aBuf));
-	aBuf[m_CursorPos] = '\0';
-	Set(aBuf);
-}
-
 void CLineInput::ProcessInput(IInput::CEvent e)
 {
 	Manipulate(e, m_aStr, MAX_SIZE, MAX_CHARS, &m_Len, &m_CursorPos, &m_NumChars, 0, 0);
