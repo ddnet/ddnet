@@ -74,9 +74,14 @@ void CLineInput::Editing(const char *pString, int Cursor)
 	m_FakeCursorPos = m_CursorPos + Cursor + 1;
 }
 
+void CLineInput::Insert(const char *pString, int Begin)
+{
+	SetRange(pString, Begin, Begin);
+}
+
 void CLineInput::Append(const char *pString)
 {
-	SetRange(pString, m_Len, m_Len);
+	Insert(pString, m_Len);
 }
 
 static bool IsNotAWordChar(signed char c)
