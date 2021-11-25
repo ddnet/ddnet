@@ -4249,6 +4249,9 @@ void CEditor::RenderFileDialog()
 					str_copy(&m_aFileDialogFileName[i], &m_aFileDialogFileName[i + 1], (int)(sizeof(m_aFileDialogFileName)) - i);
 			m_FilesSelectedIndex = -1;
 		}
+
+		if(m_FileDialogOpening)
+			UI()->SetActiveItem(&s_FileBoxID);
 	}
 	else
 	{
@@ -4404,7 +4407,7 @@ void CEditor::RenderFileDialog()
 
 	for(int i = 0; i < Input()->NumEvents(); i++)
 	{
-		if(Input()->GetEvent(i).m_Flags & IInput::FLAG_PRESS)
+		if(Input()->GetEvent(i).m_Flags & IInput::FLAG_PRESS && !UiPopupOpen() && !m_PopupEventActivated)
 		{
 			if(Input()->GetEvent(i).m_Key == KEY_RETURN || Input()->GetEvent(i).m_Key == KEY_KP_ENTER)
 				m_FileDialogActivate = true;

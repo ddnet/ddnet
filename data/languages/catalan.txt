@@ -820,7 +820,7 @@ Try fast HTTP map download first
 == Intentar primer la descàrrega ràpida del mapa
 
 Use DDRace Scoreboard
-== Fer servir la taula d'estadístiques DDRace
+== Utilitzar la taula d'estadístiques DDRace
 
 Best
 == Millor
@@ -844,7 +844,7 @@ Update now
 == Actualitza ara
 
 Show clan above name plates
-== Mostrar el clan a sobre dels noms
+== Mostrar el clan a dalt dels noms
 
 Save ghost
 == Guardar el fantasma
@@ -1310,22 +1310,22 @@ Play
 == Jugar 
 
 AFR
-== 
+== AFR
 
 ASI
-== 
+== ASI
 
 AUS
-== 
+== AUS
 
 EUR
-== 
+== EUR
 
 NA
-== 
+== NA
 
 SA
-== 
+== SA
 
 CHN
-== 
+== CHN
