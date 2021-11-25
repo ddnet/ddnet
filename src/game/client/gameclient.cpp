@@ -67,6 +67,7 @@
 #include "components/chillerbot/chillconsole.h"
 #include "components/chillerbot/chillerbotux.h"
 #include "components/chillerbot/chillpw.h"
+#include "components/chillerbot/city.h"
 #include "components/chillerbot/playerpics.h"
 #include "components/chillerbot/remotecontrol.h"
 #include "components/chillerbot/terminalui.h"
@@ -157,6 +158,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&m_RemoteControl);
 	m_All.Add(&m_WarList);
 	m_All.Add(&m_VibeBot);
+	m_All.Add(&m_CityHelper);
 	m_All.Add(&m_TerminalUI);
 	m_All.Add(&m_ChillConsole);
 	m_All.Add(&m_Unix);

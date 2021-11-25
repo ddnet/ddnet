@@ -59,6 +59,7 @@
 #include "components/chillerbot/chillconsole.h"
 #include "components/chillerbot/chillerbotux.h"
 #include "components/chillerbot/chillpw.h"
+#include "components/chillerbot/city.h"
 #include "components/chillerbot/playerpics.h"
 #include "components/chillerbot/remotecontrol.h"
 #include "components/chillerbot/terminalui.h"
@@ -165,6 +166,7 @@ public:
 	CUnix m_Unix;
 	CWarList m_WarList;
 	CVibeBot m_VibeBot;
+	CCityHelper m_CityHelper;
 	CTerminalUI m_TerminalUI;
 
 private:
