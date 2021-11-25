@@ -2091,7 +2091,7 @@ void str_utf8_copy(char *dst, const char *src, int dst_size);
 
 /*
 	Function: str_utf8_stats
-		Determines the byte size and utf8 character count of a string.
+		Determines the byte size and utf8 character count of a utf8 string.
 
 	Parameters:
 		str - Pointer to the string.
@@ -2101,8 +2101,8 @@ void str_utf8_copy(char *dst, const char *src, int dst_size);
 		count - Pointer to store count of utf8 characters of the string.
 
 	Remarks:
-		- Assumes nothing about the encoding of the string.
-		  It's the users responsibility to make sure the bounds are aligned.
+		- The string is treated as zero-terminated utf8 string.
+		- It's the user's responsibility to make sure the bounds are aligned.
 */
 void str_utf8_stats(const char *str, int max_size, int max_count, int *size, int *count);
 
