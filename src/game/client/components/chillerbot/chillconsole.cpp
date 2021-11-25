@@ -182,7 +182,7 @@ void CChillConsole::CInstance::OnInput(IInput::CEvent Event)
 			}
 			int max = minimum(i - Begin + 1, (int)sizeof(Line));
 			str_copy(Line, Text + Begin, max);
-			m_Input.Add(Line);
+			m_Input.Append(Line);
 		}
 	}
 	else if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_C))
@@ -199,11 +199,11 @@ void CChillConsole::CInstance::OnInput(IInput::CEvent Event)
 	}
 	else if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_U))
 	{
-		m_Input.DeleteUntilCursor();
+		m_Input.SetRange("", 0, m_Input.GetCursorOffset());
 	}
 	else if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_K))
 	{
-		m_Input.DeleteFromCursor();
+		m_Input.SetRange("", m_Input.GetCursorOffset(), m_Input.GetLength());
 	}
 
 	if(Event.m_Flags & IInput::FLAG_PRESS)
