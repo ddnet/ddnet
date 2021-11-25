@@ -30,6 +30,10 @@ void CVibeBot::OnInit()
 	Reset();
 	m_Mode[0] = VB_OFF;
 	m_Mode[1] = VB_OFF;
+	m_EmoteBot[0] = EB_OFF;
+	m_EmoteBot[1] = EB_OFF;
+	m_EmoteBotDelay[0] = 0;
+	m_EmoteBotDelay[1] = 0;
 	m_MoveID = 0;
 	m_NextEmote[0] = 0;
 	m_NextEmote[1] = 0;
@@ -62,6 +66,26 @@ void CVibeBot::SetMode(int Mode, int ClientID)
 	UpdateComponents();
 }
 
+void CVibeBot::SetEmoteBot(int Mode, int Delay, int ClientID)
+{
+	int ID = 0;
+	if(Mode == EB_OFF)
+	{
+		ID = ClientID ? !g_Config.m_ClDummy : g_Config.m_ClDummy;
+		m_pClient->m_Controls.m_InputData[ID].m_Fire = m_InputData[ClientID].m_Fire;
+		m_pClient->m_Controls.m_InputData[ID].m_WantedWeapon = m_InputData[ClientID].m_WantedWeapon;
+	}
+	else
+	{
+		ID = g_Config.m_ClDummy ? !ClientID : ClientID;
+		m_InputData[ClientID].m_Fire = m_pClient->m_Controls.m_InputData[ID].m_Fire;
+		m_InputData[ClientID].m_WantedWeapon = m_pClient->m_Controls.m_InputData[ID].m_WantedWeapon;
+	}
+	m_EmoteBot[ClientID] = Mode;
+	m_EmoteBotDelay[ClientID] = Delay;
+	UpdateComponents();
+}
+
 void CVibeBot::UpdateComponents()
 {
 	if(m_Mode[0] == VB_OFF && m_Mode[1] == VB_OFF)
@@ -87,6 +111,27 @@ void CVibeBot::OnConsoleInit()
 	Console()->Register("vibe", "s[sleepy|happy|music]?i[dummy]", CFGFLAG_CLIENT, ConVibe, this, "Set vibebot mode ('vibebots' for list)");
 	Console()->Register("vibes", "", CFGFLAG_CLIENT, ConVibes, this, "Shows all vibebots (set via vibebot <name>)");
 	Console()->Register("unvibe", "", CFGFLAG_CLIENT, ConUnVibe, this, "Turn off vibebot");
+	Console()->Register("emotebot", "s[sleepy|happy|music]?i[delay]?i[dummy]", CFGFLAG_CLIENT, ConEmoteBot, this, "Automatically send emotes");
+}
+
+void CVibeBot::ConEmoteBot(IConsole::IResult *pResult, void *pUserData)
+{
+	CVibeBot *pSelf = (CVibeBot *)pUserData;
+	int Mode = EB_OFF;
+	if(!str_comp(pResult->GetString(0), "happy"))
+		Mode = E_HAPPY;
+	else if(!str_comp(pResult->GetString(0), "sleepy"))
+		Mode = E_SLEEPY;
+	else if(!str_comp(pResult->GetString(0), "music"))
+		Mode = E_MUSIC;
+	else if(str_comp(pResult->GetString(0), "off"))
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "emotebot", "unkown emote.");
+	}
+	pSelf->SetEmoteBot(
+		Mode,
+		pResult->NumArguments() > 1 ? pResult->GetInteger(1) : 4,
+		pResult->NumArguments() > 2 ? pResult->GetInteger(2) : g_Config.m_ClDummy);
 }
 
 void CVibeBot::ConVibe(IConsole::IResult *pResult, void *pUserData)
@@ -122,6 +167,18 @@ void CVibeBot::ConVibes(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "vibebot", "happy: happy emote and casual eye move");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "vibebot", "music: music emote and casual eye move");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "vibebot", "sleepy: zzZ emote and casual eye move");
+}
+
+void CVibeBot::EmoteBotTick()
+{
+	if(m_EmoteBot[MoveID()] == EB_OFF)
+		return;
+
+	if(time_get() > m_NextEmoteBot[MoveID()])
+	{
+		m_NextEmoteBot[MoveID()] = time_get() + time_freq() * m_EmoteBotDelay[MoveID()];
+		Emote(m_EmoteBot[MoveID()]);
+	}
 }
 
 void CVibeBot::VibeEmote(int Emoticon)
@@ -187,6 +244,7 @@ void CVibeBot::OnRender()
 	Reset();
 	for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
 	{
+		EmoteBotTick();
 		if(m_Mode[Dummy] == VB_OFF)
 			continue;
 		m_MoveID = Dummy;
