@@ -447,7 +447,7 @@ bool CScoreWorker::SaveScore(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		"	%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, "
 		"	%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, "
 		"	%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, "
-		"	?, false);",
+		"	?, %s);",
 		pSqlServer->InsertIgnore(), pSqlServer->GetPrefix(),
 		pSqlServer->InsertTimestampAsUtc(), pData->m_Time,
 		pData->m_aCpCurrent[0], pData->m_aCpCurrent[1], pData->m_aCpCurrent[2],
@@ -458,7 +458,7 @@ bool CScoreWorker::SaveScore(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		pData->m_aCpCurrent[15], pData->m_aCpCurrent[16], pData->m_aCpCurrent[17],
 		pData->m_aCpCurrent[18], pData->m_aCpCurrent[19], pData->m_aCpCurrent[20],
 		pData->m_aCpCurrent[21], pData->m_aCpCurrent[22], pData->m_aCpCurrent[23],
-		pData->m_aCpCurrent[24]);
+		pData->m_aCpCurrent[24], pSqlServer->False());
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
 		return true;
@@ -494,10 +494,10 @@ bool CScoreWorker::SaveTeamScore(IDbConnection *pSqlServer, const ISqlData *pGam
 		"FROM (" // preselect teams with first name in team
 		"  SELECT ID "
 		"  FROM %s_teamrace "
-		"  WHERE Map = ? AND Name = ? AND DDNet7 = false"
+		"  WHERE Map = ? AND Name = ? AND DDNet7 = %s"
 		") as l INNER JOIN %s_teamrace AS r ON l.ID = r.ID "
 		"ORDER BY l.ID, Name COLLATE %s;",
-		pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->BinaryCollate());
+		pSqlServer->GetPrefix(), pSqlServer->False(), pSqlServer->GetPrefix(), pSqlServer->BinaryCollate());
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
 		return true;
@@ -536,8 +536,8 @@ bool CScoreWorker::SaveTeamScore(IDbConnection *pSqlServer, const ISqlData *pGam
 		if(pData->m_Time < Time)
 		{
 			str_format(aBuf, sizeof(aBuf),
-				"UPDATE %s_teamrace SET Time=%.2f, Timestamp=?, DDNet7=false, GameID=? WHERE ID = ?;",
-				pSqlServer->GetPrefix(), pData->m_Time);
+				"UPDATE %s_teamrace SET Time=%.2f, Timestamp=?, DDNet7=%s, GameID=? WHERE ID = ?;",
+				pSqlServer->GetPrefix(), pData->m_Time, pSqlServer->False());
 			if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 			{
 				return true;
@@ -561,9 +561,9 @@ bool CScoreWorker::SaveTeamScore(IDbConnection *pSqlServer, const ISqlData *pGam
 			// if no entry found... create a new one
 			str_format(aBuf, sizeof(aBuf),
 				"%s INTO %s_teamrace(Map, Name, Timestamp, Time, ID, GameID, DDNet7) "
-				"VALUES (?, ?, %s, %.2f, ?, ?, false);",
+				"VALUES (?, ?, %s, %.2f, ?, ?, %s);",
 				pSqlServer->InsertIgnore(), pSqlServer->GetPrefix(),
-				pSqlServer->InsertTimestampAsUtc(), pData->m_Time);
+				pSqlServer->InsertTimestampAsUtc(), pData->m_Time, pSqlServer->False());
 			if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 			{
 				return true;
@@ -1406,8 +1406,8 @@ bool CScoreWorker::SaveTeam(IDbConnection *pSqlServer, const ISqlData *pGameData
 
 		str_format(aBuf, sizeof(aBuf),
 			"%s INTO %s_saves(Savegame, Map, Code, Timestamp, Server, SaveID, DDNet7) "
-			"VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, false)",
-			pSqlServer->InsertIgnore(), pSqlServer->GetPrefix());
+			"VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, %s)",
+			pSqlServer->InsertIgnore(), pSqlServer->GetPrefix(), pSqlServer->False());
 		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 		{
 			return true;
@@ -1492,9 +1492,9 @@ bool CScoreWorker::LoadTeam(IDbConnection *pSqlServer, const ISqlData *pGameData
 	str_format(aBuf, sizeof(aBuf),
 		"SELECT Savegame, %s-%s AS Ago, SaveID "
 		"FROM %s_saves "
-		"where Code = ? AND Map = ? AND DDNet7 = false;",
+		"where Code = ? AND Map = ? AND DDNet7 = %s;",
 		aCurrentTimestamp, aTimestamp,
-		pSqlServer->GetPrefix());
+		pSqlServer->GetPrefix(), pSqlServer->False());
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
 		return true;

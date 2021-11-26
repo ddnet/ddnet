@@ -23,6 +23,8 @@ public:
 	virtual const char *InsertIgnore() const { return "INSERT OR IGNORE"; };
 	virtual const char *Random() const { return "RANDOM()"; };
 	virtual const char *MedianMapTime(char *pBuffer, int BufferSize) const;
+	virtual const char *False() const { return "0"; }
+	virtual const char *True() const { return "1"; }
 
 	virtual bool Connect(char *pError, int ErrorSize);
 	virtual void Disconnect();

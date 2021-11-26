@@ -37,6 +37,8 @@ public:
 	virtual const char *Random() const = 0;
 	// Get Median Map Time from l.Map
 	virtual const char *MedianMapTime(char *pBuffer, int BufferSize) const = 0;
+	virtual const char *False() const = 0;
+	virtual const char *True() const = 0;
 
 	// tries to allocate the connection from the pool established
 	//
