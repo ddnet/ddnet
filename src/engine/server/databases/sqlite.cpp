@@ -119,6 +119,11 @@ bool CSqliteConnection::Connect(char *pError, int ErrorSize)
 		return false;
 	}
 
+	if(sqlite3_libversion_number() < 3025000)
+	{
+		dbg_msg("sql", "SQLite version %s is not supported, use at least version 3.25.0", sqlite3_libversion());
+	}
+
 	int Result = sqlite3_open(m_aFilename, &m_pDb);
 	if(Result != SQLITE_OK)
 	{
