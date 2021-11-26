@@ -23,6 +23,9 @@ public:
 	virtual const char *InsertIgnore() const { return "INSERT OR IGNORE"; };
 	virtual const char *Random() const { return "RANDOM()"; };
 	virtual const char *MedianMapTime(char *pBuffer, int BufferSize) const;
+	// Since SQLite 3.23.0 true/false literals are recognized, but still cleaner to use 1/0, because:
+	// > For compatibility, if there exist columns named "true" or "false", then
+	// > the identifiers refer to the columns rather than Boolean constants.
 	virtual const char *False() const { return "0"; }
 	virtual const char *True() const { return "1"; }
 
