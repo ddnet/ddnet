@@ -882,6 +882,9 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, in
 	PrimarySavedTee.Load(pTargetPlayer->GetCharacter(), Team, true);
 	SecondarySavedTee.Load(pPlayer->GetCharacter(), Team, true);
 
+	swap(m_TeeStarted[pPlayer->GetCID()], m_TeeStarted[pTargetPlayer->GetCID()]);
+	swap(m_TeeFinished[pPlayer->GetCID()], m_TeeFinished[pTargetPlayer->GetCID()]);
+
 	str_format(aBuf, sizeof(aBuf),
 		"%s has swapped with %s.",
 		Server()->ClientName(pPlayer->GetCID()), Server()->ClientName(pTargetPlayer->GetCID()));
