@@ -68,7 +68,7 @@ TEST_F(Score, SaveScore)
 	str_copy(playerRequest.m_aRequestingPlayer, "brainless tee", sizeof(playerRequest.m_aRequestingPlayer));
 	playerRequest.m_Offset = 0;
 	str_copy(playerRequest.m_aServer, "GER", sizeof(playerRequest.m_aServer));
-	CScoreWorker::ShowTop(conn, &playerRequest, aError, sizeof(aError));
+	ASSERT_FALSE(CScoreWorker::ShowTop(conn, &playerRequest, aError, sizeof(aError))) << aError;
 
 	ASSERT_EQ(pPlayerResult->m_MessageKind, CScorePlayerResult::DIRECT);
 	EXPECT_STREQ(pPlayerResult->m_Data.m_aaMessages[0], "------------ Global Top ------------");
@@ -78,7 +78,7 @@ TEST_F(Score, SaveScore)
 		EXPECT_STREQ(pPlayerResult->m_Data.m_aaMessages[i], "");
 
 	str_copy(playerRequest.m_aServer, "USA", sizeof(playerRequest.m_aServer));
-	CScoreWorker::ShowTop(conn, &playerRequest, aError, sizeof(aError));
+	ASSERT_FALSE(CScoreWorker::ShowTop(conn, &playerRequest, aError, sizeof(aError))) << aError;
 
 	ASSERT_EQ(pPlayerResult->m_MessageKind, CScorePlayerResult::DIRECT);
 	EXPECT_STREQ(pPlayerResult->m_Data.m_aaMessages[0], "------------ Global Top ------------");
