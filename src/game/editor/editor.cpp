@@ -315,7 +315,7 @@ int CEditor::DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect,
 		ReturnValue = true;
 	}
 
-	RenderTools()->DrawUIRect(&ClearButton, ColorRGBA(1, 1, 1, 0.33f * ButtonColorMul(pClearID)), Corners & ~CUI::CORNER_L, 3.0f);
+	RenderTools()->DrawUIRect(&ClearButton, ColorRGBA(1, 1, 1, 0.33f * UI()->ButtonColorMul(pClearID)), Corners & ~CUI::CORNER_L, 3.0f);
 	UI()->DoLabel(&ClearButton, "×", ClearButton.h * 0.8f, 0);
 	if(UI()->DoButtonLogic(pClearID, "×", 0, &ClearButton))
 	{
@@ -331,71 +331,6 @@ int CEditor::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned Str
 	if(UI()->LastActiveItem() == pID)
 		m_EditBoxActive = 2;
 	return m_UIEx.DoEditBox(pID, pRect, pStr, StrSize, FontSize, Offset, Hidden, Corners);
-}
-
-float CEditor::ButtonColorMul(const void *pID)
-{
-	if(UI()->ActiveItem() == pID)
-		return 0.5f;
-	else if(UI()->HotItem() == pID)
-		return 1.5f;
-	return 1.0f;
-}
-
-float CEditor::UiDoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
-{
-	CUIRect Handle;
-	static float s_OffsetY;
-	pRect->HSplitTop(33, &Handle, 0);
-
-	Handle.y += (pRect->h - Handle.h) * Current;
-
-	// logic
-	float Ret = Current;
-	int Inside = UI()->MouseInside(&Handle);
-
-	if(UI()->ActiveItem() == pID)
-	{
-		if(!UI()->MouseButton(0))
-			UI()->SetActiveItem(0);
-
-		float Min = pRect->y;
-		float Max = pRect->h - Handle.h;
-		float Cur = UI()->MouseY() - s_OffsetY;
-		Ret = (Cur - Min) / Max;
-		if(Ret < 0.0f)
-			Ret = 0.0f;
-		if(Ret > 1.0f)
-			Ret = 1.0f;
-	}
-	else if(UI()->HotItem() == pID)
-	{
-		if(UI()->MouseButton(0))
-		{
-			UI()->SetActiveItem(pID);
-			s_OffsetY = UI()->MouseY() - Handle.y;
-		}
-	}
-
-	if(Inside)
-		UI()->SetHotItem(pID);
-
-	// render
-	CUIRect Rail;
-	pRect->VMargin(5.0f, &Rail);
-	RenderTools()->DrawUIRect(&Rail, ColorRGBA(1, 1, 1, 0.25f), 0, 0.0f);
-
-	CUIRect Slider = Handle;
-	Slider.w = Rail.x - Slider.x;
-	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_L, 2.5f);
-	Slider.x = Rail.x + Rail.w;
-	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_R, 2.5f);
-
-	Slider = Handle;
-	Slider.Margin(5.0f, &Slider);
-	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1, 1, 1, 0.25f * ButtonColorMul(pID)), CUI::CORNER_ALL, 2.5f);
-
-	return Ret;
 }
 
 ColorRGBA CEditor::GetButtonColor(const void *pID, int Checked)
@@ -3127,16 +3062,14 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 
 void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 {
-	CUIRect LayersBox = ToolBox;
-
 	if(!m_GuiActive)
 		return;
 
+	CUIRect LayersBox = ToolBox;
 	CUIRect Slot, Button;
 	char aBuf[64];
 
 	float LayersHeight = 12.0f; // Height of AddGroup button
-	static int s_ScrollBar = 0;
 	static float s_ScrollValue = 0;
 
 	for(int g = 0; g < m_Map.m_lGroups.size(); g++)
@@ -3153,10 +3086,8 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 	if(LayersHeight > LayersBox.h) // Do we even need a scrollbar?
 	{
 		CUIRect Scroll;
-		LayersBox.VSplitRight(15.0f, &LayersBox, &Scroll);
-		LayersBox.VSplitRight(3.0f, &LayersBox, 0); // extra spacing
-		Scroll.HMargin(5.0f, &Scroll);
-		s_ScrollValue = UiDoScrollbarV(&s_ScrollBar, &Scroll, s_ScrollValue);
+		LayersBox.VSplitRight(20.0f, &LayersBox, &Scroll);
+		s_ScrollValue = UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
 		if(UI()->MouseInside(&Scroll) || UI()->MouseInside(&LayersBox))
 		{
@@ -3791,21 +3722,18 @@ void CEditor::SortImages()
 
 void CEditor::RenderImages(CUIRect ToolBox, CUIRect View)
 {
-	static int s_ScrollBar = 0;
+	if(!m_GuiActive)
+		return;
+
 	static float s_ScrollValue = 0;
 	float ImagesHeight = 30.0f + 14.0f * m_Map.m_lImages.size() + 27.0f;
 	float ScrollDifference = ImagesHeight - ToolBox.h;
 
-	if(!m_GuiActive)
-		return;
-
 	if(ImagesHeight > ToolBox.h) // Do we even need a scrollbar?
 	{
 		CUIRect Scroll;
-		ToolBox.VSplitRight(15.0f, &ToolBox, &Scroll);
-		ToolBox.VSplitRight(3.0f, &ToolBox, 0); // extra spacing
-		Scroll.HMargin(5.0f, &Scroll);
-		s_ScrollValue = UiDoScrollbarV(&s_ScrollBar, &Scroll, s_ScrollValue);
+		ToolBox.VSplitRight(20.0f, &ToolBox, &Scroll);
+		s_ScrollValue = UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
 		if(UI()->MouseInside(&Scroll) || UI()->MouseInside(&ToolBox))
 		{
@@ -4012,21 +3940,18 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect View)
 
 void CEditor::RenderSounds(CUIRect ToolBox, CUIRect View)
 {
-	static int s_ScrollBar = 0;
+	if(!m_GuiActive)
+		return;
+
 	static float s_ScrollValue = 0;
 	float SoundsHeight = 30.0f + 14.0f * m_Map.m_lSounds.size() + 27.0f;
 	float ScrollDifference = SoundsHeight - ToolBox.h;
 
-	if(!m_GuiActive)
-		return;
-
 	if(SoundsHeight > ToolBox.h) // Do we even need a scrollbar?
 	{
 		CUIRect Scroll;
-		ToolBox.VSplitRight(15.0f, &ToolBox, &Scroll);
-		ToolBox.VSplitRight(3.0f, &ToolBox, 0); // extra spacing
-		Scroll.HMargin(5.0f, &Scroll);
-		s_ScrollValue = UiDoScrollbarV(&s_ScrollBar, &Scroll, s_ScrollValue);
+		ToolBox.VSplitRight(20.0f, &ToolBox, &Scroll);
+		s_ScrollValue = UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
 		if(UI()->MouseInside(&Scroll) || UI()->MouseInside(&ToolBox))
 		{
@@ -4219,7 +4144,7 @@ void CEditor::RenderFileDialog()
 	View.HSplitBottom(10.0f, &View, 0); // some spacing
 	if(m_FileDialogFileType == CEditor::FILETYPE_IMG)
 		View.VSplitMid(&View, &Preview);
-	View.VSplitRight(15.0f, &View, &Scroll);
+	View.VSplitRight(20.0f, &View, &Scroll);
 
 	// title
 	RenderTools()->DrawUIRect(&Title, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 4.0f);
@@ -4269,7 +4194,7 @@ void CEditor::RenderFileDialog()
 		// clearSearchbox button
 		{
 			static int s_ClearButton = 0;
-			RenderTools()->DrawUIRect(&ClearBox, ColorRGBA(1, 1, 1, 0.33f * ButtonColorMul(&s_ClearButton)), CUI::CORNER_R, 3.0f);
+			RenderTools()->DrawUIRect(&ClearBox, ColorRGBA(1, 1, 1, 0.33f * UI()->ButtonColorMul(&s_ClearButton)), CUI::CORNER_R, 3.0f);
 			UI()->DoLabel(&ClearBox, "×", 10.0f, 0);
 			if(UI()->DoButtonLogic(&s_ClearButton, "×", 0, &ClearBox))
 			{
@@ -4285,9 +4210,7 @@ void CEditor::RenderFileDialog()
 	m_FileDialogOpening = false;
 
 	int Num = (int)(View.h / 17.0f) + 1;
-	static int ScrollBar = 0;
-	Scroll.HMargin(5.0f, &Scroll);
-	m_FileDialogScrollValue = UiDoScrollbarV(&ScrollBar, &Scroll, m_FileDialogScrollValue);
+	m_FileDialogScrollValue = UIEx()->DoScrollbarV(&m_FileDialogScrollValue, &Scroll, m_FileDialogScrollValue);
 
 	int ScrollNum = 0;
 	for(int i = 0; i < m_FileList.size(); i++)
@@ -4674,11 +4597,8 @@ void CEditor::RenderUndoList(CUIRect View)
 {
 	CUIRect List, Preview, Scroll, Button;
 	View.VSplitMid(&List, &Preview);
-	List.VSplitRight(15.0f, &List, &Scroll);
-	//int Num = (int)(List.h/17.0f)+1;
-	static int ScrollBar = 0;
-	Scroll.HMargin(5.0f, &Scroll);
-	m_UndoScrollValue = UiDoScrollbarV(&ScrollBar, &Scroll, m_UndoScrollValue);
+	List.VSplitRight(20.0f, &List, &Scroll);
+	m_UndoScrollValue = UIEx()->DoScrollbarV(&m_UndoScrollValue, &Scroll, m_UndoScrollValue);
 
 	float TopY = List.y;
 	float Height = List.h;
@@ -5428,7 +5348,6 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 	View.Margin(1.0f, &ListBox);
 
 	float ListHeight = 17.0f * m_Map.m_lSettings.size();
-	static int s_ScrollBar = 0;
 	static float s_ScrollValue = 0;
 
 	float ScrollDifference = ListHeight - ListBox.h;
@@ -5436,10 +5355,8 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 	if(ListHeight > ListBox.h) // Do we even need a scrollbar?
 	{
 		CUIRect Scroll;
-		ListBox.VSplitRight(15.0f, &ListBox, &Scroll);
-		ListBox.VSplitRight(3.0f, &ListBox, 0); // extra spacing
-		Scroll.HMargin(5.0f, &Scroll);
-		s_ScrollValue = UiDoScrollbarV(&s_ScrollBar, &Scroll, s_ScrollValue);
+		ListBox.VSplitRight(20.0f, &ListBox, &Scroll);
+		s_ScrollValue = UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
 		if(UI()->MouseInside(&Scroll) || UI()->MouseInside(&ListBox))
 		{
@@ -6325,7 +6242,8 @@ void CEditor::UpdateAndRender()
 	float rx = 0, ry = 0;
 	{
 		Input()->MouseRelative(&rx, &ry);
-		UI()->ConvertMouseMove(&rx, &ry);
+		m_UIEx.ConvertMouseMove(&rx, &ry);
+		m_UIEx.ResetMouseSlow();
 
 		m_MouseDeltaX = rx;
 		m_MouseDeltaY = ry;

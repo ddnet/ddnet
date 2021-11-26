@@ -100,6 +100,8 @@ public:
 	 * @param pOtherRect The CUIRect to place inside *this* CUIRect
 	 */
 	void HMargin(float Cut, CUIRect *pOtherRect) const;
+
+	bool Inside(float x, float y) const;
 };
 
 struct SUIAnimator
@@ -256,8 +258,13 @@ public:
 	const void *ActiveItem() const { return m_pActiveItem; }
 	const void *LastActiveItem() const { return m_pLastActiveItem; }
 
-	int MouseInside(const CUIRect *pRect) const;
+	bool MouseInside(const CUIRect *pRect) const;
 	void ConvertMouseMove(float *x, float *y) const;
+
+	float ButtonColorMulActive() { return 0.5f; }
+	float ButtonColorMulHot() { return 1.5f; }
+	float ButtonColorMulDefault() { return 1.0f; }
+	float ButtonColorMul(const void *pID);
 
 	CUIRect *Screen();
 	void MapScreen();
