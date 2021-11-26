@@ -4,7 +4,8 @@
 #include <engine/server/databases/connection.h>
 #include <engine/shared/config.h>
 #include <game/server/scoreworker.h>
-#include <iostream>
+
+#include <sqlite3.h>
 
 char *CSaveTeam::GetString()
 {
@@ -36,6 +37,11 @@ protected:
 	IDbConnection *conn{CreateSqliteConnection(":memory:", true)};
 	char aError[256] = {};
 };
+
+TEST_F(Score, SQLiteVersion)
+{
+	ASSERT_GE(sqlite3_libversion_number(), 3025000) << "SQLite >= 3.25.0 required for Window functions";
+}
 
 TEST_F(Score, SaveScore)
 {
