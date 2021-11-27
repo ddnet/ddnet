@@ -191,16 +191,17 @@ struct TeamScore : public Score
 		str_copy(teamScoreData.m_aaNames[0], "nameless tee", sizeof(teamScoreData.m_aaNames[0]));
 		str_copy(teamScoreData.m_aaNames[1], "brainless tee", sizeof(teamScoreData.m_aaNames[1]));
 		teamScoreData.m_Time = 100.0;
-		str_copy(teamScoreData.m_aTimestamp, "2020-11-24 19:24:08", sizeof(teamScoreData.m_aTimestamp));
+		str_copy(teamScoreData.m_aTimestamp, "2021-11-24 19:24:08", sizeof(teamScoreData.m_aTimestamp));
 		ASSERT_FALSE(CScoreWorker::SaveTeamScore(conn, &teamScoreData, false, aError, sizeof(aError))) << aError;
+
+		str_copy(playerRequest.m_aMap, "Kobra 3", sizeof(playerRequest.m_aMap));
+		str_copy(playerRequest.m_aRequestingPlayer, "brainless tee", sizeof(playerRequest.m_aRequestingPlayer));
+		playerRequest.m_Offset = 0;
 	}
 };
 
 TEST_F(TeamScore, All)
 {
-	str_copy(playerRequest.m_aMap, "Kobra 3", sizeof(playerRequest.m_aMap));
-	str_copy(playerRequest.m_aRequestingPlayer, "brainless tee", sizeof(playerRequest.m_aRequestingPlayer));
-	playerRequest.m_Offset = 0;
 	ASSERT_FALSE(CScoreWorker::ShowTeamTop5(conn, &playerRequest, aError, sizeof(aError))) << aError;
 	ExpectLines(pPlayerResult,
 		{"------- Team Top 5 -------",
@@ -210,7 +211,6 @@ TEST_F(TeamScore, All)
 
 TEST_F(TeamScore, PlayerExists)
 {
-	pPlayerResult->SetVariant(CScorePlayerResult::DIRECT); // resets pPlayerResult
 	str_copy(playerRequest.m_aName, "brainless tee", sizeof(playerRequest.m_aMap));
 	ASSERT_FALSE(CScoreWorker::ShowPlayerTeamTop5(conn, &playerRequest, aError, sizeof(aError))) << aError;
 	ExpectLines(pPlayerResult,
