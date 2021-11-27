@@ -148,6 +148,12 @@ int CRequest::RunImpl(CURL *pHandle)
 	curl_easy_setopt(pHandle, CURLOPT_PROGRESSDATA, this);
 	curl_easy_setopt(pHandle, CURLOPT_PROGRESSFUNCTION, ProgressCallback);
 
+	if(curl_version_info(CURLVERSION_NOW)->version_num < 0x076800)
+	{
+		// Causes crashes, see https://github.com/ddnet/ddnet/issues/4342
+		curl_easy_setopt(pHandle, CURLOPT_FORBID_REUSE, 1L);
+	}
+
 #ifdef CONF_PLATFORM_ANDROID
 	curl_easy_setopt(pHandle, CURLOPT_CAINFO, "data/cacert.pem");
 #endif
