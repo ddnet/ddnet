@@ -1,4 +1,3 @@
-#include <gmock/gmock-matchers.h>
 #include <gtest/gtest.h>
 
 #include <base/detect.h>
@@ -161,8 +160,12 @@ TEST_F(SingleScore, TimesExists)
 	ASSERT_FALSE(CScoreWorker::ShowTimes(conn, &playerRequest, aError, sizeof(aError))) << aError;
 	EXPECT_EQ(pPlayerResult->m_MessageKind, CScorePlayerResult::DIRECT);
 	EXPECT_STREQ(pPlayerResult->m_Data.m_aaMessages[0], "------------- Last Times -------------");
-	EXPECT_THAT(pPlayerResult->m_Data.m_aaMessages[1], HasSubstr("[USA] "));
-	EXPECT_THAT(pPlayerResult->m_Data.m_aaMessages[1], HasSubstr(", 01:40.00"));
+	char aBuf[128];
+	str_copy(aBuf, pPlayerResult->m_Data.m_aaMessages[1], 7);
+	EXPECT_STREQ(aBuf, "[USA] ");
+
+	str_copy(aBuf, pPlayerResult->m_Data.m_aaMessages[1] + str_length(pPlayerResult->m_Data.m_aaMessages[1]) - 10, 11);
+	EXPECT_STREQ(aBuf, ", 01:40.00");
 	EXPECT_STREQ(pPlayerResult->m_Data.m_aaMessages[2], "----------------------------------------------------");
 	for(int i = 3; i < CScorePlayerResult::MAX_MESSAGES; i++)
 	{
@@ -188,7 +191,7 @@ struct TeamScore : public Score
 		str_copy(teamScoreData.m_aaNames[0], "nameless tee", sizeof(teamScoreData.m_aaNames[0]));
 		str_copy(teamScoreData.m_aaNames[1], "brainless tee", sizeof(teamScoreData.m_aaNames[1]));
 		teamScoreData.m_Time = 100.0;
-		str_copy(teamScoreData.m_aTimestamp, "2021-11-24 19:24:08", sizeof(teamScoreData.m_aTimestamp));
+		str_copy(teamScoreData.m_aTimestamp, "2020-11-24 19:24:08", sizeof(teamScoreData.m_aTimestamp));
 		ASSERT_FALSE(CScoreWorker::SaveTeamScore(conn, &teamScoreData, false, aError, sizeof(aError))) << aError;
 	}
 };
