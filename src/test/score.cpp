@@ -7,13 +7,7 @@
 
 #include <sqlite3.h>
 
-#if defined(CONF_MYSQL)
-
-// For MySQL this setup is required on localhost:
-// CREATE DATABASE ddnet;
-// CREATE USER 'ddnet'@'localhost' IDENTIFIED BY 'thebestpassword';
-// GRANT ALL PRIVILEGES ON ddnet.* TO 'ddnet'@'localhost';
-// FLUSH PRIVILEGES;
+#if defined(CONF_TEST_MYSQL)
 int DummyMysqlInit = (MysqlInit(), 1);
 #endif
 
@@ -463,7 +457,7 @@ TEST_P(RandomMap, UnfinishedDoesntExist)
 auto testValues
 {
 	testing::Values(CreateSqliteConnection(":memory:", true)
-#if defined(CONF_MYSQL)
+#if defined(CONF_TEST_MYSQL)
 				,
 		CreateMysqlConnection("ddnet", "record", "ddnet", "thebestpassword", "localhost", 3306, true)
 #endif
