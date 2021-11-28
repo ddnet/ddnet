@@ -171,7 +171,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	RenderTools()->DrawUIRect(&View, ColorRGBA(0, 0, 0, 0.15f), 0, 0);
 
 	CUIRect Scroll;
-	View.VSplitRight(10, &View, &Scroll);
+	View.VSplitRight(20.0f, &View, &Scroll);
 
 	int NumServers = ServerBrowser()->NumSortedServers();
 
@@ -188,10 +188,9 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			UI()->DoLabelScaled(&MsgBox, Localize("No servers match your filter criteria"), 16.0f, 0);
 	}
 
-	static int s_ScrollBar = 0;
 	static float s_ScrollValue = 0;
 
-	s_ScrollValue = DoScrollbarV(&s_ScrollBar, &Scroll, s_ScrollValue);
+	s_ScrollValue = m_UIEx.DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
 	if(Input()->KeyPress(KEY_TAB) && m_pClient->m_GameConsole.IsClosed())
 	{
