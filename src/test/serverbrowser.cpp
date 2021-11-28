@@ -101,6 +101,7 @@ TEST(ServerBrowser, PingCache)
 
 	delete pPingCache;
 	delete pStorage;
+	delete pConsole;
 
 	Info.DeleteTestStorageFilesOnSuccess();
 }
