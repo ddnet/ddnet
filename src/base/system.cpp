@@ -3467,16 +3467,13 @@ void str_utf8_stats(const char *str, int max_size, int max_count, int *size, int
 {
 	*size = 0;
 	*count = 0;
-	while(str[*size] && *size < max_size && *count < max_count)
+	while(*size < max_size && *count < max_count)
 	{
 		int new_size = str_utf8_forward(str, *size);
-		if(new_size != *size)
-		{
-			if(new_size >= max_size || *count >= max_count)
-				break;
-			*size = new_size;
-			++(*count);
-		}
+		if(new_size == *size || new_size >= max_size || *count >= max_count)
+			break;
+		*size = new_size;
+		++(*count);
 	}
 }
 
