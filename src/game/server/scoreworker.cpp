@@ -1232,7 +1232,7 @@ bool CScoreWorker::ShowTopPoints(IDbConnection *pSqlServer, const ISqlData *pGam
 		"  FROM %s_points "
 		"  ORDER BY Points DESC LIMIT ?"
 		") as a "
-		"LIMIT ?, 5;",
+		"ORDER BY Rank ASC, Name ASC LIMIT ?, 5;",
 		pSqlServer->GetPrefix());
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{

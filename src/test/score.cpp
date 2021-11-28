@@ -7,7 +7,9 @@
 
 #include <sqlite3.h>
 
-using namespace testing;
+#if defined(CONF_SQL)
+int DummyMysqlInit = (MysqlInit(), 1);
+#endif
 
 char *CSaveTeam::GetString()
 {
@@ -27,7 +29,12 @@ bool CSaveTeam::MatchPlayers(const char (*paNames)[MAX_NAME_LENGTH], const int *
 	return false;
 }
 
-struct Score : public ::testing::Test
+TEST(SQLite, Version)
+{
+	ASSERT_GE(sqlite3_libversion_number(), 3025000) << "SQLite >= 3.25.0 required for Window functions";
+}
+
+struct Score : public testing::TestWithParam<IDbConnection *>
 {
 	Score()
 	{
@@ -38,12 +45,25 @@ struct Score : public ::testing::Test
 
 	~Score()
 	{
-		delete conn;
+		conn->Disconnect();
 	}
 
 	void Connect()
 	{
 		ASSERT_FALSE(conn->Connect(aError, sizeof(aError))) << aError;
+
+		// Delete all existing entries for persistent databases like MySQL
+		int NumInserted = 0;
+		ASSERT_FALSE(conn->PrepareStatement("DELETE FROM record_race;", aError, sizeof(aError))) << aError;
+		ASSERT_FALSE(conn->ExecuteUpdate(&NumInserted, aError, sizeof(aError))) << aError;
+		ASSERT_FALSE(conn->PrepareStatement("DELETE FROM record_teamrace;", aError, sizeof(aError))) << aError;
+		ASSERT_FALSE(conn->ExecuteUpdate(&NumInserted, aError, sizeof(aError))) << aError;
+		ASSERT_FALSE(conn->PrepareStatement("DELETE FROM record_maps;", aError, sizeof(aError))) << aError;
+		ASSERT_FALSE(conn->ExecuteUpdate(&NumInserted, aError, sizeof(aError))) << aError;
+		ASSERT_FALSE(conn->PrepareStatement("DELETE FROM record_points;", aError, sizeof(aError))) << aError;
+		ASSERT_FALSE(conn->ExecuteUpdate(&NumInserted, aError, sizeof(aError))) << aError;
+		ASSERT_FALSE(conn->PrepareStatement("DELETE FROM record_saves;", aError, sizeof(aError))) << aError;
+		ASSERT_FALSE(conn->ExecuteUpdate(&NumInserted, aError, sizeof(aError))) << aError;
 	}
 
 	void Init()
@@ -99,16 +119,11 @@ struct Score : public ::testing::Test
 		}
 	}
 
-	IDbConnection *conn{CreateSqliteConnection(":memory:", true)};
+	IDbConnection *conn{GetParam()};
 	char aError[256] = {};
 	std::shared_ptr<CScorePlayerResult> pPlayerResult{std::make_shared<CScorePlayerResult>()};
 	CSqlPlayerRequest playerRequest{pPlayerResult};
 };
-
-TEST_F(Score, SQLiteVersion)
-{
-	ASSERT_GE(sqlite3_libversion_number(), 3025000) << "SQLite >= 3.25.0 required for Window functions";
-}
 
 struct SingleScore : public Score
 {
@@ -123,7 +138,7 @@ struct SingleScore : public Score
 	}
 };
 
-TEST_F(SingleScore, Top)
+TEST_P(SingleScore, Top)
 {
 	ASSERT_FALSE(CScoreWorker::ShowTop(conn, &playerRequest, aError, sizeof(aError))) << aError;
 	ExpectLines(pPlayerResult,
@@ -132,13 +147,13 @@ TEST_F(SingleScore, Top)
 			"------------ GER Top ------------"});
 }
 
-TEST_F(SingleScore, Rank)
+TEST_P(SingleScore, Rank)
 {
 	ASSERT_FALSE(CScoreWorker::ShowRank(conn, &playerRequest, aError, sizeof(aError))) << aError;
 	ExpectLines(pPlayerResult, {"nameless tee - 01:40.00 - better than 100% - requested by brainless tee", "Global rank 1 - GER unranked"}, true);
 }
 
-TEST_F(SingleScore, TopServer)
+TEST_P(SingleScore, TopServer)
 {
 	str_copy(playerRequest.m_aServer, "USA", sizeof(playerRequest.m_aServer));
 	ASSERT_FALSE(CScoreWorker::ShowTop(conn, &playerRequest, aError, sizeof(aError))) << aError;
@@ -148,14 +163,14 @@ TEST_F(SingleScore, TopServer)
 			"---------------------------------------"});
 }
 
-TEST_F(SingleScore, RankServer)
+TEST_P(SingleScore, RankServer)
 {
 	str_copy(playerRequest.m_aServer, "USA", sizeof(playerRequest.m_aServer));
 	ASSERT_FALSE(CScoreWorker::ShowRank(conn, &playerRequest, aError, sizeof(aError))) << aError;
 	ExpectLines(pPlayerResult, {"nameless tee - 01:40.00 - better than 100% - requested by brainless tee", "Global rank 1 - USA rank 1"}, true);
 }
 
-TEST_F(SingleScore, TimesExists)
+TEST_P(SingleScore, TimesExists)
 {
 	ASSERT_FALSE(CScoreWorker::ShowTimes(conn, &playerRequest, aError, sizeof(aError))) << aError;
 	EXPECT_EQ(pPlayerResult->m_MessageKind, CScorePlayerResult::DIRECT);
@@ -173,7 +188,7 @@ TEST_F(SingleScore, TimesExists)
 	}
 }
 
-TEST_F(SingleScore, TimesDoesntExist)
+TEST_P(SingleScore, TimesDoesntExist)
 {
 	str_copy(playerRequest.m_aName, "foo", sizeof(playerRequest.m_aMap));
 	ASSERT_FALSE(CScoreWorker::ShowTimes(conn, &playerRequest, aError, sizeof(aError))) << aError;
@@ -200,7 +215,7 @@ struct TeamScore : public Score
 	}
 };
 
-TEST_F(TeamScore, All)
+TEST_P(TeamScore, All)
 {
 	ASSERT_FALSE(CScoreWorker::ShowTeamTop5(conn, &playerRequest, aError, sizeof(aError))) << aError;
 	ExpectLines(pPlayerResult,
@@ -209,7 +224,7 @@ TEST_F(TeamScore, All)
 			"-------------------------------"});
 }
 
-TEST_F(TeamScore, PlayerExists)
+TEST_P(TeamScore, PlayerExists)
 {
 	str_copy(playerRequest.m_aName, "brainless tee", sizeof(playerRequest.m_aMap));
 	ASSERT_FALSE(CScoreWorker::ShowPlayerTeamTop5(conn, &playerRequest, aError, sizeof(aError))) << aError;
@@ -219,7 +234,7 @@ TEST_F(TeamScore, PlayerExists)
 			"-------------------------------"});
 }
 
-TEST_F(TeamScore, PlayerDoesntExist)
+TEST_P(TeamScore, PlayerDoesntExist)
 {
 	str_copy(playerRequest.m_aName, "foo", sizeof(playerRequest.m_aMap));
 	ASSERT_FALSE(CScoreWorker::ShowPlayerTeamTop5(conn, &playerRequest, aError, sizeof(aError))) << aError;
@@ -234,14 +249,14 @@ struct MapInfo : public Score
 	}
 };
 
-TEST_F(MapInfo, ExactNoFinish)
+TEST_P(MapInfo, ExactNoFinish)
 {
 	str_copy(playerRequest.m_aName, "Kobra 3", sizeof(playerRequest.m_aName));
 	ASSERT_FALSE(CScoreWorker::MapInfo(conn, &playerRequest, aError, sizeof(aError))) << aError;
 	ExpectLines(pPlayerResult, {"\"Kobra 3\" by Zerodin on Novice, ★★★★★, 5 points, released 6 years and 11 months ago, 0 finishes by 0 tees"});
 }
 
-TEST_F(MapInfo, ExactFinish)
+TEST_P(MapInfo, ExactFinish)
 {
 	InsertRank();
 	str_copy(playerRequest.m_aName, "Kobra 3", sizeof(playerRequest.m_aName));
@@ -249,7 +264,7 @@ TEST_F(MapInfo, ExactFinish)
 	ExpectLines(pPlayerResult, {"\"Kobra 3\" by Zerodin on Novice, ★★★★★, 5 points, released 6 years and 11 months ago, 1 finish by 1 tee in 01:40 median"});
 }
 
-TEST_F(MapInfo, Fuzzy)
+TEST_P(MapInfo, Fuzzy)
 {
 	InsertRank();
 	str_copy(playerRequest.m_aName, "k3", sizeof(playerRequest.m_aName));
@@ -257,7 +272,7 @@ TEST_F(MapInfo, Fuzzy)
 	ExpectLines(pPlayerResult, {"\"Kobra 3\" by Zerodin on Novice, ★★★★★, 5 points, released 6 years and 11 months ago, 1 finish by 1 tee in 01:40 median"});
 }
 
-TEST_F(MapInfo, DoesntExit)
+TEST_P(MapInfo, DoesntExit)
 {
 	str_copy(playerRequest.m_aName, "f", sizeof(playerRequest.m_aName));
 	ASSERT_FALSE(CScoreWorker::MapInfo(conn, &playerRequest, aError, sizeof(aError))) << aError;
@@ -272,7 +287,7 @@ struct MapVote : public Score
 	}
 };
 
-TEST_F(MapVote, Exact)
+TEST_P(MapVote, Exact)
 {
 	str_copy(playerRequest.m_aName, "Kobra 3", sizeof(playerRequest.m_aName));
 	ASSERT_FALSE(CScoreWorker::MapVote(conn, &playerRequest, aError, sizeof(aError))) << aError;
@@ -282,7 +297,7 @@ TEST_F(MapVote, Exact)
 	EXPECT_STREQ(pPlayerResult->m_Data.m_MapVote.m_aServer, "novice");
 }
 
-TEST_F(MapVote, Fuzzy)
+TEST_P(MapVote, Fuzzy)
 {
 	str_copy(playerRequest.m_aName, "k3", sizeof(playerRequest.m_aName));
 	ASSERT_FALSE(CScoreWorker::MapVote(conn, &playerRequest, aError, sizeof(aError))) << aError;
@@ -292,7 +307,7 @@ TEST_F(MapVote, Fuzzy)
 	EXPECT_STREQ(pPlayerResult->m_Data.m_MapVote.m_aServer, "novice");
 }
 
-TEST_F(MapVote, DoesntExist)
+TEST_P(MapVote, DoesntExist)
 {
 	str_copy(playerRequest.m_aName, "f", sizeof(playerRequest.m_aName));
 	ASSERT_FALSE(CScoreWorker::MapVote(conn, &playerRequest, aError, sizeof(aError))) << aError;
@@ -309,27 +324,27 @@ struct Points : public Score
 	}
 };
 
-TEST_F(Points, NoPoints)
+TEST_P(Points, NoPoints)
 {
 	ASSERT_FALSE(CScoreWorker::ShowPoints(conn, &playerRequest, aError, sizeof(aError))) << aError;
 	ExpectLines(pPlayerResult, {"nameless tee has not collected any points so far"});
 }
 
-TEST_F(Points, NoPointsTop)
+TEST_P(Points, NoPointsTop)
 {
 	ASSERT_FALSE(CScoreWorker::ShowTopPoints(conn, &playerRequest, aError, sizeof(aError))) << aError;
 	ExpectLines(pPlayerResult, {"-------- Top Points --------",
 					   "-------------------------------"});
 }
 
-TEST_F(Points, OnePoints)
+TEST_P(Points, OnePoints)
 {
 	conn->AddPoints("nameless tee", 2, aError, sizeof(aError));
 	ASSERT_FALSE(CScoreWorker::ShowPoints(conn, &playerRequest, aError, sizeof(aError))) << aError;
 	ExpectLines(pPlayerResult, {"1. nameless tee Points: 2, requested by brainless tee"}, true);
 }
 
-TEST_F(Points, OnePointsTop)
+TEST_P(Points, OnePointsTop)
 {
 	conn->AddPoints("nameless tee", 2, aError, sizeof(aError));
 	ASSERT_FALSE(CScoreWorker::ShowTopPoints(conn, &playerRequest, aError, sizeof(aError))) << aError;
@@ -339,7 +354,7 @@ TEST_F(Points, OnePointsTop)
 			"-------------------------------"});
 }
 
-TEST_F(Points, TwoPoints)
+TEST_P(Points, TwoPoints)
 {
 	conn->AddPoints("nameless tee", 2, aError, sizeof(aError));
 	conn->AddPoints("brainless tee", 3, aError, sizeof(aError));
@@ -347,7 +362,7 @@ TEST_F(Points, TwoPoints)
 	ExpectLines(pPlayerResult, {"2. nameless tee Points: 2, requested by brainless tee"}, true);
 }
 
-TEST_F(Points, TwoPointsTop)
+TEST_P(Points, TwoPointsTop)
 {
 	conn->AddPoints("nameless tee", 2, aError, sizeof(aError));
 	conn->AddPoints("brainless tee", 3, aError, sizeof(aError));
@@ -359,7 +374,7 @@ TEST_F(Points, TwoPointsTop)
 			"-------------------------------"});
 }
 
-TEST_F(Points, EqualPoints)
+TEST_P(Points, EqualPoints)
 {
 	conn->AddPoints("nameless tee", 2, aError, sizeof(aError));
 	conn->AddPoints("brainless tee", 3, aError, sizeof(aError));
@@ -368,7 +383,7 @@ TEST_F(Points, EqualPoints)
 	ExpectLines(pPlayerResult, {"1. nameless tee Points: 3, requested by brainless tee"}, true);
 }
 
-TEST_F(Points, EqualPointsTop)
+TEST_P(Points, EqualPointsTop)
 {
 	conn->AddPoints("nameless tee", 2, aError, sizeof(aError));
 	conn->AddPoints("brainless tee", 3, aError, sizeof(aError));
@@ -376,8 +391,8 @@ TEST_F(Points, EqualPointsTop)
 	ASSERT_FALSE(CScoreWorker::ShowTopPoints(conn, &playerRequest, aError, sizeof(aError))) << aError;
 	ExpectLines(pPlayerResult,
 		{"-------- Top Points --------",
-			"1. nameless tee Points: 3",
 			"1. brainless tee Points: 3",
+			"1. nameless tee Points: 3",
 			"-------------------------------"});
 }
 
@@ -394,7 +409,7 @@ struct RandomMap : public Score
 	}
 };
 
-TEST_F(RandomMap, NoStars)
+TEST_P(RandomMap, NoStars)
 {
 	randomMapRequest.m_Stars = -1;
 	ASSERT_FALSE(CScoreWorker::RandomMap(conn, &randomMapRequest, aError, sizeof(aError))) << aError;
@@ -403,7 +418,7 @@ TEST_F(RandomMap, NoStars)
 	EXPECT_STREQ(pRandomMapResult->m_aMessage, "");
 }
 
-TEST_F(RandomMap, StarsExists)
+TEST_P(RandomMap, StarsExists)
 {
 	randomMapRequest.m_Stars = 5;
 	ASSERT_FALSE(CScoreWorker::RandomMap(conn, &randomMapRequest, aError, sizeof(aError))) << aError;
@@ -412,7 +427,7 @@ TEST_F(RandomMap, StarsExists)
 	EXPECT_STREQ(pRandomMapResult->m_aMessage, "");
 }
 
-TEST_F(RandomMap, StarsDoesntExist)
+TEST_P(RandomMap, StarsDoesntExist)
 {
 	randomMapRequest.m_Stars = 3;
 	ASSERT_FALSE(CScoreWorker::RandomMap(conn, &randomMapRequest, aError, sizeof(aError))) << aError;
@@ -421,7 +436,7 @@ TEST_F(RandomMap, StarsDoesntExist)
 	EXPECT_STREQ(pRandomMapResult->m_aMessage, "No maps found on this server!");
 }
 
-TEST_F(RandomMap, UnfinishedExists)
+TEST_P(RandomMap, UnfinishedExists)
 {
 	randomMapRequest.m_Stars = -1;
 	ASSERT_FALSE(CScoreWorker::RandomUnfinishedMap(conn, &randomMapRequest, aError, sizeof(aError))) << aError;
@@ -430,7 +445,7 @@ TEST_F(RandomMap, UnfinishedExists)
 	EXPECT_STREQ(pRandomMapResult->m_aMessage, "");
 }
 
-TEST_F(RandomMap, UnfinishedDoesntExist)
+TEST_P(RandomMap, UnfinishedDoesntExist)
 {
 	InsertRank();
 	ASSERT_FALSE(CScoreWorker::RandomUnfinishedMap(conn, &randomMapRequest, aError, sizeof(aError))) << aError;
@@ -438,3 +453,31 @@ TEST_F(RandomMap, UnfinishedDoesntExist)
 	EXPECT_STREQ(pRandomMapResult->m_aMap, "");
 	EXPECT_STREQ(pRandomMapResult->m_aMessage, "You have no more unfinished maps on this server!");
 }
+
+auto testValues
+{
+	testing::Values(CreateSqliteConnection(":memory:", true)
+#if defined(CONF_SQL)
+				,
+		CreateMysqlConnection("ddnet", "record", "ddnet", "thebestpassword", "localhost", 3306, true)
+#endif
+	)
+};
+
+#define INSTANTIATE(SUITE) \
+	INSTANTIATE_TEST_SUITE_P(Sql, SUITE, testValues, \
+		[](const testing::TestParamInfo<Score::ParamType> &info) { \
+			switch(info.index) \
+			{ \
+			case 0: return "SQLite"; \
+			case 1: return "MySQL"; \
+			default: return "Unknown"; \
+			} \
+		})
+
+INSTANTIATE(SingleScore);
+INSTANTIATE(TeamScore);
+INSTANTIATE(MapInfo);
+INSTANTIATE(MapVote);
+INSTANTIATE(Points);
+INSTANTIATE(RandomMap);

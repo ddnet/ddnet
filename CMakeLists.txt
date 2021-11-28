@@ -2302,6 +2302,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     src/engine/server/databases/connection.cpp
     src/engine/server/databases/connection.h
     src/engine/server/databases/sqlite.cpp
+    src/engine/server/databases/mysql.cpp
     src/engine/server/name_ban.cpp
     src/engine/server/name_ban.h
     src/engine/server/sql_string_helpers.cpp
@@ -2320,7 +2321,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     $<TARGET_OBJECTS:game-shared>
     ${DEPS}
   )
-  target_link_libraries(${TARGET_TESTRUNNER} ${LIBS} ${CURL_LIBRARIES} ${GTEST_LIBRARIES})
+  target_link_libraries(${TARGET_TESTRUNNER} ${LIBS} ${CURL_LIBRARIES} ${MYSQL_LIBRARIES} ${GTEST_LIBRARIES})
   target_include_directories(${TARGET_TESTRUNNER} PRIVATE ${CURL_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS})
 
   list(APPEND TARGETS_OWN ${TARGET_TESTRUNNER})
