@@ -7,7 +7,7 @@
 
 #include <sqlite3.h>
 
-#if defined(CONF_SQL)
+#if defined(CONF_MYSQL)
 int DummyMysqlInit = (MysqlInit(), 1);
 #endif
 
@@ -457,7 +457,7 @@ TEST_P(RandomMap, UnfinishedDoesntExist)
 auto testValues
 {
 	testing::Values(CreateSqliteConnection(":memory:", true)
-#if defined(CONF_SQL)
+#if defined(CONF_MYSQL)
 				,
 		CreateMysqlConnection("ddnet", "record", "ddnet", "thebestpassword", "localhost", 3306, true)
 #endif

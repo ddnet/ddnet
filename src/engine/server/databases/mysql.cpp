@@ -1,6 +1,6 @@
 #include "connection.h"
 
-#if defined(CONF_SQL)
+#if defined(CONF_MYSQL)
 #include <mysql.h>
 
 #include <base/tl/threading.h>
