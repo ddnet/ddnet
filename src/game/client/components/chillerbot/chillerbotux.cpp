@@ -417,6 +417,10 @@ void CChillerBotUX::UpdateComponents()
 		EnableComponent("last killer");
 	else
 		DisableComponent("last killer");
+	if(g_Config.m_ClShowWallet)
+		EnableComponent("money");
+	else
+		DisableComponent("money");
 }
 
 void CChillerBotUX::OnConsoleInit()

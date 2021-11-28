@@ -34,6 +34,18 @@ void CCityHelper::SetAutoDrop(bool Drop, int Delay, int ClientID)
 void CCityHelper::OnConsoleInit()
 {
 	Console()->Register("auto_drop_money", "?i[delay]?i[dummy]?s[on|off]", CFGFLAG_CLIENT, ConAutoDropMoney, this, "");
+
+	Console()->Chain("cl_show_wallet", ConchainShowWallet, this);
+}
+
+void CCityHelper::ConchainShowWallet(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CWarList *pSelf = (CWarList *)pUserData;
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->GetInteger(0))
+		pSelf->GameClient()->m_ChillerBotUX.EnableComponent("money");
+	else
+		pSelf->GameClient()->m_ChillerBotUX.DisableComponent("money");
 }
 
 int CCityHelper::WalletMoney(int ClientID)
@@ -41,7 +53,27 @@ int CCityHelper::WalletMoney(int ClientID)
 	if(ClientID == -1)
 		ClientID = g_Config.m_ClDummy;
 	return m_WalletMoney[ClientID];
-};
+}
+
+void CCityHelper::SetWalletMoney(int Money, int ClientID)
+{
+	if(ClientID == -1)
+		ClientID = g_Config.m_ClDummy;
+	m_WalletMoney[ClientID] = Money;
+	if(g_Config.m_ClShowWallet)
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "%d", m_WalletMoney[ClientID]);
+		m_pClient->m_ChillerBotUX.SetComponentNoteLong("money", aBuf);
+	}
+}
+
+void CCityHelper::AddWalletMoney(int Money, int ClientID)
+{
+	if(ClientID == -1)
+		ClientID = g_Config.m_ClDummy;
+	SetWalletMoney(WalletMoney(ClientID) + Money);
+}
 
 void CCityHelper::ConAutoDropMoney(IConsole::IResult *pResult, void *pUserData)
 {
@@ -77,13 +109,49 @@ void CCityHelper::OnMessage(int MsgType, void *pRawMsg)
 			}
 			aAmount[i] = aMoney[i];
 		}
-		m_WalletMoney[g_Config.m_ClDummy] = atoi(aAmount);
+		SetWalletMoney(atoi(aAmount));
+		;
+	}
+	else if(MsgType == NETMSGTYPE_SV_CHAT)
+	{
+		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
+		if(pMsg->m_ClientID == -1)
+			OnServerMsg(pMsg->m_pMessage);
+	}
+}
+
+void CCityHelper::OnServerMsg(const char *pMsg)
+{
+	int Money = 0;
+	int n = sscanf(pMsg, "Collected %d money", &Money);
+	if(n == 1)
+	{
+		AddWalletMoney(Money);
+		return;
+	}
+	n = sscanf(pMsg, "You withdrew %d money from your bank account to your wallet.", &Money);
+	if(n == 1)
+	{
+		AddWalletMoney(Money);
+		return;
+	}
+	n = sscanf(pMsg, "You deposited %d money from your wallet to your bank account.", &Money);
+	if(n == 1)
+	{
+		AddWalletMoney(-Money);
+		return;
+	}
+	n = sscanf(pMsg, "Wallet [%d]", &Money);
+	if(n == 1)
+	{
+		SetWalletMoney(Money);
+		return;
 	}
 }
 
 void CCityHelper::DropAllMoney(int ClientID)
 {
-	if(!WalletMoney(ClientID))
+	if(WalletMoney(ClientID) < 1)
 		return;
 
 	char aBuf[128];
