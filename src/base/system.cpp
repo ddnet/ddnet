@@ -69,6 +69,7 @@
 #include <direct.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <io.h>
 #include <process.h>
 #include <share.h>
 #include <shellapi.h>
@@ -461,12 +462,29 @@ unsigned io_write_newline(IOHANDLE io)
 
 int io_close(IOHANDLE io)
 {
+	if(io_flush(io) != 0)
+	{
+		dbg_msg("file", "flushing stream failed: %d", errno);
+	}
+	if(io_fsync(io) != 0)
+	{
+		dbg_msg("file", "flushing file to disk failed: %d", errno);
+	}
 	return fclose((FILE *)io) != 0;
 }
 
 int io_flush(IOHANDLE io)
 {
 	return fflush((FILE *)io);
+}
+
+int io_fsync(IOHANDLE io)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	return FlushFileBuffers((HANDLE)_get_osfhandle(_fileno((FILE *)io)));
+#else
+	return fsync(fileno((FILE *)io));
+#endif
 }
 
 #define ASYNC_BUFSIZE 8 * 1024
