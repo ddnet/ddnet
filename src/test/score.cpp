@@ -454,12 +454,17 @@ TEST_P(RandomMap, UnfinishedDoesntExist)
 	EXPECT_STREQ(pRandomMapResult->m_aMessage, "You have no more unfinished maps on this server!");
 }
 
+auto pSqliteConn = CreateSqliteConnection(":memory:", true);
+#if defined(CONF_TEST_MYSQL)
+auto pMysqlConn = CreateMysqlConnection("ddnet", "record", "ddnet", "thebestpassword", "localhost", 3306, true);
+#endif
+
 auto testValues
 {
-	testing::Values(CreateSqliteConnection(":memory:", true)
+	testing::Values(pSqliteConn.get()
 #if defined(CONF_TEST_MYSQL)
 				,
-		CreateMysqlConnection("ddnet", "record", "ddnet", "thebestpassword", "localhost", 3306, true)
+		pMysqlConn.get()
 #endif
 	)
 };

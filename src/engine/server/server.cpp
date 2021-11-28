@@ -2419,17 +2419,16 @@ int CServer::Run()
 
 	if(Config()->m_SvSqliteFile[0] != '\0')
 	{
-		auto pSqlServers = std::unique_ptr<IDbConnection>(CreateSqliteConnection(
-			Config()->m_SvSqliteFile, true));
+		auto pSqliteConn = CreateSqliteConnection(Config()->m_SvSqliteFile, true);
 
 		if(Config()->m_SvUseSQL)
 		{
-			DbPool()->RegisterDatabase(std::move(pSqlServers), CDbConnectionPool::WRITE_BACKUP);
+			DbPool()->RegisterDatabase(std::move(pSqliteConn), CDbConnectionPool::WRITE_BACKUP);
 		}
 		else
 		{
-			auto pCopy = std::unique_ptr<IDbConnection>(pSqlServers->Copy());
-			DbPool()->RegisterDatabase(std::move(pSqlServers), CDbConnectionPool::READ);
+			auto pCopy = std::unique_ptr<IDbConnection>(pSqliteConn->Copy());
+			DbPool()->RegisterDatabase(std::move(pSqliteConn), CDbConnectionPool::READ);
 			DbPool()->RegisterDatabase(std::move(pCopy), CDbConnectionPool::WRITE);
 		}
 	}
@@ -3257,12 +3256,12 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 
 	bool SetUpDb = pResult->NumArguments() == 8 ? pResult->GetInteger(7) : true;
 
-	auto pSqlServers = std::unique_ptr<IDbConnection>(CreateMysqlConnection(
+	auto pMysqlConn = CreateMysqlConnection(
 		pResult->GetString(1), pResult->GetString(2), pResult->GetString(3),
 		pResult->GetString(4), pResult->GetString(5), pResult->GetInteger(6),
-		SetUpDb));
+		SetUpDb);
 
-	if(!pSqlServers)
+	if(!pMysqlConn)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "can't add MySQL server: compiled without MySQL support");
 		return;
@@ -3275,7 +3274,7 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 		pResult->GetString(1), pResult->GetString(2), pResult->GetString(3),
 		pResult->GetString(5), pResult->GetInteger(6));
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
-	pSelf->DbPool()->RegisterDatabase(std::move(pSqlServers), ReadOnly ? CDbConnectionPool::READ : CDbConnectionPool::WRITE);
+	pSelf->DbPool()->RegisterDatabase(std::move(pMysqlConn), ReadOnly ? CDbConnectionPool::READ : CDbConnectionPool::WRITE);
 }
 
 void CServer::ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData)

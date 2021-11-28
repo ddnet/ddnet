@@ -704,7 +704,7 @@ bool CMysqlConnection::AddPoints(const char *pPlayer, int Points, char *pError, 
 	return false;
 }
 
-IDbConnection *CreateMysqlConnection(
+std::unique_ptr<IDbConnection> CreateMysqlConnection(
 	const char *pDatabase,
 	const char *pPrefix,
 	const char *pUser,
@@ -713,7 +713,7 @@ IDbConnection *CreateMysqlConnection(
 	int Port,
 	bool Setup)
 {
-	return new CMysqlConnection(pDatabase, pPrefix, pUser, pPass, pIp, Port, Setup);
+	return std::unique_ptr<IDbConnection>(new CMysqlConnection(pDatabase, pPrefix, pUser, pPass, pIp, Port, Setup));
 }
 #else
 int MysqlInit()
@@ -723,7 +723,7 @@ int MysqlInit()
 void MysqlUninit()
 {
 }
-IDbConnection *CreateMysqlConnection(
+std::unique_ptr<IDbConnection> CreateMysqlConnection(
 	const char *pDatabase,
 	const char *pPrefix,
 	const char *pUser,
