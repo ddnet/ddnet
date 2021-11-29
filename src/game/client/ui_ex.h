@@ -48,8 +48,7 @@ protected:
 	CRenderTools *RenderTools() const { return m_pRenderTools; }
 
 public:
-	CUIEx(CUI *pUI, IKernel *pKernel, CRenderTools *pRenderTools, IInput::CEvent *pInputEventsArray, int *pInputEventCount);
-	CUIEx() {}
+	CUIEx();
 
 	void Init(CUI *pUI, IKernel *pKernel, CRenderTools *pRenderTools, IInput::CEvent *pInputEventsArray, int *pInputEventCount);
 
