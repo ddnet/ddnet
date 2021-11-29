@@ -13,10 +13,8 @@
 
 #include <limits>
 
-CUIEx::CUIEx(CUI *pUI, IKernel *pKernel, CRenderTools *pRenderTools, IInput::CEvent *pInputEventsArray, int *pInputEventCount)
+CUIEx::CUIEx()
 {
-	Init(pUI, pKernel, pRenderTools, pInputEventsArray, pInputEventCount);
-
 	m_MouseSlow = false;
 }
 
