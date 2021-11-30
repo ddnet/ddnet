@@ -23,6 +23,7 @@ private:
 	int m_WalletMoney[NUM_DUMMIES];
 	int64_t m_NextWalletDrop[NUM_DUMMIES];
 	int m_WalletDropDelay[NUM_DUMMIES];
+	int m_LastDummy = 0;
 
 	void SetWalletMoney(int Money, int ClientID = -1);
 	void AddWalletMoney(int Money, int ClientID = -1);

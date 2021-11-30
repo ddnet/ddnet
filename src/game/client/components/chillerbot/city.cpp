@@ -18,6 +18,7 @@ void CCityHelper::OnInit()
 	m_WalletDropDelay[1] = 1;
 	m_NextWalletDrop[0] = 0;
 	m_NextWalletDrop[1] = 0;
+	m_LastDummy = 0;
 }
 
 void CCityHelper::SetAutoDrop(bool Drop, int Delay, int ClientID)
@@ -165,6 +166,11 @@ void CCityHelper::DropAllMoney(int ClientID)
 
 void CCityHelper::OnRender()
 {
+	if(m_LastDummy != g_Config.m_ClDummy)
+	{
+		m_LastDummy = g_Config.m_ClDummy;
+		SetWalletMoney(WalletMoney());
+	}
 	for(int i = 0; i < NUM_DUMMIES; i++)
 	{
 		if(!m_AutoDropMoney[i])
