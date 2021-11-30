@@ -3880,7 +3880,9 @@ void CGameContext::Whisper(int ClientID, char *pStr)
 		while(1)
 		{
 			if(pStr[0] == '"')
+			{
 				break;
+			}
 			else if(pStr[0] == '\\')
 			{
 				if(pStr[1] == '\\')
@@ -3889,21 +3891,27 @@ void CGameContext::Whisper(int ClientID, char *pStr)
 					pStr++; // skip due to escape
 			}
 			else if(pStr[0] == 0)
+			{
 				Error = 1;
+				break;
+			}
 
 			*pDst = *pStr;
 			pDst++;
 			pStr++;
 		}
 
-		// write null termination
-		*pDst = 0;
+		if(!Error)
+		{
+			// write null termination
+			*pDst = 0;
 
-		pStr++;
+			pStr++;
 
-		for(Victim = 0; Victim < MAX_CLIENTS; Victim++)
-			if(str_comp(pName, Server()->ClientName(Victim)) == 0)
-				break;
+			for(Victim = 0; Victim < MAX_CLIENTS; Victim++)
+				if(str_comp(pName, Server()->ClientName(Victim)) == 0)
+					break;
+		}
 	}
 	else
 	{

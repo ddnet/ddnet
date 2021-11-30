@@ -528,7 +528,7 @@ void CSaveTeam::Load(int Team, bool KeepCurrentWeakStrong)
 
 	if(m_pController->GameServer()->Collision()->m_NumSwitchers)
 	{
-		for(int i = 1; i < m_pController->GameServer()->Collision()->m_NumSwitchers + 1; i++)
+		for(int i = 1; i < minimum(m_NumSwitchers, m_pController->GameServer()->Collision()->m_NumSwitchers) + 1; i++)
 		{
 			m_pController->GameServer()->Collision()->m_pSwitchers[i].m_Status[Team] = m_pSwitchers[i].m_Status;
 			if(m_pSwitchers[i].m_EndTime)

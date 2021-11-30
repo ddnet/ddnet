@@ -201,7 +201,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 			}
 			int max = minimum(i - Begin + 1, (int)sizeof(aLine));
 			str_utf8_copy(aLine, Text + Begin, max);
-			m_Input.Add(aLine);
+			m_Input.Append(aLine);
 		}
 	}
 

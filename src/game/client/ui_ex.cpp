@@ -13,9 +13,9 @@
 
 #include <limits>
 
-CUIEx::CUIEx(CUI *pUI, IKernel *pKernel, CRenderTools *pRenderTools, IInput::CEvent *pInputEventsArray, int *pInputEventCount)
+CUIEx::CUIEx()
 {
-	Init(pUI, pKernel, pRenderTools, pInputEventsArray, pInputEventCount);
+	m_MouseSlow = false;
 }
 
 void CUIEx::Init(CUI *pUI, IKernel *pKernel, CRenderTools *pRenderTools, IInput::CEvent *pInputEventsArray, int *pInputEventCount)
@@ -29,6 +29,181 @@ void CUIEx::Init(CUI *pUI, IKernel *pKernel, CRenderTools *pRenderTools, IInput:
 	m_pInput = Kernel()->RequestInterface<IInput>();
 	m_pGraphics = Kernel()->RequestInterface<IGraphics>();
 	m_pTextRender = Kernel()->RequestInterface<ITextRender>();
+}
+
+void CUIEx::ConvertMouseMove(float *pX, float *pY) const
+{
+	UI()->ConvertMouseMove(pX, pY);
+
+	if(m_MouseSlow)
+	{
+		const float SlowMouseFactor = 0.05f;
+		*pX *= SlowMouseFactor;
+		*pY *= SlowMouseFactor;
+	}
+}
+
+float CUIEx::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
+{
+	static float s_OffsetY;
+
+	CUIRect Rail;
+	pRect->Margin(5.0f, &Rail);
+
+	CUIRect Handle;
+	Rail.HSplitTop(clamp(33.0f, Rail.h / 8.0f, Rail.h), &Handle, 0);
+	Current = clamp(Current, 0.0f, 1.0f);
+	Handle.y = Rail.y + (Rail.h - Handle.h) * Current;
+
+	// logic
+	const bool InsideRail = UI()->MouseInside(&Rail);
+	const bool InsideHandle = UI()->MouseInside(&Handle);
+	bool Grabbed = false; // whether to apply the offset
+
+	if(UI()->ActiveItem() == pID)
+	{
+		if(UI()->MouseButton(0))
+		{
+			Grabbed = true;
+			if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+				m_MouseSlow = true;
+		}
+		else
+		{
+			UI()->SetActiveItem(0);
+		}
+	}
+	else if(UI()->HotItem() == pID)
+	{
+		if(UI()->MouseButton(0))
+		{
+			UI()->SetActiveItem(pID);
+			s_OffsetY = UI()->MouseY() - Handle.y;
+			Grabbed = true;
+		}
+	}
+	else if(UI()->MouseButtonClicked(0) && !InsideHandle && InsideRail)
+	{
+		UI()->SetActiveItem(pID);
+		s_OffsetY = Handle.h * 0.5f;
+		Grabbed = true;
+	}
+
+	if(InsideHandle)
+		UI()->SetHotItem(pID);
+
+	float ReturnValue = Current;
+	if(Grabbed)
+	{
+		const float Min = Rail.y;
+		const float Max = Rail.h - Handle.h;
+		const float Cur = UI()->MouseY() - s_OffsetY;
+		ReturnValue = clamp((Cur - Min) / Max, 0.0f, 1.0f);
+	}
+
+	// render
+	RenderTools()->DrawUIRect(&Rail, ColorRGBA(0, 0, 0, 0.25f), CUI::CORNER_ALL, Rail.w / 2.0f);
+
+	float ColorSlider;
+	if(UI()->ActiveItem() == pID)
+		ColorSlider = 1.0f;
+	else if(UI()->HotItem() == pID)
+		ColorSlider = 0.9f;
+	else
+		ColorSlider = 0.75f;
+
+	RenderTools()->DrawUIRect(&Handle, ColorRGBA(ColorSlider, ColorSlider, ColorSlider, 0.75f), CUI::CORNER_ALL, Handle.w / 2.0f);
+
+	return ReturnValue;
+}
+
+float CUIEx::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, const ColorRGBA *pColorInner)
+{
+	static float s_OffsetX;
+
+	CUIRect Rail;
+	if(pColorInner)
+		Rail = *pRect;
+	else
+		pRect->HMargin(5.0f, &Rail);
+
+	CUIRect Handle;
+	Rail.VSplitLeft(pColorInner ? 8.0f : clamp(33.0f, Rail.w / 8.0f, Rail.w), &Handle, 0);
+	Current = clamp(Current, 0.0f, 1.0f);
+	Handle.x += (Rail.w - Handle.w) * Current;
+
+	// logic
+	const bool InsideRail = UI()->MouseInside(&Rail);
+	const bool InsideHandle = UI()->MouseInside(&Handle);
+	bool Grabbed = false; // whether to apply the offset
+
+	if(UI()->ActiveItem() == pID)
+	{
+		if(UI()->MouseButton(0))
+		{
+			Grabbed = true;
+			if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+				m_MouseSlow = true;
+		}
+		else
+		{
+			UI()->SetActiveItem(0);
+		}
+	}
+	else if(UI()->HotItem() == pID)
+	{
+		if(UI()->MouseButton(0))
+		{
+			UI()->SetActiveItem(pID);
+			s_OffsetX = UI()->MouseX() - Handle.x;
+			Grabbed = true;
+		}
+	}
+	else if(UI()->MouseButtonClicked(0) && !InsideHandle && InsideRail)
+	{
+		UI()->SetActiveItem(pID);
+		s_OffsetX = Handle.w * 0.5f;
+		Grabbed = true;
+	}
+
+	if(InsideHandle)
+		UI()->SetHotItem(pID);
+
+	float ReturnValue = Current;
+	if(Grabbed)
+	{
+		const float Min = Rail.x;
+		const float Max = Rail.w - Handle.w;
+		const float Cur = UI()->MouseX() - s_OffsetX;
+		ReturnValue = clamp((Cur - Min) / Max, 0.0f, 1.0f);
+	}
+
+	// render
+	if(pColorInner)
+	{
+		CUIRect Slider;
+		Handle.VMargin(-2.0f, &Slider);
+		Slider.HMargin(-3.0f, &Slider);
+		RenderTools()->DrawUIRect(&Slider, ColorRGBA(0.15f, 0.15f, 0.15f, 1.0f), CUI::CORNER_ALL, 5.0f);
+		Slider.Margin(2.0f, &Slider);
+		RenderTools()->DrawUIRect(&Slider, *pColorInner, CUI::CORNER_ALL, 3.0f);
+	}
+	else
+	{
+		RenderTools()->DrawUIRect(&Rail, ColorRGBA(0, 0, 0, 0.25f), CUI::CORNER_ALL, Rail.h / 2.0f);
+
+		float ColorSlider;
+		if(UI()->ActiveItem() == pID)
+			ColorSlider = 1.0f;
+		else if(UI()->HotItem() == pID)
+			ColorSlider = 0.9f;
+		else
+			ColorSlider = 0.75f;
+
+		RenderTools()->DrawUIRect(&Handle, ColorRGBA(ColorSlider, ColorSlider, ColorSlider, 0.75f), CUI::CORNER_ALL, Handle.h / 2.0f);
+	}
+
+	return ReturnValue;
 }
 
 int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners, const char *pEmptyText)

@@ -171,7 +171,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	RenderTools()->DrawUIRect(&View, ColorRGBA(0, 0, 0, 0.15f), 0, 0);
 
 	CUIRect Scroll;
-	View.VSplitRight(10, &View, &Scroll);
+	View.VSplitRight(20.0f, &View, &Scroll);
 
 	int NumServers = ServerBrowser()->NumSortedServers();
 
@@ -188,10 +188,9 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			UI()->DoLabelScaled(&MsgBox, Localize("No servers match your filter criteria"), 16.0f, 0);
 	}
 
-	static int s_ScrollBar = 0;
 	static float s_ScrollValue = 0;
 
-	s_ScrollValue = DoScrollbarV(&s_ScrollBar, &Scroll, s_ScrollValue);
+	s_ScrollValue = m_UIEx.DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
 	if(Input()->KeyPress(KEY_TAB) && m_pClient->m_GameConsole.IsClosed())
 	{
@@ -709,24 +708,6 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	if(DoEditBox(&g_Config.m_BrFilterGametype, &Button, g_Config.m_BrFilterGametype, sizeof(g_Config.m_BrFilterGametype), FontSize, &Offset))
 		Client()->ServerBrowserUpdate();
 
-	{
-		ServerFilter.HSplitTop(19.0f, &Button, &ServerFilter);
-		CUIRect EditBox;
-		Button.VSplitRight(60.0f, &Button, &EditBox);
-
-		UI()->DoLabelScaled(&Button, Localize("Maximum ping:"), FontSize, -1);
-
-		char aBuf[5] = "";
-		if(g_Config.m_BrFilterPing != 0)
-			str_format(aBuf, sizeof(aBuf), "%d", g_Config.m_BrFilterPing);
-		static float Offset = 0.0f;
-		if(DoEditBox(&g_Config.m_BrFilterPing, &EditBox, aBuf, sizeof(aBuf), FontSize, &Offset))
-		{
-			g_Config.m_BrFilterPing = clamp(str_toint(aBuf), 0, 999);
-			Client()->ServerBrowserUpdate();
-		}
-	}
-
 	// server address
 	ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
 	ServerFilter.HSplitTop(19.0f, &Button, &ServerFilter);
@@ -1021,7 +1002,6 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		g_Config.m_BrFilterCountry = 0;
 		g_Config.m_BrFilterCountryIndex = -1;
 		g_Config.m_BrFilterPw = 0;
-		g_Config.m_BrFilterPing = 999;
 		g_Config.m_BrFilterGametype[0] = 0;
 		g_Config.m_BrFilterGametypeStrict = 0;
 		g_Config.m_BrFilterConnectingPlayers = 1;

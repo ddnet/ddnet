@@ -47,7 +47,7 @@ CUI::CUI()
 	m_pHotItem = 0;
 	m_pActiveItem = 0;
 	m_pLastActiveItem = 0;
-	m_pBecommingHotItem = 0;
+	m_pBecomingHotItem = 0;
 
 	m_MouseX = 0;
 	m_MouseY = 0;
@@ -128,18 +128,16 @@ int CUI::Update(float Mx, float My, float Mwx, float Mwy, int Buttons)
 	m_MouseWorldY = Mwy;
 	m_LastMouseButtons = m_MouseButtons;
 	m_MouseButtons = Buttons;
-	m_pHotItem = m_pBecommingHotItem;
+	m_pHotItem = m_pBecomingHotItem;
 	if(m_pActiveItem)
 		m_pHotItem = m_pActiveItem;
-	m_pBecommingHotItem = 0;
+	m_pBecomingHotItem = 0;
 	return 0;
 }
 
-int CUI::MouseInside(const CUIRect *r) const
+bool CUI::MouseInside(const CUIRect *pRect) const
 {
-	if(m_MouseX >= r->x && m_MouseX < r->x + r->w && m_MouseY >= r->y && m_MouseY < r->y + r->h)
-		return 1;
-	return 0;
+	return pRect->Inside(m_MouseX, m_MouseY);
 }
 
 void CUI::ConvertMouseMove(float *x, float *y) const
@@ -147,6 +145,15 @@ void CUI::ConvertMouseMove(float *x, float *y) const
 	float Fac = (float)(g_Config.m_UiMousesens) / g_Config.m_InpMousesens;
 	*x = *x * Fac;
 	*y = *y * Fac;
+}
+
+float CUI::ButtonColorMul(const void *pID)
+{
+	if(ActiveItem() == pID)
+		return ButtonColorMulActive();
+	else if(HotItem() == pID)
+		return ButtonColorMulHot();
+	return ButtonColorMulDefault();
 }
 
 CUIRect *CUI::Screen()
@@ -365,6 +372,11 @@ void CUIRect::HMargin(float Cut, CUIRect *pOtherRect) const
 	pOtherRect->y = r.y + Cut;
 	pOtherRect->w = r.w;
 	pOtherRect->h = r.h - 2 * Cut;
+}
+
+bool CUIRect::Inside(float x, float y) const
+{
+	return x >= this->x && x < this->x + this->w && y >= this->y && y < this->y + this->h;
 }
 
 int CUI::DoButtonLogic(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
