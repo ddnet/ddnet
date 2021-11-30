@@ -49,10 +49,44 @@ void CCityHelper::ConchainShowWallet(IConsole::IResult *pResult, void *pUserData
 		pSelf->GameClient()->m_ChillerBotUX.DisableComponent("money");
 }
 
+void CCityHelper::PrintWalletToChat(int ClientID)
+{
+	if(ClientID == -1)
+		ClientID = g_Config.m_ClDummy;
+
+	char aWallet[128];
+	char aBuf[128];
+	str_format(aWallet, sizeof(aWallet), "money: %d", WalletMoney(ClientID));
+	if(!ClientID)
+	{
+		for(auto &Entry : m_vWalletMain)
+		{
+			str_format(aBuf, sizeof(aBuf), ", \"%s\": %d", Entry.first.c_str(), Entry.second);
+			str_append(aWallet, aBuf, sizeof(aWallet));
+		}
+	}
+	else
+	{
+		for(auto &Entry : m_vWalletDummy)
+		{
+			str_format(aBuf, sizeof(aBuf), ", \"%s\": %d", Entry.first.c_str(), Entry.second);
+			str_append(aWallet, aBuf, sizeof(aWallet));
+		}
+	}
+	m_pClient->m_Chat.Say(0, aWallet);
+}
+
 int CCityHelper::WalletMoney(int ClientID)
 {
 	if(ClientID == -1)
 		ClientID = g_Config.m_ClDummy;
+	if(m_WalletMoney[ClientID] == 0)
+	{
+		if(ClientID)
+			m_vWalletDummy.clear();
+		else
+			m_vWalletMain.clear();
+	}
 	return m_WalletMoney[ClientID];
 }
 
@@ -118,7 +152,22 @@ void CCityHelper::OnMessage(int MsgType, void *pRawMsg)
 		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
 		if(pMsg->m_ClientID == -1)
 			OnServerMsg(pMsg->m_pMessage);
+		else
+			OnChatMsg(pMsg->m_ClientID, pMsg->m_pMessage);
 	}
+}
+
+void CCityHelper::AddWalletEntry(std::vector<std::pair<std::string, int>> *pVec, const std::pair<std::string, int> &Entry)
+{
+	for(auto &E : *pVec)
+	{
+		if(E.first == Entry.first)
+		{
+			E.second += Entry.second;
+			return;
+		}
+	}
+	pVec->push_back(Entry);
 }
 
 void CCityHelper::OnServerMsg(const char *pMsg)
@@ -127,6 +176,20 @@ void CCityHelper::OnServerMsg(const char *pMsg)
 	int n = sscanf(pMsg, "Collected %d money", &Money);
 	if(n == 1)
 	{
+		int Owner = ClosestClientIDToPos(
+			vec2(m_pClient->m_LocalCharacterPos.x, m_pClient->m_LocalCharacterPos.y),
+			g_Config.m_ClDummy);
+		if(Owner != -1)
+		{
+			const char *pName = m_pClient->m_aClients[Owner].m_aName;
+			std::pair<std::string, int> Pair;
+			Pair.first = std::string(pName);
+			Pair.second = Money;
+			if(!g_Config.m_ClDummy)
+				AddWalletEntry(&m_vWalletMain, Pair);
+			else
+				AddWalletEntry(&m_vWalletDummy, Pair);
+		}
 		AddWalletMoney(Money);
 		return;
 	}
@@ -148,6 +211,74 @@ void CCityHelper::OnServerMsg(const char *pMsg)
 		SetWalletMoney(Money);
 		return;
 	}
+}
+
+int CCityHelper::ClosestClientIDToPos(vec2 Pos, int Dummy)
+{
+	float ClosestRange = 0.f;
+	int ClosestId = -1;
+	vec2 ClosestPos = vec2(-1, -1);
+
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		int ClientID = m_pClient->m_LocalIDs[Dummy];
+		if(!m_pClient->m_Snap.m_aCharacters[i].m_Active)
+			continue;
+		if(ClientID == i)
+			continue;
+
+		const void *pPrevInfo = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_PLAYERINFO, i);
+		const void *pInfo = Client()->SnapFindItem(IClient::SNAP_CURRENT, NETOBJTYPE_PLAYERINFO, i);
+
+		if(pPrevInfo && pInfo)
+		{
+			vec2 otherPos = m_pClient->m_aClients[i].m_Predicted.m_Pos;
+			float len = distance(otherPos, Pos);
+			if(len < ClosestRange || !ClosestRange)
+			{
+				ClosestRange = len;
+				ClosestPos = otherPos;
+				ClosestId = i;
+			}
+		}
+	}
+	return ClosestId;
+}
+
+void CCityHelper::OnChatMsg(int ClientID, const char *pMsg)
+{
+	// TODO: move this to chat helper? or do I want a new chat command system in each component? -.-
+	const char *pName = m_pClient->m_aClients[m_pClient->m_LocalIDs[0]].m_aName;
+	const char *pDummyName = m_pClient->m_aClients[m_pClient->m_LocalIDs[1]].m_aName;
+	int NameLen = 0;
+
+	if(str_startswith(pMsg, pName))
+		NameLen = str_length(pName);
+	else if(m_pClient->Client()->DummyConnected() && str_startswith(pMsg, pDummyName))
+		NameLen = str_length(pDummyName);
+
+	if(!NameLen)
+		return;
+
+	char aMsg[2048];
+	char aCmd[2048] = {0};
+	str_copy(aMsg, pMsg + NameLen, sizeof(aMsg));
+	for(unsigned int i = 0; i < sizeof(aMsg); i++)
+	{
+		if(aMsg[i] == ' ' || aMsg[i] == ':')
+			continue;
+
+		if(aMsg[i] == '!')
+			str_copy(aCmd, &aMsg[i + 1], sizeof(aCmd));
+		break;
+	}
+	if(aCmd[0] == '\0')
+		return;
+	// char aBuf[128];
+	// str_format(aBuf, sizeof(aBuf), "cmd '%s'", aCmd);
+	// m_pClient->m_Chat.Say(0, aBuf);
+	if(!str_comp(aCmd, "wallet"))
+		PrintWalletToChat();
 }
 
 void CCityHelper::DropAllMoney(int ClientID)
