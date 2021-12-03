@@ -166,7 +166,7 @@ class CMenus : public CComponent
 						if(pText == NULL)
 							pText = GetTextLambda();
 						NewRect.m_Text = pText;
-						UI()->DoLabel(NewRect, &Text, pText, Text.h * ms_FontmodHeight, 0, -1, AlignVertically);
+						UI()->DoLabel(NewRect, &Text, pText, Text.h * CUI::ms_FontmodHeight, 0, -1, AlignVertically);
 					}
 				}
 				Graphics()->SetColor(1, 1, 1, 1);
@@ -305,7 +305,6 @@ protected:
 	static float ms_ButtonHeight;
 	static float ms_ListheaderHeight;
 	static float ms_ListitemAdditionalHeight;
-	static float ms_FontmodHeight;
 
 	// for settings
 	bool m_NeedRestartGeneral;

@@ -197,6 +197,8 @@ class CUI
 	std::vector<CUIElement *> m_UIElements;
 
 public:
+	static float ms_FontmodHeight;
+
 	// TODO: Refactor: Fill this in
 	void SetGraphics(class IGraphics *pGraphics, class ITextRender *pTextRender)
 	{

@@ -60,7 +60,6 @@ bool CMenus::ms_ValueSelectorTextMode;
 
 float CMenus::ms_ButtonHeight = 25.0f;
 float CMenus::ms_ListheaderHeight = 17.0f;
-float CMenus::ms_FontmodHeight = 0.8f;
 
 IInput::CEvent CMenus::m_aInputEvents[MAX_INPUTEVENTS];
 int CMenus::m_NumInputEvents;
@@ -214,7 +213,7 @@ int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const
 
 	Text.HMargin(pRect->h >= 20.0f ? 2.0f : 1.0f, &Text);
 	Text.HMargin((Text.h * FontFactor) / 2.0f, &Text);
-	UI()->DoLabel(&Text, pText, Text.h * ms_FontmodHeight, 0, -1, AlignVertically);
+	UI()->DoLabel(&Text, pText, Text.h * CUI::ms_FontmodHeight, 0, -1, AlignVertically);
 
 	if(MouseInsideColorPicker)
 		return 0;
@@ -227,7 +226,7 @@ void CMenus::DoButton_KeySelect(const void *pID, const char *pText, int Checked,
 	RenderTools()->DrawUIRect(pRect, ColorRGBA(1, 1, 1, 0.5f * UI()->ButtonColorMul(pID)), CUI::CORNER_ALL, 5.0f);
 	CUIRect Temp;
 	pRect->HMargin(1.0f, &Temp);
-	UI()->DoLabel(&Temp, pText, Temp.h * ms_FontmodHeight, 0);
+	UI()->DoLabel(&Temp, pText, Temp.h * CUI::ms_FontmodHeight, 0);
 }
 
 int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners, SUIAnimator *pAnimator, const ColorRGBA *pDefaultColor, const ColorRGBA *pActiveColor, const ColorRGBA *pHoverColor, float EdgeRounding, int AlignVertically)
@@ -306,7 +305,7 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 	}
 
 	Rect.HMargin(2.0f, &Temp);
-	UI()->DoLabel(&Temp, pText, Temp.h * ms_FontmodHeight, 0, -1, AlignVertically);
+	UI()->DoLabel(&Temp, pText, Temp.h * CUI::ms_FontmodHeight, 0, -1, AlignVertically);
 
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
 }
@@ -319,7 +318,7 @@ int CMenus::DoButton_GridHeader(const void *pID, const char *pText, int Checked,
 		RenderTools()->DrawUIRect(pRect, ColorRGBA(1, 1, 1, 0.5f), CUI::CORNER_T, 5.0f);
 	CUIRect t;
 	pRect->VSplitLeft(5.0f, 0, &t);
-	UI()->DoLabel(&t, pText, pRect->h * ms_FontmodHeight, -1);
+	UI()->DoLabel(&t, pText, pRect->h * CUI::ms_FontmodHeight, -1);
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
 }
 
@@ -340,13 +339,13 @@ int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const c
 	{
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT);
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
-		UI()->DoLabel(&c, "\xEE\x97\x8D", c.h * ms_FontmodHeight, 0, -1, 0);
+		UI()->DoLabel(&c, "\xEE\x97\x8D", c.h * CUI::ms_FontmodHeight, 0, -1, 0);
 		TextRender()->SetCurFont(NULL);
 	}
 	else
-		UI()->DoLabel(&c, pBoxText, c.h * ms_FontmodHeight, 0, -1, 0);
+		UI()->DoLabel(&c, pBoxText, c.h * CUI::ms_FontmodHeight, 0, -1, 0);
 	TextRender()->SetRenderFlags(0);
-	UI()->DoLabel(&t, pText, c.h * ms_FontmodHeight, -1);
+	UI()->DoLabel(&t, pText, c.h * CUI::ms_FontmodHeight, -1);
 
 	return UI()->DoButtonLogic(pID, pText, 0, pRect);
 }
@@ -2336,7 +2335,7 @@ void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
 		else // generic
 			str_format(aName, sizeof(aName), "%s", Theme.m_Name.cstr());
 
-		UI()->DoLabel(&Item.m_Rect, aName, 16 * ms_FontmodHeight, -1);
+		UI()->DoLabel(&Item.m_Rect, aName, 16 * CUI::ms_FontmodHeight, -1);
 	}
 
 	bool ItemActive = false;
