@@ -22,7 +22,7 @@ public:
 	{
 	public:
 		NETADDR m_Addr;
-		int64 m_RequestTime;
+		int64_t m_RequestTime;
 		bool m_RequestIgnoreInfo;
 		int m_GotInfo;
 		bool m_Request64Legacy;
@@ -176,7 +176,7 @@ private:
 	CServerEntry *m_pLastReqServer;
 	int m_NumRequests;
 
-	//used instead of g_Config.br_max_requests to get more servers
+	// used instead of g_Config.br_max_requests to get more servers
 	int m_CurrentMaxRequests;
 
 	int m_NeedRefresh;
@@ -191,8 +191,7 @@ private:
 	char m_aFilterGametypeString[128];
 
 	int m_ServerlistType;
-	int64 m_BroadcastTime;
-	int m_RequestNumber;
+	int64_t m_BroadcastTime;
 	unsigned char m_aTokenSeed[16];
 
 	bool m_SortOnNextUpdate;
@@ -216,6 +215,8 @@ private:
 	void Filter();
 	void Sort();
 	int SortHash() const;
+
+	void CleanUp();
 
 	void UpdateFromHttp();
 	CServerEntry *Add(const NETADDR &Addr);

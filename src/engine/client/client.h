@@ -41,6 +41,7 @@ public:
 	};
 
 	float m_Min, m_Max;
+	float m_MinRange, m_MaxRange;
 	float m_aValues[MAX_VALUES];
 	float m_aColors[MAX_VALUES][3];
 	int m_Index;
@@ -56,9 +57,9 @@ public:
 
 class CSmoothTime
 {
-	int64 m_Snap;
-	int64 m_Current;
-	int64 m_Target;
+	int64_t m_Snap;
+	int64_t m_Current;
+	int64_t m_Target;
 
 	CGraph m_Graph;
 
@@ -66,13 +67,13 @@ class CSmoothTime
 
 	float m_aAdjustSpeed[2]; // 0 = down, 1 = up
 public:
-	void Init(int64 Target);
+	void Init(int64_t Target);
 	void SetAdjustSpeed(int Direction, float Value);
 
-	int64 Get(int64 Now);
+	int64_t Get(int64_t Now);
 
-	void UpdateInt(int64 Target);
-	void Update(CGraph *pGraph, int64 Target, int TimeLeft, int AdjustDirection);
+	void UpdateInt(int64_t Target);
+	void Update(CGraph *pGraph, int64_t Target, int TimeLeft, int AdjustDirection);
 };
 
 class CServerCapabilities
@@ -81,6 +82,7 @@ public:
 	bool m_ChatTimeoutCode;
 	bool m_AnyPlayerFlag;
 	bool m_PingEx;
+	bool m_AllowDummy;
 };
 
 class CClient : public IClient, public CDemoPlayer::IListener
@@ -131,12 +133,12 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	CUuid m_ConnectionID;
 
 	unsigned m_SnapshotParts[NUM_DUMMIES];
-	int64 m_LocalStartTime;
+	int64_t m_LocalStartTime;
 
 	IGraphics::CTextureHandle m_DebugFont;
 	int m_DebugSoundIndex = 0;
 
-	int64 m_LastRenderTime;
+	int64_t m_LastRenderTime;
 	float m_RenderFrameTimeLow;
 	float m_RenderFrameTimeHigh;
 	int m_RenderFrames;
@@ -163,10 +165,10 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aVersionStr[10];
 
 	// pinging
-	int64 m_PingStartTime;
+	int64_t m_PingStartTime;
 
-	char m_aCurrentMap[MAX_PATH_LENGTH];
-	char m_aCurrentMapPath[MAX_PATH_LENGTH];
+	char m_aCurrentMap[IO_MAX_PATH_LENGTH];
+	char m_aCurrentMapPath[IO_MAX_PATH_LENGTH];
 
 	char m_aTimeoutCodes[NUM_DUMMIES][32];
 	bool m_aTimeoutCodeSent[NUM_DUMMIES];
@@ -174,14 +176,15 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	//
 	char m_aCmdConnect[256];
-	char m_aCmdPlayDemo[MAX_PATH_LENGTH];
-	char m_aCmdEditMap[MAX_PATH_LENGTH];
+	char m_aCmdPlayDemo[IO_MAX_PATH_LENGTH];
+	char m_aCmdEditMap[IO_MAX_PATH_LENGTH];
 
 	// map download
 	std::shared_ptr<CGetFile> m_pMapdownloadTask;
 	char m_aMapdownloadFilename[256];
+	char m_aMapdownloadFilenameTemp[256];
 	char m_aMapdownloadName[256];
-	IOHANDLE m_MapdownloadFile;
+	IOHANDLE m_MapdownloadFileTemp;
 	int m_MapdownloadChunk;
 	int m_MapdownloadCrc;
 	int m_MapdownloadAmount;
@@ -206,8 +209,8 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	{
 		int m_aData[MAX_INPUT_SIZE]; // the input data
 		int m_Tick; // the tick that the input is for
-		int64 m_PredictedTime; // prediction latency when we sent this input
-		int64 m_Time;
+		int64_t m_PredictedTime; // prediction latency when we sent this input
+		int64_t m_Time;
 	} m_aInputs[NUM_DUMMIES][200];
 
 	int m_CurrentInput[NUM_DUMMIES];
@@ -241,14 +244,14 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	bool ShouldSendChatTimeoutCodeHeuristic();
 
 	class CServerInfo m_CurrentServerInfo;
-	int64 m_CurrentServerInfoRequestTime; // >= 0 should request, == -1 got info
+	int64_t m_CurrentServerInfoRequestTime; // >= 0 should request, == -1 got info
 
 	int m_CurrentServerPingInfoType;
 	int m_CurrentServerPingBasicToken;
 	int m_CurrentServerPingToken;
 	CUuid m_CurrentServerPingUuid;
-	int64 m_CurrentServerCurrentPingTime; // >= 0 request running
-	int64 m_CurrentServerNextPingTime; // >= 0 should request
+	int64_t m_CurrentServerCurrentPingTime; // >= 0 request running
+	int64_t m_CurrentServerNextPingTime; // >= 0 should request
 
 	// version info
 	struct CVersionInfo
@@ -264,7 +267,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 		class CHostLookup m_VersionServeraddr;
 	} m_VersionInfo;
 
-	volatile int m_GfxState;
 	static void GraphicsThreadProxy(void *pThis) { ((CClient *)pThis)->GraphicsThread(); }
 	void GraphicsThread();
 
@@ -275,7 +277,9 @@ class CClient : public IClient, public CDemoPlayer::IListener
 #endif
 
 	IOHANDLE m_BenchmarkFile;
-	int64 m_BenchmarkStopTime;
+	int64_t m_BenchmarkStopTime;
+
+	void UpdateDemoIntraTimers();
 
 public:
 	IEngine *Engine() { return m_pEngine; }
@@ -336,6 +340,7 @@ public:
 	virtual void DummyConnect();
 	virtual bool DummyConnected();
 	virtual bool DummyConnecting();
+	virtual bool DummyAllowed();
 	int m_DummyConnected;
 	int m_LastDummyConnectTime;
 

@@ -315,7 +315,13 @@ char *CConsole::Format(char *pBuf, int Size, const char *pFrom, const char *pStr
 
 void CConsole::Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor)
 {
+	// if the color is pure white, use default terminal color
+	if(mem_comp(&PrintColor, &gs_ConsoleDefaultColor, sizeof(ColorRGBA)) == 0)
+		set_console_msg_color(NULL);
+	else
+		set_console_msg_color(&PrintColor);
 	dbg_msg(pFrom, "%s", pStr);
+	set_console_msg_color(NULL);
 	char aBuf[1024];
 	Format(aBuf, sizeof(aBuf), pFrom, pStr);
 	for(int i = 0; i < m_NumPrintCB; ++i)

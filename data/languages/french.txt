@@ -869,8 +869,8 @@ Remove chat
 Markers:
 == Marqueurs :
 
-Multiple texture units (disable for MacOS)
-== Unités de texture multiple (désactivé pour MacOS)
+Multiple texture units (disable for macOS)
+== Unités de texture multiple (désactivé pour macOS)
 
 Pause
 == Pause
@@ -1311,6 +1311,15 @@ Use modern OpenGL
 Show client IDs
 == Montrer les IDs
 
+Kill Messages
+== Messages d'élimination
+
+Kill Message Normal Color
+== Couleur normale des messages d'élimination
+
+Kill Message Highlight Color
+== Couleur de surbrillance des messages d'élimination
+
 Laser Outline Color
 == Couleur de la bordure du laser
 
@@ -1346,3 +1355,12 @@ Discord
 
 https://ddnet.tw/discord
 == https://ddnet.tw/discord
+
+Are you sure that you want to disconnect and switch to a different server?
+== Êtes vous sur de vouloir vous déconnecter et changer de serveur?
+
+Refreshing...
+== Actualisation...
+
+Show local player's key presses
+== Montrer les touches appuyées des autres joueurs

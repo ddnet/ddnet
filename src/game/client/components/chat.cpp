@@ -92,6 +92,7 @@ void CChat::Reset()
 	m_Show = false;
 	m_InputUpdate = false;
 	m_ChatStringOffset = 0;
+	m_CompletionUsed = false;
 	m_CompletionChosen = -1;
 	m_aCompletionBuffer[0] = 0;
 	m_PlaceholderOffset = 0;
@@ -102,7 +103,7 @@ void CChat::Reset()
 	m_CurrentLine = 0;
 	DisableMode();
 
-	for(long long &LastSoundPlayed : m_aLastSoundPlayed)
+	for(int64_t &LastSoundPlayed : m_aLastSoundPlayed)
 		LastSoundPlayed = 0;
 }
 
@@ -184,23 +185,23 @@ bool CChat::OnInput(IInput::CEvent Event)
 		{
 			// if the text has more than one line, we send all lines except the last one
 			// the last one is set as in the text field
-			char Line[256];
+			char aLine[256];
 			int i, Begin = 0;
 			for(i = 0; i < str_length(Text); i++)
 			{
 				if(Text[i] == '\n')
 				{
-					int max = minimum(i - Begin + 1, (int)sizeof(Line));
-					str_utf8_copy(Line, Text + Begin, max);
+					int max = minimum(i - Begin + 1, (int)sizeof(aLine));
+					str_utf8_copy(aLine, Text + Begin, max);
 					Begin = i + 1;
-					SayChat(Line);
+					SayChat(aLine);
 					while(Text[i] == '\n')
 						i++;
 				}
 			}
-			int max = minimum(i - Begin + 1, (int)sizeof(Line));
-			str_utf8_copy(Line, Text + Begin, max);
-			m_Input.Add(Line);
+			int max = minimum(i - Begin + 1, (int)sizeof(aLine));
+			str_utf8_copy(aLine, Text + Begin, max);
+			m_Input.Append(aLine);
 		}
 	}
 
@@ -309,7 +310,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 	if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_TAB)
 	{
 		// fill the completion buffer
-		if(m_CompletionChosen < 0)
+		if(!m_CompletionUsed)
 		{
 			const char *pCursor = m_Input.GetString() + m_Input.GetCursorOffset();
 			for(int Count = 0; Count < m_Input.GetCursorOffset() && *(pCursor - 1) != ' '; --pCursor, ++Count)
@@ -328,10 +329,13 @@ bool CChat::OnInput(IInput::CEvent Event)
 
 			const size_t NumCommands = m_Commands.size();
 
-			if(m_ReverseTAB)
-				m_CompletionChosen = (m_CompletionChosen - 1 + 2 * NumCommands) % (2 * NumCommands);
-			else
-				m_CompletionChosen = (m_CompletionChosen + 1) % (2 * NumCommands);
+			if(m_ReverseTAB && m_CompletionUsed)
+				m_CompletionChosen--;
+			else if(!m_ReverseTAB)
+				m_CompletionChosen++;
+			m_CompletionChosen = (m_CompletionChosen + 2 * NumCommands) % (2 * NumCommands);
+
+			m_CompletionUsed = true;
 
 			const char *pCommandStart = m_aCompletionBuffer + 1;
 			for(size_t i = 0; i < 2 * NumCommands; ++i)
@@ -392,10 +396,13 @@ bool CChat::OnInput(IInput::CEvent Event)
 			// find next possible name
 			const char *pCompletionString = 0;
 
-			if(m_ReverseTAB)
-				m_CompletionChosen = (m_CompletionChosen - 1 + 2 * MAX_CLIENTS) % (2 * MAX_CLIENTS);
-			else
-				m_CompletionChosen = (m_CompletionChosen + 1) % (2 * MAX_CLIENTS);
+			if(m_ReverseTAB && m_CompletionUsed)
+				m_CompletionChosen--;
+			else if(!m_ReverseTAB)
+				m_CompletionChosen++;
+			m_CompletionChosen = (m_CompletionChosen + 2 * MAX_CLIENTS) % (2 * MAX_CLIENTS);
+
+			m_CompletionUsed = true;
 
 			for(int i = 0; i < 2 * MAX_CLIENTS; ++i)
 			{
@@ -470,8 +477,13 @@ bool CChat::OnInput(IInput::CEvent Event)
 	{
 		// reset name completion process
 		if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key != KEY_TAB)
+		{
 			if(Event.m_Key != KEY_LSHIFT)
+			{
 				m_CompletionChosen = -1;
+				m_CompletionUsed = false;
+			}
+		}
 
 		m_OldChatStringLength = m_Input.GetLength();
 		m_Input.ProcessInput(Event);
@@ -529,6 +541,7 @@ void CChat::EnableMode(int Team)
 		Input()->SetIMEState(true);
 		Input()->Clear();
 		m_CompletionChosen = -1;
+		m_CompletionUsed = false;
 	}
 }
 
@@ -552,7 +565,7 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 
 bool CChat::LineShouldHighlight(const char *pLine, const char *pName)
 {
-	const char *pHL = str_find_nocase(pLine, pName);
+	const char *pHL = str_utf8_find_nocase(pLine, pName);
 
 	if(pHL)
 	{
@@ -846,14 +859,14 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 	}
 
 	// play sound
-	int64 Now = time();
+	int64_t Now = time();
 	if(ClientID == -1)
 	{
 		if(Now - m_aLastSoundPlayed[CHAT_SERVER] >= time_freq() * 3 / 10)
 		{
 			if(g_Config.m_SndServerMessage)
 			{
-				m_pClient->m_pSounds->Play(CSounds::CHN_GUI, SOUND_CHAT_SERVER, 0);
+				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_SERVER, 0);
 				m_aLastSoundPlayed[CHAT_SERVER] = Now;
 			}
 		}
@@ -871,7 +884,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 			Client()->Notify("DDNet Chat", aBuf);
 			if(g_Config.m_SndHighlight)
 			{
-				m_pClient->m_pSounds->Play(CSounds::CHN_GUI, SOUND_CHAT_HIGHLIGHT, 0);
+				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_HIGHLIGHT, 0);
 				m_aLastSoundPlayed[CHAT_HIGHLIGHT] = Now;
 			}
 
@@ -885,9 +898,16 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 	{
 		if(Now - m_aLastSoundPlayed[CHAT_CLIENT] >= time_freq() * 3 / 10)
 		{
-			if((g_Config.m_SndTeamChat || !m_aLines[m_CurrentLine].m_Team) && (g_Config.m_SndChat || m_aLines[m_CurrentLine].m_Team))
+			bool PlaySound = m_aLines[m_CurrentLine].m_Team ? g_Config.m_SndTeamChat : g_Config.m_SndChat;
+#if defined(CONF_VIDEORECORDER)
+			if(IVideo::Current())
 			{
-				m_pClient->m_pSounds->Play(CSounds::CHN_GUI, SOUND_CHAT_CLIENT, 0);
+				PlaySound &= g_Config.m_ClVideoShowChat;
+			}
+#endif
+			if(PlaySound)
+			{
+				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_CLIENT, 0);
 				m_aLastSoundPlayed[CHAT_CLIENT] = Now;
 			}
 		}
@@ -900,7 +920,7 @@ void CChat::RefindSkins()
 	{
 		if(Line.m_HasRenderTee)
 		{
-			const CSkin *pSkin = m_pClient->m_pSkins->Get(m_pClient->m_pSkins->Find(Line.m_aSkinName));
+			const CSkin *pSkin = m_pClient->m_Skins.Get(m_pClient->m_Skins.Find(Line.m_aSkinName));
 			if(Line.m_CustomColoredSkin)
 				Line.m_RenderSkin = pSkin->m_ColorableSkin;
 			else
@@ -919,7 +939,7 @@ void CChat::OnPrepareLines()
 
 	float ScreenRatio = Graphics()->ScreenAspect();
 
-	bool IsScoreBoardOpen = m_pClient->m_pScoreboard->Active() && (ScreenRatio > 1.7f); // only assume scoreboard when screen ratio is widescreen(something around 16:9)
+	bool IsScoreBoardOpen = m_pClient->m_Scoreboard.Active() && (ScreenRatio > 1.7f); // only assume scoreboard when screen ratio is widescreen(something around 16:9)
 
 	bool ForceRecreate = IsScoreBoardOpen != m_PrevScoreBoardShowed;
 	bool ShowLargeArea = m_Show || g_Config.m_ClShowChat == 2;
@@ -940,7 +960,7 @@ void CChat::OnPrepareLines()
 		RealMsgPaddingTee = 0;
 	}
 
-	int64 Now = time();
+	int64_t Now = time();
 	float LineWidth = (IsScoreBoardOpen ? 85.0f : 200.0f) - (RealMsgPaddingX * 1.5f) - RealMsgPaddingTee;
 
 	float HeightLimit = IsScoreBoardOpen ? 180.0f : m_PrevShowChat ? 50.0f : 200.0f;
@@ -1019,7 +1039,7 @@ void CChat::OnPrepareLines()
 
 			CTextCursor AppendCursor = Cursor;
 
-			if(!IsScoreBoardOpen)
+			if(!IsScoreBoardOpen && !g_Config.m_ClChatOld)
 			{
 				AppendCursor.m_StartX = Cursor.m_X;
 				AppendCursor.m_LineWidth -= (Cursor.m_LongestLineWidth - Cursor.m_StartX);
@@ -1131,7 +1151,7 @@ void CChat::OnPrepareLines()
 		TextRender()->TextColor(Color);
 
 		CTextCursor AppendCursor = Cursor;
-		if(!IsScoreBoardOpen)
+		if(!IsScoreBoardOpen && !g_Config.m_ClChatOld)
 		{
 			AppendCursor.m_LineWidth -= (Cursor.m_LongestLineWidth - Cursor.m_StartX);
 			AppendCursor.m_StartX = Cursor.m_X;
@@ -1239,7 +1259,7 @@ void CChat::OnRender()
 		Marker.m_X -= MarkerOffset;
 		TextRender()->TextEx(&Marker, "|", -1);
 		TextRender()->TextEx(&Cursor, m_Input.GetString(Editing) + m_Input.GetCursorOffset(Editing), -1);
-		if(m_pClient->m_pGameConsole->IsClosed())
+		if(m_pClient->m_GameConsole.IsClosed())
 			Input()->SetEditingPosition(Marker.m_X, Marker.m_Y + Marker.m_FontSize);
 	}
 
@@ -1255,9 +1275,9 @@ void CChat::OnRender()
 	OnPrepareLines();
 
 	float ScreenRatio = Graphics()->ScreenAspect();
-	bool IsScoreBoardOpen = m_pClient->m_pScoreboard->Active() && (ScreenRatio > 1.7f); // only assume scoreboard when screen ratio is widescreen(something around 16:9)
+	bool IsScoreBoardOpen = m_pClient->m_Scoreboard.Active() && (ScreenRatio > 1.7f); // only assume scoreboard when screen ratio is widescreen(something around 16:9)
 
-	int64 Now = time();
+	int64_t Now = time();
 	float HeightLimit = IsScoreBoardOpen ? 180.0f : m_PrevShowChat ? 50.0f : 200.0f;
 	int OffsetType = IsScoreBoardOpen ? 1 : 0;
 

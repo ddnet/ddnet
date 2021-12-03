@@ -35,6 +35,8 @@ private:
 	sorted_array<CCountryFlag> m_aCountryFlags;
 	int m_CodeIndexLUT[CODE_RANGE];
 
+	int m_FlagsQuadContainerIndex;
+
 	void LoadCountryflagsIndexfile();
 };
 #endif

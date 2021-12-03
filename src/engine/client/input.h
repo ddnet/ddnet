@@ -12,11 +12,14 @@ class CInput : public IEngineInput
 {
 	IEngineGraphics *m_pGraphics;
 
+	int m_LastX;
+	int m_LastY;
+
 	int m_InputGrabbed;
 	char *m_pClipboardText;
 
-	int64 m_LastRelease;
-	int64 m_ReleaseDelta;
+	int64_t m_LastRelease;
+	int64_t m_ReleaseDelta;
 
 	bool m_MouseFocus;
 	int m_VideoRestartNeeded;
@@ -51,6 +54,8 @@ public:
 	virtual void MouseRelative(float *x, float *y);
 	virtual void MouseModeAbsolute();
 	virtual void MouseModeRelative();
+	virtual void NativeMousePos(int *x, int *y) const;
+	virtual bool NativeMousePressed(int index);
 	virtual int MouseDoubleClick();
 	virtual const char *GetClipboardText();
 	virtual void SetClipboardText(const char *Text);

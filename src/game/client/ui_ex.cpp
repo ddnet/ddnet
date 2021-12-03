@@ -1,5 +1,10 @@
 #include "ui_ex.h"
 
+#include <base/system.h>
+
+#include <base/math.h>
+#include <engine/textrender.h>
+
 #include <engine/client/input.h>
 #include <engine/keys.h>
 
@@ -8,9 +13,9 @@
 
 #include <limits>
 
-CUIEx::CUIEx(CUI *pUI, IKernel *pKernel, CRenderTools *pRenderTools, IInput::CEvent *pInputEventsArray, int *pInputEventCount)
+CUIEx::CUIEx()
 {
-	Init(pUI, pKernel, pRenderTools, pInputEventsArray, pInputEventCount);
+	m_MouseSlow = false;
 }
 
 void CUIEx::Init(CUI *pUI, IKernel *pKernel, CRenderTools *pRenderTools, IInput::CEvent *pInputEventsArray, int *pInputEventCount)
@@ -26,121 +31,45 @@ void CUIEx::Init(CUI *pUI, IKernel *pKernel, CRenderTools *pRenderTools, IInput:
 	m_pTextRender = Kernel()->RequestInterface<ITextRender>();
 }
 
-int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners, const char *pEmptyText)
+void CUIEx::ConvertMouseMove(float *pX, float *pY) const
 {
-	int Inside = UI()->MouseInside(pRect);
-	bool ReturnValue = false;
-	bool UpdateOffset = false;
-	static int s_AtIndex = 0;
-	static bool s_DoScroll = false;
-	static float s_ScrollStart = 0.0f;
+	UI()->ConvertMouseMove(pX, pY);
 
-	FontSize *= UI()->Scale();
-
-	if(UI()->LastActiveItem() == pID)
+	if(m_MouseSlow)
 	{
-		int Len = str_length(pStr);
-		if(Len == 0)
-			s_AtIndex = 0;
-
-		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_V))
-		{
-			const char *Text = Input()->GetClipboardText();
-			if(Text)
-			{
-				int Offset = str_length(pStr);
-				int CharsLeft = StrSize - Offset;
-				char *pCur = pStr + Offset;
-				str_utf8_copy(pCur, Text, CharsLeft);
-				for(int i = 0; i < CharsLeft; i++)
-				{
-					if(pCur[i] == 0)
-						break;
-					else if(pCur[i] == '\r')
-						pCur[i] = ' ';
-					else if(pCur[i] == '\n')
-						pCur[i] = ' ';
-				}
-				s_AtIndex = str_length(pStr);
-				ReturnValue = true;
-			}
-		}
-
-		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_C))
-		{
-			Input()->SetClipboardText(pStr);
-		}
-
-		/* TODO: Doesn't work, SetClipboardText doesn't retain the string quickly enough?
-		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_X))
-		{
-			Input()->SetClipboardText(pStr);
-			pStr[0] = '\0';
-			s_AtIndex = 0;
-			ReturnValue = true;
-		}
-		*/
-
-		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_U))
-		{
-			pStr[0] = '\0';
-			s_AtIndex = 0;
-			ReturnValue = true;
-		}
-
-		if(Inside && UI()->MouseButton(0))
-		{
-			s_DoScroll = true;
-			s_ScrollStart = UI()->MouseX();
-			int MxRel = (int)(UI()->MouseX() - pRect->x);
-
-			for(int i = 1; i <= Len; i++)
-			{
-				if(TextRender()->TextWidth(0, FontSize, pStr, i, std::numeric_limits<float>::max()) - *Offset > MxRel)
-				{
-					s_AtIndex = i - 1;
-					break;
-				}
-
-				if(i == Len)
-					s_AtIndex = Len;
-			}
-		}
-		else if(!UI()->MouseButton(0))
-			s_DoScroll = false;
-		else if(s_DoScroll)
-		{
-			// do scrolling
-			if(UI()->MouseX() < pRect->x && s_ScrollStart - UI()->MouseX() > 10.0f)
-			{
-				s_AtIndex = maximum(0, s_AtIndex - 1);
-				s_ScrollStart = UI()->MouseX();
-				UpdateOffset = true;
-			}
-			else if(UI()->MouseX() > pRect->x + pRect->w && UI()->MouseX() - s_ScrollStart > 10.0f)
-			{
-				s_AtIndex = minimum(Len, s_AtIndex + 1);
-				s_ScrollStart = UI()->MouseX();
-				UpdateOffset = true;
-			}
-		}
-
-		for(int i = 0; i < *m_pInputEventCount; i++)
-		{
-			Len = str_length(pStr);
-			int NumChars = Len;
-			ReturnValue |= CLineInput::Manipulate(m_pInputEventsArray[i], pStr, StrSize, StrSize, &Len, &s_AtIndex, &NumChars);
-		}
+		const float SlowMouseFactor = 0.05f;
+		*pX *= SlowMouseFactor;
+		*pY *= SlowMouseFactor;
 	}
+}
 
-	bool JustGotActive = false;
+float CUIEx::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
+{
+	static float s_OffsetY;
+
+	CUIRect Rail;
+	pRect->Margin(5.0f, &Rail);
+
+	CUIRect Handle;
+	Rail.HSplitTop(clamp(33.0f, Rail.h / 8.0f, Rail.h), &Handle, 0);
+	Current = clamp(Current, 0.0f, 1.0f);
+	Handle.y = Rail.y + (Rail.h - Handle.h) * Current;
+
+	// logic
+	const bool InsideRail = UI()->MouseInside(&Rail);
+	const bool InsideHandle = UI()->MouseInside(&Handle);
+	bool Grabbed = false; // whether to apply the offset
 
 	if(UI()->ActiveItem() == pID)
 	{
-		if(!UI()->MouseButton(0))
+		if(UI()->MouseButton(0))
 		{
-			s_AtIndex = minimum(s_AtIndex, str_length(pStr));
-			s_DoScroll = false;
+			Grabbed = true;
+			if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+				m_MouseSlow = true;
+		}
+		else
+		{
 			UI()->SetActiveItem(0);
 		}
 	}
@@ -148,9 +77,360 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 	{
 		if(UI()->MouseButton(0))
 		{
-			if(UI()->LastActiveItem() != pID)
-				JustGotActive = true;
 			UI()->SetActiveItem(pID);
+			s_OffsetY = UI()->MouseY() - Handle.y;
+			Grabbed = true;
+		}
+	}
+	else if(UI()->MouseButtonClicked(0) && !InsideHandle && InsideRail)
+	{
+		UI()->SetActiveItem(pID);
+		s_OffsetY = Handle.h * 0.5f;
+		Grabbed = true;
+	}
+
+	if(InsideHandle)
+		UI()->SetHotItem(pID);
+
+	float ReturnValue = Current;
+	if(Grabbed)
+	{
+		const float Min = Rail.y;
+		const float Max = Rail.h - Handle.h;
+		const float Cur = UI()->MouseY() - s_OffsetY;
+		ReturnValue = clamp((Cur - Min) / Max, 0.0f, 1.0f);
+	}
+
+	// render
+	RenderTools()->DrawUIRect(&Rail, ColorRGBA(0, 0, 0, 0.25f), CUI::CORNER_ALL, Rail.w / 2.0f);
+
+	float ColorSlider;
+	if(UI()->ActiveItem() == pID)
+		ColorSlider = 1.0f;
+	else if(UI()->HotItem() == pID)
+		ColorSlider = 0.9f;
+	else
+		ColorSlider = 0.75f;
+
+	RenderTools()->DrawUIRect(&Handle, ColorRGBA(ColorSlider, ColorSlider, ColorSlider, 0.75f), CUI::CORNER_ALL, Handle.w / 2.0f);
+
+	return ReturnValue;
+}
+
+float CUIEx::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, const ColorRGBA *pColorInner)
+{
+	static float s_OffsetX;
+
+	CUIRect Rail;
+	if(pColorInner)
+		Rail = *pRect;
+	else
+		pRect->HMargin(5.0f, &Rail);
+
+	CUIRect Handle;
+	Rail.VSplitLeft(pColorInner ? 8.0f : clamp(33.0f, Rail.w / 8.0f, Rail.w), &Handle, 0);
+	Current = clamp(Current, 0.0f, 1.0f);
+	Handle.x += (Rail.w - Handle.w) * Current;
+
+	// logic
+	const bool InsideRail = UI()->MouseInside(&Rail);
+	const bool InsideHandle = UI()->MouseInside(&Handle);
+	bool Grabbed = false; // whether to apply the offset
+
+	if(UI()->ActiveItem() == pID)
+	{
+		if(UI()->MouseButton(0))
+		{
+			Grabbed = true;
+			if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+				m_MouseSlow = true;
+		}
+		else
+		{
+			UI()->SetActiveItem(0);
+		}
+	}
+	else if(UI()->HotItem() == pID)
+	{
+		if(UI()->MouseButton(0))
+		{
+			UI()->SetActiveItem(pID);
+			s_OffsetX = UI()->MouseX() - Handle.x;
+			Grabbed = true;
+		}
+	}
+	else if(UI()->MouseButtonClicked(0) && !InsideHandle && InsideRail)
+	{
+		UI()->SetActiveItem(pID);
+		s_OffsetX = Handle.w * 0.5f;
+		Grabbed = true;
+	}
+
+	if(InsideHandle)
+		UI()->SetHotItem(pID);
+
+	float ReturnValue = Current;
+	if(Grabbed)
+	{
+		const float Min = Rail.x;
+		const float Max = Rail.w - Handle.w;
+		const float Cur = UI()->MouseX() - s_OffsetX;
+		ReturnValue = clamp((Cur - Min) / Max, 0.0f, 1.0f);
+	}
+
+	// render
+	if(pColorInner)
+	{
+		CUIRect Slider;
+		Handle.VMargin(-2.0f, &Slider);
+		Slider.HMargin(-3.0f, &Slider);
+		RenderTools()->DrawUIRect(&Slider, ColorRGBA(0.15f, 0.15f, 0.15f, 1.0f), CUI::CORNER_ALL, 5.0f);
+		Slider.Margin(2.0f, &Slider);
+		RenderTools()->DrawUIRect(&Slider, *pColorInner, CUI::CORNER_ALL, 3.0f);
+	}
+	else
+	{
+		RenderTools()->DrawUIRect(&Rail, ColorRGBA(0, 0, 0, 0.25f), CUI::CORNER_ALL, Rail.h / 2.0f);
+
+		float ColorSlider;
+		if(UI()->ActiveItem() == pID)
+			ColorSlider = 1.0f;
+		else if(UI()->HotItem() == pID)
+			ColorSlider = 0.9f;
+		else
+			ColorSlider = 0.75f;
+
+		RenderTools()->DrawUIRect(&Handle, ColorRGBA(ColorSlider, ColorSlider, ColorSlider, 0.75f), CUI::CORNER_ALL, Handle.h / 2.0f);
+	}
+
+	return ReturnValue;
+}
+
+int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners, const char *pEmptyText)
+{
+	int Inside = UI()->MouseInside(pRect);
+	bool ReturnValue = false;
+	bool UpdateOffset = false;
+
+	FontSize *= UI()->Scale();
+
+	auto &&SetHasSelection = [&](bool HasSelection) {
+		m_HasSelection = HasSelection;
+		m_pSelItem = m_HasSelection ? pID : nullptr;
+	};
+
+	if(UI()->LastActiveItem() == pID)
+	{
+		if(m_HasSelection && m_pSelItem != pID)
+		{
+			SetHasSelection(false);
+		}
+
+		m_CurCursor = minimum(str_length(pStr), m_CurCursor);
+
+		bool IsShiftPressed = Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT);
+		bool IsCtrlPressed = Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL);
+
+		if(!IsShiftPressed && IsCtrlPressed && Input()->KeyPress(KEY_V))
+		{
+			const char *pText = Input()->GetClipboardText();
+			if(pText)
+			{
+				int OffsetL = clamp(m_CurCursor, 0, str_length(pStr));
+				int OffsetR = OffsetL;
+
+				if(m_HasSelection)
+				{
+					int SelLeft = minimum(m_CurSelStart, m_CurSelEnd);
+					int SelRight = maximum(m_CurSelStart, m_CurSelEnd);
+					int UTF8SelLeft = -1;
+					int UTF8SelRight = -1;
+					if(TextRender()->SelectionToUTF8OffSets(pStr, SelLeft, SelRight, UTF8SelLeft, UTF8SelRight))
+					{
+						OffsetL = UTF8SelLeft;
+						OffsetR = UTF8SelRight;
+						SetHasSelection(false);
+					}
+				}
+
+				std::string NewStr(pStr, OffsetL);
+
+				int WrittenChars = 0;
+
+				const char *pIt = pText;
+				while(*pIt)
+				{
+					const char *pTmp = pIt;
+					int Character = str_utf8_decode(&pTmp);
+					if(Character == -1 || Character == 0)
+						break;
+
+					if(Character == '\r' || Character == '\n')
+					{
+						NewStr.append(1, ' ');
+						++WrittenChars;
+					}
+					else
+					{
+						NewStr.append(pIt, (std::intptr_t)(pTmp - pIt));
+						WrittenChars += (int)(std::intptr_t)(pTmp - pIt);
+					}
+
+					pIt = pTmp;
+				}
+
+				NewStr.append(pStr + OffsetR);
+
+				str_copy(pStr, NewStr.c_str(), StrSize);
+
+				m_CurCursor = OffsetL + WrittenChars;
+				ReturnValue = true;
+			}
+		}
+
+		if(!IsShiftPressed && IsCtrlPressed && (Input()->KeyPress(KEY_C) || Input()->KeyPress(KEY_X)))
+		{
+			if(m_HasSelection)
+			{
+				int SelLeft = minimum(m_CurSelStart, m_CurSelEnd);
+				int SelRight = maximum(m_CurSelStart, m_CurSelEnd);
+				int UTF8SelLeft = -1;
+				int UTF8SelRight = -1;
+				if(TextRender()->SelectionToUTF8OffSets(pStr, SelLeft, SelRight, UTF8SelLeft, UTF8SelRight))
+				{
+					std::string NewStr(&pStr[UTF8SelLeft], UTF8SelRight - UTF8SelLeft);
+					Input()->SetClipboardText(NewStr.c_str());
+					if(Input()->KeyPress(KEY_X))
+					{
+						NewStr = std::string(pStr, UTF8SelLeft) + std::string(pStr + UTF8SelRight);
+						str_copy(pStr, NewStr.c_str(), StrSize);
+						SetHasSelection(false);
+						if(m_CurCursor > UTF8SelLeft)
+							m_CurCursor = maximum(0, m_CurCursor - (UTF8SelRight - UTF8SelLeft));
+						else
+							m_CurCursor = UTF8SelLeft;
+					}
+				}
+			}
+			else
+				Input()->SetClipboardText(pStr);
+		}
+
+		if(!IsShiftPressed && IsCtrlPressed && Input()->KeyPress(KEY_A))
+		{
+			m_CurSelStart = 0;
+			int StrLen = str_length(pStr);
+			TextRender()->UTF8OffToDecodedOff(pStr, StrLen, m_CurSelEnd);
+			SetHasSelection(true);
+			m_CurCursor = StrLen;
+		}
+
+		if(!IsShiftPressed && IsCtrlPressed && Input()->KeyPress(KEY_U))
+		{
+			pStr[0] = '\0';
+			m_CurCursor = 0;
+			ReturnValue = true;
+		}
+
+		for(int i = 0; i < *m_pInputEventCount; i++)
+		{
+			int32_t ManipulateChanges = 0;
+			int LastCursor = m_CurCursor;
+			int Len = str_length(pStr);
+			int NumChars = Len;
+			ManipulateChanges = CLineInput::Manipulate(m_pInputEventsArray[i], pStr, StrSize, StrSize, &Len, &m_CurCursor, &NumChars, m_HasSelection ? CLineInput::LINE_INPUT_MODIFY_DONT_DELETE : 0, IsCtrlPressed ? KEY_LCTRL : 0);
+			ReturnValue |= (ManipulateChanges & (CLineInput::LINE_INPUT_CHANGE_STRING | CLineInput::LINE_INPUT_CHANGE_CHARACTERS_DELETE)) != 0;
+
+			// if cursor changed, reset selection
+			if(ManipulateChanges != 0)
+			{
+				if(m_HasSelection && (ManipulateChanges & (CLineInput::LINE_INPUT_CHANGE_STRING | CLineInput::LINE_INPUT_CHANGE_CHARACTERS_DELETE)) != 0)
+				{
+					int OffsetL = 0;
+					int OffsetR = 0;
+
+					bool IsReverseSel = m_CurSelStart > m_CurSelEnd;
+
+					int ExtraNew = 0;
+					int ExtraOld = 0;
+					// selection correction from added chars
+					if(IsReverseSel)
+					{
+						TextRender()->UTF8OffToDecodedOff(pStr, m_CurCursor, ExtraNew);
+						TextRender()->UTF8OffToDecodedOff(pStr, LastCursor, ExtraOld);
+					}
+
+					int SelLeft = minimum(m_CurSelStart, m_CurSelEnd);
+					int SelRight = maximum(m_CurSelStart, m_CurSelEnd);
+					int UTF8SelLeft = -1;
+					int UTF8SelRight = -1;
+					if(TextRender()->SelectionToUTF8OffSets(pStr, SelLeft + (ExtraNew - ExtraOld), SelRight + (ExtraNew - ExtraOld), UTF8SelLeft, UTF8SelRight))
+					{
+						OffsetL = UTF8SelLeft;
+						OffsetR = UTF8SelRight;
+						SetHasSelection(false);
+					}
+
+					std::string NewStr(pStr, OffsetL);
+
+					NewStr.append(pStr + OffsetR);
+
+					str_copy(pStr, NewStr.c_str(), StrSize);
+
+					if(!IsReverseSel)
+						m_CurCursor = clamp<int>(m_CurCursor - (UTF8SelRight - UTF8SelLeft), 0, NewStr.length());
+				}
+
+				if(IsShiftPressed && (ManipulateChanges & CLineInput::LINE_INPUT_CHANGE_STRING) == 0)
+				{
+					int CursorPosDecoded = -1;
+					int LastCursorPosDecoded = -1;
+
+					if(!m_HasSelection)
+					{
+						m_CurSelStart = -1;
+						m_CurSelEnd = -1;
+					}
+
+					if(TextRender()->UTF8OffToDecodedOff(pStr, m_CurCursor, CursorPosDecoded))
+					{
+						if(TextRender()->UTF8OffToDecodedOff(pStr, LastCursor, LastCursorPosDecoded))
+						{
+							if(!m_HasSelection)
+							{
+								m_CurSelStart = LastCursorPosDecoded;
+								m_CurSelEnd = LastCursorPosDecoded;
+							}
+							m_CurSelEnd += (CursorPosDecoded - LastCursorPosDecoded);
+						}
+					}
+					if(m_CurSelStart == m_CurSelEnd)
+						SetHasSelection(false);
+					else
+						SetHasSelection(true);
+				}
+				else
+				{
+					if(m_HasSelection && (ManipulateChanges & CLineInput::LINE_INPUT_CHANGE_CURSOR) != 0)
+					{
+						if(m_CurSelStart < m_CurSelEnd)
+						{
+							if(m_CurCursor >= LastCursor)
+								m_CurCursor = LastCursor;
+							else
+								TextRender()->DecodedOffToUTF8Off(pStr, m_CurSelStart, m_CurCursor);
+						}
+						else
+						{
+							if(m_CurCursor <= LastCursor)
+								m_CurCursor = LastCursor;
+							else
+								TextRender()->DecodedOffToUTF8Off(pStr, m_CurSelStart, m_CurCursor);
+						}
+					}
+					SetHasSelection(false);
+				}
+			}
 		}
 	}
 
@@ -179,7 +459,7 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 	}
 
 	char aDispEditingText[128 + IInput::INPUT_TEXT_SIZE + 2] = {0};
-	int DispCursorPos = s_AtIndex;
+	int DispCursorPos = m_CurCursor;
 	if(UI()->LastActiveItem() == pID && Input()->GetIMEEditingTextLength() > -1)
 	{
 		int EditingTextCursor = Input()->GetEditingCursor();
@@ -198,22 +478,42 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 		int NewTextLen = str_length(aEditingText);
 		int CharsLeft = (int)sizeof(aDispEditingText) - str_length(aDispEditingText) - 1;
 		int FillCharLen = minimum(NewTextLen, CharsLeft);
-		for(int i = str_length(aDispEditingText) - 1; i >= s_AtIndex; i--)
+		for(int i = str_length(aDispEditingText) - 1; i >= m_CurCursor; i--)
 			aDispEditingText[i + FillCharLen] = aDispEditingText[i];
 		for(int i = 0; i < FillCharLen; i++)
-			aDispEditingText[s_AtIndex + i] = aEditingText[i];
-		DispCursorPos = s_AtIndex + EditingTextCursor + 1;
+			aDispEditingText[m_CurCursor + i] = aEditingText[i];
+		DispCursorPos = m_CurCursor + EditingTextCursor + 1;
 		pDisplayStr = aDispEditingText;
 		UpdateOffset = true;
 	}
 
+	bool IsEmptyText = false;
 	if(pDisplayStr[0] == '\0')
 	{
 		pDisplayStr = pEmptyText;
+		IsEmptyText = true;
 		TextRender()->TextColor(1, 1, 1, 0.75f);
 	}
 
 	DispCursorPos = minimum(DispCursorPos, str_length(pDisplayStr));
+
+	bool JustGotActive = false;
+	if(UI()->ActiveItem() == pID)
+	{
+		if(!UI()->MouseButton(0))
+		{
+			UI()->SetActiveItem(0);
+		}
+	}
+	else if(UI()->HotItem() == pID)
+	{
+		if(UI()->MouseButton(0))
+		{
+			if(UI()->LastActiveItem() != pID)
+				JustGotActive = true;
+			UI()->SetActiveItem(pID);
+		}
+	}
 
 	// check if the text has to be moved
 	if(UI()->LastActiveItem() == pID && !JustGotActive && (UpdateOffset || *m_pInputEventCount))
@@ -240,34 +540,71 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 	UI()->ClipEnable(pRect);
 	Textbox.x -= *Offset;
 
-	UI()->DoLabel(&Textbox, pDisplayStr, FontSize, -1);
+	CTextCursor SelCursor;
+	TextRender()->SetCursor(&SelCursor, 0, 0, 16, 0);
+
+	bool HasMouseSel = false;
+	if(UI()->LastActiveItem() == pID)
+	{
+		if(!m_MouseIsPress && UI()->MouseButtonClicked(0))
+		{
+			m_MouseIsPress = true;
+			m_MousePressX = UI()->MouseX();
+			m_MousePressY = UI()->MouseY();
+		}
+	}
+
+	if(m_MouseIsPress)
+	{
+		m_MouseCurX = UI()->MouseX();
+		m_MouseCurY = UI()->MouseY();
+	}
+	HasMouseSel = m_MouseIsPress && !IsEmptyText;
+	if(m_MouseIsPress && UI()->MouseButtonReleased(0))
+	{
+		m_MouseIsPress = false;
+	}
+
+	if(UI()->LastActiveItem() == pID)
+	{
+		int CursorPos = -1;
+		TextRender()->UTF8OffToDecodedOff(pDisplayStr, DispCursorPos, CursorPos);
+
+		SelCursor.m_CursorMode = HasMouseSel ? TEXT_CURSOR_CURSOR_MODE_CALCULATE : TEXT_CURSOR_CURSOR_MODE_SET;
+		SelCursor.m_CursorCharacter = CursorPos;
+		SelCursor.m_CalculateSelectionMode = HasMouseSel ? TEXT_CURSOR_SELECTION_MODE_CALCULATE : (m_HasSelection ? TEXT_CURSOR_SELECTION_MODE_SET : TEXT_CURSOR_SELECTION_MODE_NONE);
+		SelCursor.m_PressMouseX = m_MousePressX;
+		SelCursor.m_PressMouseY = m_MousePressY;
+		SelCursor.m_ReleaseMouseX = m_MouseCurX;
+		SelCursor.m_ReleaseMouseY = m_MouseCurY;
+		SelCursor.m_SelectionStart = m_CurSelStart;
+		SelCursor.m_SelectionEnd = m_CurSelEnd;
+	}
+
+	UI()->DoLabel(&Textbox, pDisplayStr, FontSize, -1, -1, 1, &SelCursor);
+
+	if(UI()->LastActiveItem() == pID)
+	{
+		if(SelCursor.m_CalculateSelectionMode == TEXT_CURSOR_SELECTION_MODE_CALCULATE)
+		{
+			m_CurSelStart = SelCursor.m_SelectionStart;
+			m_CurSelEnd = SelCursor.m_SelectionEnd;
+			SetHasSelection(m_CurSelStart != m_CurSelEnd);
+		}
+		if(SelCursor.m_CursorMode == TEXT_CURSOR_CURSOR_MODE_CALCULATE)
+		{
+			TextRender()->DecodedOffToUTF8Off(pDisplayStr, SelCursor.m_CursorCharacter, DispCursorPos);
+			m_CurCursor = DispCursorPos;
+		}
+	}
 
 	TextRender()->TextColor(1, 1, 1, 1);
 
-	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-	float OnePixelWidth = ((ScreenX1 - ScreenX0) / Graphics()->ScreenWidth());
-
-	// render the cursor
+	// set the ime cursor
 	if(UI()->LastActiveItem() == pID && !JustGotActive)
 	{
 		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, DispCursorPos, std::numeric_limits<float>::max());
 		Textbox.x += w;
-
-		if((2 * time_get() / time_freq()) % 2)
-		{
-			Graphics()->TextureClear();
-			Graphics()->QuadsBegin();
-			Graphics()->SetColor(0, 0, 0, 0.3f);
-			float PosToMid = (Textbox.h - FontSize) / 2.0f;
-			IGraphics::CQuadItem CursorTBack(Textbox.x - (OnePixelWidth * 2.0f) / 2.0f, Textbox.y + PosToMid, OnePixelWidth * 2 * 2.0f, FontSize);
-			Graphics()->QuadsDrawTL(&CursorTBack, 1);
-			Graphics()->SetColor(1, 1, 1, 1);
-			IGraphics::CQuadItem CursorT(Textbox.x, Textbox.y + PosToMid + OnePixelWidth * 1.5f, OnePixelWidth * 2.0f, FontSize - OnePixelWidth * 1.5f * 2);
-			Graphics()->QuadsDrawTL(&CursorT, 1);
-			Graphics()->QuadsEnd();
-		}
-
 		Input()->SetEditingPosition(Textbox.x, Textbox.y + FontSize);
 	}
 

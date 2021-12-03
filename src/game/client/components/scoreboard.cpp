@@ -428,7 +428,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			if(pInfo->m_Score == -9999)
 				aBuf[0] = 0;
 			else
-				str_time((int64)abs(pInfo->m_Score) * 100, TIME_HOURS, aBuf, sizeof(aBuf));
+				str_time((int64_t)abs(pInfo->m_Score) * 100, TIME_HOURS, aBuf, sizeof(aBuf));
 		}
 		else
 			str_format(aBuf, sizeof(aBuf), "%d", clamp(pInfo->m_Score, -999, 99999));
@@ -512,7 +512,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 		// country flag
 		ColorRGBA Color(1.0f, 1.0f, 1.0f, 0.5f);
-		m_pClient->m_pCountryFlags->Render(m_pClient->m_aClients[pInfo->m_ClientID].m_Country, &Color,
+		m_pClient->m_CountryFlags.Render(m_pClient->m_aClients[pInfo->m_ClientID].m_Country, &Color,
 			CountryOffset, y + (Spacing + TeeSizeMod * 5.0f) / 2.0f, CountryLength, LineHeight - Spacing - TeeSizeMod * 5.0f);
 
 		// ping
@@ -565,25 +565,25 @@ void CScoreboard::RenderRecordingNotification(float x)
 
 	if(m_pClient->DemoRecorder(RECORDER_MANUAL)->IsRecording())
 	{
-		str_time((int64)m_pClient->DemoRecorder(RECORDER_MANUAL)->Length() * 100, TIME_HOURS, aTime, sizeof(aTime));
+		str_time((int64_t)m_pClient->DemoRecorder(RECORDER_MANUAL)->Length() * 100, TIME_HOURS, aTime, sizeof(aTime));
 		str_format(aBuf2, sizeof(aBuf2), "%s %s  ", Localize("Manual"), aTime);
 		str_append(aBuf, aBuf2, sizeof(aBuf));
 	}
 	if(m_pClient->DemoRecorder(RECORDER_RACE)->IsRecording())
 	{
-		str_time((int64)m_pClient->DemoRecorder(RECORDER_RACE)->Length() * 100, TIME_HOURS, aTime, sizeof(aTime));
+		str_time((int64_t)m_pClient->DemoRecorder(RECORDER_RACE)->Length() * 100, TIME_HOURS, aTime, sizeof(aTime));
 		str_format(aBuf2, sizeof(aBuf2), "%s %s  ", Localize("Race"), aTime);
 		str_append(aBuf, aBuf2, sizeof(aBuf));
 	}
 	if(m_pClient->DemoRecorder(RECORDER_AUTO)->IsRecording())
 	{
-		str_time((int64)m_pClient->DemoRecorder(RECORDER_AUTO)->Length() * 100, TIME_HOURS, aTime, sizeof(aTime));
+		str_time((int64_t)m_pClient->DemoRecorder(RECORDER_AUTO)->Length() * 100, TIME_HOURS, aTime, sizeof(aTime));
 		str_format(aBuf2, sizeof(aBuf2), "%s %s  ", Localize("Auto"), aTime);
 		str_append(aBuf, aBuf2, sizeof(aBuf));
 	}
 	if(m_pClient->DemoRecorder(RECORDER_REPLAYS)->IsRecording())
 	{
-		str_time((int64)m_pClient->DemoRecorder(RECORDER_REPLAYS)->Length() * 100, TIME_HOURS, aTime, sizeof(aTime));
+		str_time((int64_t)m_pClient->DemoRecorder(RECORDER_REPLAYS)->Length() * 100, TIME_HOURS, aTime, sizeof(aTime));
 		str_format(aBuf2, sizeof(aBuf2), "%s %s  ", Localize("Replay"), aTime);
 		str_append(aBuf, aBuf2, sizeof(aBuf));
 	}
@@ -613,8 +613,8 @@ void CScoreboard::OnRender()
 		return;
 
 	// if the score board is active, then we should clear the motd message as well
-	if(m_pClient->m_pMotd->IsActive())
-		m_pClient->m_pMotd->Clear();
+	if(m_pClient->m_Motd.IsActive())
+		m_pClient->m_Motd.Clear();
 
 	float Width = 400 * 3.0f * Graphics()->ScreenAspect();
 	float Height = 400 * 3.0f;
@@ -695,7 +695,7 @@ void CScoreboard::OnRender()
 bool CScoreboard::Active()
 {
 	// if statboard is active don't show scoreboard
-	if(m_pClient->m_pStatboard->IsActive())
+	if(m_pClient->m_Statboard.IsActive())
 		return false;
 
 	if(m_Active)

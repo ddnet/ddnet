@@ -23,6 +23,7 @@
 #include <engine/console.h>
 #include <engine/engine.h>
 #include <engine/friends.h>
+#include <engine/serverbrowser.h>
 #include <engine/storage.h>
 
 #include <mastersrv/mastersrv.h>
@@ -66,7 +67,6 @@ CServerBrowser::CServerBrowser()
 	m_ServerlistType = 0;
 	m_BroadcastTime = 0;
 	secure_random_fill(m_aTokenSeed, sizeof(m_aTokenSeed));
-	m_RequestNumber = 0;
 
 	m_pDDNetInfo = 0;
 
@@ -282,15 +282,13 @@ void CServerBrowser::Filter()
 			Filtered = 1;
 		else if(g_Config.m_BrFilterPw && m_ppServerlist[i]->m_Info.m_Flags & SERVER_FLAG_PASSWORD)
 			Filtered = 1;
-		else if(g_Config.m_BrFilterPing && g_Config.m_BrFilterPing < m_ppServerlist[i]->m_Info.m_Latency)
-			Filtered = 1;
 		else if(g_Config.m_BrFilterCompatversion && str_comp_num(m_ppServerlist[i]->m_Info.m_aVersion, m_aNetVersion, 3) != 0)
 			Filtered = 1;
 		else if(g_Config.m_BrFilterServerAddress[0] && !str_find_nocase(m_ppServerlist[i]->m_Info.m_aAddress, g_Config.m_BrFilterServerAddress))
 			Filtered = 1;
 		else if(g_Config.m_BrFilterGametypeStrict && g_Config.m_BrFilterGametype[0] && str_comp_nocase(m_ppServerlist[i]->m_Info.m_aGameType, g_Config.m_BrFilterGametype))
 			Filtered = 1;
-		else if(!g_Config.m_BrFilterGametypeStrict && g_Config.m_BrFilterGametype[0] && !str_find_nocase(m_ppServerlist[i]->m_Info.m_aGameType, g_Config.m_BrFilterGametype))
+		else if(!g_Config.m_BrFilterGametypeStrict && g_Config.m_BrFilterGametype[0] && !str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aGameType, g_Config.m_BrFilterGametype))
 			Filtered = 1;
 		else if(g_Config.m_BrFilterUnfinishedMap && m_ppServerlist[i]->m_Info.m_HasRank == 1)
 			Filtered = 1;
@@ -317,7 +315,7 @@ void CServerBrowser::Filter()
 				m_ppServerlist[i]->m_Info.m_QuickSearchHit = 0;
 
 				// match against server name
-				if(str_find_nocase(m_ppServerlist[i]->m_Info.m_aName, g_Config.m_BrFilterString))
+				if(str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aName, g_Config.m_BrFilterString))
 				{
 					MatchFound = 1;
 					m_ppServerlist[i]->m_Info.m_QuickSearchHit |= IServerBrowser::QUICK_SERVERNAME;
@@ -326,8 +324,8 @@ void CServerBrowser::Filter()
 				// match against players
 				for(p = 0; p < minimum(m_ppServerlist[i]->m_Info.m_NumClients, (int)MAX_CLIENTS); p++)
 				{
-					if(str_find_nocase(m_ppServerlist[i]->m_Info.m_aClients[p].m_aName, g_Config.m_BrFilterString) ||
-						str_find_nocase(m_ppServerlist[i]->m_Info.m_aClients[p].m_aClan, g_Config.m_BrFilterString))
+					if(str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aClients[p].m_aName, g_Config.m_BrFilterString) ||
+						str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aClients[p].m_aClan, g_Config.m_BrFilterString))
 					{
 						MatchFound = 1;
 						m_ppServerlist[i]->m_Info.m_QuickSearchHit |= IServerBrowser::QUICK_PLAYER;
@@ -336,7 +334,7 @@ void CServerBrowser::Filter()
 				}
 
 				// match against map
-				if(str_find_nocase(m_ppServerlist[i]->m_Info.m_aMap, g_Config.m_BrFilterString))
+				if(str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aMap, g_Config.m_BrFilterString))
 				{
 					MatchFound = 1;
 					m_ppServerlist[i]->m_Info.m_QuickSearchHit |= IServerBrowser::QUICK_MAPNAME;
@@ -351,19 +349,19 @@ void CServerBrowser::Filter()
 				int MatchFound = 0;
 
 				// match against server name
-				if(str_find_nocase(m_ppServerlist[i]->m_Info.m_aName, g_Config.m_BrExcludeString))
+				if(str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aName, g_Config.m_BrExcludeString))
 				{
 					MatchFound = 1;
 				}
 
 				// match against map
-				if(str_find_nocase(m_ppServerlist[i]->m_Info.m_aMap, g_Config.m_BrExcludeString))
+				if(str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aMap, g_Config.m_BrExcludeString))
 				{
 					MatchFound = 1;
 				}
 
 				// match against gametype
-				if(str_find_nocase(m_ppServerlist[i]->m_Info.m_aGameType, g_Config.m_BrExcludeString))
+				if(str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aGameType, g_Config.m_BrExcludeString))
 				{
 					MatchFound = 1;
 				}
@@ -767,19 +765,13 @@ void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServer
 
 void CServerBrowser::Refresh(int Type)
 {
-	// clear out everything
-	m_ServerlistHeap.Reset();
-	m_NumServers = 0;
-	m_NumSortedServers = 0;
-	mem_zero(m_aServerlistIp, sizeof(m_aServerlistIp));
-	m_pFirstReqServer = 0;
-	m_pLastReqServer = 0;
-	m_NumRequests = 0;
-	m_CurrentMaxRequests = g_Config.m_BrMaxRequests;
-	m_RequestNumber++;
-
+	bool ServerListTypeChanged = m_ServerlistType != Type;
+	int OldServerListType = m_ServerlistType;
 	m_ServerlistType = Type;
 	secure_random_fill(m_aTokenSeed, sizeof(m_aTokenSeed));
+
+	if(Type == IServerBrowser::TYPE_LAN || (ServerListTypeChanged && OldServerListType == IServerBrowser::TYPE_LAN))
+		CleanUp();
 
 	if(Type == IServerBrowser::TYPE_LAN)
 	{
@@ -819,6 +811,13 @@ void CServerBrowser::Refresh(int Type)
 		m_pHttp->Refresh();
 		m_pPingCache->Load();
 		m_RefreshingHttp = true;
+
+		if(ServerListTypeChanged && m_pHttp->NumServers() > 0)
+		{
+			CleanUp();
+			UpdateFromHttp();
+			Sort();
+		}
 	}
 }
 
@@ -914,7 +913,7 @@ void CServerBrowser::RequestCurrentServerWithRandomToken(const NETADDR &Addr, in
 
 void CServerBrowser::SetCurrentServerPing(const NETADDR &Addr, int Ping)
 {
-	SetLatency(Addr, std::min(Ping, 999));
+	SetLatency(Addr, minimum(Ping, 999));
 }
 
 void ServerBrowserFillEstimatedLatency(int OwnLocation, const IServerBrowserPingCache::CEntry *pEntries, int NumEntries, int *pIndex, NETADDR Addr, CServerInfo *pInfo)
@@ -1159,10 +1158,23 @@ void CServerBrowser::UpdateFromHttp()
 	}
 }
 
+void CServerBrowser::CleanUp()
+{
+	// clear out everything
+	m_ServerlistHeap.Reset();
+	m_NumServers = 0;
+	m_NumSortedServers = 0;
+	mem_zero(m_aServerlistIp, sizeof(m_aServerlistIp));
+	m_pFirstReqServer = 0;
+	m_pLastReqServer = 0;
+	m_NumRequests = 0;
+	m_CurrentMaxRequests = g_Config.m_BrMaxRequests;
+}
+
 void CServerBrowser::Update(bool ForceResort)
 {
-	int64 Timeout = time_freq();
-	int64 Now = time_get();
+	int64_t Timeout = time_freq();
+	int64_t Now = time_get();
 
 	const char *pHttpBestUrl;
 	if(!m_pHttp->GetBestUrl(&pHttpBestUrl) && pHttpBestUrl != m_pHttpPrevBestUrl)
@@ -1176,10 +1188,10 @@ void CServerBrowser::Update(bool ForceResort)
 	if(m_ServerlistType != TYPE_LAN && m_RefreshingHttp && !m_pHttp->IsRefreshing())
 	{
 		m_RefreshingHttp = false;
+		CleanUp();
 		UpdateFromHttp();
 		// TODO: move this somewhere else
-		if(m_Sorthash != SortHash() || ForceResort)
-			Sort();
+		Sort();
 		return;
 	}
 

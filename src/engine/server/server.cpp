@@ -86,7 +86,7 @@ void CSnapIDPool::RemoveFirstTimeout()
 
 int CSnapIDPool::NewID()
 {
-	int64 Now = time_get();
+	int64_t Now = time_get();
 
 	// process timed ids
 	while(m_FirstTimed != -1 && m_aIDs[m_FirstTimed].m_Timeout < Now)
@@ -227,8 +227,8 @@ void CServerBan::ConBanExt(IConsole::IResult *pResult, void *pUser)
 	CServerBan *pThis = static_cast<CServerBan *>(pUser);
 
 	const char *pStr = pResult->GetString(0);
-	int Minutes = pResult->NumArguments() > 1 ? clamp(pResult->GetInteger(1), 0, 525600) : 30;
-	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "No reason given";
+	int Minutes = pResult->NumArguments() > 1 ? clamp(pResult->GetInteger(1), 0, 525600) : 10;
+	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "Follow the server rules. Type /rules into the chat.";
 
 	if(str_isallnum(pStr))
 	{
@@ -498,7 +498,7 @@ void CServer::Ban(int ClientID, int Seconds, const char *pReason)
 	return m_CurrentGameTick;
 }*/
 
-int64 CServer::TickStartTime(int Tick)
+int64_t CServer::TickStartTime(int Tick)
 {
 	return m_GameStartTime + (time_freq() * Tick) / SERVER_TICK_SPEED;
 }
@@ -778,6 +778,10 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
 					Packet.m_pData = pPack->Data();
 					Packet.m_DataSize = pPack->Size();
 					Packet.m_ClientID = i;
+					if(Antibot()->OnEngineServerMessage(i, Packet.m_pData, Packet.m_DataSize, Flags))
+					{
+						continue;
+					}
 					m_NetServer.Send(&Packet);
 				}
 			}
@@ -792,6 +796,11 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
 		Packet.m_ClientID = ClientID;
 		Packet.m_pData = Pack.Data();
 		Packet.m_DataSize = Pack.Size();
+
+		if(Antibot()->OnEngineServerMessage(ClientID, Packet.m_pData, Packet.m_DataSize, Flags))
+		{
+			return 0;
+		}
 
 		if(!(Flags & MSGFLAG_NORECORD))
 		{
@@ -1138,7 +1147,7 @@ void CServer::SendCapabilities(int ClientID)
 {
 	CMsgPacker Msg(NETMSG_CAPABILITIES, true);
 	Msg.AddInt(SERVERCAP_CURVERSION); // version
-	Msg.AddInt(SERVERCAPFLAG_DDNET | SERVERCAPFLAG_CHATTIMEOUTCODE | SERVERCAPFLAG_ANYPLAYERFLAG | SERVERCAPFLAG_PINGEX); // flags
+	Msg.AddInt(SERVERCAPFLAG_DDNET | SERVERCAPFLAG_CHATTIMEOUTCODE | SERVERCAPFLAG_ANYPLAYERFLAG | SERVERCAPFLAG_PINGEX | SERVERCAPFLAG_ALLOWDUMMY); // flags
 	SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 
@@ -1222,7 +1231,7 @@ void CServer::SendRconLine(int ClientID, const char *pLine)
 void CServer::SendRconLineAuthed(const char *pLine, void *pUser, ColorRGBA PrintColor)
 {
 	CServer *pThis = (CServer *)pUser;
-	static volatile int s_ReentryGuard = 0;
+	static int s_ReentryGuard = 0;
 	int i;
 
 	if(s_ReentryGuard)
@@ -1319,13 +1328,6 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 	Unpacker.Reset(pPacket->m_pData, pPacket->m_DataSize);
 	CMsgPacker Packer(NETMSG_EX, true);
 
-	int GameFlags = 0;
-	if(pPacket->m_Flags & NET_CHUNKFLAG_VITAL)
-	{
-		GameFlags |= MSGFLAG_VITAL;
-	}
-	Antibot()->OnEngineClientMessage(ClientID, pPacket->m_pData, pPacket->m_DataSize, GameFlags);
-
 	// unpack msgid and system flag
 	int Msg;
 	bool Sys;
@@ -1344,8 +1346,8 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 	if(g_Config.m_SvNetlimit && Msg != NETMSG_REQUEST_MAP_DATA)
 	{
-		int64 Now = time_get();
-		int64 Diff = Now - m_aClients[ClientID].m_TrafficSince;
+		int64_t Now = time_get();
+		int64_t Diff = Now - m_aClients[ClientID].m_TrafficSince;
 		float Alpha = g_Config.m_SvNetlimitAlpha / 100.0f;
 		float Limit = (float)g_Config.m_SvNetlimit * 1024 / time_freq();
 
@@ -1508,7 +1510,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		else if(Msg == NETMSG_INPUT)
 		{
 			CClient::CInput *pInput;
-			int64 TagTime;
+			int64_t TagTime;
 
 			m_aClients[ClientID].m_LastAckedSnapshot = Unpacker.GetInt();
 			int IntendedTick = Unpacker.GetInt();
@@ -1714,16 +1716,9 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		{
 			if(g_Config.m_Debug)
 			{
-				char aHex[] = "0123456789ABCDEF";
-				char aBuf[512];
-
-				for(int b = 0; b < pPacket->m_DataSize && b < 32; b++)
-				{
-					aBuf[b * 3] = aHex[((const unsigned char *)pPacket->m_pData)[b] >> 4];
-					aBuf[b * 3 + 1] = aHex[((const unsigned char *)pPacket->m_pData)[b] & 0xf];
-					aBuf[b * 3 + 2] = ' ';
-					aBuf[b * 3 + 3] = 0;
-				}
+				constexpr int MaxDumpedDataSize = 32;
+				char aBuf[MaxDumpedDataSize * 3 + 1];
+				str_hex(aBuf, sizeof(aBuf), pPacket->m_pData, minimum(pPacket->m_DataSize, MaxDumpedDataSize));
 
 				char aBufMsg[256];
 				str_format(aBufMsg, sizeof(aBufMsg), "strange message ClientID=%d msg=%d data_size=%d", ClientID, Msg, pPacket->m_DataSize);
@@ -1746,7 +1741,7 @@ bool CServer::RateLimitServerInfoConnless()
 	if(g_Config.m_SvServerInfoPerSecond)
 	{
 		SendClients = m_ServerInfoNumRequests <= g_Config.m_SvServerInfoPerSecond;
-		const int64 Now = Tick();
+		const int64_t Now = Tick();
 
 		if(Now <= m_ServerInfoFirstRequest + TickSpeed())
 		{
@@ -2244,8 +2239,34 @@ void CServer::PumpNetwork(bool PacketWaiting)
 			}
 			else
 			{
+				int GameFlags = 0;
+				if(Packet.m_Flags & NET_CHUNKFLAG_VITAL)
+				{
+					GameFlags |= MSGFLAG_VITAL;
+				}
+				if(Antibot()->OnEngineClientMessage(Packet.m_ClientID, Packet.m_pData, Packet.m_DataSize, GameFlags))
+				{
+					continue;
+				}
+
 				ProcessClientPacket(&Packet);
 			}
+		}
+	}
+	{
+		unsigned char aBuffer[NET_MAX_PAYLOAD];
+		int Flags;
+		CNetChunk Packet;
+		mem_zero(&Packet, sizeof(Packet));
+		Packet.m_pData = aBuffer;
+		while(Antibot()->OnEngineSimulateClientMessage(&Packet.m_ClientID, aBuffer, sizeof(aBuffer), &Packet.m_DataSize, &Flags))
+		{
+			Packet.m_Flags = 0;
+			if(Flags & MSGFLAG_VITAL)
+			{
+				Packet.m_Flags |= NET_CHUNKFLAG_VITAL;
+			}
+			ProcessClientPacket(&Packet);
 		}
 	}
 
@@ -2474,7 +2495,7 @@ int CServer::Run()
 
 			set_new_tick();
 
-			int64 t = time_get();
+			int64_t t = time_get();
 			int NewTicks = 0;
 
 			// load new map TODO: don't poll this
@@ -2575,6 +2596,8 @@ int CServer::Run()
 
 			while(t > TickStartTime(m_CurrentGameTick + 1))
 			{
+				GameServer()->OnPreTickTeehistorian();
+
 				for(int c = 0; c < MAX_CLIENTS; c++)
 					if(m_aClients[c].m_State == CClient::STATE_INGAME)
 						for(auto &Input : m_aClients[c].m_aInputs)
@@ -2662,7 +2685,7 @@ int CServer::Run()
 				m_ReloadedWhenEmpty = false;
 
 				set_new_tick();
-				int64 t = time_get();
+				int64_t t = time_get();
 				int x = (TickStartTime(m_CurrentGameTick + 1) - t) * 1000000 / time_freq() + 1;
 
 				PacketWaiting = x > 0 ? net_socket_read_wait(m_NetServer.Socket(), x) : true;
@@ -3067,7 +3090,7 @@ void CServer::DemoRecorder_HandleAutoStart()
 	if(g_Config.m_SvAutoDemoRecord)
 	{
 		m_aDemoRecorder[MAX_CLIENTS].Stop();
-		char aFilename[128];
+		char aFilename[IO_MAX_PATH_LENGTH];
 		char aDate[20];
 		str_timestamp(aDate, sizeof(aDate));
 		str_format(aFilename, sizeof(aFilename), "demos/%s_%s.demo", "auto/autorecord", aDate);
@@ -3093,8 +3116,8 @@ void CServer::SaveDemo(int ClientID, float Time)
 		m_aDemoRecorder[ClientID].Stop();
 
 		// rename the demo
-		char aOldFilename[256];
-		char aNewFilename[256];
+		char aOldFilename[IO_MAX_PATH_LENGTH];
+		char aNewFilename[IO_MAX_PATH_LENGTH];
 		str_format(aOldFilename, sizeof(aOldFilename), "demos/%s_%d_%d_tmp.demo", m_aCurrentMap, m_NetServer.Address().port, ClientID);
 		str_format(aNewFilename, sizeof(aNewFilename), "demos/%s_%s_%5.2f.demo", m_aCurrentMap, m_aClients[ClientID].m_aName, Time);
 		Storage()->RenameFile(aOldFilename, aNewFilename, IStorage::TYPE_SAVE);
@@ -3105,7 +3128,7 @@ void CServer::StartRecord(int ClientID)
 {
 	if(g_Config.m_SvPlayerDemoRecord)
 	{
-		char aFilename[128];
+		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "demos/%s_%d_%d_tmp.demo", m_aCurrentMap, m_NetServer.Address().port, ClientID);
 		m_aDemoRecorder[ClientID].Start(Storage(), Console(), aFilename, GameServer()->NetVersion(), m_aCurrentMap, &m_aCurrentMapSha256[SIX], m_aCurrentMapCrc[SIX], "server", m_aCurrentMapSize[SIX], m_apCurrentMapData[SIX]);
 	}
@@ -3117,7 +3140,7 @@ void CServer::StopRecord(int ClientID)
 	{
 		m_aDemoRecorder[ClientID].Stop();
 
-		char aFilename[128];
+		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "demos/%s_%d_%d_tmp.demo", m_aCurrentMap, m_NetServer.Address().port, ClientID);
 		Storage()->RemoveFile(aFilename, IStorage::TYPE_SAVE);
 	}
@@ -3131,7 +3154,7 @@ bool CServer::IsRecording(int ClientID)
 void CServer::ConRecord(IConsole::IResult *pResult, void *pUser)
 {
 	CServer *pServer = (CServer *)pUser;
-	char aFilename[128];
+	char aFilename[IO_MAX_PATH_LENGTH];
 
 	if(pResult->NumArguments())
 		str_format(aFilename, sizeof(aFilename), "demos/%s.demo", pResult->GetString(0));
@@ -3644,7 +3667,12 @@ const char *CServer::GetAnnouncementLine(char const *pFileName)
 		if(str_length(pLine))
 			if(pLine[0] != '#')
 				Lines.push_back(pLine);
-	if(Lines.size() == 1)
+
+	if(Lines.empty())
+	{
+		return 0;
+	}
+	else if(Lines.size() == 1)
 	{
 		m_AnnouncementLastLine = 0;
 	}
@@ -3657,8 +3685,9 @@ const char *CServer::GetAnnouncementLine(char const *pFileName)
 	{
 		unsigned Rand;
 		do
+		{
 			Rand = rand() % Lines.size();
-		while(Rand == m_AnnouncementLastLine);
+		} while(Rand == m_AnnouncementLastLine);
 
 		m_AnnouncementLastLine = Rand;
 	}

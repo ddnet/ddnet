@@ -26,7 +26,7 @@ CONSOLE_COMMAND("unjetpack", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConUnJetpack, th
 CONSOLE_COMMAND("unweapons", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConUnWeapons, this, "Removes all weapons from you")
 CONSOLE_COMMAND("ninja", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConNinja, this, "Makes you a ninja")
 CONSOLE_COMMAND("super", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConSuper, this, "Makes you super")
-CONSOLE_COMMAND("unsuper", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConUnSuper, this, "Removes super from you")
+CONSOLE_COMMAND("unsuper", "", CFGFLAG_SERVER, ConUnSuper, this, "Removes super from you")
 CONSOLE_COMMAND("endless_hook", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConEndlessHook, this, "Gives you endless hook")
 CONSOLE_COMMAND("unendless_hook", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConUnEndlessHook, this, "Removes endless hook from you")
 CONSOLE_COMMAND("unsolo", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConUnSolo, this, "Puts you out of solo part")

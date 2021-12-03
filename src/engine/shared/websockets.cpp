@@ -14,8 +14,6 @@
 #endif
 #include <libwebsockets.h>
 
-extern "C" {
-
 #include "websockets.h"
 
 // not sure why would anyone need more than one but well...
@@ -307,5 +305,5 @@ int websocket_fd_set(int socket, fd_set *set)
 	}
 	return max;
 }
-}
+
 #endif

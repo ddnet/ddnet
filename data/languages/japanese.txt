@@ -730,27 +730,6 @@ transmits your player name to info2.ddnet.tw
 Theme
 == テーマ
 
-AFR
-== 
-
-ASI
-== 
-
-AUS
-== 
-
-EUR
-== 
-
-NA
-== 
-
-SA
-== 
-
-CHN
-== 
-
 Getting server list from master server
 == マスターサーバーからサーバーリストを取得しています
 
@@ -994,7 +973,7 @@ Use modern OpenGL
 Preinit VBO (iGPUs only)
 == VBO を事前初期化（統合型グラフィックのみ）
 
-Multiple texture units (disable for MacOS)
+Multiple texture units (disable for macOS)
 == 多重テクスチャユニット（macOS 以外）
 
 Use high DPI
@@ -1318,3 +1297,42 @@ Grabs
 
 9+ new mentions
 == 9+ 件の新しいメンション
+
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+Refreshing...
+== 
+
+Kill Messages
+== 
+
+Kill Message Normal Color
+== 
+
+Kill Message Highlight Color
+== 
+
+Show local player's key presses
+== 

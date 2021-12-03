@@ -6,6 +6,7 @@
 #include <engine/engine.h>
 #include <engine/external/json-parser/json.h>
 #include <engine/serverbrowser.h>
+#include <engine/shared/jobs.h>
 #include <engine/shared/linereader.h>
 #include <engine/shared/serverinfo.h>
 #include <engine/storage.h>
@@ -108,7 +109,8 @@ void CChooseMaster::Reset()
 
 void CChooseMaster::Refresh()
 {
-	m_pEngine->AddJob(m_pJob = std::make_shared<CJob>(m_pData));
+	if(m_pJob == nullptr || m_pJob->Status() == IJob::STATE_DONE)
+		m_pEngine->AddJob(m_pJob = std::make_shared<CJob>(m_pData));
 }
 
 void CChooseMaster::CJob::Run()
@@ -143,7 +145,7 @@ void CChooseMaster::CJob::Run()
 		{
 			continue;
 		}
-		int64 StartTime = time_get_microseconds();
+		int64_t StartTime = time_get_microseconds();
 		CGet Get(pUrl, Timeout, HTTPLOG::FAILURE);
 		IEngine::RunJobBlocking(&Get);
 		int Time = (time_get_microseconds() - StartTime) / 1000;
@@ -228,6 +230,7 @@ private:
 		STATE_DONE,
 		STATE_WANTREFRESH,
 		STATE_REFRESHING,
+		STATE_NO_MASTER,
 	};
 
 	class CEntry
@@ -268,7 +271,7 @@ void CServerBrowserHttp::Update()
 			if(!m_pChooseMaster->IsRefreshing())
 			{
 				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "serverbrowse_http", "no working serverlist URL found");
-				m_State = STATE_DONE;
+				m_State = STATE_NO_MASTER;
 			}
 			return;
 		}
@@ -302,8 +305,10 @@ void CServerBrowserHttp::Update()
 }
 void CServerBrowserHttp::Refresh()
 {
-	if(m_State == STATE_WANTREFRESH)
+	if(m_State == STATE_WANTREFRESH || m_State == STATE_REFRESHING || m_State == STATE_NO_MASTER)
 	{
+		if(m_State == STATE_NO_MASTER)
+			m_State = STATE_WANTREFRESH;
 		m_pChooseMaster->Refresh();
 	}
 	if(m_State == STATE_DONE)

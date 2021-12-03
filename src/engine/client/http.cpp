@@ -148,6 +148,16 @@ int CRequest::RunImpl(CURL *pHandle)
 	curl_easy_setopt(pHandle, CURLOPT_PROGRESSDATA, this);
 	curl_easy_setopt(pHandle, CURLOPT_PROGRESSFUNCTION, ProgressCallback);
 
+	if(curl_version_info(CURLVERSION_NOW)->version_num < 0x076800)
+	{
+		// Causes crashes, see https://github.com/ddnet/ddnet/issues/4342
+		curl_easy_setopt(pHandle, CURLOPT_FORBID_REUSE, 1L);
+	}
+
+#ifdef CONF_PLATFORM_ANDROID
+	curl_easy_setopt(pHandle, CURLOPT_CAINFO, "data/cacert.pem");
+#endif
+
 	if(!AfterInit(pHandle))
 	{
 		return HTTP_ERROR;
@@ -179,9 +189,9 @@ size_t CRequest::WriteCallback(char *pData, size_t Size, size_t Number, void *pU
 int CRequest::ProgressCallback(void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr)
 {
 	CGetFile *pTask = (CGetFile *)pUser;
-	pTask->m_Current = DlCurr;
-	pTask->m_Size = DlTotal;
-	pTask->m_Progress = (100 * DlCurr) / (DlTotal ? DlTotal : 1);
+	pTask->m_Current.store(DlCurr, std::memory_order_relaxed);
+	pTask->m_Size.store(DlTotal, std::memory_order_relaxed);
+	pTask->m_Progress.store((100 * DlCurr) / (DlTotal ? DlTotal : 1), std::memory_order_relaxed);
 	pTask->OnProgress();
 	return pTask->m_Abort ? -1 : 0;
 }

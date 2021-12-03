@@ -57,7 +57,7 @@ public:
 	class CCharacter *GetCharacterByID(int ID) { return (ID >= 0 && ID < MAX_CLIENTS) ? m_apCharacters[ID] : 0; }
 
 	// from gamecontext
-	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int64 Mask);
+	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int64_t Mask);
 
 	// for client side prediction
 	struct
@@ -81,7 +81,7 @@ public:
 	void OnModified();
 	void NetObjBegin();
 	void NetCharAdd(int ObjID, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, int GameTeam, bool IsLocal);
-	void NetObjAdd(int ObjID, int ObjType, const void *pObjData);
+	void NetObjAdd(int ObjID, int ObjType, const void *pObjData, const CNetObj_EntityEx *pDataEx);
 	void NetObjEnd(int LocalID);
 	void CopyWorld(CGameWorld *pFrom);
 	CEntity *FindMatch(int ObjID, int ObjType, const void *pObjData);

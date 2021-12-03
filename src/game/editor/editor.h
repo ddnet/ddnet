@@ -90,7 +90,7 @@ public:
 
 	int Eval(float Time, float *pResult)
 	{
-		CRenderTools::RenderEvalEnvelope(m_lPoints.base_ptr(), m_lPoints.size(), m_Channels, (int64)((double)Time * 1000000.0), pResult);
+		CRenderTools::RenderEvalEnvelope(m_lPoints.base_ptr(), m_lPoints.size(), m_Channels, (int64_t)((double)Time * 1000000.0), pResult);
 		return m_Channels;
 	}
 
@@ -586,7 +586,7 @@ public:
 	int m_Front;
 	int m_Switch;
 	int m_Tune;
-	char m_aFileName[512];
+	char m_aFileName[IO_MAX_PATH_LENGTH];
 };
 
 class CLayerQuads : public CLayer
@@ -652,6 +652,7 @@ public:
 	class ITextRender *TextRender() { return m_pTextRender; };
 	class IStorage *Storage() { return m_pStorage; };
 	CUI *UI() { return &m_UI; }
+	CUIEx *UIEx() { return &m_UIEx; }
 	CRenderTools *RenderTools() { return &m_RenderTools; }
 
 	CEditor() :
@@ -760,7 +761,7 @@ public:
 	virtual void UpdateMentions() { m_Mentions++; }
 	virtual void ResetMentions() { m_Mentions = 0; }
 
-	int64 m_LastUndoUpdateTime;
+	int64_t m_LastUndoUpdateTime;
 	bool m_UndoRunning;
 	void CreateUndoStep();
 	static void CreateUndoStepThread(void *pUser);
@@ -816,8 +817,8 @@ public:
 
 	bool m_BrushColorEnabled;
 
-	char m_aFileName[512];
-	char m_aFileSaveName[512];
+	char m_aFileName[IO_MAX_PATH_LENGTH];
+	char m_aFileSaveName[IO_MAX_PATH_LENGTH];
 	bool m_ValidSaveFilename;
 
 	enum
@@ -857,9 +858,9 @@ public:
 	const char *m_pFileDialogButtonText;
 	void (*m_pfnFileDialogFunc)(const char *pFileName, int StorageType, void *pUser);
 	void *m_pFileDialogUser;
-	char m_aFileDialogFileName[MAX_PATH_LENGTH];
-	char m_aFileDialogCurrentFolder[MAX_PATH_LENGTH];
-	char m_aFileDialogCurrentLink[MAX_PATH_LENGTH];
+	char m_aFileDialogFileName[IO_MAX_PATH_LENGTH];
+	char m_aFileDialogCurrentFolder[IO_MAX_PATH_LENGTH];
+	char m_aFileDialogCurrentLink[IO_MAX_PATH_LENGTH];
 	char m_aFileDialogSearchText[64];
 	char m_aFileDialogPrevSearchText[64];
 	char *m_pFileDialogPath;
@@ -876,7 +877,7 @@ public:
 
 	struct CFilelistItem
 	{
-		char m_aFilename[128];
+		char m_aFilename[IO_MAX_PATH_LENGTH];
 		char m_aName[128];
 		bool m_IsDir;
 		bool m_IsLink;
@@ -911,7 +912,7 @@ public:
 	bool m_ShowTileInfo;
 	bool m_ShowDetail;
 	bool m_Animate;
-	int64 m_AnimateStart;
+	int64_t m_AnimateStart;
 	float m_AnimateTime;
 	float m_AnimateSpeed;
 
@@ -1024,8 +1025,6 @@ public:
 	void PopupSelectSoundInvoke(int Current, float x, float y);
 	int PopupSelectSoundResult();
 
-	float ButtonColorMul(const void *pID);
-
 	void DoQuadEnvelopes(const array<CQuad> &m_lQuads, IGraphics::CTextureHandle Texture = IGraphics::CTextureHandle());
 	void DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int pIndex);
 	void DoQuadPoint(CQuad *pQuad, int QuadIndex, int v);
@@ -1035,7 +1034,6 @@ public:
 	void DoMapEditor(CUIRect View);
 	void DoToolbar(CUIRect Toolbar);
 	void DoQuad(CQuad *pQuad, int Index);
-	float UiDoScrollbarV(const void *pID, const CUIRect *pRect, float Current);
 	ColorRGBA GetButtonColor(const void *pID, int Checked);
 
 	static void ReplaceImage(const char *pFilename, int StorageType, void *pUser);
@@ -1060,7 +1058,82 @@ public:
 	void AddFileDialogEntry(int Index, CUIRect *pView);
 	void SelectGameLayer();
 	void SortImages();
-	static const char *Explain(int Tile, int Layer);
+
+	//Tile Numbers For Explanations - TODO: Add/Improve tiles and explanations
+	enum
+	{
+		TILE_PUB_AIR,
+		TILE_PUB_HOOKABLE,
+		TILE_PUB_DEATH,
+		TILE_PUB_UNHOOKABLE,
+
+		TILE_PUB_CREDITS1 = 140,
+		TILE_PUB_CREDITS2,
+		TILE_PUB_CREDITS3,
+		TILE_PUB_CREDITS4,
+		TILE_PUB_CREDITS5 = 156,
+		TILE_PUB_CREDITS6,
+		TILE_PUB_CREDITS7,
+		TILE_PUB_CREDITS8,
+
+		TILE_PUB_ENTITIES_OFF1 = 190,
+		TILE_PUB_ENTITIES_OFF2,
+	};
+
+	enum
+	{
+		TILE_FNG_SPIKE_GOLD = 7,
+		TILE_FNG_SPIKE_NORMAL,
+		TILE_FNG_SPIKE_RED,
+		TILE_FNG_SPIKE_BLUE,
+		TILE_FNG_SCORE_RED,
+		TILE_FNG_SCORE_BLUE,
+
+		TILE_FNG_SPIKE_GREEN = 14,
+		TILE_FNG_SPIKE_PURPLE,
+
+		TILE_FNG_SPAWN = 192,
+		TILE_FNG_SPAWN_RED,
+		TILE_FNG_SPAWN_BLUE,
+		TILE_FNG_FLAG_RED,
+		TILE_FNG_FLAG_BLUE,
+		TILE_FNG_SHIELD,
+		TILE_FNG_HEART,
+		TILE_FNG_SHOTGUN,
+		TILE_FNG_GRENADE,
+		TILE_FNG_NINJA,
+		TILE_FNG_LASER,
+
+		TILE_FNG_SPIKE_OLD1 = 208,
+		TILE_FNG_SPIKE_OLD2,
+		TILE_FNG_SPIKE_OLD3
+	};
+
+	enum
+	{
+		TILE_VANILLA_SPAWN = 192,
+		TILE_VANILLA_SPAWN_RED,
+		TILE_VANILLA_SPAWN_BLUE,
+		TILE_VANILLA_FLAG_RED,
+		TILE_VANILLA_FLAG_BLUE,
+		TILE_VANILLA_SHIELD,
+		TILE_VANILLA_HEART,
+		TILE_VANILLA_SHOTGUN,
+		TILE_VANILLA_GRENADE,
+		TILE_VANILLA_NINJA,
+		TILE_VANILLA_LASER,
+	};
+
+	//Explanations
+	enum
+	{
+		EXPLANATION_DDNET,
+		EXPLANATION_FNG,
+		EXPLANATION_RACE,
+		EXPLANATION_VANILLA,
+		EXPLANATION_BLOCKWORLDS
+	};
+	static const char *Explain(int ExplanationID, int Tile, int Layer);
 
 	int GetLineDistance() const;
 	void ZoomMouseTarget(float ZoomFactor);

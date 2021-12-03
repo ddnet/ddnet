@@ -142,8 +142,8 @@ public:
 	unsigned char *m_pData;
 
 	int m_Sequence;
-	int64 m_LastSendTime;
-	int64 m_FirstSendTime;
+	int64_t m_LastSendTime;
+	int64_t m_FirstSendTime;
 };
 
 class CNetPacketConstruct
@@ -177,9 +177,9 @@ private:
 
 	CStaticRingBuffer<CNetChunkResend, NET_CONN_BUFFERSIZE> m_Buffer;
 
-	int64 m_LastUpdateTime;
-	int64 m_LastRecvTime;
-	int64 m_LastSendTime;
+	int64_t m_LastUpdateTime;
+	int64_t m_LastRecvTime;
+	int64_t m_LastSendTime;
 
 	char m_aErrorString[256];
 
@@ -223,8 +223,8 @@ public:
 	const char *ErrorString() const { return m_aErrorString; }
 
 	// Needed for GotProblems in NetClient
-	int64 LastRecvTime() const { return m_LastRecvTime; }
-	int64 ConnectTime() const { return m_LastUpdateTime; }
+	int64_t LastRecvTime() const { return m_LastRecvTime; }
+	int64_t ConnectTime() const { return m_LastUpdateTime; }
 
 	int AckSequence() const { return m_Ack; }
 	int SeqSequence() const { return m_Sequence; }
@@ -302,7 +302,7 @@ class CNetServer
 	struct CSpamConn
 	{
 		NETADDR m_Addr;
-		int64 m_Time;
+		int64_t m_Time;
 		int m_Conns;
 	};
 
@@ -321,11 +321,11 @@ class CNetServer
 	void *m_pUser;
 
 	int m_NumConAttempts; // log flooding attacks
-	int64 m_TimeNumConAttempts;
+	int64_t m_TimeNumConAttempts;
 	unsigned char m_aSecurityTokenSeed[16];
 
 	// vanilla connect flood detection
-	int64 m_VConnFirst;
+	int64_t m_VConnFirst;
 	int m_VConnNum;
 
 	CSpamConn m_aSpamConns[NET_CONNLIMIT_IPS];

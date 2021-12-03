@@ -871,12 +871,12 @@ void CCharacter::TickDefered()
 		int Events = m_Core.m_TriggeredEvents;
 		int CID = m_pPlayer->GetCID();
 
-		int64 TeamMask = Teams()->TeamMask(Team(), -1, CID);
+		int64_t TeamMask = Teams()->TeamMask(Team(), -1, CID);
 		// Some sounds are triggered client-side for the acting player
 		// so we need to avoid duplicating them
-		int64 TeamMaskExceptSelf = Teams()->TeamMask(Team(), CID, CID);
+		int64_t TeamMaskExceptSelf = Teams()->TeamMask(Team(), CID, CID);
 		// Some are triggered client-side but only on Sixup
-		int64 TeamMaskExceptSelfIfSixup = Server()->IsSixup(CID) ? TeamMaskExceptSelf : TeamMask;
+		int64_t TeamMaskExceptSelfIfSixup = Server()->IsSixup(CID) ? TeamMaskExceptSelf : TeamMask;
 
 		if(Events & COREEVENT_GROUND_JUMP)
 			GameServer()->CreateSound(m_Pos, SOUND_PLAYER_JUMP, TeamMaskExceptSelf);
@@ -1039,7 +1039,7 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 	// do damage Hit sound
 	if(From >= 0 && From != m_pPlayer->GetCID() && GameServer()->m_apPlayers[From])
 	{
-		int64 Mask = CmaskOne(From);
+		int64_t Mask = CmaskOne(From);
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
 			if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->m_SpectatorID == From)
@@ -1215,6 +1215,27 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 	}
 }
 
+bool CCharacter::CanSnapCharacter(int SnappingClient)
+{
+	if(SnappingClient < 0)
+		return true;
+
+	CCharacter *pSnapChar = GameServer()->GetPlayerChar(SnappingClient);
+	CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
+
+	if(pSnapPlayer->GetTeam() == TEAM_SPECTATORS || pSnapPlayer->IsPaused())
+	{
+		if(pSnapPlayer->m_SpectatorID != -1 && !CanCollide(pSnapPlayer->m_SpectatorID) && (pSnapPlayer->m_ShowOthers == 0 || (pSnapPlayer->m_ShowOthers == 2 && !SameTeam(pSnapPlayer->m_SpectatorID))))
+			return false;
+		else if(pSnapPlayer->m_SpectatorID == -1 && !CanCollide(SnappingClient) && pSnapPlayer->m_SpecTeam)
+			return false;
+	}
+	else if(pSnapChar && !pSnapChar->m_Super && !CanCollide(SnappingClient) && (pSnapPlayer->m_ShowOthers == 0 || (pSnapPlayer->m_ShowOthers == 2 && !SameTeam(SnappingClient))))
+		return false;
+
+	return true;
+}
+
 void CCharacter::Snap(int SnappingClient)
 {
 	int ID = m_pPlayer->GetCID();
@@ -1222,26 +1243,7 @@ void CCharacter::Snap(int SnappingClient)
 	if(SnappingClient > -1 && !Server()->Translate(ID, SnappingClient))
 		return;
 
-	if(NetworkClipped(SnappingClient))
-		return;
-
-	if(SnappingClient > -1)
-	{
-		CCharacter *pSnapChar = GameServer()->GetPlayerChar(SnappingClient);
-		CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
-
-		if(pSnapPlayer->GetTeam() == TEAM_SPECTATORS || pSnapPlayer->IsPaused())
-		{
-			if(pSnapPlayer->m_SpectatorID != -1 && !CanCollide(pSnapPlayer->m_SpectatorID) && (pSnapPlayer->m_ShowOthers == 0 || (pSnapPlayer->m_ShowOthers == 2 && !SameTeam(pSnapPlayer->m_SpectatorID))))
-				return;
-			else if(pSnapPlayer->m_SpectatorID == -1 && !CanCollide(SnappingClient) && pSnapPlayer->m_SpecTeam)
-				return;
-		}
-		else if(pSnapChar && !pSnapChar->m_Super && !CanCollide(SnappingClient) && (pSnapPlayer->m_ShowOthers == 0 || (pSnapPlayer->m_ShowOthers == 2 && !SameTeam(SnappingClient))))
-			return;
-	}
-
-	if(m_Paused)
+	if(NetworkClipped(SnappingClient) || !CanSnapCharacter(SnappingClient))
 		return;
 
 	SnapCharacter(SnappingClient, ID);
@@ -1355,7 +1357,7 @@ void CCharacter::HandleBroadcast()
 	else if((m_pPlayer->m_TimerType == CPlayer::TIMERTYPE_BROADCAST || m_pPlayer->m_TimerType == CPlayer::TIMERTYPE_GAMETIMER_AND_BROADCAST) && m_DDRaceState == DDRACE_STARTED && m_LastBroadcast + Server()->TickSpeed() * g_Config.m_SvTimeInBroadcastInterval <= Server()->Tick())
 	{
 		char aBuf[32];
-		int Time = (int64)100 * ((float)(Server()->Tick() - m_StartTime) / ((float)Server()->TickSpeed()));
+		int Time = (int64_t)100 * ((float)(Server()->Tick() - m_StartTime) / ((float)Server()->TickSpeed()));
 		str_time(Time, TIME_HOURS, aBuf, sizeof(aBuf));
 		GameServer()->SendBroadcast(aBuf, m_pPlayer->GetCID(), false);
 		m_CpLastBroadcast = m_CpActive;
@@ -2332,10 +2334,10 @@ void CCharacter::Rescue()
 {
 	if(m_SetSavePos && !m_Super)
 	{
-		if(m_LastRescue + (int64)g_Config.m_SvRescueDelay * Server()->TickSpeed() > Server()->Tick())
+		if(m_LastRescue + (int64_t)g_Config.m_SvRescueDelay * Server()->TickSpeed() > Server()->Tick())
 		{
 			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "You have to wait %d seconds until you can rescue yourself", (int)((m_LastRescue + (int64)g_Config.m_SvRescueDelay * Server()->TickSpeed() - Server()->Tick()) / Server()->TickSpeed()));
+			str_format(aBuf, sizeof(aBuf), "You have to wait %d seconds until you can rescue yourself", (int)((m_LastRescue + (int64_t)g_Config.m_SvRescueDelay * Server()->TickSpeed() - Server()->Tick()) / Server()->TickSpeed()));
 			GameServer()->SendChatTarget(GetPlayer()->GetCID(), aBuf);
 			return;
 		}
@@ -2355,4 +2357,9 @@ void CCharacter::Rescue()
 		m_SavedInput.m_Hook = 0;
 		m_pPlayer->Pause(CPlayer::PAUSE_NONE, true);
 	}
+}
+
+int64_t CCharacter::TeamMask()
+{
+	return Teams()->TeamMask(Team(), -1, GetPlayer()->GetCID());
 }

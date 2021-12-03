@@ -38,6 +38,7 @@ testrunner\[1\]_include.cmake
 # Ignore all the generated executables without extensions (for non-Windows
 # systems).
 DDNet
+!DDNet/
 DDNet-Server
 DDNet-Server-Launcher
 libsteam_api.a
@@ -70,6 +71,7 @@ generated
 
 # IDE project files
 .cproject
+.cmake
 .idea
 .project
 .settings

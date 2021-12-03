@@ -38,12 +38,7 @@ int CSnapshot::GetItemType(int Index) const
 	CSnapshotItem *pTypeItem = GetItem(TypeItemIndex);
 	CUuid Uuid;
 	for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
-	{
-		Uuid.m_aData[i * 4 + 0] = pTypeItem->Data()[i] >> 24;
-		Uuid.m_aData[i * 4 + 1] = pTypeItem->Data()[i] >> 16;
-		Uuid.m_aData[i * 4 + 2] = pTypeItem->Data()[i] >> 8;
-		Uuid.m_aData[i * 4 + 3] = pTypeItem->Data()[i];
-	}
+		int_to_bytes_be(&Uuid.m_aData[i * 4], pTypeItem->Data()[i]);
 
 	return g_UuidManager.LookupUuid(Uuid);
 }
@@ -57,6 +52,39 @@ int CSnapshot::GetItemIndex(int Key) const
 			return i;
 	}
 	return -1;
+}
+
+void *CSnapshot::FindItem(int Type, int ID) const
+{
+	int InternalType = Type;
+	if(Type >= OFFSET_UUID)
+	{
+		CUuid TypeUuid = g_UuidManager.GetUuid(Type);
+		int aTypeUuidItem[sizeof(CUuid) / 4];
+		for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
+			aTypeUuidItem[i] = bytes_be_to_int(&TypeUuid.m_aData[i * 4]);
+
+		bool Found = false;
+		for(int i = 0; i < m_NumItems; i++)
+		{
+			CSnapshotItem *pItem = GetItem(i);
+			if(pItem->Type() == 0 && pItem->ID() >= OFFSET_UUID_TYPE) // NETOBJTYPE_EX
+			{
+				if(mem_comp(pItem->Data(), aTypeUuidItem, sizeof(CUuid)) == 0)
+				{
+					InternalType = pItem->ID();
+					Found = true;
+					break;
+				}
+			}
+		}
+		if(!Found)
+		{
+			return nullptr;
+		}
+	}
+	int Index = GetItemIndex((InternalType << 16) | ID);
+	return Index < 0 ? nullptr : GetItem(Index)->Data();
 }
 
 unsigned CSnapshot::Crc()
@@ -473,7 +501,7 @@ void CSnapshotStorage::PurgeUntil(int Tick)
 	m_pLast = 0;
 }
 
-void CSnapshotStorage::Add(int Tick, int64 Tagtime, int DataSize, void *pData, int CreateAlt)
+void CSnapshotStorage::Add(int Tick, int64_t Tagtime, int DataSize, void *pData, int CreateAlt)
 {
 	// allocate memory for holder + snapshot_data
 	int TotalSize = sizeof(CHolder) + DataSize;
@@ -508,7 +536,7 @@ void CSnapshotStorage::Add(int Tick, int64 Tagtime, int DataSize, void *pData, i
 	m_pLast = pHolder;
 }
 
-int CSnapshotStorage::Get(int Tick, int64 *pTagtime, CSnapshot **ppData, CSnapshot **ppAltData)
+int CSnapshotStorage::Get(int Tick, int64_t *pTagtime, CSnapshot **ppData, CSnapshot **ppAltData)
 {
 	CHolder *pHolder = m_pFirst;
 
@@ -592,13 +620,7 @@ void CSnapshotBuilder::AddExtendedItemType(int Index)
 	if(pUuidItem)
 	{
 		for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
-		{
-			pUuidItem[i] =
-				(Uuid.m_aData[i * 4 + 0] << 24) |
-				(Uuid.m_aData[i * 4 + 1] << 16) |
-				(Uuid.m_aData[i * 4 + 2] << 8) |
-				(Uuid.m_aData[i * 4 + 3]);
-		}
+			pUuidItem[i] = bytes_be_to_int(&Uuid.m_aData[i * 4]);
 	}
 }
 

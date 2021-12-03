@@ -16,7 +16,7 @@ public:
 	CSaveTee();
 	~CSaveTee();
 	void Save(CCharacter *pchr);
-	void Load(CCharacter *pchr, int Team);
+	void Load(CCharacter *pchr, int Team, bool IsSwap = false);
 	char *GetString(const CSaveTeam *pTeam);
 	int FromString(const char *String);
 	void LoadHookedPlayer(const CSaveTeam *pTeam);
@@ -37,6 +37,7 @@ private:
 	int m_NeededFaketuning;
 
 	// Teamstuff
+	int m_TeeStarted;
 	int m_TeeFinished;
 	int m_IsSolo;
 

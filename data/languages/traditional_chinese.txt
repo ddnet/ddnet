@@ -2,10 +2,11 @@
 #originally created by:
 #	SiuFu
 #modified by:
-# 2020.8.19 TsFreddie
-# 2020.8.20 Dan_cao
-# 2020.11.12 TsFreddie
-# 2021.6.1 TsFreddie
+# 2020-08-19 TsFreddie
+# 2020-08-20 Dan_cao
+# 2020-11-12 TsFreddie
+# 2021-06-01 TsFreddie
+# 2021-11-19 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -917,8 +918,8 @@ Preinit VBO (iGPUs only)
 Activate
 == 啟用
 
-Multiple texture units (disable for MacOS)
-== 多重紋理單元 (MacOS不可用)
+Multiple texture units (disable for macOS)
+== 多重紋理單元 (macOS不可用)
 
 File already exists, do you want to overwrite it?
 == 檔案已存在，是否覆蓋？
@@ -1325,3 +1326,21 @@ Discord
 
 https://ddnet.tw/discord
 == https://ddnet.tw/discord
+
+Are you sure that you want to disconnect and switch to a different server?
+== 您確定要中斷此伺服器并嘗試加入其他伺服器嗎？
+
+Refreshing...
+== 正在重整...
+
+Kill Messages
+== 擊殺訊息
+
+Kill Message Normal Color
+== 其他玩家擊殺訊息顔色
+
+Kill Message Highlight Color
+== 玩家擊殺信息顔色
+
+Show local player's key presses
+== 顯示周圍玩家的按鍵輸入

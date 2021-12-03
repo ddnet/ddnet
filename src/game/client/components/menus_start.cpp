@@ -13,6 +13,10 @@
 #include <game/editor/editor.h>
 #include <game/version.h>
 
+#include <game/generated/client_data.h>
+
+#include <game/client/gameclient.h>
+
 #include "menus.h"
 
 void CMenus::RenderStartMenu(CUIRect MainView)
@@ -111,7 +115,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		}
 		else
 		{
-			char aBuf[MAX_PATH_LENGTH];
+			char aBuf[IO_MAX_PATH_LENGTH];
 			Storage()->GetBinaryPath(PLAT_SERVER_EXEC, aBuf, sizeof(aBuf));
 			IOHANDLE File = io_open(aBuf, IOFLAG_READ);
 			if(File)

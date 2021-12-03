@@ -944,8 +944,8 @@ Screen
 Preinit VBO (iGPUs only)
 == Præinit VBO (iGPUs alene)
 
-Multiple texture units (disable for MacOS)
-== Flere teksturenheder (deaktiver for MacOS)
+Multiple texture units (disable for macOS)
+== Flere teksturenheder (deaktiver for macOS)
 
 Use high DPI
 == Brug højt DPI
@@ -1236,6 +1236,9 @@ Grabs
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
 AFR
 == 
 
@@ -1258,6 +1261,9 @@ CHN
 == 
 
 Getting server list from master server
+== 
+
+Refreshing...
 == 
 
 Leak IP
@@ -1284,6 +1290,15 @@ Use modern OpenGL
 Show client IDs
 == 
 
+Kill Messages
+== 
+
+Kill Message Normal Color
+== 
+
+Kill Message Highlight Color
+== 
+
 Laser Outline Color
 == 
 
@@ -1303,6 +1318,9 @@ Tee
 == 
 
 Preview
+== 
+
+Show local player's key presses
 == 
 
 Background

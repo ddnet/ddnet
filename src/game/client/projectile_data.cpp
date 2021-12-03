@@ -49,7 +49,7 @@ CProjectileData ExtractProjectileInfoDDNet(const CNetObj_DDNetProjectile *pProj,
 
 	Result.m_ExtraInfo = true;
 	Result.m_Owner = pProj->m_Data & 255;
-	if((pProj->m_Data & PROJECTILEFLAG_NO_OWNER) & 1)
+	if(pProj->m_Data & PROJECTILEFLAG_NO_OWNER || Result.m_Owner < 0 || Result.m_Owner >= MAX_CLIENTS)
 	{
 		Result.m_Owner = -1;
 	}

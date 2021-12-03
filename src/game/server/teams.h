@@ -11,16 +11,39 @@
 
 class CGameTeams
 {
-	int m_TeamState[MAX_CLIENTS];
+	// `m_TeeStarted` is used to keep track whether a given tee has hit the
+	// start of the map yet. If a tee that leaves hasn't hit the start line
+	// yet, the team will be marked as "not allowed to finish"
+	// (`TEAMSTATE_STARTED_UNFINISHABLE`). If this were not the case, tees
+	// could go around the startline on a map, leave one tee behind at
+	// start, go to the finish line, let the tee start and kill, allowing
+	// the team to finish instantly.
+	bool m_TeeStarted[MAX_CLIENTS];
 	bool m_TeeFinished[MAX_CLIENTS];
-	bool m_TeamLocked[MAX_CLIENTS];
-	uint64 m_Invited[MAX_CLIENTS];
-	bool m_Practice[MAX_CLIENTS];
-	std::shared_ptr<CScoreSaveResult> m_pSaveTeamResult[MAX_CLIENTS];
-	uint64 m_LastSwap[MAX_CLIENTS];
+	int m_LastChat[MAX_CLIENTS];
+
+	int m_TeamState[NUM_TEAMS];
+	bool m_TeamLocked[NUM_TEAMS];
+	uint64_t m_Invited[NUM_TEAMS];
+	bool m_Practice[NUM_TEAMS];
+	std::shared_ptr<CScoreSaveResult> m_pSaveTeamResult[NUM_TEAMS];
+	uint64_t m_LastSwap[NUM_TEAMS];
+	bool m_TeamSentStartWarning[NUM_TEAMS];
+	// `m_TeamUnfinishableKillTick` is -1 by default and gets set when a
+	// team becomes unfinishable. If the team hasn't entered practice mode
+	// by that time, it'll get killed to prevent people not understanding
+	// the message from playing for a long time in an unfinishable team.
+	int m_TeamUnfinishableKillTick[NUM_TEAMS];
 
 	class CGameContext *m_pGameContext;
 
+	/**
+	* Kill the whole team.
+	* @param Team The team id to kill
+	* @param NewStrongID The player with that id will get strong hook on everyone else, -1 will set the normal spawning order
+	* @param ExceptID The player that should not get killed
+	*/
+	void KillTeam(int Team, int NewStrongID, int ExceptID = -1);
 	bool TeamFinished(int Team);
 	void OnTeamFinish(CPlayer **Players, unsigned int Size, float Time, const char *pTimestamp);
 	void OnFinish(CPlayer *Player, float Time, const char *pTimestamp);
@@ -31,6 +54,9 @@ public:
 		TEAMSTATE_EMPTY,
 		TEAMSTATE_OPEN,
 		TEAMSTATE_STARTED,
+		// Happens when a tee that hasn't hit the start tiles leaves
+		// the team.
+		TEAMSTATE_STARTED_UNFINISHABLE,
 		TEAMSTATE_FINISHED
 	};
 
@@ -61,6 +87,7 @@ public:
 	void OnCharacterFinish(int ClientID);
 	void OnCharacterSpawn(int ClientID);
 	void OnCharacterDeath(int ClientID, int Weapon);
+	void Tick();
 
 	// returns nullptr if successful, error string if failed
 	const char *SetCharacterTeam(int ClientID, int Team);
@@ -68,7 +95,7 @@ public:
 
 	void ChangeTeamState(int Team, int State);
 
-	int64 TeamMask(int Team, int ExceptID = -1, int Asker = -1);
+	int64_t TeamMask(int Team, int ExceptID = -1, int Asker = -1);
 
 	int Count(int Team) const;
 
@@ -84,8 +111,6 @@ public:
 	void ResetInvited(int Team);
 	void SetClientInvited(int Team, int ClientID, bool Invited);
 
-	int m_LastChat[MAX_CLIENTS];
-
 	int GetDDRaceState(CPlayer *Player);
 	int GetStartTime(CPlayer *Player);
 	float *GetCpCurrent(CPlayer *Player);
@@ -97,6 +122,13 @@ public:
 	void RequestTeamSwap(CPlayer *pPlayer, CPlayer *pTargetPlayer, int Team);
 	void SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, int Team);
 	void ProcessSaveTeam();
+
+	int GetFirstEmptyTeam() const;
+
+	bool TeeStarted(int ClientID)
+	{
+		return m_TeeStarted[ClientID];
+	}
 
 	bool TeeFinished(int ClientID)
 	{
@@ -126,9 +158,14 @@ public:
 		return m_TeamState[Team] == CGameTeams::TEAMSTATE_STARTED;
 	}
 
-	void SetFinished(int ClientID, bool finished)
+	void SetStarted(int ClientID, bool Started)
 	{
-		m_TeeFinished[ClientID] = finished;
+		m_TeeStarted[ClientID] = Started;
+	}
+
+	void SetFinished(int ClientID, bool Finished)
+	{
+		m_TeeFinished[ClientID] = Finished;
 	}
 
 	void SetSaving(int TeamID, std::shared_ptr<CScoreSaveResult> &SaveResult)

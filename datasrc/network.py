@@ -36,6 +36,7 @@ Emoticons = ["OOP", "EXCLAMATION", "HEARTS", "DROP", "DOTDOT", "MUSIC", "SORRY",
 
 Powerups = ["HEALTH", "ARMOR", "WEAPON", "NINJA"]
 Authed = ["NO", "HELPER", "MOD", "ADMIN"]
+EntityClasses = ["PROJECTILE", "DOOR", "DRAGGER_WEAK", "DRAGGER_NORMAL", "DRAGGER_STRONG", "GUN_NORMAL", "GUN_EXPLOSIVE", "GUN_FREEZE", "GUN_UNFREEZE", "LIGHT", "PICKUP"]
 
 RawHeader = '''
 
@@ -77,6 +78,7 @@ Enums = [
 	Enum("POWERUP", Powerups),
 	Enum("EMOTICON", Emoticons),
 	Enum("AUTHED", Authed),
+	Enum("ENTITYCLASS", EntityClasses),
 ]
 
 Flags = [
@@ -298,6 +300,27 @@ Objects = [
 	NetObjectEx("SpecChar", "spec-char@netobj.ddnet.tw", [
 		NetIntAny("m_X"),
 		NetIntAny("m_Y"),
+	]),
+
+	# Switch state for a player team.
+	NetObjectEx("SwitchState", "switch-state@netobj.ddnet.tw", [
+		NetIntRange("m_NumSwitchers", 0, 256),
+		# 256 switches / 32 bits = 8 int32
+		NetIntAny("m_Status1"),
+		NetIntAny("m_Status2"),
+		NetIntAny("m_Status3"),
+		NetIntAny("m_Status4"),
+		NetIntAny("m_Status5"),
+		NetIntAny("m_Status6"),
+		NetIntAny("m_Status7"),
+		NetIntAny("m_Status8"),
+	]),
+
+	# Switch info for map items
+	NetObjectEx("EntityEx", "entity-ex@netobj.ddnet.tw", [
+		NetIntAny("m_SwitchNumber"),
+		NetIntAny("m_Layer"),
+		NetIntAny("m_EntityClass"),
 	]),
 ]
 

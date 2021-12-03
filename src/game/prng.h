@@ -15,7 +15,7 @@ public:
 	// Seeds the random number generator with the given integer. The random
 	// sequence obtained by calling `RandomBits()` repeatedly is guaranteed
 	// to be the same for the same seed.
-	void Seed(uint64 aSeed[2]);
+	void Seed(uint64_t aSeed[2]);
 
 	// Generates 32 random bits. `Seed()` must be called before calling
 	// this function.
@@ -25,8 +25,8 @@ private:
 	char m_aDescription[64];
 
 	bool m_Seeded;
-	uint64 m_State;
-	uint64 m_Increment;
+	uint64_t m_State;
+	uint64_t m_Increment;
 };
 
 #endif // GAME_PRNG_H

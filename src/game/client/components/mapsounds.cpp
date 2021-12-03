@@ -6,6 +6,10 @@
 #include <game/client/components/maplayers.h> // envelope
 #include <game/client/components/sounds.h>
 
+#include <game/client/gameclient.h>
+
+#include <game/layers.h>
+
 #include "mapsounds.h"
 
 CMapSounds::CMapSounds()
@@ -31,10 +35,10 @@ void CMapSounds::OnMapLoad()
 		CMapItemSound *pSound = (CMapItemSound *)pMap->GetItem(Start + i, 0, 0);
 		if(pSound->m_External)
 		{
-			char Buf[256];
+			char aBuf[IO_MAX_PATH_LENGTH];
 			char *pName = (char *)pMap->GetData(pSound->m_SoundName);
-			str_format(Buf, sizeof(Buf), "mapres/%s.opus", pName);
-			m_aSounds[i] = Sound()->LoadOpus(Buf);
+			str_format(aBuf, sizeof(aBuf), "mapres/%s.opus", pName);
+			m_aSounds[i] = Sound()->LoadOpus(aBuf);
 		}
 		else
 		{
@@ -128,7 +132,7 @@ void CMapSounds::OnRender()
 				if(!pSource->m_pSource->m_Pan)
 					Flags |= ISound::FLAG_NO_PANNING;
 
-				pSource->m_Voice = m_pClient->m_pSounds->PlaySampleAt(CSounds::CHN_MAPSOUND, m_aSounds[pSource->m_Sound], 1.0f, vec2(fx2f(pSource->m_pSource->m_Position.x), fx2f(pSource->m_pSource->m_Position.y)), Flags);
+				pSource->m_Voice = m_pClient->m_Sounds.PlaySampleAt(CSounds::CHN_MAPSOUND, m_aSounds[pSource->m_Sound], 1.0f, vec2(fx2f(pSource->m_pSource->m_Position.x), fx2f(pSource->m_pSource->m_Position.y)), Flags);
 				Sound()->SetVoiceTimeOffset(pSource->m_Voice, Offset);
 				Sound()->SetVoiceFalloff(pSource->m_Voice, pSource->m_pSource->m_Falloff / 255.0f);
 				switch(pSource->m_pSource->m_Shape.m_Type)
@@ -155,7 +159,7 @@ void CMapSounds::OnRender()
 		}
 	}
 
-	vec2 Center = m_pClient->m_pCamera->m_Center;
+	vec2 Center = m_pClient->m_Camera.m_Center;
 	for(int g = 0; g < Layers()->NumGroups(); g++)
 	{
 		CMapItemGroup *pGroup = Layers()->GetGroup(g);
@@ -199,7 +203,7 @@ void CMapSounds::OnRender()
 						if(pVoice->m_pSource->m_PosEnv >= 0)
 						{
 							float aChannels[4];
-							CMapLayers::EnvelopeEval(pVoice->m_pSource->m_PosEnvOffset, pVoice->m_pSource->m_PosEnv, aChannels, m_pClient->m_pMapLayersBackGround);
+							CMapLayers::EnvelopeEval(pVoice->m_pSource->m_PosEnvOffset, pVoice->m_pSource->m_PosEnv, aChannels, &m_pClient->m_MapLayersBackGround);
 							OffsetX = aChannels[0];
 							OffsetY = aChannels[1];
 						}
@@ -218,7 +222,7 @@ void CMapSounds::OnRender()
 						if(pVoice->m_pSource->m_SoundEnv >= 0)
 						{
 							float aChannels[4];
-							CMapLayers::EnvelopeEval(pVoice->m_pSource->m_SoundEnvOffset, pVoice->m_pSource->m_SoundEnv, aChannels, m_pClient->m_pMapLayersBackGround);
+							CMapLayers::EnvelopeEval(pVoice->m_pSource->m_SoundEnvOffset, pVoice->m_pSource->m_SoundEnv, aChannels, &m_pClient->m_MapLayersBackGround);
 							float Volume = clamp(aChannels[0], 0.0f, 1.0f);
 
 							Sound()->SetVoiceVolume(pVoice->m_Voice, Volume);

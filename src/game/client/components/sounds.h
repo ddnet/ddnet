@@ -28,7 +28,7 @@ class CSounds : public CComponent
 		int m_SetId;
 	} m_aQueue[QUEUE_SIZE];
 	int m_QueuePos;
-	int64 m_QueueWaitTime;
+	int64_t m_QueueWaitTime;
 	std::shared_ptr<CSoundLoading> m_pSoundJob;
 	bool m_WaitForSoundJob;
 

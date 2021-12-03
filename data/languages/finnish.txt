@@ -4,6 +4,7 @@
 #modified by:
 #	ziltoide		2011-04-06 23:56:54
 #	ziltoide		2011-07-05 18:31:04
+#	Misse & Igrekyll	2021-07-07 18:01:51
 ##### /authors #####
 
 ##### translated strings #####
@@ -519,8 +520,6 @@ Yes
 You must restart the game for all settings to take effect.
 == Sinun täytyy uudelleenkäynnistää peli, jotta kaikki asetukset tulisivat voimaan.
 
-##### needs translation #####
-
 New name:
 == Uusi nimi:
 
@@ -543,7 +542,7 @@ Join game
 == Liity peliin
 
 FSAA samples
-== FSAA näytteet
+== FSAA-näytteet
 
 Sound volume
 == Äänenvoimakkuus
@@ -558,7 +557,7 @@ Length:
 == Pituus:
 
 Laser
-== Kivääri
+== Laser
 
 Netversion:
 == Yhteysversio:
@@ -618,273 +617,637 @@ Type:
 == Tyyppi:
 
 Successfully saved the replay!
-== 
+== Uudelleentoisto tallentui onnistuneesti!
 
 Saving ddnet-settings.cfg failed
-== 
+== ddnet-settings.cfg:n tallentaminen epäonnistui
 
 Replay feature is disabled!
-== 
+== Uudelleentoisto-ominaisuus on pois käytöstä!
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
+== Tekstuurin %s leveys ei ole jaollinen luvulla %d tai korkeus ei ole jaollinen luvulla %d, mikä voi aiheuttaa visuaalisia häiriöitä.
 
 Warning
-== 
+== Varoitus
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== 
+== Debuggaustila on käytössä. Paina Ctrl+Shift+D poistaaksesi debuggaustilan käytöstä.
 
 Game paused
-== 
+== Peli pysäytetty
 
 Server best:
-== 
+== Palvelimen paras:
 
 Personal best:
-== 
+== Henkilökohtainen paras:
 
 Reset
-== 
+== Nollaa
 
 Browser
-== 
+== Selain
 
 Ghost
-== 
+== Haamu
 
 Loading DDNet Client
-== 
+== Ladataan DDNet-asiakasta
 
 Reconnect in %d sec
-== 
+== Yhdistää uudelleen %d sekunnissa
 
 Render demo
-== 
+== Renderöi demo
 
 Replace video
-== 
+== Korvaa video
 
 File already exists, do you want to overwrite it?
-== 
+== Tiedosto on jo olemassa, haluatko kirjoittaa sen päälle?
 
 Are you sure that you want to disconnect?
-== 
+== Oletko varma, että haluat katkaista yhteyden?
 
 Disconnect Dummy
-== 
+== Katk. dummyn yhteys
 
 Are you sure that you want to disconnect your dummy?
-== 
+== Oletko varma, että haluat katkaista dummysi yhteyden?
 
 Welcome to DDNet
-== 
+== Tervetuloa DDNet:iin
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== 
+== DDraceNetwork on yhteistoiminnallinen verkkopeli, jossa tavoitteena on, että sinä ja teeryhmäsi saavuttavat kentän maaliviivan. Alokkaana sinun kannattaisi aloittaa Novice-palvelimilla, jotka isännöivät helpoimiä kenttiä. Huomioi viive valitaksesi lähellä olevan palvelimen.
 
 The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== 
+== Kentät sisältävät jäätä, joka tekee teen väliaikaisesti liikkumiskyvyttömäksi. Sinun täytyy toimia yhteistyössä päästäkesi näiden kohtien läpi.
 
 The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== 
+== Hiirenrulla vaihtaa aseita. Nuijaa (hiiren vasen painike) voidaan käyttää muiden tee-hahmojen lyömiseen ja herättämiseen jäästä.
 
 Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== 
+== Koukkua (hiiren oikea painike) voidaan käyttää kentässä etenemiseen ja muiden tee-hahmojen koukuttamiseen.
 
 Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== 
+== Kaikkein tärkeintä on viestintä: Ei ole tutoriaalia, joten sinun täytyy chatata (t-näppäin) muiden pelaajien kanssa oppiaksesi pelin perusteet ja temput.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 
+== Käytä näppäintä k tappaaksesi (uudelleenaloitus) ja näppäintä q pysäyttääksesi sekä katsoaksesi muita pelaajia. Asetuksista löydät muiden näppäinten asettelut.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
-== 
+== On suositeltavaa, että tarkistat asetukset ja säädät ne haluamiksesi ennen kuin liityt palvelimelle.
 
 Please enter your nickname below.
-== 
+== Ole hyvä ja syötä nimimerkki alle.
 
 Existing Player
-== 
+== Olemassaoleva pelaaja
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== 
+== Nimimerkki '%s' on jo käytössä (%d pistettä). Haluatko silti käyttää sitä?
 
 Checking for existing player with your name
-== 
+== Tarkistetaan, onko nimesi jo käytössä
 
 Country / Region
-== 
+== Maa / Alue
 
 Destination file already exist
-== 
+== Kohdetiedosto on jo olemassa
 
 Speed
-== 
+== Vauhti
 
 Video name:
-== 
+== Videon nimi:
 
 Show DDNet map finishes in server browser
-== 
+== Näytä DDNet kenttäläpäisyt palvelinselaimessa
 
 transmits your player name to info2.ddnet.tw
-== 
+== lähettää nimimerkkisi osoitteeseen info2.ddnet.tw
 
 Theme
-== 
+== Teema
 
 AFR
-== 
+== AFR
 
 ASI
-== 
+== ASI
 
 AUS
-== 
+== AUS
 
 EUR
-== 
+== EUR
 
 NA
-== 
+== NA
 
 SA
-== 
+== SA
 
 CHN
-== 
+== CHN
 
 Getting server list from master server
-== 
+== Ladataan palvelinlistaa isäntäpalvelimelta
 
 Search
-== 
+== Hae
 
 Exclude
-== 
+== Jätä pois
 
 %d of %d servers
-== 
+== %d %d palvelimesta
 
 %d of %d server
-== 
+== %d %d palvelimesta
 
 %d players
-== 
+== %d pelaajaa
 
 %d player
-== 
+== %d pelaaja
 
 Filter connecting players
-== 
+== Suodata yhdistävät pelaajat
 
 Indicate map finish
-== 
+== Näytä kenttäläpäisyt
 
 Unfinished map
-== 
+== Läpäisemätön kartta
 
 Countries
-== 
+== Maat
 
 Types
-== 
+== Tyypit
 
 Leak IP
-== 
+== Vuoda IP
 
 Select a name
-== 
+== Valitse nimi
 
 Please use a different name
-== 
+== Ole hyvä ja käytä toista nimeä
 
 Remove chat
-== 
+== Poista chatti
 
 Markers:
-== 
+== Merkit:
 
 %.2f MiB
-== 
+== %.2f MiB
 
 %.2f KiB
-== 
+== %.2f KiB
 
 Demo
-== 
+== Demo
 
 Markers
-== 
+== Merkit
 
 Length
-== 
+== Pituus
 
 Date
-== 
+== Päivämäärä
 
 Fetch Info
-== 
+== Lataa info
 
 Demos directory
-== 
+== Demohakemisto
 
 Render
-== 
+== Renderöi
 
 Connecting dummy
-== 
+== Yhdistetään dummyä
 
 Connect Dummy
-== 
+== Yhdistä dummy
 
 Kill
-== 
+== Tapa
 
 Pause
-== 
+== Pysäytä
 
 Reload
-== 
+== Päivitä
 
 Deactivate
-== 
+== Deaktivoi
 
 Activate
-== 
+== Aktivoi
 
 Save
-== 
+== Tallenna
 
 Smooth Dynamic Camera
-== 
+== Pehmeä dynaaminen kamera
 
 Switch weapon when out of ammo
-== 
+== Vaihda asetta ammusten loppuessa
 
 Reset wanted weapon on death
-== 
+== Palauta haluttu ase kuollessa
 
 Show only chat messages from friends
-== 
+== Näytä chattiviestit vain ystäviltä
 
 Show clan above name plates
-== 
+== Näytä klaani nimikylttien yläpuolella
 
 Clan plates size
-== 
+== Klaanikylttien koko
 
 Skip the main menu
-== 
+== Ohita päävalikko
 
 Refresh Rate
-== 
+== Virkistystaajuus
 
 Show console window
-== 
+== Näytä konsoli-ikkuna
 
 Themes directory
+== Teemahakemisto
+
+Dummy settings
+== Dummyn asetukset
+
+Download skins
+== Lataa ulkonäköjä
+
+Vanilla skins only
+== Pelkästään oletusulkonäöt
+
+Skin prefix
+== Ulkonäön etuliite
+
+Skin Database
+== Ulkonäkötietokanta
+
+Skins directory
+== Ulkonäköhakemisto
+
+Hook collisions
+== Koukun törmäysviiva
+
+Zoom in
+== Suurenna
+
+Zoom out
+== Pienennä
+
+Default zoom
+== Oletuszoom
+
+Show others
+== Näytä muut
+
+Show all
+== Näytä kaikki
+
+Toggle dyncam
+== Vaihda dynaaminen kamera
+
+Toggle dummy
+== Vaihda dummy
+
+Toggle ghost
+== Vaihda haamu
+
+Lock team
+== Lukitse joukkue
+
+Show HUD
+== Näytä HUD
+
+Chat command
+== Chattikomento
+
+UI mouse s.
+== Käyttöliittymän herkkyys
+
+Dummy
+== Dummy
+
+Windowed
+== Ikkunoitu
+
+Windowed borderless
+== Reunaton ikkuna
+
+Desktop fullscreen
+== Koko näyttö
+
+may cause delay
+== saattaa aiheuttaa viivettä
+
+Screen
+== Näyttö
+
+Use modern OpenGL
+== Käytä nykyaikaista OpenGL:ää
+
+Preinit VBO (iGPUs only)
+== Esialusta VBO (vain iGPUt)
+
+Multiple texture units (disable for macOS)
+== Monta tekstuuriyksikköä (älä käytä macOS:ällä)
+
+Use high DPI
+== Käytä korkeaa DPI:tä
+
+Enable game sounds
+== Ota pelin äänet käyttöön
+
+Enable gun sound
+== Ota aseiden äänet käyttöön
+
+Enable server message sound
+== Ota palvelinviestiäänet käyttöön
+
+Enable regular chat sound
+== Ota chatin äänet käyttöön
+
+Enable team chat sound
+== Ota joukkuechatin äänet käyttöön
+
+Enable highlighted chat sound
+== Ota korostetun chatin äänet käyttöön
+
+Threaded sound loading
+== Säikeistetty äänilataus
+
+Game sound volume
+== Pelin äänenvoimakkuus
+
+Chat sound volume
+== Chatin äänenvoimakkuus
+
+Map sound volume
+== Kenttien äänenvoimakkuus
+
+Background music volume
+== Taustamusiikin äänenvoimakkuus
+
+HUD
+== HUD
+
+DDNet
+== DDNet
+
+DDNet Client needs to be restarted to complete update!
+== DDNet-asiakas täytyy käynnistää uudelleen latauksen viimeistelemiseksi
+
+Use DDRace Scoreboard
+== Käytä DDRacen tuloslistaa
+
+Show client IDs
+== Näytä asiakkaiden ID:t
+
+Show score
+== Näytä pistemäärä
+
+Show health + ammo
+== Näytä terveyspisteet + ammusmäärä
+
+Show names in chat in team colors
+== Näytä nimet chatissa joukkueiden väreissä
+
+Show kill messages
+== Näytä tappoviestit
+
+Show votes window after voting
+== Näytä äänestysikkuna äänestämisen jälkeen
+
+Laser Outline Color
+== Laserin ulkoviivan väri
+
+Laser Inner Color
+== Laserin sisäväri
+
+Hookline
+== Koukkuviiva
+
+No hit
+== Ei osumaa
+
+Hookable
+== Koukutettava
+
+Tee
+== Tee
+
+Use old chat style
+== Käytä vanhaa chatin tyyliä
+
+Messages
+== Viestit
+
+System message
+== Järjestelmäviesti
+
+Highlighted message
+== Korostettu viesti
+
+Team message
+== Joukkueviesti
+
+Friend message
+== Ystäväviesti
+
+Normal message
+== Tavallinen viesti
+
+Client message
+== Asiakasviesti
+
+Preview
+== Esikatselu
+
+Save the best demo of each race
+== Tallenna jokaisen kentän paras demo
+
+Default length: %d
+== Oletuspituus: %d
+
+Enable replays
+== Luo uudelleentoistoja
+
+Show ghost
+== Näytä haamu
+
+Save ghost
+== Tallenna haamu
+
+Gameplay
+== Peli
+
+Size
+== Koko
+
+Show others (own team only)
+== Näytä muut (vain joukkuekaverit)
+
+AntiPing
+== AntiPing
+
+AntiPing: predict other players
+== AntiPing: ennusta muut pelaajat
+
+AntiPing: predict weapons
+== AntiPing: ennusta aseet
+
+AntiPing: predict grenade paths
+== AntiPing: ennusta kranaattien polut
+
+Show other players' hook collision lines
+== Näytä muiden pelaajien koukkujen törmaysviivat
+
+Show other players' key presses
+== Näytä muiden pelaajien näppäinpainallukset
+
+Old mouse mode
+== Vanha hiiritila
+
+Background
+== Tausta
+
+Use current map as background
+== Käytä nykyistä kenttää taustana
+
+Try fast HTTP map download first
+== Yritä nopeaa HTTP-kentänlatausta ensin
+
+DDNet %s is available:
+== DDNet %s on saatavilla:
+
+Update now
+== Päivitä nyt
+
+Updating...
+== Päivitetään...
+
+DDNet Client updated!
+== DDNet-asiakas on päivitetty!
+
+No updates available
+== Ei päivityksiä saatavilla
+
+Check now
+== Tarkista nyt
+
+Emoticons
+== Hymiöt
+
+Discord
+== Discord
+
+https://ddnet.tw/discord
+== https://ddnet.tw/discord
+
+Learn
+== Opi
+
+https://wiki.ddnet.tw/
+== https://wiki.ddnet.tw/
+
+Website
+== Verkkosivu
+
+Settings
+== Asetukset
+
+Stop server
+== Pysäytä palvelin
+
+Run server
+== Suorita palvelin
+
+Editor
+== Editori
+
+[Start menu]
+Play
+== Pelaa
+
+DDNet %s is out!
+== DDNet %s on julkaistu!
+
+Downloading %s:
+== Päivitetään %s:
+
+Update failed! Check log...
+== Päivitys epäonnistui! Katso loki...
+
+Restart
+== Uudelleenaloitus
+
+Time
+== Aika
+
+Manual
+== Ohjekirja
+
+Race
+== Kisa
+
+Replay
+== Uudelleentoisto
+
+Follow
+== Seuraa
+
+Frags
+== Tapot
+
+Deaths
+== Kuolemat
+
+Suicides
+== Itsemurhat
+
+Ratio
+== Suhde
+
+Net
+== Verkko
+
+FPM
+== FPM
+
+Best
+== Paras
+
+1 new mention
+== 1 uusi maininta
+
+%d new mentions
+== %d uutta mainintaa
+
+9+ new mentions
+== 9+ uutta mainintaa
+
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Refreshing...
 == 
 
 Automatically take statboard screenshot
@@ -896,52 +1259,7 @@ Automatically create statboard csv
 Max CSVs
 == 
 
-Dummy settings
-== 
-
-Download skins
-== 
-
-Vanilla skins only
-== 
-
 Fat skins (DDFat)
-== 
-
-Skin prefix
-== 
-
-Skin Database
-== 
-
-Skins directory
-== 
-
-Hook collisions
-== 
-
-Zoom in
-== 
-
-Zoom out
-== 
-
-Default zoom
-== 
-
-Show others
-== 
-
-Show all
-== 
-
-Toggle dyncam
-== 
-
-Toggle dummy
-== 
-
-Toggle ghost
 == 
 
 Dummy copy
@@ -956,226 +1274,37 @@ Converse
 Statboard
 == 
 
-Lock team
-== 
-
 Show entities
-== 
-
-Show HUD
-== 
-
-Chat command
-== 
-
-UI mouse s.
-== 
-
-Dummy
-== 
-
-Windowed
-== 
-
-Windowed borderless
-== 
-
-Desktop fullscreen
-== 
-
-may cause delay
-== 
-
-Screen
-== 
-
-Use modern OpenGL
-== 
-
-Preinit VBO (iGPUs only)
-== 
-
-Multiple texture units (disable for MacOS)
-== 
-
-Use high DPI
-== 
-
-Enable game sounds
-== 
-
-Enable gun sound
 == 
 
 Enable long pain sound (used when shooting in freeze)
 == 
 
-Enable server message sound
-== 
-
-Enable regular chat sound
-== 
-
-Enable team chat sound
-== 
-
-Enable highlighted chat sound
-== 
-
-Threaded sound loading
-== 
-
-Game sound volume
-== 
-
-Chat sound volume
-== 
-
-Map sound volume
-== 
-
-Background music volume
-== 
-
-HUD
-== 
-
-DDNet
-== 
-
 Assets
 == 
 
-DDNet Client needs to be restarted to complete update!
+Kill Messages
 == 
 
-Use DDRace Scoreboard
+Kill Message Normal Color
 == 
 
-Show client IDs
-== 
-
-Show score
-== 
-
-Show health + ammo
-== 
-
-Show names in chat in team colors
-== 
-
-Show kill messages
-== 
-
-Show votes window after voting
-== 
-
-Laser Outline Color
-== 
-
-Laser Inner Color
-== 
-
-Hookline
-== 
-
-No hit
-== 
-
-Hookable
-== 
-
-Tee
-== 
-
-Use old chat style
-== 
-
-Messages
-== 
-
-System message
-== 
-
-Highlighted message
-== 
-
-Team message
-== 
-
-Friend message
-== 
-
-Normal message
-== 
-
-Client message
-== 
-
-Preview
-== 
-
-Save the best demo of each race
-== 
-
-Default length: %d
-== 
-
-Enable replays
-== 
-
-Show ghost
-== 
-
-Save ghost
-== 
-
-Gameplay
+Kill Message Highlight Color
 == 
 
 Overlay entities
 == 
 
-Size
-== 
-
 Show text entities
-== 
-
-Show others (own team only)
 == 
 
 Show quads
 == 
 
-AntiPing
-== 
-
-AntiPing: predict other players
-== 
-
-AntiPing: predict weapons
-== 
-
-AntiPing: predict grenade paths
-== 
-
-Show other players' hook collision lines
-== 
-
-Show other players' key presses
-== 
-
-Old mouse mode
-== 
-
-Background
+Show local player's key presses
 == 
 
 Entities Background color
-== 
-
-Use current map as background
 == 
 
 Show tiles layers from BG map
@@ -1184,34 +1313,10 @@ Show tiles layers from BG map
 Regular Background Color
 == 
 
-Try fast HTTP map download first
-== 
-
 New random timeout code
 == 
 
-DDNet %s is available:
-== 
-
-Update now
-== 
-
-Updating...
-== 
-
-DDNet Client updated!
-== 
-
-No updates available
-== 
-
-Check now
-== 
-
 Entities
-== 
-
-Emoticons
 == 
 
 Particles
@@ -1220,102 +1325,14 @@ Particles
 Assets directory
 == 
 
-Discord
-== 
-
-https://ddnet.tw/discord
-== 
-
-Learn
-== 
-
-https://wiki.ddnet.tw/
-== 
-
-Website
-== 
-
-Settings
-== 
-
-Stop server
-== 
-
-Run server
-== 
-
 Server executable not found, can't run server
-== 
-
-Editor
-== 
-
-[Start menu]
-Play
-== 
-
-DDNet %s is out!
-== 
-
-Downloading %s:
-== 
-
-Update failed! Check log...
-== 
-
-Restart
-== 
-
-Time
-== 
-
-Manual
-== 
-
-Race
 == 
 
 Auto
 == 
 
-Replay
-== 
-
-Follow
-== 
-
-Frags
-== 
-
-Deaths
-== 
-
-Suicides
-== 
-
-Ratio
-== 
-
-Net
-== 
-
-FPM
-== 
-
 Spree
 == 
 
-Best
-== 
-
 Grabs
-== 
-
-1 new mention
-== 
-
-%d new mentions
-== 
-
-9+ new mentions
 == 

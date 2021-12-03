@@ -9,12 +9,18 @@
 #include <time.h>
 
 #include "system.h"
-
+#if !defined(CONF_PLATFORM_MACOS)
+#include <base/color.h>
+#endif
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include <chrono>
+
+#include <cinttypes>
+
 #if defined(CONF_WEBSOCKETS)
-#include "engine/shared/websockets.h"
+#include <engine/shared/websockets.h>
 #endif
 
 #if defined(CONF_FAMILY_UNIX)
@@ -46,6 +52,10 @@
 #include <mach/mach_time.h>
 #endif
 
+#ifdef CONF_PLATFORM_ANDROID
+#include <android/log.h>
+#endif
+
 #elif defined(CONF_FAMILY_WINDOWS)
 #define WIN32_LEAN_AND_MEAN
 #undef _WIN32_WINNT
@@ -58,6 +68,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <process.h>
+#include <share.h>
 #include <shellapi.h>
 #include <wincrypt.h>
 #else
@@ -68,9 +79,7 @@
 #include <sys/filio.h>
 #endif
 
-#if defined(__cplusplus)
 extern "C" {
-#endif
 
 IOHANDLE io_stdin()
 {
@@ -87,7 +96,12 @@ typedef struct
 } DBG_LOGGER_DATA;
 
 static DBG_LOGGER_DATA loggers[16];
+static int has_stdout_logger = 0;
 static int num_loggers = 0;
+
+#ifndef CONF_FAMILY_WINDOWS
+static DBG_LOGGER_DATA stdout_nonewline_logger;
+#endif
 
 static NETSTATS network_stats = {0};
 
@@ -104,12 +118,12 @@ void dbg_assert_imp(const char *filename, int line, int test, const char *msg)
 	}
 }
 
-void dbg_break_imp(void)
+void dbg_break_imp()
 {
 #ifdef __GNUC__
 	__builtin_trap();
 #else
-	*((volatile unsigned *)0) = 0x0;
+	abort();
 #endif
 }
 
@@ -133,9 +147,12 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 	va_start(args, fmt);
 #if defined(CONF_FAMILY_WINDOWS)
 	_vsnprintf(msg, sizeof(str) - len, fmt, args);
+#elif defined(CONF_PLATFORM_ANDROID)
+	__android_log_vprint(ANDROID_LOG_DEBUG, sys, fmt, args);
 #else
 	vsnprintf(msg, sizeof(str) - len, fmt, args);
 #endif
+
 	va_end(args);
 
 	for(i = 0; i < num_loggers; i++)
@@ -143,11 +160,13 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 }
 
 #if defined(CONF_FAMILY_WINDOWS)
-static void logger_debugger(const char *line, void *user)
+static void logger_win_debugger(const char *line, void *user)
 {
 	(void)user;
-	OutputDebugString(line);
-	OutputDebugString("\n");
+	WCHAR wBuffer[512];
+	MultiByteToWideChar(CP_UTF8, 0, line, -1, wBuffer, sizeof(wBuffer) / sizeof(WCHAR));
+	OutputDebugStringW(wBuffer);
+	OutputDebugStringW(L"\n");
 }
 #endif
 
@@ -160,11 +179,19 @@ static void logger_file(const char *line, void *user)
 	aio_unlock(logfile);
 }
 
+static void logger_file_no_newline(const char *line, void *user)
+{
+	ASYNCIO *logfile = (ASYNCIO *)user;
+	aio_lock(logfile);
+	aio_write_unlocked(logfile, line, str_length(line));
+	aio_unlock(logfile);
+}
+
 #if defined(CONF_FAMILY_WINDOWS)
 static void logger_stdout_sync(const char *line, void *user)
 {
 	size_t length = str_length(line);
-	wchar_t *wide = malloc(length * sizeof(*wide));
+	wchar_t *wide = (wchar_t *)malloc(length * sizeof(*wide));
 	const char *p = line;
 	int wlen = 0;
 	HANDLE console;
@@ -212,7 +239,7 @@ static void logger_file_finish(void *user)
 	logger_stdout_finish(user);
 }
 
-static void dbg_logger_finish(void)
+static void dbg_logger_finish()
 {
 	int i;
 	for(i = 0; i < num_loggers; i++)
@@ -238,19 +265,24 @@ void dbg_logger(DBG_LOGGER logger, DBG_LOGGER_FINISH finish, void *user)
 	num_loggers++;
 }
 
-void dbg_logger_stdout(void)
+void dbg_logger_stdout()
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	dbg_logger(logger_stdout_sync, 0, 0);
 #else
-	dbg_logger(logger_file, logger_stdout_finish, aio_new(io_stdout()));
+	ASYNCIO *logger_obj = aio_new(io_stdout());
+	dbg_logger(logger_file, logger_stdout_finish, logger_obj);
+	dbg_logger(logger_file_no_newline, 0, logger_obj);
+	stdout_nonewline_logger = loggers[num_loggers - 1];
+	--num_loggers;
 #endif
+	has_stdout_logger = 1;
 }
 
-void dbg_logger_debugger(void)
+void dbg_logger_debugger()
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	dbg_logger(logger_debugger, 0, 0);
+	dbg_logger(logger_win_debugger, 0, 0);
 #endif
 }
 
@@ -281,6 +313,18 @@ void mem_zero(void *block, unsigned size)
 
 IOHANDLE io_open(const char *filename, int flags)
 {
+	dbg_assert(flags == IOFLAG_READ || flags == IOFLAG_WRITE || flags == IOFLAG_APPEND, "flags must be read, write or append");
+#if defined(CONF_FAMILY_WINDOWS)
+	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
+	MultiByteToWideChar(CP_UTF8, 0, filename, -1, wBuffer, sizeof(wBuffer) / sizeof(WCHAR));
+	if(flags == IOFLAG_READ)
+		return (IOHANDLE)_wfsopen(wBuffer, L"rb", _SH_DENYNO);
+	if(flags == IOFLAG_WRITE)
+		return (IOHANDLE)_wfsopen(wBuffer, L"wb", _SH_DENYNO);
+	if(flags == IOFLAG_APPEND)
+		return (IOHANDLE)_wfsopen(wBuffer, L"ab", _SH_DENYNO);
+	return 0x0;
+#else
 	if(flags == IOFLAG_READ)
 		return (IOHANDLE)fopen(filename, "rb");
 	if(flags == IOFLAG_WRITE)
@@ -288,6 +332,7 @@ IOHANDLE io_open(const char *filename, int flags)
 	if(flags == IOFLAG_APPEND)
 		return (IOHANDLE)fopen(filename, "ab");
 	return 0x0;
+#endif
 }
 
 unsigned io_read(IOHANDLE io, void *buffer, unsigned size)
@@ -437,7 +482,7 @@ static void aio_handle_free_and_unlock(ASYNCIO *aio) RELEASE(aio->lock)
 
 static void aio_thread(void *user)
 {
-	ASYNCIO *aio = user;
+	ASYNCIO *aio = (ASYNCIO *)user;
 
 	lock_wait(aio->lock);
 	while(1)
@@ -497,7 +542,7 @@ static void aio_thread(void *user)
 
 ASYNCIO *aio_new(IOHANDLE io)
 {
-	ASYNCIO *aio = malloc(sizeof(*aio));
+	ASYNCIO *aio = (ASYNCIO *)malloc(sizeof(*aio));
 	if(!aio)
 	{
 		return 0;
@@ -507,7 +552,7 @@ ASYNCIO *aio_new(IOHANDLE io)
 	sphore_init(&aio->sphore);
 	aio->thread = 0;
 
-	aio->buffer = malloc(ASYNC_BUFSIZE);
+	aio->buffer = (unsigned char *)malloc(ASYNC_BUFSIZE);
 	if(!aio->buffer)
 	{
 		sphore_destroy(&aio->sphore);
@@ -591,7 +636,7 @@ void aio_write_unlocked(ASYNCIO *aio, const void *buffer, unsigned size)
 		unsigned int new_written = buffer_len(aio) + size + 1;
 		unsigned int next_size = next_buffer_size(aio->buffer_size, new_written);
 		unsigned int next_len = 0;
-		unsigned char *next_buffer = malloc(next_size);
+		unsigned char *next_buffer = (unsigned char *)malloc(next_size);
 
 		struct BUFFERS buffers;
 		buffer_ptrs(aio, &buffers);
@@ -696,7 +741,7 @@ static unsigned long __stdcall thread_run(void *user)
 #error not implemented
 #endif
 {
-	struct THREAD_RUN *data = user;
+	struct THREAD_RUN *data = (THREAD_RUN *)user;
 	void (*threadfunc)(void *) = data->threadfunc;
 	void *u = data->u;
 	free(data);
@@ -706,7 +751,7 @@ static unsigned long __stdcall thread_run(void *user)
 
 void *thread_init(void (*threadfunc)(void *), void *u, const char *name)
 {
-	struct THREAD_RUN *data = malloc(sizeof(*data));
+	struct THREAD_RUN *data = (THREAD_RUN *)malloc(sizeof(*data));
 	data->threadfunc = threadfunc;
 	data->u = u;
 #if defined(CONF_FAMILY_UNIX)
@@ -741,7 +786,7 @@ void thread_wait(void *thread)
 #endif
 }
 
-void thread_yield(void)
+void thread_yield()
 {
 #if defined(CONF_FAMILY_UNIX)
 	int result = sched_yield();
@@ -797,7 +842,7 @@ typedef CRITICAL_SECTION LOCKINTERNAL;
 #error not implemented on this platform
 #endif
 
-LOCK lock_create(void)
+LOCK lock_create()
 {
 	LOCKINTERNAL *lock = (LOCKINTERNAL *)malloc(sizeof(*lock));
 #if defined(CONF_FAMILY_UNIX)
@@ -932,56 +977,24 @@ void sphore_destroy(SEMAPHORE *sem)
 
 static int new_tick = -1;
 
-void set_new_tick(void)
+void set_new_tick()
 {
 	new_tick = 1;
 }
 
 /* -----  time ----- */
-int64 time_get_impl(void)
+static_assert(std::chrono::steady_clock::is_steady, "Compiler does not support steady clocks, it might be out of date.");
+static_assert(std::chrono::steady_clock::period::den / std::chrono::steady_clock::period::num >= 1000000, "Compiler has a bad timer precision and might be out of date.");
+static const std::chrono::time_point<std::chrono::steady_clock> tw_start_time = std::chrono::steady_clock::now();
+
+int64_t time_get_impl()
 {
-	static int64 last = 0;
-	{
-#if defined(CONF_PLATFORM_MACOS)
-		static int got_timebase = 0;
-		mach_timebase_info_data_t timebase;
-		uint64 time;
-		uint64 q;
-		uint64 r;
-		if(!got_timebase)
-		{
-			mach_timebase_info(&timebase);
-		}
-		time = mach_absolute_time();
-		q = time / timebase.denom;
-		r = time % timebase.denom;
-		last = q * timebase.numer + r * timebase.numer / timebase.denom;
-		return last;
-#elif defined(CONF_FAMILY_UNIX)
-		struct timespec spec;
-		if(clock_gettime(CLOCK_MONOTONIC, &spec) != 0)
-		{
-			dbg_msg("clock", "gettime failed: %d", errno);
-			return 0;
-		}
-		last = (int64)spec.tv_sec * (int64)1000000 + (int64)spec.tv_nsec / 1000;
-		return last;
-#elif defined(CONF_FAMILY_WINDOWS)
-		int64 t;
-		QueryPerformanceCounter((PLARGE_INTEGER)&t);
-		if(t < last) /* for some reason, QPC can return values in the past */
-			return last;
-		last = t;
-		return t;
-#else
-#error not implemented
-#endif
-	}
+	return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - tw_start_time).count();
 }
 
-int64 time_get(void)
+int64_t time_get()
 {
-	static int64 last = 0;
+	static int64_t last = 0;
 	if(new_tick == 0)
 		return last;
 	if(new_tick != -1)
@@ -991,28 +1004,14 @@ int64 time_get(void)
 	return last;
 }
 
-int64 time_freq(void)
+int64_t time_freq()
 {
-#if defined(CONF_PLATFORM_MACOS)
-	return 1000000000;
-#elif defined(CONF_FAMILY_UNIX)
 	return 1000000;
-#elif defined(CONF_FAMILY_WINDOWS)
-	int64 t;
-	QueryPerformanceFrequency((PLARGE_INTEGER)&t);
-	return t;
-#else
-#error not implemented
-#endif
 }
 
-int64 time_get_microseconds(void)
+int64_t time_get_microseconds()
 {
-#if defined(CONF_FAMILY_WINDOWS)
-	return (time_get_impl() * (int64)1000000) / time_freq();
-#else
 	return time_get_impl() / (time_freq() / 1000 / 1000);
-#endif
 }
 
 /* -----  network ----- */
@@ -1145,7 +1144,7 @@ void net_addr_str_v6(const unsigned short ip[8], int port, char *buffer, int buf
 		}
 		else
 		{
-			char *colon = i == 0 || i == longest_seq_start + longest_seq_len ? "" : ":";
+			const char *colon = (i == 0 || i == longest_seq_start + longest_seq_len) ? "" : ":";
 			w += str_format(buffer + w, buffer_size - w, "%s%x", colon, ip[i]);
 		}
 	}
@@ -1337,7 +1336,7 @@ int net_addr_from_str(NETADDR *addr, const char *string)
 			int size;
 			sa6.sin6_family = AF_INET6;
 			size = (int)sizeof(sa6);
-			if(WSAStringToAddress(buf, AF_INET6, NULL, (struct sockaddr *)&sa6, &size) != 0)
+			if(WSAStringToAddressA(buf, AF_INET6, NULL, (struct sockaddr *)&sa6, &size) != 0)
 				return -1;
 		}
 #else
@@ -1390,6 +1389,8 @@ int net_addr_from_str(NETADDR *addr, const char *string)
 			if(parse_uint16(&addr->port, &str))
 				return -1;
 		}
+		if(*str != '\0')
+			return -1;
 
 		addr->type = NETTYPE_IPV4;
 	}
@@ -1447,9 +1448,11 @@ static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, i
 	{
 #if defined(CONF_FAMILY_WINDOWS)
 		char buf[128];
+		WCHAR wBuffer[128];
 		int error = WSAGetLastError();
-		if(FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, 0, error, 0, buf, sizeof(buf), 0) == 0)
-			buf[0] = 0;
+		if(FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, 0, error, 0, wBuffer, sizeof(wBuffer) / sizeof(WCHAR), 0) == 0)
+			wBuffer[0] = 0;
+		WideCharToMultiByte(CP_UTF8, 0, wBuffer, -1, buf, sizeof(buf), NULL, NULL);
 		dbg_msg("net", "failed to create socket with domain %d and type %d (%d '%s')", domain, type, error, buf);
 #else
 		dbg_msg("net", "failed to create socket with domain %d and type %d (%d '%s')", domain, type, errno, strerror(errno));
@@ -1484,9 +1487,11 @@ static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, i
 	{
 #if defined(CONF_FAMILY_WINDOWS)
 		char buf[128];
+		WCHAR wBuffer[128];
 		int error = WSAGetLastError();
-		if(FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, 0, error, 0, buf, sizeof(buf), 0) == 0)
-			buf[0] = 0;
+		if(FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, 0, error, 0, wBuffer, sizeof(wBuffer) / sizeof(WCHAR), 0) == 0)
+			wBuffer[0] = 0;
+		WideCharToMultiByte(CP_UTF8, 0, wBuffer, -1, buf, sizeof(buf), NULL, NULL);
 		dbg_msg("net", "failed to bind socket with domain %d and type %d (%d '%s')", domain, type, error, buf);
 #else
 		dbg_msg("net", "failed to bind socket with domain %d and type %d (%d '%s')", domain, type, errno, strerror(errno));
@@ -1731,14 +1736,14 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *buffer, int maxsize, MMSGS
 	{
 		socklen_t fromlen = sizeof(struct sockaddr_in);
 		bytes = recvfrom(sock.ipv4sock, (char *)buffer, maxsize, 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
-		*data = buffer;
+		*data = (unsigned char *)buffer;
 	}
 
 	if(bytes <= 0 && sock.ipv6sock >= 0)
 	{
 		socklen_t fromlen = sizeof(struct sockaddr_in6);
 		bytes = recvfrom(sock.ipv6sock, (char *)buffer, maxsize, 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
-		*data = buffer;
+		*data = (unsigned char *)buffer;
 	}
 #endif
 
@@ -1747,8 +1752,8 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *buffer, int maxsize, MMSGS
 	{
 		socklen_t fromlen = sizeof(struct sockaddr);
 		struct sockaddr_in *sockaddrbuf_in = (struct sockaddr_in *)&sockaddrbuf;
-		bytes = websocket_recv(sock.web_ipv4sock, buffer, maxsize, sockaddrbuf_in, fromlen);
-		*data = buffer;
+		bytes = websocket_recv(sock.web_ipv4sock, (unsigned char *)buffer, maxsize, sockaddrbuf_in, fromlen);
+		*data = (unsigned char *)buffer;
 		sockaddrbuf_in->sin_family = AF_WEBSOCKET_INET;
 	}
 #endif
@@ -1974,7 +1979,7 @@ int net_tcp_close(NETSOCKET sock)
 	return priv_net_close_all_sockets(sock);
 }
 
-int net_errno(void)
+int net_errno()
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	return WSAGetLastError();
@@ -1983,7 +1988,7 @@ int net_errno(void)
 #endif
 }
 
-int net_would_block(void)
+int net_would_block()
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	return net_errno() == WSAEWOULDBLOCK;
@@ -1992,7 +1997,7 @@ int net_would_block(void)
 #endif
 }
 
-int net_init(void)
+int net_init()
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	WSADATA wsaData;
@@ -2005,7 +2010,7 @@ int net_init(void)
 }
 
 #if defined(CONF_FAMILY_UNIX)
-UNIXSOCKET net_unix_create_unnamed(void)
+UNIXSOCKET net_unix_create_unnamed()
 {
 	return socket(AF_UNIX, SOCK_DGRAM, 0);
 }
@@ -2028,71 +2033,38 @@ void net_unix_close(UNIXSOCKET sock)
 }
 #endif
 
-int fs_listdir_info(const char *dir, FS_LISTDIR_INFO_CALLBACK cb, int type, void *user)
-{
 #if defined(CONF_FAMILY_WINDOWS)
-	WIN32_FIND_DATA finddata;
-	HANDLE handle;
-	char buffer[1024 * 2];
-	int length;
-	str_format(buffer, sizeof(buffer), "%s/*", dir);
+static inline time_t filetime_to_unixtime(LPFILETIME filetime)
+{
+	time_t t;
+	ULARGE_INTEGER li;
+	li.LowPart = filetime->dwLowDateTime;
+	li.HighPart = filetime->dwHighDateTime;
 
-	handle = FindFirstFileA(buffer, &finddata);
+	li.QuadPart /= 10000000; // 100ns to 1s
+	li.QuadPart -= 11644473600LL; // Windows epoch is in the past
 
-	if(handle == INVALID_HANDLE_VALUE)
-		return 0;
-
-	str_format(buffer, sizeof(buffer), "%s/", dir);
-	length = str_length(buffer);
-
-	/* add all the entries */
-	do
-	{
-		str_copy(buffer + length, finddata.cFileName, (int)sizeof(buffer) - length);
-		if(cb(finddata.cFileName, fs_getmtime(buffer), fs_is_dir(buffer), type, user))
-			break;
-	} while(FindNextFileA(handle, &finddata));
-
-	FindClose(handle);
-	return 0;
-#else
-	struct dirent *entry;
-	char buffer[1024 * 2];
-	int length;
-	DIR *d = opendir(dir);
-
-	if(!d)
-		return 0;
-
-	str_format(buffer, sizeof(buffer), "%s/", dir);
-	length = str_length(buffer);
-
-	while((entry = readdir(d)) != NULL)
-	{
-		str_copy(buffer + length, entry->d_name, (int)sizeof(buffer) - length);
-		if(cb(entry->d_name, fs_getmtime(buffer), fs_is_dir(buffer), type, user))
-			break;
-	}
-
-	/* close the directory and return */
-	closedir(d);
-	return 0;
-#endif
+	t = li.QuadPart;
+	return t == li.QuadPart ? t : (time_t)-1;
 }
+#endif
 
-int fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user)
+void fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WIN32_FIND_DATA finddata;
+	WIN32_FIND_DATAW finddata;
 	HANDLE handle;
-	char buffer[1024 * 2];
+	char buffer[IO_MAX_PATH_LENGTH];
+	char buffer2[IO_MAX_PATH_LENGTH];
+	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
 	int length;
+
 	str_format(buffer, sizeof(buffer), "%s/*", dir);
+	MultiByteToWideChar(CP_UTF8, 0, buffer, -1, wBuffer, sizeof(wBuffer) / sizeof(WCHAR));
 
-	handle = FindFirstFileA(buffer, &finddata);
-
+	handle = FindFirstFileW(wBuffer, &finddata);
 	if(handle == INVALID_HANDLE_VALUE)
-		return 0;
+		return;
 
 	str_format(buffer, sizeof(buffer), "%s/", dir);
 	length = str_length(buffer);
@@ -2100,21 +2072,21 @@ int fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user)
 	/* add all the entries */
 	do
 	{
-		str_copy(buffer + length, finddata.cFileName, (int)sizeof(buffer) - length);
-		if(cb(finddata.cFileName, fs_is_dir(buffer), type, user))
+		WideCharToMultiByte(CP_UTF8, 0, finddata.cFileName, -1, buffer2, sizeof(buffer2), NULL, NULL);
+		str_copy(buffer + length, buffer2, (int)sizeof(buffer) - length);
+		if(cb(buffer2, fs_is_dir(buffer), type, user))
 			break;
-	} while(FindNextFileA(handle, &finddata));
+	} while(FindNextFileW(handle, &finddata));
 
 	FindClose(handle);
-	return 0;
 #else
 	struct dirent *entry;
-	char buffer[1024 * 2];
+	char buffer[IO_MAX_PATH_LENGTH];
 	int length;
 	DIR *d = opendir(dir);
 
 	if(!d)
-		return 0;
+		return;
 
 	str_format(buffer, sizeof(buffer), "%s/", dir);
 	length = str_length(buffer);
@@ -2128,23 +2100,93 @@ int fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user)
 
 	/* close the directory and return */
 	closedir(d);
-	return 0;
+#endif
+}
+
+void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int type, void *user)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	WIN32_FIND_DATAW finddata;
+	HANDLE handle;
+	char buffer[IO_MAX_PATH_LENGTH];
+	char buffer2[IO_MAX_PATH_LENGTH];
+	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
+	int length;
+
+	str_format(buffer, sizeof(buffer), "%s/*", dir);
+	MultiByteToWideChar(CP_UTF8, 0, buffer, -1, wBuffer, sizeof(wBuffer) / sizeof(WCHAR));
+
+	handle = FindFirstFileW(wBuffer, &finddata);
+	if(handle == INVALID_HANDLE_VALUE)
+		return;
+
+	str_format(buffer, sizeof(buffer), "%s/", dir);
+	length = str_length(buffer);
+
+	/* add all the entries */
+	do
+	{
+		WideCharToMultiByte(CP_UTF8, 0, finddata.cFileName, -1, buffer2, sizeof(buffer2), NULL, NULL);
+		str_copy(buffer + length, buffer2, (int)sizeof(buffer) - length);
+
+		CFsFileInfo info;
+		info.m_pName = buffer2;
+		info.m_TimeCreated = filetime_to_unixtime(&finddata.ftCreationTime);
+		info.m_TimeModified = filetime_to_unixtime(&finddata.ftLastWriteTime);
+
+		if(cb(&info, fs_is_dir(buffer), type, user))
+			break;
+	} while(FindNextFileW(handle, &finddata));
+
+	FindClose(handle);
+#else
+	struct dirent *entry;
+	time_t created = -1, modified = -1;
+	char buffer[IO_MAX_PATH_LENGTH];
+	int length;
+	DIR *d = opendir(dir);
+
+	if(!d)
+		return;
+
+	str_format(buffer, sizeof(buffer), "%s/", dir);
+	length = str_length(buffer);
+
+	while((entry = readdir(d)) != NULL)
+	{
+		CFsFileInfo info;
+
+		str_copy(buffer + length, entry->d_name, (int)sizeof(buffer) - length);
+		fs_file_time(buffer, &created, &modified);
+
+		info.m_pName = entry->d_name;
+		info.m_TimeCreated = created;
+		info.m_TimeModified = modified;
+
+		if(cb(&info, fs_is_dir(buffer), type, user))
+			break;
+	}
+
+	/* close the directory and return */
+	closedir(d);
 #endif
 }
 
 int fs_storage_path(const char *appname, char *path, int max)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	char *home = getenv("APPDATA");
+	WCHAR *home = _wgetenv(L"APPDATA");
 	if(!home)
 		return -1;
-	_snprintf(path, max, "%s/%s", home, appname);
+	char buffer[IO_MAX_PATH_LENGTH];
+	WideCharToMultiByte(CP_UTF8, 0, home, -1, buffer, sizeof(buffer), NULL, NULL);
+	str_format(path, max, "%s/%s", buffer, appname);
 	return 0;
+#elif defined(CONF_PLATFORM_ANDROID)
+	// just use the data directory
+	return -1;
 #else
 	char *home = getenv("HOME");
-#if !defined(CONF_PLATFORM_MACOS)
-	int i;
-#endif
 	if(!home)
 		return -1;
 
@@ -2154,10 +2196,10 @@ int fs_storage_path(const char *appname, char *path, int max)
 #endif
 
 #if defined(CONF_PLATFORM_MACOS)
-	snprintf(path, max, "%s/Library/Application Support/%s", home, appname);
+	str_format(path, max, "%s/Library/Application Support/%s", home, appname);
 #else
-	snprintf(path, max, "%s/.%s", home, appname);
-	for(i = str_length(home) + 2; path[i]; i++)
+	str_format(path, max, "%s/.%s", home, appname);
+	for(int i = str_length(home) + 2; path[i]; i++)
 		path[i] = tolower((unsigned char)path[i]);
 #endif
 
@@ -2186,7 +2228,9 @@ int fs_makedir_rec_for(const char *path)
 int fs_makedir(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	if(_mkdir(path) == 0)
+	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
+	MultiByteToWideChar(CP_UTF8, 0, path, -1, wBuffer, sizeof(wBuffer) / sizeof(WCHAR));
+	if(_wmkdir(wBuffer) == 0)
 		return 0;
 	if(errno == EEXIST)
 		return 0;
@@ -2208,7 +2252,9 @@ int fs_makedir(const char *path)
 int fs_removedir(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	if(_rmdir(path) == 0)
+	WCHAR wPath[IO_MAX_PATH_LENGTH];
+	MultiByteToWideChar(CP_UTF8, 0, path, -1, wPath, sizeof(wPath) / sizeof(WCHAR));
+	if(RemoveDirectoryW(wPath) != 0)
 		return 0;
 	return -1;
 #else
@@ -2221,46 +2267,35 @@ int fs_removedir(const char *path)
 int fs_is_dir(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	/* TODO: do this smarter */
-	WIN32_FIND_DATA finddata;
-	HANDLE handle;
-	char buffer[1024 * 2];
-	str_format(buffer, sizeof(buffer), "%s/*", path);
-
-	if((handle = FindFirstFileA(buffer, &finddata)) == INVALID_HANDLE_VALUE)
-		return 0;
-
-	FindClose(handle);
-	return 1;
+	WCHAR wPath[IO_MAX_PATH_LENGTH];
+	MultiByteToWideChar(CP_UTF8, 0, path, -1, wPath, sizeof(wPath) / sizeof(WCHAR));
+	DWORD attributes = GetFileAttributesW(wPath);
+	return attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_DIRECTORY) ? 1 : 0;
 #else
 	struct stat sb;
 	if(stat(path, &sb) == -1)
 		return 0;
-
-	if(S_ISDIR(sb.st_mode))
-		return 1;
-	else
-		return 0;
+	return S_ISDIR(sb.st_mode) ? 1 : 0;
 #endif
-}
-
-time_t fs_getmtime(const char *path)
-{
-	struct stat sb;
-	if(stat(path, &sb) == -1)
-		return 0;
-
-	return sb.st_mtime;
 }
 
 int fs_chdir(const char *path)
 {
 	if(fs_is_dir(path))
 	{
+#if defined(CONF_FAMILY_WINDOWS)
+		WCHAR wBuffer[IO_MAX_PATH_LENGTH];
+		MultiByteToWideChar(CP_UTF8, 0, path, -1, wBuffer, sizeof(wBuffer) / sizeof(WCHAR));
+		if(_wchdir(wBuffer))
+			return 1;
+		else
+			return 0;
+#else
 		if(chdir(path))
 			return 1;
 		else
 			return 0;
+#endif
 	}
 	else
 		return 1;
@@ -2271,7 +2306,11 @@ char *fs_getcwd(char *buffer, int buffer_size)
 	if(buffer == 0)
 		return 0;
 #if defined(CONF_FAMILY_WINDOWS)
-	return _getcwd(buffer, buffer_size);
+	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
+	if(_wgetcwd(wBuffer, buffer_size) == 0)
+		return 0;
+	WideCharToMultiByte(CP_UTF8, 0, wBuffer, -1, buffer, buffer_size, NULL, NULL);
+	return buffer;
 #else
 	return getcwd(buffer, buffer_size);
 #endif
@@ -2297,7 +2336,9 @@ int fs_parent_dir(char *path)
 int fs_remove(const char *filename)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	return _unlink(filename) != 0;
+	WCHAR wFilename[IO_MAX_PATH_LENGTH];
+	MultiByteToWideChar(CP_UTF8, 0, filename, -1, wFilename, sizeof(wFilename) / sizeof(WCHAR));
+	return DeleteFileW(wFilename) == 0;
 #else
 	return unlink(filename) != 0;
 #endif
@@ -2306,12 +2347,44 @@ int fs_remove(const char *filename)
 int fs_rename(const char *oldname, const char *newname)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	if(MoveFileEx(oldname, newname, MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED) == 0)
+	WCHAR wOldname[IO_MAX_PATH_LENGTH];
+	WCHAR wNewname[IO_MAX_PATH_LENGTH];
+	MultiByteToWideChar(CP_UTF8, 0, oldname, -1, wOldname, sizeof(wOldname) / sizeof(WCHAR));
+	MultiByteToWideChar(CP_UTF8, 0, newname, -1, wNewname, sizeof(wNewname) / sizeof(WCHAR));
+	if(MoveFileExW(wOldname, wNewname, MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED) == 0)
 		return 1;
 #else
 	if(rename(oldname, newname) != 0)
 		return 1;
 #endif
+	return 0;
+}
+
+int fs_file_time(const char *name, time_t *created, time_t *modified)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	WIN32_FIND_DATAW finddata;
+	HANDLE handle;
+	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
+
+	MultiByteToWideChar(CP_UTF8, 0, name, -1, wBuffer, sizeof(wBuffer) / sizeof(WCHAR));
+	handle = FindFirstFileW(wBuffer, &finddata);
+	if(handle == INVALID_HANDLE_VALUE)
+		return 1;
+
+	*created = filetime_to_unixtime(&finddata.ftCreationTime);
+	*modified = filetime_to_unixtime(&finddata.ftLastWriteTime);
+#elif defined(CONF_FAMILY_UNIX)
+	struct stat sb;
+	if(stat(name, &sb))
+		return 1;
+
+	*created = sb.st_ctime;
+	*modified = sb.st_mtime;
+#else
+#error not implemented
+#endif
+
 	return 0;
 }
 
@@ -2393,12 +2466,12 @@ int net_socket_read_wait(NETSOCKET sock, int time)
 	return 0;
 }
 
-int time_timestamp(void)
+int time_timestamp()
 {
 	return time(0);
 }
 
-int time_houroftheday(void)
+int time_houroftheday()
 {
 	time_t time_data;
 	struct tm *time_info;
@@ -2408,7 +2481,7 @@ int time_houroftheday(void)
 	return time_info->tm_hour;
 }
 
-int time_season(void)
+int time_season()
 {
 	time_t time_data;
 	struct tm *time_info;
@@ -2912,7 +2985,7 @@ static int byteval(const char *byte, unsigned char *dst)
 
 int str_hex_decode(void *dst, int dst_size, const char *src)
 {
-	unsigned char *cdst = dst;
+	unsigned char *cdst = (unsigned char *)dst;
 	int slen = str_length(src);
 	int len = slen / 2;
 	int i;
@@ -2954,7 +3027,7 @@ void str_timestamp(char *buffer, int buffer_size)
 #pragma GCC diagnostic pop
 #endif
 
-int str_time(int64 centisecs, int format, char *buffer, int buffer_size)
+int str_time(int64_t centisecs, int format, char *buffer, int buffer_size)
 {
 	const int sec = 100;
 	const int min = 60 * sec;
@@ -2973,24 +3046,24 @@ int str_time(int64 centisecs, int format, char *buffer, int buffer_size)
 	{
 	case TIME_DAYS:
 		if(centisecs >= day)
-			return str_format(buffer, buffer_size, "%lldd %02lld:%02lld:%02lld", centisecs / day,
+			return str_format(buffer, buffer_size, "%" PRId64 "d %02" PRId64 ":%02" PRId64 ":%02" PRId64, centisecs / day,
 				(centisecs % day) / hour, (centisecs % hour) / min, (centisecs % min) / sec);
 		// fall through
 	case TIME_HOURS:
 		if(centisecs >= hour)
-			return str_format(buffer, buffer_size, "%02lld:%02lld:%02lld", centisecs / hour,
+			return str_format(buffer, buffer_size, "%02" PRId64 ":%02" PRId64 ":%02" PRId64, centisecs / hour,
 				(centisecs % hour) / min, (centisecs % min) / sec);
 		// fall through
 	case TIME_MINS:
-		return str_format(buffer, buffer_size, "%02lld:%02lld", centisecs / min,
+		return str_format(buffer, buffer_size, "%02" PRId64 ":%02" PRId64, centisecs / min,
 			(centisecs % min) / sec);
 	case TIME_HOURS_CENTISECS:
 		if(centisecs >= hour)
-			return str_format(buffer, buffer_size, "%02lld:%02lld:%02lld.%02lld", centisecs / hour,
+			return str_format(buffer, buffer_size, "%02" PRId64 ":%02" PRId64 ":%02" PRId64 ".%02" PRId64, centisecs / hour,
 				(centisecs % hour) / min, (centisecs % min) / sec, centisecs % sec);
 		// fall through
 	case TIME_MINS_CENTISECS:
-		return str_format(buffer, buffer_size, "%02lld:%02lld.%02lld", centisecs / min,
+		return str_format(buffer, buffer_size, "%02" PRId64 ":%02" PRId64 ".%02" PRId64, centisecs / min,
 			(centisecs % min) / sec, centisecs % sec);
 	}
 
@@ -3381,6 +3454,20 @@ void str_utf8_copy(char *dst, const char *src, int dst_size)
 	str_utf8_truncate(dst, dst_size, src, dst_size);
 }
 
+void str_utf8_stats(const char *str, int max_size, int max_count, int *size, int *count)
+{
+	*size = 0;
+	*count = 0;
+	while(*size < max_size && *count < max_count)
+	{
+		int new_size = str_utf8_forward(str, *size);
+		if(new_size == *size || new_size >= max_size)
+			break;
+		*size = new_size;
+		++(*count);
+	}
+}
+
 unsigned str_quickhash(const char *str)
 {
 	unsigned hash = 5381;
@@ -3434,7 +3521,33 @@ const char *str_next_token(const char *str, const char *delim, char *buffer, int
 	return tok + len;
 }
 
-int pid(void)
+int bytes_be_to_int(const unsigned char *bytes)
+{
+	return ((bytes[0] & 0xff) << 24) | ((bytes[1] & 0xff) << 16) | ((bytes[2] & 0xff) << 8) | (bytes[3] & 0xff);
+}
+
+void int_to_bytes_be(unsigned char *bytes, int value)
+{
+	bytes[0] = (value >> 24) & 0xff;
+	bytes[1] = (value >> 16) & 0xff;
+	bytes[2] = (value >> 8) & 0xff;
+	bytes[3] = value & 0xff;
+}
+
+unsigned bytes_be_to_uint(const unsigned char *bytes)
+{
+	return ((bytes[0] & 0xffu) << 24u) | ((bytes[1] & 0xffu) << 16u) | ((bytes[2] & 0xffu) << 8u) | (bytes[3] & 0xffu);
+}
+
+void uint_to_bytes_be(unsigned char *bytes, unsigned value)
+{
+	bytes[0] = (value >> 24u) & 0xffu;
+	bytes[1] = (value >> 16u) & 0xffu;
+	bytes[2] = (value >> 8u) & 0xffu;
+	bytes[3] = value & 0xffu;
+}
+
+int pid()
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	return _getpid();
@@ -3446,14 +3559,16 @@ int pid(void)
 PROCESS shell_execute(const char *file)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	SHELLEXECUTEINFOA info;
-	mem_zero(&info, sizeof(SHELLEXECUTEINFOA));
-	info.cbSize = sizeof(SHELLEXECUTEINFOA);
-	info.lpVerb = "open";
-	info.lpFile = file;
+	WCHAR wBuffer[512];
+	MultiByteToWideChar(CP_UTF8, 0, file, -1, wBuffer, sizeof(wBuffer) / sizeof(WCHAR));
+	SHELLEXECUTEINFOW info;
+	mem_zero(&info, sizeof(SHELLEXECUTEINFOW));
+	info.cbSize = sizeof(SHELLEXECUTEINFOW);
+	info.lpVerb = L"open";
+	info.lpFile = wBuffer;
 	info.nShow = SW_SHOWMINNOACTIVE;
 	info.fMask = SEE_MASK_NOCLOSEPROCESS;
-	ShellExecuteEx(&info);
+	ShellExecuteExW(&info);
 	return info.hProcess;
 #elif defined(CONF_FAMILY_UNIX)
 	char *argv[2];
@@ -3487,32 +3602,18 @@ int kill_process(PROCESS process)
 
 int open_link(const char *link)
 {
-	char aBuf[512];
 #if defined(CONF_FAMILY_WINDOWS)
-	str_format(aBuf, sizeof(aBuf), "start %s", link);
-	return (uintptr_t)ShellExecuteA(NULL, "open", link, NULL, NULL, SW_SHOWDEFAULT) > 32;
+	WCHAR wBuffer[512];
+	MultiByteToWideChar(CP_UTF8, 0, link, -1, wBuffer, sizeof(wBuffer) / sizeof(WCHAR));
+	return (uintptr_t)ShellExecuteW(NULL, L"open", wBuffer, NULL, NULL, SW_SHOWDEFAULT) > 32;
 #elif defined(CONF_PLATFORM_LINUX)
+	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "xdg-open %s >/dev/null 2>&1 &", link);
 	return system(aBuf) == 0;
 #elif defined(CONF_FAMILY_UNIX)
+	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "open %s &", link);
 	return system(aBuf) == 0;
-#endif
-}
-
-int os_is_winxp_or_lower(void)
-{
-#if defined(CONF_FAMILY_WINDOWS)
-	static const DWORD WINXP_MAJOR = 5;
-	static const DWORD WINXP_MINOR = 1;
-	OSVERSIONINFO ver;
-	mem_zero(&ver, sizeof(OSVERSIONINFO));
-	ver.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-	GetVersionEx(&ver);
-	return ver.dwMajorVersion < WINXP_MAJOR ||
-	       (ver.dwMajorVersion == WINXP_MAJOR && ver.dwMinorVersion <= WINXP_MINOR);
-#else
-	return 0;
 #endif
 }
 
@@ -3528,7 +3629,7 @@ struct SECURE_RANDOM_DATA
 
 static struct SECURE_RANDOM_DATA secure_random_data = {0};
 
-int secure_random_init(void)
+int secure_random_init()
 {
 	if(secure_random_data.initialized)
 	{
@@ -3602,7 +3703,7 @@ void secure_random_fill(void *bytes, unsigned length)
 		dbg_break();
 	}
 #if defined(CONF_FAMILY_WINDOWS)
-	if(!CryptGenRandom(secure_random_data.provider, length, bytes))
+	if(!CryptGenRandom(secure_random_data.provider, length, (unsigned char *)bytes))
 	{
 		dbg_msg("secure", "CryptGenRandom failed, last_error=%ld", GetLastError());
 		dbg_break();
@@ -3616,7 +3717,7 @@ void secure_random_fill(void *bytes, unsigned length)
 #endif
 }
 
-int secure_rand(void)
+int secure_rand()
 {
 	unsigned int i;
 	secure_random_fill(&i, sizeof(i));
@@ -3651,6 +3752,69 @@ int secure_rand_below(int below)
 	}
 }
 
-#if defined(__cplusplus)
+#if defined(CONF_FAMILY_WINDOWS)
+static int color_hsv_to_windows_console_color(const ColorHSVA *hsv)
+{
+	int h = hsv->h * 255.0f;
+	int s = hsv->s * 255.0f;
+	int v = hsv->v * 255.0f;
+	if(s >= 0 && s <= 10)
+	{
+		if(v <= 150)
+			return 8;
+		return 15;
+	}
+	else if(h >= 0 && h < 15)
+		return 12;
+	else if(h >= 15 && h < 30)
+		return 6;
+	else if(h >= 30 && h < 60)
+		return 14;
+	else if(h >= 60 && h < 110)
+		return 10;
+	else if(h >= 110 && h < 140)
+		return 11;
+	else if(h >= 140 && h < 170)
+		return 9;
+	else if(h >= 170 && h < 195)
+		return 5;
+	else if(h >= 195 && h < 240)
+		return 13;
+	else if(h >= 240)
+		return 12;
+	else
+		return 15;
 }
 #endif
+
+void set_console_msg_color(const void *rgbvoid)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	const ColorRGBA *rgb = (const ColorRGBA *)rgbvoid;
+	int color = 15;
+	if(rgb)
+	{
+		ColorHSVA hsv = color_cast<ColorHSVA>(*rgb);
+		color = color_hsv_to_windows_console_color(&hsv);
+	}
+	HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(console, color);
+#elif CONF_PLATFORM_LINUX
+	const ColorRGBA *rgb = (const ColorRGBA *)rgbvoid;
+	// set true color terminal escape codes refering
+	// https://en.wikipedia.org/wiki/ANSI_escape_code#24-bit
+	int esc_seq = 0x1B;
+	char buff[32];
+	if(rgb == NULL)
+		// reset foreground color
+		str_format(buff, sizeof(buff), "%c[39m", esc_seq);
+	else
+		// set rgb foreground color
+		// if not used by a true color terminal it is still converted refering
+		// https://wiki.archlinux.org/title/Color_output_in_console#True_color_support
+		str_format(buff, sizeof(buff), "%c[38;2;%d;%d;%dm", esc_seq, (int)uint8_t(rgb->r * 255.0f), (int)uint8_t(rgb->g * 255.0f), (int)uint8_t(rgb->b * 255.0f));
+	if(has_stdout_logger)
+		stdout_nonewline_logger.logger(buff, stdout_nonewline_logger.user);
+#endif
+}
+}

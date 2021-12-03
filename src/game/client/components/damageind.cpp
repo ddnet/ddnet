@@ -9,6 +9,8 @@
 #include <game/client/render.h>
 #include <game/client/ui.h>
 
+#include <game/client/gameclient.h>
+
 CDamageInd::CDamageInd()
 {
 	m_Lastupdate = 0;
@@ -40,7 +42,7 @@ void CDamageInd::Create(vec2 Pos, vec2 Dir)
 		i->m_Pos = Pos;
 		i->m_StartTime = LocalTime();
 		i->m_Dir = Dir * -1;
-		i->m_StartAngle = (((float)rand() / (float)RAND_MAX) - 1.0f) * 2.0f * pi;
+		i->m_StartAngle = (random_float() - 1.0f) * 2.0f * pi;
 	}
 }
 
@@ -87,11 +89,12 @@ void CDamageInd::OnInit()
 	Graphics()->QuadsSetRotation(0);
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 
-	m_DmgIndQuadContainerIndex = Graphics()->CreateQuadContainer();
+	m_DmgIndQuadContainerIndex = Graphics()->CreateQuadContainer(false);
 	float ScaleX, ScaleY;
 	RenderTools()->GetSpriteScale(SPRITE_STAR1, ScaleX, ScaleY);
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	RenderTools()->QuadContainerAddSprite(m_DmgIndQuadContainerIndex, 48.f * ScaleX, 48.f * ScaleY);
+	Graphics()->QuadContainerUpload(m_DmgIndQuadContainerIndex);
 }
 
 void CDamageInd::Reset()

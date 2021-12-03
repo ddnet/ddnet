@@ -38,7 +38,7 @@ constexpr inline T mix(const T a, const T b, TB amount)
 	return a + (b - a) * amount;
 }
 
-inline float frandom() { return rand() / (float)(RAND_MAX); }
+inline float random_float() { return rand() / (float)(RAND_MAX); }
 
 // float to fixed
 constexpr inline int f2fx(float v) { return (int)(v * (float)(1 << 10)); }

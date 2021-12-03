@@ -6,6 +6,7 @@
 #include <game/server/player.h>
 
 #include <game/server/teams.h>
+#include <game/version.h>
 
 #include "character.h"
 
@@ -54,6 +55,7 @@ void CPickup::Tick()
 	for(int i = 0; i < Num; ++i)
 	{
 		CCharacter *pChr = apEnts[i];
+
 		if(pChr && pChr->IsAlive())
 		{
 			if(m_Layer == LAYER_SWITCH && m_Number > 0 && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pChr->Team()])
@@ -64,7 +66,7 @@ void CPickup::Tick()
 			{
 			case POWERUP_HEALTH:
 				if(pChr->Freeze())
-					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH, pChr->Teams()->TeamMask(pChr->Team()));
+					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH, pChr->TeamMask());
 				break;
 
 			case POWERUP_ARMOR:
@@ -85,7 +87,7 @@ void CPickup::Tick()
 				if(Sound)
 				{
 					pChr->SetLastWeapon(WEAPON_GUN);
-					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->Teams()->TeamMask(pChr->Team()));
+					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->TeamMask());
 				}
 				if(pChr->GetActiveWeapon() >= WEAPON_SHOTGUN)
 					pChr->SetActiveWeapon(WEAPON_HAMMER);
@@ -100,11 +102,11 @@ void CPickup::Tick()
 					//RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
 
 					if(m_Subtype == WEAPON_GRENADE)
-						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->Teams()->TeamMask(pChr->Team()));
+						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->TeamMask());
 					else if(m_Subtype == WEAPON_SHOTGUN)
-						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->Teams()->TeamMask(pChr->Team()));
+						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->TeamMask());
 					else if(m_Subtype == WEAPON_LASER)
-						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->Teams()->TeamMask(pChr->Team()));
+						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->TeamMask());
 
 					if(pChr->GetPlayer())
 						GameServer()->SendWeaponPickup(pChr->GetPlayer()->GetCID(), m_Subtype);
@@ -150,20 +152,32 @@ void CPickup::TickPaused()
 
 void CPickup::Snap(int SnappingClient)
 {
-	/*if(m_SpawnTick != -1 || NetworkClipped(SnappingClient))
-		return;*/
+	if(NetworkClipped(SnappingClient))
+		return;
 
 	CCharacter *Char = GameServer()->GetPlayerChar(SnappingClient);
 
 	if(SnappingClient > -1 && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1 || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) && GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
 		Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
 
-	int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
-	if(Char && Char->IsAlive() &&
-		(m_Layer == LAYER_SWITCH && m_Number > 0 &&
-			!GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()]) &&
-		(!Tick))
-		return;
+	int SnappingClientVersion = SnappingClient >= 0 ? GameServer()->GetClientVersion(SnappingClient) : CLIENT_VERSIONNR;
+
+	CNetObj_EntityEx *pEntData = 0;
+	if(SnappingClientVersion >= VERSION_DDNET_SWITCH && (m_Layer == LAYER_SWITCH || length(m_Core) > 0))
+		pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
+
+	if(pEntData)
+	{
+		pEntData->m_SwitchNumber = m_Number;
+		pEntData->m_Layer = m_Layer;
+		pEntData->m_EntityClass = ENTITYCLASS_PICKUP;
+	}
+	else
+	{
+		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
+		if(Char && Char->IsAlive() && m_Layer == LAYER_SWITCH && m_Number > 0 && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()] && !Tick)
+			return;
+	}
 
 	int Size = Server()->IsSixup(SnappingClient) ? 3 * 4 : sizeof(CNetObj_Pickup);
 	CNetObj_Pickup *pP = static_cast<CNetObj_Pickup *>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, GetID(), Size));

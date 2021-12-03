@@ -2,6 +2,8 @@
 
 #include <base/detect.h>
 
+#if defined(BACKEND_AS_OPENGL_ES) || !defined(CONF_BACKEND_OPENGL_ES)
+
 #include <engine/client/backend/opengl/opengl_sl.h>
 #include <engine/client/backend/opengl/opengl_sl_program.h>
 
@@ -190,7 +192,7 @@ void CCommandProcessorFragment_OpenGL::SetState(const CCommandBuffer::SState &St
 			}
 			else
 			{
-				dbg_msg("opengl", "Error: this call should not happen.");
+				dbg_msg("opengl", "ERROR: this call should not happen.");
 			}
 		}
 	}
@@ -1741,12 +1743,14 @@ bool CCommandProcessorFragment_OpenGL2::Cmd_Init(const SCommand_Init *pCommand)
 			glUseProgram(0);
 		}
 
-		if(g_Config.m_Gfx3DTextureAnalysisDone == 0)
+		if(g_Config.m_Gfx3DTextureAnalysisDone == 0 || str_comp(g_Config.m_Gfx3DTextureAnalysisRenderer, pCommand->m_pRendererString) != 0 || str_comp(g_Config.m_Gfx3DTextureAnalysisVersion, pCommand->m_pVersionString) != 0)
 		{
 			AnalysisCorrect = IsTileMapAnalysisSucceeded();
 			if(AnalysisCorrect)
 			{
 				g_Config.m_Gfx3DTextureAnalysisDone = 1;
+				str_copy(g_Config.m_Gfx3DTextureAnalysisRenderer, pCommand->m_pRendererString, sizeof(g_Config.m_Gfx3DTextureAnalysisRenderer) / sizeof(g_Config.m_Gfx3DTextureAnalysisRenderer[0]));
+				str_copy(g_Config.m_Gfx3DTextureAnalysisVersion, pCommand->m_pVersionString, sizeof(g_Config.m_Gfx3DTextureAnalysisVersion) / sizeof(g_Config.m_Gfx3DTextureAnalysisVersion[0]));
 			}
 		}
 	}
@@ -1834,9 +1838,9 @@ void CCommandProcessorFragment_OpenGL2::Cmd_CreateBufferObject(const CCommandBuf
 	if(m_HasShaders)
 	{
 		glGenBuffers(1, &VertBufferID);
-		glBindBuffer(GL_COPY_WRITE_BUFFER, VertBufferID);
-		glBufferData(GL_COPY_WRITE_BUFFER, (GLsizeiptr)(pCommand->m_DataSize), pUploadData, GL_STATIC_DRAW);
-		glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+		glBindBuffer(GL_ARRAY_BUFFER, VertBufferID);
+		glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)(pCommand->m_DataSize), pUploadData, GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
 	SBufferObject &BufferObject = m_BufferObjectIndices[Index];
@@ -1858,9 +1862,9 @@ void CCommandProcessorFragment_OpenGL2::Cmd_RecreateBufferObject(const CCommandB
 
 	if(m_HasShaders)
 	{
-		glBindBuffer(GL_COPY_WRITE_BUFFER, BufferObject.m_BufferObjectID);
-		glBufferData(GL_COPY_WRITE_BUFFER, (GLsizeiptr)(pCommand->m_DataSize), pUploadData, GL_STATIC_DRAW);
-		glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+		glBindBuffer(GL_ARRAY_BUFFER, BufferObject.m_BufferObjectID);
+		glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)(pCommand->m_DataSize), pUploadData, GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
 	BufferObject.m_DataSize = pCommand->m_DataSize;
@@ -1882,9 +1886,9 @@ void CCommandProcessorFragment_OpenGL2::Cmd_UpdateBufferObject(const CCommandBuf
 
 	if(m_HasShaders)
 	{
-		glBindBuffer(GL_COPY_WRITE_BUFFER, BufferObject.m_BufferObjectID);
-		glBufferSubData(GL_COPY_WRITE_BUFFER, (GLintptr)(pCommand->m_pOffset), (GLsizeiptr)(pCommand->m_DataSize), pUploadData);
-		glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+		glBindBuffer(GL_ARRAY_BUFFER, BufferObject.m_BufferObjectID);
+		glBufferSubData(GL_ARRAY_BUFFER, (GLintptr)(pCommand->m_pOffset), (GLsizeiptr)(pCommand->m_DataSize), pUploadData);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
 	if(pUploadData)
@@ -1906,9 +1910,9 @@ void CCommandProcessorFragment_OpenGL2::Cmd_CopyBufferObject(const CCommandBuffe
 
 	if(m_HasShaders)
 	{
-		glBindBuffer(GL_COPY_WRITE_BUFFER, WriteBufferObject.m_BufferObjectID);
-		glBufferSubData(GL_COPY_WRITE_BUFFER, (GLintptr)(pCommand->m_pWriteOffset), (GLsizeiptr)(pCommand->m_CopySize), ((uint8_t *)WriteBufferObject.m_pData) + (ptrdiff_t)pCommand->m_pWriteOffset);
-		glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+		glBindBuffer(GL_ARRAY_BUFFER, WriteBufferObject.m_BufferObjectID);
+		glBufferSubData(GL_ARRAY_BUFFER, (GLintptr)(pCommand->m_pWriteOffset), (GLsizeiptr)(pCommand->m_CopySize), ((uint8_t *)WriteBufferObject.m_pData) + (ptrdiff_t)pCommand->m_pWriteOffset);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 }
 
@@ -2327,6 +2331,8 @@ void CCommandProcessorFragment_OpenGL2::Cmd_RenderTileLayer(const CCommandBuffer
 
 #ifdef BACKEND_GL_MODERN_API
 #undef BACKEND_GL_MODERN_API
+#endif
+
 #endif
 
 #endif

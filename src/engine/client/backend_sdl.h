@@ -13,6 +13,10 @@
 #include <base/tl/threading.h>
 
 #include <atomic>
+#include <condition_variable>
+#include <mutex>
+#include <thread>
+#include <vector>
 
 #if defined(CONF_PLATFORM_MACOS)
 #include <objc/objc-runtime.h>
@@ -63,13 +67,15 @@ protected:
 
 private:
 	ICommandProcessor *m_pProcessor;
-	CCommandBuffer *volatile m_pBuffer;
-	volatile bool m_Shutdown;
-	CSemaphore m_Activity;
-	CSemaphore m_BufferDone;
-	void *m_pThread;
+	std::mutex m_BufferSwapMutex;
+	std::condition_variable m_BufferSwapCond;
+	std::condition_variable m_BufferDoneCond;
+	CCommandBuffer *m_pBuffer;
+	std::atomic_bool m_Shutdown;
+	std::atomic_bool m_BufferInProcess;
+	std::thread m_Thread;
 
-	static void ThreadFunc(void *pUser);
+	void ThreadFunc();
 };
 
 // takes care of implementation independent operations
@@ -140,7 +146,8 @@ private:
 	void Cmd_Shutdown(const SCommand_Shutdown *pCommand);
 	void Cmd_Swap(const CCommandBuffer::SCommand_Swap *pCommand);
 	void Cmd_VSync(const CCommandBuffer::SCommand_VSync *pCommand);
-	void Cmd_VideoModes(const CCommandBuffer::SCommand_VideoModes *pCommand);
+	void Cmd_WindowCreateNtf(const CCommandBuffer::SCommand_WindowCreateNtf *pCommand);
+	void Cmd_WindowDestroyNtf(const CCommandBuffer::SCommand_WindowDestroyNtf *pCommand);
 
 public:
 	CCommandProcessorFragment_SDL();
@@ -213,7 +220,7 @@ static constexpr size_t gs_GPUInfoStringSize = 256;
 // graphics backend implemented with SDL and OpenGL
 class CGraphicsBackend_SDL_OpenGL : public CGraphicsBackend_Threaded
 {
-	SDL_Window *m_pWindow;
+	SDL_Window *m_pWindow = NULL;
 	SDL_GLContext m_GLContext;
 	ICommandProcessor *m_pProcessor;
 	std::atomic<int> m_TextureMemoryUsage;
@@ -234,12 +241,15 @@ class CGraphicsBackend_SDL_OpenGL : public CGraphicsBackend_Threaded
 	static void ClampDriverVersion(EBackendType BackendType);
 
 public:
-	virtual int Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, class IStorage *pStorage);
+	virtual int Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int *pRefreshRate, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, class IStorage *pStorage);
 	virtual int Shutdown();
 
 	virtual int MemoryUsage() const;
 
 	virtual int GetNumScreens() const { return m_NumScreens; }
+
+	virtual void GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen);
+	virtual void GetCurrentVideoMode(CVideoMode &CurMode, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen);
 
 	virtual void Minimize();
 	virtual void Maximize();
@@ -249,7 +259,7 @@ public:
 	virtual int WindowActive();
 	virtual int WindowOpen();
 	virtual void SetWindowGrab(bool Grab);
-	virtual void ResizeWindow(int w, int h);
+	virtual void ResizeWindow(int w, int h, int RefreshRate);
 	virtual void GetViewportSize(int &w, int &h);
 	virtual void NotifyWindow();
 

@@ -11,7 +11,7 @@ void CMenus::LoadEntities(SCustomEntities *pEntitiesItem, void *pUser)
 {
 	CMenus *pThis = (CMenus *)pUser;
 
-	char aBuff[MAX_PATH_LENGTH];
+	char aBuff[IO_MAX_PATH_LENGTH];
 
 	if(str_comp(pEntitiesItem->m_aName, "default") == 0)
 	{
@@ -24,7 +24,7 @@ void CMenus::LoadEntities(SCustomEntities *pEntitiesItem, void *pUser)
 				pEntitiesItem->m_aImages[i].m_Texture = pThis->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, ImgInfo.m_Format, 0);
 				pThis->Graphics()->FreePNG(&ImgInfo);
 
-				if(pEntitiesItem->m_RenderTexture == -1)
+				if(!pEntitiesItem->m_RenderTexture.IsValid())
 					pEntitiesItem->m_RenderTexture = pEntitiesItem->m_aImages[i].m_Texture;
 			}
 		}
@@ -40,7 +40,7 @@ void CMenus::LoadEntities(SCustomEntities *pEntitiesItem, void *pUser)
 				pEntitiesItem->m_aImages[i].m_Texture = pThis->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, ImgInfo.m_Format, 0);
 				pThis->Graphics()->FreePNG(&ImgInfo);
 
-				if(pEntitiesItem->m_RenderTexture == -1)
+				if(!pEntitiesItem->m_RenderTexture.IsValid())
 					pEntitiesItem->m_RenderTexture = pEntitiesItem->m_aImages[i].m_Texture;
 			}
 			else
@@ -52,7 +52,7 @@ void CMenus::LoadEntities(SCustomEntities *pEntitiesItem, void *pUser)
 					pEntitiesItem->m_aImages[i].m_Texture = pThis->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, ImgInfo.m_Format, 0);
 					pThis->Graphics()->FreePNG(&ImgInfo);
 
-					if(pEntitiesItem->m_RenderTexture == -1)
+					if(!pEntitiesItem->m_RenderTexture.IsValid())
 						pEntitiesItem->m_RenderTexture = pEntitiesItem->m_aImages[i].m_Texture;
 				}
 			}
@@ -81,7 +81,7 @@ int CMenus::EntitiesScan(const char *pName, int IsDir, int DirType, void *pUser)
 	{
 		if(str_endswith(pName, ".png"))
 		{
-			char aName[MAX_PATH_LENGTH];
+			char aName[IO_MAX_PATH_LENGTH];
 			str_truncate(aName, sizeof(aName), pName, str_length(pName) - 4);
 			// default is reserved
 			if(str_comp(aName, "default") == 0)
@@ -100,7 +100,7 @@ int CMenus::EntitiesScan(const char *pName, int IsDir, int DirType, void *pUser)
 template<typename TName>
 static void LoadAsset(TName *pAssetItem, const char *pAssetName, IGraphics *pGraphics, void *pUser)
 {
-	char aBuff[MAX_PATH_LENGTH];
+	char aBuff[IO_MAX_PATH_LENGTH];
 
 	if(str_comp(pAssetItem->m_aName, "default") == 0)
 	{
@@ -155,7 +155,7 @@ static int AssetScan(const char *pName, int IsDir, int DirType, sorted_array<TNa
 	{
 		if(str_endswith(pName, ".png"))
 		{
-			char aName[MAX_PATH_LENGTH];
+			char aName[IO_MAX_PATH_LENGTH];
 			str_truncate(aName, sizeof(aName), pName, str_length(pName) - 4);
 			// default is reserved
 			if(str_comp(aName, "default") == 0)
@@ -228,8 +228,8 @@ void ClearAssetList(sorted_array<TName> &List, IGraphics *pGraphics)
 {
 	for(int i = 0; i < List.size(); ++i)
 	{
-		if(List[i].m_RenderTexture != -1)
-			pGraphics->UnloadTexture(List[i].m_RenderTexture);
+		if(List[i].m_RenderTexture.IsValid())
+			pGraphics->UnloadTexture(&(List[i].m_RenderTexture));
 		List[i].m_RenderTexture = IGraphics::CTextureHandle();
 	}
 	List.clear();
@@ -243,15 +243,15 @@ void CMenus::ClearCustomItems(int CurTab)
 		{
 			for(auto &Image : m_EntitiesList[i].m_aImages)
 			{
-				if(Image.m_Texture != -1)
-					Graphics()->UnloadTexture(Image.m_Texture);
+				if(Image.m_Texture.IsValid())
+					Graphics()->UnloadTexture(&Image.m_Texture);
 				Image.m_Texture = IGraphics::CTextureHandle();
 			}
 		}
 		m_EntitiesList.clear();
 
 		// reload current entities
-		m_pClient->m_pMapimages->ChangeEntitiesPath(g_Config.m_ClAssetsEntites);
+		m_pClient->m_MapImages.ChangeEntitiesPath(g_Config.m_ClAssetsEntites);
 	}
 	else if(CurTab == 1)
 	{
@@ -304,7 +304,7 @@ int InitSearchList(sorted_array<const TName *> &SearchList, sorted_array<TName> 
 		const TName *s = &AssetList[i];
 
 		// filter quick search
-		if(s_aFilterString[s_CurCustomTab][0] != '\0' && !str_find_nocase(s->m_aName, s_aFilterString[s_CurCustomTab]))
+		if(s_aFilterString[s_CurCustomTab][0] != '\0' && !str_utf8_find_nocase(s->m_aName, s_aFilterString[s_CurCustomTab]))
 			continue;
 
 		SearchList.add_unsorted(s);
@@ -378,7 +378,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 				const SCustomEntities *s = &m_EntitiesList[i];
 
 				// filter quick search
-				if(s_aFilterString[s_CurCustomTab][0] != '\0' && !str_find_nocase(s->m_aName, s_aFilterString[s_CurCustomTab]))
+				if(s_aFilterString[s_CurCustomTab][0] != '\0' && !str_utf8_find_nocase(s->m_aName, s_aFilterString[s_CurCustomTab]))
 					continue;
 
 				s_SearchEntitiesList.add_unsorted(s);
@@ -462,7 +462,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 			ItemRect.HSplitTop(15, &ItemRect, &TextureRect);
 			TextureRect.HSplitTop(10, NULL, &TextureRect);
 			UI()->DoLabelScaled(&ItemRect, s->m_aName, ItemRect.h - 2, 0);
-			if(s->m_RenderTexture != -1)
+			if(s->m_RenderTexture.IsValid())
 			{
 				Graphics()->WrapClamp();
 				Graphics()->TextureSet(s->m_RenderTexture);
@@ -484,7 +484,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 			if(s_CurCustomTab == 0)
 			{
 				str_copy(g_Config.m_ClAssetsEntites, GetCustomItem(s_CurCustomTab, NewSelected)->m_aName, sizeof(g_Config.m_ClAssetsEntites));
-				m_pClient->m_pMapimages->ChangeEntitiesPath(GetCustomItem(s_CurCustomTab, NewSelected)->m_aName);
+				m_pClient->m_MapImages.ChangeEntitiesPath(GetCustomItem(s_CurCustomTab, NewSelected)->m_aName);
 			}
 			else if(s_CurCustomTab == 1)
 			{
@@ -534,8 +534,8 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 	static int s_AssetsDirID = 0;
 	if(DoButton_Menu(&s_AssetsDirID, Localize("Assets directory"), 0, &DirectoryButton))
 	{
-		char aBuf[MAX_PATH_LENGTH];
-		char aBufFull[MAX_PATH_LENGTH + 7];
+		char aBuf[IO_MAX_PATH_LENGTH];
+		char aBufFull[IO_MAX_PATH_LENGTH + 7];
 		if(s_CurCustomTab == 0)
 			str_copy(aBufFull, "assets/entities", sizeof(aBufFull));
 		else if(s_CurCustomTab == 1)
@@ -573,7 +573,7 @@ void CMenus::ConchainAssetsEntities(IConsole::IResult *pResult, void *pUserData,
 		const char *pArg = pResult->GetString(0);
 		if(str_comp(pArg, g_Config.m_ClAssetsEntites) != 0)
 		{
-			pThis->m_pClient->m_pMapimages->ChangeEntitiesPath(pArg);
+			pThis->m_pClient->m_MapImages.ChangeEntitiesPath(pArg);
 		}
 	}
 
