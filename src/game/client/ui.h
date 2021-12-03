@@ -200,11 +200,7 @@ public:
 	static float ms_FontmodHeight;
 
 	// TODO: Refactor: Fill this in
-	void SetGraphics(class IGraphics *pGraphics, class ITextRender *pTextRender)
-	{
-		m_pGraphics = pGraphics;
-		m_pTextRender = pTextRender;
-	}
+	void Init(class IGraphics *pGraphics, class ITextRender *pTextRender);
 	class IGraphics *Graphics() const { return m_pGraphics; }
 	class ITextRender *TextRender() const { return m_pTextRender; }
 
