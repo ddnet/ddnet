@@ -597,12 +597,12 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 
 int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners, const char *pEmptyText)
 {
-	return m_UIEx.DoEditBox(pID, pRect, pStr, StrSize, FontSize, Offset, Hidden, Corners, pEmptyText);
+	return UIEx()->DoEditBox(pID, pRect, pStr, StrSize, FontSize, Offset, Hidden, Corners, pEmptyText);
 }
 
 int CMenus::DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners, const char *pEmptyText)
 {
-	return m_UIEx.DoClearableEditBox(pID, pClearID, pRect, pStr, StrSize, FontSize, Offset, Hidden, Corners, pEmptyText);
+	return UIEx()->DoClearableEditBox(pID, pClearID, pRect, pStr, StrSize, FontSize, Offset, Hidden, Corners, pEmptyText);
 }
 
 int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int Modifier, int *NewModifier)
@@ -1022,7 +1022,7 @@ void CMenus::OnInit()
 	if(g_Config.m_ClSkipStartMenu)
 		m_ShowStart = false;
 
-	m_UIEx.Init(UI(), Kernel(), RenderTools(), m_aInputEvents, &m_NumInputEvents);
+	UIEx()->Init(UI(), Kernel(), RenderTools(), m_aInputEvents, &m_NumInputEvents);
 
 	m_RefreshButton.Init(UI(), -1);
 	m_ConnectButton.Init(UI(), -1);
@@ -1288,7 +1288,7 @@ int CMenus::Render()
 
 	CUIRect Screen = *UI()->Screen();
 	UI()->MapScreen();
-	m_UIEx.ResetMouseSlow();
+	UIEx()->ResetMouseSlow();
 
 	static int s_Frame = 0;
 	if(s_Frame == 0)
@@ -2390,7 +2390,7 @@ bool CMenus::OnMouseMove(float x, float y)
 	if(!m_MenuActive)
 		return false;
 
-	m_UIEx.ConvertMouseMove(&x, &y);
+	UIEx()->ConvertMouseMove(&x, &y);
 
 	m_MousePos.x = clamp(m_MousePos.x + x, 0.f, (float)Graphics()->WindowWidth());
 	m_MousePos.y = clamp(m_MousePos.y + y, 0.f, (float)Graphics()->WindowHeight());

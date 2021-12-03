@@ -1035,12 +1035,11 @@ void CMenus::RenderGhost(CUIRect MainView)
 	CUIRect Scroll;
 	View.VSplitRight(20.0f, &View, &Scroll);
 
-	int NumGhosts = m_lGhosts.size();
 	static float s_ScrollValue = 0;
+	s_ScrollValue = UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
+
+	int NumGhosts = m_lGhosts.size();
 	static int s_SelectedIndex = 0;
-
-	s_ScrollValue = m_UIEx.DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
-
 	HandleListInputs(View, s_ScrollValue, 1.0f, nullptr, s_aCols[0].m_Rect.h, s_SelectedIndex, NumGhosts);
 
 	// set clipping

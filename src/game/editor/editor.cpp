@@ -308,14 +308,14 @@ bool CEditor::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned St
 {
 	if(UI()->LastActiveItem() == pID)
 		m_EditBoxActive = 2;
-	return m_UIEx.DoEditBox(pID, pRect, pStr, StrSize, FontSize, pOffset, Hidden, Corners);
+	return UIEx()->DoEditBox(pID, pRect, pStr, StrSize, FontSize, pOffset, Hidden, Corners);
 }
 
 bool CEditor::DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners)
 {
 	if(UI()->LastActiveItem() == pID)
 		m_EditBoxActive = 2;
-	return m_UIEx.DoClearableEditBox(pID, pClearID, pRect, pStr, StrSize, FontSize, pOffset, Hidden, Corners);
+	return UIEx()->DoClearableEditBox(pID, pClearID, pRect, pStr, StrSize, FontSize, pOffset, Hidden, Corners);
 }
 
 ColorRGBA CEditor::GetButtonColor(const void *pID, int Checked)
@@ -6134,7 +6134,7 @@ void CEditor::Init()
 	m_UI.SetGraphics(m_pGraphics, m_pTextRender);
 	m_Map.m_pEditor = this;
 
-	m_UIEx.Init(UI(), Kernel(), RenderTools(), Input()->GetEventsRaw(), Input()->GetEventCountRaw());
+	UIEx()->Init(UI(), Kernel(), RenderTools(), Input()->GetEventsRaw(), Input()->GetEventCountRaw());
 
 	m_CheckerTexture = Graphics()->LoadTexture("editor/checker.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 	m_BackgroundTexture = Graphics()->LoadTexture("editor/background.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
@@ -6227,8 +6227,8 @@ void CEditor::UpdateAndRender()
 	float rx = 0, ry = 0;
 	{
 		Input()->MouseRelative(&rx, &ry);
-		m_UIEx.ConvertMouseMove(&rx, &ry);
-		m_UIEx.ResetMouseSlow();
+		UIEx()->ConvertMouseMove(&rx, &ry);
+		UIEx()->ResetMouseSlow();
 
 		m_MouseDeltaX = rx;
 		m_MouseDeltaY = ry;

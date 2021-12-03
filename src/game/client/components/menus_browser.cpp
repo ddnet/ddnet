@@ -190,7 +190,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 	static float s_ScrollValue = 0;
 
-	s_ScrollValue = m_UIEx.DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
+	s_ScrollValue = UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
 	if(Input()->KeyPress(KEY_TAB) && m_pClient->m_GameConsole.IsClosed())
 	{
