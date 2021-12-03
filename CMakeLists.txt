@@ -2592,6 +2592,7 @@ if(CLIENT AND (DMGTOOLS_FOUND OR HDIUTIL))
     COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libswscale.5.dylib @rpath/libswscale.5.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
     COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libswresample.3.dylib @rpath/libswresample.3.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
     COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libfreetype.6.dylib @rpath/libfreetype.6.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
+    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libSDL2-2.0.0.dylib @rpath/SDL2.framework/Versions/A/SDL2 ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
     # TODO: Cleaner solution than hardcoding paths
     COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /home/deen/isos/ddnet/debian6/mac64/libwebsockets-4.2/lib/libwebsockets.18.dylib @rpath/libwebsockets.18.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
     COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change ${PROJECT_BINARY_DIR}/libsteam_api.dylib @rpath/libsteam_api.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
