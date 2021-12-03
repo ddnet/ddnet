@@ -334,11 +334,10 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 
 		for(int i = 0; i < *m_pInputEventCount; i++)
 		{
-			int32_t ManipulateChanges = 0;
 			int LastCursor = m_CurCursor;
-			int Len = str_length(pStr);
-			int NumChars = Len;
-			ManipulateChanges = CLineInput::Manipulate(m_pInputEventsArray[i], pStr, StrSize, StrSize, &Len, &m_CurCursor, &NumChars, m_HasSelection ? CLineInput::LINE_INPUT_MODIFY_DONT_DELETE : 0, IsCtrlPressed ? KEY_LCTRL : 0);
+			int Len, NumChars;
+			str_utf8_stats(pStr, StrSize, StrSize, &Len, &NumChars);
+			int32_t ManipulateChanges = CLineInput::Manipulate(m_pInputEventsArray[i], pStr, StrSize, StrSize, &Len, &m_CurCursor, &NumChars, m_HasSelection ? CLineInput::LINE_INPUT_MODIFY_DONT_DELETE : 0, IsCtrlPressed ? KEY_LCTRL : 0);
 			ReturnValue |= (ManipulateChanges & (CLineInput::LINE_INPUT_CHANGE_STRING | CLineInput::LINE_INPUT_CHANGE_CHARACTERS_DELETE)) != 0;
 
 			// if cursor changed, reset selection
