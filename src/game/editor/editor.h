@@ -868,7 +868,7 @@ public:
 	int m_FileDialogFileType;
 	float m_FileDialogScrollValue;
 	int m_FilesSelectedIndex;
-	char m_FileDialogNewFolderName[64];
+	char m_aFileDialogNewFolderName[64];
 	char m_FileDialogErrString[64];
 	IGraphics::CTextureHandle m_FilePreviewImage;
 	bool m_PreviewImageIsLoaded;
