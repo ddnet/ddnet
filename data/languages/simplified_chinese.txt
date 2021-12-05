@@ -1224,7 +1224,7 @@ Chat sound volume
 == 聊天提示音量
 
 Background music volume
-== 背景音樂音量
+== 背景音乐音量
 
 Assets
 == 材质
