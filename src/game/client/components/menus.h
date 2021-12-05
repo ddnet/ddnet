@@ -75,6 +75,8 @@ class CMenus : public CComponent
 
 	CUIEx m_UIEx;
 
+	CUIEx *UIEx() { return &m_UIEx; }
+
 	int DoButton_DemoPlayer(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 	int DoButton_Sprite(const void *pID, int ImageID, int SpriteID, int Checked, const CUIRect *pRect, int Corners);
 	int DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, bool Active);
@@ -90,9 +92,6 @@ class CMenus : public CComponent
 	int DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool UseScroll, int Current, int Min, int Max, int Step, float Scale, bool IsHex, float Round, ColorRGBA *Color);
 	int DoButton_Icon(int ImageId, int SpriteId, const CUIRect *pRect);
 	int DoButton_GridHeader(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
-
-	int DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden = false, int Corners = CUI::CORNER_ALL, const char *pEmptyText = "");
-	int DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden = false, int Corners = CUI::CORNER_ALL, const char *pEmptyText = "");
 
 	void DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 	int DoKeyReader(void *pID, const CUIRect *pRect, int Key, int Modifier, int *NewModifier);
@@ -166,7 +165,7 @@ class CMenus : public CComponent
 						if(pText == NULL)
 							pText = GetTextLambda();
 						NewRect.m_Text = pText;
-						UI()->DoLabel(NewRect, &Text, pText, Text.h * ms_FontmodHeight, 0, -1, AlignVertically);
+						UI()->DoLabel(NewRect, &Text, pText, Text.h * CUI::ms_FontmodHeight, 0, -1, AlignVertically);
 					}
 				}
 				Graphics()->SetColor(1, 1, 1, 1);
@@ -305,7 +304,6 @@ protected:
 	static float ms_ButtonHeight;
 	static float ms_ListheaderHeight;
 	static float ms_ListitemAdditionalHeight;
-	static float ms_FontmodHeight;
 
 	// for settings
 	bool m_NeedRestartGeneral;
