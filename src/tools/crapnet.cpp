@@ -208,10 +208,12 @@ void Run(unsigned short Port, NETADDR Dest)
 	}
 }
 
-int main(int argc, char **argv) // ignore_convention
+int main(int argc, const char **argv) // ignore_convention
 {
+	cmdline_fix(&argc, &argv);
 	NETADDR Addr = {NETTYPE_IPV4, {127, 0, 0, 1}, 8303};
 	dbg_logger_stdout();
 	Run(8302, Addr);
+	cmdline_free(argc, argv);
 	return 0;
 }

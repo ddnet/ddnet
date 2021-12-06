@@ -324,6 +324,8 @@ int main(int argc, const char **argv) // ignore_convention
 	ServerType Type = SERVERTYPE_INVALID;
 	NETADDR BindAddr;
 
+	cmdline_fix(&argc, &argv);
+
 	dbg_logger_stdout();
 	net_init();
 

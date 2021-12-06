@@ -682,9 +682,6 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 	if(!pPlayer)
 		return;
 
-	if(pSelf->ProcessSpamProtection(pResult->m_ClientID))
-		return;
-
 	if(!g_Config.m_SvSwap)
 	{
 		pSelf->Console()->Print(
@@ -747,6 +744,9 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 	bool SwapPending = pSwapPlayer->m_SwapTargetsClientID != pResult->m_ClientID;
 	if(SwapPending)
 	{
+		if(pSelf->ProcessSpamProtection(pResult->m_ClientID))
+			return;
+
 		Teams.RequestTeamSwap(pPlayer, pSwapPlayer, Team);
 		return;
 	}
