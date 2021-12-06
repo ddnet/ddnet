@@ -35,7 +35,7 @@ jobs:
         - os: macOS-latest
           cmake-args: -G "Unix Makefiles"
           build-args: --parallel
-          package-file: DDNet-*-osx.dmg
+          package-file: DDNet-*-macos.dmg
           fancy: false
           env:
             CFLAGS: -Wdeclaration-after-statement -Werror
