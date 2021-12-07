@@ -151,6 +151,11 @@ void CDbConnectionPool::Worker()
 		{
 			for(int i = 0; i < (int)m_aapDbConnections[Mode::READ].size(); i++)
 			{
+				if(m_Shutdown)
+				{
+					dbg_msg("sql", "%s dismissed read request during shutdown", pThreadData->m_pName);
+					break;
+				}
 				int CurServer = (ReadServer + i) % (int)m_aapDbConnections[Mode::READ].size();
 				if(ExecSqlFunc(m_aapDbConnections[Mode::READ][CurServer].get(), pThreadData.get(), false))
 				{
@@ -166,6 +171,10 @@ void CDbConnectionPool::Worker()
 		{
 			for(int i = 0; i < (int)m_aapDbConnections[Mode::WRITE].size(); i++)
 			{
+				if(m_Shutdown && !m_aapDbConnections[Mode::WRITE_BACKUP].empty()) {
+					dbg_msg("sql", "%s skipped to backup database during shutdown", pThreadData->m_pName);
+					break;
+				}
 				int CurServer = (WriteServer + i) % (int)m_aapDbConnections[Mode::WRITE].size();
 				if(ExecSqlFunc(m_aapDbConnections[Mode::WRITE][i].get(), pThreadData.get(), false))
 				{
