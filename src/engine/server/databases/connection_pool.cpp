@@ -127,8 +127,15 @@ void CDbConnectionPool::Worker()
 	// remember last working server and try to connect to it first
 	int ReadServer = 0;
 	int WriteServer = 0;
+	// enter fail mode when a sql request fails, skip read request during it and
+	// write to the backup database until all requests are handled
+	bool FailMode = false;
 	while(1)
 	{
+		if(FailMode && m_NumElem.GetApproximateValue() == 0)
+		{
+			FailMode = false;
+		}
 		m_NumElem.Wait();
 		auto pThreadData = std::move(m_aTasks[LastElem++]);
 		// work through all database jobs after OnShutdown is called before exiting the thread
@@ -150,6 +157,11 @@ void CDbConnectionPool::Worker()
 					dbg_msg("sql", "%s dismissed read request during shutdown", pThreadData->m_pName);
 					break;
 				}
+				if(FailMode)
+				{
+					dbg_msg("sql", "%s dismissed read request during FailMode", pThreadData->m_pName);
+					break;
+				}
 				int CurServer = (ReadServer + i) % (int)m_aapDbConnections[Mode::READ].size();
 				if(ExecSqlFunc(m_aapDbConnections[Mode::READ][CurServer].get(), pThreadData.get(), false))
 				{
@@ -159,14 +171,24 @@ void CDbConnectionPool::Worker()
 					break;
 				}
 			}
+			if(!Success)
+			{
+				FailMode = true;
+			}
 		}
 		break;
 		case CSqlExecData::WRITE_ACCESS:
 		{
 			for(int i = 0; i < (int)m_aapDbConnections[Mode::WRITE].size(); i++)
 			{
-				if(m_Shutdown && !m_aapDbConnections[Mode::WRITE_BACKUP].empty()) {
+				if(m_Shutdown && !m_aapDbConnections[Mode::WRITE_BACKUP].empty())
+				{
 					dbg_msg("sql", "%s skipped to backup database during shutdown", pThreadData->m_pName);
+					break;
+				}
+				if(FailMode && !m_aapDbConnections[Mode::WRITE_BACKUP].empty())
+				{
+					dbg_msg("sql", "%s skipped to backup database during FailMode", pThreadData->m_pName);
 					break;
 				}
 				int CurServer = (WriteServer + i) % (int)m_aapDbConnections[Mode::WRITE].size();
@@ -180,6 +202,7 @@ void CDbConnectionPool::Worker()
 			}
 			if(!Success)
 			{
+				FailMode = true;
 				for(int i = 0; i < (int)m_aapDbConnections[Mode::WRITE_BACKUP].size(); i++)
 				{
 					if(ExecSqlFunc(m_aapDbConnections[Mode::WRITE_BACKUP][i].get(), pThreadData.get(), true))
