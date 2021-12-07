@@ -254,9 +254,6 @@ MOTD
 Map
 == Карта
 
-Maximum ping:
-== Макс. пинг:
-
 Mouse sens.
 == Чувств. мыши
 

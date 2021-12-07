@@ -254,9 +254,6 @@ MOTD
 Map
 == 地圖
 
-Maximum ping:
-== 最高延遲：
-
 Mouse sens.
 == 滑鼠靈敏度
 

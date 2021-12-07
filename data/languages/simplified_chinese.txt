@@ -261,9 +261,6 @@ MOTD
 Map
 == 地图
 
-Maximum ping:
-== 最高延迟：
-
 Mouse sens.
 == 鼠标灵敏度
 

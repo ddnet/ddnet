@@ -247,9 +247,6 @@ MOTD
 Map
 == Χάρτης
 
-Maximum ping:
-== Μέγιστο ping:
-
 Mouse sens.
 == Ταχύτητα δείκτη
 

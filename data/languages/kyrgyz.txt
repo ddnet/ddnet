@@ -282,9 +282,6 @@ Max Screenshots
 Max demos
 == Демолордун жогорку чеги
 
-Maximum ping:
-== Пингдин ж. чеги:
-
 Miscellaneous
 == Кошумча
 

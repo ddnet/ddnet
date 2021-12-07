@@ -241,9 +241,6 @@ MOTD
 Map
 == マップ
 
-Maximum ping:
-== Ping の最大値:
-
 Mouse sens.
 == マウス感度
 

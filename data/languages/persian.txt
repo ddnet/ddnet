@@ -163,8 +163,6 @@ MOTD
 == ﺕﺎﺤﯿﺿﻮﺗ
 Map
 == ﭗﻣ
-Maximum ping:
-== :ﮓﻨﯿﭘ ﺖﯾﺎﻬﻧ
 Mouse sens.
 == ﺱﻮﻣ ﺖﯿﺳﺎﺴﺣ
 Move left
@@ -212,23 +210,14 @@ Play
 Successfully saved the replay!
 == !ﺪﺷ ﻩﺮﯿﺧﺫ ﺖﯿﻘﻓﻮﻣ ﺎﺑ ﺶﺨﭘﺯﺎﺑ
 
-Saving ddnet-settings.cfg failed
-== 
-
 Replay feature is disabled!
 == ﺪﺷ ﻝﺎﻌﻓﺮﯿﻏ ﺶﺨﭘﺯﺎﺑ
-
-The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
 
 Warning
 == ﺭﺎﻄﺧﺍ
 
 Team
 == ﻢﯿﺗ
-
-Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== 
 
 Sudden Death
 == ﯽﯾﻮﻬﯾ گﺮﻣ
@@ -253,9 +242,6 @@ Spectate
 
 Server best:
 == ﺭﻭﺮﺳ ﻦﯾﺮﺘﻬﺑ
-
-Personal best:
-== 
 
 Reset
 == ﻥﺩﺮﮐ ﯽﻧﺎﺸﻧﺯﺎﺑ
@@ -287,9 +273,6 @@ Loading DDNet Client
 Reconnect in %d sec
 == ﻪﯿﻧﺎﺛ d% ﺭﺩ ﻩﺭﺎﺑﻭﺩ ﻝﺎﺼﺗﺍ
 
-The server is running a non-standard tuning on a pure game type.
-== 
-
 Rename demo
 == ﻮﻣﺩ ﻡﺎﻧ ﺮﯿﯿﻐﺗ
 
@@ -307,9 +290,6 @@ Remove friend
 
 Sound error
 == ﺍﺪﺻ ﯼﺎﻄﺧ
-
-The audio device couldn't be initialised.
-== 
 
 Try again
 == ﺪﯿﻨﮐ ﺵﻼﺗ ﻩﺭﺎﺑﻭﺩ
@@ -333,24 +313,6 @@ DDraceNetwork is a cooperative online game where the goal is for you and your gr
 
 The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
 == .ﺪﯾﻮﺷ ﺝﺭﺎﺧ ﻥﺎﺘﻧﺎﺘﺳﻭﺩ ﮏﻤﮐ ﻪﺑ ﺪﯾﺎﺑ ﻭ ﻩﺩﺯ ﺦﯾ ﺪﯾﻮﺸﺑ ﺎﻬﻧﺁ ﺩﺭﺍﻭ ﺮﮔﺍ ﻪﮐ ﺩﺭﺍﺩ ﺩﻮﺟﻭ ﺰﯾﺮﻓ ﻥﺍﻮﻨﻋ ﺎﺑ ﯽﯾﺎﻫ ﺖﻤﺴﻗ ﯼﺎﻫ ﭗﻣ ﺭﺩ
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== 
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== 
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== 
-
-Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 
-
-It's recommended that you check the settings to adjust them to your liking before joining a server.
-== 
-
-Please enter your nickname below.
-== 
 
 Existing Player
 == ﺩﺭﺍﺩ ﺩﻮﺟﻭ ﻦﮑﯾﺯﺎﺑ
@@ -406,32 +368,8 @@ Video name:
 Show DDNet map finishes in server browser
 == ﺪﯾﺍ ﻩﺪﻧﺎﺳﺭ ﻡﺎﻤﺗﺍ ﻪﺑ ﻪﮐ ﯽﯾﺎﻫ ﭗﻣ ﻥﺩﺍﺩ ﻥﺎﺸﻧ
 
-transmits your player name to info2.ddnet.tw
-== 
-
 Theme
 == ﻢﺗ
-
-AFR
-== 
-
-ASI
-== 
-
-AUS
-== 
-
-EUR
-== 
-
-NA
-== 
-
-SA
-== 
-
-CHN
-== 
 
 Type
 == ﻉﻮﻧ
@@ -502,9 +440,6 @@ Reset filter
 Server details
 == ﺭﻭﺮﺳ ﺕﺎﻋﻼﻃﺍ
 
-Leak IP
-== 
-
 Scoreboard
 == ﺕﺍﺯﺎﯿﺘﻣﺍ ﯼﻮﻠﺑﺎﺗ
 
@@ -544,18 +479,6 @@ Map:
 Size:
 == :ﻩﺯﺍﺪﻧﺍ
 
-%.2f MiB
-== 
-
-%.2f KiB
-== 
-
-Crc:
-== 
-
-Netversion:
-== 
-
 Demo
 == ﻮﻣﺩ
 
@@ -568,17 +491,11 @@ Length
 Date
 == ﺦﯾﺭﺎﺗ
 
-Fetch Info
-== 
-
 Demos directory
 == ﺎﻫﻮﻣﺩ ﯼﺎﻤﻨﻫﺍﺭ ﺖﺳﺮﻬﻓ
 
 Rename
 == ﻡﺎﻧ ﺮﯿﯿﻐﺗ
-
-Render
-== 
 
 Connect Dummy
 == dummy ﻝﺎﺼﺗﺍ
@@ -652,21 +569,6 @@ Reset wanted weapon on death
 Show only chat messages from friends
 == ﻩﺪﺑ ﻥﺎﺸﻧ ﺍﺭ ﻥﺎﺘﺳﻭﺩ ﺖﭼ ﻂﻘﻓ
 
-Show name plates
-== 
-
-Name plates size
-== 
-
-Use team colors for name plates
-== 
-
-Show clan above name plates
-== 
-
-Clan plates size
-== 
-
 Skip the main menu
 == رد شدن از منوی اصلی
 
@@ -682,18 +584,6 @@ Refresh Rate
 Show console window
 == ﺯﺪﻨﯾﻭ ﻝﻮﺴﻨﮐ ﺶﯾﺎﻤﻧ
 
-Themes directory
-== 
-
-Automatically take statboard screenshot
-== 
-
-Automatically create statboard csv
-== 
-
-Max CSVs
-== 
-
 Dummy settings
 == dummy ﺕﺎﻤﯿﻈﻨﺗ
 
@@ -703,26 +593,14 @@ Your skin
 Download skins
 == ﻦﯿﮑﺳﺍ ﺩﻮﻠﻧﺍﺩ
 
-Vanilla skins only
-== 
-
 Fat skins (DDFat)
 == ﻕﺎﭼ ﻦﯿﮑﺳﺍ
 
 Skin prefix
 == ﻦﯿﮑﺳﺍ ﺪﻧﻮﺸﯿﭘ
 
-Skins
-== 
-
 Skin Database
 == ﺎﻫ ﻦﯿﮑﺳﺍ
-
-Skins directory
-== 
-
-Hook collisions
-== 
 
 Zoom in
 == ﯽﯾﺎﻤﻨﮔﺭﺰﺑ
@@ -745,15 +623,6 @@ Toggle dyncam
 Toggle dummy
 == dummy ﺮﯿﯿﻐﺗ
 
-Toggle ghost
-== 
-
-Dummy copy
-== 
-
-Hammerfly dummy
-== 
-
 Shotgun
 == ﻥﺎﮕﺗﺎﺷ
 
@@ -772,20 +641,8 @@ Converse
 Spectator mode
 == ﺮﮔﺎﺷﺎﻤﺗ ﺖﻟﺎﺣ
 
-Spectate next
-== 
-
-Spectate previous
-== 
-
-Remote console
-== 
-
 Screenshot
 == ﺕﺎﺷ ﻦﯾﺮﮑﺳﺍ
-
-Statboard
-== 
 
 Lock team
 == ﻢﯿﺗ ﻥﺩﺮﮐ ﻞﻔﻗ
@@ -799,9 +656,6 @@ Show HUD
 Chat command
 == ﺖﭼ ﺪﻨﻣﺎﮐ
 
-UI mouse s.
-== 
-
 Weapon
 == ﻪﺤﻠﺳﺍ
 
@@ -811,47 +665,17 @@ Reset to defaults
 Voting
 == ﻥﺩﺍﺩ ﯼﺍﺭ
 
-Dummy
-== 
-
 Miscellaneous
 == ﻪﻗﺮﻔﺘﻣ
 
 Display Modes
 == ﻪﺤﻔﺻ ﺖﻟﺎﺣ
 
-Windowed
-== 
-
-Windowed borderless
-== 
-
 Desktop fullscreen
 == ﻪﺤﻔﺻ ﻡﺎﻤﺗ
 
-V-Sync
-== 
-
-may cause delay
-== 
-
 Screen
 == ﻪﺤﻔﺻ
-
-FSAA samples
-== 
-
-Use modern OpenGL
-== 
-
-Preinit VBO (iGPUs only)
-== 
-
-Multiple texture units (disable for macOS)
-== 
-
-Use high DPI
-== 
 
 UI Color
 == ﺖﻨﯾﻼﮐ ﮓﻧﺭ
@@ -865,26 +689,11 @@ Enable game sounds
 Enable gun sound
 == ﻪﺤﻠﺳﺍ ﯼﺍﺪﺻ ﻥﺩﻮﺑ ﻝﺎﻌﻓ
 
-Enable long pain sound (used when shooting in freeze)
-== 
-
 Enable server message sound
 == ﻡﺎﯿﭘ ﯼﺍﺪﺻ ﻥﺩﻮﺑ ﻝﺎﻌﻓ
 
-Enable regular chat sound
-== 
-
 Enable team chat sound
 == ﻢﯿﺗ ﺖﭼ ﯼﺍﺪﺻ ﻥﺩﻮﺑ ﻝﺎﻌﻓ
-
-Enable highlighted chat sound
-== 
-
-Threaded sound loading
-== 
-
-Sample rate
-== 
 
 Sound volume
 == ﺍﺪﺻ ﻥﺍﺰﯿﻣ
@@ -901,11 +710,306 @@ Map sound volume
 Background music volume
 == ﻪﻨﯿﻣﺯ ﺲﭘ ﯼﺍﺪﺻ ﻥﺍﺰﯿﻣ
 
-HUD
-== 
-
 Sound
 == ﺍﺪﺻ
+
+Use DDRace Scoreboard
+== DDRace ﺕﺍﺯﺎﯿﺘﻣﺍ ﯼﻮﻠﺑﺎﺗ ﺯﺍ ﻩﺩﺎﻔﺘﺳﺍ
+
+Show client IDs
+== ﺖﻨﯾﻼﮐ ﯼﺪﯾﺁ ﺶﯾﺎﻤﻧ
+
+Show score
+== ﺯﺎﯿﺘﻣﺍ ﺶﯾﺎﻤﻧ
+
+Show health + ammo
+== ﺕﺎﻤﻬﻣ+ﯽﺘﻣﻼﺳ ﺶﯾﺎﻤﻧ
+
+Hookable
+== کﻮﻫ ﻞﺑﺎﻗ
+
+Use old chat style
+== ﺖﭼ ﯽﻤﯾﺪﻗ ﻞﯾﺎﺘﺳﺍ ﺯﺍ ﻩﺩﺎﻔﺘﺳﺍ
+
+Messages
+== ﺎﻫ ﻡﺎﯿﭘ
+
+System message
+== ﯽﻤﺘﺴﯿﺳ ﻡﺎﯿﭘ
+
+Preview
+== ﺶﯾﺎﻤﻧ ﺶﯿﭘ
+
+Enable replays
+== ﺶﺨﭘﺯﺎﺑ ﻥﺩﺮﮐ ﻦﺷﻭﺭ
+
+Gameplay
+== ﯽﻠﭘ ﻢﯿﮔ
+
+Size
+== ﻩﺯﺍﺪﻧﺍ
+
+AntiPing
+== ﮓﻨﯿﭘ ﯽﺘﻧﺁ
+
+Background
+== ﻪﻨﯿﻣﺯ ﺲﭘ
+
+Update now
+== ﻦﮐ ﯽﻧﺎﺳﺭﺯﻭﺮﺑ ﻥﻻﺍ ﻦﯿﻤﻫ
+
+Updating...
+== ﯽﻧﺎﺳﺭﺯﻭﺮﺑ ﻝﺎﺣﺭﺩ
+
+No updates available
+== ﺖﺴﯿﻧ ﺱﺮﺘﺳﺩ ﺭﺩ ﯽﻧﺎﺳﺭﺯﻭﺮﺑ
+
+Check now
+== ﻦﮐ ﮏﭼ ﻥﻻﺍ ﻦﯿﻤﻫ
+
+Discord
+== ﺩﺭﻮﮑﺴﯾﺩ
+
+Learn
+== ﺵﺯﻮﻣﺁ
+
+Website
+== ﺖﯾﺎﺴﺑﻭ
+
+Settings
+== ﺕﺎﻤﯿﻈﻨﺗ
+
+Stop server
+== ﺭﻭﺮﺳ ﻒﻗﻮﺗ
+
+Run server
+== ﺭﻭﺮﺳ ﯼﺍﺮﺟﺍ
+
+Editor
+== ﺮﮕﺸﯾﺍﺮﯾﻭ
+
+[Start menu]
+Play
+== ﻥﺩﺮﮐ ﯼﺯﺎﺑ
+
+Downloading %s:
+== s:%ﺩﻮﻠﻧﺍﺩ ﻝﺎﺣﺭﺩ
+
+Update failed! Check log...
+== ... ﺪﯿﻨﮐ ﮏﭼ ﺍﺭ گﻻ!ﻖﻓﻮﻣﺎﻧ ﯽﻧﺎﺳﺭﺯﻭﺮﺑ
+
+Restart
+== ﺩﺪﺠﻣ ﯼﺯﺍﺪﻧﺍ ﻩﺍﺭ
+
+Spectators
+== ﻥﺍﺮﮔﺎﺷﺎﻤﺗ
+
+Score
+== ﺯﺎﯿﺘﻣﺍ
+
+Replay
+== ﺶﺨﭘﺯﺎﺑ
+
+Red team wins!
+== ﺪﺷ ﻩﺪﻧﺮﺑ ﺰﻣﺮﻗ ﻢﯿﺗ
+
+Red team
+== ﺰﻣﺮﻗ ﻢﯿﺗ
+
+Follow
+== ﻥﺩﺮﮐ ﻝﺎﺒﻧﺩ
+
+Saving ddnet-settings.cfg failed
+== 
+
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== 
+
+Personal best:
+== 
+
+The server is running a non-standard tuning on a pure game type.
+== 
+
+The audio device couldn't be initialised.
+== 
+
+The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
+== 
+
+Hook (right mouse) can be used to swing through the map and to hook other tees to you.
+== 
+
+Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
+== 
+
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
+It's recommended that you check the settings to adjust them to your liking before joining a server.
+== 
+
+Please enter your nickname below.
+== 
+
+transmits your player name to info2.ddnet.tw
+== 
+
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+Leak IP
+== 
+
+%.2f MiB
+== 
+
+%.2f KiB
+== 
+
+Crc:
+== 
+
+Netversion:
+== 
+
+Fetch Info
+== 
+
+Render
+== 
+
+Show name plates
+== 
+
+Name plates size
+== 
+
+Use team colors for name plates
+== 
+
+Show clan above name plates
+== 
+
+Clan plates size
+== 
+
+Themes directory
+== 
+
+Automatically take statboard screenshot
+== 
+
+Automatically create statboard csv
+== 
+
+Max CSVs
+== 
+
+Vanilla skins only
+== 
+
+Skins
+== 
+
+Skins directory
+== 
+
+Hook collisions
+== 
+
+Toggle ghost
+== 
+
+Dummy copy
+== 
+
+Hammerfly dummy
+== 
+
+Spectate next
+== 
+
+Spectate previous
+== 
+
+Remote console
+== 
+
+Statboard
+== 
+
+UI mouse s.
+== 
+
+Dummy
+== 
+
+Windowed
+== 
+
+Windowed borderless
+== 
+
+V-Sync
+== 
+
+may cause delay
+== 
+
+FSAA samples
+== 
+
+Use modern OpenGL
+== 
+
+Preinit VBO (iGPUs only)
+== 
+
+Multiple texture units (disable for macOS)
+== 
+
+Use high DPI
+== 
+
+Enable long pain sound (used when shooting in freeze)
+== 
+
+Enable regular chat sound
+== 
+
+Enable highlighted chat sound
+== 
+
+Threaded sound loading
+== 
+
+Sample rate
+== 
+
+HUD
+== 
 
 DDNet
 == 
@@ -930,18 +1034,6 @@ Lht.
 
 Alpha
 == 
-
-Use DDRace Scoreboard
-== DDRace ﺕﺍﺯﺎﯿﺘﻣﺍ ﯼﻮﻠﺑﺎﺗ ﺯﺍ ﻩﺩﺎﻔﺘﺳﺍ
-
-Show client IDs
-== ﺖﻨﯾﻼﮐ ﯼﺪﯾﺁ ﺶﯾﺎﻤﻧ
-
-Show score
-== ﺯﺎﯿﺘﻣﺍ ﺶﯾﺎﻤﻧ
-
-Show health + ammo
-== ﺕﺎﻤﻬﻣ+ﯽﺘﻣﻼﺳ ﺶﯾﺎﻤﻧ
 
 Show names in chat in team colors
 == 
@@ -973,20 +1065,8 @@ Hookline
 No hit
 == 
 
-Hookable
-== کﻮﻫ ﻞﺑﺎﻗ
-
 Tee
 == 
-
-Use old chat style
-== ﺖﭼ ﯽﻤﯾﺪﻗ ﻞﯾﺎﺘﺳﺍ ﺯﺍ ﻩﺩﺎﻔﺘﺳﺍ
-
-Messages
-== ﺎﻫ ﻡﺎﯿﭘ
-
-System message
-== ﯽﻤﺘﺴﯿﺳ ﻡﺎﯿﭘ
 
 Highlighted message
 == 
@@ -1003,17 +1083,11 @@ Normal message
 Client message
 == 
 
-Preview
-== ﺶﯾﺎﻤﻧ ﺶﯿﭘ
-
 Save the best demo of each race
 == 
 
 Default length: %d
 == 
-
-Enable replays
-== ﺶﺨﭘﺯﺎﺑ ﻥﺩﺮﮐ ﻦﺷﻭﺭ
 
 Show ghost
 == 
@@ -1021,14 +1095,8 @@ Show ghost
 Save ghost
 == 
 
-Gameplay
-== ﯽﻠﭘ ﻢﯿﮔ
-
 Overlay entities
 == 
-
-Size
-== ﻩﺯﺍﺪﻧﺍ
 
 Show text entities
 == 
@@ -1038,9 +1106,6 @@ Show others (own team only)
 
 Show quads
 == 
-
-AntiPing
-== ﮓﻨﯿﭘ ﯽﺘﻧﺁ
 
 AntiPing: predict other players
 == 
@@ -1063,9 +1128,6 @@ Show local player's key presses
 Old mouse mode
 == 
 
-Background
-== ﻪﻨﯿﻣﺯ ﺲﭘ
-
 Entities Background color
 == 
 
@@ -1087,20 +1149,8 @@ New random timeout code
 DDNet %s is available:
 == 
 
-Update now
-== ﻦﮐ ﯽﻧﺎﺳﺭﺯﻭﺮﺑ ﻥﻻﺍ ﻦﯿﻤﻫ
-
-Updating...
-== ﯽﻧﺎﺳﺭﺯﻭﺮﺑ ﻝﺎﺣﺭﺩ
-
 DDNet Client updated!
 == 
-
-No updates available
-== ﺖﺴﯿﻧ ﺱﺮﺘﺳﺩ ﺭﺩ ﯽﻧﺎﺳﺭﺯﻭﺮﺑ
-
-Check now
-== ﻦﮐ ﮏﭼ ﻥﻻﺍ ﻦﯿﻤﻫ
 
 Entities
 == 
@@ -1114,63 +1164,23 @@ Particles
 Assets directory
 == 
 
-Discord
-== ﺩﺭﻮﮑﺴﯾﺩ
-
 https://ddnet.tw/discord
 == 
-
-Learn
-== ﺵﺯﻮﻣﺁ
 
 https://wiki.ddnet.tw/
 == 
 
-Website
-== ﺖﯾﺎﺴﺑﻭ
-
-Settings
-== ﺕﺎﻤﯿﻈﻨﺗ
-
-Stop server
-== ﺭﻭﺮﺳ ﻒﻗﻮﺗ
-
-Run server
-== ﺭﻭﺮﺳ ﯼﺍﺮﺟﺍ
-
 Server executable not found, can't run server
 == 
 
-Editor
-== ﺮﮕﺸﯾﺍﺮﯾﻭ
-
-[Start menu]
-Play
-== ﻥﺩﺮﮐ ﯼﺯﺎﺑ
-
 DDNet %s is out!
 == 
-
-Downloading %s:
-== s:%ﺩﻮﻠﻧﺍﺩ ﻝﺎﺣﺭﺩ
-
-Update failed! Check log...
-== ... ﺪﯿﻨﮐ ﮏﭼ ﺍﺭ گﻻ!ﻖﻓﻮﻣﺎﻧ ﯽﻧﺎﺳﺭﺯﻭﺮﺑ
-
-Restart
-== ﺩﺪﺠﻣ ﯼﺯﺍﺪﻧﺍ ﻩﺍﺭ
 
 Time limit: %d min
 == 
 
 Round
 == 
-
-Spectators
-== ﻥﺍﺮﮔﺎﺷﺎﻤﺗ
-
-Score
-== ﺯﺎﯿﺘﻣﺍ
 
 Manual
 == 
@@ -1180,18 +1190,6 @@ Race
 
 Auto
 == 
-
-Replay
-== ﺶﺨﭘﺯﺎﺑ
-
-Red team wins!
-== ﺪﺷ ﻩﺪﻧﺮﺑ ﺰﻣﺮﻗ ﻢﯿﺗ
-
-Red team
-== ﺰﻣﺮﻗ ﻢﯿﺗ
-
-Follow
-== ﻥﺩﺮﮐ ﻝﺎﺒﻧﺩ
 
 Frags
 == 

@@ -181,9 +181,6 @@ MOTD
 Map
 == Карта
 
-Maximum ping:
-== Макс. пінг:
-
 Mouse sens.
 == Чутлив. миші
 

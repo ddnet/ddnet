@@ -246,9 +246,6 @@ MOTD
 Map
 == Bane
 
-Maximum ping:
-== Maks ping:
-
 Mouse sens.
 == Mushastighet
 

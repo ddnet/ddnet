@@ -256,9 +256,6 @@ MOTD
 Map
 == Mapa
 
-Maximum ping:
-== Ping máximo:
-
 Mouse sens.
 == Sensib. del ratón
 

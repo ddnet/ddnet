@@ -247,9 +247,6 @@ MOTD
 Map
 == Bana
 
-Maximum ping:
-== Högsta ping:
-
 Mouse sens.
 == Muskänslighet
 
