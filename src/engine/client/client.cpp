@@ -2617,14 +2617,18 @@ void CClient::OnDemoPlayerMessage(void *pData, int Size)
 {
 	CUnpacker Unpacker;
 	Unpacker.Reset(pData, Size);
+	CMsgPacker Packer(NETMSG_EX, true);
 
 	// unpack msgid and system flag
-	int Msg = Unpacker.GetInt();
-	int Sys = Msg & 1;
-	Msg >>= 1;
+	int Msg;
+	bool Sys;
+	CUuid Uuid;
 
-	if(Unpacker.Error())
+	int Result = UnpackMessageID(&Msg, &Sys, &Uuid, &Unpacker, &Packer);
+	if(Result == UNPACKMESSAGE_ERROR)
+	{
 		return;
+	}
 
 	if(!Sys)
 		GameClient()->OnMessage(Msg, &Unpacker);
