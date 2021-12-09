@@ -18,11 +18,15 @@ void CGameTeams::Reset()
 	m_Core.Reset();
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
-		m_TeamState[i] = TEAMSTATE_EMPTY;
-		m_TeamLocked[i] = false;
 		m_TeeStarted[i] = false;
 		m_TeeFinished[i] = false;
 		m_LastChat[i] = 0;
+	}
+
+	for(int i = 0; i < NUM_TEAMS; ++i)
+	{
+		m_TeamState[i] = TEAMSTATE_EMPTY;
+		m_TeamLocked[i] = false;
 		m_pSaveTeamResult[i] = nullptr;
 
 		m_Invited[i] = 0;
@@ -894,7 +898,7 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, in
 
 void CGameTeams::ProcessSaveTeam()
 {
-	for(int Team = 0; Team < MAX_CLIENTS; Team++)
+	for(int Team = 0; Team < NUM_TEAMS; Team++)
 	{
 		if(m_pSaveTeamResult[Team] == nullptr || !m_pSaveTeamResult[Team]->m_Completed)
 			continue;

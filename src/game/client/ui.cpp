@@ -42,6 +42,14 @@ void CUIElement::SUIElementRect::Reset()
  UI
 *********************************************************/
 
+float CUI::ms_FontmodHeight = 0.8f;
+
+void CUI::Init(class IGraphics *pGraphics, class ITextRender *pTextRender)
+{
+	m_pGraphics = pGraphics;
+	m_pTextRender = pTextRender;
+}
+
 CUI::CUI()
 {
 	m_pHotItem = 0;

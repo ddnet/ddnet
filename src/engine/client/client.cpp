@@ -2661,14 +2661,18 @@ void CClient::OnDemoPlayerMessage(void *pData, int Size)
 {
 	CUnpacker Unpacker;
 	Unpacker.Reset(pData, Size);
+	CMsgPacker Packer(NETMSG_EX, true);
 
 	// unpack msgid and system flag
-	int Msg = Unpacker.GetInt();
-	int Sys = Msg & 1;
-	Msg >>= 1;
+	int Msg;
+	bool Sys;
+	CUuid Uuid;
 
-	if(Unpacker.Error())
+	int Result = UnpackMessageID(&Msg, &Sys, &Uuid, &Unpacker, &Packer);
+	if(Result == UNPACKMESSAGE_ERROR)
+	{
 		return;
+	}
 
 	if(!Sys)
 		GameClient()->OnMessage(Msg, &Unpacker);
@@ -4344,14 +4348,15 @@ void CClient::HandleMapPath(const char *pPath)
 #if defined(CONF_PLATFORM_MACOS)
 extern "C" int TWMain(int argc, const char **argv) // ignore_convention
 #elif defined(CONF_PLATFORM_ANDROID)
-extern "C" __attribute__((visibility("default"))) int SDL_main(int argc, char *argv[]);
+extern "C" __attribute__((visibility("default"))) int SDL_main(int argc, const char *argv[]);
 extern "C" void InitAndroid();
 
-int SDL_main(int argc, char *argv[])
+int SDL_main(int argc, const char *argv[])
 #else
 int main(int argc, const char **argv) // ignore_convention
 #endif
 {
+	cmdline_fix(&argc, &argv);
 	bool Silent = false;
 	bool RandInitFailed = false;
 
@@ -4529,6 +4534,7 @@ int main(int argc, const char **argv) // ignore_convention
 
 	delete pKernel;
 
+	cmdline_free(argc, argv);
 #ifdef CONF_PLATFORM_ANDROID
 	// properly close this native thread, so globals are destructed
 	std::exit(0);

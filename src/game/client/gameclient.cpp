@@ -246,7 +246,7 @@ void CGameClient::OnInit()
 	m_pGraphics->AddWindowResizeListener(OnWindowResizeCB, this);
 
 	// propagate pointers
-	m_UI.SetGraphics(Graphics(), TextRender());
+	m_UI.Init(Graphics(), TextRender());
 
 	m_RenderTools.Init(Graphics(), UI(), this);
 
@@ -1450,7 +1450,7 @@ void CGameClient::OnNewSnapshot()
 			else if(Item.m_Type == NETOBJTYPE_SWITCHSTATE)
 			{
 				const CNetObj_SwitchState *pSwitchStateData = (const CNetObj_SwitchState *)pData;
-				int Team = Item.m_ID;
+				int Team = clamp(Item.m_ID, 0, MAX_CLIENTS - 1);
 
 				int NumSwitchers = clamp(pSwitchStateData->m_NumSwitchers, 0, 255);
 				if(!Collision()->m_pSwitchers || NumSwitchers != Collision()->m_NumSwitchers)

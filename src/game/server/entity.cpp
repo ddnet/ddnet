@@ -29,14 +29,14 @@ CEntity::~CEntity()
 	Server()->SnapFreeID(m_ID);
 }
 
-bool CEntity::NetworkClipped(int SnappingClient)
+bool CEntity::NetworkClipped(int SnappingClient) const
 {
-	return ::NetworkClipped(GameServer(), SnappingClient, m_Pos);
+	return ::NetworkClipped(m_pGameWorld->GameServer(), SnappingClient, m_Pos);
 }
 
-bool CEntity::NetworkClipped(int SnappingClient, vec2 CheckPos)
+bool CEntity::NetworkClipped(int SnappingClient, vec2 CheckPos) const
 {
-	return ::NetworkClipped(GameServer(), SnappingClient, CheckPos);
+	return ::NetworkClipped(m_pGameWorld->GameServer(), SnappingClient, CheckPos);
 }
 
 bool CEntity::GameLayerClipped(vec2 CheckPos)
@@ -86,7 +86,7 @@ bool CEntity::GetNearestAirPosPlayer(vec2 PlayerPos, vec2 *OutPos)
 	return false;
 }
 
-bool NetworkClipped(CGameContext *pGameServer, int SnappingClient, vec2 CheckPos)
+bool NetworkClipped(const CGameContext *pGameServer, int SnappingClient, vec2 CheckPos)
 {
 	if(SnappingClient == -1 || pGameServer->m_apPlayers[SnappingClient]->m_ShowAll)
 		return false;

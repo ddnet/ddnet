@@ -871,7 +871,7 @@ public:
 	int m_FileDialogFileType;
 	float m_FileDialogScrollValue;
 	int m_FilesSelectedIndex;
-	char m_FileDialogNewFolderName[64];
+	char m_aFileDialogNewFolderName[64];
 	char m_FileDialogErrString[64];
 	IGraphics::CTextureHandle m_FilePreviewImage;
 	bool m_PreviewImageIsLoaded;
@@ -973,8 +973,8 @@ public:
 
 	int DoButton_ColorPicker(const void *pID, const CUIRect *pRect, ColorRGBA *pColor, const char *pToolTip = 0);
 
-	int DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners);
-	int DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden = false, int Corners = CUI::CORNER_ALL);
+	bool DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = CUI::CORNER_ALL);
+	bool DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners);
 
 	void RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, float Size, float Brightness);
 

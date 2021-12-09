@@ -304,33 +304,18 @@ void CEditor::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, void
  OTHER
 *********************************************************/
 
-int CEditor::DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners)
-{
-	bool ReturnValue = false;
-	CUIRect EditBox;
-	CUIRect ClearButton;
-	pRect->VSplitRight(15.0f, &EditBox, &ClearButton);
-	if(DoEditBox(pID, &EditBox, pStr, StrSize, FontSize, Offset, Hidden, Corners & ~CUI::CORNER_R))
-	{
-		ReturnValue = true;
-	}
-
-	RenderTools()->DrawUIRect(&ClearButton, ColorRGBA(1, 1, 1, 0.33f * UI()->ButtonColorMul(pClearID)), Corners & ~CUI::CORNER_L, 3.0f);
-	UI()->DoLabel(&ClearButton, "×", ClearButton.h * 0.8f, 0);
-	if(UI()->DoButtonLogic(pClearID, "×", 0, &ClearButton))
-	{
-		pStr[0] = 0;
-		UI()->SetActiveItem(pID);
-		ReturnValue = true;
-	}
-	return ReturnValue;
-}
-
-int CEditor::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners)
+bool CEditor::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners)
 {
 	if(UI()->LastActiveItem() == pID)
 		m_EditBoxActive = 2;
-	return m_UIEx.DoEditBox(pID, pRect, pStr, StrSize, FontSize, Offset, Hidden, Corners);
+	return UIEx()->DoEditBox(pID, pRect, pStr, StrSize, FontSize, pOffset, Hidden, Corners);
+}
+
+bool CEditor::DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners)
+{
+	if(UI()->LastActiveItem() == pID)
+		m_EditBoxActive = 2;
+	return UIEx()->DoClearableEditBox(pID, pClearID, pRect, pStr, StrSize, FontSize, pOffset, Hidden, Corners);
 }
 
 ColorRGBA CEditor::GetButtonColor(const void *pID, int Checked)
@@ -4164,8 +4149,8 @@ void CEditor::RenderFileDialog()
 	if(m_FileDialogStorageType == IStorage::TYPE_SAVE)
 	{
 		// filebox
-		static float s_FileBoxID = 0;
 		UI()->DoLabel(&FileBoxLabel, "Filename:", 10.0f, -1, -1);
+		static float s_FileBoxID = 0;
 		if(DoEditBox(&s_FileBoxID, &FileBox, m_aFileDialogFileName, sizeof(m_aFileDialogFileName), 10.0f, &s_FileBoxID))
 		{
 			// remove '/' and '\'
@@ -4185,9 +4170,9 @@ void CEditor::RenderFileDialog()
 		CUIRect ClearBox;
 		FileBox.VSplitRight(15, &FileBox, &ClearBox);
 
-		static float s_SearchBoxID = 0;
 		UI()->DoLabel(&FileBoxLabel, "Search:", 10.0f, -1, -1);
 		str_copy(m_aFileDialogPrevSearchText, m_aFileDialogSearchText, sizeof(m_aFileDialogPrevSearchText));
+		static float s_SearchBoxID = 0;
 		DoEditBox(&s_SearchBoxID, &FileBox, m_aFileDialogSearchText, sizeof(m_aFileDialogSearchText), 10.0f, &s_SearchBoxID, false, CUI::CORNER_L);
 		if(m_FileDialogOpening)
 			UI()->SetActiveItem(&s_SearchBoxID);
@@ -4426,7 +4411,7 @@ void CEditor::RenderFileDialog()
 		ButtonBar.VSplitLeft(70.0f, &Button, &ButtonBar);
 		if(DoButton_Editor(&s_NewFolderButton, "New folder", 0, &Button, 0, 0))
 		{
-			m_FileDialogNewFolderName[0] = 0;
+			m_aFileDialogNewFolderName[0] = 0;
 			m_FileDialogErrString[0] = 0;
 			static int s_NewFolderPopupID = 0;
 			UiInvokePopupMenu(&s_NewFolderPopupID, 0, Width / 2.0f - 200.0f, Height / 2.0f - 100.0f, 400.0f, 200.0f, PopupNewFolder);
@@ -5201,9 +5186,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			}
 			Graphics()->QuadsEnd();
 
-			static float s_ValNumber = 0;
-			static float s_TimeNumber = 0;
-
 			CUIRect ToolBar1;
 			CUIRect ToolBar2;
 
@@ -5223,7 +5205,9 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				UI()->DoLabel(&Label2, "Time (in s):", 10.0f, -1, -1);
 			}
 
+			static float s_ValNumber = 0;
 			DoEditBox(&s_ValNumber, &ToolBar1, s_aStrCurValue, sizeof(s_aStrCurValue), 10.0f, &s_ValNumber);
+			static float s_TimeNumber = 0;
 			DoEditBox(&s_TimeNumber, &ToolBar2, s_aStrCurTime, sizeof(s_aStrCurTime), 10.0f, &s_TimeNumber);
 		}
 	}
@@ -6147,11 +6131,11 @@ void CEditor::Init()
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pSound = Kernel()->RequestInterface<ISound>();
 	CGameClient *pGameClient = (CGameClient *)Kernel()->RequestInterface<IGameClient>();
+	m_UI.Init(m_pGraphics, m_pTextRender);
 	m_RenderTools.Init(m_pGraphics, &m_UI, pGameClient);
-	m_UI.SetGraphics(m_pGraphics, m_pTextRender);
 	m_Map.m_pEditor = this;
 
-	m_UIEx.Init(UI(), Kernel(), RenderTools(), Input()->GetEventsRaw(), Input()->GetEventCountRaw());
+	UIEx()->Init(UI(), Kernel(), RenderTools(), Input()->GetEventsRaw(), Input()->GetEventCountRaw());
 
 	m_CheckerTexture = Graphics()->LoadTexture("editor/checker.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 	m_BackgroundTexture = Graphics()->LoadTexture("editor/background.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
@@ -6246,8 +6230,8 @@ void CEditor::UpdateAndRender()
 	float rx = 0, ry = 0;
 	{
 		Input()->MouseRelative(&rx, &ry);
-		m_UIEx.ConvertMouseMove(&rx, &ry);
-		m_UIEx.ResetMouseSlow();
+		UIEx()->ConvertMouseMove(&rx, &ry);
+		UIEx()->ResetMouseSlow();
 
 		m_MouseDeltaX = rx;
 		m_MouseDeltaY = ry;

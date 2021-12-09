@@ -2194,6 +2194,32 @@ void uint_to_bytes_be(unsigned char *bytes, unsigned value);
 */
 int pid();
 
+/*
+	Function: cmdline_fix
+		Fixes the command line arguments to be encoded in UTF-8 on all
+		systems.
+
+	Parameters:
+		argc - A pointer to the argc parameter that was passed to the main function.
+		argv - A pointer to the argv parameter that was passed to the main function.
+
+	Remarks:
+		- You need to call cmdline_free once you're no longer using the
+		results.
+*/
+void cmdline_fix(int *argc, const char ***argv);
+
+/*
+	Function: cmdline_free
+		Frees memory that was allocated by cmdline_fix.
+
+	Parameters:
+		argc - The argc obtained from cmdline_fix.
+		argv - The argv obtained from cmdline_fix.
+
+*/
+void cmdline_free(int argc, const char **argv);
+
 #if defined(CONF_FAMILY_WINDOWS)
 typedef void *PROCESS;
 #else

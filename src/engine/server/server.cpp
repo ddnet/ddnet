@@ -298,6 +298,8 @@ CServer::CServer() :
 	m_CurrentGameTick = 0;
 	m_RunServer = UNINITIALIZED;
 
+	m_aShutdownReason[0] = 0;
+
 	for(int i = 0; i < 2; i++)
 	{
 		m_apCurrentMapData[i] = 0;
@@ -2693,6 +2695,9 @@ int CServer::Run()
 		}
 	}
 	const char *pDisconnectReason = "Server shutdown";
+	if(m_aShutdownReason[0])
+		pDisconnectReason = m_aShutdownReason;
+
 	if(ErrorShutdown())
 	{
 		dbg_msg("server", "shutdown from game server (%s)", m_aErrorShutdownReason);
@@ -3082,7 +3087,13 @@ void CServer::ConNameBans(IConsole::IResult *pResult, void *pUser)
 
 void CServer::ConShutdown(IConsole::IResult *pResult, void *pUser)
 {
-	((CServer *)pUser)->m_RunServer = STOPPING;
+	CServer *pThis = static_cast<CServer *>(pUser);
+	pThis->m_RunServer = STOPPING;
+	const char *pReason = pResult->GetString(0);
+	if(pReason[0])
+	{
+		str_copy(pThis->m_aShutdownReason, pReason, sizeof(pThis->m_aShutdownReason));
+	}
 }
 
 void CServer::DemoRecorder_HandleAutoStart()
@@ -3466,7 +3477,7 @@ void CServer::RegisterCommands()
 	// register console commands
 	Console()->Register("kick", "i[id] ?r[reason]", CFGFLAG_SERVER, ConKick, this, "Kick player with specified id for any reason");
 	Console()->Register("status", "?r[name]", CFGFLAG_SERVER, ConStatus, this, "List players containing name or all players");
-	Console()->Register("shutdown", "", CFGFLAG_SERVER, ConShutdown, this, "Shut down");
+	Console()->Register("shutdown", "?r[reason]", CFGFLAG_SERVER, ConShutdown, this, "Shut down");
 	Console()->Register("logout", "", CFGFLAG_SERVER, ConLogout, this, "Logout of rcon");
 	Console()->Register("show_ips", "?i[show]", CFGFLAG_SERVER, ConShowIps, this, "Show IP addresses in rcon commands (1 = on, 0 = off)");
 
@@ -3538,6 +3549,7 @@ static CServer *CreateServer() { return new CServer(); }
 
 int main(int argc, const char **argv) // ignore_convention
 {
+	cmdline_fix(&argc, &argv);
 	bool Silent = false;
 
 	for(int i = 1; i < argc; i++) // ignore_convention
@@ -3640,6 +3652,7 @@ int main(int argc, const char **argv) // ignore_convention
 	// free
 	delete pKernel;
 
+	cmdline_free(argc, argv);
 	return Ret;
 }
 

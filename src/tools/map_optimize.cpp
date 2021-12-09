@@ -78,6 +78,7 @@ void GetImageSHA256(uint8_t *pImgBuff, int ImgSize, int Width, int Height, char 
 
 int main(int argc, const char **argv)
 {
+	cmdline_fix(&argc, &argv);
 	dbg_logger_stdout();
 
 	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC, argc, argv);
@@ -324,5 +325,6 @@ int main(int argc, const char **argv)
 	DataFile.Close();
 	df.Finish();
 
+	cmdline_free(argc, argv);
 	return 0;
 }

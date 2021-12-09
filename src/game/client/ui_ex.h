@@ -35,7 +35,7 @@ class CUIEx
 	bool m_MouseSlow;
 	int m_CurSelStart = 0;
 	int m_CurSelEnd = 0;
-	void *m_pSelItem = nullptr;
+	const void *m_pSelItem = NULL;
 
 	int m_CurCursor = 0;
 
@@ -57,7 +57,9 @@ public:
 
 	float DoScrollbarV(const void *pID, const CUIRect *pRect, float Current);
 	float DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, const ColorRGBA *pColorInner = NULL);
-	int DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden = false, int Corners = CUI::CORNER_ALL, const char *pEmptyText = "");
+
+	bool DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = CUI::CORNER_ALL, const char *pEmptyText = "");
+	bool DoClearableEditBox(const void *pID, const void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = CUI::CORNER_ALL, const char *pEmptyText = "");
 };
 
 #endif

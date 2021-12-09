@@ -35,7 +35,7 @@ jobs:
         - os: macOS-latest
           cmake-args: -G "Unix Makefiles"
           build-args: --parallel
-          package-file: chillerbot-ux-*-osx.dmg
+          package-file: chillerbot-ux-*-macos.dmg
           fancy: false
           env:
             CFLAGS: -Wdeclaration-after-statement -Werror

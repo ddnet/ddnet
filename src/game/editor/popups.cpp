@@ -306,9 +306,9 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	{
 		View.HSplitBottom(5.0f, &View, &Button);
 		View.HSplitBottom(12.0f, &View, &Button);
-		static float s_Name = 0;
 		pEditor->UI()->DoLabel(&Button, "Name:", 10.0f, -1, -1);
 		Button.VSplitLeft(40.0f, 0, &Button);
+		static float s_Name = 0;
 		if(pEditor->DoEditBox(&s_Name, &Button, pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_aName, sizeof(pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_aName), 10.0f, &s_Name))
 			pEditor->m_Map.m_Modified = true;
 	}
@@ -421,9 +421,9 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View, void *pContext)
 	{
 		View.HSplitBottom(5.0f, &View, &Button);
 		View.HSplitBottom(12.0f, &View, &Button);
-		static float s_Name = 0;
 		pEditor->UI()->DoLabel(&Button, "Name:", 10.0f, -1, -1);
 		Button.VSplitLeft(40.0f, 0, &Button);
+		static float s_Name = 0;
 		if(pEditor->DoEditBox(&s_Name, &Button, pEditor->GetSelectedLayer(0)->m_aName, sizeof(pEditor->GetSelectedLayer(0)->m_aName), 10.0f, &s_Name))
 			pEditor->m_Map.m_Modified = true;
 	}
@@ -987,7 +987,7 @@ int CEditor::PopupNewFolder(CEditor *pEditor, CUIRect View, void *pContext)
 		View.VMargin(40.0f, &View);
 		View.HSplitBottom(20.0f, &View, &Label);
 		static float s_FolderBox = 0;
-		pEditor->DoEditBox(&s_FolderBox, &Label, pEditor->m_FileDialogNewFolderName, sizeof(pEditor->m_FileDialogNewFolderName), 15.0f, &s_FolderBox);
+		pEditor->DoEditBox(&s_FolderBox, &Label, pEditor->m_aFileDialogNewFolderName, sizeof(pEditor->m_aFileDialogNewFolderName), 15.0f, &s_FolderBox);
 		View.HSplitBottom(20.0f, &View, &Label);
 		pEditor->UI()->DoLabel(&Label, "Name:", 10.0f, -1);
 
@@ -998,10 +998,10 @@ int CEditor::PopupNewFolder(CEditor *pEditor, CUIRect View, void *pContext)
 		if(pEditor->DoButton_Editor(&s_CreateButton, "Create", 0, &Label, 0, 0) || pEditor->Input()->KeyPress(KEY_RETURN) || pEditor->Input()->KeyPress(KEY_KP_ENTER))
 		{
 			// create the folder
-			if(*pEditor->m_FileDialogNewFolderName)
+			if(pEditor->m_aFileDialogNewFolderName[0])
 			{
 				char aBuf[512];
-				str_format(aBuf, sizeof(aBuf), "%s/%s", pEditor->m_pFileDialogPath, pEditor->m_FileDialogNewFolderName);
+				str_format(aBuf, sizeof(aBuf), "%s/%s", pEditor->m_pFileDialogPath, pEditor->m_aFileDialogNewFolderName);
 				if(pEditor->Storage()->CreateFolder(aBuf, IStorage::TYPE_SAVE))
 				{
 					pEditor->FilelistPopulate(IStorage::TYPE_SAVE);
