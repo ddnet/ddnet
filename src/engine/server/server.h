@@ -231,6 +231,7 @@ public:
 	int m_RconClientID;
 	int m_RconAuthLevel;
 	int m_PrintCBIndex;
+	char m_aShutdownReason[128];
 
 	int64_t m_Lastheartbeat;
 	//static NETADDR4 master_server;
