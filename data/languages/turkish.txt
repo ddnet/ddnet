@@ -249,9 +249,6 @@ MOTD
 Map
 == Harita
 
-Maximum ping:
-== Maksimum ping
-
 Mouse sens.
 == Mouse duyarlılığı
 

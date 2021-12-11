@@ -242,9 +242,6 @@ MOTD
 Map
 == Pálya
 
-Maximum ping:
-== Maximum Ping:
-
 Mouse sens.
 == Egér érzékenység
 

@@ -242,9 +242,6 @@ MOTD
 Map
 == ﺏﺎﻤﻟﺍ
 
-Maximum ping:
-== ﻖﻨﺒﻠﻟ ﻰﺼﻗﻻﺍ ﺪﺤﻟﺍ:
-
 Mouse sens.
 == ﺱﻭﺎﻤﻟﺍ ﺔﻴﺳﺎﺴﺣ
 
