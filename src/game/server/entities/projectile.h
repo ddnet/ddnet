@@ -7,6 +7,8 @@
 
 class CProjectile : public CEntity
 {
+	friend class CGameTeams;
+
 public:
 	CProjectile(
 		CGameWorld *pGameWorld,
