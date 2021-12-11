@@ -5,6 +5,7 @@
 #include <engine/shared/config.h>
 
 #include "entities/character.h"
+#include "entities/laser.h"
 #include "entities/projectile.h"
 #include "player.h"
 
@@ -893,6 +894,13 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, in
 	for(CProjectile *pProj = (CProjectile *)GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_PROJECTILE); pProj; pProj = (CProjectile *)pProj->TypeNext())
 	{
 		pProj->m_Owner = pProj->m_Owner == pPlayer->GetCID() ? pTargetPlayer->GetCID() : pProj->m_Owner == pTargetPlayer->GetCID() ? pPlayer->GetCID() : pProj->m_Owner;
+	}
+	for(CEntity *pEnt = GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_LASER); pEnt; pEnt = pEnt->TypeNext())
+	{
+		if(auto *const pLaser = dynamic_cast<CLaser *>(pEnt))
+		{
+			pLaser->m_Owner = pLaser->m_Owner == pPlayer->GetCID() ? pTargetPlayer->GetCID() : pLaser->m_Owner == pTargetPlayer->GetCID() ? pPlayer->GetCID() : pLaser->m_Owner;
+		}
 	}
 
 	str_format(aBuf, sizeof(aBuf),
