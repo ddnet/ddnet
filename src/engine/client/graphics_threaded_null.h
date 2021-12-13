@@ -149,6 +149,7 @@ public:
 	void Maximize() override{};
 	void SetWindowParams(int FullscreenMode, bool IsBorderless) override{};
 	bool SetWindowScreen(int Index) override { return false; };
+	void Move(int x, int y) override{};
 	void Resize(int w, int h, int RefreshRate, bool SetWindowSize = false, bool ForceResizeEvent = false) override{};
 	void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser) override{};
 	int GetWindowScreen() override { return 0; };

@@ -2320,7 +2320,28 @@ void CGraphics_Threaded::SetWindowParams(int FullscreenMode, bool IsBorderless)
 
 bool CGraphics_Threaded::SetWindowScreen(int Index)
 {
-	return m_pBackend->SetWindowScreen(Index);
+	if(!m_pBackend->SetWindowScreen(Index))
+	{
+		return false;
+	}
+
+	m_pBackend->GetViewportSize(m_ScreenWidth, m_ScreenHeight);
+	m_ScreenHiDPIScale = m_ScreenWidth / (float)g_Config.m_GfxScreenWidth;
+	return true;
+}
+
+void CGraphics_Threaded::Move(int x, int y)
+{
+#if defined(CONF_VIDEORECORDER)
+	if(IVideo::Current() && IVideo::Current()->IsRecording())
+		return;
+#endif
+
+	// Only handling CurScreen != m_GfxScreen doesn't work reliably
+	const int CurScreen = m_pBackend->GetWindowScreen();
+	m_pBackend->UpdateDisplayMode(CurScreen);
+	m_pBackend->GetViewportSize(m_ScreenWidth, m_ScreenHeight);
+	m_ScreenHiDPIScale = m_ScreenWidth / (float)g_Config.m_GfxScreenWidth;
 }
 
 void CGraphics_Threaded::Resize(int w, int h, int RefreshRate, bool SetWindowSize, bool ForceResizeEvent)
