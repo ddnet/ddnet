@@ -5,14 +5,14 @@ endif()
 
 set_extra_dirs_lib(FREETYPE freetype)
 find_library(FREETYPE_LIBRARY
-  NAMES freetype freetype.6
+  NAMES freetype.6 freetype
   HINTS ${HINTS_FREETYPE_LIBDIR} ${PC_FREETYPE_LIBDIR} ${PC_FREETYPE_LIBRARY_DIRS}
   PATHS ${PATHS_FREETYPE_LIBDIR}
   ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
 set_extra_dirs_include(FREETYPE freetype "${FREETYPE_LIBRARY}")
 find_path(FREETYPE_INCLUDEDIR
-  NAMES config/ftheader.h freetype/config/ftheader.h
+  NAMES freetype/config/ftheader.h config/ftheader.h
   PATH_SUFFIXES freetype2
   HINTS ${HINTS_FREETYPE_INCLUDEDIR} ${PC_FREETYPE_INCLUDEDIR} ${PC_FREETYPE_INCLUDE_DIRS}
   PATHS ${PATHS_FREETYPE_INCLUDEDIR}
