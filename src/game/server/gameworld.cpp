@@ -306,6 +306,18 @@ void CGameWorld::Tick()
 	}
 }
 
+void CGameWorld::SwapClients(int Client1, int Client2)
+{
+	// update all objects
+	for(auto *pEnt : m_apFirstEntityTypes)
+		for(; pEnt;)
+		{
+			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
+			pEnt->SwapClients(Client1, Client2);
+			pEnt = m_pNextTraverseEntity;
+		}
+}
+
 // TODO: should be more general
 //CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, CEntity *pNotThis)
 CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, CCharacter *pNotThis, int CollideWith, class CCharacter *pThisOnly)
