@@ -2276,10 +2276,10 @@ void CServer::PumpNetwork(bool PacketWaiting)
 	m_Econ.Update();
 }
 
-char *CServer::GetMapName() const
+const char *CServer::GetMapName() const
 {
 	// get the name of the map without his path
-	char *pMapShortName = &g_Config.m_SvMap[0];
+	const char *pMapShortName = &g_Config.m_SvMap[0];
 	for(int i = 0; i < str_length(g_Config.m_SvMap) - 1; i++)
 	{
 		if(g_Config.m_SvMap[i] == '/' || g_Config.m_SvMap[i] == '\\')

@@ -364,7 +364,7 @@ public:
 
 	void PumpNetwork(bool PacketWaiting);
 
-	char *GetMapName() const;
+	const char *GetMapName() const;
 	int LoadMap(const char *pMapName);
 
 	void SaveDemo(int ClientID, float Time);
