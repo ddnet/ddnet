@@ -166,7 +166,7 @@ void CStatboard::RenderGlobalStats()
 		m_pClient->m_Motd.Clear();
 
 	bool GameWithFlags = m_pClient->m_Snap.m_pGameInfoObj &&
-			     m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_FLAGS;
+		m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_FLAGS;
 
 	StatboardContentWidth += 7 * 85 + 95; // Suicides 95; other labels 85
 

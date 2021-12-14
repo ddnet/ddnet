@@ -298,10 +298,10 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			Right.HSplitTop(20.0f, &Button, &Right);
 			g_Config.m_ClAutoStatboardScreenshotMax =
 				static_cast<int>(UIEx()->DoScrollbarH(&g_Config.m_ClAutoStatboardScreenshotMax,
-							 &Button,
-							 g_Config.m_ClAutoStatboardScreenshotMax / 1000.0f) *
-							 1000.0f +
-						 0.1f);
+									 &Button,
+									 g_Config.m_ClAutoStatboardScreenshotMax / 1000.0f) *
+						1000.0f +
+					0.1f);
 		}
 
 		// auto statboard csv
@@ -324,10 +324,10 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			Right.HSplitTop(20.0f, &Button, &Right);
 			g_Config.m_ClAutoCSVMax =
 				static_cast<int>(UIEx()->DoScrollbarH(&g_Config.m_ClAutoCSVMax,
-							 &Button,
-							 g_Config.m_ClAutoCSVMax / 1000.0f) *
-							 1000.0f +
-						 0.1f);
+									 &Button,
+									 g_Config.m_ClAutoCSVMax / 1000.0f) *
+						1000.0f +
+					0.1f);
 		}
 	}
 }

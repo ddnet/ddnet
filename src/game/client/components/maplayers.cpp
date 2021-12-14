@@ -105,20 +105,20 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 				int MinTick = pThis->Client()->PrevGameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
 				int CurTick = pThis->Client()->GameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
 				s_Time = (int64_t)(mix<double>(
-							   0,
-							   (CurTick - MinTick),
-							   pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
-						   TickToMicroSeconds) +
-					 MinTick * TickToMicroSeconds;
+									   0,
+									   (CurTick - MinTick),
+									   pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
+							 TickToMicroSeconds) +
+					MinTick * TickToMicroSeconds;
 			}
 			else
 			{
 				int MinTick = pThis->m_LastLocalTick;
 				s_Time = (int64_t)(mix<double>(0,
-							   pThis->m_CurrentLocalTick - MinTick,
-							   pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
-						   TickToMicroSeconds) +
-					 MinTick * TickToMicroSeconds;
+									   pThis->m_CurrentLocalTick - MinTick,
+									   pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
+							 TickToMicroSeconds) +
+					MinTick * TickToMicroSeconds;
 			}
 		}
 		pThis->RenderTools()->RenderEvalEnvelope(pPoints + pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time + (int64_t)TimeOffsetMillis * 1000ll, pChannels);
@@ -133,11 +133,11 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 				int MinTick = pThis->Client()->PrevGameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
 				int CurTick = pThis->Client()->GameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
 				s_Time = (int64_t)(mix<double>(
-							   0,
-							   (CurTick - MinTick),
-							   pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
-						   TickToMicroSeconds) +
-					 MinTick * TickToMicroSeconds;
+									   0,
+									   (CurTick - MinTick),
+									   pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
+							 TickToMicroSeconds) +
+					MinTick * TickToMicroSeconds;
 			}
 		}
 		else

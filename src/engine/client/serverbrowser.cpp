@@ -206,7 +206,8 @@ bool CServerBrowser::SortCompareName(int Index1, int Index2) const
 	CServerEntry *b = m_ppServerlist[Index2];
 	//	make sure empty entries are listed last
 	return (a->m_GotInfo && b->m_GotInfo) || (!a->m_GotInfo && !b->m_GotInfo) ? str_comp(a->m_Info.m_aName, b->m_Info.m_aName) < 0 :
-										    a->m_GotInfo ? true : false;
+		a->m_GotInfo                                                          ? true :
+                                                                                false;
 }
 
 bool CServerBrowser::SortCompareMap(int Index1, int Index2) const
@@ -1741,7 +1742,7 @@ bool IsFastCap(const CServerInfo *pInfo)
 bool IsBlockInfectionZ(const CServerInfo *pInfo)
 {
 	return str_find_nocase(pInfo->m_aGameType, "blockz") ||
-	       str_find_nocase(pInfo->m_aGameType, "infectionz");
+		str_find_nocase(pInfo->m_aGameType, "infectionz");
 }
 
 bool IsBlockWorlds(const CServerInfo *pInfo)

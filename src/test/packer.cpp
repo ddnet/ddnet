@@ -57,7 +57,7 @@ TEST(Packer, AddStringBroken)
 	ExpectAddString5("\x80\x80", 0, 0);
 	ExpectAddString5("a\x80", 0, "a�");
 	ExpectAddString5("\x80"
-			 "a",
+					 "a",
 		0, "�a");
 	ExpectAddString5("\x80", 1, "");
 	ExpectAddString5("\x80\x80", 3, "�");

@@ -40,7 +40,7 @@ def find_clang_format(version):
 	print("Found no clang-format {}".format(version))
 	sys.exit(-1)
 
-clang_format_bin = find_clang_format(10)
+clang_format_bin = find_clang_format(13)
 
 def reformat(filenames):
 	subprocess.check_call([clang_format_bin, "-i"] + filenames)

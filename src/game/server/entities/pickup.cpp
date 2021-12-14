@@ -190,7 +190,8 @@ void CPickup::Snap(int SnappingClient)
 	if(Server()->IsSixup(SnappingClient))
 	{
 		if(m_Type == POWERUP_WEAPON)
-			pP->m_Type = m_Subtype == WEAPON_SHOTGUN ? 3 : m_Subtype == WEAPON_GRENADE ? 2 : 4;
+			pP->m_Type = m_Subtype == WEAPON_SHOTGUN ? 3 : m_Subtype == WEAPON_GRENADE ? 2 :
+                                                                                         4;
 		else if(m_Type == POWERUP_NINJA)
 			pP->m_Type = 5;
 	}

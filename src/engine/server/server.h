@@ -439,7 +439,7 @@ public:
 	bool DnsblWhite(int ClientID)
 	{
 		return m_aClients[ClientID].m_DnsblState == CClient::DNSBL_STATE_NONE ||
-		       m_aClients[ClientID].m_DnsblState == CClient::DNSBL_STATE_WHITELISTED;
+			m_aClients[ClientID].m_DnsblState == CClient::DNSBL_STATE_WHITELISTED;
 	}
 	bool DnsblPending(int ClientID)
 	{
