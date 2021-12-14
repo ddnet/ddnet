@@ -150,7 +150,6 @@ public:
 
 		// connection state info
 		int m_State;
-		bool m_SupportsMapSha256;
 		int m_Latency;
 		int m_SnapRate;
 
