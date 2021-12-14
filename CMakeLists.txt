@@ -1390,7 +1390,7 @@ set(EXPECTED_DATA
 set_glob(DATA GLOB_RECURSE "frag;json;map;otf;png;rules;ttf;txt;vert;wv" data ${EXPECTED_DATA})
 
 ########################################################################
-# COPY DATA AND DLLS
+# COPY DATA AND SHARED LIBS
 ########################################################################
 
 foreach(datafile ${DATA})
@@ -1410,6 +1410,9 @@ set(COPY_FILES
   ${DISCORDSDK_COPY_FILES}
 )
 file(COPY ${COPY_FILES} DESTINATION .)
+
+set(COPY_DIRS ${SDL2_COPY_DIRS})
+file(COPY ${COPY_DIRS} DESTINATION .)
 
 ########################################################################
 # CODE GENERATION
@@ -2497,7 +2500,10 @@ set(CPACK_TARGETS
 if(STEAMAPI_KIND STREQUAL SHARED)
   list(APPEND CPACK_TARGETS ${TARGET_STEAMAPI})
 endif()
-set(CPACK_DIRS data)
+set(CPACK_DIRS
+  data
+  ${COPY_DIRS}
+)
 set(CPACK_FILES
   license.txt
   storage.cfg
