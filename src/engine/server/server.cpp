@@ -287,6 +287,7 @@ void CServer::CClient::Reset()
 CServer::CServer() :
 	m_Register(false), m_RegSixup(true)
 {
+	m_pConfig = &g_Config;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 		m_aDemoRecorder[i] = CDemoRecorder(&m_SnapshotDelta, true);
 	m_aDemoRecorder[MAX_CLIENTS] = CDemoRecorder(&m_SnapshotDelta, false);
