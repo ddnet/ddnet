@@ -2575,9 +2575,28 @@ if(CLIENT AND (DMGTOOLS_FOUND OR HDIUTIL))
   endforeach()
 
   set(DMG_DISCORD_COPY_COMMAND)
-  if(NOT FAT)
+  if(NOT FAT AND NOT TARGET_CPU_ARCHITECTURE STREQUAL "arm" AND NOT TARGET_CPU_ARCHITECTURE STREQUAL "arm64")
     set(DMG_DISCORD_COPY_COMMAND COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/discord/${LIB_DIR}/discord_game_sdk.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/)
   endif()
+
+  #add_custom_command(TARGET ${TARGET_CLIENT} POST_BUILD
+  #  COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libavcodec.58.dylib @rpath/libavcodec.58.dylib ${TARGET_CLIENT}
+  #  COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libavcodec.58.dylib @rpath/libavcodec.58.dylib libavformat.58.dylib
+  #  COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libavformat.58.dylib @rpath/libavformat.58.dylib ${TARGET_CLIENT}
+  #  COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libavutil.56.dylib @rpath/libavutil.56.dylib ${TARGET_CLIENT}
+  #  COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libavutil.56.dylib @rpath/libavutil.56.dylib libavcodec.58.dylib
+  #  COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libavutil.56.dylib @rpath/libavutil.56.dylib libavformat.58.dylib
+  #  COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libavutil.56.dylib @rpath/libavutil.56.dylib libswscale.5.dylib
+  #  COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libavutil.56.dylib @rpath/libavutil.56.dylib libswresample.3.dylib
+  #  COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libswscale.5.dylib @rpath/libswscale.5.dylib ${TARGET_CLIENT}
+  #  COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libswresample.3.dylib @rpath/libswresample.3.dylib ${TARGET_CLIENT}
+  #  COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libfreetype.6.dylib @rpath/libfreetype.6.dylib ${TARGET_CLIENT}
+  #  COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libSDL2-2.0.0.dylib @rpath/SDL2.framework/Versions/A/SDL2 ${TARGET_CLIENT}
+  #  # TODO: Cleaner solution than hardcoding paths
+  #  COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /home/deen/isos/ddnet/debian6/mac64/libwebsockets-4.2/lib/libwebsockets.18.dylib @rpath/libwebsockets.18.dylib ${TARGET_CLIENT}
+  #  COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change ${PROJECT_BINARY_DIR}/libsteam_api.dylib @rpath/libsteam_api.dylib ${TARGET_CLIENT}
+  #  COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change ${PROJECT_BINARY_DIR}/libsteam_api.dylib @rpath/libsteam_api.dylib libsteam_api.dylib
+  #)
 
   add_custom_command(OUTPUT ${CPACK_PACKAGE_FILE_NAME}.dmg
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${DMG_TMPDIR}
