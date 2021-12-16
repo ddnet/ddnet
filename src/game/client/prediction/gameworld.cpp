@@ -446,14 +446,15 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const C
 	{
 		CLaser NetLaser = CLaser(this, ObjID, (CNetObj_Laser *)pObjData);
 		CLaser *pMatching = 0;
-		if(CLaser *pLaser = (CLaser *)GetEntity(ObjID, ENTTYPE_LASER))
+		if(CLaser *pLaser = dynamic_cast<CLaser *>(GetEntity(ObjID, ENTTYPE_LASER)))
 			if(NetLaser.Match(pLaser))
 				pMatching = pLaser;
 		if(!pMatching)
 		{
-			for(CLaser *pLaser = (CLaser *)FindFirst(CGameWorld::ENTTYPE_LASER); pLaser; pLaser = (CLaser *)pLaser->TypeNext())
+			for(CEntity *pEnt = FindFirst(CGameWorld::ENTTYPE_LASER); pEnt; pEnt = pEnt->TypeNext())
 			{
-				if(pLaser->m_ID == -1 && NetLaser.Match(pLaser))
+				auto *const pLaser = dynamic_cast<CLaser *>(pEnt);
+				if(pLaser && pLaser->m_ID == -1 && NetLaser.Match(pLaser))
 				{
 					pMatching = pLaser;
 					pMatching->m_ID = ObjID;

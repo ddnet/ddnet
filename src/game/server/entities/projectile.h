@@ -25,10 +25,11 @@ public:
 	vec2 GetPos(float Time);
 	void FillInfo(CNetObj_Projectile *pProj);
 
-	virtual void Reset();
-	virtual void Tick();
-	virtual void TickPaused();
-	virtual void Snap(int SnappingClient);
+	virtual void Reset() override;
+	virtual void Tick() override;
+	virtual void TickPaused() override;
+	virtual void Snap(int SnappingClient) override;
+	virtual void SwapClients(int Client1, int Client2) override;
 
 private:
 	vec2 m_Direction;
