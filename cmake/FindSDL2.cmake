@@ -10,7 +10,11 @@ find_library(SDL2_LIBRARY
   PATHS ${PATHS_SDL2_LIBDIR}
   ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
-set(CMAKE_FIND_FRAMEWORK FIRST)
+if(PREFER_BUNDLED_LIBS)
+  set(CMAKE_FIND_FRAMEWORK FIRST)
+else()
+  set(CMAKE_FIND_FRAMEWORK LAST)
+endif()
 set_extra_dirs_include(SDL2 sdl "${SDL2_LIBRARY}")
 # Looking for 'SDL.h' directly might accidentally find a SDL instead of SDL 2
 # installation. Look for a header file only present in SDL 2 instead.
