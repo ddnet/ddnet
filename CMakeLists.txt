@@ -2305,6 +2305,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     fs.cpp
     git_revision.cpp
     hash.cpp
+    io.cpp
     jobs.cpp
     json.cpp
     mapbugs.cpp

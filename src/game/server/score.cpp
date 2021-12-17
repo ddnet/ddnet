@@ -170,7 +170,7 @@ CScore::CScore(CGameContext *pGameServer, CDbConnectionPool *pPool) :
 	secure_random_fill(aSeed, sizeof(aSeed));
 	m_Prng.Seed(aSeed);
 
-	IOHANDLE File = GameServer()->Storage()->OpenFile("wordlist.txt", IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE File = GameServer()->Storage()->OpenFile("wordlist.txt", IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
 	if(File)
 	{
 		CLineReader LineReader;
