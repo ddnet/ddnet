@@ -24,7 +24,7 @@ bool CGLSL::LoadShader(CGLSLCompiler *pCompiler, IStorage *pStorage, const char 
 {
 	if(m_IsLoaded)
 		return true;
-	IOHANDLE f = pStorage->OpenFile(pFile, IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE f = pStorage->OpenFile(pFile, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
 
 	std::vector<std::string> Lines;
 	if(f)

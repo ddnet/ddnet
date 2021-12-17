@@ -92,7 +92,7 @@ public:
 	void LoadPaths(const char *pArgv0)
 	{
 		// check current directory
-		IOHANDLE File = io_open("storage.cfg", IOFLAG_READ);
+		IOHANDLE File = io_open("storage.cfg", IOFLAG_READ | IOFLAG_SKIP_BOM);
 		if(!File)
 		{
 			// check usable path in argv[0]
@@ -105,7 +105,7 @@ public:
 				char aBuffer[IO_MAX_PATH_LENGTH];
 				str_copy(aBuffer, pArgv0, Pos + 1);
 				str_append(aBuffer, "/storage.cfg", sizeof(aBuffer));
-				File = io_open(aBuffer, IOFLAG_READ);
+				File = io_open(aBuffer, IOFLAG_READ | IOFLAG_SKIP_BOM);
 			}
 
 			if(Pos >= IO_MAX_PATH_LENGTH || !File)
