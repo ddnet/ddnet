@@ -253,9 +253,6 @@ MOTD
 Map
 == Hartă
 
-Maximum ping:
-== Ping maxim:
-
 Mouse sens.
 == Sensib. maus
 

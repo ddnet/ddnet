@@ -1,5 +1,6 @@
 #include "test.h"
 #include <gtest/gtest.h>
+#include <memory>
 
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
@@ -7,7 +8,7 @@
 
 TEST(Datafile, ExtendedType)
 {
-	IStorage *pStorage = CreateLocalStorage();
+	auto pStorage = std::unique_ptr<IStorage>(CreateLocalStorage());
 	CTestInfo Info;
 
 	CMapItemTest Test;
@@ -19,7 +20,7 @@ TEST(Datafile, ExtendedType)
 
 	{
 		CDataFileWriter Writer;
-		Writer.Open(pStorage, Info.m_aFilename);
+		Writer.Open(pStorage.get(), Info.m_aFilename);
 
 		Writer.AddItem(MAPITEMTYPE_TEST, 0x8000, sizeof(Test), &Test);
 
@@ -28,7 +29,7 @@ TEST(Datafile, ExtendedType)
 
 	{
 		CDataFileReader Reader;
-		Reader.Open(pStorage, Info.m_aFilename, IStorage::TYPE_ALL);
+		Reader.Open(pStorage.get(), Info.m_aFilename, IStorage::TYPE_ALL);
 
 		int Start, Num;
 		Reader.GetType(MAPITEMTYPE_TEST, &Start, &Num);
@@ -56,6 +57,4 @@ TEST(Datafile, ExtendedType)
 	{
 		pStorage->RemoveFile(Info.m_aFilename, IStorage::TYPE_SAVE);
 	}
-
-	delete pStorage;
 }

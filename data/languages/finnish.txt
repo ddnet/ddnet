@@ -246,9 +246,6 @@ MOTD
 Map
 == Kenttä
 
-Maximum ping:
-== Maksimiping:
-
 Mouse sens.
 == Hiiren herkkyys
 

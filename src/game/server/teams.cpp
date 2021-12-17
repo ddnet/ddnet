@@ -5,6 +5,8 @@
 #include <engine/shared/config.h>
 
 #include "entities/character.h"
+#include "entities/laser.h"
+#include "entities/projectile.h"
 #include "player.h"
 
 CGameTeams::CGameTeams(CGameContext *pGameContext) :
@@ -888,6 +890,8 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, in
 
 	swap(m_TeeStarted[pPlayer->GetCID()], m_TeeStarted[pTargetPlayer->GetCID()]);
 	swap(m_TeeFinished[pPlayer->GetCID()], m_TeeFinished[pTargetPlayer->GetCID()]);
+
+	GameServer()->m_World.SwapClients(pPlayer->GetCID(), pTargetPlayer->GetCID());
 
 	str_format(aBuf, sizeof(aBuf),
 		"%s has swapped with %s.",

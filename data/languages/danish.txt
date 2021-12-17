@@ -245,9 +245,6 @@ MOTD
 Map
 == Kort
 
-Maximum ping:
-== Højeste ping:
-
 Mouse sens.
 == Musfølsomhed
 

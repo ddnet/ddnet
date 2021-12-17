@@ -194,6 +194,8 @@ class CConsole : public IConsole
 	CCommand *FindCommand(const char *pName, int FlagMask);
 
 public:
+	CConfig *Config() { return m_pConfig; }
+
 	CConsole(int FlagMask);
 	~CConsole();
 

@@ -109,6 +109,7 @@ class CServer : public IServer
 public:
 	class IGameServer *GameServer() { return m_pGameServer; }
 	class CConfig *Config() { return m_pConfig; }
+	const CConfig *Config() const { return m_pConfig; }
 	class IConsole *Console() { return m_pConsole; }
 	class IStorage *Storage() { return m_pStorage; }
 	class IEngineAntibot *Antibot() { return m_pAntibot; }
@@ -150,7 +151,6 @@ public:
 
 		// connection state info
 		int m_State;
-		bool m_SupportsMapSha256;
 		int m_Latency;
 		int m_SnapRate;
 
@@ -226,15 +226,12 @@ public:
 
 	int m_RunServer;
 
-	int m_MapReload;
+	bool m_MapReload;
 	bool m_ReloadedWhenEmpty;
 	int m_RconClientID;
 	int m_RconAuthLevel;
 	int m_PrintCBIndex;
 	char m_aShutdownReason[128];
-
-	int64_t m_Lastheartbeat;
-	//static NETADDR4 master_server;
 
 	enum
 	{
@@ -364,7 +361,8 @@ public:
 
 	void PumpNetwork(bool PacketWaiting);
 
-	char *GetMapName() const;
+	virtual void ChangeMap(const char *pMap);
+	const char *GetMapName() const;
 	int LoadMap(const char *pMapName);
 
 	void SaveDemo(int ClientID, float Time);
@@ -413,6 +411,7 @@ public:
 	static void ConchainRconPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainRconModPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainRconHelperPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainMapUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 #if defined(CONF_FAMILY_UNIX)
 	static void ConchainConnLoggingServerChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);

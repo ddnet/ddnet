@@ -247,9 +247,6 @@ MOTD
 Map
 == Mapa
 
-Maximum ping:
-== Maksimalan ping:
-
 Mouse sens.
 == Mouse sens.
 

@@ -240,9 +240,6 @@ MOTD
 Map
 == 맵
 
-Maximum ping:
-== 최대 핑
-
 Mouse sens.
 == 미우스 감도
 

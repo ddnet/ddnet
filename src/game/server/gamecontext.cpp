@@ -1054,7 +1054,7 @@ void CGameContext::OnTick()
 			if(PlayerExists(m_SqlRandomMapResult->m_ClientID) && m_SqlRandomMapResult->m_aMessage[0] != '\0')
 				SendChatTarget(m_SqlRandomMapResult->m_ClientID, m_SqlRandomMapResult->m_aMessage);
 			if(m_SqlRandomMapResult->m_aMap[0] != '\0')
-				str_copy(g_Config.m_SvMap, m_SqlRandomMapResult->m_aMap, sizeof(g_Config.m_SvMap));
+				Server()->ChangeMap(m_SqlRandomMapResult->m_aMap);
 			else
 				m_LastMapVote = 0;
 		}
@@ -1271,18 +1271,18 @@ void CGameContext::OnClientEnter(int ClientID)
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientID);
 	}
 
+	IServer::CClientInfo Info;
+	Server()->GetClientInfo(ClientID, &Info);
+	if(Info.m_GotDDNetVersion)
+	{
+		if(OnClientDDNetVersionKnown(ClientID))
+			return; // kicked
+	}
+
 	if(!Server()->ClientPrevIngame(ClientID))
 	{
 		if(g_Config.m_SvWelcome[0] != 0)
 			SendChatTarget(ClientID, g_Config.m_SvWelcome);
-
-		IServer::CClientInfo Info;
-		Server()->GetClientInfo(ClientID, &Info);
-		if(Info.m_GotDDNetVersion)
-		{
-			if(OnClientDDNetVersionKnown(ClientID))
-				return; // kicked
-		}
 
 		if(g_Config.m_SvShowOthersDefault > 0)
 		{

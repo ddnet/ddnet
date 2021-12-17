@@ -260,9 +260,6 @@ MOTD
 Map
 == Carte
 
-Maximum ping:
-== Ping maximum :
-
 Mouse sens.
 == Sens. souris
 

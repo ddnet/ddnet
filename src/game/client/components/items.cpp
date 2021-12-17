@@ -326,9 +326,10 @@ void CItems::OnRender()
 			CProjectileData Data = pProj->GetData();
 			RenderProjectile(&Data, pProj->ID());
 		}
-		for(auto *pLaser = (CLaser *)GameClient()->m_PredictedWorld.FindFirst(CGameWorld::ENTTYPE_LASER); pLaser; pLaser = (CLaser *)pLaser->NextEntity())
+		for(CEntity *pEnt = GameClient()->m_PredictedWorld.FindFirst(CGameWorld::ENTTYPE_LASER); pEnt; pEnt = pEnt->NextEntity())
 		{
-			if(pLaser->GetOwner() < 0 || !GameClient()->m_aClients[pLaser->GetOwner()].m_IsPredictedLocal)
+			auto *const pLaser = dynamic_cast<CLaser *>(pEnt);
+			if(!pLaser || pLaser->GetOwner() < 0 || !GameClient()->m_aClients[pLaser->GetOwner()].m_IsPredictedLocal)
 				continue;
 			CNetObj_Laser Data;
 			pLaser->FillInfo(&Data);
@@ -415,7 +416,7 @@ void CItems::OnRender()
 		{
 			if(UsePredicted)
 			{
-				auto *pLaser = (CLaser *)GameClient()->m_GameWorld.FindMatch(Item.m_ID, Item.m_Type, pData);
+				auto *pLaser = dynamic_cast<CLaser *>(GameClient()->m_GameWorld.FindMatch(Item.m_ID, Item.m_Type, pData));
 				if(pLaser && pLaser->GetOwner() >= 0 && GameClient()->m_aClients[pLaser->GetOwner()].m_IsPredictedLocal)
 					continue;
 			}

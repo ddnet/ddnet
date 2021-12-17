@@ -256,9 +256,6 @@ MOTD
 Map
 == Kaart
 
-Maximum ping:
-== Hoogste ping:
-
 Mouse sens.
 == Muis resolutie
 

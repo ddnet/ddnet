@@ -115,6 +115,16 @@ public:
 	virtual void Snap(int SnappingClient) {}
 
 	/*
+		Function: SwapClients
+			Called when two players have swapped their client ids.
+
+		Arguments:
+			Client1 - First client ID
+			Client2 - Second client ID
+	*/
+	virtual void SwapClients(int Client1, int Client2) {}
+
+	/*
 		Function: NetworkClipped
 			Performs a series of test to see if a client can see the
 			entity.
