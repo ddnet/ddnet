@@ -2373,6 +2373,7 @@ void CGraphics_Threaded::Resize(int w, int h, int RefreshRate, bool SetWindowSiz
 		g_Config.m_GfxScreenWidth = w;
 		g_Config.m_GfxScreenHeight = h;
 		g_Config.m_GfxScreenRefreshRate = m_ScreenRefreshRate;
+		m_ScreenHiDPIScale = m_ScreenWidth / (float)g_Config.m_GfxScreenWidth;
 
 		CCommandBuffer::SCommand_Update_Viewport Cmd;
 		Cmd.m_X = 0;
