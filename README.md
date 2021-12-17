@@ -40,7 +40,7 @@ There is an [AUR package for pnglite](https://aur.archlinux.org/packages/pnglite
 
 On macOS you can use [homebrew](https://brew.sh/) to install build dependencies like this:
 
-    brew install cmake freetype opusfile SDL2 wavpack googletest
+    brew install cmake freetype opusfile SDL2 wavpack googletest glew
 
 If you don't want to use the system libraries, you can pass the `-DPREFER_BUNDLED_LIBS=ON` parameter to cmake.
 
