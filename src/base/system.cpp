@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 #include "system.h"
 #if !defined(CONF_PLATFORM_MACOS)
@@ -2489,20 +2488,33 @@ int time_timestamp()
 int time_houroftheday()
 {
 	time_t time_data;
-	struct tm *time_info;
 
 	time(&time_data);
+#if defined(CONF_FAMILY_WINDOWS)
+	struct tm *time_info;
 	time_info = localtime(&time_data);
 	return time_info->tm_hour;
+#else
+	struct tm time_info;
+	localtime_r(&time_data, &time_info);
+	return time_info.tm_hour;
+#endif
 }
 
 int time_season()
 {
 	time_t time_data;
-	struct tm *time_info;
 
 	time(&time_data);
+	struct tm *time_info;
+#if defined(CONF_FAMILY_WINDOWS)
+	struct tm *time_info;
 	time_info = localtime(&time_data);
+#else
+	struct tm _time_info;
+	localtime_r(&time_data, &_time_info);
+	time_info = &_time_info;
+#endif
 
 	if((time_info->tm_mon == 11 && time_info->tm_mday == 31) || (time_info->tm_mon == 0 && time_info->tm_mday == 1))
 	{
@@ -3021,9 +3033,15 @@ int str_hex_decode(void *dst, int dst_size, const char *src)
 #endif
 void str_timestamp_ex(time_t time_data, char *buffer, int buffer_size, const char *format)
 {
+#if defined(CONF_FAMILY_WINDOWS)
 	struct tm *time_info;
 	time_info = localtime(&time_data);
 	strftime(buffer, buffer_size, format, time_info);
+#else
+	struct tm time_info;
+	localtime_r(&time_data, &time_info);
+	strftime(buffer, buffer_size, format, &time_info);
+#endif
 	buffer[buffer_size - 1] = 0; /* assure null termination */
 }
 

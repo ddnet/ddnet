@@ -297,9 +297,16 @@ void CSkins::OnInit()
 	if(g_Config.m_Events)
 	{
 		time_t rawtime;
-		struct tm *timeinfo;
 		std::time(&rawtime);
+		struct tm *timeinfo;
+#if defined(CONF_FAMILY_WINDOWS)
+		struct tm *timeinfo;
 		timeinfo = localtime(&rawtime);
+#else
+		struct tm _timeinfo;
+		localtime_r(&rawtime, &_timeinfo);
+		timeinfo = &_timeinfo;
+#endif
 		if(timeinfo->tm_mon == 11 && timeinfo->tm_mday >= 24 && timeinfo->tm_mday <= 26)
 		{ // Christmas
 			str_copy(m_EventSkinPrefix, "santa", sizeof(m_EventSkinPrefix));
