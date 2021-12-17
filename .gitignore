@@ -8,6 +8,7 @@ docs/
 bundle/
 !/other/bundle/
 
+.DS_Store
 .ninja_deps
 .ninja_log
 CMakeCache.txt
@@ -92,6 +93,7 @@ tags
 *.dll
 *.dmg
 *.dtb
+*.dylib
 *.exe
 *.filters
 *.lnk
@@ -115,3 +117,4 @@ tags
 *.user
 *.vcxproj
 *.zip
+/SDL2.framework
