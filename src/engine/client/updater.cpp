@@ -247,7 +247,7 @@ bool CUpdater::ReplaceServer()
 void CUpdater::ParseUpdate()
 {
 	char aPath[IO_MAX_PATH_LENGTH];
-	IOHANDLE File = m_pStorage->OpenFile(m_pStorage->GetBinaryPath("update/update.json", aPath, sizeof aPath), IOFLAG_READ, IStorage::TYPE_ABSOLUTE);
+	IOHANDLE File = m_pStorage->OpenFile(m_pStorage->GetBinaryPath("update/update.json", aPath, sizeof aPath), IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ABSOLUTE);
 	if(!File)
 		return;
 
