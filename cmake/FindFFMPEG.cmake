@@ -12,35 +12,35 @@ endif()
 
 set_extra_dirs_lib(FFMPEG ffmpeg)
 find_library(AVCODEC_LIBRARY
-  NAMES avcodec libavcodec avcodec.58
+  NAMES avcodec.58 avcodec libavcodec
   HINTS ${HINTS_FFMPEG_LIBDIR} ${PC_AVCODEC_LIBRARY_DIRS}
   PATHS ${PATHS_AVCODEC_LIBDIR}
   ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
 
 find_library(AVFORMAT_LIBRARY
-  NAMES avformat libavformat avformat.58
+  NAMES avformat.58 avformat libavformat
   HINTS ${HINTS_FFMPEG_LIBDIR} ${PC_AVFORMAT_LIBRARY_DIRS}
   PATHS ${PATHS_AVFORMAT_LIBDIR}
   ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
 
 find_library(AVUTIL_LIBRARY
-  NAMES avutil libavutil avutil.56
+  NAMES avutil.56 avutil libavutil
   HINTS ${HINTS_FFMPEG_LIBDIR} ${PC_AVUTIL_LIBRARY_DIRS}
   PATHS ${PATHS_AVUTIL_LIBDIR}
   ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
 
 find_library(SWSCALE_LIBRARY
-  NAMES swscale libswscale swscale.5
+  NAMES swscale.5 swscale libswscale
   HINTS ${HINTS_FFMPEG_LIBDIR} ${PC_SWSCALE_LIBRARY_DIRS}
   PATHS ${PATHS_SWSCALE_LIBDIR}
   ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
 
 find_library(SWRESAMPLE_LIBRARY
-  NAMES swresample libswresample swresample.3
+  NAMES swresample.3 swresample libswresample
   HINTS ${HINTS_FFMPEG_LIBDIR} ${PC_SWRESAMPLE_LIBRARY_DIRS}
   PATHS ${PATHS_SWRESAMPLE_LIBDIR}
   ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
