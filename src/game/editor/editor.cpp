@@ -130,7 +130,7 @@ CLayerGroup::CLayerGroup()
 
 CLayerGroup::~CLayerGroup()
 {
-	Clear();
+	m_lLayers.delete_all();
 }
 
 void CLayerGroup::Convert(CUIRect *pRect)
