@@ -542,34 +542,32 @@ void CPlayers::RenderPlayer(
 
 	Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
 	Graphics()->QuadsSetRotation(0);
+	int ShowDirection = g_Config.m_ClShowDirection;
 #if defined(CONF_VIDEORECORDER)
-	if((((!IVideo::Current() && (g_Config.m_ClShowDirection >= 1)) || (IVideo::Current() && g_Config.m_ClVideoShowDirection)) && ClientID >= 0) || DemoPlayer()->IsPlaying())
-#else
-	if((g_Config.m_ClShowDirection >= 1 && ClientID >= 0) || DemoPlayer()->IsPlaying())
+	if(IVideo::Current())
+		ShowDirection = g_Config.m_ClVideoShowDirection;
 #endif
+	if((Local && ShowDirection == 2) || (!Local && ShowDirection >= 1))
 	{
-		if((Local && g_Config.m_ClShowDirection == 2) || (!Local && g_Config.m_ClShowDirection >= 1))
+		if(Player.m_Direction == -1)
 		{
-			if(Player.m_Direction == -1)
-			{
-				Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
-				Graphics()->QuadsSetRotation(pi);
-				Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, Position.x - 30.f, Position.y - 70.f);
-			}
-			else if(Player.m_Direction == 1)
-			{
-				Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
-				Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, Position.x + 30.f, Position.y - 70.f);
-			}
-			if(Player.m_Jumped & 1)
-			{
-				Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
-				Graphics()->QuadsSetRotation(pi * 3 / 2);
-				Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, Position.x, Position.y - 70.f);
-			}
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-			Graphics()->QuadsSetRotation(0);
+			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
+			Graphics()->QuadsSetRotation(pi);
+			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, Position.x - 30.f, Position.y - 70.f);
 		}
+		else if(Player.m_Direction == 1)
+		{
+			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
+			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, Position.x + 30.f, Position.y - 70.f);
+		}
+		if(Player.m_Jumped & 1)
+		{
+			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
+			Graphics()->QuadsSetRotation(pi * 3 / 2);
+			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, Position.x, Position.y - 70.f);
+		}
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		Graphics()->QuadsSetRotation(0);
 	}
 
 	if(OtherTeam || ClientID < 0)
