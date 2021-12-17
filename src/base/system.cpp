@@ -3286,31 +3286,22 @@ int str_utf8_forward(const char *str, int cursor)
 		return cursor + 1;
 	else if((*buf & 0xE0) == 0xC0) /* 110xxxxx */
 	{
-		if(!buf[1])
-			return cursor + 1;
-		return cursor + 2;
+		if(buf[1])
+			return cursor + 2;
 	}
 	else if((*buf & 0xF0) == 0xE0) /* 1110xxxx */
 	{
-		if(!buf[1])
-			return cursor + 1;
-		if(!buf[2])
-			return cursor + 2;
-		return cursor + 3;
+		if(buf[1] && buf[2])
+			return cursor + 3;
 	}
 	else if((*buf & 0xF8) == 0xF0) /* 11110xxx */
 	{
-		if(!buf[1])
-			return cursor + 1;
-		if(!buf[2])
-			return cursor + 2;
-		if(!buf[3])
-			return cursor + 3;
-		return cursor + 4;
+		if(buf[1] && buf[2] && buf[3])
+			return cursor + 4;
 	}
 
 	/* invalid */
-	return cursor + 1;
+	return cursor;
 }
 
 int str_utf8_encode(char *ptr, int chr)

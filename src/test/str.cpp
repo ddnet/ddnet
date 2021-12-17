@@ -255,6 +255,15 @@ TEST(Str, StrCopyUtf8)
 	EXPECT_STREQ(aBuf, "DDNet最好了");
 }
 
+TEST(Str, StrUtf8AutoRename)
+{
+	char aNameTryBrokenEnd[16];
+	char aNameTry[16];
+	str_format(aNameTryBrokenEnd, sizeof(aNameTryBrokenEnd), "(%d)%s", 1, "Landmine地雷");
+	str_utf8_copy(aNameTry, aNameTryBrokenEnd, sizeof(aNameTry));
+	EXPECT_STREQ(aNameTry, "(1)Landmine地");
+}
+
 TEST(Str, Utf8Stats)
 {
 	int Size, Count;
