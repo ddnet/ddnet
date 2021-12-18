@@ -412,14 +412,15 @@ private:
 		NETADDR m_Addr;
 		int m_Expire;
 		char m_aReason[128];
+		bool m_InitialChatDelay;
 	};
 
 	CMute m_aMutes[MAX_MUTES];
 	int m_NumMutes;
 	CMute m_aVoteMutes[MAX_VOTE_MUTES];
 	int m_NumVoteMutes;
-	bool TryMute(const NETADDR *pAddr, int Secs, const char *pReason);
-	void Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName, const char *pReason = "");
+	bool TryMute(const NETADDR *pAddr, int Secs, const char *pReason, bool InitialChatDelay);
+	void Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName, const char *pReason = "", bool InitialChatDelay = false);
 	bool TryVoteMute(const NETADDR *pAddr, int Secs);
 	bool VoteMute(const NETADDR *pAddr, int Secs, const char *pDisplayName, int AuthedID);
 	bool VoteUnmute(const NETADDR *pAddr, const char *pDisplayName, int AuthedID);

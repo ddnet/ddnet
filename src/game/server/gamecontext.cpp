@@ -1359,6 +1359,14 @@ void CGameContext::OnClientEnter(int ClientID)
 		NewClientInfoMsg.m_Local = 1;
 		Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientID);
 	}
+
+	// initial chat delay
+	if(g_Config.m_SvChatInitialDelay != 0 && m_apPlayers[ClientID]->m_JoinTick > m_NonEmptySince + 10 * Server()->TickSpeed())
+	{
+		NETADDR Addr;
+		Server()->GetClientAddr(ClientID, &Addr);
+		Mute(&Addr, g_Config.m_SvSpamMuteDuration, Server()->ClientName(ClientID), "Initial chat delay", true);
+	}
 }
 
 bool CGameContext::OnClientDataPersist(int ClientID, void *pData)
@@ -3789,13 +3797,11 @@ int CGameContext::ProcessSpamProtection(int ClientID, bool RespectChatInitialDel
 	Server()->GetClientAddr(ClientID, &Addr);
 
 	int Muted = 0;
-	if(m_apPlayers[ClientID]->m_JoinTick > m_NonEmptySince + 10 * Server()->TickSpeed() && RespectChatInitialDelay)
-		Muted = (m_apPlayers[ClientID]->m_JoinTick + Server()->TickSpeed() * g_Config.m_SvChatInitialDelay - Server()->Tick()) / Server()->TickSpeed();
-	if(Muted <= 0)
+	for(int i = 0; i < m_NumMutes && Muted <= 0; i++)
 	{
-		for(int i = 0; i < m_NumMutes && Muted <= 0; i++)
+		if(!net_addr_comp_noport(&Addr, &m_aMutes[i].m_Addr))
 		{
-			if(!net_addr_comp_noport(&Addr, &m_aMutes[i].m_Addr))
+			if(RespectChatInitialDelay || m_aMutes[i].m_InitialChatDelay)
 				Muted = (m_aMutes[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
 		}
 	}
