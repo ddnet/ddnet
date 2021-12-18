@@ -608,19 +608,47 @@ void CGameContext::ConMuteIP(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConUnmute(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	char aIpBuf[64];
-	char aBuf[64];
-	int Victim = pResult->GetVictim();
+	int Index = pResult->GetInteger(0);
 
-	if(Victim < 0 || Victim >= pSelf->m_NumMutes)
+	if(Index < 0 || Index >= pSelf->m_NumMutes)
 		return;
 
-	net_addr_str(&pSelf->m_aMutes[Victim].m_Addr, aIpBuf, sizeof(aIpBuf), false);
+	char aIpBuf[64];
+	char aBuf[64];
+	net_addr_str(&pSelf->m_aMutes[Index].m_Addr, aIpBuf, sizeof(aIpBuf), false);
 	str_format(aBuf, sizeof(aBuf), "Unmuted %s", aIpBuf);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes", aBuf);
 
 	pSelf->m_NumMutes--;
-	pSelf->m_aMutes[Victim] = pSelf->m_aMutes[pSelf->m_NumMutes];
+	pSelf->m_aMutes[Index] = pSelf->m_aMutes[pSelf->m_NumMutes];
+}
+
+// unmute by player id
+void CGameContext::ConUnmuteID(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->GetVictim();
+
+	if(Victim < 0 || Victim > MAX_CLIENTS || !pSelf->m_apPlayers[Victim])
+		return;
+
+	NETADDR Addr;
+	pSelf->Server()->GetClientAddr(Victim, &Addr);
+
+	for(int i = 0; i < pSelf->m_NumMutes; i++)
+	{
+		if(net_addr_comp_noport(&pSelf->m_aMutes[i].m_Addr, &Addr) == 0)
+		{
+			char aIpBuf[64];
+			char aBuf[64];
+			net_addr_str(&pSelf->m_aMutes[i].m_Addr, aIpBuf, sizeof(aIpBuf), false);
+			str_format(aBuf, sizeof(aBuf), "Unmuted %s", aIpBuf);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes", aBuf);
+			pSelf->m_NumMutes--;
+			pSelf->m_aMutes[i] = pSelf->m_aMutes[pSelf->m_NumMutes];
+			return;
+		}
+	}
 }
 
 // list mutes
