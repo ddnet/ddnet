@@ -186,9 +186,10 @@ int32_t CLineInput::Manipulate(IInput::CEvent Event, char *pStr, int StrMaxSize,
 				bool WasNonWordChar = IsNotAWordChar(pStr[CursorPos]);
 				while((!WasNonWordChar && !IsNotAWordChar(pStr[CursorPos])) || (WasNonWordChar && IsNotAWordChar(pStr[CursorPos])))
 				{
-					CursorPos = str_utf8_forward(pStr, CursorPos);
-					if(CursorPos >= Len)
+					int NewCursorPos = str_utf8_forward(pStr, CursorPos);
+					if(CursorPos >= Len || NewCursorPos == CursorPos)
 						break;
+					CursorPos = NewCursorPos;
 				}
 				Changes |= ELineInputChanges::LINE_INPUT_CHANGE_WARP_CURSOR;
 			}

@@ -264,6 +264,7 @@ class CTextRender : public IEngineTextRender
 	int WordLength(const char *pText)
 	{
 		int Length = 0;
+		int NewLength = 0;
 		while(1)
 		{
 			const char *pCursor = (pText + Length);
@@ -271,7 +272,10 @@ class CTextRender : public IEngineTextRender
 				return Length;
 			if(*pCursor == '\n' || *pCursor == '\t' || *pCursor == ' ')
 				return Length + 1;
-			Length = str_utf8_forward(pText, Length);
+			NewLength = str_utf8_forward(pText, Length);
+			if(NewLength == Length)
+				return Length;
+			Length = NewLength;
 		}
 	}
 
