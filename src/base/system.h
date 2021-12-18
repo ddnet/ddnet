@@ -2009,6 +2009,8 @@ int str_utf8_rewind(const char *str, int cursor);
 
 	Remarks:
 		- Won't move the cursor beyond the zero termination marker
+		- Won't move the cursor forward when it encounters the zero termination in
+		  the next bytes required to decode the current Unicode codepoint.
 */
 int str_utf8_forward(const char *str, int cursor);
 
