@@ -178,7 +178,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 	if(m_Mode == MODE_NONE)
 		return false;
 
-	if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_V))
+	if(Input()->ModifierIsPressed() && Input()->KeyPress(KEY_V))
 	{
 		const char *Text = Input()->GetClipboardText();
 		if(Text)
@@ -205,12 +205,12 @@ bool CChat::OnInput(IInput::CEvent Event)
 		}
 	}
 
-	if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_C))
+	if(Input()->ModifierIsPressed() && Input()->KeyPress(KEY_C))
 	{
 		Input()->SetClipboardText(m_Input.GetString());
 	}
 
-	if(Input()->KeyIsPressed(KEY_LCTRL)) // jump to spaces and special ASCII characters
+	if(Input()->ModifierIsPressed()) // jump to spaces and special ASCII characters
 	{
 		int SearchDirection = 0;
 		if(Input()->KeyPress(KEY_LEFT) || Input()->KeyPress(KEY_BACKSPACE))

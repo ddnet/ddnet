@@ -708,7 +708,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		QuickSearch.VSplitLeft(QuickSearch.w - 15.0f, &QuickSearch, &QuickSearchClearButton);
 		static int s_ClearButton = 0;
 		static float s_Offset = 0.0f;
-		if(Input()->KeyPress(KEY_F) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)))
+		if(Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
 			UI()->SetActiveItem(&g_Config.m_ClSkinFilterString);
 		if(UIEx()->DoClearableEditBox(&g_Config.m_ClSkinFilterString, &s_ClearButton, &QuickSearch, g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString), 14.0f, &s_Offset, false, CUI::CORNER_ALL, Localize("Search")))
 			s_InitSkinlist = true;
