@@ -168,9 +168,7 @@ bool CBinds::OnInput(IInput::CEvent e)
 	if(m_aapKeyBindings[0][e.m_Key] && !ret)
 	{
 		// When ctrl+shift are pressed (ctrl+shift binds and also the hard-coded ctrl+shift+d, ctrl+shift+g, ctrl+shift+e), ignore other +xxx binds
-		if(e.m_Flags & IInput::FLAG_PRESS && Mask != ((1 << MODIFIER_CTRL) | (1 << MODIFIER_SHIFT)))
-			Console()->ExecuteLineStroked(1, m_aapKeyBindings[0][e.m_Key]);
-		if(e.m_Flags & IInput::FLAG_PRESS && Mask != ((1 << MODIFIER_GUI) | (1 << MODIFIER_SHIFT)))
+		if(e.m_Flags & IInput::FLAG_PRESS && Mask != ((1 << MODIFIER_CTRL) | (1 << MODIFIER_SHIFT)) && Mask != ((1 << MODIFIER_GUI) | (1 << MODIFIER_SHIFT)))
 			Console()->ExecuteLineStroked(1, m_aapKeyBindings[0][e.m_Key]);
 		if(e.m_Flags & IInput::FLAG_RELEASE)
 			Console()->ExecuteLineStroked(0, m_aapKeyBindings[0][e.m_Key]);
