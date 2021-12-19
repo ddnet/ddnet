@@ -259,6 +259,38 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 #endif
 
 		Left.HSplitTop(15.0f, 0, &Left);
+		CUIRect SettingsButton;
+		Left.HSplitBottom(25.0f, &Left, &SettingsButton);
+
+		SettingsButton.HSplitTop(5.0f, 0, &SettingsButton);
+		static int s_SettingsButtonID = 0;
+		if(DoButton_Menu(&s_SettingsButtonID, Localize("Settings file"), 0, &SettingsButton))
+		{
+			char aBuf[IO_MAX_PATH_LENGTH];
+			Storage()->GetCompletePath(IStorage::TYPE_SAVE, "settings_ddnet.cfg", aBuf, sizeof(aBuf));
+			if(!open_file(aBuf))
+			{
+				dbg_msg("menus", "couldn't open file");
+			}
+		}
+
+		Left.HSplitTop(15.0f, 0, &Left);
+		CUIRect ConfigButton;
+		Left.HSplitBottom(25.0f, &Left, &ConfigButton);
+
+		ConfigButton.HSplitTop(5.0f, 0, &ConfigButton);
+		static int s_ConfigButtonID = 0;
+		if(DoButton_Menu(&s_ConfigButtonID, Localize("Config directory"), 0, &ConfigButton))
+		{
+			char aBuf[IO_MAX_PATH_LENGTH];
+			Storage()->GetCompletePath(IStorage::TYPE_SAVE, "", aBuf, sizeof(aBuf));
+			if(!open_file(aBuf))
+			{
+				dbg_msg("menus", "couldn't open file");
+			}
+		}
+
+		Left.HSplitTop(15.0f, 0, &Left);
 		CUIRect DirectoryButton;
 		Left.HSplitBottom(25.0f, &Left, &DirectoryButton);
 		RenderThemeSelection(Left);
@@ -268,13 +300,11 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		if(DoButton_Menu(&s_ThemesButtonID, Localize("Themes directory"), 0, &DirectoryButton))
 		{
 			char aBuf[IO_MAX_PATH_LENGTH];
-			char aBufFull[IO_MAX_PATH_LENGTH + 7];
 			Storage()->GetCompletePath(IStorage::TYPE_SAVE, "themes", aBuf, sizeof(aBuf));
 			Storage()->CreateFolder("themes", IStorage::TYPE_SAVE);
-			str_format(aBufFull, sizeof(aBufFull), "file://%s", aBuf);
-			if(!open_link(aBufFull))
+			if(!open_file(aBuf))
 			{
-				dbg_msg("menus", "couldn't open link");
+				dbg_msg("menus", "couldn't open file");
 			}
 		}
 
@@ -733,13 +763,11 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(DoButton_Menu(&s_DirectoryButtonID, Localize("Skins directory"), 0, &DirectoryButton))
 	{
 		char aBuf[IO_MAX_PATH_LENGTH];
-		char aBufFull[IO_MAX_PATH_LENGTH + 7];
 		Storage()->GetCompletePath(IStorage::TYPE_SAVE, "skins", aBuf, sizeof(aBuf));
 		Storage()->CreateFolder("skins", IStorage::TYPE_SAVE);
-		str_format(aBufFull, sizeof(aBufFull), "file://%s", aBuf);
-		if(!open_link(aBufFull))
+		if(!open_file(aBuf))
 		{
-			dbg_msg("menus", "couldn't open link");
+			dbg_msg("menus", "couldn't open file");
 		}
 	}
 

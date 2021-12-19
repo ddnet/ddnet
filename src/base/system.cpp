@@ -3666,13 +3666,26 @@ int open_link(const char *link)
 	MultiByteToWideChar(CP_UTF8, 0, link, -1, wBuffer, sizeof(wBuffer) / sizeof(WCHAR));
 	return (uintptr_t)ShellExecuteW(NULL, L"open", wBuffer, NULL, NULL, SW_SHOWDEFAULT) > 32;
 #elif defined(CONF_PLATFORM_LINUX)
-	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "xdg-open %s >/dev/null 2>&1 &", link);
-	return system(aBuf) == 0;
+	const int pid = fork();
+	if(pid == 0)
+		execlp("xdg-open", "xdg-open", link, nullptr);
+	return pid > 0;
 #elif defined(CONF_FAMILY_UNIX)
-	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "open %s &", link);
-	return system(aBuf) == 0;
+	const int pid = fork();
+	if(pid == 0)
+		execlp("open", "open", link, nullptr);
+	return pid > 0;
+#endif
+}
+
+int open_file(const char *path)
+{
+#if defined(CONF_PLATFORM_MACOS)
+	return open_link(path);
+#else
+	char buf[512];
+	str_format(buf, sizeof(buf), "file://%s", path);
+	return open_link(buf);
 #endif
 }
 

@@ -1807,17 +1807,32 @@ int net_socket_read_wait(NETSOCKET sock, int time);
 /*
 	Function: open_link
 		Opens a link in the browser.
-	
+
 	Parameters:
 		link - The link to open in a browser.
-	
+
 	Returns:
 		Returns 1 on success, 0 on failure.
-	
+
 	Remarks:
-		This may not be called with untrusted input or it'll result in arbitrary code execution.
+		This may not be called with untrusted input or it'll result in arbitrary code execution, especially on Windows.
 */
 int open_link(const char *link);
+
+/*
+	Function: open_file
+		Opens a file or directory with default program.
+
+	Parameters:
+		path - The path to open.
+
+	Returns:
+		Returns 1 on success, 0 on failure.
+
+	Remarks:
+		This may not be called with untrusted input or it'll result in arbitrary code execution, especially on Windows.
+*/
+int open_file(const char *path);
 
 void swap_endian(void *data, unsigned elem_size, unsigned num);
 
