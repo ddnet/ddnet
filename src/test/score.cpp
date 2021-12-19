@@ -54,15 +54,15 @@ struct Score : public testing::TestWithParam<IDbConnection *>
 
 		// Delete all existing entries for persistent databases like MySQL
 		int NumInserted = 0;
-		ASSERT_FALSE(conn->PrepareStatement("DELETE FROM record_race;", aError, sizeof(aError))) << aError;
+		ASSERT_FALSE(conn->PrepareStatement("DELETE FROM record_race", aError, sizeof(aError))) << aError;
 		ASSERT_FALSE(conn->ExecuteUpdate(&NumInserted, aError, sizeof(aError))) << aError;
-		ASSERT_FALSE(conn->PrepareStatement("DELETE FROM record_teamrace;", aError, sizeof(aError))) << aError;
+		ASSERT_FALSE(conn->PrepareStatement("DELETE FROM record_teamrace", aError, sizeof(aError))) << aError;
 		ASSERT_FALSE(conn->ExecuteUpdate(&NumInserted, aError, sizeof(aError))) << aError;
-		ASSERT_FALSE(conn->PrepareStatement("DELETE FROM record_maps;", aError, sizeof(aError))) << aError;
+		ASSERT_FALSE(conn->PrepareStatement("DELETE FROM record_maps", aError, sizeof(aError))) << aError;
 		ASSERT_FALSE(conn->ExecuteUpdate(&NumInserted, aError, sizeof(aError))) << aError;
-		ASSERT_FALSE(conn->PrepareStatement("DELETE FROM record_points;", aError, sizeof(aError))) << aError;
+		ASSERT_FALSE(conn->PrepareStatement("DELETE FROM record_points", aError, sizeof(aError))) << aError;
 		ASSERT_FALSE(conn->ExecuteUpdate(&NumInserted, aError, sizeof(aError))) << aError;
-		ASSERT_FALSE(conn->PrepareStatement("DELETE FROM record_saves;", aError, sizeof(aError))) << aError;
+		ASSERT_FALSE(conn->PrepareStatement("DELETE FROM record_saves", aError, sizeof(aError))) << aError;
 		ASSERT_FALSE(conn->ExecuteUpdate(&NumInserted, aError, sizeof(aError))) << aError;
 	}
 
@@ -78,7 +78,7 @@ struct Score : public testing::TestWithParam<IDbConnection *>
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf),
 			"%s into %s_maps(Map, Server, Mapper, Points, Stars, Timestamp) "
-			"VALUES (\"Kobra 3\", \"Novice\", \"Zerodin\", 5, 5, \"2015-01-01 00:00:00\");",
+			"VALUES (\"Kobra 3\", \"Novice\", \"Zerodin\", 5, 5, \"2015-01-01 00:00:00\")",
 			conn->InsertIgnore(), conn->GetPrefix());
 		ASSERT_FALSE(conn->PrepareStatement(aBuf, aError, sizeof(aError))) << aError;
 		int NumInserted = 0;

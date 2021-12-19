@@ -100,7 +100,7 @@ bool CScoreWorker::Init(IDbConnection *pSqlServer, const ISqlData *pGameData, ch
 	char aBuf[512];
 	// get the best time
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT Time FROM %s_race WHERE Map=? ORDER BY `Time` ASC LIMIT 1;",
+		"SELECT Time FROM %s_race WHERE Map=? ORDER BY `Time` ASC LIMIT 1",
 		pSqlServer->GetPrefix());
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
@@ -137,7 +137,7 @@ bool CScoreWorker::LoadPlayerData(IDbConnection *pSqlServer, const ISqlData *pGa
 		"FROM %s_race "
 		"WHERE Map = ? AND Name = ? "
 		"ORDER BY Time ASC "
-		"LIMIT 1;",
+		"LIMIT 1",
 		pSqlServer->GetPrefix());
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
@@ -221,7 +221,7 @@ bool CScoreWorker::MapVote(IDbConnection *pSqlServer, const ISqlData *pGameData,
 		"  CASE WHEN Map = ? THEN 0 ELSE 1 END, "
 		"  CASE WHEN Map LIKE ? THEN 0 ELSE 1 END, "
 		"  LENGTH(Map), Map "
-		"LIMIT 1;",
+		"LIMIT 1",
 		pSqlServer->GetPrefix(), pSqlServer->CollateNocase());
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
@@ -296,7 +296,7 @@ bool CScoreWorker::MapInfo(IDbConnection *pSqlServer, const ISqlData *pGameData,
 		"    LENGTH(Map), "
 		"    Map "
 		"  LIMIT 1"
-		") as l;",
+		") as l",
 		pSqlServer->GetPrefix(), pSqlServer->GetPrefix(),
 		pSqlServer->MedianMapTime(aMedianMapTime, sizeof(aMedianMapTime)),
 		aTimestamp, aCurrentTimestamp, aTimestamp,
@@ -394,7 +394,7 @@ bool CScoreWorker::SaveScore(IDbConnection *pSqlServer, const ISqlData *pGameDat
 	char aBuf[1024];
 
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT COUNT(*) AS NumFinished FROM %s_race WHERE Map=? AND Name=? ORDER BY time ASC LIMIT 1;",
+		"SELECT COUNT(*) AS NumFinished FROM %s_race WHERE Map=? AND Name=? ORDER BY time ASC LIMIT 1",
 		pSqlServer->GetPrefix());
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
@@ -447,7 +447,7 @@ bool CScoreWorker::SaveScore(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		"	%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, "
 		"	%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, "
 		"	%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, "
-		"	?, %s);",
+		"	?, %s)",
 		pSqlServer->InsertIgnore(), pSqlServer->GetPrefix(),
 		pSqlServer->InsertTimestampAsUtc(), pData->m_Time,
 		pData->m_aCpCurrent[0], pData->m_aCpCurrent[1], pData->m_aCpCurrent[2],
@@ -496,7 +496,7 @@ bool CScoreWorker::SaveTeamScore(IDbConnection *pSqlServer, const ISqlData *pGam
 		"  FROM %s_teamrace "
 		"  WHERE Map = ? AND Name = ? AND DDNet7 = %s"
 		") as l INNER JOIN %s_teamrace AS r ON l.ID = r.ID "
-		"ORDER BY l.ID, Name COLLATE %s;",
+		"ORDER BY l.ID, Name COLLATE %s",
 		pSqlServer->GetPrefix(), pSqlServer->False(), pSqlServer->GetPrefix(), pSqlServer->BinaryCollate());
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
@@ -536,7 +536,7 @@ bool CScoreWorker::SaveTeamScore(IDbConnection *pSqlServer, const ISqlData *pGam
 		if(pData->m_Time < Time)
 		{
 			str_format(aBuf, sizeof(aBuf),
-				"UPDATE %s_teamrace SET Time=%.2f, Timestamp=?, DDNet7=%s, GameID=? WHERE ID = ?;",
+				"UPDATE %s_teamrace SET Time=%.2f, Timestamp=?, DDNet7=%s, GameID=? WHERE ID = ?",
 				pSqlServer->GetPrefix(), pData->m_Time, pSqlServer->False());
 			if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 			{
@@ -561,7 +561,7 @@ bool CScoreWorker::SaveTeamScore(IDbConnection *pSqlServer, const ISqlData *pGam
 			// if no entry found... create a new one
 			str_format(aBuf, sizeof(aBuf),
 				"%s INTO %s_teamrace(Map, Name, Timestamp, Time, ID, GameID, DDNet7) "
-				"VALUES (?, ?, %s, %.2f, ?, ?, %s);",
+				"VALUES (?, ?, %s, %.2f, ?, ?, %s)",
 				pSqlServer->InsertIgnore(), pSqlServer->GetPrefix(),
 				pSqlServer->InsertTimestampAsUtc(), pData->m_Time, pSqlServer->False());
 			if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
@@ -604,7 +604,7 @@ bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData
 		"  GROUP BY Name "
 		"  WINDOW w AS (ORDER BY Time)"
 		") as a "
-		"WHERE Name = ?;",
+		"WHERE Name = ?",
 		pSqlServer->GetPrefix());
 
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
@@ -793,7 +793,7 @@ bool CScoreWorker::ShowTop(IDbConnection *pSqlServer, const ISqlData *pGameData,
 		"  WINDOW w AS (ORDER BY Time)"
 		") as a "
 		"ORDER BY Rank %s "
-		"LIMIT %d, ?;",
+		"LIMIT %d, ?",
 		pSqlServer->GetPrefix(),
 		pOrder,
 		LimitStart);
@@ -904,7 +904,7 @@ bool CScoreWorker::ShowTeamTop5(IDbConnection *pSqlServer, const ISqlData *pGame
 		"  LIMIT %d, 5"
 		") as l2 "
 		"INNER JOIN %s_teamrace as r ON l2.ID = r.ID "
-		"ORDER BY Rank %s, r.ID, Name ASC;",
+		"ORDER BY Rank %s, r.ID, Name ASC",
 		pSqlServer->GetPrefix(), pOrder, LimitStart, pSqlServer->GetPrefix(), pOrder);
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
@@ -1077,7 +1077,7 @@ bool CScoreWorker::ShowTimes(IDbConnection *pSqlServer, const ISqlData *pGameDat
 			"FROM %s_race "
 			"WHERE Map = ? AND Name = ? "
 			"ORDER BY Timestamp %s "
-			"LIMIT ?, 5;",
+			"LIMIT ?, 5",
 			aCurrentTimestamp, aTimestamp, aTimestamp,
 			pSqlServer->GetPrefix(), pOrder);
 		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
@@ -1095,7 +1095,7 @@ bool CScoreWorker::ShowTimes(IDbConnection *pSqlServer, const ISqlData *pGameDat
 			"FROM %s_race "
 			"WHERE Map = ? "
 			"ORDER BY Timestamp %s "
-			"LIMIT ?, 5;",
+			"LIMIT ?, 5",
 			aCurrentTimestamp, aTimestamp, aTimestamp,
 			pSqlServer->GetPrefix(), pOrder);
 		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
@@ -1183,7 +1183,7 @@ bool CScoreWorker::ShowPoints(IDbConnection *pSqlServer, const ISqlData *pGameDa
 		"  SELECT COUNT(Name) + 1 FROM %s_points WHERE Points > ("
 		"    SELECT points FROM %s_points WHERE Name = ?"
 		")) as Rank, Points, Name "
-		"FROM %s_points WHERE Name = ?;",
+		"FROM %s_points WHERE Name = ?",
 		pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
@@ -1232,7 +1232,7 @@ bool CScoreWorker::ShowTopPoints(IDbConnection *pSqlServer, const ISqlData *pGam
 		"  FROM %s_points "
 		"  ORDER BY Points DESC LIMIT ?"
 		") as a "
-		"ORDER BY Rank ASC, Name ASC LIMIT ?, 5;",
+		"ORDER BY Rank ASC, Name ASC LIMIT ?, 5",
 		pSqlServer->GetPrefix());
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
@@ -1276,7 +1276,7 @@ bool CScoreWorker::RandomMap(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		str_format(aBuf, sizeof(aBuf),
 			"SELECT Map FROM %s_maps "
 			"WHERE Server = ? AND Map != ? AND Stars = ? "
-			"ORDER BY %s LIMIT 1;",
+			"ORDER BY %s LIMIT 1",
 			pSqlServer->GetPrefix(), pSqlServer->Random());
 		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 		{
@@ -1289,7 +1289,7 @@ bool CScoreWorker::RandomMap(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		str_format(aBuf, sizeof(aBuf),
 			"SELECT Map FROM %s_maps "
 			"WHERE Server = ? AND Map != ? "
-			"ORDER BY %s LIMIT 1;",
+			"ORDER BY %s LIMIT 1",
 			pSqlServer->GetPrefix(), pSqlServer->Random());
 		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 		{
@@ -1331,7 +1331,7 @@ bool CScoreWorker::RandomUnfinishedMap(IDbConnection *pSqlServer, const ISqlData
 			"  FROM %s_race "
 			"  WHERE Name = ?"
 			") ORDER BY %s "
-			"LIMIT 1;",
+			"LIMIT 1",
 			pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->Random());
 		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 		{
@@ -1352,7 +1352,7 @@ bool CScoreWorker::RandomUnfinishedMap(IDbConnection *pSqlServer, const ISqlData
 			"  FROM %s_race as race "
 			"  WHERE Name = ?"
 			") ORDER BY %s "
-			"LIMIT 1;",
+			"LIMIT 1",
 			pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->Random());
 		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 		{
@@ -1492,7 +1492,7 @@ bool CScoreWorker::LoadTeam(IDbConnection *pSqlServer, const ISqlData *pGameData
 	str_format(aBuf, sizeof(aBuf),
 		"SELECT Savegame, %s-%s AS Ago, SaveID "
 		"FROM %s_saves "
-		"where Code = ? AND Map = ? AND DDNet7 = %s;",
+		"where Code = ? AND Map = ? AND DDNet7 = %s",
 		aCurrentTimestamp, aTimestamp,
 		pSqlServer->GetPrefix(), pSqlServer->False());
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
@@ -1568,7 +1568,7 @@ bool CScoreWorker::LoadTeam(IDbConnection *pSqlServer, const ISqlData *pGameData
 
 	str_format(aBuf, sizeof(aBuf),
 		"DELETE FROM %s_saves "
-		"WHERE Code = ? AND Map = ? AND SaveID %s;",
+		"WHERE Code = ? AND Map = ? AND SaveID %s",
 		pSqlServer->GetPrefix(),
 		pResult->m_SaveID != UUID_NO_SAVE_ID ? "= ?" : "IS NULL");
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
@@ -1623,7 +1623,7 @@ bool CScoreWorker::GetSaves(IDbConnection *pSqlServer, const ISqlData *pGameData
 	str_format(aBuf, sizeof(aBuf),
 		"SELECT COUNT(*) AS NumSaves, %s-%s AS Ago "
 		"FROM %s_saves "
-		"WHERE Map = ? AND Savegame LIKE ?;",
+		"WHERE Map = ? AND Savegame LIKE ?",
 		aCurrentTimestamp, aMaxTimestamp,
 		pSqlServer->GetPrefix());
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
