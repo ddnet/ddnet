@@ -2104,12 +2104,26 @@ void CCharacter::DDRaceTick()
 	// look for save position for rescue feature
 	if(g_Config.m_SvRescue || ((g_Config.m_SvTeam == 3 || Team() > TEAM_FLOCK) && Team() >= TEAM_FLOCK && Team() < TEAM_SUPER))
 	{
-		int index = GameServer()->Collision()->GetPureMapIndex(m_Pos);
-		int tile = GameServer()->Collision()->GetTileIndex(index);
-		int ftile = GameServer()->Collision()->GetFTileIndex(index);
-		if(IsGrounded() && tile != TILE_FREEZE && tile != TILE_DFREEZE && ftile != TILE_FREEZE && ftile != TILE_DFREEZE && !m_DeepFreeze)
+		int Index = GameServer()->Collision()->GetPureMapIndex(m_Pos);
+		const int aTiles[] = {
+			GameServer()->Collision()->GetTileIndex(Index),
+			GameServer()->Collision()->GetFTileIndex(Index),
+			GameServer()->Collision()->IsSwitch(Index)};
+		if(IsGrounded() && !m_DeepFreeze)
 		{
-			SetRescue();
+			bool IsInFreeze = false;
+			for(const int Tile : aTiles)
+			{
+				if(Tile == TILE_FREEZE || Tile == TILE_DFREEZE)
+				{
+					IsInFreeze = true;
+					break;
+				}
+			}
+			if(!IsInFreeze)
+			{
+				SetRescue();
+			}
 		}
 	}
 
