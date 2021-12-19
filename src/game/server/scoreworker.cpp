@@ -992,7 +992,7 @@ bool CScoreWorker::ShowPlayerTeamTop5(IDbConnection *pSqlServer, const ISqlData 
 		"  LIMIT %d, 5 "
 		") AS l ON TeamRank.ID = l.ID "
 		"INNER JOIN %s_teamrace AS r ON l.ID = r.ID "
-		"ORDER BY Time %s, l.ID ",
+		"ORDER BY Time %s, l.ID, Name ASC",
 		pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pOrder, LimitStart, pSqlServer->GetPrefix(), pOrder);
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{

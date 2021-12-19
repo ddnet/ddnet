@@ -32,7 +32,7 @@ jobs:
           env:
             CFLAGS: -Wdeclaration-after-statement -Werror
             CXXFLAGS: -Werror
-            GTEST_FILTER: -Sql*
+            GTEST_FILTER: -*SQLite*
         - os: macOS-latest
           cmake-args: -G "Unix Makefiles"
           build-args: --parallel
