@@ -671,6 +671,7 @@ public:
 	virtual void Maximize() = 0;
 	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless) = 0;
 	virtual bool SetWindowScreen(int Index) = 0;
+	virtual bool UpdateDisplayMode(int Index) = 0;
 	virtual int GetWindowScreen() = 0;
 	virtual int WindowActive() = 0;
 	virtual int WindowOpen() = 0;
@@ -1166,6 +1167,7 @@ public:
 	void Maximize() override;
 	void SetWindowParams(int FullscreenMode, bool IsBorderless) override;
 	bool SetWindowScreen(int Index) override;
+	void Move(int x, int y) override;
 	void Resize(int w, int h, int RefreshRate, bool SetWindowSize = false, bool ForceResizeEvent = false) override;
 	void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser) override;
 	int GetWindowScreen() override;

@@ -25,8 +25,8 @@ To clone the libraries if you have previously cloned DDNet without them:
 
     git submodule update --init --recursive
 
-Dependencies on Linux
----------------------
+Dependencies on Linux / macOS
+-----------------------------
 
 You can install the required libraries on your system, `touch CMakeLists.txt` and CMake will use the system-wide libraries by default. You can install all required dependencies and CMake on Debian or Ubuntu like this:
 
@@ -37,6 +37,10 @@ Or on Arch Linux like this:
     sudo pacman -S --needed base-devel cmake curl freetype2 git glew libnotify opusfile python sdl2 sqlite wavpack gmock
 
 There is an [AUR package for pnglite](https://aur.archlinux.org/packages/pnglite/). For instructions on installing it, see [AUR packages installation instructions on ArchWiki](https://wiki.archlinux.org/index.php/Arch_User_Repository#Installing_packages).
+
+On macOS you can use [homebrew](https://brew.sh/) to install build dependencies like this:
+
+    brew install cmake freetype opusfile SDL2 wavpack googletest glew
 
 If you don't want to use the system libraries, you can pass the `-DPREFER_BUNDLED_LIBS=ON` parameter to cmake.
 

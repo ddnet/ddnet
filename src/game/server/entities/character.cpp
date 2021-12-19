@@ -1716,46 +1716,46 @@ void CCharacter::HandleTiles(int Index)
 	m_Core.m_Vel = ClampVel(m_MoveRestrictions, m_Core.m_Vel);
 
 	// handle switch tiles
-	if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_SWITCHOPEN && Team() != TEAM_SUPER && GameServer()->Collision()->GetSwitchNumber(MapIndex) > 0)
+	if(GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_SWITCHOPEN && Team() != TEAM_SUPER && GameServer()->Collision()->GetSwitchNumber(MapIndex) > 0)
 	{
 		GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()] = true;
 		GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_EndTick[Team()] = 0;
 		GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Type[Team()] = TILE_SWITCHOPEN;
 	}
-	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_SWITCHTIMEDOPEN && Team() != TEAM_SUPER && GameServer()->Collision()->GetSwitchNumber(MapIndex) > 0)
+	else if(GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_SWITCHTIMEDOPEN && Team() != TEAM_SUPER && GameServer()->Collision()->GetSwitchNumber(MapIndex) > 0)
 	{
 		GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()] = true;
 		GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_EndTick[Team()] = Server()->Tick() + 1 + GameServer()->Collision()->GetSwitchDelay(MapIndex) * Server()->TickSpeed();
 		GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Type[Team()] = TILE_SWITCHTIMEDOPEN;
 	}
-	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_SWITCHTIMEDCLOSE && Team() != TEAM_SUPER && GameServer()->Collision()->GetSwitchNumber(MapIndex) > 0)
+	else if(GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_SWITCHTIMEDCLOSE && Team() != TEAM_SUPER && GameServer()->Collision()->GetSwitchNumber(MapIndex) > 0)
 	{
 		GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()] = false;
 		GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_EndTick[Team()] = Server()->Tick() + 1 + GameServer()->Collision()->GetSwitchDelay(MapIndex) * Server()->TickSpeed();
 		GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Type[Team()] = TILE_SWITCHTIMEDCLOSE;
 	}
-	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_SWITCHCLOSE && Team() != TEAM_SUPER && GameServer()->Collision()->GetSwitchNumber(MapIndex) > 0)
+	else if(GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_SWITCHCLOSE && Team() != TEAM_SUPER && GameServer()->Collision()->GetSwitchNumber(MapIndex) > 0)
 	{
 		GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()] = false;
 		GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_EndTick[Team()] = 0;
 		GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Type[Team()] = TILE_SWITCHCLOSE;
 	}
-	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_FREEZE && Team() != TEAM_SUPER)
+	else if(GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_FREEZE && Team() != TEAM_SUPER)
 	{
 		if(GameServer()->Collision()->GetSwitchNumber(MapIndex) == 0 || GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
 			Freeze(GameServer()->Collision()->GetSwitchDelay(MapIndex));
 	}
-	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_DFREEZE && Team() != TEAM_SUPER)
+	else if(GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_DFREEZE && Team() != TEAM_SUPER)
 	{
 		if(GameServer()->Collision()->GetSwitchNumber(MapIndex) == 0 || GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
 			m_DeepFreeze = true;
 	}
-	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_DUNFREEZE && Team() != TEAM_SUPER)
+	else if(GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_DUNFREEZE && Team() != TEAM_SUPER)
 	{
 		if(GameServer()->Collision()->GetSwitchNumber(MapIndex) == 0 || GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
 			m_DeepFreeze = false;
 	}
-	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_HIT_ENABLE && m_Hit & DISABLE_HIT_HAMMER && GameServer()->Collision()->GetSwitchDelay(MapIndex) == WEAPON_HAMMER)
+	else if(GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_HIT_ENABLE && m_Hit & DISABLE_HIT_HAMMER && GameServer()->Collision()->GetSwitchDelay(MapIndex) == WEAPON_HAMMER)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can hammer hit others");
 		m_Hit &= ~DISABLE_HIT_HAMMER;
@@ -1763,7 +1763,7 @@ void CCharacter::HandleTiles(int Index)
 		m_Core.m_NoHammerHit = false;
 		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 	}
-	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_HIT_DISABLE && !(m_Hit & DISABLE_HIT_HAMMER) && GameServer()->Collision()->GetSwitchDelay(MapIndex) == WEAPON_HAMMER)
+	else if(GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_HIT_DISABLE && !(m_Hit & DISABLE_HIT_HAMMER) && GameServer()->Collision()->GetSwitchDelay(MapIndex) == WEAPON_HAMMER)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't hammer hit others");
 		m_Hit |= DISABLE_HIT_HAMMER;
@@ -1771,43 +1771,43 @@ void CCharacter::HandleTiles(int Index)
 		m_Core.m_NoHammerHit = true;
 		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 	}
-	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_HIT_ENABLE && m_Hit & DISABLE_HIT_SHOTGUN && GameServer()->Collision()->GetSwitchDelay(MapIndex) == WEAPON_SHOTGUN)
+	else if(GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_HIT_ENABLE && m_Hit & DISABLE_HIT_SHOTGUN && GameServer()->Collision()->GetSwitchDelay(MapIndex) == WEAPON_SHOTGUN)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can shoot others with shotgun");
 		m_Hit &= ~DISABLE_HIT_SHOTGUN;
 		m_Core.m_NoShotgunHit = false;
 	}
-	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_HIT_DISABLE && !(m_Hit & DISABLE_HIT_SHOTGUN) && GameServer()->Collision()->GetSwitchDelay(MapIndex) == WEAPON_SHOTGUN)
+	else if(GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_HIT_DISABLE && !(m_Hit & DISABLE_HIT_SHOTGUN) && GameServer()->Collision()->GetSwitchDelay(MapIndex) == WEAPON_SHOTGUN)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't shoot others with shotgun");
 		m_Hit |= DISABLE_HIT_SHOTGUN;
 		m_Core.m_NoShotgunHit = true;
 	}
-	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_HIT_ENABLE && m_Hit & DISABLE_HIT_GRENADE && GameServer()->Collision()->GetSwitchDelay(MapIndex) == WEAPON_GRENADE)
+	else if(GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_HIT_ENABLE && m_Hit & DISABLE_HIT_GRENADE && GameServer()->Collision()->GetSwitchDelay(MapIndex) == WEAPON_GRENADE)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can shoot others with grenade");
 		m_Hit &= ~DISABLE_HIT_GRENADE;
 		m_Core.m_NoGrenadeHit = false;
 	}
-	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_HIT_DISABLE && !(m_Hit & DISABLE_HIT_GRENADE) && GameServer()->Collision()->GetSwitchDelay(MapIndex) == WEAPON_GRENADE)
+	else if(GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_HIT_DISABLE && !(m_Hit & DISABLE_HIT_GRENADE) && GameServer()->Collision()->GetSwitchDelay(MapIndex) == WEAPON_GRENADE)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't shoot others with grenade");
 		m_Hit |= DISABLE_HIT_GRENADE;
 		m_Core.m_NoGrenadeHit = true;
 	}
-	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_HIT_ENABLE && m_Hit & DISABLE_HIT_LASER && GameServer()->Collision()->GetSwitchDelay(MapIndex) == WEAPON_LASER)
+	else if(GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_HIT_ENABLE && m_Hit & DISABLE_HIT_LASER && GameServer()->Collision()->GetSwitchDelay(MapIndex) == WEAPON_LASER)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can shoot others with laser");
 		m_Hit &= ~DISABLE_HIT_LASER;
 		m_Core.m_NoLaserHit = false;
 	}
-	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_HIT_DISABLE && !(m_Hit & DISABLE_HIT_LASER) && GameServer()->Collision()->GetSwitchDelay(MapIndex) == WEAPON_LASER)
+	else if(GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_HIT_DISABLE && !(m_Hit & DISABLE_HIT_LASER) && GameServer()->Collision()->GetSwitchDelay(MapIndex) == WEAPON_LASER)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't shoot others with laser");
 		m_Hit |= DISABLE_HIT_LASER;
 		m_Core.m_NoLaserHit = true;
 	}
-	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_JUMP)
+	else if(GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_JUMP)
 	{
 		int newJumps = GameServer()->Collision()->GetSwitchDelay(MapIndex);
 
@@ -1834,7 +1834,7 @@ void CCharacter::HandleTiles(int Index)
 			m_Core.m_Jumps = newJumps;
 		}
 	}
-	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_ADD_TIME && !m_LastPenalty)
+	else if(GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_ADD_TIME && !m_LastPenalty)
 	{
 		int min = GameServer()->Collision()->GetSwitchDelay(MapIndex);
 		int sec = GameServer()->Collision()->GetSwitchNumber(MapIndex);
@@ -1858,7 +1858,7 @@ void CCharacter::HandleTiles(int Index)
 
 		m_LastPenalty = true;
 	}
-	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_SUBTRACT_TIME && !m_LastBonus)
+	else if(GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_SUBTRACT_TIME && !m_LastBonus)
 	{
 		int min = GameServer()->Collision()->GetSwitchDelay(MapIndex);
 		int sec = GameServer()->Collision()->GetSwitchNumber(MapIndex);
@@ -1885,12 +1885,12 @@ void CCharacter::HandleTiles(int Index)
 		m_LastBonus = true;
 	}
 
-	if(GameServer()->Collision()->IsSwitch(MapIndex) != TILE_ADD_TIME)
+	if(GameServer()->Collision()->GetSwitchType(MapIndex) != TILE_ADD_TIME)
 	{
 		m_LastPenalty = false;
 	}
 
-	if(GameServer()->Collision()->IsSwitch(MapIndex) != TILE_SUBTRACT_TIME)
+	if(GameServer()->Collision()->GetSwitchType(MapIndex) != TILE_SUBTRACT_TIME)
 	{
 		m_LastBonus = false;
 	}
@@ -2104,12 +2104,26 @@ void CCharacter::DDRaceTick()
 	// look for save position for rescue feature
 	if(g_Config.m_SvRescue || ((g_Config.m_SvTeam == 3 || Team() > TEAM_FLOCK) && Team() >= TEAM_FLOCK && Team() < TEAM_SUPER))
 	{
-		int index = GameServer()->Collision()->GetPureMapIndex(m_Pos);
-		int tile = GameServer()->Collision()->GetTileIndex(index);
-		int ftile = GameServer()->Collision()->GetFTileIndex(index);
-		if(IsGrounded() && tile != TILE_FREEZE && tile != TILE_DFREEZE && ftile != TILE_FREEZE && ftile != TILE_DFREEZE && !m_DeepFreeze)
+		int Index = GameServer()->Collision()->GetPureMapIndex(m_Pos);
+		const int aTiles[] = {
+			GameServer()->Collision()->GetTileIndex(Index),
+			GameServer()->Collision()->GetFTileIndex(Index),
+			GameServer()->Collision()->GetSwitchType(Index)};
+		if(IsGrounded() && !m_DeepFreeze)
 		{
-			SetRescue();
+			bool IsInFreeze = false;
+			for(const int Tile : aTiles)
+			{
+				if(Tile == TILE_FREEZE || Tile == TILE_DFREEZE)
+				{
+					IsInFreeze = true;
+					break;
+				}
+			}
+			if(!IsInFreeze)
+			{
+				SetRescue();
+			}
 		}
 	}
 

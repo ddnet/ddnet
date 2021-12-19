@@ -1120,19 +1120,38 @@ void CGraphicsBackend_SDL_OpenGL::SetWindowParams(int FullscreenMode, bool IsBor
 
 bool CGraphicsBackend_SDL_OpenGL::SetWindowScreen(int Index)
 {
-	if(Index >= 0 && Index < m_NumScreens)
+	if(Index < 0 || Index >= m_NumScreens)
 	{
-		SDL_Rect ScreenPos;
-		if(SDL_GetDisplayBounds(Index, &ScreenPos) == 0)
-		{
-			SDL_SetWindowPosition(m_pWindow,
-				SDL_WINDOWPOS_CENTERED_DISPLAY(Index),
-				SDL_WINDOWPOS_CENTERED_DISPLAY(Index));
-			return true;
-		}
+		return false;
 	}
 
-	return false;
+	SDL_Rect ScreenPos;
+	if(SDL_GetDisplayBounds(Index, &ScreenPos) != 0)
+	{
+		return false;
+	}
+
+	SDL_SetWindowPosition(m_pWindow,
+		SDL_WINDOWPOS_CENTERED_DISPLAY(Index),
+		SDL_WINDOWPOS_CENTERED_DISPLAY(Index));
+
+	return UpdateDisplayMode(Index);
+}
+
+bool CGraphicsBackend_SDL_OpenGL::UpdateDisplayMode(int Index)
+{
+	SDL_DisplayMode DisplayMode;
+	if(SDL_GetDesktopDisplayMode(Index, &DisplayMode) < 0)
+	{
+		dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
+		return false;
+	}
+
+	g_Config.m_GfxDesktopWidth = DisplayMode.w;
+	g_Config.m_GfxDesktopHeight = DisplayMode.h;
+	g_Config.m_GfxRefreshRate = DisplayMode.refresh_rate;
+
+	return true;
 }
 
 int CGraphicsBackend_SDL_OpenGL::GetWindowScreen()

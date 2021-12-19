@@ -154,7 +154,7 @@ int32_t CLineInput::Manipulate(IInput::CEvent Event, char *pStr, int StrMaxSize,
 		}
 		else if(Key == KEY_LEFT)
 		{
-			if(ModifierKey == KEY_LCTRL)
+			if(ModifierKey == KEY_LCTRL || ModifierKey == KEY_RCTRL || ModifierKey == KEY_LGUI || ModifierKey == KEY_RGUI)
 			{
 				bool MovedCursor = false;
 				int OldCursorPos = CursorPos;
@@ -181,7 +181,7 @@ int32_t CLineInput::Manipulate(IInput::CEvent Event, char *pStr, int StrMaxSize,
 		}
 		else if(Key == KEY_RIGHT)
 		{
-			if(ModifierKey == KEY_LCTRL)
+			if(ModifierKey == KEY_LCTRL || ModifierKey == KEY_RCTRL || ModifierKey == KEY_LGUI || ModifierKey == KEY_RGUI)
 			{
 				bool WasNonWordChar = IsNotAWordChar(pStr[CursorPos]);
 				while((!WasNonWordChar && !IsNotAWordChar(pStr[CursorPos])) || (WasNonWordChar && IsNotAWordChar(pStr[CursorPos])))
