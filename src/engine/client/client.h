@@ -171,7 +171,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aCurrentMapPath[IO_MAX_PATH_LENGTH];
 
 	char m_aTimeoutCodes[NUM_DUMMIES][32];
-	bool m_aTimeoutCodeSent[NUM_DUMMIES];
+	bool m_CodeRunAfterJoin[NUM_DUMMIES];
 	bool m_GenerateTimeoutSeed;
 
 	//
