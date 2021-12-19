@@ -120,10 +120,10 @@ void CAntibot::OnHammerFire(int ClientID)
 	Update();
 	AntibotOnHammerFire(ClientID);
 }
-void CAntibot::OnHammerHit(int ClientID)
+void CAntibot::OnHammerHit(int ClientID, int TargetID)
 {
 	Update();
-	AntibotOnHammerHit(ClientID);
+	AntibotOnHammerHit(ClientID, TargetID);
 }
 void CAntibot::OnDirectInput(int ClientID)
 {
@@ -225,7 +225,7 @@ void CAntibot::OnPlayerDestroy(int ClientID) {}
 void CAntibot::OnSpawn(int ClientID) {}
 void CAntibot::OnHammerFireReloading(int ClientID) {}
 void CAntibot::OnHammerFire(int ClientID) {}
-void CAntibot::OnHammerHit(int ClientID) {}
+void CAntibot::OnHammerHit(int ClientID, int TargetID) {}
 void CAntibot::OnDirectInput(int ClientID) {}
 void CAntibot::OnCharacterTick(int ClientID) {}
 void CAntibot::OnHookAttach(int ClientID, bool Player) {}

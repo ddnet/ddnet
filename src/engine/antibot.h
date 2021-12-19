@@ -16,7 +16,7 @@ public:
 	virtual void OnSpawn(int ClientID) = 0;
 	virtual void OnHammerFireReloading(int ClientID) = 0;
 	virtual void OnHammerFire(int ClientID) = 0;
-	virtual void OnHammerHit(int ClientID) = 0;
+	virtual void OnHammerHit(int ClientID, int TargetID) = 0;
 	virtual void OnDirectInput(int ClientID) = 0;
 	virtual void OnCharacterTick(int ClientID) = 0;
 	virtual void OnHookAttach(int ClientID, bool Player) = 0;
