@@ -5,14 +5,14 @@ endif()
 
 set_extra_dirs_lib(FREETYPE freetype)
 find_library(FREETYPE_LIBRARY
-  NAMES freetype freetype.6
+  NAMES freetype.6 freetype
   HINTS ${HINTS_FREETYPE_LIBDIR} ${PC_FREETYPE_LIBDIR} ${PC_FREETYPE_LIBRARY_DIRS}
   PATHS ${PATHS_FREETYPE_LIBDIR}
   ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
 set_extra_dirs_include(FREETYPE freetype "${FREETYPE_LIBRARY}")
 find_path(FREETYPE_INCLUDEDIR
-  NAMES config/ftheader.h freetype/config/ftheader.h
+  NAMES freetype/config/ftheader.h config/ftheader.h
   PATH_SUFFIXES freetype2
   HINTS ${HINTS_FREETYPE_INCLUDEDIR} ${PC_FREETYPE_INCLUDEDIR} ${PC_FREETYPE_INCLUDE_DIRS}
   PATHS ${PATHS_FREETYPE_INCLUDEDIR}
@@ -29,9 +29,12 @@ if(FREETYPE_FOUND)
   set(FREETYPE_INCLUDE_DIRS ${FREETYPE_INCLUDEDIR})
 
   is_bundled(FREETYPE_BUNDLED "${FREETYPE_LIBRARY}")
-  if(FREETYPE_BUNDLED AND TARGET_OS STREQUAL "windows")
-    set(FREETYPE_COPY_FILES "${EXTRA_FREETYPE_LIBDIR}/libfreetype.dll")
-  else()
-    set(FREETYPE_COPY_FILES)
+  set(FREETYPE_COPY_FILES)
+  if(FREETYPE_BUNDLED)
+    if(TARGET_OS STREQUAL "windows")
+      set(FREETYPE_COPY_FILES "${EXTRA_FREETYPE_LIBDIR}/libfreetype.dll")
+    elseif(TARGET_OS STREQUAL "mac")
+      set(FREETYPE_COPY_FILES "${EXTRA_FREETYPE_LIBDIR}/libfreetype.6.dylib")
+    endif()
   endif()
 endif()

@@ -75,6 +75,10 @@ class Hdiutil(Dmg):
 			raise NotImplementedError("symlinks are not yet implemented")
 		for i in range(5):
 			try:
+				os.remove(dmg)
+			except FileNotFoundError:
+				pass
+			try:
 				self._hdiutil('create', '-volname', volume_name, '-srcdir', directory, dmg)
 			except subprocess.CalledProcessError as e:
 				if i == 4:

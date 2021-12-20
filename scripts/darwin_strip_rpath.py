@@ -32,7 +32,7 @@ def main():
 	lc_rpath_cmds = [cmd for cmd in cmds if cmd[0] == "cmd LC_RPATH"]
 
 	path_regex = re.compile(r"^path (.*) \(offset \d+\)$")
-	rpaths = [k[0] for k in [[path_regex.match(part).group(1) for part in cmd if path_regex.match(part)] for cmd in lc_rpath_cmds]]
+	rpaths = {k[0] for k in [[path_regex.match(part).group(1) for part in cmd if path_regex.match(part)] for cmd in lc_rpath_cmds]}
 	print("Found paths:")
 
 	for path in rpaths:
