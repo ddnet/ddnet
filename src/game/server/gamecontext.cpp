@@ -1365,7 +1365,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	{
 		NETADDR Addr;
 		Server()->GetClientAddr(ClientID, &Addr);
-		Mute(&Addr, g_Config.m_SvSpamMuteDuration, Server()->ClientName(ClientID), "Initial chat delay", true);
+		Mute(&Addr, g_Config.m_SvChatInitialDelay, Server()->ClientName(ClientID), "Initial chat delay", true);
 	}
 }
 
