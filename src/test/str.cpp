@@ -231,6 +231,32 @@ TEST(Str, StrFormat)
 	EXPECT_STREQ(aBuf, "99:");
 }
 
+TEST(Str, StrFormatTruncate)
+{
+	const char *pStr = "DDNet最好了";
+	char aBuf[64];
+	str_format(aBuf, 7, "%s", pStr);
+	EXPECT_STREQ(aBuf, "DDNet");
+	str_format(aBuf, 8, "%s", pStr);
+	EXPECT_STREQ(aBuf, "DDNet");
+	str_format(aBuf, 9, "%s", pStr);
+	EXPECT_STREQ(aBuf, "DDNet最");
+	str_format(aBuf, 10, "%s", pStr);
+	EXPECT_STREQ(aBuf, "DDNet最");
+	str_format(aBuf, 11, "%s", pStr);
+	EXPECT_STREQ(aBuf, "DDNet最");
+	str_format(aBuf, 12, "%s", pStr);
+	EXPECT_STREQ(aBuf, "DDNet最好");
+	str_format(aBuf, 13, "%s", pStr);
+	EXPECT_STREQ(aBuf, "DDNet最好");
+	str_format(aBuf, 14, "%s", pStr);
+	EXPECT_STREQ(aBuf, "DDNet最好");
+	str_format(aBuf, 15, "%s", pStr);
+	EXPECT_STREQ(aBuf, "DDNet最好了");
+	str_format(aBuf, 16, "%s", pStr);
+	EXPECT_STREQ(aBuf, "DDNet最好了");
+}
+
 TEST(Str, StrCopyNum)
 {
 	const char *foo = "Foobaré";
@@ -256,29 +282,29 @@ TEST(Str, StrCopyNum)
 	EXPECT_STREQ(aBuf3, "Foobaré");
 }
 
-TEST(Str, StrCopyUtf8)
+TEST(Str, StrCopy)
 {
-	const char *foo = "DDNet最好了";
+	const char *pStr = "DDNet最好了";
 	char aBuf[64];
-	str_utf8_copy(aBuf, foo, 7);
+	str_copy(aBuf, pStr, 7);
 	EXPECT_STREQ(aBuf, "DDNet");
-	str_utf8_copy(aBuf, foo, 8);
+	str_copy(aBuf, pStr, 8);
 	EXPECT_STREQ(aBuf, "DDNet");
-	str_utf8_copy(aBuf, foo, 9);
+	str_copy(aBuf, pStr, 9);
 	EXPECT_STREQ(aBuf, "DDNet最");
-	str_utf8_copy(aBuf, foo, 10);
+	str_copy(aBuf, pStr, 10);
 	EXPECT_STREQ(aBuf, "DDNet最");
-	str_utf8_copy(aBuf, foo, 11);
+	str_copy(aBuf, pStr, 11);
 	EXPECT_STREQ(aBuf, "DDNet最");
-	str_utf8_copy(aBuf, foo, 12);
+	str_copy(aBuf, pStr, 12);
 	EXPECT_STREQ(aBuf, "DDNet最好");
-	str_utf8_copy(aBuf, foo, 13);
+	str_copy(aBuf, pStr, 13);
 	EXPECT_STREQ(aBuf, "DDNet最好");
-	str_utf8_copy(aBuf, foo, 14);
+	str_copy(aBuf, pStr, 14);
 	EXPECT_STREQ(aBuf, "DDNet最好");
-	str_utf8_copy(aBuf, foo, 15);
+	str_copy(aBuf, pStr, 15);
 	EXPECT_STREQ(aBuf, "DDNet最好了");
-	str_utf8_copy(aBuf, foo, 16);
+	str_copy(aBuf, pStr, 16);
 	EXPECT_STREQ(aBuf, "DDNet最好了");
 }
 

@@ -2094,22 +2094,6 @@ int str_utf16le_encode(char *ptr, int chr);
 int str_utf8_check(const char *str);
 
 /*
-	Function: str_utf8_copy
-		Copies a utf8 string to a buffer.
-
-	Parameters:
-		dst - Pointer to a buffer that shall receive the string.
-		src - utf8 string to be copied.
-		dst_size - Size of the buffer dst.
-
-	Remarks:
-		- The strings are treated as zero-terminated strings.
-		- Guarantees that dst string will contain zero-termination.
-		- Guarantees that dst always contains a valid utf8 string.
-*/
-void str_utf8_copy(char *dst, const char *src, int dst_size);
-
-/*
 	Function: str_utf8_stats
 		Determines the byte size and utf8 character count of a utf8 string.
 

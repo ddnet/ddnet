@@ -192,7 +192,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 				if(Text[i] == '\n')
 				{
 					int max = minimum(i - Begin + 1, (int)sizeof(aLine));
-					str_utf8_copy(aLine, Text + Begin, max);
+					str_copy(aLine, Text + Begin, max);
 					Begin = i + 1;
 					SayChat(aLine);
 					while(Text[i] == '\n')
@@ -200,7 +200,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 				}
 			}
 			int max = minimum(i - Begin + 1, (int)sizeof(aLine));
-			str_utf8_copy(aLine, Text + Begin, max);
+			str_copy(aLine, Text + Begin, max);
 			m_Input.Append(aLine);
 		}
 	}

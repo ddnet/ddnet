@@ -267,9 +267,9 @@ class CTextRender : public IEngineTextRender
 		while(1)
 		{
 			if(*pCursor == 0)
-				return Length;
+				return pCursor - pText;
 			if(*pCursor == '\n' || *pCursor == '\t' || *pCursor == ' ')
-				return Length + 1;
+				return pCursor - pText + 1;
 			str_utf8_decode(&pCursor);
 		}
 	}

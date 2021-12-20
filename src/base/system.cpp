@@ -2545,12 +2545,14 @@ void str_append(char *dst, const char *src, int dst_size)
 	}
 
 	dst[dst_size - 1] = 0; /* assure null termination */
+	str_utf8_fix_truncation(dst);
 }
 
 void str_copy(char *dst, const char *src, int dst_size)
 {
 	strncpy(dst, src, dst_size - 1);
 	dst[dst_size - 1] = 0; /* assure null termination */
+	str_utf8_fix_truncation(dst);
 }
 
 void str_utf8_truncate(char *dst, int dst_size, const char *src, int truncation_len)
@@ -2558,7 +2560,7 @@ void str_utf8_truncate(char *dst, int dst_size, const char *src, int truncation_
 	int size = -1;
 	const char *cursor = src;
 	int pos = 0;
-	while(pos <= truncation_len && cursor < dst_size && size != cursor)
+	while(pos <= truncation_len && cursor - src < dst_size && size != cursor - src)
 	{
 		size = cursor - src;
 		if(str_utf8_decode(&cursor) == 0)
@@ -2587,33 +2589,22 @@ int str_length(const char *str)
 
 int str_format(char *buffer, int buffer_size, const char *format, ...)
 {
-	int ret;
 #if defined(CONF_FAMILY_WINDOWS)
 	va_list ap;
 	va_start(ap, format);
-	ret = _vsnprintf(buffer, buffer_size, format, ap);
+	_vsnprintf(buffer, buffer_size, format, ap);
 	va_end(ap);
 
 	buffer[buffer_size - 1] = 0; /* assure null termination */
-
-	/* _vsnprintf is documented to return negative values on truncation, but
-	 * in practice we didn't see that. let's handle it anyway just in case. */
-	if(ret < 0)
-		ret = buffer_size - 1;
 #else
 	va_list ap;
 	va_start(ap, format);
-	ret = vsnprintf(buffer, buffer_size, format, ap);
+	vsnprintf(buffer, buffer_size, format, ap);
 	va_end(ap);
 
 	/* null termination is assured by definition of vsnprintf */
 #endif
-
-	/* a return value of buffer_size or more indicates truncated output */
-	if(ret >= buffer_size)
-		ret = buffer_size - 1;
-
-	return ret;
+	return str_utf8_fix_truncation(buffer);
 }
 
 char *str_trim_words(char *str, int words)
@@ -3455,11 +3446,6 @@ int str_utf8_check(const char *str)
 		}
 	}
 	return 1;
-}
-
-void str_utf8_copy(char *dst, const char *src, int dst_size)
-{
-	str_utf8_truncate(dst, dst_size, src, dst_size);
 }
 
 void str_utf8_stats(const char *str, int max_size, int max_count, int *size, int *count)
