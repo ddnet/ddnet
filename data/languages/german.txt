@@ -1350,10 +1350,10 @@ Show local player's key presses
 == Tastendrücke des eigenen Spielers anzeigen
 
 Settings file
-== 
+== Einstellungen-Datei
 
 Config directory
-== 
+== Konfigurations-Ordner
 
 Run on join
-== 
+== Ausführen beim Betreten
