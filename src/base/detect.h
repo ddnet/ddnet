@@ -167,6 +167,12 @@
 #define CONF_ARCH_ENDIAN_LITTLE 1
 #endif
 
+#if defined(__aarch64__) || defined(__arm64__)
+#define CONF_ARCH_ARM64 1
+#define CONF_ARCH_STRING "arm64"
+#define CONF_ARCH_ENDIAN_LITTLE 1
+#endif
+
 #ifndef CONF_FAMILY_STRING
 #define CONF_FAMILY_STRING "unknown"
 #endif

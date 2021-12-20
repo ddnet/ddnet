@@ -54,7 +54,6 @@ else()
   set(TARGET_BITS "64")
 endif()
 
-
 if("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "arm" OR "${CMAKE_SYSTEM_PROCESSOR}" MATCHES "aarch64")
   if(TARGET_BITS STREQUAL "32")
     set(TARGET_CPU_ARCHITECTURE "arm")
@@ -68,7 +67,6 @@ else()
     set(TARGET_CPU_ARCHITECTURE "x86_64")
   endif()
 endif()
-
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
   set(TARGET_OS "windows")
@@ -460,11 +458,11 @@ if(TARGET_OS AND TARGET_OS STREQUAL "mac")
 endif()
 
 message(STATUS "******** DDNet ********")
-if(NOT TARGET_OS STREQUAL "mac")
-  message(STATUS "Target OS: ${TARGET_OS} ${TARGET_BITS}bit")
-else()
-  message(STATUS "Target OS: ${TARGET_OS} ${TARGET_BITS}bit (SDK: ${CMAKE_OSX_SYSROOT}, architectures: ${CMAKE_OSX_ARCHITECTURES})")
+set(TARGET "Target OS: ${TARGET_OS} ${CMAKE_SYSTEM_PROCESSOR}")
+if(TARGET_OS STREQUAL "mac")
+  set(TARGET "${TARGET} (SDK: ${CMAKE_OSX_SYSROOT}, architectures: ${CMAKE_OSX_ARCHITECTURES})")
 endif()
+message(STATUS ${TARGET})
 message(STATUS "Compiler: ${CMAKE_CXX_COMPILER}")
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
@@ -2595,7 +2593,7 @@ if(CLIENT AND (DMGTOOLS_FOUND OR HDIUTIL))
   endforeach()
 
   set(DMG_DISCORD_COPY_COMMAND)
-  if(NOT FAT AND NOT TARGET_CPU_ARCHITECTURE STREQUAL "arm" AND NOT TARGET_CPU_ARCHITECTURE STREQUAL "arm64")
+  if(FAT OR NOT TARGET_CPU_ARCHITECTURE STREQUAL "arm64")
     set(DMG_DISCORD_COPY_COMMAND COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/discord/${LIB_DIR}/discord_game_sdk.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/)
   endif()
 
