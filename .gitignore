@@ -36,6 +36,8 @@ pack_*/
 rules.ninja
 testrunner\[1\]_include.cmake
 
+/SDL2.framework
+
 # Ignore all the generated executables without extensions (for non-Windows
 # systems).
 DDNet
@@ -89,6 +91,7 @@ tags
 /config.lua
 /objs
 
+*.a
 *.cmd
 *.dll
 *.dmg
@@ -117,4 +120,3 @@ tags
 *.user
 *.vcxproj
 *.zip
-/SDL2.framework
