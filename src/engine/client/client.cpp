@@ -3295,8 +3295,13 @@ void CClient::Run()
 
 			bool IsRenderActive = (g_Config.m_GfxBackgroundRender || m_pGraphics->WindowOpen());
 
+			bool AsyncRenderOld = false;
+#if !defined(CONF_PLATFORM_MACOS)
+			AsyncRenderOld = g_Config.m_GfxAsyncRenderOld;
+#endif
+
 			if(IsRenderActive &&
-				(!g_Config.m_GfxAsyncRenderOld || m_pGraphics->IsIdle()) &&
+				(!AsyncRenderOld || m_pGraphics->IsIdle()) &&
 				(!g_Config.m_GfxRefreshRate || (time_freq() / (int64_t)g_Config.m_GfxRefreshRate) <= Now - LastRenderTime))
 			{
 				m_RenderFrames++;
