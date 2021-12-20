@@ -2556,12 +2556,15 @@ void str_copy(char *dst, const char *src, int dst_size)
 void str_utf8_truncate(char *dst, int dst_size, const char *src, int truncation_len)
 {
 	int size = -1;
-	int cursor = 0;
+	const char *cursor = src;
 	int pos = 0;
 	while(pos <= truncation_len && cursor < dst_size && size != cursor)
 	{
-		size = cursor;
-		cursor = str_utf8_forward(src, cursor);
+		size = cursor - src;
+		if(str_utf8_decode(&cursor) == 0)
+		{
+			break;
+		}
 		pos++;
 	}
 	str_copy(dst, src, size + 1);
@@ -3295,39 +3298,12 @@ int str_utf8_fix_truncation(char *str)
 
 int str_utf8_forward(const char *str, int cursor)
 {
-	const char *buf = str + cursor;
-	if(!buf[0])
+	const char *ptr = str + cursor;
+	if(str_utf8_decode(&ptr) == 0)
+	{
 		return cursor;
-
-	if((*buf & 0x80) == 0x0) /* 0xxxxxxx */
-		return cursor + 1;
-	else if((*buf & 0xE0) == 0xC0) /* 110xxxxx */
-	{
-		if(!buf[1])
-			return cursor + 1;
-		return cursor + 2;
 	}
-	else if((*buf & 0xF0) == 0xE0) /* 1110xxxx */
-	{
-		if(!buf[1])
-			return cursor + 1;
-		if(!buf[2])
-			return cursor + 2;
-		return cursor + 3;
-	}
-	else if((*buf & 0xF8) == 0xF0) /* 11110xxx */
-	{
-		if(!buf[1])
-			return cursor + 1;
-		if(!buf[2])
-			return cursor + 2;
-		if(!buf[3])
-			return cursor + 3;
-		return cursor + 4;
-	}
-
-	/* invalid */
-	return cursor + 1;
+	return ptr - str;
 }
 
 int str_utf8_encode(char *ptr, int chr)
@@ -3488,14 +3464,20 @@ void str_utf8_copy(char *dst, const char *src, int dst_size)
 
 void str_utf8_stats(const char *str, int max_size, int max_count, int *size, int *count)
 {
+	const char *cursor = str;
 	*size = 0;
 	*count = 0;
 	while(*size < max_size && *count < max_count)
 	{
-		int new_size = str_utf8_forward(str, *size);
-		if(new_size == *size || new_size >= max_size)
+		if(str_utf8_decode(&cursor) == 0)
+		{
 			break;
-		*size = new_size;
+		}
+		if(cursor - str >= max_size)
+		{
+			break;
+		}
+		*size = cursor - str;
 		++(*count);
 	}
 }
