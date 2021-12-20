@@ -1332,3 +1332,12 @@ https://ddnet.tw/discord
 
 https://wiki.ddnet.tw/
 == https://wiki.ddnet.tw/
+
+Settings file
+== 
+
+Config directory
+== 
+
+Run on join
+== 

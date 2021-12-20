@@ -1333,3 +1333,12 @@ Editor
 [Start menu]
 Play
 == Грати
+
+Settings file
+== 
+
+Config directory
+== 
+
+Run on join
+== 

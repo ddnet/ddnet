@@ -915,6 +915,12 @@ Show clan above name plates
 Clan plates size
 == 
 
+Settings file
+== 
+
+Config directory
+== 
+
 Themes directory
 == 
 
@@ -1144,6 +1150,9 @@ Try fast HTTP map download first
 == 
 
 New random timeout code
+== 
+
+Run on join
 == 
 
 DDNet %s is available:

@@ -1348,3 +1348,12 @@ Kill Message Highlight Color
 
 Show local player's key presses
 == Tastendrücke des eigenen Spielers anzeigen
+
+Settings file
+== 
+
+Config directory
+== 
+
+Run on join
+== 

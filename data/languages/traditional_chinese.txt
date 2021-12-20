@@ -1341,3 +1341,12 @@ Kill Message Highlight Color
 
 Show local player's key presses
 == 顯示周圍玩家的按鍵輸入
+
+Settings file
+== 
+
+Config directory
+== 
+
+Run on join
+== 
