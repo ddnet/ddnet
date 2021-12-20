@@ -95,6 +95,33 @@ TEST(Str, Utf8ToLower)
 	EXPECT_TRUE(str_utf8_find_nocase(str, "z") == NULL);
 }
 
+TEST(Str, Utf8FixTruncation)
+{
+	char aaBuf[][32] = {
+		"",
+		"\xff",
+		"abc",
+		"abc\xff",
+		"blub\xffxyz",
+		"привет Наташа\xff",
+		"до свидания\xffОлег",
+	};
+	const char *apExpected[] = {
+		"",
+		"",
+		"abc",
+		"abc",
+		"blub\xffxyz",
+		"привет Наташа",
+		"до свидания\xffОлег",
+	};
+	for(unsigned i = 0; i < sizeof(aaBuf) / sizeof(aaBuf[0]); i++)
+	{
+		EXPECT_EQ(str_utf8_fix_truncation(aaBuf[i]), str_length(apExpected[i]));
+		EXPECT_STREQ(aaBuf[i], apExpected[i]);
+	}
+}
+
 TEST(Str, Startswith)
 {
 	EXPECT_TRUE(str_startswith("abcdef", "abc"));

@@ -3276,6 +3276,23 @@ int str_utf8_rewind(const char *str, int cursor)
 	return cursor;
 }
 
+int str_utf8_fix_truncation(char *str)
+{
+	int len = str_length(str);
+	if(len > 0)
+	{
+		int last_char_index = str_utf8_rewind(str, len);
+		const char *last_char = str + last_char_index;
+		// Fix truncated UTF-8.
+		if(str_utf8_decode(&last_char) == -1)
+		{
+			str[last_char_index] = 0;
+			return last_char_index;
+		}
+	}
+	return len;
+}
+
 int str_utf8_forward(const char *str, int cursor)
 {
 	const char *buf = str + cursor;

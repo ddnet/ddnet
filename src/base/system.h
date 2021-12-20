@@ -2003,6 +2003,19 @@ void str_utf8_trim_right(char *str);
 int str_utf8_rewind(const char *str, int cursor);
 
 /*
+	Function: str_utf8_fix_truncation
+		Fixes truncation of a Unicode character at the end of a UTF-8
+		string.
+
+	Returns:
+		The new string length.
+
+	Parameters:
+		str - utf8 string
+*/
+int str_utf8_fix_truncation(char *str);
+
+/*
 	Function: str_utf8_forward
 		Moves a cursor forwards in an utf8 string
 
