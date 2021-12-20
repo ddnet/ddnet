@@ -1149,7 +1149,6 @@ bool CGraphicsBackend_SDL_OpenGL::UpdateDisplayMode(int Index)
 
 	g_Config.m_GfxDesktopWidth = DisplayMode.w;
 	g_Config.m_GfxDesktopHeight = DisplayMode.h;
-	g_Config.m_GfxRefreshRate = DisplayMode.refresh_rate;
 
 	return true;
 }
