@@ -1641,11 +1641,11 @@ bool CScoreWorker::GetSaves(IDbConnection *pSqlServer, const ISqlData *pGameData
 	if(!End)
 	{
 		int NumSaves = pSqlServer->GetInt(1);
-		int Ago = pSqlServer->GetInt(2);
-		char aAgoString[40] = "\0";
 		char aLastSavedString[60] = "\0";
-		if(Ago)
+		if(!pSqlServer->IsNull(2))
 		{
+			int Ago = pSqlServer->GetInt(2);
+			char aAgoString[40] = "\0";
 			sqlstr::AgoTimeToString(Ago, aAgoString, sizeof(aAgoString));
 			str_format(aLastSavedString, sizeof(aLastSavedString), ", last saved %s ago", aAgoString);
 		}
