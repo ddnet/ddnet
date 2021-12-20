@@ -263,15 +263,14 @@ class CTextRender : public IEngineTextRender
 
 	int WordLength(const char *pText)
 	{
-		int Length = 0;
+		const char *pCursor = pText;
 		while(1)
 		{
-			const char *pCursor = (pText + Length);
 			if(*pCursor == 0)
-				return Length;
+				return pCursor - pText;
 			if(*pCursor == '\n' || *pCursor == '\t' || *pCursor == ' ')
-				return Length + 1;
-			Length = str_utf8_forward(pText, Length);
+				return pCursor - pText + 1;
+			str_utf8_decode(&pCursor);
 		}
 	}
 

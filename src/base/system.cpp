@@ -2545,23 +2545,28 @@ void str_append(char *dst, const char *src, int dst_size)
 	}
 
 	dst[dst_size - 1] = 0; /* assure null termination */
+	str_utf8_fix_truncation(dst);
 }
 
 void str_copy(char *dst, const char *src, int dst_size)
 {
 	strncpy(dst, src, dst_size - 1);
 	dst[dst_size - 1] = 0; /* assure null termination */
+	str_utf8_fix_truncation(dst);
 }
 
 void str_utf8_truncate(char *dst, int dst_size, const char *src, int truncation_len)
 {
 	int size = -1;
-	int cursor = 0;
+	const char *cursor = src;
 	int pos = 0;
-	while(pos <= truncation_len && cursor < dst_size && size != cursor)
+	while(pos <= truncation_len && cursor - src < dst_size && size != cursor - src)
 	{
-		size = cursor;
-		cursor = str_utf8_forward(src, cursor);
+		size = cursor - src;
+		if(str_utf8_decode(&cursor) == 0)
+		{
+			break;
+		}
 		pos++;
 	}
 	str_copy(dst, src, size + 1);
@@ -2584,33 +2589,22 @@ int str_length(const char *str)
 
 int str_format(char *buffer, int buffer_size, const char *format, ...)
 {
-	int ret;
 #if defined(CONF_FAMILY_WINDOWS)
 	va_list ap;
 	va_start(ap, format);
-	ret = _vsnprintf(buffer, buffer_size, format, ap);
+	_vsnprintf(buffer, buffer_size, format, ap);
 	va_end(ap);
 
 	buffer[buffer_size - 1] = 0; /* assure null termination */
-
-	/* _vsnprintf is documented to return negative values on truncation, but
-	 * in practice we didn't see that. let's handle it anyway just in case. */
-	if(ret < 0)
-		ret = buffer_size - 1;
 #else
 	va_list ap;
 	va_start(ap, format);
-	ret = vsnprintf(buffer, buffer_size, format, ap);
+	vsnprintf(buffer, buffer_size, format, ap);
 	va_end(ap);
 
 	/* null termination is assured by definition of vsnprintf */
 #endif
-
-	/* a return value of buffer_size or more indicates truncated output */
-	if(ret >= buffer_size)
-		ret = buffer_size - 1;
-
-	return ret;
+	return str_utf8_fix_truncation(buffer);
 }
 
 char *str_trim_words(char *str, int words)
@@ -3276,41 +3270,31 @@ int str_utf8_rewind(const char *str, int cursor)
 	return cursor;
 }
 
+int str_utf8_fix_truncation(char *str)
+{
+	int len = str_length(str);
+	if(len > 0)
+	{
+		int last_char_index = str_utf8_rewind(str, len);
+		const char *last_char = str + last_char_index;
+		// Fix truncated UTF-8.
+		if(str_utf8_decode(&last_char) == -1)
+		{
+			str[last_char_index] = 0;
+			return last_char_index;
+		}
+	}
+	return len;
+}
+
 int str_utf8_forward(const char *str, int cursor)
 {
-	const char *buf = str + cursor;
-	if(!buf[0])
+	const char *ptr = str + cursor;
+	if(str_utf8_decode(&ptr) == 0)
+	{
 		return cursor;
-
-	if((*buf & 0x80) == 0x0) /* 0xxxxxxx */
-		return cursor + 1;
-	else if((*buf & 0xE0) == 0xC0) /* 110xxxxx */
-	{
-		if(!buf[1])
-			return cursor + 1;
-		return cursor + 2;
 	}
-	else if((*buf & 0xF0) == 0xE0) /* 1110xxxx */
-	{
-		if(!buf[1])
-			return cursor + 1;
-		if(!buf[2])
-			return cursor + 2;
-		return cursor + 3;
-	}
-	else if((*buf & 0xF8) == 0xF0) /* 11110xxx */
-	{
-		if(!buf[1])
-			return cursor + 1;
-		if(!buf[2])
-			return cursor + 2;
-		if(!buf[3])
-			return cursor + 3;
-		return cursor + 4;
-	}
-
-	/* invalid */
-	return cursor + 1;
+	return ptr - str;
 }
 
 int str_utf8_encode(char *ptr, int chr)
@@ -3464,21 +3448,22 @@ int str_utf8_check(const char *str)
 	return 1;
 }
 
-void str_utf8_copy(char *dst, const char *src, int dst_size)
-{
-	str_utf8_truncate(dst, dst_size, src, dst_size);
-}
-
 void str_utf8_stats(const char *str, int max_size, int max_count, int *size, int *count)
 {
+	const char *cursor = str;
 	*size = 0;
 	*count = 0;
 	while(*size < max_size && *count < max_count)
 	{
-		int new_size = str_utf8_forward(str, *size);
-		if(new_size == *size || new_size >= max_size)
+		if(str_utf8_decode(&cursor) == 0)
+		{
 			break;
-		*size = new_size;
+		}
+		if(cursor - str >= max_size)
+		{
+			break;
+		}
+		*size = cursor - str;
 		++(*count);
 	}
 }

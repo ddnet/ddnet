@@ -2003,6 +2003,19 @@ void str_utf8_trim_right(char *str);
 int str_utf8_rewind(const char *str, int cursor);
 
 /*
+	Function: str_utf8_fix_truncation
+		Fixes truncation of a Unicode character at the end of a UTF-8
+		string.
+
+	Returns:
+		The new string length.
+
+	Parameters:
+		str - utf8 string
+*/
+int str_utf8_fix_truncation(char *str);
+
+/*
 	Function: str_utf8_forward
 		Moves a cursor forwards in an utf8 string
 
@@ -2079,22 +2092,6 @@ int str_utf16le_encode(char *ptr, int chr);
 		- The string is treated as zero-terminated utf8 string.
 */
 int str_utf8_check(const char *str);
-
-/*
-	Function: str_utf8_copy
-		Copies a utf8 string to a buffer.
-
-	Parameters:
-		dst - Pointer to a buffer that shall receive the string.
-		src - utf8 string to be copied.
-		dst_size - Size of the buffer dst.
-
-	Remarks:
-		- The strings are treated as zero-terminated strings.
-		- Guarantees that dst string will contain zero-termination.
-		- Guarantees that dst always contains a valid utf8 string.
-*/
-void str_utf8_copy(char *dst, const char *src, int dst_size);
 
 /*
 	Function: str_utf8_stats

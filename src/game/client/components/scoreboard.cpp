@@ -206,7 +206,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			pTitle = Localize("Game over");
 		else
 		{
-			str_utf8_copy(aBuf, Client()->GetCurrentMap(), sizeof(aBuf));
+			str_copy(aBuf, Client()->GetCurrentMap(), sizeof(aBuf));
 			while(TextRender()->TextWidth(0, TitleFontsize, aBuf, -1, -1.0f) > TitleWidth)
 				aBuf[str_length(aBuf) - 1] = '\0';
 			if(str_comp(aBuf, Client()->GetCurrentMap()))
