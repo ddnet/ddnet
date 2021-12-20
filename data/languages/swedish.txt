@@ -1229,6 +1229,12 @@ Demos directory
 Smooth Dynamic Camera
 == 
 
+Settings file
+== 
+
+Config directory
+== 
+
 Themes directory
 == 
 
@@ -1317,6 +1323,9 @@ Use current map as background
 == 
 
 Regular Background Color
+== 
+
+Run on join
 == 
 
 Entities

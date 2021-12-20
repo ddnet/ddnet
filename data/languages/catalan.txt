@@ -1326,3 +1326,12 @@ SA
 
 CHN
 == CHN
+
+Settings file
+== 
+
+Config directory
+== 
+
+Run on join
+== 

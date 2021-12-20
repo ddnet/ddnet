@@ -1267,6 +1267,12 @@ Refreshing...
 Leak IP
 == 
 
+Settings file
+== 
+
+Config directory
+== 
+
 Chat command
 == 
 
@@ -1328,6 +1334,9 @@ Entities Background color
 == 
 
 Regular Background Color
+== 
+
+Run on join
 == 
 
 Discord
