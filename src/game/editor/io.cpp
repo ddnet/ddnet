@@ -221,13 +221,15 @@ int CEditor::Save(const char *pFilename)
 
 int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 {
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "saving to '%s'...", pFileName);
+	char aFileNameTmp[IO_MAX_PATH_LENGTH];
+	str_format(aFileNameTmp, sizeof(aFileNameTmp), "%s.%d.tmp", pFileName, pid());
+	char aBuf[IO_MAX_PATH_LENGTH];
+	str_format(aBuf, sizeof(aBuf), "saving to '%s'...", aFileNameTmp);
 	m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor", aBuf);
 	CDataFileWriter df;
-	if(!df.Open(pStorage, pFileName))
+	if(!df.Open(pStorage, aFileNameTmp))
 	{
-		str_format(aBuf, sizeof(aBuf), "failed to open file '%s'...", pFileName);
+		str_format(aBuf, sizeof(aBuf), "failed to open file '%s'...", aFileNameTmp);
 		m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor", aBuf);
 		return 0;
 	}
@@ -552,6 +554,13 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 	// finish the data file
 	df.Finish();
 	m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", "saving done");
+
+	str_format(aBuf, sizeof(aBuf), "moving '%s' to '%s'", aFileNameTmp, pFileName);
+	m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", aBuf);
+	if(!pStorage->RenameFile(aFileNameTmp, pFileName, IStorage::TYPE_SAVE))
+	{
+		return 0;
+	}
 
 	// send rcon.. if we can
 	if(m_pEditor->Client()->RconAuthed())
