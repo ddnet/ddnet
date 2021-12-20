@@ -2657,7 +2657,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	Right.HSplitTop(20.0f, &Right, 0);
 	Right.VSplitLeft(100.0f, &Label, &TempLabel2);
 	UI()->DoLabelScaled(&Label, Localize("Run on join"), 14.0f, -1);
-	UIEx()->DoEditBox(g_Config.m_ClRunOnJoin, &TempLabel2, g_Config.m_ClRunOnJoin, sizeof(g_Config.m_ClRunOnJoin), 14.0f, &s_RunOnJoin);
+	UIEx()->DoEditBox(g_Config.m_ClRunOnJoin, &TempLabel2, g_Config.m_ClRunOnJoin, sizeof(g_Config.m_ClRunOnJoin), 14.0f, &s_RunOnJoin, false, CUI::CORNER_ALL, Localize("Chat command (e.g. showall 1)"));
 	// Updater
 #if defined(CONF_AUTOUPDATE)
 	{

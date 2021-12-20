@@ -1250,6 +1250,9 @@ Try fast HTTP map download first
 Run on join
 == 
 
+Chat command (e.g. showall 1)
+== 
+
 Entities
 == 
 

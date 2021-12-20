@@ -1357,3 +1357,6 @@ Config directory
 
 Run on join
 == Ausführen beim Betreten
+
+Chat command (e.g. showall 1)
+== Chat-Befehl (z.B. showall 1)

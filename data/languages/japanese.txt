@@ -1342,3 +1342,6 @@ Show local player's key presses
 
 Run on join
 == 
+
+Chat command (e.g. showall 1)
+== 
