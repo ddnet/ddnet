@@ -1348,3 +1348,12 @@ Kill Message Highlight Color
 
 Show local player's key presses
 == 显示周围玩家的按键输入
+
+Settings file
+== 
+
+Config directory
+== 
+
+Run on join
+== 

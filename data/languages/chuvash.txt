@@ -889,6 +889,12 @@ Refresh Rate
 Show console window
 == 
 
+Settings file
+== 
+
+Config directory
+== 
+
 Themes directory
 == 
 
@@ -1205,6 +1211,9 @@ Try fast HTTP map download first
 == 
 
 New random timeout code
+== 
+
+Run on join
 == 
 
 DDNet %s is available:

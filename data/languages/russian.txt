@@ -1341,3 +1341,12 @@ Hookable
 
 Show local player's key presses
 == Показывать нажатия клавиш игрока
+
+Settings file
+== 
+
+Config directory
+== 
+
+Run on join
+== 

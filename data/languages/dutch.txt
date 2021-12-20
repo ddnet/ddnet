@@ -1200,6 +1200,12 @@ Smooth Dynamic Camera
 Skip the main menu
 == 
 
+Settings file
+== 
+
+Config directory
+== 
+
 Themes directory
 == 
 
@@ -1294,6 +1300,9 @@ Use current map as background
 == 
 
 Regular Background Color
+== 
+
+Run on join
 == 
 
 Entities
