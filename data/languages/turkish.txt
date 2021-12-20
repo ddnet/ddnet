@@ -1305,6 +1305,9 @@ Regular Background Color
 Run on join
 == 
 
+Chat command (e.g. showall 1)
+== 
+
 Entities
 == 
 

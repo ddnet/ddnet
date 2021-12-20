@@ -1342,3 +1342,6 @@ Config directory
 
 Run on join
 == 
+
+Chat command (e.g. showall 1)
+== 

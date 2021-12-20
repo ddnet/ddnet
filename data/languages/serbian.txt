@@ -1220,6 +1220,9 @@ New random timeout code
 Run on join
 == 
 
+Chat command (e.g. showall 1)
+== 
+
 DDNet %s is available:
 == 
 
