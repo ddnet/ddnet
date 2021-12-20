@@ -72,6 +72,16 @@ Whether to enable MySQL/MariaDB support for server. Requires at least MySQL 8.0 
 
    Note that the bundled MySQL libraries might not work properly on your system. If you run into connection problems with the MySQL server, for example that it connects as root while you chose another user, make sure to install your system libraries for the MySQL client. Make sure that the CMake configuration summary says that it found MySQL libs that were not bundled (no "using bundled libs").
 
+* **-DTEST_MYSQL=[ON|OFF]** <br>
+Whether to test MySQL/MariaDB support in GTest based tests. Note that this requires a running MySQL/MariaDB database on localhost with this setup:
+
+```
+CREATE DATABASE ddnet;
+CREATE USER 'ddnet'@'localhost' IDENTIFIED BY 'thebestpassword';
+GRANT ALL PRIVILEGES ON ddnet.* TO 'ddnet'@'localhost';
+FLUSH PRIVILEGES;
+```
+
 * **-DAUTOUPDATE=[ON|OFF]** <br>
 Whether to enable the autoupdater. Packagers may want to disable this for their packages. Default value is ON for Windows and Linux.
 

@@ -23,7 +23,7 @@ void IDbConnection::FormatCreateRace(char *aBuf, unsigned int BufferSize)
 		"  GameID VARCHAR(64), "
 		"  DDNet7 BOOL DEFAULT FALSE, "
 		"  PRIMARY KEY (Map, Name, Time, Timestamp, Server)"
-		");",
+		")",
 		GetPrefix(), BinaryCollate(), MAX_NAME_LENGTH, BinaryCollate());
 }
 
@@ -39,7 +39,7 @@ void IDbConnection::FormatCreateTeamrace(char *aBuf, unsigned int BufferSize, co
 		"  GameID VARCHAR(64), "
 		"  DDNet7 BOOL DEFAULT FALSE, "
 		"  PRIMARY KEY (ID, Name)"
-		");",
+		")",
 		GetPrefix(), BinaryCollate(), MAX_NAME_LENGTH, BinaryCollate(), pIdType);
 }
 
@@ -54,7 +54,7 @@ void IDbConnection::FormatCreateMaps(char *aBuf, unsigned int BufferSize)
 		"  Stars INT DEFAULT 0, "
 		"  Timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
 		"  PRIMARY KEY (Map)"
-		");",
+		")",
 		GetPrefix(), BinaryCollate(), BinaryCollate(), BinaryCollate());
 }
 
@@ -70,7 +70,7 @@ void IDbConnection::FormatCreateSaves(char *aBuf, unsigned int BufferSize)
 		"  DDNet7 BOOL DEFAULT FALSE, "
 		"  SaveID VARCHAR(36) DEFAULT NULL, "
 		"  PRIMARY KEY (Map, Code)"
-		");",
+		")",
 		GetPrefix(), BinaryCollate(), BinaryCollate(), BinaryCollate());
 }
 
@@ -81,6 +81,6 @@ void IDbConnection::FormatCreatePoints(char *aBuf, unsigned int BufferSize)
 		"  Name VARCHAR(%d) COLLATE %s NOT NULL, "
 		"  Points INT DEFAULT 0, "
 		"  PRIMARY KEY (Name)"
-		");",
+		")",
 		GetPrefix(), MAX_NAME_LENGTH, BinaryCollate());
 }

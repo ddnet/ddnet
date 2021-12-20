@@ -101,6 +101,7 @@ endif()
 
 option(WEBSOCKETS "Enable websockets support" OFF)
 option(MYSQL "Enable mysql support" OFF)
+option(TEST_MYSQL "Test mysql support in unit tests (also sets -DMYSQL=ON)" OFF)
 option(AUTOUPDATE "Enable the autoupdater" OFF)
 option(INFORM_UPDATE "Inform about available updates" ON)
 option(VIDEORECORDER "Enable video recording support via FFmpeg" OFF)
@@ -116,6 +117,10 @@ option(DISCORD "Enable Discord rich presence support" OFF)
 option(DISCORD_DYNAMIC "Enable discovering Discord rich presence libraries at runtime (Linux only)" OFF)
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
 option(DEV "Don't generate stuff necessary for packaging" OFF)
+
+if(TEST_MYSQL)
+  set(MYSQL ON)
+endif()
 
 # Set version if not explicitly set
 if(NOT VERSION)
@@ -2112,6 +2117,8 @@ if(SERVER)
     save.h
     score.cpp
     score.h
+    scoreworker.cpp
+    scoreworker.h
     teams.cpp
     teams.h
     teehistorian.cpp
@@ -2271,6 +2278,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     netaddr.cpp
     packer.cpp
     prng.cpp
+    score.cpp
     secure_random.cpp
     serverbrowser.cpp
     serverinfo.cpp
@@ -2296,10 +2304,18 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     src/engine/client/serverbrowser_ping_cache.cpp
     src/engine/client/serverbrowser_ping_cache.h
     src/engine/client/sqlite.cpp
+    src/engine/server/databases/connection.cpp
+    src/engine/server/databases/connection.h
+    src/engine/server/databases/sqlite.cpp
+    src/engine/server/databases/mysql.cpp
     src/engine/server/name_ban.cpp
     src/engine/server/name_ban.h
+    src/engine/server/sql_string_helpers.cpp
+    src/engine/server/sql_string_helpers.h
     src/game/server/teehistorian.cpp
     src/game/server/teehistorian.h
+    src/game/server/scoreworker.cpp
+    src/game/server/scoreworker.h
   )
 
   set(TARGET_TESTRUNNER testrunner)
@@ -2310,7 +2326,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     $<TARGET_OBJECTS:game-shared>
     ${DEPS}
   )
-  target_link_libraries(${TARGET_TESTRUNNER} ${LIBS} ${CURL_LIBRARIES} ${GTEST_LIBRARIES})
+  target_link_libraries(${TARGET_TESTRUNNER} ${LIBS} ${CURL_LIBRARIES} ${MYSQL_LIBRARIES} ${GTEST_LIBRARIES})
   target_include_directories(${TARGET_TESTRUNNER} PRIVATE ${CURL_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS})
 
   list(APPEND TARGETS_OWN ${TARGET_TESTRUNNER})
@@ -2805,8 +2821,11 @@ foreach(target ${TARGETS_OWN})
     target_compile_definitions(${target} PRIVATE CONF_HEADLESS_CLIENT)
   endif()
   if(MYSQL)
-    target_compile_definitions(${target} PRIVATE CONF_SQL)
+    target_compile_definitions(${target} PRIVATE CONF_MYSQL)
     target_include_directories(${target} PRIVATE ${MYSQL_INCLUDE_DIRS})
+  endif()
+  if(TEST_MYSQL)
+    target_compile_definitions(${target} PRIVATE CONF_TEST_MYSQL)
   endif()
   if(AUTOUPDATE AND NOT STEAM)
     target_compile_definitions(${target} PRIVATE CONF_AUTOUPDATE)
