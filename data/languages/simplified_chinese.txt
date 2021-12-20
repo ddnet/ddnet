@@ -14,6 +14,7 @@
 # 2021-05-27 Momo
 # 2021-06-01 TsFreddie
 # 2021-11-19 cheeser0613
+# 2021-12-21 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -1350,13 +1351,13 @@ Show local player's key presses
 == 显示周围玩家的按键输入
 
 Settings file
-== 
+== 设置文件
 
 Config directory
-== 
+== 配置目录 (cfg)
 
 Run on join
-== 
+== 加入时执行
 
 Chat command (e.g. showall 1)
-== 
+== 聊天指令 (例如: showall 1)
