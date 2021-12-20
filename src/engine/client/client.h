@@ -301,7 +301,7 @@ public:
 	virtual int SendMsgY(CMsgPacker *pMsg, int Flags, int NetClient = 1);
 
 	void SendInfo();
-	void SendEnterGame();
+	void SendEnterGame(bool Dummy);
 	void SendReady();
 	void SendMapRequest();
 
@@ -329,8 +329,8 @@ public:
 	void SetState(int s);
 
 	// called when the map is loaded and we should init for a new round
-	void OnEnterGame();
-	virtual void EnterGame();
+	void OnEnterGame(bool Dummy);
+	virtual void EnterGame(bool Dummy);
 
 	virtual void Connect(const char *pAddress, const char *pPassword = NULL);
 	void DisconnectWithReason(const char *pReason);

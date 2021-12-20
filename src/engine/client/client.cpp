@@ -452,10 +452,10 @@ void CClient::SendInfo()
 	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH);
 }
 
-void CClient::SendEnterGame()
+void CClient::SendEnterGame(bool Dummy)
 {
 	CMsgPacker Msg(NETMSG_ENTERGAME, true);
-	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH);
+	SendMsgY(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH, Dummy);
 }
 
 void CClient::SendReady()
@@ -634,49 +634,48 @@ void CClient::SetState(int s)
 }
 
 // called when the map is loaded and we should init for a new round
-void CClient::OnEnterGame()
+void CClient::OnEnterGame(bool Dummy)
 {
 	// reset input
 	int i;
 	for(i = 0; i < 200; i++)
 	{
-		m_aInputs[0][i].m_Tick = -1;
-		m_aInputs[1][i].m_Tick = -1;
+		m_aInputs[Dummy][i].m_Tick = -1;
 	}
-	m_CurrentInput[0] = 0;
-	m_CurrentInput[1] = 0;
+	m_CurrentInput[Dummy] = 0;
 
 	// reset snapshots
-	m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] = 0;
-	m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV] = 0;
-	m_SnapshotStorage[g_Config.m_ClDummy].PurgeAll();
-	m_ReceivedSnapshots[g_Config.m_ClDummy] = 0;
-	m_SnapshotParts[g_Config.m_ClDummy] = 0;
-	m_PredTick[g_Config.m_ClDummy] = 0;
-	m_CurrentRecvTick[g_Config.m_ClDummy] = 0;
-	m_CurGameTick[g_Config.m_ClDummy] = 0;
-	m_PrevGameTick[g_Config.m_ClDummy] = 0;
+	m_aSnapshots[Dummy][SNAP_CURRENT] = 0;
+	m_aSnapshots[Dummy][SNAP_PREV] = 0;
+	m_SnapshotStorage[Dummy].PurgeAll();
+	m_ReceivedSnapshots[Dummy] = 0;
+	m_SnapshotParts[Dummy] = 0;
+	m_PredTick[Dummy] = 0;
+	m_CurrentRecvTick[Dummy] = 0;
+	m_CurGameTick[Dummy] = 0;
+	m_PrevGameTick[Dummy] = 0;
 
-	if(g_Config.m_ClDummy == 0)
+	if(Dummy == 0)
+	{
 		m_LastDummyConnectTime = 0;
-
-	GameClient()->OnEnterGame();
+		GameClient()->OnEnterGame();
+	}
 }
 
-void CClient::EnterGame()
+void CClient::EnterGame(bool Dummy)
 {
 	if(State() == IClient::STATE_DEMOPLAYBACK)
 		return;
 
+	m_CodeRunAfterJoin[Dummy] = false;
+
 	// now we will wait for two snapshots
 	// to finish the connection
-	SendEnterGame();
-	OnEnterGame();
+	SendEnterGame(Dummy);
+	OnEnterGame(Dummy);
 
 	ServerInfoRequest(); // fresh one for timeout protection
 	m_CurrentServerNextPingTime = time_get() + time_freq() / 2;
-	m_CodeRunAfterJoin[0] = false;
-	m_CodeRunAfterJoin[1] = false;
 }
 
 void GenerateTimeoutCode(char *pBuffer, unsigned Size, char *pSeed, const NETADDR &Addr, bool Dummy)
