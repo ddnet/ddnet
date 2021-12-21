@@ -3109,12 +3109,13 @@ void CClient::Run()
 			mem_zero(&BindAddr, sizeof(BindAddr));
 			BindAddr.type = NETTYPE_ALL;
 		}
-		for(auto &NetClient : m_NetClient)
+		for(unsigned int i = 0; i < sizeof(m_NetClient) / sizeof(m_NetClient[0]); i++)
 		{
-			do
+			BindAddr.port = i == CLIENT_MAIN ? g_Config.m_ClPort : i == CLIENT_DUMMY ? g_Config.m_ClDummyPort : g_Config.m_ClContactPort;
+			while(BindAddr.port == 0 || !m_NetClient[i].Open(BindAddr, 0))
 			{
 				BindAddr.port = (secure_rand() % 64511) + 1024;
-			} while(!NetClient.Open(BindAddr, 0));
+			}
 		}
 	}
 
