@@ -557,6 +557,12 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 
 	str_format(aBuf, sizeof(aBuf), "moving '%s' to '%s'", aFileNameTmp, pFileName);
 	m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", aBuf);
+	char aFileNameOld[IO_MAX_PATH_LENGTH];
+	str_format(aFileNameOld, sizeof(aFileNameOld), "%s.old", pFileName);
+	if(!pStorage->RenameFile(pFileName, aFileNameOld, IStorage::TYPE_SAVE))
+	{
+		return 0;
+	}
 	if(!pStorage->RenameFile(aFileNameTmp, pFileName, IStorage::TYPE_SAVE))
 	{
 		return 0;
