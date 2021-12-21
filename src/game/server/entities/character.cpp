@@ -2339,8 +2339,7 @@ void CCharacter::DDRaceInit()
 
 	if(g_Config.m_SvTeam == 2 && Team == TEAM_FLOCK)
 	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Please join a team before you start");
-		m_LastStartWarning = Server()->Tick();
+		GameServer()->SendStartWarning(GetPlayer()->GetCID(), "Please join a team before you start");
 	}
 }
 
