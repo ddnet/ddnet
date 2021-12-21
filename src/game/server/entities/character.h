@@ -246,30 +246,32 @@ public:
 	int m_WeaponChangeTick;
 
 	// Setters/Getters because i don't want to modify vanilla vars access modifiers
-	int GetLastWeapon() { return m_LastWeapon; };
-	void SetLastWeapon(int LastWeap) { m_LastWeapon = LastWeap; };
-	int GetActiveWeapon() { return m_Core.m_ActiveWeapon; };
-	void SetActiveWeapon(int ActiveWeap) { m_Core.m_ActiveWeapon = ActiveWeap; };
-	void SetLastAction(int LastAction) { m_LastAction = LastAction; };
-	int GetArmor() { return m_Armor; };
-	void SetArmor(int Armor) { m_Armor = Armor; };
-	CCharacterCore GetCore() { return m_Core; };
-	void SetCore(CCharacterCore Core) { m_Core = Core; };
-	CCharacterCore *Core() { return &m_Core; };
-	bool GetWeaponGot(int Type) { return m_aWeapons[Type].m_Got; };
-	void SetWeaponGot(int Type, bool Value) { m_aWeapons[Type].m_Got = Value; };
-	int GetWeaponAmmo(int Type) { return m_aWeapons[Type].m_Ammo; };
-	void SetWeaponAmmo(int Type, int Value) { m_aWeapons[Type].m_Ammo = Value; };
-	bool IsAlive() { return m_Alive; };
-	void SetNinjaActivationDir(vec2 ActivationDir) { m_Ninja.m_ActivationDir = ActivationDir; };
-	void SetNinjaActivationTick(int ActivationTick) { m_Ninja.m_ActivationTick = ActivationTick; };
-	void SetNinjaCurrentMoveTime(int CurrentMoveTime) { m_Ninja.m_CurrentMoveTime = CurrentMoveTime; };
+	int GetLastWeapon() { return m_LastWeapon; }
+	void SetLastWeapon(int LastWeap) { m_LastWeapon = LastWeap; }
+	int GetActiveWeapon() { return m_Core.m_ActiveWeapon; }
+	void SetActiveWeapon(int ActiveWeap) { m_Core.m_ActiveWeapon = ActiveWeap; }
+	void SetLastAction(int LastAction) { m_LastAction = LastAction; }
+	int GetArmor() { return m_Armor; }
+	void SetArmor(int Armor) { m_Armor = Armor; }
+	CCharacterCore GetCore() { return m_Core; }
+	void SetCore(CCharacterCore Core) { m_Core = Core; }
+	CCharacterCore *Core() { return &m_Core; }
+	bool GetWeaponGot(int Type) { return m_aWeapons[Type].m_Got; }
+	void SetWeaponGot(int Type, bool Value) { m_aWeapons[Type].m_Got = Value; }
+	int GetWeaponAmmo(int Type) { return m_aWeapons[Type].m_Ammo; }
+	void SetWeaponAmmo(int Type, int Value) { m_aWeapons[Type].m_Ammo = Value; }
+	bool IsAlive() { return m_Alive; }
+	void SetNinjaActivationDir(vec2 ActivationDir) { m_Ninja.m_ActivationDir = ActivationDir; }
+	void SetNinjaActivationTick(int ActivationTick) { m_Ninja.m_ActivationTick = ActivationTick; }
+	void SetNinjaCurrentMoveTime(int CurrentMoveTime) { m_Ninja.m_CurrentMoveTime = CurrentMoveTime; }
 
 	int GetLastAction() const { return m_LastAction; }
 
-	bool HasTelegunGun() { return m_Core.m_HasTelegunGun; };
-	bool HasTelegunGrenade() { return m_Core.m_HasTelegunGrenade; };
-	bool HasTelegunLaser() { return m_Core.m_HasTelegunLaser; };
+	bool HasTelegunGun() { return m_Core.m_HasTelegunGun; }
+	bool HasTelegunGrenade() { return m_Core.m_HasTelegunGrenade; }
+	bool HasTelegunLaser() { return m_Core.m_HasTelegunLaser; }
+
+	CSaveTee &GetRescueTeeRef() { return m_RescueTee; }
 };
 
 enum
