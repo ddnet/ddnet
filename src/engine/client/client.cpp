@@ -2969,9 +2969,7 @@ void CClient::Update()
 	Steam()->Update();
 	if(Steam()->GetConnectAddress())
 	{
-		char aAddress[NETADDR_MAXSTRSIZE];
-		net_addr_str(Steam()->GetConnectAddress(), aAddress, sizeof(aAddress), true);
-		Connect(aAddress);
+		HandleConnectAddress(Steam()->GetConnectAddress());
 		Steam()->ClearConnectAddress();
 	}
 
