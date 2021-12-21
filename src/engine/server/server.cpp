@@ -32,6 +32,8 @@
 
 #include <mastersrv/mastersrv.h>
 
+#include <game/version.h>
+
 // DDRace
 #include <engine/shared/linereader.h>
 #include <vector>
@@ -2475,8 +2477,13 @@ int CServer::Run()
 	{
 		m_RunServer = STOPPING;
 	}
-	str_format(aBuf, sizeof(aBuf), "version %s", GameServer()->NetVersion());
-	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "version " GAME_RELEASE_VERSION " on " CONF_PLATFORM_STRING " " CONF_ARCH_STRING);
+	if(GIT_SHORTREV_HASH)
+	{
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "git revision hash: %s", GIT_SHORTREV_HASH);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+	}
 
 	// process pending commands
 	m_pConsole->StoreCommands(false);
