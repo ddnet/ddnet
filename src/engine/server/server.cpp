@@ -298,7 +298,7 @@ CServer::CServer() :
 
 	m_aShutdownReason[0] = 0;
 
-	for(int i = 0; i < 2; i++)
+	for(int i = SIX; i <= SIXUP; i++)
 	{
 		m_apCurrentMapData[i] = 0;
 		m_aCurrentMapSize[i] = 0;
@@ -306,6 +306,7 @@ CServer::CServer() :
 
 	m_MapReload = false;
 	m_ReloadedWhenEmpty = false;
+	m_aCurrentMap[0] = '\0';
 
 	m_RconClientID = IServer::RCON_CID_SERV;
 	m_RconAuthLevel = AUTHED_ADMIN;
@@ -2298,7 +2299,7 @@ void CServer::ChangeMap(const char *pMap)
 
 int CServer::LoadMap(const char *pMapName)
 {
-	char aBuf[512];
+	char aBuf[IO_MAX_PATH_LENGTH];
 	str_format(aBuf, sizeof(aBuf), "maps/%s.map", pMapName);
 	GameServer()->OnMapChange(aBuf, sizeof(aBuf));
 
@@ -2354,8 +2355,9 @@ int CServer::LoadMap(const char *pMapName)
 		if(!File)
 		{
 			Config()->m_SvSixup = 0;
-			dbg_msg("sixup", "couldn't load map %s", aBuf);
-			dbg_msg("sixup", "disabling 0.7 compatibility");
+			str_format(aBufMsg, sizeof(aBufMsg), "couldn't load map %s", aBuf);
+			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "sixup", aBufMsg);
+			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "sixup", "disabling 0.7 compatibility");
 		}
 		else
 		{
@@ -2371,6 +2373,11 @@ int CServer::LoadMap(const char *pMapName)
 			str_format(aBufMsg, sizeof(aBufMsg), "%s sha256 is %s", aBuf, aSha256);
 			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "sixup", aBufMsg);
 		}
+	}
+	if(!Config()->m_SvSixup && m_apCurrentMapData[SIXUP])
+	{
+		free(m_apCurrentMapData[SIXUP]);
+		m_apCurrentMapData[SIXUP] = 0;
 	}
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -3461,6 +3468,14 @@ void CServer::ConchainMapUpdate(IConsole::IResult *pResult, void *pUserData, ICo
 	}
 }
 
+void CServer::ConchainSixupUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	CServer *pThis = static_cast<CServer *>(pUserData);
+	if(pResult->NumArguments() >= 1 && pThis->m_aCurrentMap[0] != '\0')
+		pThis->m_MapReload |= (pThis->m_apCurrentMapData[SIXUP] != 0) != (pResult->GetInteger(0) != 0);
+}
+
 #if defined(CONF_FAMILY_UNIX)
 void CServer::ConchainConnLoggingServerChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
@@ -3534,6 +3549,7 @@ void CServer::RegisterCommands()
 	Console()->Chain("sv_rcon_mod_password", ConchainRconModPasswordChange, this);
 	Console()->Chain("sv_rcon_helper_password", ConchainRconHelperPasswordChange, this);
 	Console()->Chain("sv_map", ConchainMapUpdate, this);
+	Console()->Chain("sv_sixup", ConchainSixupUpdate, this);
 
 #if defined(CONF_FAMILY_UNIX)
 	Console()->Chain("sv_conn_logging_server", ConchainConnLoggingServerChange, this);
