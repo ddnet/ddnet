@@ -4325,7 +4325,7 @@ int main(int argc, const char **argv)
 	// create the components
 	IEngine *pEngine = CreateEngine(GAME_NAME, Silent, 2);
 	IConsole *pConsole = CreateConsole(CFGFLAG_CLIENT);
-	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_CLIENT, argc, (const char **)argv);
+	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_CLIENT, argc, (const char **)argv);
 	IConfigManager *pConfigManager = CreateConfigManager();
 	IEngineSound *pEngineSound = CreateEngineSound();
 	IEngineInput *pEngineInput = CreateEngineInput();
