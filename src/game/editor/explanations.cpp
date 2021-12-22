@@ -392,7 +392,7 @@ const char *CEditor::Explain(int ExplanationID, int Tile, int Layer) //TODO: Add
 			break;
 		case ENTITY_OFFSET + ENTITY_CRAZY_SHOTGUN:
 			if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
-				return "EXPLODING BULLET: Bounces off the walls without explosion. Touching the bullet works like FREEZE tile (freezes for 3 seconds by default).";
+				return "BULLET: Bounces off the walls without explosion. Touching the bullet works like FREEZE tile (freezes for 3 seconds by default).";
 			break;
 		case ENTITY_OFFSET + ENTITY_DRAGGER_WEAK:
 			if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
