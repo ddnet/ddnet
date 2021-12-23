@@ -1,5 +1,6 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 #include "teamscore.h"
+#include <base/math.h>
 #include <engine/shared/config.h>
 
 CTeamsCore::CTeamsCore()
@@ -9,7 +10,7 @@ CTeamsCore::CTeamsCore()
 
 bool CTeamsCore::SameTeam(int ClientID1, int ClientID2) const
 {
-	return m_Team[ClientID1] == m_Team[ClientID2];
+	return m_Team[ClientID1] == TEAM_SUPER || m_Team[ClientID2] == TEAM_SUPER || m_Team[ClientID1] == m_Team[ClientID2];
 }
 
 int CTeamsCore::Team(int ClientID) const
@@ -19,7 +20,7 @@ int CTeamsCore::Team(int ClientID) const
 
 void CTeamsCore::Team(int ClientID, int Team)
 {
-	m_Team[ClientID] = Team;
+	m_Team[ClientID] = clamp(Team, (int)TEAM_FLOCK, (int)TEAM_SUPER);
 }
 
 bool CTeamsCore::CanKeepHook(int ClientID1, int ClientID2) const
