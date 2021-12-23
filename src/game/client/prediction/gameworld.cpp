@@ -144,12 +144,15 @@ void CGameWorld::RemoveEntity(CEntity *pEnt)
 
 	if(pEnt->m_ObjType == ENTTYPE_CHARACTER)
 	{
-		CCharacter *pChar = (CCharacter *)pEnt;
-		int ID = pChar->GetCID();
-		if(ID >= 0 && ID < MAX_CLIENTS)
+		CCharacter *pChar = dynamic_cast<CCharacter *>(pEnt);
+		if(pChar)
 		{
-			m_apCharacters[ID] = 0;
-			m_Core.m_apCharacters[ID] = 0;
+			int ID = pChar->GetCID();
+			if(ID >= 0 && ID < MAX_CLIENTS)
+			{
+				m_apCharacters[ID] = 0;
+				m_Core.m_apCharacters[ID] = 0;
+			}
 		}
 	}
 
