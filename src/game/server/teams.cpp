@@ -483,6 +483,9 @@ int64_t CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 {
 	int64_t Mask = 0;
 
+	if(Team == TEAM_SUPER)
+		return 0xffffffffffffffff;
+
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
 		if(i == ExceptID)
