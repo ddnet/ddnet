@@ -26,7 +26,7 @@ void CInput::AddEvent(char *pText, int Key, int Flags)
 		if(!pText)
 			m_aInputEvents[m_NumEvents].m_aText[0] = 0;
 		else
-			str_utf8_copy(m_aInputEvents[m_NumEvents].m_aText, pText, sizeof(m_aInputEvents[m_NumEvents].m_aText));
+			str_copy(m_aInputEvents[m_NumEvents].m_aText, pText, sizeof(m_aInputEvents[m_NumEvents].m_aText));
 		m_aInputEvents[m_NumEvents].m_InputCount = m_InputCounter;
 		m_NumEvents++;
 	}
@@ -359,6 +359,9 @@ int CInput::Update()
 				// shortcuts
 				switch(Event.window.event)
 				{
+				case SDL_WINDOWEVENT_MOVED:
+					Graphics()->Move(Event.window.data1, Event.window.data2);
+					break;
 				// listen to size changes, this includes our manual changes and the ones by the window manager
 				case SDL_WINDOWEVENT_SIZE_CHANGED:
 					Graphics()->Resize(Event.window.data1, Event.window.data2, -1);

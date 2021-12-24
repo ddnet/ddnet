@@ -259,6 +259,38 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 #endif
 
 		Left.HSplitTop(15.0f, 0, &Left);
+		CUIRect SettingsButton;
+		Left.HSplitBottom(25.0f, &Left, &SettingsButton);
+
+		SettingsButton.HSplitTop(5.0f, 0, &SettingsButton);
+		static int s_SettingsButtonID = 0;
+		if(DoButton_Menu(&s_SettingsButtonID, Localize("Settings file"), 0, &SettingsButton))
+		{
+			char aBuf[IO_MAX_PATH_LENGTH];
+			Storage()->GetCompletePath(IStorage::TYPE_SAVE, "settings_ddnet.cfg", aBuf, sizeof(aBuf));
+			if(!open_file(aBuf))
+			{
+				dbg_msg("menus", "couldn't open file");
+			}
+		}
+
+		Left.HSplitTop(15.0f, 0, &Left);
+		CUIRect ConfigButton;
+		Left.HSplitBottom(25.0f, &Left, &ConfigButton);
+
+		ConfigButton.HSplitTop(5.0f, 0, &ConfigButton);
+		static int s_ConfigButtonID = 0;
+		if(DoButton_Menu(&s_ConfigButtonID, Localize("Config directory"), 0, &ConfigButton))
+		{
+			char aBuf[IO_MAX_PATH_LENGTH];
+			Storage()->GetCompletePath(IStorage::TYPE_SAVE, "", aBuf, sizeof(aBuf));
+			if(!open_file(aBuf))
+			{
+				dbg_msg("menus", "couldn't open file");
+			}
+		}
+
+		Left.HSplitTop(15.0f, 0, &Left);
 		CUIRect DirectoryButton;
 		Left.HSplitBottom(25.0f, &Left, &DirectoryButton);
 		RenderThemeSelection(Left);
@@ -268,13 +300,11 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		if(DoButton_Menu(&s_ThemesButtonID, Localize("Themes directory"), 0, &DirectoryButton))
 		{
 			char aBuf[IO_MAX_PATH_LENGTH];
-			char aBufFull[IO_MAX_PATH_LENGTH + 7];
 			Storage()->GetCompletePath(IStorage::TYPE_SAVE, "themes", aBuf, sizeof(aBuf));
 			Storage()->CreateFolder("themes", IStorage::TYPE_SAVE);
-			str_format(aBufFull, sizeof(aBufFull), "file://%s", aBuf);
-			if(!open_link(aBufFull))
+			if(!open_file(aBuf))
 			{
-				dbg_msg("menus", "couldn't open link");
+				dbg_msg("menus", "couldn't open file");
 			}
 		}
 
@@ -708,7 +738,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		QuickSearch.VSplitLeft(QuickSearch.w - 15.0f, &QuickSearch, &QuickSearchClearButton);
 		static int s_ClearButton = 0;
 		static float s_Offset = 0.0f;
-		if(Input()->KeyPress(KEY_F) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)))
+		if(Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
 			UI()->SetActiveItem(&g_Config.m_ClSkinFilterString);
 		if(UIEx()->DoClearableEditBox(&g_Config.m_ClSkinFilterString, &s_ClearButton, &QuickSearch, g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString), 14.0f, &s_Offset, false, CUI::CORNER_ALL, Localize("Search")))
 			s_InitSkinlist = true;
@@ -733,13 +763,11 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(DoButton_Menu(&s_DirectoryButtonID, Localize("Skins directory"), 0, &DirectoryButton))
 	{
 		char aBuf[IO_MAX_PATH_LENGTH];
-		char aBufFull[IO_MAX_PATH_LENGTH + 7];
 		Storage()->GetCompletePath(IStorage::TYPE_SAVE, "skins", aBuf, sizeof(aBuf));
 		Storage()->CreateFolder("skins", IStorage::TYPE_SAVE);
-		str_format(aBufFull, sizeof(aBufFull), "file://%s", aBuf);
-		if(!open_link(aBufFull))
+		if(!open_file(aBuf))
 		{
-			dbg_msg("menus", "couldn't open link");
+			dbg_msg("menus", "couldn't open file");
 		}
 	}
 
@@ -2571,13 +2599,13 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	Left.VSplitRight(10.0f, &Left, 0x0);
 	Right.VSplitLeft(10.0f, 0x0, &Right);
 	Left.HSplitTop(25.0f, 0x0, &Left);
-	CUIRect TempLabel;
+	CUIRect TempLabel, TempLabel2;
 	Left.HSplitTop(25.0f, &TempLabel, &Left);
 	Left.HSplitTop(5.0f, 0x0, &Left);
 
 	UI()->DoLabelScaled(&TempLabel, Localize("Background"), 20.0f, -1);
 
-	Right.HSplitTop(25.0f, 0x0, &Right);
+	Right.HSplitTop(45.0f, 0x0, &Right);
 	Right.HSplitTop(25.0f, &TempLabel, &Right);
 	Right.HSplitTop(5.0f, 0x0, &Miscellaneous);
 
@@ -2625,12 +2653,20 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	{
 		Client()->GenerateTimeoutSeed();
 	}
+
+	static float s_RunOnJoin = 0.0f;
+	Right.VSplitLeft(5.0f, 0, &Right);
+	Right.HSplitTop(5.0f, 0, &Right);
+	Right.HSplitTop(20.0f, &Right, 0);
+	Right.VSplitLeft(100.0f, &Label, &TempLabel2);
+	UI()->DoLabelScaled(&Label, Localize("Run on join"), 14.0f, -1);
+	UIEx()->DoEditBox(g_Config.m_ClRunOnJoin, &TempLabel2, g_Config.m_ClRunOnJoin, sizeof(g_Config.m_ClRunOnJoin), 14.0f, &s_RunOnJoin, false, CUI::CORNER_ALL, Localize("Chat command (e.g. showall 1)"));
 	// Updater
 #if defined(CONF_AUTOUPDATE)
 	{
 		MainView.VSplitMid(&Left, &Right);
 		Left.w += 20.0f;
-		Left.HSplitBottom(25.0f, 0x0, &Label);
+		Left.HSplitBottom(20.0f, 0x0, &Label);
 		bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
 		char aBuf[256];
 		int State = Updater()->GetCurrentState();

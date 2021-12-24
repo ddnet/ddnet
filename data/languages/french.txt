@@ -1361,3 +1361,15 @@ Refreshing...
 
 Show local player's key presses
 == Montrer les touches appuyées des autres joueurs
+
+Settings file
+== 
+
+Config directory
+== 
+
+Run on join
+== 
+
+Chat command (e.g. showall 1)
+== 

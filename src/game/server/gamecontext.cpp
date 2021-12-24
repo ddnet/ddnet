@@ -1359,6 +1359,14 @@ void CGameContext::OnClientEnter(int ClientID)
 		NewClientInfoMsg.m_Local = 1;
 		Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientID);
 	}
+
+	// initial chat delay
+	if(g_Config.m_SvChatInitialDelay != 0 && m_apPlayers[ClientID]->m_JoinTick > m_NonEmptySince + 10 * Server()->TickSpeed())
+	{
+		NETADDR Addr;
+		Server()->GetClientAddr(ClientID, &Addr);
+		Mute(&Addr, g_Config.m_SvChatInitialDelay, Server()->ClientName(ClientID), "Initial chat delay", true);
+	}
 }
 
 bool CGameContext::OnClientDataPersist(int ClientID, void *pData)
@@ -1400,18 +1408,9 @@ void CGameContext::OnClientConnected(int ClientID, void *pData)
 	// Check which team the player should be on
 	const int StartTeam = (Spec || g_Config.m_SvTournamentMode) ? TEAM_SPECTATORS : m_pController->GetAutoTeam(ClientID);
 
-	if(!m_apPlayers[ClientID])
-		m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, StartTeam);
-	else
-	{
+	if(m_apPlayers[ClientID])
 		delete m_apPlayers[ClientID];
-		m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, StartTeam);
-		//	//m_apPlayers[ClientID]->Reset();
-		//	//((CServer*)Server())->m_aClients[ClientID].Reset();
-		//	((CServer*)Server())->m_aClients[ClientID].m_State = 4;
-	}
-	//players[client_id].init(client_id);
-	//players[client_id].client_id = client_id;
+	m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, StartTeam);
 
 #ifdef CONF_DEBUG
 	if(g_Config.m_DbgDummies)
@@ -3126,7 +3125,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	m_Layers.Init(Kernel());
 	m_Collision.Init(&m_Layers);
 
-	char aMapName[128];
+	char aMapName[IO_MAX_PATH_LENGTH];
 	int MapSize;
 	SHA256_DIGEST MapSha256;
 	int MapCrc;
@@ -3422,10 +3421,8 @@ void CGameContext::DeleteTempfile()
 
 void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 {
-	char aConfig[128];
-	char aTemp[128];
+	char aConfig[IO_MAX_PATH_LENGTH];
 	str_format(aConfig, sizeof(aConfig), "maps/%s.cfg", g_Config.m_SvMap);
-	str_format(aTemp, sizeof(aTemp), "%s.%d.tmp", pNewMapName, pid());
 
 	IOHANDLE File = Storage()->OpenFile(aConfig, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
 	if(!File)
@@ -3540,7 +3537,8 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 	dbg_msg("mapchange", "imported settings");
 	free(pSettings);
 	Reader.Close();
-	Writer.OpenFile(Storage(), aTemp);
+	char aTemp[IO_MAX_PATH_LENGTH];
+	Writer.OpenFile(Storage(), IStorage::FormatTmpPath(aTemp, sizeof(aTemp), pNewMapName));
 	Writer.Finish();
 
 	str_copy(pNewMapName, aTemp, MapNameSize);
@@ -3604,7 +3602,7 @@ void CGameContext::LoadMapSettings()
 		break;
 	}
 
-	char aBuf[128];
+	char aBuf[IO_MAX_PATH_LENGTH];
 	str_format(aBuf, sizeof(aBuf), "maps/%s.map.cfg", g_Config.m_SvMap);
 	Console()->ExecuteFile(aBuf, IConsole::CLIENT_ID_NO_GAME);
 }
@@ -3789,13 +3787,11 @@ int CGameContext::ProcessSpamProtection(int ClientID, bool RespectChatInitialDel
 	Server()->GetClientAddr(ClientID, &Addr);
 
 	int Muted = 0;
-	if(m_apPlayers[ClientID]->m_JoinTick > m_NonEmptySince + 10 * Server()->TickSpeed() && RespectChatInitialDelay)
-		Muted = (m_apPlayers[ClientID]->m_JoinTick + Server()->TickSpeed() * g_Config.m_SvChatInitialDelay - Server()->Tick()) / Server()->TickSpeed();
-	if(Muted <= 0)
+	for(int i = 0; i < m_NumMutes && Muted <= 0; i++)
 	{
-		for(int i = 0; i < m_NumMutes && Muted <= 0; i++)
+		if(!net_addr_comp_noport(&Addr, &m_aMutes[i].m_Addr))
 		{
-			if(!net_addr_comp_noport(&Addr, &m_aMutes[i].m_Addr))
+			if(RespectChatInitialDelay || m_aMutes[i].m_InitialChatDelay)
 				Muted = (m_aMutes[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
 		}
 	}

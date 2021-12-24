@@ -171,7 +171,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aCurrentMapPath[IO_MAX_PATH_LENGTH];
 
 	char m_aTimeoutCodes[NUM_DUMMIES][32];
-	bool m_aTimeoutCodeSent[NUM_DUMMIES];
+	bool m_CodeRunAfterJoin[NUM_DUMMIES];
 	bool m_GenerateTimeoutSeed;
 
 	//
@@ -303,7 +303,7 @@ public:
 	void ChillerBotLoadMap(const char *pMap);
 	void SendChillerBotUX(bool Dummy);
 	void SendInfo();
-	void SendEnterGame();
+	void SendEnterGame(bool Dummy);
 	void SendReady();
 	void SendMapRequest();
 
@@ -331,8 +331,8 @@ public:
 	void SetState(int s);
 
 	// called when the map is loaded and we should init for a new round
-	void OnEnterGame();
-	virtual void EnterGame();
+	void OnEnterGame(bool Dummy);
+	virtual void EnterGame(bool Dummy);
 
 	virtual void Connect(const char *pAddress, const char *pPassword = NULL);
 	void DisconnectWithReason(const char *pReason);

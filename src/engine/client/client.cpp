@@ -339,7 +339,7 @@ CClient::CClient() :
 	m_MapDetailsSha256 = SHA256_ZEROED;
 	m_MapDetailsCrc = 0;
 
-	str_format(m_aDDNetInfoTmp, sizeof(m_aDDNetInfoTmp), DDNET_INFO ".%d.tmp", pid());
+	IStorage::FormatTmpPath(m_aDDNetInfoTmp, sizeof(m_aDDNetInfoTmp), DDNET_INFO);
 	m_pDDNetInfoTask = NULL;
 	m_aNews[0] = '\0';
 	m_aMapDownloadUrl[0] = '\0';
@@ -494,10 +494,10 @@ void CClient::SendInfo()
 	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH);
 }
 
-void CClient::SendEnterGame()
+void CClient::SendEnterGame(bool Dummy)
 {
 	CMsgPacker Msg(NETMSG_ENTERGAME, true);
-	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH);
+	SendMsgY(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH, Dummy);
 }
 
 void CClient::SendReady()
@@ -678,49 +678,48 @@ void CClient::SetState(int s)
 }
 
 // called when the map is loaded and we should init for a new round
-void CClient::OnEnterGame()
+void CClient::OnEnterGame(bool Dummy)
 {
 	// reset input
 	int i;
 	for(i = 0; i < 200; i++)
 	{
-		m_aInputs[0][i].m_Tick = -1;
-		m_aInputs[1][i].m_Tick = -1;
+		m_aInputs[Dummy][i].m_Tick = -1;
 	}
-	m_CurrentInput[0] = 0;
-	m_CurrentInput[1] = 0;
+	m_CurrentInput[Dummy] = 0;
 
 	// reset snapshots
-	m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] = 0;
-	m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV] = 0;
-	m_SnapshotStorage[g_Config.m_ClDummy].PurgeAll();
-	m_ReceivedSnapshots[g_Config.m_ClDummy] = 0;
-	m_SnapshotParts[g_Config.m_ClDummy] = 0;
-	m_PredTick[g_Config.m_ClDummy] = 0;
-	m_CurrentRecvTick[g_Config.m_ClDummy] = 0;
-	m_CurGameTick[g_Config.m_ClDummy] = 0;
-	m_PrevGameTick[g_Config.m_ClDummy] = 0;
+	m_aSnapshots[Dummy][SNAP_CURRENT] = 0;
+	m_aSnapshots[Dummy][SNAP_PREV] = 0;
+	m_SnapshotStorage[Dummy].PurgeAll();
+	m_ReceivedSnapshots[Dummy] = 0;
+	m_SnapshotParts[Dummy] = 0;
+	m_PredTick[Dummy] = 0;
+	m_CurrentRecvTick[Dummy] = 0;
+	m_CurGameTick[Dummy] = 0;
+	m_PrevGameTick[Dummy] = 0;
 
-	if(g_Config.m_ClDummy == 0)
+	if(Dummy == 0)
+	{
 		m_LastDummyConnectTime = 0;
-
-	GameClient()->OnEnterGame();
+		GameClient()->OnEnterGame();
+	}
 }
 
-void CClient::EnterGame()
+void CClient::EnterGame(bool Dummy)
 {
 	if(State() == IClient::STATE_DEMOPLAYBACK)
 		return;
 
+	m_CodeRunAfterJoin[Dummy] = false;
+
 	// now we will wait for two snapshots
 	// to finish the connection
-	SendEnterGame();
-	OnEnterGame();
+	SendEnterGame(Dummy);
+	OnEnterGame(Dummy);
 
 	ServerInfoRequest(); // fresh one for timeout protection
 	m_CurrentServerNextPingTime = time_get() + time_freq() / 2;
-	m_aTimeoutCodeSent[0] = false;
-	m_aTimeoutCodeSent[1] = false;
 }
 
 void GenerateTimeoutCode(char *pBuffer, unsigned Size, char *pSeed, const NETADDR &Addr, bool Dummy)
@@ -1276,7 +1275,7 @@ static void FormatMapDownloadFilename(const char *pName, const SHA256_DIGEST *pS
 	char aSuffix[32];
 	if(Temp)
 	{
-		str_format(aSuffix, sizeof(aSuffix), ".%d.tmp", pid());
+		IStorage::FormatTmpPath(aSuffix, sizeof(aSuffix), "");
 	}
 	else
 	{
@@ -2102,20 +2101,27 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 						m_GameTime[g_Config.m_ClDummy].Update(&m_GametimeMarginGraph, (GameTick - 1) * time_freq() / 50, TimeLeft, 0);
 					}
 
-					if(m_ReceivedSnapshots[g_Config.m_ClDummy] > 50 && !m_aTimeoutCodeSent[g_Config.m_ClDummy])
+					if(m_ReceivedSnapshots[g_Config.m_ClDummy] > 50 && !m_CodeRunAfterJoin[g_Config.m_ClDummy])
 					{
 						if(m_ServerCapabilities.m_ChatTimeoutCode || ShouldSendChatTimeoutCodeHeuristic())
 						{
-							m_aTimeoutCodeSent[g_Config.m_ClDummy] = true;
 							CNetMsg_Cl_Say Msg;
 							Msg.m_Team = 0;
 							char aBuf[256];
-							str_format(aBuf, sizeof(aBuf), "/timeout %s", m_aTimeoutCodes[g_Config.m_ClDummy]);
+							if(g_Config.m_ClRunOnJoin[0])
+							{
+								str_format(aBuf, sizeof(aBuf), "/mc;timeout %s;%s", m_aTimeoutCodes[g_Config.m_ClDummy], g_Config.m_ClRunOnJoin);
+							}
+							else
+							{
+								str_format(aBuf, sizeof(aBuf), "/timeout %s", m_aTimeoutCodes[g_Config.m_ClDummy]);
+							}
 							Msg.m_pMessage = aBuf;
 							CMsgPacker Packer(Msg.MsgID(), false);
 							Msg.Pack(&Packer);
 							SendMsgY(&Packer, MSGFLAG_VITAL, g_Config.m_ClDummy);
 						}
+						m_CodeRunAfterJoin[g_Config.m_ClDummy] = true;
 					}
 
 					// ack snapshot
@@ -3006,9 +3012,7 @@ void CClient::Update()
 	Steam()->Update();
 	if(Steam()->GetConnectAddress())
 	{
-		char aAddress[NETADDR_MAXSTRSIZE];
-		net_addr_str(Steam()->GetConnectAddress(), aAddress, sizeof(aAddress), true);
-		Connect(aAddress);
+		HandleConnectAddress(Steam()->GetConnectAddress());
 		Steam()->ClearConnectAddress();
 	}
 
@@ -3146,12 +3150,13 @@ void CClient::Run()
 			mem_zero(&BindAddr, sizeof(BindAddr));
 			BindAddr.type = NETTYPE_ALL;
 		}
-		for(auto &NetClient : m_NetClient)
+		for(unsigned int i = 0; i < sizeof(m_NetClient) / sizeof(m_NetClient[0]); i++)
 		{
-			do
+			BindAddr.port = i == CLIENT_MAIN ? g_Config.m_ClPort : i == CLIENT_DUMMY ? g_Config.m_ClDummyPort : g_Config.m_ClContactPort;
+			while(BindAddr.port == 0 || !m_NetClient[i].Open(BindAddr, 0))
 			{
 				BindAddr.port = (secure_rand() % 64511) + 1024;
-			} while(!NetClient.Open(BindAddr, 0));
+			}
 		}
 	}
 
@@ -3181,9 +3186,13 @@ void CClient::Run()
 	GameClient()->OnInit();
 	m_ServerBrowser.OnInit();
 
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "version %s", GameClient()->NetVersion());
-	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, ColorRGBA(0.7f, 0.7f, 1, 1.0f));
+	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", "version " GAME_RELEASE_VERSION " on " CONF_PLATFORM_STRING " " CONF_ARCH_STRING, ColorRGBA(0.7f, 0.7f, 1, 1.0f));
+	if(GIT_SHORTREV_HASH)
+	{
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "git revision hash: %s", GIT_SHORTREV_HASH);
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf, ColorRGBA(0.7f, 0.7f, 1, 1.0f));
+	}
 
 	// connect to the server if wanted
 	/*
@@ -3333,8 +3342,13 @@ void CClient::Run()
 
 			bool IsRenderActive = (g_Config.m_GfxBackgroundRender || m_pGraphics->WindowOpen());
 
+			bool AsyncRenderOld = false;
+#if !defined(CONF_PLATFORM_MACOS)
+			AsyncRenderOld = g_Config.m_GfxAsyncRenderOld;
+#endif
+
 			if(IsRenderActive &&
-				(!g_Config.m_GfxAsyncRenderOld || m_pGraphics->IsIdle()) &&
+				(!AsyncRenderOld || m_pGraphics->IsIdle()) &&
 				(!g_Config.m_GfxRefreshRate || (time_freq() / (int64_t)g_Config.m_GfxRefreshRate) <= Now - LastRenderTime))
 			{
 				m_RenderFrames++;
@@ -3364,9 +3378,9 @@ void CClient::Run()
 
 				// keep the overflow time - it's used to make sure the gfx refreshrate is reached
 				int64_t AdditionalTime = g_Config.m_GfxRefreshRate ? ((Now - LastRenderTime) - (time_freq() / (int64_t)g_Config.m_GfxRefreshRate)) : 0;
-				// if the value is over a second time loose, reset the additional time (drop the frames, that are lost already)
-				if(AdditionalTime > time_freq())
-					AdditionalTime = time_freq();
+				// if the value is over the frametime of a 60 fps frame, reset the additional time (drop the frames, that are lost already)
+				if(AdditionalTime > (time_freq() / 60))
+					AdditionalTime = (time_freq() / 60);
 				LastRenderTime = Now - AdditionalTime;
 				m_LastRenderTime = Now;
 
@@ -3470,11 +3484,11 @@ void CClient::Run()
 		if(Slept)
 		{
 			// if the diff gets too small it shouldn't get even smaller (drop the updates, that could not be handled)
-			if(SleepTimeInMicroSeconds < (int64_t)-1000000)
-				SleepTimeInMicroSeconds = (int64_t)-1000000;
-			// don't go higher than the game ticks speed, because the network is waking up the client with the server's snapshots anyway
-			else if(SleepTimeInMicroSeconds > (int64_t)1000000 / m_GameTickSpeed)
-				SleepTimeInMicroSeconds = (int64_t)1000000 / m_GameTickSpeed;
+			if(SleepTimeInMicroSeconds < (int64_t)-16666)
+				SleepTimeInMicroSeconds = (int64_t)-16666;
+			// don't go higher than the frametime of a 60 fps frame
+			else if(SleepTimeInMicroSeconds > (int64_t)16666)
+				SleepTimeInMicroSeconds = (int64_t)16666;
 			// the time diff between the time that was used actually used and the time the thread should sleep/wait
 			// will be calculated in the sleep time of the next update tick by faking the time it should have slept/wait.
 			// so two cases (and the case it slept exactly the time it should):
@@ -3511,7 +3525,7 @@ void CClient::Run()
 
 bool CClient::CtrlShiftKey(int Key, bool &Last)
 {
-	if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyIsPressed(KEY_LSHIFT) && !Last && Input()->KeyIsPressed(Key))
+	if(Input()->ModifierIsPressed() && (Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && !Last && Input()->KeyIsPressed(Key))
 	{
 		Last = true;
 		return true;

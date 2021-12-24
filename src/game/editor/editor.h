@@ -254,7 +254,6 @@ public:
 
 	void Clear()
 	{
-		//m_lLayers.delete_all();
 		m_lLayers.clear();
 	}
 

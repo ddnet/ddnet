@@ -1293,6 +1293,12 @@ Markers:
 %.2f KiB
 == 
 
+Settings file
+== 
+
+Config directory
+== 
+
 Converse
 == 
 
@@ -1360,6 +1366,12 @@ Entities Background color
 == 
 
 Regular Background Color
+== 
+
+Run on join
+== 
+
+Chat command (e.g. showall 1)
 == 
 
 Discord

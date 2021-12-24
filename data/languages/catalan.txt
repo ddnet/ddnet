@@ -1326,3 +1326,15 @@ SA
 
 CHN
 == CHN
+
+Settings file
+== 
+
+Config directory
+== 
+
+Run on join
+== 
+
+Chat command (e.g. showall 1)
+== 

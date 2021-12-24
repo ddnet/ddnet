@@ -1037,6 +1037,12 @@ Reset wanted weapon on death
 Skip the main menu
 == 
 
+Settings file
+== 
+
+Config directory
+== 
+
 Themes directory
 == 
 
@@ -1239,6 +1245,12 @@ Regular Background Color
 == 
 
 Try fast HTTP map download first
+== 
+
+Run on join
+== 
+
+Chat command (e.g. showall 1)
 == 
 
 Entities

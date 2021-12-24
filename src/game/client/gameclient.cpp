@@ -768,7 +768,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)
 
 	if(MsgId == NETMSGTYPE_SV_READYTOENTER)
 	{
-		Client()->EnterGame();
+		Client()->EnterGame(IsDummy ? !g_Config.m_ClDummy : g_Config.m_ClDummy);
 	}
 	else if(MsgId == NETMSGTYPE_SV_EMOTICON)
 	{

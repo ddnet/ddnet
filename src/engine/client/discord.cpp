@@ -1,6 +1,9 @@
 #include <engine/discord.h>
 
-#if defined(CONF_DISCORD)
+// Hack for universal binary builds on macOS: Ignore arm64 until Discord
+// releases a native arm64 SDK for macOS.
+
+#if defined(CONF_DISCORD) && !(defined(CONF_ARCH_ARM64) && defined(CONF_PLATFORM_MACOS))
 #include <discord_game_sdk.h>
 
 typedef enum EDiscordResult (*FDiscordCreate)(DiscordVersion, struct DiscordCreateParams *, struct IDiscordCore **);

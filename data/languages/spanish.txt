@@ -1342,3 +1342,15 @@ Kill Message Highlight Color
 
 Show local player's key presses
 == Mostrar las teclas presionadas por el jugador local
+
+Settings file
+== 
+
+Config directory
+== 
+
+Run on join
+== 
+
+Chat command (e.g. showall 1)
+== 

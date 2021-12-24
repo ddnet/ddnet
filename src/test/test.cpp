@@ -10,8 +10,9 @@ CTestInfo::CTestInfo()
 {
 	const ::testing::TestInfo *pTestInfo =
 		::testing::UnitTest::GetInstance()->current_test_info();
-	str_format(m_aFilename, sizeof(m_aFilename), "%s.%s-%d.tmp",
-		pTestInfo->test_case_name(), pTestInfo->name(), pid());
+	char aBuf[IO_MAX_PATH_LENGTH];
+	str_format(aBuf, sizeof(aBuf), "%s.%s", pTestInfo->test_case_name(), pTestInfo->name());
+	IStorage::FormatTmpPath(m_aFilename, sizeof(m_aFilename), aBuf);
 }
 
 IStorage *CTestInfo::CreateTestStorage()

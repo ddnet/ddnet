@@ -3,6 +3,8 @@
 
 #include <base/system.h>
 
+#include <memory>
+
 class IConsole;
 
 // can hold one PreparedStatement with Results
@@ -37,6 +39,8 @@ public:
 	virtual const char *Random() const = 0;
 	// Get Median Map Time from l.Map
 	virtual const char *MedianMapTime(char *pBuffer, int BufferSize) const = 0;
+	virtual const char *False() const = 0;
+	virtual const char *True() const = 0;
 
 	// tries to allocate the connection from the pool established
 	//
@@ -96,9 +100,9 @@ protected:
 int MysqlInit();
 void MysqlUninit();
 
-IDbConnection *CreateSqliteConnection(const char *pFilename, bool Setup);
+std::unique_ptr<IDbConnection> CreateSqliteConnection(const char *pFilename, bool Setup);
 // Returns nullptr if MySQL support is not compiled in.
-IDbConnection *CreateMysqlConnection(
+std::unique_ptr<IDbConnection> CreateMysqlConnection(
 	const char *pDatabase,
 	const char *pPrefix,
 	const char *pUser,

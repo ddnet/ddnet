@@ -5,6 +5,7 @@
 
 #include <engine/graphics.h>
 #include <engine/input.h>
+#include <engine/keys.h>
 
 #include <stddef.h>
 
@@ -48,6 +49,7 @@ public:
 
 	virtual void Init();
 
+	bool ModifierIsPressed() const { return KeyState(KEY_LCTRL) || KeyState(KEY_RCTRL) || KeyState(KEY_LGUI) || KeyState(KEY_RGUI); }
 	bool KeyIsPressed(int Key) const { return KeyState(Key); }
 	bool KeyPress(int Key, bool CheckCounter) const { return CheckCounter ? (m_aInputCount[Key] == m_InputCounter) : m_aInputCount[Key]; }
 

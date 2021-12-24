@@ -1247,6 +1247,12 @@ Are you sure that you want to disconnect and switch to a different server?
 Refreshing...
 == 
 
+Settings file
+== 
+
+Config directory
+== 
+
 Automatically take statboard screenshot
 == 
 
@@ -1311,6 +1317,12 @@ Regular Background Color
 == 
 
 New random timeout code
+== 
+
+Run on join
+== 
+
+Chat command (e.g. showall 1)
 == 
 
 Entities

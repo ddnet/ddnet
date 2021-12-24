@@ -32,6 +32,8 @@
 
 #include <mastersrv/mastersrv.h>
 
+#include <game/version.h>
+
 // DDRace
 #include <engine/shared/linereader.h>
 #include <vector>
@@ -298,7 +300,7 @@ CServer::CServer() :
 
 	m_aShutdownReason[0] = 0;
 
-	for(int i = 0; i < 2; i++)
+	for(int i = SIX; i <= SIXUP; i++)
 	{
 		m_apCurrentMapData[i] = 0;
 		m_aCurrentMapSize[i] = 0;
@@ -306,6 +308,7 @@ CServer::CServer() :
 
 	m_MapReload = false;
 	m_ReloadedWhenEmpty = false;
+	m_aCurrentMap[0] = '\0';
 
 	m_RconClientID = IServer::RCON_CID_SERV;
 	m_RconAuthLevel = AUTHED_ADMIN;
@@ -400,9 +403,7 @@ bool CServer::SetClientNameImpl(int ClientID, const char *pNameRequest, bool Set
 		// auto rename
 		for(int i = 1;; i++)
 		{
-			char aNameTryBrokenEnd[MAX_NAME_LENGTH];
-			str_format(aNameTryBrokenEnd, sizeof(aNameTryBrokenEnd), "(%d)%s", i, aTrimmedName);
-			str_utf8_copy(aNameTry, aNameTryBrokenEnd, sizeof(aNameTry));
+			str_format(aNameTry, sizeof(aNameTry), "(%d)%s", i, aTrimmedName);
 			if(IsClientNameAvailable(ClientID, aNameTry))
 				break;
 		}
@@ -2300,7 +2301,7 @@ void CServer::ChangeMap(const char *pMap)
 
 int CServer::LoadMap(const char *pMapName)
 {
-	char aBuf[512];
+	char aBuf[IO_MAX_PATH_LENGTH];
 	str_format(aBuf, sizeof(aBuf), "maps/%s.map", pMapName);
 	GameServer()->OnMapChange(aBuf, sizeof(aBuf));
 
@@ -2356,8 +2357,9 @@ int CServer::LoadMap(const char *pMapName)
 		if(!File)
 		{
 			Config()->m_SvSixup = 0;
-			dbg_msg("sixup", "couldn't load map %s", aBuf);
-			dbg_msg("sixup", "disabling 0.7 compatibility");
+			str_format(aBufMsg, sizeof(aBufMsg), "couldn't load map %s", aBuf);
+			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "sixup", aBufMsg);
+			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "sixup", "disabling 0.7 compatibility");
 		}
 		else
 		{
@@ -2373,6 +2375,11 @@ int CServer::LoadMap(const char *pMapName)
 			str_format(aBufMsg, sizeof(aBufMsg), "%s sha256 is %s", aBuf, aSha256);
 			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "sixup", aBufMsg);
 		}
+	}
+	if(!Config()->m_SvSixup && m_apCurrentMapData[SIXUP])
+	{
+		free(m_apCurrentMapData[SIXUP]);
+		m_apCurrentMapData[SIXUP] = 0;
 	}
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -2419,17 +2426,16 @@ int CServer::Run()
 
 	if(Config()->m_SvSqliteFile[0] != '\0')
 	{
-		auto pSqlServers = std::unique_ptr<IDbConnection>(CreateSqliteConnection(
-			Config()->m_SvSqliteFile, true));
+		auto pSqliteConn = CreateSqliteConnection(Config()->m_SvSqliteFile, true);
 
 		if(Config()->m_SvUseSQL)
 		{
-			DbPool()->RegisterDatabase(std::move(pSqlServers), CDbConnectionPool::WRITE_BACKUP);
+			DbPool()->RegisterDatabase(std::move(pSqliteConn), CDbConnectionPool::WRITE_BACKUP);
 		}
 		else
 		{
-			auto pCopy = std::unique_ptr<IDbConnection>(pSqlServers->Copy());
-			DbPool()->RegisterDatabase(std::move(pSqlServers), CDbConnectionPool::READ);
+			auto pCopy = std::unique_ptr<IDbConnection>(pSqliteConn->Copy());
+			DbPool()->RegisterDatabase(std::move(pSqliteConn), CDbConnectionPool::READ);
 			DbPool()->RegisterDatabase(std::move(pCopy), CDbConnectionPool::WRITE);
 		}
 	}
@@ -2478,8 +2484,13 @@ int CServer::Run()
 	{
 		m_RunServer = STOPPING;
 	}
-	str_format(aBuf, sizeof(aBuf), "version %s", GameServer()->NetVersion());
-	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "version " GAME_RELEASE_VERSION " on " CONF_PLATFORM_STRING " " CONF_ARCH_STRING);
+	if(GIT_SHORTREV_HASH)
+	{
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "git revision hash: %s", GIT_SHORTREV_HASH);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+	}
 
 	// process pending commands
 	m_pConsole->StoreCommands(false);
@@ -3257,12 +3268,12 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 
 	bool SetUpDb = pResult->NumArguments() == 8 ? pResult->GetInteger(7) : true;
 
-	auto pSqlServers = std::unique_ptr<IDbConnection>(CreateMysqlConnection(
+	auto pMysqlConn = CreateMysqlConnection(
 		pResult->GetString(1), pResult->GetString(2), pResult->GetString(3),
 		pResult->GetString(4), pResult->GetString(5), pResult->GetInteger(6),
-		SetUpDb));
+		SetUpDb);
 
-	if(!pSqlServers)
+	if(!pMysqlConn)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "can't add MySQL server: compiled without MySQL support");
 		return;
@@ -3275,7 +3286,7 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 		pResult->GetString(1), pResult->GetString(2), pResult->GetString(3),
 		pResult->GetString(5), pResult->GetInteger(6));
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
-	pSelf->DbPool()->RegisterDatabase(std::move(pSqlServers), ReadOnly ? CDbConnectionPool::READ : CDbConnectionPool::WRITE);
+	pSelf->DbPool()->RegisterDatabase(std::move(pMysqlConn), ReadOnly ? CDbConnectionPool::READ : CDbConnectionPool::WRITE);
 }
 
 void CServer::ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData)
@@ -3464,6 +3475,14 @@ void CServer::ConchainMapUpdate(IConsole::IResult *pResult, void *pUserData, ICo
 	}
 }
 
+void CServer::ConchainSixupUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	CServer *pThis = static_cast<CServer *>(pUserData);
+	if(pResult->NumArguments() >= 1 && pThis->m_aCurrentMap[0] != '\0')
+		pThis->m_MapReload |= (pThis->m_apCurrentMapData[SIXUP] != 0) != (pResult->GetInteger(0) != 0);
+}
+
 #if defined(CONF_FAMILY_UNIX)
 void CServer::ConchainConnLoggingServerChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
@@ -3537,6 +3556,7 @@ void CServer::RegisterCommands()
 	Console()->Chain("sv_rcon_mod_password", ConchainRconModPasswordChange, this);
 	Console()->Chain("sv_rcon_helper_password", ConchainRconHelperPasswordChange, this);
 	Console()->Chain("sv_map", ConchainMapUpdate, this);
+	Console()->Chain("sv_sixup", ConchainSixupUpdate, this);
 
 #if defined(CONF_FAMILY_UNIX)
 	Console()->Chain("sv_conn_logging_server", ConchainConnLoggingServerChange, this);

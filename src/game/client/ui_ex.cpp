@@ -235,9 +235,9 @@ bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigne
 		m_CurCursor = minimum(str_length(pStr), m_CurCursor);
 
 		bool IsShiftPressed = Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT);
-		bool IsCtrlPressed = Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL);
+		bool IsModPressed = Input()->ModifierIsPressed();
 
-		if(!IsShiftPressed && IsCtrlPressed && Input()->KeyPress(KEY_V))
+		if(!IsShiftPressed && IsModPressed && Input()->KeyPress(KEY_V))
 		{
 			const char *pText = Input()->GetClipboardText();
 			if(pText)
@@ -294,7 +294,7 @@ bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigne
 			}
 		}
 
-		if(!IsShiftPressed && IsCtrlPressed && (Input()->KeyPress(KEY_C) || Input()->KeyPress(KEY_X)))
+		if(!IsShiftPressed && IsModPressed && (Input()->KeyPress(KEY_C) || Input()->KeyPress(KEY_X)))
 		{
 			if(m_HasSelection)
 			{
@@ -322,7 +322,7 @@ bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigne
 				Input()->SetClipboardText(pStr);
 		}
 
-		if(!IsShiftPressed && IsCtrlPressed && Input()->KeyPress(KEY_A))
+		if(!IsShiftPressed && IsModPressed && Input()->KeyPress(KEY_A))
 		{
 			m_CurSelStart = 0;
 			int StrLen = str_length(pStr);
@@ -331,7 +331,7 @@ bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigne
 			m_CurCursor = StrLen;
 		}
 
-		if(!IsShiftPressed && IsCtrlPressed && Input()->KeyPress(KEY_U))
+		if(!IsShiftPressed && IsModPressed && Input()->KeyPress(KEY_U))
 		{
 			pStr[0] = '\0';
 			m_CurCursor = 0;
@@ -343,7 +343,7 @@ bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigne
 			int LastCursor = m_CurCursor;
 			int Len, NumChars;
 			str_utf8_stats(pStr, StrSize, StrSize, &Len, &NumChars);
-			int32_t ManipulateChanges = CLineInput::Manipulate(m_pInputEventsArray[i], pStr, StrSize, StrSize, &Len, &m_CurCursor, &NumChars, m_HasSelection ? CLineInput::LINE_INPUT_MODIFY_DONT_DELETE : 0, IsCtrlPressed ? KEY_LCTRL : 0);
+			int32_t ManipulateChanges = CLineInput::Manipulate(m_pInputEventsArray[i], pStr, StrSize, StrSize, &Len, &m_CurCursor, &NumChars, m_HasSelection ? CLineInput::LINE_INPUT_MODIFY_DONT_DELETE : 0, IsModPressed ? KEY_LCTRL : 0);
 			ReturnValue |= (ManipulateChanges & (CLineInput::LINE_INPUT_CHANGE_STRING | CLineInput::LINE_INPUT_CHANGE_CHARACTERS_DELETE)) != 0;
 
 			// if cursor changed, reset selection
