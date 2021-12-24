@@ -1,5 +1,5 @@
-#ifndef ENGINE_CLIENT_HTTP_H
-#define ENGINE_CLIENT_HTTP_H
+#ifndef ENGINE_SHARED_HTTP_H
+#define ENGINE_SHARED_HTTP_H
 
 #include <atomic>
 #include <engine/kernel.h>
@@ -155,4 +155,4 @@ public:
 
 bool HttpInit(IStorage *pStorage);
 void EscapeUrl(char *pBuf, int Size, const char *pStr);
-#endif // ENGINE_CLIENT_HTTP_H
+#endif // ENGINE_SHARED_HTTP_H

@@ -5,7 +5,7 @@
 #include <base/color.h>
 #include <base/tl/sorted_array.h>
 #include <base/vmath.h>
-#include <engine/client/http.h>
+#include <engine/shared/http.h>
 #include <game/client/component.h>
 #include <game/client/skin.h>
 

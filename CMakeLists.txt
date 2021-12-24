@@ -560,7 +560,7 @@ if(CLIENT AND VULKAN)
   show_dependency_status("Vulkan" VULKAN)
 endif()
 
-if(CLIENT AND NOT(CURL_FOUND))
+if(NOT(CURL_FOUND))
   message(SEND_ERROR "You must install Curl to compile DDNet")
 endif()
 if(NOT(PYTHONINTERP_FOUND))
@@ -1666,6 +1666,8 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   filecollection.cpp
   filecollection.h
   global_uuid_manager.cpp
+  http.cpp
+  http.h
   huffman.cpp
   huffman.h
   image_manipulation.cpp
@@ -1778,6 +1780,7 @@ set(DEPS ${DEP_JSON} ${DEP_MD5} ${ZLIB_DEP})
 # Libraries
 set(LIBS
   ${CRYPTO_LIBRARIES}
+  ${CURL_LIBRARIES}
   ${SQLite3_LIBRARIES}
   ${WEBSOCKETS_LIBRARIES}
   ${ZLIB_LIBRARIES}
@@ -1862,8 +1865,6 @@ if(CLIENT)
     graphics_defines.h
     graphics_threaded.cpp
     graphics_threaded.h
-    http.cpp
-    http.h
     input.cpp
     input.h
     keynames.h
@@ -2020,7 +2021,6 @@ if(CLIENT)
   # Libraries
   set(LIBS_CLIENT
     ${LIBS}
-    ${CURL_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${GLEW_LIBRARIES}
     ${PNGLITE_LIBRARIES}
@@ -2096,7 +2096,6 @@ if(CLIENT)
   endif()
 
   target_include_directories(${TARGET_CLIENT} SYSTEM PRIVATE
-    ${CURL_INCLUDE_DIRS}
     ${FREETYPE_INCLUDE_DIRS}
     ${GLEW_INCLUDE_DIRS}
     ${OGG_INCLUDE_DIRS}
@@ -2443,8 +2442,6 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
   set(TESTS_EXTRA
     src/engine/client/blocklist_driver.cpp
     src/engine/client/blocklist_driver.h
-    src/engine/client/http.cpp
-    src/engine/client/http.h
     src/engine/client/serverbrowser.cpp
     src/engine/client/serverbrowser.h
     src/engine/client/serverbrowser_http.cpp
@@ -2476,7 +2473,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     ${DEPS}
   )
   target_link_libraries(${TARGET_TESTRUNNER} ${LIBS} ${CURL_LIBRARIES} ${MYSQL_LIBRARIES} ${GTEST_LIBRARIES})
-  target_include_directories(${TARGET_TESTRUNNER} SYSTEM PRIVATE ${CURL_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS})
+  target_include_directories(${TARGET_TESTRUNNER} SYSTEM PRIVATE ${GTEST_INCLUDE_DIRS})
 
   list(APPEND TARGETS_OWN ${TARGET_TESTRUNNER})
   list(APPEND TARGETS_LINK ${TARGET_TESTRUNNER})
@@ -2953,7 +2950,7 @@ foreach(target ${TARGETS_OWN})
   target_include_directories(${target} PRIVATE ${PROJECT_BINARY_DIR}/src)
   target_include_directories(${target} PRIVATE src)
   target_compile_definitions(${target} PRIVATE $<$<CONFIG:Debug>:CONF_DEBUG>)
-  target_include_directories(${target} SYSTEM PRIVATE ${SQLite3_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS})
+  target_include_directories(${target} SYSTEM PRIVATE ${CURL_INCLUDE_DIRS} ${SQLite3_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS})
   target_compile_definitions(${target} PRIVATE GLEW_STATIC)
   if(CRYPTO_FOUND)
     target_compile_definitions(${target} PRIVATE CONF_OPENSSL)
