@@ -1,3 +1,4 @@
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include <base/detect.h>
@@ -255,7 +256,13 @@ TEST_P(MapInfo, ExactNoFinish)
 {
 	str_copy(m_PlayerRequest.m_aName, "Kobra 3", sizeof(m_PlayerRequest.m_aName));
 	ASSERT_FALSE(CScoreWorker::MapInfo(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(pPlayerResult, {"\"Kobra 3\" by Zerodin on Novice, ★★★★★, 5 points, released moments ago, 0 finishes by 0 tees"});
+
+	EXPECT_EQ(pPlayerResult->m_MessageKind, CScorePlayerResult::DIRECT);
+	EXPECT_THAT(pPlayerResult->m_Data.m_aaMessages[0], testing::MatchesRegex("\"Kobra 3\" by Zerodin on Novice, ★★★★★, 5 points, released .* ago, 0 finishes by 0 tees"));
+	for(int i = 1; i < CScorePlayerResult::MAX_MESSAGES; i++)
+	{
+		EXPECT_STREQ(pPlayerResult->m_Data.m_aaMessages[i], "");
+	}
 }
 
 TEST_P(MapInfo, ExactFinish)
@@ -263,7 +270,13 @@ TEST_P(MapInfo, ExactFinish)
 	InsertRank();
 	str_copy(m_PlayerRequest.m_aName, "Kobra 3", sizeof(m_PlayerRequest.m_aName));
 	ASSERT_FALSE(CScoreWorker::MapInfo(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(pPlayerResult, {"\"Kobra 3\" by Zerodin on Novice, ★★★★★, 5 points, released moments ago, 1 finish by 1 tee in 01:40 median"});
+
+	EXPECT_EQ(pPlayerResult->m_MessageKind, CScorePlayerResult::DIRECT);
+	EXPECT_THAT(pPlayerResult->m_Data.m_aaMessages[0], testing::MatchesRegex("\"Kobra 3\" by Zerodin on Novice, ★★★★★, 5 points, released .* ago, 1 finish by 1 tee in 01:40 median"));
+	for(int i = 1; i < CScorePlayerResult::MAX_MESSAGES; i++)
+	{
+		EXPECT_STREQ(pPlayerResult->m_Data.m_aaMessages[i], "");
+	}
 }
 
 TEST_P(MapInfo, Fuzzy)
@@ -271,7 +284,13 @@ TEST_P(MapInfo, Fuzzy)
 	InsertRank();
 	str_copy(m_PlayerRequest.m_aName, "k3", sizeof(m_PlayerRequest.m_aName));
 	ASSERT_FALSE(CScoreWorker::MapInfo(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(pPlayerResult, {"\"Kobra 3\" by Zerodin on Novice, ★★★★★, 5 points, released moments ago, 1 finish by 1 tee in 01:40 median"});
+
+	EXPECT_EQ(pPlayerResult->m_MessageKind, CScorePlayerResult::DIRECT);
+	EXPECT_THAT(pPlayerResult->m_Data.m_aaMessages[0], testing::MatchesRegex("\"Kobra 3\" by Zerodin on Novice, ★★★★★, 5 points, released .* ago, 1 finish by 1 tee in 01:40 median"));
+	for(int i = 1; i < CScorePlayerResult::MAX_MESSAGES; i++)
+	{
+		EXPECT_STREQ(pPlayerResult->m_Data.m_aaMessages[i], "");
+	}
 }
 
 TEST_P(MapInfo, DoesntExit)
