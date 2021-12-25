@@ -80,8 +80,9 @@ jobs:
       if: contains(matrix.os, 'macOS')
       run: |
         brew update || true
-        brew install pkg-config sdl2
+        brew install pkg-config sdl2 python3
         brew upgrade freetype
+        pip3 install dmgbuild
         sudo rm -rf /Library/Developer/CommandLineTools
 
     - name: Build in debug mode

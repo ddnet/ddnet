@@ -437,24 +437,9 @@ else()
   set(WEBSOCKETS_INCLUDE_DIRS)
 endif()
 
-
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   find_program(CMAKE_OTOOL otool)
-  find_program(DMG dmg)
-  find_program(HFSPLUS hfsplus)
-  find_program(NEWFS_HFS newfs_hfs)
-  if(DMG AND HFSPLUS AND NEWFS_HFS)
-    set(DMGTOOLS_FOUND ON)
-  else()
-    set(DMGTOOLS_FOUND OFF)
-  endif()
-
-  find_program(HDIUTIL hdiutil)
-  if(HDIUTIL)
-    set(HDIUTIL_FOUND ON)
-  else()
-    set(HDIUTIL_FOUND OFF)
-  endif()
+  find_program(DMGBUILD dmgbuild)
 endif()
 
 message(STATUS "******** DDNet ********")
@@ -493,7 +478,7 @@ endif()
 show_dependency_status("Glew" GLEW)
 show_dependency_status("GTest" GTEST)
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
-  show_dependency_status("Hdiutil" HDIUTIL)
+  show_dependency_status("Dmgbuild" DMGBUILD)
 endif()
 if(UPNP)
   show_dependency_status("Miniupnpc" MINIUPNPC)
@@ -2562,17 +2547,12 @@ else()
 endif()
 
 set(PACKAGE_TARGETS)
-if(CLIENT AND (DMGTOOLS_FOUND OR HDIUTIL))
+if(CLIENT AND DMGBUILD)
   file(MAKE_DIRECTORY bundle/client/)
   file(MAKE_DIRECTORY bundle/server/)
   configure_file(other/bundle/client/Info.plist.in bundle/client/Info.plist)
   configure_file(other/bundle/server/Info.plist.in bundle/server/Info.plist)
 
-  if(HDIUTIL)
-    set(DMG_PARAMS --hdiutil ${HDIUTIL})
-  elseif(DMGTOOLS_FOUND)
-    set(DMG_PARAMS --dmgtools ${DMG} ${HFSPLUS} ${NEWFS_HFS})
-  endif()
   set(DMG_TMPDIR pack_${CPACK_PACKAGE_FILE_NAME}_dmg)
   set(DMG_MKDIRS
     ${TARGET_CLIENT}.app
@@ -2628,7 +2608,7 @@ if(CLIENT AND (DMGTOOLS_FOUND OR HDIUTIL))
     COMMAND ${CMAKE_COMMAND} -E copy ${DMG_TMPDIR}/${TARGET_SERVER}.app/Contents/MacOS/${TARGET_SERVER} ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_SERVER}
 
     # DMG
-    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/dmg.py create ${DMG_PARAMS} ${CPACK_PACKAGE_FILE_NAME}.dmg ${CPACK_PACKAGE_FILE_NAME} ${DMG_TMPDIR}
+    COMMAND dmgbuild -s ${PROJECT_SOURCE_DIR}/other/dmgsettings.py -D client=${DMG_TMPDIR}/${TARGET_CLIENT}.app -D server=${DMG_TMPDIR}/${TARGET_SERVER}.app "${CPACK_PACKAGE_NAME} ${CPACK_PACKAGE_VERSION}" ${CPACK_PACKAGE_FILE_NAME}.dmg
 
     DEPENDS
       ${TARGET_CLIENT}
@@ -2642,7 +2622,6 @@ if(CLIENT AND (DMGTOOLS_FOUND OR HDIUTIL))
       other/bundle/server/PkgInfo
       other/icons/${TARGET_CLIENT}.icns
       other/icons/${TARGET_SERVER}.icns
-      scripts/dmg.py
   )
   add_custom_target(package_dmg DEPENDS ${CPACK_PACKAGE_FILE_NAME}.dmg)
   list(APPEND PACKAGE_TARGETS package_dmg)
