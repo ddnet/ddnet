@@ -58,7 +58,7 @@ void runServer()
 
 	NSAlert *alert = [[[NSAlert alloc] init] autorelease];
 	[alert setMessageText: @"Run DDNet Server"];
-	[alert addButtonWithTitle: @"Run with default config"];
+	[alert addButtonWithTitle: @"Use default config"];
 	[alert addButtonWithTitle: @"Select config"];
 	[alert addButtonWithTitle: @"Cancel"];
 	switch([alert runModal])
