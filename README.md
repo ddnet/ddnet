@@ -106,6 +106,13 @@ You need to install `libminiupnpc-dev` on Debian, `miniupnpc` on Arch Linux.
 * **-GNinja** <br>
 Use the Ninja build system instead of Make. This automatically parallizes the build and is generally faster. Compile with `ninja` instead of `make`. Install Ninja with `sudo apt install ninja-build` on Debian, `sudo pacman -S --needed ninja` on Arch Linux.
 
+* **-DCMAKE_CXX_LINK_FLAGS=[FLAGS]** <br>
+Custom flags to set for compiler when linking. With clang++ as the compiler this can be [used to link](https://github.com/rui314/mold#how-to-use) with [mold](https://github.com/rui314/mold), speeds up linking by a factor of ~10:
+
+```bash
+CC=clang CXX=clang++ cmake -DCMAKE_CXX_LINK_FLAGS="--ld-path=/usr/bin/mold" .
+```
+
 Running tests (Debian/Ubuntu)
 -----------------------------
 
