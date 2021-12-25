@@ -42,6 +42,12 @@ int sqlstr::EscapeLike(char *pDst, const char *pSrc, int DstSize)
 
 void sqlstr::AgoTimeToString(int AgoTime, char *pAgoString, int Size)
 {
+	if(AgoTime <= 0)
+	{
+		str_copy(pAgoString, "moments", Size);
+		return;
+	}
+
 	char aBuf[20];
 	int aTimes[7] =
 		{
