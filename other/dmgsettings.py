@@ -85,9 +85,9 @@ badge_icon_server = icon_from_app(application_server)
 
 # Where to put the icons
 icon_locations = {
-	appname_client: (140, 120),
-	appname_server: (240, 120),
-	'Applications': (500, 120)
+	appname_client: (128, 288),
+	appname_server: (272, 288),
+	'Applications': (512, 288)
 	}
 
 # .. Window configuration ......................................................
@@ -112,7 +112,7 @@ icon_locations = {
 #
 # Other color components may be expressed either in the range 0 to 1, or
 # as percentages (e.g. 60% is equivalent to 0.6).
-background = 'builtin-arrow'
+background = defines.get('background', 'builtin-arrow')
 
 show_status_bar = False
 show_tab_view = False
@@ -122,7 +122,7 @@ show_sidebar = False
 sidebar_width = 180
 
 # Window position in ((x, y), (w, h)) format
-window_rect = ((100, 100), (640, 280))
+window_rect = ((100, 100), (640, 444))
 
 # Select the default view; must be one of
 #
@@ -149,7 +149,7 @@ grid_spacing = 100
 scroll_position = (0, 0)
 label_pos = 'bottom' # or 'right'
 text_size = 16
-icon_size = 128
+icon_size = 118
 
 # .. List view configuration ...................................................
 
