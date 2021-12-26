@@ -109,6 +109,7 @@ option(HEADLESS_CLIENT "Build the client without graphics" OFF)
 option(CLIENT "Compile client" ON)
 option(SERVER "Compile server" ON)
 option(TOOLS "Compile tools" ON)
+option(UNIT_TEST "Enable unit test support" ON)
 option(DOWNLOAD_GTEST "Download and compile GTest" ${AUTO_DEPENDENCIES_DEFAULT})
 option(STEAM "Build the Steam release version" OFF)
 option(DISCORD "Enable Discord rich presence support" OFF)
@@ -405,7 +406,9 @@ endif()
 if(NOT(TARGET_OS STREQUAL "android"))
   find_package(GLEW)
 endif()
-find_package(GTest)
+if(UNIT_TEST)
+  find_package(GTest)
+endif()
 if(UPNP)
   find_package(Miniupnpc)
 endif()
@@ -491,7 +494,9 @@ if(DOWNLOAD_GTEST)
   show_dependency_status("Git" GIT)
 endif()
 show_dependency_status("Glew" GLEW)
-show_dependency_status("GTest" GTEST)
+if(UNIT_TEST)
+  show_dependency_status("GTest" GTEST)
+endif()
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   show_dependency_status("Hdiutil" HDIUTIL)
 endif()
@@ -568,7 +573,7 @@ endif()
 if(TARGET_OS STREQUAL "android" AND CLIENT AND NOT(CRYPTO_FOUND))
   message(SEND_ERROR "You must install OpenSSL to compile the DDNet client")
 endif()
-if(NOT(GTEST_FOUND))
+if(UNIT_TEST AND NOT(GTEST_FOUND))
   if(DOWNLOAD_GTEST)
     if(GIT_FOUND)
       message(STATUS "Automatically downloading GTest to be able to run tests")
@@ -626,7 +631,7 @@ endif()
 # DOWNLOAD GTEST
 ########################################################################
 
-if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
+if(UNIT_TEST AND NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
   set(DDNET_GTEST_VERSION 5c8ca58edfb304b2dd5e6061f83387470826dd87) # master as of 2021-04-07
   configure_file(cmake/Download_GTest_CMakeLists.txt.in googletest-download/CMakeLists.txt)
   execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
@@ -2270,7 +2275,7 @@ add_custom_target(everything DEPENDS ${TARGETS_OWN})
 # TESTS
 ########################################################################
 
-if(GTEST_FOUND OR DOWNLOAD_GTEST)
+if(UNIT_TEST AND (GTEST_FOUND OR DOWNLOAD_GTEST))
   set_src(TESTS GLOB src/test
     aio.cpp
     bezier.cpp
