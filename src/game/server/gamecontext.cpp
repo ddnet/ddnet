@@ -464,6 +464,15 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, in
 	}
 }
 
+void CGameContext::SendStartWarning(int ClientID, const char *pMessage)
+{
+	CCharacter *pChr = GetPlayerChar(ClientID);
+	if(pChr && pChr->m_LastStartWarning < Server()->Tick() - 3 * Server()->TickSpeed())
+	{
+		SendChatTarget(ClientID, pMessage);
+	}
+}
+
 void CGameContext::SendEmoticon(int ClientID, int Emoticon)
 {
 	CNetMsg_Sv_Emoticon Msg;
