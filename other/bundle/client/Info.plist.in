@@ -20,5 +20,7 @@
 		<string>org.DDNetClient.app</string>
 		<key>NSHighResolutionCapable</key>
 		<true/>
+		<key>NSPrefersDisplaySafeAreaCompatibilityMode</key>
+		<true/>
 	</dict>
 </plist>

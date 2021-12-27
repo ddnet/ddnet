@@ -2548,6 +2548,7 @@ if(NOT DEV)
   install(FILES other/ddnet.appdata.xml DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/metainfo COMPONENT client)
   foreach(SIZE 16 32 48 128 256 512)
     install(FILES other/icons/DDNet_${SIZE}x${SIZE}x32.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/${SIZE}x${SIZE}/apps RENAME ddnet.png COMPONENT client)
+    install(FILES other/icons/DDNet-Server_${SIZE}x${SIZE}x32.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/${SIZE}x${SIZE}/apps RENAME ddnet-server.png COMPONENT server)
   endforeach()
 endif()
 
