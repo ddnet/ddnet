@@ -48,7 +48,7 @@ TEST(CVariableInt, RoundtripCompressDecompress)
 	ASSERT_EQ(DecompressedSize, sizeof(DATA));
 	for(int i = 0; i < NUM; i++)
 	{
-		EXPECT_EQ(DATA[i], aDecompressed[i]);
+		EXPECT_EQ(aDecompressed[i], DATA[i]);
 	}
 }
 
