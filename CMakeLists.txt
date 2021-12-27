@@ -2276,6 +2276,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     bezier.cpp
     blocklist_driver.cpp
     color.cpp
+    compression.cpp
     csv.cpp
     datafile.cpp
     fs.cpp
