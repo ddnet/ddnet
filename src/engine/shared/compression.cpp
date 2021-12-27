@@ -7,23 +7,21 @@
 // Format: ESDDDDDD EDDDDDDD EDD... Extended, Data, Sign
 unsigned char *CVariableInt::Pack(unsigned char *pDst, int i)
 {
-	*pDst = (i >> 25) & 0x40; // set sign bit if i<0
-	i ^= i >> 31; // if(i<0) i = ~i
+	*pDst = 0;
+	if(i < 0)
+	{
+		*pDst |= 0x40; // set sign bit
+		i = ~i;
+	}
 
 	*pDst |= i & 0x3F; // pack 6bit into dst
 	i >>= 6; // discard 6 bits
-	if(i)
+	while(i)
 	{
 		*pDst |= 0x80; // set extend bit
-		while(true)
-		{
-			pDst++;
-			*pDst = i & 0x7F; // pack 7bit
-			i >>= 7; // discard 7 bits
-			*pDst |= (i != 0) << 7; // set extend bit (may branch)
-			if(!i)
-				break;
-		}
+		pDst++;
+		*pDst = i & 0x7F; // pack 7bit
+		i >>= 7; // discard 7 bits
 	}
 
 	pDst++;
