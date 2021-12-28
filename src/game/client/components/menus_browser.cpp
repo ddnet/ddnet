@@ -415,6 +415,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			}
 			else if(ID == COL_PING)
 			{
+				Button.VMargin(4.0f, &Button);
 				FormatServerbrowserPing(aTemp, sizeof(aTemp), pItem);
 				if(g_Config.m_UiColorizePing)
 				{
