@@ -97,9 +97,6 @@ Client
 Close
 == Sluiten
 
-Compatible version
-== Samenwerkende versie
-
 Connect
 == Verbinden
 

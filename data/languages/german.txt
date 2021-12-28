@@ -99,9 +99,6 @@ Client
 Close
 == Schließ.
 
-Compatible version
-== Kompatible Version
-
 Connect
 == Verbinden
 

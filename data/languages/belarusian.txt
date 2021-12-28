@@ -85,9 +85,6 @@ Client
 Close
 == Выйсці
 
-Compatible version
-== Сумяшчальная версія
-
 Connect
 == Падлучыцца
 

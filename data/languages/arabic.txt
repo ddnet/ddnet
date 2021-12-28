@@ -80,9 +80,6 @@ Client
 Close
 == ﻕﻼﻏﺍ
 
-Compatible version
-== ﻲﻟﺎﺤﻟﺍ ﺭﺍﺪﺻﻻﺍ
-
 Connect
 == ﻝﺎﺼﺗﺍ
 

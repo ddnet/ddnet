@@ -55,8 +55,6 @@ Client
 == ﺖﻨﯾﻼﻛ
 Close
 == ﻦﺘﺴﺑ
-Compatible version
-== ﺭﺎﮔﺯﺎﺳ ﻪﺨﺴﻧ
 Connect
 == ﻥﺪﺷ ﻞﺻﻭ
 Connecting to

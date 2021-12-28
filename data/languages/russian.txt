@@ -95,9 +95,6 @@ Client
 Close
 == Закрыть
 
-Compatible version
-== Совместимая версия
-
 Connect
 == Подключиться
 
