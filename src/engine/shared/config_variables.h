@@ -56,7 +56,6 @@ MACRO_CONFIG_STR(BrFilterGametype, br_filter_gametype, 128, "", CFGFLAG_SAVE | C
 MACRO_CONFIG_INT(BrFilterGametypeStrict, br_filter_gametype_strict, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Strict gametype filter")
 MACRO_CONFIG_INT(BrFilterConnectingPlayers, br_filter_connecting_players, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Filter connecting players")
 MACRO_CONFIG_STR(BrFilterServerAddress, br_filter_serveraddress, 128, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "Server address to filter")
-MACRO_CONFIG_INT(BrFilterCompatversion, br_filter_compatversion, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Filter out non-compatible servers in browser")
 MACRO_CONFIG_INT(BrFilterUnfinishedMap, br_filter_unfinished_map, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Show only servers with unfinished maps")
 
 MACRO_CONFIG_STR(BrFilterExcludeCountries, br_filter_exclude_countries, 128, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "Filter out DDNet servers by country")

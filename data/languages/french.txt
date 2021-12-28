@@ -101,9 +101,6 @@ Client
 Close
 == Fermer
 
-Compatible version
-== Version compatible
-
 Connect
 == Se connecter
 

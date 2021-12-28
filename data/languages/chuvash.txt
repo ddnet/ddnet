@@ -85,9 +85,6 @@ Client
 Close
 == Хупма
 
-Compatible version
-== Пĕрле ĕçлекен верси
-
 Connect
 == Çых
 

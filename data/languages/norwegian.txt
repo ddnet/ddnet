@@ -87,9 +87,6 @@ Client
 Close
 == Lukk
 
-Compatible version
-== Kompitabel versjon
-
 Connect
 == Koble til
 

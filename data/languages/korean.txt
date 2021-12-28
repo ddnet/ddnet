@@ -84,9 +84,6 @@ Client
 Close
 == 닫기
 
-Compatible version
-== 버전 호환
-
 Connect
 == 연결
 

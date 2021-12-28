@@ -87,9 +87,6 @@ Client
 Close
 == Sulje
 
-Compatible version
-== Yhteensopiva versio
-
 Connect
 == Yhdistä
 

@@ -88,9 +88,6 @@ Client
 Close
 == Fechar
 
-Compatible version
-== Versão compatível
-
 Connect
 == Ligar
 

@@ -90,9 +90,6 @@ Client
 Close
 == Chiudi
 
-Compatible version
-== Versione compatibile
-
 Connect
 == Connetti
 

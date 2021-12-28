@@ -86,9 +86,6 @@ Client
 Close
 == Bezárás
 
-Compatible version
-== Kompatibilis Verzió
-
 Connect
 == Csatlakozás
 

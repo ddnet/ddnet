@@ -97,9 +97,6 @@ Client
 Close
 == 关闭
 
-Compatible version
-== 兼容的版本
-
 Connect
 == 连接
 

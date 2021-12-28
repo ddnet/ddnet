@@ -86,9 +86,6 @@ Client
 Close
 == Luk
 
-Compatible version
-== Kompatibel version
-
 Connect
 == Tilslut
 

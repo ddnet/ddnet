@@ -85,9 +85,6 @@ Client
 Close
 == 閉じる
 
-Compatible version
-== 互換性のあるバージョン
-
 Connect
 == 接続
 
