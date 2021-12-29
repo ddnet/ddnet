@@ -22,6 +22,7 @@ MACRO_CONFIG_INT(ClShowLastKiller, cl_show_last_killer, 0, 0, 1, CFGFLAG_CLIENT 
 MACRO_CONFIG_INT(ClRenderLaserHead, cl_render_laser_head, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Render laser bubbles")
 MACRO_CONFIG_STR(ClPasswordFile, cl_password_file, 512, "chillerbot/chillpw_secret.txt", CFGFLAG_CLIENT | CFGFLAG_SAVE, "File to load passwords for autologin")
 MACRO_CONFIG_INT(ClShowWallet, cl_show_wallet, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show your city mod money in the hud")
+MACRO_CONFIG_INT(ClAlwaysReconnect, cl_always_reconnect, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Reconnect to last server after some time no matter what")
 
 // warlist
 MACRO_CONFIG_INT(ClWarList, cl_war_list, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Display nameplate color based on chillerbot/warlist directory")
