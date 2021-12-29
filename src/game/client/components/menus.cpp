@@ -861,7 +861,7 @@ int CMenus::RenderMenubar(CUIRect r)
 	Box.VSplitRight(33.0f, &Box, &Button);
 	static int s_QuitButton = 0;
 	ColorRGBA QuitColor(1, 0, 0, 0.5f);
-	if(DoButton_MenuTab(&s_QuitButton, "\xEE\x97\x8D", 0, &Button, CUI::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_QUIT], NULL, NULL, &QuitColor, 10.0f, 0))
+	if(DoButton_MenuTab(&s_QuitButton, "\xEE\xA2\xAC", 0, &Button, CUI::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_QUIT], NULL, NULL, &QuitColor, 10.0f, 0))
 	{
 		if(m_pClient->Editor()->HasUnsavedData() || (Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmQuitTime && g_Config.m_ClConfirmQuitTime >= 0))
 		{
