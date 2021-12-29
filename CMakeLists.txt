@@ -658,7 +658,7 @@ if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
       )
 
       if(MSVC)
-        foreach(target gtest)
+        foreach(target gtest gmock)
           # `/w` disables all warnings. This is needed because `gtest` enables
           # `/WX` (equivalent of `-Werror`) for some reason, breaking builds
           # when MSVS adds new warnings.
@@ -666,10 +666,10 @@ if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
         endforeach()
       endif()
 
-      set(GTEST_LIBRARIES gtest)
+      set(GTEST_LIBRARIES gtest gmock)
       set(GTEST_INCLUDE_DIRS)
       if(CMAKE_VERSION VERSION_LESS 2.8.11)
-        set(GTEST_INCLUDE_DIRS "${gtest_SOURCE_DIR}/include")
+        set(GTEST_INCLUDE_DIRS "${gtest_SOURCE_DIR}/include" "${gmock_SOURCE_DIR}/include")
       endif()
     endif()
   endif()
@@ -2318,6 +2318,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     bezier.cpp
     blocklist_driver.cpp
     color.cpp
+    compression.cpp
     csv.cpp
     datafile.cpp
     fs.cpp
@@ -2589,6 +2590,7 @@ if(NOT DEV)
   install(FILES other/chillerbot-ux.appdata.xml DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/metainfo COMPONENT client)
   foreach(SIZE 16 32 48 128 256 512)
     install(FILES other/icons/chillerbot-ux_${SIZE}x${SIZE}x32.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/${SIZE}x${SIZE}/apps RENAME chillerbot-ux.png COMPONENT client)
+    install(FILES other/icons/DDNet-Server_${SIZE}x${SIZE}x32.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/${SIZE}x${SIZE}/apps RENAME ddnet-server.png COMPONENT server)
   endforeach()
 endif()
 

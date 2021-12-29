@@ -94,9 +94,6 @@ Client
 Close
 == Cerrar
 
-Compatible version
-== Versión compatible
-
 Connect
 == Conectar
 

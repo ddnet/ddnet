@@ -90,9 +90,6 @@ Client
 Close
 == Kapat
 
-Compatible version
-== Uyumlu versiyon
-
 Connect
 == Bağlan
 

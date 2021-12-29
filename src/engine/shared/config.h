@@ -67,6 +67,7 @@ public:
 
 	virtual void Init();
 	virtual void Reset();
+	virtual void Reset(const char *pScriptName);
 	virtual bool Save();
 	virtual CConfig *Values() { return &g_Config; }
 

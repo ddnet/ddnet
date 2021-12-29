@@ -1,3 +1,4 @@
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include <base/detect.h>
@@ -75,11 +76,13 @@ struct Score : public testing::TestWithParam<IDbConnection *>
 
 	void InsertMap()
 	{
+		char aTimestamp[32];
+		str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_SPACE);
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf),
 			"%s into %s_maps(Map, Server, Mapper, Points, Stars, Timestamp) "
-			"VALUES (\"Kobra 3\", \"Novice\", \"Zerodin\", 5, 5, \"2015-01-01 00:00:00\")",
-			m_pConn->InsertIgnore(), m_pConn->GetPrefix());
+			"VALUES (\"Kobra 3\", \"Novice\", \"Zerodin\", 5, 5, \"%s\")",
+			m_pConn->InsertIgnore(), m_pConn->GetPrefix(), aTimestamp);
 		ASSERT_FALSE(m_pConn->PrepareStatement(aBuf, m_aError, sizeof(m_aError))) << m_aError;
 		int NumInserted = 0;
 		ASSERT_FALSE(m_pConn->ExecuteUpdate(&NumInserted, m_aError, sizeof(m_aError))) << m_aError;
@@ -253,7 +256,13 @@ TEST_P(MapInfo, ExactNoFinish)
 {
 	str_copy(m_PlayerRequest.m_aName, "Kobra 3", sizeof(m_PlayerRequest.m_aName));
 	ASSERT_FALSE(CScoreWorker::MapInfo(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(pPlayerResult, {"\"Kobra 3\" by Zerodin on Novice, ★★★★★, 5 points, released 6 years and 11 months ago, 0 finishes by 0 tees"});
+
+	EXPECT_EQ(pPlayerResult->m_MessageKind, CScorePlayerResult::DIRECT);
+	EXPECT_THAT(pPlayerResult->m_Data.m_aaMessages[0], testing::MatchesRegex("\"Kobra 3\" by Zerodin on Novice, ★★★★★, 5 points, released .* ago, 0 finishes by 0 tees"));
+	for(int i = 1; i < CScorePlayerResult::MAX_MESSAGES; i++)
+	{
+		EXPECT_STREQ(pPlayerResult->m_Data.m_aaMessages[i], "");
+	}
 }
 
 TEST_P(MapInfo, ExactFinish)
@@ -261,7 +270,13 @@ TEST_P(MapInfo, ExactFinish)
 	InsertRank();
 	str_copy(m_PlayerRequest.m_aName, "Kobra 3", sizeof(m_PlayerRequest.m_aName));
 	ASSERT_FALSE(CScoreWorker::MapInfo(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(pPlayerResult, {"\"Kobra 3\" by Zerodin on Novice, ★★★★★, 5 points, released 6 years and 11 months ago, 1 finish by 1 tee in 01:40 median"});
+
+	EXPECT_EQ(pPlayerResult->m_MessageKind, CScorePlayerResult::DIRECT);
+	EXPECT_THAT(pPlayerResult->m_Data.m_aaMessages[0], testing::MatchesRegex("\"Kobra 3\" by Zerodin on Novice, ★★★★★, 5 points, released .* ago, 1 finish by 1 tee in 01:40 median"));
+	for(int i = 1; i < CScorePlayerResult::MAX_MESSAGES; i++)
+	{
+		EXPECT_STREQ(pPlayerResult->m_Data.m_aaMessages[i], "");
+	}
 }
 
 TEST_P(MapInfo, Fuzzy)
@@ -269,7 +284,13 @@ TEST_P(MapInfo, Fuzzy)
 	InsertRank();
 	str_copy(m_PlayerRequest.m_aName, "k3", sizeof(m_PlayerRequest.m_aName));
 	ASSERT_FALSE(CScoreWorker::MapInfo(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(pPlayerResult, {"\"Kobra 3\" by Zerodin on Novice, ★★★★★, 5 points, released 6 years and 11 months ago, 1 finish by 1 tee in 01:40 median"});
+
+	EXPECT_EQ(pPlayerResult->m_MessageKind, CScorePlayerResult::DIRECT);
+	EXPECT_THAT(pPlayerResult->m_Data.m_aaMessages[0], testing::MatchesRegex("\"Kobra 3\" by Zerodin on Novice, ★★★★★, 5 points, released .* ago, 1 finish by 1 tee in 01:40 median"));
+	for(int i = 1; i < CScorePlayerResult::MAX_MESSAGES; i++)
+	{
+		EXPECT_STREQ(pPlayerResult->m_Data.m_aaMessages[i], "");
+	}
 }
 
 TEST_P(MapInfo, DoesntExit)

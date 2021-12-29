@@ -88,9 +88,6 @@ Client
 Close
 == Stäng
 
-Compatible version
-== Kompatibel version
-
 Connect
 == Anslut
 

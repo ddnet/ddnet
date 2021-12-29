@@ -103,9 +103,6 @@ Client
 Close
 == Fechar
 
-Compatible version
-== Versão compatível
-
 Connect
 == Conectar
 

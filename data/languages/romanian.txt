@@ -91,9 +91,6 @@ Client
 Close
 == Închide
 
-Compatible version
-== Versiune compatibilă
-
 Connect
 == Conectează
 

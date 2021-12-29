@@ -85,9 +85,6 @@ Client
 Close
 == Zavrieť
 
-Compatible version
-== Kompatibilná verzia
-
 Connect
 == Pripojiť
 

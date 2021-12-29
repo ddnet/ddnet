@@ -43,9 +43,6 @@ Chat
 Close
 == Зачинити
 
-Compatible version
-== Сумісна версія
-
 Connect
 == Під’єднатись
 

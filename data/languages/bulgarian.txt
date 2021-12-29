@@ -85,9 +85,6 @@ Client
 Close
 == Затвори
 
-Compatible version
-== Съвместима версия
-
 Connect
 == Впиши
 

@@ -85,9 +85,6 @@ Client
 Close
 == Κλείσιμο
 
-Compatible version
-== Συμβατή έκδοση
-
 Connect
 == Σύνδεση
 

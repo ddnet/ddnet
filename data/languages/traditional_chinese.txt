@@ -90,9 +90,6 @@ Client
 Close
 == 關閉
 
-Compatible version
-== 相容的版本
-
 Connect
 == 連線
 

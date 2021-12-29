@@ -81,9 +81,6 @@ Client
 Close
 == Tancar
 
-Compatible version
-== Versió compatible
-
 Connect
 == Connectar
 
