@@ -259,12 +259,9 @@ bool CMysqlConnection::ConnectImpl()
 	}
 
 	m_pStmt = nullptr;
-	unsigned int OptConnectTimeout = 30;
-	unsigned int OptReadTimeout = 10;
-	// The timeout in seconds for each attempt to write to the server. There
-	// is a retry if necessary, so the total effective timeout value is two
-	// times the option value.
-	unsigned int OptWriteTimeout = 10;
+	unsigned int OptConnectTimeout = 60;
+	unsigned int OptReadTimeout = 60;
+	unsigned int OptWriteTimeout = 120;
 	my_bool OptReconnect = true;
 	mysql_options(&m_Mysql, MYSQL_OPT_CONNECT_TIMEOUT, &OptConnectTimeout);
 	mysql_options(&m_Mysql, MYSQL_OPT_READ_TIMEOUT, &OptReadTimeout);
