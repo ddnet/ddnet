@@ -3523,15 +3523,30 @@ const char *str_next_token(const char *str, const char *delim, char *buffer, int
 
 int bytes_be_to_int(const unsigned char *bytes)
 {
-	return ((bytes[0] & 0xff) << 24) | ((bytes[1] & 0xff) << 16) | ((bytes[2] & 0xff) << 8) | (bytes[3] & 0xff);
+	int Result;
+	unsigned char *pResult = (unsigned char *)&Result;
+	for(unsigned i = 0; i < sizeof(int); i++)
+	{
+#if defined(CONF_ARCH_ENDIAN_BIG)
+		pResult[i] = bytes[i];
+#else
+		pResult[i] = bytes[sizeof(int) - i - 1];
+#endif
+	}
+	return Result;
 }
 
 void int_to_bytes_be(unsigned char *bytes, int value)
 {
-	bytes[0] = (value >> 24) & 0xff;
-	bytes[1] = (value >> 16) & 0xff;
-	bytes[2] = (value >> 8) & 0xff;
-	bytes[3] = value & 0xff;
+	const unsigned char *pValue = (const unsigned char *)&value;
+	for(unsigned i = 0; i < sizeof(int); i++)
+	{
+#if defined(CONF_ARCH_ENDIAN_BIG)
+		bytes[i] = pValue[i];
+#else
+		bytes[sizeof(int) - i - 1] = pValue[i];
+#endif
+	}
 }
 
 unsigned bytes_be_to_uint(const unsigned char *bytes)
