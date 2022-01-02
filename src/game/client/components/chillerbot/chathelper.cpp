@@ -176,6 +176,7 @@ bool CChatHelper::IsGreeting(const char *pMsg)
 		"yoo",
 		"yooo",
 		"salut",
+		"slt",
 		"sup",
 		"szia",
 		"selam"};
@@ -189,6 +190,29 @@ bool CChatHelper::IsGreeting(const char *pMsg)
 			if((pMsg == pHL || pHL[-1] == ' ') && (pHL[Length] == 0 || pHL[Length] == ' ' || pHL[Length] == '.' || pHL[Length] == '!' || pHL[Length] == ',' || pHL[Length] == '1' || pHL[Length] == pHL[Length - 1]))
 				return true;
 			pHL = str_find_nocase(pHL + 1, aGreeting);
+		}
+	}
+	return false;
+}
+
+bool CChatHelper::IsBye(const char *pMsg)
+{
+	const char aByes[][128] = {
+		"bb",
+		"see you",
+		"leaving",
+		"quit",
+		"bye"};
+	for(const auto &aBye : aByes)
+	{
+		const char *pHL = str_find_nocase(pMsg, aBye);
+		while(pHL)
+		{
+			int Length = str_length(aBye);
+
+			if((pMsg == pHL || pHL[-1] == ' ') && (pHL[Length] == 0 || pHL[Length] == ' ' || pHL[Length] == '.' || pHL[Length] == '!' || pHL[Length] == ',' || pHL[Length] == '1' || pHL[Length] == pHL[Length - 1]))
+				return true;
+			pHL = str_find_nocase(pHL + 1, aBye);
 		}
 	}
 	return false;
@@ -286,6 +310,13 @@ void CChatHelper::ReplyToLastPing()
 		m_aLastPingMessage[0] = '\0';
 		return;
 	}
+	if(IsBye(m_aLastPingMessage))
+	{
+		str_format(aBuf, sizeof(aBuf), "bye %s", m_aLastPingName);
+		m_pClient->m_Chat.Say(0, aBuf);
+		m_aLastPingMessage[0] = '\0';
+		return;
+	}
 	// why?
 	if(IsQuestionWhy(m_aLastPingMessage) || (str_find(m_aLastPingMessage, "?") && MsgLen < NameLen + 4))
 	{
@@ -308,6 +339,99 @@ void CChatHelper::ReplyToLastPing()
 			m_aLastPingMessage[0] = '\0';
 			return;
 		}
+	}
+	// spec me
+	if(str_find_nocase(m_aLastPingMessage, "spec") || str_find_nocase(m_aLastPingMessage, "watch") || (str_find_nocase(m_aLastPingMessage, "look") && !str_find_nocase(m_aLastPingMessage, "looks")) || str_find_nocase(m_aLastPingMessage, "schau"))
+	{
+		str_format(aBuf, sizeof(aBuf), "/pause %s", m_aLastPingName);
+		m_pClient->m_Chat.Say(0, aBuf);
+		str_format(aBuf, sizeof(aBuf), "%s ok i am watching you", m_aLastPingName);
+		m_pClient->m_Chat.Say(0, aBuf);
+		m_aLastPingMessage[0] = '\0';
+		return;
+	}
+	// no u
+	if(MsgLen < NameLen + 8 && (str_find_nocase(m_aLastPingMessage, "no u") || str_find_nocase(m_aLastPingMessage, "no you") || str_find_nocase(m_aLastPingMessage, "bad")))
+	{
+		str_format(aBuf, sizeof(aBuf), "%s no u", m_aLastPingName);
+		m_pClient->m_Chat.Say(0, aBuf);
+		m_aLastPingMessage[0] = '\0';
+		return;
+	}
+	// wanna? (always say no automated if motivated to do something type yes manually)
+	if(str_find_nocase(m_aLastPingMessage, "wanna") || str_find_nocase(m_aLastPingMessage, "want"))
+	{
+		// TODO: fix tone
+		// If you get asked to be given something "no sorry" sounds weird
+		// If you are being asked to do something together "no thanks" sounds weird
+		// the generic "no" might be a bit dry
+		str_format(aBuf, sizeof(aBuf), "%s no", m_aLastPingName);
+		m_pClient->m_Chat.Say(0, aBuf);
+		m_aLastPingMessage[0] = '\0';
+		return;
+	}
+	// help
+	if(str_find_nocase(m_aLastPingMessage, "help"))
+	{
+		str_format(aBuf, sizeof(aBuf), "%s where? what?", m_aLastPingName);
+		m_pClient->m_Chat.Say(0, aBuf);
+		m_aLastPingMessage[0] = '\0';
+		return;
+	}
+	// small talk
+	if(str_find_nocase(m_aLastPingMessage, "how are you") || str_find_nocase(m_aLastPingMessage, "how is it going") || str_find_nocase(m_aLastPingMessage, "ca va"))
+	{
+		str_format(aBuf, sizeof(aBuf), "%s good, and you? :)", m_aLastPingName);
+		m_pClient->m_Chat.Say(0, aBuf);
+		m_aLastPingMessage[0] = '\0';
+		return;
+	}
+	if(str_find_nocase(m_aLastPingMessage, "wie gehts") || str_find_nocase(m_aLastPingMessage, "wie geht es") || str_find_nocase(m_aLastPingMessage, "was geht"))
+	{
+		str_format(aBuf, sizeof(aBuf), "%s gut, und dir? :)", m_aLastPingName);
+		m_pClient->m_Chat.Say(0, aBuf);
+		m_aLastPingMessage[0] = '\0';
+		return;
+	}
+	if(str_find_nocase(m_aLastPingMessage, "about you") || str_find_nocase(m_aLastPingMessage, "and you") || str_find_nocase(m_aLastPingMessage, "and u") ||
+		(str_find_nocase(m_aLastPingMessage, "u?") && MsgLen < NameLen + 5) ||
+		(str_find_nocase(m_aLastPingMessage, "wbu") && MsgLen < NameLen + 8) ||
+		(str_find_nocase(m_aLastPingMessage, "hbu") && MsgLen < NameLen + 8))
+	{
+		str_format(aBuf, sizeof(aBuf), "%s good", m_aLastPingName);
+		m_pClient->m_Chat.Say(0, aBuf);
+		m_aLastPingMessage[0] = '\0';
+		return;
+	}
+	// advertise chillerbot
+	if(str_find_nocase(m_aLastPingMessage, "what client") || str_find_nocase(m_aLastPingMessage, "which client") || str_find_nocase(m_aLastPingMessage, "wat client") ||
+		str_find_nocase(m_aLastPingMessage, "good client") ||
+		((str_find_nocase(m_aLastPingMessage, "ddnet") || str_find_nocase(m_aLastPingMessage, "vanilla")) && str_find_nocase(m_aLastPingMessage, "?")))
+	{
+		str_format(aBuf, sizeof(aBuf), "%s I use chillerbot-ux ( https://chillerbot.github.io )", m_aLastPingName);
+		m_pClient->m_Chat.Say(0, aBuf);
+		m_aLastPingMessage[0] = '\0';
+		return;
+	}
+	// compliments
+	if(str_find_nocase(m_aLastPingMessage, "good") ||
+		str_find_nocase(m_aLastPingMessage, "happy") ||
+		str_find_nocase(m_aLastPingMessage, "congrats") ||
+		str_find_nocase(m_aLastPingMessage, "nice") ||
+		str_find_nocase(m_aLastPingMessage, "pro"))
+	{
+		str_format(aBuf, sizeof(aBuf), "%s thanks", m_aLastPingName);
+		m_pClient->m_Chat.Say(0, aBuf);
+		m_aLastPingMessage[0] = '\0';
+		return;
+	}
+	// impatient
+	if(str_find_nocase(m_aLastPingMessage, "answer") || str_find_nocase(m_aLastPingMessage, "ignore") || str_find_nocase(m_aLastPingMessage, "antwort") || str_find_nocase(m_aLastPingMessage, "ignorier"))
+	{
+		str_format(aBuf, sizeof(aBuf), "%s i am currently busy (automated reply)", m_aLastPingName);
+		m_pClient->m_Chat.Say(0, aBuf);
+		m_aLastPingMessage[0] = '\0';
+		return;
 	}
 }
 

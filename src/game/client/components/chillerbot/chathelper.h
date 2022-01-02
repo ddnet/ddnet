@@ -37,6 +37,7 @@ class CChatHelper : public CComponent
 
 	bool LineShouldHighlight(const char *pLine, const char *pName);
 	bool IsGreeting(const char *pMsg);
+	bool IsBye(const char *pMsg);
 	bool IsQuestionWhy(const char *pMsg);
 	void DoGreet();
 	void ReplyToLastPing();
