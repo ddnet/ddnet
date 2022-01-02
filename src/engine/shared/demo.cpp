@@ -12,8 +12,6 @@
 #include <engine/shared/video.h>
 #endif
 
-#include <game/generated/protocol.h>
-
 #include "compression.h"
 #include "demo.h"
 #include "memheap.h"

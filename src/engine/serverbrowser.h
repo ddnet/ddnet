@@ -5,11 +5,12 @@
 
 #include <engine/map.h>
 #include <engine/shared/protocol.h>
-#include <game/client/ui.h>
 
 #include "kernel.h"
 
 #define DDNET_INFO "ddnet-info.json"
+
+class CUIElement;
 
 class CServerInfo
 {

@@ -11,6 +11,7 @@
 #include <engine/storage.h>
 
 #include <memory>
+#include <vector>
 
 class CChooseMaster
 {
