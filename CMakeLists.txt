@@ -83,6 +83,7 @@ endif()
 include(CheckCCompilerFlag)
 include(CheckCXXCompilerFlag)
 include(CheckSymbolExists)
+include(CheckAtomic)
 
 check_symbol_exists(__i386 "" TARGET_ARCH_X86_i386)
 if(TARGET_ARCH_X86_i386)
@@ -2317,6 +2318,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     aio.cpp
     bezier.cpp
     blocklist_driver.cpp
+    bytes_be.cpp
     color.cpp
     compression.cpp
     csv.cpp
