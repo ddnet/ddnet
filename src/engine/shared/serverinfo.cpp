@@ -108,7 +108,7 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 		{
 			return true;
 		}
-		if(i < MAX_CLIENTS)
+		if(i < SERVERINFO_MAX_CLIENTS)
 		{
 			CClient *pClient = &pOut->m_aClients[i];
 			str_copy(pClient->m_aName, Name, sizeof(pClient->m_aName));
@@ -173,7 +173,7 @@ CServerInfo2::operator CServerInfo() const
 	str_copy(Result.m_aMap, m_aMapName, sizeof(Result.m_aMap));
 	str_copy(Result.m_aVersion, m_aVersion, sizeof(Result.m_aVersion));
 
-	for(int i = 0; i < minimum(m_NumClients, (int)MAX_CLIENTS); i++)
+	for(int i = 0; i < minimum(m_NumClients, (int)SERVERINFO_MAX_CLIENTS); i++)
 	{
 		str_copy(Result.m_aClients[i].m_aName, m_aClients[i].m_aName, sizeof(Result.m_aClients[i].m_aName));
 		str_copy(Result.m_aClients[i].m_aClan, m_aClients[i].m_aClan, sizeof(Result.m_aClients[i].m_aClan));
@@ -182,7 +182,7 @@ CServerInfo2::operator CServerInfo() const
 		Result.m_aClients[i].m_Player = m_aClients[i].m_IsPlayer;
 	}
 
-	Result.m_NumReceivedClients = minimum(m_NumClients, (int)MAX_CLIENTS);
+	Result.m_NumReceivedClients = minimum(m_NumClients, (int)SERVERINFO_MAX_CLIENTS);
 	Result.m_Latency = -1;
 
 	return Result;
