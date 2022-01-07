@@ -765,6 +765,22 @@ void CCharacter::HandleTiles(int Index)
 		if(newJumps != m_Core.m_Jumps)
 			m_Core.m_Jumps = newJumps;
 	}
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_LFREEZE  && Team() != TEAM_SUPER)
+	{
+		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Collision()->m_pSwitchers[Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
+		{
+			m_LiveFreeze = true;
+			m_Core.m_LiveFrozen = true;
+		}
+	}
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_LUNFREEZE && Team() != TEAM_SUPER)
+	{
+		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Collision()->m_pSwitchers[Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
+		{
+			m_LiveFreeze = false;
+			m_Core.m_LiveFrozen = false;
+		}
+	}
 
 	// freeze
 	if(((m_TileIndex == TILE_FREEZE) || (m_TileFIndex == TILE_FREEZE)) && !m_Super && !m_DeepFreeze)
@@ -784,6 +800,18 @@ void CCharacter::HandleTiles(int Index)
 	else if(((m_TileIndex == TILE_DUNFREEZE) || (m_TileFIndex == TILE_DUNFREEZE)) && !m_Super && m_DeepFreeze)
 	{
 		m_DeepFreeze = false;
+	}
+
+	// live freeze
+	if(((m_TileIndex == TILE_LFREEZE) || (m_TileFIndex == TILE_LFREEZE)) && !m_Super)
+	{
+		m_LiveFreeze = true;
+		m_Core.m_LiveFrozen = true;
+	}
+	else if(((m_TileIndex == TILE_LUNFREEZE) || (m_TileFIndex == TILE_LUNFREEZE)) && !m_Super)
+	{
+		m_LiveFreeze = false;
+		m_Core.m_LiveFrozen = false;
 	}
 
 	// endless hook
@@ -889,6 +917,12 @@ void CCharacter::HandleTuneLayer()
 void CCharacter::DDRaceTick()
 {
 	mem_copy(&m_Input, &m_SavedInput, sizeof(m_Input));
+	if(m_LiveFreeze && !m_CanMoveInFreeze)
+	{
+		m_Input.m_Direction = 0;
+		m_Input.m_Jump = 0;
+		//Hook and weapons are possible in live freeze
+	}
 	if(m_FreezeTime > 0 || m_FreezeTime == -1)
 	{
 		if(m_FreezeTime > 0)
@@ -1071,6 +1105,7 @@ void CCharacter::ResetPrediction()
 	m_FreezeTime = 0;
 	m_FreezeTick = 0;
 	m_DeepFreeze = 0;
+	m_LiveFreeze = 0;
 	m_FrozenLastTick = false;
 	m_Super = false;
 	for(int w = 0; w < NUM_WEAPONS; w++)
@@ -1130,6 +1165,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 			RemoveNinja();
 
 		m_DeepFreeze = false;
+		m_LiveFreeze = (pExtended->m_Flags & CHARACTERFLAG_NO_MOVEMENTS) != 0;
 		if(GameWorld()->m_WorldConfig.m_PredictFreeze && pExtended->m_FreezeEnd != 0)
 		{
 			if(pExtended->m_FreezeEnd > 0)

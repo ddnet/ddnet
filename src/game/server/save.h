@@ -58,6 +58,7 @@ private:
 	int m_FreezeTime;
 	int m_FreezeTick;
 	int m_DeepFreeze;
+	int m_LiveFreeze;
 	int m_EndlessHook;
 	int m_DDRaceState;
 

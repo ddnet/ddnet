@@ -48,6 +48,7 @@ void CSaveTee::Save(CCharacter *pChr)
 	m_FreezeTick = pChr->Server()->Tick() - pChr->m_FreezeTick;
 
 	m_DeepFreeze = pChr->m_DeepFreeze;
+	m_LiveFreeze = pChr->m_LiveFreeze;
 	m_EndlessHook = pChr->m_EndlessHook;
 	m_DDRaceState = pChr->m_DDRaceState;
 
@@ -142,6 +143,7 @@ void CSaveTee::Load(CCharacter *pChr, int Team, bool IsSwap)
 	pChr->m_FreezeTick = pChr->Server()->Tick() - m_FreezeTick;
 
 	pChr->m_DeepFreeze = m_DeepFreeze;
+	pChr->m_LiveFreeze = m_LiveFreeze;
 	pChr->m_EndlessHook = m_EndlessHook;
 	pChr->m_DDRaceState = m_DDRaceState;
 
@@ -238,7 +240,7 @@ char *CSaveTee::GetString(const CSaveTeam *pTeam)
 		"%d\t%d\t%d\t%d\t"
 		"%d\t%d\t"
 		// tee stats
-		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t" // m_SuperJump
+		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t" // m_SuperJump
 		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t" // m_DDRaceState
 		"%d\t%d\t%d\t%d\t" // m_Pos.x
 		"%d\t%d\t" // m_TeleCheckpoint
@@ -270,7 +272,7 @@ char *CSaveTee::GetString(const CSaveTeam *pTeam)
 		m_aWeapons[5].m_AmmoRegenStart, m_aWeapons[5].m_Ammo, m_aWeapons[5].m_Ammocost, m_aWeapons[5].m_Got,
 		m_LastWeapon, m_QueuedWeapon,
 		// tee states
-		m_SuperJump, m_Jetpack, m_NinjaJetpack, m_FreezeTime, m_FreezeTick, m_DeepFreeze, m_EndlessHook,
+		m_SuperJump, m_Jetpack, m_NinjaJetpack, m_FreezeTime, m_FreezeTick, m_DeepFreeze, m_LiveFreeze, m_EndlessHook,
 		m_DDRaceState, m_Hit, m_Collision, m_TuneZone, m_TuneZoneOld, m_Hook, m_Time,
 		(int)m_Pos.x, (int)m_Pos.y, (int)m_PrevPos.x, (int)m_PrevPos.y,
 		m_TeleCheckpoint, m_LastPenalty,
@@ -309,7 +311,7 @@ int CSaveTee::FromString(const char *String)
 		"%d\t%d\t%d\t%d\t"
 		"%d\t%d\t"
 		// tee states
-		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t" // m_SuperJump
+		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t" // m_SuperJump
 		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t" // m_DDRaceState
 		"%f\t%f\t%f\t%f\t" // m_Pos.x
 		"%d\t%d\t" // m_TeleCheckpoint
@@ -341,7 +343,7 @@ int CSaveTee::FromString(const char *String)
 		&m_aWeapons[5].m_AmmoRegenStart, &m_aWeapons[5].m_Ammo, &m_aWeapons[5].m_Ammocost, &m_aWeapons[5].m_Got,
 		&m_LastWeapon, &m_QueuedWeapon,
 		// tee states
-		&m_SuperJump, &m_Jetpack, &m_NinjaJetpack, &m_FreezeTime, &m_FreezeTick, &m_DeepFreeze, &m_EndlessHook,
+		&m_SuperJump, &m_Jetpack, &m_NinjaJetpack, &m_FreezeTime, &m_FreezeTick, &m_DeepFreeze, &m_LiveFreeze, &m_EndlessHook,
 		&m_DDRaceState, &m_Hit, &m_Collision, &m_TuneZone, &m_TuneZoneOld, &m_Hook, &m_Time,
 		&m_Pos.x, &m_Pos.y, &m_PrevPos.x, &m_PrevPos.y,
 		&m_TeleCheckpoint, &m_LastPenalty,

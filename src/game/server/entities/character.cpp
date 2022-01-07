@@ -1102,14 +1102,15 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 	}
 
 	// change eyes and use ninja graphic if player is frozen
-	if(m_DeepFreeze || m_FreezeTime > 0 || m_FreezeTime == -1)
+	if(m_DeepFreeze || m_FreezeTime > 0 || m_FreezeTime == -1 || m_LiveFreeze)
 	{
 		if(Emote == EMOTE_NORMAL)
-			Emote = m_DeepFreeze ? EMOTE_PAIN : EMOTE_BLINK;
-
-		Weapon = WEAPON_NINJA;
+			Emote = (m_DeepFreeze || m_LiveFreeze) ? EMOTE_PAIN : EMOTE_BLINK;
+		
+		if(m_DeepFreeze || m_FreezeTime > 0 || m_FreezeTime == -1)
+			Weapon = WEAPON_NINJA;
 	}
-
+	
 	// This could probably happen when m_Jetpack changes instead
 	// jetpack and ninjajetpack prediction
 	if(m_pPlayer->GetCID() == SnappingClient)
@@ -1152,7 +1153,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 
 	if(GetPlayer()->m_Afk || GetPlayer()->IsPaused())
 	{
-		if(m_FreezeTime > 0 || m_FreezeTime == -1 || m_DeepFreeze)
+		if(m_FreezeTime > 0 || m_FreezeTime == -1 || m_DeepFreeze || m_LiveFreeze)
 			Emote = EMOTE_NORMAL;
 		else
 			Emote = EMOTE_BLINK;
@@ -1293,6 +1294,9 @@ void CCharacter::Snap(int SnappingClient)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_LASER;
 	if(m_Core.m_ActiveWeapon == WEAPON_NINJA)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_NINJA;
+	if(m_Core.m_LiveFrozen) {
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_MOVEMENTS;
+	}
 
 	pDDNetCharacter->m_FreezeEnd = m_DeepFreeze ? -1 : m_FreezeTime == 0 ? 0 : Server()->Tick() + m_FreezeTime;
 	pDDNetCharacter->m_Jumps = m_Core.m_Jumps;
@@ -1542,10 +1546,26 @@ void CCharacter::HandleTiles(int Index)
 	else if(((m_TileIndex == TILE_DUNFREEZE) || (m_TileFIndex == TILE_DUNFREEZE)) && !m_Super && m_DeepFreeze)
 		m_DeepFreeze = false;
 
+	// live freeze
+	if(((m_TileIndex == TILE_LFREEZE) || (m_TileFIndex == TILE_LFREEZE)) && !m_Super)
+	{
+		if(!m_LiveFreeze && !m_Core.m_LiveFrozen)
+			GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Live FREEZE has been activated");
+		m_LiveFreeze = true;
+		m_Core.m_LiveFrozen = true;
+	}
+	else if(((m_TileIndex == TILE_LUNFREEZE) || (m_TileFIndex == TILE_LUNFREEZE)) && !m_Super)
+	{
+		if(m_LiveFreeze && m_Core.m_LiveFrozen)
+			GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Live FREEZE has been deactivated");
+		m_LiveFreeze = false;
+		m_Core.m_LiveFrozen = false;
+	}
+
 	// endless hook
 	if(((m_TileIndex == TILE_EHOOK_ENABLE) || (m_TileFIndex == TILE_EHOOK_ENABLE)))
 	{
-		SetEndlessHook(true);
+ 		SetEndlessHook(true);
 	}
 	else if(((m_TileIndex == TILE_EHOOK_DISABLE) || (m_TileFIndex == TILE_EHOOK_DISABLE)))
 	{
@@ -1754,6 +1774,21 @@ void CCharacter::HandleTiles(int Index)
 	{
 		if(GameServer()->Collision()->GetSwitchNumber(MapIndex) == 0 || GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
 			m_DeepFreeze = false;
+	}
+	else if(GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_LFREEZE  && Team() != TEAM_SUPER)
+	{
+		if (GameServer()->Collision()->GetSwitchNumber(MapIndex) == 0 || GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()]) {
+			m_LiveFreeze = true;
+			m_Core.m_LiveFrozen = true;
+		}
+	}
+	else if(GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_LUNFREEZE && Team() != TEAM_SUPER)
+	{
+		if(GameServer()->Collision()->GetSwitchNumber(MapIndex) == 0 || GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
+		{
+			m_LiveFreeze = false;
+			m_Core.m_LiveFrozen = false;
+		}
 	}
 	else if(GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_HIT_ENABLE && m_Hit & DISABLE_HIT_HAMMER && GameServer()->Collision()->GetSwitchDelay(MapIndex) == WEAPON_HAMMER)
 	{
@@ -2082,6 +2117,12 @@ void CCharacter::DDRaceTick()
 	if(m_Input.m_Direction != 0 || m_Input.m_Jump != 0)
 		m_LastMove = Server()->Tick();
 
+	if(m_LiveFreeze)
+	{
+		m_Input.m_Direction = 0;
+		m_Input.m_Jump = 0;
+		// Hook is possible in live freeze
+	}
 	if(m_FreezeTime > 0 || m_FreezeTime == -1)
 	{
 		if(m_FreezeTime % Server()->TickSpeed() == Server()->TickSpeed() - 1 || m_FreezeTime == -1)
@@ -2114,7 +2155,7 @@ void CCharacter::DDRaceTick()
 			bool IsInFreeze = false;
 			for(const int Tile : aTiles)
 			{
-				if(Tile == TILE_FREEZE || Tile == TILE_DFREEZE)
+				if(Tile == TILE_FREEZE || Tile == TILE_DFREEZE || Tile == TILE_LFREEZE)
 				{
 					IsInFreeze = true;
 					break;

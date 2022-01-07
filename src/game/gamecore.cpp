@@ -104,6 +104,7 @@ void CCharacterCore::Reset()
 	m_HasTelegunLaser = false;
 	m_FreezeEnd = 0;
 	m_DeepFrozen = false;
+	m_LiveFrozen = false;
 
 	// never initialize both to 0
 	m_Input.m_TargetX = 0;
@@ -556,12 +557,13 @@ void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 	m_Collision = !m_NoCollision;
 
 	// Endless
-	m_EndlessHook = pObjDDNet->m_Flags & CHARACTERFLAG_ENDLESS_HOOK;
+ 	m_EndlessHook = pObjDDNet->m_Flags & CHARACTERFLAG_ENDLESS_HOOK;
 	m_EndlessJump = pObjDDNet->m_Flags & CHARACTERFLAG_ENDLESS_JUMP;
 
 	// Freeze
 	m_FreezeEnd = pObjDDNet->m_FreezeEnd;
 	m_DeepFrozen = pObjDDNet->m_FreezeEnd == -1;
+	m_LiveFrozen = (pObjDDNet->m_Flags & CHARACTERFLAG_NO_MOVEMENTS) != 0;
 
 	// Telegun
 	m_HasTelegunGrenade = pObjDDNet->m_Flags & CHARACTERFLAG_TELEGUN_GRENADE;
