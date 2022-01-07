@@ -1,6 +1,6 @@
 #include "connection.h"
 
-#if defined(CONF_SQL)
+#if defined(CONF_MYSQL)
 #include <mysql.h>
 
 #include <base/tl/threading.h>
@@ -73,6 +73,8 @@ public:
 	virtual const char *InsertIgnore() const { return "INSERT IGNORE"; };
 	virtual const char *Random() const { return "RAND()"; };
 	virtual const char *MedianMapTime(char *pBuffer, int BufferSize) const;
+	virtual const char *False() const { return "FALSE"; }
+	virtual const char *True() const { return "TRUE"; }
 
 	virtual bool Connect(char *pError, int ErrorSize);
 	virtual void Disconnect();
@@ -82,6 +84,7 @@ public:
 	virtual void BindString(int Idx, const char *pString);
 	virtual void BindBlob(int Idx, unsigned char *pBlob, int Size);
 	virtual void BindInt(int Idx, int Value);
+	virtual void BindInt64(int Idx, int64_t Value);
 	virtual void BindFloat(int Idx, float Value);
 
 	virtual void Print() {}
@@ -400,6 +403,23 @@ void CMysqlConnection::BindInt(int Idx, int Value)
 	pParam->error = nullptr;
 }
 
+void CMysqlConnection::BindInt64(int Idx, int64_t Value)
+{
+	m_NewQuery = true;
+	Idx -= 1;
+	dbg_assert(0 <= Idx && Idx < (int)m_aStmtParameters.size(), "index out of bounds");
+
+	m_aStmtParameterExtras[Idx].i = Value;
+	MYSQL_BIND *pParam = &m_aStmtParameters[Idx];
+	pParam->buffer_type = MYSQL_TYPE_LONGLONG;
+	pParam->buffer = &m_aStmtParameterExtras[Idx].i;
+	pParam->buffer_length = sizeof(m_aStmtParameterExtras[Idx].i);
+	pParam->length = nullptr;
+	pParam->is_null = nullptr;
+	pParam->is_unsigned = false;
+	pParam->error = nullptr;
+}
+
 void CMysqlConnection::BindFloat(int Idx, float Value)
 {
 	m_NewQuery = true;
@@ -684,7 +704,7 @@ bool CMysqlConnection::AddPoints(const char *pPlayer, int Points, char *pError, 
 	return false;
 }
 
-IDbConnection *CreateMysqlConnection(
+std::unique_ptr<IDbConnection> CreateMysqlConnection(
 	const char *pDatabase,
 	const char *pPrefix,
 	const char *pUser,
@@ -693,7 +713,7 @@ IDbConnection *CreateMysqlConnection(
 	int Port,
 	bool Setup)
 {
-	return new CMysqlConnection(pDatabase, pPrefix, pUser, pPass, pIp, Port, Setup);
+	return std::unique_ptr<IDbConnection>(new CMysqlConnection(pDatabase, pPrefix, pUser, pPass, pIp, Port, Setup));
 }
 #else
 int MysqlInit()
@@ -703,7 +723,7 @@ int MysqlInit()
 void MysqlUninit()
 {
 }
-IDbConnection *CreateMysqlConnection(
+std::unique_ptr<IDbConnection> CreateMysqlConnection(
 	const char *pDatabase,
 	const char *pPrefix,
 	const char *pUser,

@@ -84,9 +84,6 @@ Client
 Close
 == 닫기
 
-Compatible version
-== 버전 호환
-
 Connect
 == 연결
 
@@ -239,9 +236,6 @@ MOTD
 
 Map
 == 맵
-
-Maximum ping:
-== 최대 핑
 
 Mouse sens.
 == 미우스 감도
@@ -840,10 +834,10 @@ Demos directory
 Render
 == 
 
-Connecting dummy
+Connect Dummy
 == 
 
-Connect Dummy
+Connecting dummy
 == 
 
 Kill
@@ -889,6 +883,12 @@ Refresh Rate
 == 
 
 Show console window
+== 
+
+Settings file
+== 
+
+Config directory
 == 
 
 Themes directory
@@ -1207,6 +1207,12 @@ Try fast HTTP map download first
 == 
 
 New random timeout code
+== 
+
+Run on join
+== 
+
+Chat command (e.g. showall 1)
 == 
 
 DDNet %s is available:

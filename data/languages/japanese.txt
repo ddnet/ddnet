@@ -85,9 +85,6 @@ Client
 Close
 == 閉じる
 
-Compatible version
-== 互換性のあるバージョン
-
 Connect
 == 接続
 
@@ -240,9 +237,6 @@ MOTD
 
 Map
 == マップ
-
-Maximum ping:
-== Ping の最大値:
 
 Mouse sens.
 == マウス感度
@@ -1325,6 +1319,12 @@ CHN
 Refreshing...
 == 
 
+Settings file
+== 
+
+Config directory
+== 
+
 Kill Messages
 == 
 
@@ -1335,4 +1335,10 @@ Kill Message Highlight Color
 == 
 
 Show local player's key presses
+== 
+
+Run on join
+== 
+
+Chat command (e.g. showall 1)
 == 

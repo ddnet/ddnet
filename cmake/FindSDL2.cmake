@@ -10,7 +10,11 @@ find_library(SDL2_LIBRARY
   PATHS ${PATHS_SDL2_LIBDIR}
   ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
-set(CMAKE_FIND_FRAMEWORK FIRST)
+if(PREFER_BUNDLED_LIBS)
+  set(CMAKE_FIND_FRAMEWORK FIRST)
+else()
+  set(CMAKE_FIND_FRAMEWORK LAST)
+endif()
 set_extra_dirs_include(SDL2 sdl "${SDL2_LIBRARY}")
 # Looking for 'SDL.h' directly might accidentally find a SDL instead of SDL 2
 # installation. Look for a header file only present in SDL 2 instead.
@@ -31,14 +35,18 @@ if(SDL2_FOUND)
   set(SDL2_INCLUDE_DIRS ${SDL2_INCLUDEDIR})
 
   is_bundled(SDL2_BUNDLED "${SDL2_LIBRARY}")
-  if(SDL2_BUNDLED AND TARGET_OS STREQUAL "windows")
-    set(SDL2_COPY_FILES "${EXTRA_SDL2_LIBDIR}/SDL2.dll")
-    if(TARGET_BITS EQUAL 32)
-      list(APPEND OPUSFILE_COPY_FILES
-        "${EXTRA_SDL2_LIBDIR}/libgcc_s_dw2-1.dll"
-      )
+  set(SDL2_COPY_FILES)
+  set(SDL2_COPY_DIRS)
+  if(SDL2_BUNDLED)
+    if(TARGET_OS STREQUAL "windows")
+      set(SDL2_COPY_FILES "${EXTRA_SDL2_LIBDIR}/SDL2.dll")
+      if(TARGET_BITS EQUAL 32)
+        list(APPEND OPUSFILE_COPY_FILES
+          "${EXTRA_SDL2_LIBDIR}/libgcc_s_dw2-1.dll"
+        )
+      endif()
+    elseif(TARGET_OS STREQUAL "mac")
+      set(SDL2_COPY_DIRS "${EXTRA_SDL2_LIBDIR}/SDL2.framework")
     endif()
-  else()
-    set(SDL2_COPY_FILES)
   endif()
 endif()

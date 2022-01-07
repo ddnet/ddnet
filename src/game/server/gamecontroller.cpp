@@ -466,7 +466,7 @@ void IGameController::StartRound()
 
 void IGameController::ChangeMap(const char *pToMap)
 {
-	str_copy(g_Config.m_SvMap, pToMap, sizeof(g_Config.m_SvMap));
+	Server()->ChangeMap(pToMap);
 }
 
 void IGameController::OnReset()
@@ -635,6 +635,9 @@ void IGameController::Snap(int SnappingClient)
 
 		if(pPlayer && (pPlayer->GetTeam() == TEAM_SPECTATORS || pPlayer->IsPaused()) && pPlayer->m_SpectatorID != SPEC_FREEVIEW && GameServer()->m_apPlayers[pPlayer->m_SpectatorID] && GameServer()->m_apPlayers[pPlayer->m_SpectatorID]->GetCharacter())
 			Team = GameServer()->m_apPlayers[pPlayer->m_SpectatorID]->GetCharacter()->Team();
+
+		if(Team == TEAM_SUPER)
+			return;
 
 		CNetObj_SwitchState *pSwitchState = static_cast<CNetObj_SwitchState *>(Server()->SnapNewItem(NETOBJTYPE_SWITCHSTATE, Team, sizeof(CNetObj_SwitchState)));
 		if(!pSwitchState)

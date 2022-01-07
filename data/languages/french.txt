@@ -101,9 +101,6 @@ Client
 Close
 == Fermer
 
-Compatible version
-== Version compatible
-
 Connect
 == Se connecter
 
@@ -260,9 +257,6 @@ MOTD
 Map
 == Carte
 
-Maximum ping:
-== Ping maximum :
-
 Mouse sens.
 == Sens. souris
 
@@ -397,7 +391,7 @@ Screenshot
 == Capture d'écran
 
 Server address:
-== Addresse du serveur :
+== Adresse du serveur :
 
 Server details
 == Détails du serveur
@@ -825,7 +819,7 @@ Reset
 == Défaut
 
 Threaded sound loading
-== Chargement de sons enfilés
+== Chargement des sons dans un thread spécifique
 
 File already exists, do you want to overwrite it?
 == Ce fichier existe déjà, voulez-vous l'écraser ?
@@ -1107,7 +1101,7 @@ The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other te
 == La molette de la souris permet de changer d'arme. Le marteau (clic gauche) peut être utilisé pour frapper les autres tees ce qui les unfreeze (dégèle).
 
 Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== Le grappin (clic droit) peut être utilisé pour se balancer tout le long de la carte en attrappant les murs et peut aussi permettre d'attrapper les autres Tees.
+== Le grappin (clic droit) peut être utilisé pour se balancer tout le long de la carte en attrapant les murs et peut aussi permettre d'attraper les autres Tees.
 
 Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
 == La communication est la clé de la réussite: Il n'y a pas de tutoriel donc vous devrez parler avec d'autres joueurs (touche T) afin d'apprendre les bases du jeu ainsi que ses mécanismes complexes, avancés et variés.
@@ -1357,10 +1351,22 @@ https://ddnet.tw/discord
 == https://ddnet.tw/discord
 
 Are you sure that you want to disconnect and switch to a different server?
-== 
+== Êtes vous sur de vouloir vous déconnecter et changer de serveur?
 
 Refreshing...
-== 
+== Actualisation...
 
 Show local player's key presses
+== Montrer les touches appuyées des autres joueurs
+
+Settings file
+== 
+
+Config directory
+== 
+
+Run on join
+== 
+
+Chat command (e.g. showall 1)
 == 

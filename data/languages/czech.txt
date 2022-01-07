@@ -88,9 +88,6 @@ Client
 Close
 == Zavřít
 
-Compatible version
-== Kompatibilní verze
-
 Connect
 == Připojit
 
@@ -246,9 +243,6 @@ MOTD
 
 Map
 == Mapa
-
-Maximum ping:
-== Maximální ping:
 
 Mouse sens.
 == Citlivost myši
@@ -1271,6 +1265,12 @@ Refreshing...
 Leak IP
 == 
 
+Settings file
+== 
+
+Config directory
+== 
+
 Chat command
 == 
 
@@ -1332,6 +1332,12 @@ Entities Background color
 == 
 
 Regular Background Color
+== 
+
+Run on join
+== 
+
+Chat command (e.g. showall 1)
 == 
 
 Discord

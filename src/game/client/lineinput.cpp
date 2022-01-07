@@ -1,5 +1,9 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <base/math.h>
+#include <base/system.h>
+#include <base/tl/base.h>
+
 #include "lineinput.h"
 #include <engine/keys.h>
 
@@ -10,23 +14,47 @@ CLineInput::CLineInput()
 
 void CLineInput::Clear()
 {
-	mem_zero(m_aStr, sizeof(m_aStr));
-	m_Len = 0;
-	m_CursorPos = 0;
-	m_NumChars = 0;
+	Set("");
 }
 
 void CLineInput::Set(const char *pString)
 {
 	str_copy(m_aStr, pString, sizeof(m_aStr));
-	m_Len = str_length(m_aStr);
+	str_utf8_stats(m_aStr, MAX_SIZE, MAX_CHARS, &m_Len, &m_NumChars);
 	m_CursorPos = m_Len;
-	m_NumChars = 0;
-	int Offset = 0;
-	while(pString[Offset])
+}
+
+void CLineInput::SetRange(const char *pString, int Begin, int End)
+{
+	if(Begin > End)
+		swap(Begin, End);
+	Begin = clamp(Begin, 0, m_Len);
+	End = clamp(End, 0, m_Len);
+
+	int RemovedCharSize, RemovedCharCount;
+	str_utf8_stats(m_aStr + Begin, End - Begin + 1, MAX_CHARS, &RemovedCharSize, &RemovedCharCount);
+
+	int AddedCharSize, AddedCharCount;
+	str_utf8_stats(pString, MAX_SIZE - m_Len + RemovedCharSize, MAX_CHARS - m_NumChars + RemovedCharCount, &AddedCharSize, &AddedCharCount);
+
+	if(RemovedCharSize || AddedCharSize)
 	{
-		Offset = str_utf8_forward(pString, Offset);
-		++m_NumChars;
+		if(AddedCharSize < RemovedCharSize)
+		{
+			if(AddedCharSize)
+				mem_copy(m_aStr + Begin, pString, AddedCharSize);
+			mem_move(m_aStr + Begin + AddedCharSize, m_aStr + Begin + RemovedCharSize, m_Len - Begin - AddedCharSize);
+		}
+		else if(AddedCharSize > RemovedCharSize)
+			mem_move(m_aStr + End + AddedCharSize - RemovedCharSize, m_aStr + End, m_Len - End);
+
+		if(AddedCharSize >= RemovedCharSize)
+			mem_copy(m_aStr + Begin, pString, AddedCharSize);
+
+		m_CursorPos = End - RemovedCharSize + AddedCharSize;
+		m_Len += AddedCharSize - RemovedCharSize;
+		m_NumChars += AddedCharCount - RemovedCharCount;
+		m_aStr[m_Len] = '\0';
 	}
 }
 
@@ -46,13 +74,14 @@ void CLineInput::Editing(const char *pString, int Cursor)
 	m_FakeCursorPos = m_CursorPos + Cursor + 1;
 }
 
-void CLineInput::Add(const char *pString)
+void CLineInput::Insert(const char *pString, int Begin)
 {
-	if((int)sizeof(m_aStr) - m_Len <= str_length(pString))
-		return;
-	str_copy(m_aStr + m_Len, pString, sizeof(m_aStr) - m_Len);
-	m_Len = str_length(m_aStr);
-	m_CursorPos = m_Len;
+	SetRange(pString, Begin, Begin);
+}
+
+void CLineInput::Append(const char *pString)
+{
+	Insert(pString, m_Len);
 }
 
 static bool IsNotAWordChar(signed char c)
@@ -75,15 +104,7 @@ int32_t CLineInput::Manipulate(IInput::CEvent Event, char *pStr, int StrMaxSize,
 		// gather string stats
 		int CharCount = 0;
 		int CharSize = 0;
-		while(Event.m_aText[CharSize])
-		{
-			int NewCharSize = str_utf8_forward(Event.m_aText, CharSize);
-			if(NewCharSize != CharSize)
-			{
-				++CharCount;
-				CharSize = NewCharSize;
-			}
-		}
+		str_utf8_stats(Event.m_aText, MAX_SIZE, MAX_CHARS, &CharSize, &CharCount);
 
 		// add new string
 		if(CharCount)
@@ -133,7 +154,7 @@ int32_t CLineInput::Manipulate(IInput::CEvent Event, char *pStr, int StrMaxSize,
 		}
 		else if(Key == KEY_LEFT)
 		{
-			if(ModifierKey == KEY_LCTRL)
+			if(ModifierKey == KEY_LCTRL || ModifierKey == KEY_RCTRL || ModifierKey == KEY_LGUI || ModifierKey == KEY_RGUI)
 			{
 				bool MovedCursor = false;
 				int OldCursorPos = CursorPos;
@@ -160,7 +181,7 @@ int32_t CLineInput::Manipulate(IInput::CEvent Event, char *pStr, int StrMaxSize,
 		}
 		else if(Key == KEY_RIGHT)
 		{
-			if(ModifierKey == KEY_LCTRL)
+			if(ModifierKey == KEY_LCTRL || ModifierKey == KEY_RCTRL || ModifierKey == KEY_LGUI || ModifierKey == KEY_RGUI)
 			{
 				bool WasNonWordChar = IsNotAWordChar(pStr[CursorPos]);
 				while((!WasNonWordChar && !IsNotAWordChar(pStr[CursorPos])) || (WasNonWordChar && IsNotAWordChar(pStr[CursorPos])))
@@ -195,22 +216,6 @@ int32_t CLineInput::Manipulate(IInput::CEvent Event, char *pStr, int StrMaxSize,
 	*pStrLenPtr = Len;
 
 	return Changes;
-}
-
-void CLineInput::DeleteUntilCursor()
-{
-	char aBuf[MAX_SIZE];
-	str_copy(aBuf, &m_aStr[m_CursorPos], sizeof(aBuf));
-	Set(aBuf);
-	SetCursorOffset(0);
-}
-
-void CLineInput::DeleteFromCursor()
-{
-	char aBuf[MAX_SIZE];
-	str_copy(aBuf, m_aStr, sizeof(aBuf));
-	aBuf[m_CursorPos] = '\0';
-	Set(aBuf);
 }
 
 void CLineInput::ProcessInput(IInput::CEvent e)

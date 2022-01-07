@@ -306,9 +306,9 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	{
 		View.HSplitBottom(5.0f, &View, &Button);
 		View.HSplitBottom(12.0f, &View, &Button);
-		static float s_Name = 0;
 		pEditor->UI()->DoLabel(&Button, "Name:", 10.0f, -1, -1);
 		Button.VSplitLeft(40.0f, 0, &Button);
+		static float s_Name = 0;
 		if(pEditor->DoEditBox(&s_Name, &Button, pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_aName, sizeof(pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_aName), 10.0f, &s_Name))
 			pEditor->m_Map.m_Modified = true;
 	}
@@ -421,9 +421,9 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View, void *pContext)
 	{
 		View.HSplitBottom(5.0f, &View, &Button);
 		View.HSplitBottom(12.0f, &View, &Button);
-		static float s_Name = 0;
 		pEditor->UI()->DoLabel(&Button, "Name:", 10.0f, -1, -1);
 		Button.VSplitLeft(40.0f, 0, &Button);
+		static float s_Name = 0;
 		if(pEditor->DoEditBox(&s_Name, &Button, pEditor->GetSelectedLayer(0)->m_aName, sizeof(pEditor->GetSelectedLayer(0)->m_aName), 10.0f, &s_Name))
 			pEditor->m_Map.m_Modified = true;
 	}
@@ -987,7 +987,7 @@ int CEditor::PopupNewFolder(CEditor *pEditor, CUIRect View, void *pContext)
 		View.VMargin(40.0f, &View);
 		View.HSplitBottom(20.0f, &View, &Label);
 		static float s_FolderBox = 0;
-		pEditor->DoEditBox(&s_FolderBox, &Label, pEditor->m_FileDialogNewFolderName, sizeof(pEditor->m_FileDialogNewFolderName), 15.0f, &s_FolderBox);
+		pEditor->DoEditBox(&s_FolderBox, &Label, pEditor->m_aFileDialogNewFolderName, sizeof(pEditor->m_aFileDialogNewFolderName), 15.0f, &s_FolderBox);
 		View.HSplitBottom(20.0f, &View, &Label);
 		pEditor->UI()->DoLabel(&Label, "Name:", 10.0f, -1);
 
@@ -995,13 +995,13 @@ int CEditor::PopupNewFolder(CEditor *pEditor, CUIRect View, void *pContext)
 		ButtonBar.VSplitLeft(30.0f, 0, &ButtonBar);
 		ButtonBar.VSplitLeft(110.0f, &Label, &ButtonBar);
 		static int s_CreateButton = 0;
-		if(pEditor->DoButton_Editor(&s_CreateButton, "Create", 0, &Label, 0, 0))
+		if(pEditor->DoButton_Editor(&s_CreateButton, "Create", 0, &Label, 0, 0) || pEditor->Input()->KeyPress(KEY_RETURN) || pEditor->Input()->KeyPress(KEY_KP_ENTER))
 		{
 			// create the folder
-			if(*pEditor->m_FileDialogNewFolderName)
+			if(pEditor->m_aFileDialogNewFolderName[0])
 			{
 				char aBuf[512];
-				str_format(aBuf, sizeof(aBuf), "%s/%s", pEditor->m_pFileDialogPath, pEditor->m_FileDialogNewFolderName);
+				str_format(aBuf, sizeof(aBuf), "%s/%s", pEditor->m_pFileDialogPath, pEditor->m_aFileDialogNewFolderName);
 				if(pEditor->Storage()->CreateFolder(aBuf, IStorage::TYPE_SAVE))
 				{
 					pEditor->FilelistPopulate(IStorage::TYPE_SAVE);
@@ -1161,7 +1161,7 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 	ButtonBar.VSplitLeft(30.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(110.0f, &Label, &ButtonBar);
 	static int s_OkButton = 0;
-	if(pEditor->DoButton_Editor(&s_OkButton, "Ok", 0, &Label, 0, 0))
+	if(pEditor->DoButton_Editor(&s_OkButton, "Ok", 0, &Label, 0, 0) || pEditor->Input()->KeyPress(KEY_RETURN) || pEditor->Input()->KeyPress(KEY_KP_ENTER))
 	{
 		if(pEditor->m_PopupEventType == POPEVENT_EXIT)
 			g_Config.m_ClEditor = 0;
@@ -1186,7 +1186,7 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 	if(pEditor->m_PopupEventType != POPEVENT_LARGELAYER && pEditor->m_PopupEventType != POPEVENT_PREVENTUNUSEDTILES && pEditor->m_PopupEventType != POPEVENT_IMAGEDIV16 && pEditor->m_PopupEventType != POPEVENT_IMAGE_MAX)
 	{
 		static int s_AbortButton = 0;
-		if(pEditor->DoButton_Editor(&s_AbortButton, "Abort", 0, &Label, 0, 0))
+		if(pEditor->DoButton_Editor(&s_AbortButton, "Abort", 0, &Label, 0, 0) || pEditor->Input()->KeyPress(KEY_ESCAPE))
 		{
 			pEditor->m_PopupEventWasActivated = false;
 			return 1;
@@ -1207,7 +1207,6 @@ int CEditor::PopupSelectImage(CEditor *pEditor, CUIRect View, void *pContext)
 
 	int ShowImage = g_SelectImageCurrent;
 
-	static int s_ScrollBar = 0;
 	static float s_ScrollValue = 0;
 	float ImagesHeight = pEditor->m_Map.m_lImages.size() * 14;
 	float ScrollDifference = ImagesHeight - ButtonBar.h;
@@ -1215,10 +1214,8 @@ int CEditor::PopupSelectImage(CEditor *pEditor, CUIRect View, void *pContext)
 	if(pEditor->m_Map.m_lImages.size() > 20) // Do we need a scrollbar?
 	{
 		CUIRect Scroll;
-		ButtonBar.VSplitRight(15.0f, &ButtonBar, &Scroll);
-		ButtonBar.VSplitRight(3.0f, &ButtonBar, 0); // extra spacing
-		Scroll.HMargin(5.0f, &Scroll);
-		s_ScrollValue = pEditor->UiDoScrollbarV(&s_ScrollBar, &Scroll, s_ScrollValue);
+		ButtonBar.VSplitRight(20.0f, &ButtonBar, &Scroll);
+		s_ScrollValue = pEditor->UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
 		if(pEditor->UI()->MouseInside(&Scroll) || pEditor->UI()->MouseInside(&ButtonBar))
 		{
@@ -1317,7 +1314,6 @@ int CEditor::PopupSelectSound(CEditor *pEditor, CUIRect View, void *pContext)
 	View.VSplitLeft(80.0f, &ButtonBar, &View);
 	View.Margin(10.0f, &SoundView);
 
-	static int s_ScrollBar = 0;
 	static float s_ScrollValue = 0;
 	float SoundsHeight = pEditor->m_Map.m_lSounds.size() * 14;
 	float ScrollDifference = SoundsHeight - ButtonBar.h;
@@ -1325,10 +1321,8 @@ int CEditor::PopupSelectSound(CEditor *pEditor, CUIRect View, void *pContext)
 	if(pEditor->m_Map.m_lSounds.size() > 20) // Do we need a scrollbar?
 	{
 		CUIRect Scroll;
-		ButtonBar.VSplitRight(15.0f, &ButtonBar, &Scroll);
-		ButtonBar.VSplitRight(3.0f, &ButtonBar, 0); // extra spacing
-		Scroll.HMargin(5.0f, &Scroll);
-		s_ScrollValue = pEditor->UiDoScrollbarV(&s_ScrollBar, &Scroll, s_ScrollValue);
+		ButtonBar.VSplitRight(20.0f, &ButtonBar, &Scroll);
+		s_ScrollValue = pEditor->UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
 		if(pEditor->UI()->MouseInside(&Scroll) || pEditor->UI()->MouseInside(&ButtonBar))
 		{
@@ -1448,7 +1442,6 @@ int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pCon
 	const float ButtonHeight = 12.0f;
 	const float ButtonMargin = 2.0f;
 
-	static int s_ScrollBar = 0;
 	static float s_ScrollValue = 0;
 
 	// Add 1 more for the "None" option.
@@ -1459,10 +1452,8 @@ int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pCon
 	if(ListHeight > View.h)
 	{
 		CUIRect Scroll;
-		View.VSplitRight(15.f, &View, &Scroll);
-
-		Scroll.HMargin(5.f, &Scroll);
-		s_ScrollValue = pEditor->UiDoScrollbarV(&s_ScrollBar, &Scroll, s_ScrollValue);
+		View.VSplitRight(20.0f, &View, &Scroll);
+		s_ScrollValue = pEditor->UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
 		if(pEditor->UI()->MouseInside(&View) || pEditor->UI()->MouseInside(&Scroll))
 		{

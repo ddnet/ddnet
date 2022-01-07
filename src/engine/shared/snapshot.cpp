@@ -185,7 +185,7 @@ void CSnapshotDelta::UndiffItem(int *pPast, int *pDiff, int *pOut, int Size)
 			m_aSnapshotDataRate[m_SnapshotCurrent] += 1;
 		else
 		{
-			unsigned char aBuf[16];
+			unsigned char aBuf[CVariableInt::MAX_BYTES_PACKED];
 			unsigned char *pEnd = CVariableInt::Pack(aBuf, *pDiff);
 			m_aSnapshotDataRate[m_SnapshotCurrent] += (int)(pEnd - (unsigned char *)aBuf) * 8;
 		}
@@ -642,6 +642,11 @@ int CSnapshotBuilder::GetExtendedItemTypeIndex(int TypeID)
 
 void *CSnapshotBuilder::NewItem(int Type, int ID, int Size)
 {
+	if(ID == -1)
+	{
+		return 0;
+	}
+
 	if(m_DataSize + sizeof(CSnapshotItem) + Size >= CSnapshot::MAX_SIZE ||
 		m_NumItems + 1 >= MAX_ITEMS)
 	{

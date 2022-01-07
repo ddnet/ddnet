@@ -100,6 +100,8 @@ public:
 	 * @param pOtherRect The CUIRect to place inside *this* CUIRect
 	 */
 	void HMargin(float Cut, CUIRect *pOtherRect) const;
+
+	bool Inside(float x, float y) const;
 };
 
 struct SUIAnimator
@@ -180,7 +182,7 @@ class CUI
 	const void *m_pHotItem;
 	const void *m_pActiveItem;
 	const void *m_pLastActiveItem;
-	const void *m_pBecommingHotItem;
+	const void *m_pBecomingHotItem;
 	float m_MouseX, m_MouseY; // in gui space
 	float m_MouseDeltaX, m_MouseDeltaY; // in gui space
 	float m_MouseWorldX, m_MouseWorldY; // in world space
@@ -195,12 +197,10 @@ class CUI
 	std::vector<CUIElement *> m_UIElements;
 
 public:
+	static float ms_FontmodHeight;
+
 	// TODO: Refactor: Fill this in
-	void SetGraphics(class IGraphics *pGraphics, class ITextRender *pTextRender)
-	{
-		m_pGraphics = pGraphics;
-		m_pTextRender = pTextRender;
-	}
+	void Init(class IGraphics *pGraphics, class ITextRender *pTextRender);
 	class IGraphics *Graphics() const { return m_pGraphics; }
 	class ITextRender *TextRender() const { return m_pTextRender; }
 
@@ -243,7 +243,7 @@ public:
 	int MouseButtonClicked(int Index) const { return MouseButton(Index) && !((m_LastMouseButtons >> Index) & 1); }
 	int MouseButtonReleased(int Index) const { return ((m_LastMouseButtons >> Index) & 1) && !MouseButton(Index); }
 
-	void SetHotItem(const void *pID) { m_pBecommingHotItem = pID; }
+	void SetHotItem(const void *pID) { m_pBecomingHotItem = pID; }
 	void SetActiveItem(const void *pID)
 	{
 		m_pActiveItem = pID;
@@ -252,12 +252,17 @@ public:
 	}
 	void ClearLastActiveItem() { m_pLastActiveItem = 0; }
 	const void *HotItem() const { return m_pHotItem; }
-	const void *NextHotItem() const { return m_pBecommingHotItem; }
+	const void *NextHotItem() const { return m_pBecomingHotItem; }
 	const void *ActiveItem() const { return m_pActiveItem; }
 	const void *LastActiveItem() const { return m_pLastActiveItem; }
 
-	int MouseInside(const CUIRect *pRect) const;
+	bool MouseInside(const CUIRect *pRect) const;
 	void ConvertMouseMove(float *x, float *y) const;
+
+	float ButtonColorMulActive() { return 0.5f; }
+	float ButtonColorMulHot() { return 1.5f; }
+	float ButtonColorMulDefault() { return 1.0f; }
+	float ButtonColorMul(const void *pID);
 
 	CUIRect *Screen();
 	void MapScreen();

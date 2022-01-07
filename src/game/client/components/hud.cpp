@@ -127,8 +127,7 @@ void CHud::RenderGameTimer()
 
 		str_time(Time * 100, TIME_DAYS, aBuf, sizeof(aBuf));
 		float FontSize = 10.0f;
-		float w;
-		w = TextRender()->TextWidth(0, 12,
+		float w = TextRender()->TextWidth(0, FontSize,
 			Time >= 3600 * 24 ? "00d 00:00:00" : Time >= 3600 ? "00:00:00" : "00:00",
 			-1, -1.0f);
 		// last 60 sec red, last 10 sec blink

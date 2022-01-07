@@ -108,12 +108,6 @@ void CDbConnectionPool::OnShutdown()
 	int i = 0;
 	while(m_Shutdown.load())
 	{
-		if(i > 600)
-		{
-			dbg_msg("sql", "Waited 60 seconds for score-threads to complete, quitting anyway");
-			break;
-		}
-
 		// print a log about every two seconds
 		if(i % 20 == 0)
 			dbg_msg("sql", "Waiting for score-threads to complete (%ds)", i / 10);

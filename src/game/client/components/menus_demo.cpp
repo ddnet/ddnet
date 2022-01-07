@@ -26,14 +26,14 @@
 
 int CMenus::DoButton_DemoPlayer(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {
-	RenderTools()->DrawUIRect(pRect, ColorRGBA(1, 1, 1, (Checked ? 0.10f : 0.5f) * ButtonColorMul(pID)), CUI::CORNER_ALL, 5.0f);
+	RenderTools()->DrawUIRect(pRect, ColorRGBA(1, 1, 1, (Checked ? 0.10f : 0.5f) * UI()->ButtonColorMul(pID)), CUI::CORNER_ALL, 5.0f);
 	UI()->DoLabel(pRect, pText, 14.0f, 0);
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
 }
 
 int CMenus::DoButton_Sprite(const void *pID, int ImageID, int SpriteID, int Checked, const CUIRect *pRect, int Corners)
 {
-	RenderTools()->DrawUIRect(pRect, ColorRGBA(1.0f, 1.0f, 1.0f, (Checked ? 0.10f : 0.5f) * ButtonColorMul(pID)), Corners, 5.0f);
+	RenderTools()->DrawUIRect(pRect, ColorRGBA(1.0f, 1.0f, 1.0f, (Checked ? 0.10f : 0.5f) * UI()->ButtonColorMul(pID)), Corners, 5.0f);
 	Graphics()->TextureSet(g_pData->m_aImages[ImageID].m_Id);
 	Graphics()->QuadsBegin();
 	if(!Checked)
@@ -158,8 +158,8 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		TextBox.VSplitLeft(20.0f, 0, &TextBox);
 		TextBox.VSplitRight(60.0f, &TextBox, 0);
 		UI()->DoLabel(&Label, Localize("New name:"), 18.0f, -1);
-		static float Offset = 0.0f;
-		if(DoEditBox(&Offset, &TextBox, m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile), 12.0f, &Offset))
+		static float s_Offset = 0.0f;
+		if(UIEx()->DoEditBox(&s_Offset, &TextBox, m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile), 12.0f, &s_Offset))
 		{
 			m_aDemoPlayerPopupHint[0] = '\0';
 		}
@@ -527,7 +527,7 @@ void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHe
 		RenderTools()->DrawUIRect(&View, ColorRGBA(0, 0, 0, 0.15f), CUI::CORNER_ALL, 5.0f);
 	}
 
-	View.VSplitRight(10, &View, &Scroll);
+	View.VSplitRight(20.0f, &View, &Scroll);
 
 	// setup the variables
 	gs_ListBoxOriginalView = View;
@@ -563,7 +563,7 @@ void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHe
 	if(Num == 0)
 		gs_ListBoxScrollValue = 0;
 	else
-		gs_ListBoxScrollValue = clamp(DoScrollbarV(pID, &Scroll, gs_ListBoxScrollValue), 0.0f, 1.0f);
+		gs_ListBoxScrollValue = UIEx()->DoScrollbarV(pID, &Scroll, gs_ListBoxScrollValue);
 
 	// the list
 	gs_ListBoxView = gs_ListBoxOriginalView;
@@ -1069,13 +1069,10 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 	// scrollbar
 	CUIRect Scroll;
-	ListBox.VSplitRight(15, &ListBox, &Scroll);
+	ListBox.VSplitRight(20.0f, &ListBox, &Scroll);
 
-	static int s_ScrollBar = 0;
 	static float s_ScrollValue = 0;
-
-	Scroll.HMargin(5.0f, &Scroll);
-	s_ScrollValue = DoScrollbarV(&s_ScrollBar, &Scroll, s_ScrollValue);
+	s_ScrollValue = UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
 	int PreviousIndex = m_DemolistSelectedIndex;
 	HandleListInputs(ListBox, s_ScrollValue, 3.0f, &m_ScrollOffset, s_aCols[0].m_Rect.h, m_DemolistSelectedIndex, m_lDemos.size());
@@ -1205,7 +1202,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	}
 
 	static int s_RefreshButton = 0;
-	if(DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &RefreshRect) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))))
+	if(DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &RefreshRect) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed()))
 	{
 		DemolistPopulate();
 		DemolistOnUpdate(false);
@@ -1257,13 +1254,11 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	if(DoButton_Menu(&s_DirectoryButtonID, Localize("Demos directory"), 0, &DirectoryButton))
 	{
 		char aBuf[IO_MAX_PATH_LENGTH];
-		char aBufFull[IO_MAX_PATH_LENGTH + 7];
 		Storage()->GetCompletePath(IStorage::TYPE_SAVE, "demos", aBuf, sizeof(aBuf));
 		Storage()->CreateFolder("demos", IStorage::TYPE_SAVE);
-		str_format(aBufFull, sizeof(aBufFull), "file://%s", aBuf);
-		if(!open_link(aBufFull))
+		if(!open_file(aBuf))
 		{
-			dbg_msg("menus", "couldn't open link");
+			dbg_msg("menus", "couldn't open file");
 		}
 	}
 

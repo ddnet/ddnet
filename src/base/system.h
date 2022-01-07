@@ -42,16 +42,12 @@ extern "C" {
 		msg - Message that should be printed if the test fails.
 
 	Remarks:
-		Does nothing in release version
+		Also works in release mode.
 
 	See Also:
 		<dbg_break>
 */
-#ifdef CONF_DEBUG
 #define dbg_assert(test, msg) dbg_assert_imp(__FILE__, __LINE__, test, msg)
-#else
-#define dbg_assert(test, msg)
-#endif
 void dbg_assert_imp(const char *filename, int line, int test, const char *msg);
 
 #ifdef __clang_analyzer__
@@ -71,17 +67,12 @@ void dbg_assert_imp(const char *filename, int line, int test, const char *msg);
 		Breaks into the debugger.
 
 	Remarks:
-		Does nothing in release version
+		Also works in release mode.
 
 	See Also:
 		<dbg_assert>
 */
-#ifdef CONF_DEBUG
-#define dbg_break() dbg_break_imp()
-#else
-#define dbg_break()
-#endif
-void dbg_break_imp();
+void dbg_break();
 
 /*
 	Function: dbg_msg
@@ -93,7 +84,7 @@ void dbg_break_imp();
 		fmt - A printf styled format string.
 
 	Remarks:
-		Also works in release version
+		Also works in release mode.
 
 	See Also:
 		<dbg_assert>
@@ -171,6 +162,7 @@ enum
 	IOFLAG_READ = 1,
 	IOFLAG_WRITE = 2,
 	IOFLAG_APPEND = 4,
+	IOFLAG_SKIP_BOM = 8,
 
 	IOSEEK_START = 0,
 	IOSEEK_CUR = 1,
@@ -187,7 +179,7 @@ typedef struct IOINTERNAL *IOHANDLE;
 
 	Parameters:
 		filename - File to open.
-		flags - A set of flags. IOFLAG_READ, IOFLAG_WRITE, IOFLAG_APPEND.
+		flags - A set of flags. IOFLAG_READ, IOFLAG_WRITE, IOFLAG_APPEND, IOFLAG_SKIP_BOM.
 
 	Returns:
 		Returns a handle to the file on success and 0 on failure.
@@ -1690,12 +1682,6 @@ int fs_storage_path(const char *appname, char *path, int max);
 int fs_is_dir(const char *path);
 
 /*
-	Function: fs_getmtime
-		Gets the modification time of a file
-*/
-time_t fs_getmtime(const char *path);
-
-/*
 	Function: fs_chdir
 		Changes current working directory
 
@@ -1821,17 +1807,32 @@ int net_socket_read_wait(NETSOCKET sock, int time);
 /*
 	Function: open_link
 		Opens a link in the browser.
-	
+
 	Parameters:
 		link - The link to open in a browser.
-	
+
 	Returns:
 		Returns 1 on success, 0 on failure.
-	
+
 	Remarks:
-		This may not be called with untrusted input or it'll result in arbitrary code execution.
+		This may not be called with untrusted input or it'll result in arbitrary code execution, especially on Windows.
 */
 int open_link(const char *link);
+
+/*
+	Function: open_file
+		Opens a file or directory with default program.
+
+	Parameters:
+		path - The path to open.
+
+	Returns:
+		Returns 1 on success, 0 on failure.
+
+	Remarks:
+		This may not be called with untrusted input or it'll result in arbitrary code execution, especially on Windows.
+*/
+int open_file(const char *path);
 
 void swap_endian(void *data, unsigned elem_size, unsigned num);
 
@@ -2002,6 +2003,19 @@ void str_utf8_trim_right(char *str);
 int str_utf8_rewind(const char *str, int cursor);
 
 /*
+	Function: str_utf8_fix_truncation
+		Fixes truncation of a Unicode character at the end of a UTF-8
+		string.
+
+	Returns:
+		The new string length.
+
+	Parameters:
+		str - utf8 string
+*/
+int str_utf8_fix_truncation(char *str);
+
+/*
 	Function: str_utf8_forward
 		Moves a cursor forwards in an utf8 string
 
@@ -2080,31 +2094,35 @@ int str_utf16le_encode(char *ptr, int chr);
 int str_utf8_check(const char *str);
 
 /*
-	Function: str_utf8_copy
-		Copies a utf8 string to a buffer.
+	Function: str_utf8_stats
+		Determines the byte size and utf8 character count of a utf8 string.
 
 	Parameters:
-		dst - Pointer to a buffer that shall receive the string.
-		src - utf8 string to be copied.
-		dst_size - Size of the buffer dst.
+		str - Pointer to the string.
+		max_size - Maximum number of bytes to count.
+		max_count - Maximum number of utf8 characters to count.
+		size - Pointer to store size (number of non-zero bytes) of the string.
+		count - Pointer to store count of utf8 characters of the string.
 
 	Remarks:
-		- The strings are treated as zero-terminated strings.
-		- Guarantees that dst string will contain zero-termination.
-		- Guarantees that dst always contains a valid utf8 string.
+		- The string is treated as zero-terminated utf8 string.
+		- It's the user's responsibility to make sure the bounds are aligned.
 */
-void str_utf8_copy(char *dst, const char *src, int dst_size);
+void str_utf8_stats(const char *str, int max_size, int max_count, int *size, int *count);
 
 /*
 	Function: str_next_token
 		Writes the next token after str into buf, returns the rest of the string.
+
 	Parameters:
 		str - Pointer to string.
 		delim - Delimiter for tokenization.
 		buffer - Buffer to store token in.
 		buffer_size - Size of the buffer.
+
 	Returns:
 		Pointer to rest of the string.
+
 	Remarks:
 		- The token is always null-terminated.
 */
@@ -2179,6 +2197,32 @@ void uint_to_bytes_be(unsigned char *bytes, unsigned value);
 		pid of the current process
 */
 int pid();
+
+/*
+	Function: cmdline_fix
+		Fixes the command line arguments to be encoded in UTF-8 on all
+		systems.
+
+	Parameters:
+		argc - A pointer to the argc parameter that was passed to the main function.
+		argv - A pointer to the argv parameter that was passed to the main function.
+
+	Remarks:
+		- You need to call cmdline_free once you're no longer using the
+		results.
+*/
+void cmdline_fix(int *argc, const char ***argv);
+
+/*
+	Function: cmdline_free
+		Frees memory that was allocated by cmdline_fix.
+
+	Parameters:
+		argc - The argc obtained from cmdline_fix.
+		argv - The argv obtained from cmdline_fix.
+
+*/
+void cmdline_free(int argc, const char **argv);
 
 #if defined(CONF_FAMILY_WINDOWS)
 typedef void *PROCESS;
@@ -2276,6 +2320,7 @@ int secure_rand_below(int below);
 /*
 	Function: set_console_msg_color
 		Sets the console color.
+
 	Parameters:
 		rgb - If NULL it will reset the console color to default, else it will transform the rgb color to a console color
 */

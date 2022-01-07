@@ -55,7 +55,7 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 		return true;
 	}
 
-	IOHANDLE IoHandle = pStorage->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE IoHandle = pStorage->OpenFile(pFilename, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
 	if(!IoHandle)
 		return false;
 

@@ -252,7 +252,6 @@ public:
 
 	void Clear()
 	{
-		//m_lLayers.delete_all();
 		m_lLayers.clear();
 	}
 
@@ -652,6 +651,7 @@ public:
 	class ITextRender *TextRender() { return m_pTextRender; };
 	class IStorage *Storage() { return m_pStorage; };
 	CUI *UI() { return &m_UI; }
+	CUIEx *UIEx() { return &m_UIEx; }
 	CRenderTools *RenderTools() { return &m_RenderTools; }
 
 	CEditor() :
@@ -867,7 +867,7 @@ public:
 	int m_FileDialogFileType;
 	float m_FileDialogScrollValue;
 	int m_FilesSelectedIndex;
-	char m_FileDialogNewFolderName[64];
+	char m_aFileDialogNewFolderName[64];
 	char m_FileDialogErrString[64];
 	IGraphics::CTextureHandle m_FilePreviewImage;
 	bool m_PreviewImageIsLoaded;
@@ -969,8 +969,8 @@ public:
 
 	int DoButton_ColorPicker(const void *pID, const CUIRect *pRect, ColorRGBA *pColor, const char *pToolTip = 0);
 
-	int DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners);
-	int DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden = false, int Corners = CUI::CORNER_ALL);
+	bool DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = CUI::CORNER_ALL);
+	bool DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners);
 
 	void RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, float Size, float Brightness);
 
@@ -1024,8 +1024,6 @@ public:
 	void PopupSelectSoundInvoke(int Current, float x, float y);
 	int PopupSelectSoundResult();
 
-	float ButtonColorMul(const void *pID);
-
 	void DoQuadEnvelopes(const array<CQuad> &m_lQuads, IGraphics::CTextureHandle Texture = IGraphics::CTextureHandle());
 	void DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int pIndex);
 	void DoQuadPoint(CQuad *pQuad, int QuadIndex, int v);
@@ -1035,7 +1033,6 @@ public:
 	void DoMapEditor(CUIRect View);
 	void DoToolbar(CUIRect Toolbar);
 	void DoQuad(CQuad *pQuad, int Index);
-	float UiDoScrollbarV(const void *pID, const CUIRect *pRect, float Current);
 	ColorRGBA GetButtonColor(const void *pID, int Checked);
 
 	static void ReplaceImage(const char *pFilename, int StorageType, void *pUser);

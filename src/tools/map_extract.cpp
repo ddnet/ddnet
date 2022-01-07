@@ -93,8 +93,9 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 	return Map.Close();
 }
 
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
+	cmdline_fix(&argc, &argv);
 	dbg_logger_stdout();
 
 	char aMap[512];
@@ -126,5 +127,7 @@ int main(int argc, char *argv[])
 
 	png_init(0, 0);
 
-	return Process(pStorage, aMap, aDir) ? 0 : 1;
+	int Result = Process(pStorage, aMap, aDir) ? 0 : 1;
+	cmdline_free(argc, argv);
+	return Result;
 }

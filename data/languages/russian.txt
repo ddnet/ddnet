@@ -95,9 +95,6 @@ Client
 Close
 == Закрыть
 
-Compatible version
-== Совместимая версия
-
 Connect
 == Подключиться
 
@@ -253,9 +250,6 @@ MOTD
 
 Map
 == Карта
-
-Maximum ping:
-== Макс. пинг:
 
 Mouse sens.
 == Чувств. мыши
@@ -1344,3 +1338,15 @@ Hookable
 
 Show local player's key presses
 == Показывать нажатия клавиш игрока
+
+Settings file
+== 
+
+Config directory
+== 
+
+Run on join
+== 
+
+Chat command (e.g. showall 1)
+== 

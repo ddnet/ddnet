@@ -75,10 +75,7 @@ class CMenus : public CComponent
 
 	CUIEx m_UIEx;
 
-	float ButtonColorMulActive() { return 0.5f; }
-	float ButtonColorMulHot() { return 1.5f; }
-	float ButtonColorMulDefault() { return 1.0f; }
-	float ButtonColorMul(const void *pID);
+	CUIEx *UIEx() { return &m_UIEx; }
 
 	int DoButton_DemoPlayer(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 	int DoButton_Sprite(const void *pID, int ImageID, int SpriteID, int Checked, const CUIRect *pRect, int Corners);
@@ -92,32 +89,13 @@ class CMenus : public CComponent
 	int DoButton_CheckBox_Number(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 	ColorHSLA DoLine_ColorPicker(int *pResetID, const float LineSize, const float WantedPickerPosition, const float LabelSize, const float BottomMargin, CUIRect *pMainRect, const char *pText, unsigned int *pColorValue, const ColorRGBA DefaultColor, bool CheckBoxSpacing = true, bool UseCheckBox = false, int *pCheckBoxValue = NULL);
 	void DoLaserPreview(const CUIRect *pRect, const ColorHSLA OutlineColor, const ColorHSLA InnerColor);
-	/*static void ui_draw_menu_button(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
-	static void ui_draw_keyselect_button(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
-	static void ui_draw_menu_tab_button(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
-	static void ui_draw_settings_tab_button(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
-	*/
 	int DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool UseScroll, int Current, int Min, int Max, int Step, float Scale, bool IsHex, float Round, ColorRGBA *Color);
 	int DoButton_Icon(int ImageId, int SpriteId, const CUIRect *pRect);
 	int DoButton_GridHeader(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 
-	//static void ui_draw_browse_icon(int what, const CUIRect *r);
-	//static void ui_draw_grid_header(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
-
-	/*static void ui_draw_checkbox_common(const void *id, const char *text, const char *boxtext, const CUIRect *r, const void *extra);
-	static void ui_draw_checkbox(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
-	static void ui_draw_checkbox_number(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
-	*/
-	int DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden = false, int Corners = CUI::CORNER_ALL, const char *pEmptyText = "");
-	int DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden = false, int Corners = CUI::CORNER_ALL, const char *pEmptyText = "");
-	//static int ui_do_edit_box(void *id, const CUIRect *rect, char *str, unsigned str_size, float font_size, bool hidden=false);
-
-	float DoScrollbarV(const void *pID, const CUIRect *pRect, float Current);
-	float DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, bool ColorPickerSlider = false, ColorRGBA *pColorInner = NULL);
 	void DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 	int DoKeyReader(void *pID, const CUIRect *pRect, int Key, int Modifier, int *NewModifier);
 
-	//static int ui_do_key_reader(void *id, const CUIRect *rect, int key);
 	void UiDoGetButtons(int Start, int Stop, CUIRect View, CUIRect ScopeView);
 
 	void RenderColorPicker();
@@ -168,11 +146,11 @@ class CMenus : public CComponent
 				{
 					Color.a = RealColor.a;
 					if(i == 0)
-						Color.a *= ButtonColorMulActive();
+						Color.a *= UI()->ButtonColorMulActive();
 					else if(i == 1)
-						Color.a *= ButtonColorMulHot();
+						Color.a *= UI()->ButtonColorMulHot();
 					else if(i == 2)
-						Color.a *= ButtonColorMulDefault();
+						Color.a *= UI()->ButtonColorMulDefault();
 					Graphics()->SetColor(Color);
 
 					CUIElement::SUIElementRect &NewRect = *UIElement.Get(i);
@@ -187,7 +165,7 @@ class CMenus : public CComponent
 						if(pText == NULL)
 							pText = GetTextLambda();
 						NewRect.m_Text = pText;
-						UI()->DoLabel(NewRect, &Text, pText, Text.h * ms_FontmodHeight, 0, -1, AlignVertically);
+						UI()->DoLabel(NewRect, &Text, pText, Text.h * CUI::ms_FontmodHeight, 0, -1, AlignVertically);
 					}
 				}
 				Graphics()->SetColor(1, 1, 1, 1);
@@ -223,9 +201,6 @@ class CMenus : public CComponent
 	int UiDoListboxEnd(float *pScrollValue, bool *pItemActivated, bool *pListBoxActive = 0);
 
 	int UiLogicGetCurrentClickedItem();
-
-	//static void demolist_listdir_callback(const char *name, int is_dir, void *user);
-	//static void demolist_list_callback(const CUIRect *rect, int index, void *user);
 
 	// menus_settings_assets.cpp
 public:
@@ -287,7 +262,6 @@ protected:
 	bool m_MenuActive;
 	bool m_UseMouseButtons;
 	vec2 m_MousePos;
-	bool m_MouseSlow;
 
 	char m_aNextServer[256];
 
@@ -330,7 +304,6 @@ protected:
 	static float ms_ButtonHeight;
 	static float ms_ListheaderHeight;
 	static float ms_ListitemAdditionalHeight;
-	static float ms_FontmodHeight;
 
 	// for settings
 	bool m_NeedRestartGeneral;

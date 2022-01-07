@@ -66,7 +66,8 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 	// start
 	if(IsOnStartTile && PlayerDDRaceState != DDRACE_CHEAT)
 	{
-		if(m_Teams.GetSaving(GetPlayerTeam(ClientID)))
+		const int Team = GetPlayerTeam(ClientID);
+		if(m_Teams.GetSaving(Team))
 		{
 			if(pChr->m_LastStartWarning < Server()->Tick() - 3 * Server()->TickSpeed())
 			{
@@ -76,15 +77,17 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 			pChr->Die(ClientID, WEAPON_WORLD);
 			return;
 		}
-		if(g_Config.m_SvTeam == 2 && (GetPlayerTeam(ClientID) == TEAM_FLOCK || m_Teams.Count(GetPlayerTeam(ClientID)) <= 1))
+		if(g_Config.m_SvTeam == 2 && (Team == TEAM_FLOCK || m_Teams.Count(Team) <= 1))
 		{
-			if(pChr->m_LastStartWarning < Server()->Tick() - 3 * Server()->TickSpeed())
-			{
-				GameServer()->SendChatTarget(ClientID, "You have to be in a team with other tees to start");
-				pChr->m_LastStartWarning = Server()->Tick();
-			}
+			GameServer()->SendStartWarning(ClientID, "You have to be in a team with other tees to start");
 			pChr->Die(ClientID, WEAPON_WORLD);
 			return;
+		}
+		if(g_Config.m_SvTeam != 3 && Team > TEAM_FLOCK && Team < TEAM_SUPER && m_Teams.Count(Team) < g_Config.m_SvMinTeamSize)
+		{
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "Your team has fewer than %d players, so your team rank won't count", g_Config.m_SvMinTeamSize);
+			GameServer()->SendStartWarning(ClientID, aBuf);
 		}
 		if(g_Config.m_SvResetPickups)
 		{

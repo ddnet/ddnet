@@ -8,6 +8,7 @@ docs/
 bundle/
 !/other/bundle/
 
+.DS_Store
 .ninja_deps
 .ninja_log
 CMakeCache.txt
@@ -34,6 +35,8 @@ ninja_package
 pack_*/
 rules.ninja
 testrunner\[1\]_include.cmake
+
+/SDL2.framework
 
 # Ignore all the generated executables without extensions (for non-Windows
 # systems).
@@ -88,10 +91,12 @@ tags
 /config.lua
 /objs
 
+*.a
 *.cmd
 *.dll
 *.dmg
 *.dtb
+*.dylib
 *.exe
 *.filters
 *.lnk

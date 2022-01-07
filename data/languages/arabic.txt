@@ -80,9 +80,6 @@ Client
 Close
 == ﻕﻼﻏﺍ
 
-Compatible version
-== ﻲﻟﺎﺤﻟﺍ ﺭﺍﺪﺻﻻﺍ
-
 Connect
 == ﻝﺎﺼﺗﺍ
 
@@ -241,9 +238,6 @@ MOTD
 
 Map
 == ﺏﺎﻤﻟﺍ
-
-Maximum ping:
-== ﻖﻨﺒﻠﻟ ﻰﺼﻗﻻﺍ ﺪﺤﻟﺍ:
 
 Mouse sens.
 == ﺱﻭﺎﻤﻟﺍ ﺔﻴﺳﺎﺴﺣ
@@ -1258,6 +1252,12 @@ Refreshing...
 Leak IP
 == 
 
+Settings file
+== 
+
+Config directory
+== 
+
 Chat command
 == 
 
@@ -1322,6 +1322,12 @@ Entities Background color
 == 
 
 Regular Background Color
+== 
+
+Run on join
+== 
+
+Chat command (e.g. showall 1)
 == 
 
 DDNet %s is available:

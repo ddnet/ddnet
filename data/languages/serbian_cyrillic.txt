@@ -85,9 +85,6 @@ Client
 Close
 == Затвори
 
-Compatible version
-== Компатибилна верзија
-
 Connect
 == Повежи се
 
@@ -243,9 +240,6 @@ MOTD
 
 Map
 == Мапа
-
-Maximum ping:
-== Највећи пинг:
 
 Mouse sens.
 == Осетљивост миша
@@ -1253,6 +1247,12 @@ Leak IP
 Smooth Dynamic Camera
 == 
 
+Settings file
+== 
+
+Config directory
+== 
+
 Chat command
 == 
 
@@ -1329,6 +1329,12 @@ Use current map as background
 == 
 
 Regular Background Color
+== 
+
+Run on join
+== 
+
+Chat command (e.g. showall 1)
 == 
 
 Discord

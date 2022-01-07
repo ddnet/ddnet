@@ -13,9 +13,9 @@
 
 #include <limits>
 
-CUIEx::CUIEx(CUI *pUI, IKernel *pKernel, CRenderTools *pRenderTools, IInput::CEvent *pInputEventsArray, int *pInputEventCount)
+CUIEx::CUIEx()
 {
-	Init(pUI, pKernel, pRenderTools, pInputEventsArray, pInputEventCount);
+	m_MouseSlow = false;
 }
 
 void CUIEx::Init(CUI *pUI, IKernel *pKernel, CRenderTools *pRenderTools, IInput::CEvent *pInputEventsArray, int *pInputEventCount)
@@ -31,7 +31,188 @@ void CUIEx::Init(CUI *pUI, IKernel *pKernel, CRenderTools *pRenderTools, IInput:
 	m_pTextRender = Kernel()->RequestInterface<ITextRender>();
 }
 
-int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners, const char *pEmptyText)
+void CUIEx::ConvertMouseMove(float *pX, float *pY) const
+{
+	UI()->ConvertMouseMove(pX, pY);
+
+	if(m_MouseSlow)
+	{
+		const float SlowMouseFactor = 0.05f;
+		*pX *= SlowMouseFactor;
+		*pY *= SlowMouseFactor;
+	}
+}
+
+float CUIEx::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
+{
+	Current = clamp(Current, 0.0f, 1.0f);
+
+	// layout
+	CUIRect Rail;
+	pRect->Margin(5.0f, &Rail);
+
+	CUIRect Handle;
+	Rail.HSplitTop(clamp(33.0f, Rail.w, Rail.h / 3.0f), &Handle, 0);
+	Handle.y = Rail.y + (Rail.h - Handle.h) * Current;
+
+	// logic
+	static float s_OffsetY;
+	const bool InsideRail = UI()->MouseInside(&Rail);
+	const bool InsideHandle = UI()->MouseInside(&Handle);
+	bool Grabbed = false; // whether to apply the offset
+
+	if(UI()->ActiveItem() == pID)
+	{
+		if(UI()->MouseButton(0))
+		{
+			Grabbed = true;
+			if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+				m_MouseSlow = true;
+		}
+		else
+		{
+			UI()->SetActiveItem(0);
+		}
+	}
+	else if(UI()->HotItem() == pID)
+	{
+		if(UI()->MouseButton(0))
+		{
+			UI()->SetActiveItem(pID);
+			s_OffsetY = UI()->MouseY() - Handle.y;
+			Grabbed = true;
+		}
+	}
+	else if(UI()->MouseButtonClicked(0) && !InsideHandle && InsideRail)
+	{
+		UI()->SetActiveItem(pID);
+		s_OffsetY = Handle.h / 2.0f;
+		Grabbed = true;
+	}
+
+	if(InsideHandle)
+	{
+		UI()->SetHotItem(pID);
+	}
+
+	float ReturnValue = Current;
+	if(Grabbed)
+	{
+		const float Min = Rail.y;
+		const float Max = Rail.h - Handle.h;
+		const float Cur = UI()->MouseY() - s_OffsetY;
+		ReturnValue = clamp((Cur - Min) / Max, 0.0f, 1.0f);
+	}
+
+	// render
+	RenderTools()->DrawUIRect(&Rail, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, Rail.w / 2.0f);
+
+	float ColorSlider;
+	if(UI()->ActiveItem() == pID)
+		ColorSlider = 0.9f;
+	else if(UI()->HotItem() == pID)
+		ColorSlider = 1.0f;
+	else
+		ColorSlider = 0.8f;
+
+	RenderTools()->DrawUIRect(&Handle, ColorRGBA(ColorSlider, ColorSlider, ColorSlider, 1.0f), CUI::CORNER_ALL, Handle.w / 2.0f);
+
+	return ReturnValue;
+}
+
+float CUIEx::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, const ColorRGBA *pColorInner)
+{
+	Current = clamp(Current, 0.0f, 1.0f);
+
+	// layout
+	CUIRect Rail;
+	if(pColorInner)
+		Rail = *pRect;
+	else
+		pRect->HMargin(5.0f, &Rail);
+
+	CUIRect Handle;
+	Rail.VSplitLeft(pColorInner ? 8.0f : clamp(33.0f, Rail.h, Rail.w / 3.0f), &Handle, 0);
+	Handle.x += (Rail.w - Handle.w) * Current;
+
+	// logic
+	static float s_OffsetX;
+	const bool InsideRail = UI()->MouseInside(&Rail);
+	const bool InsideHandle = UI()->MouseInside(&Handle);
+	bool Grabbed = false; // whether to apply the offset
+
+	if(UI()->ActiveItem() == pID)
+	{
+		if(UI()->MouseButton(0))
+		{
+			Grabbed = true;
+			if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+				m_MouseSlow = true;
+		}
+		else
+		{
+			UI()->SetActiveItem(0);
+		}
+	}
+	else if(UI()->HotItem() == pID)
+	{
+		if(UI()->MouseButton(0))
+		{
+			UI()->SetActiveItem(pID);
+			s_OffsetX = UI()->MouseX() - Handle.x;
+			Grabbed = true;
+		}
+	}
+	else if(UI()->MouseButtonClicked(0) && !InsideHandle && InsideRail)
+	{
+		UI()->SetActiveItem(pID);
+		s_OffsetX = Handle.w / 2.0f;
+		Grabbed = true;
+	}
+
+	if(InsideHandle)
+	{
+		UI()->SetHotItem(pID);
+	}
+
+	float ReturnValue = Current;
+	if(Grabbed)
+	{
+		const float Min = Rail.x;
+		const float Max = Rail.w - Handle.w;
+		const float Cur = UI()->MouseX() - s_OffsetX;
+		ReturnValue = clamp((Cur - Min) / Max, 0.0f, 1.0f);
+	}
+
+	// render
+	if(pColorInner)
+	{
+		CUIRect Slider;
+		Handle.VMargin(-2.0f, &Slider);
+		Slider.HMargin(-3.0f, &Slider);
+		RenderTools()->DrawUIRect(&Slider, ColorRGBA(0.15f, 0.15f, 0.15f, 1.0f), CUI::CORNER_ALL, 5.0f);
+		Slider.Margin(2.0f, &Slider);
+		RenderTools()->DrawUIRect(&Slider, *pColorInner, CUI::CORNER_ALL, 3.0f);
+	}
+	else
+	{
+		RenderTools()->DrawUIRect(&Rail, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, Rail.h / 2.0f);
+
+		float ColorSlider;
+		if(UI()->ActiveItem() == pID)
+			ColorSlider = 0.9f;
+		else if(UI()->HotItem() == pID)
+			ColorSlider = 1.0f;
+		else
+			ColorSlider = 0.8f;
+
+		RenderTools()->DrawUIRect(&Handle, ColorRGBA(ColorSlider, ColorSlider, ColorSlider, 1.0f), CUI::CORNER_ALL, Handle.h / 2.0f);
+	}
+
+	return ReturnValue;
+}
+
+bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners, const char *pEmptyText)
 {
 	int Inside = UI()->MouseInside(pRect);
 	bool ReturnValue = false;
@@ -54,9 +235,9 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 		m_CurCursor = minimum(str_length(pStr), m_CurCursor);
 
 		bool IsShiftPressed = Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT);
-		bool IsCtrlPressed = Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL);
+		bool IsModPressed = Input()->ModifierIsPressed();
 
-		if(!IsShiftPressed && IsCtrlPressed && Input()->KeyPress(KEY_V))
+		if(!IsShiftPressed && IsModPressed && Input()->KeyPress(KEY_V))
 		{
 			const char *pText = Input()->GetClipboardText();
 			if(pText)
@@ -113,7 +294,7 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 			}
 		}
 
-		if(!IsShiftPressed && IsCtrlPressed && (Input()->KeyPress(KEY_C) || Input()->KeyPress(KEY_X)))
+		if(!IsShiftPressed && IsModPressed && (Input()->KeyPress(KEY_C) || Input()->KeyPress(KEY_X)))
 		{
 			if(m_HasSelection)
 			{
@@ -141,7 +322,7 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 				Input()->SetClipboardText(pStr);
 		}
 
-		if(!IsShiftPressed && IsCtrlPressed && Input()->KeyPress(KEY_A))
+		if(!IsShiftPressed && IsModPressed && Input()->KeyPress(KEY_A))
 		{
 			m_CurSelStart = 0;
 			int StrLen = str_length(pStr);
@@ -150,7 +331,7 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 			m_CurCursor = StrLen;
 		}
 
-		if(!IsShiftPressed && IsCtrlPressed && Input()->KeyPress(KEY_U))
+		if(!IsShiftPressed && IsModPressed && Input()->KeyPress(KEY_U))
 		{
 			pStr[0] = '\0';
 			m_CurCursor = 0;
@@ -159,11 +340,10 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 
 		for(int i = 0; i < *m_pInputEventCount; i++)
 		{
-			int32_t ManipulateChanges = 0;
 			int LastCursor = m_CurCursor;
-			int Len = str_length(pStr);
-			int NumChars = Len;
-			ManipulateChanges = CLineInput::Manipulate(m_pInputEventsArray[i], pStr, StrSize, StrSize, &Len, &m_CurCursor, &NumChars, m_HasSelection ? CLineInput::LINE_INPUT_MODIFY_DONT_DELETE : 0, IsCtrlPressed ? KEY_LCTRL : 0);
+			int Len, NumChars;
+			str_utf8_stats(pStr, StrSize, StrSize, &Len, &NumChars);
+			int32_t ManipulateChanges = CLineInput::Manipulate(m_pInputEventsArray[i], pStr, StrSize, StrSize, &Len, &m_CurCursor, &NumChars, m_HasSelection ? CLineInput::LINE_INPUT_MODIFY_DONT_DELETE : 0, IsModPressed ? KEY_LCTRL : 0);
 			ReturnValue |= (ManipulateChanges & (CLineInput::LINE_INPUT_CHANGE_STRING | CLineInput::LINE_INPUT_CHANGE_CHARACTERS_DELETE)) != 0;
 
 			// if cursor changed, reset selection
@@ -344,26 +524,26 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 	if(UI()->LastActiveItem() == pID && !JustGotActive && (UpdateOffset || *m_pInputEventCount))
 	{
 		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, DispCursorPos, std::numeric_limits<float>::max());
-		if(w - *Offset > Textbox.w)
+		if(w - *pOffset > Textbox.w)
 		{
 			// move to the left
 			float wt = TextRender()->TextWidth(0, FontSize, pDisplayStr, -1, std::numeric_limits<float>::max());
 			do
 			{
-				*Offset += minimum(wt - *Offset - Textbox.w, Textbox.w / 3);
-			} while(w - *Offset > Textbox.w + 0.0001f);
+				*pOffset += minimum(wt - *pOffset - Textbox.w, Textbox.w / 3);
+			} while(w - *pOffset > Textbox.w + 0.0001f);
 		}
-		else if(w - *Offset < 0.0f)
+		else if(w - *pOffset < 0.0f)
 		{
 			// move to the right
 			do
 			{
-				*Offset = maximum(0.0f, *Offset - Textbox.w / 3);
-			} while(w - *Offset < -0.0001f);
+				*pOffset = maximum(0.0f, *pOffset - Textbox.w / 3);
+			} while(w - *pOffset < -0.0001f);
 		}
 	}
 	UI()->ClipEnable(pRect);
-	Textbox.x -= *Offset;
+	Textbox.x -= *pOffset;
 
 	CTextCursor SelCursor;
 	TextRender()->SetCursor(&SelCursor, 0, 0, 16, 0);
@@ -435,5 +615,25 @@ int CUIEx::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSi
 
 	UI()->ClipDisable();
 
+	return ReturnValue;
+}
+
+bool CUIEx::DoClearableEditBox(const void *pID, const void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners, const char *pEmptyText)
+{
+	CUIRect EditBox;
+	CUIRect ClearButton;
+	pRect->VSplitRight(15.0f, &EditBox, &ClearButton);
+	bool ReturnValue = DoEditBox(pID, &EditBox, pStr, StrSize, FontSize, pOffset, Hidden, Corners & ~CUI::CORNER_R, pEmptyText);
+
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT);
+	RenderTools()->DrawUIRect(&ClearButton, ColorRGBA(1, 1, 1, 0.33f * UI()->ButtonColorMul(pClearID)), Corners & ~CUI::CORNER_L, 3.0f);
+	UI()->DoLabel(&ClearButton, "×", ClearButton.h * CUI::ms_FontmodHeight, 0, -1, 0);
+	TextRender()->SetRenderFlags(0);
+	if(UI()->DoButtonLogic(pClearID, "×", 0, &ClearButton))
+	{
+		pStr[0] = 0;
+		UI()->SetActiveItem(pID);
+		ReturnValue = true;
+	}
 	return ReturnValue;
 }

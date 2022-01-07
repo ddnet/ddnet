@@ -5,6 +5,8 @@
 #include <engine/shared/config.h>
 
 #include "entities/character.h"
+#include "entities/laser.h"
+#include "entities/projectile.h"
 #include "player.h"
 
 CGameTeams::CGameTeams(CGameContext *pGameContext) :
@@ -18,11 +20,15 @@ void CGameTeams::Reset()
 	m_Core.Reset();
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
-		m_TeamState[i] = TEAMSTATE_EMPTY;
-		m_TeamLocked[i] = false;
 		m_TeeStarted[i] = false;
 		m_TeeFinished[i] = false;
 		m_LastChat[i] = 0;
+	}
+
+	for(int i = 0; i < NUM_TEAMS; ++i)
+	{
+		m_TeamState[i] = TEAMSTATE_EMPTY;
+		m_TeamLocked[i] = false;
 		m_pSaveTeamResult[i] = nullptr;
 
 		m_Invited[i] = 0;
@@ -165,7 +171,7 @@ void CGameTeams::OnCharacterStart(int ClientID)
 			}
 		}
 
-		if(g_Config.m_SvTeam < 3 && g_Config.m_SvTeamMaxSize != 2 && g_Config.m_SvPauseable)
+		if(g_Config.m_SvTeam < 3 && g_Config.m_SvMaxTeamSize != 2 && g_Config.m_SvPauseable)
 		{
 			for(int i = 0; i < MAX_CLIENTS; ++i)
 			{
@@ -648,7 +654,7 @@ void CGameTeams::OnTeamFinish(CPlayer **Players, unsigned int Size, float Time, 
 		}
 	}
 
-	if(Size >= 2)
+	if(Size >= (unsigned int)g_Config.m_SvMinTeamSize)
 		GameServer()->Score()->SaveTeamScore(PlayerCIDs, Size, Time, pTimestamp);
 }
 
@@ -882,6 +888,12 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, in
 	PrimarySavedTee.Load(pTargetPlayer->GetCharacter(), Team, true);
 	SecondarySavedTee.Load(pPlayer->GetCharacter(), Team, true);
 
+	swap(m_TeeStarted[pPlayer->GetCID()], m_TeeStarted[pTargetPlayer->GetCID()]);
+	swap(m_TeeFinished[pPlayer->GetCID()], m_TeeFinished[pTargetPlayer->GetCID()]);
+	swap(pPlayer->GetCharacter()->GetRescueTeeRef(), pTargetPlayer->GetCharacter()->GetRescueTeeRef());
+
+	GameServer()->m_World.SwapClients(pPlayer->GetCID(), pTargetPlayer->GetCID());
+
 	str_format(aBuf, sizeof(aBuf),
 		"%s has swapped with %s.",
 		Server()->ClientName(pPlayer->GetCID()), Server()->ClientName(pTargetPlayer->GetCID()));
@@ -891,7 +903,7 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, in
 
 void CGameTeams::ProcessSaveTeam()
 {
-	for(int Team = 0; Team < MAX_CLIENTS; Team++)
+	for(int Team = 0; Team < NUM_TEAMS; Team++)
 	{
 		if(m_pSaveTeamResult[Team] == nullptr || !m_pSaveTeamResult[Team]->m_Completed)
 			continue;

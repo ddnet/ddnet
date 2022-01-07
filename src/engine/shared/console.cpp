@@ -315,11 +315,14 @@ char *CConsole::Format(char *pBuf, int Size, const char *pFrom, const char *pStr
 
 void CConsole::Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor)
 {
-	// if the color is pure white, use default terminal color
-	if(mem_comp(&PrintColor, &gs_ConsoleDefaultColor, sizeof(ColorRGBA)) == 0)
-		set_console_msg_color(NULL);
-	else
-		set_console_msg_color(&PrintColor);
+	if(g_Config.m_ConsoleEnableColors)
+	{
+		// if the color is pure white, use default terminal color
+		if(mem_comp(&PrintColor, &gs_ConsoleDefaultColor, sizeof(ColorRGBA)) == 0)
+			set_console_msg_color(NULL);
+		else
+			set_console_msg_color(&PrintColor);
+	}
 	dbg_msg(pFrom, "%s", pStr);
 	set_console_msg_color(NULL);
 	char aBuf[1024];
@@ -588,7 +591,7 @@ void CConsole::ExecuteFile(const char *pFilename, int ClientID, bool LogFailure,
 	m_pFirstExec = &ThisFile;
 
 	// exec the file
-	IOHANDLE File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, StorageType);
+	IOHANDLE File = m_pStorage->OpenFile(pFilename, IOFLAG_READ | IOFLAG_SKIP_BOM, StorageType);
 
 	char aBuf[128];
 	if(File)

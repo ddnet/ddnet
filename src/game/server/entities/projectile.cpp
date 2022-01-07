@@ -179,8 +179,8 @@ void CProjectile::Tick()
 		{
 			int MapIndex = GameServer()->Collision()->GetPureMapIndex(pTargetChr ? pTargetChr->m_Pos : ColPos);
 			int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
-			bool IsSwitchTeleGun = GameServer()->Collision()->IsSwitch(MapIndex) == TILE_ALLOW_TELE_GUN;
-			bool IsBlueSwitchTeleGun = GameServer()->Collision()->IsSwitch(MapIndex) == TILE_ALLOW_BLUE_TELE_GUN;
+			bool IsSwitchTeleGun = GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_ALLOW_TELE_GUN;
+			bool IsBlueSwitchTeleGun = GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_ALLOW_BLUE_TELE_GUN;
 
 			if(IsSwitchTeleGun || IsBlueSwitchTeleGun)
 			{
@@ -355,6 +355,11 @@ void CProjectile::Snap(int SnappingClient)
 		}
 		FillInfo(pProj);
 	}
+}
+
+void CProjectile::SwapClients(int Client1, int Client2)
+{
+	m_Owner = m_Owner == Client1 ? Client2 : m_Owner == Client2 ? Client1 : m_Owner;
 }
 
 // DDRace

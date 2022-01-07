@@ -95,6 +95,33 @@ TEST(Str, Utf8ToLower)
 	EXPECT_TRUE(str_utf8_find_nocase(str, "z") == NULL);
 }
 
+TEST(Str, Utf8FixTruncation)
+{
+	char aaBuf[][32] = {
+		"",
+		"\xff",
+		"abc",
+		"abc\xff",
+		"blub\xffxyz",
+		"привет Наташа\xff",
+		"до свидания\xffОлег",
+	};
+	const char *apExpected[] = {
+		"",
+		"",
+		"abc",
+		"abc",
+		"blub\xffxyz",
+		"привет Наташа",
+		"до свидания\xffОлег",
+	};
+	for(unsigned i = 0; i < sizeof(aaBuf) / sizeof(aaBuf[0]); i++)
+	{
+		EXPECT_EQ(str_utf8_fix_truncation(aaBuf[i]), str_length(apExpected[i]));
+		EXPECT_STREQ(aaBuf[i], apExpected[i]);
+	}
+}
+
 TEST(Str, Startswith)
 {
 	EXPECT_TRUE(str_startswith("abcdef", "abc"));
@@ -204,6 +231,32 @@ TEST(Str, StrFormat)
 	EXPECT_STREQ(aBuf, "99:");
 }
 
+TEST(Str, StrFormatTruncate)
+{
+	const char *pStr = "DDNet最好了";
+	char aBuf[64];
+	str_format(aBuf, 7, "%s", pStr);
+	EXPECT_STREQ(aBuf, "DDNet");
+	str_format(aBuf, 8, "%s", pStr);
+	EXPECT_STREQ(aBuf, "DDNet");
+	str_format(aBuf, 9, "%s", pStr);
+	EXPECT_STREQ(aBuf, "DDNet最");
+	str_format(aBuf, 10, "%s", pStr);
+	EXPECT_STREQ(aBuf, "DDNet最");
+	str_format(aBuf, 11, "%s", pStr);
+	EXPECT_STREQ(aBuf, "DDNet最");
+	str_format(aBuf, 12, "%s", pStr);
+	EXPECT_STREQ(aBuf, "DDNet最好");
+	str_format(aBuf, 13, "%s", pStr);
+	EXPECT_STREQ(aBuf, "DDNet最好");
+	str_format(aBuf, 14, "%s", pStr);
+	EXPECT_STREQ(aBuf, "DDNet最好");
+	str_format(aBuf, 15, "%s", pStr);
+	EXPECT_STREQ(aBuf, "DDNet最好了");
+	str_format(aBuf, 16, "%s", pStr);
+	EXPECT_STREQ(aBuf, "DDNet最好了");
+}
+
 TEST(Str, StrCopyNum)
 {
 	const char *foo = "Foobaré";
@@ -229,30 +282,67 @@ TEST(Str, StrCopyNum)
 	EXPECT_STREQ(aBuf3, "Foobaré");
 }
 
-TEST(Str, StrCopyUtf8)
+TEST(Str, StrCopy)
 {
-	const char *foo = "DDNet最好了";
+	const char *pStr = "DDNet最好了";
 	char aBuf[64];
-	str_utf8_copy(aBuf, foo, 7);
+	str_copy(aBuf, pStr, 7);
 	EXPECT_STREQ(aBuf, "DDNet");
-	str_utf8_copy(aBuf, foo, 8);
+	str_copy(aBuf, pStr, 8);
 	EXPECT_STREQ(aBuf, "DDNet");
-	str_utf8_copy(aBuf, foo, 9);
+	str_copy(aBuf, pStr, 9);
 	EXPECT_STREQ(aBuf, "DDNet最");
-	str_utf8_copy(aBuf, foo, 10);
+	str_copy(aBuf, pStr, 10);
 	EXPECT_STREQ(aBuf, "DDNet最");
-	str_utf8_copy(aBuf, foo, 11);
+	str_copy(aBuf, pStr, 11);
 	EXPECT_STREQ(aBuf, "DDNet最");
-	str_utf8_copy(aBuf, foo, 12);
+	str_copy(aBuf, pStr, 12);
 	EXPECT_STREQ(aBuf, "DDNet最好");
-	str_utf8_copy(aBuf, foo, 13);
+	str_copy(aBuf, pStr, 13);
 	EXPECT_STREQ(aBuf, "DDNet最好");
-	str_utf8_copy(aBuf, foo, 14);
+	str_copy(aBuf, pStr, 14);
 	EXPECT_STREQ(aBuf, "DDNet最好");
-	str_utf8_copy(aBuf, foo, 15);
+	str_copy(aBuf, pStr, 15);
 	EXPECT_STREQ(aBuf, "DDNet最好了");
-	str_utf8_copy(aBuf, foo, 16);
+	str_copy(aBuf, pStr, 16);
 	EXPECT_STREQ(aBuf, "DDNet最好了");
+}
+
+TEST(Str, Utf8Stats)
+{
+	int Size, Count;
+
+	str_utf8_stats("abc", 4, 3, &Size, &Count);
+	EXPECT_EQ(Size, 3);
+	EXPECT_EQ(Count, 3);
+
+	str_utf8_stats("abc", 2, 3, &Size, &Count);
+	EXPECT_EQ(Size, 1);
+	EXPECT_EQ(Count, 1);
+
+	str_utf8_stats("", 1, 0, &Size, &Count);
+	EXPECT_EQ(Size, 0);
+	EXPECT_EQ(Count, 0);
+
+	str_utf8_stats("abcde", 6, 5, &Size, &Count);
+	EXPECT_EQ(Size, 5);
+	EXPECT_EQ(Count, 5);
+
+	str_utf8_stats("любовь", 13, 6, &Size, &Count);
+	EXPECT_EQ(Size, 12);
+	EXPECT_EQ(Count, 6);
+
+	str_utf8_stats("abc愛", 7, 4, &Size, &Count);
+	EXPECT_EQ(Size, 6);
+	EXPECT_EQ(Count, 4);
+
+	str_utf8_stats("abc愛", 6, 4, &Size, &Count);
+	EXPECT_EQ(Size, 3);
+	EXPECT_EQ(Count, 3);
+
+	str_utf8_stats("любовь", 13, 3, &Size, &Count);
+	EXPECT_EQ(Size, 6);
+	EXPECT_EQ(Count, 3);
 }
 
 TEST(Str, StrTime)

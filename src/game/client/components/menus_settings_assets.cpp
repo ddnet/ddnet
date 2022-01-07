@@ -520,10 +520,10 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(QuickSearch.w - 15.0f, &QuickSearch, &QuickSearchClearButton);
 		static int s_ClearButton = 0;
-		static float Offset = 0.0f;
-		if(Input()->KeyPress(KEY_F) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)))
+		static float s_Offset = 0.0f;
+		if(Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
 			UI()->SetActiveItem(&s_aFilterString[s_CurCustomTab]);
-		if(DoClearableEditBox(&s_aFilterString[s_CurCustomTab], &s_ClearButton, &QuickSearch, s_aFilterString[s_CurCustomTab], sizeof(s_aFilterString[0]), 14.0f, &Offset, false, CUI::CORNER_ALL, Localize("Search")))
+		if(UIEx()->DoClearableEditBox(&s_aFilterString[s_CurCustomTab], &s_ClearButton, &QuickSearch, s_aFilterString[s_CurCustomTab], sizeof(s_aFilterString[0]), 14.0f, &s_Offset, false, CUI::CORNER_ALL, Localize("Search")))
 			s_InitCustomList[s_CurCustomTab] = true;
 	}
 
@@ -547,10 +547,9 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 		Storage()->GetCompletePath(IStorage::TYPE_SAVE, aBufFull, aBuf, sizeof(aBuf));
 		Storage()->CreateFolder("assets", IStorage::TYPE_SAVE);
 		Storage()->CreateFolder(aBufFull, IStorage::TYPE_SAVE);
-		str_format(aBufFull, sizeof(aBufFull), "file://%s", aBuf);
-		if(!open_link(aBufFull))
+		if(!open_file(aBuf))
 		{
-			dbg_msg("menus", "couldn't open link");
+			dbg_msg("menus", "couldn't open file");
 		}
 	}
 

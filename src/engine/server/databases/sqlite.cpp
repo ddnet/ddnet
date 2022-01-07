@@ -23,6 +23,11 @@ public:
 	virtual const char *InsertIgnore() const { return "INSERT OR IGNORE"; };
 	virtual const char *Random() const { return "RANDOM()"; };
 	virtual const char *MedianMapTime(char *pBuffer, int BufferSize) const;
+	// Since SQLite 3.23.0 true/false literals are recognized, but still cleaner to use 1/0, because:
+	// > For compatibility, if there exist columns named "true" or "false", then
+	// > the identifiers refer to the columns rather than Boolean constants.
+	virtual const char *False() const { return "0"; }
+	virtual const char *True() const { return "1"; }
 
 	virtual bool Connect(char *pError, int ErrorSize);
 	virtual void Disconnect();
@@ -32,6 +37,7 @@ public:
 	virtual void BindString(int Idx, const char *pString);
 	virtual void BindBlob(int Idx, unsigned char *pBlob, int Size);
 	virtual void BindInt(int Idx, int Value);
+	virtual void BindInt64(int Idx, int64_t Value);
 	virtual void BindFloat(int Idx, float Value);
 
 	virtual void Print();
@@ -116,6 +122,11 @@ bool CSqliteConnection::Connect(char *pError, int ErrorSize)
 		return false;
 	}
 
+	if(sqlite3_libversion_number() < 3025000)
+	{
+		dbg_msg("sql", "SQLite version %s is not supported, use at least version 3.25.0", sqlite3_libversion());
+	}
+
 	int Result = sqlite3_open(m_aFilename, &m_pDb);
 	if(Result != SQLITE_OK)
 	{
@@ -193,6 +204,13 @@ void CSqliteConnection::BindBlob(int Idx, unsigned char *pBlob, int Size)
 void CSqliteConnection::BindInt(int Idx, int Value)
 {
 	int Result = sqlite3_bind_int(m_pStmt, Idx, Value);
+	AssertNoError(Result);
+	m_Done = false;
+}
+
+void CSqliteConnection::BindInt64(int Idx, int64_t Value)
+{
+	int Result = sqlite3_bind_int64(m_pStmt, Idx, Value);
 	AssertNoError(Result);
 	m_Done = false;
 }
@@ -349,7 +367,7 @@ bool CSqliteConnection::AddPoints(const char *pPlayer, int Points, char *pError,
 	str_format(aBuf, sizeof(aBuf),
 		"INSERT INTO %s_points(Name, Points) "
 		"VALUES (?, ?) "
-		"ON CONFLICT(Name) DO UPDATE SET Points=Points+?;",
+		"ON CONFLICT(Name) DO UPDATE SET Points=Points+?",
 		GetPrefix());
 	if(PrepareStatement(aBuf, pError, ErrorSize))
 	{
@@ -366,7 +384,7 @@ bool CSqliteConnection::AddPoints(const char *pPlayer, int Points, char *pError,
 	return false;
 }
 
-IDbConnection *CreateSqliteConnection(const char *pFilename, bool Setup)
+std::unique_ptr<IDbConnection> CreateSqliteConnection(const char *pFilename, bool Setup)
 {
-	return new CSqliteConnection(pFilename, Setup);
+	return std::unique_ptr<IDbConnection>(new CSqliteConnection(pFilename, Setup));
 }

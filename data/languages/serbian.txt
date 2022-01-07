@@ -88,9 +88,6 @@ Client
 Close
 == Zatvori
 
-Compatible version
-== Kompatibilna verzija
-
 Connect
 == Konektuj
 
@@ -246,9 +243,6 @@ MOTD
 
 Map
 == Mapa
-
-Maximum ping:
-== Maksimalan ping:
 
 Mouse sens.
 == Mouse sens.
@@ -842,10 +836,10 @@ Demos directory
 Render
 == 
 
-Connecting dummy
+Connect Dummy
 == 
 
-Connect Dummy
+Connecting dummy
 == 
 
 Kill
@@ -894,6 +888,12 @@ Refresh Rate
 == 
 
 Show console window
+== 
+
+Settings file
+== 
+
+Config directory
 == 
 
 Themes directory
@@ -1212,6 +1212,12 @@ Try fast HTTP map download first
 == 
 
 New random timeout code
+== 
+
+Run on join
+== 
+
+Chat command (e.g. showall 1)
 == 
 
 DDNet %s is available:

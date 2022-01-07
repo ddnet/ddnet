@@ -72,7 +72,7 @@ public:
 	int m_MapSize;
 	char m_aVersion[32];
 	char m_aAddress[NETADDR_MAXSTRSIZE];
-	CClient m_aClients[MAX_CLIENTS];
+	CClient m_aClients[SERVERINFO_MAX_CLIENTS];
 	mutable int m_NumFilteredPlayers;
 
 	mutable CUIElement *m_pUIElement;

@@ -754,7 +754,7 @@ void CCollision::GetSpeedup(int Index, vec2 *Dir, int *Force, int *MaxSpeed) con
 		*MaxSpeed = m_pSpeedup[Index].m_MaxSpeed;
 }
 
-int CCollision::IsSwitch(int Index) const
+int CCollision::GetSwitchType(int Index) const
 {
 	if(Index < 0 || !m_pSwitch)
 		return 0;

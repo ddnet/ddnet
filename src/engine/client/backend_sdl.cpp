@@ -1120,19 +1120,37 @@ void CGraphicsBackend_SDL_OpenGL::SetWindowParams(int FullscreenMode, bool IsBor
 
 bool CGraphicsBackend_SDL_OpenGL::SetWindowScreen(int Index)
 {
-	if(Index >= 0 && Index < m_NumScreens)
+	if(Index < 0 || Index >= m_NumScreens)
 	{
-		SDL_Rect ScreenPos;
-		if(SDL_GetDisplayBounds(Index, &ScreenPos) == 0)
-		{
-			SDL_SetWindowPosition(m_pWindow,
-				SDL_WINDOWPOS_CENTERED_DISPLAY(Index),
-				SDL_WINDOWPOS_CENTERED_DISPLAY(Index));
-			return true;
-		}
+		return false;
 	}
 
-	return false;
+	SDL_Rect ScreenPos;
+	if(SDL_GetDisplayBounds(Index, &ScreenPos) != 0)
+	{
+		return false;
+	}
+
+	SDL_SetWindowPosition(m_pWindow,
+		SDL_WINDOWPOS_CENTERED_DISPLAY(Index),
+		SDL_WINDOWPOS_CENTERED_DISPLAY(Index));
+
+	return UpdateDisplayMode(Index);
+}
+
+bool CGraphicsBackend_SDL_OpenGL::UpdateDisplayMode(int Index)
+{
+	SDL_DisplayMode DisplayMode;
+	if(SDL_GetDesktopDisplayMode(Index, &DisplayMode) < 0)
+	{
+		dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
+		return false;
+	}
+
+	g_Config.m_GfxDesktopWidth = DisplayMode.w;
+	g_Config.m_GfxDesktopHeight = DisplayMode.h;
+
+	return true;
 }
 
 int CGraphicsBackend_SDL_OpenGL::GetWindowScreen()
@@ -1142,12 +1160,12 @@ int CGraphicsBackend_SDL_OpenGL::GetWindowScreen()
 
 int CGraphicsBackend_SDL_OpenGL::WindowActive()
 {
-	return SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_INPUT_FOCUS;
+	return m_pWindow && SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_INPUT_FOCUS;
 }
 
 int CGraphicsBackend_SDL_OpenGL::WindowOpen()
 {
-	return SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_SHOWN;
+	return m_pWindow && SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_SHOWN;
 }
 
 void CGraphicsBackend_SDL_OpenGL::SetWindowGrab(bool Grab)
@@ -1158,35 +1176,35 @@ void CGraphicsBackend_SDL_OpenGL::SetWindowGrab(bool Grab)
 void CGraphicsBackend_SDL_OpenGL::ResizeWindow(int w, int h, int RefreshRate)
 {
 	// don't call resize events when the window is at fullscreen desktop
-	if((SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN_DESKTOP) != SDL_WINDOW_FULLSCREEN_DESKTOP)
+	if(!m_pWindow || (SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN_DESKTOP)
+		return;
+
+	// if the window is at fullscreen use SDL_SetWindowDisplayMode instead, suggested by SDL
+	if(SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN)
 	{
-		// if the window is at fullscreen use SDL_SetWindowDisplayMode instead, suggested by SDL
-		if(SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN)
-		{
 #ifdef CONF_PLATFORM_WINDOWS
-			// in windows make the window windowed mode first, this prevents strange window glitches (other games probably do something similar)
-			SetWindowParams(0, 1);
+		// in windows make the window windowed mode first, this prevents strange window glitches (other games probably do something similar)
+		SetWindowParams(0, 1);
 #endif
-			SDL_DisplayMode SetMode = {};
-			SDL_DisplayMode ClosestMode = {};
-			SetMode.format = 0;
-			SetMode.w = w;
-			SetMode.h = h;
-			SetMode.refresh_rate = RefreshRate;
-			SDL_SetWindowDisplayMode(m_pWindow, SDL_GetClosestDisplayMode(g_Config.m_GfxScreen, &SetMode, &ClosestMode));
+		SDL_DisplayMode SetMode = {};
+		SDL_DisplayMode ClosestMode = {};
+		SetMode.format = 0;
+		SetMode.w = w;
+		SetMode.h = h;
+		SetMode.refresh_rate = RefreshRate;
+		SDL_SetWindowDisplayMode(m_pWindow, SDL_GetClosestDisplayMode(g_Config.m_GfxScreen, &SetMode, &ClosestMode));
 #ifdef CONF_PLATFORM_WINDOWS
-			// now change it back to fullscreen, this will restore the above set state, bcs SDL saves fullscreen modes appart from other video modes (as of SDL 2.0.16)
-			// see implementation of SDL_SetWindowDisplayMode
-			SetWindowParams(1, 0);
+		// now change it back to fullscreen, this will restore the above set state, bcs SDL saves fullscreen modes appart from other video modes (as of SDL 2.0.16)
+		// see implementation of SDL_SetWindowDisplayMode
+		SetWindowParams(1, 0);
 #endif
-		}
-		else
-		{
-			SDL_SetWindowSize(m_pWindow, w, h);
-			if(SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_MAXIMIZED)
-				// remove maximize flag
-				SDL_RestoreWindow(m_pWindow);
-		}
+	}
+	else
+	{
+		SDL_SetWindowSize(m_pWindow, w, h);
+		if(SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_MAXIMIZED)
+			// remove maximize flag
+			SDL_RestoreWindow(m_pWindow);
 	}
 }
 

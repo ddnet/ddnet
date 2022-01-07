@@ -82,6 +82,7 @@ public:
 	bool m_ChatTimeoutCode;
 	bool m_AnyPlayerFlag;
 	bool m_PingEx;
+	bool m_AllowDummy;
 };
 
 class CClient : public IClient, public CDemoPlayer::IListener
@@ -170,7 +171,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aCurrentMapPath[IO_MAX_PATH_LENGTH];
 
 	char m_aTimeoutCodes[NUM_DUMMIES][32];
-	bool m_aTimeoutCodeSent[NUM_DUMMIES];
+	bool m_CodeRunAfterJoin[NUM_DUMMIES];
 	bool m_GenerateTimeoutSeed;
 
 	//
@@ -300,7 +301,7 @@ public:
 	virtual int SendMsgY(CMsgPacker *pMsg, int Flags, int NetClient = 1);
 
 	void SendInfo();
-	void SendEnterGame();
+	void SendEnterGame(bool Dummy);
 	void SendReady();
 	void SendMapRequest();
 
@@ -328,8 +329,8 @@ public:
 	void SetState(int s);
 
 	// called when the map is loaded and we should init for a new round
-	void OnEnterGame();
-	virtual void EnterGame();
+	void OnEnterGame(bool Dummy);
+	virtual void EnterGame(bool Dummy);
 
 	virtual void Connect(const char *pAddress, const char *pPassword = NULL);
 	void DisconnectWithReason(const char *pReason);
@@ -339,6 +340,7 @@ public:
 	virtual void DummyConnect();
 	virtual bool DummyConnected();
 	virtual bool DummyConnecting();
+	virtual bool DummyAllowed();
 	int m_DummyConnected;
 	int m_LastDummyConnectTime;
 
@@ -415,6 +417,7 @@ public:
 	static void Con_Minimize(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Ping(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Screenshot(IConsole::IResult *pResult, void *pUserData);
+	static void Con_Reset(IConsole::IResult *pResult, void *pUserData);
 
 #if defined(CONF_VIDEORECORDER)
 	static void StartVideo(IConsole::IResult *pResult, void *pUserData, const char *pVideName);

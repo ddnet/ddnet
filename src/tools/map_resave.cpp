@@ -6,6 +6,7 @@
 
 int main(int argc, const char **argv)
 {
+	cmdline_fix(&argc, &argv);
 	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC, argc, argv);
 	int Index, ID = 0, Type = 0, Size;
 	void *pPtr;
@@ -48,5 +49,6 @@ int main(int argc, const char **argv)
 
 	DataFile.Close();
 	df.Finish();
+	cmdline_free(argc, argv);
 	return 0;
 }

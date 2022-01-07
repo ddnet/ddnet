@@ -2,10 +2,12 @@
 #originally created by:
 #	SiuFu
 #modified by:
-# 2020.8.19 TsFreddie
-# 2020.8.20 Dan_cao
-# 2020.11.12 TsFreddie
-# 2021.6.1 TsFreddie
+# 2020-08-19 TsFreddie
+# 2020-08-20 Dan_cao
+# 2020-11-12 TsFreddie
+# 2021-06-01 TsFreddie
+# 2021-11-19 cheeser0613
+# 2021-12-21 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -87,9 +89,6 @@ Client
 
 Close
 == 關閉
-
-Compatible version
-== 相容的版本
 
 Connect
 == 連線
@@ -252,9 +251,6 @@ MOTD
 
 Map
 == 地圖
-
-Maximum ping:
-== 最高延遲：
 
 Mouse sens.
 == 滑鼠靈敏度
@@ -1327,19 +1323,31 @@ https://ddnet.tw/discord
 == https://ddnet.tw/discord
 
 Are you sure that you want to disconnect and switch to a different server?
-== 
+== 您確定要中斷此伺服器并嘗試加入其他伺服器嗎？
 
 Refreshing...
-== 
+== 正在重整...
 
 Kill Messages
-== 
+== 擊殺訊息
 
 Kill Message Normal Color
-== 
+== 其他玩家擊殺訊息顔色
 
 Kill Message Highlight Color
-== 
+== 玩家擊殺信息顔色
 
 Show local player's key presses
-== 
+== 顯示周圍玩家的按鍵輸入
+
+Settings file
+== 設定文件
+
+Config directory
+== 配置目錄 (cfg)
+
+Run on join
+== 加入時執行
+
+Chat command (e.g. showall 1)
+== 聊天指令 (例如: showall 1)

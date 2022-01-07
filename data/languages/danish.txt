@@ -86,9 +86,6 @@ Client
 Close
 == Luk
 
-Compatible version
-== Kompatibel version
-
 Connect
 == Tilslut
 
@@ -244,9 +241,6 @@ MOTD
 
 Map
 == Kort
-
-Maximum ping:
-== Højeste ping:
 
 Mouse sens.
 == Musfølsomhed
@@ -1269,6 +1263,12 @@ Refreshing...
 Leak IP
 == 
 
+Settings file
+== 
+
+Config directory
+== 
+
 Chat command
 == 
 
@@ -1330,6 +1330,12 @@ Entities Background color
 == 
 
 Regular Background Color
+== 
+
+Run on join
+== 
+
+Chat command (e.g. showall 1)
 == 
 
 Discord
