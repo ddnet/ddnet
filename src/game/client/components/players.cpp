@@ -474,11 +474,11 @@ void CPlayers::RenderPlayer(
 		{
 			if(Direction.x < 0)
 			{
-				m_pClient->m_Effects.PowerupShine(p + vec2(32, 0), vec2(32, 12)); //GC
+				m_pClient->m_Effects.PowerupShine(p + vec2(32, 0), vec2(32, 12));
 			}
 			else
 			{
-				m_pClient->m_Effects.PowerupShine(p - vec2(32, 0), vec2(32, 12)); //GC
+				m_pClient->m_Effects.PowerupShine(p - vec2(32, 0), vec2(32, 12));
 			}
 		}
 
