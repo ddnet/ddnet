@@ -765,7 +765,7 @@ void CCharacter::HandleTiles(int Index)
 		if(newJumps != m_Core.m_Jumps)
 			m_Core.m_Jumps = newJumps;
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_LFREEZE  && Team() != TEAM_SUPER)
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_LFREEZE && Team() != TEAM_SUPER)
 	{
 		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Collision()->m_pSwitchers[Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
 		{

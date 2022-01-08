@@ -1106,11 +1106,11 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 	{
 		if(Emote == EMOTE_NORMAL)
 			Emote = (m_DeepFreeze || m_LiveFreeze) ? EMOTE_PAIN : EMOTE_BLINK;
-		
+
 		if(m_DeepFreeze || m_FreezeTime > 0 || m_FreezeTime == -1)
 			Weapon = WEAPON_NINJA;
 	}
-	
+
 	// This could probably happen when m_Jetpack changes instead
 	// jetpack and ninjajetpack prediction
 	if(m_pPlayer->GetCID() == SnappingClient)
@@ -1294,11 +1294,13 @@ void CCharacter::Snap(int SnappingClient)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_LASER;
 	if(m_Core.m_ActiveWeapon == WEAPON_NINJA)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_NINJA;
-	if(m_Core.m_LiveFrozen) {
+	if(m_Core.m_LiveFrozen)
+	{
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_MOVEMENTS;
 	}
 
-	pDDNetCharacter->m_FreezeEnd = m_DeepFreeze ? -1 : m_FreezeTime == 0 ? 0 : Server()->Tick() + m_FreezeTime;
+	pDDNetCharacter->m_FreezeEnd = m_DeepFreeze ? -1 : m_FreezeTime == 0 ? 0 :
+                                                                               Server()->Tick() + m_FreezeTime;
 	pDDNetCharacter->m_Jumps = m_Core.m_Jumps;
 	pDDNetCharacter->m_TeleCheckpoint = m_TeleCheckpoint;
 	pDDNetCharacter->m_StrongWeakID = m_StrongWeakID;
@@ -1565,7 +1567,7 @@ void CCharacter::HandleTiles(int Index)
 	// endless hook
 	if(((m_TileIndex == TILE_EHOOK_ENABLE) || (m_TileFIndex == TILE_EHOOK_ENABLE)))
 	{
- 		SetEndlessHook(true);
+		SetEndlessHook(true);
 	}
 	else if(((m_TileIndex == TILE_EHOOK_DISABLE) || (m_TileFIndex == TILE_EHOOK_DISABLE)))
 	{
@@ -1775,9 +1777,10 @@ void CCharacter::HandleTiles(int Index)
 		if(GameServer()->Collision()->GetSwitchNumber(MapIndex) == 0 || GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
 			m_DeepFreeze = false;
 	}
-	else if(GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_LFREEZE  && Team() != TEAM_SUPER)
+	else if(GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_LFREEZE && Team() != TEAM_SUPER)
 	{
-		if (GameServer()->Collision()->GetSwitchNumber(MapIndex) == 0 || GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()]) {
+		if(GameServer()->Collision()->GetSwitchNumber(MapIndex) == 0 || GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
+		{
 			m_LiveFreeze = true;
 			m_Core.m_LiveFrozen = true;
 		}
