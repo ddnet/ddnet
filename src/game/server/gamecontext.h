@@ -333,6 +333,7 @@ private:
 
 	static void ConToTeleporter(IConsole::IResult *pResult, void *pUserData);
 	static void ConToCheckTeleporter(IConsole::IResult *pResult, void *pUserData);
+	void Teleport(CCharacter *pChar, vec2 Pos);
 	static void ConTeleport(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConCredits(IConsole::IResult *pResult, void *pUserData);
@@ -383,6 +384,7 @@ private:
 	static void ConTime(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetTimerType(IConsole::IResult *pResult, void *pUserData);
 	static void ConRescue(IConsole::IResult *pResult, void *pUserData);
+	static void ConTele(IConsole::IResult *pResult, void *pUserData);
 	static void ConProtectedKill(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConVoteMute(IConsole::IResult *pResult, void *pUserData);
