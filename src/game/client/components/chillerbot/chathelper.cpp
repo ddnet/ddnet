@@ -382,6 +382,7 @@ void CChatHelper::ReplyToLastPing()
 	if(str_find_nocase(m_aLastPingMessage, "how are you") ||
 		str_find_nocase(m_aLastPingMessage, "how r u") ||
 		str_find_nocase(m_aLastPingMessage, "how r you") ||
+		str_find_nocase(m_aLastPingMessage, "how are u") ||
 		str_find_nocase(m_aLastPingMessage, "how is it going") ||
 		str_find_nocase(m_aLastPingMessage, "ca va"))
 	{
