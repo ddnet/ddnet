@@ -61,6 +61,10 @@ class CSmoothTime
 	int64_t m_Current;
 	int64_t m_Target;
 
+	int64_t m_SnapMargin;
+	int64_t m_CurrentMargin;
+	int64_t m_TargetMargin;
+
 	CGraph m_Graph;
 
 	int m_SpikeCounter;
@@ -74,6 +78,9 @@ public:
 
 	void UpdateInt(int64_t Target);
 	void Update(CGraph *pGraph, int64_t Target, int TimeLeft, int AdjustDirection);
+
+	int64_t GetMargin(int64_t Now);
+	void UpdateMargin(int64_t TargetMargin);
 };
 
 class CServerCapabilities
@@ -106,7 +113,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	enum
 	{
 		NUM_SNAPSHOT_TYPES = 2,
-		PREDICTION_MARGIN = 1000 / 50 / 2, // magic network prediction value
 	};
 
 	enum
@@ -210,6 +216,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 		int m_aData[MAX_INPUT_SIZE]; // the input data
 		int m_Tick; // the tick that the input is for
 		int64_t m_PredictedTime; // prediction latency when we sent this input
+		int64_t m_PredictionMargin; // prediction margin when we sent this input
 		int64_t m_Time;
 	} m_aInputs[NUM_DUMMIES][200];
 
@@ -280,6 +287,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int64_t m_BenchmarkStopTime;
 
 	void UpdateDemoIntraTimers();
+	int MaxLatencyTicks() const;
 
 public:
 	IEngine *Engine() { return m_pEngine; }
