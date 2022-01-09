@@ -379,7 +379,11 @@ void CChatHelper::ReplyToLastPing()
 		return;
 	}
 	// small talk
-	if(str_find_nocase(m_aLastPingMessage, "how are you") || str_find_nocase(m_aLastPingMessage, "how is it going") || str_find_nocase(m_aLastPingMessage, "ca va"))
+	if(str_find_nocase(m_aLastPingMessage, "how are you") ||
+		str_find_nocase(m_aLastPingMessage, "how r u") ||
+		str_find_nocase(m_aLastPingMessage, "how r you") ||
+		str_find_nocase(m_aLastPingMessage, "how is it going") ||
+		str_find_nocase(m_aLastPingMessage, "ca va"))
 	{
 		str_format(aBuf, sizeof(aBuf), "%s good, and you? :)", m_aLastPingName);
 		m_pClient->m_Chat.Say(0, aBuf);
