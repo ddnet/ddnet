@@ -702,8 +702,9 @@ void CClient::OnEnterGame(bool Dummy)
 	if(Dummy == 0)
 	{
 		m_LastDummyConnectTime = 0;
-		GameClient()->OnEnterGame();
 	}
+
+	GameClient()->OnEnterGame();
 }
 
 void CClient::EnterGame(bool Dummy)
