@@ -240,7 +240,7 @@ void CGameTeams::Tick()
 	{
 		CCharacter *pChar = GameServer()->m_apPlayers[i] ? GameServer()->m_apPlayers[i]->GetCharacter() : nullptr;
 		int Team = m_Core.Team(i);
-		if(!pChar || m_TeamState[Team] != TEAMSTATE_STARTED || m_TeeStarted[i])
+		if(!pChar || m_TeamState[Team] != TEAMSTATE_STARTED || m_TeeStarted[i] || m_Practice[m_Core.Team(i)])
 		{
 			continue;
 		}
