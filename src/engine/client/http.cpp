@@ -145,8 +145,8 @@ int CRequest::RunImpl(CURL *pHandle)
 	curl_easy_setopt(pHandle, CURLOPT_WRITEDATA, this);
 	curl_easy_setopt(pHandle, CURLOPT_WRITEFUNCTION, WriteCallback);
 	curl_easy_setopt(pHandle, CURLOPT_NOPROGRESS, 0L);
-	curl_easy_setopt(pHandle, CURLOPT_PROGRESSDATA, this);
-	curl_easy_setopt(pHandle, CURLOPT_PROGRESSFUNCTION, ProgressCallback);
+	curl_easy_setopt(pHandle, CURLOPT_XFERINFODATA, this);
+	curl_easy_setopt(pHandle, CURLOPT_XFERINFOFUNCTION, ProgressCallback);
 
 	if(curl_version_info(CURLVERSION_NOW)->version_num < 0x076800)
 	{
