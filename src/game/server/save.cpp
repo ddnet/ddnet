@@ -240,7 +240,7 @@ char *CSaveTee::GetString(const CSaveTeam *pTeam)
 		"%d\t%d\t%d\t%d\t"
 		"%d\t%d\t"
 		// tee stats
-		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t" // m_SuperJump
+		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t" // m_SuperJump
 		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t" // m_DDRaceState
 		"%d\t%d\t%d\t%d\t" // m_Pos.x
 		"%d\t%d\t" // m_TeleCheckpoint
@@ -261,7 +261,8 @@ char *CSaveTee::GetString(const CSaveTeam *pTeam)
 		"%d\t%d\t" // m_HookedPlayer, m_NewHook
 		"%d\t%d\t%d\t%d\t" // input stuff
 		"%d\t" // m_ReloadTimer
-		"%d", // m_TeeStarted
+		"%d\t", // m_TeeStarted
+		"%d", //m_LiveFreeze
 		m_aName, m_Alive, m_Paused, m_NeededFaketuning, m_TeeFinished, m_IsSolo,
 		// weapons
 		m_aWeapons[0].m_AmmoRegenStart, m_aWeapons[0].m_Ammo, m_aWeapons[0].m_Ammocost, m_aWeapons[0].m_Got,
@@ -272,7 +273,7 @@ char *CSaveTee::GetString(const CSaveTeam *pTeam)
 		m_aWeapons[5].m_AmmoRegenStart, m_aWeapons[5].m_Ammo, m_aWeapons[5].m_Ammocost, m_aWeapons[5].m_Got,
 		m_LastWeapon, m_QueuedWeapon,
 		// tee states
-		m_SuperJump, m_Jetpack, m_NinjaJetpack, m_FreezeTime, m_FreezeTick, m_DeepFreeze, m_LiveFreeze, m_EndlessHook,
+		m_SuperJump, m_Jetpack, m_NinjaJetpack, m_FreezeTime, m_FreezeTick, m_DeepFreeze, m_EndlessHook,
 		m_DDRaceState, m_Hit, m_Collision, m_TuneZone, m_TuneZoneOld, m_Hook, m_Time,
 		(int)m_Pos.x, (int)m_Pos.y, (int)m_PrevPos.x, (int)m_PrevPos.y,
 		m_TeleCheckpoint, m_LastPenalty,
@@ -293,7 +294,8 @@ char *CSaveTee::GetString(const CSaveTeam *pTeam)
 		HookedPlayer, m_NewHook,
 		m_InputDirection, m_InputJump, m_InputFire, m_InputHook,
 		m_ReloadTimer,
-		m_TeeStarted);
+		m_TeeStarted,
+		m_LiveFreeze);
 	return m_aString;
 }
 
@@ -311,7 +313,7 @@ int CSaveTee::FromString(const char *String)
 		"%d\t%d\t%d\t%d\t"
 		"%d\t%d\t"
 		// tee states
-		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t" // m_SuperJump
+		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t" // m_SuperJump
 		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t" // m_DDRaceState
 		"%f\t%f\t%f\t%f\t" // m_Pos.x
 		"%d\t%d\t" // m_TeleCheckpoint
@@ -333,6 +335,7 @@ int CSaveTee::FromString(const char *String)
 		"%d\t%d\t%d\t%d\t" // input stuff
 		"%d\t" // m_ReloadTimer
 		"%d", // m_TeeStarted
+		"%d", // m_LiveFreeze
 		m_aName, &m_Alive, &m_Paused, &m_NeededFaketuning, &m_TeeFinished, &m_IsSolo,
 		// weapons
 		&m_aWeapons[0].m_AmmoRegenStart, &m_aWeapons[0].m_Ammo, &m_aWeapons[0].m_Ammocost, &m_aWeapons[0].m_Got,
@@ -343,7 +346,7 @@ int CSaveTee::FromString(const char *String)
 		&m_aWeapons[5].m_AmmoRegenStart, &m_aWeapons[5].m_Ammo, &m_aWeapons[5].m_Ammocost, &m_aWeapons[5].m_Got,
 		&m_LastWeapon, &m_QueuedWeapon,
 		// tee states
-		&m_SuperJump, &m_Jetpack, &m_NinjaJetpack, &m_FreezeTime, &m_FreezeTick, &m_DeepFreeze, &m_LiveFreeze, &m_EndlessHook,
+		&m_SuperJump, &m_Jetpack, &m_NinjaJetpack, &m_FreezeTime, &m_FreezeTick, &m_DeepFreeze, &m_EndlessHook,
 		&m_DDRaceState, &m_Hit, &m_Collision, &m_TuneZone, &m_TuneZoneOld, &m_Hook, &m_Time,
 		&m_Pos.x, &m_Pos.y, &m_PrevPos.x, &m_PrevPos.y,
 		&m_TeleCheckpoint, &m_LastPenalty,
@@ -364,7 +367,8 @@ int CSaveTee::FromString(const char *String)
 		&m_HookedPlayer, &m_NewHook,
 		&m_InputDirection, &m_InputJump, &m_InputFire, &m_InputHook,
 		&m_ReloadTimer,
-		&m_TeeStarted);
+		&m_TeeStarted,
+		&m_LiveFreeze);
 	switch(Num) // Don't forget to update this when you save / load more / less.
 	{
 	case 96:
@@ -391,6 +395,9 @@ int CSaveTee::FromString(const char *String)
 		m_TeeStarted = true;
 		// fall through
 	case 109:
+		m_LiveFreeze = 0;
+		// fall through
+	case 110:
 		return 0;
 	default:
 		dbg_msg("load", "failed to load tee-string");
