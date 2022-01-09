@@ -90,6 +90,7 @@ public:
 	bool m_AnyPlayerFlag;
 	bool m_PingEx;
 	bool m_AllowDummy;
+	bool m_SyncWeaponInput;
 };
 
 class CClient : public IClient, public CDemoPlayer::IListener
@@ -288,6 +289,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	void UpdateDemoIntraTimers();
 	int MaxLatencyTicks() const;
+	int PredictionMargin() const;
 
 public:
 	IEngine *Engine() { return m_pEngine; }

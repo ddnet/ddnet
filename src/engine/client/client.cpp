@@ -1589,6 +1589,10 @@ static CServerCapabilities GetServerCapabilities(int Version, int Flags)
 	{
 		Result.m_AllowDummy = Flags & SERVERCAPFLAG_ALLOWDUMMY;
 	}
+	if(Version >= 5)
+	{
+		Result.m_SyncWeaponInput = Flags & SERVERCAPFLAG_SYNCWEAPONINPUT;
+	}
 	return Result;
 }
 
@@ -2058,7 +2062,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 						// start at 200ms and work from there
 						m_PredictedTime.Init(GameTick * time_freq() / 50);
 						m_PredictedTime.SetAdjustSpeed(1, 1000.0f);
-						m_PredictedTime.UpdateMargin(g_Config.m_ClPredictionMargin * time_freq() / 1000);
+						m_PredictedTime.UpdateMargin(PredictionMargin() * time_freq() / 1000);
 						m_GameTime[g_Config.m_ClDummy].Init((GameTick - 1) * time_freq() / 50);
 						m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV] = m_SnapshotStorage[g_Config.m_ClDummy].m_pFirst;
 						m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] = m_SnapshotStorage[g_Config.m_ClDummy].m_pLast;
@@ -3001,7 +3005,7 @@ void CClient::Update()
 		m_ReconnectTime = 0;
 	}
 
-	m_PredictedTime.UpdateMargin(g_Config.m_ClPredictionMargin * time_freq() / 1000);
+	m_PredictedTime.UpdateMargin(PredictionMargin() * time_freq() / 1000);
 }
 
 void CClient::RegisterInterfaces()
@@ -4639,5 +4643,10 @@ SWarning *CClient::GetCurWarning()
 
 int CClient::MaxLatencyTicks() const
 {
-	return SERVER_TICK_SPEED + (g_Config.m_ClPredictionMargin * SERVER_TICK_SPEED) / 1000;
+	return SERVER_TICK_SPEED + (PredictionMargin() * SERVER_TICK_SPEED) / 1000;
+}
+
+int CClient::PredictionMargin() const
+{
+	return m_ServerCapabilities.m_SyncWeaponInput ? g_Config.m_ClPredictionMargin : 10;
 }
