@@ -69,7 +69,7 @@ const char *CEditor::Explain(int ExplanationID, int Tile, int Layer) //TODO: Add
 			break;
 		case TILE_LFREEZE:
 			if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
-				return "LIVE FREEZE: Freezes tees on moviments, while hook and weapons can still be used.";
+				return "LIVE FREEZE: Live frozen tees cannot move or jump, while hook and weapons can still be used.";
 			break;
 		case TILE_LUNFREEZE:
 			if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
