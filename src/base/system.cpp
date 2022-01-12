@@ -132,7 +132,7 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 {
 #if defined(CONF_CURSES_CLIENT)
 	puts("DBG_MSG SHOULD NOT BE CALLED");
-	dbg_break_imp();
+	dbg_break();
 #endif
 
 	va_list args;
