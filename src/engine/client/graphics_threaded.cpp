@@ -2387,7 +2387,7 @@ void CGraphics_Threaded::Resize(int w, int h, int RefreshRate, bool SetWindowSiz
 			return;
 		}
 
-		// kick the command buffer
+		// kick the command buffer and wait
 		KickCommandBuffer();
 		WaitForIdle();
 
@@ -2506,6 +2506,11 @@ void CGraphics_Threaded::Swap()
 
 	// kick the command buffer
 	KickCommandBuffer();
+	// TODO: Remove when https://github.com/libsdl-org/SDL/issues/5203 is fixed
+#ifdef CONF_PLATFORM_MACOS
+	if(str_find(GetVersionString(), "Metal"))
+		WaitForIdle();
+#endif
 }
 
 bool CGraphics_Threaded::SetVSync(bool State)
