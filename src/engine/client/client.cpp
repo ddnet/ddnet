@@ -1869,7 +1869,6 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 			int DeltaTick = GameTick - Unpacker.GetInt();
 			int PartSize = 0;
 			unsigned int Crc = 0;
-			int CompleteSize = 0;
 			const char *pData = 0;
 
 			// only allow packets from the server we actually want
@@ -1912,15 +1911,10 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 				{
 					static CSnapshot Emptysnap;
 					CSnapshot *pDeltaShot = &Emptysnap;
-					int PurgeTick;
-					void *pDeltaData;
-					int DeltaSize;
 					unsigned char aTmpBuffer2[CSnapshot::MAX_SIZE];
 					unsigned char aTmpBuffer3[CSnapshot::MAX_SIZE];
 					CSnapshot *pTmpBuffer3 = (CSnapshot *)aTmpBuffer3; // Fix compiler warning for strict-aliasing
-					int SnapSize;
-
-					CompleteSize = (NumParts - 1) * MAX_SNAPSHOT_PACKSIZE + PartSize;
+					const int CompleteSize = (NumParts - 1) * MAX_SNAPSHOT_PACKSIZE + PartSize;
 
 					// reset snapshoting
 					m_SnapshotParts[g_Config.m_ClDummy] = 0;
@@ -1952,8 +1946,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 					}
 
 					// decompress snapshot
-					pDeltaData = m_SnapshotDelta.EmptyDelta();
-					DeltaSize = sizeof(int) * 3;
+					const void *pDeltaData = m_SnapshotDelta.EmptyDelta();
+					int DeltaSize = sizeof(int) * 3;
 
 					if(CompleteSize)
 					{
@@ -1967,7 +1961,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 					}
 
 					// unpack delta
-					SnapSize = m_SnapshotDelta.UnpackDelta(pDeltaShot, pTmpBuffer3, pDeltaData, DeltaSize);
+					const int SnapSize = m_SnapshotDelta.UnpackDelta(pDeltaShot, pTmpBuffer3, pDeltaData, DeltaSize);
 					if(SnapSize < 0)
 					{
 						dbg_msg("client", "delta unpack failed!=%d", SnapSize);
@@ -2001,7 +1995,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 					}
 
 					// purge old snapshots
-					PurgeTick = DeltaTick;
+					int PurgeTick = DeltaTick;
 					if(m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV] && m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick < PurgeTick)
 						PurgeTick = m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick;
 					if(m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] && m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_Tick < PurgeTick)
@@ -2159,14 +2153,8 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 		}
 		else if(Msg == NETMSG_SNAP || Msg == NETMSG_SNAPSINGLE || Msg == NETMSG_SNAPEMPTY)
 		{
-			int NumParts = 1;
-			int Part = 0;
 			int GameTick = Unpacker.GetInt();
 			int DeltaTick = GameTick - Unpacker.GetInt();
-			int PartSize = 0;
-			unsigned int Crc = 0;
-			int CompleteSize = 0;
-			const char *pData = 0;
 
 			// only allow packets from the server we actually want
 			if(net_addr_comp(&pPacket->m_Address, &m_ServerAddress))
@@ -2176,19 +2164,23 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 			if(State() < IClient::STATE_LOADING)
 				return;
 
+			int NumParts = 1;
+			int Part = 0;
 			if(Msg == NETMSG_SNAP)
 			{
 				NumParts = Unpacker.GetInt();
 				Part = Unpacker.GetInt();
 			}
 
+			unsigned int Crc = 0;
+			int PartSize = 0;
 			if(Msg != NETMSG_SNAPEMPTY)
 			{
 				Crc = Unpacker.GetInt();
 				PartSize = Unpacker.GetInt();
 			}
 
-			pData = (const char *)Unpacker.GetRaw(PartSize);
+			const char *pData = (const char *)Unpacker.GetRaw(PartSize);
 
 			if(Unpacker.Error() || NumParts < 1 || NumParts > CSnapshot::MAX_PARTS || Part < 0 || Part >= NumParts || PartSize < 0 || PartSize > MAX_SNAPSHOT_PACKSIZE)
 				return;
@@ -2208,15 +2200,11 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 				{
 					static CSnapshot Emptysnap;
 					CSnapshot *pDeltaShot = &Emptysnap;
-					int PurgeTick;
-					void *pDeltaData;
-					int DeltaSize;
 					unsigned char aTmpBuffer2[CSnapshot::MAX_SIZE];
 					unsigned char aTmpBuffer3[CSnapshot::MAX_SIZE];
 					CSnapshot *pTmpBuffer3 = (CSnapshot *)aTmpBuffer3; // Fix compiler warning for strict-aliasing
-					int SnapSize;
 
-					CompleteSize = (NumParts - 1) * MAX_SNAPSHOT_PACKSIZE + PartSize;
+					const int CompleteSize = (NumParts - 1) * MAX_SNAPSHOT_PACKSIZE + PartSize;
 
 					// reset snapshoting
 					m_SnapshotParts[!g_Config.m_ClDummy] = 0;
@@ -2248,8 +2236,8 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 					}
 
 					// decompress snapshot
-					pDeltaData = m_SnapshotDelta.EmptyDelta();
-					DeltaSize = sizeof(int) * 3;
+					const void *pDeltaData = m_SnapshotDelta.EmptyDelta();
+					int DeltaSize = sizeof(int) * 3;
 
 					if(CompleteSize)
 					{
@@ -2263,7 +2251,7 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 					}
 
 					// unpack delta
-					SnapSize = m_SnapshotDelta.UnpackDelta(pDeltaShot, pTmpBuffer3, pDeltaData, DeltaSize);
+					const int SnapSize = m_SnapshotDelta.UnpackDelta(pDeltaShot, pTmpBuffer3, pDeltaData, DeltaSize);
 					if(SnapSize < 0)
 					{
 						m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client", "delta unpack failed!");
@@ -2297,7 +2285,7 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 					}
 
 					// purge old snapshots
-					PurgeTick = DeltaTick;
+					int PurgeTick = DeltaTick;
 					if(m_aSnapshots[!g_Config.m_ClDummy][SNAP_PREV] && m_aSnapshots[!g_Config.m_ClDummy][SNAP_PREV]->m_Tick < PurgeTick)
 						PurgeTick = m_aSnapshots[!g_Config.m_ClDummy][SNAP_PREV]->m_Tick;
 					if(m_aSnapshots[!g_Config.m_ClDummy][SNAP_CURRENT] && m_aSnapshots[!g_Config.m_ClDummy][SNAP_CURRENT]->m_Tick < PurgeTick)
