@@ -27,7 +27,7 @@ class CGameConsole : public CComponent
 			ColorRGBA m_PrintColor;
 			char m_aText[1];
 		};
-		CStaticRingBuffer<CBacklogEntry, 1024 * 1024, CRingBufferBase::FLAG_RECYCLE> m_Backlog;
+		CStaticRingBuffer<CBacklogEntry, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_Backlog;
 		CStaticRingBuffer<char, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_History;
 		char *m_pHistoryEntry;
 
