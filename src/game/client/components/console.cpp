@@ -73,6 +73,16 @@ void CGameConsole::CInstance::ClearBacklog()
 	m_BacklogActPage = 0;
 }
 
+void CGameConsole::CInstance::ClearBacklogYOffsets()
+{
+	auto *pEntry = m_Backlog.First();
+	while(pEntry)
+	{
+		pEntry->m_YOffset = -1.0f;
+		pEntry = m_Backlog.Next(pEntry);
+	}
+}
+
 void CGameConsole::CInstance::ClearHistory()
 {
 	m_History.Init();
@@ -991,6 +1001,17 @@ void CGameConsole::OnConsoleInit()
 	Console()->Register("console_page_down", "", CFGFLAG_CLIENT, ConConsolePageDown, this, "Next page in console");
 
 	Console()->Chain("console_output_level", ConchainConsoleOutputLevelUpdate, this);
+}
+
+void CGameConsole::OnInit()
+{
+	// add resize event
+	Graphics()->AddWindowResizeListener([this](void *) {
+		m_LocalConsole.ClearBacklogYOffsets();
+		m_RemoteConsole.ClearBacklogYOffsets();
+		m_HasSelection = false;
+	},
+		nullptr);
 }
 
 void CGameConsole::OnStateChange(int NewState, int OldState)
