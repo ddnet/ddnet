@@ -214,7 +214,8 @@ public:
 	virtual bool SetVSync(bool State) = 0;
 	virtual int GetWindowScreen() = 0;
 	virtual void Move(int x, int y) = 0;
-	virtual void Resize(int w, int h, int RefreshRate, bool SetWindowSize = false, bool ForceResizeEvent = false) = 0;
+	virtual void Resize(int w, int h, int RefreshRate) = 0;
+	virtual void GotResized(int w, int h, int RefreshRate) = 0;
 	virtual void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser) = 0;
 
 	virtual void WindowDestroyNtf(uint32_t WindowID) = 0;
