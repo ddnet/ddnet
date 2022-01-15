@@ -209,9 +209,12 @@ void CSaveTee::Load(CCharacter *pChr, int Team, bool IsSwap)
 
 	pChr->SetSolo(m_IsSolo);
 
-	// Always create a rescue tee at the exact location we loaded from so that
-	// the old one gets overwritten.
-	pChr->SetRescue();
+	if(!IsSwap)
+	{
+		// Always create a rescue tee at the exact location we loaded from so that
+		// the old one gets overwritten.
+		pChr->SetRescue();
+	}
 }
 
 char *CSaveTee::GetString(const CSaveTeam *pTeam)
