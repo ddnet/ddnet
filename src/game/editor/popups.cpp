@@ -1397,7 +1397,21 @@ static int s_GametileOpSelected = -1;
 
 int CEditor::PopupSelectGametileOp(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	static const char *s_pButtonNames[] = {"Air", "Hookable", "Death", "Unhookable", "Hookthrough", "Freeze", "Unfreeze", "Deep Freeze", "Deep Unfreeze", "Blue Check-Tele", "Red Check-Tele"};
+	static const char *s_pButtonNames[] = {
+		"Air",
+		"Hookable",
+		"Death",
+		"Unhookable",
+		"Hookthrough",
+		"Freeze",
+		"Unfreeze",
+		"Deep Freeze",
+		"Deep Unfreeze",
+		"Blue Check-Tele",
+		"Red Check-Tele",
+		"Live Freeze",
+		"Live Unfreeze",
+	};
 	static unsigned s_NumButtons = sizeof(s_pButtonNames) / sizeof(char *);
 	CUIRect Button;
 
@@ -1416,7 +1430,7 @@ void CEditor::PopupSelectGametileOpInvoke(float x, float y)
 {
 	static int s_SelectGametileOpPopupId = 0;
 	s_GametileOpSelected = -1;
-	UiInvokePopupMenu(&s_SelectGametileOpPopupId, 0, x, y, 120.0f, 165.0f, PopupSelectGametileOp);
+	UiInvokePopupMenu(&s_SelectGametileOpPopupId, 0, x, y, 120.0f, 189.0f, PopupSelectGametileOp);
 }
 
 int CEditor::PopupSelectGameTileOpResult()
