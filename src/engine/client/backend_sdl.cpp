@@ -309,7 +309,7 @@ static bool BackendInitGlew(EBackendType BackendType, int &GlewMajor, int &GlewM
 			return true;
 		}
 // Don't allow GL 3.3, if the driver doesn't support atleast OpenGL 4.5
-#ifndef CONF_PLATFORM_WINDOWS
+#ifndef CONF_FAMILY_WINDOWS
 		if(GLEW_VERSION_4_4)
 		{
 			GlewMajor = 4;
@@ -726,17 +726,28 @@ void CGraphicsBackend_SDL_OpenGL::GetVideoModes(CVideoMode *pModes, int MaxModes
 void CGraphicsBackend_SDL_OpenGL::GetCurrentVideoMode(CVideoMode &CurMode, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen)
 {
 	SDL_DisplayMode DPMode;
-	if(SDL_GetDesktopDisplayMode(Screen, &DPMode) < 0)
+	// if "real" fullscreen, obtain the video mode for that
+	if((SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN)
 	{
-		dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
+		if(SDL_GetCurrentDisplayMode(Screen, &DPMode))
+		{
+			dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
+		}
 	}
 	else
 	{
-		int Width = 0;
-		int Height = 0;
-		SDL_GL_GetDrawableSize(m_pWindow, &Width, &Height);
-		DPMode.w = Width;
-		DPMode.h = Height;
+		if(SDL_GetDesktopDisplayMode(Screen, &DPMode) < 0)
+		{
+			dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
+		}
+		else
+		{
+			int Width = 0;
+			int Height = 0;
+			SDL_GL_GetDrawableSize(m_pWindow, &Width, &Height);
+			DPMode.w = Width;
+			DPMode.h = Height;
+		}
 	}
 	DisplayToVideoMode(&CurMode, &DPMode, HiDPIScale, DPMode.refresh_rate);
 }
@@ -1173,16 +1184,16 @@ void CGraphicsBackend_SDL_OpenGL::SetWindowGrab(bool Grab)
 	SDL_SetWindowGrab(m_pWindow, Grab ? SDL_TRUE : SDL_FALSE);
 }
 
-void CGraphicsBackend_SDL_OpenGL::ResizeWindow(int w, int h, int RefreshRate)
+bool CGraphicsBackend_SDL_OpenGL::ResizeWindow(int w, int h, int RefreshRate)
 {
 	// don't call resize events when the window is at fullscreen desktop
 	if(!m_pWindow || (SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN_DESKTOP)
-		return;
+		return false;
 
 	// if the window is at fullscreen use SDL_SetWindowDisplayMode instead, suggested by SDL
 	if(SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN)
 	{
-#ifdef CONF_PLATFORM_WINDOWS
+#ifdef CONF_FAMILY_WINDOWS
 		// in windows make the window windowed mode first, this prevents strange window glitches (other games probably do something similar)
 		SetWindowParams(0, 1);
 #endif
@@ -1193,11 +1204,12 @@ void CGraphicsBackend_SDL_OpenGL::ResizeWindow(int w, int h, int RefreshRate)
 		SetMode.h = h;
 		SetMode.refresh_rate = RefreshRate;
 		SDL_SetWindowDisplayMode(m_pWindow, SDL_GetClosestDisplayMode(g_Config.m_GfxScreen, &SetMode, &ClosestMode));
-#ifdef CONF_PLATFORM_WINDOWS
+#ifdef CONF_FAMILY_WINDOWS
 		// now change it back to fullscreen, this will restore the above set state, bcs SDL saves fullscreen modes appart from other video modes (as of SDL 2.0.16)
 		// see implementation of SDL_SetWindowDisplayMode
 		SetWindowParams(1, 0);
 #endif
+		return true;
 	}
 	else
 	{
@@ -1206,6 +1218,8 @@ void CGraphicsBackend_SDL_OpenGL::ResizeWindow(int w, int h, int RefreshRate)
 			// remove maximize flag
 			SDL_RestoreWindow(m_pWindow);
 	}
+
+	return false;
 }
 
 void CGraphicsBackend_SDL_OpenGL::GetViewportSize(int &w, int &h)

@@ -676,7 +676,8 @@ public:
 	virtual int WindowActive() = 0;
 	virtual int WindowOpen() = 0;
 	virtual void SetWindowGrab(bool Grab) = 0;
-	virtual void ResizeWindow(int w, int h, int RefreshRate) = 0;
+	// returns true, if the video mode changed
+	virtual bool ResizeWindow(int w, int h, int RefreshRate) = 0;
 	virtual void GetViewportSize(int &w, int &h) = 0;
 	virtual void NotifyWindow() = 0;
 
@@ -1168,7 +1169,8 @@ public:
 	void SetWindowParams(int FullscreenMode, bool IsBorderless) override;
 	bool SetWindowScreen(int Index) override;
 	void Move(int x, int y) override;
-	void Resize(int w, int h, int RefreshRate, bool SetWindowSize = false, bool ForceResizeEvent = false) override;
+	void Resize(int w, int h, int RefreshRate) override;
+	void GotResized(int w, int h, int RefreshRate) override;
 	void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser) override;
 	int GetWindowScreen() override;
 

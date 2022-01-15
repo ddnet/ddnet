@@ -260,7 +260,7 @@ public:
 	virtual int WindowActive();
 	virtual int WindowOpen();
 	virtual void SetWindowGrab(bool Grab);
-	virtual void ResizeWindow(int w, int h, int RefreshRate);
+	virtual bool ResizeWindow(int w, int h, int RefreshRate);
 	virtual void GetViewportSize(int &w, int &h);
 	virtual void NotifyWindow();
 

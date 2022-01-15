@@ -364,7 +364,7 @@ int CInput::Update()
 					break;
 				// listen to size changes, this includes our manual changes and the ones by the window manager
 				case SDL_WINDOWEVENT_SIZE_CHANGED:
-					Graphics()->Resize(Event.window.data1, Event.window.data2, -1);
+					Graphics()->GotResized(Event.window.data1, Event.window.data2, -1);
 					break;
 				case SDL_WINDOWEVENT_FOCUS_GAINED:
 					if(m_InputGrabbed)
