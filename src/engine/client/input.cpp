@@ -123,14 +123,14 @@ bool CInput::NativeMousePressed(int index)
 	return (i & SDL_BUTTON(index)) != 0;
 }
 
-int CInput::MouseDoubleClick()
+bool CInput::MouseDoubleClick()
 {
 	if(m_MouseDoubleClick)
 	{
 		m_MouseDoubleClick = false;
-		return 1;
+		return true;
 	}
-	return 0;
+	return false;
 }
 
 const char *CInput::GetClipboardText()
