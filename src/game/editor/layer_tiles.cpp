@@ -747,6 +747,13 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 			break;
 		case 10:
 			Result = TILE_TELECHECKINEVIL;
+			break;
+		case 11:
+			Result = TILE_LFREEZE;
+			break;
+		case 12:
+			Result = TILE_LUNFREEZE;
+			break;
 		default:
 			break;
 		}

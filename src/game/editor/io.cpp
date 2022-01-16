@@ -965,6 +965,8 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 									TILE_FREEZE,
 									TILE_DFREEZE,
 									TILE_DUNFREEZE,
+									TILE_LFREEZE,
+									TILE_LUNFREEZE,
 									TILE_HIT_ENABLE,
 									TILE_HIT_DISABLE,
 									TILE_JUMP,

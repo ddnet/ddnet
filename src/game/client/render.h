@@ -19,6 +19,7 @@ public:
 		m_ColorFeet = ColorRGBA(1, 1, 1);
 		m_Size = 1.0f;
 		m_GotAirJump = 1;
+		m_ShineDecoration = 0;
 	};
 
 	IGraphics::CTextureHandle m_Texture;
@@ -35,6 +36,7 @@ public:
 	ColorRGBA m_ColorFeet;
 	float m_Size;
 	int m_GotAirJump;
+	int m_ShineDecoration;
 };
 
 // sprite renderings

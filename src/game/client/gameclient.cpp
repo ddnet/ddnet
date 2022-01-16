@@ -1358,6 +1358,7 @@ void CGameClient::OnNewSnapshot()
 					// Freeze
 					pClient->m_FreezeEnd = pCharacterData->m_FreezeEnd;
 					pClient->m_DeepFrozen = pCharacterData->m_FreezeEnd == -1;
+					pClient->m_LiveFrozen = (pCharacterData->m_Flags & CHARACTERFLAG_NO_MOVEMENTS) != 0;
 
 					// Telegun
 					pClient->m_HasTelegunGrenade = pCharacterData->m_Flags & CHARACTERFLAG_TELEGUN_GRENADE;
@@ -2046,6 +2047,7 @@ void CGameClient::CClientData::Reset()
 	m_HasTelegunLaser = false;
 	m_FreezeEnd = 0;
 	m_DeepFrozen = false;
+	m_LiveFrozen = false;
 
 	m_Evolved.m_Tick = -1;
 

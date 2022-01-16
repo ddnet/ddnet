@@ -386,6 +386,7 @@ public:
 		bool m_HasTelegunLaser;
 		int m_FreezeEnd;
 		bool m_DeepFrozen;
+		bool m_LiveFrozen;
 
 		CCharacterCore m_Predicted;
 		CCharacterCore m_PrevPredicted;
