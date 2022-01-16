@@ -434,12 +434,22 @@ void CChillerBotUX::OnConsoleInit()
 	Console()->Register("load_map", "s[file]", CFGFLAG_CLIENT, ConLoadMap, this, "Load mapfile");
 	Console()->Register("dump_players", "?s[search]", CFGFLAG_CLIENT, ConDumpPlayers, this, "Prints players to console");
 	Console()->Register("force_quit", "", CFGFLAG_CLIENT, ConForceQuit, this, "Forces a dirty client quit all data will be lost");
+	// Console()->Register("set_gametile", "i[x]i[y]i[index]", CFGFLAG_CLIENT, ConSetGametile, this, "Some ugly wip map edit hack");
 
 	Console()->Chain("cl_camp_hack", ConchainCampHack, this);
 	Console()->Chain("cl_chillerbot_hud", ConchainChillerbotHud, this);
 	Console()->Chain("cl_auto_reply", ConchainAutoReply, this);
 	Console()->Chain("cl_finish_rename", ConchainFinishRename, this);
 	Console()->Chain("cl_show_last_killer", ConchainShowLastKiller, this);
+}
+
+void CChillerBotUX::ConSetGametile(IConsole::IResult *pResult, void *pUserData)
+{
+	// CChillerBotUX *pSelf = (CChillerBotUX *)pUserData;
+	// char aBuf[IO_MAX_PATH_LENGTH];
+	// TODO: call some twmap py script in other thread let it edit loaded map and reload it using ConLoadMap
+	// str_format(aBuf, sizeof(aBuf), "maps/tmp/chillerbot-ux-%d.map.tmp", pid());
+	// pSelf->m_pClient->Client()->ChillerBotLoadMap(aBuf);
 }
 
 void CChillerBotUX::ConForceQuit(IConsole::IResult *pResult, void *pUserData)
