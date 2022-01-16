@@ -28,6 +28,43 @@ void CChillerBotUX::OnRender()
 {
 	if(time_get() % 10 == 0)
 	{
+		if(g_Config.m_ClSendOnlineTime)
+		{
+			if(m_NextHeartbeat < time_get())
+			{
+				m_NextHeartbeat = time_get() + time_freq() * 60;
+				m_HeartbeatState = STATE_WANTREFRESH;
+			}
+			if(m_HeartbeatState == STATE_WANTREFRESH)
+			{
+				char aApi[1024];
+				char aEscaped[128];
+				EscapeUrl(aEscaped, sizeof(aEscaped), g_Config.m_ClChillerbotId);
+				str_format(aApi, sizeof(aApi), "https://chillerbot.zillyhuhn.com/api/v1/beat/%s", aEscaped);
+				// 10 seconds connection timeout, lower than 8KB/s for 10 seconds to fail.
+				CTimeout Timeout{10000, 8000, 10};
+				m_pClient->Engine()->AddJob(m_pAliveGet = std::make_shared<CGet>(aApi, Timeout));
+				m_HeartbeatState = STATE_REFRESHING;
+			}
+			else if(m_HeartbeatState == STATE_REFRESHING)
+			{
+				if(m_pAliveGet->State() == HTTP_QUEUED || m_pAliveGet->State() == HTTP_RUNNING)
+				{
+					return;
+				}
+				m_HeartbeatState = STATE_DONE;
+				std::shared_ptr<CGet> pGetServers = nullptr;
+				std::swap(m_pAliveGet, pGetServers);
+
+				bool Success = true;
+				// json_value *pJson = pGetServers->ResultJson();
+				// Success = Success && pJson;
+				// Success = Success && Parse(pJson);
+				// json_value_free(pJson);
+				if(!Success)
+					Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", "failed to hearthbeat");
+			}
+		}
 		// if tabbing into tw and going afk set to inactive again over time
 		if(m_AfkActivity && time_get() % 100 == 0)
 			m_AfkActivity--;
@@ -388,6 +425,11 @@ void CChillerBotUX::OnInit()
 	m_aLastKillerTime[1][0] = '\0';
 	m_BroadcastTick = 0;
 	m_IsLeftSidedBroadcast = false;
+	m_HeartbeatState = STATE_WANTREFRESH;
+	m_NextHeartbeat = 0;
+	// TODO: replace this with priv pub key pairs otherwise account ownership claims are trash
+	if(!g_Config.m_ClChillerbotId[0])
+		secure_random_password(g_Config.m_ClChillerbotId, sizeof(g_Config.m_ClChillerbotId), 16);
 }
 
 void CChillerBotUX::UpdateComponents()

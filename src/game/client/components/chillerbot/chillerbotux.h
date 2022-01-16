@@ -5,6 +5,8 @@
 #include <game/client/render.h>
 #include <game/mapitems.h>
 
+#include <engine/client/http.h>
+
 #define MAX_COMPONENT_LEN 16
 #define MAX_COMPONENTS_ENABLED 8
 
@@ -12,6 +14,15 @@ class CChillerBotUX : public CComponent
 {
 	class CChatHelper *m_pChatHelper;
 
+	enum
+	{
+		STATE_DONE,
+		STATE_WANTREFRESH,
+		STATE_REFRESHING,
+	};
+	int m_HeartbeatState;
+	std::shared_ptr<CGet> m_pAliveGet;
+	int64_t m_NextHeartbeat;
 	int64_t m_AfkTill;
 
 	bool m_IsNearFinish;

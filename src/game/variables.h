@@ -23,6 +23,9 @@ MACRO_CONFIG_INT(ClRenderLaserHead, cl_render_laser_head, 1, 0, 1, CFGFLAG_CLIEN
 MACRO_CONFIG_STR(ClPasswordFile, cl_password_file, 512, "chillerbot/chillpw_secret.txt", CFGFLAG_CLIENT | CFGFLAG_SAVE, "File to load passwords for autologin")
 MACRO_CONFIG_INT(ClShowWallet, cl_show_wallet, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show your city mod money in the hud")
 MACRO_CONFIG_INT(ClAlwaysReconnect, cl_always_reconnect, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Reconnect to last server after some time no matter what")
+MACRO_CONFIG_INT(ClSendOnlineTime, cl_send_online_time, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Notify zillyhuhn.com when you are online")
+MACRO_CONFIG_STR(ClChillerbotId, cl_chillerbot_id, 64, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "chillerbot id do not change")
+
 
 // warlist
 MACRO_CONFIG_INT(ClWarList, cl_war_list, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Display nameplate color based on chillerbot/warlist directory")
