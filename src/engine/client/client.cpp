@@ -3355,8 +3355,6 @@ void CClient::Run()
 					}
 					m_pGraphics->Swap();
 				}
-
-				Input()->NextFrame();
 			}
 			else if(!IsRenderActive)
 			{

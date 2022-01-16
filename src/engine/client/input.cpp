@@ -164,17 +164,6 @@ bool CInput::KeyState(int Key) const
 	return m_aInputState[Key];
 }
 
-void CInput::NextFrame()
-{
-	int i;
-	const Uint8 *pState = SDL_GetKeyboardState(&i);
-	if(i >= KEY_LAST)
-		i = KEY_LAST - 1;
-	mem_copy(m_aInputState, pState, i);
-	if(m_EditingTextLen == 0)
-		m_EditingTextLen = -1;
-}
-
 bool CInput::GetIMEState()
 {
 	return m_NumTextInputInstances > 0;
@@ -233,6 +222,16 @@ int CInput::Update()
 {
 	// keep the counter between 1..0xFFFF, 0 means not pressed
 	m_InputCounter = (m_InputCounter % 0xFFFF) + 1;
+
+	{
+		int i;
+		const Uint8 *pState = SDL_GetKeyboardState(&i);
+		if(i >= KEY_LAST)
+			i = KEY_LAST - 1;
+		mem_copy(m_aInputState, pState, i);
+		if(m_EditingTextLen == 0)
+			m_EditingTextLen = -1;
+	}
 
 	// these states must always be updated manually because they are not in the GetKeyState from SDL
 	int i = SDL_GetMouseState(NULL, NULL);
