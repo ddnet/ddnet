@@ -26,7 +26,6 @@ MACRO_CONFIG_INT(ClAlwaysReconnect, cl_always_reconnect, 0, 0, 1, CFGFLAG_CLIENT
 MACRO_CONFIG_INT(ClSendOnlineTime, cl_send_online_time, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Notify zillyhuhn.com when you are online")
 MACRO_CONFIG_STR(ClChillerbotId, cl_chillerbot_id, 64, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "chillerbot id do not change")
 
-
 // warlist
 MACRO_CONFIG_INT(ClWarList, cl_war_list, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Display nameplate color based on chillerbot/warlist directory")
 MACRO_CONFIG_INT(ClWarListAutoReload, cl_war_list_auto_reload, 10, 0, 600, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Reload warlist every x seconds 0=off")

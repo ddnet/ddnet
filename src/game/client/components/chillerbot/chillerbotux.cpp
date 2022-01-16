@@ -37,13 +37,20 @@ void CChillerBotUX::OnRender()
 			}
 			if(m_HeartbeatState == STATE_WANTREFRESH)
 			{
-				char aApi[1024];
+				char aUrl[1024];
 				char aEscaped[128];
+				str_copy(aUrl, "https://chillerbot.zillyhuhn.com/api/v1/beat/", sizeof(aUrl));
 				EscapeUrl(aEscaped, sizeof(aEscaped), g_Config.m_ClChillerbotId);
-				str_format(aApi, sizeof(aApi), "https://chillerbot.zillyhuhn.com/api/v1/beat/%s", aEscaped);
+				str_append(aUrl, aEscaped, sizeof(aUrl));
+				str_append(aUrl, "/", sizeof(aUrl));
+				if(g_Config.m_PlayerName[0])
+					EscapeUrl(aEscaped, sizeof(aEscaped), g_Config.m_PlayerName);
+				else
+					str_copy(aEscaped, "nameless tee", sizeof(aEscaped));
+				str_append(aUrl, aEscaped, sizeof(aUrl));
 				// 10 seconds connection timeout, lower than 8KB/s for 10 seconds to fail.
 				CTimeout Timeout{10000, 8000, 10};
-				m_pClient->Engine()->AddJob(m_pAliveGet = std::make_shared<CGet>(aApi, Timeout));
+				m_pClient->Engine()->AddJob(m_pAliveGet = std::make_shared<CGet>(aUrl, Timeout));
 				m_HeartbeatState = STATE_REFRESHING;
 			}
 			else if(m_HeartbeatState == STATE_REFRESHING)
