@@ -76,7 +76,13 @@ void CVoting::CallvoteOption(int OptionID, const char *pReason, bool ForceVote)
 			if(ForceVote)
 			{
 				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "force_vote option \"%s\" %s", pOption->m_aDescription, pReason);
+				str_copy(aBuf, "force_vote option \"", sizeof(aBuf));
+				char *pDst = aBuf + str_length(aBuf);
+				str_escape(&pDst, pOption->m_aDescription, aBuf + sizeof(aBuf));
+				str_append(aBuf, "\" \"", sizeof(aBuf));
+				pDst = aBuf + str_length(aBuf);
+				str_escape(&pDst, pReason, aBuf + sizeof(aBuf));
+				str_append(aBuf, "\"", sizeof(aBuf));
 				Client()->Rcon(aBuf);
 			}
 			else
@@ -97,7 +103,10 @@ void CVoting::RemovevoteOption(int OptionID)
 		if(OptionID == 0)
 		{
 			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "remove_vote \"%s\"", pOption->m_aDescription);
+			str_copy(aBuf, "remove_vote \"", sizeof(aBuf));
+			char *pDst = aBuf + str_length(aBuf);
+			str_escape(&pDst, pOption->m_aDescription, aBuf + sizeof(aBuf));
+			str_append(aBuf, "\"", sizeof(aBuf));
 			Client()->Rcon(aBuf);
 			break;
 		}
@@ -110,7 +119,13 @@ void CVoting::RemovevoteOption(int OptionID)
 void CVoting::AddvoteOption(const char *pDescription, const char *pCommand)
 {
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "add_vote \"%s\" %s", pDescription, pCommand);
+	str_copy(aBuf, "add_vote \"", sizeof(aBuf));
+	char *pDst = aBuf + str_length(aBuf);
+	str_escape(&pDst, pDescription, aBuf + sizeof(aBuf));
+	str_append(aBuf, "\" \"", sizeof(aBuf));
+	pDst = aBuf + str_length(aBuf);
+	str_escape(&pDst, pCommand, aBuf + sizeof(aBuf));
+	str_append(aBuf, "\"", sizeof(aBuf));
 	Client()->Rcon(aBuf);
 }
 
