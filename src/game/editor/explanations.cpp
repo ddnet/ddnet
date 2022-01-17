@@ -46,13 +46,13 @@ const char *CEditor::Explain(int ExplanationID, int Tile, int Layer) //TODO: Add
 				return "JUMP: Sets defined amount of jumps (default is 2).";
 			break;
 		case TILE_FREEZE:
-			if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
+			if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 				return "FREEZE: Freezes tees for 3 seconds.";
 			if(Layer == LAYER_SWITCH)
 				return "FREEZE: Freezes tees for defined amount of seconds.";
 			break;
 		case TILE_UNFREEZE:
-			if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
+			if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 				return "UNFREEZE: Unfreezes tees immediately.";
 			break;
 		case TILE_TELEINEVIL:
