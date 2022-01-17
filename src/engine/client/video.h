@@ -75,7 +75,7 @@ private:
 	void FinishFrames(OutputStream *pStream);
 	void CloseStream(OutputStream *pStream);
 
-	bool AddStream(OutputStream *pStream, AVFormatContext *pOC, AVCodec **ppCodec, enum AVCodecID CodecId);
+	bool AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCodec **ppCodec, enum AVCodecID CodecId);
 
 	class CGraphics_Threaded *m_pGraphics;
 	class IStorage *m_pStorage;
@@ -107,13 +107,13 @@ private:
 	OutputStream m_VideoStream;
 	OutputStream m_AudioStream;
 
-	AVCodec *m_VideoCodec;
-	AVCodec *m_AudioCodec;
+	const AVCodec *m_VideoCodec;
+	const AVCodec *m_AudioCodec;
 
 	AVDictionary *m_pOptDict;
 
 	AVFormatContext *m_pFormatContext;
-	AVOutputFormat *m_pFormat;
+	const AVOutputFormat *m_pFormat;
 
 	uint8_t *m_pRGB;
 
