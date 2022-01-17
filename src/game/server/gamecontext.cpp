@@ -1773,8 +1773,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if(Length == 0 || (pMsg->m_pMessage[0] != '/' && (g_Config.m_SvSpamprotection && pPlayer->m_LastChat && pPlayer->m_LastChat + Server()->TickSpeed() * ((31 + Length) / 32) > Server()->Tick())))
 				return;
 
-			pPlayer->UpdatePlaytime();
-
 			int GameTeam = ((CGameControllerDDRace *)m_pController)->m_Teams.m_Core.Team(pPlayer->GetCID());
 			if(Team)
 				Team = ((pPlayer->GetTeam() == -1) ? CHAT_SPEC : GameTeam);
@@ -1842,6 +1840,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 			else
 			{
+				pPlayer->UpdatePlaytime();
 				char aCensoredMessage[256];
 				CensorMessage(aCensoredMessage, pMsg->m_pMessage, sizeof(aCensoredMessage));
 				SendChat(ClientID, Team, aCensoredMessage, ClientID);

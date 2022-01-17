@@ -71,6 +71,7 @@ void CPlayer::Reset()
 	m_aTimeoutCode[0] = '\0';
 	delete m_pLastTarget;
 	m_pLastTarget = new CNetObj_PlayerInput({0});
+	m_LastTargetInit = false;
 	m_TuneZone = 0;
 	m_TuneZoneOld = m_TuneZone;
 	m_Halloween = false;
@@ -555,8 +556,11 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 	if(mem_comp(NewInput, m_pLastTarget, sizeof(CNetObj_PlayerInput)))
 	{
 		mem_copy(m_pLastTarget, NewInput, sizeof(CNetObj_PlayerInput));
-		UpdatePlaytime();
+		// Ignore the first direct input and keep the player afk as it is sent automatically
+		if(m_LastTargetInit)
+			UpdatePlaytime();
 		m_LastActionTick = Server()->Tick();
+		m_LastTargetInit = true;
 	}
 }
 
