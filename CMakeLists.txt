@@ -85,6 +85,10 @@ include(CheckCXXCompilerFlag)
 include(CheckSymbolExists)
 include(CheckAtomic)
 
+if(CMAKE_BUILD_TYPE MATCHES "^(Release|RelWithDebInfo)$")
+  set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE) # LTO
+endif()
+
 check_symbol_exists(__i386 "" TARGET_ARCH_X86_i386)
 if(TARGET_ARCH_X86_i386)
   set(TARGET_ARCH x86)
