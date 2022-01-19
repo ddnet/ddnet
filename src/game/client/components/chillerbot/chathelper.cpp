@@ -350,14 +350,6 @@ void CChatHelper::ReplyToLastPing()
 		m_aLastPingMessage[0] = '\0';
 		return;
 	}
-	// no u
-	if(MsgLen < NameLen + 8 && (str_find_nocase(m_aLastPingMessage, "no u") || str_find_nocase(m_aLastPingMessage, "no you") || str_find_nocase(m_aLastPingMessage, "bad")))
-	{
-		str_format(aBuf, sizeof(aBuf), "%s no u", m_aLastPingName);
-		m_pClient->m_Chat.Say(0, aBuf);
-		m_aLastPingMessage[0] = '\0';
-		return;
-	}
 	// wanna? (always say no automated if motivated to do something type yes manually)
 	if(str_find_nocase(m_aLastPingMessage, "wanna") || str_find_nocase(m_aLastPingMessage, "want"))
 	{
@@ -434,6 +426,35 @@ void CChatHelper::ReplyToLastPing()
 	if(str_find_nocase(m_aLastPingMessage, "answer") || str_find_nocase(m_aLastPingMessage, "ignore") || str_find_nocase(m_aLastPingMessage, "antwort") || str_find_nocase(m_aLastPingMessage, "ignorier"))
 	{
 		str_format(aBuf, sizeof(aBuf), "%s i am currently busy (automated reply)", m_aLastPingName);
+		m_pClient->m_Chat.Say(0, aBuf);
+		m_aLastPingMessage[0] = '\0';
+		return;
+	}
+	// weeb
+	if(str_find_nocase(m_aLastPingMessage, "uwu"))
+	{
+		str_format(aBuf, sizeof(aBuf), "%s OwO", m_aLastPingName);
+		m_pClient->m_Chat.Say(0, aBuf);
+		m_aLastPingMessage[0] = '\0';
+		return;
+	}
+	if(str_find_nocase(m_aLastPingMessage, "owo"))
+	{
+		str_format(aBuf, sizeof(aBuf), "%s UwU", m_aLastPingName);
+		m_pClient->m_Chat.Say(0, aBuf);
+		m_aLastPingMessage[0] = '\0';
+		return;
+	}
+	// no u
+	if(MsgLen < NameLen + 8 && (str_find_nocase(m_aLastPingMessage, "no u") ||
+					   str_find_nocase(m_aLastPingMessage, "no you") ||
+					   str_find_nocase(m_aLastPingMessage, "noob") ||
+					   str_find_nocase(m_aLastPingMessage, "nob") ||
+					   str_find_nocase(m_aLastPingMessage, "nuub") ||
+					   str_find_nocase(m_aLastPingMessage, "nub") ||
+					   str_find_nocase(m_aLastPingMessage, "bad")))
+	{
+		str_format(aBuf, sizeof(aBuf), "%s no u", m_aLastPingName);
 		m_pClient->m_Chat.Say(0, aBuf);
 		m_aLastPingMessage[0] = '\0';
 		return;
