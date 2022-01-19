@@ -186,6 +186,7 @@ public:
 	bool m_LastBroadcastImportance;
 
 	CNetObj_PlayerInput *m_pLastTarget;
+	bool m_LastTargetInit;
 	/* 
 		afk timer's 1st warning after 50% of sv_max_afk_time
 		2nd warning after 90%

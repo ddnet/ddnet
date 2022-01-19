@@ -1195,7 +1195,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 	bool Activated = false;
 
-	if(m_EnterPressed || (Input()->MouseDoubleClick() && UI()->HotItem() == m_lDemos[m_DemolistSelectedIndex].m_aName))
+	if(m_EnterPressed || (UI()->HotItem() == m_lDemos[m_DemolistSelectedIndex].m_aName && Input()->MouseDoubleClick()))
 	{
 		UI()->SetActiveItem(0);
 		Activated = true;
