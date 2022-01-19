@@ -23,6 +23,7 @@ public:
 	void Init(class IKernel *pKernel);
 	void InitBackground(class IMap *pMap);
 	int NumGroups() const { return m_GroupsNum; };
+	int NumLayers() const { return m_LayersNum; }
 	class IMap *Map() const { return m_pMap; };
 	CMapItemGroup *GameGroup() const { return m_pGameGroup; };
 	CMapItemLayerTilemap *GameLayer() const { return m_pGameLayer; };
