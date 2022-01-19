@@ -107,6 +107,8 @@ void CLayers::Init(class IKernel *pKernel)
 			}
 		}
 	}
+
+	InitTilemapSkip();
 }
 
 void CLayers::InitBackground(class IMap *pMap)
@@ -153,6 +155,42 @@ void CLayers::InitBackground(class IMap *pMap)
 						m_pGameGroup->m_ClipH = 0;
 					}
 					//We don't care about tile layers.
+				}
+			}
+		}
+	}
+
+	InitTilemapSkip();
+}
+
+void CLayers::InitTilemapSkip()
+{
+	for(int g = 0; g < NumGroups(); g++)
+	{
+		CMapItemGroup *pGroup = GetGroup(g);
+
+		for(int l = 0; l < pGroup->m_NumLayers; l++)
+		{
+			CMapItemLayer *pLayer = GetLayer(pGroup->m_StartLayer + l);
+
+			if(pLayer->m_Type == LAYERTYPE_TILES)
+			{
+				CMapItemLayerTilemap *pTmap = (CMapItemLayerTilemap *)pLayer;
+				CTile *pTiles = (CTile *)m_pMap->GetData(pTmap->m_Data);
+				for(int y = 0; y < pTmap->m_Height; y++)
+				{
+					for(int x = 1; x < pTmap->m_Width;)
+					{
+						int sx;
+						for(sx = 1; x + sx < pTmap->m_Width && sx < 255; sx++)
+						{
+							if(pTiles[y * pTmap->m_Width + x + sx].m_Index)
+								break;
+						}
+
+						pTiles[y * pTmap->m_Width + x].m_Skip = sx - 1;
+						x += sx;
+					}
 				}
 			}
 		}
