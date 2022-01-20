@@ -41,6 +41,7 @@ public:
 	virtual void OnStateChange(int NewState, int OldState);
 	virtual void OnMessage(int MsgType, void *pRawMsg);
 	virtual void OnMapLoad();
+	virtual void OnShutdown();
 
 	void OnNewSnapshot();
 };

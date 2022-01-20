@@ -155,6 +155,7 @@ public:
 	virtual void OnReset();
 	virtual void OnMessage(int MsgType, void *pRawMsg);
 	virtual void OnMapLoad();
+	virtual void OnShutdown();
 
 	void OnNewSnapshot();
 	void OnNewPredictedSnapshot();

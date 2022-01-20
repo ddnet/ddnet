@@ -528,6 +528,7 @@ public:
 	virtual void OnRender();
 	virtual bool OnInput(IInput::CEvent Event);
 	virtual bool OnMouseMove(float x, float y);
+	virtual void OnShutdown();
 
 	enum
 	{

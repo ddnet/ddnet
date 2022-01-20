@@ -117,6 +117,11 @@ void CRaceDemo::OnReset()
 	StopRecord();
 }
 
+void CRaceDemo::OnShutdown()
+{
+	StopRecord();
+}
+
 void CRaceDemo::OnMessage(int MsgType, void *pRawMsg)
 {
 	// check for messages from server
