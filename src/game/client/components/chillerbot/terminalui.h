@@ -23,6 +23,7 @@ class CTerminalUI : public CComponent
 	void DrawBorders(WINDOW *screen, int x, int y, int w, int h);
 	void DrawBorders(WINDOW *screen);
 	void RenderScoreboard(int Team, WINDOW *pWin);
+	void RenderServerList();
 	int m_aLastPressedKey[KEY_HISTORY_LEN];
 	bool KeyInHistory(int Key, int Ticks = KEY_HISTORY_LEN)
 	{
@@ -95,7 +96,11 @@ class CTerminalUI : public CComponent
 	int AimX;
 	int AimY;
 	bool m_ScoreboardActive;
+	bool m_RenderServerList;
+	int m_SelectedServer;
 	int m_InputMode;
+	int64_t m_LastKeyPress;
+	int m_NumServers;
 
 public:
 	int OnKeyPress(int Key, WINDOW *pWin);

@@ -1,5 +1,6 @@
 // ChillerDragon 2020 - chillerbot
 
+#include <engine/client/serverbrowser.h>
 #include <game/client/components/controls.h>
 #include <game/client/gameclient.h>
 
@@ -109,6 +110,7 @@ int CTerminalUI::CursesTick()
 	// draw to our windows
 	LogDraw();
 	InfoDraw();
+	RenderServerList();
 
 	int input = GetInput(); // calls InputDraw()
 
@@ -117,8 +119,50 @@ int CTerminalUI::CursesTick()
 	return input == -1;
 }
 
+void CTerminalUI::RenderServerList()
+{
+	if(!m_RenderServerList)
+		return;
+	int mx = getmaxx(g_pLogWindow);
+	int my = getmaxy(g_pLogWindow);
+	int offY = 5;
+	int offX = 40;
+	if(mx < 128)
+		offX = 2;
+	if(my < 60)
+		offY = 2;
+	int width = minimum(128, mx - 3);
+	m_NumServers = ServerBrowser()->NumSortedServers();
+	DrawBorders(g_pLogWindow, offX, offY - 1, width, m_NumServers + 2);
+	for(int i = 0; i < m_NumServers; i++)
+	{
+		const CServerInfo *pItem = ServerBrowser()->SortedGet(i);
+		if(!pItem)
+			continue;
+
+		// dbg_msg("serverbrowser", "server %s", pItem->m_aName);
+		char aLine[1024];
+		char aBuf[1024];
+		char aName[64];
+		str_copy(aName, pItem->m_aName, sizeof(aName));
+		aName[60] = '\0';
+		str_format(aBuf, sizeof(aBuf),
+			"%-60s | %-20s |",
+			aName,
+			pItem->m_aMap);
+		if(m_SelectedServer == i)
+			str_format(aLine, sizeof(aLine), "< %-*s>", width - 3, aBuf);
+		else
+			str_format(aLine, sizeof(aLine), "|%-*s|", width - 2, aBuf);
+		aLine[mx - 2] = '\0'; // ensure no line wrapping
+		mvwprintw(g_pLogWindow, offY + i, offX, aLine);
+	}
+}
+
 void CTerminalUI::RenderScoreboard(int Team, WINDOW *pWin)
 {
+	if(!m_ScoreboardActive)
+		return;
 	// TODO:
 	/*
 	int RenderScoreIDs[MAX_CLIENTS];
@@ -179,6 +223,10 @@ void CTerminalUI::RenderScoreboard(int Team, WINDOW *pWin)
 
 void CTerminalUI::OnInit()
 {
+	m_NumServers = 0;
+	m_SelectedServer = 0;
+	m_RenderServerList = false;
+	m_ScoreboardActive = false;
 	g_pClient = m_pClient;
 	mem_zero(m_aLastPressedKey, sizeof(m_aLastPressedKey));
 	AimX = 20;
@@ -210,8 +258,12 @@ void CTerminalUI::OnRender()
 {
 	CursesTick();
 
+	str_format(g_aInfoStr2, sizeof(g_aInfoStr2),
+		"selectedServer=%d/%d",
+		m_SelectedServer, m_NumServers);
 	if(!m_pClient->m_Snap.m_pLocalCharacter)
 		return;
+	RenderScoreboard(0, g_pLogWindow);
 	float X = m_pClient->m_Snap.m_pLocalCharacter->m_X;
 	float Y = m_pClient->m_Snap.m_pLocalCharacter->m_Y;
 	str_format(g_aInfoStr2, sizeof(g_aInfoStr2),
@@ -314,6 +366,7 @@ int CTerminalUI::GetInput()
 
 int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 {
+	bool KeyPressed = true;
 	// m_pClient->m_Controls.SetCursesDir(-2);
 	// m_pClient->m_Controls.SetCursesJump(-2);
 	// m_pClient->m_Controls.SetCursesHook(-2);
@@ -332,17 +385,42 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 		/* m_pClient->m_Controls.SetCursesJump(1); */ return 0;
 	else if(KeyInHistory('h', 10) || Key == 'h')
 		/* m_pClient->m_Controls.SetCursesHook(1); */ return 0;
+	else if(Key == 'b' && m_LastKeyPress < time_get() - time_freq() / 2)
+	{
+		m_RenderServerList = !m_RenderServerList;
+		gs_NeedLogDraw = true;
+	}
 	else if(Key == KEY_LEFT)
 		AimX = maximum(AimX - 10, -20);
 	else if(Key == KEY_RIGHT)
 		AimX = minimum(AimX + 10, 20);
 	else if(Key == KEY_UP)
+	{
 		AimY = maximum(AimY - 10, -20);
+		m_SelectedServer = clamp(--m_SelectedServer, 0, m_NumServers);
+		gs_NeedLogDraw = true;
+	}
 	else if(Key == KEY_DOWN)
+	{
 		AimY = minimum(AimY + 10, 20);
+		m_SelectedServer = clamp(++m_SelectedServer, 0, m_NumServers);
+		gs_NeedLogDraw = true;
+	}
+	else if(Key == 'c')
+	{
+		const CServerInfo *pItem = ServerBrowser()->SortedGet(m_SelectedServer);
+		if(pItem && m_pClient->Client()->State() != IClient::STATE_CONNECTING)
+		{
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "connect %s", pItem->m_aAddress);
+			Console()->ExecuteLine(aBuf);
+		}
+	}
+	else
+		KeyPressed = false;
 
-	if(m_ScoreboardActive)
-		RenderScoreboard(0, pWin);
+	if(KeyPressed)
+		m_LastKeyPress = time_get();
 
 	if(Key == EOF)
 		return 0;
