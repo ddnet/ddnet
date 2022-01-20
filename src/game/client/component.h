@@ -159,6 +159,11 @@ public:
 	 */
 	virtual void OnInit(){};
 	/**
+	 * Called to cleanup the component.
+	 * This method is called when the client is closed.
+	 */
+	virtual void OnShutdown(){};
+	/**
 	 * Called to reset the component.
 	 * This method is usually called on your component constructor to avoid code duplication.
 	 * @see CHud::CHud()
