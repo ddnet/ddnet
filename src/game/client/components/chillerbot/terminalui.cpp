@@ -349,6 +349,8 @@ int CTerminalUI::GetInput()
 		}
 		else if(c == KEY_BACKSPACE || c == 127) // delete
 		{
+			if(str_length(g_aInputStr) < 1)
+				return 0;
 			str_truncate(g_aInputStr, sizeof(g_aInputStr), g_aInputStr, str_length(g_aInputStr) - 1);
 			wclear(g_pInputWin);
 			InputDraw();
