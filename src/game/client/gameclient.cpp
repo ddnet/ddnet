@@ -896,8 +896,13 @@ void CGameClient::OnRconType(bool UsernameReq)
 	m_GameConsole.RequireUsername(UsernameReq);
 }
 
+#include <base/terminalui.h>
+
 void CGameClient::OnRconLine(const char *pLine)
 {
+#if defined(CONF_CURSES_CLIENT)
+	curses_log_push(pLine);
+#endif
 	m_ChillConsole.PrintLine(CGameConsole::CONSOLETYPE_REMOTE, pLine);
 	m_GameConsole.PrintLine(CGameConsole::CONSOLETYPE_REMOTE, pLine);
 }

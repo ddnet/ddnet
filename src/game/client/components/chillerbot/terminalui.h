@@ -90,7 +90,7 @@ class CTerminalUI : public CComponent
 	virtual void OnInit();
 	virtual void OnRender();
 	virtual void OnShutdown();
-	bool RconAuthed() { return false; } // TODO:
+	bool RconAuthed() { return Client()->RconAuthed(); }
 	int GetInput();
 	void DrawAllBorders();
 	void LogDraw();
