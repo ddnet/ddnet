@@ -3314,10 +3314,7 @@ void CClient::Run()
 
 			bool IsRenderActive = (g_Config.m_GfxBackgroundRender || m_pGraphics->WindowOpen());
 
-			bool AsyncRenderOld = false;
-#if !defined(CONF_PLATFORM_MACOS)
-			AsyncRenderOld = g_Config.m_GfxAsyncRenderOld;
-#endif
+			bool AsyncRenderOld = g_Config.m_GfxAsyncRenderOld;
 
 			if(IsRenderActive &&
 				(!AsyncRenderOld || m_pGraphics->IsIdle()) &&
