@@ -111,12 +111,49 @@ int CTerminalUI::CursesTick()
 	LogDraw();
 	InfoDraw();
 	RenderServerList();
+	RenderHelpPage();
 
 	int input = GetInput(); // calls InputDraw()
 
 	// refresh each window
 	curses_refresh_windows();
 	return input == -1;
+}
+
+void CTerminalUI::RenderHelpPage()
+{
+	if(!m_RenderHelpPage)
+		return;
+	int mx = getmaxx(g_pLogWindow);
+	int my = getmaxy(g_pLogWindow);
+	int offY = 5;
+	int offX = 40;
+	if(mx < 128)
+		offX = 2;
+	if(my < 60)
+		offY = 2;
+	int width = minimum(128, mx - 3);
+
+	const char aHelpLines[][128] = {
+		"?  - toggle this help",
+		"t  - chat",
+		"z  - team chat",
+		"f1 - local console",
+		"f2 - remote console",
+		"b  - toggle server browser",
+		"c  - connect to currently selected server",
+		"k  - selfkill"};
+
+	DrawBorders(g_pLogWindow, offX, offY - 1, width, 8 + 2);
+
+	int i = 0;
+	for(auto &aLine : aHelpLines)
+	{
+		char aBuf[1024];
+		str_format(aBuf, sizeof(aBuf), "|%-*s|", width - 2, aLine);
+		aBuf[mx - 2] = '\0'; // ensure no line wrapping
+		mvwprintw(g_pLogWindow, offY + i++, offX, aBuf);
+	}
 }
 
 void CTerminalUI::RenderServerList()
@@ -227,6 +264,7 @@ void CTerminalUI::OnInit()
 	m_SelectedServer = 0;
 	m_RenderServerList = false;
 	m_ScoreboardActive = false;
+	m_RenderHelpPage = false;
 	g_pClient = m_pClient;
 	mem_zero(m_aLastPressedKey, sizeof(m_aLastPressedKey));
 	AimX = 20;
@@ -393,6 +431,11 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 		/* m_pClient->m_Controls.SetCursesJump(1); */ return 0;
 	else if(KeyInHistory('h', 10) || Key == 'h')
 		/* m_pClient->m_Controls.SetCursesHook(1); */ return 0;
+	else if(Key == '?' && m_LastKeyPress < time_get() - time_freq() / 2)
+	{
+		m_RenderHelpPage = !m_RenderHelpPage;
+		gs_NeedLogDraw = true;
+	}
 	else if(Key == 'b' && m_LastKeyPress < time_get() - time_freq() / 2)
 	{
 		if((m_RenderServerList = !m_RenderServerList))

@@ -108,7 +108,7 @@ void curses_log_push(const char *pStr)
 	int Max = CHILLER_LOGGER_HEIGHT > y ? y : CHILLER_LOGGER_HEIGHT;
 	int Top = CHILLER_LOGGER_HEIGHT - 2;
 	int Bottom = CHILLER_LOGGER_HEIGHT - Max;
-	str_format(g_aInfoStr, sizeof(g_aInfoStr), "max=%d CHILLER_LOGGER_HEIGHT=%d y=%d top=%d bottom=%d                                            ",
+	str_format(g_aInfoStr, sizeof(g_aInfoStr), "?=help max=%d HEIGHT=%d y=%d top=%d bottom=%d                                            ",
 		Max, CHILLER_LOGGER_HEIGHT, y, Top, Bottom);
 	gs_NeedLogDraw = true;
 	// shift all
