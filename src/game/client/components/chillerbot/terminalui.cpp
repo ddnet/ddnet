@@ -455,18 +455,18 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 	else if(Key == KEY_UP)
 	{
 		AimY = maximum(AimY - 10, -20);
-		if(m_RenderServerList)
+		if(m_RenderServerList && m_NumServers)
 		{
-			m_SelectedServer = clamp(--m_SelectedServer, 0, m_NumServers);
+			m_SelectedServer = clamp(--m_SelectedServer, 0, m_NumServers - 1);
 			gs_NeedLogDraw = true;
 		}
 	}
 	else if(Key == KEY_DOWN)
 	{
 		AimY = minimum(AimY + 10, 20);
-		if(m_RenderServerList)
+		if(m_RenderServerList && m_NumServers)
 		{
-			m_SelectedServer = clamp(++m_SelectedServer, 0, m_NumServers);
+			m_SelectedServer = clamp(++m_SelectedServer, 0, m_NumServers - 1);
 			gs_NeedLogDraw = true;
 		}
 	}
