@@ -255,7 +255,6 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 		if(m_Loaded)
 		{
 			m_pLayers->InitBackground(m_pMap);
-			RenderTools()->RenderTilemapGenerateSkip(m_pLayers);
 			NeedImageLoading = true;
 
 			CMapLayers::OnMapLoad();
