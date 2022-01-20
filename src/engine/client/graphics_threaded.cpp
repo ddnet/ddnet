@@ -2420,6 +2420,8 @@ int CGraphics_Threaded::GetWindowScreen()
 
 void CGraphics_Threaded::WindowDestroyNtf(uint32_t WindowID)
 {
+	m_pBackend->WindowDestroyNtf(WindowID);
+
 	CCommandBuffer::SCommand_WindowDestroyNtf Cmd;
 	Cmd.m_WindowID = WindowID;
 
@@ -2432,6 +2434,8 @@ void CGraphics_Threaded::WindowDestroyNtf(uint32_t WindowID)
 
 void CGraphics_Threaded::WindowCreateNtf(uint32_t WindowID)
 {
+	m_pBackend->WindowCreateNtf(WindowID);
+
 	CCommandBuffer::SCommand_WindowCreateNtf Cmd;
 	Cmd.m_WindowID = WindowID;
 
