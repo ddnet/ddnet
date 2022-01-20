@@ -1238,4 +1238,13 @@ void CGraphicsBackend_SDL_OpenGL::NotifyWindow()
 #endif
 }
 
+void CGraphicsBackend_SDL_OpenGL::WindowDestroyNtf(uint32_t WindowID)
+{
+}
+
+void CGraphicsBackend_SDL_OpenGL::WindowCreateNtf(uint32_t WindowID)
+{
+	m_pWindow = SDL_GetWindowFromID(WindowID);
+}
+
 IGraphicsBackend *CreateGraphicsBackend() { return new CGraphicsBackend_SDL_OpenGL; }

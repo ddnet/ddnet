@@ -264,6 +264,9 @@ public:
 	virtual void GetViewportSize(int &w, int &h);
 	virtual void NotifyWindow();
 
+	virtual void WindowDestroyNtf(uint32_t WindowID);
+	virtual void WindowCreateNtf(uint32_t WindowID);
+
 	virtual void GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch);
 	virtual bool IsConfigModernAPI() { return IsModernAPI(m_BackendType); }
 	virtual bool IsNewOpenGL() { return m_UseNewOpenGL; }

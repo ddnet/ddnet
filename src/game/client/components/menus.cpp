@@ -2387,6 +2387,11 @@ void CMenus::OnReset()
 {
 }
 
+void CMenus::OnShutdown()
+{
+	KillServer();
+}
+
 bool CMenus::OnMouseMove(float x, float y)
 {
 	if(!m_MenuActive)

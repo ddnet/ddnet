@@ -681,6 +681,9 @@ public:
 	virtual void GetViewportSize(int &w, int &h) = 0;
 	virtual void NotifyWindow() = 0;
 
+	virtual void WindowDestroyNtf(uint32_t WindowID) = 0;
+	virtual void WindowCreateNtf(uint32_t WindowID) = 0;
+
 	virtual void RunBuffer(CCommandBuffer *pBuffer) = 0;
 	virtual bool IsIdle() const = 0;
 	virtual void WaitForIdle() = 0;

@@ -3359,10 +3359,7 @@ void CClient::Run()
 
 			bool IsRenderActive = (g_Config.m_GfxBackgroundRender || m_pGraphics->WindowOpen());
 
-			bool AsyncRenderOld = false;
-#if !defined(CONF_PLATFORM_MACOS)
-			AsyncRenderOld = g_Config.m_GfxAsyncRenderOld;
-#endif
+			bool AsyncRenderOld = g_Config.m_GfxAsyncRenderOld;
 
 			if(IsRenderActive &&
 				(!AsyncRenderOld || m_pGraphics->IsIdle()) &&
@@ -4384,14 +4381,17 @@ void CClient::HandleMapPath(const char *pPath)
 #if defined(CONF_PLATFORM_MACOS)
 extern "C" int TWMain(int argc, const char **argv) // ignore_convention
 #elif defined(CONF_PLATFORM_ANDROID)
-extern "C" __attribute__((visibility("default"))) int SDL_main(int argc, const char *argv[]);
+extern "C" __attribute__((visibility("default"))) int SDL_main(int argc, char *argv[]);
 extern "C" void InitAndroid();
 
-int SDL_main(int argc, const char *argv[])
+int SDL_main(int argc, char *argv2[])
 #else
 int main(int argc, const char **argv) // ignore_convention
 #endif
 {
+#if defined(CONF_PLATFORM_ANDROID)
+	const char **argv = const_cast<const char **>(argv2);
+#endif
 	cmdline_fix(&argc, &argv);
 	bool Silent = false;
 	bool RandInitFailed = false;
