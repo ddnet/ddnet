@@ -142,6 +142,7 @@ void CTerminalUI::RenderHelpPage()
 		"f2 - remote console",
 		"b  - toggle server browser",
 		"c  - connect to currently selected server",
+		"h  - auto reply to known chat messages",
 		"k  - selfkill"};
 
 	DrawBorders(g_pLogWindow, offX, offY - 1, width, 8 + 2);
@@ -429,12 +430,14 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 		/* m_pClient->m_Controls.SetCursesDir(1); */ return 0;
 	else if(KeyInHistory(' ', 3) || Key == ' ')
 		/* m_pClient->m_Controls.SetCursesJump(1); */ return 0;
-	else if(KeyInHistory('h', 10) || Key == 'h')
-		/* m_pClient->m_Controls.SetCursesHook(1); */ return 0;
 	else if(Key == '?' && m_LastKeyPress < time_get() - time_freq() / 2)
 	{
 		m_RenderHelpPage = !m_RenderHelpPage;
 		gs_NeedLogDraw = true;
+	}
+	else if(Key == 'h' && m_LastKeyPress < time_get() - time_freq() / 2)
+	{
+		Console()->ExecuteLine("reply_to_last_ping");
 	}
 	else if(Key == 'b' && m_LastKeyPress < time_get() - time_freq() / 2)
 	{
