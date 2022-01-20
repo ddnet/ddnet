@@ -301,7 +301,8 @@ int CTerminalUI::GetInput()
 		m_InputMode == INPUT_LOCAL_CONSOLE ||
 		m_InputMode == INPUT_REMOTE_CONSOLE ||
 		m_InputMode == INPUT_CHAT ||
-		m_InputMode == INPUT_CHAT_TEAM)
+		m_InputMode == INPUT_CHAT_TEAM ||
+		m_InputMode == INPUT_BROWSER_SEARCH)
 	{
 		if(c == ERR) // nonblocking empty read
 			return 0;
@@ -320,6 +321,11 @@ int CTerminalUI::GetInput()
 				m_pClient->m_Chat.Say(0, g_aInputStr);
 			else if(m_InputMode == INPUT_CHAT_TEAM)
 				m_pClient->m_Chat.Say(1, g_aInputStr);
+			else if(m_InputMode == INPUT_BROWSER_SEARCH)
+			{
+				str_copy(g_Config.m_BrFilterString, g_aInputStr, sizeof(g_Config.m_BrFilterString));
+				ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
+			}
 			g_aInputStr[0] = '\0';
 			wclear(g_pInputWin);
 			DrawBorders(g_pInputWin);
@@ -389,7 +395,11 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 		/* m_pClient->m_Controls.SetCursesHook(1); */ return 0;
 	else if(Key == 'b' && m_LastKeyPress < time_get() - time_freq() / 2)
 	{
-		m_RenderServerList = !m_RenderServerList;
+		if((m_RenderServerList = !m_RenderServerList))
+		{
+			m_InputMode = INPUT_BROWSER_SEARCH;
+			str_copy(g_aInputStr, g_Config.m_BrFilterString, sizeof(g_aInputStr));
+		}
 		gs_NeedLogDraw = true;
 	}
 	else if(Key == KEY_LEFT)
@@ -399,14 +409,20 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 	else if(Key == KEY_UP)
 	{
 		AimY = maximum(AimY - 10, -20);
-		m_SelectedServer = clamp(--m_SelectedServer, 0, m_NumServers);
-		gs_NeedLogDraw = true;
+		if(m_RenderServerList)
+		{
+			m_SelectedServer = clamp(--m_SelectedServer, 0, m_NumServers);
+			gs_NeedLogDraw = true;
+		}
 	}
 	else if(Key == KEY_DOWN)
 	{
 		AimY = minimum(AimY + 10, 20);
-		m_SelectedServer = clamp(++m_SelectedServer, 0, m_NumServers);
-		gs_NeedLogDraw = true;
+		if(m_RenderServerList)
+		{
+			m_SelectedServer = clamp(++m_SelectedServer, 0, m_NumServers);
+			gs_NeedLogDraw = true;
+		}
 	}
 	else if(Key == 'c')
 	{

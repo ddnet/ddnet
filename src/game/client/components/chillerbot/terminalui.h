@@ -59,6 +59,7 @@ class CTerminalUI : public CComponent
 		INPUT_REMOTE_CONSOLE,
 		INPUT_CHAT,
 		INPUT_CHAT_TEAM,
+		INPUT_BROWSER_SEARCH,
 
 		NC_INFO_SIZE = 3,
 	};
@@ -78,6 +79,8 @@ class CTerminalUI : public CComponent
 			return "CHAT";
 		case INPUT_CHAT_TEAM:
 			return "TEAM CHAT";
+		case INPUT_BROWSER_SEARCH:
+			return "INPUT_BROWSER_SEARCH";
 		default:
 			return "INVALID";
 		}
