@@ -464,15 +464,18 @@ float CUI::DoTextLabel(float x, float y, float w, float h, const char *pText, fl
 	{
 		AlignmentVert = y + (h - AlignedSize) / 2.f - (AlignedSize - MaxCharacterHeightInLine) / 2.f;
 	}
-	if(Align == 0)
+	// if(Align == 0)
+	if(Align & TEXTALIGN_CENTER)
 	{
 		AlignmentHori = x + (w - tw) / 2.f;
 	}
-	else if(Align < 0)
+	// else if(Align < 0)
+	else if(Align & TEXTALIGN_LEFT)
 	{
 		AlignmentHori = x;
 	}
-	else if(Align > 0)
+	// else if(Align > 0)
+	else if(Align & TEXTALIGN_RIGHT)
 	{
 		AlignmentHori = x + w - tw;
 	}
@@ -530,15 +533,18 @@ void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, cons
 	{
 		AlignmentVert = pRect->y + (pRect->h - AlignedSize) / 2.f - (AlignedSize - MaxCharacterHeightInLine) / 2.f;
 	}
-	if(Align == 0)
+	// if(Align == 0)
+	if(Align & TEXTALIGN_CENTER)
 	{
 		AlignmentHori = pRect->x + (pRect->w - tw) / 2.f;
 	}
-	else if(Align < 0)
+	// else if(Align < 0)
+	else if(Align & TEXTALIGN_LEFT)
 	{
 		AlignmentHori = pRect->x;
 	}
-	else if(Align > 0)
+	// else if(Align > 0)
+	else if(Align & TEXTALIGN_RIGHT)
 	{
 		AlignmentHori = pRect->x + pRect->w - tw;
 	}
