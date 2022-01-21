@@ -64,10 +64,10 @@ public:
 
 	enum
 	{
-		CLIENT_MAIN = 0,
-		CLIENT_DUMMY,
-		CLIENT_CONTACT,
-		NUM_CLIENTS,
+		CONN_MAIN = 0,
+		CONN_DUMMY,
+		CONN_CONTACT,
+		NUM_CONNS,
 	};
 
 	/* Constants: Client States
@@ -94,13 +94,13 @@ public:
 	inline int State() const { return m_State; }
 
 	// tick time access
-	inline int PrevGameTick(int Client) const { return m_PrevGameTick[Client]; }
-	inline int GameTick(int Client) const { return m_CurGameTick[Client]; }
-	inline int PredGameTick(int Client) const { return m_PredTick[Client]; }
-	inline float IntraGameTick(int Client) const { return m_GameIntraTick[Client]; }
-	inline float PredIntraGameTick(int Client) const { return m_PredIntraTick[Client]; }
-	inline float IntraGameTickSincePrev(int Client) const { return m_GameIntraTickSincePrev[Client]; }
-	inline float GameTickTime(int Client) const { return m_GameTickTime[Client]; }
+	inline int PrevGameTick(int Conn) const { return m_PrevGameTick[Conn]; }
+	inline int GameTick(int Conn) const { return m_CurGameTick[Conn]; }
+	inline int PredGameTick(int Conn) const { return m_PredTick[Conn]; }
+	inline float IntraGameTick(int Conn) const { return m_GameIntraTick[Conn]; }
+	inline float PredIntraGameTick(int Conn) const { return m_PredIntraTick[Conn]; }
+	inline float IntraGameTickSincePrev(int Conn) const { return m_GameIntraTickSincePrev[Conn]; }
+	inline float GameTickTime(int Conn) const { return m_GameTickTime[Conn]; }
 	inline int GameTickSpeed() const { return m_GameTickSpeed; }
 
 	// other time access
@@ -142,7 +142,7 @@ public:
 	virtual void Notify(const char *pTitle, const char *pMessage) = 0;
 
 	// networking
-	virtual void EnterGame(int Client) = 0;
+	virtual void EnterGame(int Conn) = 0;
 
 	//
 	virtual const char *MapDownloadName() const = 0;
@@ -181,7 +181,7 @@ public:
 
 	virtual void SnapSetStaticsize(int ItemType, int Size) = 0;
 
-	virtual int SendMsg(int Client, CMsgPacker *pMsg, int Flags) = 0;
+	virtual int SendMsg(int Conn, CMsgPacker *pMsg, int Flags) = 0;
 	virtual int SendMsgActive(CMsgPacker *pMsg, int Flags) = 0;
 
 	template<class T>
@@ -251,7 +251,7 @@ public:
 	virtual void OnUpdate() = 0;
 	virtual void OnStateChange(int NewState, int OldState) = 0;
 	virtual void OnConnected() = 0;
-	virtual void OnMessage(int MsgID, CUnpacker *pUnpacker, int Client, bool Dummy) = 0;
+	virtual void OnMessage(int MsgID, CUnpacker *pUnpacker, int Conn, bool Dummy) = 0;
 	virtual void OnPredict() = 0;
 	virtual void OnActivateEditor() = 0;
 

@@ -457,7 +457,7 @@ public:
 	virtual void OnInit();
 	virtual void OnConsoleInit();
 	virtual void OnStateChange(int NewState, int OldState);
-	virtual void OnMessage(int MsgId, CUnpacker *pUnpacker, int Client, bool Dummy);
+	virtual void OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dummy);
 	virtual void InvalidateSnapshot();
 	virtual void OnNewSnapshot();
 	virtual void OnPredict();
