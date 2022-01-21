@@ -586,7 +586,7 @@ bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigne
 		SelCursor.m_SelectionEnd = m_CurSelEnd;
 	}
 
-	UI()->DoLabel(&Textbox, pDisplayStr, FontSize, -1, -1, 1, &SelCursor);
+	UI()->DoLabel(&Textbox, pDisplayStr, FontSize, TEXTALIGN_LEFT, -1, 1, &SelCursor);
 
 	if(UI()->LastActiveItem() == pID)
 	{
@@ -627,7 +627,7 @@ bool CUIEx::DoClearableEditBox(const void *pID, const void *pClearID, const CUIR
 
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT);
 	RenderTools()->DrawUIRect(&ClearButton, ColorRGBA(1, 1, 1, 0.33f * UI()->ButtonColorMul(pClearID)), Corners & ~CUI::CORNER_L, 3.0f);
-	UI()->DoLabel(&ClearButton, "×", ClearButton.h * CUI::ms_FontmodHeight, 0, -1, 0);
+	UI()->DoLabel(&ClearButton, "×", ClearButton.h * CUI::ms_FontmodHeight, TEXTALIGN_CENTER, -1, 0);
 	TextRender()->SetRenderFlags(0);
 	if(UI()->DoButtonLogic(pClearID, "×", 0, &ClearButton))
 	{

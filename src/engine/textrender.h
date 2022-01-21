@@ -15,6 +15,13 @@ enum
 	TEXTFLAG_STOP_AT_END = 4
 };
 
+enum ETextAlignment
+{
+	TEXTALIGN_LEFT = 1 << 0,
+	TEXTALIGN_CENTER = 1 << 1,
+	TEXTALIGN_RIGHT = 1 << 2,
+};
+
 enum ETextRenderFlags
 {
 	TEXT_RENDER_FLAG_NO_X_BEARING = 1 << 0,

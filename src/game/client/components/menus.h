@@ -165,7 +165,7 @@ class CMenus : public CComponent
 						if(pText == NULL)
 							pText = GetTextLambda();
 						NewRect.m_Text = pText;
-						UI()->DoLabel(NewRect, &Text, pText, Text.h * CUI::ms_FontmodHeight, 0, -1, AlignVertically);
+						UI()->DoLabel(NewRect, &Text, pText, Text.h * CUI::ms_FontmodHeight, TEXTALIGN_CENTER, -1, AlignVertically);
 					}
 				}
 				Graphics()->SetColor(1, 1, 1, 1);
