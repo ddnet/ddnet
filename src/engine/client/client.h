@@ -116,14 +116,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 		NUM_SNAPSHOT_TYPES = 2,
 	};
 
-	enum
-	{
-		CLIENT_MAIN = 0,
-		CLIENT_DUMMY,
-		CLIENT_CONTACT,
-		NUM_CLIENTS,
-	};
-
 	class CNetClient m_NetClient[NUM_CLIENTS];
 	class CDemoPlayer m_DemoPlayer;
 	class CDemoRecorder m_DemoRecorder[RECORDER_MAX];
@@ -307,11 +299,12 @@ public:
 	CClient();
 
 	// ----- send functions -----
-	virtual int SendMsg(CMsgPacker *pMsg, int Flags);
-	virtual int SendMsgY(CMsgPacker *pMsg, int Flags, int NetClient = 1);
+	virtual int SendMsg(int Client, CMsgPacker *pMsg, int Flags);
+	// Send via the currently active client (main/dummy)
+	virtual int SendMsgActive(CMsgPacker *pMsg, int Flags);
 
 	void SendInfo();
-	void SendEnterGame(bool Dummy);
+	void SendEnterGame(int Client);
 	void SendReady();
 	void SendMapRequest();
 
@@ -340,7 +333,7 @@ public:
 
 	// called when the map is loaded and we should init for a new round
 	void OnEnterGame(bool Dummy);
-	virtual void EnterGame(bool Dummy);
+	virtual void EnterGame(int Client);
 
 	virtual void Connect(const char *pAddress, const char *pPassword = NULL);
 	void DisconnectWithReason(const char *pReason);
@@ -384,8 +377,7 @@ public:
 
 	void ProcessConnlessPacket(CNetChunk *pPacket);
 	void ProcessServerInfo(int Type, NETADDR *pFrom, const void *pData, int DataSize);
-	void ProcessServerPacket(CNetChunk *pPacket);
-	void ProcessServerPacketDummy(CNetChunk *pPacket);
+	void ProcessServerPacket(CNetChunk *pPacket, int Client, bool Dummy);
 
 	void ResetMapDownload();
 	void FinishMapDownload();

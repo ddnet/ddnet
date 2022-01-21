@@ -31,7 +31,7 @@ void CVoting::Callvote(const char *pType, const char *pValue, const char *pReaso
 	Msg.m_Type = pType;
 	Msg.m_Value = pValue;
 	Msg.m_Reason = pReason;
-	Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
 }
 
 void CVoting::CallvoteSpectate(int ClientID, const char *pReason, bool ForceVote)
@@ -133,7 +133,7 @@ void CVoting::Vote(int v)
 {
 	m_Voted = v;
 	CNetMsg_Cl_Vote Msg = {v};
-	Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
 }
 
 CVoting::CVoting()
