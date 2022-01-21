@@ -56,24 +56,25 @@ int putenv(const char *);
 
 // ------------ CGraphicsBackend_Threaded
 
-void CGraphicsBackend_Threaded::ThreadFunc()
+void CGraphicsBackend_Threaded::ThreadFunc(void *pUser)
 {
-	std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
+	auto *pSelf = (CGraphicsBackend_Threaded *)pUser;
+	std::unique_lock<std::mutex> Lock(pSelf->m_BufferSwapMutex);
 	// notify, that the thread started
-	m_BufferDoneCond.notify_all();
-	while(!m_Shutdown)
+	pSelf->m_BufferDoneCond.notify_all();
+	while(!pSelf->m_Shutdown)
 	{
-		m_BufferSwapCond.wait(Lock);
-		if(m_pBuffer)
+		pSelf->m_BufferSwapCond.wait(Lock);
+		if(pSelf->m_pBuffer)
 		{
 #ifdef CONF_PLATFORM_MACOS
 			CAutoreleasePool AutoreleasePool;
 #endif
-			m_pProcessor->RunBuffer(m_pBuffer);
+			pSelf->m_pProcessor->RunBuffer(pSelf->m_pBuffer);
 
-			m_pBuffer = nullptr;
-			m_BufferInProcess.store(false, std::memory_order_relaxed);
-			m_BufferDoneCond.notify_all();
+			pSelf->m_pBuffer = nullptr;
+			pSelf->m_BufferInProcess.store(false, std::memory_order_relaxed);
+			pSelf->m_BufferDoneCond.notify_all();
 		}
 #if defined(CONF_VIDEORECORDER)
 		if(IVideo::Current())
@@ -94,7 +95,7 @@ void CGraphicsBackend_Threaded::StartProcessor(ICommandProcessor *pProcessor)
 	m_Shutdown = false;
 	m_pProcessor = pProcessor;
 	std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
-	m_Thread = std::thread([&]() { ThreadFunc(); });
+	m_Thread = thread_init(ThreadFunc, this, "Graphics thread");
 	// wait for the thread to start
 	m_BufferDoneCond.wait(Lock);
 }
@@ -106,7 +107,7 @@ void CGraphicsBackend_Threaded::StopProcessor()
 		std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
 		m_BufferSwapCond.notify_all();
 	}
-	m_Thread.join();
+	thread_wait(m_Thread);
 }
 
 void CGraphicsBackend_Threaded::RunBuffer(CCommandBuffer *pBuffer)
