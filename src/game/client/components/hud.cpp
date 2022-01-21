@@ -647,11 +647,11 @@ void CHud::RenderVoting()
 	str_format(aBuf, sizeof(aBuf), "%s - %s", aKey, Localize("Vote yes"));
 	Base.y += Base.h;
 	Base.h = 11.f;
-	UI()->DoLabel(&Base, aBuf, 6.0f, -1);
+	UI()->DoLabel(&Base, aBuf, 6.0f, TEXTALIGN_LEFT);
 
 	m_pClient->m_Binds.GetKey("vote no", aKey, sizeof(aKey));
 	str_format(aBuf, sizeof(aBuf), "%s - %s", Localize("Vote no"), aKey);
-	UI()->DoLabel(&Base, aBuf, 6.0f, 1);
+	UI()->DoLabel(&Base, aBuf, 6.0f, TEXTALIGN_RIGHT);
 }
 
 void CHud::RenderCursor()
