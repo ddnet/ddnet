@@ -105,8 +105,6 @@ public:
 	void DrawCircle(float x, float y, float r, int Segments);
 
 	// larger rendering methods
-	void RenderTilemapGenerateSkip(class CLayers *pLayers);
-
 	void GetRenderTeeBodySize(class CAnimState *pAnim, CTeeRenderInfo *pInfo, vec2 &BodyOffset, float &Width, float &Height);
 	void GetRenderTeeFeetSize(class CAnimState *pAnim, CTeeRenderInfo *pInfo, vec2 &FeetOffset, float &Width, float &Height);
 
