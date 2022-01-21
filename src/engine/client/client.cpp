@@ -1778,12 +1778,12 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Client, bool Dummy)
 			if(m_RconAuthed[0])
 				RconAuth("", m_RconPassword);
 		}
-		else if(!Dummy && Msg == NETMSG_PING)
+		else if(Msg == NETMSG_PING)
 		{
 			CMsgPacker Msg(NETMSG_PING_REPLY, true);
 			SendMsg(Client, &Msg, 0);
 		}
-		else if(!Dummy && Msg == NETMSG_PINGEX)
+		else if(Msg == NETMSG_PINGEX)
 		{
 			CUuid *pID = (CUuid *)Unpacker.GetRaw(sizeof(*pID));
 			if(Unpacker.Error())
@@ -1844,13 +1844,13 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Client, bool Dummy)
 			if(Unpacker.Error() == 0)
 				GameClient()->OnRconLine(pLine);
 		}
-		else if(!Dummy && Msg == NETMSG_PING_REPLY)
+		else if(Client == CLIENT_MAIN && Msg == NETMSG_PING_REPLY)
 		{
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "latency %.2f", (time_get() - m_PingStartTime) * 1000 / (float)time_freq());
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client/network", aBuf);
 		}
-		else if(!Dummy && Msg == NETMSG_INPUTTIMING)
+		else if(Msg == NETMSG_INPUTTIMING)
 		{
 			int InputPredTick = Unpacker.GetInt();
 			int TimeLeft = Unpacker.GetInt();
@@ -2048,12 +2048,12 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Client, bool Dummy)
 						m_GameTime[Client].Init((GameTick - 1) * time_freq() / 50);
 						m_aSnapshots[Client][SNAP_PREV] = m_SnapshotStorage[Client].m_pFirst;
 						m_aSnapshots[Client][SNAP_CURRENT] = m_SnapshotStorage[Client].m_pLast;
-						m_LocalStartTime = time_get(); // TODO: why reset this for dummy?
-#if defined(CONF_VIDEORECORDER)
-						IVideo::SetLocalStartTime(m_LocalStartTime); // TODO: why reset this for dummy?
-#endif
 						if(!Dummy)
 						{
+							m_LocalStartTime = time_get();
+#if defined(CONF_VIDEORECORDER)
+							IVideo::SetLocalStartTime(m_LocalStartTime);
+#endif
 							GameClient()->OnNewSnapshot();
 						}
 						SetState(IClient::STATE_ONLINE);
@@ -2100,7 +2100,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Client, bool Dummy)
 				}
 			}
 		}
-		else if(!Dummy && Msg == NETMSG_RCONTYPE)
+		else if(Client == CLIENT_MAIN && Msg == NETMSG_RCONTYPE)
 		{
 			bool UsernameReq = Unpacker.GetInt() & 1;
 			GameClient()->OnRconType(UsernameReq);
