@@ -1357,7 +1357,7 @@ void CChat::Say(int Team, const char *pLine)
 	CNetMsg_Cl_Say Msg;
 	Msg.m_Team = Team;
 	Msg.m_pMessage = pLine;
-	Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
 }
 
 void CChat::SayChat(const char *pLine)
