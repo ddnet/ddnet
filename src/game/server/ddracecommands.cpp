@@ -283,7 +283,7 @@ void CGameContext::ConToTeleporter(IConsole::IResult *pResult, void *pUserData)
 	unsigned int TeleTo = pResult->GetInteger(0);
 	CGameControllerDDRace *pGameControllerDDRace = (CGameControllerDDRace *)pSelf->m_pController;
 
-	if(pGameControllerDDRace->m_TeleOuts[TeleTo - 1].size())
+	if(!pGameControllerDDRace->m_TeleOuts[TeleTo - 1].empty())
 	{
 		CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
 		if(pChr)
@@ -304,7 +304,7 @@ void CGameContext::ConToCheckTeleporter(IConsole::IResult *pResult, void *pUserD
 	unsigned int TeleTo = pResult->GetInteger(0);
 	CGameControllerDDRace *pGameControllerDDRace = (CGameControllerDDRace *)pSelf->m_pController;
 
-	if(pGameControllerDDRace->m_TeleCheckOuts[TeleTo - 1].size())
+	if(!pGameControllerDDRace->m_TeleCheckOuts[TeleTo - 1].empty())
 	{
 		CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
 		if(pChr)

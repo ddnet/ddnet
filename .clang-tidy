@@ -40,6 +40,7 @@ Checks: >
   readability-const-return-type,
   readability-container-data-pointer,
   readability-qualified-auto,
+  readability-container-size-empty,
   readability-delete-null-pointer,
   performance-*,
   -performance-no-int-to-ptr,

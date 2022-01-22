@@ -977,7 +977,7 @@ public:
 
 		AppendTextContainer(pCursor, ContainerIndex, pText, Length);
 
-		if(TextContainer.m_StringInfo.m_CharacterQuads.size() == 0 && TextContainer.m_StringInfo.m_SelectionQuadContainerIndex == -1 && IsRendered)
+		if(TextContainer.m_StringInfo.m_CharacterQuads.empty() && TextContainer.m_StringInfo.m_SelectionQuadContainerIndex == -1 && IsRendered)
 		{
 			FreeTextContainer(ContainerIndex);
 			return -1;
@@ -1402,7 +1402,7 @@ public:
 				GotNewLineLast = 0;
 		}
 
-		if(TextContainer.m_StringInfo.m_CharacterQuads.size() != 0 && IsRendered)
+		if(!TextContainer.m_StringInfo.m_CharacterQuads.empty() && IsRendered)
 		{
 			TextContainer.m_StringInfo.m_QuadNum = TextContainer.m_StringInfo.m_CharacterQuads.size();
 			// setup the buffers

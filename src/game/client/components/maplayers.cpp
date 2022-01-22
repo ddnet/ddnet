@@ -394,7 +394,7 @@ void mem_copy_special(void *pDest, void *pSource, size_t Size, size_t Count, siz
 CMapLayers::~CMapLayers()
 {
 	//clear everything and destroy all buffers
-	if(m_TileLayerVisuals.size() != 0)
+	if(!m_TileLayerVisuals.empty())
 	{
 		int s = m_TileLayerVisuals.size();
 		for(int i = 0; i < s; ++i)
@@ -402,7 +402,7 @@ CMapLayers::~CMapLayers()
 			delete m_TileLayerVisuals[i];
 		}
 	}
-	if(m_QuadLayerVisuals.size() != 0)
+	if(!m_QuadLayerVisuals.empty())
 	{
 		int s = m_QuadLayerVisuals.size();
 		for(int i = 0; i < s; ++i)
@@ -417,7 +417,7 @@ void CMapLayers::OnMapLoad()
 	if(!Graphics()->IsTileBufferingEnabled() && !Graphics()->IsQuadBufferingEnabled())
 		return;
 	//clear everything and destroy all buffers
-	if(m_TileLayerVisuals.size() != 0)
+	if(!m_TileLayerVisuals.empty())
 	{
 		int s = m_TileLayerVisuals.size();
 		for(int i = 0; i < s; ++i)
@@ -427,7 +427,7 @@ void CMapLayers::OnMapLoad()
 		}
 		m_TileLayerVisuals.clear();
 	}
-	if(m_QuadLayerVisuals.size() != 0)
+	if(!m_QuadLayerVisuals.empty())
 	{
 		int s = m_QuadLayerVisuals.size();
 		for(int i = 0; i < s; ++i)
@@ -823,8 +823,8 @@ void CMapLayers::OnMapLoad()
 						tmpTileTexCoords.insert(tmpTileTexCoords.end(), tmpBorderRightTilesTexCoords.begin(), tmpBorderRightTilesTexCoords.end());
 
 						//setup params
-						float *pTmpTiles = (tmpTiles.size() == 0) ? NULL : (float *)&tmpTiles[0];
-						unsigned char *pTmpTileTexCoords = (tmpTileTexCoords.size() == 0) ? NULL : (unsigned char *)&tmpTileTexCoords[0];
+						float *pTmpTiles = (tmpTiles.empty()) ? NULL : (float *)&tmpTiles[0];
+						unsigned char *pTmpTileTexCoords = (tmpTileTexCoords.empty()) ? NULL : (unsigned char *)&tmpTileTexCoords[0];
 
 						Visuals.m_BufferContainerIndex = -1;
 						size_t UploadDataSize = tmpTileTexCoords.size() * sizeof(SGraphicTileTexureCoords) + tmpTiles.size() * sizeof(SGraphicTile);

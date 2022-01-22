@@ -1901,7 +1901,7 @@ void CCharacter::HandleTiles(int Index)
 	}
 
 	int z = GameServer()->Collision()->IsTeleport(MapIndex);
-	if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons && z && (*m_pTeleOuts)[z - 1].size())
+	if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons && z && !(*m_pTeleOuts)[z - 1].empty())
 	{
 		if(m_Super)
 			return;
@@ -1916,7 +1916,7 @@ void CCharacter::HandleTiles(int Index)
 		return;
 	}
 	int evilz = GameServer()->Collision()->IsEvilTeleport(MapIndex);
-	if(evilz && (*m_pTeleOuts)[evilz - 1].size())
+	if(evilz && !(*m_pTeleOuts)[evilz - 1].empty())
 	{
 		if(m_Super)
 			return;
@@ -1945,7 +1945,7 @@ void CCharacter::HandleTiles(int Index)
 		// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
 		for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
 		{
-			if((*m_pTeleCheckOuts)[k].size())
+			if(!(*m_pTeleCheckOuts)[k].empty())
 			{
 				int TeleOut = m_Core.m_pWorld->RandomOr0((*m_pTeleCheckOuts)[k].size());
 				m_Core.m_Pos = (*m_pTeleCheckOuts)[k][TeleOut];
@@ -1982,7 +1982,7 @@ void CCharacter::HandleTiles(int Index)
 		// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
 		for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
 		{
-			if((*m_pTeleCheckOuts)[k].size())
+			if(!(*m_pTeleCheckOuts)[k].empty())
 			{
 				int TeleOut = m_Core.m_pWorld->RandomOr0((*m_pTeleCheckOuts)[k].size());
 				m_Core.m_Pos = (*m_pTeleCheckOuts)[k][TeleOut];

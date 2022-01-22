@@ -17,7 +17,7 @@ void CUIElement::Init(CUI *pUI, int RequestedRectCount)
 
 void CUIElement::InitRects(int RequestedRectCount)
 {
-	dbg_assert(m_UIRects.size() == 0, "UI rects can only be initialized once, create another ui element instead.");
+	dbg_assert(m_UIRects.empty(), "UI rects can only be initialized once, create another ui element instead.");
 	m_UIRects.resize(RequestedRectCount);
 }
 
