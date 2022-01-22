@@ -322,19 +322,11 @@ bool CMapLayers::STileLayerVisuals::Init(unsigned int Width, unsigned int Height
 
 CMapLayers::STileLayerVisuals::~STileLayerVisuals()
 {
-	if(m_TilesOfLayer)
-	{
-		delete[] m_TilesOfLayer;
-	}
-
-	if(m_BorderTop)
-		delete[] m_BorderTop;
-	if(m_BorderBottom)
-		delete[] m_BorderBottom;
-	if(m_BorderLeft)
-		delete[] m_BorderLeft;
-	if(m_BorderRight)
-		delete[] m_BorderRight;
+	delete[] m_TilesOfLayer;
+	delete[] m_BorderTop;
+	delete[] m_BorderBottom;
+	delete[] m_BorderLeft;
+	delete[] m_BorderRight;
 
 	m_TilesOfLayer = NULL;
 	m_BorderTop = NULL;

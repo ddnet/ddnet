@@ -37,7 +37,10 @@ Checks: >
   -misc-unused-parameters,
   modernize-loop-convert,
   readability-avoid-const-params-in-decls,
+  readability-const-return-type,
+  readability-container-data-pointer,
   readability-qualified-auto,
+  readability-delete-null-pointer,
   performance-*,
   -performance-no-int-to-ptr,
 HeaderFilterRegex: 'src/.*'

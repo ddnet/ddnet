@@ -566,10 +566,8 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elas
 
 void CCollision::Dest()
 {
-	if(m_pDoor)
-		delete[] m_pDoor;
-	if(m_pSwitchers)
-		delete[] m_pSwitchers;
+	delete[] m_pDoor;
+	delete[] m_pSwitchers;
 	m_pTiles = 0;
 	m_Width = 0;
 	m_Height = 0;
