@@ -488,12 +488,7 @@ bool CCommandProcessorFragment_OpenGL::InitOpenGL(const SCommand_Init *pCommand)
 				pCommand->m_pCapabilities->m_TextBuffering = false;
 				pCommand->m_pCapabilities->m_QuadContainerBuffering = false;
 
-				if(GLEW_ARB_texture_non_power_of_two || pCommand->m_GlewMajor > 2)
-					pCommand->m_pCapabilities->m_NPOTTextures = true;
-				else
-				{
-					pCommand->m_pCapabilities->m_NPOTTextures = false;
-				}
+				pCommand->m_pCapabilities->m_NPOTTextures = GLEW_ARB_texture_non_power_of_two || pCommand->m_GlewMajor > 2;
 
 				if(!pCommand->m_pCapabilities->m_NPOTTextures || (!pCommand->m_pCapabilities->m_3DTextures && !pCommand->m_pCapabilities->m_2DArrayTextures))
 				{

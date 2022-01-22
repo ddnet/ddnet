@@ -882,7 +882,7 @@ void CHud::OnMessage(int MsgType, void *pRawMsg)
 
 		m_LastReceivedTimeTick = Client()->GameTick(g_Config.m_ClDummy);
 
-		m_FinishTime = pMsg->m_Finish ? true : false;
+		m_FinishTime = pMsg->m_Finish != 0;
 
 		if(pMsg->m_Check)
 		{

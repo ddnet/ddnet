@@ -11,7 +11,7 @@ bool CBinds::CBindsSpecial::OnInput(IInput::CEvent Event)
 	// only handle F and composed F binds
 	if((Event.m_Key >= KEY_F1 && Event.m_Key <= KEY_F12) || (Event.m_Key >= KEY_F13 && Event.m_Key <= KEY_F24))
 	{
-		int Mask = m_pBinds->GetModifierMask(Input());
+		int Mask = CBinds::GetModifierMask(Input());
 
 		// Look for a composed bind
 		bool ret = false;

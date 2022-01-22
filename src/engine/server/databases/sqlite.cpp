@@ -377,11 +377,7 @@ bool CSqliteConnection::AddPoints(const char *pPlayer, int Points, char *pError,
 	BindInt(2, Points);
 	BindInt(3, Points);
 	bool End;
-	if(Step(&End, pError, ErrorSize))
-	{
-		return true;
-	}
-	return false;
+	return Step(&End, pError, ErrorSize);
 }
 
 std::unique_ptr<IDbConnection> CreateSqliteConnection(const char *pFilename, bool Setup)

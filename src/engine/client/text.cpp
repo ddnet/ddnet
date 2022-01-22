@@ -1087,16 +1087,12 @@ public:
 		int SelectionEndChar = -1;
 
 		auto &&CheckInsideChar = [&](bool CheckOuter, int CursorX, int CursorY, float LastCharX, float LastCharWidth, float CharX, float CharWidth, float CharY) -> bool {
-			if((LastCharX - LastCharWidth / 2 <= CursorX &&
-				   CharX + CharWidth / 2 > CursorX &&
-				   CharY - Size <= CursorY &&
-				   CharY > CursorY) ||
-				(CheckOuter &&
-					CharY - Size > CursorY))
-			{
-				return true;
-			}
-			return false;
+			return (LastCharX - LastCharWidth / 2 <= CursorX &&
+				       CharX + CharWidth / 2 > CursorX &&
+				       CharY - Size <= CursorY &&
+				       CharY > CursorY) ||
+			       (CheckOuter &&
+				       CharY - Size > CursorY);
 		};
 		auto &&CheckSelectionStart = [&](bool CheckOuter, int CursorX, int CursorY, int &SelectionChar, bool &SelectionUsedCase, float LastCharX, float LastCharWidth, float CharX, float CharWidth, float CharY) {
 			if(!SelectionStarted && !SelectionUsedCase)
@@ -1110,15 +1106,11 @@ public:
 			}
 		};
 		auto &&CheckOutsideChar = [&](bool CheckOuter, int CursorX, int CursorY, float CharX, float CharWidth, float CharY) -> bool {
-			if((CharX + CharWidth / 2 > CursorX &&
-				   CharY - Size <= CursorY &&
-				   CharY > CursorY) ||
-				(CheckOuter &&
-					CharY <= CursorY))
-			{
-				return true;
-			}
-			return false;
+			return (CharX + CharWidth / 2 > CursorX &&
+				       CharY - Size <= CursorY &&
+				       CharY > CursorY) ||
+			       (CheckOuter &&
+				       CharY <= CursorY);
 		};
 		auto &&CheckSelectionEnd = [&](bool CheckOuter, int CursorX, int CursorY, int &SelectionChar, bool &SelectionUsedCase, float CharX, float CharWidth, float CharY) {
 			if(SelectionStarted && !SelectionUsedCase)

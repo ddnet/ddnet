@@ -24,14 +24,7 @@ static const char *VANILLA_SKINS[] = {"bluekitty", "bluestripe", "brownbear",
 
 static bool IsVanillaSkin(const char *pName)
 {
-	for(auto &pVanillaSkin : VANILLA_SKINS)
-	{
-		if(str_comp(pName, pVanillaSkin) == 0)
-		{
-			return true;
-		}
-	}
-	return false;
+	return std::all_of(std::begin(VANILLA_SKINS), std::end(VANILLA_SKINS), [pName](const char *pVanillaSkin) { return str_comp(pName, pVanillaSkin) == 0; });
 }
 
 int CSkins::CGetPngFile::OnCompletion(int State)

@@ -121,7 +121,7 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 					 MinTick * TickToMicroSeconds;
 			}
 		}
-		pThis->RenderTools()->RenderEvalEnvelope(pPoints + pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time + (int64_t)TimeOffsetMillis * 1000ll, pChannels);
+		CRenderTools::RenderEvalEnvelope(pPoints + pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time + (int64_t)TimeOffsetMillis * 1000ll, pChannels);
 	}
 	else
 	{
@@ -146,7 +146,7 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 			s_Time += CurTime - s_LastLocalTime;
 			s_LastLocalTime = CurTime;
 		}
-		pThis->RenderTools()->RenderEvalEnvelope(pPoints + pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time + (int64_t)TimeOffsetMillis * 1000ll, pChannels);
+		CRenderTools::RenderEvalEnvelope(pPoints + pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time + (int64_t)TimeOffsetMillis * 1000ll, pChannels);
 	}
 }
 
@@ -880,7 +880,7 @@ void CMapLayers::OnMapLoad()
 				m_QuadLayerVisuals.push_back(new SQuadLayerVisuals());
 				SQuadLayerVisuals *pQLayerVisuals = m_QuadLayerVisuals.back();
 
-				bool Textured = (pQLayer->m_Image == -1 ? false : true);
+				bool Textured = (pQLayer->m_Image != -1);
 
 				tmpQuads.clear();
 				tmpQuadsTextured.clear();

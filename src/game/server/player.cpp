@@ -889,9 +889,7 @@ int CPlayer::IsPaused()
 
 bool CPlayer::IsPlaying()
 {
-	if(m_pCharacter && m_pCharacter->IsAlive())
-		return true;
-	return false;
+	return m_pCharacter && m_pCharacter->IsAlive();
 }
 
 void CPlayer::SpectatePlayerName(const char *pName)

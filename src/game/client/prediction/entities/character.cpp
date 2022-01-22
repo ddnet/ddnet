@@ -37,12 +37,7 @@ bool CCharacter::IsGrounded()
 		return true;
 
 	int MoveRestrictionsBelow = Collision()->GetMoveRestrictions(m_Pos + vec2(0, m_ProximityRadius / 2 + 4), 0.0f);
-	if(MoveRestrictionsBelow & CANTMOVE_DOWN)
-	{
-		return true;
-	}
-
-	return false;
+	return (MoveRestrictionsBelow & CANTMOVE_DOWN) != 0;
 }
 
 void CCharacter::HandleJetpack()
@@ -1311,9 +1306,7 @@ void CCharacter::SetCoreWorld(CGameWorld *pGameWorld)
 
 bool CCharacter::Match(CCharacter *pChar)
 {
-	if(distance(pChar->m_Core.m_Pos, m_Core.m_Pos) > 32.f)
-		return false;
-	return true;
+	return distance(pChar->m_Core.m_Pos, m_Core.m_Pos) <= 32.f;
 }
 
 void CCharacter::SetActiveWeapon(int ActiveWeap)

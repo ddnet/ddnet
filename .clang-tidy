@@ -10,6 +10,8 @@
 #   TODO: Requires C11 to fix
 # misc-unused-parameters
 #   TODO: Many changes
+# readability-static-accessed-through-instance,
+#   Crashes: https://github.com/llvm/llvm-project/issues/53359
 
 Checks: >
   -*,
@@ -52,5 +54,14 @@ Checks: >
   readability-redundant-member-init,
   readability-redundant-preprocessor,
   readability-redundant-smartptr-get,
+  readability-redundant-string-cstr,
+  readability-redundant-string-init,
+  readability-simplify-boolean-expr,
+  readability-simplify-subscript-expr,
+  -readability-static-accessed-through-instance,
+  readability-static-definition-in-anonymous-namespace,
+  readability-string-compare,
+  readability-uniqueptr-delete-release,
+  readability-use-anyofallof,
   performance-*,
   -performance-no-int-to-ptr,
