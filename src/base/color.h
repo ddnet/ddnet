@@ -155,7 +155,7 @@ public:
 };
 
 template<typename T, typename F>
-T color_cast(const F &f) = delete;
+T color_cast(const F&) = delete;
 
 template<>
 inline ColorHSLA color_cast(const ColorRGBA &rgb)

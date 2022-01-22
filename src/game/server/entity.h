@@ -145,7 +145,7 @@ public:
 
 	// DDRace
 
-	bool GetNearestAirPos(vec2 Pos, vec2 ColPos, vec2 *pOutPos);
+	bool GetNearestAirPos(vec2 Pos, vec2 PrevPos, vec2 *pOutPos);
 	bool GetNearestAirPosPlayer(vec2 PlayerPos, vec2 *OutPos);
 
 	int m_Number;

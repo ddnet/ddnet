@@ -42,6 +42,7 @@ Checks: >
   readability-qualified-auto,
   readability-container-size-empty,
   readability-delete-null-pointer,
+  readability-inconsistent-declaration-parameter-name,
   performance-*,
   -performance-no-int-to-ptr,
 HeaderFilterRegex: 'src/.*'

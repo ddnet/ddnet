@@ -181,16 +181,16 @@ void CEmoticon::OnRender()
 	Graphics()->WrapNormal();
 }
 
-void CEmoticon::Emote(int Emoticon)
+void CEmoticon::Emote(int Emote)
 {
 	CNetMsg_Cl_Emoticon Msg;
-	Msg.m_Emoticon = Emoticon;
+	Msg.m_Emoticon = Emote;
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
 
 	if(g_Config.m_ClDummyCopyMoves)
 	{
 		CMsgPacker Msg(NETMSGTYPE_CL_EMOTICON, false);
-		Msg.AddInt(Emoticon);
+		Msg.AddInt(Emote);
 		Client()->SendMsg(!g_Config.m_ClDummy, &Msg, MSGFLAG_VITAL);
 	}
 }

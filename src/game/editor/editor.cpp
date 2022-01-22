@@ -1352,7 +1352,7 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
-void CEditor::DoQuad(CQuad *q, int Index)
+void CEditor::DoQuad(CQuad *pQuad, int Index)
 {
 	enum
 	{
@@ -1365,7 +1365,7 @@ void CEditor::DoQuad(CQuad *q, int Index)
 	};
 
 	// some basic values
-	void *pID = &q->m_aPoints[4]; // use pivot addr as id
+	void *pID = &pQuad->m_aPoints[4]; // use pivot addr as id
 	static array<array<CPoint>> s_lRotatePoints;
 	static int s_Operation = OP_NONE;
 	static float s_RotateAngle = 0;
@@ -1373,8 +1373,8 @@ void CEditor::DoQuad(CQuad *q, int Index)
 	float wy = UI()->MouseWorldY();
 
 	// get pivot
-	float CenterX = fx2f(q->m_aPoints[4].x);
-	float CenterY = fx2f(q->m_aPoints[4].y);
+	float CenterX = fx2f(pQuad->m_aPoints[4].x);
+	float CenterY = fx2f(pQuad->m_aPoints[4].y);
 
 	float dx = (CenterX - wx) / m_WorldZoom;
 	float dy = (CenterY - wy) / m_WorldZoom;
@@ -1417,13 +1417,13 @@ void CEditor::DoQuad(CQuad *q, int Index)
 					else
 						y = (int)((wy - (LineDistance / 2) * m_GridFactor) / (LineDistance * m_GridFactor)) * (LineDistance * m_GridFactor);
 
-					q->m_aPoints[4].x = f2fx(x);
-					q->m_aPoints[4].y = f2fx(y);
+					pQuad->m_aPoints[4].x = f2fx(x);
+					pQuad->m_aPoints[4].y = f2fx(y);
 				}
 				else
 				{
-					q->m_aPoints[4].x = f2fx(wx);
-					q->m_aPoints[4].y = f2fx(wy);
+					pQuad->m_aPoints[4].x = f2fx(wx);
+					pQuad->m_aPoints[4].y = f2fx(wy);
 				}
 			}
 			else if(s_Operation == OP_MOVE_ALL)
@@ -1445,8 +1445,8 @@ void CEditor::DoQuad(CQuad *q, int Index)
 					else
 						y = (int)((wy - (LineDistance / 2) * m_GridFactor) / (LineDistance * m_GridFactor)) * (LineDistance * m_GridFactor);
 
-					int OffsetX = f2fx(x) - q->m_aPoints[4].x;
-					int OffsetY = f2fx(y) - q->m_aPoints[4].y;
+					int OffsetX = f2fx(x) - pQuad->m_aPoints[4].x;
+					int OffsetY = f2fx(y) - pQuad->m_aPoints[4].y;
 
 					for(int i = 0; i < m_lSelectedQuads.size(); ++i)
 					{
@@ -1460,8 +1460,8 @@ void CEditor::DoQuad(CQuad *q, int Index)
 				}
 				else
 				{
-					int OffsetX = f2fx(wx) - q->m_aPoints[4].x;
-					int OffsetY = f2fx(wy) - q->m_aPoints[4].y;
+					int OffsetX = f2fx(wx) - pQuad->m_aPoints[4].x;
+					int OffsetY = f2fx(wy) - pQuad->m_aPoints[4].y;
 
 					for(int i = 0; i < m_lSelectedQuads.size(); ++i)
 					{

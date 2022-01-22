@@ -204,11 +204,11 @@ float CUIRect::Scale() const
 	return g_Config.m_UiScale / 100.0f;
 }
 
-void CUI::ClipEnable(const CUIRect *r)
+void CUI::ClipEnable(const CUIRect *pRect)
 {
 	float XScale = Graphics()->ScreenWidth() / Screen()->w;
 	float YScale = Graphics()->ScreenHeight() / Screen()->h;
-	Graphics()->ClipEnable((int)(r->x * XScale), (int)(r->y * YScale), (int)(r->w * XScale), (int)(r->h * YScale));
+	Graphics()->ClipEnable((int)(pRect->x * XScale), (int)(pRect->y * YScale), (int)(pRect->w * XScale), (int)(pRect->h * YScale));
 }
 
 void CUI::ClipDisable()
@@ -507,14 +507,14 @@ float CUI::DoTextLabel(float x, float y, float w, float h, const char *pText, fl
 	return tw;
 }
 
-void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically, CTextCursor *pSelCursor)
+void CUI::DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically, CTextCursor *pSelCursor)
 {
-	DoTextLabel(r->x, r->y, r->w, r->h, pText, Size, Align, MaxWidth, AlignVertically, false, pSelCursor);
+	DoTextLabel(pRect->x, pRect->y, pRect->w, pRect->h, pText, Size, Align, MaxWidth, AlignVertically, false, pSelCursor);
 }
 
-void CUI::DoLabelScaled(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically)
+void CUI::DoLabelScaled(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically)
 {
-	DoLabel(r, pText, Size * Scale(), Align, MaxWidth, AlignVertically);
+	DoLabel(pRect, pText, Size * Scale(), Align, MaxWidth, AlignVertically);
 }
 
 void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically, bool StopAtEnd, int StrLen, CTextCursor *pReadCursor)
