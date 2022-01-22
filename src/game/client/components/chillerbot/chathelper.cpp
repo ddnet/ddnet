@@ -620,6 +620,9 @@ bool CChatHelper::IsSpam(int ClientID, int Team, const char *pMsg)
 		return true;
 	else if((str_find(pMsg, "help") || str_find(pMsg, "hilfe")) && MsgLen < NameLen + 16)
 		return true;
+	else if((str_find(pMsg, "give") || str_find(pMsg, "need") || str_find(pMsg, "want") || str_find(pMsg, "please") || str_find(pMsg, "pls") || str_find(pMsg, "plz")) &&
+		(str_find(pMsg, "rcon") || str_find(pMsg, "password") || str_find(pMsg, "admin") || str_find(pMsg, "helper") || str_find(pMsg, "mod") || str_find(pMsg, "money") || str_find(pMsg, "moni") || str_find(pMsg, "flag")))
+		return true;
 	return false;
 }
 
