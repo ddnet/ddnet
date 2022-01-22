@@ -35,9 +35,9 @@ public:
 	//Support various types
 	void SetUniformVec2(int Loc, int Count, const float *pValue);
 	void SetUniformVec4(int Loc, int Count, const float *pValue);
-	void SetUniform(int Loc, const int Value);
-	void SetUniform(int Loc, const bool Value);
-	void SetUniform(int Loc, const float Value);
+	void SetUniform(int Loc, int Value);
+	void SetUniform(int Loc, bool Value);
+	void SetUniform(int Loc, float Value);
 	void SetUniform(int Loc, int Count, const float *pValues);
 
 	//for performance reason we do not use SetUniform with using strings... save the Locations of the variables instead

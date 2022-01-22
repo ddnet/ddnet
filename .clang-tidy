@@ -36,6 +36,7 @@ Checks: >
   -misc-static-assert,
   -misc-unused-parameters,
   modernize-loop-convert,
+  readability-avoid-const-params-in-decls,
   readability-qualified-auto,
   performance-*,
   -performance-no-int-to-ptr,
