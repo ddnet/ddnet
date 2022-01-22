@@ -54,4 +54,3 @@ Checks: >
   readability-redundant-smartptr-get,
   performance-*,
   -performance-no-int-to-ptr,
-HeaderFilterRegex: 'src/.*'
