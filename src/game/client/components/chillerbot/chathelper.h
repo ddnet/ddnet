@@ -40,10 +40,11 @@ class CChatHelper : public CComponent
 	bool IsBye(const char *pMsg);
 	bool IsQuestionWhy(const char *pMsg);
 	void DoGreet();
-	void ReplyToLastPing();
+	bool ReplyToLastPing(const char *pMessageAuthor, const char *pMessage);
 	void SayFormat(const char *pMsg);
 	void AddChatFilter(const char *pFilter);
 	void ListChatFilter();
+	bool IsSpam(int ClientID, int Team, const char *pMsg);
 
 	void OnChatMessage(int ClientID, int Team, const char *pMsg);
 
