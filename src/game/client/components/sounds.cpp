@@ -184,7 +184,7 @@ void CSounds::PlayAndRecord(int Chn, int SetId, float Vol, vec2 Pos)
 {
 	CNetMsg_Sv_SoundGlobal Msg;
 	Msg.m_SoundID = SetId;
-	Client()->SendPackMsg(&Msg, MSGFLAG_NOSEND | MSGFLAG_RECORD);
+	Client()->SendPackMsgActive(&Msg, MSGFLAG_NOSEND | MSGFLAG_RECORD);
 
 	Play(Chn, SetId, Vol);
 }

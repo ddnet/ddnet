@@ -292,7 +292,7 @@ void CCityHelper::DropAllMoney(int ClientID)
 	CMsgPacker Msg(NETMSGTYPE_CL_SAY, false);
 	Msg.AddInt(0);
 	Msg.AddString(aBuf, -1);
-	Client()->SendMsgY(&Msg, MSGFLAG_VITAL, ClientID);
+	Client()->SendMsg(ClientID, &Msg, MSGFLAG_VITAL);
 }
 
 void CCityHelper::OnRender()

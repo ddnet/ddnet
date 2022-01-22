@@ -1365,7 +1365,7 @@ void CChat::Say(int Team, const char *pLine)
 	CNetMsg_Cl_Say Msg;
 	Msg.m_Team = Team;
 	Msg.m_pMessage = pLine;
-	Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
 
 	m_pClient->m_ChillerBotUX.ReturnFromAfk(pLine);
 }

@@ -199,7 +199,7 @@ void CVibeBot::Emote(int Emoticon)
 {
 	CMsgPacker Msg(NETMSGTYPE_CL_EMOTICON, false);
 	Msg.AddInt(Emoticon);
-	Client()->SendMsgY(&Msg, MSGFLAG_VITAL, m_MoveID);
+	Client()->SendMsg(m_MoveID, &Msg, MSGFLAG_VITAL);
 }
 
 void CVibeBot::Aim(int TargetX, int TargetY)
