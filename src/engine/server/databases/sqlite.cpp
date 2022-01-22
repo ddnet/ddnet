@@ -224,12 +224,12 @@ void CSqliteConnection::BindFloat(int Idx, float Value)
 
 // TODO(2020-09-07): remove extern declaration, when all supported systems ship SQLite3 version 3.14 or above
 #if defined(__GNUC__)
-extern char *sqlite3_expanded_sql(sqlite3_stmt *pStmt) __attribute__((weak));
+
 #endif
 
 void CSqliteConnection::Print()
 {
-	if(m_pStmt != nullptr && sqlite3_expanded_sql != nullptr)
+	if(m_pStmt != nullptr)
 	{
 		char *pExpandedStmt = sqlite3_expanded_sql(m_pStmt);
 		dbg_msg("sql", "SQLite statement: %s", pExpandedStmt);

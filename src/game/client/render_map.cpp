@@ -76,7 +76,6 @@ void CRenderTools::RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Cha
 	pResult[1] = fx2f(pPoints[NumPoints - 1].m_aValues[1]);
 	pResult[2] = fx2f(pPoints[NumPoints - 1].m_aValues[2]);
 	pResult[3] = fx2f(pPoints[NumPoints - 1].m_aValues[3]);
-	return;
 }
 
 static void Rotate(CPoint *pCenter, CPoint *pPoint, float Rotation)

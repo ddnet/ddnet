@@ -298,12 +298,10 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 
 void CMenuBackground::OnMapLoad()
 {
-	return;
 }
 
 void CMenuBackground::OnRender()
 {
-	return;
 }
 
 bool CMenuBackground::Render()

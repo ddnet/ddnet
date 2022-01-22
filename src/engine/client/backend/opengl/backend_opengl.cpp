@@ -2329,9 +2329,7 @@ void CCommandProcessorFragment_OpenGL2::Cmd_RenderTileLayer(const CCommandBuffer
 	}
 }
 
-#ifdef BACKEND_GL_MODERN_API
 #undef BACKEND_GL_MODERN_API
-#endif
 
 #endif
 

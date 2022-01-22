@@ -184,8 +184,6 @@ void CCharacter::HandleNinja()
 
 		return;
 	}
-
-	return;
 }
 
 void CCharacter::DoWeaponSwitch()
@@ -485,8 +483,6 @@ void CCharacter::HandleWeapons()
 
 	// fire Weapon, if wanted
 	FireWeapon();
-
-	return;
 }
 
 void CCharacter::GiveNinja()
@@ -574,7 +570,6 @@ void CCharacter::Tick()
 
 	m_PrevPrevPos = m_PrevPos;
 	m_PrevPos = m_Core.m_Pos;
-	return;
 }
 
 void CCharacter::TickDefered()

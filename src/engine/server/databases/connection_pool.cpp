@@ -54,7 +54,7 @@ CSqlExecData::CSqlExecData(
 }
 
 CDbConnectionPool::CDbConnectionPool() :
-	m_NumElem(),
+
 	FirstElem(0),
 	LastElem(0)
 {

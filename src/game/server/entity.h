@@ -48,7 +48,6 @@ public: // TODO: Maybe make protected
 	/* Getters */
 	int GetID() const { return m_ID; }
 
-public:
 	/* Constructor */
 	CEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos = vec2(0, 0), int ProximityRadius = 0);
 
