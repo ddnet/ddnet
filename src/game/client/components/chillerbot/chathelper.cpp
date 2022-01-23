@@ -403,6 +403,35 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 		m_pClient->m_Chat.Say(0, aBuf);
 		return true;
 	}
+	// whats your setting (mousesense, distance, dyn)
+	if((str_find_nocase(pMessage, "?") ||
+		   str_find_nocase(pMessage, "what") ||
+		   str_find_nocase(pMessage, "which") ||
+		   str_find_nocase(pMessage, "wat") ||
+		   str_find_nocase(pMessage, "much") ||
+		   str_find_nocase(pMessage, "many") ||
+		   str_find_nocase(pMessage, "viel") ||
+		   str_find_nocase(pMessage, "hoch")) &&
+		(str_find_nocase(pMessage, "sens") || str_find_nocase(pMessage, "sesn") || str_find_nocase(pMessage, "snse") || str_find_nocase(pMessage, "senes") || str_find_nocase(pMessage, "inp") || str_find_nocase(pMessage, "speed")))
+	{
+		str_format(aBuf, sizeof(aBuf), "%s my current inp_mousesens is %d", pMessageAuthor, g_Config.m_InpMousesens);
+		m_pClient->m_Chat.Say(0, aBuf);
+		return true;
+	}
+	if((str_find_nocase(pMessage, "?") || str_find_nocase(pMessage, "what") || str_find_nocase(pMessage, "which") || str_find_nocase(pMessage, "wat") || str_find_nocase(pMessage, "much") || str_find_nocase(pMessage, "many")) &&
+		str_find_nocase(pMessage, "dist"))
+	{
+		str_format(aBuf, sizeof(aBuf), "%s my current cl_mouse_max_distance is %d", pMessageAuthor, g_Config.m_ClMouseMaxDistance);
+		m_pClient->m_Chat.Say(0, aBuf);
+		return true;
+	}
+	if((str_find_nocase(pMessage, "?") || str_find_nocase(pMessage, "do you") || str_find_nocase(pMessage, "do u")) &&
+		str_find_nocase(pMessage, "dyn"))
+	{
+		str_format(aBuf, sizeof(aBuf), "%s my dyncam is currently %s", pMessageAuthor, g_Config.m_ClDyncam ? "on" : "off");
+		m_pClient->m_Chat.Say(0, aBuf);
+		return true;
+	}
 	// compliments
 	if(str_find_nocase(pMessage, "good") ||
 		str_find_nocase(pMessage, "happy") ||
