@@ -4102,12 +4102,7 @@ int CGameContext::GetClientVersion(int ClientID) const
 
 bool CGameContext::PlayerModerating() const
 {
-	for(const auto &pPlayer : m_apPlayers)
-	{
-		if(pPlayer && pPlayer->m_Moderating)
-			return true;
-	}
-	return false;
+	return std::any_of(std::begin(m_apPlayers), std::end(m_apPlayers), [](const CPlayer *pPlayer) { return pPlayer && pPlayer->m_Moderating; });
 }
 
 void CGameContext::ForceVote(int EnforcerID, bool Success)

@@ -69,14 +69,7 @@ static const char *VANILLA_IMAGES[] = {
 
 static bool IsVanillaImage(const char *pImage)
 {
-	for(const auto *pVanillaImage : VANILLA_IMAGES)
-	{
-		if(str_comp(pImage, pVanillaImage) == 0)
-		{
-			return true;
-		}
-	}
-	return false;
+	return std::any_of(std::begin(VANILLA_IMAGES), std::end(VANILLA_IMAGES), [pImage](const char *pVanillaImage) { return str_comp(pImage, pVanillaImage) == 0; });
 }
 
 const void *CEditor::ms_pUiGotContext;
