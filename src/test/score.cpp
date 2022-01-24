@@ -81,9 +81,10 @@ struct Score : public testing::TestWithParam<IDbConnection *>
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf),
 			"%s into %s_maps(Map, Server, Mapper, Points, Stars, Timestamp) "
-			"VALUES (\"Kobra 3\", \"Novice\", \"Zerodin\", 5, 5, \"%s\")",
-			m_pConn->InsertIgnore(), m_pConn->GetPrefix(), aTimestamp);
+			"VALUES (\"Kobra 3\", \"Novice\", \"Zerodin\", 5, 5, %s)",
+			m_pConn->InsertIgnore(), m_pConn->GetPrefix(), m_pConn->InsertTimestampAsUtc());
 		ASSERT_FALSE(m_pConn->PrepareStatement(aBuf, m_aError, sizeof(m_aError))) << m_aError;
+		m_pConn->BindString(1, aTimestamp);
 		int NumInserted = 0;
 		ASSERT_FALSE(m_pConn->ExecuteUpdate(&NumInserted, m_aError, sizeof(m_aError))) << m_aError;
 		ASSERT_EQ(NumInserted, 1);
