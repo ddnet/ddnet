@@ -1573,7 +1573,7 @@ void CGameClient::OnNewSnapshot()
 
 	for(int i = 0; i < 2; i++)
 	{
-		if(!m_DDRaceMsgSent[i] && m_Snap.m_pLocalInfo)
+		if(m_DDRaceMsgSent[i] || !m_Snap.m_pLocalInfo)
 		{
 			continue;
 		}
