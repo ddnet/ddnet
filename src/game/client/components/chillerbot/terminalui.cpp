@@ -117,6 +117,12 @@ int CTerminalUI::CursesTick()
 
 	// refresh each window
 	curses_refresh_windows();
+	static int s_LastLogsPushed = 0;
+	if(gs_LogsPushed != s_LastLogsPushed)
+	{
+		gs_LogsPushed = s_LastLogsPushed;
+		gs_NeedLogDraw = true;
+	}
 	return input == -1;
 }
 

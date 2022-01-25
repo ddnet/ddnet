@@ -19,6 +19,7 @@ char g_aInfoStr[1024];
 char g_aInfoStr2[1024];
 char g_aInputStr[1024];
 bool gs_NeedLogDraw;
+int gs_LogsPushed = 0;
 
 void curses_init()
 {
@@ -116,6 +117,10 @@ void curses_log_push(const char *pStr)
 		str_copy(gs_aaChillerLogger[i], gs_aaChillerLogger[i - 1], sizeof(gs_aaChillerLogger[i]));
 	// insert newest on the bottom
 	str_copy(gs_aaChillerLogger[0], pStr, sizeof(gs_aaChillerLogger[0]));
+	gs_LogsPushed++;
+	// scared of integer overflows xd
+	if(gs_LogsPushed > 1000)
+		gs_LogsPushed = 0;
 }
 
 // ChillerDragon: no fucking idea why on macOS vdbg needs it but dbg doesn't
