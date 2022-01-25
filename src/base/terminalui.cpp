@@ -48,8 +48,8 @@ void log_draw()
 	getmaxyx(g_pLogWindow, y, x);
 	int Max = CHILLER_LOGGER_HEIGHT > y ? y : CHILLER_LOGGER_HEIGHT;
 	Max -= 3;
-	int Top = CHILLER_LOGGER_HEIGHT - 2;
-	int line = 0;
+	// int Top = CHILLER_LOGGER_HEIGHT - 2;
+	// int line = 0;
 	for(int k = Max, i = Max; i >= 0; i--)
 	{
 		if(gs_aaChillerLogger[i][0] == '\0')
@@ -58,7 +58,7 @@ void log_draw()
 		// str_format(aBuf, sizeof(aBuf), "%2d|%2d|%s", line++, k, gs_aaChillerLogger[i]);
 		// aBuf[x - 2] = '\0'; // prevent line wrapping and cut on screen border
 		str_copy(aBuf, gs_aaChillerLogger[i], x - 2);
-		mvwprintw(g_pLogWindow, Max - k-- + 1, 1, aBuf);
+		mvwprintw(g_pLogWindow, Max - k-- + 1, 1, "%s", aBuf);
 	}
 }
 

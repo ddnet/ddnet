@@ -61,7 +61,7 @@ void CTerminalUI::InfoDraw()
 	char aBuf[1024 * 4 + 16];
 	str_format(aBuf, sizeof(aBuf), "%s | %s | %s", GetInputMode(), g_aInfoStr, g_aInfoStr2);
 	aBuf[x - 2] = '\0'; // prevent line wrapping and cut on screen border
-	mvwprintw(g_pInfoWin, 1, 1, aBuf);
+	mvwprintw(g_pInfoWin, 1, 1, "%s", aBuf);
 }
 
 void CTerminalUI::InputDraw()
@@ -78,7 +78,7 @@ void CTerminalUI::InputDraw()
 		str_copy(aBuf, g_aInputStr, sizeof(aBuf));
 	int x = getmaxx(g_pInfoWin);
 	aBuf[x - 2] = '\0'; // prevent line wrapping and cut on screen border
-	mvwprintw(g_pInputWin, 1, 1, aBuf);
+	mvwprintw(g_pInputWin, 1, 1, "%s", aBuf);
 }
 
 int CTerminalUI::CursesTick()
@@ -159,7 +159,7 @@ void CTerminalUI::RenderHelpPage()
 		char aBuf[1024];
 		str_format(aBuf, sizeof(aBuf), "|%-*s|", width - 2, aLine);
 		aBuf[mx - 2] = '\0'; // ensure no line wrapping
-		mvwprintw(g_pLogWindow, offY + i++, offX, aBuf);
+		mvwprintw(g_pLogWindow, offY + i++, offX, "%s", aBuf);
 	}
 }
 
@@ -199,7 +199,7 @@ void CTerminalUI::RenderServerList()
 		else
 			str_format(aLine, sizeof(aLine), "|%-*s|", width - 2, aBuf);
 		aLine[mx - 2] = '\0'; // ensure no line wrapping
-		mvwprintw(g_pLogWindow, offY + i, offX, aLine);
+		mvwprintw(g_pLogWindow, offY + i, offX, "%s", aLine);
 	}
 }
 
@@ -259,7 +259,7 @@ void CTerminalUI::RenderScoreboard(int Team, WINDOW *pWin)
             );
             str_format(aLine, sizeof(aLine), "|%-*s|", width - 2, aBuf);
             aLine[mx-2] = '\0'; // ensure no line wrapping
-	        mvwprintw(pWin, offY+i, offX, aLine);
+	        mvwprintw(pWin, offY+i, offX, "%s", aLine);
         }
     }
     */
