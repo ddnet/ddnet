@@ -106,6 +106,7 @@ class CTerminalUI : public CComponent
 	int m_InputMode;
 	int64_t m_LastKeyPress;
 	int m_NumServers;
+	bool m_NewInput;
 
 public:
 	int OnKeyPress(int Key, WINDOW *pWin);

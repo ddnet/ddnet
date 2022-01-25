@@ -123,6 +123,11 @@ int CTerminalUI::CursesTick()
 		gs_LogsPushed = s_LastLogsPushed;
 		gs_NeedLogDraw = true;
 	}
+	if(m_NewInput)
+	{
+		m_NewInput = false;
+		gs_NeedLogDraw = true;
+	}
 	return input == -1;
 }
 
@@ -453,6 +458,7 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 			str_copy(g_aInputStr, g_Config.m_BrFilterString, sizeof(g_aInputStr));
 		}
 		gs_NeedLogDraw = true;
+		m_NewInput = true;
 	}
 	else if(Key == KEY_LEFT)
 		AimX = maximum(AimX - 10, -20);
@@ -476,7 +482,7 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 			gs_NeedLogDraw = true;
 		}
 	}
-	else if(Key == 'c')
+	else if(Key == 'c' && m_RenderServerList)
 	{
 		const CServerInfo *pItem = ServerBrowser()->SortedGet(m_SelectedServer);
 		if(pItem && m_pClient->Client()->State() != IClient::STATE_CONNECTING)
