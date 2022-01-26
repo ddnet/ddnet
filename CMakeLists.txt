@@ -2197,7 +2197,7 @@ if(TOOLS)
   list(APPEND TARGETS_LINK ${TARGET_MASTERSRV} ${TARGET_TWPING})
 
   set(TARGETS_TOOLS)
-  set_src(TOOLS GLOB src/tools
+  set_src(TOOLS_SRC GLOB src/tools
     config_common.h
     config_retrieve.cpp
     config_store.cpp
@@ -2215,7 +2215,7 @@ if(TOOLS)
     unicode_confusables.cpp
     uuid.cpp
   )
-  foreach(ABS_T ${TOOLS})
+  foreach(ABS_T ${TOOLS_SRC})
     file(RELATIVE_PATH T "${PROJECT_SOURCE_DIR}/src/tools/" ${ABS_T})
     if(T MATCHES "\\.cpp$")
       string(REGEX REPLACE "\\.cpp$" "" TOOL "${T}")
