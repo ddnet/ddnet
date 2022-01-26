@@ -616,9 +616,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(*UseCustomColor)
 	{
 		CUIRect aRects[2];
-		Label.VSplitMid(&aRects[0], &aRects[1]);
-		aRects[0].VSplitRight(10.0f, &aRects[0], 0);
-		aRects[1].VSplitLeft(10.0f, 0, &aRects[1]);
+		Label.VSplitMid(&aRects[0], &aRects[1], 20.0f);
 
 		unsigned *paColors[2] = {ColorBody, ColorFeet};
 		const char *paParts[] = {Localize("Body"), Localize("Feet")};
