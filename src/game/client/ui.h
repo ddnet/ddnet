@@ -19,10 +19,11 @@ public:
 	/**
 	 * Splits 2 CUIRect inside *this* CUIRect horizontally. You can pass null pointers.
 	 *
-	 * @param pTop This rect will end up taking the top half of this CUIRect
-	 * @param pBottom This rect will end up taking the bottom half of this CUIRect
+	 * @param pTop This rect will end up taking the top half of this CUIRect.
+	 * @param pBottom This rect will end up taking the bottom half of this CUIRect.
+	 * @param Spacing Total size of margin between split rects.
 	 */
-	void HSplitMid(CUIRect *pTop, CUIRect *pBottom) const;
+	void HSplitMid(CUIRect *pTop, CUIRect *pBottom, float Spacing = 0.0f) const;
 	/**
 	 * Splits 2 CUIRect inside *this* CUIRect.
 	 *
@@ -52,8 +53,9 @@ public:
 	 *
 	 * @param pLeft This rect will take up the left half of *this* CUIRect.
 	 * @param pRight This rect will take up the right half of *this* CUIRect.
+	 * @param Spacing Total size of margin between split rects.
 	 */
-	void VSplitMid(CUIRect *pLeft, CUIRect *pRight) const;
+	void VSplitMid(CUIRect *pLeft, CUIRect *pRight, float Spacing = 0.0f) const;
 	/**
 	 * Splits 2 CUIRect inside *this* CUIRect.
 	 *
