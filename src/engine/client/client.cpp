@@ -1856,7 +1856,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
 			}
 		}
-		else if(!Dummy && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_ADD)
+		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_ADD)
 		{
 			const char *pName = Unpacker.GetString(CUnpacker::SANITIZE_CC);
 			const char *pHelp = Unpacker.GetString(CUnpacker::SANITIZE_CC);
@@ -1864,7 +1864,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			if(Unpacker.Error() == 0)
 				m_pConsole->RegisterTemp(pName, pParams, CFGFLAG_SERVER, pHelp);
 		}
-		else if(!Dummy && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_REM)
+		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_REM)
 		{
 			const char *pName = Unpacker.GetString(CUnpacker::SANITIZE_CC);
 			if(Unpacker.Error() == 0)
@@ -2059,18 +2059,21 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					// add new
 					m_SnapshotStorage[Conn].Add(GameTick, time_get(), SnapSize, pTmpBuffer3, 1);
 
-					// for antiping: if the projectile netobjects from the server contains extra data, this is removed and the original content restored before recording demo
-					unsigned char aExtraInfoRemoved[CSnapshot::MAX_SIZE];
-					mem_copy(aExtraInfoRemoved, pTmpBuffer3, SnapSize);
-					SnapshotRemoveExtraProjectileInfo(aExtraInfoRemoved);
-
-					// add snapshot to demo
-					for(auto &DemoRecorder : m_DemoRecorder)
+					if(!Dummy)
 					{
-						if(DemoRecorder.IsRecording())
+						// for antiping: if the projectile netobjects from the server contains extra data, this is removed and the original content restored before recording demo
+						unsigned char aExtraInfoRemoved[CSnapshot::MAX_SIZE];
+						mem_copy(aExtraInfoRemoved, pTmpBuffer3, SnapSize);
+						SnapshotRemoveExtraProjectileInfo(aExtraInfoRemoved);
+
+						// add snapshot to demo
+						for(auto &DemoRecorder : m_DemoRecorder)
 						{
-							// write snapshot
-							DemoRecorder.RecordSnapshot(GameTick, aExtraInfoRemoved, SnapSize);
+							if(DemoRecorder.IsRecording())
+							{
+								// write snapshot
+								DemoRecorder.RecordSnapshot(GameTick, aExtraInfoRemoved, SnapSize);
+							}
 						}
 					}
 
