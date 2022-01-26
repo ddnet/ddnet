@@ -470,11 +470,7 @@ bool CScoreWorker::SaveScore(IDbConnection *pSqlServer, const ISqlData *pGameDat
 	pSqlServer->BindString(5, pData->m_aGameUuid);
 	pSqlServer->Print();
 	int NumInserted;
-	if(pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize))
-	{
-		return true;
-	}
-	return false;
+	return pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize);
 }
 
 bool CScoreWorker::SaveTeamScore(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure, char *pError, int ErrorSize)
@@ -869,12 +865,7 @@ bool CScoreWorker::ShowTop(IDbConnection *pSqlServer, const ISqlData *pGameData,
 			sizeof(pResult->m_Data.m_aaMessages[Line]));
 	}
 
-	if(!End)
-	{
-		return true;
-	}
-
-	return false;
+	return !End;
 }
 
 bool CScoreWorker::ShowTeamTop5(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)

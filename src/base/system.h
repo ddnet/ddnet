@@ -1873,14 +1873,14 @@ int str_utf8_to_skeleton(const char *str, int *buf, int buf_len);
 		Compares two strings for visual appearance.
 
 	Parameters:
-		a - String to compare.
-		b - String to compare.
+		str1 - String to compare.
+		str2 - String to compare.
 
 	Returns:
 		0 if the strings are confusable.
 		!=0 otherwise.
 */
-int str_utf8_comp_confusable(const char *a, const char *b);
+int str_utf8_comp_confusable(const char *str1, const char *str2);
 
 /*
 	Function: str_utf8_tolower
@@ -1978,13 +1978,13 @@ const char *str_utf8_skip_whitespaces(const char *str);
 		the string in-place.
 
 	Parameters:
-		str - Pointer to the string.
+		param - Pointer to the string.
 
 	Remarks:
 		- The strings are treated as zero-terminated strings.
 		- The string is modified in-place.
 */
-void str_utf8_trim_right(char *str);
+void str_utf8_trim_right(char *param);
 
 /*
 	Function: str_utf8_rewind

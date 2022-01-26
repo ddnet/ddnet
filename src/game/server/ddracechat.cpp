@@ -1294,9 +1294,7 @@ void CGameContext::ConSpecTeam(IConsole::IResult *pResult, void *pUserData)
 
 bool CheckClientID(int ClientID)
 {
-	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
-		return false;
-	return true;
+	return ClientID >= 0 && ClientID < MAX_CLIENTS;
 }
 
 void CGameContext::ConSayTime(IConsole::IResult *pResult, void *pUserData)

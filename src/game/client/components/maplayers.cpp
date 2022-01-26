@@ -121,7 +121,7 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 					 MinTick * TickToMicroSeconds;
 			}
 		}
-		pThis->RenderTools()->RenderEvalEnvelope(pPoints + pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time + (int64_t)TimeOffsetMillis * 1000ll, pChannels);
+		CRenderTools::RenderEvalEnvelope(pPoints + pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time + (int64_t)TimeOffsetMillis * 1000ll, pChannels);
 	}
 	else
 	{
@@ -146,7 +146,7 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 			s_Time += CurTime - s_LastLocalTime;
 			s_LastLocalTime = CurTime;
 		}
-		pThis->RenderTools()->RenderEvalEnvelope(pPoints + pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time + (int64_t)TimeOffsetMillis * 1000ll, pChannels);
+		CRenderTools::RenderEvalEnvelope(pPoints + pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time + (int64_t)TimeOffsetMillis * 1000ll, pChannels);
 	}
 }
 
@@ -322,19 +322,11 @@ bool CMapLayers::STileLayerVisuals::Init(unsigned int Width, unsigned int Height
 
 CMapLayers::STileLayerVisuals::~STileLayerVisuals()
 {
-	if(m_TilesOfLayer)
-	{
-		delete[] m_TilesOfLayer;
-	}
-
-	if(m_BorderTop)
-		delete[] m_BorderTop;
-	if(m_BorderBottom)
-		delete[] m_BorderBottom;
-	if(m_BorderLeft)
-		delete[] m_BorderLeft;
-	if(m_BorderRight)
-		delete[] m_BorderRight;
+	delete[] m_TilesOfLayer;
+	delete[] m_BorderTop;
+	delete[] m_BorderBottom;
+	delete[] m_BorderLeft;
+	delete[] m_BorderRight;
 
 	m_TilesOfLayer = NULL;
 	m_BorderTop = NULL;
@@ -402,7 +394,7 @@ void mem_copy_special(void *pDest, void *pSource, size_t Size, size_t Count, siz
 CMapLayers::~CMapLayers()
 {
 	//clear everything and destroy all buffers
-	if(m_TileLayerVisuals.size() != 0)
+	if(!m_TileLayerVisuals.empty())
 	{
 		int s = m_TileLayerVisuals.size();
 		for(int i = 0; i < s; ++i)
@@ -410,7 +402,7 @@ CMapLayers::~CMapLayers()
 			delete m_TileLayerVisuals[i];
 		}
 	}
-	if(m_QuadLayerVisuals.size() != 0)
+	if(!m_QuadLayerVisuals.empty())
 	{
 		int s = m_QuadLayerVisuals.size();
 		for(int i = 0; i < s; ++i)
@@ -425,7 +417,7 @@ void CMapLayers::OnMapLoad()
 	if(!Graphics()->IsTileBufferingEnabled() && !Graphics()->IsQuadBufferingEnabled())
 		return;
 	//clear everything and destroy all buffers
-	if(m_TileLayerVisuals.size() != 0)
+	if(!m_TileLayerVisuals.empty())
 	{
 		int s = m_TileLayerVisuals.size();
 		for(int i = 0; i < s; ++i)
@@ -435,7 +427,7 @@ void CMapLayers::OnMapLoad()
 		}
 		m_TileLayerVisuals.clear();
 	}
-	if(m_QuadLayerVisuals.size() != 0)
+	if(!m_QuadLayerVisuals.empty())
 	{
 		int s = m_QuadLayerVisuals.size();
 		for(int i = 0; i < s; ++i)
@@ -831,8 +823,8 @@ void CMapLayers::OnMapLoad()
 						tmpTileTexCoords.insert(tmpTileTexCoords.end(), tmpBorderRightTilesTexCoords.begin(), tmpBorderRightTilesTexCoords.end());
 
 						//setup params
-						float *pTmpTiles = (tmpTiles.size() == 0) ? NULL : (float *)&tmpTiles[0];
-						unsigned char *pTmpTileTexCoords = (tmpTileTexCoords.size() == 0) ? NULL : (unsigned char *)&tmpTileTexCoords[0];
+						float *pTmpTiles = (tmpTiles.empty()) ? NULL : (float *)&tmpTiles[0];
+						unsigned char *pTmpTileTexCoords = (tmpTileTexCoords.empty()) ? NULL : (unsigned char *)&tmpTileTexCoords[0];
 
 						Visuals.m_BufferContainerIndex = -1;
 						size_t UploadDataSize = tmpTileTexCoords.size() * sizeof(SGraphicTileTexureCoords) + tmpTiles.size() * sizeof(SGraphicTile);
@@ -888,7 +880,7 @@ void CMapLayers::OnMapLoad()
 				m_QuadLayerVisuals.push_back(new SQuadLayerVisuals());
 				SQuadLayerVisuals *pQLayerVisuals = m_QuadLayerVisuals.back();
 
-				bool Textured = (pQLayer->m_Image == -1 ? false : true);
+				bool Textured = (pQLayer->m_Image != -1);
 
 				tmpQuads.clear();
 				tmpQuadsTextured.clear();

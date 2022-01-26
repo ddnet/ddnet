@@ -133,12 +133,7 @@ bool CCharacter::IsGrounded()
 		return true;
 
 	int MoveRestrictionsBelow = GameServer()->Collision()->GetMoveRestrictions(m_Pos + vec2(0, GetProximityRadius() / 2 + 4), 0.0f);
-	if(MoveRestrictionsBelow & CANTMOVE_DOWN)
-	{
-		return true;
-	}
-
-	return false;
+	return (MoveRestrictionsBelow & CANTMOVE_DOWN) != 0;
 }
 
 void CCharacter::HandleJetpack()
@@ -278,8 +273,6 @@ void CCharacter::HandleNinja()
 
 		return;
 	}
-
-	return;
 }
 
 void CCharacter::DoWeaponSwitch()
@@ -619,31 +612,6 @@ void CCharacter::HandleWeapons()
 
 	// fire Weapon, if wanted
 	FireWeapon();
-	/*
-	// ammo regen
-	int AmmoRegenTime = g_pData->m_Weapons.m_aId[m_Core.m_ActiveWeapon].m_Ammoregentime;
-	if(AmmoRegenTime)
-	{
-		// If equipped and not active, regen ammo?
-		if (m_ReloadTimer <= 0)
-		{
-			if (m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart < 0)
-				m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart = Server()->Tick();
-
-			if ((Server()->Tick() - m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart) >= AmmoRegenTime * Server()->TickSpeed() / 1000)
-			{
-				// Add some ammo
-				m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo = minimum(m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo + 1, 10);
-				m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart = -1;
-			}
-		}
-		else
-		{
-			m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart = -1;
-		}
-	}*/
-
-	return;
 }
 
 void CCharacter::GiveNinja()
@@ -782,7 +750,6 @@ void CCharacter::Tick()
 	m_PrevInput = m_Input;
 
 	m_PrevPos = m_Core.m_Pos;
-	return;
 }
 
 void CCharacter::TickDefered()
@@ -1901,7 +1868,7 @@ void CCharacter::HandleTiles(int Index)
 	}
 
 	int z = GameServer()->Collision()->IsTeleport(MapIndex);
-	if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons && z && (*m_pTeleOuts)[z - 1].size())
+	if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons && z && !(*m_pTeleOuts)[z - 1].empty())
 	{
 		if(m_Super)
 			return;
@@ -1916,7 +1883,7 @@ void CCharacter::HandleTiles(int Index)
 		return;
 	}
 	int evilz = GameServer()->Collision()->IsEvilTeleport(MapIndex);
-	if(evilz && (*m_pTeleOuts)[evilz - 1].size())
+	if(evilz && !(*m_pTeleOuts)[evilz - 1].empty())
 	{
 		if(m_Super)
 			return;
@@ -1945,7 +1912,7 @@ void CCharacter::HandleTiles(int Index)
 		// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
 		for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
 		{
-			if((*m_pTeleCheckOuts)[k].size())
+			if(!(*m_pTeleCheckOuts)[k].empty())
 			{
 				int TeleOut = m_Core.m_pWorld->RandomOr0((*m_pTeleCheckOuts)[k].size());
 				m_Core.m_Pos = (*m_pTeleCheckOuts)[k][TeleOut];
@@ -1982,7 +1949,7 @@ void CCharacter::HandleTiles(int Index)
 		// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
 		for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
 		{
-			if((*m_pTeleCheckOuts)[k].size())
+			if(!(*m_pTeleCheckOuts)[k].empty())
 			{
 				int TeleOut = m_Core.m_pWorld->RandomOr0((*m_pTeleCheckOuts)[k].size());
 				m_Core.m_Pos = (*m_pTeleCheckOuts)[k][TeleOut];

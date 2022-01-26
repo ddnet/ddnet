@@ -171,7 +171,7 @@ public:
 
 	bool AreRectsInit()
 	{
-		return m_UIRects.size() != 0;
+		return !m_UIRects.empty();
 	}
 
 	void InitRects(int RequestedRectCount);

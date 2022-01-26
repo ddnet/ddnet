@@ -344,11 +344,7 @@ bool ServerbrowserParseUrl(NETADDR *pOut, const char *pUrl)
 		}
 	}
 	str_truncate(aHost, sizeof(aHost), pRest + Start, End - Start);
-	if(net_addr_from_str(pOut, aHost))
-	{
-		return true;
-	}
-	return false;
+	return net_addr_from_str(pOut, aHost) != 0;
 }
 bool CServerBrowserHttp::Validate(json_value *pJson)
 {

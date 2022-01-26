@@ -91,7 +91,6 @@ public:
 
 	std::vector<CTheme> m_lThemes;
 
-public:
 	CMenuBackground();
 	~CMenuBackground() override {}
 

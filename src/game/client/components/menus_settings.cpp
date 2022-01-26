@@ -1287,14 +1287,11 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	// check if the new settings require a restart
 	if(CheckSettings)
 	{
-		if(s_GfxFsaaSamples == g_Config.m_GfxFsaaSamples &&
-			s_GfxOpenGLVersion == (int)IsNewOpenGL &&
-			s_GfxUsePreinitBuffer == g_Config.m_GfxUsePreinitBuffer &&
-			s_GfxEnableTextureUnitOptimization == g_Config.m_GfxEnableTextureUnitOptimization &&
-			s_GfxHighdpi == g_Config.m_GfxHighdpi)
-			m_NeedRestartGraphics = false;
-		else
-			m_NeedRestartGraphics = true;
+		m_NeedRestartGraphics = !(s_GfxFsaaSamples == g_Config.m_GfxFsaaSamples &&
+					  s_GfxOpenGLVersion == (int)IsNewOpenGL &&
+					  s_GfxUsePreinitBuffer == g_Config.m_GfxUsePreinitBuffer &&
+					  s_GfxEnableTextureUnitOptimization == g_Config.m_GfxEnableTextureUnitOptimization &&
+					  s_GfxHighdpi == g_Config.m_GfxHighdpi);
 	}
 
 	MainView.HSplitTop(20.0f, &Label, &MainView);

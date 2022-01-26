@@ -470,6 +470,7 @@ void CGameContext::SendStartWarning(int ClientID, const char *pMessage)
 	if(pChr && pChr->m_LastStartWarning < Server()->Tick() - 3 * Server()->TickSpeed())
 	{
 		SendChatTarget(ClientID, pMessage);
+		pChr->m_LastStartWarning = Server()->Tick();
 	}
 }
 
@@ -3650,7 +3651,7 @@ void CGameContext::OnPostSnap()
 
 bool CGameContext::IsClientReady(int ClientID) const
 {
-	return m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_IsReady ? true : false;
+	return m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_IsReady;
 }
 
 bool CGameContext::IsClientPlayer(int ClientID) const
@@ -3842,9 +3843,7 @@ void CGameContext::ResetTuning()
 
 bool CheckClientID2(int ClientID)
 {
-	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
-		return false;
-	return true;
+	return ClientID >= 0 && ClientID < MAX_CLIENTS;
 }
 
 void CGameContext::Whisper(int ClientID, char *pStr)
@@ -4104,12 +4103,7 @@ int CGameContext::GetClientVersion(int ClientID) const
 
 bool CGameContext::PlayerModerating() const
 {
-	for(const auto &pPlayer : m_apPlayers)
-	{
-		if(pPlayer && pPlayer->m_Moderating)
-			return true;
-	}
-	return false;
+	return std::any_of(std::begin(m_apPlayers), std::end(m_apPlayers), [](const CPlayer *pPlayer) { return pPlayer && pPlayer->m_Moderating; });
 }
 
 void CGameContext::ForceVote(int EnforcerID, bool Success)

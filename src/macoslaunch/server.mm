@@ -52,7 +52,7 @@ void runServer()
 	NSBundle *mainBundle = [NSBundle mainBundle];
 	NSTask *task;
 	task = [[NSTask alloc] init];
-	[task setCurrentDirectoryPath: [mainBundle resourcePath]];
+	[task setCurrentDirectoryPath: [mainBundle resourcePath]]; // NOLINT(clang-analyzer-nullability.NullablePassedToNonnull)
 
 	NSArray *arguments = [NSArray new];
 

@@ -192,7 +192,5 @@ bool CLaser::Match(CLaser *pLaser)
 	const vec2 ThisDiff = m_Pos - m_From;
 	const vec2 OtherDiff = pLaser->m_Pos - pLaser->m_From;
 	const float DirError = distance(normalize(OtherDiff) * length(ThisDiff), ThisDiff);
-	if(DirError > 2.f)
-		return false;
-	return true;
+	return DirError <= 2.f;
 }

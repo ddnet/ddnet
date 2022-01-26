@@ -54,7 +54,7 @@ CSqlExecData::CSqlExecData(
 }
 
 CDbConnectionPool::CDbConnectionPool() :
-	m_NumElem(),
+
 	FirstElem(0),
 	LastElem(0)
 {
@@ -83,20 +83,20 @@ void CDbConnectionPool::RegisterDatabase(std::unique_ptr<IDbConnection> pDatabas
 
 void CDbConnectionPool::Execute(
 	FRead pFunc,
-	std::unique_ptr<const ISqlData> pThreadData,
+	std::unique_ptr<const ISqlData> pSqlRequestData,
 	const char *pName)
 {
-	m_aTasks[FirstElem++].reset(new CSqlExecData(pFunc, std::move(pThreadData), pName));
+	m_aTasks[FirstElem++].reset(new CSqlExecData(pFunc, std::move(pSqlRequestData), pName));
 	FirstElem %= sizeof(m_aTasks) / sizeof(m_aTasks[0]);
 	m_NumElem.Signal();
 }
 
 void CDbConnectionPool::ExecuteWrite(
 	FWrite pFunc,
-	std::unique_ptr<const ISqlData> pThreadData,
+	std::unique_ptr<const ISqlData> pSqlRequestData,
 	const char *pName)
 {
-	m_aTasks[FirstElem++].reset(new CSqlExecData(pFunc, std::move(pThreadData), pName));
+	m_aTasks[FirstElem++].reset(new CSqlExecData(pFunc, std::move(pSqlRequestData), pName));
 	FirstElem %= sizeof(m_aTasks) / sizeof(m_aTasks[0]);
 	m_NumElem.Signal();
 }

@@ -2454,7 +2454,7 @@ int net_socket_read_wait(NETSOCKET sock, int time)
 	tv.tv_usec = time % 1000000;
 	sockid = 0;
 
-	FD_ZERO(&readfds);
+	FD_ZERO(&readfds); // NOLINT(clang-analyzer-security.insecureAPI.bzero)
 	if(sock.ipv4sock >= 0)
 	{
 		FD_SET(sock.ipv4sock, &readfds);

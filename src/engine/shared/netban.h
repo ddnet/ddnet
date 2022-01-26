@@ -181,7 +181,7 @@ public:
 	int UnbanByRange(const CNetRange *pRange);
 	int UnbanByIndex(int Index);
 	void UnbanAll();
-	bool IsBanned(const NETADDR *pAddr, char *pBuf, unsigned BufferSize) const;
+	bool IsBanned(const NETADDR *pOrigAddr, char *pBuf, unsigned BufferSize) const;
 
 	static void ConBan(class IConsole::IResult *pResult, void *pUser);
 	static void ConBanRange(class IConsole::IResult *pResult, void *pUser);

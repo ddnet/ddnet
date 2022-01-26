@@ -566,10 +566,8 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elas
 
 void CCollision::Dest()
 {
-	if(m_pDoor)
-		delete[] m_pDoor;
-	if(m_pSwitchers)
-		delete[] m_pSwitchers;
+	delete[] m_pDoor;
+	delete[] m_pSwitchers;
 	m_pTiles = 0;
 	m_Width = 0;
 	m_Height = 0;
@@ -597,9 +595,7 @@ bool CCollision::IsThrough(int x, int y, int xoff, int yoff, vec2 pos0, vec2 pos
 	if(m_pFront && m_pFront[pos].m_Index == TILE_THROUGH_DIR && ((m_pFront[pos].m_Flags == ROTATION_0 && pos0.y > pos1.y) || (m_pFront[pos].m_Flags == ROTATION_90 && pos0.x < pos1.x) || (m_pFront[pos].m_Flags == ROTATION_180 && pos0.y < pos1.y) || (m_pFront[pos].m_Flags == ROTATION_270 && pos0.x > pos1.x)))
 		return true;
 	int offpos = GetPureMapIndex(x + xoff, y + yoff);
-	if(m_pTiles[offpos].m_Index == TILE_THROUGH || (m_pFront && m_pFront[offpos].m_Index == TILE_THROUGH))
-		return true;
-	return false;
+	return m_pTiles[offpos].m_Index == TILE_THROUGH || (m_pFront && m_pFront[offpos].m_Index == TILE_THROUGH);
 }
 
 bool CCollision::IsHookBlocker(int x, int y, vec2 pos0, vec2 pos1) const

@@ -1275,7 +1275,7 @@ void CGraphics_Threaded::QuadContainerUpload(int ContainerIndex)
 	if(IsQuadContainerBufferingEnabled())
 	{
 		SQuadContainer &Container = m_QuadContainers[ContainerIndex];
-		if(Container.m_Quads.size() > 0)
+		if(!Container.m_Quads.empty())
 		{
 			if(Container.m_QuadBufferObjectIndex == -1)
 			{

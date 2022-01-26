@@ -273,7 +273,7 @@ void CProjectile::Tick()
 	else
 		z = GameServer()->Collision()->IsTeleportWeapon(x);
 	CGameControllerDDRace *pControllerDDRace = (CGameControllerDDRace *)GameServer()->m_pController;
-	if(z && pControllerDDRace->m_TeleOuts[z - 1].size())
+	if(z && !pControllerDDRace->m_TeleOuts[z - 1].empty())
 	{
 		int TeleOut = GameServer()->m_World.m_Core.RandomOr0(pControllerDDRace->m_TeleOuts[z - 1].size());
 		m_Pos = pControllerDDRace->m_TeleOuts[z - 1][TeleOut];

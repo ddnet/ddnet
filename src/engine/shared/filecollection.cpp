@@ -29,29 +29,26 @@ bool CFileCollection::IsFilenameValid(const char *pFilename)
 		pFilename += m_FileDescLength;
 	}
 
-	if(pFilename[0] == '_' &&
-		pFilename[1] >= '0' && pFilename[1] <= '9' &&
-		pFilename[2] >= '0' && pFilename[2] <= '9' &&
-		pFilename[3] >= '0' && pFilename[3] <= '9' &&
-		pFilename[4] >= '0' && pFilename[4] <= '9' &&
-		pFilename[5] == '-' &&
-		pFilename[6] >= '0' && pFilename[6] <= '9' &&
-		pFilename[7] >= '0' && pFilename[7] <= '9' &&
-		pFilename[8] == '-' &&
-		pFilename[9] >= '0' && pFilename[9] <= '9' &&
-		pFilename[10] >= '0' && pFilename[10] <= '9' &&
-		pFilename[11] == '_' &&
-		pFilename[12] >= '0' && pFilename[12] <= '9' &&
-		pFilename[13] >= '0' && pFilename[13] <= '9' &&
-		pFilename[14] == '-' &&
-		pFilename[15] >= '0' && pFilename[15] <= '9' &&
-		pFilename[16] >= '0' && pFilename[16] <= '9' &&
-		pFilename[17] == '-' &&
-		pFilename[18] >= '0' && pFilename[18] <= '9' &&
-		pFilename[19] >= '0' && pFilename[19] <= '9')
-		return true;
-
-	return false;
+	return pFilename[0] == '_' &&
+	       pFilename[1] >= '0' && pFilename[1] <= '9' &&
+	       pFilename[2] >= '0' && pFilename[2] <= '9' &&
+	       pFilename[3] >= '0' && pFilename[3] <= '9' &&
+	       pFilename[4] >= '0' && pFilename[4] <= '9' &&
+	       pFilename[5] == '-' &&
+	       pFilename[6] >= '0' && pFilename[6] <= '9' &&
+	       pFilename[7] >= '0' && pFilename[7] <= '9' &&
+	       pFilename[8] == '-' &&
+	       pFilename[9] >= '0' && pFilename[9] <= '9' &&
+	       pFilename[10] >= '0' && pFilename[10] <= '9' &&
+	       pFilename[11] == '_' &&
+	       pFilename[12] >= '0' && pFilename[12] <= '9' &&
+	       pFilename[13] >= '0' && pFilename[13] <= '9' &&
+	       pFilename[14] == '-' &&
+	       pFilename[15] >= '0' && pFilename[15] <= '9' &&
+	       pFilename[16] >= '0' && pFilename[16] <= '9' &&
+	       pFilename[17] == '-' &&
+	       pFilename[18] >= '0' && pFilename[18] <= '9' &&
+	       pFilename[19] >= '0' && pFilename[19] <= '9';
 }
 
 int64_t CFileCollection::ExtractTimestamp(const char *pTimestring)

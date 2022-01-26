@@ -298,12 +298,10 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 
 void CMenuBackground::OnMapLoad()
 {
-	return;
 }
 
 void CMenuBackground::OnRender()
 {
-	return;
 }
 
 bool CMenuBackground::Render()
@@ -389,7 +387,7 @@ void CMenuBackground::ChangePosition(int PositionNumber)
 
 std::vector<CTheme> &CMenuBackground::GetThemes()
 {
-	if(m_lThemes.size() == 0) // not loaded yet
+	if(m_lThemes.empty()) // not loaded yet
 	{
 		// when adding more here, make sure to change the value of PREDEFINED_THEMES_COUNT too
 		m_lThemes.push_back(CTheme("", true, true)); // no theme

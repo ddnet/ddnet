@@ -67,7 +67,7 @@ public:
 	bool m_IsLocal;
 
 	CTeamsCore *TeamsCore();
-	bool Freeze(int Time);
+	bool Freeze(int Seconds);
 	bool Freeze();
 	bool UnFreeze();
 	void GiveAllWeapons();

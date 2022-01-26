@@ -158,19 +158,19 @@ void CScore::SaveScore(int ClientID, float Time, const char *pTimestamp, float C
 	m_pPool->ExecuteWrite(CScoreWorker::SaveScore, std::move(Tmp), "save score");
 }
 
-void CScore::SaveTeamScore(int *aClientIDs, unsigned int Size, float Time, const char *pTimestamp)
+void CScore::SaveTeamScore(int *pClientIDs, unsigned int Size, float Time, const char *pTimestamp)
 {
 	CConsole *pCon = (CConsole *)GameServer()->Console();
 	if(pCon->m_Cheated)
 		return;
 	for(unsigned int i = 0; i < Size; i++)
 	{
-		if(GameServer()->m_apPlayers[aClientIDs[i]]->m_NotEligibleForFinish)
+		if(GameServer()->m_apPlayers[pClientIDs[i]]->m_NotEligibleForFinish)
 			return;
 	}
 	auto Tmp = std::unique_ptr<CSqlTeamScoreData>(new CSqlTeamScoreData());
 	for(unsigned int i = 0; i < Size; i++)
-		str_copy(Tmp->m_aaNames[i], Server()->ClientName(aClientIDs[i]), sizeof(Tmp->m_aaNames[i]));
+		str_copy(Tmp->m_aaNames[i], Server()->ClientName(pClientIDs[i]), sizeof(Tmp->m_aaNames[i]));
 	Tmp->m_Size = Size;
 	Tmp->m_Time = Time;
 	str_copy(Tmp->m_aTimestamp, pTimestamp, sizeof(Tmp->m_aTimestamp));

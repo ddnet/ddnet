@@ -91,7 +91,7 @@ public:
 
 	// returns nullptr if successful, error string if failed
 	const char *SetCharacterTeam(int ClientID, int Team);
-	void CheckTeamFinished(int ClientID);
+	void CheckTeamFinished(int Team);
 
 	void ChangeTeamState(int Team, int State);
 
