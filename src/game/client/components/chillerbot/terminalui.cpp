@@ -6,11 +6,23 @@
 
 #include <base/terminalui.h>
 
+#include <signal.h>
+
 #include "terminalui.h"
 
 #if defined(CONF_CURSES_CLIENT)
 
 CGameClient *g_pClient;
+volatile sig_atomic_t cl_InterruptSignaled = 0;
+
+void HandleSigIntTerm(int Param)
+{
+	cl_InterruptSignaled = 1;
+
+	// Exit the next time a signal is received
+	signal(SIGINT, SIG_DFL);
+	signal(SIGTERM, SIG_DFL);
+}
 
 // mvwprintw(WINDOW, y, x, const char*),
 
@@ -297,6 +309,9 @@ void CTerminalUI::OnInit()
 	DrawBorders(g_pLogWindow);
 	DrawBorders(g_pInfoWin);
 	DrawBorders(g_pInputWin);
+
+	signal(SIGINT, HandleSigIntTerm);
+	signal(SIGTERM, HandleSigIntTerm);
 }
 
 void CTerminalUI::OnShutdown()
@@ -307,6 +322,9 @@ void CTerminalUI::OnShutdown()
 void CTerminalUI::OnRender()
 {
 	CursesTick();
+
+	if(cl_InterruptSignaled)
+		Console()->ExecuteLine("quit");
 
 	str_format(g_aInfoStr2, sizeof(g_aInfoStr2),
 		"selectedServer=%d/%d",
