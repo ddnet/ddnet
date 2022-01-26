@@ -470,6 +470,7 @@ void CGameContext::SendStartWarning(int ClientID, const char *pMessage)
 	if(pChr && pChr->m_LastStartWarning < Server()->Tick() - 3 * Server()->TickSpeed())
 	{
 		SendChatTarget(ClientID, pMessage);
+		pChr->m_LastStartWarning = Server()->Tick();
 	}
 }
 

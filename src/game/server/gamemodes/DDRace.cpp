@@ -69,11 +69,7 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 		const int Team = GetPlayerTeam(ClientID);
 		if(m_Teams.GetSaving(Team))
 		{
-			if(pChr->m_LastStartWarning < Server()->Tick() - 3 * Server()->TickSpeed())
-			{
-				GameServer()->SendChatTarget(ClientID, "You can't start while loading/saving of team is in progress");
-				pChr->m_LastStartWarning = Server()->Tick();
-			}
+			GameServer()->SendStartWarning(ClientID, "You can't start while loading/saving of team is in progress");
 			pChr->Die(ClientID, WEAPON_WORLD);
 			return;
 		}
