@@ -319,7 +319,8 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 		return true;
 	}
 	// why?
-	if(IsQuestionWhy(pMessage) || (str_find(pMessage, "?") && MsgLen < NameLen + 4))
+	if(IsQuestionWhy(pMessage) || (str_find(pMessage, "?") && MsgLen < NameLen + 4) ||
+		((str_find(pMessage, "stop") || str_find_nocase(pMessage, "help")) && (m_pClient->m_WarList.IsWarlist(pMessageAuthor) || m_pClient->m_WarList.IsTraitorlist(pMessageAuthor))))
 	{
 		char aWarReason[128];
 		if(m_pClient->m_WarList.IsWarlist(pMessageAuthor) || m_pClient->m_WarList.IsTraitorlist(pMessageAuthor))
