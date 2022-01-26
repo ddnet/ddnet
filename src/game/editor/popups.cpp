@@ -1166,7 +1166,7 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 		if(pEditor->m_PopupEventType == POPEVENT_EXIT)
 			g_Config.m_ClEditor = 0;
 		else if(pEditor->m_PopupEventType == POPEVENT_LOAD)
-			pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Load map", "Load", "maps", "", pEditor->CallbackOpenMap, pEditor);
+			pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Load map", "Load", "maps", "", CEditor::CallbackOpenMap, pEditor);
 		else if(pEditor->m_PopupEventType == POPEVENT_LOADCURRENT)
 			pEditor->LoadCurrentMap();
 		else if(pEditor->m_PopupEventType == POPEVENT_NEW)
@@ -1175,7 +1175,7 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 			pEditor->m_aFileName[0] = 0;
 		}
 		else if(pEditor->m_PopupEventType == POPEVENT_SAVE)
-			pEditor->CallbackSaveMap(pEditor->m_aFileSaveName, IStorage::TYPE_SAVE, pEditor);
+			CEditor::CallbackSaveMap(pEditor->m_aFileSaveName, IStorage::TYPE_SAVE, pEditor);
 		else if(pEditor->m_PopupEventType == POPEVENT_PLACE_BORDER_TILES)
 			pEditor->PlaceBorderTiles();
 		pEditor->m_PopupEventWasActivated = false;
@@ -1753,7 +1753,7 @@ int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View, void *pContext)
 	pEditor->Graphics()->QuadsBegin();
 
 	// base: white - hue
-	ColorHSVA hsv = pEditor->ms_PickerColor;
+	ColorHSVA hsv = CEditor::ms_PickerColor;
 	IGraphics::CColorVertex ColorArray[4];
 
 	ColorRGBA c = color_cast<ColorRGBA>(ColorHSVA(hsv.x, 0.0f, 1.0f));
@@ -1794,7 +1794,7 @@ int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View, void *pContext)
 
 	// logic
 	float X, Y;
-	if(pEditor->UI()->DoPickerLogic(&pEditor->ms_SVPicker, &SVPicker, &X, &Y))
+	if(pEditor->UI()->DoPickerLogic(&CEditor::ms_SVPicker, &SVPicker, &X, &Y))
 	{
 		hsv.y = X / SVPicker.w;
 		hsv.z = 1.0f - Y / SVPicker.h;
@@ -1835,12 +1835,12 @@ int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View, void *pContext)
 
 	pEditor->Graphics()->QuadsEnd();
 
-	if(pEditor->UI()->DoPickerLogic(&pEditor->ms_HuePicker, &HuePicker, &X, &Y))
+	if(pEditor->UI()->DoPickerLogic(&CEditor::ms_HuePicker, &HuePicker, &X, &Y))
 	{
 		hsv.x = 1.0f - Y / HuePicker.h;
 	}
 
-	pEditor->ms_PickerColor = hsv;
+	CEditor::ms_PickerColor = hsv;
 
 	return 0;
 }

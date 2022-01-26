@@ -34,7 +34,7 @@ public:
 	int GetTeam() const { return m_Team; };
 	int GetCID() const { return m_ClientID; };
 	int GetClientVersion() const;
-	bool SetTimerType(int NewType);
+	bool SetTimerType(int TimerType);
 
 	void Tick();
 	void PostTick();

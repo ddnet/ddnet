@@ -129,7 +129,7 @@ public:
 	static bool HandleSaveError(int Result, int ClientID, CGameContext *pGameContext);
 
 private:
-	CCharacter *MatchCharacter(int ClientID, int SaveID, bool KeepCurrentWeakStrong);
+	CCharacter *MatchCharacter(int ClientID, int SaveID, bool KeepCurrentCharacter);
 
 	IGameController *m_pController;
 

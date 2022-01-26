@@ -28,7 +28,7 @@ public:
 	virtual void OnRelease();
 	virtual bool OnMouseMove(float x, float y);
 
-	void Emote(int Emote);
+	void Emote(int Emoticon);
 	void EyeEmote(int EyeEmote);
 };
 

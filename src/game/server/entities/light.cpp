@@ -97,7 +97,6 @@ void CLight::Tick()
 	}
 
 	HitCharacter();
-	return;
 }
 
 void CLight::Snap(int SnappingClient)

@@ -136,13 +136,13 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&m_Statboard);
 	m_All.Add(&m_Motd);
 	m_All.Add(&m_Menus);
-	m_All.Add(&m_Menus.m_Binder);
+	m_All.Add(&CMenus::m_Binder);
 	m_All.Add(&m_GameConsole);
 
 	m_All.Add(&m_MenuBackground);
 
 	// build the input stack
-	m_Input.Add(&m_Menus.m_Binder); // this will take over all input when we want to bind a key
+	m_Input.Add(&CMenus::m_Binder); // this will take over all input when we want to bind a key
 	m_Input.Add(&m_Binds.m_SpecialBinds);
 	m_Input.Add(&m_GameConsole);
 	m_Input.Add(&m_Chat); // chat has higher prio due to tha you can quit it by pressing esc

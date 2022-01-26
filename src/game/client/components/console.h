@@ -36,7 +36,6 @@ class CGameConsole : public CComponent
 		int m_CompletionEnumerationCount;
 		int m_BacklogActPage;
 
-	public:
 		CGameConsole *m_pGameConsole;
 
 		char m_aCompletionBuffer[128];

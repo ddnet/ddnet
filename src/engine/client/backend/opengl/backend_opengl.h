@@ -72,7 +72,6 @@ protected:
 
 	bool m_IsOpenGLES;
 
-protected:
 	bool IsTexturedState(const CCommandBuffer::SState &State);
 	static bool Texture2DTo3D(void *pImageBuffer, int ImageWidth, int ImageHeight, int ImageColorChannelCount, int SplitCountWidth, int SplitCountHeight, void *pTarget3DImageData, int &Target3DImageWidth, int &Target3DImageHeight);
 
@@ -209,7 +208,7 @@ protected:
 
 public:
 	CCommandProcessorFragment_OpenGL2() :
-		CCommandProcessorFragment_OpenGL(), m_UseMultipleTextureUnits(false) {}
+		m_UseMultipleTextureUnits(false) {}
 };
 
 class CCommandProcessorFragment_OpenGL3 : public CCommandProcessorFragment_OpenGL2

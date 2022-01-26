@@ -88,8 +88,8 @@ public:
 	int GetDataUpdates(int Index) const { return m_aSnapshotDataUpdates[Index]; }
 	void SetStaticsize(int ItemType, int Size);
 	const CData *EmptyDelta() const;
-	int CreateDelta(class CSnapshot *pFrom, class CSnapshot *pTo, void *pData);
-	int UnpackDelta(class CSnapshot *pFrom, class CSnapshot *pTo, const void *pData, int DataSize);
+	int CreateDelta(class CSnapshot *pFrom, class CSnapshot *pTo, void *pDstData);
+	int UnpackDelta(class CSnapshot *pFrom, class CSnapshot *pTo, const void *pSrcData, int DataSize);
 };
 
 // CSnapshotStorage

@@ -2709,7 +2709,7 @@ void CClient::Update()
 
 	if(State() == IClient::STATE_ONLINE)
 	{
-		if(m_EditJobs.size() > 0)
+		if(!m_EditJobs.empty())
 		{
 			std::shared_ptr<CDemoEdit> e = m_EditJobs.front();
 			if(e->Status() == IJob::STATE_DONE)

@@ -57,7 +57,7 @@ class CMapImages : public CComponent
 
 public:
 	CMapImages();
-	CMapImages(int ImageSize);
+	CMapImages(int TextureSize);
 
 	IGraphics::CTextureHandle Get(int Index) const { return m_aTextures[Index]; }
 	int Num() const { return m_Count; }
@@ -75,7 +75,7 @@ public:
 	IGraphics::CTextureHandle GetOverlayTop();
 	IGraphics::CTextureHandle GetOverlayCenter();
 
-	void SetTextureScale(int Size);
+	void SetTextureScale(int Scale);
 	int GetTextureScale();
 
 	void ChangeEntitiesPath(const char *pPath);

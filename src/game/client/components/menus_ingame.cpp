@@ -888,7 +888,6 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 	}
 
 	RenderServerbrowser(MainView);
-	return;
 }
 
 // ghost stuff

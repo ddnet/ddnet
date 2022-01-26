@@ -35,9 +35,9 @@ public:
 	//Support various types
 	void SetUniformVec2(int Loc, int Count, const float *pValue);
 	void SetUniformVec4(int Loc, int Count, const float *pValue);
-	void SetUniform(int Loc, const int Value);
-	void SetUniform(int Loc, const bool Value);
-	void SetUniform(int Loc, const float Value);
+	void SetUniform(int Loc, int Value);
+	void SetUniform(int Loc, bool Value);
+	void SetUniform(int Loc, float Value);
 	void SetUniform(int Loc, int Count, const float *pValues);
 
 	//for performance reason we do not use SetUniform with using strings... save the Locations of the variables instead
@@ -71,8 +71,8 @@ public:
 class CGLSLTextProgram : public CGLSLTWProgram
 {
 public:
-	CGLSLTextProgram() :
-		CGLSLTWProgram()
+	CGLSLTextProgram()
+
 	{
 		m_LastColor[0] = m_LastColor[1] = m_LastColor[2] = m_LastColor[3] = -1.f;
 		m_LastOutlineColor[0] = m_LastOutlineColor[1] = m_LastOutlineColor[2] = m_LastOutlineColor[3] = -1.f;
@@ -101,8 +101,8 @@ public:
 class CGLSLPrimitiveExProgram : public CGLSLTWProgram
 {
 public:
-	CGLSLPrimitiveExProgram() :
-		CGLSLTWProgram()
+	CGLSLPrimitiveExProgram()
+
 	{
 		m_LastRotation = 0.f;
 		m_LastCenter[0] = m_LastCenter[1] = 0.f;
@@ -121,8 +121,8 @@ public:
 class CGLSLSpriteMultipleProgram : public CGLSLTWProgram
 {
 public:
-	CGLSLSpriteMultipleProgram() :
-		CGLSLTWProgram()
+	CGLSLSpriteMultipleProgram()
+
 	{
 		m_LastCenter[0] = m_LastCenter[1] = 0.f;
 		m_LastVertciesColor[0] = m_LastVertciesColor[1] = m_LastVertciesColor[2] = m_LastVertciesColor[3] = -1.f;

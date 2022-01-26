@@ -36,7 +36,5 @@ CEntity::~CEntity()
 bool CEntity::GameLayerClipped(vec2 CheckPos)
 {
 	return round_to_int(CheckPos.x) / 32 < -200 || round_to_int(CheckPos.x) / 32 > Collision()->GetWidth() + 200 ||
-			       round_to_int(CheckPos.y) / 32 < -200 || round_to_int(CheckPos.y) / 32 > Collision()->GetHeight() + 200 ?
-		       true :
-		       false;
+	       round_to_int(CheckPos.y) / 32 < -200 || round_to_int(CheckPos.y) / 32 > Collision()->GetHeight() + 200;
 }

@@ -430,10 +430,8 @@ CSaveTeam::CSaveTeam(IGameController *Controller)
 
 CSaveTeam::~CSaveTeam()
 {
-	if(m_pSwitchers)
-		delete[] m_pSwitchers;
-	if(m_pSavedTees)
-		delete[] m_pSavedTees;
+	delete[] m_pSwitchers;
+	delete[] m_pSavedTees;
 }
 
 int CSaveTeam::Save(int Team)
