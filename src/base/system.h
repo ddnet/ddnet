@@ -2326,6 +2326,20 @@ int secure_rand_below(int below);
 */
 void set_console_msg_color(const void *rgbvoid);
 
+/*
+	Function: os_version_str
+		Returns a human-readable version string of the operating system
+
+	Parameters:
+		version - Buffer to use for the output.
+		length - Length of the output buffer.
+
+	Returns:
+		0 - Success in getting the version.
+		1 - Failure in getting the version.
+*/
+int os_version_str(char *version, int length);
+
 #if defined(__cplusplus)
 }
 #endif

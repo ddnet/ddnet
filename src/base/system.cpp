@@ -26,6 +26,7 @@
 #if defined(CONF_FAMILY_UNIX)
 #include <signal.h>
 #include <sys/time.h>
+#include <sys/utsname.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -3893,6 +3894,85 @@ void set_console_msg_color(const void *rgbvoid)
 		str_format(buff, sizeof(buff), "%c[38;2;%d;%d;%dm", esc_seq, (int)uint8_t(rgb->r * 255.0f), (int)uint8_t(rgb->g * 255.0f), (int)uint8_t(rgb->b * 255.0f));
 	if(has_stdout_logger)
 		stdout_nonewline_logger.logger(buff, stdout_nonewline_logger.user);
+#endif
+}
+
+int os_version_str(char *version, int length)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	const char *DLL = "C:\\Windows\\System32\\user32.dll";
+	DWORD handle;
+	DWORD size = GetFileVersionInfoSizeA(DLL, &handle);
+	if(!size)
+	{
+		return 1;
+	}
+	void *data = malloc(size);
+	if(!GetFileVersionInfoA(DLL, handle, size, data))
+	{
+		free(data);
+		return 1;
+	}
+	VS_FIXEDFILEINFO *fileinfo;
+	UINT unused;
+	if(!VerQueryValueA(data, "\\", (void **)&fileinfo, &unused))
+	{
+		free(data);
+		return 1;
+	}
+	str_format(version, length, "Windows %d.%d.%d.%d",
+		HIWORD(fileinfo->dwProductVersionMS),
+		LOWORD(fileinfo->dwProductVersionMS),
+		HIWORD(fileinfo->dwProductVersionLS),
+		LOWORD(fileinfo->dwProductVersionLS));
+	free(data);
+	return 0;
+#else
+	struct utsname u;
+	if(uname(&u))
+	{
+		return 1;
+	}
+	char extra[128];
+	extra[0] = 0;
+
+	do
+	{
+		IOHANDLE os_release = io_open("/etc/os-release", IOFLAG_READ);
+		char buf[4096];
+		int read;
+		int offset;
+		char *newline;
+		if(!os_release)
+		{
+			break;
+		}
+		read = io_read(os_release, buf, sizeof(buf) - 1);
+		io_close(os_release);
+		buf[read] = 0;
+		if(str_startswith(buf, "PRETTY_NAME="))
+		{
+			offset = 0;
+		}
+		else
+		{
+			const char *found = str_find(buf, "\nPRETTY_NAME=");
+			if(!found)
+			{
+				break;
+			}
+			offset = found - buf + 1;
+		}
+		newline = (char *)str_find(buf + offset, "\n");
+		if(newline)
+		{
+			*newline = 0;
+		}
+		str_format(extra, sizeof(extra), "; %s", buf + offset + 12);
+	} while(0);
+
+	str_format(version, length, "%s %s (%s, %s)%s", u.sysname, u.release, u.machine, u.version, extra);
+	return 0;
 #endif
 }
 }
