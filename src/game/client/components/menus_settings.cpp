@@ -616,9 +616,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(*UseCustomColor)
 	{
 		CUIRect aRects[2];
-		Label.VSplitMid(&aRects[0], &aRects[1]);
-		aRects[0].VSplitRight(10.0f, &aRects[0], 0);
-		aRects[1].VSplitLeft(10.0f, 0, &aRects[1]);
+		Label.VSplitMid(&aRects[0], &aRects[1], 20.0f);
 
 		unsigned *paColors[2] = {ColorBody, ColorFeet};
 		const char *paParts[] = {Localize("Body"), Localize("Feet")};
@@ -2071,7 +2069,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		Section, SectionTwo;
 
 	MainView.HSplitTop(20, &TabLabel1, &MainView);
-	TabLabel1.VSplitLeft(TabLabel1.w / 2, &TabLabel1, &TabLabel2);
+	TabLabel1.VSplitMid(&TabLabel1, &TabLabel2);
 
 	static int s_aPageTabs[2] = {};
 
@@ -2172,7 +2170,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	else if(s_CurTab == 1)
 	{ // ***** CHAT TAB ***** //
 
-		MainView.VSplitLeft(MainView.w / 2, &MainView, &Column);
+		MainView.VSplitMid(&MainView, &Column);
 
 		if(DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatOld, Localize("Use old chat style"), &g_Config.m_ClChatOld, &MainView, LineMargin))
 			GameClient()->m_Chat.RebuildChat();
