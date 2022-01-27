@@ -326,11 +326,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 			str_truncate(m_aCompletionBuffer, sizeof(m_aCompletionBuffer), m_Input.GetString() + m_PlaceholderOffset, m_PlaceholderLength);
 		}
 
-		if(false && m_pClient->m_ChatHelper.OnAutocomplete(&m_Input, m_aCompletionBuffer, m_PlaceholderOffset, m_PlaceholderLength, &m_OldChatStringLength, &m_CompletionChosen, m_ReverseTAB))
-		{
-			m_InputUpdate = true;
-		}
-		else if(m_aCompletionBuffer[0] == '/')
+		if(m_aCompletionBuffer[0] == '/')
 		{
 			CCommand *pCompletionCommand = 0;
 

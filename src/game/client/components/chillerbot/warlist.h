@@ -52,9 +52,9 @@ class CWarList : public CComponent
 	int m_TeamDirs;
 	int m_TraitorDirs;
 
-	static int LoadWarDir(const char *pImgName, int IsDir, int DirType, void *pUser);
-	static int LoadTeamDir(const char *pImgName, int IsDir, int DirType, void *pUser);
-	static int LoadTraitorDir(const char *pImgName, int IsDir, int DirType, void *pUser);
+	static int LoadWarDir(const char *pDirname, int IsDir, int DirType, void *pUser);
+	static int LoadTeamDir(const char *pDirname, int IsDir, int DirType, void *pUser);
+	static int LoadTraitorDir(const char *pDirname, int IsDir, int DirType, void *pUser);
 	void LoadWarList();
 	void LoadTeamList();
 	void LoadTraitorList();
@@ -63,7 +63,7 @@ class CWarList : public CComponent
 	void LoadWarClanPrefixList();
 	int LoadWarNames(const char *pDir);
 	int LoadTeamNames(const char *pFilename);
-	int LoadTraitorNames(const char *pFilename);
+	int LoadTraitorNames(const char *pDir);
 	int LoadWarClanNames(const char *pFilename);
 	int LoadTeamClanNames(const char *pFilename);
 	int LoadWarClanPrefixNames(const char *pFilename);

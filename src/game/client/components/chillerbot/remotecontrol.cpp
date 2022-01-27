@@ -101,7 +101,6 @@ void CRemoteControl::ExecuteWhitelisted(const char *pCommand, const char *pWhite
 	str_format(aBuf, sizeof(aBuf), "command '%s' not whitelisted", pCommand);
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", aBuf);
 	io_close(File);
-	return;
 }
 
 void CRemoteControl::OnMessage(int MsgType, void *pRawMsg)
