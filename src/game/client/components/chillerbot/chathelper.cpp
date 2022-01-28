@@ -340,6 +340,153 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 			return true;
 		}
 	}
+	// check war for others
+	const char *pWhy = str_find_nocase(pMessage, "why");
+	if(!pWhy)
+		pWhy = str_find_nocase(pMessage, "stop");
+	if(!pWhy)
+		pWhy = str_find_nocase(pMessage, "do not");
+	if(!pWhy)
+		pWhy = str_find_nocase(pMessage, "don't");
+	if(!pWhy)
+		pWhy = str_find_nocase(pMessage, "do u");
+	if(!pWhy)
+		pWhy = str_find_nocase(pMessage, "do you");
+	if(!pWhy)
+		pWhy = str_find_nocase(pMessage, "is u");
+	if(!pWhy)
+		pWhy = str_find_nocase(pMessage, "is you");
+	if(!pWhy)
+		pWhy = str_find_nocase(pMessage, "are u");
+	if(!pWhy)
+		pWhy = str_find_nocase(pMessage, "are you");
+	if(pWhy)
+	{
+		const char *pKill = NULL;
+		pKill = str_find_nocase(pWhy, "kill "); // why do you kill foo?
+		if(pKill)
+			pKill = pKill + str_length("kill ");
+		else if((pKill = str_find_nocase(pWhy, "kil "))) // why kil foo?
+			pKill = pKill + str_length("kil ");
+		else if((pKill = str_find_nocase(pWhy, "killed "))) // why killed foo?
+			pKill = pKill + str_length("killed ");
+		else if((pKill = str_find_nocase(pWhy, "block "))) // why do you block foo?
+			pKill = pKill + str_length("block ");
+		else if((pKill = str_find_nocase(pWhy, "blocked "))) // why do you blocked foo?
+			pKill = pKill + str_length("blocked ");
+		else if((pKill = str_find_nocase(pWhy, "help "))) // why no help foo?
+			pKill = pKill + str_length("help ");
+		else if((pKill = str_find_nocase(pWhy, "war with "))) // why do you have war with foo?
+			pKill = pKill + str_length("war with ");
+		else if((pKill = str_find_nocase(pWhy, "war "))) // why war foo?
+			pKill = pKill + str_length("war ");
+		else if((pKill = str_find_nocase(pWhy, "wared "))) // why wared foo?
+			pKill = pKill + str_length("wared ");
+		else if((pKill = str_find_nocase(pWhy, "waring "))) // why waring foo?
+			pKill = pKill + str_length("waring ");
+		else if((pKill = str_find_nocase(pWhy, "bully "))) // why bully foo?
+			pKill = pKill + str_length("bully ");
+		else if((pKill = str_find_nocase(pWhy, "bullying "))) // why bullying foo?
+			pKill = pKill + str_length("bullying ");
+		else if((pKill = str_find_nocase(pWhy, "bullied "))) // why bullied foo?
+			pKill = pKill + str_length("bullied ");
+		else if((pKill = str_find_nocase(pWhy, "freeze "))) // why freeze foo?
+			pKill = pKill + str_length("freeze ");
+
+		if(pKill)
+		{
+			bool HasWar = true;
+			char aVictim[MAX_NAME_LENGTH];
+			str_copy(aVictim, pKill, sizeof(aVictim));
+			if(!m_pClient->m_WarList.IsWarlist(aVictim) && !m_pClient->m_WarList.IsTraitorlist(aVictim))
+			{
+				HasWar = false;
+				if(str_endswith(aVictim, "?")) // cut off the question mark from the victim name
+					aVictim[str_length(aVictim) - 1] = '\0';
+				// cut off own name from the victime name if question in this format "why do you war foo (your name)"
+				char aOwnName[MAX_NAME_LENGTH + 3];
+				// main tee
+				str_format(aOwnName, sizeof(aOwnName), " %s", m_pClient->m_aClients[m_pClient->m_LocalIDs[0]].m_aName);
+				if(str_endswith(aVictim, aOwnName))
+					aVictim[str_length(aVictim) - str_length(aOwnName)] = '\0';
+				if(m_pClient->Client()->DummyConnected())
+				{
+					str_format(aOwnName, sizeof(aOwnName), " %s", m_pClient->m_aClients[m_pClient->m_LocalIDs[1]].m_aName);
+					if(str_endswith(aVictim, aOwnName))
+						aVictim[str_length(aVictim) - str_length(aOwnName)] = '\0';
+				}
+
+				// cut off descriptions like this
+				// why do you block foo he is new here!
+				// why do you block foo she is my friend!!
+				for(int i = 0; i < str_length(aVictim); i++)
+				{
+					// c++ be like...
+					if(i < 2)
+						continue;
+					if(aVictim[i - 1] != ' ')
+						continue;
+					if((aVictim[i] != 'h' || !aVictim[i + 1] || aVictim[i + 1] != 'e' || !aVictim[i + 2] || aVictim[i + 2] != ' ') &&
+						(aVictim[i] != 's' || !aVictim[i + 1] || aVictim[i + 1] != 'h' || !aVictim[i + 2] || aVictim[i + 2] != 'e' || !aVictim[i + 3] || aVictim[i + 3] != ' '))
+						continue;
+
+					aVictim[i - 1] = '\0';
+					break;
+				}
+
+				// do not kill my friend foo
+				const char *pFriend = NULL;
+				if((pFriend = str_find_nocase(aVictim, " friend ")))
+					pFriend += str_length(" friend ");
+				else if((pFriend = str_find_nocase(aVictim, " frint ")))
+					pFriend += str_length(" frint ");
+				else if((pFriend = str_find_nocase(aVictim, " mate ")))
+					pFriend += str_length(" mate ");
+				else if((pFriend = str_find_nocase(aVictim, " bff ")))
+					pFriend += str_length(" bff ");
+				else if((pFriend = str_find_nocase(aVictim, " girlfriend ")))
+					pFriend += str_length(" girlfriend ");
+				else if((pFriend = str_find_nocase(aVictim, " boyfriend ")))
+					pFriend += str_length(" boyfriend ");
+				else if((pFriend = str_find_nocase(aVictim, " dog ")))
+					pFriend += str_length(" dog ");
+				else if((pFriend = str_find_nocase(aVictim, " gf ")))
+					pFriend += str_length(" gf ");
+				else if((pFriend = str_find_nocase(aVictim, " bf ")))
+					pFriend += str_length(" bf ");
+
+				if(pFriend)
+					str_copy(aVictim, pFriend, sizeof(aVictim));
+			}
+
+			char aWarReason[128];
+			if(HasWar || m_pClient->m_WarList.IsWarlist(aVictim) || m_pClient->m_WarList.IsTraitorlist(aVictim))
+			{
+				m_pClient->m_WarList.GetWarReason(aVictim, aWarReason, sizeof(aWarReason));
+				if(aWarReason[0])
+					str_format(aBuf, sizeof(aBuf), "%s: %s has war because: %s", pMessageAuthor, aVictim, aWarReason);
+				else
+					str_format(aBuf, sizeof(aBuf), "%s: the name %s is on my warlist.", pMessageAuthor, aVictim);
+				m_pClient->m_Chat.Say(0, aBuf);
+				return true;
+			}
+			for(auto &Client : m_pClient->m_aClients)
+			{
+				if(!Client.m_Active)
+					continue;
+				if(str_comp(Client.m_aName, aVictim))
+					continue;
+
+				if(m_pClient->m_WarList.IsWarClanlist(Client.m_aClan))
+				{
+					str_format(aBuf, sizeof(aBuf), "%s i war %s because his clan %s is on my warlist.", pMessageAuthor, aVictim, Client.m_aClan);
+					m_pClient->m_Chat.Say(0, aBuf);
+					return true;
+				}
+			}
+		}
+	}
+
 	// spec me
 	if(str_find_nocase(pMessage, "spec") || str_find_nocase(pMessage, "watch") || (str_find_nocase(pMessage, "look") && !str_find_nocase(pMessage, "looks")) || str_find_nocase(pMessage, "schau"))
 	{
@@ -684,10 +831,7 @@ bool CChatHelper::FilterChat(int ClientID, int Team, const char *pLine)
 			str_format(aBuf, sizeof(aBuf), "%s your message got spam filtered", aName);
 			m_pClient->m_Chat.Say(0, aBuf);
 			m_aLastPingMessage[0] = '\0';
-			dbg_msg("chiller", "fallback spam %s", pLine);
 		}
-		else
-			dbg_msg("chiller", "autoreply spam %s", pLine);
 		return true;
 	}
 	return false;
