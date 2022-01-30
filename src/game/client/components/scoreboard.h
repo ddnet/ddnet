@@ -19,16 +19,16 @@ class CScoreboard : public CComponent
 
 public:
 	CScoreboard();
-	virtual void OnReset();
-	virtual void OnConsoleInit();
-	virtual void OnRender();
-	virtual void OnRelease();
+	virtual void OnReset() override;
+	virtual void OnConsoleInit() override;
+	virtual void OnRender() override;
+	virtual void OnRelease() override;
 
 	bool Active();
 
 	// DDRace
 
-	virtual void OnMessage(int MsgType, void *pRawMsg);
+	virtual void OnMessage(int MsgType, void *pRawMsg) override;
 
 private:
 	float m_ServerRecord;

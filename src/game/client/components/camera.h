@@ -40,12 +40,12 @@ public:
 	float m_ZoomSmoothingTarget;
 
 	CCamera();
-	virtual void OnRender();
+	virtual void OnRender() override;
 
 	// DDRace
 
-	virtual void OnConsoleInit();
-	virtual void OnReset();
+	virtual void OnConsoleInit() override;
+	virtual void OnReset() override;
 
 private:
 	static void ConZoomPlus(IConsole::IResult *pResult, void *pUserData);

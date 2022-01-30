@@ -52,7 +52,7 @@ public:
 	IInput::CEvent m_Key;
 	int m_Modifier;
 	CMenusKeyBinder();
-	virtual bool OnInput(IInput::CEvent Event);
+	virtual bool OnInput(IInput::CEvent Event) override;
 };
 
 class CMenus : public CComponent
@@ -521,14 +521,14 @@ public:
 	bool IsActive() const { return m_MenuActive; }
 	void KillServer();
 
-	virtual void OnInit();
+	virtual void OnInit() override;
 
-	virtual void OnStateChange(int NewState, int OldState);
-	virtual void OnReset();
-	virtual void OnRender();
-	virtual bool OnInput(IInput::CEvent Event);
-	virtual bool OnMouseMove(float x, float y);
-	virtual void OnShutdown();
+	virtual void OnStateChange(int NewState, int OldState) override;
+	virtual void OnReset() override;
+	virtual void OnRender() override;
+	virtual bool OnInput(IInput::CEvent Event) override;
+	virtual bool OnMouseMove(float x, float y) override;
+	virtual void OnShutdown() override;
 
 	enum
 	{

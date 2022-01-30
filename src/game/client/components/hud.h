@@ -66,14 +66,14 @@ public:
 	CHud();
 
 	void ResetHudContainers();
-	virtual void OnWindowResize();
-	virtual void OnReset();
-	virtual void OnRender();
-	virtual void OnInit();
+	virtual void OnWindowResize() override;
+	virtual void OnReset() override;
+	virtual void OnRender() override;
+	virtual void OnInit() override;
 
 	// DDRace
 
-	virtual void OnMessage(int MsgType, void *pRawMsg);
+	virtual void OnMessage(int MsgType, void *pRawMsg) override;
 
 private:
 	void RenderRecord();

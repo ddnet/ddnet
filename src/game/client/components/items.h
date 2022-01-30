@@ -16,8 +16,8 @@ class CItems : public CComponent
 	int m_ItemsQuadContainerIndex;
 
 public:
-	virtual void OnRender();
-	virtual void OnInit();
+	virtual void OnRender() override;
+	virtual void OnInit() override;
 
 	void ReconstructSmokeTrail(const CProjectileData *pCurrent, int DestroyTick);
 };

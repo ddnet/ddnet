@@ -22,11 +22,11 @@ class CEmoticon : public CComponent
 public:
 	CEmoticon();
 
-	virtual void OnReset();
-	virtual void OnConsoleInit();
-	virtual void OnRender();
-	virtual void OnRelease();
-	virtual bool OnMouseMove(float x, float y);
+	virtual void OnReset() override;
+	virtual void OnConsoleInit() override;
+	virtual void OnRender() override;
+	virtual void OnRelease() override;
+	virtual bool OnMouseMove(float x, float y) override;
 
 	void Emote(int Emoticon);
 	void EyeEmote(int EyeEmote);

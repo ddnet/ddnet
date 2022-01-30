@@ -18,7 +18,7 @@ public:
 		bool operator<(const CCountryFlag &Other) const { return str_comp(m_aCountryCodeString, Other.m_aCountryCodeString) < 0; }
 	};
 
-	void OnInit();
+	void OnInit() override;
 
 	int Num() const;
 	const CCountryFlag *GetByCountryCode(int CountryCode) const;

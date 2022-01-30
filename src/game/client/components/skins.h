@@ -17,7 +17,7 @@ public:
 		CSkins *m_pSkins;
 
 	protected:
-		virtual int OnCompletion(int State);
+		virtual int OnCompletion(int State) override;
 
 	public:
 		CGetPngFile(CSkins *pSkins, IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType = -2, CTimeout Timeout = CTimeout{4000, 500, 5}, HTTPLOG LogProgress = HTTPLOG::ALL);
@@ -35,7 +35,7 @@ public:
 		bool operator==(const char *pOther) const { return !str_comp(m_aName, pOther); }
 	};
 
-	void OnInit();
+	void OnInit() override;
 
 	void Refresh();
 	int Num();

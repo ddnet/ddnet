@@ -35,10 +35,10 @@ public:
 	CVoteOptionClient *m_pRecycleLast;
 
 	CVoting();
-	virtual void OnReset();
-	virtual void OnConsoleInit();
-	virtual void OnMessage(int Msgtype, void *pRawMsg);
-	virtual void OnRender();
+	virtual void OnReset() override;
+	virtual void OnConsoleInit() override;
+	virtual void OnMessage(int Msgtype, void *pRawMsg) override;
+	virtual void OnRender() override;
 
 	void RenderBars(CUIRect Bars, bool Text);
 

@@ -37,11 +37,11 @@ public:
 
 	CRaceDemo();
 
-	virtual void OnReset();
-	virtual void OnStateChange(int NewState, int OldState);
-	virtual void OnMessage(int MsgType, void *pRawMsg);
-	virtual void OnMapLoad();
-	virtual void OnShutdown();
+	virtual void OnReset() override;
+	virtual void OnStateChange(int NewState, int OldState) override;
+	virtual void OnMessage(int MsgType, void *pRawMsg) override;
+	virtual void OnMapLoad() override;
+	virtual void OnShutdown() override;
 
 	void OnNewSnapshot();
 };

@@ -50,10 +50,10 @@ public:
 		CHN_MAPSOUND,
 	};
 
-	virtual void OnInit();
-	virtual void OnReset();
-	virtual void OnStateChange(int NewState, int OldState);
-	virtual void OnRender();
+	virtual void OnInit() override;
+	virtual void OnReset() override;
+	virtual void OnStateChange(int NewState, int OldState) override;
+	virtual void OnRender() override;
 
 	void ClearQueue();
 	void Enqueue(int Channel, int SetId);

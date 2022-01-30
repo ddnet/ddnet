@@ -63,8 +63,8 @@ public:
 	int Num() const { return m_Count; }
 
 	void OnMapLoadImpl(class CLayers *pLayers, class IMap *pMap);
-	virtual void OnMapLoad();
-	virtual void OnInit();
+	virtual void OnMapLoad() override;
+	virtual void OnInit() override;
 	void LoadBackground(class CLayers *pLayers, class IMap *pMap);
 
 	// DDRace

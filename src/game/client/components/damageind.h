@@ -34,7 +34,7 @@ public:
 
 	void Create(vec2 Pos, vec2 Dir);
 	void Reset();
-	virtual void OnRender();
-	virtual void OnInit();
+	virtual void OnRender() override;
+	virtual void OnInit() override;
 };
 #endif

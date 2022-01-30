@@ -29,7 +29,7 @@ public:
 	{
 	public:
 		CBinds *m_pBinds;
-		virtual bool OnInput(IInput::CEvent Event);
+		virtual bool OnInput(IInput::CEvent Event) override;
 	};
 
 	enum
@@ -57,8 +57,8 @@ public:
 	static const char *GetModifierName(int Modifier);
 	static const char *GetKeyBindModifiersName(int Modifier);
 
-	virtual void OnConsoleInit();
-	virtual bool OnInput(IInput::CEvent Event);
+	virtual void OnConsoleInit() override;
+	virtual bool OnInput(IInput::CEvent Event) override;
 
 	// DDRace
 

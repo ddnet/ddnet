@@ -31,9 +31,9 @@ class CMapSounds : public CComponent
 public:
 	CMapSounds();
 
-	virtual void OnMapLoad();
-	virtual void OnRender();
-	virtual void OnStateChange(int NewState, int OldState);
+	virtual void OnMapLoad() override;
+	virtual void OnRender() override;
+	virtual void OnStateChange(int NewState, int OldState) override;
 };
 
 #endif // GAME_CLIENT_COMPONENTS_MAPSOUNDS_H
