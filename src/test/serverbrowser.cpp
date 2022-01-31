@@ -11,6 +11,7 @@
 TEST(ServerBrowser, PingCache)
 {
 	CTestInfo Info;
+	Info.m_DeleteTestStorageFilesOnSuccess = true;
 
 	auto pConsole = std::unique_ptr<IConsole>(CreateConsole(CFGFLAG_CLIENT));
 	auto pStorage = std::unique_ptr<IStorage>(Info.CreateTestStorage());
@@ -99,6 +100,4 @@ TEST(ServerBrowser, PingCache)
 		EXPECT_EQ(pEntries[0].m_Ping, 1337);
 		EXPECT_EQ(pEntries[1].m_Ping, 345);
 	}
-
-	Info.DeleteTestStorageFilesOnSuccess();
 }
