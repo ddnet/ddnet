@@ -1782,11 +1782,17 @@ void CCharacter::HandleTiles(int Index)
 	else if(GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_JUMP)
 	{
 		int NewJumps = GameServer()->Collision()->GetSwitchDelay(MapIndex);
+		if(NewJumps == 255)
+		{
+			NewJumps = -1;
+		}
 
 		if(NewJumps != m_Core.m_Jumps)
 		{
 			char aBuf[256];
-			if(NewJumps == 1)
+			if(NewJumps == -1)
+				str_format(aBuf, sizeof(aBuf), "You only have your ground jump now");
+			else if(NewJumps == 1)
 				str_format(aBuf, sizeof(aBuf), "You can jump %d time", NewJumps);
 			else
 				str_format(aBuf, sizeof(aBuf), "You can jump %d times", NewJumps);
@@ -2120,7 +2126,9 @@ void CCharacter::DDRacePostCoreTick()
 	if(m_DeepFreeze && !m_Super)
 		Freeze();
 
-	if(m_Core.m_Jumps == 0 && !m_Super)
+	if(m_Core.m_Jumps == -1 && !m_Super)
+		m_Core.m_Jumped |= 2;
+	else if(m_Core.m_Jumps == 0 && !m_Super)
 		m_Core.m_Jumped = 3;
 	else if(m_Core.m_Jumps == 1 && m_Core.m_Jumped > 0)
 		m_Core.m_Jumped = 3;
