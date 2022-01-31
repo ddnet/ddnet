@@ -333,6 +333,12 @@ IOHANDLE io_stdout();
 */
 IOHANDLE io_stderr();
 
+/*
+	Function: io_current_exe
+		Returns an <IOHANDLE> to the current executable.
+*/
+IOHANDLE io_current_exe();
+
 typedef struct ASYNCIO ASYNCIO;
 
 /*

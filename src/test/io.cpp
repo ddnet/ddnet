@@ -61,3 +61,10 @@ TEST(Io, ReadBom6)
 {
 	TestFileRead("\xef\xbb\xbfxyz\xef\xbb\xbf", true, "xyz\xef\xbb\xbf");
 }
+TEST(Io, CurrentExe)
+{
+	IOHANDLE CurrentExe = io_current_exe();
+	ASSERT_TRUE(CurrentExe);
+	EXPECT_GE(io_length(CurrentExe), 1024);
+	io_close(CurrentExe);
+}

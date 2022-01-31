@@ -50,6 +50,7 @@
 #define _task_user_
 
 #include <Carbon/Carbon.h>
+#include <mach-o/dyld.h>
 #include <mach/mach_time.h>
 #endif
 
@@ -88,6 +89,47 @@ IOHANDLE io_stdin()
 }
 IOHANDLE io_stdout() { return (IOHANDLE)stdout; }
 IOHANDLE io_stderr() { return (IOHANDLE)stderr; }
+
+IOHANDLE io_current_exe()
+{
+	// From https://stackoverflow.com/a/1024937.
+#if defined(CONF_FAMILY_WINDOWS)
+	wchar_t wpath[IO_MAX_PATH_LENGTH];
+	char path[IO_MAX_PATH_LENGTH];
+	if(!GetModuleFileNameW(NULL, wpath, sizeof(wpath) / sizeof(wpath[0])))
+	{
+		return 0;
+	}
+	if(!WideCharToMultiByte(CP_UTF8, 0, wpath, -1, path, sizeof(path), NULL, NULL))
+	{
+		return 0;
+	}
+	return io_open(path, IOFLAG_READ);
+#elif defined(CONF_PLATFORM_MACOS)
+	char path[IO_MAX_PATH_LENGTH];
+	uint32_t path_size = sizeof(path);
+	if(_NSGetExecutablePath(path, &path_size))
+	{
+		return 0;
+	}
+	return io_open(path, IOFLAG_READ);
+#else
+	static const char *NAMES[] = {
+		"/proc/self/exe", // Linux, Android
+		"/proc/curproc/exe", // NetBSD
+		"/proc/curproc/file", // DragonFly
+	};
+	for(auto &name : NAMES)
+	{
+		IOHANDLE result = io_open(name, IOFLAG_READ);
+		if(result)
+		{
+			return result;
+		}
+	}
+	return 0;
+#endif
+}
 
 typedef struct
 {
