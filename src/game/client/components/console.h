@@ -119,6 +119,7 @@ public:
 	};
 
 	CGameConsole();
+	virtual int Sizeof() const override { return sizeof(*this); }
 
 	void PrintLine(int Type, const char *pLine);
 	void RequireUsername(bool UsernameReq);

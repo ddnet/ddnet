@@ -35,6 +35,7 @@ public:
 	int m_OtherFire;
 
 	CControls();
+	virtual int Sizeof() const override { return sizeof(*this); }
 
 	virtual void OnReset() override;
 	virtual void OnRelease() override;

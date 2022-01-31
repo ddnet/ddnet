@@ -146,6 +146,7 @@ public:
 
 	CMapLayers(int Type, bool OnlineOnly = true);
 	virtual ~CMapLayers();
+	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual void OnInit() override;
 	virtual void OnRender() override;
 	virtual void OnMapLoad() override;

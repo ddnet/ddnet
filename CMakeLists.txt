@@ -293,7 +293,9 @@ endfunction()
 function(set_src VAR GLOBBING DIRECTORY) # ...
   set_glob(${VAR} ${GLOBBING} "c;cpp;h" ${DIRECTORY} ${ARGN})
   set(${VAR} ${${VAR}} PARENT_SCOPE)
+  set(CHECKSUM_SRC ${CHECKSUM_SRC} ${${VAR}} PARENT_SCOPE)
 endfunction()
+set(CHECKSUM_SRC)
 
 function(set_own_rpath TARGET)
   if(NOT TARGET_OS STREQUAL "windows" AND NOT TARGET_OS STREQUAL "mac")
@@ -1749,6 +1751,7 @@ if(CLIENT)
     backend_sdl.h
     blocklist_driver.cpp
     blocklist_driver.h
+    checksum.h
     client.cpp
     client.h
     demoedit.cpp
@@ -1905,6 +1908,7 @@ if(CLIENT)
     popups.cpp
   )
   set(GAME_GENERATED_CLIENT
+    src/game/generated/checksum.cpp
     src/game/generated/client_data.cpp
     src/game/generated/client_data.h
     src/game/generated/client_data7.cpp
@@ -2251,6 +2255,36 @@ if(TOOLS)
   add_custom_target(tools DEPENDS ${TARGETS_TOOLS})
 endif()
 add_custom_target(everything DEPENDS ${TARGETS_OWN})
+
+########################################################################
+# CHECKSUM
+########################################################################
+
+if(DEV)
+  # Only do minimal checksumming in a DEV build.
+  set(CHECKSUM_SRC)
+endif()
+list(APPEND CHECKSUM_SRC
+  ${PROJECT_SOURCE_DIR}/CMakeLists.txt
+  ${PROJECT_SOURCE_DIR}/scripts/checksum.py
+)
+configure_file(cmake/checksummed_extra.txt checksummed_extra.txt)
+string(REPLACE ";" "\n" CHECKSUM_SRC_FILE "${CHECKSUM_SRC}")
+file(WRITE ${PROJECT_BINARY_DIR}/checksummed_files.txt ${CHECKSUM_SRC_FILE})
+
+add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/src/game/generated/checksum.cpp
+  COMMAND ${PYTHON_EXECUTABLE}
+    scripts/checksum.py
+    ${PROJECT_BINARY_DIR}/checksummed_files.txt
+    ${PROJECT_BINARY_DIR}/checksummed_extra.txt
+    > ${PROJECT_BINARY_DIR}/src/game/generated/checksum.cpp
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  DEPENDS
+    ${CHECKSUM_SRC}
+    ${PROJECT_BINARY_DIR}/checksummed_files.txt
+    ${PROJECT_BINARY_DIR}/checksummed_extra.txt
+    scripts/checksum.py
+)
 
 ########################################################################
 # TESTS

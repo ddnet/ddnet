@@ -50,6 +50,7 @@ public:
 		CHN_MAPSOUND,
 	};
 
+	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual void OnInit() override;
 	virtual void OnReset() override;
 	virtual void OnStateChange(int NewState, int OldState) override;

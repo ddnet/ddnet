@@ -16,6 +16,7 @@ class CItems : public CComponent
 	int m_ItemsQuadContainerIndex;
 
 public:
+	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual void OnRender() override;
 	virtual void OnInit() override;
 

@@ -40,6 +40,7 @@ public:
 	float m_ZoomSmoothingTarget;
 
 	CCamera();
+	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual void OnRender() override;
 
 	// DDRace

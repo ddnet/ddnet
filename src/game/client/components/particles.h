@@ -62,6 +62,7 @@ public:
 	};
 
 	CParticles();
+	virtual int Sizeof() const override { return sizeof(*this); }
 
 	void Add(int Group, CParticle *pPart, float TimePassed = 0.f);
 
@@ -89,6 +90,7 @@ private:
 	{
 	public:
 		CParticles *m_pParts;
+		virtual int Sizeof() const override { return sizeof(*this); }
 		virtual void OnRender() override { m_pParts->RenderGroup(TGROUP); }
 	};
 

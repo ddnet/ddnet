@@ -52,6 +52,7 @@ public:
 	IInput::CEvent m_Key;
 	int m_Modifier;
 	CMenusKeyBinder();
+	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual bool OnInput(IInput::CEvent Event) override;
 };
 
@@ -514,6 +515,7 @@ public:
 	static CMenusKeyBinder m_Binder;
 
 	CMenus();
+	virtual int Sizeof() const override { return sizeof(*this); }
 
 	void RenderLoading();
 	void RenderUpdating(const char *pCaption, int current = 0, int total = 0);

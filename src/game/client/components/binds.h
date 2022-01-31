@@ -24,11 +24,13 @@ class CBinds : public CComponent
 public:
 	CBinds();
 	~CBinds();
+	virtual int Sizeof() const override { return sizeof(*this); }
 
 	class CBindsSpecial : public CComponent
 	{
 	public:
 		CBinds *m_pBinds;
+		virtual int Sizeof() const override { return sizeof(*this); }
 		virtual bool OnInput(IInput::CEvent Event) override;
 	};
 

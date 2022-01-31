@@ -51,6 +51,7 @@ class CNamePlates : public CComponent
 	void ResetNamePlates();
 
 public:
+	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual void OnWindowResize() override;
 	virtual void OnInit() override;
 	virtual void OnRender() override;

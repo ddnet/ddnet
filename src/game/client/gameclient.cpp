@@ -3,6 +3,7 @@
 
 #include <limits>
 
+#include <engine/client/checksum.h>
 #include <engine/demo.h>
 #include <engine/editor.h>
 #include <engine/engine.h>
@@ -322,6 +323,19 @@ void CGameClient::OnInit()
 	// Agressively try to grab window again since some Windows users report
 	// window not being focussed after starting client.
 	Graphics()->SetWindowGrab(true);
+
+	CChecksumData *pChecksum = Client()->ChecksumData();
+	pChecksum->m_SizeofGameClient = sizeof(*this);
+	pChecksum->m_NumComponents = m_All.m_Num;
+	for(int i = 0; i < m_All.m_Num; i++)
+	{
+		if(i >= (int)(sizeof(pChecksum->m_aComponentsChecksum) / sizeof(pChecksum->m_aComponentsChecksum[0])))
+		{
+			break;
+		}
+		int Size = m_All.m_paComponents[i]->Sizeof();
+		pChecksum->m_aComponentsChecksum[i] = Size;
+	}
 }
 
 void CGameClient::OnUpdate()
@@ -1615,6 +1629,7 @@ void CGameClient::OnNewSnapshot()
 		RenderTools()->CalcScreenParams(Graphics()->ScreenAspect(), ZoomToSend, &x, &y);
 		Msg.m_X = x;
 		Msg.m_Y = y;
+		Client()->ChecksumData()->m_Zoom = ZoomToSend;
 		CMsgPacker Packer(Msg.MsgID(), false);
 		Msg.Pack(&Packer);
 		if(ZoomToSend != m_LastZoom)

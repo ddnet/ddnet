@@ -58,6 +58,7 @@ class CMapImages : public CComponent
 public:
 	CMapImages();
 	CMapImages(int TextureSize);
+	virtual int Sizeof() const override { return sizeof(*this); }
 
 	IGraphics::CTextureHandle Get(int Index) const { return m_aTextures[Index]; }
 	int Num() const { return m_Count; }

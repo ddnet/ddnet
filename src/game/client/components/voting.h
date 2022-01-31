@@ -35,6 +35,7 @@ public:
 	CVoteOptionClient *m_pRecycleLast;
 
 	CVoting();
+	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual void OnReset() override;
 	virtual void OnConsoleInit() override;
 	virtual void OnMessage(int Msgtype, void *pRawMsg) override;

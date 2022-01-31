@@ -35,6 +35,7 @@ public:
 		bool operator==(const char *pOther) const { return !str_comp(m_aName, pOther); }
 	};
 
+	virtual int Sizeof() const override { return sizeof(*this); }
 	void OnInit() override;
 
 	void Refresh();

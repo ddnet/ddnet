@@ -64,6 +64,7 @@ class CHud : public CComponent
 
 public:
 	CHud();
+	virtual int Sizeof() const override { return sizeof(*this); }
 
 	void ResetHudContainers();
 	virtual void OnWindowResize() override;

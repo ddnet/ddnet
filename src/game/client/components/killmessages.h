@@ -53,6 +53,7 @@ public:
 	CKillMsg m_aKillmsgs[MAX_KILLMSGS];
 	int m_KillmsgCurrent;
 
+	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual void OnWindowResize() override;
 	virtual void OnReset() override;
 	virtual void OnRender() override;

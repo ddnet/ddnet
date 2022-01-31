@@ -12,6 +12,7 @@ class CBroadcast : public CComponent
 	float m_BroadcastRenderOffset;
 
 public:
+	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual void OnReset() override;
 	virtual void OnRender() override;
 	virtual void OnMessage(int MsgType, void *pRawMsg) override;

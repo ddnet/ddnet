@@ -11,6 +11,7 @@ class CEffects : public CComponent
 
 public:
 	CEffects();
+	virtual int Sizeof() const override { return sizeof(*this); }
 
 	virtual void OnRender() override;
 

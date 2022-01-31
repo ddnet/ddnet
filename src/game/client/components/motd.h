@@ -12,6 +12,7 @@ class CMotd : public CComponent
 public:
 	char m_aServerMotd[900];
 
+	virtual int Sizeof() const override { return sizeof(*this); }
 	void Clear();
 	bool IsActive();
 

@@ -21,6 +21,7 @@ class CEmoticon : public CComponent
 
 public:
 	CEmoticon();
+	virtual int Sizeof() const override { return sizeof(*this); }
 
 	virtual void OnReset() override;
 	virtual void OnConsoleInit() override;

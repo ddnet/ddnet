@@ -149,6 +149,7 @@ public:
 	bool m_AllowRestart;
 
 	CGhost();
+	virtual int Sizeof() const override { return sizeof(*this); }
 
 	virtual void OnRender() override;
 	virtual void OnConsoleInit() override;

@@ -33,6 +33,7 @@ class CSpectator : public CComponent
 
 public:
 	CSpectator();
+	virtual int Sizeof() const override { return sizeof(*this); }
 
 	virtual void OnConsoleInit() override;
 	virtual bool OnMouseMove(float x, float y) override;

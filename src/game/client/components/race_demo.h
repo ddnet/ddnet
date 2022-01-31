@@ -36,6 +36,7 @@ public:
 	bool m_AllowRestart;
 
 	CRaceDemo();
+	virtual int Sizeof() const override { return sizeof(*this); }
 
 	virtual void OnReset() override;
 	virtual void OnStateChange(int NewState, int OldState) override;

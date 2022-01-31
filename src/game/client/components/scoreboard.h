@@ -19,6 +19,7 @@ class CScoreboard : public CComponent
 
 public:
 	CScoreboard();
+	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual void OnReset() override;
 	virtual void OnConsoleInit() override;
 	virtual void OnRender() override;

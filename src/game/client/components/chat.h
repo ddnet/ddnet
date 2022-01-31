@@ -119,6 +119,7 @@ class CChat : public CComponent
 
 public:
 	CChat();
+	virtual int Sizeof() const override { return sizeof(*this); }
 
 	static constexpr float MESSAGE_PADDING_X = 5.0f;
 	static constexpr float MESSAGE_TEE_SIZE = 7.0f;

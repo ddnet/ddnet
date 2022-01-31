@@ -30,6 +30,7 @@ class CMapSounds : public CComponent
 
 public:
 	CMapSounds();
+	virtual int Sizeof() const override { return sizeof(*this); }
 
 	virtual void OnMapLoad() override;
 	virtual void OnRender() override;
