@@ -58,13 +58,14 @@ class CMapImages : public CComponent
 public:
 	CMapImages();
 	CMapImages(int TextureSize);
+	virtual int Sizeof() const override { return sizeof(*this); }
 
 	IGraphics::CTextureHandle Get(int Index) const { return m_aTextures[Index]; }
 	int Num() const { return m_Count; }
 
 	void OnMapLoadImpl(class CLayers *pLayers, class IMap *pMap);
-	virtual void OnMapLoad();
-	virtual void OnInit();
+	virtual void OnMapLoad() override;
+	virtual void OnInit() override;
 	void LoadBackground(class CLayers *pLayers, class IMap *pMap);
 
 	// DDRace

@@ -7,6 +7,7 @@
 #include <base/system.h>
 #include <base/vmath.h>
 
+#include <engine/client/checksum.h>
 #include <engine/shared/protocol.h>
 #include <engine/storage.h>
 
@@ -340,6 +341,29 @@ void CConsole::SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCa
 {
 	m_pfnTeeHistorianCommandCallback = pfnCallback;
 	m_pTeeHistorianCommandUserdata = pUser;
+}
+
+void CConsole::InitChecksum(CChecksumData *pData) const
+{
+	pData->m_NumCommands = 0;
+	for(CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
+	{
+		if(pData->m_NumCommands < (int)(sizeof(pData->m_aCommandsChecksum) / sizeof(pData->m_aCommandsChecksum[0])))
+		{
+			FCommandCallback pfnCallback = pCommand->m_pfnCallback;
+			void *pUserData = pCommand->m_pUserData;
+			while(pfnCallback == Con_Chain)
+			{
+				CChain *pChainInfo = static_cast<CChain *>(pUserData);
+				pfnCallback = pChainInfo->m_pfnCallback;
+				pUserData = pChainInfo->m_pCallbackUserData;
+			}
+			int CallbackBits = (uintptr_t)pfnCallback & 0xfff;
+			int *pTarget = &pData->m_aCommandsChecksum[pData->m_NumCommands];
+			*pTarget = ((uint8_t)pCommand->m_pName[0]) | ((uint8_t)pCommand->m_pName[1] << 8) | (CallbackBits << 16);
+		}
+		pData->m_NumCommands += 1;
+	}
 }
 
 bool CConsole::LineIsValid(const char *pStr)

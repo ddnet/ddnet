@@ -293,7 +293,9 @@ endfunction()
 function(set_src VAR GLOBBING DIRECTORY) # ...
   set_glob(${VAR} ${GLOBBING} "c;cpp;h" ${DIRECTORY} ${ARGN})
   set(${VAR} ${${VAR}} PARENT_SCOPE)
+  set(CHECKSUM_SRC ${CHECKSUM_SRC} ${${VAR}} PARENT_SCOPE)
 endfunction()
+set(CHECKSUM_SRC)
 
 function(set_own_rpath TARGET)
   if(NOT TARGET_OS STREQUAL "windows" AND NOT TARGET_OS STREQUAL "mac")
@@ -570,7 +572,7 @@ endif()
 if(TARGET_OS STREQUAL "windows")
   set(PLATFORM_CLIENT)
   set(PLATFORM_CLIENT_LIBS opengl32 winmm)
-  set(PLATFORM_LIBS ws2_32) # Windows sockets
+  set(PLATFORM_LIBS version ws2_32) # Windows sockets
 elseif(TARGET_OS STREQUAL "mac")
   find_library(CARBON Carbon)
   find_library(COCOA Cocoa)
@@ -1749,6 +1751,7 @@ if(CLIENT)
     backend_sdl.h
     blocklist_driver.cpp
     blocklist_driver.h
+    checksum.h
     client.cpp
     client.h
     demoedit.cpp
@@ -1905,6 +1908,7 @@ if(CLIENT)
     popups.cpp
   )
   set(GAME_GENERATED_CLIENT
+    src/game/generated/checksum.cpp
     src/game/generated/client_data.cpp
     src/game/generated/client_data.h
     src/game/generated/client_data7.cpp
@@ -2197,7 +2201,7 @@ if(TOOLS)
   list(APPEND TARGETS_LINK ${TARGET_MASTERSRV} ${TARGET_TWPING})
 
   set(TARGETS_TOOLS)
-  set_src(TOOLS GLOB src/tools
+  set_src(TOOLS_SRC GLOB src/tools
     config_common.h
     config_retrieve.cpp
     config_store.cpp
@@ -2215,7 +2219,7 @@ if(TOOLS)
     unicode_confusables.cpp
     uuid.cpp
   )
-  foreach(ABS_T ${TOOLS})
+  foreach(ABS_T ${TOOLS_SRC})
     file(RELATIVE_PATH T "${PROJECT_SOURCE_DIR}/src/tools/" ${ABS_T})
     if(T MATCHES "\\.cpp$")
       string(REGEX REPLACE "\\.cpp$" "" TOOL "${T}")
@@ -2253,6 +2257,36 @@ endif()
 add_custom_target(everything DEPENDS ${TARGETS_OWN})
 
 ########################################################################
+# CHECKSUM
+########################################################################
+
+if(DEV)
+  # Only do minimal checksumming in a DEV build.
+  set(CHECKSUM_SRC)
+endif()
+list(APPEND CHECKSUM_SRC
+  ${PROJECT_SOURCE_DIR}/CMakeLists.txt
+  ${PROJECT_SOURCE_DIR}/scripts/checksum.py
+)
+configure_file(cmake/checksummed_extra.txt checksummed_extra.txt)
+string(REPLACE ";" "\n" CHECKSUM_SRC_FILE "${CHECKSUM_SRC}")
+file(WRITE ${PROJECT_BINARY_DIR}/checksummed_files.txt ${CHECKSUM_SRC_FILE})
+
+add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/src/game/generated/checksum.cpp
+  COMMAND ${PYTHON_EXECUTABLE}
+    scripts/checksum.py
+    ${PROJECT_BINARY_DIR}/checksummed_files.txt
+    ${PROJECT_BINARY_DIR}/checksummed_extra.txt
+    > ${PROJECT_BINARY_DIR}/src/game/generated/checksum.cpp
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  DEPENDS
+    ${CHECKSUM_SRC}
+    ${PROJECT_BINARY_DIR}/checksummed_files.txt
+    ${PROJECT_BINARY_DIR}/checksummed_extra.txt
+    scripts/checksum.py
+)
+
+########################################################################
 # TESTS
 ########################################################################
 
@@ -2275,6 +2309,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     mapbugs.cpp
     name_ban.cpp
     netaddr.cpp
+    os.cpp
     packer.cpp
     prng.cpp
     score.cpp

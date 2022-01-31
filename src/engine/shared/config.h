@@ -41,6 +41,7 @@ enum
 	CFGFLAG_NONTEEHISTORIC = 1 << 9,
 	CFGFLAG_COLLIGHT = 1 << 10,
 	CFGFLAG_COLALPHA = 1 << 11,
+	CFGFLAG_INSENSITIVE = 1 << 12,
 };
 
 class CConfigManager : public IConfigManager

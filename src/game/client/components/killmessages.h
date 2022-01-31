@@ -53,11 +53,12 @@ public:
 	CKillMsg m_aKillmsgs[MAX_KILLMSGS];
 	int m_KillmsgCurrent;
 
-	virtual void OnWindowResize();
-	virtual void OnReset();
-	virtual void OnRender();
-	virtual void OnMessage(int MsgType, void *pRawMsg);
-	virtual void OnInit();
+	virtual int Sizeof() const override { return sizeof(*this); }
+	virtual void OnWindowResize() override;
+	virtual void OnReset() override;
+	virtual void OnRender() override;
+	virtual void OnMessage(int MsgType, void *pRawMsg) override;
+	virtual void OnInit() override;
 
 	void RefindSkins();
 };
