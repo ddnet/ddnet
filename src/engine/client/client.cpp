@@ -1600,6 +1600,7 @@ static CServerCapabilities GetServerCapabilities(int Version, int Flags)
 	Result.m_AnyPlayerFlag = DDNet;
 	Result.m_PingEx = false;
 	Result.m_AllowDummy = true;
+	Result.m_SyncWeaponInput = false;
 	if(Version >= 1)
 	{
 		Result.m_ChatTimeoutCode = Flags & SERVERCAPFLAG_CHATTIMEOUTCODE;
@@ -3438,7 +3439,10 @@ void CClient::Con_StartVideo(IConsole::IResult *pResult, void *pUserData)
 	CClient *pSelf = (CClient *)pUserData;
 
 	if(pSelf->State() != IClient::STATE_DEMOPLAYBACK)
+	{
 		pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "videorecorder", "Can not start videorecorder outside of demoplayer.");
+		return;
+	}
 
 	if(!IVideo::Current())
 	{
