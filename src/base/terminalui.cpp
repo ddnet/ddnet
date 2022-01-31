@@ -20,6 +20,8 @@ char g_aInfoStr2[1024];
 char g_aInputStr[1024];
 bool gs_NeedLogDraw;
 int gs_LogsPushed = 0;
+IOHANDLE gs_Logfile = 0;
+
 
 void curses_init()
 {
@@ -154,6 +156,11 @@ void curses_logf(const char *sys, const char *fmt, ...)
 
 	// printf("%s\n", str);
 	curses_log_push(str);
+	if(gs_Logfile)
+	{
+		io_write(gs_Logfile, str, str_length(str));
+		io_write(gs_Logfile, "\n", 1);
+	}
 }
 #ifdef __GNUC__
 #pragma GCC diagnostic pop

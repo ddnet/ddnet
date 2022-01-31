@@ -312,6 +312,12 @@ void CTerminalUI::OnInit()
 
 	signal(SIGINT, HandleSigIntTerm);
 	signal(SIGTERM, HandleSigIntTerm);
+
+	gs_Logfile = 0;
+	// if(g_Config.m_Logfile[0])
+	// {
+	// 	gs_Logfile = io_open(g_Config.m_Logfile, IOFLAG_WRITE);
+	// }
 }
 
 void CTerminalUI::OnShutdown()
