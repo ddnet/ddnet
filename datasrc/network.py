@@ -238,7 +238,7 @@ Objects = [
 	NetObjectEx("DDNetCharacter", "character@netobj.ddnet.tw", [
 		NetIntAny("m_Flags"),
 		NetTick("m_FreezeEnd"),
-		NetIntRange("m_Jumps", 0, 255),
+		NetIntRange("m_Jumps", -1, 255),
 		NetIntAny("m_TeleCheckpoint"),
 		NetIntRange("m_StrongWeakID", 0, 'MAX_CLIENTS-1'),
 	]),
