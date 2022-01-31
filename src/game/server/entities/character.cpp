@@ -1781,18 +1781,18 @@ void CCharacter::HandleTiles(int Index)
 	}
 	else if(GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_JUMP)
 	{
-		int newJumps = GameServer()->Collision()->GetSwitchDelay(MapIndex);
+		int NewJumps = GameServer()->Collision()->GetSwitchDelay(MapIndex);
 
-		if(newJumps != m_Core.m_Jumps)
+		if(NewJumps != m_Core.m_Jumps)
 		{
 			char aBuf[256];
-			if(newJumps == 1)
-				str_format(aBuf, sizeof(aBuf), "You can jump %d time", newJumps);
+			if(NewJumps == 1)
+				str_format(aBuf, sizeof(aBuf), "You can jump %d time", NewJumps);
 			else
-				str_format(aBuf, sizeof(aBuf), "You can jump %d times", newJumps);
+				str_format(aBuf, sizeof(aBuf), "You can jump %d times", NewJumps);
 			GameServer()->SendChatTarget(GetPlayer()->GetCID(), aBuf);
 
-			if(newJumps == 0 && !m_SuperJump)
+			if(NewJumps == 0 && !m_SuperJump)
 			{
 				m_NeededFaketuning |= FAKETUNE_NOJUMP;
 				GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
@@ -1803,7 +1803,7 @@ void CCharacter::HandleTiles(int Index)
 				GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 			}
 
-			m_Core.m_Jumps = newJumps;
+			m_Core.m_Jumps = NewJumps;
 		}
 	}
 	else if(GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_ADD_TIME && !m_LastPenalty)

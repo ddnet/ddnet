@@ -751,9 +751,9 @@ void CCharacter::HandleTiles(int Index)
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_JUMP)
 	{
-		int newJumps = Collision()->GetSwitchDelay(MapIndex);
-		if(newJumps != m_Core.m_Jumps)
-			m_Core.m_Jumps = newJumps;
+		int NewJumps = Collision()->GetSwitchDelay(MapIndex);
+		if(NewJumps != m_Core.m_Jumps)
+			m_Core.m_Jumps = NewJumps;
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_LFREEZE && Team() != TEAM_SUPER)
 	{
