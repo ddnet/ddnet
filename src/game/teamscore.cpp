@@ -20,7 +20,8 @@ int CTeamsCore::Team(int ClientID) const
 
 void CTeamsCore::Team(int ClientID, int Team)
 {
-	m_Team[ClientID] = clamp(Team, (int)TEAM_FLOCK, (int)TEAM_SUPER);
+	dbg_assert(Team >= TEAM_FLOCK && Team <= TEAM_SUPER, "invalid team");
+	m_Team[ClientID] = Team;
 }
 
 bool CTeamsCore::CanKeepHook(int ClientID1, int ClientID2) const
