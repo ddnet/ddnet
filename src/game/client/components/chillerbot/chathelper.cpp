@@ -165,6 +165,7 @@ bool CChatHelper::IsGreeting(const char *pMsg)
 		"moin",
 		"servus",
 		"guten tag",
+		"good morning",
 		"priviet",
 		"ola",
 		"ay",
@@ -205,6 +206,8 @@ bool CChatHelper::IsBye(const char *pMsg)
 		"bb",
 		"see you",
 		"leaving",
+		"have a nice day",
+		"have an nice day",
 		"quit",
 		"bye"};
 	for(const auto &aBye : aByes)
