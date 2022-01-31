@@ -462,14 +462,6 @@ unsigned io_write_newline(IOHANDLE io)
 
 int io_close(IOHANDLE io)
 {
-	if(io_flush(io) != 0)
-	{
-		dbg_msg("file", "flushing stream failed: %d", errno);
-	}
-	if(io_fsync(io) != 0)
-	{
-		dbg_msg("file", "flushing file to disk failed: %d", errno);
-	}
 	return fclose((FILE *)io) != 0;
 }
 
@@ -478,12 +470,16 @@ int io_flush(IOHANDLE io)
 	return fflush((FILE *)io);
 }
 
-int io_fsync(IOHANDLE io)
+int io_sync(IOHANDLE io)
 {
+	if(io_flush(io))
+	{
+		return 1;
+	}
 #if defined(CONF_FAMILY_WINDOWS)
-	return FlushFileBuffers((HANDLE)_get_osfhandle(_fileno((FILE *)io)));
+	return FlushFileBuffers((HANDLE)_get_osfhandle(_fileno((FILE *)io))) == 0;
 #else
-	return fsync(fileno((FILE *)io));
+	return fsync(fileno((FILE *)io)) != 0;
 #endif
 }
 

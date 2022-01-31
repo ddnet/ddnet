@@ -304,8 +304,8 @@ int io_close(IOHANDLE io);
 int io_flush(IOHANDLE io);
 
 /*
-	Function: io_fsync
-		Synchronize file changes to disk
+	Function: io_sync
+		Synchronize file changes to disk.
 
 	Parameters:
 		io - Handle to the file.
@@ -313,7 +313,7 @@ int io_flush(IOHANDLE io);
 	Returns:
 		Returns 0 on success.
 */
-int io_fsync(IOHANDLE io);
+int io_sync(IOHANDLE io);
 
 /*
 	Function: io_error
