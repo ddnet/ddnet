@@ -1462,6 +1462,53 @@ void CGameContext::ConRescue(IConsole::IResult *pResult, void *pUserData)
 	pChr->Rescue();
 }
 
+void CGameContext::ConTele(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if(!pPlayer)
+		return;
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(!pChr)
+		return;
+
+	CGameTeams &Teams = ((CGameControllerDDRace *)pSelf->m_pController)->m_Teams;
+	int Team = Teams.m_Core.Team(pResult->m_ClientID);
+	if(!Teams.IsPractice(Team))
+	{
+		pSelf->SendChatTarget(pPlayer->GetCID(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
+		return;
+	}
+
+	vec2 Pos = pPlayer->m_ViewPos;
+
+	if(pResult->NumArguments() > 0)
+	{
+		int ClientID;
+		for(ClientID = 0; ClientID < MAX_CLIENTS; ClientID++)
+		{
+			if(str_comp(pResult->GetString(0), pSelf->Server()->ClientName(ClientID)) == 0)
+				break;
+		}
+		if(ClientID == MAX_CLIENTS)
+		{
+			pSelf->SendChatTarget(pPlayer->GetCID(), "No player with this name found.");
+			return;
+		}
+		CPlayer *pPlayerTo = pSelf->m_apPlayers[ClientID];
+		if(!pPlayerTo)
+			return;
+		CCharacter *pChrTo = pPlayerTo->GetCharacter();
+		if(!pChrTo)
+			return;
+		Pos = pChrTo->m_Pos;
+	}
+
+	pSelf->Teleport(pChr, Pos);
+}
+
 void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
