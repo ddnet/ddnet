@@ -60,7 +60,7 @@ public:
 		}
 
 		// add save directories
-		if(StorageType != STORAGETYPE_BASIC && m_NumPaths && (!m_aaStoragePaths[TYPE_SAVE][0] || !fs_makedir(m_aaStoragePaths[TYPE_SAVE])))
+		if(StorageType != STORAGETYPE_BASIC && m_NumPaths && (!m_aaStoragePaths[TYPE_SAVE][0] || !fs_makedir_rec_for(m_aaStoragePaths[TYPE_SAVE]) || !fs_makedir(m_aaStoragePaths[TYPE_SAVE])))
 		{
 			char aPath[IO_MAX_PATH_LENGTH];
 			if(StorageType == STORAGETYPE_CLIENT)

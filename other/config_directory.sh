@@ -13,8 +13,9 @@ case "$(uname -s)" in
 			open "$HOME/Library/Application Support/Teeworlds/"
 		fi;;
 	*)
-		if [ -d "$HOME/.ddnet/" ]; then
-			xdg-open "$HOME/.ddnet/"
+		DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+		if [ -d "$DATA_HOME/ddnet/" ]; then
+			xdg-open "$DATA_HOME/ddnet/"
 		else
 			xdg-open "$HOME/.teeworlds/"
 		fi;;
