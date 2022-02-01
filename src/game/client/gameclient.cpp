@@ -580,6 +580,17 @@ void CGameClient::UpdatePositions()
 
 void CGameClient::OnRender()
 {
+	if(m_GameInfo.m_AllowEntities && g_Config.m_ClOverlayEntities)
+	{
+		ColorRGBA bg = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClBackgroundEntitiesColor));
+		Graphics()->Clear(bg.r, bg.g, bg.b);
+	}
+	else
+	{
+		ColorRGBA bg = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClBackgroundColor));
+		Graphics()->Clear(bg.r, bg.g, bg.b);
+	}
+
 	// update the local character and spectate position
 	UpdatePositions();
 
@@ -1017,6 +1028,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	Info.m_DontMaskEntities = !DDNet;
 	Info.m_AllowXSkins = false;
 	Info.m_EntitiesFDDrace = FDDrace;
+	Info.m_AllowEntities = true;
 
 	if(Version >= 0)
 	{
@@ -1061,6 +1073,10 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	if(Version >= 6)
 	{
 		Info.m_EntitiesFDDrace = Flags2 & GAMEINFOFLAG2_ENTITIES_FDDRACE;
+	}
+	if(Version >= 7)
+	{
+		Info.m_AllowEntities = Flags2 & GAMEINFOFLAG2_ALLOW_ENTITIES;
 	}
 	return Info;
 }

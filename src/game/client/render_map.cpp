@@ -86,12 +86,12 @@ static void Rotate(CPoint *pCenter, CPoint *pPoint, float Rotation)
 	pPoint->y = (int)(x * sinf(Rotation) + y * cosf(Rotation) + pCenter->y);
 }
 
-void CRenderTools::RenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser)
+void CRenderTools::RenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser, int EntityOverlayVal)
 {
-	if(!g_Config.m_ClShowQuads || g_Config.m_ClOverlayEntities == 100)
+	if(!g_Config.m_ClShowQuads || (EntityOverlayVal == 100))
 		return;
 
-	ForceRenderQuads(pQuads, NumQuads, RenderFlags, pfnEval, pUser, (100 - g_Config.m_ClOverlayEntities) / 100.0f);
+	ForceRenderQuads(pQuads, NumQuads, RenderFlags, pfnEval, pUser, (100 - EntityOverlayVal) / 100.0f);
 }
 
 void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser, float Alpha)
