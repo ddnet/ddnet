@@ -69,6 +69,7 @@
 #include <direct.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <io.h>
 #include <process.h>
 #include <share.h>
 #include <shellapi.h>
@@ -467,6 +468,19 @@ int io_close(IOHANDLE io)
 int io_flush(IOHANDLE io)
 {
 	return fflush((FILE *)io);
+}
+
+int io_sync(IOHANDLE io)
+{
+	if(io_flush(io))
+	{
+		return 1;
+	}
+#if defined(CONF_FAMILY_WINDOWS)
+	return FlushFileBuffers((HANDLE)_get_osfhandle(_fileno((FILE *)io))) == 0;
+#else
+	return fsync(fileno((FILE *)io)) != 0;
+#endif
 }
 
 #define ASYNC_BUFSIZE 8 * 1024

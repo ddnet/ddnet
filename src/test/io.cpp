@@ -68,3 +68,13 @@ TEST(Io, CurrentExe)
 	EXPECT_GE(io_length(CurrentExe), 1024);
 	io_close(CurrentExe);
 }
+TEST(Io, SyncWorks)
+{
+	CTestInfo Info;
+	IOHANDLE File = io_open(Info.m_aFilename, IOFLAG_WRITE);
+	ASSERT_TRUE(File);
+	EXPECT_EQ(io_write(File, "abc\n", 4), 4);
+	EXPECT_FALSE(io_sync(File));
+	EXPECT_FALSE(io_close(File));
+	EXPECT_FALSE(fs_remove(Info.m_aFilename));
+}
