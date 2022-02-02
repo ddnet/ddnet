@@ -24,7 +24,7 @@ GameInfoFlags = [
 	# Full, use GameInfoFlags2 for more flags
 ]
 GameInfoFlags2 = [
-	"ALLOW_X_SKINS", "GAMETYPE_CITY", "GAMETYPE_FDDRACE", "ENTITIES_FDDRACE", "ALLOW_ENTITIES",
+	"ALLOW_X_SKINS", "GAMETYPE_CITY", "GAMETYPE_FDDRACE", "ENTITIES_FDDRACE", "CURRENT_MAP_ENTITIES",
 ]
 ExPlayerFlags = ["AFK", "PAUSED", "SPEC"]
 ProjectileFlags = ["CLIENTID_BIT{}".format(i) for i in range(8)] + [

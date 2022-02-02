@@ -85,7 +85,7 @@ public:
 	bool m_EntitiesVanilla;
 	bool m_EntitiesBW;
 	bool m_EntitiesFDDrace;
-	bool m_AllowEntities;
+	bool m_CurrentMapEntities;
 
 	bool m_Race;
 

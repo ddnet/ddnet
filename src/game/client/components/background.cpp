@@ -65,7 +65,7 @@ void CBackground::LoadBackground()
 	str_copy(m_aMapName, g_Config.m_ClBackgroundEntities, sizeof(m_aMapName));
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "maps/%s", g_Config.m_ClBackgroundEntities);
-	if(str_comp(g_Config.m_ClBackgroundEntities, CURRENT_MAP) == 0)
+	if(str_comp(g_Config.m_ClBackgroundEntities, CURRENT_MAP) == 0 || GameClient()->m_GameInfo.m_CurrentMapEntities)
 	{
 		m_pMap = Kernel()->RequestInterface<IEngineMap>();
 		if(m_pMap->IsLoaded())
@@ -105,7 +105,7 @@ void CBackground::OnMapLoad()
 void CBackground::OnRender()
 {
 	//probably not the best place for this
-	if(g_Config.m_ClBackgroundEntities[0] != '\0' && str_comp(g_Config.m_ClBackgroundEntities, m_aMapName))
+	if((g_Config.m_ClBackgroundEntities[0] != '\0' && str_comp(g_Config.m_ClBackgroundEntities, m_aMapName)) || GameClient()->m_GameInfo.m_CurrentMapEntities)
 		LoadBackground();
 
 	if(!m_Loaded)
@@ -114,7 +114,7 @@ void CBackground::OnRender()
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		return;
 
-	if(GameClient()->m_GameInfo.m_AllowEntities && g_Config.m_ClOverlayEntities != 100)
+	if(g_Config.m_ClOverlayEntities != 100)
 		return;
 
 	CMapLayers::OnRender();

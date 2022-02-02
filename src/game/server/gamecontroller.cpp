@@ -600,7 +600,7 @@ void IGameController::Snap(int SnappingClient)
 		GAMEINFOFLAG_ENTITIES_DDRACE |
 		GAMEINFOFLAG_ENTITIES_RACE |
 		GAMEINFOFLAG_RACE;
-	pGameInfoEx->m_Flags2 = GAMEINFOFLAG2_ALLOW_ENTITIES;
+	pGameInfoEx->m_Flags2 = GAMEINFOFLAG2_CURRENT_MAP_ENTITIES;
 	pGameInfoEx->m_Version = GAMEINFO_CURVERSION;
 
 	if(Server()->IsSixup(SnappingClient))

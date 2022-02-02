@@ -1153,6 +1153,17 @@ const char *CClient::ErrorString() const
 
 void CClient::Render()
 {
+	if(g_Config.m_ClOverlayEntities)
+	{
+		ColorRGBA bg = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClBackgroundEntitiesColor));
+		Graphics()->Clear(bg.r, bg.g, bg.b);
+	}
+	else
+	{
+		ColorRGBA bg = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClBackgroundColor));
+		Graphics()->Clear(bg.r, bg.g, bg.b);
+	}
+
 	GameClient()->OnRender();
 	DebugRender();
 
