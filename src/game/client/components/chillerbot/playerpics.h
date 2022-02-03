@@ -21,7 +21,7 @@ public:
 		bool operator<(const CPlayerPic &Other) const { return str_comp(m_aPlayerName, Other.m_aPlayerName) < 0; }
 	};
 
-	void OnInit();
+	virtual void OnInit() override;
 
 	int Num() const;
 	const CPlayerPic *GetByName(const char *pName) const;
