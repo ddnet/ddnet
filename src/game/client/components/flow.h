@@ -22,6 +22,7 @@ class CFlow : public CComponent
 
 public:
 	CFlow();
+	virtual int Sizeof() const override { return sizeof(*this); }
 
 	vec2 Get(vec2 Pos);
 	void Add(vec2 Pos, vec2 Vel, float Size);

@@ -22,6 +22,7 @@ Makefile
 Release
 _CPack_Packages/
 build.ninja
+checksummed_*
 cmake_install.cmake
 gmock.pc
 gmock_main.pc

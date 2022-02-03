@@ -6,10 +6,10 @@
 class CCityHelper : public CComponent
 {
 private:
-	virtual void OnRender();
-	virtual void OnInit();
-	virtual void OnConsoleInit();
-	virtual void OnMessage(int MsgType, void *pRawMsg);
+	virtual void OnRender() override;
+	virtual void OnInit() override;
+	virtual void OnConsoleInit() override;
+	virtual void OnMessage(int MsgType, void *pRawMsg) override;
 
 	static void ConchainShowWallet(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
@@ -32,6 +32,8 @@ private:
 	void AddWalletMoney(int Money, int ClientID = -1);
 
 public:
+	virtual int Sizeof() const override { return sizeof(*this); }
+
 	std::vector<std::pair<std::string, int>> m_vWalletMain;
 	std::vector<std::pair<std::string, int>> m_vWalletDummy;
 

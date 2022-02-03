@@ -110,6 +110,11 @@ bool CConfigManager::Save()
 	for(int i = 0; i < m_NumCallbacks; i++)
 		m_aCallbacks[i].m_pfnFunc(this, m_aCallbacks[i].m_pUserData);
 
+	if(io_sync(m_ConfigFile) != 0)
+	{
+		m_Failed = true;
+	}
+
 	if(io_close(m_ConfigFile) != 0)
 		m_Failed = true;
 

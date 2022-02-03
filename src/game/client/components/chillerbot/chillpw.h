@@ -9,10 +9,13 @@
 
 class CChillPw : public CComponent
 {
+public:
+	virtual int Sizeof() const override { return sizeof(*this); }
+
 private:
-	virtual void OnMapLoad();
-	virtual void OnRender();
-	virtual void OnInit();
+	virtual void OnMapLoad() override;
+	virtual void OnRender() override;
+	virtual void OnInit() override;
 
 	bool AuthChatAccount(int Dummy, int Offset);
 	void SavePassword(const char *pServer, const char *pPassword);

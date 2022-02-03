@@ -304,6 +304,18 @@ int io_close(IOHANDLE io);
 int io_flush(IOHANDLE io);
 
 /*
+	Function: io_sync
+		Synchronize file changes to disk.
+
+	Parameters:
+		io - Handle to the file.
+
+	Returns:
+		Returns 0 on success.
+*/
+int io_sync(IOHANDLE io);
+
+/*
 	Function: io_error
 		Checks whether an error occurred during I/O with the file.
 
@@ -332,6 +344,12 @@ IOHANDLE io_stdout();
 		Returns an <IOHANDLE> to the standard error.
 */
 IOHANDLE io_stderr();
+
+/*
+	Function: io_current_exe
+		Returns an <IOHANDLE> to the current executable.
+*/
+IOHANDLE io_current_exe();
 
 typedef struct ASYNCIO ASYNCIO;
 
@@ -2325,6 +2343,20 @@ int secure_rand_below(int below);
 		rgb - If NULL it will reset the console color to default, else it will transform the rgb color to a console color
 */
 void set_console_msg_color(const void *rgbvoid);
+
+/*
+	Function: os_version_str
+		Returns a human-readable version string of the operating system
+
+	Parameters:
+		version - Buffer to use for the output.
+		length - Length of the output buffer.
+
+	Returns:
+		0 - Success in getting the version.
+		1 - Failure in getting the version.
+*/
+int os_version_str(char *version, int length);
 
 #if defined(CONF_CURSES_CLIENT)
 void curses_logf(const char *sys, const char *fmt, ...);

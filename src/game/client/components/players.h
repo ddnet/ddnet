@@ -33,8 +33,9 @@ class CPlayers : public CComponent
 
 public:
 	vec2 m_CurPredictedPos[MAX_CLIENTS];
-	virtual void OnInit();
-	virtual void OnRender();
+	virtual int Sizeof() const override { return sizeof(*this); }
+	virtual void OnInit() override;
+	virtual void OnRender() override;
 };
 
 #endif

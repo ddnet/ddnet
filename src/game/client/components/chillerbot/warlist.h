@@ -68,9 +68,9 @@ class CWarList : public CComponent
 	int LoadTeamClanNames(const char *pFilename);
 	int LoadWarClanPrefixNames(const char *pFilename);
 
-	virtual void OnRender();
-	virtual void OnConsoleInit();
-	virtual void OnInit();
+	virtual void OnRender() override;
+	virtual void OnConsoleInit() override;
+	virtual void OnInit() override;
 
 	static void ConWarlist(IConsole::IResult *pResult, void *pUserData);
 
@@ -82,6 +82,7 @@ class CWarList : public CComponent
 
 public:
 	void GetWarReason(const char *pName, char *pReason, int ReasonSize);
+	virtual int Sizeof() const override { return sizeof(*this); }
 
 	// non cached used when its about the name and there is no up to date id
 	bool IsWar(const char *pName, const char *pClan);

@@ -87,9 +87,9 @@ class CTerminalUI : public CComponent
 		}
 	};
 
-	virtual void OnInit();
-	virtual void OnRender();
-	virtual void OnShutdown();
+	virtual void OnInit() override;
+	virtual void OnRender() override;
+	virtual void OnShutdown() override;
 	bool RconAuthed() { return Client()->RconAuthed(); }
 	int GetInput();
 	void DrawAllBorders();
@@ -110,6 +110,7 @@ class CTerminalUI : public CComponent
 
 public:
 	int OnKeyPress(int Key, WINDOW *pWin);
+	virtual int Sizeof() const override { return sizeof(*this); }
 #endif
 };
 

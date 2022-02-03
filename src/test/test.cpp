@@ -72,15 +72,11 @@ int TestCollect(const char *pName, int IsDir, int Unused, void *pUser)
 	return 0;
 }
 
-void CTestInfo::DeleteTestStorageFilesOnSuccess()
+void TestDeleteTestStorageFiles(const char *pPath)
 {
-	if(::testing::Test::HasFailure())
-	{
-		return;
-	}
 	std::vector<CTestInfoPath> aEntries;
 	CTestCollectData Data;
-	str_copy(Data.m_aCurrentDir, m_aFilename, sizeof(Data.m_aCurrentDir));
+	str_copy(Data.m_aCurrentDir, pPath, sizeof(Data.m_aCurrentDir));
 	Data.m_paEntries = &aEntries;
 	fs_listdir(Data.m_aCurrentDir, TestCollect, 0, &Data);
 
@@ -104,6 +100,14 @@ void CTestInfo::DeleteTestStorageFilesOnSuccess()
 		{
 			ASSERT_FALSE(fs_remove(Entry.m_aData));
 		}
+	}
+}
+
+CTestInfo::~CTestInfo()
+{
+	if(!::testing::Test::HasFailure() && m_DeleteTestStorageFilesOnSuccess)
+	{
+		TestDeleteTestStorageFiles(m_aFilename);
 	}
 }
 

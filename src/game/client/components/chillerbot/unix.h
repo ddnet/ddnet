@@ -5,14 +5,17 @@
 
 class CUnix : public CComponent
 {
-	virtual void OnConsoleInit();
-	virtual void OnInit();
+	virtual void OnConsoleInit() override;
+	virtual void OnInit() override;
 
 	void ls();
 
 	static int listDirCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser);
 
 	static void ConLs(IConsole::IResult *pResult, void *pUserData);
+
+public:
+	virtual int Sizeof() const override { return sizeof(*this); }
 };
 
 #endif

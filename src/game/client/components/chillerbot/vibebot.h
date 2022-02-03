@@ -11,9 +11,9 @@
 class CVibeBot : public CComponent
 {
 private:
-	virtual void OnRender();
-	virtual void OnInit();
-	virtual void OnConsoleInit();
+	virtual void OnRender() override;
+	virtual void OnInit() override;
+	virtual void OnConsoleInit() override;
 
 	static void ConVibe(IConsole::IResult *pResult, void *pUserData);
 	static void ConVibes(IConsole::IResult *pResult, void *pUserData);
@@ -41,6 +41,7 @@ private:
 
 public:
 	CVibeBot();
+	virtual int Sizeof() const override { return sizeof(*this); }
 
 	CNetObj_Character *GetCharacter() const;
 	void Emote(int Emoticon);

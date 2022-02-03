@@ -48,10 +48,10 @@ class CChatHelper : public CComponent
 
 	void OnChatMessage(int ClientID, int Team, const char *pMsg);
 
-	virtual void OnRender();
-	virtual void OnMessage(int MsgType, void *pRawMsg);
-	virtual void OnConsoleInit();
-	virtual void OnInit();
+	virtual void OnRender() override;
+	virtual void OnMessage(int MsgType, void *pRawMsg) override;
+	virtual void OnConsoleInit() override;
+	virtual void OnInit() override;
 
 	static void ConReplyToLastPing(IConsole::IResult *pResult, void *pUserData);
 	static void ConSayHi(IConsole::IResult *pResult, void *pUserData);
@@ -62,6 +62,7 @@ class CChatHelper : public CComponent
 
 public:
 	CChatHelper();
+	virtual int Sizeof() const override { return sizeof(*this); }
 	void RegisterCommand(const char *pName, const char *pParams, int flags, const char *pHelp);
 	void Get128Name(const char *pMsg, char *pName);
 	const char *GetGreetName() { return m_aGreetName; }

@@ -135,6 +135,10 @@ public:
 	 */
 	virtual ~CComponent() {}
 	/**
+	 * Gets the size of the non-abstract component.
+	 */
+	virtual int Sizeof() const = 0;
+	/**
 	 * Get a pointer to the game client.
 	 */
 	class CGameClient *GameClient() const { return m_pClient; }

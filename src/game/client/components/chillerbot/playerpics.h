@@ -11,6 +11,8 @@
 class CPlayerPics : public CComponent
 {
 public:
+	virtual int Sizeof() const override { return sizeof(*this); }
+
 	struct CPlayerPic
 	{
 		char m_aPlayerName[32];
@@ -46,6 +48,6 @@ private:
 		const CNetObj_PlayerInfo *pPlayerInfo);
 	void RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pPlayerInfo, float Alpha);
 
-	virtual void OnRender();
+	virtual void OnRender() override;
 };
 #endif

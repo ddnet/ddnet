@@ -94,12 +94,12 @@ class CChillerBotUX : public CComponent
 	void GotoTele(int Number, int Offset = -1);
 	void DumpPlayers(const char *pSearch = 0);
 
-	virtual void OnRender();
-	virtual void OnMessage(int MsgType, void *pRawMsg);
-	virtual void OnConsoleInit();
-	virtual void OnInit();
-	virtual bool OnMouseMove(float x, float y);
-	virtual bool OnInput(IInput::CEvent e);
+	virtual void OnRender() override;
+	virtual void OnMessage(int MsgType, void *pRawMsg) override;
+	virtual void OnConsoleInit() override;
+	virtual void OnInit() override;
+	virtual bool OnMouseMove(float x, float y) override;
+	virtual bool OnInput(IInput::CEvent e) override;
 
 	static void ConAfk(IConsole::IResult *pResult, void *pUserData);
 	static void ConCampHack(IConsole::IResult *pResult, void *pUserData);
@@ -119,6 +119,7 @@ class CChillerBotUX : public CComponent
 	static void ConchainShowLastKiller(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 public:
+	virtual int Sizeof() const override { return sizeof(*this); }
 	int m_IgnoreChatAfk;
 
 	void ReturnFromAfk(const char *pChatMessage = 0);

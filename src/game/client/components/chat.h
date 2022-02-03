@@ -119,6 +119,7 @@ class CChat : public CComponent
 
 public:
 	CChat();
+	virtual int Sizeof() const override { return sizeof(*this); }
 
 	static constexpr float MESSAGE_PADDING_X = 5.0f;
 	static constexpr float MESSAGE_TEE_SIZE = 7.0f;
@@ -137,15 +138,15 @@ public:
 	void RegisterCommand(const char *pName, const char *pParams, int flags, const char *pHelp);
 	void Echo(const char *pString);
 
-	virtual void OnWindowResize();
-	virtual void OnConsoleInit();
-	virtual void OnStateChange(int NewState, int OldState);
-	virtual void OnRender();
+	virtual void OnWindowResize() override;
+	virtual void OnConsoleInit() override;
+	virtual void OnStateChange(int NewState, int OldState) override;
+	virtual void OnRender() override;
 	virtual void RefindSkins();
 	virtual void OnPrepareLines();
-	virtual void OnRelease();
-	virtual void OnMessage(int MsgType, void *pRawMsg);
-	virtual bool OnInput(IInput::CEvent Event);
+	virtual void OnRelease() override;
+	virtual void OnMessage(int MsgType, void *pRawMsg) override;
+	virtual bool OnInput(IInput::CEvent Event) override;
 
 	void RebuildChat();
 };

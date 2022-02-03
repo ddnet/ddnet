@@ -31,4 +31,8 @@ UUID(NETMSG_CLIENTVER, "clientver@ddnet.tw")
 UUID(NETMSG_PINGEX, "ping@ddnet.tw")
 UUID(NETMSG_PONGEX, "pong@ddnet.tw")
 
+UUID(NETMSG_CHECKSUM_REQUEST, "checksum-request@ddnet.tw")
+UUID(NETMSG_CHECKSUM_RESPONSE, "checksum-response@ddnet.tw")
+UUID(NETMSG_CHECKSUM_ERROR, "checksum-error@ddnet.tw")
+
 UUID(NETMSG_IAMCHILLERBOT, "i-am-chillerbot@chillerbot.github.io")

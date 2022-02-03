@@ -23,6 +23,7 @@ enum
 };
 
 typedef bool (*CLIENTFUNC_FILTER)(const void *pData, int DataSize, void *pUser);
+struct CChecksumData;
 
 class IClient : public IInterface
 {
@@ -231,6 +232,8 @@ public:
 	virtual void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount) = 0;
 
 	virtual SWarning *GetCurWarning() = 0;
+
+	virtual CChecksumData *ChecksumData() = 0;
 
 	// chillerbot
 
