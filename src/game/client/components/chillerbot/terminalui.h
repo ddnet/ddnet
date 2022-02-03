@@ -110,8 +110,9 @@ class CTerminalUI : public CComponent
 
 public:
 	int OnKeyPress(int Key, WINDOW *pWin);
-	virtual int Sizeof() const override { return sizeof(*this); }
 #endif
+public:
+	virtual int Sizeof() const override { return sizeof(*this); }
 };
 
 #endif
