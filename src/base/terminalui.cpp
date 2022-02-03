@@ -22,7 +22,6 @@ bool gs_NeedLogDraw;
 int gs_LogsPushed = 0;
 IOHANDLE gs_Logfile = 0;
 
-
 void curses_init()
 {
 	for(int i = 0; i < CHILLER_LOGGER_HEIGHT; i++)
