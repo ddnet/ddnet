@@ -253,7 +253,7 @@ public:
 
 	virtual void Minimize();
 	virtual void Maximize();
-	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless);
+	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless, bool AllowResizing);
 	virtual bool SetWindowScreen(int Index);
 	virtual bool UpdateDisplayMode(int Index);
 	virtual int GetWindowScreen();
