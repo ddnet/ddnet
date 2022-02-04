@@ -225,6 +225,43 @@ bool CChatHelper::IsBye(const char *pMsg)
 	return false;
 }
 
+bool CChatHelper::IsInsult(int ClientID, const char *pMsg, int MsgLen, int NameLen)
+{
+	const char aByes[][128] = {
+		"DELETE THE GAME",
+		"GAYASS",
+		"NIGGER",
+		"NIGGA",
+		"GAYNIGGER",
+		"GAYNIGGA",
+		"your mother",
+		"ur mom",
+		"fuck your",
+		"fucking idiot"
+		"piece of shit"};
+	for(const auto &aBye : aByes)
+	{
+		const char *pHL = str_find_nocase(pMsg, aBye);
+		while(pHL)
+		{
+			int Length = str_length(aBye);
+
+			if((pMsg == pHL || pHL[-1] == ' ') && (pHL[Length] == 0 || pHL[Length] == ' ' || pHL[Length] == '.' || pHL[Length] == '!' || pHL[Length] == ',' || pHL[Length] == '1' || pHL[Length] == pHL[Length - 1]))
+				return true;
+			pHL = str_find_nocase(pHL + 1, aBye);
+		}
+	}
+	// /me
+	if(str_startswith(pMsg, "### '"))
+	{
+		if(str_endswith(pMsg, "' DELETED"))
+			return true;
+		if(str_endswith(pMsg, "' RRRRREEEEEEEEEEEEEEEEEEEEEEEEE"))
+			return true;
+	}
+	return false;
+}
+
 bool CChatHelper::IsQuestionWhy(const char *pMsg)
 {
 	const char aWhys[][128] = {
@@ -756,10 +793,10 @@ void CChatHelper::AddChatFilter(const char *pFilter)
 	}
 }
 
-bool CChatHelper::IsSpam(int ClientID, int Team, const char *pMsg)
+int CChatHelper::IsSpam(int ClientID, int Team, const char *pMsg)
 {
 	if(!g_Config.m_ClChatSpamFilter)
-		return false;
+		return SPAM_NONE;
 	int MsgLen = str_length(pMsg);
 	int NameLen = 0;
 	const char *pName = m_pClient->m_aClients[m_pClient->m_LocalIDs[0]].m_aName;
@@ -777,8 +814,10 @@ bool CChatHelper::IsSpam(int ClientID, int Team, const char *pMsg)
 	}
 	if(Team == 3) // whisper recv
 		Highlighted = true;
+	if(g_Config.m_ClChatSpamFilterInsults && IsInsult(ClientID, pMsg, MsgLen, NameLen))
+		return SPAM_INSULT;
 	if(!Highlighted)
-		return false;
+		return SPAM_NONE;
 	char aName[64];
 	str_copy(aName, m_pClient->m_aClients[ClientID].m_aName, sizeof(aName));
 	if(ClientID == 63 && !str_comp_num(m_pClient->m_aClients[ClientID].m_aName, " ", 2))
@@ -789,23 +828,23 @@ bool CChatHelper::IsSpam(int ClientID, int Team, const char *pMsg)
 	}
 	// ignore own and dummys messages
 	if(!str_comp(aName, m_pClient->m_aClients[m_pClient->m_LocalIDs[0]].m_aName))
-		return false;
+		return SPAM_NONE;
 	if(Client()->DummyConnected() && !str_comp(aName, m_pClient->m_aClients[m_pClient->m_LocalIDs[1]].m_aName))
-		return false;
+		return SPAM_NONE;
 
 	// ping without further context
 	if(MsgLen < NameLen + 2)
-		return true;
+		return SPAM_OTHER;
 	else if(!str_comp(aName, "nameless tee") || !str_comp(aName, "brainless tee") || str_find(aName, ")nameless tee") || str_find(aName, ")brainless te"))
-		return true;
+		return SPAM_OTHER;
 	else if(str_find(pMsg, "bro, check out this client: krxclient.pages.dev"))
-		return true;
+		return SPAM_OTHER;
 	else if((str_find(pMsg, "help") || str_find(pMsg, "hilfe")) && MsgLen < NameLen + 16)
-		return true;
+		return SPAM_OTHER;
 	else if((str_find(pMsg, "give") || str_find(pMsg, "need") || str_find(pMsg, "want") || str_find(pMsg, "please") || str_find(pMsg, "pls") || str_find(pMsg, "plz")) &&
 		(str_find(pMsg, "rcon") || str_find(pMsg, "password") || str_find(pMsg, "admin") || str_find(pMsg, "helper") || str_find(pMsg, "mod") || str_find(pMsg, "money") || str_find(pMsg, "moni") || str_find(pMsg, "flag")))
-		return true;
-	return false;
+		return SPAM_OTHER;
+	return SPAM_NONE;
 }
 
 bool CChatHelper::FilterChat(int ClientID, int Team, const char *pLine)
@@ -817,9 +856,12 @@ bool CChatHelper::FilterChat(int ClientID, int Team, const char *pLine)
 		if(str_find(pLine, aChatFilter))
 			return true;
 	}
-	if(IsSpam(ClientID, Team, pLine))
+	int Spam = IsSpam(ClientID, Team, pLine);
+	if(Spam)
 	{
 		if(g_Config.m_ClChatSpamFilter != 2)
+			return true;
+		if(Spam >= SPAM_INSULT)
 			return true;
 		char aName[64];
 		str_copy(aName, m_pClient->m_aClients[ClientID].m_aName, sizeof(aName));

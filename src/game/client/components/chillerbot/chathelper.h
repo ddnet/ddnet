@@ -38,13 +38,20 @@ class CChatHelper : public CComponent
 	bool LineShouldHighlight(const char *pLine, const char *pName);
 	bool IsGreeting(const char *pMsg);
 	bool IsBye(const char *pMsg);
+	bool IsInsult(int ClientID, const char *pMsg, int MsgLen, int NameLen);
 	bool IsQuestionWhy(const char *pMsg);
 	void DoGreet();
 	bool ReplyToLastPing(const char *pMessageAuthor, const char *pMessage);
 	void SayFormat(const char *pMsg);
 	void AddChatFilter(const char *pFilter);
 	void ListChatFilter();
-	bool IsSpam(int ClientID, int Team, const char *pMsg);
+	enum
+	{
+		SPAM_NONE,
+		SPAM_OTHER,
+		SPAM_INSULT
+	};
+	int IsSpam(int ClientID, int Team, const char *pMsg);
 
 	void OnChatMessage(int ClientID, int Team, const char *pMsg);
 
