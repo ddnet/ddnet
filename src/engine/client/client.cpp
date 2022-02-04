@@ -4261,6 +4261,20 @@ int main(int argc, const char **argv) // ignore_convention
 			AllocConsole();
 #endif
 		}
+		else if(str_comp("-d3d12", argv[i]) == 0) // ignore_convention
+		{
+#if defined(CONF_FAMILY_WINDOWS)
+			SDL_setenv("SDL_OPENGL_LIBRARY", "mesa/opengl32.dll", 1);
+			SDL_setenv("GALLIUM_DRIVER", "d3d12", 1);
+#endif
+		}
+		else if(str_comp("-soft", argv[i]) == 0) // ignore_convention
+		{
+#if defined(CONF_FAMILY_WINDOWS)
+			SDL_setenv("SDL_OPENGL_LIBRARY", "mesa/opengl32.dll", 1);
+			SDL_setenv("GALLIUM_DRIVER", "llvmpipe", 1);
+#endif
+		}
 	}
 
 #if defined(CONF_PLATFORM_ANDROID)

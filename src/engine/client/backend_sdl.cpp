@@ -753,6 +753,27 @@ void CGraphicsBackend_SDL_OpenGL::GetCurrentVideoMode(CVideoMode &CurMode, int H
 	DisplayToVideoMode(&CurMode, &DPMode, HiDPIScale, DPMode.refresh_rate);
 }
 
+#ifdef CONF_FAMILY_WINDOWS
+extern "C" void *__stdcall glewGetProcAddress(const GLchar *name)
+{
+	return SDL_GL_GetProcAddress(name);
+}
+
+static void LoadOpenGLLibrary()
+{
+	const auto *pOpenGLLibName = SDL_getenv("SDL_OPENGL_LIBRARY");
+	bool HasCustomOpenGLLib = pOpenGLLibName != nullptr;
+	if(HasCustomOpenGLLib)
+	{
+		dbg_msg("sdl", "loading custom opengl32.dll: %s", pOpenGLLibName);
+	}
+	if(SDL_GL_LoadLibrary(nullptr) != 0)
+	{
+		dbg_msg("sdl", "loading opengl32.dll failed, please remove any start parameter. (error %s)", SDL_GetError());
+	}
+}
+#endif
+
 int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *pScreen, int *pWidth, int *pHeight, int *pRefreshRate, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, IStorage *pStorage)
 {
 	// print sdl version
@@ -773,6 +794,9 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *pScreen, int *pWid
 			dbg_msg("gfx", "unable to init SDL video: %s", SDL_GetError());
 			return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_SDL_INIT_FAILED;
 		}
+#ifdef CONF_FAMILY_WINDOWS
+		LoadOpenGLLibrary();
+#endif
 	}
 
 	m_BackendType = DetectBackend();

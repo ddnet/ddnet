@@ -571,7 +571,7 @@ endif()
 
 if(TARGET_OS STREQUAL "windows")
   set(PLATFORM_CLIENT)
-  set(PLATFORM_CLIENT_LIBS opengl32 winmm)
+  set(PLATFORM_CLIENT_LIBS winmm)
   set(PLATFORM_LIBS version ws2_32) # Windows sockets
 elseif(TARGET_OS STREQUAL "mac")
   find_library(CARBON Carbon)
@@ -2034,7 +2034,10 @@ if(CLIENT)
   endif()
 
   if(GLEW_BUNDLED)
-	  target_compile_definitions(${TARGET_CLIENT} PRIVATE CONF_GLEW_HAS_CONTEXT_INIT)
+    target_compile_definitions(${TARGET_CLIENT} PRIVATE CONF_GLEW_HAS_CONTEXT_INIT)
+    if(TARGET_OS STREQUAL "windows")
+      target_compile_definitions(${TARGET_CLIENT} PRIVATE GLEW_CUSTOM_GET_PROC)
+    endif()
   endif()
 
   list(APPEND TARGETS_OWN ${TARGET_CLIENT})
