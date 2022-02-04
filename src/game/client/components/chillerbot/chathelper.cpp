@@ -237,7 +237,7 @@ bool CChatHelper::IsInsult(int ClientID, const char *pMsg, int MsgLen, int NameL
 		"your mother",
 		"ur mom",
 		"fuck your",
-		"fucking idiot"
+		"fucking idiot",
 		"piece of shit"};
 	for(const auto &aBye : aByes)
 	{
