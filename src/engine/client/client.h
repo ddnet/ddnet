@@ -487,7 +487,7 @@ public:
 
 	// gfx
 	virtual void SwitchWindowScreen(int Index);
-	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless);
+	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless, bool AllowResizing);
 	virtual void ToggleWindowVSync();
 	virtual void LoadFont();
 	virtual void Notify(const char *pTitle, const char *pMessage);

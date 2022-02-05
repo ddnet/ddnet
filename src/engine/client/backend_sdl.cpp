@@ -668,7 +668,7 @@ void CGraphicsBackend_SDL_OpenGL::GetVideoModes(CVideoMode *pModes, int MaxModes
 
 	// Only collect fullscreen modes when requested, that makes sure in windowed mode no refresh rates are shown that aren't supported without
 	// fullscreen anyway(except fullscreen desktop)
-	bool IsFullscreenDestkop = m_pWindow != NULL && ((SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN_DESKTOP);
+	bool IsFullscreenDestkop = m_pWindow != NULL && (((SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN_DESKTOP) || g_Config.m_GfxFullscreen == 3);
 	bool CollectFullscreenModes = m_pWindow == NULL || ((SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN) != 0 && !IsFullscreenDestkop);
 
 	if(SDL_GetDesktopDisplayMode(Screen, &DesktopMode) < 0)
@@ -863,7 +863,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *pScreen, int *pWid
 	else if(Flags & (IGraphicsBackend::INITFLAG_DESKTOP_FULLSCREEN))
 		SdlFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 
-	bool IsFullscreen = (SdlFlags & SDL_WINDOW_FULLSCREEN) != 0;
+	bool IsFullscreen = (SdlFlags & SDL_WINDOW_FULLSCREEN) != 0 || g_Config.m_GfxFullscreen == 3;
 	// use desktop resolution as default resolution, clamp resolution if users's display is smaller than we remembered
 	// if the user starts in fullscreen, and the resolution was not found use the desktop one
 	if((IsFullscreen && !SupportedResolution) || *pWidth == 0 || *pHeight == 0 || (IsDesktopChanged && (*pWidth > *pDesktopWidth || *pHeight > *pDesktopHeight)))
@@ -1105,10 +1105,15 @@ void CGraphicsBackend_SDL_OpenGL::Maximize()
 	// TODO: SDL
 }
 
-void CGraphicsBackend_SDL_OpenGL::SetWindowParams(int FullscreenMode, bool IsBorderless)
+void CGraphicsBackend_SDL_OpenGL::SetWindowParams(int FullscreenMode, bool IsBorderless, bool AllowResizing)
 {
 	if(FullscreenMode > 0)
 	{
+		bool IsDesktopFullscreen = FullscreenMode == 2;
+#ifndef CONF_FAMILY_WINDOWS
+		//  special mode for windows only
+		IsDesktopFullscreen |= FullscreenMode == 3;
+#endif
 		if(FullscreenMode == 1)
 		{
 #if defined(CONF_PLATFORM_MACOS) || defined(CONF_PLATFORM_HAIKU)
@@ -1117,16 +1122,35 @@ void CGraphicsBackend_SDL_OpenGL::SetWindowParams(int FullscreenMode, bool IsBor
 #else
 			SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN);
 #endif
+			SDL_SetWindowResizable(m_pWindow, SDL_TRUE);
 		}
-		else if(FullscreenMode == 2)
+		else if(IsDesktopFullscreen)
 		{
 			SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+			SDL_SetWindowResizable(m_pWindow, SDL_TRUE);
+		}
+		else
+		{
+			SDL_SetWindowFullscreen(m_pWindow, 0);
+			SDL_SetWindowBordered(m_pWindow, SDL_TRUE);
+			SDL_SetWindowResizable(m_pWindow, SDL_FALSE);
+			SDL_DisplayMode DPMode;
+			if(SDL_GetDesktopDisplayMode(g_Config.m_GfxScreen, &DPMode) < 0)
+			{
+				dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
+			}
+			else
+			{
+				ResizeWindow(DPMode.w, DPMode.h, DPMode.refresh_rate);
+				SDL_SetWindowPosition(m_pWindow, SDL_WINDOWPOS_CENTERED_DISPLAY(g_Config.m_GfxScreen), SDL_WINDOWPOS_CENTERED_DISPLAY(g_Config.m_GfxScreen));
+			}
 		}
 	}
 	else
 	{
 		SDL_SetWindowFullscreen(m_pWindow, 0);
 		SDL_SetWindowBordered(m_pWindow, SDL_bool(!IsBorderless));
+		SDL_SetWindowResizable(m_pWindow, SDL_TRUE);
 	}
 }
 
@@ -1196,7 +1220,7 @@ bool CGraphicsBackend_SDL_OpenGL::ResizeWindow(int w, int h, int RefreshRate)
 	{
 #ifdef CONF_FAMILY_WINDOWS
 		// in windows make the window windowed mode first, this prevents strange window glitches (other games probably do something similar)
-		SetWindowParams(0, 1);
+		SetWindowParams(0, 1, true);
 #endif
 		SDL_DisplayMode SetMode = {};
 		SDL_DisplayMode ClosestMode = {};
@@ -1208,7 +1232,7 @@ bool CGraphicsBackend_SDL_OpenGL::ResizeWindow(int w, int h, int RefreshRate)
 #ifdef CONF_FAMILY_WINDOWS
 		// now change it back to fullscreen, this will restore the above set state, bcs SDL saves fullscreen modes appart from other video modes (as of SDL 2.0.16)
 		// see implementation of SDL_SetWindowDisplayMode
-		SetWindowParams(1, 0);
+		SetWindowParams(1, 0, true);
 #endif
 		return true;
 	}

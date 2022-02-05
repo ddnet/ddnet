@@ -1170,27 +1170,29 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 	// switches
 	static float s_ScrollValueDrop = 0;
-	static const int s_NumWindowMode = 4;
+	const char *pWindowModes[] = {Localize("Windowed"), Localize("Windowed borderless"), Localize("Windowed fullscreen"), Localize("Desktop fullscreen"), Localize("Fullscreen")};
+	static const int s_NumWindowMode = sizeof(pWindowModes) / sizeof(pWindowModes[0]);
 	static int s_aWindowModeIDs[s_NumWindowMode];
 	const void *aWindowModeIDs[s_NumWindowMode];
 	for(int i = 0; i < s_NumWindowMode; ++i)
 		aWindowModeIDs[i] = &s_aWindowModeIDs[i];
 	static int s_WindowModeDropDownState = 0;
-	const char *pWindowModes[] = {Localize("Windowed"), Localize("Windowed borderless"), Localize("Desktop fullscreen"), Localize("Fullscreen")};
 
-	OldSelected = (g_Config.m_GfxFullscreen ? (g_Config.m_GfxFullscreen == 1 ? 3 : 2) : (g_Config.m_GfxBorderless ? 1 : 0));
+	OldSelected = (g_Config.m_GfxFullscreen ? (g_Config.m_GfxFullscreen == 1 ? 4 : (g_Config.m_GfxFullscreen == 2 ? 3 : 2)) : (g_Config.m_GfxBorderless ? 1 : 0));
 
 	const int NewWindowMode = RenderDropDown(s_WindowModeDropDownState, &MainView, OldSelected, aWindowModeIDs, pWindowModes, s_NumWindowMode, &s_NumWindowMode, s_ScrollValueDrop);
 	if(OldSelected != NewWindowMode)
 	{
 		if(NewWindowMode == 0)
-			Client()->SetWindowParams(0, false);
+			Client()->SetWindowParams(0, false, true);
 		else if(NewWindowMode == 1)
-			Client()->SetWindowParams(0, true);
+			Client()->SetWindowParams(0, true, true);
 		else if(NewWindowMode == 2)
-			Client()->SetWindowParams(2, false);
+			Client()->SetWindowParams(3, false, false);
 		else if(NewWindowMode == 3)
-			Client()->SetWindowParams(1, false);
+			Client()->SetWindowParams(2, false, true);
+		else if(NewWindowMode == 4)
+			Client()->SetWindowParams(1, false, true);
 	}
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
