@@ -38,7 +38,7 @@ CMenusKeyBinder::CMenusKeyBinder()
 {
 	m_TakeKey = false;
 	m_GotKey = false;
-	m_Modifier = 0;
+	m_ModifierCombination = 0;
 }
 
 bool CMenusKeyBinder::OnInput(IInput::CEvent Event)
@@ -53,14 +53,14 @@ bool CMenusKeyBinder::OnInput(IInput::CEvent Event)
 			m_TakeKey = false;
 
 			int Mask = CBinds::GetModifierMask(Input());
-			m_Modifier = 0;
+			m_ModifierCombination = 0;
 			while(!(Mask & 1))
 			{
 				Mask >>= 1;
-				m_Modifier++;
+				m_ModifierCombination++;
 			}
-			if(CBinds::ModifierMatchesKey(m_Modifier, Event.m_Key))
-				m_Modifier = 0;
+			if(CBinds::ModifierMatchesKey(m_ModifierCombination, Event.m_Key))
+				m_ModifierCombination = 0;
 		}
 		return true;
 	}
@@ -790,7 +790,7 @@ typedef struct
 	CLocConstString m_Name;
 	const char *m_pCommand;
 	int m_KeyId;
-	int m_Modifier;
+	int m_ModifierCombination;
 } CKeyInfo;
 
 static CKeyInfo gs_aKeys[] =
@@ -874,14 +874,14 @@ void CMenus::UiDoGetButtons(int Start, int Stop, CUIRect View, CUIRect ScopeView
 			str_format(aBuf, sizeof(aBuf), "%s:", Localize((const char *)Key.m_Name));
 
 			UI()->DoLabelScaled(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
-			int OldId = Key.m_KeyId, OldModifier = Key.m_Modifier, NewModifier;
-			int NewId = DoKeyReader((void *)&gs_aKeys[i].m_Name, &Button, OldId, OldModifier, &NewModifier);
-			if(NewId != OldId || NewModifier != OldModifier)
+			int OldId = Key.m_KeyId, OldModifierCombination = Key.m_ModifierCombination, NewModifierCombination;
+			int NewId = DoKeyReader((void *)&Key.m_Name, &Button, OldId, OldModifierCombination, &NewModifierCombination);
+			if(NewId != OldId || NewModifierCombination != OldModifierCombination)
 			{
 				if(OldId != 0 || NewId == 0)
-					m_pClient->m_Binds.Bind(OldId, "", false, OldModifier);
+					m_pClient->m_Binds.Bind(OldId, "", false, OldModifierCombination);
 				if(NewId != 0)
-					m_pClient->m_Binds.Bind(NewId, gs_aKeys[i].m_pCommand, false, NewModifier);
+					m_pClient->m_Binds.Bind(NewId, gs_aKeys[i].m_pCommand, false, NewModifierCombination);
 			}
 		}
 
@@ -895,7 +895,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 
 	// this is kinda slow, but whatever
 	for(auto &Key : gs_aKeys)
-		Key.m_KeyId = Key.m_Modifier = 0;
+		Key.m_KeyId = Key.m_ModifierCombination = 0;
 
 	for(int Mod = 0; Mod < CBinds::MODIFIER_COUNT; Mod++)
 	{
@@ -909,7 +909,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 				if(str_comp(pBind, Key.m_pCommand) == 0)
 				{
 					Key.m_KeyId = KeyId;
-					Key.m_Modifier = Mod;
+					Key.m_ModifierCombination = Mod;
 					break;
 				}
 		}
