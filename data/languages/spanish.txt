@@ -12,6 +12,7 @@
 # Headshot        2020-11-07 12:40:00
 # Headshot        2021-05-30 17:00:00
 # Deëivid!        2021-10-27 00:49:00
+# Deëivid!        2022-02-05 21:53:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1341,13 +1342,13 @@ Show local player's key presses
 == Mostrar las teclas presionadas por el jugador local
 
 Settings file
-== 
+== Archivo de configuraciones
 
 Config directory
-== 
+== Directorio de configuración
 
 Run on join
-== 
+== Ejec. al entrar
 
 Chat command (e.g. showall 1)
-== 
+== Comando de chat (Ej. showall 1)
