@@ -1359,4 +1359,4 @@ Chat command (e.g. showall 1)
 == Chat-Befehl (z.B. showall 1)
 
 Windowed fullscreen
-== 
+== Vollbild-Fenster
