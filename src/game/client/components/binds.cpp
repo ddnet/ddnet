@@ -453,8 +453,6 @@ void CBinds::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData)
 {
 	CBinds *pSelf = (CBinds *)pUserData;
 
-	char aBuffer[256];
-	char *pEnd = aBuffer + sizeof(aBuffer);
 	pConfigManager->WriteLine("unbindall");
 	for(int i = 0; i < MODIFIER_COMBINATION_COUNT; i++)
 	{
@@ -463,13 +461,19 @@ void CBinds::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData)
 			if(!pSelf->m_aapKeyBindings[i][j])
 				continue;
 
-			str_format(aBuffer, sizeof(aBuffer), "bind %s%s \"", GetKeyBindModifiersName(i), pSelf->Input()->KeyName(j));
-			// process the string. we need to escape some characters
-			char *pDst = aBuffer + str_length(aBuffer);
-			str_escape(&pDst, pSelf->m_aapKeyBindings[i][j], pEnd);
-			str_append(aBuffer, "\"", sizeof(aBuffer));
+			// worst case the str_escape can double the string length
+			int Size = str_length(pSelf->m_aapKeyBindings[i][j]) * 2 + 30;
+			char *pBuffer = (char *)malloc(Size);
+			char *pEnd = pBuffer + Size;
 
-			pConfigManager->WriteLine(aBuffer);
+			str_format(pBuffer, Size, "bind %s%s \"", GetKeyBindModifiersName(i), pSelf->Input()->KeyName(j));
+			// process the string. we need to escape some characters
+			char *pDst = pBuffer + str_length(pBuffer);
+			str_escape(&pDst, pSelf->m_aapKeyBindings[i][j], pEnd);
+			str_append(pBuffer, "\"", Size);
+
+			pConfigManager->WriteLine(pBuffer);
+			free(pBuffer);
 		}
 	}
 }
