@@ -87,14 +87,24 @@ void CBinds::Bind(int KeyID, const char *pStr, bool FreeOnly, int ModifierCombin
 int CBinds::GetModifierMask(IInput *i)
 {
 	int Mask = 0;
-	Mask |= i->KeyIsPressed(KEY_LSHIFT) << CBinds::MODIFIER_SHIFT;
-	Mask |= i->KeyIsPressed(KEY_RSHIFT) << CBinds::MODIFIER_SHIFT;
-	Mask |= i->KeyIsPressed(KEY_LCTRL) << CBinds::MODIFIER_CTRL;
-	Mask |= i->KeyIsPressed(KEY_RCTRL) << CBinds::MODIFIER_CTRL;
-	Mask |= i->KeyIsPressed(KEY_LALT) << CBinds::MODIFIER_ALT;
-	Mask |= i->KeyIsPressed(KEY_RALT) << CBinds::MODIFIER_ALT;
-	Mask |= i->KeyIsPressed(KEY_LGUI) << CBinds::MODIFIER_GUI;
-	Mask |= i->KeyIsPressed(KEY_RGUI) << CBinds::MODIFIER_GUI;
+	static const auto ModifierKeys = {
+		KEY_LSHIFT,
+		KEY_RSHIFT,
+		KEY_LCTRL,
+		KEY_RCTRL,
+		KEY_LALT,
+		KEY_RALT,
+		KEY_LGUI,
+		KEY_RGUI,
+	};
+	for(const auto Key : ModifierKeys)
+	{
+		if(i->KeyIsPressed(Key))
+		{
+			Mask |= GetModifierMaskOfKey(Key);
+		}
+	}
+
 	if(!Mask)
 		return 1 << CBinds::MODIFIER_NONE;
 
