@@ -52,15 +52,11 @@ bool CMenusKeyBinder::OnInput(IInput::CEvent Event)
 			m_GotKey = true;
 			m_TakeKey = false;
 
-			int Mask = CBinds::GetModifierMask(Input());
-			m_ModifierCombination = 0;
-			while(!(Mask & 1))
+			m_ModifierCombination = CBinds::GetModifierMask(Input());
+			if(m_ModifierCombination == CBinds::GetModifierMaskOfKey(Event.m_Key))
 			{
-				Mask >>= 1;
-				m_ModifierCombination++;
-			}
-			if(CBinds::ModifierMatchesKey(m_ModifierCombination, Event.m_Key))
 				m_ModifierCombination = 0;
+			}
 		}
 		return true;
 	}
