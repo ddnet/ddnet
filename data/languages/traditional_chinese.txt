@@ -1351,3 +1351,6 @@ Run on join
 
 Chat command (e.g. showall 1)
 == 聊天指令 (例如: showall 1)
+
+Windowed fullscreen
+== 

@@ -1365,6 +1365,9 @@ Settings file
 Config directory
 == 
 
+Windowed fullscreen
+== 
+
 Run on join
 == 
 
