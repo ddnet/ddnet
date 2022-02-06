@@ -751,9 +751,14 @@ void CCharacter::HandleTiles(int Index)
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_JUMP)
 	{
-		int newJumps = Collision()->GetSwitchDelay(MapIndex);
-		if(newJumps != m_Core.m_Jumps)
-			m_Core.m_Jumps = newJumps;
+		int NewJumps = Collision()->GetSwitchDelay(MapIndex);
+		if(NewJumps == 255)
+		{
+			NewJumps = -1;
+		}
+
+		if(NewJumps != m_Core.m_Jumps)
+			m_Core.m_Jumps = NewJumps;
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_LFREEZE && Team() != TEAM_SUPER)
 	{
@@ -945,7 +950,9 @@ void CCharacter::DDRacePostCoreTick()
 	if(m_DeepFreeze && !m_Super)
 		Freeze();
 
-	if(m_Core.m_Jumps == 0 && !m_Super)
+	if(m_Core.m_Jumps == -1 && !m_Super)
+		m_Core.m_Jumped |= 2;
+	else if(m_Core.m_Jumps == 0 && !m_Super)
 		m_Core.m_Jumped = 3;
 	else if(m_Core.m_Jumps == 1 && m_Core.m_Jumped > 0)
 		m_Core.m_Jumped = 3;
