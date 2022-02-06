@@ -132,24 +132,6 @@ int CBinds::GetModifierMaskOfKey(int Key)
 	}
 }
 
-bool CBinds::ModifierMatchesKey(int Modifier, int Key)
-{
-	switch(Modifier)
-	{
-	case MODIFIER_SHIFT:
-		return Key == KEY_LSHIFT || Key == KEY_RSHIFT;
-	case MODIFIER_CTRL:
-		return Key == KEY_LCTRL || Key == KEY_RCTRL;
-	case MODIFIER_ALT:
-		return Key == KEY_LALT || Key == KEY_RALT;
-	case MODIFIER_GUI:
-		return Key == KEY_LGUI || Key == KEY_RGUI;
-	case MODIFIER_NONE:
-	default:
-		return false;
-	}
-}
-
 bool CBinds::OnInput(IInput::CEvent e)
 {
 	// don't handle invalid events
